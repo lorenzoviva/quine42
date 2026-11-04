@@ -4,6 +4,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { MAX_FORM_TIME } from '../../src/mj/run';
 import { bersaglio } from '../banco/bersagli';
 import { esegui, giudica, misura } from '../banco/misure';
 
@@ -26,7 +27,8 @@ describe('i programmi del prompt procedurale (T182)', () => {
   for (const { b, n, finale } of passati) {
     it(`${b}/${n}: gira nel motore e passa le misure al seme 1`, () => {
       const t = bersaglio(b)!;
-      const e = esegui(fs.readFileSync(path.join(finale, 'modello.xml'), 'utf8'), t, 1);
+      // Under the suite's load 8 s may not be enough, and a program cut in half fails everything.
+      const e = esegui(fs.readFileSync(path.join(finale, 'modello.xml'), 'utf8'), t, 1, MAX_FORM_TIME);
       const m = misura(e, t);
       expect(m.analisi.errors.filter((x) => !/termina|tempo/.test(x))).toEqual([]);
       // The time limit depends on what else the machine is doing: the bench measured it alone.

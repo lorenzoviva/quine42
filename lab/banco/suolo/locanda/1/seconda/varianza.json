@@ -1,0 +1,148 @@
+{
+  "taglie": [
+    {
+      "taglia": "grande",
+      "box": [
+        100,
+        100,
+        100
+      ],
+      "vpt": 20,
+      "gradino": 4,
+      "semi": [
+        {
+          "seme": 1,
+          "difetti": [],
+          "ms": 6245
+        },
+        {
+          "seme": 2,
+          "difetti": [],
+          "ms": 7916
+        },
+        {
+          "seme": 3,
+          "difetti": [],
+          "ms": 8043
+        },
+        {
+          "seme": 4,
+          "difetti": [],
+          "ms": 7619
+        },
+        {
+          "seme": 5,
+          "difetti": [],
+          "ms": 7581
+        }
+      ],
+      "regge": true,
+      "varianza": {
+        "voxel": 0.5931757815073243,
+        "colore": 0.17013159235199465,
+        "pianta": 0.1810184668509194,
+        "perimetro": 0.03557026437617171,
+        "interno": 0.6005652026657292,
+        "semi": 5,
+        "firmePiani": 1,
+        "firmeStanze": 3,
+        "architetture": 3,
+        "statico": false
+      },
+      "difettiVarianza": [
+        "perimetro: 0.04 (serve ≥ 0.15)"
+      ]
+    },
+    {
+      "taglia": "enorme",
+      "box": [
+        120,
+        120,
+        112
+      ],
+      "vpt": 16,
+      "gradino": 3,
+      "semi": [
+        {
+          "seme": 1,
+          "difetti": [
+            "finisce: no (serve entro 8000 ms)",
+            "valido: non termina: dopo 715 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+            "piani: 1 (serve ≥ 2)",
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+            "murato: 3.1 (serve ≤ 0.25)",
+            "finestre: 1 su 1 lati (serve ≥ 6 su ≥ 3 lati)"
+          ],
+          "ms": 8575
+        },
+        {
+          "seme": 2,
+          "difetti": [
+            "finisce: no (serve entro 8000 ms)",
+            "valido: il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato); pezzi staccati: 20% dei voxel non è attaccato al corpo principale (2 pezzi); non termina: dopo 596 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+            "piani: 1 (serve ≥ 2)",
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+            "murato: 4.65 (serve ≤ 0.25)",
+            "finestre: 1 su 1 lati (serve ≥ 6 su ≥ 3 lati)"
+          ],
+          "ms": 8696
+        },
+        {
+          "seme": 3,
+          "difetti": [
+            "finisce: no (serve entro 8000 ms)",
+            "valido: non termina: dopo 618 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+            "piani: 1 (serve ≥ 2)",
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+            "murato: 3.82 (serve ≤ 0.25)",
+            "finestre: 1 su 1 lati (serve ≥ 6 su ≥ 3 lati)"
+          ],
+          "ms": 8640
+        },
+        {
+          "seme": 4,
+          "difetti": [
+            "finisce: no (serve entro 8000 ms)",
+            "valido: il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato); pezzi staccati: 18% dei voxel non è attaccato al corpo principale (2 pezzi); non termina: dopo 653 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+            "piani: 1 (serve ≥ 2)",
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+            "murato: 4.01 (serve ≤ 0.25)",
+            "finestre: 1 su 1 lati (serve ≥ 6 su ≥ 3 lati)"
+          ],
+          "ms": 8588
+        },
+        {
+          "seme": 5,
+          "difetti": [
+            "finisce: no (serve entro 8000 ms)",
+            "valido: non termina: dopo 714 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+            "piani: 1 (serve ≥ 2)",
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+            "murato: 3.41 (serve ≤ 0.25)",
+            "finestre: 1 su 1 lati (serve ≥ 6 su ≥ 3 lati)"
+          ],
+          "ms": 9608
+        }
+      ],
+      "regge": false,
+      "varianza": {
+        "voxel": 0.5282022025355295,
+        "colore": 0.1879890362467752,
+        "pianta": 0.5445892596398247,
+        "perimetro": 0.29466501240694787,
+        "interno": 0.8426782798040283,
+        "semi": 5,
+        "firmePiani": 1,
+        "firmeStanze": 3,
+        "architetture": 4,
+        "statico": false
+      },
+      "difettiVarianza": []
+    }
+  ],
+  "regge": false,
+  "statico": false,
+  "varia": false,
+  "passa": false,
+  "ms": 81746
+}

@@ -241,6 +241,13 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Da non usare**: nessuno
 - **Fermo**: lo strato `floor` di `TerrainLayer`.
 
+### Lettera del suolo
+- **Inglese**: `soil`, `soilAt`
+- **Definizione**: la lettera che un programma nomina con `suolo` e che il kernel scrive sullo strato `base`, prima che parta: dice dov'è il suolo del mondo, a ogni taglia.
+- **Dove vive**: `src/mj/engine.ts`, `src/mj/model.ts`, `src/kernel/forms.ts`
+- **Da non usare**: nessuno
+- **Fermo**: l'attributo `suolo` nei programmi.
+
 ### Cantina
 - **Inglese**: `cellar`, `cellarOf`, `sunk`
 - **Definizione**: la parte di una struttura sotto il suolo, con il buco nel terreno (`Form.hole`).

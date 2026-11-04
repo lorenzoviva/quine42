@@ -9,6 +9,7 @@
 //                                           sculptor's box comes from the class and overrides it
 //   origin="True" | "bottom"                MarkovJunior's centre of the box, or the centre of the floor
 //   ground="G"                              fills the floor layer before the program starts
+//   suolo="E"                               fills the layer of the world's ground, `base` voxels up (ADR-0135): the same program at every size
 //   <color symbol="N" value="8b5a2b" part="gamba" hidden="True" glow="True"/>  recolours a letter
 //                                           (MarkovJunior's palette.xml syntax); `part` names a limb that
 //                                           moves when the figure walks; `hidden` keeps a marker out of the
@@ -423,8 +424,13 @@ function pad(a: string, b: string): [string, string] {
   return [fit(ga, false), fit(gb, true)];
 }
 
-/** Compiles a program; `size` (the class's box) wins over the program's own. Throws Mj3Error with the line. */
-export function compileMjx(src: string, opts: { size?: Vec3; strict?: boolean } = {}): MjxModel {
+const hasMap = (el: XmlElement): boolean => el.name === 'map' || el.children.some(hasMap);
+
+/**
+ * Compiles a program; `size` (the class's box) wins over the program's own, `base` says how many voxels of it are under the ground
+ * (`suolo` marks that layer). Throws Mj3Error with the line.
+ */
+export function compileMjx(src: string, opts: { size?: Vec3; strict?: boolean; base?: number } = {}): MjxModel {
   let roots: XmlElement[];
   try {
     roots = parseXml(src);
@@ -467,6 +473,9 @@ export function compileMjx(src: string, opts: { size?: Vec3; strict?: boolean } 
 
   const origin = root.attrs.origin;
   const ground = root.attrs.ground;
+  const soil = root.attrs.suolo;
+  // `base` counts voxels of the finished model: on the coarse grid of a `map` it would be another height.
+  if (soil && hasMap(root)) c.fail(root, 'suolo non vale con map: il suolo si conta in voxel del modello finito');
   return {
     name: root.attrs.name,
     ...(c.sound ? { sound: c.sound } : {}),
@@ -481,6 +490,7 @@ export function compileMjx(src: string, opts: { size?: Vec3; strict?: boolean } 
       ...(Object.keys(unions).length ? { unions } : {}),
       ...(origin && !/^false$/i.test(origin) ? { origin: values[1] ?? c.fail(root, 'origin vuole almeno due values'), originAt: /^bottom$/i.test(origin) ? ('bottom' as const) : ('centre' as const) } : {}),
       ...(ground ? { ground: c.one(root, ground, ctx, 'ground') } : {}),
+      ...(soil ? { soil: c.one(root, soil, ctx, 'suolo'), soilAt: opts.base ?? 0 } : {}),
       program: program!,
     },
   };

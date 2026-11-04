@@ -93,6 +93,8 @@ export interface FormRequest {
   tempo?: number;
   /** Model id for diagnostics and cache key (T64). */
   model?: string;
+  /** Voxels under the ground, for a program that marks it (`suolo`, ADR-0135) and only then: the others run and are kept as ever. */
+  base?: number;
 }
 
 /** How long a model's program may run, unless its entry in the index says otherwise. */
@@ -368,9 +370,10 @@ export const FORM_CACHE_BYTES = 256 * 1024 * 1024;
  * Everything the result of a program depends on, and nothing else (ADR-0108): the whole text of the program, so two programs
  * are never taken for one, the seed, the box and the tint. The model's id, its density, `rig` and `sway` do not change the voxels; `tempo`
  * only says how long to wait for them, and what did not finish in time is not kept. The head is JSON, so where it ends is not in doubt.
+ * `base` only where it is said (ADR-0135): the key of every other program stays what it was, and what is kept under it stays good.
  */
 export function formKey(q: FormRequest): string {
-  return JSON.stringify([String(q.seed), q.size?.map(String) ?? null, q.tint?.symbol ?? null, q.tint?.color ?? null]) + q.xml;
+  return JSON.stringify([String(q.seed), q.size?.map(String) ?? null, q.tint?.symbol ?? null, q.tint?.color ?? null, ...(q.base ? [String(q.base)] : [])]) + q.xml;
 }
 
 /** Results somewhere slower than memory, under a `formKey`: only the tests have one (`tests/setup/forms-disk.ts`). */
@@ -469,7 +472,7 @@ export class InlineRunner implements FormRunner {
 /** The pure part of running a form (the browser's worker does the same, then makes meshes). */
 export function runForm(q: FormRequest): FormResult & { model: ReturnType<typeof compileMjx>; finished: boolean } {
   if (q.xml.length > MAX_FORM_XML) throw new Mj3Error(`programma troppo lungo (max ${MAX_FORM_XML} caratteri)`);
-  const m = compileMjx(q.xml, q.size ? { size: q.size } : {});
+  const m = compileMjx(q.xml, { ...(q.size ? { size: q.size } : {}), ...(q.base ? { base: q.base } : {}) });
   if (q.tint && m.program.palette[q.tint.symbol]) m.program.palette[q.tint.symbol] = { ...m.program.palette[q.tint.symbol], color: q.tint.color };
   const r = runMjx(m, q.seed, { deadline: Math.min(q.tempo ?? MODEL_TIME, MAX_FORM_TIME), limits: FORM_LIMITS });
   const g = r.grid;
@@ -564,16 +567,18 @@ export class Forms {
     const info = this.library[model];
     const cls = this.classOf(model);
     const vpt = vptOf(info);
+    const under = cellarOf(info) * vpt;
     return {
       xml,
       seed,
-      size: sizeFor(xml, cls, info?.taglia, cellarOf(info) * vpt),
+      size: sizeFor(xml, cls, info?.taglia, under),
       tint: info?.tinta && tint ? { symbol: info.tinta, color: tint } : undefined,
       rig: cls.animation === 'camminata',
       sway: cls.animation === 'vento',
       vpt,
       model,
       ...(info?.tempo ? { tempo: info.tempo } : {}),
+      ...(under && /\ssuolo="/.test(rootTag(xml)) ? { base: under } : {}),
     };
   }
 

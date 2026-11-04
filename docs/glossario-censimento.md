@@ -15,7 +15,7 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Luogo | `Place` | 462 (67) | 0 (0) | 26 (13) | 2 (2) |
 | Piano del luogo | `mappa` | 2 (2) | 0 (0) | 18 (11) | 1 (1) |
 | Piano del luogo | `piano` | 12 (6) | 2 (2) | 152 (42) | 0 (0) |
-| Casella | `cell` | 533 (43) | 0 (0) | 7 (4) | 25 (2) |
+| Casella | `cell` | 534 (43) | 0 (0) | 7 (4) | 25 (2) |
 | Casella | `cella` | 9 (4) | 8 (3) | 9 (7) | 0 (0) |
 | Terreno | `tile` | 696 (44) | 3 (2) | 28 (17) | 14 (2) |
 | Ambiente | `layout` | 260 (30) | 1 (1) | 34 (14) | 2 (2) |
@@ -34,9 +34,9 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Modulo | `mod` | 33 (4) | 0 (0) | 0 (0) | 0 (0) |
 | Struttura | `edificio` | 21 (8) | 1 (1) | 39 (19) | 0 (0) |
 | Struttura | `building` | 263 (15) | 0 (0) | 9 (6) | 0 (0) |
-| Modello | `modello` | 93 (29) | 6 (3) | 247 (60) | 15 (4) |
+| Modello | `modello` | 94 (29) | 6 (3) | 247 (60) | 15 (4) |
 | Programma | `codice` | 73 (16) | 17 (7) | 115 (51) | 3 (2) |
-| Programma | `xml` | 255 (24) | 4 (2) | 47 (17) | 6 (2) |
+| Programma | `xml` | 257 (24) | 4 (2) | 48 (17) | 6 (2) |
 | Programma sonoro | `preset` | 34 (7) | 0 (0) | 19 (8) | 2 (1) |
 | Partitura | `spartito` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
 | Direttore del suono | `jukebox` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
@@ -45,8 +45,8 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Ritocco | `correzione` | 7 (5) | 0 (0) | 18 (11) | 0 (0) |
 | Inchiostro | `outline` | 24 (7) | 0 (0) | 0 (0) | 11 (3) |
 | Inchiostro | `bordo` | 7 (5) | 3 (3) | 54 (16) | 0 (0) |
-| Taglia | `size` | 731 (78) | 3 (2) | 21 (12) | 147 (12) |
-| Taglia | `Taglia` | 90 (11) | 5 (3) | 48 (13) | 0 (0) |
+| Taglia | `size` | 732 (78) | 3 (2) | 21 (12) | 147 (12) |
+| Taglia | `Taglia` | 90 (11) | 5 (3) | 51 (13) | 0 (0) |
 | Taglia | `TAGLIE` | 4 (3) | 1 (1) | 19 (6) | 0 (0) |
 | Viandante | `player` | 336 (55) | 2 (1) | 41 (19) | 5 (2) |
 | Viandante | `giocatore` | 32 (13) | 3 (3) | 142 (48) | 0 (0) |
@@ -83,7 +83,7 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Registro del Concilio | `registro` | 16 (6) | 0 (0) | 115 (46) | 0 (0) |
 | Registro del Concilio | `log` | 155 (33) | 1 (1) | 20 (15) | 1 (1) |
 | Sessione del Concilio | `sessione` | 36 (13) | 0 (0) | 84 (35) | 12 (1) |
-| Modello di IA | `modello` | 93 (29) | 6 (3) | 247 (60) | 15 (4) |
+| Modello di IA | `modello` | 94 (29) | 6 (3) | 247 (60) | 15 (4) |
 | Modello di IA | `Models` | 393 (75) | 0 (0) | 90 (35) | 4 (3) |
 | Eredità | `Eredita` | 7 (4) | 0 (0) | 11 (5) | 5 (1) |
 | Eredità | `EREDITA` | 7 (4) | 0 (0) | 11 (5) | 5 (1) |

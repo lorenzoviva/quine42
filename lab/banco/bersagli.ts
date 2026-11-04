@@ -69,6 +69,6 @@ export function testoBersaglio(b: Bersaglio): string {
     `Com'è: ${b.descrizione}`,
     `Scatola: ${X} × ${Y} × ${Z} voxel; una casella è ${s.vpt} voxel.`,
     `Corpo: gradino ${s.gradino} voxel, passaggio largo almeno ${s.corpo}, persona alta ${s.persona}; salto: sale al più ${Math.floor(1.05 * s.vpt)}, va da ${s.vpt} a ${Math.floor(2.6 * s.vpt)} voxel di distanza.`,
-    s.base ? `I ${s.base} voxel più bassi sono sottoterra: il suolo è a z=${s.base}, la cantina sta sotto e ci si scende con una scala; fuori dalla cantina sotto il suolo non scrivere nulla.` : 'Il suolo è a z=0.',
+    s.base ? `C'è una cantina: il suolo, la lettera dell'attributo suolo, sta ${s.base} voxel sopra il fondo in questa scatola e a un'altra quota in un'altra taglia; ci si scende con una scala e fuori dalla cantina sotto il suolo non si scrive nulla.` : 'Il suolo è in fondo alla scatola.',
   ].join('\n');
 }

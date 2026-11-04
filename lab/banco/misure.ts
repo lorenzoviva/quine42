@@ -71,14 +71,14 @@ export interface Eseguito {
 const copia = (g: Grid3): Grid3 => ({ ...g, cells: new Uint8Array(g.cells), alphabet: [...g.alphabet], log: [], epoch: 0 });
 
 /** Runs a program as the game does: the class's box, its limits, its time. Throws `Mj3Error` if the game would not take it. */
-export function esegui(xml: string, b: Bersaglio, seme = 1): Eseguito {
+export function esegui(xml: string, b: Bersaglio, seme = 1, tempo?: number): Eseguito {
   if (xml.length > MAX_FORM_XML) throw new Mj3Error(`programma troppo lungo (max ${MAX_FORM_XML} caratteri)`);
   const scatola = scatolaDi(b);
   const scritto = withSize(xml, scatola.box);
   const { forms, id } = voce(b, scritto);
   const q = forms.request(id, seme)!;
-  const model = compileMjx(q.xml, q.size ? { size: q.size } : {});
-  const result = runMjx(model, seme, { deadline: Math.min(q.tempo ?? MODEL_TIME, MAX_FORM_TIME), limits: FORM_LIMITS });
+  const model = compileMjx(q.xml, { ...(q.size ? { size: q.size } : {}), ...(q.base ? { base: q.base } : {}) });
+  const result = runMjx(model, seme, { deadline: Math.min(tempo ?? q.tempo ?? MODEL_TIME, MAX_FORM_TIME), limits: FORM_LIMITS });
   const g = result.grid;
   const box: Vec3 = [g.X, g.Y, g.Z];
   const clip = model.actions.find((a) => /^apr/i.test(a.name));

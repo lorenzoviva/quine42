@@ -90,6 +90,10 @@ export interface Program3 {
   originAt?: 'bottom' | 'centre';
   /** Fills the layer z = 0 with this code (a floor to grow on; hide it if it should not show). */
   ground?: string;
+  /** Fills the layer `soilAt` with this code, over `ground` if it is the same layer: where the ground of the world is (ADR-0135). `originAt: 'bottom'` is on it. */
+  soil?: string;
+  /** Voxels under the ground; 0 if not said. */
+  soilAt?: number;
   /** Symbol → codes it stands for in rule inputs (MarkovJunior "union"). */
   unions?: Record<string, string>;
   program: Node3;
@@ -1035,7 +1039,10 @@ export function run(p: Program3, seed: number, maxSteps = 20000, limits: GridLim
     const v = alpha.index(p.ground);
     for (let i = 0; i < X * Y; i++) g.cells[i] = v;
   }
-  if (typeof p.origin === 'string' && p.origin.length === 1) g.cells[(X >> 1) + (Y >> 1) * X + (p.originAt === 'centre' ? (Z >> 1) * X * Y : 0)] = alpha.index(p.origin);
+  // As `Forms.get` lays the model: a box with no room for what is under the ground has its ground at the bottom.
+  const soilAt = typeof p.soil === 'string' && p.soil.length === 1 ? (p.soilAt && p.soilAt > 0 && p.soilAt < Z ? p.soilAt : 0) : -1;
+  if (soilAt >= 0) g.cells.fill(alpha.index(p.soil!), soilAt * X * Y, (soilAt + 1) * X * Y);
+  if (typeof p.origin === 'string' && p.origin.length === 1) g.cells[(X >> 1) + (Y >> 1) * X + (p.originAt === 'centre' ? (Z >> 1) * X * Y : Math.max(0, soilAt) * X * Y)] = alpha.index(p.origin);
   return exec(root, g, seed, maxSteps, t0, trace, opts);
 }
 

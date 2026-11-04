@@ -23,6 +23,10 @@ La misura di partenza (T180, `../varianza/riepilogo.md`) era 31 programmi su 31 
 
 La stessa idea della palazzina con regole corte e `steps` (`../pattern.md`, pattern 13): 9 kB invece di 25. È dentro `../prompt.md`. Regge 19-20 semi su 20 a Grande e Enorme (cade su un salto o sulla sagoma) e varia: voxel 0,68 / 0,67, pianta 0,56, perimetro 0,24 / 0,30, interno 0,72 / 0,68, architetture 5/5.
 
+## La cantina (`cantina.xml`, T258)
+
+Lo scheletro con `suolo="E"` e un pozzo di due campate in linea scavato fino al fondo (`ground="Z"`, ADR-0135), per la locanda (`sotto: 1`): a Grande il suolo è a z=20, a Enorme a z=16, e nel programma quei numeri non ci sono. **12 semi su 12 alle due taglie, e varia**: voxel 0,65, pianta 0,41, perimetro 0,20, interno 0,77, architetture 8/12 a Grande; 6,8 s a Enorme contro il limite di 8 s, poco margine: `docs/pipeline/domande/T258.md`. Le botti vanno dal pavimento al soffitto: una cima bassa è un pavimento non raggiunto, e il kernel butta via tutta la cantina. Foglio: `cantina-locanda.png`. La ricetta è dentro `../prompt.md`.
+
 ## Palazzina moderna
 
 Reticolo di campate da 30 voxel dal centro del lotto (3×3 a entrambe le taglie, perché il margine chiesto oltre il pilastro è 3); la campata

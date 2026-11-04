@@ -1,0 +1,671 @@
+[
+ {
+  "nome": "suolo/locanda/1",
+  "prova": {
+   "taglie": [
+    {
+     "taglia": "grande",
+     "box": [
+      100,
+      100,
+      100
+     ],
+     "vpt": 20,
+     "gradino": 4,
+     "semi": [
+      {
+       "seme": 1,
+       "difetti": [
+        "finisce: no (serve entro 8000 ms)",
+        "valido: il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato); pezzi staccati: 20% dei voxel non è attaccato al corpo principale (2 pezzi); non termina: dopo 762 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+        "piani: 1 (serve ≥ 2)",
+        "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+        "murato: 2.86 (serve ≤ 0.25)",
+        "salti: 0 (serve ≥ 2)",
+        "finestre: 1 su 1 lati (serve ≥ 6 su ≥ 3 lati)",
+        "sagoma: 3 (serve ≥ 4)"
+       ],
+       "ms": 8750
+      },
+      {
+       "seme": 2,
+       "difetti": [
+        "finisce: no (serve entro 8000 ms)",
+        "valido: non termina: dopo 1022 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+        "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+        "murato: 1.59 (serve ≤ 0.25)"
+       ],
+       "ms": 8776
+      },
+      {
+       "seme": 3,
+       "difetti": [
+        "finisce: no (serve entro 8000 ms)",
+        "valido: non termina: dopo 930 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+        "piani: 1 (serve ≥ 2)",
+        "stanze: 2 (serve ≥ 3)",
+        "cantina: 0.09 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+        "murato: 4.65 (serve ≤ 0.25)",
+        "salti: 0 (serve ≥ 2)",
+        "finestre: 2 su 1 lati (serve ≥ 6 su ≥ 3 lati)"
+       ],
+       "ms": 8537
+      },
+      {
+       "seme": 4,
+       "difetti": [
+        "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)"
+       ],
+       "ms": 7530
+      },
+      {
+       "seme": 5,
+       "difetti": [
+        "finisce: no (serve entro 8000 ms)",
+        "valido: non termina: dopo 1158 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+        "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)"
+       ],
+       "ms": 8592
+      }
+     ],
+     "regge": false,
+     "varianza": {
+      "voxel": 0.67440211276083,
+      "colore": 0.35859636940927253,
+      "pianta": 0.06043846235093893,
+      "perimetro": 0.10136986301369863,
+      "interno": 0.741688691787442,
+      "semi": 5,
+      "firmePiani": 2,
+      "firmeStanze": 3,
+      "architetture": 4,
+      "statico": false
+     },
+     "difettiVarianza": [
+      "pianta: 0.06 (serve ≥ 0.15)",
+      "perimetro: 0.1 (serve ≥ 0.15)"
+     ]
+    },
+    {
+     "taglia": "enorme",
+     "box": [
+      120,
+      120,
+      112
+     ],
+     "vpt": 16,
+     "gradino": 3,
+     "semi": [
+      {
+       "seme": 1,
+       "difetti": [
+        "finisce: no (serve entro 8000 ms)",
+        "valido: il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato); pezzi staccati: 23% dei voxel non è attaccato al corpo principale (2 pezzi); non termina: dopo 784 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+        "piani: 1 (serve ≥ 2)",
+        "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+        "murato: 4.25 (serve ≤ 0.25)",
+        "finestre: 1 su 1 lati (serve ≥ 6 su ≥ 3 lati)",
+        "sagoma: 3 (serve ≥ 4)"
+       ],
+       "ms": 8511
+      },
+      {
+       "seme": 2,
+       "difetti": [
+        "finisce: no (serve entro 8000 ms)",
+        "valido: il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato); pezzi staccati: 23% dei voxel non è attaccato al corpo principale (2 pezzi); non termina: dopo 823 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+        "piani: 1 (serve ≥ 2)",
+        "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+        "murato: 4.9 (serve ≤ 0.25)",
+        "finestre: 1 su 1 lati (serve ≥ 6 su ≥ 3 lati)"
+       ],
+       "ms": 8687
+      },
+      {
+       "seme": 3,
+       "difetti": [
+        "finisce: no (serve entro 8000 ms)",
+        "valido: il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato); pezzi staccati: 23% dei voxel non è attaccato al corpo principale (2 pezzi); non termina: dopo 825 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+        "piani: 1 (serve ≥ 2)",
+        "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+        "murato: 4.25 (serve ≤ 0.25)"
+       ],
+       "ms": 8677
+      },
+      {
+       "seme": 4,
+       "difetti": [
+        "finisce: no (serve entro 8000 ms)",
+        "valido: il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato); pezzi staccati: 33% dei voxel non è attaccato al corpo principale (2 pezzi); non termina: dopo 681 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+        "piani: 1 (serve ≥ 2)",
+        "testa: 1.25 (serve ≥ 1.5 caselle per piano)",
+        "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+        "murato: 3.47 (serve ≤ 0.25)",
+        "porta: x 59, scarto 0, alta 1.25, libera (serve sul davanti, scarto ≤ 0.33, alta ≥ 1.5)",
+        "salti: 0 (serve ≥ 2)",
+        "sagoma: 3 (serve ≥ 4)"
+       ],
+       "ms": 8596
+      },
+      {
+       "seme": 5,
+       "difetti": [
+        "finisce: no (serve entro 8000 ms)",
+        "valido: il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato); pezzi staccati: 33% dei voxel non è attaccato al corpo principale (2 pezzi); non termina: dopo 745 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+        "piani: 1 (serve ≥ 2)",
+        "testa: 1.06 (serve ≥ 1.5 caselle per piano)",
+        "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+        "murato: 2.66 (serve ≤ 0.25)",
+        "porta: x 59, scarto 0, alta 1.06, libera (serve sul davanti, scarto ≤ 0.33, alta ≥ 1.5)",
+        "salti: 0 (serve ≥ 2)",
+        "finestre: 7 su 2 lati (serve ≥ 6 su ≥ 3 lati)",
+        "sagoma: 3 (serve ≥ 4)"
+       ],
+       "ms": 8617
+      }
+     ],
+     "regge": false,
+     "varianza": {
+      "voxel": 0.5233767058649706,
+      "colore": 0.22482401748663347,
+      "pianta": 0.5759040098748553,
+      "perimetro": 0.30585181168152964,
+      "interno": 0.8552850059230326,
+      "semi": 5,
+      "firmePiani": 1,
+      "firmeStanze": 1,
+      "architetture": 3,
+      "statico": false
+     },
+     "difettiVarianza": [
+      "piani e stanze: 1 liste di piani, 1 di stanze (serve almeno una con ≥ 2)"
+     ]
+    }
+   ],
+   "regge": false,
+   "statico": false,
+   "varia": false,
+   "passa": false,
+   "ms": 85518
+  }
+ },
+ {
+  "nome": "suolo/locanda/1/seconda",
+  "prova": {
+   "taglie": [
+    {
+     "taglia": "grande",
+     "box": [
+      100,
+      100,
+      100
+     ],
+     "vpt": 20,
+     "gradino": 4,
+     "semi": [
+      {
+       "seme": 1,
+       "difetti": [],
+       "ms": 7674
+      },
+      {
+       "seme": 2,
+       "difetti": [],
+       "ms": 7271
+      },
+      {
+       "seme": 3,
+       "difetti": [],
+       "ms": 7650
+      },
+      {
+       "seme": 4,
+       "difetti": [],
+       "ms": 8248
+      },
+      {
+       "seme": 5,
+       "difetti": [
+        "finisce: no (serve entro 8000 ms)",
+        "valido: non termina: dopo 880 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)"
+       ],
+       "ms": 8361
+      }
+     ],
+     "regge": false,
+     "varianza": {
+      "voxel": 0.5931757815073243,
+      "colore": 0.17013159235199465,
+      "pianta": 0.1810184668509194,
+      "perimetro": 0.03557026437617171,
+      "interno": 0.6005652026657292,
+      "semi": 5,
+      "firmePiani": 1,
+      "firmeStanze": 3,
+      "architetture": 3,
+      "statico": false
+     },
+     "difettiVarianza": [
+      "perimetro: 0.04 (serve ≥ 0.15)"
+     ]
+    },
+    {
+     "taglia": "enorme",
+     "box": [
+      120,
+      120,
+      112
+     ],
+     "vpt": 16,
+     "gradino": 3,
+     "semi": [
+      {
+       "seme": 1,
+       "difetti": [
+        "finisce: no (serve entro 8000 ms)",
+        "valido: il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato); pezzi staccati: 22% dei voxel non è attaccato al corpo principale (2 pezzi); non termina: dopo 673 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+        "piani: 1 (serve ≥ 2)",
+        "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+        "murato: 3.5 (serve ≤ 0.25)",
+        "finestre: 1 su 1 lati (serve ≥ 6 su ≥ 3 lati)",
+        "sagoma: 3 (serve ≥ 4)"
+       ],
+       "ms": 8641
+      },
+      {
+       "seme": 2,
+       "difetti": [
+        "finisce: no (serve entro 8000 ms)",
+        "valido: il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato); pezzi staccati: 23% dei voxel non è attaccato al corpo principale (2 pezzi); non termina: dopo 589 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+        "piani: 1 (serve ≥ 2)",
+        "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+        "murato: 4.25 (serve ≤ 0.25)",
+        "finestre: 1 su 1 lati (serve ≥ 6 su ≥ 3 lati)",
+        "sagoma: 3 (serve ≥ 4)"
+       ],
+       "ms": 8591
+      },
+      {
+       "seme": 3,
+       "difetti": [
+        "finisce: no (serve entro 8000 ms)",
+        "valido: il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato); pezzi staccati: 23% dei voxel non è attaccato al corpo principale (2 pezzi); non termina: dopo 594 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+        "piani: 1 (serve ≥ 2)",
+        "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+        "murato: 4.25 (serve ≤ 0.25)",
+        "finestre: 1 su 1 lati (serve ≥ 6 su ≥ 3 lati)",
+        "sagoma: 3 (serve ≥ 4)"
+       ],
+       "ms": 8508
+      },
+      {
+       "seme": 4,
+       "difetti": [
+        "finisce: no (serve entro 8000 ms)",
+        "valido: il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato); pezzi staccati: 21% dei voxel non è attaccato al corpo principale (2 pezzi); non termina: dopo 647 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+        "piani: 1 (serve ≥ 2)",
+        "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+        "murato: 3.66 (serve ≤ 0.25)",
+        "finestre: 1 su 1 lati (serve ≥ 6 su ≥ 3 lati)"
+       ],
+       "ms": 8606
+      },
+      {
+       "seme": 5,
+       "difetti": [
+        "finisce: no (serve entro 8000 ms)",
+        "valido: il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato); pezzi staccati: 22% dei voxel non è attaccato al corpo principale (2 pezzi); non termina: dopo 667 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+        "piani: 1 (serve ≥ 2)",
+        "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+        "murato: 3.5 (serve ≤ 0.25)",
+        "finestre: 1 su 1 lati (serve ≥ 6 su ≥ 3 lati)",
+        "sagoma: 3 (serve ≥ 4)"
+       ],
+       "ms": 8607
+      }
+     ],
+     "regge": false,
+     "varianza": {
+      "voxel": 0.36250264732987064,
+      "colore": 0.21657500070286634,
+      "pianta": 0.5445892596398247,
+      "perimetro": 0.29466501240694787,
+      "interno": 0.8426782798040283,
+      "semi": 5,
+      "firmePiani": 1,
+      "firmeStanze": 2,
+      "architetture": 4,
+      "statico": false
+     },
+     "difettiVarianza": []
+    }
+   ],
+   "regge": false,
+   "statico": false,
+   "varia": false,
+   "passa": false,
+   "ms": 82392
+  }
+ },
+ {
+  "nome": "suolo/locanda/2",
+  "prova": {
+   "taglie": [
+    {
+     "taglia": "grande",
+     "box": [
+      100,
+      100,
+      100
+     ],
+     "vpt": 20,
+     "gradino": 4,
+     "semi": [
+      {
+       "seme": 1,
+       "difetti": [
+        "finisce: no (serve entro 8000 ms)",
+        "valido: non termina: dopo 837 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+        "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+        "murato: 1.65 (serve ≤ 0.25)",
+        "salti: 1 (serve ≥ 2)",
+        "finestre: 4 su 3 lati (serve ≥ 6 su ≥ 3 lati)"
+       ],
+       "ms": 8855
+      },
+      {
+       "seme": 2,
+       "difetti": [
+        "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+        "salti: 0 (serve ≥ 2)"
+       ],
+       "ms": 6443
+      },
+      {
+       "seme": 3,
+       "difetti": [
+        "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+        "salti: 1 (serve ≥ 2)"
+       ],
+       "ms": 6055
+      },
+      {
+       "seme": 4,
+       "difetti": [
+        "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+        "salti: 0 (serve ≥ 2)"
+       ],
+       "ms": 6012
+      },
+      {
+       "seme": 5,
+       "difetti": [
+        "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+        "salti: 0 (serve ≥ 2)"
+       ],
+       "ms": 6041
+      }
+     ],
+     "regge": false,
+     "varianza": {
+      "voxel": 0.5392660096653927,
+      "colore": 0.10507846097479775,
+      "pianta": 0.16792639000406367,
+      "perimetro": 0.11527760475063328,
+      "interno": 0.5170240381076545,
+      "semi": 5,
+      "firmePiani": 1,
+      "firmeStanze": 3,
+      "architetture": 3,
+      "statico": false
+     },
+     "difettiVarianza": [
+      "perimetro: 0.12 (serve ≥ 0.15)"
+     ]
+    },
+    {
+     "taglia": "enorme",
+     "box": [
+      120,
+      120,
+      112
+     ],
+     "vpt": 16,
+     "gradino": 3,
+     "semi": [
+      {
+       "seme": 1,
+       "difetti": [
+        "finisce: no (serve entro 8000 ms)",
+        "valido: non termina: dopo 904 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+        "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+        "murato: 2.25 (serve ≤ 0.25)",
+        "salti: 0 (serve ≥ 2)",
+        "finestre: 1 su 1 lati (serve ≥ 6 su ≥ 3 lati)"
+       ],
+       "ms": 9013
+      },
+      {
+       "seme": 2,
+       "difetti": [
+        "finisce: no (serve entro 8000 ms)",
+        "valido: non termina: dopo 795 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+        "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+        "murato: 2.62 (serve ≤ 0.25)",
+        "finestre: 1 su 1 lati (serve ≥ 6 su ≥ 3 lati)"
+       ],
+       "ms": 8409
+      },
+      {
+       "seme": 3,
+       "difetti": [
+        "finisce: no (serve entro 8000 ms)",
+        "valido: non termina: dopo 805 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+        "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+        "murato: 2.64 (serve ≤ 0.25)",
+        "finestre: 1 su 1 lati (serve ≥ 6 su ≥ 3 lati)"
+       ],
+       "ms": 8403
+      },
+      {
+       "seme": 4,
+       "difetti": [
+        "finisce: no (serve entro 8000 ms)",
+        "valido: non termina: dopo 860 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+        "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+        "murato: 2.37 (serve ≤ 0.25)",
+        "finestre: 1 su 1 lati (serve ≥ 6 su ≥ 3 lati)"
+       ],
+       "ms": 8404
+      },
+      {
+       "seme": 5,
+       "difetti": [
+        "finisce: no (serve entro 8000 ms)",
+        "valido: non termina: dopo 782 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+        "piani: 1 (serve ≥ 2)",
+        "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+        "murato: 3.38 (serve ≤ 0.25)",
+        "salti: 0 (serve ≥ 2)",
+        "finestre: 1 su 1 lati (serve ≥ 6 su ≥ 3 lati)"
+       ],
+       "ms": 8368
+      }
+     ],
+     "regge": false,
+     "varianza": {
+      "voxel": 0.4718466003425657,
+      "colore": 0.19468279897287957,
+      "pianta": 0.5446310697442313,
+      "perimetro": 0.29738154613466333,
+      "interno": 0.8740742665068578,
+      "semi": 5,
+      "firmePiani": 2,
+      "firmeStanze": 3,
+      "architetture": 4,
+      "statico": false
+     },
+     "difettiVarianza": []
+    }
+   ],
+   "regge": false,
+   "statico": false,
+   "varia": false,
+   "passa": false,
+   "ms": 76176
+  }
+ },
+ {
+  "nome": "suolo/locanda/2/seconda",
+  "prova": {
+   "taglie": [
+    {
+     "taglia": "grande",
+     "box": [
+      100,
+      100,
+      100
+     ],
+     "vpt": 20,
+     "gradino": 4,
+     "semi": [
+      {
+       "seme": 1,
+       "difetti": [
+        "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)"
+       ],
+       "ms": 5944
+      },
+      {
+       "seme": 2,
+       "difetti": [],
+       "ms": 6166
+      },
+      {
+       "seme": 3,
+       "difetti": [],
+       "ms": 6236
+      },
+      {
+       "seme": 4,
+       "difetti": [],
+       "ms": 6494
+      },
+      {
+       "seme": 5,
+       "difetti": [],
+       "ms": 7245
+      }
+     ],
+     "regge": false,
+     "varianza": {
+      "voxel": 0.5359146291852417,
+      "colore": 0.19544206154461682,
+      "pianta": 0.18339216654423396,
+      "perimetro": 0.04774996314004676,
+      "interno": 0.6247392668398581,
+      "semi": 5,
+      "firmePiani": 2,
+      "firmeStanze": 4,
+      "architetture": 3,
+      "statico": false
+     },
+     "difettiVarianza": [
+      "perimetro: 0.05 (serve ≥ 0.15)"
+     ]
+    },
+    {
+     "taglia": "enorme",
+     "box": [
+      120,
+      120,
+      112
+     ],
+     "vpt": 16,
+     "gradino": 3,
+     "semi": [
+      {
+       "seme": 1,
+       "difetti": [
+        "finisce: no (serve entro 8000 ms)",
+        "valido: non termina: dopo 722 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+        "piani: 1 (serve ≥ 2)",
+        "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+        "murato: 3.38 (serve ≤ 0.25)",
+        "salti: 0 (serve ≥ 2)",
+        "finestre: 1 su 1 lati (serve ≥ 6 su ≥ 3 lati)"
+       ],
+       "ms": 8796
+      },
+      {
+       "seme": 2,
+       "difetti": [
+        "finisce: no (serve entro 8000 ms)",
+        "valido: non termina: dopo 633 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+        "piani: 1 (serve ≥ 2)",
+        "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+        "murato: 4.08 (serve ≤ 0.25)",
+        "salti: 0 (serve ≥ 2)",
+        "finestre: 1 su 1 lati (serve ≥ 6 su ≥ 3 lati)"
+       ],
+       "ms": 8962
+      },
+      {
+       "seme": 3,
+       "difetti": [
+        "finisce: no (serve entro 8000 ms)",
+        "valido: non termina: dopo 830 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+        "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+        "murato: 2.7 (serve ≤ 0.25)"
+       ],
+       "ms": 8411
+      },
+      {
+       "seme": 4,
+       "difetti": [
+        "finisce: no (serve entro 8000 ms)",
+        "valido: non termina: dopo 837 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+        "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+        "murato: 2.4 (serve ≤ 0.25)",
+        "finestre: 1 su 1 lati (serve ≥ 6 su ≥ 3 lati)"
+       ],
+       "ms": 8456
+      },
+      {
+       "seme": 5,
+       "difetti": [
+        "finisce: no (serve entro 8000 ms)",
+        "valido: non termina: dopo 705 passi riscrive ancora (metti \"steps\" ai nodi che crescono) (serve i controlli di check.ts)",
+        "piani: 1 (serve ≥ 2)",
+        "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+        "murato: 3.38 (serve ≤ 0.25)",
+        "salti: 0 (serve ≥ 2)",
+        "finestre: 1 su 1 lati (serve ≥ 6 su ≥ 3 lati)"
+       ],
+       "ms": 8717
+      }
+     ],
+     "regge": false,
+     "varianza": {
+      "voxel": 0.5017368187194966,
+      "colore": 0.1991514783008997,
+      "pianta": 0.525104373003427,
+      "perimetro": 0.2633801994875656,
+      "interno": 0.8601115955561975,
+      "semi": 5,
+      "firmePiani": 2,
+      "firmeStanze": 3,
+      "architetture": 5,
+      "statico": false
+     },
+     "difettiVarianza": []
+    }
+   ],
+   "regge": false,
+   "statico": false,
+   "varia": false,
+   "passa": false,
+   "ms": 75668
+  }
+ }
+]
