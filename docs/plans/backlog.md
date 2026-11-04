@@ -2182,7 +2182,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   `MockModels` se cambiano gli schemi.
 - Fatto quando: typecheck e test verdi; le icone nell'inventario e le foto dell'Artista nel browser hanno l'aspetto del mondo.
 
-### T89e · Cartone: laboratorio, prestazioni, togliere la prova — `in attesa` (dipende da T89b, T89d)
+### T89e · Cartone: laboratorio, prestazioni, togliere la prova — `da fare` (dipende da T89b, T89d)
 - Pipeline: claude · stima 4% · approvato · browser · priorità 79
 - Step: 29
 - Contesto: ADR-0093, conseguenze e punto 6.
@@ -2190,7 +2190,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   studio, la corona) e scriverli nell'ADR; se il disegno degli id costa troppo, MRT o metà risoluzione per gli id; togliere `?cartone` e `window.cartone`
   lasciando `?classica`; ADR-0093 `accettato` e AGENTS.md aggiornato.
 - Fatto quando: typecheck e test verdi; misure nell'ADR; verifica nel browser di simulazione, studio, corona e laboratorio.
-- Esito: nessun codice cambiato, solo la domanda in `docs/pipeline/domande/T89e.md`: T89e è partito prima di T89b e T89d perché il parser legge `dipende da T89a-d` come il solo T89a; mancano interruttore del laboratorio, misure, rimozione di `?cartone` e `window.cartone`, ADR-0093 `accettato`; test, typecheck e browser non eseguiti perché non c'è codice da provare; raccomandato riaccodarlo con `dipende da T89b, T89d` e correggere il parser.
+- Nota: un primo lancio (04/11) è partito prima di T89b e T89d perché il parser non espande `T89a-d`; nessun codice. Dipendenza corretta a mano: `docs/pipeline/domande/T89e.md`.
 
 ### T92 · Integrare T52 (i sotterranei) nel base 3d — `fatto`
 - Pipeline: gemini · stima 1% · approvato · priorità 0
