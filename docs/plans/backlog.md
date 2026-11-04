@@ -3937,3 +3937,12 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Test: basta `git diff HEAD~1 HEAD --stat` vuoto, niente suite: l'albero non cambia.
 - Browser: non serve.
 - Quando è fatto: commit su `task/T250` senza differenze di contenuto. Sicurezza: nessuna superficie nuova.
+
+### T251 · Integrare T247 — `da fare`
+- Pipeline: claude · stima 4% · approvato · priorità 1
+- Step: 34
+- Contesto: nasce da T247 (`dossier T247`, `traccia T247`). `integra T247` va in conflitto con il base in `AGENTS.md`, `src/session/client.ts`, `src/session/protocol.ts`, `src/style.css`: nel frattempo sono entrati T241 (scala φ in `src/theme.css` e negli stili di HUD e pannelli), T243 e T244.
+- Cosa fare: nel tuo worktree `git merge task/T247` e risolvi. Due aggiunte nello stesso punto restano entrambe. In `src/style.css` valgono insieme gli stili della lobby di T247 e la scala φ di T241: i nuovi stili della lobby usano le variabili della scala. Tieni l'ADR di T247 col numero 0133 e non toccare l'ADR-0132 di T243.
+- Test: suite intera e typecheck verdi.
+- Browser: solo la lobby, perché `src/style.css` è in conflitto: `?offline&lobby` da soli a 1920 px, controlli leggibili e non tagliati, blocco dopo l'applicazione. Non rifare le altre prove di T247.
+- Quando è fatto: commit di merge su `task/T251`, nessun conflitto rimasto; l'esito dice come hai risolto ciascuno dei quattro file. Sicurezza: nessuna superficie nuova oltre a quella dichiarata da T247.

@@ -88,7 +88,7 @@ L'autore: il rilascio aperto al pubblico, con i pagamenti Stripe. Il piano di la
 | 31 | Quattro ambientazioni, generate senza browser dai crediti che avanzano | I | da fare | T152 T153 T207 T88 |
 | 32 | Il kernel regge mesi di vita, e gli NPC agiscono davvero | I | da fare | T183 T245 |
 | 33 | Il rapporto aureo in HUD, pannelli e in ciò che si genera da qui in poi | I | da fare | T241 T242 |
-| 34 | Pronti per la beta: server, guida, notizie, home, consumo in lobby, registro dei fallimenti del Concilio | I | in corso | T45f T234 T236 T237 T238 T243 T244 T247 T248 T249 T250 |
+| 34 | Pronti per la beta: server, guida, notizie, home, consumo in lobby, registro dei fallimenti del Concilio | I | in corso | T45f T234 T236 T237 T238 T243 T244 T247 T248 T249 T250 T251 |
 | 35 | Il sito è il launcher del gioco | II | in attesa | T232 T233 T235 |
 | 36 | Il gioco in quattro lingue | III | in attesa | T239 |
 | 37 | Altri universi: spazio, pirati, cowboy (fase proposta: l'autore non l'ha detta) | III | in attesa | T184 T185 |
