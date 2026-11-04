@@ -1,0 +1,35 @@
+{
+ "file": "fantasy/torre-di-guardia.xml",
+ "ambientazione": "fantasy",
+ "nome": "torre-di-guardia",
+ "titolo": "Torre di guardia del passo, con la segreta",
+ "cantina": true,
+ "passa": true,
+ "regge": true,
+ "varia": true,
+ "maxMs": {
+  "grande": 2438,
+  "enorme": 3341
+ },
+ "semiOk": {
+  "grande": "5/5",
+  "enorme": "5/5"
+ },
+ "varianza": {
+  "grande": {
+   "voxel": 0.6194746636023365,
+   "pianta": 0.42025014889815365,
+   "perimetro": 0.15672451193058567,
+   "interno": 0.688287080930327,
+   "architetture": 5
+  },
+  "enorme": {
+   "voxel": 0.6073011005805522,
+   "pianta": 0.37179595817304145,
+   "perimetro": 0.2275104020648377,
+   "interno": 0.6734382580351939,
+   "architetture": 5
+  }
+ },
+ "difetti": []
+}
