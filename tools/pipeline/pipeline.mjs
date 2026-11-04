@@ -342,8 +342,12 @@ export function parseBacklog(text) {
     if (!m) continue;
     const [, id, title, tail = ''] = m;
     const deps = new Set();
-    for (const d of block.matchAll(/(?:dipende da|dipendenze:|dopo)\s*:?\s*([^)\n;.]*)/gi))
-      for (const t of d[1].matchAll(/T\d+[a-z]?/g)) if (!new RegExp(`^${id}[a-z]?$`).test(t[0])) deps.add(t[0]); // not itself nor its sub-tasks (T6 ≠ T63)
+    for (const d of block.matchAll(/(?:dipende da|dipendenze:|dopo)\s*:?\s*([^)\n;.]*)/gi)) {
+      const clause = d[1].replace(/\b(T\d+)([a-z])-(?:\1)?([a-z])\b/g, (r, p, a, b) =>
+        a <= b ? Array.from({ length: b.charCodeAt(0) - a.charCodeAt(0) + 1 }, (_, i) => p + String.fromCharCode(a.charCodeAt(0) + i)).join(' ') : r,
+      );
+      for (const t of clause.matchAll(/T\d+[a-z]?/g)) if (!new RegExp(`^${id}[a-z]?$`).test(t[0])) deps.add(t[0]); // not itself nor its sub-tasks (T6 ≠ T63)
+    }
     const pipe = /^- Pipeline:\s*(.+)$/m.exec(block);
     const info = pipe ? parsePipelineLine(pipe[1]) : {};
     const stepLine = /^- Step:\s*(\d+)\s*$/m.exec(block);

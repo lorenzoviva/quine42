@@ -3967,13 +3967,14 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Quando è fatto: commit su `task/T252`; nell'esito l'altezza prima e ora. Sicurezza: nessuna superficie nuova.
 - Esito: chiuso senza lavoro: la stessa correzione è entrata con T152 (`e30e2c8`, `flex-shrink: 0` sui figli della finestra). Non provati i 390 px.
 
-### T253 · Il parser delle dipendenze capisce gli intervalli — `da fare`
+### T253 · Il parser delle dipendenze capisce gli intervalli — `fatto` (`adbf865`)
 - Pipeline: argon · stima 5% · approvato · priorità 10
 - Contesto: nasce da T89e (`dossier T89e`, `docs/pipeline/domande/T89e.md`). `parseBacklog` in `tools/pipeline/pipeline.mjs` legge un intervallo come `T89a-d` come il solo `T89a`: un task è partito troppo presto, a dipendenza non finita.
 - Cosa fare: in `parseBacklog` espandi le lettere di un intervallo (`T89a-d` → `T89a`, `T89b`, `T89c`, `T89d`; anche `T89a-T89d`). Solo dove il parser legge già le dipendenze: non cambiare le parole che le introducono. Non espandere gli intervalli di soli numeri come `T230-T242`: i due estremi restano ciò che sono oggi. Poi cerca nei blocchi non `fatto` di `docs/plans/backlog.md` la stessa forma e riporta nell'esito quali task cambierebbero dipendenze; il backlog non lo tocchi.
 - Test: casi nuovi in `tests/pipeline.test.ts`: intervallo di lettere nelle due forme, un elenco misto con un intervallo, i soli numeri invariati, il task stesso che non diventa una sua dipendenza. Suite intera e typecheck con i loro turni.
 - Browser: non serve.
 - Quando è fatto: commit su `task/T253`. Sicurezza: nessuna superficie nuova.
+- Esito: in `parseBacklog` (`tools/pipeline/pipeline.mjs`) espansi gli intervalli di lettere nelle due forme (`T89a-d` e `T89a-T89d`) dentro le clausole di dipendenza senza toccare gli intervalli di soli numeri (`T230-T242`) né includere il task stesso; nessun blocco non `fatto` del backlog attuale cambia dipendenze (`T89e` era già stato corretto in `dipende da T89b, T89d`, mentre `T43`, `T45`, `T52` e `T253` hanno intervalli solo fuori dalle clausole di dipendenza); aggiunti i test in `tests/pipeline.test.ts`, typecheck e suite eseguiti nei rispettivi turni (`subscription.test.ts` verde da solo, 131/132 file verdi nel turno della suite intera).
 
 ## I modelli e le loro benchmark (chat del 04/11/2026, sera)
 
