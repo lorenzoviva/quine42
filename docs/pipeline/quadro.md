@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 04/11/2026, epoca 243. Crediti: vedi `stato`.
+Aggiornato il 04/11/2026, epoca 244. Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -32,11 +32,11 @@ Aggiornato il 04/11/2026, epoca 243. Crediti: vedi `stato`.
 - **T186 integrato** (`cf88084`): landing, striscia «coming soon» con spazio, pirati, cowboy, senza link. Verificata a 1920 e 390 px; non provata sotto `npm run serve`.
 - **T225 integrato** (`c0c7868`, ADR-0127): Musicista (`sound.compose`) nella casa dell'Artista, `ScoreDirector` entro `ai.maxBrani` (8) e coefficiente `brani`, incarico `musica` del Referente. Non provati: ascolto umano, multigiocatore dal vivo, `ScoreDirector` con un modello vero; suite intera non rilanciata dopo una correzione ai soli documenti. Limiti: validazione sincrona ~0,8 s a tentativo sulla pagina; i brani di Gemini seguono da vicino l'esempio; un «Low Detail» salvato senza `brani` non è più riconosciuto finché non lo si riapplica.
 - **T229 e T158 integrati** (`d8909a5`): l'Attore nella corona (ADR-0116), dieci al tavolo, `guest` assorbito in `Building.teams`. Verificato nel browser. Non provati: Attore acceso con una battuta vera, teletrasporti con `E` nel browser. Scoperti, nessun task: `Archive.go` senza file manda lo Scultore in `buildings[0]`; `docs/glossario-censimento.md` rigenerato porta differenze estranee.
-- ADR nuovi dallo **0128**. Prossimo task: T246.
+- ADR nuovi dallo **0128**. Prossimo task: T247.
 
 ## Pronti e priorità
 
-1. **In coda, approvati e pronti, partono da soli:** T230 T234 T238 T243 T89b T89e T183 T152, poi T241, T244; T182 in corso.
+1. **In coda, approvati e pronti, partono da soli:** T246 (tooltip dei task nella chat web, richiesta dell'autore del 04/11), T230 T234 T238 T243 T89b T89e T183 T152, poi T241, T244; T182 in corso.
 4. **T182 → T156** (strutture procedurali). T182 su Claude, stima 8 %, al più 4 giri; è pronto.
 4b. **Generazione differita** (richiesta dell'autore, 03/11): **solo dopo T156, il prompt nuovo dello Scultore** (l'autore: non sprecare crediti). T207 (generatore senza browser, solo abbonamenti, aspetta T156) → T88 (la pipeline lo accende coi crediti che avanzano) → T153 (legge e prova i tre universi). L'elenco `generazione` di `config.json` c'è già: nessuno lo legge finché T88 non lo usa; la sua forma è mia, T88 può adattarla.
 5. T89d resta bloccato.
@@ -68,5 +68,5 @@ Aggiornato il 04/11/2026, epoca 243. Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **243:** T236 chiuso, T243-T245 creati; T93 chiarito (solo Stripe), T232 a fine Fase II.
 - **242:** T229 e T158 integrati; Attore e Musicista nella corona.
-- **241:** T186 e T225 integrati; catena del suono finita; T158 in conflitto, T229 creato.
