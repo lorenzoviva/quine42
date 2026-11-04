@@ -744,9 +744,11 @@ export class StudioPanel {
 
 function photoToCanvas(pic: Picture): HTMLCanvasElement {
   const cv = el('canvas', { width: String(pic.w), height: String(pic.h), class: 'photo' }) as HTMLCanvasElement;
-  cv.style.imageRendering = 'pixelated';
-  cv.style.width = `${Math.min(130, Math.max(70, pic.w * 2))}px`;
-  cv.style.height = `${Math.min(130, Math.max(70, pic.h * 2))}px`;
+  // Inside its frame, with its proportions; reduced smoothly, or the ink's thin lines would drop out here and there.
+  const scale = Math.min(130 / pic.w, 130 / pic.h, 2);
+  cv.style.imageRendering = scale >= 1 ? 'pixelated' : 'auto';
+  cv.style.width = `${Math.round(pic.w * scale)}px`;
+  cv.style.height = `${Math.round(pic.h * scale)}px`;
   cv.style.background = '#0a0d14';
   cv.style.border = '1px solid var(--line)';
   cv.style.borderRadius = '4px';

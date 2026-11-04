@@ -7,6 +7,8 @@
 // right flank towards us), 2 back, 3 left.
 
 import { AIR, type Grid3, type PaletteEntry } from './engine';
+import { partTable } from './mesh';
+import { SUN_FROM, toLinear, toonTones, toSrgb } from './toonlight';
 
 export interface RenderOptions {
   /** Pixels per voxel along x. */
@@ -23,10 +25,18 @@ export interface RenderOptions {
   crop: boolean;
   /** Where the shadow falls, per voxel of height: [east, south]. The style guide wants it short, to the south-east. */
   sun?: [number, number];
+  /** As the world looks (ADR-0093): flat tones in the bands, tinted shadows, ink where a part changes, in place of the classic light and contours. */
+  cartoon?: boolean;
 }
 
 export const DEFAULT_SUN: [number, number] = [0.18, 0.22];
 export const DEFAULT_RENDER: RenderOptions = { px: 1, top: 1, front: 1, outline: true, shadow: true, light: true, crop: true, sun: DEFAULT_SUN };
+
+/** The world's sun as a shadow per voxel of height: to the east and, the sun being south-west, towards the back. */
+const WORLD_SUN: [number, number] = [-SUN_FROM[0] / SUN_FROM[1], -SUN_FROM[2] / SUN_FROM[1]];
+
+/** The photographs of the models as the world draws them; `px` pixels per voxel, enough for the ink to be a line and not whole voxels. */
+export const cartoonRender = (px = 4): RenderOptions => ({ ...DEFAULT_RENDER, px, top: px, front: px, sun: WORLD_SUN, cartoon: true });
 
 /** The sun over a day, for shadows that move: morning to the west, noon short, evening long to the east. */
 export const DAY: Array<{ name: string; sun: [number, number] }> = [
@@ -80,11 +90,29 @@ export interface Raster extends Picture {
   /** Where voxel (0, 0, 0)'s top face starts: x, and y of the ground row. */
   ox: number;
   oy: number;
+  /** The part of the model each pixel belongs to (`partTable`), what the ink follows. */
+  part: Uint8Array;
+  /** 1 where a pixel gives light: it takes no ink. */
+  glow: Uint8Array;
 }
+
+/** The tint and the opacity of a cast shadow on the ground, in the cartoon: cold, not black. */
+const TOON_GROUND_SHADOW = { rgb: [34, 44, 92], alpha: 96 } as const;
+
+/** Depth (y + z, in voxels) where the ink draws inside one part: a real step, not the voxels of a crown. About what the world's `uDepthEdge` starts from. */
+const INK_JUMP = 12;
+
+/** The ink's colour, in linear RGB, over the pixel's colour: the same as the shader of `Ink`. */
+const INK_KEEP = 0.18;
+const INK_FLOOR = [0.03, 0.03, 0.05] as const;
+const INK_MIX = 0.9;
 
 export function render(g: Grid3, palette: Record<string, PaletteEntry>, view: number, o: RenderOptions = DEFAULT_RENDER): Picture {
   const r = paint(g, palette, view, o);
-  if (o.outline) outline(r);
+  if (o.outline) {
+    if (o.cartoon) inkRaster(r);
+    else outline(r);
+  }
   const pic = { w: r.w, h: r.h, data: r.data };
   return o.crop ? crop(pic) : pic;
 }
@@ -115,8 +143,11 @@ export function paint(g: Grid3, palette: Record<string, PaletteEntry>, view: num
   /** 0 empty, 1 ground shadow, 2 model. */
   const kind = new Uint8Array(W * H);
   const near = new Int16Array(W * H);
+  const part = new Uint8Array(W * H);
+  const glowing = new Uint8Array(W * H);
+  const parts = partTable(g.alphabet, palette);
   const oy = 1 + t.Z * o.front + my * o.top;
-  const rect = (x0: number, y0: number, w: number, h: number, c: Rgb, n: number) => {
+  const rect = (x0: number, y0: number, w: number, h: number, c: Rgb, n: number, letter: number, glows: boolean) => {
     for (let y = Math.max(0, y0); y < Math.min(H, y0 + h); y++)
       for (let x = Math.max(0, x0); x < Math.min(W, x0 + w); x++) {
         const i = y * W + x;
@@ -126,6 +157,8 @@ export function paint(g: Grid3, palette: Record<string, PaletteEntry>, view: num
         data[i * 4 + 3] = 255;
         kind[i] = 2;
         near[i] = n;
+        part[i] = parts[letter];
+        glowing[i] = glows ? 1 : 0;
       }
   };
 
@@ -146,13 +179,16 @@ export function paint(g: Grid3, palette: Record<string, PaletteEntry>, view: num
           for (let px = 0; px < o.px; px++) {
             const i = (oy + (gy - my) * o.top + py) * W + ox - mx * o.px + gx * o.px + px;
             if (i < 0 || i >= W * H) continue;
-            data[i * 4 + 3] = 70;
+            if (o.cartoon) data.set([...TOON_GROUND_SHADOW.rgb, TOON_GROUND_SHADOW.alpha], i * 4);
+            else data[i * 4 + 3] = 70;
             kind[i] = 1;
           }
       }
   }
 
   const shade = (c: Rgb, k: number): Rgb => [c[0] * k, c[1] * k, c[2] * k];
+  const tones = o.cartoon ? toonTones() : undefined;
+  const toned = (c: Rgb, tone: readonly [number, number, number]): Rgb => [0, 1, 2].map((ch) => toSrgb(toLinear(c[ch] / 255) * tone[ch]) * 255) as Rgb;
   for (let y = 0; y < t.Y; y++)
     for (let z = 0; z < t.Z; z++)
       for (let x = 0; x < t.X; x++) {
@@ -163,6 +199,17 @@ export function paint(g: Grid3, palette: Record<string, PaletteEntry>, view: num
         if (!topOpen && !frontOpen) continue;
         const left = ox + x * o.px;
         const n = y + z;
+        const letter = t.cells[x + y * t.X + z * XY];
+        if (tones) {
+          // Flat tones, as the bands: what gives light keeps its own colour on every face.
+          const gives = !!palette[g.alphabet[letter]]?.glow;
+          // From the air in front of each face: a wall is not in the shade of the voxels above it.
+          const topDark = !gives && o.light && !lit(x, y, z + 1);
+          const frontDark = !gives && o.light && !lit(x, y + 1, z);
+          if (topOpen) rect(left, oy + y * o.top - (z + 1) * o.front, o.px, o.top, gives ? c : toned(c, topDark ? tones.topInShadow : tones.top), n, letter, gives);
+          if (frontOpen) rect(left, oy + (y + 1) * o.top - (z + 1) * o.front, o.px, o.front, gives ? c : toned(c, frontDark ? tones.frontInShadow : tones.front), n, letter, gives);
+          continue;
+        }
         let k = 1;
         let shadeFront = 0.8;
         // What glows is not shaded: it is its own light.
@@ -180,15 +227,48 @@ export function paint(g: Grid3, palette: Record<string, PaletteEntry>, view: num
         }
         if (topOpen) {
           const sy = oy + y * o.top - (z + 1) * o.front;
-          rect(left, sy, o.px, o.top, shade(c, k * (o.light && !glow && !solid(x, y - 1, z) && !solid(x, y - 1, z + 1) ? 1.06 : 1)), n);
+          rect(left, sy, o.px, o.top, shade(c, k * (o.light && !glow && !solid(x, y - 1, z) && !solid(x, y - 1, z + 1) ? 1.06 : 1)), n, letter, glow);
         }
         if (frontOpen) {
           const sy = oy + (y + 1) * o.top - (z + 1) * o.front;
-          rect(left, sy, o.px, o.front, shade(c, k * shadeFront), n);
+          rect(left, sy, o.px, o.front, shade(c, k * shadeFront), n, letter, glow);
         }
       }
 
-  return { w: W, h: H, data, kind, near, ox, oy };
+  return { w: W, h: H, data, kind, near, ox, oy, part, glow: glowing };
+}
+
+/**
+ * The ink of the cartoon on a painted picture, by the same rule as the world's (`Ink`, ADR-0093): one pixel on each side of where
+ * the part changes, of the silhouette, or of a real step in depth; never over what gives light; the colour is the pixel's own, much darker.
+ */
+export function inkRaster(r: Raster): void {
+  const { w: W, h: H, data, kind, near, part, glow } = r;
+  /** Whose colour the ink over each pixel takes, plus one; 0 where there is no ink. */
+  const from = new Int32Array(W * H);
+  for (let y = 0; y < H; y++)
+    for (let x = 0; x < W; x++) {
+      const i = y * W + x;
+      if (kind[i] === 2 && glow[i]) continue;
+      const around = [x > 0 ? i - 1 : -1, x < W - 1 ? i + 1 : -1, y > 0 ? i - W : -1, y < H - 1 ? i + W : -1];
+      for (const j of around) {
+        if (j < 0) continue;
+        if (kind[i] === 2) {
+          if (kind[j] !== 2 || part[j] !== part[i] || Math.abs(near[j] - near[i]) >= INK_JUMP) from[i] = i + 1;
+        } else if (kind[j] === 2 && !glow[j]) from[i] = j + 1;
+      }
+    }
+  const source = data.slice();
+  for (let i = 0; i < W * H; i++) {
+    if (!from[i]) continue;
+    const s = (from[i] - 1) * 4;
+    for (let ch = 0; ch < 3; ch++) {
+      const c = toLinear(source[s + ch] / 255);
+      data[i * 4 + ch] = toSrgb(c + (c * INK_KEEP + INK_FLOOR[ch] - c) * INK_MIX) * 255;
+    }
+    data[i * 4 + 3] = 255;
+    if (kind[i] !== 2) kind[i] = 3;
+  }
 }
 
 /** Contours where a nearer surface covers a farther one, then around the whole silhouette. */

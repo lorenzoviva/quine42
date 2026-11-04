@@ -371,9 +371,9 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Fermo**: il componente `form`, `forma` del protocollo, gli id `forma-…`.
 
 ### Inchiostro
-- **Inglese**: `Ink`, `idsOf`, `thingOf`
+- **Inglese**: `Ink`, `idsOf`, `thingOf`; nelle foto dei modelli `inkRaster`
 - **Definizione**: i contorni della grafica a cartone: una riga scura dove cambia la cosa o la parte, o dove la profondità salta (ADR-0093).
-- **Dove vive**: `src/render/cartoon.ts`, `src/render/materials.ts`
+- **Dove vive**: `src/render/cartoon.ts`, `src/render/materials.ts`, `src/mj/photo.ts`
 - **Da non usare**: `outline`, `bordo` (per questa riga)
 
 ### Parte di un modello

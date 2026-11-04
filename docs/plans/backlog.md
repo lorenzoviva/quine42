@@ -2173,7 +2173,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Fatto quando: typecheck e test verdi; screenshot di giorno e di notte (`k.time` spostato da console) con e senza cartone.
 - Esito: luce chiave calda ed emisfero freddo con luna di notte (`cartoonLight`, `PHASES`, `CARTOON_INDOORS`), ombre tinte senza seconda lettura della mappa (`addShade`, da `toon()` e `addGlow`), nebbia come prospettiva aerea anche con la camera libera (`aerial`: 0,85-2,2 distanze), inchiostro che sbiadisce con la nebbia (`uFog` in `Ink`: T89b deve tenerlo), bloom tarato (raggio 0,3; forza 0,5 di giorno, 0,85 di notte, 0,7 al chiuso); test nuovi in `tests/cartoon.test.ts`, ADR-0093 e `#cartone` aggiornati; typecheck e build verdi, suite verde al secondo giro (117 file, 1607 test): al primo giro è fallito `tests/subscription.test.ts` (T68c), che non tocca il renderer e passa da solo, causa non cercata; `CARTOON_BY_DEFAULT` resta `false` finché non è fatto T89b; non provati le prestazioni (T89e) e l'effetto della camera delle ombre ±22 da lontano (dedotto, come nel classico); dopo l'ultima taratura della nebbia ricontrollati solo giorno e notte; icone e laboratorio restano Lambert (T89d, T89e). Sicurezza: nessuna superficie nuova.
 
-### T89d · Cartone: lo stile nei dati e le foto dei modelli — `da fare` (dipende da T89b)
+### T89d · Cartone: lo stile nei dati e le foto dei modelli — `fatto` (`1b0d744`) (dipende da T89b)
 - Pipeline: claude · stima 3% · approvato · browser · priorità 78
 - Step: 29
 - Contesto: ADR-0093, punto 5. Il bordo nasce dove cambia la parte: i programmi devono avere parti di colore ben distinto.
@@ -2182,6 +2182,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
   dell'Artista guarda anche se le parti si leggono a contorni. Le foto (`src/mj/photo.ts`, `src/render/thumbs.ts`) con fasce e inchiostro. Le risposte di
   `MockModels` se cambiano gli schemi.
 - Fatto quando: typecheck e test verdi; le icone nell'inventario e le foto dell'Artista nel browser hanno l'aspetto del mondo.
+- Esito: foto dell'Artista e del tornio sempre a cartone (`cartoonRender`, `inkRaster`, `toonlight.ts`, nessun three.js), icone con fasce, luce di giorno e `Ink` dietro l'interruttore, guida del seme, prompt di Artista e Scultore, `genesis.style` e testo del giudizio aggiornati, schema e mock invariati; cambiato rispetto al previsto: il sole delle foto a cartone è quello del mondo (l'ombra cade a nord-est), le icone disegnano la scena due volte per non bucare i voxel luminosi e dare la riga alla sagoma, il pannello del tornio ora tiene le proporzioni, `window.cartone` si imposta in `bloom.ts`; manca: laboratorio (T89e) e carte del sito ancora alle foto classiche, guide e modelli esistenti non toccati; non provato: giudizio con Gemini vero, `devicePixelRatio` diverso da 1 sulle icone; suite 128 file/1991 test e typecheck verdi. Sicurezza: nessuna superficie nuova.
 
 ### T89e · Cartone: laboratorio, prestazioni, togliere la prova — `da fare` (dipende da T89b, T89d)
 - Pipeline: claude · stima 4% · approvato · browser · priorità 79

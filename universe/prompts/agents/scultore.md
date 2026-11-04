@@ -77,7 +77,14 @@ manico) con lettere sue.
   convolution per levigare. Cose costruite: un volume pieno che poi si scava, si erode, si decora.
 - I dettagli li trovano i pattern: una cella con il vuoto sopra (`in="B R"`) è la superficie in cima;
   "BB/BW" è uno spigolo; un muro con il vuoto davanti e il fondo a terra è dove va una porta.
-- 4-8 colori: per ogni materiale un tono base, uno chiaro in cima, uno scuro (crepe, ombre).
+- Il mondo si disegna come un cartone: fasce di luce piatte e un contorno scuro dove cambia la parte. Una parte è un colore
+  pieno: lettere con la stessa tinta e una luminosità vicina sono una parte sola e fra loro non nasce nessun contorno.
+- 3-6 colori, uno pieno per parte (tronco, chioma; muro, tetto, porta). Le parti vicine ben staccate di chiaro e scuro: di
+  almeno un quarto della scala di luminosità se hanno la stessa tinta, o il contorno tra loro non c'è.
+- Il dettaglio è un segno: assi, pannelli, crepe, finestre con una lettera scura dedicata e righe nette, non micro-voxel sparsi
+  né macchie di tre toni. Le ombre non si dipingono: le fanno le fasce di luce.
+- Forme tozze e semplificate, leggibili da lontano. L'ambiente (rocce, erba, legno) è smorzato e chiaro; i colori saturi sono
+  pochi, per ciò che conta.
 - Nulla di sospeso: tutto attaccato al corpo principale, che poggia su z=0.
 - Persone: gambe, busto, braccia lungo i fianchi, testa grande (un terzo dell'altezza), volto verso y grande.
 

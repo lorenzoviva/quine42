@@ -6,7 +6,7 @@ import { boxOf } from '../mj/classes';
 import type { PaletteEntry, Snapshot } from '../mj/engine';
 import type { VoxelGrid } from '../mj/mesh';
 import { compileMjx, type MjxModel } from '../mj/model';
-import { render, type Picture } from '../mj/photo';
+import { cartoonRender, render, type Picture } from '../mj/photo';
 import { runMjx } from '../mj/run';
 import { rootTag, type Forms, type ModelInfo } from './forms';
 import type { FileMap } from './types';
@@ -63,13 +63,13 @@ export function latheModels(files: FileMap, forms: Forms): LatheModelEntry[] {
       } else if (voto !== undefined && voto < 7) {
         consigli = [
           'Migliorare la silhouette per una maggiore leggibilità dai quattro lati',
-          'Aggiungere sfumature per enfatizzare profondità e dettagli',
+          'Staccare le parti con colori pieni e dare ai dettagli una lettera scura',
         ];
         if (!problemi.length) {
           problemi = ['Proporzioni migliorabili', 'Dettagli poco evidenti da alcune angolazioni'];
         }
       } else if (voto !== undefined) {
-        consigli = ['Rifinire i raccordi tra i volumi e variare i toni di luce per accentuare le forme'];
+        consigli = ['Rifinire i raccordi tra i volumi e staccare di più le parti vicine, perché i contorni le leggano'];
       } else {
         consigli = ['Modello conforme allo stile voxel del canone di QUINE42'];
       }
@@ -120,7 +120,7 @@ export function latheExecute(
 
   const photos: Picture[] = [];
   for (let view = 0; view < 4; view++) {
-    photos.push(render(g, m.program.palette, view, { px: 2, top: 2, front: 2, outline: true, shadow: true, light: true, crop: true }));
+    photos.push(render(g, m.program.palette, view, cartoonRender()));
   }
 
   const grid: VoxelGrid = { X: g.X, Y: g.Y, Z: g.Z, cells: g.cells, alphabet: g.alphabet };

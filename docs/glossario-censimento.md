@@ -10,12 +10,12 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Universo | `reame` | 0 (0) | 0 (0) | 17 (8) | 1 (1) |
 | Universo | `realm` | 15 (5) | 0 (0) | 2 (2) | 0 (0) |
 | Partita | `Partita` | 53 (19) | 0 (0) | 125 (36) | 6 (3) |
-| Luogo | `place` | 461 (66) | 0 (0) | 26 (13) | 2 (2) |
+| Luogo | `place` | 462 (67) | 0 (0) | 26 (13) | 2 (2) |
 | Luogo | `chunk` | 586 (43) | 0 (0) | 109 (27) | 0 (0) |
-| Luogo | `Place` | 461 (66) | 0 (0) | 26 (13) | 2 (2) |
+| Luogo | `Place` | 462 (67) | 0 (0) | 26 (13) | 2 (2) |
 | Piano del luogo | `mappa` | 2 (2) | 0 (0) | 17 (11) | 1 (1) |
-| Piano del luogo | `piano` | 12 (6) | 2 (2) | 151 (42) | 0 (0) |
-| Casella | `cell` | 532 (43) | 0 (0) | 7 (4) | 25 (2) |
+| Piano del luogo | `piano` | 12 (6) | 2 (2) | 152 (42) | 0 (0) |
+| Casella | `cell` | 533 (43) | 0 (0) | 7 (4) | 25 (2) |
 | Casella | `cella` | 9 (4) | 8 (3) | 9 (7) | 0 (0) |
 | Terreno | `tile` | 696 (44) | 3 (2) | 28 (17) | 14 (2) |
 | Ambiente | `layout` | 260 (30) | 1 (1) | 34 (14) | 2 (2) |
@@ -23,10 +23,10 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Lotto | `building` | 263 (15) | 0 (0) | 9 (6) | 0 (0) |
 | Lotto | `Building` | 263 (15) | 0 (0) | 9 (6) | 0 (0) |
 | Lotto | `buildings` | 44 (10) | 0 (0) | 1 (1) | 0 (0) |
-| Corona | `crown` | 1 (1) | 0 (0) | 0 (0) | 0 (0) |
+| Corona | `crown` | 2 (2) | 0 (0) | 0 (0) | 0 (0) |
 | Corona | `anello` | 4 (4) | 1 (1) | 37 (14) | 0 (0) |
 | Edificio | `edificio` | 21 (8) | 1 (1) | 39 (19) | 0 (0) |
-| Piano | `Floor` | 532 (60) | 0 (0) | 27 (8) | 18 (10) |
+| Piano | `Floor` | 534 (60) | 0 (0) | 27 (8) | 18 (10) |
 | Piano | `floors` | 16 (3) | 0 (0) | 1 (1) | 0 (0) |
 | Entità | `thing` | 126 (38) | 0 (0) | 5 (4) | 0 (0) |
 | Entità | `Things` | 72 (26) | 0 (0) | 0 (0) | 0 (0) |
@@ -45,7 +45,7 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Ritocco | `correzione` | 7 (5) | 0 (0) | 18 (11) | 0 (0) |
 | Inchiostro | `outline` | 24 (7) | 0 (0) | 0 (0) | 11 (3) |
 | Inchiostro | `bordo` | 7 (5) | 3 (3) | 54 (16) | 0 (0) |
-| Taglia | `size` | 729 (78) | 3 (2) | 21 (12) | 147 (12) |
+| Taglia | `size` | 731 (78) | 3 (2) | 21 (12) | 147 (12) |
 | Taglia | `Taglia` | 90 (11) | 5 (3) | 48 (13) | 0 (0) |
 | Taglia | `TAGLIE` | 4 (3) | 1 (1) | 19 (6) | 0 (0) |
 | Viandante | `player` | 336 (55) | 2 (1) | 41 (19) | 5 (2) |
@@ -73,7 +73,7 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Runa | `glifo` | 9 (4) | 1 (1) | 13 (10) | 0 (0) |
 | Frase | `hand` | 172 (27) | 0 (0) | 7 (6) | 0 (0) |
 | Frase | `sentence` | 1 (1) | 0 (0) | 0 (0) | 0 (0) |
-| Frase | `mano` | 20 (9) | 1 (1) | 53 (34) | 2 (1) |
+| Frase | `mano` | 20 (9) | 1 (1) | 55 (35) | 2 (1) |
 | Incidere | `engrave` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
 | Incidere | `scrivere` | 8 (3) | 0 (0) | 28 (20) | 0 (0) |
 | Pronunciare | `lanciare` | 0 (0) | 0 (0) | 1 (1) | 0 (0) |
@@ -84,7 +84,7 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Registro del Concilio | `log` | 155 (33) | 1 (1) | 20 (15) | 1 (1) |
 | Sessione del Concilio | `sessione` | 36 (13) | 0 (0) | 84 (35) | 12 (1) |
 | Modello di IA | `modello` | 93 (29) | 6 (3) | 245 (60) | 15 (4) |
-| Modello di IA | `Models` | 391 (73) | 0 (0) | 90 (35) | 4 (3) |
+| Modello di IA | `Models` | 392 (74) | 0 (0) | 90 (35) | 4 (3) |
 | Eredità | `Eredita` | 7 (4) | 0 (0) | 11 (5) | 5 (1) |
 | Eredità | `EREDITA` | 7 (4) | 0 (0) | 11 (5) | 5 (1) |
 | Eredità | `Origine` | 11 (5) | 0 (0) | 35 (17) | 2 (1) |
