@@ -5,9 +5,12 @@ import { pathToFileURL } from 'node:url';
 
 const at = (file: string) => pathToFileURL(path.resolve(__dirname, '../tools/pipeline', file)).href;
 let md: (s: string, o?: { breaks?: boolean }) => string;
+let refs: (html: string, titles: Map<string, string>) => string;
 
 beforeAll(async () => {
-  md = (await import(/* @vite-ignore */ at('markdown.mjs'))).markdownToHtml;
+  const M = await import(/* @vite-ignore */ at('markdown.mjs'));
+  md = M.markdownToHtml;
+  refs = M.taskRefsToHtml;
 });
 
 describe('markdownToHtml', () => {
@@ -53,12 +56,45 @@ describe('markdownToHtml', () => {
   });
 });
 
+describe('taskRefsToHtml', () => {
+  const titles = new Map([['T93', 'La chat'], ['T89b', 'Un pezzo'], ['T12', 'Dodici']]);
+  const ref = (id: string, title: string) => `<span class="task-ref" data-task="${id}" title="${title}">${id}</span>`;
+
+  it('un task esistente, anche col suffisso di lettera, diventa un riferimento col titolo', () => {
+    expect(refs('<p>vedi T93, poi (T89b).</p>', titles)).toBe(`<p>vedi ${ref('T93', 'La chat')}, poi (${ref('T89b', 'Un pezzo')}).</p>`);
+    expect(refs('task/T93', titles)).toBe(`task/${ref('T93', 'La chat')}`);
+    expect(refs(md('&#39;T93&#39; **T12**'), titles)).toContain(`<strong>${ref('T12', 'Dodici')}</strong>`);
+  });
+
+  it('un numero senza task resta testo, e così ciò che sta dentro una parola', () => {
+    for (const s of ['T999', 'T93c', 'T89', 'ST12', 'T12x', 'T12_a', 'èT12', 'T123', 't12']) expect(refs(s, titles)).toBe(s);
+    expect(refs(undefined as unknown as string, titles)).toBe('');
+  });
+
+  it('dentro il codice in linea sì', () => {
+    expect(refs(md('il `T93`'), titles)).toBe(`<p>il <code>${ref('T93', 'La chat')}</code></p>`);
+  });
+
+  it('non tocca gli attributi né il testo di un link, e dopo il link riprende', () => {
+    const link = '<a href="https://a.b/T12" title="T93 > T12" target="_blank">T12</a>';
+    expect(refs(`${link} T12`, titles)).toBe(`${link} ${ref('T12', 'Dodici')}`);
+    expect(refs(md('[T12](https://a.b/T93)'), titles)).toBe(md('[T12](https://a.b/T93)'));
+  });
+
+  it("il titolo passa per l'escape", () => {
+    const html = refs('T1', new Map([['T1', `Un "titolo" <img src=x onerror=y> & l'altro`]]));
+    expect(html).toBe(ref('T1', 'Un &quot;titolo&quot; &lt;img src=x onerror=y&gt; &amp; l&#39;altro'));
+    expect(html).not.toContain('<img');
+  });
+});
+
 describe('la pagina della pipeline', () => {
   it('ha la funzione e il pulsante, spento; lo script si compila', async () => {
     const W = (await import(/* @vite-ignore */ at('web.mjs'))) as { renderHtml(): string };
     const html = W.renderHtml();
     expect(html).toContain('id="btn-md-source"');
     expect(html).toContain('function markdownToHtml');
+    expect(html).toContain('function taskRefsToHtml');
     expect(html).toContain("localStorage.getItem('pipeline-md-sorgente') === '1'");
     const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)];
     expect(scripts).toHaveLength(1);

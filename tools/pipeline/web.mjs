@@ -3,7 +3,7 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
-import { markdownToHtml } from './markdown.mjs';
+import { markdownToHtml, taskRefsToHtml } from './markdown.mjs';
 import {
   approveTasks,
   assignTask,
@@ -949,6 +949,7 @@ export function renderHtml() {
     .md pre code { background: none; border: 0; padding: 0; }
     .md table { border-collapse: collapse; display: block; overflow-x: auto; }
     .md th, .md td { border: 1px solid var(--border); padding: 3px 8px; text-align: left; vertical-align: top; }
+    .task-ref { text-decoration: underline dotted; text-underline-offset: 2px; cursor: pointer; }
     .md-source { white-space: pre-wrap; word-break: break-word; font-family: var(--mono); font-size: 12px; }
     .md-doc { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 13px; }
     #btn-md-source.active { color: var(--accent); border-color: var(--accent); }
@@ -1275,6 +1276,7 @@ export function renderHtml() {
 
     const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     ${markdownToHtml.toString()}
+    ${taskRefsToHtml.toString()}
     let MD_SOURCE = localStorage.getItem('pipeline-md-sorgente') === '1';
     const md = (text, breaks = false) => MD_SOURCE
       ? \`<div class="md-source">\${esc(text)}</div>\`
@@ -1374,22 +1376,27 @@ export function renderHtml() {
     function renderChatAndEvents(s) {
       const chatEl = document.getElementById('chat-list');
       const atBottom = chatEl.scrollHeight - chatEl.scrollTop - chatEl.clientHeight < 60;
+      const titles = new Map(s.tasks.map((t) => [t.id, t.title]));
+      // The Source view stays the text as it is written.
+      const refs = (html) => MD_SOURCE ? html : taskRefsToHtml(html, titles);
       const items = [];
       for (const c of s.chat) {
         const cls = c.chi === 'autore' ? 'autore' : c.chi === 'orchestratore' ? 'orchestratore' : 'pipeline';
         const time = (c.t || '').slice(11, 19);
         items.push(\`<div class="msg \${cls}">
           <div class="msg-meta"><strong>\${esc(c.chi)}\${c.provider ? ' (' + esc(c.provider) + ')' : ''}</strong><span>\${esc(time)}</span></div>
-          <div>\${c.chi === 'pipeline' ? esc(c.testo) : md(c.testo, true)}</div>
+          <div>\${refs(c.chi === 'pipeline' ? esc(c.testo) : md(c.testo, true))}</div>
         </div>\`);
       }
       for (const q of s.orchestratore.inCoda) {
         items.push(\`<div class="msg incoda">
           <div class="msg-meta"><strong>autore · in coda per il prossimo turno</strong><button type="button" onclick="removeQueued('\${esc(q.id)}')">✕</button></div>
-          <div>\${md(q.testo, true)}</div>
+          <div>\${refs(md(q.testo, true))}</div>
         </div>\`);
       }
-      chatEl.innerHTML = items.join('') || '<div style="color:var(--muted);">Nessun messaggio nella chat.</div>';
+      // Only when something changes: a refresh must not lose a selection nor close the tooltip under the mouse.
+      const chatHtml = items.join('') || '<div style="color:var(--muted);">Nessun messaggio nella chat.</div>';
+      if (chatEl.dataset.shown !== chatHtml) { chatEl.innerHTML = chatHtml; chatEl.dataset.shown = chatHtml; }
       if (atBottom) chatEl.scrollTop = chatEl.scrollHeight;
 
       const evEl = document.getElementById('events-list');
@@ -1870,6 +1877,10 @@ export function renderHtml() {
     syncEditor('domande');
     syncEditor('todo');
     document.getElementById('btn-refresh').addEventListener('click', () => loadState());
+    document.getElementById('chat-list').addEventListener('click', (e) => {
+      const ref = e.target.closest('.task-ref');
+      if (ref && String(getSelection()) === '') openTask(ref.dataset.task);
+    });
     document.getElementById('btn-refresh-usage').addEventListener('click', async () => {
       showToast('Lettura /usage dalle CLI in corso…');
       await api('POST', '/api/budget', { uso: true });

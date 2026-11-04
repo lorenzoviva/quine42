@@ -1,5 +1,5 @@
 // The Markdown of the pipeline's web page (agents' messages, quadro, dossiers, questions), with no dependencies: the page
-// gets this very function through `toString()`, so it must use nothing from outside. Agents write the text: everything is
+// gets these very functions through `toString()`, so they must use nothing from outside. Agents write the text: everything is
 // escaped, no raw HTML passes, and only http(s) links become links.
 export function markdownToHtml(source, { breaks = false } = {}) {
   const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
@@ -118,4 +118,23 @@ export function markdownToHtml(source, { breaks = false } = {}) {
   };
 
   return blocks(String(source ?? '').replace(/\u0000/g, '').replace(/\r\n?/g, '\n').split('\n'), 0);
+}
+
+/**
+ * Marks the references to existing tasks (`T93`, `T89b`) in HTML that is already escaped, with the title of the task as a
+ * tooltip. Tags are copied as they are (a `T12` in an attribute stays there) and so is the text of a link; `titles` is a Map
+ * from task id to title, and an id it does not know, or one inside a word (`ST12`, `T12x`), stays plain text.
+ */
+export function taskRefsToHtml(html, titles) {
+  const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  let inLink = 0;
+  return String(html ?? '').replace(/<(?:"[^"]*"|'[^']*'|[^'">])*>|(?<![\p{L}\p{N}_])T\d+[a-z]?(?![\p{L}\p{N}_])/gu, (token) => {
+    if (token[0] === '<') {
+      if (/^<a[\s>]/i.test(token)) inLink++;
+      else if (/^<\/a\s*>/i.test(token)) inLink = Math.max(0, inLink - 1);
+      return token;
+    }
+    const title = inLink ? undefined : titles.get(token);
+    return title === undefined ? token : `<span class="task-ref" data-task="${token}" title="${esc(title)}">${token}</span>`;
+  });
 }
