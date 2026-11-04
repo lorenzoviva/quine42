@@ -154,7 +154,7 @@ export class GenesisScreen {
   show(online: boolean, local = false): Promise<void> {
     const canGenerate = online || local;
     return new Promise((resolve) => {
-      const theme = el('textarea', { rows: '7', spellcheck: 'false' }) as HTMLTextAreaElement;
+      const theme = el('textarea', { rows: '10', spellcheck: 'false' }) as HTMLTextAreaElement;
       theme.value = (this.k.files[this.k.config.theme] ?? '').trim();
       // Four themes to start from (ADR-0134): the text stays free, and a text rewritten is simply «su misura».
       const CUSTOM = 'misura';
