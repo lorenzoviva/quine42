@@ -1,0 +1,9 @@
+{
+  "id": "mech.mercato", "name": "Il mercato", "kind": "system", "logic": "logic.lua", "order": 60,
+  "ui": { "id": "mercato", "titolo": "Il mercato", "elementi": [
+    { "tipo": "testo", "etichetta": "Prezzo del grano", "campo": "mercato_visto.prezzo" },
+    { "tipo": "pulsante", "id": "compra", "etichetta": "Compra un sacco" },
+    { "tipo": "pulsante", "id": "ricorda", "etichetta": "Segna il prezzo sul taccuino" }
+  ] },
+  "singleton": { "mercato": { "prezzo": 10, "scorta": 100 } }
+}

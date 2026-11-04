@@ -1,0 +1,2 @@
+{ "id": "gente.guardia", "name": "Guardia", "kind": "entity", "appearance": { "glyph": "G", "color": "#334488", "aspetto": "una guardia cittadina" },
+  "physics": { "solid": false, "radius": 0.3 }, "components": { "guardia": { "passo": 2 } } }

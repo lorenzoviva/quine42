@@ -1,0 +1,2 @@
+{ "id": "gioco.avversario", "name": "Avversario", "kind": "entity", "appearance": { "glyph": "A", "color": "#3366cc", "aspetto": "un giocatore in maglia blu" },
+  "physics": { "solid": false, "radius": 0.3 }, "components": { "avversario": { "passo": 0.7 } } }

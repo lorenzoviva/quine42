@@ -1,0 +1,2 @@
+{ "id": "gente.statua", "name": "Statua del fondatore", "kind": "entity", "appearance": { "glyph": "S", "color": "#aaaaaa", "aspetto": "una statua" },
+  "physics": { "solid": false, "radius": 0.3 }, "components": { "protetto": { "da": "citta" } } }

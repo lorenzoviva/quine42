@@ -1,0 +1,10 @@
+{
+  "id": "mech.torneo", "name": "Il torneo", "kind": "system", "logic": "logic.lua", "order": 60,
+  "ui": { "id": "torneo", "titolo": "Il torneo", "elementi": [
+    { "tipo": "testo", "etichetta": "Tabellone", "campo": "torneo_visto.tabellone" },
+    { "tipo": "testo", "etichetta": "A chi tocca", "campo": "torneo_visto.tocca" },
+    { "tipo": "pulsante", "id": "iscriviti", "etichetta": "Iscriviti" },
+    { "tipo": "pulsante", "id": "tira", "etichetta": "Tira" }
+  ] },
+  "singleton": { "torneo": { "iscritti": "", "n": 0, "turno": 0, "punti_a": 0, "punti_b": 0, "a": 0, "b": 0, "tabellone": "aperto" } }
+}

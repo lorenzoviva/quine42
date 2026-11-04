@@ -1,0 +1,9 @@
+{
+  "id": "mech.barca", "name": "Navigare", "kind": "system", "logic": "logic.lua", "order": 60,
+  "ui": { "id": "barca", "titolo": "Barca", "elementi": [
+    { "tipo": "testo", "etichetta": "Stato", "campo": "barca.stato" },
+    { "tipo": "testo", "etichetta": "Vento", "campo": "barca.vento" },
+    { "tipo": "pulsante", "id": "sali", "etichetta": "Sali a bordo" },
+    { "tipo": "pulsante", "id": "scendi", "etichetta": "Scendi" }
+  ] }
+}

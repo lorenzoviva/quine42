@@ -1,0 +1,3 @@
+{ "id": "npc.muratore", "name": "Muratore", "kind": "entity", "tags": ["muratore"],
+  "appearance": { "glyph": "M", "color": "#bb8844", "aspetto": "un muratore col grembiule" },
+  "physics": { "solid": false, "radius": 0.3 }, "components": { "muratore": { "lavoro": 0 } } }

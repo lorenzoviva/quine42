@@ -1,0 +1,2 @@
+{ "id": "dati.bisca", "name": "Gettoni", "kind": "data",
+  "items": [ { "id": "item.gettone", "name": "Gettone", "description": "Un gettone di osso, senza valore fuori di qui.", "category": "varie", "weight": 0, "stack": 99, "tags": ["moneta"], "glyph": "o", "color": "#ddcc88" } ] }
