@@ -37,7 +37,6 @@ L'elenco unico (richiesta dell'autore, 04/11): l'orchestratore lo tiene aggiorna
 - **D24** `tests/abbonamenti.test.ts` dietro una variabile.
 - **D25** T155 e T173 chiusi allentando la soglia (entro due richieste).
 - **D26** Il salto sulle casse: non ritrovo il testo della domanda. Se non hai nulla da segnalare la chiudo.
-- **D27** `riprendi` su un task già integrato punta a un worktree che non c'è più e fallisce: farlo ripartire da capo in automatico? Consigliato sì, task piccolo su Claude.
 
 ## Rimandate per tua scelta
 T45f a fine Fase I (progetto GCP, hosting, regione); T93 in Fase IV (Managed Payments).

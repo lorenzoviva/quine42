@@ -3994,3 +3994,11 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Test: `tests/pipeline.test.ts` con i provider nuovi: conto condiviso, tetto della CLI rispettato, nessuno dei due orchestratore. Suite intera e typecheck con i loro turni.
 - Browser: non serve.
 - Quando è fatto: commit su `task/T255`. Sicurezza: nessuna superficie nuova.
+
+### T256 · Un task tornato `da fare` riparte da capo — `da fare`
+- Pipeline: claude · stima 3% · approvato · priorità 5
+- Contesto: richiesta dell'autore (chat del 04/11/2026). Nasce da T89e (`dossier T89e`). Una voce di `.pipeline/esecuzioni.json` con `integrato` resta anche se il blocco del task torna `da fare`. Il difetto ha due facce, in `tools/pipeline/pipeline.mjs`: `plan` lo mette tra i pronti, ma `execute` lancia solo con `!runs[t.id]`, quindi il task resta fermo in silenzio; `resumeTasks` (`riprendi`) riapre la vecchia conversazione nel vecchio worktree, che `integra` ha tolto, e l'esecuzione muore con codice -1 e log vuoto, finendo come «fallito». Oggi l'unica via è togliere la voce a mano.
+- Cosa fare: una voce già integrata non vale più per un task non chiuso: il task si lancia da capo, con worktree, branch e conversazione nuovi, senza che nessuno intervenga, e `riprendi` fa lo stesso. Anche fuori da questo caso, `riprendi` su una voce il cui worktree non esiste più non deve riaprire la conversazione: riparte da capo e lo dice nel messaggio. Non perdere ciò che `dossier` e `traccia` dicono del tentativo vecchio, se costa poco (per esempio i campi essenziali in una lista `precedenti` della voce nuova). Un task `fatto` non cambia: la sua voce resta com'è. Una voce finita e non integrata resta `daIntegrare`.
+- Test: casi nuovi in `tests/pipeline.test.ts`: voce integrata e blocco `da fare` (viene lanciato, voce nuova con `tentativi` da capo); `riprendi` sulla stessa voce; `riprendi` con worktree assente; voce integrata e blocco `fatto` (nulla cambia); voce finita non integrata (resta da integrare). Suite intera e typecheck con i loro turni.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T256`; `docs/pipeline/README.md` aggiornato se descrive `riprendi`. Sicurezza: nessuna superficie nuova.
