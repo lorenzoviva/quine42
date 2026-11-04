@@ -3974,3 +3974,23 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Test: casi nuovi in `tests/pipeline.test.ts`: intervallo di lettere nelle due forme, un elenco misto con un intervallo, i soli numeri invariati, il task stesso che non diventa una sua dipendenza. Suite intera e typecheck con i loro turni.
 - Browser: non serve.
 - Quando è fatto: commit su `task/T253`. Sicurezza: nessuna superficie nuova.
+
+## I modelli e le loro benchmark (chat del 04/11/2026, sera)
+
+L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopra Fable 5.1 pur costando meno, in particolare nella pianificazione ad alto livello); i modelli vanno inquadrati con le loro benchmark, l'orchestratore deve sapere chi rende meglio su ogni tipo di task, i modelli di Claude vanno distinti (Opus, Sonnet, ecc.).
+
+### T254 · La scheda dei modelli: benchmark e misure nostre per tipo di task — `da fare`
+- Pipeline: gemini · stima 3% · approvato · priorità 8
+- Contesto: richiesta dell'autore, sopra. Oggi la scelta del provider in `docs/pipeline/pianifica.md` poggia su impressioni (ADR-0115 per Fable). Nasce anche dal contatore «Claude and GPT models» di Antigravity, che `stato` elenca come non usato.
+- Cosa fare: scrivi `docs/pipeline/modelli.md`. Per ogni modello disponibile: Claude Opus 5.5, Sonnet 5.5, Haiku 5.5, Fable 5.1; Gemini e Argon come li usa `agy`; i modelli Claude e GPT che `agy` offre davvero (guarda cosa dice la CLI). Una tabella modelli × tipi di task della pipeline: pianificazione e orchestrazione, architettura e kernel, programmazione, sicurezza, programmi MarkovJunior, documenti, UI, test semplici. Per ogni cella la benchmark pubblica con nome, data e URL. Accanto, ciò che abbiamo misurato noi da `docs/pipeline/consumi.jsonl`: consumo contro stima per provider, esiti. Prezzi di listino e contatore su cui pesa ogni modello. Infine una proposta di assegnazione per tipo di task, con il motivo.
+- Regole: **nessun numero senza fonte**. Ciò che non trovi resta «non misurato», non si deduce e non si ricorda a memoria. Due benchmark che si contraddicono si riportano entrambe. Se non hai accesso al web, fermati e dillo nell'esito: niente tabella inventata. Non toccare `config.json` né il codice.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T254` col solo `docs/pipeline/modelli.md`. Sicurezza: nessuna superficie nuova.
+
+### T255 · I modelli di Claude distinti nella pipeline, l'assegnazione dalla scheda — `da fare` (dipende da T254)
+- Pipeline: argon · stima 15% · approvato · priorità 9
+- Contesto: richiesta dell'autore, sopra. Oggi il provider `claude` è Opus 5.5 e nulla lo dice. Stima alta perché Argon ha consumato molto oltre la stima (`consumi.jsonl`: T69 stima 6, misurati 50).
+- Cosa fare: in `tools/pipeline/config.json` i provider `sonnet` e `haiku` (`claude-sonnet-5-5`, `claude-haiku-5-5`), sullo stesso conto di `claude`, con `orchestrabile: false`; il loro `ratioSessioneSettimana` provvisorio uguale a `claude`, detto nell'esito come non misurato. `stato`, `indice` e `assegna` mostrano il modello per nome, così che `claude` si legga come Opus; il nome `claude` resta com'è per non riscrivere il backlog. Il tetto della CLI resta 3 e non si alza nessun tetto. `docs/pipeline/pianifica.md` e `docs/pipeline/orchestra.md`: l'assegnazione si sceglie da `docs/pipeline/modelli.md`, e in `orchestra.md` la regola nuova: **ogni domanda per l'autore si scrive per intero in chat, numerata, con la raccomandazione; i file di `domande/` non bastano**, e l'elenco vivo è `docs/pipeline/domande/aperte.md`. ADR nuovo che aggiorna ADR-0115, riga in `AGENTS.md`. Quale modello faccia cosa lo decide l'autore: scrivi nell'ADR ciò che dice il blocco del task in quel momento, altrimenti lascia la scelta di oggi.
+- Test: `tests/pipeline.test.ts` con i provider nuovi: conto condiviso, tetto della CLI rispettato, nessuno dei due orchestratore. Suite intera e typecheck con i loro turni.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T255`. Sicurezza: nessuna superficie nuova.
