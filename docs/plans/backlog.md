@@ -3527,38 +3527,51 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Contesto: dal to-do del 04/11: carte famose, video in loop di gameplay o delle strutture più «lerpe» in 3D, universi di giocatori più giocati. Ha senso solo con dati veri: riparte alla fine della Fase II, quando lo dice l'autore. Il conteggio delle partite non esiste ancora; una rotta pubblica nuova passa da `gate` e dall'elenco di `server/production.ts`.
 - Domanda per l'autore: nessuna ora; alla ripartenza si riscrive con ciò che la beta ha lasciato.
 
-### T236 · La beta: turni di gioco e crediti in due parti — `in attesa`
-- Contesto: per la Fase II l'autore dà 5 € a ogni tester e genera a sue spese gli universi vanilla; si gioca prenotando il turno; una parte dei crediti per esplorare, l'altra sbloccata da un secondo file che rivela la corona. Oggi con gli account `QUINE_TETTO_RICARICHE` vale 0.
+### T236 · La beta: i crediti in due parti — `in attesa`
+- Contesto: per la Fase II l'autore dà 5 € a ogni tester e genera a sue spese gli universi vanilla; una parte dei crediti per esplorare, l'altra sbloccata da un secondo file che rivela la corona. Oggi con gli account `QUINE_TETTO_RICARICHE` vale 0. **Calendario, chat tra i partecipanti e comunicazioni li gestisce l'autore fuori dal repository (04/11):** niente prenotazioni nel sito né codice che in produzione sparirebbe; la beta non deve durare troppo. Su richiesta l'orchestratore lo aiuta con i messaggi WhatsApp d'invito.
 - Domande per l'autore: in `docs/pipeline/domande/T236.md`.
 
 ### T237 · La guida dei beta tester, in due file — `da fare` (dipende da T45f, T236)
 - Pipeline: claude · stima 2% · approvato · priorità 3
-- Contesto: si scrive a fine Fase I, per gli amici dell'autore, non pagati: «non è il classico beta testing noioso». Il primo file: come giocare, come prenotare (anche insieme, senza esagerare con le sessioni a molti), tutte le limitazioni del server di beta con cui ci si potrebbe frustrare. Il secondo file: la corona, e come avere la seconda parte dei crediti, per chi non ha capito come uscire dal tappeto. Il primo non deve guastarla.
+- Contesto: si scrive a fine Fase I, per gli amici dell'autore, non pagati: «non è il classico beta testing noioso». Il primo file: come giocare, che si gioca prenotando il turno sul calendario dell'autore, fuori dal repository (anche insieme, senza esagerare con le sessioni a molti), tutte le limitazioni del server di beta con cui ci si potrebbe frustrare. Il secondo file: la corona, e come avere la seconda parte dei crediti, per chi non ha capito come uscire dal tappeto. Il primo non deve guastarla.
 - Cosa fare: `docs/beta/guida.md` e `docs/beta/la-corona.md`, in italiano, dal comportamento vero del server di beta (limiti di `LIMITS`, `FRONT_RATES`, mondi accesi, tetti, modelli locali a crediti finiti), non dai documenti: ciò che non puoi provare lo segni. Tono da amico.
 - Test: nessun codice: typecheck con il suo turno.
 - Browser: sì: segui la guida da viandante nuovo sul server di beta; ogni passo che non torna lo correggi.
 - Quando è fatto: l'autore può spedirla; commit su `task/T237`. Sicurezza: nessuna superficie nuova.
 
 ### T238 · Il registro di ciò che il Concilio non riesce a fare — `da fare`
-- Pipeline: claude · stima 2% · priorità 3
-- Contesto: la Fase III parte dalle funzionalità che il Concilio non riesce a implementare durante le sessioni, chieste dai giocatori o nate dal Concilio. Se la beta non le registra, si perdono: va fatto entro la Fase I. Proposta dell'orchestratore sul come: aspetta l'approvazione.
+- Pipeline: claude · stima 2% · approvato · priorità 3
+- Contesto: la Fase III parte dalle funzionalità che il Concilio non riesce a implementare durante le sessioni, chieste dai giocatori o nate dal Concilio. Se la beta non le registra, si perdono: va fatto entro la Fase I. Approvato dall'autore il 04/11. I feedback dei giocatori non passano da qui: l'autore li porta in chat.
 - Cosa fare: leggi `#concilio` e i punti in cui una richiesta finisce male (Referente, Fucina, azioni libere, validatore che rifiuta anche l'ultimo tentativo, Ingegnere che non ripara). Ognuno scrive una voce (richiesta, chi, agente, motivo, quante volte) in un file di mondo che non va ai client e senza quarta parete nel gioco; un comando che ne fa il rapporto per il kernel 1.0.0.
 - Test: typecheck e suite intera con i loro turni, offline con `MockAiModels`.
 - Browser: non serve.
 - Quando è fatto: una richiesta rifiutata in un test diventa una riga del rapporto; commit su `task/T238`. Sicurezza: il file resta fuori da `playerFiles` e `publicFiles`; scrivi l'esito.
 
-### T239 · Quattro lingue: censimento e progetto — `da fare`
-- Pipeline: claude · stima 2% · priorità 4
-- Contesto: prima della Fase IV il gioco va in italiano, inglese (la versione di punta sui social), francese e spagnolo: le lingue che l'autore può verificare. Oggi UI, prompt e testi di gioco sono in italiano per convenzione. Non è solo tradurre: i contenuti li genera il Concilio, gli universi hanno già una lingua, il multigiocatore può mescolarle, i costi dei modelli cambiano. Il lavoro vero è per la Fase III; ora solo il progetto, se l'autore lo approva.
-- Cosa fare: censimento dei testi (UI, sito, prompt, seme, lessico, canone delle rune, messaggi del kernel), proposta con le alternative in `docs/lingue.md`: lingua per universo o per viandante, cosa si traduce e cosa si genera, come si verifica. Nessun codice. Task spezzati proposti nell'esito.
-- Test: typecheck con il suo turno.
-- Browser: non serve.
-- Quando è fatto: l'autore può decidere; commit su `task/T239`. Sicurezza: nessuna superficie nuova.
+### T239 · Quattro lingue: censimento e progetto — `in attesa`
+- Contesto: prima della Fase IV il gioco va in italiano, inglese (la versione di punta sui social), francese e spagnolo: le lingue che l'autore può verificare. **L'autore (04/11): è l'ultimissima operazione, in Fase III, non in Fase I:** è dispendiosa e obbliga a quadruplicare ogni modifica che tocca la lingua. Riparte quando lo dice l'autore. Oggi UI, prompt e testi di gioco sono in italiano per convenzione; i contenuti li genera il Concilio, gli universi hanno già una lingua, il multigiocatore può mescolarle.
+- Cosa fare alla ripartenza: censimento dei testi (UI, sito, prompt, seme, lessico, canone delle rune, messaggi del kernel), proposta con le alternative in `docs/lingue.md`: lingua per universo o per viandante, cosa si traduce e cosa si genera, come si verifica. A parte documentazione, pipeline agentica e pregresso dello sviluppo: si traducono solo se il piano di lancio punta anche alla comunità dello sviluppo agentico.
+- Domanda per l'autore: nessuna ora.
 
-### T240 · Il piano di lancio: concorrenti, punti di forza, Boa Loger — `da fare`
-- Pipeline: fable · stima 5% · approvato · priorità 2
+### T240 · Il piano di lancio: concorrenti, punti di forza, Boa Loger — `in attesa`
+- **L'autore (04/11): si lancia su Fable dal reset settimanale del 05/11 (15:59 UTC), non prima.** Alla ripartenza: riga `- Pipeline: fable · stima 5% · approvato · priorità 2` e stato `da fare`.
 - Contesto: leggi tutto il to-do del 04/11, «Fase IV». L'autore: «ci giochiamo tutte le carte», non ha studi di marketing, vuole le idee migliori e il dissenso dove c'è. Afferma che non esiste niente del genere e chiede se la narrativa generativa sia davvero solo sua: va verificato, non assecondato. Propone: account dedicati, una settimana di spoiler in contemporanea, post finale col link; il personaggio Boa Loger (gerboa, finto anonimato facile da forare, collettivo artistico, interviste animate).
-- Cosa fare: `docs/lancio/piano.md`, con le fonti. (1) Ricerca sul web dei concorrenti, per ogni punto di forza: chi lo fa già, e quanto; cosa resta davvero unico, in una frase difendibile su Hacker News. (2) I punti di forza in ordine, per pubblico (tecnico, giocatori, creatori), compresi quelli che l'autore non ha elencato: il mondo fatto del proprio codice, le rune eseguite, il tappeto e la corona, i modelli come programmi di testo. (3) Giudizio sul piano dell'autore: regole di autopromozione e di account nuovi di Reddit e Hacker News, la pubblicazione simultanea, quali canali mancano e quali togliere; cosa impone il farsi pagare in UE sull'identità pubblica. (4) Boa Loger: cosa tenere e cosa rischia, un personaggio dichiarato contro un finto sviluppatore, voce sintetica, compatibilità con la regola 0 se entra nella narrativa dell'universo. (5) Calendario dal termine della Fase III, narrativa e 3-5 idee migliori della sua, con il costo in tempo per una persona sola. (6) Ciò che il gioco deve avere prima (video, press kit, costi a molti utenti al picco, tetti di spesa). Non creare account e non pubblicare nulla.
+- Cosa fare: `docs/lancio/piano.md`, con le fonti. (1) Ricerca sul web dei concorrenti, per ogni punto di forza: chi lo fa già, e quanto; cosa resta davvero unico, in una frase difendibile su Hacker News. (2) I punti di forza in ordine, per pubblico (tecnico, giocatori, creatori), compresi quelli che l'autore non ha elencato: il mondo fatto del proprio codice, le rune eseguite, il tappeto e la corona, i modelli come programmi di testo. (3) Giudizio sul piano dell'autore: regole di autopromozione e di account nuovi di Reddit e Hacker News, la pubblicazione simultanea, quali canali mancano e quali togliere; cosa impone il farsi pagare in UE sull'identità pubblica. (4) Boa Loger: cosa tenere e cosa rischia, un personaggio dichiarato contro un finto sviluppatore, voce sintetica, compatibilità con la regola 0 se entra nella narrativa dell'universo. (5) Calendario dal termine della Fase III, narrativa e 3-5 idee migliori della sua, con il costo in tempo per una persona sola. (6) Ciò che il gioco deve avere prima (video, press kit, costi a molti utenti al picco, tetti di spesa). (7) Il pubblico degli sviluppatori: l'autore crede che il progetto interessi anche chi segue lo sviluppo agentico (i subreddit dedicati): la pipeline, l'orchestratore, i task. Di' se conviene e cosa chiede: tradurre documentazione, pipeline e pregresso, oggi in italiano, ha un costo (→ il censimento delle lingue, T239). Parti dalle osservazioni che l'orchestratore ha dato all'autore il 04/11 e che lui ha apprezzato, ma verificale: la frase «non esiste niente del genere» è smontabile, di unico c'è l'insieme; il punto più forte è il mondo fatto del proprio codice e le rune eseguite, con la storia di 18 anni come racconto; Boa Loger come mascotte dichiarata anziché finto sviluppatore, perché chi incassa in UE mostra comunque la propria identità; account nuovi e stessa data ovunque sembrano spam; mancano Discord, YouTube, TikTok. Non creare account e non pubblicare nulla.
 - Test: nessun codice: typecheck con il suo turno.
 - Browser: non serve.
 - Quando è fatto: l'autore può decidere voce per voce; commit su `task/T240`. Sicurezza: nessuna superficie nuova.
+
+### T241 · Il rapporto aureo in HUD e pannelli — `da fare` (dipende da T233)
+- Pipeline: claude · stima 2% · approvato · priorità 4
+- Contesto: l'autore (04/11, `docs/pipeline/domande/T232.md`): nel gioco il rapporto aureo sì per la UI, senza spese grosse. Si usa la stessa scala della landing scelta (`dossier T233`).
+- Cosa fare: spaziature, proporzioni e tipografia di HUD e pannelli dalla scala φ/Fibonacci in `src/theme.css`. Solo stile: niente modelli, niente logica, nessun effetto sulle prestazioni.
+- Test: typecheck e suite intera con i loro turni.
+- Browser: sì, con `?skip&offline`: HUD, inventario, chat, profilo a 1920 e 1280 px, testi che non escono dai riquadri.
+- Quando è fatto: commit su `task/T241`, con la tabella dei rapporti in `#sito`. Sicurezza: nessuna superficie nuova.
+
+### T242 · Il rapporto aureo nei prompt dello Scultore e dell'Artista — `da fare` (dipende da T156)
+- Pipeline: claude · stima 1% · approvato · priorità 33
+- Contesto: l'autore (04/11, `docs/pipeline/domande/T232.md`): nel mondo solo come indicazione per ciò che si genera da qui in poi. **I modelli esistenti non si toccano e non si rigenerano:** potrebbe costare caro.
+- Cosa fare: una riga di principio (proporzioni auree, spirali di Fibonacci dove ha senso: piante, conchiglie, scale, cupole) nel prompt dello Scultore e nella guida di stile dell'Artista, nel seme. Misura sul banco, con pochi tentativi, che non peggiori qualità e varianza.
+- Test: typecheck e suite intera con i loro turni, offline.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T242`, con le misure prima e con la riga. Sicurezza: nessuna superficie nuova.
