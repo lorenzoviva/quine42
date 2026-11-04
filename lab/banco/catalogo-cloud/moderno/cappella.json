@@ -1,0 +1,35 @@
+{
+ "file": "moderno/cappella.xml",
+ "ambientazione": "moderno",
+ "nome": "cappella",
+ "titolo": "Cappella del silenzio, con il campanile",
+ "cantina": false,
+ "passa": true,
+ "regge": true,
+ "varia": true,
+ "maxMs": {
+  "grande": 840,
+  "enorme": 1581
+ },
+ "semiOk": {
+  "grande": "5/5",
+  "enorme": "5/5"
+ },
+ "varianza": {
+  "grande": {
+   "voxel": 0.5924817307756203,
+   "pianta": 0.5804243907849289,
+   "perimetro": 0.23287821524097047,
+   "interno": 0.5987324597904367,
+   "architetture": 5
+  },
+  "enorme": {
+   "voxel": 0.516870115947828,
+   "pianta": 0.25991597659967214,
+   "perimetro": 0.17906265706148433,
+   "interno": 0.49646717117153993,
+   "architetture": 5
+  }
+ },
+ "difetti": []
+}

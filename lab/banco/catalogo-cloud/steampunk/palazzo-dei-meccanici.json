@@ -1,0 +1,35 @@
+{
+ "file": "steampunk/palazzo-dei-meccanici.xml",
+ "ambientazione": "steampunk",
+ "nome": "palazzo-dei-meccanici",
+ "titolo": "Palazzo dei meccanici, a due piani",
+ "cantina": false,
+ "passa": true,
+ "regge": true,
+ "varia": true,
+ "maxMs": {
+  "grande": 958,
+  "enorme": 1765
+ },
+ "semiOk": {
+  "grande": "5/5",
+  "enorme": "5/5"
+ },
+ "varianza": {
+  "grande": {
+   "voxel": 0.5966255232270053,
+   "pianta": 0.5804243907849289,
+   "perimetro": 0.23287821524097047,
+   "interno": 0.5987324597904367,
+   "architetture": 5
+  },
+  "enorme": {
+   "voxel": 0.5241959743927675,
+   "pianta": 0.25991597659967214,
+   "perimetro": 0.17906265706148433,
+   "interno": 0.49646717117153993,
+   "architetture": 5
+  }
+ },
+ "difetti": []
+}
