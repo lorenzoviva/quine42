@@ -4040,3 +4040,145 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: non serve.
 - Quando è fatto: commit su `task/T257` col solo `docs/pipeline/modelli.md`; nell'esito cosa cambia nella proposta. Sicurezza: nessuna superficie nuova.
 - Esito: aggiornato `docs/pipeline/modelli.md` correggendo l'attribuzione di T180/T181/T182 e del modello del banco (`claude-opus-5-5`), ricalcolando i consumi sulle 213 righe di `consumi.jsonl` (inclusi T181, T182 e T254), correggendo il fattore di Argon da 8,13× a 3,92× su 4 task (1,10× in T254, senza doppio conteggio T68b+T69), riallineando OSWorld 2.1 (Opus 81,8 % vs Sonnet 80,1 %) e tutti i numeri del PDF `gemini_4_argon_model_evaluation.pdf`, e aggiornando la proposta di assegnazione con indicazione esplicita delle voci `mai provato da noi`; nulla manca.
+
+### T260 · Le regole per cambiare il kernel senza wipe — `da fare`
+- Pipeline: claude · stima 6% · approvato · priorità 11
+- Step: 32
+- Contesto: approvate dall'autore il 04/11 (D10). Nasce da T183 (`dossier T183`): `docs/design/espressivita.md`, «Divisione delle primitive» e «Il costo di una primitiva aggiunta».
+- Cosa fare: le sette regole di quel documento in un ADR e in `AGENTS.md`. Ciò che non è solo scritto: (regola 2) un test di non regressione tiene ferme le caselle di un luogo campione; (regola 7) `universe.json → kernel` dichiara la versione che serve, e un universo più nuovo del kernel lo dice invece di rovinarsi; (regola 6, primitiva 6) un effetto nuovo vive nel kernel, oppure un `tipo` senza chi lo applica dà un guasto chiaro: oggi non accade nulla, senza guasto (`TRAP: in a universe that rewrote`).
+- Test: i test `TRAP` di `tests/espressivita/` che questo task chiude cambiano di conseguenza. Suite intera e typecheck con i loro turni.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T260`; ADR, `AGENTS.md`. Sicurezza: scrivi l'esito, tocca il validatore o il caricamento di un universo.
+
+### T261 · I luoghi salvati come caselle — `da fare`
+- Pipeline: claude · stima 8% · approvato · priorità 10
+- Step: 32
+- Contesto: primitiva 1 di `docs/design/espressivita.md`, approvata dall'autore il 04/11 (D10). È l'unica vera scadenza: deve uscire prima del primo cambio di caso o di MarkovJunior, altrimenti un universo vecchio non ha più modo di sapere com'era. Misura di T183: con `hash32` cambiato, l'8,9 % di 5184 caselle è diverso sotto gli stessi piani. Nasce da T183 (`dossier T183`).
+- Cosa fare: `plan.tiles`, scritto la prima volta che un luogo si apre; un piano che non lo ha si legge come oggi e lo riceve all'apertura. Verifica se serve lo stesso per il rilievo e dillo nell'esito. Misura quanto pesano su disco un luogo e `valmora`, e se il formato in più pesa sui client (`playerFiles`, `publicFiles`: un campo nuovo non esce finché non lo si nomina).
+- Test: con `hash32` cambiato nel test, un luogo già aperto resta identico; un universo di prima si apre come oggi. Suite intera e typecheck con i loro turni.
+- Browser: sì, `?skip&offline`: un luogo riaperto è uguale, nessun errore in console.
+- Quando è fatto: commit su `task/T261`; ADR, sezione in `docs/architettura-dettagli.md`; nell'esito byte in più per luogo. Sicurezza: scrivi l'esito.
+
+### T262 · Il salvataggio che non si ferma — `da fare` (dipende da T261)
+- Pipeline: claude · stima 6% · approvato · priorità 12
+- Step: 32
+- Contesto: decisione dell'autore del 04/11 (D9): un guasto a runtime di un modulo invalida il codice, non i dati della partita. Oggi un guasto qualsiasi, anche di un giocatore, ferma tutti i salvataggi: in una vita di mesi è la perdita più probabile. Nasce da T183 (`dossier T183`): `docs/design/espressivita.md`, primitiva 3 e `TRAP: every module that calls it`.
+- Cosa fare: con un guasto aperto stato, viandanti e piani si salvano; il codice guasto non diventa uno stato valido. Riscrivi la regola 6 di `AGENTS.md` con la distinzione. `R` e la riparazione dell'Ingegnere restano come sono, e non toccano i file modificati dal giocatore (regola 3). Decidi e di' nell'esito cosa succede a chi torna all'ultimo stato valido del codice tenendo i dati nuovi.
+- Test: un modulo in guasto e dei dati salvati si riaprono; il guasto di un giocatore non ferma i salvataggi degli altri; `R` torna indietro come prima. Suite intera e typecheck con i loro turni.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T262`; ADR, regola 6. Sicurezza: scrivi l'esito.
+
+### T263 · I pannelli e i comandi di ogni viandante in multigiocatore — `da fare` (dipende da T245a)
+- Pipeline: claude · stima 8% · approvato · priorità 16
+- Step: 32
+- Contesto: primitive `W` e `K` di `docs/design/espressivita.md`, approvate dall'autore il 04/11 (D10). Senza, nessuna meccanica con un pannello si legge e nessun veicolo si guida; il pannello del cantiere di T245d usa `W`. Nasce da T183 (`dossier T183`).
+- Cosa fare: `W`: i `campo` nominati dai `manifest.ui` viaggiano in `MyState`, a elenco (regola 8f). `K`: `world.wanderers()`, `input.held(azione, id)`. Un'API nuova per Lua segue la convenzione di `AGENTS.md`.
+- Test: gli scenari di `tests/espressivita/` che chiedevano `W` e `K` ora riescono in multigiocatore; un campo non nominato non esce. Suite intera e typecheck con i loro turni.
+- Browser: sì, due schede con `?viandante=`.
+- Quando è fatto: commit su `task/T263`; ADR se serve, riga in `AGENTS.md`. Sicurezza: scrivi l'esito, tocca il filo.
+
+### T245a · Il magazzino durevole e `vite` — `da fare` (dipende da T262)
+- Pipeline: claude · stima 7% · approvato · priorità 13
+- Step: 32
+- Contesto: Nasce da T245 (`dossier T245`): progetto in `docs/design/comportamento-npc.md`, sezione 7. Fase 0.9.0, decisione dell'autore del 04/11 (D8). Primitive 2 e 5 di `docs/design/espressivita.md` (D10).
+- Cosa fare: `world.store_get/set` (file per modulo, tetto in byte, fuori da `playerFiles`); il salvataggio conserva i campi ignoti; `vite` in `COEFFICIENT_KEYS` con 0 assente, in lobby e in `hourlyEstimate`.
+- Test: `TRAP: in the saved state` cambia di conseguenza; `vite` segue la sorte di `dialoghi` a partita in corso. Suite intera e typecheck con i loro turni.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T245a`; ADR, glossario, `AGENTS.md`. Sicurezza: scrivi l'esito.
+
+### T245b · Il lavoro degli NPC: i primi tre mestieri — `da fare` (dipende da T245a)
+- Pipeline: claude · stima 12% · approvato · priorità 17
+- Step: 32
+- Contesto: Nasce da T245 (`dossier T245`): progetto in `docs/design/comportamento-npc.md`, sezioni 1 e 7. Fase 0.9.0 (D8).
+- Cosa fare: `sys.lavoro` con i comportamenti, `world.path` e `world.find_tile` nel `Host`, `matura` nei terreni, il giorno in `plan.edits`; tre programmi scritti a mano nel seme (contadino, boscaiolo, pescatore) e il campo che cambia davvero, senza una chiamata ai modelli.
+- Test: test del banco su un luogo pianificato. Suite intera e typecheck con i loro turni.
+- Browser: sì: un contadino ara, semina e miete.
+- Quando è fatto: commit su `task/T245b`; ADR, glossario, `AGENTS.md`. Sicurezza: scrivi l'esito.
+
+### T245c · Gli altri mestieri del seme — `da fare` (dipende da T245b)
+- Pipeline: claude · stima 7% · approvato · priorità 18
+- Step: 32
+- Contesto: Nasce da T245 (`dossier T245`): progetto in `docs/design/comportamento-npc.md`, sezione 7. Fase 0.9.0 (D8).
+- Cosa fare: gli altri nove programmi del seme per le quattro ambientazioni (T152), `produci` e `usa` (`host.act`), il deposito del luogo.
+- Test: Suite intera e typecheck con i loro turni.
+- Browser: sì: una giornata di tre mestieri.
+- Quando è fatto: commit su `task/T245c`; glossario. Sicurezza: scrivi l'esito.
+
+### T245d · Le imprese — `da fare` (dipende da T245b, T263)
+- Pipeline: claude · stima 12% · approvato · priorità 19
+- Step: 32
+- Contesto: Nasce da T245 (`dossier T245`): progetto in `docs/design/comportamento-npc.md`, sezione 3. Fase 0.9.0 (D8).
+- Cosa fare: `world/imprese.json`, assegnazione, materiali, morte e sostituzione, le imprese dalle regole del kernel (ricostruzione, casa comune, raccolto), `costruisci`, il pannello del cantiere con `W`.
+- Test: test di durata: mesi di orologio, riaperture. Suite intera e typecheck con i loro turni.
+- Browser: sì: un'impresa che avanza e il suo pannello.
+- Quando è fatto: commit su `task/T245d`; ADR, glossario, `AGENTS.md`. Sicurezza: scrivi l'esito.
+
+### T245e · L'edificio per stadi — `da fare` (dipende da T245d)
+- Pipeline: claude · stima 9% · approvato · priorità 20
+- Step: 32
+- Contesto: Nasce da T245 (`dossier T245`): progetto in `docs/design/comportamento-npc.md`, sezione 3.4. Fase 0.9.0 (D8).
+- Cosa fare: filtro `(griglia, stadio)`, impalcature e picchetti, impronta e pavimenti per stadio, `stadio` nel piano.
+- Test: Suite intera e typecheck con i loro turni.
+- Browser: sì: una casa che sale in quattro fasi.
+- Quando è fatto: commit su `task/T245e`; ADR se è un contratto nuovo dei programmi. Sicurezza: scrivi l'esito.
+
+### T245f · Fuori vista — `da fare` (dipende da T245d, T245e)
+- Pipeline: claude · stima 9% · approvato · priorità 21
+- Step: 32
+- Contesto: Nasce da T245 (`dossier T245`): progetto in `docs/design/comportamento-npc.md`, sezione 5. Fase 0.9.0, decisione dell'autore del 04/11 (D8: il progetto la lasciava aperta).
+- Cosa fare: contabilità al cambio di fase, `on_return`, maturazione e stadio al ritorno; sul server dei mondi di molti con due viandanti lontani.
+- Test: Suite intera e typecheck con i loro turni.
+- Browser: sì, due schede con `?viandante=`.
+- Quando è fatto: commit su `task/T245f`; ADR se serve. Sicurezza: scrivi l'esito, tocca il server.
+
+### T245g · Il Narratore scrive mestieri e imprese — `in attesa` (dipende da T245c, T245d)
+- Pipeline: claude · stima 10% · approvato · priorità 90
+- Step: 39
+- Contesto: Nasce da T245 (`dossier T245`): progetto in `docs/design/comportamento-npc.md`, sezione 7. Fase 1.0.0 (D8): non parte prima della Fase III.
+- Cosa fare: `job.program` con `JobDirector` e validatore, `impresa.plan` dalle trame e dal Referente, effetto `impresa`, `CENSUS`, mock, registro; i costi misurati su un universo.
+- Test: Suite intera e typecheck con i loro turni.
+- Browser: da decidere quando riparte.
+- Quando è fatto: commit su `task/T245g`; Sicurezza: scrivi l'esito.
+
+### T245h · I bivi degli NPC — `in attesa` (dipende da T245g)
+- Pipeline: claude · stima 10% · approvato · priorità 90
+- Step: 39
+- Contesto: Nasce da T245 (`dossier T245`): progetto in `docs/design/comportamento-npc.md`, sezione 2. Fase 1.0.0 (D8): non parte prima della Fase III.
+- Cosa fare: `npc.decide` con l'Attore o il Narratore, opzioni chiuse, ritmo, chi paga; tratti e opinioni in `people.json` e nella scheda; a grado 0 il seme.
+- Test: Suite intera e typecheck con i loro turni.
+- Browser: da decidere quando riparte.
+- Quando è fatto: commit su `task/T245h`; Sicurezza: scrivi l'esito.
+
+### T245i · Vite lunghe — `in attesa` (dipende da T245h)
+- Pipeline: claude · stima 10% · approvato · priorità 90
+- Step: 39
+- Contesto: Nasce da T245 (`dossier T245`): progetto in `docs/design/comportamento-npc.md`, sezione 8. Fase 1.0.0 (D8): non parte prima della Fase III.
+- Cosa fare: cronaca per righe, `npc.reflect`, `npc.life` con il calendario (nozze, nascite, traslochi, cambio mestiere, morte naturale), vicinato e colleghi derivati dal grafo; un universo di prova fatto invecchiare 90 giorni di mondo.
+- Test: Suite intera e typecheck con i loro turni.
+- Browser: da decidere quando riparte.
+- Quando è fatto: commit su `task/T245i`; Sicurezza: scrivi l'esito.
+
+### T264 · `?dev&teleport` ignora lo scostamento salvato — `da fare`
+- Pipeline: claude · stima 2% · approvato · priorità 15
+- Contesto: decisione dell'autore del 04/11 (D13): chi chiude nella corona riparte dov'era, come oggi. Ma `pagehide` salva lo scostamento del tappeto, che sposta `?dev&teleport=46,0` di 46 caselle a ogni caricamento chiuso bene. Nasce da T214 (`dossier T214`).
+- Cosa fare: con `?dev&teleport` lo scostamento salvato non si applica, così l'URL porta sempre allo stesso punto; senza, tutto come prima.
+- Test: un test sullo scostamento con e senza `teleport`, se la logica si isola. Suite intera e typecheck con i loro turni.
+- Browser: sì: due caricamenti di `?dev&teleport=46,0` chiusi bene arrivano allo stesso punto; senza `teleport` si riparte dov'era.
+- Quando è fatto: commit su `task/T264`; nell'esito cosa è stato provato. Sicurezza: nessuna superficie nuova.
+
+### T265 · I commit non si perdono: fila su disco, tutte le scritture, token scaduto — `da fare`
+- Pipeline: claude · stima 6% · approvato · priorità 14
+- Step: 34
+- Contesto: decisione dell'autore del 04/11 (D15): prima della beta. Nasce da T211 (`dossier T211`, ADR-0122): la fila di `UniverseClient` sta solo in memoria e senza tetto; `putMap`, `branch` e `merge` non ritentano; un 401 da token scaduto perde il commit.
+- Cosa fare: la fila sopravvive a una ricarica e ha un tetto, con ciò che fa al tetto scritto nell'ADR; `putMap`, `branch` e `merge` ritentano come i commit; un 401 rinnova il token e riprova. Un rifiuto del server resta senza nuovi tentativi (regola 6). Mai un ordine diverso da quello dei commit.
+- Test: server che cade e torna, ricarica a metà fila, token scaduto. Suite intera e typecheck con i loro turni.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T265`; ADR che aggiorna ADR-0122, regola 6. Sicurezza: scrivi l'esito, tocca token e scritture sull'universo.
+
+### T266 · Un'altra tornata di rinomine — `in attesa`
+- Pipeline: claude · stima 5% · priorità 90
+- Contesto: decisione dell'autore del 04/11 (D14): sì, verso la fine della Fase I. I nomi sono dell'autore: quando riparte, l'orchestratore gli chiede quali righe nuove aggiungere al glossario (ADR-0117); il task poi le esegue.
+- Cosa fare: i nomi rimasti, per riga. R4: `SessionClient.places`, `Client.places`, `ThinClient.places()`, `ShowcaseEntry.place`, `graphCache.places`, `PLACE_PHASES`, `PLACES_PER_MINUTE`, `Kernel.miniature`, `tests/places.test.ts`. R7: `stepTornio`, `openTornio`, `TORNIO_AT`, `CoronaView.tornio`, `Studio.tornio`, `Kernel.plinto()`, `updatePlinto`, che convivono con `lathe`. R8: «ledger» in locali e commenti di consumi e carte, omonimo dei saldi. R9: «ground floor» nei commenti. R10: i campi `cell` di `Placements` e `HoverInfo`, `Building.cells`, `Cell`/`cells`/`cell()` di `water.ts`, `Overlay.cell`, i locali `cells`. R11: il campo `layouts` di `environmentsFor` e `designLayouts`, `validateLayout`, `checkLayout`, `LayoutCheck`. R12: `tiles` e `tile` del risultato di `cartography.ts`, `VOID_TILE`. R13: «universe/world/server/session of many» nei commenti. R14: «qualche chunk» in `CLAUDE.md:19`. R15, per scelta: l'ancora `#reami`, `quine:sito:reame` in `localStorage`, `realm-card` in `docs/design/sito/`. R16: il locale `person` di `src/ui/chat.ts`, `persona` di `src/render/entities.ts:156`, testi e `tab-persone` di `site/index.html`, il testo di `tools/sicurezza/catalogo.mjs:614`. R17: i locali `partita` di `server/access.ts:100,140`, `tests/partita.test.ts`, `ProvaTaglia` e `taglieDiProva` di `lab/banco/varianza.ts`. I numeri di riga sono del 04/11: ricontrollali.
+- Test: Suite intera e typecheck con i loro turni.
+- Browser: non serve, salvo righe che toccano ciò che si vede.
+- Quando è fatto: commit su `task/T266`; Sicurezza: nessuna superficie nuova.

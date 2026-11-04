@@ -8,16 +8,16 @@ fasi sono quelle pianificate oggi e **possono cambiare in corso d'opera**. Le pa
 
 ## Le quattro fasi
 
-Siamo nella **Fase I**. Il criterio della Fase I è una proposta; quelli delle altre tre sono ricavati da ciò che l'autore ha scritto. Il criterio lo può cambiare solo lui, ed è sempre lui a dire finita una fase.
+Siamo nella **Fase I**. Il criterio della Fase I l'ha approvato l'autore il 04/11; quelli delle altre tre sono ricavati da ciò che l'autore ha scritto. Il criterio lo può cambiare solo lui, ed è sempre lui a dire finita una fase.
 
 ### Fase I: il kernel 0.9.0
 
 L'autore: l'implementazione del kernel 0.9.0, divisa in step. La guida dei beta tester si scrive alla fine di questa fase, prima della Fase II.
 
-**Finita quando (proposta, da approvare):**
+**Finita quando:**
 
 1. Tutti gli step di Fase I nella tabella sono `raggiunto`, oppure l'autore li ha spostati a un'altra fase.
-2. Il server di beta è acceso: un universo multigiocatore giocato da due browser veri (T45f).
+2. Il server di beta è acceso: un universo multigiocatore giocato da due browser veri (T45f, l'ultimo passo della fase: per scelta dell'autore parte quando il resto è finito).
 3. I quattro universi vanilla sono generati e ci si cammina senza errori (T153).
 4. `npm run sicurezza:prove` passa contro il server di beta, e nel registro non resta aperta una voce con cui un tester possa toccare i crediti di altri, il server o la chiave.
 5. Ciò che T183 trova mancare al kernel e che non entrerebbe senza wipe è deciso: dentro la 0.9.0 oppure rimandato sapendo cosa costa, perché un wipe degli universi ufficiali costa molto.
@@ -86,13 +86,14 @@ L'autore: il rilascio aperto al pubblico, con i pagamenti Stripe. Il piano di la
 | 29 | La grafica a cartone | I | in corso | T89 T89a T89b T89c T89d T89e T98 |
 | 30 | Lo Scultore scolpisce strutture con un metodo misurato sul banco | I | in corso | T154 T155 T173 T180 T181 T182 T258 T259 T156 |
 | 31 | Quattro ambientazioni, generate senza browser dai crediti che avanzano | I | da fare | T152 T153 T207 T88 |
-| 32 | Il kernel regge mesi di vita, e gli NPC agiscono davvero | I | da fare | T183 T245 |
+| 32 | Il kernel regge mesi di vita, e gli NPC agiscono davvero | I | in corso | T183 T245 T260 T261 T262 T263 T245a T245b T245c T245d T245e T245f |
 | 33 | Il rapporto aureo in HUD, pannelli e in ciò che si genera da qui in poi | I | da fare | T241 T242 |
-| 34 | Pronti per la beta: server, guida, notizie, home, consumo in lobby, registro dei fallimenti del Concilio | I | in corso | T45f T234 T236 T237 T238 T243 T244 T247 T248 T249 T250 T251 T252 |
+| 34 | Pronti per la beta: server, guida, notizie, home, consumo in lobby, registro dei fallimenti del Concilio | I | in corso | T45f T234 T236 T237 T238 T243 T244 T247 T248 T249 T250 T251 T252 T265 |
 | 35 | Il sito è il launcher del gioco | II | in attesa | T232 T233 T235 |
 | 36 | Il gioco in quattro lingue | III | in attesa | T239 |
-| 37 | Altri universi: spazio, pirati, cowboy (fase proposta: l'autore non l'ha detta) | III | in attesa | T184 T185 |
+| 37 | Altri universi: spazio, pirati, cowboy | III | in attesa | T184 T185 |
 | 38 | Il lancio | IV | in attesa | T240 |
+| 39 | Gli NPC decidono e invecchiano | III | in attesa | T245g T245h T245i |
 
 La Fase II non ha ancora uno step per la beta stessa e la Fase III non ha quelli dei requisiti: uno step si apre quando ha dei task.
 
