@@ -45,7 +45,7 @@ L'autore: il rilascio aperto al pubblico, con i pagamenti Stripe. Il piano di la
 
 ## Le regole della tabella
 
-- **Un numero non cambia mai.** Uno step nuovo prende il primo numero libero, qualunque sia la sua fase: la numerazione non è un calendario, e lo step 25 viene dopo il 26 e il 27 solo sulla carta. Uno step può cambiare fase.
+- **Un numero non cambia mai.** Uno step nuovo prende il primo numero libero, qualunque sia la sua fase: la numerazione non è un calendario (il 26 e il 27 sono arrivati in gran parte prima del 25). Uno step può cambiare fase.
 - **Ogni task sta in una sola riga.** Chi pianifica un task che serve a uno step lo scrive qui nello stesso commit; un task che non serve a nessun obiettivo può non avere step.
 - **La colonna `task` è un elenco di id separati da spazi**, senza intervalli: `pipeline.mjs` la leggerà così (T231).
 - **`stato`** è uno di: `raggiunto` (i suoi task sono finiti e l'obiettivo si vede), `in corso` (almeno un task è fatto o in corso), `da fare`, `in attesa` (aspetta l'autore o un'altra fase).

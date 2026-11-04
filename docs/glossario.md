@@ -891,7 +891,7 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Inglese**: `step`
 - **Definizione**: il raggiungimento di un obiettivo condiviso tra task, con un numero che non cambia («step 25: aggiungere il suono al gioco»); la numerazione continua quella dei nove step di prima, riletti come obiettivi.
 - **Dove vive**: `docs/fasi.md`
-- **Da non usare**: `tappa`
+- **Da non usare**: `tappa` (per lo step)
 
 ## Gli omonimi
 
