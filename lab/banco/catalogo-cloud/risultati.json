@@ -1,0 +1,794 @@
+{
+ "fantasy/locanda-del-cinghiale": {
+  "file": "lab/banco/catalogo-cloud/fantasy/locanda-del-cinghiale.xml",
+  "nome": "locanda-del-cinghiale",
+  "ambientazione": "fantasy",
+  "cantina": true,
+  "passa": true,
+  "difetti": [],
+  "taglie": [
+   {
+    "taglia": "grande",
+    "box": [
+     100,
+     100,
+     100
+    ],
+    "vpt": 20,
+    "semi": [
+     {
+      "seme": 1,
+      "ms": 1389,
+      "piani": 2,
+      "stanze": 4,
+      "cantina": 2.105,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 4,
+      "finestre": 27,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 2,
+      "ms": 1349,
+      "piani": 2,
+      "stanze": 4,
+      "cantina": 1.8225,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 6,
+      "finestre": 25,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 3,
+      "ms": 1804,
+      "piani": 2,
+      "stanze": 3,
+      "cantina": 1.815,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 4,
+      "finestre": 24,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 4,
+      "ms": 1671,
+      "piani": 2,
+      "stanze": 3,
+      "cantina": 2.12,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 4,
+      "finestre": 22,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 5,
+      "ms": 1566,
+      "piani": 2,
+      "stanze": 4,
+      "cantina": 2.1,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 4,
+      "finestre": 26,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     }
+    ],
+    "varianza": {
+     "voxel": 0.6552472497186168,
+     "colore": 0.14288819052095553,
+     "pianta": 0.3258493847453662,
+     "perimetro": 0.19538670284938942,
+     "interno": 0.7291856328942212,
+     "firmePiani": 1,
+     "firmeStanze": 2,
+     "architetture": 5,
+     "statico": false
+    },
+    "difettiVarianza": [],
+    "msMax": 1804
+   },
+   {
+    "taglia": "enorme",
+    "box": [
+     120,
+     120,
+     112
+    ],
+    "vpt": 16,
+    "semi": [
+     {
+      "seme": 1,
+      "ms": 2402,
+      "piani": 3,
+      "stanze": 4,
+      "cantina": 3.3515625,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 8,
+      "finestre": 26,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 2,
+      "ms": 2386,
+      "piani": 3,
+      "stanze": 4,
+      "cantina": 3.35546875,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 8,
+      "finestre": 27,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 3,
+      "ms": 2635,
+      "piani": 3,
+      "stanze": 4,
+      "cantina": 3.35546875,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 8,
+      "finestre": 34,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 4,
+      "ms": 2535,
+      "piani": 3,
+      "stanze": 4,
+      "cantina": 2.89453125,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 8,
+      "finestre": 23,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 5,
+      "ms": 2275,
+      "piani": 3,
+      "stanze": 5,
+      "cantina": 2.8671875,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 5,
+      "finestre": 23,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     }
+    ],
+    "varianza": {
+     "voxel": 0.7048145397232355,
+     "colore": 0.13798216766552496,
+     "pianta": 0.33993781028889364,
+     "perimetro": 0.3099632684540071,
+     "interno": 0.8100962853343385,
+     "firmePiani": 1,
+     "firmeStanze": 2,
+     "architetture": 5,
+     "statico": false
+    },
+    "difettiVarianza": [],
+    "msMax": 2635
+   }
+  ]
+ },
+ "fantasy/tempio-della-luna": {
+  "file": "lab/banco/catalogo-cloud/fantasy/tempio-della-luna.xml",
+  "nome": "tempio-della-luna",
+  "ambientazione": "fantasy",
+  "cantina": false,
+  "passa": true,
+  "difetti": [],
+  "taglie": [
+   {
+    "taglia": "grande",
+    "box": [
+     100,
+     100,
+     80
+    ],
+    "vpt": 20,
+    "semi": [
+     {
+      "seme": 1,
+      "ms": 729,
+      "piani": 2,
+      "stanze": 6,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 6,
+      "finestre": 28,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 2,
+      "ms": 794,
+      "piani": 2,
+      "stanze": 6,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 7,
+      "finestre": 31,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 3,
+      "ms": 643,
+      "piani": 2,
+      "stanze": 5,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 7,
+      "finestre": 27,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 4,
+      "ms": 777,
+      "piani": 2,
+      "stanze": 7,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 4,
+      "finestre": 29,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 5,
+      "ms": 837,
+      "piani": 2,
+      "stanze": 7,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 5,
+      "finestre": 33,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     }
+    ],
+    "varianza": {
+     "voxel": 0.7029364282335008,
+     "colore": 0.13973408038042126,
+     "pianta": 0.5636759348381529,
+     "perimetro": 0.3514946787258,
+     "interno": 0.6763836660599706,
+     "firmePiani": 1,
+     "firmeStanze": 3,
+     "architetture": 5,
+     "statico": false
+    },
+    "difettiVarianza": [],
+    "msMax": 837
+   },
+   {
+    "taglia": "enorme",
+    "box": [
+     120,
+     120,
+     96
+    ],
+    "vpt": 16,
+    "semi": [
+     {
+      "seme": 1,
+      "ms": 1365,
+      "piani": 2,
+      "stanze": 7,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 8,
+      "finestre": 25,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 2,
+      "ms": 1553,
+      "piani": 2,
+      "stanze": 7,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 8,
+      "finestre": 26,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 3,
+      "ms": 1471,
+      "piani": 2,
+      "stanze": 6,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 5,
+      "finestre": 24,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 4,
+      "ms": 1468,
+      "piani": 2,
+      "stanze": 6,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 7,
+      "finestre": 25,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 5,
+      "ms": 1546,
+      "piani": 2,
+      "stanze": 7,
+      "cantina": 0,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 5,
+      "finestre": 41,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     }
+    ],
+    "varianza": {
+     "voxel": 0.6481922934008622,
+     "colore": 0.11436755749619186,
+     "pianta": 0.349353374452528,
+     "perimetro": 0.23341375150784077,
+     "interno": 0.6197545909710207,
+     "firmePiani": 1,
+     "firmeStanze": 2,
+     "architetture": 4,
+     "statico": false
+    },
+    "difettiVarianza": [],
+    "msMax": 1553
+   }
+  ]
+ },
+ "fantasy/torre-del-mago": {
+  "file": "lab/banco/catalogo-cloud/fantasy/torre-del-mago.xml",
+  "nome": "torre-del-mago",
+  "ambientazione": "fantasy",
+  "cantina": true,
+  "passa": true,
+  "difetti": [],
+  "taglie": [
+   {
+    "taglia": "grande",
+    "box": [
+     100,
+     100,
+     100
+    ],
+    "vpt": 20,
+    "semi": [
+     {
+      "seme": 1,
+      "ms": 1560,
+      "piani": 2,
+      "stanze": 4,
+      "cantina": 2.095,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 4,
+      "finestre": 27,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 2,
+      "ms": 1348,
+      "piani": 2,
+      "stanze": 4,
+      "cantina": 1.8325,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 4,
+      "finestre": 30,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 3,
+      "ms": 1223,
+      "piani": 2,
+      "stanze": 3,
+      "cantina": 1.8425,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 4,
+      "finestre": 25,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 4,
+      "ms": 1592,
+      "piani": 2,
+      "stanze": 3,
+      "cantina": 2.09,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 6,
+      "finestre": 25,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 5,
+      "ms": 1677,
+      "piani": 2,
+      "stanze": 4,
+      "cantina": 2.1,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 4,
+      "finestre": 28,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     }
+    ],
+    "varianza": {
+     "voxel": 0.6380981365832921,
+     "colore": 0.1812078107701255,
+     "pianta": 0.33951630600210947,
+     "perimetro": 0.1538377459315035,
+     "interno": 0.7293266803039233,
+     "firmePiani": 1,
+     "firmeStanze": 2,
+     "architetture": 5,
+     "statico": false
+    },
+    "difettiVarianza": [],
+    "msMax": 1677
+   },
+   {
+    "taglia": "enorme",
+    "box": [
+     120,
+     120,
+     112
+    ],
+    "vpt": 16,
+    "semi": [
+     {
+      "seme": 1,
+      "ms": 2435,
+      "piani": 3,
+      "stanze": 4,
+      "cantina": 3.3828125,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 8,
+      "finestre": 20,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 2,
+      "ms": 2645,
+      "piani": 3,
+      "stanze": 4,
+      "cantina": 3.33984375,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 5,
+      "finestre": 31,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 3,
+      "ms": 2673,
+      "piani": 3,
+      "stanze": 4,
+      "cantina": 3.3828125,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 8,
+      "finestre": 35,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 4,
+      "ms": 2667,
+      "piani": 3,
+      "stanze": 4,
+      "cantina": 2.8984375,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 8,
+      "finestre": 26,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 5,
+      "ms": 2483,
+      "piani": 3,
+      "stanze": 5,
+      "cantina": 2.9375,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 5,
+      "finestre": 22,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     }
+    ],
+    "varianza": {
+     "voxel": 0.6910220344908262,
+     "colore": 0.1613304922963113,
+     "pianta": 0.37114200353303095,
+     "perimetro": 0.276878612716763,
+     "interno": 0.8099915105790984,
+     "firmePiani": 1,
+     "firmeStanze": 2,
+     "architetture": 5,
+     "statico": false
+    },
+    "difettiVarianza": [],
+    "msMax": 2673
+   }
+  ]
+ },
+ "fantasy/fucina-nanica": {
+  "file": "lab/banco/catalogo-cloud/fantasy/fucina-nanica.xml",
+  "nome": "fucina-nanica",
+  "ambientazione": "fantasy",
+  "cantina": true,
+  "passa": true,
+  "difetti": [],
+  "taglie": [
+   {
+    "taglia": "grande",
+    "box": [
+     100,
+     100,
+     100
+    ],
+    "vpt": 20,
+    "semi": [
+     {
+      "seme": 1,
+      "ms": 1407,
+      "piani": 2,
+      "stanze": 4,
+      "cantina": 2.1,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 5,
+      "finestre": 30,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 2,
+      "ms": 1384,
+      "piani": 2,
+      "stanze": 4,
+      "cantina": 1.8325,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 4,
+      "finestre": 29,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 3,
+      "ms": 1398,
+      "piani": 2,
+      "stanze": 3,
+      "cantina": 1.83,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 4,
+      "finestre": 28,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 4,
+      "ms": 2213,
+      "piani": 2,
+      "stanze": 3,
+      "cantina": 2.09,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 6,
+      "finestre": 23,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     },
+     {
+      "seme": 5,
+      "ms": 1373,
+      "piani": 2,
+      "stanze": 4,
+      "cantina": 2.115,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 4,
+      "finestre": 25,
+      "porta": "scarto 0,03, alta 1,50",
+      "difetti": []
+     }
+    ],
+    "varianza": {
+     "voxel": 0.6505963624700138,
+     "colore": 0.1530891422544864,
+     "pianta": 0.32882321574534495,
+     "perimetro": 0.18667697184338738,
+     "interno": 0.7266229373199057,
+     "firmePiani": 1,
+     "firmeStanze": 2,
+     "architetture": 5,
+     "statico": false
+    },
+    "difettiVarianza": [],
+    "msMax": 2213
+   },
+   {
+    "taglia": "enorme",
+    "box": [
+     120,
+     120,
+     112
+    ],
+    "vpt": 16,
+    "semi": [
+     {
+      "seme": 1,
+      "ms": 2235,
+      "piani": 3,
+      "stanze": 4,
+      "cantina": 3.359375,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 8,
+      "finestre": 30,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 2,
+      "ms": 2407,
+      "piani": 3,
+      "stanze": 4,
+      "cantina": 3.32421875,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 5,
+      "finestre": 27,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 3,
+      "ms": 2349,
+      "piani": 3,
+      "stanze": 4,
+      "cantina": 3.34765625,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 8,
+      "finestre": 34,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 4,
+      "ms": 2492,
+      "piani": 3,
+      "stanze": 4,
+      "cantina": 2.890625,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 8,
+      "finestre": 25,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     },
+     {
+      "seme": 5,
+      "ms": 2363,
+      "piani": 3,
+      "stanze": 5,
+      "cantina": 2.91796875,
+      "murato": 0,
+      "persi": 0,
+      "staccati": 0,
+      "salti": 5,
+      "finestre": 25,
+      "porta": "scarto 0,03, alta 1,88",
+      "difetti": []
+     }
+    ],
+    "varianza": {
+     "voxel": 0.6939657798988379,
+     "colore": 0.14867770145487888,
+     "pianta": 0.34076529152752516,
+     "perimetro": 0.3010204081632653,
+     "interno": 0.8096138997788769,
+     "firmePiani": 1,
+     "firmeStanze": 2,
+     "architetture": 5,
+     "statico": false
+    },
+    "difettiVarianza": [],
+    "msMax": 2492
+   }
+  ]
+ }
+}
