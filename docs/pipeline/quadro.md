@@ -53,7 +53,6 @@ Aggiornato il 04/11/2026, epoca 256. Crediti: vedi `stato`.
 - **T45f, in attesa fino alla fine della Fase I** (`domande/T45f.md`, progetto GCP e deploy; quando riparte: `QUINE_TETTO_RICARICHE` e `QUINE_UNIVERSI_PER_ACCOUNT` da T236). Prima di T45f restano non provabili qui: token vero di Firebase, TLS e bilanciatore, `QUINE_PROXY_FIDATI` e controllo di salute, Stripe vero con le imposte, `npm ci --omit=dev`, tetto Gemini sul server di produzione; silenzio massimo del mondo 5,5 s contro i 5 di `notice`.
 - **Decisioni di gioco e sicurezza chieste:** il salto sulle casse; V-023 con gli account; V-002 chiusa col residuo; l'orologio di 2 s di T126; anonimo che avvia un mondo fermo (consigliato tenerlo); il master del clone nel corpo della richiesta (consigliato tenerlo); Referente senza crediti e `QUINE_TETTO_RICARICHE`; immagine per le carte dei luoghi (consigliato no).
 - **Da guardare:** il criterio degli interni; la rilettura di `lab/banco/finale/giudizio.md` con le foto; la vista Markdown della pagina web, mai vista in un browser; `tests/abbonamenti.test.ts` dietro una variabile (consigliato sì); le prove a mano V-001.n, V-001.o, V-006.g se vuole rifarle.
-- **Da dirgli se non è d'accordo:** T155 e T173 chiusi con un allentamento della soglia (scelta A), la strada ora è T179-T182. Lo sbalzo di spazio su C: durante i task lo verifica lui.
 
 ## Regole attive
 
