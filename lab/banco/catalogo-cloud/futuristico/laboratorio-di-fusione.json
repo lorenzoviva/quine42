@@ -1,0 +1,35 @@
+{
+ "file": "futuristico/laboratorio-di-fusione.xml",
+ "ambientazione": "futuristico",
+ "nome": "laboratorio-di-fusione",
+ "titolo": "Laboratorio di fusione, con il nucleo interrato",
+ "cantina": true,
+ "passa": true,
+ "regge": true,
+ "varia": true,
+ "maxMs": {
+  "grande": 1965,
+  "enorme": 2971
+ },
+ "semiOk": {
+  "grande": "5/5",
+  "enorme": "5/5"
+ },
+ "varianza": {
+  "grande": {
+   "voxel": 0.6061781309175751,
+   "pianta": 0.42025014889815365,
+   "perimetro": 0.15672451193058567,
+   "interno": 0.688287080930327,
+   "architetture": 5
+  },
+  "enorme": {
+   "voxel": 0.5844192236612026,
+   "pianta": 0.37179595817304145,
+   "perimetro": 0.2275104020648377,
+   "interno": 0.6734382580351939,
+   "architetture": 5
+  }
+ },
+ "difetti": []
+}
