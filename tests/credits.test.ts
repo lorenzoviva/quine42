@@ -70,7 +70,7 @@ describe('credits and common costs (T45a)', () => {
     expect(shares[0]).toBeCloseTo(0.084167, 5);
   });
 
-  it('the fee is the server\'s to say: 0 is a fee, what is not a fraction is the default (ADR-0131)', () => {
+  it('the fee is the server\'s to say: 0 is a fee, what is not a fraction is the default (ADR-0132)', () => {
     expect(platformFeeOf({})).toBe(0.01);
     expect(platformFeeOf({ QUINE_COMMISSIONE: '0' })).toBe(0);
     expect(platformFeeOf({ QUINE_COMMISSIONE: ' 0.05 ' })).toBe(0.05);
@@ -86,7 +86,7 @@ describe('credits and common costs (T45a)', () => {
 
   const COMMON_CALL = { model: 'gemini-3.1-flash-lite', agent: 'narratore', task: 'council.session', prompt: 1_000_000, cached: 0, output: 0, thoughts: 0, chi: COMUNE };
 
-  it('with fee 0 a balance goes down by the base cost exactly: a personal call and a common one (ADR-0131)', async () => {
+  it('with fee 0 a balance goes down by the base cost exactly: a personal call and a common one (ADR-0132)', async () => {
     const k = await bootMany(0);
     const server = new SessionServer(k);
     const a = await thin(server, 'io');
@@ -104,7 +104,7 @@ describe('credits and common costs (T45a)', () => {
     expect(k.creditsOf('io')).toBe(9.875);
   });
 
-  it('without a word from the server the fee stays 1%, and only the server can say otherwise (ADR-0131)', async () => {
+  it('without a word from the server the fee stays 1%, and only the server can say otherwise (ADR-0132)', async () => {
     // Neither a field written in the universe: it is not read.
     const k = await bootMany(undefined, { commissione: 0, QUINE_COMMISSIONE: 0 });
     expect(k.platformFee).toBe(0.01);
@@ -117,7 +117,7 @@ describe('credits and common costs (T45a)', () => {
     expect(k.platformFee).toBe(0.01);
   });
 
-  it('the master\'s mirror shows the fee the server decided, and a player\'s is not told (ADR-0131)', async () => {
+  it('the master\'s mirror shows the fee the server decided, and a player\'s is not told (ADR-0132)', async () => {
     const k = await bootMany(0.02);
     const server = new SessionServer(k);
     const master = await thin(server, 'io');

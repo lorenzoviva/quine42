@@ -98,7 +98,7 @@ describe('the wallet route (T105)', () => {
     }
   });
 
-  it('the fee is the server\'s: at 0 what is shown is the cost alone, and the page says so (ADR-0131)', async () => {
+  it('the fee is the server\'s: at 0 what is shown is the cost alone, and the page says so (ADR-0132)', async () => {
     const dir = diskUniverse();
     try {
       const w = (await call(walletHandler({ universesDir: dir, platformFee: 0 }), 'GET', '/api/crediti?universo=prova&viandante=ugo')).body.portafoglio;

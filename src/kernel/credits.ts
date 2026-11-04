@@ -1,11 +1,11 @@
-// The credit system (T45a, ADR-0081; P#1 of the multiplayer plan). Every model call deducts its cost + the platform fee (ADR-0131) from its payer
+// The credit system (T45a, ADR-0081; P#1 of the multiplayer plan). Every model call deducts its cost + the platform fee (ADR-0132) from its payer
 // (`payerOf`). Common expenses (`comune`) are split equally among all currently connected players (master included). When credits
 // are exhausted, what the wanderer asks for is answered by local models (like without an API key). Anonymous wanderers have no
 // credits and always use local models. Stripe Checkout (T45e, ADR-0083) tops up.
 // Balances and payments live in a `Ledger` (T125, ADR-0104), outside the universe's files and their history: here its rules; on the
 // server `server/ledger.ts` keeps it on disk, a mirror or a test has it in memory.
 
-/** Platform fee on top of model cost when the server says nothing (P#1): 1%. The server decides it (`QUINE_COMMISSIONE`, `platformFeeOf`, ADR-0131). */
+/** Platform fee on top of model cost when the server says nothing (P#1): 1%. The server decides it (`QUINE_COMMISSIONE`, `platformFeeOf`, ADR-0132). */
 export const DEFAULT_PLATFORM_FEE = 0.01;
 
 /** Where a universe of before the ledger kept its payments: only the migration reads it (ADR-0104). */
