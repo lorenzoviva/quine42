@@ -66,7 +66,32 @@ npx vite-node lab/banco/catalogo-cloud/valida.ts -- --indice                    
 
 I tempi sono misurati su una macchina a 4 core con fino a tre prove in parallelo: da soli sono più bassi del 10-30 %.
 
+## La varianza senza cantina
+
+Lo scheletro senza cantina (`../riferimento/cantiere.xml`) reggeva ma a 5 semi non variava abbastanza: a Grande ogni seme aveva 4 stanze al piano
+terra e 1 sopra (una sola firma di stanze), a Enorme il perimetro stava a 0,11-0,15. Tre cose, tutte nel progetto:
+
+- **la quarta campata bassa a moneta** (`scheletri/piano.xml`): cresce come le altre con un seme `r`, una moneta (`p="0.5"` su una cella sola)
+  la tiene o no, e se no la sua porta torna muro (`r/H → z/p`); con tre campate fisse l'ingombro a Enorme resta sopra 0,30;
+- **l'arredo a moneta** (`arredoForse`): un bancone contro un muro pieno di una campata a due piani, scritto con `r` e una cella `f`, a un seme su
+  due; una campata arredata smette di contare come stanza, e le firme cambiano;
+- **l'ala nel margine** (`ala`): un corpo basso di 13 × 12 contro un muro esterno, che chiede 13 file di suolo oltre il muro: a Grande il margine è 5
+  e non c'è, a Enorme è 15 e sposta il contorno di più di mezza casella (ciò che `perimetro` conta).
+
+Le strutture con la cantina variano già per il pozzo (due campate in linea dietro una qualunque campata davanti).
+
+## Le torri e la scatola
+
+La scatola di una struttura grande è alta 80 voxel sopra il suolo a Grande e 96 a Enorme, e i due piani dello scheletro arrivano a 66-70: una
+torre (`torre`, un quadrato di tetto che sale fino alla cima della scatola) sporge di 10-14 voxel a Grande e di 26-30 a Enorme. Torre di guardia,
+osservatorio, faro, torre panoramica, campanili e guglie si leggono a Enorme; a Grande sono torrette. Una torre più alta vuole una classe più alta
+(o un terzo piano con un'altra scala), non un altro programma.
+
 ## Ciò che non è provato
+
+Le dodici strutture di uno stesso scheletro condividono il generatore della pianta: a parità di seme le loro piante si somigliano (le quote di
+varianza nella tabella sono quasi le stesse), e a distinguerle sono materiali, tetti, torri, comignoli, facciate, finestre e arredi. Piante
+proprie per tipo (una navata per il tempio, un cortile per il forte) sono il passo successivo.
 
 Nessuno di questi programmi è stato provato dentro il gioco: lo Scultore non passa ancora `base` a `checkProgram` e `withSize` scrive la scatola
 senza la cantina (ADR-0135, «Conseguenze»: serve T156). I giudizi estetici (lo stile si riconosce? la torre è una torre?) sono dell'autore, sui
