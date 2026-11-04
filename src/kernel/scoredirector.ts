@@ -66,6 +66,7 @@ export class ScoreDirector {
     this.used++;
     const k = this.k;
     const skip = () => req.ambienti?.forEach((e) => this.skip.add(e));
+    const lacking = (esito: 'invalido' | 'errore', motivo: string) => k.noteShortfall({ richiesta: req.richiesta, chi, agente: 'musicista', compito: COMPOSE_TASK, esito, motivo });
     try {
       const effetti = [...new Set(soundPrograms(k.files).flatMap((p) => (p.suono?.uso === 'effetto' ? (p.suono.effetti ?? []) : [])))];
       k.council.say('musicista', 'propone', req.richiesta.slice(0, 80), undefined, COMPOSE_TASK);
@@ -73,6 +74,7 @@ export class ScoreDirector {
       this.nextAt = k.time + pieceGap(k.coefficients().brani);
       if (!r) {
         skip();
+        lacking('invalido', k.lastDiscard('musicista', COMPOSE_TASK));
         return { ok: false, summary: 'Il Musicista non è riuscito a scrivere un programma valido.' };
       }
       const id = soundId(r.nome, r.suono, soundPrograms(k.files), (x) => k.files[`models/${x}.xml`] !== undefined);
@@ -80,6 +82,7 @@ export class ScoreDirector {
       const card = { task: COMPOSE_TASK, autore: 'musicista', ...(chi ? { chi } : {}) };
       if (!k.addModel(id, xml, { classe: SOUND_CLASS, nome: r.nome, autore: r.model, suono: r.suono }, `musicista: ${r.nome}`, card)) {
         skip();
+        lacking('invalido', k.lastDiscard('musicista', COMPOSE_TASK));
         return { ok: false, summary: `Il programma «${r.nome}» non è passato dal validatore.` };
       }
       return { ok: true, summary: `Il Musicista ha scritto «${r.nome}» (${r.suono.uso === 'effetto' ? `effetto: ${r.suono.effetti?.join(', ')}` : `musica: ${r.suono.ambienti?.join(', ')}`}).` };
@@ -87,6 +90,7 @@ export class ScoreDirector {
       if (e instanceof BudgetError) this.stopped = true;
       k.council.say('musicista', 'errore', (e as Error).message, undefined, COMPOSE_TASK);
       skip();
+      lacking('errore', (e as Error).message);
       return { ok: false, summary: `Il Musicista non ha potuto scrivere: ${(e as Error).message}` };
     } finally {
       this.busy = false;

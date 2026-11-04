@@ -101,18 +101,25 @@ export class ModelDirector {
       this.nextAt = this.k.time + modelGap(coef.modelli);
       if (!r) {
         this.skip.add(req.id);
+        this.lacking(req, 'invalido', this.k.lastDiscard('scultore', 'model.sculpt'));
         return false;
       }
-      this.k.addModel(req.id, r.xml, { classe: req.classe, ...modelSize(req), nome: req.nome, autore: r.model, ...(r.voto !== undefined ? { voto: r.voto } : {}), ...(req.tinta ? { tinta: 'C' } : {}) }, `scultore: ${req.nome}`);
-      return true;
+      const added = this.k.addModel(req.id, r.xml, { classe: req.classe, ...modelSize(req), nome: req.nome, autore: r.model, ...(r.voto !== undefined ? { voto: r.voto } : {}), ...(req.tinta ? { tinta: 'C' } : {}) }, `scultore: ${req.nome}`);
+      if (!added) this.lacking(req, 'invalido', this.k.lastDiscard('scultore', 'model.sculpt'));
+      return added;
     } catch (e) {
       if (e instanceof BudgetError) this.stopped = true;
       this.k.council.say('scultore', 'errore', `«${req.nome}»: ${(e as Error).message}`, undefined, 'model.sculpt');
       this.skip.add(req.id);
+      this.lacking(req, 'errore', (e as Error).message);
       return false;
     } finally {
       this.busy = false;
     }
+  }
+
+  private lacking(req: SculptRequest, esito: 'invalido' | 'errore', motivo: string): void {
+    this.k.noteShortfall({ richiesta: `il modello di «${req.nome}»`, agente: 'scultore', compito: 'model.sculpt', esito, motivo });
   }
 
   /** A model of its own for an entity that showed a generic one, or a new version of its own. */

@@ -330,7 +330,12 @@ export class Council {
   }
 
   async ask<T>(agent: AgentId, task: string, prompt: string, schema: Schema, opts: CallOptions & { system?: string; role?: string } = {}): Promise<T> {
-    return parseJson<T>(await this.write(agent, task, prompt, { ...opts, schema }));
+    try {
+      return parseJson<T>(await this.write(agent, task, prompt, { ...opts, schema }));
+    } catch (e) {
+      if (e instanceof Error) (e as Error & { agent?: AgentId }).agent ??= agent;
+      throw e;
+    }
   }
 
   /**

@@ -34,6 +34,7 @@ import { onBeat, repairActor, repairCoefficients, stretch, type ActorConfig, typ
 import { BudgetError, type AiModels } from './ai/models';
 import { billedModel, costOf } from './ai/prices';
 import { USAGE_FILE, UsageLog, type CallRecord } from './ai/usage';
+import { SHORTFALLS_FILE, ShortfallLog, type ShortfallNote } from './shortfalls';
 import { addBudgetFromCap, costWithFee, DEFAULT_GRANT_CAP, MemoryLedger, splitCost, type Ledger, type PaymentRecord } from './credits';
 import { MemoryChunks, type ChunkStore } from './chunks';
 import { bodyFoot, bodyGround, Forms, holesOf, InlineRunner, instanceGrid, levelAt, rampBlocks, stepOf, toLocal, topUnder, type Form, type FormComp, type FormRunner, type Ground } from './forms';
@@ -47,7 +48,7 @@ import { layout, type Lot, type LayoutResult, articulationPoints } from './layou
 import { AGENTS, Council, readBible, wordsOf, type AgentId, type CatalogEntry, type FeedEntry } from './agents/council';
 import { designEnvironment, drawAtlas, planChunk, readStructure, type ChunkPlan, type WaterRecord, type Where } from './agents/cartography';
 import { WaterFlow, WET, type WaterChange } from './water';
-import { forge, judgeCombination, repairLogic, slug, type ForgeOrigin } from './agents/forge';
+import { forge, ForgeRejected, judgeCombination, repairLogic, slug, type ForgeOrigin } from './agents/forge';
 import { agentReply, examine, narrate, NARRATOR_PLAYS, npcDialogue, npcReply, npcSheet, liaisonReply, weavePlot, type Interpreter, type NpcReply, type Turn } from './agents/minds';
 import { planGenesis } from './agents/genesis';
 import { councilSession, inventRune, judgeAction, judgeCraft, judgeDeath, nameSpell } from './agents/effects';
@@ -367,6 +368,9 @@ export const HEAR = 8;
 export const GIVE_REACH = 3;
 export const SAY_MAX = 140;
 
+/** A plot that still does not hold after the Narrator's second answer. */
+class PlotRejected extends Error {}
+
 export class Kernel {
   readonly ecs = new World();
   readonly bus = new EventBus();
@@ -377,6 +381,10 @@ export class Kernel {
   /** What the models cost, per day, model and task (world/consumi.json). */
   readonly usage = new UsageLog();
   private usageWritten = -1;
+  /** What the Council could not do (T238): world/mancanze.json, written before every commit; it survives rollbacks. */
+  readonly shortfalls = new ShortfallLog();
+  /** A kernel on the master's branch keeps nothing of its own: what it could not do goes to the world's. */
+  private onShortfall?: (n: ShortfallNote) => void;
   /** The cards' uses and the places' cards (T36): world/carte.json, written before every commit. */
   readonly cards = new CardUses();
   private cardsWritten = -1;
@@ -617,6 +625,7 @@ export class Kernel {
     };
     // The usage ledger: every call is counted; the file is written before every commit (it survives rollbacks).
     k.usage.load(repo.working[USAGE_FILE]);
+    k.shortfalls.load(repo.working[SHORTFALLS_FILE]);
     k.ai.onCall = (r) => {
       k.usage.record(r);
       k.billCall(r);
@@ -634,6 +643,7 @@ export class Kernel {
       k.commanded.clear();
       if (k.mirror) return;
       k.writeUsage();
+      k.writeShortfalls();
       k.writeCards();
       k.writeGraph();
     };
@@ -1684,6 +1694,7 @@ export class Kernel {
         if (e instanceof BudgetError) break;
       }
     }
+    if (feedback) this.noteShortfall({ richiesta: 'il piano di un luogo', chi: ch.chi, agente: 'cartografo', compito: 'chunk.plan', esito: 'invalido', motivo: feedback });
     const plan = this.fallbackPlan(ch, layouts.map((l) => l.id), start);
     if (region) plan.place = { name: region.nome, description: region.descrizione };
     return plan;
@@ -1731,6 +1742,7 @@ export class Kernel {
    * needed), the validator test-runs it, and it is placed on the atlas in an unexplored direction.
    */
   async createEnvironment(request: string): Promise<{ ok: boolean; summary: string }> {
+    const chi = this.payerNow();
     const pc = this.wandererCarpet();
     const S = this.config.chunkSize;
     const here: [number, number] = [Math.floor(pc.x / S), Math.floor(pc.y / S)];
@@ -1741,6 +1753,7 @@ export class Kernel {
       try {
         d = await designEnvironment(this.council, request, { palette: this.palette, layouts, here: this.chunkHere()?.name ?? 'qui', stamps: STAMP_SHAPES, feedback });
       } catch (e) {
+        this.noteShortfall({ richiesta: request, chi, agente: 'cartografo', compito: 'cartographer.environment', esito: 'errore', motivo: (e as Error).message });
         return { ok: false, summary: `Il Cartografo non riesce: ${(e as Error).message}` };
       }
       // New terrains: one free character each, a known layer.
@@ -1793,6 +1806,7 @@ export class Kernel {
       this.council.say('cartografo', 'approva', `${summary} (commit ${c.id})`, undefined, 'cartographer.environment');
       return { ok: true, summary };
     }
+    this.noteShortfall({ richiesta: request, chi, agente: 'cartografo', compito: 'cartographer.environment', esito: 'invalido', motivo: feedback });
     return { ok: false, summary: `Il Cartografo non è riuscito a scrivere un ambiente valido: ${feedback}` };
   }
 
@@ -3524,16 +3538,24 @@ export class Kernel {
   async freeCraft(rawText: string): Promise<{ ok: boolean; story: string }> {
     const text = rawText.trim().slice(0, 120);
     if (!text) return { ok: false, story: '' };
+    // Who asks: `as` never spans an await.
+    const me = this.payerNow();
+    const lacking = (esito: 'rifiuto' | 'errore', motivo: string) => this.noteShortfall({ richiesta: `fabbricare «${text}»`, chi: me, agente: 'narratore', compito: 'craft.free', esito, motivo });
     const key = `craft|${normName(text)}`;
     const ruled = this.rules().find((r) => r.chiave === key && !r.possibile);
-    if (ruled) return { ok: false, story: ruled.racconto };
+    if (ruled) {
+      lacking('rifiuto', ruled.racconto);
+      return { ok: false, story: ruled.racconto };
+    }
     let j;
     try {
       j = await judgeCraft(this.council, text, this.carriedNames(), [...this.content.items.values()].map((d) => d.name), this.focusOn([]));
     } catch (e) {
+      lacking('errore', (e as Error).message);
       return { ok: false, story: `(il Concilio tace: ${(e as Error).message})` };
     }
     const refuse = (why: string) => {
+      lacking('rifiuto', why);
       this.council.say('narratore', 'obietta', `fabbricare «${text}»: ${why}`, undefined, 'craft.free');
       this.recordRule({ chiave: key, testo: `fabbricare «${text}»`, possibile: false, racconto: why }, true, { task: 'craft.free', autore: 'narratore' });
       return { ok: false, story: why };
@@ -3553,7 +3575,7 @@ export class Kernel {
       if (!id) return { ok: false, story: `${j.story} Ma non hai «${t}».` };
       if (!inputs.some((i) => i.item === id)) tools.push(id);
     }
-    const result = this.content.byName(j.result!) ?? (await this.introduceItems([j.result!], `fabbricato dal viandante: ${j.description ?? text}`))[0];
+    const result = this.content.byName(j.result!) ?? (await this.introduceItems([j.result!], `fabbricato dal viandante: ${j.description ?? text}`, me))[0];
     if (!result) return { ok: false, story: `${j.story} (ma il Concilio non riesce a dire cosa ne esca)` };
     let id = `ricetta.${slug(result.name)}`;
     while (this.content.recipes.some((r) => r.id === id)) id += '-2';
@@ -3576,16 +3598,18 @@ export class Kernel {
     const ia = this.itemInfo(sa.item);
     const ib = this.itemInfo(sb.item);
     const known = [...this.content.items.values()];
+    const me = this.payerNow();
     let verdict;
     try {
       verdict = await judgeCombination(this.council, ia, ib, known.map((d) => d.name).slice(-150), this.focusOn([ia.name, ib.name]));
     } catch (e) {
+      this.noteShortfall({ richiesta: `combinare «${ia.name}» e «${ib.name}»`, chi: me, agente: 'narratore', compito: 'craft.judge', esito: 'errore', motivo: (e as Error).message });
       return `Il Concilio non risponde: ${(e as Error).message}`;
     }
     if (!verdict.possible || !verdict.result) return verdict.reason;
     let result = this.content.byName(verdict.result)?.id;
     if (!result) {
-      const defs = await this.introduceItems([verdict.result], `ottenuto combinando ${ia.name} e ${ib.name}: ${verdict.description ?? ''}`);
+      const defs = await this.introduceItems([verdict.result], `ottenuto combinando ${ia.name} e ${ib.name}: ${verdict.description ?? ''}`, me);
       result = defs[0]?.id;
       if (!result) return 'Il Concilio non riesce a dare forma al risultato.';
     }
@@ -4059,6 +4083,7 @@ export class Kernel {
     // Who asks: after the await what happens is theirs (`as` never spans an await).
     const me = this.wanderer().id;
     const say = (t: string) => this.bus.emit('ui:dialog', { speaker: sub.name, text: t });
+    const lacking = (esito: 'rifiuto' | 'invalido' | 'errore', motivo: string, agente: AgentId = 'narratore', compito = 'action.judge') => this.noteShortfall({ richiesta: `«${text}» su ${sub.name}`, chi: me, agente, compito, esito, motivo });
     // What its model already knows how to do (an action of the program) happens without asking.
     const own = sub.entity !== undefined && !sub.wanderer ? this.modelActions(sub.entity).find((a) => normName(a.label) === normName(text) || normName(a.name) === normName(text)) : undefined;
     if (own && this.doModelAction(sub.entity!, own.name)) {
@@ -4078,6 +4103,7 @@ export class Kernel {
     const ruleKey = `${sub.key}|${normName(text)}`;
     const ruled = this.rules().find((r) => r.chiave === ruleKey && !r.possibile);
     if (ruled) {
+      lacking('rifiuto', ruled.racconto);
       say(ruled.racconto);
       return ruled.racconto;
     }
@@ -4105,6 +4131,7 @@ export class Kernel {
       }, this.focusOn([sub.name, sub.learnModule && `tipo:${nodeSlug(sub.learnModule.manifest.id)}`, sub.learnItem && `oggetto:${nodeSlug(sub.learnItem)}`], p));
     } catch (e) {
       const msg = `(il Concilio tace: ${(e as Error).message})`;
+      lacking('errore', (e as Error).message);
       say(msg);
       return msg;
     }
@@ -4122,12 +4149,15 @@ export class Kernel {
     };
     let v = validateEffects(j.possible ? j.effects : [], ectx);
     if (v.unknownItems.length) {
-      await this.introduceItems(v.unknownItems, `nati dall'azione «${text}» su ${sub.name}`);
+      await this.introduceItems(v.unknownItems, `nati dall'azione «${text}» su ${sub.name}`, me);
       v = validateEffects(j.possible ? j.effects : [], ectx);
     }
     v.effects = v.effects.filter((e) => !(e.tipo === 'consuma' && e.oggetto === sub.key));
     // What changes the entity's look becomes a rule of its model (ADR-0044): the entity stays, changed.
     const shaped = j.possible && j.shape && sub.entity !== undefined ? await this.learnShape(sub.entity, j.label || text, text, j.shape) : undefined;
+    if (j.possible && j.shape && sub.entity !== undefined && !shaped) lacking('invalido', this.lastDiscard('scultore', 'model.action'), 'scultore', 'model.action');
+    if (!j.possible) lacking('rifiuto', j.story);
+    else if (v.dropped.length) lacking('invalido', v.dropped.join('; '));
     if (shaped) v.effects = v.effects.filter((e) => e.tipo !== 'distruggi');
     if (v.dropped.length) this.council.say('kernel', 'scarta', `azione «${text}»: ${v.dropped.join('; ')}`, 'narratore', 'action.judge');
     this.council.say('narratore', j.possible ? 'approva' : 'obietta', `«${text}» su ${sub.name}: ${j.story}${v.effects.length ? ` [${v.effects.map((e) => e.tipo).join(', ')}]` : ''}`, undefined, 'action.judge');
@@ -4726,6 +4756,7 @@ export class Kernel {
     try {
       r = await agentReply(this.council, agent, history, text);
     } catch (e) {
+      this.noteShortfall({ richiesta: text, chi, agente: agent, compito: 'agent.chat', esito: 'errore', motivo: (e as Error).message });
       return { say: `(${AGENTS[agent].name} non risponde: ${(e as Error).message})` };
     }
     history.push({ who: 'giocatore', text }, { who: 'npc', text: r.say });
@@ -4745,15 +4776,20 @@ export class Kernel {
    * Cartographer, the Artist, the rules, the Narrator's packs. The Council says yes to almost anything.
    */
   private async askLiaison(text: string, history: Turn[], chi: string, here: string | undefined): Promise<{ say: string; forged?: string; runes?: string[]; credits?: { target: string; amount: number } }> {
+    const lacking = (esito: 'rifiuto' | 'invalido' | 'errore', motivo: string, agente: AgentId = 'referente') => this.noteShortfall({ richiesta: text, chi, agente, compito: 'referente.coordinate', esito, motivo });
     let r;
     try {
       r = await liaisonReply(this.council, history, text);
     } catch (e) {
+      lacking('errore', (e as Error).message);
       return { say: `(il Referente non risponde: ${(e as Error).message})` };
     }
     history.push({ who: 'giocatore', text }, { who: 'npc', text: r.say });
     this.archive.go('referente', undefined, r.say);
-    if (r.refusal) return { say: r.say, forged: `Il Concilio rifiuta: ${r.refusal}` };
+    if (r.refusal) {
+      lacking('rifiuto', r.refusal);
+      return { say: r.say, forged: `Il Concilio rifiuta: ${r.refusal}` };
+    }
     const req = r.request ?? text;
     this.council.say('referente', 'info', `il viandante chiede: «${text}» → ${r.task}`, r.task === 'ambiente' ? 'cartografo' : r.task === 'riscolpisci' ? 'artista' : r.task === 'musica' ? 'musicista' : r.task === 'regola' ? 'arbitro' : r.task === 'nessuno' ? undefined : 'narratore', 'referente.coordinate');
     switch (r.task) {
@@ -4766,7 +4802,7 @@ export class Kernel {
       case 'ambiente':
         return { say: r.say, forged: (await this.createEnvironment(req)).summary };
       case 'oggetti':
-        return { say: r.say, forged: (await this.growContent(`richiesta del viandante: ${req}`, 12, true)) ? 'Il Narratore ha scritto un pacchetto di oggetti nuovi.' : 'Il pacchetto non è venuto.' };
+        return { say: r.say, forged: (await this.growContent(`richiesta del viandante: ${req}`, 12, true, chi)) ? 'Il Narratore ha scritto un pacchetto di oggetti nuovi.' : 'Il pacchetto non è venuto.' };
       case 'meccanica':
         return { say: r.say, forged: (await this.forgeMechanic(req)).summary };
       case 'regola': {
@@ -4777,7 +4813,10 @@ export class Kernel {
         // The master's runes (T42f): in a multiplayer game the Council gives them, alone they are found in the world.
         if (!this.manyPlayers() || !this.isMaster()) return { say: r.say, forged: 'Le rune non si chiedono: si trovano nel mondo.' };
         const runes = askedRunes(r.runes);
-        if (!runes.length) return { say: r.say, forged: 'Il Referente non capisce quali rune vuoi.' };
+        if (!runes.length) {
+          lacking('invalido', 'non si capisce quali rune');
+          return { say: r.say, forged: 'Il Referente non capisce quali rune vuoi.' };
+        }
         // A mirror (the kernel of the master's branch) gives nothing: the server gives them in the world.
         if (!this.mirror) this.grantRunes(runes);
         return { say: r.say, forged: `Il Concilio ti dà ${runes.length === 1 ? 'la runa' : 'le rune'} ${runes.map((t) => `«${t}»`).join(' ')}.`, runes };
@@ -4786,8 +4825,13 @@ export class Kernel {
         return { say: r.say, forged: (await this.composing.make({ richiesta: req }, chi, here)).summary };
       case 'riscolpisci': {
         const target = this.findExhibit(r.target ?? req);
-        if (!target) return { say: r.say, forged: `Lo Scultore non trova «${r.target ?? req}».` };
-        return { say: r.say, forged: this.requestResculpt(target.target, req) ? `Lo Scultore riscolpirà «${target.label}».` : 'Lo Scultore non può riscolpirlo.' };
+        if (!target) {
+          lacking('invalido', `non trova «${r.target ?? req}»`, 'scultore');
+          return { say: r.say, forged: `Lo Scultore non trova «${r.target ?? req}».` };
+        }
+        if (this.requestResculpt(target.target, req)) return { say: r.say, forged: `Lo Scultore riscolpirà «${target.label}».` };
+        lacking('invalido', `non può riscolpire «${target.label}»`, 'scultore');
+        return { say: r.say, forged: 'Lo Scultore non può riscolpirlo.' };
       }
     }
     return { say: r.say };
@@ -5295,6 +5339,7 @@ export class Kernel {
    * system module with a panel and Lua logic; validated (panel cleaned, code compiled, dry-loaded).
    */
   async forgeMechanic(request: string, chi?: string): Promise<{ ok: boolean; id?: string; summary: string }> {
+    const asker = chi ?? this.payerNow();
     const items = [...this.content.items.values()].filter((d) => d.equippable || d.slot || ['arma', 'vestiario'].includes(d.category)).map((d) => `${d.name}${d.slot ? ` [${d.slot}]` : ` (${d.category})`}${d.bonus ? ` ${JSON.stringify(d.bonus)}` : ''}`);
     const mechanics = this.uiPanels().map((p) => p.panel.titolo);
     let feedback = '';
@@ -5303,6 +5348,7 @@ export class Kernel {
       try {
         d = await designMechanic(this.council, request, { items, mechanics, feedback, chi });
       } catch (e) {
+        this.noteShortfall({ richiesta: request, chi: asker, agente: 'ingegnere', compito: 'mechanic.design', esito: 'errore', motivo: (e as Error).message });
         return { ok: false, summary: `L'Ingegnere non riesce: ${(e as Error).message}` };
       }
       let id = `mech.${slug(d.name)}`;
@@ -5342,6 +5388,7 @@ export class Kernel {
       this.council.say('ingegnere', 'approva', `nuova meccanica «${d.name}»: ${d.description} (pannello «${panel!.titolo}», commit ${c.id})`, undefined, 'mechanic.design');
       return { ok: true, id, summary: `Nuova meccanica: ${d.name} — ${d.description} (la trovi nell'inventario, scheda «${panel!.titolo}»).` };
     }
+    this.noteShortfall({ richiesta: request, chi: asker, agente: 'ingegnere', compito: 'mechanic.design', esito: 'invalido', motivo: feedback });
     return { ok: false, summary: `L'Ingegnere non è riuscito a scrivere una meccanica valida: ${feedback}` };
   }
 
@@ -5808,6 +5855,7 @@ export class Kernel {
           draft = await inventRune(this.council, known, reason, errors, this.focusOn(known.map((r) => `runa:${nodeSlug(r.token)}`)));
         } catch (e) {
           this.council.say('narratore', 'errore', `runa nuova: ${(e as Error).message}`, undefined, 'rune.invent');
+          this.noteShortfall({ richiesta: `una runa nuova: ${reason}`, chi, agente: 'narratore', compito: 'rune.invent', esito: 'errore', motivo: (e as Error).message });
           return undefined;
         }
         const v = validateNewRune(draft, this.content.runes, wordsOf(this.files));
@@ -5836,6 +5884,7 @@ export class Kernel {
         this.council.say('narratore', 'propone', `runa nuova ${r.rune.glyph} ${r.rune.name} («${r.token}», ${r.rune.element}): ${r.rune.description} (commit ${c.id})`, undefined, 'rune.invent');
         return r.token;
       }
+      this.noteShortfall({ richiesta: `una runa nuova: ${reason}`, chi, agente: 'narratore', compito: 'rune.invent', esito: 'invalido', motivo: errors.join('; ') });
       return undefined;
     } finally {
       this.inventingRune = false;
@@ -6357,12 +6406,13 @@ export class Kernel {
         const why = `la trama «${a.titolo}» non torna: ${a.problems.join('; ')}.`;
         this.council.say('kernel', 'scarta', why, 'narratore', 'plot.weave');
         a = await attempt(why);
-        if (!a.plot) throw new Error(`ancora incoerente: ${a.problems.join('; ')}`);
+        if (!a.plot) throw new PlotRejected(`ancora incoerente: ${a.problems.join('; ')}`);
         if (a.problems.length) this.council.say('arbitro', 'corregge', `trama «${a.titolo}»: ${a.problems.join('; ')}`, 'narratore', 'plot.weave');
       }
       plot = a.plot;
     } catch (e) {
       this.council.say('narratore', 'errore', `trama: ${(e as Error).message}`, undefined, 'plot.weave');
+      this.noteShortfall({ richiesta: 'una trama nuova', agente: 'narratore', compito: 'plot.weave', esito: e instanceof PlotRejected ? 'invalido' : 'errore', motivo: (e as Error).message });
       return undefined;
     }
     if (!plot || plot.tappe.length < 2) return undefined;
@@ -6706,7 +6756,7 @@ export class Kernel {
   }
 
   /** New items, defined by the Narrator, written into the "citati" pack, committed. */
-  async introduceItems(names: string[], context: string): Promise<ItemDef[]> {
+  async introduceItems(names: string[], context: string, chi?: string): Promise<ItemDef[]> {
     const fresh = [...new Set(names.map((n) => n.trim()).filter((n) => n.length >= 2 && !this.content.byName(n)))].slice(0, 6);
     if (!fresh.length) return names.map((n) => this.content.byName(n)).filter((d): d is ItemDef => !!d);
     let raw;
@@ -6714,11 +6764,15 @@ export class Kernel {
       raw = await defineItems(this.council, fresh, context);
     } catch (e) {
       this.council.say('narratore', 'errore', (e as Error).message);
+      this.noteShortfall({ richiesta: `definire ${fresh.join(', ')}: ${context}`, chi, agente: 'narratore', compito: 'content.define', esito: 'errore', motivo: (e as Error).message });
       return [];
     }
     const taken = new Set(this.content.items.keys());
     const defs = raw.map((r) => toItemDef(r, taken)).filter((d): d is ItemDef => !!d);
-    if (!defs.length) return [];
+    if (!defs.length) {
+      this.noteShortfall({ richiesta: `definire ${fresh.join(', ')}: ${context}`, chi, agente: 'narratore', compito: 'content.define', esito: 'invalido', motivo: 'nessuna definizione valida' });
+      return [];
+    }
     this.writePack('modules/items.citati/manifest.json', { id: 'items.citati', name: 'Oggetti di cui si è parlato', description: 'Oggetti entrati nel mondo perché qualcuno ne ha parlato.' }, { items: defs, recipes: [], loot: {} });
     this.applyFiles({ ...this.repo.working });
     this.commitContent(`contenuti: ${defs.map((d) => d.name).join(', ')}`, 'items.citati', 'narratore');
@@ -6734,7 +6788,7 @@ export class Kernel {
   }
 
   /** The world grows as it is explored: a new pack of items, recipes and loot (text only, cheap). */
-  async growContent(reason: string, count = 16, force = false): Promise<boolean> {
+  async growContent(reason: string, count = 16, force = false, chi?: string): Promise<boolean> {
     if (this.growing || (!force && (this.packsUsed >= (this.config.ai.maxPacks ?? 4) || this.ai.name === 'offline'))) return false;
     this.growing = true;
     this.packsUsed++;
@@ -6746,6 +6800,7 @@ export class Kernel {
       const errors = this.validator.validateItems(pack.items);
       if (errors.length || !pack.items.length) {
         this.council.say('kernel', 'scarta', `pacchetto: ${errors.join('; ') || 'vuoto'}`, 'narratore');
+        this.noteShortfall({ richiesta: `un pacchetto di oggetti: ${reason}`, chi, agente: 'narratore', compito: 'content.items', esito: 'invalido', motivo: errors.join('; ') || 'vuoto' });
         return false;
       }
       let n = 1;
@@ -6757,6 +6812,7 @@ export class Kernel {
       return true;
     } catch (e) {
       this.council.say('narratore', 'errore', `pacchetto: ${(e as Error).message}`);
+      this.noteShortfall({ richiesta: `un pacchetto di oggetti: ${reason}`, chi, agente: 'narratore', compito: 'content.items', esito: 'errore', motivo: (e as Error).message });
       return false;
     } finally {
       this.growing = false;
@@ -6839,6 +6895,7 @@ export class Kernel {
     // The Genesis is the world's; what the wanderer who transcended asks is theirs, and they wrote it (T36).
     if (origin === 'genesi') chi = COMUNE;
     const autore = permissive ? this.wanderer().id : 'narratore';
+    const asker = chi ?? (permissive ? this.payerNow() : COMUNE);
     const ids = [...this.modules.keys()];
     try {
       const r = await forge(
@@ -6866,6 +6923,7 @@ export class Kernel {
     } catch (e) {
       const msg = (e as Error).message;
       this.council.say('kernel', 'errore', `Fucina: ${msg}`);
+      this.noteShortfall({ richiesta: prompt, chi: asker, agente: (e as { agent?: string }).agent ?? 'kernel', compito: 'forge.concept', esito: e instanceof ForgeRejected ? 'invalido' : 'errore', motivo: msg });
       return { ok: false, summary: `Il Concilio non è riuscito a creare un modulo valido: ${msg}` };
     }
   }
@@ -6885,6 +6943,7 @@ export class Kernel {
     if (this.repo.lastAuthorOf(entry.logicPath) !== 'agent') return false;
     this.repaired.add(m[1]);
     this.council.say('kernel', 'obietta', `${m[1]}.${m[2]} fallisce durante il gioco: ${message}`, 'ingegnere', 'forge.fix');
+    const unrepaired = (motivo: string) => this.noteShortfall({ richiesta: `riparare ${m[1]}.${m[2]}: ${message}`, agente: 'ingegnere', compito: 'forge.fix', esito: 'guasto', motivo });
     let feedback = '';
     for (let round = 0; round < 2; round++) {
       try {
@@ -6903,9 +6962,11 @@ export class Kernel {
         return true;
       } catch (e) {
         this.council.say('ingegnere', 'errore', (e as Error).message);
+        unrepaired((e as Error).message);
         return false;
       }
     }
+    unrepaired(feedback);
     return false;
   }
 
@@ -7081,6 +7142,7 @@ export class Kernel {
       return true;
     } catch (e) {
       this.council.say('kernel', 'errore', `Genesi fallita: ${(e as Error).message}`);
+      this.noteShortfall({ richiesta: 'la Genesi', agente: (e as { agent?: string }).agent ?? 'kernel', compito: 'genesis', esito: 'errore', motivo: (e as Error).message });
       this.game = keptGame;
       this.repo.restore();
       this.applyFiles({ ...this.repo.working });
@@ -7117,7 +7179,8 @@ export class Kernel {
     };
     // Each wanderer in their own file (T34); the world's state no longer carries one.
     const players = Object.fromEntries([...this.wanderersById.values()].map((w) => [playerFile(w.id), this.as(w.id, () => this.wandererState(w))]));
-    const json = JSON.stringify([state, players]);
+    // A request that ended badly commits nothing of its own: the save carries it (`beforeCommit`), even if nothing else moved.
+    const json = JSON.stringify([state, players, this.shortfalls.version]);
     if (json === this.lastState) return false;
     this.lastState = json;
     const written: FileMap = {};
@@ -7210,6 +7273,34 @@ export class Kernel {
     this.usageWritten = this.usage.version;
     this.repo.write(USAGE_FILE, this.usage.toJson());
     this.files = { ...this.files, [USAGE_FILE]: this.repo.working[USAGE_FILE]! };
+  }
+
+  /**
+   * What the Council could not do goes in the working files when they do not say it already: by the text, because a rollback brings
+   * the file back to what it was and the log, as the usage, stays as it is.
+   */
+  private writeShortfalls(): void {
+    if (!this.repo || !this.shortfalls.list().length) return;
+    const json = this.shortfalls.toJson();
+    if (this.repo.working[SHORTFALLS_FILE] === json) return;
+    this.repo.write(SHORTFALLS_FILE, json);
+    this.files = { ...this.files, [SHORTFALLS_FILE]: json };
+  }
+
+  /**
+   * One request of a wanderer or of the world that the Council could not satisfy (T238): nothing shows it, in the world or on a
+   * client. `chi` is who asked: `as` never spans an await, so what comes after one passes it; without one, the world asked.
+   */
+  noteShortfall(n: Omit<ShortfallNote, 'chi'> & { chi?: string }): void {
+    if (this.bench) return;
+    const note = { ...n, chi: n.chi || COMUNE };
+    if (this.mirror) this.onShortfall?.(note);
+    else this.shortfalls.note(note);
+  }
+
+  /** The last thing the kernel threw out of an agent's task: an agent's own attempts end without saying why. */
+  lastDiscard(agent: AgentId, task: string): string {
+    return [...this.council.feed].reverse().find((e) => e.from === 'kernel' && e.kind === 'scarta' && e.to === agent && e.task === task)?.text ?? 'nessun tentativo valido';
   }
 
   /** Puts the cards' ledger in the working files when it changed (T36). */
@@ -7468,6 +7559,7 @@ export class Kernel {
     if (body !== undefined) k.wandererEntity = body;
     k.council.payer = (task) => payerOf(task, wanderer);
     k.council.hasCredits = (chi) => this.hasCredits(chi);
+    k.onShortfall = (n) => this.noteShortfall(n);
     return k;
   }
 
