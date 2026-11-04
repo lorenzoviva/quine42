@@ -13,9 +13,9 @@ import type { MeshData } from '../mj/mesh';
  * Version of the persistent cache: raising it throws away everything saved before. 2 (T163): the entries of version 1 may be
  * half models, and nothing in them says so. 3 (T164): the keys changed, the old ones would only take room. 4 (T175): every entry says when it
  * was last used and how much it weighs, and those saved before do not. 5 (T212): grids and meshes in two stores; moving 1.8 GB across while the page
- * waits would cost more than making them again, once.
+ * waits would cost more than making them again, once. 6 (T89b): the meshes carry their parts, and without them a model has no ink inside.
  */
-export const FORMS_DB_VERSION = 5;
+export const FORMS_DB_VERSION = 6;
 
 /**
  * The most the page keeps ready beyond what it has drawn, and the most the persistent cache keeps, in bytes of arrays (ADR-0108, measures there).
@@ -39,7 +39,7 @@ export function keepsFormsOnDisk(place: { hostname: string; port: string; search
 }
 
 /** The bytes of the arrays of a mesh. */
-const meshBytes = (m: MeshData): number => [m.positions, m.normals, m.colors, m.indices, m.sway, m.glow, m.alpha].reduce((n, a) => n + (a?.byteLength ?? 0), 0);
+const meshBytes = (m: MeshData): number => [m.positions, m.normals, m.colors, m.indices, m.sway, m.glow, m.alpha, m.part].reduce((n, a) => n + (a?.byteLength ?? 0), 0);
 
 /** About how much a form takes: its arrays. Everything else in it is small, and the key is the program's text, already in memory. */
 export function formBytes(res: FormResult): number {
@@ -70,6 +70,7 @@ function restoreMesh(m: MeshData): MeshData {
   if (m.normals && !(m.normals instanceof Float32Array)) m.normals = new Float32Array(m.normals);
   if (m.colors && !(m.colors instanceof Float32Array)) m.colors = new Float32Array(m.colors);
   if (m.indices && !(m.indices instanceof Uint32Array)) m.indices = new Uint32Array(m.indices);
+  if (m.part && !(m.part instanceof Uint8Array)) m.part = new Uint8Array(m.part);
   if (m.sway && !(m.sway instanceof Float32Array)) m.sway = new Float32Array(m.sway);
   if (m.glow && !(m.glow instanceof Float32Array)) m.glow = new Float32Array(m.glow);
   if (m.alpha && !(m.alpha instanceof Float32Array)) m.alpha = new Float32Array(m.alpha);

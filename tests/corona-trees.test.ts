@@ -9,7 +9,7 @@ import { meshVoxels } from '../src/mj/mesh';
 import { compileMjx } from '../src/mj/model';
 import { runMjx } from '../src/mj/run';
 import { buildCoronaRing } from '../src/render/corona3d';
-import { MAT, normalsOf } from '../src/render/materials';
+import { idsOf, MAT } from '../src/render/materials';
 import { geometry, modelMaterials } from '../src/render/models';
 
 const voxels = (sway: boolean) => meshVoxels({ X: 1, Y: 1, Z: 2, cells: new Uint8Array([1, 1]), alphabet: ['.', 'M'] }, { M: { color: '#14141a' } }, { vpt: 8, sway });
@@ -78,9 +78,7 @@ describe('the light trees of the corona', () => {
   it('their glass, if they have any, is the corona\'s, and the ink bends with them without the clip', () => {
     const glassy = geometry(meshVoxels({ X: 2, Y: 1, Z: 1, cells: new Uint8Array([1, 2]), alphabet: ['.', 'M', 'v'] }, { M: { color: '#14141a' }, v: { color: '#29adff', alpha: 0.38 } }, { vpt: 8, sway: true }));
     expect(modelMaterials(glassy, MAT.coronaSway)).toEqual([MAT.coronaSway, MAT.coronaGlass]);
-    const ink = normalsOf(MAT.coronaSway)!;
-    expect(ink.userData.clipped).toBeFalsy();
-    const { vertexShader, fragmentShader } = compiled(ink);
+    const { vertexShader, fragmentShader } = idsOf(MAT.coronaSway) as THREE.ShaderMaterial;
     expect(vertexShader).toContain('sway * uWind');
     expect(fragmentShader).not.toContain('discard');
   });

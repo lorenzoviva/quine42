@@ -4,7 +4,7 @@
 // their colour; while the renderer blooms they also mark themselves in the frame's alpha, which the bloom reads.
 
 import * as THREE from 'three';
-import { addShade, CARTOON, toon } from './cartoon';
+import { addShade, CARTOON, thingOf, toon } from './cartoon';
 
 /** Shared uniforms: time (wind, flicker), wind strength, the radius beyond which the simulation is cut. */
 export const U = {
@@ -76,33 +76,36 @@ const fillers = new WeakSet<THREE.BufferAttribute>();
  * frame uploads it and sees a new attribute; the one frame in between reads the constant, like a geometry never drawn.
  */
 function noGlow(m: THREE.Material): void {
-  m.onBeforeRender = (_r, _s, _c, geometry) => {
-    if (!lacksFillers(geometry) || filling.has(geometry)) return;
-    filling.add(geometry);
-    queueMicrotask(() => {
-      filling.delete(geometry);
-      addFillers(geometry);
-    });
-  };
+  m.onBeforeRender = (_r, _s, _c, geometry) => fillLater(geometry, FILLERS, filling);
 }
+
+function fillLater(geometry: THREE.BufferGeometry, list: Fillers, waiting: WeakSet<THREE.BufferGeometry>): void {
+  if (!list.some(([name]) => staleFiller(geometry, name)) || waiting.has(geometry)) return;
+  waiting.add(geometry);
+  queueMicrotask(() => {
+    waiting.delete(geometry);
+    addFillers(geometry, list);
+  });
+}
+
+type Fillers = ReadonlyArray<readonly [string, number]>;
 
 /** The geometries waiting for their attributes, until the frame that found them lacking ends. */
 const filling = new WeakSet<THREE.BufferGeometry>();
+const fillingPart = new WeakSet<THREE.BufferGeometry>();
 
-const FILLERS = [['glow', 0], ['alpha', 1]] as const;
+const FILLERS: Fillers = [['glow', 0], ['alpha', 1]];
+/** Only the ink reads it: the classic look does not pay for it. */
+const PART_FILLER: Fillers = [['part', 0]];
 
 function staleFiller(geometry: THREE.BufferGeometry, name: string): boolean {
   const a = geometry.getAttribute(name) as THREE.BufferAttribute | undefined;
   return !a || (fillers.has(a) && a.count !== (geometry.attributes.position?.count ?? 0));
 }
 
-function lacksFillers(geometry: THREE.BufferGeometry): boolean {
-  return FILLERS.some(([name]) => staleFiller(geometry, name));
-}
-
-function addFillers(geometry: THREE.BufferGeometry): void {
+function addFillers(geometry: THREE.BufferGeometry, list: Fillers): void {
   const n = geometry.attributes.position?.count ?? 0;
-  for (const [name, value] of FILLERS) {
+  for (const [name, value] of list) {
     if (!staleFiller(geometry, name)) continue;
     const filler = new THREE.BufferAttribute(new Float32Array(n).fill(value), 1);
     fillers.add(filler);
@@ -128,6 +131,16 @@ const WIND_VERTEX = `#include <begin_vertex>
     transformed.x += sway * uWind * (sin(ph) + 0.35 * sin(ph * 2.3 + 1.0));
     transformed.z += sway * uWind * 0.45 * cos(ph * 0.8);`;
 
+/** Where a vertex really stands, for the circle clip: instances (terrain models) are cut where they stand, not at the mesh origin. */
+const CLIP_VERTEX = `vec4 clipP = vec4(transformed, 1.0);
+  #ifdef USE_BATCHING
+  clipP = batchingMatrix * clipP;
+  #endif
+  #ifdef USE_INSTANCING
+  clipP = instanceMatrix * clipP;
+  #endif
+  vClipXZ = (modelMatrix * clipP).xz;`;
+
 /** The wind without the circle clip, for what stands beyond the circle (T218): the corona's trees. */
 export function windy<M extends THREE.Material>(m: M, key: string): M {
   m.onBeforeCompile = (sh) => {
@@ -150,19 +163,7 @@ export function clipped<M extends THREE.Material>(m: M, key: string, sway = fals
     sh.uniforms.uClipR = U.clipR;
     sh.vertexShader = `${sway ? 'attribute float sway;\n' : ''}uniform float uTime;\nuniform float uWind;\nvarying vec2 vClipXZ;\n${sh.vertexShader}`
       .replace('#include <begin_vertex>', sway ? WIND_VERTEX : '#include <begin_vertex>')
-      // The clip follows project_vertex: instances (terrain models) are cut where they stand, not at the mesh origin.
-      .replace(
-        '#include <project_vertex>',
-        `#include <project_vertex>
-  vec4 clipP = vec4(transformed, 1.0);
-  #ifdef USE_BATCHING
-  clipP = batchingMatrix * clipP;
-  #endif
-  #ifdef USE_INSTANCING
-  clipP = instanceMatrix * clipP;
-  #endif
-  vClipXZ = (modelMatrix * clipP).xz;`,
-      );
+      .replace('#include <project_vertex>', `#include <project_vertex>\n  ${CLIP_VERTEX}`);
     sh.fragmentShader = `uniform float uClipR;\nvarying vec2 vClipXZ;\n${sh.fragmentShader}`.replace('void main() {', 'void main() {\n  if (length(vClipXZ) > uClipR) discard;');
     addGlow(sh);
   };
@@ -174,26 +175,65 @@ export function clipped<M extends THREE.Material>(m: M, key: string, sway = fals
   return m;
 }
 
-/** The normals of the cartoon's ink (ADR-0093), one per material drawn: clipped like it, cut like it. */
-const normalsCache = new WeakMap<THREE.Material, THREE.Material>();
-const PLAIN_NORMALS = new THREE.MeshNormalMaterial();
+/** What stands in for each material when the cartoon's ink draws its ids (ADR-0093). */
+const idsCache = new WeakMap<THREE.Material, THREE.Material>();
 
 /**
- * The normal material that stands in for `m` when the ink draws the frame's normals and depth (T98): with the circle
- * clip if `m` has it (the simulation beyond the circle stays hidden once the corona shows), the same clipping planes
- * (the cut above the head), sway and faces. Undefined for what writes neither colour nor depth (nothing to outline).
+ * The material that writes the ids of what `m` draws: red the thing, green the instance, blue the part (the frame's ink reads them
+ * without filtering), clipped as `m` is (the simulation beyond the circle stays hidden once the corona shows, the cut above the head stays) and moved by
+ * the same wind. Undefined for what gets no ink and hides nothing: what does not draw, the halo-like (`noInk`: neon, the floor's faint lines), and
+ * whatever is seen through and is not voxels (a label on its quad, a soft shadow on its disc: the quad's edge is not an edge).
  */
-export function normalsOf(m: THREE.Material): THREE.Material | undefined {
-  if (!m.visible || (!m.colorWrite && !m.depthWrite)) return undefined;
-  if (!m.userData?.clipped && !m.userData?.sway && !m.clippingPlanes?.length && m.side === THREE.FrontSide) return PLAIN_NORMALS;
-  let n = normalsCache.get(m);
-  if (!n) {
-    n = new THREE.MeshNormalMaterial({ side: m.side, clippingPlanes: m.clippingPlanes ?? null });
-    if (m.userData?.clipped) clipped(n, `normal-${m.userData.clipKey}`, !!m.userData.sway);
-    else if (m.userData?.sway) windy(n, `normal-${m.customProgramCacheKey()}`);
-    normalsCache.set(m, n);
+export function idsOf(m: THREE.Material): THREE.Material | undefined {
+  if (!m.visible || !m.colorWrite || !m.depthTest || m.userData?.noInk) return undefined;
+  if (m.transparent && !m.vertexColors) return undefined;
+  let ids = idsCache.get(m);
+  if (!ids) {
+    const clip = !!m.userData?.clipped;
+    const sway = !!m.userData?.sway;
+    const material = new THREE.ShaderMaterial({
+      uniforms: { uThing: { value: 0 }, uTime: U.time, uWind: U.wind, uClipR: U.clipR },
+      side: m.side,
+      clipping: true,
+      clippingPlanes: m.clippingPlanes ?? null,
+      vertexShader: `attribute float part;
+${sway ? 'attribute float sway;' : ''}
+uniform float uTime;
+uniform float uWind;
+${clip ? 'varying vec2 vClipXZ;' : ''}
+varying vec2 vIds;
+#include <clipping_planes_pars_vertex>
+void main() {
+  #ifdef USE_INSTANCING
+  vIds = vec2(mod(float(gl_InstanceID), 256.0) / 255.0, part / 255.0);
+  #else
+  vIds = vec2(0.0, part / 255.0);
+  #endif
+  ${sway ? WIND_VERTEX : '#include <begin_vertex>'}
+  #include <project_vertex>
+  ${clip ? CLIP_VERTEX : ''}
+  #include <clipping_planes_vertex>
+}`,
+      fragmentShader: `uniform float uThing;
+uniform float uClipR;
+${clip ? 'varying vec2 vClipXZ;' : ''}
+varying vec2 vIds;
+#include <clipping_planes_pars_fragment>
+void main() {
+  ${clip ? 'if (length(vClipXZ) > uClipR) discard;' : ''}
+  #include <clipping_planes_fragment>
+  gl_FragColor = vec4(uThing / 255.0, vIds, 1.0);
+}`,
+    });
+    // One material for many meshes: the thing goes up at each draw.
+    material.onBeforeRender = (_r, _s, _c, geometry, object) => {
+      material.uniforms.uThing.value = thingOf(object);
+      material.uniformsNeedUpdate = true;
+      fillLater(geometry, PART_FILLER, fillingPart);
+    };
+    idsCache.set(m, (ids = material));
   }
-  return n;
+  return ids;
 }
 
 /** The shadow pass draws with its own depth material: clipped too, or what is cut still casts its shadow. */
@@ -217,6 +257,12 @@ export function lit(opts: THREE.MeshLambertMaterialParameters): THREE.Material {
   return CARTOON ? toon(opts as THREE.MeshToonMaterialParameters) : new THREE.MeshLambertMaterial(opts);
 }
 
+/** What the ink leaves alone, as if it were not there. */
+function noInk<M extends THREE.Material>(m: M): M {
+  m.userData.noInk = true;
+  return m;
+}
+
 export const MAT = {
   /** The structure the wanderer is in: cut above the head. */
   cut: clipped(lit({ vertexColors: true, clippingPlanes: [CUT] }), 'cut'),
@@ -235,9 +281,9 @@ export const MAT = {
   /** Translucent voxels in the corona. */
   coronaGlass: glowing(lit({ vertexColors: true, transparent: true, depthWrite: false }), 'corona-glass'),
   /** Neon edges and glowing things (unlit, they bloom). */
-  glow: glowing(new THREE.MeshBasicMaterial({ vertexColors: true }), 'neon', true),
+  glow: noInk(glowing(new THREE.MeshBasicMaterial({ vertexColors: true }), 'neon', true)),
   /** Faint lines (the studio's floor grid): unlit, but outside the bloom, so they cast no halo (T49a). */
-  line: new THREE.MeshBasicMaterial({ vertexColors: true }),
+  line: noInk(new THREE.MeshBasicMaterial({ vertexColors: true })),
 };
 
 /** Solid-coloured clipped material (stand-ins). Cached by colour. */

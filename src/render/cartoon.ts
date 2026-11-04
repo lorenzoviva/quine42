@@ -1,7 +1,6 @@
 // The cartoon look (ADR-0093): banded (toon) shading in place of Lambert for every lit material (T89a), saturated on the
 // side away from the sun, with sharper cast shadows; a warm key light, a cold fill, tinted shadows and the fog as aerial
-// perspective (T89c); ink outlines in post-processing, still the trial of T89 from the depth and the normals of the frame
-// (T89b draws them from ids).
+// perspective (T89c); ink outlines in post-processing, where the thing or the part changes or the depth jumps (T89b).
 
 import * as THREE from 'three';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
@@ -170,103 +169,126 @@ export function toon(opts: THREE.MeshToonMaterialParameters): THREE.MeshToonMate
   return m;
 }
 
+/** The thing the ground and the walls are, across all chunks: otherwise the ink would draw the edge of every chunk. */
+export const TERRAIN_THING = 255;
+
+/** The id of a mesh in the ink's red channel: 0 is the empty, 255 the terrain. Two things that meet with the same id only lose the line between them. */
+export function thingOf(o: { id: number; userData: { inkThing?: number } }): number {
+  return o.userData.inkThing ?? 1 + (o.id % 254);
+}
+
 const INK = `uniform sampler2D tDiffuse;
-uniform sampler2D tNormal;
+uniform sampler2D tIds;
 uniform sampler2D tDepth;
 uniform vec2 uTexel;
 uniform float uNear;
 uniform float uFar;
 uniform vec2 uDepthEdge;
-uniform vec2 uNormalEdge;
 uniform vec2 uFog;
 varying vec2 vUv;
-float lin(vec2 uv) {
+vec3 ids;
+// One over the view depth: on a plane it changes evenly across the screen, so a slope seen at a low angle does not look like a jump.
+float inverseDepth(vec2 uv) {
   float z = texture2D(tDepth, uv).x * 2.0 - 1.0;
-  return 2.0 * uNear * uFar / (uFar + uNear - z * (uFar - uNear));
+  return (uFar + uNear - z * (uFar - uNear)) / (2.0 * uNear * uFar);
+}
+float differs(vec2 o) {
+  vec3 d = abs(texture2D(tIds, vUv + o * uTexel).rgb - ids);
+  return max(d.r, max(d.g, d.b)) > 0.002 ? 1.0 : 0.0;
 }
 void main() {
   vec4 c = texture2D(tDiffuse, vUv);
-  float d = lin(vUv);
-  vec3 n = texture2D(tNormal, vUv).xyz * 2.0 - 1.0;
-  float de = 0.0;
-  float ne = 0.0;
-  for (int i = 0; i < 4; i++) {
-    vec2 o = i == 0 ? vec2(1.0, 0.0) : i == 1 ? vec2(-1.0, 0.0) : i == 2 ? vec2(0.0, 1.0) : vec2(0.0, -1.0);
-    vec2 uv = vUv + o * uTexel;
-    de = max(de, abs(lin(uv) - d) / d);
-    ne = max(ne, 1.0 - dot(n, texture2D(tNormal, uv).xyz * 2.0 - 1.0));
-  }
-  float edge = max(smoothstep(uDepthEdge.x, uDepthEdge.y, de), smoothstep(uNormalEdge.x, uNormalEdge.y, ne));
+  ids = texture2D(tIds, vUv).rgb;
+  // Where the thing or the part changes. The corners count less: without samples of its own this is what keeps a diagonal from being a staircase.
+  float sides = max(max(differs(vec2(1.0, 0.0)), differs(vec2(-1.0, 0.0))), max(differs(vec2(0.0, 1.0)), differs(vec2(0.0, -1.0))));
+  float corners = max(max(differs(vec2(1.0, 1.0)), differs(vec2(-1.0, 1.0))), max(differs(vec2(1.0, -1.0)), differs(vec2(-1.0, -1.0))));
+  float edge = max(sides, corners * 0.5);
+  // Where the depth jumps, in tiles: within one part too (the tiers of a pine), not between its voxels.
+  float i0 = inverseDepth(vUv);
+  vec2 dx = vec2(uTexel.x, 0.0);
+  vec2 dy = vec2(0.0, uTexel.y);
+  float ix0 = inverseDepth(vUv - dx), ix1 = inverseDepth(vUv + dx), iy0 = inverseDepth(vUv - dy), iy1 = inverseDepth(vUv + dy);
+  float jump = max(abs(ix0 + ix1 - 2.0 * i0), abs(iy0 + iy1 - 2.0 * i0)) / (i0 * i0);
+  edge = max(edge, smoothstep(uDepthEdge.x, uDepthEdge.y, jump));
   // What the air has taken has no ink either: a dark line over a shape that fades would stand out of the distance.
-  edge *= 1.0 - smoothstep(uFog.x, uFog.y, d);
+  // By the nearest of the pixels around: on the sky's side of a shape the line belongs to the shape.
+  float nearest = 1.0 / max(i0, max(max(ix0, ix1), max(iy0, iy1)));
+  edge *= 1.0 - smoothstep(uFog.x, uFog.y, nearest);
+  // Nothing over what gives light: its alpha in this frame says so (U.glowMask).
+  edge *= clamp(c.a, 0.0, 1.0);
   // Ink: the colour itself, much darker (dark blue-brown, not black), as in hand-inked cartoons.
   vec3 ink = c.rgb * 0.18 + vec3(0.03, 0.03, 0.05);
   gl_FragColor = vec4(mix(c.rgb, ink, edge * 0.9), c.a);
 }`;
 
 /**
- * Ink outlines: before the frame, the scene is drawn once more with its normals into a target with a depth texture;
- * the pass darkens where depth or normal jump (silhouettes and the voxels' creases). Each mesh draws with the normal
- * material of its own (`normalsOf`), never one override for all: the circle clip and the cut above the head stay, or
- * the simulation hidden beyond the circle would show its outlines around the corona (T98).
+ * Ink outlines from ids, never from the voxels' faces: before the frame, the scene is drawn once more into a target with a depth
+ * texture, each mesh with the ids of its own material (`idsOf`, never one override for all: the circle clip and the cut above the
+ * head stay, or the simulation hidden beyond the circle would show its outlines around the corona, T98). The pass darkens where the
+ * thing or the part changes or the depth jumps. The width is in CSS pixels, so the line looks the same at any `devicePixelRatio`.
  */
 export class Ink {
   readonly pass: ShaderPass;
-  private target = new THREE.WebGLRenderTarget(1, 1, { depthTexture: new THREE.DepthTexture(1, 1) });
-  /** The materials swapped for their normals while `prepare` draws, to put back after. */
+  private target = new THREE.WebGLRenderTarget(1, 1, { depthTexture: new THREE.DepthTexture(1, 1), minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter, generateMipmaps: false });
+  /** The materials swapped for their ids while `prepare` draws, to put back after. */
   private swapped: [THREE.Mesh, THREE.Material | THREE.Material[]][] = [];
+  private clearColor = new THREE.Color();
 
   constructor(
     private scene: THREE.Scene,
     private camera: THREE.PerspectiveCamera,
-    /** The normal material that stands in for each one (`normalsOf` of materials.ts, passed in: materials imports this file). */
-    private normalsOf: (m: THREE.Material) => THREE.Material | undefined,
+    /** The material that stands in for each one (`idsOf` of materials.ts, passed in: materials imports this file). */
+    private idsOf: (m: THREE.Material) => THREE.Material | undefined,
   ) {
     this.pass = new ShaderPass({
       uniforms: {
         tDiffuse: { value: null },
-        tNormal: { value: null },
+        tIds: { value: null },
         tDepth: { value: null },
         uTexel: { value: new THREE.Vector2(1, 1) },
         uNear: { value: 0.1 },
         uFar: { value: 1000 },
-        uDepthEdge: { value: new THREE.Vector2(0.03, 0.08) },
-        uNormalEdge: { value: new THREE.Vector2(0.25, 0.6) },
+        uDepthEdge: { value: new THREE.Vector2(0.6, 1.1) },
         uFog: { value: new THREE.Vector2(1e6, 1e6 + 1) },
       },
       vertexShader: 'varying vec2 vUv;\nvoid main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
       fragmentShader: INK,
     });
     // ShaderPass clones its uniforms (textures too): the targets go in after.
-    this.pass.uniforms.tNormal.value = this.target.texture;
+    this.pass.uniforms.tIds.value = this.target.texture;
     this.pass.uniforms.tDepth.value = this.target.depthTexture;
-    // The trial's thresholds, to try from the console (`window.cartone.uDepthEdge.value.set(…)`).
+    // The thresholds, to try from the console (`window.cartone.uDepthEdge.value.set(…)`).
     (globalThis as { cartone?: unknown }).cartone = this.pass.uniforms;
   }
 
   setSize(w: number, h: number, dpr: number): void {
     this.target.setSize(Math.floor(w * dpr), Math.floor(h * dpr));
-    (this.pass.uniforms.uTexel.value as THREE.Vector2).set(1 / (w * dpr), 1 / (h * dpr));
+    // One CSS pixel, not one of the target: the line stays as wide on any screen.
+    (this.pass.uniforms.uTexel.value as THREE.Vector2).set(1 / w, 1 / h);
   }
 
-  /** Draws the normals and the depth of the frame (before the composer). */
+  /** Draws the ids and the depth of the frame (before the composer). */
   prepare(gl: THREE.WebGLRenderer): void {
     this.pass.uniforms.uNear.value = this.camera.near;
     this.pass.uniforms.uFar.value = this.camera.far;
     const bg = this.scene.background;
     const fog = this.scene.fog;
     if (fog instanceof THREE.Fog) (this.pass.uniforms.uFog.value as THREE.Vector2).set(fog.near, Math.max(fog.far, fog.near + 1));
+    const updateShadows = gl.shadowMap.autoUpdate;
+    const clearAlpha = gl.getClearAlpha();
+    gl.getClearColor(this.clearColor);
     this.scene.background = null;
-    this.scene.fog = null;
+    // Ids need no shadows, and the frame right after draws them anyway.
+    gl.shadowMap.autoUpdate = false;
     this.swap();
     gl.setRenderTarget(this.target);
-    gl.setClearColor(0x8080ff, 1);
-    gl.clear();
+    gl.setClearColor(0x000000, 1);
     gl.render(this.scene, this.camera);
     gl.setRenderTarget(null);
     this.restore();
+    gl.setClearColor(this.clearColor, clearAlpha);
+    gl.shadowMap.autoUpdate = updateShadows;
     this.scene.background = bg;
-    this.scene.fog = fog;
   }
 
   private swap(): void {
@@ -274,8 +296,8 @@ export class Ink {
       const mesh = o as THREE.Mesh;
       if (!mesh.material) return;
       const was = mesh.material;
-      // Lines, points and sprites have no normals to outline: they stay out of the target.
-      const of = (m: THREE.Material) => (mesh.isMesh ? this.normalsOf(m) : undefined) ?? HIDDEN;
+      // Lines, points and sprites have no surface to outline: they stay out of the target.
+      const of = (m: THREE.Material) => (mesh.isMesh ? this.idsOf(m) : undefined) ?? HIDDEN;
       const now = Array.isArray(was) ? was.map(of) : of(was);
       this.swapped.push([mesh, was]);
       mesh.material = now;
@@ -288,5 +310,5 @@ export class Ink {
   }
 }
 
-/** What draws nothing in the normals (a material that is not drawn). */
+/** What draws nothing in the ids (a material that is not drawn). */
 const HIDDEN = new THREE.MeshBasicMaterial({ visible: false });

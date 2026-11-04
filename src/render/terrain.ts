@@ -10,6 +10,7 @@ import * as THREE from 'three';
 import type { Chunk, Kernel } from '../kernel/kernel';
 import { hash32 } from '../kernel/rng';
 import type { TerrainDef } from '../kernel/types';
+import { TERRAIN_THING } from './cartoon';
 import { casts, MAT, rgbOf } from './materials';
 import { geoOf, modelMaterials, type ModelGeo } from './models';
 import type { Form } from '../kernel/forms';
@@ -17,17 +18,32 @@ import type { Form } from '../kernel/forms';
 export const WALL_H = 1.6;
 const WATER_Y = -0.18;
 
+/** What the sides of a part add to it: a step of the relief has its line at the top and at the foot, though the depth does not jump seen from the front. */
+const SIDE_PART = 128;
+
 /** Accumulates coloured boxes and quads into one geometry. */
 export class Builder {
   pos: number[] = [];
   nor: number[] = [];
   col: number[] = [];
+  /** The part of each vertex, what the cartoon's ink follows (ADR-0093). */
+  prt: number[] = [];
+  /** The part of what comes next (at most 127; the sides of a box are this + 128). Unsaid, a colour is a part: every change of colour gets its line. */
+  fixedPart?: number;
 
-  quad(a: number[], b: number[], c: number[], d: number[], n: number[], rgb: number[]): void {
+  private partOf(rgb: number[], side = false): number {
+    if (this.fixedPart !== undefined) return this.fixedPart + (side ? SIDE_PART : 0);
+    const [r, g, b] = rgb.map((v) => Math.round(v * 64));
+    return 1 + ((r * 961 + g * 31 + b) % 255);
+  }
+
+  quad(a: number[], b: number[], c: number[], d: number[], n: number[], rgb: number[], side = false): void {
+    const part = this.partOf(rgb, side);
     for (const v of [a, b, c, a, c, d]) {
       this.pos.push(v[0], v[1], v[2]);
       this.nor.push(n[0], n[1], n[2]);
       this.col.push(rgb[0], rgb[1], rgb[2]);
+      this.prt.push(part);
     }
   }
 
@@ -36,11 +52,11 @@ export class Builder {
     const top = rgb.map((v) => v * 1.08);
     const side = rgb.map((v) => v * 0.9);
     this.quad([x0, y1, z0], [x0, y1, z1], [x1, y1, z1], [x1, y1, z0], [0, 1, 0], top);
-    this.quad([x0, y0, z1], [x1, y0, z1], [x1, y1, z1], [x0, y1, z1], [0, 0, 1], rgb);
-    this.quad([x1, y0, z0], [x0, y0, z0], [x0, y1, z0], [x1, y1, z0], [0, 0, -1], side);
-    this.quad([x1, y0, z1], [x1, y0, z0], [x1, y1, z0], [x1, y1, z1], [1, 0, 0], side);
-    this.quad([x0, y0, z0], [x0, y0, z1], [x0, y1, z1], [x0, y1, z0], [-1, 0, 0], side);
-    if (bottom) this.quad([x0, y0, z0], [x1, y0, z0], [x1, y0, z1], [x0, y0, z1], [0, -1, 0], side);
+    this.quad([x0, y0, z1], [x1, y0, z1], [x1, y1, z1], [x0, y1, z1], [0, 0, 1], rgb, true);
+    this.quad([x1, y0, z0], [x0, y0, z0], [x0, y1, z0], [x1, y1, z0], [0, 0, -1], side, true);
+    this.quad([x1, y0, z1], [x1, y0, z0], [x1, y1, z0], [x1, y1, z1], [1, 0, 0], side, true);
+    this.quad([x0, y0, z0], [x0, y0, z1], [x0, y1, z1], [x0, y1, z0], [-1, 0, 0], side, true);
+    if (bottom) this.quad([x0, y0, z0], [x1, y0, z0], [x1, y0, z1], [x0, y0, z1], [0, -1, 0], side, true);
   }
 
   /** An n-sided vertical cylinder from y0 to y1 with radius r, centered at (cx, cz). */
@@ -55,12 +71,13 @@ export class Builder {
       const x0 = cx + c0 * r, z0 = cz + s0 * r;
       const x1 = cx + c1 * r, z1 = cz + s1 * r;
       const nx = (c0 + c1) / 2, nz = (s0 + s1) / 2;
-      this.quad([x0, y0, z0], [x1, y0, z1], [x1, y1, z1], [x0, y1, z0], [nx, 0, nz], sideCol);
+      this.quad([x0, y0, z0], [x1, y0, z1], [x1, y1, z1], [x0, y1, z0], [nx, 0, nz], sideCol, true);
       if (top) {
         for (const v of [[cx, y1, cz], [x0, y1, z0], [x1, y1, z1]]) {
           this.pos.push(v[0], v[1], v[2]);
           this.nor.push(0, 1, 0);
           this.col.push(topCol[0], topCol[1], topCol[2]);
+          this.prt.push(this.partOf(topCol));
         }
       }
       if (bottom) {
@@ -68,6 +85,7 @@ export class Builder {
           this.pos.push(v[0], v[1], v[2]);
           this.nor.push(0, -1, 0);
           this.col.push(sideCol[0], sideCol[1], sideCol[2]);
+          this.prt.push(this.partOf(sideCol, true));
         }
       }
     }
@@ -95,6 +113,7 @@ export class Builder {
         this.pos.push(x, y, z);
         this.nor.push(0, 1, 0);
         this.col.push(rgb[0], rgb[1], rgb[2]);
+        this.prt.push(this.partOf(rgb));
       }
   }
 
@@ -103,6 +122,7 @@ export class Builder {
     g.setAttribute('position', new THREE.Float32BufferAttribute(this.pos, 3));
     g.setAttribute('normal', new THREE.Float32BufferAttribute(this.nor, 3));
     g.setAttribute('color', new THREE.Float32BufferAttribute(this.col, 3));
+    g.setAttribute('part', new THREE.Uint8BufferAttribute(this.prt, 1));
     g.computeBoundingSphere();
     return g;
   }
@@ -187,6 +207,8 @@ export function buildChunk(k: Kernel, ch: Chunk, models = ''): TerrainView {
   }
   const ground0 = (x: number, z: number) => k.groundAt(x, z) - (holes.get(`${x},${z}`) ?? 0);
   const top = (x: number, z: number) => ground0(x, z) + groundY(tile(x, z));
+  // A terrain is a part (its code), so the ink follows where one meets another and never the tiles of one.
+  const terrainPart = new Map(Object.keys(pal).map((code, i) => [code, 1 + (i % (SIDE_PART - 1))]));
   const place = (code: string, x: number, y: number, z: number, h: number, every: number): boolean => {
     if (!formsOf.has(code)) formsOf.set(code, tileForms(k, code));
     const fs = formsOf.get(code);
@@ -214,6 +236,8 @@ export function buildChunk(k: Kernel, ch: Chunk, models = ''): TerrainView {
       const y = g0 + groundY(t);
       const k0 = 0.92 + (h % 13) / 100;
       const base = rgbOf(t?.color, k0);
+      ground.fixedPart = terrainPart.get(code) ?? 0;
+      solid.fixedPart = undefined;
       ground.quad([x, y, z], [x, y, z + 1], [x + 1, y, z + 1], [x + 1, y, z], [0, 1, 0], base);
       // Sides where this tile is higher than its neighbour: the slope of a hill in its own colour, darker,
       // banks of earth down to the water.
@@ -223,17 +247,19 @@ export function buildChunk(k: Kernel, ch: Chunk, models = ''): TerrainView {
         if (ny >= y) continue;
         const earth = n?.layer === 'liquid' && t?.layer !== 'liquid' ? rgbOf('#735638') : base.map((v) => v * 0.72);
         // Wound counter-clockwise seen from outside, like the boxes.
-        if (dx === 1) ground.quad([x + 1, y, z + 1], [x + 1, ny, z + 1], [x + 1, ny, z], [x + 1, y, z], [1, 0, 0], earth);
-        if (dx === -1) ground.quad([x, y, z], [x, ny, z], [x, ny, z + 1], [x, y, z + 1], [-1, 0, 0], earth);
-        if (dz === 1) ground.quad([x, y, z + 1], [x, ny, z + 1], [x + 1, ny, z + 1], [x + 1, y, z + 1], [0, 0, 1], earth);
-        if (dz === -1) ground.quad([x + 1, y, z], [x + 1, ny, z], [x, ny, z], [x, y, z], [0, 0, -1], earth);
+        if (dx === 1) ground.quad([x + 1, y, z + 1], [x + 1, ny, z + 1], [x + 1, ny, z], [x + 1, y, z], [1, 0, 0], earth, true);
+        if (dx === -1) ground.quad([x, y, z], [x, ny, z], [x, ny, z + 1], [x, y, z + 1], [-1, 0, 0], earth, true);
+        if (dz === 1) ground.quad([x, y, z + 1], [x, ny, z + 1], [x + 1, ny, z + 1], [x + 1, y, z + 1], [0, 0, 1], earth, true);
+        if (dz === -1) ground.quad([x + 1, y, z], [x + 1, ny, z], [x, ny, z], [x, y, z], [0, 0, -1], earth, true);
       }
       switch (t?.layer) {
         case 'wall':
+          solid.fixedPart = ground.fixedPart;
           solid.box(x, g0, z, x + 1, g0 + WALL_H, z + 1, rgbOf(t.color, 0.95 + (h % 7) / 100));
           break;
         case 'door':
           // An opening: posts at the sides where walls continue, a lintel above.
+          solid.fixedPart = ground.fixedPart;
           solid.box(x, g0 + WALL_H - 0.35, z, x + 1, g0 + WALL_H, z + 1, rgbOf(t.color, 0.8));
           break;
         case 'vegetation':
@@ -247,9 +273,13 @@ export function buildChunk(k: Kernel, ch: Chunk, models = ''): TerrainView {
   const group = new THREE.Group();
   const g = new THREE.Mesh(ground.geometry(), MAT.world);
   g.receiveShadow = true;
+  // One thing across the chunks, or the ink would draw their edges.
+  g.userData.inkThing = TERRAIN_THING;
   group.add(g);
   if (!solid.empty) {
-    group.add(casts(new THREE.Mesh(solid.geometry(), MAT.world), true));
+    const s = casts(new THREE.Mesh(solid.geometry(), MAT.world), true);
+    s.userData.inkThing = TERRAIN_THING;
+    group.add(s);
   }
   for (const { geo, mats } of instances.values()) {
     const im = new THREE.InstancedMesh(geo.body, modelMaterials(geo.body, geo.sway ? MAT.sway : MAT.world), mats.length);

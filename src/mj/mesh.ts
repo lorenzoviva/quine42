@@ -17,6 +17,8 @@ export interface MeshData {
   sway?: Float32Array;
   /** Per vertex, 1 where the voxel gives light (`<color glow="True">`): only if the mesh has some. */
   glow?: Float32Array;
+  /** Per vertex, which part of the model it belongs to (`partTable`), what the cartoon's ink follows (ADR-0093). */
+  part?: Uint8Array;
   /** Per vertex, alpha transparency in 0..1 (<color alpha="0.5">): only if the mesh has translucent voxels. */
   alpha?: Float32Array;
   /** Number of opaque indices at start of indices array, when mesh has translucent voxels. */
@@ -65,6 +67,60 @@ export function alphaTable(alphabet: string[], palette: Record<string, PaletteEn
   });
 }
 
+/** CIE Lab of a colour `#rrggbb`, or undefined. */
+function labOf(color: string | undefined): [number, number, number] | undefined {
+  const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(color ?? '');
+  if (!m) return undefined;
+  const [r, g, b] = [m[1], m[2], m[3]].map((h) => {
+    const c = parseInt(h, 16) / 255;
+    return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  });
+  const f = (t: number) => (t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116);
+  const x = f((0.4124 * r + 0.3576 * g + 0.1805 * b) / 0.9505);
+  const y = f(0.2126 * r + 0.7152 * g + 0.0722 * b);
+  const z = f((0.0193 * r + 0.1192 * g + 0.9505 * b) / 1.089);
+  return [116 * y - 16, 500 * (x - y), 200 * (y - z)];
+}
+
+/** How far apart two shades of one part can be, in Lab: lightness, hue in degrees, and what counts as grey (no hue to speak of). */
+const SHADE_LIGHTNESS = 25;
+const SHADE_HUE = 15;
+const SHADE_GREY = 10;
+
+/** Whether two colours are shades of one thing: the same hue, not far in lightness. Two greys only have the lightness. */
+function shades(p: [number, number, number], q: [number, number, number]): boolean {
+  if (Math.abs(p[0] - q[0]) > SHADE_LIGHTNESS) return false;
+  const [cp, cq] = [Math.hypot(p[1], p[2]), Math.hypot(q[1], q[2])];
+  if (cp < SHADE_GREY && cq < SHADE_GREY) return true;
+  if (cp < SHADE_GREY || cq < SHADE_GREY) return Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2]) < SHADE_GREY;
+  const turn = Math.abs(Math.atan2(p[2], p[1]) - Math.atan2(q[2], q[1])) * (180 / Math.PI);
+  return Math.min(turn, 360 - turn) <= SHADE_HUE;
+}
+
+/**
+ * Per alphabet index, the part of the model that letter belongs to: the first letter of its group. Letters are not parts: a
+ * program often scatters three greens over a crown, and a line along every one of them is the noise ADR-0093 wants gone. So
+ * shades of one colour are one part, also through a third (dark, middle, light), and only a real change of colour is a border.
+ * Letters that move as one limb (`<color part>`) are one part whatever their colour; what gives light or lets it through never
+ * joins what does not.
+ */
+export function partTable(alphabet: string[], palette: Record<string, PaletteEntry>): Uint8Array {
+  const root = alphabet.map((_, i) => i);
+  const find = (i: number): number => (root[i] === i ? i : (root[i] = find(root[i])));
+  const lab = alphabet.map((ch) => labOf(palette[ch]?.color));
+  const kind = (ch: string) => `${!!palette[ch]?.glow}|${(palette[ch]?.alpha ?? 1) < 1}`;
+  for (let i = 1; i < alphabet.length; i++) {
+    const [p, a] = [lab[i], palette[alphabet[i]]];
+    if (!p) continue;
+    for (let j = 1; j < i; j++) {
+      const [q, b] = [lab[j], palette[alphabet[j]]];
+      if (!q || kind(alphabet[i]) !== kind(alphabet[j]) || a?.part !== b?.part) continue;
+      if (a?.part || shades(p, q)) root[Math.max(find(i), find(j))] = Math.min(find(i), find(j));
+    }
+  }
+  return Uint8Array.from(alphabet.map((_, i) => find(i)));
+}
+
 // Faces: normal (engine axes), the four corners (as offsets 0/1), and the two tangent axes for AO.
 const FACES: Array<{ n: [number, number, number]; corners: Array<[number, number, number]> }> = [
   { n: [1, 0, 0], corners: [[1, 0, 0], [1, 1, 0], [1, 1, 1], [1, 0, 1]] },
@@ -87,6 +143,7 @@ export function meshVoxels(g: VoxelGrid, palette: Record<string, PaletteEntry>, 
   const colors = colorTable(g.alphabet, palette);
   const glows = g.alphabet.map((ch) => !!palette[ch]?.glow);
   const alphas = alphaTable(g.alphabet, palette);
+  const parts = partTable(g.alphabet, palette);
   const solid = (x: number, y: number, z: number) => {
     if (x < 0 || y < 0 || z < 0 || x >= X || y >= Y || z >= Z) return false;
     const i = x + y * X + z * XY;
@@ -111,6 +168,7 @@ export function meshVoxels(g: VoxelGrid, palette: Record<string, PaletteEntry>, 
   const sw: number[] = [];
   const gl: number[] = [];
   const al: number[] = [];
+  const pa: number[] = [];
   let glowing = false;
   let hasTranslucent = false;
   const opaqueIdx: number[] = [];
@@ -160,6 +218,7 @@ export function meshVoxels(g: VoxelGrid, palette: Record<string, PaletteEntry>, 
             nor.push(nx, nz, ny);
             gl.push(glow ? 1 : 0);
             al.push(alphaVal);
+            pa.push(parts[cell]);
             col.push(c[0] * light, c[1] * light, c[2] * light);
             if (o.sway) {
               const h = Math.max(0, vz / top - 0.25) / 0.75;
@@ -183,6 +242,7 @@ export function meshVoxels(g: VoxelGrid, palette: Record<string, PaletteEntry>, 
     normals: new Float32Array(nor),
     colors: new Float32Array(col),
     indices: new Uint32Array(allIndices),
+    part: Uint8Array.from(pa),
     ...(o.sway ? { sway: new Float32Array(sw) } : {}),
     ...(glowing ? { glow: new Float32Array(gl) } : {}),
     ...(hasTranslucent ? { alpha: new Float32Array(al), opaqueCount: opaqueIdx.length } : {}),

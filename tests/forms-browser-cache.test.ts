@@ -538,7 +538,7 @@ describe('the persistent cache', () => {
       const old = drawn(100, 9);
       idb.dbs.set('rune-forms', { version: 4, stores: new Map([['forms', new Map<string, unknown>([[key, old]])], ['uses', new Map<string, unknown>([[key, { at: 1, bytes: formBytes(old) }]])]]) });
       vi.stubGlobal('indexedDB', idb);
-      expect(FORMS_DB_VERSION).toBe(5);
+      expect(FORMS_DB_VERSION).toBe(6);
 
       const { runner, jobs } = limited(1024 * 1024, 100, new IdbFormStore());
       const back = await runner.withoutMeshes(other(1));
@@ -547,7 +547,7 @@ describe('the persistent cache', () => {
       expect(back.meshes).toBeDefined();
       await settle();
       const d = idb.dbs.get('rune-forms')!;
-      expect(d.version).toBe(5);
+      expect(d.version).toBe(FORMS_DB_VERSION);
       expect([...d.stores.keys()].sort()).toEqual(['forms', 'meshes', 'uses']);
       expect(d.stores.get('forms')!.get(key)).not.toHaveProperty('meshes');
       expect(d.stores.get('meshes')!.has(key)).toBe(true);
