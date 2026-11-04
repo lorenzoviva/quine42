@@ -7,10 +7,11 @@ garantisce poi che tutto sia raggiungibile (sentieri scavati tra i varchi dei co
 zone calpestabili) e posiziona oggetti e personaggi dove dici (dentro o fuori gli edifici).
 
 - Dai a ogni luogo un nome e una frase, coerenti con la bibbia e con i luoghi confinanti.
+- Tutto è dell'epoca che la bibbia dice: un borgo, una città a vapore, una metropoli; gli esempi qui sotto sono solo esempi.
 - Un mondo credibile è pieno di cose: case arredate, attrezzi, cibo, persone con un mestiere.
 - Le strutture hanno una taglia di D&D (minuscola, piccola, media, grande, enorme, gargantuesca): media una casa,
-  grande un mulino o una torre. Enorme (un castello, un tempio) e gargantuesca (una cittadella, una cattedrale) sono
-  rare: una enorme per zona del mondo, una gargantuesca per reame; scegline una solo dove il luogo lo merita, in un
+  grande un mulino, una stazione o una torre. Enorme (un castello, una centrale) e gargantuesca (una cittadella, una
+  cattedrale, una torre-città) sono rare: una enorme per zona del mondo, una gargantuesca per mondo; scegline una solo dove il luogo lo merita, in un
   ambiente con edifici grandi (il kernel adatta la taglia al lotto e alla rarità).
 - Le rune (per chi vive nel mondo: antichi glifi luminosi) sono frammenti presi dal catalogo: usali così come sono.
 - Nomi e descrizioni dei luoghi stanno dentro il mondo: niente riferimenti a codice, simulazioni o al Concilio.
@@ -34,7 +35,7 @@ Una regola è `{"in":"...","out":"..."}`: righe separate da `/`, stessa forma in
 In ingresso `*` è qualunque cosa e `[gp]` è g oppure p; in uscita `*` lascia la cella com'è.
 Le regole sono provate anche ruotate e specchiate (`"symmetry":"none"` per evitarlo).
 
-Esempio — un borgo: radura, due case con porta, strade dalle porte al sentiero.
+Esempio — un abitato: radura, due case con porta, strade dalle porte al sentiero.
 ```json
 {"type":"sequence","children":[
   {"type":"prl","rules":[{"in":"t","out":"g","p":0.7}]},
@@ -59,13 +60,14 @@ toccano, con porte tra loro.
 
 ## Strutture: i timbri del kernel
 
-Castelli, torri e piramidi non si disegnano a mano (nessuno sa contare le caselle): si chiede al kernel
-un **timbro**, che le disegna con i codici di questo mondo.
+Le grandi strutture non si disegnano a mano (nessuno sa contare le caselle): si chiede al kernel un **timbro**, che
+le disegna con i codici di questo mondo. Un timbro è una **forma**, non un'epoca: il suo nome resta nel programma, e
+ciò che è lo dicono il nome dell'ambiente e i materiali di `codes` (una `fortezza` può essere un deposito blindato, una
+`torre` un faro o un grattacielo, le `capanne` baracche di lamiera, il `castello` un isolato di palazzi cinto da un canale).
 
-- `{"type":"stamp","shape":"castello"}` — fossato, mura con torri agli angoli, ponte levatoio, mastio.
-- Forme: `casa`, `castello`, `fortezza`, `torre` (del mago), `tempio`, `piramide`, `capanne`, `recinto`
-  (maneggio con stalla), `caserma`, `dungeon` (stanze e cunicoli nella roccia), `tana` (caverna, anche
-  di drago), `pozzo`.
+- `{"type":"stamp","shape":"castello"}` — fossato, mura con torri agli angoli, un ponte, un mastio.
+- Forme: `casa`, `castello`, `fortezza`, `torre`, `tempio`, `piramide`, `capanne`, `recinto`
+  (maneggio con stalla), `caserma`, `dungeon` (stanze e cunicoli nella roccia), `tana` (caverna), `pozzo`.
 - `"count": N` ne mette N (es. 5 capanne); `"codes"` sceglie i terreni per ogni ruolo: `muro`,
   `pavimento`, `porta`, `acqua`, `ponte`, `terreno`, `strada`, `roccia`, `recinto` (es. capanne con
   `{"muro":"a"}` = paglia, un castello con `{"muro":"b","ponte":"z"}`). Senza `codes` il kernel sceglie.
@@ -73,7 +75,7 @@ un **timbro**, che le disegna con i codici di questo mondo.
 
 ## L'atlante
 
-Il mondo ha una geografia: regioni (un deserto, un castello, il bosco degli elfi…) con un centro e un
+Il mondo ha una geografia: regioni (un deserto, un castello, una darsena, un bosco…) con un centro e un
 raggio, in `world/atlas.json`. I luoghi dentro una regione usano il suo ambiente e ne portano il nome.
 Quando ti chiedono un ambiente nuovo, lo scrivi (programma + eventuali terreni nuovi) e lo **collochi**:
 in che direzione e a quanti luoghi da dove si trova il viandante, in una zona ancora inesplorata.

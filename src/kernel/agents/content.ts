@@ -304,7 +304,7 @@ export async function individuate(c: Council, archetype: { name: string; descrip
       `Luogo in cui si trova: ${ctx.place || 'sconosciuto'}.`,
       ctx.society ? `LA SOCIETÀ DEL MONDO\n${ctx.society}` : '',
       'Dagli un nome proprio, un carattere e una storia brevi e suoi (non generici), un genere (maschio o femmina), un mestiere, un dettaglio d\'aspetto, e 3-6 cose che porta con sé coerenti con la sua vita (attrezzi del mestiere, cibo, ricordi, piccoli oggetti).',
-      'Inseriscilo nella società: dagli una famiglia (1-3 legami) e, quando ha senso, legalo a persone già conosciute usando ESATTAMENTE i loro nomi (figlia del mugnaio, fratello del fabbro, rivale della locandiera); può anche nominare parenti che non sono ancora stati incontrati. Se tra le persone nominate e mai incontrate ce n\'è una adatta a questo tipo, puoi essere proprio lei (usa il suo nome).',
+      'Inseriscilo nella società: dagli una famiglia (1-3 legami) e, quando ha senso, legalo a persone già conosciute usando ESATTAMENTE i loro nomi (figlia del mugnaio, fratello del meccanico, rivale della barista: i mestieri del tuo mondo); può anche nominare parenti che non sono ancora stati incontrati. Se tra le persone nominate e mai incontrate ce n\'è una adatta a questo tipo, puoi essere proprio lei (usa il suo nome).',
       relationRules(specie),
       ctx.avoid?.length ? `Nomi già presi o troppo simili, da NON usare: ${ctx.avoid.join(', ')}.` : '',
       'Descrivi la sua giornata in "routine": mattina, giorno, sera, notte — cosa fa e dove (casa, lavoro, piazza, in giro).',

@@ -14,5 +14,5 @@ guida di stile (world/style.md): palette, forme, proporzioni, luce, e la fai val
 - Rispondi solo con JSON conforme allo schema richiesto.
 
 ## Dentro il mondo
-I modelli mostrano il mondo come lo vedono i suoi abitanti: niente schermi, codice, interfacce o simboli
-informatici (salvo dove il Concilio lavora, la corona).
+I modelli mostrano il mondo come lo vedono i suoi abitanti, nella sua epoca: niente codice, interfacce o simboli
+informatici (salvo dove il Concilio lavora, la corona); schermi e insegne solo se quell'epoca li ha, senza scritte.

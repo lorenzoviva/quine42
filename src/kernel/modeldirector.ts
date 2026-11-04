@@ -9,6 +9,7 @@ import { classOf, densityOf, guessClass, sizeOf, TILE, tilesOf, type SizeTier } 
 import type { ModelInfo } from './forms';
 import { BudgetError } from './ai/models';
 import { modelGap, sculptPlan } from './coefficients';
+import { hashStr, hex } from './rng';
 
 /**
  * What a model's index entry says of its size (ADR-0092): the size, if not its class's own, and the coarser density
@@ -30,6 +31,10 @@ export const itemShapeModel = (f: string) => `forma-${f}`;
 export const GENERIC = new Set(['persona', 'animale', 'bestia', 'albero', 'cespuglio', 'roccia', 'sasso', 'oggetto', 'mobile', 'edificio', 'monumento', 'grande']);
 
 /** A model id for a module or an item of its own ("npc.mugnaio" → "npc-mugnaio"). */
+const COMMON_HOUSE = 'casa-comune-';
+/** The model of a world's common houses (ADR-0134): another description, another model, so a new Genesis does not find the old one. */
+export const commonHouseModel = (house: string, classe: string) => `${COMMON_HOUSE}${classe}-${hex(hashStr(house))}`;
+
 export const ownModelId = (id: string) => id.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'cosa';
 
 export class ModelDirector {
@@ -81,7 +86,8 @@ export class ModelDirector {
       if (code === '?' || !lacks(t.model)) continue;
       out.push({ id: t.model!, nome: t.name, aspetto: t.description ?? t.name, classe: t.layer === 'vegetation' ? 'albero' : t.layer === 'rock' ? 'roccia' : 'cespuglio', contesto: `sulle caselle di ${t.name}` });
     }
-    return out;
+    // Every common lot shows them: before anything else, or the budget may end on the seed's cottages.
+    return [...out.filter((r) => r.id.startsWith(COMMON_HOUSE)), ...out.filter((r) => !r.id.startsWith(COMMON_HOUSE))];
   }
 
   /** Called every few seconds: starts the next model if idle. */

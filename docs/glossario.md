@@ -734,6 +734,12 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Dove vive**: `src/kernel/agents/genesis.ts`, `src/ui/genesis.ts`
 - **Da non usare**: nessuno
 
+### Ambientazione
+- **Inglese**: `WorldTheme`, `WORLD_THEMES`, `themeOfText`
+- **Definizione**: uno dei testi di tema tra cui si sceglie alla Genesi; il kernel non la conosce, di una Genesi resta il tema.
+- **Dove vive**: `src/kernel/themes.ts`, `src/ui/genesis.ts`
+- **Da non usare**: nessuno
+
 ### Bibbia
 - **Inglese**: `bible`, `readBible`, `biblePages`
 - **Definizione**: la memoria del Narratore: prologo, luoghi, personaggi, fatti, misteri.

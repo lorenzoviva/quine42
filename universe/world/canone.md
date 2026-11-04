@@ -38,6 +38,10 @@ Ciò che chi vive nel mondo sa delle rune. È vero sempre e ovunque: nessuna sto
 - Che cosa dicono i segni delle rune non magiche.
 - Su questo la gente racconta di tutto (dei, antichi maghi, fortuna), ma sono dicerie: nessuna è provata.
 
+## In ogni epoca
+- Le rune sono le stesse ovunque. «Magia» è la parola più comune, e ogni mondo ne parla a modo suo (c'è chi dice scienza,
+  chi non ci crede). Nessuna macchina le fabbrica.
+
 ## Ciò che le storie possono fare
 - Persone che cercano, collezionano, studiano, vendono, rubano o temono le rune; scuole e maestri di magia; libri
   antichi; mercanti di rune false (che sono pietre qualunque, senza luce); dispute su chi le ha trovate prima.
