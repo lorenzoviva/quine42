@@ -1,17 +1,11 @@
 # Le domande aperte per l'autore
 
-L'elenco unico (richiesta dell'autore, 04/11): l'orchestratore lo tiene aggiornato e lo riporta in chat. I numeri non cambiano; una risposta toglie la riga. Il dettaglio di T182 è in `domande/T182.md` sul branch `task/T182`.
+L'elenco unico (richiesta dell'autore, 04/11): l'orchestratore lo tiene aggiornato e lo riporta in chat. I numeri non cambiano; una risposta toglie la riga.
 
 ## I modelli
-- **D1** Quale benchmark hai visto? Serve il link o il nome per T254.
-- **D2** Opus orchestra già oggi. Chi programma? Raccomandato: decidere sulla tabella di T254.
-- **D3** Accendere i modelli Claude e GPT di Antigravity (residuo 97 %, mai usati)? Raccomandato: sì, se T254 li conferma.
-
-## Bloccano T156, T207, T88, T153, T242 (T182)
-- **D4** Cantina a due taglie: A il kernel segna il suolo (raccomandata), B si prova a una taglia, C `sotto` in voxel.
-- **D5** Interni contro `stanze`: A campate più grandi, un giro da 15-20 $ (raccomandata), B si corregge la misura, C interni fatti in seguito da un agente.
-- **D6** La ricchezza dei programmi a regole basta, con la varietà in cambio? Fogli: `lab/banco/conferma/rocca/1/lati.png`, `lab/banco/procedurale/rocca/2/semi.png`.
-- **D7** Il giro di T182 su Argon, ora che Claude è basso? Raccomandato: sì.
+- **D29** Approvi T259, il progetto dello Scenografo con la misura del costo? Raccomandato: sì.
+- **D30** Vuoi Fable a orchestrare? Raccomandato: non prima del reset del 05/11, poi solo per i giri di pianificazione difficili. La casella è tua.
+- **D28** Un task per la causa di `tests/subscription.test.ts`, rosso sotto carico e verde da solo? Raccomandato: sì, piccolo.
 
 ## Il kernel e le fasi
 - **D8** T245: raccomandati a-e per la 0.9.0, g-i per la 1.0.0, f da decidere.

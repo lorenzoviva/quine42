@@ -34,12 +34,12 @@ Aggiornato il 04/11/2026, epoca 259. Crediti: vedi `stato`.
 ## Pronti e priorità
 
 1. **In corso T257 su Argon.** Pronti: **T256** (claude, se la finestra regge; richiesta dell'autore), **T255** (Argon). **T253 integrato:** il parser legge `T89a-d`, nessuna dipendenza del backlog cambia. `tests/subscription.test.ts` rosso nella suite intera e verde da solo per la seconda volta (T89c, T253), causa non cercata: proposto all'autore un task. Gemini all'8 % è sotto `sogliaUnSolo` (10): nessun task nuovo fino al reset del 05/11 alle 17:37 UTC.
-4. **T182 → T156** (strutture procedurali). **T182 fermo in attesa dell'autore al giro 3 di 4, non integrato:** soglia NO. Misure e varianza 10/12 entro due richieste (7 alla prima), foto 0/10 per giudizio dell'agente, locanda esclusa; 1,15 $ a modello, 30,59 $ in tutto a listino. **Chieste le 3 decisioni di `docs/pipeline/domande/T182.md` (sul branch `task/T182`):** cantina a due taglie, interni contro la misura `stanze`, se la ricchezza basta. Bloccati finché non risponde: T156, poi T207, T88, T153, T242.
+4. **T258 → T156** (strutture procedurali). **T182 integrato e chiuso dall'autore (04/11):** D4 A (il kernel segna il suolo, T258, approvato), D5 C (gli interni li fa un agente, T259, da approvare: D29), D6 la ricchezza basta, D7 niente giro su Argon. Soglia foto non raggiunta, accettato; `pagoda/1` e `tempio/2` restano fuori dai 10. T156 aspetta T258, non T259.
 4b. **Generazione differita** (richiesta dell'autore, 03/11): **solo dopo T156, il prompt nuovo dello Scultore** (l'autore: non sprecare crediti). T207 (generatore senza browser, solo abbonamenti, aspetta T156) → T88 (la pipeline lo accende coi crediti che avanzano) → T153 (legge e prova i tre universi). L'elenco `generazione` di `config.json` c'è già: nessuno lo legge finché T88 non lo usa; la sua forma è mia, T88 può adattarla.
 
 ## Attese dall'autore
 
-- **Tutte le domande sono numerate in `docs/pipeline/domande/aperte.md` (D1-D26), riportate in chat il 04/11.** Le voci qui sotto sono il contesto.
+- **Tutte le domande sono numerate in `docs/pipeline/domande/aperte.md`.** D1-D7 chiuse il 04/11; le altre sono ancora aperte. Le voci qui sotto sono il contesto.
 - **T245 integrato (`b48399f`), chiesto all'autore:** `docs/design/comportamento-npc.md`, nove task T245a-i (a-e per la 0.9.0, f da decidere, g-i per la 1.0.0), tre gradi con la manopola `vite`; costi stimati, non misurati. Il documento lascia a lui cosa fare e in che fase: nessun task finché non risponde, anche nell'autonomia. Da mettere in `docs/fasi.md`, step 32.
 - **T183, regola 6 di `AGENTS.md` (`docs/design/espressivita.md`, «Il salvataggio che non si ferma»):** oggi un guasto qualsiasi ferma tutti i salvataggi; proposta: un guasto a runtime di un modulo invalida il codice, non i dati della partita. Chiesto all'autore.
 - **To-do del 04/11 pianificato, T230-T242:** approvati T230, T231 (fasi, step, tag), T232, T234 (landing launcher, blog), T237 (guida beta), T238 (registro), T241, T242 (aureo in UI e prompt; **i modelli esistenti non si toccano**). T236 chiuso (2 € + 3 € a mano, altri 5 € agli assidui, 4 universi condivisi; da mettere nel deploy: `QUINE_TETTO_RICARICHE`, `QUINE_UNIVERSI_PER_ACCOUNT`). T243 approvato (commissione configurabile). T232 e T233 a fine Fase II (autore, 04/11), T234 e T241 staccati. T244: ritocchi della home, più video lunghi dell'autore sul nostro server (con `Range`), istruzioni a due parti. Lo sconto: pagamento a mano e in dollari; come dichiarare i soldi lo gestisce l'autore (`domande/T243.md` chiusa). T235 riparte a fine Fase II; T239 (lingue) in Fase III, ultima operazione. **T240 (piano di lancio, Fable): dal reset del 05/11 alle 15:59 UTC lo riporto a `da fare` io.** L'autore porta in chat i feedback dei giocatori; su richiesta lo aiuto con i messaggi WhatsApp della beta.
@@ -56,7 +56,7 @@ Aggiornato il 04/11/2026, epoca 259. Crediti: vedi `stato`.
 - **I tetti sono dell'autore** (`limiti`: 3 su Claude dal 03/11 per sua istruzione, di cui Fable al più 1, e 1 su `agy`; il processo legge i limiti solo all'avvio): non si alzano senza una sua istruzione. Mai zero slot per la previsione (T96).
 - **Abbonamenti** (ADR-0119): Claude Max 5x dal 01-02/11, Google Ultra. Le stime si scrivono sul piano di riferimento; lo script le scala.
 - **La finestra delle 5 ore la protegge lo script.** Mai più togliere `· approvato` per dosare i lanci. Nessun ripiego: un task aspetta il suo provider, si sposta solo con `assegna`.
-- **Argon:** quota esaurita fino al 04/11. **Fable:** solo i task più difficili, mai orchestratore; una sola misura (T157: 7 % sul suo contatore, ~55 punti di sessione).
+- **Argon (autore, 04/11): pochi crediti, tienilo sotto controllo.** Solo task piccoli, anche complessi; mai grandi esecuzioni. **Fable:** solo i task più difficili; può orchestrare solo se l'autore spunta la casella (T255 cambia ADR-0115); una misura: T157, 7 % sul suo contatore, ~55 punti di sessione. **Claude e GPT su `agy` non si accendono:** l'autore ha provato Opus lì, quota finita in meno di un minuto. **Gemini:** valutare anche i modelli inferiori dalla scheda.
 - **Ogni domanda per l'autore va in chat per intero, numerata, con la raccomandazione** (sua richiesta, 04/11), e in `domande/aperte.md`; mai solo «vedi il file». Sui modelli fatti, non impressioni: T254 scrive `docs/pipeline/modelli.md`, T255 distingue Sonnet e Haiku.
 - Al più una verifica nel browser alla volta, solo su Claude. Risposte brevi all'autore.
 - Obiettivi: nessun parallelismo che aumenta il lavoro; finire i crediti entro il reset settimanale, non prima; margine per le urgenze.
@@ -69,4 +69,4 @@ Aggiornato il 04/11/2026, epoca 259. Crediti: vedi `stato`.
 ## Ultime 2 epoche
 
 - **258:** integrati T254 e T253; creati T256 e T257.
-- **259:** integrato T89e.
+- **259:** integrati T89e e T182; creati T258 e T259.
