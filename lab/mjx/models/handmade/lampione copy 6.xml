@@ -1,0 +1,402 @@
+<!--
+Lampione futuristico a gravità con mortaio fotonico (corona): arredo urbano neon punk per il viale della corona.
+Architettura a spirale elicoidale con nucleo/cubo di vetro in risalita lenta e caduta gravitazionale,
+con attivazione sequenziale dei condensatori luminosi a 26 fasi di decadimento.
+Palette armonizzata con gli edifici e i droni della Corona (Torre della Magia, Sala Sistemi, Treno Pod, Panchina).
+-->
+<sequence values="BMmDSsVTGNWEexXpabcvOPC1234567890ZAFYURQLKJIH" size="10 10 100" symmetry="(x)" name="Lampione">
+  <!-- Materiali strutturali: metallo cybernetico abissale e ardesia violacea (da Sala Sistemi / Torre Magia) -->
+  <color symbol="D" value="0c0a12" name="piastra base carbonio abissale"/>
+  <color symbol="M" value="14141a" name="metallo primario nero-viola"/>
+  <color symbol="m" value="242632" name="metallo secondario biselli ardesia"/>
+
+  <!-- Meccanica, gabbia elicoidale e finiture cromate (riflessi lavanda/indaco) -->
+  <color symbol="S" value="6e6a85" name="cromo satinato brunito lavanda"/>
+  <color symbol="s" value="c2c3c7" name="argento cromo lucido bulloni"/>
+
+  <!-- Ottiche, guide riflettenti e prismi -->
+  <color symbol="V" value="181c28" name="vano ottico vetro scuro"/>
+  <color symbol="T" value="403858" name="riflettore prisma lavanda scuro"/>
+  <color symbol="G" value="05d9e8" name="diffusore prismatico ciano"/>
+  <color symbol="x" value="ff0000" hidden="True" name="marker temporaneo per ripristino fascia"/>
+
+  <!-- Fonti luminose attive (glow="True"): Gradiente Neon Punk a 26 fasi -->
+  <!-- Dal picco laser bianco-ciano (1), attraverso elettrico/cobalto (6-Z), fino alla coda viola/magenta (F-Y) -->
+  <color symbol="1" value="ffffff" glow="True" name="fascio neon 1 picco fotonico"/>
+  <color symbol="2" value="d8fcff" glow="True" name="fascio neon 2 ghiaccio"/>
+  <color symbol="3" value="9ef6ff" glow="True" name="fascio neon 3 ciano chiaro"/>
+  <color symbol="4" value="5cecff" glow="True" name="fascio neon 4 ciano vivo"/>
+  <color symbol="5" value="05d9e8" glow="True" name="fascio neon 5 ciano corona"/>
+  <color symbol="6" value="00c2f2" glow="True" name="fascio neon 6 azzurro"/>
+  <color symbol="7" value="29adff" glow="True" name="fascio neon 7 cobalto"/>
+  <color symbol="8" value="4794ff" glow="True" name="fascio neon 8 cobalto profondo"/>
+  <color symbol="9" value="667cff" glow="True" name="fascio neon 9 indaco elettrico"/>
+  <color symbol="0" value="8566ff" glow="True" name="fascio neon 10 ametista"/>
+  <color symbol="A" value="a352ff" glow="True" name="fascio neon 11 viola neon"/>
+  <color symbol="Z" value="c084f8" glow="True" name="fascio neon 12 lavanda magia"/>
+  <color symbol="C" value="d946ef" glow="True" name="fascio neon 13 orchidea"/>
+  <color symbol="F" value="ff2a6d" glow="True" name="fascio neon 14 magenta punk"/>
+  <color symbol="H" value="db2464" glow="True" name="fascio neon 15 cremisi"/>
+  <color symbol="I" value="b81f5b" glow="True" name="fascio neon 16 rubino scuro"/>
+  <color symbol="J" value="961a51" glow="True" name="fascio neon 17 vinaccia"/>
+  <color symbol="K" value="781748" glow="True" name="fascio neon 18 prugna"/>
+  <color symbol="L" value="5c143e" glow="True" name="fascio neon 19 melanzana"/>
+  <color symbol="N" value="441134" glow="True" name="fascio neon 20 viola notturno"/>
+  <color symbol="O" value="300e29" glow="True" name="fascio neon 21 brace viola"/>
+  <color symbol="P" value="220b1f" glow="True" name="fascio neon 22 fumo"/>
+  <color symbol="Q" value="160816" glow="True" name="fascio neon 23 ombra"/>
+  <color symbol="R" value="0e050f" glow="True" name="fascio neon 24 residuo"/>
+  <color symbol="U" value="080309" glow="True" name="fascio neon 25 quasi spento"/>
+  <color symbol="Y" value="040105" glow="True" name="fascio neon 26 innesco dormiente"/>
+
+  <!-- Spie telemetriche e nuclei (coerenti con Panchina, Totem e Treno) -->
+  <color symbol="W" value="ffffff" glow="True" name="nucleo fotonico bianco"/>
+  <color symbol="E" value="00ff88" glow="True" name="led alimentazione smeraldo"/>
+  <color symbol="e" value="29adff" glow="True" name="led uplink cobalto"/>
+
+  <!-- Componenti in vetro e massa battente in caduta -->
+  <color symbol="v" value="29adff" alpha="0.38" name="vetro protettivo cobalto"/>
+  <color symbol="p" value="05d9e8" alpha="0.55" name="peso mortaio caricatore ciano"/>
+  <color symbol="c" value="ff2a6d" alpha="0.60" name="peso mortaio in caduta magenta"/>
+
+  <!-- Marcatori per cinematica e regole generative -->
+  <color symbol="a" value="29adff" alpha="0" name="apice mortaio"/>
+  <color symbol="b" hidden="True" alpha="0" name="marker caduta mortaio"/>
+  <color symbol="X" hidden="True" name="marker generativo"/>
+
+  <!-- ======================================================== -->
+  <!-- 1. PLINTO E FLANGIA DI FONDAZIONE (z = 0..2)             -->
+  <!-- ======================================================== -->
+  <box at="3.5 3 0" size="4 7 1" color="D"/>
+  <box at="3.5 3 0" size="8 5 1" color="D"/>
+
+  <!-- Bulloni cromati esagonali di ancoraggio -->
+  <box at="2 0 0" size="1 1 1" color="s"/>
+  <box at="5 0 0" size="1 1 1" color="s"/>
+  <box at="7 1 0" size="1 1 1" color="s"/>
+  <box at="7 5 0" size="1 1 1" color="s"/>
+  <box at="0 5 0" size="1 1 1" color="s"/>
+  <box at="0 1 0" size="1 1 1" color="s"/>
+  <box at="2 6 0" size="1 1 1" color="s"/>
+  <box at="5 6 0" size="1 1 1" color="s"/>
+  <box at="5 6 17" size="1 1 1" color="s"/>
+  <box at="2 6 17" size="1 1 1" color="s"/>
+  <box at="1 1 30" size="1 1 1" color="s"/>
+  <box at="1 1 33" size="1 1 1" color="s"/>
+  <box at="6 1 30" size="1 1 1" color="s"/>
+  <box at="6 1 33" size="1 1 1" color="s"/>
+  <box at="1 1 44" size="1 1 1" color="s"/>
+  <box at="1 1 47" size="1 1 1" color="s"/>
+  <box at="6 1 44" size="1 1 1" color="s"/>
+  <box at="6 1 47" size="1 1 1" color="s"/>
+
+  <!-- Zoccolo a gradino in metallo primario a quota z=1 -->
+  <box at="3.5 3.0 1" size="4 3 1" color="M"/>
+
+  <!-- Pannello telemetrico frontale sul plinto (con spie E, e riattivate: +2 voxel glow) -->
+  <box at="2 5 1" size="1 1 1" color="E"/>
+  <box at="3.5 4 2" size="2 1 1" color="F"/>
+  <box at="3.5 5 1" size="2 1 1" color="C"/>
+  <box at="3.5 3 3" size="2 1 1" color="H"/>
+  <box at="5 5 1" size="1 1 1" color="e"/>
+
+  <!-- Collare rastremato di ancoraggio colonna a quota z=2 -->
+  <box at="3.5 2.5 2" size="4 2 1" color="m"/>
+  <box at="3.5 2.5 2" size="2 2 1" color="S"/>
+
+  <!-- ======================================================== -->
+  <!-- 2. PILONE VERTICALE AERODINAMICO (z = 2..11)             -->
+  <!-- ======================================================== -->
+  <box at="3.5 2 2" size="2 1 10" color="M"/>
+  <box at="3.5 1 3" size="2 1 1" color="m"/>
+  <box at="3.5 1 5" size="2 1 4" color="m"/>
+
+  <!-- Anelli collare intermedi e spirale inferiore -->
+  <box at="2 1 5" size="1 1 1" color="S"/>
+  <box at="2 4 7" size="1 1 1" color="S"/>
+  <box at="2 2.5 6" size="1 2 1" color="S"/>
+  <box at="2 0 1" size="1 1 4" color="S"/>
+  <box at="2 5 8" size="1 1 5" color="S"/>
+  <box at="3.5 3 0" size="6 5 1" color="S"/>
+  <box at="3.5 2.5 5" size="2 2 1" color="M"/>
+  <box at="3.5 2.5 9" size="2 2 1" color="M"/>
+
+  <!-- ======================================================== -->
+  <!-- 3. SNODO MECCANICO E GABBIA ELICOIDALE (z = 11..63)      -->
+  <!-- ======================================================== -->
+  <box at="3.5 2.5 11" size="2 2 1" color="s"/>
+  <box at="3.5 1.0 12" size="2 1 2" color="m"/>
+  <box at="3.5 1 18" size="2 1 1" color="m"/>
+  <box at="3.5 1 14" size="2 1 1" color="m"/>
+  <box at="3.5 1.0 13" size="2 1 1" color="s"/>
+  <box at="3.5 1 9" size="2 1 1" color="s"/>
+  <box at="3.5 1 4" size="2 1 1" color="s"/>
+
+  <box at="3.5 2.5 12" size="2 2 1" color="M"/>
+  <box at="3.5 3.5 12" size="2 2 1" color="M"/>
+
+  <box at="3.5 3.5 13" size="2 2 1" color="M"/>
+  <box at="3.5 4.0 13" size="4 1 1" color="S"/>
+  <box at="5 6 12" size="1 1 1" color="S"/>
+  <box at="2 6 12" size="1 1 1" color="S"/>
+  <box at="3.5 3 14" size="4 1 1" color="S"/>
+  <box at="3.5 2 14" size="2 1 1" color="S"/>
+  <box at="3.5 1 15" size="4 1 1" color="S"/>
+  <box at="1 1 20" size="1 1 1" color="S"/>
+  <box at="1 4 22" size="1 1 1" color="S"/>
+  <box at="1 6 21" size="1 1 2" color="S"/>
+  <box at="1 7 19" size="1 1 2" color="S"/>
+  <box at="6 6 21" size="1 1 2" color="S"/>
+  <box at="6 7 19" size="1 1 2" color="S"/>
+  <box at="3.5 7 18" size="4 1 1" color="S"/>
+  <box at="1 2.5 21" size="1 2 1" color="S"/>
+  <box at="1 0 16" size="1 1 4" color="S"/>
+  <box at="1 5 23" size="1 1 4" color="S"/>
+  <box at="1 3.5 27" size="1 2 1" color="S"/>
+  <box at="1 2 28" size="1 1 1" color="S"/>
+  <box at="1 1 29" size="1 1 1" color="S"/>
+  <box at="1 1 34" size="1 1 1" color="S"/>
+  <box at="1 4 36" size="1 1 1" color="S"/>
+  <box at="1 2.5 35" size="1 2 1" color="S"/>
+  <box at="1 0 30" size="1 1 4" color="S"/>
+  <box at="1 5 37" size="1 1 4" color="S"/>
+  <box at="1 3.5 41" size="1 2 1" color="S"/>
+  <box at="1 2 42" size="1 1 1" color="S"/>
+  <box at="1 1 43" size="1 1 1" color="S"/>
+  <box at="1 1 48" size="1 1 1" color="S"/>
+  <box at="1 4 50" size="1 1 1" color="S"/>
+  <box at="1 2.5 49" size="1 2 1" color="S"/>
+  <box at="1 0 44" size="1 1 4" color="S"/>
+  <box at="1 0 58" size="1 1 4" color="S"/>
+  <box at="1 5 51" size="1 1 4" color="S"/>
+  <box at="1 3.5 55" size="1 2 1" color="S"/>
+  <box at="1 6 55" size="1 1 1" color="S"/>
+  <box at="2 5 63" size="1 1 1" color="5"/>
+  <box at="5 5 63" size="1 1 1" color="5"/>
+  <box at="3.5 6 63" size="4 1 1" color="M"/>
+  <box at="3.5 5 63" size="2 1 1" color="M"/>
+  <box at="1 7 56" size="1 1 1" color="S"/>
+  <box at="6 6 55" size="1 1 1" color="S"/>
+  <box at="6 7 56" size="1 1 1" color="S"/>
+  <box at="1 2 56" size="1 1 1" color="S"/>
+  <box at="3.5 7 57" size="4 1 1" color="S"/>
+
+  <box at="1 1 57" size="1 1 1" color="S"/>
+  <box at="1 3.5 62" size="1 6 1" color="S"/>
+  <box at="6 1 20" size="1 1 1" color="S"/>
+  <box at="6 4 22" size="1 1 1" color="S"/>
+  <box at="6 2.5 21" size="1 2 1" color="S"/>
+  <box at="6 0 16" size="1 1 4" color="S"/>
+  <box at="6 5 23" size="1 1 4" color="S"/>
+  <box at="6 3.5 27" size="1 2 1" color="S"/>
+  <box at="6 2 28" size="1 1 1" color="S"/>
+  <box at="6 1 29" size="1 1 1" color="S"/>
+  <box at="6 1 34" size="1 1 1" color="S"/>
+  <box at="6 4 36" size="1 1 1" color="S"/>
+  <box at="6 2.5 35" size="1 2 1" color="S"/>
+  <box at="6 0 30" size="1 1 4" color="S"/>
+  <box at="6 5 37" size="1 1 4" color="S"/>
+  <box at="6 3.5 41" size="1 2 1" color="S"/>
+  <box at="6 2 42" size="1 1 1" color="S"/>
+  <box at="6 1 43" size="1 1 1" color="S"/>
+  <box at="6 1 48" size="1 1 1" color="S"/>
+  <box at="6 4 50" size="1 1 1" color="S"/>
+  <box at="6 2.5 49" size="1 2 1" color="S"/>
+  <box at="6 0 44" size="1 1 4" color="S"/>
+
+  <!-- Collari di rinforzo intermedi a z=31 e z=45 con micro-nodi neon (+4 voxel glow) -->
+  <box at="3.5 0 45" size="4 1 2" color="m"/>
+  <box at="5.5 1 45" size="2 1 2" color="m"/>
+  <box at="1.5 1 45" size="2 1 2" color="m"/>
+  <box at="1 3.5 45" size="1 1 1" color="Z"/>
+  <box at="6 3.5 45" size="1 1 1" color="Z"/>
+
+  <box at="1 4.5 57" size="1 6 1" color="m"/>
+  <box at="6 4.5 57" size="1 6 1" color="m"/>
+  <box at="1 5 55" size="1 1 1" color="s"/>
+  <box at="6 5 55" size="1 1 1" color="s"/>
+
+  <box at="3.5 0 31" size="4 1 2" color="m"/>
+  <box at="5.5 1 31" size="2 1 2" color="m"/>
+  <box at="1.5 1 31" size="2 1 2" color="m"/>
+  <box at="1 3.5 31" size="1 1 1" color="P"/>
+  <box at="6 3.5 31" size="1 1 1" color="P"/>
+
+  <box at="6 0 58" size="1 1 4" color="S"/>
+  <box at="6 5 51" size="1 1 4" color="S"/>
+  <box at="6 3.5 55" size="1 2 1" color="S"/>
+  <box at="6 2 56" size="1 1 1" color="S"/>
+  <box at="6 1 57" size="1 1 1" color="S"/>
+  <box at="6 3.5 62" size="1 6 1" color="S"/>
+  <box at="5 1 5" size="1 1 1" color="S"/>
+  <box at="5 4 7" size="1 1 1" color="S"/>
+  <box at="5 2.5 6" size="1 2 1" color="S"/>
+  <box at="5 0 1" size="1 1 4" color="S"/>
+  <box at="5 5 8" size="1 1 5" color="S"/>
+  <box at="3.5 4.0 13" size="2 1 1" color="M"/>
+
+  <box at="3.5 4 14" size="2 1 1" color="M"/>
+  <box at="5 4.5 14" size="1 2 1" color="m"/>
+  <box at="2 4.5 14" size="1 2 1" color="m"/>
+  <box at="3.5 4 14" size="2 1 1" color="s"/>
+
+  <box at="3.5 4 15" size="2 1 1" color="M"/>
+  <box at="3.5 5.0 15" size="4 1 1" color="S"/>
+  <box at="3.5 5.0 15" size="2 1 1" color="M"/>
+
+  <box at="3.5 2 13" size="2 1 1" color="X"/>
+
+  <!-- ======================================================== -->
+  <!-- 4. CORPO, TESTA SUPERIORE E VETRI DI CONFINAMENTO        -->
+  <!-- ======================================================== -->
+  <box at="3.5 4.5 16" size="4 4 1" color="M"/>
+  <box at="6 3.5 17" size="1 6 1" color="M"/>
+  <box at="1 3.5 17" size="1 6 1" color="M"/>
+  <box at="3.5 2.5 63" size="4 4 1" color="M"/>
+
+  <box at="3.5 3.5 19" size="4 4 4" color="p"/>
+  <box at="3.5 6 13" size="4 1 3" color="v"/>
+  <box at="3.5 7 58" size="4 1 4" color="v"/>
+  <box at="3.5 6 58" size="4 1 4" color="7"/>
+  <box at="3.5 1 18" size="2 1 45" color="v"/>
+  <box at="6 4 58" size="1 7 4" color="v"/>
+  <box at="1 4 58" size="1 7 4" color="v"/>
+  <box at="3.5 5 8" size="2 1 4" color="v"/>
+  <box at="3.5 6 12" size="2 1 1" color="v"/>
+  <box at="3.5 4 7" size="2 1 1" color="v"/>
+  <box at="5 5 13" size="1 1 1" color="v"/>
+  <box at="2 5 13" size="1 1 1" color="v"/>
+  <box at="2 2.5 13" size="1 2 1" color="v"/>
+  <box at="2 3 15" size="1 1 1" color="v"/>
+  <box at="3.5 1 16" size="4 1 2" color="v"/>
+  <box at="2 2 14" size="1 1 4" color="v"/>
+  <box at="2 2.5 7" size="1 2 1" color="v"/>
+  <box at="2 3 8" size="1 3 5" color="v"/>
+  <box at="5 2.5 13" size="1 2 1" color="v"/>
+  <box at="5 3 15" size="1 1 1" color="v"/>
+  <box at="5 2 14" size="1 1 4" color="v"/>
+  <box at="5 2.5 7" size="1 2 1" color="v"/>
+  <box at="5 3 8" size="1 3 5" color="v"/>
+
+  <box at="2 4.5 16" size="1 2 1" color="s"/>
+  <box at="5 4.5 16" size="1 2 1" color="s"/>
+  <box at="3.5 3.0 16" size="2 1 1" color="m"/>
+
+  <box at="3.5 4.5 17" size="4 2 1" color="M"/>
+  <box at="3.5 6.0 17" size="2 1 1" color="m"/>
+  <box at="3.5 7 17" size="6 1 1" color="m"/>
+  <box at="3.5 7 62" size="6 1 1" color="m"/>
+  <box at="3.5 3.5 17" size="2 2 1" color="m"/>
+
+  <box at="3.5 4.5 18" size="2 3 1" color="m"/>
+  <box at="3.5 3.5 18" size="2 2 1" color="V"/>
+  <box at="3.5 5.0 18" size="2 1 1" color="T"/>
+  <box at="3.5 2 18" size="2 1 1" color="T"/>
+  <box at="3.5 5.5 18" size="2 1 1" color="s"/>
+
+  <!-- ======================================================== -->
+  <!-- 5. FERITOIA OTTICA E COLONNA ENERGETICA (z = 4..15)      -->
+  <!-- ======================================================== -->
+  <box at="3.5 4.5 15" size="4 2 1" color="T"/>
+  <box at="2 5.0 15" size="1 2 1" color="G"/>
+  <box at="5 5.0 15" size="1 2 1" color="G"/>
+
+  <box at="3.5 4.5 15" size="2 2 1" color="1"/>
+  <box at="3.5 4.5 14" size="2 2 1" color="Y"/>
+  <box at="3.5 4.5 13" size="2 2 1" color="U"/>
+  <box at="3.5 5 12" size="2 1 1" color="R"/>
+  <box at="3.5 4 11" size="2 1 1" color="Q"/>
+  <box at="3.5 3 10" size="2 1 1" color="P"/>
+  <box at="3.5 3 8" size="2 1 1" color="N"/>
+  <box at="3.5 3 7" size="2 1 1" color="L"/>
+  <box at="3.5 3 6" size="2 1 1" color="K"/>
+  <box at="3.5 3 4" size="2 1 1" color="I"/>
+
+  <box at="3.5 2 63" size="2 1 1" color="a"/>
+  <box at="3.5 0 59" size="2 1 1" color="b"/>
+  <box at="3.5 0 55" size="2 1 1" color="b"/>
+  <box at="3.5 0 47" size="2 1 1" color="b"/>
+  <box at="3.5 0 30" size="2 1 1" color="b"/>
+  <box at="3.5 0 22" size="2 1 1" color="b"/>
+  <box at="3.5 6 61" size="2 1 1" color="b"/>
+  <box at="3.5 6 62" size="2 1 1" color="b"/>
+
+  <!-- ======================================================== -->
+  <!-- 6. REGOLE GENERATIVE: VARIANTI NEI SEMI                  -->
+  <!-- ======================================================== -->
+  <one steps="1">
+    <rule in="X" out="s" p="0.40"/>
+    <rule in="X" out="m" p="0.30"/>
+    <rule in="X" out="B" p="0.30"/>
+  </one>
+  <all in="X" out="s"/>
+
+  <prl steps="1" optional="True">
+    <rule in="B M M" out="* s *" p="0.25"/>
+    <rule in="M M B" out="* s *" p="0.25"/>
+    <rule in="M/M/M" out="*/m/*" p="0.15"/>
+  </prl>
+
+  <prl steps="1" optional="True">
+    <rule in="T" out="G" p="0.25"/>
+  </prl>
+</sequence>
+
+<!-- ============================================================ -->
+<!-- 7. ANIMAZIONE TELEMETRIA (26 FRAMES): GRAVITÀ E DECADIMENTO  -->
+<!-- ============================================================ -->
+<animation name="telemetria" frames="26">
+  <sequence>
+    <!-- Risalita lenta del cubo di vetro (p) -->
+    <one in="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB pppp/pppp/pppp/pppp pppp/pppp/pppp/pppp pppp/pppp/pppp/pppp pppp/pppp/pppp/pppp"
+        out="pppp/pppp/pppp/pppp pppp/pppp/pppp/pppp pppp/pppp/pppp/pppp pppp/pppp/pppp/pppp BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB"
+        steps="1" symmetry="(xy)"/>
+
+    <!-- Conversione all'apice in massa battente (c) e caduta per gravità -->
+    <all in="****/*MM*/****/**** pppp/pppp/pppp/pppp pppp/pppp/pppp/pppp pppp/pppp/pppp/pppp pppp/pppp/pppp/pppp" out="****/*MM*/****/**** cccc/cccc/cccc/cccc cccc/cccc/cccc/cccc cccc/cccc/cccc/cccc cccc/cccc/cccc/cccc" steps="1" symmetry="(xy)"/>
+    
+    <all in="mm/vm" out="Bx/vm" symmetry="()"/>
+    <all in="mm/mv" out="xB/mv" symmetry="()"/>
+    <markov>
+        <all in="*BB*/****/cccc/cccc/cccc/cccc ****/****/cccc/cccc/cccc/cccc ****/****/cccc/cccc/cccc/cccc ****/****/cccc/cccc/cccc/cccc ****/****/BBBB/BBBB/BBBB/BBBB" out="*BB*/****/BBBB/BBBB/BBBB/BBBB ****/****/cccc/cccc/cccc/cccc ****/****/cccc/cccc/cccc/cccc ****/****/cccc/cccc/cccc/cccc ****/****/cccc/cccc/cccc/cccc" steps="1" symmetry="()"/>
+    </markov>
+    
+    <all in="Bx/vm" out="mm/vm" symmetry="()"/>
+    <all in="xB/mv" out="mm/mv" symmetry="()"/>
+    <all in="*bb*/****/cccc/cccc/cccc/cccc ****/****/cccc/cccc/cccc/cccc ****/****/cccc/cccc/cccc/cccc ****/****/cccc/cccc/cccc/cccc ****/****/BBBB/BBBB/BBBB/BBBB" out="*bb*/****/BBBB/BBBB/BBBB/BBBB ****/****/cccc/cccc/cccc/cccc ****/****/cccc/cccc/cccc/cccc ****/****/cccc/cccc/cccc/cccc ****/****/cccc/cccc/cccc/cccc" steps="1" symmetry="()"/>
+
+    <!-- Pulsazione diagnostica delle spie alla base -->
+    <prl steps="1">
+      <rule in="E" out="e" p="0.30"/>
+      <rule in="e" out="E" p="0.30"/>
+    </prl>
+  </sequence>
+
+  <!-- Catena di attivazione e spegnimento graduale a 26 stadi -->
+  <all in="Y" out="1" steps="1" />
+  <all in="U" out="Y" steps="1" />
+  <all in="R" out="U" steps="1" />
+  <all in="Q" out="R" steps="1" />
+  <all in="P" out="Q" steps="1" />
+  <all in="O" out="P" steps="1" />
+  <all in="N" out="O" steps="1" />
+  <all in="L" out="N" steps="1" />
+  <all in="K" out="L" steps="1" />
+  <all in="J" out="K" steps="1" />
+  <all in="I" out="K" steps="1" />
+  <all in="H" out="I" steps="1" />
+  <all in="F" out="H" steps="1" />
+  <all in="C" out="F" steps="1" />
+  <all in="Z" out="C" steps="1" />
+  <all in="A" out="Z" steps="1" />
+  <all in="0" out="A" steps="1" />
+  <all in="9" out="0" steps="1" />
+  <all in="8" out="9" steps="1" />
+  <all in="7" out="8" steps="1" />
+  <all in="6" out="7" steps="1" />
+  <all in="5" out="6" steps="1" />
+  <all in="4" out="5" steps="1" />
+  <all in="3" out="4" steps="1" />
+  <all in="2" out="3" steps="1" />
+  <all in="1" out="2" steps="1" />
+</animation>
