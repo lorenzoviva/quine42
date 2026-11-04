@@ -22,6 +22,7 @@ Senza numero («esegui il prossimo task del backlog») vale il primo `da fare` c
 ## Step 9 — chiusura
 
 ### T01 · Lotti e strutture: test, ADR, documenti — `fatto` (`34adee7`)
+- Step: 9
 - Contesto: F7 di [`step9-3d.md`](../archivio/2-step/plans/step9-3d.md) (codice fatto: `settleLots`, `placeInside`, `floorAt`,
   `structureAt`, una struttura importante per zona, `form.wanted`).
 - Fare: test in `tests/` (gli edifici del borgo diventano strutture girate verso la porta; le caselle del lotto
@@ -34,6 +35,7 @@ Senza numero («esegui il prossimo task del backlog») vale il primo `da fare` c
   come occupante del proprio pavimento, quindi le cose `dentro` finivano sempre sulla casella del lotto), corretto.
 
 ### T02 · Azioni come regole: «Altro…» scrive un'`<action>` — `fatto` (`fd85a30`)
+- Step: 9
 - Contesto: F8 del piano. Oggi «Altro…» su un'entità produce effetti (ADR-0014).
 - Fare: se ciò che il viandante vuole fare cambia la **forma** della cosa (aprire, rompere, accendere, spegnere),
   l'Ingegnere (o lo Scultore) scrive una regola `<action>` sul programma del tipo; il kernel la prova sul modello
@@ -47,6 +49,7 @@ Senza numero («esegui il prossimo task del backlog») vale il primo `da fare` c
   Non verificato nel browser con Gemini (nessuna UI nuova: la voce `modello:` del menu c'era già).
 
 ### T03 · Bug: alberi e massi dei terreni visibili oltre il cerchio — `fatto` (`b1fa100`)
+- Step: 9
 - Dal to-do: «gli oggetti bloccanti (roccia, montagna) vengono spawnati anche sulla corona».
 - Causa probabile: in `src/render/materials.ts` il taglio usa `modelMatrix * transformed` senza `instanceMatrix`,
   quindi le istanze (`InstancedMesh` dei modelli dei terreni) non vengono tagliate.
@@ -57,6 +60,7 @@ Senza numero («esegui il prossimo task del backlog») vale il primo `da fare` c
   (`casts`). Verificato nel browser (offline): corona senza alberi né ombre, dentro il cerchio tutto come prima.
 
 ### T04 · Aiuto (H/F1) senza meta-gioco, con i comandi del 3D — `fatto` (`de71498`)
+- Step: 9
 - Dal to-do: «rimuovere i riferimenti meta del menu di aiuto». Il testo in `index.html` parla di codice, Concilio,
   simulazione, «spezza la simulazione», caselle, sprite. Riscriverlo dentro il mondo (ADR-0025) e con i comandi
   attuali; ciò che è da giocatore trasceso solo dopo la corona.
@@ -68,6 +72,7 @@ Senza numero («esegui il prossimo task del backlog») vale il primo `da fare` c
   `NODE_ENV=development` nella shell `npm run build` fa una build di sviluppo (`DEV` sempre vero).
 
 ### T05 · Backup degli universi 2D e push del branch — `fatto` (chiuso dall'autore)
+- Step: 9
 - D2 del piano: spostare `H:\projects\rune\universes\valmora`, `valmora copy 2`, `valmora new` in
   `H:\projects\rune-backup\universi-2d\` (spostati, non copiati; prima verificare la copia: numero di file e
   dimensione). Push del branch `3d` (mai su `main`).
@@ -82,6 +87,7 @@ Senza numero («esegui il prossimo task del backlog») vale il primo `da fare` c
   (`rm -rf "H:/projects/rune/universes/valmora" "H:/projects/rune/universes/valmora copy 2" "H:/projects/rune/universes/valmora new"`).
 
 ### T06 · Chiusura dello step 9 — `fatto` (`4e19d6a`)
+- Step: 9
 - AGENTS.md riscritto dove descrive ancora il 2D (Visione, Regole, Corona, Personaggi, Fatto/Prossimi passi);
   `GEMINI.md` («gioco 2D top-down»); `README.md`; ADR-0037 → «attuato»; diario del piano chiuso; riassunto finale
   dello step 9 (cosa è cambiato, cosa manca, quanto è costato) in `docs/reports/step9.md`.
@@ -98,6 +104,7 @@ diverso dalle regole). Analisi completa dell'autore, con gli esempi, in
 [`docs/userchats/to-do-2026-10-22.md`](../archivio/3-to-do-backlog/userchats/to-do-2026-10-22.md) (sezione «Incoerenze personaggi e trame»).
 
 ### T07 · Decisione: Graphify e il grafo del mondo — `fatto` (`faa0bc7`)
+- Step: 10
 - **Risposta dell'autore** (22/10/2026): approvato il grafo nativo del kernel («in casa») per l'uso (b); resta da
   provare Graphify per (a) e scrivere l'ADR.
 - Due usi distinti, da non confondere: (a) **sviluppo**: Graphify (CLI open source che fa del repository un
@@ -117,6 +124,7 @@ diverso dalle regole). Analisi completa dell'autore, con gli esempi, in
   1 verso nessuno, molti nomi quasi uguali: i casi di prova di T10-T12.
 
 ### T08 · Il canone delle rune — `fatto` (`dc311a7`)
+- Step: 10
 - Un documento dell'universo (`world/canone.md`) che dice cosa sono le rune per chi vive nel mondo: aspetto, dove
   si trovano, che restano dove sono finché qualcuno non le raccoglie, cosa fanno le magiche, cosa nessuno sa. Lo
   ricevono il Narratore e l'Arbitro in ogni compito narrativo; regola: nessuna trama inventa comportamenti nuovi
@@ -129,6 +137,7 @@ diverso dalle regole). Analisi completa dell'autore, con gli esempi, in
   Nessuna verifica nel browser (nessuna UI cambiata).
 
 ### T09 · Prompt narrativi più semplici e senza quarta parete — `fatto` (`23d04a1`)
+- Step: 10
 - Genesi: togliere l'invito al mistero e la leggenda attorno alla piazza («chi cammina troppo si ritrova in
   piazza»). Principi della quarta parete (`src/kernel/fourthwall.ts`) con gli esempi dell'analisi (tornare in
   piazza, essere osservati, confini invalicabili, simboli luminosi nel terreno) e il divieto di duplicare elementi
@@ -142,6 +151,7 @@ diverso dalle regole). Analisi completa dell'autore, con gli esempi, in
   aggiornamento dell'ADR-0025; la revisione ora tocca anche `plots.json`. Nessuna verifica nel browser (nessuna UI).
 
 ### T10 · Società coerente — `fatto` (`5f7db1c`)
+- Step: 10
 - Ogni individuo ha una specie (persona, animale) e un genere; i legami possibili dipendono da entrambi (un gatto
   non ha fratelli umani né apprendisti; una donna non è padre); niente nomi quasi uguali. Validatore della
   società e riparazione di `people.json` esistenti; prompt del Narratore; test.
@@ -158,6 +168,7 @@ diverso dalle regole). Analisi completa dell'autore, con gli esempi, in
   resta (es. «Isolde» maschio). Nessuna verifica nel browser (nessuna UI; `aurora` non ha ancora persone).
 
 ### T11 · Trame coerenti con le persone — `fatto` (`311c466`) (dipende da T08, T10)
+- Step: 10
 - Le trame (`plots.json`) validate contro `people.json` (personaggi esistenti, specie, legami) e contro il canone
   delle rune; ciò che non torna va al Narratore con il motivo. Test.
 - Esito: `reviewPlot` in `plots.ts` (persone esistenti; animali che non parlano, non scrivono, non chiedono missioni;
@@ -171,6 +182,7 @@ diverso dalle regole). Analisi completa dell'autore, con gli esempi, in
   i luoghi delle tappe (`dove`) non sono verificati: lo farà il grafo (T12-T13). Nessuna verifica nel browser (nessuna UI).
 
 ### T12 · Il grafo del mondo — `fatto` (`be10b34`) (dipende da T07)
+- Step: 10
 - Attuare l'[ADR-0045](../adr/0045-grafo-del-mondo.md): `src/kernel/graph.ts` costruisce il grafo dai file dell'universo
   (nodi e archi tipizzati, id `<tipo>:<slug>`), lo ricostruisce dopo ogni scrittura di quei file e lo scrive in
   `world/grafo.json` con il commit (formato node-link di Graphify); `find`, `node`, `neighbors`, `context`, `check`.
@@ -189,6 +201,7 @@ diverso dalle regole). Analisi completa dell'autore, con gli esempi, in
   corretto la specie delle persone attese, che dava un falso «figlio di un gatto»).
 
 ### T13 · Il contesto degli agenti dal grafo — `fatto` (`44c5dce`) (dipende da T12)
+- Step: 10
 - Ogni compito narrativo riceve i nodi rilevanti (le persone coinvolte e i loro legami, il luogo, le trame
   aperte, il canone) invece dei riassunti generici di oggi: meno token, meno invenzioni. Misurare i token prima e
   dopo con il registro dei consumi.
@@ -204,6 +217,7 @@ diverso dalle regole). Analisi completa dell'autore, con gli esempi, in
 ## Grafica e controlli 3D
 
 ### T14 · Voxel luminosi — `fatto` (`8c0e949`)
+- Step: 11
 - `<color symbol="F" value="ffcc66" glow="True"/>`: lettere che emettono luce (fiamme, finestre, rune, neon).
   Emissivo nelle mesh (attributo per vertice), un bloom leggero, nella palette dello Scultore e nelle istruzioni.
   Serve per la corona neon (T19, T20).
@@ -215,6 +229,7 @@ diverso dalle regole). Analisi completa dell'autore, con gli esempi, in
   bloom; le lastre delle rune (texture trasparenti) no, e i voxel luminosi non illuminano ciò che hanno intorno.
 
 ### T15 · Telecamera che ruota — `fatto` (`8806e24`)
+- Step: 11
 - Dal to-do: «non mi è chiaro come si giri la telecamera»: oggi è fissa (il movimento del kernel è relativo allo
   schermo, Q e R sono tasti del gioco). Proposta: rotazione a scatti di 90° (tasti da scegliere tra quelli liberi)
   e trascinamento con il tasto centrale; WASD relativo alla telecamera (l'input del kernel ruota di conseguenza);
@@ -226,6 +241,7 @@ diverso dalle regole). Analisi completa dell'autore, con gli esempi, in
   il trascinamento si posa su π. Diverso dal previsto: nessuno; le rune incise si leggono nel verso del mondo.
 
 ### T16 · Terreno con le altezze (Hills) — `fatto` (`8af0a7b`)
+- Step: 12
 - Dal to-do: il terreno con variazioni di altezza, partendo dal modello 3D `Hills` di MarkovJunior. ADR: campo di
   altezza a scala di casella, continuo fra i chunk (deterministico per seme e coordinate); il renderer lo disegna,
   il kernel lo usa per i pavimenti dei corpi. Da decidere nel task: altezze solo estetiche o anche ostacoli
@@ -241,6 +257,7 @@ diverso dalle regole). Analisi completa dell'autore, con gli esempi, in
   (`waterLevels`); fra due chunk può restare un gradino. Corrette anche le sponde, che erano girate al contrario.
 
 ### T17 · Lotti in piano — `fatto` (`c50490b`)
+- Step: 12
 - Le strutture su più caselle hanno bisogno di spazi piani: il piano spiana i lotti (e i sentieri) prima di
   posare i modelli. Test.
 - Da T16: oggi una struttura sta sul suolo sotto il suo centro, e sotto un lotto il rilievo varia fino a 2 livelli
@@ -262,6 +279,7 @@ Dal to-do (testo completo, con le specifiche di ogni edificio, in
 restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano ridondanti.
 
 ### T18 · Corona quattro volte più grande — `fatto` (`151549f`)
+- Step: 15
 - Raggio del campus ×4 (il cerchio della simulazione no), edifici ridisposti sull'anello, viale, insegne. Test
   dello studio aggiornati.
 - Esito: `CAMPUS` in `src/kernel/corona.ts`: l'anello va da 9 a 36 caselle oltre il cerchio (`outer` = R + 36 = 80); viale
@@ -272,6 +290,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   Diverso dal previsto: nessun ADR (è una misura, non una decisione); i test dello studio non dipendevano dal raggio.
 
 ### T19 · Prompt per Gemini (abbonamento): le strutture della corona — `fatto` (`74bf122`)
+- Step: 15
 - Un prompt per Gemini CLI (agente con file e browser, **senza** la `GEMINI_API_KEY`: genera lui stesso l'XML e
   lo collauda nella sandbox `/lab/3d/` e con gli script del laboratorio), una struttura alla volta, con le
   specifiche dell'autore: Torre della Magia (cilindrica, alta, incisa di rune, scritta in rune), Studio dei
@@ -288,6 +307,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   Nessun ADR: la decisione la attua (e la registra) T20.
 
 ### T20 · Gli esterni della corona come modelli — `fatto` (`40435ef`)
+- Step: 15
 - Ogni edificio della corona usa il suo programma (`models/corona-<id>.xml`) con insegna neon; collisione dai
   voxel; porta dove il modello la mette.
 - Dai programmi di T19 (in `lab/mjx/models/corona-*.xml`): la libreria deve avere una densità per modello (quelli della
@@ -304,6 +324,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   va eseguito dall'autore in Gemini CLI); qui c'è il motore, e portarli nel gioco è T31.
 
 ### T21 · La vetrina con selettore — `fatto` (`0021163`)
+- Step: 15
 - Un meccanismo comune agli interni: un oggetto (schermo, silos, stampante) con «<» «>» ai lati che sceglie
   cosa mostrare; un clic apre un pannello con le informazioni (il modello, il modulo). Base per T22-T24.
 - Esito: `corona.ts`: voci `showcase` (con `source` `rune | persone | cose | oggetti` e `device` `schermo | silos |
@@ -321,6 +342,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   l'effetto (T22), il liquido viscoso e l'individuo scelto (T23), la stampante 3 × 3 (T24; oggi 3 × 1).
 
 ### T22 · La Torre della Magia, dentro — `fatto` (`d2612e8`)
+- Step: 15
 - Lo schermo mostra una runa o una combinazione di rune (magiche e incantesimi noti), «<» «>» per cambiarla; il
   clic mostra nel pannello l'effetto.
 - Esito: `showcaseEntries('rune')` elenca le combinazioni: ogni runa magica da sola (con il suo incantesimo, se c'è),
@@ -332,6 +354,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   Diverso dal previsto: niente; nessun ADR. Le rune singole e i loro incantesimi sono una voce sola (prima erano due).
 
 ### T23 · Lo Studio dei personaggi, dentro — `fatto` (`5058b48`)
+- Step: 15
 - Un silos al centro con il personaggio scelto che fluttua in un liquido viscoso; «<» «>»; il clic mostra il
   modulo e l'individuo.
 - Esito: `showcaseEntries('persone')` mette dopo ogni tipo i suoi individui (`person:<nome>`, «nome · mestiere»), ciascuno
@@ -344,6 +367,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   modulo. Diverso dal previsto: il tipo resta una voce a sé, prima dei suoi individui; nessun ADR.
 
 ### T24 · Laboratorio delle cose e Magazzino degli oggetti, dentro — `fatto` (`5a5a3c8`)
+- Step: 15
 - Una stampante 3D di 3 × 3 caselle con l'oggetto scelto sulla casella centrale (le strutture ridotte alla scala
   di una casella); «<» «>»; il clic mostra le informazioni.
 - Esito: `corona.ts`: `StudioItem.h` (profondità in caselle), `PRINTER = 3`; la vetrina `stampante` è 3 × 3 (righe 10-12),
@@ -357,6 +381,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   quindi solo la casella centrale brilla (il contorno); nessun ADR.
 
 ### T25 · La Sala del Concilio: il tavolo unito — `fatto` (`aa4d322`)
+- Step: 15
 - Il tavolo è fatto di cubi separati: farne un ellissoide unico (un modello o una mesh sola).
 - Esito: `roundTable` in `src/render/corona3d.ts`: un piano ellittico pieno sull'ellisse del kernel (3.4 × 2.3, quella
   della collisione in `corona.ts`), il bordo arrotondato come mezzo ellissoide (64 spicchi, quad orientati da `facing`),
@@ -364,6 +389,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   solo, senza buchi. Diverso dal previsto: nessun modello MarkovJunior (bastano le quad del `Builder`), nessun ADR.
 
 ### T26 · L'Ufficio dei luoghi, dentro — `fatto` (T26a, T26b, T26c, T26d)
+- Step: 15
 - Da progettare in funzione di come lavora il Cartografo (piani, lotti, atlante). **Proposta all'autore** prima
   di costruire.
 - Proposta scritta il 23/10/2026: [`corona-proposte.md`](../archivio/3-to-do-backlog/plans/corona-proposte.md) §1 — **il plastico**: un tavolo olografico
@@ -417,6 +443,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   attorno all'origine), in cache; tutti gli ambienti del seme restano validi. Nessun ADR.
 
 ### T27 · La Sala sistemi, dentro — `fatto` (T27a, T27b, T27c, T27d)
+- Step: 15
 - L'autore chiede un aiuto: far apprezzare la complessità del codice con esempi (cosa fa un sistema, casi d'uso).
   **Proposta all'autore** (es. ogni sistema come un «caso» animato: prima, regola, dopo).
 - Proposta scritta il 23/10/2026: [`corona-proposte.md`](../archivio/3-to-do-backlog/plans/corona-proposte.md) §2 — **la catena** (ogni sistema una
@@ -471,6 +498,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   stazione come i `sys.*`, col suo pannello. Nessun ADR (deciso in T27/T32); nessuna prova nel browser (solo lo scaffale cambia edificio).
 
 ### T32 · Gli edifici dimenticati: Direzione, Biblioteca, Galleria, Archivio — `fatto` (commit «Corona (T32)»)
+- Step: 15
 - Contesto: nel seme il campus ha 12 edifici (13 con l'Archivio, dove oggi finiscono le meccaniche `mech.*`); le
   specifiche del 22/10 e il prompt di T19 ne coprono 8. Proposte in [`corona-proposte.md`](../archivio/3-to-do-backlog/plans/corona-proposte.md) §3:
   Direzione come regia (maxischermo, torre di trasmissione; dentro la linea del tempo dei commit e il quadro dei costi),
@@ -491,6 +519,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   T32-T34, ma T33-T45 sono del multiplayer, quindi T46-T48.
 
 ### T49 · Gli interni della corona: aria, simmetria, luci più tenui — `fatto` (T49a, T49b)
+- Step: 15
 - Contesto: richiesta del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/userchats/to-do-2026-10-24.md), «Interni edifici della corona»,
   con `docs/userchats/direzione.png`). Vale per tutte le stanze (`buildRoom`/`itemMesh` in `corona3d.ts`, le posizioni in
   `corona.ts`). Oggi: tre postazioni (`desk`, `x 4/6/8, y ROOM_H-4`) davanti allo schermo della storia sono celle bloccate
@@ -530,6 +559,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 - Domande per l'autore: nessuna (se il piano terra non tiene dispositivo e scaffali, la scelta è scritta nel task).
 
 ### T46 · La Direzione, dentro: la sala operativa — `fatto` (T46a, T46b, T46c)
+- Step: 15
 - Contesto: [`corona-proposte.md`](../archivio/3-to-do-backlog/plans/corona-proposte.md) §3.1 (approvata il 23/10). Oggi dentro la Direzione (`universo`,
   squadra dell'Arbitro, oro `ffcf5c`) ci sono solo gli scaffali di `universe.json` e le scrivanie. Gli apparecchi seguono
   le vetrine di T21-T28 (`SHOWCASES`/`GRAPH_AT` in `corona.ts`, `showcaseOf`/`stepShowcase`/`clickStudio` in
@@ -584,6 +614,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 - Fatto quando (per pezzo): test verdi, typecheck, verifica nel browser (`aurora`, offline) con pannello e nessun errore.
 
 ### T47 · La Biblioteca del Mondo, dentro — T47a `fatto` (`a363021`), T47b `fatto`
+- Step: 15
 - Contesto: §3.2 (il chiostro, scelto il 23/10). Oggi dentro la Biblioteca (`mondo`, Narratore, verde `7dd87d`) ci sono
   solo gli scaffali dei file di `world/`.
 - **T47a · il leggio**: al posto della vetrina, un libro aperto olografico; «<» «>» sfogliano la bibbia (`world/bible.json`:
@@ -615,6 +646,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 - Fatto quando (per pezzo): test verdi, typecheck, verifica nel browser.
 
 ### T48 · La Galleria dell'Artista, dentro e il plinto — `fatto`
+- Step: 15
 - Contesto: §3.3 (approvata il 23/10). Oggi la Galleria (`galleria`) espone i modelli come quadri con «riscolpisci».
 - **T48a · il tornio dello Scultore** — `fatto` (`a4483c7`): al posto della vetrina un piedistallo che gira con il modello scelto, il suo
   programma eseguito **passo passo** (i passi di MarkovJunior, come nella sandbox del lab: i passi intermedi da
@@ -645,6 +677,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 - Fatto quando (per pezzo): test verdi, typecheck, verifica nel browser da vicino e dal viale.
 
 ### T28 · Il Nucleo, dentro — `fatto` (`673eeba`) (dipende da T12)
+- Step: 15
 - Il grafo del mondo navigabile in UI.
 - Esito: `corona.ts`: voce `grafo` (3 × 3, `GRAPH_AT`, dove gli altri edifici hanno la vetrina) al piano terra del Nucleo;
   `kernel.ts`: E o un clic (`clickStudio`) → `ui:graph`. `src/ui/graphlayout.ts`: `ForceLayout` senza DOM (molle sugli archi,
@@ -661,6 +694,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   era una palla abbagliante, quindi voxel piccoli a metà intensità; nessun ADR (interno della corona, come T21-T24).
 
 ### T31 · Gli otto edifici della corona nella libreria — `fatto` (commit «Corona (T31)»)
+- Step: 15
 - Contesto: T20 ha fatto il motore (ADR-0049); mancano i programmi. **Per l'autore**: esegui il prompt di
   [`docs/prompts/gemini-strutture-corona.md`](../archivio/3-to-do-backlog/prompts/gemini-strutture-corona.md) in Gemini CLI, una struttura per
   sessione (`magia`, `persone`, `cose`, `oggetti`, `luoghi`, `sistemi`, `nucleo`, `concilio`), poi rimetti questo task
@@ -692,6 +726,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
   Il `dev` di Vite su un'altra porta non caricava wasmoon (`LuaFactory` mancante); la build di produzione sì.
 
 ### T58 · Ritocchi di luce: il piedistallo del Nucleo e il silos dei personaggi — T58a `fatto` (`33638c4`), T58b `fatto` (`93da812`)
+- Step: 15
 - Contesto: richiesta del 24/10, sera ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/userchats/to-do-2026-10-24.md), «Luci del Nucleo e del silos»).
   Il disegno è in `src/render/corona3d.ts`; non tocca il kernel.
 - **T58a · il piedistallo del grafo**: oggi (`itemMesh`, caso `grafo`) il gradino alto ha il neon solo sul bordo davanti e su
@@ -711,6 +746,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 - Dipendenze: nessuna. Domande per l'autore: nessuna.
 
 ### T50 · La corona personalizzata: arredi futuristici, trasporti e Concilio di gerboa — `fatto`
+- Step: 15
 - Contesto: consultazione del 24/10 ([`risposte-T50.md`](../archivio/3-to-do-backlog/userchats/risposte-T50.md)). Gli undici edifici sono completati
   nel campus (T31 fatto). L'ambientazione della corona deve essere marcatamente futuristica e artificiosa («lo studio che
   programma la realtà»), sfruttando MarkovJunior a piena potenza: programmi con semi riutilizzabili ad altissima varietà visiva
@@ -761,6 +797,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 - Dipendenze: nessuna (T31 è completato). Domande per l'autore: nessuna (chiarite in `risposte-T50.md`).
 
 ### T59 · Da Rune a QUINE42: refactoring del nome del gioco — `fatto` (`1133a70`)
+- Step: 16
 - Contesto: a seguito di consultazione, il nome provvisorio del gioco passa da «Rune» a «QUINE42» (tributo al concetto
   di quine — il programma che produce il proprio codice sorgente, cuore del gioco — e alla Risposta Fondamentale 42 della
   *Guida Galattica per gli Autostoppisti*).
@@ -790,6 +827,7 @@ restano di dimensioni diverse; tavoli e schermi di oggi restano se non diventano
 - Dipendenze: nessuna.
 
 ### T60 · Il raggio 42: i 42 passi verso la corona — `fatto` (`17045a9`)
+- Step: 15
 - Contesto: con il nuovo nome QUINE42 (T59, tributo alla Guida Galattica e alla ricorsione), il cerchio di simulazione
   si allinea: 42 passi per uscire (non più 44). Il raggio del cerchio (`universe.json → circleRadius` e default in
   `src/kernel/universe.ts`) diventa 42.
@@ -809,6 +847,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
 
 ### T51 · Il livello del mare — `fatto` (T51a; il motore dell'acqua è il task T51b, qui sotto)
 - Pipeline: claude · stima 6% · priorità 50
+- Step: 12
 - Contesto: ADR-0048. Oggi ogni specchio d'acqua è piano **dentro il suo chunk** (`waterLevels` in `relief.ts`: al livello
   più basso delle sue caselle, contando solo il chunk); lo stesso lago o fiume su due chunk ha due livelli, e laghi vicini
   livelli diversi: a vista l'acqua ha dei dislivelli (si vede anche in `Blocchi.png`).
@@ -827,6 +866,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
 
 ### T51b · Il motore dell'acqua — `fatto` (dipende da T51)
 - Pipeline: claude · stima 5% · approvato · priorità 50
+- Step: 12
 - Contesto: spezzato da T51 il 31/10 (T51a fatto; `dossier T51`, `docs/pipeline/domande/T51.md`). Si appoggia a `worldLevels` di T51a.
 - Fare (ADR nuovo): l'acqua che scorre quando il terreno cambia (incantesimi che alzano o abbassano
   il terreno, T57; «Altro…» che scava). Proposta: MarkovJunior resta per **generare** (rilievo, fiumi alla Genesi); per la
@@ -852,6 +892,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
 
 ### T52 · I sotterranei — T52a `fatto` (progetto, ADR-0091), T52b `fatto`, T52c-f `da fare`
 - Pipeline: claude · stima 3% · approvato · priorità 50
+- Step: 13
 - Contesto: oggi niente sta sotto il livello del terreno (il rilievo è una colonna piena, i modelli stanno sul suolo,
   `floorAt`). L'autore vuole i sotterranei (anche un edificio seminterrato nella corona, come la Sala sistemi).
 - **Risposte dell'autore** (30/10, `docs/pipeline/domande/T52.md`): **(b)**, parti sotterranee delle strutture (cantine, cripte):
@@ -905,6 +946,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
 
 ### T53 · Le scale come rampe e le strutture su più piani — T53a `fatto` (`d7812ae`), T53b `fatto` (`eb03038`)
 - Pipeline: claude · stima 6% · approvato · priorità 50
+- Step: 13
 - Contesto: richiesta del 24/10: le strutture devono essere navigabili appena generate; l'autore sceglie la seconda via
   (la scala è una lastra inclinata, il viandante ci sale camminando), non «E → Sali». Oggi `floors()` in `src/mj/mesh.ts`
   dà un'altezza per colonna di voxel e **solo** fino a un gradino (`h <= step`, oltre vale 0 e l'impronta blocca): una scala
@@ -943,6 +985,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
 
 ### T54 · Le taglie di D&D per strutture e creature — `fatto` (`3c5fe95`)
 - Pipeline: claude · stima 6% · approvato · priorità 50
+- Step: 13
 - Contesto: richiesta del 24/10. Oggi le classi (`CLASSES` in `src/mj/classes.ts`: `persona`, `animale`, `bestia`,
   `edificio`, `grande`…) danno la scatola in caselle, e una struttura «importante» (Argon) per zona di 56 × 56 luoghi.
   L'autore vuole riferirsi alla taglia di D&D: Minuscola, Piccola, Media, Grande, Enorme, Gargantuesca. **Gargantuesca è la
@@ -972,6 +1015,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
 ## Controlli
 
 ### T55 · La camera libera (orbita) nel gioco — `fatto` (`b9d7de1`)
+- Step: 11
 - Contesto: richiesta del 24/10: nel laboratorio (`/lab/3d/`) il tasto destro trascinato fa orbitare la camera e all'autore
   piace; nel gioco la camera gira a quarti di giro (ADR-0047: `,` `.`, tasto centrale trascinato, `Input.turn`) e il tasto
   destro apre il menu della casella (ADR-0029).
@@ -992,6 +1036,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
 
 ### T56 · Il salto, e le cose che chiudono i sentieri — T56a `fatto` (`e5f8099`), T56b `fatto` (`f91b6fe`)
 - Pipeline: claude · stima 4% · approvato · priorità 55
+- Step: 13
 - Contesto: richiesta del 24/10 con `docs/userchats/Blocchi.png`: un sentiero largo una casella su un lago, con un banco,
   una cassa e un letto messi sopra; i dislivelli piccoli si salgono già senza saltare (ADR-0048) e devono restare così.
 - **T56a · niente cose sui passaggi obbligati**: il piazzamento delle cose (`placementsOf`/`placeInside`) non mette nulla di
@@ -1018,6 +1063,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
 
 ### T57 · Le rune come codice: sequenze ordinate, effetti, rune nuove — `fatto` (T57a; il resto in T57b e T57c)
 - Pipeline: claude · stima 8% · approvato · priorità 60
+- Step: 14
 - Contesto: richiesta del 24/10 («Le rune»). L'esempio del seme `acqua fuoco` → «Vapore» (si annullano, un messaggio, in
   `universe/modules/magic.runes/manifest.json`) non è l'idea: le rune sono come codice, una **sequenza ordinata** produce
   un effetto specifico, e l'ordine conta (`aria terra` ≠ `terra aria`). Effetti come incantesimi di D&D (`terra fuoco` →
@@ -1053,6 +1099,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
 
 ### T57b · Rune nuove dal Concilio — `fatto` (dipende da T57)
 - Pipeline: claude · stima 5% · approvato · priorità 60
+- Step: 14
 - Contesto: il pezzo T57b del blocco T57 (T57a fatto e integrato con T99: canone, `SPELL_GUIDE`, prompt di Narratore, Fisico, Arbitro).
 - Fare: una via per inventare una runa magica (nome, glifo, colore, cosa significa nel canone) in una sessione del Concilio o quando una
   combinazione la chiede: modulo `magic.runes` riscritto, validatore (glifo unico, nome non simile alle altre, niente meta-gioco), canone
@@ -1070,6 +1117,7 @@ Richieste del 24/10 ([`to-do-2026-10-24.md`](../archivio/3-to-do-backlog/usercha
 
 ### T57c · Il terreno che sale e scende — `fatto` (`c689328`, ADR-0096)
 - Pipeline: claude · stima 3% · approvato · priorità 61
+- Step: 12
 - Contesto: il pezzo T57c del blocco T57. Oggi l'effetto `terreno` cambia il tipo di casella, non l'altezza; T51b ha dato
   `kernel.dig(col, row, delta)` e l'acqua che scorre (ADR-0094). La domanda del blocco T57 (un effetto `rilievo` generico nel kernel):
   l'autore ha approvato il task il 01/11.
@@ -1087,6 +1135,7 @@ le fasi 1-3 (T38-T43) si provano con il server di Vite e più schede; la fase 4 
 le risposte alle domande del piano.
 
 ### T29 · Aggiornare il piano del multiplayer — `fatto` (`a004e46`)
+- Step: 17
 - Riscrivere [`docs/plans/multiplayer.md`](../archivio/3-to-do-backlog/plans/multiplayer.md) con le decisioni dell'autore del to-do (sezione «Multiplayer» di
   [`docs/userchats/to-do-2026-10-22.md`](../archivio/3-to-do-backlog/userchats/to-do-2026-10-22.md)): server unica fonte di
   verità, modalità singola e multigiocatore, crediti e proxy, contenuti come carte del giocatore (P#2), master in
@@ -1098,6 +1147,7 @@ le risposte alle domande del piano.
   il kernel può restare nel browser (cambiano solo proxy e crediti); spostarlo sul server anche lì è rimandato.
 
 ### T33 · La configurazione dell'universo alla Genesi — `fatto` (`5668808`)
+- Step: 17
 - Contesto: decisione 9 del piano. Prima della Genesi si sceglie quanto è punitiva la morte (uno slider da 0 a 4),
   PvP sì/no, «Altro…» tra giocatori sì/no, e la modalità (singola / multigiocatore). Sono definitive.
 - Fare: una sezione `partita` in `universe.json` (`modalita`, `morte`, `pvp`, `altroTraGiocatori`) con i valori di oggi
@@ -1113,6 +1163,7 @@ le risposte alle domande del piano.
   T43 o dopo); `continueAfterDeath` è diventata asincrona (aspetta il Narratore).
 
 ### T34 · Il viandante con un id e lo stato per giocatore — `fatto` (`8df01dc`)
+- Step: 17
 - Contesto: oggi c'è un solo `playerId` e `world/stato.json` è il viandante; ricordi, legami e missioni parlano di «il
   viandante».
 - Fare: un id stabile del viandante (in singola uno solo, `io`); lo stato del giocatore in `world/giocatori/<id>.json`
@@ -1128,6 +1179,7 @@ le risposte alle domande del piano.
   `playerId`, invece di passare un id a ogni funzione; gli altri viandanti non hanno ancora input né rendering (T38-T39).
 
 ### T35 · Semi condivisi e determinismo — `fatto` (`965b494`)
+- Step: 17
 - Contesto: decisione 2. Ogni estrazione casuale (kernel, `hash` e `math.random` di Lua, `sys.wander`, fuoco, bottino)
   deve venire da (seme dell'universo, tick, entità); niente orologio di sistema nella simulazione.
 - Fare: censire le fonti di casualità e di tempo (`Math.random`, `Date.now`, `performance.now` dentro il tick) e
@@ -1142,6 +1194,7 @@ le risposte alle domande del piano.
   contatore); l'orologio resta, documentato, in ciò che non è simulazione (registro, consumi, guasti, misure, scadenze di MJ).
 
 ### T36 · Chi ha generato ogni contenuto (carte, P#2) — `fatto` (`6a3cce5`)
+- Step: 17
 - Contesto: decisioni 4 e 6. Ogni chiamata ha un `chi` (il giocatore) o è comune; ogni contenuto generato ha autore e
   pagante e un contatore di utilizzi.
 - Fare: `chi` nel registro dei consumi (`ai/usage.ts`, `world/consumi.json`), con le chiamate del Concilio per il mondo
@@ -1159,6 +1212,7 @@ le risposte alle domande del piano.
   chiamata è il viandante che agisce quando parte (dopo un `await` è `io`): il server di T38-T40 passerà `chi` esplicito.
 
 ### T37 · Rune e binding per ruolo — `fatto` (`cfe85fa`)
+- Step: 17
 - Contesto: decisioni 7 e 8. In multigiocatore i giocatori non hanno le rune del tappeto (`CARPET_TOKENS`) né quelle che
   scrivono `x y speed carpet time`; il master ha la sola runa che porta nella Sala del Concilio.
 - Fare: con `partita.modalita = multigiocatore` niente rune del tappeto nei luoghi; il kernel ignora le scritture di quei
@@ -1175,6 +1229,7 @@ le risposte alle domande del piano.
   nel browser: in singola il gioco non cambia, e per provare il multigiocatore servirebbe una Genesi nuova sul disco dell'autore.
 
 ### T38 · Il kernel sul server — `fatto` (`bdec7a9`)
+- Step: 17
 - Contesto: decisione 2 e «Architettura» del piano. Un processo per universo con il kernel headless, `universeStore`, il
   proxy e un WebSocket `/api/session`.
 - Fare: il kernel avviabile in Node senza DOM (come nei test) dentro il server di Vite; protocollo: ingresso (istantanea:
@@ -1196,6 +1251,7 @@ le risposte alle domande del piano.
   `io`, T40), `zone` e corona del solo `io` (T41-T42), nessuna verifica nel browser (il gioco in singola non usa la sessione: T39).
 
 ### T39 · Il client sottile e gli avatar — `fatto` (`8b9c227`)
+- Step: 17
 - Fare: in multigiocatore `main.ts` non crea il kernel ma un client che riceve lo stato e lo dà al renderer; predizione del
   proprio passo (il tappeto compensa come oggi) e correzione; entità `remote` per gli altri giocatori, con il modello
   del viandante, il seme e il colore del profilo, interpolate, con arti e fumetti; l'esito delle azioni mostrato subito
@@ -1215,6 +1271,7 @@ le risposte alle domande del piano.
   contenitori, fabbricazione e azioni sulle caselle non sono nel protocollo: T39b.
 
 ### T39b · Inventario e fabbricazione tra molti — `fatto` (`dc928a6`)
+- Step: 17
 - Contesto: ADR-0059, punto 7. Nello specchio `useSlot equipSlot equip unequip dropSlot moveSlot craft combine freeCraft
   freeItemAction itemAct takeFromContainer putIntoContainer putIntoBag takeFromBag uiAction freeTileAction openContainer`
   (`LATER` in `thin.ts`) dicono «non ancora».
@@ -1232,6 +1289,7 @@ le risposte alle domande del piano.
   Resta in `LATER` solo `rollback` (del master, T42).
 
 ### T40 · Luoghi nuovi con il lock, a spese di chi esplora — `fatto` (`32f58bf`)
+- Step: 17
 - Fare: il primo che entra in un luogo nuovo lo chiede al server, che lo genera una volta (Cartografo, Scultore), lo
   committa in `maps/` e lo addebita a lui (`chi`); gli altri lo ricevono pronto; un limite di luoghi nuovi al minuto
   per universo. Il Concilio (sessioni, trame, Fucina) gira solo sul server, anche senza master collegato.
@@ -1245,6 +1303,7 @@ le risposte alle domande del piano.
   cambia, e il multigiocatore è coperto dai test col finto trasporto.
 
 ### T41 · Il client del giocatore senza corona né Concilio — `fatto` (`fdd9f42`)
+- Step: 17
 - Fare: corona, studio, pannello del Concilio, registro, console ed editor caricati solo dal master (import dinamici); il
   server non manda ai giocatori il registro del Concilio, i file dello studio né gli interni della corona; `window.rune`
   del giocatore espone solo il client.
@@ -1262,11 +1321,13 @@ le risposte alle domande del piano.
   dal server (non sono entità); il master non riceveva il registro del Concilio, e ora sì.
 
 ### T42 · Il master — `fatto` (T42a-T42f) (dipende da T37, T41)
+- Step: 17
 - Contesto: il piano del multigiocatore, «Il master». Troppo grande per una sessione: master fisso e god mode (T42a), il ramo
   `master` e la pubblicazione (T42b), i giocatori dalla corona (T42c), il clone con un altro master (T42d), le rune della corona e il
   Referente sul ramo (T42e), le rune chieste al Referente (T42f).
 
 ### T42a · Il master in god mode, visibile solo nel mondo — `fatto` (`093d98e`)
+- Step: 17
 - Fare: il master è chi crea l'universo multigiocatore (non si cambia); god mode (niente morte, bisogni, danni, effetti dei
   giocatori), visibile agli altri col suo viandante solo quando è nel mondo.
 - Fatto quando: test (il master non muore; gli effetti di un giocatore non lo toccano; uscito dal cerchio gli altri non lo vedono).
@@ -1278,6 +1339,7 @@ le risposte alle domande del piano.
   browser: in singola il gioco non cambia, e il multigiocatore è coperto dai test col finto trasporto.
 
 ### T42b · Il ramo `master` e la pubblicazione — `fatto` (`5973cae`) (dipende da T42a)
+- Step: 17
 - Contesto: piano del multigiocatore, «Modifiche in prova»; `R` del master e `rollback` ancora in `LATER` di `thin.ts`.
 - Fare: le modifiche del master (editor, rune scritte nella corona, richieste al Referente) vanno su un ramo `master` del
   repository dell'universo; lui le prova da solo (il suo kernel vede il ramo, i giocatori no) e le **pubblica** con un gesto esplicito
@@ -1300,6 +1362,7 @@ le risposte alle domande del piano.
   in singola nulla cambia (il pulsante non c'è) e il multigiocatore è coperto dai test col finto trasporto.
 
 ### T42e · Le rune della corona e il Referente sul ramo `master` — `fatto` (`9e45c46`) (dipende da T42b)
+- Step: 17
 - Contesto: T42b porta sul ramo `master` le modifiche dell'editor (e il suo `R`); in multigiocatore le rune incise nella corona e le
   richieste al Referente non arrivano ancora al server (la corona è dello specchio del master, il Referente non è un'entità del server).
 - Fare: le rune scritte nella corona e ciò che il Referente fa fare alle squadre girano sul server per il master e committano sul suo
@@ -1317,6 +1380,7 @@ le risposte alle domande del piano.
   nulla cambia (`talkToAgent` resta locale) e il multigiocatore è coperto dai test col finto trasporto.
 
 ### T42f · Le rune che il master chiede al Referente — `fatto` (`99b5fcc`) (dipende da T42e)
+- Step: 17
 - Contesto: piano del multigiocatore, «Il master»: il master ha una sola runa del tappeto (quella del Concilio) e «ogni altra runa la
   chiede al Referente». Oggi il Referente non ha un incarico per le rune (`referenteReply`: oggetto, cosa, personaggio, ambiente,
   regola, riscolpisci, oggetti, meccanica, nessuno).
@@ -1335,6 +1399,7 @@ le risposte alle domande del piano.
   nel browser: in singola nulla cambia di visibile e il multigiocatore è coperto dai test col finto trasporto.
 
 ### T42c · I giocatori dalla corona — `fatto` (`d119c30`) (dipende da T42a)
+- Step: 17
 - Fare: nell'atlante della corona (Ufficio dei luoghi) e nel tavolo della situazione i giocatori collegati, ciascuno sul suo chunk;
   una vista che ne segue uno (la camera del master sopra di lui finché non la lascia), senza uscire dalla corona.
 - Fatto quando: test (la situazione elenca i giocatori collegati con la loro posizione); verifica nel browser con un universo di prova.
@@ -1348,6 +1413,7 @@ le risposte alle domande del piano.
   tavolo luminoso che apre il pannello, senza disegni dei luoghi); la vista seguita mostra soltanto: le azioni sulle caselle restano fuori portata.
 
 ### T42d · Clonare l'universo con un altro master — `fatto` (`852be62`) (dipende da T42b)
+- Step: 17
 - Fare: copiare il repository dell'universo in un universo nuovo con `partita.master` diverso (l'unico modo di cambiare master); le
   carte restano a chi le ha generate (`carta.autore`, `pagante`), il titolare può restare o passare al nuovo master (da decidere).
 - Fatto quando: test (il clone ha lo stesso mondo, un altro master, le stesse carte).
@@ -1362,6 +1428,7 @@ le risposte alle domande del piano.
   c'è solo per il master in multigiocatore e chiama l'endpoint coperto dal test su disco; in singola nulla cambia).
 
 ### T43 · Tra giocatori — spezzato in T43a-T43c (dipende da T33, T39)
+- Step: 17
 - Fare: «Altro…» su un altro giocatore giudicato come su una persona (se l'universo lo permette), effetti applicati dal
   server; PvP secondo `partita.pvp`; scambi di oggetti; chat tra avatar vicini (fumetti, senza filtro della quarta
   parete); morte in multigiocatore con la punizione di T33; ricollegamento con lo stato del giocatore.
@@ -1369,6 +1436,7 @@ le risposte alle domande del piano.
 - Spezzato (troppo per una sessione): chat e doni (T43a), «Altro…» e PvP (T43b), morte e ricollegamento (T43c).
 
 ### T43a · Parole e doni tra viandanti — `fatto` (`c65398f`) (dipende da T39)
+- Step: 17
 - Contesto: il server rifiuta ogni azione su un altro viandante (`outOfReach`: «non c'è niente lì»); i fumetti dei viandanti
   già viaggiano (`OtherView.testo`), ma niente li scrive. Il piano: «gli scambi di oggetti e la chat tra avatar vicini (fumetti)
   ci sono sempre», senza filtro della quarta parete (sono persone vere).
@@ -1389,6 +1457,7 @@ le risposte alle domande del piano.
 
 ### T43b · «Altro…» e PvP tra viandanti — `fatto` (`655fe3c`) (dipende da T43a)
 - Pipeline: claude · stima 5% · approvato · priorità 1
+- Step: 17
 - Fare: «Altro…» su un altro viandante giudicato come su una persona, solo se `partita.altroTraGiocatori`; gli effetti li applica
   il server sul corpo dell'altro (il master in god mode lascia passare solo `messaggio`, ADR-0065); ciò che ferisce
   (bisogni che scendono, `spingi`, `fuoco`…) solo se `partita.pvp`, altrimenti il Narratore lo sa e il kernel lo toglie.
@@ -1405,6 +1474,7 @@ le risposte alle domande del piano.
 
 ### T43c · Morte e ricollegamento in multigiocatore — `fatto` (5979812) (dipende da T43b)
 - Pipeline: claude · stima 5% · approvato · priorità 2
+- Step: 17
 - Fare: a salute zero un giocatore (mai il master) muore con la punizione di T33 (`continueAfterDeath` sul server, come lui,
   senza chiudere la sessione degli altri); il client lo mostra e riparte dove dice il verdetto. Chi si ricollega ritrova il suo
   stato (`world/giocatori/<id>.json`): posizione, inventario, frase, stati; la carta e i legami restano.
@@ -1422,6 +1492,7 @@ le risposte alle domande del piano.
   server di sviluppo.
 
 ### T44 · Account, profilo e viandante personalizzato — spezzato in T44a e T44b
+- Step: 17
 - Fare: autenticazione sicura, un profilo ricco, il viandante personalizzabile (seme e colori del suo modello, nome);
   l'id del viandante (T34) è quello dell'account.
 - Spezzato il 29/10/2026 (multigiocatore in testa): il profilo e il viandante personalizzato non aspettano il fornitore
@@ -1429,6 +1500,7 @@ le risposte alle domande del piano.
 
 ### T44a · Il profilo e il viandante personalizzato — `fatto` (dipende da T43a)
 - Pipeline: claude · stima 4% · approvato · priorità 3
+- Step: 17
 - Contesto: oggi il mantello di un viandante viene dal suo id (`wandererColor` in `src/kernel/wanderers.ts`, «until the profile»)
   e il nome è l'id (`?viandante=<id>` o uno per scheda, `socket.ts`). Il profilo è di chi gioca, non dell'universo.
 - Fare: un profilo del viandante (`nome`, `seme` del programma `viandante`, `colori`/`tinta` del mantello, poche righe di
@@ -1446,6 +1518,7 @@ le risposte alle domande del piano.
 
 ### T44b · L'account e l'autenticazione — `fatto` (risposte in `docs/pipeline/domande/T44b.md`; dipende da T44a)
 - Pipeline: claude · stima 5% · approvato · priorità 4
+- Step: 18
 - Decisioni dell'autore (29/10/2026): Firebase Auth / Identity Platform di Google Cloud, accesso con Google e anonimo; in singola
   nessun account (il viandante resta `io`). Un anonimo non può recuperare l'account: non compra crediti e gioca solo offline
   (modelli locali), finché non lo lega a un account Google.
@@ -1472,6 +1545,7 @@ le risposte alle domande del piano.
 
 ### T44c · Correzioni dalla verifica nel browser di T44a e T43c — `fatto` (dipende da T44a, T43c)
 - Pipeline: claude · stima 3% · approvato · priorità 3
+- Step: 17
 - Contesto: verifica con due schede del 29/10/2026 (diario di `docs/pipeline/orchestrazione.md`): profilo, nome doppio, morte di un
   giocatore, uscita e rientro funzionano; restano questi difetti.
 - Fare:
@@ -1500,6 +1574,7 @@ le risposte alle domande del piano.
   con il timeout alzato (nessuna asserzione fallita).
 
 ### T45 · Crediti, lobby, carte e server su Google Cloud — spezzato in T45a-T45f (risposte in docs/pipeline/domande/T45.md)
+- Step: 18
 - Fare, a pezzi (spezzare quando si comincia): crediti e pagamenti (P#1: l'1% sul costo); la lobby con il tetto di
   crediti, i modelli degli agenti (oggi `ai.textModel` e la tabella delle classi dello Scultore), i coefficienti e i
   minimi dell'universo; crediti finiti → ricarica, offline (modelli locali) o abbandona; la collezione di carte fuori
@@ -1514,6 +1589,7 @@ le risposte alle domande del piano.
 
 ### T45a · I crediti e le spese comuni — `fatto` (dipende da T36)
 - Pipeline: claude · stima 5% · approvato · priorità 5
+- Step: 18
 - Fare: un saldo di crediti per viandante (in `world/giocatori/<id>.json`, scritto solo dal server), dati a mano dal master
   (console, o il Referente); ogni chiamata scala dal suo `chi` (T36: `payerOf`) il costo più l'1 % (P#1); le spese `comune` si
   dividono tra i giocatori collegati in quel momento, master compreso; crediti finiti → ciò che il viandante chiede si fa con i
@@ -1523,6 +1599,7 @@ le risposte alle domande del piano.
 
 ### T45b · I coefficienti di generazione e la partita «Low Detail» — `fatto`
 - Pipeline: claude · stima 6% · approvato · priorità 6
+- Step: 18
 - Contesto: l'autore vuole poter giocare a risparmio. I coefficienti regolano **quanto spesso ogni agente chiama l'IA**: direttamente
   dove c'è un ritmo (sessioni del Concilio ogni N luoghi, dialoghi tra persone, revisioni dello Scultore, trame), indirettamente dove
   no (meno persone per luogo, pacchetti di oggetti più rari, meno cose per luogo), e dove non si può si dice al giocatore cosa costa.
@@ -1542,6 +1619,7 @@ le risposte alle domande del piano.
 
 ### T45c · L'eredità dei cloni — `fatto` (dipende da T42d, T36)
 - Pipeline: claude · stima 5% · approvato · priorità 7
+- Step: 18
 - Contesto: un clone di un clone porta contenuti cambiati più volte; chi li ha creati per primo deve ricevere una quota.
 - Fare: nella carta (`carta`) la catena dei titolari precedenti (`origini`), allungata da `cloneChanges`; a ogni utilizzo di un
   contenuto (T36: `luoghi trame prompt`) le quote: una base fissa di eredità (10 %, in `universe.json`) più una parte in funzione di
@@ -1560,6 +1638,7 @@ le risposte alle domande del piano.
 
 ### T45d · La lobby — `fatto`
 - Pipeline: gemini · stima 5% · approvato · priorità 1
+- Step: 18
 - Fare: prima di entrare in un universo multigiocatore la lobby: il tetto di crediti di chi entra (si somma ai budget di `ai`), i
   coefficienti e i modelli dell'universo (del master), i minimi; crediti finiti in partita → ricarica, offline o abbandona; la
   collezione di carte fuori dalla partita, con gli utilizzi.
@@ -1568,6 +1647,7 @@ le risposte alle domande del piano.
 
 ### T45e · I pagamenti con Stripe — `fatto`
 - Pipeline: gemini · stima 5% · approvato · priorità 9
+- Step: 18
 - Fare: la ricarica dei crediti con Stripe Checkout (Google Pay compreso) in modalità di prova; il webhook sul server accredita
   (idempotente); chiavi solo sul server; un anonimo non compra.
 - Fatto quando: test con il webhook finto, una ricarica di prova nel browser con le chiavi di test, commit. Le chiavi di Stripe le
@@ -1576,6 +1656,7 @@ le risposte alle domande del piano.
 
 ### T45f · Il server su Google Cloud — `in attesa` (dipende da T44b, T45d, T133, T134, T172, T209)
 - Pipeline: claude · stima 6% · priorità 10
+- Step: 34
 - **In attesa (autore, 04/11): la fine della Fase I.** Allora servono le risposte di `docs/pipeline/domande/T45f.md`.
 - Fare: il server della sessione e i repository degli universi su Google Cloud, sempre acceso (Cloud Run con istanza minima o una VM,
   disco persistente per `universes/`, repository privati), il deploy da script, i segreti in Secret Manager.
@@ -1585,6 +1666,7 @@ le risposte alle domande del piano.
 
 ### T70 · Integrare T53b (più piani) con il salto di T56b — `fatto`
 - Pipeline: claude · stima 3% · approvato · priorità 0
+- Step: 13
 - Contesto: `integra T53b` del 30/10/2026 si è fermato sui conflitti (il base è com'era): T53b (strutture su più piani: un pavimento
   per tratto di pieno, `pos.z`, `free`/`free_real`/`floorAt` con l'altezza, taglio del renderer sul piano) e T56b (il salto, già nel
   base, ADR-0080: altezza delle cose da `mesh.ts`/`forms.ts`, `jump`/`jumpTick`, arco e ombra in `things.ts`) toccano gli stessi punti.
@@ -1614,6 +1696,7 @@ le risposte alle domande del piano.
 
 ### T69 · L'interfaccia web della pipeline — `fatto` (dipende da T61)
 - Pipeline: argon · stima 6% · approvato · priorità 60
+- Step: 19
 - Contesto: richiesta dell'autore del 30/10/2026 (non prioritaria: prima si usa il nuovo ambiente, ADR-0079). Oggi la pipeline si
   segue dal terminale di `node tools/pipeline/pipeline.mjs orchestra` e dai file (`docs/pipeline/PIANO.md`, `quadro.md`,
   `orchestrazione.md`, `.pipeline/esecuzioni.json`, `.pipeline/budget.json`, `.pipeline/orchestra/chat.jsonl`, `eventi.jsonl`).
@@ -1633,6 +1716,7 @@ le risposte alle domande del piano.
 
 ### T30 · Immagini del 3D nel README — `fatto`
 - Pipeline: gemini · stima 2% · approvato · priorità 60
+- Step: 16
 - Il README mostrava le immagini del 2D (`docs/img/`): ora non le mostra più. Fare quattro schermate del 3D (il borgo
   di giorno, una persona con la chat, l'inventario con le icone dei modelli, la corona con `?dev&teleport=46,0`) con
   `vite preview` offline, salvarle in `docs/img/3d/` e rimetterle nel README.
@@ -1663,6 +1747,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 ## Ambiente di sviluppo
 
 ### T61 · La pipeline agentica e i worktree — `fatto` (`3312c23`)
+- Step: 19
 - Dal to-do del 28/10/2026 (`docs/userchats/to-do-2026-10-28.md`): «Strutturare meglio l'ambiente di sviluppo agentico» (ordine nei
   worktree) e «Automatizzare il lavoro agentico» (la pipeline to-do → scambio → backlog → piano → esecuzione per provider).
 - Fare: la pipeline (ADR-0072), le regole dell'ambiente condiviso, un worktree per task, lo storico dei consumi; non perdere i task del backlog.
@@ -1675,6 +1760,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T62 · I test della pipeline — `fatto`
 - Pipeline: claude · stima 1% · approvato · priorità 1
+- Step: 19
 - Contesto: la prima esecuzione end-to-end della pipeline (T61, ADR-0072) su un caso semplice. `tools/pipeline/pipeline.mjs` esporta
   `parseBacklog`, `parsePipelineLine`, `parseUsage`, `usageLimit`, `readOutput`, ma nessun test li prova.
 - Fare: `tests/pipeline.test.ts` (Vitest, import dinamico del `.mjs`): `parseBacklog` su un backlog in miniatura (stato tra backtick,
@@ -1693,6 +1779,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T63 · I modelli disegnati a mano per i file della corona — `fatto` (commit «Corona (T63)»)
 - Pipeline: gemini · stima 4% · approvato · priorità 10
+- Step: 15
 - Contesto: l'autore ha disegnato nell'editor (T59) `schermo-scritte`, `schermo-struttura`, `circuito-3D` in `lab/mjx/models/handmade/`
   (accanto a copie di prova: `schermo-struttura copy*.xml`, `circuito.xml`, `circuito-mormale.xml`, da non portare).
 - Fare: portarli nella libreria (`universe/models/` + `index.json`, con `vpt`) e usarli per i file sugli scaffali della corona:
@@ -1703,6 +1790,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T64 · Le varianti precalcolate dei modelli pesanti — `fatto` (dipende da T63)
 - Pipeline: gemini · stima 5% · approvato · priorità 20
+- Step: 15
 - Contesto: i modelli dell'autore (es. `circuito-3D`) danno a ogni seme risultati molto diversi e sono pesanti da generare e animare.
 - Fare: misurare prima (tempo di generazione e di animazione di `circuito-3D` nei worker); se serve, una cache per (programma, seme)
   della griglia finita e dei fotogrammi delle animazioni (in memoria e IndexedDB nel browser), precaricata per pochi semi per tipo,
@@ -1712,6 +1800,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T65 · Il lessico di QUINE42 — `fatto` (risposte in `docs/pipeline/domande/T65.md`)
 - Pipeline: claude · stima 5% · approvato · priorità 30
+- Step: 10
 - Decisioni dell'autore (29/10/2026): il lessico è un file del seme, `universe/world/lessico.md`, che ogni universo eredita e il
   Narratore può arricchire ma non contraddire, con **pochi** termini nuovi generati; la prima versione la propone l'agente del task
   (15-20 voci: usanze, saluti, modi di dire, bon ton, parole sostituite); al più 5-6 parole sostituite, le stesse in ogni
@@ -1729,6 +1818,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T66 · Riorganizzare la documentazione per metodologia — `fatto`
 - Pipeline: gemini · stima 3% · approvato · priorità 15
+- Step: 24
 - Contesto: in `docs/` convivono le metodologie passate (thread unico, step, to-do e backlog) e quella attuale (pipeline, T61).
 - Fare: archiviare i documenti delle metodologie precedenti in cartelle ordinate, senza modificarne il contenuto né i link interni;
   a livello di `docs/` un resoconto: le metodologie in ordine, cosa contiene ogni cartella, e una tabella «link citato → dove è ora».
@@ -1739,6 +1829,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T67 · Il grafo delle conversazioni con Gemini — `fatto`
 - Pipeline: gemini · stima 4% · approvato · priorità 25
+- Step: 24
 - Contesto: per tradurre il gioco in quattro lingue (fine della fase I) servono i riferimenti a tutti i testi, compresi i prompt.
 - Fare: `docs/conversazioni.md`: per ogni compito degli agenti (`src/kernel/agents/`, `src/kernel/ai/`) chi chiama, con quale prompt
   (`universe/prompts/`, testi nel codice), quali parti del contesto, quale schema di risposta; grafi in mermaid. Un elenco dei testi
@@ -1747,6 +1838,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Esito: redatto `docs/conversazioni.md` con l'architettura end-to-end, i diagrammi Mermaid dei flussi, le schede dettagliate di tutti i 38 task degli agenti (Genesi, Cartografia, Fucina, Contenuti, Azioni ed effetti, Menti e dialoghi, Scultura 3D, Meccaniche) con ruoli, prompt di sistema, prompt utente, response schema e flussi di validazione. Censimento completo di tutti i testi hardcoded in italiano nel codice (template dei prompt, descrizioni degli schemi, principi e filtri della quarta parete, narrazione di fallback, testi UI e HUD) con proposta di organizzazione per la futura localizzazione multi-lingua e per la coda abbonamenti (T68).
 
 ### T68 · Generare l'universo con gli abbonamenti — spezzato in T68a, T68b, T68c (risposte in docs/pipeline/domande/T68.md)
+- Step: 20
 - Decisioni dell'autore (29/10/2026): solo in locale con l'abbonamento di chi gioca (singola e sviluppo), mai il server del
   multigiocatore; solo i compiti già lenti (Genesi, Fucina, modelli dello Scultore, sessioni del Concilio), il resto sulle API;
   quale provider per quale agente in una tabella in `universe.json → ai`, con un provider predefinito.
@@ -1758,6 +1850,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Spezzato (29/10/2026) in tre pezzi, ADR-0077:
 
 ### T68a · La tabella dei provider e la coda su disco — `fatto`
+- Step: 20
 - Fare: `universe.json → ai.provider`/`agenti` (riparati), i compiti lenti, `RoutedModels`, `QueueModels` (client di `/api/coda`),
   la coda su disco `server/subscriptionQueue.ts` (richiesta → presa → risposta, battito del servitore), prezzi a zero nel registro.
 - Fatto quando: test della coda e dell'instradamento, ADR, commit.
@@ -1767,6 +1860,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T68b · Il processo che serve la coda con le CLI — `fatto` (dipende da T68a)
 - Pipeline: claude · stima 4% · approvato · priorità 20
+- Step: 20
 - Contesto: `take`/`answer`/`beat` di `server/subscriptionQueue.ts` sono il protocollo; il lancio delle CLI e il riconoscimento dei
   limiti sono in `tools/pipeline/pipeline.mjs` (`usageLimit`).
 - Fare: `tools/abbonamenti/servi.mjs` (o `.ts` con vite-node) `--provider claude|antigravity`: battito ogni 10 s, prende la richiesta più
@@ -1778,6 +1872,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T68c · Gli abbonamenti nel gioco — `fatto` (dipende da T68b)
 - Pipeline: claude · stima 3% · approvato · priorità 21
+- Step: 20
 - Fare: `main.ts` costruisce `RoutedModels` se `usesSubscriptions` e la coda è servita (`QueueModels.available`), solo se l'universo
   è in singola (mai in `host.ts`); `#models` e il pannello del Concilio dicono quali agenti vanno su quale abbonamento e cosa c'è in coda;
   documentazione per chi scarica il repository (README: impostare la tabella, lanciare il servitore).
@@ -1786,6 +1881,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T71 · Soglie della pipeline e dell'orchestratore sul limite settimanale per Argon — `fatto`
 - Pipeline: gemini · stima 2% · approvato · priorità 0
+- Step: 19
 - Contesto: richiesta urgente dell'autore in chat (30/10/2026). La pipeline e l'orchestratore (`tools/pipeline/pipeline.mjs`,
   `tools/pipeline/orchestra.mjs`, `tools/pipeline/config.json`) fanno affidamento su soglie specifiche (es. per l'orchestratore il 50 %
   della sessione, o `sogliaUnSolo` / `riserva` / cambio provider dell'orchestratore), ma in `agy -p /usage` **Argon** (`Gemini 4 Argon`)
@@ -1802,6 +1898,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T72 · Integrare T71 (soglie settimanali Argon) con T69 (interfaccia web) — `fatto`
 - Pipeline: gemini · stima 1% · approvato · priorità 0
+- Step: 19
 - Contesto: `integra T71` del 30/10/2026 si è fermato su un conflitto in `tools/pipeline/pipeline.mjs` (perché nel frattempo è stato
   integrato T69). Leggi `node tools/pipeline/pipeline.mjs dossier T71` e `dossier T69`.
 - Fare: nel tuo worktree esegui `git merge task/T71` e risolvi i conflitti in `tools/pipeline/pipeline.mjs` (ed eventuali altri file)
@@ -1815,6 +1912,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T73 · Integrare T68b (processo abbonamenti CLI) con T45a in AGENTS.md — `fatto`
 - Pipeline: gemini · stima 1% · approvato · priorità 0
+- Step: 20
 - Contesto: `integra T68b` del 30/10/2026 si è fermato su un conflitto in `AGENTS.md` (perché nel frattempo è stato
   integrato T45a con crediti e spese comuni). Leggi `node tools/pipeline/pipeline.mjs dossier T68b` e `dossier T45a`.
 - Fare: nel tuo worktree esegui `git merge task/T68b` e risolvi i conflitti in `AGENTS.md` mantenendo sia le aggiunte
@@ -1828,6 +1926,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T74 · Integrare T68c (gli abbonamenti nel gioco) in backlog.md — `fatto`
 - Pipeline: gemini · stima 1% · approvato · priorità 0
+- Step: 20
 - Contesto: `integra T68c` del 30/10/2026 si è fermato su un conflitto in `docs/plans/backlog.md` (dovuto alle integrazioni concorrenti di T71, T72 e T73 nel branch base). Leggi `node tools/pipeline/pipeline.mjs dossier T68c`.
 - Fare: nel tuo worktree esegui `git merge task/T68c` e risolvi il conflitto in `docs/plans/backlog.md` mantenendo sia le aggiunte recenti (T71, T72, T73, T74) sia lo stato `fatto` e l'esito di T68c. IMPORTANTE: esegui solo `npx vitest run tests/subscription.test.ts` e `npm run typecheck` (con `WaitMsBeforeAsync: 10000`, NON lanciare `npm test` sull'intera suite per evitare timeout o backgrounding).
 - Fatto quando: `npx vitest run tests/subscription.test.ts` e `npm run typecheck` verdi, commit sul branch `task/T74`. Poi l'orchestratore farà `integra T74` e `integra T68c`.
@@ -1836,6 +1935,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T75 · Integrare T44b (l'account e l'autenticazione) con T45a (i crediti) — `fatto`
 - Pipeline: gemini · stima 3% · approvato · priorità 0
+- Step: 18
 - Contesto: `integra T44b` del 30/10/2026 si è fermato su conflitti in `docs/adr/README.md`, `src/main.ts`, `src/session/client.ts`,
   `src/session/protocol.ts`, `src/session/server.ts`: T44b è partito da `ab79ce4`, prima che entrassero T45a (crediti, `38dcd69`) e T68c
   (abbonamenti, `7f9c965`). Nasce da T44b: `node tools/pipeline/pipeline.mjs dossier T44b`; leggi anche `dossier T45a`.
@@ -1851,6 +1951,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Esito: eseguito merge di `task/T44b` in `task/T75`; risolti i conflitti in `docs/adr/README.md`, `src/main.ts`, `src/session/client.ts`, `src/session/protocol.ts`, `src/session/server.ts`; ADR-0081 di T44b rinumerato in ADR-0082 (`docs/adr/0082-l-account.md`, `README.md`, `AGENTS.md`, `backlog.md`); unificato il meccanismo dell'anonimo sul sistema dei crediti di ADR-0081 (`anonimo: true`, 0 crediti non ricaricabili, escluso dalle spese comuni, richieste personali gestite con `MockModels` a crediti esauriti; legandosi a Google smette di essere anonimo, sblocca i crediti e tiene viandante e profilo; rimosso `src/kernel/ai/local.ts`); verificati `tests/account.test.ts`, `tests/credits.test.ts`, `tests/session.test.ts`, `tests/subscription.test.ts` e `npm run typecheck` con esito verde.
 ### T76 · Integrare T75 (account T44b e crediti T45a) con T44c in src/main.ts — `fatto`
 - Pipeline: gemini · stima 1% · approvato · priorità 0
+- Step: 18
 - Contesto: `integra T75` del 30/10/2026 si è fermato su un conflitto in `src/main.ts` (perché nel frattempo nel base `3d` è stato integrato T44c, commit `906ed6a`). Leggi `node tools/pipeline/pipeline.mjs dossier T75` e `dossier T44c`.
 - Fare: nel tuo worktree esegui `git merge task/T75` e risolvi il conflitto in `src/main.ts` (e se si presenta in `docs/plans/backlog.md` mantenendo sia T75 sia T76) preservando sia le novità di T44c (`savedProfile(name, id)`, «Chi è» nel client sottile, profilo per universo e viandante, hover/clic destro corretti, schermata della morte in multigiocatore) sia quelle di T75/T44b/T45a (gestione account Firebase, login con Google/anonimo, crediti anonimo).
   IMPORTANTE: esegui solo `npx vitest run tests/account.test.ts tests/credits.test.ts tests/session.test.ts tests/subscription.test.ts` e `npm run typecheck` (con `WaitMsBeforeAsync: 10000`, NON lanciare `npm test` sull'intera suite per evitare timeout o backgrounding).
@@ -1859,6 +1960,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T77 · Integrare T45e (i pagamenti con Stripe) nel base 3d — `fatto`
 - Pipeline: gemini · stima 1% · approvato · priorità 0
+- Step: 18
 - Contesto: `integra T45e` del 30/10/2026 si è fermato su un conflitto in `docs/plans/backlog.md` (e possibili sovrapposizioni nei file aggiornati da T76/T75/T44b in `3d`). Leggi `node tools/pipeline/pipeline.mjs dossier T45e` e `dossier T76`.
 - Fare: nel tuo worktree esegui `git merge task/T45e` e risolvi i conflitti:
   - In `docs/plans/backlog.md` mantieni lo stato aggiornato di T45e (con le sue note/esito e domanda chiavi Stripe) e aggiungi T77.
@@ -1870,6 +1972,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T78 · Integrare T45c (l'eredità dei cloni) nel base 3d — `fatto`
 - Pipeline: gemini · stima 2% · approvato · priorità 0
+- Step: 18
 - Contesto: T45c (`task/T45c`, `ce4b2db`) ha scritto il suo ADR come `docs/adr/0081-l-eredita-dei-cloni.md`, ma nel base 0081 è già «Crediti e spese comuni» (0082 l'account, 0083 Stripe). Leggi `node tools/pipeline/pipeline.mjs dossier T45c` e `traccia T45c`. L'agente ha lasciato 8 test in timeout (`between`, `referente`, `thin`, `wanderers`, `watch`), attribuiti al carico della macchina; per `between`, `referente`, `thin` il confronto con il commit di partenza non è stato fatto.
 - Fare: nel tuo worktree `git merge task/T45c`; rinomina l'ADR in `docs/adr/0084-l-eredita-dei-cloni.md` (o il primo numero libero) e correggi ogni riferimento a ADR-0081 che parla dell'eredità (AGENTS.md, `docs/adr/README.md`, backlog, commenti in `src/kernel/heritage.ts`, `cards.ts`, `clone.ts`, test), lasciando ADR-0081 ai crediti. Risolvi i conflitti tenendo entrambe le aggiunte. Fai girare `npm run typecheck`, `npx vitest run tests/heritage.test.ts tests/clone.test.ts tests/cards.test.ts tests/credits.test.ts` e, uno per volta, `tests/between.test.ts tests/referente.test.ts tests/thin.test.ts tests/wanderers.test.ts tests/watch.test.ts`: se uno fallisce, provalo anche su `3d` e di' nell'esito se il guasto c'era già.
 - Fatto quando: typecheck e test indicati verdi (o fallimenti dimostrati preesistenti), commit su `task/T78`. Poi l'orchestratore fa `integra T78` e `integra T45c`.
@@ -1877,6 +1980,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T79 · Integrare T45b (coefficienti di generazione e partita Low Detail) nel base 3d — `fatto`
 - Pipeline: gemini · stima 2% · approvato · priorità 0
+- Step: 18
 - Contesto: T45b (`task/T45b`, `bc77bd9`) ha completato i coefficienti di generazione e la partita Low Detail ma ha scritto il suo ADR come `docs/adr/0081-i-coefficienti-di-generazione.md`. Nel base, 0081 è «Crediti e spese comuni», 0082 l'account, 0083 Stripe, 0084 l'eredità dei cloni (ADR-0084, T78). Claude è fermo per limite 5 ore fino alle 17:00 UTC. Leggi `node tools/pipeline/pipeline.mjs dossier T45b`.
 - Fare: nel tuo worktree esegui `git merge task/T45b`; rinomina l'ADR in `docs/adr/0085-i-coefficienti-di-generazione.md` (e aggiorna il titolo interno e i riferimenti ad ADR-0081 che parlano dei coefficienti in ADR-0085 in `AGENTS.md`, `docs/adr/README.md`, backlog, commenti in `src/kernel/coefficients.ts`, `src/ui/genesis.ts`, test). Risolvi i conflitti in `docs/plans/backlog.md`, `AGENTS.md`, `docs/adr/README.md` e in `src/kernel/kernel.ts` / `src/kernel/types.ts` tenendo entrambe le aggiunte (sia l'eredità dei cloni ADR-0084 e Stripe ADR-0083 sia i coefficienti ADR-0085).
   IMPORTANTE: esegui solo `npx vitest run tests/coefficients.test.ts tests/heritage.test.ts tests/stripe.test.ts tests/credits.test.ts` e `npm run typecheck` (con timeout adeguato, NON lanciare l'intera suite).
@@ -1885,6 +1989,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T80 · Integrare T45d (la lobby multigiocatore) nel base 3d — `fatto`
 - Pipeline: gemini · stima 1% · approvato · priorità 0
+- Step: 18
 - Contesto: `integra T45d` del 30/10/2026 si è fermato su un conflitto in `docs/plans/backlog.md` dovuto ai commit dell'orchestratore nel base `3d`. Tutti i file sorgente di codice, `AGENTS.md` e `docs/adr/README.md` si fondono senza conflitti e ADR-0086 è già numerato correttamente. Leggi `node tools/pipeline/pipeline.mjs dossier T45d` e `traccia T45d`.
 - Fare: nel tuo worktree esegui `git merge task/T45d` e risolvi il conflitto in `docs/plans/backlog.md`:
   - Nel blocco di T45d mantieni lo stato `fatto`, la pipeline approvata su gemini, e il testo dell'esito scritto da T45d.
@@ -1901,6 +2006,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T81 · Bug: la pagina web della pipeline non parte (SyntaxError nella regex) — `fatto`
 - Pipeline: gemini · stima 1% · approvato · priorità 0
+- Step: 19
 - Contesto: aprendo `http://localhost:4242` la console dice `Uncaught SyntaxError: Invalid regular expression flags (at (index):1264:44)`:
   probabilmente una regex nello script inline di `tools/pipeline/web.mjs` perde i `\` dentro il template string del server. Nasce da T69: `dossier T69`.
 - Fare: trovare la riga 1264 della pagina servita, correggere l'escape; un test che fa il parse dello script servito (`new Function(script)` in Node) per non ricaderci.
@@ -1909,6 +2015,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T82 · Un task per provider: tetti di parallelismo per provider e modello — `fatto`
 - Pipeline: claude · stima 4% · approvato · priorità 1
+- Step: 19
 - Dipende da: T70 (gira su Claude: aspetta che finisca).
 - Contesto: oggi `maxParalleli` (5) è uno solo per tutta la pipeline. Troppi task in parallelo: lasciarne due a metà al reset costa più che finirne uno,
   i cambi di provider moltiplicano il costo, crescono i conflitti, i crediti finiscono in modo imprevedibile, la macchina rallenta.
@@ -1927,6 +2034,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T83 · Il carico della macchina: un solo browser e una sola suite pesante alla volta — `fatto` (`441a7cb`)
 - Pipeline: claude · stima 3% · approvato · priorità 2
+- Step: 19
 - Dipende da: T82.
 - Contesto: `npm test` intero dura ~30 minuti e, lanciato da più agenti insieme, rallenta tutto (anche `agy -p usage` ci mette 2 minuti); più verifiche nel browser insieme sono deleterie.
 - Fare: un semaforo su disco (`.pipeline/lock/`) per le operazioni pesanti: **al più una verifica nel browser** in tutta la pipeline e **al più una suite intera** di vitest;
@@ -1937,6 +2045,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T84 · L'orchestratore parla solo quando serve, e con meno epoche — `fatto`
 - Pipeline: claude · stima 3% · approvato · priorità 3
+- Step: 19
 - Dipende da: T83.
 - Contesto: in attesa dei reset Gemini ha aperto più di 100 epoche senza portare avanti nessun task («contesto a 114 % della finestra»), con risposte prolisse ogni volta:
   rumore e crediti sprecati. Forse il quadro e l'`avvio.md` sono troppo grandi (l'avvio ripete chat lunghe), forse il contesto è misurato male (token cumulati, cache comprese).
@@ -1948,6 +2057,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T85 · Spegnere la pipeline in modo sicuro — `fatto`
 - Pipeline: claude · stima 3% · approvato · priorità 0
+- Step: 19
 - Dipende da: T84.
 - Contesto: l'autore vuole fermare tutto senza Ctrl+C brutale, anche chiedendolo all'orchestratore in chat («chiudi ora tutti i task e spegni», «aspetta che finiscano e spegni»).
 - Fare: comandi `ferma --ora` (interrompe ogni task tenendo la sua conversazione, salva lo stato, spegne `orchestra`) e `ferma --dopo` (niente lanci nuovi, aspetta che i task
@@ -1958,6 +2068,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T86 · Tracciare tutte le conversazioni in corso, anche quelle di agy e dell'orchestratore — `fatto`
 - Pipeline: claude · stima 3% · approvato · priorità 0
+- Step: 19
 - Dipende da: T85.
 - Contesto: `traccia Txx` su un task Claude in corso dà l'id e il file della conversazione (si può seguire e suggerire); per agy l'id arriva solo alla fine. L'autore vuole poter
   sempre seguire tutte le conversazioni in corso, anche per valutare qualità ed efficienza dell'uso dei crediti, compreso il thread dell'orchestratore.
@@ -1969,6 +2080,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T87 · Le verifiche nel browser di agy non funzionano — `fatto`
 - Pipeline: gemini · stima 2% · approvato · priorità 6
+- Step: 19
 - Dipende da: T81 (un task alla volta su Gemini).
 - Contesto: l'autore nota che i task su Gemini/Argon (agy) non riescono a fare le verifiche nel browser.
 - Fare: capire perché (`agy -p` non ha il browser di Antigravity in modalità non interattiva? manca un flag?) e correggere `tools/pipeline/config.json`; se non si può,
@@ -1978,6 +2090,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T90 · Integrare T82 (tetti per provider) con T87 (browser solo su Claude) in pipeline.mjs — `fatto`
 - Pipeline: claude · stima 1% · approvato · priorità 0
+- Step: 19
 - Contesto: `integra T82` del 30/10/2026 si è fermato su un conflitto in `tools/pipeline/pipeline.mjs`: T87 (già nel base `3d`) manda i task con verifica nel browser solo a Claude, mai ad agy; T82 aggiunge i tetti per CLI e modello (`config.json → limiti`), gli slot dinamici e lo slot di riserva (ADR-0087). Leggi `node tools/pipeline/pipeline.mjs dossier T82`, `traccia T82` e `traccia T87`.
 - Fare: nel tuo worktree `git merge task/T82` e risolvi tenendo entrambe le regole (i task col browser solo su Claude e dentro i tetti di T82). Se ci sono conflitti anche in `docs/plans/backlog.md`, tieni lo stato `fatto` e l'esito di T82 e T87 e questo blocco. Esegui solo i test della pipeline (`npx vitest run tests/pipeline.test.ts` e quelli che T82 ha aggiunto) e `npm run typecheck`, NON la suite intera.
 - Fatto quando: test della pipeline e typecheck verdi, commit su `task/T90`. Poi l'orchestratore fa `integra T90` e `integra T82`.
@@ -1985,6 +2098,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T91 · I test che falliscono anche da soli: `branch.test.ts` e `between.test.ts` — `fatto`
 - Pipeline: claude · stima 2% · approvato · priorità 3
+- Step: 27
 - Contesto: chiesto dall'autore il 30/10/2026. T83 (`dossier T83`, `traccia T83`) ha trovato nella suite intera 55 test falliti su 609: quasi tutti timeout per carico della macchina, ma due file falliscono anche da soli: `tests/branch.test.ts` (tre test si aspettano un solo file cambiato, `modules/npc.cat/manifest.json`, e ne ricevono due) e un test di `tests/between.test.ts`.
 - Fare: verifica sul base `3d` che falliscano davvero; trova la causa (il test vecchio o un cambio del codice, per esempio un task integrato dopo) e correggi ciò che è sbagliato, senza indebolire ciò che il test garantisce. Lancia i due file da soli; la suite intera solo nel suo turno (`node tools/pipeline/pipeline.mjs turno test -- npm test`). Se i timeout della suite intera hanno una causa comune evidente (non il carico), annotala nel blocco senza correggerla.
 - Fatto quando: `branch.test.ts` e `between.test.ts` verdi da soli, typecheck verde, commit su `task/T91` con una riga sulla causa.
@@ -1992,6 +2106,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T88 · Spendere i crediti che avanzano con la generazione differita — `da fare`
 - Pipeline: claude · stima 4% · approvato · priorità 60
+- Step: 31
 - Contesto: obiettivo dell'autore (03/11): generare gli universi non in tempo reale, in alta qualità, solo con gli abbonamenti. Sono lavori costosi in crediti ma leggeri per la macchina: perfetti per consumare ciò che a fine settimana resterebbe inutilizzato. Il generatore è T207. Nasce da T68: `dossier T68`. Previsione degli slot: T82, T85.
 - Cosa fare: con la previsione degli slot, quando un provider arriverebbe al reset settimanale con crediti avanzati anche a slot pieni, la pipeline avvia il generatore sul prossimo universo dell'elenco `generazione` di `tools/pipeline/config.json`, entro ciò che avanza e il tetto per universo; lo ferma, tenendo il lavoro fatto, quando un task o l'autore servono quei crediti, e rispetta la finestra delle 5 ore. Il generatore occupa uno slot del tetto di Claude, che non cambia, e cede sempre il posto ai task pronti. `stato` dice cosa genera e quanto ha speso; l'autore può spegnerlo.
 - Test: offline, sulla previsione e sull'avvio e l'arresto con un generatore finto: crediti avanzati → parte; un task pronto che ha bisogno dello slot → si ferma e riprende; tetto raggiunto → passa al prossimo. Typecheck e suite con i loro turni.
@@ -2001,6 +2116,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T207 · La generazione differita: un universo generato senza browser, solo dagli abbonamenti — `da fare` (dipende da T205, T156)
 - Pipeline: claude · stima 6% · approvato · priorità 59
+- Step: 31
 - Contesto: richiesta dell'autore (03/11), l'idea di T88 e T153: generare gli universi non in tempo reale, in alta qualità, solo con gli abbonamenti. Oggi la coda (ADR-0077, ADR-0106, `src/kernel/ai/subscription.ts`) prende solo i compiti lenti, il resto va alle API, e non c'è sul server dei mondi di molti: una partita multigiocatore senza API non genererebbe i luoghi nuovi. Se il mondo si genera prima, il problema non si pone per ciò che è già pronto.
 - Cosa fare: un comando locale, senza browser, che apre un universo in un kernel e genera Genesi, luoghi in anticipo a partire dal centro, persone e modelli, un passo alla volta. In questa modalità **ogni** compito va alla coda; se una chiamata andrebbe alle API, il comando si ferma con un errore, non spende. Ogni passo passa dal validatore e dal filtro della quarta parete come sempre, e si committa solo uno stato valido; fermato e riavviato, riprende da lì. Un tetto di consumo per universo in percentuale della settimana, riletto a ogni passo. Mai su un universo con un mondo acceso. La partita (singola o multigiocatore) si sceglie all'avvio. Decidi tu, e scrivilo: quale modello per l'alta qualità (con revisioni in più?), quanti luoghi, chi risulta pagante e titolare delle carte. L'isolamento della CLI (ADR-0106) non cambia. Mai sul server di produzione. Un ADR e la voce nel glossario.
 - Test: offline, con una coda finta: una Genesi e qualche luogo completi senza alcuna chiamata alle API; un compito fuori coda ferma il comando; interruzione e ripresa; tetto raggiunto; rifiuto con un mondo acceso. Typecheck e suite con i loro turni.
@@ -2008,6 +2124,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Quando è fatto: commit su `task/T207`; nell'esito il comando, il costo misurato di un luogo, e cosa vede chi cammina oltre ciò che è stato generato, in un mondo di molti senza API. La riga «sicurezza:».
 ### T89 · La grafica a cartone — `fatto` (progetto; codice in T89a-e)
 - Pipeline: claude · stima 5% · approvato · priorità 100
+- Step: 29
 - Contesto: richiesta del to-do del 29/10 che la pianificazione aveva saltato (`docs/archivio/3-to-do-backlog/userchats/to-do-2026-10-29.md`, «Grafica a cartone»):
   l'autore vuole che l'universo abbia l'aspetto di Stompworks (https://www.reddit.com/r/ClaudeGameDev/comments/1x2ldgg/stompworks_a_small_books_worth_of_prompts_in/),
   foto in `docs/archivio/3-to-do-backlog/userchats/grafica_cartone.png`. Provider proposto dall'autore: Claude Code.
@@ -2025,6 +2142,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T89a · Cartone: fasce e interruttore — `fatto` (`9ae9a23`) (dipende da T89, T205)
 - Pipeline: claude · stima 3% · approvato · browser · priorità 75
+- Step: 29
 - Contesto: ADR-0093, punti 1, 2 e 6; la prova `?cartone` di T89 (`src/render/cartoon.ts`, `lit()` in `materials.ts`).
 - Fare: la rampa a 3 fasce per tutti i materiali illuminati (simulazione, corona e studio: `MAT.corona`, `coronaGlass`, `solid()`), i voxel luminosi fuori
   dalle fasce; il lato in ombra saturo (la fascia bassa non sotto ~0,35, il colore dell'emisfero non grigio); ombre portate più nette. Il cartone diventa il
@@ -2034,6 +2152,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T89b · Cartone: contorni dagli id di cosa e parte — `da fare` (dipende da T89a)
 - Pipeline: claude · stima 6% · approvato · browser · priorità 76
+- Step: 29
 - Contesto: ADR-0093, punto 3. Il passo `Ink` di T89 legge normali e profondità: sugli alberi fa rumore.
 - Fare: `src/mj/mesh.ts` scrive per vertice l'attributo `part` (indice della lettera della palette o della `<color part>`); `models.ts` e `terrain.ts` lo
   passano (il terreno: il codice della casella); ogni mesh/istanza ha un id. Un disegno degli id (MRT se three.js lo permette con il composer, altrimenti un
@@ -2045,6 +2164,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T89c · Cartone: luce tinta e prospettiva aerea — `fatto` (`8914f6f`) (dipende da T89a)
 - Pipeline: claude · stima 3% · approvato · browser · priorità 77
+- Step: 29
 - Contesto: ADR-0093, punto 4 (la foto: chiave calda, riempimento freddo, ombre azzurre, lontananza che sbiadisce nel cielo).
 - Fare: in `renderer.ts` la luce chiave calda e l'emisfero freddo, l'ombra portata tinta (un pezzo di shader dopo `lights_fragment_end` o il colore
   dell'ombra), la nebbia come prospettiva aerea (verso il colore del cielo, più vicina e più forte, con la camera libera del master compresa), per giorno,
@@ -2054,6 +2174,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T89d · Cartone: lo stile nei dati e le foto dei modelli — `da fare` (dipende da T89b)
 - Pipeline: claude · stima 3% · approvato · browser · priorità 78
+- Step: 29
 - Contesto: ADR-0093, punto 5. Il bordo nasce dove cambia la parte: i programmi devono avere parti di colore ben distinto.
 - Fare: nel seme `world/style.md` e nei prompt `prompts/agents/artista.md` e `scultore.md`: un colore pieno per parte, contrasto di valore tra parti vicine,
   dettagli come lettere scure dedicate (assi, pannelli, crepe) invece di micro-voxel, forme tozze, ambiente smorzato e pochi accenti saturi; il giudizio
@@ -2063,6 +2184,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T89e · Cartone: laboratorio, prestazioni, togliere la prova — `da fare` (dipende da T89a-d)
 - Pipeline: claude · stima 4% · approvato · browser · priorità 79
+- Step: 29
 - Contesto: ADR-0093, conseguenze e punto 6.
 - Fare: `lab/3d/` e `lab/editor/` con l'interruttore cartone/classica (usano `Bloom`); misurare fps e ms per fotogramma con e senza (un luogo pieno, lo
   studio, la corona) e scriverli nell'ADR; se il disegno degli id costa troppo, MRT o metà risoluzione per gli id; togliere `?cartone` e `window.cartone`
@@ -2071,6 +2193,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T92 · Integrare T52 (i sotterranei) nel base 3d — `fatto`
 - Pipeline: gemini · stima 1% · approvato · priorità 0
+- Step: 13
 - Contesto: `integra T52` del 31/10/2026 si è fermato su conflitti in `AGENTS.md`, `docs/adr/README.md` e `docs/plans/backlog.md`. Nel frattempo nel base `3d` sono entrati ADR-0081..ADR-0090. L'ADR dei sotterranei scritto da T52a deve diventare ADR-0091 (`docs/adr/0091-i-sotterranei.md`). T52 è un task di solo progetto (nessun codice sorgente di gioco modificato). Leggi `node tools/pipeline/pipeline.mjs dossier T52` e `traccia T52`.
 - Fare: nel tuo worktree esegui `git merge task/T52` e risolvi i conflitti:
   - Rinomina `docs/adr/0081-i-sotterranei.md` in `docs/adr/0091-i-sotterranei.md`, aggiorna il titolo/numero al suo interno ("# ADR-0091: I sotterranei"), e inseriscilo in `docs/adr/README.md` in fondo alla lista dopo ADR-0090.
@@ -2083,6 +2206,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T93 · Verifica nel browser dei pagamenti Stripe (T45e) — `fatto` (dipende da T45e)
 - Pipeline: claude · stima 3% · approvato · priorità 9
+- Step: 18
 - Contesto: T45e ha completato l'integrazione di Stripe Checkout (ADR-0083) nel base `3d` con test headless. L'autore ha inserito le chiavi di test (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PUBLISHABLE_KEY`) nel `.env`. L'autore conferma che il listener locale è attivo e inoltra gli eventi a `localhost:5173/api/stripe/webhook` (porta standard del dev server). Leggi `node tools/pipeline/pipeline.mjs dossier T45e` e `traccia T45e`.
 - Fare: verificare nel browser con Claude (`--chrome`) la ricarica crediti di prova tramite Stripe Checkout:
   - Il gioco e le sue API girano sul server Vite sulla porta 5173 (se libera, o con preview/dev sotto il turno browser: `node tools/pipeline/pipeline.mjs turno browser -- npm run dev -- --port 5173 --strictPort`);
@@ -2098,6 +2222,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T94 · Integrare T54 — `fatto` (`0041da5`)
 - Pipeline: claude · stima 3% · approvato · priorità 8
+- Step: 13
 - Contesto: `integra T54` va in conflitto con il base `3d` in `AGENTS.md`, `docs/adr/README.md`, `docs/plans/backlog.md`,
   `src/kernel/kernel.ts`, `src/kernel/validator.ts`. T54 ha scritto l'ADR come ADR-0081, numero già preso
   (`0081-crediti-e-spese-comuni.md`). Nasce da T54: `dossier T54`.
@@ -2109,6 +2234,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T95 · Test rossi da soli: explore, partita, subscription — `fatto`
 - Pipeline: claude · stima 3% · priorità 60
+- Step: 27
 - Contesto: T93 riporta che `tests/explore*`, `tests/partita*` e `tests/subscription*` falliscono anche lanciati da soli,
   senza legame con Stripe (`traccia T93`); T54 riporta 33 timeout di carico nella suite intera (`traccia T54`).
 - Cosa fare: sul base `3d` lancia ciascuno di quei file da solo; per ciò che fallisce davvero (non per timeout di carico) trova il
@@ -2118,6 +2244,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T96 · Mai zero slot per nessun provider — `fatto`
 - Pipeline: gemini · stima 3% · priorità 5 · approvato
+- Step: 19
 - Contesto: richieste dell'autore del 31/10: «non chiudere mai tutti gli slot per claude», poi «tutti i modelli abbiano sempre almeno
   uno slot; sta all'orchestratore decidere l'ordine e se sospendere temporaneamente nuovi task a un provider per permettere a un altro di
   completare il proprio». `nextSlot`/`updateSlots` in `tools/pipeline/pipeline.mjs` (ADR-0087) scendono fino a 0 quando la previsione dei
@@ -2137,6 +2264,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T97 · Il sito: progetto, pagine e stile — `fatto`
 - Pipeline: claude · stima 5% · approvato · priorità 60
+- Step: 21
 - Contesto: richiesta dell'autore del 31/10 (`docs/userchats/to-do-2026-10-31.md`): landing, login, pagina delle sessioni con «Crea nuovo
   universo», profilo, area delle carte, area pagamenti. Tema per il sito e per le interfacce in gioco: pop art a fumetti e arcade retro, neon punk,
   retrowave/synthwave; richiama velatamente la corona del Concilio senza svelarla (es. in fondo alla landing la punta delle orecchie dei gerboa,
@@ -2155,6 +2283,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T98 · Cartone: fuori dalla corona i contorni della simulazione nascosta — `fatto`
 - Pipeline: claude · stima 2% · priorità 40 · approvato
+- Step: 29
 - Contesto: segnalazione dell'autore del 31/10 (to-do, «Bug grafica cartoon», foto in `docs/userchats/image.png`): con `?cartone`,
   quando la corona si vede, oltre il cerchio compaiono i contorni a inchiostro delle cose che starebbero lì se si fosse ancora sul
   tappeto (alberi, case, sentieri). Causa probabile: il passo `Ink` di `src/render/cartoon.ts` ridisegna la scena con
@@ -2168,6 +2297,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T99 · Integrare T57 (T57a) — `fatto`
 - Pipeline: claude · stima 1% · approvato · priorità 5
+- Step: 14
 - Contesto: `integra T57` va in conflitto con il base `3d` solo in `docs/plans/backlog.md` (il base ha aggiunto T96-T98 e
   aggiornato altri blocchi). T57 ha fatto il pezzo T57a (rune composte come programma); T57b e T57c restano da fare. Nasce da T57: `dossier T57`.
 - Cosa fare: nel worktree `git merge task/T57`; in `backlog.md` tieni tutti i blocchi del base e, per il blocco di T57, la versione
@@ -2177,6 +2307,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T100 · Integrare T97 e verificare il sito nel browser — `fatto`
 - Pipeline: claude · stima 4% · approvato · priorità 6
+- Step: 21
 - Contesto: T97 (il sito, ADR-0095) è fatto su `task/T97` (`416ea7d`) ma è partito da `cbe8532`: nel suo `backlog.md` ha
   pianificato i task del sito come T99-T104, numeri che nel base sono già presi (T98 cartone, T99 integrare T57). Chiede anche la
   verifica nel browser (`BROWSER: da verificare`, su Antigravity non c'era il browser). Nasce da T97: `dossier T97`, `traccia T97`.
@@ -2209,6 +2340,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 - Stile: copia lo stile grafico del template in `docs/design/sito/` (fatto da T109, leggi il suo `README.md`).
 - Pipeline: claude · stima 4% · approvato · priorità 62
+- Step: 21
 - Contesto: ADR-0095, punto 2 (Landing Page). La pagina di presentazione di QUINE42.
 - Fare: completare la landing page (`site/index.html`, `site/site.css`, `site/landing.ts`) con layout responsive pop art / synthwave: hero banner con Three.js e animazione voxel procedurale MarkovJunior in tempo reale, navigazione con indicatori di stato, pulsante CTA «Gioca Subito» collegato a `../index.html`, sezione pilastri (Rune, MarkovJunior 3D, Carte, Concilio IA), vetrina interattiva delle caratteristiche e footer con la silhouette delle orecchie dei gerboa (il segreto della Corona).
 - Fatto quando: typecheck e test verdi; navigazione e canvas 3D funzionanti senza errori nel browser.
@@ -2218,6 +2350,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 - Stile: copia lo stile grafico del template in `docs/design/sito/` (fatto da T109, leggi il suo `README.md`).
 - Pipeline: claude · stima 4% · approvato · priorità 64
+- Step: 21
 - Contesto: ADR-0095, punto 2 (Profilo & Account) e ADR-0082 (Firebase Auth).
 - Fare: creare la pagina profilo (`site/profilo.html` e modulo TS associato): accesso Firebase con Google o anonimo riusando `src/session/login.ts` e `/api/account`; visualizzazione dettagli viandante (ID account, stato collegamento, saldo crediti); editor estetico con scelta colore mantello e seme del modello viandante con anteprima tridimensionale interattiva renderizzata tramite Three.js e `src/mj/mesh.ts`; pulsanti per legare l'account anonimo a Google (`linkWithPopup`) o disconnettersi.
 - Fatto quando: typecheck e test verdi; autenticazione e visualizzatore 3D dell'avatar funzionanti nel browser.
@@ -2228,6 +2361,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 - Stile: copia lo stile grafico del template in `docs/design/sito/` (fatto da T109, leggi il suo `README.md`).
 - Pipeline: claude · stima 4% · approvato · priorità 66
+- Step: 21
 - Contesto: ADR-0095, punto 2 (Sessioni & Nuovo Universo), ADR-0058 (sessioni) e ADR-0086 (lobby multigiocatore).
 - Fare: implementare l'hub delle sessioni (`site/sessioni.html` e modulo TS associato): interrogare `/api/universe` e lo stato delle sessioni attive su `/api/session`; mostrare la lista dei reami disponibili con dettagli del master, modelli IA impiegati, coefficienti di generazione, stima oraria della spesa e tetto minimo richiesto; pulsante diretto per accedere alla lobby multigiocatore del reame scelto; pannello wizard «Crea nuovo universo» per avviare la Genesi di un nuovo reame git specificando nome, seme e parametri base.
 - Fatto quando: typecheck e test verdi; elenco sessioni e creazione nuovo universo funzionanti via interfaccia web.
@@ -2237,6 +2371,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 - Stile: copia lo stile grafico del template in `docs/design/sito/` (fatto da T109, leggi il suo `README.md`).
 - Pipeline: claude · stima 5% · approvato · priorità 68
+- Step: 21
 - Contesto: ADR-0095, punto 2 (Carte 3D), ADR-0056 (carte) e ADR-0084 (eredità dei cloni).
 - Fare: sviluppare la galleria interattiva delle carte collezionabili (`site/carte.html` e modulo TS associato): leggere la collezione del viandante (`collectionOf` da `src/kernel/cards.ts` e `world/carte.json`); per ogni carta visualizzare una mesh 3D Three.js con texture olografica prismatica, animazione di galleggiamento e rotazione 3D interattiva su hover/click (flip della carta); esporre i contatori di utilizzo nel mondo (luoghi, trame, prompt, totale), la rarità, l'impronta MinHash e l'albero genealogico della catena dei cloni titolari con le relative quote economiche.
 - Fatto quando: typecheck e test verdi; galleria carte 3D interattiva e fluida a 60 fps nel browser.
@@ -2246,6 +2381,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 - Stile: copia lo stile grafico del template in `docs/design/sito/` (fatto da T109, leggi il suo `README.md`).
 - Pipeline: claude · stima 3% · approvato · priorità 70
+- Step: 21
 - Contesto: ADR-0095, punto 2 (Crediti & Stripe), ADR-0081 (crediti) e ADR-0083 (Stripe Checkout).
 - Fare: realizzare la pagina di gestione crediti (`site/pagamenti.html` e modulo TS associato): cruscotto con saldo crediti disponibile e storico dei consumi; selettore per ricarica crediti con tagli prefissati ($5, $10, $20, $50) o cifra libera; interazione con l'endpoint `/api/stripe/checkout` per avviare la sessione protetta Stripe Checkout (supporto carte e Google Pay); tabella cronologica dei pagamenti ricevuti letta da `world/pagamenti.json` con id transazione, data e accredito.
 - Fatto quando: typecheck e test verdi; flusso di checkout Stripe avviabile dall'interfaccia e storico consultabile.
@@ -2255,6 +2391,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 - Stile: copia lo stile grafico del template in `docs/design/sito/` (fatto da T109, leggi il suo `README.md`).
 - Pipeline: claude · stima 4% · approvato · priorità 72
+- Step: 21
 - Contesto: ADR-0095, punto 3 (Variabili CSS unificate). Il tema grafico deve permeare anche l'esperienza di gioco.
 - Fare: aggiornare `src/style.css` e i componenti UI in-game (`src/ui/hud.ts`, `inventory.ts`, `lobby.ts`, `profile.ts`, `chat.ts`, `creditdialog.ts`) per adottare appieno i token di `src/theme.css`: bordi a inchiostro netto fumetto (`--border-ink-thick`), ombre rigide neon offset (`--shadow-hard-cyan`, `--shadow-hard-pink`), pattern mezze tinte sui pannelli modali, pulsanti arcade retrò e font display per intestazioni e notifiche d'avviso.
 - Fatto quando: typecheck e test verdi; screenshot nel browser delle interfacce in-game rinnovate con il tema pop art comics / neon punk.
@@ -2262,6 +2399,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T107 · Il sito: correggere i difetti della pagina dimostrativa — `fatto`
 - Pipeline: gemini · stima 2% · approvato · priorità 20
+- Step: 21
 - Contesto: la verifica di T100 nel browser su `site/index.html` (T97, ADR-0095) ha trovato cinque difetti, scritti nel blocco di T100.
   Nasce da T97 e T100: `dossier T97`, `dossier T100`.
 - Cosa fare: (1) la carta demo girata mostra il fronte specchiato: un retro vero (`backface-visibility: hidden` sulle due facce);
@@ -2275,6 +2413,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T108 · Verificare T107 (il sito corretto) nel browser — `fatto`
 - Pipeline: claude · stima 3% · approvato · priorità 30
+- Step: 21
 - Contesto: T107 ha corretto i cinque difetti trovati da T100 su `site/index.html` ma su Antigravity non c'era il browser
   (`BROWSER: da verificare`). Nasce da T107 e T100: `dossier T107`, `dossier T100`.
 - Cosa fare: nel worktree `git merge task/T107`; typecheck e build; grep in `dist/` di domini esterni (`googleapis`, `gstatic`) e di
@@ -2294,6 +2433,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T109 · Il sito: il template grafico in `docs/design/sito/` — `fatto`
 - Pipeline: claude · stima 4% · approvato · priorità 59
+- Step: 21
 - Contesto: richiesta dell'autore del 01/11: il template va fatto prima dei task del sito (T101-T106), e lo fa la pipeline al posto suo.
   Posto scelto dall'autore: `docs/design/sito/` (`docs/pipeline/domande/T97.md`, risposta (a)). Nasce da T97: `dossier T97`; tema in ADR-0095,
   `src/theme.css`, `site/index.html` (pagina dimostrativa, corretta da T107).
@@ -2314,6 +2454,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T110 · Verificare T109 (il template del sito) nel browser — `fatto`
 - Pipeline: claude · stima 3% · approvato · priorità 30
+- Step: 21
 - Contesto: T109 ha fatto su Gemini il template statico in `docs/design/sito/` (landing, login, profilo, sessioni, carte, pagamenti,
   componenti, `README.md`), ma su Antigravity non c'era il browser (`BROWSER: da verificare`). Nasce da T109: `dossier T109`, `traccia T109`.
 - Cosa fare: nel worktree `git merge task/T109`; typecheck. Nel turno browser (`pipeline.mjs turno browser -- …`) servi `docs/design/sito/`
@@ -2331,6 +2472,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T111 · Pipeline: un task con verifica nel browser non ripiega su un provider senza browser — `fatto`
 - Pipeline: gemini · stima 2% · approvato · priorità 20
+- Step: 19
 - Contesto: il 01/11 T109 e T110 (verifica nel browser) erano assegnati a `claude`; con lo slot di Claude occupato la pipeline ha scritto
   «claude non può, va su gemini» e li ha lanciati su Antigravity, che non ha il browser: T110 è stato interrotto a mano. `assegna` rifiuta già
   questi task su un provider senza browser (`assignTask` in `tools/pipeline/pipeline.mjs`), il ripiego no.
@@ -2340,6 +2482,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T112 · Verificare T110 (il template del sito, con T109) nel browser — `fatto`
 - Pipeline: claude · stima 3% · approvato · priorità 25 · browser
+- Step: 21
 - Contesto: T109 e T110 sono girati su Antigravity, senza browser (`BROWSER: da verificare`): T110 ha fuso T109, aggiunto i font latin-ext,
   corretto nav e modali su mobile e tolto le rotture della quarta parete, senza vederle. Nasce da T109 e T110: `dossier T110`, `traccia T110`.
 - Cosa fare: nel worktree `git merge task/T110`; typecheck. Nel turno browser (`pipeline.mjs turno browser -- …`) servi la radice
@@ -2362,6 +2505,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T113 · Corona: il lampione intero e il drone in scala 1:2 dai modelli dell'autore — `fatto`
 - Pipeline: claude · stima 4% · approvato · priorità 20 · browser
+- Step: 15
 - Contesto: richiesta dell'autore del 01/11. Ha ridisegnato a mano due modelli della corona in `lab/mjx/models/handmade/`:
   `lampione.xml` (molto alto; già copiato in `universe/models/corona-lampione.xml` e girato di π in `corona.ts`, commit `8ca9053`) e
   `drone-xl.xml` (voxel raddoppiati per avere più definizione). Il lampione nel gioco esce **tagliato in altezza**: l'autore sospetta la taglia
@@ -2382,6 +2526,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T114 · Verificare T103 (l'hub sessioni multigiocatore) nel browser e integrare — `fatto`
 - Pipeline: claude · stima 3% · approvato · priorità 25 · browser
+- Step: 21
 - Contesto: T103 è stato completato su Gemini/agy senza browser (`BROWSER: da verificare`). Ha implementato l'hub sessioni (`site/sessioni.html`, `site/sessioni.ts`, `site/sessioni.css`), l'endpoint `GET /api/session`, la visualizzazione dei reami con spesa oraria stimata e il wizard «Crea nuovo universo». Il merge diretto con `3d` presenta conflitti in `site/index.html` (aggiornato nel frattempo da T101 con la nuova landing e hero 3D). Nasce da T103: `dossier T103`, `traccia T103`.
 - Cosa fare: nel worktree fare `git merge task/T103`; risolvere il conflitto in `site/index.html` preservando integralmente la nuova landing page di T101 e integrando nella barra di navigazione e nel footer il link a `./sessioni.html`; typecheck e test. Nel turno browser (`pipeline.mjs turno browser -- npx vite --port <libera> --strictPort`) verificare con Claude in Chrome:
   - Apertura di `site/sessioni.html` e navigazione corretta a 1400 px e a 375 px (desktop e mobile);
@@ -2396,6 +2541,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T115 · Integrare T57b (rune nuove dal Concilio) — `fatto`
 - Pipeline: claude · stima 3% · approvato · priorità 20
+- Step: 14
 - Contesto: T57b è fatto in `task/T57b` (rune nuove dal Concilio, `src/kernel/magic.ts`, compito `rune.invent`), ma `integra T57b` va in conflitto in `AGENTS.md`, `docs/adr/README.md` e `src/kernel/agents/effects.ts` con T57c (già nel base, ADR-0096 effetto rilievo). Anche T57b ha scritto un ADR-0096. Nasce da T57b: `dossier T57b`, `traccia T57b`.
 - Cosa fare: nel worktree `git merge task/T57b`; l'ADR di T57b diventa **ADR-0097** (file rinominato, indice, riferimenti in `AGENTS.md`, backlog e codice); nelle sezioni in conflitto tenere entrambe le aggiunte (in `effects.ts` sia la guida dell'effetto `rilievo` di T57c sia le rune nuove in `SPELL_GUIDE` di T57b); typecheck, `tests/magic.test.ts`, `tests/effects*` e la suite intera nel turno test (`pipeline.mjs turno test -- npm test`). I 5 timeout noti (referente T42e/T42f, wanderers T34, watch T42c) falliscono anche sul base: non sono difetti.
 - Quando è fatto: merge risolto con ADR-0097, typecheck e test verdi (salvo i timeout noti), commit su `task/T115`.
@@ -2403,6 +2549,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T116 · Integrare T102 (la pagina profilo del sito) — `fatto`
 - Pipeline: claude · stima 3% · approvato · priorità 21
+- Step: 21
 - Contesto: T102 è fatto in `task/T102` (pagina profilo, editor con anteprima 3D, rotta `/api/viandante`), ma `integra T102` va in conflitto in `site/index.html` e `vite.config.ts` con T103/T114 (hub sessioni, `GET /api/session`, link a `sessioni.html`), già nel base. Nasce da T102: `dossier T102`, `traccia T102`; vedi anche `dossier T114`.
 - Cosa fare: nel worktree `git merge task/T102`; tenere entrambe le aggiunte (in `vite.config.ts` gli ingressi delle pagine e le rotte di tutti e due; in `site/index.html` la landing di T101 con i link sia a `sessioni.html` sia al profilo); typecheck e la suite nel turno test (`pipeline.mjs turno test -- npm test`); i timeout noti (referente, wanderers, watch, kernel sotto carico) non sono difetti. Una prova breve nel turno browser: le pagine landing, sessioni e profilo si aprono e i link tra loro funzionano.
 - Quando è fatto: merge risolto, typecheck e test verdi (salvo i timeout noti), commit su `task/T116`.
@@ -2410,6 +2557,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T117 · Audit di sicurezza: il Lua sul server, le chiavi, i rischi a valle del Concilio — `fatto`
 - Pipeline: claude · stima 5% · approvato · priorità 0
+- Step: 22
 - Contesto: domanda dell'autore (01/11): il codice Lua gira sandboxed sul server? Può esporre le chiavi delle API di Gemini? Quali altri rischi solleva? **Modello di minaccia, deciso dall'autore**: gli agenti del Concilio non rilevano né neutralizzano i prompt avversari, quindi il giocatore può dettare al Concilio qualunque contenuto o codice, e può anche scrivere Lua direttamente. La sicurezza deve stare **a valle** della scrittura del codice: difese contro i prompt avversari sul Concilio non contano come difese. Nasce da una richiesta in chat; vedi ADR-0057, 0058, 0059, 0061, 0066, 0069, 0077, 0082, 0083.
 - Cosa fare: **solo analisi, nessuna correzione**. Rispondere alle due domande con prove, non solo leggendo il codice: riprodurre gli attacchi in locale con il kernel vero (`src/kernel/sandbox.ts`, `prelude.lua`, `Host`, `validator.ts`, wasmoon) e file di prova non committati.
   1. **La sandbox**: dove gira il Lua in multigiocatore (`src/session/host.ts`, `server/session.ts`), chi può farlo girare (rune incise, `logic.lua` generati, editor e ramo del master). Provare a uscirne: oggetti e funzioni JS passati da wasmoon a Lua (`constructor.constructor`, prototipi, `process`), metatabelle di stringhe e tabelle, `load`/`require`/`debug` raggiunti per altre vie, `pcall` e coroutine contro il budget di istruzioni, confronto tra ciò che controlla il validatore e ciò che la sandbox impedisce davvero a runtime (il validatore si può aggirare?).
@@ -2421,6 +2569,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T118 · La CPU satura con due task: limitare test, typecheck e build — `fatto`
 - Pipeline: claude · stima 3% · approvato · priorità 1
+- Step: 19
 - Contesto: l'autore (01/11) vede la CPU al 100 % già con due task insieme (6 core, 12 thread); i test vanno in timeout e si ripetono, sprecando crediti. Agent View è scartato: non gestisce il carico della CPU. Ipotesi dell'orchestratore, da verificare: il carico viene da test e build, non dagli agenti; `vite.config.ts` non limita i worker di Vitest e il turno (ADR-0088) copre solo la suite intera e la preview. Nasce dalle regole di ADR-0088: leggi l'ADR e `dossier` dei task che lo hanno attuato.
 - Cosa fare:
   1. **Misurare** cosa satura la CPU mentre girano due task (quali processi, in quali fasi: suite intera, singoli file, typecheck, build, preview), con campioni reali; scrivere i numeri nel blocco del task. Se l'ipotesi è sbagliata, dirlo e correggere la causa vera o, se esce dallo scopo, scriverlo in `docs/pipeline/domande/T118.md`.
@@ -2443,6 +2592,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T119 · Integrare T116 (T102, la pagina profilo) dopo T104 — `fatto`
 - Pipeline: claude · stima 2% · approvato · priorità 2
+- Step: 21
 - Contesto: `integra T116` va in conflitto in `AGENTS.md`, `docs/plans/backlog.md` e `vite.config.ts` con T104 (galleria delle carte), appena entrato nel base. `task/T116` contiene già il merge di T102. Nasce da T116, T102 e T104: `dossier T116`, `dossier T104`.
 - Cosa fare: nel worktree di T119 `git merge task/T116`; risolvere tenendo entrambe le aggiunte (pagine del sito in `vite.config.ts`, righe di `AGENTS.md`); nel backlog restano i blocchi di tutti i task. Niente nuove funzioni.
 - Test: typecheck e build; `tests/site-profile.test.ts` e `tests/site-carte.test.ts` da soli. La suite intera è da poco stata eseguita da T116 e T104 con timeout per il carico: **non ripeterla** se il merge tocca solo i tre file in conflitto (T118 si occupa del carico); dillo nell'esito. Se il merge cambia altro codice, lanciala con il turno.
@@ -2452,6 +2602,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T141 · Il materiale per generare il nuovo logo — `fatto`
 - Pipeline: claude · stima 3% · approvato · priorità 0
+- Step: 16
 - Contesto: richiesta dell'autore (chat del 01/11): vuole rifare il logo del gioco con Claude Design o con Gemini, dalle loro interfacce web, e scegliere tra una serie di alternative. Serve una cartella con materiale grafico e istruzioni scritte. Oggi non c'è un logo: il gioco mostra ancora ᚱ ᚢ ᚾ ᛖ, il vecchio nome (`index.html`, `src/ui/genesis.ts`), il sito la scritta QUINE42 (`.nav-logo` in `site/site.css`). Il task prepara il materiale e basta: non genera loghi e non cambia il gioco né il sito. L'autore sta già facendo le prove: il materiale gli serve presto, meglio pochi file buoni che molti.
 - Cosa fare, in `docs/design/logo/`:
   - `brief.md`, da incollare così com'è, scritto per chi non sa nulla del progetto: il nome esatto `QUINE42` (cosa vuol dire: quine è il programma che stampa il proprio sorgente, 42 sono i passi del cerchio e il numero che tutti riconoscono); il gioco in poche righe (mondo a voxel fatto del proprio codice sorgente, rune che sono token di codice vero, il tappeto, il cerchio, la corona); le idee visive tra cui scegliere; lo stile (pop art a fumetti, retro arcade, neon punk, retrowave) con i colori esadecimali di `src/theme.css` e i font Bangers, Press Start 2P, VT323 come riferimento; ciò che va evitato (lettere sbagliate, testi inventati oltre al nome, rune decorative alla fantasy generica, il vecchio nome RUNE).
@@ -2467,6 +2618,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T143 · Le rune non si vedono sul tappeto — `fatto`
 - Pipeline: claude · stima 5% · approvato · priorità 2
+- Step: 14
 - Contesto: bug riportato dall'autore (chat del 01/11): giocando, le rune non si vedono sul tappeto «da un po', almeno da 40 task». È una regressione: una volta si vedevano. Indizio da T141 (`dossier T141`, ultima riga dell'esito), raccolto con il tappeto fermato dalla console: le lastre si vedevano stando nella corona e non stando dentro il cerchio (`speed = speed` a (12-14, 8) guardata da (13, 11), scorrimento a zero). Causa non cercata: non darla per buona, può essere anche il taglio al cerchio, la disposizione delle rune, l'altezza delle lastre sul rilievo o altro.
 - Cosa fare:
   - Riprodurre giocando normalmente, con il tappeto attivo, in `?skip&offline` e nella build (`AGENTS.md`, «Convalida nel browser»). Il chunk (0,0) ha sempre `x`, `speed = speed` e la runa magica `luce`, quindi si può guardare subito attorno alla partenza. Provare sia le rune a terra sia quelle incise dalla frase, che camminano con il tappeto.
@@ -2483,6 +2635,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T120 · Chi può scrivere: `/api/universe` e il WebSocket — `fatto` (dipende da T136, T137, T139)
 - Pipeline: claude · stima 5% · approvato · priorità 3
+- Step: 22
 - Contesto: richiesta dell'autore: con F12 un giocatore può riscrivere i file Lua sul server. Confermato nel codice: `server/universeStore.ts` accetta `commit`, `create`, `checkout`, `branch`, `merge`, `clone`, `reset` e `PUT map` senza identità (R1). Il WebSocket controlla `isMaster`, ma senza account l'id lo sceglie il client (R6). Nasce da T117: `dossier T117`; vedi ADR-0058, 0061, 0066, 0082.
 - Cosa fare:
   1. Identità verificata sul server e permessi per operazione su ogni route di `/api/universe`: su un universo multigiocatore un non master non scrive nulla; `clone` prende il master dall'identità verificata, non dal corpo. Verificare prima come scrivono `host.ts`, il kernel del server e `site/sessioni.ts` (`create`) e tenere funzionanti i percorsi legittimi.
@@ -2498,6 +2651,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T121 · Percorsi ammessi e protezione di git — `fatto` (dipende da T120)
 - Pipeline: claude · stima 3% · approvato · priorità 4
+- Step: 22
 - Contesto: R3 dell'audit: `safePath` (`universeStore.ts`) e `cleanBranch` (`src/session/server.ts`) confrontano `.git` alla lettera; su NTFS varianti dello stesso nome sono la stessa cartella, e scriverci può diventare esecuzione di codice sulla macchina (il server lancia git lì).
 - Cosa fare: elenco di percorsi ammessi (`modules/ models/ world/ maps/ prompts/ universe.json`, da verificare con ciò che il kernel scrive davvero) invece di un divieto; normalizzare maiuscole, punti e spazi finali, flussi NTFS, nomi riservati di Windows; git lanciato con `core.hooksPath` vuoto e nessuna configurazione del repository scrivibile.
 - Test: tabella di percorsi rifiutati sul validatore dei percorsi, senza scrivere fuori da una cartella temporanea.
@@ -2506,6 +2660,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T122 · Non si esce dalla sandbox: prove difensive e chiusure — `fatto` (dipende da T136, T137)
 - Pipeline: claude · stima 4% · approvato · priorità 2
+- Step: 22
 - Contesto: è **la cosa più importante per l'autore**, e l'audit non l'ha dimostrata: una sessione è stata fermata da un filtro di sicurezza mentre preparava le prove. Il lavoro è difensivo, sulla sandbox di questo progetto. Il `Sandbox` gira in wasmoon dentro il processo del server. Nasce da T117 (R8 ridotta, annotazione `string.dump`, «Cosa non è stato fatto»).
 - Cosa fare:
   1. Test in `tests/` che affermano le proprietà: da Lua nessun accesso a `process`, `require`, costruttori o prototipi JS, né attraverso i valori restituiti dall'`Host` né attraverso le metatabelle; `string.dump` non raggiungibile nemmeno con la sintassi a metodo; `pcall` e coroutine non scavalcano il budget; un valore finto in una variabile d'ambiente di prova non arriva mai a Lua.
@@ -2518,6 +2673,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T123 · Il proxy di Gemini — `fatto` (dipende da T136)
 - Pipeline: claude · stima 3% · approvato · priorità 6
+- Step: 22
 - Contesto: R2: `/api/gemini` spende la chiave per chiunque raggiunga la porta, con qualunque modello `gemini-*` e fino a 12 MB.
 - Cosa fare: elenco dei modelli ammessi (quelli di `universe.json` e dei prezzi), corpo massimo ridotto, tetto di spesa nel proxy, accesso solo da loopback con controllo di `Origin`; in multigiocatore il server chiama Google direttamente, senza route pubblica. La chiave resta fuori dal browser (regola 9).
 - Test: richieste rifiutate per origine, modello e dimensione, con `fetch` finto; nessuna chiamata vera a Gemini.
@@ -2526,6 +2682,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T124 · Il webhook di Stripe — `fatto` (dipende da T136, T139)
 - Pipeline: claude · stima 2% · approvato · priorità 7
+- Step: 22
 - Contesto: R4: senza `STRIPE_WEBHOOK_SECRET` ogni evento è accettato (crediti gratis); `metadata.universo` e `wandererId` finiscono in `path.join` senza validazione; `crediti` non è confrontato con `amount_total`. T105 ha aggiunto le rotte di Stripe anche alla preview e riscritto parte di `server/stripe.ts`: per questo si parte da T139.
 - Cosa fare: senza segreto la route risponde 503, nel server di sviluppo e nella preview; validare nomi e id come fa il checkout; credito calcolato dall'importo pagato.
 - Test: i tre casi.
@@ -2534,6 +2691,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T125 · Saldi e pagamenti fuori dall'universo — `fatto` (dipende da T120, T124)
 - Pipeline: claude · stima 6% · approvato · priorità 8
+- Step: 22
 - Contesto: R5 e R10: i crediti sono **l'unica cosa del gioco che non si deve poter modificare**, ma stanno in `world/giocatori/*.json` e `world/pagamenti.json`, nel repository dell'universo: un `checkout`, `R`, un ramo pubblicato o il codice generato possono cambiarli; la risposta del Referente diventa `giveCredits` senza tetto visibile; il controllo di idempotenza non passa dalla coda `serial`. Vedi ADR-0081, 0083.
 - Cosa fare: un archivio del server fuori dalla storia dell'universo per saldi e registro dei pagamenti, con migrazione dai file di oggi; nessuna via da Lua, dal Concilio, dal ramo o dal rollback; accredito atomico e idempotente; chi può ricaricare a mano e con quale tetto (scriverlo nell'ADR). I saldi degli altri non vanno al master nei file. ADR nuovo e `AGENTS.md`.
 - Test: rollback, ramo pubblicato e codice generato non cambiano i saldi; due eventi uguali in contemporanea accreditano una volta. La corsa è stata misurata (V-005.a: 8 consegne, 2 accrediti) ma non esce a ogni giro: il test la ripete o la forza, un solo giro verde non basta.
@@ -2542,6 +2700,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T126 · I limiti dentro la sandbox — `fatto` (dipende da T136)
 - Pipeline: claude · stima 4% · approvato · priorità 9
+- Step: 22
 - Contesto: R7, prima parte. Provato: un solo pattern di `string.find` blocca il processo oltre 60 s; `string.rep` alloca 200 MB senza guasti. Il budget conta le istruzioni VM per chiamata, non il lavoro nelle funzioni C né il tick.
 - Cosa fare: `string.*` con limiti di lunghezza e di pattern; limite di memoria della VM; budget per tick; limiti di scatola e di tempo per i programmi MarkovJunior sul server (l'XML può dire la propria `size`). Attenzione ai moduli esistenti, che devono continuare a girare, e alle prestazioni del tick.
 - Test: i casi della tabella dell'audit finiscono in un guasto entro un tempo breve, senza payload nel report.
@@ -2550,6 +2709,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T127 · Ogni mondo in un worker con un sorvegliante — `fatto` (dipende da T120, T126)
 - Pipeline: claude · stima 8% · approvato · priorità 10
+- Step: 22
 - Contesto: R7, seconda parte, la difesa più importante a valle: oggi tick, Lua e HTTP stanno nello stesso event loop del processo che tiene i segreti. Vedi ADR-0058 (`server/session.ts`, `src/session/host.ts`).
 - Cosa fare: ogni mondo in un `worker_thread` o processo, **senza i segreti nell'ambiente**, con limite di memoria e un sorvegliante che lo uccide se il tick si blocca e lo riavvia dall'ultimo stato valido; i MarkovJunior nel worker; i client lo sanno (un avviso, non un errore). ADR nuovo e `AGENTS.md`. Se è troppo grande, spezzarlo.
 - Test: un mondo bloccato non ferma l'HTTP né un altro mondo e riparte; i test del multigiocatore restano verdi.
@@ -2559,6 +2719,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T128 · La coda delle CLI — `fatto` (dipende da T136)
 - Pipeline: claude · stima 3% · approvato · priorità 11
+- Step: 22
 - Contesto: R9: `POST /api/coda` non ha autenticazione e accetta `system` e `prompt` qualsiasi; un testo dettato dal giocatore può arrivare a un agente con strumenti sulla macchina di chi gioca. Vedi ADR-0077.
 - Cosa fare: route montata solo su richiesta esplicita, solo in loopback, con un segreto locale; CLI in una cartella vuota, ambiente ridotto, strumenti esclusi e configurazione MCP e hook isolati, con conferma verificata; se Antigravity non può escludere gli strumenti, niente Antigravity sulla coda (dirlo all'autore nell'esito).
 - Test: senza segreto o non da loopback è rifiutata; gli argomenti delle CLI, senza lanciarle.
@@ -2567,6 +2728,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T129 · Limiti ai messaggi — `fatto` (dipende da T120)
 - Pipeline: claude · stima 2% · approvato · priorità 12
+- Step: 22
 - Contesto: R11: `inbox` non ha tetto per client, ogni messaggio può chiamare il modello, `testo` è tagliato solo per `agente`. Un giocatore esaurisce i budget comuni del mondo.
 - Cosa fare: ritmo per client, lunghezza massima del testo, code per pagante, in `src/session/server.ts`. Il gioco normale non deve accorgersene.
 - Test: un client che inonda è limitato, gli altri no.
@@ -2575,6 +2737,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T130 · Ciò che esce e ciò che il Concilio scrive — `fatto` (dipende da T120)
 - Pipeline: claude · stima 3% · approvato · priorità 13
+- Step: 22
 - Contesto: R12 e R13. `playerFiles` toglie campi invece di ammetterli; in sviluppo Vite potrebbe servire i file di `universes/` (da verificare). Il Concilio può forse scrivere `ai` in `universe.json`, cioè budget e provider: soldi veri, quindi fuori dal «tutto si può modificare».
 - Cosa fare: `playerFiles` a elenco di campi ammessi; `universes/` non servito da Vite; il Concilio scrive solo in un elenco di percorsi; `ai` solo dal kernel, su comando del master.
 - Test: i campi che non escono; una scrittura di `ai` dal Concilio rifiutata.
@@ -2583,6 +2746,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T131 · `npm audit` e Vite — `fatto` (dipende da T136)
 - Pipeline: claude · stima 2% · approvato · priorità 2
+- Step: 22
 - Contesto: R14: Vite 5.4.10, l'audit non ha lanciato `npm audit`.
 - Cosa fare: lanciarlo, aggiornare ciò che serve (Vite compreso, nei limiti della 5.x se basta), riportare ciò che resta aperto e perché.
 - Test: suite intera, typecheck, build.
@@ -2592,6 +2756,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T132 · Le correzioni piccole — `fatto` (dipende da T136)
 - Pipeline: claude · stima 2% · approvato · priorità 15
+- Step: 22
 - Contesto: R15 e R16.
 - Cosa fare: `Number()` su `realm.seed` in `site/sessioni.ts`; `returnUrl` del checkout limitato alla stessa origine; una CSP compatibile con three.js e con i worker; errori generici al client e dettagli nel log (`stripe.ts`); un test che cerca valori finti dei segreti in `dist/` dopo una build con un ambiente di prova.
 - Browser: gioco e sito senza errori di CSP in console.
@@ -2600,6 +2765,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T133 · Il server di produzione — `fatto` (dipende da T120, T123, T127, T131, T132)
 - Pipeline: claude · stima 6% · approvato · priorità 16
+- Step: 22
 - Contesto: correzione 1 dell'audit: il server di sviluppo non va esposto. Oggi la sessione vive nel plugin di Vite (`ssrLoadModule`). Prerequisito di T45f.
 - Cosa fare: un punto d'ingresso di produzione senza il server di sviluppo di Vite, che serve la build e monta solo le route ammesse; rifiuta di partire senza verificatore di identità, segreto del webhook e origini configurate; la coda delle CLI non c'è; ogni risposta porta la stessa CSP (`server/csp.ts`, l'ADR della CSP, nota di T132). ADR e `AGENTS.md`.
 - Test: non parte senza configurazione; una partita di prova con `fakeLink` o WebSocket vero in locale.
@@ -2609,6 +2775,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T134 · Le prove contro il server vero — `fatto` (dipende da T120, T121, T122, T123, T124, T125, T128, T129, T130, T132, T133, T137)
 - Pipeline: claude · stima 3% · approvato · priorità 17
+- Step: 22
 - Contesto: chiude «Cosa non è stato fatto» dell'audit, per la parte non coperta dai test di ogni correzione: nessuna prova HTTP o WebSocket è stata fatta contro un server vero.
 - Cosa fare: test di integrazione che avviano il server di produzione in locale con segreti finti e provano le regole di accesso (identità, origine, percorsi, webhook, proxy) e che i valori finti non escano mai (risposte, log, `dist/`). Aggiornare `docs/sicurezza/audit-2026-11.md` voce per voce: chiusa, provata, o aperta con il motivo.
 - Quando è fatto: test e typecheck verdi, report aggiornato, commit su `task/T134`. Poi l'orchestratore porta all'autore cosa resta prima di T45f.
@@ -2616,6 +2783,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T170 · Integrare T132 — `fatto` (dipende da T169)
 - Pipeline: claude · stima 2% · approvato · browser · priorità 1
+- Step: 22
 - Contesto: T132 (`dossier T132`) ha preso l'ADR-0110, che va a T127 (T169). Si fonde pulito con il base di oggi, ma il numero si scontra appena T169 entra, e T132 non è mai stato provato con il mondo in un processo a parte (T127 tocca `server/session.ts` e `vite.config.ts`, come T132).
 - Cosa fare: nel worktree di T170, con il base aggiornato, `git merge task/T132`. L'ADR della CSP diventa **0111**: file, indice, `AGENTS.md`, `docs/sicurezza/registro.md`, commenti e test che lo citano. Nelle aggiunte nello stesso punto tieni tutte e due. Nel registro V-020 cita T167 come task (anche nella tabella in fondo e in `tools/sicurezza/catalogo.mjs`, se il test lo chiede). Controlla che `server/csp.ts` valga anche per ciò che T127 ha aggiunto e che il WebSocket del rientro dopo un riavvio del mondo non sia bloccato.
 - Test: `npm run typecheck` e la suite intera con i loro turni, col limite normale; nell'esito quanti passano, i rossi rilanciando il file da solo, il tempo. Il kit `npm run sicurezza:prove -- --solo V-007,V-015,V-016`, esito in un file a parte.
@@ -2625,6 +2793,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T167 · Secondo audit: trovare da soli le vulnerabilità e correggerle — `fatto` (dipende da T127, T132, T166)
 - Pipeline: claude · stima 8% · approvato · browser · priorità 18
+- Step: 22
 - Contesto: richiesta dell'autore (chat, 02/11): «per la sicurezza, cerca di trovare da solo vulnerabilità e correggerle». Il primo audit (T117, `dossier T117`) ha fatto poche prove, e le correzioni hanno aggiunto codice mai riletto da chi attacca: `server/access.ts`, `server/ledger.ts`, `server/git.ts`, `src/kernel/paths.ts`, `Crossing` in `sandbox.ts`, i limiti ai messaggi, gli elenchi di `src/session/files.ts`, il worker dei mondi. Il processo è `docs/sicurezza/README.md`: ciò che conta (le tre proprietà) e ciò che non è una vulnerabilità valgono qui; il modello di minaccia è quello di T117: il giocatore può dettare al Concilio qualunque contenuto o codice, la difesa sta a valle.
 - Cosa fare, cercando prima dove un guasto costa di più (sandbox, crediti, scritture dei non master, spesa, macchina che ospita):
   1. **Cercare con prove**: rileggere da avversario il codice elencato sopra e ogni route e messaggio che ascolta un client (confronti tra ciò che il validatore controlla e ciò che succede a runtime, corse tra le richieste, bordi di `Crossing`, percorsi, XSS nel gioco e in `site/` da testi di altri giocatori, le route del sito, il ramo del master, il clone). Ogni sospetto si prova con un test o con il kit, non basta leggerlo. `npm audit` compreso. Il server di produzione rientra se è già nel base quando il task parte; altrimenti l'esito dice che manca.
@@ -2639,6 +2808,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T171 · Integrare T167 — `fatto`
 - Pipeline: claude · stima 3% · approvato · browser · priorità 1
+- Step: 22
 - Contesto: T167 (`dossier T167`) è partito prima che T133 (`dossier T133`) entrasse: ha preso l'ADR-0112, che è di T133, e non ha mai visto il server di produzione. `integra T167` va in conflitto in `AGENTS.md` e `server/session.ts`.
 - Cosa fare: nel worktree di T171, con il base aggiornato, `git merge task/T167`. L'ADR dell'audit diventa **0113**: file, indice, `AGENTS.md`, `docs/sicurezza/registro.md`, report, commenti e test che lo citano. Nelle aggiunte nello stesso punto tieni tutte e due. In `server/session.ts` le correzioni di T167 (`worldRefusal`, V-021, V-025, V-028) devono valere anche per `attachSessions` di T133. Il server di produzione deve avere ciò che T167 ha messo nel server di sviluppo: controlla V-020, V-021, V-025, V-028 e il checkout attraverso `gate`; `cors: false` di V-029 riguarda Vite, ma scrivi cosa fa la produzione con un'altra origine. Se manca qualcosa, mettilo qui con un test. In V-026 il campo Task dice **T172**, anche nella tabella e in `tools/sicurezza/catalogo.mjs` se il test lo chiede.
 - Test: `npm run typecheck` e la suite intera con i loro turni, col limite normale; nell'esito quanti passano, i rossi rilanciando il file da solo, il tempo. Il kit intero, esito in un file a parte.
@@ -2648,6 +2818,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T172 · Le risorse per account — `fatto` (dipende da T171)
 - Pipeline: claude · stima 4% · approvato · priorità 16
+- Step: 22
 - Contesto: V-026 (`docs/sicurezza/registro.md`, gravità alta, oggi bassa), trovata dal secondo audit (`dossier T167`). Va chiusa prima di esporre il server (T45f).
 - Cosa fare: la contromisura della voce. (1) Il mondo parte solo con un `entra` dal token verificato. (2) Un mondo vuoto si salva e si ferma dopo qualche minuto. (3) Una quota di universi per account, nel `.env`, e nessun `create` da un anonimo. (4) `POST /api/viandante` solo per chi il mondo conosce o con un ritmo per account. (5) Un ritmo per indirizzo su socket e route HTTP, nel server di produzione (`server/production.ts`); dietro un bilanciatore l'indirizzo vero va letto senza fidarsi di un'intestazione mandata dal client: scrivi la scelta nell'ADR. Il rientro di chi resta collegato mentre il mondo si ferma deve continuare a funzionare (`mondo`, `reenter`).
 - Test: proprietà in `tests/sicurezza/`, prove nel kit (`tools/sicurezza/catalogo.mjs`); typecheck e suite intera con i loro turni. Una misura di carico minima, scritta nell'esito con ciò che resta non misurato.
@@ -2656,6 +2827,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T168 · I resti della verifica di T166: raccogliere da non master, carte, porta nelle sessioni — `fatto`
 - Pipeline: claude · stima 2% · approvato · browser · priorità 28
+- Step: 17
 - Contesto: note dell'esito di T166 (`dossier T166`), con T130 ormai nel base. La verifica non ha visto un «Raccogli» riuscito da un viandante non master, e una volta `ospite` è rimasto chiuso nel bosco con tutte le caselle attorno bloccate, durante un cammino fatto da script: non si sa se dipende dallo script.
 - Cosa fare: (1) col turno `browser`, in un universo multigiocatore usa e getta, un non master raccoglie una cosa da vicino, con il loop normale: se non riesce, trova la causa e correggi. (2) Prova a riprodurre il viandante chiuso nel bosco, con i tasti veri e il loop normale; se non si ripete, scrivilo e non correggere nulla. (3) `describeCard` (`site/carte.ts`) cerca ancora `lore` e `aspetto`, che `publicFiles` non dà più: togli i rami morti, una carta senza `description` resta con la riga generica; non rimettere campi negli elenchi di `src/session/files.ts`. (4) `site/sessioni.ts:330` scrive «PORTA 5173» fisso: la porta vera o niente. (5) Nota di T132 (`dossier T132`): in `site/carte.html` le foto delle carte non compaiono e nessun worker parte, anche togliendo la CSP: trova la causa e correggi.
 - Test: uno per `describeCard`, con una carta come la dà `publicFiles`; `npm run typecheck` e la suite con i loro turni.
@@ -2664,6 +2836,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T169 · Integrare T127 — `fatto`
 - Pipeline: claude · stima 3% · approvato · browser · priorità 1
+- Step: 22
 - Contesto: T127 (`dossier T127`) ha preso l'ADR-0107, che è dei limiti ai messaggi, ed è partito da un base senza T129, T130 e la cache delle forme: quello che fa non è mai stato provato con loro. `git merge-tree` dà conflitti in `AGENTS.md` e `docs/adr/README.md`; `server/session.ts` e `vite.config.ts` si fondono da soli, ma vanno riletti.
 - Cosa fare: nel worktree di T169, con il base aggiornato, `git merge task/T127`. L'ADR di T127 diventa **0110**: file, indice, `AGENTS.md`, `docs/sicurezza/registro.md`, commenti e test che lo citano; 0107, 0108, 0109 restano dove sono. Nelle aggiunte nello stesso punto tieni tutte e due. Controlla dove le parti si toccano, e correggi qui ciò che non torna: i limiti ai messaggi (`LIMITS`, `heavy`) e gli elenchi di `src/session/files.ts` valgono anche con il mondo in un processo a parte, e i messaggi che il processo manda (l'avviso, il rientro) passano dagli elenchi; `server/hidden.ts` copre anche la cartella `node_modules/.quine-mondo/`, se è servibile; `buildWorld` contiene ciò che serve a `sharedForms` e a `engineVersion`; a ogni riavvio del mondo la cache delle forme riparte da vuota: misura quanto ci mette il primo avvio e confrontalo con i 5 s dell'avviso e i 45 s del sorvegliante, perché un avvio lento non deve far uccidere il mondo.
 - Test: `npm run typecheck` e la suite intera con i loro turni, col limite normale; nell'esito quanti passano, i rossi rilanciando il file da solo, il tempo. Il kit `npm run sicurezza:prove -- --solo V-001,V-002,V-005,V-007,V-011,V-012,V-013`, con la build, esito in un file a parte.
@@ -2673,6 +2846,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T135 · Integrare T119 dopo i task di sicurezza — `fatto`
 - Pipeline: claude · stima 1% · approvato · priorità 2
+- Step: 21
 - Contesto: `integra T119` va in conflitto solo in `docs/plans/backlog.md`: la sezione «La sicurezza» (T120-T134) è entrata in fondo al file, accanto al blocco di T119. Nasce da T119: `dossier T119`.
 - Cosa fare: nel worktree di T135 `git merge task/T119`; nel backlog restano tutti i blocchi, con ciò che T119 ha scritto nel proprio e la sezione «La sicurezza» intera. Niente altro.
 - Test: `npm run typecheck`. Niente suite intera né browser: T119 li ha già fatti e il conflitto è solo in un documento. Se il merge cambia altro, fermarsi e scriverlo nell'esito.
@@ -2681,6 +2855,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T136 · Il processo delle vulnerabilità: registro, specifiche, suite — `fatto`
 - Pipeline: claude · stima 4% · approvato · priorità 1
+- Step: 22
 - Contesto: richiesta dell'autore (`docs/pipeline/domande/T117.md`, 01/11): un processo di rilevamento, documentazione e specifica delle contromisure, che regga molte vulnerabilità e finisca in task della pipeline. Le voci di oggi sono R1-R16 in `docs/sicurezza/audit-2026-11.md`, le correzioni T120-T134. Nasce da T117: `dossier T117`. Solo documenti e struttura dei test: nessuna correzione e nessun attacco qui.
 - Cosa fare:
   1. `docs/sicurezza/README.md`, il processo: **rilevamento** (audit, `npm audit`, suite, prove dell'autore, revisione dei task che toccano server, sandbox o pagamenti) → **scheda** → **specifica della contromisura** → **task della pipeline** (dalla gravità alla priorità) → **test di regressione** → **chiusura**. Dice anche cosa non è una vulnerabilità: la decisione dell'autore in testa a questa sezione del backlog.
@@ -2692,6 +2867,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T137 · Le prove che esegue l'autore — `fatto` (dipende da T136)
 - Pipeline: claude · stima 4% · approvato · priorità 2
+- Step: 22
 - Contesto: l'autore esegue di persona ciò che una sessione di agente non riesce a eseguire (`docs/pipeline/domande/T117.md`). Serve a misurare lo stato di oggi prima delle correzioni: le voci «Cosa non è stato fatto» dell'audit. Ogni prova è difensiva e afferma una proprietà di questo progetto. Nasce da T117 e T136: `dossier T117`.
 - Cosa fare:
   1. `tools/sicurezza/`: uno script `npm run sicurezza:prove` che avvia il server in locale e prova route HTTP e WebSocket (senza identità, da un'altra origine, percorsi, webhook, proxy) e la sandbox in un processo a parte. Stampa per ogni prova `V-NNN`, proprietà, `ok` o `FALLA`, e scrive `docs/sicurezza/esiti/<data>.json`.
@@ -2705,6 +2881,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T140 · Integrare T123 — `fatto` (dipende da T139)
 - Pipeline: claude · stima 1% · approvato · priorità 1
+- Step: 22
 - Contesto: `integra T123` va in conflitto in `docs/sicurezza/registro.md`: T123 chiude V-002, T137 ha aggiunto a ogni voce la copertura e la misura del kit. Parte da un base che ha già T139 e T105, che con T123 toccano `vite.config.ts`: si risolve tutto insieme. Nasce da T123: `dossier T123`.
 - Cosa fare: nel worktree di T140, partito dal base con T139 e T105 dentro, `git merge task/T123`; nel registro V-002 resta `chiusa` e tiene anche ciò che T137 ha scritto, con la misura del 01/11 detta come precedente a T123. Se le prove V-002 di `tools/sicurezza/catalogo.mjs` o i test di T137 si aspettano ancora la falla, vanno allineati a T123.
 - Test: `npm run typecheck`, `npm run sicurezza:prove -- --solo V-002` (nell'esito le righe `ok` e `FALLA`: una FALLA vuol dire che V-002 non è chiusa e va detto, non coperto) e la suite intera con il suo turno.
@@ -2713,6 +2890,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T138 · Integrare T118 — `fatto`
 - Pipeline: claude · stima 1% · approvato · priorità 1
+- Step: 19
 - Contesto: `integra T118` va in conflitto in `vite.config.ts`: T118 ha toccato la configurazione dei test (worker e `hookTimeout`), mentre nel base sono entrati altri cambi allo stesso file. Serve presto: senza T118 la suite resta a 11 worker e con i timeout, anche per i task di sicurezza. Nasce da T118: `dossier T118`.
 - Cosa fare: nel worktree di T138 `git merge task/T118`; in `vite.config.ts` restano le aggiunte di entrambi. Nel backlog restano tutti i blocchi. Se gli ADR si scontrano, quello di T118 prende il primo numero libero.
 - Test: `npm run typecheck` e la suite intera con il suo turno: deve restare senza timeout (T118 ne ha misurati 680 su 680; il base ha test in più).
@@ -2721,6 +2899,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T142 · Integrare T131 — `fatto`
 - Pipeline: claude · stima 2% · approvato · priorità 1
+- Step: 22
 - Contesto: `integra T131` va in conflitto in `AGENTS.md`. T131 porta Vite 7.3.7 e Vitest 4.1.12 (`npm audit` a 0, ADR-0099). Nasce da T131: `dossier T131`.
 - Cosa fare: nel worktree di T142 `git merge task/T131`; in `AGENTS.md` restano le aggiunte di entrambi. Se gli ADR si scontrano, quello di T131 prende il primo numero libero. `node_modules` è una junction verso quello del base, che ha ancora le versioni vecchie e che altri task stanno usando: **non installare attraverso la junction**. Toglila (solo la junction, non il contenuto) e fai un `npm ci` tuo nel worktree, come ha fatto T131.
 - Test: `npm run typecheck`, `npm run build` e la suite intera con i loro turni. Nell'esito scrivi quanti test passano e i rossi che restano rilanciando il file da solo.
@@ -2730,6 +2909,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T139 · Integrare T105 — `fatto`
 - Pipeline: claude · stima 1% · approvato · priorità 1
+- Step: 21
 - Contesto: `integra T105` va in conflitto in `vite.config.ts`: T105 aggiunge `walletRoute` e la pagina `sitePagamenti`, mentre nel base è entrato T118 con `testWorkers`. T105 è verificato nel browser. Viene prima di T124, che tocca `server/stripe.ts` come T105. Nasce da T105: `dossier T105`.
 - Cosa fare: nel worktree di T139 `git merge task/T105`; in `vite.config.ts` restano le aggiunte di entrambi. Nel backlog restano tutti i blocchi. Se gli ADR si scontrano, quello di T105 prende il primo numero libero.
 - Test: `npm run typecheck` e la suite intera con il suo turno. È la prima suite con T118, T136 e T105 insieme: nell'esito scrivi quanti test passano e, se ce ne sono di rossi, quali. Un rosso che resta rilanciando il file da solo va detto e non va coperto: T136 ne aveva 45-47 e T105 14 (`watch`, `referente`, `wanderers`, `thin`, `between`), tutti senza T118.
@@ -2738,6 +2918,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T145 · Integrare T142 (con T131) — `fatto`
 - Pipeline: claude · stima 2% · approvato · priorità 1
+- Step: 22
 - Contesto: `integra T142` va in conflitto in `docs/adr/README.md`: il 0099 nel base è di T123 (il proxy di Gemini), T131 aveva preso lo stesso numero per Vite 7. T142 porta T131 (Vite 7.3.7, Vitest 4.1.12) ed è verificato nel browser, ma la sua suite è partita senza T140 e T123. Nasce da T142: `dossier T142`.
 - Cosa fare: nel worktree di T145 `git merge task/T142`. L'ADR `0099-vite-7-vitest-4-e-il-primo-npm-audit.md` diventa `0100-…`; correggi le citazioni che parlano di Vite 7 («ADR-0099» di T131 in `AGENTS.md`, `docs/`, codice, indice degli ADR), lasciando stare quelle del proxy. Nel backlog restano tutti i blocchi. `node_modules` è una junction verso il base, che ha ancora le versioni vecchie: **non installare attraverso la junction**; togli solo la junction e fai un `npm ci` tuo nel worktree.
 - Test: `npm run typecheck`, `npm run build` e la suite intera con i loro turni: è la prima con Vite 7, Vitest 4 e il proxy di T123 insieme. Nell'esito quanti passano e i rossi che restano rilanciando il file da solo.
@@ -2747,6 +2928,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T149 · Integrare T146 — `fatto`
 - Pipeline: claude · stima 2% · approvato · priorità 1
+- Step: 22
 - Contesto: `integra T146` va in conflitto in `docs/adr/README.md` e `src/kernel/validator.ts`. T146 (che porta dentro T126, i limiti dentro la sandbox) è partito senza T121 e ha preso il numero 0103, che nel base è di T121 (percorsi ammessi e git del server). Nasce da T146: `dossier T146`.
 - Cosa fare: nel worktree di T149 `git merge task/T146`. L'ADR `0103-i-limiti-dentro-la-sandbox.md` prende il primo numero libero del base (0104, se nessun altro lo ha preso); correggi le citazioni che parlano di quei limiti (`AGENTS.md`, `docs/`, codice, test, indice degli ADR), lasciando stare quelle di T121. In `src/kernel/validator.ts` restano le modifiche di entrambi. Nel backlog restano tutti i blocchi.
 - Test: `npm run typecheck` e la suite intera con i loro turni; nell'esito quanti passano e i rossi che restano rilanciando il file da solo. Poi `npm run sicurezza:prove -- --solo V-007` e `--solo V-003`: il kit si legge, non si riscrive; se sovrascrive un esito di `docs/sicurezza/esiti/`, ripristinalo e metti il tuo in un file a parte.
@@ -2756,6 +2938,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T150 · Integrare T149 — `fatto`
 - Pipeline: claude · stima 2% · approvato · priorità 1
+- Step: 22
 - Contesto: `integra T149` va in conflitto su una riga di `docs/adr/README.md`: nello stesso punto dell'indice entrano la 0104 del base (T125, i saldi) e la 0105 di T149 (i limiti dentro la sandbox). La suite e il kit di T149 non hanno girato con T125 dentro, e T125 e T126 toccano entrambi `src/kernel/kernel.ts` (git li fonde da solo, va provato). Nasce da T149: `dossier T149`.
 - Cosa fare: nel worktree di T150 `git merge task/T149`. Nell'indice restano entrambe le righe, la 0104 prima. Non si rinumera nulla. Nel backlog restano tutti i blocchi.
 - Test: `npm run typecheck` e la suite intera con i loro turni; nell'esito quanti passano e i rossi che restano rilanciando il file da solo. Poi `npm run sicurezza:prove -- --solo V-005`, `--solo V-007`, `--solo V-010`: il kit si legge, non si riscrive; se sovrascrive un esito di `docs/sicurezza/esiti/`, ripristinalo e metti il tuo in un file a parte.
@@ -2765,6 +2948,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T147 · Integrare T128 — `fatto` (dipende da T146)
 - Pipeline: claude · stima 3% · approvato · priorità 1
+- Step: 22
 - Contesto: `integra T128` va in conflitto in `docs/adr/README.md` e `vite.config.ts`: T128 (la coda delle CLI blindata, V-009) è partito senza T120, che ha messo `gate` sulle route in `vite.config.ts`, e aveva preso il numero 0102, che nel base è di T120. Nasce da T128: `dossier T128`.
 - Cosa fare: nel worktree di T147 `git merge task/T128`. L'ADR di T128 prende il primo numero libero del base; correggi le citazioni della coda blindata (`AGENTS.md`, `docs/`, codice, test, indice degli ADR), lasciando stare quelle di T120. In `vite.config.ts` restano entrambe le cose: la route `/api/coda` montata solo con `QUINE_CODA=1`, loopback, stessa origine e segreto di T128, insieme ai controlli di T120. In `AGENTS.md` e nel backlog restano le aggiunte di entrambi.
 - Test: `npm run typecheck` e la suite intera con i loro turni; nell'esito quanti passano e i rossi che restano rilanciando il file da solo. Poi `npm run sicurezza:prove -- --solo V-009`: il kit si legge, non si riscrive.
@@ -2774,6 +2958,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T148 · Alleggerire `tests/between.test.ts` — `fatto`
 - Pipeline: claude · stima 3% · approvato · priorità 2
+- Step: 27
 - Contesto: richiesta dell'autore (02/11). In T121 il file ha 1 timeout a 60 s nella suite; da solo col limite normale ne scadono 5, col limite alzato passa 7 su 7 a circa 67 s per test, a macchina carica. Il file mette limiti di 60 s e 180 s test per test (T91 li aveva già alzati): alzarli ancora non è la soluzione. Nasce da T121 e T91: `dossier T121`, `dossier T91`.
 - Cosa fare: misura prima dove va il tempo (avvio del kernel per ogni test, tick simulati, attese) e con che carico; se ne viene un collo di bottiglia del kernel e non del test, dillo nell'esito con la misura. Poi accorcia il file: per esempio un mondo condiviso dove i test non si disturbano, meno tick da simulare, un universo di prova più piccolo. Ogni test continua ad affermare le stesse cose (T43a, T43b, T43c): nessuna asserzione tolta né indebolita, nessun `skip`. Niente limiti alzati. Non cambiare il codice del gioco per far passare i test: se serve, è una domanda.
 - Test: tempi del file prima e dopo, da solo e nella suite, e il carico della macchina quando li misuri. `npm run typecheck` e la suite intera con i loro turni; nell'esito quanti passano e i rossi che restano rilanciando il file da solo.
@@ -2783,6 +2968,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T151 · Alleggerire `tests/credits.test.ts` e `tests/referente.test.ts` — `fatto`
 - Pipeline: claude · stima 3% · approvato · priorità 2
+- Step: 27
 - Contesto: approvato dall'autore (02/11). Nella suite di T148 sono gli unici 2 rossi, per timeout a 60 s; T121 li aveva verdi. Rilanciati insieme, senza il resto della suite, danno 5 timeout su 11 a 62-66 s, con la CPU al 51-62 %. Causa probabile, non misurata su questi due file: i boot ripetuti, che rieseguono in Node i programmi delle forme della corona (T91). T148 ha risolto lo stesso problema in `tests/between.test.ts` con un `InlineRunner` condiviso, passato con `KernelOptions.forms`. Nasce da T148 e T91: `dossier T148`, `dossier T91`.
 - Cosa fare: prima misura dove va il tempo in ciascun file; se la causa non sono i boot, scrivilo nell'esito e correggi ciò che misuri. Poi alleggerisci i due file come ha fatto T148. Non togliere asserzioni, non usare `skip`, non alzare i limiti, non toccare il codice del gioco: la cache delle forme nel kernel è un passo a parte, che l'autore non ha ancora approvato. Se i file non si possono alleggerire senza toccare il gioco, fermati e scrivilo in `docs/pipeline/domande/T151.md`.
 - Test: tempi dei due file prima e dopo, da soli e nella suite, e il carico della macchina quando li misuri. `npm run typecheck` e la suite intera con i loro turni; nell'esito quanti passano e i rossi che restano rilanciando il file da solo.
@@ -2792,6 +2978,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T144 · Integrare T122 — `fatto` (dipende da T142)
 - Pipeline: claude · stima 2% · approvato · priorità 1
+- Step: 22
 - Contesto: `integra T122` va in conflitto in `AGENTS.md`, sulle righe vicine dello Stack. T122 (il confine tra JS e Lua, `Crossing`) è finito e verificato. Parte quando Vite 7 e Vitest 4 di T131 sono nel base, per non rifare il merge. Nasce da T122: `dossier T122`.
 - Cosa fare: nel worktree di T144 `git merge task/T122`; in `AGENTS.md` restano le aggiunte di entrambi. L'ADR di T122 è `0099-il-confine-tra-js-e-lua.md`, ma nel base il 0099 è già di T123 (il proxy di Gemini) e T131 ne prende un altro: rinominalo al primo numero libero del base e correggi le citazioni che parlano del confine («ADR-0099» di T122 in `AGENTS.md`, `sandbox.ts`, test, `docs/sicurezza/`, indice degli ADR), lasciando stare quelle del proxy. Nel backlog restano tutti i blocchi.
 - Test: `npm run typecheck` e la suite intera con i loro turni, con Vitest 4 e i test nuovi di T122 (`tests/sicurezza/uscita.test.ts`, il limite di 180 s in `tests/between.test.ts`). Nell'esito quanti passano e i rossi che restano rilanciando il file da solo; le voci V-008, V-017 e V-019 restano chiuse.
@@ -2801,6 +2988,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T146 · Integrare T126 — `fatto`
 - Pipeline: claude · stima 3% · approvato · priorità 1
+- Step: 22
 - Contesto: `integra T126` va in conflitto in `docs/adr/README.md`: il 0102 nel base è di T120 (chi può scrivere), T126 aveva preso lo stesso numero per i limiti dentro la sandbox. La suite di T126 è partita senza T120. T126 non ha provato nel browser il nuovo allocatore (lo attraversa JS a ogni allocazione) né ripassato il kit. Nasce da T126: `dossier T126`.
 - Cosa fare: nel worktree di T146 `git merge task/T126`. L'ADR dei limiti dentro la sandbox prende il primo numero libero del base; correggi le citazioni che parlano di quei limiti (`AGENTS.md`, `docs/`, codice, test, indice degli ADR), lasciando stare quelle di T120. In `AGENTS.md` e nel backlog restano le aggiunte di entrambi.
 - Test: `npm run typecheck` e la suite intera con i loro turni. Nell'esito quanti passano e i rossi che restano rilanciando il file da solo. Poi `npm run sicurezza:prove` per V-007, compresa V-007.c (l'HTTP con un mondo bloccato, che nei test non ha equivalente), e V-007 nel registro secondo ciò che misura: resta `in correzione` per T127. Il kit si legge, non si riscrive: se una prova va cambiata, l'esito lo dice con il motivo.
@@ -2810,6 +2998,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T159 · Integrare T129 — `fatto`
 - Pipeline: claude · stima 2% · approvato · priorità 1
+- Step: 22
 - Contesto: `integra T129` va in conflitto in `docs/adr/README.md`: T129 (i limiti ai messaggi, V-011) ha preso il numero 0105, che nel base è di T149 (i limiti dentro la sandbox). T129 è partito da `e1c04a8`, senza T126, T146, T148, T149 e T150. Nasce da T129: `dossier T129`.
 - Cosa fare: nel worktree di T159 `git merge task/T129`. L'ADR di T129 diventa **ADR-0107** (0107-limiti-ai-messaggi.md): lo 0106 è riservato a T147, già in corso. Correggi le citazioni dei limiti ai messaggi (`AGENTS.md`, `docs/`, codice, test, `docs/sicurezza/registro.md`, l'esito del kit di T129 in `docs/sicurezza/esiti/` se la cita, il blocco di T129 nel backlog), lasciando stare quelle dei limiti dentro la sandbox. Nell'indice degli ADR restano tutte le righe, in ordine. Nel backlog restano tutti i blocchi.
 - Test: `npm run typecheck` e la suite intera con i loro turni, col limite normale, senza `--testTimeout`: nell'esito quanti passano, i rossi che restano rilanciando il file da solo, il carico della macchina. Il `between` nuovo di T148 è nel base: i tempi di `between` vanno letti col suo. Poi `npm run sicurezza:prove -- --solo V-011`: il kit si legge, non si riscrive; se sovrascrive un esito, ripristinalo e metti il tuo in un file a parte.
@@ -2821,6 +3010,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T152 · Le ambientazioni della Genesi: medievale, steampunk, moderna, futuristica — `da fare` (dipende da T205)
 - Pipeline: claude · stima 5% · approvato · browser · priorità 80
+- Step: 31
 - Contesto: richiesta 1 dell'autore: un universo medievale (quello che c'è, `aurora`), uno steampunk, uno moderno (grande città, anni 90), uno futuristico (tipo neonpunk). Oggi il tema è testo libero nella schermata della Genesi (`src/ui/genesis.ts`, `planGenesis` in `agents/genesis.ts`) e il seme `universe/prompts/theme.md` è il Regno di Valmora. Il seme può presupporre il medioevo anche altrove: i 20 ambienti, i prompt degli agenti, la guida di stile, il canone delle rune e i modelli generici. Il lessico è già uguale in ogni ambientazione (ADR-0075).
 - Cosa fare: prima un censimento di ciò che nel seme presuppone il medioevo, con file e riga. Poi quattro temi tra cui scegliere nella schermata della Genesi, modificabili come oggi; il medievale resta quello attuale. Ciò che il censimento trova diventa neutro o dipende dal tema, nel modo più piccolo: niente seme separato per ambientazione. Rune, tappeto, corona e quarta parete valgono ovunque; il tema spiega le rune senza magia medievale obbligatoria e senza metagioco. Il censimento dice anche ciò che si è lasciato com'è e perché. Decisione architetturale: ADR e `AGENTS.md`.
 - Test: una Genesi offline (`MockModels`) per ogni tema: i file giusti, `prompts/theme.md` scritto, un universo che parte. Un universo esistente non cambia. Typecheck e suite intera con i loro turni.
@@ -2829,6 +3019,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T153 · Gli universi steampunk, moderno e futuristico: leggerli e provarli — `in attesa` (dipende da T152, T156, T88)
 - Pipeline: claude · stima 2% · priorità 81
+- Step: 31
 - In attesa: la generazione stessa. I nomi scelti dall'autore (03/11, `docs/pipeline/domande/T153.md`) sono nell'elenco `generazione` di `tools/pipeline/config.json`: `orichalcum` (steampunk), `neapolis` (moderno), `sidera` (futuristico). Questo task si approva quando gli universi sono pronti.
 - Contesto: integrato con T88 su richiesta dell'autore (03/11): gli universi li genera il generatore differito (T207) con i crediti che avanzano (T88), non questo task. Decisioni dell'autore: niente API a consumo; solo Claude Code (`agy` soltanto nelle prove del prompt, ADR-0106 non si riapre); tetto per universo 25 % della settimana, modificabile in corsa; tutti in multigiocatore; `aurora` non si tocca. Le strutture vengono col prompt nuovo: T156.
 - Cosa fare: per ogni universo leggi i contenuti e il costo da ciò che il generatore registra. La bibbia, gli ambienti e i modelli sono dell'ambientazione? Ciò che tradisce il tema diventa una proposta di task.
@@ -2836,6 +3027,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Quando è fatto: nell'esito il costo di ciascuno e ciò che si è visto.
 ### T154 · Il banco del prompt delle strutture: una prova senza contesto e il suo giudizio — `fatto`
 - Pipeline: claude · stima 4% · approvato · priorità 30
+- Step: 30
 - Contesto: richiesta 2 dell'autore. Con piani (T53b), rampe (T53a), salto (ADR-0080) e sotterranei (ADR-0091) i palazzi devono essere più articolati e dettagliati. Il metodo è dell'autore: si scrive un prompt, lo si prova senza altro contesto su Claude Code, si guarda il risultato, si corregge **il prompt e mai il risultato**, si riparte. Si riusa ciò che c'è: `lab/prompts/scultore-mj.md`, `lab/mjx/sculptor.ts`, `lab/scripts/mjx-trial.ts`, `mjx-render.ts`, `mjx-stats.ts`, `src/mj/check.ts`, `src/mj/photo.ts`, `universe/prompts/agents/scultore.md`.
 - Cosa fare: uno script che (1) lancia `claude -p` col solo prompt e il bersaglio, da una cartella vuota, senza strumenti né file di progetto, e ne salva i token di input e di output; (2) passa l'XML al motore vero e dà quattro foto, le misure e un elenco di difetti; (3) tiene ogni tentativo in una cartella con prompt, risposta, foto e misure, così si confrontano. Definisci la soglia di qualità, in misure dove si può: più piani raggiungibili con rampe, stanze collegate, porta sul sentiero, punti da cui si salta, varietà delle parti, finestre e dettagli, il modello che finisce entro `FORM_LIMITS`. Ciò che non si misura lo giudica chi guarda le foto, con criteri scritti. Scrivi anche una prima versione del prompt. Bersagli: almeno 6 edifici diversi, tra cui uno moderno, uno steampunk e uno futuristico.
 - Test: lo script gira su un bersaglio e le misure riconoscono un modello buono e uno brutto (test offline su XML fissi). Typecheck e suite intera con i loro turni.
@@ -2845,6 +3037,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T155 · Iterare il prompt delle strutture fino alla soglia — `fatto` (dipende da T154)
 - Pipeline: claude · stima 8% · approvato · priorità 31
+- Step: 30
 - Contesto: il ciclo della richiesta 2, col banco di T154. Obiettivo: alta qualità col minimo di token in input; il prompt può contenere esempi o altre tecniche, purché ognuna si guadagni i suoi token.
 - Cosa fare: ciclo prova → foto e misure → correzione del prompt → da capo. Mai correggere a mano un XML. A ogni giro una riga in un diario (cosa è cambiato, token, misure, cosa si vede). Prova anche a togliere: ciò che non cambia il risultato esce. La soglia è raggiunta quando tutti i bersagli la passano nello stesso giro e con un secondo tentativo sugli stessi (la casualità conta). **Al più 12 giri**: se la soglia non arriva, fermati e scrivi in `docs/pipeline/domande/T155.md` a che punto sei e cosa manca, senza abbassarla.
 - Test: i modelli finali girano nel motore del gioco e passano i controlli di `src/mj/check.ts`. Typecheck con il suo turno.
@@ -2854,6 +3047,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T173 · Il banco con una seconda richiesta: il giro di conferma del prompt delle strutture — `fatto` (dipende da T155)
 - Pipeline: claude · stima 6% · approvato · priorità 31
+- Step: 30
 - Contesto: nasce da T155 (`dossier T155`, `docs/pipeline/domande/T155.md`, con la decisione in fondo): 11 giri, soglia non raggiunta per sbagli del singolo tentativo. Decisione dell'orchestratore, nell'autonomia dell'autore: si conta come nel gioco, dove l'invalido torna con il motivo (regola 2 di `AGENTS.md`, e l'Artista giudica con problemi e consigli). Il prompt è `lab/banco/prompt.md`.
 - Cosa fare: al banco una seconda richiesta: al tentativo che non passa torna il suo XML con i difetti misurati e, se le misure passano e le foto no, i problemi scritti dal giudizio. Poi **un solo giro** dei sette bersagli, due tentativi ciascuno. Passa se tutti i 14 tentativi passano misure e foto entro due richieste, nello stesso giro: misure e criteri restano quelli di `lab/banco/README.md`, senza toccarli, e il README dice cosa conta ora. **Non cambiare il prompt.** Il giudizio delle foto lo dà chi non ha scritto il prompt: `lab/banco/conferma/giudizio.md` con le foto accanto, e dice per ogni tentativo se è passato alla prima o alla seconda. Se non passa, fermati: niente altri giri, scrivi in `docs/pipeline/domande/T173.md` cosa manca.
 - Test: i modelli finali girano nel motore del gioco e passano i controlli di `src/mj/check.ts`; il cambio al banco ha un test in `lab/tests/banco.test.ts`. Typecheck con il suo turno.
@@ -2863,6 +3057,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T156 · Il prompt nuovo nello Scultore del gioco — `da fare` (dipende da T155, T173, T182)
 - Pipeline: claude · stima 5% · approvato · browser · priorità 32
+- Step: 30
 - Cambiato il 03/11 (autore, `docs/userchats/to-do-2026-11-03.md`, richiesta 1): il prompt da portare è quello procedurale di T182, non quello di T155. In più: il banco di T180 anche su Gemini (varianza e scala, non solo la qualità); nel gioco un programma serve più taglie, un forte enorme e uno gargantuesco lo condividono, e la seconda richiesta dello Scultore porta la traccia di T179; ciò che T180 dice che manca si fa qui.
 - Contesto: T155 ottimizza il prompt su Claude, ma nel gioco le strutture le scrive lo Scultore sui modelli Gemini (ADR-0042, e i provider di ADR-0077): il risultato può cambiare col modello e va misurato. **Niente API (autore, 02/11):** per ora si genera solo con gli abbonamenti, Claude Code e `agy`. Il prompt del gioco è `universe/prompts/agents/scultore.md`, con `agents/sculptor.ts`.
 - Cosa fare: porta il prompt per le classi di struttura e togli ciò che è superato, senza peggiorare le classi semplici. Prova gli stessi bersagli di T155 su Gemini attraverso `agy`, col banco di T154 e il suo prompt fidato (non la coda, ADR-0106), poche chiamate, nessuna alle API, con token e consumo nell'esito. Se il risultato è sotto la soglia, dillo con foto e misure e proponi la strada (adattare il prompt o cambiare modello): non cambiare da solo il modello predefinito, ha un costo per chi gioca. Gli universi esistenti ricevono il prompt come ogni aggiornamento dal seme, senza che cambi un modello già scolpito.
@@ -2872,6 +3067,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T157 · L'Attore: chi interpreta gli NPC, un'opzione del master — `fatto` (`a63d8e2`)
 - Pipeline: fable · stima 15% · approvato · browser · priorità 20
+- Step: 26
 - Contesto: richiesta 3 dell'autore. Oggi il Narratore è l'unico interprete: `npc.chat` e `npc.dialogue` in `agents/minds.ts`. Con l'opzione accesa il Narratore crea solo legami, storie e **schede degli NPC** (il prompt di ognuno); un agente nuovo, l'**Attore**, le interpreta. Default spento: senza l'opzione nulla cambia e nessuna chiamata in più.
 - Cosa fare: `universe.json → ai.attore`, riparato dal validatore, che il master sceglie con modelli e coefficienti (Genesi con `kernel.setAi`) e che la lobby mostra e permette di impostare (ADR-0086). La scheda è scritta dal Narratore una volta per individuo, salvata con lui, rivista quando cambiano legami o storia ma non a ogni battuta; alla prima battuta di un NPC senza scheda (universi vecchi) si scrive. L'Attore riceve scheda, ricordi per viandante, vicinato del grafo e tutto ciò che il Narratore riceve per quei compiti: principi della quarta parete, canone, lessico, filtro. Non inventa fatti del mondo: ciò che nasce nel dialogo (ricordi, oggetti citati, azioni) passa come oggi. Convenzione del nuovo compito: schema Gemini, risposta in `MockModels`, voce nel registro, `CENSUS` dei coefficienti, `payerOf`, prompt in `prompts/agents/attore.md`. Decidi il modello predefinito dell'Attore e scrivi perché. Decisione architetturale: ADR e `AGENTS.md`.
 - Test: con l'opzione spenta le chiamate sono le stesse di oggi; accesa, `npc.chat` e `npc.dialogue` vanno all'Attore con la scheda, il Narratore scrive la scheda una volta sola, paga chi pagava; quarta parete e crediti esauriti come oggi; un client che non è il master non cambia l'opzione. Typecheck e suite intera con i loro turni. Esito «sicurezza: …» (lobby, sessione, crediti).
@@ -2903,6 +3099,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T158 · L'Attore nello studio — `fatto` (`4759b9a`) (dipende da T157, T205)
 - Pipeline: claude · stima 3% · approvato · browser · priorità 86
+- Step: 26
 - Contesto: ogni agente è una squadra nella corona (`archive.ts`), con un gerboa e un cappello (`corona-gerboa-<agente>.xml`, T50), un posto nella Sala del Concilio e una console nella Direzione; l'Attore di T157 non c'è ancora.
 - Cosa fare: il suo gerboa con un cappello riconoscibile, il posto al tavolo (i membri seduti diventano nove), la console, lo studio dove sta, i colori e i nomi nei pannelli. Con l'opzione spenta scegli se non compare o resta a riposo come gli altri che non lavorano, e scrivilo.
 - Test: quelli di corona e archivio; typecheck e suite intera con i loro turni.
@@ -2912,6 +3109,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T162 · Integrare T161 — `fatto` (dab503e)
 - Pipeline: claude · stima 1% · approvato · priorità 0
+- Step: 27
 - Contesto: `integra T161` va in conflitto solo in `docs/adr/README.md`: T161 aggiunge la riga dello 0108 dove il base ha aggiunto quella dello 0106. Nasce da T161: `dossier T161`.
 - Cosa fare: nel worktree di T162 `git merge task/T161` e tieni tutte e due le righe, in ordine di numero, senza un posto per lo 0107 (lo aggiungerà T159). Nessun numero cambia.
 - Test: `npm run typecheck` e la suite intera con i loro turni, col limite normale; nell'esito quanti passano, i rossi che restano rilanciando il file da solo, il tempo della suite e il carico della macchina. Il base ha T128 e T147, che T161 non aveva: è la prima suite con la cache e con loro.
@@ -2921,6 +3119,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T165 · Integrare T159 — `fatto`
 - Pipeline: claude · stima 1% · approvato · priorità 1
+- Step: 22
 - Contesto: `integra T159` e `integra T129` vanno in conflitto solo in `docs/adr/README.md`: T159 aggiunge la riga dello 0107 e il base, nel frattempo, quella dello 0108 di T161. Nasce da T159: `dossier T159`.
 - Cosa fare: nel worktree di T165 `git merge task/T159` (porta dentro anche T129) e tieni tutte le righe dell'indice, in ordine di numero. Nessun numero cambia.
 - Test: `npm run typecheck` e la suite intera con i loro turni, col limite normale; nell'esito quanti passano, i rossi che restano rilanciando il file da solo, il tempo della suite e il carico della macchina. T159 non aveva la cache delle forme e aveva un rosso per timeout in `tests/referente.test.ts`: di' se con la cache è sparito. Il kit su V-011 (`npm run sicurezza:prove -- --solo V-011`) va rifatto su questo merge; l'esito in un file a parte, senza sovrascriverne altri.
@@ -2930,6 +3129,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T166 · Integrare T130 — `fatto` (dipende da T165)
 - Pipeline: claude · stima 3% · approvato · browser · priorità 1
+- Step: 22
 - Contesto: T130 ha preso l'ADR-0107, riservato ai limiti ai messaggi di T129, e non ha la cache delle forme; tocca `AGENTS.md`, l'indice ADR, il backlog e `docs/sicurezza/registro.md` come T159. Ha corretto due test senza rifare la suite e non ha aperto il browser, ma cambia ciò che il client del giocatore riceve. Nasce da T130: `dossier T130`.
 - Cosa fare: nel worktree di T166, con il base aggiornato, `git merge task/T130`. Lo 0107 resta ai limiti ai messaggi; l'ADR di T130 diventa **0109**: file, indice, `AGENTS.md`, `docs/sicurezza/registro.md`, commenti e test che lo citano. Nelle aggiunte nello stesso punto tieni tutte e due. Controlla anche se i file con limiti ai messaggi (`src/session/`) e l'elenco dei campi si toccano: un campo o messaggio nuovo non deve restare fuori dagli elenchi. `.t130msg.txt` non deve stare nel risultato.
 - Test: `npm run typecheck` e la suite intera con i loro turni, col limite normale; nell'esito quanti passano, i rossi rilanciando il file da solo, il tempo. Il kit `npm run sicurezza:prove -- --solo V-011,V-012,V-013,V-014`, con la build, esito in un file a parte.
@@ -2939,6 +3139,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T160 · Ottimizzare i test più lenti della suite — `fatto` (dipende da T151, T161)
 - Pipeline: claude · stima 5% · approvato · priorità 2
+- Step: 27
 - Contesto: richiesta dell'autore (02/11): i tempi di esecuzione della suite sono molto lunghi, va cercato ciò che si può accorciare, anche come in T148 e T151. In T148 un boot del kernel costava ~10 s contro 0,2-0,5 s con le forme già pronte: `tests/between.test.ts` è sceso da 386 s a 39 s con un `InlineRunner` condiviso, passato con `KernelOptions.forms`. Ogni minuto di suite pesa su ogni task, perché la suite ha un turno solo. Nasce da T148, T151 e T91: `dossier T148`, `dossier T151`, `dossier T91`.
 - Cosa fare: misura la suite intera con il reporter JSON di Vitest e fai la classifica dei file e dei test per tempo; per i primi file misura dove va il tempo (boot del kernel, tick simulati, attese, `setTimeout` veri, git su disco, build). Poi alleggerisci, dal più lento e finché il guadagno vale il lavoro: il runner condiviso dove i test non si disturbano, un helper comune in `tests/` se lo stesso rimedio serve in più file, meno tick da simulare, attese sostituite da tempi finti, mondi di prova più piccoli, fixture git condivise. `between`, `credits` e `referente` li hanno già visti T148 e T151: toccali solo se sono ancora in testa. Puoi guardare anche la configurazione di Vitest (pool, isolamento), senza superare i 6 worker dei turni. Ogni test continua ad affermare le stesse cose: nessuna asserzione tolta né indebolita, nessuno `skip`, nessun limite alzato, nessun test cancellato. In `tests/sicurezza/` e nei test del determinismo uno stato condiviso non deve nascondere ciò che il test prova: nel dubbio lascia il file com'è e dillo nell'esito. Non cambiare il codice del gioco: la cache delle forme nel kernel la fa T161, e la classifica si misura con quella dentro; togli gli `InlineRunner` condivisi nei test se non servono più.
 - Test: la classifica e il tempo totale della suite prima e poi, con il carico della macchina quando li misuri, nelle stesse condizioni per quanto puoi. `npm run typecheck` e la suite intera con i loro turni; nell'esito quanti passano e i rossi che restano rilanciando il file da solo. Stesso numero di test di prima, a meno di quelli entrati col base.
@@ -2948,6 +3149,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T161 · La cache delle forme nel kernel, condivisa nel processo — `fatto`
 - Pipeline: claude · stima 3% · approvato · priorità 1
+- Step: 27
 - Contesto: approvato dall'autore (02/11). Ogni `Kernel.boot` costa ~10 s, quasi tutti in `placeCampus` → `forms.preload`, che riesegue in Node i programmi MarkovJunior della corona; con le forme pronte un boot scende a 0,2-0,5 s (misura di T148). `InlineRunner` (`src/kernel/forms.ts`) ha già una cache, ma per istanza: ogni kernel ne fa una sua. T148 e T151 la condividono a mano nei test con `KernelOptions.forms`. Nasce da T91 e T148: `dossier T91`, `dossier T148`.
 - Cosa fare: una cache di `InlineRunner` condivisa tra i kernel dello stesso processo, senza che chi crea un kernel debba fare nulla. Il browser non cambia: lì le forme le fanno i worker. Attenzione a:
   - **La chiave**: oggi non contiene `q.size` e identifica il programma con `hashStr`. Una volta condivisa, deve dire tutto ciò da cui dipende il risultato (`size` compreso) e non può confondere due programmi: sul server girano più universi nello stesso processo, e un universo non deve poter avere la forma di un altro per una collisione. Usa il testo intero o un hash crittografico.
@@ -2964,6 +3166,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T163 · La cache delle forme nel browser non tiene i modelli incompleti — `fatto`
 - Pipeline: claude · stima 3% · approvato · priorità 60
+- Step: 27
 - Contesto: richiesta dell'autore (02/11). `WorkerRunner` (`src/render/forms.ts`) mette in memoria e in IndexedDB ogni risposta dei worker, anche quando il programma ha finito il tempo o i passi e il modello è a metà. Da quel momento quel modello resta incompleto a ogni visita, e quanto è andato avanti dipende dalla macchina. In Node non succede più: `InlineRunner` (`src/kernel/forms.ts`) tiene solo i run con `finished` (ADR-0108). Il difetto è dedotto dal codice, non visto nel gioco. Nasce da T161: `dossier T161`.
 - Cosa fare: fai arrivare `finished` dal worker (`src/render/worker.ts`) a `WorkerRunner`, anche nel ripiego senza worker; un risultato non finito va a chi l'ha chiesto e non entra né in memoria né in IndexedDB, come in `InlineRunner`. Le voci incomplete già salvate nell'IndexedDB dei giocatori non si riconoscono: scartale una volta (una versione del database o della chiave), senza toccare la cartella dell'universo. Non cambiare l'hash della chiave: è T164. Se chi chiede la stessa forma riparte a ogni frame perché nulla la tiene, evita di rilanciare il programma di continuo e di' nell'esito come.
 - Test: un test con un `workerFactory` finto: risposta non finita → `has(key)` falso, niente nello store; risposta finita → in cache; una voce vecchia non viene riusata. `npm run typecheck` e la suite intera con i loro turni, col limite normale.
@@ -2973,6 +3176,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T164 · La chiave della cache delle forme nel browser senza collisioni — `fatto` (dipende da T163)
 - Pipeline: claude · stima 3% · approvato · priorità 61
+- Step: 27
 - Contesto: richiesta dell'autore (02/11): con molti universi e molti modelli può diventare un problema. `formCacheKey` (`src/render/forms.ts`) usa `hashStr(req.xml)`, 32 bit: due programmi diversi con lo stesso modello e lo stesso seme possono dare la stessa chiave, e il secondo prende la forma del primo. Il nome del modello sta nella chiave, quindi l'universo no: due universi dello stesso browser condividono le voci. In Node ADR-0108 ha già tolto `hashStr` (`formKey`, testo intero). Il difetto è dedotto dal codice, non visto nel gioco. Nasce da T161: `dossier T161`.
 - Cosa fare: una chiave che due programmi diversi non possono condividere in pratica: il testo intero come `formKey` o un hash forte, a tua scelta, misurando quanto pesano memoria e IndexedDB con i programmi veri del seme. Attento: `has` e `getCached` sono sincroni, un hash asincrono (`crypto.subtle`) non ci sta senza cambiare chi li chiama. Controlla tutti gli usi di `formCacheKey`. Le voci con la chiave vecchia non servono più: non devono restare a occupare spazio. Scrivi nell'esito il rapporto in numeri prima e dopo (lunghezza delle chiavi, tempo di un `run` già in cache). Il limite alla crescita di `memory` e dello store resta fuori: se misurando lo trovi un problema, scrivilo nell'esito.
 - Test: due programmi con lo stesso `hashStr` (trovali con una ricerca nel test o costruiscili) danno chiavi diverse e forme diverse; la stessa richiesta dà la stessa chiave. `npm run typecheck` e la suite intera con i loro turni, col limite normale.
@@ -2982,6 +3186,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T174 · Il timeout di `produzione.test.ts` nella suite intera: la causa — `fatto`
 - Pipeline: claude · stima 3% · approvato · priorità 20
+- Step: 27
 - Contesto: nasce da T172 e T164 (`dossier T172`, `dossier T164`): in `tests/sicurezza/produzione.test.ts` scadono i 30 s dell'attesa dell'ingresso («ingresso di bruno» in T172, V-006 in T164), solo al primo giro della suite, verde da solo. Due volte su suite diverse: «carico» è una deduzione, non una misura. T163 aveva visto rossi simili in `determinism.test.ts` e `sicurezza/mondo.test.ts`. Conta per T45f: l'ingresso nel mondo di molti è il percorso che lì deve reggere.
 - Cosa fare: riproducilo (la suite intera col suo turno, o il file insieme a un carico misurato) e di' cosa occupa quei 30 s: la macchina, il primo avvio del mondo (build del programma, forme senza cache) o un'attesa persa nel server. Se è un difetto del server, correggilo; se è il test, che aspetti ciò che deve senza alzare il limite alla cieca. Non cambiare il comportamento del gioco.
 - Test: il file verde nella suite intera per due giri di fila; se non si riproduce, scrivi quanti giri hai fatto e cosa hai aggiunto per vedere la causa la prossima volta.
@@ -2991,6 +3196,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T175 · Un tetto alla cache delle forme nel browser — `fatto` (`c213912`) (dipende da T205)
 - Pipeline: claude · stima 4% · approvato · browser · priorità 55
+- Step: 27
 - Contesto: nasce da T164 (`dossier T164`): il solo mondo iniziale pesa 1,86 GB di array e 528 MB su disco, più universi si sommano e nulla toglie voci. La memoria della scheda è dedotta da quei byte, non misurata. In Node la cache ha già un tetto (ADR-0108: LRU, 4096 voci, 256 MB).
 - Cosa fare: misura prima la memoria vera della scheda nel mondo iniziale. Poi un tetto sia in memoria (`WorkerRunner`, `src/render/forms.ts`) sia in IndexedDB, usando l'LRU e togliendo le voci meno usate, con i numeri scelti da quella misura e scritti nell'ADR-0108. Una forma tolta si rifà nei worker: mai un modello che manca. Controlla anche se il `memory` deve tenere gli array quando le mesh sono già fatte.
 - Test: oltre il tetto escono le voci meno usate, una forma tolta torna, la stessa richiesta dà la stessa forma.
@@ -3000,6 +3206,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T176 · `mondo.test.ts` rosso sotto carico: la causa — `fatto`
 - Pipeline: claude · stima 3% · approvato · priorità 21
+- Step: 27
 - Contesto: nasce da T174 e T163 (`dossier T174`, `dossier T163`), approvato dall'autore il 02/11. In `tests/sicurezza/mondo.test.ts`, con 24 thread a vuoto su 12 processori logici, sono rossi al primo giro V-007 «muore due volte» e «un mondo bloccato». Il primo aspetta 1,5 s fissi prima che un commit sia «vissuto»: che siano troppo pochi è una deduzione di T174, non una misura. T163 aveva visto `mondo.test.ts` rosso nella suite intera. Conta per T45f: il sorvegliante dei mondi è ciò che lì deve reggere. Un giro di T174 con 7 rossi non vale come misura: i mondi uscivano con `0xC000026B` perché Windows non creava più processi con quel carico.
 - Cosa fare: riproduci con un carico misurato che lasci creare i processi (se un mondo esce con `0xC000026B` il giro non conta, abbassa il carico), e di' per ciascuno dei due test cosa occupa il tempo. Se è il test, che aspetti ciò che deve invece di un tempo fisso, senza alzare i limiti alla cieca. Se è il sorvegliante (`server/worldHost.ts`), per esempio un mondo sano ucciso perché tace sotto carico, non correggere da solo se cambia il comportamento: scrivilo nell'esito con la misura e la proposta. Guarda anche, senza filtrare l'output, se torna l'errore a livello del blocco `il server vero` di `produzione.test.ts` visto una volta da T174: se non torna, scrivi quanti giri hai fatto.
 - Test: `mondo.test.ts` verde sotto lo stesso carico che lo faceva rosso, e nella suite intera per due giri di fila; se non si riproduce, scrivi quanti giri hai fatto e con quale carico.
@@ -3011,6 +3218,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T177 · Il disco C: si riempie: chi scrive, e i residui dei test — `fatto`
 - Pipeline: claude · stima 2% · approvato · priorità 19
+- Step: 27
 - Contesto: richiesta 5 dell'autore: svuotati 30 GB la settimana scorsa, di nuovo pieno; il progetto è su H:. Misurato dall'orchestratore il 02/11 alle 23:20 UTC: C: 196 GB, liberi 12 (95 %). In `%TEMP%` 6038 voci, circa 2400 `coda-*` e 2400 `quine-*` (`quine-turni`, `quine-ferma`, `quine-traccia`), 1147 delle `quine-*` nate il solo 02/11: test e strumenti non le tolgono (da verificare in `tests/pipeline.test.ts`, `tests/subscription.test.ts`, `tests/abbonamenti.test.ts`, `tests/sicurezza/*`). Pesano poco una per una (6-22 KB, ma `quine-t43c-*` 49 MB), quindi **non è detto che spieghino i 30 GB**. `~/.claude` 643 MB, `ms-playwright` 645 MB. Non misurati: il totale di `%TEMP%` (contarlo è lento), i profili di Chrome, le cache di npm e dei browser, ciò che è fuori dal profilo utente.
 - Cosa fare: (1) in sola lettura, le cartelle che pesano di più su C:, con le date; la crescita misurata su un intervallo, se si può; chi le scrive, con le prove: l'autore ha ipotizzato git, va verificato. Il gioco può non c'entrare: se è così, dillo. (2) Correggi ciò che è del progetto: test e strumenti tolgono le cartelle temporanee che creano. (3) **Non cancellare nulla su C: fuori da ciò che crea il tuo giro**: nell'esito l'elenco di ciò che si può togliere, quanto libera e il comando; decide l'autore.
 - Test: la suite non lascia nuove voci in `%TEMP%` (conteggio prima e dopo, un giro col suo turno); typecheck.
@@ -3020,6 +3228,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T178 · Il glossario: un nome per ogni concetto — `fatto`
 - Pipeline: claude · stima 3% · approvato · priorità 22
+- Step: 24
 - Contesto: richiesta 2 dell'autore: una nomenclatura ufficiale, gli stessi concetti chiamati allo stesso modo, nel codice in inglese. Oggi si mescolano italiano e inglese e nomi diversi per la stessa cosa (esempi da verificare: `struttura`/`structure`/`edificio`, `luogo`/`chunk`/`place`, `viandante`/`wanderer`/`player`, `modello`/`programma`/`forma`, `cose`/`entità`, `master`/`dio`).
 - Cosa fare: `docs/glossario.md`: per ogni concetto il nome ufficiale in italiano (documenti, UI, prompt), quello in inglese (codice), una definizione di una riga, dove vive, i sinonimi da non usare. Il censimento viene da `AGENTS.md`, `docs/adr/`, `src/`, `server/`, `universe/prompts/` e conta le occorrenze dei sinonimi. Attenzione a ciò che non si rinomina senza migrazione: campi JSON degli universi, messaggi del protocollo, API Lua, nomi nel validatore. Una regola in `AGENTS.md` (Convenzioni) e un ADR. **Nessuna rinomina nel codice in questo task**: nell'esito le rinomine proposte, a gruppi, ciascuna con quanti file tocca e se chiede una migrazione. Ne nasceranno task quando l'autore avrà letto il glossario, da eseguire con pochi task in corso, perché vanno in conflitto con tutti.
 - Test: un test che controlla che ogni voce abbia i suoi campi e che i nomi in inglese citati esistano in `src/` o `server/`. Typecheck e suite con i loro turni.
@@ -3029,6 +3238,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T179 · La traccia di un programma MarkovJunior, in testo — `fatto`
 - Pipeline: claude · stima 3% · approvato · priorità 23
+- Step: 23
 - Contesto: richiesta 1 dell'autore, primo pezzo. I modelli di T155 e T173 sono belli ma statici, e chi li scrive vede solo il risultato (foto dai quattro lati). Non può capire cosa fanno `one all prl convolution path` passo per passo, come fa l'autore nell'editor andando avanti e indietro tra i fotogrammi; così non sa usare i pattern dei programmi migliori. Le immagini costano: il debug intermedio va in testo. Il risultato finale resta giudicato con le foto, come oggi. Si riusa: `src/mj/engine.ts`, `lab/scripts/mjx-trial.ts`, `mjx-stats.ts`, `lab/banco/` (leggi `dossier T154`, `dossier T173`), le sezioni del laboratorio, l'editor `/lab/editor/`.
 - Cosa fare: uno strumento che, dati XML e seme, dà una traccia leggibile da un modello: per ogni nodo eseguito il tipo, la regola, quante volte e quante celle ha cambiato, la scatola di ciò che ha cambiato; le sezioni di un fotogramma scelto, coi simboli MJ al posto dei voxel. Confronta tre forme sugli stessi programmi, in token e in ciò che fanno capire: (a) sezioni in simboli, (b) solo le differenze tra nodi, (c) la proposta dell'autore: il fotogramma come modello statico con i voxel raggruppati in scatole. Scegli la predefinita, con un tetto di token e una compressione (fotogrammi vicini, piani uguali), e scrivi i numeri. Lo strumento non cambia il risultato del motore. Il banco deve poterla mettere nella seconda richiesta (`lab/banco/seconda.ts`).
 - Test: su XML fissi la traccia dice i nodi e le celle giuste per ogni tipo di nodo; griglia identica con e senza traccia; tetto rispettato. Typecheck e suite con i loro turni.
@@ -3038,6 +3248,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T180 · Il banco misura varianza e scala — `fatto` (`d3864f2`)
 - Pipeline: claude · stima 3% · approvato · priorità 24
+- Step: 30
 - Contesto: richiesta 1, secondo pezzo. Il banco di T154 prova un seme in una scatola sola: premia i modelli statici. L'autore vuole lo stesso programma per più semi e più taglie: un forte enorme e uno gargantuesco possono condividere il programma e differire nell'area di generazione; architetture diverse da seme a seme, per gli edifici grandi anche il perimetro esterno. Taglie: ADR-0092, `boxOf`, `sizeFor` in `src/kernel/forms.ts`.
 - Cosa fare: (1) le misure di varianza fra almeno 5 semi: quota di voxel diversi, pianta e perimetro diversi, piani e stanze diversi; il solo rumore di colore non conta come varianza. (2) La prova di scala: lo stesso programma in almeno 2 taglie; tutte le misure di oggi (piani, stanze, rampe, porta, `FORM_LIMITS`) devono passare a ogni seme e a ogni taglia. (3) La misura di partenza sui modelli di `lab/banco/finale` e `lab/banco/conferma`: l'osservazione dell'autore, statici, con il numero. (4) La soglia proposta, scritta nel README del banco, con i criteri delle foto (un foglio di contatto a basso costo: un solo PNG con i semi). (5) Cosa fa oggi il gioco: un programma può già servire due taglie? Come si nomina nella libreria (`struttura-<concetto>`, `ModelInfo.taglia`)? Se manca qualcosa, descrivilo nell'esito: non correggerlo qui, lo farà T156.
 - Test: offline, su XML fissi: un modello statico è riconosciuto come tale, uno che varia no, uno che si rompe a una taglia è bocciato. Typecheck e suite con i loro turni.
@@ -3047,6 +3258,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T181 · I pattern di MarkovJunior e il metodo del cantiere: programmi di riferimento — `fatto` (`11a973c`) (dipende da T179, T180, T205)
 - Pipeline: fable · stima 10% · approvato · priorità 25
+- Step: 30
 - Contesto: richiesta 1, terzo pezzo, il più difficile: **il risultato di oggi è la qualità voluta, ma da un programma che genera architetture diverse.** L'autore chiede di basarsi sui programmi del [repository di MarkovJunior](https://github.com/mxgmn/MarkovJunior) (nel laboratorio ci sono 16 modelli 3D ufficiali; gli altri si scaricano in `lab/`, con la licenza e la fonte) e propone il metodo del **cantiere** per gli edifici grandi, perimetro compreso. Esempio suo, palazzina moderna: lo scheletro di metallo; il cemento armato attorno a colonne e righe; i piani, pavimenti riempiti con una regola `all`; le scale: i pavimenti aperti nello stesso punto a tutti i piani, tolti N incroci dello scheletro, poi scale, raccordi, una rampa; l'ascensore; e così via. Non va imitata l'edilizia troppo alla lettera: si possono usare marcatori temporanei o riempire l'intero edificio di «materiale» per discriminare una regola successiva, come fa l'autore nell'editor. Dell'edilizia si prende ciò che aiuta a generare invece di disegnare.
 - Cosa fare: (1) con la traccia di T179, leggi i programmi ufficiali che fanno crescere strutture e scrivi `lab/banco/pattern.md`: per ogni pattern cosa fa, il frammento minimo, il programma da cui viene, cosa dà per varianza e scala (crescita di corridoi e stanze, divisione dello spazio, `path` per collegare, `convolution`, marcatori, `map` per cambiare scala). (2) Scrivi a mano, con quel metodo, almeno 3 programmi di riferimento di stile diverso (una palazzina moderna, un forte per due taglie, uno a scelta tra i bersagli): passano la soglia di T180 a ogni seme e taglia e tutte le regole del gioco (rampe, piani, porte, `FORM_LIMITS`). La qualità di riferimento sono le foto di `lab/banco/conferma/`. Se un pattern non si può esprimere col motore, dillo. Fogli di contatto nel commit, per l'autore.
 - Test: i programmi girano nel motore del gioco e passano `src/mj/check.ts` e il banco. Typecheck e suite con i loro turni.
@@ -3056,6 +3268,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T182 · Il prompt procedurale delle strutture — `da fare` (dipende da T181)
 - Pipeline: claude · stima 8% · approvato · priorità 26
+- Step: 30
 - Contesto: richiesta 1, quarto pezzo: portare nel prompt del banco (`lab/banco/prompt.md`) i pattern di T181, senza perdere la qualità raggiunta. Oggi un programma costa 57-60 mila token di output: un giro di 14 tentativi ~20 dollari a listino e un pezzo del limite delle 5 ore (T155: 114 dollari). Metodo come T155: si corregge il prompt, mai il risultato.
 - Cosa fare: ciclo sul banco con la soglia di T180 e con misure e foto di prima; ogni richiesta successiva alla prima porta la traccia di T179 in testo, le foto solo per il risultato finale. Decidi se i programmi di riferimento entrano come esempi: ogni esempio si guadagna i suoi token. **Al più 4 giri**: oltre, `docs/pipeline/domande/T182.md`, senza abbassare la soglia. Diario in `lab/banco/diario.md`.
 - Test: i modelli finali girano nel motore e passano i controlli. Typecheck col suo turno.
@@ -3064,6 +3277,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T183 · Le interfacce di simulazione complesse: una prova dell'espressività del kernel — `da fare` (dipende da T205)
 - Pipeline: claude · stima 9% · approvato · priorità 79
+- Step: 32
 - **Scenario obbligato (autore, 04/11):** un gruppo di NPC costruisce un edificio in una sessione lunga mesi, con passi visivamente coerenti verso lo scopo comune. Provalo come gli altri: cosa manca al kernel, di che genere, se entra senza wipe. Serve a T245.
 - Precisazione dell'autore (03/11, in `docs/userchats/to-do-2026-11-03.md`), vale più del resto del blocco: **i sei scenari non sono il limite, usa l'immaginazione.** Un universo parte con una versione del kernel e deve reggere anche ciò che servirà dopo mesi di vita: chi ha speso sul suo universo non vorrà rinunciarci per un kernel nuovo, e un wipe degli universi ufficiali costa molto. Quindi **le versioni «finali» del kernel vanno ridotte al minimo**, e ognuna deve prevedere le esigenze future. Allarga di conseguenza: (1) un catalogo di almeno 30 scenari inventati da te, scelti per coprire generi di primitive diversi, non per quantità, compresi quelli che nascono solo col tempo in un universo vivo (a titolo di esempio: economia e mercati, leggi e fazioni, costruzioni fatte dai giocatori, stagioni, veicoli con più persone, tornei, mondi che crescono per mesi) e ciò che il Concilio potrebbe chiedere di più ambizioso; per ognuno il genere di primitive che chiede. In codice bastano quelli che provano un genere non ancora provato. (2) **Il costo di una primitiva aggiunta dopo, misurato:** cosa succede davvero a un universo esistente quando il kernel cambia (API Lua in più, un campo nuovo, un effetto nuovo, un nodo MJ nuovo, un formato di file che cambia; `universes.ts`, gli aggiornamenti dal seme): cosa entra senza rompere nulla e cosa chiede davvero un wipe. La premessa «non si può introdurre a posteriori» va verificata caso per caso: se il grosso è aggiuntivo, dillo, con la prova su un universo fatto col kernel di prima. (3) In `docs/design/espressivita.md`, oltre alla tabella, le primitive divise in: da avere prima della prima versione pubblica, aggiungibili dopo senza danno, e le regole perché un kernel cambi senza wipe.
 - Contesto: richiesta 3 dell'autore, non prioritaria: il simulatore deve reggere gli scenari più ambiziosi del Concilio, coerente con la storia e la grafica, nel 3D e nelle UI dentro il tappeto; il kernel deve esporre molte primitive per comporre i moduli. **Non serve aggiungere contenuti al gioco:** è una misura. Scenari: navigazione in barca, volo in mongolfiera, sparo di un fucile, interazione con un computer (anni 90: «forse troppo?»), una bisca con scommesse clandestine, una partita 1v1 di uno sport semplice inventato. Primitive di oggi: API Lua, pannelli (`manifest.ui`, ADR-0028), effetti, stati (ADR-0026), `<action>` e `<animation>`, i casi della Sala sistemi (ADR-0052).
@@ -3074,6 +3288,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T184 · Le ambientazioni spazio, pirati, cowboy — `in attesa` (dipende da T152)
 - Pipeline: claude · stima 2% · browser · priorità 90
+- Step: 37
 - In attesa (autore, 03/11): «per ora mettili in attesa»; riparte quando lo dice lui. Vale solo per spazio, pirati e cowboy: T152 e T153 non cambiano. Sul sito intanto li annuncia T186.
 - Contesto: richiesta 4 dell'autore, l'ultima: altri universi, spazio, pirati, cowboy. T152 fa i temi della Genesi e il censimento di ciò che presuppone il medioevo: questo task ne aggiunge tre. Lo spazio è il caso difficile: terreno, cielo, acqua e clima possono non significare ciò che significano altrove. Pirati e cowboy chiedono barche e fucili: le meccaniche le misura T183.
 - Cosa fare: tre temi in più nella schermata della Genesi, col metodo di T152; ciò che il censimento non aveva considerato diventa neutro o dipende dal tema, nel modo più piccolo. Dello spazio di' cosa funziona e cosa no.
@@ -3083,12 +3298,14 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T185 · Generare gli universi spazio, pirati, cowboy — `in attesa` (dipende da T184, T153)
 - Pipeline: claude · stima 2% · priorità 91
+- Step: 37
 - Contesto: in attesa come T184, per scelta dell'autore (03/11); servono anche le risposte di T153 (`docs/pipeline/domande/T153.md`): costo, abbonamenti, nomi.
 - Cosa fare: come T153, un universo alla volta, nessuna chiamata alle API Gemini.
 - Quando è fatto: i tre universi su disco; nell'esito il costo di ciascuno e ciò che si è visto.
 
 ### T186 · Sul sito: spazio, pirati e cowboy «coming soon» — `fatto` (`f776e79`) (dipende da T205)
 - Pipeline: claude · stima 1% · approvato · browser · priorità 85
+- Step: 21
 - Contesto: l'autore (03/11) ha messo in attesa questi tre universi (T184, T185) e propone di scrivere «coming soon» sul sito. Pagine in `site/`, stile del template `docs/design/sito/` (`site/site.css`), landing `site/landing.ts`, reami in `site/sessioni.html`.
 - Cosa fare: guarda dove il sito parla degli universi e metti lì spazio, pirati e cowboy come «coming soon», senza link né pulsanti che portano a un universo che non c'è e senza date. Nel punto più piccolo che si vede: se non c'è un posto naturale, una sezione breve nella landing. Niente generazione né modelli nuovi. Il testo di tema, nessun meta-gioco sui contenuti del mondo.
 - Test: typecheck e, se tocca il codice di una pagina, i test del sito con il loro turno.
@@ -3102,6 +3319,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T206 · Integrare T179 — `fatto` (`2f5cb96`)
 - Pipeline: claude · stima 1% · approvato · priorità 1
+- Step: 23
 - Contesto: T179 (`dossier T179`) è finito, ma `integra T179` va in conflitto in `docs/adr/README.md`: ha preso lo 0117, che nel base è il glossario di T178.
 - Cosa fare: nel tuo worktree `git merge task/T179`; il suo ADR diventa **0118** (file, indice, citazioni in `AGENTS.md` e nel codice che porta); le due righe dell'indice restano entrambe. Nessun'altra modifica. Il blocco di T179 nel backlog dice ADR-0117: si legge 0118, non riscriverlo.
 - Test: typecheck e suite intera con i loro turni.
@@ -3111,6 +3329,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T187 · Il glossario con le scelte dell'autore — `fatto` (`074bb7f`) (dipende da T179)
 - Pipeline: claude · stima 1% · approvato · priorità 2
+- Step: 24
 - Contesto: l'autore ha letto il glossario di T178 (`dossier T178`) e ha deciso. Scelte 1, 2, 3, 5, 7, 8 come raccomandate: «universo» anche nel sito, `chunk`, «sessione del Concilio» resta, «entità» ed `entity`, `Storey`, `phrase`. **Scelta 4:** «individuo», `Individual` per uomini e animali; «persona» resta solo il valore di `specie` (`persona | animale`) e nei campi fermi (`people.json`, `persona` nel manifest, `npc.*`). **Scelta 6, nessuna eccezione alla convenzione:** `Taglia` → `SizeTier`, `TAGLIE` → `SIZE_TIERS`, `Partita` → `GameSetup`, `referenteReply` → `liaisonReply`, `askReferente` → `askLiaison`; in italiano restano «taglia», «partita», «Referente» e il valore `referente` di `AgentId`, come gli altri agenti.
 - Cosa fare: correggi `docs/glossario.md`: le voci delle scelte 4 e 6; la sezione «Le scelte dubbie» diventa «Le scelte fatte» (una riga per scelta, senza alternative); nella tabella delle rinomine aggiungi **R16** (`Person` e i nomi derivati → `Individual…`: censisci tu quali; `Identity` resta, unirli è un'altra cosa) e **R17** (la scelta 6); dai a **R7** i nomi inglesi d'arrivo, che oggi non dice, senza collisioni in `src server tests site`, e aggiungi `Carta` se è un tipo da rinominare. Per ogni R, nomi di partenza e d'arrivo esatti, così il task che la esegue non deve scegliere. Riconta i file. Nessuna rinomina nel codice in questo task. Gli ADR non si riscrivono: se ADR-0117 dice le eccezioni ora tolte, la correzione sta nel glossario e, se serve, in `AGENTS.md`.
 - **Regole comuni a T188-T204:** (1) esegui solo la tua R, con i nomi d'arrivo del glossario, in `src server tests site tools lab`, e in `AGENTS.md`, `CLAUDE.md` e `docs/glossario.md` dove citano quei nomi; ADR, backlog e diari sono storia, non si toccano. (2) **Ciò che è su disco, sul filo o visibile a Lua non cambia** (campi JSON, messaggi del protocollo, API Lua, effetti, componenti, chiavi di `localStorage`): attento alle abbreviazioni che fanno da chiave di ciò che si serializza (`{ hand }`), al `Host`, ai nomi in stringhe (`bus`, `window.quine`, `lab/`, script, prompt). Se un nome si rivela fermo, lascialo e scrivilo nell'esito. (3) Niente modifiche di logica, formattazione o pulizia di passaggio: il diff deve leggersi come una rinomina; un'incongruenza trovata va nell'esito. (4) Un nome già occupato o una R che tocca molto più del previsto: non inventare, scrivilo in `docs/pipeline/domande/<Txx>.md`. (5) Il glossario si aggiorna nello stesso commit: la riga R segnata fatta, i nomi nuovi nelle voci, quelli vecchi tra i «da non usare».
@@ -3121,6 +3340,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T188 · R1: `Building` → `Lot` — `fatto` (`a47dd57`) (dipende da T187)
 - Pipeline: claude · stima 1% · approvato · priorità 3
+- Step: 24
 - Contesto: una rinomina del glossario (`docs/glossario.md`, «Le rinomine proposte»), scelta dall'autore il 03/11. Regole comuni: blocco di T187. Nasce da T178: `dossier T178`.
 - Cosa fare: R1 del glossario: il `Building` di `layout.ts`, `Chunk.buildings`, `findBuildings`, `buildingAt`.
 - Test: `npm run typecheck` e la suite intera con i loro turni; `tests/glossario.test.ts` verde, censimento rigenerato.
@@ -3130,6 +3350,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T189 · R2: `Models` → `AiModels`, `kernel.ai` — `fatto` (`b88d99e`) (dipende da T188)
 - Pipeline: claude · stima 2% · approvato · priorità 4
+- Step: 24
 - Contesto: una rinomina del glossario (`docs/glossario.md`, «Le rinomine proposte»), scelta dall'autore il 03/11. Regole comuni: blocco di T187. Nasce da T178: `dossier T178`.
 - Cosa fare: R2: `Models` e le sue classi, `kernel.models` → `kernel.ai`. Tocca ~100 file, soprattutto test: una sostituzione meccanica verificata dal typecheck. Cambia `window.quine.models`: aggiorna ciò che lo cita (`AGENTS.md`, `lab/`).
 - Test: `npm run typecheck` e la suite intera con i loro turni; `tests/glossario.test.ts` verde, censimento rigenerato.
@@ -3139,6 +3360,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T190 · R3: `player…` → `wanderer…` — `fatto` (`4597184`) (dipende da T189)
 - Pipeline: claude · stima 2% · approvato · priorità 5
+- Step: 24
 - Contesto: una rinomina del glossario (`docs/glossario.md`, «Le rinomine proposte»), scelta dall'autore il 03/11. Regole comuni: blocco di T187. Nasce da T178: `dossier T178`.
 - Cosa fare: R3. **Fermi** `world.player`, `world.player_pos`, `player_id`, `player_get`, `player_set` e il binding: Lua li vede. `playerPos` è nella procedura di «Convalida nel browser» di `AGENTS.md`: aggiornala.
 - Test: `npm run typecheck` e la suite intera con i loro turni; `tests/glossario.test.ts` verde, censimento rigenerato.
@@ -3148,6 +3370,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T191 · R4: `Place` → `ChunkInfo`, `PlaceView` → `ChunkView` — `fatto` (`b02f53a`) (dipende da T190)
 - Pipeline: claude · stima 2% · approvato · priorità 6
+- Step: 24
 - Contesto: una rinomina del glossario (`docs/glossario.md`, «Le rinomine proposte»), scelta dall'autore il 03/11. Regole comuni: blocco di T187. Nasce da T178: `dossier T178`.
 - Cosa fare: R4; il `ChunkView` del renderer diventa prima `TerrainView`. I `place` locali a mano, dove sono il luogo. **Fermi** `plan.place` in `maps/`, `placesPerMinute`, `luoghi` del protocollo.
 - Test: `npm run typecheck` e la suite intera con i loro turni; `tests/glossario.test.ts` verde, censimento rigenerato.
@@ -3157,6 +3380,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T192 · R5: `hand` → `phrase` nel TypeScript — `fatto` (`2ce3311`) (dipende da T191)
 - Pipeline: claude · stima 1% · approvato · priorità 7
+- Step: 24
 - Contesto: una rinomina del glossario (`docs/glossario.md`, «Le rinomine proposte»), scelta dall'autore il 03/11. Regole comuni: blocco di T187. Nasce da T178: `dossier T178`.
 - Cosa fare: R5, senza il componente: **fermo** il componente `hand`, salvato nello stato dei viandanti e visto da Lua.
 - Test: `npm run typecheck` e la suite intera con i loro turni; `tests/glossario.test.ts` verde, censimento rigenerato.
@@ -3166,6 +3390,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T193 · R6: `Thing…` → `Entity…` — `fatto` (`0333f7f`) (dipende da T192)
 - Pipeline: claude · stima 2% · approvato · priorità 8
+- Step: 24
 - Contesto: una rinomina del glossario (`docs/glossario.md`, «Le rinomine proposte»), scelta dall'autore il 03/11. Regole comuni: blocco di T187. Nasce da T178: `dossier T178`.
 - Cosa fare: R6, con `src/render/things.ts` → `entities.ts` (`git mv`). **Fermi** `cose` ed `entita` del protocollo; nei prompt del Cartografo «cose» resta.
 - Test: `npm run typecheck` e la suite intera con i loro turni; `tests/glossario.test.ts` verde, censimento rigenerato.
@@ -3175,6 +3400,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T194 · R7: l'italiano nel TypeScript — `fatto` (`44e81b9`) (dipende da T193)
 - Pipeline: claude · stima 1% · approvato · priorità 9
+- Step: 24
 - Contesto: una rinomina del glossario (`docs/glossario.md`, «Le rinomine proposte»), scelta dall'autore il 03/11. Regole comuni: blocco di T187. Nasce da T178: `dossier T178`.
 - Cosa fare: R7, con i nomi che T187 ha scritto nel glossario. **Fermi** i campi omonimi nei file (`attore`, `minimi`, `eredita`, `sotto`, `titolare`, `tetto`).
 - Test: `npm run typecheck` e la suite intera con i loro turni; `tests/glossario.test.ts` verde, censimento rigenerato.
@@ -3184,6 +3410,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T195 · R8: `CardUses`, `UsageLog` — `fatto` (`059b1cf`) (dipende da T194)
 - Pipeline: claude · stima 1% · approvato · priorità 10
+- Step: 24
 - Contesto: una rinomina del glossario (`docs/glossario.md`, «Le rinomine proposte»), scelta dall'autore il 03/11. Regole comuni: blocco di T187. Nasce da T178: `dossier T178`.
 - Cosa fare: R8: `CardLedger` → `CardUses`, `UsageLedger` → `UsageLog`; `Ledger` resta dei saldi.
 - Test: `npm run typecheck` e la suite intera con i loro turni; `tests/glossario.test.ts` verde, censimento rigenerato.
@@ -3193,6 +3420,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T196 · R9: `Floor` → `Storey` — `fatto` (`ea03b51`) (dipende da T195)
 - Pipeline: claude · stima 2% · approvato · priorità 11
+- Step: 24
 - Contesto: una rinomina del glossario (`docs/glossario.md`, «Le rinomine proposte»), scelta dall'autore il 03/11. Regole comuni: blocco di T187. Nasce da T178: `dossier T178`.
 - Cosa fare: R9, solo il piano di un edificio: il pavimento resta `floor` (`floorAt`, `floorBelow`), controlla ogni uso. `k.corona.building(id).floors` è nella «Convalida nel browser» di `AGENTS.md`: aggiornala.
 - Test: `npm run typecheck` e la suite intera con i loro turni; `tests/glossario.test.ts` verde, censimento rigenerato.
@@ -3202,6 +3430,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T197 · R10: le caselle → `…Tiles` — `fatto` (`3034e3d`) (dipende da T196)
 - Pipeline: claude · stima 1% · approvato · priorità 12
+- Step: 24
 - Contesto: una rinomina del glossario (`docs/glossario.md`, «Le rinomine proposte»), scelta dall'autore il 03/11. Regole comuni: blocco di T187. Nasce da T178: `dossier T178`.
 - Cosa fare: R10: gli identificatori elencati (`playerCell` si chiama ormai `wandererCell`, per R3); le variabili locali `cell` a mano solo dove sono una casella e non una cella di voxel o di griglia.
 - Test: `npm run typecheck` e la suite intera con i loro turni; `tests/glossario.test.ts` verde, censimento rigenerato.
@@ -3211,6 +3440,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T198 · R11: `LayoutDef` → `EnvironmentDef` — `fatto` (`8781b79`) (dipende da T197)
 - Pipeline: claude · stima 1% · approvato · priorità 13
+- Step: 24
 - Contesto: una rinomina del glossario (`docs/glossario.md`, «Le rinomine proposte»), scelta dall'autore il 03/11. Regole comuni: blocco di T187. Nasce da T178: `dossier T178`.
 - Cosa fare: R11. **Fermi** `layouts` nei manifest, `layout` nei piani.
 - Test: `npm run typecheck` e la suite intera con i loro turni; `tests/glossario.test.ts` verde, censimento rigenerato.
@@ -3220,6 +3450,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T199 · R12: `TileDef` → `TerrainDef` — `fatto` (`51897f7`) (dipende da T198)
 - Pipeline: claude · stima 1% · approvato · priorità 14
+- Step: 24
 - Contesto: una rinomina del glossario (`docs/glossario.md`, «Le rinomine proposte»), scelta dall'autore il 03/11. Regole comuni: blocco di T187. Nasce da T178: `dossier T178`.
 - Cosa fare: R12. **Fermo** `tiles`.
 - Test: `npm run typecheck` e la suite intera con i loro turni; `tests/glossario.test.ts` verde, censimento rigenerato.
@@ -3229,6 +3460,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T200 · R13: i commenti, «multiplayer» e `slot` — `fatto` (`aa1cadd`) (dipende da T199)
 - Pipeline: claude · stima 1% · approvato · priorità 15
+- Step: 24
 - Contesto: una rinomina del glossario (`docs/glossario.md`, «Le rinomine proposte»), scelta dall'autore il 03/11. Regole comuni: blocco di T187. Nasce da T178: `dossier T178`.
 - Cosa fare: R13: «game of many» → «multiplayer», `pocket` → `slot`, nei commenti e nelle poche variabili.
 - Test: `npm run typecheck` e la suite intera con i loro turni; `tests/glossario.test.ts` verde, censimento rigenerato.
@@ -3238,6 +3470,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T201 · R15: nel sito «universo», non «reame» — `fatto` (`0b842ae`) (dipende da T200)
 - Pipeline: claude · stima 1% · approvato · priorità 16
+- Step: 24
 - Contesto: una rinomina del glossario (`docs/glossario.md`, «Le rinomine proposte»), scelta dall'autore il 03/11. Regole comuni: blocco di T187. Nasce da T178: `dossier T178`.
 - Cosa fare: R15: testi di `site/` e, nel suo codice e CSS, `realm` → `universe`, con i 6 test. **Fermi** ciò che un URL o una rotta espone e il «reame» del kernel, che è l'area di 4 × 4 zone (`realmOf`).
 - Test: `npm run typecheck` e la suite intera con i loro turni; `tests/glossario.test.ts` verde, censimento rigenerato.
@@ -3247,6 +3480,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T202 · R16: `Person` → `Individual` — `fatto` (`7a7a82e`) (dipende da T201)
 - Pipeline: claude · stima 2% · approvato · priorità 17
+- Step: 24
 - Contesto: una rinomina del glossario (`docs/glossario.md`, «Le rinomine proposte»), scelta dall'autore il 03/11. Regole comuni: blocco di T187. Nasce da T178: `dossier T178`.
 - Cosa fare: R16, con i nomi di T187. **Fermi** `people.json`, `persona` nel manifest, il valore `persona` di `specie`, `npc.*`, i nodi `persona:…` del grafo, salvati in `world/grafo.json`. `Identity` resta.
 - Test: `npm run typecheck` e la suite intera con i loro turni; `tests/glossario.test.ts` verde, censimento rigenerato.
@@ -3256,6 +3490,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T203 · R17: `SizeTier`, `GameSetup`, `liaison` — `fatto` (`23ae1f6`) (dipende da T202)
 - Pipeline: claude · stima 2% · approvato · priorità 18
+- Step: 24
 - Contesto: una rinomina del glossario (`docs/glossario.md`, «Le rinomine proposte»), scelta dall'autore il 03/11. Regole comuni: blocco di T187. Nasce da T178: `dossier T178`.
 - Cosa fare: R17: `Taglia` → `SizeTier`, `TAGLIE` → `SIZE_TIERS`, `Partita` → `GameSetup`, `referenteReply` → `liaisonReply`, `askReferente` → `askLiaison`. **Fermi** `universe.json → partita`, `appearance.taglia`, `strutture[].taglia`, il valore `referente` di `AgentId`. Il file `partita.ts` resta dov'è, salvo che il glossario dica altro.
 - Test: `npm run typecheck` e la suite intera con i loro turni; `tests/glossario.test.ts` verde, censimento rigenerato.
@@ -3265,6 +3500,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T204 · R14: `AGENTS.md` con i nomi del glossario — `fatto` (`e971fb4`) (dipende da T203)
 - Pipeline: claude · stima 1% · approvato · priorità 19
+- Step: 24
 - Contesto: una rinomina del glossario (`docs/glossario.md`, «Le rinomine proposte»), scelta dall'autore il 03/11. Regole comuni: blocco di T187. Nasce da T178: `dossier T178`.
 - Cosa fare: R14: in `AGENTS.md`, `chunk` → «luogo» e `layout` → «ambiente» dove sono il concetto e non un identificatore; ricontrolla che ogni identificatore citato esista ancora. Gli ADR non si toccano. Solo documenti: la suite intera non serve se il codice non cambia.
 - Test: `npm run typecheck` e la suite intera con i loro turni; `tests/glossario.test.ts` verde, censimento rigenerato.
@@ -3274,6 +3510,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T205 · La prova delle rinomine nel gioco — `fatto` (`94121e2`) (dipende da T204)
 - Pipeline: claude · stima 2% · approvato · browser · priorità 20
+- Step: 24
 - Contesto: T188-T204 hanno rinominato con i soli test e il typecheck. Ciò che sfugge a entrambi sono i nomi in stringhe e ciò che si serializza.
 - Cosa fare: un universo salvato **prima** delle rinomine deve aprirsi uguale: prova il seme e, se c'è, un universo già esistente in `universes/`, su una copia di lavoro, senza modificarlo. Correggi solo ciò che le rinomine hanno rotto; altro va nell'esito.
 - Test: suite intera con il turno, `npm run build`, `npm run build:server`.
@@ -3283,6 +3520,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T208 · La pagina web conta male le domande aperte — `fatto` (`0e14809`)
 - Pipeline: claude · stima 1% · approvato · priorità 5
+- Step: 19
 - Contesto: richiesta dell'autore del 03/11 («un sacco di domande aperte che probabilmente non dovrebbero esserle»). `parseQuestionFile` (`tools/pipeline/web.mjs`) sbaglia in entrambi i versi. Dà «da rispondere» a file risolti, scritti in forma libera (T117, T155, T173, T45e, T97), e «risposto» a file con la risposta vuota (T45f, T93), perché in `Risposta:\s*\S` il `\s*` scavalca l'a capo e `\S` prende il `**` di `**Risposta:**` o il testo seguente. Il badge (riga ~1481) somma quei falsi.
 - Cosa fare: i file ora hanno in testa una riga `Stato: aperta` o `Stato: chiusa`, scritta dall'orchestratore: se c'è, decide lei. Senza quella riga vale il parser di oggi, corretto perché una risposta vuota sia vuota (mai oltre l'a capo, `**` non è una risposta). Il badge conta solo le aperte; l'elenco le mette per prime e nomina lo stato giusto. Di' in `docs/pipeline/README.md`, nelle regole sulle domande, che chi chiude una domanda aggiorna la riga. `POST /api/domande` non deve togliere la riga.
 - Test: casi in `tests/pipeline.test.ts` (riga aperta, riga chiusa, `**Risposta:**` vuoto, forma libera senza riga), poi la suite intera e il typecheck con i loro turni.
@@ -3291,6 +3529,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 - Esito: `parseQuestionFile` legge la riga `Stato:` in testa e, senza riga, non prende più per risposta l'a capo o `**`; badge (`domandeAperte`, anche 0) solo sulle aperte, elenco con le aperte per prime e stato giusto; `POST /api/domande` conserva la riga e scrive anche su `**Risposta:**`; regola nel README; test in `tests/pipeline.test.ts`, suite e typecheck verdi. Sui file veri: 3 aperte (T45f, T93, T153), 12 chiuse. Non provato nel browser (il task non lo chiede): si vedrà dopo il riavvio del processo. Sicurezza: nessuna superficie nuova.
 ### T209 · Il sorvegliante: `healthy` da `pronto`, e `stop()` che aspetta i git — `fatto` (`d59dbf3`) (dipende da T205)
 - Pipeline: claude · stima 2% · approvato · priorità 9
+- Step: 27
 - Contesto: le due proposte di T176 (`dossier T176`, l'esito), rimaste senza risposta; le approva l'orchestratore nell'autonomia data dall'autore il 03/11. Da chiudere prima di T45f, perché in produzione i mondi si aprono lenti. (1) `healthy` si conta dal `fork`: con i tempi di produzione (60 s) un mondo che impiega 90 s ad aprirsi ha le morti azzerate al primo sguardo; se muore appena aperto per un commit cattivo non torna all'ultimo vissuto e non si arrende, riparte per sempre, 90 s di processore ogni volta. (2) `stop()` non aspetta il `git commit` già partito: se il processo viene interrotto i lock restano nel repository dell'universo.
 - Cosa fare: in `server/worldHost.ts` contare `healthy` da `pronto` (`heard`/`markGood`); `stop()` aspetta i git in corso, entro un limite di tempo, e non lascia lock. Solo questo: tempi e soglie di produzione non cambiano.
 - Test: un mondo che muore appena aperto, dopo un'apertura più lunga di `healthy`, torna al commit vissuto e alla fine si arrende; `stop()` con un commit in corso non lascia `*.lock`. Suite intera e typecheck con i loro turni.
@@ -3299,6 +3538,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 - Esito: `healthy` si conta da `pronto` (`openedAt`); `stop()` aspetta i git del suo universo al più 5 s (`settleGit`, `holdGit` in `server/git.ts`, `gits` in `WorldHost`), poi uccide il resto e toglie i `*.lock`; in più del previsto il server di produzione fa `settleAllGit` dopo aver chiuso le connessioni. ADR-0121, `AGENTS.md`. Test nuovi in `mondo.test.ts` (apertura più lunga di `healthy` → commit vissuto e resa; morti dimenticate dopo `healthy` da aperto; commit in corso senza lock e arrivato; git bloccato ucciso e lock tolti) e assenza di lock dopo lo stop in `produzione.test.ts`; i due test principali sono rossi senza le correzioni. Suite 108 file/1452 test verde, typecheck verde. Non provato: i 60 s veri di `healthy`, `npm run serve` fermato con un segnale reale, carico da 24 thread (nessun giro dedicato). Resta fuori, scritto nell'ADR: un server ucciso di colpo lascia i lock fino alla fermata seguente di quel mondo, all'apertura nessuno li toglie; il limite di 5 s va rivisto al deploy (T45f). Sicurezza: nessuna superficie nuova (`settleGit` cancella solo `*.lock` dentro `.git` di una cartella di universo con nome già validato, senza seguire i link); nessuna voce V-NNN da aggiungere o aggiornare: V-007 resta chiusa.
 ### T210 · Il `heap out of memory` nel log della suite — `fatto` (`55e2e97`) (dipende da T205)
 - Pipeline: claude · stima 2% · approvato · priorità 12
+- Step: 27
 - Contesto: le rinomine T188-T194 riportano un `heap out of memory` nel log di `npm test`, con tutti i test verdi. Non si sa di chi è né se un errore di quel tipo può nascondere un file di test non eseguito o un rosso. Proposta dell'orchestratore, approvata nell'autonomia del 03/11. (`dossier T194`)
 - Cosa fare: trova quale processo finisce la memoria (worker di Vitest, un mondo avviato da un test, un figlio) e con quale test. Se è un mondo di prova col suo limite voluto (`QUINE_MONDO_MEMORIA`, ADR-0110) e il test se lo aspetta, scrivilo e chiudi. Se è altro, correggilo; se la correzione è grande, descrivila nell'esito e fermati.
 - Test: suite intera col suo turno, due giri, senza quell'errore o con la spiegazione del perché resta.
@@ -3307,6 +3547,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 - Esito: causa: il `heap out of memory` viene da un mondo di prova del test `V-007 oltre il limite di memoria muore lui solo, e riparte` (`tests/sicurezza/mondo.test.ts`, `memoryMb: 200` + `sonda-gonfia`), che muore apposta e stampa nel log perché il figlio eredita lo stderr; riprodotto col solo test e confermato in due giri della suite: 1 solo `FATAL ERROR` per giro, heap a 196-197 MB, 108 file eseguiti su 108 attesi, 1448 test verdi, nessun `Unhandled` o `Worker exited`, quindi non nasconde né file né rossi. Il messaggio resta, voluto; cambiato solo un commento sopra il test (commit `55e2e97`), typecheck verde, test rilanciato verde, i due giri sono di prima del commento. Non provato: un esaurimento di memoria in un worker di Vitest (qui non avviene). Sicurezza: nessuna superficie nuova.
 ### T211 · Il commit dell'universo che fallisce e si perde — `fatto` (`27031cc`)
 - Pipeline: claude · stima 2% · approvato · priorità 12
+- Step: 27
 - Contesto: nasce da T205 (`dossier T205`): alla prima partenza si è visto una volta «fetch failed» su `UniverseClient.commit` (`src/kernel/universes.ts`), il commit dell'Arbitro è andato perso e mondo e disco sono rimasti diversi. Causa non accertata, non ripetuto in tre partenze. La regola 6 di `AGENTS.md` dice che si committano gli stati validi: uno perso in silenzio non torna con `R`. Proposta dell'orchestratore, approvata nell'autonomia del 03/11.
 - Cosa fare: leggi cosa succede oggi a un commit fallito (chi lo chiama, se lo stato resta da scrivere, se il commit seguente lo recupera). Se il commit seguente porta già tutto, scrivilo con un test e chiudi. Altrimenti fai in modo che un fallimento di rete non perda il commit (ritenta, o resta in attesa del prossimo) senza bloccare il gioco e senza riordinare i commit; un rifiuto del server (percorso non ammesso, permesso) non si ritenta. Cerca anche perché il server non rispondeva alla prima partenza, senza fermarti su questo se non si riproduce.
 - Test: un test offline con un `fetch` che fallisce una volta: niente di perso su disco alla fine; uno con un rifiuto del server: nessun ritento. Suite intera col suo turno, typecheck.
@@ -3317,6 +3558,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T212 · La cache delle forme legge da IndexedDB tutto ciò che ha — `fatto` (`783317a`)
 - Pipeline: claude · stima 2% · approvato · priorità 13
+- Step: 27
 - Contesto: nasce da T175 (`dossier T175`, ADR-0108): ogni caricamento legge da IndexedDB tutti gli 1,77 GB per usarne 49 MB, perché griglie e mesh stanno insieme nello stesso valore.
 - Cosa fare: tieni griglie e mesh in due archivi, così che un caricamento legga solo le mesh che servono e la griglia solo quando un `Form.remake` la chiede. Alza `FORMS_DB_VERSION` senza perdere il gioco: una cache vecchia si migra o si scarta, mai un errore. Il tetto di 4 GB e l'LRU valgono sul totale. Misura prima e dopo: byte letti e tempo al secondo caricamento.
 - Test: offline con l'IndexedDB finto (una griglia non letta finché non serve, migrazione dalla versione 4, tetto rispettato). Suite intera col suo turno, typecheck.
@@ -3326,6 +3568,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T213 · Il gioco a 1,5 frame al secondo nella verifica di T175: è il codice o la scheda? — `fatto` (`5c899cd`)
 - Pipeline: claude · stima 1.5% · approvato · priorità 14
+- Step: 27
 - Contesto: nasce da T175 (`dossier T175`): la scheda di verifica girava a circa 1,5 frame al secondo, causa non accertata e senza confronto col codice di prima; anche i 12-15 s per arrivare alla corona sono misurati a quel ritmo, quindi quel numero può non valere per un giocatore.
 - Cosa fare: solo misura e diagnosi, niente correzioni. Misura i frame al secondo con la scheda in primo piano (`document.visibilityState`, renderer WebGL da `WEBGL_debug_renderer_info`: una scheda nascosta o una GPU software spiegano già tutto), sul base e sul commit che precede il merge di T175, stessa scena, stessa partita, build di produzione, `?skip&offline`. Rimisura il tempo per arrivare alla corona. Se il rallentamento viene dal codice, individua dove va il tempo di un frame e scrivilo nell'esito: la correzione sarà un task a parte.
 - Test: nessun test nuovo se il codice non cambia.
@@ -3335,6 +3578,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T214 · Il terreno grigio a ovest della corona, che cambia tra un caricamento e l'altro — `fatto` (`4a9a7f1`)
 - Pipeline: claude · stima 2% · approvato · browser · priorità 15
+- Step: 27
 - Contesto: nasce da T213 (`dossier T213`, `traccia T213`). Nella build che comprende T175 il terreno a ovest della corona è a volte grigio, a volte con acqua ed erba, e resta grigio anche a 40 s: non è un ritardo. Nelle poche catture della build precedente era sempre colorato, ma il legame con T175 non è accertato. Quella misura non comprendeva T212, che ha cambiato il modo in cui arrivano le mesh.
 - Cosa fare: riproduci sul base attuale (build di produzione, `?skip&offline`, stesso universo, più caricamenti, spostandosi a (46, 0)). Confronta con il commit `2dad42c`, che precede T175, sugli stessi file. Trova la causa. Se è una forma tolta dal tetto e mai rifatta, o un'altra regressione della cache, correggila; se il comportamento c'era già o viene da altro, scrivi la causa nell'esito e non correggere nulla di estraneo alla cache.
 - Test: se correggi, un test che fallisce senza la correzione.
@@ -3344,6 +3588,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T215 · Il prezzo di T175 per arrivare alla corona, rimisurato; l'avviso sulla scheda a 1 Hz — `fatto` (`c277555`)
 - Pipeline: claude · stima 3% · approvato · browser · priorità 16
+- Step: 27
 - Contesto: nasce da T213 (`dossier T213`): a 60 fps l'arrivo alla corona era di circa 6 s contro 0,7-1,0 s del codice precedente a T175, ma la misura non comprendeva T212, che nella scheda lenta porta l'arrivo a 5,2 s. Nella scheda di Claude in Chrome il ritmo è di circa 1 Hz anche con pagina vuota: i tempi legati ai frame presi lì non valgono. In una prova di T213 c'è anche un ultimo cambio di `forms.version` a 48,8 s, mai indagato.
 - Cosa fare: (1) in `docs/architettura-dettagli.md#convalida-browser` aggiungi l'avviso: nella scheda di Claude in Chrome misura prima una pagina vuota, e i tempi legati ai frame si prendono in Chrome headless con la GPU vera. (2) Rimisura l'arrivo alla corona sul base attuale, in headless, con la stessa definizione di T213 (ultimo cambio di `forms.version` dallo spostamento a (46, 0)), almeno tre volte, sugli stessi file di `2dad42c`. (3) Se resta sopra i 2 s, trova dove va il tempo (T213 indica le forme rifatte perché il tetto le ha tolte) e correggi senza alzare la memoria oltre i tetti dell'ADR-0108; se la correzione richiede di scegliere tra memoria e tempo, scrivi le due misure e lascia la scelta nell'esito. (4) Se il cambio tardivo di `forms.version` si ripresenta, di' cos'è.
 - Test: se correggi, un test sul comportamento; nessun test nuovo per la sola misura.
@@ -3353,6 +3598,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T216 · L'avviso sullo scostamento del tappeto salvato nelle prove con teleport — `fatto` (`023db5b`)
 - Pipeline: claude · stima 1% · approvato · priorità 17
+- Step: 27
 - Contesto: nasce da T214 (`dossier T214`): il terreno grigio a ovest della corona non è una regressione della cache. `pagehide` salva lo scostamento del tappeto (`saveState`, `applyWandererState`), che sposta `?dev&teleport=46,0` di 46 caselle a ogni caricamento chiuso in modo ordinato: scostamenti 0, 46, 92, 138 e terreno che cambia con loro. Chi confronta due caricamenti sullo stesso profilo guarda posti diversi.
 - Cosa fare: in `docs/architettura-dettagli.md#convalida-browser`, vicino a `?dev&teleport`, aggiungi l'avviso in poche righe: la posizione del teleport si somma allo scostamento salvato, quindi per confrontare due caricamenti si riparte da un profilo pulito o si controlla la posizione prima di guardare o misurare. Solo documentazione, nessun cambio al codice.
 - Test: nessuno.
@@ -3362,6 +3608,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T217 · Il vetro del lampione della corona non lascia passare la luce: lo stesso rendering dell'editor — `fatto` (`beb677f`)
 - Pipeline: claude · stima 1.5% · approvato · priorità 1
+- Step: 15
 - Contesto: richiesta dell'autore (03/11): «Il vetro del lampione della corona non si comporta come nell'editor, non lascia passare proprio la luce. Voglio che il rendering sia lo stesso che nell'editor. Anche il lab3d ha il comportamento atteso». Il modello è `corona-lampione` (T113: `dossier T113`), messo nella corona da `src/kernel/corona.ts`. I riferimenti giusti sono l'editor (`lab/editor/`) e il sandbox `lab/3d/`, dove il vetro è `matGlass` (`lab/3d/main.ts`); nel gioco è `MAT.coronaGlass` (`src/render/materials.ts`), scelto in `src/render/models.ts`. La causa non è accertata. Prima ipotesi da provare: il ciclo dei `props` di `buildCoronaRing` (`src/render/corona3d.ts`) crea `new THREE.Mesh(bg, mat)` con un solo materiale, mentre `models.ts` passa `[mat, glassMat]` quando la geometria ha i gruppi, quindi il vetro dei props verrebbe disegnato opaco; vale anche per le ombre (`castShadow`). Poi confronta materiali, luci e cosa fa `cartoonOn` sul vetro, anche con il cartone spento.
 - Cosa fare: trova perché il vetro del lampione nella corona blocca la luce e correggilo perché si veda come nell'editor. Correggi la causa nel materiale o nelle luci condivise, senza un caso speciale per questo modello, e guarda se lo stesso difetto tocca gli altri vetri del gioco (`MAT.glass`, `MAT.cutGlass`): di' nell'esito cosa cambia per loro.
 - Test: un test sul materiale o sulla mesh se la causa si può fissare fuori dal browser; altrimenti scrivi nell'esito perché non c'è.
@@ -3371,6 +3618,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T218 · Gli alberi di luce della corona non si vedono — `fatto` (`2b1d6a8`)
 - Pipeline: claude · stima 1.5% · approvato · priorità 1
+- Step: 15
 - Contesto: richiesta dell'autore (03/11): «Gli alberi luce della corona non sono visibili, dal codice sembrano essere stati disposti ma non li vedo». Il kernel li dispone in `src/kernel/corona.ts` (`addProp('albero', 'corona-albero-luce', …)`, tre per settore, nati con T50e), il renderer li disegna nel ciclo dei `props` di `buildCoronaRing` (`src/render/corona3d.ts`) con `MAT.sway`, gli altri con `MAT.corona`. La causa non è accertata. Da controllare in quest'ordine: il programma `universe/models/corona-albero-luce.xml` produce voxel con quel seme; la forma arriva (`k.forms.ready`, il tetto della cache di T175 e il censimento di `kernel.ts`); `MAT.sway` regge i frame e i colori dei vertici; le posizioni cadono dentro un edificio o sotto il terreno; `campusKey` ricostruisce l'anello quando la forma è pronta.
 - Cosa fare: trova perché non si vedono e correggi la causa, senza spostare gli alberi né cambiare il modello se non è lì il difetto. Di' nell'esito quanti alberi ci sono nella corona e quanti ne vedi.
 - Test: un test sulla causa se si può fissare fuori dal browser (per esempio che il programma dia una griglia non vuota per ogni seme usato); altrimenti scrivi nell'esito perché non c'è.
@@ -3381,6 +3629,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T219 · Il viale della corona: due cerchi perfetti al posto delle caselle seghettate — `fatto` (`eaeacc6`)
 - Pipeline: claude · stima 2% · approvato · priorità 1
+- Step: 15
 - Contesto: richiesta dell'autore (03/11): «La strada seghettata della corona: dalla prima "corona" che abbiamo implementato abbiamo lasciato una "strada" graficamente povera. Le tiles designate come strada presentano una riga orizzontale, sempre nella stessa direzione. Voglio che invece i due estremi della strada siano due cerchi perfetti concentrici». La strada è il suolo `viale` di `buildCoronaRing` (`src/render/corona3d.ts`): caselle quadrate con il colore di `GROUND`, e la riga è `glow.box(x, …, y + 0.45, x + 1, …)`, uguale in ogni casella qualunque sia la sua direzione sull'anello. Il raggio e la linea stanno in `CAMPUS` (`src/kernel/corona.ts`).
 - Cosa fare: disegna il viale come una corona circolare con il bordo interno e il bordo esterno cerchi perfetti e concentrici, con abbastanza segmenti da non vedere spigoli alla distanza della camera. Togli la riga orizzontale da ogni casella. Se serve una linea di luce, è anch'essa un cerchio concentrico. Il prato deve toccare i due bordi senza fessure né z-fighting, e anche i vicoli, gli ingressi degli edifici e ciò che sta sul viale devono restare a posto. La griglia delle caselle del kernel non cambia, a meno che non serva: il cambio è di disegno. Guarda se il bordo disegnato e ciò che blocca il cammino restano coerenti (regola 10): di' nell'esito cosa hai trovato.
 - Test: un test sulla geometria se la funzione si può isolare (ogni vertice di bordo sta al suo raggio, i centri coincidono); altrimenti scrivi nell'esito perché non c'è.
@@ -3390,6 +3639,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T220 · Il pavimento a esagoni nelle sale del Concilio — `fatto` (`b21d65e`)
 - Pipeline: claude · stima 1% · approvato · priorità 1
+- Step: 15
 - Contesto: richiesta dell'autore (03/11): «Il pavimento a esagoni nelle sale del concilio: voglio che la griglia del pavimento delle varie sale dei membri del concilio abbia un pattern esagonale anzichè quadrato». La griglia sta in `src/render/corona3d.ts`, nel disegno della stanza (le due righe `lines.box` con `GRID`, colore della stanza, tenue e senza bloom, T49a). È la stessa per ogni stanza dello studio, e ogni edificio ha la sua squadra (`ROOMS` in `src/kernel/corona.ts`). Scelta dell'orchestratore, da correggere se l'autore la vuole diversa: gli esagoni valgono per tutte le stanze dello studio, non solo per la Sala del Concilio.
 - Cosa fare: sostituisci la griglia quadrata con una griglia esagonale, tagliata pulita ai bordi del pavimento, con la stessa tenuità di `GRID` e lo stesso colore. Le linee sono oblique, quindi `lines.box` non basta: usa quad sottili nello stesso builder, così resta una sola geometria. Solo disegno: caselle, cammino, scaffali e piattaforme restano sulla griglia quadrata del kernel. Lato dell'esagono intorno a una casella. Tieni d'occhio il numero di triangoli (stanze per piani) e dillo nell'esito.
 - Test: nessuno se è solo disegno; scrivi nell'esito se ne hai aggiunto uno.
@@ -3399,6 +3649,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T221 · Il suono come programma MarkovJunior: la lingua in XML, il sintetizzatore puro, i preset — `fatto` (`a6ee6e6`)
 - Pipeline: claude · stima 3.5% · approvato · priorità 1
+- Step: 25
 - Contesto: richiesta dell'autore (03/11): «colonna sonora e effetti sonori generati proceduralmente con MJ (e l'IA genera i programmi). Abbiamo fatto una prova di implementazione di un sintetizzatore MJ. I risultati sono eccezzionali. Voglio integrarlo, ti passo il mockup, la demo creata da Argon in browser. La sintassi è diversa, è json invece di xml, quindi riadattalo, voglio che i programmi MJ siano solo xml. Inoltre assicurati che siano presenti tutte le funzioni MJ e completa il mockup per renderlo operativo». Il mockup è `docs/userchats/mj_3d_soundlab_sintetizzatore_musicale_markovjunior.html`: ha un suo motore MJ in JavaScript e programmi in JSON. La griglia è la partitura: X il tempo, Y la traccia (0 lead, 1 pad, 2 basso e batteria), Z l'altezza sulla scala, i simboli il tipo di evento (nota, sustain, accento, ghost, marcatori nascosti); `SoundEngine` suona con Web Audio (filtro, delay, compressore, swing) e il rumore viene da `Math.random`. Oggi nel gioco c'è solo `src/audio.ts` (`Sfx`, pochi blip).
 - Cosa fare: (1) la lingua: i programmi sonori sono XML del motore vero (`src/mj/xml.ts`, `model.ts`, `engine.ts`), senza un secondo motore né JSON; i parametri musicali (bpm, scala, tonica, swing, strumenti, mix) stanno nell'XML. Confronta i nodi e gli attributi del mockup (`one`, `all`, `prl`, `markov`, `sequence`, `path` con `inertia` e `longest`, `conv`, `unions`, `steps`) con il motore: ciò che manca lo aggiungi al motore, per tutti i programmi, senza cambiare il risultato di quelli che ci sono. Un test prova in un programma sonoro ogni nodo che il motore conosce. (2) la partitura: una funzione pura griglia → eventi. (3) il sintetizzatore: **una sola fonte del suono**, una funzione pura partitura + seme → campioni, che gira anche in Node e in un worker, senza `Math.random` né orologio; il browser suona quei campioni. Ciò che un agente misura è ciò che il giocatore sente. Riproduci il carattere del grafo Web Audio del mockup (inviluppi, filtro, delay, compressore, swing, batteria): è il suono che all'autore è piaciuto. (4) i preset del mockup, tutti, tradotti in XML in un posto che i test leggono. (5) decidi dove stanno i programmi sonori in un universo, restando nell'elenco di `src/kernel/paths.ts` (consigliato: dentro `models/`, con una classe propria in `index.json`). ADR, voce in `AGENTS.md`, sezione in `docs/architettura-dettagli.md`, voci in `docs/glossario.md` per i concetti nuovi.
 - Test: stessi programma e seme danno campioni identici; ogni preset dà una partitura non vuota su ogni traccia che dichiara e un segnale senza NaN e senza clipping; i programmi visivi esistenti danno le griglie di prima.
@@ -3407,6 +3658,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T222 · Il SoundLab nel laboratorio: il mockup reso operativo per il lavoro a mano — `fatto` (`6912da5`)
 - Pipeline: claude · stima 2.5% · approvato · priorità 1
+- Step: 25
 - Contesto: richiesta dell'autore (03/11): «Dotalo di tutte le funzionalità necessarie per il lavoro manuale (io in browser nel lab)». Il mockup è `docs/userchats/mj_3d_soundlab_sintetizzatore_musicale_markovjunior.html`; le pagine del laboratorio sono `lab/3d/` e `lab/editor/`, da cui riusare editor XML e salvataggio.
 - Cosa fare: una pagina `/lab/suono/` (senza CDN, niente Tailwind né font esterni) che porta tutto ciò che il mockup sa fare: preset, editor del programma (ora XML, con errori e diagnostica), vista a voxel 3D, piano roll modificabile, passi del programma avanti e indietro, morph del loop, oscilloscopio, manopole (bpm, swing, cutoff, spazio, scala, tonica, volume e muto per traccia), export WAV. Completa ciò che è demo: carica e salva l'XML su disco come l'editor, seme esplicito e ripetibile, una modifica nel piano roll si riflette in qualcosa che si può salvare (se non è esprimibile nel programma, dillo a vista). Il suono viene dal sintetizzatore puro del task richiesto, non da un secondo grafo Web Audio; una manopola agisce senza scatti udibili.
 - Test: la logica della pagina che si può isolare (piano roll → griglia, salva e ricarica dà lo stesso XML).
@@ -3417,6 +3669,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T223 · L'analisi automatica dei programmi sonori per gli agenti — `fatto` (`abc5803`)
 - Pipeline: claude · stima 1.5% · approvato · priorità 1
+- Step: 25
 - Contesto: richiesta dell'autore (03/11): «tutte le funzionalità necessarie […] per l'analisi automatizzata dei risultati da parte degli agenti». Un agente non sente: deve leggere il risultato come testo. C'è già la traccia dei programmi (`src/mj/trace.ts`, ADR-0118, `lab/banco/traccia.md`) e il banco della varianza (`lab/banco/varianza.ts`).
 - Cosa fare: un comando in `lab/scripts/` che da un programma XML e dai semi dà il WAV, la traccia MJ e un rapporto in testo: note per traccia e per battuta, estensione, densità, ripetizione e varianza tra i semi, tonalità effettiva contro quella dichiarata, picco e RMS, silenzi, clipping, spettro per bande, durata del loop e continuità alla giuntura. Soglie che dicono «vuoto», «piatto», «ripetitivo», «stonato», «fuori volume», che servono anche al validatore del Concilio: la funzione sta dove `src/` può importarla, il comando in `lab/`. Una guida breve per chi scrive programmi sonori, in `lab/banco/`, che dice anche che cosa le misure non possono dire. Calibra le soglie sui preset: passano tutti, e un programma costruito apposta per ogni difetto viene segnalato.
 - Test: i casi costruiti, uno per difetto; il rapporto è deterministico.
@@ -3426,6 +3679,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T224 · La colonna sonora e gli effetti nel gioco — `fatto` (`cdf5bce`)
 - Pipeline: claude · stima 3% · approvato · priorità 2
+- Step: 25
 - Contesto: richiesta dell'autore (03/11): «colonna sonora e effetti sonori generati proceduralmente con MJ». Scelta dell'orchestratore, da correggere se l'autore la vuole diversa: musica per ambiente e momento del giorno, effetti per ciò che oggi fa `Sfx` (`src/audio.ts`) e per le azioni principali. Regola 11 e `#semi`: un programma per tipo, le istanze sono semi; la simulazione non estrae dall'orologio.
 - Cosa fare: programmi di partenza nel seme `universe/`, a mano, pochi e per tipo. Il direttore del suono sceglie cosa suona dallo stato del mondo; il rendering sta in un worker e in cache come le forme, e non ferma mai il thread principale; dissolvenze ai cambi, volume e muto nel menu, sblocco dell'audio al primo gesto. `Sfx` passa dal nuovo percorso senza perdere i suoni di oggi. Un programma che fallisce tace e non rompe il gioco (regola 7). In multigiocatore il suono è del client e non chiede messaggi nuovi. Misura costo di rendering e memoria.
 - Test: la scelta del brano da uno stato è pura e deterministica; un programma rotto non getta eccezioni.
@@ -3436,6 +3690,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T225 · Il Musicista: un membro del Concilio nella casa dell'Artista — `fatto` (`9c8f546`)
 - Pipeline: claude · stima 3% · approvato · priorità 2
+- Step: 25
 - Contesto: richiesta dell'autore (03/11): «dobbiamo creare un membro del concilio musicista, ma la corona è già troppo piena di palazzi, io forse lo metterei nella casa dell'artista». Decisione dell'orchestratore, sulla proposta dell'autore: nessun edificio nuovo, sta nella `galleria` (`ROOMS` in `src/kernel/corona.ts`, team `artista`), che oggi ha una squadra sola. Gli agenti stanno in `src/kernel/agents/council.ts` (`AgentId`).
 - Cosa fare: l'agente `musicista`, coi passi di `AGENTS.md` per un compito nuovo: schema Gemini, risposta in `MockAiModels`, voce nel registro, prompt in `universe/prompts/agents/musicista.md`, tabella del Concilio. Scrive i programmi sonori XML di ciò che il mondo chiede; il validatore li esegue di prova e applica le soglie dell'analisi, e l'invalido torna a lui col motivo (regola 2); niente meta-gioco nei nomi (regola 0). Coperto da `councilMayWrite`, da `chi` e dalle carte come gli altri contenuti, con i coefficienti di generazione e il «Low Detail» (ADR-0085). Nella corona: il Musicista si vede al lavoro nella casa dell'Artista, senza edifici nuovi, e la stanza regge due squadre senza un caso speciale; il Referente gli porta le richieste. ADR se il modello «una stanza, una squadra» cambia.
 - Chiamate vere: al più 10 di testo per provare il prompt; tutto il resto offline.
@@ -3447,6 +3702,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T226 · La corona si disegna solo fuori dal tappeto, per chiunque e con qualunque camera — `fatto` (`ab70e37`)
 - Pipeline: claude · stima 2% · approvato · priorità 1
+- Step: 15
 - Contesto: richiesta dell'autore (03/11): «Quando sono entrato all'interno di una struttura (edificio) in single player, la telecamera è passata da bloccata a 3/4 a orbit libero 360°. Muovendo la telecamera ho visto la corona. Potrebbe essere un bug da correggere, ma pensandoci bene: il concilio può sbagliare e concedere il free orbit anche a chi è in gioco. Alcuni edifici alti potrebbero comunque portare la corona nell'inquadratura. Per garantire che non si veda, non la renderiamo proprio finché il giocatore non esce dal tappeto. Di base preferisco la visuale di 3/4 nel simulatore per questioni di performance del gioco, nella corona avere il free orbit permette di avere una visione d'insieme ed è affascinante da guardare. Nel gioco, se si attiva il full orbit per un'attività è ok, basta che non si veda la corona. Questo ultimo punto lo applicherei anche al master (in multiplayer) o al giocatore che è già uscito dal tappeto (in single). L'esperienza di gioco verrebbe compromessa dalla presenza costante della corona intorno. Lascierei comunque la possibilità di usare il free orbit e free zoom, per avere una visione più ampia, ma da dentro il tappeto non farei render della corona». Il codice oggi: `coronaRevealed()` (`src/kernel/kernel.ts`) è vero già a 0,45 del raggio; il renderer lo usa per l'anello (`CoronaView.update`, `src/render/coronaview.ts`), il taglio del mondo (`U.clipR`), lo sfondo e le etichette, e `canFreeOrbit()` (`src/render/renderer.ts`) dà l'orbita libera con quello. Dedotto dal codice, da accertare: dentro una struttura il viandante si è trovato oltre quella soglia, e da lì orbita e corona insieme. Regola 8, ADR-0009.
 - Cosa fare: (1) **la garanzia**: un solo punto decide se la corona si disegna: vero solo se il viandante è fuori dal tappeto (a distanza `circleRadius` o più dal centro) o in un interno dello studio. Dentro il cerchio la corona non si disegna per nessuno: giocatore mai uscito, chi è già uscito ed è tornato, master, god mode, qualunque camera, orbita o zoom. Niente anello, luci, ombre, etichette, hover, né lo sfondo della corona; la simulazione dentro il cerchio resta senza il taglio, come per chi non è mai uscito. Passa in rassegna ogni uso di `coronaRevealed()`, anche nel kernel (`clamp` e il controllo del movimento), e dì nell'esito cosa fa ognuno: ciò che riguarda il cammino non cambia senza un motivo. (2) **la camera**: nel simulatore di base 3/4; l'orbita libera resta a chi è nella corona o nello studio, al god mode e al master, e a un'attività che la chiede. Togli `coronaRevealed()` da `canFreeOrbit()` e trova la causa del passaggio all'orbita entrando in una struttura: entrarci in single player lascia la 3/4. Chi è uscito ed è tornato dentro riprende la 3/4, a meno che il suo ruolo non dia l'orbita. (3) **il passaggio**: attraversare il bordo non deve bloccare il thread (i numeri di T215 sono il riferimento) né far vedere un buco nel mondo: scelta dell'autore e dell'orchestratore (03/11): l'anello si prepara **già costruito ma invisibile** (`visible = false`) quando il viandante si avvicina al bordo, con geometrie e materiali già sulla GPU (`visible = false` da solo rimanda il caricamento al primo frame, e il blocco resterebbe), e si butta quando si allontana, perché con la corona in scena la memoria sale a 1,4-1,6 GB (T175): chi il tappeto tiene al centro non deve pagarla. Da invisibile non deve dare ombre, luci, etichette né hover (il raycast di three.js non guarda `visible`). La soglia di preparazione la scegli misurando e la scrivi nell'esito; se il cambio resta brusco, dillo all'autore con una cattura. ADR, regola 8 in `AGENTS.md`, `#corona` in `docs/architettura-dettagli.md`.
 - Test: la decisione è una funzione pura, con i casi: mai uscito, a 0,45 del raggio, appena dentro e appena fuori dal bordo, tornato dentro, master, god mode, dentro una struttura, interno dello studio. Un test che fissa che l'orbita libera non accende la corona.
@@ -3456,6 +3712,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T227 · Integrare T223 — `fatto` (`e3c9839`)
 - Pipeline: claude · stima 1% · approvato · priorità 1
+- Step: 25
 - Contesto: T223 (`dossier T223`) è finito, ma `integra T223` va in conflitto in `AGENTS.md`, `docs/architettura-dettagli.md`, `docs/glossario.md`: T222 (`dossier T222`), già nel base, ha scritto negli stessi punti.
 - Cosa fare: nel tuo worktree `git merge task/T223`; le due aggiunte restano entrambe, in un testo unico dove stanno sulla stessa riga. L'ADR-0125 resta 0125, se è ancora libero. Nessun'altra modifica.
 - Test: typecheck e suite intera con i loro turni.
@@ -3465,6 +3722,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T228 · Integrare T224 — `fatto` (`99c356e`)
 - Pipeline: claude · stima 2% · approvato · priorità 1
+- Step: 25
 - Contesto: T224 (`dossier T224`) è finito, ma `integra T224` va in conflitto in `AGENTS.md` e `docs/architettura-dettagli.md`: T222 e T223 (`dossier T223`), già nel base, hanno scritto negli stessi punti. I programmi sonori di T224 non sono mai stati provati insieme alle soglie di T223.
 - Cosa fare: nel tuo worktree `git merge task/T224`; le aggiunte restano tutte, in un testo unico dove stanno sulla stessa riga. L'ADR-0126 resta 0126. Fai passare i 7 brani e i 9 effetti del seme dall'analisi di T223 (`src/mj/soundanalysis.ts`, validatore). Se un programma non passa e il difetto è vero, correggi il programma; le soglie non si toccano; se pensi sia un falso difetto, lascialo com'è e scrivilo nell'esito con le misure. `suono-effetto-morte` e `suono-musica-profondo` sono i preferiti dell'autore: non si ritoccano, se non passano si scrive nell'esito e si lascia decidere a lui.
 - Test: typecheck e suite intera con i loro turni.
@@ -3474,6 +3732,7 @@ Una catena: ogni task parte solo con il precedente integrato, e nient'altro gira
 
 ### T229 · Integrare T158 — `fatto` (`396bf90`)
 - Pipeline: claude · stima 3% · approvato · priorità 1
+- Step: 26
 - Contesto: T158 (`dossier T158`, l'Attore nella corona) è finito, ma `integra T158` va in conflitto in `AGENTS.md`, `src/kernel/archive.ts`, `src/kernel/corona.ts`, `src/kernel/kernel.ts`, `tests/kernel-studio.test.ts`: T225 (`dossier T225`, il Musicista), già nel base, ha toccato gli stessi punti. Il conflitto è anche di sostanza: entrambi prendono il nono posto al tavolo della Sala del Concilio, e T225 ha sostituito `Building.team` con `Building.teams`, mentre T158 aggiunge il campo `guest` alla stanza dello Studio dei Personaggi.
 - Cosa fare: nel tuo worktree `git merge task/T158`; le aggiunte restano tutte. Al tavolo siedono dieci: Musicista e Attore hanno ciascuno il suo posto e il suo teletrasporto, senza collisioni e senza occupare l'uscita; ricalcola ciò che era scritto per nove. Decidi se il `guest` di T158 può diventare una squadra di `Building.teams` senza perdere il comportamento di T158 (l'Attore a riposo con l'opzione spenta, un passo oltre il Narratore, le battute senza file dette da lì): se sì un solo meccanismo, altrimenti tienili entrambi e scrivi il perché nell'esito. Nessun ADR nuovo se non cambia una decisione.
 - Test: typecheck e suite intera con i loro turni, anche l'ultima volta che cambi il codice.
@@ -3487,6 +3746,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 
 ### T230 · Fasi e step: glossario, documento, il pregresso riassegnato — `fatto` (`0e16a6c`)
 - Pipeline: claude · stima 2% · approvato · priorità 1
+- Step: 28
 - Contesto: l'autore introduce due termini (to-do del 04/11, «Fasi dello sviluppo»). **Fase**: I kernel 0.9.0, II beta tester (10 persone), III kernel 1.0.0, IV produzione pubblica con Stripe. **Step**: non più una tappa del piano ma il raggiungimento di un obiettivo condiviso tra task (esempio suo: «step 25: aggiungere il suono al gioco»). La numerazione continua quella dei 9 step fatti. Le fasi possono cambiare in corso d'opera.
 - Cosa fare: voci `Fase` e `Step` in `docs/glossario.md`. Nuovo `docs/fasi.md`: le quattro fasi con ciò che l'autore ne ha detto e il criterio per dire finita ciascuna (per la Fase I proponilo tu, segnato come proposta); una tabella `| step | obiettivo | fase | stato | task |` col pregresso riassegnato agli obiettivi già raggiunti e il lavoro aperto raggruppato negli step da fare, numerati a seguire. Leggi il backlog con `pipeline.mjs indice` e, solo dove serve, i blocchi: non aprire i diari. ADR e riga in `AGENTS.md`. Il backlog non lo tocchi: i tag li mette l'orchestratore, con il comando di T231, dalla tua tabella.
 - Test: typecheck e suite intera con i loro turni (`tools/glossario` se il censimento ne risente; le sue differenze estranee non si committano).
@@ -3496,6 +3756,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 
 ### T231 · Il tag `step` nella pipeline — `fatto` (`2ff2f99`) (dipende da T230)
 - Pipeline: claude · stima 1% · approvato · priorità 1
+- Step: 28
 - Contesto: l'autore vuole dire all'orchestratore «priorizza lo step N». La tabella di `docs/fasi.md` dice quali task stanno in ogni step; serve che anche la pipeline lo sappia. Molti task vecchi non hanno la riga `- Pipeline:`: il tag è una riga a parte, `- Step: <n>`.
 - Cosa fare: in `tools/pipeline/pipeline.mjs` il parser di `- Step:`; il campo in `indice`, `dossier` e nella pagina web; `step <n> Txx…` assegna il tag; `step --da-tabella` li mette tutti leggendo `docs/fasi.md`; `step <n>` elenca i task; `step <n> --priorita <p>` porta alla priorità data quelli non finiti. Un task nuovo senza step resta valido. Aggiorna `docs/pipeline/README.md` e `orchestra.md`. Tocchi il backlog solo nei test, su una copia.
 - Test: `tests/` della pipeline; typecheck e suite intera con i loro turni.
@@ -3505,6 +3766,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 
 ### T232 · Il sito come launcher: proposte della landing col rapporto aureo — `in attesa`
 - Pipeline: claude · stima 3% · approvato · priorità 90
+- Step: 35
 - **L'autore (04/11): si fa a fine Fase II.** Lo riporta a `da fare` l'orchestratore, con T235 e il logo scelto.
 - Contesto: per l'autore la home «sembra a metà tra un pitch per una startup e un blog per fumetti». La vuole come il launcher di un gioco multiplayer moderno: accattivante, «oddly satisfying», «che rimarresti ore a guardarla», con molti rapporti tra dimensioni che rispettano il rapporto aureo. Dossier: `dossier T97`, `dossier T186`. Le proposte del logo sono in `docs/design/logo/proposte/` (file dell'autore: non toccarli, mai `git add` di quella cartella).
 - Cosa fare: 3 proposte in `docs/design/sito/launcher/`, pagine statiche provabili nel browser, che rispettano la CSP (`server/csp.ts`). Griglia e tipografia da φ e Fibonacci, con la tabella dei rapporti usati. Almeno una con al centro un programma MarkovJunior che cresce dal vivo (la crescita è già di suo «oddly satisfying»), con ciò che costa misurato. Posto per: carte e strutture in 3D o video in loop, universi più giocati, notizie. Niente testi che guastino la scoperta della corona. Non cambiare `site/`.
@@ -3514,6 +3776,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 
 ### T233 · La landing launcher nel sito — `da fare` (dipende da T232)
 - Pipeline: claude · stima 3% · priorità 2
+- Step: 35
 - Contesto: si approva solo quando l'autore ha scelto una proposta (`dossier T232`).
 - Cosa fare: la proposta scelta in `site/` col tema condiviso, senza framework; le sezioni di showcase e notizie restano nascoste finché non hanno contenuti, niente «coming soon» finti. La striscia «coming soon» degli altri universi resta.
 - Test: typecheck, build e suite intera con i loro turni.
@@ -3522,6 +3785,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 
 ### T234 · Il news-blog del sito — `da fare`
 - Pipeline: claude · stima 2% · approvato · priorità 3
+- Step: 34
 - L'autore (04/11): non aspetta la landing nuova. Grafica semplice nel tema attuale, entro la Fase I.
 - Contesto: dal rilascio in beta l'autore vuole notizie: aggiornamenti del kernel, creazione di un universo, sessioni di generazione intensa, sondaggi per feedback, link alla pianificazione dell'utilizzo dei server.
 - Cosa fare: notizie come file Markdown in `site/`, trasformate alla build, senza rotte nuove sul server né database; elenco, pagina singola, tag per tipo, le ultime nella landing. Un sondaggio è un link esterno. Una notizia di prova e la guida di due righe per scriverne una.
@@ -3530,16 +3794,19 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Quando è fatto: l'autore aggiunge un file e la notizia appare; commit su `task/T234`. Sicurezza: nessuna superficie nuova, o le voci.
 
 ### T235 · Showcase: carte famose e universi più giocati — `in attesa` (dipende da T233)
+- Step: 35
 - Contesto: dal to-do del 04/11: carte famose, video in loop di gameplay o delle strutture più «lerpe» in 3D, universi di giocatori più giocati. Ha senso solo con dati veri: riparte alla fine della Fase II, quando lo dice l'autore. Il conteggio delle partite non esiste ancora; una rotta pubblica nuova passa da `gate` e dall'elenco di `server/production.ts`.
 - Domanda per l'autore: nessuna ora; alla ripartenza si riscrive con ciò che la beta ha lasciato.
 
 ### T236 · La beta: i crediti in due parti — `fatto` (decisioni dell'autore, 04/11, nessun commit di codice)
+- Step: 34
 - Contesto: per la Fase II l'autore dà 5 € a ogni tester e genera a sue spese gli universi vanilla; una parte dei crediti per esplorare, l'altra sbloccata da un secondo file che rivela la corona. Oggi con gli account `QUINE_TETTO_RICARICHE` vale 0. **Calendario, chat tra i partecipanti e comunicazioni li gestisce l'autore fuori dal repository (04/11):** niente prenotazioni nel sito né codice che in produzione sparirebbe; la beta non deve durare troppo. Su richiesta l'orchestratore lo aiuta con i messaggi WhatsApp d'invito.
 - **Deciso dall'autore (04/11, `docs/pipeline/domande/T236.md`):** 2 € per esplorare, parlare, generare oggetti; 3 € con il secondo file, e chi li riceve può restare nel tappeto: è una scelta. Tutto a mano dal master. Altri 5 € a mano ai più assidui. Chi poi vuole continuare in beta ha uno sconto del 50 % sui crediti, a prezzo lineare e senza commissione (T243; come paga: `docs/pipeline/domande/T243.md`). Quattro universi condivisi: medievale (`aurora`), steampunk, moderno, futuristico, generati perlopiù sul server con gli abbonamenti (T207, T88, T153).
 - Conseguenze per il deploy: `QUINE_TETTO_RICARICHE` da alzare, oggi 0 con gli account (consigliato 50: 10 tester per 5); `QUINE_UNIVERSI_PER_ACCOUNT` è 3 e i mondi del master sono 4. I saldi stanno per universo (ADR-0104), quindi i crediti di un tester valgono in un mondo solo.
 
 ### T237 · La guida dei beta tester, in due file — `da fare` (dipende da T45f, T236)
 - Pipeline: claude · stima 2% · approvato · priorità 3
+- Step: 34
 - Contesto: si scrive a fine Fase I, per gli amici dell'autore, non pagati: «non è il classico beta testing noioso». Il primo file: come giocare, che si gioca prenotando il turno sul calendario dell'autore, fuori dal repository (anche insieme, senza esagerare con le sessioni a molti), tutte le limitazioni del server di beta con cui ci si potrebbe frustrare. Il secondo file: la corona, e come avere la seconda parte dei crediti, per chi non ha capito come uscire dal tappeto. Il primo non deve guastarla.
 - Decisioni di T236: 2 € + 3 €, a mano; il secondo file dice che si può anche restare nel tappeto; quattro universi condivisi con l'autore come master. Da provare, non da supporre: cosa può fare nella corona chi non è il master; come si spende il saldo, che vale per un universo solo. Gli altri 5 € e lo sconto li propone l'autore a voce: non stanno nei file. I due file vanno anche sul sito (T244): scrivili come pagine pubbliche, e il primo non guasti la corona.
 - Cosa fare: `docs/beta/guida.md` e `docs/beta/la-corona.md`, in italiano, dal comportamento vero del server di beta (limiti di `LIMITS`, `FRONT_RATES`, mondi accesi, tetti, modelli locali a crediti finiti), non dai documenti: ciò che non puoi provare lo segni. Tono da amico.
@@ -3549,6 +3816,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 
 ### T238 · Il registro di ciò che il Concilio non riesce a fare — `da fare`
 - Pipeline: claude · stima 2% · approvato · priorità 3
+- Step: 34
 - Contesto: la Fase III parte dalle funzionalità che il Concilio non riesce a implementare durante le sessioni, chieste dai giocatori o nate dal Concilio. Se la beta non le registra, si perdono: va fatto entro la Fase I. Approvato dall'autore il 04/11. I feedback dei giocatori non passano da qui: l'autore li porta in chat.
 - Cosa fare: leggi `#concilio` e i punti in cui una richiesta finisce male (Referente, Fucina, azioni libere, validatore che rifiuta anche l'ultimo tentativo, Ingegnere che non ripara). Ognuno scrive una voce (richiesta, chi, agente, motivo, quante volte) in un file di mondo che non va ai client e senza quarta parete nel gioco; un comando che ne fa il rapporto per il kernel 1.0.0.
 - Test: typecheck e suite intera con i loro turni, offline con `MockAiModels`.
@@ -3556,11 +3824,13 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Quando è fatto: una richiesta rifiutata in un test diventa una riga del rapporto; commit su `task/T238`. Sicurezza: il file resta fuori da `playerFiles` e `publicFiles`; scrivi l'esito.
 
 ### T239 · Quattro lingue: censimento e progetto — `in attesa`
+- Step: 36
 - Contesto: prima della Fase IV il gioco va in italiano, inglese (la versione di punta sui social), francese e spagnolo: le lingue che l'autore può verificare. **L'autore (04/11): è l'ultimissima operazione, in Fase III, non in Fase I:** è dispendiosa e obbliga a quadruplicare ogni modifica che tocca la lingua. Riparte quando lo dice l'autore. Oggi UI, prompt e testi di gioco sono in italiano per convenzione; i contenuti li genera il Concilio, gli universi hanno già una lingua, il multigiocatore può mescolarle.
 - Cosa fare alla ripartenza: censimento dei testi (UI, sito, prompt, seme, lessico, canone delle rune, messaggi del kernel), proposta con le alternative in `docs/lingue.md`: lingua per universo o per viandante, cosa si traduce e cosa si genera, come si verifica. A parte documentazione, pipeline agentica e pregresso dello sviluppo: si traducono solo se il piano di lancio punta anche alla comunità dello sviluppo agentico.
 - Domanda per l'autore: nessuna ora.
 
 ### T240 · Il piano di lancio: concorrenti, punti di forza, Boa Loger — `in attesa`
+- Step: 38
 - **L'autore (04/11): si lancia su Fable dal reset settimanale del 05/11 (15:59 UTC), non prima.** Alla ripartenza: riga `- Pipeline: fable · stima 5% · approvato · priorità 2` e stato `da fare`.
 - Contesto: leggi tutto il to-do del 04/11, «Fase IV». L'autore: «ci giochiamo tutte le carte», non ha studi di marketing, vuole le idee migliori e il dissenso dove c'è. Afferma che non esiste niente del genere e chiede se la narrativa generativa sia davvero solo sua: va verificato, non assecondato. Da confrontare almeno con: AI Dungeon, Project Sid, Generative Agents (Smallville), inZOI; nella ricerca veloce del 04/11 nessun gioco pubblicato che generi mondo e codice durante il gioco, con fonti deboli. Propone: account dedicati, una settimana di spoiler in contemporanea, post finale col link; il personaggio Boa Loger (gerboa, finto anonimato facile da forare, collettivo artistico, interviste animate).
 - Cosa fare: `docs/lancio/piano.md`, con le fonti. (1) Ricerca sul web dei concorrenti, per ogni punto di forza: chi lo fa già, e quanto; cosa resta davvero unico, in una frase difendibile su Hacker News. (2) I punti di forza in ordine, per pubblico (tecnico, giocatori, creatori), compresi quelli che l'autore non ha elencato: il mondo fatto del proprio codice, le rune eseguite, il tappeto e la corona, i modelli come programmi di testo. (3) Giudizio sul piano dell'autore: regole di autopromozione e di account nuovi di Reddit e Hacker News, la pubblicazione simultanea, quali canali mancano e quali togliere; cosa impone il farsi pagare in UE sull'identità pubblica. (4) Boa Loger: cosa tenere e cosa rischia, un personaggio dichiarato contro un finto sviluppatore, voce sintetica, compatibilità con la regola 0 se entra nella narrativa dell'universo. (5) Calendario dal termine della Fase III, narrativa e 3-5 idee migliori della sua, con il costo in tempo per una persona sola. (6) Ciò che il gioco deve avere prima (video, press kit, costi a molti utenti al picco, tetti di spesa). (7) Il pubblico degli sviluppatori: l'autore crede che il progetto interessi anche chi segue lo sviluppo agentico (i subreddit dedicati): la pipeline, l'orchestratore, i task. Di' se conviene e cosa chiede: tradurre documentazione, pipeline e pregresso, oggi in italiano, ha un costo (→ il censimento delle lingue, T239). Parti dalle osservazioni che l'orchestratore ha dato all'autore il 04/11 e che lui ha apprezzato, ma verificale: la frase «non esiste niente del genere» è smontabile, di unico c'è l'insieme; il punto più forte è il mondo fatto del proprio codice e le rune eseguite, con la storia di 18 anni come racconto; Boa Loger come mascotte dichiarata anziché finto sviluppatore, perché chi incassa in UE mostra comunque la propria identità; account nuovi e stessa data ovunque sembrano spam; mancano Discord, YouTube, TikTok. Non creare account e non pubblicare nulla.
@@ -3570,6 +3840,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 
 ### T241 · Il rapporto aureo in HUD e pannelli — `da fare`
 - Pipeline: claude · stima 2% · approvato · priorità 4
+- Step: 33
 - Contesto: l'autore (04/11, `docs/pipeline/domande/T232.md`): nel gioco il rapporto aureo sì per la UI, senza spese grosse. La landing nuova non c'è ancora (T232 è a fine Fase II): la scala φ/Fibonacci nasce qui, e la landing la riprenderà.
 - Cosa fare: spaziature, proporzioni e tipografia di HUD e pannelli dalla scala φ/Fibonacci in `src/theme.css`. Solo stile: niente modelli, niente logica, nessun effetto sulle prestazioni.
 - Test: typecheck e suite intera con i loro turni.
@@ -3578,6 +3849,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 
 ### T242 · Il rapporto aureo nei prompt dello Scultore e dell'Artista — `da fare` (dipende da T156)
 - Pipeline: claude · stima 1% · approvato · priorità 33
+- Step: 33
 - Contesto: l'autore (04/11, `docs/pipeline/domande/T232.md`): nel mondo solo come indicazione per ciò che si genera da qui in poi. **I modelli esistenti non si toccano e non si rigenerano:** potrebbe costare caro.
 - Cosa fare: una riga di principio (proporzioni auree, spirali di Fibonacci dove ha senso: piante, conchiglie, scale, cupole) nel prompt dello Scultore e nella guida di stile dell'Artista, nel seme. Misura sul banco, con pochi tentativi, che non peggiori qualità e varianza.
 - Test: typecheck e suite intera con i loro turni, offline.
@@ -3586,6 +3858,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 
 ### T243 · La beta senza commissione — `da fare`
 - Pipeline: claude · stima 1% · approvato · priorità 3
+- Step: 34
 - Contesto: l'autore (04/11, da T236): in beta i crediti hanno un prezzo lineare e nessun interesse, perché chi gioca contribuisce allo sviluppo. Oggi `PLATFORM_FEE` è una costante di `src/kernel/credits.ts` (+1 %, ADR-0081). Lo sconto del 50 % non è qui: per ora si fa a mano (`docs/pipeline/domande/T243.md`).
 - Cosa fare: la commissione diventa configurazione del server, `QUINE_COMMISSIONE`, predefinita 0,01; 0 è ammesso, un valore non valido dà il predefinito. Arriva al processo del mondo (`worldEnv`, nessun segreto) e la decide solo il server: mai `universe.json`, Lua, il Concilio o il client. Tutti i punti che calcolano o mostrano il +1 % la seguono, sito e lobby compresi. Controlla che ricariche e consumi siano lineari, senza fasce. Aggiorna `AGENTS.md`, `#carte-crediti` e un ADR.
 - Test: commissione 0 e predefinita su consumi e spese comuni; valore non valido. Typecheck e suite intera con i loro turni, offline.
@@ -3594,6 +3867,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 
 ### T244 · La home per la beta: ritocchi, video, istruzioni — `da fare` (dipende da T234)
 - Pipeline: claude · stima 3% · approvato · browser · priorità 3
+- Step: 34
 - Contesto: l'autore (04/11): la home di oggi lo imbarazza («a metà tra un pitch per una startup e un blog per fumetti») e molti tester sono amici sviluppatori. Non è il launcher, che resta a T232: solo ritocchi. Un video in cui l'autore parla del progetto; le istruzioni della prima parte del test, senza corona; quando tutti passano alla seconda parte l'autore aggiunge le altre. I video li registra lui: **più di uno e non brevi** (lui che parla del progetto, il gameplay; autore, 04/11), serviti dal nostro sito.
 - Cosa fare: in `site/index.html`, `site/landing.ts`, `site/site.css` togli il tono da pitch e riduci i fumetti, tenendo programmi MarkovJunior e striscia «coming soon». Un elenco di video, con titolo e ordine in un file di configurazione: si vede solo ciò che ha il file. I file video non vanno nel repository né in `dist/`: stanno in una cartella del server detta da una variabile d'ambiente, e `npm run dev` li serve allo stesso modo. Oggi `server/production.ts` manda i file interi, senza richieste `Range`: un video lungo non si può saltare in avanti né riprendere. Aggiungile per questa cartella, con i tetti di `FRONT_RATES` e l'elenco delle rotte (regola 8h), e controlla quanta memoria costano più visioni insieme. Una pagina di istruzioni dal Markdown, con la stessa trasformazione del blog: mostra `docs/beta/guida.md` e, solo quando l'autore lo accende con una riga di configurazione, `docs/beta/la-corona.md`. Se i file non ci sono ancora la pagina non compare. Di' nella consegna come si aggiunge un video e come si accende la seconda parte.
 - Test: la seconda parte non finisce in `dist/` finché è spenta, testo compreso. Typecheck, build e suite intera con i loro turni.
@@ -3602,6 +3876,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 
 ### T245 · Gli NPC agiscono davvero: mestieri in sotto-compiti e scopi comuni, il progetto — `da fare` (dipende da T183)
 - Pipeline: fable · stima 5% · approvato · priorità 20
+- Step: 32
 - Contesto: l'autore (04/11): vuole che l'intero comportamento degli NPC sia gestito con l'IA, non solo le chat. Oggi ci sono routine (`RoutineStep`, `meta`) e attività che si vedono (`ACTIVITIES`, `inferActivity` in `src/kernel/society.ts`, ADR-0024). Suo esempio: «lavora al campo di grano» scomposto in tutti i sotto-compiti e poi attuato davvero, con **codice Lua riutilizzabile, non l'IA che ogni volta dice cosa fare**. Se l'Attore è acceso (ADR-0116) può essere lui a gestire le azioni dell'NPC. Narratore e attori devono poter collaborare a uno scopo comune: in una sessione lunga mesi costruiscono un edificio, facendo qualcosa di visivamente coerente per arrivarci. Il kernel deve permetterlo. Nasce da T157, T183: `dossier T157`, `dossier T183`.
 - Cosa fare: **solo il progetto**, in `docs/design/comportamento-npc.md`, nessun codice del gioco. (1) Da mestiere a sotto-compiti ad azioni nel mondo: chi scompone, dove sta il risultato (dati dell'universo, riusati da ogni individuo con quel mestiere), quali comportamenti Lua servono e quali primitive del `Host`. (2) Chi decide cosa: kernel, Lua, Narratore, Attore; a Attore spento il gioco deve reggere uguale. (3) Lo scopo comune: come nasce, dove vive per mesi, come se lo dividono, cosa succede se chi lavora muore, se manca il materiale, se il viandante interviene; come un edificio cresce a vista per passi coerenti, in rapporto ai programmi delle strutture (`dossier T156`, `lab/banco/pattern.md`). (4) I costi, con i numeri: chiamate per NPC al giorno di gioco, per universo e per mese, chi paga (regola 8i), il coefficiente che le limita, il «Low Detail». (5) Luoghi non caricati e server dei mondi di molti (regola 8g): cosa si simula quando nessuno guarda. (6) Cosa entra in un universo esistente senza wipe, dalle misure di T183, e cosa va nel kernel 0.9.0. (7) Una spezzatura in task, con stime. Guarda cosa hanno imparato Generative Agents (Smallville) e Project Sid, con le fonti.
 - **Gli esempi non sono il perimetro (autore, 04/11):** gli scenari a lungo termine sono di tipo diverso e il progetto non si limita a quelli citati, mestieri ed edifici compresi. Altri suoi esempi: in una sessione lunga mesi il viandante mette su famiglia con un NPC e ha un vicinato di NPC; nell'universo moderno ha un lavoro d'ufficio con dei colleghi. Ognuno ha una storia, un carattere, una personalità: Giovanni il collega può essere di destra e complottista. Quindi il documento risponde anche a questo: (8) cosa regge in generale i legami e le vite lunghe (famiglia, vicinato, colleghi), oltre ai lavori; come la personalità, anche con opinioni nette, sta nei dati dell'individuo, resta coerente per mesi e cambia ciò che fa, non solo ciò che dice; come ogni NPC ha la sua storia senza che il costo cresca oltre il punto (4).
@@ -3612,6 +3887,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 
 ### T246 · La chat dell'orchestratore: il titolo di un task al passaggio del mouse — `fatto` (`6ef2eaf`)
 - Pipeline: claude · stima 1% · approvato · browser · priorità 2
+- Step: 28
 - Contesto: l'autore (04/11): nella chat dell'orchestratore della pagina web vuole che i riferimenti ai task (`T93`, `T89b`) siano riconosciuti e che al passaggio del mouse appaia il titolo del task, per capire di cosa si parla senza andarlo a cercare. La chat si disegna in `renderChatAndEvents` di `tools/pipeline/web.mjs`, col Markdown di `tools/pipeline/markdown.mjs`, e si ridisegna a ogni aggiornamento della pagina. Nasce da T69: `dossier T69`.
 - Cosa fare: nei messaggi della chat (autore, orchestratore, pipeline, in coda) ogni riferimento a un task esistente, anche dentro il `codice` in linea, diventa un elemento con il titolo del task come tooltip e una sottolineatura leggera che dica che lo si può passare col mouse. I titoli vengono dai dati che la pagina ha già, o da un campo in più dell'API di stato se mancano. Non si tocca ciò che è già HTML: un `T12` dentro un attributo o un link non deve rompere il markup; il testo arriva da fuori, quindi il titolo va sottoposto a escape. Un numero senza task resta testo semplice. La vista «Sorgente» resta il testo com'è scritto. Il riconoscimento è una funzione pura, provata da sola. Il clic che apre il task è facoltativo: solo se la pagina ha già la modale pronta e costa poche righe.
 - Test: la funzione di riconoscimento con task esistente, inesistente, suffisso di lettera, dentro una parola (`ST12`), dentro il codice in linea, titolo con `"` e `<`. Typecheck e test della pipeline con i loro turni.
@@ -3621,6 +3897,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 
 ### T247 · Tutto il consumo si regola in lobby, prima di giocare — `da fare`
 - Pipeline: claude · stima 4% · approvato · browser · priorità 10
+- Step: 34
 - Contesto: l'autore (04/11): «il consumo deve essere tutto tunabile in lobby pre game». Oggi la lobby (`src/ui/lobby.ts`, ADR-0086) al master fa regolare solo l'Attore (ADR-0116): modello del Concilio, modelli dello Scultore, coefficienti, «Low Detail» e minimi sono solo mostrati. In `CENSUS` (`src/kernel/coefficients.ts`, ADR-0085) molti compiti sono `non regolabile`, come `chunk.plan`, `npc.reply`, `text.examine`, `action.judge` e la Genesi. Il grado di realismo degli NPC progettato da T245 sarà una manopola in più di questa lobby. Nasce da T45b, T45d, T157: `dossier T45b`, `dossier T45d`, `dossier T157`.
 - Cosa fare: (1) in lobby il master regola ciò che già esiste: preset, ogni coefficiente, ogni modello, budget e minimi, con la stima oraria che segue i valori; gli altri li vedono e non li toccano, e lo rifiuta il server, come per l'Attore (regole 8b e 8f). (2) Ogni riga `non regolabile` di `CENSUS` riceve una manopola, con ciò che il gioco fa quando è al minimo (testo locale, risposta breve, niente chiamata). Non si tolgono i modi di giocare senza dirlo: a zero il gioco regge e il viandante capisce cosa succede, senza meta-gioco nel mondo (regola 0). Una riga che non può averla (per esempio una della Genesi, se la lobby compare a Genesi finita) va in `docs/pipeline/domande/T247.md` con il motivo e una proposta. (3) Un test impedisce che un compito nuovo entri in `CENSUS` senza una manopola. (4) Le impostazioni si fissano entrando in partita. Scrivi nell'esito quando compare la lobby di un universo già avviato e se c'è un equivalente per chi gioca da solo.
 - **Deciso dall'autore (04/11): tutte le manopole si bloccano a partita in corso.** Oggi il master può cambiare `ai` anche durante la partita (`setAi`, l'editor): questa possibilità va tolta, e il blocco lo fa rispettare il server e il kernel, non solo l'interfaccia. Definisci cosa vuol dire «partita in corso» e quando il master può tornare a regolare (per esempio a mondo fermo), per la partita di molti e per chi gioca da solo, e scrivilo nell'ADR. Il tetto di spesa del singolo viandante e le scelte a crediti esauriti (ricarica, offline, abbandona) sono suoi, non manopole del master: restano.

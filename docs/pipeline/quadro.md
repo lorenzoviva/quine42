@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 04/11/2026, epoca 246. Crediti: vedi `stato`.
+Aggiornato il 04/11/2026, epoca 247. Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -34,18 +34,19 @@ Aggiornato il 04/11/2026, epoca 246. Crediti: vedi `stato`.
 - **T229 e T158 integrati** (`d8909a5`): l'Attore nella corona (ADR-0116), dieci al tavolo, `guest` assorbito in `Building.teams`. Verificato nel browser. Non provati: Attore acceso con una battuta vera, teletrasporti con `E` nel browser. Scoperti, nessun task: `Archive.go` senza file manda lo Scultore in `buildings[0]`; `docs/glossario-censimento.md` rigenerato porta differenze estranee.
 - **T230 integrato** (ADR-0128): `docs/fasi.md`, quattro fasi e 38 step, glossario. Suite intera non rilanciata dopo il secondo commit, solo documenti. Scoperto: due blocchi `T59` nel backlog, da tenere presente per T231. **Chiesto all'autore:** approvare il criterio di fine della Fase I (proposta, in `docs/fasi.md`) e la fase III proposta per lo step 37. Attenzione: il punto 2 del criterio chiede T45f, che l'autore ha messo in attesa fino alla fine della Fase I: circolare, detto all'autore.
 - **T246 integrato:** tooltip e clic sui task nella chat web; si vede al riavvio del processo; la finestrina del tooltip nativo non è stata vista a occhio.
+- **T231 integrato** (`cf576f3`): il tag `step` (`pipeline.mjs step`), in `indice`, `dossier` e pagina web. `step --da-tabella` lanciato sul backlog vero: 282 task in tabella, 277 righe `- Step:` aggiunte, nient'altro cambiato. Pagina web provata solo col test. La priorità 0 scavalca la finestra delle 5 ore: `step <n> --priorita` non la usa.
 - ADR nuovi dallo **0129**. Prossimo task: T248.
 
 ## Pronti e priorità
 
-1. **In coda, approvati e pronti, partono da soli:** T231 T234 T238 T243 T241 T247 T89b T89e T183 T152; T244 bloccato dalle sue dipendenze.
+1. **In coda, approvati e pronti, partono da soli:** T234 (in corso) T238 T243 T241 T247 T89b T89e T183 T152; T244 bloccato dalle sue dipendenze.
 4. **T182 → T156** (strutture procedurali). **T182 fermo in attesa dell'autore al giro 3 di 4, non integrato:** soglia NO. Misure e varianza 10/12 entro due richieste (7 alla prima), foto 0/10 per giudizio dell'agente, locanda esclusa; 1,15 $ a modello, 30,59 $ in tutto a listino. **Chieste le 3 decisioni di `docs/pipeline/domande/T182.md` (sul branch `task/T182`):** cantina a due taglie, interni contro la misura `stanze`, se la ricchezza basta. Bloccati finché non risponde: T156, poi T207, T88, T153, T242.
 4b. **Generazione differita** (richiesta dell'autore, 03/11): **solo dopo T156, il prompt nuovo dello Scultore** (l'autore: non sprecare crediti). T207 (generatore senza browser, solo abbonamenti, aspetta T156) → T88 (la pipeline lo accende coi crediti che avanzano) → T153 (legge e prova i tre universi). L'elenco `generazione` di `config.json` c'è già: nessuno lo legge finché T88 non lo usa; la sua forma è mia, T88 può adattarla.
 5. T89d resta bloccato.
 
 ## Attese dall'autore
 
-- **To-do del 04/11 pianificato, T230-T242:** approvati T230, T231 (fasi, step, tag), T232, T234 (landing launcher, blog), T237 (guida beta), T238 (registro), T241, T242 (aureo in UI e prompt; **i modelli esistenti non si toccano**). T236 chiuso (2 € + 3 € a mano, altri 5 € agli assidui, 4 universi condivisi; da mettere nel deploy: `QUINE_TETTO_RICARICHE`, `QUINE_UNIVERSI_PER_ACCOUNT`). T243 approvato (commissione configurabile). T232 e T233 a fine Fase II (autore, 04/11), T234 e T241 staccati. T244: ritocchi della home, più video lunghi dell'autore sul nostro server (con `Range`), istruzioni a due parti. **T245 (Fable, dipende da T183): il progetto del comportamento degli NPC, richiesta dell'autore del 04/11:** mestieri in sotto-compiti con Lua riutilizzabile, Attore che agisce, cantieri lunghi mesi, e vite lunghe di ogni tipo (famiglia, vicinato, colleghi con storia e personalità); gli esempi non sono il perimetro; programmi invece dell'IA dove è possibile, grado di realismo e spesa scelto in lobby, solo dal master e fisso a partita in corso. Fase da decidere col documento. Lo sconto: pagamento a mano e in dollari; come dichiarare i soldi lo gestisce l'autore (`domande/T243.md` chiusa). T235 riparte a fine Fase II; T239 (lingue) in Fase III, ultima operazione. **T240 (piano di lancio, Fable): dal reset del 05/11 alle 15:59 UTC lo riporto a `da fare` io.** Con T231 integrato: `step --da-tabella`. L'autore porta in chat i feedback dei giocatori; su richiesta lo aiuto con i messaggi WhatsApp della beta.
+- **To-do del 04/11 pianificato, T230-T242:** approvati T230, T231 (fasi, step, tag), T232, T234 (landing launcher, blog), T237 (guida beta), T238 (registro), T241, T242 (aureo in UI e prompt; **i modelli esistenti non si toccano**). T236 chiuso (2 € + 3 € a mano, altri 5 € agli assidui, 4 universi condivisi; da mettere nel deploy: `QUINE_TETTO_RICARICHE`, `QUINE_UNIVERSI_PER_ACCOUNT`). T243 approvato (commissione configurabile). T232 e T233 a fine Fase II (autore, 04/11), T234 e T241 staccati. T244: ritocchi della home, più video lunghi dell'autore sul nostro server (con `Range`), istruzioni a due parti. **T245 (Fable, dipende da T183): il progetto del comportamento degli NPC, richiesta dell'autore del 04/11:** mestieri in sotto-compiti con Lua riutilizzabile, Attore che agisce, cantieri lunghi mesi, e vite lunghe di ogni tipo (famiglia, vicinato, colleghi con storia e personalità); gli esempi non sono il perimetro; programmi invece dell'IA dove è possibile, grado di realismo e spesa scelto in lobby, solo dal master e fisso a partita in corso. Fase da decidere col documento. Lo sconto: pagamento a mano e in dollari; come dichiarare i soldi lo gestisce l'autore (`domande/T243.md` chiusa). T235 riparte a fine Fase II; T239 (lingue) in Fase III, ultima operazione. **T240 (piano di lancio, Fable): dal reset del 05/11 alle 15:59 UTC lo riporto a `da fare` io.** L'autore porta in chat i feedback dei giocatori; su richiesta lo aiuto con i messaggi WhatsApp della beta.
 - **T247 (tutto il consumo regolabile in lobby, richiesta dell'autore del 04/11), approvato. Deciso dall'autore:** tutte le manopole bloccate a partita in corso, `setAi` in partita si toglie; il tetto del viandante e le scelte a crediti esauriti restano.
 - **Domande nei file (04/11): nessuna da chiedere ora. T45f (progetto, hosting, regione) aspetta la fine della Fase I, T93 (Managed Payments) la Fase IV: decisione dell'autore; le altre hanno `Stato: chiusa` in testa. T208 integrato: il conteggio giusto della pagina web si vede dopo il riavvio del processo, non provato nel browser.**
 - **T176, le due proposte sul sorvegliante:** approvate da me nell'autonomia, sono T209, integrato; T45f è `in attesa` fino alla fine della Fase I. T210 integrato: il `heap out of memory` è il mondo di prova di V-007, che muore apposta; non nasconde file né test rossi. Da dirgli al ritorno.
@@ -71,5 +72,5 @@ Aggiornato il 04/11/2026, epoca 246. Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **243:** T236 chiuso, T243-T245 creati; T93 chiarito (solo Stripe), T232 a fine Fase II.
-- **242:** T229 e T158 integrati; Attore e Musicista nella corona.
+- **247:** T231 integrato, tag `step` messi sul backlog.
+- **246:** T230 e T246 integrati; T182 fermo in attesa dell'autore.
