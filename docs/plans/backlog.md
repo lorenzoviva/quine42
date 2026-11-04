@@ -3070,7 +3070,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Quando è fatto: commit su `task/T258`; ADR se la lettera è un contratto nuovo dei programmi, voce nel glossario. Sicurezza: nessuna superficie nuova.
 
 ### T259 · Lo Scenografo: progetto e misura degli interni separati dall'edificio — `da fare`
-- Pipeline: claude · stima 5% · priorità 8
+- Pipeline: claude · stima 5% · approvato · priorità 8
 - Step: 30
 - Contesto: decisione dell'autore del 04/11 (`domande/T182.md`, domanda 2, opzione C): interni, decorazioni e oggetti di scena non li scrive lo Scultore ma un agente a parte, come il passaggio dal Cartografo allo Scultore. L'autore si aspetta di risparmiare rispetto a generare tutto insieme: va misurato. T182 dice che accorciare il prompt non ha abbassato il costo (1,15 $ contro 1,22 $: quasi tutto l'output è ragionamento), quindi il risparmio non è scontato. Nasce da T182 (`dossier T182`).
 - Cosa fare, senza toccare il gioco: `docs/design/scenografo.md`. Come riceve l'edificio (programma, semi, piani, stanze misurate); come resta vera la regola «un programma per tipo, le istanze sono semi» su un edificio che cambia a ogni seme, confrontando un programma che cresce sulla griglia già fatta con la scelta di mobili esistenti come dati; quando parte (al primo ingresso o nella generazione differita); cosa si vede prima; quale manopola in `CENSUS`; chi paga. Sul banco, poche richieste: un edificio di T182 con il suo interno a parte contro lo stesso edificio con l'interno insieme, con token e costo; anche su un modello che costi meno.
@@ -4018,13 +4018,14 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: non serve.
 - Quando è fatto: commit su `task/T255`. Sicurezza: nessuna superficie nuova.
 
-### T256 · Un task tornato `da fare` riparte da capo — `da fare`
+### T256 · Un task tornato `da fare` riparte da capo — `fatto` (`e2a2528`)
 - Pipeline: claude · stima 3% · approvato · priorità 5
 - Contesto: richiesta dell'autore (chat del 04/11/2026). Nasce da T89e (`dossier T89e`). Una voce di `.pipeline/esecuzioni.json` con `integrato` resta anche se il blocco del task torna `da fare`. Il difetto ha due facce, in `tools/pipeline/pipeline.mjs`: `plan` lo mette tra i pronti, ma `execute` lancia solo con `!runs[t.id]`, quindi il task resta fermo in silenzio; `resumeTasks` (`riprendi`) riapre la vecchia conversazione nel vecchio worktree, che `integra` ha tolto, e l'esecuzione muore con codice -1 e log vuoto, finendo come «fallito». Oggi l'unica via è togliere la voce a mano.
 - Cosa fare: una voce già integrata non vale più per un task non chiuso: il task si lancia da capo, con worktree, branch e conversazione nuovi, senza che nessuno intervenga, e `riprendi` fa lo stesso. Anche fuori da questo caso, `riprendi` su una voce il cui worktree non esiste più non deve riaprire la conversazione: riparte da capo e lo dice nel messaggio. Non perdere ciò che `dossier` e `traccia` dicono del tentativo vecchio, se costa poco (per esempio i campi essenziali in una lista `precedenti` della voce nuova). Un task `fatto` non cambia: la sua voce resta com'è. Una voce finita e non integrata resta `daIntegrare`.
 - Test: casi nuovi in `tests/pipeline.test.ts`: voce integrata e blocco `da fare` (viene lanciato, voce nuova con `tentativi` da capo); `riprendi` sulla stessa voce; `riprendi` con worktree assente; voce integrata e blocco `fatto` (nulla cambia); voce finita non integrata (resta da integrare). Suite intera e typecheck con i loro turni.
 - Browser: non serve.
 - Quando è fatto: commit su `task/T256`; `docs/pipeline/README.md` aggiornato se descrive `riprendi`. Sicurezza: nessuna superficie nuova.
+- Esito: una voce integrata di un task non chiuso non vale più: `esegui` lo rilancia con worktree, branch e conversazione nuovi e `tentativi` da capo; `riprendi` su voce integrata, senza worktree o senza conversazione la porta allo stato `da capo` e lo dice; tentativi vecchi in `precedenti`, mostrati da `dossier` e `traccia`; `fatto` e voci non integrate invariati; cambiato rispetto al previsto: log con nome proprio (`T1.d1.1.log`) per non sovrascrivere i vecchi, `taskWorktree` fa `git worktree prune` se la cartella è sparita; da sapere: integrare un `fallito` o un esito senza riga lascia il blocco `da fare`, quindi ora il task si rilancia da solo (scritto nel README), e con worktree sparito e branch ancora presente riparte da quel branch; non provato: una CLI reale (test su repository git veri con CLI finta); suite 2060 passati e 1 saltato, typecheck verde. Sicurezza: nessuna superficie nuova.
 
 ### T257 · La scheda dei modelli: correggere attribuzioni e misure — `da fare`
 - Pipeline: argon · stima 5% · approvato · priorità 7
