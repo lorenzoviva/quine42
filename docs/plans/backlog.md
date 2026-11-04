@@ -4209,3 +4209,9 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: non serve.
 - Quando è fatto: commit su `task/T268` col solo `docs/pipeline/modelli.md`; nell'esito i cali misurati (settimana e 5h) per ciascun modello. Sicurezza: nessuna superficie nuova.
 - Esito: provati e misurati sul campo i tre modelli esterni di `agy` sul contatore `Claude and GPT models` (`claude-opus-5-5-high`: settimana -4 pt [97%→93%], 5h -8 pt [100%→92%], rapporto 2,00, 23,61 s; `claude-sonnet-5-5-high`: settimana -2 pt [93%→91%], 5h -4 pt [92%→88%], rapporto 2,00, 17,01 s; `gpt-oss-120b-medium`: settimana 0 pt [91%→91%], 5h 0 pt [88%→88%], rapporto 0/0, 25,47 s) e aggiornate le sezioni 1.2, 3.1 e 4.1 di `docs/pipeline/modelli.md`; nulla manca.
+
+### T269 · Cantiere 1: il catalogo di 24 strutture procedurali e le cantine veloci — `in corso`
+- Step: —
+- Contesto: richiesta dell'autore (04/11, sessione cloud): 24 programmi MarkovJunior di strutture (`classe` grande), 6 per ambientazione (fantasy, steampunk, moderno, futuristico), almeno 12 con la cantina (`suolo="E"`, ADR-0135), ognuno validato con `lab/banco/misure.ts` e `lab/banco/varianza.ts` su 5 semi e 2 taglie (Grande, Enorme), sotto 4500 ms a Enorme. Il riferimento `lab/banco/riferimento/cantina.xml` impiegava 7 s a Enorme (`docs/pipeline/domande/T258.md`).
+- Cosa fare: in `lab/banco/catalogo-cloud/` gli XML, un rapporto per struttura (misure alle due taglie, varianza, traccia del seme 1), l'indice `README.md`; nessun modello chiamato.
+- Quando è fatto: le 24 strutture passano; commit ogni 4. Sicurezza: nessuna superficie nuova (solo `lab/`).
