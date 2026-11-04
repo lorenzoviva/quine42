@@ -4041,25 +4041,25 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Quando è fatto: commit su `task/T257` col solo `docs/pipeline/modelli.md`; nell'esito cosa cambia nella proposta. Sicurezza: nessuna superficie nuova.
 - Esito: aggiornato `docs/pipeline/modelli.md` correggendo l'attribuzione di T180/T181/T182 e del modello del banco (`claude-opus-5-5`), ricalcolando i consumi sulle 213 righe di `consumi.jsonl` (inclusi T181, T182 e T254), correggendo il fattore di Argon da 8,13× a 3,92× su 4 task (1,10× in T254, senza doppio conteggio T68b+T69), riallineando OSWorld 2.1 (Opus 81,8 % vs Sonnet 80,1 %) e tutti i numeri del PDF `gemini_4_argon_model_evaluation.pdf`, e aggiornando la proposta di assegnazione con indicazione esplicita delle voci `mai provato da noi`; nulla manca.
 
-### T260 · Le regole per cambiare il kernel senza wipe — `da fare`
+### T260 · Le regole per cambiare il kernel senza wipe — `in attesa`
 - Pipeline: claude · stima 6% · approvato · priorità 11
 - Step: 32
-- Contesto: approvate dall'autore il 04/11 (D10). Nasce da T183 (`dossier T183`): `docs/design/espressivita.md`, «Divisione delle primitive» e «Il costo di una primitiva aggiunta».
-- Cosa fare: le sette regole di quel documento in un ADR e in `AGENTS.md`. Ciò che non è solo scritto: (regola 2) un test di non regressione tiene ferme le caselle di un luogo campione; (regola 7) `universe.json → kernel` dichiara la versione che serve, e un universo più nuovo del kernel lo dice invece di rovinarsi; (regola 6, primitiva 6) un effetto nuovo vive nel kernel, oppure un `tipo` senza chi lo applica dà un guasto chiaro: oggi non accade nulla, senza guasto (`TRAP: in a universe that rewrote`).
+- Contesto: in attesa di D32 (04/11): l'autore ha chiarito che una nuova versione del kernel non deve essere limitata dalla retrocompatibilità con gli universi precedenti (sul nuovo kernel si inizia un nuovo universo, o si tiene il vecchio kernel sul suo server / futura migrazione IA a pagamento). Nasce da T183 (`dossier T183`).
+- Cosa fare: da riscrivere dopo D32 (tenere solo `universe.json → kernel` con controllo di versione, guasto chiaro su effetto senza chi lo applica, e ADR/regola che lega ogni universo alla sua versione del kernel senza vincolare i kernel futuri).
 - Test: i test `TRAP` di `tests/espressivita/` che questo task chiude cambiano di conseguenza. Suite intera e typecheck con i loro turni.
 - Browser: non serve.
 - Quando è fatto: commit su `task/T260`; ADR, `AGENTS.md`. Sicurezza: scrivi l'esito, tocca il validatore o il caricamento di un universo.
 
-### T261 · I luoghi salvati come caselle — `da fare`
+### T261 · I luoghi salvati come caselle — `in attesa`
 - Pipeline: claude · stima 8% · approvato · priorità 10
 - Step: 32
-- Contesto: primitiva 1 di `docs/design/espressivita.md`, approvata dall'autore il 04/11 (D10). È l'unica vera scadenza: deve uscire prima del primo cambio di caso o di MarkovJunior, altrimenti un universo vecchio non ha più modo di sapere com'era. Misura di T183: con `hash32` cambiato, l'8,9 % di 5184 caselle è diverso sotto gli stessi piani. Nasce da T183 (`dossier T183`).
-- Cosa fare: `plan.tiles`, scritto la prima volta che un luogo si apre; un piano che non lo ha si legge come oggi e lo riceve all'apertura. Verifica se serve lo stesso per il rilievo e dillo nell'esito. Misura quanto pesano su disco un luogo e `valmora`, e se il formato in più pesa sui client (`playerFiles`, `publicFiles`: un campo nuovo non esce finché non lo si nomina).
+- Contesto: in attesa di D32 (04/11): `plan.tiles` serviva solo a congelare le caselle contro cambi di caso/MJ/layout tra versioni diverse del kernel, che l'autore ha escluso (e bloccare le caselle impedirebbe evoluzioni come l'immersione in acqua). Dentro la stessa versione del kernel `(piano, seme) + plan.edits` è già deterministico. Nasce da T183 (`dossier T183`).
+- Cosa fare: proposto l'annullamento in D32.
 - Test: con `hash32` cambiato nel test, un luogo già aperto resta identico; un universo di prima si apre come oggi. Suite intera e typecheck con i loro turni.
 - Browser: sì, `?skip&offline`: un luogo riaperto è uguale, nessun errore in console.
 - Quando è fatto: commit su `task/T261`; ADR, sezione in `docs/architettura-dettagli.md`; nell'esito byte in più per luogo. Sicurezza: scrivi l'esito.
 
-### T262 · Il salvataggio che non si ferma — `da fare` (dipende da T261)
+### T262 · Il salvataggio che non si ferma — `da fare`
 - Pipeline: claude · stima 6% · approvato · priorità 12
 - Step: 32
 - Contesto: decisione dell'autore del 04/11 (D9): un guasto a runtime di un modulo invalida il codice, non i dati della partita. Oggi un guasto qualsiasi, anche di un giocatore, ferma tutti i salvataggi: in una vita di mesi è la perdita più probabile. Nasce da T183 (`dossier T183`): `docs/design/espressivita.md`, primitiva 3 e `TRAP: every module that calls it`.
