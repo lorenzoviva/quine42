@@ -32,7 +32,7 @@ fa verificare nel browser e integra; non lavora sul codice, delega. Gli eventi d
 turno e l'altro, anche se non scrivi nulla.
 
 **L'interfaccia web** (`tools/pipeline/web.mjs`) legge e scrive gli stessi file e comandi della pipeline, senza una seconda fonte di verità:
-1. **Chat e Orchestra**: chat con l'orchestratore (`.pipeline/orchestra/chat.jsonl` + `coda.json`), eventi (`eventi.jsonl`), il quadro (`quadro.md`) e il diario (`orchestrazione.md`).
+1. **Chat e Orchestra**: chat con l'orchestratore (`.pipeline/orchestra/chat.jsonl` + `coda.json`), eventi (`eventi.jsonl`), il quadro (`quadro.md`) e il diario (`orchestrazione.md`). Nei messaggi della chat un riferimento a un task esistente (`T93`) è sottolineato a puntini: col mouse sopra si legge il titolo, col clic si apre il dettaglio.
 2. **Lavagna e Tabella**: lavagna Kanban a colonne con le code di `PIANO.md` (In corso, Finiti da integrare, Pronti, Da approvare / stimare, Bloccati, In attesa) e tabella filtrabile di tutti i task del backlog.
 3. **Dettaglio di un task**: dossier completo (`dossier`), log dell'esecuzione (`log/<Txx>.<tentativo>.log`) e **conversazione in diretta** dell'agente che sta lavorando (letta dal `.jsonl` di Claude o da `transcript.jsonl` di Antigravity).
 4. **Azioni dirette**: approvare (`approva`), assegnare provider/stima/priorità (`assegna`), interrompere (`interrompi`), riprendere (`riprendi`) e integrare (`integra`).
