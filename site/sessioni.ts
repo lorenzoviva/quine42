@@ -15,6 +15,7 @@ import { bundledFiles } from '../src/kernel/bundle';
 import { SEED_FILE, seedHashes, WANDERER_HEADER } from '../src/kernel/universes';
 import { SOLO } from '../src/kernel/wanderers';
 import { accountConfig, signIn } from '../src/session/login';
+import { escapeHtml } from './shared';
 
 export interface ActiveSessionRecord {
   name: string;
@@ -35,16 +36,6 @@ export interface UniverseView {
   hourlyCost: number;
   minCap: number;
   description: string;
-}
-
-/** Escapes special HTML characters to prevent XSS. */
-export function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
 }
 
 /** Fetches active sessions from /api/session. */

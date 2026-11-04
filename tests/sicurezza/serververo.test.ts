@@ -201,7 +201,7 @@ describe('con gli account', () => {
 
   describe('la build vera', () => {
     it('V-014 la pagina del gioco e quelle del sito si aprono, e ciò che chiedono c’è', async () => {
-      for (const page of ['/?universo=prova', '/site/', '/site/sessioni.html', '/site/profilo.html', '/site/pagamenti.html', '/site/carte.html']) {
+      for (const page of ['/?universo=prova', '/site/', '/site/sessioni.html', '/site/profilo.html', '/site/pagamenti.html', '/site/carte.html', '/site/notizie.html']) {
         const r = await ask(page);
         expect(r.status, page).toBe(200);
         expect(r.headers['content-type'], page).toMatch(/text\/html/);

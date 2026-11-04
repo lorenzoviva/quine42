@@ -133,5 +133,6 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0126](0126-il-suono-nel-gioco-e-del-client.md) | Il suono nel gioco è del client: un direttore puro, un worker con la cache, nessun messaggio; ciò che fallisce tace |
 | [0127](0127-il-musicista-e-una-stanza-con-piu-squadre.md) | Il Musicista sta nella casa dell'Artista: una stanza ha un elenco di squadre, e il mondo chiede la musica che gli manca |
 | [0128](0128-fasi-e-step.md) | Lo sviluppo si divide in quattro fasi e in step, cioè obiettivi condivisi tra task; la tabella è in `docs/fasi.md` |
+| [0129](0129-le-notizie-sono-file-nella-build.md) | Le notizie del sito sono file Markdown raccolti alla build: niente rotte né database, tutto il testo esce escapato |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.

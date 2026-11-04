@@ -70,6 +70,7 @@ export default defineConfig(({ mode }) => {
           site: path.resolve('site/index.html'),
           sessioni: path.resolve('site/sessioni.html'),
           carte: path.resolve('site/carte.html'),
+          notizie: path.resolve('site/notizie.html'),
           siteProfilo: path.resolve('site/profilo.html'),
           sitePagamenti: path.resolve('site/pagamenti.html'),
         },

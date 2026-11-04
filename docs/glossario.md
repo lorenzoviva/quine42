@@ -853,6 +853,12 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Dove vive**: `src/ui/lobby.ts`
 - **Da non usare**: `sala d'attesa` (nei documenti)
 
+### Notizia
+- **Inglese**: `NewsItem`, `parseNews`, `loadNews`
+- **Definizione**: un file Markdown con un'intestazione in `site/notizie/`, che alla build diventa una voce del sito: aggiornamenti del kernel, universi nuovi, sessioni di generazione, sondaggi, server.
+- **Dove vive**: `site/notizie-testo.ts`, `site/notizie/`
+- **Da non usare**: nessuno
+
 ## Il kernel
 
 ### Kernel

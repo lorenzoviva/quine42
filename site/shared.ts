@@ -34,6 +34,16 @@ export function playLink(universo: string, view: { id: string; account: string }
   return `../index.html?${q}`;
 }
 
+/** Escapes special HTML characters to prevent XSS. */
+export function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 export const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 
 export function alertBox(kind: 'success' | 'warning' | 'error' | 'info', badge: string, text: string): void {
