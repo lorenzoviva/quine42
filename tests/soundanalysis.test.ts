@@ -44,8 +44,8 @@ describe('the thresholds, on the presets', () => {
 });
 
 describe('the thresholds, on the programs of the game (T228)', () => {
-  it('are the seven pieces and the nine effects of the seed', () => {
-    expect(inGame.map((p) => p.suono!.uso).sort()).toEqual([...new Array(9).fill('effetto'), ...new Array(7).fill('musica')]);
+  it('are the pieces and the effects of the seed: seven and nine of T224, six, nineteen and the Death made again of Claude Cloud (T273)', () => {
+    expect(inGame.map((p) => p.suono!.uso).sort()).toEqual([...new Array(9 + 19 + 1).fill('effetto'), ...new Array(7 + 6).fill('musica')]);
   });
 
   it.each(inGame.map((p) => [p.id, p.xml] as const))('%s passes, on the default seeds and on others, unless the author keeps it as it is', (id, xml) => {

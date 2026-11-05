@@ -202,7 +202,7 @@
  "grande": {
   "classe": "grande",
   "nome": "Casa a graticcio",
-  "autore": "procedurale, a mano (Claude Cloud, T270)"
+  "autore": "a mano (Claude Code)"
  },
  "mobile": {
   "classe": "mobile",
@@ -352,7 +352,7 @@
  "suono-effetto-morte": {
   "classe": "suono",
   "nome": "Morte",
-  "autore": "Claude Cloud, colonna sonora ed effetti (T271): la Morte rifatta",
+  "autore": "a mano (T224)",
   "suono": {
    "uso": "effetto",
    "effetti": [
@@ -876,6 +876,17 @@
   "classe": "monumento",
   "nome": "La costola dello scafo antico",
   "autore": "Claude Cloud (T272, come sidera-relitto)"
+ },
+ "suono-effetto-morte-v2": {
+  "classe": "suono",
+  "nome": "Morte (rifatta, da ascoltare)",
+  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "morte"
+   ]
+  }
  },
  "struttura-bar-orbitale": {
   "classe": "grande",

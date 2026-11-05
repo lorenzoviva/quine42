@@ -8,7 +8,7 @@
 // of 8 or more). Aurora has no maps of its own: the places around the start are planned once here by the offline Cartographer and kept in
 // lab/banco/universi-cloud/aurora/maps/. Running it again gives the same files.
 
-import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { Kernel } from '../../../../src/kernel/kernel';
 import { memoryStore } from '../../../../src/kernel/repo';
@@ -71,9 +71,6 @@ function registra(u: Universo): string[] {
   for (const m of sounds) put(m.id, xmlDi(m), m.voce);
   fatti.push(`${sounds.length} suoni`);
   if (u.nome === 'sidera') fatti.push(...sidera(dir, index));
-  // What an earlier version of this script wrote beside the seed's Death.
-  delete index['suono-effetto-morte-v2'];
-  rmSync(join(dir, 'suono-effetto-morte-v2.xml'), { force: true });
   const keys = Object.keys(index);
   scriviIndice(indexPath, Object.fromEntries(keys.map((k) => [k, index[k]])), indentDi(text));
   return fatti;

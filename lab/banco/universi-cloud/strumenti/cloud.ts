@@ -123,10 +123,20 @@ export interface Modello {
   voce: Record<string, unknown>;
 }
 
-/** The 24 seed models rewritten as procedural programs (T270): the same ids, the same classes, the seed's own names. */
+/**
+ * Seed models that stay as they are. `grande`, the common house of every world without a `commonHouse` (aurora): what the kernel puts indoors
+ * (`placeInside`) goes to points of the floor that `interiorPoints` finds clear and that `free` may still find blocked, on the old house as on
+ * the new one (measured: 21 of 32 points of the old one, all 15 of the new one, at yaw 0; INTEGRAZIONE.md). tests/lots.test.ts passed on the
+ * old one because its four draws fell on clear points: the new one would make it fail, the defect is the kernel's and is left to a task of its own.
+ */
+export const SEME_TENUTI = new Set(['grande']);
+
+/** The seed models rewritten as procedural programs (T270), but those the seed keeps: the same ids, the same classes, the seed's own names. */
 export function semeProcedurale(): Modello[] {
   const index = JSON.parse(readFileSync(join(LAB, 'seme-procedurale/index.json'), 'utf8')) as Record<string, { classe: string; nome: string }>;
-  return Object.entries(index).map(([id, v]) => ({ id, file: `seme-procedurale/${id}.xml`, voce: { classe: v.classe, nome: v.nome } }));
+  return Object.entries(index)
+    .filter(([id]) => !SEME_TENUTI.has(id))
+    .map(([id, v]) => ({ id, file: `seme-procedurale/${id}.xml`, voce: { classe: v.classe, nome: v.nome } }));
 }
 
 /** The ten props of a theme (T270). */
@@ -156,13 +166,14 @@ const NOTTE = ['notte'];
  * index first, so the Cloud's pieces take a few environments each and leave the rest to the music each universe already had.
  */
 const MUSICA: Record<string, Record<string, Uso>> = {
+  // The seed's music is the author's (T224, tests/sounddirector.test.ts): borgo, campi, bosco, castello and dungeon keep theirs.
   aurora: {
     'citta-locanda': { ambienti: ['locanda', 'borgo_mattoni'], momenti: ['mattina', 'giorno', 'sera'] },
     'luogo-sacro': { ambienti: ['tempio', 'piramide'], momenti: GIORNO },
-    'sotterraneo-abisso': { ambienti: ['dungeon', 'tana_drago'] },
+    'sotterraneo-abisso': { ambienti: ['tana_drago', 'rovine'] },
     'tensione-pericolo': { ambienti: ['fortezza', 'caserma'], momenti: GIORNO },
-    'esplorazione-giorno': { ambienti: ['bosco', 'campi', 'montagne'], momenti: GIORNO },
-    'esplorazione-notte': { momenti: NOTTE },
+    'esplorazione-giorno': { ambienti: ['montagne', 'deserto'], momenti: GIORNO },
+    'esplorazione-notte': { ambienti: ['bosco', 'giungla', 'montagne', 'deserto'], momenti: NOTTE },
   },
   orichalcum: {
     'citta-locanda': { ambienti: ['quartiere_mattoni', 'baracche'], momenti: ['mattina', 'giorno', 'sera'] },
@@ -193,8 +204,9 @@ const MUSICA: Record<string, Record<string, Uso>> = {
 const AUTORE_SUONI = 'Claude Cloud, colonna sonora ed effetti (T271)';
 
 /**
- * The sounds of a universe: the six pieces of its theme, the nineteen effects, and the Death made again, in the place of the seed's (whose seeds
- * gave the same score: `modelErrors` sent it back as `ripetitivo`), under the same id, so that every universe of the seed's Death gets it.
+ * The sounds of a universe: the six pieces of its theme, the nineteen effects, and the Death made again beside the seed's. The seed's Death is the
+ * same on every seed, and the author chose it by ear (`SOUNDS_KEPT_BY_THE_AUTHOR` in tests/helpers.ts: «to change it, ask the author»): the new
+ * one comes after it in the index, so the old one still plays (`effectProgram` takes the first) until the author swaps them.
  */
 export function suoni(u: Universo): Modello[] {
   const out: Modello[] = [];
@@ -207,7 +219,7 @@ export function suoni(u: Universo): Modello[] {
     const effetto = id.replace(/^suono-effetto-/, '');
     out.push({ id, file: `suoni-cloud/effetti/${f}`, voce: { classe: 'suono', nome: effetto[0].toUpperCase() + effetto.slice(1).replace(/-/g, ' '), autore: AUTORE_SUONI, suono: { uso: 'effetto', effetti: [effetto] } } });
   }
-  out.push({ id: 'suono-effetto-morte', file: 'suoni-cloud/suono-effetto-morte-v2.xml', voce: { classe: 'suono', nome: 'Morte', autore: `${AUTORE_SUONI}: la Morte rifatta`, suono: { uso: 'effetto', effetti: ['morte'] } } });
+  out.push({ id: 'suono-effetto-morte-v2', file: 'suoni-cloud/suono-effetto-morte-v2.xml', voce: { classe: 'suono', nome: 'Morte (rifatta, da ascoltare)', autore: AUTORE_SUONI, suono: { uso: 'effetto', effetti: ['morte'] } } });
   return out;
 }
 

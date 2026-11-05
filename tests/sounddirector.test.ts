@@ -73,7 +73,8 @@ describe('the choice of the music', () => {
 
 describe('the programs of the seed', () => {
   it('are few, one for a type, and the presets of the SoundLab stay for the SoundLab', () => {
-    expect(music).toHaveLength(7);
+    // The seven of T224 and the six of the fantasy theme of Claude Cloud (T273): each its own type, in environments of their own.
+    expect(music).toHaveLength(13);
     expect(soundPrograms(bundledFiles).filter((p) => !p.suono)).toHaveLength(4);
   });
 

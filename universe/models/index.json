@@ -134,7 +134,7 @@
  "grande": {
   "classe": "grande",
   "nome": "Casa a graticcio",
-  "autore": "procedurale, a mano (Claude Cloud, T270)"
+  "autore": "a mano (Claude Code)"
  },
  "fattoria": {
   "classe": "grande",
@@ -541,7 +541,7 @@
  "suono-effetto-morte": {
   "classe": "suono",
   "nome": "Morte",
-  "autore": "Claude Cloud, colonna sonora ed effetti (T271): la Morte rifatta",
+  "autore": "a mano (T224)",
   "suono": {
    "uso": "effetto",
    "effetti": [
@@ -606,9 +606,8 @@
   "suono": {
    "uso": "musica",
    "ambienti": [
-    "bosco",
-    "campi",
-    "montagne"
+    "montagne",
+    "deserto"
    ],
    "momenti": [
     "mattina",
@@ -622,6 +621,12 @@
   "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
   "suono": {
    "uso": "musica",
+   "ambienti": [
+    "bosco",
+    "giungla",
+    "montagne",
+    "deserto"
+   ],
    "momenti": [
     "notte"
    ]
@@ -683,8 +688,8 @@
   "suono": {
    "uso": "musica",
    "ambienti": [
-    "dungeon",
-    "tana_drago"
+    "tana_drago",
+    "rovine"
    ]
   }
  },
@@ -894,6 +899,17 @@
    "uso": "effetto",
    "effetti": [
     "vento-alta-quota"
+   ]
+  }
+ },
+ "suono-effetto-morte-v2": {
+  "classe": "suono",
+  "nome": "Morte (rifatta, da ascoltare)",
+  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "morte"
    ]
   }
  },

@@ -2,7 +2,7 @@
 
 Quarantaquattro programmi sonori MarkovJunior scritti senza modelli e senza orecchie, misurati con l'analisi del gioco
 (`src/mj/soundanalysis.ts`) e con il validatore (`modelErrors` in `src/kernel/validator.ts`). Stanno nel laboratorio:
-dal 05/11 (T273) i brani del tema, i 19 effetti e la Morte rifatta (al posto della vecchia, con lo stesso id) sono nei quattro universi
+dal 05/11 (T273) i brani del tema, i 19 effetti e la Morte rifatta (accanto alla vecchia, che suona ancora: l'ha scelta l'autore) sono nei quattro universi
 esplorabili: dove suona ogni brano lo dice [`../universi-cloud/INTEGRAZIONE.md`](../universi-cloud/INTEGRAZIONE.md).
 
 | Cartella | Cosa |

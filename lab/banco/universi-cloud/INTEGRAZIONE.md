@@ -6,10 +6,10 @@ un modello**: niente `GEMINI_API_KEY`, solo `MockAiModels`; costo dei modelli 0,
 
 | universo | tema | dove sta nel repository | strutture del catalogo | modelli del seme procedurali | props | suoni |
 |---|---|---|---|---|---|---|
-| aurora | fantasy | `universe/` (il seme) + le mappe in `aurora/maps/` | 12 (una Enorme) | 24 | 10 | 6 brani, 19 effetti, la Morte rifatta |
-| orichalcum | steampunk | `orichalcum/` | 12 (una Enorme) | 24 | 10 | 6 brani, 19 effetti, la Morte rifatta |
-| neapolis | moderno | `neapolis/` | 12 (una Enorme) + le 2 sue (T272) | 24 | 10 | 6 brani, 19 effetti, la Morte rifatta |
-| sidera | futuristico | `sidera/` | 12 + le 2 sue (T272) | 10 (quelli che aveva) | 10 | 6 brani, 19 effetti, la Morte rifatta |
+| aurora | fantasy | `universe/` (il seme) + le mappe in `aurora/maps/` | 12 (una Enorme) | 24 | 10 | 6 brani, 19 effetti, la Morte rifatta (accanto) |
+| orichalcum | steampunk | `orichalcum/` | 12 (una Enorme) | 24 | 10 | 6 brani, 19 effetti, la Morte rifatta (accanto) |
+| neapolis | moderno | `neapolis/` | 12 (una Enorme) + le 2 sue (T272) | 24 | 10 | 6 brani, 19 effetti, la Morte rifatta (accanto) |
+| sidera | futuristico | `sidera/` | 12 + le 2 sue (T272) | 10 (quelli che aveva) | 10 | 6 brani, 19 effetti, la Morte rifatta (accanto) |
 
 ## Come si installa ed esplora (in locale)
 
@@ -164,8 +164,13 @@ stesso `0.1`, `Z` uguale a quello del kernel. `tests/universi-cloud.test.ts` li 
   - i 6 brani del tema e i 19 effetti (T271). Dove suona ogni brano (`suono.ambienti`, `momenti`) è in `strumenti/cloud.ts → MUSICA`: chi
     nomina un ambiente esattamente suona lì, l'ultimo dell'indice per primo, quindi ogni brano prende pochi ambienti e lascia gli altri alla
     musica che l'universo aveva;
-  - la Morte rifatta (`suono-effetto-morte-v2.xml`) **al posto** di `suono-effetto-morte.xml`, con lo stesso id: la vecchia dava la stessa
-    partitura a ogni seme e `modelErrors` la rimandava (`ripetitivo`); così anche gli universi esistenti nati dal seme la ricevono.
+  - la Morte rifatta (`suono-effetto-morte-v2`) **accanto** alla vecchia, dopo di lei nell'indice: `effectProgram` suona la prima che
+    nomina l'effetto, quindi suona ancora quella del seme. La vecchia dà la stessa partitura a ogni seme (`modelErrors` la rimanda come
+    `ripetitivo`), ma l'autore l'ha scelta a orecchio e i test lo dicono (`SOUNDS_KEPT_BY_THE_AUTHOR` in `tests/helpers.ts`: «per cambiarla,
+    chiedi all'autore»): per sentire la nuova basta spostarla prima della vecchia in `models/index.json`, o togliere `morte` alla vecchia.
+    Nel seme la musica di T224 resta dove i suoi test la vogliono (`borgo`, `campi`, `bosco` di giorno, `castello`, `dungeon`): i brani fantasy
+    prendono `locanda`, `borgo_mattoni`, `tempio`, `piramide`, `fortezza`, `caserma`, `tana_drago`, `rovine`, `montagne` e `deserto`, e di notte
+    `bosco`, `giungla`, `montagne`, `deserto`.
 - *Sidera*: non aveva `commonHouse`, quindi i suoi lotti comuni erano le casette e le case a graticcio del seme in una città di lega. Ora
   il terreno dice «moduli abitativi di lega bianca…» e le case comuni sono `casa-comune-edificio-052c7ac8` (il suo `sidera-modulo-abitativo`)
   e `casa-comune-grande-052c7ac8` (la `residenza-modulare` del gemello). Le due strutture che i suoi piani nominavano senza modello (la cupola
@@ -201,7 +206,7 @@ stesso `0.1`, `Z` uguale a quello del kernel. `tests/universi-cloud.test.ts` li 
 - **`npm run universi:cloud` su `universes/` vero**: nel clone non c'è; l'ho eseguito su una cartella temporanea (e lo fa il test).
 - **L'ascolto** dei brani e degli effetti (T271 dice lo stesso); i 19 effetti nuovi non hanno ancora un momento del gioco che li chiami
   (`SOUND_CUES` ne ha 9: runa, oggetto, arpeggio, incantesimo, guasto, ritorno, soglia, salto, morte), stanno nella libreria e il Musicista li
-  vede fra gli effetti noti. Suonano davvero: i 6 brani (negli ambienti di `MUSICA`) e la Morte rifatta.
+  vede fra gli effetti noti. Suonano davvero i 6 brani (negli ambienti di `MUSICA`); la Morte rifatta aspetta l'orecchio dell'autore.
 - **I props** sono nella libreria (la Galleria dell'Artista nello studio li mette sugli scaffali, `models/` → `galleria`), ma nessun luogo
   li mette in scena: servirebbero moduli che li usano come aspetto.
 - **La suite intera** di `npm test`: vedi sopra cosa ho fatto girare.
