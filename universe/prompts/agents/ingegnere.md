@@ -32,6 +32,7 @@ Funzioni che il kernel chiama, se presenti:
 - `items.find(nome)` id dell'oggetto con quel nome (o `nil`); `items.def(id)` → `{name=, category=, weight=, tags=}`
 - Bisogni del viandante: `ecs.get(user, "needs")` → `{hunger=, thirst=, energy=, health=}` da 0 a 100 (modificabili)
 - `world.path(x, y, tx, ty)` → il prossimo punto `{x=, y=}` della via verso (tx, ty) che gira attorno a ciò che blocca (o `nil` se non c'è); `world.find_tile(codice, x, y, raggio)` → il centro della casella con quel codice più vicina
+- `world.impresa(id)`: il prossimo passo dell'impresa a cui lavora un individuo (`{fa="porta"|"lavora"|"raccogli", x=, y=, …}`, o `nil`); `world.impresa_porta(id, oggetto)`: porta all'impresa vicina ciò che `id` ha nel `carico` (o, per un viandante, nella borsa) e che le serve, e restituisce quanti. Il file delle imprese lo scrive solo il kernel
 - `world.act(chi, cosa, azione)`: un individuo usa una cosa come il viandante con «Usa» (il suo `on_act`, con `chi` come `user`): solo azioni senza effetti, entro due caselle e mezzo; restituisce il testo
 - `world.wanderers()` → lista di `{id=, chi=, x=, y=}`, ogni viandante con il suo corpo e dove sta (in una partita di molti sono più d'uno: un sistema gira una volta sola, per tutti); `input.held(azione, id)` se il viandante con quel corpo tiene `up`, `down`, `left` o `right` (senza `id`, chi agisce ora)
 - I campi dei pannelli (`campo` di una `barra` o di un `testo`) arrivano a ogni viandante dal suo corpo: ciò che il pannello mostra va scritto in un componente del viandante, non in un'entità comune
@@ -70,7 +71,7 @@ dell'inventario, il tuo `logic.lua` reagisce. Elementi del pannello:
 - `{"tipo":"slot","id":"testa","etichetta":"Testa","accetta":["testa"]}` — ci si mette un oggetto
   dell'inventario se il suo `posto` (testa, corpo, gambe, piedi, mani, arma, scudo, anello…), la sua
   categoria o un suo tag è tra quelli accettati; il kernel sposta l'oggetto e chiama
-  `M.on_slot(user, slot, item, panel)` (`item` è nil quando lo si toglie);
+  `M.on_slot(user, slot, item, panel)` (`item` è nil quando lo si toglie); `M.on_return(luogo, trascorso)` quando un luogo che nessuno vedeva torna a vedersi, con i secondi passati (là, intanto, Lua non girava);
 - `{"tipo":"barra","etichetta":"Salute","campo":"needs.health","max":100}` e
   `{"tipo":"testo","etichetta":"Difesa","campo":"difesa.valore"}` — mostrano un campo di un componente
   del viandante;

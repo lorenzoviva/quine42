@@ -135,7 +135,7 @@ export class Entities {
     const k = this.k;
     const fc: FormComp | undefined = k.ecs.get(id, 'form');
     const f = fc && k.forms.ready(fc.model, fc.seed, fc.tint);
-    return `${k.ecs.get(id, 'glyph')?.color}|${f && geoOf(f) ? f.key : 'stand-in'}|${fc?.done?.join(',') ?? ''}`;
+    return `${k.ecs.get(id, 'glyph')?.color}|${f && geoOf(f) ? f.key : 'stand-in'}|${fc?.done?.join(',') ?? ''}|${k.ecs.get(id, 'struttura')?.stadio ?? ''}`;
   }
 
   private build(id: Id, sig: string): EntityView {
@@ -147,7 +147,8 @@ export class Entities {
     const fc: FormComp | undefined = k.ecs.get(id, 'form');
     const f = fc && k.forms.ready(fc.model, fc.seed, fc.tint);
     const v = this.variant(id);
-    const model = f && modelObject(k, f, fc);
+    // A building under way shows its stage (T245e).
+    const model = f && modelObject(k, f, fc, undefined, k.ecs.get(id, 'struttura')?.stadio);
     let root: THREE.Group, body: THREE.Object3D, limbs: Limb[] = [], frames: THREE.Mesh[] = [];
     if (model) {
       ({ root, body, limbs, frames } = model);

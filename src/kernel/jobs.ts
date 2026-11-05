@@ -194,3 +194,21 @@ export function matchJob(mestiere: string | undefined, programs: readonly JobPro
   const words = new Set(t.split(/[^a-zàèéìòù]+/).filter(Boolean));
   return programs.find((p) => p.nomi.some((n) => words.has(n)));
 }
+
+/**
+ * What a trade brings to the deposit of its place in a day (T245f, ADR-0147): the things it gathers or makes and then carries there
+ * (`porta` to its place, not into a thing), and what making them uses up. The accounting of the places nobody sees counts with this.
+ */
+export function dailyProduce(p: JobProgram): { gathered: Record<string, number>; made: Array<{ oggetto: string; con?: string; quante: number }> } {
+  const tasks = JOB_PHASES.flatMap((f) => p.giornata[f] ?? []);
+  const delivered = new Set(tasks.flatMap((t) => (t.fa === 'porta' && t.oggetto && !t.dove?.startsWith('entita:') ? [t.oggetto] : [])));
+  const gathered: Record<string, number> = {};
+  const made: Array<{ oggetto: string; con?: string; quante: number }> = [];
+  for (const t of tasks) {
+    if (!t.oggetto || !delivered.has(t.oggetto)) continue;
+    const n = t.quante ?? 1;
+    if (t.fa === 'raccogli') gathered[t.oggetto] = (gathered[t.oggetto] ?? 0) + n;
+    else if (t.fa === 'produci') made.push({ oggetto: t.oggetto, ...(t.con ? { con: t.con } : {}), quante: n });
+  }
+  return { gathered, made };
+}

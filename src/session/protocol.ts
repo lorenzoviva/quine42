@@ -72,7 +72,7 @@ export interface EntityView {
   m?: string;
   form?: FormView;
   glyph?: unknown;
-  /** The other components a client draws it and makes its menu with (`ENTITY_PARTS`): to pick up, a rune, a body, a light… */
+  /** The other components a client draws it and makes its menu with (`ENTITY_PARTS`): to pick up, a rune, a body, a light…; and `struttura: {stadio}` for a building under way (T245e). */
   c?: Record<string, unknown>;
   /** What it is saying, while it says it. */
   testo?: string;

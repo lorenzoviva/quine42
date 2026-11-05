@@ -1006,6 +1006,9 @@ export class SessionServer {
       const v = k.ecs.get(id, name);
       parts[name] = name === 'mind' ? {} : name === 'identity' ? { name: v?.name } : name === 'container' ? { size: v?.size } : v;
     }
+    // A building under way (T245e): of its structure only the stage, so every client sees it rise.
+    const stadio = k.ecs.get(id, 'struttura')?.stadio;
+    if (typeof stadio === 'number' && Number.isFinite(stadio) && stadio < 1) parts.struttura = { stadio };
     return {
       ...(m ? { m: String(m) } : {}),
       ...(form ? { form } : {}),

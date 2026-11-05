@@ -5,7 +5,7 @@
 import * as THREE from 'three';
 import type { Kernel } from '../kernel/kernel';
 import { instanceGrid, type Form, type FormComp } from '../kernel/forms';
-import { meshVoxels, type MeshData } from '../mj/mesh';
+import { meshVoxels, stageGrid, type MeshData } from '../mj/mesh';
 import { casts, MAT } from './materials';
 import type { Limb } from './entities';
 import type { FormMeshes } from './worker';
@@ -139,18 +139,33 @@ export interface ModelObject {
   frames: THREE.Mesh[];
 }
 
-/** An object for one instance of a form. `material` overrides the world's (the wanderer is never clipped). */
-export function modelObject(k: Kernel, f: Form, fc: FormComp | undefined, material?: THREE.Material): ModelObject | undefined {
+/** A building under way (T245e, ADR-0146): the finished grid as its stage shows it, with the site of the kernel around it. */
+const staged = new Map<string, THREE.BufferGeometry>();
+export function stagedBody(k: Kernel, f: Form, done: string[], stadio: number): THREE.BufferGeometry {
+  const key = `${f.key}|${done.join(',')}|${stadio}`;
+  let g = staged.get(key);
+  if (!g) {
+    const grid = done.length ? instanceGrid(k.forms, f, done) : f.result!.grid;
+    const s = stageGrid(grid, f.result!.palette, stadio, { base: f.base, vpt: f.vpt, site: true });
+    staged.set(key, (g = geometry(meshVoxels(s.grid, s.palette, { vpt: f.vpt }))));
+    shared.add(g);
+  }
+  return g;
+}
+
+/** An object for one instance of a form. `material` overrides the world's (the wanderer is never clipped). `stadio` < 1: a building under way. */
+export function modelObject(k: Kernel, f: Form, fc: FormComp | undefined, material?: THREE.Material, stadio?: number): ModelObject | undefined {
   const g = geoOf(f);
   if (!g) return undefined;
   const mat = material ?? (g.sway ? MAT.sway : MAT.world);
   const mesh = (geo: THREE.BufferGeometry) => casts(new THREE.Mesh(geo, modelMaterials(geo, mat)), true);
   const root = new THREE.Group();
-  const bodyMesh = mesh(fc?.done?.length ? changedBody(k, f, fc.done) : g.body);
+  const rising = typeof stadio === 'number' && Number.isFinite(stadio) && stadio < 1;
+  const bodyMesh = mesh(rising ? stagedBody(k, f, fc?.done ?? [], stadio) : fc?.done?.length ? changedBody(k, f, fc.done) : g.body);
   const body = new THREE.Group();
   body.add(bodyMesh);
   root.add(body);
-  const limbs: Limb[] = g.limbs.map((l) => {
+  const limbs: Limb[] = rising ? [] : g.limbs.map((l) => {
     const pivot = new THREE.Group();
     pivot.position.set(...l.joint);
     pivot.add(mesh(l.geo));
@@ -158,7 +173,7 @@ export function modelObject(k: Kernel, f: Form, fc: FormComp | undefined, materi
     return { pivot, part: l.part, phase: l.phase };
   });
   // An animated model shows one frame at a time instead of its body (the action's body has none).
-  const frames = fc?.done?.length ? [] : g.frames.map((geo) => {
+  const frames = fc?.done?.length || rising ? [] : g.frames.map((geo) => {
     const m = mesh(geo);
     m.visible = false;
     root.add(m);
