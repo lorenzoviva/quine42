@@ -1,0 +1,116 @@
+[
+ {
+  "nome": "modello-locanda",
+  "prova": {
+   "taglie": [
+    {
+     "taglia": "grande",
+     "box": [
+      100,
+      100,
+      100
+     ],
+     "vpt": 20,
+     "gradino": 4,
+     "semi": [
+      {
+       "seme": 1,
+       "difetti": [],
+       "ms": 633
+      },
+      {
+       "seme": 2,
+       "difetti": [],
+       "ms": 550
+      },
+      {
+       "seme": 3,
+       "difetti": [],
+       "ms": 477
+      },
+      {
+       "seme": 4,
+       "difetti": [],
+       "ms": 536
+      },
+      {
+       "seme": 5,
+       "difetti": [],
+       "ms": 450
+      }
+     ],
+     "regge": true,
+     "varianza": {
+      "voxel": 0.6408287856416877,
+      "colore": 0.17626222469631309,
+      "pianta": 0.3239357563514128,
+      "perimetro": 0.187507421921387,
+      "interno": 0.6371540652309882,
+      "semi": 5,
+      "firmePiani": 1,
+      "firmeStanze": 3,
+      "architetture": 3,
+      "statico": false
+     },
+     "difettiVarianza": []
+    },
+    {
+     "taglia": "enorme",
+     "box": [
+      120,
+      120,
+      112
+     ],
+     "vpt": 16,
+     "gradino": 3,
+     "semi": [
+      {
+       "seme": 1,
+       "difetti": [],
+       "ms": 563
+      },
+      {
+       "seme": 2,
+       "difetti": [],
+       "ms": 525
+      },
+      {
+       "seme": 3,
+       "difetti": [],
+       "ms": 543
+      },
+      {
+       "seme": 4,
+       "difetti": [],
+       "ms": 542
+      },
+      {
+       "seme": 5,
+       "difetti": [],
+       "ms": 542
+      }
+     ],
+     "regge": true,
+     "varianza": {
+      "voxel": 0.6156640086704546,
+      "colore": 0.15769252638574222,
+      "pianta": 0.3318176518596246,
+      "perimetro": 0.23628428927680797,
+      "interno": 0.7698753289416231,
+      "semi": 5,
+      "firmePiani": 1,
+      "firmeStanze": 2,
+      "architetture": 3,
+      "statico": false
+     },
+     "difettiVarianza": []
+    }
+   ],
+   "regge": true,
+   "statico": false,
+   "varia": true,
+   "passa": true,
+   "ms": 5509
+  }
+ }
+]

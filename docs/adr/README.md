@@ -146,5 +146,6 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0139](0139-i-pannelli-e-i-tasti-di-ogni-viandante.md) | I pannelli e i tasti di ogni viandante: i `campo` dei `manifest.ui` in `MyState.campi` (a elenco), il messaggio `tasti`, `input.held(azione, id)` e `world.wanderers()` |
 | [0140](0140-i-mestieri-come-programmi.md) | I mestieri come programmi: `mestieri` nei moduli `data`, validati per riferimento, `sys.lavoro` con i comportamenti, `world.path` e `world.find_tile`, `matura` nei terreni e il giorno delle modifiche in `plan.giorni`; contadino, boscaiolo e pescatore nel seme |
 | [0141](0141-gli-altri-mestieri-e-il-deposito.md) | Gli altri nove mestieri del seme per le quattro ambientazioni, `porta prendi produci usa`, `world.act` (l'`on_act` di una cosa con l'individuo come chi la usa, senza effetti), il deposito del luogo nel magazzino di `sys.lavoro`, la via che vede le forme |
+| [0142](0142-il-motore-guarda-solo-dove-serve.md) | Il motore MarkovJunior guarda solo dove serve: un censimento delle lettere per riga accelera le scansioni intere senza cambiare un voxel, e una fixture di impronte lo prova | accettato |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.
