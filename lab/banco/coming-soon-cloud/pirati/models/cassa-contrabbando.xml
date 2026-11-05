@@ -1,0 +1,15 @@
+<!-- Cassa di contrabbando: a mano (Claude Code, Cantiere 9). Una cassa scura senza marchi, legata con una cima e chiusa con un lucchetto; ogni seme cambia i chiodi e la cima. -->
+<sequence values="BCANLR" size="20 20 20" symmetry="()" name="Cassa di contrabbando">
+  <color symbol="C" value="5c4630" name="cassa"/>
+  <color symbol="A" value="44321e" name="assi"/>
+  <color symbol="N" value="8a8f99" name="chiodi"/>
+  <color symbol="L" value="3a3a40" name="lucchetto"/>
+  <color symbol="R" value="c9a46a" name="cima"/>
+  <box at="10 10 0" size="14 12 10" color="C"/>
+  <box at="10 10 10" size="14 12 1" color="A"/>
+  <box at="10 4 4" size="3 1 3" color="L"/>
+  <box at="10 10 0" size="1 12 11" color="R"/>
+  <prl in="B A" out="N A" p="0.12" steps="1"/>
+  <prl in="B R" out="R R" p="0.4" steps="1"/>
+  <prl in="BC" out="AC" p="0.05" steps="1"/>
+</sequence>

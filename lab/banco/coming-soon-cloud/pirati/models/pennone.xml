@@ -1,0 +1,15 @@
+<!-- Pennone con bandiera: a mano (Claude Code, Cantiere 9). Un'asta su un cumulo di pietre, la bandiera rossa in cima; ogni seme cambia le pietre del cumulo e le pieghe della bandiera. -->
+<sequence values="BSPFCD" size="20 20 40" symmetry="()" name="Pennone">
+  <color symbol="S" value="8f8a80" name="pietre"/>
+  <color symbol="P" value="7a5432" name="asta"/>
+  <color symbol="F" value="c0392b" name="bandiera"/>
+  <color symbol="C" value="d8c8a0" name="drizza"/>
+  <color symbol="D" value="8e2418" name="piega"/>
+  <cylinder at="10 10 0" size="10 10 3" color="S"/>
+  <box at="10 10 3" size="2 2 35" color="P"/>
+  <box at="15 10 28" size="9 1 8" color="F"/>
+  <box at="11 11 3" size="1 1 33" color="C"/>
+  <prl in="B S" out="S S" p="0.3" steps="1"/>
+  <prl in="BF" out="DF" p="0.2" steps="1"/>
+  <prl in="FB" out="FD" p="0.2" steps="1"/>
+</sequence>

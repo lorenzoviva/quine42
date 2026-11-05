@@ -1,0 +1,42 @@
+{
+  "id": "pirati.timone",
+  "name": "Ruota del timone",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "a mano (Claude Code, Cantiere 9)",
+  "description": "Una ruota di legno a otto caviglie, montata su un piedistallo.",
+  "context": "sui ponti dei velieri, nei cantieri, nelle botteghe dei mastri d'ascia",
+  "appearance": {
+    "model": "timone",
+    "glyph": "✣",
+    "color": "#8a5a30",
+    "aspetto": "una ruota di timone di legno a otto caviglie su un piedistallo",
+    "classe": "mobile"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.45
+  },
+  "actions": [
+    {
+      "id": "babordo",
+      "label": "Gira a babordo"
+    },
+    {
+      "id": "tribordo",
+      "label": "Gira a tribordo"
+    },
+    {
+      "id": "barra",
+      "label": "Guarda la barra"
+    }
+  ],
+  "spawn": {
+    "tiles": [
+      "f"
+    ],
+    "chance": 0.03,
+    "max": 1
+  },
+  "logic": "logic.lua"
+}

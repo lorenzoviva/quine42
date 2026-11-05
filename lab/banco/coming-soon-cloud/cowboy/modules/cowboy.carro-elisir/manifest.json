@@ -1,0 +1,44 @@
+{
+  "id": "cowboy.carro-elisir",
+  "name": "Carro dell'elisir",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "a mano (Claude Code, Cantiere 9)",
+  "description": "Il carro dipinto di una venditrice ambulante, con le bottiglie in fila sulla sponda.",
+  "context": "sulle strade maestre, nelle piazze, alle fiere",
+  "appearance": {
+    "model": "carro-elisir",
+    "glyph": "⊞",
+    "color": "#3a7a5a",
+    "aspetto": "un carro di legno dipinto di verde e rosso con bottiglie in fila sulla sponda",
+    "classe": "mobile"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.45
+  },
+  "actions": [
+    {
+      "id": "compra",
+      "label": "Compra un elisir",
+      "requires": "item.dollaro"
+    },
+    {
+      "id": "annusa",
+      "label": "Annusa una bottiglia"
+    },
+    {
+      "id": "chiedi",
+      "label": "Chiedi a cosa serve"
+    }
+  ],
+  "spawn": {
+    "tiles": [
+      "p",
+      "g"
+    ],
+    "chance": 0.02,
+    "max": 1
+  },
+  "logic": "logic.lua"
+}

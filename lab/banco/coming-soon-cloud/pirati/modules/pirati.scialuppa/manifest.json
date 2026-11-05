@@ -1,0 +1,43 @@
+{
+  "id": "pirati.scialuppa",
+  "name": "Scialuppa",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "a mano (Claude Code, Cantiere 9)",
+  "description": "Una scialuppa a quattro remi tirata in secco, con una falla da chiudere.",
+  "context": "sulle spiagge, accanto ai moli, nelle lagune",
+  "appearance": {
+    "model": "scialuppa",
+    "glyph": "◒",
+    "color": "#9a6a3a",
+    "aspetto": "una scialuppa di legno a quattro remi tirata in secco sulla sabbia",
+    "classe": "mobile"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.5
+  },
+  "actions": [
+    {
+      "id": "ripara",
+      "label": "Chiudi la falla con la pece",
+      "requires": "item.pece"
+    },
+    {
+      "id": "vara",
+      "label": "Spingi la scialuppa in acqua"
+    },
+    {
+      "id": "controlla",
+      "label": "Controlla lo scafo"
+    }
+  ],
+  "spawn": {
+    "tiles": [
+      "s"
+    ],
+    "chance": 0.05,
+    "max": 1
+  },
+  "logic": "logic.lua"
+}

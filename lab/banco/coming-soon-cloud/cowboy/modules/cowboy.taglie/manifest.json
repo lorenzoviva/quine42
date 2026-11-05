@@ -1,0 +1,44 @@
+{
+  "id": "cowboy.taglie",
+  "name": "Bacheca delle taglie",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "a mano (Claude Code, Cantiere 9)",
+  "description": "La bacheca sulla porta dell'ufficio dello sceriffo, coperta di manifesti.",
+  "context": "davanti agli uffici degli sceriffi, nelle stazioni, nei saloon",
+  "appearance": {
+    "model": "bacheca-taglie",
+    "glyph": "▦",
+    "color": "#8a6a40",
+    "aspetto": "una bacheca di legno con manifesti di taglia inchiodati e una stella d'ottone",
+    "classe": "monumento"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.45
+  },
+  "actions": [
+    {
+      "id": "leggi",
+      "label": "Leggi le taglie"
+    },
+    {
+      "id": "stacca",
+      "label": "Stacca un manifesto"
+    },
+    {
+      "id": "riscuoti",
+      "label": "Consegna un manifesto risolto",
+      "requires": "item.manifesto"
+    }
+  ],
+  "spawn": {
+    "tiles": [
+      "p",
+      "f"
+    ],
+    "chance": 0.03,
+    "max": 1
+  },
+  "logic": "logic.lua"
+}

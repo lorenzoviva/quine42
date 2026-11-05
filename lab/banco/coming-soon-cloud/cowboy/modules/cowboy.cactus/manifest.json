@@ -1,0 +1,43 @@
+{
+  "id": "cowboy.cactus",
+  "name": "Cactus della piana",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "a mano (Claude Code, Cantiere 9)",
+  "description": "Un grande cactus a candelabro, con qualche fico rosso sulle braccia.",
+  "context": "nella piana, nei canyon, ai margini dei pascoli",
+  "appearance": {
+    "model": "cactus",
+    "glyph": "Ψ",
+    "color": "#5a9a4a",
+    "aspetto": "un grande cactus verde a candelabro con fichi rossi sulle braccia",
+    "classe": "mobile"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.45
+  },
+  "actions": [
+    {
+      "id": "raccogli",
+      "label": "Raccogli un fico"
+    },
+    {
+      "id": "tocca",
+      "label": "Tocca il cactus"
+    },
+    {
+      "id": "ombra",
+      "label": "Siediti all'ombra"
+    }
+  ],
+  "spawn": {
+    "tiles": [
+      "s",
+      "g"
+    ],
+    "chance": 0.06,
+    "max": 2
+  },
+  "logic": "logic.lua"
+}

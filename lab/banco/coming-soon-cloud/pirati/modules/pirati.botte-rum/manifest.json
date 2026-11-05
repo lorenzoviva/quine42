@@ -1,0 +1,44 @@
+{
+  "id": "pirati.botte-rum",
+  "name": "Botte di rum",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "a mano (Claude Code, Cantiere 9)",
+  "description": "Una botte panciuta di rum scuro, con la spina di legno.",
+  "context": "nelle locande, nelle stive, nei magazzini del porto",
+  "appearance": {
+    "model": "botte-rum",
+    "glyph": "◍",
+    "color": "#7a4320",
+    "aspetto": "una botte panciuta di legno scuro con cerchi di ferro e una spina",
+    "classe": "mobile"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.45
+  },
+  "actions": [
+    {
+      "id": "spilla",
+      "label": "Spilla un fiasco"
+    },
+    {
+      "id": "bussa",
+      "label": "Bussa sulla botte"
+    },
+    {
+      "id": "rabbocca",
+      "label": "Rabbocca con la melassa",
+      "requires": "item.melassa"
+    }
+  ],
+  "spawn": {
+    "tiles": [
+      "f",
+      "l"
+    ],
+    "chance": 0.05,
+    "max": 2
+  },
+  "logic": "logic.lua"
+}

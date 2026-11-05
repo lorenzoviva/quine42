@@ -1,0 +1,9 @@
+{
+  "regole": [
+    { "chiave": "azione.issare_bandiera", "testo": "issare una bandiera nera sul pennone", "possibile": true, "racconto": "Chiunque può issare la bandiera che vuole, ma al forte la vedono, e i doganieri vengono a chiedere perché.", "effetti": ["messaggio"] },
+    { "chiave": "azione.sparare_cannone", "testo": "sparare un colpo di cannone senza palla", "possibile": true, "racconto": "Il colpo a salve rimbomba sulla laguna e fa alzare in volo i gabbiani; in porto è il saluto dei velieri che partono.", "effetti": ["messaggio"] },
+    { "chiave": "azione.nuotare_al_largo", "testo": "nuotare oltre la secca", "possibile": false, "racconto": "Oltre la secca le correnti tirano verso il fondo: i pescatori ci vanno solo in barca, e legati." },
+    { "chiave": "fabbricare.rum", "testo": "fabbricare «Rum delle Secche»", "possibile": true, "racconto": "Si fa con melassa, acqua dolce e pazienza; la locanda compra ogni botte.", "effetti": ["ricetta: Melassa ×2 + Acqua dolce ×1"] },
+    { "chiave": "azione.rubare_dazio", "testo": "rubare il registro dei dazi", "possibile": false, "racconto": "Il comandante Bastiani dorme con il registro sotto il cuscino, e la sergente Torre dorme nella stanza accanto." }
+  ]
+}

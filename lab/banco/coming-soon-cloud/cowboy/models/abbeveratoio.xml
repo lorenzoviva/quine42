@@ -1,0 +1,18 @@
+<!-- Abbeveratoio: a mano (Claude Code, Cantiere 9). Una vasca di assi cerchiata di ferro, l'acqua dentro, la pompa a un lato; ogni seme cambia le paglie e le assi. -->
+<sequence values="BLIWPYS" size="20 20 20" symmetry="()" name="Abbeveratoio">
+  <color symbol="L" value="7a5a3a" name="assi"/>
+  <color symbol="I" value="4a4c52" name="cerchio"/>
+  <color symbol="W" value="4a8ab8" name="acqua" alpha="0.85"/>
+  <color symbol="P" value="3a3a40" name="pompa"/>
+  <color symbol="Y" value="d8c070" name="paglia"/>
+  <color symbol="S" value="5a4028" name="assi scure"/>
+  <box at="10 10 0" size="16 8 6" color="L"/>
+  <box at="10 10 1" size="14 6 5" color="W"/>
+  <box at="3 10 0" size="1 8 6" color="I"/>
+  <box at="17 10 0" size="1 8 6" color="I"/>
+  <box at="18 6 0" size="2 2 12" color="P"/>
+  <box at="17 7 11" size="2 3 1" color="P"/>
+  <prl in="B W" out="Y W" p="0.06" steps="1"/>
+  <prl in="B L" out="S L" p="0.25" steps="1"/>
+  <prl in="BL" out="SL" p="0.06" steps="1"/>
+</sequence>

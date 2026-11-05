@@ -1,0 +1,320 @@
+{
+  "id": "items.cowboy",
+  "name": "Merci della frontiera",
+  "kind": "data",
+  "version": "0.1.0",
+  "origin": "a mano (Claude Code)",
+  "description": "Ciò che si compra, si vende e si trova sulla frontiera: dollari, pepite, lazi, cartucce, caffè e fagioli.",
+  "items": [
+    {
+      "id": "item.dollaro",
+      "name": "Dollaro d'argento",
+      "description": "Una moneta d'argento con un'aquila incisa, lucida di tasche.",
+      "category": "varie",
+      "weight": 0.05,
+      "stack": 50,
+      "tags": [
+        "moneta",
+        "frontiera"
+      ],
+      "glyph": "¤",
+      "color": "#c8ccd2"
+    },
+    {
+      "id": "item.biglietto",
+      "name": "Biglietto del treno",
+      "description": "Un cartoncino forato dal capotreno: vale per un viaggio.",
+      "category": "varie",
+      "weight": 0.01,
+      "stack": 5,
+      "tags": [
+        "ferrovia"
+      ],
+      "glyph": "▭",
+      "color": "#e8d7a8"
+    },
+    {
+      "id": "item.setaccio",
+      "name": "Setaccio da cercatore",
+      "description": "Una padella larga di ferro con il bordo basso, per lavare la sabbia del fiume.",
+      "category": "attrezzo",
+      "weight": 1,
+      "stack": 1,
+      "tags": [
+        "attrezzo",
+        "miniera"
+      ],
+      "glyph": "◎",
+      "color": "#8a8f99"
+    },
+    {
+      "id": "item.pepita",
+      "name": "Pepita d'oro",
+      "description": "Un sassolino giallo, pesante come una promessa.",
+      "category": "varie",
+      "weight": 0.05,
+      "stack": 20,
+      "tags": [
+        "oro",
+        "miniera"
+      ],
+      "glyph": "•",
+      "color": "#f2c84e"
+    },
+    {
+      "id": "item.trave",
+      "name": "Trave di pino",
+      "description": "Una trave squadrata per puntellare le gallerie.",
+      "category": "materiale",
+      "weight": 4,
+      "stack": 4,
+      "tags": [
+        "materiale",
+        "miniera"
+      ],
+      "glyph": "═",
+      "color": "#a07848"
+    },
+    {
+      "id": "item.lazo",
+      "name": "Lazo di canapa",
+      "description": "Una corda arrotolata con il nodo scorsoio, morbida di sego.",
+      "category": "attrezzo",
+      "weight": 1.2,
+      "stack": 1,
+      "tags": [
+        "attrezzo",
+        "mandria"
+      ],
+      "glyph": "§",
+      "color": "#c9a46a"
+    },
+    {
+      "id": "item.manifesto",
+      "name": "Manifesto di taglia",
+      "description": "Un foglio con il ritratto di un ladro di bestiame e la cifra della taglia.",
+      "category": "varie",
+      "weight": 0.02,
+      "stack": 5,
+      "tags": [
+        "sceriffo"
+      ],
+      "glyph": "▤",
+      "color": "#e8d7a8"
+    },
+    {
+      "id": "item.cartuccia",
+      "name": "Cartuccia",
+      "description": "Una cartuccia di ottone per la carabina da bersaglio.",
+      "category": "arma",
+      "weight": 0.02,
+      "stack": 30,
+      "tags": [
+        "arma",
+        "bersaglio"
+      ],
+      "glyph": "¦",
+      "color": "#c89a3a"
+    },
+    {
+      "id": "item.elisir",
+      "name": "Elisir della Mele",
+      "description": "Una bottiglietta verde che sa di liquirizia e di promesse.",
+      "category": "medicina",
+      "weight": 0.3,
+      "stack": 4,
+      "tags": [
+        "medicina",
+        "emporio"
+      ],
+      "glyph": "¡",
+      "color": "#5aa86a",
+      "effects": {
+        "health": 10
+      }
+    },
+    {
+      "id": "item.fico-india",
+      "name": "Fico d'India",
+      "description": "Un frutto spinoso e dolce, da sbucciare con attenzione.",
+      "category": "cibo",
+      "weight": 0.2,
+      "stack": 6,
+      "tags": [
+        "cibo",
+        "deserto"
+      ],
+      "glyph": "ò",
+      "color": "#d8506a",
+      "effects": {
+        "hunger": 15,
+        "thirst": 5
+      }
+    },
+    {
+      "id": "item.ferro-cavallo",
+      "name": "Ferro di cavallo",
+      "description": "Un ferro nuovo, con sette buchi per i chiodi.",
+      "category": "materiale",
+      "weight": 0.5,
+      "stack": 6,
+      "tags": [
+        "materiale",
+        "forgia"
+      ],
+      "glyph": "∩",
+      "color": "#6d7687"
+    },
+    {
+      "id": "item.barra-ferro",
+      "name": "Barra di ferro",
+      "description": "Una barra grezza da battere sull'incudine.",
+      "category": "materiale",
+      "weight": 2,
+      "stack": 6,
+      "tags": [
+        "materiale",
+        "forgia"
+      ],
+      "glyph": "▬",
+      "color": "#55585e"
+    },
+    {
+      "id": "item.chicchi-caffe",
+      "name": "Chicchi di caffè",
+      "description": "Un sacchetto di chicchi tostati, che profumano anche da chiusi.",
+      "category": "materiale",
+      "weight": 0.3,
+      "stack": 6,
+      "tags": [
+        "materiale",
+        "bivacco"
+      ],
+      "glyph": "∴",
+      "color": "#5a3315"
+    },
+    {
+      "id": "item.caffe",
+      "name": "Tazza di caffè",
+      "description": "Caffè nero e bollente, bevuto in piedi accanto al fuoco.",
+      "category": "bevanda",
+      "weight": 0.3,
+      "stack": 3,
+      "tags": [
+        "bevanda",
+        "bivacco"
+      ],
+      "glyph": "u",
+      "color": "#3e2a1a",
+      "effects": {
+        "thirst": 15,
+        "energy": 15
+      }
+    },
+    {
+      "id": "item.sarsaparilla",
+      "name": "Sarsaparilla",
+      "description": "Una bottiglia di sarsaparilla fresca, dolce e frizzante.",
+      "category": "bevanda",
+      "weight": 0.5,
+      "stack": 4,
+      "tags": [
+        "bevanda",
+        "saloon"
+      ],
+      "glyph": "¡",
+      "color": "#8a4b1c",
+      "effects": {
+        "thirst": 20
+      }
+    },
+    {
+      "id": "item.fagioli",
+      "name": "Piatto di fagioli",
+      "description": "Fagioli con la pancetta e un pezzo di pane di mais.",
+      "category": "cibo",
+      "weight": 0.5,
+      "stack": 3,
+      "tags": [
+        "cibo",
+        "saloon"
+      ],
+      "glyph": "ò",
+      "color": "#a0603a",
+      "effects": {
+        "hunger": 35
+      }
+    }
+  ],
+  "recipes": [
+    {
+      "id": "ricetta.caffe",
+      "name": "Caffè del bivacco",
+      "inputs": [
+        {
+          "item": "item.chicchi-caffe",
+          "count": 1
+        }
+      ],
+      "tools": [],
+      "output": {
+        "item": "item.caffe",
+        "count": 1
+      }
+    }
+  ],
+  "loot": {
+    "emporio": {
+      "rolls": [
+        1,
+        3
+      ],
+      "entries": [
+        {
+          "item": "item.fagioli",
+          "weight": 3
+        },
+        {
+          "item": "item.chicchi-caffe",
+          "weight": 3
+        },
+        {
+          "item": "item.cartuccia",
+          "weight": 2,
+          "min": 2,
+          "max": 6
+        },
+        {
+          "item": "item.dollaro",
+          "weight": 2,
+          "min": 1,
+          "max": 3
+        },
+        {
+          "item": "item.elisir",
+          "weight": 1
+        }
+      ]
+    },
+    "miniera": {
+      "rolls": [
+        1,
+        2
+      ],
+      "entries": [
+        {
+          "item": "item.pepita",
+          "weight": 2
+        },
+        {
+          "item": "item.trave",
+          "weight": 3
+        },
+        {
+          "item": "item.barra-ferro",
+          "weight": 2
+        }
+      ]
+    }
+  }
+}

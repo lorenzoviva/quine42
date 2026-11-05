@@ -1,0 +1,32 @@
+{
+  "titolo": "Le Rotte di Vesta",
+  "tono": "concreto e caldo nonostante il freddo di fuori, con un pizzico di meraviglia: stazioni alla deriva lungo le rotte tra gli asteroidi",
+  "sintesi": "Una fascia di asteroidi dove si vive di miniere, di serre e di commercio tra le stazioni. La Stazione Àncora tiene il registro delle rotte, l'Anello del Mercato compra e vende tutto, e i relitti alla deriva sono di chi arriva per primo. Qua e là, sul suolo, si trovano le rune: lastre con un segno che manda una luce tenue.",
+  "storia": "La Stazione Àncora è nata attorno a un vecchio cargo arenato su un asteroide, quando i primi minatori decisero di non ripartire. Poi vennero le serre, il mercato e l'ispettorato delle rotte. I vecchi raccontano dell'anno della grande carestia d'ossigeno, della pilota Dalia che portò in salvo quaranta persone su una navetta per dieci, e della cometa che passò così vicina da illuminare a giorno le gallerie.",
+  "luoghi": [
+    "Stazione Àncora",
+    "Anello del Mercato",
+    "Locanda del Molo Sette",
+    "Relitto della Perseveranza",
+    "Serre di Cerere",
+    "Asteroide Ferroso",
+    "Cometa dei Ghiacci",
+    "Gallerie di Talassa"
+  ],
+  "personaggi": [
+    "I minatori delle gallerie, rumorosi e generosi",
+    "Gli ispettori delle rotte, che contano ogni carico",
+    "Le botaniche delle serre, che parlano alle piante a voce bassa"
+  ],
+  "fatti": [
+    "Ogni carico che attracca alla Stazione Àncora paga un diritto in bombole d'ossigeno.",
+    "La Locanda del Molo Sette serve zuppa d'alghe calda a qualsiasi ora del turno.",
+    "Quando una navetta parte, chi resta batte tre colpi sul portello per augurare buon viaggio.",
+    "Il mercato dell'Anello apre al cambio del turno di notte, quando i minatori tornano dalle gallerie.",
+    "Le carte delle rotte si correggono a mano dopo ogni sciame di meteore."
+  ],
+  "misteri": [
+    "Nessuno sa chi abbia lasciato in orbita la Perseveranza con le stive sigillate.",
+    "Quando passa la Cometa dei Ghiacci, nelle gallerie di Talassa si sente un tintinnio: i minatori dicono che sia il ghiaccio che si spacca."
+  ]
+}

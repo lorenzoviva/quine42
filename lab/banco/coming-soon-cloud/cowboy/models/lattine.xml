@@ -1,0 +1,17 @@
+<!-- Lattine sulla staccionata: a mano (Claude Code, Cantiere 9). Tre pali, due assi e una fila di lattine; ogni seme ne butta giù qualcuna e ne ammacca altre. -->
+<sequence values="BPAKD" size="20 20 20" symmetry="()" name="Lattine">
+  <color symbol="P" value="6a4a2e" name="palo"/>
+  <color symbol="A" value="a07848" name="asse"/>
+  <color symbol="K" value="b8b8b0" name="lattina"/>
+  <color symbol="D" value="8a8a82" name="ammaccatura"/>
+  <box at="2 10 0" size="2 2 10" color="P"/>
+  <box at="10 10 0" size="2 2 10" color="P"/>
+  <box at="18 10 0" size="2 2 10" color="P"/>
+  <box at="10 10 5" size="20 1 1" color="A"/>
+  <box at="10 10 9" size="20 2 1" color="A"/>
+  <prl in="B A" out="K A" p="0.35" steps="1"/>
+  <all steps="2">
+    <rule in="B K" out="K K" p="0.8"/>
+  </all>
+  <prl in="BK" out="DK" p="0.1" steps="1"/>
+</sequence>

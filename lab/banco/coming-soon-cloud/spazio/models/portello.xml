@@ -1,0 +1,18 @@
+<!-- Portello del relitto: a mano (Claude Code, Cantiere 9). Una paratia con un portello rotondo, la ruota di chiusura e una spia; ogni seme cambia la ruggine e le incrostazioni. -->
+<sequence values="BPHWLRK" size="20 20 24" symmetry="()" name="Portello del relitto">
+  <color symbol="P" value="6a6e76" name="paratia"/>
+  <color symbol="H" value="4a4e56" name="portello"/>
+  <color symbol="W" value="c8a050" name="ruota"/>
+  <color symbol="L" value="e8403a" name="spia" glow="True"/>
+  <color symbol="R" value="9a5a3a" name="ruggine"/>
+  <color symbol="K" value="2a2c30" name="giuntura"/>
+  <box at="10 12 0" size="18 4 22" color="P"/>
+  <cylinder at="10 10 3" size="12 2 1" color="K"/>
+  <box at="10 10 3" size="12 1 14" color="H"/>
+  <box at="10 9 9" size="6 1 1" color="W"/>
+  <box at="10 9 7" size="1 1 5" color="W"/>
+  <box at="15 9 17" size="1 1 1" color="L"/>
+  <prl in="B P" out="R P" p="0.25" steps="1"/>
+  <prl in="BP" out="RP" p="0.06" steps="1"/>
+  <prl in="PB" out="PR" p="0.06" steps="1"/>
+</sequence>

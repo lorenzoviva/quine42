@@ -1,0 +1,45 @@
+{
+  "id": "spazio.trivella",
+  "name": "Trivella da asteroide",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "a mano (Claude Code, Cantiere 9)",
+  "description": "Una trivella su tre piedi, con la punta di diamante e un radiatore che si scalda.",
+  "context": "sugli asteroidi, nelle gallerie, nei cantieri",
+  "appearance": {
+    "model": "trivella",
+    "glyph": "⚒",
+    "color": "#d88a3a",
+    "aspetto": "una trivella arancione su tre piedi con una punta lunga e un radiatore",
+    "classe": "mobile"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.45
+  },
+  "actions": [
+    {
+      "id": "perfora",
+      "label": "Perfora la roccia",
+      "requires": "item.cella-energia"
+    },
+    {
+      "id": "raffredda",
+      "label": "Lascia raffreddare"
+    },
+    {
+      "id": "controlla",
+      "label": "Controlla la punta"
+    }
+  ],
+  "spawn": {
+    "tiles": [
+      "s",
+      "r",
+      "k"
+    ],
+    "chance": 0.03,
+    "max": 1
+  },
+  "logic": "logic.lua"
+}

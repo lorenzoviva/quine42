@@ -1,0 +1,32 @@
+{
+  "titolo": "L'Arcipelago delle Sette Secche",
+  "tono": "concreto, caldo e salato, con un pizzico di meraviglia: l'età della vela tra isole senza mappa",
+  "sintesi": "Un arcipelago di isole basse e lagune dove si vive di pesca, di commercio e di contrabbando. I velieri vanno e vengono dal porto di Malvasia, il forte di San Bastiano riscuote i dazi, e nelle grotte si nasconde ciò che non paga. Qua e là, sul suolo, si trovano le rune: lastre con un segno che manda una luce tenue.",
+  "storia": "Malvasia è nata attorno al suo molo, quando i pescatori di corallo cominciarono a vendere le loro perle ai mercanti di passaggio. Poi arrivò il forte, con i suoi cannoni e i suoi dazi, e con i dazi il contrabbando. I vecchi raccontano della grande burrasca che spazzò via mezzo porto, della capitana Ilaria Fuocobianco che tornò con tre velieri carichi d'argento, e dell'anno in cui la laguna gelò per una notte.",
+  "luoghi": [
+    "Porto di Malvasia",
+    "Locanda del Pesce Volante",
+    "Forte di San Bastiano",
+    "Laguna Verde",
+    "Grotte del Riflusso",
+    "Isola delle Scimmie Urlatrici",
+    "Secca della Sabbia Bianca",
+    "Villaggio dei Coralli"
+  ],
+  "personaggi": [
+    "Le ciurme del porto, chiassose e superstiziose",
+    "I doganieri del forte, puntuali e pochissimo amati",
+    "I pescatori di corallo del villaggio, che conoscono ogni secca"
+  ],
+  "fatti": [
+    "Il forte di San Bastiano riscuote un dazio su ogni botte che entra in porto.",
+    "La Locanda del Pesce Volante è aperta giorno e notte: chi sbarca paga da bere a chi resta.",
+    "I velieri che partono all'alba salutano il faro con tre colpi di campana.",
+    "Il mercato del pesce si tiene sul molo ogni mattina, prima che il sole scaldi le pietre.",
+    "Le mappe delle secche si comprano a caro prezzo: ogni burrasca sposta un poco la sabbia."
+  ],
+  "misteri": [
+    "Nessuno ha mai trovato il carico della Gabbiana, affondata davanti alle grotte con le stive piene.",
+    "Nelle notti di marea alta, dalle Grotte del Riflusso arriva un rumore di remi: i pescatori dicono che sia l'acqua tra gli scogli."
+  ]
+}

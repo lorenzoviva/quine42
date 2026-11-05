@@ -1,0 +1,45 @@
+{
+  "id": "pirati.faro",
+  "name": "Lanterna del faro",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "a mano (Claude Code, Cantiere 9)",
+  "description": "Una grande lanterna d'ottone su un piedistallo di pietra, che si vede dal mare.",
+  "context": "sulle scogliere, in cima ai moli, sui forti",
+  "appearance": {
+    "model": "lanterna-faro",
+    "glyph": "☀",
+    "color": "#e8c050",
+    "aspetto": "una grande lanterna d'ottone e vetro su un piedistallo di pietra",
+    "classe": "monumento"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.4
+  },
+  "actions": [
+    {
+      "id": "accendi",
+      "label": "Accendi con l'olio",
+      "requires": "item.olio-lampada"
+    },
+    {
+      "id": "spegni",
+      "label": "Spegni la lanterna"
+    },
+    {
+      "id": "guarda",
+      "label": "Guarda il mare"
+    }
+  ],
+  "spawn": {
+    "tiles": [
+      "l",
+      "s",
+      "r"
+    ],
+    "chance": 0.02,
+    "max": 1
+  },
+  "logic": "logic.lua"
+}

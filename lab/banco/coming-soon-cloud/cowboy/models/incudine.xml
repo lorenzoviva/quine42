@@ -1,0 +1,17 @@
+<!-- Incudine del maniscalco: a mano (Claude Code, Cantiere 9). Un ceppo di legno, l'incudine nera con il corno, le tenaglie; ogni seme cambia i ferri posati e le scaglie. -->
+<sequence values="BCIHTFS" size="20 20 20" symmetry="()" name="Incudine">
+  <color symbol="C" value="6a4a2e" name="ceppo"/>
+  <color symbol="I" value="2e2e33" name="incudine"/>
+  <color symbol="H" value="45454c" name="corno"/>
+  <color symbol="T" value="6d7687" name="tenaglie"/>
+  <color symbol="F" value="8a8f99" name="ferro"/>
+  <color symbol="S" value="4a3020" name="scaglie"/>
+  <cylinder at="10 10 0" size="10 10 8" color="C"/>
+  <box at="10 10 8" size="6 6 2" color="I"/>
+  <box at="10 10 10" size="8 14 3" color="I"/>
+  <box at="10 2 11" size="4 3 2" color="H"/>
+  <box at="15 10 4" size="1 2 6" color="T"/>
+  <prl in="B I" out="F I" p="0.1" steps="1"/>
+  <prl in="BC" out="SC" p="0.08" steps="1"/>
+  <prl in="B C" out="S C" p="0.15" steps="1"/>
+</sequence>

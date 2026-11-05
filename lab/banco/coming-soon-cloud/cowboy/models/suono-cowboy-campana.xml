@@ -1,0 +1,15 @@
+<!-- La campana della stazione: due rintocchi chiari che annunciano il treno. -->
+<sequence name="Campana della stazione" values="BNAMT" size="6 1 10" symmetry="()">
+  <sound bpm="180" scale="pentatonic_minor" root="74" swing="0" cutoff="8000" space="0.4">
+    <track y="0" instrument="lead" volume="0.9"/>
+  </sound>
+  <color symbol="N" value="38bdf8" name="Nota" glow="True"/>
+  <color symbol="A" value="f43f5e" name="Accento" glow="True"/>
+  <color symbol="M" value="10b981" name="Testa" hidden="True"/>
+  <color symbol="T" value="ec4899" name="Partenza" hidden="True"/>
+
+  <line at="0 0 2" to="0 0 4" r="0" color="M"/>
+  <one in="M" out="T" steps="1"/>
+  <all in="M" out="B"/>
+  <one in="BBB BBB BBB TBB" out="BBN BNB BBB ABB"/>
+</sequence>

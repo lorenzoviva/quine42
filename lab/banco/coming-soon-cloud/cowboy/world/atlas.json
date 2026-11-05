@@ -1,0 +1,12 @@
+{
+  "regioni": [
+    { "id": "citta", "nome": "Sorgente Rossa", "descrizione": "case di legno con la facciata alta lungo la strada maestra, la stazione, la banca e l'ufficio dello sceriffo", "ambiente": "borgo", "centro": [0, -6], "raggio": 1 },
+    { "id": "saloon", "nome": "Saloon della Diligenza", "descrizione": "un grande saloon di legno con le porte a battente, la sala del pianoforte e le stanze di sopra per chi scende dalla diligenza", "ambiente": "locanda", "centro": [4, -5], "raggio": 1 },
+    { "id": "ranch", "nome": "Ranch del Ferro di Cavallo", "descrizione": "recinti di staccionata per i cavalli e la mandria, una stalla, il fienile", "ambiente": "maneggio", "centro": [6, 3], "raggio": 1 },
+    { "id": "miniera", "nome": "Miniera della Montagna Spaccata", "descrizione": "gallerie puntellate scavate nella montagna, carrelli e vene d'oro nella roccia", "ambiente": "dungeon", "centro": [-8, 2], "raggio": 1 },
+    { "id": "forte", "nome": "Forte Ventoso", "descrizione": "il forte della cavalleria sull'altopiano, lungo e basso, con il cortile per le esercitazioni", "ambiente": "caserma", "centro": [-6, -4], "raggio": 1 },
+    { "id": "canyon", "nome": "Canyon delle Aquile", "descrizione": "pareti di roccia rossa, passi stretti e nidi d'aquila sulle cime", "ambiente": "montagne", "centro": [-4, 9], "raggio": 1 },
+    { "id": "piana", "nome": "Piana Bruciata", "descrizione": "una distesa di sabbia e rocce bruciate dal sole, cactus e rare pozze", "ambiente": "deserto", "centro": [3, 10], "raggio": 1 },
+    { "id": "pascoli", "nome": "Pascoli dell'Erba Alta", "descrizione": "praterie divise da staccionate, campi di granturco e un capanno per i mandriani", "ambiente": "campi", "centro": [9, -1], "raggio": 1 }
+  ]
+}

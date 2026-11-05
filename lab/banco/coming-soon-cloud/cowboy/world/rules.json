@@ -1,0 +1,9 @@
+{
+  "regole": [
+    { "chiave": "azione.sparare_alle_lattine", "testo": "sparare alle lattine sulla staccionata", "possibile": true, "racconto": "Chiunque può provarci; il fabbro rimette le lattine in fila ogni mattina, e chi le butta giù tutte offre da bere.", "effetti": ["messaggio"] },
+    { "chiave": "azione.cavalcare_mandria", "testo": "saltare in groppa a un manzo della mandria", "possibile": false, "racconto": "I manzi del ranch non si cavalcano: si spaventano, e la mandria intera scappa verso il canyon." },
+    { "chiave": "azione.duello_all_alba", "testo": "sfidare qualcuno a duello all'alba", "possibile": true, "racconto": "La sfida si accetta, e all'alba ci si trova davanti al saloon; lo sceriffo arriva sempre prima e i duellanti finiscono a bere caffè insieme.", "effetti": ["messaggio"] },
+    { "chiave": "fabbricare.caffe", "testo": "fabbricare «Caffè del bivacco»", "possibile": true, "racconto": "Chicchi tostati sul fuoco, acqua del pozzo e un bricco annerito: chi passa ne riceve una tazza.", "effetti": ["ricetta: Chicchi di caffè ×1"] },
+    { "chiave": "azione.rapinare_banca", "testo": "rapinare la banca di Sorgente Rossa", "possibile": false, "racconto": "La cassaforte della banca è murata nella roccia, e il banchiere dorme sopra la cassaforte con la sua doppietta." }
+  ]
+}

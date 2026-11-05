@@ -1,0 +1,20 @@
+<!-- Trivella da asteroide: a mano (Claude Code, Cantiere 9). Tre piedi, il corpo arancione con il radiatore e la punta nella roccia; ogni seme cambia i sassi smossi attorno e le alette del radiatore. -->
+<sequence values="BRPCODK" size="20 20 30" symmetry="()" name="Trivella da asteroide">
+  <color symbol="R" value="7a6a5a" name="roccia"/>
+  <color symbol="P" value="5a5e66" name="piedi"/>
+  <color symbol="C" value="d88a3a" name="corpo"/>
+  <color symbol="O" value="aab0b8" name="radiatore"/>
+  <color symbol="D" value="c8ccd4" name="punta"/>
+  <color symbol="K" value="3a3e46" name="motore"/>
+  <cylinder at="10 10 0" size="14 14 2" color="R"/>
+  <box at="4 10 0" size="2 2 12" color="P"/>
+  <box at="15 6 0" size="2 2 12" color="P"/>
+  <box at="15 14 0" size="2 2 12" color="P"/>
+  <box at="10 10 1" size="2 2 6" color="D"/>
+  <box at="10 10 7" size="12 10 3" color="P"/>
+  <box at="10 10 10" size="8 8 10" color="C"/>
+  <box at="10 10 20" size="6 6 4" color="K"/>
+  <prl in="B R" out="R R" p="0.3" steps="1"/>
+  <prl in="BC" out="OC" p="0.2" steps="1"/>
+  <prl in="CB" out="CO" p="0.2" steps="1"/>
+</sequence>

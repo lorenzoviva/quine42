@@ -1,0 +1,19 @@
+<!-- Vasca idroponica: a mano (Claude Code, Cantiere 9). Una vasca di metallo con l'acqua, le piante che crescono e una lampada su un'asta; ogni seme fa crescere le piante in modo diverso. -->
+<sequence values="BMWGFLA" size="20 20 24" symmetry="()" name="Vasca idroponica">
+  <color symbol="M" value="8a9098" name="vasca"/>
+  <color symbol="W" value="4ab8d8" name="acqua" alpha="0.8"/>
+  <color symbol="G" value="5ab05a" name="foglie"/>
+  <color symbol="F" value="3a8a3a" name="foglie scure"/>
+  <color symbol="L" value="fff0b0" name="lampada" glow="True"/>
+  <color symbol="A" value="5a5e66" name="asta"/>
+  <box at="10 10 0" size="16 12 5" color="M"/>
+  <box at="10 10 4" size="14 10 1" color="W"/>
+  <box at="3 10 5" size="1 1 14" color="A"/>
+  <box at="10 10 19" size="15 3 1" color="A"/>
+  <box at="10 10 18" size="10 2 1" color="L"/>
+  <prl in="B W" out="G W" p="0.4" steps="1"/>
+  <all steps="5">
+    <rule in="B G" out="G G" p="0.35"/>
+  </all>
+  <prl in="B G" out="F G" p="0.3" steps="1"/>
+</sequence>
