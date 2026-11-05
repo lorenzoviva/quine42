@@ -1,0 +1,20 @@
+{
+  "id": "obj.capsula-criogenica",
+  "name": "Capsula criogenica",
+  "kind": "entity",
+  "version": "1.0.0",
+  "description": "Una capsula a uovo col coperchio di vetro brinato, dove i dormienti di Ombralta aspettano una cura o un viaggio. Dentro, un respiro lentissimo.",
+  "context": "nelle sale fredde dei Laboratori di Ombralta",
+  "logic": "logic.lua",
+  "appearance": { "model": "sidera-capsula-criogenica", "glyph": "⬭", "color": "#9fe8ff", "aspetto": "una capsula ovale bianca col coperchio di vetro coperto di brina azzurra" },
+  "physics": { "solid": true, "radius": 0.45 },
+  "tags": ["criogenia", "macchina", "laboratorio"],
+  "components": { "luce": { "raggio": 2, "accesa": true, "colore": "#9fe8ff" }, "capsula": { "freddo": 80, "visite": 0 } },
+  "actions": [
+    { "id": "registro", "label": "Leggi il registro della capsula" },
+    { "id": "rabbocca", "label": "Rabbocca il siero criogenico", "requires": "item.siero-criogenico" },
+    { "id": "riposa", "label": "Riposa nella capsula vuota" },
+    { "id": "parla", "label": "Parla al dormiente" }
+  ],
+  "spawn": { "tiles": ["l"], "chance": 0.1, "max": 2 }
+}

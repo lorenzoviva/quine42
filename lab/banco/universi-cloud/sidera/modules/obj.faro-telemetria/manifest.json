@@ -1,0 +1,19 @@
+{
+  "id": "obj.faro-telemetria",
+  "name": "Faro di telemetria",
+  "kind": "entity",
+  "version": "1.0.0",
+  "description": "Un faro su tre zampe che lampeggia ambra e manda la posizione dei droni e delle navette alla torre della Gilda. Quando la cabina scende dal cordone, tremola con tutti i lampioni.",
+  "context": "sui piloni, ai bordi delle piste, nella Gola dei Cristalli, lungo la costa",
+  "logic": "logic.lua",
+  "appearance": { "model": "sidera-faro", "glyph": "♆", "color": "#f0b43c", "aspetto": "un faro su un treppiede di lega con una luce ambra rotonda in cima e una piccola antenna" },
+  "physics": { "solid": true, "radius": 0.35 },
+  "tags": ["faro", "macchina", "telemetria"],
+  "components": { "luce": { "raggio": 3, "accesa": true, "colore": "#f0b43c" }, "faro": { "silenzi": 0, "ultimo": 0 } },
+  "actions": [
+    { "id": "leggi", "label": "Leggi la telemetria" },
+    { "id": "accendi", "label": "Riaccendi il faro" },
+    { "id": "ripara", "label": "Ripara l'antenna", "requires": "item.filo-superconduttore" }
+  ],
+  "spawn": { "tiles": ["p", "s", "e"], "chance": 0.06, "max": 1 }
+}

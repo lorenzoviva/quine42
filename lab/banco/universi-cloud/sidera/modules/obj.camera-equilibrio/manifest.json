@@ -1,0 +1,19 @@
+{
+  "id": "obj.camera-equilibrio",
+  "name": "Camera di equilibrio",
+  "kind": "entity",
+  "version": "1.0.0",
+  "description": "Un portale di lega con due portelli e una luce che passa dal rosso al verde: pareggia l'aria tra fuori e dentro, alla base dell'ascensore, allo spazioporto e alle torri.",
+  "context": "allo spazioporto, ai portoni delle torri, alla base dell'ascensore",
+  "logic": "logic.lua",
+  "appearance": { "model": "sidera-camera-equilibrio", "glyph": "⊓", "color": "#f0b43c", "aspetto": "un portale di lega grigia con due portelli scorrevoli e una lampada che passa dal rosso al verde" },
+  "physics": { "solid": true, "radius": 0.5 },
+  "tags": ["portale", "macchina"],
+  "components": { "equilibrio": { "ciclo": 0, "pronta": true } },
+  "actions": [
+    { "id": "cicla", "label": "Avvia il ciclo della camera" },
+    { "id": "gettone", "label": "Inserisci un gettone della cabina", "requires": "item.gettone-cabina" },
+    { "id": "ascolta", "label": "Ascolta il sibilo dell'aria" }
+  ],
+  "spawn": { "tiles": ["e", "p"], "chance": 0.03, "max": 1 }
+}

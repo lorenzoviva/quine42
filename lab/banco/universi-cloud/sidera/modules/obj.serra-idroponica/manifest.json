@@ -1,0 +1,21 @@
+{
+  "id": "obj.serra-idroponica",
+  "name": "Serra idroponica",
+  "kind": "entity",
+  "version": "1.0.0",
+  "description": "Uno scaffale di vasche idroponiche a tre piani, con le lampade rosa e i germogli che crescono nella soluzione nutritiva.",
+  "context": "nelle cupole di Serralta, negli orti pensili, nei laboratori",
+  "logic": "logic.lua",
+  "appearance": { "model": "sidera-serra-idroponica", "glyph": "♧", "color": "#6adf8a", "aspetto": "uno scaffale a tre ripiani con vasche di germogli verdi e lampade rosa" },
+  "physics": { "solid": true, "radius": 0.45 },
+  "tags": ["serra", "piante", "tagliabile"],
+  "components": { "serra": { "crescita": 0, "ultima": 0, "nutrita": false } },
+  "drops": ["item.frutto-vetro", "item.foglie-felce"],
+  "actions": [
+    { "id": "nutri", "label": "Versa la soluzione nutritiva", "requires": "item.soluzione-nutritiva" },
+    { "id": "semina", "label": "Semina i semi di Serralta", "requires": "item.semi-alieni" },
+    { "id": "raccogli", "label": "Raccogli ciò che è maturo" },
+    { "id": "osserva", "label": "Osserva i germogli" }
+  ],
+  "spawn": { "tiles": ["m", "f", "l"], "chance": 0.15, "max": 2 }
+}
