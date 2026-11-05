@@ -1,0 +1,44 @@
+{
+  "id": "spazio.capsula",
+  "name": "Capsula di salvataggio",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "a mano (Claude Code, Cantiere 9)",
+  "description": "Una capsula a uovo con l'oblò, tirata in secco e mai usata.",
+  "context": "sui moli, nei relitti, accanto alle stazioni",
+  "appearance": {
+    "model": "capsula",
+    "glyph": "⬭",
+    "color": "#e8e0d0",
+    "aspetto": "una capsula di salvataggio a forma d'uovo, bianca, con un oblò rotondo",
+    "classe": "mobile"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.5
+  },
+  "actions": [
+    {
+      "id": "controlla",
+      "label": "Controlla le scorte"
+    },
+    {
+      "id": "rifornisci",
+      "label": "Metti una razione",
+      "requires": "item.razione"
+    },
+    {
+      "id": "apri_portello",
+      "label": "Apri il portello della capsula"
+    }
+  ],
+  "spawn": {
+    "tiles": [
+      "l",
+      "s"
+    ],
+    "chance": 0.03,
+    "max": 1
+  },
+  "logic": "logic.lua"
+}

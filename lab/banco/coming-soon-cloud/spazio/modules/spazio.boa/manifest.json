@@ -1,0 +1,45 @@
+{
+  "id": "spazio.boa",
+  "name": "Boa di segnalazione",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "a mano (Claude Code, Cantiere 9)",
+  "description": "Una boa di rotta con una lampada in cima, piantata dove la roccia finisce.",
+  "context": "ai margini degli asteroidi, sui moli, all'ingresso delle gallerie",
+  "appearance": {
+    "model": "boa-segnale",
+    "glyph": "☀",
+    "color": "#e85040",
+    "aspetto": "una boa di segnalazione a strisce rosse e bianche con una lampada in cima",
+    "classe": "monumento"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.35
+  },
+  "actions": [
+    {
+      "id": "accendi",
+      "label": "Accendi con una cella",
+      "requires": "item.cella-energia"
+    },
+    {
+      "id": "spegni",
+      "label": "Spegni la boa"
+    },
+    {
+      "id": "guarda",
+      "label": "Guarda la rotta"
+    }
+  ],
+  "spawn": {
+    "tiles": [
+      "s",
+      "r",
+      "l"
+    ],
+    "chance": 0.02,
+    "max": 1
+  },
+  "logic": "logic.lua"
+}

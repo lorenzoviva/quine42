@@ -1,0 +1,19 @@
+<!-- Boa di segnalazione: a mano (Claude Code, Cantiere 9). Una colonna a strisce rosse e bianche su una base di roccia, la lampada in cima; ogni seme cambia i sassi della base e i ganci. -->
+<sequence values="BRWSLGK" size="20 20 36" symmetry="()" name="Boa di segnalazione">
+  <color symbol="R" value="7a6a5a" name="roccia"/>
+  <color symbol="W" value="eef0f2" name="bianco"/>
+  <color symbol="S" value="d8402a" name="rosso"/>
+  <color symbol="L" value="ff7a5a" name="lampada" glow="True"/>
+  <color symbol="G" value="8a9098" name="gancio"/>
+  <color symbol="K" value="3a3e46" name="cappello"/>
+  <cylinder at="10 10 0" size="12 12 3" color="R"/>
+  <cylinder at="10 10 3" size="6 6 24" color="W"/>
+  <cylinder at="10 10 7" size="6 6 4" color="S"/>
+  <cylinder at="10 10 15" size="6 6 4" color="S"/>
+  <cylinder at="10 10 23" size="6 6 4" color="S"/>
+  <cylinder at="10 10 27" size="4 4 4" color="L"/>
+  <cylinder at="10 10 31" size="6 6 2" color="K"/>
+  <prl in="B R" out="R R" p="0.3" steps="1"/>
+  <prl in="BW" out="GW" p="0.06" steps="1"/>
+  <prl in="WB" out="WG" p="0.06" steps="1"/>
+</sequence>

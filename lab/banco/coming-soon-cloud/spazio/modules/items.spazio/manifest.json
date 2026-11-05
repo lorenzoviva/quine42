@@ -1,0 +1,29 @@
+{
+  "id": "items.spazio",
+  "name": "Merci delle rotte",
+  "kind": "data",
+  "version": "0.1.0",
+  "origin": "a mano (Claude Code)",
+  "description": "Ciò che si compra, si vende e si recupera tra le stazioni: bombole, celle d'energia, minerale, gettoni, razioni.",
+  "items": [
+    { "id": "item.bombola-ossigeno", "name": "Bombola d'ossigeno", "description": "Una bombola d'acciaio piena d'aria buona, con il manometro sul collo.", "category": "attrezzo", "weight": 3, "stack": 3, "tags": ["attrezzo", "aria"], "glyph": "▯", "color": "#d8e8f0" },
+    { "id": "item.bombola-vuota", "name": "Bombola vuota", "description": "Una bombola d'acciaio che suona vuota quando la batti.", "category": "materiale", "weight": 2.5, "stack": 3, "tags": ["materiale", "aria"], "glyph": "▯", "color": "#8a98a0" },
+    { "id": "item.cella-energia", "name": "Cella d'energia", "description": "Un cilindro tiepido che ronza piano: accende scudi, trivelle e boe.", "category": "materiale", "weight": 1, "stack": 6, "tags": ["materiale", "energia"], "glyph": "⌁", "color": "#5ad8ff" },
+    { "id": "item.gettone", "name": "Gettone di stazione", "description": "Un gettone d'ottone con il buco al centro: la moneta delle rotte.", "category": "varie", "weight": 0.02, "stack": 50, "tags": ["moneta"], "glyph": "¤", "color": "#d8b04a" },
+    { "id": "item.minerale-ferro", "name": "Minerale ferroso", "description": "Un pezzo di roccia rossastra, pesante, che si attacca alle calamite.", "category": "materiale", "weight": 2, "stack": 10, "tags": ["materiale", "miniera"], "glyph": "◆", "color": "#a0583a" },
+    { "id": "item.razione", "name": "Razione di alghe", "description": "Una tavoletta verde scura che sa di mare e di sale.", "category": "cibo", "weight": 0.2, "stack": 10, "tags": ["cibo", "serra"], "glyph": "▫", "color": "#5a8a4a", "effects": { "hunger": 25 } },
+    { "id": "item.alghe", "name": "Alghe essiccate", "description": "Un mazzetto di alghe delle serre, secche e croccanti.", "category": "materiale", "weight": 0.1, "stack": 10, "tags": ["materiale", "serra"], "glyph": "≀", "color": "#4a7a3a" },
+    { "id": "item.semi", "name": "Bustina di semi", "description": "Semi di lattuga delle serre, in una bustina di carta cerata.", "category": "materiale", "weight": 0.05, "stack": 10, "tags": ["materiale", "serra"], "glyph": "∵", "color": "#c8b070" },
+    { "id": "item.taccuino", "name": "Taccuino di bordo", "description": "Un taccuino a quadretti con la copertina di tela cerata.", "category": "attrezzo", "weight": 0.2, "stack": 3, "tags": ["attrezzo", "rotte"], "glyph": "▤", "color": "#c89a5a" },
+    { "id": "item.carta-stellare", "name": "Carta stellare", "description": "Una carta delle stelle ricopiata a mano, con una croce dove passa la cometa.", "category": "varie", "weight": 0.1, "stack": 1, "tags": ["rotte", "tesoro"], "glyph": "✦", "color": "#e8e0c0" },
+    { "id": "item.piastra", "name": "Piastra della Perseveranza", "description": "Una piastra di metallo annerita con lo stemma di un cargo perduto.", "category": "varie", "weight": 0.5, "stack": 1, "tags": ["tesoro", "relitto"], "glyph": "◘", "color": "#6a6a72" },
+    { "id": "item.chiave-inglese", "name": "Chiave inglese", "description": "Una chiave inglese pesante, buona per i bulloni e per bussare forte.", "category": "attrezzo", "weight": 1.2, "stack": 1, "tags": ["attrezzo", "officina"], "glyph": "⚒", "color": "#9aa0a8" }
+  ],
+  "recipes": [
+    { "id": "ricetta.razione", "name": "Razione di alghe", "inputs": [{ "item": "item.alghe", "count": 2 }], "tools": [], "output": { "item": "item.razione", "count": 1 } }
+  ],
+  "loot": {
+    "relitto": { "rolls": [2, 4], "entries": [ { "item": "item.cella-energia", "weight": 4 }, { "item": "item.gettone", "weight": 3, "min": 1, "max": 4 }, { "item": "item.bombola-vuota", "weight": 2 }, { "item": "item.piastra", "weight": 1 }, { "item": "item.chiave-inglese", "weight": 1 } ] },
+    "capsula": { "rolls": [1, 3], "entries": [ { "item": "item.razione", "weight": 4 }, { "item": "item.bombola-ossigeno", "weight": 1 }, { "item": "item.taccuino", "weight": 1 }, { "item": "item.cella-energia", "weight": 1 } ] }
+  }
+}

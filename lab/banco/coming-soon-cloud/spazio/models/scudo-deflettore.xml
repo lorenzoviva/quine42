@@ -1,0 +1,16 @@
+<!-- Generatore di scudo deflettore: a mano (Claude Code, Cantiere 9). Un corpo tozzo con alette e una sfera viola in cima; ogni seme cambia le alette di raffreddamento e i cavi. -->
+<sequence values="BMDVACK" size="20 20 24" symmetry="()" name="Scudo deflettore">
+  <color symbol="M" value="7a8088" name="corpo"/>
+  <color symbol="D" value="3a3e46" name="base"/>
+  <color symbol="V" value="a08aff" name="sfera" glow="True"/>
+  <color symbol="A" value="aab0b8" name="aletta"/>
+  <color symbol="C" value="d8a83a" name="cavo"/>
+  <color symbol="K" value="5a5e66" name="anello"/>
+  <cylinder at="10 10 0" size="16 16 3" color="D"/>
+  <cylinder at="10 10 3" size="10 10 10" color="M"/>
+  <cylinder at="10 10 13" size="12 12 2" color="K"/>
+  <cylinder at="10 10 15" size="8 8 6" color="V"/>
+  <prl in="BM" out="AM" p="0.18" steps="1"/>
+  <prl in="MB" out="MA" p="0.18" steps="1"/>
+  <prl in="B D" out="C D" p="0.1" steps="1"/>
+</sequence>

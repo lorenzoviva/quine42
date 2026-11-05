@@ -1,0 +1,44 @@
+{
+  "id": "spazio.vasca",
+  "name": "Vasca idroponica",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "a mano (Claude Code, Cantiere 9)",
+  "description": "Una vasca di serra con l'acqua che scorre tra le radici e una lampada sopra.",
+  "context": "nelle serre, nelle cucine delle stazioni, nei moduli abitati",
+  "appearance": {
+    "model": "vasca-serra",
+    "glyph": "♣",
+    "color": "#5ab05a",
+    "aspetto": "una vasca di metallo piena di piante verdi sotto una lampada",
+    "classe": "mobile"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.45
+  },
+  "actions": [
+    {
+      "id": "semina",
+      "label": "Semina",
+      "requires": "item.semi"
+    },
+    {
+      "id": "irriga",
+      "label": "Apri l'acqua"
+    },
+    {
+      "id": "raccogli",
+      "label": "Raccogli le alghe"
+    }
+  ],
+  "spawn": {
+    "tiles": [
+      "g",
+      "f"
+    ],
+    "chance": 0.05,
+    "max": 2
+  },
+  "logic": "logic.lua"
+}

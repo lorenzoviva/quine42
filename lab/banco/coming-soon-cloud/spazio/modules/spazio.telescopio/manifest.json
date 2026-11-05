@@ -1,0 +1,41 @@
+{
+  "id": "spazio.telescopio",
+  "name": "Telescopio",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "a mano (Claude Code, Cantiere 9)",
+  "description": "Un telescopio d'ottone su un treppiede, puntato verso la cometa.",
+  "context": "sulle cupole, sui tetti delle stazioni, nelle botteghe dei navigatori",
+  "appearance": {
+    "model": "telescopio",
+    "glyph": "⌖",
+    "color": "#c8a050",
+    "aspetto": "un telescopio d'ottone su un treppiede di legno",
+    "classe": "mobile"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.35
+  },
+  "actions": [
+    {
+      "id": "osserva",
+      "label": "Guarda nel telescopio"
+    },
+    {
+      "id": "annota",
+      "label": "Annota la posizione della cometa",
+      "requires": "item.taccuino"
+    }
+  ],
+  "spawn": {
+    "tiles": [
+      "l",
+      "s",
+      "g"
+    ],
+    "chance": 0.02,
+    "max": 1
+  },
+  "logic": "logic.lua"
+}
