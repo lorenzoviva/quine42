@@ -4356,3 +4356,11 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Test: `tests/lots.test.ts` con la casa nuova, tutti i punti e non quattro tiri; suite intera e typecheck con i loro turni.
 - Browser: sì, un oggetto dentro una struttura del catalogo.
 - Quando è fatto: commit su `task/T281`. Sicurezza: nessuna superficie nuova.
+
+### T282 · Integrare T275: il conflitto in `package.json` — `da fare`
+- Pipeline: claude · stima 1% · approvato · priorità 1
+- Sforzo: high.
+- Contesto: `integra T275` si è fermato su `package.json`. Nasce da T275: `dossier T275`. `3d` ha aggiunto lo script `universi:cloud` (T279), `task/T275` lo script `genera` e la versione `0.1.6`.
+- Cosa fare: nel tuo worktree `git merge task/T275`; in `package.json` tieni i due script e la versione `0.1.6`, uguale in `version.ts`. Gli ADR 0142 e 0143 di T275 si scontrano col 0142 di T276: rinumerali ai primi liberi, anche nei rimandi di `AGENTS.md`, `docs/architettura-dettagli.md` e `docs/adr/README.md`. Suite intera e typecheck con i loro turni; i due test «forte» di `lab/tests/riferimento.test.ts` hanno un limite di tempo reale, sotto carico possono cadere: riprovali da soli e dillo nell'esito.
+- Browser: non serve, T275 ha già provato T264.
+- Quando è fatto: commit su `task/T282`. All'integrazione l'orchestratore segna `fatto` T264, T265, T267, T207 e dà `integra T275`. Sicurezza: scrivi l'esito, T265 tocca le scritture dell'universo.
