@@ -3330,6 +3330,12 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Cosa fare: come T153, un universo alla volta, nessuna chiamata alle API Gemini.
 - Quando è fatto: i tre universi su disco; nell'esito il costo di ciascuno e ciò che si è visto.
 
+### T269 · I tre reami sul banco: spazio, pirati, cowboy — `fatto` (`9765398`, `962bcc1`, `bc173fd`)
+- Step: 37
+- Contesto: sessione del 05/11 (Cantiere 9), su richiesta dell'autore, mentre T184 e T185 restano in attesa: non tocca la Genesi né genera universi, scrive a mano ciò che un universo di ciascun tema deve contenere e misura quanto il kernel di oggi lo regge.
+- Fatto: `lab/banco/coming-soon-cloud/{spazio,pirati,cowboy}/` (tema, bibbia, stile, lessico, canone con 10 rune e 2 formule, atlante di 8 regioni, 16 individui, 6 trame, 5 regole, 12 moduli Lua, un pacchetto di oggetti, 10 modelli MarkovJunior, 4 brani e 2 effetti sonori, un README per reame) e `verifica.ts`, che valida tutto con i validatori del kernel (rune su `validateNewRune`, incantesimi su `validateEffects`, moduli su `validateForged`, società, trame, bibbia, atlante, quarta parete; modelli su 5 semi con `analyse` e la soglia `statico` di `varianza.ts`; suoni su 10 terne di semi con `analyzeSound`) e fa girare ogni reame su un `Kernel` vero per 400 tick con `MockAiModels`: tutti e tre reggono, 0 fault, 0 rotture della quarta parete (`esito.md`). `tests/reami.test.ts` fa lo stesso senza i suoni e prova che la verifica rifiuta ciò che deve.
+- Diverso dal previsto: i moduli hanno `logic.lua` (la convenzione del repository), non `module.lua`; i modelli non sono strutture (la soglia piena di `varianza.ts` vale per edifici con stanze, qui si misura solo che i semi cambino la forma). Non funziona col kernel di oggi, scritto nei README: ambienti e terreni sono quelli del seme rinominati; navi, treni, navette e cavalli non portano nessuno (il kernel non tiene un corpo su un altro, T183); gli effetti sonori dei reami non hanno un evento (Lua non può chiedere un suono); nello spazio il vuoto non è un terreno e l'ossigeno è un oggetto, non un bisogno; `META_RE` vieta parole del mestiere dello spazio (calcolatore sì, «computer» no). Non provato: il browser, un Concilio vero. Sicurezza: nessuna superficie nuova.
+
 ### T186 · Sul sito: spazio, pirati e cowboy «coming soon» — `fatto` (`f776e79`) (dipende da T205)
 - Pipeline: claude · stima 1% · approvato · browser · priorità 85
 - Step: 21
