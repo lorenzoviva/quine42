@@ -5,11 +5,12 @@ Una veste è una cartella qui dentro (ADR-0145). Il nome della cartella è il su
 - `skin.json`: `nome` (nel selettore), `descrizione`, `icona` (la favicon, un file della cartella).
 - `skin.css`: ogni token `--skin-*` che la base legge, sotto `:root[data-skin='<id>']`. Le altre regole sotto `[data-skin='<id>'] …`. È un file servito così com'è: gli `url()` sono relativi alla cartella, i `@font-face` si dichiarano qui.
 - Font, sfondi, loghi: file della cartella (`.css .svg .png .jpg .webp .ico .woff2 .woff`).
-- `effects.ts`, facoltativo: `export function start() { …; return () => { /* ferma tutto */ }; }`. Si carica solo per la veste in uso; si ferma a scheda nascosta e rispetta `prefers-reduced-motion` per conto suo. Meglio a tick che a ogni fotogramma: la futuristica aspetta il tick con un timer e dipinge un fotogramma solo, e muove solo ciò che si vede (ADR-0151). Può importare altri moduli della sua cartella, che Vite porta con lui.
+- `effects.ts`, facoltativo: `export function start() { …; return () => { /* ferma tutto */ }; }`. Si carica solo per la veste in uso; si ferma a scheda nascosta e rispetta `prefers-reduced-motion` per conto suo. Meglio a tick che a ogni fotogramma: la futuristica aspetta il tick con un timer e dipinge un fotogramma solo, e muove solo ciò che si vede (ADR-0151). Può importare altri moduli della sua cartella, che Vite porta con lui. Ciò che si muove sta qui e non in `skin.css`, che non può avere `@keyframes` né `@media` (ogni regola sta sotto `[data-skin='<id>']`): la veste a fumetto anima il suo `body::before` con la Web Animations API (`effects.ts` lì).
+- Altri file che non sono di quell'elenco (un generatore dei disegni, come `fumetto/genera.ts`) restano nella cartella: non si servono e non entrano nella build.
 
 Le vesti cambiano l'aspetto, non i contenuti né la struttura: spazi e corpi vengono dalla scala di `src/theme.css`.
 
-Il logo è la scritta `.nav-logo` e `.footer-brand`, con i token `--skin-logo-*`; per un'immagine, una regola in `skin.css`. Logo e icona della sobria e della futuristica vengono dalle proposte, estratti così come sono: `npx vite-node --script tools/vesti/estrai.ts` li riscrive (`tools/vesti/logo.ts`, `tools/vesti/scritta.ts`), e i loro test rifiutano un ritocco a mano.
+Il logo è la scritta `.nav-logo` e `.footer-brand`, con i token `--skin-logo-*`; per un'immagine, una regola in `skin.css`. Logo e icona della sobria e della futuristica vengono dalle proposte, estratti così come sono: `npx vite-node --script tools/vesti/estrai.ts` li riscrive (`tools/vesti/logo.ts`, `tools/vesti/scritta.ts`), e i loro test rifiutano un ritocco a mano. Quelli del fumetto (la scritta e l'icona della proposta 01, con la Q in un corpo solo, e i pois) li riscrive `npx vite-node site/skins/fumetto/genera.ts -- --scrivi`, e `tests/site-skin-fumetto.test.ts` li confronta.
 
 Aggiungere una veste non tocca nient'altro. `npx vitest run tests/site-skins.test.ts` dice se manca qualcosa.
 

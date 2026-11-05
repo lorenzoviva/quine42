@@ -1,6 +1,9 @@
-/* La veste a fumetto (T283, ADR-0145): la prima stesura, solo colori, font e retini. La Q, i pois animati e la palette sono di T285. */
+/* La veste a fumetto (T285): «Crea la tua quine-storia». La scritta e l'icona sono quelle della proposta 01 di Claude (v2), con la Q in un corpo solo; i pois
+   delle pagine sono un retino a mezzatinta che si muove piano (effects.ts). Scritta, icona e retino si rigenerano con genera.mjs.
+   La palette è quella della proposta, con ciò che stonava riportato nella famiglia dei tre inchiostri del logo (giallo, ciano, rosa) e del nero:
+   il viola elettrico, il grigio beige tra neutri viola, il bianco sul rosa e il rosso gemello del rosa. Misure e catture: docs/design/vesti/fumetto.md. */
 :root[data-skin='fumetto'] {
-  /* Colori */
+  /* Colori: i tre inchiostri, il nero, la carta e la notte */
   --skin-bg: #090514;
   --skin-panel: #130a24;
   --skin-panel-raised: #1c1133;
@@ -8,16 +11,16 @@
   --skin-ink-raised: #150c26;
   --skin-ink-surface: #1e1038;
   --skin-text: #fff5ea;
-  --skin-text-dim: #c5b8a9;
+  --skin-text-dim: #c9bfe0;
   --skin-text-faint: #8c829c;
   --skin-primary: #ffe600;
   --skin-accent: #00f0ff;
   --skin-accent-2: #ff2a85;
   --skin-success: #05ffa1;
-  --skin-danger: #ff3344;
-  --skin-rare: #9d00ff;
+  --skin-danger: #ff2600;
+  --skin-rare: #a968ff;
   --skin-on-bright: #07040d;
-  --skin-on-accent-2: #ffffff;
+  --skin-on-accent-2: #07040d;
   --skin-grid-line: rgba(0, 240, 255, 0.18);
 
   /* Font */
@@ -27,37 +30,120 @@
   --skin-font-mono: 'Cascadia Mono', 'JetBrains Mono', Consolas, 'DejaVu Sans Mono', monospace;
   --skin-font-logo: 'Bangers', 'Impact', 'Arial Black', sans-serif;
 
-  /* Titoli e logo */
+  /* Titoli come le lettere del logo: contorno nero ed estrusione rosa. Il logo è un disegno (logo.svg): la scritta resta per chi non vede */
   --skin-title-color: #ffe600;
   --skin-title-weight: 400;
   --skin-title-spacing: 0.05em;
   --skin-title-case: uppercase;
-  --skin-title-shadow: -2px -2px 0 #07040d, 2px -2px 0 #07040d, -2px 2px 0 #07040d, 2px 2px 0 #07040d, 4px 4px 0 #ff2a85;
+  --skin-title-shadow: -2px -2px 0 #07040d, 2px -2px 0 #07040d, -2px 2px 0 #07040d, 2px 2px 0 #07040d, 3px 3px 0 #07040d, 4px 4px 0 #ff2a85, 5px 5px 0 #ff2a85;
   --skin-title-transform: skew(-2deg);
-  --skin-logo-color: #ffe600;
-  --skin-logo-spacing: 0.12em;
-  --skin-logo-shadow: -2px -2px 0 #07040d, 2px -2px 0 #07040d, -2px 2px 0 #07040d, 2px 2px 0 #07040d, 3px 3px 0 #ff2a85;
-  --skin-logo-transform: skew(-4deg);
+  --skin-logo-color: transparent;
+  --skin-logo-spacing: 0;
+  --skin-logo-shadow: none;
+  --skin-logo-transform: none;
 
-  /* Ombre e bagliori */
+  /* Ombre piene, senza sfumatura, come l'inchiostro */
   --skin-shadow-s: var(--space-2);
   --skin-shadow-m: var(--space-5);
   --skin-shadow-l: var(--space-8);
   --skin-shadow-blur: 0px;
   --skin-glow: var(--space-13);
 
-  /* Sfondi */
-  --skin-page-background: radial-gradient(circle, rgba(255, 42, 133, 0.16) 1.5px, transparent 1.5px), linear-gradient(180deg, #090514 0%, #130a24 100%);
+  /* Sfondi: i pois delle pagine sono il livello sotto (body::before), questi stanno fermi */
+  --skin-page-background: linear-gradient(180deg, #090514 0%, #130a24 100%);
   --skin-nav-background: #090514;
-  --skin-stage-background: radial-gradient(circle at center, rgba(157, 0, 255, 0.25) 0%, rgba(9, 5, 20, 0.95) 75%);
-  --skin-texture: radial-gradient(circle, rgba(0, 240, 255, 0.2) 1.5px, transparent 1.5px);
+  --skin-stage-background: radial-gradient(circle at center, rgba(255, 42, 133, 0.18) 0%, rgba(9, 5, 20, 0.95) 75%);
+  --skin-texture: radial-gradient(circle, rgba(255, 42, 133, 0.16) 1.5px, transparent 1.5px);
 }
 
-[data-skin='fumetto'] body {
-  background-size: var(--space-13) var(--space-13), auto;
+/* Il retino delle pagine: due raggiere di pois dagli angoli della finestra, che spariscono prima del centro, a ogni proporzione dello schermo.
+   Al più 0,32 di opacità: sul pixel peggiore (il pois ciano più grosso sul fondo del gradiente) testo, grigio secondario, giallo e ciano restano sopra 4,5:1. Fermo senza JavaScript; effects.ts lo fa respirare */
+[data-skin='fumetto'] body::before {
+  content: '';
+  position: fixed;
+  inset: calc(0px - var(--space-34));
+  z-index: -1;
+  background:
+    url('pois-rosa.svg') right top / min(var(--measure-843), 61.8vmax) no-repeat,
+    url('pois-ciano.svg') left bottom / min(var(--measure-843), 61.8vmax) no-repeat;
+  opacity: 0.32;
+  pointer-events: none;
+}
+
+/* Il logo */
+[data-skin='fumetto'] .nav-logo,
+[data-skin='fumetto'] .footer-brand {
+  display: block;
+  aspect-ratio: 540 / 172;
+  background: url('logo.svg') left center / contain no-repeat;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+[data-skin='fumetto'] .nav-logo {
+  height: clamp(var(--space-34), 10vw, var(--space-55));
+}
+
+[data-skin='fumetto'] .footer-brand {
+  height: var(--space-89);
+  margin-left: auto;
+  margin-right: auto;
+  background-position: center;
 }
 
 [data-skin='fumetto'] .nav-link,
 [data-skin='fumetto'] .comic-btn {
   letter-spacing: 0.05em;
+}
+
+/* Le didascalie del narratore: la storia nella storia */
+[data-skin='fumetto'] .section-head p {
+  display: inline-block;
+  padding: var(--space-5) var(--space-8);
+  background: var(--skin-primary);
+  color: var(--skin-on-bright);
+  border: var(--border-ink);
+  box-shadow: var(--shadow-s) var(--skin-ink);
+  transform: skew(-2deg);
+}
+
+/* La scheda scelta della vetrina: inchiostro sul rosa, come ogni scritta su un colore */
+[data-skin='fumetto'] .showcase-tab[aria-selected='true'] {
+  color: var(--skin-on-accent-2);
+}
+
+/* Chi parla, parla in un fumetto: il gerboa del footer e l'etichetta del palco */
+[data-skin='fumetto'] .jerboa-tooltip {
+  background: var(--skin-text);
+  color: var(--skin-on-bright);
+  border: var(--border-ink-thick);
+  border-radius: var(--space-21);
+  box-shadow: var(--shadow-s) var(--skin-accent-2);
+}
+
+[data-skin='fumetto'] .jerboa-tooltip::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: var(--space-13);
+  height: var(--space-13);
+  background: var(--skin-text);
+  border-right: var(--border-ink-thick);
+  border-bottom: var(--border-ink-thick);
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+[data-skin='fumetto'] .hero-3d-badge {
+  border-radius: var(--space-13);
+}
+
+[data-skin='fumetto'] .hero-3d-badge::after {
+  content: '';
+  position: absolute;
+  left: var(--space-13);
+  top: 100%;
+  border-left: var(--space-8) solid transparent;
+  border-right: var(--space-2) solid transparent;
+  border-top: var(--space-8) solid var(--skin-ink);
 }
