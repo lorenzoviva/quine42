@@ -4011,7 +4011,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Esito: creato e committato `docs/pipeline/modelli.md` con tabella modelli × 8 tipi di task, benchmark pubbliche con data e URL (incluse le contraddizioni), misure reali sulle 141 righe di `consumi.jsonl` e sui benchmark interni (`costi-step8.2B.md`, `lab/banco/`, `quadro.md`), prezzi di listino, contatori CLI (`claude` e `agy`) e proposta motivata di assegnazione per T255; nessun file di codice o configurazione modificato.
 
 ### T255 · I modelli di Claude distinti nella pipeline, lo sforzo (`effort`) e l'assegnazione dalla scheda — `da fare` (dipende da T254, T268)
-- Pipeline: claude · stima 3% · approvato · priorità 2
+- Pipeline: claude · stima 3% · approvato · priorità 0
 - Sforzo: extra. Decisione dell'autore del 05/11, da codificare in `pianifica.md`, `orchestra.md` e nel predefinito di `assegna`: tanti task `high`, media `extra`, `max` qua e là; la qualità conta più del tempo.
 - Ripresa: Argon si è fermato a metà (0 % fino all'11/11). Il worktree `t255` ha le sue modifiche non committate a `tools/pipeline/config.json`, `orchestra.mjs`, `pipeline.mjs`: rileggile con `git diff`, tieni ciò che è giusto, completa e committa. Il ramo è indietro rispetto al base: fondi il base prima dei test.
 - Contesto: richiesta dell'autore, sopra e il 05/11 («Voglio che per i task venga anche stimato e distinto l'effort (low, medium, high, extra, max) ho notato che con max i risultati sono eccezionali, sopra ogni aspettativa»). Oggi il provider `claude` è Opus 5.5 e nulla lo dice, né la pipeline distingue o registra il livello di sforzo (`effort`). Nasce da T254 (`dossier T254`), T257 (`dossier T257`) e T268 (`dossier T268`).
