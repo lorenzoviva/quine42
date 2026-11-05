@@ -4564,3 +4564,13 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Test: il caso riprodotto, una via su rilievo con gradini validi e invalidi. Typecheck e suite intera con i loro turni. Versione del kernel (ADR-0136).
 - Browser: sì, con `?skip&offline`: un individuo che attraversa un dislivello e il rientro a piedi in un cantiere. Catture nel commit.
 - Quando è fatto: commit su `task/T299`.
+
+### T300 · Integrare T297 sul base con T283: il censimento e l'ADR-0145 — `da fare`
+- Pipeline: claude · stima 1% · approvato · priorità 1
+- Sforzo: high.
+- Step: 32
+- Contesto: `integra T297` e `integra T280` si fermano su `docs/glossario-censimento.md`, perché T283 è entrato nel base con la voce «Veste» e con ADR-0145. Nasce da T297: `dossier T297`, e da T283: `dossier T283`. `task/T297` contiene già `task/T280` e usa ADR-0145, 0146, 0147.
+- Cosa fare: nel tuo worktree `git merge task/T297`. Il censimento è generato: rigeneralo con `tools/glossario/glossario.mjs`, non fonderlo a mano. **ADR:** ADR-0145 sul base è di T283 (le vesti) e resta suo: rinumera imprese, edificio per stadi e fuori vista ai primi numeri liberi, con i rimandi in `AGENTS.md`, `docs/architettura-dettagli.md`, indice degli ADR e codice. Versione `0.1.9` uguale nei quattro file (ADR-0136), o più alta se il base nel frattempo è salito.
+- Test: suite intera e typecheck con i loro turni.
+- Browser: non serve, T280 ha già guardato.
+- Quando è fatto: commit su `task/T300`. Nell'esito: i numeri nuovi degli ADR; ricorda di dare `integra T297` e `integra T280` e di segnare `fatto` T245d, T245e, T245f.
