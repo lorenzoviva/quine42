@@ -1,0 +1,64 @@
+<!-- Caldaia a pressione, steampunk (Cantiere 2, Parte B): un corpo di rame cerchiato d'ottone su uno zoccolo di ghisa, il focolare acceso
+     sul davanti, un manometro e il camino. Il seme sceglie se il corpo è snello o panciuto, quanto è alto, dove e quanto sale il camino
+     sulla cupola e da che lato esce il tubo del vapore. -->
+<sequence values="BGCOAFMPEhkVrtwmXY" size="20 20 20" symmetry="(xy)" name="Caldaia a pressione">
+  <color symbol="G" value="3b3a3f" name="ghisa"/>
+  <color symbol="C" value="b8653a" name="rame"/>
+  <color symbol="O" value="c9a13b" name="ottone"/>
+  <color symbol="A" value="e8b04a" name="vetro ambrato" glow="True"/>
+  <color symbol="F" value="ff7a2a" name="fuoco del focolare" glow="True"/>
+  <color symbol="M" value="e9dfb8" name="quadrante del manometro"/>
+  <color symbol="P" value="5a4636" name="legno scuro"/>
+  <color symbol="E" value="8a8f96" name="tubo di ferro"/>
+  <color symbol="h" hidden="True" name="altezze possibili"/>
+  <color symbol="k" hidden="True" name="la quota scelta"/>
+  <color symbol="V" hidden="True" name="dove può uscire il tubo"/>
+  <color symbol="r" hidden="True" name="punta che cresce"/>
+  <color symbol="t" hidden="True" name="il tubo scelto"/>
+  <color symbol="w" hidden="True" name="la pancia possibile"/>
+  <color symbol="m" hidden="True" name="il dado della pancia"/>
+  <color symbol="X" hidden="True" name="pancia sì"/>
+  <color symbol="Y" hidden="True" name="pancia no"/>
+  <!-- Lo zoccolo e il corpo, snello o panciuto -->
+  <box at="10 10 0" size="16 16 2" color="G"/>
+  <cylinder at="10 10 2" size="9 9 18" color="C"/>
+  <cylinder at="10 10 2" size="14 14 18" color="w" on="B"/>
+  <box at="10 4 2" size="1 1 1" color="m"/>
+  <one steps="1">
+    <rule in="m" out="X"/>
+    <rule in="m" out="Y"/>
+  </one>
+  <all in="Xw" out="XX" symmetry="(xyz)"/>
+  <all in="X" out="C"/>
+  <all in="[wY]" out="B"/>
+  <cylinder at="10 10 6" size="16 16 1" color="O" on="B"/>
+  <cylinder at="10 10 13" size="16 16 1" color="O" on="B"/>
+  <!-- L'altezza: tutto ciò che sta dalla quota scelta in su sparisce -->
+  <box at="0 0 7" size="1 1 13" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all in="kB" out="kk"/>
+  <all in="k[CO]" out="kk"/>
+  <all in="[BCOk] k" out="k k"/>
+  <all in="k" out="B"/>
+  <!-- La cupola: lo strato in cima si fa d'ottone -->
+  <all in="B C" out="B O"/>
+  <!-- Il focolare e il manometro sul davanti -->
+  <box at="9 15 2" size="6 5 4" color="G" on="B"/>
+  <box at="9 17 3" size="4 1 2" color="F" on="G"/>
+  <box at="14 13 3" size="2 6 2" color="M" on="B"/>
+  <!-- Il camino: nasce in un punto a caso della cupola e sale -->
+  <prl steps="1" in="B O" out="r O" p="0.08"/>
+  <one in="r" out="t" steps="1"/>
+  <all in="r" out="B"/>
+  <all in="t" out="r"/>
+  <one steps="9" in="B r" out="r E"/>
+  <all in="r" out="A"/>
+  <!-- Il tubo del vapore: esce da un lato a mezza altezza e corre a terra -->
+  <box at="10 10 5" size="20 20 1" color="V" on="B"/>
+  <one in="VC" out="tC" steps="1"/>
+  <all in="V" out="B"/>
+  <one steps="5" in="Bt" out="tE"/>
+  <one steps="5" in="t B" out="E t"/>
+  <all in="t" out="P"/>
+</sequence>

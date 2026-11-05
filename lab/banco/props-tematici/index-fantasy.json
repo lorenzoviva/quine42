@@ -1,0 +1,62 @@
+{
+  "fantasy-altare-runico": {
+    "classe": "mobile",
+    "nome": "Altare runico",
+    "ambientazione": "fantasy (aurora)",
+    "descrizione": "Un altare di pietra con rune luminose sui fianchi. Il seme sceglie la forma del corpo (blocco, tavola su pilastri, ara rotonda) e ciò che sta sopra (cristallo, libro sul leggio, candele, stele)."
+  },
+  "fantasy-libreria-alchemica": {
+    "classe": "mobile",
+    "nome": "Libreria alchemica",
+    "ambientazione": "fantasy (aurora)",
+    "descrizione": "Uno scaffale di legno con tomi e ampolle luminose. Il seme sceglie la forma (alta, larga con divisorio, media con banco e alambicco), quali ripiani hanno libri e quanto è alto ogni tomo."
+  },
+  "fantasy-calderone-bollente": {
+    "classe": "mobile",
+    "nome": "Calderone bollente",
+    "ambientazione": "fantasy (aurora)",
+    "descrizione": "Un calderone di ferro battuto su un fuoco di ciocchi, colmo di un intruglio verde luminoso. Il seme sceglie il calderone (pancia tonda sui piedi, pentola alta sulle pietre, appeso al treppiede), le fiamme e le bolle che traboccano."
+  },
+  "fantasy-statua-guardiano": {
+    "classe": "monumento",
+    "nome": "Statua del guardiano",
+    "ambientazione": "fantasy (aurora)",
+    "descrizione": "Un guerriero di pietra in armatura su un piedistallo, con occhi e rune luminose. Il seme sceglie il piedistallo, l'elmo (cornuto, corona, cappuccio), l'arma della destra (lancia, spada piantata, martello) e la sinistra (scudo, sfera di cristallo, braccio al fianco)."
+  },
+  "fantasy-cristallo-arcano": {
+    "classe": "mobile",
+    "nome": "Cristallo arcano",
+    "ambientazione": "fantasy (aurora)",
+    "descrizione": "Un grande cristallo viola luminoso piantato nella pietra, con schegge storte attorno. Il seme sceglie la base (cumulo, piedistallo con rune, masso alto), quanto sale il cristallo maggiore e dove nascono e piegano le schegge."
+  },
+  "fantasy-bancarella-mercato": {
+    "classe": "mobile",
+    "nome": "Bancarella del mercato",
+    "ambientazione": "fantasy (aurora)",
+    "descrizione": "Un banco di legno su quattro pali sotto una tenda a strisce, con la merce in mostra. Il seme sceglie la tenda (spiovente, tettoia piatta, a capanna), la merce (frutta, orci, stoffe e ampolle) e le piccole cose sparse sul banco."
+  },
+  "fantasy-gabbia-sospesa": {
+    "classe": "monumento",
+    "nome": "Gabbia sospesa",
+    "ambientazione": "fantasy (aurora)",
+    "descrizione": "Una forca di legno da cui pende, a una catena, una gabbia di ferro con una fiammella prigioniera. Il seme sceglie l'altezza del braccio, la catena e la forma della gabbia, la base e dove si posano i corvi."
+  },
+  "fantasy-trono-di-pietra": {
+    "classe": "mobile",
+    "nome": "Trono di pietra",
+    "ambientazione": "fantasy (aurora)",
+    "descrizione": "Un seggio di pietra con il cuscino di velluto, i braccioli e uno schienale con una gemma runica. Il seme sceglie la parte bassa (pedana a gradini, quattro gambe, podio tondo), lo schienale (a punta, a ventaglio, ad arco) e dove crescono schegge e muschio."
+  },
+  "fantasy-fontana-antica": {
+    "classe": "edificio",
+    "nome": "Fontana antica",
+    "ambientazione": "fantasy (aurora)",
+    "descrizione": "Una vasca di pietra colma d'acqua con una colonna al centro da cui l'acqua ricade. Il seme sceglie la vasca (tonda, quadrata, a quadrifoglio), la colonna (una coppa, due coppe, quattro bocche con i getti), la cima (cristallo luminoso o fanciulla con l'anfora) e il muschio."
+  },
+  "fantasy-obelisco-inciso": {
+    "classe": "monumento",
+    "nome": "Obelisco inciso",
+    "ambientazione": "fantasy (aurora)",
+    "descrizione": "Un obelisco di pietra con la punta di bronzo e rune che brillano dal fondo dei solchi. Il seme sceglie l'altezza, la base (gradoni, tamburo con cristalli, cumulo di macerie) e dove sono incisi i segni e quanto sono lunghi."
+  }
+}

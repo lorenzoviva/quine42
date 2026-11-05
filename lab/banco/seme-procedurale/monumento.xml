@@ -1,0 +1,74 @@
+<!-- Colonna (il monumento generico), procedurale (Cantiere 2): pietra, pietra consumata, marmo e scanalature dell'originale. Il seme sceglie
+     l'altezza del fusto (da 40 a 57 voxel), se è tondo e scanalato o un pilastro quadrato, se in cima ha il capitello o se è spezzata come
+     una rovina, e quanti gradini ha la base. -->
+<sequence values="BDdWwhkpcsmrq" size="20 20 60" symmetry="(xy)" name="Colonna">
+  <color symbol="D" value="b8b0a0" name="pietra"/>
+  <color symbol="d" value="8e8678" name="pietra consumata"/>
+  <color symbol="W" value="d8d0c0" name="marmo"/>
+  <color symbol="w" value="a8a090" name="scanalatura"/>
+  <color symbol="h" hidden="True" name="altezze possibili"/>
+  <color symbol="k" hidden="True" name="il taglio"/>
+  <color symbol="p" hidden="True" name="il pilastro quadrato possibile"/>
+  <color symbol="c" hidden="True" name="il capitello che si allarga"/>
+  <color symbol="s" hidden="True" name="il gradino in più possibile"/>
+  <color symbol="m" hidden="True" name="dado"/>
+  <color symbol="r" hidden="True" name="la rottura"/>
+  <color symbol="q" hidden="True" name="il capitello"/>
+  <!-- Mescola: il generatore riparte da un punto diverso per ogni seme (vedi README) -->
+  <box at="10 0 59" size="20 2 1" color="m"/>
+  <prl in="m" out="B" p="0.5" steps="1"/>
+  <all in="m" out="B"/>
+  <!-- La base: uno o due gradini -->
+  <box at="10 10 0" size="18 18 2" color="D"/>
+  <box at="10 10 2" size="16 16 3" color="D"/>
+  <box at="10 10 5" size="13 13 2" color="s"/>
+  <box at="10 10 5" size="1 1 1" color="m"/>
+  <one steps="1">
+    <rule in="m" out="D"/>
+    <rule in="m" out="k"/>
+  </one>
+  <all in="Ds" out="DD"/>
+  <all in="ks" out="kk"/>
+  <all in="k" out="B"/>
+  <!-- Il fusto: tondo, o quadrato -->
+  <box at="10 10 5" size="10 10 54" color="p" on="[Bs]"/>
+  <cylinder at="10 10 5" size="10 10 54" color="W"/>
+  <box at="10 10 8" size="1 1 1" color="m"/>
+  <one steps="1">
+    <rule in="m" out="c"/>
+    <rule in="m" out="W"/>
+  </one>
+  <all symmetry="(xyz)">
+    <rule in="cW" out="cc"/>
+    <rule in="cp" out="cc"/>
+  </all>
+  <all in="c" out="W"/>
+  <all in="p" out="B"/>
+  <!-- L'altezza -->
+  <box at="0 0 40" size="1 1 18" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all in="k*" out="kk"/>
+  <all in="* k" out="k *"/>
+  <all in="k" out="B"/>
+  <!-- In cima: il capitello, o la rottura. Il dado si spande nell'aria e arriva alla cima, dovunque sia -->
+  <box at="0 19 0" size="1 1 1" color="m"/>
+  <one steps="1">
+    <rule in="m" out="c"/>
+    <rule in="m" out="r"/>
+    <rule in="m" out="c"/>
+  </one>
+  <all symmetry="(xyz)">
+    <rule in="cB" out="cc"/>
+    <rule in="rB" out="rr"/>
+  </all>
+  <prl in="r W" out="* r" p="0.5" steps="5"/>
+  <all in="c W" out="q *"/>
+  <all in="[cr]" out="B"/>
+  <all in="qB" out="qq" steps="2"/>
+  <all in="B q" out="q *" steps="1"/>
+  <all in="qB" out="qq" steps="1"/>
+  <all in="q" out="D"/>
+  <prl in="W/B" out="w/*" p="0.5" steps="1" symmetry="()"/>
+  <prl in="D" out="d" p="0.1" steps="1"/>
+</sequence>

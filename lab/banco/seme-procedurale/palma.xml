@@ -1,0 +1,61 @@
+<!-- Palma ricurva, procedurale (Cantiere 2): fusto ad anelli, fronde e noci di cocco dell'originale. Il seme decide quanto sale il fusto (fra
+     38 e 50 voxel) e come si incurva, quante fronde partono dalla cima, verso dove e quanto si allungano prima di ricadere, e quante noci
+     pendono sotto il ciuffo. -->
+<sequence values="BTKHFLDChkrfgc" size="40 40 60" symmetry="(xy)" name="Palma ricurva">
+  <color symbol="T" value="a87d46" name="fusto palma"/>
+  <color symbol="K" value="634423" name="anello tronco scuro"/>
+  <color symbol="H" value="c4985a" name="fusto illuminato"/>
+  <color symbol="F" value="387d34" name="fronda"/>
+  <color symbol="L" value="5ea842" name="fronda al sole"/>
+  <color symbol="D" value="215224" name="fronda in ombra"/>
+  <color symbol="C" value="54371d" name="noce di cocco"/>
+  <color symbol="h" hidden="True" name="altezze possibili"/>
+  <color symbol="k" hidden="True" name="la quota scelta"/>
+  <color symbol="r" hidden="True" name="la punta del fusto"/>
+  <color symbol="f" hidden="True" name="punta di una fronda che si allunga"/>
+  <color symbol="g" hidden="True" name="punta di una fronda che ricade"/>
+  <color symbol="c" hidden="True" name="la cima"/>
+  <box at="0 0 44" size="1 1 11" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all in="kB" out="kk"/>
+  <!-- Il fusto: sale piegando, ogni piega lo porta di lato -->
+  <box at="20 20 0" size="1 1 1" color="r"/>
+  <one steps="70">
+    <rule in="B r" out="r T" p="1"/>
+    <rule in="B* *r" out="r* *T" p="0.04"/>
+  </one>
+  <all in="r" out="c"/>
+  <all in="k" out="B"/>
+  <all in="TB" out="TT" steps="1"/>
+  <!-- Gli anelli -->
+  <!-- Le fronde: fino a otto, dritte verso fuori, di lunghezza diversa, poi ricadono -->
+  <all in="B c" out="F *"/>
+  <all>
+    <rule in="FB" out="Ff"/>
+    <rule in="F*/*B" out="**/*f"/>
+  </all>
+  <prl in="f" out="B" p="0.3" steps="1"/>
+  <prl steps="13" p="0.8">
+    <rule in="FfB" out="FFf" p="0.8"/>
+    <rule in="F**/*f*/**B" out="***/*F*/**f" p="0.8"/>
+  </prl>
+  <all steps="2">
+    <rule in="FfB" out="FFf"/>
+    <rule in="F**/*f*/**B" out="***/*F*/**f"/>
+  </all>
+  <all in="f B" out="F f" steps="4"/>
+  <all in="f" out="F"/>
+  <prl steps="1" in="FB" out="FF" p="0.3"/>
+  <prl in="T" out="K" p="0.12" steps="1"/>
+  <!-- Le noci di cocco: da due a quattro, appese sotto la cima -->
+  <all in="c" out="T"/>
+  <prl in="T B" out="* C" p="0.5" steps="1"/>
+  <all in="C B" out="* C" steps="1"/>
+  <prl in="CB" out="*C" p="0.4" steps="1"/>
+  <prl steps="1">
+    <rule in="B F" out="B L" p="0.75"/>
+    <rule in="F B" out="D B" p="0.65"/>
+    <rule in="B T" out="B H" p="0.5"/>
+  </prl>
+</sequence>

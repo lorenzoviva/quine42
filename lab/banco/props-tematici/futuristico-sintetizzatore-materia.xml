@@ -1,0 +1,69 @@
+<!-- Sintetizzatore di materia (ambientazione futuristica, sidera): un banco di ceramica bianca su uno zoccolo di grafite, la piastra di
+     sintesi con quattro colonnine dalle punte ciano e, sopra, l'oggetto che prende forma in cristallo magenta e ciano. Il seme sceglie
+     quanto è alto il banco, quanto sono alte le colonnine, la forma dell'oggetto e quali serbatoi ha ai lati. -->
+<sequence values="BWwGgCMVhkcexXpoqt" size="20 20 20" symmetry="(xy)" name="Sintetizzatore di materia">
+  <color symbol="W" value="eef1f5" name="ceramica bianca"/>
+  <color symbol="w" value="c3c9d3" name="ceramica in ombra"/>
+  <color symbol="G" value="353a42" name="grafite"/>
+  <color symbol="g" value="565d68" name="grafite chiara"/>
+  <color symbol="C" value="5ff0ff" name="luce ciano" glow="True"/>
+  <color symbol="M" value="ff3ec8" name="materia magenta" glow="True"/>
+  <color symbol="V" value="9fd8e6" name="vetro"/>
+  <color symbol="h" hidden="True" name="quote possibili"/>
+  <color symbol="k" hidden="True" name="la quota scelta"/>
+  <color symbol="c" hidden="True" name="il centro del banco"/>
+  <color symbol="e" hidden="True" name="l'emettitore"/>
+  <color symbol="x" value="353a42" name="piastra di sintesi"/>
+  <color symbol="X" hidden="True" name="la piastra che si allarga"/>
+  <color symbol="p" hidden="True" name="una colonnina che sale"/>
+  <color symbol="o" hidden="True" name="l'oggetto che prende forma"/>
+  <color symbol="q" hidden="True" name="dove può stare un serbatoio"/>
+  <color symbol="t" hidden="True" name="un serbatoio"/>
+  <!-- Il dado si scalda: tre lanci a vuoto, perché i primi numeri di semi vicini si somigliano -->
+  <box at="19 19 17" size="1 1 3" color="k"/>
+  <one in="k" out="B" steps="3"/>
+  <!-- Lo zoccolo e il banco, con il suo centro nascosto -->
+  <box at="10 10 0" size="16 12 1" color="G"/>
+  <box at="10 10 1" size="1 1 18" color="c"/>
+  <box at="10 10 1" size="14 10 15" color="W" on="B"/>
+  <!-- La quota del banco: una fra 7 e 14; ciò che sta sopra sparisce -->
+  <box at="0 0 7" size="1 1 8" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all in="k[BWc]" out="kk"/>
+  <all in="[BWc] k" out="k k"/>
+  <all in="k" out="B"/>
+  <all in="B c" out="e *" symmetry="()"/>
+  <all in="c" out="W"/>
+  <!-- La piastra di sintesi e le colonnine agli angoli -->
+  <all in="B e" out="o X" symmetry="()"/>
+  <all in="e" out="W"/>
+  <all in="XB" out="*X" steps="3"/>
+  <all in="BBB/BXB" out="***/*p*"/>
+  <all in="X" out="x"/>
+  <all in="B p" out="p *" symmetry="()"/>
+  <prl in="B p" out="p *" p="0.5" steps="3" symmetry="()"/>
+  <all in="B p" out="C *" symmetry="()"/>
+  <all in="p" out="g"/>
+  <!-- L'oggetto: cresce a caso sopra la piastra -->
+  <one steps="22">
+    <rule in="B o" out="o *"/>
+    <rule in="oB" out="*o"/>
+  </one>
+  <prl in="o" out="C" p="0.3" steps="1"/>
+  <all in="o" out="M"/>
+  <!-- I serbatoi ai lati: alcuni sì, alcuni no, alti a caso -->
+  <box at="2 7 1" size="1 1 1" color="q"/>
+  <box at="2 13 1" size="1 1 1" color="q"/>
+  <box at="18 7 1" size="1 1 1" color="q"/>
+  <box at="18 13 1" size="1 1 1" color="q"/>
+  <prl in="q" out="t" p="0.55" steps="1"/>
+  <all in="q" out="B"/>
+  <prl in="B t" out="t *" p="0.7" steps="6" symmetry="()"/>
+  <all in="Bt" out="Vt" steps="1"/>
+  <all in="B t" out="g *" symmetry="()"/>
+  <all in="t" out="C"/>
+  <!-- La cornice in ombra in cima al banco -->
+  <all in="B W" out="* w" symmetry="()"/>
+  <all in="Bw" out="Bg" symmetry="(xy)"/>
+</sequence>

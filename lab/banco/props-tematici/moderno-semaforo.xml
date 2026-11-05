@@ -1,0 +1,125 @@
+<!-- Semaforo stradale (moderno): un palo d'acciaio su un plinto di cemento, la lanterna nera con il pannello giallo e le tre luci sul
+     davanti. Il seme sceglie a che altezza sta la lanterna (tre quote), che cosa porta il retro del palo (la lanterna dei pedoni con il
+     pulsante, una seconda lanterna per l'altra corsia o un cartello), a che altezza sta la cassetta dei
+     cavi sul palo e quale luce è accesa. -->
+<sequence values="BCPKYRrAaGgWwSsmXUVLDEFtcNn" size="20 20 60" symmetry="(xy)" name="Semaforo">
+  <color symbol="C" value="9a9a96" name="cemento"/>
+  <color symbol="P" value="4a5056" name="acciaio del palo"/>
+  <color symbol="K" value="202226" name="lanterna nera"/>
+  <color symbol="Y" value="e8c020" name="pannello giallo"/>
+  <color symbol="R" value="ff3a2a" name="rosso acceso" glow="True"/>
+  <color symbol="r" value="5a1a16" name="rosso spento"/>
+  <color symbol="A" value="ffb020" name="giallo acceso" glow="True"/>
+  <color symbol="a" value="5a4214" name="giallo spento"/>
+  <color symbol="G" value="40e070" name="verde acceso" glow="True"/>
+  <color symbol="g" value="17462a" name="verde spento"/>
+  <color symbol="W" value="f2f2f2" name="omino bianco" glow="True"/>
+  <color symbol="w" value="2a6ad0" name="cartello blu"/>
+  <color symbol="S" value="c8ccd0" name="staffa"/>
+  <color symbol="s" value="303438" name="pulsante"/>
+  <color symbol="m" hidden="True" name="il dado"/>
+  <color symbol="X" hidden="True" name="lanterna bassa"/>
+  <color symbol="U" hidden="True" name="lanterna media"/>
+  <color symbol="V" hidden="True" name="lanterna alta"/>
+  <color symbol="L" hidden="True" name="retro: pedoni"/>
+  <color symbol="D" hidden="True" name="retro: seconda lanterna"/>
+  <color symbol="E" hidden="True" name="retro: cartello"/>
+  <color symbol="F" hidden="True" name="luce rossa da scegliere"/>
+  <color symbol="t" hidden="True" name="luce gialla da scegliere"/>
+  <color symbol="c" hidden="True" name="luce verde da scegliere"/>
+  <color symbol="N" value="5c6168" name="cassetta dei cavi"/>
+  <color symbol="n" hidden="True" name="dove può stare la cassetta"/>
+  <!-- Il plinto e il palo comune -->
+  <box at="10 10 0" size="5 5 1" color="C"/>
+  <box at="9.5 9.5 1" size="2 2 30" color="P"/>
+  <!-- Il dado si scuote prima di decidere -->
+  <box at="1 0 0" size="3 1 1" color="m"/>
+  <prl steps="1" in="m" out="B"/>
+  <!-- Prima scelta: la quota della lanterna -->
+  <box at="0 0 0" size="1 1 1" color="m"/>
+  <one steps="1">
+    <rule in="m" out="X"/>
+    <rule in="m" out="U"/>
+    <rule in="m" out="V"/>
+  </one>
+  <all symmetry="(xyz)">
+    <rule in="XB" out="XX"/>
+    <rule in="UB" out="UU"/>
+    <rule in="VB" out="VV"/>
+  </all>
+  <!-- quota 40 -->
+  <box at="9.5 9.5 31" size="2 2 10" color="P" on="X"/>
+  <box at="9.5 11 27" size="8 1 14" color="Y" on="X"/>
+  <box at="9.5 13 28" size="6 3 12" color="K" on="X"/>
+  <box at="9.5 15 37" size="4 1 3" color="F" on="X"/>
+  <box at="9.5 15 33" size="4 1 3" color="t" on="X"/>
+  <box at="9.5 15 29" size="4 1 3" color="c" on="X"/>
+  <!-- quota 47 -->
+  <box at="9.5 9.5 31" size="2 2 17" color="P" on="U"/>
+  <box at="9.5 11 34" size="8 1 14" color="Y" on="U"/>
+  <box at="9.5 13 35" size="6 3 12" color="K" on="U"/>
+  <box at="9.5 15 44" size="4 1 3" color="F" on="U"/>
+  <box at="9.5 15 40" size="4 1 3" color="t" on="U"/>
+  <box at="9.5 15 36" size="4 1 3" color="c" on="U"/>
+  <!-- quota 54 -->
+  <box at="9.5 9.5 31" size="2 2 24" color="P" on="V"/>
+  <box at="9.5 11 41" size="8 1 14" color="Y" on="V"/>
+  <box at="9.5 13 42" size="6 3 12" color="K" on="V"/>
+  <box at="9.5 15 51" size="4 1 3" color="F" on="V"/>
+  <box at="9.5 15 47" size="4 1 3" color="t" on="V"/>
+  <box at="9.5 15 43" size="4 1 3" color="c" on="V"/>
+  <all in="[XUV]" out="B"/>
+  <!-- Seconda scelta: il retro del palo -->
+  <box at="0 0 0" size="1 1 1" color="m"/>
+  <one steps="1">
+    <rule in="m" out="L"/>
+    <rule in="m" out="D"/>
+    <rule in="m" out="E"/>
+  </one>
+  <all symmetry="(xyz)">
+    <rule in="LB" out="LL"/>
+    <rule in="DB" out="DD"/>
+    <rule in="EB" out="EE"/>
+  </all>
+  <!-- la lanterna dei pedoni e il pulsante -->
+  <box at="9.5 7 18" size="6 3 9" color="K" on="L"/>
+  <box at="9.5 5 23" size="4 1 3" color="r" on="L"/>
+  <box at="9.5 5 19" size="4 1 3" color="W" on="L"/>
+  <box at="11.5 9.5 11" size="2 2 4" color="Y" on="L"/>
+  <box at="12.5 9.5 12" size="1 1 1" color="s" on="L"/>
+  <!-- la seconda lanterna, per l'altra corsia -->
+  <box at="9.5 8 22" size="8 1 14" color="Y" on="D"/>
+  <box at="9.5 6 23" size="6 3 12" color="K" on="D"/>
+  <box at="9.5 4 32" size="4 1 3" color="r" on="D"/>
+  <box at="9.5 4 28" size="4 1 3" color="a" on="D"/>
+  <box at="9.5 4 24" size="4 1 3" color="G" on="D"/>
+  <!-- il cartello con la staffa -->
+  <box at="9.5 8 20" size="2 1 12" color="S" on="E"/>
+  <cylinder at="9.5 7 21" size="9 2 10" color="w" on="E"/>
+  <box at="9.5 6 25" size="5 1 2" color="W" on="E"/>
+  <all in="[LDE]" out="B"/>
+  <!-- La luce accesa: una delle tre -->
+  <one steps="1">
+    <rule in="F" out="R"/>
+    <rule in="t" out="A"/>
+    <rule in="c" out="G"/>
+  </one>
+  <all symmetry="(xyz)">
+    <rule in="RF" out="RR"/>
+    <rule in="At" out="AA"/>
+    <rule in="Gc" out="GG"/>
+  </all>
+  <all in="F" out="r"/>
+  <all in="t" out="a"/>
+  <all in="c" out="g"/>
+  <!-- La cassetta dei cavi sul fianco del palo, a un'altezza scelta -->
+  <box at="8 9.5 2" size="1 2 9" color="n" on="B"/>
+  <box at="11 9.5 2" size="1 2 9" color="n" on="B"/>
+  <box at="9.5 8 2" size="2 1 9" color="n" on="B"/>
+  <box at="9.5 11 2" size="2 1 9" color="n" on="B"/>
+  <one in="n" out="N" steps="1"/>
+  <all in="n" out="B"/>
+  <all steps="3" in="B N" out="N N" symmetry="()"/>
+  <all steps="1" in="BN" out="NN"/>
+  <all in="m" out="B"/>
+</sequence>

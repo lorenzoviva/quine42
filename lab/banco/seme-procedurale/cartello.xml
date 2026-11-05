@@ -1,0 +1,56 @@
+<!-- Cartello, procedurale (Cantiere 2): palo, tavola, bordo e incisioni dell'originale (niente scritte: chi passa la legge). Il seme sceglie
+     quanto è alto il palo, quante tavole porta (una, o una seconda più in basso che indica l'altra strada) e verso dove sporge ciascuna, e se
+     il palo è un poco storto. -->
+<sequence values="BNLndhkrtaS" size="20 20 20" symmetry="(xy)" name="Cartello">
+  <color symbol="N" value="6b4a2e" name="palo"/>
+  <color symbol="L" value="c09a62" name="tavola"/>
+  <color symbol="n" value="8a6a40" name="bordo"/>
+  <color symbol="d" value="4a3420" name="incisione"/>
+  <color symbol="h" hidden="True" name="altezze possibili"/>
+  <color symbol="k" hidden="True" name="la quota scelta"/>
+  <color symbol="r" hidden="True" name="la punta del palo"/>
+  <color symbol="t" hidden="True" name="dove nasce una tavola"/>
+  <color symbol="a" hidden="True" name="una tavola che si allunga"/>
+  <color symbol="S" hidden="True" name="la cima"/>
+  <!-- Il palo sale fino alla quota scelta, forse piegando una volta -->
+  <box at="0 0 12" size="1 1 7" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all in="kB" out="kk"/>
+  <box at="10 10 0" size="1 1 1" color="r"/>
+  <one steps="20">
+    <rule in="B r" out="r N" p="1"/>
+    <rule in="B* *r" out="r* *N" p="0.025"/>
+  </one>
+  <all in="r" out="S"/>
+  <all in="k" out="B"/>
+  <all in="NB" out="NN" steps="1" symmetry="()"/>
+  <all in="N/B" out="N/N" steps="1" symmetry="()"/>
+  <!-- La tavola alta, sotto la cima, e forse una seconda più in basso -->
+  <all in="S/B" out="N/t" symmetry="()"/>
+  <all in="* S" out="* N"/>
+  <prl in="N/B" out="*/t" symmetry="()" p="0.04" steps="1"/>
+  <all in="t/*/* */*/* */*/* */*/*" out="*/*/* */*/* */*/* */*/*" symmetry="()"/>
+  <one steps="2" in="t" out="a"/>
+  <all in="t" out="B"/>
+  <!-- Ogni tavola: si allunga a destra o a sinistra o da entrambe le parti, poi prende altezza -->
+  <one steps="2">
+    <rule in="aB" out="aa"/>
+    <rule in="Ba" out="aa"/>
+  </one>
+  <all symmetry="()">
+    <rule in="aB" out="aa"/>
+  </all>
+  <prl steps="4" symmetry="()" in="aB" out="aa" p="0.8"/>
+  <prl steps="4" symmetry="()" in="Ba" out="aa" p="0.8"/>
+  <all symmetry="()" steps="3">
+    <rule in="B a" out="a a"/>
+  </all>
+  <all symmetry="()" steps="2">
+    <rule in="a B" out="a a"/>
+  </all>
+  <all in="B a" out="* n"/>
+  <all in="a B" out="n *"/>
+  <all in="a" out="L"/>
+  <prl in="L/B" out="d/*" p="0.12" steps="1" symmetry="()"/>
+</sequence>

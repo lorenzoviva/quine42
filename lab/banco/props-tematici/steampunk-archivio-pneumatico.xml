@@ -1,0 +1,88 @@
+<!-- Archivio pneumatico, steampunk (Cantiere 2, Parte B): uno schedario di legno scuro a cassetti con le maniglie d'ottone, da cui
+     salgono i tubi pneumatici di rame che portano i messaggi, con le capsule di vetro ambrato. Il seme sceglie quanto è largo e alto lo
+     schedario, quanti tubi escono dal coperchio, dove, quanto salgono prima di piegare verso il muro. -->
+<sequence values="BDNOCAEhkjgrtV" size="20 20 20" symmetry="(xy)" name="Archivio pneumatico">
+  <color symbol="D" value="4a2f22" name="legno scuro"/>
+  <color symbol="N" value="2e1d15" name="fuga dei cassetti"/>
+  <color symbol="O" value="c9a13b" name="ottone"/>
+  <color symbol="C" value="b8653a" name="rame"/>
+  <color symbol="A" value="f2b54a" name="capsula ambrata" glow="True"/>
+  <color symbol="E" value="3b3a3f" name="ghisa"/>
+  <color symbol="h" hidden="True" name="altezze possibili"/>
+  <color symbol="k" hidden="True" name="la quota scelta"/>
+  <color symbol="j" hidden="True" name="larghezze possibili"/>
+  <color symbol="g" hidden="True" name="dove finisce lo schedario"/>
+  <color symbol="r" hidden="True" name="il tubo che sale"/>
+  <color symbol="t" hidden="True" name="dove nasce un tubo"/>
+  <color symbol="V" hidden="True" name="dove possono correre i tubi"/>
+  <!-- Lo schedario intero: zoccolo, corpo, fughe e maniglie -->
+  <box at="10 12 0" size="18 9 1" color="E"/>
+  <box at="10 12 1" size="18 8 15" color="D"/>
+  <box at="10 16 3" size="18 1 1" color="N"/>
+  <box at="10 16 6" size="18 1 1" color="N"/>
+  <box at="10 16 9" size="18 1 1" color="N"/>
+  <box at="10 16 12" size="18 1 1" color="N"/>
+  <box at="4 16 1" size="1 1 15" color="N"/>
+  <box at="8 16 1" size="1 1 15" color="N"/>
+  <box at="12 16 1" size="1 1 15" color="N"/>
+  <box at="16 16 1" size="1 1 15" color="N"/>
+  <box at="2 17 1" size="1 1 1" color="O"/>
+  <box at="6 17 1" size="1 1 1" color="O"/>
+  <box at="10 17 1" size="1 1 1" color="O"/>
+  <box at="14 17 1" size="1 1 1" color="O"/>
+  <box at="18 17 1" size="1 1 1" color="O"/>
+  <box at="2 17 4" size="1 1 1" color="O"/>
+  <box at="6 17 4" size="1 1 1" color="O"/>
+  <box at="10 17 4" size="1 1 1" color="O"/>
+  <box at="14 17 4" size="1 1 1" color="O"/>
+  <box at="18 17 4" size="1 1 1" color="O"/>
+  <box at="2 17 7" size="1 1 1" color="O"/>
+  <box at="6 17 7" size="1 1 1" color="O"/>
+  <box at="10 17 7" size="1 1 1" color="O"/>
+  <box at="14 17 7" size="1 1 1" color="O"/>
+  <box at="18 17 7" size="1 1 1" color="O"/>
+  <box at="2 17 10" size="1 1 1" color="O"/>
+  <box at="6 17 10" size="1 1 1" color="O"/>
+  <box at="10 17 10" size="1 1 1" color="O"/>
+  <box at="14 17 10" size="1 1 1" color="O"/>
+  <box at="18 17 10" size="1 1 1" color="O"/>
+  <box at="2 17 13" size="1 1 1" color="O"/>
+  <box at="6 17 13" size="1 1 1" color="O"/>
+  <box at="10 17 13" size="1 1 1" color="O"/>
+  <box at="14 17 13" size="1 1 1" color="O"/>
+  <box at="18 17 13" size="1 1 1" color="O"/>
+  <!-- L'altezza -->
+  <box at="0 0 7" size="1 1 9" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all in="kB" out="kk"/>
+  <all in="k[DNOE]" out="kk"/>
+  <all in="[BDNOEk] k" out="k k"/>
+  <all in="k" out="B"/>
+  <!-- La larghezza: da dove finisce in là sparisce tutto, e il fianco si chiude -->
+  <box at="14 0 0" size="9 1 1" color="j"/>
+  <one in="j" out="g" steps="1"/>
+  <all in="j" out="B"/>
+  <all symmetry="()">
+    <rule in="g/[BDNOE]" out="g/g"/>
+    <rule in="[BDNOE]/g" out="g/g"/>
+    <rule in="[BDNOE] g" out="g g"/>
+    <rule in="g [BDNOE]" out="g g"/>
+  </all>
+  <all symmetry="()" in="g[BDNOE]" out="gg"/>
+  <all in="g" out="B"/>
+  <all symmetry="()" in="[NO]B" out="DB"/>
+  <!-- Il coperchio d'ottone -->
+  <all in="B D" out="B O"/>
+  <!-- I tubi: nascono in punti a caso del coperchio e salgono curvando -->
+  <box at="10 10 0" size="20 20 20" color="V" on="B"/>
+  <prl steps="1" in="V O" out="t O" p="0.03"/>
+  <one steps="1" in="V O" out="t O"/>
+  <all in="t" out="r"/>
+  <prl steps="12">
+    <rule in="V r" out="r C" p="0.65"/>
+  </prl>
+  <all steps="3" symmetry="()" in="V/r" out="r/C"/>
+  <all in="r" out="A"/>
+  <all in="V" out="B"/>
+</sequence>

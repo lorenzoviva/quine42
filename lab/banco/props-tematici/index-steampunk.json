@@ -1,0 +1,62 @@
+{
+  "steampunk-caldaia-a-pressione": {
+    "classe": "mobile",
+    "nome": "Caldaia a pressione",
+    "ambientazione": "steampunk (orichalcum)",
+    "descrizione": "Un corpo di rame cerchiato d'ottone su uno zoccolo di ghisa, con il focolare acceso. Il seme sceglie l'altezza del corpo, dove sale il camino e da che lato esce il tubo del vapore."
+  },
+  "steampunk-ingranaggio-monumentale": {
+    "classe": "monumento",
+    "nome": "Ingranaggio monumentale",
+    "ambientazione": "steampunk (orichalcum)",
+    "descrizione": "Una grande ruota dentata d'ottone con raggi e mozzo di ghisa, ritta su un pilastro sopra uno zoccolo a gradini. Il seme sceglie l'altezza della ruota e se sta davanti, al centro o dietro sullo zoccolo."
+  },
+  "steampunk-lampione-a-gas": {
+    "classe": "monumento",
+    "nome": "Lampione a gas in ottone",
+    "ambientazione": "steampunk (orichalcum)",
+    "descrizione": "Un fusto d'ottone su uno zoccolo di ghisa, con la sbarra per la scala e le lanterne di vetro ambrato acceso. Il seme sceglie l'altezza del fusto e la testa: una lanterna in cima, due su un braccio o quattro su una croce."
+  },
+  "steampunk-banco-da-orologiaio": {
+    "classe": "mobile",
+    "nome": "Banco da orologiaio",
+    "ambientazione": "steampunk (orichalcum)",
+    "descrizione": "Un piano di legno scuro su una cassettiera dai pomelli d'ottone, con una lampada a braccio ambrata e ingranaggi sparsi. Il seme sceglie la lunghezza del banco, se c'è l'alzata di casellari, dove sta la lampada e dove cadono i pezzi."
+  },
+  "steampunk-automa-a-molla": {
+    "classe": "persona",
+    "nome": "Automa a molla",
+    "ambientazione": "steampunk (orichalcum)",
+    "descrizione": "Un automa dal corpo a botte di rame cerchiato d'ottone, con la chiave della carica sulla schiena e gli occhi ambrati. Il seme sceglie l'altezza del corpo, la posa delle braccia e la testa (cupola, cilindro o lanterna)."
+  },
+  "steampunk-dirigibile-da-attracco": {
+    "classe": "edificio",
+    "nome": "Dirigibile da attracco",
+    "ambientazione": "steampunk (orichalcum)",
+    "descrizione": "Un dirigibile di tela cerata con centine d'ottone e gondola di legno scuro, legato per il muso a una torre d'attracco di ghisa. Il seme sceglie l'altezza dell'ormeggio, dove sta la torre e dove la tela è rattoppata."
+  },
+  "steampunk-pompa-idraulica": {
+    "classe": "mobile",
+    "nome": "Pompa idraulica",
+    "ambientazione": "steampunk (orichalcum)",
+    "descrizione": "Un cilindro di ghisa cerchiato d'ottone con il bilanciere e la bocca che versa, e un tubo di rame che scende a terra. Il seme sceglie l'altezza del cilindro, come pende il bilanciere, se c'è il trogolo con l'acqua e da che parte corre il tubo."
+  },
+  "steampunk-archivio-pneumatico": {
+    "classe": "mobile",
+    "nome": "Archivio pneumatico",
+    "ambientazione": "steampunk (orichalcum)",
+    "descrizione": "Uno schedario di legno scuro a cassetti con maniglie d'ottone, da cui salgono tubi pneumatici di rame con capsule ambrate. Il seme sceglie larghezza e altezza dello schedario, quanti tubi escono, dove e come curvano."
+  },
+  "steampunk-stufa-in-ghisa": {
+    "classe": "mobile",
+    "nome": "Stufa in ghisa",
+    "ambientazione": "steampunk (orichalcum)",
+    "descrizione": "Una stufa panciuta di ghisa su quattro piedi, con lo sportello della brace accesa, il collare d'ottone e la canna fumaria a gomito. Il seme sceglie la pancia stretta o larga, quanto sale la canna, da che parte piega e quanto corre."
+  },
+  "steampunk-telegrafo-a-vapore": {
+    "classe": "mobile",
+    "nome": "Telegrafo a vapore",
+    "ambientazione": "steampunk (orichalcum)",
+    "descrizione": "Un tavolino di legno scuro su una colonna di ghisa con il tasto d'ottone, il ricevitore e una piccola caldaia di rame col fischietto. Il seme sceglie l'altezza della colonna e la disposizione del banco: bobina del nastro, antenna con gli isolatori o caldaia alta fra due bobine."
+  }
+}

@@ -1,0 +1,86 @@
+<!-- Reattore a fusione (ambientazione futuristica, sidera): uno zoccolo di grafite, la colonna di vetro con il plasma ciano al centro,
+     anelli di contenimento in ceramica bianca e pilastri di raffreddamento magenta. Il seme sceglie quanto sale la colonna, a che
+     altezza stanno i due anelli di contenimento e quali dei quattro pilastri di raffreddamento ci sono e quanto sono alti. -->
+<sequence values="BWwGgCMVhkKaPpq" size="50 50 50" symmetry="(xy)" name="Reattore a fusione">
+  <color symbol="W" value="eef1f5" name="ceramica bianca"/>
+  <color symbol="w" value="c3c9d3" name="ceramica in ombra"/>
+  <color symbol="G" value="353a42" name="grafite"/>
+  <color symbol="g" value="565d68" name="grafite chiara"/>
+  <color symbol="C" value="3ef2ff" name="plasma ciano" glow="True"/>
+  <color symbol="M" value="ff3ec8" name="luce magenta" glow="True"/>
+  <color symbol="V" value="9fd8e6" name="vetro"/>
+  <color symbol="h" hidden="True" name="altezze possibili"/>
+  <color symbol="k" hidden="True" name="la quota scelta"/>
+  <color symbol="K" hidden="True" name="l'anello scelto"/>
+  <color symbol="a" hidden="True" name="dove può stare un anello"/>
+  <color symbol="P" value="353a42" name="tubo di raffreddamento"/>
+  <color symbol="p" hidden="True" name="dove può stare un pilastro"/>
+  <color symbol="q" hidden="True" name="quanto sale un pilastro"/>
+  <!-- Lo zoccolo e la colonna -->
+  <cylinder at="25 25 0" size="34 34 3" color="G"/>
+  <cylinder at="25 25 3" size="26 26 2" color="g"/>
+  <cylinder at="25 25 5" size="10 10 44" color="C"/>
+  <cylinder at="25 25 5" size="14 14 3" color="V" on="B"/>
+  <cylinder at="25 25 14" size="14 14 2" color="V" on="B"/>
+  <cylinder at="25 25 22" size="14 14 2" color="V" on="B"/>
+  <cylinder at="25 25 30" size="14 14 2" color="V" on="B"/>
+  <cylinder at="25 25 38" size="14 14 2" color="V" on="B"/>
+  <box at="25 19 5" size="2 2 44" color="G" on="B"/>
+  <box at="25 31 5" size="2 2 44" color="G" on="B"/>
+  <box at="19 25 5" size="2 2 44" color="G" on="B"/>
+  <box at="31 25 5" size="2 2 44" color="G" on="B"/>
+  <!-- La quota della colonna: una fra 30 e 47; ciò che sta sopra sparisce -->
+  <box at="0 0 30" size="1 1 18" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all in="k[BVCG]" out="kk"/>
+  <all in="[BVCG] k" out="k k"/>
+  <all in="k" out="B"/>
+  <!-- La calotta bianca sulla colonna -->
+  <all in="B [VCG]" out="W *"/>
+  <all in="B W" out="w *" steps="1"/>
+  <!-- Due anelli di contenimento ad altezze scelte -->
+  <cylinder at="25 25 8" size="26 26 20" color="a" on="B"/>
+  <box at="0 0 9" size="1 1 18" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all>
+    <rule in="kB" out="kk"/>
+    <rule in="ka" out="kK"/>
+    <rule in="Ka" out="KK"/>
+    <rule in="KB" out="Kk"/>
+  </all>
+  <all in="k" out="B"/>
+  <box at="49 49 9" size="1 1 18" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all>
+    <rule in="kB" out="kk"/>
+    <rule in="ka" out="kK"/>
+    <rule in="Ka" out="KK"/>
+    <rule in="KB" out="Kk"/>
+  </all>
+  <all in="k" out="B"/>
+  <all steps="1" symmetry="()">
+    <rule in="a K" out="K *"/>
+    <rule in="K a" out="* K"/>
+  </all>
+  <all in="a" out="B"/>
+  <all in="K" out="W"/>
+  <all in="W/V" out="w/*" symmetry="()" steps="1"/>
+  <!-- I pilastri di raffreddamento: alcuni sì, alcuni no, ognuno alto a modo suo -->
+  <box at="10 25 3" size="1 1 1" color="p"/>
+  <box at="40 25 3" size="1 1 1" color="p"/>
+  <box at="25 10 3" size="1 1 1" color="p"/>
+  <box at="25 40 3" size="1 1 1" color="p"/>
+  <box at="12 12 3" size="1 1 1" color="p"/>
+  <box at="38 38 3" size="1 1 1" color="p"/>
+  <box at="12 38 3" size="1 1 1" color="p"/>
+  <box at="38 12 3" size="1 1 1" color="p"/>
+  <prl in="p" out="q" p="0.5" steps="1"/>
+  <all in="p" out="B"/>
+  <one in="B q" out="q q" steps="60" symmetry="()"/>
+  <all in="B q" out="M *" symmetry="()"/>
+  <all in="Bq" out="Pq"/>
+  <all in="q" out="M"/>
+</sequence>

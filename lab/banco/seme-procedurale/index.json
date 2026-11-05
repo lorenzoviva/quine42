@@ -1,0 +1,122 @@
+{
+  "edificio": {
+    "classe": "edificio",
+    "nome": "Casetta",
+    "originale": "edificio.xml"
+  },
+  "fattoria": {
+    "classe": "grande",
+    "nome": "Fattoria",
+    "originale": "fattoria.xml"
+  },
+  "grande": {
+    "classe": "grande",
+    "nome": "Casa a graticcio",
+    "originale": "grande.xml"
+  },
+  "albero": {
+    "classe": "albero",
+    "nome": "Pino",
+    "originale": "albero.xml"
+  },
+  "quercia": {
+    "classe": "albero",
+    "nome": "Quercia",
+    "originale": "quercia.xml"
+  },
+  "betulla": {
+    "classe": "albero",
+    "nome": "Betulla",
+    "originale": "betulla.xml"
+  },
+  "palma": {
+    "classe": "albero",
+    "nome": "Palma",
+    "originale": "palma.xml"
+  },
+  "roccia": {
+    "classe": "roccia",
+    "nome": "Masso",
+    "originale": "roccia.xml"
+  },
+  "masso-muschioso": {
+    "classe": "roccia",
+    "nome": "Masso muschioso",
+    "originale": "masso-muschioso.xml"
+  },
+  "sasso": {
+    "classe": "sasso",
+    "nome": "Sasso",
+    "originale": "sasso.xml"
+  },
+  "cespuglio": {
+    "classe": "cespuglio",
+    "nome": "Cespuglio",
+    "originale": "cespuglio.xml"
+  },
+  "cespuglio-con-bacche": {
+    "classe": "cespuglio",
+    "nome": "Cespuglio con bacche",
+    "originale": "cespuglio-con-bacche.xml"
+  },
+  "pozzo": {
+    "classe": "edificio",
+    "nome": "Pozzo",
+    "originale": "pozzo.xml"
+  },
+  "monumento": {
+    "classe": "monumento",
+    "nome": "Colonna",
+    "originale": "monumento.xml"
+  },
+  "cartello": {
+    "classe": "mobile",
+    "nome": "Cartello",
+    "originale": "cartello.xml"
+  },
+  "falo": {
+    "classe": "mobile",
+    "nome": "Falò",
+    "originale": "falo.xml"
+  },
+  "barile": {
+    "classe": "mobile",
+    "nome": "Barile",
+    "originale": "barile.xml"
+  },
+  "banco": {
+    "classe": "mobile",
+    "nome": "Banco da lavoro",
+    "originale": "banco.xml"
+  },
+  "credenza": {
+    "classe": "mobile",
+    "nome": "Credenza",
+    "originale": "credenza.xml"
+  },
+  "letto": {
+    "classe": "mobile",
+    "nome": "Letto",
+    "originale": "letto.xml"
+  },
+  "mobile": {
+    "classe": "mobile",
+    "nome": "Cassa",
+    "originale": "mobile.xml"
+  },
+  "viandante": {
+    "classe": "persona",
+    "nome": "Viandante",
+    "originale": "viandante.xml"
+  },
+  "contadina": {
+    "classe": "persona",
+    "nome": "Contadina",
+    "originale": "contadina.xml"
+  },
+  "bestia": {
+    "classe": "bestia",
+    "nome": "Lupo",
+    "originale": "bestia.xml"
+  }
+}

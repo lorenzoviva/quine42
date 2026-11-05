@@ -1,0 +1,121 @@
+<!-- Viandante, procedurale (Cantiere 2): gli stessi colori e le stesse parti animate dell'originale (stivali, braccio libero). Il seme sceglie
+     quanto è ampio il mantello (stretto, normale, a ruota fino a terra), se porta il cappello a tesa larga, se il cappuccio finisce a punta, se il bastone c'è e quanto è lungo, se il braccio libero è alzato, e se sulla
+     schiena porta una bisaccia. Il viso, gli occhi e la fibbia restano dove sono: lo si riconosce sempre. -->
+<sequence values="BGMNOCSEAQHPWLKpqmabcdgzrs0" size="20 15 30" symmetry="(xy)" name="Viandante">
+  <color symbol="G" value="4a3424" name="stivali" part="gamba"/>
+  <color symbol="M" value="3f6470" name="mantello"/>
+  <color symbol="N" value="5a8592" name="mantello al sole"/>
+  <color symbol="O" value="2c4952" name="piega del mantello"/>
+  <color symbol="C" value="46707d" name="cappuccio"/>
+  <color symbol="S" value="e0b48c" name="viso"/>
+  <color symbol="E" value="1e1a22" name="occhi"/>
+  <color symbol="A" value="3f6470" name="braccio libero" part="braccio"/>
+  <color symbol="Q" value="e0b48c" name="mano libera" part="braccio"/>
+  <color symbol="H" value="3f6470" name="braccio col bastone"/>
+  <color symbol="P" value="e0b48c" name="mano"/>
+  <color symbol="W" value="7a5532" name="bastone"/>
+  <color symbol="L" value="6b4626" name="cintura"/>
+  <color symbol="K" value="d8b048" name="fibbia"/>
+  <color symbol="p" hidden="True" name="il mantello a ruota"/>
+  <color symbol="q" hidden="True" name="il mantello normale"/>
+  <color symbol="m" hidden="True" name="dado"/>
+  <color symbol="a" hidden="True" name="scelta: a ruota"/>
+  <color symbol="b" hidden="True" name="scelta: normale"/>
+  <color symbol="c" hidden="True" name="la punta del cappuccio, forse"/>
+  <color symbol="d" hidden="True" name="la bisaccia, forse"/>
+  <color symbol="g" hidden="True" name="altezze possibili del bastone"/>
+  <color symbol="z" hidden="True" name="il bastone che sale"/>
+  <color symbol="r" hidden="True" name="il braccio alzato scelto"/>
+  <color symbol="s" hidden="True" name="la mano alzata scelta"/>
+  <color symbol="0" hidden="True" name="mescola"/>
+  <!-- Mescola: il generatore riparte da un punto diverso per ogni seme (vedi README) -->
+  <box at="10 0 29" size="20 2 1" color="0"/>
+  <prl in="0" out="B" p="0.5" steps="1"/>
+  <all in="0" out="B"/>
+  <box at="8 7 0" size="3 3 9" color="G"/>
+  <box at="12 7 0" size="3 3 9" color="G"/>
+  <!-- Il mantello: tre ampiezze, il dado al centro sceglie fin dove arriva -->
+  <cone at="10 7 1" size="17 13 21" color="p" on="B"/>
+  <cone at="10 7 6" size="14 11 16" color="q" on="[Bp]"/>
+  <cone at="10 7 8" size="10 7 14" color="M" on="[Bpq]"/>
+  <cylinder at="10 7 8" size="9 7 9" color="M" on="[Bpq]"/>
+  <box at="10 7 16" size="1 1 1" color="m"/>
+  <one steps="1">
+    <rule in="m" out="a"/>
+    <rule in="m" out="a"/>
+    <rule in="m" out="b"/>
+  </one>
+  <all symmetry="(xyz)">
+    <rule in="aM" out="aa"/>
+    <rule in="a[pq]" out="aa"/>
+    <rule in="bM" out="bb"/>
+    <rule in="bq" out="bb"/>
+  </all>
+  <all in="[ab]" out="M"/>
+  <all in="[pq]" out="B"/>
+  <!-- Le braccia, il cappuccio e il viso come nell'originale -->
+  <!-- Il braccio libero: lungo il fianco, o alzato in saluto -->
+  <cylinder at="4 7 10" size="3 3 7" color="A" on="B"/>
+  <box at="4 7 9" size="2 2 2" color="Q" on="B"/>
+  <cylinder at="3 7 17" size="3 3 6" color="p" on="B"/>
+  <box at="3 7 23" size="2 2 2" color="q" on="B"/>
+  <box at="4 7 9" size="1 1 1" color="m"/>
+  <one steps="1">
+    <rule in="m" out="a"/>
+    <rule in="m" out="Q"/>
+  </one>
+  <all symmetry="(xyz)">
+    <rule in="a[AQ]" out="aa"/>
+    <rule in="ap" out="ar"/>
+    <rule in="rp" out="rr"/>
+    <rule in="rq" out="rs"/>
+    <rule in="sq" out="ss"/>
+  </all>
+  <all in="[apq]" out="B"/>
+  <all in="r" out="A"/>
+  <all in="s" out="Q"/>
+  <cylinder at="16 8 10" size="3 3 7" color="H" on="B"/>
+  <box at="16 9 9" size="2 2 2" color="P" on="B"/>
+  <ellipsoid at="10 6 16" size="12 10 12" color="C" on="B"/>
+  <ellipsoid at="10 7 16" size="10 8 10" color="S" on="C"/>
+  <box at="10 12 17" size="8 3 5" color="B" on="C"/>
+  <box at="8 11 19" size="1 5 2" color="E" on="S"/>
+  <box at="12 11 19" size="1 5 2" color="E" on="S"/>
+  <cylinder at="10 7 11" size="11 9 1" color="L" on="M"/>
+  <box at="10 11 11" size="2 2 1" color="K" on="L"/>
+  <!-- La punta del cappuccio, forse, che sale e piega indietro -->
+  <box at="10 5 28" size="1 1 1" color="c"/>
+  <prl in="c" out="B" p="0.4" steps="1"/>
+  <all in="c B C" out="C C *" steps="1"/>
+  <all in="c B" out="* C"/>
+  <all in="c" out="B"/>
+  <!-- Il cappello a tesa larga, forse, al posto della punta -->
+  <ellipsoid at="10 6 25" size="17 14 1" color="d" on="B"/>
+  <cone at="10 6 25" size="9 9 5" color="d" on="B"/>
+  <one steps="1">
+    <rule in="d" out="L"/>
+    <rule in="d" out="B"/>
+  </one>
+  <all symmetry="(xyz)" in="Ld" out="LL"/>
+  <all in="d" out="B"/>
+  <!-- La bisaccia sulla schiena, forse -->
+  <box at="10 3 8" size="10 4 11" color="d" on="B"/>
+  <one steps="1">
+    <rule in="d" out="L"/>
+    <rule in="d" out="B"/>
+  </one>
+  <all symmetry="(xyz)" in="Ld" out="LL"/>
+  <all in="d" out="B"/>
+  <!-- Il bastone: assente, o alto da 17 a 26 voxel -->
+  <box at="0 0 17" size="1 1 10" color="g"/>
+  <one in="g" out="z" steps="1"/>
+  <all in="g" out="B"/>
+  <all in="zB" out="zz"/>
+  <box at="16 10 0" size="1 1 1" color="W"/>
+  <prl in="W" out="B" p="0.25" steps="1"/>
+  <one steps="30" in="B W" out="W W"/>
+  <all in="z" out="B"/>
+  <prl steps="1" symmetry="()" in="M/B" out="O/B" p="0.12"/>
+  <one steps="30" symmetry="()" in="O M" out="O O"/>
+  <prl steps="1" in="B M" out="B N" p="0.8"/>
+</sequence>
