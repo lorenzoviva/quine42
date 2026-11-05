@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 05/11/2026, epoca 285. Crediti: vedi `stato`.
+Aggiornato il 05/11/2026, epoca 286. Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -14,7 +14,7 @@ Aggiornato il 05/11/2026, epoca 285. Crediti: vedi `stato`.
 - **T278 integrato** (`112b736`): reami spazio, pirati, cowboy in `lab/banco/coming-soon-cloud/` (400 tick, 0 fault; non provati browser e Concilio vero; ambienti e terreni del seme rinominati, veicoli che non portano nessuno, effetti sonori senza evento, `META_RE` vieta parole dello spazio), `docs/lingue.md`, `docs/lancio/piano.md`. T239 e T240 restano `in attesa`, li chiude l'autore: **D34, D35**. T240 non si rilancia su Fable.
 - **T279 integrato** (`c5ecbd8`, T273 e T277 `fatto`): 4 universi con le strutture Cloud, visti nel browser da installazione temporanea (0 guasti, kernel 0.1.5). 23 modelli del seme cambiati; `grande` e la Morte restano i vecchi. **Al primo caricamento le strutture sono blocchi scuri per 30-40 s:** da rivedere con i tempi di T276. Non provati interni, cantine, scale, Enorme, ascolto, 19 effetti senza momento di gioco, props in scena. **Installare in `universes/` lo decide l'autore (D36).** T281 approvato da me (p5): `placeInside` dentro i muri.
 - **T276 integrato** (`ed092eb`, ADR-0142): motore MarkovJunior 10-22 volte più veloce a Enorme con griglie uguali (cantina 11,87 → 1,1 s, `locanda/1/seconda` 11,67 → 0,5 s, macchina carica). **D33 chiusa con A da me**, T258 `fatto`, **T156 ora pronto** (p32). T259 `in attesa`: costi solo stimati (**D37**).
-- **T280 e T297 finiti, non integrati:** T297 (versione `0.1.9`, ADR di T280 → 0145-0147) si scontra con T283 su `docs/glossario-censimento.md` e sull'ADR-0145 → **T300** (p1, parte al riavvio). Poi `integra T297`, `integra T280`, segnare `fatto` T245d-f. Nel browser mestieri, cantiere, casa per stadi, fuori vista; non provati casa comune e raccolto, `on_return`, rientro a piedi, produzione. Dipendono da T297: **T298** (p5, i mestieri dei tre universi) e **T299** (p6, Ugo fermo su un dislivello).
+- **T280 e T297 integrati via T300** (`d4dc0c6`, kernel 0.1.9; ADR-0147 imprese, ADR-0148 edificio per stadi, ADR-0149 fuori vista; T245d-f `fatto`). Nel browser mestieri, cantiere, casa per stadi, fuori vista; non provati casa comune e raccolto, `on_return`, rientro a piedi, produzione, la build e i quattro universi sul merge. Ora pronti **T298** (p5, i mestieri dei tre universi) e **T299** (p6, Ugo fermo su un dislivello). Il primo lancio con `--effort` (T300) è andato.
 - **T274 integrato** (`73b5841`, kernel 0.1.5; T260, T262, T263, T245a-c `fatto`; T245c da vedere nel browser con T280). T245d-f `in attesa` con una riga `- Cloud:`.
 - **T255 integrato** (`23147ca`, ADR-0146): provider `sonnet`, `haiku`, `agy-opus`, `agy-sonnet` in prova a tetto 1, `sforzo` nella riga `- Pipeline:`, `assegna --sforzo` (predefinito `high`). Non provati: un lancio reale con `--effort` e i provider nuovi; `ratioSessioneSettimana` di `sonnet` e `haiku` provvisorio (12). Riavviato (epoca 285): `claude` e `fable` riattivati, sforzo scritto con `assegna` sui 15 task aperti con stima; T290 non ha riga `- Pipeline:`, lo prende quando esce dall'attesa. **Il primo lancio con `--effort` (T300) è da guardare.**
 - **T180 integrato** (banco della varianza, solo `lab/`): 31 programmi su 31 statici; i sei vuoti del gioco per T156 sono nel suo esito; da decidere con T156 il tetto di 120 per Enorme e Gargantuesca. Soglia non provata su un edificio vero.
@@ -37,7 +37,7 @@ Aggiornato il 05/11/2026, epoca 285. Crediti: vedi `stato`.
 
 0. **Decisioni dell'autore del 04/11 (D8-D32 chiuse):**
    - **D32 (versionamento del kernel `X.Y.Z` e universi):** nuovo contratto del kernel `X.Y` = nuovo universo (o server dedicato alla versione precedente / futura migrazione IA a pagamento). Schema SemVer scelto: `X` = era (`0` in Fase I-II, `1` dal kernel `1.0.0`), `Y` = contratto dell'universo (parte da `1` in `0.1.0`, sale quando una modifica a `src/kernel/` cambia formati/primitive in modo incompatibile, ed è `9` in `0.9.0` per la Beta a fine Fase I), `Z` = incremento progressivo (`+1` a ogni task integrato che tocca `src/kernel/` restando compatibile con lo stesso `X.Y`). **T261** (`plan.tiles`) chiuso senza lavoro; **T260** riscritto (3 %, `da fare`, priorità 10). Step 32: T260, T262 → T245a → T263 e T245b → T245c, T245d → T245e → T245f. T245g-i in attesa della Fase III (step 39). T265 prima della beta (step 34), T264 piccolo, T266 in attesa verso fine Fase I. D16: `suono-effetto-morte` resta. D17-D26 confermate. Step 28 segnato `raggiunto`.
-1. **Pronti (al riavvio):** T300 (p1), T285, T286, T281 (p5), T156 (p32). Claude prossimo reset il 12/11; Gemini 17:37 UTC; Argon a 0 % fino all'11/11. **T256 integrato** (`d16d20a`), **T253 integrato.**
+1. **Pronti:** T281, T298, T288, T299, T293, T156; in corso T291. Claude prossimo reset il 12/11; Gemini 17:37 UTC; Argon a 0 % fino all'11/11. **T256 integrato** (`d16d20a`), **T253 integrato.**
 4. **T182 integrato e chiuso (04/11):** D5 C (T259), D6-D7 chiuse; `pagoda/1` e `tempio/2` restano fuori dai 10. Non provati nel gioco la lettera del suolo e il motore nuovo (T156).
 4b. **Generazione differita** (richiesta dell'autore, 03/11 e 05/11): **solo dopo T156, il prompt nuovo dello Scultore** (e T242, T259, D33). T207 (generatore senza browser, solo abbonamenti, aspetta T156) → T88 (la pipeline lo accende coi crediti che avanzano) → T153 (legge e prova i tre universi). I pacchetti e modelli generati ora su Claude Cloud in `lab/banco/` (`universi-cloud/`, `catalogo-cloud/`, `seme-procedurale/`, `props-tematici/`, `catalogo-60/`) usano già `lab/banco/prompt.md` (T182 + T258), ma **non** `sculptor.ts` aggiornato (T156), né il generatore differito (T207), né T242/T259: si tengono in `lab/banco/` e poi si rifaranno/rigenereranno nell'ordine giusto dopo i prerequisiti.
 
@@ -69,6 +69,6 @@ Aggiornato il 05/11/2026, epoca 285. Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **286 (claude):** integrati T300, T297, T280; T245d-f `fatto`.
 - **285 (claude):** riavvio, `riattiva claude` e `fable`, sforzo su 15 task, T300 in partenza.
-- **284 (claude):** T255 integrato, `ferma --dopo`.
 

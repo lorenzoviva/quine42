@@ -4133,8 +4133,8 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: sì: una giornata di tre mestieri.
 - Quando è fatto: commit su `task/T245c`; glossario. Sicurezza: scrivi l'esito.
 
-### T245d · Le imprese — `in attesa` (dipende da T245b, T263)
-- Cloud: finita il 05/11 (sessione B, `e7cddc1`); non lanciare in locale, lo porta T280.
+### T245d · Le imprese — `fatto`
+- Cloud: finita il 05/11 (sessione B, `e7cddc1`); integrata con T280, via T297 e T300 (`d4dc0c6`): ADR-0147, 0148, 0149, kernel 0.1.9.
 - Pipeline: claude · stima 12% · approvato · priorità 19
 - Step: 32
 - Contesto: Nasce da T245 (`dossier T245`): progetto in `docs/design/comportamento-npc.md`, sezione 3. Fase 0.9.0 (D8).
@@ -4143,8 +4143,8 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: sì: un'impresa che avanza e il suo pannello.
 - Quando è fatto: commit su `task/T245d`; ADR, glossario, `AGENTS.md`. Sicurezza: scrivi l'esito.
 
-### T245e · L'edificio per stadi — `in attesa` (dipende da T245d)
-- Cloud: finita il 05/11 (sessione B, `e7cddc1`); non lanciare in locale, lo porta T280.
+### T245e · L'edificio per stadi — `fatto`
+- Cloud: finita il 05/11 (sessione B, `e7cddc1`); integrata con T280, via T297 e T300 (`d4dc0c6`): ADR-0147, 0148, 0149, kernel 0.1.9.
 - Pipeline: claude · stima 9% · approvato · priorità 20
 - Step: 32
 - Contesto: Nasce da T245 (`dossier T245`): progetto in `docs/design/comportamento-npc.md`, sezione 3.4. Fase 0.9.0 (D8).
@@ -4153,8 +4153,8 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: sì: una casa che sale in quattro fasi.
 - Quando è fatto: commit su `task/T245e`; ADR se è un contratto nuovo dei programmi. Sicurezza: scrivi l'esito.
 
-### T245f · Fuori vista — `in attesa` (dipende da T245d, T245e)
-- Cloud: finita il 05/11 (sessione B, `e7cddc1`); non lanciare in locale, lo porta T280.
+### T245f · Fuori vista — `fatto`
+- Cloud: finita il 05/11 (sessione B, `e7cddc1`); integrata con T280, via T297 e T300 (`d4dc0c6`): ADR-0147, 0148, 0149, kernel 0.1.9.
 - Pipeline: claude · stima 9% · approvato · priorità 21
 - Step: 32
 - Contesto: Nasce da T245 (`dossier T245`): progetto in `docs/design/comportamento-npc.md`, sezione 5. Fase 0.9.0, decisione dell'autore del 04/11 (D8: il progetto la lasciava aperta).
