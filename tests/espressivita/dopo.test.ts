@@ -5,6 +5,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { MockAiModels } from '../../src/kernel/ai/mock';
 import { bundledFiles } from '../../src/kernel/bundle';
+import { checkKernelVersion, KERNEL_VERSION } from '../../src/kernel/version';
 import { MemoryChunks } from '../../src/kernel/chunks';
 import { Kernel } from '../../src/kernel/kernel';
 import { allowedPath } from '../../src/kernel/paths';
@@ -12,37 +13,9 @@ import { memoryStore } from '../../src/kernel/repo';
 import { LUA_API } from '../../src/kernel/validator';
 import { closeWorld, developAll, DT, newLasting, open, universeWith } from './banco';
 
-vi.mock('../../src/kernel/prelude.lua?raw', async (original) => {
-  const real = (await original()) as { default: string };
-  const api = 'local world = {\n    store_get = function(key) return host.store_get(tostring(key)) end,\n    store_set = function(key, value) return host.store_set(tostring(key), value) end,';
-  return { default: real.default.replace('local world = {', api) };
-});
+const STORE = 'world/magazzino/mech.mercato.json';
 
-const STORE = 'world/moduli.json';
-
-/** Tomorrow's Host and tomorrow's save: the only two changes the primitive needs in the kernel, besides the two lines of the prelude and the list of the validator. */
-function tomorrow(): void {
-  const proto = Kernel.prototype as any;
-  if (proto.tomorrow) return;
-  proto.tomorrow = true;
-  const makeHost = proto.makeHost;
-  proto.makeHost = function (this: any) {
-    const data = (): Record<string, unknown> => (this.store_ ??= JSON.parse(this.files?.[STORE] ?? '{}'));
-    return { ...makeHost.call(this), store_get: (k: string) => data()[k], store_set: (k: string, v: unknown) => void (data()[k] = v) };
-  };
-  const saveState = proto.saveState;
-  proto.saveState = function (this: any) {
-    if (this.store_ && !this.mirror) {
-      const text = JSON.stringify(this.store_);
-      this.repo.write(STORE, text);
-      this.files = { ...this.files, [STORE]: text };
-    }
-    return saveState.call(this);
-  };
-  LUA_API.world.push('store_get', 'store_set');
-}
-
-const LASTING_MARKET = `-- Il mercato di domani: il prezzo sta nel magazzino del mondo.
+const LASTING_MARKET = `-- Il mercato che ricorda: il prezzo sta nel magazzino del mondo.
 local M = {}
 function M.on_ui(user, azione)
   local m = world.store_get("mercato") or { prezzo = 10 }
@@ -54,27 +27,27 @@ function M.update(dt) end
 return M
 `;
 
+// T183 built this primitive here, on a kernel of tomorrow (the prelude and the Host extended in the test). T245a (ADR-0138) put it in the
+// kernel as it was measured: the same three tests now run on the kernel of today.
 describe('a kernel with one more primitive, and a universe of before', () => {
   it('the same universe opens with no fault: its modules never called it', async () => {
-    tomorrow();
     const k = await open(newLasting(bundledFiles));
     expect(k.faults.list()).toEqual([]);
   });
 
   it('a name the universe already used for itself still works: its local is its own', async () => {
-    tomorrow();
     const own = 'local M = {}\nlocal store_get = function() return 7 end\nfunction M.update(dt) ecs.set(world.player(), "mio", { v = store_get() }) end\nreturn M\n';
     const k = await open(newLasting({ ...universeWith('mech.posa'), 'modules/mech.posa/logic.lua': own }));
     k.tick(DT);
     expect(k.ecs.get(k.wandererEntity, 'mio').v).toBe(7);
   });
 
-  it('the validator of tomorrow takes a module that uses it, its data survive the restart, and the path was already allowed', async () => {
-    tomorrow();
+  it('the validator takes a module that uses it, its data survive the restart, and the path was already allowed', async () => {
     const w = newLasting({ ...universeWith('mech.mercato'), 'modules/mech.mercato/logic.lua': LASTING_MARKET });
     const first = await open(w);
     const manifest = { id: 'mech.nuova', name: 'x', kind: 'system', ui: { id: 'n', titolo: 'n', elementi: [{ tipo: 'pulsante', id: 'a', etichetta: 'a' }] } } as any;
     expect(first.validator.validateForged(manifest, LASTING_MARKET, new Set(), { system: true })).toEqual([]);
+    expect(LUA_API.world).toEqual(expect.arrayContaining(['store_get', 'store_set']));
     for (let i = 0; i < 3; i++) first.uiAction('mercato', 'compra');
     first.give('item.pane', 1);
     await closeWorld(first, w);
@@ -82,7 +55,7 @@ describe('a kernel with one more primitive, and a universe of before', () => {
     expect(JSON.parse(w.files[STORE]).mercato.prezzo).toBe(13);
     const second = await open(w);
     second.uiAction('mercato', 'compra');
-    expect((second as any).store_.mercato.prezzo).toBe(14);
+    expect(second.stores.get('mech.mercato', 'mercato')).toEqual({ prezzo: 14 });
   });
 });
 
@@ -126,5 +99,12 @@ describe('a kernel whose shared random changed', () => {
     expect(same).toBeLessThan(all);
     // The edit made before the change is still there: it is stored by index.
     expect(after.edit).toBe('l');
+  });
+
+  it('such a kernel is another contract (T260, ADR-0136): it goes up in Y, and the universe of before does not open on it as if nothing changed', () => {
+    const made = JSON.parse(bundledFiles['universe.json']).kernel;
+    const next = KERNEL_VERSION.replace(/^(\d+)\.(\d+)\.\d+$/, (_, x, y) => `${x}.${Number(y) + 1}.0`);
+    expect(checkKernelVersion(made, KERNEL_VERSION).ok).toBe(true);
+    expect(checkKernelVersion(made, next)).toMatchObject({ ok: false, motivo: expect.stringMatching(/universo nuovo/) });
   });
 });

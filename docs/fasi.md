@@ -20,10 +20,10 @@ L'autore: l'implementazione del kernel 0.9.0, divisa in step. La guida dei beta 
 2. Il server di beta è acceso: un universo multigiocatore giocato da due browser veri (T45f, l'ultimo passo della fase: per scelta dell'autore parte quando il resto è finito).
 3. I quattro universi vanilla sono generati e ci si cammina senza errori (T153).
 4. `npm run sicurezza:prove` passa contro il server di beta, e nel registro non resta aperta una voce con cui un tester possa toccare i crediti di altri, il server o la chiave.
-5. Ciò che T183 trova mancare al kernel e che non entrerebbe senza wipe è deciso: dentro la 0.9.0 oppure rimandato sapendo cosa costa, perché un wipe degli universi ufficiali costa molto.
+5. Ciò che T183 trova mancare al kernel e che non entrerebbe senza wipe è deciso: dentro la 0.9.0 oppure rimandato sapendo cosa costa, perché un wipe degli universi ufficiali costa molto. Con il versionamento (ADR-0136) «senza wipe» vuol dire «nella stessa `X.Y`»: ciò che cambia il contratto dopo la 0.9.0 la porta a 0.10.0 o a 1.0.0, e gli universi della beta restano sul server della loro versione.
 6. Il registro di ciò che il Concilio non riesce a fare è acceso (T238): senza, la Fase III non ha da dove partire.
 7. Un viandante nuovo ha seguito i due file della guida sul server di beta, e ogni passo torna (T237).
-8. `package.json` dice `0.9.0` (oggi `0.1.0`) e quel commit ha un tag.
+8. `package.json`, `KERNEL_VERSION` (`src/kernel/version.ts`) e `universe.json → kernel` del seme dicono `0.9.0` (oggi `0.1.x`: `Z` sale a ogni task che cambia il kernel, ADR-0136) e quel commit ha un tag.
 
 ### Fase II: i beta tester
 

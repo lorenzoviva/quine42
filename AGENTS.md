@@ -45,8 +45,9 @@ Design doc originale: [`docs/design.md`](docs/design.md). Decisioni: [`docs/adr/
 5. **Ogni contenuto è un modulo autosufficiente** con `manifest.json`; il manifest dei moduli
    generati lo assembla il kernel (forma garantita). Gli oggetti stanno in pacchetti di dati.
 6. **Due repository** (ADR-0021): il kernel (questo progetto; `universe/` è il seme, immutabile) e
-   l'universo (repository git su disco, `universes/<nome>/`). Si committano solo stati validi; `R` torna
-   all'ultimo valido; ripartire dal seme mette l'universo in `universes/.cestino/`. Un commit che la rete non porta resta in fila, in ordine; un rifiuto del server non si ritenta (ADR-0122).
+   l'universo (repository git su disco, `universes/<nome>/`). Si committano solo stati validi, e un guasto invalida il codice, non i dati (ADR-0137): il codice
+   scritto senza commit è trattenuto da ogni commit (`Repo.withheld`), stato, viandanti e piani si salvano anche con un guasto aperto (non un universo
+   di un altro kernel o con `universe.json` illeggibile); `R` torna all'ultimo valido, che ha i dati dell'ultimo salvataggio; ripartire dal seme mette l'universo in `universes/.cestino/`. Un commit che la rete non porta resta in fila, in ordine; un rifiuto del server non si ritenta (ADR-0122).
 7. **Il kernel è il pavimento**: sopravvive a NaN, nil, cicli infiniti, binding recisi. Le API del
    `Host` validano gli input e restituiscono `undefined` (mai `null`).
 8. **Dal cerchio nessuno vede la corona** (ADR-0009, ADR-0124): si disegna solo per chi è fuori dal tappeto (a `circleRadius` o più dal centro) o in un interno dello studio; lo decide solo `kernel.coronaRevealed()`, che non guarda ruolo né camera. Dentro il cerchio niente anello, luci, etichette, hover né sfondo, per il giocatore, per chi è tornato, per il master e in god mode; la camera di base è la 3/4 e l'orbita libera non accende nulla.
@@ -157,6 +158,9 @@ src/
     chain.ts            la catena della Sala sistemi (T27a): misure di ogni sistema nel tick, stazioni
                         (bench.ts: anche il banco di prova, T27b: casi, scena, nomi dei campi)
     shortfalls.ts       le mancanze (ADR-0130): ciò che il Concilio non è riuscito a fare (`world/mancanze.json`, mai ai client), il rapporto
+    jobs.ts             i programmi dei mestieri (`validateJobProgram`, `matchJob`, `JOB_BEHAVIOURS`, ADR-0140); route.ts, la via tra due caselle (`findRoute`, `RouteCache`)
+    store.ts            il magazzino dei moduli (`ModuleStores`, `world/magazzino/<modulo>.json`, tetti in byte, ADR-0138)
+    version.ts          la versione del kernel `X.Y.Z` (`KERNEL_VERSION`, `checkKernelVersion`, `stampKernel`, ADR-0136)
     credits.ts          la commissione di piattaforma (`costWithFee`, la decide il server, ADR-0132) e la divisione delle spese comuni (ADR-0081)
     ai/                 models.ts, gemini.ts, mock.ts, prices.ts (prezzi, con la data), usage.ts (registro dei consumi),
                         subscription.ts (la tabella dei provider, RoutedAiModels, QueueAiModels: i compiti lenti sugli abbonamenti, ADR-0077)
@@ -176,11 +180,13 @@ universe/
                         rules.json (regole), people.json (la società, con i ricordi), plots.json (trame),
                         atlas.json (geografia), stato.json (lo stato del mondo), grafo.json (il grafo del mondo, derivato),
                         giocatori/<id>.json (lo stato di ogni viandante: inventario, bisogni, stati, slot, frase),
-                        carte.json (gli utilizzi delle carte e le carte dei luoghi)
+                        carte.json (gli utilizzi delle carte e le carte dei luoghi),
+                        magazzino/<modulo>.json (il magazzino di ogni modulo, `world.store_get/set`, mai ai client, ADR-0138)
   prompts/              theme.md, agents/<agente>.md
   models/               index.json + <id>.xml: i programmi MarkovJunior di ogni cosa (ADR-0041), uno per tipo
   modules/<id>/         manifest.json (+ logic.lua): sistemi, terreni, ambienti, pacchetti di oggetti, mobili, individui,
-                        effetti (core.effects), fuoco (sys.fire), rune magiche e incantesimi (magic.runes, magic.spells)
+                        effetti (core.effects), fuoco (sys.fire), rune magiche e incantesimi (magic.runes, magic.spells),
+                        il lavoro (sys.lavoro) e i programmi dei mestieri (lavoro.<mestiere>, `kind: data` con `mestieri`, ADR-0140)
 tests/  docs/
 src/mj/                 MarkovJunior del gioco (ADR-0036, 0038): engine.ts (motore 3D), xml.ts e model.ts (XML alla lettera), palette.ts,
                         run.ts (esecuzione, animazioni, azioni), rig.ts (arti), mesh.ts (voxel → triangoli, impronte, pavimenti),
@@ -223,15 +229,15 @@ Registro, Luogo, Fucina e Genesi → `docs/architettura-dettagli.md#concilio`.
 - **Spazi, tappeto, rune, magia, borse**: cerchio di raggio 42 col tappeto, rune come token Lua eseguiti, canone, frase, `T` e mana → `#spazi-rune-magia`
 - **Lessico**: le parole e le usanze del mondo, mai spiegate come un glossario → `#lessico`
 - **Regole, effetti, stati, morte, menu, salto, contenuti**: i giudizi diventano regole, gli effetti sono un insieme chiuso → `#regole-effetti`
-- **Società, vita degli NPC, personaggi**: individui, legami, routine, trame, missioni → `#societa`
+- **Società, vita degli NPC, personaggi**: individui, legami, routine, trame, missioni; i mestieri come programmi (`sys.lavoro`, `matura` nei terreni, il giorno in `plan.giorni`, ADR-0140) → `#societa`
 - **Corona e interni dello studio**: campus, edifici, vetrine, plastico, Nucleo, Biblioteca, Direzione, Galleria, Sala del Concilio → `#corona`
 - **Meccaniche, casi dei sistemi, catena, banco di prova** (Sala sistemi) → `#sala-sistemi`
 - **Geografia**: biomi, ambienti, timbri, atlante → `#geografia`
 - **La partita, i viandanti, le rune per ruolo**: scelte alla Genesi e fisse, `as(id, fn)` sincrono, il master → `#partita-viandanti`
 - **Semi condivisi**: la simulazione non estrae mai dall'orologio → `#semi`
 - **Chi paga, carte, crediti**: `chi` su ogni chiamata, `commitContent`, commissione decisa dal server (`QUINE_COMMISSIONE`), spese comuni divise → `#carte-crediti`
-- **Regolazioni del consumo**: ogni compito ha una manopola, si fissano entrando (ADR-0133) → `#lobby`
-- **Multigiocatore**: kernel sul server, client sottile, luoghi nuovi, file del giocatore, ramo del master, god mode, doni, PvP, profilo, morte → `#multigiocatore`
+- **Regolazioni del consumo**: ogni compito ha una manopola, si fissano entrando (ADR-0133); `vite` (Cronaca, Vita, Teatro) assente vale 0 (ADR-0138) → `#lobby`
+- **Multigiocatore**: kernel sul server, client sottile, luoghi nuovi, file del giocatore, ramo del master, god mode, doni, PvP, profilo, morte; i `campo` dei pannelli in `MyState.campi` (a elenco, regola 8f) e i tasti di ogni viandante (`tasti`, `world.wanderers()`, `input.held(azione, id)`, ADR-0139) → `#multigiocatore`
 - **Account Firebase e anonimi** → `#account`; **Stripe Checkout** → `#stripe`; **lobby** → `#lobby`; **coda CLI degli abbonamenti** → `#abbonamenti`
 - **Clone con un altro master, eredità delle carte** → `#clone-eredita`
 - **Mondo in 3D, bozze di prova, mappa, voxel luminosi**: un'unità = una casella, kernel (x, y) = three.js (x, z) → `#mondo3d`
@@ -253,13 +259,13 @@ Registro, Luogo, Fucina e Genesi → `docs/architettura-dettagli.md#concilio`.
 (`solid`, `radius`, `pushable`, `mass`, `friction`, `speed`), `components`, `singleton`, `persist`,
 `interaction` (`talk | read | lua`), `actions` (`id`, `label`, `requires`, `effects`), `container` (`size`, `loot`),
 `ui` (pannello: `titolo`, `elementi`), `spawn`, `persona`, `unique`, `inventory` (id di oggetti), `item`, `context`, `lore`, `tags`, `drops`,
-`origin`; generatori: `tiles` (`name`, `color`, `solid`, `layer`, `indoor`, `speed`, `model`, `actions`),
-`roof`, `commonHouse`; dati: `items` (anche `model`, `aspetto`, `container`, `actions`, `slot`, `bonus`, effetti `mana`), `recipes`, `loot`, `layouts`, `fragments`, `runes`, `spells`.
+`origin`; generatori: `tiles` (`name`, `color`, `solid`, `layer`, `indoor`, `speed`, `model`, `actions`, `matura`),
+`roof`, `commonHouse`; dati: `items` (anche `model`, `aspetto`, `container`, `actions`, `slot`, `bonus`, effetti `mana`), `recipes`, `loot`, `layouts`, `fragments`, `runes`, `spells`, `mestieri` (ADR-0140).
 
 ### API Lua — l'unica disponibile, il validatore rifiuta il resto
-`ecs.each/get/set/spawn/destroy/first`; `world.free/free_real/tile/speed_at/spawn/player/player_pos/
-nearest/has_tag/break_entity/say/speak/set_tile/open/make_container`; `inventory.add/remove/count/equipped`; `items.find/def/bonus`; `ui.slot`;
-`input.held`; `bus.emit`; `log`; `hash`; `math string table utf8 pairs pcall…` (`math.random` seminato dal kernel, ADR-0055).
+`ecs.each/get/set/spawn/destroy/first`; `world.free/free_real/tile/speed_at/spawn/player/player_pos/wanderers/path/find_tile/act/
+nearest/has_tag/break_entity/say/speak/set_tile/open/make_container/store_get/store_set` (il magazzino del modulo, ADR-0138); `inventory.add/remove/count/equipped`; `items.find/def/bonus`; `ui.slot`;
+`input.held(azione, id?)` (i tasti di ogni viandante, ADR-0139); `bus.emit`; `log`; `hash`; `math string table utf8 pairs pcall…` (`math.random` seminato dal kernel, ADR-0055).
 Hook: `update(dt)` (sistemi), `generate_chunk`, `on_spawn(id)`, `on_interact(id, user)`,
 `on_act(id, user, action)`, `on_use(user, item)`, `on_action(user, target, item)`, `on_slot(user, slot, item, panel)`, `on_ui(user, azione)`; `core.items.use(user, item)`;
 `core.effects.apply(target, user, effect, x, y)`. Componenti noti: `luce {raggio, accesa, colore}`, `fuoco {raggio}`,
@@ -320,5 +326,6 @@ La procedura, con gli snippet per spostarsi nelle stanze, è in [`docs/architett
 - File in LF (`.gitattributes`). Su Windows niente `Get-Content`/`Set-Content` di PowerShell 5.1 sui sorgenti.
 - Nuova API per Lua: `Host` + `prelude.lua` + `LUA_API` nel validatore + prompt dell'Ingegnere + questo file.
 - Nuovo compito per un agente: schema Gemini + risposta in `MockAiModels` + voce nel registro.
+- **La versione del kernel** (ADR-0136): `X.Y.Z` = era, contratto, incremento, in `src/kernel/version.ts` (`KERNEL_VERSION`) e in `package.json`, uguali. Chi cambia `src/kernel/` sale di `Z` se gli universi della stessa `X.Y` restano buoni, di `Y` (e `Z` a 0) se cambia il contratto (formati, senso di una primitiva, regole del terreno, caso): un contratto nuovo vuole un universo nuovo. `universe.json → kernel` lo scrive il kernel; `checkKernelVersion` al caricamento, un universo di un'altra `X.Y` resta in piedi con il guasto `universe:kernel`.
 - Prima di consegnare: `npm test` e `npm run typecheck` verdi.
 - Un sottosistema nuovo o cambiato si descrive in `docs/architettura-dettagli.md`; qui una riga nell'indice (ADR-0120).

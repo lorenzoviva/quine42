@@ -150,7 +150,7 @@ Modello di una voce:
 - Prova: solo lettura del codice (T117); misurata dal kit (`esiti/2026-11-01.json`): FALLA V-012.a, b, d: **il server di sviluppo serve i file di `universes/`**; prompt, bibbia, persone e codice non arrivano al giocatore (V-012.c, e, f, ok). Dopo T130: V-012.a, b, c, d ok (`esiti/2026-11-02-dopo-T130-V-012.json`); test: elenco dei campi, un campo mai visto, uno specchio sul seme, le vie per `universes/`. Contro il server di produzione vero (T134, `serververo.test.ts`): letture da non master e `ingresso` di un giocatore
 - Contromisura: `playerFiles` a elenco di campi ammessi; `universes/` non servito da Vite.
 - Task: T130
-- Test: `tests/sicurezza/uscite.test.ts`, `tests/sicurezza/rotte.test.ts`, `tests/sicurezza/mondo.test.ts`, `tests/sicurezza/serververo.test.ts`
+- Test: `tests/sicurezza/uscite.test.ts`, `tests/sicurezza/rotte.test.ts`, `tests/sicurezza/mondo.test.ts`, `tests/sicurezza/serververo.test.ts`, `tests/sicurezza/pannelli.test.ts` (T263: i campi dei pannelli e i tasti, ADR-0139)
 - Esito: chiusa da T130 (ADR-0109), 02/11/2026, branch `task/T130`. Alla lobby e al sito (`publicFiles`) restano di `ai` modelli, coefficienti, minimi e budget, che mostrano per scelta (ADR-0086); `provider` e `agenti` no.
 
 ### V-013 · Configurazione scrivibile
@@ -249,7 +249,7 @@ Modello di una voce:
 - Prova: test, su ogni forma di messaggio; kit contro il server vero (V-021.a): sul codice di prima FALLA, chi guardava ha sentito che il mondo si era fermato (`esiti/2026-11-02-T167-prima-V-021.json`), dopo ok
 - Contromisura: `handleSafely`, `seqOf`, un `try` all'ingresso e sul canale, le promesse fallite nel log (ADR-0113).
 - Task: T167
-- Test: `tests/sicurezza/secondo-audit.test.ts`, `tests/sicurezza/produzione.test.ts`
+- Test: `tests/sicurezza/secondo-audit.test.ts`, `tests/sicurezza/produzione.test.ts`, `tests/sicurezza/pannelli.test.ts` (T263: i campi dei pannelli e i tasti, ADR-0139)
 - Esito: chiusa da T167 (ADR-0113), 02/11/2026, branch `task/T167`.
 
 ### V-022 · Il master paga ciò che chiedono gli altri

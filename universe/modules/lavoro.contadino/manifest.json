@@ -1,0 +1,105 @@
+{
+  "id": "lavoro.contadino",
+  "name": "Il contadino",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi lavora la terra: ara il prato, semina i solchi, miete il grano maturo; la sera in piazza, la notte a casa.",
+  "items": [
+    {
+      "id": "item.grano",
+      "name": "grano",
+      "description": "Un fascio di spighe mietute, ancora odorose di campo.",
+      "category": "materiale",
+      "weight": 0.5,
+      "stack": 20,
+      "tags": [
+        "raccolto",
+        "grano"
+      ]
+    }
+  ],
+  "mestieri": [
+    {
+      "id": "contadino",
+      "nomi": [
+        "contadino",
+        "contadina",
+        "bracciante",
+        "ortolano",
+        "ortolana",
+        "agricoltore",
+        "agricoltrice",
+        "mezzadro",
+        "mezzadra",
+        "fattore",
+        "fattora",
+        "coltivatore",
+        "coltivatrice"
+      ],
+      "posto": {
+        "casella": "m"
+      },
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "trasforma",
+            "da": "g",
+            "a": "m",
+            "quante": 2,
+            "durata": 10,
+            "posa": "zappa",
+            "dice": "Terra dura, stamattina."
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "trasforma",
+            "da": "m",
+            "a": "e",
+            "quante": 3,
+            "durata": 8,
+            "posa": "zappa"
+          },
+          {
+            "fa": "raccogli",
+            "casella": "u",
+            "oggetto": "item.grano",
+            "lascia": "m",
+            "quante": 3,
+            "durata": 8,
+            "posa": "zappa",
+            "dice": "Questo è pronto."
+          }
+        ],
+        "sera": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "porta",
+            "oggetto": "item.grano",
+            "dove": "piazza",
+            "dice": "Il grano di oggi, al deposito."
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}
