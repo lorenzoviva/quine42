@@ -16,7 +16,7 @@ import path from 'node:path';
 import { MockAiModels } from '../../../src/kernel/ai/mock';
 import { readAtlas } from '../../../src/kernel/atlas';
 import { bundledFiles } from '../../../src/kernel/bundle';
-import { bibleBreaks, lexiconWords, metaBreak, OWN_CUSTOMS } from '../../../src/kernel/fourthwall';
+import { bibleBreaks, lexiconWords, metaBreak } from '../../../src/kernel/fourthwall';
 import { Kernel } from '../../../src/kernel/kernel';
 import { validateNewRune } from '../../../src/kernel/magic';
 import { validateEffects } from '../../../src/kernel/validator';
