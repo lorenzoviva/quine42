@@ -46,7 +46,7 @@ Design doc originale: [`docs/design.md`](docs/design.md). Decisioni: [`docs/adr/
    generati lo assembla il kernel (forma garantita). Gli oggetti stanno in pacchetti di dati.
 6. **Due repository** (ADR-0021): il kernel (questo progetto; `universe/` è il seme, immutabile) e
    l'universo (repository git su disco, `universes/<nome>/`). Si committano solo stati validi; `R` torna
-   all'ultimo valido; ripartire dal seme mette l'universo in `universes/.cestino/`. Un commit che la rete non porta resta in fila, in ordine; un rifiuto del server non si ritenta (ADR-0122).
+   all'ultimo valido; ripartire dal seme mette l'universo in `universes/.cestino/`. Ogni scrittura (commit, piano, ramo, pubblicazione) che la rete non porta resta in fila, in ordine, anche dopo una ricarica e fino a un tetto oltre il quale si unisce; un 401 rinnova il token; un rifiuto del server non si ritenta (ADR-0122, ADR-0136).
 7. **Il kernel è il pavimento**: sopravvive a NaN, nil, cicli infiniti, binding recisi. Le API del
    `Host` validano gli input e restituiscono `undefined` (mai `null`).
 8. **Dal cerchio nessuno vede la corona** (ADR-0009, ADR-0124): si disegna solo per chi è fuori dal tappeto (a `circleRadius` o più dal centro) o in un interno dello studio; lo decide solo `kernel.coronaRevealed()`, che non guarda ruolo né camera. Dentro il cerchio niente anello, luci, etichette, hover né sfondo, per il giocatore, per chi è tornato, per il master e in god mode; la camera di base è la 3/4 e l'orbita libera non accende nulla.

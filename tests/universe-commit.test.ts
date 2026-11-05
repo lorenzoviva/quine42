@@ -170,7 +170,7 @@ describe('la coda dei commit (T211)', () => {
     client.close();
     await vi.advanceTimersByTimeAsync(120_000);
     expect(asked.length).toBe(4);
-    expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('1 commit non scritti su disco alla chiusura'));
+    expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('1 scritture non su disco alla chiusura'));
   });
 
   it('un errore del server si ritenta poco, poi cede il passo: non ferma per sempre i commit dopo', async () => {
@@ -217,8 +217,8 @@ describe('la coda dei commit (T211)', () => {
     });
     void client.commit({ 'world/a.json': '1' }, 'a', 'agent');
     await vi.advanceTimersByTimeAsync(5200);
-    await expect(client.clone('copia', 'io')).rejects.toThrow('1 commit in attesa');
-    await expect(client.checkout('abcd')).rejects.toThrow('1 commit in attesa');
+    await expect(client.clone('copia', 'io')).rejects.toThrow('1 scritture in attesa');
+    await expect(client.checkout('abcd')).rejects.toThrow('1 scritture in attesa');
     await expect(client.merge('master', 'pubblica')).resolves.toBeUndefined();
     await expect(client.branch('master', { 'world/x.json': '1' }, 'ramo', 'player')).resolves.toBeNull();
     expect(others).toEqual([]);

@@ -43,6 +43,13 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Dove vive**: `universe/`, `src/kernel/universes.ts`
 - **Da non usare**: nessuno (dire «il seme» da solo è ambiguo con «Seme»)
 
+### Fila delle scritture
+- **Inglese**: `OwedWrite`, `OwedStorage`, `browserOwedStorage`, `renewAuth`
+- **Definizione**: le scritture sull'universo che il server non ha ancora preso (commit, piani, rami, pubblicazioni), in ordine; nel browser sopravvive a una ricarica, ha un tetto (ADR-0122, ADR-0136).
+- **Dove vive**: `src/kernel/universes.ts` (`UniverseClient`), `localStorage` `quine:fila:<universo>:<scheda>`
+- **Da non usare**: `coda dei commit` (non ha solo commit; «coda» è quella degli abbonamenti)
+- **Fermo**: la chiave `quine:fila:` e la forma delle scritture salvate.
+
 ### Seme
 - **Inglese**: `seed`, `seedLua`, `rngFor`
 - **Definizione**: il numero da cui escono le estrazioni: quello dell'universo e quello che fa di un modello un'istanza.

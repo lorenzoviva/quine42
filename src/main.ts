@@ -416,6 +416,9 @@ async function main() {
   // Another master is another universe (T42d): the store copies this one, from the main line on disk.
   if (tools && thin && client) {
     client.identify(account ? { Authorization: `Bearer ${account.token}` } : { [WANDERER_HEADER]: thin.session.id });
+    // A token that expired is renewed and the write tried again (T265).
+    const signed = account;
+    if (signed) client.renewAuth = async () => ({ Authorization: `Bearer ${await signed.freshToken()}` });
     tools.konsole.onClone = (nome, master, titolari) => client.clone(nome, master, titolari);
   }
   kernel.bus.on('genesis:done', ({ title }) => hud.showBanner(title.toUpperCase(), 'Un nuovo universo è stato scritto. Il tappeto ti riporta al centro.', 4000));
