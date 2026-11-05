@@ -1,13 +1,11 @@
 // I 25 moduli di Sidera passano dal validatore come un modulo della Fucina: manifest, Lua che compila, solo l'API
 // ammessa, caricamento di prova in una VM a parte; poi la quarta parete su ogni testo e gli avvisi di coerenza
 // (oggetti, rune e modelli nominati che devono esistere). Esegui: npx vite-node lab/banco/universi-cloud/sidera/strumenti/moduli.ts
-import fs from 'node:fs';
-import path from 'node:path';
 import { Sandbox } from '../../../../../src/kernel/sandbox';
 import { apiErrors, Validator } from '../../../../../src/kernel/validator';
 import { lexiconWords, metaBreak } from '../../../../../src/kernel/fourthwall';
 import { fakeHost } from '../../../../../tests/helpers';
-import { fileDi, SIDERA } from './carica';
+import { fileDi } from './carica';
 
 /** I moduli scritti per Sidera (gli altri sono il pavimento del seme, copiati così come sono). */
 export const MODULI_SIDERA = [
