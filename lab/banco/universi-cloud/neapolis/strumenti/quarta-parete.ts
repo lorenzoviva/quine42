@@ -1,10 +1,10 @@
 // La quarta parete su tutto ciò che di Neapolis il mondo legge: le stringhe dei JSON (world/, modules/, maps/), i letterali
 // delle stringhe Lua (i commenti del codice restano al tavolo del Concilio), i Markdown del mondo e il tema; le trame con
-// reviewPlot (persone, parentele, canone delle rune), la bibbia con bibleBreaks, e il glossario del lessico.
+// reviewPlot (persone, parentele, canone delle rune), la bibbia con bibleBreaks; metaBreak con le parole del lessico guarda anche il glossario.
 // Restano fuori i prompt degli agenti (prompts/agents: istruzioni al Concilio) e i programmi dei modelli (models/).
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
-import { bibleBreaks, glossaryBreak, lexiconWords, metaBreak } from '../../../../../src/kernel/fourthwall';
+import { bibleBreaks, lexiconWords, metaBreak } from '../../../../../src/kernel/fourthwall';
 import { canonBreak, readPlots, reviewPlot } from '../../../../../src/kernel/plots';
 import { readPeople } from '../../../../../src/kernel/society';
 import { DIR } from './universo';
@@ -68,12 +68,5 @@ export function checkFourthWall(dir = DIR): WallReport {
     const r = reviewPlot(plot, people, words);
     for (const p of r.problems) breaks.push(`world/plots.json «${plot.titolo}»: ${p}`);
   }
-  void glossaryBreak;
   return { files, texts, breaks };
-}
-
-if (process.argv.length >= 2) {
-  const r = checkFourthWall();
-  console.log(`${r.files} file, ${r.texts} testi, ${r.breaks.length} rotture`);
-  for (const b of r.breaks) console.log(`  ✗ ${b}`);
 }
