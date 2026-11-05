@@ -568,7 +568,7 @@ export const CREATURE_VEICOLI: Definizione[] = [
     titolo: 'Furgone delle consegne',
     classe: 'bestia',
     descrizione: 'Il furgone che fa il giro dei quartieri di Neapolis, con i pacchi che non stanno mai dentro.',
-    procedura: 'tre scelte a caso (carrozzeria: tetto alto, media, cassonato con le casse; porte: chiuse, laterale aperta, posteriori aperte; carico a terra: solo il paraurti, pila di pacchi, carrello) e pacchi che si impilano a caso sul tetto o sul cassone.',
+    procedura: 'tre scelte a caso (carrozzeria: tetto alto, media, cassonato con le casse; porte: chiuse, laterale aperta, posteriori aperte; carico a terra: solo il paraurti, pila di pacchi, carrello; sul tetto della cabina: lampeggiante, scala, antenna) e pacchi che si impilano a caso sul tetto o sul cassone.',
     xml: () =>
       programma({
         titolo: 'Furgone delle consegne',
@@ -581,6 +581,7 @@ export const CREATURE_VEICOLI: Definizione[] = [
           ['C', 'b8875a', 'cartone'],
           ['L', 'fff2b0', 'fari', 'glow'],
           ['I', '7a7a7a', 'ferro'],
+          ['Y', 'f2a020', 'lampeggiante', 'glow'],
         ],
         marcatori: 'P',
         corpo: [
@@ -603,6 +604,11 @@ export const CREATURE_VEICOLI: Definizione[] = [
             ['pila di pacchi', [box([8, 3, 0], [7, 4, 6], 'C'), box([16, 3, 0], [6, 4, 8], 'C'), box([11, 3, 6], [6, 4, 5], 'C')]],
             ['carrello', [box([12, 3, 0], [8, 4, 1], 'I'), line([9, 2, 0], [9, 2, 16], 0.5, 'I'), line([15, 2, 0], [15, 2, 16], 0.5, 'I'), box([12, 3, 1], [7, 3, 8], 'C')]],
           ]),
+          ...scelta('sul tetto', [[12, 34, 17], [21, 10, 12]], [
+            ['lampeggiante', [box([12, 35, 17], [8, 3, 2], 'Y')]],
+            ['scala', [box([4, 34, 17], [2, 10, 1], 'I'), box([20, 34, 17], [2, 10, 1], 'I'), line([4, 34, 17], [20, 34, 17], 0.5, 'I')]],
+            ['antenna', [line([18, 34, 17], [18, 34, 27], 0.5, 'I')]],
+          ]),
           nota('i pacchi si impilano dove capita'),
           `<one steps="6"><rule in="B P" out="P C"/><rule in="BP" out="PC"/></one>`,
           `<prl in="P" out="C"/>`,
@@ -617,7 +623,7 @@ export const CREATURE_VEICOLI: Definizione[] = [
     titolo: 'Motocicletta stradale',
     classe: 'bestia',
     descrizione: 'Una moto delle strade di Neapolis: ogni seme è un\'altra moto, dalla sportiva carenata alla custom con la forcella lunga.',
-    procedura: 'tre scelte a caso (stile: sportiva, custom, naked, turismo con le borse; scarico: basso a destra, alto a sinistra, doppio; cavalletto o casco appoggiato) e adesivi che compaiono a caso sulle carene.',
+    procedura: 'quattro scelte a caso (stile: sportiva, custom, naked, turismo con le borse; scarico: basso a destra, alto a sinistra, doppio; cavalletto, casco appoggiato o bauletto; faro supplementare, portapacchi alto, paramani o niente) e adesivi che compaiono a caso sulle carene.',
     xml: () =>
       programma({
         titolo: 'Motocicletta stradale',
@@ -648,6 +654,12 @@ export const CREATURE_VEICOLI: Definizione[] = [
             ['cavalletto', [line([9, 19, 4], [5, 21, 0], 0.5, 'C')]],
             ['casco sul serbatoio', [ell([12, 21, 14], [6, 6, 6], 'K'), box([12, 23, 16], [4, 1, 2], 'V')]],
             ['bauletto', [line([9, 19, 4], [5, 21, 0], 0.5, 'C'), box([12, 8, 9], [8, 5, 8], 'K')]],
+          ]),
+          ...scelta('extra', [[12, 20, 0], [25, 40, 30]], [
+            ['faro supplementare', [line([12, 30, 14], [12, 36, 14], 0.5, 'C'), box([12, 37, 14], [4, 2, 3], 'L')]],
+            ['portapacchi alto', [line([12, 12, 12], [12, 4, 20], 0.5, 'C'), box([12, 4, 20], [8, 6, 1], 'C'), box([12, 4, 21], [6, 5, 4], 'K')]],
+            ['paramani', [line([12, 27, 16], [6, 27, 18], 0.5, 'C'), line([12, 27, 16], [18, 27, 18], 0.5, 'C'), box([5, 28, 18], [2, 4, 3], 'R'), box([19, 28, 18], [2, 4, 3], 'R')]],
+            ['niente di più', [box([12, 19, 3], [1, 1, 1], 'M')]],
           ]),
           nota('adesivi a caso sulle carene'),
           macchie('R', 'Y', 0.04),
@@ -716,7 +728,7 @@ export const CREATURE_VEICOLI: Definizione[] = [
     titolo: 'Drone esapode',
     classe: 'bestia',
     descrizione: 'Il drone a sei zampe che pattuglia le colonie di Sidera: guscio bianco, giunti grigi, un occhio azzurro.',
-    procedura: 'due scelte a caso (le sei zampe: larghe e basse, alte, in cammino a tripode; il modulo sul dorso: cupola di sensori, rotori spiegati, torretta, antenna) e un\'antenna che cresce a rami dal guscio, luci di posizione a caso.',
+    procedura: 'tre scelte a caso (le sei zampe: larghe e basse, alte, in cammino a tripode; il modulo sul dorso: cupola di sensori, rotori spiegati, torretta, antenna; il carico sotto la pancia: capsula, pinza, sfera dei sensori, niente) e un\'antenna che cresce a rami dal guscio, luci di posizione a caso.',
     xml: () => {
       const zampe = (ginocchio: number, ap: number, passo: (i: number) => number) =>
         [14, 20, 26].flatMap((y, i) => [
@@ -752,6 +764,12 @@ export const CREATURE_VEICOLI: Definizione[] = [
             ['torretta', [box([12, 18, 14], [8, 8, 4], 'K'), line([12, 20, 16], [12, 34, 16], 1, 'G'), box([12, 18, 18], [1, 1, 1], 'P')]],
             ['antenna', [cyl([12, 14, 14], [3, 3, 9], 'G'), box([12, 14, 23], [1, 1, 1], 'P')]],
           ]),
+          ...scelta('carico', [[12, 20, 0], [14, 22, 9]], [
+            ['capsula', [line([12, 20, 8], [12, 20, 6], 0.5, 'G'), ell([12, 20, 1], [7, 12, 6], 'W')]],
+            ['pinza', [line([12, 24, 8], [10, 27, 2], 0.5, 'G'), line([12, 24, 8], [14, 27, 2], 0.5, 'G'), box([12, 27, 1], [6, 2, 2], 'K')]],
+            ['sfera dei sensori', [line([12, 18, 8], [12, 18, 6], 0.5, 'G'), ell([12, 18, 2], [6, 6, 5], 'E')]],
+            ['niente', [box([12, 20, 8], [3, 3, 1], 'G')]],
+          ]),
           nota('l\'antenna cresce a rami'),
           ...ramifica(5, 'P', 'G', { su: 2, obliquo: 1, biforca: 0.5 }),
           macchie('W', 'L', 0.015),
@@ -766,7 +784,7 @@ export const CREATURE_VEICOLI: Definizione[] = [
     titolo: 'Camminatore pesante',
     classe: 'edificio',
     descrizione: 'Il camminatore bipede dei cantieri orbitali di Sidera: gambe a pistone, cabina corazzata, bracci da lavoro o da guardia.',
-    procedura: 'tre scelte a caso (gambe erette, al passo, accovacciate; cabina larga, a cupola o a torre; bracci con due cannoni, con lanciamissili sulle spalle, con artiglio e cannone) e antenne che crescono a rami dalle spalle, piastre di colore diverso a caso.',
+    procedura: 'tre scelte a caso (gambe erette, al passo, accovacciate; cabina larga, a cupola o a torre; bracci con due cannoni, con lanciamissili sulle spalle, con artiglio e cannone) sfiati che spuntano a caso sulla cabina, antenne che crescono a rami dalle spalle e piastre di colore diverso a caso.',
     xml: () =>
       programma({
         titolo: 'Camminatore pesante',
@@ -778,7 +796,7 @@ export const CREATURE_VEICOLI: Definizione[] = [
           ['K', '23282c', 'giunti'],
           ['V', '6ad0ff', 'cabina di vetro', 'glow'],
         ],
-        marcatori: 'P',
+        marcatori: 'PQ',
         corpo: [
           box([25, 25, 20], [14, 10, 6], 'K'),
           ...scelta('gambe', [[25, 25, 0], [40, 46, 23]], [
@@ -800,6 +818,8 @@ export const CREATURE_VEICOLI: Definizione[] = [
             ['lanciamissili', [box([10, 25, 36], [8, 12, 8], 'Y'), box([40, 25, 36], [8, 12, 8], 'Y'), line([11, 25, 30], [8, 30, 18], 2, 'G'), line([39, 25, 30], [42, 30, 18], 2, 'G')]],
             ['artiglio e cannone', [line([11, 26, 31], [8, 36, 14], 2.5, 'G'), line([8, 36, 14], [6, 41, 6], 1.5, 'K'), line([8, 36, 14], [11, 42, 6], 1.5, 'K'), line([39, 25, 31], [39, 46, 33], 2.5, 'G'), cyl([39, 22, 34], [5, 5, 6], 'Y')]],
           ]),
+          nota('sfiati che spuntano a caso sulla cabina'),
+          ...punte('W', 4, 3, 'K', 'Q'),
           nota('antenne a rami dalle spalle'),
           ...ramifica(10, 'P', 'K', { su: 2, obliquo: 1, biforca: 0.4 }),
           `<prl in="W" out="Y" p="0.002" steps="1"/>`,
@@ -860,7 +880,7 @@ export const CREATURE_VEICOLI: Definizione[] = [
     titolo: 'Navetta orbitale',
     classe: 'edificio',
     descrizione: 'La navetta che fa la spola fra le stazioni di Sidera, posata sui suoi carrelli.',
-    procedura: 'quattro scelte a caso (fusoliera lunga, tozza o a freccia; ali a delta, a freccia o corte; deriva singola, doppia o a V; motori: due, tre o uno solo grande) e pannelli termici scuri che si allargano a caso sulla pancia.',
+    procedura: 'quattro scelte a caso (fusoliera lunga, tozza o a freccia; ali a delta, a freccia o corte; deriva singola, doppia o a V; motori: due, tre o uno solo grande), antenne dorsali che spuntano a caso con altezze proprie e pannelli termici scuri che si allargano a caso sulla pancia.',
     xml: () =>
       programma({
         titolo: 'Navetta orbitale',
@@ -872,6 +892,7 @@ export const CREATURE_VEICOLI: Definizione[] = [
           ['V', '3f6c8a', 'vetri'],
           ['O', 'ff8c3a', 'ugelli', 'glow'],
         ],
+        marcatori: 'P',
         corpo: [
           line([25, 40, 0], [25, 40, 12], 1, 'G'),
           line([18, 12, 0], [22, 14, 12], 1, 'G'),
@@ -900,6 +921,10 @@ export const CREATURE_VEICOLI: Definizione[] = [
             ['tre', [ell([20, 9, 8], [5, 8, 5], 'K'), ell([30, 9, 8], [5, 8, 5], 'K'), ell([25, 8, 14], [5, 8, 5], 'K'), box([20, 5, 10], [2, 1, 2], 'O'), box([30, 5, 10], [2, 1, 2], 'O'), box([25, 4, 16], [2, 1, 2], 'O')]],
             ['uno grande', [ell([25, 8, 7], [10, 9, 10], 'K'), box([25, 3, 11], [5, 1, 5], 'O')]],
           ]),
+          nota('antenne dorsali che spuntano a caso, alte a caso'),
+          `<one in="B W" out="P *" steps="3"/>`,
+          `<prl steps="8"><rule in="B P" out="P G" p="0.8"/></prl>`,
+          `<prl in="P" out="O"/>`,
           nota('pannelli termici che si allargano sulla pancia'),
           `<prl in="W B" out="K *" p="0.03" steps="1"/>`,
           `<prl in="KW" out="*K" p="0.4" steps="3"/>`,

@@ -12,7 +12,7 @@ Un ragno a vapore delle miniere di Orichalcum: otto zampe a pistone, addome-cald
 | voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
 | distanza media fra i 5 semi (forma) | 0.509 | ≥ 0.15 |
 | distanza minima fra due semi | 0.269 | — |
-| tempo del seme più lento | 177 ms | < 1500 ms |
+| tempo del seme più lento | 193 ms | < 1500 ms |
 | voxel per seme (1-5) | 4389, 4531, 5162, 3214, 5310 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`ragno-meccanico.png`](ragno-meccanico.png).
@@ -20,7 +20,7 @@ Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`ragno-meccan
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 25×40×30, 102 nodi, 167 passi, finito in 185 ms.
+Traccia, seme 1: griglia 25×40×30, 102 nodi, 167 passi, finito in 196 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 2=marcatore (marcatore), O=piastre d'ottone, D=bronzo scuro, I=zampe di ferro, R=occhi di vetro, T=valvole, P=marcatore (marcatore), u=marcatore (marcatore), z=marcatore (marcatore).
 Alla fine: D 2074, I 1603, O 694, T 16, R 2.

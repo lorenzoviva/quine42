@@ -12,7 +12,7 @@ Un arco naturale nelle forre di Aurora: roccia grigia rosa, muschio sopra, liane
 | voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
 | distanza media fra i 5 semi (forma) | 0.476 | ≥ 0.15 |
 | distanza minima fra due semi | 0.168 | — |
-| tempo del seme più lento | 599 ms | < 1500 ms |
+| tempo del seme più lento | 690 ms | < 1500 ms |
 | voxel per seme (1-5) | 13527, 16570, 13508, 13760, 16686 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`arco-roccia-muschioso.png`](arco-roccia-muschioso.png).
@@ -20,7 +20,7 @@ Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`arco-roccia-
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 50×50×50, 33 nodi, 166 passi, finito in 649 ms.
+Traccia, seme 1: griglia 50×50×50, 33 nodi, 166 passi, finito in 648 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 2=marcatore (marcatore), R=roccia, D=roccia scura, M=muschio, V=liane, P=marcatore (marcatore), u=marcatore (marcatore), z=marcatore (marcatore).
 Alla fine: R 10977, D 1710, M 767, V 73.

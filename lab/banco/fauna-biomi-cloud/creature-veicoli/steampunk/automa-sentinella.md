@@ -12,7 +12,7 @@ La sentinella d'ottone di Orichalcum: caldaia nel petto, rivetti, una lanterna o
 | voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
 | distanza media fra i 5 semi (forma) | 0.264 | ≥ 0.15 |
 | distanza minima fra due semi | 0.054 | — |
-| tempo del seme più lento | 72 ms | < 1500 ms |
+| tempo del seme più lento | 57 ms | < 1500 ms |
 | voxel per seme (1-5) | 1710, 2039, 1945, 1746, 1881 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`automa-sentinella.png`](automa-sentinella.png).
@@ -20,7 +20,7 @@ Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`automa-senti
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 20×15×30, 64 nodi, 191 passi, finito in 89 ms.
+Traccia, seme 1: griglia 20×15×30, 64 nodi, 191 passi, finito in 67 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 2=marcatore (marcatore), 3=marcatore (marcatore), O=ottone, D=ottone brunito, C=rame dei rivetti, I=ferro, L=luce della caldaia, u=marcatore (marcatore), z=marcatore (marcatore).
 Alla fine: O 1139, I 264, L 146, D 132, C 29.

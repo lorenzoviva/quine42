@@ -12,7 +12,7 @@ Il rover a sei ruote che mappa i deserti di Sidera, con l'albero delle telecamer
 | voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
 | distanza media fra i 5 semi (forma) | 0.215 | ≥ 0.15 |
 | distanza minima fra due semi | 0.064 | — |
-| tempo del seme più lento | 90 ms | < 1500 ms |
+| tempo del seme più lento | 93 ms | < 1500 ms |
 | voxel per seme (1-5) | 3278, 3266, 3362, 3455, 3323 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`rover-esplorazione.png`](rover-esplorazione.png).
@@ -20,7 +20,7 @@ Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`rover-esplor
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 25×40×30, 62 nodi, 184 passi, finito in 103 ms.
+Traccia, seme 1: griglia 25×40×30, 62 nodi, 184 passi, finito in 99 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 2=marcatore (marcatore), 3=marcatore (marcatore), W=telaio, K=ruote, G=bracci, C=rame, D=polvere, u=marcatore (marcatore), z=marcatore (marcatore).
 Alla fine: W 1754, K 677, G 420, C 335, D 92.

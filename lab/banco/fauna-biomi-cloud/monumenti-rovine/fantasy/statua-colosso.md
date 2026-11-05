@@ -12,7 +12,7 @@ Il guardiano di pietra che veglia su un passo di Aurora: ogni seme è un altro e
 | voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
 | distanza media fra i 5 semi (forma) | 0.280 | ≥ 0.15 |
 | distanza minima fra due semi | 0.034 | — |
-| tempo del seme più lento | 119 ms | < 1500 ms |
+| tempo del seme più lento | 124 ms | < 1500 ms |
 | voxel per seme (1-5) | 4160, 4713, 4711, 4042, 4840 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`statua-colosso.png`](statua-colosso.png).
@@ -20,7 +20,7 @@ Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`statua-colos
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 20×20×60, 55 nodi, 160 passi, finito in 118 ms.
+Traccia, seme 1: griglia 20×20×60, 55 nodi, 160 passi, finito in 134 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 1=marcatore (marcatore), 2=marcatore (marcatore), 4=marcatore (marcatore), S=pietra chiara, D=pietra scura, O=bronzo, M=muschio, K=crepe, u=marcatore (marcatore), z=marcatore (marcatore).
 Alla fine: S 3169, D 667, O 137, M 134, K 53.

@@ -12,7 +12,7 @@ La porta di un quartiere di Orichalcum: due torri di mattoni con le ruote dentat
 | voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
 | distanza media fra i 5 semi (forma) | 0.549 | ≥ 0.15 |
 | distanza minima fra due semi | 0.165 | — |
-| tempo del seme più lento | 589 ms | < 1500 ms |
+| tempo del seme più lento | 676 ms | < 1500 ms |
 | voxel per seme (1-5) | 17021, 4859, 15016, 16760, 5723 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`ponte-levatoio-ingranaggi.png`](ponte-levatoio-ingranaggi.png).
@@ -20,7 +20,7 @@ Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`ponte-levato
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 50×50×50, 75 nodi, 315 passi, finito in 524 ms.
+Traccia, seme 1: griglia 50×50×50, 75 nodi, 315 passi, finito in 579 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 2=marcatore (marcatore), 3=marcatore (marcatore), K=mattoni, W=tavolato, I=ferro, O=ruote d'ottone, Z=ruggine, N=catene, u=marcatore (marcatore), z=marcatore (marcatore).
 Alla fine: K 14164, W 1295, I 1146, O 276, N 84, Z 56.

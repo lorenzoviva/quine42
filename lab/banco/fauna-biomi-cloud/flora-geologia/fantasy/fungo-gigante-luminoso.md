@@ -12,7 +12,7 @@ Il fungo alto come un albero che illumina le radure notturne di Aurora: gambo pa
 | voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
 | distanza media fra i 5 semi (forma) | 0.397 | ≥ 0.15 |
 | distanza minima fra due semi | 0.085 | — |
-| tempo del seme più lento | 268 ms | < 1500 ms |
+| tempo del seme più lento | 295 ms | < 1500 ms |
 | voxel per seme (1-5) | 7172, 7180, 9774, 8368, 9770 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`fungo-gigante-luminoso.png`](fungo-gigante-luminoso.png).
@@ -20,7 +20,7 @@ Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`fungo-gigant
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 40×40×60, 30 nodi, 141 passi, finito in 273 ms.
+Traccia, seme 1: griglia 40×40×60, 30 nodi, 141 passi, finito in 298 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 3=marcatore (marcatore), T=gambo, U=gambo alto, C=cappello, W=macchie del cappello, G=lamelle, M=muschio, H=marcatore (marcatore), P=marcatore (marcatore), u=marcatore (marcatore), z=marcatore (marcatore).
 Alla fine: C 5428, G 609, T 479, M 460, W 115, U 81.

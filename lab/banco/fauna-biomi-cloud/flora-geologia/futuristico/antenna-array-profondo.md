@@ -12,7 +12,7 @@ Una stazione d'ascolto di Sidera che punta lontano: parabole, pannelli e antenne
 | voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
 | distanza media fra i 5 semi (forma) | 0.345 | ≥ 0.15 |
 | distanza minima fra due semi | 0.012 | — |
-| tempo del seme più lento | 601 ms | < 1500 ms |
+| tempo del seme più lento | 618 ms | < 1500 ms |
 | voxel per seme (1-5) | 8182, 6965, 8185, 8182, 6960 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`antenna-array-profondo.png`](antenna-array-profondo.png).
@@ -20,7 +20,7 @@ Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`antenna-arra
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 50×50×50, 47 nodi, 179 passi, finito in 635 ms.
+Traccia, seme 1: griglia 50×50×50, 47 nodi, 179 passi, finito in 627 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 2=marcatore (marcatore), S=piattaforma, W=parabole, I=tralicci, R=luci, P=marcatore (marcatore), x=marcatore (marcatore), u=marcatore (marcatore), z=marcatore (marcatore).
 Alla fine: S 5526, W 1992, I 637, R 27.

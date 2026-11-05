@@ -10,20 +10,20 @@ Il traliccio d'acciaio che porta la corrente attraverso le campagne di Neapolis.
 |---|---|---|
 | errori del validatore (`modelErrors`) e dell'analisi (semi 1-20) | 0 | 0 |
 | voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
-| distanza media fra i 5 semi (forma) | 0.389 | ≥ 0.15 |
-| distanza minima fra due semi | 0.001 | — |
-| tempo del seme più lento | 100 ms | < 1500 ms |
-| voxel per seme (1-5) | 2133, 1869, 2133, 1535, 1869 | — |
+| distanza media fra i 5 semi (forma) | 0.390 | ≥ 0.15 |
+| distanza minima fra due semi | 0.004 | — |
+| tempo del seme più lento | 101 ms | < 1500 ms |
+| voxel per seme (1-5) | 2137, 1873, 2137, 1536, 1870 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`traliccio-alta-tensione.png`](traliccio-alta-tensione.png).
 
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 20×20×60, 86 nodi, 99 passi, finito in 98 ms.
+Traccia, seme 1: griglia 20×20×60, 87 nodi, 102 passi, finito in 108 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 2=marcatore (marcatore), I=acciaio, W=nido, R=cartello, S=plinti, u=marcatore (marcatore), z=marcatore (marcatore).
-Alla fine: I 2058, S 72, R 2, W 1.
+Alla fine: I 2058, S 72, W 5, R 2.
 #2-3 box×2: 8 celle x0-6 y0-1 z0, passi 1-2
  #4 one z → . passi=8: ×8, 8 celle x0-6 y0-1 z0, passi 3-10, z→. 8
 #5-8 box×4: 72 celle x0-19 y0-19 z0-1, passi 11-14
@@ -39,8 +39,9 @@ Alla fine: I 2058, S 72, R 2, W 1.
 #41-42 line×2: 280 celle x1-19 y9-11 z43-53, passi 94-95
  #81 prl u → . (+4): ×1, 19550 celle x1-19 y1-19 z0-59, passi 96, 2→. 19550
    r1 u → . ×0; r2 1 → . ×0; r3 2 → . ×19550; r4 3 → . ×0; r5 4 → . ×0
- #84 one . I → W * passi=1: ×1, 1 celle x2 y14 z7, passi 97, .→W 1
- #86 one .I → *R passi=2: ×2, 2 celle x2-4 y9-12 z22-35, passi 98-99, I→R 2
+ #84 one . I → W * passi=2: ×2, 2 celle x2-16 y12-14 z7-23, passi 97-98, .→W 2
+ #86 prl . W → W * passi=2: ×2, 3 celle x2-16 y12-14 z8-24, passi 99-100, .→W 3
+ #87 one .I → *R passi=2: ×2, 2 celle x6-7 y7-9 z37-48, passi 101-102, I→R 2
 Senza effetto (non hanno mai cambiato una cella):
 #12 line 1 1 0 → 7 7 38 I
 #13 line 18 1 0 → 13 7 38 I

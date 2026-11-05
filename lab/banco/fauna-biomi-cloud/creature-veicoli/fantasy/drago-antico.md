@@ -12,7 +12,7 @@ Il drago delle vette di Aurora, accucciato su quattro zampe: squame color bronzo
 | voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
 | distanza media fra i 5 semi (forma) | 0.446 | ≥ 0.15 |
 | distanza minima fra due semi | 0.070 | — |
-| tempo del seme più lento | 778 ms | < 1500 ms |
+| tempo del seme più lento | 669 ms | < 1500 ms |
 | voxel per seme (1-5) | 8595, 9494, 8539, 8373, 8618 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`drago-antico.png`](drago-antico.png).
@@ -20,7 +20,7 @@ Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`drago-antico
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 50×50×50, 82 nodi, 444 passi, finito in 679 ms.
+Traccia, seme 1: griglia 50×50×50, 82 nodi, 444 passi, finito in 692 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 1=marcatore (marcatore), 2=marcatore (marcatore), 3=marcatore (marcatore), F=squame bronzo, W=ventre, M=membrana delle ali, O=ossa delle ali, A=corna e creste, E=occhi, P=marcatore (marcatore), u=marcatore (marcatore), z=marcatore (marcatore).
 Alla fine: F 6741, M 1268, W 489, O 56, A 40, E 1.

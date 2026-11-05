@@ -90,6 +90,23 @@
   <cylinder at="12 14 14" size="3 3 9" color="G" on="4"/>
   <box at="12 14 23" size="1 1 1" color="P" on="4"/>
   <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/><rule in="4" out="B"/></prl>
+  <!-- scelta «carico»: capsula | pinza | sfera dei sensori | niente -->
+  <box at="12 20 0" size="14 22 9" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/><rule in="u" out="4"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/><rule in="4u" out="*4"/></all>
+  <!--   1: capsula -->
+  <line at="12 20 8" to="12 20 6" r="0.5" color="G" on="1"/>
+  <ellipsoid at="12 20 1" size="7 12 6" color="W" on="1"/>
+  <!--   2: pinza -->
+  <line at="12 24 8" to="10 27 2" r="0.5" color="G" on="2"/>
+  <line at="12 24 8" to="14 27 2" r="0.5" color="G" on="2"/>
+  <box at="12 27 1" size="6 2 2" color="K" on="2"/>
+  <!--   3: sfera dei sensori -->
+  <line at="12 18 8" to="12 18 6" r="0.5" color="G" on="3"/>
+  <ellipsoid at="12 18 2" size="6 6 5" color="E" on="3"/>
+  <!--   4: niente -->
+  <box at="12 20 8" size="3 3 1" color="G" on="4"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/><rule in="4" out="B"/></prl>
   <!-- l'antenna cresce a rami -->
   <one steps="5">
     <rule in="B P" out="P G" p="2"/>

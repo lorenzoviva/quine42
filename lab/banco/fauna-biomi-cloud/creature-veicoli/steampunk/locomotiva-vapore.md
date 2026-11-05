@@ -12,7 +12,7 @@ La locomotiva delle linee di Orichalcum: caldaia nera, ruote motrici rosse, cabi
 | voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
 | distanza media fra i 5 semi (forma) | 0.227 | ≥ 0.15 |
 | distanza minima fra due semi | 0.098 | — |
-| tempo del seme più lento | 120 ms | < 1500 ms |
+| tempo del seme più lento | 138 ms | < 1500 ms |
 | voxel per seme (1-5) | 7158, 6761, 8274, 7568, 7907 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`locomotiva-vapore.png`](locomotiva-vapore.png).
@@ -20,7 +20,7 @@ Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`locomotiva-v
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 25×40×30, 71 nodi, 236 passi, finito in 138 ms.
+Traccia, seme 1: griglia 25×40×30, 71 nodi, 236 passi, finito in 127 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 1=marcatore (marcatore), 2=marcatore (marcatore), 3=marcatore (marcatore), N=caldaia nera, R=ruote motrici, O=fasce d'ottone, C=cabina di legno, K=carbone, S=fumo, P=marcatore (marcatore), u=marcatore (marcatore), z=marcatore (marcatore).
 Alla fine: N 5193, R 879, C 781, O 151, K 146, S 8.

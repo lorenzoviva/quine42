@@ -222,7 +222,11 @@ function indice(esiti: Map<string, Esito>): string {
     'npx vite-node lab/banco/fauna-biomi-cloud/banco.ts -- <nome>  # uno',
     '```',
     '',
-    `Validi: **${fatti} su ${CATALOGO.length}**.`,
+    `Validi: **${fatti} su ${CATALOGO.length}**. La distanza minima fra due semi è nei rapporti: con molte scelte due semi su cinque possono`,
+    'cadere sulle stesse opzioni e differire solo per ciò che cresce a caso (antenne, tiranti, pacchi, nidi).',
+    '',
+    'Il nome `torre- schermatura` della richiesta (con uno spazio) è diventato `torre-schermatura`: i nomi dei modelli del gioco non hanno',
+    'spazi (`MODEL_RE` in `src/kernel/validator.ts`).',
     ...righe,
     '',
   ].join('\n');

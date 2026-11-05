@@ -95,6 +95,25 @@
   <line at="9 19 4" to="5 21 0" r="0.5" color="C" on="3"/>
   <box at="12 8 9" size="8 5 8" color="K" on="3"/>
   <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <!-- scelta «extra»: faro supplementare | portapacchi alto | paramani | niente di più -->
+  <box at="12 20 0" size="25 40 30" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/><rule in="u" out="4"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/><rule in="4u" out="*4"/></all>
+  <!--   1: faro supplementare -->
+  <line at="12 30 14" to="12 36 14" r="0.5" color="C" on="1"/>
+  <box at="12 37 14" size="4 2 3" color="L" on="1"/>
+  <!--   2: portapacchi alto -->
+  <line at="12 12 12" to="12 4 20" r="0.5" color="C" on="2"/>
+  <box at="12 4 20" size="8 6 1" color="C" on="2"/>
+  <box at="12 4 21" size="6 5 4" color="K" on="2"/>
+  <!--   3: paramani -->
+  <line at="12 27 16" to="6 27 18" r="0.5" color="C" on="3"/>
+  <line at="12 27 16" to="18 27 18" r="0.5" color="C" on="3"/>
+  <box at="5 28 18" size="2 4 3" color="R" on="3"/>
+  <box at="19 28 18" size="2 4 3" color="R" on="3"/>
+  <!--   4: niente di più -->
+  <box at="12 19 3" size="1 1 1" color="M" on="4"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/><rule in="4" out="B"/></prl>
   <!-- adesivi a caso sulle carene -->
   <prl in="BR" out="*Y" p="0.04" steps="1"/>
 </sequence>

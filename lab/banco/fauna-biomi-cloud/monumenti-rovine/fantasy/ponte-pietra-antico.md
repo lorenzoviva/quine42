@@ -12,7 +12,7 @@ Un ponte di pietra che scavalca un torrente di Aurora da prima che qualcuno rico
 | voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
 | distanza media fra i 5 semi (forma) | 0.354 | ≥ 0.15 |
 | distanza minima fra due semi | 0.023 | — |
-| tempo del seme più lento | 258 ms | < 1500 ms |
+| tempo del seme più lento | 251 ms | < 1500 ms |
 | voxel per seme (1-5) | 12204, 15436, 12192, 12238, 14463 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`ponte-pietra-antico.png`](ponte-pietra-antico.png).
@@ -20,7 +20,7 @@ Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`ponte-pietra
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 50×50×50, 54 nodi, 185 passi, finito in 296 ms.
+Traccia, seme 1: griglia 50×50×50, 54 nodi, 185 passi, finito in 280 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 2=marcatore (marcatore), 3=marcatore (marcatore), S=pietra, D=pietra scura, Q=parapetto, M=muschio, V=edera, P=marcatore (marcatore), x=marcatore (marcatore), u=marcatore (marcatore), z=marcatore (marcatore).
 Alla fine: S 10942, D 740, Q 272, V 140, M 110.

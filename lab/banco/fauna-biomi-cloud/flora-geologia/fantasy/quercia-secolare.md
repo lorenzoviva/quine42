@@ -12,7 +12,7 @@ La quercia dei boschi antichi di Aurora: tronco nodoso e muschioso, rami larghi,
 | voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
 | distanza media fra i 5 semi (forma) | 0.665 | ≥ 0.15 |
 | distanza minima fra due semi | 0.532 | — |
-| tempo del seme più lento | 192 ms | < 1500 ms |
+| tempo del seme più lento | 109 ms | < 1500 ms |
 | voxel per seme (1-5) | 9002, 10036, 9058, 10271, 11619 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`quercia-secolare.png`](quercia-secolare.png).
@@ -20,7 +20,7 @@ Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`quercia-seco
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 40×40×60, 33 nodi, 160 passi, finito in 112 ms.
+Traccia, seme 1: griglia 40×40×60, 33 nodi, 160 passi, finito in 116 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 2=marcatore (marcatore), T=corteccia, U=corteccia alta, A=rami, F=chioma, L=foglie al sole, M=muschio, R=radici, H=marcatore (marcatore), e=marcatore (marcatore), w=marcatore (marcatore), s=marcatore (marcatore), n=marcatore (marcatore), u=marcatore (marcatore), z=marcatore (marcatore).
 Alla fine: F 6584, T 806, L 551, A 415, R 360, U 221, M 65.

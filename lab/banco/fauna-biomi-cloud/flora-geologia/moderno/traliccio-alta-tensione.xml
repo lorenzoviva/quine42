@@ -104,7 +104,8 @@
   <prl in="P B" out="C P" p="0.8" steps="6"/>
   <prl in="P" out="C"/>
   <!-- un nido e i cartelli -->
-  <one in="B I" out="W *" steps="1"/>
+  <one in="B I" out="W *" steps="2"/>
   <prl in="BW" out="*W" p="0.7" steps="2"/>
+  <prl in="B W" out="W *" p="0.5" steps="2"/>
   <one in="BI" out="*R" steps="2"/>
 </sequence>

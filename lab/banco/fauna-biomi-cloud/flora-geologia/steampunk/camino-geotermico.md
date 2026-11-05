@@ -12,7 +12,7 @@ Una bocca di vapore delle terre calde di Orichalcum, incanalata in camini d'otto
 | voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
 | distanza media fra i 5 semi (forma) | 0.191 | ≥ 0.15 |
 | distanza minima fra due semi | 0.097 | — |
-| tempo del seme più lento | 334 ms | < 1500 ms |
+| tempo del seme più lento | 323 ms | < 1500 ms |
 | voxel per seme (1-5) | 12077, 12097, 12019, 12084, 12073 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`camino-geotermico.png`](camino-geotermico.png).
@@ -20,7 +20,7 @@ Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`camino-geote
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 50×50×50, 40 nodi, 136 passi, finito in 312 ms.
+Traccia, seme 1: griglia 50×50×50, 40 nodi, 136 passi, finito in 309 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 1=marcatore (marcatore), R=roccia calda, Y=zolfo, O=ottone, I=ferro, S=vapore, L=brace, g=marcatore (marcatore), P=marcatore (marcatore), u=marcatore (marcatore), z=marcatore (marcatore).
 Alla fine: R 10840, O 789, I 273, Y 155, S 18, L 2.

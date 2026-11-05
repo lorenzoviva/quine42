@@ -12,7 +12,7 @@ L'orologio astronomico in mezzo a una piazza di Orichalcum: torre di ghisa, quat
 | voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
 | distanza media fra i 5 semi (forma) | 0.292 | ≥ 0.15 |
 | distanza minima fra due semi | 0.091 | — |
-| tempo del seme più lento | 264 ms | < 1500 ms |
+| tempo del seme più lento | 296 ms | < 1500 ms |
 | voxel per seme (1-5) | 12156, 8299, 8452, 11405, 9137 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`orologio-astrario-piazza.png`](orologio-astrario-piazza.png).
@@ -20,7 +20,7 @@ Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`orologio-ast
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 50×50×50, 71 nodi, 201 passi, finito in 296 ms.
+Traccia, seme 1: griglia 50×50×50, 71 nodi, 201 passi, finito in 302 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 2=marcatore (marcatore), 3=marcatore (marcatore), I=ghisa, O=ottone, W=quadranti, K=lancette, C=ingranaggi di rame, S=pietra, A=acqua, L=luce dei quadranti, u=marcatore (marcatore), z=marcatore (marcatore).
 Alla fine: I 4289, A 3735, S 2767, C 843, L 243, O 190, W 81, K 8.

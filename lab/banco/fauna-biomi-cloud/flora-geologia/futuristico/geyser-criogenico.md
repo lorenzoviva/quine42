@@ -12,7 +12,7 @@ Un geyser delle lune ghiacciate di Sidera: un cono di ghiaccio e un getto che ge
 | voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
 | distanza media fra i 5 semi (forma) | 0.434 | ≥ 0.15 |
 | distanza minima fra due semi | 0.267 | — |
-| tempo del seme più lento | 552 ms | < 1500 ms |
+| tempo del seme più lento | 641 ms | < 1500 ms |
 | voxel per seme (1-5) | 6301, 8715, 5285, 6091, 5353 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`geyser-criogenico.png`](geyser-criogenico.png).
@@ -20,7 +20,7 @@ Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`geyser-criog
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 50×50×50, 32 nodi, 181 passi, finito in 573 ms.
+Traccia, seme 1: griglia 50×50×50, 32 nodi, 181 passi, finito in 633 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 0=marcatore (marcatore), 3=marcatore (marcatore), 7=marcatore (marcatore), 8=marcatore (marcatore), 9=marcatore (marcatore), I=ghiaccio, D=ghiaccio scuro, J=getto gelato, X=brina, g=marcatore (marcatore), P=marcatore (marcatore), Q=marcatore (marcatore), u=marcatore (marcatore), z=marcatore (marcatore).
 Alla fine: I 4150, J 1305, D 678, X 168.

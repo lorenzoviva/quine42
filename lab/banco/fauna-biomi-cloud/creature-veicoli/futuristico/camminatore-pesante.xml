@@ -1,11 +1,12 @@
 <!-- Camminatore pesante (Cantiere 8, sidera): gambe, cabina e bracci a caso; antenne a rami dalle spalle. -->
-<sequence values="BWYGKVPu123456z" symmetry="(xy)" name="Camminatore pesante">
+<sequence values="BWYGKVPQu123456z" symmetry="(xy)" name="Camminatore pesante">
   <color symbol="W" value="c9d0d4" name="corazza"/>
   <color symbol="Y" value="e2b23a" name="piastre gialle"/>
   <color symbol="G" value="4c545a" name="pistoni" part="gamba"/>
   <color symbol="K" value="23282c" name="giunti"/>
   <color symbol="V" value="6ad0ff" name="cabina di vetro" glow="True"/>
   <color symbol="P" hidden="True" name="marcatore"/>
+  <color symbol="Q" hidden="True" name="marcatore"/>
   <color symbol="u" hidden="True" name="marcatore"/>
   <color symbol="1" hidden="True" name="marcatore"/>
   <color symbol="2" hidden="True" name="marcatore"/>
@@ -84,6 +85,11 @@
   <line at="39 25 31" to="39 46 33" r="2.5" color="G" on="3"/>
   <cylinder at="39 22 34" size="5 5 6" color="Y" on="3"/>
   <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <!-- sfiati che spuntano a caso sulla cabina -->
+  <!-- 4 punte a caso sulla faccia alta di W, alte fino a 3 -->
+  <one in="B W" out="Q *" steps="4"/>
+  <all steps="3"><rule in="B Q" out="Q K"/><rule in="B* *Q" out="Q* *K"/></all>
+  <prl in="Q" out="K"/>
   <!-- antenne a rami dalle spalle -->
   <one steps="10">
     <rule in="B P" out="P K" p="2"/>

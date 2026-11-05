@@ -12,7 +12,7 @@ Una soglia di pietra runica in una radura di Aurora, con una pellicola di luce t
 | voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
 | distanza media fra i 5 semi (forma) | 0.489 | ≥ 0.15 |
 | distanza minima fra due semi | 0.307 | — |
-| tempo del seme più lento | 297 ms | < 1500 ms |
+| tempo del seme più lento | 257 ms | < 1500 ms |
 | voxel per seme (1-5) | 7395, 6935, 4671, 5774, 4658 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`portale-arcano.png`](portale-arcano.png).
@@ -20,7 +20,7 @@ Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`portale-arca
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 50×50×50, 43 nodi, 178 passi, finito in 241 ms.
+Traccia, seme 1: griglia 50×50×50, 43 nodi, 178 passi, finito in 265 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 1=marcatore (marcatore), 2=marcatore (marcatore), 7=marcatore (marcatore), 8=marcatore (marcatore), S=pietra runica, D=pietra scura, F=pellicola di luce, R=rune, X=cristalli, x=marcatore (marcatore), P=marcatore (marcatore), Q=marcatore (marcatore), u=marcatore (marcatore), z=marcatore (marcatore).
 Alla fine: D 3548, S 3010, F 612, R 126, X 99.

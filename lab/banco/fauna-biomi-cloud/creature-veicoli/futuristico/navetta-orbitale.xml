@@ -1,10 +1,11 @@
 <!-- Navetta orbitale (Cantiere 8, sidera): fusoliera, ali, deriva e motori a caso; pannelli termici a caso. -->
-<sequence values="BWKGVOu123456z" symmetry="(xy)" name="Navetta orbitale">
+<sequence values="BWKGVOPu123456z" symmetry="(xy)" name="Navetta orbitale">
   <color symbol="W" value="eceff1" name="scafo"/>
   <color symbol="K" value="2c3036" name="pannelli termici"/>
   <color symbol="G" value="7d858c" name="carrelli" part="gamba"/>
   <color symbol="V" value="3f6c8a" name="vetri"/>
   <color symbol="O" value="ff8c3a" name="ugelli" glow="True"/>
+  <color symbol="P" hidden="True" name="marcatore"/>
   <color symbol="u" hidden="True" name="marcatore"/>
   <color symbol="1" hidden="True" name="marcatore"/>
   <color symbol="2" hidden="True" name="marcatore"/>
@@ -84,6 +85,10 @@
   <ellipsoid at="25 8 7" size="10 9 10" color="K" on="3"/>
   <box at="25 3 11" size="5 1 5" color="O" on="3"/>
   <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <!-- antenne dorsali che spuntano a caso, alte a caso -->
+  <one in="B W" out="P *" steps="3"/>
+  <prl steps="8"><rule in="B P" out="P G" p="0.8"/></prl>
+  <prl in="P" out="O"/>
   <!-- pannelli termici che si allargano sulla pancia -->
   <prl in="W B" out="K *" p="0.03" steps="1"/>
   <prl in="KW" out="*K" p="0.4" steps="3"/>

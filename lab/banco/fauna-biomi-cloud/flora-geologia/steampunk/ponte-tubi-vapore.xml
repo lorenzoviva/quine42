@@ -1,5 +1,5 @@
 <!-- Ponte di tubi a vapore (Cantiere 8, orichalcum): piloni e tubi a caso; valvole e vapore a caso. -->
-<sequence values="BIKOCRSPu123456z" symmetry="(xy)" name="Ponte di tubi a vapore">
+<sequence values="BIKOCRSPQu123456z" symmetry="(xy)" name="Ponte di tubi a vapore">
   <color symbol="I" value="3c3a38" name="ferro"/>
   <color symbol="K" value="8a4a35" name="mattoni"/>
   <color symbol="O" value="b8892e" name="tubi d'ottone"/>
@@ -7,6 +7,7 @@
   <color symbol="R" value="a3322a" name="valvole"/>
   <color symbol="S" value="e8ecef" name="vapore"/>
   <color symbol="P" hidden="True" name="marcatore"/>
+  <color symbol="Q" hidden="True" name="marcatore"/>
   <color symbol="u" hidden="True" name="marcatore"/>
   <color symbol="1" hidden="True" name="marcatore"/>
   <color symbol="2" hidden="True" name="marcatore"/>
@@ -64,6 +65,10 @@
   <line at="1 27 33" to="48 27 33" r="1.5" color="O" on="3"/>
   <line at="1 31 35" to="48 31 35" r="1.5" color="C" on="3"/>
   <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <!-- tiranti che scendono a caso dai tubi verso il basso, di lunghezza propria -->
+  <one in="C B" out="* Q" steps="3"/>
+  <prl in="Q B" out="I Q" p="0.85" steps="12"/>
+  <prl in="Q" out="R"/>
   <!-- valvole e perdite di vapore a caso sui tubi -->
   <prl in="B O" out="R *" p="0.04" steps="1"/>
   <one in="B C" out="P *" steps="4"/>

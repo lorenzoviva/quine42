@@ -12,7 +12,7 @@ L'elisoccorso di Neapolis, bianco e rosso, posato sui pattini.
 | voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
 | distanza media fra i 5 semi (forma) | 0.431 | ≥ 0.15 |
 | distanza minima fra due semi | 0.248 | — |
-| tempo del seme più lento | 497 ms | < 1500 ms |
+| tempo del seme più lento | 463 ms | < 1500 ms |
 | voxel per seme (1-5) | 3165, 4706, 5121, 3155, 4094 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`elicottero-soccorso.png`](elicottero-soccorso.png).
@@ -20,7 +20,7 @@ Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`elicottero-s
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 50×50×50, 64 nodi, 279 passi, finito in 444 ms.
+Traccia, seme 1: griglia 50×50×50, 64 nodi, 279 passi, finito in 525 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 2=marcatore (marcatore), 3=marcatore (marcatore), W=fusoliera bianca, R=fascia rossa, K=pale e pattini, V=vetri, Y=numeri di bordo, O=galleggianti, u=marcatore (marcatore), z=marcatore (marcatore).
 Alla fine: W 1523, K 1188, R 288, O 129, V 28, Y 9.

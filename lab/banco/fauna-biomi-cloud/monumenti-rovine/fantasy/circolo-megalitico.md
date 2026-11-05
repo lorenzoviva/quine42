@@ -12,7 +12,7 @@ Un cerchio di pietre ritte su un poggio di Aurora: nessuno sa chi le abbia alzat
 | voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
 | distanza media fra i 5 semi (forma) | 0.633 | ≥ 0.15 |
 | distanza minima fra due semi | 0.535 | — |
-| tempo del seme più lento | 162 ms | < 1500 ms |
+| tempo del seme più lento | 163 ms | < 1500 ms |
 | voxel per seme (1-5) | 6500, 7615, 7769, 7184, 7015 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`circolo-megalitico.png`](circolo-megalitico.png).
@@ -20,7 +20,7 @@ Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`circolo-mega
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 50×50×50, 31 nodi, 134 passi, finito in 156 ms.
+Traccia, seme 1: griglia 50×50×50, 31 nodi, 134 passi, finito in 153 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 4=marcatore (marcatore), E=poggio erboso, S=pietra, D=pietra scura, L=licheni, M=muschio, F=fuoco, g=marcatore (marcatore), P=marcatore (marcatore), x=marcatore (marcatore), u=marcatore (marcatore), z=marcatore (marcatore).
 Alla fine: E 2963, S 2602, M 392, L 336, D 133, F 74.

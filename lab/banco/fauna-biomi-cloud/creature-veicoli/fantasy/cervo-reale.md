@@ -12,7 +12,7 @@ Il cervo dei boschi di Aurora: mantello fulvo, ventre chiaro, palchi d'osso che 
 | voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
 | distanza media fra i 5 semi (forma) | 0.439 | ≥ 0.15 |
 | distanza minima fra due semi | 0.244 | — |
-| tempo del seme più lento | 125 ms | < 1500 ms |
+| tempo del seme più lento | 135 ms | < 1500 ms |
 | voxel per seme (1-5) | 2325, 3113, 2156, 3032, 2146 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`cervo-reale.png`](cervo-reale.png).
@@ -20,7 +20,7 @@ Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`cervo-reale.
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 25×40×30, 59 nodi, 209 passi, finito in 158 ms.
+Traccia, seme 1: griglia 25×40×30, 59 nodi, 209 passi, finito in 167 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 1=marcatore (marcatore), 2=marcatore (marcatore), 3=marcatore (marcatore), F=mantello fulvo, W=ventre chiaro, G=zampe, K=zoccoli e naso, A=palco d'osso, P=marcatore (marcatore), u=marcatore (marcatore), z=marcatore (marcatore).
 Alla fine: F 1588, G 456, W 255, K 20, A 6.

@@ -329,7 +329,7 @@ export const FLORA_GEOLOGIA: Definizione[] = [
     titolo: 'Ponte di tubi a vapore',
     classe: 'edificio',
     descrizione: 'Un fascio di tubature che scavalca la strada fra due piloni, nel quartiere delle caldaie di Orichalcum: valvole, perdite di vapore.',
-    procedura: 'i piloni a caso (traliccio, mattoni, cavalletto), il fascio di tubi a caso (tre tubi in fila, due tubi grandi, quattro a gradini), valvole in posti a caso e perdite di vapore che nascono a caso sui tubi e salgono a rami.',
+    procedura: 'i piloni a caso (traliccio, mattoni, cavalletto), il fascio di tubi a caso (tre tubi in fila, due tubi grandi, quattro a gradini), tiranti che pendono dai tubi per lunghezze a caso, valvole in posti a caso e perdite di vapore che nascono a caso sui tubi e salgono a rami.',
     xml: () =>
       programma({
         titolo: 'Ponte di tubi a vapore',
@@ -342,7 +342,7 @@ export const FLORA_GEOLOGIA: Definizione[] = [
           ['R', 'a3322a', 'valvole'],
           ['S', 'e8ecef', 'vapore'],
         ],
-        marcatori: 'P',
+        marcatori: 'PQ',
         corpo: [
           ...scelta('piloni', [[25, 25, 0], [50, 22, 30]], [
             ['traliccio', [line([4, 21, 0], [6, 25, 26], 1, 'I'), line([8, 29, 0], [6, 25, 26], 1, 'I'), line([4, 29, 0], [6, 25, 26], 1, 'I'), line([8, 21, 0], [6, 25, 26], 1, 'I'),
@@ -355,6 +355,10 @@ export const FLORA_GEOLOGIA: Definizione[] = [
             ['due grandi', [line([1, 22, 32], [48, 22, 32], 4, 'C'), line([1, 30, 31], [48, 30, 31], 3, 'O')]],
             ['quattro a gradini', [line([1, 19, 29], [48, 19, 29], 1.5, 'O'), line([1, 23, 31], [48, 23, 31], 1.5, 'C'), line([1, 27, 33], [48, 27, 33], 1.5, 'O'), line([1, 31, 35], [48, 31, 35], 1.5, 'C')]],
           ]),
+          nota('tiranti che scendono a caso dai tubi verso il basso, di lunghezza propria'),
+          `<one in="C B" out="* Q" steps="3"/>`,
+          `<prl in="Q B" out="I Q" p="0.85" steps="12"/>`,
+          `<prl in="Q" out="R"/>`,
           nota('valvole e perdite di vapore a caso sui tubi'),
           `<prl in="B O" out="R *" p="0.04" steps="1"/>`,
           `<one in="B C" out="P *" steps="4"/>`,
@@ -586,8 +590,9 @@ export const FLORA_GEOLOGIA: Definizione[] = [
           `<prl in="P B" out="C P" p="0.8" steps="6"/>`,
           `<prl in="P" out="C"/>`,
           nota('un nido e i cartelli'),
-          `<one in="B I" out="W *" steps="1"/>`,
+          `<one in="B I" out="W *" steps="2"/>`,
           `<prl in="BW" out="*W" p="0.7" steps="2"/>`,
+          `<prl in="B W" out="W *" p="0.5" steps="2"/>`,
           `<one in="BI" out="*R" steps="2"/>`,
         ],
       });

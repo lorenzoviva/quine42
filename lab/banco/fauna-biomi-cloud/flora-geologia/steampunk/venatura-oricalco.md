@@ -12,7 +12,7 @@ Uno sperone di roccia nera rigato da vene di oricalco che i minatori di Orichalc
 | voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
 | distanza media fra i 5 semi (forma) | 0.472 | ≥ 0.15 |
 | distanza minima fra due semi | 0.041 | — |
-| tempo del seme più lento | 447 ms | < 1500 ms |
+| tempo del seme più lento | 512 ms | < 1500 ms |
 | voxel per seme (1-5) | 27741, 10481, 11391, 27849, 10566 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`venatura-oricalco.png`](venatura-oricalco.png).
@@ -20,7 +20,7 @@ Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`venatura-ori
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 50×50×50, 40 nodi, 233 passi, finito in 481 ms.
+Traccia, seme 1: griglia 50×50×50, 40 nodi, 233 passi, finito in 507 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 2=marcatore (marcatore), 3=marcatore (marcatore), R=roccia nera, D=roccia grigia, V=oricalco, W=legno, I=ferro, g=marcatore (marcatore), P=marcatore (marcatore), u=marcatore (marcatore), z=marcatore (marcatore).
 Alla fine: R 14922, V 11299, D 1450, W 56, I 14.

@@ -12,7 +12,7 @@ La stazione a monte della teleferica di Orichalcum: la grande ruota delle funi, 
 | voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
 | distanza media fra i 5 semi (forma) | 0.240 | ≥ 0.15 |
 | distanza minima fra due semi | 0.047 | — |
-| tempo del seme più lento | 266 ms | < 1500 ms |
+| tempo del seme più lento | 294 ms | < 1500 ms |
 | voxel per seme (1-5) | 17604, 14110, 16759, 17589, 14109 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`stazione-teleferica.png`](stazione-teleferica.png).
@@ -20,7 +20,7 @@ Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`stazione-tel
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 50×50×50, 67 nodi, 215 passi, finito in 292 ms.
+Traccia, seme 1: griglia 50×50×50, 67 nodi, 215 passi, finito in 387 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 1=marcatore (marcatore), 2=marcatore (marcatore), 3=marcatore (marcatore), K=mattoni, I=ferro, O=ottone, R=cabina rossa, V=vetri, F=fumo, P=marcatore (marcatore), u=marcatore (marcatore), z=marcatore (marcatore).
 Alla fine: K 10654, O 4879, I 1651, R 391, V 15, F 14.

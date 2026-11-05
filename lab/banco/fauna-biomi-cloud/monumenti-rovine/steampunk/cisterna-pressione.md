@@ -12,7 +12,7 @@ Una cisterna del vapore cittadino di Orichalcum: lamiera rivettata, manometri ac
 | voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
 | distanza media fra i 5 semi (forma) | 0.415 | ≥ 0.15 |
 | distanza minima fra due semi | 0.016 | — |
-| tempo del seme più lento | 604 ms | < 1500 ms |
+| tempo del seme più lento | 546 ms | < 1500 ms |
 | voxel per seme (1-5) | 18899, 20190, 19020, 12645, 20167 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`cisterna-pressione.png`](cisterna-pressione.png).
@@ -20,7 +20,7 @@ Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`cisterna-pre
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 50×50×50, 34 nodi, 136 passi, finito in 451 ms.
+Traccia, seme 1: griglia 50×50×50, 34 nodi, 136 passi, finito in 550 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 2=marcatore (marcatore), T=lamiera, I=ferro, C=tubi di rame, R=valvole, G=manometri, Z=ruggine, S=basamento, e=marcatore (marcatore), w=marcatore (marcatore), s=marcatore (marcatore), n=marcatore (marcatore), u=marcatore (marcatore), z=marcatore (marcatore).
 Alla fine: T 14975, S 3042, Z 637, C 141, G 50, I 38, R 16.

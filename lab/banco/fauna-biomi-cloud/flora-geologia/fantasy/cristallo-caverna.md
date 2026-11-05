@@ -12,7 +12,7 @@ Un nido di cristalli che spunta dalla roccia delle caverne di Aurora, ognuno con
 | voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
 | distanza media fra i 5 semi (forma) | 0.298 | ≥ 0.15 |
 | distanza minima fra due semi | 0.184 | — |
-| tempo del seme più lento | 372 ms | < 1500 ms |
+| tempo del seme più lento | 425 ms | < 1500 ms |
 | voxel per seme (1-5) | 11548, 11389, 11186, 11138, 11774 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`cristallo-caverna.png`](cristallo-caverna.png).
@@ -20,7 +20,7 @@ Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`cristallo-ca
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 50×50×50, 28 nodi, 158 passi, finito in 384 ms.
+Traccia, seme 1: griglia 50×50×50, 28 nodi, 158 passi, finito in 387 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 0=marcatore (marcatore), 4=marcatore (marcatore), 7=marcatore (marcatore), 8=marcatore (marcatore), 9=marcatore (marcatore), R=roccia, D=roccia scura, X=cristallo, Y=cristallo chiaro, g=marcatore (marcatore), P=marcatore (marcatore), Q=marcatore (marcatore), u=marcatore (marcatore), z=marcatore (marcatore).
 Alla fine: R 8694, Y 1908, X 558, D 388.

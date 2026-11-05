@@ -12,7 +12,7 @@ Il dirigibile delle spedizioni di Orichalcum, ormeggiato al suo traliccio: invol
 | voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
 | distanza media fra i 5 semi (forma) | 0.442 | ≥ 0.15 |
 | distanza minima fra due semi | 0.039 | — |
-| tempo del seme più lento | 516 ms | < 1500 ms |
+| tempo del seme più lento | 556 ms | < 1500 ms |
 | voxel per seme (1-5) | 11527, 6875, 8410, 11407, 7329 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`dirigibile-esploratore.png`](dirigibile-esploratore.png).
@@ -20,7 +20,7 @@ Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`dirigibile-e
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 50×50×50, 63 nodi, 364 passi, finito in 485 ms.
+Traccia, seme 1: griglia 50×50×50, 63 nodi, 364 passi, finito in 537 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 1=marcatore (marcatore), 2=marcatore (marcatore), 3=marcatore (marcatore), T=tela, Q=toppe, W=gondola di legno, I=traliccio di ferro, O=eliche d'ottone, V=oblò, u=marcatore (marcatore), z=marcatore (marcatore).
 Alla fine: T 9714, W 735, I 394, O 344, Q 334, V 6.

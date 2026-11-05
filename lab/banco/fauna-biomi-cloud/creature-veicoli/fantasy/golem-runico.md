@@ -12,7 +12,7 @@ Un guardiano di pietra di Aurora, massi sovrapposti tenuti insieme da rune che b
 | voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
 | distanza media fra i 5 semi (forma) | 0.306 | ≥ 0.15 |
 | distanza minima fra due semi | 0.112 | — |
-| tempo del seme più lento | 61 ms | < 1500 ms |
+| tempo del seme più lento | 74 ms | < 1500 ms |
 | voxel per seme (1-5) | 2585, 2590, 2506, 2512, 2636 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`golem-runico.png`](golem-runico.png).
@@ -20,7 +20,7 @@ Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`golem-runico
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 20×15×30, 51 nodi, 207 passi, finito in 88 ms.
+Traccia, seme 1: griglia 20×15×30, 51 nodi, 207 passi, finito in 64 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 1=marcatore (marcatore), 2=marcatore (marcatore), 3=marcatore (marcatore), S=pietra, D=pietra scura, M=muschio, R=rune, u=marcatore (marcatore), z=marcatore (marcatore).
 Alla fine: S 1284, D 1208, M 53, R 40.

@@ -12,7 +12,7 @@ Un cinghiale enorme con placche d'osso sul dorso e zanne ricurve: la bestia dell
 | voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
 | distanza media fra i 5 semi (forma) | 0.382 | ≥ 0.15 |
 | distanza minima fra due semi | 0.158 | — |
-| tempo del seme più lento | 144 ms | < 1500 ms |
+| tempo del seme più lento | 136 ms | < 1500 ms |
 | voxel per seme (1-5) | 3655, 3820, 5540, 4656, 4750 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`cinghiale-corazzato.png`](cinghiale-corazzato.png).
@@ -20,7 +20,7 @@ Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`cinghiale-co
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 25×40×30, 44 nodi, 197 passi, finito in 115 ms.
+Traccia, seme 1: griglia 25×40×30, 44 nodi, 197 passi, finito in 119 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 1=marcatore (marcatore), 2=marcatore (marcatore), 3=marcatore (marcatore), F=setole brune, R=placche d'osso, S=punte, G=zampe, T=zanne, K=grugno e zoccoli, P=marcatore (marcatore), u=marcatore (marcatore), z=marcatore (marcatore).
 Alla fine: F 2497, R 651, G 324, T 100, S 54, K 29.

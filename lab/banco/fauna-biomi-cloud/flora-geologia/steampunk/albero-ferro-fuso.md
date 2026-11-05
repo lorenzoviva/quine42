@@ -12,7 +12,7 @@ Un albero di tubi e lamiera nei giardini meccanici di Orichalcum: tronco a canna
 | voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
 | distanza media fra i 5 semi (forma) | 0.782 | ≥ 0.15 |
 | distanza minima fra due semi | 0.613 | — |
-| tempo del seme più lento | 106 ms | < 1500 ms |
+| tempo del seme più lento | 145 ms | < 1500 ms |
 | voxel per seme (1-5) | 2028, 2324, 2127, 2283, 2549 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`albero-ferro-fuso.png`](albero-ferro-fuso.png).
@@ -20,7 +20,7 @@ Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`albero-ferro
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 40×40×60, 28 nodi, 150 passi, finito in 110 ms.
+Traccia, seme 1: griglia 40×40×60, 28 nodi, 150 passi, finito in 101 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 2=marcatore (marcatore), T=ghisa, U=ghisa alta, A=tubi, F=foglie di rame, O=ottone, Z=ruggine, H=marcatore (marcatore), e=marcatore (marcatore), w=marcatore (marcatore), s=marcatore (marcatore), n=marcatore (marcatore), u=marcatore (marcatore), z=marcatore (marcatore).
 Alla fine: T 939, F 736, A 161, U 115, Z 64, O 13.

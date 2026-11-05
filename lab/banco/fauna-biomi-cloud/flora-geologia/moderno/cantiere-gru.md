@@ -12,7 +12,7 @@ Un palazzo in costruzione a Neapolis: platea, pilastri che salgono, solai gettat
 | voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
 | distanza media fra i 5 semi (forma) | 0.192 | ≥ 0.15 |
 | distanza minima fra due semi | 0.135 | — |
-| tempo del seme più lento | 853 ms | < 1500 ms |
+| tempo del seme più lento | 871 ms | < 1500 ms |
 | voxel per seme (1-5) | 7607, 7417, 7879, 7631, 7940 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`cantiere-gru.png`](cantiere-gru.png).
@@ -20,7 +20,7 @@ Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`cantiere-gru
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 50×50×50, 100 nodi, 328 passi, finito in 806 ms.
+Traccia, seme 1: griglia 50×50×50, 100 nodi, 328 passi, finito in 879 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 3=marcatore (marcatore), S=cemento, C=pilastri, R=ferri d'armatura, Y=gru, I=ferro, K=sacchi, W=tavole del ponteggio, P=marcatore (marcatore), s=marcatore (marcatore), u=marcatore (marcatore), z=marcatore (marcatore).
 Alla fine: S 4074, C 2375, Y 711, I 269, W 90, R 83, K 5.

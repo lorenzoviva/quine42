@@ -12,7 +12,7 @@ La gru a vapore sopra un pozzo di Orichalcum: torre a traliccio, braccio, carruc
 | voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
 | distanza media fra i 5 semi (forma) | 0.524 | ≥ 0.15 |
 | distanza minima fra due semi | 0.224 | — |
-| tempo del seme più lento | 283 ms | < 1500 ms |
+| tempo del seme più lento | 307 ms | < 1500 ms |
 | voxel per seme (1-5) | 2468, 1960, 2075, 2585, 1912 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`gru-miniera.png`](gru-miniera.png).
@@ -20,7 +20,7 @@ Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`gru-miniera.
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 50×50×50, 59 nodi, 186 passi, finito in 306 ms.
+Traccia, seme 1: griglia 50×50×50, 59 nodi, 186 passi, finito in 292 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 2=marcatore (marcatore), 3=marcatore (marcatore), O=traliccio d'ottone, I=ferro, K=contrappeso, S=pietra, M=minerale, g=marcatore (marcatore), u=marcatore (marcatore), z=marcatore (marcatore).
 Alla fine: S 1101, O 1031, M 177, K 103, I 56.

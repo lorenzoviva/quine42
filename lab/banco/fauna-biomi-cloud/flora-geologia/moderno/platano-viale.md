@@ -12,7 +12,7 @@ Il platano dei viali di Neapolis: tronco chiazzato che si sfoglia, chioma larga,
 | voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
 | distanza media fra i 5 semi (forma) | 0.761 | ≥ 0.15 |
 | distanza minima fra due semi | 0.594 | — |
-| tempo del seme più lento | 121 ms | < 1500 ms |
+| tempo del seme più lento | 129 ms | < 1500 ms |
 | voxel per seme (1-5) | 4930, 7320, 5449, 5302, 8281 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`platano-viale.png`](platano-viale.png).
@@ -20,7 +20,7 @@ Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`platano-vial
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 40×40×60, 27 nodi, 142 passi, finito in 124 ms.
+Traccia, seme 1: griglia 40×40×60, 27 nodi, 142 passi, finito in 141 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 2=marcatore (marcatore), T=corteccia, U=corteccia alta, K=chiazze chiare, A=rami, F=chioma, L=foglie al sole, W=legno della panchina, H=marcatore (marcatore), e=marcatore (marcatore), w=marcatore (marcatore), n=marcatore (marcatore), u=marcatore (marcatore), z=marcatore (marcatore).
 Alla fine: F 2211, W 1400, T 445, A 407, L 230, K 147, U 90.

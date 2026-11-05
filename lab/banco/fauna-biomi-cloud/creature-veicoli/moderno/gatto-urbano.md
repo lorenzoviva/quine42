@@ -12,7 +12,7 @@ Il gatto dei tetti di Neapolis: tigrato, sornione, la coda che si muove per cont
 | voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
 | distanza media fra i 5 semi (forma) | 0.711 | ≥ 0.15 |
 | distanza minima fra due semi | 0.032 | — |
-| tempo del seme più lento | 44 ms | < 1500 ms |
+| tempo del seme più lento | 25 ms | < 1500 ms |
 | voxel per seme (1-5) | 340, 368, 299, 368, 467 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`gatto-urbano.png`](gatto-urbano.png).
@@ -20,7 +20,7 @@ Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`gatto-urbano
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 15×20×15, 61 nodi, 65 passi, finito in 23 ms.
+Traccia, seme 1: griglia 15×20×15, 61 nodi, 65 passi, finito in 22 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 3=marcatore (marcatore), F=pelo grigio, D=strisce, E=occhi, Q=marcatore (marcatore), u=marcatore (marcatore), z=marcatore (marcatore).
 Alla fine: F 322, D 16, E 2.

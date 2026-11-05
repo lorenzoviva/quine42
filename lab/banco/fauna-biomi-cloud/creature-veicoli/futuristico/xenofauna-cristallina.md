@@ -12,7 +12,7 @@ Una bestia delle lune di Sidera, a sei zampe, con cristalli vivi che le crescono
 | voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
 | distanza media fra i 5 semi (forma) | 0.383 | ≥ 0.15 |
 | distanza minima fra due semi | 0.162 | — |
-| tempo del seme più lento | 147 ms | < 1500 ms |
+| tempo del seme più lento | 167 ms | < 1500 ms |
 | voxel per seme (1-5) | 2784, 2742, 2655, 2761, 2958 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`xenofauna-cristallina.png`](xenofauna-cristallina.png).
@@ -20,7 +20,7 @@ Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`xenofauna-cr
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 25×40×30, 63 nodi, 196 passi, finito in 133 ms.
+Traccia, seme 1: griglia 25×40×30, 63 nodi, 196 passi, finito in 137 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 1=marcatore (marcatore), 2=marcatore (marcatore), F=carapace viola, D=carapace scuro, G=zampe, X=cristallo, E=occhi, P=marcatore (marcatore), u=marcatore (marcatore), z=marcatore (marcatore).
 Alla fine: F 1575, G 666, X 298, D 243, E 2.

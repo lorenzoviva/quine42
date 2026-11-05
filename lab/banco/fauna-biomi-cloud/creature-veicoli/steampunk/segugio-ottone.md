@@ -12,7 +12,7 @@ Un cane da caccia meccanico di Orichalcum: corpo a caldaia, giunti di ferro, com
 | voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
 | distanza media fra i 5 semi (forma) | 0.496 | ≥ 0.15 |
 | distanza minima fra due semi | 0.277 | — |
-| tempo del seme più lento | 141 ms | < 1500 ms |
+| tempo del seme più lento | 180 ms | < 1500 ms |
 | voxel per seme (1-5) | 3391, 2171, 2271, 2302, 2192 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`segugio-ottone.png`](segugio-ottone.png).
@@ -20,7 +20,7 @@ Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`segugio-otto
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 25×40×30, 70 nodi, 243 passi, finito in 181 ms.
+Traccia, seme 1: griglia 25×40×30, 70 nodi, 243 passi, finito in 163 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 1=marcatore (marcatore), 2=marcatore (marcatore), 3=marcatore (marcatore), O=ottone, D=ottone scuro, I=giunti di ferro, T=comignoli, L=occhi di brace, P=marcatore (marcatore), u=marcatore (marcatore), z=marcatore (marcatore).
 Alla fine: O 2792, I 499, D 66, T 21, L 13.

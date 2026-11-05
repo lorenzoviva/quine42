@@ -12,7 +12,7 @@ Il frangiflutti del porto di Neapolis: un muro di cemento, scogli e tetrapodi am
 | voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
 | distanza media fra i 5 semi (forma) | 0.326 | ≥ 0.15 |
 | distanza minima fra due semi | 0.029 | — |
-| tempo del seme più lento | 254 ms | < 1500 ms |
+| tempo del seme più lento | 262 ms | < 1500 ms |
 | voxel per seme (1-5) | 22581, 14710, 19707, 22533, 14798 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`scogliera-frangiflutti.png`](scogliera-frangiflutti.png).
@@ -20,7 +20,7 @@ Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`scogliera-fr
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 50×50×50, 28 nodi, 155 passi, finito in 259 ms.
+Traccia, seme 1: griglia 50×50×50, 28 nodi, 155 passi, finito in 307 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
 Lettere: 2=marcatore (marcatore), S=cemento, D=cemento scuro, R=scogli, T=tetrapodi, A=alghe, g=marcatore (marcatore), P=marcatore (marcatore), u=marcatore (marcatore), z=marcatore (marcatore).
 Alla fine: S 19012, D 2450, R 1022, A 52, T 45.
