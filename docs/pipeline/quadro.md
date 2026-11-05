@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 05/11/2026, epoca 270. Crediti: vedi `stato`.
+Aggiornato il 05/11/2026, epoca 271. Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -66,5 +66,5 @@ Aggiornato il 05/11/2026, epoca 270. Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **268:** `git push origin 3d` e avviate su richiesta dell'autore 4 sessioni autonome su Claude Cloud (`claude-opus-5-5` su `claude.ai/code`) per consumare i 250 $ in scadenza domani alle 9:00: Cantiere 1 strutture 3D (`session_01Tozk123FBT7m2bcK2eJjnm`), Cantiere 2 modelli seme + props (`session_01Tozk11CdD1xBuczzXmJB4K`), Cantiere 3 suoni MJ (`session_01Tozk15AdWzG8q4xRMv2qZy`), Cantiere 4 universi `orichalcum`/`neapolis`/`sidera` (`session_01Tozk139u3r5JUxKpgtjZMs`).
-- **270:** `git fetch origin` sui rami di Claude Cloud: Cantiere 1 completato due volte (`origin/claude/quine42-3d-structures-catalog-00g70n`, `9298643`, 24 strutture con foto, e duplicato `-3l6ejl`, `36bd3ad`, 24 strutture), Cantiere 3 completato (`origin/claude/markov-junior-sound-programs-pxu6ye`, `5c3ff31`, 44 programmi sonori), Cantiere 2 agli ultimi modelli (`origin/claude/quine42-procedural-seed-models-x1hrxt`, `c48b65c`, 40/40 props e 23/24 modelli seme), Cantiere 4 fermo con domande su `claude.ai/code`.
+- **270:** `git fetch origin` sui rami di Claude Cloud: Cantiere 1 completato due volte (`origin/claude/quine42-3d-structures-catalog-00g70n`, `9298643`, 24 strutture, e `-3l6ejl`, `36bd3ad`, 24 strutture), Cantiere 2 completato (`origin/claude/quine42-procedural-seed-models-x1hrxt`, `28afffb`, 64 modelli), Cantiere 3 completato (`origin/claude/markov-junior-sound-programs-pxu6ye`, `5c3ff31`, 44 programmi sonori); Cantiere 4 aveva ricevuto il prompt troncato alle prime virgolette `"simboli luminosi"` in PowerShell 5.1.
+- **271:** lanciate su richiesta dell'autore altre 8 sessioni autonome su Claude Cloud (`claude-opus-5-5`, ~5,5 KB di prompt interi senza `"` verificati nei debug log) per consumare i 180 $ residui entro mattina: [5] `orichalcum` completo (`session_01Tozk12SLk82sBvihmjfpWt`, `claude/orichalcum-steampunk-universe`), [6] `neapolis` completo (`session_01Tozk11F44Z2A2UWejRQudf`, `claude/neapolis-modern-universe`), [7] `sidera` completo (`session_01Tozk12YwMeJz5UqoKMwMEF`, `claude/sidera-futuristic-universe`), [8] ottimizzazione `src/mj/engine.ts` D33 + Scenografo T259 (`session_01Tozk12EnTvZQTpsLFgpAET`, `claude/markov-junior-optimization-scenografo`), [9] catena Step 32 T260+T262+T245a+T263+T245b+T245c (`session_01Tozk11e9cy4LcEcVbpDq2h`, `claude/step32-kernel-chain`), [10] T267+T264+T265+T207 (`session_01Tozk13UQYLM5HRHagK7Gqq`, `claude/quine42-kernel-tasks`), [11] 60 modelli 3D creature/veicoli/flora/monumenti (`session_01Tozk15bXTzYeXEqjo1L48d`, `claude/markov-junior-3d-60-models`), [12] 3 reami `spazio`/`pirati`/`cowboy` + T239 + T240 (`session_01Tozk12nhr93NY5PPSoB8Hg`, `claude/quine42-realms-languages`).
