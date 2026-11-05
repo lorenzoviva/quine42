@@ -1109,6 +1109,12 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Dove vive**: `src/theme.css`, `src/style.css`, `site/site.css`
 - **Da non usare**: nessuno
 
+### Scritta
+- **Inglese**: `lettering`, `LETTERING`, `letteringSurface`
+- **Definizione**: il nome del gioco disegnato come logo, nella barra e nel piede del sito. Nella veste futuristica è la proposta 05 di Claude estratta così com'è: le lettere grandi QUINE42 fatte di righe del piccolo QUINE42, che si muovono come un tappeto (ADR-0151).
+- **Dove vive**: `site/skins/futuristica/scritta.ts`, `site/skins/futuristica/surface.ts`, `tools/vesti/scritta.ts`
+- **Da non usare**: `wordmark`
+
 ### Veste
 - **Inglese**: `skin`, `SkinManifest`, `siteSkins`, `SKIN_KEY`
 - **Definizione**: uno degli aspetti del sito (colori, font, logo, sfondi, effetti) sopra una base comune che non cambia: una cartella di `site/skins/`, scelta con `data-skin` sulla radice. Non riguarda il gioco.
