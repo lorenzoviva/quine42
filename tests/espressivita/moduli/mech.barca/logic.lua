@@ -28,17 +28,17 @@ function M.on_ui(user, azione)
   return nil
 end
 
-function M.update(dt)
-  local me = world.player()
-  local b = ecs.get(me, "barca")
+-- Ogni viandante a bordo ha il suo timone: i suoi tasti, la sua barca (T263: `world.wanderers()`, `input.held(azione, id)`).
+local function naviga(w, dt)
+  local b = ecs.get(w.id, "barca")
   if not b or not b.a_bordo then return end
   local s = ecs.get(b.scafo, "pos")
   if not s then return end
   local dx, dy = 0, 0
-  if input.held("left") then dx = dx - 1 end
-  if input.held("right") then dx = dx + 1 end
-  if input.held("up") then dy = dy - 1 end
-  if input.held("down") then dy = dy + 1 end
+  if input.held("left", w.id) then dx = dx - 1 end
+  if input.held("right", w.id) then dx = dx + 1 end
+  if input.held("up", w.id) then dy = dy - 1 end
+  if input.held("down", w.id) then dy = dy + 1 end
   local vx, vy = vento()
   local spinta = 0.4 + 0.6 * math.max(0, dx * vx + dy * vy)
   b.vento = string.format("%.1f %.1f", vx, vy)
@@ -52,9 +52,12 @@ function M.update(dt)
   end
   -- Il sedile: il kernel non sa tenere un corpo su un altro (il passo non scende sotto 0,2), si rimette a ogni tick
   -- lo scarto fra dove il viandante è nel mondo e dove sta lo scafo.
-  local here = world.player_pos()
-  local p = ecs.get(me, "pos")
-  p.x, p.y = p.x + (s.x - here.x), p.y + (s.y - here.y)
+  local p = ecs.get(w.id, "pos")
+  p.x, p.y = p.x + (s.x - w.x), p.y + (s.y - w.y)
+end
+
+function M.update(dt)
+  for _, w in ipairs(world.wanderers()) do naviga(w, dt) end
 end
 
 return M

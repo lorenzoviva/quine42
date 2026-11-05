@@ -14,12 +14,10 @@ function M.update(dt)
   if not id then return end
   local c = ecs.get(id, "carro")
   c.chi = world.player()
-  local n = 0
-  ecs.each("player", function() n = n + 1 end)
-  c.visti = n
-  -- Solo chi tiene la tastiera di questo kernel ha dei tasti, e il sistema non gira per ogni viandante.
-  if input.held("right") then c.tasti = c.tasti + 1 end
+  c.visti = #world.wanderers()
   if c.guidatore == 0 then return end
+  -- I tasti sono di chi guida, chiunque tenga la tastiera di questo kernel (T263: `input.held(azione, id)`).
+  if input.held("right", c.guidatore) then c.tasti = c.tasti + 1 end
   ecs.each("a_bordo, pos", function(_, _, p) p.x = p.x + VELOCITA * dt end)
 end
 

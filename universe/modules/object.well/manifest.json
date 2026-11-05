@@ -5,14 +5,44 @@
   "version": "0.3.0",
   "origin": "esempio",
   "description": "Un vecchio pozzo di pietra.",
+  "tags": [
+    "pozzo",
+    "acqua"
+  ],
   "context": "piazze, cortili e radure",
   "logic": "logic.lua",
-  "appearance": { "model": "pozzo", "glyph": "Ö", "color": "#9aa6b8", "aspetto": "un pozzo di pietra rotondo, acqua scura" },
-  "physics": { "solid": true, "radius": 0.45 },
+  "appearance": {
+    "model": "pozzo",
+    "glyph": "Ö",
+    "color": "#9aa6b8",
+    "aspetto": "un pozzo di pietra rotondo, acqua scura"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.45
+  },
   "actions": [
-    { "id": "attingi", "label": "Attingi acqua", "requires": "item.secchio" },
-    { "id": "moneta", "label": "Getta una moneta", "requires": "item.moneta" },
-    { "id": "ascolta", "label": "Ascolta il pozzo" }
+    {
+      "id": "attingi",
+      "label": "Attingi acqua",
+      "requires": "item.secchio"
+    },
+    {
+      "id": "moneta",
+      "label": "Getta una moneta",
+      "requires": "item.moneta"
+    },
+    {
+      "id": "ascolta",
+      "label": "Ascolta il pozzo"
+    }
   ],
-  "spawn": { "tiles": ["g", "p"], "chance": 0.06, "max": 1 }
+  "spawn": {
+    "tiles": [
+      "g",
+      "p"
+    ],
+    "chance": 0.06,
+    "max": 1
+  }
 }

@@ -72,6 +72,11 @@ export class Repo {
   beforeCommit?: (author: Author) => void;
   /** Runs after HEAD moved (a commit, a checkout): a master's client sends its branch (T42b). */
   onCommit?: (c: Commit) => void;
+  /**
+   * Paths whose working version is not a valid state (T262, ADR-0137): code written without a commit. Every commit takes them as
+   * HEAD has them, so data are saved while that code stays where it is, in the working files only.
+   */
+  withheld?: () => Iterable<string>;
 
   private constructor(
     data: RepoData,
@@ -155,14 +160,28 @@ export class Repo {
     else this.working[path] = content;
   }
 
+  /** What a commit holds now: the working files, with what is withheld as HEAD has it. */
+  private snapshot(): FileMap {
+    const held = [...(this.withheld?.() ?? [])];
+    if (!held.length) return this.working;
+    const head = this.head().files;
+    const files = { ...this.working };
+    for (const p of held) {
+      if (p in head) files[p] = head[p];
+      else delete files[p];
+    }
+    return files;
+  }
+
   commit(message: string, author: Author): Commit {
     this.beforeCommit?.(author);
     const prev = this.head().files;
-    const c = Repo.makeCommit(this.data.head, message, author, this.working);
+    const files = this.snapshot();
+    const c = Repo.makeCommit(this.data.head, message, author, files);
     if (this.backend) {
       const changes: Record<string, string | null> = {};
-      for (const [p, v] of Object.entries(this.working)) if (prev[p] !== v) changes[p] = v;
-      for (const p of Object.keys(prev)) if (!(p in this.working)) changes[p] = null;
+      for (const [p, v] of Object.entries(files)) if (prev[p] !== v) changes[p] = v;
+      for (const p of Object.keys(prev)) if (!(p in files)) changes[p] = null;
       if (Object.keys(changes).length) void this.backend.commit(changes, message, author);
     }
     this.data.commits.push(c);

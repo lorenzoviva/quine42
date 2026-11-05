@@ -4281,7 +4281,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: non serve (convalida con `Kernel.boot` + `MockAiModels` nei test; se il provider ha lo strumento browser controlla anche dal vivo `?skip&offline`, altrimenti scrivi le coordinate `(cx, cy)` nell'esito per l'esplorazione diretta).
 - Quando è fatto: commit su `task/T273` e installazione dei 4 universi in `universes/`; nell'esito l'elenco dei luoghi/coordinate `(cx, cy)` dove si trova ogni struttura nei 4 universi. Sicurezza: nessuna superficie nuova.
 
-### T274 · Integrare la catena Step 32 di Claude Cloud (T260, T262, T245a, T263, T245b, T245c) — `da fare`
+### T274 · Integrare la catena Step 32 di Claude Cloud (T260, T262, T245a, T263, T245b, T245c) — `fatto` (`73b5841`)
 - Pipeline: claude · stima 3% · approvato · priorità 1
 - Step: 32
 - Sforzo: extra.
@@ -4289,6 +4289,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Cosa fare: `git merge` del ramo nel worktree; rinumera gli ADR se servono; suite intera e typecheck con i loro turni; controlla che `npm run mancanze` e il caricamento di `universe/` reggano `checkKernelVersion`. Nell'esito elenca ciò che il ramo non ha provato (browser di T263, T245b, T245c; i test di `aggiunte.test.ts` saltati nel clone Cloud, da far girare qui).
 - Browser: sì, i pannelli di T263 e un mestiere di T245b: se non si può, `BROWSER: da verificare`.
 - Quando è fatto: commit su `task/T274`. All'integrazione l'orchestratore segna `fatto` i sei task. Sicurezza: scrivi l'esito, il ramo tocca sessione, pannelli e caricamento di un universo.
+- Esito: merge di `origin/claude/step32-kernel-chain-cghym8` (`6c75530`) senza conflitti, ADR 0136-0141 invariati, kernel `0.1.5`; suite (2142 passati, 1 saltato ma lanciato a parte su `valmora` e `valmora new`), typecheck e build verdi; `checkKernelVersion` regge il seme e gli universi senza campo, `npm run mancanze` funziona ma non lo chiama; sicurezza: messaggio `tasti`, `campi` in `MyState`, `world.wanderers`, `world.path`, `world.find_tile`, campo `kernel`, nessuna voce nuova oltre V-012 e V-021 già aggiornate dal ramo; non provati nel browser T245c, la maturazione e il server di produzione; all'integrazione vanno segnati `fatto` T260, T262, T245a, T263, T245b, T245c.
 
 ### T275 · Integrare i task del kernel di Claude Cloud (T267, T264, T265, T207) — `da fare` (dipende da T274)
 - Pipeline: claude · stima 2% · approvato · priorità 3

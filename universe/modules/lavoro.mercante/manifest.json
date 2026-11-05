@@ -1,0 +1,79 @@
+{
+  "id": "lavoro.mercante",
+  "name": "Il mercante",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi compra e vende: prende dal deposito ciò che altri hanno portato e lo tiene al banco per chi passa.",
+  "mestieri": [
+    {
+      "id": "mercante",
+      "nomi": [
+        "mercante",
+        "mercantessa",
+        "bottegaio",
+        "bottegaia",
+        "negoziante",
+        "commerciante",
+        "venditore",
+        "venditrice",
+        "ambulante",
+        "rigattiere",
+        "rigattiera",
+        "droghiere",
+        "droghiera"
+      ],
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "prendi",
+            "oggetto": "item.grano",
+            "quante": 2,
+            "dove": "piazza"
+          },
+          {
+            "fa": "prendi",
+            "oggetto": "item.pesce",
+            "quante": 2,
+            "dove": "piazza"
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "aspetta",
+            "durata": 90,
+            "posa": "commercia",
+            "dice": "Merce buona, prezzi giusti!"
+          }
+        ],
+        "sera": [
+          {
+            "fa": "porta",
+            "oggetto": "item.grano",
+            "dove": "piazza"
+          },
+          {
+            "fa": "porta",
+            "oggetto": "item.pesce",
+            "dove": "piazza"
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}

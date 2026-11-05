@@ -83,6 +83,8 @@ export interface TerrainDef {
   model?: string;
   /** Actions learned on this kind of terrain ("Altro…" on a tile): effects at that place. */
   actions?: ActionDef[];
+  /** What it becomes by itself (T245b, ADR-0140): after `dopo` days of the world from when the tile was written, the tile `in`. */
+  matura?: { dopo: number; in: string };
 }
 
 export const ITEM_CATEGORIES = ['cibo', 'bevanda', 'medicina', 'attrezzo', 'arma', 'materiale', 'luce', 'vestiario', 'contenitore', 'magia', 'varie'] as const;
@@ -404,6 +406,8 @@ export interface UniverseConfig {
   rilievo?: { mare?: number };
   /** The heritage of clones (T45c, ADR-0084): what of every use of a cloned card goes back to who held it before. */
   eredita?: import('./heritage').HeritageConfig;
+  /** The kernel that wrote it (T260, ADR-0136): `X.Y.Z`; a universe of another `X.Y` does not open here. */
+  kernel?: string;
 }
 
 /** How the game is played in this universe: chosen before the Genesis, then fixed (ADR-0053). */

@@ -1,0 +1,67 @@
+{
+  "id": "lavoro.sacerdote",
+  "name": "Il sacerdote",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi officia: la preghiera della mattina, la gente in piazza, il raccoglimento della sera.",
+  "mestieri": [
+    {
+      "id": "sacerdote",
+      "nomi": [
+        "sacerdote",
+        "sacerdotessa",
+        "prete",
+        "monaco",
+        "monaca",
+        "suora",
+        "frate",
+        "sciamano",
+        "sciamana",
+        "predicatore",
+        "predicatrice",
+        "officiante",
+        "eremita"
+      ],
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "prega",
+            "durata": 40
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "chiacchiera",
+            "durata": 60
+          },
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          }
+        ],
+        "sera": [
+          {
+            "fa": "prega"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}
