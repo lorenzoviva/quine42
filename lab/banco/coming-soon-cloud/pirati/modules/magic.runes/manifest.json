@@ -1,0 +1,339 @@
+{
+  "id": "magic.runes",
+  "name": "Rune magiche",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "Le rune della magia: ognuna è anche una parola del codice (una variabile che non vale niente, finché qualcuno non le dà un valore), ma tenute in mano e pronunciate (T) diventano incantesimi. Più rune in fila sono una formula: l’ordine conta (terra fuoco non è fuoco terra) e ripetere una runa la rafforza; il Concilio dà nome e effetti a una formula la prima volta che qualcuno la pronuncia. I cristalli magici, nascosti nelle case e nelle casse, ridanno mana; le rune si consumano quando le pronunci.",
+  "runes": {
+    "marea": {
+      "name": "Risacca",
+      "glyph": "≈",
+      "color": "#3fb6c9",
+      "element": "acqua",
+      "description": "l'onda che sale: scorre, bagna, allaga"
+    },
+    "brezza": {
+      "name": "Maestrale",
+      "glyph": "☴",
+      "color": "#d8f4ff",
+      "element": "aria",
+      "description": "il vento di bordo: spinge, porta voci"
+    },
+    "fanale": {
+      "name": "Lanterna",
+      "glyph": "☼",
+      "color": "#ffe27a",
+      "element": "luce",
+      "description": "la lanterna di poppa: illumina, guida"
+    },
+    "polvere": {
+      "name": "Miccia",
+      "glyph": "✹",
+      "color": "#ff7a3a",
+      "element": "fuoco",
+      "description": "la polvere da sparo: brucia, scoppia"
+    },
+    "corallo": {
+      "name": "Gorgonia",
+      "glyph": "❦",
+      "color": "#ff6f91",
+      "element": "vita",
+      "description": "il corallo vivo: cura, fa ricrescere"
+    },
+    "ancora": {
+      "name": "Ormeggio",
+      "glyph": "⚓",
+      "color": "#b9a6ff",
+      "element": "protezione",
+      "description": "l'ancora: tiene fermi, protegge"
+    },
+    "sale": {
+      "name": "Salina",
+      "glyph": "✲",
+      "color": "#f2efe6",
+      "element": "conserva",
+      "description": "il sale: secca, conserva, ridà forza"
+    },
+    "nebbia": {
+      "name": "Foschia",
+      "glyph": "☁",
+      "color": "#c9d3dc",
+      "element": "velo",
+      "description": "la nebbia sul mare: nasconde, rallenta"
+    },
+    "abisso": {
+      "name": "Vortice",
+      "glyph": "♆",
+      "color": "#2a4d8f",
+      "element": "fondo",
+      "description": "il fondo del mare: smuove, solleva"
+    },
+    "stella": {
+      "name": "Polare",
+      "glyph": "✶",
+      "color": "#fff3b0",
+      "element": "rotta",
+      "description": "la stella dei naviganti: orienta, rivela"
+    }
+  },
+  "spells": {
+    "marea": {
+      "name": "Polla salmastra",
+      "description": "Dal suolo davanti a te sgorga acqua salata.",
+      "cost": 10,
+      "effects": [
+        {
+          "tipo": "terreno",
+          "a": "w",
+          "raggio": 0
+        }
+      ]
+    },
+    "brezza": {
+      "name": "Raffica",
+      "description": "Una raffica spinge via ciò che hai davanti.",
+      "cost": 6,
+      "effects": [
+        {
+          "tipo": "spingi",
+          "forza": 5
+        }
+      ]
+    },
+    "fanale": {
+      "name": "Lume di bordo",
+      "description": "Una piccola luce resta sospesa davanti a te.",
+      "cost": 4,
+      "effects": [
+        {
+          "tipo": "luce",
+          "raggio": 5,
+          "durata": 90
+        }
+      ]
+    },
+    "polvere": {
+      "name": "Vampata",
+      "description": "Una vampata davanti a te: brucia ciò che è secco.",
+      "cost": 10,
+      "effects": [
+        {
+          "tipo": "fuoco",
+          "raggio": 1,
+          "durata": 8
+        }
+      ]
+    },
+    "corallo": {
+      "name": "Linfa di mare",
+      "description": "Un tepore salato ti scorre nelle vene.",
+      "cost": 12,
+      "effects": [
+        {
+          "tipo": "bisogni",
+          "salute": 25
+        }
+      ]
+    },
+    "ancora": {
+      "name": "Guscio",
+      "description": "Un guscio d'aria ti avvolge.",
+      "cost": 8,
+      "effects": [
+        {
+          "tipo": "scudo",
+          "durata": 30
+        }
+      ]
+    },
+    "sale": {
+      "name": "Galletta",
+      "description": "La stanchezza ti scivola di dosso come l'acqua da una vela.",
+      "cost": 8,
+      "effects": [
+        {
+          "tipo": "bisogni",
+          "energia": 20
+        }
+      ]
+    },
+    "nebbia": {
+      "name": "Banco di nebbia",
+      "description": "Una nebbia leggera ti segue: cammini piano, senza rumore.",
+      "cost": 6,
+      "effects": [
+        {
+          "tipo": "stato",
+          "nome": "nella nebbia",
+          "durata": 30,
+          "velocita": 0.8
+        }
+      ]
+    },
+    "abisso": {
+      "name": "Secca",
+      "description": "La sabbia del fondo sale davanti a te: un passaggio asciutto.",
+      "cost": 14,
+      "effects": [
+        {
+          "tipo": "terreno",
+          "a": "s",
+          "raggio": 1
+        }
+      ]
+    },
+    "stella": {
+      "name": "Stella di rotta",
+      "description": "Una luce alta e ferma si accende sopra di te.",
+      "cost": 6,
+      "effects": [
+        {
+          "tipo": "luce",
+          "raggio": 8,
+          "durata": 40
+        }
+      ]
+    },
+    "polvere brezza": {
+      "name": "Bordata",
+      "description": "Il vento porta la fiamma: una bordata di fuoco scoppia davanti a te.",
+      "cost": 16,
+      "effects": [
+        {
+          "tipo": "fuoco",
+          "raggio": 2,
+          "durata": 10
+        }
+      ]
+    },
+    "marea abisso": {
+      "name": "Bassa marea",
+      "description": "L'acqua si ritira e la sabbia emerge tutto attorno.",
+      "cost": 18,
+      "effects": [
+        {
+          "tipo": "terreno",
+          "a": "s",
+          "raggio": 2
+        }
+      ]
+    }
+  },
+  "items": [
+    {
+      "id": "item.cristallo-magico",
+      "name": "Cristallo magico",
+      "description": "Un cristallo che pulsa di luce fredda. Assorbito, ridà forza magica (mana); gli incantesimi di tre o più rune ne consumano uno.",
+      "category": "magia",
+      "weight": 0.1,
+      "stack": 10,
+      "tags": [
+        "magia",
+        "cristallo"
+      ],
+      "glyph": "✦",
+      "color": "#9fe8ff",
+      "aspetto": "a small glowing blue magic crystal shard",
+      "effects": {
+        "mana": 40
+      }
+    },
+    {
+      "id": "item.borsa-rune",
+      "name": "Borsa delle rune",
+      "description": "Una borsetta di pelle con tante taschine: tiene ordinate centinaia di rune.",
+      "category": "contenitore",
+      "weight": 0.2,
+      "stack": 1,
+      "tags": [
+        "contenitore",
+        "runa"
+      ],
+      "glyph": "◘",
+      "color": "#c49a5a",
+      "aspetto": "a small leather pouch with runic stitching",
+      "container": {
+        "size": 12,
+        "accepts": "runa"
+      }
+    },
+    {
+      "id": "item.sacca",
+      "name": "Sacca di tela",
+      "description": "Una sacca da spalla: dentro ci sta di tutto, un po' di tutto.",
+      "category": "contenitore",
+      "weight": 0.4,
+      "stack": 1,
+      "tags": [
+        "contenitore",
+        "casa"
+      ],
+      "glyph": "◘",
+      "color": "#b8a888",
+      "aspetto": "a canvas shoulder bag",
+      "container": {
+        "size": 6
+      }
+    }
+  ],
+  "loot": {
+    "magia": {
+      "rolls": [
+        1,
+        1
+      ],
+      "entries": [
+        {
+          "item": "item.cristallo-magico",
+          "weight": 5,
+          "min": 1,
+          "max": 2
+        },
+        {
+          "item": "rune:marea",
+          "weight": 1
+        },
+        {
+          "item": "rune:brezza",
+          "weight": 1
+        },
+        {
+          "item": "rune:fanale",
+          "weight": 1
+        },
+        {
+          "item": "rune:polvere",
+          "weight": 1
+        },
+        {
+          "item": "rune:corallo",
+          "weight": 1
+        },
+        {
+          "item": "rune:ancora",
+          "weight": 1
+        },
+        {
+          "item": "rune:sale",
+          "weight": 1
+        },
+        {
+          "item": "rune:nebbia",
+          "weight": 1
+        },
+        {
+          "item": "rune:abisso",
+          "weight": 1
+        },
+        {
+          "item": "rune:stella",
+          "weight": 1
+        },
+        {
+          "item": "item.sacca",
+          "weight": 1
+        }
+      ]
+    }
+  }
+}

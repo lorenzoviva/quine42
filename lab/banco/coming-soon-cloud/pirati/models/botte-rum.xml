@@ -1,0 +1,22 @@
+<!-- Botte di rum: a mano (Claude Code, Cantiere 9), dal barile del seme. Doghe scure, cerchi di ferro, la spina sul davanti; ogni seme cambia i fiaschi posati sopra e le doghe sporgenti. -->
+<sequence values="BWLDIFS" size="20 20 20" symmetry="()" name="Botte di rum">
+  <color symbol="W" value="6e3c1c" name="doghe"/>
+  <color symbol="L" value="8c5428" name="doghe chiare"/>
+  <color symbol="D" value="3e200c" name="coperchio"/>
+  <color symbol="I" value="3c4048" name="cerchio"/>
+  <color symbol="F" value="2f5d3a" name="fiasco"/>
+  <color symbol="S" value="a8783c" name="spina"/>
+  <cylinder at="10 10 0" size="12 12 15" color="W"/>
+  <cylinder at="10 10 2" size="14 14 11" color="W"/>
+  <cylinder at="10 10 4" size="16 16 7" color="W"/>
+  <cylinder at="10 10 15" size="10 10 1" color="D"/>
+  <cylinder at="10 10 2" size="16 16 2" color="I" on="B"/>
+  <cylinder at="10 10 10" size="16 16 2" color="I" on="B"/>
+  <box at="10 18 6" size="2 2 2" color="S" on="B"/>
+  <prl in="B W" out="B L" p="0.3" steps="1"/>
+  <prl in="B D" out="F D" p="0.06" steps="1"/>
+  <all steps="2">
+    <rule in="B F" out="F F" p="0.7"/>
+  </all>
+  <prl in="BW" out="LW" p="0.04" steps="1"/>
+</sequence>

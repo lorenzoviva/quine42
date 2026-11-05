@@ -1,0 +1,140 @@
+{
+ "cannone": {
+  "classe": "mobile",
+  "nome": "Cannone di bordata",
+  "autore": "a mano (Claude Code, Cantiere 9)"
+ },
+ "chiesuola": {
+  "classe": "mobile",
+  "nome": "Chiesuola",
+  "autore": "a mano (Claude Code, Cantiere 9)"
+ },
+ "botte-rum": {
+  "classe": "mobile",
+  "nome": "Botte di rum",
+  "autore": "a mano (Claude Code, Cantiere 9)"
+ },
+ "forziere": {
+  "classe": "mobile",
+  "nome": "Forziere sepolto",
+  "autore": "a mano (Claude Code, Cantiere 9)"
+ },
+ "scialuppa": {
+  "classe": "mobile",
+  "nome": "Scialuppa",
+  "autore": "a mano (Claude Code, Cantiere 9)"
+ },
+ "timone": {
+  "classe": "mobile",
+  "nome": "Ruota del timone",
+  "autore": "a mano (Claude Code, Cantiere 9)"
+ },
+ "pennone": {
+  "classe": "monumento",
+  "nome": "Pennone",
+  "autore": "a mano (Claude Code, Cantiere 9)"
+ },
+ "lanterna-faro": {
+  "classe": "monumento",
+  "nome": "Lanterna del faro",
+  "autore": "a mano (Claude Code, Cantiere 9)"
+ },
+ "cassa-contrabbando": {
+  "classe": "mobile",
+  "nome": "Cassa di contrabbando",
+  "autore": "a mano (Claude Code, Cantiere 9)"
+ },
+ "pappagallo": {
+  "classe": "mobile",
+  "nome": "Pappagallo sul trespolo",
+  "autore": "a mano (Claude Code, Cantiere 9)"
+ },
+ "suono-pirati-molo": {
+  "classe": "suono",
+  "nome": "Molo",
+  "autore": "a mano (Claude Code, Cantiere 9), da suono-musica-pastorale",
+  "suono": {
+   "uso": "musica",
+   "ambienti": [
+    "borgo_mattoni",
+    "locanda",
+    "capanne",
+    "borgo"
+   ],
+   "momenti": [
+    "mattina",
+    "giorno"
+   ]
+  }
+ },
+ "suono-pirati-bonaccia": {
+  "classe": "suono",
+  "nome": "Bonaccia",
+  "autore": "a mano (Claude Code, Cantiere 9), da suono-musica-tramonto",
+  "suono": {
+   "uso": "musica",
+   "ambienti": [
+    "borgo_mattoni",
+    "lago",
+    "deserto",
+    "giungla",
+    "capanne",
+    "locanda"
+   ],
+   "momenti": [
+    "sera"
+   ]
+  }
+ },
+ "suono-pirati-riflusso": {
+  "classe": "suono",
+  "nome": "Riflusso",
+  "autore": "a mano (Claude Code, Cantiere 9), da suono-musica-profondo",
+  "suono": {
+   "uso": "musica",
+   "ambienti": [
+    "dungeon"
+   ]
+  }
+ },
+ "suono-pirati-abbordaggio": {
+  "classe": "suono",
+  "nome": "Abbordaggio",
+  "autore": "a mano (Claude Code, Cantiere 9), da suono-musica-pietra",
+  "suono": {
+   "uso": "musica",
+   "ambienti": [
+    "fortezza",
+    "castello",
+    "caserma"
+   ],
+   "momenti": [
+    "mattina",
+    "giorno",
+    "sera"
+   ]
+  }
+ },
+ "suono-pirati-cannonata": {
+  "classe": "suono",
+  "nome": "Cannonata",
+  "autore": "a mano (Claude Code, Cantiere 9), da suono-effetto-arpeggio",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "cannone"
+   ]
+  }
+ },
+ "suono-pirati-campana": {
+  "classe": "suono",
+  "nome": "Campana di bordo",
+  "autore": "a mano (Claude Code, Cantiere 9), da suono-effetto-ritorno",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "campana"
+   ]
+  }
+ }
+}

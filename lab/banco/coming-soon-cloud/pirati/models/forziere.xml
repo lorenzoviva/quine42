@@ -1,0 +1,19 @@
+<!-- Forziere sepolto: a mano (Claude Code, Cantiere 9). Una cassa con borchie d'ottone che esce da un cumulo di sabbia; ogni seme sposta la sabbia e le monete sul coperchio. -->
+<sequence values="BSCLOGK" size="20 20 20" symmetry="()" name="Forziere sepolto">
+  <color symbol="S" value="e6d6a8" name="sabbia"/>
+  <color symbol="C" value="7a4a22" name="cassa"/>
+  <color symbol="L" value="5e3818" name="coperchio"/>
+  <color symbol="O" value="c89a3a" name="borchie"/>
+  <color symbol="G" value="f2c84e" name="oro" glow="True"/>
+  <color symbol="K" value="3a2a1a" name="serratura"/>
+  <cylinder at="10 10 0" size="18 18 3" color="S"/>
+  <cylinder at="10 10 3" size="12 12 2" color="S"/>
+  <box at="10 10 2" size="12 8 6" color="C"/>
+  <box at="10 10 8" size="12 8 3" color="L"/>
+  <box at="4 10 2" size="1 8 9" color="O"/>
+  <box at="16 10 2" size="1 8 9" color="O"/>
+  <box at="10 6 6" size="2 1 2" color="K"/>
+  <prl in="B S" out="S S" p="0.25" steps="1"/>
+  <one in="B L" out="G L" steps="4"/>
+  <prl in="BS" out="SS" p="0.15" steps="1"/>
+</sequence>
