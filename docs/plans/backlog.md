@@ -4343,7 +4343,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Quando è fatto: commit su `task/T280`. All'integrazione l'orchestratore segna `fatto` T245d, T245e, T245f. Sicurezza: scrivi l'esito, il ramo tocca sessione, sandbox e validatore.
 
 ### T281 · I punti di `placeInside` che il kernel trova bloccati dentro le strutture — `da fare` (dipende da T279)
-- Pipeline: claude · stima 4% · approvato · priorità 5
+- Pipeline: claude · sforzo extra · stima 4% · approvato · priorità 5
 - Sforzo: extra.
 - Contesto: difetto trovato dalla sessione A, sezione «Un difetto del kernel» di `lab/banco/universi-cloud/INTEGRAZIONE.md`: `interiorPoints` trova sgombro un punto che `kernel.free(x, y, 0.15)` trova bloccato (`formBlocks`): casa a graticcio del seme 21 su 32 la vecchia e 15 su 15 la procedurale a yaw 0, 0 girata di -π/2; catalogo da 10 su 59 a 61 su 128. Ciò che si mette dentro una struttura può finire nei muri. Per questo `grande` è rimasta la casa vecchia (`SEME_TENUTI` in `strumenti/cloud.ts`).
 - Cosa fare: guarda se `interiorPoints` e `formsUnder`/`rampBlocks` usano la stessa rotazione e lo stesso livello (senza `z`, `free` misura al suolo un pavimento rialzato); correggi; togli `grande` da `SEME_TENUTI`, rilancia `integra.ts`; alza `Z` di `KERNEL_VERSION`.
@@ -4376,7 +4376,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Esito: base comune (solo token `--skin-*`, misure dalla scala aurea in `site/*.css`) e vesti in `site/skins/<id>/` scelte con `data-skin`; `server/skins.ts` genera `/skins/boot.js` e copia i file in `dist/skins/` senza rotte, `site/skin.ts` è il selettore con `localStorage`; sobria (l'aspetto di T244, ora su tutte le pagine, `body.home` tolto), fumetto e futuristica come prime stesure per T285 e T284 (logo e favicon definitivi a T286); `tests/site-skins.test.ts` ricava il contratto da ciò che la base legge; ADR-0145, voce nel glossario, tabella in `#sito`; aggiunti `--space-55`, `--space-89`, `--measure-1364`; carta 322×521; typecheck e build verdi, suite intera verde (2311 test, 1 saltato), dopo la quale ho allentato un test di `site-skins` e rilanciato da soli quel file e `glossario.test.ts`. Non provati: carte e schede di universi vere (nessun universo nel worktree, si vedono solo gli stati vuoti, quindi la carta 322×521 non è mai stata disegnata), `effects.ts` (nessuna veste ne ha uno), un telefono vero, un browser diverso da Chrome, `istruzioni.html` sotto `npm run serve` (senza `docs/beta/guida.md` la pagina non è nella build). Sicurezza: nessuna superficie nuova in produzione; in sviluppo il plugin serve solo nomi semplici di `site/skins/` con estensioni a elenco, e `boot.js` non scrive mai nella pagina ciò che è in `localStorage` se non è un id noto (test).
 
 ### T284 · La veste futuristica: l'inception di scritte neon — `da fare` (dipende da T283, T255)
-- Pipeline: claude · stima 4% · approvato · browser · priorità 3
+- Pipeline: claude · sforzo max · stima 4% · approvato · browser · priorità 3
 - Sforzo: max, scelto dall'autore. Dipende da T255 perché questo sforzo arrivi davvero alla CLI.
 - Step: 34
 - Contesto: testo dell'autore in `docs/userchats/to-do-2026-11-05.md`, § «Tema futuristico». Parte dalla seconda proposta di Claude per il prompt 5: `docs/design/logo/proposte/claude/Logo Videogioco Quine42/QUINE42 Logo.html` (file da 1,4 MB: cerca la sezione, non leggerlo intero) e `docs/design/logo/proposte/landing-tests/5-claude-2.png`; i giudizi in `docs/design/logo/proposte/votazioni.md`. La scritta QUINE è fatta di scritte «quine» più piccole, tra Matrix e Tron, nei colori neon punk. Allude a MarkovJunior, alle rune del tappeto, al doppio livello di gioco e a un gioco fatto del suo stesso codice.
@@ -4391,7 +4391,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Quando è fatto: la veste è selezionabile, le misure sono nell'esito; commit su `task/T284`. Sicurezza: nessuna superficie nuova.
 
 ### T285 · La veste a fumetto: crea la tua quine-storia — `da fare` (dipende da T283)
-- Pipeline: claude · stima 3% · approvato · browser · priorità 3
+- Pipeline: claude · sforzo extra · stima 3% · approvato · browser · priorità 3
 - Sforzo: extra.
 - Step: 34
 - Contesto: testo dell'autore in `docs/userchats/to-do-2026-11-05.md`, § «Tema Fumetto». Parte dalla seconda proposta di Claude per il prompt 1: `docs/design/logo/proposte/claude/Logo Videogioco Quine42/QUINE42 Logo.html` (cerca la sezione) e `docs/design/logo/proposte/landing-tests/1-claude-2.png`. Il vecchio aspetto pop art del sito è nella storia: `git show 9b8523c~1:site/site.css`. Allude alla storia nella storia, alla libera conversazione di NPC e Concilio, ai fumetti del gioco.
@@ -4405,7 +4405,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Quando è fatto: la veste è selezionabile; commit su `task/T285`. Sicurezza: nessuna superficie nuova.
 
 ### T286 · La veste sobria: vediamoci chiaro — `da fare` (dipende da T283)
-- Pipeline: claude · stima 2% · approvato · browser · priorità 3
+- Pipeline: claude · sforzo high · stima 2% · approvato · browser · priorità 3
 - Sforzo: high.
 - Step: 34
 - Contesto: testo dell'autore in `docs/userchats/to-do-2026-11-05.md`, § «Tema sobrio». Il sito attuale (T244) è chiaro e pulito, misterioso e poco spoilerante, ma ha poca personalità. Il logo è la seconda proposta di Claude per il prompt 4 (`docs/design/logo/proposte/claude/Logo Videogioco Quine42/QUINE42 Logo.html`, `docs/design/logo/proposte/landing-tests/4-claude-2.png`), con la sua icona, che all'autore piace molto.
@@ -4421,7 +4421,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Se si vota: lo switch in alto e una scelta per account, che si può cambiare, registrata dal server. Una rotta nuova passa da `gate` e dall'elenco di `server/production.ts`, con il suo ritmo in `FRONT_RATES`; i voti stanno sotto `universes/` in una cartella che non si serve, e i conti li legge solo il master. Due parole per i tester nella guida della beta. Sicurezza: voci nuove.
 
 ### T288 · Ciò che il viandante impugna si vede addosso: armi e attrezzi — `da fare` (dipende da T255)
-- Pipeline: claude · stima 4% · approvato · browser · priorità 6
+- Pipeline: claude · sforzo max · stima 4% · approvato · browser · priorità 6
 - Sforzo: max, scelto dall'autore. Dipende da T255 perché questo sforzo arrivi davvero alla CLI.
 - Step: 40
 - Contesto: richiesta dell'autore del 05/11, testo in `docs/userchats/to-do-2026-11-05.md`, § «Interazioni grafiche di oggetti». Oggi impugnare e gli slot esistono (`src/kernel/inventory.ts`, `#regole-effetti`, `#multigiocatore`), ma il renderer non mostra nulla sul corpo. Regola dell'autore: **minimizzare i modelli; un attrezzo usa la stessa mesh di quando è a terra.** Vale la regola 11: niente immagini, ogni aspetto è un programma MarkovJunior; niente modelli nuovi né chiamate ai modelli.
@@ -4435,7 +4435,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Quando è fatto: impugno, si vede, lo vede anche l'altro viandante; commit su `task/T288`, riga in `#mondo3d`. Sicurezza: scrivi l'esito, tocca ciò che esce dal server.
 
 ### T289 · Vestiti e armature addosso: il banco che decide come — `da fare` (dipende da T288)
-- Pipeline: claude · stima 3% · approvato · browser · priorità 6
+- Pipeline: claude · sforzo max · stima 3% · approvato · browser · priorità 6
 - Sforzo: max, scelto dall'autore.
 - Step: 40
 - Contesto: testo dell'autore in `docs/userchats/to-do-2026-11-05.md`: «per i vestiti e l'armatura va deciso», forse due mesh, una a terra e una indossata, che «eventualmente potrebbe essere solo una modifica alla mesh dell'NPC». Questo task produce la decisione, con le prove. Ricorda che l'autore ha già detto di non rigenerare tutti i modelli perché costa caro (`docs/pipeline/domande/T232.md`).
@@ -4454,7 +4454,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Contesto: lo riscrive e lo stima l'orchestratore con la decisione dell'autore su T289. Conterrà il rendering, ciò che esce verso gli altri client, il prompt dello Scultore se servono programmi nuovi, e cosa fare degli oggetti che esistono già.
 
 ### T291 · Posare gli oggetti sui mobili — `da fare` (dipende da T255)
-- Pipeline: claude · stima 3% · approvato · browser · priorità 6
+- Pipeline: claude · sforzo max · stima 3% · approvato · browser · priorità 6
 - Sforzo: max, scelto dall'autore. Dipende da T255 perché questo sforzo arrivi davvero alla CLI.
 - Step: 40
 - Contesto: testo dell'autore in `docs/userchats/to-do-2026-11-05.md`, § «Interazioni grafiche di oggetti»: «la possibilità di posare gli oggetti sui mobili». Le superfici delle forme ci sono già (`surfaces` in `src/mj/mesh.ts`, `src/kernel/forms.ts`), e le usano i pavimenti. Stessa mesh di quando l'oggetto è a terra.
@@ -4464,7 +4464,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Quando è fatto: poso, ricarico la pagina, è ancora lì; commit su `task/T291`, riga in `#regole-effetti`. Sicurezza: scrivi l'esito, tocca il protocollo.
 
 ### T292 · Prendere e spostare i mobili (`takeable`) — `da fare` (dipende da T288)
-- Pipeline: claude · stima 4% · approvato · browser · priorità 6
+- Pipeline: claude · sforzo max · stima 4% · approvato · browser · priorità 6
 - Sforzo: max, scelto dall'autore.
 - Step: 40
 - Contesto: testo dell'autore in `docs/userchats/to-do-2026-11-05.md`, § «Interazioni grafiche con oggetti di grandi dimensioni»: alcuni mobili hanno una proprietà che dice se si possono prendere e spostare. La credenza sì, il pozzo no. Oggi un mobile è un'entità di modulo (`physics.pushable` lo spinge soltanto), un oggetto in borsa è un'altra cosa (`ItemDef`).
@@ -4480,7 +4480,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Quando è fatto: commit su `task/T292`, ADR, riga in `#regole-effetti` e nell'elenco del manifest. Sicurezza: scrivi l'esito, tocca il protocollo e il validatore.
 
 ### T293 · Le carte fatte a mano: forma, archivio, rotte, interruttore — `da fare` (dipende da T255)
-- Pipeline: claude · stima 3% · approvato · priorità 7
+- Pipeline: claude · sforzo max · stima 3% · approvato · priorità 7
 - Sforzo: max.
 - Step: 41
 - Deciso dall'autore (05/11): **D40 A**: la carta sta nella collezione del suo account, fuori dagli universi; entra in un mondo solo con T295, all'inizio di un universo.
@@ -4496,7 +4496,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Quando è fatto: commit su `task/T293`, ADR, sezione in `#carte-crediti`, riga in `AGENTS.md`. Nell'esito le voci di sicurezza.
 
 ### T294 · I tre laboratori per i giocatori: forkare e modificare — `da fare` (dipende da T293)
-- Pipeline: claude · stima 4% · approvato · browser · priorità 7
+- Pipeline: claude · sforzo high · stima 4% · approvato · browser · priorità 7
 - Sforzo: high.
 - Step: 41
 - Contesto: testo dell'autore come T293. Le tre pagine sono `lab/3d/`, `lab/editor/`, `lab/suono/`; sono strumenti da sviluppatore, senza account e senza un punto d'ingresso per chi gioca. `NOT_SERVED` oggi le esclude dal server di produzione.
@@ -4511,7 +4511,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Quando è fatto: commit su `task/T294`. Sicurezza: nell'esito.
 
 ### T295 · Portare le carte in un universo nuovo, prima della Genesi — `da fare` (dipende da T293)
-- Pipeline: claude · stima 4% · approvato · browser · priorità 7
+- Pipeline: claude · sforzo max · stima 4% · approvato · browser · priorità 7
 - Sforzo: max, scelto dall'autore.
 - Step: 41
 - Deciso dall'autore (05/11): **D39 A**: il primo commit dal seme è identico per lo stesso seme e la stessa `X.Y`; gli universi che esistono già restano fuori.
@@ -4527,7 +4527,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Quando è fatto: commit su `task/T295`, ADR, sezione in `#clone-eredita`.
 
 ### T296 · Eliminare la carta problematica — `da fare` (dipende da T295)
-- Pipeline: claude · stima 1.5% · approvato · browser · priorità 7
+- Pipeline: claude · sforzo max · stima 1.5% · approvato · browser · priorità 7
 - Sforzo: max, scelto dall'autore.
 - Step: 41
 - Contesto: testo dell'autore: «se poi ci dovesse essere [una collisione] eliminiamo la carta problematica». Regola 2: l'IA non rompe mai il gioco, regola 3: ciò che viene da un giocatore si isola.
@@ -4547,7 +4547,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Quando è fatto: commit su `task/T297`. Nell'esito: i numeri nuovi degli ADR; ricorda di dare `integra T280` e di segnare `fatto` T245d, T245e, T245f.
 
 ### T298 · I mestieri di orichalcum, neapolis e sidera — `da fare` (dipende da T297)
-- Pipeline: claude · stima 2% · approvato · priorità 5
+- Pipeline: claude · sforzo high · stima 2% · approvato · priorità 5
 - Sforzo: high.
 - Step: 32
 - Contesto: trovato da T280 (`dossier T280`, e il suo `INTEGRAZIONE.md`). I tre universi non hanno `sys.lavoro` né `lavoro.*`: un edificio che crolla vi resta ai picchetti. I moduli del seme non bastano: 0/24, 4/24, 3/24 persone con un programma, e mancano `item.grano` e `item.pesce`. Mestieri: ADR-0140 e `#societa`.
@@ -4557,7 +4557,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Quando è fatto: commit su `task/T298`; nell'esito la tabella persone con un programma per universo.
 
 ### T299 · Un individuo si blocca su un dislivello — `da fare` (dipende da T297)
-- Pipeline: claude · stima 1% · approvato · priorità 6
+- Pipeline: claude · sforzo high · stima 1% · approvato · priorità 6
 - Sforzo: high.
 - Step: 32
 - Contesto: nella verifica di T280 (`dossier T280`, `traccia T280`) Ugo si è fermato su un dislivello, tanto che il rientro a piedi non si è potuto provare. Un mestiere o un'impresa che non arriva vale poco. Vie: `src/kernel/route.ts` (`findRoute`), `#rilievo`.
@@ -4567,7 +4567,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Quando è fatto: commit su `task/T299`.
 
 ### T300 · Integrare T297 sul base con T283: il censimento e l'ADR-0145 — `da fare`
-- Pipeline: claude · stima 1% · approvato · priorità 1
+- Pipeline: claude · sforzo high · stima 1% · approvato · priorità 1
 - Sforzo: high.
 - Step: 32
 - Contesto: `integra T297` e `integra T280` si fermano su `docs/glossario-censimento.md`, perché T283 è entrato nel base con la voce «Veste» e con ADR-0145. Nasce da T297: `dossier T297`, e da T283: `dossier T283`. `task/T297` contiene già `task/T280` e usa ADR-0145, 0146, 0147.
