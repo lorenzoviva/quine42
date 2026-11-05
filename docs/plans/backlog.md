@@ -4055,8 +4055,8 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Quando è fatto: commit su `task/T257` col solo `docs/pipeline/modelli.md`; nell'esito cosa cambia nella proposta. Sicurezza: nessuna superficie nuova.
 - Esito: aggiornato `docs/pipeline/modelli.md` correggendo l'attribuzione di T180/T181/T182 e del modello del banco (`claude-opus-5-5`), ricalcolando i consumi sulle 213 righe di `consumi.jsonl` (inclusi T181, T182 e T254), correggendo il fattore di Argon da 8,13× a 3,92× su 4 task (1,10× in T254, senza doppio conteggio T68b+T69), riallineando OSWorld 2.1 (Opus 81,8 % vs Sonnet 80,1 %) e tutti i numeri del PDF `gemini_4_argon_model_evaluation.pdf`, e aggiornando la proposta di assegnazione con indicazione esplicita delle voci `mai provato da noi`; nulla manca.
 
-### T260 · Il versionamento del kernel (`X.Y.Z`) e la compatibilità degli universi — `in attesa`
-- Cloud: catena Step 32 su Claude Cloud; non lanciare in locale, lo porta il suo task di integrazione.
+### T260 · Il versionamento del kernel (`X.Y.Z`) e la compatibilità degli universi — `fatto` (`73b5841`)
+- Cloud: fatto su Claude Cloud, portato da T274 (`73b5841`).
 - Pipeline: claude · stima 3% · approvato · priorità 10
 - Step: 32
 - Contesto: decisioni dell'autore del 04/11 (D32): (1) una nuova versione incompatibile del kernel non è vincolata dalla retrocompatibilità con gli universi precedenti («se vuoi giocare sul nuovo kernel devi iniziare un nuovo universo»; gli universi vecchi girano sul server della versione con cui sono nati o migrano in futuro via IA a pagamento); (2) introdurre da subito il versionamento rigoroso del kernel a partire da `0.1.0`, avanzando progressivamente quando le modifiche toccano `src/kernel/`. Nasce da T183 (`dossier T183`).
@@ -4084,8 +4084,8 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Quando è fatto: chiuso senza lavoro.
 - Esito: chiuso senza lavoro per decisione dell'autore (04/11, D32): congelare le caselle in `plan.tiles` tra versioni del kernel legherebbe le mani alle evoluzioni future; dentro lo stesso contratto `X.Y` del kernel `(piano, seme) + plan.edits` è già deterministico, e un cambio incompatibile di `X.Y` richiede un nuovo universo.
 
-### T262 · Il salvataggio che non si ferma — `in attesa`
-- Cloud: catena Step 32 su Claude Cloud; non lanciare in locale, lo porta il suo task di integrazione.
+### T262 · Il salvataggio che non si ferma — `fatto` (`73b5841`)
+- Cloud: fatto su Claude Cloud, portato da T274 (`73b5841`).
 - Pipeline: claude · stima 6% · approvato · priorità 12
 - Step: 32
 - Contesto: decisione dell'autore del 04/11 (D9): un guasto a runtime di un modulo invalida il codice, non i dati della partita. Oggi un guasto qualsiasi, anche di un giocatore, ferma tutti i salvataggi: in una vita di mesi è la perdita più probabile. Nasce da T183 (`dossier T183`): `docs/design/espressivita.md`, primitiva 3 e `TRAP: every module that calls it`.
@@ -4094,8 +4094,8 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: non serve.
 - Quando è fatto: commit su `task/T262`; ADR, regola 6. Sicurezza: scrivi l'esito.
 
-### T263 · I pannelli e i comandi di ogni viandante in multigiocatore — `in attesa` (dipende da T245a)
-- Cloud: catena Step 32 su Claude Cloud; non lanciare in locale, lo porta il suo task di integrazione.
+### T263 · I pannelli e i comandi di ogni viandante in multigiocatore — `fatto` (`73b5841`) (dipende da T245a)
+- Cloud: fatto su Claude Cloud, portato da T274 (`73b5841`).
 - Pipeline: claude · stima 8% · approvato · priorità 16
 - Step: 32
 - Contesto: primitive `W` e `K` di `docs/design/espressivita.md`, approvate dall'autore il 04/11 (D10). Senza, nessuna meccanica con un pannello si legge e nessun veicolo si guida; il pannello del cantiere di T245d usa `W`. Nasce da T183 (`dossier T183`).
@@ -4104,8 +4104,8 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: sì, due schede con `?viandante=`.
 - Quando è fatto: commit su `task/T263`; ADR se serve, riga in `AGENTS.md`. Sicurezza: scrivi l'esito, tocca il filo.
 
-### T245a · Il magazzino durevole e `vite` — `in attesa` (dipende da T262)
-- Cloud: catena Step 32 su Claude Cloud; non lanciare in locale, lo porta il suo task di integrazione.
+### T245a · Il magazzino durevole e `vite` — `fatto` (`73b5841`) (dipende da T262)
+- Cloud: fatto su Claude Cloud, portato da T274 (`73b5841`).
 - Pipeline: claude · stima 7% · approvato · priorità 13
 - Step: 32
 - Contesto: Nasce da T245 (`dossier T245`): progetto in `docs/design/comportamento-npc.md`, sezione 7. Fase 0.9.0, decisione dell'autore del 04/11 (D8). Primitive 2 e 5 di `docs/design/espressivita.md` (D10).
@@ -4114,8 +4114,8 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: non serve.
 - Quando è fatto: commit su `task/T245a`; ADR, glossario, `AGENTS.md`. Sicurezza: scrivi l'esito.
 
-### T245b · Il lavoro degli NPC: i primi tre mestieri — `in attesa` (dipende da T245a)
-- Cloud: catena Step 32 su Claude Cloud; non lanciare in locale, lo porta il suo task di integrazione.
+### T245b · Il lavoro degli NPC: i primi tre mestieri — `fatto` (`73b5841`) (dipende da T245a)
+- Cloud: fatto su Claude Cloud, portato da T274 (`73b5841`).
 - Pipeline: claude · stima 12% · approvato · priorità 17
 - Step: 32
 - Contesto: Nasce da T245 (`dossier T245`): progetto in `docs/design/comportamento-npc.md`, sezioni 1 e 7. Fase 0.9.0 (D8).
@@ -4124,8 +4124,8 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: sì: un contadino ara, semina e miete.
 - Quando è fatto: commit su `task/T245b`; ADR, glossario, `AGENTS.md`. Sicurezza: scrivi l'esito.
 
-### T245c · Gli altri mestieri del seme — `in attesa` (dipende da T245b)
-- Cloud: catena Step 32 su Claude Cloud; non lanciare in locale, lo porta il suo task di integrazione.
+### T245c · Gli altri mestieri del seme — `fatto` (`73b5841`) (dipende da T245b)
+- Cloud: fatto su Claude Cloud, portato da T274 (`73b5841`). Nel browser da vedere con T280.
 - Pipeline: claude · stima 7% · approvato · priorità 18
 - Step: 32
 - Contesto: Nasce da T245 (`dossier T245`): progetto in `docs/design/comportamento-npc.md`, sezione 7. Fase 0.9.0 (D8).
@@ -4338,7 +4338,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Sforzo: extra.
 - Contesto: sveglia del 05/11, richiesta dell'autore. Ramo `origin/claude/step32-kernel-chain-2vu1qd` (`e7cddc1`, sessione `session_01Tozk15L8GmN1nhtMGKeTdr`), kernel `0.1.8`, ADR-0142, ADR-0143, ADR-0144; senza conflitti con `3d` né con il ramo di T279 al 05/11. Viene per secondo perché cambia `sys.lavoro`, `mesh.ts` e il kernel sotto i quattro universi di T279, e questo una fusione pulita non lo vede. Il ramo ha scritto nel backlog e nel quadro: tieni quelli di `3d`.
 - Cosa fare: `git merge` del ramo; rinumera gli ADR se servono; `KERNEL_VERSION`, `package.json` e `universe/universe.json` allineati; suite intera e typecheck con i loro turni; la verifica dei quattro universi su questo kernel: 0 fault, e di' se i tre di `lab/banco/universi-cloud/` hanno bisogno del `sys.lavoro` nuovo.
-- Browser: sì, il pannello del cantiere, una casa che sale per stadi, due schede con `?viandante=` per il fuori vista: se non si può, `BROWSER: da verificare`.
+- Browser: sì, un mestiere di T245c (non visto da T274), il pannello del cantiere, una casa che sale per stadi, due schede con `?viandante=` per il fuori vista: se non si può, `BROWSER: da verificare`.
 - Quando è fatto: commit su `task/T280`. All'integrazione l'orchestratore segna `fatto` T245d, T245e, T245f. Sicurezza: scrivi l'esito, il ramo tocca sessione, sandbox e validatore.
 
 ### T281 · I punti di `placeInside` che il kernel trova bloccati dentro le strutture — `da fare` (dipende da T279)
