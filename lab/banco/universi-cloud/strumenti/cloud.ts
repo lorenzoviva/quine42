@@ -4,6 +4,7 @@
 
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { ownModelId } from '../../../../src/kernel/modeldirector';
 import { Kernel } from '../../../../src/kernel/kernel';
 import { memoryStore } from '../../../../src/kernel/repo';
@@ -18,7 +19,7 @@ import type { FileMap } from '../../../../src/kernel/types';
 import { leggiUniverso, negozioMappe, prefissoMappe } from './carica';
 
 /** The project's root, whatever the directory one runs from. */
-export const PROGETTO = new URL('../../../../', import.meta.url).pathname;
+export const PROGETTO = fileURLToPath(new URL('../../../../', import.meta.url));
 const LAB = join(PROGETTO, 'lab/banco');
 
 export type Tema = 'fantasy' | 'steampunk' | 'moderno' | 'futuristico';

@@ -6,6 +6,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { compileMjx } from '../../../src/mj/model';
 import { run } from '../../../src/mj/engine';
 import { scoreOf, type ScoreEvent } from '../../../src/mj/sound';
@@ -15,7 +16,7 @@ import { renderTrace, traceProgram } from '../../../src/mj/trace';
 import { modelErrors } from '../../../src/kernel/validator';
 
 export const TRIPLES: number[][] = Array.from({ length: 10 }, (_, i) => [3 * i + 1, 3 * i + 2, 3 * i + 3]);
-const here = path.dirname(new URL(import.meta.url).pathname);
+const here = path.dirname(fileURLToPath(import.meta.url));
 const out = path.join(here, 'rapporti');
 
 const key = (e: ScoreEvent) => `${e.step}:${e.track}:${e.z}:${e.voice}`;

@@ -1,11 +1,12 @@
 // Writes world/canone.md of orichalcum: the seed's canon plus one line per rune of magic.vapore (canonWithRune), each rune validated
 // with validateNewRune against all the other eighteen (in groups under MAX_MAGIC_RUNES: the cap is for what the Council adds, ADR-0097).
 import { readFileSync, writeFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { canonWithRune, MAX_MAGIC_RUNES, validateNewRune } from '../../../../src/kernel/magic';
 import { lexiconWords } from '../../../../src/kernel/fourthwall';
 import type { MagicRune } from '../../../../src/kernel/types';
 
-const U = new URL('../orichalcum/', import.meta.url).pathname;
+const U = fileURLToPath(new URL('../orichalcum/', import.meta.url));
 const read = (p: string) => readFileSync(U + p, 'utf8');
 const seed: Record<string, MagicRune> = JSON.parse(read('modules/magic.runes/manifest.json')).runes;
 const mine: Record<string, MagicRune> = JSON.parse(read('modules/magic.vapore/manifest.json')).runes;

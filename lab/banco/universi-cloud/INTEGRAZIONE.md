@@ -230,6 +230,13 @@ suoi quattro tiri cadevano su punti sgombri, e cadrebbe con la nuova: per questo
 **da fare in un task del kernel** (guardare se `interiorPoints` e `formsUnder`/`rampBlocks` usano la stessa rotazione e lo stesso livello: senza
 `z`, `free` misura al suolo un pavimento rialzato), poi togliere `grande` da `SEME_TENUTI` e rilanciare `integra.ts`.
 
+## L'integrazione su Windows (T279, 05/11)
+
+- `new URL(…, import.meta.url).pathname` su Windows dà `/H:/…`: lo script si fermava con `H:\H:\…`. Ora gli strumenti del banco usano `fileURLToPath`.
+- Installati con `--dir` su una cartella temporanea e copiati in una `universes/` del worktree, che non esisteva, poi tolta: niente nel cestino, `universes/` dell'autore non toccata.
+- Visti nel browser, sulla preview della build, con `?universo=<nome>&skip&offline`, 0 guasti, kernel `0.1.5`: aurora (locanda, fucina nanica), orichalcum (taverna, cattedrale degli ingranaggi), neapolis (cappella), sidera (santuario della luce, bar orbitale; in Chrome headless). Finché il worker non finisce, una struttura è un blocco scuro: il primo caricamento di un universo ha chiesto 30-40 secondi nella scheda.
+- Il resto dell'elenco qui sotto resta non provato, tranne la suite intera, che su Windows è verde. Interni, cantine, scale e la taglia Enorme non sono stati guardati.
+
 ## Cosa non ho provato
 
 - **Il browser**: nessuna partita vera, nessuno screenshot. Le strutture sono costruite dal kernel (le forme dei loro programmi, con la

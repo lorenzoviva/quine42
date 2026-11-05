@@ -2,9 +2,10 @@
 //   npx vite-node lab/banco/catalogo-cloud/indice.ts
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { CATALOGO } from './catalogo-generatore';
 
-const qui = path.dirname(new URL(import.meta.url).pathname);
+const qui = path.dirname(fileURLToPath(import.meta.url));
 const r = JSON.parse(fs.readFileSync(path.join(qui, 'risultati.json'), 'utf8'));
 const n2 = (v: number) => v.toFixed(2).replace('.', ',');
 const righe = ['| ambientazione | struttura | cosa è | cantina | Grande: semi, ms max | Enorme: semi, ms max | perimetro G / E | pianta G / E | interno G / E | architetture G / E | esito |', '|---|---|---|---|---|---|---|---|---|---|---|'];

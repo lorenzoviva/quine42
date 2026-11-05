@@ -5,12 +5,13 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { CATALOGO } from './catalogo-generatore';
 import { xmlDi } from './genera';
 import { programma } from './struttura';
 
 const filtro = process.argv.slice(2).filter((a) => a !== '--')[0];
-const qui = path.dirname(new URL(import.meta.url).pathname);
+const qui = path.dirname(fileURLToPath(import.meta.url));
 for (const s of CATALOGO) {
   if (filtro && !`${s.ambientazione}/${s.nome}`.includes(filtro)) continue;
   const dir = path.join(qui, s.ambientazione);
