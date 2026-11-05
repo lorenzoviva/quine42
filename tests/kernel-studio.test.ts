@@ -232,10 +232,11 @@ describe('mechanics with interfaces', () => {
   it('the Council adds equipment slots as a module with a panel; wearing a helmet gives defence', async () => {
     const k = await boot();
     clearArea(k);
-    expect(k.uiPanels().length).toBe(0);
+    // The seed has one panel, the site of the ventures (T245d).
+    expect(k.uiPanels().map((x) => x.module)).toEqual(['sys.lavoro']);
     const r = await k.forgeMechanic('equipaggiamento: slot per indossare e impugnare');
     expect(r.ok).toBe(true);
-    const p = k.uiPanels()[0];
+    const p = k.uiPanels().find((x) => x.module !== 'sys.lavoro')!;
     expect(p.panel.elementi.filter((e) => e.tipo === 'slot').map((e) => e.id)).toEqual(['testa', 'corpo', 'piedi', 'arma']);
     // A helmet from a pack of the Narrator (with its place and bonus).
     const items = JSON.parse(k.files['modules/items.base/manifest.json']);

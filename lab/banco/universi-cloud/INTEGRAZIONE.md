@@ -251,3 +251,7 @@ suoi quattro tiri cadevano su punti sgombri, e cadrebbe con la nuova: per questo
 - **La suite intera** di `npm test`: vedi sopra cosa ho fatto girare.
 - **Online**: con Gemini il Cartografo scrive i luoghi nuovi oltre i 19 e potrebbe chiedere altre strutture; quelle del catalogo le trova
   già se il concetto coincide.
+
+## Sul kernel delle imprese (T280, kernel `0.1.9`)
+
+Le verifiche di orichalcum, neapolis e sidera restano verdi, 0 fault, ma questi tre universi **non hanno `sys.lavoro` né i programmi `lavoro.*`**: `jobPrograms()` è vuoto, nessuno lavora, nessuna squadra. Ciò che cade fa un'impresa `ferma` per sempre: il lotto resta ai picchetti (misurato: nove giorni dopo, `lavorato` 0). Gli stessi moduli del seme non bastano: con l'innesto i programmi validi sono 6, 6 e 5, e le persone con un programma 0/24 in orichalcum, 4/24 in neapolis, 3/24 in sidera, perché i mestieri di questi mondi non si chiamano così (fuochista, barista, xenobotanica…), e `item.grano` e `item.pesce` mancano. Servono programmi dei loro mestieri. Aurora è il seme: li ha.

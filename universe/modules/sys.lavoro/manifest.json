@@ -3,9 +3,46 @@
   "name": "Il lavoro",
   "kind": "system",
   "version": "0.1.0",
-  "description": "Gli individui con un mestiere fanno la loro giornata: camminano, arano, seminano, mietono, tagliano, pescano, portano e prendono dal deposito del luogo, producono al banco, usano le cose. Il kernel dice la fase e i posti; qui ogni compito cambia il mondo davvero.",
+  "description": "Gli individui con un mestiere fanno la loro giornata: camminano, arano, seminano, mietono, tagliano, pescano, portano e prendono dal deposito del luogo, producono al banco, usano le cose, lavorano alle imprese (costruisci). Il kernel dice la fase e i posti; qui ogni compito cambia il mondo davvero.",
   "logic": "logic.lua",
   "order": 28,
+  "ui": {
+    "id": "cantiere",
+    "titolo": "Il cantiere",
+    "descrizione": "Il lavoro di molti più vicino: a che punto è, cosa manca, chi ci lavora.",
+    "elementi": [
+      {
+        "tipo": "testo",
+        "etichetta": "Che cosa",
+        "campo": "cantiere.titolo"
+      },
+      {
+        "tipo": "testo",
+        "etichetta": "A che punto è",
+        "campo": "cantiere.fase"
+      },
+      {
+        "tipo": "testo",
+        "etichetta": "Come va",
+        "campo": "cantiere.stato"
+      },
+      {
+        "tipo": "testo",
+        "etichetta": "Cosa manca",
+        "campo": "cantiere.manca"
+      },
+      {
+        "tipo": "testo",
+        "etichetta": "Chi ci lavora",
+        "campo": "cantiere.squadra"
+      },
+      {
+        "tipo": "pulsante",
+        "id": "porta",
+        "etichetta": "Porta ciò che serve"
+      }
+    ]
+  },
   "casi": [
     {
       "titolo": "Verso il lavoro",

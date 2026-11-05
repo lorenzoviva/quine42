@@ -44,9 +44,10 @@ local function cammina(id, p, tx, ty, solido)
   return false
 end
 
--- Dove: casa, lavoro, piazza (dal kernel), casella:<codice> (la più vicina).
+-- Dove: casa, lavoro, piazza (dal kernel), impresa (il cantiere), casella:<codice> (la più vicina).
 local function posto(m, p, dove)
   if dove == "casa" or dove == "lavoro" or dove == "piazza" then return m[dove] end
+  if dove == "impresa" then return m.impresa_posto end
   local codice = type(dove) == "string" and dove:match("^casella:(.+)$")
   if codice then
     local c = m.lavoro or p
@@ -271,8 +272,54 @@ function B.usa(id, compito, s, m, p)
   return "finito"
 end
 
--- Costruire è delle imprese (T245d): finché non ci sono, il compito si salta.
-function B.costruisci() return "finito" end
+-- Costruire (T245d): il prossimo passo dell'impresa lo dice il kernel (world.impresa). Portare un materiale (dal carico, o prima
+-- dal deposito del luogo, in piazza), lavorare al cantiere, mietere. Finché c'è un passo il compito continua; senza, si torna al mestiere.
+-- Il lavoro lo conta il kernel guardando chi sta fermo al cantiere: qui non si scrive nessun numero.
+function B.costruisci(id, compito, s, m, p, dt)
+  local passo = world.impresa(id)
+  if not passo then return "finito" end
+  if s.passo_fa ~= passo.fa or s.oggetto ~= passo.oggetto then
+    s.passo_fa, s.oggetto, s.x, s.y, s.fino, s.fatti, s.preso = passo.fa, passo.oggetto, nil, nil, nil, nil, nil
+  end
+  if passo.fa == "porta" then
+    local c = ecs.get(id, "carico") or {}
+    if (c[passo.oggetto] or 0) <= 0 then
+      -- Al deposito del luogo, in piazza.
+      local t = m.piazza or p
+      if not cammina(id, p, t.x, t.y) then return "continua" end
+      local n = preleva(id, passo.oggetto, 2)
+      if n <= 0 then return "finito" end
+      carica(id, passo.oggetto, n)
+      return "continua"
+    end
+    if not cammina(id, p, passo.x, passo.y, true) then return "continua" end
+    if world.impresa_porta(id, passo.oggetto) <= 0 then return "finito" end
+    dice(id, compito, s)
+    return "continua"
+  end
+  if passo.fa == "raccogli" then
+    local esito = cambia(id, passo, s, { lavoro = { x = passo.x, y = passo.y } }, p, passo.casella, passo.lascia, passo.oggetto)
+    if esito == "finito" and (s.fatti or 0) == 0 then return "finito" end
+    if esito == "finito" then s.fatti = 0 end
+    return "continua"
+  end
+  -- Lavorare: al proprio posto attorno al cantiere, fermi nella posa.
+  if not s.fino then
+    if not cammina(id, p, passo.x, passo.y) then return "continua" end
+    s.fino = true
+  end
+  ferma(id, passo.posa or "lavora")
+  dice(id, compito, s)
+  return "continua"
+end
+
+-- Il pannello del cantiere (T245d): il pulsante porta ciò che serve dalla borsa del viandante, se è vicino al cantiere.
+function M.on_ui(user, azione)
+  if azione ~= "porta" then return nil end
+  local n = world.impresa_porta(user)
+  if n > 0 then return "Lasci al cantiere " .. n .. " cose che servivano." end
+  return "Al cantiere qui vicino non serve niente di ciò che porti (o sei troppo lontano)."
+end
 
 M.comportamenti = B
 
@@ -281,8 +328,8 @@ function M.update(dt)
     local mind = ecs.get(id, "mind")
     if mind and mind.mode ~= "vaga" then return end
     local s = ecs.get(id, "lavoro")
-    if not s or s.fase ~= m.fase or s.giorno ~= m.giorno then
-      ecs.set(id, "lavoro", { fase = m.fase, giorno = m.giorno, passo = 1 })
+    if not s or s.fase ~= m.fase or s.giorno ~= m.giorno or s.impresa ~= m.impresa then
+      ecs.set(id, "lavoro", { fase = m.fase, giorno = m.giorno, impresa = m.impresa, passo = 1 })
       -- ecs.set copia: ciò che il compito scrive va nella tabella del componente, quella che si rilegge.
       s = ecs.get(id, "lavoro")
     end
@@ -296,7 +343,7 @@ function M.update(dt)
     if esito == "continua" and s.bloccato then esito = "fallito:non ci arriva" end
     if esito ~= "continua" then
       -- Il compito dopo comincia da capo: dello stato resta solo dove si è arrivati nella giornata, e l'ultimo motivo.
-      ecs.set(id, "lavoro", { fase = s.fase, giorno = s.giorno, passo = s.passo + 1, motivo = esito ~= "finito" and esito or s.motivo })
+      ecs.set(id, "lavoro", { fase = s.fase, giorno = s.giorno, impresa = s.impresa, passo = s.passo + 1, motivo = esito ~= "finito" and esito or s.motivo })
     end
   end)
 end
