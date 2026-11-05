@@ -33,7 +33,8 @@ const JUMP = 4;
 /** Farther than this (tiles) from where the client thinks it is, the server carried its wanderer there (a rune, a door). */
 const CARRIED = 8;
 /** The components an entity of the server may have here (besides its place). */
-const MIRRORED = ['module', 'form', 'glyph', ...ENTITY_PARTS];
+// `struttura` arrives only as the stage of a building under way (T245e), and goes when it is finished.
+const MIRRORED = ['module', 'form', 'glyph', 'struttura', ...ENTITY_PARTS];
 
 /** What the kernel does that a multiplayer game does not do from a player's client yet (the master's R is their branch's). */
 const LATER = ['rollback'] as const;

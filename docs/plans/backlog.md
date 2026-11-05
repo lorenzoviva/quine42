@@ -4569,7 +4569,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: sì, con `?skip&offline`: un individuo che attraversa un dislivello e il rientro a piedi in un cantiere. Catture nel commit.
 - Quando è fatto: commit su `task/T299`.
 
-### T300 · Integrare T297 sul base con T283: il censimento e l'ADR-0145 — `da fare`
+### T300 · Integrare T297 sul base con T283: il censimento e l'ADR-0145 — `fatto` (`2c40eb0`)
 - Pipeline: claude · sforzo high · stima 1% · approvato · priorità 1
 - Sforzo: high.
 - Step: 32
@@ -4578,3 +4578,4 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Test: suite intera e typecheck con i loro turni.
 - Browser: non serve, T280 ha già guardato.
 - Quando è fatto: commit su `task/T300`. Nell'esito: i numeri nuovi degli ADR; ricorda di dare `integra T297` e `integra T280` e di segnare `fatto` T245d, T245e, T245f.
+- Esito: `task/T297` fuso in `task/T300` (`4163194`) col censimento del glossario rigenerato con `tools/glossario/glossario.mjs`; ADR di T280 rinumerati ai primi liberi: imprese → ADR-0147, edificio per stadi → ADR-0148, fuori vista → ADR-0149, con i rimandi in `AGENTS.md`, `docs/architettura-dettagli.md`, `docs/glossario.md`, indice degli ADR, codice e test; ADR-0145 (vesti, T283) e ADR-0146 (modelli e sforzo, T255) del base non toccati; versione `0.1.9` in `package.json`, `package-lock.json`, `src/kernel/version.ts` e `universe/universe.json` (il base è a `0.1.6`); fuso anche `task/T280` (`2c40eb0`, `-s ours`), andato avanti con `7e8cd6c` dopo T297: era la stessa rinumerazione di `f560a67` e senza il merge `integra T280` si sarebbe fermato su un conflitto; suite 2350 passati e 1 saltato, typecheck verde; non provati la build e i quattro universi su questo merge; `docs/pipeline/quadro.md` dice ancora «ADR di T280 → 0145-0147»; manca dare prima `integra T300`, poi `integra T297` e `integra T280` (a quel punto non fondono niente), e segnare `fatto` T245d, T245e, T245f; sicurezza: nessuna superficie nuova oltre a quella dichiarata da T280.
