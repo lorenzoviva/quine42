@@ -1,0 +1,93 @@
+<!-- Rover da esplorazione (Cantiere 8, sidera): albero, braccio ed energia a caso; polvere a caso. -->
+<sequence values="BWKGSCEDu123456z" symmetry="(xy)" name="Rover da esplorazione">
+  <color symbol="W" value="d8d4ca" name="telaio"/>
+  <color symbol="K" value="2b2b2e" name="ruote"/>
+  <color symbol="G" value="8a8f94" name="bracci" part="gamba"/>
+  <color symbol="S" value="2f4a7a" name="celle solari"/>
+  <color symbol="C" value="e0a040" name="rame"/>
+  <color symbol="E" value="7fe8ff" name="telecamere" glow="True"/>
+  <color symbol="D" value="b88a5a" name="polvere"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="1" hidden="True" name="marcatore"/>
+  <color symbol="2" hidden="True" name="marcatore"/>
+  <color symbol="3" hidden="True" name="marcatore"/>
+  <color symbol="4" hidden="True" name="marcatore"/>
+  <color symbol="5" hidden="True" name="marcatore"/>
+  <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
+  <ellipsoid at="3 8 0" size="4 8 8" color="K"/>
+  <ellipsoid at="22 8 0" size="4 8 8" color="K"/>
+  <line at="3 8 4" to="6 20 9" r="0.5" color="G"/>
+  <line at="21 8 4" to="18 20 9" r="0.5" color="G"/>
+  <ellipsoid at="3 20 0" size="4 8 8" color="K"/>
+  <ellipsoid at="22 20 0" size="4 8 8" color="K"/>
+  <line at="3 20 4" to="6 20 9" r="0.5" color="G"/>
+  <line at="21 20 4" to="18 20 9" r="0.5" color="G"/>
+  <ellipsoid at="3 32 0" size="4 8 8" color="K"/>
+  <ellipsoid at="22 32 0" size="4 8 8" color="K"/>
+  <line at="3 32 4" to="6 20 9" r="0.5" color="G"/>
+  <line at="21 32 4" to="18 20 9" r="0.5" color="G"/>
+  <box at="12 20 7" size="14 28 5" color="W"/>
+  <!-- scelta «albero»: alto | basso | doppio -->
+  <box at="12 30 12" size="25 18 18" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <!--   1: alto -->
+  <line at="12 30 12" to="12 30 26" r="0.5" color="G" on="1"/>
+  <box at="12 31 26" size="6 4 3" color="W" on="1"/>
+  <box at="12 33 27" size="4 1 1" color="E" on="1"/>
+  <!--   2: basso -->
+  <line at="8 31 12" to="8 31 18" r="1" color="G" on="2"/>
+  <box at="8 32 18" size="7 5 3" color="W" on="2"/>
+  <box at="8 34 19" size="5 1 1" color="E" on="2"/>
+  <!--   3: doppio -->
+  <line at="8 30 12" to="8 30 22" r="0.5" color="G" on="3"/>
+  <line at="16 30 12" to="16 30 22" r="0.5" color="G" on="3"/>
+  <box at="8 31 22" size="4 4 3" color="W" on="3"/>
+  <box at="16 31 22" size="4 4 3" color="W" on="3"/>
+  <box at="8 33 23" size="2 1 1" color="E" on="3"/>
+  <box at="16 33 23" size="2 1 1" color="E" on="3"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <!-- scelta «braccio»: a riposo | teso a terra | alzato -->
+  <box at="12 36 0" size="25 8 22" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <!--   1: a riposo -->
+  <line at="15 33 10" to="20 37 10" r="1" color="G" on="1"/>
+  <line at="20 37 10" to="6 38 10" r="1" color="G" on="1"/>
+  <box at="6 38 9" size="3 2 3" color="C" on="1"/>
+  <!--   2: teso a terra -->
+  <line at="15 33 10" to="15 38 8" r="1" color="G" on="2"/>
+  <line at="15 38 8" to="15 39 1" r="1" color="G" on="2"/>
+  <box at="15 38 0" size="3 2 2" color="C" on="2"/>
+  <!--   3: alzato -->
+  <line at="15 33 10" to="16 37 18" r="1" color="G" on="3"/>
+  <line at="16 37 18" to="14 38 21" r="1" color="G" on="3"/>
+  <box at="14 38 21" size="3 2 3" color="C" on="3"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <!-- scelta «energia»: pannelli piatti | pannelli ad ali | generatore con alette -->
+  <box at="12 18 11" size="25 26 19" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <!--   1: pannelli piatti -->
+  <box at="12 18 12" size="24 24 1" color="S" on="1"/>
+  <box at="12 18 11" size="4 4 1" color="G" on="1"/>
+  <!--   2: pannelli ad ali -->
+  <box at="12 18 12" size="12 22 1" color="S" on="2"/>
+  <line at="6 18 12" to="1 18 20" r="0.5" color="G" on="2"/>
+  <line at="18 18 12" to="23 18 20" r="0.5" color="G" on="2"/>
+  <box at="1 18 18" size="1 22 8" color="S" on="2"/>
+  <box at="23 18 18" size="1 22 8" color="S" on="2"/>
+  <!--   3: generatore con alette -->
+  <cylinder at="12 10 12" size="7 7 9" color="C" on="3"/>
+  <box at="12 10 12" size="13 1 8" color="G" on="3"/>
+  <box at="12 10 12" size="1 13 8" color="G" on="3"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <!-- polvere sulle facce in alto -->
+  <prl in="B W" out="* D" p="0.3" steps="1"/>
+  <prl in="B S" out="* D" p="0.1" steps="1"/>
+</sequence>

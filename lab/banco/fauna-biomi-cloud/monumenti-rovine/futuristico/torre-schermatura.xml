@@ -1,0 +1,86 @@
+<!-- Torre di schermatura (Cantiere 8, sidera): anelli, cima e base a caso; archi di energia a caso. -->
+<sequence values="BTDREPu123456z" symmetry="(xy)" name="Torre di schermatura">
+  <color symbol="T" value="7a828c" name="acciaio"/>
+  <color symbol="D" value="3a4048" name="acciaio scuro"/>
+  <color symbol="R" value="b0f0ff" name="anelli" glow="True"/>
+  <color symbol="E" value="7ab8ff" name="archi di energia" glow="True"/>
+  <color symbol="P" hidden="True" name="marcatore"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="1" hidden="True" name="marcatore"/>
+  <color symbol="2" hidden="True" name="marcatore"/>
+  <color symbol="3" hidden="True" name="marcatore"/>
+  <color symbol="4" hidden="True" name="marcatore"/>
+  <color symbol="5" hidden="True" name="marcatore"/>
+  <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
+  <!-- scelta «base»: a tripode | a gradoni | a cassone -->
+  <box at="10 10 0" size="20 20 8" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <!--   1: a tripode -->
+  <line at="10 10 6" to="1 4 0" r="1.5" color="D" on="1"/>
+  <line at="10 10 6" to="19 4 0" r="1.5" color="D" on="1"/>
+  <line at="10 10 6" to="10 19 0" r="1.5" color="D" on="1"/>
+  <cylinder at="10 10 0" size="7 7 7" color="D" on="1"/>
+  <!--   2: a gradoni -->
+  <box at="10 10 0" size="18 18 2" color="D" on="2"/>
+  <box at="10 10 2" size="14 14 2" color="D" on="2"/>
+  <box at="10 10 4" size="10 10 3" color="D" on="2"/>
+  <!--   3: a cassone -->
+  <box at="10 10 0" size="16 16 7" color="D" on="3"/>
+  <box at="10 10 7" size="12 12 1" color="T" on="3"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <cylinder at="10 10 6" size="6 6 42" color="T"/>
+  <!-- scelta «anelli»: tre uguali | a spirale | crescenti | due dischi grandi -->
+  <box at="10 10 8" size="20 20 40" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/><rule in="u" out="4"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/><rule in="4u" out="*4"/></all>
+  <!--   1: tre uguali -->
+  <cylinder at="10 10 16" size="16 16 2" color="R" on="1"/>
+  <cylinder at="10 10 26" size="16 16 2" color="R" on="1"/>
+  <cylinder at="10 10 36" size="16 16 2" color="R" on="1"/>
+  <!--   2: a spirale -->
+  <box at="15 10 12" size="6 6 2" color="R" on="2"/>
+  <box at="13 14 17" size="6 6 2" color="R" on="2"/>
+  <box at="9 15 22" size="6 6 2" color="R" on="2"/>
+  <box at="5 12 27" size="6 6 2" color="R" on="2"/>
+  <box at="6 8 32" size="6 6 2" color="R" on="2"/>
+  <box at="9 5 37" size="6 6 2" color="R" on="2"/>
+  <box at="13 6 42" size="6 6 2" color="R" on="2"/>
+  <!--   3: crescenti -->
+  <cylinder at="10 10 12" size="8 8 2" color="R" on="3"/>
+  <cylinder at="10 10 20" size="11 11 2" color="R" on="3"/>
+  <cylinder at="10 10 28" size="14 14 2" color="R" on="3"/>
+  <cylinder at="10 10 36" size="18 18 2" color="R" on="3"/>
+  <!--   4: due dischi grandi -->
+  <cylinder at="10 10 18" size="19 19 2" color="R" on="4"/>
+  <cylinder at="10 10 34" size="19 19 2" color="R" on="4"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/><rule in="4" out="B"/></prl>
+  <!-- scelta «cima»: cupola | punta | forcella -->
+  <box at="10 10 47" size="20 20 13" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <!--   1: cupola -->
+  <ellipsoid at="10 10 47" size="12 12 10" color="R" on="1"/>
+  <!--   2: punta -->
+  <cone at="10 10 47" size="8 8 13" color="T" on="2"/>
+  <box at="10 10 52" size="3 3 2" color="R" on="2"/>
+  <!--   3: forcella -->
+  <line at="10 10 47" to="4 10 59" r="1" color="T" on="3"/>
+  <line at="10 10 47" to="16 10 59" r="1" color="T" on="3"/>
+  <box at="4 10 58" size="3 3 2" color="R" on="3"/>
+  <box at="16 10 58" size="3 3 2" color="R" on="3"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <!-- archi di energia che nascono dagli anelli -->
+  <one in="B R" out="P *" steps="5"/>
+  <one steps="18">
+    <rule in="B P" out="P E" p="1"/>
+    <rule in="B* *P" out="P* *E" p="3"/>
+    <rule in="B*B *P*" out="P*P *E*" p="0.4"/>
+  </one>
+  <prl in="P" out="E"/>
+</sequence>
