@@ -198,6 +198,24 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   (`world/plots.json`, diario nell'HUD). Ogni trama passa dal validatore (`reviewPlot` in `plots.ts`): individui che
   esistono, animali da animali, legami del registro, rune del canone, niente quarta parete; ciò che non torna va al
   Narratore con il motivo, all'avvio `reviewPlots` ripara o ritira le trame aperte.
+- **Il lavoro** (ADR-0140, T245b; progetto in `docs/design/comportamento-npc.md`): un mestiere con un **programma** (`mestieri` di un
+  modulo `data`, `lavoro.<mestiere>/manifest.json`: nomi, posto, i compiti di ogni fase) si abbina per nome, poi per parola
+  (`matchJob` in `jobs.ts`); il programma passa dal validatore per riferimento (`validateJobProgram`: comportamenti di un elenco chiuso,
+  caselle del terreno, oggetti del registro, durate 5-300 s, al più 6 compiti per fase). A ogni fase del giorno il kernel mette
+  all'individuo il componente `mestiere` (i compiti della fase, casa, piazza e lavoro da `placeFor` e `findTile`) e non gli sceglie più
+  la meta; `sys.lavoro` (seme, ordine 28) esegue i compiti uno dopo l'altro con lo stato in `lavoro` e ciò che porta in `carico`, e
+  cammina mettendo `meta` al prossimo punto di `world.path` (A* sulle caselle dei luoghi caricati, `route.ts`, con la cache), che
+  `sys.wander` segue. `trasforma` e `raccogli` cambiano davvero le caselle (`world.set_tile`, quindi `plan.edits`), senza chiamare i
+  modelli; al più 12 al lavoro per luogo, chi segue il viandante smette. **Ciò che matura** è del kernel: un terreno con
+  `matura {dopo, in}` diventa `in` dopo `dopo` giorni da quando la casella è stata scritta (`plan.giorni`, il giorno di ogni modifica;
+  una modifica senza giorno vale da oggi), a ogni fase del giorno nei luoghi caricati (`matureTick`). Il seme ha il contadino (ara
+  `g→m`, semina `m→e`, il seminato matura in grano `u` in un giorno, miete `u→m` con `item.grano`), il boscaiolo (`t→x` con
+  `item.ciocco`, la ceppaia ricresce in bosco in tre giorni) e il pescatore (`item.pesce` dalla riva di `w`). Con T245c (ADR-0141) i
+  mestieri del seme sono dodici, con i nomi delle quattro ambientazioni (pastore, fabbro, oste, mercante, guardia, sacerdote, scrivano,
+  cuoco, impiegato in più); `porta` e `prendi` passano dal **deposito del luogo** (la voce `deposito:<cx>:<cy>` del magazzino di
+  `sys.lavoro`, il luogo è `mestiere.luogo`, `placeDeposit`), `produci` consuma `con` e fa un pezzo al banco, `usa` chiama l'`on_act`
+  di una cosa con l'individuo come chi la usa (`world.act`, solo azioni senza effetti, entro 2,5 caselle). La via vede le forme dei
+  modelli (`free`); chi è fermo a meno di tre caselle dalla meta è arrivato, chi è fermo lontano per otto secondi lascia il compito.
 - **Personaggi** (ADR-0010, 0013, 0017, 0020): tipo + individuo (`identity`: anche `job family routine story`), `mind` (memoria, umore, modo), azioni
   `segui resta vaga dai nessuna`, oggetti citati → `wanted`. Al massimo 2 dello stesso tipo nel mondo
   caricato; nuovi tipi forgiati esplorando (`ai.maxCast`); ogni individuo è un seme del programma del suo tipo (pochi semi per classe).
@@ -356,6 +374,13 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   fabbricazione, pannelli delle meccaniche, azioni e «Altro…» sulle caselle vanno al server, che li fa con `as`; gli spostamenti di
   slot si vedono subito e, finché sono in viaggio, l'inventario del server non li sovrascrive (`pending`). Ogni
   viandante oltre `io` è un seme suo del `viandante` col mantello del suo colore (`wandererColor`, `tinta: N`).
+- **I pannelli e i tasti di ogni viandante** (ADR-0139, T263): `MyState.campi` porta, per ogni viandante, il valore di ogni `campo` che
+  un `manifest.ui` nomina (`panelFields`: solo testi, numeri e booleani, testi a 200 caratteri); un campo che nessun pannello nomina
+  resta sul server (regola 8f). Sul client `takePanelFields` scrive quei campi nei componenti del suo viandante, mai in quelli del
+  kernel (`needs`, `stati`, `inventory`…). Il client dice al server le direzioni che tiene con `tasti` (solo quando cambiano, senza
+  risposta, nel ritmo di ogni messaggio); il server tiene solo `up down left right` (`setHeldOf`). Lua le legge con
+  `input.held(azione, id)` e vede ogni viandante con `world.wanderers()` (`{id, chi, x, y}`): un sistema che gira una volta sola sul
+  server guida un carro con i tasti di chi guida e rilancia la palla a chiunque la tocchi. Da soli tutto come prima.
 - **Luoghi nuovi con il lock** (ADR-0060, T40): il chunk ricorda chi lo ha voluto vedere per primo (`Chunk.chi`); se il piano non è
   in `maps/` lo paga lui (la chiamata del Cartografo, la carta del luogo, la Fucina di ciò che il piano chiede). Le bozze si pianificano
   vicino a qualunque viandante fuori dallo studio (il master nello studio o scollegato non ferma gli altri); in multigiocatore al più

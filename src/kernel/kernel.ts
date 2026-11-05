@@ -61,6 +61,10 @@ import { chunkLevels, HILLS, LEVEL, Relief, RELIEF_PATH, worldLevels } from './r
 import { CardUses, CARDS_FILE, COMUNE, allCards, collectionOf, moduleCardId, receivedBy, type Received, payerOf, chunkCardId, stampFiles, cardHolderOf, type Card, type CardStamp } from './cards';
 import { bondWith, memoriesFor, playerFile, PLAYERS_DIR, readWandererState, repairProfile, SOLO, validWandererId, WANDERER_NAME, wandererColor, wandererOf, wanderersIn, type Profile, type ProfileRepair, type Wanderer, type WandererState, PER_WANDERER } from './wanderers';
 import type { ActionDef, AiSettings, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, GameSetup, ChunkInfo, Recipe, RuneFragment, TerrainDef, UniverseConfig } from './types';
+import { checkKernelVersion, KERNEL_VERSION, stampKernel } from './version';
+import { ModuleStores } from './store';
+import { matchJob, validateJobProgram, WORKERS_PER_PLACE, type JobProgram } from './jobs';
+import { findRoute, RouteCache } from './route';
 
 /** A solid entity with a model, as collision sees it: where it is, its form, where it blocks and its floors. */
 interface SolidForm extends Ground {
@@ -370,6 +374,37 @@ export const HEAR = 8;
 export const GIVE_REACH = 3;
 export const SAY_MAX = 140;
 
+/** The effects the kernel applies itself (T260): the relief, and the social ones of a judgement. */
+/**
+ * The fields of world/stato.json and of a wanderer's file that this kernel reads and writes, those of before it migrates included (T245a):
+ * any other field is a kernel of tomorrow's, and the save keeps it as it was. Credits are not data of the universe (ADR-0104): never kept.
+ */
+const STATE_FIELDS: ReadonlySet<string> = new Set(['consumati', 'contenitori', 'forme', 'rari', 'ora', 'importanti', 'viandante']);
+const WANDERER_FIELDS: ReadonlySet<string> = new Set(['nome', 'profilo', 'pos', 'inventory', 'needs', 'hand', 'stati', 'slots', 'trasceso', 'anonimo', 'crediti']);
+
+/** The fields of a saved JSON object that are not in `known`. */
+function unknownFields(src: string | undefined, known: ReadonlySet<string>): Record<string, unknown> {
+  if (!src) return {};
+  try {
+    const v = JSON.parse(src);
+    if (!v || typeof v !== 'object' || Array.isArray(v)) return {};
+    return Object.fromEntries(Object.entries(v).filter(([k]) => !known.has(k) && k !== '__proto__'));
+  } catch {
+    return {};
+  }
+}
+
+/** A field a panel reads (T263): `componente.campo`, plain names. */
+const PANEL_FIELD_RE = /^[A-Za-z_][A-Za-z0-9_]{0,40}\.[A-Za-z_][A-Za-z0-9_]{0,40}$/;
+/** Components of the wanderer that the kernel keeps itself: a panel's field from the server never writes them on a mirror. */
+const KERNEL_COMPONENTS = new Set(['pos', 'player', 'carpet', 'hand', 'inventory', 'slots', 'needs', 'stati', 'module', 'chunk', 'container', 'remote', 'body', 'form']);
+/** What a client may say it holds (T263): the four directions, in the world's terms. */
+const HELD_ACTIONS = new Set(['up', 'down', 'left', 'right']);
+
+const KERNEL_EFFECTS = new Set(['rilievo', 'legame', 'ricordo', 'nascita']);
+/** The effects every core.effects of the contract 0.1 applies: what a core.effects without `handles` is trusted with (T260). */
+const CORE_EFFECTS_0_1 = new Set(['messaggio', 'bisogni', 'crea_oggetto', 'consuma', 'distruggi', 'apri', 'contenitore', 'terreno', 'fuoco', 'luce', 'scudo', 'spingi', 'evoca', 'stato', 'togli_stato']);
+
 /** A plot that still does not hold after the Narrator's second answer. */
 class PlotRejected extends Error {}
 
@@ -644,10 +679,13 @@ export class Kernel {
     k.council.onFocus = (ids) => k.cards.use(ids, 'prompt', (id) => k.isCard(id));
     // A mirror saves nothing of its own: its commits hold only the files it was told and the master's edits (T42b). The Council
     // is fenced in on a mirror too: a kernel on the master's branch is one (T42e).
+    // The code written without a commit is not a valid state (T262): every commit takes it as HEAD has it.
+    repo.withheld = () => k.unsaved;
     repo.beforeCommit = (author) => {
       if (author === 'agent') k.fenceCouncil();
       k.commanded.clear();
       if (k.mirror) return;
+      k.stampKernel();
       k.writeUsage();
       k.writeShortfalls();
       k.writeCards();
@@ -711,7 +749,14 @@ export class Kernel {
         this.runesDirty = true;
       },
       first: (name) => this.ecs.query(name)[0],
-      held: (a) => this.wanderer().id === this.inputFor && this.input.isHeld(a),
+      held: (a, id) => this.heldBy(typeof id === 'number' ? this.wandererOf(id) : this.wanderer().id, a),
+      wanderers: () => this.wanderersInWorld(),
+      path: (x, y, tx, ty) => this.routeStep(x, y, tx, ty),
+      find_tile: (code, x, y, r) => this.findTile(code, x, y, r),
+      act: (user, target, action) => this.actAs(user, target, action),
+      // The lasting store (T245a, ADR-0138): the module running is the only one whose data a call sees. A rune, a mirror: nothing.
+      store_get: (key) => (this.luaModule && !this.mirror ? this.stores.get(this.luaModule, key) : undefined),
+      store_set: (key, value) => !!this.luaModule && !this.mirror && this.stores.set(this.luaModule, key, value),
       free: (x, y, r, z) => this.free(x, y, r, typeof z === 'number' ? z : undefined),
       free_real: (x, y, r, z) => this.freeReal(x, y, r, typeof z === 'number' ? z : undefined),
       tile: (x, y) => this.tileAt(Math.floor(x), Math.floor(y)) ?? '',
@@ -810,7 +855,14 @@ export class Kernel {
     const key = `module:${id}:${fn}`;
     this.faultFlag = null;
     this.seedLua(key, typeof args[0] === 'number' ? args[0] : 0);
-    const value = this.sandbox.run(id, fn, ...args);
+    const outer = this.luaModule;
+    this.luaModule = id;
+    let value: unknown;
+    try {
+      value = this.sandbox.run(id, fn, ...args);
+    } finally {
+      this.luaModule = outer;
+    }
     const failed = this.faultFlag === key;
     if (!failed) this.faults.clear(key);
     return { value, failed };
@@ -884,6 +936,35 @@ export class Kernel {
   wanderer(): Wanderer {
     for (const w of this.wanderersById.values()) if (w.entity === this.wandererEntity) return { id: w.id, nome: w.nome };
     return { id: SOLO, nome: WANDERER_NAME };
+  }
+
+  /** The keys a wanderer's client holds (T263): world directions, set by the server from what the client says. */
+  private heldKeys = new Map<string, Set<string>>();
+
+  /** What a client holds, said by its server (T263): only the four directions, never more. */
+  setHeldOf(id: string, actions: unknown): void {
+    if (!this.wanderersById.has(id)) return;
+    const list = Array.isArray(actions) ? actions.filter((a): a is string => typeof a === 'string' && HELD_ACTIONS.has(a)) : [];
+    if (list.length) this.heldKeys.set(id, new Set(list));
+    else this.heldKeys.delete(id);
+  }
+
+  /** Whether a wanderer holds an action: what their client said, or this kernel's keyboard for the one it belongs to. */
+  heldBy(id: string | undefined, action: string): boolean {
+    if (!id) return false;
+    const said = this.heldKeys.get(id);
+    if (said) return said.has(action);
+    return id === this.inputFor && this.input.isHeld(action);
+  }
+
+  /** Every wanderer of this kernel with a body: what `world.wanderers()` gives Lua (T263). Who they are and where, nothing else. */
+  private wanderersInWorld(): Array<{ id: number; chi: string; x: number; y: number }> {
+    const out: Array<{ id: number; chi: string; x: number; y: number }> = [];
+    for (const w of this.wanderersById.keys()) {
+      const at = this.wandererAt(w);
+      if (at && Number.isFinite(at.x) && Number.isFinite(at.y)) out.push({ id: at.entity, chi: w, x: at.x, y: at.y });
+    }
+    return out;
   }
 
   wanderers(): Wanderer[] {
@@ -1069,6 +1150,7 @@ export class Kernel {
     this.ecs.destroy(w.entity);
     this.wanderersById.delete(id);
     this.remote.delete(id);
+    this.heldKeys.delete(id);
     return true;
   }
 
@@ -1263,6 +1345,12 @@ export class Kernel {
     const config = { ...read.config };
     if (error) this.faults.raise('universe:config', error);
     else this.faults.clear('universe:config');
+    // A universe of another contract does not open as if it were ours (T260): the world stands, nothing of it is committed.
+    const version = error ? { ok: true } : checkKernelVersion(config.kernel);
+    if (!version.ok) {
+      if (!this.faults.has('universe:kernel')) this.message(`Questo universo non è di questo kernel: ${version.motivo}.`, 'warn');
+      this.faults.raise('universe:kernel', version.motivo!);
+    } else this.faults.clear('universe:kernel');
     this.keepGame(config, files);
     this.keepSettings(config, files);
     const radiusChanged = !this.config || this.config.circleRadius !== config.circleRadius;
@@ -1273,6 +1361,7 @@ export class Kernel {
     if (radiusChanged) this.corona = new Corona(config.circleRadius);
 
     if (opts.reset) {
+      this.stores.load(files);
       this.sandbox.reset();
       this.loaded.clear();
       this.lines.clear();
@@ -2862,6 +2951,9 @@ export class Kernel {
     ch.tiles = ch.tiles.slice(0, tile) + code + ch.tiles.slice(tile + 1);
     ch.version++;
     (ch.plan.edits ??= {})[String(tile)] = code;
+    // The day it was written (T245b): what ripens counts from here.
+    (ch.plan.giorni ??= {})[String(tile)] = this.day();
+    this.routes.clear();
     this.saveChunkSoon(ch);
     return true;
   }
@@ -5368,6 +5460,37 @@ export class Kernel {
   // --- Interfaces of modules (ADR-0028) -------------------------------------------------------
 
   /** Panels modules bring into the game (drawn by the kernel as tabs of the inventory). */
+  /**
+   * What the panels show of the wanderer acting (T263, ADR-0139): the value of every `campo` a manifest's `ui` names, and nothing
+   * else. It travels in `MyState` (rule 8f): a field of a component that no panel names never leaves the server.
+   */
+  panelFields(): Record<string, string | number | boolean> {
+    const out: Record<string, string | number | boolean> = {};
+    for (const { panel } of this.uiPanels()) {
+      for (const e of panel.elementi) {
+        if (!e.campo || !PANEL_FIELD_RE.test(e.campo) || e.campo in out) continue;
+        const v = this.uiValue(e.campo);
+        if (typeof v === 'string') out[e.campo] = v.slice(0, 200);
+        else if (typeof v === 'boolean' || (typeof v === 'number' && Number.isFinite(v))) out[e.campo] = v;
+      }
+    }
+    return out;
+  }
+
+  /** The fields a server sent (T263): on a mirror they become the components the panels read. The kernel's own are never touched. */
+  takePanelFields(fields: unknown): void {
+    if (!fields || typeof fields !== 'object') return;
+    const named = new Set(this.uiPanels().flatMap(({ panel }) => panel.elementi.map((e) => e.campo).filter((c): c is string => !!c)));
+    for (const [campo, v] of Object.entries(fields as Record<string, unknown>)) {
+      if (!named.has(campo) || !PANEL_FIELD_RE.test(campo) || !['string', 'number', 'boolean'].includes(typeof v)) continue;
+      const [c, f] = campo.split('.');
+      if (KERNEL_COMPONENTS.has(c)) continue;
+      const comp = this.ecs.get(this.wandererEntity, c);
+      if (comp && typeof comp === 'object') comp[f] = v;
+      else this.ecs.set(this.wandererEntity, c, { [f]: v });
+    }
+  }
+
   uiPanels(): Array<{ module: string; panel: UiPanel }> {
     return [...this.modules.values()].filter((m) => m.manifest.ui?.elementi?.length).map((m) => ({ module: m.manifest.id, panel: m.manifest.ui! }));
   }
@@ -6010,11 +6133,20 @@ export class Kernel {
   /** Applies validated effects through core.effects (Lua): the world's own code decides how they happen. */
   applyEffects(effects: Effect[], target?: Id, at?: { x: number; y: number }): string[] {
     const out: string[] = [];
-    if (!this.modules.has('core.effects')) return out;
+    if (!this.modules.has('core.effects')) {
+      for (const e of effects) if (!KERNEL_EFFECTS.has(e.tipo)) this.unhandledEffect(e.tipo);
+      return out;
+    }
     // Nobody touches a god but the god (T42a): on their body only words arrive.
     const god = target !== undefined && this.wandererOf(target);
     if (god && god !== this.wanderer().id && this.godMode(god)) effects = effects.filter((e) => e.tipo === 'messaggio');
     for (const e of effects) {
+      // The social effects are the kernel's, applied where an action is judged: here they do nothing, as before.
+      if (e.tipo === 'legame' || e.tipo === 'ricordo' || e.tipo === 'nascita') continue;
+      if (e.tipo !== 'rilievo' && !this.effectHandled(e.tipo)) {
+        this.unhandledEffect(e.tipo);
+        continue;
+      }
       if (e.tipo === 'rilievo') {
         const p = target !== undefined ? this.ecs.get(target, 'pos') : undefined;
         const cx = Math.floor(p?.x ?? at?.x ?? this.wandererCarpet().x);
@@ -6039,6 +6171,23 @@ export class Kernel {
     }
     this.runesDirty = true;
     return out;
+  }
+
+  /**
+   * Whether core.effects applies an effect (T260): its `handles` says so; a core.effects written before it had one applies the effects
+   * of the first contract, and no other (a new effect arrives with the seed, not in a core.effects the universe rewrote).
+   */
+  private effectHandled(tipo: string): boolean {
+    if (this.sandbox.has('core.effects', 'handles')) {
+      const { value, failed } = this.runModule('core.effects', 'handles', tipo);
+      return !failed && value === true;
+    }
+    return CORE_EFFECTS_0_1.has(tipo);
+  }
+
+  /** An effect that nobody applies is a fault, not a silence (T260): who reads the faults sees which one. */
+  private unhandledEffect(tipo: string): void {
+    this.faults.raise(`effect:${tipo}`, `l'effetto «${tipo}» non ha chi lo applica: né il kernel né core.effects lo conoscono`);
   }
 
   /**
@@ -6341,6 +6490,12 @@ export class Kernel {
     const pc = this.wandererCarpet();
     const people = this.ecs.query('mind', 'pos');
     let started = 0;
+    this.matureTick();
+    const workers = new Map<string, number>();
+    for (const id of this.ecs.query('mestiere', 'chunk')) {
+      const k = this.ecs.get(id, 'chunk')?.key;
+      if (k) workers.set(k, (workers.get(k) ?? 0) + 1);
+    }
     for (const id of people) {
       const p = this.ecs.get(id, 'pos');
       const identity: Identity | undefined = this.ecs.get(id, 'identity');
@@ -6352,6 +6507,8 @@ export class Kernel {
         continue;
       }
       const mind: Mind = this.ecs.get(id, 'mind');
+      // A trade with a program (T245b): sys.lavoro carries out its day; the kernel says which phase it is and where home is.
+      if (this.workTick(id, identity, mind, workers)) continue;
       const now = this.routineNow(identity);
       if (!now) continue;
       const activity: Activity = (now as { azione?: Activity }).azione ?? inferActivity(now.fa, now.dove);
@@ -6374,6 +6531,168 @@ export class Kernel {
     this.meetings(people, pc);
     this.plotTick();
     this.questTick();
+  }
+
+  // --- The trades (T245b, ADR-0140) -----------------------------------------------------------
+
+  private jobCache?: { files: FileMap; programs: JobProgram[] };
+  private routes = new RouteCache();
+  private maturedPhase = '';
+
+  /** The programs of the trades of this universe: the `mestieri` of its `data` modules, those that are valid. */
+  jobPrograms(): JobProgram[] {
+    if (this.jobCache?.files === this.files) return this.jobCache.programs;
+    const world = { codes: new Set(Object.keys(this.palette)), items: new Set(this.content.items.keys()), tags: new Set([...this.modules.values()].flatMap((m) => m.manifest.tags ?? [])) };
+    const programs: JobProgram[] = [];
+    const seen = new Set<string>();
+    for (const m of this.modules.values()) {
+      const list = (m.manifest as { mestieri?: unknown }).mestieri;
+      if (m.manifest.kind !== 'data' || !Array.isArray(list)) continue;
+      for (const raw of list) {
+        const { program, errors } = validateJobProgram(raw, world);
+        if (!program) {
+          this.log('lavoro', `${m.manifest.id}: programma scartato: ${errors.slice(0, 3).join('; ')}`);
+          continue;
+        }
+        if (seen.has(program.id)) continue;
+        seen.add(program.id);
+        programs.push({ ...program, modulo: m.manifest.id });
+      }
+    }
+    this.jobCache = { files: this.files, programs };
+    return programs;
+  }
+
+  /**
+   * An individual with a trade that has a program (T245b): at each phase of the day the kernel gives them its tasks (`mestiere`), the
+   * places they need (home, the square, the work) and nothing else; `sys.lavoro` does the rest. At most `WORKERS_PER_PLACE` per place:
+   * the others live as before. False when they are not at work (no program, following someone, the place full).
+   */
+  private workTick(id: Id, identity: Identity, mind: Mind, workers: Map<string, number>): boolean {
+    const had = this.ecs.get(id, 'mestiere');
+    const program = mind.mode === 'vaga' ? matchJob(identity.job, this.jobPrograms()) : undefined;
+    const place: string | undefined = this.ecs.get(id, 'chunk')?.key;
+    if (!program || (!had && place && (workers.get(place) ?? 0) >= WORKERS_PER_PLACE)) {
+      if (had) {
+        this.ecs.remove(id, 'mestiere');
+        this.ecs.remove(id, 'lavoro');
+      }
+      return false;
+    }
+    const fase = dayPhase(this.time, Kernel.DAY_SECONDS);
+    if (had?.id === program.id && had.fase === fase) return true;
+    if (!had && place) workers.set(place, (workers.get(place) ?? 0) + 1);
+    const first = program.giornata.mattina.concat(program.giornata.giorno).find((t) => t.posa)?.posa;
+    const home = this.placeFor(id, identity, 'casa', 'dorme') ?? this.placeFor(id, identity, 'casa');
+    const square = this.placeFor(id, identity, 'piazza');
+    const anchor = home ?? this.ecs.get(id, 'pos');
+    // The work: the nearest tile of its kind, or the nearest thing with its tag (the bench of the smith), or the place the routine would give.
+    const bench = program.posto?.entita && anchor ? this.nearest(anchor.x, anchor.y, 18, program.posto.entita) : undefined;
+    const benchAt = bench !== undefined ? this.ecs.get(bench, 'pos') : undefined;
+    const work = (program.posto?.casella && anchor ? this.findTile(program.posto.casella, anchor.x, anchor.y, 18) : undefined) ?? (benchAt ? { x: benchAt.x, y: benchAt.y } : undefined) ?? this.placeFor(id, identity, 'lavoro', first);
+    const p = this.ecs.get(id, 'pos');
+    // The place they belong to: its deposit is where what they make goes (T245c).
+    const luogo = place ?? (p ? this.chunkAt(p.x, p.y)?.key : undefined);
+    this.ecs.set(id, 'mestiere', {
+      id: program.id,
+      fase,
+      giorno: this.day(),
+      ...(luogo ? { luogo } : {}),
+      compiti: structuredClone(program.giornata[fase]),
+      ...(home ? { casa: home } : {}),
+      ...(square ? { piazza: square } : {}),
+      ...(work ? { lavoro: work } : {}),
+    });
+    this.ecs.remove(id, 'meta');
+    return true;
+  }
+
+  private actingAs = 0;
+
+  /**
+   * An individual uses a thing (T245c, ADR-0141): the `on_act` of its module with the individual as user, as «Usa» does for the wanderer.
+   * Only an action without effects (the effects of a manifest are the wanderer's: needs, items, states), only within reach, never a
+   * wanderer as user (they act through the kernel), never more than two deep.
+   */
+  actAs(user: Id, target: Id, action?: string): string | undefined {
+    if (this.actingAs >= 2 || !this.ecs.alive.has(user) || !this.ecs.alive.has(target) || user === target || this.wandererOf(user) !== undefined || this.ecs.has(user, 'player')) return undefined;
+    const modId: string | undefined = this.ecs.get(target, 'module')?.id;
+    const entry = modId ? this.modules.get(modId) : undefined;
+    const pu = this.ecs.get(user, 'pos');
+    const pt = this.ecs.get(target, 'pos');
+    if (!entry?.logicPath || !pu || !pt || Math.hypot(pu.x - pt.x, pu.y - pt.y) > 2.5 || !this.sandbox.has(modId!, 'on_act')) return undefined;
+    const actions = entry.manifest.actions ?? [];
+    const a = action === undefined ? actions.find((x) => !x.effects?.length) : actions.find((x) => x.id === action);
+    if (!a || a.effects?.length) return undefined;
+    this.actingAs++;
+    try {
+      const { value, failed } = this.runModule(modId!, 'on_act', target, user, a.id);
+      return !failed && typeof value === 'string' && value ? value.slice(0, 300) : undefined;
+    } finally {
+      this.actingAs--;
+    }
+  }
+
+  /** What the deposit of a place holds (T245c, ADR-0141): what the trades brought there, in the store of `sys.lavoro`. */
+  placeDeposit(chunkKey: string): Record<string, number> {
+    const v = this.stores.get('sys.lavoro', `deposito:${chunkKey.replace(',', ':')}`);
+    return v && typeof v === 'object' && !Array.isArray(v) ? (v as Record<string, number>) : {};
+  }
+
+  /** The next point of the way between two places of the world (carpet space): two tiles ahead on a way the cache keeps. */
+  private routeStep(x: number, y: number, tx: number, ty: number): { x: number; y: number } | undefined {
+    if (![x, y, tx, ty].every(Number.isFinite) || Math.hypot(tx - x, ty - y) > 60) return undefined;
+    const from = [Math.floor(x), Math.floor(y)] as const;
+    const to = [Math.floor(tx), Math.floor(ty)] as const;
+    // Passable as walking is: the tile and the models standing on it (a wall of a house is a model, not a tile).
+    const way = this.routes.get(from, to, this.tickCount, () => findRoute(from, to, (c, r) => this.free(c + 0.5, r + 0.5, 0.3)));
+    if (!way) return undefined;
+    if (way.length <= 2) return { x: tx, y: ty };
+    const [c, r] = way[Math.min(2, way.length - 1)];
+    return { x: c + 0.5, y: r + 0.5 };
+  }
+
+  /** The centre of the nearest tile with a code within r (at most 24) of a point: the nearest, then the first row, then the first column. */
+  findTile(code: string, x: number, y: number, r: number): { x: number; y: number } | undefined {
+    if (typeof code !== 'string' || !this.palette[code] || ![x, y].every(Number.isFinite)) return undefined;
+    const R = Math.max(0, Math.min(24, Math.floor(Number.isFinite(r) ? r : 8)));
+    const c0 = Math.floor(x);
+    const r0 = Math.floor(y);
+    let best: { x: number; y: number; d: number } | undefined;
+    for (let dr = -R; dr <= R; dr++)
+      for (let dc = -R; dc <= R; dc++) {
+        if (this.tileAt(c0 + dc, r0 + dr) !== code) continue;
+        const cx = c0 + dc + 0.5;
+        const cy = r0 + dr + 0.5;
+        const d = Math.hypot(cx - x, cy - y);
+        if (!best || d < best.d - 1e-9) best = { x: cx, y: cy, d };
+      }
+    return best ? { x: best.x, y: best.y } : undefined;
+  }
+
+  /**
+   * What ripens ripens (T245b, ADR-0140): at each phase of the day, in the places loaded, a tile whose terrain says `matura` becomes
+   * the tile it says once its days have passed from when it was written. An edit with no day is of today (the plans of before).
+   */
+  private matureTick(): void {
+    const phase = `${this.day()}|${dayPhase(this.time, Kernel.DAY_SECONDS)}`;
+    if (phase === this.maturedPhase || this.mirror) return;
+    this.maturedPhase = phase;
+    const today = this.day();
+    const S = this.config.chunkSize;
+    for (const ch of this.chunks.values()) {
+      const edits = ch.plan?.edits;
+      if (ch.stage !== 'planned' || !edits) continue;
+      for (const [idx, code] of Object.entries(edits)) {
+        const m = this.palette[code]?.matura;
+        if (!m || !this.palette[m.in]) continue;
+        const days = (ch.plan!.giorni ??= {});
+        const since = days[idx] ??= today;
+        if (today - since < m.dopo) continue;
+        const i = Number(idx);
+        this.setTile(ch.cx * S + (i % S), ch.cy * S + Math.floor(i / S), m.in);
+      }
+    }
   }
 
   /** People who meet talk: by their relation, what they remember, the plots they are in. */
@@ -7270,13 +7589,21 @@ export class Kernel {
   /** Containers opened in earlier sessions, by stable origin: they keep what was left in them. */
   private savedContainers = new Map<string, { inv: Inventory; filled: boolean }>();
   private lastState = '';
+  /** The lasting stores of the modules (T245a, ADR-0138): `world/magazzino/`, saved with the game. */
+  readonly stores = new ModuleStores();
+  /** The module whose Lua runs now: whose store `world.store_get/set` reach. */
+  private luaModule: string | undefined;
+  /** Files the player wrote that are not a valid state (T262, ADR-0137): in the working files, never in a commit. */
+  private unsaved = new Set<string>();
 
   /**
    * The state of play is part of the universe too (`world/stato.json`): what the wanderer carries,
    * what was taken from the world, what is left in chests. Saved only while the universe is valid.
    */
   saveState(): boolean {
-    if (this.faults.size || this.generationHeld || this.mirror) return false;
+    // A fault invalidates code, not the data of the game (T262, ADR-0137): what is broken is withheld from every commit
+    // (`unsaved`), the rest is saved. Only a universe that is not this world's (its configuration, another kernel) saves nothing.
+    if (this.generationHeld || this.mirror || this.foreignUniverse()) return false;
     const containers: Record<string, { inv: Inventory; filled: boolean }> = Object.fromEntries(this.savedContainers);
     for (const id of this.ecs.query('container', 'origin')) {
       const c: Container = this.ecs.get(id, 'container');
@@ -7293,16 +7620,25 @@ export class Kernel {
     const players = Object.fromEntries([...this.wanderersById.values()].map((w) => [playerFile(w.id), this.as(w.id, () => this.wandererState(w))]));
     // A request that ended badly commits nothing of its own: the save carries it (`beforeCommit`), even if nothing else moved.
     const json = JSON.stringify([state, players, this.shortfalls.version]);
-    if (json === this.lastState) return false;
+    const stores = this.stores.takeChanged();
+    if (json === this.lastState && !Object.keys(stores).length) return false;
     this.lastState = json;
-    const written: FileMap = {};
-    for (const [p, v] of Object.entries({ 'world/stato.json': state, ...players })) {
+    const written: FileMap = { ...stores };
+    for (const [p, v] of Object.entries(stores)) this.repo.write(p, v);
+    // What this kernel does not know of a file it saves stays in it (T245a): a kernel of tomorrow wrote it, a kernel of today keeps it.
+    const kept = (p: string, v: object, known: ReadonlySet<string>) => ({ ...unknownFields(this.repo.working[p], known), ...v });
+    for (const [p, v] of Object.entries({ 'world/stato.json': kept('world/stato.json', state, STATE_FIELDS), ...Object.fromEntries(Object.entries(players).map(([q, w]) => [q, kept(q, w, WANDERER_FIELDS)])) })) {
       this.repo.write(p, JSON.stringify(v, null, 1) + '\n');
       written[p] = this.repo.working[p]!;
     }
     this.files = { ...this.files, ...written };
     this.repo.commit('salvataggio della partita', 'player');
     return true;
+  }
+
+  /** universe.json unreadable or of another kernel (T260): the world running is not the universe's, nothing of it is saved. */
+  private foreignUniverse(): boolean {
+    return this.faults.has('universe:config') || this.faults.has('universe:kernel');
   }
 
   /** What is saved of the wanderer acting now. */
@@ -7377,6 +7713,16 @@ export class Kernel {
       this.graphChunks.set(key, { cx, cy, nome: m.name, ambiente: m.layout || undefined });
       this.graphChunksVersion++;
     }
+  }
+
+  /** universe.json says the kernel that writes it (T260): a compatible universe takes this kernel's version at its next commit. */
+  private stampKernel(): void {
+    if (!this.repo || this.faults.has('universe:kernel')) return;
+    const stamped = stampKernel(this.repo.working['universe.json']);
+    if (stamped === undefined) return;
+    this.repo.write('universe.json', stamped);
+    this.files = { ...this.files, 'universe.json': stamped };
+    this.config = { ...this.config, kernel: KERNEL_VERSION };
   }
 
   /** Puts the usage ledger in the working files when it changed (the next commit carries it). */
@@ -7513,8 +7859,8 @@ export class Kernel {
   /** On leaving: the spending of this session goes into the universe even if nothing else changed. */
   saveUsage(): boolean {
     if (this.mirror) return false;
-    // Only valid states are committed: with a fault the ledger waits for the next valid commit.
-    if ((this.usage.version === this.usageWritten && this.cards.version === this.cardsWritten) || this.faults.size) return false;
+    // Broken code is withheld from the commit (T262): the ledger is saved anyway, unless the universe is not this world's.
+    if ((this.usage.version === this.usageWritten && this.cards.version === this.cardsWritten) || this.foreignUniverse()) return false;
     this.repo.commit('consumi dei modelli', 'kernel');
     return true;
   }
@@ -7576,6 +7922,7 @@ export class Kernel {
     if (!files) return false;
     for (const [p, v] of Object.entries(files)) this.repo.write(p, v);
     for (const p of Object.keys(this.repo.working)) if (!(p in files)) this.repo.write(p, null);
+    this.unsaved.clear();
     this.applyFiles({ ...this.repo.working }, { reset: true });
     // The disk already has the commit ("ritorno a …"): here only the session snapshot.
     const backend = this.repo.backend;
@@ -7603,6 +7950,7 @@ export class Kernel {
       this.ecs.destroy(id);
     }
     const files = commitId ? this.repo.checkout(commitId) : this.repo.restore();
+    this.unsaved.clear();
     this.faults.clearAll();
     this.applyFiles(files, { reset: true });
     const head = this.repo.head();
@@ -7617,13 +7965,15 @@ export class Kernel {
     if (errors.length && !force) return { errors, committed: false, written: false };
     this.writeCommanded(path, content);
     this.applyFiles({ ...this.repo.working });
-    const broken = this.faults.list().some((f) => f.key.startsWith('manifest:') || f.key.endsWith(':load') || f.key === 'universe:config');
+    const broken = this.faults.list().some((f) => f.key.startsWith('manifest:') || f.key.endsWith(':load') || f.key === 'universe:config' || f.key === 'universe:kernel');
     let committed = false;
     if (!errors.length && !broken) {
+      this.unsaved.delete(path);
       const c = this.repo.commit(`modifica ${path}`, 'player');
       this.log('repo', `commit ${c.id}: ${c.message}`);
       committed = true;
     } else {
+      this.unsaved.add(path);
       this.log('repo', `${path} scritto senza commit: l'universo è in uno stato non valido`);
     }
     return { errors, committed, written: true };
@@ -7644,12 +7994,13 @@ export class Kernel {
     const before = Object.fromEntries(paths.map((p) => [p, this.repo.working[p] ?? null]));
     for (const p of paths) this.repo.write(p, changes[p]);
     this.applyFiles({ ...this.repo.working });
-    const broken = this.faults.list().find((f) => f.key.startsWith('manifest:') || f.key.endsWith(':load') || f.key === 'universe:config');
+    const broken = this.faults.list().find((f) => f.key.startsWith('manifest:') || f.key.endsWith(':load') || f.key === 'universe:config' || f.key === 'universe:kernel');
     if (broken) {
       for (const p of paths) this.repo.write(p, before[p]);
       this.applyFiles({ ...this.repo.working });
       return { ok: false, motivo: `il mondo si romperebbe: ${broken.message}` };
     }
+    for (const p of paths) this.unsaved.delete(p);
     const commit = this.repo.commit(message, 'player');
     this.log('repo', `commit ${commit.id}: ${message}`);
     return { ok: true, commit };

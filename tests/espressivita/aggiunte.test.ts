@@ -81,7 +81,7 @@ describe('a new field', () => {
     expect(up.description).toBe('la nostra');
   });
 
-  it('TRAP: in the saved state, what the kernel does not know is thrown away at the next save', async () => {
+  it('in the saved state, what the kernel does not know stays at the next save (T245a: once a TRAP, it was thrown away)', async () => {
     const w = newLasting({
       ...bundledFiles,
       'world/stato.json': JSON.stringify({ consumati: [], ora: 5, di_domani: { x: 1 } }),
@@ -90,8 +90,8 @@ describe('a new field', () => {
     const k = await open(w);
     k.give('item.pane', 1);
     await closeWorld(k, w);
-    expect(JSON.parse(w.files['world/stato.json']).di_domani).toBeUndefined();
-    expect(JSON.parse(w.files['world/giocatori/io.json']).di_domani).toBeUndefined();
+    expect(JSON.parse(w.files['world/stato.json']).di_domani).toEqual({ x: 1 });
+    expect(JSON.parse(w.files['world/giocatori/io.json']).di_domani).toBe(1);
   });
 });
 
@@ -111,13 +111,23 @@ describe('a new effect', () => {
     expect(await apply(files)).toEqual({ value: 'Tira vento: 3', failed: false });
   });
 
-  it('TRAP: in a universe that rewrote core.effects the kernel would accept it and nothing happens, without a fault', async () => {
+  it('in a universe that rewrote core.effects the new effect does not happen, and a fault says so (T260: once it was a silence)', async () => {
     const mine = `${bundledFiles['modules/core.effects/logic.lua']}\n-- ritoccato\n`;
     const { files } = upgradeFromSeed({ ...madeFrom(bundledFiles), 'modules/core.effects/logic.lua': mine }, next(bundledFiles));
     expect(files['modules/core.effects/logic.lua']).toBe(mine);
     const r = await apply(files);
     expect(r.failed).toBe(false);
     expect(r.value ?? null).toBeNull();
+    const k = await boot(files);
+    expect(k.applyEffects([{ tipo: 'vento', forza: 3 } as any], k.wandererEntity)).toEqual([]);
+    expect(k.faults.get('effect:vento')?.message).toMatch(/non ha chi lo applica/);
+  });
+
+  it('where it arrived, the kernel applies it with no fault', async () => {
+    const { files } = upgradeFromSeed(madeFrom(bundledFiles), next(bundledFiles));
+    const k = await boot(files);
+    expect(k.applyEffects([{ tipo: 'vento', forza: 3 } as any], k.wandererEntity)).toEqual(['Tira vento: 3']);
+    expect(k.faults.has('effect:vento')).toBe(false);
   });
 });
 
@@ -142,14 +152,15 @@ describe('a new node of MarkovJunior', () => {
 });
 
 describe('a Lua API taken away (what is not additive)', () => {
-  it('TRAP: every module that calls it faults at once, and with a fault open the world saves nothing', async () => {
+  it('TRAP: every module that calls it faults at once; with the fault open the world still saves its data (T262)', async () => {
     const universe = universeWith('mech.posa');
     const k = await boot({ ...universe, 'modules/mech.posa/logic.lua': 'local M = {}\nfunction M.update(dt) world.tolta() end\nreturn M\n' });
     await developAll(k);
     k.tick(DT);
     expect(k.faults.list().map((f) => f.key)).toContain('module:mech.posa:update');
     k.give('item.pane', 1);
-    expect(k.saveState()).toBe(false);
+    expect(k.saveState()).toBe(true);
+    expect(k.repo.head().files['modules/mech.posa/logic.lua']).toContain('world.tolta');
   });
 });
 

@@ -24,7 +24,7 @@ export interface Outcome {
   borsa?: number;
 }
 
-type Action = Exclude<ClientMsg, { t: 'entra' } | { t: 'passo' }>;
+type Action = Exclude<ClientMsg, { t: 'entra' } | { t: 'passo' } | { t: 'tasti' }>;
 type WithoutSeq<T> = T extends { seq: number } ? Omit<T, 'seq'> : never;
 
 export class SessionClient {
@@ -113,6 +113,16 @@ export class SessionClient {
     if (this.me) this.me = { ...this.me, x, y };
     this.link.send({ t: 'passo', seq, x, y });
     return seq;
+  }
+
+  private heldSaid = '';
+
+  /** The directions the wanderer holds (T263): said to the server only when they change. */
+  keys(held: string[]): void {
+    const key = held.join(',');
+    if (key === this.heldSaid) return;
+    this.heldSaid = key;
+    this.link.send({ t: 'tasti', tenuti: held });
   }
 
   /** Something the wanderer does; the answer is what came of it. */

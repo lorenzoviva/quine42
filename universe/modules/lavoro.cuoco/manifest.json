@@ -1,0 +1,94 @@
+{
+  "id": "lavoro.cuoco",
+  "name": "Il cuoco",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi cucina: il grano del deposito diventa pane, il pesce zuppa, e il pane va in piazza.",
+  "mestieri": [
+    {
+      "id": "cuoco",
+      "nomi": [
+        "cuoco",
+        "cuoca",
+        "panettiere",
+        "panettiera",
+        "fornaio",
+        "fornaia",
+        "chef",
+        "pasticciere",
+        "pasticciera",
+        "cuciniere",
+        "cuciniera",
+        "mugnaio",
+        "mugnaia"
+      ],
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "prendi",
+            "oggetto": "item.grano",
+            "quante": 2,
+            "dove": "piazza"
+          },
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "produci",
+            "oggetto": "item.pane",
+            "con": "item.grano",
+            "quante": 2,
+            "durata": 15,
+            "posa": "cucina",
+            "dice": "Il forno è caldo."
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "prendi",
+            "oggetto": "item.pesce",
+            "quante": 1,
+            "dove": "piazza"
+          },
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "produci",
+            "oggetto": "item.zuppa",
+            "con": "item.pesce",
+            "quante": 1,
+            "durata": 20,
+            "posa": "cucina"
+          }
+        ],
+        "sera": [
+          {
+            "fa": "porta",
+            "oggetto": "item.pane",
+            "dove": "piazza"
+          },
+          {
+            "fa": "porta",
+            "oggetto": "item.zuppa",
+            "dove": "piazza"
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}
