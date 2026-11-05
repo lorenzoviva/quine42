@@ -140,5 +140,6 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0133](0133-tutto-il-consumo-si-regola-prima-di-entrare.md) | Tutto il consumo si regola prima di entrare: una manopola per ogni compito tranne la Genesi, e a partita in corso nessuno cambia nulla, nemmeno il master | accettato |
 | [0134](0134-le-ambientazioni-della-genesi.md) | Le ambientazioni della Genesi sono testo tra cui scegliere su un seme solo: ciò che sopravvive alla Genesi parla di epoca, le case comuni dipendono dal mondo | accettato |
 | [0135](0135-la-lettera-del-suolo.md) | La lettera del suolo: `suolo="E"` sulla radice, il kernel la scrive sullo strato `base`, così lo stesso programma con la cantina serve ogni taglia; chi non la dice non cambia, chiave di cache compresa |
+| [0136](0136-il-motore-guarda-solo-dove-serve.md) | Il motore MarkovJunior guarda solo dove serve: un censimento delle lettere per riga accelera le scansioni intere senza cambiare un voxel, e una fixture di impronte lo prova | accettato |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.
