@@ -14,6 +14,7 @@ export function fakeHost() {
     destroy: () => {},
     first: () => undefined,
     held: () => false,
+    wanderers: () => [],
     store_get: () => undefined,
     store_set: () => false,
     free: () => true,

@@ -98,7 +98,7 @@ const HEX_RE = /^#[0-9a-f]{6}$/i;
 /** The Lua API (prelude.lua): generated code may only call these. */
 export const LUA_API: Record<string, string[]> = {
   ecs: ['each', 'get', 'set', 'spawn', 'destroy', 'first'],
-  world: ['free', 'free_real', 'tile', 'speed_at', 'spawn', 'player', 'player_pos', 'nearest', 'has_tag', 'break_entity', 'say', 'speak', 'set_tile', 'open', 'make_container', 'store_get', 'store_set'],
+  world: ['free', 'free_real', 'tile', 'speed_at', 'spawn', 'player', 'player_pos', 'nearest', 'has_tag', 'break_entity', 'say', 'speak', 'set_tile', 'open', 'make_container', 'store_get', 'store_set', 'wanderers'],
   inventory: ['add', 'remove', 'count', 'equipped'],
   input: ['held'],
   bus: ['emit'],

@@ -24,6 +24,8 @@ import { SEA_DRAFT } from '../kernel/relief';
 
 /** Seconds between two steps sent (the server checks the walk at its pace; 20 a second are plenty). */
 const STEP_EVERY = 0.05;
+/** The directions a server's systems may read (T263). */
+const HELD = ['up', 'down', 'left', 'right'] as const;
 /** How fast what moves on the server catches up with where it is (per second): about one update period. */
 const FOLLOW = 12;
 /** Farther than this (tiles) an entity jumps where it is instead of gliding there. */
@@ -128,6 +130,8 @@ export class ThinClient {
         p.y += (to.y - p.y) * f;
       }
     }
+    // The keys held, for the systems that run on the server (T263).
+    this.session.keys(HELD.filter((a) => k.input.isHeld(a)));
     const at = k.wandererCarpet();
     if (this.clock - this.lastStep.t >= STEP_EVERY && !(Math.hypot(at.x - this.lastStep.x, at.y - this.lastStep.y) <= 0.005)) {
       this.lastStep = { ...at, t: this.clock };
@@ -401,6 +405,7 @@ export class ThinClient {
     const pid = k.wandererEntity;
     if (s.needs) k.ecs.set(pid, 'needs', { ...(k.needs() ?? {}), ...s.needs });
     if (s.stati) k.ecs.set(pid, 'stati', structuredClone(s.stati));
+    if (s.campi) k.takePanelFields(s.campi);
     if (typeof s.crediti === 'number') {
       const prev = k.creditsOf(k.wanderer().id);
       k.setCredits(k.wanderer().id, s.crediti);

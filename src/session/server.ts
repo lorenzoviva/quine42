@@ -509,7 +509,7 @@ export class SessionServer {
         return c.link.close();
       }
       // A step lost is made good by the next one.
-      if (msg && typeof msg === 'object' && msg.t !== 'passo') this.answer(c, seqOf(msg), { ok: false, motivo: SLOW_DOWN });
+      if (msg && typeof msg === 'object' && msg.t !== 'passo' && msg.t !== 'tasti') this.answer(c, seqOf(msg), { ok: false, motivo: SLOW_DOWN });
       return;
     }
     p.msgs--;
@@ -556,6 +556,8 @@ export class SessionServer {
   /** What a message does; the promise, for what waits for the Council, ends when it has been answered. */
   private handle(c: Client, msg: ClientMsg): void | Promise<void> {
     if (msg.t === 'passo') return this.step(c, msg);
+    // The keys a client holds (T263): only the four directions pass, `setHeldOf` reads them as a list of names.
+    if (msg.t === 'tasti') return this.kernel.setHeldOf(c.id, Array.isArray(msg.tenuti) ? msg.tenuti.slice(0, 8) : []);
     const seq = seqOf(msg);
     const k = this.kernel;
     if (msg.t === 'altro' && typeof msg.viandante === 'string') return this.later(c, seq, () => k.freeOnWanderer(String(msg.viandante), words(msg.testo)));
@@ -924,6 +926,7 @@ export class SessionServer {
       stati: k.states(),
       slots: k.slots(),
       crediti: k.creditsOf(c.id),
+      campi: k.panelFields(),
     }));
     const sKey = JSON.stringify(stato);
     if (sKey !== c.stato) out.stato = JSON.parse(sKey);

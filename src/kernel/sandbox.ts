@@ -16,7 +16,10 @@ export interface Host {
   spawn(components: unknown): number | undefined;
   destroy(id: number): void;
   first(name: string): number | undefined;
-  held(action: string): boolean;
+  /** Whether an action is held: by the wanderer acting, or by the wanderer whose body is `id` (T263, ADR-0139). */
+  held(action: string, id?: number): boolean;
+  /** Every wanderer in this kernel: their body, who they are, where they are in the world (T263, ADR-0139). */
+  wanderers(): unknown;
   /** What the module running keeps under a key in its lasting store (T245a, ADR-0138), or undefined. */
   store_get(key: string): unknown;
   /** Keeps a value in the store of the module running (nil takes it away); false when the key, the value or the caps say no. */
@@ -352,6 +355,7 @@ function emptyHost(): Host {
     destroy: () => {},
     first: () => undefined,
     held: () => false,
+    wanderers: () => [],
     store_get: () => undefined,
     store_set: () => false,
     free: () => true,

@@ -392,6 +392,13 @@ function unknownFields(src: string | undefined, known: ReadonlySet<string>): Rec
   }
 }
 
+/** A field a panel reads (T263): `componente.campo`, plain names. */
+const PANEL_FIELD_RE = /^[A-Za-z_][A-Za-z0-9_]{0,40}\.[A-Za-z_][A-Za-z0-9_]{0,40}$/;
+/** Components of the wanderer that the kernel keeps itself: a panel's field from the server never writes them on a mirror. */
+const KERNEL_COMPONENTS = new Set(['pos', 'player', 'carpet', 'hand', 'inventory', 'slots', 'needs', 'stati', 'module', 'chunk', 'container', 'remote', 'body', 'form']);
+/** What a client may say it holds (T263): the four directions, in the world's terms. */
+const HELD_ACTIONS = new Set(['up', 'down', 'left', 'right']);
+
 const KERNEL_EFFECTS = new Set(['rilievo', 'legame', 'ricordo', 'nascita']);
 /** The effects every core.effects of the contract 0.1 applies: what a core.effects without `handles` is trusted with (T260). */
 const CORE_EFFECTS_0_1 = new Set(['messaggio', 'bisogni', 'crea_oggetto', 'consuma', 'distruggi', 'apri', 'contenitore', 'terreno', 'fuoco', 'luce', 'scudo', 'spingi', 'evoca', 'stato', 'togli_stato']);
@@ -740,7 +747,8 @@ export class Kernel {
         this.runesDirty = true;
       },
       first: (name) => this.ecs.query(name)[0],
-      held: (a) => this.wanderer().id === this.inputFor && this.input.isHeld(a),
+      held: (a, id) => this.heldBy(typeof id === 'number' ? this.wandererOf(id) : this.wanderer().id, a),
+      wanderers: () => this.wanderersInWorld(),
       // The lasting store (T245a, ADR-0138): the module running is the only one whose data a call sees. A rune, a mirror: nothing.
       store_get: (key) => (this.luaModule && !this.mirror ? this.stores.get(this.luaModule, key) : undefined),
       store_set: (key, value) => !!this.luaModule && !this.mirror && this.stores.set(this.luaModule, key, value),
@@ -923,6 +931,35 @@ export class Kernel {
   wanderer(): Wanderer {
     for (const w of this.wanderersById.values()) if (w.entity === this.wandererEntity) return { id: w.id, nome: w.nome };
     return { id: SOLO, nome: WANDERER_NAME };
+  }
+
+  /** The keys a wanderer's client holds (T263): world directions, set by the server from what the client says. */
+  private heldKeys = new Map<string, Set<string>>();
+
+  /** What a client holds, said by its server (T263): only the four directions, never more. */
+  setHeldOf(id: string, actions: unknown): void {
+    if (!this.wanderersById.has(id)) return;
+    const list = Array.isArray(actions) ? actions.filter((a): a is string => typeof a === 'string' && HELD_ACTIONS.has(a)) : [];
+    if (list.length) this.heldKeys.set(id, new Set(list));
+    else this.heldKeys.delete(id);
+  }
+
+  /** Whether a wanderer holds an action: what their client said, or this kernel's keyboard for the one it belongs to. */
+  heldBy(id: string | undefined, action: string): boolean {
+    if (!id) return false;
+    const said = this.heldKeys.get(id);
+    if (said) return said.has(action);
+    return id === this.inputFor && this.input.isHeld(action);
+  }
+
+  /** Every wanderer of this kernel with a body: what `world.wanderers()` gives Lua (T263). Who they are and where, nothing else. */
+  private wanderersInWorld(): Array<{ id: number; chi: string; x: number; y: number }> {
+    const out: Array<{ id: number; chi: string; x: number; y: number }> = [];
+    for (const w of this.wanderersById.keys()) {
+      const at = this.wandererAt(w);
+      if (at && Number.isFinite(at.x) && Number.isFinite(at.y)) out.push({ id: at.entity, chi: w, x: at.x, y: at.y });
+    }
+    return out;
   }
 
   wanderers(): Wanderer[] {
@@ -1108,6 +1145,7 @@ export class Kernel {
     this.ecs.destroy(w.entity);
     this.wanderersById.delete(id);
     this.remote.delete(id);
+    this.heldKeys.delete(id);
     return true;
   }
 
@@ -5414,6 +5452,37 @@ export class Kernel {
   // --- Interfaces of modules (ADR-0028) -------------------------------------------------------
 
   /** Panels modules bring into the game (drawn by the kernel as tabs of the inventory). */
+  /**
+   * What the panels show of the wanderer acting (T263, ADR-0139): the value of every `campo` a manifest's `ui` names, and nothing
+   * else. It travels in `MyState` (rule 8f): a field of a component that no panel names never leaves the server.
+   */
+  panelFields(): Record<string, string | number | boolean> {
+    const out: Record<string, string | number | boolean> = {};
+    for (const { panel } of this.uiPanels()) {
+      for (const e of panel.elementi) {
+        if (!e.campo || !PANEL_FIELD_RE.test(e.campo) || e.campo in out) continue;
+        const v = this.uiValue(e.campo);
+        if (typeof v === 'string') out[e.campo] = v.slice(0, 200);
+        else if (typeof v === 'boolean' || (typeof v === 'number' && Number.isFinite(v))) out[e.campo] = v;
+      }
+    }
+    return out;
+  }
+
+  /** The fields a server sent (T263): on a mirror they become the components the panels read. The kernel's own are never touched. */
+  takePanelFields(fields: unknown): void {
+    if (!fields || typeof fields !== 'object') return;
+    const named = new Set(this.uiPanels().flatMap(({ panel }) => panel.elementi.map((e) => e.campo).filter((c): c is string => !!c)));
+    for (const [campo, v] of Object.entries(fields as Record<string, unknown>)) {
+      if (!named.has(campo) || !PANEL_FIELD_RE.test(campo) || !['string', 'number', 'boolean'].includes(typeof v)) continue;
+      const [c, f] = campo.split('.');
+      if (KERNEL_COMPONENTS.has(c)) continue;
+      const comp = this.ecs.get(this.wandererEntity, c);
+      if (comp && typeof comp === 'object') comp[f] = v;
+      else this.ecs.set(this.wandererEntity, c, { [f]: v });
+    }
+  }
+
   uiPanels(): Array<{ module: string; panel: UiPanel }> {
     return [...this.modules.values()].filter((m) => m.manifest.ui?.elementi?.length).map((m) => ({ module: m.manifest.id, panel: m.manifest.ui! }));
   }

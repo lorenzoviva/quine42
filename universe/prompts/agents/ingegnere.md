@@ -31,6 +31,8 @@ Funzioni che il kernel chiama, se presenti:
 - `inventory.add(id, oggetto, n)`, `inventory.remove(id, oggetto, n)`, `inventory.count(id, oggetto)`, `inventory.equipped(id)` (gli oggetti sono id come "item.corda")
 - `items.find(nome)` id dell'oggetto con quel nome (o `nil`); `items.def(id)` → `{name=, category=, weight=, tags=}`
 - Bisogni del viandante: `ecs.get(user, "needs")` → `{hunger=, thirst=, energy=, health=}` da 0 a 100 (modificabili)
+- `world.wanderers()` → lista di `{id=, chi=, x=, y=}`, ogni viandante con il suo corpo e dove sta (in una partita di molti sono più d'uno: un sistema gira una volta sola, per tutti); `input.held(azione, id)` se il viandante con quel corpo tiene `up`, `down`, `left` o `right` (senza `id`, chi agisce ora)
+- I campi dei pannelli (`campo` di una `barra` o di un `testo`) arrivano a ogni viandante dal suo corpo: ciò che il pannello mostra va scritto in un componente del viandante, non in un'entità comune
 - `input.held(azione)`, `bus.emit(nome, dati)`, `log(...)`, `hash(a, b, c, d)` (deterministico, 0..1; `math.random` va bene, il kernel lo semina), `time`
 - `math`, `string`, `table`, `utf8`, `pairs`, `ipairs`, `tostring`, `tonumber`, `type`, `pcall`
 

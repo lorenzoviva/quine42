@@ -143,5 +143,6 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0136](0136-la-versione-del-kernel.md) | La versione del kernel `X.Y.Z` (era, contratto, incremento) da `0.1.0`: `universe.json → kernel`, `checkKernelVersion` al caricamento, un contratto nuovo vuole un universo nuovo; un effetto senza chi lo applica è un guasto |
 | [0137](0137-il-salvataggio-che-non-si-ferma.md) | Il salvataggio che non si ferma: un guasto invalida il codice, non i dati; il codice scritto senza commit è trattenuto da ogni commit (`Repo.withheld`), stato, viandanti e piani si salvano con un guasto aperto; `R` tiene i dati dell'ultimo salvataggio |
 | [0138](0138-il-magazzino-dei-moduli-e-vite.md) | Il magazzino dei moduli (`world.store_get/set`, un file per modulo in `world/magazzino/`, tetti in byte, mai ai client), il salvataggio che conserva i campi ignoti, la manopola `vite` (assente vale 0) |
+| [0139](0139-i-pannelli-e-i-tasti-di-ogni-viandante.md) | I pannelli e i tasti di ogni viandante: i `campo` dei `manifest.ui` in `MyState.campi` (a elenco), il messaggio `tasti`, `input.held(azione, id)` e `world.wanderers()` |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.

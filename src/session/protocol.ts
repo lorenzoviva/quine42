@@ -31,6 +31,8 @@ export interface MyState {
   slots?: Record<string, Record<string, { item: string; count: number } | null>>;
   /** The wanderer's credit balance in USD (T45a). */
   crediti?: number;
+  /** What the panels of the mechanics show (T263, ADR-0139): `componente.campo` → value, only the fields a manifest's `ui` names. */
+  campi?: Record<string, string | number | boolean>;
 }
 
 /** A place near the wanderer: its tiles, sent again when they change. */
@@ -108,6 +110,8 @@ export type ClientMsg =
   | { t: 'profilo'; seq: number; profilo: Partial<Profile> }
   /** Where the client's wanderer is now, in the world: the server checks the step and may correct it. */
   | { t: 'passo'; seq: number; x: number; y: number }
+  /** The directions the wanderer holds, in the world's terms (T263): what `input.held(azione, id)` reads on the server. No answer. */
+  | { t: 'tasti'; tenuti: string[] }
   | { t: 'frase'; seq: number; tokens: string[] }
   | { t: 'incidi'; seq: number }
   | { t: 'pronuncia'; seq: number }

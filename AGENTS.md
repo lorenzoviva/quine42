@@ -235,7 +235,7 @@ Registro, Luogo, Fucina e Genesi → `docs/architettura-dettagli.md#concilio`.
 - **Semi condivisi**: la simulazione non estrae mai dall'orologio → `#semi`
 - **Chi paga, carte, crediti**: `chi` su ogni chiamata, `commitContent`, commissione decisa dal server (`QUINE_COMMISSIONE`), spese comuni divise → `#carte-crediti`
 - **Regolazioni del consumo**: ogni compito ha una manopola, si fissano entrando (ADR-0133); `vite` (Cronaca, Vita, Teatro) assente vale 0 (ADR-0138) → `#lobby`
-- **Multigiocatore**: kernel sul server, client sottile, luoghi nuovi, file del giocatore, ramo del master, god mode, doni, PvP, profilo, morte → `#multigiocatore`
+- **Multigiocatore**: kernel sul server, client sottile, luoghi nuovi, file del giocatore, ramo del master, god mode, doni, PvP, profilo, morte; i `campo` dei pannelli in `MyState.campi` (a elenco, regola 8f) e i tasti di ogni viandante (`tasti`, `world.wanderers()`, `input.held(azione, id)`, ADR-0139) → `#multigiocatore`
 - **Account Firebase e anonimi** → `#account`; **Stripe Checkout** → `#stripe`; **lobby** → `#lobby`; **coda CLI degli abbonamenti** → `#abbonamenti`
 - **Clone con un altro master, eredità delle carte** → `#clone-eredita`
 - **Mondo in 3D, bozze di prova, mappa, voxel luminosi**: un'unità = una casella, kernel (x, y) = three.js (x, z) → `#mondo3d`
@@ -261,9 +261,9 @@ Registro, Luogo, Fucina e Genesi → `docs/architettura-dettagli.md#concilio`.
 `roof`, `commonHouse`; dati: `items` (anche `model`, `aspetto`, `container`, `actions`, `slot`, `bonus`, effetti `mana`), `recipes`, `loot`, `layouts`, `fragments`, `runes`, `spells`.
 
 ### API Lua — l'unica disponibile, il validatore rifiuta il resto
-`ecs.each/get/set/spawn/destroy/first`; `world.free/free_real/tile/speed_at/spawn/player/player_pos/
+`ecs.each/get/set/spawn/destroy/first`; `world.free/free_real/tile/speed_at/spawn/player/player_pos/wanderers/
 nearest/has_tag/break_entity/say/speak/set_tile/open/make_container/store_get/store_set` (il magazzino del modulo, ADR-0138); `inventory.add/remove/count/equipped`; `items.find/def/bonus`; `ui.slot`;
-`input.held`; `bus.emit`; `log`; `hash`; `math string table utf8 pairs pcall…` (`math.random` seminato dal kernel, ADR-0055).
+`input.held(azione, id?)` (i tasti di ogni viandante, ADR-0139); `bus.emit`; `log`; `hash`; `math string table utf8 pairs pcall…` (`math.random` seminato dal kernel, ADR-0055).
 Hook: `update(dt)` (sistemi), `generate_chunk`, `on_spawn(id)`, `on_interact(id, user)`,
 `on_act(id, user, action)`, `on_use(user, item)`, `on_action(user, target, item)`, `on_slot(user, slot, item, panel)`, `on_ui(user, azione)`; `core.items.use(user, item)`;
 `core.effects.apply(target, user, effect, x, y)`. Componenti noti: `luce {raggio, accesa, colore}`, `fuoco {raggio}`,

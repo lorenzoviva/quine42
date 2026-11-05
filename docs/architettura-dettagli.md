@@ -356,6 +356,13 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   fabbricazione, pannelli delle meccaniche, azioni e «Altro…» sulle caselle vanno al server, che li fa con `as`; gli spostamenti di
   slot si vedono subito e, finché sono in viaggio, l'inventario del server non li sovrascrive (`pending`). Ogni
   viandante oltre `io` è un seme suo del `viandante` col mantello del suo colore (`wandererColor`, `tinta: N`).
+- **I pannelli e i tasti di ogni viandante** (ADR-0139, T263): `MyState.campi` porta, per ogni viandante, il valore di ogni `campo` che
+  un `manifest.ui` nomina (`panelFields`: solo testi, numeri e booleani, testi a 200 caratteri); un campo che nessun pannello nomina
+  resta sul server (regola 8f). Sul client `takePanelFields` scrive quei campi nei componenti del suo viandante, mai in quelli del
+  kernel (`needs`, `stati`, `inventory`…). Il client dice al server le direzioni che tiene con `tasti` (solo quando cambiano, senza
+  risposta, nel ritmo di ogni messaggio); il server tiene solo `up down left right` (`setHeldOf`). Lua le legge con
+  `input.held(azione, id)` e vede ogni viandante con `world.wanderers()` (`{id, chi, x, y}`): un sistema che gira una volta sola sul
+  server guida un carro con i tasti di chi guida e rilancia la palla a chiunque la tocchi. Da soli tutto come prima.
 - **Luoghi nuovi con il lock** (ADR-0060, T40): il chunk ricorda chi lo ha voluto vedere per primo (`Chunk.chi`); se il piano non è
   in `maps/` lo paga lui (la chiamata del Cartografo, la carta del luogo, la Fucina di ciò che il piano chiede). Le bozze si pianificano
   vicino a qualunque viandante fuori dallo studio (il master nello studio o scollegato non ferma gli altri); in multigiocatore al più
