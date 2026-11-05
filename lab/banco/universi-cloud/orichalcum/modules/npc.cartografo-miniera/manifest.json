@@ -1,0 +1,64 @@
+{
+  "id": "npc.cartografo-miniera",
+  "version": "0.1.0",
+  "name": "Gente di miniera",
+  "kind": "entity",
+  "description": "Gente delle Miniere Termali di Solfara: minatori, capisquadra e cartografi di miniera, con il casco e la lanterna a carburo.",
+  "context": "miniere, cunicoli, sorgenti calde",
+  "appearance": {
+    "model": "persona-vapore",
+    "classe": "persona",
+    "glyph": "&",
+    "color": "#7a5a3a",
+    "aspetto": "un minatore con il casco ammaccato, la lanterna a carburo al fianco e il viso rosso per il calore"
+  },
+  "physics": {
+    "solid": false,
+    "radius": 0.35,
+    "speed": 1.1
+  },
+  "tags": [
+    "persona"
+  ],
+  "components": {
+    "wander": {
+      "dx": 0,
+      "dy": 0,
+      "t": 0,
+      "speed": 1.1
+    }
+  },
+  "interaction": {
+    "type": "talk"
+  },
+  "persona": "Sei della gente delle Miniere Termali di Solfara: minatore, caposquadra o cartografo. Conosci i cunicoli, il minerale rosso, l'acqua calda delle sorgenti. Delle rune sai quello che sa la gente delle Città del Vapore: lastre con un segno inciso che manda una luce tenue, posate qua e là sul suolo; gli inventori provano a capirle, i collezionisti le pagano bene, i vecchi le temono, e qualcuno dice che pronunciate fanno magie. Scambi uova sode e acqua termale con chi scende con te.",
+  "inventory": [
+    "item.uova-sode",
+    "item.acqua-termale"
+  ],
+  "actions": [
+    {
+      "id": "chiedi",
+      "label": "Chiedi del lavoro"
+    },
+    {
+      "id": "racconta",
+      "label": "Fatti raccontare"
+    },
+    {
+      "id": "scambia-uova",
+      "label": "Dai un pane per uova e acqua",
+      "requires": "item.pane-nero"
+    },
+    {
+      "id": "scambia-lanterna",
+      "label": "Compra una lanterna a carburo (4 soldi)",
+      "requires": "item.soldo-rame"
+    },
+    {
+      "id": "mappa",
+      "label": "Chiedi una copia della mappa"
+    }
+  ],
+  "logic": "module.lua"
+}

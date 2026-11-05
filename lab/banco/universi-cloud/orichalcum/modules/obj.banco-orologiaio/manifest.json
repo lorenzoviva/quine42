@@ -1,0 +1,54 @@
+{
+  "id": "obj.banco-orologiaio",
+  "version": "0.1.0",
+  "name": "Banco dell'orologiaio",
+  "kind": "entity",
+  "description": "Un banco di noce pieno di cassettini, con la lampada a braccio, le pinzette e i quadranti smontati: qui si riparano manometri e si montano orologi.",
+  "context": "botteghe di orologiai e officine di inventori",
+  "appearance": {
+    "model": "banco-orologiaio",
+    "classe": "mobile",
+    "glyph": "π",
+    "color": "#7a5030",
+    "aspetto": "un banco di noce con molti cassettini, una lampada a braccio d'ottone e quadranti smontati"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.45
+  },
+  "tags": [
+    "banco",
+    "legno",
+    "bottega"
+  ],
+  "components": {
+    "banco": {
+      "lavori": 0
+    }
+  },
+  "interaction": {
+    "type": "lua"
+  },
+  "actions": [
+    {
+      "id": "ripara",
+      "label": "Ripara un manometro",
+      "requires": "item.manometro-rotto"
+    },
+    {
+      "id": "orologio",
+      "label": "Monta un orologio da tasca",
+      "requires": "item.molla-acciaio"
+    },
+    {
+      "id": "ingranaggi",
+      "label": "Taglia ingranaggi da una lamina",
+      "requires": "item.lamina-ottone"
+    },
+    {
+      "id": "studia",
+      "label": "Studia i quadranti"
+    }
+  ],
+  "logic": "module.lua"
+}

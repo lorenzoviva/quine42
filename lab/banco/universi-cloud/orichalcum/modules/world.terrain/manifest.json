@@ -1,0 +1,211 @@
+{
+  "id": "world.terrain",
+  "name": "Terreni",
+  "kind": "generator",
+  "version": "0.4.0",
+  "description": "Bozza procedurale continua delle mappe e palette dei terreni delle Città del Vapore (con strati: terreno, pavimento, muro, porta, acqua, vegetazione, roccia). Gli ambienti trasformano la bozza.",
+  "logic": "logic.lua",
+  "tiles": {
+    "g": {
+      "name": "terra battuta",
+      "description": "terra scura e calpestata, con ciuffi d'erba stenta tra la fuliggine",
+      "color": "#6f7a4e",
+      "solid": false,
+      "layer": "ground",
+      "speed": 1
+    },
+    "p": {
+      "name": "strada lastricata",
+      "description": "lastre di pietra consumate dai carri e dai passi",
+      "color": "#a89878",
+      "solid": false,
+      "layer": "ground",
+      "speed": 1.15
+    },
+    "t": {
+      "model": "albero",
+      "name": "boschetto di platani",
+      "description": "platani fitti dalle foglie velate di fuliggine",
+      "color": "#2c6a34",
+      "solid": true,
+      "layer": "vegetation"
+    },
+    "w": {
+      "name": "acqua del canale",
+      "description": "acqua scura e lenta, che sa di ferro",
+      "color": "#3a6a8c",
+      "solid": true,
+      "layer": "liquid"
+    },
+    "r": {
+      "model": "roccia",
+      "name": "roccia",
+      "description": "massi grigi e lastre di scisto",
+      "color": "#8c8d95",
+      "solid": true,
+      "layer": "rock"
+    },
+    "h": {
+      "name": "muro di mattoni",
+      "description": "mattoni rossi anneriti dal fumo",
+      "color": "#7e4434",
+      "solid": true,
+      "layer": "wall"
+    },
+    "f": {
+      "name": "pavimento di assi",
+      "description": "assi di quercia unte d'olio di macchina",
+      "color": "#8e6a44",
+      "solid": false,
+      "layer": "floor",
+      "indoor": true
+    },
+    "d": {
+      "name": "porta",
+      "description": "porta di legno con le borchie d'ottone",
+      "color": "#c8a040",
+      "solid": false,
+      "layer": "door"
+    },
+    "m": {
+      "name": "campo arato",
+      "description": "solchi di terra scura pronti per la trebbiatrice",
+      "color": "#6e5434",
+      "solid": false,
+      "layer": "ground",
+      "speed": 0.8
+    },
+    "s": {
+      "name": "sabbia",
+      "color": "#d8c27a",
+      "solid": false,
+      "speed": 0.85,
+      "layer": "ground",
+      "description": "sabbia grigia di riva, mescolata a polvere di carbone"
+    },
+    "j": {
+      "model": "palma",
+      "name": "serra",
+      "color": "#1f6b34",
+      "solid": true,
+      "layer": "vegetation",
+      "description": "piante tropicali fittissime, come nelle serre di vetro dei ricchi"
+    },
+    "o": {
+      "name": "mare",
+      "color": "#1d4f8a",
+      "solid": true,
+      "layer": "liquid",
+      "description": "acqua profonda del mare, grigia sotto il fumo dei bastimenti"
+    },
+    "k": {
+      "model": "masso-muschioso",
+      "name": "montagna",
+      "color": "#6e6a66",
+      "solid": true,
+      "layer": "rock",
+      "description": "pareti di scisto e di roccia rossa, invalicabili"
+    },
+    "n": {
+      "name": "neve",
+      "color": "#e8eef2",
+      "solid": false,
+      "speed": 0.7,
+      "layer": "ground",
+      "description": "neve alta, grigia in superficie, che rallenta il passo"
+    },
+    "b": {
+      "name": "muro di pietra",
+      "color": "#8a8580",
+      "solid": true,
+      "layer": "wall",
+      "description": "grossi blocchi di pietra squadrata: fonderie, magazzini, torri"
+    },
+    "q": {
+      "name": "muro di mattoni rossi",
+      "color": "#9a4a32",
+      "solid": true,
+      "layer": "wall",
+      "description": "mattoni rossi cotti al forno, con le fasce di ferro agli angoli"
+    },
+    "a": {
+      "name": "parete di assi",
+      "color": "#c9a85a",
+      "solid": true,
+      "layer": "wall",
+      "description": "tavole di legno inchiodate, di baracche e capanni"
+    },
+    "c": {
+      "name": "cancellata di ferro",
+      "color": "#7a5a34",
+      "solid": true,
+      "layer": "wall",
+      "description": "sbarre di ferro battuto con le punte a lancia"
+    },
+    "z": {
+      "name": "passerella di ferro",
+      "color": "#8b6a42",
+      "solid": false,
+      "layer": "floor",
+      "description": "lamiera a rombi rivettata, sopra l'acqua e sopra i fossi"
+    },
+    "l": {
+      "name": "pavimento di pietra",
+      "color": "#9c958c",
+      "solid": false,
+      "layer": "floor",
+      "indoor": true,
+      "description": "lastre di pietra consumate dai passi"
+    },
+    "v": {
+      "name": "colata di metallo",
+      "color": "#e2581e",
+      "solid": true,
+      "layer": "liquid",
+      "description": "metallo fuso che scorre nei canali di colata: nessuno lo attraversa"
+    },
+    "x": {
+      "name": "binari",
+      "description": "traversine di legno e rotaie di ferro lucide",
+      "color": "#5c544c",
+      "solid": false,
+      "layer": "ground",
+      "speed": 1.05
+    },
+    "e": {
+      "name": "selciato",
+      "description": "cubetti di porfido grigi e rossi, posati a ventaglio",
+      "color": "#8a7a70",
+      "solid": false,
+      "layer": "ground",
+      "speed": 1.1
+    },
+    "y": {
+      "name": "scorie",
+      "description": "scorie nere e vetrose delle colate, che scricchiolano sotto le scarpe",
+      "color": "#3e3a3c",
+      "solid": false,
+      "layer": "ground",
+      "speed": 0.85
+    },
+    "u": {
+      "name": "lamiera",
+      "description": "pareti di lamiera rivettata, calde al tatto",
+      "color": "#6a6e74",
+      "solid": true,
+      "layer": "wall"
+    },
+    "i": {
+      "name": "pavimento di ghisa",
+      "description": "piastre di ghisa forate, che risuonano sotto i passi",
+      "color": "#4e5258",
+      "solid": false,
+      "layer": "floor",
+      "indoor": true
+    }
+  },
+  "roof": {
+    "color": "#4e5560"
+  },
+  "commonHouse": "case di mattoni rossi strette e alte, con un comignolo e il tetto di ardesia"
+}

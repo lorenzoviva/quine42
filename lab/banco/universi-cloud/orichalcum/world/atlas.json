@@ -1,0 +1,114 @@
+{
+  "regioni": [
+    {
+      "id": "fornace-alta",
+      "nome": "Fornace Alta",
+      "descrizione": "il cuore della città: la Piazza della Pesa con la grande bilancia d'ottone, case di mattoni strette e alte, lampioni a gas e il chiasso dei giornalai",
+      "ambiente": "piazza_pesa",
+      "centro": [
+        0,
+        0
+      ],
+      "raggio": 1
+    },
+    {
+      "id": "fonderie-ramelli",
+      "nome": "Fonderie Ramelli",
+      "descrizione": "il recinto di pietra della Casa Ramelli, con i forni d'oricalco che non si spengono mai, i canali di colata e le montagne di scorie nere",
+      "ambiente": "fonderia",
+      "centro": [
+        0,
+        -2
+      ],
+      "raggio": 1
+    },
+    {
+      "id": "miniere-solfara",
+      "nome": "Miniere Termali di Solfara",
+      "descrizione": "colline di roccia rossa bucate di cunicoli, dove l'acqua sgorga calda e fumante e i carrelli scendono sui binari",
+      "ambiente": "miniera_termale",
+      "centro": [
+        1,
+        -4
+      ],
+      "raggio": 2
+    },
+    {
+      "id": "scalo-ferrovia",
+      "nome": "Scalo della Ferrovia Sospesa",
+      "descrizione": "binari, scambi e rimesse sotto i piloni del viadotto, dove i vagoni del minerale vengono agganciati alla rotaia alta",
+      "ambiente": "scalo_ferroviario",
+      "centro": [
+        0,
+        3
+      ],
+      "raggio": 1
+    },
+    {
+      "id": "torre-ormeggio",
+      "nome": "Torre d'Ormeggio di Vetta Bruna",
+      "descrizione": "la torre di ferro sulla collina di levante, con i dirigibili ormeggiati ai cavi e i piazzali degli aeronauti",
+      "ambiente": "torre_ormeggio",
+      "centro": [
+        3,
+        0
+      ],
+      "raggio": 1
+    },
+    {
+      "id": "porto-bastimenti",
+      "nome": "Porto dei Bastimenti",
+      "descrizione": "banchine di pietra, passerelle di ferro e magazzini di lamiera dove attraccano i bastimenti del rame",
+      "ambiente": "porto_bastimenti",
+      "centro": [
+        -3,
+        0
+      ],
+      "raggio": 1
+    },
+    {
+      "id": "quartiere-telai",
+      "nome": "Quartiere dei Telai",
+      "descrizione": "capannoni dei telai a vapore e case operaie, dove le tessitrici cantano le notizie da una fila all'altra",
+      "ambiente": "quartiere_telai",
+      "centro": [
+        2,
+        2
+      ],
+      "raggio": 1
+    },
+    {
+      "id": "officine-bruma",
+      "nome": "Officine del Canale Bruma",
+      "descrizione": "officine di lamiera lungo il canale, passerelle, trucioli di ferro e inventori che non dormono",
+      "ambiente": "officine_canale",
+      "centro": [
+        -2,
+        2
+      ],
+      "raggio": 1
+    },
+    {
+      "id": "campagne-trebbie",
+      "nome": "Campagne delle Trebbie",
+      "descrizione": "campi di grano e di orzo fuori città, cascine di assi e trebbiatrici a caldaia che fumano sull'aia",
+      "ambiente": "campagne_trebbie",
+      "centro": [
+        1,
+        6
+      ],
+      "raggio": 2
+    },
+    {
+      "id": "giardino-fuliggine",
+      "nome": "Giardino della Fuliggine",
+      "descrizione": "il parco dei platani anneriti, con la fontana di ghisa e le panchine dove i macchinisti fumano la pipa",
+      "ambiente": "giardino_fuliggine",
+      "centro": [
+        3,
+        -2
+      ],
+      "raggio": 1
+    }
+  ]
+}

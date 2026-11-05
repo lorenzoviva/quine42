@@ -1,0 +1,58 @@
+<!-- Valvola con manometro: scritto a mano per orichalcum (Cantiere 4A), corpo fisso e varianti scelte a ogni seme. -->
+<sequence values="BRVOQN0123456789abcdefghijk" size="20 20 20" symmetry="(xy)" name="Valvola con manometro">
+  <color symbol="R" value="b0603a" name="tubo di rame"/>
+  <color symbol="V" value="c0302a" name="volantino rosso"/>
+  <color symbol="O" value="c8a04a" name="ottone"/>
+  <color symbol="Q" value="f0ece0" name="quadrante"/>
+  <color symbol="N" value="2a2c30" name="base"/>
+  <color symbol="0" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="1" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="2" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="3" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="4" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="5" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="6" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="7" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="8" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="9" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="a" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="b" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="c" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="d" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="e" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="f" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="g" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="h" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="i" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="j" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="k" value="ff00ff" name="variante" hidden="True"/>
+  <box at="10 10 0" size="8 8 2" color="N"/>
+  <cylinder at="10 10 2" size="4 4 12" color="R" on="B"/>
+  <cylinder at="10 10 13" size="10 10 1" color="V" on="B"/>
+  <cylinder at="10 10 13" size="6 6 1" color="B" on="V"/>
+  <box at="10 10 13" size="10 2 1" color="V" on="B"/>
+  <box at="10 10 13" size="2 10 1" color="V" on="B"/>
+  <cylinder at="10 10 14" size="6 6 4" color="1" on="B"/>
+  <box at="10 14 15" size="2 1 2" color="3" on="B"/>
+  <cylinder at="4 10 5" size="5 5 5" color="6" on="B"/>
+  <box at="7 10 6" size="4 2 2" color="6" on="B"/>
+  <box at="4 13 7" size="2 1 2" color="8" on="B"/>
+  <cylinder at="16 10 5" size="5 5 5" color="b" on="B"/>
+  <box at="13 10 6" size="4 2 2" color="b" on="B"/>
+  <box at="16 13 7" size="2 1 2" color="d" on="B"/>
+  <one steps="1"><rule in="1" out="0"/></one>
+  <one steps="1"><rule in="6" out="5"/></one>
+  <one steps="1"><rule in="b" out="a"/></one>
+  <one steps="1"><rule in="0" out="2"/><rule in="5" out="7"/><rule in="a" out="c"/></one>
+  <all><rule in="21" out="22"/><rule in="2 1" out="2 2"/><rule in="1 2" out="2 2"/><rule in="23" out="24"/><rule in="2 3" out="2 4"/><rule in="3 2" out="4 2"/><rule in="41" out="42"/><rule in="4 1" out="4 2"/><rule in="1 4" out="2 4"/><rule in="43" out="44"/><rule in="4 3" out="4 4"/><rule in="3 4" out="4 4"/><rule in="76" out="77"/><rule in="7 6" out="7 7"/><rule in="6 7" out="7 7"/><rule in="78" out="79"/><rule in="7 8" out="7 9"/><rule in="8 7" out="9 7"/><rule in="96" out="97"/><rule in="9 6" out="9 7"/><rule in="6 9" out="7 9"/><rule in="98" out="99"/><rule in="9 8" out="9 9"/><rule in="8 9" out="9 9"/><rule in="cb" out="cc"/><rule in="c b" out="c c"/><rule in="b c" out="c c"/><rule in="cd" out="ce"/><rule in="c d" out="c e"/><rule in="d c" out="e c"/><rule in="eb" out="ec"/><rule in="e b" out="e c"/><rule in="b e" out="c e"/><rule in="ed" out="ee"/><rule in="e d" out="e e"/><rule in="d e" out="e e"/></all>
+  <all><rule in="2" out="O"/><rule in="4" out="Q"/><rule in="7" out="O"/><rule in="9" out="Q"/><rule in="c" out="O"/><rule in="e" out="Q"/><rule in="1" out="B"/><rule in="3" out="B"/><rule in="0" out="B"/><rule in="6" out="B"/><rule in="8" out="B"/><rule in="5" out="B"/><rule in="b" out="B"/><rule in="d" out="B"/><rule in="a" out="B"/></all>
+  <line at="10 10 4" to="10 2 4" r="1" color="g" on="B"/>
+  <box at="10 2 0" size="3 3 5" color="g" on="B"/>
+  <line at="10 10 4" to="10 18 4" r="1" color="j" on="B"/>
+  <box at="10 18 0" size="3 3 5" color="j" on="B"/>
+  <one steps="1"><rule in="g" out="f"/></one>
+  <one steps="1"><rule in="j" out="i"/></one>
+  <one steps="1"><rule in="f" out="h"/><rule in="i" out="k"/></one>
+  <all><rule in="hg" out="hh"/><rule in="h g" out="h h"/><rule in="g h" out="h h"/><rule in="kj" out="kk"/><rule in="k j" out="k k"/><rule in="j k" out="k k"/></all>
+  <all><rule in="h" out="R"/><rule in="k" out="R"/><rule in="g" out="B"/><rule in="f" out="B"/><rule in="j" out="B"/><rule in="i" out="B"/></all>
+</sequence>

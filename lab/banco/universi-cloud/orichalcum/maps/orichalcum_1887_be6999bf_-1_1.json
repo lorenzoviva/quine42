@@ -1,0 +1,41 @@
+{
+ "plan": {
+  "place": {
+   "name": "Officine del Canale Bruma",
+   "description": "Officine di lamiera lungo il canale, passerelle di ferro e l'officina disordinata dell'inventore Ingegni."
+  },
+  "layout": "officine_canale",
+  "objects": [
+   {
+    "module": "npc.caldaista",
+    "where": "fuori"
+   },
+   {
+    "module": "npc.orologiaia",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.caldaia",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.banco-orologiaio",
+    "where": "ovunque"
+   },
+   {
+    "module": "obj.valvola-manometro",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Tubo di rame",
+   "Viti e bulloni",
+   "Straccio unto"
+  ],
+  "fresh": [],
+  "runes": [
+   "molla",
+   "scintilla"
+  ]
+ }
+}

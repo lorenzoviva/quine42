@@ -1,0 +1,52 @@
+{
+  "regole": [
+    {
+      "chiave": "caldaia-senza-acqua",
+      "testo": "Accendere una caldaia senz'acqua",
+      "possibile": false,
+      "racconto": "Una caldaia senz'acqua non si accende: il caldaista ti ferma la mano prima che tu ci metta il fuoco, e ti spiega che così scoppiano.",
+      "effetti": []
+    },
+    {
+      "chiave": "bere-acqua-termale",
+      "testo": "Bere l'acqua delle sorgenti di Solfara",
+      "possibile": true,
+      "racconto": "L'acqua termale è calda e sa di ferro, ma disseta; i minatori la bevono da sempre.",
+      "effetti": [
+        "bisogni"
+      ]
+    },
+    {
+      "chiave": "toccare-colata",
+      "testo": "Toccare l'oricalco fuso",
+      "possibile": false,
+      "racconto": "Il metallo fuso brucia anche da lontano: nessuno si avvicina a un canale di colata senza grembiule e senza pinze.",
+      "effetti": []
+    },
+    {
+      "chiave": "salire-viadotto",
+      "testo": "Arrampicarsi sui piloni del viadotto",
+      "possibile": false,
+      "racconto": "I piloni sono lisci e unti di grasso, e le guardie della Compagnia tirano giù chiunque ci provi.",
+      "effetti": []
+    },
+    {
+      "chiave": "scambiare-capsula",
+      "testo": "Mandare una capsula con il telegrafo pneumatico",
+      "possibile": true,
+      "racconto": "Si mette un soldo nella fessura, si chiude la capsula, si tira la leva: la capsula sparisce con un soffio e arriva dall'altra parte della città.",
+      "effetti": [
+        "consuma"
+      ]
+    },
+    {
+      "chiave": "tarare-manometro",
+      "testo": "Tarare un manometro",
+      "possibile": true,
+      "racconto": "Con il cacciavite fine e un po' di pazienza la lancetta torna sullo zero; Selene Vitti lo fa in un minuto, gli altri in un'ora.",
+      "effetti": [
+        "messaggio"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+ "plan": {
+  "place": {
+   "name": "Campagne delle Trebbie",
+   "description": "Campi arati fuori città, una cascina di assi e la trebbiatrice a caldaia ferma sull'aia."
+  },
+  "layout": "campagne_trebbie",
+  "objects": [
+   {
+    "module": "obj.caldaia",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Mela renetta",
+   "Mela renetta",
+   "Pane nero di segale"
+  ],
+  "fresh": [],
+  "runes": [
+   "vita",
+   "terra"
+  ]
+ }
+}

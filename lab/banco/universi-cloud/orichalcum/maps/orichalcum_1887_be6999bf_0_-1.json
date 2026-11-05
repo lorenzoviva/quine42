@@ -1,0 +1,50 @@
+{
+ "plan": {
+  "place": {
+   "name": "Fonderie Ramelli",
+   "description": "Il recinto di pietra delle Fonderie Ramelli: forni d'oricalco, canali di colata e montagne di scorie nere."
+  },
+  "layout": "fonderia",
+  "objects": [
+   {
+    "module": "npc.fonditrice",
+    "where": "fuori"
+   },
+   {
+    "module": "npc.fonditrice",
+    "where": "fuori"
+   },
+   {
+    "module": "npc.gatto-fabbrica",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.fucina-oricalco",
+    "where": "ovunque"
+   },
+   {
+    "module": "obj.caldaia",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.valvola-manometro",
+    "where": "fuori"
+   },
+   {
+    "module": "npc.automa-guardia",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Minerale rosso di Solfara",
+   "Lingotto di rame",
+   "Pane di zinco",
+   "Carbone"
+  ],
+  "fresh": [],
+  "runes": [
+   "carbone",
+   "ottone"
+  ]
+ }
+}

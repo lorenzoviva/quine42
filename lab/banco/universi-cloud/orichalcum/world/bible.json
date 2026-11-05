@@ -1,0 +1,53 @@
+{
+  "titolo": "Le Città del Vapore di Oricalco",
+  "tono": "concreto e caldo, con un pizzico di meraviglia: un'età del vapore e dell'ottone, fuliggine e lampioni a gas, gente che lavora e spera",
+  "sintesi": "Fornace Alta è una città di mattoni cresciuta attorno alle fonderie d'oricalco, la lega rosso-dorata che fa girare le caldaie di mezzo mondo. Sopra i tetti corre la ferrovia sospesa, alle torri d'ormeggio dormono i dirigibili, sotto le colline fumano le miniere termali. Qua e là, sul suolo, si trovano le rune: lastre con un segno inciso che manda una luce tenue.",
+  "storia": "Cento anni fa Fornace Alta era un villaggio di carbonai sulla collina della Pesa. Poi Ottavia Ramelli trovò nelle sorgenti calde di Solfara un minerale rosso che, fuso con il rame, dava un metallo che non si stanca: l'oricalco. Le prime fonderie nacquero lungo il fiume Bruma, i caldaisti si riunirono in gilda, la Compagnia della Ferrovia Sospesa gettò i viadotti sopra i tetti per portare il minerale dalle miniere alle colate. Oggi le corporazioni del vapore si dividono la città: i Fonditori della Casa Ramelli tengono le colate, la Compagnia tiene i binari, la Gilda dei Caldaisti tiene il fuoco, e i dirigibili della Torre d'Ormeggio portano la lega oltre le montagne. Il prezzo dell'oricalco lo decide ogni lunedì la Pesa Grande in piazza: quando sale, la città mangia; quando scende, si sciopera.",
+  "luoghi": [
+    "Piazza della Pesa",
+    "Fonderie Ramelli",
+    "Scalo della Ferrovia Sospesa",
+    "Torre d'Ormeggio di Vetta Bruna",
+    "Miniere Termali di Solfara",
+    "Quartiere dei Telai",
+    "Officine del Canale Bruma",
+    "Porto dei Bastimenti",
+    "Campagne delle Trebbie",
+    "Giardino della Fuliggine"
+  ],
+  "personaggi": [
+    "Ottavia Ramelli la Vecchia, che trovò il minerale rosso e ora non esce più dalla sua serra di vetro",
+    "Bruno Caldera, capo della Gilda dei Caldaisti, che parla piano e conta tutto",
+    "Selene Vitti, orologiaia del Quartiere dei Telai, che ripara i manometri di mezza città",
+    "Ilario Fumagalli, macchinista della linea alta, che conosce ogni curva del viadotto a occhi chiusi",
+    "Marta Ventidue, aeronauta della Torre d'Ormeggio, tornata dalle montagne con un dirigibile bucato e un debito",
+    "Teodoro Gessi, cartografo di miniera, che disegna i cunicoli di Solfara a memoria",
+    "i Guardiani di ottone, automi a molla che fanno la ronda attorno ai magazzini della Casa Ramelli"
+  ],
+  "fatti": [
+    "L'oricalco si ottiene fondendo il minerale rosso di Solfara con il rame, a una temperatura che solo le caldaie di ghisa reggono.",
+    "La Pesa Grande decide il prezzo dell'oricalco ogni lunedì mattina, in piazza, davanti a tutti.",
+    "La Gilda dei Caldaisti chiede da un anno turni di dieci ore invece che di dodici; la Casa Ramelli non risponde.",
+    "La ferrovia sospesa porta il minerale dalle miniere alle fonderie su vagoni di ferro appesi a una rotaia sola.",
+    "I manometri di tutta la città si tarano nel laboratorio di Selene Vitti, una volta l'anno.",
+    "Il telegrafo pneumatico manda capsule di ottone da un capo all'altro della città in pochi minuti, per un soldo.",
+    "Dodici anni fa una caldaia della fonderia vecchia scoppiò: da allora ogni caldaia ha due valvole di sfogo.",
+    "I dirigibili si ormeggiano alla Torre di Vetta Bruna e partono solo con il vento da ponente.",
+    "Nelle Miniere Termali l'acqua sgorga calda come il tè, e i minatori ci cuociono le uova a mezzogiorno.",
+    "Le operaie dei telai si passano le notizie cantando, un verso per ogni fila di macchine.",
+    "La moneta della città è il soldo di rame; dieci soldi fanno una lira d'ottone.",
+    "Gli inventori squattrinati depositano i brevetti al Banco dei Brevetti, che sta sopra la farmacia."
+  ],
+  "misteri": [
+    "Qualcuno dice che la Casa Ramelli allunga l'oricalco con rame comune, e che per questo le caldaie nuove fischiano.",
+    "Nel cunicolo diciassette di Solfara c'è una porta di ghisa murata; i minatori ci lasciano un uovo sodo quando passano.",
+    "Il brevetto dell'ingegnere Amedeo Lenti, sparito il giorno dello scoppio, non è mai stato ritrovato.",
+    "Le vecchie dei telai dicono che una runa in tasca porta fortuna a chi lavora vicino alle caldaie; gli inventori ridono, ma una in tasca la tengono anche loro.",
+    "Di notte un dirigibile senza fanali passa sopra il porto; i doganieri dicono che è contrabbando di rame."
+  ],
+  "usanze": [
+    "Prima di accendere una caldaia nuova il caldaista ci batte sopra tre volte con la chiave inglese e dice il nome di chi l'ha fatta.",
+    "Chi riceve una capsula del telegrafo pneumatico la rimanda vuota, il giorno dopo, con dentro un chicco di caffè: vuol dire che è arrivata.",
+    "Il lunedì della Pesa Grande nessuno compra niente prima di mezzogiorno."
+  ]
+}

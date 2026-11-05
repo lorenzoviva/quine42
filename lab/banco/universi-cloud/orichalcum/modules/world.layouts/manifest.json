@@ -1,0 +1,820 @@
+{
+  "id": "world.layouts",
+  "name": "Ambienti",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "Gli ambienti delle Città del Vapore come regole di riscrittura (stile MarkovJunior) applicati alla bozza del terreno, provati prima di entrare nel mondo.",
+  "layouts": {
+    "piazza_pesa": {
+      "name": "Piazza della Pesa",
+      "description": "una piazza selciata con la grande bilancia, case di mattoni strette attorno e lampioni a gas",
+      "environment": "misto",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "[tw]",
+                "out": "g",
+                "p": 0.9
+              }
+            ]
+          },
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "g",
+                "out": "e",
+                "p": 0.75
+              }
+            ]
+          },
+          {
+            "type": "stamp",
+            "shape": "casa",
+            "codes": {
+              "muro": "q",
+              "pavimento": "f"
+            },
+            "count": 3
+          },
+          {
+            "type": "stamp",
+            "shape": "pozzo"
+          }
+        ]
+      }
+    },
+    "quartiere_mattoni": {
+      "name": "Quartiere di mattoni",
+      "description": "file di case di mattoni rossi strette e alte, cortili con i panni stesi, comignoli fumanti",
+      "environment": "misto",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "[tw]",
+                "out": "g",
+                "p": 0.9
+              }
+            ]
+          },
+          {
+            "type": "stamp",
+            "shape": "casa",
+            "codes": {
+              "muro": "q",
+              "pavimento": "f"
+            },
+            "count": 5
+          },
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "g",
+                "out": "e",
+                "p": 0.35
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "quartiere_telai": {
+      "name": "Quartiere dei Telai",
+      "description": "capannoni dei telai a vapore e case operaie, cortili pieni di matasse e di voci",
+      "environment": "misto",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "[tw]",
+                "out": "g",
+                "p": 0.9
+              }
+            ]
+          },
+          {
+            "type": "stamp",
+            "shape": "casa",
+            "codes": {
+              "muro": "q",
+              "pavimento": "l"
+            },
+            "count": 4
+          },
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "g",
+                "out": "e",
+                "p": 0.5
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "fonderia": {
+      "name": "Fonderia",
+      "description": "un recinto di pietra con i forni d'oricalco, canali di colata e montagne di scorie",
+      "environment": "misto",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "[tw]",
+                "out": "g",
+                "p": 0.9
+              }
+            ]
+          },
+          {
+            "type": "stamp",
+            "shape": "fortezza",
+            "codes": {
+              "muro": "b",
+              "pavimento": "i"
+            }
+          },
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "g",
+                "out": "y",
+                "p": 0.55
+              }
+            ]
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "yyyy/yyyy/yyyy",
+                "out": "yyyy/yvvy/yyyy"
+              }
+            ],
+            "steps": 2
+          }
+        ]
+      }
+    },
+    "scalo_ferroviario": {
+      "name": "Scalo ferroviario",
+      "description": "binari paralleli, uno scambio, la pensilina della stazione e i vagoni del minerale",
+      "environment": "misto",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "[tw]",
+                "out": "g",
+                "p": 0.9
+              }
+            ]
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "gggggggggg",
+                "out": "xxxxxxxxxx"
+              }
+            ],
+            "steps": 4
+          },
+          {
+            "type": "stamp",
+            "shape": "casa",
+            "codes": {
+              "muro": "q",
+              "pavimento": "i"
+            },
+            "count": 1
+          },
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "g",
+                "out": "y",
+                "p": 0.2
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "torre_ormeggio": {
+      "name": "Torre d'ormeggio",
+      "description": "una torre di ferro e lamiera dove si ormeggiano i dirigibili, piazzali di selciato e cavi tesi",
+      "environment": "misto",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "[tw]",
+                "out": "g",
+                "p": 0.9
+              }
+            ]
+          },
+          {
+            "type": "stamp",
+            "shape": "torre",
+            "codes": {
+              "muro": "u",
+              "pavimento": "i"
+            }
+          },
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "g",
+                "out": "e",
+                "p": 0.4
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "miniera_termale": {
+      "name": "Miniera termale",
+      "description": "cunicoli nella roccia rossa, pozze d'acqua calda che fumano, carrelli sui binari",
+      "environment": "interno",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "t",
+                "out": "r",
+                "p": 0.6
+              }
+            ]
+          },
+          {
+            "type": "stamp",
+            "shape": "dungeon",
+            "codes": {
+              "muro": "r",
+              "pavimento": "l"
+            }
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "ggg/ggg",
+                "out": "gwg/ggg"
+              }
+            ],
+            "steps": 3
+          },
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "g",
+                "out": "y",
+                "p": 0.25
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "campagne_trebbie": {
+      "name": "Campagne delle trebbie",
+      "description": "campi arati e stoppie, una cascina di assi e la trebbiatrice a caldaia ferma sull'aia",
+      "environment": "esterno",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "t",
+                "out": "g",
+                "p": 0.85
+              }
+            ]
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "gggg/gggg/gggg",
+                "out": "mmmm/mmmm/pppp"
+              }
+            ],
+            "steps": 5
+          },
+          {
+            "type": "stamp",
+            "shape": "casa",
+            "codes": {
+              "muro": "a",
+              "pavimento": "f"
+            },
+            "count": 1
+          }
+        ]
+      }
+    },
+    "porto_bastimenti": {
+      "name": "Porto dei bastimenti",
+      "description": "banchine di pietra, passerelle di ferro sull'acqua, magazzini di lamiera e casse di rame",
+      "environment": "misto",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "t",
+                "out": "g",
+                "p": 0.9
+              }
+            ]
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "gggggg/gggggg/gggggg",
+                "out": "wwwwww/wwwwww/zzzzzz"
+              }
+            ],
+            "steps": 2
+          },
+          {
+            "type": "stamp",
+            "shape": "casa",
+            "codes": {
+              "muro": "u",
+              "pavimento": "i"
+            },
+            "count": 2
+          },
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "g",
+                "out": "e",
+                "p": 0.3
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "officine_canale": {
+      "name": "Officine del canale",
+      "description": "officine di lamiera lungo un canale, passerelle, scorie e trucioli di ferro",
+      "environment": "misto",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "t",
+                "out": "g",
+                "p": 0.9
+              }
+            ]
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "gggggggg/gggggggg",
+                "out": "wwwwwwww/zzzzzzzz"
+              }
+            ],
+            "steps": 1
+          },
+          {
+            "type": "stamp",
+            "shape": "casa",
+            "codes": {
+              "muro": "u",
+              "pavimento": "i"
+            },
+            "count": 3
+          },
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "g",
+                "out": "y",
+                "p": 0.2
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "giardino_fuliggine": {
+      "name": "Giardino della fuliggine",
+      "description": "un parco di platani anneriti, viali di ghiaia e una fontana di ghisa",
+      "environment": "esterno",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "g",
+                "out": "t",
+                "p": 0.22
+              }
+            ]
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "ttt/ttt/ttt",
+                "out": "ggg/ggg/ggg"
+              }
+            ],
+            "steps": 4
+          },
+          {
+            "type": "stamp",
+            "shape": "pozzo"
+          }
+        ]
+      }
+    },
+    "baracche": {
+      "name": "Baracche dei fuochisti",
+      "description": "capanni di assi e di lamiera attorno a un cortile, bidoni e fumo di stufe",
+      "environment": "misto",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "[tw]",
+                "out": "g",
+                "p": 0.9
+              }
+            ]
+          },
+          {
+            "type": "stamp",
+            "shape": "capanne",
+            "codes": {
+              "muro": "a",
+              "pavimento": "f"
+            }
+          },
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "g",
+                "out": "y",
+                "p": 0.3
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "magazzini_ramelli": {
+      "name": "Magazzini Ramelli",
+      "description": "capannoni di pietra dietro una cancellata di ferro, dove si ammassano i lingotti",
+      "environment": "misto",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "[tw]",
+                "out": "g",
+                "p": 0.9
+              }
+            ]
+          },
+          {
+            "type": "stamp",
+            "shape": "caserma",
+            "codes": {
+              "muro": "b",
+              "pavimento": "i"
+            }
+          },
+          {
+            "type": "stamp",
+            "shape": "recinto",
+            "codes": {
+              "recinto": "c"
+            }
+          },
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "g",
+                "out": "e",
+                "p": 0.3
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "bosco": {
+      "name": "Bosco",
+      "description": "alberi fitti con radure e sentieri di animali",
+      "environment": "esterno",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "g",
+                "out": "t",
+                "p": 0.35
+              }
+            ]
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "ttt/ttt/ttt",
+                "out": "ggg/ggg/ggg"
+              }
+            ],
+            "steps": 3
+          }
+        ]
+      }
+    },
+    "campi": {
+      "name": "Campi",
+      "description": "appezzamenti coltivati divisi da viottoli, un capanno",
+      "environment": "esterno",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "t",
+                "out": "g",
+                "p": 0.9
+              }
+            ]
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "gggg/gggg/gggg",
+                "out": "mmmm/mmmm/pppp"
+              }
+            ],
+            "steps": 5
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "gggg/gggg/gggg/gggg",
+                "out": "hhhh/hffh/hffh/hhdh"
+              }
+            ],
+            "steps": 1
+          }
+        ]
+      }
+    },
+    "rovine": {
+      "name": "Rovine",
+      "description": "colonne spezzate e muri crollati di un edificio dimenticato",
+      "environment": "esterno",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "ggg/ggg/ggg",
+                "out": "r*r/***/r*r"
+              }
+            ],
+            "steps": 3
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "gggg",
+                "out": "hh*h"
+              }
+            ],
+            "steps": 4
+          },
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "g",
+                "out": "p",
+                "p": 0.08
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "dungeon": {
+      "name": "Sotterraneo",
+      "description": "cunicoli e stanze scavati nella roccia, umidi e bui",
+      "environment": "interno",
+      "program": {
+        "type": "stamp",
+        "shape": "dungeon",
+        "codes": {
+          "roccia": "k",
+          "pavimento": "l"
+        }
+      }
+    },
+    "deserto": {
+      "name": "Deserto",
+      "description": "dune di sabbia, rocce bruciate dal sole, rare oasi",
+      "environment": "esterno",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "[gt]",
+                "out": "s",
+                "p": 1
+              }
+            ]
+          },
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "s",
+                "out": "r",
+                "p": 0.04
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "giungla": {
+      "name": "Giungla",
+      "description": "una giungla fitta, umida, con radure e sentieri di animali",
+      "environment": "esterno",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "[gt]",
+                "out": "j",
+                "p": 0.62
+              }
+            ]
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "jjj/jjj",
+                "out": "ggg/ggg"
+              }
+            ],
+            "steps": 4
+          }
+        ]
+      }
+    },
+    "montagne": {
+      "name": "Montagne",
+      "description": "pareti di roccia, passi stretti e neve sulle cime",
+      "environment": "esterno",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "g",
+                "out": "r",
+                "p": 0.25
+              }
+            ]
+          },
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "r",
+                "out": "k",
+                "p": 0.5
+              }
+            ]
+          },
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "g",
+                "out": "n",
+                "p": 0.2
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "lago": {
+      "name": "Lago",
+      "description": "un lago tranquillo tra i canneti",
+      "environment": "esterno",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "gggg/gggg/gggg",
+                "out": "wwww/wwww/wwww"
+              }
+            ],
+            "steps": 3
+          },
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "w",
+                "out": "g",
+                "p": 0.05
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "id": "npc.fonditrice",
+  "version": "0.1.0",
+  "name": "Fonditrice",
+  "kind": "entity",
+  "description": "Gente delle fonderie: colatrici, capi forno e direttori della Casa Ramelli, con il grembiule di cuoio e gli occhialoni affumicati.",
+  "context": "fonderie, magazzini, la fonderia vecchia",
+  "appearance": {
+    "model": "persona-vapore",
+    "classe": "persona",
+    "glyph": "&",
+    "color": "#a8442a",
+    "aspetto": "una fonditrice con il grembiule di cuoio bruciacchiato, gli occhialoni affumicati sul collo e le pinze da colata"
+  },
+  "physics": {
+    "solid": false,
+    "radius": 0.35,
+    "speed": 1.1
+  },
+  "tags": [
+    "persona"
+  ],
+  "components": {
+    "wander": {
+      "dx": 0,
+      "dy": 0,
+      "t": 0,
+      "speed": 1.1
+    }
+  },
+  "interaction": {
+    "type": "talk"
+  },
+  "persona": "Sei della gente delle fonderie d'oricalco delle Città del Vapore: colatrice, capo forno o direttore. Conosci il minerale rosso, il rame, il calore del forno e il colore della lega. Delle rune sai quello che sa la gente delle Città del Vapore: lastre con un segno inciso che manda una luce tenue, posate qua e là sul suolo; gli inventori provano a capirle, i collezionisti le pagano bene, i vecchi le temono, e qualcuno dice che pronunciate fanno magie. Scambi minerale e lingotti con chi lavora sodo.",
+  "inventory": [
+    "item.unguento-ustioni",
+    "item.minerale-rosso"
+  ],
+  "actions": [
+    {
+      "id": "chiedi",
+      "label": "Chiedi del lavoro"
+    },
+    {
+      "id": "racconta",
+      "label": "Fatti raccontare"
+    },
+    {
+      "id": "scambia-minerale",
+      "label": "Dai tre pezzi di carbone per del minerale",
+      "requires": "item.carbone"
+    },
+    {
+      "id": "scambia-oricalco",
+      "label": "Vendi un lingotto d'oricalco",
+      "requires": "item.lingotto-oricalco"
+    }
+  ],
+  "logic": "module.lua"
+}

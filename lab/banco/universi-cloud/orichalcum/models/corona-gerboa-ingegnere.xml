@@ -1,0 +1,302 @@
+﻿<!--
+corona-gerboa-ingegnere: Il Tecnico dei Sistemi del Concilio (avatar della Corona).
+Membro del Concilio in forma di Gerboa gigante ingegnere dei sistemi (scala 20 vpt, anatomia base con orecchie in avanti).
+Manto scuro color prugna/ardesia arricchito da macchie e screziature lavanda tecnologico, con soffice pettorina e ventre crema lilla.
+Indossa un berretto da macchinista hi-tech con visiera in tessuto tecnico viola (#78348c e #b9a6ff, colore araldico dell'Ingegnere)
+con profilo neon lavanda brillante sul bordo della visiera (glow="True"), sagomato tra le orecchie con asole sartoriali anatomiche;
+sull'occhio destro cala un vistoso monocolo ottico di precisione con ghiera circolare cromata, lente olografica lavanda (glow="True")
+e reticolo centrale brillante; piccolo auricolare ad archetto in titanio che circonda la base dell'orecchio destro con microfonino
+a braccetto sul musetto; collare tecnico a nastro con badge logico dei sistemi al collo, cintura porta-attrezzi con scanner diagnostico
+al fianco sinistro con display olografico lavanda (glow="True"), e spettacolare pennacchio caudale con batuffolo soffice lavanda.
+Scatola: 1.6 × 2.2 × 2.1 caselle, 32 × 44 × 42 voxel, 20 voxel per casella (vpt: 20).
+Ruolo: npc.
+-->
+<sequence values="BFfDCcTtUuNWEZRrOoGgPpaAKkJIHhsVvMmXxYyQq" size="32 44 42" symmetry="()" name="GerboaIngegnere">
+  <!-- Manto scuro color prugna/ardesia del corpo e dorso -->
+  <color symbol="F" value="362a42" name="prugna ardesia base dorso"/>
+  <color symbol="f" value="4f3e61" name="prugna chiaro luce dorso"/>
+  <color symbol="D" value="201828" name="prugna notte ombra profonda"/>
+
+  <!-- Ventre, petto e gola in morbido crema lavanda chiarissimo -->
+  <color symbol="C" value="f2effc" name="crema lavanda chiaro ventre"/>
+  <color symbol="c" value="dcd4f0" name="crema lilla sfumatura pancia"/>
+
+  <!-- Testa, musetto, tartufo e baffi (part="testa") -->
+  <color symbol="T" value="362a42" part="testa" name="testa prugna base"/>
+  <color symbol="t" value="4f3e61" part="testa" name="testa prugna chiaro guance"/>
+  <color symbol="U" value="f2effc" part="testa" name="musetto e guance crema lavanda"/>
+  <color symbol="u" value="dcd4f0" part="testa" name="sfumatura musetto lilla"/>
+  <color symbol="N" value="1e1624" part="testa" name="tartufo naso scuro"/>
+  <color symbol="W" value="483c54" part="testa" name="baffetti vibrisse"/>
+  <color symbol="E" value="121018" part="testa" name="occhi scuri profondi"/>
+  <color symbol="Z" value="ffffff" glow="True" part="testa" name="riflesso occhio sinistro vispo"/>
+
+  <!-- Grandi orecchie a conchiglia (part="testa") -->
+  <color symbol="O" value="362a42" part="testa" name="dorso orecchio prugna"/>
+  <color symbol="o" value="5d4a73" part="testa" name="bordo orecchio chiaro"/>
+  <color symbol="R" value="e8a8d0" part="testa" name="interno orecchio rosa lilla"/>
+  <color symbol="r" value="f6d2e8" part="testa" name="concavita orecchio lilla chiaro"/>
+
+  <!-- Zampe posteriori bipedali piegate a Z (part="gamba") -->
+  <color symbol="G" value="362a42" part="gamba" name="coscia prugna"/>
+  <color symbol="g" value="261c30" part="gamba" name="stinco e garretto"/>
+  <color symbol="P" value="f2effc" part="gamba" name="piede crema lavanda dita"/>
+  <color symbol="p" value="b8a2dc" part="gamba" name="polpastrelli unghie lilla"/>
+
+  <!-- Zampette anteriori al petto (part="braccio") -->
+  <color symbol="A" value="4f3e61" part="braccio" name="braccino prugna"/>
+  <color symbol="a" value="f2effc" part="braccio" name="manina crema lavanda"/>
+
+  <!-- Coda sinuosa e pennacchio bicolore (part="coda") -->
+  <color symbol="K" value="362a42" part="coda" name="fusto coda prugna"/>
+  <color symbol="k" value="261c30" part="coda" name="giunto fusto coda"/>
+  <color symbol="J" value="1e1624" part="coda" name="base pennacchio prugna scura"/>
+  <color symbol="I" value="b9a6ff" part="coda" name="punta pennacchio batuffolo lavanda"/>
+
+  <!-- Accessori dell'Ingegnere: Berretto macchinista hi-tech (part="testa") -->
+  <color symbol="H" value="78348c" part="testa" name="berretto macchinista tessuto tecnico viola"/>
+  <color symbol="h" value="b9a6ff" part="testa" name="pannello superiore berretto lavanda"/>
+  <color symbol="s" value="3a1645" part="testa" name="bordo fascia e asole prugna scuro"/>
+  <color symbol="V" value="252834" part="testa" name="visiera tecnica carbonio scuro"/>
+  <color symbol="v" value="b9a6ff" glow="True" part="testa" name="profilo visiera neon lavanda glow"/>
+
+  <!-- Hardware ottico e microfonico: Monocolo, Auricolare, Microfono (part="testa") -->
+  <color symbol="M" value="3a4250" part="testa" name="titanio montature e staffe"/>
+  <color symbol="m" value="c4d6eb" part="testa" name="cromo lucido ghiera e braccetti"/>
+  <color symbol="X" value="b9a6ff" glow="True" part="testa" name="lente ottica monocolo lavanda glow"/>
+  <color symbol="x" value="ffffff" glow="True" part="testa" name="fuoco ottico e led auricolare glow"/>
+
+  <!-- Collare tecnico a nastro e badge dei sistemi (part="testa") -->
+  <color symbol="Y" value="5a1f6a" part="testa" name="collare nastro tecnico viola"/>
+  <color symbol="y" value="b9a6ff" part="testa" name="badge sistemi e chiusura lavanda"/>
+
+  <!-- Attrezzatura corpo: Cintura e diagnostico multi-tool/scanner al fianco -->
+  <color symbol="Q" value="252833" name="scanner logico corpo grafite"/>
+  <color symbol="q" value="b9a6ff" glow="True" name="display olografico scanner glow"/>
+
+  <!-- ======================================================== -->
+  <!-- 1. LUNGHE ZAMPE POSTERIORI DA SALTATORE (part="gamba")   -->
+  <!-- ======================================================== -->
+  <!-- Piedone sinistro al suolo (x=10..12, y=15..28, z=0..1)   -->
+  <box at="11 21.5 0" size="3 14 1" color="P"/>
+  <box at="10 28 0" size="1 1 1" color="p"/>
+  <box at="11 28 0" size="1 1 1" color="p"/>
+  <box at="12 28 0" size="1 1 1" color="p"/>
+  <box at="11 20 1" size="3 8 1" color="P"/>
+  <box at="11 15.5 0" size="3 3 3" color="g"/>
+
+  <!-- Piedone destro al suolo (x=19..21, y=15..28, z=0..1)     -->
+  <box at="20 21.5 0" size="3 14 1" color="P"/>
+  <box at="19 28 0" size="1 1 1" color="p"/>
+  <box at="20 28 0" size="1 1 1" color="p"/>
+  <box at="21 28 0" size="1 1 1" color="p"/>
+  <box at="20 20 1" size="3 8 1" color="P"/>
+  <box at="20 15.5 0" size="3 3 3" color="g"/>
+
+  <!-- Lunghi stinchi inclinati in avanti dal garretto al ginocchio (z=2..12) -->
+  <line at="11 15.5 2" to="11 24.5 11.5" r="1.1" color="g"/>
+  <line at="20 15.5 2" to="20 24.5 11.5" r="1.1" color="g"/>
+
+  <!-- Cosce muscolose alte piegate a Z che raccordano ginocchio e bacino -->
+  <ellipsoid at="11 20 9.5" size="5 9 10" color="G"/>
+  <ellipsoid at="20 20 9.5" size="5 9 10" color="G"/>
+
+  <!-- ======================================================== -->
+  <!-- 2. CORPO ALLUNGATO INCLINATO E PETTO CREMA LAVANDA       -->
+  <!-- ======================================================== -->
+  <!-- Groppa posteriore alta (si salda alle cosce e alla coda) -->
+  <ellipsoid at="15.5 18 15" size="12 10 9" color="F"/>
+
+  <!-- Dorso medio allungato (inclinato verso il basso e in avanti) -->
+  <ellipsoid at="15.5 24 14" size="11 10 8" color="F"/>
+
+  <!-- Petto e spalle anteriori -->
+  <ellipsoid at="15.5 29 14.5" size="10 8 8" color="F"/>
+
+  <!-- Soffice ventre e pettorina crema lavanda (+y e parte inferiore) -->
+  <ellipsoid at="15.5 24 11" size="8 9 5" color="C"/>
+  <ellipsoid at="15.5 28 12.5" size="7 7 6" color="C"/>
+  <ellipsoid at="15.5 31 14" size="6 5 5" color="c"/>
+
+  <!-- ======================================================== -->
+  <!-- 3. ZAMPETTE ANTERIORI MINUSCOLE AL PETTO (part="braccio") -->
+  <!-- ======================================================== -->
+  <!-- Braccino sinistro e manina crema lavanda -->
+  <line at="12 29 14" to="13.5 32 12" r="0.6" color="A"/>
+  <box at="13.5 33 12" size="2 2 2" color="a"/>
+
+  <!-- Braccino destro e manina crema lavanda -->
+  <line at="19 29 14" to="17.5 32 12" r="0.6" color="A"/>
+  <box at="17.5 33 12" size="2 2 2" color="a"/>
+
+  <!-- ======================================================== -->
+  <!-- 4. TESTA GRANDE, GUANCE, MUSETTO, OCCHI (part="testa")   -->
+  <!-- ======================================================== -->
+  <!-- Cranio principale prugna ardesia -->
+  <ellipsoid at="15.5 31 19" size="13 11 10" color="T"/>
+
+  <!-- Fronte tra gli occhi -->
+  <box at="15.5 34 21" size="4 4 4" color="T"/>
+  <box at="15.5 36 22" size="2 2 2" color="t"/>
+
+  <!-- Guanciotte morbide ai lati del muso -->
+  <ellipsoid at="10.5 34 18.5" size="5 5 5" color="t"/>
+  <ellipsoid at="20.5 34 18.5" size="5 5 5" color="t"/>
+  <box at="10 35 18" size="3 3 3" color="U"/>
+  <box at="21 35 18" size="3 3 3" color="U"/>
+
+  <!-- Musetto conico crema lavanda allungato in avanti -->
+  <box at="15.5 37 18" size="5 4 3" color="U"/>
+  <box at="15.5 39 18" size="3 3 2" color="U"/>
+  <!-- Tartufo nasino scuro -->
+  <box at="15.5 40 19" size="2 1 1" color="N"/>
+
+  <!-- Sottili accenni di vibrisse laterali sul muso -->
+  <box at="13 38 18" size="1 1 1" color="W"/>
+  <box at="18 38 18" size="1 1 1" color="W"/>
+
+  <!-- Occhio sinistro naturale profondo (3x2x3 voxel) con vispo riflesso bianco Z -->
+  <box at="11 34.5 20" size="3 2 3" color="E"/>
+  <box at="10 35 22" size="1 1 1" color="Z"/>
+
+  <!-- Occhio destro scuro di base (3x2x3 voxel) su cui cala il monocolo -->
+  <box at="20 34.5 20" size="3 2 3" color="E"/>
+
+  <!-- ======================================================== -->
+  <!-- 5. COLLARE TECNICO A NASTRO E BADGE SISTEMI (part="testa") -->
+  <!-- ======================================================== -->
+  <!-- Collare tecnico attorno al collo -->
+  <cylinder at="15.5 32 16" size="8 7 1.8" color="Y"/>
+  <!-- Badge dei sistemi e chiusura frontale -->
+  <box at="15.5 35 15" size="3 1 2" color="y"/>
+  <box at="15.5 36 15" size="1 1 2" color="x"/>
+
+  <!-- ======================================================== -->
+  <!-- 6. GIGANTESCHE ORECCHIE A CONCHIGLIA (part="testa", z=25..39) -->
+  <!-- ======================================================== -->
+  <!-- Orecchio sinistro: guscio prugna posteriore/esterno -->
+  <ellipsoid at="9.5 29 25" size="8 4 15" color="O"/>
+  <!-- Padiglione interno concavo velluto rosa lilla -->
+  <ellipsoid at="9.5 30.5 26" size="6 3 13" color="R"/>
+  <box at="9.5 31 27" size="4 1 8" color="r"/>
+  <line at="6 30 28" to="9 30 38" r="0.5" color="o"/>
+
+  <!-- Orecchio destro: guscio prugna posteriore/esterno -->
+  <ellipsoid at="21.5 29 25" size="8 4 15" color="O"/>
+  <!-- Padiglione interno concavo velluto rosa lilla -->
+  <ellipsoid at="21.5 30.5 26" size="6 3 13" color="R"/>
+  <box at="21.5 31 27" size="4 1 8" color="r"/>
+  <line at="25 30 28" to="22 30 38" r="0.5" color="o"/>
+
+  <!-- ======================================================== -->
+  <!-- 7. BERRETTO DA MACCHINISTA HI-TECH (part="testa")        -->
+  <!-- ======================================================== -->
+  <!-- Base e fascia circonferenza con asole sartoriali per le orecchie -->
+  <cylinder at="15.5 32 25" size="8 8 1" color="s"/>
+  <!-- Bordo posteriore coprinuca ribassato -->
+  <box at="15.5 27 25" size="7 3 1" color="H"/>
+
+  <!-- Calotta profilata da flat cap / engineer cap tra le orecchie -->
+  <ellipsoid at="15.5 32 26" size="7.6 9 5.5" color="H"/>
+  <!-- Pannello superiore e creste tecniche lavanda -->
+  <box at="15.5 32 28" size="6 8 1" color="h"/>
+  <box at="15.5 32 28.5" size="4 6 1" color="h"/>
+  <box at="15.5 32 29" size="2 2 1" color="s"/>
+
+  <!-- Visiera tecnica rigida sporgente in avanti sopra la fronte (z=25) -->
+  <box at="15.5 36 25" size="10 3 1" color="V"/>
+  <box at="15.5 37.5 25" size="8 2 1" color="V"/>
+  <!-- Profilo neon lavanda brillante sul bordo anteriore della visiera (glow="True") -->
+  <box at="15.5 38 25" size="8 1 1" color="v"/>
+
+  <!-- ======================================================== -->
+  <!-- 8. VISTOSO MONOCOLO OTTICO DI PRECISIONE SULL'OCCHIO DESTRO -->
+  <!-- ======================================================== -->
+  <!-- Ghiera frontale circolare cromata brillante attorno all'occhio destro (x=19..22, z=19..23, y=36) -->
+  <box at="20.5 36 23" size="2 1 1" color="m"/>
+  <box at="20.5 36 19" size="2 1 1" color="m"/>
+  <box at="18.5 36 21" size="1 1 3" color="m"/>
+  <box at="22.5 36 21" size="1 1 3" color="m"/>
+  <!-- Staffe di ancoraggio e snodi in titanio scuro -->
+  <box at="19 36 22" size="1 1 1" color="M"/>
+  <box at="22 36 22" size="1 1 1" color="M"/>
+  <box at="19 36 20" size="1 1 1" color="M"/>
+  <box at="22 36 20" size="1 1 1" color="M"/>
+
+  <!-- Grande lente olografica a cerchi concentrici lavanda brillante (glow="True") -->
+  <box at="20.5 36 21" size="2 1 2" color="X"/>
+  <!-- Punto focale ottico centrale e reticolo luminoso sporgente (glow="True") -->
+  <box at="20.5 37 21" size="1 1 1" color="x"/>
+
+  <!-- Braccetto articolato di calibrazione che sale alla visiera e all'auricolare -->
+  <line at="21 36 23" to="21.5 34 25" r="0.4" color="m"/>
+  <line at="21.5 34 25" to="22 31 26" r="0.4" color="M"/>
+
+  <!-- ======================================================== -->
+  <!-- 9. AURICOLARE AD ARCHETTO E MICROFONO SULL'ORECCHIO DESTRO -->
+  <!-- ======================================================== -->
+  <!-- Archetto curvo in titanio che circonda la radice dell'orecchio destro -->
+  <line at="21.5 27 25" to="22 29 27" r="0.4" color="M"/>
+  <line at="22 29 27" to="22 32 26" r="0.4" color="m"/>
+  <line at="22 32 26" to="21.5 34 24" r="0.4" color="M"/>
+  <!-- LED di stato alimentazione auricolare -->
+  <box at="22 30 27" size="1 1 1" color="x"/>
+
+  <!-- Astina microfono che scende lungo la guancia destra verso il musetto -->
+  <line at="21.5 34 24" to="21 36 21" r="0.3" color="m"/>
+  <line at="21 36 21" to="19.5 38 18.5" r="0.3" color="m"/>
+  <!-- Capsula microfonica con spia trasmissione radio lavanda -->
+  <box at="18 39 18" size="1 1 1" color="M"/>
+  <box at="18 40 18" size="1 1 1" color="X"/>
+
+  <!-- ======================================================== -->
+  <!-- 10. CINTURA PORTA-ATTREZZI E SCANNER LOGICO AL FIANCO    -->
+  <!-- ======================================================== -->
+  <!-- Cintura tecnica in ardesia scura -->
+  <line at="11 23 13" to="15.5 18 14" r="0.6" color="D"/>
+  <line at="15.5 18 14" to="20 23 13" r="0.6" color="D"/>
+  <line at="11 23 13" to="15.5 26 12" r="0.6" color="D"/>
+  <line at="20 23 13" to="15.5 26 12" r="0.6" color="D"/>
+  <!-- Fibbia magnetica della cintura in cromo lucido -->
+  <box at="15.5 27 12" size="2 1 1" color="m"/>
+
+  <!-- Scanner logico / multi-tool diagnostico sul fianco sinistro -->
+  <box at="10.5 21 13" size="2 3 3" color="Q"/>
+  <!-- Display olografico lavanda glow -->
+  <box at="9 21.5 14" size="1 2 2" color="q"/>
+  <!-- Piccola antenna sonda cromata -->
+  <line at="10 20 13" to="10 23 17" r="0.4" color="m"/>
+
+  <!-- ======================================================== -->
+  <!-- 11. LUNGHISSIMA CODA E PENNACCHIO LAVANDA (part="coda")  -->
+  <!-- ======================================================== -->
+  <!-- Attacco alla groppa posteriore alta (y=15, z=16) -->
+  <line at="15.5 15 16" to="15.5 10 9" r="1.1" color="K"/>
+  <!-- Discesa sinuosa verso il terreno -->
+  <line at="15.5 10 9" to="15.5 6 4" r="0.9" color="K"/>
+  <line at="15.5 6 4" to="15.5 3.5 2.5" r="0.8" color="K"/>
+  <!-- Risalita verso l'alto -->
+  <line at="15.5 3.5 2.5" to="15.5 2.5 5.5" r="0.8" color="k"/>
+  <line at="15.5 2.5 5.5" to="15.5 2.5 9" r="0.8" color="k"/>
+
+  <!-- Pennacchio bicolore: base scura e grande ciuffo batuffoloso lavanda -->
+  <ellipsoid at="15.5 2.5 9" size="5 4 5" color="J"/>
+  <ellipsoid at="15.5 2.5 12" size="6 5 6" color="I"/>
+  <ellipsoid at="15.5 2.5 16" size="4 4 5" color="I"/>
+  <box at="15.5 2.5 18" size="2 2 2" color="I"/>
+
+  <!-- ======================================================== -->
+  <!-- 12. REGOLE GENERATIVE: SFUMATURE, MACCHIE E TEXTURE      -->
+  <!-- ======================================================== -->
+  <!-- Luce sommitale sul dorso prugna -->
+  <prl steps="1" p="0.3" in="B F" out="B f"/>
+  <!-- Macchie e screziature lavanda tecnologico sui fianchi e groppa -->
+  <prl steps="1" p="0.12" in="B F" out="B h"/>
+  <!-- Ombreggiatura naturale nelle pieghe inferiori del dorso -->
+  <prl steps="1" p="0.15" in="F/B" out="D/*"/>
+  <!-- Transizione morbida tra pancia crema lavanda e fianchi prugna -->
+  <prl steps="1" p="0.35" in="F/C" out="*/c"/>
+  <prl steps="1" p="0.25" in="FC" out="Fc" symmetry="(x)"/>
+  <!-- Sfumatura delicata tra guance e musetto -->
+  <prl steps="1" p="0.25" in="t U" out="u *"/>
+</sequence>

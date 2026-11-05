@@ -1,0 +1,59 @@
+{
+  "id": "npc.automa-guardia",
+  "version": "0.1.0",
+  "name": "Guardiano d'ottone",
+  "kind": "entity",
+  "description": "Un automa a molla di ottone e ghisa, alto come un uomo, con gli occhi di vetro verde e una chiave nella schiena: fa la ronda attorno ai magazzini della Casa Ramelli finché la molla è carica.",
+  "context": "magazzini e fonderie della Casa Ramelli",
+  "appearance": {
+    "model": "automa-ottone",
+    "classe": "persona",
+    "glyph": "Ä",
+    "color": "#c8a04a",
+    "aspetto": "un automa d'ottone e ghisa con il corpo a botte, gli occhi di vetro verde e una grossa chiave nella schiena"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.4,
+    "speed": 0.9
+  },
+  "tags": [
+    "automa",
+    "metallo",
+    "ottone",
+    "guardiano"
+  ],
+  "components": {
+    "wander": {
+      "dx": 0,
+      "dy": 0,
+      "t": 0,
+      "speed": 0.9
+    },
+    "automa": {
+      "carica": 80,
+      "fermo": false,
+      "allarmi": 0
+    }
+  },
+  "interaction": {
+    "type": "lua"
+  },
+  "actions": [
+    {
+      "id": "carica",
+      "label": "Carica la molla",
+      "requires": "item.chiave-inglese"
+    },
+    {
+      "id": "saluta",
+      "label": "Saluta il guardiano"
+    },
+    {
+      "id": "mostra",
+      "label": "Mostra un lingotto d'oricalco",
+      "requires": "item.lingotto-oricalco"
+    }
+  ],
+  "logic": "module.lua"
+}

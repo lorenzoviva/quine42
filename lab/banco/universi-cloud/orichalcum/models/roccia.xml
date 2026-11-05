@@ -1,0 +1,19 @@
+<!-- Masso muschioso: scritto a mano da Claude Code, step 8B (lab/mj3d/examples.ts). Convertito dal JSON (lab/mjx/convert.ts): stessi voxel. -->
+<sequence values="BRSDM" size="20 20 16" symmetry="(xy)" origin="bottom" name="Masso muschioso">
+  <color symbol="R" value="8c8d95" name="granito"/>
+  <color symbol="S" value="a9aab2" name="granito chiaro"/>
+  <color symbol="D" value="5d5e68" name="crepa"/>
+  <color symbol="M" value="5a8a3c" name="muschio"/>
+  <one steps="900" symmetry="(xyz)" in="RB" out="RR"/>
+  <one steps="450" in="RB" out="RR"/>
+  <convolution neighborhood="Moore" steps="3">
+    <rule in="B" out="R" values="R" sum="14..26"/>
+    <rule in="R" out="B" values="R" sum="1..7"/>
+  </convolution>
+  <prl steps="1">
+    <rule in="R" out="S" p="0.1"/>
+    <rule in="R" out="D" p="0.04"/>
+  </prl>
+  <prl steps="1" in="B [RSD]" out="B M" p="0.03"/>
+  <one steps="160" in="BB M[RSD]" out="BB MM"/>
+</sequence>

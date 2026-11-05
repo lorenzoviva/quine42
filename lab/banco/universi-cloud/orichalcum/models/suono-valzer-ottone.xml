@@ -1,0 +1,35 @@
+<!-- Valzer d'ottone (orichalcum): un ballo delle sale operaie della domenica, in dorico; il motivo si sposta di battuta in battuta e il basso tiene il passo. -->
+<sequence name="Valzer d'ottone" values="BNSAGKHCRTMP" size="4 3 4" symmetry="()">
+  <sound bpm="132" scale="dorian" root="55" swing="0.18" cutoff="5200" space="0.3">
+    <track y="0" instrument="lead" volume="0.8"/>
+    <track y="1" instrument="pad" volume="0.7"/>
+    <track y="2" instrument="bass" volume="0.88"/>
+  </sound>
+  <color symbol="N" value="38bdf8" name="Nota" glow="True"/>
+  <color symbol="S" value="0284c7" name="Sustain" alpha="0.85"/>
+  <color symbol="A" value="f43f5e" name="Accento" glow="True"/>
+  <color symbol="G" value="818cf8" name="Ghost" alpha="0.7"/>
+  <color symbol="K" value="fbbf24" name="Kick" glow="True"/>
+  <color symbol="H" value="fde047" name="Hi-hat" alpha="0.85"/>
+  <color symbol="C" value="fb923c" name="Rullante" glow="True"/>
+  <color symbol="R" value="a855f7" name="Radice" hidden="True"/>
+  <color symbol="T" value="ec4899" name="Meta" hidden="True"/>
+  <color symbol="M" value="10b981" name="Motivo" hidden="True"/>
+  <color symbol="P" value="64748b" name="Passaggio" hidden="True"/>
+
+  <one in="B/B/B" out="M/R/K" steps="1"/>
+  <one steps="3">
+    <rule in="B/B/B" out="M/T/K"/>
+    <rule in="B/B/B" out="T/R/C"/>
+    <rule in="B/B/B" out="R/M/C"/>
+  </one>
+  <all in="B" out="P"/>
+  <map scale="4 1 2" values="BNSAGKHCRTMP">
+    <rule in="M" out="NBGB ABNB"/>
+    <rule in="R" out="BBNS NSBB"/>
+    <rule in="T" out="GBBN BNAB"/>
+    <rule in="K" out="BBHB KBBH"/>
+    <rule in="C" out="BHBB CBHB"/>
+    <rule in="P" out="BBBB BGBB"/>
+  </map>
+</sequence>

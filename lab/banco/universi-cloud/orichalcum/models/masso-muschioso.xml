@@ -1,0 +1,35 @@
+<!-- Masso muschioso: scolpito da gemini-3.8-flash nello step 8.2A (lab/out/mjx-38-flash-2), voti dell'Artista 8/10 -->
+<sequence values="BRSDM" size="20 20 16" symmetry="(xy)" origin="bottom">
+  <color symbol="R" value="737785" name="granito grigio base"/>
+  <color symbol="S" value="9da1ad" name="granito chiaro illuminato"/>
+  <color symbol="D" value="474954" name="crepa e ombra pietra"/>
+  <color symbol="M" value="488028" name="muschio vivace"/>
+
+  <!-- Crescita iniziale della massa del masso dal fondo -->
+  <one steps="800" symmetry="(xyz)" in="RB" out="*R"/>
+  <one steps="400" in="RB" out="*R"/>
+
+  <!-- Lisciatura e consolidamento del volume con automa cellulare -->
+  <convolution neighborhood="Moore" steps="3">
+    <rule in="B" out="R" values="R" sum="14..26"/>
+    <rule in="R" out="B" values="R" sum="1..8"/>
+  </convolution>
+
+  <!-- Ombre e crepe nei recessi e alla base -->
+  <prl steps="1">
+    <rule in="R" out="D" p="0.08"/>
+    <rule in="R" out="S" p="0.12"/>
+  </prl>
+
+  <!-- Luce dall'alto: schiarisce le superfici scoperte -->
+  <prl steps="1" in="B R" out="* S" p="0.65"/>
+
+  <!-- Chiazze di muschio sulla cima esposta alla luce -->
+  <prl steps="1" in="B S" out="* M" p="0.15"/>
+  <prl steps="1" in="B R" out="* M" p="0.05"/>
+
+  <!-- Espansione a macchia (clustering) del muschio sulle superfici superiori -->
+  <all steps="3" in="B/B M/R" out="*/* */M"/>
+  <all steps="2" in="B M" out="* M"/>
+  <prl steps="1" in="BB MR" out="** *M" p="0.5"/>
+</sequence>

@@ -1,0 +1,60 @@
+{
+  "id": "npc.orologiaia",
+  "version": "0.1.0",
+  "name": "Orologiaia",
+  "kind": "entity",
+  "description": "Gente dalle mani fini: orologiai, taratrici di manometri, inventori; lenti nell'occhio e tasche piene di viti.",
+  "context": "botteghe del Quartiere dei Telai e officine del canale",
+  "appearance": {
+    "model": "persona-vapore",
+    "classe": "persona",
+    "glyph": "&",
+    "color": "#6a5a8a",
+    "aspetto": "un'orologiaia con la lente nell'occhio, il grembiule pieno di tasche e un cacciavite fine dietro l'orecchio"
+  },
+  "physics": {
+    "solid": false,
+    "radius": 0.35,
+    "speed": 1.1
+  },
+  "tags": [
+    "persona"
+  ],
+  "components": {
+    "wander": {
+      "dx": 0,
+      "dy": 0,
+      "t": 0,
+      "speed": 1.1
+    }
+  },
+  "interaction": {
+    "type": "talk"
+  },
+  "persona": "Sei un'orologiaia, o un inventore, delle Città del Vapore: ripari orologi e manometri, monti ingranaggi, sogni macchine nuove. Delle rune sai quello che sa la gente delle Città del Vapore: lastre con un segno inciso che manda una luce tenue, posate qua e là sul suolo; gli inventori provano a capirle, i collezionisti le pagano bene, i vecchi le temono, e qualcuno dice che pronunciate fanno magie. Paghi bene chi ti porta ingranaggi e molle.",
+  "inventory": [
+    "item.ingranaggio",
+    "item.molla-acciaio"
+  ],
+  "actions": [
+    {
+      "id": "chiedi",
+      "label": "Chiedi del lavoro"
+    },
+    {
+      "id": "racconta",
+      "label": "Fatti raccontare"
+    },
+    {
+      "id": "scambia-manometro",
+      "label": "Porta un manometro rotto",
+      "requires": "item.manometro-rotto"
+    },
+    {
+      "id": "scambia-ingranaggi",
+      "label": "Vendi due ingranaggi",
+      "requires": "item.ingranaggio"
+    }
+  ],
+  "logic": "module.lua"
+}

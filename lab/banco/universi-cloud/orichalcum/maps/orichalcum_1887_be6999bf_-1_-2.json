@@ -1,0 +1,32 @@
+{
+ "plan": {
+  "place": {
+   "name": "Cunicolo diciassette",
+   "description": "Un cunicolo profondo di Solfara che finisce contro una porta di ghisa murata; l'aria è calda e umida."
+  },
+  "layout": "miniera_termale",
+  "objects": [
+   {
+    "module": "npc.cartografo-miniera",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.enigma-ingranaggi",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.carrello-minerario",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Minerale rosso di Solfara",
+   "Lanterna a carburo"
+  ],
+  "fresh": [],
+  "runes": [
+   "ingranaggio",
+   "magnete"
+  ]
+ }
+}

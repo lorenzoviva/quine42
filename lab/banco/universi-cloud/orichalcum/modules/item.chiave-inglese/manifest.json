@@ -1,0 +1,34 @@
+{
+  "id": "item.chiave-inglese",
+  "version": "0.1.0",
+  "name": "Chiave inglese",
+  "kind": "item",
+  "description": "Una chiave inglese di ferro con la ganascia regolabile e il manico consumato. Impugnala e premi F davanti a una caldaia, una valvola o un guardiano d'ottone.",
+  "context": "vicoli dei caldaisti, officine, rimesse",
+  "appearance": {
+    "model": "chiave-inglese",
+    "classe": "oggetto",
+    "glyph": "⚒",
+    "color": "#8a8e96",
+    "aspetto": "una chiave inglese di ferro con la ganascia regolabile e il manico consumato"
+  },
+  "physics": {
+    "solid": false,
+    "radius": 0.2
+  },
+  "tags": [
+    "attrezzo",
+    "metallo",
+    "officina"
+  ],
+  "item": {
+    "stackable": false,
+    "maxStack": 1,
+    "weight": 1.2,
+    "equippable": true,
+    "controls": {
+      "azione": "stringe, svita, carica le molle di ciò che hai davanti"
+    }
+  },
+  "logic": "module.lua"
+}

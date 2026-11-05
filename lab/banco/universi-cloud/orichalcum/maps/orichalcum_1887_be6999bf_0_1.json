@@ -1,0 +1,40 @@
+{
+ "plan": {
+  "place": {
+   "name": "Scalo della Ferrovia Sospesa",
+   "description": "I binari dello scalo sotto i piloni del viadotto, la pensilina e i vagoni del minerale in attesa."
+  },
+  "layout": "scalo_ferroviario",
+  "objects": [
+   {
+    "module": "npc.macchinista",
+    "where": "fuori"
+   },
+   {
+    "module": "npc.gatto-fabbrica",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.carrello-minerario",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.lampione-gas",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.telegrafo-pneumatico",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Biglietto della linea alta",
+   "Birra scura"
+  ],
+  "fresh": [],
+  "runes": [
+   "vapore",
+   "rame"
+  ]
+ }
+}

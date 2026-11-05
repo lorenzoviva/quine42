@@ -1,0 +1,219 @@
+<!--
+Panchina sintetica monoblocco a nastro curvo (corona): arredo urbano per vicoli, piazze e prati della corona.
+Scritto da Gemini CLI (Gemini 3.8 Flash, abbonamento), task T50a.
+Scatola: 1.5 × 1 × 1 caselle, 12 × 8 × 8 voxel, 8 voxel per casella (vpt: 8).
+Ruolo: prop.
+Design e concetto scultoreo:
+- Linea fluida monolitica a nastro continuo in tecnopolimero composito scuro grafite (M, m);
+- Il nastro si sviluppa da un lato, plasma la seduta orizzontale ergonomica ribassata (z=2), sale nello
+  schienale ribassato con raccordo curvo (z=3..5) e ridiscende con flange laterali alari e braccioli integrati;
+- Effetto galleggiamento: poggia su un compatto piedistallo centrale fortemente arretrato (x=4..7, y=2..3, z=0)
+  in carbonio ultra-scuro (D) con bullonature d'ancoraggio (S); l'ampio sbalzo aereo su tutti i lati crea
+  una marcata sensazione di levitazione magnetica;
+- Lama inferiore neon magenta/rosa (R, glow="True") incassata sul fronte inferiore (z=1, y=5), con nucleo laser
+  bianco (W, glow="True"), alloggiata nel vano ottico scuro (V) e schermata da diffusori acrilici (P);
+- Seduta comfort in materiale sintetico grafite (C, c) con profilo ergonomico a cascata (waterfall front);
+- Sul retro della spalliera (z=4, y=1), una feritoia orizzontale a nastro neon (R, W, P) diffonde luce verso il fondo;
+- Braccioli laterali con piastre di ricarica induttiva e indicatori telemetrici ciano/cobalto (E, e).
+Animazione "respiro" (6 fotogrammi):
+- La lama neon inferiore pulsa espandendo e ritraendo il nucleo laser centrale (W, R);
+- Le spie di telemetria e ricarica wireless sui braccioli alternano lo stato tra standby ciano (E) e uplink cobalto (e).
+-->
+<sequence values="BMmDSsCcPVRWEeXYZ" size="12 8 8" symmetry="(x)" name="Panchina">
+  <!-- Materiali strutturali: guscio monoblocco scuro grafite e titanio -->
+  <color symbol="M" value="20222a" name="guscio monoblocco scuro"/>
+  <color symbol="m" value="2e323f" name="titanio biselli scocca"/>
+  <color symbol="D" value="141418" name="plinto centrale carbonio"/>
+
+  <!-- Meccanica, raccordi metallici e profili di finitura -->
+  <color symbol="S" value="3d4354" name="ancoraggi metallo satinato"/>
+  <color symbol="s" value="8a95ab" name="rifinitura argento cromo"/>
+
+  <!-- Seduta comfort ergonomica in materiale sintetico elastomero -->
+  <color symbol="C" value="495060" name="seduta comfort grafite"/>
+  <color symbol="c" value="636c80" name="bisello seduta comfort chiaro"/>
+
+  <!-- Ottiche e diffusori acrilici traslucidi -->
+  <color symbol="V" value="1c2a3a" name="vano ottico incassato"/>
+  <color symbol="P" value="ff7597" name="diffusore magenta traslucido"/>
+
+  <!-- Fonti luminose attive (glow="True") per bloom neon -->
+  <color symbol="R" value="ff2a6d" glow="True" name="lama neon magenta"/>
+  <color symbol="W" value="ffffff" glow="True" name="nucleo fotonico bianco"/>
+  <color symbol="E" value="05d9e8" glow="True" name="led ricarica ciano"/>
+  <color symbol="e" value="29adff" glow="True" name="led uplink cobalto"/>
+
+  <!-- Marcatori invisibili per regole generative -->
+  <color symbol="X" hidden="True" name="marker nastro terminale"/>
+  <color symbol="Y" hidden="True" name="marker feritoia posteriore"/>
+  <color symbol="Z" hidden="True" name="marker seduta comfort"/>
+
+  <!-- ======================================================== -->
+  <!-- 1. PLINTO DI FONDAZIONE CENTRALE ARRETRATO (z = 0)       -->
+  <!-- ======================================================== -->
+  <!-- Basamento centrale compatto in carbonio scuro D          -->
+  <box at="5.5 2.5 0" size="4 2 1" color="D"/>
+
+  <!-- Bullonature angolari satinate ai vertici del plinto       -->
+  <box at="4 2 0" size="1 1 1" color="S"/>
+  <box at="7 2 0" size="1 1 1" color="S"/>
+  <box at="4 3 0" size="1 1 1" color="S"/>
+  <box at="7 3 0" size="1 1 1" color="S"/>
+
+  <!-- ======================================================== -->
+  <!-- 2. TELAIO DI SOSPENSIONE E LAMA NEON INFERIORE (z = 1)   -->
+  <!-- ======================================================== -->
+  <!-- Longherone centrale di supporto in titanio scuro M       -->
+  <box at="5.5 2.5 1" size="6 2 1" color="M"/>
+  <box at="5.5 2.5 1" size="8 1 1" color="m"/>
+
+  <!-- Vano ottico incassato scuro V                            -->
+  <box at="5.5 4.0 1" size="8 1 1" color="V"/>
+
+  <!-- Lama neon magenta inferiore frontale (y=5, x=2..9)       -->
+  <box at="5.5 5.0 1" size="8 1 1" color="R"/>
+  <!-- Nucleo fotonico laser bianco centrale (x=4..7)           -->
+  <box at="5.5 5.0 1" size="4 1 1" color="W"/>
+  <!-- Diffusori acrilici alle estremità della lama             -->
+  <box at="2 5 1" size="1 1 1" color="P"/>
+  <box at="9 5 1" size="1 1 1" color="P"/>
+
+  <!-- Flange laterali del nastro a sbalzo verso il basso       -->
+  <box at="1 3.0 1" size="1 3 1" color="m"/>
+  <box at="10 3.0 1" size="1 3 1" color="m"/>
+  <box at="1 2 1" size="1 1 1" color="X"/>
+  <box at="10 2 1" size="1 1 1" color="X"/>
+
+  <!-- ======================================================== -->
+  <!-- 3. SEDUTA ERGONOMICA RIBASSATA E BORDO WATERFALL (z = 2) -->
+  <!-- ======================================================== -->
+  <!-- Scocca monoblocco portante (x=1..10, y=2..5)             -->
+  <box at="5.5 3.5 2" size="10 4 1" color="M"/>
+
+  <!-- Bordo anteriore a cascata (waterfall y=5)                -->
+  <box at="5.5 5.0 2" size="8 1 1" color="c"/>
+  <box at="1 5 2" size="1 1 1" color="m"/>
+  <box at="10 5 2" size="1 1 1" color="m"/>
+
+  <!-- Cuscino comfort ergonomico grafite (x=2..9, y=2..4)      -->
+  <box at="5.5 3.0 2" size="8 3 1" color="C"/>
+  <box at="2 3.0 2" size="1 3 1" color="c"/>
+  <box at="9 3.0 2" size="1 3 1" color="c"/>
+  <box at="5.5 4.0 2" size="8 1 1" color="c"/>
+
+  <!-- Raccordo posteriore verso lo schienale (y=1)             -->
+  <box at="5.5 1.0 2" size="10 1 1" color="M"/>
+
+  <!-- Alloggiamento marker per venatura/cucitura seduta        -->
+  <box at="5.5 3.0 2" size="2 1 1" color="Z"/>
+
+  <!-- ======================================================== -->
+  <!-- 4. RISALITA SCHIENALE E BRACCIOLI ALATI (z = 3)          -->
+  <!-- ======================================================== -->
+  <!-- Monoblocco dello schienale in salita (x=1..10, y=1..2)   -->
+  <box at="5.5 1.5 3" size="10 2 1" color="M"/>
+  <!-- Cuscinetto lombare comfort sul fronte                    -->
+  <box at="5.5 2.0 3" size="8 1 1" color="C"/>
+
+  <!-- Braccioli / ali laterali aerodinamiche (x=1 e x=10, y=2..4)-->
+  <box at="1 3.0 3" size="1 3 1" color="M"/>
+  <box at="10 3.0 3" size="1 3 1" color="M"/>
+  <box at="1 2.5 3" size="1 2 1" color="s"/>
+  <box at="10 2.5 3" size="1 2 1" color="s"/>
+
+  <!-- Terminali di interfaccia e ricarica wireless Qi (y=4)    -->
+  <box at="1 4 3" size="1 1 1" color="E"/>
+  <box at="10 4 3" size="1 1 1" color="e"/>
+
+  <!-- ======================================================== -->
+  <!-- 5. CORPO SCHIENALE E FERITOIA LUMINOSA (z = 4)           -->
+  <!-- ======================================================== -->
+  <!-- Blocco centrale dello schienale                          -->
+  <box at="5.5 1.5 4" size="10 2 1" color="M"/>
+  <box at="5.5 2.0 4" size="8 1 1" color="c"/>
+
+  <!-- Vano ottico incassato scuro sul retro (y=1, x=2..9)      -->
+  <box at="5.5 1.0 4" size="8 1 1" color="V"/>
+
+  <!-- Feritoia orizzontale al neon magenta (x=3..8, y=1)       -->
+  <box at="5.5 1.0 4" size="6 1 1" color="R"/>
+  <!-- Nucleo laser bianco fotonico centrale                    -->
+  <box at="5.5 1.0 4" size="2 1 1" color="W"/>
+  <!-- Diffusori acrilici terminali                             -->
+  <box at="3 1 4" size="1 1 1" color="P"/>
+  <box at="8 1 4" size="1 1 1" color="P"/>
+
+  <!-- Alloggiamento per varianti fessura generativa            -->
+  <box at="5.5 1.0 4" size="2 1 1" color="Y"/>
+
+  <!-- ======================================================== -->
+  <!-- 6. CORONAMENTO SUPERIORE DELLO SCHIENALE (z = 5)         -->
+  <!-- ======================================================== -->
+  <!-- Cresta ergonomica rastremata (x=2..9, y=1..2)            -->
+  <box at="5.5 1.5 5" size="8 2 1" color="m"/>
+  <!-- Modanatura superiore riflettente in cromo satinato       -->
+  <box at="5.5 1.0 5" size="6 1 1" color="s"/>
+  <box at="5.5 2.0 5" size="8 1 1" color="c"/>
+
+  <!-- ======================================================== -->
+  <!-- 7. REGOLE GENERATIVE: VARIANTI STOCASTICHE NEI SEMI      -->
+  <!-- ======================================================== -->
+  <!-- A) Risoluzione del terminale del nastro laterale (X)     -->
+  <one steps="1">
+    <!-- Variante 1: raccordo alare aerodinamico continuo in titanio -->
+    <rule in="X" out="m" p="0.45"/>
+    <!-- Variante 2: inserto di raccordo cromato satinato -->
+    <rule in="X" out="s" p="0.30"/>
+    <!-- Variante 3: feritoia aperta alleggerita -->
+    <rule in="X" out="B" p="0.25"/>
+  </one>
+  <all in="X" out="m"/>
+
+  <!-- B) Risoluzione del nucleo fotonico della feritoia (Y)    -->
+  <one steps="1">
+    <!-- Variante 1: nucleo bianco laser concentrato -->
+    <rule in="Y" out="W" p="0.50"/>
+    <!-- Variante 2: fessura a spettro magenta pieno -->
+    <rule in="Y" out="R" p="0.50"/>
+  </one>
+  <all in="Y" out="W"/>
+
+  <!-- C) Risoluzione della venatura della seduta comfort (Z)   -->
+  <one steps="1">
+    <!-- Variante 1: canalina di ventilazione centrale -->
+    <rule in="Z" out="c" p="0.50"/>
+    <!-- Variante 2: continuità solida del pad comfort -->
+    <rule in="Z" out="C" p="0.50"/>
+  </one>
+  <all in="Z" out="C"/>
+
+  <!-- D) Micro-scanalature ergonomiche sulla seduta comfort    -->
+  <prl steps="1" optional="True">
+    <rule in="C C C" out="* c *" p="0.18"/>
+  </prl>
+
+  <!-- E) Sfaccettatura riflettente sul coronamento superiore   -->
+  <prl steps="1" optional="True">
+    <rule in="B s" out="* s" p="0.15"/>
+    <rule in="m s" out="* s" p="0.12"/>
+  </prl>
+</sequence>
+
+<!-- ============================================================ -->
+<!-- 8. ANIMAZIONE RESPIRO (6 FRAMES): PULSAZIONE LAMA E SPIE     -->
+<!-- ============================================================ -->
+<animation name="respiro" frames="6">
+  <sequence>
+    <!-- Il nucleo fotonico bianco W vibra e scambia celle lungo la lama neon R -->
+    <prl steps="1">
+      <rule in="W R" out="R W" p="0.40"/>
+      <rule in="R W" out="W R" p="0.40"/>
+    </prl>
+
+    <!-- Le spie telemetriche sui braccioli pulsano tra ciano ed azzurro cobalto -->
+    <prl steps="1">
+      <rule in="E" out="e" p="0.30"/>
+      <rule in="e" out="E" p="0.30"/>
+    </prl>
+  </sequence>
+</animation>
