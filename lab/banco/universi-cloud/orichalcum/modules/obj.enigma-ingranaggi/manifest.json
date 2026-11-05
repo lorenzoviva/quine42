@@ -1,0 +1,55 @@
+{
+  "id": "obj.enigma-ingranaggi",
+  "version": "0.1.0",
+  "name": "Serratura a ingranaggi",
+  "kind": "entity",
+  "description": "Una piastra di ghisa con tre ruote dentate incastrate l'una nell'altra: girandone una si muovono anche le altre. Quando i tre denti segnati stanno in alto, qualcosa scatta.",
+  "context": "porte murate, cancelli dei giardini, cunicoli e botteghe",
+  "appearance": {
+    "model": "enigma-ingranaggi",
+    "classe": "mobile",
+    "glyph": "⚙",
+    "color": "#8a7a5a",
+    "aspetto": "una piastra di ghisa con tre ruote dentate d'ottone incastrate e tre denti dipinti di rosso"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.4
+  },
+  "tags": [
+    "enigma",
+    "meccanismo",
+    "ghisa"
+  ],
+  "components": {
+    "ruote": {
+      "a": 0,
+      "b": 0,
+      "c": 0,
+      "aperta": false,
+      "mosse": 0
+    }
+  },
+  "interaction": {
+    "type": "lua"
+  },
+  "actions": [
+    {
+      "id": "prima",
+      "label": "Gira la ruota grande"
+    },
+    {
+      "id": "seconda",
+      "label": "Gira la ruota media"
+    },
+    {
+      "id": "terza",
+      "label": "Gira la ruota piccola"
+    },
+    {
+      "id": "guarda",
+      "label": "Guarda i denti segnati"
+    }
+  ],
+  "logic": "module.lua"
+}

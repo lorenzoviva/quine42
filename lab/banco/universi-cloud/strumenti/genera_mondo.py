@@ -6,7 +6,8 @@ P={}
 def person(key,nome,tipo,mestiere,eta,genere,storia,persona,aspetto,porta,routine,specie='persona'):
     P[key]=dict(nome=nome,specie=specie,genere=genere,tipo=tipo,mestiere=mestiere,eta=eta,famiglia=[],routine=[dict(quando=q,fa=f,dove=d,azione=a) for q,f,d,a in routine],storia=storia,persona=persona,aspetto=aspetto,porta=porta,ricordi=[])
 def bond(a,b,ab,ba):
-    P[a]['famiglia'].append(dict(nome=P[b]['nome'],legame=ab)); P[b]['famiglia'].append(dict(nome=P[a]['nome'],legame=ba))
+    # ab: what b is to a; ba: what a is to b. In a's list a relation says what a is to the other (repairSociety's reading).
+    P[a]['famiglia'].append(dict(nome=P[b]['nome'],legame=ba)); P[b]['famiglia'].append(dict(nome=P[a]['nome'],legame=ab))
 def mem(k,testo,peso=2,con=None,quando='giorno 0'):
     m=dict(quando=quando,testo=testo,peso=peso)
     if con: m['con']=P[con]['nome']
@@ -122,12 +123,12 @@ person('zeno','Zeno Marras','npc.cittadino','doganiere del porto','44 anni','mas
  "Sei Zeno Marras, doganiere del Porto dei Bastimenti. Pignolo, sospettoso, onesto fino alla noia. I conti del rame non tornano e di notte vedi passare un dirigibile senza fanali.",
  "un uomo pallido con la divisa grigia della dogana, il registro sotto il braccio e una matita dietro l'orecchio",['Capsula d\'ottone'],
  [R('mattina','apre la dogana','lavoro','lavora'),R('giorno','pesa le casse di rame','lavoro','commercia'),R('sera','ricontrolla i registri','casa','legge'),R('notte','fa la ronda sulle banchine','in giro','pattuglia')])
-person('ruggine','Ruggine','npc.gatto-fabbrica','gatta di fonderia','4 anni','femmina',
+person('ruggine','Ruggine','npc.gatto-fabbrica','cacciatrice di topi della fonderia','4 anni','femmina',
  "Vive tra i forni delle Fonderie Ramelli, dorme sui lingotti ancora tiepidi e caccia i topi dei magazzini.",
  "Sei Ruggine, una gatta di fonderia dal pelo rosso scuro. Rispondi solo con versi, fusa e azioni descritte tra parentesi. Ami il calore dei forni.",
  "una gatta dal pelo rosso ruggine con una macchia nera sul naso",[],
  [R('mattina','dorme sui lingotti tiepidi','lavoro','dorme'),R('giorno','caccia topi nei magazzini','lavoro','passeggia'),R('sera','gironzola tra le gambe dei fonditori','in giro','passeggia'),R('notte','dorme vicino al forno','lavoro','dorme')],specie='animale')
-person('tizzone','Tizzone','npc.gatto-fabbrica','gatto dello scalo','6 anni','maschio',
+person('tizzone','Tizzone','npc.gatto-fabbrica','cacciatore di topi dello scalo','6 anni','maschio',
  "Il gatto nero dello scalo ferroviario: sale sui vagoni del minerale e scende sempre alla fermata giusta.",
  "Sei Tizzone, un gatto nero dello scalo ferroviario. Rispondi solo con versi, fusa e azioni descritte tra parentesi. Viaggi sui vagoni e ti fai coccolare dai macchinisti.",
  "un gatto nero lucido con gli occhi gialli e un orecchio smangiato",[],
@@ -135,9 +136,9 @@ person('tizzone','Tizzone','npc.gatto-fabbrica','gatto dello scalo','6 anni','ma
 assert len(P)==24
 bond('bruno','nives','figlia','padre'); bond('bruno','pietro','nipote','zio'); bond('selene','amalia','figlia','madre')
 bond('ilario','teresa','moglie','marito'); bond('teodoro','clelia','figlia','padre'); bond('gelsomina','ornella','amica','amica')
-bond('marta','elia','amico','amica'); bond('amalia','corrado','maestro','allieva'); bond('osvaldo','corrado','amico','amico')
-bond('bruno','quinto','alleato','alleato'); bond('fosca','nives','allieva','maestra'); bond('raniero','bruno','rivale','rivale')
-bond('nestore','zeno','rivale','rivale'); bond('dafne','marta','amica','amica'); bond('ermanno','fosca','vecchia amica','vecchio amico')
+bond('marta','elia','amico','amica'); bond('amalia','corrado','maestro','apprendista'); bond('osvaldo','corrado','amico','amico')
+bond('bruno','quinto','amico','amico'); bond('fosca','nives','apprendista','maestra'); bond('raniero','bruno','rivale','rivale')
+bond('nestore','zeno','rivale','rivale'); bond('dafne','marta','amica','amica'); bond('ermanno','fosca','amica','amico')
 bond('teodoro','quinto','collega','collega'); bond('ilario','nestore','collega','collega')
 mem('bruno',"Il giorno dello scoppio della fonderia vecchia ha tirato fuori dalle macerie tre lavoranti.",3)
 mem('bruno',"La Casa Ramelli non ha risposto alla terza lettera della Gilda sui turni di dieci ore.",2,'raniero')

@@ -2,7 +2,7 @@
 // places, the plots against the registry of people. Each returns one line per problem (empty: all good).
 
 import { bibleBreaks, lexiconWords, metaBreak } from '../../../../src/kernel/fourthwall';
-import { readPeople, similarNames } from '../../../../src/kernel/society';
+import { readPeople, repairSociety, similarNames } from '../../../../src/kernel/society';
 import { readPlots, reviewPlot } from '../../../../src/kernel/plots';
 import { readFileSync } from 'node:fs';
 import type { Kernel } from '../../../../src/kernel/kernel';
@@ -87,6 +87,33 @@ export function societa(files: FileMap): string[] {
       else if (!other.famiglia.some((g) => g.nome === p.nome)) out.push(`${p.nome}: ${f.nome} non sa di essere ${f.legame}`);
     }
   }
+  for (const f of repairSociety(people, (t) => (/gatto/.test(t) ? 'animale' : 'persona')).fixes) out.push(`persone: il kernel correggerebbe «${f}»`);
   for (const plot of readPlots(files)) for (const pr of reviewPlot(plot, people, words).problems) out.push(`trama ${plot.id}: ${pr}`);
   return out;
 }
+
+/**
+ * A module as the kernel takes it from the universe's files, and as the Forge would take it: the manifest (`parseManifest`), the Lua that compiles
+ * (`checkLua`), calls only the API (`apiErrors`) and loads in a VM apart (`probe`); an entity or an item also through `validateForged`, the
+ * Forge's own gate. Systems and data never come from the Forge (ADR-0028), so for them the first four are the whole of it.
+ */
+export function modulo(k: Kernel, files: FileMap, id: string): string[] {
+  const path = `modules/${id}/manifest.json`;
+  const { manifest, errors } = k.validator.parseManifest(path, files[path] ?? '');
+  if (!manifest) return errors;
+  const logicPath = `modules/${id}/${manifest.logic ?? 'logic.lua'}`;
+  const logic = manifest.logic ? files[logicPath] : undefined;
+  if (manifest.logic && logic === undefined) return [`${logicPath}: manca`];
+  const out = [...errors];
+  if (logic !== undefined) {
+    out.push(...k.validator.checkLua(logicPath, logic), ...apiErrorsOf(logic).map((e) => `${logicPath}: ${e}`));
+    if (!out.length) {
+      const e = (k as any).sandbox.probe(logic, logicPath) as string | null;
+      if (e) out.push(e);
+    }
+  }
+  if (manifest.kind === 'entity' || manifest.kind === 'item') out.push(...k.validator.validateForged(manifest, logic ?? 'return {}', new Set()));
+  return [...new Set(out)];
+}
+
+import { apiErrors as apiErrorsOf } from '../../../../src/kernel/validator';

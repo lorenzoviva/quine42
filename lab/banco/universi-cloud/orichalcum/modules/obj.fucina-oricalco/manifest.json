@@ -1,0 +1,55 @@
+{
+  "id": "obj.fucina-oricalco",
+  "version": "0.1.0",
+  "name": "Fucina d'oricalco",
+  "kind": "entity",
+  "description": "Un forno a crogiolo di mattoni refrattari con il mantice a vapore: con il carbone giusto il minerale rosso e il rame diventano oricalco.",
+  "context": "fonderie e officine dei fonditori",
+  "appearance": {
+    "model": "fucina-oricalco",
+    "classe": "edificio",
+    "glyph": "Ψ",
+    "color": "#e08a3a",
+    "aspetto": "un forno a crogiolo di mattoni refrattari con una bocca rovente, un mantice e un canale di colata"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.6
+  },
+  "tags": [
+    "forno",
+    "fonderia",
+    "caldo"
+  ],
+  "components": {
+    "forno": {
+      "calore": 0,
+      "colate": 0
+    }
+  },
+  "interaction": {
+    "type": "lua"
+  },
+  "actions": [
+    {
+      "id": "alimenta",
+      "label": "Alimenta il forno",
+      "requires": "item.carbone"
+    },
+    {
+      "id": "cola",
+      "label": "Cola l'oricalco",
+      "requires": "item.minerale-rosso"
+    },
+    {
+      "id": "tempra",
+      "label": "Tempra una lamina",
+      "requires": "item.lingotto-rame"
+    },
+    {
+      "id": "guarda",
+      "label": "Guarda la colata"
+    }
+  ],
+  "logic": "module.lua"
+}

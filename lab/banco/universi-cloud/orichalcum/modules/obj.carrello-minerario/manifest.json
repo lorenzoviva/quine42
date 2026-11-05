@@ -1,0 +1,54 @@
+{
+  "id": "obj.carrello-minerario",
+  "version": "0.1.0",
+  "name": "Carrello del minerale",
+  "kind": "entity",
+  "description": "Un carrello di ferro sui binari, mezzo pieno di minerale rosso di Solfara, con il freno a leva e le ruote che stridono.",
+  "context": "miniere, scali ferroviari e banchine",
+  "appearance": {
+    "model": "carrello-minerario",
+    "classe": "mobile",
+    "glyph": "▣",
+    "color": "#6a5a4a",
+    "aspetto": "un carrello di ferro su ruote con il cassone pieno di pietre rosse e un freno a leva"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.45
+  },
+  "tags": [
+    "carrello",
+    "metallo",
+    "miniera"
+  ],
+  "components": {
+    "carrello": {
+      "minerale": 6,
+      "frenato": true
+    }
+  },
+  "interaction": {
+    "type": "lua"
+  },
+  "actions": [
+    {
+      "id": "prendi",
+      "label": "Prendi un pezzo di minerale"
+    },
+    {
+      "id": "carica",
+      "label": "Carica minerale nel carrello",
+      "requires": "item.minerale-rosso"
+    },
+    {
+      "id": "freno",
+      "label": "Tira il freno a leva"
+    },
+    {
+      "id": "scava",
+      "label": "Scava tra le pietre",
+      "requires": "item.piccone"
+    }
+  ],
+  "logic": "module.lua"
+}

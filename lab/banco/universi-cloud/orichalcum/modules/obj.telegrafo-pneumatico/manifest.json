@@ -1,0 +1,52 @@
+{
+  "id": "obj.telegrafo-pneumatico",
+  "version": "0.1.0",
+  "name": "Telegrafo pneumatico",
+  "kind": "entity",
+  "description": "Una colonnina d'ottone con un tubo che sparisce nel selciato, uno sportello per le capsule e la fessura per il soldo: in pochi minuti la capsula è dall'altra parte della città.",
+  "context": "piazze, scali, torri e banchine",
+  "appearance": {
+    "model": "telegrafo-pneumatico",
+    "classe": "monumento",
+    "glyph": "¶",
+    "color": "#d4a83a",
+    "aspetto": "una colonnina d'ottone alta con uno sportello rotondo, una leva e un tubo che entra nel suolo"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.35
+  },
+  "tags": [
+    "telegrafo",
+    "ottone",
+    "meccanismo"
+  ],
+  "components": {
+    "telegrafo": {
+      "in_viaggio": false,
+      "arrivo": 0,
+      "inviate": 0,
+      "arrivate": 0
+    }
+  },
+  "interaction": {
+    "type": "lua"
+  },
+  "actions": [
+    {
+      "id": "invia",
+      "label": "Manda una capsula (un soldo)",
+      "requires": "item.soldo-rame"
+    },
+    {
+      "id": "rimanda",
+      "label": "Rimanda una capsula vuota",
+      "requires": "item.capsula-pneumatica"
+    },
+    {
+      "id": "ascolta",
+      "label": "Ascolta il tubo"
+    }
+  ],
+  "logic": "module.lua"
+}

@@ -1,0 +1,67 @@
+{
+  "id": "obj.caldaia",
+  "version": "0.1.0",
+  "name": "Caldaia a pressione",
+  "kind": "entity",
+  "description": "Una caldaia di ghisa panciuta con le fasce d'ottone, il portello del fuoco e due valvole di sfogo. Vuole carbone e acqua; senz'acqua non si accende.",
+  "context": "piazze, officine, fonderie, rimesse e aie delle Città del Vapore",
+  "appearance": {
+    "model": "caldaia-vapore",
+    "classe": "edificio",
+    "glyph": "♨",
+    "color": "#5a5e66",
+    "aspetto": "una caldaia di ghisa panciuta con fasce d'ottone, un portello del fuoco arancio e un comignolo"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.55
+  },
+  "tags": [
+    "caldaia",
+    "metallo",
+    "macchina"
+  ],
+  "components": {
+    "caldaia": {
+      "accesa": false,
+      "carbone": 0,
+      "acqua": 0,
+      "pressione": 0,
+      "sfoghi": 0,
+      "battuta": false
+    }
+  },
+  "interaction": {
+    "type": "lua"
+  },
+  "actions": [
+    {
+      "id": "carbone",
+      "label": "Metti carbone",
+      "requires": "item.carbone"
+    },
+    {
+      "id": "acqua",
+      "label": "Versa acqua termale",
+      "requires": "item.acqua-termale"
+    },
+    {
+      "id": "accendi",
+      "label": "Accendi il fuoco"
+    },
+    {
+      "id": "sfiata",
+      "label": "Apri lo sfiato"
+    },
+    {
+      "id": "batti",
+      "label": "Batti tre volte con la chiave",
+      "requires": "item.chiave-inglese"
+    },
+    {
+      "id": "ascolta",
+      "label": "Ascolta la caldaia"
+    }
+  ],
+  "logic": "module.lua"
+}

@@ -1,0 +1,9 @@
+{
+  "id": "sys.pressione",
+  "version": "0.1.0",
+  "name": "Pressione delle caldaie",
+  "kind": "system",
+  "order": 40,
+  "description": "Le caldaie delle Città del Vapore: il carbone brucia, l'acqua diventa vapore, la pressione sale; le valvole di sfogo fischiano quando è troppa; i manometri vicini la segnano; la fiamma di una brace o di una scintilla accanto a una caldaia spenta la riaccende.",
+  "logic": "module.lua"
+}

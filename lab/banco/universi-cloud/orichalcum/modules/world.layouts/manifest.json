@@ -3,7 +3,7 @@
   "name": "Ambienti",
   "kind": "data",
   "version": "0.1.0",
-  "description": "Gli ambienti delle Città del Vapore come regole di riscrittura (stile MarkovJunior) applicati alla bozza del terreno; il kernel li prova prima di accettarli.",
+  "description": "Gli ambienti delle Città del Vapore come regole di riscrittura (stile MarkovJunior) applicati alla bozza del terreno, provati prima di entrare nel mondo.",
   "layouts": {
     "piazza_pesa": {
       "name": "Piazza della Pesa",

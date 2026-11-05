@@ -1,0 +1,56 @@
+{
+  "id": "obj.dirigibile-attracco",
+  "version": "0.1.0",
+  "name": "Dirigibile all'ormeggio",
+  "kind": "entity",
+  "description": "Il pilone d'ormeggio della torre con un dirigibile legato ai cavi: la Rondine di Marta Ventidue, con lo squarcio sul fianco e il bruciatore spento.",
+  "context": "torri d'ormeggio e piazzali degli aeronauti",
+  "appearance": {
+    "model": "pilone-ormeggio",
+    "classe": "monumento",
+    "glyph": "Ѫ",
+    "color": "#8a6a4a",
+    "aspetto": "un pilone di ferro a traliccio con un anello in cima e cavi tesi verso un dirigibile color sabbia"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.5
+  },
+  "tags": [
+    "dirigibile",
+    "ormeggio",
+    "metallo"
+  ],
+  "components": {
+    "dirigibile": {
+      "tubi": 0,
+      "toppe": 0,
+      "riparato": false,
+      "voli": 0
+    }
+  },
+  "interaction": {
+    "type": "lua"
+  },
+  "actions": [
+    {
+      "id": "tubo",
+      "label": "Porta un tubo di rame al bruciatore",
+      "requires": "item.tubo-rame"
+    },
+    {
+      "id": "toppa",
+      "label": "Rattoppa la tela",
+      "requires": "item.straccio"
+    },
+    {
+      "id": "sali",
+      "label": "Sali a bordo"
+    },
+    {
+      "id": "osserva",
+      "label": "Osserva il cielo"
+    }
+  ],
+  "logic": "module.lua"
+}

@@ -10,15 +10,15 @@
       "famiglia": [
         {
           "nome": "Nives Caldera",
-          "legame": "figlia"
+          "legame": "padre"
         },
         {
           "nome": "Pietro Lanzi",
-          "legame": "nipote"
+          "legame": "zio"
         },
         {
           "nome": "Quinto Sbarra",
-          "legame": "alleato"
+          "legame": "amico"
         },
         {
           "nome": "Raniero Ramelli",
@@ -197,7 +197,7 @@
       "famiglia": [
         {
           "nome": "Bruno Caldera",
-          "legame": "zio"
+          "legame": "nipote"
         }
       ],
       "routine": [
@@ -252,7 +252,7 @@
       "famiglia": [
         {
           "nome": "Amalia Vitti",
-          "legame": "figlia"
+          "legame": "madre"
         }
       ],
       "routine": [
@@ -308,11 +308,11 @@
       "famiglia": [
         {
           "nome": "Selene Vitti",
-          "legame": "madre"
+          "legame": "figlia"
         },
         {
           "nome": "Corrado Ingegni",
-          "legame": "maestro"
+          "legame": "apprendista"
         }
       ],
       "routine": [
@@ -369,7 +369,7 @@
       "famiglia": [
         {
           "nome": "Amalia Vitti",
-          "legame": "allieva"
+          "legame": "maestro"
         },
         {
           "nome": "Osvaldo Brace",
@@ -429,7 +429,7 @@
       "famiglia": [
         {
           "nome": "Teresa Fumagalli",
-          "legame": "moglie"
+          "legame": "marito"
         },
         {
           "nome": "Nestore Binda",
@@ -489,7 +489,7 @@
       "famiglia": [
         {
           "nome": "Ilario Fumagalli",
-          "legame": "marito"
+          "legame": "moglie"
         }
       ],
       "routine": [
@@ -604,7 +604,7 @@
       "famiglia": [
         {
           "nome": "Elia Sartori",
-          "legame": "amico"
+          "legame": "amica"
         },
         {
           "nome": "Dafne Corsi",
@@ -663,7 +663,7 @@
       "famiglia": [
         {
           "nome": "Marta Ventidue",
-          "legame": "amica"
+          "legame": "amico"
         }
       ],
       "routine": [
@@ -774,11 +774,11 @@
       "famiglia": [
         {
           "nome": "Bruno Caldera",
-          "legame": "padre"
+          "legame": "figlia"
         },
         {
           "nome": "Fosca Ruggi",
-          "legame": "maestra"
+          "legame": "apprendista"
         }
       ],
       "routine": [
@@ -890,11 +890,11 @@
       "famiglia": [
         {
           "nome": "Nives Caldera",
-          "legame": "allieva"
+          "legame": "maestra"
         },
         {
           "nome": "Ermanno Tosi",
-          "legame": "vecchio amico"
+          "legame": "amica"
         }
       ],
       "routine": [
@@ -949,7 +949,7 @@
       "famiglia": [
         {
           "nome": "Clelia Gessi",
-          "legame": "figlia"
+          "legame": "padre"
         },
         {
           "nome": "Quinto Sbarra",
@@ -1009,7 +1009,7 @@
       "famiglia": [
         {
           "nome": "Teodoro Gessi",
-          "legame": "padre"
+          "legame": "figlia"
         }
       ],
       "routine": [
@@ -1065,7 +1065,7 @@
       "famiglia": [
         {
           "nome": "Bruno Caldera",
-          "legame": "alleato"
+          "legame": "amico"
         },
         {
           "nome": "Teodoro Gessi",
@@ -1125,7 +1125,7 @@
       "famiglia": [
         {
           "nome": "Fosca Ruggi",
-          "legame": "vecchia amica"
+          "legame": "amico"
         }
       ],
       "routine": [
@@ -1286,7 +1286,7 @@
       "specie": "animale",
       "genere": "femmina",
       "tipo": "npc.gatto-fabbrica",
-      "mestiere": "gatta di fonderia",
+      "mestiere": "cacciatrice di topi della fonderia",
       "eta": "4 anni",
       "famiglia": [],
       "routine": [
@@ -1334,7 +1334,7 @@
       "specie": "animale",
       "genere": "maschio",
       "tipo": "npc.gatto-fabbrica",
-      "mestiere": "gatto dello scalo",
+      "mestiere": "cacciatore di topi dello scalo",
       "eta": "6 anni",
       "famiglia": [],
       "routine": [

@@ -1,0 +1,51 @@
+{
+  "id": "obj.valvola-manometro",
+  "version": "0.1.0",
+  "name": "Valvola con manometro",
+  "kind": "entity",
+  "description": "Un tubo che esce dal muro con una valvola a volantino rosso e un manometro d'ottone: segna la pressione della caldaia più vicina e, aperto, la sfoga.",
+  "context": "accanto alle caldaie, nelle officine e nelle fonderie",
+  "appearance": {
+    "model": "valvola-manometro",
+    "classe": "mobile",
+    "glyph": "◎",
+    "color": "#c8a04a",
+    "aspetto": "una valvola a volantino rosso su un tubo di rame con un manometro d'ottone dal quadrante bianco"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.35
+  },
+  "tags": [
+    "valvola",
+    "metallo",
+    "meccanismo"
+  ],
+  "components": {
+    "manometro": {
+      "lettura": 0
+    },
+    "valvola": {
+      "tarata": false
+    }
+  },
+  "interaction": {
+    "type": "lua"
+  },
+  "actions": [
+    {
+      "id": "leggi",
+      "label": "Leggi il manometro"
+    },
+    {
+      "id": "apri",
+      "label": "Gira il volantino"
+    },
+    {
+      "id": "tara",
+      "label": "Tara il manometro",
+      "requires": "item.cacciavite-fine"
+    }
+  ],
+  "logic": "module.lua"
+}

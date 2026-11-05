@@ -1,0 +1,9 @@
+{
+  "id": "sys.meccanismi",
+  "version": "0.1.0",
+  "name": "Meccanismi della città",
+  "kind": "system",
+  "order": 46,
+  "description": "Ciò che nelle Città del Vapore va a molla, a gas o ad aria: le capsule del telegrafo pneumatico che arrivano, i guardiani d'ottone che si scaricano camminando, i lampioni a gas che si accendono di sera e si riaccendono a una scintilla.",
+  "logic": "module.lua"
+}
