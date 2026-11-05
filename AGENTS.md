@@ -45,8 +45,9 @@ Design doc originale: [`docs/design.md`](docs/design.md). Decisioni: [`docs/adr/
 5. **Ogni contenuto è un modulo autosufficiente** con `manifest.json`; il manifest dei moduli
    generati lo assembla il kernel (forma garantita). Gli oggetti stanno in pacchetti di dati.
 6. **Due repository** (ADR-0021): il kernel (questo progetto; `universe/` è il seme, immutabile) e
-   l'universo (repository git su disco, `universes/<nome>/`). Si committano solo stati validi; `R` torna
-   all'ultimo valido; ripartire dal seme mette l'universo in `universes/.cestino/`. Un commit che la rete non porta resta in fila, in ordine; un rifiuto del server non si ritenta (ADR-0122).
+   l'universo (repository git su disco, `universes/<nome>/`). Si committano solo stati validi, e un guasto invalida il codice, non i dati (ADR-0137): il codice
+   scritto senza commit è trattenuto da ogni commit (`Repo.withheld`), stato, viandanti e piani si salvano anche con un guasto aperto (non un universo
+   di un altro kernel o con `universe.json` illeggibile); `R` torna all'ultimo valido, che ha i dati dell'ultimo salvataggio; ripartire dal seme mette l'universo in `universes/.cestino/`. Un commit che la rete non porta resta in fila, in ordine; un rifiuto del server non si ritenta (ADR-0122).
 7. **Il kernel è il pavimento**: sopravvive a NaN, nil, cicli infiniti, binding recisi. Le API del
    `Host` validano gli input e restituiscono `undefined` (mai `null`).
 8. **Dal cerchio nessuno vede la corona** (ADR-0009, ADR-0124): si disegna solo per chi è fuori dal tappeto (a `circleRadius` o più dal centro) o in un interno dello studio; lo decide solo `kernel.coronaRevealed()`, che non guarda ruolo né camera. Dentro il cerchio niente anello, luci, etichette, hover né sfondo, per il giocatore, per chi è tornato, per il master e in god mode; la camera di base è la 3/4 e l'orbita libera non accende nulla.

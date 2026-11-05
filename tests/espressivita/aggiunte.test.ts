@@ -152,14 +152,15 @@ describe('a new node of MarkovJunior', () => {
 });
 
 describe('a Lua API taken away (what is not additive)', () => {
-  it('TRAP: every module that calls it faults at once, and with a fault open the world saves nothing', async () => {
+  it('TRAP: every module that calls it faults at once; with the fault open the world still saves its data (T262)', async () => {
     const universe = universeWith('mech.posa');
     const k = await boot({ ...universe, 'modules/mech.posa/logic.lua': 'local M = {}\nfunction M.update(dt) world.tolta() end\nreturn M\n' });
     await developAll(k);
     k.tick(DT);
     expect(k.faults.list().map((f) => f.key)).toContain('module:mech.posa:update');
     k.give('item.pane', 1);
-    expect(k.saveState()).toBe(false);
+    expect(k.saveState()).toBe(true);
+    expect(k.repo.head().files['modules/mech.posa/logic.lua']).toContain('world.tolta');
   });
 });
 

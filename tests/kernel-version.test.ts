@@ -88,7 +88,7 @@ describe('a universe at boot', () => {
 
   it('of another contract opens standing, with a fault that says why, and is never committed as ours', async () => {
     const k = await boot(withKernel('0.2.0'));
-    expect(k.faults.get('universe:kernel')?.message).toMatch(/0\.2\.0.*0\.1\.0/);
+    expect(k.faults.get('universe:kernel')?.message).toContain(`del kernel 0.2.0, il kernel è il ${KERNEL_VERSION}`);
     const saved = k.saveFile('world/prova.txt', 'x\n');
     expect(saved.committed).toBe(false);
     expect(JSON.parse(k.repo.working['universe.json']).kernel).toBe('0.2.0');

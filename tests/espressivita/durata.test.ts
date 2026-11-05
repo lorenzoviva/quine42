@@ -145,11 +145,12 @@ describe('what Lua can leave behind for the next opening of the world', () => {
     expect(JSON.parse(w.files['world/stato.json']).forme ?? {}).toEqual({});
   });
 
-  it('LIMIT (lasting state): one fault anywhere and nothing is saved until it is gone', async () => {
+  it('a fault anywhere does not stop the saves (T262, once a LIMIT): it invalidates code, not the data of the game', async () => {
     const k = await open(newLasting(universeWith('mech.posa')));
     k.give('item.pane', 1);
     k.faults.raise('module:mech.qualsiasi:update', 'rotto');
-    expect(k.saveState()).toBe(false);
+    expect(k.saveState()).toBe(true);
+    k.give('item.pane', 1);
     k.faults.clear('module:mech.qualsiasi:update');
     expect(k.saveState()).toBe(true);
   });

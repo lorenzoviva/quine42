@@ -650,6 +650,8 @@ export class Kernel {
     k.council.onFocus = (ids) => k.cards.use(ids, 'prompt', (id) => k.isCard(id));
     // A mirror saves nothing of its own: its commits hold only the files it was told and the master's edits (T42b). The Council
     // is fenced in on a mirror too: a kernel on the master's branch is one (T42e).
+    // The code written without a commit is not a valid state (T262): every commit takes it as HEAD has it.
+    repo.withheld = () => k.unsaved;
     repo.beforeCommit = (author) => {
       if (author === 'agent') k.fenceCouncil();
       k.commanded.clear();
@@ -7309,13 +7311,17 @@ export class Kernel {
   /** Containers opened in earlier sessions, by stable origin: they keep what was left in them. */
   private savedContainers = new Map<string, { inv: Inventory; filled: boolean }>();
   private lastState = '';
+  /** Files the player wrote that are not a valid state (T262, ADR-0137): in the working files, never in a commit. */
+  private unsaved = new Set<string>();
 
   /**
    * The state of play is part of the universe too (`world/stato.json`): what the wanderer carries,
    * what was taken from the world, what is left in chests. Saved only while the universe is valid.
    */
   saveState(): boolean {
-    if (this.faults.size || this.generationHeld || this.mirror) return false;
+    // A fault invalidates code, not the data of the game (T262, ADR-0137): what is broken is withheld from every commit
+    // (`unsaved`), the rest is saved. Only a universe that is not this world's (its configuration, another kernel) saves nothing.
+    if (this.generationHeld || this.mirror || this.foreignUniverse()) return false;
     const containers: Record<string, { inv: Inventory; filled: boolean }> = Object.fromEntries(this.savedContainers);
     for (const id of this.ecs.query('container', 'origin')) {
       const c: Container = this.ecs.get(id, 'container');
@@ -7342,6 +7348,11 @@ export class Kernel {
     this.files = { ...this.files, ...written };
     this.repo.commit('salvataggio della partita', 'player');
     return true;
+  }
+
+  /** universe.json unreadable or of another kernel (T260): the world running is not the universe's, nothing of it is saved. */
+  private foreignUniverse(): boolean {
+    return this.faults.has('universe:config') || this.faults.has('universe:kernel');
   }
 
   /** What is saved of the wanderer acting now. */
@@ -7562,8 +7573,8 @@ export class Kernel {
   /** On leaving: the spending of this session goes into the universe even if nothing else changed. */
   saveUsage(): boolean {
     if (this.mirror) return false;
-    // Only valid states are committed: with a fault the ledger waits for the next valid commit.
-    if ((this.usage.version === this.usageWritten && this.cards.version === this.cardsWritten) || this.faults.size) return false;
+    // Broken code is withheld from the commit (T262): the ledger is saved anyway, unless the universe is not this world's.
+    if ((this.usage.version === this.usageWritten && this.cards.version === this.cardsWritten) || this.foreignUniverse()) return false;
     this.repo.commit('consumi dei modelli', 'kernel');
     return true;
   }
@@ -7625,6 +7636,7 @@ export class Kernel {
     if (!files) return false;
     for (const [p, v] of Object.entries(files)) this.repo.write(p, v);
     for (const p of Object.keys(this.repo.working)) if (!(p in files)) this.repo.write(p, null);
+    this.unsaved.clear();
     this.applyFiles({ ...this.repo.working }, { reset: true });
     // The disk already has the commit ("ritorno a …"): here only the session snapshot.
     const backend = this.repo.backend;
@@ -7652,6 +7664,7 @@ export class Kernel {
       this.ecs.destroy(id);
     }
     const files = commitId ? this.repo.checkout(commitId) : this.repo.restore();
+    this.unsaved.clear();
     this.faults.clearAll();
     this.applyFiles(files, { reset: true });
     const head = this.repo.head();
@@ -7669,10 +7682,12 @@ export class Kernel {
     const broken = this.faults.list().some((f) => f.key.startsWith('manifest:') || f.key.endsWith(':load') || f.key === 'universe:config' || f.key === 'universe:kernel');
     let committed = false;
     if (!errors.length && !broken) {
+      this.unsaved.delete(path);
       const c = this.repo.commit(`modifica ${path}`, 'player');
       this.log('repo', `commit ${c.id}: ${c.message}`);
       committed = true;
     } else {
+      this.unsaved.add(path);
       this.log('repo', `${path} scritto senza commit: l'universo è in uno stato non valido`);
     }
     return { errors, committed, written: true };
@@ -7699,6 +7714,7 @@ export class Kernel {
       this.applyFiles({ ...this.repo.working });
       return { ok: false, motivo: `il mondo si romperebbe: ${broken.message}` };
     }
+    for (const p of paths) this.unsaved.delete(p);
     const commit = this.repo.commit(message, 'player');
     this.log('repo', `commit ${commit.id}: ${message}`);
     return { ok: true, commit };

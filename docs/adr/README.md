@@ -141,5 +141,6 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0134](0134-le-ambientazioni-della-genesi.md) | Le ambientazioni della Genesi sono testo tra cui scegliere su un seme solo: ciò che sopravvive alla Genesi parla di epoca, le case comuni dipendono dal mondo | accettato |
 | [0135](0135-la-lettera-del-suolo.md) | La lettera del suolo: `suolo="E"` sulla radice, il kernel la scrive sullo strato `base`, così lo stesso programma con la cantina serve ogni taglia; chi non la dice non cambia, chiave di cache compresa |
 | [0136](0136-la-versione-del-kernel.md) | La versione del kernel `X.Y.Z` (era, contratto, incremento) da `0.1.0`: `universe.json → kernel`, `checkKernelVersion` al caricamento, un contratto nuovo vuole un universo nuovo; un effetto senza chi lo applica è un guasto |
+| [0137](0137-il-salvataggio-che-non-si-ferma.md) | Il salvataggio che non si ferma: un guasto invalida il codice, non i dati; il codice scritto senza commit è trattenuto da ogni commit (`Repo.withheld`), stato, viandanti e piani si salvano con un guasto aperto; `R` tiene i dati dell'ultimo salvataggio |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.

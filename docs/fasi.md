@@ -23,7 +23,7 @@ L'autore: l'implementazione del kernel 0.9.0, divisa in step. La guida dei beta 
 5. Ciò che T183 trova mancare al kernel e che non entrerebbe senza wipe è deciso: dentro la 0.9.0 oppure rimandato sapendo cosa costa, perché un wipe degli universi ufficiali costa molto. Con il versionamento (ADR-0136) «senza wipe» vuol dire «nella stessa `X.Y`»: ciò che cambia il contratto dopo la 0.9.0 la porta a 0.10.0 o a 1.0.0, e gli universi della beta restano sul server della loro versione.
 6. Il registro di ciò che il Concilio non riesce a fare è acceso (T238): senza, la Fase III non ha da dove partire.
 7. Un viandante nuovo ha seguito i due file della guida sul server di beta, e ogni passo torna (T237).
-8. `package.json`, `KERNEL_VERSION` (`src/kernel/version.ts`) e `universe.json → kernel` del seme dicono `0.9.0` (oggi `0.1.0`, ADR-0136) e quel commit ha un tag.
+8. `package.json`, `KERNEL_VERSION` (`src/kernel/version.ts`) e `universe.json → kernel` del seme dicono `0.9.0` (oggi `0.1.x`: `Z` sale a ogni task che cambia il kernel, ADR-0136) e quel commit ha un tag.
 
 ### Fase II: i beta tester
 
