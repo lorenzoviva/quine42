@@ -1,560 +1,740 @@
 {
- "viandante": {
-  "classe": "persona",
-  "nome": "Viandante",
-  "autore": "a mano (Claude Code)",
-  "tinta": "N"
- },
- "contadina": {
-  "classe": "persona",
-  "nome": "Contadina",
-  "autore": "gemini-3.8-flash (step 8.2A)",
-  "voto": 8
- },
- "persona": {
-  "classe": "persona",
-  "nome": "Fabbro",
-  "autore": "a mano, step 8B (Claude Code)"
- },
- "animale": {
-  "classe": "animale",
-  "nome": "Gatto",
-  "autore": "a mano, step 8B (Claude Code)"
- },
- "bestia": {
-  "classe": "bestia",
-  "nome": "Lupo",
-  "autore": "a mano, step 8B (Claude Code)"
- },
- "albero": {
-  "classe": "albero",
-  "nome": "Pino",
-  "autore": "a mano, step 8B (Claude Code)"
- },
- "quercia": {
-  "classe": "albero",
-  "nome": "Quercia",
-  "autore": "gemini-3.8-flash (step 8.2A)",
-  "voto": 5
- },
- "betulla": {
-  "classe": "albero",
-  "nome": "Betulla",
-  "autore": "gemini-3.8-flash (step 8.2A)",
-  "voto": 8
- },
- "palma": {
-  "classe": "albero",
-  "nome": "Palma",
-  "autore": "a mano, step 8B (Claude Code)"
- },
- "cespuglio": {
-  "classe": "cespuglio",
-  "nome": "Cespuglio",
-  "autore": "a mano (Claude Code)"
- },
- "cespuglio-con-bacche": {
-  "classe": "cespuglio",
-  "nome": "Cespuglio con bacche",
-  "autore": "gemini-3.8-flash (step 8.2A)",
-  "voto": 8
- },
- "roccia": {
-  "classe": "roccia",
-  "nome": "Masso",
-  "autore": "a mano (Claude Code)"
- },
- "masso-muschioso": {
-  "classe": "roccia",
-  "nome": "Masso muschioso",
-  "autore": "gemini-3.8-flash (step 8.2A)",
-  "voto": 8
- },
- "sasso": {
-  "classe": "sasso",
-  "nome": "Sasso",
-  "autore": "a mano, step 8B (Claude Code)"
- },
- "barile": {
-  "classe": "mobile",
-  "nome": "Barile",
-  "autore": "gemini-3.8-flash (step 8B)",
-  "voto": 7
- },
- "falo": {
-  "classe": "mobile",
-  "nome": "Falò",
-  "autore": "a mano (Claude Code)"
- },
- "mobile": {
-  "classe": "mobile",
-  "nome": "Cassa",
-  "autore": "a mano (Claude Code)"
- },
- "letto": {
-  "classe": "mobile",
-  "nome": "Letto",
-  "autore": "a mano (Claude Code)"
- },
- "banco": {
-  "classe": "mobile",
-  "nome": "Banco da lavoro",
-  "autore": "a mano (Claude Code)"
- },
- "credenza": {
-  "classe": "mobile",
-  "nome": "Credenza",
-  "autore": "a mano (Claude Code)"
- },
- "cartello": {
-  "classe": "mobile",
-  "nome": "Cartello",
-  "autore": "a mano (Claude Code)"
- },
- "oggetto": {
-  "classe": "oggetto",
-  "nome": "Cosa",
-  "autore": "a mano (Claude Code)",
-  "tinta": "C"
- },
- "forbici": {
-  "classe": "oggetto",
-  "nome": "Forbici",
-  "autore": "a mano (Claude Code)"
- },
- "pozzo": {
-  "classe": "edificio",
-  "nome": "Pozzo",
-  "autore": "gemini-3.8-flash (step 8.2A)",
-  "voto": 8
- },
- "edificio": {
-  "classe": "edificio",
-  "nome": "Casetta",
-  "autore": "gemini-3.8-flash (step 8.2A)",
-  "voto": 9
- },
- "monumento": {
-  "classe": "monumento",
-  "nome": "Colonna",
-  "autore": "a mano (Claude Code)"
- },
- "grande": {
-  "classe": "grande",
-  "nome": "Casa a graticcio",
-  "autore": "a mano (Claude Code)"
- },
- "fattoria": {
-  "classe": "grande",
-  "nome": "Fattoria",
-  "autore": "a mano (Claude Code)"
- },
- "corona-magia": {
-  "classe": "edificio",
-  "nome": "Torre della Magia",
-  "autore": "gemini-3.8-flash (Gemini CLI, T19)",
-  "vpt": 8
- },
- "corona-concilio": {
-  "classe": "edificio",
-  "nome": "Sala del Concilio",
-  "autore": "gemini-3.8-flash (Gemini CLI, T19)",
-  "vpt": 8
- },
- "corona-cose": {
-  "classe": "edificio",
-  "nome": "Laboratorio delle cose",
-  "autore": "gemini-3.8-flash (Gemini CLI, T19)",
-  "vpt": 8
- },
- "corona-galleria": {
-  "classe": "edificio",
-  "nome": "Galleria dell'Artista",
-  "autore": "gemini-3.8-flash (Gemini CLI, T19)",
-  "vpt": 8
- },
- "corona-luoghi": {
-  "classe": "edificio",
-  "nome": "Ufficio dei luoghi",
-  "autore": "gemini-3.8-flash (Gemini CLI, T19)",
-  "vpt": 8
- },
- "corona-mondo": {
-  "classe": "edificio",
-  "nome": "Biblioteca del Mondo",
-  "autore": "gemini-3.8-flash (Gemini CLI, T19)",
-  "vpt": 8
- },
- "corona-nucleo": {
-  "classe": "edificio",
-  "nome": "Il Nucleo",
-  "autore": "gemini-3.8-flash (Gemini CLI, T19)",
-  "vpt": 8
- },
- "corona-oggetti": {
-  "classe": "edificio",
-  "nome": "Magazzino degli oggetti",
-  "autore": "gemini-3.8-flash (Gemini CLI, T19)",
-  "vpt": 8
- },
- "corona-persone": {
-  "classe": "edificio",
-  "nome": "Studio dei personaggi",
-  "autore": "gemini-3.8-flash (Gemini CLI, T19)",
-  "vpt": 8
- },
- "corona-sistemi": {
-  "classe": "edificio",
-  "nome": "Sala sistemi",
-  "autore": "gemini-3.8-flash (Gemini CLI, T19)",
-  "vpt": 8
- },
- "corona-universo": {
-  "classe": "edificio",
-  "nome": "La Direzione",
-  "autore": "gemini-3.8-flash (Gemini CLI, T19)",
-  "vpt": 8
- },
- "corona-albero-luce": {
-  "classe": "albero",
-  "nome": "Albero di luce (corona)",
-  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
-  "vpt": 8
- },
- "corona-lampione": {
-  "classe": "mobile",
-  "nome": "Lampione (corona)",
-  "autore": "l'autore, a mano (T113)",
-  "vpt": 8
- },
- "corona-panchina": {
-  "classe": "mobile",
-  "nome": "Panchina (corona)",
-  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
-  "vpt": 8
- },
- "corona-totem": {
-  "classe": "monumento",
-  "nome": "Totem (corona)",
-  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
-  "vpt": 8
- },
- "corona-drone": {
-  "classe": "oggetto",
-  "nome": "Drone (corona)",
-  "autore": "l'autore, a mano; ridotto in scala 1:2 (T113)",
-  "vpt": 8
- },
- "corona-treno": {
-  "classe": "mobile",
-  "nome": "Treno pod (corona)",
-  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
-  "vpt": 8
- },
- "corona-gerboa": {
-  "classe": "persona",
-  "nome": "Gerboa base (corona)",
-  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
-  "vpt": 20
- },
- "corona-gerboa-narratore": {
-  "classe": "persona",
-  "nome": "Gerboa Narratore (corona)",
-  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
-  "vpt": 20
- },
- "corona-gerboa-cartografo": {
-  "classe": "persona",
-  "nome": "Gerboa Cartografo (corona)",
-  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
-  "vpt": 20
- },
- "corona-gerboa-artista": {
-  "classe": "persona",
-  "nome": "Gerboa Artista (corona)",
-  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
-  "vpt": 20
- },
- "corona-gerboa-musicista": {
-  "classe": "persona",
-  "nome": "Gerboa Musicista (corona)",
-  "autore": "dal Gerboa Artista, a mano (T225)",
-  "vpt": 20
- },
- "corona-gerboa-scultore": {
-  "classe": "persona",
-  "nome": "Gerboa Scultore (corona)",
-  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
-  "vpt": 20
- },
- "corona-gerboa-fisico": {
-  "classe": "persona",
-  "nome": "Gerboa Fisico (corona)",
-  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
-  "vpt": 20
- },
- "corona-gerboa-ingegnere": {
-  "classe": "persona",
-  "nome": "Gerboa Ingegnere (corona)",
-  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
-  "vpt": 20
- },
- "corona-gerboa-arbitro": {
-  "classe": "persona",
-  "nome": "Gerboa Arbitro (corona)",
-  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
-  "vpt": 20
- },
- "corona-gerboa-referente": {
-  "classe": "persona",
-  "nome": "Gerboa Referente (corona)",
-  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
-  "vpt": 20
- },
- "corona-gerboa-attore": {
-  "classe": "persona",
-  "nome": "Gerboa Attore (corona)",
-  "autore": "claude-opus-5-5 (Claude Code, T158)",
-  "vpt": 20
- },
- "schermo-scritte": {
-  "classe": "oggetto",
-  "nome": "Schermo scritte",
-  "autore": "a mano (editor MJ, T59)",
-  "vpt": 20
- },
- "schermo-struttura": {
-  "classe": "oggetto",
-  "nome": "Schermo struttura",
-  "autore": "a mano (editor MJ, T59)",
-  "vpt": 20
- },
- "circuito-3D": {
-  "classe": "oggetto",
-  "nome": "Circuito 3D",
-  "autore": "a mano (editor MJ, T59)",
-  "vpt": 20,
-  "tempo": 30000
- },
- "suono-sentiero-melodico": {
-  "classe": "suono",
-  "nome": "Sentiero Melodico",
-  "autore": "Argon (SoundLab), in XML a mano (T221)"
- },
- "suono-fuga-cellulare": {
-  "classe": "suono",
-  "nome": "Fuga Cellular Automata",
-  "autore": "Argon (SoundLab), in XML a mano (T221)"
- },
- "suono-architettura-frattale": {
-  "classe": "suono",
-  "nome": "Architettura Frattale",
-  "autore": "Argon (SoundLab), in XML a mano (T221)"
- },
- "suono-scontro-finale": {
-  "classe": "suono",
-  "nome": "Boss Fight Cyber-Dungeon",
-  "autore": "Argon (SoundLab), in XML a mano (T221)"
- },
- "suono-musica-pastorale": {
-  "classe": "suono",
-  "nome": "Prati",
-  "autore": "a mano (T224)",
-  "suono": {
-   "uso": "musica",
-   "ambienti": [
-    "borgo",
-    "campi",
-    "capanne",
-    "maneggio",
-    "locanda",
-    "lago"
-   ],
-   "momenti": [
-    "mattina",
-    "giorno"
-   ]
+  "viandante": {
+    "classe": "persona",
+    "nome": "Viandante",
+    "autore": "a mano (Claude Code)",
+    "tinta": "N"
+  },
+  "contadina": {
+    "classe": "persona",
+    "nome": "Contadina",
+    "autore": "gemini-3.8-flash (step 8.2A)",
+    "voto": 8
+  },
+  "persona": {
+    "classe": "persona",
+    "nome": "Fabbro",
+    "autore": "a mano, step 8B (Claude Code)"
+  },
+  "animale": {
+    "classe": "animale",
+    "nome": "Gatto",
+    "autore": "a mano, step 8B (Claude Code)"
+  },
+  "bestia": {
+    "classe": "bestia",
+    "nome": "Lupo",
+    "autore": "a mano, step 8B (Claude Code)"
+  },
+  "albero": {
+    "classe": "albero",
+    "nome": "Pino",
+    "autore": "a mano, step 8B (Claude Code)"
+  },
+  "quercia": {
+    "classe": "albero",
+    "nome": "Quercia",
+    "autore": "gemini-3.8-flash (step 8.2A)",
+    "voto": 5
+  },
+  "betulla": {
+    "classe": "albero",
+    "nome": "Betulla",
+    "autore": "gemini-3.8-flash (step 8.2A)",
+    "voto": 8
+  },
+  "palma": {
+    "classe": "albero",
+    "nome": "Palma",
+    "autore": "a mano, step 8B (Claude Code)"
+  },
+  "cespuglio": {
+    "classe": "cespuglio",
+    "nome": "Cespuglio",
+    "autore": "a mano (Claude Code)"
+  },
+  "cespuglio-con-bacche": {
+    "classe": "cespuglio",
+    "nome": "Cespuglio con bacche",
+    "autore": "gemini-3.8-flash (step 8.2A)",
+    "voto": 8
+  },
+  "roccia": {
+    "classe": "roccia",
+    "nome": "Masso",
+    "autore": "a mano (Claude Code)"
+  },
+  "masso-muschioso": {
+    "classe": "roccia",
+    "nome": "Masso muschioso",
+    "autore": "gemini-3.8-flash (step 8.2A)",
+    "voto": 8
+  },
+  "sasso": {
+    "classe": "sasso",
+    "nome": "Sasso",
+    "autore": "a mano, step 8B (Claude Code)"
+  },
+  "barile": {
+    "classe": "mobile",
+    "nome": "Barile",
+    "autore": "gemini-3.8-flash (step 8B)",
+    "voto": 7
+  },
+  "falo": {
+    "classe": "mobile",
+    "nome": "Falò",
+    "autore": "a mano (Claude Code)"
+  },
+  "mobile": {
+    "classe": "mobile",
+    "nome": "Cassa",
+    "autore": "a mano (Claude Code)"
+  },
+  "letto": {
+    "classe": "mobile",
+    "nome": "Letto",
+    "autore": "a mano (Claude Code)"
+  },
+  "banco": {
+    "classe": "mobile",
+    "nome": "Banco da lavoro",
+    "autore": "a mano (Claude Code)"
+  },
+  "credenza": {
+    "classe": "mobile",
+    "nome": "Credenza",
+    "autore": "a mano (Claude Code)"
+  },
+  "cartello": {
+    "classe": "mobile",
+    "nome": "Cartello",
+    "autore": "a mano (Claude Code)"
+  },
+  "oggetto": {
+    "classe": "oggetto",
+    "nome": "Cosa",
+    "autore": "a mano (Claude Code)",
+    "tinta": "C"
+  },
+  "forbici": {
+    "classe": "oggetto",
+    "nome": "Forbici",
+    "autore": "a mano (Claude Code)"
+  },
+  "pozzo": {
+    "classe": "edificio",
+    "nome": "Pozzo",
+    "autore": "gemini-3.8-flash (step 8.2A)",
+    "voto": 8
+  },
+  "edificio": {
+    "classe": "edificio",
+    "nome": "Casetta",
+    "autore": "gemini-3.8-flash (step 8.2A)",
+    "voto": 9
+  },
+  "monumento": {
+    "classe": "monumento",
+    "nome": "Colonna",
+    "autore": "a mano (Claude Code)"
+  },
+  "grande": {
+    "classe": "grande",
+    "nome": "Casa a graticcio",
+    "autore": "a mano (Claude Code)"
+  },
+  "fattoria": {
+    "classe": "grande",
+    "nome": "Fattoria",
+    "autore": "a mano (Claude Code)"
+  },
+  "corona-magia": {
+    "classe": "edificio",
+    "nome": "Torre della Magia",
+    "autore": "gemini-3.8-flash (Gemini CLI, T19)",
+    "vpt": 8
+  },
+  "corona-concilio": {
+    "classe": "edificio",
+    "nome": "Sala del Concilio",
+    "autore": "gemini-3.8-flash (Gemini CLI, T19)",
+    "vpt": 8
+  },
+  "corona-cose": {
+    "classe": "edificio",
+    "nome": "Laboratorio delle cose",
+    "autore": "gemini-3.8-flash (Gemini CLI, T19)",
+    "vpt": 8
+  },
+  "corona-galleria": {
+    "classe": "edificio",
+    "nome": "Galleria dell'Artista",
+    "autore": "gemini-3.8-flash (Gemini CLI, T19)",
+    "vpt": 8
+  },
+  "corona-luoghi": {
+    "classe": "edificio",
+    "nome": "Ufficio dei luoghi",
+    "autore": "gemini-3.8-flash (Gemini CLI, T19)",
+    "vpt": 8
+  },
+  "corona-mondo": {
+    "classe": "edificio",
+    "nome": "Biblioteca del Mondo",
+    "autore": "gemini-3.8-flash (Gemini CLI, T19)",
+    "vpt": 8
+  },
+  "corona-nucleo": {
+    "classe": "edificio",
+    "nome": "Il Nucleo",
+    "autore": "gemini-3.8-flash (Gemini CLI, T19)",
+    "vpt": 8
+  },
+  "corona-oggetti": {
+    "classe": "edificio",
+    "nome": "Magazzino degli oggetti",
+    "autore": "gemini-3.8-flash (Gemini CLI, T19)",
+    "vpt": 8
+  },
+  "corona-persone": {
+    "classe": "edificio",
+    "nome": "Studio dei personaggi",
+    "autore": "gemini-3.8-flash (Gemini CLI, T19)",
+    "vpt": 8
+  },
+  "corona-sistemi": {
+    "classe": "edificio",
+    "nome": "Sala sistemi",
+    "autore": "gemini-3.8-flash (Gemini CLI, T19)",
+    "vpt": 8
+  },
+  "corona-universo": {
+    "classe": "edificio",
+    "nome": "La Direzione",
+    "autore": "gemini-3.8-flash (Gemini CLI, T19)",
+    "vpt": 8
+  },
+  "corona-albero-luce": {
+    "classe": "albero",
+    "nome": "Albero di luce (corona)",
+    "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+    "vpt": 8
+  },
+  "corona-lampione": {
+    "classe": "mobile",
+    "nome": "Lampione (corona)",
+    "autore": "l'autore, a mano (T113)",
+    "vpt": 8
+  },
+  "corona-panchina": {
+    "classe": "mobile",
+    "nome": "Panchina (corona)",
+    "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+    "vpt": 8
+  },
+  "corona-totem": {
+    "classe": "monumento",
+    "nome": "Totem (corona)",
+    "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+    "vpt": 8
+  },
+  "corona-drone": {
+    "classe": "oggetto",
+    "nome": "Drone (corona)",
+    "autore": "l'autore, a mano; ridotto in scala 1:2 (T113)",
+    "vpt": 8
+  },
+  "corona-treno": {
+    "classe": "mobile",
+    "nome": "Treno pod (corona)",
+    "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+    "vpt": 8
+  },
+  "corona-gerboa": {
+    "classe": "persona",
+    "nome": "Gerboa base (corona)",
+    "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+    "vpt": 20
+  },
+  "corona-gerboa-narratore": {
+    "classe": "persona",
+    "nome": "Gerboa Narratore (corona)",
+    "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+    "vpt": 20
+  },
+  "corona-gerboa-cartografo": {
+    "classe": "persona",
+    "nome": "Gerboa Cartografo (corona)",
+    "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+    "vpt": 20
+  },
+  "corona-gerboa-artista": {
+    "classe": "persona",
+    "nome": "Gerboa Artista (corona)",
+    "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+    "vpt": 20
+  },
+  "corona-gerboa-musicista": {
+    "classe": "persona",
+    "nome": "Gerboa Musicista (corona)",
+    "autore": "dal Gerboa Artista, a mano (T225)",
+    "vpt": 20
+  },
+  "corona-gerboa-scultore": {
+    "classe": "persona",
+    "nome": "Gerboa Scultore (corona)",
+    "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+    "vpt": 20
+  },
+  "corona-gerboa-fisico": {
+    "classe": "persona",
+    "nome": "Gerboa Fisico (corona)",
+    "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+    "vpt": 20
+  },
+  "corona-gerboa-ingegnere": {
+    "classe": "persona",
+    "nome": "Gerboa Ingegnere (corona)",
+    "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+    "vpt": 20
+  },
+  "corona-gerboa-arbitro": {
+    "classe": "persona",
+    "nome": "Gerboa Arbitro (corona)",
+    "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+    "vpt": 20
+  },
+  "corona-gerboa-referente": {
+    "classe": "persona",
+    "nome": "Gerboa Referente (corona)",
+    "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+    "vpt": 20
+  },
+  "corona-gerboa-attore": {
+    "classe": "persona",
+    "nome": "Gerboa Attore (corona)",
+    "autore": "claude-opus-5-5 (Claude Code, T158)",
+    "vpt": 20
+  },
+  "schermo-scritte": {
+    "classe": "oggetto",
+    "nome": "Schermo scritte",
+    "autore": "a mano (editor MJ, T59)",
+    "vpt": 20
+  },
+  "schermo-struttura": {
+    "classe": "oggetto",
+    "nome": "Schermo struttura",
+    "autore": "a mano (editor MJ, T59)",
+    "vpt": 20
+  },
+  "circuito-3D": {
+    "classe": "oggetto",
+    "nome": "Circuito 3D",
+    "autore": "a mano (editor MJ, T59)",
+    "vpt": 20,
+    "tempo": 30000
+  },
+  "suono-sentiero-melodico": {
+    "classe": "suono",
+    "nome": "Sentiero Melodico",
+    "autore": "Argon (SoundLab), in XML a mano (T221)"
+  },
+  "suono-fuga-cellulare": {
+    "classe": "suono",
+    "nome": "Fuga Cellular Automata",
+    "autore": "Argon (SoundLab), in XML a mano (T221)"
+  },
+  "suono-architettura-frattale": {
+    "classe": "suono",
+    "nome": "Architettura Frattale",
+    "autore": "Argon (SoundLab), in XML a mano (T221)"
+  },
+  "suono-scontro-finale": {
+    "classe": "suono",
+    "nome": "Boss Fight Cyber-Dungeon",
+    "autore": "Argon (SoundLab), in XML a mano (T221)"
+  },
+  "suono-musica-pastorale": {
+    "classe": "suono",
+    "nome": "Prati",
+    "autore": "a mano (T224)",
+    "suono": {
+      "uso": "musica",
+      "ambienti": [
+        "borgo",
+        "campi",
+        "capanne",
+        "maneggio",
+        "locanda",
+        "lago"
+      ],
+      "momenti": [
+        "mattina",
+        "giorno"
+      ]
+    }
+  },
+  "suono-musica-selva": {
+    "classe": "suono",
+    "nome": "Selva",
+    "autore": "a mano (T224)",
+    "suono": {
+      "uso": "musica",
+      "ambienti": [
+        "bosco",
+        "giungla",
+        "montagne",
+        "deserto",
+        "torre_mago"
+      ],
+      "momenti": [
+        "mattina",
+        "giorno"
+      ]
+    }
+  },
+  "suono-musica-pietra": {
+    "classe": "suono",
+    "nome": "Pietra",
+    "autore": "a mano (T224)",
+    "suono": {
+      "uso": "musica",
+      "ambienti": [
+        "castello",
+        "fortezza",
+        "caserma",
+        "tempio",
+        "piramide"
+      ],
+      "momenti": [
+        "mattina",
+        "giorno"
+      ]
+    }
+  },
+  "suono-musica-profondo": {
+    "classe": "suono",
+    "nome": "Profondo",
+    "autore": "a mano (T224)",
+    "suono": {
+      "uso": "musica",
+      "ambienti": [
+        "dungeon",
+        "tana_drago",
+        "rovine"
+      ]
+    }
+  },
+  "suono-musica-tramonto": {
+    "classe": "suono",
+    "nome": "Tramonto",
+    "autore": "a mano (T224)",
+    "suono": {
+      "uso": "musica",
+      "momenti": [
+        "sera"
+      ]
+    }
+  },
+  "suono-musica-notte": {
+    "classe": "suono",
+    "nome": "Notte",
+    "autore": "a mano (T224)",
+    "suono": {
+      "uso": "musica",
+      "momenti": [
+        "notte"
+      ]
+    }
+  },
+  "suono-musica-oltre": {
+    "classe": "suono",
+    "nome": "Oltre",
+    "autore": "a mano (T224)",
+    "suono": {
+      "uso": "musica",
+      "oltre": true
+    }
+  },
+  "suono-effetto-runa": {
+    "classe": "suono",
+    "nome": "Runa",
+    "autore": "a mano (T224)",
+    "suono": {
+      "uso": "effetto",
+      "effetti": [
+        "runa"
+      ]
+    }
+  },
+  "suono-effetto-oggetto": {
+    "classe": "suono",
+    "nome": "Oggetto",
+    "autore": "a mano (T224)",
+    "suono": {
+      "uso": "effetto",
+      "effetti": [
+        "oggetto"
+      ]
+    }
+  },
+  "suono-effetto-arpeggio": {
+    "classe": "suono",
+    "nome": "Arpeggio",
+    "autore": "a mano (T224)",
+    "suono": {
+      "uso": "effetto",
+      "effetti": [
+        "arpeggio"
+      ]
+    }
+  },
+  "suono-effetto-incantesimo": {
+    "classe": "suono",
+    "nome": "Incantesimo",
+    "autore": "a mano (T224)",
+    "suono": {
+      "uso": "effetto",
+      "effetti": [
+        "incantesimo"
+      ]
+    }
+  },
+  "suono-effetto-guasto": {
+    "classe": "suono",
+    "nome": "Guasto",
+    "autore": "a mano (T224)",
+    "suono": {
+      "uso": "effetto",
+      "effetti": [
+        "guasto"
+      ]
+    }
+  },
+  "suono-effetto-ritorno": {
+    "classe": "suono",
+    "nome": "Ritorno",
+    "autore": "a mano (T224)",
+    "suono": {
+      "uso": "effetto",
+      "effetti": [
+        "ritorno"
+      ]
+    }
+  },
+  "suono-effetto-soglia": {
+    "classe": "suono",
+    "nome": "Soglia",
+    "autore": "a mano (T224)",
+    "suono": {
+      "uso": "effetto",
+      "effetti": [
+        "soglia"
+      ]
+    }
+  },
+  "suono-effetto-salto": {
+    "classe": "suono",
+    "nome": "Salto",
+    "autore": "a mano (T224)",
+    "suono": {
+      "uso": "effetto",
+      "effetti": [
+        "salto"
+      ]
+    }
+  },
+  "suono-effetto-morte": {
+    "classe": "suono",
+    "nome": "Morte",
+    "autore": "a mano (T224)",
+    "suono": {
+      "uso": "effetto",
+      "effetti": [
+        "morte"
+      ]
+    }
+  },
+  "caldaia-vapore": {
+    "classe": "edificio",
+    "nome": "Caldaia a vapore",
+    "autore": "a mano per orichalcum (Cantiere 4A, Claude Code)"
+  },
+  "valvola-manometro": {
+    "classe": "mobile",
+    "nome": "Valvola con manometro",
+    "autore": "a mano per orichalcum (Cantiere 4A, Claude Code)"
+  },
+  "banco-orologiaio": {
+    "classe": "mobile",
+    "nome": "Banco dell'orologiaio",
+    "autore": "a mano per orichalcum (Cantiere 4A, Claude Code)"
+  },
+  "fucina-oricalco": {
+    "classe": "edificio",
+    "nome": "Fucina d'oricalco",
+    "autore": "a mano per orichalcum (Cantiere 4A, Claude Code)"
+  },
+  "carrello-minerario": {
+    "classe": "mobile",
+    "nome": "Carrello del minerale",
+    "autore": "a mano per orichalcum (Cantiere 4A, Claude Code)"
+  },
+  "telegrafo-pneumatico": {
+    "classe": "monumento",
+    "nome": "Telegrafo pneumatico",
+    "autore": "a mano per orichalcum (Cantiere 4A, Claude Code)"
+  },
+  "pilone-ormeggio": {
+    "classe": "monumento",
+    "nome": "Pilone d'ormeggio",
+    "autore": "a mano per orichalcum (Cantiere 4A, Claude Code)"
+  },
+  "enigma-ingranaggi": {
+    "classe": "mobile",
+    "nome": "Serratura a ingranaggi",
+    "autore": "a mano per orichalcum (Cantiere 4A, Claude Code)"
+  },
+  "cassaforte-ghisa": {
+    "classe": "mobile",
+    "nome": "Cassaforte di ghisa",
+    "autore": "a mano per orichalcum (Cantiere 4A, Claude Code)"
+  },
+  "lampione-gas": {
+    "classe": "monumento",
+    "nome": "Lampione a gas",
+    "autore": "a mano per orichalcum (Cantiere 4A, Claude Code)"
+  },
+  "bacheca-corporazione": {
+    "classe": "monumento",
+    "nome": "Bacheca delle corporazioni",
+    "autore": "a mano per orichalcum (Cantiere 4A, Claude Code)"
+  },
+  "automa-ottone": {
+    "classe": "persona",
+    "nome": "Guardiano d'ottone",
+    "autore": "a mano per orichalcum (Cantiere 4A, Claude Code)"
+  },
+  "chiave-inglese": {
+    "classe": "oggetto",
+    "nome": "Chiave inglese",
+    "autore": "a mano per orichalcum (Cantiere 4A, Claude Code)"
+  },
+  "persona-vapore": {
+    "classe": "persona",
+    "nome": "Gente del vapore",
+    "autore": "a mano per orichalcum (Cantiere 4A, Claude Code)"
+  },
+  "casa-comune-edificio-ee18c0d6": {
+    "classe": "edificio",
+    "nome": "Casa di mattoni",
+    "autore": "a mano per orichalcum (Cantiere 4A, Claude Code)"
+  },
+  "casa-comune-grande-ee18c0d6": {
+    "classe": "grande",
+    "nome": "Palazzina di mattoni",
+    "autore": "a mano per orichalcum (Cantiere 4A, Claude Code)"
+  },
+  "suono-fonderia-notturna": {
+    "classe": "suono",
+    "nome": "Fonderia notturna",
+    "autore": "a mano per orichalcum (Cantiere 4A, Claude Code)",
+    "suono": {
+      "uso": "musica",
+      "ambienti": [
+        "fonderia",
+        "magazzini_ramelli",
+        "baracche"
+      ]
+    }
+  },
+  "suono-valzer-ottone": {
+    "classe": "suono",
+    "nome": "Valzer d'ottone",
+    "autore": "a mano per orichalcum (Cantiere 4A, Claude Code)",
+    "suono": {
+      "uso": "musica",
+      "ambienti": [
+        "piazza_pesa",
+        "quartiere_mattoni",
+        "quartiere_telai",
+        "giardino_fuliggine"
+      ],
+      "momenti": [
+        "mattina",
+        "giorno"
+      ]
+    }
+  },
+  "suono-binari-alti": {
+    "classe": "suono",
+    "nome": "Binari alti",
+    "autore": "a mano per orichalcum (Cantiere 4A, Claude Code)",
+    "suono": {
+      "uso": "musica",
+      "ambienti": [
+        "scalo_ferroviario",
+        "porto_bastimenti",
+        "officine_canale"
+      ]
+    }
+  },
+  "suono-miniera-calda": {
+    "classe": "suono",
+    "nome": "Miniera calda",
+    "autore": "a mano per orichalcum (Cantiere 4A, Claude Code)",
+    "suono": {
+      "uso": "musica",
+      "ambienti": [
+        "miniera_termale"
+      ]
+    }
+  },
+  "suono-dirigibile-ponente": {
+    "classe": "suono",
+    "nome": "Dirigibile di ponente",
+    "autore": "a mano per orichalcum (Cantiere 4A, Claude Code)",
+    "suono": {
+      "uso": "musica",
+      "ambienti": [
+        "torre_ormeggio",
+        "campagne_trebbie"
+      ]
+    }
+  },
+  "suono-effetto-sfiato": {
+    "classe": "suono",
+    "nome": "Sfiato",
+    "autore": "a mano per orichalcum (Cantiere 4A, Claude Code)",
+    "suono": {
+      "uso": "effetto",
+      "effetti": [
+        "sfiato"
+      ]
+    }
+  },
+  "suono-effetto-ingranaggio": {
+    "classe": "suono",
+    "nome": "Ingranaggio",
+    "autore": "a mano per orichalcum (Cantiere 4A, Claude Code)",
+    "suono": {
+      "uso": "effetto",
+      "effetti": [
+        "ingranaggio"
+      ]
+    }
+  },
+  "suono-effetto-capsula": {
+    "classe": "suono",
+    "nome": "Capsula",
+    "autore": "a mano per orichalcum (Cantiere 4A, Claude Code)",
+    "suono": {
+      "uso": "effetto",
+      "effetti": [
+        "capsula"
+      ]
+    }
   }
- },
- "suono-musica-selva": {
-  "classe": "suono",
-  "nome": "Selva",
-  "autore": "a mano (T224)",
-  "suono": {
-   "uso": "musica",
-   "ambienti": [
-    "bosco",
-    "giungla",
-    "montagne",
-    "deserto",
-    "torre_mago"
-   ],
-   "momenti": [
-    "mattina",
-    "giorno"
-   ]
-  }
- },
- "suono-musica-pietra": {
-  "classe": "suono",
-  "nome": "Pietra",
-  "autore": "a mano (T224)",
-  "suono": {
-   "uso": "musica",
-   "ambienti": [
-    "castello",
-    "fortezza",
-    "caserma",
-    "tempio",
-    "piramide"
-   ],
-   "momenti": [
-    "mattina",
-    "giorno"
-   ]
-  }
- },
- "suono-musica-profondo": {
-  "classe": "suono",
-  "nome": "Profondo",
-  "autore": "a mano (T224)",
-  "suono": {
-   "uso": "musica",
-   "ambienti": [
-    "dungeon",
-    "tana_drago",
-    "rovine"
-   ]
-  }
- },
- "suono-musica-tramonto": {
-  "classe": "suono",
-  "nome": "Tramonto",
-  "autore": "a mano (T224)",
-  "suono": {
-   "uso": "musica",
-   "momenti": [
-    "sera"
-   ]
-  }
- },
- "suono-musica-notte": {
-  "classe": "suono",
-  "nome": "Notte",
-  "autore": "a mano (T224)",
-  "suono": {
-   "uso": "musica",
-   "momenti": [
-    "notte"
-   ]
-  }
- },
- "suono-musica-oltre": {
-  "classe": "suono",
-  "nome": "Oltre",
-  "autore": "a mano (T224)",
-  "suono": {
-   "uso": "musica",
-   "oltre": true
-  }
- },
- "suono-effetto-runa": {
-  "classe": "suono",
-  "nome": "Runa",
-  "autore": "a mano (T224)",
-  "suono": {
-   "uso": "effetto",
-   "effetti": [
-    "runa"
-   ]
-  }
- },
- "suono-effetto-oggetto": {
-  "classe": "suono",
-  "nome": "Oggetto",
-  "autore": "a mano (T224)",
-  "suono": {
-   "uso": "effetto",
-   "effetti": [
-    "oggetto"
-   ]
-  }
- },
- "suono-effetto-arpeggio": {
-  "classe": "suono",
-  "nome": "Arpeggio",
-  "autore": "a mano (T224)",
-  "suono": {
-   "uso": "effetto",
-   "effetti": [
-    "arpeggio"
-   ]
-  }
- },
- "suono-effetto-incantesimo": {
-  "classe": "suono",
-  "nome": "Incantesimo",
-  "autore": "a mano (T224)",
-  "suono": {
-   "uso": "effetto",
-   "effetti": [
-    "incantesimo"
-   ]
-  }
- },
- "suono-effetto-guasto": {
-  "classe": "suono",
-  "nome": "Guasto",
-  "autore": "a mano (T224)",
-  "suono": {
-   "uso": "effetto",
-   "effetti": [
-    "guasto"
-   ]
-  }
- },
- "suono-effetto-ritorno": {
-  "classe": "suono",
-  "nome": "Ritorno",
-  "autore": "a mano (T224)",
-  "suono": {
-   "uso": "effetto",
-   "effetti": [
-    "ritorno"
-   ]
-  }
- },
- "suono-effetto-soglia": {
-  "classe": "suono",
-  "nome": "Soglia",
-  "autore": "a mano (T224)",
-  "suono": {
-   "uso": "effetto",
-   "effetti": [
-    "soglia"
-   ]
-  }
- },
- "suono-effetto-salto": {
-  "classe": "suono",
-  "nome": "Salto",
-  "autore": "a mano (T224)",
-  "suono": {
-   "uso": "effetto",
-   "effetti": [
-    "salto"
-   ]
-  }
- },
- "suono-effetto-morte": {
-  "classe": "suono",
-  "nome": "Morte",
-  "autore": "a mano (T224)",
-  "suono": {
-   "uso": "effetto",
-   "effetti": [
-    "morte"
-   ]
-  }
- }
 }

@@ -1,0 +1,42 @@
+<!-- Chiave inglese: scritto a mano per orichalcum (Cantiere 4A), corpo fisso e varianti scelte a ogni seme. -->
+<sequence values="BIiW0123456789abcd" size="12 12 12" symmetry="(xy)" name="Chiave inglese">
+  <color symbol="I" value="8a8e96" name="ferro"/>
+  <color symbol="i" value="5a5e66" name="ferro scuro"/>
+  <color symbol="W" value="6a4024" name="impugnatura"/>
+  <color symbol="0" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="1" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="2" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="3" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="4" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="5" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="6" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="7" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="8" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="9" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="a" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="b" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="c" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="d" value="ff00ff" name="variante" hidden="True"/>
+  <box at="7 6 0" size="8 2 2" color="I"/>
+  <box at="2 6 0" size="3 6 2" color="i"/>
+  <box at="2 2 0" size="3 2 2" color="1" on="B"/>
+  <box at="2 10 0" size="3 2 2" color="1" on="B"/>
+  <box at="2 6 2" size="3 6 2" color="4" on="B"/>
+  <one steps="1"><rule in="1" out="0"/></one>
+  <one steps="1"><rule in="4" out="3"/></one>
+  <one steps="1"><rule in="0" out="2"/><rule in="3" out="5"/></one>
+  <all><rule in="21" out="22"/><rule in="2 1" out="2 2"/><rule in="1 2" out="2 2"/><rule in="54" out="55"/><rule in="5 4" out="5 5"/><rule in="4 5" out="5 5"/></all>
+  <all><rule in="2" out="i"/><rule in="5" out="i"/><rule in="1" out="B"/><rule in="0" out="B"/><rule in="4" out="B"/><rule in="3" out="B"/></all>
+  <box at="9 6 0" size="5 4 3" color="7" on="B"/>
+  <box at="0 0 11" size="1 1 1" color="9" on="B"/>
+  <one steps="1"><rule in="7" out="6"/></one>
+  <one steps="1"><rule in="6" out="8"/><rule in="9" out="B"/></one>
+  <all><rule in="87" out="88"/><rule in="8 7" out="8 8"/><rule in="7 8" out="8 8"/></all>
+  <all><rule in="8" out="W"/><rule in="7" out="B"/><rule in="6" out="B"/><rule in="9" out="B"/></all>
+  <box at="11 6 0" size="2 4 4" color="b" on="B"/>
+  <box at="0 0 11" size="1 1 1" color="d" on="B"/>
+  <one steps="1"><rule in="b" out="a"/></one>
+  <one steps="1"><rule in="a" out="c"/><rule in="d" out="B"/></one>
+  <all><rule in="cb" out="cc"/><rule in="c b" out="c c"/><rule in="b c" out="c c"/></all>
+  <all><rule in="c" out="i"/><rule in="b" out="B"/><rule in="a" out="B"/><rule in="d" out="B"/></all>
+</sequence>

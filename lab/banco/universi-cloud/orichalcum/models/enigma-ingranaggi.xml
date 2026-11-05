@@ -1,0 +1,66 @@
+<!-- Serratura a ingranaggi: scritto a mano per orichalcum (Cantiere 4A), corpo fisso e varianti scelte a ogni seme. -->
+<sequence values="BGOoR0123456789abcdefghijklmnpqrst" size="20 20 20" symmetry="(xy)" name="Serratura a ingranaggi">
+  <color symbol="G" value="3e4248" name="ghisa"/>
+  <color symbol="O" value="c8a04a" name="ruote d'ottone"/>
+  <color symbol="o" value="8a6a2a" name="denti"/>
+  <color symbol="R" value="c0302a" name="denti segnati"/>
+  <color symbol="0" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="1" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="2" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="3" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="4" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="5" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="6" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="7" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="8" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="9" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="a" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="b" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="c" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="d" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="e" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="f" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="g" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="h" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="i" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="j" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="k" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="l" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="m" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="n" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="p" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="q" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="r" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="s" value="ff00ff" name="variante" hidden="True"/>
+  <color symbol="t" value="ff00ff" name="variante" hidden="True"/>
+  <box at="10 10 0" size="18 6 2" color="G"/>
+  <box at="10 10 2" size="16 3 17" color="G"/>
+  <ellipsoid at="6 13 3" size="9 3 9" color="1" on="B"/>
+  <box at="6 15 7" size="2 1 2" color="3" on="B"/>
+  <ellipsoid at="7 13 10" size="9 3 9" color="6" on="B"/>
+  <box at="7 15 14" size="2 1 2" color="8" on="B"/>
+  <one steps="1"><rule in="1" out="0"/></one>
+  <one steps="1"><rule in="6" out="5"/></one>
+  <one steps="1"><rule in="0" out="2"/><rule in="5" out="7"/></one>
+  <all><rule in="21" out="22"/><rule in="2 1" out="2 2"/><rule in="1 2" out="2 2"/><rule in="23" out="24"/><rule in="2 3" out="2 4"/><rule in="3 2" out="4 2"/><rule in="41" out="42"/><rule in="4 1" out="4 2"/><rule in="1 4" out="2 4"/><rule in="43" out="44"/><rule in="4 3" out="4 4"/><rule in="3 4" out="4 4"/><rule in="76" out="77"/><rule in="7 6" out="7 7"/><rule in="6 7" out="7 7"/><rule in="78" out="79"/><rule in="7 8" out="7 9"/><rule in="8 7" out="9 7"/><rule in="96" out="97"/><rule in="9 6" out="9 7"/><rule in="6 9" out="7 9"/><rule in="98" out="99"/><rule in="9 8" out="9 9"/><rule in="8 9" out="9 9"/></all>
+  <all><rule in="2" out="O"/><rule in="4" out="R"/><rule in="7" out="O"/><rule in="9" out="R"/><rule in="1" out="B"/><rule in="3" out="B"/><rule in="0" out="B"/><rule in="6" out="B"/><rule in="8" out="B"/><rule in="5" out="B"/></all>
+  <ellipsoid at="14 13 10" size="7 3 7" color="b" on="B"/>
+  <box at="14 15 13" size="1 1 1" color="d" on="B"/>
+  <ellipsoid at="14 13 3" size="7 3 7" color="g" on="B"/>
+  <box at="14 15 6" size="1 1 1" color="i" on="B"/>
+  <one steps="1"><rule in="b" out="a"/></one>
+  <one steps="1"><rule in="g" out="f"/></one>
+  <one steps="1"><rule in="a" out="c"/><rule in="f" out="h"/></one>
+  <all><rule in="cb" out="cc"/><rule in="c b" out="c c"/><rule in="b c" out="c c"/><rule in="cd" out="ce"/><rule in="c d" out="c e"/><rule in="d c" out="e c"/><rule in="eb" out="ec"/><rule in="e b" out="e c"/><rule in="b e" out="c e"/><rule in="ed" out="ee"/><rule in="e d" out="e e"/><rule in="d e" out="e e"/><rule in="hg" out="hh"/><rule in="h g" out="h h"/><rule in="g h" out="h h"/><rule in="hi" out="hj"/><rule in="h i" out="h j"/><rule in="i h" out="j h"/><rule in="jg" out="jh"/><rule in="j g" out="j h"/><rule in="g j" out="h j"/><rule in="ji" out="jj"/><rule in="j i" out="j j"/><rule in="i j" out="j j"/></all>
+  <all><rule in="c" out="O"/><rule in="e" out="R"/><rule in="h" out="O"/><rule in="j" out="R"/><rule in="b" out="B"/><rule in="d" out="B"/><rule in="a" out="B"/><rule in="g" out="B"/><rule in="i" out="B"/><rule in="f" out="B"/></all>
+  <ellipsoid at="11 13 14" size="5 3 5" color="l" on="B"/>
+  <ellipsoid at="11 13 2" size="5 3 5" color="p" on="B"/>
+  <ellipsoid at="3 13 14" size="5 3 5" color="s" on="B"/>
+  <one steps="1"><rule in="l" out="k"/></one>
+  <one steps="1"><rule in="p" out="n"/></one>
+  <one steps="1"><rule in="s" out="r"/></one>
+  <one steps="1"><rule in="k" out="m"/><rule in="n" out="q"/><rule in="r" out="t"/></one>
+  <all><rule in="ml" out="mm"/><rule in="m l" out="m m"/><rule in="l m" out="m m"/><rule in="qp" out="qq"/><rule in="q p" out="q q"/><rule in="p q" out="q q"/><rule in="ts" out="tt"/><rule in="t s" out="t t"/><rule in="s t" out="t t"/></all>
+  <all><rule in="m" out="o"/><rule in="q" out="o"/><rule in="t" out="o"/><rule in="l" out="B"/><rule in="k" out="B"/><rule in="p" out="B"/><rule in="n" out="B"/><rule in="s" out="B"/><rule in="r" out="B"/></all>
+  <prl steps="1"><rule in="BO" out="oO" p="0.35"/></prl>
+</sequence>

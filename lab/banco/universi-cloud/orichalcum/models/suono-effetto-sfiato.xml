@@ -1,0 +1,12 @@
+<!-- Uno sfiato di caldaia (orichalcum): un soffio a scatti, mai uguale, che si spegne. -->
+<sequence name="Sfiato" values="BHC" size="10 1 6" symmetry="()">
+  <sound bpm="340" scale="dorian" root="50" swing="0" cutoff="8000" space="0.2">
+    <track y="0" instrument="lead" volume="0.9"/>
+  </sound>
+  <color symbol="H" value="fde047" name="Hi-hat" alpha="0.85"/>
+  <color symbol="C" value="fb923c" name="Rullante" glow="True"/>
+
+  <line at="0 0 0" to="0 0 0" r="0" color="C"/>
+  <one in="B" out="H" steps="7"/>
+  <one in="B" out="C" steps="2"/>
+</sequence>
