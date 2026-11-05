@@ -4417,3 +4417,62 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Contesto: l'autore confronta le tre vesti. Se una è nettamente superiore la sceglie subito; altrimenti decidono i tester. Il testo in `docs/userchats/to-do-2026-11-05.md`. Lo riscrive e lo stima l'orchestratore alla risposta dell'autore.
 - Se sceglie subito: restano la veste scelta e, solo se è la futuristica o la fumetto, le sue conseguenze (senza showcase se è MJ; i fumetti degli NPC in gioco se è la fumetto).
 - Se si vota: lo switch in alto e una scelta per account, che si può cambiare, registrata dal server. Una rotta nuova passa da `gate` e dall'elenco di `server/production.ts`, con il suo ritmo in `FRONT_RATES`; i voti stanno sotto `universes/` in una cartella che non si serve, e i conti li legge solo il master. Due parole per i tester nella guida della beta. Sicurezza: voci nuove.
+
+### T288 · Ciò che il viandante impugna si vede addosso: armi e attrezzi — `da fare` (dipende da T255)
+- Pipeline: claude · stima 4% · approvato · browser · priorità 6
+- Sforzo: max, scelto dall'autore. Dipende da T255 perché questo sforzo arrivi davvero alla CLI.
+- Step: 40
+- Contesto: richiesta dell'autore del 05/11, testo in `docs/userchats/to-do-2026-11-05.md`, § «Interazioni grafiche di oggetti». Oggi impugnare e gli slot esistono (`src/kernel/inventory.ts`, `#regole-effetti`, `#multigiocatore`), ma il renderer non mostra nulla sul corpo. Regola dell'autore: **minimizzare i modelli; un attrezzo usa la stessa mesh di quando è a terra.** Vale la regola 11: niente immagini, ogni aspetto è un programma MarkovJunior; niente modelli nuovi né chiamate ai modelli.
+- Cosa fare:
+  1. L'oggetto impugnato si disegna sul viandante con la sua mesh di terra, agganciato a un arto del rig (`src/mj/rig.ts`, `src/render/entities.ts`): segue il passo e le animazioni e guarda dalla parte del corpo. Scala e presa valgono per qualunque modello, anche generato domani, e si ricavano dalla forma, senza una tabella per oggetto. Un oggetto senza modello o un corpo senza arti non rompono nulla: semplicemente non si vede.
+  2. Ogni oggetto si aggancia dove ha senso per il suo posto (`slot`), con un punto di aggancio per posto scritto una volta sola.
+  3. **In multigiocatore lo vedono anche gli altri:** ciò che esce verso i client resta a elenco (regola 8f), e il cambio arriva a chi è vicino senza ricaricare. Vale anche per gli NPC che hanno qualcosa in mano, se il dato c'è già; altrimenti scrivi nell'esito cosa manca.
+  4. Costo misurato con molti viandanti in scena: le mesh sono condivise, nessuna griglia si rifà a ogni cambio.
+- Test: aggancio e scelta del punto come funzioni pure; ciò che esce verso gli altri client; typecheck e suite intera con i loro turni. Versione del kernel se tocchi `src/kernel/` (ADR-0136).
+- Browser: sì, con `?skip&offline`: spada e attrezzo fermi e in cammino, da più lati, a cartone e con `?classica`; due schede in multigiocatore. Catture nel commit.
+- Quando è fatto: impugno, si vede, lo vede anche l'altro viandante; commit su `task/T288`, riga in `#mondo3d`. Sicurezza: scrivi l'esito, tocca ciò che esce dal server.
+
+### T289 · Vestiti e armature addosso: il banco che decide come — `da fare` (dipende da T288)
+- Pipeline: claude · stima 3% · approvato · browser · priorità 6
+- Sforzo: max, scelto dall'autore.
+- Step: 40
+- Contesto: testo dell'autore in `docs/userchats/to-do-2026-11-05.md`: «per i vestiti e l'armatura va deciso», forse due mesh, una a terra e una indossata, che «eventualmente potrebbe essere solo una modifica alla mesh dell'NPC». Questo task produce la decisione, con le prove. Ricorda che l'autore ha già detto di non rigenerare tutti i modelli perché costa caro (`docs/pipeline/domande/T232.md`).
+- Cosa fare: in `lab/banco/`, confronta almeno tre vie sugli stessi tre oggetti (un elmo, una corazza, un mantello) e su due corpi diversi (il viandante e una creatura non umana):
+  - **A:** due programmi per oggetto, a terra e indossato;
+  - **B:** un programma solo, con una riscrittura che lo modella sul corpo (mesh dell'NPC modificata dalle regole, senza un modello in più);
+  - **C:** un cambio di palette e poche celle sul corpo, senza geometria propria.
+  Per ognuna: foto da quattro lati, tempo per viandante, memoria, modelli da scrivere per un universo, costo stimato con lo Scultore, cosa succede con i corpi generati e con gli oggetti che esistono già. Scrivi `lab/banco/indossati.md` con la raccomandazione e la domanda per l'autore (le foto una accanto all'altra).
+- Test: quelli del banco; typecheck col suo turno. Il gioco non cambia.
+- Browser: sì, per le foto nel `lab/`.
+- Quando è fatto: l'autore può decidere guardando le foto; commit su `task/T289`. Sicurezza: nessuna superficie nuova.
+
+### T290 · Vestiti e armature addosso nel gioco — `in attesa` (dipende da T289)
+- Step: 40
+- Sforzo: max, scelto dall'autore.
+- Contesto: lo riscrive e lo stima l'orchestratore con la decisione dell'autore su T289. Conterrà il rendering, ciò che esce verso gli altri client, il prompt dello Scultore se servono programmi nuovi, e cosa fare degli oggetti che esistono già.
+
+### T291 · Posare gli oggetti sui mobili — `da fare` (dipende da T255)
+- Pipeline: claude · stima 3% · approvato · browser · priorità 6
+- Sforzo: max, scelto dall'autore. Dipende da T255 perché questo sforzo arrivi davvero alla CLI.
+- Step: 40
+- Contesto: testo dell'autore in `docs/userchats/to-do-2026-11-05.md`, § «Interazioni grafiche di oggetti»: «la possibilità di posare gli oggetti sui mobili». Le superfici delle forme ci sono già (`surfaces` in `src/mj/mesh.ts`, `src/kernel/forms.ts`), e le usano i pavimenti. Stessa mesh di quando l'oggetto è a terra.
+- Cosa fare: un'azione per posare ciò che impugni sul mobile che guardi; l'oggetto sta sul piano vero del mobile, alla sua altezza, si riprende e resta lì nel salvataggio e per gli altri viandanti. Si rifiuta con una frase del mondo se non c'è un piano libero (una sedia occupata, un pozzo, un mobile senza superficie). Decidi quanti oggetti stanno su un piano in base alla loro impronta. Un oggetto posato non rende invalicabile nulla (regola 10) e non si perde se il mobile sparisce.
+- Test: scelta del punto su forme vere, salvataggio e riapertura, due viandanti; typecheck e suite intera con i loro turni. Versione del kernel (ADR-0136). Un messaggio nuovo del protocollo non getta eccezioni per ciò che arriva dal filo (regola 8i).
+- Browser: sì, con `?skip&offline`, su due mobili diversi; catture nel commit.
+- Quando è fatto: poso, ricarico la pagina, è ancora lì; commit su `task/T291`, riga in `#regole-effetti`. Sicurezza: scrivi l'esito, tocca il protocollo.
+
+### T292 · Prendere e spostare i mobili (`takeable`) — `da fare` (dipende da T288)
+- Pipeline: claude · stima 4% · approvato · browser · priorità 6
+- Sforzo: max, scelto dall'autore.
+- Step: 40
+- Contesto: testo dell'autore in `docs/userchats/to-do-2026-11-05.md`, § «Interazioni grafiche con oggetti di grandi dimensioni»: alcuni mobili hanno una proprietà che dice se si possono prendere e spostare. La credenza sì, il pozzo no. Oggi un mobile è un'entità di modulo (`physics.pushable` lo spinge soltanto), un oggetto in borsa è un'altra cosa (`ItemDef`).
+- Decisioni dell'orchestratore, da riportare all'autore: assente vale `false` (gli universi che esistono restano buoni); **un contenitore pieno non si prende, si vuota prima**, così niente borse dentro borse.
+- Cosa fare:
+  1. Campo `takeable` nel manifest (`src/kernel/types.ts`, validatore, riga in `AGENTS.md`), e una voce «Prendi» nel menu. In inventario il mobile è un oggetto con la sua icona, e mentre è in mano si vede con T288 (grande: decidi come portarlo, per esempio sopra la testa, e fallo giudicare con le catture).
+  2. Posarlo a terra rispetta la regola 10: la casella dev'essere libera e **il luogo resta connesso**, niente solido su un punto di articolazione né davanti a una porta (ADR-0064). Se non si può, una frase del mondo, e il mobile resta in mano.
+  3. Stato e identità seguono il mobile (componenti, codice del modulo, contenuto una volta vuoto), e l'entità sta dove è stata posata nel salvataggio, anche se il piano del luogo la generava altrove; non rinasce al ricaricamento del luogo. Vale in multigiocatore, e il mobile preso da uno sparisce per gli altri.
+  4. Il Narratore e il Cartografo decidono `takeable` per ciò che generano (schema, prompt, `MockAiModels`, voce nel registro). Nel seme, a mano: i moduli di `universe/` che si possono spostare.
+  5. Nell'esito di' cosa non è coperto, per esempio chi porta via i mobili dalla casa di un NPC: oggi nessuna conseguenza.
+- Test: connessione a ogni posa, salvataggio, doppia presa in multigiocatore, contenitore pieno; typecheck e suite intera con i loro turni. Versione del kernel (ADR-0136).
+- Browser: sì, con `?skip&offline`: prendo una credenza, la porto altrove, ricarico; provo a tapparmi una porta; il pozzo non si prende. Catture nel commit.
+- Quando è fatto: commit su `task/T292`, ADR, riga in `#regole-effetti` e nell'elenco del manifest. Sicurezza: scrivi l'esito, tocca il protocollo e il validatore.
