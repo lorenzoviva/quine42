@@ -30,7 +30,7 @@ async function world() {
 }
 
 describe('the fields of the panels on the wire', () => {
-  it('a field a panel names leaves, the other fields of the same component and the other components never do', async () => {
+  it('V-012 a field a panel names leaves, the other fields of the same component and the other components never do', async () => {
     const { k, server, got } = await world();
     k.as('bea', () => k.ecs.set(k.wandererEntity, 'segreti', { mostrato: 'visibile', nascosto: 'la chiave del forziere' }));
     k.as('bea', () => k.ecs.set(k.wandererEntity, 'altro', { campo: 'mai sul filo' }));
@@ -41,7 +41,7 @@ describe('the fields of the panels on the wire', () => {
     expect(wire).not.toContain('mai sul filo');
   });
 
-  it('what a field holds that is not a plain value does not leave, and a long text is cut', async () => {
+  it('V-012 what a field holds that is not a plain value does not leave, and a long text is cut', async () => {
     const { k, server, got } = await world();
     k.as('bea', () => k.ecs.set(k.wandererEntity, 'segreti', { mostrato: { dentro: 'una tabella intera' } }));
     for (let i = 0; i < 10; i++) server.tick(1 / 60);
@@ -54,7 +54,7 @@ describe('the fields of the panels on the wire', () => {
 });
 
 describe('the keys a client says', () => {
-  it('only the four directions are kept, whatever comes; nothing is answered, nothing throws', async () => {
+  it('V-021 only the four directions are kept, whatever comes; nothing is answered, nothing throws', async () => {
     const { k, server, send, got } = await world();
     const answers = () => got.filter((m) => m.t === 'esito').length;
     const before = answers();
