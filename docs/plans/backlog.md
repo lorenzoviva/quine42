@@ -4459,7 +4459,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Sforzo: max, scelto dall'autore.
 - Contesto: lo riscrive e lo stima l'orchestratore con la decisione dell'autore su T289. Conterrà il rendering, ciò che esce verso gli altri client, il prompt dello Scultore se servono programmi nuovi, e cosa fare degli oggetti che esistono già.
 
-### T291 · Posare gli oggetti sui mobili — `da fare` (dipende da T255)
+### T291 · Posare gli oggetti sui mobili — `fatto` (`bbf0db7`) (dipende da T255)
 - Pipeline: claude · sforzo max · stima 3% · approvato · browser · priorità 6
 - Sforzo: max, scelto dall'autore. Dipende da T255 perché questo sforzo arrivi davvero alla CLI.
 - Step: 40
@@ -4468,6 +4468,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Test: scelta del punto su forme vere, salvataggio e riapertura, due viandanti; typecheck e suite intera con i loro turni. Versione del kernel (ADR-0136). Un messaggio nuovo del protocollo non getta eccezioni per ciò che arriva dal filo (regola 8i).
 - Browser: sì, con `?skip&offline`, su due mobili diversi; catture nel commit.
 - Quando è fatto: poso, ricarico la pagina, è ancora lì; commit su `task/T291`, riga in `#regole-effetti`. Sicurezza: scrivi l'esito, tocca il protocollo.
+- Esito: dal menu di un mobile si posa ciò che si impugna, sul ripiano vero (scelta per impronta dall'angolo vicino a chi posa), con frasi del mondo per i rifiuti; componente `posato` e `stato.json → posati`; resta dopo ricarica e per gli altri viandanti; regola 10 rispettata, l'oggetto non si perde se il mobile sparisce; kernel 0.1.7, ADR-0147, glossario, `#regole-effetti`; typecheck e suite intera verdi (152 file, 2344 test). Non provato: due viandanti in due schede vere del browser (solo nei test). Gli oggetti gettati a terra restano non salvati come prima. Sicurezza: nessuna superficie nuova fuori dal gioco (l'azione passa da `azione`, con raggio e ritmo; `posato` dice solo ciò che la posizione già dice; `posati` si legge con validazione).
 
 ### T292 · Prendere e spostare i mobili (`takeable`) — `da fare` (dipende da T288)
 - Pipeline: claude · sforzo max · stima 4% · approvato · browser · priorità 6
