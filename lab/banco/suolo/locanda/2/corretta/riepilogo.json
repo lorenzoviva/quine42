@@ -1,0 +1,116 @@
+[
+ {
+  "nome": "modello-locanda",
+  "prova": {
+   "taglie": [
+    {
+     "taglia": "grande",
+     "box": [
+      100,
+      100,
+      100
+     ],
+     "vpt": 20,
+     "gradino": 4,
+     "semi": [
+      {
+       "seme": 1,
+       "difetti": [],
+       "ms": 734
+      },
+      {
+       "seme": 2,
+       "difetti": [],
+       "ms": 706
+      },
+      {
+       "seme": 3,
+       "difetti": [],
+       "ms": 634
+      },
+      {
+       "seme": 4,
+       "difetti": [],
+       "ms": 556
+      },
+      {
+       "seme": 5,
+       "difetti": [],
+       "ms": 535
+      }
+     ],
+     "regge": true,
+     "varianza": {
+      "voxel": 0.6320011759542543,
+      "colore": 0.18916592195337478,
+      "pianta": 0.31297256624314906,
+      "perimetro": 0.19934197915720872,
+      "interno": 0.6326983677438437,
+      "semi": 5,
+      "firmePiani": 1,
+      "firmeStanze": 3,
+      "architetture": 3,
+      "statico": false
+     },
+     "difettiVarianza": []
+    },
+    {
+     "taglia": "enorme",
+     "box": [
+      120,
+      120,
+      112
+     ],
+     "vpt": 16,
+     "gradino": 3,
+     "semi": [
+      {
+       "seme": 1,
+       "difetti": [],
+       "ms": 730
+      },
+      {
+       "seme": 2,
+       "difetti": [],
+       "ms": 628
+      },
+      {
+       "seme": 3,
+       "difetti": [],
+       "ms": 652
+      },
+      {
+       "seme": 4,
+       "difetti": [],
+       "ms": 686
+      },
+      {
+       "seme": 5,
+       "difetti": [],
+       "ms": 716
+      }
+     ],
+     "regge": true,
+     "varianza": {
+      "voxel": 0.5741788275693276,
+      "colore": 0.2155877162995526,
+      "pianta": 0.26868932930798217,
+      "perimetro": 0.15010922828534606,
+      "interno": 0.7654183796343029,
+      "semi": 5,
+      "firmePiani": 1,
+      "firmeStanze": 4,
+      "architetture": 4,
+      "statico": false
+     },
+     "difettiVarianza": []
+    }
+   ],
+   "regge": true,
+   "statico": false,
+   "varia": true,
+   "passa": true,
+   "ms": 6726
+  }
+ }
+]
