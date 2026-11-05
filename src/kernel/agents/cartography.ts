@@ -21,6 +21,19 @@ export interface PlacedObject {
 /** The water of a tile that has flowed (T51b): its bed, its water (levels), the tile it was before it became water. */
 export type WaterRecord = [number, number] | [number, number, string];
 
+/** A house a venture builds on free ground (T245e): in the plan of its place, so whoever draws the place (a client too) has it. */
+export interface PlannedHouse {
+  origine: string;
+  x: number;
+  y: number;
+  modello: string;
+  seme: number;
+  yaw: number;
+  classe: string;
+  concetto: string;
+  stadio: number;
+}
+
 export interface ChunkPlan {
   place: ChunkInfo;
   /** Layout (environment) id. */
@@ -42,6 +55,12 @@ export interface ChunkPlan {
   edits?: Record<string, string>;
   /** The day of the world each edit was written (T245b, ADR-0140): what ripens counts from there. An edit without one is of today. */
   giorni?: Record<string, number>;
+  /** The stage of the building of a lot that a venture is putting up again (T245e, ADR-0143): lot origin → 0..1. Absent: standing. */
+  stadi?: Record<string, number>;
+  /** The houses the ventures build on free ground (T245e): where, which model and seed, and their stage. */
+  case?: PlannedHouse[];
+  /** When it was last left (T245f, ADR-0144): seconds of the world, only while nobody sees it; at the return the kernel says how long. */
+  visto?: number;
   /** The ground dug (negative) or raised after the layout (T51b): cell index → levels. */
   scavi?: Record<string, number>;
   /** The water that has flowed (T51b, `water.ts`): cell index → its bed and its water (levels), and the tile it was before it became water. */

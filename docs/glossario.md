@@ -487,6 +487,55 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Da non usare**: `magazzino` (per il deposito: il magazzino è di un modulo), `granaio`, `scorta`
 - **Fermo**: la chiave `deposito:<cx>:<cy>`, `luogo` di `mestiere`.
 
+### Impresa
+- **Inglese**: `Venture`, `ventures`, `ventureProgress`, `ventureState`
+- **Definizione**: un lavoro di molti verso un risultato che si vede, lungo giorni o mesi: una costruzione, un raccolto (e, con i task che le portano, una festa, una ricerca…). Ha fasi con materiali e lavoro, una squadra e uno stato; il progresso si ricava da ciò che è stato portato e lavorato, mai da un contatore (T245d, ADR-0142).
+- **Dove vive**: `src/kernel/ventures.ts`, `src/kernel/kernel.ts`, `world/imprese.json`
+- **Da non usare**: `progetto` (per l'impresa: il progetto è un documento), `cantiere` (è il posto dell'impresa e il suo pannello), `quest`, `obiettivo`, `job`
+- **Fermo**: `world/imprese.json`, `imprese`, `fasi`, `materiali`, `lavoro`, `stadio`, `portati`, `lavorato`, `squadra`, `ruoli`, `nato_da`, i valori di `tipo` e di `stato`; l'API Lua `world.impresa`, `world.impresa_porta`; il comportamento `costruisci`.
+
+### Squadra di un'impresa
+- **Inglese**: `fillTeam`, `VentureMember`, `staffVentures`
+- **Definizione**: chi lavora a un'impresa, con il suo ruolo (capomastro, manovale, mietitore): la fa il kernel per mestiere, vicinanza e un'estrazione del seme, e la rifà a ogni giorno nuovo (chi non c'è più se ne va, un altro prende il posto) (T245d, ADR-0142).
+- **Dove vive**: `src/kernel/ventures.ts`
+- **Da non usare**: `squadra` da sola dove si confonde con quella del Concilio nello studio, `team` (nei documenti), `gruppo`, `ciurma`
+- **Fermo**: `squadra`, `ruolo`, `ruoli` in `world/imprese.json`.
+
+### Stadio di un edificio
+- **Inglese**: `stageGrid`, `stageHeights`, `stagedBody`, `stadio`
+- **Definizione**: a che punto è un edificio che un'impresa costruisce, da 0 (il lotto segnato) a 1 (finito): la griglia del suo modello, finita, mostrata fino a una quota (il piano terra, i muri, il tetto), con il cantiere attorno (picchetti, impalcature) (T245e, ADR-0143).
+- **Dove vive**: `src/mj/mesh.ts`, `src/render/models.ts`, `src/kernel/kernel.ts`
+- **Da non usare**: `fase` (per lo stadio: la fase è dell'impresa), `livello` (è del rilievo), `step`, `stage` (nei documenti)
+- **Fermo**: `stadio` nelle fasi di `world/imprese.json` e in `struttura`, `stadi` e `case` nel piano del luogo, `c.struttura.stadio` sul filo.
+
+### Impalcatura
+- **Inglese**: `SCAFFOLD_LETTER`, `STAKE_LETTER`, `site` (di `stageGrid`)
+- **Definizione**: il cantiere che il kernel aggiunge attorno a un edificio che sale: i picchetti con la corda allo stadio 0, i pali e le tavole finché non è finito. Voxel derivati dalla griglia e dallo stadio, non un modello (T245e, ADR-0143).
+- **Dove vive**: `src/mj/mesh.ts`
+- **Da non usare**: `ponteggio`, `scaffold` (nei documenti)
+- **Fermo**: le due lettere del cantiere.
+
+### Contabilità fuori vista
+- **Inglese**: `awayTick`, `dailyProduce`, `AWAY_WORK`
+- **Definizione**: ciò che il kernel conta una volta al giorno per i luoghi che nessuno vede, senza Lua e senza chiamate: le imprese prendono dal deposito e vanno avanti del lavoro della squadra, i mestieri riempiono il deposito del loro luogo (T245f, ADR-0144).
+- **Dove vive**: `src/kernel/kernel.ts`, `src/kernel/jobs.ts`
+- **Da non usare**: `simulazione` (per la contabilità: nessuno simula), `offline`, `background`
+- **Fermo**: nessuno.
+
+### Ritorno
+- **Inglese**: `returnToPlace`, `onReturn`, `on_return`
+- **Definizione**: quando un luogo lasciato torna a caricarsi: ciò che matura matura per data, gli edifici prendono lo stadio delle loro imprese, e i moduli che lo chiedono sentono `on_return(luogo, trascorso)` (T245f, ADR-0144).
+- **Dove vive**: `src/kernel/kernel.ts`
+- **Da non usare**: `reload`, `ricarica` (per il ritorno: la ricarica è della pagina)
+- **Fermo**: l'hook `on_return`, `visto` nel piano del luogo.
+
+### Cantiere
+- **Inglese**: `cantierePanels`, `posto` (dell'impresa)
+- **Definizione**: dove un'impresa si lavora (`posto`), e il pannello «Il cantiere» che dice dell'impresa più vicina a che punto è, cosa manca e chi ci lavora (T245d, ADR-0142).
+- **Dove vive**: `universe/modules/sys.lavoro/manifest.json` (`ui`), `src/kernel/kernel.ts`
+- **Da non usare**: `impresa` (per il posto o il pannello), `sito`, `site` (nei documenti)
+- **Fermo**: il pannello `cantiere`, i campi `cantiere.titolo`, `cantiere.fase`, `cantiere.stato`, `cantiere.manca`, `cantiere.squadra`, il pulsante `porta`.
+
 ### Maturazione
 - **Inglese**: `matura`, `matureTick`
 - **Definizione**: ciò che una casella diventa da sola dopo qualche giorno del mondo (il seminato in grano, la ceppaia in bosco), contato dal giorno in cui la casella è stata scritta (`plan.giorni`). La fa il kernel, non Lua (T245b, ADR-0140).
