@@ -49,6 +49,7 @@ export function chooseMusic(state: SoundState, programs: readonly SoundProgram[]
 export const SOUND_CUES = {
   'rune:picked': { effect: 'runa', seeds: [1, 2, 3] },
   'item:picked': { effect: 'oggetto', seeds: [1, 2] },
+  'item:placed': { effect: 'oggetto', seeds: [2] },
   'item:used': { effect: 'oggetto', seeds: [3] },
   'item:action': { effect: 'oggetto', seeds: [4] },
   'ui:container': { effect: 'oggetto', seeds: [5] },

@@ -187,6 +187,12 @@ export class Entities {
       const moved = Math.hypot(dx, dy);
       v.last = { x: p.x, y: p.y };
       showFrame(v.frames, t, id * 0.37);
+      if (v.kind === 'item' && k.ecs.has(id, 'posato')) {
+        // Put down on furniture (T291): still on its shelf, as high as the kernel rests it, turned as it was laid.
+        v.root.position.set(p.x, (Number.isFinite(p.z) ? p.z : k.groundAt(p.x, p.y)) + (v.owned ? 0.16 : 0), p.y);
+        v.root.rotation.y = k.ecs.get(id, 'form')?.yaw ?? 0;
+        continue;
+      }
       if (v.kind === 'item') {
         // Things to pick up hover a little and turn, so they are seen among the grass.
         v.root.position.set(p.x, k.groundAt(p.x, p.y) + (v.owned ? 0.25 + Math.sin(t * 2.5 + id) * 0.05 : 0.04 + Math.abs(Math.sin(t * 2 + id)) * 0.04), p.y);

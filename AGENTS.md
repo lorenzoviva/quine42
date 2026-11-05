@@ -165,6 +165,7 @@ src/
     jobs.ts             i programmi dei mestieri (`validateJobProgram`, `matchJob`, `JOB_BEHAVIOURS`, ADR-0140); route.ts, la via tra due caselle (`findRoute`, `RouteCache`)
     ventures.ts         le imprese (ADR-0147): `world/imprese.json`, il progresso derivato (`ventureProgress`), la squadra (`fillTeam`), il passo (`nextStep`)
     store.ts            il magazzino dei moduli (`ModuleStores`, `world/magazzino/<modulo>.json`, tetti in byte, ADR-0138)
+    placing.ts          posare sui mobili (ADR-0150): i ripiani di una forma (`shelvesOf`), l'impronta di un oggetto (`itemShape`), dove sta (`findSpot`)
     version.ts          la versione del kernel `X.Y.Z` (`KERNEL_VERSION`, `checkKernelVersion`, `stampKernel`, ADR-0136)
     deferred.ts         la generazione differita (ADR-0143): `DeferredModels` (tutto alla coda, il resto ferma), `StepGate` (si scrive solo un passo valido), `runDeferred`, `spiral`
     credits.ts          la commissione di piattaforma (`costWithFee`, la decide il server, ADR-0132) e la divisione delle spese comuni (ADR-0081)
@@ -235,7 +236,7 @@ Registro, Luogo, Fucina e Genesi → `docs/architettura-dettagli.md#concilio`.
 
 - **Spazi, tappeto, rune, magia, borse**: cerchio di raggio 42 col tappeto, rune come token Lua eseguiti, canone, frase, `T` e mana → `#spazi-rune-magia`
 - **Lessico**: le parole e le usanze del mondo, mai spiegate come un glossario → `#lessico`
-- **Regole, effetti, stati, morte, menu, salto, contenuti**: i giudizi diventano regole, gli effetti sono un insieme chiuso → `#regole-effetti`
+- **Regole, effetti, stati, morte, menu, salto, contenuti**: i giudizi diventano regole, gli effetti sono un insieme chiuso; ciò che si impugna si posa sul ripiano di un mobile, dove la sua impronta sta (`placing.ts`, `posato`, `stato.json → posati`, ADR-0150) → `#regole-effetti`
 - **Società, vita degli NPC, personaggi**: individui, legami, routine, trame, missioni; i mestieri come programmi (`sys.lavoro`, `matura` nei terreni, il giorno in `plan.giorni`, ADR-0140); le imprese (`world/imprese.json`, scritto solo dal kernel, progresso derivato da ciò che è portato e lavorato, regole senza chiamate, `costruisci`, il pannello del cantiere, ADR-0147); l'edificio per stadi (la griglia finita filtrata, `stageGrid`, picchetti e impalcature, `plan.stadi` e `plan.case`, ADR-0148); fuori vista (la contabilità una volta al giorno, il ritorno, `on_return`, ADR-0149) → `#societa`
 - **Corona e interni dello studio**: campus, edifici, vetrine, plastico, Nucleo, Biblioteca, Direzione, Galleria, Sala del Concilio → `#corona`
 - **Meccaniche, casi dei sistemi, catena, banco di prova** (Sala sistemi) → `#sala-sistemi`

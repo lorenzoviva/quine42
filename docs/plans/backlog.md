@@ -4584,7 +4584,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Quando è fatto: commit su `task/T300`. Nell'esito: i numeri nuovi degli ADR; ricorda di dare `integra T297` e `integra T280` e di segnare `fatto` T245d, T245e, T245f.
 - Esito: `task/T297` fuso in `task/T300` (`4163194`) col censimento del glossario rigenerato con `tools/glossario/glossario.mjs`; ADR di T280 rinumerati ai primi liberi: imprese → ADR-0147, edificio per stadi → ADR-0148, fuori vista → ADR-0149, con i rimandi in `AGENTS.md`, `docs/architettura-dettagli.md`, `docs/glossario.md`, indice degli ADR, codice e test; ADR-0145 (vesti, T283) e ADR-0146 (modelli e sforzo, T255) del base non toccati; versione `0.1.9` in `package.json`, `package-lock.json`, `src/kernel/version.ts` e `universe/universe.json` (il base è a `0.1.6`); fuso anche `task/T280` (`2c40eb0`, `-s ours`), andato avanti con `7e8cd6c` dopo T297: era la stessa rinumerazione di `f560a67` e senza il merge `integra T280` si sarebbe fermato su un conflitto; suite 2350 passati e 1 saltato, typecheck verde; non provati la build e i quattro universi su questo merge; `docs/pipeline/quadro.md` dice ancora «ADR di T280 → 0145-0147»; manca dare prima `integra T300`, poi `integra T297` e `integra T280` (a quel punto non fondono niente), e segnare `fatto` T245d, T245e, T245f; sicurezza: nessuna superficie nuova oltre a quella dichiarata da T280.
 
-### T301 · Integrare T291 sul base con T300: versione del kernel e ADR — `da fare`
+### T301 · Integrare T291 sul base con T300: versione del kernel e ADR — `fatto` (`da81925`)
 - Pipeline: claude · sforzo high · stima 2% · approvato · priorità 1
 - Step: 40
 - Contesto: `integra T291` si ferma su `AGENTS.md`, `package-lock.json`, `package.json`, `src/kernel/version.ts`, `universe/universe.json`: T291 ha portato il kernel a `0.1.7` e ha preso ADR-0147, mentre il base, con T300 (T280, T297), è a `0.1.9` e ADR-0147, 0148, 0149 sono imprese, edificio per stadi e fuori vista. Nasce da T291: `dossier T291`, e da T300: `dossier T300`.
@@ -4592,6 +4592,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Test: suite intera e typecheck con i loro turni.
 - Browser: non serve, T291 ha già guardato.
 - Quando è fatto: commit su `task/T301`. Nell'esito: il numero nuovo dell'ADR; ricorda di dare `integra T301`, poi `integra T291`.
+- Esito: `task/T291` fuso in `task/T301` (`da81925`); l'ADR di posare sui mobili è **ADR-0150** (T291 lo aveva già rinumerato, nessun rimando a 0147); ADR-0147, 0148 e 0149 del base non toccati; `AGENTS.md` con entrambe le aggiunte; versione `0.1.10` nei quattro file; censimento del glossario rigenerato; `posato` e `stato.json → posati` convivono con T280, che non scrive campi nuovi in `stato.json`; un oggetto posato non appartiene al luogo e torna con lui, provato da un test nuovo in `tests/posare.test.ts`; suite 2365 passati e 1 saltato, typecheck verde; non provate la build e il browser (non richiesti); manca dare `integra T301`, poi `integra T291`; sicurezza: nessuna superficie nuova oltre a quella dichiarata da T291.
 
 ### T302 · Gli universi dicono su quali kernel girano: l'intervallo e l'impalcatura della retrocompatibilità — `da fare`
 - Pipeline: claude · sforzo high · stima 3% · approvato · priorità 3
