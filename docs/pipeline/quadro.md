@@ -3,12 +3,12 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 05/11/2026, epoca 286. Crediti: vedi `stato`.
+Aggiornato il 05/11/2026, epoca 287. Crediti: vedi `stato`.
 
 ## Stato attuale
 
 - **Carte fatte a mano (autore, 05/11, step 41, Fase I, p7):** T293 archivio e rotte (**D40 A**, aspetta T255) → T294 i tre laboratori ai giocatori; T295 carte prima della Genesi (**D39 A**) → T296 eliminare la carta problematica. Scelte mie, dette all'autore: interruttore a parte `laboratori` in `site/beta.json`, quote come ADR-0084, import gratis, carte visibili a tutti. T237 ha la sezione e dipende da T294.
-- **Oggetti e mobili (autore, 05/11, tutto `max`, step 40):** T288 in mano (dopo T255) → T289 banco per vestiti e armature → T290 `in attesa` della sua scelta sulle foto; T291 posare sui mobili; T292 `takeable` (scelte mie da riferirgli: assente = false, contenitore pieno non si prende).
+- **Oggetti e mobili (autore, 05/11, tutto `max`, step 40):** T288 in mano (dopo T255) → T289 banco per vestiti e armature → T290 `in attesa` della sua scelta sulle foto; T291 posare sui mobili **fatto e visto nel browser, `integra` in conflitto (versione 0.1.7 contro 0.1.9, ADR-0147 preso): T301 lo integra (p1), poi `integra T301` e `integra T291`**; non provati due viandanti in due schede vere; T292 `takeable` (scelte mie da riferirgli: assente = false, contenitore pieno non si prende).
 - **Tre vesti del sito per la beta (autore, 05/11):** T283 integrato (`9784019`, ADR-0145): la base va, ma le tre vesti sono bozze **bocciate dall'autore** (niente scritte né icone delle proposte: `docs/design/logo/proposte/` non è nel repository). D41 A: T284, T285, T286 `da fare` da capo, dalla v2 di Claude (`proposte/claude/QUINE42 Logo v2 standalone.html`, committata) → T287. T233 dipende da T287. Aperta **D38**.
 - **T275 integrato via T282** (`7b0d821`, kernel 0.1.6, ADR-0143 generazione differita, ADR-0144 fila delle scritture; T264, T265, T267, T207 `fatto`). Fixture `mj-engine-hashes.json` rigenerata col motore di prima di D33 (già rossa su `3d`). Non provati: `npm run genera` con la CLI vera e il suo costo per luogo, la fila di T265 nel browser a server spento, il rinnovo del 401 con un account vero, `/usage` con la CLI vera. T265 tiene il testo in fila in `localStorage` (senza token). **T207 fatto non accende nulla:** T88 aspetta ancora T156.
 - **T278 integrato** (`112b736`): reami spazio, pirati, cowboy in `lab/banco/coming-soon-cloud/` (400 tick, 0 fault; non provati browser e Concilio vero; ambienti e terreni del seme rinominati, veicoli che non portano nessuno, effetti sonori senza evento, `META_RE` vieta parole dello spazio), `docs/lingue.md`, `docs/lancio/piano.md`. T239 e T240 restano `in attesa`, li chiude l'autore: **D34, D35**. T240 non si rilancia su Fable.
@@ -37,7 +37,7 @@ Aggiornato il 05/11/2026, epoca 286. Crediti: vedi `stato`.
 
 0. **Decisioni dell'autore del 04/11 (D8-D32 chiuse):**
    - **D32 (versionamento del kernel `X.Y.Z` e universi):** nuovo contratto del kernel `X.Y` = nuovo universo (o server dedicato alla versione precedente / futura migrazione IA a pagamento). Schema SemVer scelto: `X` = era (`0` in Fase I-II, `1` dal kernel `1.0.0`), `Y` = contratto dell'universo (parte da `1` in `0.1.0`, sale quando una modifica a `src/kernel/` cambia formati/primitive in modo incompatibile, ed è `9` in `0.9.0` per la Beta a fine Fase I), `Z` = incremento progressivo (`+1` a ogni task integrato che tocca `src/kernel/` restando compatibile con lo stesso `X.Y`). **T261** (`plan.tiles`) chiuso senza lavoro; **T260** riscritto (3 %, `da fare`, priorità 10). Step 32: T260, T262 → T245a → T263 e T245b → T245c, T245d → T245e → T245f. T245g-i in attesa della Fase III (step 39). T265 prima della beta (step 34), T264 piccolo, T266 in attesa verso fine Fase I. D16: `suono-effetto-morte` resta. D17-D26 confermate. Step 28 segnato `raggiunto`.
-1. **Pronti:** T281, T298, T288, T299, T293, T156; in corso T291. Claude prossimo reset il 12/11; Gemini 17:37 UTC; Argon a 0 % fino all'11/11. **T256 integrato** (`d16d20a`), **T253 integrato.**
+1. **Pronti:** T301 (p1), T284-T286, T281, T298, T288, T299, T293, T156. Claude prossimo reset il 12/11; Gemini 17:37 UTC; Argon a 0 % fino all'11/11. **T256 integrato** (`d16d20a`), **T253 integrato.**
 4. **T182 integrato e chiuso (04/11):** D5 C (T259), D6-D7 chiuse; `pagoda/1` e `tempio/2` restano fuori dai 10. Non provati nel gioco la lettera del suolo e il motore nuovo (T156).
 4b. **Generazione differita** (richiesta dell'autore, 03/11 e 05/11): **solo dopo T156, il prompt nuovo dello Scultore** (e T242, T259, D33). T207 (generatore senza browser, solo abbonamenti, aspetta T156) → T88 (la pipeline lo accende coi crediti che avanzano) → T153 (legge e prova i tre universi). I pacchetti e modelli generati ora su Claude Cloud in `lab/banco/` (`universi-cloud/`, `catalogo-cloud/`, `seme-procedurale/`, `props-tematici/`, `catalogo-60/`) usano già `lab/banco/prompt.md` (T182 + T258), ma **non** `sculptor.ts` aggiornato (T156), né il generatore differito (T207), né T242/T259: si tengono in `lab/banco/` e poi si rifaranno/rigenereranno nell'ordine giusto dopo i prerequisiti.
 
@@ -69,6 +69,6 @@ Aggiornato il 05/11/2026, epoca 286. Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **287 (claude):** T291 fatto, `integra` in conflitto → T301.
 - **286 (claude):** integrati T300, T297, T280; T245d-f `fatto`.
-- **285 (claude):** riavvio, `riattiva claude` e `fable`, sforzo su 15 task, T300 in partenza.
 
