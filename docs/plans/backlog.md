@@ -4409,7 +4409,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: sì, a 1920 e 390 px; contrasto dei testi sopra i pois; catture nel commit.
 - Quando è fatto: la veste è selezionabile; commit su `task/T285`. Sicurezza: nessuna superficie nuova.
 
-### T286 · La veste sobria: vediamoci chiaro — `da fare` (dipende da T283)
+### T286 · La veste sobria: vediamoci chiaro — `fatto` (`08d9e54`) (dipende da T283)
 - Ripartenza (D41 A, 05/11): l'autore ha visto le bozze di T283 e le boccia: scritte e icone delle proposte scelte mancano. Si rifà tutto partendo dalla scritta e dall'icona della proposta, **estratte così come sono** (SVG/HTML) e poi ritoccate come chiede l'autore; le bozze di T283 in `site/skins/<id>/` si buttano. Le proposte sono nel repository: **parti dalla v2 di Claude, fatta dopo le votazioni**, `docs/design/logo/proposte/claude/QUINE42 Logo v2 standalone.html` (1,7 MB, HTML autosufficiente con le risorse incorporate: cerca la sezione, non leggerlo intero); la v1 e le catture di `landing-tests/` servono solo da confronto.
 - Pipeline: claude · sforzo high · stima 2% · approvato · browser · priorità 3
 - Sforzo: high.
@@ -4419,6 +4419,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Test: typecheck, build e suite intera con i loro turni.
 - Browser: sì, a 1920 e 390 px; catture nel commit.
 - Quando è fatto: la veste è selezionabile; commit su `task/T286`. Sicurezza: nessuna superficie nuova.
+- Esito: la sobria ha il logo e l'icona della proposta 04 v2 di Claude, estratti così come sono da `tools/vesti/logo.ts` (lo richiama `estrai.ts`) in `site/skins/sobria/scritta.svg` e `icona.svg` (barra, piede, favicon), con `tests/site-skin-sobria.test.ts` che li confronta con la proposta elemento per elemento; il carattere a fumetti è tolto; tre gesti dalla Q, solo CSS: doppia riga rosa e ciano sotto la barra, anelli del tappeto nel palco 3D, la Q in piccolo davanti ai titoli; catture a 1920 e 390 px in `docs/design/vesti/sobria/`; righe in `#sito`, LEGGIMI e AGENTS.md; typecheck, build e suite intera verdi (2382 test, 1 saltato). Le orecchie del piede (di T244) sono rimaste: da decidere con l'autore. Non provati: telefono vero, `npm run serve`, carte con un universo vero. Sicurezza: nessuna superficie nuova.
 
 ### T287 · La scelta della veste: subito dall'autore, o col voto dei beta tester — `in attesa` (dipende da T284, T285, T286)
 - D38 A (autore, 05/11): il filone del prompt 7 (le orecchie) resta fuori dal sito della beta, niente quarta veste; le orecchie restano un'idea per monete e carte.

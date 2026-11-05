@@ -9,7 +9,7 @@ Una veste è una cartella qui dentro (ADR-0145). Il nome della cartella è il su
 
 Le vesti cambiano l'aspetto, non i contenuti né la struttura: spazi e corpi vengono dalla scala di `src/theme.css`.
 
-Il logo è la scritta `.nav-logo` e `.footer-brand`, con i token `--skin-logo-*`; per un'immagine, una regola in `skin.css`.
+Il logo è la scritta `.nav-logo` e `.footer-brand`, con i token `--skin-logo-*`; per un'immagine, una regola in `skin.css`. Logo e icona della sobria e della futuristica vengono dalle proposte, estratti così come sono: `npx vite-node --script tools/vesti/estrai.ts` li riscrive (`tools/vesti/logo.ts`, `tools/vesti/scritta.ts`), e i loro test rifiutano un ritocco a mano.
 
 Aggiungere una veste non tocca nient'altro. `npx vitest run tests/site-skins.test.ts` dice se manca qualcosa.
 
