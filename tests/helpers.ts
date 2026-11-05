@@ -18,6 +18,8 @@ export function fakeHost() {
     path: () => undefined,
     find_tile: () => undefined,
     act: () => undefined,
+    impresa: () => undefined,
+    impresa_porta: () => 0,
     store_get: () => undefined,
     store_set: () => false,
     free: () => true,

@@ -159,6 +159,7 @@ src/
                         (bench.ts: anche il banco di prova, T27b: casi, scena, nomi dei campi)
     shortfalls.ts       le mancanze (ADR-0130): ciò che il Concilio non è riuscito a fare (`world/mancanze.json`, mai ai client), il rapporto
     jobs.ts             i programmi dei mestieri (`validateJobProgram`, `matchJob`, `JOB_BEHAVIOURS`, ADR-0140); route.ts, la via tra due caselle (`findRoute`, `RouteCache`)
+    ventures.ts         le imprese (ADR-0142): `world/imprese.json`, il progresso derivato (`ventureProgress`), la squadra (`fillTeam`), il passo (`nextStep`)
     store.ts            il magazzino dei moduli (`ModuleStores`, `world/magazzino/<modulo>.json`, tetti in byte, ADR-0138)
     version.ts          la versione del kernel `X.Y.Z` (`KERNEL_VERSION`, `checkKernelVersion`, `stampKernel`, ADR-0136)
     credits.ts          la commissione di piattaforma (`costWithFee`, la decide il server, ADR-0132) e la divisione delle spese comuni (ADR-0081)
@@ -176,7 +177,7 @@ src/
                         graph.ts + graphlayout.ts (il grafo del mondo nel Nucleo), dom.ts, lobby.ts (la lobby: le regolazioni del master, minimi, tetto e carte; anche da soli, ADR-0086, ADR-0133), creditdialog.ts (la modale crediti esauriti, ADR-0086)
 universe/
   universe.json         nome, seme, raggio, lato del luogo (18), modelli e budget, `partita` (scelta alla Genesi, ADR-0053), `ai.minimi` (ADR-0086), `rilievo.mare` (facoltativo), `eredita` (le quote dei cloni, ADR-0084)
-  world/                bible.json (memoria del Narratore), style.md (guida di stile dei modelli), canone.md (le rune), lessico.md (come parla la gente), consumi.json, mancanze.json (ciò che il Concilio non è riuscito a fare),
+  world/                bible.json (memoria del Narratore), imprese.json (le imprese, le scrive solo il kernel), style.md (guida di stile dei modelli), canone.md (le rune), lessico.md (come parla la gente), consumi.json, mancanze.json (ciò che il Concilio non è riuscito a fare),
                         rules.json (regole), people.json (la società, con i ricordi), plots.json (trame),
                         atlas.json (geografia), stato.json (lo stato del mondo), grafo.json (il grafo del mondo, derivato),
                         giocatori/<id>.json (lo stato di ogni viandante: inventario, bisogni, stati, slot, frase),
@@ -229,7 +230,7 @@ Registro, Luogo, Fucina e Genesi → `docs/architettura-dettagli.md#concilio`.
 - **Spazi, tappeto, rune, magia, borse**: cerchio di raggio 42 col tappeto, rune come token Lua eseguiti, canone, frase, `T` e mana → `#spazi-rune-magia`
 - **Lessico**: le parole e le usanze del mondo, mai spiegate come un glossario → `#lessico`
 - **Regole, effetti, stati, morte, menu, salto, contenuti**: i giudizi diventano regole, gli effetti sono un insieme chiuso → `#regole-effetti`
-- **Società, vita degli NPC, personaggi**: individui, legami, routine, trame, missioni; i mestieri come programmi (`sys.lavoro`, `matura` nei terreni, il giorno in `plan.giorni`, ADR-0140) → `#societa`
+- **Società, vita degli NPC, personaggi**: individui, legami, routine, trame, missioni; i mestieri come programmi (`sys.lavoro`, `matura` nei terreni, il giorno in `plan.giorni`, ADR-0140); le imprese (`world/imprese.json`, scritto solo dal kernel, progresso derivato da ciò che è portato e lavorato, regole senza chiamate, `costruisci`, il pannello del cantiere, ADR-0142) → `#societa`
 - **Corona e interni dello studio**: campus, edifici, vetrine, plastico, Nucleo, Biblioteca, Direzione, Galleria, Sala del Concilio → `#corona`
 - **Meccaniche, casi dei sistemi, catena, banco di prova** (Sala sistemi) → `#sala-sistemi`
 - **Geografia**: biomi, ambienti, timbri, atlante → `#geografia`
@@ -264,7 +265,7 @@ Registro, Luogo, Fucina e Genesi → `docs/architettura-dettagli.md#concilio`.
 
 ### API Lua — l'unica disponibile, il validatore rifiuta il resto
 `ecs.each/get/set/spawn/destroy/first`; `world.free/free_real/tile/speed_at/spawn/player/player_pos/wanderers/path/find_tile/act/
-nearest/has_tag/break_entity/say/speak/set_tile/open/make_container/store_get/store_set` (il magazzino del modulo, ADR-0138); `inventory.add/remove/count/equipped`; `items.find/def/bonus`; `ui.slot`;
+nearest/has_tag/break_entity/say/speak/set_tile/open/make_container/store_get/store_set` (il magazzino del modulo, ADR-0138), `world.impresa/impresa_porta` (il passo dell'impresa e ciò che le si porta, ADR-0142); `inventory.add/remove/count/equipped`; `items.find/def/bonus`; `ui.slot`;
 `input.held(azione, id?)` (i tasti di ogni viandante, ADR-0139); `bus.emit`; `log`; `hash`; `math string table utf8 pairs pcall…` (`math.random` seminato dal kernel, ADR-0055).
 Hook: `update(dt)` (sistemi), `generate_chunk`, `on_spawn(id)`, `on_interact(id, user)`,
 `on_act(id, user, action)`, `on_use(user, item)`, `on_action(user, target, item)`, `on_slot(user, slot, item, panel)`, `on_ui(user, azione)`; `core.items.use(user, item)`;
