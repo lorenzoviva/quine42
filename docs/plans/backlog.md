@@ -3829,11 +3829,12 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - **Deciso dall'autore (04/11, `docs/pipeline/domande/T236.md`):** 2 € per esplorare, parlare, generare oggetti; 3 € con il secondo file, e chi li riceve può restare nel tappeto: è una scelta. Tutto a mano dal master. Altri 5 € a mano ai più assidui. Chi poi vuole continuare in beta ha uno sconto del 50 % sui crediti, a prezzo lineare e senza commissione (T243; come paga: `docs/pipeline/domande/T243.md`). Quattro universi condivisi: medievale (`aurora`), steampunk, moderno, futuristico, generati perlopiù sul server con gli abbonamenti (T207, T88, T153).
 - Conseguenze per il deploy: `QUINE_TETTO_RICARICHE` da alzare, oggi 0 con gli account (consigliato 50: 10 tester per 5); `QUINE_UNIVERSI_PER_ACCOUNT` è 3 e i mondi del master sono 4. I saldi stanno per universo (ADR-0104), quindi i crediti di un tester valgono in un mondo solo.
 
-### T237 · La guida dei beta tester, in due file — `da fare` (dipende da T45f, T236)
+### T237 · La guida dei beta tester, in due file — `da fare` (dipende da T45f, T236, T294)
 - Pipeline: claude · stima 2% · approvato · priorità 3
 - Step: 34
 - Contesto: si scrive a fine Fase I, per gli amici dell'autore, non pagati: «non è il classico beta testing noioso». Il primo file: come giocare, che si gioca prenotando il turno sul calendario dell'autore, fuori dal repository (anche insieme, senza esagerare con le sessioni a molti), tutte le limitazioni del server di beta con cui ci si potrebbe frustrare. Il secondo file: la corona, e come avere la seconda parte dei crediti, per chi non ha capito come uscire dal tappeto. Il primo non deve guastarla.
 - Decisioni di T236: 2 € + 3 €, a mano; il secondo file dice che si può anche restare nel tappeto; quattro universi condivisi con l'autore come master. Da provare, non da supporre: cosa può fare nella corona chi non è il master; come si spende il saldo, che vale per un universo solo. Gli altri 5 € e lo sconto li propone l'autore a voce: non stanno nei file. I due file vanno anche sul sito (T244): scrivili come pagine pubbliche, e il primo non guasti la corona.
+- Richiesta dell'autore (05/11): il secondo file ha una sezione sui laboratori, che si accendono solo nel secondo passo (`laboratori` in `site/beta.json`, T294): come si forka, come si salva, cosa ci si fa.
 - Cosa fare: `docs/beta/guida.md` e `docs/beta/la-corona.md`, in italiano, dal comportamento vero del server di beta (limiti di `LIMITS`, `FRONT_RATES`, mondi accesi, tetti, modelli locali a crediti finiti), non dai documenti: ciò che non puoi provare lo segni. Tono da amico.
 - Test: nessun codice: typecheck con il suo turno.
 - Browser: sì: segui la guida da viandante nuovo sul server di beta; ogni passo che non torna lo correggi.
@@ -4314,6 +4315,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 
 ### T278 · Integrare i tre reami, le lingue e il piano di lancio di Claude Cloud (step 37, T239, T240) — `fatto` (`112b736`)
 - Pipeline: claude · stima 1% · approvato · priorità 4
+- Step: 37
 - Sforzo: high.
 - Contesto: ramo `origin/claude/quine42-realms-languages-4mbbsi` (`40eb2de`): reami spazio, pirati, cowboy sul banco, censimento delle lingue, piano di lancio. Il ramo ha scritto nel backlog: tieni il backlog di `3d` e riporta solo gli esiti. T239 e T240 restano `in attesa`: li chiude l'autore, che deve leggerli.
 - Cosa fare: `git merge`, test e typecheck con i loro turni.
@@ -4474,3 +4476,60 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Test: connessione a ogni posa, salvataggio, doppia presa in multigiocatore, contenitore pieno; typecheck e suite intera con i loro turni. Versione del kernel (ADR-0136).
 - Browser: sì, con `?skip&offline`: prendo una credenza, la porto altrove, ricarico; provo a tapparmi una porta; il pozzo non si prende. Catture nel commit.
 - Quando è fatto: commit su `task/T292`, ADR, riga in `#regole-effetti` e nell'elenco del manifest. Sicurezza: scrivi l'esito, tocca il protocollo e il validatore.
+
+### T293 · Le carte fatte a mano: forma, archivio, rotte, interruttore — `in attesa` (dipende da T255)
+- Pipeline: claude · stima 3% · approvato · priorità 7
+- Sforzo: max.
+- Step: 41
+- In attesa di: **D40** (dove sta la copia di un giocatore), `docs/pipeline/domande/aperte.md`. Il testo sotto segue la raccomandazione: se l'autore sceglie altro si riscrive.
+- Contesto: testo dell'autore in `docs/userchats/to-do-2026-11-05.md`, § «Modificare le carte». I giocatori forkano un modello o un suono e modificano la copia, che è associata a una carta. Oggi `lab/` non ha un archivio (il SoundLab usa `localStorage`), e la regola 8b vieta a chi non è il master di scrivere l'universo. Carte ed eredità: `#carte-crediti`, `#clone-eredita`, ADR-0056, ADR-0084.
+- Cosa fare:
+  1. Decidi e scrivi in un ADR la forma di una carta fatta a mano: programma XML (modello o suono), da quale modello e universo nasce (id, impronta, `carta.origini` di `heritage.ts`), autore, nome, classe e taglia, versione `X.Y` del kernel. Un fork prende un id suo: non sostituisce mai l'originale. Voce nel glossario.
+  2. L'archivio fuori dagli universi, per account, come i saldi (regola 8d: `universes/.carte-mano/`): nessun Lua, Concilio, ramo o rollback ci arriva. Tetti per account: numero di carte e byte.
+  3. Rotte (GET elenco, POST crea e aggiorna, DELETE): passano da `gate`, si aggiungono all'elenco di `server/production.ts`, stanno sotto `FRONT_RATES`; solo l'autore scrive le sue carte; ciò che esce a un altro è a elenco (regola 8f).
+  4. Un programma scritto da un giocatore finirà nei browser e nei mondi di altri: va al validatore, con tetti di griglia, passi e tempo misurati sul motore vero. Per i suoni le soglie di `soundanalysis.ts`. Nome e testi sono dati ostili (HTML sul sito, quarta parete).
+  5. L'interruttore: `site/beta.json` prende `{ "laboratori": false }`, separato da `laCorona`. Spento, le rotte rifiutano e `/lab` resta in `NOT_SERVED` (`server/production.ts:96`), come oggi; e i link non ci sono.
+- Test: permessi (un altro account, nessun account, interruttore spento), tetti, programma che non termina, XML ostile, nome con HTML, un programma di altro `X.Y`; `tests/sicurezza/` con le voci nuove. Typecheck e suite intera con i loro turni. Versione del kernel se tocchi `src/kernel/` (ADR-0136).
+- Browser: non serve.
+- Quando è fatto: commit su `task/T293`, ADR, sezione in `#carte-crediti`, riga in `AGENTS.md`. Nell'esito le voci di sicurezza.
+
+### T294 · I tre laboratori per i giocatori: forkare e modificare — `da fare` (dipende da T293)
+- Pipeline: claude · stima 4% · approvato · browser · priorità 7
+- Sforzo: high.
+- Step: 41
+- Contesto: testo dell'autore come T293. Le tre pagine sono `lab/3d/`, `lab/editor/`, `lab/suono/`; sono strumenti da sviluppatore, senza account e senza un punto d'ingresso per chi gioca. `NOT_SERVED` oggi le esclude dal server di produzione.
+- Cosa fare:
+  1. Con `laboratori` acceso il server di produzione le serve, sotto la CSP (`server/csp.ts`); spento non escono, come oggi. Controlla cosa entra davvero in `dist/`: nessuna chiave, nessuno script di `lab/scripts/`, nessuna chiamata ai modelli.
+  2. «Forka» da un modello o da un suono di un universo che il giocatore può leggere (solo ciò che `publicFiles` già dà) e dalle proprie carte: apre la copia nel laboratorio giusto. «Salva» scrive la carta (T293) e riporta il motivo di un rifiuto del validatore.
+  3. Le carte fatte a mano stanno in `site/carte.html` con le altre, riconoscibili, con l'autore e il link al laboratorio; visibili a tutti gli account.
+  4. Un punto d'ingresso nel sito, col tema condiviso. Ciò che nei laboratori serve solo agli sviluppatori (cartelle del disco, prove con Gemini, modelli ufficiali da confrontare) non si vede.
+  5. Il lavoro non si perde: una modifica non salvata resta in locale. Dai laboratori non si chiama mai Gemini: per un giocatore non costano crediti.
+- Test: la logica isolabile (fork → carta → riapertura dà lo stesso XML); server di produzione con interruttore acceso e spento. Typecheck, build e suite intera con i loro turni.
+- Browser: sì, sotto `npm run serve` con l'interruttore nei due stati, con un account di prova (emulatore): forko un modello, lo modifico, salvo, ricarico, lo vedo in `carte.html`; stesso giro per un suono (l'agente non sente: misura il segnale e di' cosa deve ascoltare l'autore); da un secondo account lo vedo e non lo scrivo. Catture nel commit.
+- Quando è fatto: commit su `task/T294`. Sicurezza: nell'esito.
+
+### T295 · Portare le carte in un universo nuovo, prima della Genesi — `in attesa` (dipende da T293)
+- Pipeline: claude · stima 4% · approvato · browser · priorità 7
+- Sforzo: max, scelto dall'autore.
+- Step: 41
+- In attesa di: **D39** (l'antenato comune), `docs/pipeline/domande/aperte.md`. Il testo sotto segue la raccomandazione: se l'autore sceglie altro si riscrive.
+- Contesto: testo dell'autore, § «A regime». Oggi i modelli e i suoni di un universo si ereditano solo clonandolo. L'autore vuole aggiungere carte, fatte a mano o generate, solo all'inizio, prima della Genesi, solo tra universi con un antenato comune: meno collisioni, e la Genesi non rigenera ciò che esiste. Fatto trovato pianificando: ogni universo nato dal seme fa il suo `git init` (`server/universeStore.ts:391`), e il clone copia un mondo già generato, senza Genesi: oggi le due condizioni non sono mai vere insieme.
+- Cosa fare:
+  1. Il primo commit di un universo nato dal seme è identico per lo stesso seme e la stessa `X.Y` (albero, data e autore fissi): tutti hanno la stessa radice. «Antenato comune» si controlla confrontando le radici (`git rev-list --max-parents=0`, solo da `server/git.ts`), senza portare la storia dell'altro universo. I cloni tengono la radice. Gli universi che esistono già non la hanno: dillo nell'esito.
+  2. Nella Genesi, prima di partire, il master sceglie le carte: dalla sua collezione, da quelle fatte a mano e dai modelli e suoni degli universi che può leggere e che hanno la stessa radice. Per un clone il momento è prima che entri il primo viandante. Poi la scelta si chiude.
+  3. Ogni carta ripassa dal validatore e dal controllo di `X.Y`, e due carte con lo stesso id si segnalano prima di partire; entrano nell'universo con un commit del kernel e con la loro `carta`.
+  4. La Genesi e i direttori (`ModelDirector`, `ScoreDirector`, `runDeferred` di ADR-0143) non rigenerano ciò che c'è, e il Cartografo e lo Scultore sanno che esiste e lo usano: conta le chiamate con e senza carte con `MockAiModels` e scrivi il risparmio. Controlla cosa dice l'Artista della guida di stile davanti a modelli nati altrove.
+  5. Chi guadagna: la catena di `carta.origini` si allunga come in un clone e le quote seguono ADR-0084; importare non costa crediti. Il controllo della regola 8d resta: nessun saldo si muove con l'import.
+- Test: radice uguale e diversa, clone, `X.Y` diverso, scelta a Genesi già fatta (rifiutata), a partita iniziata (rifiutata), non master (rifiutata), Genesi offline con carte (meno chiamate, 0 fault), carta ostile da un altro universo; `tests/sicurezza/` se serve. Typecheck e suite intera con i loro turni. Versione del kernel (ADR-0136; una radice nuova per i nuovi universi: motiva nell'ADR se `Y` sale).
+- Browser: sì, con `?offline`: scelgo due modelli e un suono prima della Genesi, li vedo nel mondo, ricarico. Catture nel commit.
+- Quando è fatto: commit su `task/T295`, ADR, sezione in `#clone-eredita`.
+
+### T296 · Eliminare la carta problematica — `da fare` (dipende da T295)
+- Pipeline: claude · stima 1.5% · approvato · browser · priorità 7
+- Sforzo: max, scelto dall'autore.
+- Step: 41
+- Contesto: testo dell'autore: «se poi ci dovesse essere [una collisione] eliminiamo la carta problematica». Regola 2: l'IA non rompe mai il gioco, regola 3: ciò che viene da un giocatore si isola.
+- Cosa fare: una carta importata che fallisce (programma che non produce, forma senza impronta, guasto nel worker, suono muto) non rompe il mondo: si isola, si mostra al master con il motivo, e il master la toglie da un'azione nella console (scheda «Universo»), con un commit. Ciò che la usava torna al modello generico o alla richiesta al `ModelDirector` / `ScoreDirector`, entro i loro tetti; il suono tace (ADR-0126). La carta resta nell'archivio del suo autore e nella catena delle origini. Registra il fallimento in `world/mancanze.json` se il Concilio non può rimediare (ADR-0130).
+- Test: una carta rotta per ogni modo di fallire: 0 crash, entità ancora presenti, rimozione, salvataggio e riapertura; un non master non può togliere. Typecheck e suite intera con i loro turni. Versione del kernel (ADR-0136).
+- Browser: sì, con `?offline`: una carta rotta di proposito, il mondo gira, la tolgo dalla console, ricarico. Catture nel commit.
+- Quando è fatto: commit su `task/T296`. Sicurezza: nell'esito.

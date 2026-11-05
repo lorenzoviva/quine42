@@ -7,6 +7,7 @@ Aggiornato il 05/11/2026, epoca 281. Crediti: vedi `stato`.
 
 ## Stato attuale
 
+- **Carte fatte a mano (autore, 05/11, step 41, Fase I, p7):** T293 archivio e rotte (`in attesa` di **D40**) → T294 i tre laboratori ai giocatori; T295 carte prima della Genesi (`in attesa` di **D39**) → T296 eliminare la carta problematica. Scelte mie, dette all'autore: interruttore a parte `laboratori` in `site/beta.json`, quote come ADR-0084, import gratis, carte visibili a tutti. T237 ha la sezione e dipende da T294. Sforzo da scrivere con `assegna` a T255 integrato.
 - **Oggetti e mobili (autore, 05/11, tutto `max`, step 40):** T288 in mano (dopo T255) → T289 banco per vestiti e armature → T290 `in attesa` della sua scelta sulle foto; T291 posare sui mobili; T292 `takeable` (scelte mie da riferirgli: assente = false, contenitore pieno non si prende). Quando T255 è integrato, scrivere lo sforzo con `assegna`.
 - **Tre vesti del sito per la beta (autore, 05/11):** T283 (base, φ, assorbe T232) → T284 futuristica (`max`, dipende anche da T255: quando T255 è integrato, scrivere lo sforzo con `assegna`), T285 fumetto, T286 sobria → T287 `in attesa`: alla fine delle tre mostrarle all'autore, che sceglie subito o fa votare i tester. T233 dipende da T287. Aperta **D38** (prompt 7).
 - **T275 integrato via T282** (`7b0d821`, kernel 0.1.6, ADR-0143 generazione differita, ADR-0144 fila delle scritture; T264, T265, T267, T207 `fatto`). Fixture `mj-engine-hashes.json` rigenerata col motore di prima di D33 (già rossa su `3d`). Non provati: `npm run genera` con la CLI vera e il suo costo per luogo, la fila di T265 nel browser a server spento, il rinnovo del 401 con un account vero, `/usage` con la CLI vera. T265 tiene il testo in fila in `localStorage` (senza token). **T207 fatto non accende nulla:** T88 aspetta ancora T156.
@@ -42,7 +43,7 @@ Aggiornato il 05/11/2026, epoca 281. Crediti: vedi `stato`.
 
 ## Attese dall'autore
 
-- **Tutte le domande sono numerate in `docs/pipeline/domande/aperte.md`.** D1-D32 chiuse il 04/11; aperte **D38** (prompt 7), **D34** (T239, lingue, senza fretta), **D35** (T240, piano di lancio; D3.1 gli account è da decidere ora), **D36** (installare i 4 universi), **D37** (T259, misura del costo). D33 chiusa. Le voci qui sotto sono il contesto.
+- **Tutte le domande sono numerate in `docs/pipeline/domande/aperte.md`.** D1-D32 chiuse il 04/11; aperte **D39, D40** (carte fatte a mano), **D38** (prompt 7), **D34** (T239, lingue, senza fretta), **D35** (T240, piano di lancio; D3.1 gli account è da decidere ora), **D36** (installare i 4 universi), **D37** (T259, misura del costo). D33 chiusa. Le voci qui sotto sono il contesto.
 - **To-do del 04/11 pianificato, T230-T242:** approvati T230, T231 (fasi, step, tag), T232, T234 (landing launcher, blog), T237 (guida beta), T238 (registro), T241, T242 (aureo in UI e prompt; **i modelli esistenti non si toccano**). T236 chiuso (2 € + 3 € a mano, altri 5 € agli assidui, 4 universi condivisi; da mettere nel deploy: `QUINE_TETTO_RICARICHE`, `QUINE_UNIVERSI_PER_ACCOUNT`). T243 approvato (commissione configurabile). T232 e T233 a fine Fase II (autore, 04/11), T234 e T241 staccati. T244: ritocchi della home, più video lunghi dell'autore sul nostro server (con `Range`), istruzioni a due parti. Lo sconto: pagamento a mano e in dollari; come dichiarare i soldi lo gestisce l'autore (`domande/T243.md` chiusa). T235 riparte a fine Fase II; T239 (lingue) in Fase III, ultima operazione. L'autore porta in chat i feedback dei giocatori; su richiesta lo aiuto con i messaggi WhatsApp della beta.
 - **T247 (tutto il consumo regolabile in lobby, richiesta dell'autore del 04/11), approvato. Deciso dall'autore:** tutte le manopole bloccate a partita in corso, `setAi` in partita si toglie; il tetto del viandante e le scelte a crediti esauriti restano.
 - **Domande nei file (04/11): nessuna da chiedere ora. T45f (progetto, hosting, regione) aspetta la fine della Fase I, T93 (Managed Payments) la Fase IV: decisione dell'autore; le altre hanno `Stato: chiusa` in testa. T208 integrato: il conteggio giusto della pagina web si vede dopo il riavvio del processo, non provato nel browser.**
@@ -69,5 +70,5 @@ Aggiornato il 05/11/2026, epoca 281. Crediti: vedi `stato`.
 ## Ultime 2 epoche
 
 - **280 (claude):** T282-T292 creati (tre vesti del sito, oggetti e mobili), D38 aperta.
-- **281 (claude):** T282 e T275 integrati; T264, T265, T267, T207 `fatto`.
+- **281 (claude):** T282 e T275 integrati; T264, T265, T267, T207 `fatto`; T293-T296 creati, D39-D40 aperte.
 

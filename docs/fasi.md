@@ -95,6 +95,7 @@ L'autore: il rilascio aperto al pubblico, con i pagamenti Stripe. Il piano di la
 | 38 | Il lancio | IV | in attesa | T240 |
 | 39 | Gli NPC decidono e invecchiano | III | in attesa | T245g T245h T245i |
 | 40 | Gli oggetti si vedono: in mano, addosso, sui mobili; i mobili si spostano | I | da fare | T288 T289 T290 T291 T292 |
+| 41 | I giocatori modificano le carte nei laboratori; le carte passano da un universo all'altro prima della Genesi | I | da fare | T293 T294 T295 T296 |
 
 La Fase II non ha ancora uno step per la beta stessa e la Fase III non ha quelli dei requisiti: uno step si apre quando ha dei task.
 
