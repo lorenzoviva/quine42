@@ -1,0 +1,50 @@
+{
+  "id": "npc.gatto",
+  "name": "Gatto di quartiere",
+  "kind": "entity",
+  "version": "0.1.0",
+  "description": "I gatti di Neapolis: del bar, del porto, dei cortili. Di tutti e di nessuno.",
+  "context": "bar, moli, cortili dei rioni",
+  "logic": "logic.lua",
+  "appearance": {
+    "model": "animale",
+    "glyph": "f",
+    "color": "#808088",
+    "aspetto": "un gatto di strada magro, con la coda dritta"
+  },
+  "physics": {
+    "solid": false,
+    "radius": 0.25,
+    "speed": 2.2
+  },
+  "components": {
+    "wander": {
+      "dx": 0,
+      "dy": 0,
+      "t": 0,
+      "speed": 2.2
+    }
+  },
+  "interaction": {
+    "type": "talk"
+  },
+  "persona": "Sei un gatto di quartiere di Neapolis. Rispondi solo con versi, fusa e azioni descritte tra parentesi. Dormi sulle cose calde, rubi il pesce, segui chi ti dà da mangiare, se ne hai voglia.",
+  "actions": [
+    {
+      "id": "accarezza",
+      "label": "Accarezza"
+    },
+    {
+      "id": "sfama",
+      "label": "Dagli da mangiare"
+    },
+    {
+      "id": "rune",
+      "label": "Fagli annusare la borsa delle rune"
+    }
+  ],
+  "tags": [
+    "neapolis",
+    "animale"
+  ]
+}

@@ -1,0 +1,20 @@
+<!-- Cabina elettrica di quartiere: cemento grigio, sportello di metallo, il cartello giallo del fulmine; alta quanto capita. -->
+<sequence values="BZHTRSYK" size="20 20 26" symmetry="(xy)" name="Cabina elettrica">
+  <color symbol="Z" hidden="True"/><color symbol="H" hidden="True"/>
+  <color symbol="T" value="a8a49c" name="cemento"/><color symbol="R" value="6a6864" name="tetto di cemento"/><color symbol="S" value="5a6a7a" name="sportello di metallo"/>
+  <color symbol="Y" value="f0c820" name="cartello giallo"/><color symbol="K" value="2a2a2a" name="griglia"/>
+  <box at="10 10 0" size="12 10 22" color="Z"/>
+  <box at="10 10 0" size="12 10 10" color="T"/>
+  <box at="10 10 10" size="1 1 1" color="H"/>
+  <one>
+    <rule in="Z H" out="H T" p="6"/>
+    <rule in="H" out="T" p="1"/>
+  </one>
+  <all in="TZ" out="TT" symmetry="(xy)"/>
+  <all in="Z" out="B"/>
+  <all in="B T" out="R T"/>
+  <all in="RB" out="RR" steps="1"/>
+  <box at="9 14 1" size="6 1 8" color="S" on="T"/>
+  <box at="14 14 7" size="2 1 2" color="Y" on="T"/>
+  <box at="4 10 5" size="1 4 2" color="K" on="T"/>
+</sequence>

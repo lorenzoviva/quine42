@@ -1,0 +1,72 @@
+<!-- Quercia: scolpito da gemini-3.8-flash nello step 8.2A (lab/out/mjx-38-flash-2), voti dell'Artista 4 → 5/10 -->
+<sequence values="BTtFfLY" size="40 40 60" symmetry="(xy)" name="Quercia">
+  <color symbol="T" value="6b4a2e" name="tronco base"/>
+  <color symbol="t" value="4a2f19" name="legno ombra"/>
+  <color symbol="F" value="2f6b3a" name="chioma base"/>
+  <color symbol="f" value="1a4023" name="chioma ombra"/>
+  <color symbol="L" value="4b8f4a" name="foglie medie"/>
+  <color symbol="Y" value="7ec850" name="foglie luce"/>
+
+  <!-- Base radici e tronco massiccio ben ancorato al terreno -->
+  <cylinder at="20 20 0" size="14 14 5" color="t"/>
+  <cylinder at="20 20 0" size="10 10 18" color="T"/>
+  <cylinder at="20 20 14" size="8 8 12" color="T"/>
+
+  <!-- Radici robuste a terra -->
+  <line at="20 20 8" to="11 11 0" r="3" color="t"/>
+  <line at="20 20 8" to="29 11 0" r="3" color="t"/>
+  <line at="20 20 8" to="11 29 0" r="3" color="T"/>
+  <line at="20 20 8" to="29 29 0" r="3" color="T"/>
+
+  <!-- Grandi rami portanti divergenti che aprono la chioma in orizzontale -->
+  <line at="20 20 18" to="10 10 28" r="3" color="t"/>
+  <line at="20 20 18" to="30 10 28" r="3" color="t"/>
+  <line at="20 20 18" to="10 30 28" r="3" color="T"/>
+  <line at="20 20 18" to="30 30 28" r="3" color="T"/>
+  <line at="20 20 20" to="20 20 36" r="4" color="T"/>
+
+  <!-- Chioma ampia e frondosa: espansa lateralmente (quasi a tutta scatola 38x38) -->
+  <ellipsoid at="20 20 25" size="36 36 18" color="F"/>
+
+  <!-- Lobi frondosi irregolari che danno volume e sporgenza ai lati -->
+  <ellipsoid at="11 12 28" size="22 22 18" color="F"/>
+  <ellipsoid at="29 12 28" size="21 21 18" color="F"/>
+  <ellipsoid at="12 28 29" size="21 21 19" color="F"/>
+  <ellipsoid at="28 28 29" size="22 22 19" color="F"/>
+
+  <ellipsoid at="20 9 30" size="22 20 18" color="F"/>
+  <ellipsoid at="20 31 30" size="22 20 18" color="F"/>
+  <ellipsoid at="9 20 30" size="20 22 18" color="F"/>
+  <ellipsoid at="31 20 30" size="20 22 18" color="F"/>
+
+  <!-- Strato intermedio e superiore: cupola piena e continua verso l'alto -->
+  <ellipsoid at="20 20 34" size="32 32 20" color="F"/>
+  <ellipsoid at="15 16 38" size="20 20 18" color="F"/>
+  <ellipsoid at="25 17 38" size="19 19 18" color="F"/>
+  <ellipsoid at="16 25 39" size="20 20 18" color="F"/>
+  <ellipsoid at="24 24 39" size="21 21 18" color="F"/>
+
+  <!-- Calotta sommitale bombata a cupola fino a z=52 (alta >48, chiusa e morbida) -->
+  <ellipsoid at="20 20 42" size="24 24 18" color="F"/>
+  <ellipsoid at="20 20 46" size="16 16 14" color="F"/>
+
+  <!-- Saldatura organica dei volumi fogliari -->
+  <convolution neighborhood="Moore" steps="2">
+    <rule in="B" out="F" values="F" sum="15..26"/>
+  </convolution>
+
+  <!-- Ombreggiature profonde sotto i lobi delle fronde -->
+  <prl steps="1">
+    <rule in="F B" out="f B" p="0.85"/>
+  </prl>
+
+  <!-- Luce RPG 3/4 sulle superfici esposte verso l'alto e il sud -->
+  <prl steps="1">
+    <rule in="B F" out="B L" p="0.9"/>
+  </prl>
+
+  <!-- Punti luce brillanti dorati sui dossi superiori delle masse fogliari -->
+  <prl steps="1">
+    <rule in="B L" out="B Y" p="0.75"/>
+  </prl>
+</sequence>

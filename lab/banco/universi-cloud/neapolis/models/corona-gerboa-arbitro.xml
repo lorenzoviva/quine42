@@ -1,0 +1,346 @@
+<!--
+corona-gerboa-arbitro: Il Custode dell'Armonia del Concilio (avatar della Corona).
+Membro del Concilio in forma di Gerboa gigante magistrato (scala 20 vpt, anatomia base con orecchie in avanti).
+Manto marrone castano caldo con soffice pettorina e ventre candido puro.
+Indossa una classica parrucca cerimoniale settecentesca da giudice a riccioli candidi sovrapposti (#ffffff e #dbe4ee)
+con asole sartoriali anatomiche da cui svettano maestose le grandi orecchie a conchiglia,
+fiocco sartoriale alla nuca e boccoli a cannone scalati lungo le guance,
+sormontata da una cupola/tocco di panno rosso corallo (#ff6b6b, colore araldico dell'Arbitro) con sigillo luminescente dell'Armonia (glow="True"),
+ampio jabot a balze candido da magistrato che scende sul petto tra le zampine con spilla corallo e gemma brillante (glow="True"),
+cintura con martelletto cerimoniale da giudice (gavel) in legno pregiato e finiture in ottone al fianco sinistro,
+e spettacolare pennacchio caudale con batuffolo candido.
+Scatola: 1.6 × 2.2 × 2.1 caselle, 32 × 44 × 42 voxel, 20 voxel per casella (vpt: 20).
+Ruolo: npc.
+-->
+<sequence values="BFfDCcTtUuNWEZRrOoGgPpaAKkJIHhsMmVvXLlYyxQqS" size="32 44 42" symmetry="()" name="GerboaArbitro">
+  <!-- Manto castano caldo del corpo e dorso -->
+  <color symbol="F" value="6e3d24" name="castano base dorso"/>
+  <color symbol="f" value="8f5533" name="castano chiaro luce dorso"/>
+  <color symbol="D" value="482614" name="castano scuro ombra profonda"/>
+
+  <!-- Ventre, petto e gola in morbido candido puro -->
+  <color symbol="C" value="ffffff" name="candido puro ventre"/>
+  <color symbol="c" value="f2e8de" name="crema caldo sfumatura pancia"/>
+
+  <!-- Testa, musetto, tartufo e baffi (part="testa") -->
+  <color symbol="T" value="6e3d24" part="testa" name="testa castano base"/>
+  <color symbol="t" value="8f5533" part="testa" name="testa castano chiaro guance"/>
+  <color symbol="U" value="ffffff" part="testa" name="musetto e guance candido puro"/>
+  <color symbol="u" value="f2e8de" part="testa" name="sfumatura musetto crema"/>
+  <color symbol="N" value="24120a" part="testa" name="tartufo naso scuro"/>
+  <color symbol="W" value="482614" part="testa" name="baffetti vibrisse"/>
+  <color symbol="E" value="141418" part="testa" name="occhi scuri profondi"/>
+  <color symbol="Z" value="ffffff" glow="True" part="testa" name="riflesso occhi vispo glow"/>
+
+  <!-- Grandi orecchie a conchiglia (part="testa") -->
+  <color symbol="O" value="6e3d24" part="testa" name="dorso orecchio castano"/>
+  <color symbol="o" value="8f5533" part="testa" name="bordo orecchio chiaro"/>
+  <color symbol="R" value="ffaec0" part="testa" name="interno orecchio rosa"/>
+  <color symbol="r" value="ffd2dc" part="testa" name="concavita orecchio rosa chiaro"/>
+
+  <!-- Zampe posteriori bipedali piegate a Z (part="gamba") -->
+  <color symbol="G" value="6e3d24" part="gamba" name="coscia castana"/>
+  <color symbol="g" value="482614" part="gamba" name="stinco e garretto"/>
+  <color symbol="P" value="ffffff" part="gamba" name="piede candido dita"/>
+  <color symbol="p" value="d9b49b" part="gamba" name="polpastrelli unghie"/>
+
+  <!-- Zampette anteriori al petto (part="braccio") -->
+  <color symbol="A" value="8f5533" part="braccio" name="braccino castano"/>
+  <color symbol="a" value="ffffff" part="braccio" name="manina candida"/>
+
+  <!-- Coda sinuosa e pennacchio bicolore (part="coda") -->
+  <color symbol="K" value="6e3d24" part="coda" name="fusto coda castano"/>
+  <color symbol="k" value="482614" part="coda" name="giunto fusto coda"/>
+  <color symbol="J" value="24120a" part="coda" name="base pennacchio scura"/>
+  <color symbol="I" value="ffffff" part="coda" name="punta pennacchio candida"/>
+
+  <!-- Parrucca cerimoniale settecentesca da magistrato (part="testa") -->
+  <color symbol="H" value="ffffff" part="testa" name="parrucca riccioli candida base"/>
+  <color symbol="h" value="dbe4ee" part="testa" name="parrucca riccioli polvere sfumatura"/>
+  <color symbol="s" value="9eb2cc" part="testa" name="parrucca solchi ombra riccioli"/>
+
+  <!-- Tocco cerimoniale di panno rosso corallo dell'Arbitro (part="testa") -->
+  <color symbol="M" value="ff6b6b" part="testa" name="tocco panno rosso corallo base"/>
+  <color symbol="m" value="c73838" part="testa" name="tocco pieghe ombra corallo scuro"/>
+  <color symbol="V" value="ff8a8a" part="testa" name="tocco sommità luce corallo chiaro"/>
+  <color symbol="v" value="ffa6a6" part="testa" name="tocco cordoncino orlo brillante"/>
+  <color symbol="X" value="ff6b6b" glow="True" part="testa" name="sigillo armonia corallo glow"/>
+
+  <!-- Jabot da magistrato e spilla cerimoniale (part="testa") -->
+  <color symbol="L" value="ffffff" part="testa" name="jabot pizzo candido pieghe"/>
+  <color symbol="l" value="cbdbfc" part="testa" name="jabot pizzo ombre azzurrine"/>
+  <color symbol="Y" value="ff6b6b" part="testa" name="nastro collare corallo"/>
+  <color symbol="y" value="c73838" part="testa" name="nodo spilla corallo ombra"/>
+  <color symbol="x" value="ffffff" glow="True" part="testa" name="gemma spilla armonia luce glow"/>
+
+  <!-- Accessori: Cintura e Martelletto cerimoniale da giudice (gavel) -->
+  <color symbol="Q" value="3a2416" name="cintura cuoio e manico martelletto"/>
+  <color symbol="q" value="5c3318" name="testa martelletto legno scuro"/>
+  <color symbol="S" value="e4bb40" name="anello ottone martelletto e fibbia"/>
+
+  <!-- ======================================================== -->
+  <!-- 1. LUNGHE ZAMPE POSTERIORI DA SALTATORE (part="gamba")   -->
+  <!-- ======================================================== -->
+  <!-- Piedone sinistro al suolo (x=10..12, y=15..28, z=0..1)   -->
+  <box at="11 21.5 0" size="3 14 1" color="P"/>
+  <box at="10 28 0" size="1 1 1" color="p"/>
+  <box at="11 28 0" size="1 1 1" color="p"/>
+  <box at="12 28 0" size="1 1 1" color="p"/>
+  <box at="11 20 1" size="3 8 1" color="P"/>
+  <box at="11 15.5 0" size="3 3 3" color="g"/>
+
+  <!-- Piedone destro al suolo (x=19..21, y=15..28, z=0..1)     -->
+  <box at="20 21.5 0" size="3 14 1" color="P"/>
+  <box at="19 28 0" size="1 1 1" color="p"/>
+  <box at="20 28 0" size="1 1 1" color="p"/>
+  <box at="21 28 0" size="1 1 1" color="p"/>
+  <box at="20 20 1" size="3 8 1" color="P"/>
+  <box at="20 15.5 0" size="3 3 3" color="g"/>
+
+  <!-- Lunghi stinchi inclinati in avanti dal garretto al ginocchio (z=2..12) -->
+  <line at="11 15.5 2" to="11 24.5 11.5" r="1.1" color="g"/>
+  <line at="20 15.5 2" to="20 24.5 11.5" r="1.1" color="g"/>
+
+  <!-- Cosce muscolose alte piegate a Z che raccordano ginocchio e bacino -->
+  <ellipsoid at="11 20 9.5" size="5 9 10" color="G"/>
+  <ellipsoid at="20 20 9.5" size="5 9 10" color="G"/>
+
+  <!-- ======================================================== -->
+  <!-- 2. CORPO ALLUNGATO INCLINATO E VENTRE CANDIDO (z = 10..22) -->
+  <!-- ======================================================== -->
+  <!-- Groppa posteriore alta (si salda alle cosce e alla coda) -->
+  <ellipsoid at="15.5 18 15" size="12 10 9" color="F"/>
+
+  <!-- Dorso medio allungato (inclinato verso il basso e in avanti) -->
+  <ellipsoid at="15.5 24 14" size="11 10 8" color="F"/>
+
+  <!-- Petto e spalle anteriori -->
+  <ellipsoid at="15.5 29 14.5" size="10 8 8" color="F"/>
+
+  <!-- Soffice ventre e pettorina candida (+y e parte inferiore) -->
+  <ellipsoid at="15.5 24 11" size="8 9 5" color="C"/>
+  <ellipsoid at="15.5 28 12.5" size="7 7 6" color="C"/>
+  <ellipsoid at="15.5 31 14" size="6 5 5" color="c"/>
+
+  <!-- Cintura sottile in cuoio scuro con fibbia in ottone lucido -->
+  <box at="15.5 24 13" size="12 10 1" color="Q"/>
+  <box at="15.5 29 13" size="2 1 1" color="S"/>
+
+  <!-- Martelletto cerimoniale da giudice (gavel) appeso al fianco sinistro -->
+  <!-- Passante in cuoio alla cintura -->
+  <box at="9 24 12" size="1 2 1" color="Q"/>
+  <!-- Testa del martelletto a barilotto orizzontale in legno pregiato -->
+  <box at="8 24 11" size="2 4 2" color="q"/>
+  <!-- Anello centrale dorato della testa del martelletto -->
+  <box at="8 24 11" size="2 2 2" color="S"/>
+  <!-- Manico del martelletto tornito con pomello dorato -->
+  <line at="8 24 11" to="8 21 8.5" r="0.5" color="Q"/>
+  <box at="8 21 8" size="1 1 1" color="S"/>
+
+  <!-- ======================================================== -->
+  <!-- 3. ZAMPETTE ANTERIORI MINUSCOLE AL PETTO (part="braccio") -->
+  <!-- ======================================================== -->
+  <!-- Braccino sinistro e manina candida -->
+  <line at="12 29 14" to="13.5 32 12" r="0.6" color="A"/>
+  <box at="13.5 33 12" size="2 1 1" color="a"/>
+
+  <!-- Braccino destro e manina candida -->
+  <line at="19 29 14" to="17.5 32 12" r="0.6" color="A"/>
+  <box at="17.5 33 12" size="2 1 1" color="a"/>
+
+  <!-- ======================================================== -->
+  <!-- 4. TESTA GRANDE, GUANCE, MUSETTO, OCCHI (part="testa")   -->
+  <!-- ======================================================== -->
+  <!-- Cranio principale castano caldo -->
+  <ellipsoid at="15.5 31 19" size="13 11 10" color="T"/>
+
+  <!-- Ponte frontale castano tra gli occhi -->
+  <box at="15.5 34 21" size="4 4 4" color="T"/>
+  <box at="15.5 36 22" size="2 2 2" color="t"/>
+
+  <!-- Guanciotte paffute ai lati del viso -->
+  <ellipsoid at="10.5 34 18.5" size="5 5 5" color="t"/>
+  <ellipsoid at="20.5 34 18.5" size="5 5 5" color="t"/>
+  <box at="10 35 18" size="3 3 3" color="U"/>
+  <box at="21 35 18" size="3 3 3" color="U"/>
+
+  <!-- Musetto conico allungato in avanti candido puro (+y, z=18..19) -->
+  <box at="15.5 37 18" size="5 4 3" color="U"/>
+  <box at="15.5 39 18" size="3 3 2" color="U"/>
+  <box at="15.5 38 17" size="3 2 1" color="u"/>
+  <!-- Tartufo nasino scuro -->
+  <box at="15.5 40 19" size="2 1 1" color="N"/>
+
+  <!-- Sottili accenni di vibrisse laterali sul muso -->
+  <box at="13 38 18" size="1 1 1" color="W"/>
+  <box at="18 38 18" size="1 1 1" color="W"/>
+
+  <!-- Grandi occhi scuri espressivi (3x2x3 voxel a z=20..22, y=34..35) -->
+  <box at="11 34.5 20" size="3 2 3" color="E"/>
+  <box at="20 34.5 20" size="3 2 3" color="E"/>
+
+  <!-- Punti luce bianchi riflesso vispo (Z, glow="True") in alto a sx -->
+  <box at="10 35 22" size="1 1 1" color="Z"/>
+  <box at="19 35 22" size="1 1 1" color="Z"/>
+
+  <!-- ======================================================== -->
+  <!-- 5. JABOT DA MAGISTRATO E SPILLA CORALLO (part="testa")   -->
+  <!-- ======================================================== -->
+  <!-- Ampio jabot a balze candido a pieghe cascanti sul petto -->
+  <!-- Balza superiore a ventaglio sotto la gola (z=14..15) -->
+  <box at="15.5 34.5 14" size="6 2 2" color="L"/>
+  <box at="13 34.5 14" size="1 2 2" color="l"/>
+  <box at="18 34.5 14" size="1 2 2" color="l"/>
+  <!-- Balza intermedia tra le zampine con pieghe verticali (z=12..13) -->
+  <box at="15.5 34.5 12" size="4 2 2" color="L"/>
+  <box at="15.5 35 12" size="4 1 2" color="L"/>
+  <box at="14 35 12" size="1 1 2" color="l"/>
+  <box at="17 35 12" size="1 1 2" color="l"/>
+  <!-- Balza inferiore a punta elegante sopra la cintura (z=11) -->
+  <box at="15.5 34 11" size="2 2 1" color="L"/>
+  <box at="15.5 34 11" size="2 1 1" color="l"/>
+
+  <!-- Nastro del colletto corallo che avvolge il collo -->
+  <cylinder at="15.5 32 16" size="8 7 2" color="Y"/>
+
+  <!-- Spilla / Cameo dell'Armonia al centro del collo/jabot (z=15..16) -->
+  <!-- Base nastro corallo della spilla -->
+  <box at="15.5 35 15" size="4 2 2" color="Y"/>
+  <!-- Nodo/montatura corallo ombra sopra e sotto la gemma -->
+  <box at="15.5 36 16" size="2 1 1" color="y"/>
+  <box at="15.5 36 14" size="2 1 1" color="y"/>
+  <!-- Gemma centrale brillante dell'Armonia con luce glow -->
+  <box at="15.5 36 15" size="2 1 1" color="x"/>
+
+  <!-- ======================================================== -->
+  <!-- 6. GIGANTESCHE ORECCHIE A CONCHIGLIA (part="testa", z=25..39) -->
+  <!-- ======================================================== -->
+  <!-- Orecchio sinistro: guscio castano posteriore/esterno -->
+  <ellipsoid at="9.5 29 25" size="8 4 15" color="O"/>
+  <!-- Padiglione interno concavo velluto rosa carne -->
+  <ellipsoid at="9.5 30.5 26" size="6 3 13" color="R"/>
+  <box at="9.5 31 27" size="4 1 8" color="r"/>
+  <line at="6 30 28" to="9 30 38" r="0.5" color="o"/>
+
+  <!-- Orecchio destro: guscio castano posteriore/esterno -->
+  <ellipsoid at="21.5 29 25" size="8 4 15" color="O"/>
+  <!-- Padiglione interno concavo velluto rosa carne -->
+  <ellipsoid at="21.5 30.5 26" size="6 3 13" color="R"/>
+  <box at="21.5 31 27" size="4 1 8" color="r"/>
+  <line at="25 30 28" to="22 30 38" r="0.5" color="o"/>
+
+  <!-- ======================================================== -->
+  <!-- 7. PARRUCCA CERIMONIALE DA GIUDICE (part="testa")        -->
+  <!-- ======================================================== -->
+  <!-- Calotta centrale tra le radici delle orecchie -->
+  <box at="15.5 32 25" size="8 8 3" color="H"/>
+  <box at="15.5 33 26" size="8 6 2" color="h"/>
+  <box at="15.5 33 27" size="6 4 2" color="H"/>
+
+  <!-- Rotolo frontale sopra la fronte tra gli occhi -->
+  <box at="15.5 35 24" size="8 2 2" color="H"/>
+  <box at="15.5 36 24" size="6 1 1" color="h"/>
+  <box at="15.5 34 23" size="8 1 1" color="s"/>
+
+  <!-- Nuca e rotoli posteriori della parrucca -->
+  <!-- Rotolo basso della nuca (z=18..19) -->
+  <box at="15.5 26 18" size="10 3 2" color="H"/>
+  <box at="15.5 25 18" size="8 1 1" color="s"/>
+  <box at="15.5 26 19" size="8 1 1" color="h"/>
+  <!-- Rotolo medio della nuca (z=20..21) -->
+  <box at="15.5 26 20" size="12 3 2" color="H"/>
+  <box at="15.5 25 20" size="10 1 1" color="s"/>
+  <box at="15.5 26 21" size="10 1 1" color="h"/>
+  <!-- Rotolo alto della nuca (z=22..23) -->
+  <box at="15.5 27 22" size="12 3 2" color="H"/>
+  <box at="15.5 26 22" size="10 1 1" color="s"/>
+  <box at="15.5 27 23" size="10 1 1" color="h"/>
+
+  <!-- Fiocchetto sartoriale di chiusura parrucca alla nuca (z=16..17) -->
+  <box at="15.5 24.5 17" size="2 1 1" color="Y"/>
+  <box at="14 24.5 16" size="1 1 2" color="y"/>
+  <box at="17 24.5 16" size="1 1 2" color="y"/>
+
+  <!-- Boccoli cerimoniali laterali a cannone sovrapposti (framing guance) -->
+  <!-- Lato sinistro: 3 rotoli cilindrici orizzontali sovrapposti -->
+  <!-- Rotolo alto sinistro (z=22..23) -->
+  <box at="8 32.5 22" size="3 3 2" color="H"/>
+  <box at="7 33 22" size="1 2 1" color="h"/>
+  <box at="8 32 21" size="3 2 1" color="s"/>
+  <!-- Rotolo medio sinistro (z=19..20) -->
+  <box at="8 33 19" size="3 3 2" color="H"/>
+  <box at="7 33 19" size="1 2 1" color="h"/>
+  <box at="8 33 18" size="3 2 1" color="s"/>
+  <!-- Rotolo basso sinistro (z=16..17) -->
+  <box at="8 32 16" size="3 3 2" color="H"/>
+  <box at="7 32 16" size="1 2 1" color="h"/>
+  <box at="8 32 15" size="2 2 1" color="s"/>
+
+  <!-- Lato destro: 3 rotoli cilindrici orizzontali sovrapposti -->
+  <!-- Rotolo alto destro (z=22..23) -->
+  <box at="23 32.5 22" size="3 3 2" color="H"/>
+  <box at="24 33 22" size="1 2 1" color="h"/>
+  <box at="23 32 21" size="3 2 1" color="s"/>
+  <!-- Rotolo medio destro (z=19..20) -->
+  <box at="23 33 19" size="3 3 2" color="H"/>
+  <box at="24 33 19" size="1 2 1" color="h"/>
+  <box at="23 33 18" size="3 2 1" color="s"/>
+  <!-- Rotolo basso destro (z=16..17) -->
+  <box at="23 32 16" size="3 3 2" color="H"/>
+  <box at="24 32 16" size="1 2 1" color="h"/>
+  <box at="23 32 15" size="2 2 1" color="s"/>
+
+  <!-- ======================================================== -->
+  <!-- 8. TOCCO CERIMONIALE ROSSO CORALLO (part="testa")        -->
+  <!-- ======================================================== -->
+  <!-- Fascia / alloggiamento alla base del tocco -->
+  <cylinder at="15.5 32 28" size="8 7 1" color="m"/>
+  <!-- Cupola bombata del tocco in panno rosso corallo -->
+  <ellipsoid at="15.5 32 28.5" size="7 7 3" color="M"/>
+  <!-- Pieghe d'ombra del panno velluto a croce -->
+  <box at="15.5 32 30" size="6 2 1" color="m"/>
+  <box at="15.5 32 30" size="2 6 1" color="m"/>
+  <!-- Sommità con luce velluto corallo chiaro -->
+  <box at="15.5 32 30" size="4 4 1" color="V"/>
+  <box at="15.5 32 31" size="2 2 1" color="V"/>
+  <!-- Cordoncino e orli rifiniti del tocco -->
+  <box at="15.5 34 29" size="4 1 1" color="v"/>
+  <box at="15.5 30 29" size="4 1 1" color="v"/>
+  <box at="13 32 29" size="1 4 1" color="v"/>
+  <box at="18 32 29" size="1 4 1" color="v"/>
+  <!-- Sigillo centrale dell'Armonia luminescente (glow="True") all'apice del tocco -->
+  <box at="15.5 32 32" size="2 2 1" color="X"/>
+
+  <!-- ======================================================== -->
+  <!-- 9. LUNGHISSIMA CODA E PENNACCHIO BICOLORE (part="coda")  -->
+  <!-- ======================================================== -->
+  <!-- Attacco alla groppa posteriore alta (y=15, z=16) -->
+  <line at="15.5 15 16" to="15.5 10 9" r="1.1" color="K"/>
+  <!-- Discesa sinuosa verso il terreno -->
+  <line at="15.5 10 9" to="15.5 6 4" r="0.9" color="K"/>
+  <line at="15.5 6 4" to="15.5 3.5 2.5" r="0.8" color="K"/>
+  <!-- Risalita verso l'alto -->
+  <line at="15.5 3.5 2.5" to="15.5 2.5 5.5" r="0.8" color="k"/>
+  <line at="15.5 2.5 5.5" to="15.5 2.5 9" r="0.8" color="k"/>
+
+  <!-- Spettacolare pennacchio bicolore: collare scuro e grande batuffolo bianco candido -->
+  <ellipsoid at="15.5 2.5 9" size="5 4 5" color="J"/>
+  <ellipsoid at="15.5 2.5 12" size="6 5 6" color="I"/>
+  <ellipsoid at="15.5 2.5 16" size="4 4 5" color="I"/>
+  <box at="15.5 2.5 18" size="2 2 2" color="I"/>
+
+  <!-- ======================================================== -->
+  <!-- 10. REGOLE GENERATIVE: SFUMATURE, PELO E TEXTURE         -->
+  <!-- ======================================================== -->
+  <!-- Illuminazione sommitale del dorso e delle spalle -->
+  <prl steps="1" p="0.3" in="B F" out="B f"/>
+  <!-- Ombreggiatura naturale nelle pieghe inferiori del dorso -->
+  <prl steps="1" p="0.15" in="F/B" out="D/*"/>
+  <!-- Transizione morbida tra pancia candida e fianchi castani -->
+  <prl steps="1" p="0.35" in="F/C" out="*/c"/>
+  <prl steps="1" p="0.25" in="FC" out="Fc" symmetry="(x)"/>
+  <!-- Sfumatura delicata tra guance e musetto -->
+  <prl steps="1" p="0.25" in="t U" out="u *"/>
+  <!-- Morbida cipria di polvere sui riccioli della parrucca -->
+  <prl steps="1" p="0.15" in="H" out="h"/>
+</sequence>

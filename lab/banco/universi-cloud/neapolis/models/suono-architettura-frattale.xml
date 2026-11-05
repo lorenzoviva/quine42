@@ -1,0 +1,36 @@
+<!-- Dal SoundLab: una griglia di 4×3×4 (quattro battute) scalata per 4×1×2: ogni cella grossa diventa sedicesimi, legature, accenti e colpi. -->
+<sequence name="Architettura Frattale" values="BNSAGKHCRTMP" size="4 3 4" symmetry="()">
+  <sound bpm="114" scale="hirajoshi" root="53" swing="0.12" cutoff="4800" space="0.35">
+    <track y="0" instrument="lead" volume="0.82"/>
+    <track y="1" instrument="pad" volume="0.75"/>
+    <track y="2" instrument="bass" volume="0.9"/>
+  </sound>
+  <color symbol="N" value="38bdf8" name="Nota" glow="True"/>
+  <color symbol="S" value="0284c7" name="Sustain" alpha="0.85"/>
+  <color symbol="A" value="f43f5e" name="Accento" glow="True"/>
+  <color symbol="G" value="818cf8" name="Ghost" alpha="0.7"/>
+  <color symbol="K" value="fbbf24" name="Kick" glow="True"/>
+  <color symbol="H" value="fde047" name="Hi-hat" alpha="0.85"/>
+  <color symbol="C" value="fb923c" name="Rullante" glow="True"/>
+  <color symbol="R" value="a855f7" name="Radice" hidden="True"/>
+  <color symbol="T" value="ec4899" name="Meta" hidden="True"/>
+  <color symbol="M" value="10b981" name="Motivo" hidden="True"/>
+  <color symbol="P" value="64748b" name="Passaggio" hidden="True"/>
+
+  <!-- La struttura grossa. La prima colonna è sempre completa, così il pad c'è con ogni seme. -->
+  <one in="B/B/B" out="R/M/K" steps="1"/>
+  <one steps="3">
+    <rule in="B/B/B" out="R/M/K"/>
+    <rule in="B/B/B" out="T/B/C"/>
+  </one>
+  <all in="B" out="P"/>
+  <!-- L'espansione: gli strati si scrivono dall'alto, come sempre in MarkovJunior. -->
+  <map scale="4 1 2" values="BNSAGKHCRTMP">
+    <rule in="R" out="BBGN ABNB"/>
+    <rule in="T" out="BBBG NSSB"/>
+    <rule in="M" out="BNSS NSSS"/>
+    <rule in="K" out="BBNB KBHB"/>
+    <rule in="C" out="NBAB CBHB"/>
+    <rule in="P" out="BBBB BBBB"/>
+  </map>
+</sequence>

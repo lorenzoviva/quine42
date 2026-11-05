@@ -1,0 +1,35 @@
+{
+ "plan": {
+  "place": {
+   "name": "Vico del Vesuvietto",
+   "description": "Un vicolo del rione a due passi dal cantiere, con la pizzeria «Il Vesuvietto», i motorini sul marciapiede e le sedie in strada la sera."
+  },
+  "layout": "rione",
+  "objects": [
+   {
+    "module": "npc.cuoca",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.cucina-trattoria",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.motorino",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.lampione",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Mozzarella",
+   "Schedina del lotto",
+   "Farina"
+  ],
+  "fresh": [],
+  "runes": [],
+  "strutture": []
+ }
+}

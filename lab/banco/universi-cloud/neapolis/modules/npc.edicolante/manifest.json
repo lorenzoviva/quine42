@@ -1,0 +1,63 @@
+{
+  "id": "npc.edicolante",
+  "name": "Edicolante",
+  "kind": "entity",
+  "version": "0.1.0",
+  "description": "Edicolanti di Neapolis: giornali, figurine, fotoromanzi, biglietti del tram e tutte le notizie del quartiere.",
+  "context": "chioschi verdi delle piazze e del mercato",
+  "logic": "logic.lua",
+  "appearance": {
+    "model": "persona",
+    "glyph": "E",
+    "color": "#3a8a4a",
+    "aspetto": "una persona col gilet di lana, gli occhiali sulla punta del naso e un giornale piegato sotto il braccio"
+  },
+  "physics": {
+    "solid": false,
+    "radius": 0.35,
+    "speed": 0.44999999999999996
+  },
+  "components": {
+    "wander": {
+      "dx": 0,
+      "dy": 0,
+      "t": 0,
+      "speed": 0.44999999999999996
+    }
+  },
+  "interaction": {
+    "type": "talk"
+  },
+  "persona": "Fai l’edicolante a Neapolis: sai le notizie prima di tutti e le ripeti con gusto. Delle rune sai ciò che sa la gente di città: lastre con un segno inciso che manda una luce tenue, sul marciapiede come nei giardini; alla radio ci ridono sopra, i ragazzi le vendono al mercatino, e chi ne ha pronunciata una lo racconta sottovoce.",
+  "actions": [
+    {
+      "id": "saluta",
+      "label": "Saluta"
+    },
+    {
+      "id": "quartiere",
+      "label": "Chiedi del quartiere"
+    },
+    {
+      "id": "mestiere",
+      "label": "Chiedi del lavoro"
+    },
+    {
+      "id": "insisti",
+      "label": "Insisti"
+    },
+    {
+      "id": "rune",
+      "label": "Parla delle rune"
+    },
+    {
+      "id": "compra",
+      "label": "Compra le figurine (una moneta)",
+      "requires": "item.cento-lire"
+    }
+  ],
+  "tags": [
+    "neapolis",
+    "abitante"
+  ]
+}

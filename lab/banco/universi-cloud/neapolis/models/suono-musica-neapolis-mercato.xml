@@ -1,0 +1,69 @@
+<!-- Di giorno, tra la piazza, il mercato e i vicoli: pentatonica svelta, swing da mandolino, hi-hat fitto come le voci dei banchi. -->
+<sequence name="Mercato" values="BNSAGKHCRTMPD" size="128 3 12" symmetry="()">
+  <sound bpm="104" scale="pentatonic_minor" root="52" swing="0.16" cutoff="4200" space="0.35">
+    <track y="0" instrument="lead" volume="0.66"/>
+    <track y="1" instrument="pad" volume="0.55"/>
+    <track y="2" instrument="bass" volume="0.72"/>
+  </sound>
+  <color symbol="N" value="38bdf8" name="Nota" glow="True"/>
+  <color symbol="S" value="0284c7" name="Sustain" alpha="0.85"/>
+  <color symbol="A" value="f43f5e" name="Accento" glow="True"/>
+  <color symbol="G" value="818cf8" name="Ghost" alpha="0.7"/>
+  <color symbol="K" value="fbbf24" name="Kick" glow="True"/>
+  <color symbol="H" value="fde047" name="Hi-hat" alpha="0.85"/>
+  <color symbol="C" value="fb923c" name="Rullante" glow="True"/>
+  <color symbol="R" value="a855f7" name="Radice" hidden="True"/>
+  <color symbol="T" value="ec4899" name="Testa degli accordi" hidden="True"/>
+  <color symbol="M" value="10b981" name="Testa della melodia" hidden="True"/>
+  <color symbol="P" value="64748b" name="Testa del ritmo" hidden="True"/>
+  <color symbol="D" value="475569" name="Battuta" hidden="True"/>
+
+  <!-- Le teste, all'inizio del ciclo. -->
+  <line at="0 0 5" to="0 0 5" r="0" color="M"/>
+  <line at="0 1 3" to="0 1 3" r="0" color="T"/>
+  <line at="0 2 0" to="0 2 0" r="0" color="P"/>
+
+  <!-- Il ritmo (y=2, quota 0): una testa segna le battute, ognuna ha il suo disegno. -->
+  <one in="PBBBBBBBBBBBBBBBB" out="DBBBBBBBBBBBBBBBP"/>
+  <all in="P" out="D"/>
+  <all>
+    <rule in="DBBBBBBBBBBBBBBB" out="KBHBHBBBKBHBHBBB" p="3"/>
+    <rule in="DBBBBBBBBBBBBBBB" out="KBBBHBHBKBBBHBBB" p="2"/>
+    <rule in="DBBBBBBBBBBBBBBB" out="KBBBHBBBKBHBHBBB"/>
+  </all>
+
+  <!-- L'armonia (y=1): la testa cammina di battuta in battuta e lascia una radice. -->
+  <one>
+    <rule in="TBBBBBBBBBBBBBBBB" out="RBBBBBBBBBBBBBBBT" p="2"/>
+    <rule in="BBBBBBBBBBBBBBBBB BBBBBBBBBBBBBBBBB BBBBBBBBBBBBBBBBB TBBBBBBBBBBBBBBBB" out="BBBBBBBBBBBBBBBBT BBBBBBBBBBBBBBBBB BBBBBBBBBBBBBBBBB RBBBBBBBBBBBBBBBB" p="2"/>
+    <rule in="TBBBBBBBBBBBBBBBB BBBBBBBBBBBBBBBBB BBBBBBBBBBBBBBBBB BBBBBBBBBBBBBBBBB" out="RBBBBBBBBBBBBBBBB BBBBBBBBBBBBBBBBB BBBBBBBBBBBBBBBBB BBBBBBBBBBBBBBBBT" p="2"/>
+    <rule in="BBBBBBBBBBBBBBBBB TBBBBBBBBBBBBBBBB" out="BBBBBBBBBBBBBBBBT RBBBBBBBBBBBBBBBB"/>
+    <rule in="TBBBBBBBBBBBBBBBB BBBBBBBBBBBBBBBBB" out="RBBBBBBBBBBBBBBBB BBBBBBBBBBBBBBBBT"/>
+  </one>
+  <all in="T" out="R"/>
+  <!-- Il basso (y=2) suona la radice dell'accordo. -->
+  <all in="R/B" out="*/A"/>
+  <!-- Il pad: tre note per radice, tenute; dove la cima non c'è resta la radice sola. -->
+  <all in="B B B B R" out="N * N * N"/>
+  <all in="R" out="N"/>
+  <all in="NBBBBBBBBBBBBB" out="NSSSSSSSSSSSSS"/>
+  <!-- Il disegno del basso nella battuta. -->
+  <all>
+    <rule in="ABBBBBBBBBBBBBBB" out="ASSSBBBBNSSSBBBB" p="2"/>
+    <rule in="ABBBBBBBBBBBBBBB" out="ASSSBBNSBBBBNSBB"/>
+  </all>
+
+  <!-- La melodia (y=0): una testa che va avanti nel tempo e sale o scende di un grado. -->
+  <one>
+    <rule in="MBB" out="NBM" p="4"/>
+    <rule in="MBBBB" out="NSSBM" p="3"/>
+    <rule in="MBBBB" out="BBBBM" p="2"/>
+    <rule in="BBB MBB" out="BBM NBB" p="3"/>
+    <rule in="MBB BBB" out="NBB BBM" p="3"/>
+    <rule in="BBB BBB MBB" out="BBM BBB NBB"/>
+    <rule in="MBB BBB BBB" out="NBB BBB BBM"/>
+  </one>
+  <all in="M" out="B"/>
+  <!-- Qualche accento. -->
+  <one in="N/*/*" out="A/*/*" steps="6"/>
+</sequence>

@@ -1,0 +1,49 @@
+{
+  "titolo": "Neapolis, la città del porto",
+  "tono": "concreto e caldo, con un pizzico di meraviglia: una grande città di mare negli anni Novanta, rumorosa, affettuosa e piena di debiti piccoli e di feste grandi",
+  "sintesi": "Neapolis è una metropoli portuale stretta tra il mare e il Colle dei Gelsi: rioni di panni stesi, un centro direzionale di vetro ancora mezzo vuoto, una stazione che non dorme mai, il cantiere eterno della Linea 2 e un porto che vive di traghetti, container e pescherecci. Qua e là, sul basolato come sul prato dei giardini, si trovano le rune: lastre con un segno inciso che manda una luce tenue. Alla radio ci ridono sopra, i ragazzi le raccolgono e qualcuno, sottovoce, racconta di averne pronunciata una.",
+  "storia": "La città è cresciuta attorno al Molo Vecchio, dove le barche dei pescatori scaricavano prima che arrivassero le gru. Nel dopoguerra i rioni si sono riempiti di gente venuta dai paesi dell'interno; negli anni Ottanta il comune ha tirato su il Centro Direzionale sulle vecchie paludi dei Granili, promettendo lavoro per tutti. Oggi le torri di vetro sono abitate a metà, il cantiere della metropolitana ha aperto tre volte e chiuso due, il porto commerciale si mangia le banchine dei pescatori e il quartiere discute ogni sera, al bar, di chi ha venduto cosa e a chi. Radio Ciok Ciok trasmette dall'ultimo piano di un palazzo del Corso, e quello che dice la sera il giorno dopo lo ripete tutto il mercato.",
+  "luoghi": [
+    "Piazza delle Erbe",
+    "Rione delle Lavandaie",
+    "Corso Partenope",
+    "Centro Direzionale",
+    "Mercato del Pendino",
+    "Stazione Centrale",
+    "Cantiere della Linea 2",
+    "Lungomare delle Rondini",
+    "Porto di Neapolis",
+    "Officine dei Granili",
+    "Colle dei Gelsi",
+    "Parco dei Platani"
+  ],
+  "personaggi": [
+    "Assunta Cimmino, barista del Bar Gambrinus di Piazza delle Erbe: sa tutto di tutti e lo dice solo a chi paga il caffè sospeso",
+    "Gennaro Esposito, meccanico dell'officina sotto il cavalcavia: ripara motorini, taxi e, quando non lo vede nessuno, anche le radio dei vicini",
+    "Rosaria Vitale, giornalista del Mattino di Neapolis: segue la storia degli appalti della Linea 2 da tre anni e non molla",
+    "Salvatore Iovine, portuale della compagnia del Molo Vecchio: gruista di notte, pescatore la domenica, sindacalista sempre",
+    "La dottoressa Carla Ferrante, medico del turno di notte al pronto soccorso dei Pellegrini: non dorme da quando c'erano i gettoni",
+    "Ciro Amitrano, elettricista dell'azienda comunale: conosce ogni cabina e ogni quadro del quartiere, e i nomi di chi si attacca alla corrente",
+    "Don Peppe Russo, il pagosso del rione: benedice i motorini nuovi e tiene la cassa delle feste"
+  ],
+  "fatti": [
+    "Il cantiere della Linea 2 ha chiuso via Duomo per la terza volta: i negozianti hanno fatto una colletta per pagare l'avvocato.",
+    "Al Centro Direzionale tre torri su sette sono ancora vuote: di notte le finestre accese si contano sulle dita.",
+    "Il mercato del Pendino apre alle cinque del mattino e chiude quando finisce il pesce.",
+    "Radio Ciok Ciok trasmette dal Corso Partenope e regala biglietti per lo stadio a chi indovina il quiz della sera.",
+    "Il porto commerciale vuole le banchine dei pescatori per i container: la compagnia del Molo Vecchio ha detto di no.",
+    "Il tram 1 passa ogni dodici minuti, dice l'orario; la gente dice quando vuole lui.",
+    "Le rune si trovano anche in città: sul basolato del rione, nei giardini del Colle, tra i binari morti dello scalo merci. I ragazzi le vendono al mercatino della domenica."
+  ],
+  "misteri": [
+    "Qualcuno ha visto una luce accesa al quattordicesimo piano della Torre C, che risulta vuota da quando l'hanno finita.",
+    "Al mercato giurano che Vincenzo l’edicolante sappia il tempo di domani prima della radio: guarda i gabbiani sul tetto del mercato.",
+    "Nel cantiere della Linea 2, scavando, hanno trovato un pezzo di molo antico; i lavori si sono fermati e nessuno vuole dire chi ha dato l'ordine.",
+    "Un professore del Colle dei Gelsi compra tutte le rune che i ragazzi gli portano, ma non ha mai detto a nessuno che cosa ci fa."
+  ],
+  "usanze": [
+    "Al bar si lascia pagato un caffè sospeso per chi verrà dopo: chi lo beve non chiede chi l'ha offerto.",
+    "La prima sera di caldo tutto il rione porta le sedie in strada e il pagosso benedice le scale dei palazzi.",
+    "Chi apre un'attività nuova appende in vetrina il primo biglietto incassato, e nessuno lo spende mai."
+  ]
+}

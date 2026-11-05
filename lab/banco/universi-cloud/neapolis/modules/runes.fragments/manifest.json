@@ -1,0 +1,28 @@
+{
+  "id": "runes.fragments",
+  "name": "Frammenti di runa",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "Catalogo dei frammenti di codice che il generatore può spargere sul tappeto. Ognuno è già codice valido e innocuo così com'è.",
+  "fragments": [
+    { "line": "x", "weight": 4 },
+    { "line": "y", "weight": 3 },
+    { "line": "speed", "weight": 2 },
+    { "line": "carpet", "weight": 2 },
+    { "line": "time", "weight": 1 },
+    { "line": "0", "weight": 4 },
+    { "line": "1", "weight": 2 },
+    { "line": "false", "weight": 3 },
+    { "line": "true", "weight": 1 },
+    { "line": "nil", "weight": 1 },
+    { "line": "not true", "weight": 1 },
+    { "line": "- 1", "weight": 1 },
+    { "line": "speed * 2", "weight": 1 },
+    { "line": "carpet . strength", "weight": 3 },
+    { "line": "carpet . rate", "weight": 2 },
+    { "line": "carpet . active", "weight": 3 },
+    { "line": "speed = speed", "weight": 2 },
+    { "line": "x = x", "weight": 1 },
+    { "line": "y = y", "weight": 1 }
+  ]
+}

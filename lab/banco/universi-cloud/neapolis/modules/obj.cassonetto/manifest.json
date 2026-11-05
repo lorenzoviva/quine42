@@ -1,0 +1,35 @@
+{
+  "id": "obj.cassonetto",
+  "name": "Cassonetto",
+  "kind": "entity",
+  "version": "0.1.0",
+  "description": "Un cassonetto verde all’angolo della strada: dentro, quello che la città butta via.",
+  "context": "angoli delle strade, retro dei bar e dei mercati",
+  "logic": "logic.lua",
+  "appearance": {
+    "model": "cassonetto",
+    "glyph": "▬",
+    "color": "#3a6a3a",
+    "aspetto": "un cassonetto della spazzatura verde con il coperchio rotondo, le ruote e un sacco che sporge"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.42
+  },
+  "actions": [
+    {
+      "id": "rovista",
+      "label": "Rovista nel cassonetto"
+    },
+    {
+      "id": "butta",
+      "label": "Butta un fusibile bruciato",
+      "requires": "item.fusibile-bruciato"
+    }
+  ],
+  "tags": [
+    "neapolis",
+    "rifiuti",
+    "metallo"
+  ]
+}

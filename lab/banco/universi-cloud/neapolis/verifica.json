@@ -1,0 +1,177 @@
+{
+ "quartaParete": {
+  "files": 106,
+  "texts": 5110,
+  "breaks": []
+ },
+ "moduli": {
+  "lua": 25,
+  "dati": 4,
+  "errori": 0,
+  "avvisi": 0
+ },
+ "luoghi": {
+  "piani": 19,
+  "problemi": 0,
+  "ambienti": 12,
+  "bozze": 19,
+  "problemiAmbienti": 0
+ },
+ "societa": {
+  "individui": 24,
+  "legami": 28,
+  "problemi": 0,
+  "trame": 8,
+  "regioni": 10
+ },
+ "rune": {
+  "urbane": 12,
+  "totali": 16,
+  "incantesimi": 21
+ },
+ "modelli": [
+  {
+   "id": "distributore",
+   "varianza": 0.248,
+   "errori": 0
+  },
+  {
+   "id": "macchina-espresso",
+   "varianza": 0.374,
+   "errori": 0
+  },
+  {
+   "id": "scrivania-ufficio",
+   "varianza": 0.331,
+   "errori": 0
+  },
+  {
+   "id": "banco-officina",
+   "varianza": 0.283,
+   "errori": 0
+  },
+  {
+   "id": "quadro-elettrico",
+   "varianza": 0.29,
+   "errori": 0
+  },
+  {
+   "id": "edicola",
+   "varianza": 0.251,
+   "errori": 0
+  },
+  {
+   "id": "transenna",
+   "varianza": 0.211,
+   "errori": 0
+  },
+  {
+   "id": "cucina-trattoria",
+   "varianza": 0.238,
+   "errori": 0
+  },
+  {
+   "id": "lampione",
+   "varianza": 0.258,
+   "errori": 0
+  },
+  {
+   "id": "motorino",
+   "varianza": 0.417,
+   "errori": 0
+  },
+  {
+   "id": "cabina-telefonica",
+   "varianza": 0.274,
+   "errori": 0
+  },
+  {
+   "id": "cassonetto",
+   "varianza": 0.228,
+   "errori": 0
+  },
+  {
+   "id": "casa-comune-edificio-f2e1f8de",
+   "varianza": 0.37,
+   "errori": 0
+  },
+  {
+   "id": "casa-comune-grande-f2e1f8de",
+   "varianza": 0.368,
+   "errori": 0
+  },
+  {
+   "id": "struttura-torre-di-vetro",
+   "varianza": 0.344,
+   "errori": 0
+  },
+  {
+   "id": "struttura-mercato-coperto",
+   "varianza": 0.389,
+   "errori": 0
+  }
+ ],
+ "suoni": [
+  {
+   "id": "suono-musica-neapolis-mercato",
+   "effetto": false,
+   "difetti": 0
+  },
+  {
+   "id": "suono-musica-neapolis-corso",
+   "effetto": false,
+   "difetti": 0
+  },
+  {
+   "id": "suono-musica-neapolis-porto",
+   "effetto": false,
+   "difetti": 0
+  },
+  {
+   "id": "suono-musica-neapolis-sera",
+   "effetto": false,
+   "difetti": 0
+  },
+  {
+   "id": "suono-musica-neapolis-notte",
+   "effetto": false,
+   "difetti": 0
+  },
+  {
+   "id": "suono-effetto-tazzina",
+   "effetto": true,
+   "difetti": 0
+  },
+  {
+   "id": "suono-effetto-campanello",
+   "effetto": true,
+   "difetti": 0
+  },
+  {
+   "id": "suono-effetto-blackout",
+   "effetto": true,
+   "difetti": 0
+  }
+ ],
+ "mondo": {
+  "tick": 600,
+  "individui": 20,
+  "riconosciuti": 16,
+  "azioni": 314,
+  "raccolti": 30,
+  "rune": 12,
+  "ricette": 12,
+  "usati": 9,
+  "incantesimi": 16,
+  "luoghi": 19,
+  "missioni": 3,
+  "buio": 1,
+  "riaccesi": 1,
+  "faults": [],
+  "faultsAllaFine": 0,
+  "chiamateAiModelli": 42,
+  "frasi": 327
+ },
+ "esito": "verde",
+ "problemi": []
+}

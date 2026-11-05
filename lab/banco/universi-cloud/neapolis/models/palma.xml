@@ -1,0 +1,52 @@
+<!-- Palma ricurva: step 8B, gemini-3.8-flash (b-semplici-flash38/palma.json, voto dell'Artista 7/10). Convertito dal JSON (lab/mjx/convert.ts): stessi voxel. -->
+<sequence values="BTKHFLDC" size="40 40 60" symmetry="(xy)" name="Palma ricurva">
+  <color symbol="T" value="a87d46" name="fusto palma"/>
+  <color symbol="K" value="634423" name="anello tronco scuro"/>
+  <color symbol="H" value="c4985a" name="fusto illuminato"/>
+  <color symbol="F" value="387d34" name="fronda"/>
+  <color symbol="L" value="5ea842" name="fronda al sole"/>
+  <color symbol="D" value="215224" name="fronda in ombra"/>
+  <color symbol="C" value="54371d" name="noce di cocco"/>
+  <cylinder at="18 19 0" size="8 8 3" color="T"/>
+  <line at="18 19 2" to="18 19 12" r="2" color="T"/>
+  <line at="18 19 12" to="20 20 25" r="2" color="T"/>
+  <line at="20 20 25" to="22 21 37" r="2" color="T"/>
+  <line at="22 21 37" to="22 20 48" r="2" color="T"/>
+  <box at="18 19 5" size="10 10 1" color="K" on="T"/>
+  <box at="18 19 10" size="10 10 1" color="K" on="T"/>
+  <box at="19 20 16" size="10 10 1" color="K" on="T"/>
+  <box at="20 20 22" size="10 10 1" color="K" on="T"/>
+  <box at="21 21 28" size="10 10 1" color="K" on="T"/>
+  <box at="22 21 34" size="10 10 1" color="K" on="T"/>
+  <box at="22 20 40" size="10 10 1" color="K" on="T"/>
+  <box at="22 20 45" size="10 10 1" color="K" on="T"/>
+  <ellipsoid at="21 18 46" size="3 3 3" color="C"/>
+  <ellipsoid at="24 20 46" size="3 3 3" color="C"/>
+  <ellipsoid at="22 22 45" size="3 3 3" color="C"/>
+  <line at="22 20 48" to="22 20 56" r="1" color="F" on="B"/>
+  <line at="22 20 48" to="22 27 54" r="1" color="F" on="B"/>
+  <line at="22 27 54" to="22 34 46" r="1" color="F" on="B"/>
+  <line at="22 20 48" to="22 13 54" r="1" color="F" on="B"/>
+  <line at="22 13 54" to="22 6 46" r="1" color="F" on="B"/>
+  <line at="22 20 48" to="29 20 54" r="1" color="F" on="B"/>
+  <line at="29 20 54" to="36 20 46" r="1" color="F" on="B"/>
+  <line at="22 20 48" to="15 20 54" r="1" color="F" on="B"/>
+  <line at="15 20 54" to="8 20 46" r="1" color="F" on="B"/>
+  <line at="22 20 48" to="28 25 53" r="1" color="F" on="B"/>
+  <line at="28 25 53" to="34 30 45" r="1" color="F" on="B"/>
+  <line at="22 20 48" to="16 25 53" r="1" color="F" on="B"/>
+  <line at="16 25 53" to="10 30 45" r="1" color="F" on="B"/>
+  <line at="22 20 48" to="28 15 53" r="1" color="F" on="B"/>
+  <line at="28 15 53" to="34 10 45" r="1" color="F" on="B"/>
+  <line at="22 20 48" to="16 15 53" r="1" color="F" on="B"/>
+  <line at="16 15 53" to="10 10 45" r="1" color="F" on="B"/>
+  <prl steps="2" in="FB" out="FF" p="0.4"/>
+  <convolution neighborhood="Moore" steps="1">
+    <rule in="F" out="B" values="B" sum="22..26"/>
+  </convolution>
+  <prl steps="1">
+    <rule in="B F" out="B L" p="0.75"/>
+    <rule in="F B" out="D B" p="0.65"/>
+    <rule in="B T" out="B H" p="0.5"/>
+  </prl>
+</sequence>

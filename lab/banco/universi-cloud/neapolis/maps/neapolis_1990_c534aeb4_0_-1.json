@@ -1,0 +1,41 @@
+{
+ "plan": {
+  "place": {
+   "name": "Corso Partenope",
+   "description": "Il corso dei negozi, con le vetrine illuminate, il tram che sferraglia e, all’ultimo piano di un palazzo d’angolo, le antenne di Radio Ciok Ciok."
+  },
+  "layout": "corso",
+  "objects": [
+   {
+    "module": "npc.giornalista",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.lampione",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.motorino",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.cassonetto",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.distributore",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Biglietto del tram",
+   "Giornale del mattino",
+   "Moneta da cento lire"
+  ],
+  "fresh": [],
+  "runes": [
+   "voce"
+  ],
+  "strutture": []
+ }
+}

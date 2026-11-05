@@ -1,0 +1,85 @@
+<!-- Palazzina di tufo di Neapolis (la casa comune della città): intonaco ocra, persiane verdi, balcone di ferro, tetto piano con le antenne; piani in più o in meno a ogni seme. -->
+<sequence values="BZHTVGKRFDA" size="40 40 40" symmetry="(xy)" name="Palazzina">
+  <color symbol="Z" hidden="True"/><color symbol="H" hidden="True"/>
+  <color symbol="T" value="d8b070" name="intonaco ocra"/><color symbol="V" value="8ab0c8" name="vetri" alpha="0.6"/><color symbol="G" value="3a7a4a" name="persiane verdi"/>
+  <color symbol="K" value="3a3a40" name="ferro dei balconi"/><color symbol="R" value="a89c88" name="terrazzo"/><color symbol="F" value="b89870" name="solaio"/><color symbol="D" value="4a6a3a" name="portone"/><color symbol="A" value="6a6a70" name="antenne"/>
+  <box at="20 20 0" size="32 28 36" color="Z"/>
+  <box at="20 20 0" size="32 28 14" color="T"/>
+  <box at="20 20 14" size="1 1 1" color="H"/>
+  <one>
+    <rule in="Z H" out="H T" p="6"/>
+    <rule in="H" out="T" p="1"/>
+  </one>
+  <all in="TZ" out="TT" symmetry="(xy)"/>
+  <all in="Z" out="B"/>
+  <all in="B T" out="R T"/>
+  <box at="7 20 3" size="2 40 3" color="V" on="T"/>
+  <box at="6 20 3" size="1 40 3" color="G" on="T"/>
+  <box at="7 20 15" size="2 40 3" color="V" on="T"/>
+  <box at="6 20 15" size="1 40 3" color="G" on="T"/>
+  <box at="7 20 26" size="2 40 3" color="V" on="T"/>
+  <box at="6 20 26" size="1 40 3" color="G" on="T"/>
+  <box at="11 20 3" size="2 40 3" color="V" on="T"/>
+  <box at="10 20 3" size="1 40 3" color="G" on="T"/>
+  <box at="11 20 15" size="2 40 3" color="V" on="T"/>
+  <box at="10 20 15" size="1 40 3" color="G" on="T"/>
+  <box at="11 20 26" size="2 40 3" color="V" on="T"/>
+  <box at="10 20 26" size="1 40 3" color="G" on="T"/>
+  <box at="15 20 3" size="2 40 3" color="V" on="T"/>
+  <box at="14 20 3" size="1 40 3" color="G" on="T"/>
+  <box at="15 20 15" size="2 40 3" color="V" on="T"/>
+  <box at="14 20 15" size="1 40 3" color="G" on="T"/>
+  <box at="15 20 26" size="2 40 3" color="V" on="T"/>
+  <box at="14 20 26" size="1 40 3" color="G" on="T"/>
+  <box at="19 20 3" size="2 40 3" color="V" on="T"/>
+  <box at="18 20 3" size="1 40 3" color="G" on="T"/>
+  <box at="19 20 15" size="2 40 3" color="V" on="T"/>
+  <box at="18 20 15" size="1 40 3" color="G" on="T"/>
+  <box at="19 20 26" size="2 40 3" color="V" on="T"/>
+  <box at="18 20 26" size="1 40 3" color="G" on="T"/>
+  <box at="23 20 3" size="2 40 3" color="V" on="T"/>
+  <box at="22 20 3" size="1 40 3" color="G" on="T"/>
+  <box at="23 20 15" size="2 40 3" color="V" on="T"/>
+  <box at="22 20 15" size="1 40 3" color="G" on="T"/>
+  <box at="23 20 26" size="2 40 3" color="V" on="T"/>
+  <box at="22 20 26" size="1 40 3" color="G" on="T"/>
+  <box at="27 20 3" size="2 40 3" color="V" on="T"/>
+  <box at="26 20 3" size="1 40 3" color="G" on="T"/>
+  <box at="27 20 15" size="2 40 3" color="V" on="T"/>
+  <box at="26 20 15" size="1 40 3" color="G" on="T"/>
+  <box at="27 20 26" size="2 40 3" color="V" on="T"/>
+  <box at="26 20 26" size="1 40 3" color="G" on="T"/>
+  <box at="31 20 3" size="2 40 3" color="V" on="T"/>
+  <box at="30 20 3" size="1 40 3" color="G" on="T"/>
+  <box at="31 20 15" size="2 40 3" color="V" on="T"/>
+  <box at="30 20 15" size="1 40 3" color="G" on="T"/>
+  <box at="31 20 26" size="2 40 3" color="V" on="T"/>
+  <box at="30 20 26" size="1 40 3" color="G" on="T"/>
+  <box at="20 9 3" size="40 2 3" color="V" on="T"/>
+  <box at="20 9 15" size="40 2 3" color="V" on="T"/>
+  <box at="20 9 26" size="40 2 3" color="V" on="T"/>
+  <box at="20 13 3" size="40 2 3" color="V" on="T"/>
+  <box at="20 13 15" size="40 2 3" color="V" on="T"/>
+  <box at="20 13 26" size="40 2 3" color="V" on="T"/>
+  <box at="20 17 3" size="40 2 3" color="V" on="T"/>
+  <box at="20 17 15" size="40 2 3" color="V" on="T"/>
+  <box at="20 17 26" size="40 2 3" color="V" on="T"/>
+  <box at="20 21 3" size="40 2 3" color="V" on="T"/>
+  <box at="20 21 15" size="40 2 3" color="V" on="T"/>
+  <box at="20 21 26" size="40 2 3" color="V" on="T"/>
+  <box at="20 25 3" size="40 2 3" color="V" on="T"/>
+  <box at="20 25 15" size="40 2 3" color="V" on="T"/>
+  <box at="20 25 26" size="40 2 3" color="V" on="T"/>
+  <box at="20 29 3" size="40 2 3" color="V" on="T"/>
+  <box at="20 29 15" size="40 2 3" color="V" on="T"/>
+  <box at="20 29 26" size="40 2 3" color="V" on="T"/>
+  <box at="20 20 1" size="30 26 40" color="B" on="T"/>
+  <box at="20 20 1" size="30 26 40" color="B" on="V"/>
+  <box at="20 20 1" size="30 26 40" color="B" on="G"/>
+  <box at="20 20 13" size="30 26 1" color="F" on="B"/>
+  <box at="20 33 1" size="3 1 5" color="D" on="T"/>
+  <box at="20 33 1" size="3 1 5" color="D" on="V"/>
+  <box at="20 34 6" size="7 2 1" color="K"/>
+  <one in="B R" out="A R" steps="2"/>
+  <all in="B A" out="A A" steps="3"/>
+</sequence>

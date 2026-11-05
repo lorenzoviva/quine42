@@ -1,0 +1,46 @@
+{
+  "id": "obj.transenna",
+  "name": "Transenna del cantiere",
+  "kind": "entity",
+  "version": "0.1.0",
+  "description": "Una transenna a strisce del cantiere della Linea 2, con la lampada gialla: dietro, lo scavo.",
+  "context": "cantieri stradali, strade chiuse",
+  "logic": "logic.lua",
+  "appearance": {
+    "model": "transenna",
+    "glyph": "╪",
+    "color": "#f0a020",
+    "aspetto": "una transenna da cantiere stradale a strisce bianche e rosse, con la lampada gialla lampeggiante e i sacchi di sabbia alla base"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.42
+  },
+  "components": {
+    "luce": {
+      "raggio": 1.5,
+      "accesa": true,
+      "colore": "#ffc040"
+    }
+  },
+  "actions": [
+    {
+      "id": "guarda",
+      "label": "Guarda oltre la transenna"
+    },
+    {
+      "id": "scava",
+      "label": "Fruga tra la terra smossa"
+    },
+    {
+      "id": "segna",
+      "label": "Segna col gessetto",
+      "requires": "item.gessetto"
+    }
+  ],
+  "tags": [
+    "neapolis",
+    "cantiere",
+    "metallo"
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "id": "npc.medico",
+  "name": "Medico",
+  "kind": "entity",
+  "version": "0.1.0",
+  "description": "Medici e infermieri degli ospedali di Neapolis, del turno di giorno e di quello di notte.",
+  "context": "pronto soccorso dei Pellegrini, ospedale del Colle",
+  "logic": "logic.lua",
+  "appearance": {
+    "model": "persona",
+    "glyph": "+",
+    "color": "#e8f0f0",
+    "aspetto": "una persona col camice bianco sopra il maglione e uno stetoscopio al collo"
+  },
+  "physics": {
+    "solid": false,
+    "radius": 0.35,
+    "speed": 0.85
+  },
+  "components": {
+    "wander": {
+      "dx": 0,
+      "dy": 0,
+      "t": 0,
+      "speed": 0.85
+    }
+  },
+  "interaction": {
+    "type": "talk"
+  },
+  "persona": "Fai il medico (o l’infermiere) in un ospedale di Neapolis: stanco, pratico, attento. Delle rune sai ciò che sa la gente di città: lastre con un segno inciso che manda una luce tenue, sul marciapiede come nei giardini; alla radio ci ridono sopra, i ragazzi le vendono al mercatino, e chi ne ha pronunciata una lo racconta sottovoce.",
+  "actions": [
+    {
+      "id": "saluta",
+      "label": "Saluta"
+    },
+    {
+      "id": "quartiere",
+      "label": "Chiedi del quartiere"
+    },
+    {
+      "id": "mestiere",
+      "label": "Chiedi del lavoro"
+    },
+    {
+      "id": "insisti",
+      "label": "Insisti"
+    },
+    {
+      "id": "rune",
+      "label": "Parla delle rune"
+    },
+    {
+      "id": "compra",
+      "label": "Fatti medicare (una moneta)",
+      "requires": "item.cento-lire"
+    }
+  ],
+  "tags": [
+    "neapolis",
+    "abitante"
+  ]
+}

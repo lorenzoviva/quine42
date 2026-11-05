@@ -1,0 +1,391 @@
+<!--
+Pod magnetico di trasporto archivi e file (corona): vagoncino passeggeri/merci futuristico per il trasporto veloce di file e dati tra i settori della corona.
+Scritto da Gemini CLI (Gemini 3.8 Flash, abbonamento), task T50a.
+Scatola: 2.5 × 1 × 1.25 caselle, 20 × 8 × 10 voxel, 8 voxel per casella (vpt: 8).
+Ruolo: prop.
+Design e concetto scultoreo:
+- Vagoncino a siluro/proiettile magnetico aerodinamico e affusolato ad alta velocità lungo l'asse X;
+- Carrozzeria bicolore futuristica: scocca inferiore in carbonio composito ultra-scuro (M, m) e tetto/spalle in titanio satinato e cromo (S, s);
+- Sospensione a repulsione magnetica: viaggia visibilmente sollevato di 1 voxel da terra, ancorato a z=0 da due carrelli bogie (anteriore e posteriore) con pattini anti-attrito (P) e bobine di repulsione a lama neon magenta (R, r, A, glow="True") che proiettano una scia luminosa al suolo;
+- Vano centrale a campata aerea levitante (x=7..12) completamente sospesa sul vuoto a z=0 con fascio magnetico ventrale;
+- Finestrature panoramiche oscurate e specchiate con montanti azzurro ciano (V, v) e alloggiamenti aperti da cui risplendono le capsule dati;
+- Interni archivi illuminati: attraverso la fiancata e le vetrate si intravedono pile ordinate di cubetti dati quantistici che brillano (1, 2, 3, 4, G, glow="True") e un nucleo olografico fluttuante centrale;
+- Muso affusolato con fari anteriori a doppio fascio laser bianco (W, glow="True") e scanner telemetrico lidar ciano (C, glow="True");
+- Coda rastremata a siluro con doppi ugelli di propulsione al plasma vettoriale magenta (T, t, glow="True"), luci di posizione cobalto (c, glow="True") e pinna dorsale alettonata swept-back in cromo (s);
+- Spina dorsale aerodinamica a basso profilo con radome dati ad alta frequenza e beacon di navigazione ciano (C).
+Animazione "levitazione" (4 fotogrammi):
+- I pattini magnetici pulsano modulando l'induzione e facendo scorrere un'onda di repulsione magenta (R -> r -> A);
+- Gli archivi dati interni ciclano l'energia quantistica dei file in sincronizzazione di transito (1 -> 2 -> 3 -> 4);
+- I propulsori di spinta e la telemetria di rotta pulsano in sequenza (T -> t, C -> c).
+-->
+<sequence values="BMmSsDPVvWRrAtTcC1234GQXYZxyz" size="20 8 10" symmetry="()" name="TrenoPod">
+  <!-- Materiali strutturali: carbonio scuro, titanio e finiture satinate/cromate -->
+  <color symbol="M" value="141418" name="carbonio ultra-scuro telaio e scocca"/>
+  <color symbol="m" value="20222a" name="titanio grafite scuro carrozzeria"/>
+  <color symbol="S" value="847e87" name="argento titanio satinato spalle e tetto"/>
+  <color symbol="s" value="c2c3c7" name="argento cromo lucido modanature e pinne"/>
+  <color symbol="D" value="2e303d" name="struttura interna rack e plinti archivi"/>
+  <color symbol="P" value="3a3a40" name="pattini carrello grafite anti-attrito"/>
+
+  <!-- Vetri panoramici e ottiche oscurate -->
+  <color symbol="V" value="1c2a3a" name="vetro scuro fumé finestrature panoramiche"/>
+  <color symbol="v" value="3d5a78" name="riflesso azzurro ciano montanti cristallo"/>
+
+  <!-- Ottiche attive anteriori e telemetria (glow="True") -->
+  <color symbol="W" value="ffffff" glow="True" name="fari proiettori laser bianchi"/>
+  <color symbol="C" value="05d9e8" glow="True" name="lidar scanner e beacon ciano"/>
+  <color symbol="c" value="29adff" glow="True" name="led telemetria e guida cobalto"/>
+
+  <!-- Campo a repulsione magnetica dei pattini e scia (glow="True") -->
+  <color symbol="R" value="ff2a6d" glow="True" name="lama neon magenta primaria pattini"/>
+  <color symbol="r" value="ff7597" glow="True" name="lama neon magenta secondaria"/>
+  <color symbol="A" value="ffa3c4" glow="True" name="picco induzione laser magenta"/>
+
+  <!-- Propulsione e scarichi vettoriali di coda (glow="True") -->
+  <color symbol="T" value="ff0055" glow="True" name="plasma vettoriale coda primario"/>
+  <color symbol="t" value="ff5277" glow="True" name="plasma vettoriale coda secondario"/>
+
+  <!-- Archivi dati interni illuminati (glow="True") -->
+  <color symbol="1" value="ffec27" glow="True" name="cubetti dati oro brillante"/>
+  <color symbol="2" value="ffa300" glow="True" name="pacchetti logici ambra"/>
+  <color symbol="3" value="ffe27a" glow="True" name="cubi quantistici panna-oro"/>
+  <color symbol="4" value="ff7700" glow="True" name="cristalli archivio arancio vivo"/>
+  <color symbol="G" value="00ffff" glow="True" name="cluster dati iper-densi ciano"/>
+
+  <!-- Marcatori invisibili per varianti stocastiche nei semi -->
+  <color symbol="Q" hidden="True" name="marker carenatura tetto"/>
+  <color symbol="X" hidden="True" name="marker archivio anteriore"/>
+  <color symbol="Y" hidden="True" name="marker archivio centrale"/>
+  <color symbol="Z" hidden="True" name="marker archivio posteriore"/>
+
+  <!-- Buffer invisibili per fotogrammi animati -->
+  <color symbol="x" hidden="True" name="buffer animazione flusso dati"/>
+  <color symbol="y" hidden="True" name="buffer animazione induzione magnetica"/>
+  <color symbol="z" hidden="True" name="buffer animazione propulsori"/>
+
+  <!-- ======================================================== -->
+  <!-- 1. PATTINI MAGNETICI A TERRA (z = 0)                     -->
+  <!-- ======================================================== -->
+  <!-- Bogie posteriore: pattini su z=0 (x=4..6 a y=2 e y=5)    -->
+  <box at="5 2 0" size="3 1 1" color="P"/>
+  <box at="5 2 0" size="1 1 1" color="R"/>
+  <box at="5 5 0" size="3 1 1" color="P"/>
+  <box at="5 5 0" size="1 1 1" color="R"/>
+  <box at="5 3.5 0" size="3 2 1" color="M"/>
+
+  <!-- Bogie anteriore: pattini su z=0 (x=13..15 a y=2 e y=5)   -->
+  <box at="14 2 0" size="3 1 1" color="P"/>
+  <box at="14 2 0" size="1 1 1" color="R"/>
+  <box at="14 5 0" size="3 1 1" color="P"/>
+  <box at="14 5 0" size="1 1 1" color="R"/>
+  <box at="14 3.5 0" size="3 2 1" color="M"/>
+
+  <!-- ======================================================== -->
+  <!-- 2. PIANALE INFERIORE, CHASSIS E SOSPENSIONE (z = 1)      -->
+  <!-- ======================================================== -->
+  <!-- Coda a cono rastremata a z=1 (x=1..3)                    -->
+  <box at="1 3 1" size="1 1 1" color="t"/>
+  <box at="1 4 1" size="1 1 1" color="t"/>
+  <box at="2.5 3.5 1" size="2 2 1" color="M"/>
+  <box at="3.5 3.5 1" size="2 4 1" color="M"/>
+
+  <!-- Telaio principale e guscio inferiore (x=4..15, y=1..6)   -->
+  <box at="9.5 3.5 1" size="12 6 1" color="M"/>
+
+  <!-- Lama di levitazione magnetica ventrale (x=7..12 a z=1)   -->
+  <!-- Proietta bagliore neon magenta verso il suolo vuoto      -->
+  <box at="9.5 3.5 1" size="6 2 1" color="R"/>
+  <box at="9.5 3.5 1" size="2 2 1" color="A"/>
+
+  <!-- Fiancate inferiori: lama neon magenta sul vano sospeso   -->
+  <box at="5 1 1" size="3 1 1" color="m"/>
+  <box at="5 6 1" size="3 1 1" color="m"/>
+  <box at="5 1 1" size="1 1 1" color="s"/>
+  <box at="5 6 1" size="1 1 1" color="s"/>
+
+  <!-- Lama magenta laterale con sfumatura alle estremità       -->
+  <box at="7 1 1" size="1 1 1" color="r"/>
+  <box at="7 6 1" size="1 1 1" color="r"/>
+  <box at="9.5 1 1" size="4 1 1" color="R"/>
+  <box at="9.5 6 1" size="4 1 1" color="R"/>
+  <box at="12 1 1" size="1 1 1" color="r"/>
+  <box at="12 6 1" size="1 1 1" color="r"/>
+
+  <box at="14 1 1" size="3 1 1" color="m"/>
+  <box at="14 6 1" size="3 1 1" color="m"/>
+  <box at="14 1 1" size="1 1 1" color="s"/>
+  <box at="14 6 1" size="1 1 1" color="s"/>
+
+  <!-- Muso rastremato a z=1 (x=16..18)                         -->
+  <box at="16.5 3.5 1" size="2 4 1" color="M"/>
+  <box at="18 3.5 1" size="1 2 1" color="s"/>
+
+  <!-- ======================================================== -->
+  <!-- 3. LIVELLO ARCHIVI ILLUMINATI E SCARICHI (z = 2)         -->
+  <!-- ======================================================== -->
+  <!-- Ugelli di coda e scarichi plasma vettoriali (x=1..2)     -->
+  <box at="1 3 2" size="1 1 1" color="T"/>
+  <box at="1 4 2" size="1 1 1" color="T"/>
+  <box at="2 3.5 2" size="1 4 1" color="M"/>
+  <box at="2 2 2" size="1 1 1" color="s"/>
+  <box at="2 5 2" size="1 1 1" color="s"/>
+
+  <!-- Raccordo posteriore cabina (x=3)                         -->
+  <box at="3 3.5 2" size="1 6 1" color="M"/>
+  <box at="3 1 2" size="1 1 1" color="S"/>
+  <box at="3 6 2" size="1 1 1" color="S"/>
+
+  <!-- Pilastri carrozzeria e montanti laterali                 -->
+  <box at="4 1 2" size="1 1 1" color="S"/>
+  <box at="4 6 2" size="1 1 1" color="S"/>
+  <box at="7 1 2" size="1 1 1" color="m"/>
+  <box at="7 6 2" size="1 1 1" color="m"/>
+  <box at="11 1 2" size="1 1 1" color="m"/>
+  <box at="11 6 2" size="1 1 1" color="m"/>
+  <box at="15 1 2" size="1 1 1" color="S"/>
+  <box at="15 6 2" size="1 1 1" color="S"/>
+
+  <!-- Basamento interno rack archivi (y=2..5)                  -->
+  <box at="9.5 3.5 2" size="12 4 1" color="D"/>
+
+  <!-- Moduli rack dati e cubetti archivi illuminati (z=2)      -->
+  <!-- Direttamente visibili dalle aperture laterali!           -->
+  <!-- Rack 1 (posteriore x=5..6)                               -->
+  <box at="5 1 2" size="1 1 1" color="1"/>
+  <box at="6 1 2" size="1 1 1" color="2"/>
+  <box at="5 2 2" size="1 1 1" color="1"/>
+  <box at="6 2 2" size="1 1 1" color="2"/>
+  <box at="5 5 2" size="1 1 1" color="Z"/>
+  <box at="6 5 2" size="1 1 1" color="3"/>
+  <box at="5 6 2" size="1 1 1" color="Z"/>
+  <box at="6 6 2" size="1 1 1" color="3"/>
+
+  <!-- Rack 2 (centrale x=8..10)                                -->
+  <box at="8 1 2" size="1 1 1" color="3"/>
+  <box at="9 1 2" size="1 1 1" color="Y"/>
+  <box at="10 1 2" size="1 1 1" color="G"/>
+  <box at="8 2 2" size="1 1 1" color="3"/>
+  <box at="9 2 2" size="1 1 1" color="Y"/>
+  <box at="10 2 2" size="1 1 1" color="1"/>
+  <box at="8 5 2" size="1 1 1" color="2"/>
+  <box at="9 5 2" size="1 1 1" color="4"/>
+  <box at="10 5 2" size="1 1 1" color="G"/>
+  <box at="8 6 2" size="1 1 1" color="2"/>
+  <box at="9 6 2" size="1 1 1" color="4"/>
+  <box at="10 6 2" size="1 1 1" color="G"/>
+
+  <!-- Rack 3 (anteriore x=12..14)                              -->
+  <box at="12 1 2" size="1 1 1" color="X"/>
+  <box at="13 1 2" size="1 1 1" color="1"/>
+  <box at="14 1 2" size="1 1 1" color="4"/>
+  <box at="12 2 2" size="1 1 1" color="X"/>
+  <box at="13 2 2" size="1 1 1" color="1"/>
+  <box at="12 5 2" size="1 1 1" color="G"/>
+  <box at="13 5 2" size="1 1 1" color="2"/>
+  <box at="12 6 2" size="1 1 1" color="G"/>
+  <box at="13 6 2" size="1 1 1" color="2"/>
+  <box at="14 6 2" size="1 1 1" color="1"/>
+
+  <!-- Console di rotta e avionica anteriore (x=14..15)         -->
+  <box at="14.5 3.5 2" size="2 2 1" color="m"/>
+  <box at="14 3 2" size="1 1 1" color="C"/>
+  <box at="14 4 2" size="1 1 1" color="c"/>
+
+  <!-- Muso e carenatura frontale inferiore (x=16..18)          -->
+  <box at="16.5 3.5 2" size="2 4 1" color="S"/>
+  <box at="18 3.5 2" size="1 2 1" color="s"/>
+  <box at="18 3 2" size="1 1 1" color="W"/>
+  <box at="18 4 2" size="1 1 1" color="W"/>
+
+  <!-- ======================================================== -->
+  <!-- 4. VETRATE PANORAMICHE E ARCHIVI CENTRALI (z = 3)        -->
+  <!-- ======================================================== -->
+  <!-- Scarico superiore coda e luci di posizione cobalto       -->
+  <box at="1 3.5 3" size="1 2 1" color="m"/>
+  <box at="1 2 3" size="1 1 1" color="c"/>
+  <box at="1 5 3" size="1 1 1" color="c"/>
+  <box at="2 3.5 3" size="1 4 1" color="S"/>
+
+  <!-- Paratia posteriore cabina (x=3)                          -->
+  <box at="3 3.5 3" size="1 6 1" color="S"/>
+  <box at="3 3.5 3" size="1 2 1" color="D"/>
+
+  <!-- Vetrate panoramiche e montanti riflettenti (y=1 e y=6)   -->
+  <box at="9.5 1 3" size="12 1 1" color="V"/>
+  <box at="9.5 6 3" size="12 1 1" color="V"/>
+  <box at="4 1 3" size="1 1 1" color="S"/>
+  <box at="4 6 3" size="1 1 1" color="S"/>
+  <box at="7 1 3" size="1 1 1" color="v"/>
+  <box at="7 6 3" size="1 1 1" color="v"/>
+  <box at="11 1 3" size="1 1 1" color="v"/>
+  <box at="11 6 3" size="1 1 1" color="v"/>
+  <box at="15 1 3" size="1 1 1" color="S"/>
+  <box at="15 6 3" size="1 1 1" color="S"/>
+
+  <!-- Cubetti dati e archivi quantistici interni a z=3         -->
+  <box at="5 2 3" size="1 1 1" color="2"/>
+  <box at="6 2 3" size="1 1 1" color="1"/>
+  <box at="5 5 3" size="1 1 1" color="1"/>
+  <box at="6 5 3" size="1 1 1" color="Z"/>
+
+  <box at="8 2 3" size="1 1 1" color="Y"/>
+  <box at="9 2 3" size="1 1 1" color="3"/>
+  <box at="10 2 3" size="1 1 1" color="4"/>
+  <box at="8 5 3" size="1 1 1" color="G"/>
+  <box at="9 5 3" size="1 1 1" color="1"/>
+  <box at="10 5 3" size="1 1 1" color="2"/>
+
+  <box at="12 2 3" size="1 1 1" color="1"/>
+  <box at="13 2 3" size="1 1 1" color="X"/>
+  <box at="12 5 3" size="1 1 1" color="3"/>
+  <box at="13 5 3" size="1 1 1" color="1"/>
+
+  <!-- Nucleo dati quantistico olografico fluttuante centrale   -->
+  <box at="9 3.5 3" size="1 2 1" color="G"/>
+
+  <!-- Cockpit anteriore e fari principali (x=16..18)           -->
+  <box at="16 3.5 3" size="1 4 1" color="V"/>
+  <box at="16 3.5 3" size="1 2 1" color="v"/>
+  <box at="16 1 3" size="1 1 1" color="S"/>
+  <box at="16 6 3" size="1 1 1" color="S"/>
+  <!-- Muso affusolato con fari laser e spoiler frontale        -->
+  <box at="17 3.5 3" size="1 4 1" color="S"/>
+  <box at="18 3.5 3" size="1 2 1" color="s"/>
+  <box at="18 3 3" size="1 1 1" color="W"/>
+  <box at="18 4 3" size="1 1 1" color="W"/>
+
+  <!-- ======================================================== -->
+  <!-- 5. LIVELLO SUPERIORE CABINA E PARABREZZA (z = 4)         -->
+  <!-- ======================================================== -->
+  <!-- Radice pinna di coda (x=2..3)                            -->
+  <box at="2.5 3.5 4" size="2 2 1" color="s"/>
+
+  <!-- Cintura montanti cabina superiore                        -->
+  <box at="3 3.5 4" size="1 4 1" color="S"/>
+  <box at="4 1 4" size="1 1 1" color="S"/>
+  <box at="4 6 4" size="1 1 1" color="S"/>
+  <box at="7 1 4" size="1 1 1" color="v"/>
+  <box at="7 6 4" size="1 1 1" color="v"/>
+  <box at="11 1 4" size="1 1 1" color="v"/>
+  <box at="11 6 4" size="1 1 1" color="v"/>
+  <box at="15 1 4" size="1 1 1" color="S"/>
+  <box at="15 6 4" size="1 1 1" color="S"/>
+  <box at="9.5 1 4" size="10 1 1" color="V"/>
+  <box at="9.5 6 4" size="10 1 1" color="V"/>
+
+  <!-- Cielo cabina con rack dati pensili                       -->
+  <box at="6 2 4" size="1 1 1" color="1"/>
+  <box at="6 5 4" size="1 1 1" color="3"/>
+  <box at="9 2 4" size="1 1 1" color="2"/>
+  <box at="9 5 4" size="1 1 1" color="G"/>
+  <box at="12 2 4" size="1 1 1" color="4"/>
+  <box at="12 5 4" size="1 1 1" color="1"/>
+
+  <!-- Cupolino inclinato e scanner lidar frontale (x=16..18)   -->
+  <box at="16 3.5 4" size="1 4 1" color="V"/>
+  <box at="17 3.5 4" size="1 2 1" color="S"/>
+  <box at="18 3.5 4" size="1 2 1" color="C"/>
+
+  <!-- ======================================================== -->
+  <!-- 6. TETTO AERODINAMICO E CANTRAIL (z = 5)                 -->
+  <!-- ======================================================== -->
+  <!-- Pinna stabilizzatrice di coda swept-back                 -->
+  <box at="3 3.5 5" size="3 2 1" color="s"/>
+
+  <!-- Cantrail e spalle del tetto in argento satinato (y=1, 6) -->
+  <box at="9.5 1 5" size="12 1 1" color="S"/>
+  <box at="9.5 6 5" size="12 1 1" color="S"/>
+
+  <!-- Calotta centrale tetto in titanio grafite scuro (y=2..5) -->
+  <box at="9.5 3.5 5" size="12 4 1" color="m"/>
+  <box at="9.5 3.5 5" size="12 2 1" color="S"/>
+  <box at="16 3.5 5" size="1 4 1" color="S"/>
+
+  <!-- ======================================================== -->
+  <!-- 7. CARENATURA DORSALE E GRIGLIE SCORRIMENTO (z = 6)      -->
+  <!-- ======================================================== -->
+  <!-- Pinna stabilizzatrice di coda swept-back                 -->
+  <box at="2.5 3.5 6" size="2 2 1" color="s"/>
+
+  <!-- Carenatura dorsale aerodinamica rastremata               -->
+  <box at="10 3.5 6" size="9 2 1" color="m"/>
+  <box at="6 3.5 6" size="1 2 1" color="D"/>
+  <box at="8 3.5 6" size="1 2 1" color="Q"/>
+  <box at="11 3.5 6" size="1 2 1" color="Q"/>
+  <box at="14 3.5 6" size="1 2 1" color="D"/>
+  <box at="15 3.5 6" size="1 2 1" color="S"/>
+
+  <!-- ======================================================== -->
+  <!-- 8. SPINA DORSALE, RADOME DATI E BEACON (z = 7)           -->
+  <!-- ======================================================== -->
+  <!-- Cresta terminale pinna di coda                           -->
+  <box at="2 3.5 7" size="1 2 1" color="s"/>
+
+  <!-- Radome ad alta frequenza e beacon telemetrico ciano      -->
+  <box at="9.5 3.5 7" size="2 2 1" color="s"/>
+  <box at="9 3.5 7" size="1 2 1" color="C"/>
+  <box at="10 3.5 7" size="1 2 1" color="c"/>
+
+  <!-- ======================================================== -->
+  <!-- 9. REGOLE GENERATIVE: VARIANTI STOCASTICHE NEI SEMI      -->
+  <!-- ======================================================== -->
+  <!-- A) Risoluzione quantistica archivio 1 (X)                -->
+  <one steps="4">
+    <rule in="X" out="1" p="0.40"/>
+    <rule in="X" out="3" p="0.30"/>
+    <rule in="X" out="G" p="0.20"/>
+    <rule in="X" out="2" p="0.10"/>
+  </one>
+  <all in="X" out="1" optional="True"/>
+
+  <!-- B) Risoluzione pacchetti dati archivio 2 (Y)             -->
+  <one steps="4">
+    <rule in="Y" out="2" p="0.45"/>
+    <rule in="Y" out="4" p="0.25"/>
+    <rule in="Y" out="1" p="0.20"/>
+    <rule in="Y" out="G" p="0.10"/>
+  </one>
+  <all in="Y" out="2" optional="True"/>
+
+  <!-- C) Risoluzione cluster archivio 3 (Z)                    -->
+  <one steps="4">
+    <rule in="Z" out="G" p="0.35"/>
+    <rule in="Z" out="1" p="0.35"/>
+    <rule in="Z" out="3" p="0.20"/>
+    <rule in="Z" out="4" p="0.10"/>
+  </one>
+  <all in="Z" out="G" optional="True"/>
+
+  <!-- D) Dettagli carenatura dorsale (Q)                       -->
+  <one steps="2">
+    <rule in="Q" out="s" p="0.50"/>
+    <rule in="Q" out="m" p="0.30"/>
+    <rule in="Q" out="c" p="0.20"/>
+  </one>
+  <all in="Q" out="s" optional="True"/>
+</sequence>
+
+<!-- ============================================================ -->
+<!-- 10. ANIMAZIONE LEVITAZIONE (4 FRAMES): MAGNETISMO E DATI     -->
+<!-- ============================================================ -->
+<animation name="levitazione" frames="4" symmetry="()">
+  <sequence>
+    <!-- 1. Ciclo energetico quantistico dei dati negli archivi   -->
+    <all in="1" out="x"/>
+    <all in="2" out="1"/>
+    <all in="3" out="2"/>
+    <all in="4" out="3"/>
+    <all in="x" out="4"/>
+
+    <!-- 2. Onda di induzione e repulsione magnetica sui pattini  -->
+    <all in="R" out="y"/>
+    <all in="r" out="R"/>
+    <all in="A" out="r"/>
+    <all in="y" out="A"/>
+
+    <!-- 3. Pulsazione telemetria di rotta e scarichi coda        -->
+    <all in="T" out="z"/>
+    <all in="t" out="T"/>
+    <all in="z" out="t"/>
+  </sequence>
+</animation>

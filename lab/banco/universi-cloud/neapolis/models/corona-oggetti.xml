@@ -1,0 +1,623 @@
+<!--
+Il Magazzino degli oggetti (corona): piramide in metallo nero e vetro riflettente, caveau cibernetico degli oggetti.
+Scritto da Gemini CLI (Gemini 3.8 Flash, abbonamento) il 23/10/2026, task T19.
+Scatola: 14 × 14 × 10 caselle, 112 × 112 × 80 voxel, 8 voxel per casella.
+Lettere chiave:
+  O = porta (lettera O, nome "porta", al centro x=56, y=98, z=0..16, atrio interno vuoto per 16 voxel)
+  F = insegna ("IL MAGAZZINO DEGLI OGGETTI", neon ambra e0b070 glow fisso su totem frontale a sinistra)
+  P = targa scura opaca per il totem dell'insegna
+  M = metallo nero primario (spigoli, nervature, travi e portale)
+  m = metallo secondario scuro (basamenti, pannelli e profilati)
+  C = cemento grafite della base e pavimentazione
+  S = acciaio chiaro / montanti e binari logistici
+  s = acciaio scuro strutturale
+  V = vetro scuro riflettente
+  v = fasce di riflesso azzurrato sul vetro
+  w = fasce di riflesso ambrato sul vetro
+  n = neon ambra tenue per cornici e raccordi (glow)
+  N = neon ambra vivo per portale e capstone (glow)
+  x = buffer temporaneo per l'animazione (hidden)
+Fasi pulsanti del neon ambra (1..8):
+  1..8 = gradiente continuo di 8 fasi (da 8a5220 a f6bf68) con onda morbida e respiro del caveau.
+Architettura:
+  Piramide a gradoni a base quadrata (base 82 × 82 voxel, z=2..71) con spigoli angolari continui in metallo nero e neon ambra,
+  facce in vetro scuro riflettente a fasce orizzontali alternate con riflessi e marcapiani tecnici.
+Portale d'ingresso sporgente:
+  Portale monumentale cybernetico che fuoriesce dalla faccia sud verso il viale (y=84..98) con cornice neon ambra vivo,
+  porta O centrata a x=56 e vano d'ingresso passante libero per oltre 16 voxel.
+Caveau tecnologico interno:
+  Interno cavo su più livelli con colonna montacarichi centrale, matrice di archiviazione automatizzata degli oggetti,
+  celle stasi illuminate in ambra pulsante visibili in trasparenza dalle vetrate.
+Totem insegna:
+  Monolite cybernetico sul lato sinistro (x=5..47, y=102..107, z=0..29) gemello del Laboratorio delle cose, con targa scura opaca,
+  tiranti posteriori e scritta neon "IL MAGAZZINO DEGLI OGGETTI" su quattro righe perfettamente centrate e leggibili.
+Banchina logistica:
+  Piattaforma di ricezione merci robotizzata sul lato destro del piazzale (x=74..100, y=92..104) con binari e segnalatori ambra.
+Animazione "stasi" (8 frame):
+  Onda di energia continua che fluisce attraverso le linee neon degli spigoli, il capstone sommitale e le celle di stasi del caveau.
+-->
+<sequence values="BMmCSsVvwNnFPOx12345678" size="112 112 80" symmetry="()" name="Magazzino degli oggetti">
+  <!-- Materiali e palette -->
+  <color symbol="M" value="16161e" name="metallo primario"/>
+  <color symbol="m" value="242632" name="metallo secondario"/>
+  <color symbol="C" value="363842" name="cemento grafite"/>
+  <color symbol="S" value="8a8f9c" name="acciaio chiaro"/>
+  <color symbol="s" value="545866" name="acciaio scuro"/>
+  <color symbol="V" value="182432" name="vetro scuro"/>
+  <color symbol="v" value="344c68" name="riflesso vetro freddo"/>
+  <color symbol="w" value="605030" name="riflesso vetro ambrato"/>
+  <color symbol="N" value="e0b070" glow="True" name="neon ambra vivo"/>
+  <color symbol="n" value="b87830" glow="True" name="neon ambra tenue"/>
+  <color symbol="P" value="0b0b10" name="targa insegna"/>
+  <color symbol="F" value="e0b070" glow="True" name="insegna fissa"/>
+  <color symbol="O" value="302214" name="porta"/>
+  <color symbol="x" hidden="True" name="buffer animazione"/>
+
+  <!-- 8 Fasi dell'onda neon ambra (pulsazione ciclica del caveau) -->
+  <color symbol="1" value="8a5220" glow="True" name="fase ambra 1"/>
+  <color symbol="2" value="a86828" glow="True" name="fase ambra 2"/>
+  <color symbol="3" value="c48035" glow="True" name="fase ambra 3"/>
+  <color symbol="4" value="dc9948" glow="True" name="fase ambra 4"/>
+  <color symbol="5" value="f6bf68" glow="True" name="fase ambra apice"/>
+  <color symbol="6" value="dc9948" glow="True" name="fase ambra 6"/>
+  <color symbol="7" value="c48035" glow="True" name="fase ambra 7"/>
+  <color symbol="8" value="a86828" glow="True" name="fase ambra 8"/>
+
+  <!-- ================================================================= -->
+  <!-- 1. BASAMENTO, PIAZZALE E BANCHINE (z = 0..3)                      -->
+  <!-- ================================================================= -->
+  <!-- Basamento quadrato a gradoni sotto la piramide (cx=56, cy=46) -->
+  <box at="56 46 0" size="92 92 2" color="C"/>
+  <box at="56 46 1" size="88 88 1" color="m"/>
+  <box at="56 46 2" size="86 86 1" color="C"/>
+
+  <!-- Piazzale frontale pavimentato verso il viale (y=46..106) -->
+  <box at="56 86 0" size="44 44 2" color="C"/>
+  <box at="56 86 1" size="38 42 1" color="m"/>
+  <box at="56 94 2" size="24 24 1" color="C"/>
+
+  <!-- Guide luminose neon ambra lungo il percorso pedonale (fasi 2 e 6) -->
+  <box at="47 101 2" size="1 10 1" color="2"/>
+  <box at="65 101 2" size="1 10 1" color="6"/>
+
+  <!-- Basamento monolitico per il totem dell'insegna (lato sinistro) -->
+  <box at="26 104 0" size="46 6 2" color="C"/>
+  <box at="26 104 2" size="44 4 1" color="m"/>
+
+  <!-- Banchina logistica di ricezione merci robotizzata (lato destro) -->
+  <box at="87 98 0" size="26 16 2" color="C"/>
+  <box at="87 98 2" size="24 14 1" color="m"/>
+  <!-- Binari robotizzati di traslazione container -->
+  <box at="87 95 3" size="20 2 1" color="S"/>
+  <box at="87 101 3" size="20 2 1" color="S"/>
+  <box at="80 98 3" size="2 8 1" color="s"/>
+  <box at="94 98 3" size="2 8 1" color="s"/>
+  <!-- Colonne di controllo logistico con segnalatori ambra (fase 4 e 5) -->
+  <box at="77 104 0" size="3 3 8" color="M"/>
+  <box at="77 104 8" size="2 2 2" color="S"/>
+  <box at="77 104 10" size="1 1 2" color="5"/>
+  <box at="97 104 0" size="3 3 8" color="M"/>
+  <box at="97 104 8" size="2 2 2" color="S"/>
+  <box at="97 104 10" size="1 1 2" color="4"/>
+
+  <!-- ================================================================= -->
+  <!-- 2. CORPO DELLA PIRAMIDE A GRADONI (z = 2..71, cx=56, cy=46)       -->
+  <!-- 35 gradoni: h=2, larghezza da 82 a 14 voxel                      -->
+  <!-- ================================================================= -->
+  <box at="56 46 2" size="82 82 2" color="M"/>
+  <box at="56 46 4" size="80 80 2" color="V"/>
+  <box at="56 46 6" size="78 78 2" color="v"/>
+  <box at="56 46 8" size="76 76 2" color="V"/>
+  <box at="56 46 10" size="74 74 2" color="w"/>
+  <box at="56 46 12" size="72 72 2" color="M"/>
+  <box at="56 46 14" size="70 70 2" color="V"/>
+  <box at="56 46 16" size="68 68 2" color="v"/>
+  <box at="56 46 18" size="66 66 2" color="V"/>
+  <box at="56 46 20" size="64 64 2" color="w"/>
+  <box at="56 46 22" size="62 62 2" color="M"/>
+  <box at="56 46 24" size="60 60 2" color="V"/>
+  <box at="56 46 26" size="58 58 2" color="v"/>
+  <box at="56 46 28" size="56 56 2" color="V"/>
+  <box at="56 46 30" size="54 54 2" color="w"/>
+  <box at="56 46 32" size="52 52 2" color="M"/>
+  <box at="56 46 34" size="50 50 2" color="V"/>
+  <box at="56 46 36" size="48 48 2" color="v"/>
+  <box at="56 46 38" size="46 46 2" color="V"/>
+  <box at="56 46 40" size="44 44 2" color="w"/>
+  <box at="56 46 42" size="42 42 2" color="M"/>
+  <box at="56 46 44" size="40 40 2" color="V"/>
+  <box at="56 46 46" size="38 38 2" color="v"/>
+  <box at="56 46 48" size="36 36 2" color="V"/>
+  <box at="56 46 50" size="34 34 2" color="w"/>
+  <box at="56 46 52" size="32 32 2" color="M"/>
+  <box at="56 46 54" size="30 30 2" color="V"/>
+  <box at="56 46 56" size="28 28 2" color="v"/>
+  <box at="56 46 58" size="26 26 2" color="V"/>
+  <box at="56 46 60" size="24 24 2" color="w"/>
+  <box at="56 46 62" size="22 22 2" color="M"/>
+  <box at="56 46 64" size="20 20 2" color="V"/>
+  <box at="56 46 66" size="18 18 2" color="v"/>
+  <box at="56 46 68" size="16 16 2" color="V"/>
+  <box at="56 46 70" size="14 14 2" color="w"/>
+
+  <!-- ================================================================= -->
+  <!-- 3. SVUOTAMENTO INTERNO DEL CAVEAU (spessore parete = 2 voxel)     -->
+  <!-- ================================================================= -->
+  <box at="56 46 2" size="78 78 2" color="B"/>
+  <box at="56 46 4" size="76 76 2" color="B"/>
+  <box at="56 46 6" size="74 74 2" color="B"/>
+  <box at="56 46 8" size="72 72 2" color="B"/>
+  <box at="56 46 10" size="70 70 2" color="B"/>
+  <box at="56 46 12" size="68 68 2" color="B"/>
+  <box at="56 46 14" size="66 66 2" color="B"/>
+  <box at="56 46 16" size="64 64 2" color="B"/>
+  <box at="56 46 18" size="62 62 2" color="B"/>
+  <box at="56 46 20" size="60 60 2" color="B"/>
+  <box at="56 46 22" size="58 58 2" color="B"/>
+  <box at="56 46 24" size="56 56 2" color="B"/>
+  <box at="56 46 26" size="54 54 2" color="B"/>
+  <box at="56 46 28" size="52 52 2" color="B"/>
+  <box at="56 46 30" size="50 50 2" color="B"/>
+  <box at="56 46 32" size="48 48 2" color="B"/>
+  <box at="56 46 34" size="46 46 2" color="B"/>
+  <box at="56 46 36" size="44 44 2" color="B"/>
+  <box at="56 46 38" size="42 42 2" color="B"/>
+  <box at="56 46 40" size="40 40 2" color="B"/>
+  <box at="56 46 42" size="38 38 2" color="B"/>
+  <box at="56 46 44" size="36 36 2" color="B"/>
+  <box at="56 46 46" size="34 34 2" color="B"/>
+  <box at="56 46 48" size="32 32 2" color="B"/>
+  <box at="56 46 50" size="30 30 2" color="B"/>
+  <box at="56 46 52" size="28 28 2" color="B"/>
+  <box at="56 46 54" size="26 26 2" color="B"/>
+  <box at="56 46 56" size="24 24 2" color="B"/>
+  <box at="56 46 58" size="22 22 2" color="B"/>
+  <box at="56 46 60" size="20 20 2" color="B"/>
+  <box at="56 46 62" size="18 18 2" color="B"/>
+  <box at="56 46 64" size="16 16 2" color="B"/>
+  <box at="56 46 66" size="14 14 2" color="B"/>
+  <box at="56 46 68" size="12 12 2" color="B"/>
+
+  <!-- Pavimentazione interna a terra (z=0..2) -->
+  <box at="56 46 0" size="76 76 1" color="C"/>
+  <box at="56 46 1" size="74 74 1" color="m"/>
+
+  <!-- Piani mezzanini interni di servizio a traliccio d'acciaio -->
+  <!-- Mezzanino 1 (z=16) -->
+  <box at="56 46 16" size="64 64 1" color="s"/>
+  <box at="56 46 16" size="30 30 1" color="B"/>
+  <!-- Mezzanino 2 (z=32) -->
+  <box at="56 46 32" size="48 48 1" color="s"/>
+  <box at="56 46 32" size="26 26 1" color="B"/>
+  <!-- Mezzanino 3 (z=48) -->
+  <box at="56 46 48" size="32 32 1" color="s"/>
+  <box at="56 46 48" size="20 20 1" color="B"/>
+
+  <!-- ================================================================= -->
+  <!-- 4. I 4 SPIGOLI DELLA PIRAMIDE (NERVATURE NERE E NEON DINAMICO)    -->
+  <!-- SW: (15,87)->(49,53); SE: (97,87)->(63,53)                        -->
+  <!-- NW: (15,5)->(49,39);  NE: (97,5)->(63,39)                         -->
+  <!-- ================================================================= -->
+  <!-- Spigoli strutturali in metallo nero (r=1) -->
+  <line at="15 87 2" to="49 53 71" r="1" color="M"/>
+  <line at="97 87 2" to="63 53 71" r="1" color="M"/>
+  <line at="15 5 2" to="49 39 71" r="1" color="M"/>
+  <line at="97 5 2" to="63 39 71" r="1" color="M"/>
+
+  <!-- Linee neon ambra animate a gradiente verticale lungo i 4 spigoli (r=0) -->
+  <!-- Spigolo SW (fronte-ovest) -->
+  <line at="15 87 2" to="23 79 19" r="0" color="1"/>
+  <line at="23 79 19" to="32 70 36" r="0" color="2"/>
+  <line at="32 70 36" to="41 62 54" r="0" color="3"/>
+  <line at="41 62 54" to="49 53 71" r="0" color="4"/>
+
+  <!-- Spigolo SE (fronte-est) -->
+  <line at="97 87 2" to="89 79 19" r="0" color="5"/>
+  <line at="89 79 19" to="80 70 36" r="0" color="6"/>
+  <line at="80 70 36" to="71 62 54" r="0" color="7"/>
+  <line at="71 62 54" to="63 53 71" r="0" color="8"/>
+
+  <!-- Spigolo NW (retro-ovest) -->
+  <line at="15 5 2" to="23 13 19" r="0" color="3"/>
+  <line at="23 13 19" to="32 22 36" r="0" color="4"/>
+  <line at="32 22 36" to="41 31 54" r="0" color="5"/>
+  <line at="41 31 54" to="49 39 71" r="0" color="6"/>
+
+  <!-- Spigolo NE (retro-est) -->
+  <line at="97 5 2" to="89 13 19" r="0" color="7"/>
+  <line at="89 13 19" to="80 22 36" r="0" color="8"/>
+  <line at="80 22 36" to="71 31 54" r="0" color="1"/>
+  <line at="71 31 54" to="63 39 71" r="0" color="2"/>
+
+  <!-- ================================================================= -->
+  <!-- 5. APEX E CAPSTONE SOMMITALE (z = 70..79)                         -->
+  <!-- ================================================================= -->
+  <!-- Piattaforma e cornice sommitale in metallo nero e acciaio -->
+  <box at="56 46 71" size="16 16 2" color="M"/>
+  <box at="56 46 72" size="14 14 1" color="S"/>
+  <box at="56 46 71" size="10 10 3" color="B"/>
+
+  <!-- 4 piloni a prisma di ritenzione del capstone con punte ambra -->
+  <box at="50 40 71" size="3 3 6" color="M"/>
+  <box at="50 40 77" size="2 2 1" color="S"/>
+  <box at="50 40 78" size="1 1 1" color="5"/>
+
+  <box at="62 40 71" size="3 3 6" color="M"/>
+  <box at="62 40 77" size="2 2 1" color="S"/>
+  <box at="62 40 78" size="1 1 1" color="5"/>
+
+  <box at="50 52 71" size="3 3 6" color="M"/>
+  <box at="50 52 77" size="2 2 1" color="S"/>
+  <box at="50 52 78" size="1 1 1" color="5"/>
+
+  <box at="62 52 71" size="3 3 6" color="M"/>
+  <box at="62 52 77" size="2 2 1" color="S"/>
+  <box at="62 52 78" size="1 1 1" color="5"/>
+
+  <!-- Bracci di contenimento in acciaio che collegano i piloni al capstone -->
+  <line at="50 40 74" to="53 43 74" r="0" color="S"/>
+  <line at="62 40 74" to="59 43 74" r="0" color="S"/>
+  <line at="50 52 74" to="53 49 74" r="0" color="S"/>
+  <line at="62 52 74" to="59 49 74" r="0" color="S"/>
+
+  <!-- Il Capstone: cristallo geometrico ambra sospeso ad alta energia -->
+  <box at="56 46 73" size="6 6 4" color="5"/>
+  <box at="56 46 72" size="4 4 1" color="4"/>
+  <box at="56 46 77" size="4 4 1" color="4"/>
+  <box at="56 46 78" size="2 2 1" color="N"/>
+
+  <!-- ================================================================= -->
+  <!-- 6. MATRICE LOGISTICA CENTRALE DEL CAVEAU (INTERNO DELLA PIRAMIDE) -->
+  <!-- ================================================================= -->
+  <!-- Colonna montacarichi centrale (z=2..68) -->
+  <box at="56 46 2" size="16 16 66" color="m"/>
+  <box at="56 46 2" size="14 14 66" color="B"/>
+
+  <!-- 4 guide verticali d'acciaio negli angoli del montacarichi -->
+  <box at="50 40 2" size="2 2 66" color="S"/>
+  <box at="62 40 2" size="2 2 66" color="S"/>
+  <box at="50 52 2" size="2 2 66" color="S"/>
+  <box at="62 52 2" size="2 2 66" color="S"/>
+
+  <!-- Condotto verticale centrale di stasi / fascio ambra (fase 5 apice) -->
+  <box at="56 46 2" size="2 2 66" color="5"/>
+  <box at="56 46 2" size="4 4 66" color="4" on="B"/>
+
+  <!-- Celle di stasi illuminate con gli oggetti archiviati (fasi 1..8) -->
+  <!-- Tier 1 celle (z=8) -->
+  <box at="56 38 8" size="10 2 3" color="1"/>
+  <box at="56 54 8" size="10 2 3" color="2"/>
+  <box at="48 46 8" size="2 10 3" color="3"/>
+  <box at="64 46 8" size="2 10 3" color="4"/>
+  <!-- Tier 2 celle (z=22) -->
+  <box at="56 38 22" size="10 2 3" color="5"/>
+  <box at="56 54 22" size="10 2 3" color="6"/>
+  <box at="48 46 22" size="2 10 3" color="7"/>
+  <box at="64 46 22" size="2 10 3" color="8"/>
+  <!-- Tier 3 celle (z=38) -->
+  <box at="56 38 38" size="8 2 3" color="1"/>
+  <box at="56 54 38" size="8 2 3" color="3"/>
+  <box at="48 46 38" size="2 8 3" color="5"/>
+  <box at="64 46 38" size="2 8 3" color="7"/>
+  <!-- Tier 4 celle (z=54) -->
+  <box at="56 40 54" size="6 2 3" color="2"/>
+  <box at="56 52 54" size="6 2 3" color="4"/>
+  <box at="50 46 54" size="2 6 3" color="6"/>
+  <box at="62 46 54" size="2 6 3" color="8"/>
+
+  <!-- ================================================================= -->
+  <!-- 7. PORTALE D'INGRESSO MONUMENTALE (FACCIA SUD, y=82..98)          -->
+  <!-- ================================================================= -->
+  <!-- Taglio rettangolare nella facciata sud della piramide (x=45..67, y=80..88, z=0..20) -->
+  <box at="56 85 0" size="22 12 20" color="B"/>
+
+  <!-- Corpo del portale sporgente in metallo nero e acciaio (y=84..98) -->
+  <box at="56 91 0" size="24 14 20" color="M"/>
+  <box at="56 92 2" size="22 12 18" color="m"/>
+
+  <!-- Piloni d'avancorpo sagomati e smussati -->
+  <box at="45 97 0" size="4 4 22" color="M"/>
+  <box at="67 97 0" size="4 4 22" color="M"/>
+  <box at="45 98 4" size="2 1 16" color="S"/>
+  <box at="67 98 4" size="2 1 16" color="S"/>
+  <box at="45 97 22" size="4 4 1" color="N"/>
+  <box at="67 97 22" size="4 4 1" color="N"/>
+
+  <!-- Cornice neon ambra vivo del portale d'ingresso (y=98) -->
+  <box at="48 98 0" size="1 1 18" color="N"/>
+  <box at="64 98 0" size="1 1 18" color="N"/>
+  <box at="56 98 18" size="17 1 1" color="N"/>
+  <!-- Architrave scanalato in acciaio e sensore ottico ambra -->
+  <box at="56 97 19" size="19 2 2" color="S"/>
+  <box at="56 98 19" size="15 1 1" color="w"/>
+  <box at="56 98 20" size="5 1 1" color="5"/>
+
+  <!-- I VOXEL DELLA PORTA O (z=0..16, x=50..62, larghezza 13, altezza 17) -->
+  <box at="56 97 0" size="13 1 17" color="O"/>
+  <!-- Vano d'ingresso e atrio interno vuoto e sgombro per oltre 16 voxel (y=80..96) -->
+  <box at="56 88 0" size="13 16 17" color="B"/>
+  <box at="56 88 0" size="13 16 1" color="C"/>
+
+  <!-- ================================================================= -->
+  <!-- 8. TOTEM DELL'INSEGNA (LATO SINISTRO, x=5..47, y=102..107)        -->
+  <!-- ================================================================= -->
+  <!-- Piloni verticali di sostegno del totem -->
+  <box at="5 104 0" size="3 4 28" color="M"/>
+  <box at="47 104 0" size="3 4 28" color="M"/>
+  <box at="5 105 4" size="1 1 24" color="S"/>
+  <box at="47 105 4" size="1 1 24" color="S"/>
+  <box at="5 104 28" size="3 4 1" color="N"/>
+  <box at="47 104 28" size="3 4 1" color="N"/>
+
+  <!-- Tiranti diagonali anteriori e posteriori di ancoraggio del totem -->
+  <line at="5 104 20" to="2 104 0" r="0" color="M"/>
+  <line at="47 104 20" to="50 104 0" r="0" color="M"/>
+  <line at="5 103 24" to="5 100 0" r="0" color="S"/>
+  <line at="47 103 24" to="47 100 0" r="0" color="S"/>
+  <!-- Rinforzi reticolari a croce sul retro del totem (visibili da nord) -->
+  <box at="26 102 16" size="38 1 2" color="m"/>
+  <line at="5 102 5" to="47 102 27" r="0" color="S"/>
+  <line at="5 102 27" to="47 102 5" r="0" color="S"/>
+
+  <!-- Targa opaca scura di fondo per l'insegna (x=5..47, y=104, z=4..28) -->
+  <box at="26 104 5" size="39 1 23" color="P"/>
+  <box at="26 103 5" size="39 1 23" color="M"/>
+
+  <!-- Cornice perimetrale al neon ambra della targa -->
+  <box at="26 104 4" size="41 1 1" color="n"/>
+  <box at="26 104 28" size="41 1 1" color="n"/>
+  <box at="6 104 5" size="1 1 23" color="n"/>
+  <box at="46 104 5" size="1 1 23" color="n"/>
+
+  <!-- ================================================================= -->
+  <!-- 9. L'INSEGNA NEON "IL MAGAZZINO DEGLI OGGETTI" (y=105, glow=True) -->
+  <!-- ================================================================= -->
+  <!-- RIGA 1: "IL" (z=23..27, y=105) -->
+  <box at="23 105 27" size="1 1 1" color="F"/>
+  <box at="24 105 27" size="1 1 1" color="F"/>
+  <box at="25 105 27" size="1 1 1" color="F"/>
+  <box at="24 105 24" size="1 1 1" color="F"/>
+  <box at="24 105 25" size="1 1 1" color="F"/>
+  <box at="24 105 26" size="1 1 1" color="F"/>
+  <box at="23 105 23" size="1 1 1" color="F"/>
+  <box at="24 105 23" size="1 1 1" color="F"/>
+  <box at="25 105 23" size="1 1 1" color="F"/>
+  <box at="27 105 23" size="1 1 1" color="F"/>
+  <box at="27 105 24" size="1 1 1" color="F"/>
+  <box at="27 105 25" size="1 1 1" color="F"/>
+  <box at="27 105 26" size="1 1 1" color="F"/>
+  <box at="27 105 27" size="1 1 1" color="F"/>
+  <box at="28 105 23" size="1 1 1" color="F"/>
+  <box at="29 105 23" size="1 1 1" color="F"/>
+  <!-- RIGA 2: "MAGAZZINO" (z=17..21, y=105) -->
+  <box at="9 105 17" size="1 1 1" color="F"/>
+  <box at="9 105 18" size="1 1 1" color="F"/>
+  <box at="9 105 19" size="1 1 1" color="F"/>
+  <box at="9 105 20" size="1 1 1" color="F"/>
+  <box at="9 105 21" size="1 1 1" color="F"/>
+  <box at="10 105 20" size="1 1 1" color="F"/>
+  <box at="11 105 17" size="1 1 1" color="F"/>
+  <box at="11 105 18" size="1 1 1" color="F"/>
+  <box at="11 105 19" size="1 1 1" color="F"/>
+  <box at="11 105 20" size="1 1 1" color="F"/>
+  <box at="11 105 21" size="1 1 1" color="F"/>
+  <box at="13 105 21" size="1 1 1" color="F"/>
+  <box at="14 105 21" size="1 1 1" color="F"/>
+  <box at="15 105 21" size="1 1 1" color="F"/>
+  <box at="13 105 20" size="1 1 1" color="F"/>
+  <box at="15 105 20" size="1 1 1" color="F"/>
+  <box at="13 105 19" size="1 1 1" color="F"/>
+  <box at="14 105 19" size="1 1 1" color="F"/>
+  <box at="15 105 19" size="1 1 1" color="F"/>
+  <box at="13 105 18" size="1 1 1" color="F"/>
+  <box at="15 105 18" size="1 1 1" color="F"/>
+  <box at="13 105 17" size="1 1 1" color="F"/>
+  <box at="15 105 17" size="1 1 1" color="F"/>
+  <box at="17 105 21" size="1 1 1" color="F"/>
+  <box at="18 105 21" size="1 1 1" color="F"/>
+  <box at="19 105 21" size="1 1 1" color="F"/>
+  <box at="17 105 20" size="1 1 1" color="F"/>
+  <box at="17 105 19" size="1 1 1" color="F"/>
+  <box at="19 105 19" size="1 1 1" color="F"/>
+  <box at="17 105 18" size="1 1 1" color="F"/>
+  <box at="19 105 18" size="1 1 1" color="F"/>
+  <box at="17 105 17" size="1 1 1" color="F"/>
+  <box at="18 105 17" size="1 1 1" color="F"/>
+  <box at="19 105 17" size="1 1 1" color="F"/>
+  <box at="21 105 21" size="1 1 1" color="F"/>
+  <box at="22 105 21" size="1 1 1" color="F"/>
+  <box at="23 105 21" size="1 1 1" color="F"/>
+  <box at="21 105 20" size="1 1 1" color="F"/>
+  <box at="23 105 20" size="1 1 1" color="F"/>
+  <box at="21 105 19" size="1 1 1" color="F"/>
+  <box at="22 105 19" size="1 1 1" color="F"/>
+  <box at="23 105 19" size="1 1 1" color="F"/>
+  <box at="21 105 18" size="1 1 1" color="F"/>
+  <box at="23 105 18" size="1 1 1" color="F"/>
+  <box at="21 105 17" size="1 1 1" color="F"/>
+  <box at="23 105 17" size="1 1 1" color="F"/>
+  <box at="25 105 21" size="1 1 1" color="F"/>
+  <box at="26 105 21" size="1 1 1" color="F"/>
+  <box at="27 105 21" size="1 1 1" color="F"/>
+  <box at="27 105 20" size="1 1 1" color="F"/>
+  <box at="26 105 19" size="1 1 1" color="F"/>
+  <box at="25 105 18" size="1 1 1" color="F"/>
+  <box at="25 105 17" size="1 1 1" color="F"/>
+  <box at="26 105 17" size="1 1 1" color="F"/>
+  <box at="27 105 17" size="1 1 1" color="F"/>
+  <box at="29 105 21" size="1 1 1" color="F"/>
+  <box at="30 105 21" size="1 1 1" color="F"/>
+  <box at="31 105 21" size="1 1 1" color="F"/>
+  <box at="31 105 20" size="1 1 1" color="F"/>
+  <box at="30 105 19" size="1 1 1" color="F"/>
+  <box at="29 105 18" size="1 1 1" color="F"/>
+  <box at="29 105 17" size="1 1 1" color="F"/>
+  <box at="30 105 17" size="1 1 1" color="F"/>
+  <box at="31 105 17" size="1 1 1" color="F"/>
+  <box at="33 105 21" size="1 1 1" color="F"/>
+  <box at="34 105 21" size="1 1 1" color="F"/>
+  <box at="35 105 21" size="1 1 1" color="F"/>
+  <box at="34 105 18" size="1 1 1" color="F"/>
+  <box at="34 105 19" size="1 1 1" color="F"/>
+  <box at="34 105 20" size="1 1 1" color="F"/>
+  <box at="33 105 17" size="1 1 1" color="F"/>
+  <box at="34 105 17" size="1 1 1" color="F"/>
+  <box at="35 105 17" size="1 1 1" color="F"/>
+  <box at="37 105 17" size="1 1 1" color="F"/>
+  <box at="37 105 18" size="1 1 1" color="F"/>
+  <box at="37 105 19" size="1 1 1" color="F"/>
+  <box at="37 105 20" size="1 1 1" color="F"/>
+  <box at="37 105 21" size="1 1 1" color="F"/>
+  <box at="38 105 19" size="1 1 1" color="F"/>
+  <box at="39 105 17" size="1 1 1" color="F"/>
+  <box at="39 105 18" size="1 1 1" color="F"/>
+  <box at="39 105 19" size="1 1 1" color="F"/>
+  <box at="39 105 20" size="1 1 1" color="F"/>
+  <box at="39 105 21" size="1 1 1" color="F"/>
+  <box at="41 105 21" size="1 1 1" color="F"/>
+  <box at="42 105 21" size="1 1 1" color="F"/>
+  <box at="43 105 21" size="1 1 1" color="F"/>
+  <box at="41 105 18" size="1 1 1" color="F"/>
+  <box at="43 105 18" size="1 1 1" color="F"/>
+  <box at="41 105 19" size="1 1 1" color="F"/>
+  <box at="43 105 19" size="1 1 1" color="F"/>
+  <box at="41 105 20" size="1 1 1" color="F"/>
+  <box at="43 105 20" size="1 1 1" color="F"/>
+  <box at="41 105 17" size="1 1 1" color="F"/>
+  <box at="42 105 17" size="1 1 1" color="F"/>
+  <box at="43 105 17" size="1 1 1" color="F"/>
+  <!-- RIGA 3: "DEGLI" (z=11..15, y=105) -->
+  <box at="17 105 11" size="1 1 1" color="F"/>
+  <box at="17 105 12" size="1 1 1" color="F"/>
+  <box at="17 105 13" size="1 1 1" color="F"/>
+  <box at="17 105 14" size="1 1 1" color="F"/>
+  <box at="17 105 15" size="1 1 1" color="F"/>
+  <box at="18 105 15" size="1 1 1" color="F"/>
+  <box at="19 105 14" size="1 1 1" color="F"/>
+  <box at="19 105 13" size="1 1 1" color="F"/>
+  <box at="19 105 12" size="1 1 1" color="F"/>
+  <box at="18 105 11" size="1 1 1" color="F"/>
+  <box at="21 105 11" size="1 1 1" color="F"/>
+  <box at="21 105 12" size="1 1 1" color="F"/>
+  <box at="21 105 13" size="1 1 1" color="F"/>
+  <box at="21 105 14" size="1 1 1" color="F"/>
+  <box at="21 105 15" size="1 1 1" color="F"/>
+  <box at="22 105 15" size="1 1 1" color="F"/>
+  <box at="23 105 15" size="1 1 1" color="F"/>
+  <box at="22 105 13" size="1 1 1" color="F"/>
+  <box at="22 105 11" size="1 1 1" color="F"/>
+  <box at="23 105 11" size="1 1 1" color="F"/>
+  <box at="25 105 15" size="1 1 1" color="F"/>
+  <box at="26 105 15" size="1 1 1" color="F"/>
+  <box at="27 105 15" size="1 1 1" color="F"/>
+  <box at="25 105 14" size="1 1 1" color="F"/>
+  <box at="25 105 13" size="1 1 1" color="F"/>
+  <box at="27 105 13" size="1 1 1" color="F"/>
+  <box at="25 105 12" size="1 1 1" color="F"/>
+  <box at="27 105 12" size="1 1 1" color="F"/>
+  <box at="25 105 11" size="1 1 1" color="F"/>
+  <box at="26 105 11" size="1 1 1" color="F"/>
+  <box at="27 105 11" size="1 1 1" color="F"/>
+  <box at="29 105 11" size="1 1 1" color="F"/>
+  <box at="29 105 12" size="1 1 1" color="F"/>
+  <box at="29 105 13" size="1 1 1" color="F"/>
+  <box at="29 105 14" size="1 1 1" color="F"/>
+  <box at="29 105 15" size="1 1 1" color="F"/>
+  <box at="30 105 11" size="1 1 1" color="F"/>
+  <box at="31 105 11" size="1 1 1" color="F"/>
+  <box at="33 105 15" size="1 1 1" color="F"/>
+  <box at="34 105 15" size="1 1 1" color="F"/>
+  <box at="35 105 15" size="1 1 1" color="F"/>
+  <box at="34 105 12" size="1 1 1" color="F"/>
+  <box at="34 105 13" size="1 1 1" color="F"/>
+  <box at="34 105 14" size="1 1 1" color="F"/>
+  <box at="33 105 11" size="1 1 1" color="F"/>
+  <box at="34 105 11" size="1 1 1" color="F"/>
+  <box at="35 105 11" size="1 1 1" color="F"/>
+  <!-- RIGA 4: "OGGETTI" (z=5..9, y=105) -->
+  <box at="13 105 9" size="1 1 1" color="F"/>
+  <box at="14 105 9" size="1 1 1" color="F"/>
+  <box at="15 105 9" size="1 1 1" color="F"/>
+  <box at="13 105 6" size="1 1 1" color="F"/>
+  <box at="15 105 6" size="1 1 1" color="F"/>
+  <box at="13 105 7" size="1 1 1" color="F"/>
+  <box at="15 105 7" size="1 1 1" color="F"/>
+  <box at="13 105 8" size="1 1 1" color="F"/>
+  <box at="15 105 8" size="1 1 1" color="F"/>
+  <box at="13 105 5" size="1 1 1" color="F"/>
+  <box at="14 105 5" size="1 1 1" color="F"/>
+  <box at="15 105 5" size="1 1 1" color="F"/>
+  <box at="17 105 9" size="1 1 1" color="F"/>
+  <box at="18 105 9" size="1 1 1" color="F"/>
+  <box at="19 105 9" size="1 1 1" color="F"/>
+  <box at="17 105 8" size="1 1 1" color="F"/>
+  <box at="17 105 7" size="1 1 1" color="F"/>
+  <box at="19 105 7" size="1 1 1" color="F"/>
+  <box at="17 105 6" size="1 1 1" color="F"/>
+  <box at="19 105 6" size="1 1 1" color="F"/>
+  <box at="17 105 5" size="1 1 1" color="F"/>
+  <box at="18 105 5" size="1 1 1" color="F"/>
+  <box at="19 105 5" size="1 1 1" color="F"/>
+  <box at="21 105 9" size="1 1 1" color="F"/>
+  <box at="22 105 9" size="1 1 1" color="F"/>
+  <box at="23 105 9" size="1 1 1" color="F"/>
+  <box at="21 105 8" size="1 1 1" color="F"/>
+  <box at="21 105 7" size="1 1 1" color="F"/>
+  <box at="23 105 7" size="1 1 1" color="F"/>
+  <box at="21 105 6" size="1 1 1" color="F"/>
+  <box at="23 105 6" size="1 1 1" color="F"/>
+  <box at="21 105 5" size="1 1 1" color="F"/>
+  <box at="22 105 5" size="1 1 1" color="F"/>
+  <box at="23 105 5" size="1 1 1" color="F"/>
+  <box at="25 105 5" size="1 1 1" color="F"/>
+  <box at="25 105 6" size="1 1 1" color="F"/>
+  <box at="25 105 7" size="1 1 1" color="F"/>
+  <box at="25 105 8" size="1 1 1" color="F"/>
+  <box at="25 105 9" size="1 1 1" color="F"/>
+  <box at="26 105 9" size="1 1 1" color="F"/>
+  <box at="27 105 9" size="1 1 1" color="F"/>
+  <box at="26 105 7" size="1 1 1" color="F"/>
+  <box at="26 105 5" size="1 1 1" color="F"/>
+  <box at="27 105 5" size="1 1 1" color="F"/>
+  <box at="29 105 9" size="1 1 1" color="F"/>
+  <box at="30 105 9" size="1 1 1" color="F"/>
+  <box at="31 105 9" size="1 1 1" color="F"/>
+  <box at="30 105 5" size="1 1 1" color="F"/>
+  <box at="30 105 6" size="1 1 1" color="F"/>
+  <box at="30 105 7" size="1 1 1" color="F"/>
+  <box at="30 105 8" size="1 1 1" color="F"/>
+  <box at="33 105 9" size="1 1 1" color="F"/>
+  <box at="34 105 9" size="1 1 1" color="F"/>
+  <box at="35 105 9" size="1 1 1" color="F"/>
+  <box at="34 105 5" size="1 1 1" color="F"/>
+  <box at="34 105 6" size="1 1 1" color="F"/>
+  <box at="34 105 7" size="1 1 1" color="F"/>
+  <box at="34 105 8" size="1 1 1" color="F"/>
+  <box at="37 105 9" size="1 1 1" color="F"/>
+  <box at="38 105 9" size="1 1 1" color="F"/>
+  <box at="39 105 9" size="1 1 1" color="F"/>
+  <box at="38 105 6" size="1 1 1" color="F"/>
+  <box at="38 105 7" size="1 1 1" color="F"/>
+  <box at="38 105 8" size="1 1 1" color="F"/>
+  <box at="37 105 5" size="1 1 1" color="F"/>
+  <box at="38 105 5" size="1 1 1" color="F"/>
+  <box at="39 105 5" size="1 1 1" color="F"/>
+</sequence>
+
+<!-- ================================================================= -->
+<!-- ANIMAZIONE CICLICA "STASI" (8 frame, pulsazione continua fluida)  -->
+<!-- Il respiro dell'energia ambra pulsa negli spigoli e nel caveau    -->
+<!-- ================================================================= -->
+<animation name="stasi" frames="8">
+  <sequence>
+    <all in="1" out="x"/>
+    <all in="2" out="1"/>
+    <all in="3" out="2"/>
+    <all in="4" out="3"/>
+    <all in="5" out="4"/>
+    <all in="6" out="5"/>
+    <all in="7" out="6"/>
+    <all in="8" out="7"/>
+    <all in="x" out="8"/>
+  </sequence>
+</animation>

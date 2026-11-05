@@ -1,0 +1,537 @@
+{
+  "id": "magic.runes",
+  "name": "Rune magiche",
+  "kind": "data",
+  "version": "0.2.0",
+  "description": "Le rune della magia: ognuna è anche una parola del codice (una variabile che non vale niente, finché qualcuno non le dà un valore), ma tenute in mano e pronunciate (T) diventano incantesimi. Più rune in fila sono una formula: l’ordine conta (terra fuoco non è fuoco terra) e ripetere una runa la rafforza; il Concilio dà nome e effetti a una formula la prima volta che qualcuno la pronuncia. I cristalli magici, nascosti nelle case e nelle casse, ridanno mana; le rune si consumano quando le pronunci.",
+  "runes": {
+    "luce": {
+      "name": "Sowilo",
+      "glyph": "ᛊ",
+      "color": "#ffe27a",
+      "element": "luce",
+      "description": "il sole: illumina, rivela"
+    },
+    "fuoco": {
+      "name": "Kenaz",
+      "glyph": "ᚲ",
+      "color": "#ff7a3a",
+      "element": "fuoco",
+      "description": "la fiaccola: brucia, scalda"
+    },
+    "terra": {
+      "name": "Othala",
+      "glyph": "ᛟ",
+      "color": "#c49a5a",
+      "element": "terra",
+      "description": "il suolo: apre sentieri, smuove"
+    },
+    "vento": {
+      "name": "Ansuz",
+      "glyph": "ᚨ",
+      "color": "#d8f4ff",
+      "element": "aria",
+      "description": "il soffio: spinge, porta voci"
+    },
+    "corrente": {
+      "name": "Naudiz",
+      "glyph": "ᚡ",
+      "color": "#7ad8ff",
+      "element": "elettricità",
+      "description": "il filo teso: accende, carica"
+    },
+    "lamiera": {
+      "name": "Hagalaz",
+      "glyph": "ᚣ",
+      "color": "#9aa4ae",
+      "element": "metallo",
+      "description": "la serranda: ripara, resiste"
+    },
+    "marea": {
+      "name": "Wunjo",
+      "glyph": "ᚤ",
+      "color": "#3a8ac8",
+      "element": "mare",
+      "description": "il mare che sale: bagna, allaga"
+    },
+    "asfalto": {
+      "name": "Raido",
+      "glyph": "ᚥ",
+      "color": "#6b6b70",
+      "element": "strada",
+      "description": "la strada: spiana, apre il passo"
+    },
+    "caffe": {
+      "name": "Jera",
+      "glyph": "ᚧ",
+      "color": "#8a5a32",
+      "element": "veglia",
+      "description": "la tazzina: sveglia, scalda"
+    },
+    "voce": {
+      "name": "Gebo",
+      "glyph": "ᚪ",
+      "color": "#ffb347",
+      "element": "voce",
+      "description": "il richiamo: spinge, fa largo"
+    },
+    "sirena": {
+      "name": "Tiwaz",
+      "glyph": "ᚫ",
+      "color": "#ff4a4a",
+      "element": "allarme",
+      "description": "il lampeggiante: avverte, mette in allerta"
+    },
+    "pane": {
+      "name": "Fehu",
+      "glyph": "ᚬ",
+      "color": "#e8b860",
+      "element": "nutrimento",
+      "description": "la sfornata: sfama"
+    },
+    "nebbia": {
+      "name": "Isaz",
+      "glyph": "ᚭ",
+      "color": "#c8d0d8",
+      "element": "nebbia",
+      "description": "la foschia del porto: nasconde"
+    },
+    "motore": {
+      "name": "Ehwaz",
+      "glyph": "ᚮ",
+      "color": "#ffd23a",
+      "element": "velocità",
+      "description": "il motorino: corre"
+    },
+    "sutura": {
+      "name": "Mannaz",
+      "glyph": "ᚯ",
+      "color": "#7ee0b0",
+      "element": "cura",
+      "description": "il punto di sutura: ricuce, guarisce"
+    },
+    "tufo": {
+      "name": "Perthro",
+      "glyph": "ᚰ",
+      "color": "#d8c070",
+      "element": "pietra gialla",
+      "description": "il tufo del colle: solleva"
+    }
+  },
+  "spells": {
+    "luce": {
+      "name": "Lume",
+      "description": "Una piccola luce resta sospesa davanti a te.",
+      "cost": 4,
+      "effects": [
+        {
+          "tipo": "luce",
+          "raggio": 5,
+          "durata": 90
+        }
+      ]
+    },
+    "fuoco": {
+      "name": "Favilla",
+      "description": "Una fiammata davanti a te: brucia ciò che è secco.",
+      "cost": 10,
+      "effects": [
+        {
+          "tipo": "fuoco",
+          "raggio": 1,
+          "durata": 8
+        }
+      ]
+    },
+    "terra": {
+      "name": "Varco",
+      "description": "Il terreno davanti a te si spiana in un sentiero, anche attraverso rovi e muri.",
+      "cost": 14,
+      "effects": [
+        {
+          "tipo": "terreno",
+          "a": "p",
+          "raggio": 1
+        }
+      ]
+    },
+    "vento": {
+      "name": "Soffio",
+      "description": "Una folata spinge via ciò che hai davanti.",
+      "cost": 6,
+      "effects": [
+        {
+          "tipo": "spingi",
+          "forza": 5
+        }
+      ]
+    },
+    "terra fuoco": {
+      "name": "Palla di fuoco",
+      "description": "La terra dà corpo alla fiamma: una palla di fuoco scoppia davanti a te e brucia tutto attorno.",
+      "cost": 16,
+      "effects": [
+        {
+          "tipo": "fuoco",
+          "raggio": 2,
+          "durata": 10
+        }
+      ]
+    },
+    "corrente": {
+      "name": "Scintilla",
+      "description": "Una luce bianca si accende davanti a te e ti senti carico come una batteria.",
+      "cost": 8,
+      "effects": [
+        {
+          "tipo": "luce",
+          "raggio": 6,
+          "durata": 120
+        },
+        {
+          "tipo": "stato",
+          "nome": "carico",
+          "velocita": 1.2,
+          "durata": 30
+        }
+      ]
+    },
+    "lamiera": {
+      "name": "Serranda",
+      "description": "Un guscio duro come una saracinesca ti avvolge.",
+      "cost": 9,
+      "effects": [
+        {
+          "tipo": "scudo",
+          "durata": 40
+        }
+      ]
+    },
+    "marea": {
+      "name": "Risacca",
+      "description": "Dal suolo davanti a te affiora acqua che sa di mare.",
+      "cost": 10,
+      "effects": [
+        {
+          "tipo": "terreno",
+          "a": "w",
+          "raggio": 0
+        }
+      ]
+    },
+    "asfalto": {
+      "name": "Carreggiata",
+      "description": "Il terreno davanti a te si spiana in una strada liscia.",
+      "cost": 14,
+      "effects": [
+        {
+          "tipo": "terreno",
+          "a": "p",
+          "raggio": 1
+        }
+      ]
+    },
+    "caffe": {
+      "name": "Ristretto",
+      "description": "Un calore amaro ti sveglia da capo a piedi.",
+      "cost": 6,
+      "effects": [
+        {
+          "tipo": "bisogni",
+          "energia": 30,
+          "sete": 5
+        }
+      ]
+    },
+    "voce": {
+      "name": "Banditore",
+      "description": "Un grido da banco del pesce spinge via ciò che hai davanti.",
+      "cost": 6,
+      "effects": [
+        {
+          "tipo": "spingi",
+          "forza": 5
+        }
+      ]
+    },
+    "sirena": {
+      "name": "Lampeggiante",
+      "description": "Una luce rossa gira attorno a te e i sensi si fanno svelti.",
+      "cost": 9,
+      "effects": [
+        {
+          "tipo": "luce",
+          "raggio": 8,
+          "durata": 30
+        },
+        {
+          "tipo": "stato",
+          "nome": "allerta",
+          "velocita": 1.3,
+          "durata": 20
+        }
+      ]
+    },
+    "pane": {
+      "name": "Sfornata",
+      "description": "Un profumo di forno ti riempie la pancia.",
+      "cost": 8,
+      "effects": [
+        {
+          "tipo": "bisogni",
+          "fame": 30
+        }
+      ]
+    },
+    "nebbia": {
+      "name": "Foschia",
+      "description": "Una foschia bassa ti avvolge: la gente ti guarda senza vederti.",
+      "cost": 7,
+      "effects": [
+        {
+          "tipo": "stato",
+          "nome": "nascosto",
+          "velocita": 0.9,
+          "durata": 40
+        }
+      ]
+    },
+    "motore": {
+      "name": "Sgasata",
+      "description": "Le gambe ti partono come un motorino in discesa.",
+      "cost": 10,
+      "effects": [
+        {
+          "tipo": "stato",
+          "nome": "di corsa",
+          "velocita": 1.8,
+          "durata": 25
+        }
+      ]
+    },
+    "sutura": {
+      "name": "Ricucitura",
+      "description": "Un fresco di disinfettante ti richiude le ferite.",
+      "cost": 12,
+      "effects": [
+        {
+          "tipo": "bisogni",
+          "salute": 25
+        }
+      ]
+    },
+    "tufo": {
+      "name": "Gradone",
+      "description": "Il suolo davanti a te si alza di un gradino di pietra gialla.",
+      "cost": 12,
+      "effects": [
+        {
+          "tipo": "rilievo",
+          "delta": 1,
+          "raggio": 1
+        }
+      ]
+    },
+    "corrente sirena": {
+      "name": "Blackout",
+      "description": "Una luce rossa e bianca esplode attorno a te e ti lascia all'erta, carico e svelto.",
+      "cost": 16,
+      "effects": [
+        {
+          "tipo": "luce",
+          "raggio": 8,
+          "durata": 60
+        },
+        {
+          "tipo": "stato",
+          "nome": "allerta",
+          "velocita": 1.4,
+          "durata": 30
+        }
+      ]
+    },
+    "caffe pane": {
+      "name": "Colazione al banco",
+      "description": "Cornetto e tazzina: fame e sonno spariscono.",
+      "cost": 14,
+      "effects": [
+        {
+          "tipo": "bisogni",
+          "fame": 25,
+          "energia": 25
+        }
+      ]
+    },
+    "marea nebbia": {
+      "name": "Bruma del Molo",
+      "description": "Il mare sale in foschia e ti nasconde a lungo.",
+      "cost": 15,
+      "effects": [
+        {
+          "tipo": "stato",
+          "nome": "nascosto",
+          "velocita": 1,
+          "durata": 70
+        }
+      ]
+    },
+    "tufo asfalto": {
+      "name": "Rampa",
+      "description": "Il suolo si alza e si spiana in una rampa di strada.",
+      "cost": 18,
+      "effects": [
+        {
+          "tipo": "rilievo",
+          "delta": 1,
+          "raggio": 1
+        },
+        {
+          "tipo": "terreno",
+          "a": "p",
+          "raggio": 1
+        }
+      ]
+    }
+  },
+  "items": [
+    {
+      "id": "item.cristallo-magico",
+      "name": "Cristallo magico",
+      "description": "Un cristallo che pulsa di luce fredda. Assorbito, ridà forza magica (mana); gli incantesimi di tre o più rune ne consumano uno.",
+      "category": "magia",
+      "weight": 0.1,
+      "stack": 10,
+      "tags": [
+        "magia",
+        "cristallo"
+      ],
+      "glyph": "✦",
+      "color": "#9fe8ff",
+      "aspetto": "a small glowing blue magic crystal shard",
+      "effects": {
+        "mana": 40
+      }
+    },
+    {
+      "id": "item.borsa-rune",
+      "name": "Borsa delle rune",
+      "description": "Una borsetta di pelle con tante taschine: tiene ordinate centinaia di rune.",
+      "category": "contenitore",
+      "weight": 0.2,
+      "stack": 1,
+      "tags": [
+        "contenitore",
+        "runa"
+      ],
+      "glyph": "◘",
+      "color": "#c49a5a",
+      "aspetto": "a small leather pouch with runic stitching",
+      "container": {
+        "size": 12,
+        "accepts": "runa"
+      }
+    },
+    {
+      "id": "item.sacca",
+      "name": "Sacca di tela",
+      "description": "Una sacca da spalla: dentro ci sta di tutto, un po' di tutto.",
+      "category": "contenitore",
+      "weight": 0.4,
+      "stack": 1,
+      "tags": [
+        "contenitore",
+        "casa"
+      ],
+      "glyph": "◘",
+      "color": "#b8a888",
+      "aspetto": "a canvas shoulder bag",
+      "container": {
+        "size": 6
+      }
+    }
+  ],
+  "loot": {
+    "magia": {
+      "rolls": [
+        1,
+        1
+      ],
+      "entries": [
+        {
+          "item": "item.cristallo-magico",
+          "weight": 5,
+          "min": 1,
+          "max": 2
+        },
+        {
+          "item": "rune:luce",
+          "weight": 1
+        },
+        {
+          "item": "rune:fuoco",
+          "weight": 1
+        },
+        {
+          "item": "rune:terra",
+          "weight": 1
+        },
+        {
+          "item": "rune:vento",
+          "weight": 1
+        },
+        {
+          "item": "rune:corrente",
+          "weight": 1
+        },
+        {
+          "item": "rune:lamiera",
+          "weight": 1
+        },
+        {
+          "item": "rune:marea",
+          "weight": 1
+        },
+        {
+          "item": "rune:asfalto",
+          "weight": 1
+        },
+        {
+          "item": "rune:caffe",
+          "weight": 1
+        },
+        {
+          "item": "rune:voce",
+          "weight": 1
+        },
+        {
+          "item": "rune:sirena",
+          "weight": 1
+        },
+        {
+          "item": "rune:pane",
+          "weight": 1
+        },
+        {
+          "item": "rune:nebbia",
+          "weight": 1
+        },
+        {
+          "item": "rune:motore",
+          "weight": 1
+        },
+        {
+          "item": "rune:sutura",
+          "weight": 1
+        },
+        {
+          "item": "rune:tufo",
+          "weight": 1
+        },
+        {
+          "item": "item.sacca",
+          "weight": 1
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,21 @@
+<!-- Cucina a gas di trattoria: quattro fuochi, il forno, la cappa di rame che sale fino a dove capita, le pentole sul fuoco. -->
+<sequence values="BZHTKDCPRF" size="20 20 26" symmetry="(xy)" name="Cucina">
+  <color symbol="Z" hidden="True"/><color symbol="H" hidden="True"/>
+  <color symbol="T" value="e8e0d0" name="smalto bianco"/><color symbol="K" value="2a2a2e" name="griglia dei fuochi"/><color symbol="D" value="3a3e44" name="sportello del forno"/>
+  <color symbol="C" value="c87a3a" name="rame della cappa"/><color symbol="P" value="8a8e94" name="pentole"/><color symbol="R" value="7a4a2a" name="bordo della cappa"/><color symbol="F" value="ff8a3a" name="fiamma" glow="True"/>
+  <box at="10 10 0" size="14 8 7" color="T"/>
+  <box at="10 10 7" size="14 8 1" color="K"/>
+  <box at="10 13 1" size="8 1 4" color="D" on="T"/>
+  <box at="10 8 8" size="12 6 16" color="Z"/>
+  <box at="10 8 8" size="12 6 1" color="C"/>
+  <box at="10 8 9" size="1 1 1" color="H"/>
+  <one>
+    <rule in="Z H" out="H C" p="7"/>
+    <rule in="H" out="C" p="1"/>
+  </one>
+  <all in="CZ" out="CC" symmetry="(xy)"/>
+  <all in="Z" out="B"/>
+  <all in="B C" out="R C"/>
+  <one in="BB/BB KK/KK" out="PP/PP KK/KK" steps="2"/>
+  <box at="5 13 6" size="1 1 1" color="F" on="T"/>
+</sequence>

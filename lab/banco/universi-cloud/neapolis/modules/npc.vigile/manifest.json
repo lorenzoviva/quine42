@@ -1,0 +1,63 @@
+{
+  "id": "npc.vigile",
+  "name": "Vigile urbano",
+  "kind": "entity",
+  "version": "0.1.0",
+  "description": "I vigili urbani di Neapolis: traffico, multe, bancarelle, cantieri.",
+  "context": "incroci, cantieri, vicoli del rione",
+  "logic": "logic.lua",
+  "appearance": {
+    "model": "persona",
+    "glyph": "v",
+    "color": "#f0f0f8",
+    "aspetto": "una persona con la divisa bianca e blu, il casco coloniale e un fischietto"
+  },
+  "physics": {
+    "solid": false,
+    "radius": 0.35,
+    "speed": 0.95
+  },
+  "components": {
+    "wander": {
+      "dx": 0,
+      "dy": 0,
+      "t": 0,
+      "speed": 0.95
+    }
+  },
+  "interaction": {
+    "type": "talk"
+  },
+  "persona": "Fai il vigile urbano a Neapolis: l’ordine prima di tutto, ma conosci la gente. Delle rune sai ciò che sa la gente di città: lastre con un segno inciso che manda una luce tenue, sul marciapiede come nei giardini; alla radio ci ridono sopra, i ragazzi le vendono al mercatino, e chi ne ha pronunciata una lo racconta sottovoce.",
+  "actions": [
+    {
+      "id": "saluta",
+      "label": "Saluta"
+    },
+    {
+      "id": "quartiere",
+      "label": "Chiedi del quartiere"
+    },
+    {
+      "id": "mestiere",
+      "label": "Chiedi del lavoro"
+    },
+    {
+      "id": "insisti",
+      "label": "Insisti"
+    },
+    {
+      "id": "rune",
+      "label": "Parla delle rune"
+    },
+    {
+      "id": "compra",
+      "label": "Paga una multa (due monete)",
+      "requires": "item.cento-lire"
+    }
+  ],
+  "tags": [
+    "neapolis",
+    "abitante"
+  ]
+}

@@ -1,0 +1,434 @@
+{
+  "trame": [
+    {
+      "id": "trama-busta-gialla",
+      "titolo": "La busta gialla della Torre C",
+      "mistero": "Dario Fusco ha trovato pratiche della Linea 2 con firme doppie e vuole farle arrivare a Rosaria Vitale senza farsi scoprire dalla sua capoufficio.",
+      "coinvolti": [
+        "Dario Fusco",
+        "Rosaria Vitale",
+        "Sabrina Longo"
+      ],
+      "tappe": [
+        {
+          "giorno": 0,
+          "momento": "mattina",
+          "chi": "Dario Fusco",
+          "dove": "Torre C del Centro Direzionale",
+          "cosa": "archivia le pratiche e nasconde una busta nell’ultimo cassetto",
+          "battuta": "Non posso uscire con queste carte. Non oggi.",
+          "indizio": "una busta gialla in fondo all’archivio della Torre C"
+        },
+        {
+          "giorno": 0,
+          "momento": "sera",
+          "chi": "Rosaria Vitale",
+          "dove": "Piazza delle Erbe",
+          "cosa": "aspetta al bar una busta che non arriva",
+          "battuta": "Doveva essere qui alle sette. Qualcuno l’ha spaventato."
+        },
+        {
+          "giorno": 1,
+          "momento": "giorno",
+          "chi": "Sabrina Longo",
+          "dove": "Piazzale degli Uffici",
+          "cosa": "controlla chi è entrato in archivio",
+          "battuta": "Un fascicolo è sparito ed è tornato. Voglio sapere chi.",
+          "indizio": "il registro delle chiavi dell’archivio"
+        },
+        {
+          "giorno": 2,
+          "momento": "sera",
+          "chi": "Rosaria Vitale",
+          "dove": "Redazione del Mattino",
+          "cosa": "scrive l’articolo, se ha le carte",
+          "battuta": "Con le prove, domani esce in prima pagina."
+        }
+      ],
+      "missione": {
+        "da": "Rosaria Vitale",
+        "testo": "Prendi la busta gialla dall’archivio della Torre C e portamela, senza farti vedere.",
+        "obiettivo": {
+          "tipo": "porta",
+          "oggetto": "Busta gialla",
+          "a": "Rosaria Vitale"
+        },
+        "ricompensa": "Biglietto dello stadio",
+        "stato": "offerta"
+      },
+      "inizio": 0,
+      "stato": "attiva"
+    },
+    {
+      "id": "trama-camion-notte",
+      "titolo": "Il camion senza targa",
+      "mistero": "Ogni notte un camion senza targa esce dal cantiere della Linea 2 e va al porto: chi lo guida e che cosa porta?",
+      "coinvolti": [
+        "Franco Barone",
+        "Anna Greco",
+        "Salvatore Iovine"
+      ],
+      "tappe": [
+        {
+          "giorno": 0,
+          "momento": "notte",
+          "chi": "Franco Barone",
+          "dove": "Cantiere della Linea 2",
+          "cosa": "fa finta di non vedere il camion che esce",
+          "battuta": "Dopo le dieci io non guardo. Me l’hanno ordinato.",
+          "indizio": "le tracce di gomme fresche davanti alla transenna"
+        },
+        {
+          "giorno": 1,
+          "momento": "notte",
+          "chi": "Anna Greco",
+          "dove": "Vico del Molo",
+          "cosa": "segna l’ora in cui passa il camion",
+          "battuta": "Mezzanotte e dieci, come ieri. Va al porto."
+        },
+        {
+          "giorno": 2,
+          "momento": "mattina",
+          "chi": "Salvatore Iovine",
+          "dove": "Porto commerciale",
+          "cosa": "trova il lucchetto nuovo del magazzino sette",
+          "battuta": "Questo lucchetto non è della compagnia.",
+          "indizio": "la chiave con l’etichetta «Mag. 7»"
+        },
+        {
+          "giorno": 3,
+          "momento": "sera",
+          "chi": "Anna Greco",
+          "dove": "Piazza delle Erbe",
+          "cosa": "decide di fare rapporto al comando",
+          "battuta": "La legge vale anche di notte."
+        }
+      ],
+      "missione": {
+        "da": "Anna Greco",
+        "testo": "Scopri dove va il camion senza targa: segui la strada dal cantiere fino al porto commerciale.",
+        "obiettivo": {
+          "tipo": "vai",
+          "luogo": "Porto commerciale"
+        },
+        "ricompensa": "Mappa della città",
+        "stato": "offerta"
+      },
+      "inizio": 0,
+      "stato": "attiva"
+    },
+    {
+      "id": "trama-blackout",
+      "titolo": "Il rione al buio",
+      "mistero": "Il quartiere resta al buio certe notti: Ciro Amitrano è convinto che il cantiere stacchi la corrente per collegare le sue pompe con un quadro abusivo.",
+      "coinvolti": [
+        "Ciro Amitrano",
+        "Lucia Sorrentino",
+        "Carla Ferrante"
+      ],
+      "tappe": [
+        {
+          "giorno": 0,
+          "momento": "notte",
+          "chi": "Ciro Amitrano",
+          "dove": "Cantiere della Linea 2",
+          "cosa": "trova un quadro col lucchetto nuovo nella cabina del cantiere",
+          "battuta": "Questo non l’ha montato l’azienda.",
+          "indizio": "il contatore del cantiere che gira al contrario"
+        },
+        {
+          "giorno": 1,
+          "momento": "giorno",
+          "chi": "Lucia Sorrentino",
+          "dove": "Officine dei Granili",
+          "cosa": "confronta i contatori della centralina",
+          "battuta": "I numeri non mentono: quel quadro ruba corrente al rione."
+        },
+        {
+          "giorno": 2,
+          "momento": "notte",
+          "chi": "Carla Ferrante",
+          "dove": "Pronto soccorso dei Pellegrini",
+          "cosa": "lavora a lume di torcia durante il blackout",
+          "battuta": "Il generatore tossisce. Se salta, opero al buio."
+        }
+      ],
+      "missione": {
+        "da": "Ciro Amitrano",
+        "testo": "Il quartiere è al buio: cambia il fusibile della cabina elettrica, e poi portami un fusibile bruciato come prova.",
+        "obiettivo": {
+          "tipo": "porta",
+          "oggetto": "Fusibile bruciato",
+          "a": "Ciro Amitrano"
+        },
+        "ricompensa": "Torcia elettrica",
+        "stato": "offerta"
+      },
+      "inizio": 0,
+      "stato": "attiva"
+    },
+    {
+      "id": "trama-molo-vecchio",
+      "titolo": "Il Molo Vecchio non si vende",
+      "mistero": "Il porto commerciale vuole le banchine dei pescatori per i container; un uomo in giacca ha offerto soldi a Salvatore Iovine per una firma.",
+      "coinvolti": [
+        "Pasquale Amato",
+        "Salvatore Iovine",
+        "Gilda Marino",
+        "Vincenzo Sannino"
+      ],
+      "tappe": [
+        {
+          "giorno": 0,
+          "momento": "mattina",
+          "chi": "Pasquale Amato",
+          "dove": "Molo Vecchio",
+          "cosa": "vede un uomo in giacca misurare le banchine",
+          "battuta": "Quello non è un pescatore. Nemmeno un turista."
+        },
+        {
+          "giorno": 1,
+          "momento": "sera",
+          "chi": "Salvatore Iovine",
+          "dove": "Porto commerciale",
+          "cosa": "tiene l’assemblea dei portuali",
+          "battuta": "Il molo è di chi ci lavora. Nessuno firma."
+        },
+        {
+          "giorno": 2,
+          "momento": "giorno",
+          "chi": "Gilda Marino",
+          "dove": "Piazzale degli Uffici",
+          "cosa": "sente un cliente parlare di «sistemare il molo» entro fine mese",
+          "battuta": "Gente che parla troppo in macchina.",
+          "indizio": "il nome di un ufficio della Torre C"
+        },
+        {
+          "giorno": 3,
+          "momento": "sera",
+          "chi": "Vincenzo Sannino",
+          "dove": "Mercato del Pendino",
+          "cosa": "porta al cugino il giornale con la notizia",
+          "battuta": "Lo sa anche Ciok Ciok, ormai."
+        }
+      ],
+      "missione": {
+        "da": "Salvatore Iovine",
+        "testo": "Parla con Gilda Marino, la tassista: ha sentito qualcosa in macchina su chi vuole il molo.",
+        "obiettivo": {
+          "tipo": "parla",
+          "a": "Gilda Marino"
+        },
+        "ricompensa": "Cassetta di alici",
+        "stato": "offerta"
+      },
+      "inizio": 0,
+      "stato": "attiva"
+    },
+    {
+      "id": "trama-molo-antico",
+      "titolo": "Il molo sotto la strada",
+      "mistero": "Scavando la metropolitana sono venute fuori le pietre di un molo antico; i lavori si sono fermati e nessuno dice chi ha dato l’ordine.",
+      "coinvolti": [
+        "Franco Barone",
+        "Raffaele Sorrentino",
+        "Marco De Luca"
+      ],
+      "tappe": [
+        {
+          "giorno": 0,
+          "momento": "giorno",
+          "chi": "Franco Barone",
+          "dove": "Cantiere della Linea 2",
+          "cosa": "tiene lontani i curiosi dallo scavo",
+          "battuta": "Circolare, non c’è niente da vedere."
+        },
+        {
+          "giorno": 1,
+          "momento": "mattina",
+          "chi": "Raffaele Sorrentino",
+          "dove": "Ospedale del Colle",
+          "cosa": "racconta che il pagosso del rione ha visto le pietre",
+          "battuta": "Dice che sono più vecchie della città.",
+          "indizio": "un coccio liscio tra la terra smossa"
+        },
+        {
+          "giorno": 2,
+          "momento": "giorno",
+          "chi": "Marco De Luca",
+          "dove": "Corso Partenope",
+          "cosa": "cerca di fotografare lo scavo",
+          "battuta": "Una foto e lo sa tutta la città."
+        }
+      ],
+      "missione": {
+        "da": "Marco De Luca",
+        "testo": "Portami una prova dal cantiere: un pezzo del molo antico, anche piccolo.",
+        "obiettivo": {
+          "tipo": "porta",
+          "oggetto": "Coccio antico",
+          "a": "Marco De Luca"
+        },
+        "ricompensa": "Rullino fotografico",
+        "stato": "offerta"
+      },
+      "inizio": 0,
+      "stato": "attiva"
+    },
+    {
+      "id": "trama-locale-tonino",
+      "titolo": "Il locale di Tonino",
+      "mistero": "Tonino Cimmino vuole aprire un locale con la musica sul lungomare, ma ha paura di dirlo a sua madre Assunta.",
+      "coinvolti": [
+        "Tonino Cimmino",
+        "Anna Greco",
+        "Assunta Cimmino",
+        "Filomena Caputo"
+      ],
+      "tappe": [
+        {
+          "giorno": 0,
+          "momento": "giorno",
+          "chi": "Tonino Cimmino",
+          "dove": "Lungomare delle Rondini",
+          "cosa": "conta i soldi delle granite e sogna il suo locale",
+          "battuta": "Un locale piccolo, con le sedie fuori e la radio accesa."
+        },
+        {
+          "giorno": 1,
+          "momento": "sera",
+          "chi": "Anna Greco",
+          "dove": "Lungomare delle Rondini",
+          "cosa": "gli dice che deve parlarne con la madre",
+          "battuta": "Se non glielo dici tu, glielo dice Filomena."
+        },
+        {
+          "giorno": 2,
+          "momento": "mattina",
+          "chi": "Assunta Cimmino",
+          "dove": "Piazza delle Erbe",
+          "cosa": "scopre il progetto del figlio da Filomena",
+          "battuta": "Un locale? E il bar chi lo tiene, i gatti?"
+        },
+        {
+          "giorno": 3,
+          "momento": "sera",
+          "chi": "Filomena Caputo",
+          "dove": "Piazza delle Erbe",
+          "cosa": "convince Assunta a dare una possibilità al figlio",
+          "battuta": "Assunta, il primo biglietto in vetrina l’hai appeso anche tu."
+        }
+      ],
+      "missione": {
+        "da": "Tonino Cimmino",
+        "testo": "Va’ in Piazza delle Erbe e parla con mia madre Assunta, prima che lo sappia da qualcun altro.",
+        "obiettivo": {
+          "tipo": "parla",
+          "a": "Assunta Cimmino"
+        },
+        "ricompensa": "Granita al limone",
+        "stato": "offerta"
+      },
+      "inizio": 0,
+      "stato": "attiva"
+    },
+    {
+      "id": "trama-ragu-domenica",
+      "titolo": "La sfida del ragù",
+      "mistero": "Al rione c’è una vecchia rivalità di cucina: Carmela Esposito dice che i giovani non sanno fare il ragù, e Gaetano Cozzolino vuole dimostrare il contrario alla festa di quartiere.",
+      "coinvolti": [
+        "Carmela Esposito",
+        "Gaetano Cozzolino",
+        "Nunzia Esposito"
+      ],
+      "tappe": [
+        {
+          "giorno": 0,
+          "momento": "mattina",
+          "chi": "Carmela Esposito",
+          "dove": "Vico delle Lavandaie",
+          "cosa": "sceglie i pomodori al mercato",
+          "battuta": "Il pomodoro giusto si sceglie con le mani, non con gli occhi."
+        },
+        {
+          "giorno": 1,
+          "momento": "giorno",
+          "chi": "Gaetano Cozzolino",
+          "dove": "Vico del Vesuvietto",
+          "cosa": "prova il suo ragù per la festa",
+          "battuta": "Il mio ragù farà piangere anche Carmela."
+        },
+        {
+          "giorno": 2,
+          "momento": "sera",
+          "chi": "Nunzia Esposito",
+          "dove": "Vico delle Lavandaie",
+          "cosa": "assaggia i due ragù e non vuole scegliere",
+          "battuta": "Nonna, sono buoni tutti e due. Davvero."
+        }
+      ],
+      "missione": {
+        "da": "Carmela Esposito",
+        "testo": "Per il ragù della festa mi servono i pomodori del Pendino: portamene.",
+        "obiettivo": {
+          "tipo": "porta",
+          "oggetto": "Pomodori",
+          "a": "Carmela Esposito"
+        },
+        "ricompensa": "Ragù della domenica",
+        "stato": "offerta"
+      },
+      "inizio": 0,
+      "stato": "attiva"
+    },
+    {
+      "id": "trama-luce-torre",
+      "titolo": "La luce al quattordicesimo piano",
+      "mistero": "Al quattordicesimo piano della Torre C, che risulta vuoto, di notte c’è una luce accesa: chi ci lavora, e senza contratto della luce?",
+      "coinvolti": [
+        "Marco De Luca",
+        "Lucia Sorrentino",
+        "Dario Fusco"
+      ],
+      "tappe": [
+        {
+          "giorno": 0,
+          "momento": "notte",
+          "chi": "Marco De Luca",
+          "dove": "Torre C del Centro Direzionale",
+          "cosa": "fotografa la finestra accesa",
+          "battuta": "Ecco: quattordicesimo piano. Vuoto, dicono."
+        },
+        {
+          "giorno": 1,
+          "momento": "giorno",
+          "chi": "Lucia Sorrentino",
+          "dove": "Officine dei Granili",
+          "cosa": "scopre che la Torre C non ha contratto per quel piano",
+          "battuta": "Corrente senza contatore. Come al cantiere.",
+          "indizio": "un cavo che dal cantiere sale alla torre"
+        },
+        {
+          "giorno": 2,
+          "momento": "notte",
+          "chi": "Dario Fusco",
+          "dove": "Torre C del Centro Direzionale",
+          "cosa": "sente un telefono squillare di sopra",
+          "battuta": "C’è qualcuno, lassù. Ogni notte."
+        }
+      ],
+      "missione": {
+        "da": "Lucia Sorrentino",
+        "testo": "Va’ alla Torre C del Centro Direzionale e guarda tu stesso: se la luce è accesa di notte, ho ragione io.",
+        "obiettivo": {
+          "tipo": "vai",
+          "luogo": "Torre C del Centro Direzionale"
+        },
+        "ricompensa": "Fusibile",
+        "stato": "offerta"
+      },
+      "inizio": 0,
+      "stato": "attiva"
+    }
+  ]
+}

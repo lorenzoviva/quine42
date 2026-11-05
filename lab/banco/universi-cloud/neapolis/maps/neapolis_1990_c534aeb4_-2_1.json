@@ -1,0 +1,46 @@
+{
+ "plan": {
+  "place": {
+   "name": "Cantiere della Linea 2",
+   "description": "Il cantiere eterno della metropolitana: recinzioni di rete, transenne a strisce, il grande scavo con le pompe e, in fondo, pietre di un molo antico."
+  },
+  "layout": "cantiere",
+  "objects": [
+   {
+    "module": "npc.elettricista",
+    "where": "fuori"
+   },
+   {
+    "module": "npc.vigile",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.transenna",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.transenna",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.transenna",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.quadro-elettrico",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Gessetto",
+   "Mattone forato",
+   "Filo di rame",
+   "Cavo elettrico"
+  ],
+  "fresh": [],
+  "runes": [
+   "lamiera"
+  ],
+  "strutture": []
+ }
+}

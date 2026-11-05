@@ -1,0 +1,45 @@
+{
+ "plan": {
+  "place": {
+   "name": "Officine dei Granili",
+   "description": "Capannoni di mattoni sotto il cavalcavia: l’officina di Gennaro, la centralina elettrica del quartiere, piazzali pieni di motorini da riparare."
+  },
+  "layout": "officine",
+  "objects": [
+   {
+    "module": "npc.meccanico",
+    "where": "fuori"
+   },
+   {
+    "module": "npc.elettricista",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.banco-officina",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.quadro-elettrico",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.motorino",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.cassonetto",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Olio motore",
+   "Fusibile",
+   "Pezzo di ricambio"
+  ],
+  "fresh": [],
+  "runes": [
+   "corrente"
+  ],
+  "strutture": []
+ }
+}

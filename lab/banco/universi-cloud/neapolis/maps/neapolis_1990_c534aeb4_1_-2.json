@@ -1,0 +1,30 @@
+{
+ "plan": {
+  "place": {
+   "name": "Parco dei Platani",
+   "description": "Il giardino pubblico sul colle: viali di brecciolino, platani, la vasca dei pesci rossi, le panchine dei pensionati."
+  },
+  "layout": "parco",
+  "objects": [
+   {
+    "module": "obj.lampione",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.lampione",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.cassonetto",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Limone",
+   "Bustina di figurine"
+  ],
+  "fresh": [],
+  "runes": [],
+  "strutture": []
+ }
+}

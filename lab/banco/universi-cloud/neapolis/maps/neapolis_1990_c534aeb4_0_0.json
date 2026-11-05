@@ -1,0 +1,55 @@
+{
+ "plan": {
+  "place": {
+   "name": "Piazza delle Erbe",
+   "description": "La piazza del basolato con la fontana dei delfini, il Bar Gambrinus sotto i portici, l’edicola verde e la cabina del telefono: qui si incontra mezza città."
+  },
+  "layout": "piazza",
+  "objects": [
+   {
+    "module": "npc.barista",
+    "where": "fuori"
+   },
+   {
+    "module": "npc.edicolante",
+    "where": "fuori"
+   },
+   {
+    "module": "npc.gatto",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.espresso",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.edicola",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.lampione",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.lampione",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.cabina-telefonica",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Cornetto",
+   "Moneta da cento lire",
+   "Moneta da cento lire",
+   "Gettone telefonico"
+  ],
+  "fresh": [],
+  "runes": [
+   "luce",
+   "caffe"
+  ],
+  "strutture": []
+ }
+}

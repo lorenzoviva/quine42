@@ -1,0 +1,37 @@
+{
+ "plan": {
+  "place": {
+   "name": "Porto commerciale",
+   "description": "Le banchine del porto commerciale: gru, pile di container, i magazzini di mattoni numerati, il magazzino sette con il lucchetto nuovo."
+  },
+  "layout": "porto",
+  "objects": [
+   {
+    "module": "npc.portuale",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.quadro-elettrico",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.lampione",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.cassonetto",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Chiave del magazzino",
+   "Caschetto giallo",
+   "Cima da ormeggio"
+  ],
+  "fresh": [],
+  "runes": [
+   "fuoco"
+  ],
+  "strutture": []
+ }
+}

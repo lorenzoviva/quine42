@@ -1,0 +1,26 @@
+<!-- Banco da meccanico con la morsa e il pannello forato degli attrezzi, alto quanto capita. -->
+<sequence values="BZHKMTVRAC" size="20 20 26" symmetry="(xy)" name="Banco officina">
+  <color symbol="Z" hidden="True"/><color symbol="H" hidden="True"/>
+  <color symbol="K" value="3a4048" name="gambe di ferro"/><color symbol="M" value="6a7480" name="piano di lamiera"/><color symbol="T" value="b89868" name="pannello forato"/>
+  <color symbol="V" value="2a2a30" name="morsa"/><color symbol="R" value="5a4a3a" name="cornice"/><color symbol="A" value="c84a3a" name="attrezzi rossi"/><color symbol="C" value="d8d8e0" name="chiavi"/>
+  <box at="2 6 0" size="1 1 8" color="K"/>
+  <box at="17 6 0" size="1 1 8" color="K"/>
+  <box at="2 14 0" size="1 1 8" color="K"/>
+  <box at="17 14 0" size="1 1 8" color="K"/>
+  <box at="10 10 8" size="18 12 1" color="M"/>
+  <box at="15 12 9" size="3 3 2" color="V"/>
+  <box at="10 4 9" size="16 2 15" color="Z"/>
+  <box at="10 4 9" size="16 2 2" color="T"/>
+  <box at="10 4 11" size="1 1 1" color="H"/>
+  <one>
+    <rule in="Z H" out="H T" p="9"/>
+    <rule in="H" out="T" p="1"/>
+  </one>
+  <all in="TZ" out="TT" symmetry="(xy)"/>
+  <all in="Z" out="B"/>
+  <all in="B T" out="R T"/>
+  <box at="5 5 10" size="2 1 2" color="A" on="T"/>
+  <box at="9 5 11" size="1 1 2" color="C" on="T"/>
+  <box at="12 5 10" size="3 1 1" color="C" on="T"/>
+  <box at="15 5 11" size="1 1 2" color="A" on="T"/>
+</sequence>

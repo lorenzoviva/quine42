@@ -1,0 +1,12 @@
+<!-- Qualcosa si è rotto: la corrente che salta, scatti e ronzii, mai uguali. -->
+<sequence name="Blackout" values="BHC" size="12 1 6" symmetry="()">
+  <sound bpm="340" scale="phrygian" root="45" swing="0" cutoff="6000" space="0.2">
+    <track y="0" instrument="lead" volume="0.9"/>
+  </sound>
+  <color symbol="H" value="fde047" name="Hi-hat" alpha="0.85"/>
+  <color symbol="C" value="fb923c" name="Rullante" glow="True"/>
+
+  <line at="0 0 0" to="0 0 0" r="0" color="C"/>
+  <one in="B" out="C" steps="3"/>
+  <one in="B" out="H" steps="7"/>
+</sequence>

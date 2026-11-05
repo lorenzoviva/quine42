@@ -1,0 +1,43 @@
+{
+  "id": "obj.scrivania",
+  "name": "Scrivania e archivio delle pratiche",
+  "kind": "entity",
+  "version": "0.1.0",
+  "description": "Una postazione d’ufficio con l’archivio delle pratiche: timbri, cartelline, cassetti che si aprono a fatica.",
+  "context": "uffici del Centro Direzionale",
+  "logic": "logic.lua",
+  "appearance": {
+    "model": "scrivania-ufficio",
+    "glyph": "▤",
+    "color": "#8a7a6a",
+    "aspetto": "una scrivania d’ufficio grigia con la macchina da scrivere, il telefono a disco e un archivio a cassetti pieno di cartelline"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.42
+  },
+  "container": {
+    "size": 6,
+    "loot": "ufficio"
+  },
+  "actions": [
+    {
+      "id": "fruga",
+      "label": "Fruga nell’archivio"
+    },
+    {
+      "id": "timbra",
+      "label": "Timbra una pratica",
+      "requires": "item.pratica"
+    },
+    {
+      "id": "telefono",
+      "label": "Alza il telefono"
+    }
+  ],
+  "tags": [
+    "neapolis",
+    "ufficio",
+    "metallo"
+  ]
+}

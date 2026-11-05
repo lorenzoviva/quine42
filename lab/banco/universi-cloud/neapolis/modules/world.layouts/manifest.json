@@ -1,0 +1,727 @@
+{
+  "id": "world.layouts",
+  "name": "Ambienti di Neapolis",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "Gli ambienti della città: dalla bozza fanno piazze, rioni, corsi, uffici, mercati, la stazione, il cantiere, il lungomare, il porto, le officine, il colle e i parchi.",
+  "layouts": {
+    "piazza": {
+      "name": "Piazza",
+      "description": "una piazza di basolato con la fontana al centro, aiuole, panchine e palazzi con il bar sotto i portici",
+      "environment": "esterno",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "t",
+                "out": "g",
+                "p": 0.7
+              }
+            ]
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "[gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen]",
+                "out": "gwwg/wwww/wwww/gwwg"
+              }
+            ],
+            "steps": 1
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]",
+                "out": "hhhhhh/hffffh/hffffh/hffffh/hhdhhh"
+              }
+            ],
+            "steps": 2
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "[gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen]",
+                "out": "mmm/mmm"
+              }
+            ],
+            "steps": 3
+          },
+          {
+            "type": "path",
+            "from": "d",
+            "to": "p",
+            "on": "gme",
+            "color": "p",
+            "steps": 3
+          }
+        ]
+      }
+    },
+    "rione": {
+      "name": "Rione",
+      "description": "vicoli stretti tra palazzine di tufo con i panni stesi, bassi con la porta sulla strada, un cortile con la siepe",
+      "environment": "misto",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "t",
+                "out": "g",
+                "p": 0.8
+              }
+            ]
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "[gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen]",
+                "out": "hhhhh/hfffh/hfffh/hfffh/hhdhh"
+              },
+              {
+                "in": "[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]",
+                "out": "hhhhhh/hffffh/hffffh/hffffh/hdhhhh"
+              }
+            ],
+            "steps": 4
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "[gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen]",
+                "out": "qqqq/qffq/qffq/qdqq"
+              }
+            ],
+            "steps": 1
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "ggg",
+                "out": "jjj"
+              }
+            ],
+            "steps": 2
+          },
+          {
+            "type": "path",
+            "from": "d",
+            "to": "p",
+            "on": "gme",
+            "color": "p",
+            "steps": 3
+          }
+        ]
+      }
+    },
+    "corso": {
+      "name": "Corso",
+      "description": "un corso alberato di negozi e vetrine, con le aiuole spartitraffico e la fermata del tram",
+      "environment": "misto",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]",
+                "out": "hhhhhhh/hlllllh/hlllllh/hlllllh/hhhdhhh"
+              }
+            ],
+            "steps": 2
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "[gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen]",
+                "out": "hhhhh/hfffh/hfffh/hhdhh"
+              }
+            ],
+            "steps": 1
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "ggggg",
+                "out": "mtmtm"
+              }
+            ],
+            "steps": 2
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "gggggg",
+                "out": "aaaaaa"
+              }
+            ],
+            "steps": 1
+          },
+          {
+            "type": "path",
+            "from": "d",
+            "to": "p",
+            "on": "gmea",
+            "color": "p",
+            "steps": 3
+          }
+        ]
+      }
+    },
+    "uffici": {
+      "name": "Centro direzionale",
+      "description": "torri di vetro e cemento con l’atrio di marmo, piazzali, parcheggi e aiuole squadrate",
+      "environment": "misto",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "t",
+                "out": "m",
+                "p": 0.6
+              }
+            ]
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]",
+                "out": "bbbbbbbb/bllllllb/bllllllb/bllllllb/bllllllb/bllllllb/bbbdbbbb"
+              }
+            ],
+            "steps": 1
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]",
+                "out": "bbbbbb/bllllb/bllllb/bllllb/bbdbbb"
+              }
+            ],
+            "steps": 1
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "[gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen]",
+                "out": "eeee/eeee/eeee"
+              }
+            ],
+            "steps": 2
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "gg/gg",
+                "out": "mm/mm"
+              }
+            ],
+            "steps": 2
+          },
+          {
+            "type": "path",
+            "from": "d",
+            "to": "p",
+            "on": "gme",
+            "color": "p",
+            "steps": 3
+          }
+        ]
+      }
+    },
+    "mercato": {
+      "name": "Mercato",
+      "description": "il mercato coperto di mattoni con i banchi del pesce e della frutta, e le bancarelle all’aperto attorno",
+      "environment": "misto",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "t",
+                "out": "g",
+                "p": 0.9
+              }
+            ]
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]",
+                "out": "qqqqqqqqq/qlllllllq/qlllllllq/qlllllllq/qlllllllq/qqdqqqdqq"
+              }
+            ],
+            "steps": 1
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "[gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen]",
+                "out": "hhhh/hffh/hffh/hdhh"
+              }
+            ],
+            "steps": 2
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "ggg",
+                "out": "cgc"
+              }
+            ],
+            "steps": 2
+          },
+          {
+            "type": "path",
+            "from": "d",
+            "to": "p",
+            "on": "gme",
+            "color": "p",
+            "steps": 3
+          }
+        ]
+      }
+    },
+    "stazione": {
+      "name": "Stazione",
+      "description": "la grande stazione di cemento con la sala d’aspetto di marmo, i binari del tram e il piazzale dei taxi",
+      "environment": "misto",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "t",
+                "out": "g",
+                "p": 0.8
+              }
+            ]
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]",
+                "out": "bbbbbbbbbb/bllllllllb/bllllllllb/bllllllllb/bllllllllb/bbbdbbdbbb"
+              }
+            ],
+            "steps": 1
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "gggggggg",
+                "out": "aaaaaaaa"
+              }
+            ],
+            "steps": 2
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "[gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen]",
+                "out": "eeee/eeee/eeee"
+              }
+            ],
+            "steps": 1
+          },
+          {
+            "type": "path",
+            "from": "d",
+            "to": "p",
+            "on": "gmea",
+            "color": "p",
+            "steps": 3
+          }
+        ]
+      }
+    },
+    "cantiere": {
+      "name": "Cantiere",
+      "description": "il cantiere della metropolitana: recinzioni di rete, brecciolino, cumuli di macerie, la baracca degli operai",
+      "environment": "esterno",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "g",
+                "out": "n",
+                "p": 0.35
+              }
+            ]
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]",
+                "out": "ccccccc/cnnnnnc/cnnrnnc/cnnnnnc/cccnccc"
+              }
+            ],
+            "steps": 1
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "[gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen]",
+                "out": "bbbb/bffb/bffb/bdbb"
+              }
+            ],
+            "steps": 1
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "[gn][gn]",
+                "out": "rr"
+              }
+            ],
+            "steps": 2
+          },
+          {
+            "type": "path",
+            "from": "d",
+            "to": "p",
+            "on": "gmen",
+            "color": "p",
+            "steps": 3
+          }
+        ]
+      }
+    },
+    "lungomare": {
+      "name": "Lungomare",
+      "description": "la passeggiata sul mare: spiaggia di ciottoli, la banchina, palme e chioschi, gli scogli del frangiflutti",
+      "environment": "esterno",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "all",
+            "rules": [
+              {
+                "in": "s/w",
+                "out": "z/*"
+              }
+            ]
+          },
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "t",
+                "out": "m",
+                "p": 0.5
+              }
+            ]
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "[gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen]",
+                "out": "hhhh/hffh/hffh/hdhh"
+              }
+            ],
+            "steps": 2
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "ggg",
+                "out": "mtm"
+              }
+            ],
+            "steps": 3
+          },
+          {
+            "type": "path",
+            "from": "d",
+            "to": "p",
+            "on": "gmesz",
+            "color": "p",
+            "steps": 3
+          }
+        ]
+      }
+    },
+    "porto": {
+      "name": "Porto",
+      "description": "le banchine del porto con i magazzini di mattoni, le pile di container, le bitte e i pontili dei pescherecci",
+      "environment": "misto",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "all",
+            "rules": [
+              {
+                "in": "s",
+                "out": "z"
+              }
+            ]
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "z/w/w",
+                "out": "z/z/z"
+              }
+            ],
+            "steps": 6
+          },
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "t",
+                "out": "g",
+                "p": 1
+              }
+            ]
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]",
+                "out": "qqqqqqq/qfffffq/qfffffq/qfffffq/qqqdqqq"
+              }
+            ],
+            "steps": 2
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "gg/gg",
+                "out": "xx/xx"
+              }
+            ],
+            "steps": 3
+          },
+          {
+            "type": "path",
+            "from": "d",
+            "to": "p",
+            "on": "gmez",
+            "color": "p",
+            "steps": 3
+          }
+        ]
+      }
+    },
+    "officine": {
+      "name": "Officine",
+      "description": "capannoni di mattoni e officine meccaniche, piazzali di cemento, recinzioni e la cabina elettrica",
+      "environment": "misto",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "t",
+                "out": "g",
+                "p": 0.8
+              }
+            ]
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen][gpmen][gpmen]",
+                "out": "qqqqqqq/qfffffq/qfffffq/qfffffq/qfffffq/qqqdqqq"
+              }
+            ],
+            "steps": 2
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "[gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen]",
+                "out": "eeee/eeee/eeee"
+              }
+            ],
+            "steps": 2
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "gggg",
+                "out": "cccc"
+              }
+            ],
+            "steps": 2
+          },
+          {
+            "type": "path",
+            "from": "d",
+            "to": "p",
+            "on": "gme",
+            "color": "p",
+            "steps": 3
+          }
+        ]
+      }
+    },
+    "collina": {
+      "name": "Collina",
+      "description": "il colle di tufo con i pini, le ville con il giardino, i viali di brecciolino e il belvedere sul golfo",
+      "environment": "esterno",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "[gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen][gpmen]",
+                "out": "hhhhh/hfffh/hfffh/hfffh/hhdhh"
+              }
+            ],
+            "steps": 2
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "ggg/ggg",
+                "out": "jjj/mmm"
+              }
+            ],
+            "steps": 2
+          },
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "g",
+                "out": "n",
+                "p": 0.12
+              }
+            ]
+          },
+          {
+            "type": "path",
+            "from": "d",
+            "to": "p",
+            "on": "gmen",
+            "color": "p",
+            "steps": 3
+          }
+        ]
+      }
+    },
+    "parco": {
+      "name": "Parco",
+      "description": "un giardino pubblico di platani e aiuole, con la vasca dei pesci rossi, le siepi e i viali di brecciolino",
+      "environment": "esterno",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "g",
+                "out": "m",
+                "p": 0.5
+              }
+            ]
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "[gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen]",
+                "out": "mwm/www/mwm"
+              }
+            ],
+            "steps": 1
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "mmm",
+                "out": "jjj"
+              }
+            ],
+            "steps": 2
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "[gm][gm][gm]",
+                "out": "ntn"
+              }
+            ],
+            "steps": 3
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "[gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen]/[gpmen][gpmen][gpmen][gpmen]",
+                "out": "hhhh/hffh/hffh/hdhh"
+              }
+            ],
+            "steps": 1
+          },
+          {
+            "type": "path",
+            "from": "d",
+            "to": "p",
+            "on": "gmen",
+            "color": "p",
+            "steps": 3
+          }
+        ]
+      }
+    }
+  }
+}

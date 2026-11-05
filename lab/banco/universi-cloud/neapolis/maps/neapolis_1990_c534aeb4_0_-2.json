@@ -1,0 +1,32 @@
+{
+ "plan": {
+  "place": {
+   "name": "Ospedale del Colle",
+   "description": "L’ospedale tra i pini del Colle dei Gelsi, con il giardino dei convalescenti, le panchine e la vista sul golfo."
+  },
+  "layout": "collina",
+  "objects": [
+   {
+    "module": "npc.medico",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.distributore",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.lampione",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Caramella alla menta",
+   "Disinfettante"
+  ],
+  "fresh": [],
+  "runes": [
+   "terra"
+  ],
+  "strutture": []
+ }
+}

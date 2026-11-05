@@ -1,0 +1,63 @@
+{
+  "id": "npc.giornalista",
+  "name": "Giornalista",
+  "kind": "entity",
+  "version": "0.1.0",
+  "description": "Cronisti e fotografi di Neapolis: il Mattino, Radio Ciok Ciok, le notizie prima degli altri.",
+  "context": "redazioni del Corso, piazze, cantieri",
+  "logic": "logic.lua",
+  "appearance": {
+    "model": "persona",
+    "glyph": "g",
+    "color": "#c8b088",
+    "aspetto": "una persona con l’impermeabile, un taccuino in mano e una penna dietro l’orecchio"
+  },
+  "physics": {
+    "solid": false,
+    "radius": 0.35,
+    "speed": 1.1
+  },
+  "components": {
+    "wander": {
+      "dx": 0,
+      "dy": 0,
+      "t": 0,
+      "speed": 1.1
+    }
+  },
+  "interaction": {
+    "type": "talk"
+  },
+  "persona": "Fai il giornalista a Neapolis: fai domande, prendi appunti, non riveli le fonti. Delle rune sai ciò che sa la gente di città: lastre con un segno inciso che manda una luce tenue, sul marciapiede come nei giardini; alla radio ci ridono sopra, i ragazzi le vendono al mercatino, e chi ne ha pronunciata una lo racconta sottovoce.",
+  "actions": [
+    {
+      "id": "saluta",
+      "label": "Saluta"
+    },
+    {
+      "id": "quartiere",
+      "label": "Chiedi del quartiere"
+    },
+    {
+      "id": "mestiere",
+      "label": "Chiedi del lavoro"
+    },
+    {
+      "id": "insisti",
+      "label": "Insisti"
+    },
+    {
+      "id": "rune",
+      "label": "Parla delle rune"
+    },
+    {
+      "id": "compra",
+      "label": "Compra il giornale (cento lire)",
+      "requires": "item.cento-lire"
+    }
+  ],
+  "tags": [
+    "neapolis",
+    "abitante"
+  ]
+}

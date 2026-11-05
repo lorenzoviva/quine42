@@ -1,0 +1,42 @@
+{
+  "id": "obj.cucina-trattoria",
+  "name": "Cucina della trattoria",
+  "kind": "entity",
+  "version": "0.1.0",
+  "description": "La cucina di una trattoria del rione: quattro fuochi, il pentolone del ragù che borbotta, il forno per le pizze.",
+  "context": "trattorie e pizzerie dei rioni",
+  "logic": "logic.lua",
+  "appearance": {
+    "model": "cucina-trattoria",
+    "glyph": "♣",
+    "color": "#c8643a",
+    "aspetto": "una cucina a gas di trattoria con quattro fuochi, il pentolone del ragù, le padelle appese e il forno di sotto"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.42
+  },
+  "container": {
+    "size": 6,
+    "loot": "cucina"
+  },
+  "actions": [
+    {
+      "id": "cucina",
+      "label": "Cucina con quello che hai"
+    },
+    {
+      "id": "assaggia",
+      "label": "Assaggia il ragù"
+    },
+    {
+      "id": "forno",
+      "label": "Accendi il forno"
+    }
+  ],
+  "tags": [
+    "neapolis",
+    "cucina",
+    "caldo"
+  ]
+}

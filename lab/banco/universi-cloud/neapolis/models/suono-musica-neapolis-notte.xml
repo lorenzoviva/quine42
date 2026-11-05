@@ -1,0 +1,58 @@
+<!-- La notte in città: il pad della radio lontana, poche note come i lampioni rimasti accesi. -->
+<sequence name="Notte in città" values="BNSAGKHCRTMPD" size="128 3 12" symmetry="()">
+  <sound bpm="60" scale="phrygian" root="47" swing="0.03" cutoff="1800" space="0.75">
+    <track y="0" instrument="lead" volume="0.45"/>
+    <track y="1" instrument="pad" volume="0.72"/>
+    <track y="2" instrument="bass" volume="0.52"/>
+  </sound>
+  <color symbol="N" value="38bdf8" name="Nota" glow="True"/>
+  <color symbol="S" value="0284c7" name="Sustain" alpha="0.85"/>
+  <color symbol="A" value="f43f5e" name="Accento" glow="True"/>
+  <color symbol="G" value="818cf8" name="Ghost" alpha="0.7"/>
+  <color symbol="K" value="fbbf24" name="Kick" glow="True"/>
+  <color symbol="H" value="fde047" name="Hi-hat" alpha="0.85"/>
+  <color symbol="C" value="fb923c" name="Rullante" glow="True"/>
+  <color symbol="R" value="a855f7" name="Radice" hidden="True"/>
+  <color symbol="T" value="ec4899" name="Testa degli accordi" hidden="True"/>
+  <color symbol="M" value="10b981" name="Testa della melodia" hidden="True"/>
+  <color symbol="P" value="64748b" name="Testa del ritmo" hidden="True"/>
+  <color symbol="D" value="475569" name="Battuta" hidden="True"/>
+
+  <!-- Le teste, all'inizio del ciclo. -->
+  <line at="0 0 6" to="0 0 6" r="0" color="M"/>
+  <line at="0 1 2" to="0 1 2" r="0" color="T"/>
+
+  <!-- L'armonia (y=1): la testa cammina di battuta in battuta e lascia una radice. -->
+  <one>
+    <rule in="TBBBBBBBBBBBBBBBB" out="RBBBBBBBBBBBBBBBT" p="3"/>
+    <rule in="BBBBBBBBBBBBBBBBB BBBBBBBBBBBBBBBBB BBBBBBBBBBBBBBBBB TBBBBBBBBBBBBBBBB" out="BBBBBBBBBBBBBBBBT BBBBBBBBBBBBBBBBB BBBBBBBBBBBBBBBBB RBBBBBBBBBBBBBBBB"/>
+    <rule in="TBBBBBBBBBBBBBBBB BBBBBBBBBBBBBBBBB BBBBBBBBBBBBBBBBB BBBBBBBBBBBBBBBBB" out="RBBBBBBBBBBBBBBBB BBBBBBBBBBBBBBBBB BBBBBBBBBBBBBBBBB BBBBBBBBBBBBBBBBT"/>
+    <rule in="TBBBBBBBBBBBBBBBB BBBBBBBBBBBBBBBBB" out="RBBBBBBBBBBBBBBBB BBBBBBBBBBBBBBBBT"/>
+    <rule in="BBBBBBBBBBBBBBBBB TBBBBBBBBBBBBBBBB" out="BBBBBBBBBBBBBBBBT RBBBBBBBBBBBBBBBB"/>
+  </one>
+  <all in="T" out="R"/>
+  <!-- Il basso (y=2) suona la radice dell'accordo. -->
+  <all in="R/B" out="*/A"/>
+  <!-- Il pad: tre note per radice, tenute; dove la cima non c'è resta la radice sola. -->
+  <all in="B B B B R" out="N * N * N"/>
+  <all in="R" out="N"/>
+  <all in="NBBBBBBBBBBBBBBB" out="NSSSSSSSSSSSSSSS"/>
+  <!-- Il disegno del basso nella battuta. -->
+  <all>
+    <rule in="ABBBBBBBBBBBBBBB" out="ASSSSSSSSSSSSSSS"/>
+  </all>
+
+  <!-- La melodia (y=0): una testa che va avanti nel tempo e sale o scende di un grado. -->
+  <one>
+    <rule in="MBB" out="NBM"/>
+    <rule in="MBBBB" out="NSSBM" p="2"/>
+    <rule in="MBBBBBBBBBBBB" out="BBBBBBBBBBBBM" p="6"/>
+    <rule in="BBB MBB" out="BBM NBB"/>
+    <rule in="MBB BBB" out="NBB BBM"/>
+    <rule in="BBB BBB MBB" out="BBM BBB NBB"/>
+    <rule in="MBB BBB BBB" out="NBB BBB BBM"/>
+  </one>
+  <all in="M" out="B"/>
+  <!-- Qualche accento. -->
+  <one in="N/*/*" out="A/*/*" steps="2"/>
+</sequence>

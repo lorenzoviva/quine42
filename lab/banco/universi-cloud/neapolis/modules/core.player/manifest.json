@@ -1,0 +1,48 @@
+{
+  "id": "core.player",
+  "name": "Viandante",
+  "kind": "player",
+  "version": "0.4.0",
+  "description": "Tu.",
+  "appearance": {
+    "model": "viandante",
+    "glyph": "@",
+    "color": "#ffffff",
+    "aspetto": "un viandante con mantello e cappuccio"
+  },
+  "physics": {
+    "solid": false,
+    "radius": 0.22
+  },
+  "components": {
+    "player": {
+      "speed": 6,
+      "facing": "down",
+      "load": 0
+    },
+    "hand": {
+      "tokens": [],
+      "sel": 0
+    },
+    "needs": {
+      "hunger": 85,
+      "thirst": 85,
+      "energy": 90,
+      "health": 100,
+      "mana": 60
+    }
+  },
+  "persist": [
+    "player.facing",
+    "hand.tokens",
+    "hand.sel",
+    "needs.hunger",
+    "needs.thirst",
+    "needs.energy",
+    "needs.health",
+    "needs.mana"
+  ],
+  "inventory": [
+    "item.borsa-rune"
+  ]
+}
