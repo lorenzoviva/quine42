@@ -111,13 +111,23 @@ describe('a new effect', () => {
     expect(await apply(files)).toEqual({ value: 'Tira vento: 3', failed: false });
   });
 
-  it('TRAP: in a universe that rewrote core.effects the kernel would accept it and nothing happens, without a fault', async () => {
+  it('in a universe that rewrote core.effects the new effect does not happen, and a fault says so (T260: once it was a silence)', async () => {
     const mine = `${bundledFiles['modules/core.effects/logic.lua']}\n-- ritoccato\n`;
     const { files } = upgradeFromSeed({ ...madeFrom(bundledFiles), 'modules/core.effects/logic.lua': mine }, next(bundledFiles));
     expect(files['modules/core.effects/logic.lua']).toBe(mine);
     const r = await apply(files);
     expect(r.failed).toBe(false);
     expect(r.value ?? null).toBeNull();
+    const k = await boot(files);
+    expect(k.applyEffects([{ tipo: 'vento', forza: 3 } as any], k.wandererEntity)).toEqual([]);
+    expect(k.faults.get('effect:vento')?.message).toMatch(/non ha chi lo applica/);
+  });
+
+  it('where it arrived, the kernel applies it with no fault', async () => {
+    const { files } = upgradeFromSeed(madeFrom(bundledFiles), next(bundledFiles));
+    const k = await boot(files);
+    expect(k.applyEffects([{ tipo: 'vento', forza: 3 } as any], k.wandererEntity)).toEqual(['Tira vento: 3']);
+    expect(k.faults.has('effect:vento')).toBe(false);
   });
 });
 

@@ -951,6 +951,13 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Dove vive**: `src/kernel/faults.ts`
 - **Da non usare**: `fault` (nei documenti e nella UI), `errore` (per il guasto)
 
+### Versione del kernel
+- **Inglese**: `KERNEL_VERSION`, `checkKernelVersion`, `stampKernel`, `parseVersion`
+- **Definizione**: `X.Y.Z`, era, contratto con l'universo, incremento (ADR-0136); `universe.json → kernel` dice il kernel che ha scritto l'universo, e un universo di un altro contratto (`X.Y`) non si apre come se fosse di questo kernel.
+- **Dove vive**: `src/kernel/version.ts`
+- **Da non usare**: `release`, `edizione` (per la versione del kernel)
+- **Fermo**: `kernel` in `universe.json`
+
 ## Lo sviluppo
 
 ### Fase

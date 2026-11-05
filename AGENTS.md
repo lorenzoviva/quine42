@@ -157,6 +157,7 @@ src/
     chain.ts            la catena della Sala sistemi (T27a): misure di ogni sistema nel tick, stazioni
                         (bench.ts: anche il banco di prova, T27b: casi, scena, nomi dei campi)
     shortfalls.ts       le mancanze (ADR-0130): ciò che il Concilio non è riuscito a fare (`world/mancanze.json`, mai ai client), il rapporto
+    version.ts          la versione del kernel `X.Y.Z` (`KERNEL_VERSION`, `checkKernelVersion`, `stampKernel`, ADR-0136)
     credits.ts          la commissione di piattaforma (`costWithFee`, la decide il server, ADR-0132) e la divisione delle spese comuni (ADR-0081)
     ai/                 models.ts, gemini.ts, mock.ts, prices.ts (prezzi, con la data), usage.ts (registro dei consumi),
                         subscription.ts (la tabella dei provider, RoutedAiModels, QueueAiModels: i compiti lenti sugli abbonamenti, ADR-0077)
@@ -320,5 +321,6 @@ La procedura, con gli snippet per spostarsi nelle stanze, è in [`docs/architett
 - File in LF (`.gitattributes`). Su Windows niente `Get-Content`/`Set-Content` di PowerShell 5.1 sui sorgenti.
 - Nuova API per Lua: `Host` + `prelude.lua` + `LUA_API` nel validatore + prompt dell'Ingegnere + questo file.
 - Nuovo compito per un agente: schema Gemini + risposta in `MockAiModels` + voce nel registro.
+- **La versione del kernel** (ADR-0136): `X.Y.Z` = era, contratto, incremento, in `src/kernel/version.ts` (`KERNEL_VERSION`) e in `package.json`, uguali. Chi cambia `src/kernel/` sale di `Z` se gli universi della stessa `X.Y` restano buoni, di `Y` (e `Z` a 0) se cambia il contratto (formati, senso di una primitiva, regole del terreno, caso): un contratto nuovo vuole un universo nuovo. `universe.json → kernel` lo scrive il kernel; `checkKernelVersion` al caricamento, un universo di un'altra `X.Y` resta in piedi con il guasto `universe:kernel`.
 - Prima di consegnare: `npm test` e `npm run typecheck` verdi.
 - Un sottosistema nuovo o cambiato si descrive in `docs/architettura-dettagli.md`; qui una riga nell'indice (ADR-0120).

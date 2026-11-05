@@ -61,6 +61,7 @@ import { chunkLevels, HILLS, LEVEL, Relief, RELIEF_PATH, worldLevels } from './r
 import { CardUses, CARDS_FILE, COMUNE, allCards, collectionOf, moduleCardId, receivedBy, type Received, payerOf, chunkCardId, stampFiles, cardHolderOf, type Card, type CardStamp } from './cards';
 import { bondWith, memoriesFor, playerFile, PLAYERS_DIR, readWandererState, repairProfile, SOLO, validWandererId, WANDERER_NAME, wandererColor, wandererOf, wanderersIn, type Profile, type ProfileRepair, type Wanderer, type WandererState, PER_WANDERER } from './wanderers';
 import type { ActionDef, AiSettings, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, GameSetup, ChunkInfo, Recipe, RuneFragment, TerrainDef, UniverseConfig } from './types';
+import { checkKernelVersion, KERNEL_VERSION, stampKernel } from './version';
 
 /** A solid entity with a model, as collision sees it: where it is, its form, where it blocks and its floors. */
 interface SolidForm extends Ground {
@@ -370,6 +371,11 @@ export const HEAR = 8;
 export const GIVE_REACH = 3;
 export const SAY_MAX = 140;
 
+/** The effects the kernel applies itself (T260): the relief, and the social ones of a judgement. */
+const KERNEL_EFFECTS = new Set(['rilievo', 'legame', 'ricordo', 'nascita']);
+/** The effects every core.effects of the contract 0.1 applies: what a core.effects without `handles` is trusted with (T260). */
+const CORE_EFFECTS_0_1 = new Set(['messaggio', 'bisogni', 'crea_oggetto', 'consuma', 'distruggi', 'apri', 'contenitore', 'terreno', 'fuoco', 'luce', 'scudo', 'spingi', 'evoca', 'stato', 'togli_stato']);
+
 /** A plot that still does not hold after the Narrator's second answer. */
 class PlotRejected extends Error {}
 
@@ -648,6 +654,7 @@ export class Kernel {
       if (author === 'agent') k.fenceCouncil();
       k.commanded.clear();
       if (k.mirror) return;
+      k.stampKernel();
       k.writeUsage();
       k.writeShortfalls();
       k.writeCards();
@@ -1263,6 +1270,12 @@ export class Kernel {
     const config = { ...read.config };
     if (error) this.faults.raise('universe:config', error);
     else this.faults.clear('universe:config');
+    // A universe of another contract does not open as if it were ours (T260): the world stands, nothing of it is committed.
+    const version = error ? { ok: true } : checkKernelVersion(config.kernel);
+    if (!version.ok) {
+      if (!this.faults.has('universe:kernel')) this.message(`Questo universo non è di questo kernel: ${version.motivo}.`, 'warn');
+      this.faults.raise('universe:kernel', version.motivo!);
+    } else this.faults.clear('universe:kernel');
     this.keepGame(config, files);
     this.keepSettings(config, files);
     const radiusChanged = !this.config || this.config.circleRadius !== config.circleRadius;
@@ -6010,11 +6023,20 @@ export class Kernel {
   /** Applies validated effects through core.effects (Lua): the world's own code decides how they happen. */
   applyEffects(effects: Effect[], target?: Id, at?: { x: number; y: number }): string[] {
     const out: string[] = [];
-    if (!this.modules.has('core.effects')) return out;
+    if (!this.modules.has('core.effects')) {
+      for (const e of effects) if (!KERNEL_EFFECTS.has(e.tipo)) this.unhandledEffect(e.tipo);
+      return out;
+    }
     // Nobody touches a god but the god (T42a): on their body only words arrive.
     const god = target !== undefined && this.wandererOf(target);
     if (god && god !== this.wanderer().id && this.godMode(god)) effects = effects.filter((e) => e.tipo === 'messaggio');
     for (const e of effects) {
+      // The social effects are the kernel's, applied where an action is judged: here they do nothing, as before.
+      if (e.tipo === 'legame' || e.tipo === 'ricordo' || e.tipo === 'nascita') continue;
+      if (e.tipo !== 'rilievo' && !this.effectHandled(e.tipo)) {
+        this.unhandledEffect(e.tipo);
+        continue;
+      }
       if (e.tipo === 'rilievo') {
         const p = target !== undefined ? this.ecs.get(target, 'pos') : undefined;
         const cx = Math.floor(p?.x ?? at?.x ?? this.wandererCarpet().x);
@@ -6039,6 +6061,23 @@ export class Kernel {
     }
     this.runesDirty = true;
     return out;
+  }
+
+  /**
+   * Whether core.effects applies an effect (T260): its `handles` says so; a core.effects written before it had one applies the effects
+   * of the first contract, and no other (a new effect arrives with the seed, not in a core.effects the universe rewrote).
+   */
+  private effectHandled(tipo: string): boolean {
+    if (this.sandbox.has('core.effects', 'handles')) {
+      const { value, failed } = this.runModule('core.effects', 'handles', tipo);
+      return !failed && value === true;
+    }
+    return CORE_EFFECTS_0_1.has(tipo);
+  }
+
+  /** An effect that nobody applies is a fault, not a silence (T260): who reads the faults sees which one. */
+  private unhandledEffect(tipo: string): void {
+    this.faults.raise(`effect:${tipo}`, `l'effetto «${tipo}» non ha chi lo applica: né il kernel né core.effects lo conoscono`);
   }
 
   /**
@@ -7379,6 +7418,16 @@ export class Kernel {
     }
   }
 
+  /** universe.json says the kernel that writes it (T260): a compatible universe takes this kernel's version at its next commit. */
+  private stampKernel(): void {
+    if (!this.repo || this.faults.has('universe:kernel')) return;
+    const stamped = stampKernel(this.repo.working['universe.json']);
+    if (stamped === undefined) return;
+    this.repo.write('universe.json', stamped);
+    this.files = { ...this.files, 'universe.json': stamped };
+    this.config = { ...this.config, kernel: KERNEL_VERSION };
+  }
+
   /** Puts the usage ledger in the working files when it changed (the next commit carries it). */
   private writeUsage(): void {
     if (this.usage.version === this.usageWritten || !this.repo) return;
@@ -7617,7 +7666,7 @@ export class Kernel {
     if (errors.length && !force) return { errors, committed: false, written: false };
     this.writeCommanded(path, content);
     this.applyFiles({ ...this.repo.working });
-    const broken = this.faults.list().some((f) => f.key.startsWith('manifest:') || f.key.endsWith(':load') || f.key === 'universe:config');
+    const broken = this.faults.list().some((f) => f.key.startsWith('manifest:') || f.key.endsWith(':load') || f.key === 'universe:config' || f.key === 'universe:kernel');
     let committed = false;
     if (!errors.length && !broken) {
       const c = this.repo.commit(`modifica ${path}`, 'player');
@@ -7644,7 +7693,7 @@ export class Kernel {
     const before = Object.fromEntries(paths.map((p) => [p, this.repo.working[p] ?? null]));
     for (const p of paths) this.repo.write(p, changes[p]);
     this.applyFiles({ ...this.repo.working });
-    const broken = this.faults.list().find((f) => f.key.startsWith('manifest:') || f.key.endsWith(':load') || f.key === 'universe:config');
+    const broken = this.faults.list().find((f) => f.key.startsWith('manifest:') || f.key.endsWith(':load') || f.key === 'universe:config' || f.key === 'universe:kernel');
     if (broken) {
       for (const p of paths) this.repo.write(p, before[p]);
       this.applyFiles({ ...this.repo.working });

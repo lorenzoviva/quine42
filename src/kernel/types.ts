@@ -404,6 +404,8 @@ export interface UniverseConfig {
   rilievo?: { mare?: number };
   /** The heritage of clones (T45c, ADR-0084): what of every use of a cloned card goes back to who held it before. */
   eredita?: import('./heritage').HeritageConfig;
+  /** The kernel that wrote it (T260, ADR-0136): `X.Y.Z`; a universe of another `X.Y` does not open here. */
+  kernel?: string;
 }
 
 /** How the game is played in this universe: chosen before the Genesis, then fixed (ADR-0053). */

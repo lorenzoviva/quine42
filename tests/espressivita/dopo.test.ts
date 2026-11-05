@@ -5,6 +5,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { MockAiModels } from '../../src/kernel/ai/mock';
 import { bundledFiles } from '../../src/kernel/bundle';
+import { checkKernelVersion, KERNEL_VERSION } from '../../src/kernel/version';
 import { MemoryChunks } from '../../src/kernel/chunks';
 import { Kernel } from '../../src/kernel/kernel';
 import { allowedPath } from '../../src/kernel/paths';
@@ -126,5 +127,12 @@ describe('a kernel whose shared random changed', () => {
     expect(same).toBeLessThan(all);
     // The edit made before the change is still there: it is stored by index.
     expect(after.edit).toBe('l');
+  });
+
+  it('such a kernel is another contract (T260, ADR-0136): it goes up in Y, and the universe of before does not open on it as if nothing changed', () => {
+    const made = JSON.parse(bundledFiles['universe.json']).kernel;
+    const next = KERNEL_VERSION.replace(/^(\d+)\.(\d+)\.\d+$/, (_, x, y) => `${x}.${Number(y) + 1}.0`);
+    expect(checkKernelVersion(made, KERNEL_VERSION).ok).toBe(true);
+    expect(checkKernelVersion(made, next)).toMatchObject({ ok: false, motivo: expect.stringMatching(/universo nuovo/) });
   });
 });
