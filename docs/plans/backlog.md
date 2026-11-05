@@ -4685,3 +4685,12 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Test: suite intera, typecheck e build con i loro turni.
 - Browser: non serve, T285 ha già guardato.
 - Quando è fatto: commit su `task/T311`. Nell'esito: ricorda di dare `integra T311`, poi `integra T285`.
+
+### T312 · Il Concilio non scrive su un universo fuori dall'intervallo dei kernel — `da fare`
+- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 3
+- Step: 32
+- Contesto: T302 (ADR-0152) apre un universo fuori dall'intervallo `kernels` con il guasto `universe:kernel` e rifiuta il salvataggio dello stato, ma nella verifica nel browser il Concilio ha committato 5 contenuti sulla copia `vecchio` (kernel 0.0.4): un difetto che c'era già prima. Nasce da T302: `dossier T302`, e da ADR-0136.
+- Cosa fare: con il guasto `universe:kernel` aperto nessun commit dell'universo (contenuti del Concilio, moduli, modelli, brani, mappe, piani, rami, pubblicazioni) arriva al repository; il mondo resta giocabile in sola lettura e il pannello dell'anomalia lo dice. Trova il punto unico (`Repo`, `UniverseClient`, `commitContent` o dove passa ogni scrittura) invece di un controllo per agente; meglio ancora: con il guasto aperto il Concilio non chiama nemmeno i modelli (niente spesa per contenuti che non si salvano). Versione del kernel come dice ADR-0136; una riga in `docs/architettura-dettagli.md` dove T302 ha descritto l'intervallo.
+- Test: unitari (universo fuori intervallo: nessun commit, nessuna chiamata ai modelli; universo buono: come prima); suite intera e typecheck con i loro turni.
+- Browser: la copia `vecchio` di T302 (fatta a mano in una cartella temporanea): entrando e camminando qualche minuto offline, `git log` dell'universo non si muove; `sidera` scrive come prima.
+- Quando è fatto: commit su `task/T312`. Nell'esito: dove sta il blocco e cosa resta scrivibile (se qualcosa).

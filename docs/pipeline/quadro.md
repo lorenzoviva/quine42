@@ -3,10 +3,11 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 05/11/2026, epoca 290. Crediti: vedi `stato`.
+Aggiornato il 06/11/2026, epoca 295. Crediti: vedi `stato`.
 
 ## Stato attuale
 
+- **T302 integrato** (`93a6442`, ADR-0152, kernel 0.1.11): `universe.json → kernels`, etichetta «kernel X.Y–X.Y» in sessioni e lobby, `src/kernel/migrations.ts` vuoto. Difetto trovato: il Concilio committa su un universo fuori intervallo → **T312** (claude, high, 3 %, p3, step 32, approvato da me). Installare i 4 universi (`npm run universi:cloud`, `aurora` nel cestino) lo fa l'autore.
 - **Inglese lingua interna (autore, 05/11 sera, D34 chiusa):** C per le lingue (mondo per universo, interfaccia del viandante, resto di T239 in Fase III); subito lo step 42: T306 (tabella, rune in latino, ADR; dopo T302) → T307 valori → T308 campi su disco (questi due **da soli**, senza altri task su `src/` o `universe/`) → T309 commenti Lua/XML → T310 prompt in inglese.
 - **Carte fatte a mano (autore, 05/11, step 41, Fase I, p7):** T293 archivio e rotte (**D40 A**, aspetta T255) → T294 i tre laboratori ai giocatori; T295 carte prima della Genesi (**D39 A**) → T296 eliminare la carta problematica. Scelte mie, dette all'autore: interruttore a parte `laboratori` in `site/beta.json`, quote come ADR-0084, import gratis, carte visibili a tutti. T237 ha la sezione e dipende da T294.
 - **Oggetti e mobili (autore, 05/11, tutto `max`, step 40):** T288 in mano (dopo T255) → T289 banco per vestiti e armature → T290 `in attesa` della sua scelta sulle foto; T291 posare sui mobili **integrato via T301 (`bbd99a5`, `9e14b53`, ADR-0150, kernel 0.1.10)**; non provati due viandanti in due schede vere; T292 `takeable` (scelte mie da riferirgli: assente = false, contenitore pieno non si prende).
@@ -38,7 +39,7 @@ Aggiornato il 05/11/2026, epoca 290. Crediti: vedi `stato`.
 
 0. **Decisioni dell'autore del 04/11 (D8-D32 chiuse):**
    - **D32 (versionamento del kernel `X.Y.Z` e universi):** nuovo contratto del kernel `X.Y` = nuovo universo (o server dedicato alla versione precedente / futura migrazione IA a pagamento). Schema SemVer scelto: `X` = era (`0` in Fase I-II, `1` dal kernel `1.0.0`), `Y` = contratto dell'universo (parte da `1` in `0.1.0`, sale quando una modifica a `src/kernel/` cambia formati/primitive in modo incompatibile, ed è `9` in `0.9.0` per la Beta a fine Fase I), `Z` = incremento progressivo (`+1` a ogni task integrato che tocca `src/kernel/` restando compatibile con lo stesso `X.Y`). **T261** (`plan.tiles`) chiuso senza lavoro; **T260** riscritto (3 %, `da fare`, priorità 10). Step 32: T260, T262 → T245a → T263 e T245b → T245c, T245d → T245e → T245f. T245g-i in attesa della Fase III (step 39). T265 prima della beta (step 34), T264 piccolo, T266 in attesa verso fine Fase I. D16: `suono-effetto-morte` resta. D17-D26 confermate. Step 28 segnato `raggiunto`.
-1. **Pronti:** T284-T286, T302, T156, T281, T298, T288, T299, T293. Claude sessione azzerata alle 21:00 UTC, prossimo reset settimanale il 12/11; Gemini 17:37 UTC; Argon a 0 % fino all'11/11. **T256 integrato** (`d16d20a`), **T253 integrato.**
+1. **Pronti:** T306 (sbloccato da T302), T312, T156, T281, T298, T288, T299, T293. Claude sessione azzerata alle 21:00 UTC, prossimo reset settimanale il 12/11; Gemini 17:37 UTC; Argon a 0 % fino all'11/11. **T256 integrato** (`d16d20a`), **T253 integrato.**
 4. **T182 integrato e chiuso (04/11):** D5 C (T259), D6-D7 chiuse; `pagoda/1` e `tempio/2` restano fuori dai 10. Non provati nel gioco la lettera del suolo e il motore nuovo (T156).
 4b. **Generazione differita** (richiesta dell'autore, 03/11 e 05/11): **solo dopo T156, il prompt nuovo dello Scultore** (e T242, T259, D33). T207 (generatore senza browser, solo abbonamenti, aspetta T156) → T88 (la pipeline lo accende coi crediti che avanzano) → T153 (legge e prova i tre universi). I pacchetti e modelli generati ora su Claude Cloud in `lab/banco/` (`universi-cloud/`, `catalogo-cloud/`, `seme-procedurale/`, `props-tematici/`, `catalogo-60/`) usano già `lab/banco/prompt.md` (T182 + T258), ma **non** `sculptor.ts` aggiornato (T156), né il generatore differito (T207), né T242/T259: si tengono in `lab/banco/` e poi si rifaranno/rigenereranno nell'ordine giusto dopo i prerequisiti.
 
@@ -70,6 +71,6 @@ Aggiornato il 05/11/2026, epoca 290. Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **295 (claude):** T302 integrato; T312 creato. T311 in corso, poi `integra T311` e `integra T285`.
 - **294 (claude):** T285 (veste fumetto) finito e verificato nel browser; `integra` in conflitto su `architettura-dettagli.md` e `site/skins/LEGGIMI.md` → **T311** (claude, high, 2 %, p1, step 34), poi `integra T311` e `integra T285`. **T286 integrato** (veste sobria dalla proposta 04 v2; orecchie del piede di T244 da decidere con l'autore). T302 in corso.
-- **290 (gemini):** lanciato T284 (veste futuristica), poi integrato (`ebbdfb4`, ADR-0151).
 
