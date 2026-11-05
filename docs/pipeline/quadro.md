@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 05/11/2026, epoca 283. Crediti: vedi `stato`.
+Aggiornato il 05/11/2026, epoca 284. Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -16,7 +16,7 @@ Aggiornato il 05/11/2026, epoca 283. Crediti: vedi `stato`.
 - **T276 integrato** (`ed092eb`, ADR-0142): motore MarkovJunior 10-22 volte più veloce a Enorme con griglie uguali (cantina 11,87 → 1,1 s, `locanda/1/seconda` 11,67 → 0,5 s, macchina carica). **D33 chiusa con A da me**, T258 `fatto`, **T156 ora pronto** (p32). T259 `in attesa`: costi solo stimati (**D37**).
 - **T280 e T297 finiti, non integrati:** T297 (versione `0.1.9`, ADR di T280 → 0145-0147) si scontra con T283 su `docs/glossario-censimento.md` e sull'ADR-0145 → **T300** (p1, parte al riavvio). Poi `integra T297`, `integra T280`, segnare `fatto` T245d-f. Nel browser mestieri, cantiere, casa per stadi, fuori vista; non provati casa comune e raccolto, `on_return`, rientro a piedi, produzione. Dipendono da T297: **T298** (p5, i mestieri dei tre universi) e **T299** (p6, Ugo fermo su un dislivello).
 - **T274 integrato** (`73b5841`, kernel 0.1.5; T260, T262, T263, T245a-c `fatto`; T245c da vedere nel browser con T280). T245d-f `in attesa` con una riga `- Cloud:`.
-- **SPEGNIMENTO IN CORSO (autore, 05/11): `claude` e `fable` sono sospesi apposta; T255 gira (lanciato 18:12 UTC).** Il processo acceso è del 04/11 17:56 UTC, con il codice di prima di T256: non conosce lo stato `da capo` (T255 era fermo per questo, ho tolto a mano la sua voce da `esecuzioni.json`; il tentativo Argon: sessione `98be5869`, `T255.1.log`). **Quando T255 finisce: `integra T255`, poi `ferma --dopo`.** Al riavvio dell'autore: `riattiva claude`, `riattiva fable`, scrivere lo sforzo con `assegna` nei task con la riga `- Sforzo:`. Il riavvio serve: il processo importa `pipeline.mjs` una volta sola.
+- **T255 integrato** (`23147ca`, ADR-0146): provider `sonnet`, `haiku`, `agy-opus`, `agy-sonnet` in prova a tetto 1, `sforzo` nella riga `- Pipeline:`, `assegna --sforzo` (predefinito `high`). Non provati: un lancio reale con `--effort` e i provider nuovi; `ratioSessioneSettimana` di `sonnet` e `haiku` provvisorio (12). **SPEGNIMENTO: dato `ferma --dopo`, per ordine dell'autore (05/11).** **Al riavvio:** `riattiva claude`, `riattiva fable`, poi riportare con `assegna` le 27 righe `- Sforzo:` del backlog, che lo script non legge (l'ho rimandato apposta: va fatto col processo nuovo). Il primo lancio con `--effort` è da guardare.
 - **T180 integrato** (banco della varianza, solo `lab/`): 31 programmi su 31 statici; i sei vuoti del gioco per T156 sono nel suo esito; da decidere con T156 il tetto di 120 per Enorme e Gargantuesca. Soglia non provata su un edificio vero.
 - **Rinomine finite: R1-R17 integrate, T205 integrato:** un universo salvato prima si apre uguale (unica differenza `buildings`→`lots`, stessi valori), nessuna correzione al codice. Non provati `npm run serve` avviato, Firebase, Stripe, Gemini vero, un salvataggio nato in multigiocatore. All'apertura di `valmora` l'Arbitro ritira 16 moduli, uguale col codice di prima: detto all'autore.
 - **T211 integrato** (ADR-0122): i commit di `UniverseClient` stanno in fila, ritentano e non si perdono più per un errore di rete. Causa del «fetch failed» di T205 non trovata; ora `lastError` riporta il codice. Scoperti: fila solo in memoria e senza tetto; `putMap`, `branch`, `merge` non ritentano; un 401 da token scaduto perde il commit. Non provato un mondo vero col server che cade. L'autore (D15): T265, prima della beta.
@@ -69,6 +69,6 @@ Aggiornato il 05/11/2026, epoca 283. Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **284 (claude):** T255 integrato, `ferma --dopo`.
 - **283 (claude):** T255 sbloccato e in corso, T283 integrato, T300 creato, spegnimento avviato; il processo aveva il codice di prima di T256.
-- **282 (claude):** D39 e D40 chiuse con A; T293 e T295 `da fare`.
 
