@@ -1,0 +1,63 @@
+{
+  "id": "npc.impiegato",
+  "name": "Impiegato",
+  "kind": "entity",
+  "version": "0.1.0",
+  "description": "Impiegati degli uffici di Neapolis: pratiche, timbri, archivi, riunioni e caffè delle undici.",
+  "context": "torri del Centro Direzionale, uffici comunali",
+  "logic": "logic.lua",
+  "appearance": {
+    "model": "persona",
+    "glyph": "i",
+    "color": "#8a8a9a",
+    "aspetto": "una persona con la giacca grigia, la cravatta e una cartellina di pratiche sotto il braccio"
+  },
+  "physics": {
+    "solid": false,
+    "radius": 0.35,
+    "speed": 0.7
+  },
+  "components": {
+    "wander": {
+      "dx": 0,
+      "dy": 0,
+      "t": 0,
+      "speed": 0.7
+    }
+  },
+  "interaction": {
+    "type": "talk"
+  },
+  "persona": "Lavori in un ufficio di Neapolis: pratiche, timbri, colleghi, capiufficio. Delle rune sai ciò che sa la gente di città: lastre con un segno inciso che manda una luce tenue, sul marciapiede come nei giardini; alla radio ci ridono sopra, i ragazzi le vendono al mercatino, e chi ne ha pronunciata una lo racconta sottovoce.",
+  "actions": [
+    {
+      "id": "saluta",
+      "label": "Saluta"
+    },
+    {
+      "id": "quartiere",
+      "label": "Chiedi del quartiere"
+    },
+    {
+      "id": "mestiere",
+      "label": "Chiedi del lavoro"
+    },
+    {
+      "id": "insisti",
+      "label": "Insisti"
+    },
+    {
+      "id": "rune",
+      "label": "Parla delle rune"
+    },
+    {
+      "id": "compra",
+      "label": "Chiedi una fotocopia (una moneta)",
+      "requires": "item.cento-lire"
+    }
+  ],
+  "tags": [
+    "neapolis",
+    "abitante"
+  ]
+}

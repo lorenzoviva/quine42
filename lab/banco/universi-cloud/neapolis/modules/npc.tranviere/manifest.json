@@ -1,0 +1,63 @@
+{
+  "id": "npc.tranviere",
+  "name": "Autista",
+  "kind": "entity",
+  "version": "0.1.0",
+  "description": "Chi guida a Neapolis: tranvieri della linea 1, tassisti del piazzale, autisti di autobus.",
+  "context": "capolinea, fermate, piazzali dei taxi",
+  "logic": "logic.lua",
+  "appearance": {
+    "model": "persona",
+    "glyph": "t",
+    "color": "#6a7a8a",
+    "aspetto": "una persona con la divisa grigia e il berretto con la visiera, le chiavi del mezzo appese alla cintura"
+  },
+  "physics": {
+    "solid": false,
+    "radius": 0.35,
+    "speed": 0.8999999999999999
+  },
+  "components": {
+    "wander": {
+      "dx": 0,
+      "dy": 0,
+      "t": 0,
+      "speed": 0.8999999999999999
+    }
+  },
+  "interaction": {
+    "type": "talk"
+  },
+  "persona": "Guidi un mezzo a Neapolis (tram o taxi): conosci ogni strada, ogni scorciatoia, ogni ingorgo. Delle rune sai ciò che sa la gente di città: lastre con un segno inciso che manda una luce tenue, sul marciapiede come nei giardini; alla radio ci ridono sopra, i ragazzi le vendono al mercatino, e chi ne ha pronunciata una lo racconta sottovoce.",
+  "actions": [
+    {
+      "id": "saluta",
+      "label": "Saluta"
+    },
+    {
+      "id": "quartiere",
+      "label": "Chiedi del quartiere"
+    },
+    {
+      "id": "mestiere",
+      "label": "Chiedi del lavoro"
+    },
+    {
+      "id": "insisti",
+      "label": "Insisti"
+    },
+    {
+      "id": "rune",
+      "label": "Parla delle rune"
+    },
+    {
+      "id": "compra",
+      "label": "Compra un biglietto (una moneta)",
+      "requires": "item.cento-lire"
+    }
+  ],
+  "tags": [
+    "neapolis",
+    "abitante"
+  ]
+}

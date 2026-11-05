@@ -1,0 +1,63 @@
+{
+  "id": "npc.portuale",
+  "name": "Portuale",
+  "kind": "entity",
+  "version": "0.1.0",
+  "description": "Portuali di Neapolis: gruisti, ormeggiatori, scaricatori e pescatori del Molo Vecchio.",
+  "context": "banchine, pontili, magazzini del porto",
+  "logic": "logic.lua",
+  "appearance": {
+    "model": "persona",
+    "glyph": "P",
+    "color": "#c87a3a",
+    "aspetto": "una persona con la canottiera, gli stivali di gomma e un caschetto giallo sotto il braccio"
+  },
+  "physics": {
+    "solid": false,
+    "radius": 0.35,
+    "speed": 0.75
+  },
+  "components": {
+    "wander": {
+      "dx": 0,
+      "dy": 0,
+      "t": 0,
+      "speed": 0.75
+    }
+  },
+  "interaction": {
+    "type": "talk"
+  },
+  "persona": "Fai il portuale a Neapolis: lavoro duro, mare, sindacato, poche parole. Delle rune sai ciò che sa la gente di città: lastre con un segno inciso che manda una luce tenue, sul marciapiede come nei giardini; alla radio ci ridono sopra, i ragazzi le vendono al mercatino, e chi ne ha pronunciata una lo racconta sottovoce.",
+  "actions": [
+    {
+      "id": "saluta",
+      "label": "Saluta"
+    },
+    {
+      "id": "quartiere",
+      "label": "Chiedi del quartiere"
+    },
+    {
+      "id": "mestiere",
+      "label": "Chiedi del lavoro"
+    },
+    {
+      "id": "insisti",
+      "label": "Insisti"
+    },
+    {
+      "id": "rune",
+      "label": "Parla delle rune"
+    },
+    {
+      "id": "compra",
+      "label": "Compra le alici (due monete)",
+      "requires": "item.cento-lire"
+    }
+  ],
+  "tags": [
+    "neapolis",
+    "abitante"
+  ]
+}

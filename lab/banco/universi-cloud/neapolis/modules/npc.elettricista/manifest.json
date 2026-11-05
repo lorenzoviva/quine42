@@ -1,0 +1,63 @@
+{
+  "id": "npc.elettricista",
+  "name": "Elettricista",
+  "kind": "entity",
+  "version": "0.1.0",
+  "description": "Gli elettricisti dell’azienda comunale: cabine, quadri, lampioni e qualche favore agli amici.",
+  "context": "cabine elettriche, cantieri, lampioni del rione",
+  "logic": "logic.lua",
+  "appearance": {
+    "model": "persona",
+    "glyph": "e",
+    "color": "#f08030",
+    "aspetto": "una persona con la tuta arancione dell’azienda, la cassetta degli attrezzi e un rotolo di nastro isolante"
+  },
+  "physics": {
+    "solid": false,
+    "radius": 0.35,
+    "speed": 0.85
+  },
+  "components": {
+    "wander": {
+      "dx": 0,
+      "dy": 0,
+      "t": 0,
+      "speed": 0.85
+    }
+  },
+  "interaction": {
+    "type": "talk"
+  },
+  "persona": "Fai l’elettricista dell’azienda comunale a Neapolis: conosci ogni cabina e ogni quadro. Delle rune sai ciò che sa la gente di città: lastre con un segno inciso che manda una luce tenue, sul marciapiede come nei giardini; alla radio ci ridono sopra, i ragazzi le vendono al mercatino, e chi ne ha pronunciata una lo racconta sottovoce.",
+  "actions": [
+    {
+      "id": "saluta",
+      "label": "Saluta"
+    },
+    {
+      "id": "quartiere",
+      "label": "Chiedi del quartiere"
+    },
+    {
+      "id": "mestiere",
+      "label": "Chiedi del lavoro"
+    },
+    {
+      "id": "insisti",
+      "label": "Insisti"
+    },
+    {
+      "id": "rune",
+      "label": "Parla delle rune"
+    },
+    {
+      "id": "compra",
+      "label": "Compra un fusibile (una moneta)",
+      "requires": "item.cento-lire"
+    }
+  ],
+  "tags": [
+    "neapolis",
+    "abitante"
+  ]
+}

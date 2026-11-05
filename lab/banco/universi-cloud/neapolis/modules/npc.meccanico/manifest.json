@@ -1,0 +1,63 @@
+{
+  "id": "npc.meccanico",
+  "name": "Meccanico",
+  "kind": "entity",
+  "version": "0.1.0",
+  "description": "Meccanici di Neapolis: motorini, taxi, furgoni, e qualche radio per i vicini.",
+  "context": "officine dei Granili, piazzali, sotto il cavalcavia",
+  "logic": "logic.lua",
+  "appearance": {
+    "model": "persona",
+    "glyph": "m",
+    "color": "#4a6a9a",
+    "aspetto": "una persona con la tuta blu macchiata d’olio e una chiave inglese nella tasca"
+  },
+  "physics": {
+    "solid": false,
+    "radius": 0.35,
+    "speed": 0.6000000000000001
+  },
+  "components": {
+    "wander": {
+      "dx": 0,
+      "dy": 0,
+      "t": 0,
+      "speed": 0.6000000000000001
+    }
+  },
+  "interaction": {
+    "type": "talk"
+  },
+  "persona": "Fai il meccanico a Neapolis: mani sporche, poche parole, lavori in contanti. Delle rune sai ciò che sa la gente di città: lastre con un segno inciso che manda una luce tenue, sul marciapiede come nei giardini; alla radio ci ridono sopra, i ragazzi le vendono al mercatino, e chi ne ha pronunciata una lo racconta sottovoce.",
+  "actions": [
+    {
+      "id": "saluta",
+      "label": "Saluta"
+    },
+    {
+      "id": "quartiere",
+      "label": "Chiedi del quartiere"
+    },
+    {
+      "id": "mestiere",
+      "label": "Chiedi del lavoro"
+    },
+    {
+      "id": "insisti",
+      "label": "Insisti"
+    },
+    {
+      "id": "rune",
+      "label": "Parla delle rune"
+    },
+    {
+      "id": "compra",
+      "label": "Compra un pezzo di ricambio (due monete)",
+      "requires": "item.cento-lire"
+    }
+  ],
+  "tags": [
+    "neapolis",
+    "abitante"
+  ]
+}
