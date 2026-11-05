@@ -1,0 +1,37 @@
+{
+ "plan": {
+  "place": {
+   "name": "Vico delle Lavandaie",
+   "description": "Il cuore del rione: vicoli coi panni stesi, i bassi con la porta aperta, la trattoria «Da Carmela» e l’edicola votiva all’angolo."
+  },
+  "layout": "rione",
+  "objects": [
+   {
+    "module": "npc.cuoca",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.cucina-trattoria",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.lampione",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.cassonetto",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Pomodori",
+   "Farina",
+   "Carne macinata"
+  ],
+  "fresh": [],
+  "runes": [
+   "pane"
+  ],
+  "strutture": []
+ }
+}

@@ -1,0 +1,134 @@
+{
+  "regioni": [
+    {
+      "id": "colle-dei-gelsi",
+      "nome": "Colle dei Gelsi",
+      "descrizione": "il colle di tufo a nord della città: ville con il giardino, pini, viali di brecciolino, il belvedere sul golfo e il parco dei Platani",
+      "ambiente": "collina",
+      "centro": [
+        0,
+        -3
+      ],
+      "raggio": 1,
+      "bioma": "collina mediterranea",
+      "rilievo": "alto: pareti di tufo e terrazze"
+    },
+    {
+      "id": "rione-lavandaie",
+      "nome": "Rione delle Lavandaie",
+      "descrizione": "il rione vecchio: vicoli stretti, palazzine di tufo con i panni stesi, i bassi con la porta sulla strada, le trattorie e le edicole votive",
+      "ambiente": "rione",
+      "centro": [
+        -1,
+        0
+      ],
+      "raggio": 1,
+      "bioma": "città vecchia",
+      "rilievo": "pianeggiante, scale verso il colle"
+    },
+    {
+      "id": "corso-partenope",
+      "nome": "Corso Partenope",
+      "descrizione": "il corso dei negozi e delle vetrine, con il tram, le aiuole spartitraffico e la radio all’ultimo piano",
+      "ambiente": "corso",
+      "centro": [
+        0,
+        -1
+      ],
+      "raggio": 0,
+      "bioma": "città",
+      "rilievo": "pianeggiante"
+    },
+    {
+      "id": "centro-direzionale",
+      "nome": "Centro Direzionale",
+      "descrizione": "le torri di vetro e cemento costruite sulle vecchie paludi dei Granili: uffici, banche, parcheggi, molte finestre ancora buie",
+      "ambiente": "uffici",
+      "centro": [
+        1,
+        -1
+      ],
+      "raggio": 1,
+      "bioma": "città nuova",
+      "rilievo": "piatto, su terreno di bonifica"
+    },
+    {
+      "id": "mercato-del-pendino",
+      "nome": "Mercato del Pendino",
+      "descrizione": "il mercato coperto di mattoni, i banchi del pesce e della frutta, le bancarelle, le grida dalle cinque del mattino",
+      "ambiente": "mercato",
+      "centro": [
+        -2,
+        0
+      ],
+      "raggio": 0,
+      "bioma": "città vecchia",
+      "rilievo": "in leggera discesa verso il mare"
+    },
+    {
+      "id": "stazione-centrale",
+      "nome": "Stazione Centrale",
+      "descrizione": "la grande stazione di cemento, la sala d’aspetto di marmo, i binari del tram, il piazzale dei taxi e lo scalo merci",
+      "ambiente": "stazione",
+      "centro": [
+        2,
+        0
+      ],
+      "raggio": 0,
+      "bioma": "città",
+      "rilievo": "piatto"
+    },
+    {
+      "id": "cantiere-linea-2",
+      "nome": "Cantiere della Linea 2",
+      "descrizione": "il cantiere eterno della metropolitana: recinzioni, brecciolino, macerie, la baracca degli operai e il pezzo di molo antico trovato scavando",
+      "ambiente": "cantiere",
+      "centro": [
+        -2,
+        1
+      ],
+      "raggio": 0,
+      "bioma": "cantiere",
+      "rilievo": "scavi e cumuli di terra"
+    },
+    {
+      "id": "lungomare-rondini",
+      "nome": "Lungomare delle Rondini",
+      "descrizione": "la passeggiata sul mare: spiaggia di ciottoli, banchina, palme, chioschi delle granite e gli scogli del frangiflutti",
+      "ambiente": "lungomare",
+      "centro": [
+        0,
+        2
+      ],
+      "raggio": 0,
+      "bioma": "costa",
+      "rilievo": "al livello del mare"
+    },
+    {
+      "id": "porto-di-neapolis",
+      "nome": "Porto di Neapolis",
+      "descrizione": "le banchine del porto: magazzini di mattoni, pile di container, gru, i traghetti per le isole e i pontili dei pescherecci del Molo Vecchio",
+      "ambiente": "porto",
+      "centro": [
+        0,
+        3
+      ],
+      "raggio": 1,
+      "bioma": "porto e mare aperto",
+      "rilievo": "banchine sul mare"
+    },
+    {
+      "id": "officine-dei-granili",
+      "nome": "Officine dei Granili",
+      "descrizione": "i capannoni di mattoni, le officine meccaniche, la cabina elettrica di quartiere e i piazzali di cemento dietro la stazione",
+      "ambiente": "officine",
+      "centro": [
+        2,
+        1
+      ],
+      "raggio": 0,
+      "bioma": "zona industriale",
+      "rilievo": "piatto"
+    }
+  ]
+}

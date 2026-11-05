@@ -1,0 +1,55 @@
+{
+  "regole": [
+    {
+      "chiave": "caffe-sospeso",
+      "testo": "al bar si può lasciare pagato un caffè per chi verrà dopo, e prenderne uno sospeso",
+      "possibile": true,
+      "racconto": "Il caffè sospeso è un’usanza della città: chi lo lascia non lo dice, chi lo prende non chiede.",
+      "effetti": [
+        "crea_oggetto"
+      ]
+    },
+    {
+      "chiave": "motorino-seconda-fila",
+      "testo": "un motorino in seconda fila si può accendere e guidare, se ha la miscela",
+      "possibile": true,
+      "racconto": "Il motorino parte con una nuvola blu e porta lontano in fretta.",
+      "effetti": [
+        "stato"
+      ]
+    },
+    {
+      "chiave": "cabina-elettrica",
+      "testo": "un fusibile nuovo nella cabina elettrica ridà la luce al quartiere quando salta",
+      "possibile": true,
+      "racconto": "Il colpo secco del fusibile, e i lampioni che si riaccendono uno dopo l’altro.",
+      "effetti": [
+        "messaggio"
+      ]
+    },
+    {
+      "chiave": "cantiere-di-notte",
+      "testo": "di notte il cantiere della Linea 2 non si attraversa: le recinzioni sono chiuse e c’è chi sorveglia",
+      "possibile": false,
+      "racconto": "Le recinzioni del cantiere sono alte e qualcuno, di notte, punta le torce su chi si avvicina."
+    },
+    {
+      "chiave": "tram-gratis",
+      "testo": "sul tram si sale solo col biglietto timbrato",
+      "possibile": true,
+      "racconto": "Il controllore della linea 1 non perdona: biglietto timbrato o multa."
+    },
+    {
+      "chiave": "gru-del-porto",
+      "testo": "le gru del porto le manovrano solo i gruisti della compagnia",
+      "possibile": false,
+      "racconto": "Le cabine delle gru sono chiuse a chiave e i portuali non lasciano salire nessuno."
+    },
+    {
+      "chiave": "rune-in-vendita",
+      "testo": "le rune si possono vendere e comprare al mercatino della domenica",
+      "possibile": true,
+      "racconto": "I ragazzi le vendono sul telo, accanto ai fumetti; metà sono pietre dipinte, l’altra metà fanno luce."
+    }
+  ]
+}

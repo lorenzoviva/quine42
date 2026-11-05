@@ -1,0 +1,45 @@
+{
+ "plan": {
+  "place": {
+   "name": "Stazione Centrale",
+   "description": "La stazione di cemento con la sala d’aspetto di marmo, il capolinea del tram 1, il piazzale dei taxi e l’officina dei tassisti sul retro."
+  },
+  "layout": "stazione",
+  "objects": [
+   {
+    "module": "npc.meccanico",
+    "where": "fuori"
+   },
+   {
+    "module": "npc.tranviere",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.distributore",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.banco-officina",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.cabina-telefonica",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.lampione",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Orario dei tram",
+   "Pila",
+   "Biglietto del tram"
+  ],
+  "fresh": [],
+  "runes": [
+   "sirena"
+  ],
+  "strutture": []
+ }
+}

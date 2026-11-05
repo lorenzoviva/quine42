@@ -1,0 +1,180 @@
+{
+  "id": "world.terrain",
+  "name": "Terreni di Neapolis",
+  "kind": "generator",
+  "version": "0.1.0",
+  "description": "Bozza procedurale continua della città (reticolo di strade, colle a nord, mare a sud) e palette dei terreni urbani; gli ambienti trasformano la bozza.",
+  "logic": "logic.lua",
+  "tiles": {
+    "g": {
+      "name": "marciapiede",
+      "description": "basolato grigio e marciapiedi consumati dai passi",
+      "color": "#b8b0a2",
+      "solid": false,
+      "layer": "ground"
+    },
+    "p": {
+      "name": "strada",
+      "description": "asfalto con le strisce sbiadite",
+      "color": "#5e5e64",
+      "solid": false,
+      "layer": "ground",
+      "speed": 1.15
+    },
+    "t": {
+      "name": "platani",
+      "description": "platani e pini dalle chiome tonde",
+      "color": "#3e7a3a",
+      "solid": true,
+      "layer": "vegetation",
+      "model": "albero"
+    },
+    "w": {
+      "name": "acqua",
+      "description": "acqua di fontana o di darsena",
+      "color": "#3c7cc8",
+      "solid": true,
+      "layer": "liquid"
+    },
+    "r": {
+      "name": "scogli",
+      "description": "scogli e frangiflutti di cemento",
+      "color": "#7c7a76",
+      "solid": true,
+      "layer": "rock",
+      "model": "roccia"
+    },
+    "h": {
+      "name": "muro",
+      "description": "muri di tufo intonacati di ocra e di rosa",
+      "color": "#d8b88a",
+      "solid": true,
+      "layer": "wall"
+    },
+    "f": {
+      "name": "pavimento di piastrelle",
+      "description": "piastrelle di graniglia a scacchi",
+      "color": "#c8beb0",
+      "solid": false,
+      "layer": "floor",
+      "indoor": true
+    },
+    "d": {
+      "name": "portone",
+      "description": "portone di legno verde con il citofono",
+      "color": "#4a6a3a",
+      "solid": false,
+      "layer": "door"
+    },
+    "s": {
+      "name": "spiaggia",
+      "description": "sabbia scura e ciottoli della spiaggia di città",
+      "color": "#d8c27a",
+      "solid": false,
+      "layer": "ground",
+      "speed": 0.85
+    },
+    "j": {
+      "name": "siepe",
+      "description": "siepi fitte di pitosforo e bouganville",
+      "color": "#2e6a3a",
+      "solid": true,
+      "layer": "vegetation",
+      "model": "cespuglio"
+    },
+    "o": {
+      "name": "mare",
+      "description": "il mare aperto del golfo",
+      "color": "#1d4f8a",
+      "solid": true,
+      "layer": "liquid"
+    },
+    "k": {
+      "name": "tufo",
+      "description": "pareti di tufo giallo del colle",
+      "color": "#c8a85a",
+      "solid": true,
+      "layer": "rock",
+      "model": "masso-muschioso"
+    },
+    "n": {
+      "name": "brecciolino",
+      "description": "ghiaia e brecciolino dei viali del colle e dei cantieri",
+      "color": "#a89c88",
+      "solid": false,
+      "layer": "ground",
+      "speed": 0.7
+    },
+    "b": {
+      "name": "muro di cemento",
+      "description": "cemento armato a vista di uffici e capannoni",
+      "color": "#a8a49c",
+      "solid": true,
+      "layer": "wall"
+    },
+    "q": {
+      "name": "muro di mattoni",
+      "description": "mattoni rossi delle officine e dei magazzini del porto",
+      "color": "#9a4a32",
+      "solid": true,
+      "layer": "wall"
+    },
+    "l": {
+      "name": "pavimento di marmo",
+      "description": "marmo lucido degli atri e delle sale d’aspetto",
+      "color": "#d8d4cc",
+      "solid": false,
+      "layer": "floor",
+      "indoor": true
+    },
+    "c": {
+      "name": "cancellata",
+      "description": "inferriate e recinzioni di rete metallica",
+      "color": "#3a3f44",
+      "solid": true,
+      "layer": "wall"
+    },
+    "z": {
+      "name": "banchina",
+      "description": "banchina di cemento e pontili di legno sul mare",
+      "color": "#8a7a64",
+      "solid": false,
+      "layer": "floor"
+    },
+    "a": {
+      "name": "binari",
+      "description": "traversine e binari del tram e dello scalo",
+      "color": "#6a5a4a",
+      "solid": false,
+      "layer": "ground",
+      "speed": 0.85
+    },
+    "m": {
+      "name": "aiuola",
+      "description": "prato all’inglese delle aiuole e dei giardini pubblici",
+      "color": "#5a9e48",
+      "solid": false,
+      "layer": "ground",
+      "speed": 0.95
+    },
+    "e": {
+      "name": "parcheggio",
+      "description": "asfalto del parcheggio con le righe bianche",
+      "color": "#6e6e74",
+      "solid": false,
+      "layer": "ground",
+      "speed": 1.1
+    },
+    "x": {
+      "name": "container",
+      "description": "container colorati impilati sulle banchine del porto",
+      "color": "#c8642a",
+      "solid": true,
+      "layer": "wall"
+    }
+  },
+  "roof": {
+    "color": "#b05a3a"
+  },
+  "commonHouse": "una palazzina di tufo intonacata di ocra, con balconi di ferro, persiane verdi e tetto piano con le antenne"
+}

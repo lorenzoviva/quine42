@@ -1,0 +1,1575 @@
+{
+  "id": "items.neapolis",
+  "name": "Oggetti di Neapolis",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "Gli oggetti della città: bar e cucina, ospedale, officina ed elettricità, edicola e uffici, porto e cantiere, con le ricette di casa, di bottega e di cucina e le tabelle di bottino.",
+  "items": [
+    {
+      "id": "item.tazzina-caffe",
+      "name": "Tazzina di caffè",
+      "description": "Un caffè ristretto nella tazzina bollente, col piattino.",
+      "category": "bevanda",
+      "weight": 0.2,
+      "stack": 5,
+      "tags": [
+        "bar",
+        "caffe"
+      ],
+      "glyph": "u",
+      "color": "#5a3a22",
+      "effects": {
+        "thirst": 6,
+        "energy": 22
+      }
+    },
+    {
+      "id": "item.cornetto",
+      "name": "Cornetto",
+      "description": "Un cornetto alla crema ancora tiepido.",
+      "category": "cibo",
+      "weight": 0.1,
+      "stack": 6,
+      "tags": [
+        "bar",
+        "forno"
+      ],
+      "glyph": "ò",
+      "color": "#e0a850",
+      "effects": {
+        "hunger": 18,
+        "energy": 4
+      }
+    },
+    {
+      "id": "item.granita",
+      "name": "Granita al limone",
+      "description": "Granita di limone del chiosco del lungomare, in un bicchiere di carta.",
+      "category": "bevanda",
+      "weight": 0.3,
+      "stack": 3,
+      "tags": [
+        "bar",
+        "chiosco"
+      ],
+      "glyph": "u",
+      "color": "#f0f070",
+      "effects": {
+        "thirst": 30,
+        "energy": 5
+      }
+    },
+    {
+      "id": "item.chicchi-caffe",
+      "name": "Chicchi di caffè",
+      "description": "Un sacchetto di chicchi tostati, profumati di bar.",
+      "category": "materiale",
+      "weight": 0.3,
+      "stack": 10,
+      "tags": [
+        "bar",
+        "caffe",
+        "mercato"
+      ],
+      "glyph": "•",
+      "color": "#4a2a16"
+    },
+    {
+      "id": "item.acqua-minerale",
+      "name": "Acqua minerale",
+      "description": "Una bottiglia di vetro di acqua frizzante.",
+      "category": "bevanda",
+      "weight": 0.6,
+      "stack": 4,
+      "tags": [
+        "bar",
+        "distributore"
+      ],
+      "glyph": "i",
+      "color": "#a8d8f0",
+      "effects": {
+        "thirst": 35
+      }
+    },
+    {
+      "id": "item.limone",
+      "name": "Limone",
+      "description": "Un limone grosso del Colle, con le foglie.",
+      "category": "cibo",
+      "weight": 0.2,
+      "stack": 10,
+      "tags": [
+        "mercato",
+        "frutta"
+      ],
+      "glyph": "ò",
+      "color": "#f0e040",
+      "effects": {
+        "thirst": 6,
+        "hunger": 2
+      }
+    },
+    {
+      "id": "item.zucchero",
+      "name": "Zucchero",
+      "description": "Una bustina di zucchero del bar.",
+      "category": "materiale",
+      "weight": 0.05,
+      "stack": 20,
+      "tags": [
+        "bar",
+        "cucina"
+      ],
+      "glyph": "·",
+      "color": "#f8f8f0"
+    },
+    {
+      "id": "item.farina",
+      "name": "Farina",
+      "description": "Un pacco di farina doppio zero.",
+      "category": "materiale",
+      "weight": 1,
+      "stack": 5,
+      "tags": [
+        "cucina",
+        "mercato",
+        "forno"
+      ],
+      "glyph": "▫",
+      "color": "#f0ece0"
+    },
+    {
+      "id": "item.pomodori",
+      "name": "Pomodori",
+      "description": "Pomodori San Marzano del mercato, rossi e lunghi.",
+      "category": "cibo",
+      "weight": 0.4,
+      "stack": 10,
+      "tags": [
+        "cucina",
+        "mercato",
+        "frutta"
+      ],
+      "glyph": "ò",
+      "color": "#d83a2a",
+      "effects": {
+        "hunger": 6,
+        "thirst": 4
+      }
+    },
+    {
+      "id": "item.mozzarella",
+      "name": "Mozzarella",
+      "description": "Una mozzarella nel suo latte, avvolta nella carta.",
+      "category": "cibo",
+      "weight": 0.3,
+      "stack": 5,
+      "tags": [
+        "cucina",
+        "mercato"
+      ],
+      "glyph": "ò",
+      "color": "#f8f8f0",
+      "effects": {
+        "hunger": 16
+      }
+    },
+    {
+      "id": "item.carne-macinata",
+      "name": "Carne macinata",
+      "description": "Carne della macelleria del Pendino, nella carta oleata.",
+      "category": "cibo",
+      "weight": 0.5,
+      "stack": 5,
+      "tags": [
+        "cucina",
+        "mercato"
+      ],
+      "glyph": "ò",
+      "color": "#b04a3a",
+      "effects": {
+        "hunger": 8
+      }
+    },
+    {
+      "id": "item.pagnotta",
+      "name": "Pagnotta casereccia",
+      "description": "Pane del forno del rione, croccante fuori.",
+      "category": "cibo",
+      "weight": 0.5,
+      "stack": 5,
+      "tags": [
+        "cucina",
+        "forno"
+      ],
+      "glyph": "ò",
+      "color": "#c8904a",
+      "effects": {
+        "hunger": 28
+      }
+    },
+    {
+      "id": "item.pizza",
+      "name": "Pizza a portafoglio",
+      "description": "Una pizza piegata in quattro, da mangiare camminando.",
+      "category": "cibo",
+      "weight": 0.3,
+      "stack": 4,
+      "tags": [
+        "cucina",
+        "pizzeria"
+      ],
+      "glyph": "ò",
+      "color": "#e86a3a",
+      "effects": {
+        "hunger": 35,
+        "energy": 5
+      }
+    },
+    {
+      "id": "item.ragu",
+      "name": "Ragù della domenica",
+      "description": "Un tegamino di ragù che ha cotto tutta la mattina.",
+      "category": "cibo",
+      "weight": 0.6,
+      "stack": 3,
+      "tags": [
+        "cucina",
+        "trattoria"
+      ],
+      "glyph": "ò",
+      "color": "#8a2a1a",
+      "effects": {
+        "hunger": 45,
+        "health": 5
+      }
+    },
+    {
+      "id": "item.panino",
+      "name": "Panino con la mozzarella",
+      "description": "Pane casereccio e mozzarella: il pranzo degli operai.",
+      "category": "cibo",
+      "weight": 0.4,
+      "stack": 4,
+      "tags": [
+        "cucina"
+      ],
+      "glyph": "ò",
+      "color": "#e0c080",
+      "effects": {
+        "hunger": 32
+      }
+    },
+    {
+      "id": "item.cuoppo",
+      "name": "Cuoppo di alici",
+      "description": "Un cono di carta paglia pieno di alici fritte.",
+      "category": "cibo",
+      "weight": 0.3,
+      "stack": 4,
+      "tags": [
+        "cucina",
+        "porto"
+      ],
+      "glyph": "ò",
+      "color": "#d8b060",
+      "effects": {
+        "hunger": 26,
+        "thirst": -4
+      }
+    },
+    {
+      "id": "item.alici",
+      "name": "Cassetta di alici",
+      "description": "Una cassetta di legno di alici fresche del Molo Vecchio.",
+      "category": "cibo",
+      "weight": 1.5,
+      "stack": 3,
+      "tags": [
+        "porto",
+        "pesce",
+        "mercato"
+      ],
+      "glyph": "ò",
+      "color": "#8ab0c8",
+      "effects": {
+        "hunger": 10
+      }
+    },
+    {
+      "id": "item.caramella",
+      "name": "Caramella alla menta",
+      "description": "Una caramella forte, incartata.",
+      "category": "cibo",
+      "weight": 0.02,
+      "stack": 20,
+      "tags": [
+        "ospedale",
+        "edicola"
+      ],
+      "glyph": "·",
+      "color": "#a0f0c0",
+      "effects": {
+        "energy": 3
+      }
+    },
+    {
+      "id": "item.termos",
+      "name": "Termos di caffè",
+      "description": "Un termos di latta pieno di caffè per la notte.",
+      "category": "bevanda",
+      "weight": 0.8,
+      "stack": 2,
+      "tags": [
+        "ospedale",
+        "caffe"
+      ],
+      "glyph": "i",
+      "color": "#c04a2a",
+      "effects": {
+        "thirst": 15,
+        "energy": 30
+      }
+    },
+    {
+      "id": "item.garza",
+      "name": "Garza",
+      "description": "Un rotolo di garza sterile del pronto soccorso.",
+      "category": "medicina",
+      "weight": 0.1,
+      "stack": 10,
+      "tags": [
+        "ospedale",
+        "medicina"
+      ],
+      "glyph": "+",
+      "color": "#f8f8f8",
+      "effects": {
+        "health": 15
+      }
+    },
+    {
+      "id": "item.cerotti",
+      "name": "Scatola di cerotti",
+      "description": "Cerotti di tutte le misure in una scatoletta di latta.",
+      "category": "medicina",
+      "weight": 0.1,
+      "stack": 5,
+      "tags": [
+        "ospedale",
+        "medicina",
+        "farmacia"
+      ],
+      "glyph": "+",
+      "color": "#f0d0b0",
+      "effects": {
+        "health": 8
+      }
+    },
+    {
+      "id": "item.disinfettante",
+      "name": "Disinfettante",
+      "description": "Una boccetta di disinfettante rosso che brucia.",
+      "category": "medicina",
+      "weight": 0.2,
+      "stack": 5,
+      "tags": [
+        "ospedale",
+        "medicina",
+        "farmacia"
+      ],
+      "glyph": "i",
+      "color": "#c82a2a",
+      "effects": {
+        "health": 6
+      }
+    },
+    {
+      "id": "item.kit-pronto-soccorso",
+      "name": "Kit di pronto soccorso",
+      "description": "Una cassetta bianca con la croce rossa: garze, cerotti e disinfettante.",
+      "category": "medicina",
+      "weight": 0.6,
+      "stack": 2,
+      "tags": [
+        "ospedale",
+        "medicina"
+      ],
+      "glyph": "+",
+      "color": "#f04040",
+      "effects": {
+        "health": 40
+      }
+    },
+    {
+      "id": "item.chiave-inglese",
+      "name": "Chiave inglese",
+      "description": "Una chiave inglese pesante, con il manico consumato.",
+      "category": "attrezzo",
+      "weight": 0.8,
+      "stack": 1,
+      "tags": [
+        "officina",
+        "attrezzo",
+        "metallo"
+      ],
+      "glyph": "⚒",
+      "color": "#9aa4ae",
+      "equippable": true
+    },
+    {
+      "id": "item.cacciavite",
+      "name": "Cacciavite",
+      "description": "Un cacciavite a croce dal manico giallo.",
+      "category": "attrezzo",
+      "weight": 0.2,
+      "stack": 1,
+      "tags": [
+        "officina",
+        "attrezzo",
+        "elettricita"
+      ],
+      "glyph": "⚒",
+      "color": "#e0c030",
+      "equippable": true
+    },
+    {
+      "id": "item.straccio",
+      "name": "Straccio unto",
+      "description": "Uno straccio rosso sporco d’olio.",
+      "category": "materiale",
+      "weight": 0.1,
+      "stack": 5,
+      "tags": [
+        "officina"
+      ],
+      "glyph": "▫",
+      "color": "#a83a2a"
+    },
+    {
+      "id": "item.olio-motore",
+      "name": "Olio motore",
+      "description": "Una latta di olio per motorini.",
+      "category": "materiale",
+      "weight": 1,
+      "stack": 4,
+      "tags": [
+        "officina",
+        "distributore"
+      ],
+      "glyph": "i",
+      "color": "#3a3a20"
+    },
+    {
+      "id": "item.candela-motore",
+      "name": "Candela del motore",
+      "description": "Una candela d’accensione nuova nella sua scatolina.",
+      "category": "materiale",
+      "weight": 0.05,
+      "stack": 10,
+      "tags": [
+        "officina",
+        "ricambio",
+        "metallo"
+      ],
+      "glyph": "·",
+      "color": "#d0d0d0"
+    },
+    {
+      "id": "item.ricambio",
+      "name": "Pezzo di ricambio",
+      "description": "Un pezzo di motore ancora unto: un carburatore, una frizione, chissà.",
+      "category": "materiale",
+      "weight": 0.6,
+      "stack": 5,
+      "tags": [
+        "officina",
+        "ricambio",
+        "metallo"
+      ],
+      "glyph": "⚙",
+      "color": "#7a7a80"
+    },
+    {
+      "id": "item.nastro-isolante",
+      "name": "Nastro isolante",
+      "description": "Un rotolo di nastro isolante nero.",
+      "category": "materiale",
+      "weight": 0.05,
+      "stack": 10,
+      "tags": [
+        "elettricita",
+        "officina"
+      ],
+      "glyph": "○",
+      "color": "#202020"
+    },
+    {
+      "id": "item.fusibile",
+      "name": "Fusibile",
+      "description": "Un fusibile di ceramica da quadro elettrico.",
+      "category": "materiale",
+      "weight": 0.05,
+      "stack": 10,
+      "tags": [
+        "elettricita",
+        "ricambio"
+      ],
+      "glyph": "·",
+      "color": "#e8e0c8"
+    },
+    {
+      "id": "item.fusibile-bruciato",
+      "name": "Fusibile bruciato",
+      "description": "Un fusibile annerito: dentro il filo è saltato.",
+      "category": "materiale",
+      "weight": 0.05,
+      "stack": 10,
+      "tags": [
+        "elettricita",
+        "rottame"
+      ],
+      "glyph": "·",
+      "color": "#4a4a40"
+    },
+    {
+      "id": "item.filo-rame",
+      "name": "Filo di rame",
+      "description": "Una matassa di filo di rame lucido.",
+      "category": "materiale",
+      "weight": 0.2,
+      "stack": 10,
+      "tags": [
+        "elettricita",
+        "metallo",
+        "cantiere"
+      ],
+      "glyph": "~",
+      "color": "#d07a3a"
+    },
+    {
+      "id": "item.cavo",
+      "name": "Cavo elettrico",
+      "description": "Un pezzo di cavo con la guaina grigia.",
+      "category": "materiale",
+      "weight": 0.4,
+      "stack": 5,
+      "tags": [
+        "elettricita",
+        "cantiere"
+      ],
+      "glyph": "~",
+      "color": "#8a8a8a"
+    },
+    {
+      "id": "item.pila",
+      "name": "Pila",
+      "description": "Una pila torcia da un volt e mezzo.",
+      "category": "materiale",
+      "weight": 0.1,
+      "stack": 10,
+      "tags": [
+        "elettricita",
+        "distributore",
+        "edicola"
+      ],
+      "glyph": "▮",
+      "color": "#3a8a3a"
+    },
+    {
+      "id": "item.lampadina",
+      "name": "Lampadina",
+      "description": "Una lampadina a filamento nella sua scatola di cartone.",
+      "category": "materiale",
+      "weight": 0.05,
+      "stack": 10,
+      "tags": [
+        "elettricita",
+        "casa"
+      ],
+      "glyph": "○",
+      "color": "#fff3b0"
+    },
+    {
+      "id": "item.torcia",
+      "name": "Torcia elettrica",
+      "description": "Una torcia di plastica rossa. Impugnata, fa luce.",
+      "category": "luce",
+      "weight": 0.4,
+      "stack": 1,
+      "tags": [
+        "elettricita",
+        "luce",
+        "attrezzo"
+      ],
+      "glyph": "¡",
+      "color": "#d84a3a",
+      "equippable": true
+    },
+    {
+      "id": "item.prolunga",
+      "name": "Prolunga",
+      "description": "Un cavo con la spina e la presa, fatto in casa col nastro isolante.",
+      "category": "attrezzo",
+      "weight": 0.5,
+      "stack": 2,
+      "tags": [
+        "elettricita",
+        "attrezzo"
+      ],
+      "glyph": "~",
+      "color": "#f0f0f0"
+    },
+    {
+      "id": "item.radiolina",
+      "name": "Radiolina",
+      "description": "Una radiolina tascabile: si sente Radio Ciok Ciok.",
+      "category": "varie",
+      "weight": 0.3,
+      "stack": 1,
+      "tags": [
+        "elettricita",
+        "radio"
+      ],
+      "glyph": "▣",
+      "color": "#3a3a4a",
+      "equippable": true
+    },
+    {
+      "id": "item.gettone",
+      "name": "Gettone telefonico",
+      "description": "Un gettone di ottone con le scanalature: vale una telefonata.",
+      "category": "varie",
+      "weight": 0.01,
+      "stack": 30,
+      "tags": [
+        "moneta",
+        "edicola",
+        "bar"
+      ],
+      "glyph": "©",
+      "color": "#c8a040"
+    },
+    {
+      "id": "item.cento-lire",
+      "name": "Moneta da cento lire",
+      "description": "Una moneta da cento lire, un po’ consumata.",
+      "category": "varie",
+      "weight": 0.01,
+      "stack": 50,
+      "tags": [
+        "moneta"
+      ],
+      "glyph": "©",
+      "color": "#c8c8c0"
+    },
+    {
+      "id": "item.mille-lire",
+      "name": "Banconota da mille lire",
+      "description": "Una banconota da mille lire piegata in quattro.",
+      "category": "varie",
+      "weight": 0.01,
+      "stack": 30,
+      "tags": [
+        "moneta"
+      ],
+      "glyph": "▭",
+      "color": "#a8c890"
+    },
+    {
+      "id": "item.giornale",
+      "name": "Giornale del mattino",
+      "description": "Il Mattino di Neapolis di oggi: in prima pagina il cantiere.",
+      "category": "varie",
+      "weight": 0.2,
+      "stack": 3,
+      "tags": [
+        "edicola",
+        "carta"
+      ],
+      "glyph": "▤",
+      "color": "#e8e4d8"
+    },
+    {
+      "id": "item.figurine",
+      "name": "Bustina di figurine",
+      "description": "Una bustina di figurine dei calciatori, ancora chiusa.",
+      "category": "varie",
+      "weight": 0.01,
+      "stack": 10,
+      "tags": [
+        "edicola",
+        "carta"
+      ],
+      "glyph": "▭",
+      "color": "#e0503a"
+    },
+    {
+      "id": "item.fotoromanzo",
+      "name": "Fotoromanzo",
+      "description": "Un fotoromanzo con una coppia che si abbraccia in copertina.",
+      "category": "varie",
+      "weight": 0.2,
+      "stack": 3,
+      "tags": [
+        "edicola",
+        "carta"
+      ],
+      "glyph": "▤",
+      "color": "#f0a0c0"
+    },
+    {
+      "id": "item.cartolina",
+      "name": "Cartolina del golfo",
+      "description": "Una cartolina col golfo al tramonto.",
+      "category": "varie",
+      "weight": 0.01,
+      "stack": 10,
+      "tags": [
+        "edicola",
+        "carta"
+      ],
+      "glyph": "▭",
+      "color": "#f0b060"
+    },
+    {
+      "id": "item.taccuino",
+      "name": "Taccuino",
+      "description": "Un taccuino a spirale pieno di appunti fitti.",
+      "category": "varie",
+      "weight": 0.1,
+      "stack": 1,
+      "tags": [
+        "carta",
+        "ufficio"
+      ],
+      "glyph": "▤",
+      "color": "#c8b88a"
+    },
+    {
+      "id": "item.penna",
+      "name": "Penna a sfera",
+      "description": "Una penna blu mordicchiata.",
+      "category": "varie",
+      "weight": 0.01,
+      "stack": 5,
+      "tags": [
+        "ufficio",
+        "carta"
+      ],
+      "glyph": "/",
+      "color": "#3a5ac8"
+    },
+    {
+      "id": "item.rullino",
+      "name": "Rullino fotografico",
+      "description": "Un rullino da trentasei pose, già scattato.",
+      "category": "varie",
+      "weight": 0.05,
+      "stack": 5,
+      "tags": [
+        "foto"
+      ],
+      "glyph": "○",
+      "color": "#e0c020"
+    },
+    {
+      "id": "item.biglietto-stadio",
+      "name": "Biglietto dello stadio",
+      "description": "Un biglietto della curva per la partita di domenica.",
+      "category": "varie",
+      "weight": 0.01,
+      "stack": 3,
+      "tags": [
+        "carta",
+        "radio"
+      ],
+      "glyph": "▭",
+      "color": "#4a8ad8"
+    },
+    {
+      "id": "item.biglietto-tram",
+      "name": "Biglietto del tram",
+      "description": "Un biglietto della linea 1, da timbrare.",
+      "category": "varie",
+      "weight": 0.01,
+      "stack": 20,
+      "tags": [
+        "carta",
+        "tram",
+        "edicola"
+      ],
+      "glyph": "▭",
+      "color": "#f0d040"
+    },
+    {
+      "id": "item.orario-tram",
+      "name": "Orario dei tram",
+      "description": "Un libretto con gli orari dei tram, pieno di correzioni a penna.",
+      "category": "varie",
+      "weight": 0.1,
+      "stack": 1,
+      "tags": [
+        "carta",
+        "tram"
+      ],
+      "glyph": "▤",
+      "color": "#d8d0a0"
+    },
+    {
+      "id": "item.mappa",
+      "name": "Mappa della città",
+      "description": "Una pianta di Neapolis piegata male, con le scorciatoie segnate.",
+      "category": "varie",
+      "weight": 0.1,
+      "stack": 1,
+      "tags": [
+        "carta"
+      ],
+      "glyph": "▤",
+      "color": "#c8d8a0"
+    },
+    {
+      "id": "item.schedina",
+      "name": "Schedina del lotto",
+      "description": "Una schedina giocata sui numeri del sogno di stanotte.",
+      "category": "varie",
+      "weight": 0.01,
+      "stack": 5,
+      "tags": [
+        "carta",
+        "edicola"
+      ],
+      "glyph": "▭",
+      "color": "#f0f0d0"
+    },
+    {
+      "id": "item.blocchetto-multe",
+      "name": "Blocchetto delle multe",
+      "description": "Un blocchetto di verbali con la carta carbone.",
+      "category": "varie",
+      "weight": 0.2,
+      "stack": 1,
+      "tags": [
+        "carta",
+        "vigili"
+      ],
+      "glyph": "▤",
+      "color": "#f0f0f0"
+    },
+    {
+      "id": "item.fischietto",
+      "name": "Fischietto",
+      "description": "Un fischietto di metallo con il cordino.",
+      "category": "varie",
+      "weight": 0.05,
+      "stack": 1,
+      "tags": [
+        "vigili",
+        "metallo"
+      ],
+      "glyph": "·",
+      "color": "#c0c0c8"
+    },
+    {
+      "id": "item.libro-diritto",
+      "name": "Libro di diritto",
+      "description": "Un manuale di diritto amministrativo, sottolineato a matita.",
+      "category": "varie",
+      "weight": 0.9,
+      "stack": 1,
+      "tags": [
+        "carta",
+        "studio"
+      ],
+      "glyph": "▤",
+      "color": "#3a4a8a"
+    },
+    {
+      "id": "item.pratica",
+      "name": "Pratica timbrata",
+      "description": "Una cartellina con una pratica d’appalto, piena di timbri.",
+      "category": "varie",
+      "weight": 0.3,
+      "stack": 5,
+      "tags": [
+        "ufficio",
+        "carta"
+      ],
+      "glyph": "▤",
+      "color": "#e8d8a8"
+    },
+    {
+      "id": "item.graffettatrice",
+      "name": "Graffettatrice",
+      "description": "Una graffettatrice di metallo grigio, pesante.",
+      "category": "attrezzo",
+      "weight": 0.4,
+      "stack": 1,
+      "tags": [
+        "ufficio",
+        "metallo"
+      ],
+      "glyph": "⚒",
+      "color": "#8a8a90"
+    },
+    {
+      "id": "item.agenda",
+      "name": "Agenda di pelle",
+      "description": "Un’agenda di pelle blu con gli appuntamenti dell’anno.",
+      "category": "varie",
+      "weight": 0.3,
+      "stack": 1,
+      "tags": [
+        "ufficio",
+        "carta"
+      ],
+      "glyph": "▤",
+      "color": "#2a3a6a"
+    },
+    {
+      "id": "item.caschetto",
+      "name": "Caschetto giallo",
+      "description": "Un caschetto da lavoro giallo, graffiato.",
+      "category": "vestiario",
+      "weight": 0.4,
+      "stack": 1,
+      "tags": [
+        "cantiere",
+        "porto",
+        "vestiario"
+      ],
+      "glyph": "∩",
+      "color": "#f0c020",
+      "equippable": true,
+      "slot": "testa",
+      "bonus": {
+        "difesa": 2
+      }
+    },
+    {
+      "id": "item.cima",
+      "name": "Cima da ormeggio",
+      "description": "Una cima intrecciata che sa di mare.",
+      "category": "materiale",
+      "weight": 1.2,
+      "stack": 3,
+      "tags": [
+        "porto"
+      ],
+      "glyph": "~",
+      "color": "#c8b080"
+    },
+    {
+      "id": "item.chiave-magazzino",
+      "name": "Chiave del magazzino",
+      "description": "Una chiave lunga di ferro con un’etichetta di cartone: «Mag. 7».",
+      "category": "varie",
+      "weight": 0.05,
+      "stack": 1,
+      "tags": [
+        "porto",
+        "chiave"
+      ],
+      "glyph": "⚷",
+      "color": "#8a7a5a"
+    },
+    {
+      "id": "item.busta-gialla",
+      "name": "Busta gialla",
+      "description": "Una busta gialla chiusa con lo scotch: dentro, fotocopie di pratiche.",
+      "category": "varie",
+      "weight": 0.1,
+      "stack": 1,
+      "tags": [
+        "ufficio",
+        "carta",
+        "indagine"
+      ],
+      "glyph": "▭",
+      "color": "#f0d060"
+    },
+    {
+      "id": "item.gessetto",
+      "name": "Gessetto",
+      "description": "Un gessetto bianco da cantiere per segnare i muri.",
+      "category": "materiale",
+      "weight": 0.02,
+      "stack": 10,
+      "tags": [
+        "cantiere"
+      ],
+      "glyph": "·",
+      "color": "#f8f8f8"
+    },
+    {
+      "id": "item.mattone",
+      "name": "Mattone forato",
+      "description": "Un mattone forato del cantiere.",
+      "category": "materiale",
+      "weight": 2.5,
+      "stack": 5,
+      "tags": [
+        "cantiere"
+      ],
+      "glyph": "▮",
+      "color": "#b85a3a"
+    },
+    {
+      "id": "item.coccio-antico",
+      "name": "Coccio antico",
+      "description": "Un pezzo di anfora trovato negli scavi del cantiere, con il bordo liscio.",
+      "category": "varie",
+      "weight": 0.3,
+      "stack": 3,
+      "tags": [
+        "cantiere",
+        "indagine"
+      ],
+      "glyph": "◊",
+      "color": "#c87a4a"
+    }
+  ],
+  "recipes": [
+    {
+      "id": "ricetta.caffe",
+      "name": "Caffè fatto in casa",
+      "inputs": [
+        {
+          "item": "item.chicchi-caffe",
+          "count": 1
+        },
+        {
+          "item": "item.acqua-minerale",
+          "count": 1
+        }
+      ],
+      "output": {
+        "item": "item.tazzina-caffe",
+        "count": 2
+      }
+    },
+    {
+      "id": "ricetta.granita",
+      "name": "Granita al limone",
+      "inputs": [
+        {
+          "item": "item.limone",
+          "count": 2
+        },
+        {
+          "item": "item.zucchero",
+          "count": 1
+        },
+        {
+          "item": "item.acqua-minerale",
+          "count": 1
+        }
+      ],
+      "output": {
+        "item": "item.granita",
+        "count": 2
+      }
+    },
+    {
+      "id": "ricetta.pizza",
+      "name": "Pizza a portafoglio",
+      "inputs": [
+        {
+          "item": "item.farina",
+          "count": 1
+        },
+        {
+          "item": "item.pomodori",
+          "count": 1
+        },
+        {
+          "item": "item.mozzarella",
+          "count": 1
+        }
+      ],
+      "output": {
+        "item": "item.pizza",
+        "count": 2
+      }
+    },
+    {
+      "id": "ricetta.ragu",
+      "name": "Ragù della domenica",
+      "inputs": [
+        {
+          "item": "item.pomodori",
+          "count": 2
+        },
+        {
+          "item": "item.carne-macinata",
+          "count": 1
+        }
+      ],
+      "output": {
+        "item": "item.ragu",
+        "count": 1
+      }
+    },
+    {
+      "id": "ricetta.panino",
+      "name": "Panino con la mozzarella",
+      "inputs": [
+        {
+          "item": "item.pagnotta",
+          "count": 1
+        },
+        {
+          "item": "item.mozzarella",
+          "count": 1
+        }
+      ],
+      "output": {
+        "item": "item.panino",
+        "count": 2
+      }
+    },
+    {
+      "id": "ricetta.cuoppo",
+      "name": "Cuoppo di alici",
+      "inputs": [
+        {
+          "item": "item.alici",
+          "count": 1
+        },
+        {
+          "item": "item.farina",
+          "count": 1
+        }
+      ],
+      "output": {
+        "item": "item.cuoppo",
+        "count": 3
+      }
+    },
+    {
+      "id": "ricetta.torcia",
+      "name": "Torcia elettrica",
+      "inputs": [
+        {
+          "item": "item.pila",
+          "count": 2
+        },
+        {
+          "item": "item.lampadina",
+          "count": 1
+        },
+        {
+          "item": "item.nastro-isolante",
+          "count": 1
+        }
+      ],
+      "output": {
+        "item": "item.torcia",
+        "count": 1
+      }
+    },
+    {
+      "id": "ricetta.prolunga",
+      "name": "Prolunga",
+      "inputs": [
+        {
+          "item": "item.cavo",
+          "count": 2
+        },
+        {
+          "item": "item.nastro-isolante",
+          "count": 1
+        }
+      ],
+      "tools": [
+        "item.cacciavite"
+      ],
+      "output": {
+        "item": "item.prolunga",
+        "count": 1
+      }
+    },
+    {
+      "id": "ricetta.fusibile",
+      "name": "Fusibile riparato",
+      "inputs": [
+        {
+          "item": "item.fusibile-bruciato",
+          "count": 1
+        },
+        {
+          "item": "item.filo-rame",
+          "count": 1
+        }
+      ],
+      "tools": [
+        "item.cacciavite"
+      ],
+      "output": {
+        "item": "item.fusibile",
+        "count": 1
+      }
+    },
+    {
+      "id": "ricetta.radiolina",
+      "name": "Radiolina",
+      "inputs": [
+        {
+          "item": "item.filo-rame",
+          "count": 2
+        },
+        {
+          "item": "item.pila",
+          "count": 1
+        },
+        {
+          "item": "item.ricambio",
+          "count": 1
+        }
+      ],
+      "tools": [
+        "item.cacciavite"
+      ],
+      "output": {
+        "item": "item.radiolina",
+        "count": 1
+      }
+    },
+    {
+      "id": "ricetta.kit",
+      "name": "Kit di pronto soccorso",
+      "inputs": [
+        {
+          "item": "item.garza",
+          "count": 2
+        },
+        {
+          "item": "item.cerotti",
+          "count": 1
+        },
+        {
+          "item": "item.disinfettante",
+          "count": 1
+        }
+      ],
+      "output": {
+        "item": "item.kit-pronto-soccorso",
+        "count": 1
+      }
+    },
+    {
+      "id": "ricetta.candela-motore",
+      "name": "Candela del motore pulita",
+      "inputs": [
+        {
+          "item": "item.ricambio",
+          "count": 1
+        },
+        {
+          "item": "item.olio-motore",
+          "count": 1
+        }
+      ],
+      "tools": [
+        "item.chiave-inglese"
+      ],
+      "output": {
+        "item": "item.candela-motore",
+        "count": 2
+      }
+    }
+  ],
+  "loot": {
+    "comune": {
+      "rolls": [
+        1,
+        3
+      ],
+      "entries": [
+        {
+          "tag": "cibo",
+          "weight": 3
+        },
+        {
+          "tag": "carta",
+          "weight": 3
+        },
+        {
+          "item": "item.cento-lire",
+          "weight": 3,
+          "min": 1,
+          "max": 5
+        },
+        {
+          "item": "item.gettone",
+          "weight": 2
+        },
+        {
+          "tag": "elettricita",
+          "weight": 1
+        }
+      ]
+    },
+    "cassa": {
+      "rolls": [
+        1,
+        4
+      ],
+      "entries": [
+        {
+          "tag": "materiale",
+          "weight": 3
+        },
+        {
+          "tag": "attrezzo",
+          "weight": 2
+        },
+        {
+          "tag": "carta",
+          "weight": 2
+        },
+        {
+          "item": "item.mille-lire",
+          "weight": 2,
+          "min": 1,
+          "max": 3
+        }
+      ]
+    },
+    "bar": {
+      "rolls": [
+        2,
+        4
+      ],
+      "entries": [
+        {
+          "tag": "bar",
+          "weight": 6
+        },
+        {
+          "item": "item.gettone",
+          "weight": 2,
+          "min": 1,
+          "max": 3
+        },
+        {
+          "item": "item.zucchero",
+          "weight": 2,
+          "min": 1,
+          "max": 4
+        }
+      ]
+    },
+    "distributore": {
+      "rolls": [
+        1,
+        2
+      ],
+      "entries": [
+        {
+          "item": "item.acqua-minerale",
+          "weight": 4
+        },
+        {
+          "item": "item.pila",
+          "weight": 2
+        },
+        {
+          "item": "item.caramella",
+          "weight": 3
+        },
+        {
+          "item": "item.cento-lire",
+          "weight": 1
+        }
+      ]
+    },
+    "edicola": {
+      "rolls": [
+        2,
+        4
+      ],
+      "entries": [
+        {
+          "tag": "edicola",
+          "weight": 6
+        },
+        {
+          "item": "item.biglietto-tram",
+          "weight": 2,
+          "min": 1,
+          "max": 3
+        }
+      ]
+    },
+    "officina": {
+      "rolls": [
+        2,
+        4
+      ],
+      "entries": [
+        {
+          "tag": "officina",
+          "weight": 5
+        },
+        {
+          "tag": "ricambio",
+          "weight": 3
+        },
+        {
+          "tag": "elettricita",
+          "weight": 1
+        }
+      ]
+    },
+    "elettricita": {
+      "rolls": [
+        2,
+        3
+      ],
+      "entries": [
+        {
+          "tag": "elettricita",
+          "weight": 6
+        },
+        {
+          "item": "item.fusibile-bruciato",
+          "weight": 2
+        }
+      ]
+    },
+    "ufficio": {
+      "rolls": [
+        1,
+        3
+      ],
+      "entries": [
+        {
+          "tag": "ufficio",
+          "weight": 5
+        },
+        {
+          "item": "item.pratica",
+          "weight": 3
+        },
+        {
+          "item": "item.tazzina-caffe",
+          "weight": 1
+        }
+      ]
+    },
+    "cucina": {
+      "rolls": [
+        2,
+        4
+      ],
+      "entries": [
+        {
+          "tag": "cucina",
+          "weight": 6
+        },
+        {
+          "item": "item.farina",
+          "weight": 2
+        },
+        {
+          "item": "item.pomodori",
+          "weight": 2
+        }
+      ]
+    },
+    "cantiere": {
+      "rolls": [
+        1,
+        3
+      ],
+      "entries": [
+        {
+          "tag": "cantiere",
+          "weight": 5
+        },
+        {
+          "item": "item.caschetto",
+          "weight": 1
+        },
+        {
+          "item": "item.coccio-antico",
+          "weight": 1
+        }
+      ]
+    },
+    "porto": {
+      "rolls": [
+        1,
+        3
+      ],
+      "entries": [
+        {
+          "tag": "porto",
+          "weight": 5
+        },
+        {
+          "item": "item.alici",
+          "weight": 2
+        }
+      ]
+    },
+    "ospedale": {
+      "rolls": [
+        1,
+        3
+      ],
+      "entries": [
+        {
+          "tag": "ospedale",
+          "weight": 5
+        },
+        {
+          "tag": "medicina",
+          "weight": 3
+        }
+      ]
+    },
+    "mercato": {
+      "rolls": [
+        2,
+        4
+      ],
+      "entries": [
+        {
+          "tag": "mercato",
+          "weight": 6
+        },
+        {
+          "tag": "frutta",
+          "weight": 2
+        }
+      ]
+    },
+    "terreno": {
+      "rolls": [
+        0,
+        2
+      ],
+      "entries": [
+        {
+          "item": "item.cento-lire",
+          "weight": 3
+        },
+        {
+          "item": "item.gettone",
+          "weight": 2
+        },
+        {
+          "tag": "carta",
+          "weight": 2
+        },
+        {
+          "item": "item.biglietto-tram",
+          "weight": 1
+        }
+      ]
+    }
+  }
+}

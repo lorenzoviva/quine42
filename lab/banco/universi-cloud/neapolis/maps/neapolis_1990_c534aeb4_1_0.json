@@ -1,0 +1,40 @@
+{
+ "plan": {
+  "place": {
+   "name": "Piazzale degli Uffici",
+   "description": "Il piazzale tra le torri, con il parcheggio dei taxi, le aiuole squadrate e i signori in giacca che parlano al telefono."
+  },
+  "layout": "uffici",
+  "objects": [
+   {
+    "module": "npc.tranviere",
+    "where": "fuori"
+   },
+   {
+    "module": "npc.impiegato",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.scrivania",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.motorino",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.cabina-telefonica",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Gettone telefonico",
+   "Mappa della città"
+  ],
+  "fresh": [],
+  "runes": [
+   "motore"
+  ],
+  "strutture": []
+ }
+}

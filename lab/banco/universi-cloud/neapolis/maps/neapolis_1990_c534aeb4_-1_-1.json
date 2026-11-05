@@ -1,0 +1,37 @@
+{
+ "plan": {
+  "place": {
+   "name": "Pronto soccorso dei Pellegrini",
+   "description": "Il vecchio ospedale del rione, con il pronto soccorso sempre pieno, il cortile delle ambulanze e la cabina elettrica che ronza."
+  },
+  "layout": "rione",
+  "objects": [
+   {
+    "module": "npc.medico",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.distributore",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.lampione",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.quadro-elettrico",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Garza",
+   "Scatola di cerotti",
+   "Disinfettante"
+  ],
+  "fresh": [],
+  "runes": [
+   "sutura"
+  ],
+  "strutture": []
+ }
+}

@@ -1,0 +1,28 @@
+{
+ "plan": {
+  "place": {
+   "name": "Belvedere dei Gelsi",
+   "description": "La terrazza di tufo sul colle, dove si vede tutta la città fino al porto; le ville coi giardini, il chiosco chiuso, la cabina del telefono."
+  },
+  "layout": "collina",
+  "objects": [
+   {
+    "module": "obj.lampione",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.cabina-telefonica",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Cartolina del golfo",
+   "Limone"
+  ],
+  "fresh": [],
+  "runes": [
+   "vento"
+  ],
+  "strutture": []
+ }
+}

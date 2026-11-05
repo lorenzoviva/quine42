@@ -1,0 +1,36 @@
+{
+ "plan": {
+  "place": {
+   "name": "Molo Vecchio",
+   "description": "Il molo dei pescatori: gozzi tirati a secco, reti stese, cassette di alici, gatti che aspettano. Il porto commerciale lo vuole per i container."
+  },
+  "layout": "porto",
+  "objects": [
+   {
+    "module": "npc.portuale",
+    "where": "fuori"
+   },
+   {
+    "module": "npc.gatto",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.cassonetto",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.lampione",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Cima da ormeggio",
+   "Cassetta di alici"
+  ],
+  "fresh": [],
+  "runes": [
+   "marea"
+  ],
+  "strutture": []
+ }
+}

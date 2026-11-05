@@ -1,0 +1,36 @@
+{
+ "plan": {
+  "place": {
+   "name": "Vico del Molo",
+   "description": "Il vicolo in discesa che porta dal rione al mare, con le scale, i bassi dei pescatori e la cabina telefonica all’incrocio."
+  },
+  "layout": "rione",
+  "objects": [
+   {
+    "module": "npc.vigile",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.cabina-telefonica",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.cassonetto",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.lampione",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Gettone telefonico",
+   "Moneta da cento lire"
+  ],
+  "fresh": [],
+  "runes": [
+   "asfalto"
+  ],
+  "strutture": []
+ }
+}

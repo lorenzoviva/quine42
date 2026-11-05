@@ -1,0 +1,42 @@
+{
+ "plan": {
+  "place": {
+   "name": "Mercato del Pendino",
+   "description": "Il mercato coperto di mattoni rossi, con i banchi del pesce e della frutta, le bancarelle all’aperto e l’edicola all’ingresso."
+  },
+  "layout": "mercato",
+  "objects": [
+   {
+    "module": "npc.edicolante",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.edicola",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.cassonetto",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.distributore",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Limone",
+   "Cassetta di alici",
+   "Pomodori",
+   "Chicchi di caffè"
+  ],
+  "fresh": [],
+  "runes": [
+   "tufo"
+  ],
+  "strutture": [
+   {
+    "concetto": "mercato coperto"
+   }
+  ]
+ }
+}

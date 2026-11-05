@@ -1,0 +1,40 @@
+{
+ "plan": {
+  "place": {
+   "name": "Torre C del Centro Direzionale",
+   "description": "La torre di vetro più alta del Centro Direzionale, mezza vuota: atrio di marmo, ascensori lenti, l’ufficio appalti al decimo piano."
+  },
+  "layout": "uffici",
+  "objects": [
+   {
+    "module": "npc.impiegato",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.scrivania",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.distributore",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.lampione",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Pratica timbrata",
+   "Penna a sfera"
+  ],
+  "fresh": [],
+  "runes": [
+   "nebbia"
+  ],
+  "strutture": [
+   {
+    "concetto": "torre di vetro"
+   }
+  ]
+ }
+}

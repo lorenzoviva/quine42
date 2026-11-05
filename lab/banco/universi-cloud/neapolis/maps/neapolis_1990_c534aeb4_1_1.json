@@ -1,0 +1,34 @@
+{
+ "plan": {
+  "place": {
+   "name": "Redazione del Mattino",
+   "description": "La redazione del giornale in un palazzo d’angolo del Corso: macchine da scrivere, telefoni che squillano, il chiosco dei giornali sotto."
+  },
+  "layout": "corso",
+  "objects": [
+   {
+    "module": "npc.giornalista",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.edicola",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.scrivania",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.lampione",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Taccuino",
+   "Rullino fotografico"
+  ],
+  "fresh": [],
+  "runes": [],
+  "strutture": []
+ }
+}

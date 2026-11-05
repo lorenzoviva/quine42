@@ -1,0 +1,38 @@
+{
+ "plan": {
+  "place": {
+   "name": "Lungomare delle Rondini",
+   "description": "La passeggiata sul golfo: la spiaggia di ciottoli, il chiosco delle granite di Tonino, le panchine, gli innamorati e i pescatori della domenica."
+  },
+  "layout": "lungomare",
+  "objects": [
+   {
+    "module": "npc.barista",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.lampione",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.lampione",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.distributore",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.cabina-telefonica",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Granita al limone",
+   "Cartolina del golfo"
+  ],
+  "fresh": [],
+  "runes": [],
+  "strutture": []
+ }
+}
