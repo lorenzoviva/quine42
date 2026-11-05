@@ -1,5 +1,5 @@
 <!-- Automa sentinella (Cantiere 8, orichalcum): gambe, tronco, braccia e testa a caso; rivetti a caso. -->
-<sequence values="BODCILu123456" symmetry="(xy)" name="Automa sentinella">
+<sequence values="BODCILu123456z" symmetry="(xy)" name="Automa sentinella">
   <color symbol="O" value="b8892e" name="ottone"/>
   <color symbol="D" value="6b4a1e" name="ottone brunito"/>
   <color symbol="C" value="c4703a" name="rame dei rivetti"/>
@@ -12,6 +12,11 @@
   <color symbol="4" hidden="True" name="marcatore"/>
   <color symbol="5" hidden="True" name="marcatore"/>
   <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
   <!-- scelta «gambe»: dritte | al passo | piegate -->
   <box at="10 7 0" size="20 15 12" color="u" on="B"/>
   <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>

@@ -1,5 +1,5 @@
 <!-- Camino geotermico (Cantiere 8, orichalcum): massi, camini e vapore a caso. -->
-<sequence values="BRYOISLgPu123456" symmetry="(xy)" name="Camino geotermico">
+<sequence values="BRYOISLgPu123456z" symmetry="(xy)" name="Camino geotermico">
   <color symbol="R" value="6a5040" name="roccia calda"/>
   <color symbol="Y" value="d8c040" name="zolfo"/>
   <color symbol="O" value="b88a2e" name="ottone"/>
@@ -15,6 +15,11 @@
   <color symbol="4" hidden="True" name="marcatore"/>
   <color symbol="5" hidden="True" name="marcatore"/>
   <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
   <cone at="25 25 0" size="30 30 12" color="R"/>
   <!-- 7 massi nascono a caso sul terreno accanto a ciò che c'è già (R) e crescono di lato e in alto -->
   <box at="25 25 0" size="44 44 1" color="g" on="B"/>

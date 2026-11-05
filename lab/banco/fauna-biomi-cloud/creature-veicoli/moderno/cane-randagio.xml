@@ -1,5 +1,5 @@
 <!-- Cane randagio (Cantiere 8, neapolis): postura a caso; orecchie, coda e chiazze crescono a caso. -->
-<sequence values="BFDWGKPQu123456" symmetry="(xy)" name="Cane randagio">
+<sequence values="BFDWGKPQu123456z" symmetry="(xy)" name="Cane randagio">
   <color symbol="F" value="c9a06a" name="pelo fulvo"/>
   <color symbol="D" value="6a4a2c" name="chiazze scure"/>
   <color symbol="W" value="efe6d6" name="muso chiaro"/>
@@ -14,6 +14,11 @@
   <color symbol="4" hidden="True" name="marcatore"/>
   <color symbol="5" hidden="True" name="marcatore"/>
   <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
   <!-- scelta «postura»: in piedi | seduto | sdraiato | a fiutare -->
   <box at="7 10 0" size="15 20 15" color="u" on="B"/>
   <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/><rule in="u" out="4"/></one>

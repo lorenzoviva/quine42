@@ -1,5 +1,5 @@
 <!-- Fungo gigante luminoso (Cantiere 8, aurora): gambo storto a caso, cappello a caso, lamelle e funghetti a caso. -->
-<sequence values="BTUCWGMHPu123456" symmetry="(xy)" name="Fungo gigante luminoso">
+<sequence values="BTUCWGMHPu123456z" symmetry="(xy)" name="Fungo gigante luminoso">
   <color symbol="T" value="e6dccb" name="gambo"/>
   <color symbol="U" value="e6dccb" name="gambo alto"/>
   <color symbol="C" value="7a3f9e" name="cappello"/>
@@ -15,6 +15,11 @@
   <color symbol="4" hidden="True" name="marcatore"/>
   <color symbol="5" hidden="True" name="marcatore"/>
   <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
   <ellipsoid at="20 20 0" size="16 16 5" color="M"/>
   <cylinder at="20 20 0" size="8 8 5" color="T"/>
   <box at="20 20 5" size="1 1 1" color="H"/>

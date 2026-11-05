@@ -1,5 +1,5 @@
 <!-- Ragno meccanico (Cantiere 8, orichalcum): postura e addome a caso; valvole a caso sul dorso. -->
-<sequence values="BODIRTPu123456" symmetry="(xy)" name="Ragno meccanico">
+<sequence values="BODIRTPu123456z" symmetry="(xy)" name="Ragno meccanico">
   <color symbol="O" value="9a7a3a" name="piastre d'ottone"/>
   <color symbol="D" value="4f3d22" name="bronzo scuro"/>
   <color symbol="I" value="2e2c2a" name="zampe di ferro" part="gamba"/>
@@ -13,6 +13,11 @@
   <color symbol="4" hidden="True" name="marcatore"/>
   <color symbol="5" hidden="True" name="marcatore"/>
   <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
   <!-- scelta «postura»: alta | acquattata | in cammino | all'attacco -->
   <box at="12 20 0" size="25 40 30" color="u" on="B"/>
   <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/><rule in="u" out="4"/></one>

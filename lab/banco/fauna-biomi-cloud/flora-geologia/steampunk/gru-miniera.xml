@@ -1,5 +1,5 @@
 <!-- Gru di miniera (Cantiere 8, orichalcum): base e braccio a caso; la fune scende a caso; cumuli di minerale a caso. -->
-<sequence values="BOIKWSMFPgu123456" symmetry="(xy)" name="Gru di miniera">
+<sequence values="BOIKWSMFPgu123456z" symmetry="(xy)" name="Gru di miniera">
   <color symbol="O" value="a87a2a" name="traliccio d'ottone"/>
   <color symbol="I" value="3a3633" name="ferro"/>
   <color symbol="K" value="6a6560" name="contrappeso"/>
@@ -16,6 +16,11 @@
   <color symbol="4" hidden="True" name="marcatore"/>
   <color symbol="5" hidden="True" name="marcatore"/>
   <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
   <!-- scelta «base»: binari | zoccolo di pietra | cavalletto di legno -->
   <box at="25 25 0" size="30 30 6" color="u" on="B"/>
   <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>

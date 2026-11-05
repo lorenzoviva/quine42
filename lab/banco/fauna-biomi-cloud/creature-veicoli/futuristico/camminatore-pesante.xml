@@ -1,5 +1,5 @@
 <!-- Camminatore pesante (Cantiere 8, sidera): gambe, cabina e bracci a caso; antenne a rami dalle spalle. -->
-<sequence values="BWYGKVPu123456" symmetry="(xy)" name="Camminatore pesante">
+<sequence values="BWYGKVPu123456z" symmetry="(xy)" name="Camminatore pesante">
   <color symbol="W" value="c9d0d4" name="corazza"/>
   <color symbol="Y" value="e2b23a" name="piastre gialle"/>
   <color symbol="G" value="4c545a" name="pistoni" part="gamba"/>
@@ -13,6 +13,11 @@
   <color symbol="4" hidden="True" name="marcatore"/>
   <color symbol="5" hidden="True" name="marcatore"/>
   <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
   <box at="25 25 20" size="14 10 6" color="K"/>
   <!-- scelta «gambe»: erette | al passo | accovacciate -->
   <box at="25 25 0" size="40 46 23" color="u" on="B"/>

@@ -125,6 +125,14 @@ export const massi = (centro: V, lato: V, n: number, passi: number, r: string, p
   `<prl in="g" out="B"/>`,
 ];
 
+/**
+ * The hidden letter of the first nodes: eight cells that `one` erases, one draw each. The engine's generator (mulberry32) gives related
+ * numbers to close seeds at the same draw (first draw, seeds 1-5: 0.63 0.73 0.72 0.92 0.69; second: 0.00 0.32 0.04 0.33 0.77, seeds 1 and 3
+ * alike), so the first choice of a program would fall on the same options for the seeds a bench tries. The ninth draw is the first
+ * that, for seeds 1-15 and two to five options, never puts most seeds on one option (measured in `metodo.md`).
+ */
+const MESCOLA = 'z';
+
 export interface Modello {
   titolo: string;
   /** symbol, colour (rrggbb), name, and `part` or `glow`. */
@@ -139,7 +147,7 @@ export interface Modello {
 export function programma(m: Modello): string {
   const usa = m.corpo.join('\n');
   const scelte = /on="[1-6]"|in="u"/.test(usa) ? SCELTA : '';
-  const nascoste = [...new Set([...(m.marcatori ?? ''), ...scelte])].filter((c) => !m.colori.some(([s]) => s === c));
+  const nascoste = [...new Set([...(m.marcatori ?? ''), ...scelte, ...MESCOLA])].filter((c) => !m.colori.some(([s]) => s === c));
   const values = ['B', ...m.colori.map(([s]) => s), ...nascoste].join('');
   const colori = m.colori.map(([s, hex, nome, extra]) => {
     const x = extra === 'glow' ? ' glow="True"' : extra ? ` part="${extra}"` : '';
@@ -150,7 +158,13 @@ export function programma(m: Modello): string {
     `<sequence values="${values}" symmetry="(xy)" name="${m.titolo}">`,
     ...colori,
     ...nascoste.map((c) => `  <color symbol="${c}" hidden="True" name="marcatore"/>`),
-    ...m.corpo.map((r) => `  ${r}`),
+    ...[
+      nota('mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini'),
+      box([3, 0, 0], [7, 1, 1], MESCOLA, 'B'),
+      box([0, 1, 0], [1, 1, 1], MESCOLA, 'B'),
+      `<one in="${MESCOLA}" out="B" steps="8"/>`,
+      ...m.corpo,
+    ].map((r) => `  ${r}`),
     '</sequence>',
     '',
   ].join('\n');

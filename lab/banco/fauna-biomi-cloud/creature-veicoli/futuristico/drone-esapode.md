@@ -8,51 +8,52 @@ Il drone a sei zampe che pattuglia le colonie di Sidera: guscio bianco, giunti g
 
 | misura | valore | soglia |
 |---|---|---|
-| errori del validatore (`modelErrors`) e dell'analisi | 0 | 0 |
-| voxel fluttuanti (fuori dal corpo principale, seme peggiore) | 0 | 0 |
-| distanza media fra i 5 semi (forma) | 0.307 | ≥ 0.15 |
+| errori del validatore (`modelErrors`) e dell'analisi (semi 1-20) | 0 | 0 |
+| voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
+| distanza media fra i 5 semi (forma) | 0.423 | ≥ 0.15 |
 | distanza minima fra due semi | 0.000 | — |
-| tempo del seme più lento | 141 ms | < 1500 ms |
-| voxel per seme (1-5) | 2605, 2319, 2740, 2462, 2740 | — |
+| tempo del seme più lento | 148 ms | < 1500 ms |
+| voxel per seme (1-5) | 3012, 2319, 2370, 3012, 2463 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`drone-esapode.png`](drone-esapode.png).
 
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 25×40×30, 67 nodi, 144 passi, finito in 199 ms.
+Traccia, seme 1: griglia 25×40×30, 70 nodi, 162 passi, finito in 142 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
-Lettere: 2=marcatore (marcatore), 4=marcatore (marcatore), W=guscio bianco, G=giunti, K=nero opaco, E=occhio, L=luci di posizione, P=marcatore (marcatore), u=marcatore (marcatore).
-Alla fine: G 1248, W 1084, K 260, E 10, L 3.
-#2-5 box×3, ellipsoid×1: 21710 celle x0-24 y1-39 z0-21, passi 1-4
- #6 one u → 1 (+2) passi=1: ×1, 1 celle x13 y22 z19, passi 5, u→2 1
+Lettere: 2=marcatore (marcatore), W=guscio bianco, G=giunti, K=nero opaco, E=occhio, L=luci di posizione, u=marcatore (marcatore), z=marcatore (marcatore).
+Alla fine: G 1499, W 1084, K 416, E 10, L 3.
+#2-4 box×2, one×1: 16 celle x0-6 y0-1 z0, passi 1-10
+#5-8 box×3, ellipsoid×1: 21710 celle x0-24 y1-39 z0-21, passi 11-14
+ #9 one u → 1 (+2) passi=1: ×1, 1 celle x23 y28 z5, passi 15, u→2 1
    r1 u → 1 ×0; r2 u → 2 ×1; r3 u → 3 ×0
- #7 all 1u → *1 (+2): ×53, 20092 celle x0-24 y1-39 z0-21, passi 6-58, u→2 20092
+ #10 all 1u → *1 (+2): ×66, 20092 celle x0-24 y1-39 z0-21, passi 16-81, u→2 20092
    r1 1u → *1 ×0; r2 2u → *2 ×20092; r3 3u → *3 ×0
-#20-31 line×12: 1176 celle x1-23 y13-27 z0-21, passi 59-70
- #44 prl u → . (+3): ×1, 18917 celle x0-24 y1-39 z0-21, passi 71, 2→. 18917
+#23-34 line×12: 1176 celle x1-23 y13-27 z0-21, passi 82-93
+ #47 prl u → . (+3): ×1, 18917 celle x0-24 y1-39 z0-21, passi 94, 2→. 18917
    r1 u → . ×0; r2 1 → . ×0; r3 2 → . ×18917; r4 3 → . ×0
- #45 box at 12 20 14 size 25 40 16 u su .: ×1, 14818 celle x0-24 y1-39 z14-29, passi 72, .→u 14818
- #46 one u → 1 (+3) passi=1: ×1, 1 celle x9 y32 z29, passi 73, u→4 1
-   r1 u → 1 ×0; r2 u → 2 ×0; r3 u → 3 ×0; r4 u → 4 ×1
- #47 all 1u → *1 (+3): ×61, 14817 celle x0-24 y1-39 z14-29, passi 74-134, u→4 14817
-   r1 1u → *1 ×0; r2 2u → *2 ×0; r3 3u → *3 ×0; r4 4u → *4 ×14817
-#62-63 cylinder×1, box×1: 67 celle x11-13 y13-15 z15-23, passi 135-136
- #64 prl u → . (+4): ×1, 14751 celle x0-24 y1-39 z14-29, passi 137, 4→. 14751
-   r1 u → . ×0; r2 1 → . ×0; r3 2 → . ×0; r4 3 → . ×0; r5 4 → . ×14751
-#65-67 one×1, prl×2: 14 celle x9-16 y11-30 z14-28, passi 138-144
+ #48 box at 12 20 14 size 25 40 16 u su .: ×1, 14818 celle x0-24 y1-39 z14-29, passi 95, .→u 14818
+ #49 one u → 1 (+3) passi=1: ×1, 1 celle x5 y30 z22, passi 96, u→2 1
+   r1 u → 1 ×0; r2 u → 2 ×1; r3 u → 3 ×0; r4 u → 4 ×0
+ #50 all 1u → *1 (+3): ×56, 14817 celle x0-24 y1-39 z14-29, passi 97-152, u→2 14817
+   r1 1u → *1 ×0; r2 2u → *2 ×14817; r3 3u → *3 ×0; r4 4u → *4 ×0
+#54-61 line×4, ellipsoid×4: 479 celle x0-24 y6-34 z15-19, passi 153-160
+ #67 prl u → . (+4): ×1, 14339 celle x0-24 y1-39 z14-29, passi 161, 2→. 14339
+   r1 u → . ×0; r2 1 → . ×0; r3 2 → . ×14339; r4 3 → . ×0; r5 4 → . ×0
+ #70 prl .W → *L passi=1: ×1, 3 celle x8-12 y8-30 z11-15, passi 162, W→L 3
 Senza effetto (non hanno mai cambiato una cella):
-#8 line 7 14 12 → 2 14 14 G
-#9 line 2 14 14 → 1 14 0 G
-#10 line 17 14 12 → 22 14 14 G
-#11 line 22 14 14 → 23 14 0 G
-#12 line 7 20 12 → 2 20 14 G
-#13 line 2 20 14 → 1 20 0 G
-#14 line 17 20 12 → 22 20 14 G
-#15 line 22 20 14 → 23 20 0 G
-#16 line 7 26 12 → 2 26 14 G
-#17 line 2 26 14 → 1 26 0 G
-#18 line 17 26 12 → 22 26 14 G
-#19 line 22 26 14 → 23 26 0 G
-… e altri 26
+#11 line 7 14 12 → 2 14 14 G
+#12 line 2 14 14 → 1 14 0 G
+#13 line 17 14 12 → 22 14 14 G
+#14 line 22 14 14 → 23 14 0 G
+#15 line 7 20 12 → 2 20 14 G
+#16 line 2 20 14 → 1 20 0 G
+#17 line 17 20 12 → 22 20 14 G
+#18 line 22 20 14 → 23 20 0 G
+#19 line 7 26 12 → 2 26 14 G
+#20 line 2 26 14 → 1 26 0 G
+#21 line 17 26 12 → 22 26 14 G
+#22 line 22 26 14 → 23 26 0 G
+… e altri 22
 ```

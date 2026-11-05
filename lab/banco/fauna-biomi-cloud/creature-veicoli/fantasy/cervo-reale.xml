@@ -1,5 +1,5 @@
 <!-- Cervo reale (Cantiere 8, aurora): zampe, corpo e testa scelti a caso; i palchi crescono a rami da due punte sulla testa. -->
-<sequence values="BFWGKAPu123456" symmetry="(xy)" name="Cervo reale">
+<sequence values="BFWGKAPu123456z" symmetry="(xy)" name="Cervo reale">
   <color symbol="F" value="a0643a" name="mantello fulvo"/>
   <color symbol="W" value="e8d6b4" name="ventre chiaro"/>
   <color symbol="G" value="7a4a2a" name="zampe" part="gamba"/>
@@ -13,6 +13,11 @@
   <color symbol="4" hidden="True" name="marcatore"/>
   <color symbol="5" hidden="True" name="marcatore"/>
   <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
   <!-- scelta «zampe»: ferma | al passo | in slancio -->
   <box at="12 20 0" size="19 38 15" color="u" on="B"/>
   <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>

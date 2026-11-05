@@ -1,5 +1,5 @@
 <!-- Elicottero di soccorso (Cantiere 8, neapolis): fusoliera, rotore e dotazione a caso. -->
-<sequence values="BWRKVYLOu123456" symmetry="(xy)" name="Elicottero di soccorso">
+<sequence values="BWRKVYLOu123456z" symmetry="(xy)" name="Elicottero di soccorso">
   <color symbol="W" value="eef0f0" name="fusoliera bianca"/>
   <color symbol="R" value="d52f2a" name="fascia rossa"/>
   <color symbol="K" value="2a2b2e" name="pale e pattini"/>
@@ -14,6 +14,11 @@
   <color symbol="4" hidden="True" name="marcatore"/>
   <color symbol="5" hidden="True" name="marcatore"/>
   <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
   <line at="19 15 0" to="19 39 0" r="1" color="K"/>
   <line at="31 15 0" to="31 39 0" r="1" color="K"/>
   <line at="19 21 0" to="22 22 9" r="0.5" color="K"/>
@@ -76,7 +81,7 @@
   <!--   1: scaletta -->
   <line at="31 30 0" to="29 30 8" r="0.5" color="K" on="1"/>
   <!--   2: verricello e barella -->
-  <line at="34 30 16" to="41 30 16" r="1" color="K" on="2"/>
+  <line at="30 30 14" to="41 30 16" r="1" color="K" on="2"/>
   <line at="41 30 16" to="41 30 1" r="0" color="K" on="2"/>
   <box at="41 30 0" size="5 14 2" color="O" on="2"/>
   <box at="41 30 2" size="5 14 1" color="W" on="2"/>

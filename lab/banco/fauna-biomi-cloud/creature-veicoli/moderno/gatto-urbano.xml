@@ -1,5 +1,5 @@
 <!-- Gatto urbano (Cantiere 8, neapolis): postura a caso; la coda e le strisce crescono a caso. -->
-<sequence values="BFDWGEQu123456" symmetry="(xy)" name="Gatto urbano">
+<sequence values="BFDWGEQu123456z" symmetry="(xy)" name="Gatto urbano">
   <color symbol="F" value="9a9a96" name="pelo grigio"/>
   <color symbol="D" value="4e4d4b" name="strisce"/>
   <color symbol="W" value="e9e6df" name="petto bianco"/>
@@ -13,6 +13,11 @@
   <color symbol="4" hidden="True" name="marcatore"/>
   <color symbol="5" hidden="True" name="marcatore"/>
   <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
   <!-- scelta «postura»: seduto | in cammino | a pagnotta | ad arco | sdraiato su un fianco -->
   <box at="7 10 0" size="15 20 15" color="u" on="B"/>
   <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/><rule in="u" out="4"/><rule in="u" out="5"/></one>

@@ -1,5 +1,5 @@
 <!-- Quercia secolare (Cantiere 8, aurora): radici a caso; tronco, rami e chioma crescono a caso. -->
-<sequence values="BTUAFLMRHewsnu123456" symmetry="(xy)" name="Quercia secolare">
+<sequence values="BTUAFLMRHewsnu123456z" symmetry="(xy)" name="Quercia secolare">
   <color symbol="T" value="5a4030" name="corteccia"/>
   <color symbol="U" value="5a4030" name="corteccia alta"/>
   <color symbol="A" value="6b4a2e" name="rami"/>
@@ -19,6 +19,11 @@
   <color symbol="4" hidden="True" name="marcatore"/>
   <color symbol="5" hidden="True" name="marcatore"/>
   <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
   <!-- scelta «radici»: larghe | a ceppo | ad arco -->
   <box at="20 20 0" size="40 40 6" color="u" on="B"/>
   <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>

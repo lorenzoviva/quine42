@@ -1,5 +1,5 @@
 <!-- Dirigibile esploratore (Cantiere 8, orichalcum): involucro, traliccio, gondola e impennaggi a caso; toppe a caso. -->
-<sequence values="BTQWIOVu123456" symmetry="(xy)" name="Dirigibile esploratore">
+<sequence values="BTQWIOVu123456z" symmetry="(xy)" name="Dirigibile esploratore">
   <color symbol="T" value="d8cdb0" name="tela"/>
   <color symbol="Q" value="a89a78" name="toppe"/>
   <color symbol="W" value="6b4a2a" name="gondola di legno"/>
@@ -13,6 +13,11 @@
   <color symbol="4" hidden="True" name="marcatore"/>
   <color symbol="5" hidden="True" name="marcatore"/>
   <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
   <!-- scelta «involucro»: lungo | panciuto | a sigaro alto -->
   <box at="25 25 18" size="27 50 32" color="u" on="B"/>
   <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>

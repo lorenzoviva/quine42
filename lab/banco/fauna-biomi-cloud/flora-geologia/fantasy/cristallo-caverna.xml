@@ -1,5 +1,5 @@
 <!-- Cristalli di caverna (Cantiere 8, aurora): massi, cristallo madre e cristalli a caso. -->
-<sequence values="BRDXYgPQ7890u123456" symmetry="(xy)" name="Cristalli di caverna">
+<sequence values="BRDXYgPQ7890u123456z" symmetry="(xy)" name="Cristalli di caverna">
   <color symbol="R" value="4f4a56" name="roccia"/>
   <color symbol="D" value="35313b" name="roccia scura"/>
   <color symbol="X" value="b48cff" name="cristallo" glow="True"/>
@@ -18,6 +18,11 @@
   <color symbol="4" hidden="True" name="marcatore"/>
   <color symbol="5" hidden="True" name="marcatore"/>
   <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
   <ellipsoid at="25 25 0" size="22 22 8" color="R"/>
   <!-- 6 massi nascono a caso sul terreno accanto a ciò che c'è già (R) e crescono di lato e in alto -->
   <box at="25 25 0" size="40 40 1" color="g" on="B"/>

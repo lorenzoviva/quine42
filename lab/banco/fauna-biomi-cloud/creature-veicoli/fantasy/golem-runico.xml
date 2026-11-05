@@ -1,5 +1,5 @@
 <!-- Golem runico (Cantiere 8, aurora): gambe, tronco, braccia e testa a caso; rune e muschio in posti a caso. -->
-<sequence values="BSDMRu123456" symmetry="(xy)" name="Golem runico">
+<sequence values="BSDMRu123456z" symmetry="(xy)" name="Golem runico">
   <color symbol="S" value="8a8778" name="pietra"/>
   <color symbol="D" value="5f5d52" name="pietra scura"/>
   <color symbol="M" value="5f8f3e" name="muschio"/>
@@ -11,6 +11,11 @@
   <color symbol="4" hidden="True" name="marcatore"/>
   <color symbol="5" hidden="True" name="marcatore"/>
   <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
   <!-- scelta «gambe»: divaricate | al passo | in ginocchio -->
   <box at="10 7 0" size="20 15 11" color="u" on="B"/>
   <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>

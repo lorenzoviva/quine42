@@ -23,6 +23,8 @@ import { CATALOGO, type Voce } from './catalogo';
 
 const QUI = dirname(fileURLToPath(import.meta.url));
 export const SEMI = [1, 2, 3, 4, 5];
+/** Seeds tried only for what breaks (floating pieces, errors of the analysis): the combinations of the choices are many more than five. */
+export const SEMI_ROBUSTEZZA = 20;
 /** The thresholds of the cantiere. */
 export const SOGLIE = { distanza: 0.15, ms: 1500 } as const;
 
@@ -125,6 +127,20 @@ export function provaVoce(v: Voce): Esito {
       grids.push(g);
       voxel.push(a.voxels);
     }
+  // The other seeds: only what breaks counts.
+  if (model)
+    for (let seme = SEMI.length + 1; seme <= SEMI_ROBUSTEZZA; seme++) {
+      const r = runMjx(model, seme, { deadline: MAX_FORM_TIME, limits: FORM_LIMITS });
+      const a = analyse(r, model.program.palette, { grounded: true, minHeight: classe.minHeight ? Math.ceil(classe.minHeight * box[2]) : undefined });
+      for (const e of a.errors) errori.push(`seme ${seme}: ${e}`);
+      const g = r.grid;
+      const colors = colorTable(g.alphabet, model.program.palette);
+      const p = new Uint8Array(g.cells.length);
+      for (let i = 0; i < p.length; i++) if (colors[g.cells[i]]) p[i] = 1;
+      const f = fuoriDalCorpo(p, g.X, g.Y, g.Z);
+      if (f) errori.push(`seme ${seme}: ${f} voxel fluttuanti`);
+      fluttuanti = Math.max(fluttuanti, f);
+    }
   const coppie: number[] = [];
   for (let i = 0; i < pieni.length; i++) for (let j = i + 1; j < pieni.length; j++) coppie.push(distanza(pieni[i], pieni[j]));
   const dist = coppie.length ? coppie.reduce((s, x) => s + x, 0) / coppie.length : 0;
@@ -154,8 +170,8 @@ function rapporto(e: Esito, model: Parameters<typeof traceText>[0], box: number[
     '',
     '| misura | valore | soglia |',
     '|---|---|---|',
-    `| errori del validatore (\`modelErrors\`) e dell'analisi | ${e.errori.length} | 0 |`,
-    `| voxel fluttuanti (fuori dal corpo principale, seme peggiore) | ${e.fluttuanti} | 0 |`,
+    `| errori del validatore (\`modelErrors\`) e dell'analisi (semi 1-${SEMI_ROBUSTEZZA}) | ${e.errori.length} | 0 |`,
+    `| voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-${SEMI_ROBUSTEZZA}) | ${e.fluttuanti} | 0 |`,
     `| distanza media fra i 5 semi (forma) | ${r2(e.distanza)} | ≥ ${SOGLIE.distanza} |`,
     `| distanza minima fra due semi | ${r2(e.minima)} | — |`,
     `| tempo del seme più lento | ${e.ms} ms | < ${SOGLIE.ms} ms |`,
@@ -198,7 +214,7 @@ function indice(esiti: Map<string, Esito>): string {
     'regole di MarkovJunior: semi diversi, modelli diversi. Il metodo è in [`metodo.md`](metodo.md).',
     '',
     `Ogni programma passa dal banco (\`banco.ts\`): il validatore del gioco (\`modelErrors\` di \`src/kernel/validator.ts\`, nella scatola della`,
-    `sua classe), cinque semi (1-5) con 0 voxel fluttuanti, distanza media di forma fra i semi ≥ ${SOGLIE.distanza} (voxel pieni in un seme e vuoti`,
+    `sua classe), cinque semi (1-5) con 0 voxel fluttuanti (e altri ${SEMI_ROBUSTEZZA - SEMI.length} semi provati solo per ciò che si rompe), distanza media di forma fra i semi ≥ ${SOGLIE.distanza} (voxel pieni in un seme e vuoti`,
     `nell'altro su quelli pieni in uno dei due, la misura \`voxel\` di \`lab/banco/varianza.ts\`), meno di ${SOGLIE.ms} ms per seme.`,
     '',
     '```bash',

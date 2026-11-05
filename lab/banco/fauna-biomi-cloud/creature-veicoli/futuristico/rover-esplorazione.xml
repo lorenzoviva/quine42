@@ -1,5 +1,5 @@
 <!-- Rover da esplorazione (Cantiere 8, sidera): albero, braccio ed energia a caso; polvere a caso. -->
-<sequence values="BWKGSCEDu123456" symmetry="(xy)" name="Rover da esplorazione">
+<sequence values="BWKGSCEDu123456z" symmetry="(xy)" name="Rover da esplorazione">
   <color symbol="W" value="d8d4ca" name="telaio"/>
   <color symbol="K" value="2b2b2e" name="ruote"/>
   <color symbol="G" value="8a8f94" name="bracci" part="gamba"/>
@@ -14,6 +14,11 @@
   <color symbol="4" hidden="True" name="marcatore"/>
   <color symbol="5" hidden="True" name="marcatore"/>
   <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
   <ellipsoid at="3 8 0" size="4 8 8" color="K"/>
   <ellipsoid at="22 8 0" size="4 8 8" color="K"/>
   <line at="3 8 4" to="6 20 9" r="0.5" color="G"/>

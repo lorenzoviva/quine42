@@ -1,5 +1,5 @@
 <!-- Lupo dei boschi (Cantiere 8, aurora): andatura, corpo, testa e coda scelti a caso; chiazze scure sul dorso. -->
-<sequence values="BFDWGKEu123456" symmetry="(xy)" name="Lupo dei boschi">
+<sequence values="BFDWGKEu123456z" symmetry="(xy)" name="Lupo dei boschi">
   <color symbol="F" value="6e7484" name="pelliccia grigia"/>
   <color symbol="D" value="393c47" name="dorso scuro"/>
   <color symbol="W" value="c8cbda" name="petto chiaro"/>
@@ -13,6 +13,11 @@
   <color symbol="4" hidden="True" name="marcatore"/>
   <color symbol="5" hidden="True" name="marcatore"/>
   <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
   <!-- scelta «andatura»: fermo | al trotto | acquattato -->
   <box at="12 20 0" size="21 38 14" color="u" on="B"/>
   <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>

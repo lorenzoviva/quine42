@@ -1,5 +1,5 @@
 <!-- Segugio d'ottone (Cantiere 8, orichalcum): andatura, corpo, testa, coda a caso; comignoli a caso sul dorso. -->
-<sequence values="BODITLPu123456" symmetry="(xy)" name="Segugio d'ottone">
+<sequence values="BODITLPu123456z" symmetry="(xy)" name="Segugio d'ottone">
   <color symbol="O" value="c09030" name="ottone"/>
   <color symbol="D" value="7a5520" name="ottone scuro"/>
   <color symbol="I" value="3a3836" name="giunti di ferro" part="gamba"/>
@@ -13,6 +13,11 @@
   <color symbol="4" hidden="True" name="marcatore"/>
   <color symbol="5" hidden="True" name="marcatore"/>
   <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
   <!-- scelta «andatura»: ferma | in punta | di corsa -->
   <box at="12 20 0" size="21 38 14" color="u" on="B"/>
   <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>

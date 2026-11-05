@@ -8,42 +8,44 @@ Il fungo alto come un albero che illumina le radure notturne di Aurora: gambo pa
 
 | misura | valore | soglia |
 |---|---|---|
-| errori del validatore (`modelErrors`) e dell'analisi | 0 | 0 |
-| voxel fluttuanti (fuori dal corpo principale, seme peggiore) | 0 | 0 |
-| distanza media fra i 5 semi (forma) | 0.486 | ≥ 0.15 |
-| distanza minima fra due semi | 0.116 | — |
-| tempo del seme più lento | 266 ms | < 1500 ms |
-| voxel per seme (1-5) | 8334, 9777, 7212, 8366, 7308 | — |
+| errori del validatore (`modelErrors`) e dell'analisi (semi 1-20) | 0 | 0 |
+| voxel fluttuanti (fuori dal corpo principale, il peggiore dei semi 1-20) | 0 | 0 |
+| distanza media fra i 5 semi (forma) | 0.397 | ≥ 0.15 |
+| distanza minima fra due semi | 0.085 | — |
+| tempo del seme più lento | 268 ms | < 1500 ms |
+| voxel per seme (1-5) | 7172, 7180, 9774, 8368, 9770 | — |
 
 Foglio di contatto dei semi 1-5 (sopra di lato, sotto di fronte): [`fungo-gigante-luminoso.png`](fungo-gigante-luminoso.png).
 
 ## Traccia (seme 1, nodi)
 
 ```
-Traccia, seme 1: griglia 40×40×60, 27 nodi, 133 passi, finito in 268 ms.
+Traccia, seme 1: griglia 40×40×60, 30 nodi, 141 passi, finito in 273 ms.
 x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
-Lettere: 4=marcatore (marcatore), T=gambo, U=gambo alto, C=cappello, W=macchie del cappello, G=lamelle, M=muschio, H=marcatore (marcatore), P=marcatore (marcatore), u=marcatore (marcatore).
-Alla fine: C 6227, G 912, T 479, M 460, W 175, U 81.
-#2-4 ellipsoid×1, cylinder×1, box×1: 911 celle x13-27 y13-27 z0-5, passi 1-3
-#5-6 one×2: 68 celle x20-22 y19-23 z5-39, passi 4-37
- #7 all T. → *T passi=2: ×2, 216 celle x18-23 y18-24 z5-22, passi 38-39, .→T 216
-#8-9 all×1, prl×1: 65 celle x19-23 y18-24 z23-39, passi 40-41
- #10 box at 20 20 30 size 40 40 30 u su .: ×1, 45584 celle x1-39 y1-39 z30-59, passi 42, .→u 45584
- #11 one u → 1 (+3) passi=1: ×1, 1 celle x30 y11 z43, passi 43, u→4 1
-   r1 u → 1 ×0; r2 u → 2 ×0; r3 u → 3 ×0; r4 u → 4 ×1
- #12 all 1u → *1 (+3): ×73, 45583 celle x1-39 y1-39 z30-59, passi 44-116, u→4 45583
-   r1 1u → *1 ×0; r2 2u → *2 ×0; r3 3u → *3 ×0; r4 4u → *4 ×45583
-#16-17 ellipsoid×2: 6402 celle x5-35 y5-35 z36-53, passi 117-118
- #18 prl u → . (+4): ×1, 39182 celle x1-39 y1-39 z30-59, passi 119, 4→. 39182
-   r1 u → . ×0; r2 1 → . ×0; r3 2 → . ×0; r4 3 → . ×0; r5 4 → . ×39182
- #20 prl P → U: ×1, 1 celle x21 y23 z39, passi 120, P→U 1
- #21 prl C . → * G passi=1: ×1, 728 celle x5-35 y5-35 z35-47, passi 121, .→G 728
- #22 prl G . → * G passi=1: ×1, 184 celle x5-35 y5-35 z34-45, passi 122, .→G 184
- #23 prl . C → * W passi=1: ×1, 80 celle x6-35 y5-35 z40-53, passi 123, C→W 80
-#24-27 prl×2, one×1, all×1: 135 celle x7-35 y5-35 z3-53, passi 124-133
+Lettere: 3=marcatore (marcatore), T=gambo, U=gambo alto, C=cappello, W=macchie del cappello, G=lamelle, M=muschio, H=marcatore (marcatore), P=marcatore (marcatore), u=marcatore (marcatore), z=marcatore (marcatore).
+Alla fine: C 5428, G 609, T 479, M 460, W 115, U 81.
+#2-4 box×2, one×1: 16 celle x0-6 y0-1 z0, passi 1-10
+#5-7 ellipsoid×1, cylinder×1, box×1: 911 celle x13-27 y13-27 z0-5, passi 11-13
+#8-9 one×2: 68 celle x19-22 y18-22 z5-39, passi 14-47
+ #10 all T. → *T passi=2: ×2, 216 celle x17-22 y17-23 z5-22, passi 48-49, .→T 216
+#11-12 all×1, prl×1: 65 celle x19-23 y17-23 z23-39, passi 50-51
+ #13 box at 20 20 30 size 40 40 30 u su .: ×1, 45584 celle x1-39 y1-39 z30-59, passi 52, .→u 45584
+ #14 one u → 1 (+3) passi=1: ×1, 1 celle x19 y2 z45, passi 53, u→3 1
+   r1 u → 1 ×0; r2 u → 2 ×0; r3 u → 3 ×1; r4 u → 4 ×0
+ #15 all 1u → *1 (+3): ×72, 45583 celle x1-39 y1-39 z30-59, passi 54-125, u→3 45583
+   r1 1u → *1 ×0; r2 2u → *2 ×0; r3 3u → *3 ×45583; r4 4u → *4 ×0
+ #18 cone at 20 20 37 size 30 30 22 C su 3: ×1, 5543 celle x6-34 y6-34 z37-58, passi 126, 3→C 5543
+ #21 prl u → . (+4): ×1, 40041 celle x1-39 y1-39 z30-59, passi 127, 3→. 40041
+   r1 u → . ×0; r2 1 → . ×0; r3 2 → . ×0; r4 3 → . ×40041; r5 4 → . ×0
+ #23 prl P → U: ×1, 1 celle x22 y22 z39, passi 128, P→U 1
+ #24 prl C . → * G passi=1: ×1, 474 celle x6-34 y6-34 z36, passi 129, .→G 474
+ #25 prl G . → * G passi=1: ×1, 135 celle x6-34 y6-33 z35, passi 130, .→G 135
+ #26 prl . C → * W passi=1: ×1, 60 celle x6-32 y7-34 z37-57, passi 131, C→W 60
+#27-30 prl×2, one×1, all×1: 95 celle x6-32 y7-34 z3-57, passi 132-141
 Senza effetto (non hanno mai cambiato una cella):
-#13 ellipsoid at 20 20 41 size 34 34 9 C su 1
-#14 ellipsoid at 20 20 36 size 28 28 20 C su 2
-#15 cone at 20 20 37 size 30 30 22 C su 3
-#19 all . P → P U: le celle cercate c'erano, ma mai disposte come nel pattern
+#16 ellipsoid at 20 20 41 size 34 34 9 C su 1
+#17 ellipsoid at 20 20 36 size 28 28 20 C su 2
+#19 ellipsoid at 20 20 36 size 32 32 8 C su 4
+#20 ellipsoid at 20 20 44 size 20 20 10 C su 4
+#22 all . P → P U: le celle cercate c'erano, ma mai disposte come nel pattern
 ```

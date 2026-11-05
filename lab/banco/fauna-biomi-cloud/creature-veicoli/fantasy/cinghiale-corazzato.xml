@@ -1,5 +1,5 @@
 <!-- Cinghiale corazzato (Cantiere 8, aurora): zampe, corpo e testa a caso; le punte delle placche nascono in posti a caso. -->
-<sequence values="BFRSGTKPu123456" symmetry="(xy)" name="Cinghiale corazzato">
+<sequence values="BFRSGTKPu123456z" symmetry="(xy)" name="Cinghiale corazzato">
   <color symbol="F" value="5a3f2c" name="setole brune"/>
   <color symbol="R" value="8f8676" name="placche d'osso"/>
   <color symbol="S" value="d9d0bc" name="punte"/>
@@ -14,6 +14,11 @@
   <color symbol="4" hidden="True" name="marcatore"/>
   <color symbol="5" hidden="True" name="marcatore"/>
   <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
   <!-- scelta «zampe»: ferme | alla carica -->
   <box at="12 20 0" size="21 38 10" color="u" on="B"/>
   <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/></one>

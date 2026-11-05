@@ -1,5 +1,5 @@
 <!-- Drone esapode (Cantiere 8, sidera): zampe e modulo del dorso a caso; antenna a rami e luci a caso. -->
-<sequence values="BWGKELPu123456" symmetry="(xy)" name="Drone esapode">
+<sequence values="BWGKELPu123456z" symmetry="(xy)" name="Drone esapode">
   <color symbol="W" value="e6ecef" name="guscio bianco"/>
   <color symbol="G" value="6f7980" name="giunti" part="gamba"/>
   <color symbol="K" value="2b3238" name="nero opaco"/>
@@ -13,6 +13,11 @@
   <color symbol="4" hidden="True" name="marcatore"/>
   <color symbol="5" hidden="True" name="marcatore"/>
   <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
   <box at="12 33 11" size="5 1 2" color="E"/>
   <ellipsoid at="12 20 9" size="14 26 7" color="W"/>
   <box at="12 20 9" size="16 20 2" color="K" on="W"/>

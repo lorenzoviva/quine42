@@ -27,11 +27,26 @@ ne prende una. In MarkovJunior puro, senza coordinate decise dal seme:
 <prl><rule in="u" out="B"/><rule in="1" out="B"/>…</prl>        <!-- la regione torna aria -->
 ```
 
-Ogni regola di `one` corrisponde a tutte le celle `u`, quindi le opzioni sono equiprobabili. Il riempimento è un `all` con la simmetria di
+Ogni regola di `one` corrisponde a tutte le celle `u`, quindi le opzioni sono equiprobabili (con la mescola qui sotto). Il riempimento è un `all` con la simmetria di
 tutto il cubo (la radice ha `(xy)`: senza, invaderebbe un solo piano). Costa quanto la regione, non la griglia: per questo la regione è una
 scatola che contiene solo le forme delle opzioni (sull'intera griglia di un edificio, 50³, una scelta costava 450 ms; nella sua regione
 40-150 ms). Le forme dipingono solo l'aria (`on="k"`): ciò che è già stato costruito resta, e una parte nuova si attacca a quella vecchia
 sovrapponendosi di almeno un voxel. Più scelte indipendenti in fila danno il prodotto delle combinazioni (il cervo: 3 × 3 × 4).
+
+### 1b. La mescola (i semi vicini)
+
+Il generatore del motore (`Rng` di `src/kernel/rng.ts`, mulberry32) dà numeri imparentati a semi vicini alla stessa estrazione: la prima
+estrazione dei semi 1-5 è 0,63 0,73 0,72 0,92 0,69, la seconda 0,00 0,32 0,04 0,33 0,77 (i semi 1 e 3, 2 e 4 si somigliano). Su 200 semi la
+distribuzione è uniforme, ma sui semi che un banco prova la prima scelta di un programma cadeva quasi sempre sulle ultime opzioni (quattro
+semi su cinque sullo stesso furgone). Ogni programma comincia quindi con una **mescola**: otto celle nascoste che `one` cancella una per
+passo, otto estrazioni consumate. La nona è la prima che, per i semi 1-15 e da due a cinque opzioni, non mette mai la maggior parte dei semi
+sulla stessa opzione (misurato provando tutti i valori da 0 a 300). Il motore non si tocca: è una riga in testa al programma.
+
+```xml
+<box at="3 0 0" size="7 1 1" color="z" on="B"/>
+<box at="0 1 0" size="1 1 1" color="z" on="B"/>
+<one in="z" out="B" steps="8"/>
+```
 
 ### 2. I camminatori (`ramifica`, e le code e le orecchie)
 
@@ -56,7 +71,10 @@ Il banco (`banco.ts`) prova ogni programma come il gioco: la scatola della sua c
 programma con `withSize`), il validatore del gioco (`modelErrors` di `src/kernel/validator.ts`, che compila, esegue il seme 1 e
 analizza), poi cinque semi (1-5) con l'analisi di `src/mj/check.ts` (tocca terra, nessun pezzo staccato, l'altezza minima della classe).
 
-- **Voxel fluttuanti**: i voxel visibili fuori dal pezzo più grande (26-connesso), al seme peggiore. Devono essere 0.
+- **Voxel fluttuanti**: i voxel visibili fuori dal pezzo più grande (26-connesso), al seme peggiore. Devono essere 0, e non solo sui cinque
+  semi della distanza: errori e pezzi staccati si cercano sui **semi 1-20**, perché le combinazioni delle scelte sono molte più di cinque
+  e un attacco sbagliato si vede solo in una (le borse laterali della moto da turismo staccate dalla sella, una scala del ponteggio a un
+  voxel dalla platea).
 - **Distanza fra i semi**: per ogni coppia di semi, i voxel pieni in uno e vuoti nell'altro su quelli pieni in almeno uno (la misura
   `voxel` di `lab/banco/varianza.ts`); la media delle dieci coppie deve essere ≥ 0,15. Il colore non conta.
 - **Tempo**: il seme più lento sotto 1500 ms.
@@ -76,3 +94,13 @@ solo per ciò che cresce a caso.
 | `edificio` | 50 × 50 × 50 | drago, dirigibile, elicottero, formazioni, ponti, rovine |
 
 La classe `grande` (100 × 100 × 80) non si usa: otto volte i voxel di un edificio, e le scelte a caso costerebbero oltre il tempo.
+
+## Tre cose imparate
+
+- **L'ordine delle forme in un'opzione conta**: ognuna dipinge solo le celle ancora libere (`on="k"`), quindi il dettaglio interno va
+  prima del volume che lo contiene (la terra prima del bordo di cemento dell'aiuola, gli occhi prima della testa del ragno), e uno scavo
+  (`color="B" on="W"`) lascia aria, non la lettera della scelta: ciò che deve attraversarlo si disegna prima.
+- **Una linea di raggio 0 non diagonale** è continua; **in diagonale ha buchi** (il motore dipinge le celle entro mezzo voxel dai punti
+  campionati): i fili diagonali hanno raggio 0,5.
+- **I massi accanto a ciò che c'è**: dei semi a caso sul terreno fanno sassi staccati; il seme nasce accanto alla roccia (`in="Rg"`) e il
+  mucchio resta un pezzo solo.

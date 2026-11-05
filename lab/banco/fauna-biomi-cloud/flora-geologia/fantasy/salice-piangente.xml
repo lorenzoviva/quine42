@@ -1,5 +1,5 @@
 <!-- Salice piangente (Cantiere 8, aurora): tronco e rami a caso; le fronde ricadono a caso. -->
-<sequence values="BTUAFLSHewsnu123456" symmetry="(xy)" name="Salice piangente">
+<sequence values="BTUAFLSHewsnu123456z" symmetry="(xy)" name="Salice piangente">
   <color symbol="T" value="6b5a42" name="corteccia"/>
   <color symbol="U" value="6b5a42" name="corteccia alta"/>
   <color symbol="A" value="7a6a4a" name="rami"/>
@@ -18,6 +18,11 @@
   <color symbol="4" hidden="True" name="marcatore"/>
   <color symbol="5" hidden="True" name="marcatore"/>
   <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
   <!-- scelta «base»: sul prato | sulla riva | sulle radici -->
   <box at="20 20 0" size="40 40 5" color="u" on="B"/>
   <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>

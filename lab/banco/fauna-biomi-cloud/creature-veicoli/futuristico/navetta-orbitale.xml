@@ -1,5 +1,5 @@
 <!-- Navetta orbitale (Cantiere 8, sidera): fusoliera, ali, deriva e motori a caso; pannelli termici a caso. -->
-<sequence values="BWKGVOu123456" symmetry="(xy)" name="Navetta orbitale">
+<sequence values="BWKGVOu123456z" symmetry="(xy)" name="Navetta orbitale">
   <color symbol="W" value="eceff1" name="scafo"/>
   <color symbol="K" value="2c3036" name="pannelli termici"/>
   <color symbol="G" value="7d858c" name="carrelli" part="gamba"/>
@@ -12,6 +12,11 @@
   <color symbol="4" hidden="True" name="marcatore"/>
   <color symbol="5" hidden="True" name="marcatore"/>
   <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
   <line at="25 40 0" to="25 40 12" r="1" color="G"/>
   <line at="18 12 0" to="22 14 12" r="1" color="G"/>
   <line at="32 12 0" to="28 14 12" r="1" color="G"/>

@@ -1,5 +1,5 @@
 <!-- Locomotiva a vapore (Cantiere 8, orichalcum): ruote, caldaia, cabina e fumaiolo a caso; il fumo cresce a caso. -->
-<sequence values="BNROCKSPu123456" symmetry="(xy)" name="Locomotiva a vapore">
+<sequence values="BNROCKSPu123456z" symmetry="(xy)" name="Locomotiva a vapore">
   <color symbol="N" value="26282b" name="caldaia nera"/>
   <color symbol="R" value="a3322a" name="ruote motrici"/>
   <color symbol="O" value="c9a24a" name="fasce d'ottone"/>
@@ -14,6 +14,11 @@
   <color symbol="4" hidden="True" name="marcatore"/>
   <color symbol="5" hidden="True" name="marcatore"/>
   <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
   <box at="12 20 3" size="16 36 3" color="N"/>
   <!-- scelta «ruote»: tre motrici grandi | quattro piccole -->
   <box at="12 20 0" size="25 40 12" color="u" on="B"/>
