@@ -12,7 +12,7 @@
     "taglia": "grande",
     "voxel": 125965,
     "cantina": 20,
-    "ms": 10
+    "ms": 9
    },
    {
     "cx": 0,
@@ -34,7 +34,7 @@
     "taglia": "grande",
     "voxel": 73735,
     "cantina": 0,
-    "ms": 8
+    "ms": 7
    },
    {
     "cx": 0,
@@ -45,7 +45,7 @@
     "taglia": "grande",
     "voxel": 125987,
     "cantina": 20,
-    "ms": 8
+    "ms": 9
    },
    {
     "cx": -1,
@@ -100,7 +100,7 @@
     "taglia": "grande",
     "voxel": 73703,
     "cantina": 20,
-    "ms": 9
+    "ms": 8
    },
    {
     "cx": -1,
@@ -122,7 +122,7 @@
     "taglia": "grande",
     "voxel": 79580,
     "cantina": 0,
-    "ms": 7
+    "ms": 11
    },
    {
     "cx": 2,
@@ -164,7 +164,7 @@
     "taglia": "grande",
     "voxel": 126240,
     "cantina": 20,
-    "ms": 9
+    "ms": 8
    },
    {
     "cx": 1,
@@ -175,7 +175,7 @@
     "taglia": "grande",
     "voxel": 66115,
     "cantina": 0,
-    "ms": 8
+    "ms": 7
    },
    {
     "cx": 0,
@@ -186,7 +186,7 @@
     "taglia": "grande",
     "voxel": 92144,
     "cantina": 0,
-    "ms": 7
+    "ms": 8
    },
    {
     "cx": -1,
@@ -241,7 +241,7 @@
     "taglia": "enorme",
     "voxel": 66020,
     "cantina": 16,
-    "ms": 15
+    "ms": 14
    },
    {
     "cx": -2,
@@ -263,7 +263,7 @@
     "taglia": "grande",
     "voxel": 56195,
     "cantina": 20,
-    "ms": 9
+    "ms": 8
    },
    {
     "cx": 2,
@@ -274,7 +274,7 @@
     "taglia": "grande",
     "voxel": 78928,
     "cantina": 0,
-    "ms": 7
+    "ms": 8
    }
   ],
   "fault": [],
@@ -294,7 +294,7 @@
     "taglia": "grande",
     "voxel": 55895,
     "cantina": 0,
-    "ms": 11
+    "ms": 7
    },
    {
     "cx": 0,
@@ -305,7 +305,7 @@
     "taglia": "grande",
     "voxel": 55614,
     "cantina": 0,
-    "ms": 7
+    "ms": 11
    },
    {
     "cx": 1,
@@ -327,7 +327,7 @@
     "taglia": "grande",
     "voxel": 65888,
     "cantina": 0,
-    "ms": 7
+    "ms": 8
    },
    {
     "cx": -1,
@@ -348,7 +348,7 @@
     "modello": "struttura-torre-di-vetro",
     "voxel": 2720,
     "cantina": 0,
-    "ms": 1
+    "ms": 0
    },
    {
     "cx": 1,
@@ -370,7 +370,7 @@
     "taglia": "grande",
     "voxel": 70101,
     "cantina": 20,
-    "ms": 11
+    "ms": 9
    },
    {
     "cx": 0,
@@ -413,7 +413,7 @@
     "taglia": "grande",
     "voxel": 56143,
     "cantina": 20,
-    "ms": 8
+    "ms": 10
    },
    {
     "cx": 1,
@@ -424,7 +424,7 @@
     "taglia": "grande",
     "voxel": 92180,
     "cantina": 0,
-    "ms": 8
+    "ms": 7
    },
    {
     "cx": 1,
@@ -455,7 +455,7 @@
     "taglia": "grande",
     "voxel": 59316,
     "cantina": 20,
-    "ms": 10
+    "ms": 9
    },
    {
     "cx": 0,
@@ -488,7 +488,7 @@
     "taglia": "grande",
     "voxel": 56658,
     "cantina": 0,
-    "ms": 8
+    "ms": 7
    },
    {
     "cx": 1,
@@ -499,7 +499,7 @@
     "taglia": "grande",
     "voxel": 71376,
     "cantina": 0,
-    "ms": 8
+    "ms": 7
    },
    {
     "cx": -1,
@@ -521,7 +521,7 @@
     "taglia": "grande",
     "voxel": 84925,
     "cantina": 0,
-    "ms": 9
+    "ms": 8
    },
    {
     "cx": -2,
@@ -532,7 +532,7 @@
     "taglia": "grande",
     "voxel": 71471,
     "cantina": 20,
-    "ms": 9
+    "ms": 8
    },
    {
     "cx": 2,
@@ -543,7 +543,7 @@
     "taglia": "piccola",
     "voxel": 11995,
     "cantina": 0,
-    "ms": 2
+    "ms": 1
    },
    {
     "cx": 0,
@@ -587,7 +587,7 @@
     "taglia": "grande",
     "voxel": 56290,
     "cantina": 20,
-    "ms": 9
+    "ms": 10
    },
    {
     "cx": 2,

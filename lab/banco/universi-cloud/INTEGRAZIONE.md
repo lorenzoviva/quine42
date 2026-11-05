@@ -6,10 +6,10 @@ un modello**: niente `GEMINI_API_KEY`, solo `MockAiModels`; costo dei modelli 0,
 
 | universo | tema | dove sta nel repository | strutture del catalogo | modelli del seme procedurali | props | suoni |
 |---|---|---|---|---|---|---|
-| aurora | fantasy | `universe/` (il seme) + le mappe in `aurora/maps/` | 12 (una Enorme) | 24 | 10 | 6 brani, 19 effetti, la Morte rifatta (accanto) |
-| orichalcum | steampunk | `orichalcum/` | 12 (una Enorme) | 24 | 10 | 6 brani, 19 effetti, la Morte rifatta (accanto) |
-| neapolis | moderno | `neapolis/` | 12 (una Enorme) + le 2 sue (T272) | 24 | 10 | 6 brani, 19 effetti, la Morte rifatta (accanto) |
-| sidera | futuristico | `sidera/` | 12 + le 2 sue (T272) | 10 (quelli che aveva) | 10 | 6 brani, 19 effetti, la Morte rifatta (accanto) |
+| aurora | fantasy | `universe/` (il seme) + le mappe in `aurora/maps/` | 12 (una Enorme) | 23 | 10 | 6 brani, 19 effetti, la Morte rifatta (accanto) |
+| orichalcum | steampunk | `orichalcum/` | 12 (una Enorme) | 23 | 10 | 6 brani, 19 effetti, la Morte rifatta (accanto) |
+| neapolis | moderno | `neapolis/` | 12 (una Enorme) + le 2 sue (T272) | 23 | 10 | 6 brani, 19 effetti, la Morte rifatta (accanto) |
+| sidera | futuristico | `sidera/` | 12 + le 2 sue (T272) | 9 (quelli che aveva, meno `grande`) | 10 | 6 brani, 19 effetti, la Morte rifatta (accanto) |
 
 ## Come si installa ed esplora (in locale)
 
@@ -52,8 +52,8 @@ const k = window.quine, c = k.carpet(), p = k.wandererPos();
 c.ox = X - p.x; c.oy = Y - p.y;   // X, Y = centro del luogo; la struttura è sul lotto indicato, la porta verso il sentiero
 ```
 
-`?dev&teleport=X,Y` non serve qui: ferma il tappeto e mette il viandante a X, Y **dal centro del cerchio**, quindi oltre 42 caselle nella
-corona. La posizione si salva alla chiusura (`world/giocatori/io.json`, T214): per ripartire dalla piazza, reinstalla l'universo.
+`?dev&teleport=X,Y` non serve qui: ferma il tappeto e mette il viandante a X, Y **dal centro del cerchio**, non nel mondo (oltre 42
+caselle si è nella corona). La posizione si salva alla chiusura (`world/giocatori/io.json`, T214): per ripartire dalla piazza, reinstalla l'universo.
 
 ## Dove sta ogni struttura
 
@@ -158,8 +158,9 @@ stesso `0.1`, `Z` uguale a quello del kernel. `tests/universi-cloud.test.ts` li 
     struttura è del suo modello). Il concetto è il nome del file in parole (`torre-del-mago` → «torre del mago»), tranne
     `moderno/mercato-coperto` → «mercato coperto rionale», perché neapolis ha già il suo `struttura-mercato-coperto`;
   - i modelli procedurali del seme (T270) **al posto** delle copie del seme che l'universo aveva (tutte identiche al seme), con la voce che
-    resta (nome, tinta) e `autore` nuovo; il `voto` dell'Artista, che era del modello vecchio, va via. Sidera ne aveva 10 su 24 (aveva tolto
-    gli altri): solo quelli;
+    resta (nome, tinta) e `autore` nuovo; il `voto` dell'Artista, che era del modello vecchio, va via. Sono 23 su 24: **`grande`** (la casa
+    a graticcio, la casa comune di aurora) resta la vecchia, per il difetto del kernel descritto sotto. Sidera ne aveva 10 su 24 (aveva tolto
+    gli altri): 9, gli stessi meno `grande`;
   - i 10 props del tema (T270);
   - i 6 brani del tema e i 19 effetti (T271). Dove suona ogni brano (`suono.ambienti`, `momenti`) è in `strumenti/cloud.ts → MUSICA`: chi
     nomina un ambiente esattamente suona lì, l'ultimo dell'indice per primo, quindi ogni brano prende pochi ambienti e lascia gli altri alla
@@ -196,7 +197,38 @@ stesso `0.1`, `Z` uguale a quello del kernel. `tests/universi-cloud.test.ts` li 
 
 ## Verifiche (tutte offline)
 
-{{VERIFICHE}}
+Tutte con `MockAiModels`, nessuna chiave letta, sul kernel `0.1.5`.
+
+| cosa | comando | esito |
+|---|---|---|
+| versione del kernel dei 4 universi | `tests/universi-cloud.test.ts` (`checkKernelVersion`) | 4/4 compatibili (`0.1.5`) |
+| ogni modello delle 4 librerie nella scatola in cui la libreria lo fa girare (`erroriModello` in `strumenti/cloud.ts`: classe, taglia, cantina) | `modelErrors` | 553 modelli (127 + 151 + 148 + 127): 549 senza un errore; gli altri 4 sono la Morte del seme (`ripetitivo`), una per universo, scelta dell'autore che i test tengono (`SOUNDS_KEPT_BY_THE_AUTHOR`) |
+| le strutture dei piani: dal modello della libreria (`forms.resolve(own, 'grande') === own`), `validatePlan` senza errori né scarti, `lotsOf` senza `wanted`, `claimSizes` non cambia niente, ogni struttura del tema su un lotto | `tests/universi-cloud.test.ts` | verde |
+| l'installazione su una cartella temporanea: 4 repository, un commit `genesi:`, albero pulito, saldi sigillati, `upgradeFromSeed` non ha più niente da fare, la seconda volta il vecchio va nel cestino | `tests/universi-cloud.test.ts`, e a mano `npm run universi:cloud -- --dir <tmp>` | verde |
+| orichalcum, neapolis, sidera da capo a fondo (600-900 tick, ogni modulo, rune, società, quarta parete) | `npx vite-node lab/banco/universi-cloud/<nome>/verifica.ts` | verdi tutte e tre: 0 fault visti e alla fine, nessun problema (dopo che le loro copie del seme di `core.effects` e del prompt dell'Ingegnere hanno seguito il seme di T260: prima la quarta parete di orichalcum le leggeva come testi suoi) |
+| le strutture sul kernel vero, come le installa lo script: i 19 luoghi visitati, 600 tick, la forma di ogni struttura costruita (voxel, cantina sotto terra), nessun `wanted` | `npx vite-node lab/banco/universi-cloud/strumenti/verifica-strutture.ts` (scrive `verifica-strutture.json`) | verde: aurora 12, orichalcum 12, neapolis 14, sidera 14 strutture costruite, con la cantina dove il programma la ha; 0 fault, 0 `wanted` |
+| typecheck | `npm run typecheck` | verde |
+| i test toccati | `npx vitest run tests/universi-cloud.test.ts tests/kernel-version.test.ts tests/forms.test.ts tests/lots.test.ts tests/sound.test.ts tests/sounddirector.test.ts tests/soundanalysis.test.ts lab/tests/banco.test.ts` | verdi (262 test) |
+| la suite intera | `npm test` | 2201 passati, 3 saltati, **4 caduti, tutti dell'ambiente di questo clone e caduti uguali sul commit di partenza (`608b0a3`)**: V-006 e V-007 di `tests/sicurezza/` (`fsync API is disabled when Permission Model is enabled`, Node 22 del contenitore, come in T269) e due casi di `tests/espressivita/aggiunte.test.ts` (`7ced571`, `0d773f2`: il clone è superficiale e quei commit non ci sono). V-016 cadeva per questo lavoro (vedi sotto) e ora passa |
+
+I test cambiati e perché: `tests/forms.test.ts` giudica ogni modello del seme nella scatola della libreria (le strutture del catalogo non
+scrivono `size`: la cantina e la taglia le dà la libreria, ADR-0135), con un tempo più lungo; `tests/fixtures/griglie-visive.json` ha le griglie
+dei 23 programmi del seme cambiati (gli altri 34 danno le stesse: il motore è lo stesso); `lab/tests/banco.test.ts` misura il banco sulla casa
+e sulla fattoria di prima (`lab/tests/fixtures/`), perché le loro proprietà erano del programma vecchio; `tests/sounddirector.test.ts` e
+`tests/soundanalysis.test.ts` contano i suoni del seme (13 brani, 29 effetti); `tools/sicurezza/ambiente.mjs` dà a `git` 256 MB di uscita: il
+seme ora pesa 2 MB e `git log --all -p` di un universo passava il MB di `execFileSync` (V-016).
+
+## Un difetto del kernel che le strutture mostrano (non corretto qui)
+
+Ciò che il piano mette «dentro» una struttura (`placeInside`) va in un punto del pavimento che `interiorPoints` trova sgombro (niente
+`foot` nei ±6 voxel, pavimento non più alto di un gradino), ma che `kernel.free(x, y, 0.15)` può trovare bloccato: è `formBlocks`, non le
+caselle (contati sui 4 universi installati, punti bloccati su punti trovati). Per la casa a graticcio del seme: **21 su 32 la vecchia, 15 su
+15 la procedurale**, a yaw 0 (girata di −π/2, 0 su 32 e 0 su 15); per le strutture del catalogo da 10 su 59 a 61 su 128, a ogni rotazione;
+per la casa comune grande di orichalcum (T272) 34 su 800. `tests/lots.test.ts` («never inside its walls») passava con la casa vecchia perché i
+suoi quattro tiri cadevano su punti sgombri, e cadrebbe con la nuova: per questo `grande` resta la vecchia (`SEME_TENUTI` in
+`strumenti/cloud.ts`). Toccare `src/kernel/` voleva dire alzare `KERNEL_VERSION` in un compito di integrazione, ed è fuori da questo:
+**da fare in un task del kernel** (guardare se `interiorPoints` e `formsUnder`/`rampBlocks` usano la stessa rotazione e lo stesso livello: senza
+`z`, `free` misura al suolo un pavimento rialzato), poi togliere `grande` da `SEME_TENUTI` e rilanciare `integra.ts`.
 
 ## Cosa non ho provato
 

@@ -4,7 +4,7 @@ Generato da `verifica.ts` (`npx vite-node lab/banco/universi-cloud/sidera/verifi
 
 ## 1. Quarta parete
 
-101 file, 4493 frasi controllate con `metaBreak` (e `bibleBreaks` sulla bibbia): **0 violazioni**.
+101 file, 4498 frasi controllate con `metaBreak` (e `bibleBreaks` sulla bibbia): **0 violazioni**.
 
 ## 2. Moduli
 
