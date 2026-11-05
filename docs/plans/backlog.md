@@ -4676,11 +4676,11 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: una Genesi con `?offline` e la prova a pagamento sopra.
 - Quando è fatto: commit su `task/T310`. Nell'esito quanti testi del Concilio sono usciti in inglese per sbaglio e la differenza di token misurata.
 
-### T311 · Integrare T285 sul base con T284: la sezione delle vesti e il LEGGIMI — `da fare` (dipende da T285)
+### T311 · Integrare T285 sul base con T284 e T286: la sezione delle vesti e il LEGGIMI — `da fare`
 - Pipeline: claude · sforzo high · stima 2% · approvato · priorità 1
 - Step: 34
-- Contesto: `integra T285` si ferma su `docs/architettura-dettagli.md` e `site/skins/LEGGIMI.md`: T284 (veste futuristica, ADR-0151) e T285 (veste fumetto) aggiungono entrambi righe nella sezione `#sito` e nel LEGGIMI delle vesti. Nasce da T285: `dossier T285`, e da T284: `dossier T284`.
-- Cosa fare: nel tuo worktree `git merge task/T285`. Nei conflitti le due aggiunte restano entrambe, nell'ordine delle vesti; se T285 ha preso un numero di ADR già usato nel base, va al primo libero con i rimandi. Controlla che `tests/site-skin-fumetto.test.ts` e i test della futuristica passino insieme e che la build porti entrambe le vesti in `dist/skins/`.
+- Contesto: `integra T285` si ferma su `docs/architettura-dettagli.md` e `site/skins/LEGGIMI.md`: T284 (veste futuristica, ADR-0151), T286 (veste sobria, integrata dopo) e T285 (veste fumetto) aggiungono tutti righe nella sezione `#sito` e nel LEGGIMI delle vesti. Nasce da T285: `dossier T285`, da T284: `dossier T284` e da T286: `dossier T286`. Parti dal base attuale (con T286).
+- Cosa fare: nel tuo worktree `git merge task/T285`. Nei conflitti tutte le aggiunte restano, nell'ordine delle vesti (anche in `AGENTS.md`); se T285 ha preso un numero di ADR già usato nel base, va al primo libero con i rimandi. Controlla che `tests/site-skin-fumetto.test.ts` , i test della futuristica e `tests/site-skin-sobria.test.ts` passino insieme e che la build porti tutte e tre le vesti in `dist/skins/`.
 - Test: suite intera, typecheck e build con i loro turni.
 - Browser: non serve, T285 ha già guardato.
 - Quando è fatto: commit su `task/T311`. Nell'esito: ricorda di dare `integra T311`, poi `integra T285`.
