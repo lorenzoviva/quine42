@@ -1,5 +1,5 @@
 <!-- Antenna dello spazio profondo (Cantiere 8, sidera): strumento a caso; antenne a rami e luci a caso. -->
-<sequence values="BSWIKREPu123456z" symmetry="(xy)" name="Antenna dello spazio profondo">
+<sequence values="BSWIKREPxu123456z" symmetry="(xy)" name="Antenna dello spazio profondo">
   <color symbol="S" value="c8ccd0" name="piattaforma"/>
   <color symbol="W" value="eef2f4" name="parabole"/>
   <color symbol="I" value="5a6068" name="tralicci"/>
@@ -7,6 +7,7 @@
   <color symbol="R" value="ff4040" name="luci" glow="True"/>
   <color symbol="E" value="6af0ff" name="ricevitori" glow="True"/>
   <color symbol="P" hidden="True" name="marcatore"/>
+  <color symbol="x" hidden="True" name="marcatore"/>
   <color symbol="u" hidden="True" name="marcatore"/>
   <color symbol="1" hidden="True" name="marcatore"/>
   <color symbol="2" hidden="True" name="marcatore"/>
@@ -26,26 +27,26 @@
   <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/><rule in="4u" out="*4"/></all>
   <!--   1: una parabola grande -->
   <cylinder at="25 25 3" size="8 8 14" color="I" on="1"/>
-  <ellipsoid at="25 25 15" size="40 40 22" color="W" on="1"/>
-  <ellipsoid at="25 25 20" size="36 36 22" color="B" on="W"/>
   <line at="25 25 17" to="25 25 34" r="0.5" color="I" on="1"/>
+  <ellipsoid at="25 25 20" size="36 36 22" color="x" on="1"/>
+  <ellipsoid at="25 25 15" size="40 40 22" color="W" on="1"/>
   <box at="25 25 34" size="3 3 3" color="E" on="1"/>
   <!--   2: tre parabole -->
   <line at="12 14 3" to="12 14 32" r="0.5" color="I" on="2"/>
   <box at="12 14 32" size="1 1 2" color="E" on="2"/>
   <line at="12 14 3" to="12 14 22" r="1" color="I" on="2"/>
+  <ellipsoid at="12 14 23" size="14 14 10" color="x" on="2"/>
   <ellipsoid at="12 14 20" size="16 16 10" color="W" on="2"/>
-  <ellipsoid at="12 14 23" size="14 14 10" color="B" on="W"/>
   <line at="38 14 3" to="38 14 32" r="0.5" color="I" on="2"/>
   <box at="38 14 32" size="1 1 2" color="E" on="2"/>
   <line at="38 14 3" to="38 14 22" r="1" color="I" on="2"/>
+  <ellipsoid at="38 14 23" size="14 14 10" color="x" on="2"/>
   <ellipsoid at="38 14 20" size="16 16 10" color="W" on="2"/>
-  <ellipsoid at="38 14 23" size="14 14 10" color="B" on="W"/>
   <line at="25 38 3" to="25 38 32" r="0.5" color="I" on="2"/>
   <box at="25 38 32" size="1 1 2" color="E" on="2"/>
   <line at="25 38 3" to="25 38 22" r="1" color="I" on="2"/>
+  <ellipsoid at="25 38 23" size="14 14 10" color="x" on="2"/>
   <ellipsoid at="25 38 20" size="16 16 10" color="W" on="2"/>
-  <ellipsoid at="25 38 23" size="14 14 10" color="B" on="W"/>
   <!--   3: pannelli a fase -->
   <box at="12 25 3" size="2 30 26" color="K" on="3"/>
   <box at="38 25 3" size="2 30 26" color="K" on="3"/>
@@ -62,6 +63,8 @@
   <box at="25 25 32" size="8 8 1" color="I" on="4"/>
   <ellipsoid at="25 25 42" size="12 12 6" color="W" on="4"/>
   <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/><rule in="4" out="B"/></prl>
+  <!-- il vuoto delle parabole torna aria -->
+  <prl in="x" out="B"/>
   <!-- antenne che crescono a rami dalla piattaforma -->
   <one in="B S" out="P *" steps="4"/>
   <one steps="40"><rule in="B P" out="P I" p="3"/><rule in="B* *P" out="P* *I" p="0.6"/><rule in="B*B *P*" out="P*P *I*" p="0.4"/></one>

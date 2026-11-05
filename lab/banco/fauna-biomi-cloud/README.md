@@ -13,7 +13,7 @@ npx vite-node lab/banco/fauna-biomi-cloud/banco.ts            # tutti
 npx vite-node lab/banco/fauna-biomi-cloud/banco.ts -- <nome>  # uno
 ```
 
-Validi: **40 su 40**.
+Validi: **50 su 50**.
 
 ## `creature-veicoli/`
 
@@ -63,4 +63,19 @@ Validi: **40 su 40**.
 | futuristico | [Corallo di silicio](flora-geologia/futuristico/corallo-silicio.md) ([xml](flora-geologia/futuristico/corallo-silicio.xml)) | albero | 0.349 | 0 | 304 ms | valido |
 | futuristico | [Monolite magnetico](flora-geologia/futuristico/monolite-magnetico.md) ([xml](flora-geologia/futuristico/monolite-magnetico.xml)) | monumento | 0.441 | 0 | 125 ms | valido |
 | futuristico | [Geyser criogenico](flora-geologia/futuristico/geyser-criogenico.md) ([xml](flora-geologia/futuristico/geyser-criogenico.xml)) | edificio | 0.434 | 0 | 552 ms | valido |
-| futuristico | [Antenna dello spazio profondo](flora-geologia/futuristico/antenna-array-profondo.md) ([xml](flora-geologia/futuristico/antenna-array-profondo.xml)) | edificio | 0.345 | 0 | 602 ms | valido |
+| futuristico | [Antenna dello spazio profondo](flora-geologia/futuristico/antenna-array-profondo.md) ([xml](flora-geologia/futuristico/antenna-array-profondo.xml)) | edificio | 0.345 | 0 | 601 ms | valido |
+
+## `monumenti-rovine/`
+
+| ambientazione | modello | classe | distanza | fluttuanti | tempo | esito |
+|---|---|---|---|---|---|---|
+| fantasy | [Ponte di pietra antico](monumenti-rovine/fantasy/ponte-pietra-antico.md) ([xml](monumenti-rovine/fantasy/ponte-pietra-antico.xml)) | edificio | 0.354 | 0 | 258 ms | valido |
+| fantasy | [Circolo megalitico](monumenti-rovine/fantasy/circolo-megalitico.md) ([xml](monumenti-rovine/fantasy/circolo-megalitico.xml)) | edificio | 0.633 | 0 | 162 ms | valido |
+| fantasy | [Rovine del tempio sommerso](monumenti-rovine/fantasy/rovine-tempio-sommerso.md) ([xml](monumenti-rovine/fantasy/rovine-tempio-sommerso.xml)) | edificio | 0.246 | 0 | 136 ms | valido |
+| fantasy | [Statua colosso](monumenti-rovine/fantasy/statua-colosso.md) ([xml](monumenti-rovine/fantasy/statua-colosso.xml)) | monumento | 0.280 | 0 | 119 ms | valido |
+| fantasy | [Portale arcano](monumenti-rovine/fantasy/portale-arcano.md) ([xml](monumenti-rovine/fantasy/portale-arcano.xml)) | edificio | 0.489 | 0 | 297 ms | valido |
+| steampunk | [Orologio astrario](monumenti-rovine/steampunk/orologio-astrario-piazza.md) ([xml](monumenti-rovine/steampunk/orologio-astrario-piazza.xml)) | edificio | 0.292 | 0 | 264 ms | valido |
+| steampunk | [Ponte levatoio a ingranaggi](monumenti-rovine/steampunk/ponte-levatoio-ingranaggi.md) ([xml](monumenti-rovine/steampunk/ponte-levatoio-ingranaggi.xml)) | edificio | 0.549 | 0 | 589 ms | valido |
+| steampunk | [Cisterna a pressione](monumenti-rovine/steampunk/cisterna-pressione.md) ([xml](monumenti-rovine/steampunk/cisterna-pressione.xml)) | edificio | 0.415 | 0 | 604 ms | valido |
+| steampunk | [Stazione della teleferica](monumenti-rovine/steampunk/stazione-teleferica.md) ([xml](monumenti-rovine/steampunk/stazione-teleferica.xml)) | edificio | 0.240 | 0 | 266 ms | valido |
+| steampunk | [Faro aeronautico](monumenti-rovine/steampunk/faro-aeronautico.md) ([xml](monumenti-rovine/steampunk/faro-aeronautico.xml)) | edificio | 0.465 | 0 | 357 ms | valido |

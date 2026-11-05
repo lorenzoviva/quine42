@@ -587,15 +587,165 @@
  "antenna-array-profondo": {
   "errori": [],
   "fluttuanti": 0,
-  "distanza": 0.3454415019868132,
-  "minima": 0.011661807580174927,
-  "ms": 602,
+  "distanza": 0.34538682335438237,
+  "minima": 0.011541732474790426,
+  "ms": 601,
   "voxel": [
-   8187,
+   8182,
    6965,
-   8181,
+   8185,
    8182,
    6960
+  ],
+  "passa": true
+ },
+ "ponte-pietra-antico": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.3539672354279326,
+  "minima": 0.02317478324284904,
+  "ms": 258,
+  "voxel": [
+   12204,
+   15436,
+   12192,
+   12238,
+   14463
+  ],
+  "passa": true
+ },
+ "circolo-megalitico": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.6334180579738435,
+  "minima": 0.5345780148599734,
+  "ms": 162,
+  "voxel": [
+   6500,
+   7615,
+   7769,
+   7184,
+   7015
+  ],
+  "passa": true
+ },
+ "rovine-tempio-sommerso": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.24553704725962575,
+  "minima": 0.01826295914864401,
+  "ms": 136,
+  "voxel": [
+   14052,
+   14431,
+   14111,
+   17055,
+   14433
+  ],
+  "passa": true
+ },
+ "statua-colosso": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.28003991115855525,
+  "minima": 0.03355290242898312,
+  "ms": 119,
+  "voxel": [
+   4160,
+   4713,
+   4711,
+   4042,
+   4840
+  ],
+  "passa": true
+ },
+ "portale-arcano": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.48885532991859826,
+  "minima": 0.3067470164244358,
+  "ms": 297,
+  "voxel": [
+   7395,
+   6935,
+   4671,
+   5774,
+   4658
+  ],
+  "passa": true
+ },
+ "orologio-astrario-piazza": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.29235520524635156,
+  "minima": 0.09145402997164843,
+  "ms": 264,
+  "voxel": [
+   12156,
+   8299,
+   8452,
+   11405,
+   9137
+  ],
+  "passa": true
+ },
+ "ponte-levatoio-ingranaggi": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.5494283728968368,
+  "minima": 0.1653722913159181,
+  "ms": 589,
+  "voxel": [
+   17021,
+   4859,
+   15016,
+   16760,
+   5723
+  ],
+  "passa": true
+ },
+ "cisterna-pressione": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.41491232629362623,
+  "minima": 0.015587353100260609,
+  "ms": 604,
+  "voxel": [
+   18899,
+   20190,
+   19020,
+   12645,
+   20167
+  ],
+  "passa": true
+ },
+ "stazione-teleferica": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.24027981577439234,
+  "minima": 0.046894944225539706,
+  "ms": 266,
+  "voxel": [
+   17604,
+   14110,
+   16759,
+   17589,
+   14109
+  ],
+  "passa": true
+ },
+ "faro-aeronautico": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.46506348590599267,
+  "minima": 0.1424993042026162,
+  "ms": 357,
+  "voxel": [
+   6522,
+   5506,
+   4191,
+   6826,
+   5809
   ],
   "passa": true
  }

@@ -98,8 +98,10 @@ La classe `grande` (100 × 100 × 80) non si usa: otto volte i voxel di un edifi
 ## Tre cose imparate
 
 - **L'ordine delle forme in un'opzione conta**: ognuna dipinge solo le celle ancora libere (`on="k"`), quindi il dettaglio interno va
-  prima del volume che lo contiene (la terra prima del bordo di cemento dell'aiuola, gli occhi prima della testa del ragno), e uno scavo
-  (`color="B" on="W"`) lascia aria, non la lettera della scelta: ciò che deve attraversarlo si disegna prima.
+  prima del volume che lo contiene (la terra prima del bordo di cemento dell'aiuola, gli occhi prima della testa del ragno).
+- **In un'opzione non si scava**: una forma con un suo `on` (`color="B" on="S"`) non dipende dalla scelta e scaverebbe in tutti i semi.
+  Il vuoto (l'arco di un ponte, l'incavo di una parabola) si disegna **per primo** con una lettera nascosta, `x`, che occupa le celle; il
+  pieno viene dopo e le trova prese; finita la scelta `x` torna aria.
 - **Una linea di raggio 0 non diagonale** è continua; **in diagonale ha buchi** (il motore dipinge le celle entro mezzo voxel dai punti
   campionati): i fili diagonali hanno raggio 0,5.
 - **I massi accanto a ciò che c'è**: dei semi a caso sul terreno fanno sassi staccati; il seme nasce accanto alla roccia (`in="Rg"`) e il

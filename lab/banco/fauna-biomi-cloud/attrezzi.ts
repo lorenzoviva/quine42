@@ -135,7 +135,7 @@ const MESCOLA = 'z';
 
 export interface Modello {
   titolo: string;
-  /** symbol, colour (rrggbb), name, and `part` or `glow`. */
+  /** symbol, colour (rrggbb), name, and `part`, `glow` or `alpha 0.6`. */
   colori: Array<[string, string, string, string?]>;
   /** Hidden letters the program uses besides those of the choices. */
   marcatori?: string;
@@ -150,7 +150,7 @@ export function programma(m: Modello): string {
   const nascoste = [...new Set([...(m.marcatori ?? ''), ...scelte, ...MESCOLA])].filter((c) => !m.colori.some(([s]) => s === c));
   const values = ['B', ...m.colori.map(([s]) => s), ...nascoste].join('');
   const colori = m.colori.map(([s, hex, nome, extra]) => {
-    const x = extra === 'glow' ? ' glow="True"' : extra ? ` part="${extra}"` : '';
+    const x = extra === 'glow' ? ' glow="True"' : extra?.startsWith('alpha ') ? ` alpha="${extra.slice(6)}"` : extra ? ` part="${extra}"` : '';
     return `  <color symbol="${s}" value="${hex}" name="${nome}"${x}/>`;
   });
   return [
