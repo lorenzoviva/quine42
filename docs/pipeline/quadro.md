@@ -70,6 +70,6 @@ Aggiornato il 05/11/2026, epoca 290. Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **294 (claude):** T285 (veste fumetto) finito e verificato nel browser; `integra` in conflitto su `architettura-dettagli.md` e `site/skins/LEGGIMI.md` → **T311** (claude, high, 2 %, p1, step 34), poi `integra T311` e `integra T285`. T286 in corso.
+- **294 (claude):** T285 (veste fumetto) finito e verificato nel browser; `integra` in conflitto su `architettura-dettagli.md` e `site/skins/LEGGIMI.md` → **T311** (claude, high, 2 %, p1, step 34), poi `integra T311` e `integra T285`. **T286 integrato** (veste sobria dalla proposta 04 v2; orecchie del piede di T244 da decidere con l'autore). T302 in corso.
 - **290 (gemini):** lanciato T284 (veste futuristica), poi integrato (`ebbdfb4`, ADR-0151).
 
