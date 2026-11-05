@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 06/11/2026, epoca 295. Crediti: vedi `stato`.
+Aggiornato il 06/11/2026, epoca 296. Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -70,6 +70,6 @@ Aggiornato il 06/11/2026, epoca 295. Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **296 (claude):** T311 e T285 integrati (`cc08517`, `b31c89c`): le tre vesti sono nel base, resta T287. D44 (Jev per le decisioni chiuse, consiglio A: misura in `lab/banco/`) chiesta all'autore. T306 in corso.
 - **295 (claude):** T302 integrato; T312 creato. T311 in corso, poi `integra T311` e `integra T285`.
-- **294 (claude):** T285 (veste fumetto) finito e verificato nel browser; `integra` in conflitto su `architettura-dettagli.md` e `site/skins/LEGGIMI.md` → **T311** (claude, high, 2 %, p1, step 34), poi `integra T311` e `integra T285`. **T286 integrato** (veste sobria dalla proposta 04 v2; orecchie del piede di T244 da decidere con l'autore). T302 in corso.
 
