@@ -135,6 +135,11 @@ export function pickOrchestrator(order, budget, threshold, at = new Date()) {
   return order.find(usable);
 }
 
+/** Whether a quiet orchestrator goes back to the preferred provider: its credits are well back, and the author did not choose this one (`/agente`). */
+export function backToPreferred({ provider, chosen, queued, order, budget, soglia }) {
+  return !queued && provider !== order[0] && provider !== chosen && Boolean(pickOrchestrator([order[0]], budget, 3 * soglia));
+}
+
 /** What the orchestrator gets in a turn: the author's messages and the pipeline's events since the last one. */
 export function composeTurn(messages, events) {
   const parts = [];
@@ -230,6 +235,7 @@ export async function orchestra({ agente, porta } = {}) {
   if (agente && !canOrchestrate(agente)) throw new Error(`non può orchestrare: ${agente}`);
   let busy = false;
   let wanted; // a provider the author asked for (`/agente`)
+  let chosen; // the last one they asked for: it stays until its credits end
   let rotate; // why the next turn starts a new epoch
 
   const print = (who, text) => process.stdout.write(`\n${who} ${text}\n> `);
@@ -296,6 +302,7 @@ export async function orchestra({ agente, porta } = {}) {
         const low = s.provider && !pickOrchestrator([s.provider], budget, OPTS.soglia);
         if (wanted) {
           if (wanted !== s.provider) newEpoch(s, wanted, 'scelto dall\'autore');
+          chosen = wanted;
           wanted = undefined;
         } else if (!s.provider || stopped) {
           if (!best) { print('·', 'nessun provider ha crediti per orchestrare: riprovo tra un minuto'); break; }
@@ -304,7 +311,7 @@ export async function orchestra({ agente, porta } = {}) {
           newEpoch(s, best, `${s.provider} sotto il ${OPTS.soglia} %`);
         } else if (!s.sessione && best && order.indexOf(best) < order.indexOf(s.provider)) {
           newEpoch(s, best, `${best} ha di nuovo crediti`);
-        } else if (s.sessione && !queued.length && s.provider !== order[0] && pickOrchestrator([order[0]], budget, 3 * OPTS.soglia)) {
+        } else if (s.sessione && backToPreferred({ provider: s.provider, chosen, queued: queued.length > 0, order, budget, soglia: OPTS.soglia })) {
           // Back to the preferred provider, at a quiet moment, once its credits are well back.
           newEpoch(s, order[0], `${order[0]} ha di nuovo crediti`);
         } else if (rotate && s.sessione) {

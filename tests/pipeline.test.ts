@@ -2284,6 +2284,16 @@ describe('i modelli di Claude distinti e lo sforzo (T255)', () => {
     expect(S().canOrchestrate('fable', spuntato)).toBe(true);
   });
 
+  it("chi l'autore sceglie con /agente resta, anche nei momenti quieti", async () => {
+    const url = pathToFileURL(path.resolve(__dirname, '../tools/pipeline/orchestra.mjs')).href;
+    const O = (await import(/* @vite-ignore */ url)) as { backToPreferred(o: unknown): boolean };
+    const base = { provider: 'argon', queued: false, order: ['claude', 'argon'], budget: { claude: { residuo: 90, sessione: 90 } }, soglia: 10 };
+    expect(O.backToPreferred(base)).toBe(true);
+    expect(O.backToPreferred({ ...base, chosen: 'argon' })).toBe(false);
+    expect(O.backToPreferred({ ...base, queued: true })).toBe(false);
+    expect(O.backToPreferred({ ...base, chosen: 'gemini' })).toBe(true);
+  });
+
   it('il modello si dice per nome: claude è Opus', () => {
     expect(S().modelOf('claude')).toBe('Opus 5.5');
     expect(S().modelOf('sonnet')).toBe('Sonnet 5.5');
