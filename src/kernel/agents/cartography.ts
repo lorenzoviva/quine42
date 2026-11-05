@@ -40,6 +40,8 @@ export interface ChunkPlan {
   strutture?: Array<{ concetto: string; taglia?: SizeTier }>;
   /** Tiles changed after the layout (by effects, spells, Lua): cell index → tile code. */
   edits?: Record<string, string>;
+  /** The day of the world each edit was written (T245b, ADR-0140): what ripens counts from there. An edit without one is of today. */
+  giorni?: Record<string, number>;
   /** The ground dug (negative) or raised after the layout (T51b): cell index → levels. */
   scavi?: Record<string, number>;
   /** The water that has flowed (T51b, `water.ts`): cell index → its bed and its water (levels), and the tile it was before it became water. */

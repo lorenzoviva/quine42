@@ -787,7 +787,7 @@ local function make_api()
   function ecs.destroy(id) host.destroy(id) end
   function ecs.first(name) return host.first(name) end
 
-  local input = { held = function(action) return host.held(action) end }
+  local input = { held = function(action, id) return host.held(tostring(action), id) end }
   local world = {
     free = function(x, y, r, z) return host.free(x, y, r or 0, z) end,
     free_real = function(x, y, r, z) return host.free_real(x, y, r or 0, z) end,
@@ -804,6 +804,12 @@ local function make_api()
     set_tile = function(x, y, code) return host.set_tile(x, y, tostring(code)) end,
     open = function(id) return host.open(id) end,
     make_container = function(id, size, loot) return host.make_container(id, size or 6, tostring(loot or "cassa")) end,
+    wanderers = function() return host.wanderers() end,
+    path = function(x, y, tx, ty) return host.path(x, y, tx, ty) end,
+    find_tile = function(code, x, y, r) return host.find_tile(tostring(code), x, y, r or 8) end,
+    act = function(user, target, action) return host.act(user, target, action ~= nil and tostring(action) or nil) end,
+    store_get = function(key) return host.store_get(tostring(key)) end,
+    store_set = function(key, value) return host.store_set(tostring(key), value) end,
   }
   local inventory = {
     add = function(id, item, n) return host.inv_add(id, tostring(item), n or 1) end,

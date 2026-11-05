@@ -29,8 +29,10 @@ function M.update(dt)
     end
     if d < TOCCO and v.vx > 0 then v.vx, v.vy = -3, (math.random() - 0.5) * 2 end
   end)
-  local w = world.player_pos()
-  if math.abs(p.x - w.x) < TOCCO and math.abs(p.y - w.y) < TOCCO and v.vx < 0 then v.vx, v.vy = 3, (math.random() - 0.5) * 2 end
+  -- Ogni viandante in campo la rilancia, non solo chi tiene il corpo di questo kernel (T263: `world.wanderers()`).
+  for _, w in ipairs(world.wanderers()) do
+    if math.abs(p.x - w.x) < TOCCO and math.abs(p.y - w.y) < TOCCO and v.vx < 0 then v.vx, v.vy = 3, (math.random() - 0.5) * 2 end
+  end
   if p.x > CAMPO or p.x < -CAMPO then
     if p.x > CAMPO then g.noi = g.noi + 1 else g.loro = g.loro + 1 end
     v.vx, v.vy = p.x > CAMPO and -2 or 2, 0.6

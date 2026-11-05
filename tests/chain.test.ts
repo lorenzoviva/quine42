@@ -26,7 +26,7 @@ describe('the chain of the Systems Room', () => {
     const f = k.corona.building('sistemi')!.storeys[0];
     const stations = f.items.filter((i) => i.kind === 'stazione');
     expect(stations.map((s) => s.target)).toEqual(k.systems.map((m) => m.manifest.id));
-    expect(stations.map((s) => s.target)).toEqual(['core.movement', 'core.carpet', 'sys.physics', 'sys.wander', 'sys.follow', 'sys.needs', 'sys.fire']);
+    expect(stations.map((s) => s.target)).toEqual(['core.movement', 'core.carpet', 'sys.physics', 'sys.lavoro', 'sys.wander', 'sys.follow', 'sys.needs', 'sys.fire']);
     expect(new Set(stations.map((s) => s.y - f.oy))).toEqual(new Set([WALL_Y]));
     for (let j = 1; j < stations.length; j++) expect(stations[j].x).toBe(stations[j - 1].x + (stations[j - 1].w ?? 1));
     // Centred on the exit's column, inside the walls, off the stairs.

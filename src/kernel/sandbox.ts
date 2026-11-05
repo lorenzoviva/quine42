@@ -16,7 +16,20 @@ export interface Host {
   spawn(components: unknown): number | undefined;
   destroy(id: number): void;
   first(name: string): number | undefined;
-  held(action: string): boolean;
+  /** Whether an action is held: by the wanderer acting, or by the wanderer whose body is `id` (T263, ADR-0139). */
+  held(action: string, id?: number): boolean;
+  /** Every wanderer in this kernel: their body, who they are, where they are in the world (T263, ADR-0139). */
+  wanderers(): unknown;
+  /** The next point of the way from (x, y) to (tx, ty) on the tiles of the places loaded (T245b, ADR-0140), or undefined. */
+  path(x: number, y: number, tx: number, ty: number): { x: number; y: number } | undefined;
+  /** An individual uses a thing as the wanderer does with «Usa» (T245c, ADR-0141): its `on_act`, with the individual as user. The text, or undefined. */
+  act(user: number, target: number, action?: string): string | undefined;
+  /** The centre of the nearest tile with this code within r of (x, y) (T245b), or undefined. */
+  find_tile(code: string, x: number, y: number, r: number): { x: number; y: number } | undefined;
+  /** What the module running keeps under a key in its lasting store (T245a, ADR-0138), or undefined. */
+  store_get(key: string): unknown;
+  /** Keeps a value in the store of the module running (nil takes it away); false when the key, the value or the caps say no. */
+  store_set(key: string, value: unknown): boolean;
   /** z: the height of the feet (tiles, `pos.z`), the floor of a structure one is on (T53b). */
   free(x: number, y: number, r: number, z?: number): boolean;
   free_real(x: number, y: number, r: number, z?: number): boolean;
@@ -348,6 +361,12 @@ function emptyHost(): Host {
     destroy: () => {},
     first: () => undefined,
     held: () => false,
+    wanderers: () => [],
+    path: () => undefined,
+    find_tile: () => undefined,
+    act: () => undefined,
+    store_get: () => undefined,
+    store_set: () => false,
     free: () => true,
     free_real: () => true,
     tile: () => '',

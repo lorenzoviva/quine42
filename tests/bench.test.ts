@@ -150,7 +150,7 @@ describe('the bench with the cases of the seed', () => {
   it('every system of the seed has cases, and each one shows its system working with the real code', async () => {
     const k = await boot();
     const systems = k.systems.map((m) => m.manifest.id).filter((id) => id.startsWith('sys.'));
-    expect(systems).toEqual(['sys.physics', 'sys.wander', 'sys.follow', 'sys.needs', 'sys.fire']);
+    expect(systems).toEqual(['sys.physics', 'sys.lavoro', 'sys.wander', 'sys.follow', 'sys.needs', 'sys.fire']);
     for (const id of systems) {
       const { manifest, logic } = seed(k, id);
       expect(manifest.casi?.length, id).toBeGreaterThanOrEqual(2);
@@ -197,7 +197,7 @@ describe('the bench with the cases of the seed', () => {
     expect(room.items.filter((i) => (i.kind === 'prev' || i.kind === 'next') && i.target === 'banco').length).toBe(2);
     const all = k.benchCases();
     expect(all[0]).toMatchObject({ id: 'sys.physics#0', system: 'sys.physics', of: 0, path: 'modules/sys.physics/logic.lua' });
-    expect([...new Set(all.map((c) => c.system))]).toEqual(['sys.physics', 'sys.wander', 'sys.follow', 'sys.needs', 'sys.fire']);
+    expect([...new Set(all.map((c) => c.system))]).toEqual(['sys.physics', 'sys.lavoro', 'sys.wander', 'sys.follow', 'sys.needs', 'sys.fire']);
     // Asking for the bench starts its run; it arrives with studio:bench.
     const done = new Promise<BenchShown>((ok) => k.bus.on('studio:bench', (b: BenchShown) => b?.run && ok(b)));
     const first = k.benchOf()!;

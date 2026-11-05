@@ -163,6 +163,38 @@
       "solid": true,
       "layer": "liquid",
       "description": "roccia fusa che ribolle: nessuno la attraversa"
+    },
+    "e": {
+      "name": "campo seminato",
+      "color": "#6e5232",
+      "solid": false,
+      "layer": "ground",
+      "speed": 0.8,
+      "description": "Solchi appena chiusi sul seme: tra un giorno spunta il grano.",
+      "matura": {
+        "dopo": 1,
+        "in": "u"
+      }
+    },
+    "u": {
+      "name": "grano maturo",
+      "color": "#d6b445",
+      "solid": false,
+      "layer": "ground",
+      "speed": 0.7,
+      "description": "Spighe alte e gialle, pronte per la falce."
+    },
+    "x": {
+      "name": "ceppaia",
+      "color": "#6f8a3c",
+      "solid": false,
+      "layer": "ground",
+      "speed": 0.9,
+      "description": "Il ceppo di un albero tagliato: in qualche giorno il bosco si richiude.",
+      "matura": {
+        "dopo": 3,
+        "in": "t"
+      }
     }
   },
   "roof": {

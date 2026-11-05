@@ -138,6 +138,11 @@ function F.evoca(target, _, e, x, y)
   return nil
 end
 
+-- Se un effetto ha chi lo applica: il kernel lo chiede prima di applicarlo, e un effetto senza è un guasto (T260).
+function M.handles(tipo)
+  return F[tipo] ~= nil
+end
+
 function M.apply(target, user, e, x, y)
   local f = F[e.tipo]
   if not f then return nil end

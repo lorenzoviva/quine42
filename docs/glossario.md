@@ -290,6 +290,13 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Da non usare**: `mod`
 - **Fermo**: i valori di `kind` (compreso `player`).
 
+### Magazzino
+- **Inglese**: `ModuleStores`, `stores`, `store_get`, `store_set`, `STORE_DIR`
+- **Definizione**: ciò che un modulo tiene da un'apertura del mondo all'altra e che non è una casella (un prezzo, un contatore, un tabellone), sotto chiavi semplici, in un file per modulo, con un tetto in byte per modulo e per universo (T245a, ADR-0138). Ogni modulo vede solo il suo; non va mai ai client.
+- **Dove vive**: `src/kernel/store.ts`, `world/magazzino/<modulo>.json`
+- **Da non usare**: `store` (nei documenti e nella UI), `deposito` (per il magazzino di un modulo), `memoria del modulo`
+- **Fermo**: `world.store_get`, `world.store_set`, la cartella `world/magazzino/`.
+
 ### Sistema
 - **Inglese**: `system`
 - **Definizione**: un modulo con `update(dt)`, eseguito a ogni tick nell'ordine di `order`.
@@ -458,6 +465,34 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Dove vive**: `src/kernel/society.ts`, `world/people.json`
 - **Da non usare**: `npc` (per l'individuo), `persona` (idem: è il valore di `specie`), `person`, `Person`, `DialoguePerson`, `addPerson`, `updatePerson`, `personOf`, `personFacts`, `personByName`, `personNode`, `noPerson`
 - **Fermo**: `world/people.json`, `persone`, il valore `persona` di `specie`, `npc.reply`, `npc.dialogue`, `npc.sheet`, `persona` nel manifest, `identity` e `mind` dei componenti.
+
+### Programma di mestiere
+- **Inglese**: `JobProgram`, `jobPrograms`, `validateJobProgram`, `matchJob`
+- **Definizione**: com'è fatta la giornata di un mestiere, scritta una volta per mestiere e usata da ogni individuo che lo ha: i compiti di ogni fase, ognuno un comportamento con i suoi parametri (T245b, ADR-0140). Dati, mai codice.
+- **Dove vive**: `src/kernel/jobs.ts`, `universe/modules/lavoro.contadino/manifest.json`
+- **Da non usare**: `routine` (per il programma: la routine è il testo di oggi), `script`, `job`
+- **Fermo**: `mestieri` nei manifest, `giornata`, `nomi`, `posto`, i componenti `mestiere`, `lavoro`, `carico`.
+
+### Comportamento
+- **Inglese**: `JOB_BEHAVIOURS`, `JobBehaviour`
+- **Definizione**: uno dei compiti di un elenco chiuso (`vai`, `trasforma`, `raccogli`, `porta`, `produci`, `usa`…) che `sys.lavoro` sa fare e che cambia il mondo davvero (T245b, ADR-0140).
+- **Dove vive**: `src/kernel/jobs.ts`, `universe/modules/sys.lavoro/logic.lua`
+- **Da non usare**: `azione` (per il comportamento: l'azione è del viandante), `task`
+- **Fermo**: i valori di `fa`.
+
+### Deposito del luogo
+- **Inglese**: `placeDeposit`
+- **Definizione**: ciò che i mestieri di un luogo portano e prendono (il grano, i ciocchi, il pane), una voce `deposito:<cx>:<cy>` del magazzino di `sys.lavoro`; il luogo è quello a cui l'individuo appartiene (`mestiere.luogo`). Dura con la partita, non va ai client (T245c, ADR-0141).
+- **Dove vive**: `universe/modules/sys.lavoro/logic.lua`, `src/kernel/kernel.ts`
+- **Da non usare**: `magazzino` (per il deposito: il magazzino è di un modulo), `granaio`, `scorta`
+- **Fermo**: la chiave `deposito:<cx>:<cy>`, `luogo` di `mestiere`.
+
+### Maturazione
+- **Inglese**: `matura`, `matureTick`
+- **Definizione**: ciò che una casella diventa da sola dopo qualche giorno del mondo (il seminato in grano, la ceppaia in bosco), contato dal giorno in cui la casella è stata scritta (`plan.giorni`). La fa il kernel, non Lua (T245b, ADR-0140).
+- **Dove vive**: `src/kernel/kernel.ts`, `universe/modules/world.terrain/manifest.json`
+- **Da non usare**: `crescita` (per la maturazione), `ripen`
+- **Fermo**: `matura {dopo, in}` nei `tiles`, `giorni` nel piano del luogo.
 
 ### Tipo di individuo
 - **Inglese**: `persona`
@@ -806,6 +841,13 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Da non usare**: nessuno
 - **Fermo**: `ai.coefficienti`.
 
+### Vite degli individui
+- **Inglese**: `vite` (la chiave), `ABSENT`
+- **Definizione**: la manopola del realismo degli individui (T245a, ADR-0138): Cronaca a 0, Vita a 0,5, Teatro a 1. Assente vale 0, a differenza delle altre manopole, così un universo di prima non spende per ciò che non ha scelto; si fissa entrando come tutte (ADR-0133).
+- **Dove vive**: `src/kernel/coefficients.ts`
+- **Da non usare**: `realismo` (per la manopola), `grado di vita`
+- **Fermo**: `ai.coefficienti.vite`, i nomi `Cronaca`, `Vita`, `Teatro`.
+
 ### Consumi
 - **Inglese**: `usage`, `UsageLog`
 - **Definizione**: quanto si è speso per giorno, modello e compito, in token e dollari.
@@ -950,6 +992,13 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Definizione**: un errore di codice del mondo, isolato e mostrato, che si può riparare.
 - **Dove vive**: `src/kernel/faults.ts`
 - **Da non usare**: `fault` (nei documenti e nella UI), `errore` (per il guasto)
+
+### Versione del kernel
+- **Inglese**: `KERNEL_VERSION`, `checkKernelVersion`, `stampKernel`, `parseVersion`
+- **Definizione**: `X.Y.Z`, era, contratto con l'universo, incremento (ADR-0136); `universe.json → kernel` dice il kernel che ha scritto l'universo, e un universo di un altro contratto (`X.Y`) non si apre come se fosse di questo kernel.
+- **Dove vive**: `src/kernel/version.ts`
+- **Da non usare**: `release`, `edizione` (per la versione del kernel)
+- **Fermo**: `kernel` in `universe.json`
 
 ## Lo sviluppo
 
