@@ -1,0 +1,44 @@
+{
+  "id": "obj.banco-officina",
+  "name": "Banco da officina",
+  "kind": "entity",
+  "version": "0.1.0",
+  "description": "Un banco da meccanico con la morsa e gli attrezzi appesi: si ripara di tutto, se si sa come.",
+  "context": "officine dei Granili e della stazione",
+  "logic": "logic.lua",
+  "appearance": {
+    "model": "banco-officina",
+    "glyph": "⚙",
+    "color": "#5a6a7a",
+    "aspetto": "un banco da officina di ferro con la morsa, gli attrezzi appesi al pannello forato e una lampada a braccio"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.42
+  },
+  "container": {
+    "size": 8,
+    "loot": "officina"
+  },
+  "actions": [
+    {
+      "id": "ripara",
+      "label": "Ripara un pezzo",
+      "requires": "item.ricambio"
+    },
+    {
+      "id": "attrezzi",
+      "label": "Prendi un attrezzo"
+    },
+    {
+      "id": "radio",
+      "label": "Aggiusta una radiolina",
+      "requires": "item.radiolina"
+    }
+  ],
+  "tags": [
+    "neapolis",
+    "officina",
+    "metallo"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "id": "obj.quadro-elettrico",
+  "name": "Cabina elettrica di quartiere",
+  "kind": "entity",
+  "version": "0.1.0",
+  "description": "La cabina elettrica che dà la luce al rione: dentro, il quadro con le leve, i fusibili e i contatori.",
+  "context": "angoli delle strade, cantieri, officine",
+  "logic": "logic.lua",
+  "appearance": {
+    "model": "quadro-elettrico",
+    "glyph": "ϟ",
+    "color": "#a8a49c",
+    "aspetto": "una cabina elettrica di cemento grigio con lo sportello di metallo, il cartello del fulmine e i contatori dietro il vetro"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.42
+  },
+  "actions": [
+    {
+      "id": "contatori",
+      "label": "Leggi i contatori"
+    },
+    {
+      "id": "fusibile",
+      "label": "Cambia il fusibile",
+      "requires": "item.fusibile"
+    },
+    {
+      "id": "leva",
+      "label": "Tira la leva generale",
+      "requires": "item.cacciavite"
+    }
+  ],
+  "tags": [
+    "neapolis",
+    "elettricita",
+    "metallo"
+  ]
+}

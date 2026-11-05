@@ -1,0 +1,44 @@
+{
+  "id": "obj.motorino",
+  "name": "Motorino",
+  "kind": "entity",
+  "version": "0.1.0",
+  "description": "Un motorino rosso parcheggiato in seconda fila: chi lo sa accendere ci va dappertutto.",
+  "context": "strade, marciapiedi, davanti ai bar",
+  "logic": "logic.lua",
+  "appearance": {
+    "model": "motorino",
+    "glyph": "ø",
+    "color": "#d83a3a",
+    "aspetto": "un motorino rosso con lo scudo anteriore, la sella nera, lo specchietto e il bauletto dietro"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.42
+  },
+  "components": {
+    "serbatoio": {
+      "miscela": 2
+    }
+  },
+  "actions": [
+    {
+      "id": "monta",
+      "label": "Monta e accendi"
+    },
+    {
+      "id": "smonta",
+      "label": "Scendi dal motorino"
+    },
+    {
+      "id": "rifornisci",
+      "label": "Fai la miscela",
+      "requires": "item.olio-motore"
+    }
+  ],
+  "tags": [
+    "neapolis",
+    "motorino",
+    "metallo"
+  ]
+}

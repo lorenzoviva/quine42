@@ -1,0 +1,39 @@
+{
+  "id": "obj.cabina-telefonica",
+  "name": "Cabina telefonica",
+  "kind": "entity",
+  "version": "0.1.0",
+  "description": "Una cabina telefonica a gettoni: si chiama casa, si chiama la radio, a volte risponde qualcuno che non aspettavi.",
+  "context": "piazze, stazioni, lungomare",
+  "logic": "logic.lua",
+  "appearance": {
+    "model": "cabina-telefonica",
+    "glyph": "☎",
+    "color": "#c8c8d0",
+    "aspetto": "una cabina telefonica grigia e arancione con i vetri, il telefono a gettoni e l’elenco appeso alla catenella"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.42
+  },
+  "actions": [
+    {
+      "id": "telefona",
+      "label": "Telefona alla radio",
+      "requires": "item.gettone"
+    },
+    {
+      "id": "elenco",
+      "label": "Sfoglia l’elenco"
+    },
+    {
+      "id": "squilla",
+      "label": "Aspetta che squilli"
+    }
+  ],
+  "tags": [
+    "neapolis",
+    "telefono",
+    "metallo"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "id": "sys.quartiere",
+  "name": "Il quartiere",
+  "kind": "system",
+  "version": "0.1.0",
+  "order": 55,
+  "logic": "logic.lua",
+  "description": "La vita della città giorno per giorno: al tramonto si accendono lampioni e insegne, all’alba si spengono; certe notti il cantiere della Linea 2 stacca la corrente e il quartiere resta al buio finché qualcuno non cambia il fusibile alla cabina o non torna il mattino. Il buio lo leggono individui e cose."
+}

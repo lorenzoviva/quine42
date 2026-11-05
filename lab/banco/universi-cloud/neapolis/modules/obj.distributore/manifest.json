@@ -1,0 +1,47 @@
+{
+  "id": "obj.distributore",
+  "name": "Distributore automatico",
+  "kind": "entity",
+  "version": "0.1.0",
+  "description": "Un distributore di bibite e merendine: a volte dà il resto, a volte no.",
+  "context": "stazioni, uffici, ospedali",
+  "logic": "logic.lua",
+  "appearance": {
+    "model": "distributore",
+    "glyph": "▥",
+    "color": "#d83a3a",
+    "aspetto": "un distributore automatico rosso con la vetrina illuminata, le spirali di bibite e la feritoia delle monete"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.42
+  },
+  "components": {
+    "luce": {
+      "raggio": 2.5,
+      "accesa": false,
+      "colore": "#ff9a7a"
+    }
+  },
+  "actions": [
+    {
+      "id": "compra",
+      "label": "Metti cento lire",
+      "requires": "item.cento-lire"
+    },
+    {
+      "id": "scuoti",
+      "label": "Scuoti il distributore"
+    },
+    {
+      "id": "gettone",
+      "label": "Prova con un gettone",
+      "requires": "item.gettone"
+    }
+  ],
+  "tags": [
+    "neapolis",
+    "insegna",
+    "metallo"
+  ]
+}

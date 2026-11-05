@@ -1,0 +1,44 @@
+{
+  "id": "obj.edicola",
+  "name": "Edicola",
+  "kind": "entity",
+  "version": "0.1.0",
+  "description": "Il chiosco verde dei giornali: quotidiani, fotoromanzi, figurine, biglietti del tram e cartoline del golfo.",
+  "context": "piazze, ingressi dei mercati, fermate",
+  "logic": "logic.lua",
+  "appearance": {
+    "model": "edicola",
+    "glyph": "▦",
+    "color": "#3a8a4a",
+    "aspetto": "un chiosco verde di lamiera con le riviste appese alle mollette, i giornali impilati e la tettoia"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.42
+  },
+  "container": {
+    "size": 6,
+    "loot": "edicola"
+  },
+  "actions": [
+    {
+      "id": "sfoglia",
+      "label": "Sfoglia i titoli"
+    },
+    {
+      "id": "compra",
+      "label": "Compra il giornale",
+      "requires": "item.cento-lire"
+    },
+    {
+      "id": "cartolina",
+      "label": "Compra una cartolina",
+      "requires": "item.cento-lire"
+    }
+  ],
+  "tags": [
+    "neapolis",
+    "edicola",
+    "carta"
+  ]
+}

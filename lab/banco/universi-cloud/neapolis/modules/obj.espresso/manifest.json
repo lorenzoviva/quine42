@@ -1,0 +1,50 @@
+{
+  "id": "obj.espresso",
+  "name": "Macchina del caffè espresso",
+  "kind": "entity",
+  "version": "0.1.0",
+  "description": "La macchina del caffè di un bar: cromata, bollente, sbuffa vapore. Con i chicchi giusti fa il caffè migliore della città.",
+  "context": "banconi dei bar",
+  "logic": "logic.lua",
+  "appearance": {
+    "model": "macchina-espresso",
+    "glyph": "♨",
+    "color": "#c0c4c8",
+    "aspetto": "una macchina del caffè espresso da bar, cromata, con le leve, i manometri e le tazzine capovolte sopra"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.42
+  },
+  "components": {
+    "caldaia": {
+      "pressione": 1
+    }
+  },
+  "actions": [
+    {
+      "id": "caffe",
+      "label": "Fai il caffè",
+      "requires": "item.chicchi-caffe"
+    },
+    {
+      "id": "vapore",
+      "label": "Apri il vapore"
+    },
+    {
+      "id": "sospeso",
+      "label": "Lascia un caffè sospeso",
+      "requires": "item.cento-lire"
+    },
+    {
+      "id": "prendi-sospeso",
+      "label": "Prendi un caffè sospeso"
+    }
+  ],
+  "tags": [
+    "neapolis",
+    "bar",
+    "metallo",
+    "caldo"
+  ]
+}

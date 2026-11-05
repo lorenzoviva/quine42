@@ -1,0 +1,41 @@
+{
+  "id": "obj.lampione",
+  "name": "Lampione",
+  "kind": "entity",
+  "version": "0.1.0",
+  "description": "Un lampione di ghisa del rione: si accende al tramonto, se il quartiere ha la corrente.",
+  "context": "strade, piazze, lungomare",
+  "logic": "logic.lua",
+  "appearance": {
+    "model": "lampione",
+    "glyph": "¥",
+    "color": "#e0d080",
+    "aspetto": "un lampione di ghisa verde scuro con il braccio ricurvo e la lanterna gialla"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.42
+  },
+  "components": {
+    "luce": {
+      "raggio": 4,
+      "accesa": false,
+      "colore": "#ffd88a"
+    }
+  },
+  "actions": [
+    {
+      "id": "appoggiati",
+      "label": "Appoggiati al lampione"
+    },
+    {
+      "id": "guarda",
+      "label": "Guarda la lanterna"
+    }
+  ],
+  "tags": [
+    "neapolis",
+    "lampione",
+    "metallo"
+  ]
+}
