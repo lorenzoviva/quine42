@@ -8,6 +8,7 @@ import { memoryStore } from '../../../../src/kernel/repo';
 import { allowedPath } from '../../../../src/kernel/paths';
 import { SEED_FILE, seedHashes, upgradeFromSeed } from '../../../../src/kernel/universes';
 import type { FileMap } from '../../../../src/kernel/types';
+import { checkKernelVersion, KERNEL_VERSION, stampKernel } from '../../../../src/kernel/version';
 import { runGit } from '../../../../server/git';
 import { sealLedger } from '../../../../server/ledger';
 import { leggiUniverso, negozioMappe } from './carica';
@@ -41,7 +42,13 @@ export function componi(u: Universo, seed = seme()): { files: FileMap; maps: Rec
   for (const f of readdirSync(dir).filter((f) => f.endsWith('.json')).sort()) maps[`maps/${f}`] = readFileSync(path.join(dir, f), 'utf8').replace(/\r\n/g, '\n');
   const born = { ...files, [SEED_FILE]: JSON.stringify(seedHashes(seed), null, 1) + '\n' };
   const up = upgradeFromSeed(born, seed);
-  return { files: up.files, maps, dalSeme: up.updated.filter((p) => p !== SEED_FILE) };
+  // The range of the kernels it runs on (T302, ADR-0152), as the kernel writes it before its commit: from the contract it was made for.
+  const cfg = JSON.parse(up.files['universe.json']) as { kernel?: unknown; kernels?: unknown };
+  const check = checkKernelVersion(cfg.kernel, KERNEL_VERSION, cfg.kernels);
+  if (!check.ok) throw new Error(`${u.nome}: non è di questo kernel: ${check.motivo}`);
+  const stamped = stampKernel(up.files['universe.json']);
+  const out = stamped ? { ...up.files, 'universe.json': stamped } : up.files;
+  return { files: out, maps, dalSeme: up.updated.filter((p) => p !== SEED_FILE) };
 }
 
 /** What would be wrong with it in the game: a fault of the kernel at boot, a structure the library does not have. */

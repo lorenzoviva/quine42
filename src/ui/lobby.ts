@@ -10,6 +10,7 @@ import { DEFAULT_SCULPTORS, type SculptorAiModels } from '../kernel/agents/sculp
 import { BUDGET_KEYS, BUDGET_SCALE, readConfig, SCULPTOR_CLASSES, withinMinimums, type BudgetKey } from '../kernel/universe';
 import type { AiSettings, FileMap } from '../kernel/types';
 import { usd } from '../kernel/ai/prices';
+import { checkKernelVersion, KERNEL_VERSION } from '../kernel/version';
 import { el } from './dom';
 
 export interface LobbyOptions {
@@ -81,6 +82,8 @@ export class LobbyScreen {
     const { name, files, wandererId, wandererName, credits, isAnonymous, inCorso, alone } = this.opts;
     const { config } = readConfig(files);
     const ai = config.ai;
+    // The kernels it runs on (T302, ADR-0152): out of the range it is shown with its label, and still opens.
+    const kernels = checkKernelVersion(config.kernel, KERNEL_VERSION, config.kernels);
     const master = config.partita?.master ?? 'io';
     const minimi = ai.minimi;
     const coef = repairCoefficients(ai.coefficienti);
@@ -402,6 +405,7 @@ export class LobbyScreen {
       el('div', { class: 'lobby-logo' }, 'ᚱ ᚢ ᚾ ᛖ'),
       el('h1', { class: 'comic-title' }, alone ? 'PRIMA DI ENTRARE' : 'LOBBY MULTIGIOCATORE'),
       el('div', { class: 'lobby-sub' }, alone ? `Universo «${name}»` : `Universo «${name}» · Master: ${master}`),
+      ...(kernels.ok ? [] : [el('div', { class: 'locked-note kernel-range' }, kernels.etichetta ? `${kernels.etichetta}: questo universo gira su altri kernel (questo è il ${KERNEL_VERSION}). Si apre con il guasto che lo dice e non si salva; non si cancella.` : `Questo universo non è di questo kernel: ${kernels.motivo}.`)]),
       masterBlock,
       ...(minimumsBlock ? [minimumsBlock] : []),
       ...(alone ? [] : [wandererBlock, cardsBlock]),

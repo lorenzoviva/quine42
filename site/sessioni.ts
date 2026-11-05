@@ -13,6 +13,7 @@ import {
 import { DEFAULT_SCULPTORS, type SculptorAiModels } from '../src/kernel/agents/sculptor';
 import { bundledFiles } from '../src/kernel/bundle';
 import { SEED_FILE, seedHashes, WANDERER_HEADER } from '../src/kernel/universes';
+import { rangeLabel } from '../src/kernel/version';
 import { SOLO } from '../src/kernel/wanderers';
 import { accountConfig, signIn } from '../src/session/login';
 import { escapeHtml } from './shared';
@@ -36,6 +37,8 @@ export interface UniverseView {
   hourlyCost: number;
   minCap: number;
   description: string;
+  /** When this kernel does not run it, the range of the kernels it runs on, «kernel 0.1–0.1» (T302): it is shown, never deleted. */
+  kernels?: string;
 }
 
 /** Fetches active sessions from /api/session. */
@@ -83,6 +86,7 @@ const toNumber = (value: unknown): number => {
 export function parseUniverseSnapshot(name: string, files: FileMap, active?: ActiveSessionRecord): UniverseView {
   const { config } = readConfig(files);
   const ai = config.ai;
+  const kernels = rangeLabel(config);
   const master = config.partita?.master ?? 'io';
   const coef = repairCoefficients(ai.coefficienti);
   const sculpt: SculptorAiModels = { ...DEFAULT_SCULPTORS, ...(ai.scultori ?? {}) };
@@ -128,6 +132,7 @@ export function parseUniverseSnapshot(name: string, files: FileMap, active?: Act
     hourlyCost: toNumber(estimate.dollari),
     minCap,
     description,
+    ...(kernels ? { kernels } : {}),
   };
 }
 
@@ -285,11 +290,13 @@ export function renderUniverseCard(universe: UniverseView): HTMLElement {
   const liveBadge = universe.live
     ? `<span class="comic-badge green">LIVE · ${universe.clients} ${universe.clients === 1 ? 'VIANDANTE' : 'VIANDANTI'}</span>`
     : `<span class="comic-badge yellow">IN PAUSA</span>`;
+  // Out of the kernels it runs on (T302): the label, and it opens with the fault that says why.
+  const kernelBadge = universe.kernels ? ` <span class="comic-badge pink" title="Questo universo gira su altri kernel: si apre con il guasto che lo dice, e non si salva">${escapeHtml(universe.kernels.toUpperCase())}</span>` : '';
 
   card.innerHTML = `
     <div class="universe-card-header">
       <div>
-        ${liveBadge}
+        ${liveBadge}${kernelBadge}
         <h3 class="comic-title" style="font-size: var(--text-29); margin: var(--space-8) 0 0;">${escapeHtml(universe.name.toUpperCase())}</h3>
       </div>
       <span class="arcade-text text-cyan" style="font-size: var(--text-11);">SEME #${universe.seed}</span>

@@ -130,6 +130,15 @@ describe('Hub Sessioni & Creazione Nuovo Universo (T103)', () => {
     expect(parsed.description).toBe('Un antico borgo tra le colline con cripte runiche.');
   });
 
+  it('un universo che gira su altri kernel si vede con l’etichetta del suo intervallo (T302), uno di questo kernel senza', () => {
+    const at = (cfg: object) => parseUniverseSnapshot('vecchio', { ...bundledFiles, 'universe.json': JSON.stringify({ ...JSON.parse(bundledFiles['universe.json']), ...cfg }) });
+    expect(at({ kernel: '0.0.3', kernels: { from: '0.0' } }).kernels).toBe('kernel 0.0–0.0');
+    expect(at({ kernel: '0.0.3', kernels: undefined }).kernels).toBe('kernel 0.0–0.0');
+    expect(at({}).kernels).toBeUndefined();
+    expect(parseUniverseSnapshot('seme', bundledFiles).kernels).toBeUndefined();
+    if (typeof document !== 'undefined') expect(renderUniverseCard(at({ kernel: '0.0.3' })).innerHTML).toContain('KERNEL 0.0–0.0');
+  });
+
   it('buildNewUniverseFiles genera la configurazione corretta per i profili IA e regole di partita', () => {
     // 1. Profilo Low Detail & Partita Narrativa
     const filesLow = buildNewUniverseFiles({

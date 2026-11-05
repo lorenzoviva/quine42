@@ -430,6 +430,14 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
       const choice = await openPromise;
       expect(choice).toEqual({ tetto: 2.0 });
       expect(lobby.isOpen).toBe(false);
+      // A universe of this kernel says nothing of its kernels; one out of its range shows the label, and is entered all the same (T302).
+      expect(root.textContent).not.toContain('gira su altri kernel');
+      const old = new LobbyScreen({ name: 'vecchio', files: { ...files, 'universe.json': JSON.stringify({ ...JSON.parse(files['universe.json']), kernel: '0.0.2', kernels: { from: '0.0' } }) }, wandererId: 'io', credits: 5.0, alone: true });
+      const oldOpen = old.open();
+      const oldRoot = (old as any).root as FakeElement;
+      expect(oldRoot.textContent).toContain('kernel 0.0–0.0: questo universo gira su altri kernel');
+      (oldRoot.querySelector('.primary') as FakeElement).onclick!();
+      await oldOpen;
 
       // 2. Test CreditExhaustedModal
       let recharged = false;

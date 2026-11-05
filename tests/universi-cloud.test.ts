@@ -94,6 +94,9 @@ describe('the installation in universes/ (lab/scripts/installa-universi-cloud.ts
         const { files } = leggiUniverso(root + '/');
         expect(Object.keys(upgradeFromSeed(files, seed).changes)).toEqual([]);
         expect(readdirSync(path.join(root, 'maps')).length).toBe(d.luoghi);
+        // The range of the kernels it runs on is written (T302), open, from this kernel's contract.
+        expect(JSON.parse(files['universe.json'])).toMatchObject({ kernel: KERNEL_VERSION, kernels: { from: KERNEL_VERSION.split('.').slice(0, 2).join('.') } });
+        expect(JSON.parse(files['universe.json']).kernels.to).toBeUndefined();
         expect(d.strutture).toBeGreaterThanOrEqual(12);
       }
       // Installed again, what was there goes aside, never away.
