@@ -559,6 +559,11 @@ export class ThinClient {
     const studio = k.interact.bind(k);
     k.interact = async () => (k.zone === 'sim' ? this.interact() : studio());
     k.perform = (id, action) => this.perform(id, action);
+    // Putting down on furniture (T291) is the server's: the thing comes with its next update, on the shelf the server chose.
+    k.placeOn = async (id) => {
+      await this.perform(id, 'posa');
+      return '';
+    };
     k.freeAction = async (id, text) => {
       // On another wanderer (T43b) by their id: their body has no id of its own on the server.
       const other = k.otherWanderer(id);

@@ -578,6 +578,32 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Da non usare**: nessuno
 - **Fermo**: il componente `container`, il messaggio `contenitore`.
 
+### Mobile
+- **Inglese**: `isFurniture`, `mobile` (la classe)
+- **Definizione**: una cosa del mondo della classe `mobile` (cassa, banco, letto, credenza, barile, altare), solida e ferma: ci si posano gli oggetti.
+- **Dove vive**: `src/kernel/kernel.ts`, `src/mj/classes.ts`
+- **Da non usare**: `arredo`, `furniture` (nei documenti)
+- **Fermo**: la classe `mobile` nell'indice dei modelli.
+
+### Ripiano
+- **Inglese**: `Support`, `shelvesOf`, `findSpot`, `Spot`
+- **Definizione**: un pavimento della forma di un mobile sopra il suo suolo, dove si posa un oggetto; ne tiene tanti quante impronte ci stanno.
+- **Dove vive**: `src/kernel/placing.ts`
+- **Da non usare**: `piano` (da solo: è di un edificio e di un luogo), `superficie`
+
+### Impronta di un oggetto
+- **Inglese**: `ItemShape`, `itemShape`, `cellsOf`
+- **Definizione**: il modello di un oggetto visto dall'alto: le sue colonne stanno sul ripiano, il loro rettangolo prende il posto.
+- **Dove vive**: `src/kernel/placing.ts`
+- **Da non usare**: `footprint` (è dove un corpo non passa, `Form.foot`)
+
+### Oggetto posato
+- **Inglese**: `placeOn`, `PlacedComp`, `PlacedRecord`, `restorePlaced`, `supportOf`
+- **Definizione**: un oggetto che un viandante ha posato sul ripiano di un mobile: sta alla sua altezza, si raccoglie come da terra, resta nel salvataggio e per tutti.
+- **Dove vive**: `src/kernel/placing.ts`, `src/kernel/kernel.ts`
+- **Da non usare**: `appoggiato`
+- **Fermo**: il componente `posato`, il campo `posati` di `world/stato.json`, l'azione `posa`.
+
 ### Bottino
 - **Inglese**: `loot`, `LootTable`, `LootEntry`
 - **Definizione**: le tabelle per tag da cui escono gli oggetti di un luogo o di un contenitore.

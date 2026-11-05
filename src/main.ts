@@ -486,7 +486,7 @@ async function main() {
   const tp = teleportTarget(params, dev);
   if (tp) applyTeleport(kernel, tp);
 
-  for (const cue of ['rune:picked', 'item:picked', 'item:used', 'item:action', 'ui:container', 'item:crafted', 'rune:inscribed', 'spell:cast', 'rollback', 'forge:done'] as SoundCue[]) kernel.bus.on(cue, () => sound.cue(cue));
+  for (const cue of ['rune:picked', 'item:picked', 'item:placed', 'item:used', 'item:action', 'ui:container', 'item:crafted', 'rune:inscribed', 'spell:cast', 'rollback', 'forge:done'] as SoundCue[]) kernel.bus.on(cue, () => sound.cue(cue));
   kernel.bus.on('fault', ({ isNew }) => isNew && sound.cue('fault'));
   kernel.bus.on('zone', ({ zone }) => zone === 'corona' && kernel.coronaRevealed() && sound.cue('beyond'));
   kernel.bus.on('wanderer:jumped', () => sound.cue('jump'));

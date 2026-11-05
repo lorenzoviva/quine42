@@ -56,7 +56,7 @@ import { canonWithRune, MAX_MAGIC_RUNES, validateNewRune } from './magic';
 import { cleanPanel, designMechanic } from './agents/mechanics';
 import { BENCH, cleanCases, runCase, textKey, type BenchEntry, type BenchRun, type BenchScene, type BenchShown } from './bench';
 import { assemblePack, defineItems, individuate, itemPack, toItemDef, type Identity } from './agents/content';
-import { addItem, CARRY_CAPACITY, countItem, HOTBAR, equippedItem, moveSlot, newInventory, putSlot, removeItem, takeFromSlot, totalWeight, type Inventory } from './inventory';
+import { addItem, CARRY_CAPACITY, countItem, HOTBAR, equippedItem, moveSlot, newInventory, putSlot, readInventory, removeItem, takeFromSlot, totalWeight, type Inventory } from './inventory';
 import { chunkLevels, HILLS, LEVEL, Relief, RELIEF_PATH, worldLevels } from './relief';
 import { CardUses, CARDS_FILE, COMUNE, allCards, collectionOf, moduleCardId, receivedBy, type Received, payerOf, chunkCardId, stampFiles, cardHolderOf, type Card, type CardStamp } from './cards';
 import { bondWith, memoriesFor, playerFile, PLAYERS_DIR, readWandererState, repairProfile, SOLO, validWandererId, WANDERER_NAME, wandererColor, wandererOf, wanderersIn, type Profile, type ProfileRepair, type Wanderer, type WandererState, PER_WANDERER } from './wanderers';
@@ -65,6 +65,7 @@ import { checkKernelVersion, KERNEL_VERSION, stampKernel } from './version';
 import { ModuleStores } from './store';
 import { matchJob, validateJobProgram, WORKERS_PER_PLACE, type JobProgram } from './jobs';
 import { findRoute, RouteCache } from './route';
+import { blockShape, cellsOf, discCells, findSpot, itemShape, turnsBetween, type ItemShape, type PlacedRecord, type SpotFailure, type Support } from './placing';
 
 /** A solid entity with a model, as collision sees it: where it is, its form, where it blocks and its floors. */
 interface SolidForm extends Ground {
@@ -373,13 +374,37 @@ export { PER_WANDERER };
 export const HEAR = 8;
 export const GIVE_REACH = 3;
 export const SAY_MAX = 140;
+/** Putting things down on furniture (T291): how far from where one stands, how high above and below one's feet (tiles). */
+export const PLACE_REACH = 2;
+export const PLACE_UP = 1.5;
+export const PLACE_DOWN = 1;
+/** The things lying on furniture that a save keeps, the most recent ones. */
+export const MAX_PLACED = 4000;
+/** How far above its height (tiles) a thing lying on furniture still finds its shelf: the rounding of a save, far less than a voxel. */
+const REST_SLACK = 0.01;
+
+/** Why something does not go on a piece of furniture, as the world says it (T291): no word of the game in it. */
+export function placeRefusal(why: SpotFailure, name: string, what: string): string {
+  switch (why) {
+    case 'alto':
+      return `Non arrivi al piano di ${name}.`;
+    case 'lontano':
+      return `Avvicinati a ${name} per posarci ${what}.`;
+    case 'pieno':
+      return `Su ${name} non c'è più posto per ${what}.`;
+    case 'occupato':
+      return `Sopra ${name} c'è già qualcuno.`;
+    default:
+      return `${name} non ha un piano dove stia ${what}.`;
+  }
+}
 
 /** The effects the kernel applies itself (T260): the relief, and the social ones of a judgement. */
 /**
  * The fields of world/stato.json and of a wanderer's file that this kernel reads and writes, those of before it migrates included (T245a):
  * any other field is a kernel of tomorrow's, and the save keeps it as it was. Credits are not data of the universe (ADR-0104): never kept.
  */
-const STATE_FIELDS: ReadonlySet<string> = new Set(['consumati', 'contenitori', 'forme', 'rari', 'ora', 'importanti', 'viandante']);
+const STATE_FIELDS: ReadonlySet<string> = new Set(['consumati', 'contenitori', 'forme', 'rari', 'ora', 'importanti', 'viandante', 'posati']);
 const WANDERER_FIELDS: ReadonlySet<string> = new Set(['nome', 'profilo', 'pos', 'inventory', 'needs', 'hand', 'stati', 'slots', 'trasceso', 'anonimo', 'crediti']);
 
 /** The fields of a saved JSON object that are not in `known`. */
@@ -3547,6 +3572,156 @@ export class Kernel {
     this.message(`Posi: ${this.itemInfo(taken.item).name}${taken.count > 1 ? ` ×${taken.count}` : ''}`);
   }
 
+  // --- Putting things down on furniture (T291, ADR-0147) ------------------------------------------
+
+  /** A piece of furniture (T291): a thing of the world whose model is of the class `mobile` (a chest, a table, a bed, a barrel), not someone. */
+  private isFurniture(id: Id): boolean {
+    const fc: FormComp | undefined = this.ecs.get(id, 'form');
+    const m = this.modules.get(this.ecs.get(id, 'module')?.id)?.manifest;
+    return !!fc && !!m && !m.persona && !this.ecs.has(id, 'struttura') && this.forms.classOf(fc.model).id === 'mobile';
+  }
+
+  /** Whether the menu of a thing offers to put down on it what is held (T291): something with a body that is not someone nor a building, or what lies on furniture. */
+  private offersPlace(id: Id): boolean {
+    if (this.ecs.has(id, 'posato')) return true;
+    const m = this.modules.get(this.ecs.get(id, 'module')?.id)?.manifest;
+    return !!m && !m.persona && this.ecs.has(id, 'form') && this.ecs.has(id, 'body') && !this.ecs.has(id, 'struttura') && !this.ecs.has(id, 'pickup');
+  }
+
+  /** The furniture a thing lying on furniture lies on (T291): the solid thing under it with a shelf at its height, while it is there. */
+  supportOf(id: Id): Id | undefined {
+    const p = this.ecs.get(id, 'pos');
+    const placed = this.ecs.get(id, 'posato');
+    if (!p || !placed || !Number.isFinite(placed.z) || !Number.isFinite(p.x) || !Number.isFinite(p.y)) return undefined;
+    for (const s of this.solidForms.get(`${Math.floor(p.x)},${Math.floor(p.y)}`) ?? []) {
+      if (s.id === id || !this.isFurniture(s.id)) continue;
+      const [lx, lz] = toLocal(p.x - s.x, p.y - s.y, s.yaw);
+      const g = s.form.result!.grid;
+      const vx = Math.floor(lx * s.form.vpt + g.X / 2), vy = Math.floor(lz * s.form.vpt + g.Y / 2);
+      if (vx < 0 || vy < 0 || vx >= g.X || vy >= g.Y) continue;
+      const i = vx + vy * g.X;
+      const h = this.levelIn(s, placed.z);
+      for (let l = s.levels.start[i]; l < s.levels.start[i + 1]; l++) if (Math.abs(s.levels.z[l] - h) < 0.5) return s.id;
+    }
+    return undefined;
+  }
+
+  /** The shape of an item on a shelf (T291): its model's, or a small block while its model is not there. */
+  private shapeOfItem(item: string, fc?: FormComp): ItemShape {
+    const look = fc ?? this.itemLook(item);
+    const f = this.forms.ready(look.model, look.seed, look.tint);
+    return (f?.result && itemShape(f.result.grid, f.result.palette, f.vpt)) || blockShape();
+  }
+
+  /** Who stands somewhere now (T291): every wanderer in the world and every figure, with the height of their feet (none on the ground). */
+  private standing(): Array<{ x: number; y: number; z?: number; r: number }> {
+    const out: Array<{ x: number; y: number; z?: number; r: number }> = [];
+    for (const w of this.wanderersById.keys()) {
+      if (!this.inWorld(w)) continue;
+      this.as(w, () => {
+        const c = this.wandererCarpet();
+        out.push({ x: c.x, y: c.y, z: this.wandererPos().z, r: Number(this.ecs.get(this.wandererEntity, 'body')?.r) || 0.3 });
+      });
+    }
+    for (const id of this.ecs.query('pos', 'body')) {
+      if (this.ecs.has(id, 'player') || this.ecs.has(id, 'pickup') || !(this.ecs.has(id, 'mind') || this.ecs.has(id, 'wander') || this.ecs.has(id, 'identity'))) continue;
+      const p = this.ecs.get(id, 'pos');
+      out.push({ x: p.x, y: p.y, z: p.z, r: Number(this.ecs.get(id, 'body').r) || 0.3 });
+    }
+    return out;
+  }
+
+  /**
+   * Puts what the wanderer holds onto a piece of furniture (T291): `target` is the furniture, or something lying on it (then the same
+   * furniture). Where it goes the shapes of both decide (`findSpot`); it leaves the hand and lies there, at the shelf's height, for every
+   * wanderer, until someone takes it; the save keeps it. False, with a sentence of the world, when it does not go.
+   */
+  async placeOn(target: Id): Promise<string | false> {
+    const who = this.wanderer().id;
+    // The shapes of what is put down and of where, the first time they are seen: a program runs in a worker, or in a promise.
+    const held = equippedItem(this.inventory());
+    const look = held ? this.itemLook(held) : undefined;
+    const under = this.ecs.has(target, 'posato') ? this.supportOf(target) : target;
+    const fc: FormComp | undefined = under !== undefined && this.ecs.alive.has(under) ? this.ecs.get(under, 'form') : undefined;
+    const waits: Array<Promise<unknown>> = [];
+    if (look && !this.forms.ready(look.model, look.seed, look.tint)) waits.push(this.forms.wait(look.model, look.seed, look.tint));
+    if (fc && !this.forms.ready(fc.model, fc.seed, fc.tint)) waits.push(this.forms.wait(fc.model, fc.seed, fc.tint));
+    if (waits.length) {
+      await Promise.all(waits);
+      // Who asked may have gone meanwhile: nobody does it in their place.
+      if (!this.wanderersById.has(who)) return false;
+    }
+    return this.as(who, () => this.putOn(target));
+  }
+
+  private putOn(target: Id): string | false {
+    const refuse = (text: string): false => (this.message(text, 'warn'), false);
+    const inv = this.inventory();
+    const at = inv.equipped;
+    const held = at !== null ? inv.slots[at] : null;
+    if (at === null || !held) return refuse('Non impugni nulla da posare (1–6 o inventario).');
+    if (this.zone !== 'sim' || !this.ecs.alive.has(target)) return false;
+    const what = this.itemInfo(held.item).name;
+    const id = this.ecs.has(target, 'posato') ? this.supportOf(target) : target;
+    if (id === undefined) return refuse(`${this.nameOf(target)} non sta su un mobile.`);
+    const name = this.nameOf(id);
+    if (!this.isFurniture(id)) return refuse(`${name} non è un mobile: lì sopra non si posa niente.`);
+    const body = this.ecs.get(id, 'body');
+    if (!body?.solid || body.pushable) return refuse(`${name} si muove: lì sopra non resterebbe fermo niente.`);
+    const fc: FormComp = this.ecs.get(id, 'form');
+    const f = this.forms.ready(fc.model, fc.seed, fc.tint);
+    const sp = this.ecs.get(id, 'pos');
+    if (!f?.result || !sp || !Number.isFinite(sp.x) || !Number.isFinite(sp.y)) return refuse(`${name} non ha un piano dove stia ${what}.`);
+    const g = f.result.grid;
+    const support: Support = { levels: this.groundOf(id, fc, f).levels, X: g.X, Y: g.Y, vpt: f.vpt, base: f.base };
+    // Heights of the world (tiles) as heights of its grid (voxels), points of the world in its own frame.
+    const floor = this.groundAt(sp.x, sp.y);
+    const toShelf = (z: number) => (z - floor) * f.vpt + f.base;
+    const local = (x: number, y: number) => toLocal(x - sp.x, y - sp.y, fc.yaw);
+    const things = new Map<number, Set<number>>();
+    const bodies = new Map<number, Set<number>>();
+    const take = (to: Map<number, Set<number>>, h: number, cells: number[]) => {
+      if (!cells.length) return;
+      let s = to.get(h);
+      if (!s) to.set(h, (s = new Set()));
+      for (const c of cells) s.add(c);
+    };
+    // What lies there already takes the rectangle of its footprint; who stands there, the disc of their body.
+    const near = f.reach + 1;
+    for (const other of this.ecs.query('posato', 'pickup', 'pos')) {
+      const p = this.ecs.get(other, 'pos');
+      const z = this.ecs.get(other, 'posato').z;
+      if (!(Math.hypot(p.x - sp.x, p.y - sp.y) <= near) || !Number.isFinite(z)) continue;
+      const ofc: FormComp | undefined = this.ecs.get(other, 'form');
+      const [lx, ly] = local(p.x, p.y);
+      take(things, Math.round(toShelf(z)), cellsOf(support, this.shapeOfItem(this.ecs.get(other, 'pickup').item, ofc), lx, ly, turnsBetween(ofc?.yaw ?? 0, fc.yaw)));
+    }
+    for (const b of this.standing()) {
+      if (b.z === undefined || !Number.isFinite(b.z) || !(Math.hypot(b.x - sp.x, b.y - sp.y) <= near)) continue;
+      const [lx, ly] = local(b.x, b.y);
+      take(bodies, Math.round(toShelf(b.z)), discCells(support, lx, ly, b.r));
+    }
+    const wc = this.wandererCarpet();
+    const feet = this.floorAt(wc.x, wc.y, this.wandererPos().z);
+    const [fx, fy] = local(wc.x, wc.y);
+    const r = findSpot(support, this.shapeOfItem(held.item), { things, bodies, from: { x: fx, y: fy }, reach: PLACE_REACH, top: toShelf(feet + PLACE_UP), bottom: toShelf(feet - PLACE_DOWN) });
+    if ('fail' in r) return refuse(placeRefusal(r.fail, name, what));
+    const taken = takeFromSlot(inv, at, 1)!;
+    const c = Math.cos(fc.yaw), s = Math.sin(fc.yaw);
+    const z = floor + (r.spot.h - f.base) / f.vpt;
+    const item = this.spawnItem(taken.item, sp.x + r.spot.x * c + r.spot.y * s, sp.y - r.spot.x * s + r.spot.y * c, 1);
+    const turn = fc.yaw + (r.spot.turns * Math.PI) / 2;
+    this.ecs.get(item, 'form').yaw = ((turn % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+    this.ecs.set(item, 'posato', { z });
+    this.ecs.get(item, 'pos').z = z;
+    if (taken.inv) this.ecs.get(item, 'pickup').inv = taken.inv;
+    this.syncPhrase();
+    this.bus.emit('item:placed', { item: taken.item, on: id });
+    const said = `Posi ${what} su ${name}.`;
+    this.message(said);
+    return said;
+  }
+
   moveSlot(from: number, to: number): void {
     moveSlot(this.inventory(), from, to, this.itemSpec);
   }
@@ -3797,6 +3972,8 @@ export class Kernel {
       out.push({ id: `act:${a.id}`, label: a.label, enabled: ok, reason: ok ? undefined : `serve: ${this.content.get(a.requires!)?.name ?? a.requires}` });
     }
     const held = equippedItem(inv);
+    // What is held goes down on furniture (T291), or beside what already lies on it; the kernel says why when it does not.
+    if (held && this.offersPlace(id)) out.push({ id: 'posa', label: `Posa ${this.itemInfo(held).name} ${this.ecs.has(id, 'posato') ? 'accanto' : 'qui sopra'}`, enabled: true });
     if (held) out.push({ id: 'strumento', label: `Usa ${this.itemInfo(held).name}`, enabled: true });
     out.push({ id: 'esamina', label: 'Esamina', enabled: true });
     out.push({ id: 'altro', label: 'Altro…', enabled: true });
@@ -3975,6 +4152,9 @@ export class Kernel {
       case 'strumento':
         this.action(id);
         return;
+      case 'posa':
+        await this.placeOn(id);
+        return;
       case 'altro':
         this.bus.emit('ui:freeaction', { id, name: speaker });
         return;
@@ -4052,7 +4232,7 @@ export class Kernel {
         description: info?.description ?? `${m?.description ?? ''}${identity ? ` ${identity.look}` : ''}`,
         tags: info?.tags ?? m?.tags ?? [],
         container: this.ecs.has(id, 'container'),
-        kind: pk ? 'oggetto a terra' : m?.persona ? 'persona' : this.ecs.has(id, 'container') ? 'mobile' : 'cosa',
+        kind: pk ? (this.ecs.has(id, 'posato') ? 'oggetto posato su un mobile' : 'oggetto a terra') : m?.persona ? 'persona' : this.ecs.has(id, 'container') ? 'mobile' : 'cosa',
         learnModule: !pk && !m?.persona ? entry : undefined,
         learnItem: pk?.item,
       },
@@ -7579,6 +7759,8 @@ export class Kernel {
       this.consumed.clear();
       this.savedContainers.clear();
       for (const m of this.rari.values()) m.clear();
+      // What lay on the furniture of the world of before goes with it (T291).
+      for (const id of this.ecs.query('posato')) this.ecs.destroy(id);
       this.repo.write('world/stato.json', null);
       for (const p of Object.keys(this.repo.working)) if (p.startsWith(PLAYERS_DIR)) this.repo.write(p, null);
       this.wanted.clear();
@@ -7650,12 +7832,14 @@ export class Kernel {
       const c: Container = this.ecs.get(id, 'container');
       if (c.filled) containers[this.ecs.get(id, 'origin').key] = { inv: c.inv, filled: true };
     }
+    const placed = this.placedToSave();
     const state = {
       consumati: [...this.consumed].slice(-5000),
       contenitori: containers,
       forme: this.formsToSave(),
       rari: Object.fromEntries([...this.rari].map(([t, m]) => [t, Object.fromEntries(m)])),
       ora: Math.round(this.time),
+      ...(placed.length ? { posati: placed } : {}),
     };
     // Each wanderer in their own file (T34); the world's state no longer carries one.
     const players = Object.fromEntries([...this.wanderersById.values()].map((w) => [playerFile(w.id), this.as(w.id, () => this.wandererState(w))]));
@@ -7911,6 +8095,43 @@ export class Kernel {
     return Object.fromEntries([...this.savedForms].filter(([, d]) => d.length));
   }
 
+  /** What lies on furniture (T291): enough to put it back where it was, turned as it was; the most recent if they are very many. */
+  private placedToSave(): PlacedRecord[] {
+    const out: PlacedRecord[] = [];
+    const r4 = (v: number) => Math.round(v * 10000) / 10000;
+    for (const id of this.ecs.query('posato', 'pickup', 'pos')) {
+      const pk = this.ecs.get(id, 'pickup');
+      const p = this.ecs.get(id, 'pos');
+      const z = this.ecs.get(id, 'posato').z;
+      const yaw = this.ecs.get(id, 'form')?.yaw ?? 0;
+      if (typeof pk?.item !== 'string' || !(pk.count >= 1) || ![p.x, p.y, z, yaw].every(Number.isFinite)) continue;
+      out.push({ item: pk.item, count: Math.floor(pk.count), x: r4(p.x), y: r4(p.y), z: r4(z), yaw: r4(yaw), ...(pk.inv ? { inv: pk.inv } : {}) });
+    }
+    return out.slice(-MAX_PLACED);
+  }
+
+  /**
+   * Puts back what lay on furniture when the game was saved (T291). `world/stato.json` is a file of the universe, which a master may
+   * write by hand: whatever is not a known item at a finite place is left out, never thrown at the world.
+   */
+  private restorePlaced(list: unknown): void {
+    if (!Array.isArray(list)) return;
+    for (const r of list.slice(-MAX_PLACED)) {
+      if (!r || typeof r !== 'object') continue;
+      const { item, count, x, y, z, yaw, inv } = r as Record<string, unknown>;
+      if (typeof item !== 'string' || !this.content.get(item)) continue;
+      const at = [x, y, z].map((v) => (typeof v === 'number' && Number.isFinite(v) && Math.abs(v) < 1e6 ? v : NaN));
+      if (!at.every(Number.isFinite)) continue;
+      const n = typeof count === 'number' && Number.isInteger(count) && count >= 1 ? Math.min(count, 999) : 1;
+      const id = this.spawnItem(item, at[0], at[1], n);
+      if (typeof yaw === 'number' && Number.isFinite(yaw)) this.ecs.get(id, 'form').yaw = yaw;
+      this.ecs.set(id, 'posato', { z: at[2] });
+      this.ecs.get(id, 'pos').z = at[2];
+      const bag = readInventory(inv);
+      if (bag) this.ecs.get(id, 'pickup').inv = bag;
+    }
+  }
+
   /** Restores what was saved: the same wanderer, the same world, after a restart. */
   loadState(): void {
     let st: any;
@@ -7932,6 +8153,7 @@ export class Kernel {
     for (const k of st.consumati ?? []) this.consumed.add(String(k));
     for (const [k, c] of Object.entries(st.contenitori ?? {})) this.savedContainers.set(k, c as { inv: Inventory; filled: boolean });
     for (const [k, d] of Object.entries(st.forme ?? {})) if (Array.isArray(d)) this.savedForms.set(k, d.map(String));
+    this.restorePlaced(st.posati);
     // The important structures of before ADR-0092 are the Huge ones.
     for (const [z, c] of Object.entries(st.importanti ?? {})) if (typeof c === 'string') this.rari.get('enorme')!.set(z, c);
     for (const t of RARE_SIZES) for (const [z, c] of Object.entries(st.rari?.[t] ?? {})) if (typeof c === 'string') this.rari.get(t)!.set(z, c);
@@ -8271,7 +8493,12 @@ export class Kernel {
     for (const id of this.ecs.query('body', 'pos')) {
       if (wanderers.has(id)) continue;
       const p = this.ecs.get(id, 'pos');
-      if (Number.isFinite(p.x) && Number.isFinite(p.y)) settle(p, p.x, p.y);
+      if (!Number.isFinite(p.x) || !Number.isFinite(p.y)) continue;
+      // What lies on furniture rests on the highest floor no higher than where it was put (T291): its shelf, or, if the furniture is
+      // not there (gone, or its form still on its way), what is under it. Where it was put stays, so the shelf takes it back.
+      const placed = this.ecs.get(id, 'posato');
+      if (placed && Number.isFinite(placed.z)) p.z = this.floorBelow(p.x, p.y, placed.z + REST_SLACK);
+      else settle(p, p.x, p.y);
     }
   }
 

@@ -80,9 +80,10 @@ export interface EntityView {
 
 /**
  * The components of an entity a client gets (T39): what the renderer and the menus read. Its mind, its memories and
- * what it carries stay on the server; of `identity` only the name, of `mind` only that it has one.
+ * what it carries stay on the server; of `identity` only the name, of `mind` only that it has one. `posato` (T291): the height of
+ * the shelf a thing lies on, from which the mirror rests it on the furniture it has too.
  */
-export const ENTITY_PARTS = ['pickup', 'rune', 'body', 'interact', 'luce', 'fuoco', 'attivita', 'wander', 'container', 'identity', 'mind'] as const;
+export const ENTITY_PARTS = ['pickup', 'rune', 'body', 'interact', 'luce', 'fuoco', 'attivita', 'wander', 'container', 'identity', 'mind', 'posato'] as const;
 
 /** Another wanderer in sight. */
 export interface OtherView {

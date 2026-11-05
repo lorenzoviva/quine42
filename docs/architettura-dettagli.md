@@ -17,7 +17,7 @@
 | [Il Concilio al lavoro: registro, Luogo, Fucina, Genesi](#concilio) | `src/kernel/agents/`, `src/kernel/layout.ts` |
 | [Spazi, rune, magia, borse](#spazi-rune-magia) | `src/kernel/kernel.ts`, `src/kernel/runes.ts`, `src/kernel/magic.ts`, `src/kernel/inventory.ts` |
 | [Il lessico](#lessico) | `world/lessico.md`, `src/kernel/fourthwall.ts` |
-| [Regole, effetti, stati, morte, menu, salto, contenuti](#regole-effetti) | `src/kernel/kernel.ts`, `src/kernel/content.ts`, `src/kernel/validator.ts`, `universe/modules/` |
+| [Regole, effetti, stati, morte, menu, salto, contenuti](#regole-effetti) | `src/kernel/kernel.ts`, `src/kernel/content.ts`, `src/kernel/validator.ts`, `src/kernel/placing.ts`, `universe/modules/` |
 | [Società, NPC, personaggi](#societa) | `src/kernel/society.ts`, `src/kernel/plots.ts`, `src/kernel/agents/minds.ts` |
 | [La corona e gli interni dello studio](#corona) | `src/kernel/corona.ts`, `src/kernel/archive.ts`, `src/kernel/bible.ts`, `src/kernel/situation.ts`, `src/kernel/screens.ts`, `src/render/corona3d.ts`, `src/render/screens.ts`, `src/ui/studio.ts`, `src/ui/graph.ts` |
 | [Meccaniche, casi dei sistemi, catena e banco di prova](#sala-sistemi) | `src/kernel/agents/mechanics.ts`, `src/kernel/bench.ts`, `src/kernel/chain.ts`, `src/render/chain.ts`, `src/render/bench.ts` |
@@ -207,6 +207,22 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 - **Il salto** (ADR-0080, T56b): Spazio (`kernel.jump()`) nella simulazione: verso dove si cammina o si guarda, sopra ciò che non va più in alto di `JUMP_UP` (1,05 caselle, `topUnder` sui `Form.levels`) e sopra l'acqua, mai sopra muri, rocce o caselle solide del terreno; atterra nel primo punto da 1 a `JUMP_FAR` (2,6) caselle dove il corpo sta, altrimenti salto sul posto. Con i piani (T70) si salta dal pavimento su cui si sta (`pos.z`), conta il pieno che comincia sotto `JUMP_UP` (non il soffitto) e si atterra sul pavimento più alto che si supera (`floorBelow`). Componente `salto` del viandante portato da `jumpTick` dopo i sistemi; `kernel.jumping()` per arco e ombra. Nella corona, nello studio e nel kernel specchio Spazio fa ciò che fa `E`.
 - **Contenuti** (ADR-0012): `ItemDef` in pacchetti; bottino per tag; contenitori; ricette; bisogni
   (`needs` sul giocatore, `sys.needs`); uso generico in `core.items`; menu azioni (`E`).
+- **Posare sui mobili** (ADR-0147, T291): nel menu di una cosa (`E`, tasto destro) chi impugna qualcosa ha «Posa *X* qui sopra»
+  (`perform(id, 'posa')` → `kernel.placeOn`; su ciò che è già posato «Posa *X* accanto», sullo stesso mobile). Un **mobile** è una
+  cosa ferma e solida di classe `mobile` (non `pushable`, non una persona né una struttura); il **ripiano** è un pavimento della sua
+  forma sopra il suo suolo (`Form.levels`, con le azioni fatte), da `PLACE_DOWN` (1) sotto a `PLACE_UP` (1,5 caselle) sopra i piedi,
+  entro `PLACE_REACH` (2) da chi posa. `findSpot` (`src/kernel/placing.ts`, funzioni pure) prova le quattro quarte di giro dell'oggetto
+  (girato come il mobile): ogni colonna del suo modello visto dall'alto sta su legno alla stessa altezza con lo spazio per la sua
+  altezza, il rettangolo della sua **impronta** non tocca quello di ciò che c'è già né il disco di chi ci sta in piedi; sceglie il
+  ripiano più largo (poi il più alto) e, riga per riga, l'angolo più vicino a chi posa. Quanti oggetti stanno su un ripiano lo dicono
+  le impronte (la cassapanca del seme tiene due oggetti generici, il banco con gli attrezzi uno). Altrimenti una frase del mondo
+  (`placeRefusal`: non è un mobile, si muove, non ha un piano, non arrivi, avvicinati, non c'è più posto, c'è già qualcuno). L'oggetto
+  è un `pickup` senza luogo con il componente `posato {z}` (l'altezza del ripiano): `settleHeights` lo posa sul pavimento più alto
+  non sopra `z` (`floorBelow`), quindi sul ripiano o, se il mobile non c'è più o non è ancora pronto, su ciò che sta sotto, e non si
+  perde; non è solido e non cambia pavimenti (regola 10); si raccoglie come da terra. Il salvataggio lo tiene in `world/stato.json →
+  posati` (oggetto, quanti, x, y, z, yaw, la borsa; al più `MAX_PLACED`), letto con validazione; la Genesi lo toglie. In
+  multigiocatore `posato` è in `ENTITY_PARTS` e il kernel specchio lo posa sulla sua copia del mobile; l'azione viaggia in `azione`
+  (nessun messaggio nuovo). Il renderer lo disegna fermo, all'altezza del ripiano, girato come lo si è posato.
 
 <a id="societa"></a>
 ## Società, NPC, personaggi
