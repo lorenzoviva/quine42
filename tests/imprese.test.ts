@@ -350,4 +350,34 @@ describe('the ventures in a world', () => {
     expect(k.ventures()[0].portati).toEqual({ 'item.ciocco': 16 });
     expect(k.individualOf('Baldo')?.ricordi?.some((r) => r.peso === 2 && /materiale/.test(r.testo))).toBe(true);
   }, 60000);
+
+  it('where a wanderer is, for the site, is where the carpet took them: not their position on the carpet', async () => {
+    const k = await world();
+    const { key } = placeOf(k);
+    const { id } = aStructure(k);
+    const site = { ...k.ecs.get(id, 'pos') };
+    setPeople(k, [{ nome: 'Baldo', mestiere: 'fabbro', origine: `${key}#t0` }]);
+    (k as unknown as { breakEntity(id: number): void }).breakEntity(id);
+    addItem(k.inventory(), 'item.ciocco', 30, { weight: 0, stack: 99 } as never);
+    const carpet = k.carpet()!;
+    // Carried far from the site, standing right on its coordinates on the carpet: too far to bring anything, and no site in the panel.
+    const p = k.ecs.get(k.wandererEntity, 'pos');
+    p.x = site.x + 1;
+    p.y = site.y + 1;
+    carpet.ox = 100;
+    carpet.oy = 100;
+    k.uiAction('cantiere', 'porta');
+    expect(k.ventures()[0].portati).toEqual({});
+    play(k, 1.5);
+    expect(k.ecs.get(k.wandererEntity, 'cantiere')).toBeUndefined();
+    // Carried next to it, at the centre of the carpet: what the game is, the panel says the site and the button brings.
+    p.x = 0;
+    p.y = 0;
+    carpet.ox = site.x + 1;
+    carpet.oy = site.y + 1;
+    play(k, 1.5);
+    expect(k.ecs.get(k.wandererEntity, 'cantiere')?.titolo).toBe(k.ventures()[0].titolo);
+    k.uiAction('cantiere', 'porta');
+    expect(k.ventures()[0].portati).toEqual({ 'item.ciocco': 16 });
+  }, 60000);
 });

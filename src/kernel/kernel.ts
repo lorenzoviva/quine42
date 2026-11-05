@@ -7050,9 +7050,10 @@ export class Kernel {
   private ventureBring(id: Id, wanted?: string | null): number {
     const item = typeof wanted === 'string' ? wanted : undefined;
     if (!this.ecs.alive.has(id)) return 0;
-    const p = this.ecs.get(id, 'pos');
-    if (!p) return 0;
     const wanderer = this.wandererOf(id);
+    // A wanderer's `pos` is on the carpet: where they are in the world is what the carpet says, as for the sites.
+    const p = wanderer !== undefined ? this.wandererAt(wanderer) : this.ecs.get(id, 'pos');
+    if (!p) return 0;
     const name = this.ecs.get(id, 'identity')?.name;
     const v = wanderer !== undefined
       ? openVentures(this.ventureList).filter((o) => Math.hypot(o.posto.x - p.x, o.posto.y - p.y) <= 6).sort((a, b) => Math.hypot(a.posto.x - p.x, a.posto.y - p.y) - Math.hypot(b.posto.x - p.x, b.posto.y - p.y))[0]
@@ -7100,8 +7101,7 @@ export class Kernel {
    */
   private cantierePanels(): void {
     for (const w of this.wanderersInWorld()) {
-      const p = this.ecs.get(w.id, 'pos');
-      if (!p) continue;
+      const p = { x: w.x, y: w.y };
       const near = this.ventureList
         .filter((v) => v.stato !== 'finita' || (v.fine ?? 0) >= this.day() - 1)
         .map((v) => ({ v, d: Math.hypot(v.posto.x - p.x, v.posto.y - p.y) }))
@@ -7201,6 +7201,20 @@ export class Kernel {
     if (this.mirror) return undefined;
     let changed = false;
     for (const v of this.ventureList) if (v.luogo === ch.key && this.ventureIntoPlan(v, plan)) changed = true;
+    // A plan goes to disk on its own, ahead of the file of the ventures: after a tab closed in between, or `R`, a stage no venture backs
+    // would keep its scaffolding for ever. The ventures say what is being built; without one the building is whole, the new house was never begun.
+    const building = new Set(this.ventureList.filter((v) => v.luogo === ch.key && v.stato !== 'finita').map((v) => v.origine));
+    for (const origin of Object.keys(plan.stadi ?? {})) {
+      if (building.has(origin)) continue;
+      delete plan.stadi![origin];
+      changed = true;
+    }
+    if (plan.stadi && !Object.keys(plan.stadi).length) delete plan.stadi;
+    const houses = plan.case?.filter((h) => !(Number.isFinite(h.stadio) && h.stadio < 1) || building.has(h.origine));
+    if (houses && houses.length !== plan.case!.length) {
+      plan.case = houses;
+      changed = true;
+    }
     this.matureChunk(ch);
     const away = Number.isFinite(plan.visto) ? Math.max(0, this.time - plan.visto!) : undefined;
     if (plan.visto !== undefined) {
