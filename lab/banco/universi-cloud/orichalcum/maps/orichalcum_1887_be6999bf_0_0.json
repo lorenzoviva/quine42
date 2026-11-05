@@ -49,6 +49,16 @@
    "vapore",
    "ingranaggio",
    "luce"
+  ],
+  "strutture": [
+   {
+    "concetto": "cattedrale degli ingranaggi",
+    "taglia": "grande"
+   },
+   {
+    "concetto": "taverna",
+    "taglia": "grande"
+   }
   ]
  }
 }

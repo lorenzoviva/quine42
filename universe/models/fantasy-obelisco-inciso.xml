@@ -1,0 +1,73 @@
+<!-- Obelisco inciso (fantasy, aurora): un obelisco di pietra che si assottiglia verso l'alto, con la punta di bronzo e rune incise che
+     brillano dal fondo dei solchi. Il seme sceglie l'altezza (quattro quote), la base (a gradoni, un tamburo con quattro cristalli o un
+     cumulo di macerie) e dove la pietra è incisa e quanto è lungo ogni segno. -->
+<sequence values="BSdGPRCxvVUklmnabo" size="20 20 60" symmetry="(xy)" name="Obelisco inciso">
+  <color symbol="S" value="8a8478" name="pietra"/>
+  <color symbol="d" value="5e5a52" name="pietra scura"/>
+  <color symbol="G" value="a6a196" name="pietra chiara"/>
+  <color symbol="P" value="b08a3a" name="bronzo"/>
+  <color symbol="R" value="7fd8ff" name="runa luminosa" glow="True"/>
+  <color symbol="C" value="b48cff" name="cristallo arcano" glow="True"/>
+  <color symbol="x" hidden="True" name="solco inciso"/>
+  <color symbol="v" hidden="True" name="per mescolare il caso"/>
+  <color symbol="V" hidden="True" name="spazio della base"/>
+  <color symbol="U" hidden="True" name="spazio del fusto"/>
+  <color symbol="k" hidden="True" name="alto 37"/>
+  <color symbol="l" hidden="True" name="alto 45"/>
+  <color symbol="m" hidden="True" name="alto 52"/>
+  <color symbol="n" hidden="True" name="alto 58"/>
+  <color symbol="a" hidden="True" name="base a gradoni"/>
+  <color symbol="b" hidden="True" name="tamburo con i cristalli"/>
+  <color symbol="o" hidden="True" name="cumulo di macerie"/>
+  <!-- Gli spazi e i due dadi -->
+  <box at="10 10 0" size="21 21 60" color="v"/>
+  <all in="v" out="B"/>
+  <box at="10 10 0" size="21 21 6" color="V"/>
+  <box at="10 10 6" size="21 21 54" color="U"/>
+  <one steps="1"><rule in="U" out="k"/><rule in="U" out="l"/><rule in="U" out="m"/><rule in="U" out="n"/></one>
+  <one steps="1"><rule in="V" out="a"/><rule in="V" out="b"/><rule in="V" out="o"/></one>
+  <all symmetry="(xyz)">
+    <rule in="kU" out="kk"/><rule in="lU" out="ll"/><rule in="mU" out="mm"/><rule in="nU" out="nn"/>
+    <rule in="aV" out="aa"/><rule in="bV" out="bb"/><rule in="oV" out="oo"/>
+  </all>
+  <!-- La base -->
+  <box at="10 10 0" size="17 17 2" color="d" on="a"/>
+  <box at="10 10 2" size="13 13 2" color="G" on="a"/>
+  <box at="10 10 4" size="9 9 2" color="d" on="a"/>
+  <cylinder at="10 10 0" size="19 19 3" color="d" on="b"/>
+  <cylinder at="10 10 3" size="13 13 3" color="G" on="b"/>
+  <box at="4 4 3" size="1 1 3" color="C" on="b"/>
+  <box at="16 4 3" size="1 1 3" color="C" on="b"/>
+  <box at="4 16 3" size="1 1 3" color="C" on="b"/>
+  <box at="16 16 3" size="1 1 3" color="C" on="b"/>
+  <ellipsoid at="10 10 0" size="19 19 12" color="d" on="o"/>
+  <ellipsoid at="6 13 0" size="7 7 5" color="G" on="o"/>
+  <ellipsoid at="14 6 0" size="5 5 3" color="S" on="o"/>
+  <!-- Il fusto alto 37 -->
+  <box at="10 10 6" size="7 7 10" color="S" on="k"/>
+  <box at="10 10 6" size="5 5 27" color="S" on="k"/>
+  <box at="10 10 33" size="3 3 2" color="P" on="k"/>
+  <box at="10 10 35" size="1 1 2" color="P" on="k"/>
+  <!-- Il fusto alto 45 -->
+  <box at="10 10 6" size="7 7 21" color="S" on="l"/>
+  <box at="10 10 6" size="5 5 35" color="S" on="l"/>
+  <box at="10 10 41" size="3 3 2" color="P" on="l"/>
+  <box at="10 10 43" size="1 1 2" color="P" on="l"/>
+  <!-- Il fusto alto 52 -->
+  <box at="10 10 6" size="7 7 16" color="S" on="m"/>
+  <box at="10 10 6" size="5 5 42" color="S" on="m"/>
+  <box at="10 10 48" size="3 3 2" color="P" on="m"/>
+  <box at="10 10 50" size="1 1 2" color="P" on="m"/>
+  <!-- Il fusto alto 58 -->
+  <box at="10 10 6" size="7 7 28" color="S" on="n"/>
+  <box at="10 10 6" size="5 5 48" color="S" on="n"/>
+  <box at="10 10 54" size="3 3 2" color="P" on="n"/>
+  <box at="10 10 56" size="1 1 2" color="P" on="n"/>
+  <all in="[vVUklmnabo]" out="B"/>
+  <!-- Le incisioni: dove cominciano e quanto è lungo ogni segno -->
+  <prl steps="1" in="SB" out="xB" p="0.025"/>
+  <prl steps="3" in="S x" out="x *" p="0.5"/>
+  <prl steps="1" in="xS" out="*x" p="0.15"/>
+  <all in="xS" out="xR"/>
+  <all in="x" out="B"/>
+</sequence>

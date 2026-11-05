@@ -1,0 +1,62 @@
+<!-- Stufa in ghisa, steampunk (Cantiere 2, Parte B): una stufa panciuta di ghisa su quattro piedi, lo sportello con la brace
+     ambrata accesa, il collare d'ottone e la canna fumaria che sale e piega a gomito. Il seme sceglie se la pancia è stretta o larga,
+     quanto sale la canna, da che parte piega il gomito e quanto corre,
+     e dove spuntano le borchie d'ottone sulla pancia. -->
+<sequence values="BEOGAFQswmXYrc" size="20 20 20" symmetry="(xy)" name="Stufa in ghisa">
+  <color symbol="E" value="2f2e33" name="ghisa"/>
+  <color symbol="G" value="4a4448" name="ghisa chiara"/>
+  <color symbol="O" value="c9a13b" name="ottone"/>
+  <color symbol="A" value="f2b54a" name="vetro ambrato acceso" glow="True"/>
+  <color symbol="F" value="ff7a2a" name="brace" glow="True"/>
+  <color symbol="Q" value="2f2e33" name="ghisa dell'asse"/>
+  <color symbol="s" hidden="True" name="la cima della pancia"/>
+  <color symbol="w" hidden="True" name="la pancia larga possibile"/>
+  <color symbol="m" hidden="True" name="il dado della pancia"/>
+  <color symbol="X" hidden="True" name="pancia larga"/>
+  <color symbol="Y" hidden="True" name="pancia stretta"/>
+  <color symbol="r" hidden="True" name="la canna che sale"/>
+  <color symbol="c" hidden="True" name="il gomito"/>
+  <!-- Piedi, piastra e pancia, stretta o larga -->
+  <box at="7 7 0" size="2 2 2" color="E"/>
+  <box at="13 7 0" size="2 2 2" color="E"/>
+  <box at="7 13 0" size="2 2 2" color="E"/>
+  <box at="13 13 0" size="2 2 2" color="E"/>
+  <cylinder at="10 10 2" size="11 11 1" color="G"/>
+  <ellipsoid at="10 10 2" size="9 9 8" color="E"/>
+  <ellipsoid at="10 10 2" size="13 13 10" color="w" on="B"/>
+  <box at="10 10 3" size="1 1 15" color="Q" on="[Ew]"/>
+  <box at="10 5 4" size="1 1 1" color="m"/>
+  <!-- I ribattini dei piedi, poi il dado della pancia -->
+  <prl steps="1" in="E B" out="O B" p="0.3"/>
+  <one steps="1"><rule in="m" out="X"/><rule in="m" out="Y"/></one>
+  <all in="Xw" out="XX" symmetry="(xyz)"/>
+  <all in="X" out="E"/>
+  <all in="[wY]" out="B"/>
+  <all in="BQB" out="BBB"/>
+  <all in="B Q" out="s Q"/>
+  <prl steps="1" in="B E" out="B G" p="0.2"/>
+  <all in="Q" out="E"/>
+  <!-- Lo sportello con la brace, davanti -->
+  <box at="10 16 3" size="5 4 4" color="O" on="[BE]"/>
+  <box at="10 17 4" size="3 3 2" color="F" on="[O]"/>
+  <box at="10 18 4" size="1 1 2" color="A"/>
+  <!-- Il collare e la canna: sale, poi piega a gomito -->
+  <one steps="1" symmetry="()">
+    <rule in="*****/*****/*****/*****/***** *****/*****/**s**/*****/*****" out="*****/*EEE*/*ErE*/*EEE*/***** OOOOO/OOOOO/OOOOO/OOOOO/OOOOO"/>
+  </one>
+  <all in="s" out="E"/>
+  <one steps="4" in="B r" out="r E"/>
+  <one steps="10">
+    <rule in="B r" out="r E"/>
+    <rule in="B r" out="B c" p="0.25"/>
+  </one>
+  <all in="c" out="r"/>
+  <one steps="1" in="Br" out="cO"/>
+  <all steps="4" in="BcO" out="cEO"/>
+  <prl steps="4">
+    <rule in="BcE" out="cEE" p="0.5"/>
+  </prl>
+  <all in="[rc]" out="O"/>
+  <!-- Le borchie sulla pancia -->
+  <prl steps="1" in="B E" out="O E" p="0.05"/>
+</sequence>

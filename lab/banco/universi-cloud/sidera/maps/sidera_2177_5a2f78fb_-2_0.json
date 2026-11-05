@@ -35,6 +35,11 @@
   "runes": [
    "stasi"
   ],
-  "strutture": []
+  "strutture": [
+   {
+    "concetto": "faro al plasma",
+    "taglia": "grande"
+   }
+  ]
  }
 }

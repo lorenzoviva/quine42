@@ -1,0 +1,37 @@
+{
+ "plan": {
+  "place": {
+   "name": "Stagno del Nastro",
+   "description": "Le onde arrivano a riva lente, portando foglie."
+  },
+  "layout": "borgo",
+  "objects": [
+   {
+    "module": "npc.villager",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.banco",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.cassa",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.letto",
+    "where": "fuori"
+   },
+   {
+    "module": "object.crate",
+    "where": "fuori"
+   }
+  ],
+  "ground": [],
+  "fresh": [],
+  "runes": [
+   "- 1"
+  ],
+  "strutture": []
+ }
+}

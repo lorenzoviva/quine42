@@ -1,0 +1,91 @@
+<!-- Cupola idroponica di Sidera: una serra di vetro su un anello di metallo bagnato, con la porta davanti e le piante dentro.
+     Attorno, a caso, cupole minori unite da corridoi, una cisterna e un'antenna. Cantiere 4C, a mano (Claude Code). -->
+<sequence values="BDdGRCAOPLIQqMNXT" size="50 50 50" symmetry="()" name="Cupola idroponica">
+  <color symbol="D" value="262b36" name="metallo bagnato"/>
+  <color symbol="d" value="47505f" name="metallo chiaro"/>
+  <color symbol="G" value="8fe3f0" alpha="0.45" name="vetro della cupola"/>
+  <color symbol="R" value="1b1f28" name="costole scure"/>
+  <color symbol="C" value="2ee6ff" glow="True" name="neon ciano"/>
+  <color symbol="A" value="ffb02e" glow="True" name="luce ambra della porta"/>
+  <color symbol="O" value="3a2f45" name="battente della porta"/>
+  <color symbol="P" value="2b7a4f" name="stelo"/>
+  <color symbol="L" value="62d98c" name="foglie idroponiche"/>
+  <color symbol="I" hidden="True" name="aria interna"/>
+  <color symbol="Q" hidden="True" name="cupola minore possibile"/>
+  <color symbol="q" hidden="True" name="cisterna possibile"/>
+  <color symbol="M" hidden="True" name="segno di una cupola minore"/>
+  <color symbol="N" hidden="True" name="segno di una cisterna"/>
+  <color symbol="X" value="8fe3f0" alpha="0.45" name="vetro delle cupole minori"/>
+  <color symbol="T" value="3b4352" name="cisterna"/>
+
+  <!-- Le cupole minori possibili, ai quattro angoli: guscio, pavimento, corridoio verso il centro. -->
+  <ellipsoid at="9 9 -9" size="17 17 26" color="Q"/>
+  <ellipsoid at="41 9 -9" size="17 17 26" color="Q"/>
+  <ellipsoid at="9 41 -9" size="15 15 22" color="Q"/>
+  <ellipsoid at="41 41 -9" size="15 15 22" color="Q"/>
+  <ellipsoid at="9 9 -8" size="15 15 24" color="B" on="Q"/>
+  <ellipsoid at="41 9 -8" size="15 15 24" color="B" on="Q"/>
+  <ellipsoid at="9 41 -8" size="13 13 20" color="B" on="Q"/>
+  <ellipsoid at="41 41 -8" size="13 13 20" color="B" on="Q"/>
+  <cylinder at="9 9 0" size="17 17 1" color="Q"/>
+  <cylinder at="41 9 0" size="17 17 1" color="Q"/>
+  <cylinder at="9 41 0" size="15 15 1" color="Q"/>
+  <cylinder at="41 41 0" size="15 15 1" color="Q"/>
+  <line at="13 13 2" to="18 18 2" r="2" color="Q"/>
+  <line at="37 13 2" to="32 18 2" r="2" color="Q"/>
+  <line at="13 37 2" to="18 32 2" r="2" color="Q"/>
+  <line at="37 37 2" to="32 32 2" r="2" color="Q"/>
+  <box at="9 9 0" size="1 1 1" color="M"/>
+  <box at="41 9 0" size="1 1 1" color="M"/>
+  <box at="9 41 0" size="1 1 1" color="M"/>
+  <box at="41 41 0" size="1 1 1" color="M"/>
+  <!-- Le cisterne possibili, ai lati. -->
+  <cylinder at="4 25 0" size="7 7 14" color="q"/>
+  <cylinder at="46 25 0" size="7 7 18" color="q"/>
+  <box at="4 25 0" size="1 1 1" color="N"/>
+  <box at="46 25 0" size="1 1 1" color="N"/>
+
+  <!-- L'anello di base e la cupola grande, vuota dentro. -->
+  <ellipsoid at="25 25 -15" size="37 37 52" color="G"/>
+  <ellipsoid at="25 25 -14" size="35 35 50" color="I" on="G"/>
+  <cylinder at="25 25 0" size="41 41 4" color="D"/>
+  <cylinder at="25 25 3" size="39 39 1" color="d"/>
+  <box at="25 25 4" size="49 1 46" color="R" on="G"/>
+  <box at="25 25 4" size="1 49 46" color="R" on="G"/>
+  <cylinder at="25 25 16" size="49 49 1" color="R" on="G"/>
+  <cylinder at="25 25 26" size="49 49 1" color="R" on="G"/>
+  <cylinder at="25 25 3" size="43 43 1" color="C" on="B"/>
+
+  <!-- La porta sul davanti. -->
+  <box at="25 43 0" size="9 7 12" color="D"/>
+  <box at="25 44 0" size="5 7 9" color="O"/>
+  <box at="25 44 9" size="5 7 1" color="A"/>
+  <box at="25 40 4" size="5 5 8" color="I"/>
+
+  <!-- Le cupole minori e le cisterne: ciascuna c'è o non c'è. -->
+  <prl steps="1">
+    <rule in="M" out="X" p="0.5"/>
+    <rule in="N" out="T" p="0.5"/>
+  </prl>
+  <all in="XQ" out="XX" symmetry="(xyz)"/>
+  <all in="Tq" out="TT" symmetry="(xyz)"/>
+  <all>
+    <rule in="Q" out="B"/>
+    <rule in="q" out="B"/>
+    <rule in="M" out="B"/>
+    <rule in="N" out="B"/>
+  </all>
+  <cylinder at="9 9 0" size="17 17 1" color="D" on="X"/>
+  <cylinder at="41 9 0" size="17 17 1" color="D" on="X"/>
+  <cylinder at="9 41 0" size="15 15 1" color="D" on="X"/>
+  <cylinder at="41 41 0" size="15 15 1" color="D" on="X"/>
+  <box at="25 25 2" size="50 50 1" color="d" on="X"/>
+  <prl steps="1" in="B T" out="C T" p="0.25"/>
+
+  <!-- Le piante: semi sul pavimento, steli, chiome che crescono nell'aria interna. -->
+  <one steps="9" in="I I d" out="P P d"/>
+  <all steps="6" in="I P" out="P P"/>
+  <one steps="700" in="IP" out="LP" symmetry="(xyz)"/>
+  <one steps="1300" in="IL" out="LL" symmetry="(xyz)"/>
+  <all in="I" out="B"/>
+</sequence>

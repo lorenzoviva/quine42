@@ -1,0 +1,43 @@
+{
+ "plan": {
+  "place": {
+   "name": "Piana delle Lanterne",
+   "description": "L'erba si piega al vento."
+  },
+  "layout": "borgo",
+  "objects": [
+   {
+    "module": "npc.cat",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.cassa",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.credenza",
+    "where": "dentro"
+   },
+   {
+    "module": "object.sign",
+    "where": "fuori"
+   }
+  ],
+  "ground": [],
+  "fresh": [],
+  "runes": [
+   "time",
+   "0"
+  ],
+  "strutture": [
+   {
+    "concetto": "residenza del borgomastro",
+    "taglia": "grande"
+   },
+   {
+    "concetto": "fucina",
+    "taglia": "grande"
+   }
+  ]
+ }
+}

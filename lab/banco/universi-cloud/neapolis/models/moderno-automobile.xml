@@ -1,0 +1,126 @@
+<!-- Automobile compatta (moderno): una macchina di città vista di fianco, con le ruote, i fari, i paraurti e i vetri. Il seme sceglie
+     che macchina è (l'utilitaria a due volumi, il furgoncino con la fascia sul fianco o il pickup con il cassone), dove stanno le casse
+     nel cassone e che cosa porta sul tetto (il portapacchi con la valigia, l'insegna del taxi o il baule). -->
+<sequence values="BKSVTRWwAaHhOEemXUJLDnc" size="50 50 50" symmetry="(xy)" name="Automobile">
+  <color symbol="K" value="1e2024" name="gomma e plastica nera"/>
+  <color symbol="S" value="b8bec6" name="cerchi d'acciaio"/>
+  <color symbol="V" value="7fb8d0" name="vetri"/>
+  <color symbol="T" value="fff4c0" name="fari" glow="True"/>
+  <color symbol="R" value="ff4030" name="fanali" glow="True"/>
+  <color symbol="W" value="d23a32" name="carrozzeria rossa"/>
+  <color symbol="w" value="ecece6" name="carrozzeria bianca"/>
+  <color symbol="A" value="3a6cb8" name="carrozzeria blu"/>
+  <color symbol="a" value="f08a24" name="fascia arancio"/>
+  <color symbol="H" value="ffd230" name="insegna del taxi" glow="True"/>
+  <color symbol="h" value="5a5f66" name="portapacchi"/>
+  <color symbol="O" value="6a4a8a" name="valigia"/>
+  <color symbol="E" value="b48a56" name="cassa di legno"/>
+  <color symbol="e" value="8a6438" name="cassa in ombra"/>
+  <color symbol="m" hidden="True" name="il dado"/>
+  <color symbol="X" hidden="True" name="utilitaria"/>
+  <color symbol="U" hidden="True" name="furgoncino"/>
+  <color symbol="J" hidden="True" name="pickup"/>
+  <color symbol="L" hidden="True" name="portapacchi"/>
+  <color symbol="D" hidden="True" name="taxi"/>
+  <color symbol="n" hidden="True" name="baule"/>
+  <color symbol="c" hidden="True" name="dove può stare una cassa"/>
+  <!-- Le ruote: quattro dischi con i cerchi -->
+  <box at="12 13 3" size="5 1 5" color="S"/>
+  <box at="37 13 3" size="5 1 5" color="S"/>
+  <box at="12 37 3" size="5 1 5" color="S"/>
+  <box at="37 37 3" size="5 1 5" color="S"/>
+  <ellipsoid at="12 15 0" size="11 4 11" color="K"/>
+  <ellipsoid at="37 15 0" size="11 4 11" color="K"/>
+  <ellipsoid at="12 35 0" size="11 4 11" color="K"/>
+  <ellipsoid at="37 35 0" size="11 4 11" color="K"/>
+  <!-- Paraurti, fari e fanali -->
+  <box at="45 25 3" size="1 21 3" color="K"/>
+  <box at="4 25 3" size="1 21 3" color="K"/>
+  <box at="45 18 8" size="1 3 2" color="T"/>
+  <box at="45 32 8" size="1 3 2" color="T"/>
+  <box at="45 25 6" size="1 7 3" color="K"/>
+  <box at="4 18 9" size="1 3 3" color="R"/>
+  <box at="4 32 9" size="1 3 3" color="R"/>
+  <!-- Il dado si scuote prima di decidere -->
+  <box at="1 0 0" size="3 1 1" color="m"/>
+  <prl steps="1" in="m" out="B"/>
+  <!-- Prima scelta: che macchina è -->
+  <box at="0 0 0" size="1 1 1" color="m"/>
+  <one steps="1">
+    <rule in="m" out="X"/>
+    <rule in="m" out="U"/>
+    <rule in="m" out="J"/>
+  </one>
+  <all symmetry="(xyz)">
+    <rule in="XB" out="XX"/>
+    <rule in="UB" out="UU"/>
+    <rule in="JB" out="JJ"/>
+  </all>
+  <!-- l'utilitaria rossa: cofano corto e abitacolo alto -->
+  <box at="24 15 4" size="1 1 9" color="K" on="X"/>
+  <box at="24 35 4" size="1 1 9" color="K" on="X"/>
+  <box at="24.5 25 3" size="40 21 11" color="W" on="X"/>
+  <box at="37 16 19" size="1 1 9" color="W" on="X"/>
+  <box at="37 34 19" size="1 1 9" color="W" on="X"/>
+  <box at="24 16 19" size="2 1 9" color="W" on="X"/>
+  <box at="24 34 19" size="2 1 9" color="W" on="X"/>
+  <box at="11 16 19" size="1 1 9" color="W" on="X"/>
+  <box at="11 34 19" size="1 1 9" color="W" on="X"/>
+  <box at="24 25 19" size="27 19 9" color="V" on="X"/>
+  <box at="24 25 14" size="27 19 17" color="W" on="X"/>
+  <!-- il furgoncino bianco: tutto abitacolo, la fascia sul fianco -->
+  <box at="24.5 25 3" size="40 21 11" color="w" on="U"/>
+  <box at="40 16 20" size="1 1 8" color="w" on="U"/>
+  <box at="40 34 20" size="1 1 8" color="w" on="U"/>
+  <box at="36 25 20" size="9 19 8" color="V" on="U"/>
+  <box at="19 25 20" size="23 19 3" color="a" on="U"/>
+  <box at="23 25 14" size="35 19 18" color="w" on="U"/>
+  <!-- il pickup blu: cabina corta e cassone con le sponde -->
+  <box at="24.5 25 3" size="40 21 11" color="A" on="J"/>
+  <box at="38 16 19" size="1 1 8" color="A" on="J"/>
+  <box at="38 34 19" size="1 1 8" color="A" on="J"/>
+  <box at="28 16 19" size="1 1 8" color="A" on="J"/>
+  <box at="28 34 19" size="1 1 8" color="A" on="J"/>
+  <box at="33 25 19" size="11 19 8" color="V" on="J"/>
+  <box at="33 25 14" size="11 19 17" color="A" on="J"/>
+  <box at="15.5 15 14" size="22 1 4" color="A" on="J"/>
+  <box at="15.5 35 14" size="22 1 4" color="A" on="J"/>
+  <box at="5 25 14" size="1 21 4" color="A" on="J"/>
+  <box at="15 25 14" size="19 19 1" color="c" on="J"/>
+  <all in="[XUJ]" out="B"/>
+  <!-- Le casse nel cassone: due o tre, dove capitano -->
+  <one steps="1" in="c" out="E"/>
+  <one steps="2" in="c" out="E"/>
+  <all in="c" out="B"/>
+  <all in="EB" out="EE" steps="3"/>
+  <all in="B E" out="E E" symmetry="()" steps="5"/>
+  <prl steps="1" in="B E" out="B e" symmetry="()"/>
+  <!-- Seconda scelta: che cosa porta sul tetto -->
+  <box at="0 0 0" size="1 1 1" color="m"/>
+  <one steps="1">
+    <rule in="m" out="L"/>
+    <rule in="m" out="D"/>
+    <rule in="m" out="n"/>
+  </one>
+  <all symmetry="(xyz)">
+    <rule in="LB" out="LL"/>
+    <rule in="DB" out="DD"/>
+    <rule in="nB" out="nn"/>
+  </all>
+  <!-- il portapacchi con la valigia -->
+  <box at="26 18 31" size="1 1 1" color="h" on="L"/>
+  <box at="36 18 31" size="1 1 1" color="h" on="L"/>
+  <box at="26 32 31" size="1 1 1" color="h" on="L"/>
+  <box at="36 32 31" size="1 1 1" color="h" on="L"/>
+  <box at="31 18 32" size="11 1 1" color="h" on="L"/>
+  <box at="31 32 32" size="11 1 1" color="h" on="L"/>
+  <box at="26 25 32" size="1 15 1" color="h" on="L"/>
+  <box at="36 25 32" size="1 15 1" color="h" on="L"/>
+  <box at="31 25 32" size="9 11 5" color="O" on="L"/>
+  <!-- l'insegna del taxi -->
+  <box at="31 25 31" size="5 9 3" color="H" on="D"/>
+  <!-- il baule da tetto -->
+  <ellipsoid at="31 25 28" size="17 11 9" color="K" on="n"/>
+  <all in="[LDn]" out="B"/>
+  <all in="m" out="B"/>
+</sequence>

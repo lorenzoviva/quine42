@@ -33,6 +33,12 @@
   "runes": [
    "quadrante",
    "molla"
+  ],
+  "strutture": [
+   {
+    "concetto": "palazzina degli inventori",
+    "taglia": "grande"
+   }
   ]
  }
 }

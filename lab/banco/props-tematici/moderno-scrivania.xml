@@ -1,6 +1,6 @@
-<!-- Scrivania con terminale (moderno): il piano di laminato dell'ufficio e il computer. Il seme sceglie come sta in piedi la scrivania
+<!-- Scrivania con terminale (moderno): il piano di laminato dell'ufficio e l'unità centrale. Il seme sceglie come sta in piedi la scrivania
      (quattro gambe d'acciaio, la cassettiera a destra, o la cassettiera a sinistra con il pannello sul retro), che cosa c'è sopra (il
-     vecchio terminale a tubo con lo schermo verde, due schermi piatti con il computer sotto, o il portatile con la lampada e le carte)
+     vecchio terminale a tubo con lo schermo verde, due schermi piatti con l'unità centrale sotto, o il portatile con la lampada e le carte)
      e dove è rimasta la tazza. -->
 <sequence values="BDdPKkSWGYuhmXUJLEnF" size="20 20 20" symmetry="(xy)" name="Scrivania">
   <color symbol="D" value="c9c4b6" name="laminato"/>
@@ -75,7 +75,7 @@
   <box at="8 7 17" size="5 3 1" color="k" on="L"/>
   <box at="8 12.5 10" size="9 2 1" color="k" on="L"/>
   <box at="15 11 10" size="2 3 1" color="k" on="L"/>
-  <!-- due schermi piatti, la tastiera e il computer sotto -->
+  <!-- due schermi piatti, la tastiera e l'unità centrale sotto -->
   <box at="6 9 13" size="5 1 4" color="W" on="E"/>
   <box at="14 9 13" size="5 1 4" color="W" on="E"/>
   <box at="6 8 12" size="7 1 6" color="K" on="E"/>

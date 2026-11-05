@@ -1,0 +1,109 @@
+<!-- Locomotiva a vapore (Cantiere 8, orichalcum): ruote, caldaia, cabina e fumaiolo a caso; il fumo cresce a caso. -->
+<sequence values="BNROCKSPu123456z" symmetry="(xy)" name="Locomotiva a vapore">
+  <color symbol="N" value="26282b" name="caldaia nera"/>
+  <color symbol="R" value="a3322a" name="ruote motrici"/>
+  <color symbol="O" value="c9a24a" name="fasce d'ottone"/>
+  <color symbol="C" value="5a3a22" name="cabina di legno"/>
+  <color symbol="K" value="1a1a1a" name="carbone"/>
+  <color symbol="S" value="cfd3d6" name="fumo"/>
+  <color symbol="P" hidden="True" name="marcatore"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="1" hidden="True" name="marcatore"/>
+  <color symbol="2" hidden="True" name="marcatore"/>
+  <color symbol="3" hidden="True" name="marcatore"/>
+  <color symbol="4" hidden="True" name="marcatore"/>
+  <color symbol="5" hidden="True" name="marcatore"/>
+  <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
+  <box at="12 20 3" size="16 36 3" color="N"/>
+  <!-- scelta «ruote»: tre motrici grandi | quattro piccole -->
+  <box at="12 20 0" size="25 40 12" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/></all>
+  <!--   1: tre motrici grandi -->
+  <ellipsoid at="5 12 0" size="4 10 10" color="R" on="1"/>
+  <ellipsoid at="5 21 0" size="4 10 10" color="R" on="1"/>
+  <ellipsoid at="5 30 0" size="4 9 9" color="R" on="1"/>
+  <ellipsoid at="20 12 0" size="4 10 10" color="R" on="1"/>
+  <ellipsoid at="20 21 0" size="4 10 10" color="R" on="1"/>
+  <ellipsoid at="20 30 0" size="4 9 9" color="R" on="1"/>
+  <line at="5 12 5" to="5 30 5" r="0.5" color="O" on="1"/>
+  <line at="19 12 5" to="19 30 5" r="0.5" color="O" on="1"/>
+  <!--   2: quattro piccole -->
+  <ellipsoid at="5 7 0" size="3 7 7" color="R" on="2"/>
+  <ellipsoid at="5 15 0" size="3 7 7" color="R" on="2"/>
+  <ellipsoid at="5 23 0" size="3 7 7" color="R" on="2"/>
+  <ellipsoid at="5 31 0" size="3 7 7" color="R" on="2"/>
+  <ellipsoid at="19 7 0" size="3 7 7" color="R" on="2"/>
+  <ellipsoid at="19 15 0" size="3 7 7" color="R" on="2"/>
+  <ellipsoid at="19 23 0" size="3 7 7" color="R" on="2"/>
+  <ellipsoid at="19 31 0" size="3 7 7" color="R" on="2"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/></prl>
+  <!-- scelta «caldaia»: lunga | grossa | corta col duomo doppio -->
+  <box at="12 24 5" size="25 32 16" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <!--   1: lunga -->
+  <line at="12 14 12" to="12 37 12" r="5" color="N" on="1"/>
+  <cylinder at="12 26 16" size="5 5 4" color="O" on="1"/>
+  <!--   2: grossa -->
+  <line at="12 16 13" to="12 35 13" r="6" color="N" on="2"/>
+  <cylinder at="12 24 18" size="6 6 3" color="O" on="2"/>
+  <!--   3: corta col duomo doppio -->
+  <line at="12 18 11" to="12 34 11" r="5" color="N" on="3"/>
+  <cylinder at="12 22 15" size="4 4 4" color="O" on="3"/>
+  <cylinder at="12 28 15" size="4 4 4" color="O" on="3"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <!-- scelta «cabina»: chiusa | aperta | con tender -->
+  <box at="12 8 5" size="25 17 25" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <!--   1: chiusa -->
+  <box at="12 8 6" size="18 11 14" color="C" on="1"/>
+  <box at="12 8 20" size="20 13 2" color="N" on="1"/>
+  <box at="12 13 13" size="8 1 4" color="O" on="1"/>
+  <!--   2: aperta -->
+  <box at="12 9 6" size="18 8 3" color="C" on="2"/>
+  <line at="4 5 6" to="4 5 20" r="0.5" color="N" on="2"/>
+  <line at="20 5 6" to="20 5 20" r="0.5" color="N" on="2"/>
+  <line at="4 12 6" to="4 12 20" r="0.5" color="N" on="2"/>
+  <line at="20 12 6" to="20 12 20" r="0.5" color="N" on="2"/>
+  <box at="12 8 20" size="19 11 2" color="C" on="2"/>
+  <!--   3: con tender -->
+  <box at="12 11 6" size="16 7 12" color="C" on="3"/>
+  <box at="12 11 18" size="18 9 2" color="N" on="3"/>
+  <box at="12 3 3" size="16 6 8" color="N" on="3"/>
+  <ellipsoid at="12 3 9" size="12 5 6" color="K" on="3"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <!-- scelta «fumaiolo»: a imbuto | dritto | a pallone -->
+  <box at="12 33 13" size="14 9 17" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <!--   1: a imbuto -->
+  <cylinder at="12 33 15" size="3 3 7" color="N" on="1"/>
+  <cone at="12 33 26" size="7 7 -4" color="N" on="1"/>
+  <cylinder at="12 33 21" size="6 6 3" color="N" on="1"/>
+  <box at="12 33 24" size="1 1 1" color="P" on="1"/>
+  <!--   2: dritto -->
+  <cylinder at="12 33 15" size="4 4 11" color="N" on="2"/>
+  <cylinder at="12 33 25" size="5 5 1" color="O" on="2"/>
+  <box at="12 33 26" size="1 1 1" color="P" on="2"/>
+  <!--   3: a pallone -->
+  <cylinder at="12 33 15" size="3 3 4" color="N" on="3"/>
+  <ellipsoid at="12 33 18" size="8 8 6" color="N" on="3"/>
+  <box at="12 33 24" size="1 1 1" color="P" on="3"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <ellipsoid at="12 38 1" size="10 4 6" color="O" on="B"/>
+  <!-- il fumo sale dal fumaiolo e si gonfia -->
+  <one steps="5">
+    <rule in="B P" out="P S" p="2"/>
+    <rule in="B* *P" out="P* *S" p="2"/>
+    <rule in="B*B *P*" out="P*P *S*" p="1"/>
+  </one>
+  <prl in="P" out="S"/>
+  <prl in="BS" out="*S" p="0.4" steps="1"/>
+</sequence>

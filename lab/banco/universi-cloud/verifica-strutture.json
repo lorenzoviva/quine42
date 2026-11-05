@@ -1,0 +1,608 @@
+{
+ "aurora": {
+  "tick": 601,
+  "luoghi": 19,
+  "strutture": [
+   {
+    "cx": 0,
+    "cy": 0,
+    "luogo": "Campagna del Primo Passo",
+    "concetto": "locanda",
+    "modello": "struttura-locanda",
+    "taglia": "grande",
+    "voxel": 125965,
+    "cantina": 20,
+    "ms": 9
+   },
+   {
+    "cx": 0,
+    "cy": 0,
+    "luogo": "Campagna del Primo Passo",
+    "concetto": "fucina nanica",
+    "modello": "struttura-fucina-nanica",
+    "taglia": "grande",
+    "voxel": 73870,
+    "cantina": 20,
+    "ms": 9
+   },
+   {
+    "cx": 0,
+    "cy": -1,
+    "luogo": "Piana delle Lanterne",
+    "concetto": "residenza del borgomastro",
+    "modello": "struttura-residenza-del-borgomastro",
+    "taglia": "grande",
+    "voxel": 73735,
+    "cantina": 0,
+    "ms": 7
+   },
+   {
+    "cx": 0,
+    "cy": -1,
+    "luogo": "Piana delle Lanterne",
+    "concetto": "fucina",
+    "modello": "struttura-fucina",
+    "taglia": "grande",
+    "voxel": 125987,
+    "cantina": 20,
+    "ms": 9
+   },
+   {
+    "cx": -1,
+    "cy": 0,
+    "luogo": "Radura Senza Ritorno",
+    "concetto": "fortino",
+    "modello": "struttura-fortino",
+    "taglia": "grande",
+    "voxel": 61122,
+    "cantina": 0,
+    "ms": 8
+   },
+   {
+    "cx": -1,
+    "cy": 0,
+    "luogo": "Radura Senza Ritorno",
+    "concetto": "tempio della luna",
+    "modello": "struttura-tempio-della-luna",
+    "taglia": "grande",
+    "voxel": 86193,
+    "cantina": 0,
+    "ms": 7
+   },
+   {
+    "cx": 1,
+    "cy": 0,
+    "luogo": "Torre dell'Astrologo",
+    "concetto": "torre del mago",
+    "modello": "struttura-torre-del-mago",
+    "taglia": "grande",
+    "voxel": 72267,
+    "cantina": 20,
+    "ms": 9
+   },
+   {
+    "cx": 0,
+    "cy": 1,
+    "luogo": "Contrada dei Mattoni",
+    "concetto": "casa del borgomastro",
+    "modello": "struttura-casa-del-borgomastro",
+    "taglia": "grande",
+    "voxel": 79338,
+    "cantina": 0,
+    "ms": 7
+   },
+   {
+    "cx": 0,
+    "cy": 1,
+    "luogo": "Contrada dei Mattoni",
+    "concetto": "torre di guardia",
+    "modello": "struttura-torre-di-guardia",
+    "taglia": "grande",
+    "voxel": 73703,
+    "cantina": 20,
+    "ms": 8
+   },
+   {
+    "cx": -1,
+    "cy": -1,
+    "luogo": "Borgo Immobile",
+    "concetto": "locanda del cinghiale",
+    "modello": "struttura-locanda-del-cinghiale",
+    "taglia": "enorme",
+    "voxel": 70216,
+    "cantina": 16,
+    "ms": 15
+   },
+   {
+    "cx": 1,
+    "cy": -1,
+    "luogo": "Santuario della Luna Bianca",
+    "concetto": "santuario",
+    "modello": "struttura-santuario",
+    "taglia": "grande",
+    "voxel": 79580,
+    "cantina": 0,
+    "ms": 11
+   },
+   {
+    "cx": 2,
+    "cy": 0,
+    "luogo": "Rocca del Passo",
+    "concetto": "forte di frontiera",
+    "modello": "struttura-forte-di-frontiera",
+    "taglia": "grande",
+    "voxel": 56651,
+    "cantina": 0,
+    "ms": 7
+   }
+  ],
+  "fault": [],
+  "esito": "verde",
+  "secondi": 33
+ },
+ "orichalcum": {
+  "tick": 601,
+  "luoghi": 19,
+  "strutture": [
+   {
+    "cx": 0,
+    "cy": 0,
+    "luogo": "Piazza della Pesa",
+    "concetto": "cattedrale degli ingranaggi",
+    "modello": "struttura-cattedrale-degli-ingranaggi",
+    "taglia": "grande",
+    "voxel": 88649,
+    "cantina": 0,
+    "ms": 8
+   },
+   {
+    "cx": 0,
+    "cy": 0,
+    "luogo": "Piazza della Pesa",
+    "concetto": "taverna",
+    "modello": "struttura-taverna",
+    "taglia": "grande",
+    "voxel": 126240,
+    "cantina": 20,
+    "ms": 8
+   },
+   {
+    "cx": 1,
+    "cy": 0,
+    "luogo": "Bottega Vitti",
+    "concetto": "palazzina degli inventori",
+    "modello": "struttura-palazzina-degli-inventori",
+    "taglia": "grande",
+    "voxel": 66115,
+    "cantina": 0,
+    "ms": 7
+   },
+   {
+    "cx": 0,
+    "cy": 1,
+    "luogo": "Scalo della Ferrovia Sospesa",
+    "concetto": "stazione dirigibili",
+    "modello": "struttura-stazione-dirigibili",
+    "taglia": "grande",
+    "voxel": 92144,
+    "cantina": 0,
+    "ms": 8
+   },
+   {
+    "cx": -1,
+    "cy": 1,
+    "luogo": "Officine del Canale Bruma",
+    "concetto": "officina",
+    "modello": "struttura-officina",
+    "taglia": "grande",
+    "voxel": 122979,
+    "cantina": 20,
+    "ms": 9
+   },
+   {
+    "cx": 1,
+    "cy": 1,
+    "luogo": "Capannone dei Telai",
+    "concetto": "palazzo dei meccanici",
+    "modello": "struttura-palazzo-dei-meccanici",
+    "taglia": "grande",
+    "voxel": 69446,
+    "cantina": 0,
+    "ms": 7
+   },
+   {
+    "cx": -2,
+    "cy": 0,
+    "luogo": "Porto dei Bastimenti",
+    "concetto": "osservatorio",
+    "modello": "struttura-osservatorio",
+    "taglia": "grande",
+    "voxel": 85302,
+    "cantina": 20,
+    "ms": 9
+   },
+   {
+    "cx": 2,
+    "cy": 0,
+    "luogo": "Torre d'Ormeggio di Vetta Bruna",
+    "concetto": "faro a vapore",
+    "modello": "struttura-faro-a-vapore",
+    "taglia": "grande",
+    "voxel": 72304,
+    "cantina": 20,
+    "ms": 10
+   },
+   {
+    "cx": -1,
+    "cy": -2,
+    "luogo": "Cunicolo diciassette",
+    "concetto": "officina meccanica",
+    "modello": "struttura-officina-meccanica",
+    "taglia": "enorme",
+    "voxel": 66020,
+    "cantina": 16,
+    "ms": 14
+   },
+   {
+    "cx": -2,
+    "cy": 1,
+    "luogo": "Banchina del rame",
+    "concetto": "stazione ferroviaria",
+    "modello": "struttura-stazione-ferroviaria",
+    "taglia": "grande",
+    "voxel": 71570,
+    "cantina": 0,
+    "ms": 10
+   },
+   {
+    "cx": 2,
+    "cy": 1,
+    "luogo": "Piazzale degli aeronauti",
+    "concetto": "taverna delle caldaie",
+    "modello": "struttura-taverna-delle-caldaie",
+    "taglia": "grande",
+    "voxel": 56195,
+    "cantina": 20,
+    "ms": 8
+   },
+   {
+    "cx": 2,
+    "cy": 1,
+    "luogo": "Piazzale degli aeronauti",
+    "concetto": "cattedrale",
+    "modello": "struttura-cattedrale",
+    "taglia": "grande",
+    "voxel": 78928,
+    "cantina": 0,
+    "ms": 8
+   }
+  ],
+  "fault": [],
+  "esito": "verde",
+  "secondi": 27
+ },
+ "neapolis": {
+  "tick": 601,
+  "luoghi": 19,
+  "strutture": [
+   {
+    "cx": 0,
+    "cy": 0,
+    "luogo": "Piazza delle Erbe",
+    "concetto": "cappella",
+    "modello": "struttura-cappella",
+    "taglia": "grande",
+    "voxel": 55895,
+    "cantina": 0,
+    "ms": 7
+   },
+   {
+    "cx": 0,
+    "cy": -1,
+    "luogo": "Corso Partenope",
+    "concetto": "palazzina",
+    "modello": "struttura-palazzina",
+    "taglia": "grande",
+    "voxel": 55614,
+    "cantina": 0,
+    "ms": 11
+   },
+   {
+    "cx": 1,
+    "cy": 0,
+    "luogo": "Piazzale degli Uffici",
+    "concetto": "bistrot",
+    "modello": "struttura-bistrot",
+    "taglia": "enorme",
+    "voxel": 68774,
+    "cantina": 16,
+    "ms": 14
+   },
+   {
+    "cx": -1,
+    "cy": -1,
+    "luogo": "Pronto soccorso dei Pellegrini",
+    "concetto": "condominio",
+    "modello": "struttura-condominio",
+    "taglia": "grande",
+    "voxel": 65888,
+    "cantina": 0,
+    "ms": 8
+   },
+   {
+    "cx": -1,
+    "cy": -1,
+    "luogo": "Pronto soccorso dei Pellegrini",
+    "concetto": "trattoria con cantina",
+    "modello": "struttura-trattoria-con-cantina",
+    "taglia": "grande",
+    "voxel": 71965,
+    "cantina": 20,
+    "ms": 9
+   },
+   {
+    "cx": 1,
+    "cy": -1,
+    "luogo": "Torre C del Centro Direzionale",
+    "concetto": "torre di vetro",
+    "modello": "struttura-torre-di-vetro",
+    "voxel": 2720,
+    "cantina": 0,
+    "ms": 0
+   },
+   {
+    "cx": 1,
+    "cy": -1,
+    "luogo": "Torre C del Centro Direzionale",
+    "concetto": "osservatorio civico",
+    "modello": "struttura-osservatorio-civico",
+    "taglia": "grande",
+    "voxel": 71471,
+    "cantina": 20,
+    "ms": 9
+   },
+   {
+    "cx": -1,
+    "cy": 1,
+    "luogo": "Vico del Vesuvietto",
+    "concetto": "laboratorio",
+    "modello": "struttura-laboratorio",
+    "taglia": "grande",
+    "voxel": 70101,
+    "cantina": 20,
+    "ms": 9
+   },
+   {
+    "cx": 0,
+    "cy": -2,
+    "luogo": "Ospedale del Colle",
+    "concetto": "chiesa moderna",
+    "modello": "struttura-chiesa-moderna",
+    "taglia": "grande",
+    "voxel": 80729,
+    "cantina": 0,
+    "ms": 7
+   },
+   {
+    "cx": -2,
+    "cy": 0,
+    "luogo": "Mercato del Pendino",
+    "concetto": "mercato coperto",
+    "modello": "struttura-mercato-coperto",
+    "voxel": 2988,
+    "cantina": 0,
+    "ms": 1
+   },
+   {
+    "cx": 2,
+    "cy": 0,
+    "luogo": "Stazione Centrale",
+    "concetto": "mercato a padiglione",
+    "modello": "struttura-mercato-a-padiglione",
+    "taglia": "grande",
+    "voxel": 74787,
+    "cantina": 0,
+    "ms": 7
+   },
+   {
+    "cx": 2,
+    "cy": 1,
+    "luogo": "Officine dei Granili",
+    "concetto": "laboratorio artigiano",
+    "modello": "struttura-laboratorio-artigiano",
+    "taglia": "grande",
+    "voxel": 56143,
+    "cantina": 20,
+    "ms": 10
+   },
+   {
+    "cx": 1,
+    "cy": 2,
+    "luogo": "Porto commerciale",
+    "concetto": "mercato coperto rionale",
+    "modello": "struttura-mercato-coperto-rionale",
+    "taglia": "grande",
+    "voxel": 92180,
+    "cantina": 0,
+    "ms": 7
+   },
+   {
+    "cx": 1,
+    "cy": 2,
+    "luogo": "Porto commerciale",
+    "concetto": "torre panoramica",
+    "modello": "struttura-torre-panoramica",
+    "taglia": "grande",
+    "voxel": 77265,
+    "cantina": 20,
+    "ms": 9
+   }
+  ],
+  "fault": [],
+  "esito": "verde",
+  "secondi": 23
+ },
+ "sidera": {
+  "tick": 601,
+  "luoghi": 19,
+  "strutture": [
+   {
+    "cx": 0,
+    "cy": 0,
+    "luogo": "Piazza dei Viadotti",
+    "concetto": "bar orbitale",
+    "modello": "struttura-bar-orbitale",
+    "taglia": "grande",
+    "voxel": 59316,
+    "cantina": 20,
+    "ms": 9
+   },
+   {
+    "cx": 0,
+    "cy": 0,
+    "luogo": "Piazza dei Viadotti",
+    "concetto": "santuario della luce",
+    "modello": "struttura-santuario-della-luce",
+    "taglia": "grande",
+    "voxel": 79262,
+    "cantina": 0,
+    "ms": 7
+   },
+   {
+    "cx": 0,
+    "cy": -1,
+    "luogo": "Ponte dei Canali",
+    "concetto": "residenza modulare",
+    "modello": "struttura-residenza-modulare",
+    "taglia": "grande",
+    "voxel": 68322,
+    "cantina": 0,
+    "ms": 7
+   },
+   {
+    "cx": -1,
+    "cy": 0,
+    "luogo": "Scalinata dei Corrieri",
+    "concetto": "scalo navette",
+    "modello": "struttura-scalo-navette",
+    "taglia": "grande",
+    "voxel": 56658,
+    "cantina": 0,
+    "ms": 7
+   },
+   {
+    "cx": 1,
+    "cy": 0,
+    "luogo": "Vicolo delle Cuoche",
+    "concetto": "stazione di transito",
+    "modello": "struttura-stazione-di-transito",
+    "taglia": "grande",
+    "voxel": 71376,
+    "cantina": 0,
+    "ms": 7
+   },
+   {
+    "cx": -1,
+    "cy": -1,
+    "luogo": "Rampa dei Turni",
+    "concetto": "laboratorio di fusione",
+    "modello": "struttura-laboratorio-di-fusione",
+    "taglia": "grande",
+    "voxel": 69781,
+    "cantina": 20,
+    "ms": 10
+   },
+   {
+    "cx": -1,
+    "cy": 1,
+    "luogo": "Fermata del Treno Sospeso",
+    "concetto": "santuario quantico",
+    "modello": "struttura-santuario-quantico",
+    "taglia": "grande",
+    "voxel": 84925,
+    "cantina": 0,
+    "ms": 8
+   },
+   {
+    "cx": -2,
+    "cy": 0,
+    "luogo": "Spazioporto di Ponente",
+    "concetto": "faro al plasma",
+    "modello": "struttura-faro-al-plasma",
+    "taglia": "grande",
+    "voxel": 71471,
+    "cantina": 20,
+    "ms": 8
+   },
+   {
+    "cx": 2,
+    "cy": 0,
+    "luogo": "Cupole di Serralta",
+    "concetto": "la grande cupola di Serralta, vetro a spicchi su un anello di lega",
+    "modello": "struttura-la-grande-cupola-di-serralta-v",
+    "taglia": "piccola",
+    "voxel": 11995,
+    "cantina": 0,
+    "ms": 1
+   },
+   {
+    "cx": 0,
+    "cy": 2,
+    "luogo": "Quartiere delle Torri",
+    "concetto": "residenza ad anelli",
+    "modello": "struttura-residenza-ad-anelli",
+    "taglia": "grande",
+    "voxel": 55663,
+    "cantina": 0,
+    "ms": 7
+   },
+   {
+    "cx": 0,
+    "cy": 2,
+    "luogo": "Quartiere delle Torri",
+    "concetto": "lounge criogenica",
+    "modello": "struttura-lounge-criogenica",
+    "taglia": "grande",
+    "voxel": 91461,
+    "cantina": 20,
+    "ms": 9
+   },
+   {
+    "cx": -1,
+    "cy": 2,
+    "luogo": "Torre dei Filtri",
+    "concetto": "faro",
+    "modello": "struttura-faro",
+    "taglia": "grande",
+    "voxel": 71321,
+    "cantina": 20,
+    "ms": 9
+   },
+   {
+    "cx": -2,
+    "cy": -2,
+    "luogo": "Cantiere della Fusione",
+    "concetto": "laboratorio del plasma",
+    "modello": "struttura-laboratorio-del-plasma",
+    "taglia": "grande",
+    "voxel": 56290,
+    "cantina": 20,
+    "ms": 10
+   },
+   {
+    "cx": 2,
+    "cy": -2,
+    "luogo": "Campo dei Relitti",
+    "concetto": "la costola ricurva di uno scafo antico, lamiere corrose",
+    "modello": "struttura-la-costola-ricurva-di-uno-scaf",
+    "taglia": "media",
+    "voxel": 926,
+    "cantina": 0,
+    "ms": 0
+   }
+  ],
+  "fault": [],
+  "esito": "verde",
+  "secondi": 20
+ }
+}

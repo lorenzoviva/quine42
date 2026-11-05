@@ -88,6 +88,7 @@ npm run build:server # il server di produzione: dist-server/server.mjs e il prog
 npm run serve        # lo avvia (dopo build e build:server), legge il .env se c'è; rifiuta di partire senza configurazione
 npx vite-node lab/scripts/mjx-sound.ts -- suono-fuga-cellulare  # un programma sonoro: WAV, traccia e rapporto in testo, senza browser né modelli (ADR-0125)
 npm run mancanze -- <universo>  # il rapporto di ciò che il Concilio non è riuscito a fare, per il kernel 1.0.0 (senza nome: tutti gli universi; ADR-0130)
+npm run universi:cloud  # installa in universes/ aurora, orichalcum, neapolis e sidera con le strutture, i modelli e i suoni di Claude Cloud, a costo zero (T273, lab/banco/universi-cloud/INTEGRAZIONE.md)
 npm run abbonamento  # serve la coda /api/coda con la CLI di Claude (con QUINE_CODA=1 nel .env, ADR-0077, ADR-0106)
 ```
 

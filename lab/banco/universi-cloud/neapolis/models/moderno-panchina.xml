@@ -1,0 +1,113 @@
+<!-- Panchina urbana con lampione (moderno): la panchina a doghe sui piedi di ghisa e, a un capo, il lampione di acciaio con la luce
+     accesa. Il seme sceglie a quale capo sta il lampione e com'è fatto (a pastorale con una lanterna appesa, o a doppio braccio con due
+     globi), e com'è la panchina (con lo schienale e i braccioli, con la fioriera dietro o semplice); una borsa
+     dimenticata sta sulla seduta in un punto scelto. -->
+<sequence values="BCPKWwTGgmabcdLDEnxX" size="20 20 60" symmetry="(xy)" name="Panchina con lampione">
+  <color symbol="C" value="9c9a94" name="cemento"/>
+  <color symbol="P" value="3e4650" name="acciaio verniciato"/>
+  <color symbol="K" value="26282a" name="ghisa"/>
+  <color symbol="W" value="a8743e" name="doghe di legno"/>
+  <color symbol="w" value="7e5428" name="doghe in ombra"/>
+  <color symbol="T" value="ffe9a8" name="luce" glow="True"/>
+  <color symbol="G" value="4f8f3c" name="siepe"/>
+  <color symbol="g" value="7a7a74" name="fioriera"/>
+  <color symbol="m" hidden="True" name="il dado"/>
+  <color symbol="a" hidden="True" name="pastorale a sinistra"/>
+  <color symbol="b" hidden="True" name="pastorale a destra"/>
+  <color symbol="c" hidden="True" name="doppio braccio a sinistra"/>
+  <color symbol="d" hidden="True" name="doppio braccio a destra"/>
+  <color symbol="L" hidden="True" name="con lo schienale"/>
+  <color symbol="D" hidden="True" name="con la fioriera"/>
+  <color symbol="E" hidden="True" name="semplice"/>
+  <color symbol="n" hidden="True" name="le doghe da ombreggiare"/>
+  <color symbol="x" hidden="True" name="dove può stare la borsa"/>
+  <color symbol="X" value="b8324a" name="borsa dimenticata"/>
+  <!-- La panchina: seduta a doghe e due piedi di ghisa -->
+  <box at="10 11.5 4" size="13 4 1" color="W"/>
+  <box at="4 11.5 0" size="1 4 4" color="K"/>
+  <box at="16 11.5 0" size="1 4 4" color="K"/>
+  <!-- Il dado si scuote prima di decidere -->
+  <box at="1 0 0" size="3 1 1" color="m"/>
+  <prl steps="1" in="m" out="B"/>
+  <!-- Prima scelta: il lampione, a quale capo e com'è -->
+  <box at="0 0 0" size="1 1 1" color="m"/>
+  <one steps="1">
+    <rule in="m" out="a"/>
+    <rule in="m" out="b"/>
+    <rule in="m" out="c"/>
+    <rule in="m" out="d"/>
+  </one>
+  <all symmetry="(xyz)">
+    <rule in="aB" out="aa"/>
+    <rule in="bB" out="bb"/>
+    <rule in="cB" out="cc"/>
+    <rule in="dB" out="dd"/>
+  </all>
+  <!-- pastorale a sinistra -->
+  <box at="1.5 11.5 0" size="4 4 1" color="C" on="a"/>
+  <box at="1.5 11.5 1" size="2 2 47" color="P" on="a"/>
+  <box at="1.5 11.5 1" size="3 3 4" color="K" on="a"/>
+  <line at="2 12 47" to="4 12 51" color="P" on="a"/>
+  <line at="4 12 51" to="9 12 51" color="P" on="a"/>
+  <box at="9 12 49" size="1 1 2" color="P" on="a"/>
+  <box at="9 12 48" size="5 5 1" color="P" on="a"/>
+  <box at="9 12 45" size="3 3 3" color="T" on="a"/>
+  <!-- pastorale a destra -->
+  <box at="17.5 11.5 0" size="4 4 1" color="C" on="b"/>
+  <box at="17.5 11.5 1" size="2 2 47" color="P" on="b"/>
+  <box at="17.5 11.5 1" size="3 3 4" color="K" on="b"/>
+  <line at="18 12 47" to="15 12 51" color="P" on="b"/>
+  <line at="15 12 51" to="10 12 51" color="P" on="b"/>
+  <box at="10 12 49" size="1 1 2" color="P" on="b"/>
+  <box at="10 12 48" size="5 5 1" color="P" on="b"/>
+  <box at="10 12 45" size="3 3 3" color="T" on="b"/>
+  <!-- doppio braccio a sinistra -->
+  <box at="1.5 11.5 0" size="4 4 1" color="C" on="c"/>
+  <box at="1.5 11.5 1" size="2 2 52" color="P" on="c"/>
+  <box at="1.5 11.5 1" size="3 3 4" color="K" on="c"/>
+  <line at="2 5 52" to="2 19 52" color="P" on="c"/>
+  <ellipsoid at="2 6 47" size="4 4 5" color="T" on="c"/>
+  <ellipsoid at="2 18 47" size="4 4 5" color="T" on="c"/>
+  <box at="1.5 11.5 53" size="2 2 2" color="P" on="c"/>
+  <!-- doppio braccio a destra -->
+  <box at="17.5 11.5 0" size="4 4 1" color="C" on="d"/>
+  <box at="17.5 11.5 1" size="2 2 52" color="P" on="d"/>
+  <box at="17.5 11.5 1" size="3 3 4" color="K" on="d"/>
+  <line at="18 5 52" to="18 19 52" color="P" on="d"/>
+  <ellipsoid at="18 6 47" size="4 4 5" color="T" on="d"/>
+  <ellipsoid at="18 18 47" size="4 4 5" color="T" on="d"/>
+  <box at="17.5 11.5 53" size="2 2 2" color="P" on="d"/>
+  <all in="[abcd]" out="B"/>
+  <!-- Seconda scelta: com'è la panchina -->
+  <box at="0 0 0" size="1 1 1" color="m"/>
+  <one steps="1">
+    <rule in="m" out="L"/>
+    <rule in="m" out="D"/>
+    <rule in="m" out="E"/>
+  </one>
+  <all symmetry="(xyz)">
+    <rule in="LB" out="LL"/>
+    <rule in="DB" out="DD"/>
+    <rule in="EB" out="EE"/>
+  </all>
+  <!-- lo schienale e i braccioli -->
+  <box at="10 9 4" size="13 1 7" color="W" on="L"/>
+  <box at="4 9 4" size="1 1 7" color="K" on="L"/>
+  <box at="16 9 4" size="1 1 7" color="K" on="L"/>
+  <box at="4 11.5 5" size="1 4 3" color="K" on="L"/>
+  <box at="16 11.5 5" size="1 4 3" color="K" on="L"/>
+  <box at="10 9 6" size="13 1 1" color="n" on="L"/>
+  <box at="10 9 8" size="13 1 1" color="n" on="L"/>
+  <!-- la fioriera dietro, con la siepe -->
+  <box at="10 7 0" size="13 5 5" color="g" on="D"/>
+  <ellipsoid at="10 7 4" size="13 5 6" color="G" on="D"/>
+  <all in="[LDE]" out="B"/>
+  <all in="n" out="w"/>
+  <!-- Una borsa dimenticata sulla seduta, in un punto scelto -->
+  <box at="10 11.5 5" size="11 2 1" color="x"/>
+  <one in="x" out="X" steps="1"/>
+  <all in="x" out="B"/>
+  <all in="B X" out="X X" symmetry="()" steps="2"/>
+  <all in="XB" out="XX" symmetry="()" steps="1"/>
+  <all in="m" out="B"/>
+</sequence>

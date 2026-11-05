@@ -1,0 +1,84 @@
+<!-- Modulo abitativo di Sidera: due moduli prefabbricati dagli angoli arrotondati, impilati su piedi bassi, oblò ciano e la porta
+     davanti con la luce ambra. Il seme aggiunge moduli laterali, una cabina sul tetto, un'antenna. Cantiere 4C, a mano (Claude Code). -->
+<sequence values="BDWwCKAOQMX" size="50 50 50" symmetry="()" name="Modulo abitativo">
+  <color symbol="D" value="20242e" name="metallo bagnato"/>
+  <color symbol="W" value="5d6a7e" name="scafo del modulo"/>
+  <color symbol="w" value="363e4c" name="giunture"/>
+  <color symbol="C" value="38e6ff" glow="True" name="oblò illuminati"/>
+  <color symbol="K" value="ff3fae" glow="True" name="striscia magenta"/>
+  <color symbol="A" value="ffb12e" glow="True" name="luce della porta"/>
+  <color symbol="O" value="2b2733" name="porta"/>
+  <color symbol="Q" hidden="True" name="modulo possibile"/>
+  <color symbol="M" hidden="True" name="segno di un modulo"/>
+  <color symbol="X" value="6f7d92" name="modulo aggiunto"/>
+
+  <!-- I piedi e il modulo di sotto. -->
+  <box at="15 20 0" size="3 3 3" color="D"/>
+  <box at="35 20 0" size="3 3 3" color="D"/>
+  <box at="15 30 0" size="3 3 3" color="D"/>
+  <box at="35 30 0" size="3 3 3" color="D"/>
+  <box at="25 25 2" size="13 19 14" color="W"/>
+  <cylinder at="19 25 2" size="19 19 14" color="W"/>
+  <cylinder at="31 25 2" size="19 19 14" color="W"/>
+  <!-- Il modulo di sopra, più stretto. -->
+  <box at="25 25 16" size="9 15 15" color="W"/>
+  <cylinder at="21 25 16" size="15 15 15" color="W"/>
+  <cylinder at="29 25 16" size="15 15 15" color="W"/>
+  <box at="25 25 15" size="50 50 1" color="w" on="W"/>
+  <box at="25 25 30" size="50 50 1" color="w" on="W"/>
+
+  <!-- I moduli possibili: a sinistra, a destra, dietro, una cabina sul tetto, un'antenna. -->
+  <cylinder at="6 25 0" size="11 15 13" color="Q" on="B"/>
+  <cylinder at="44 23 0" size="11 13 15" color="Q" on="B"/>
+  <box at="25 9 0" size="15 13 10" color="Q" on="B"/>
+  <box at="24 25 31" size="9 9 7" color="Q" on="B"/>
+  <line at="33 25 31" to="33 25 45" r="0" color="Q" on="B"/>
+  <ellipsoid at="33 25 42" size="7 7 3" color="Q" on="B"/>
+  <line at="15 20 16" to="15 20 19" r="0" color="Q" on="B"/>
+  <box at="15 20 20" size="7 7 1" color="Q" on="B"/>
+  <cylinder at="41 39 0" size="7 7 11" color="Q" on="B"/>
+  <line at="40 38 7" to="35 32 7" r="0.5" color="Q" on="B"/>
+  <box at="15 20 16" size="1 1 1" color="M"/>
+  <box at="41 39 0" size="1 1 1" color="M"/>
+  <box at="9 25 4" size="1 1 1" color="M"/>
+  <box at="41 23 4" size="1 1 1" color="M"/>
+  <box at="25 13 4" size="1 1 1" color="M"/>
+  <box at="24 25 31" size="1 1 1" color="M"/>
+  <box at="33 25 31" size="1 1 1" color="M"/>
+  <prl steps="1" in="M" out="X" p="0.5"/>
+  <all in="XQ" out="XX" symmetry="(xyz)"/>
+  <all>
+    <rule in="Q" out="B"/>
+    <rule in="M" out="B"/>
+  </all>
+
+  <!-- Oblò, strisce, porta. -->
+  <box at="25 25 9" size="50 50 3" color="C" on="W"/>
+  <box at="25 25 22" size="50 50 3" color="C" on="W"/>
+  <box at="25 25 5" size="50 50 2" color="C" on="X"/>
+  <box at="11 25 0" size="1 50 32" color="w" on="C"/>
+  <box at="15 25 0" size="1 50 32" color="w" on="C"/>
+  <box at="19 25 0" size="1 50 32" color="w" on="C"/>
+  <box at="23 25 0" size="1 50 32" color="w" on="C"/>
+  <box at="27 25 0" size="1 50 32" color="w" on="C"/>
+  <box at="31 25 0" size="1 50 32" color="w" on="C"/>
+  <box at="35 25 0" size="1 50 32" color="w" on="C"/>
+  <box at="39 25 0" size="1 50 32" color="w" on="C"/>
+  <box at="25 19 0" size="50 1 32" color="w" on="C"/>
+  <box at="25 23 0" size="50 1 32" color="w" on="C"/>
+  <box at="25 27 0" size="50 1 32" color="w" on="C"/>
+  <box at="25 31 0" size="50 1 32" color="w" on="C"/>
+  <box at="25 25 4" size="50 50 1" color="K" on="W"/>
+  <!-- Dentro i moduli è vuoto. -->
+  <convolution neighborhood="Moore" steps="1">
+    <rule in="W" out="B" values="B" sum="0"/>
+    <rule in="X" out="B" values="B" sum="0"/>
+    <rule in="w" out="B" values="B" sum="0"/>
+    <rule in="C" out="B" values="B" sum="0"/>
+  </convolution>
+  <box at="25 34 2" size="7 3 11" color="w"/>
+  <box at="25 35 2" size="5 3 9" color="O"/>
+  <box at="25 35 11" size="5 3 1" color="A"/>
+  <box at="25 38 0" size="7 3 2" color="D"/>
+  <box at="25 41 0" size="7 3 1" color="D"/>
+</sequence>

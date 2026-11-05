@@ -35,6 +35,11 @@
   "runes": [
    "motore"
   ],
-  "strutture": []
+  "strutture": [
+   {
+    "concetto": "bistrot",
+    "taglia": "enorme"
+   }
+  ]
  }
 }

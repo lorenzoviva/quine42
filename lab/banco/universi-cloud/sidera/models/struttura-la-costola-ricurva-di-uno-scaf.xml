@@ -1,0 +1,63 @@
+<!-- Relitto antico di Sidera: un pezzo di scafo curvo, mezzo sepolto, con le costole che si alzano spezzate a altezze diverse.
+     Il bordo rotto, l'altezza di ogni costola, i rottami attorno e il bagliore che ancora trapela cambiano a ogni seme. Cantiere 4C, a mano (Claude Code). -->
+<sequence values="BWwRrTSCKDG" size="20 20 60" symmetry="()" name="Relitto antico">
+  <color symbol="W" value="3c3f48" name="scafo antico"/>
+  <color symbol="w" value="6b5a4a" name="ruggine"/>
+  <color symbol="R" value="565b68" name="costole"/>
+  <color symbol="r" value="2a2d35" name="costole in ombra"/>
+  <color symbol="T" hidden="True" name="costola che cresce"/>
+  <color symbol="S" hidden="True" name="costola spezzata"/>
+  <color symbol="C" value="3fe9ff" glow="True" name="bagliore che trapela"/>
+  <color symbol="K" value="ff3fae" glow="True" name="vena magenta"/>
+  <color symbol="D" value="23252c" name="rottami"/>
+  <color symbol="G" hidden="True" name="suolo libero"/>
+
+  <!-- Lo scafo: un guscio curvo tagliato a metà. -->
+  <ellipsoid at="10 10 -10" size="19 20 26" color="W"/>
+  <ellipsoid at="10 10 -9" size="16 17 24" color="B" on="W"/>
+  <box at="16 10 0" size="12 20 60" color="B" on="W"/>
+  <box at="10 10 4" size="20 20 1" color="r" on="W"/>
+  <!-- Il bordo rotto. -->
+  <convolution neighborhood="Moore" steps="2">
+    <rule in="W" out="B" values="B" sum="17..26" p="0.6"/>
+  </convolution>
+
+  <!-- Le costole: ognuna sale dal suolo e si spezza dove capita; una arriva sempre in alto. -->
+  <line at="3 3 0" to="3 17 0" r="0" color="r"/>
+  <line at="6 6 0" to="6 14 0" r="0" color="r"/>
+  <line at="9 4 0" to="9 16 0" r="0" color="r"/>
+  <line at="12 8 0" to="12 12 0" r="0" color="r"/>
+  <line at="2 10 0" to="13 10 0" r="0" color="r"/>
+  <line at="2 10 1" to="13 10 1" r="0" color="r"/>
+  <box at="4 10 0" size="1 1 38" color="R"/>
+  <box at="4 10 38" size="1 1 1" color="T"/>
+  <box at="3 3 0" size="1 1 1" color="T"/>
+  <box at="3 17 0" size="1 1 1" color="T"/>
+  <box at="6 6 0" size="1 1 1" color="T"/>
+  <box at="6 14 0" size="1 1 1" color="T"/>
+  <box at="9 4 0" size="1 1 1" color="T"/>
+  <box at="9 16 0" size="1 1 1" color="T"/>
+  <box at="12 8 0" size="1 1 1" color="T"/>
+  <box at="12 12 0" size="1 1 1" color="T"/>
+  <one>
+    <rule in="[BWr] T" out="T R" p="12"/>
+    <rule in="T" out="S"/>
+  </one>
+  <all in="S" out="R"/>
+  <all steps="1" in="RB" out="*R"/>
+  <prl steps="1">
+    <rule in="R" out="r" p="0.3"/>
+    <rule in="W" out="w" p="0.12"/>
+  </prl>
+  <one steps="30" in="wW" out="ww" symmetry="(xyz)"/>
+
+  <!-- Rottami sul suolo e il bagliore che ancora esce dalle crepe. -->
+  <box at="10 10 0" size="20 20 1" color="G" on="B"/>
+  <one steps="4" in="G[RrWw]" out="D*" symmetry="(xy)"/>
+  <one steps="90" in="GD" out="DD" symmetry="(xy)"/>
+  <all in="G" out="B"/>
+  <prl steps="1">
+    <rule in="BW" out="BC" p="0.03"/>
+    <rule in="B R" out="K R" p="0.15"/>
+  </prl>
+</sequence>

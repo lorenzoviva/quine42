@@ -27,6 +27,11 @@
    "tunnel",
    "y"
   ],
-  "strutture": []
+  "strutture": [
+   {
+    "concetto": "scalo navette",
+    "taglia": "grande"
+   }
+  ]
  }
 }

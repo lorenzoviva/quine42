@@ -1,19 +1,63 @@
-<!-- Barile a doghe: step 8B, gemini-3.8-flash (b-semplici-flash38/barile.json, voto dell'Artista 7/10). Convertito dal JSON (lab/mjx/convert.ts): stessi voxel. -->
-<sequence values="BWLDIST" size="20 20 20" symmetry="(xy)" name="Barile a doghe">
+<!-- Barile a doghe, procedurale (Cantiere 2): le doghe, i cerchi di ferro e il tappo dell'originale. Il seme sceglie quanto è panciuto il
+     barile (snello, a botte, largo), quanto è alto (da 8 a 19 voxel: una botticella o una botte da cantina) e se sul coperchio c'è un
+     mestolo appoggiato. -->
+<sequence values="BWLDISThkpqmab" size="20 20 20" symmetry="(xy)" name="Barile a doghe">
   <color symbol="W" value="8c532b" name="legno doghe"/>
   <color symbol="L" value="ad6f3d" name="legno chiaro"/>
   <color symbol="D" value="4e2c14" name="fessura doghe"/>
   <color symbol="I" value="424754" name="cerchio ferro"/>
   <color symbol="S" value="6d7687" name="ferro lucido"/>
   <color symbol="T" value="6a3b1a" name="tappo botte"/>
-  <cylinder at="10 10 0" size="12 12 16" color="W"/>
-  <cylinder at="10 10 2" size="14 14 12" color="W"/>
-  <cylinder at="10 10 5" size="16 16 6" color="W"/>
-  <cylinder at="10 10 15" size="10 10 1" color="D"/>
-  <cylinder at="10 10 3" size="16 16 2" color="I" on="B"/>
-  <cylinder at="10 10 11" size="16 16 2" color="I" on="B"/>
-  <box at="10 18 8" size="2 1 2" color="T" on="B"/>
-  <box at="10 10 15" size="2 2 1" color="T"/>
+  <color symbol="h" hidden="True" name="altezze possibili"/>
+  <color symbol="k" hidden="True" name="il taglio"/>
+  <color symbol="p" hidden="True" name="la pancia larga"/>
+  <color symbol="q" hidden="True" name="la pancia a botte"/>
+  <color symbol="m" hidden="True" name="il dado della pancia, poi il mestolo"/>
+  <color symbol="a" hidden="True" name="scelta: pancia larga"/>
+  <color symbol="b" hidden="True" name="scelta: pancia a botte"/>
+  <!-- La pancia: il dado al centro del fondo sceglie fino a quale anello la botte si allarga -->
+  <cylinder at="10 10 1" size="18 18 17" color="p"/>
+  <cylinder at="10 10 1" size="16 16 17" color="q"/>
+  <cylinder at="10 10 0" size="12 12 20" color="W"/>
+  <box at="10 10 0" size="1 1 1" color="m"/>
+  <one steps="1">
+    <rule in="m" out="a"/>
+    <rule in="m" out="b"/>
+    <rule in="m" out="W"/>
+  </one>
+  <all>
+    <rule in="aW" out="aa"/>
+    <rule in="a q" out="a a"/>
+    <rule in="aq" out="aa"/>
+    <rule in="ap" out="aa"/>
+    <rule in="bW" out="bb"/>
+    <rule in="bq" out="bb"/>
+  </all>
+  <all in="[ab]" out="W"/>
+  <all in="[pq]" out="B"/>
+  <!-- I fianchi arrotondati: gli spigoli della pancia si smussano -->
+  <convolution neighborhood="Moore" steps="1">
+    <rule in="W" out="B" values="B" sum="15..26"/>
+  </convolution>
+  <!-- I cerchi di ferro -->
+  <box at="10 10 3" size="20 20 2" color="I" on="W"/>
+  <box at="10 10 12" size="20 20 2" color="I" on="W"/>
+  <!-- L'altezza: lo strato scelto e tutto ciò che sta sopra spariscono -->
+  <box at="0 0 8" size="1 1 12" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all in="k*" out="kk"/>
+  <all in="* k" out="k *"/>
+  <all in="k" out="B"/>
+  <!-- Il coperchio: un anello scuro sul bordo di cima e il tappo al centro -->
+  <all in="B [WI]" out="B D"/>
+  <all in="D/D/D/D/D D/D/D/D/D" out="*/*/*/*/* */*/W/*/*" symmetry="()"/>
+  <all in="D/D/D D/D/D" out="*/*/* */T/*" symmetry="()" steps="1"/>
+  <!-- Forse un mestolo appoggiato sul coperchio -->
+  <prl in="B D" out="m *" p="0.03" steps="1"/>
+  <one in="m" out="S" steps="1"/>
+  <all in="m" out="B"/>
+  <one in="SB" out="SS" steps="5"/>
   <prl steps="1" in="B W" out="B D" p="0.05"/>
   <all steps="8">
     <rule in="D W" out="D D"/>

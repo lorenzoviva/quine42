@@ -1,0 +1,47 @@
+{
+ "plan": {
+  "place": {
+   "name": "Campagna del Primo Passo",
+   "description": "L'erba si piega al vento."
+  },
+  "layout": "borgo",
+  "objects": [
+   {
+    "module": "obj.banco",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.cassa",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.credenza",
+    "where": "dentro"
+   },
+   {
+    "module": "object.bush",
+    "where": "fuori"
+   },
+   {
+    "module": "object.crate",
+    "where": "fuori"
+   }
+  ],
+  "ground": [],
+  "fresh": [],
+  "runes": [
+   "carpet . rate",
+   "false"
+  ],
+  "strutture": [
+   {
+    "concetto": "locanda",
+    "taglia": "grande"
+   },
+   {
+    "concetto": "fucina nanica",
+    "taglia": "grande"
+   }
+  ]
+ }
+}

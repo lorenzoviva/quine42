@@ -7,7 +7,8 @@ contadina, lupo), 3 variavano meno di 0,15 (pino, betulla, cespuglio con bacche)
 passavano (casa a graticcio, palma, rocce, cespuglio, falò) variavano per rumore di superficie o per poco. Ora tutti e 24 passano il
 validatore a ogni seme senza un solo frammento e hanno una distanza media fra i semi da 0,15 in su (media delle medie 0,44).
 
-Qui non si tocca il seme: `universe/models/` resta com'è. Questi file sono il banco da cui sceglierli.
+Questi file sono il banco da cui sceglierli. Dal 05/11 (T273) sono anche in `universe/models/` e nei tre universi di Claude Cloud, al posto
+delle copie del seme (`../universi-cloud/strumenti/integra.ts`, [`../universi-cloud/INTEGRAZIONE.md`](../universi-cloud/INTEGRAZIONE.md)).
 
 ## Il banco (`prova.ts`)
 

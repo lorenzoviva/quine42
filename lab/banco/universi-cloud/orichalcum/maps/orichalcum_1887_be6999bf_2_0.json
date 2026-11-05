@@ -31,6 +31,12 @@
   "runes": [
    "vento",
    "vapore"
+  ],
+  "strutture": [
+   {
+    "concetto": "faro a vapore",
+    "taglia": "grande"
+   }
   ]
  }
 }

@@ -1,0 +1,41 @@
+<!-- Corallo di silicio (Cantiere 8, sidera): scoglio a caso; i rami crescono e si biforcano a caso. -->
+<sequence values="BRADXPu123456z" symmetry="(xy)" name="Corallo di silicio">
+  <color symbol="R" value="4a4f5a" name="scoglio"/>
+  <color symbol="A" value="c8d8e8" name="silicio"/>
+  <color symbol="D" value="8aa0b8" name="silicio scuro"/>
+  <color symbol="X" value="ff7ad8" name="punte accese" glow="True"/>
+  <color symbol="P" hidden="True" name="marcatore"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="1" hidden="True" name="marcatore"/>
+  <color symbol="2" hidden="True" name="marcatore"/>
+  <color symbol="3" hidden="True" name="marcatore"/>
+  <color symbol="4" hidden="True" name="marcatore"/>
+  <color symbol="5" hidden="True" name="marcatore"/>
+  <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
+  <!-- scelta «scoglio»: masso tondo | disco | tre pietre -->
+  <box at="20 20 0" size="40 40 12" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <!--   1: masso tondo -->
+  <ellipsoid at="20 20 0" size="20 20 10" color="R" on="1"/>
+  <!--   2: disco -->
+  <cylinder at="20 20 0" size="28 28 4" color="R" on="2"/>
+  <!--   3: tre pietre -->
+  <ellipsoid at="13 16 0" size="12 12 8" color="R" on="3"/>
+  <ellipsoid at="27 16 0" size="12 12 9" color="R" on="3"/>
+  <ellipsoid at="20 28 0" size="12 12 8" color="R" on="3"/>
+  <ellipsoid at="20 20 0" size="10 10 6" color="R" on="3"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <!-- punte a caso sullo scoglio -->
+  <one in="B R" out="P *" steps="5"/>
+  <!-- crescono insieme: salgono, piegano, si biforcano -->
+  <prl steps="46"><rule in="B P" out="P A" p="0.45"/><rule in="B* *P" out="P* *A" p="0.25"/><rule in="B*B *P*" out="P*P *A*" p="0.04"/></prl>
+  <prl in="P" out="X"/>
+  <all in="AB" out="*D" steps="1"/>
+  <prl in="B X" out="X *" p="0.6" steps="1"/>
+</sequence>

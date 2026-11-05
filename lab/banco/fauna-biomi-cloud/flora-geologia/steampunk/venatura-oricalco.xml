@@ -1,0 +1,69 @@
+<!-- Venatura di oricalco (Cantiere 8, orichalcum): sperone, massi, vene e attrezzi dei minatori a caso. -->
+<sequence values="BRDVWILgPu123456z" symmetry="(xy)" name="Venatura di oricalco">
+  <color symbol="R" value="2f2c30" name="roccia nera"/>
+  <color symbol="D" value="4a454c" name="roccia grigia"/>
+  <color symbol="V" value="e0a030" name="oricalco" glow="True"/>
+  <color symbol="W" value="6b4a2a" name="legno"/>
+  <color symbol="I" value="5a5550" name="ferro"/>
+  <color symbol="L" value="ffd27a" name="lanterna" glow="True"/>
+  <color symbol="g" hidden="True" name="marcatore"/>
+  <color symbol="P" hidden="True" name="marcatore"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="1" hidden="True" name="marcatore"/>
+  <color symbol="2" hidden="True" name="marcatore"/>
+  <color symbol="3" hidden="True" name="marcatore"/>
+  <color symbol="4" hidden="True" name="marcatore"/>
+  <color symbol="5" hidden="True" name="marcatore"/>
+  <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
+  <!-- scelta «sperone»: guglia alta | mensa larga | due denti -->
+  <box at="25 25 0" size="44 44 46" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <!--   1: guglia alta -->
+  <cone at="25 25 0" size="26 24 44" color="R" on="1"/>
+  <ellipsoid at="25 25 0" size="30 30 14" color="R" on="1"/>
+  <!--   2: mensa larga -->
+  <box at="25 25 0" size="32 28 26" color="R" on="2"/>
+  <ellipsoid at="25 25 20" size="34 30 14" color="R" on="2"/>
+  <!--   3: due denti -->
+  <cone at="18 25 0" size="20 20 40" color="R" on="3"/>
+  <cone at="33 23 0" size="18 18 32" color="R" on="3"/>
+  <ellipsoid at="25 25 0" size="36 26 12" color="R" on="3"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <!-- 8 massi nascono a caso sul terreno accanto a ciò che c'è già (R) e crescono di lato e in alto -->
+  <box at="25 25 0" size="48 48 1" color="g" on="B"/>
+  <one in="Rg" out="*D" steps="8"/>
+  <prl steps="7"><rule in="D[Bg]" out="*D" p="0.5"/><rule in="B D" out="D *" p="0.45"/></prl>
+  <prl in="g" out="B"/>
+  <!-- le vene di oricalco attraversano la roccia -->
+  <one in="BR" out="*P" steps="6"/>
+  <prl steps="20"><rule in="PR" out="VP" p="0.7"/><rule in="P R" out="V P" p="0.3"/><rule in="R P" out="P V" p="0.3"/></prl>
+  <prl in="P" out="V"/>
+  <!-- scelta «attrezzi»: palo con lanterna | carrello sui binari | piccone piantato -->
+  <box at="25 43 0" size="50 14 30" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <!--   1: palo con lanterna -->
+  <line at="20 46 0" to="20 46 24" r="1" color="W" on="1"/>
+  <line at="20 46 24" to="20 41 24" r="0.5" color="W" on="1"/>
+  <box at="20 41 22" size="2 2 2" color="L" on="1"/>
+  <line at="20 46 0" to="20 41 0" r="0.5" color="W" on="1"/>
+  <ellipsoid at="25 40 0" size="34 16 4" color="D" on="1"/>
+  <!--   2: carrello sui binari -->
+  <box at="25 44 0" size="30 6 1" color="I" on="2"/>
+  <box at="22 44 2" size="8 5 5" color="W" on="2"/>
+  <ellipsoid at="22 44 7" size="7 4 3" color="V" on="2"/>
+  <ellipsoid at="25 40 0" size="34 16 4" color="D" on="2"/>
+  <!--   3: piccone piantato -->
+  <line at="30 40 2" to="33 46 16" r="0.5" color="W" on="3"/>
+  <line at="30 46 16" to="36 46 16" r="0.5" color="I" on="3"/>
+  <ellipsoid at="33 44 0" size="8 8 3" color="D" on="3"/>
+  <ellipsoid at="25 40 0" size="34 16 4" color="D" on="3"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <prl in="B R" out="* D" p="0.25" steps="1"/>
+</sequence>

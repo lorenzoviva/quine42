@@ -24,12 +24,17 @@ Funzioni che il kernel chiama, se presenti:
 - `world.nearest(x, y, raggio, tag)` id dell'entità più vicina (tag opzionale) o `nil`
 - `world.has_tag(id, tag)`, `world.break_entity(id)` (la distrugge e lascia cadere i suoi "drops")
 - `world.set_tile(x, y, codice)` (cambia il terreno di una casella, resta cambiato), `world.open(id)` (apre un contenitore al viandante), `world.make_container(id, capienza, bottino)`
+- `world.store_get(chiave)`, `world.store_set(chiave, valore)`: il magazzino del modulo, che dura tra una partita e l'altra (prezzi, contatori, tabelloni, accordi: ciò che non è una casella). Chiavi semplici (lettere, cifre, `_ - . :`), valori da dati (numeri, testi, tabelle); `nil` toglie la chiave; `store_set` restituisce `false` se il magazzino è pieno. Ogni modulo vede solo il suo; i componenti e i `singleton` invece tornano come all'inizio quando il mondo si riapre
 - Effetti pronti: il modulo `core.effects` applica `{ tipo = "fuoco" | "luce" | "scudo" | "terreno" | ... }`; componenti `fuoco`, `luce {raggio, accesa}`, `effimero {fino}` (sparisce a tempo), `scudo {fino}`
 - `world.tile(x, y)` codice del terreno; `world.speed_at(x, y)`; `world.free(x, y, r, z)` (z: `p.z`, l'altezza dei piedi, per chi sta su un piano alto; facoltativo)
 - `world.say(testo)` messaggio al viandante; `world.speak(id, testo)` fumetto sopra un'entità
 - `inventory.add(id, oggetto, n)`, `inventory.remove(id, oggetto, n)`, `inventory.count(id, oggetto)`, `inventory.equipped(id)` (gli oggetti sono id come "item.corda")
 - `items.find(nome)` id dell'oggetto con quel nome (o `nil`); `items.def(id)` → `{name=, category=, weight=, tags=}`
 - Bisogni del viandante: `ecs.get(user, "needs")` → `{hunger=, thirst=, energy=, health=}` da 0 a 100 (modificabili)
+- `world.path(x, y, tx, ty)` → il prossimo punto `{x=, y=}` della via verso (tx, ty) che gira attorno a ciò che blocca (o `nil` se non c'è); `world.find_tile(codice, x, y, raggio)` → il centro della casella con quel codice più vicina
+- `world.act(chi, cosa, azione)`: un individuo usa una cosa come il viandante con «Usa» (il suo `on_act`, con `chi` come `user`): solo azioni senza effetti, entro due caselle e mezzo; restituisce il testo
+- `world.wanderers()` → lista di `{id=, chi=, x=, y=}`, ogni viandante con il suo corpo e dove sta (in una partita di molti sono più d'uno: un sistema gira una volta sola, per tutti); `input.held(azione, id)` se il viandante con quel corpo tiene `up`, `down`, `left` o `right` (senza `id`, chi agisce ora)
+- I campi dei pannelli (`campo` di una `barra` o di un `testo`) arrivano a ogni viandante dal suo corpo: ciò che il pannello mostra va scritto in un componente del viandante, non in un'entità comune
 - `input.held(azione)`, `bus.emit(nome, dati)`, `log(...)`, `hash(a, b, c, d)` (deterministico, 0..1; `math.random` va bene, il kernel lo semina), `time`
 - `math`, `string`, `table`, `utf8`, `pairs`, `ipairs`, `tostring`, `tonumber`, `type`, `pcall`
 
