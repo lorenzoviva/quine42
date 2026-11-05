@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 05/11/2026, epoca 289. Crediti: vedi `stato`.
+Aggiornato il 05/11/2026, epoca 290. Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -69,6 +69,6 @@ Aggiornato il 05/11/2026, epoca 289. Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **290 (gemini):** riavviato contatore Claude dopo il reset (`uso`); lanciato T284 (veste futuristica, Opus 5.5, sforzo max) in corso.
 - **289 (gemini):** integrati T301 e T291 (`bbd99a5`, `9e14b53`, ADR-0150, kernel 0.1.10).
-- **288 (claude):** lanciato T301 su claude per fondere T291 sul base con T300.
 

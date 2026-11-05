@@ -1364,3 +1364,6 @@
 - [2026-11-05T20:48:07.645Z] task/T301 integrato in 3d; worktree e branch tolti.
 - [2026-11-05T20:48:13.252Z] task/T291 integrato in 3d; worktree e branch tolti.
 - [2026-11-05T20:48:54.675Z] nota: epoca 289 (gemini): integrati T301 e T291 (ADR-0150, kernel 0.1.10)
+- [2026-11-05T20:50:06.440Z] orchestratore: epoca 290 su gemini (contesto a 128 % della finestra)
+- [2026-11-05T21:03:30.282Z] lancio T284 su claude (Opus 5.5, sforzo max) in H:\projects\rune\.claude\worktrees\t284
+- [2026-11-05T21:04:29.846Z] nota: epoca 290 (gemini): riavviato contatore Claude dopo il reset (5h al 94%), lanciato T284 su claude (Opus 5.5, sforzo max)
