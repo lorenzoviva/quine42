@@ -12,6 +12,7 @@ L'elenco unico (richiesta dell'autore, 04/11): l'orchestratore lo tiene aggiorna
 
 Chiuse il 05/11: D34 → C, inglese lingua interna subito (T306-T310, step 42), rune in latino, prompt in inglese; D36 → T302 (intervallo dei kernel, poi l'installazione), D37 → T303 (misura con gli abbonamenti), D38 A.
 - **D42 (T284 — la variante `?fx=mj-pagina` della veste futuristica):** niente palco 3D, MarkovJunior su tutta la pagina e un labirinto 2D di lettere al posto del palco (18,3 % del thread a CPU 4× con three.js caricato, 9,8 % senza, contro 39,6 % della veste scelta). Non è nel selettore. Se la vuoi servono three.js caricato solo quando il palco si vede e un intervento sui picchi da 11-15 ms. Consiglio: guardala (`?fx=mj-pagina`) dopo T285 e T286; decidere a fine giro delle tre vesti (T287).
+- **D43 (T286 — le orecchie dei gerboa nel piede della veste sobria):** la sagoma delle orecchie in fondo alla pagina (il segreto dei gerboa di T97/T244) è rimasta anche nella sobria, accanto al logo della proposta 04. A: restano in tutte le vesti; B: nella sobria si tolgono. Consiglio A (è il richiamo alla corona di ADR-0095), da guardare con T287.
 
 ## Rimandate per tua scelta
 T45f a fine Fase I (progetto GCP, hosting, regione); T93 in Fase IV (Managed Payments).
