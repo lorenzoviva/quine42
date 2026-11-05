@@ -1,0 +1,62 @@
+{
+  "id": "npc.corvo-tetto",
+  "name": "Corvo di tetto",
+  "kind": "entity",
+  "version": "1.0.0",
+  "description": "Un corvo nero lucido di pioggia che vive sui tetti e sotto i viadotti: ruba tutto ciò che luccica.",
+  "context": "sui tetti, sotto i viadotti, in piazza",
+  "logic": "logic.lua",
+  "appearance": {
+    "model": "animale",
+    "glyph": "v",
+    "color": "#2a2a3a",
+    "aspetto": "un corvo nero lucido di pioggia, con un anello di filo al piede"
+  },
+  "physics": {
+    "solid": false,
+    "radius": 0.25,
+    "speed": 2.2
+  },
+  "components": {
+    "wander": {
+      "dx": 0,
+      "dy": 0,
+      "t": 0,
+      "speed": 2.2
+    },
+    "corvo": {
+      "bottino": 0
+    }
+  },
+  "interaction": {
+    "type": "talk"
+  },
+  "persona": "Sei un corvo di tetto di Sidera. Rispondi solo con versi, gracchi e azioni descritte tra parentesi. Ti piacciono le briciole e le cose lucide; segui chi ti offre del cibo, ma solo se ne hai voglia.",
+  "actions": [
+    {
+      "id": "briciole",
+      "label": "Dagli le briciole",
+      "requires": "item.pane-alghe"
+    },
+    {
+      "id": "lucido",
+      "label": "Mostragli qualcosa di lucido",
+      "requires": "item.cella-energetica"
+    },
+    {
+      "id": "guarda",
+      "label": "Guarda cosa ha nel becco"
+    }
+  ],
+  "tags": [
+    "animale"
+  ],
+  "spawn": {
+    "tiles": [
+      "p",
+      "g"
+    ],
+    "chance": 0.08,
+    "max": 1
+  }
+}

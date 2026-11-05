@@ -1,0 +1,19 @@
+{
+  "id": "obj.relitto",
+  "name": "Relitto antico",
+  "kind": "entity",
+  "version": "1.0.0",
+  "description": "Un pezzo di scafo antico conficcato nella sabbia, con le costole che spuntano come ossa: una lega che nessuna fonderia di Sidera sa rifare.",
+  "context": "nel Campo dei Relitti, sulla costa allagata, nella sabbia vitrea",
+  "logic": "logic.lua",
+  "appearance": { "model": "sidera-relitto", "glyph": "⌇", "color": "#8a5a3c", "aspetto": "un frammento di scafo antico arrugginito con costole ricurve che spuntano dalla sabbia" },
+  "physics": { "solid": true, "radius": 0.5 },
+  "tags": ["relitto", "antico", "metallo"],
+  "components": { "relitto": { "frugato": 0, "tagliato": false } },
+  "actions": [
+    { "id": "fruga", "label": "Fruga tra le lamiere" },
+    { "id": "taglia", "label": "Taglia una lamiera", "requires": "item.taglierina" },
+    { "id": "incisioni", "label": "Guarda le incisioni" }
+  ],
+  "spawn": { "tiles": ["s"], "chance": 0.05, "max": 1 }
+}

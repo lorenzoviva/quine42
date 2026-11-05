@@ -1,0 +1,41 @@
+{
+ "plan": {
+  "place": {
+   "name": "Vicolo delle Cuoche",
+   "description": "Un vicolo stretto pieno di piastre fumanti e insegne: qui si mangia con una cella, e chi non ce l'ha mangia lo stesso."
+  },
+  "layout": "vicoli_pioggia",
+  "objects": [
+   {
+    "module": "npc.colono",
+    "where": "fuori"
+   },
+   {
+    "module": "npc.sintetista",
+    "where": "ovunque"
+   },
+   {
+    "module": "npc.colono",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.armadietto",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.drone-ricognizione",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Spiedino di alghe",
+   "Pane d'alghe"
+  ],
+  "fresh": [],
+  "runes": [
+   "grava",
+   "speed"
+  ],
+  "strutture": []
+ }
+}

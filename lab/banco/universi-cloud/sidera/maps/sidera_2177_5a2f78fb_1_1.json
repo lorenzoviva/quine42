@@ -1,0 +1,28 @@
+{
+ "plan": {
+  "place": {
+   "name": "Orti Pensili",
+   "description": "Terrazze coltivate tra le case, con vasche idroponiche e un boschetto di vetro che tintinna."
+  },
+  "layout": "mercato_viadotti",
+  "objects": [
+   {
+    "module": "obj.serra-idroponica",
+    "where": "ovunque"
+   },
+   {
+    "module": "obj.armadietto",
+    "where": "ovunque"
+   }
+  ],
+  "ground": [
+   "Frutto di vetro",
+   "Foglie di felce"
+  ],
+  "fresh": [],
+  "runes": [
+   "intreccio"
+  ],
+  "strutture": []
+ }
+}

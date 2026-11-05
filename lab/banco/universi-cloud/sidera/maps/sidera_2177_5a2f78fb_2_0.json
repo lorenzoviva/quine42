@@ -1,0 +1,45 @@
+{
+ "plan": {
+  "place": {
+   "name": "Cupole di Serralta",
+   "description": "Le cupole di vetro dei xenobotanici, appannate di umidità, piene di vasche e germogli; fuori, i campi di vasche all'aperto sotto la pioggia."
+  },
+  "layout": "cupola",
+  "objects": [
+   {
+    "module": "npc.xenobotanica",
+    "where": "dentro"
+   },
+   {
+    "module": "npc.xenobotanica",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.serra-idroponica",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.serra-idroponica",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.armadietto",
+    "where": "dentro"
+   }
+  ],
+  "ground": [
+   "Semi di Serralta",
+   "Soluzione nutritiva"
+  ],
+  "fresh": [],
+  "runes": [
+   "orbita"
+  ],
+  "strutture": [
+   {
+    "concetto": "la grande cupola di Serralta, vetro a spicchi su un anello di lega",
+    "taglia": "media"
+   }
+  ]
+ }
+}

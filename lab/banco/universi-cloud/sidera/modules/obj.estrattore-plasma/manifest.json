@@ -1,0 +1,19 @@
+{
+  "id": "obj.estrattore-plasma",
+  "name": "Estrattore di plasma",
+  "kind": "entity",
+  "version": "1.0.0",
+  "description": "Una pompa a pistoni che pesca plasma dalle canalette e lo chiude in bottiglie magnetiche; si inceppa spesso e va presa a calci con gentilezza.",
+  "context": "lungo le canalette del Cantiere della Fusione, sulle rampe dei turni",
+  "logic": "logic.lua",
+  "appearance": { "model": "sidera-estrattore-plasma", "glyph": "⏚", "color": "#5fd3ff", "aspetto": "una pompa a pistoni con tubi spessi e un serbatoio di vetro pieno di plasma azzurro" },
+  "physics": { "solid": true, "radius": 0.45 },
+  "tags": ["cantiere", "macchina", "plasma"],
+  "components": { "estrattore": { "pressione": 0, "inceppato": false, "ultima": 0 } },
+  "actions": [
+    { "id": "pompa", "label": "Aziona la pompa" },
+    { "id": "imbottiglia", "label": "Imbottiglia il plasma" },
+    { "id": "sblocca", "label": "Sblocca i pistoni", "requires": "item.chiave-dinamometrica" }
+  ],
+  "spawn": { "tiles": ["g", "l"], "chance": 0.04, "max": 1 }
+}

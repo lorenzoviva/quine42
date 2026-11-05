@@ -1,0 +1,20 @@
+{
+  "id": "obj.sintetizzatore",
+  "name": "Sintetizzatore molecolare",
+  "kind": "entity",
+  "version": "1.0.0",
+  "description": "Un armadio di lega con un portello di vetro e tubi che gorgogliano: i sintetisti ci mettono dentro polveri e fili e ne tirano fuori metamateriali e celle.",
+  "context": "nelle botteghe dei sintetisti, al mercato, nei laboratori",
+  "logic": "logic.lua",
+  "appearance": { "model": "sidera-sintetizzatore", "glyph": "⌸", "color": "#c08af0", "aspetto": "un armadio di lega con un portello di vetro, tubi trasparenti e una spia viola" },
+  "physics": { "solid": true, "radius": 0.45 },
+  "tags": ["sintesi", "macchina", "laboratorio"],
+  "components": { "luce": { "raggio": 2, "accesa": true, "colore": "#c08af0" } },
+  "actions": [
+    { "id": "metamateriale", "label": "Sintetizza una lastra di metamateriale", "requires": "item.polvere-cristallo" },
+    { "id": "cella", "label": "Ricarica una cella energetica", "requires": "item.plasma-contenuto" },
+    { "id": "filo", "label": "Tira un filo superconduttore", "requires": "item.lega-grezza" },
+    { "id": "guarda", "label": "Guarda dentro il portello" }
+  ],
+  "spawn": { "tiles": ["f", "l"], "chance": 0.08, "max": 1 }
+}

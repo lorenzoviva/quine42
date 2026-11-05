@@ -1,0 +1,1125 @@
+{
+ "id": "items.sidera",
+ "name": "Oggetti di Sidera",
+ "kind": "data",
+ "version": "1.0.0",
+ "description": "Gli oggetti di tutti i giorni a Sidera: cibo delle serre e dei vicoli, acqua filtrata, medicine dei laboratori, attrezzi della fusione, celle energetiche (la moneta dei vicoli), metamateriali, vestiti per la pioggia; con le ricette dei sintetisti e le tabelle di ciò che si trova in casse, serre, laboratori, relitti e cantieri.",
+ "items": [
+  {
+   "id": "item.razione-serra",
+   "name": "Razione di serra",
+   "description": "Un panetto compresso di legumi e alghe delle Cupole, insipido ma onesto.",
+   "category": "cibo",
+   "weight": 0.3,
+   "stack": 6,
+   "tags": [
+    "cucina",
+    "serra"
+   ],
+   "glyph": "ò",
+   "color": "#9fbf6a",
+   "aspetto": "a compressed green food ration bar in foil",
+   "effects": {
+    "hunger": 30
+   }
+  },
+  {
+   "id": "item.spiedino-alghe",
+   "name": "Spiedino di alghe",
+   "description": "Alghe di vasca arrostite sulla piastra del Vicolo, con la salsa piccante di Mara.",
+   "category": "cibo",
+   "weight": 0.2,
+   "stack": 6,
+   "tags": [
+    "cucina",
+    "strada"
+   ],
+   "glyph": "ò",
+   "color": "#5f8f4a",
+   "aspetto": "a skewer of grilled green seaweed",
+   "effects": {
+    "hunger": 18,
+    "thirst": -2
+   }
+  },
+  {
+   "id": "item.zuppa-funghi",
+   "name": "Zuppa di funghi di vasca",
+   "description": "Una scodella termica di zuppa calda, profuma di terra bagnata.",
+   "category": "cibo",
+   "weight": 0.5,
+   "stack": 3,
+   "tags": [
+    "cucina",
+    "serra"
+   ],
+   "glyph": "ò",
+   "color": "#b08a5a",
+   "aspetto": "a thermal bowl of mushroom soup",
+   "effects": {
+    "hunger": 35,
+    "thirst": 10
+   }
+  },
+  {
+   "id": "item.frutto-vetro",
+   "name": "Frutto di vetro",
+   "description": "Il frutto ambrato dei boschetti di vetro: croccante fuori, dolce e freddo dentro.",
+   "category": "cibo",
+   "weight": 0.2,
+   "stack": 10,
+   "tags": [
+    "frutta",
+    "bosco",
+    "serra"
+   ],
+   "glyph": "ò",
+   "color": "#f0b84a",
+   "aspetto": "an amber faceted fruit like cut glass",
+   "effects": {
+    "hunger": 12,
+    "thirst": 6
+   }
+  },
+  {
+   "id": "item.pane-alghe",
+   "name": "Pane d'alghe",
+   "description": "Pane scuro impastato con farina d'alghe, la colazione dei turni di notte.",
+   "category": "cibo",
+   "weight": 0.3,
+   "stack": 5,
+   "tags": [
+    "cucina",
+    "forno"
+   ],
+   "glyph": "ò",
+   "color": "#6a6a3a",
+   "aspetto": "a dark loaf of seaweed bread",
+   "effects": {
+    "hunger": 25
+   }
+  },
+  {
+   "id": "item.acqua-filtrata",
+   "name": "Borraccia d'acqua filtrata",
+   "description": "Acqua piovana filtrata dalle compagnie, col sigillo del lotto sul tappo.",
+   "category": "bevanda",
+   "weight": 0.6,
+   "stack": 4,
+   "tags": [
+    "bevanda",
+    "acqua",
+    "viaggio"
+   ],
+   "glyph": "ô",
+   "color": "#7ac8f0",
+   "aspetto": "a metal water flask with a blue cap",
+   "effects": {
+    "thirst": 40
+   }
+  },
+  {
+   "id": "item.te-serra",
+   "name": "Tè di serra",
+   "description": "Infuso di foglie di felce: scalda le mani e schiarisce la testa.",
+   "category": "bevanda",
+   "weight": 0.3,
+   "stack": 5,
+   "tags": [
+    "bevanda",
+    "serra",
+    "erbe"
+   ],
+   "glyph": "ô",
+   "color": "#c8a85a",
+   "aspetto": "a steaming paper cup of herbal tea",
+   "effects": {
+    "thirst": 20,
+    "energy": 10
+   }
+  },
+  {
+   "id": "item.brodo-caldo",
+   "name": "Brodo caldo",
+   "description": "Brodo di ossa e radici, venduto nei bicchieri di carta sotto i viadotti.",
+   "category": "bevanda",
+   "weight": 0.4,
+   "stack": 4,
+   "tags": [
+    "bevanda",
+    "cucina",
+    "strada"
+   ],
+   "glyph": "ô",
+   "color": "#d8a060",
+   "aspetto": "a paper cup of hot broth",
+   "effects": {
+    "thirst": 25,
+    "hunger": 8
+   }
+  },
+  {
+   "id": "item.cerotto-gel",
+   "name": "Cerotto al gel",
+   "description": "Un cerotto trasparente che si scalda sulla pelle e chiude i tagli.",
+   "category": "medicina",
+   "weight": 0.05,
+   "stack": 10,
+   "tags": [
+    "medicina",
+    "laboratorio"
+   ],
+   "glyph": "+",
+   "color": "#b8f0e8",
+   "aspetto": "a transparent gel bandage patch",
+   "effects": {
+    "health": 15
+   }
+  },
+  {
+   "id": "item.siero-criogenico",
+   "name": "Siero criogenico",
+   "description": "Una fiala azzurra che rallenta il sangue e calma il dolore; la usano i medici delle capsule.",
+   "category": "medicina",
+   "weight": 0.1,
+   "stack": 5,
+   "tags": [
+    "medicina",
+    "laboratorio",
+    "criogenia"
+   ],
+   "glyph": "+",
+   "color": "#7ad8ff",
+   "aspetto": "a small vial of glowing blue serum",
+   "effects": {
+    "health": 30,
+    "energy": -10
+   }
+  },
+  {
+   "id": "item.kit-medico",
+   "name": "Kit medico",
+   "description": "Una valigetta con forbici, bende, garze e una pinza magnetica.",
+   "category": "medicina",
+   "weight": 0.8,
+   "stack": 1,
+   "tags": [
+    "medicina",
+    "laboratorio",
+    "attrezzo"
+   ],
+   "glyph": "+",
+   "color": "#f05a5a",
+   "aspetto": "a white medical case with a red cross band",
+   "effects": {
+    "health": 40
+   }
+  },
+  {
+   "id": "item.chiave-dinamometrica",
+   "name": "Chiave dinamometrica",
+   "description": "Una chiave pesante con la scala tarata: gli ingegneri della fusione non ne prestano mai una.",
+   "category": "attrezzo",
+   "weight": 1.0,
+   "stack": 1,
+   "tags": [
+    "metallo",
+    "cantiere",
+    "bottega"
+   ],
+   "glyph": "⚒",
+   "color": "#a8b0bc",
+   "aspetto": "a heavy torque wrench",
+   "equippable": true
+  },
+  {
+   "id": "item.saldatore",
+   "name": "Saldatore a impulsi",
+   "description": "Un saldatore a pistola che sputa scintille azzurre.",
+   "category": "attrezzo",
+   "weight": 1.2,
+   "stack": 1,
+   "tags": [
+    "metallo",
+    "cantiere",
+    "bottega",
+    "fuoco"
+   ],
+   "glyph": "⚒",
+   "color": "#5ab8f0",
+   "aspetto": "a pistol-grip pulse welder with a blue tip",
+   "equippable": true
+  },
+  {
+   "id": "item.taglierina",
+   "name": "Taglierina al plasma",
+   "description": "Una taglierina corta per lamiere; scalda tanto da far sfrigolare la pioggia.",
+   "category": "attrezzo",
+   "weight": 0.9,
+   "stack": 1,
+   "tags": [
+    "metallo",
+    "cantiere",
+    "taglio",
+    "relitto"
+   ],
+   "glyph": "⚒",
+   "color": "#f07a3a",
+   "aspetto": "a short plasma cutter with an orange nozzle",
+   "equippable": true
+  },
+  {
+   "id": "item.cella-energetica",
+   "name": "Cella energetica",
+   "description": "Un cilindro di lega con la spia verde: dentro c'è energia per una settimana di lampade. Nei vicoli vale come moneta.",
+   "category": "materiale",
+   "weight": 0.2,
+   "stack": 20,
+   "tags": [
+    "energia",
+    "cantiere",
+    "moneta",
+    "metallo"
+   ],
+   "glyph": "▮",
+   "color": "#5af07a",
+   "aspetto": "a small cylindrical energy cell with a green light"
+  },
+  {
+   "id": "item.lega-grezza",
+   "name": "Lega grezza",
+   "description": "Un lingotto opaco di lega da fonderia, ancora da lavorare.",
+   "category": "materiale",
+   "weight": 1.0,
+   "stack": 10,
+   "tags": [
+    "metallo",
+    "cantiere",
+    "bottega"
+   ],
+   "glyph": "▬",
+   "color": "#8a909a",
+   "aspetto": "a dull grey alloy ingot"
+  },
+  {
+   "id": "item.filo-superconduttore",
+   "name": "Filo superconduttore",
+   "description": "Una matassa di filo sottile, freddo come la brina.",
+   "category": "materiale",
+   "weight": 0.2,
+   "stack": 10,
+   "tags": [
+    "metallo",
+    "laboratorio",
+    "energia"
+   ],
+   "glyph": "∿",
+   "color": "#c0e8ff",
+   "aspetto": "a coil of thin silver-blue wire"
+  },
+  {
+   "id": "item.polvere-cristallo",
+   "name": "Polvere di cristallo",
+   "description": "Polvere violetta raschiata dagli speroni della Gola; brilla appena alla luce delle lampade.",
+   "category": "materiale",
+   "weight": 0.1,
+   "stack": 20,
+   "tags": [
+    "cristallo-polvere",
+    "gola",
+    "laboratorio"
+   ],
+   "glyph": "∴",
+   "color": "#a07ae8",
+   "aspetto": "a small jar of violet crystal dust"
+  },
+  {
+   "id": "item.metamateriale",
+   "name": "Lastra di metamateriale",
+   "description": "Una lastra sottile che piega la luce attorno ai bordi: i sintetisti ne fanno scudi e lenti.",
+   "category": "materiale",
+   "weight": 0.4,
+   "stack": 10,
+   "tags": [
+    "laboratorio",
+    "metallo",
+    "sintesi"
+   ],
+   "glyph": "▭",
+   "color": "#e8a0f0",
+   "aspetto": "a thin iridescent plate that bends light"
+  },
+  {
+   "id": "item.semi-alieni",
+   "name": "Semi di Serralta",
+   "description": "Una bustina di semi selezionati dai xenobotanici, nati per questa terra.",
+   "category": "materiale",
+   "weight": 0.05,
+   "stack": 20,
+   "tags": [
+    "serra",
+    "erbe"
+   ],
+   "glyph": "·",
+   "color": "#9adf6a",
+   "aspetto": "a small paper pouch of seeds"
+  },
+  {
+   "id": "item.soluzione-nutritiva",
+   "name": "Soluzione nutritiva",
+   "description": "Una tanica di liquido verde per le vasche idroponiche.",
+   "category": "materiale",
+   "weight": 1.0,
+   "stack": 5,
+   "tags": [
+    "serra",
+    "laboratorio"
+   ],
+   "glyph": "▯",
+   "color": "#6adf8a",
+   "aspetto": "a small green jerrycan of nutrient solution"
+  },
+  {
+   "id": "item.foglie-felce",
+   "name": "Foglie di felce",
+   "description": "Foglie arrotolate di felce a spirale, umide e aromatiche.",
+   "category": "materiale",
+   "weight": 0.05,
+   "stack": 20,
+   "tags": [
+    "erbe",
+    "serra",
+    "bosco"
+   ],
+   "glyph": "♣",
+   "color": "#3a9a6a",
+   "aspetto": "a bundle of curled green fern leaves"
+  },
+  {
+   "id": "item.lamiera-antica",
+   "name": "Lamiera antica",
+   "description": "Un pezzo di scafo dal Campo dei Relitti, di una lega che nessuna fonderia sa rifare.",
+   "category": "materiale",
+   "weight": 1.5,
+   "stack": 5,
+   "tags": [
+    "relitto",
+    "metallo",
+    "antico"
+   ],
+   "glyph": "▱",
+   "color": "#8a5a3c",
+   "aspetto": "a curved piece of ancient rusty hull plating"
+  },
+  {
+   "id": "item.plasma-contenuto",
+   "name": "Bottiglia di plasma",
+   "description": "Plasma azzurro chiuso in un vetro magnetico: scotta anche attraverso il guanto.",
+   "category": "materiale",
+   "weight": 0.5,
+   "stack": 5,
+   "tags": [
+    "energia",
+    "cantiere",
+    "fuoco"
+   ],
+   "glyph": "◉",
+   "color": "#5fd3ff",
+   "aspetto": "a magnetic glass bottle with blue plasma inside"
+  },
+  {
+   "id": "item.lampada-fusione",
+   "name": "Lampada a fusione",
+   "description": "Una lampada tascabile con un nucleo che non si scarica mai del tutto.",
+   "category": "luce",
+   "weight": 0.4,
+   "stack": 1,
+   "tags": [
+    "luce",
+    "viaggio",
+    "energia"
+   ],
+   "glyph": "☼",
+   "color": "#9fe8ff",
+   "aspetto": "a pocket lamp with a cyan glowing core",
+   "equippable": true
+  },
+  {
+   "id": "item.impermeabile",
+   "name": "Impermeabile",
+   "description": "Un impermeabile lungo col cappuccio, rattoppato con nastro telato.",
+   "category": "vestiario",
+   "weight": 1.2,
+   "stack": 1,
+   "tags": [
+    "stoffa",
+    "viaggio"
+   ],
+   "glyph": "Ʌ",
+   "color": "#4a5a7a",
+   "aspetto": "a long grey-blue rain coat with a hood",
+   "equippable": true,
+   "slot": "corpo",
+   "bonus": {
+    "difesa": 1,
+    "calore": 2
+   }
+  },
+  {
+   "id": "item.stivali-magnetici",
+   "name": "Stivali magnetici",
+   "description": "Stivali con le suole che si aggrappano alle passerelle bagnate.",
+   "category": "vestiario",
+   "weight": 1.4,
+   "stack": 1,
+   "tags": [
+    "metallo",
+    "viaggio",
+    "cantiere"
+   ],
+   "glyph": "Ʌ",
+   "color": "#5a6070",
+   "aspetto": "heavy boots with magnetic soles",
+   "equippable": true,
+   "slot": "piedi",
+   "bonus": {
+    "velocita": 1
+   }
+  },
+  {
+   "id": "item.casco-visore",
+   "name": "Casco con visore",
+   "description": "Un casco da cantiere col visore ambrato che toglie il riflesso dei neon.",
+   "category": "vestiario",
+   "weight": 0.9,
+   "stack": 1,
+   "tags": [
+    "cantiere",
+    "metallo"
+   ],
+   "glyph": "Ʌ",
+   "color": "#f0b43c",
+   "aspetto": "a work helmet with an amber visor",
+   "equippable": true,
+   "slot": "testa",
+   "bonus": {
+    "difesa": 2
+   }
+  },
+  {
+   "id": "item.storditore",
+   "name": "Storditore",
+   "description": "Un bastoncino che schiocca di scintille: le guardie delle compagnie ne portano due.",
+   "category": "arma",
+   "weight": 0.6,
+   "stack": 1,
+   "tags": [
+    "metallo",
+    "guardia",
+    "energia"
+   ],
+   "glyph": "†",
+   "color": "#f0e05a",
+   "aspetto": "a short stun baton with yellow sparks",
+   "equippable": true,
+   "slot": "arma",
+   "bonus": {
+    "attacco": 2
+   }
+  },
+  {
+   "id": "item.bastone-telescopico",
+   "name": "Bastone telescopico",
+   "description": "Un bastone da cammino che si allunga con uno scatto.",
+   "category": "arma",
+   "weight": 0.8,
+   "stack": 1,
+   "tags": [
+    "viaggio",
+    "metallo"
+   ],
+   "glyph": "†",
+   "color": "#8a9aa8",
+   "aspetto": "a telescopic walking staff",
+   "equippable": true,
+   "slot": "arma",
+   "bonus": {
+    "attacco": 1
+   }
+  },
+  {
+   "id": "item.borsa-rune",
+   "name": "Borsa delle rune",
+   "description": "Una borsetta impermeabile con tante taschine: tiene ordinate centinaia di rune.",
+   "category": "contenitore",
+   "weight": 0.2,
+   "stack": 1,
+   "tags": [
+    "contenitore",
+    "runa"
+   ],
+   "glyph": "◘",
+   "color": "#4a8aa8",
+   "aspetto": "a small waterproof pouch with many pockets",
+   "container": {
+    "size": 12,
+    "accepts": "runa"
+   }
+  },
+  {
+   "id": "item.sacca",
+   "name": "Sacca a tracolla",
+   "description": "Una sacca cerata da corriere: dentro ci sta di tutto, un po' di tutto.",
+   "category": "contenitore",
+   "weight": 0.4,
+   "stack": 1,
+   "tags": [
+    "contenitore",
+    "casa",
+    "viaggio"
+   ],
+   "glyph": "◘",
+   "color": "#3a4a5a",
+   "aspetto": "a waxed courier shoulder bag",
+   "container": {
+    "size": 6
+   }
+  },
+  {
+   "id": "item.cassetta-campioni",
+   "name": "Cassetta dei campioni",
+   "description": "Una cassetta con gli scomparti imbottiti per semi, polveri e frammenti.",
+   "category": "contenitore",
+   "weight": 0.6,
+   "stack": 1,
+   "tags": [
+    "contenitore",
+    "laboratorio",
+    "serra"
+   ],
+   "glyph": "◘",
+   "color": "#d8dee6",
+   "aspetto": "a white sample case with padded compartments",
+   "container": {
+    "size": 8
+   }
+  },
+  {
+   "id": "item.cristallo-magico",
+   "name": "Cristallo di risonanza",
+   "description": "Un cristallo che vibra di luce fredda. Assorbito, ridà forza interiore (mana); gli incantesimi di tre o più rune ne consumano uno.",
+   "category": "magia",
+   "weight": 0.1,
+   "stack": 10,
+   "tags": [
+    "magia",
+    "cristallo"
+   ],
+   "glyph": "✦",
+   "color": "#9fe8ff",
+   "aspetto": "a small humming cyan crystal shard",
+   "effects": {
+    "mana": 40
+   }
+  },
+  {
+   "id": "item.gettone-cabina",
+   "name": "Gettone della cabina",
+   "description": "Il gettone d'ottone che fa salire sulla cabina del cordone, fino all'Anello.",
+   "category": "varie",
+   "weight": 0.02,
+   "stack": 20,
+   "tags": [
+    "moneta",
+    "viaggio",
+    "anello"
+   ],
+   "glyph": "●",
+   "color": "#d8b048",
+   "aspetto": "a brass token with a ring engraved"
+  },
+  {
+   "id": "item.mappa-rotte",
+   "name": "Carta delle rotte",
+   "description": "Una carta stellare della Gilda, con le rotte per gli avamposti segnate a mano.",
+   "category": "varie",
+   "weight": 0.1,
+   "stack": 1,
+   "tags": [
+    "gilda",
+    "navigazione",
+    "viaggio"
+   ],
+   "glyph": "▤",
+   "color": "#5a7ad8",
+   "aspetto": "a folded star chart with hand-drawn routes"
+  },
+  {
+   "id": "item.diario-bordo",
+   "name": "Diario di bordo",
+   "description": "Un quaderno impermeabile pieno di annotazioni di viaggio e conti di celle.",
+   "category": "varie",
+   "weight": 0.3,
+   "stack": 1,
+   "tags": [
+    "gilda",
+    "navigazione",
+    "lettura"
+   ],
+   "glyph": "▤",
+   "color": "#8a6a4a",
+   "aspetto": "a worn waterproof notebook"
+  },
+  {
+   "id": "item.medaglione-gilda",
+   "name": "Medaglione della gilda",
+   "description": "Un medaglione di lega con l'impronta di una gilda: apre porte e bocche.",
+   "category": "varie",
+   "weight": 0.1,
+   "stack": 1,
+   "tags": [
+    "gilda",
+    "metallo"
+   ],
+   "glyph": "●",
+   "color": "#c0c8d8",
+   "aspetto": "a round alloy guild medallion"
+  },
+  {
+   "id": "item.frammento-relitto",
+   "name": "Frammento di relitto",
+   "description": "Un frammento di scafo antico con incisioni geometriche che nessuno sa leggere.",
+   "category": "varie",
+   "weight": 0.3,
+   "stack": 5,
+   "tags": [
+    "relitto",
+    "antico",
+    "lettura"
+   ],
+   "glyph": "◇",
+   "color": "#a0785a",
+   "aspetto": "a small fragment of ancient hull with geometric etchings"
+  }
+ ],
+ "recipes": [
+  {
+   "id": "ricetta.cella",
+   "name": "Cella energetica",
+   "inputs": [
+    {
+     "item": "item.lega-grezza",
+     "count": 1
+    },
+    {
+     "item": "item.plasma-contenuto",
+     "count": 1
+    }
+   ],
+   "tools": [
+    "item.chiave-dinamometrica"
+   ],
+   "output": {
+    "item": "item.cella-energetica",
+    "count": 2
+   }
+  },
+  {
+   "id": "ricetta.filo",
+   "name": "Filo superconduttore",
+   "inputs": [
+    {
+     "item": "item.lega-grezza",
+     "count": 2
+    }
+   ],
+   "tools": [
+    "item.saldatore"
+   ],
+   "output": {
+    "item": "item.filo-superconduttore",
+    "count": 2
+   }
+  },
+  {
+   "id": "ricetta.metamateriale",
+   "name": "Lastra di metamateriale",
+   "inputs": [
+    {
+     "item": "item.polvere-cristallo",
+     "count": 2
+    },
+    {
+     "item": "item.filo-superconduttore",
+     "count": 1
+    }
+   ],
+   "tools": [
+    "item.saldatore"
+   ],
+   "output": {
+    "item": "item.metamateriale",
+    "count": 1
+   }
+  },
+  {
+   "id": "ricetta.cristallo",
+   "name": "Cristallo di risonanza",
+   "inputs": [
+    {
+     "item": "item.metamateriale",
+     "count": 1
+    },
+    {
+     "item": "item.cella-energetica",
+     "count": 1
+    }
+   ],
+   "output": {
+    "item": "item.cristallo-magico",
+    "count": 1
+   }
+  },
+  {
+   "id": "ricetta.soluzione",
+   "name": "Soluzione nutritiva",
+   "inputs": [
+    {
+     "item": "item.acqua-filtrata",
+     "count": 1
+    },
+    {
+     "item": "item.foglie-felce",
+     "count": 2
+    }
+   ],
+   "output": {
+    "item": "item.soluzione-nutritiva",
+    "count": 1
+   }
+  },
+  {
+   "id": "ricetta.te",
+   "name": "Tè di serra",
+   "inputs": [
+    {
+     "item": "item.foglie-felce",
+     "count": 2
+    },
+    {
+     "item": "item.acqua-filtrata",
+     "count": 1
+    }
+   ],
+   "output": {
+    "item": "item.te-serra",
+    "count": 2
+   }
+  },
+  {
+   "id": "ricetta.razione",
+   "name": "Razione di serra",
+   "inputs": [
+    {
+     "item": "item.pane-alghe",
+     "count": 1
+    },
+    {
+     "item": "item.spiedino-alghe",
+     "count": 1
+    }
+   ],
+   "output": {
+    "item": "item.razione-serra",
+    "count": 2
+   }
+  },
+  {
+   "id": "ricetta.siero",
+   "name": "Siero criogenico",
+   "inputs": [
+    {
+     "item": "item.polvere-cristallo",
+     "count": 1
+    },
+    {
+     "item": "item.acqua-filtrata",
+     "count": 1
+    }
+   ],
+   "tools": [
+    "item.kit-medico"
+   ],
+   "output": {
+    "item": "item.siero-criogenico",
+    "count": 1
+   }
+  },
+  {
+   "id": "ricetta.cerotto",
+   "name": "Cerotti al gel",
+   "inputs": [
+    {
+     "item": "item.soluzione-nutritiva",
+     "count": 1
+    }
+   ],
+   "tools": [
+    "item.kit-medico"
+   ],
+   "output": {
+    "item": "item.cerotto-gel",
+    "count": 3
+   }
+  },
+  {
+   "id": "ricetta.lega",
+   "name": "Lega dai relitti",
+   "inputs": [
+    {
+     "item": "item.lamiera-antica",
+     "count": 1
+    }
+   ],
+   "tools": [
+    "item.taglierina"
+   ],
+   "output": {
+    "item": "item.lega-grezza",
+    "count": 2
+   }
+  }
+ ],
+ "loot": {
+  "comune": {
+   "rolls": [
+    1,
+    3
+   ],
+   "entries": [
+    {
+     "tag": "cibo",
+     "weight": 4
+    },
+    {
+     "tag": "materiale",
+     "weight": 3
+    },
+    {
+     "tag": "varie",
+     "weight": 2
+    },
+    {
+     "tag": "luce",
+     "weight": 1
+    },
+    {
+     "tag": "medicina",
+     "weight": 1
+    }
+   ]
+  },
+  "cucina": {
+   "rolls": [
+    2,
+    4
+   ],
+   "entries": [
+    {
+     "tag": "cucina",
+     "weight": 6
+    },
+    {
+     "tag": "bevanda",
+     "weight": 3
+    },
+    {
+     "tag": "erbe",
+     "weight": 2
+    }
+   ]
+  },
+  "cassa": {
+   "rolls": [
+    1,
+    4
+   ],
+   "entries": [
+    {
+     "tag": "materiale",
+     "weight": 3
+    },
+    {
+     "tag": "vestiario",
+     "weight": 2
+    },
+    {
+     "tag": "attrezzo",
+     "weight": 2
+    },
+    {
+     "tag": "varie",
+     "weight": 2
+    },
+    {
+     "item": "item.cella-energetica",
+     "weight": 2,
+     "min": 1,
+     "max": 4
+    }
+   ]
+  },
+  "bottega": {
+   "rolls": [
+    2,
+    5
+   ],
+   "entries": [
+    {
+     "tag": "bottega",
+     "weight": 5
+    },
+    {
+     "tag": "attrezzo",
+     "weight": 2
+    },
+    {
+     "tag": "metallo",
+     "weight": 2
+    }
+   ]
+  },
+  "serra": {
+   "rolls": [
+    1,
+    4
+   ],
+   "entries": [
+    {
+     "tag": "serra",
+     "weight": 6
+    },
+    {
+     "tag": "erbe",
+     "weight": 3
+    },
+    {
+     "item": "item.semi-alieni",
+     "weight": 2,
+     "min": 1,
+     "max": 5
+    }
+   ]
+  },
+  "laboratorio": {
+   "rolls": [
+    1,
+    3
+   ],
+   "entries": [
+    {
+     "tag": "laboratorio",
+     "weight": 5
+    },
+    {
+     "tag": "medicina",
+     "weight": 3
+    },
+    {
+     "item": "item.cristallo-magico",
+     "weight": 1
+    }
+   ]
+  },
+  "relitto": {
+   "rolls": [
+    1,
+    3
+   ],
+   "entries": [
+    {
+     "tag": "relitto",
+     "weight": 5
+    },
+    {
+     "item": "item.frammento-relitto",
+     "weight": 2
+    },
+    {
+     "item": "item.lamiera-antica",
+     "weight": 2
+    }
+   ]
+  },
+  "cantiere": {
+   "rolls": [
+    1,
+    4
+   ],
+   "entries": [
+    {
+     "tag": "cantiere",
+     "weight": 5
+    },
+    {
+     "tag": "energia",
+     "weight": 3
+    },
+    {
+     "item": "item.cella-energetica",
+     "weight": 2,
+     "min": 1,
+     "max": 3
+    }
+   ]
+  },
+  "armadietto": {
+   "rolls": [
+    1,
+    3
+   ],
+   "entries": [
+    {
+     "tag": "vestiario",
+     "weight": 3
+    },
+    {
+     "tag": "viaggio",
+     "weight": 3
+    },
+    {
+     "tag": "medicina",
+     "weight": 1
+    },
+    {
+     "item": "item.gettone-cabina",
+     "weight": 1
+    }
+   ]
+  },
+  "terreno": {
+   "rolls": [
+    0,
+    2
+   ],
+   "entries": [
+    {
+     "tag": "bosco",
+     "weight": 3
+    },
+    {
+     "tag": "frutta",
+     "weight": 2
+    },
+    {
+     "item": "item.cella-energetica",
+     "weight": 1
+    },
+    {
+     "tag": "materiale",
+     "weight": 2
+    }
+   ]
+  }
+ }
+}

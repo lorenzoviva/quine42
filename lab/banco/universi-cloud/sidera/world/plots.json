@@ -1,0 +1,394 @@
+{
+  "trame": [
+    {
+      "id": "trama-nonna",
+      "titolo": "La Nonna non si spegne",
+      "mistero": "La compagnia dell'energia vuole spegnere il reattore più vecchio di Sidera, la Nonna; Ugo Ranieri ha fatto manomettere una valvola per far sembrare Ottone un incapace.",
+      "coinvolti": [
+        "Ottone Varga",
+        "Greta Varga",
+        "Ugo Ranieri"
+      ],
+      "tappe": [
+        {
+          "giorno": 0,
+          "momento": "mattina",
+          "chi": "Ottone Varga",
+          "dove": "Cantiere della Fusione",
+          "cosa": "trova la valvola tre della Nonna allentata",
+          "battuta": "Questa valvola non si è svitata da sola.",
+          "indizio": "la vite ha segni di una chiave nuova, non della sua"
+        },
+        {
+          "giorno": 1,
+          "momento": "giorno",
+          "chi": "Ugo Ranieri",
+          "dove": "Cantiere della Fusione",
+          "cosa": "propone alla compagnia di spegnere la Nonna",
+          "battuta": "I numeri parlano chiaro: è vecchia."
+        },
+        {
+          "giorno": 2,
+          "momento": "sera",
+          "chi": "Greta Varga",
+          "dove": "Vicolo delle Cuoche",
+          "cosa": "confida a Dario di aver visto Ugo vicino alla valvola",
+          "battuta": "Non so se dirlo a mio padre.",
+          "indizio": "Ugo aveva una chiave dinamometrica nuova di zecca"
+        }
+      ],
+      "missione": {
+        "da": "Ottone Varga",
+        "testo": "Portami una chiave dinamometrica: con la mia non arrivo alla valvola tre, e devo capire chi l'ha toccata.",
+        "obiettivo": {
+          "tipo": "porta",
+          "oggetto": "Chiave dinamometrica",
+          "a": "Ottone Varga"
+        },
+        "ricompensa": "Cella energetica",
+        "stato": "offerta"
+      },
+      "inizio": 0,
+      "stato": "attiva"
+    },
+    {
+      "id": "trama-carico",
+      "titolo": "Il carico di Orlo Nero",
+      "mistero": "Selene Moro ha riportato da Orlo Nero una cassa che non risulta sui registri: dentro ci sono semi di una pianta che cresce nel ghiaccio, e Iris Calandra potrebbe salvare le cupole con quei semi.",
+      "coinvolti": [
+        "Selene Moro",
+        "Kira Novak",
+        "Iris Calandra"
+      ],
+      "tappe": [
+        {
+          "giorno": 0,
+          "momento": "notte",
+          "chi": "Selene Moro",
+          "dove": "Spazioporto di Ponente",
+          "cosa": "sposta la cassa nascosta nell'hangar della Gilda",
+          "battuta": "Nessuno deve aprirla prima di domani."
+        },
+        {
+          "giorno": 1,
+          "momento": "mattina",
+          "chi": "Kira Novak",
+          "dove": "Spazioporto di Ponente",
+          "cosa": "nota che la stiva della navetta pesa più del dichiarato",
+          "battuta": "Le stelle non mentono, i registri sì.",
+          "indizio": "il peso in più è quello di una cassa di semi"
+        },
+        {
+          "giorno": 3,
+          "momento": "giorno",
+          "chi": "Iris Calandra",
+          "dove": "Cupole di Serralta",
+          "cosa": "riceve un biglietto senza firma: 'semi del ghiaccio, al tramonto'"
+        }
+      ],
+      "missione": {
+        "da": "Selene Moro",
+        "testo": "Vai alle Cupole di Serralta e assicurati che Iris Calandra sia sola al tramonto: ho una cosa per lei.",
+        "obiettivo": {
+          "tipo": "vai",
+          "luogo": "Cupole di Serralta"
+        },
+        "ricompensa": "Carta delle rotte",
+        "stato": "offerta"
+      },
+      "inizio": 0,
+      "stato": "attiva"
+    },
+    {
+      "id": "trama-scafi",
+      "titolo": "Più vecchi della Traversata",
+      "mistero": "Gli scafi sepolti nel Campo dei Relitti sono davvero più antichi delle navi della Traversata; la compagnia vuole chiudere gli scavi per vendere la lega antica, ed Elio vende lamiere di nascosto.",
+      "coinvolti": [
+        "Lia Corvi",
+        "Elio Marchetti",
+        "Nilo Sardi"
+      ],
+      "tappe": [
+        {
+          "giorno": 0,
+          "momento": "giorno",
+          "chi": "Lia Corvi",
+          "dove": "Campo dei Relitti",
+          "cosa": "scansiona un frammento con incisioni geometriche",
+          "battuta": "Questa lega è più vecchia di noi tutti."
+        },
+        {
+          "giorno": 2,
+          "momento": "sera",
+          "chi": "Elio Marchetti",
+          "dove": "Mercato sotto i Piloni",
+          "cosa": "vende una lamiera antica a Nilo Sardi",
+          "battuta": "Solo questa, poi smetto.",
+          "indizio": "le lamiere vendute al mercato hanno lo stesso segno dei frammenti di Lia"
+        },
+        {
+          "giorno": 4,
+          "momento": "mattina",
+          "chi": "Lia Corvi",
+          "dove": "Campo dei Relitti",
+          "cosa": "scopre che manca una lamiera catalogata"
+        }
+      ],
+      "missione": {
+        "da": "Lia Corvi",
+        "testo": "Portami un frammento di relitto dalla sabbia: lo scanner deve vederne almeno due per dire quanti anni hanno.",
+        "obiettivo": {
+          "tipo": "porta",
+          "oggetto": "Frammento di relitto",
+          "a": "Lia Corvi"
+        },
+        "ricompensa": "Lastra di metamateriale",
+        "stato": "offerta"
+      },
+      "inizio": 0,
+      "stato": "attiva"
+    },
+    {
+      "id": "trama-celle",
+      "titolo": "Celle sotto il banco",
+      "mistero": "Nilo Sardi vende celle energetiche fuori controllo per far mangiare il Vicolo; Vera Montani lo bracca, ma suo fratello è morto di sete quando l'acqua costava troppo e in fondo lo capisce.",
+      "coinvolti": [
+        "Nilo Sardi",
+        "Vera Montani",
+        "Mara Lupi"
+      ],
+      "tappe": [
+        {
+          "giorno": 0,
+          "momento": "giorno",
+          "chi": "Vera Montani",
+          "dove": "Mercato sotto i Piloni",
+          "cosa": "controlla le bancarelle in cerca delle celle di Nilo",
+          "battuta": "Prima o poi sbagli, Sardi."
+        },
+        {
+          "giorno": 1,
+          "momento": "sera",
+          "chi": "Mara Lupi",
+          "dove": "Vicolo delle Cuoche",
+          "cosa": "paga la cena dei turni di notte con le celle di Nilo",
+          "battuta": "Qui si mangia, il resto si vedrà.",
+          "indizio": "le celle di Mara hanno la spia verde dei sintetizzatori di Nilo"
+        },
+        {
+          "giorno": 3,
+          "momento": "notte",
+          "chi": "Vera Montani",
+          "dove": "Vicolo delle Cuoche",
+          "cosa": "vede Mara dare da mangiare a chi non ha niente, e non dice nulla"
+        }
+      ],
+      "missione": {
+        "da": "Mara Lupi",
+        "testo": "Parla con Vera Montani al Quartiere delle Torri e dille che al Vicolo c'è un piatto anche per lei, quando smonta.",
+        "obiettivo": {
+          "tipo": "parla",
+          "a": "Vera Montani"
+        },
+        "ricompensa": "Zuppa di funghi di vasca",
+        "stato": "offerta"
+      },
+      "inizio": 0,
+      "stato": "attiva"
+    },
+    {
+      "id": "trama-dormiente",
+      "titolo": "Il dormiente più antico",
+      "mistero": "Il dormiente più vecchio delle capsule di Ombralta ha nel registro lo stesso cognome di Kira Novak: è suo fratello, partito per la quarta rotta e tornato congelato prima della Grande Mareggiata.",
+      "coinvolti": [
+        "Ada Ferraris",
+        "Bianca Soldani",
+        "Kira Novak"
+      ],
+      "tappe": [
+        {
+          "giorno": 0,
+          "momento": "sera",
+          "chi": "Ada Ferraris",
+          "dove": "Laboratori di Ombralta",
+          "cosa": "parla al dormiente più antico come ogni sera",
+          "battuta": "Stasera piove ancora. Te lo dico perché tu lo sappia."
+        },
+        {
+          "giorno": 2,
+          "momento": "notte",
+          "chi": "Bianca Soldani",
+          "dove": "Laboratori di Ombralta",
+          "cosa": "legge per sbaglio il registro della capsula più vecchia",
+          "battuta": "C'è un cognome qui sotto la brina.",
+          "indizio": "sul registro c'è scritto Novak"
+        },
+        {
+          "giorno": 5,
+          "momento": "mattina",
+          "chi": "Kira Novak",
+          "dove": "Spazioporto di Ponente",
+          "cosa": "chiede ai cadetti se qualcuno sa leggere i vecchi registri dei laboratori"
+        }
+      ],
+      "missione": {
+        "da": "Ada Ferraris",
+        "testo": "Portami un siero criogenico: la capsula più vecchia sta perdendo freddo e il mio è finito.",
+        "obiettivo": {
+          "tipo": "porta",
+          "oggetto": "Siero criogenico",
+          "a": "Ada Ferraris"
+        },
+        "ricompensa": "Kit medico",
+        "stato": "offerta"
+      },
+      "inizio": 0,
+      "stato": "attiva"
+    },
+    {
+      "id": "trama-fari",
+      "titolo": "I fari che tacciono",
+      "mistero": "I fari di telemetria della Gola dei Cristalli smettono di rispondere quando i cristalli più grandi vibrano col freddo: Luca dice che cantano, Irene cerca una spiegazione, Teo usa i silenzi per far passare le rune di contrabbando.",
+      "coinvolti": [
+        "Irene Galli",
+        "Luca Ferri",
+        "Teo Sardi"
+      ],
+      "tappe": [
+        {
+          "giorno": 0,
+          "momento": "notte",
+          "chi": "Irene Galli",
+          "dove": "Gola dei Cristalli",
+          "cosa": "annota che il faro est tace per un'ora",
+          "battuta": "Un'ora di silenzio. Di nuovo."
+        },
+        {
+          "giorno": 1,
+          "momento": "notte",
+          "chi": "Luca Ferri",
+          "dove": "Gola dei Cristalli",
+          "cosa": "sente i cristalli suonare mentre il faro tace",
+          "battuta": "Te l'avevo detto che cantano.",
+          "indizio": "il faro tace sempre quando la brina si posa sui cristalli"
+        },
+        {
+          "giorno": 2,
+          "momento": "notte",
+          "chi": "Teo Sardi",
+          "dove": "Gola dei Cristalli",
+          "cosa": "attraversa la Gola con una borsa piena di rune durante il silenzio"
+        }
+      ],
+      "missione": {
+        "da": "Irene Galli",
+        "testo": "Vai alla Gola dei Cristalli di notte e guarda chi passa quando il faro est tace.",
+        "obiettivo": {
+          "tipo": "vai",
+          "luogo": "Gola dei Cristalli"
+        },
+        "ricompensa": "Lampada a fusione",
+        "stato": "offerta"
+      },
+      "inizio": 0,
+      "stato": "attiva"
+    },
+    {
+      "id": "trama-debito",
+      "titolo": "Trenta celle",
+      "mistero": "Ruben Kessler deve trenta celle a Teo Sardi e per saldare porta in navetta pacchi senza domande; Selene teme che la Gilda lo scopra e lo tolga dai voli.",
+      "coinvolti": [
+        "Ruben Kessler",
+        "Teo Sardi",
+        "Selene Moro"
+      ],
+      "tappe": [
+        {
+          "giorno": 0,
+          "momento": "sera",
+          "chi": "Ruben Kessler",
+          "dove": "Piazza dei Viadotti",
+          "cosa": "perde ancora ai dadi sotto i viadotti",
+          "battuta": "La prossima è quella buona."
+        },
+        {
+          "giorno": 1,
+          "momento": "giorno",
+          "chi": "Teo Sardi",
+          "dove": "Spazioporto di Ponente",
+          "cosa": "consegna a Ruben un pacco da portare alla Base dell'Ascensore",
+          "battuta": "Non aprirlo, e siamo pari a venti.",
+          "indizio": "il pacco ha lo stesso nastro delle borse di rune di Teo"
+        },
+        {
+          "giorno": 3,
+          "momento": "sera",
+          "chi": "Selene Moro",
+          "dove": "Spazioporto di Ponente",
+          "cosa": "trova il pacco nella navetta e affronta Ruben"
+        }
+      ],
+      "missione": {
+        "da": "Ruben Kessler",
+        "testo": "Porta dieci celle... no, anche solo una cella energetica a Teo Sardi, a nome mio: è un inizio.",
+        "obiettivo": {
+          "tipo": "porta",
+          "oggetto": "Cella energetica",
+          "a": "Teo Sardi"
+        },
+        "ricompensa": "Gettone della cabina",
+        "stato": "offerta"
+      },
+      "inizio": 0,
+      "stato": "attiva"
+    },
+    {
+      "id": "trama-corvo",
+      "titolo": "Il nascondiglio di Pennanera",
+      "mistero": "Il corvo di Pino Lupi ha un nascondiglio sotto un pilone dei viadotti dove accumula cose lucide: tra queste c'è una runa vera che Ilde Ferraris cerca da anni.",
+      "coinvolti": [
+        "Pino Lupi",
+        "Ilde Ferraris",
+        "Pennanera"
+      ],
+      "tappe": [
+        {
+          "giorno": 0,
+          "momento": "mattina",
+          "chi": "Pennanera",
+          "dove": "Piazza dei Viadotti",
+          "cosa": "ruba un gettone d'ottone dal banchetto di Ilde"
+        },
+        {
+          "giorno": 1,
+          "momento": "giorno",
+          "chi": "Ilde Ferraris",
+          "dove": "Piazza dei Viadotti",
+          "cosa": "racconta ai bambini di una runa vera vista nel becco di un corvo",
+          "battuta": "Una lastra con la luce, ragazzi. Vera."
+        },
+        {
+          "giorno": 2,
+          "momento": "sera",
+          "chi": "Pino Lupi",
+          "dove": "Piazza dei Viadotti",
+          "cosa": "segue Pennanera fino al pilone del nascondiglio",
+          "battuta": "Dove le porti tutte, eh?",
+          "indizio": "il nascondiglio è sotto il pilone più vicino alla fontana"
+        }
+      ],
+      "missione": {
+        "da": "Ilde Ferraris",
+        "testo": "Parla con Pino Lupi, il ragazzo del corvo: chiedigli dove porta le cose lucide il suo uccellaccio.",
+        "obiettivo": {
+          "tipo": "parla",
+          "a": "Pino Lupi"
+        },
+        "ricompensa": "Cristallo di risonanza",
+        "stato": "offerta"
+      },
+      "inizio": 0,
+      "stato": "attiva"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "id": "obj.armadietto",
+  "name": "Armadietto di lega",
+  "kind": "entity",
+  "version": "1.0.0",
+  "description": "Un armadietto stretto di lega ammaccata, col lucchetto rotto da anni: dentro i turni lasciano impermeabili, borracce e qualche cella.",
+  "context": "negli spogliatoi, sotto le scale, nei laboratori, nelle case dei vicoli",
+  "appearance": { "model": "mobile", "glyph": "▥", "color": "#7a8494", "aspetto": "un armadietto metallico grigio, stretto e alto, con le feritoie in alto" },
+  "physics": { "solid": true, "radius": 0.42 },
+  "tags": ["contenitore", "metallo"],
+  "container": { "size": 8, "loot": "armadietto" },
+  "spawn": { "tiles": ["f", "l"], "chance": 0.3, "max": 1 }
+}

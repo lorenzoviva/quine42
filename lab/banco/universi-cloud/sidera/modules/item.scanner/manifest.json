@@ -1,0 +1,14 @@
+{
+  "id": "item.scanner",
+  "name": "Scanner portatile",
+  "kind": "item",
+  "version": "1.0.0",
+  "description": "Uno scanner da campo degli astro-archeologi: impugnalo e premi F davanti a qualcosa per leggerne la lega, l'età e la temperatura; usato da solo misura il freddo e il peso dell'aria attorno.",
+  "context": "negli scavi del Campo dei Relitti, nei laboratori, nelle borse dei corrieri",
+  "logic": "logic.lua",
+  "appearance": { "model": "oggetto", "glyph": "⌁", "color": "#5af0c8", "aspetto": "uno scanner portatile con un piccolo schermo verde e un'antenna corta" },
+  "physics": { "solid": false, "radius": 0.2 },
+  "item": { "stackable": false, "maxStack": 1, "weight": 0.4, "equippable": true, "controls": { "azione": "legge lega, età e temperatura di ciò che hai davanti" } },
+  "tags": ["laboratorio", "relitto", "viaggio"],
+  "spawn": { "tiles": ["s", "l"], "chance": 0.04, "max": 1 }
+}

@@ -1,0 +1,76 @@
+<!-- Camera di equilibrio di Sidera: un portale di metallo bagnato con due battenti che scorrono, strisce ciano dentro lo stipite e la
+     luce magenta d'allarme sull'architrave. Quanto sono aperti i battenti, e cosa sta sopra e ai lati, lo decide il seme. Cantiere 4C, a mano (Claude Code). -->
+<sequence values="BDdWCKAOQTUSPMX" size="20 20 60" symmetry="()" name="Camera di equilibrio">
+  <color symbol="D" value="1b1f28" name="basamento"/>
+  <color symbol="d" value="3a4251" name="metallo bagnato"/>
+  <color symbol="W" value="6b788d" name="stipiti"/>
+  <color symbol="C" value="36e7ff" glow="True" name="strisce ciano"/>
+  <color symbol="K" value="ff3db3" glow="True" name="allarme magenta"/>
+  <color symbol="A" value="ffb12d" glow="True" name="spie ambra"/>
+  <color symbol="O" value="9a8fb8" name="battenti"/>
+  <color symbol="Q" hidden="True" name="vano della porta"/>
+  <color symbol="T" hidden="True" name="battente sinistro che chiude"/>
+  <color symbol="U" hidden="True" name="battente destro che chiude"/>
+  <color symbol="S" hidden="True" name="battente fermo"/>
+  <color symbol="P" hidden="True" name="parte possibile"/>
+  <color symbol="M" hidden="True" name="segno di una parte"/>
+  <color symbol="X" value="4f596b" name="parte aggiunta"/>
+
+  <!-- Basamento, stipiti, architrave. -->
+  <box at="10 10 0" size="19 9 1" color="D"/>
+  <box at="4.5 10 1" size="4 7 33" color="W"/>
+  <box at="15.5 10 1" size="4 7 33" color="W"/>
+  <box at="10 10 30" size="16 7 8" color="W"/>
+  <box at="10 10 30" size="16 9 1" color="d"/>
+  <box at="10 10 37" size="16 9 1" color="d"/>
+  <box at="6 10 1" size="1 3 29" color="C"/>
+  <box at="14 10 1" size="1 3 29" color="C"/>
+  <box at="10 13 33" size="5 1 2" color="K"/>
+  <box at="10 7 33" size="5 1 2" color="K"/>
+  <box at="4.5 13 20" size="1 1 1" color="A"/>
+  <box at="15.5 13 20" size="1 1 1" color="A"/>
+
+  <!-- I battenti: ognuno scorre dal suo stipite verso il centro, fin dove arriva oggi. -->
+  <box at="10 10 1" size="7 3 29" color="Q"/>
+  <box at="7 10 1" size="1 1 1" color="T"/>
+  <box at="13 10 1" size="1 1 1" color="U"/>
+  <one>
+    <rule in="TQ" out="OT" p="2"/>
+    <rule in="QU" out="UO" p="2"/>
+    <rule in="T" out="S"/>
+    <rule in="U" out="S"/>
+  </one>
+  <all in="S" out="O"/>
+  <all>
+    <rule in="Q/O" out="O/O"/>
+    <rule in="O/Q" out="O/O"/>
+  </all>
+  <all in="Q O" out="O O"/>
+  <all in="Q" out="B"/>
+
+  <!-- Le parti possibili: serbatoi ai lati, antenne e cresta sopra, un condotto dietro, il gradino davanti. -->
+  <cylinder at="1 7 0" size="3 3 15" color="P" on="B"/>
+  <cylinder at="18 14 0" size="3 3 19" color="P" on="B"/>
+  <line at="4 10 38" to="4 10 52" r="0" color="P" on="B"/>
+  <line at="16 10 38" to="16 10 45" r="0" color="P" on="B"/>
+  <ellipsoid at="10 10 37" size="7 5 7" color="P" on="B"/>
+  <line at="5 15 1" to="5 15 36" r="0.5" color="P" on="B"/>
+  <box at="10 4 0" size="9 3 1" color="P" on="B"/>
+  <box at="1 7 0" size="1 1 1" color="M"/>
+  <box at="18 14 0" size="1 1 1" color="M"/>
+  <box at="4 10 38" size="1 1 1" color="M"/>
+  <box at="16 10 38" size="1 1 1" color="M"/>
+  <box at="10 10 38" size="1 1 1" color="M"/>
+  <box at="5 15 1" size="1 1 1" color="M"/>
+  <box at="10 4 0" size="1 1 1" color="M"/>
+  <prl steps="1" in="M" out="X" p="0.5"/>
+  <all in="XP" out="XX" symmetry="(xyz)"/>
+  <all>
+    <rule in="P" out="B"/>
+    <rule in="M" out="B"/>
+  </all>
+  <prl steps="1" in="B X" out="K X" p="0.15"/>
+  <convolution neighborhood="Moore" steps="1">
+    <rule in="W" out="B" values="B" sum="0"/>
+  </convolution>
+</sequence>

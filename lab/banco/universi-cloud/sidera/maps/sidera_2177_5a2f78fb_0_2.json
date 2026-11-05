@@ -1,0 +1,31 @@
+{
+ "plan": {
+  "place": {
+   "name": "Quartiere delle Torri",
+   "description": "I basamenti delle torri di vetro delle compagnie, cortili pensili e portoni sorvegliati dalle guardie dell'acqua."
+  },
+  "layout": "quartiere_torri",
+  "objects": [
+   {
+    "module": "npc.colono",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.camera-equilibrio",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.armadietto",
+    "where": "dentro"
+   }
+  ],
+  "ground": [
+   "Borraccia d'acqua filtrata"
+  ],
+  "fresh": [],
+  "runes": [
+   "spin"
+  ],
+  "strutture": []
+ }
+}

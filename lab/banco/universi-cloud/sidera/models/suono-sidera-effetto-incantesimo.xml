@@ -1,0 +1,30 @@
+<!-- Un incantesimo pronunciato su Sidera: un arpeggio che sale veloce sopra una nota tenuta, e in cima un lampo di piatti. -->
+<sequence name="Incantesimo" values="BNSAHMT" size="14 2 12" symmetry="()">
+  <sound bpm="220" scale="dorian" root="55" swing="0" cutoff="8500" space="0.55">
+    <track y="0" instrument="lead" volume="0.85"/>
+    <track y="1" instrument="pad" volume="0.75"/>
+  </sound>
+  <color symbol="N" value="38bdf8" name="Nota" glow="True"/>
+  <color symbol="S" value="0284c7" name="Tenuta" alpha="0.85"/>
+  <color symbol="A" value="f43f5e" name="Accento" glow="True"/>
+  <color symbol="H" value="fde047" name="Piatto" alpha="0.85"/>
+  <color symbol="M" value="10b981" name="Testa" hidden="True"/>
+  <color symbol="T" value="ec4899" name="Partenza" hidden="True"/>
+
+  <line at="0 0 0" to="0 0 3" r="0" color="T"/>
+  <one in="T" out="M" steps="1"/>
+  <all in="T" out="B"/>
+  <!-- La salita: passi di uno o due gradi, a scelta del seme. -->
+  <one steps="5">
+    <rule in="BBB BBB MBB" out="BBM BBB NBB" p="2"/>
+    <rule in="BB MB" out="BM NB"/>
+  </one>
+  <all in="M" out="A"/>
+  <all in="ABBBBB" out="ASSSSS"/>
+  <!-- Sotto, la nota tenuta; in cima, i piatti. -->
+  <line at="0 1 1" to="0 1 1" r="0" color="N"/>
+  <line at="0 1 3" to="0 1 3" r="0" color="N"/>
+  <all in="NBBBBBBBBB" out="NSSSSSSSSS"/>
+  <line at="11 1 5" to="11 1 5" r="0" color="H"/>
+  <line at="12 1 4" to="12 1 4" r="0" color="H"/>
+</sequence>

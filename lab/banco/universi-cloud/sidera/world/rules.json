@@ -1,0 +1,47 @@
+{
+  "regole": [
+    {
+      "chiave": "bere l'acqua del canale",
+      "testo": "Bere l'acqua dei canali senza filtrarla",
+      "possibile": true,
+      "racconto": "L'acqua del canale sa di ruggine e pioggia: disseta, ma lo stomaco protesta.",
+      "effetti": [
+        "sete +15",
+        "salute -5"
+      ]
+    },
+    {
+      "chiave": "arrampicarsi sulle paratie",
+      "testo": "Arrampicarsi sulle paratie bagnate",
+      "possibile": false,
+      "racconto": "Le paratie sono lisce e grondanti: le mani scivolano e si torna giù."
+    },
+    {
+      "chiave": "toccare il plasma",
+      "testo": "Toccare il plasma di una canaletta",
+      "possibile": false,
+      "racconto": "Il calore ti respinge prima ancora di avvicinarti: nessuno tocca il plasma e lo racconta."
+    },
+    {
+      "chiave": "pagare con le celle",
+      "testo": "Pagare con celle energetiche",
+      "possibile": true,
+      "racconto": "Nei vicoli una cella carica vale un pasto caldo; al mercato si tratta."
+    },
+    {
+      "chiave": "salire sulla cabina",
+      "testo": "Salire sulla cabina del cordone senza gettone",
+      "possibile": false,
+      "racconto": "Il guardiano della camera di equilibrio non fa passare nessuno senza gettone d'ottone."
+    },
+    {
+      "chiave": "raccogliere frutti di vetro",
+      "testo": "Raccogliere i frutti dei boschetti di vetro",
+      "possibile": true,
+      "racconto": "I frutti ambrati si staccano con un tintinnio: sono dolci e freddi.",
+      "effetti": [
+        "crea Frutto di vetro"
+      ]
+    }
+  ]
+}

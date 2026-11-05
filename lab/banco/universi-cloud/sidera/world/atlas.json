@@ -1,0 +1,114 @@
+{
+  "regioni": [
+    {
+      "id": "cupole",
+      "nome": "Cupole di Serralta",
+      "descrizione": "cupole di vetro piene di vasche idroponiche, i campi di germogli all'aperto e le case dei xenobotanici",
+      "ambiente": "cupola",
+      "centro": [
+        3,
+        0
+      ],
+      "raggio": 1
+    },
+    {
+      "id": "spazioporto",
+      "nome": "Spazioporto di Ponente",
+      "descrizione": "piste d'atterraggio bruciate, hangar della Gilda della Navigazione Profonda, navette che partono per gli avamposti",
+      "ambiente": "spazioporto",
+      "centro": [
+        -3,
+        0
+      ],
+      "raggio": 1
+    },
+    {
+      "id": "gola",
+      "nome": "Gola dei Cristalli",
+      "descrizione": "una gola di sabbia vitrea tra speroni di cristallo violetto che tintinnano col vento",
+      "ambiente": "canyon_cristalli",
+      "centro": [
+        0,
+        -3
+      ],
+      "raggio": 1
+    },
+    {
+      "id": "torri",
+      "nome": "Quartiere delle Torri",
+      "descrizione": "i basamenti delle torri di vetro delle compagnie, cortili pensili e portoni sorvegliati",
+      "ambiente": "quartiere_torri",
+      "centro": [
+        0,
+        3
+      ],
+      "raggio": 1
+    },
+    {
+      "id": "relitti",
+      "nome": "Campo dei Relitti",
+      "descrizione": "lamiere antiche conficcate nella sabbia, costole di scafi che nessun registro ricorda, gli scavi degli astro-archeologi",
+      "ambiente": "relitti",
+      "centro": [
+        3,
+        -3
+      ],
+      "raggio": 1
+    },
+    {
+      "id": "fusione",
+      "nome": "Cantiere della Fusione",
+      "descrizione": "le sale dei reattori a fusione, recinti di rete, canalette di plasma e tre turni che non si fermano mai",
+      "ambiente": "cantiere_fusione",
+      "centro": [
+        -3,
+        -3
+      ],
+      "raggio": 1
+    },
+    {
+      "id": "costa",
+      "nome": "Costa Allagata",
+      "descrizione": "la vecchia costa sommersa dalla Grande Mareggiata, tetti che affiorano e passerelle di grata",
+      "ambiente": "costa_allagata",
+      "centro": [
+        3,
+        3
+      ],
+      "raggio": 1
+    },
+    {
+      "id": "ombralta",
+      "nome": "Laboratori di Ombralta",
+      "descrizione": "padiglioni bianchi di ricerca, le capsule dei dormienti, le serre di prova",
+      "ambiente": "laboratorio",
+      "centro": [
+        -3,
+        3
+      ],
+      "raggio": 1
+    },
+    {
+      "id": "fondovetro",
+      "nome": "Cratere di Fondovetro",
+      "descrizione": "il fondo di un cratere antico, sabbia vitrea e brina, cristalli che suonano col freddo",
+      "ambiente": "cratere",
+      "centro": [
+        8,
+        -6
+      ],
+      "raggio": 2
+    },
+    {
+      "id": "ascensore",
+      "nome": "Base dell'Ascensore",
+      "descrizione": "la torre del cordone che sale verso l'Anello, le banchine di carico e la cabina che scende ogni sei ore",
+      "ambiente": "base_ascensore",
+      "centro": [
+        -7,
+        6
+      ],
+      "raggio": 2
+    }
+  ]
+}

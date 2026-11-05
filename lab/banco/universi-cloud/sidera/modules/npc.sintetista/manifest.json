@@ -1,0 +1,66 @@
+{
+  "id": "npc.sintetista",
+  "name": "Sintetista",
+  "kind": "entity",
+  "version": "1.0.0",
+  "description": "I sintetisti di metamateriali e i corrieri del mercato: trasformano polvere di cristallo e filo in lastre e celle, e fanno girare le merci sotto i piloni.",
+  "context": "al Mercato sotto i Piloni e nei vicoli",
+  "logic": "logic.lua",
+  "appearance": {
+    "model": "sidera-colono",
+    "glyph": "⚗",
+    "color": "#c08af0",
+    "aspetto": "una persona con un grembiule di lega e gli occhiali da saldatore sulla fronte"
+  },
+  "physics": {
+    "solid": false,
+    "radius": 0.35,
+    "speed": 1.1
+  },
+  "components": {
+    "wander": {
+      "dx": 0,
+      "dy": 0,
+      "t": 0,
+      "speed": 1.1
+    },
+    "dialogo": {
+      "fase": 0,
+      "fiducia": 0
+    }
+  },
+  "interaction": {
+    "type": "talk"
+  },
+  "persona": "Sei un sintetista o un corriere del mercato di Sidera. Conosci metamateriali, celle energetiche, filo superconduttore, polvere di cristallo, e chi compra e vende cosa. Sei affabile e furbo, sempre pronto a un affare. Delle rune sai quello che sa la gente di Sidera: lastre con un segno inciso che manda una luce tenue, nel fango come sull'asfalto; le compagnie le comprano, i corrieri le contrabbandano, gli ambulanti ne vendono di false; qualcuna, pronunciata, fa magie.",
+  "actions": [
+    {
+      "id": "affare",
+      "label": "Chiedi un affare"
+    },
+    {
+      "id": "vendi",
+      "label": "Vendi polvere di cristallo",
+      "requires": "item.polvere-cristallo"
+    },
+    {
+      "id": "rune",
+      "label": "Chiedi delle rune"
+    }
+  ],
+  "inventory": [
+    "item.metamateriale",
+    "item.cella-energetica"
+  ],
+  "tags": [
+    "mercato"
+  ],
+  "spawn": {
+    "tiles": [
+      "p",
+      "g"
+    ],
+    "chance": 0.08,
+    "max": 1
+  }
+}

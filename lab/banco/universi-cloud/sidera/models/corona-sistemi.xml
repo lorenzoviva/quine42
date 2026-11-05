@@ -1,0 +1,553 @@
+<!--
+La Sala sistemi (corona): installazione bunker sotterranea con terrapieno corazzato,
+trincea d'accesso a cielo aperto con illusione di discesa progressiva nel sottosuolo,
+portellone blindato pressurizzato incassato a z=0 con atrio interno sgombro,
+insegna monumentale al neon lavanda "SALA SISTEMI",
+barriere anti-intrusione a scacchi neon/nero, pilastri di sicurezza con fari rotanti a 8 direzioni,
+sbarra d'accesso, griglie industriali di ventilazione e cupola radar geodetica sul tetto.
+Scritto da Gemini CLI (Gemini 3.8 Flash, abbonamento) il 23/10/2026, task T19.
+Scatola: 14 × 14 × 5 caselle, 112 × 112 × 40 voxel, 8 voxel per casella.
+Lettere chiave:
+  O = porta (lettera O, nome "porta", al centro x=56, y=36..37, z=0..16, portellone blindato con atrio interno vuoto e passante)
+  F = insegna ("SALA SISTEMI", neon lavanda b9a6ff glow fisso su due righe sopra il portellone blindato sulla parete di fondo a z=18..29)
+  P = targa scura opaca per l'insegna
+  M = metallo nero cybernetico primario (14141a, blindature, architravi, paraste, costoloni)
+  m = metallo secondario scuro (20222a, carter di protezione, pannellature tecniche, cornici, flange)
+  C = cemento e composito grafite (363842, muri di contenimento della trincea, basamenti)
+  c = conglomerato scuro d'asfalto e pavimentazione tecnica (282a32, piano stradale della trincea)
+  G = manto geotessile / erba mimetica scura da bunker (354a32, terrapieno)
+  g = manto ombreggiato scuro (283826, gradoni e declivi del terrapieno)
+  S = acciaio chiaro (8a8f9c, corrimano e ringhiere anti-caduta, tiranti, gabbia fari, stelo radar)
+  s = acciaio strutturale scuro (525662, profilati di giunzione, griglie di ventilazione, canaline)
+  V = vetro scuro riflettente (181c28, pannelli radar geodetico)
+  v = riflessi freddi azzurrati del radar (2c3848)
+  w = riflessi lavanda del radar (403858)
+  N = neon lavanda vivo d'accento (b9a6ff glow, cornici, barriere a scacchi, avvisi)
+  n = neon lavanda tenue (7a66b8 glow, guida a terra della trincea, sottogriglie, anello radar)
+  R = spia rossa d'ostacolo sulla sommità dell'antenna (ff3a3a glow)
+  x = buffer temporaneo per l'animazione (hidden)
+Fasi del faro rotante (1..8):
+  1 = fascio principale attivo (b9a6ff glow) orientato in una delle 8 direzioni cardinali/intercardinali.
+  8 = scia di decadimento fosfori (8a70c8 glow) sul settore precedente.
+  7 = dissolvenza residua non-glow (504270).
+  2..6 = lente oscurata spenta (221e2c).
+Architettura:
+  - Terrapieno corazzato perimetrale a gradoni (x=10..102, y=10..102, z=0..26) in cemento grafite e geotessile mimetico.
+  - Trincea centrale a cielo aperto (x=45..67, y=36..104, z=0) con pavimento in asfalto tecnico a quota z=0.
+  - Muri di contenimento laterali che salgono gradualmente da z=3 all'ingresso fino a z=26 sul fondo, creando l'illusione di scendere in profondità.
+  - Allargamento della trincea a x=43..69 in fondo (y=36..42) per dare respiro visivo al portellone e alla targa dell'insegna.
+  - Ringhiere di protezione in acciaio anticaduta sul ciglio superiore della trincea.
+  - Portellone blindato O centrato a z=0 con atrio interno vuoto profondo oltre 16 voxel (y=18..35).
+  - Insegna "SALA SISTEMI" su due righe centrata a x=56 sopra il portellone sulla parete nord della trincea, perfettamente leggibile.
+  - Checkpoint d'ingresso a sud (y=96..104): barriere jersey a scacchi lavanda/nero, due pilastri di sicurezza con fari rotanti e sbarra d'accesso.
+  - Radome radar geodetico (x=20..36, y=18..32, z=24..37) con anello di scansione neon sul plateau ovest del bunker.
+  - Stazione di ventilazione industriale con griglie di raffreddamento a feritoie e rotori di aspirazione (x=70..88, y=18..34, z=24..28) sul plateau est.
+Animazione "rotazione" (8 frame):
+  Rotazione ciclica e sincronizzata a 360° dei fari stroboscopici di allarme/guida in cima ai due pilastri di sicurezza.
+-->
+<sequence values="BMmCcGgSsVvwNnR12345678FPOx" size="112 112 40" symmetry="()" name="Sala sistemi">
+  <!-- Materiali e palette neon punk -->
+  <color symbol="M" value="14141a" name="metallo primario"/>
+  <color symbol="m" value="20222a" name="metallo secondary"/>
+  <color symbol="C" value="363842" name="cemento grafite"/>
+  <color symbol="c" value="282a32" name="asfalto tecnico"/>
+  <color symbol="G" value="354a32" name="turf terrapieno"/>
+  <color symbol="g" value="283826" name="turf ombra"/>
+  <color symbol="S" value="8a8f9c" name="acciaio chiaro"/>
+  <color symbol="s" value="525662" name="acciaio scuro"/>
+  <color symbol="V" value="181c28" name="vetro scuro"/>
+  <color symbol="v" value="2c3848" name="riflesso freddo"/>
+  <color symbol="w" value="403858" name="riflesso lavanda"/>
+  <color symbol="N" value="b9a6ff" glow="True" name="neon lavanda vivo"/>
+  <color symbol="n" value="7a66b8" glow="True" name="neon lavanda tenue"/>
+  <color symbol="R" value="ff3a3a" glow="True" name="luce ostacolo rossa"/>
+  <color symbol="P" value="0c0a12" name="targa insegna"/>
+  <color symbol="F" value="b9a6ff" glow="True" name="insegna fissa"/>
+  <color symbol="O" value="181424" name="porta"/>
+  <color symbol="x" hidden="True" name="buffer animazione"/>
+
+  <!-- 8 Fasi del faro stroboscopico rotante (1..8) -->
+  <color symbol="1" value="b9a6ff" glow="True" name="faro fascio principale"/>
+  <color symbol="2" value="282436" name="faro lente spenta 2"/>
+  <color symbol="3" value="221e30" name="faro lente spenta 3"/>
+  <color symbol="4" value="1c1a26" name="faro lente spenta 4"/>
+  <color symbol="5" value="1c1a26" name="faro lente spenta 5"/>
+  <color symbol="6" value="221e30" name="faro lente spenta 6"/>
+  <color symbol="7" value="504270" name="faro dissolvenza 7"/>
+  <color symbol="8" value="8a70c8" glow="True" name="faro scia bagliore"/>
+
+  <!-- ================================================================= -->
+  <!-- 1. BASAMENTO PERIMETRALE E PAVIMENTAZIONE DI SERVIZIO            -->
+  <!-- ================================================================= -->
+  <!-- Platea di fondazione a quota z=0 -->
+  <box at="56 56 0" size="98 98 1" color="c"/>
+  <box at="56 56 0" size="94 94 1" color="C"/>
+  <box at="56 56 0" size="92 92 1" color="m"/>
+
+  <!-- ================================================================= -->
+  <!-- 2. TERRAPIENO CORAZZATO A GRADONI (MOUND / BERM)                  -->
+  <!-- ================================================================= -->
+  <!-- Livello 1: z=1..4 (quota 4 voxel) -->
+  <!-- Fianco Ovest -->
+  <box at="28.5 56 1" size="33 90 4" color="C"/>
+  <box at="27.5 56 3" size="31 86 2" color="G"/>
+  <!-- Fianco Est -->
+  <box at="83.5 56 1" size="33 90 4" color="C"/>
+  <box at="84.5 56 3" size="31 86 2" color="G"/>
+  <!-- Dorso Nord -->
+  <box at="56 24 1" size="86 26 4" color="C"/>
+  <box at="56 24 3" size="82 22 2" color="G"/>
+
+  <!-- Livello 2: z=5..9 (quota 9 voxel) -->
+  <!-- Fianco Ovest -->
+  <box at="29 52 5" size="30 76 5" color="C"/>
+  <box at="28 52 7" size="28 72 3" color="g"/>
+  <box at="28 52 9" size="26 68 1" color="G"/>
+  <!-- Fianco Est -->
+  <box at="83 52 5" size="30 76 5" color="C"/>
+  <box at="84 52 7" size="28 72 3" color="g"/>
+  <box at="84 52 9" size="26 68 1" color="G"/>
+  <!-- Dorso Nord -->
+  <box at="56 24 5" size="80 22 5" color="C"/>
+  <box at="56 24 7" size="76 18 3" color="g"/>
+  <box at="56 24 9" size="74 16 1" color="G"/>
+
+  <!-- Livello 3: z=10..15 (quota 15 voxel) -->
+  <!-- Fianco Ovest -->
+  <box at="29.5 47 10" size="27 62 6" color="C"/>
+  <box at="28.5 47 13" size="25 58 3" color="G"/>
+  <!-- Fianco Est -->
+  <box at="82.5 47 10" size="27 62 6" color="C"/>
+  <box at="83.5 47 13" size="25 58 3" color="G"/>
+  <!-- Dorso Nord -->
+  <box at="56 24 10" size="72 20 6" color="C"/>
+  <box at="56 24 13" size="68 16 3" color="G"/>
+
+  <!-- Livello 4: z=16..21 (quota 21 voxel) -->
+  <!-- Fianco Ovest -->
+  <box at="30 42 16" size="24 48 6" color="C"/>
+  <box at="29 42 19" size="22 44 3" color="g"/>
+  <!-- Fianco Est -->
+  <box at="82 42 16" size="24 48 6" color="C"/>
+  <box at="83 42 19" size="22 44 3" color="g"/>
+  <!-- Dorso Nord -->
+  <box at="56 24 16" size="66 18 6" color="C"/>
+  <box at="56 24 19" size="62 14 3" color="g"/>
+
+  <!-- Livello 5: z=22..24 (quota 24 voxel) e Plateau / Tetto Bunker -->
+  <!-- West Plateau -->
+  <box at="31 36 22" size="22 34 3" color="C"/>
+  <box at="31 36 24" size="20 30 1" color="M"/>
+  <!-- East Plateau -->
+  <box at="81 36 22" size="22 34 3" color="C"/>
+  <box at="81 36 24" size="20 30 1" color="M"/>
+  <!-- Tetto Bunker Nord -->
+  <box at="56 24 22" size="60 16 3" color="C"/>
+  <box at="56 24 24" size="58 14 1" color="M"/>
+
+  <!-- ================================================================= -->
+  <!-- 3. SCAVO DELLA TRINCEA E PIANO STRADALE (Z=0)                     -->
+  <!-- ================================================================= -->
+  <!-- Apertura del corridoio trincea a cielo aperto (x=45..67, y=42..106, z=1..39) -->
+  <box at="56 74 1" size="24 66 39" color="B"/>
+  <!-- Allargamento della trincea sul fondo davanti alla porta (x=42..70, y=36..42) -->
+  <box at="56 39 1" size="30 8 39" color="B"/>
+
+  <!-- Pavimento tecnico continuo della trincea a quota z=0 -->
+  <box at="56 71 0" size="26 72 1" color="c"/>
+  <!-- Canaline di scolo laterali in acciaio scuro -->
+  <box at="44 71 0" size="1 72 1" color="s"/>
+  <box at="68 71 0" size="1 72 1" color="s"/>
+
+  <!-- Segnapassi luminosi incassati a filo terra lungo le canaline -->
+  <box at="44 48 0" size="1 2 1" color="n"/>
+  <box at="68 48 0" size="1 2 1" color="n"/>
+  <box at="44 60 0" size="1 2 1" color="n"/>
+  <box at="68 60 0" size="1 2 1" color="n"/>
+  <box at="44 72 0" size="1 2 1" color="n"/>
+  <box at="68 72 0" size="1 2 1" color="n"/>
+  <box at="44 84 0" size="1 2 1" color="n"/>
+  <box at="68 84 0" size="1 2 1" color="n"/>
+  <box at="44 96 0" size="1 2 1" color="n"/>
+  <box at="68 96 0" size="1 2 1" color="n"/>
+
+  <!-- Piastre / tombini di servizio lungo l'asse centrale -->
+  <box at="56 54 0" size="4 4 1" color="s"/>
+  <box at="56 54 0" size="2 2 1" color="m"/>
+  <box at="56 68 0" size="4 4 1" color="s"/>
+  <box at="56 68 0" size="2 2 1" color="m"/>
+  <box at="56 82 0" size="4 4 1" color="s"/>
+  <box at="56 82 0" size="2 2 1" color="m"/>
+
+  <!-- ================================================================= -->
+  <!-- 4. MURI DI CONTENIMENTO DELLA TRINCEA (SALITA PROGRESSIVA)        -->
+  <!-- ================================================================= -->
+  <!-- Muro Ovest (x=43..44 per la trincea, arretrato a x=41..42 sul fondo) -->
+  <box at="43.5 96.5 0" size="2 11 4" color="C"/>
+  <box at="43.5 85.5 0" size="2 11 9" color="C"/>
+  <box at="43.5 73.5 0" size="2 13 14" color="C"/>
+  <box at="43.5 60.5 0" size="2 13 19" color="C"/>
+  <box at="43.5 48.5 0" size="2 11 23" color="C"/>
+  <!-- Rientranza atrio di fondo Ovest -->
+  <box at="41.5 39.5 0" size="2 7 26" color="C"/>
+
+  <!-- Muro Est (x=68..69 per la trincea, arretrato a x=70..71 sul fondo) -->
+  <box at="68.5 96.5 0" size="2 11 4" color="C"/>
+  <box at="68.5 85.5 0" size="2 11 9" color="C"/>
+  <box at="68.5 73.5 0" size="2 13 14" color="C"/>
+  <box at="68.5 60.5 0" size="2 13 19" color="C"/>
+  <box at="68.5 48.5 0" size="2 11 23" color="C"/>
+  <!-- Rientranza atrio di fondo Est -->
+  <box at="70.5 39.5 0" size="2 7 26" color="C"/>
+
+  <!-- Cordoli sommitali in metallo nero sui muri -->
+  <box at="43.5 96.5 4" size="2 11 1" color="M"/>
+  <box at="43.5 85.5 9" size="2 11 1" color="M"/>
+  <box at="43.5 73.5 14" size="2 13 1" color="M"/>
+  <box at="43.5 60.5 19" size="2 13 1" color="M"/>
+  <box at="43.5 48.5 23" size="2 11 1" color="M"/>
+  <box at="41.5 39.5 26" size="2 7 1" color="M"/>
+
+  <box at="68.5 96.5 4" size="2 11 1" color="M"/>
+  <box at="68.5 85.5 9" size="2 11 1" color="M"/>
+  <box at="68.5 73.5 14" size="2 13 1" color="M"/>
+  <box at="68.5 60.5 19" size="2 13 1" color="M"/>
+  <box at="68.5 48.5 23" size="2 11 1" color="M"/>
+  <box at="70.5 39.5 26" size="2 7 1" color="M"/>
+
+  <!-- Costoloni / paraste verticali corazzate lungo le pareti della trincea -->
+  <!-- y=84 -->
+  <box at="44.5 84 0" size="1 2 9" color="M"/>
+  <box at="45 84 1" size="1 2 7" color="n"/>
+  <box at="67.5 84 0" size="1 2 9" color="M"/>
+  <box at="67 84 1" size="1 2 7" color="n"/>
+  <!-- y=72 -->
+  <box at="44.5 72 0" size="1 2 14" color="M"/>
+  <box at="45 72 1" size="1 2 12" color="n"/>
+  <box at="67.5 72 0" size="1 2 14" color="M"/>
+  <box at="67 72 1" size="1 2 12" color="n"/>
+  <!-- y=60 -->
+  <box at="44.5 60 0" size="1 2 19" color="M"/>
+  <box at="45 60 1" size="1 2 17" color="n"/>
+  <box at="67.5 60 0" size="1 2 19" color="M"/>
+  <box at="67 60 1" size="1 2 17" color="n"/>
+  <!-- y=48 -->
+  <box at="44.5 48 0" size="1 2 23" color="M"/>
+  <box at="45 48 1" size="1 2 21" color="n"/>
+  <box at="67.5 48 0" size="1 2 23" color="M"/>
+  <box at="67 48 1" size="1 2 21" color="n"/>
+
+  <!-- Ringhiere anticaduta in acciaio chiaro sul ciglio superiore della trincea -->
+  <box at="43 96.5 5" size="1 11 2" color="S"/>
+  <box at="43 85.5 10" size="1 11 2" color="S"/>
+  <box at="43 73.5 15" size="1 13 2" color="S"/>
+  <box at="43 60.5 20" size="1 13 2" color="S"/>
+  <box at="43 48.5 24" size="1 11 2" color="S"/>
+  <box at="41 39.5 27" size="1 7 2" color="S"/>
+
+  <box at="69 96.5 5" size="1 11 2" color="S"/>
+  <box at="69 85.5 10" size="1 11 2" color="S"/>
+  <box at="69 73.5 15" size="1 13 2" color="S"/>
+  <box at="69 60.5 20" size="1 13 2" color="S"/>
+  <box at="69 48.5 24" size="1 11 2" color="S"/>
+  <box at="71 39.5 27" size="1 7 2" color="S"/>
+
+  <!-- Flange e supporti montanti ringhiere in metallo m -->
+  <box at="43 84 9" size="1 1 2" color="m"/>
+  <box at="43 72 14" size="1 1 2" color="m"/>
+  <box at="43 60 19" size="1 1 2" color="m"/>
+  <box at="43 48 23" size="1 1 2" color="m"/>
+  <box at="69 84 9" size="1 1 2" color="m"/>
+  <box at="69 72 14" size="1 1 2" color="m"/>
+  <box at="69 60 19" size="1 1 2" color="m"/>
+  <box at="69 48 23" size="1 1 2" color="m"/>
+
+  <!-- ================================================================= -->
+  <!-- 5. PARETE DI FONDO, PORTALE E PORTELLONE BLINDATO (QUOTA Z=0)    -->
+  <!-- ================================================================= -->
+  <!-- Muraglione corazzato nord di testata trincea (x=40..72, y=36..38, z=0..31) -->
+  <box at="56 37 0" size="30 3 32" color="C"/>
+  <box at="56 38 0" size="28 1 32" color="M"/>
+
+  <!-- Portale monumentale della blast door (x=47..65, z=0..18) -->
+  <!-- Montanti laterali portale -->
+  <box at="47.5 38 0" size="3 1 18" color="M"/>
+  <box at="64.5 38 0" size="3 1 18" color="M"/>
+  <!-- Architrave portale -->
+  <box at="56 38 16" size="20 1 3" color="M"/>
+  <box at="56 38 16" size="16 1 1" color="m"/>
+  <!-- Cornice neon lavanda viva del portale -->
+  <box at="46 38 0" size="1 1 19" color="N"/>
+  <box at="66 38 0" size="1 1 19" color="N"/>
+  <box at="56 38 19" size="21 1 1" color="N"/>
+
+  <!-- Portellone blindato pressurizzato (lettera O, nome "porta", x=50..62, y=36..37, z=0..15) -->
+  <box at="56 37 0" size="13 2 16" color="O"/>
+  <!-- Struttura corazzata a pannelli e rinforzi idraulici del portellone -->
+  <box at="56 37.5 0" size="1 1 16" color="M"/>
+  <box at="56 37.5 7.5" size="13 1 1" color="M"/>
+  <!-- Rinforzi trasversali secondari -->
+  <box at="53 37.5 3" size="5 1 1" color="m"/>
+  <box at="59 37.5 3" size="5 1 1" color="m"/>
+  <box at="53 37.5 12" size="5 1 1" color="m"/>
+  <box at="59 37.5 12" size="5 1 1" color="m"/>
+  <!-- Chiavistelli di bloccaggio idraulico laterali -->
+  <box at="49.5 37.5 4" size="1 1 2" color="S"/>
+  <box at="49.5 37.5 11" size="1 1 2" color="S"/>
+  <box at="62.5 37.5 4" size="1 1 2" color="S"/>
+  <box at="62.5 37.5 11" size="1 1 2" color="S"/>
+
+  <!-- Cavità interna sgombra (atrio d'ingresso vuoto passante a z=0..16, y=18..35) -->
+  <box at="56 26 0" size="15 18 16" color="B"/>
+  <box at="56 26 0" size="15 18 1" color="c"/>
+
+  <!-- ================================================================= -->
+  <!-- 6. TARGA E INSEGNA NEON "SALA SISTEMI" (PARETE DI FONDO SUD)     -->
+  <!-- ================================================================= -->
+  <!-- Targa scura opaca di contrasto a z=17..30, x=42..70, y=38 -->
+  <box at="56 38 17" size="28 1 14" color="P"/>
+  <box at="56 38 17" size="30 1 1" color="s"/>
+  <box at="56 38 30" size="30 1 1" color="s"/>
+  <box at="41 38 17" size="1 1 14" color="s"/>
+  <box at="71 38 17" size="1 1 14" color="s"/>
+
+  <!-- RIGA 1: "SALA" (z=25..29, centrata a x=56, larghezza 15 voxel: x=49..63) -->
+  <!-- S (x=49..51) -->
+  <box at="50 38 29" size="3 1 1" color="F"/>
+  <box at="49 38 28" size="1 1 1" color="F"/>
+  <box at="50 38 27" size="3 1 1" color="F"/>
+  <box at="51 38 26" size="1 1 1" color="F"/>
+  <box at="50 38 25" size="3 1 1" color="F"/>
+  <!-- A (x=53..55) -->
+  <box at="53 38 25" size="1 1 4" color="F"/>
+  <box at="55 38 25" size="1 1 4" color="F"/>
+  <box at="54 38 29" size="3 1 1" color="F"/>
+  <box at="54 38 27" size="1 1 1" color="F"/>
+  <!-- L (x=57..59) -->
+  <box at="57 38 25" size="1 1 5" color="F"/>
+  <box at="58.5 38 25" size="2 1 1" color="F"/>
+  <!-- A (x=61..63) -->
+  <box at="61 38 25" size="1 1 4" color="F"/>
+  <box at="63 38 25" size="1 1 4" color="F"/>
+  <box at="62 38 29" size="3 1 1" color="F"/>
+  <box at="62 38 27" size="1 1 1" color="F"/>
+
+  <!-- RIGA 2: "SISTEMI" (z=18..22, centrata a x=56, larghezza 23 voxel: x=45..67) -->
+  <!-- S (x=45..47) -->
+  <box at="46 38 22" size="3 1 1" color="F"/>
+  <box at="45 38 21" size="1 1 1" color="F"/>
+  <box at="46 38 20" size="3 1 1" color="F"/>
+  <box at="47 38 19" size="1 1 1" color="F"/>
+  <box at="46 38 18" size="3 1 1" color="F"/>
+  <!-- I (x=49) -->
+  <box at="49 38 18" size="1 1 5" color="F"/>
+  <!-- S (x=51..53) -->
+  <box at="52 38 22" size="3 1 1" color="F"/>
+  <box at="51 38 21" size="1 1 1" color="F"/>
+  <box at="52 38 20" size="3 1 1" color="F"/>
+  <box at="53 38 19" size="1 1 1" color="F"/>
+  <box at="52 38 18" size="3 1 1" color="F"/>
+  <!-- T (x=55..57, centro a x=56) -->
+  <box at="56 38 22" size="3 1 1" color="F"/>
+  <box at="56 38 18" size="1 1 5" color="F"/>
+  <!-- E (x=59..61) -->
+  <box at="59 38 18" size="1 1 5" color="F"/>
+  <box at="60 38 22" size="3 1 1" color="F"/>
+  <box at="59.5 38 20" size="2 1 1" color="F"/>
+  <box at="60 38 18" size="3 1 1" color="F"/>
+  <!-- M (x=63..65) -->
+  <box at="63 38 18" size="1 1 5" color="F"/>
+  <box at="65 38 18" size="1 1 5" color="F"/>
+  <box at="64 38 21" size="1 1 1" color="F"/>
+  <!-- I (x=67) -->
+  <box at="67 38 18" size="1 1 5" color="F"/>
+
+  <!-- ================================================================= -->
+  <!-- 7. CHECKPOINT DI SICUREZZA, BARRIERE A SCACCHI E FARI ROTANTI     -->
+  <!-- ================================================================= -->
+  <!-- Barriere Jersey anti-intrusione a scacchi neon lavanda e nero a sud -->
+  <!-- Barriera Ovest (x=33..41, y=101..104, z=0..5) -->
+  <box at="37 102.5 0" size="9 4 2" color="C"/>
+  <box at="37 102.5 2" size="9 3 2" color="M"/>
+  <box at="37 102.5 4" size="9 2 2" color="C"/>
+  <!-- Scacchi lavanda / chevron stripes -->
+  <box at="33.5 102.5 2" size="2 3 2" color="N"/>
+  <box at="37.5 102.5 2" size="2 3 2" color="N"/>
+  <box at="35.5 102.5 4" size="2 2 2" color="N"/>
+  <box at="39.5 102.5 4" size="2 2 2" color="N"/>
+
+  <!-- Barriera Est (x=71..79, y=101..104, z=0..5) -->
+  <box at="75 102.5 0" size="9 4 2" color="C"/>
+  <box at="75 102.5 2" size="9 3 2" color="M"/>
+  <box at="75 102.5 4" size="9 2 2" color="C"/>
+  <!-- Scacchi lavanda / chevron stripes -->
+  <box at="72.5 102.5 2" size="2 3 2" color="N"/>
+  <box at="76.5 102.5 2" size="2 3 2" color="N"/>
+  <box at="74.5 102.5 4" size="2 2 2" color="N"/>
+  <box at="78.5 102.5 4" size="2 2 2" color="N"/>
+
+  <!-- Pilastro di sicurezza Ovest (centro x=42, y=98, z=0..14) -->
+  <!-- Zoccolo -->
+  <box at="42 98 0" size="5 5 2" color="C"/>
+  <box at="42 98 2" size="3 3 1" color="m"/>
+  <!-- Fusto corazzato con fasce chevron -->
+  <box at="42 98 3" size="3 3 8" color="M"/>
+  <box at="42 98 5" size="3 3 1" color="N"/>
+  <box at="42 98 9" size="3 3 1" color="N"/>
+  <!-- Anima centrale della lanterna -->
+  <box at="42 98 11" size="1 1 3" color="S"/>
+  <!-- Gabbia d'acciaio protettiva sui 4 angoli -->
+  <box at="41 97 11" size="1 1 4" color="S"/>
+  <box at="43 97 11" size="1 1 4" color="S"/>
+  <box at="41 99 11" size="1 1 4" color="S"/>
+  <box at="43 99 11" size="1 1 4" color="S"/>
+  <!-- Cappello sommitale del faro -->
+  <box at="42 98 14" size="3 3 1" color="M"/>
+
+  <!-- Settori rotanti del faro Ovest (8 direzioni cardinali a z=11..13, altezza 3 voxel) -->
+  <box at="42 97 11" size="1 1 3" color="1"/>  <!-- Nord -->
+  <box at="43 97 11" size="1 1 3" color="2"/>  <!-- Nord-Est -->
+  <box at="43 98 11" size="1 1 3" color="3"/>  <!-- Est -->
+  <box at="43 99 11" size="1 1 3" color="4"/>  <!-- Sud-Est -->
+  <box at="42 99 11" size="1 1 3" color="5"/>  <!-- Sud -->
+  <box at="41 99 11" size="1 1 3" color="6"/>  <!-- Sud-Ovest -->
+  <box at="41 98 11" size="1 1 3" color="7"/>  <!-- Ovest -->
+  <box at="41 97 11" size="1 1 3" color="8"/>  <!-- Nord-Ovest -->
+
+  <!-- Pilastro di sicurezza Est (centro x=70, y=98, z=0..14) -->
+  <!-- Zoccolo -->
+  <box at="70 98 0" size="5 5 2" color="C"/>
+  <box at="70 98 2" size="3 3 1" color="m"/>
+  <!-- Fusto corazzato con fasce chevron -->
+  <box at="70 98 3" size="3 3 8" color="M"/>
+  <box at="70 98 5" size="3 3 1" color="N"/>
+  <box at="70 98 9" size="3 3 1" color="N"/>
+  <!-- Anima centrale della lanterna -->
+  <box at="70 98 11" size="1 1 3" color="S"/>
+  <!-- Gabbia d'acciaio protettiva sui 4 angoli -->
+  <box at="69 97 11" size="1 1 4" color="S"/>
+  <box at="71 97 11" size="1 1 4" color="S"/>
+  <box at="69 99 11" size="1 1 4" color="S"/>
+  <box at="71 99 11" size="1 1 4" color="S"/>
+  <!-- Cappello sommitale del faro -->
+  <box at="70 98 14" size="3 3 1" color="M"/>
+
+  <!-- Settori rotanti del faro Est (8 direzioni cardinali a z=11..13, altezza 3 voxel) -->
+  <box at="70 97 11" size="1 1 3" color="1"/>  <!-- Nord -->
+  <box at="71 97 11" size="1 1 3" color="2"/>  <!-- Nord-Est -->
+  <box at="71 98 11" size="1 1 3" color="3"/>  <!-- Est -->
+  <box at="71 99 11" size="1 1 3" color="4"/>  <!-- Sud-Est -->
+  <box at="70 99 11" size="1 1 3" color="5"/>  <!-- Sud -->
+  <box at="69 99 11" size="1 1 3" color="6"/>  <!-- Sud-Ovest -->
+  <box at="69 98 11" size="1 1 3" color="7"/>  <!-- Ovest -->
+  <box at="69 97 11" size="1 1 3" color="8"/>  <!-- Nord-Ovest -->
+
+  <!-- Sbarra di controllo d'accesso (alzata a 45° sul lato destro, z=7..16) -->
+  <!-- Snodo idraulico di sollevamento su pilastro Est -->
+  <box at="68 98 6" size="2 2 3" color="s"/>
+  <box at="68 98 7" size="1 1 1" color="m"/>
+  <!-- Asta mobile a fasce alternate M e N sollevata in posizione aperta -->
+  <line at="68 98 7" to="59 98 16" r="1" color="M"/>
+  <box at="66 98 9" size="1 1 2" color="N"/>
+  <box at="63 98 12" size="1 1 2" color="N"/>
+  <box at="60 98 15" size="1 1 2" color="N"/>
+
+  <!-- ================================================================= -->
+  <!-- 8. TETTO BUNKER: CUPOLA RADAR GEODETICA (OVEST)                   -->
+  <!-- ================================================================= -->
+  <!-- Basamento cilindrico del radome a z=24..25 (x=28, y=24) -->
+  <cylinder at="28 24 24" size="18 18 2" color="M"/>
+  <cylinder at="28 24 25" size="16 16 1" color="C"/>
+  <!-- Anello al neon lavanda alla base del radome -->
+  <cylinder at="28 24 25" size="15 15 1" color="n"/>
+
+  <!-- Calotta sferica / cupola geodetica in vetro scuro riflettente a z=26..35 -->
+  <ellipsoid at="28 24 26" size="15 15 11" color="V"/>
+  <!-- Riflessi sfaccettati freddi e lavanda -->
+  <ellipsoid at="27 23 28" size="11 11 8" color="v"/>
+  <ellipsoid at="28 25 29" size="9 9 6" color="w"/>
+  <ellipsoid at="28 24 27" size="13 13 8" color="V"/>
+
+  <!-- Anello equatoriale di scansione al neon lavanda a z=29 -->
+  <cylinder at="28 24 29" size="14 14 1" color="n"/>
+  <cylinder at="28 24 29" size="12 12 1" color="V"/>
+
+  <!-- Costoloni geodetici e anelli di giunzione della cupola in metallo nero -->
+  <box at="28 24 26" size="15 1 10" color="M"/>
+  <box at="28 24 26" size="1 15 10" color="M"/>
+  <!-- Stilo di telemetria ed emettitore sommitale -->
+  <box at="28 24 35" size="1 1 3" color="S"/>
+  <box at="28 24 37" size="1 1 1" color="N"/>
+
+  <!-- ================================================================= -->
+  <!-- 9. TETTO BUNKER: STAZIONE DI VENTILAZIONE INDUSTRIALE (EST)       -->
+  <!-- ================================================================= -->
+  <!-- Basamento in cemento grafite perimetrale (x=71..87, y=17..33, z=24..27) -->
+  <box at="79 25 24" size="19 19 3" color="C"/>
+  <box at="79 25 26" size="17 17 2" color="M"/>
+  <!-- Vano interno della griglia di raffreddamento -->
+  <box at="79 25 25" size="15 15 3" color="B"/>
+  <box at="79 25 24" size="15 15 1" color="M"/>
+
+  <!-- Fessure e bagliore tenue di dissipazione termica nel pozzo -->
+  <box at="79 25 25" size="13 13 1" color="n"/>
+
+  <!-- Rotori turbine di aspirazione all'interno del vano -->
+  <cylinder at="75 25 25" size="5 5 1" color="m"/>
+  <box at="75 25 25" size="1 1 1" color="S"/>
+  <cylinder at="83 25 25" size="5 5 1" color="m"/>
+  <box at="83 25 25" size="1 1 1" color="S"/>
+
+  <!-- Griglie a feritoie in acciaio scuro e metallo nero -->
+  <box at="79 19 27" size="15 1 1" color="s"/>
+  <box at="79 21 27" size="15 1 1" color="s"/>
+  <box at="79 23 27" size="15 1 1" color="s"/>
+  <box at="79 25 27" size="15 1 1" color="s"/>
+  <box at="79 27 27" size="15 1 1" color="s"/>
+  <box at="79 29 27" size="15 1 1" color="s"/>
+  <box at="79 31 27" size="15 1 1" color="s"/>
+  <!-- Trave di rinforzo centrale della griglia -->
+  <box at="79 25 27" size="1 15 1" color="M"/>
+
+  <!-- ================================================================= -->
+  <!-- 10. TUBAZIONI DI SERVIZIO E ANTENNA DI TELECOMUNICAZIONE          -->
+  <!-- ================================================================= -->
+  <!-- Condotta tubolare di raffreddamento tra le due ali del bunker (linea orizzontale a z=25) -->
+  <line at="38 18 25" to="72 18 25" r="1.5" color="s"/>
+  <line at="38 18 25" to="72 18 25" r="0.8" color="M"/>
+  <!-- Raccordi e calate verticali nel tetto -->
+  <cylinder at="38 18 23" size="3 3 3" color="s"/>
+  <cylinder at="72 18 23" size="3 3 3" color="s"/>
+  <!-- Staffe di supporto tubazione in acciaio e metallo secondary -->
+  <box at="48 18 23" size="2 2 3" color="m"/>
+  <box at="48 18 25" size="3 1 1" color="S"/>
+  <box at="62 18 23" size="2 2 3" color="m"/>
+  <box at="62 18 25" size="3 1 1" color="S"/>
+
+  <!-- Traliccio d'antenna telecomunicazioni sul retro-est (x=90, y=18, z=22..38) -->
+  <box at="90 18 22" size="3 3 4" color="M"/>
+  <box at="90 18 26" size="1 1 12" color="S"/>
+  <!-- Bracci trasversali dell'antenna -->
+  <box at="90 18 32" size="5 1 1" color="S"/>
+  <box at="90 18 35" size="3 1 1" color="S"/>
+  <!-- Luce rossa d'ostacolo sulla punta dell'antenna -->
+  <box at="90 18 38" size="1 1 1" color="R"/>
+
+</sequence>
+
+<!-- ================================================================= -->
+<!-- ANIMAZIONE CICLICA "ROTAZIONE" (8 frame, fari stroboscopici)      -->
+<!-- ================================================================= -->
+<animation name="rotazione" frames="8">
+  <sequence>
+    <all in="1" out="x"/>
+    <all in="2" out="1"/>
+    <all in="3" out="2"/>
+    <all in="4" out="3"/>
+    <all in="5" out="4"/>
+    <all in="6" out="5"/>
+    <all in="7" out="6"/>
+    <all in="8" out="7"/>
+    <all in="x" out="8"/>
+  </sequence>
+</animation>

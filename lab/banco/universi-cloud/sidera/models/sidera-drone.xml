@@ -1,0 +1,53 @@
+<!-- Drone da ricognizione di Sidera, posato sui pattini: un corpo scuro con l'occhio ciano, quattro bracci, quattro rotori che girano
+     (la scia delle pale cambia a ogni seme) e, a volte, una sacca sotto la pancia o un'antenna. Cantiere 4C, a mano (Claude Code). -->
+<sequence values="BDdWCKRQPMX" size="12 12 12" symmetry="()" name="Drone da ricognizione">
+  <color symbol="D" value="1e222b" name="telaio scuro"/>
+  <color symbol="d" value="4a5465" name="metallo bagnato"/>
+  <color symbol="W" value="b9c4d1" name="scocca chiara"/>
+  <color symbol="C" value="34e8ff" glow="True" name="occhio ciano"/>
+  <color symbol="K" value="ff40b0" glow="True" name="luci di posizione"/>
+  <color symbol="R" value="9fb6c8" alpha="0.55" name="scia delle pale"/>
+  <color symbol="Q" hidden="True" name="giro delle pale"/>
+  <color symbol="P" hidden="True" name="parte possibile"/>
+  <color symbol="M" hidden="True" name="segno di una parte"/>
+  <color symbol="X" value="ffb02e" glow="True" name="sacca e antenna"/>
+
+  <!-- Pattini. -->
+  <line at="4 3 0" to="4 8 0" r="0" color="D"/>
+  <line at="7 3 0" to="7 8 0" r="0" color="D"/>
+  <line at="4 5 1" to="4 5 2" r="0" color="d"/>
+  <line at="7 5 1" to="7 5 2" r="0" color="d"/>
+  <!-- Il corpo, i bracci, i mozzi. -->
+  <ellipsoid at="5.5 5.5 2" size="6 6 4" color="W"/>
+  <box at="5.5 5.5 3" size="6 6 1" color="d" on="W"/>
+  <line at="2 2 4" to="9 9 4" r="0" color="D"/>
+  <line at="9 2 4" to="2 9 4" r="0" color="D"/>
+  <box at="2 2 5" size="1 1 1" color="d"/>
+  <box at="9 2 5" size="1 1 1" color="d"/>
+  <box at="2 9 5" size="1 1 1" color="d"/>
+  <box at="9 9 5" size="1 1 1" color="d"/>
+  <box at="5.5 8 3" size="2 1 1" color="C"/>
+  <box at="2 9 4" size="1 1 1" color="K"/>
+  <box at="9 9 4" size="1 1 1" color="K"/>
+
+  <!-- Le pale che girano: una scia che cresce dal mozzo, diversa a ogni seme. -->
+  <cylinder at="2 2 6" size="5 5 1" color="Q" on="B"/>
+  <cylinder at="9 2 6" size="5 5 1" color="Q" on="B"/>
+  <cylinder at="2 9 6" size="5 5 1" color="Q" on="B"/>
+  <cylinder at="9 9 6" size="5 5 1" color="Q" on="B"/>
+  <all in="Q d" out="R d"/>
+  <one steps="34" in="RQ" out="RR" symmetry="(xy)"/>
+  <all in="Q" out="B"/>
+
+  <!-- Una sacca sotto, un'antenna sopra: ciascuna c'è o non c'è. -->
+  <box at="5.5 5.5 1" size="2 2 1" color="P" on="B"/>
+  <line at="5.5 4 6" to="5.5 4 10" r="0" color="P" on="B"/>
+  <box at="5.5 5.5 1" size="1 1 1" color="M"/>
+  <box at="5.5 4 6" size="1 1 1" color="M"/>
+  <prl steps="1" in="M" out="X" p="0.5"/>
+  <all in="XP" out="XX" symmetry="(xyz)"/>
+  <all>
+    <rule in="P" out="B"/>
+    <rule in="M" out="B"/>
+  </all>
+</sequence>

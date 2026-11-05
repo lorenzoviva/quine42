@@ -1,0 +1,20 @@
+<!-- Pino: scritto a mano da Claude Code, step 8B (lab/mj3d/examples.ts). Convertito dal JSON (lab/mjx/convert.ts): stessi voxel. -->
+<sequence values="BTFLN" size="40 40 60" symmetry="(xy)" name="Pino">
+  <color symbol="T" value="6b4a2e" name="tronco"/>
+  <color symbol="F" value="2f6b3a" name="aghi"/>
+  <color symbol="L" value="4b8f4a" name="aghi al sole"/>
+  <color symbol="N" value="1f4a2c" name="aghi in ombra"/>
+  <cylinder at="20 20 0" size="3 3 52" color="T"/>
+  <cone at="20 20 8" size="32 32 16" color="F" on="B"/>
+  <cone at="20 20 19" size="26 26 14" color="F" on="B"/>
+  <cone at="20 20 30" size="20 20 13" color="F" on="B"/>
+  <cone at="20 20 40" size="13 13 12" color="F" on="B"/>
+  <cone at="20 20 49" size="7 7 10" color="F" on="B"/>
+  <convolution neighborhood="Moore" steps="2">
+    <rule in="F" out="B" values="B" sum="13..26" p="0.45"/>
+  </convolution>
+  <prl steps="1">
+    <rule in="B F" out="B L" p="0.7"/>
+    <rule in="F B" out="N B" p="0.8"/>
+  </prl>
+</sequence>

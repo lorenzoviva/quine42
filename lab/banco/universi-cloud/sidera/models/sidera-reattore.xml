@@ -1,0 +1,70 @@
+<!-- Reattore a fusione di Sidera: un anello di metallo scuro su un basamento, e al centro il nucleo di plasma che arde ciano.
+     Il plasma prende ogni volta un'altra forma; bobine, archi e tubi ci sono o no a seconda del seme. Cantiere 4C, a mano (Claude Code). -->
+<sequence values="BDdWwCcKQPMXY" size="20 20 20" symmetry="()" name="Reattore a fusione">
+  <color symbol="D" value="1d212a" name="basamento"/>
+  <color symbol="d" value="3e4757" name="metallo bagnato"/>
+  <color symbol="W" value="66748a" name="anello del reattore"/>
+  <color symbol="w" value="2b313d" name="giunti dell'anello"/>
+  <color symbol="C" value="3cf0ff" glow="True" name="plasma ciano"/>
+  <color symbol="c" value="d2fbff" glow="True" name="cuore del plasma"/>
+  <color symbol="K" value="ff3ab4" glow="True" name="bobine magenta"/>
+  <color symbol="Q" hidden="True" name="spazio del plasma"/>
+  <color symbol="P" hidden="True" name="parte possibile"/>
+  <color symbol="M" hidden="True" name="segno di una parte"/>
+  <color symbol="X" value="ffad2c" glow="True" name="arco ambra"/>
+  <color symbol="Y" value="4e586a" name="tubo"/>
+
+  <!-- Basamento e anello. -->
+  <cylinder at="10 10 0" size="19 19 2" color="D"/>
+  <cylinder at="10 10 2" size="7 7 3" color="d"/>
+  <cylinder at="10 10 4" size="19 19 7" color="W"/>
+  <cylinder at="10 10 4" size="11 11 7" color="B" on="W"/>
+  <cylinder at="10 10 4" size="19 19 1" color="w" on="W"/>
+  <cylinder at="10 10 10" size="19 19 1" color="w" on="W"/>
+  <box at="10 10 4" size="1 20 7" color="w" on="W"/>
+  <box at="10 10 4" size="20 1 7" color="w" on="W"/>
+
+  <!-- Le parti possibili: bobine sull'anello, archi sopra il nucleo, tubi verso terra. -->
+  <box at="4 4 3" size="3 3 9" color="P" on="B"/>
+  <box at="16 4 3" size="3 3 9" color="P" on="B"/>
+  <box at="4 16 3" size="3 3 9" color="P" on="B"/>
+  <box at="16 16 3" size="3 3 9" color="P" on="B"/>
+  <line at="5 10 11" to="10 10 17" r="0.5" color="P" on="B"/>
+  <line at="15 10 11" to="10 10 17" r="0.5" color="P" on="B"/>
+  <line at="10 5 11" to="10 10 18" r="0.5" color="P" on="B"/>
+  <line at="1 10 5" to="1 10 2" r="0.5" color="P" on="B"/>
+  <line at="18 10 5" to="18 10 2" r="0.5" color="P" on="B"/>
+  <box at="4 4 3" size="1 1 1" color="M"/>
+  <box at="16 4 3" size="1 1 1" color="M"/>
+  <box at="4 16 3" size="1 1 1" color="M"/>
+  <box at="16 16 3" size="1 1 1" color="M"/>
+  <box at="5 10 11" size="1 1 1" color="M"/>
+  <box at="15 10 11" size="1 1 1" color="M"/>
+  <box at="10 5 11" size="1 1 1" color="M"/>
+  <box at="1 10 5" size="1 1 1" color="M"/>
+  <box at="18 10 5" size="1 1 1" color="M"/>
+  <prl steps="1" in="M" out="X" p="0.5"/>
+  <all in="XP" out="XX" symmetry="(xyz)"/>
+  <all>
+    <rule in="P" out="B"/>
+    <rule in="M" out="B"/>
+  </all>
+  <box at="10 10 0" size="20 20 12" color="K" on="X"/>
+  <box at="10 10 0" size="20 20 6" color="Y" on="K"/>
+  <prl steps="1" in="K" out="w" p="0.3"/>
+
+  <!-- Il nucleo: un seme di plasma sul pilastro, che cresce a caso nello spazio del nucleo. -->
+  <ellipsoid at="10 10 4" size="13 13 15" color="Q" on="B"/>
+  <box at="10 10 5" size="1 1 1" color="c"/>
+  <one steps="160" in="cQ" out="cc" symmetry="(xyz)"/>
+  <one steps="300" in="cQ" out="cC" symmetry="(xyz)"/>
+  <one steps="300" in="CQ" out="CC" symmetry="(xyz)"/>
+  <all in="Q" out="B"/>
+  <!-- Anello e basamento sono gusci. -->
+  <convolution neighborhood="Moore" steps="1">
+    <rule in="W" out="B" values="B" sum="0"/>
+    <rule in="w" out="B" values="B" sum="0"/>
+    <rule in="D" out="B" values="B" sum="0"/>
+    <rule in="c" out="B" values="B" sum="0"/>
+  </convolution>
+</sequence>

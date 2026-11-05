@@ -1,0 +1,46 @@
+{
+ "plan": {
+  "place": {
+   "name": "Campo dei Relitti",
+   "description": "Lamiere antiche conficcate nella sabbia vitrea, costole di scafo che nessun registro ricorda e le tende degli scavi."
+  },
+  "layout": "relitti",
+  "objects": [
+   {
+    "module": "npc.astroarcheologo",
+    "where": "fuori"
+   },
+   {
+    "module": "npc.astroarcheologo",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.relitto",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.relitto",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.armadietto",
+    "where": "ovunque"
+   }
+  ],
+  "ground": [
+   "Frammento di relitto",
+   "Lamiera antica"
+  ],
+  "fresh": [],
+  "runes": [
+   "tunnel",
+   "massa"
+  ],
+  "strutture": [
+   {
+    "concetto": "la costola ricurva di uno scafo antico, lamiere corrose",
+    "taglia": "media"
+   }
+  ]
+ }
+}

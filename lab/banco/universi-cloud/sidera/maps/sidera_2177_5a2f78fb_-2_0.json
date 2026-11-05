@@ -1,0 +1,40 @@
+{
+ "plan": {
+  "place": {
+   "name": "Spazioporto di Ponente",
+   "description": "Le piste bruciate dello spazioporto, l'hangar della Gilda della Navigazione Profonda e la camera di equilibrio per chi parte."
+  },
+  "layout": "spazioporto",
+  "objects": [
+   {
+    "module": "npc.navigatore",
+    "where": "fuori"
+   },
+   {
+    "module": "npc.navigatore",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.camera-equilibrio",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.faro-telemetria",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.drone-ricognizione",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Gettone della cabina",
+   "Carta delle rotte"
+  ],
+  "fresh": [],
+  "runes": [
+   "stasi"
+  ],
+  "strutture": []
+ }
+}

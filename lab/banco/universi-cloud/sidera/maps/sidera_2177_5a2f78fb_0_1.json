@@ -1,0 +1,28 @@
+{
+ "plan": {
+  "place": {
+   "name": "Viale delle Bancarelle",
+   "description": "Bancarelle sotto i piloni, tende cerate che gocciolano, cassette di merce e gente che contratta."
+  },
+  "layout": "mercato_viadotti",
+  "objects": [
+   {
+    "module": "obj.sintetizzatore",
+    "where": "ovunque"
+   },
+   {
+    "module": "obj.armadietto",
+    "where": "ovunque"
+   }
+  ],
+  "ground": [
+   "Tè di serra"
+  ],
+  "fresh": [],
+  "runes": [
+   "quanto",
+   "y = y"
+  ],
+  "strutture": []
+ }
+}

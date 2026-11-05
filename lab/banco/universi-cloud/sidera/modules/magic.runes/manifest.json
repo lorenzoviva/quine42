@@ -1,0 +1,508 @@
+{
+  "id": "magic.runes",
+  "name": "Rune magiche",
+  "kind": "data",
+  "version": "1.0.0",
+  "description": "Le rune della magia a Sidera: ognuna è anche una parola, ma tenute in mano e pronunciate (T) diventano incantesimi. Quattro sono quelle di sempre (luce, fuoco, acqua, scudo); dodici parlano di peso, leggerezza, legami, onde, freddo, maree e stasi. Più rune in fila sono una formula: l'ordine conta e ripetere una runa la rafforza. I cristalli di risonanza ridanno mana; le rune si consumano quando le pronunci.",
+  "runes": {
+    "luce": {
+      "name": "Sowilo",
+      "glyph": "ᛊ",
+      "color": "#ffe27a",
+      "element": "luce",
+      "description": "il sole: illumina, rivela"
+    },
+    "fuoco": {
+      "name": "Kenaz",
+      "glyph": "ᚲ",
+      "color": "#ff7a3a",
+      "element": "fuoco",
+      "description": "la fiaccola: brucia, scalda"
+    },
+    "acqua": {
+      "name": "Laguz",
+      "glyph": "ᛚ",
+      "color": "#5ab8ff",
+      "element": "acqua",
+      "description": "il lago: scorre, spegne, allaga"
+    },
+    "scudo": {
+      "name": "Algiz",
+      "glyph": "ᛉ",
+      "color": "#b9a6ff",
+      "element": "protezione",
+      "description": "il corno d'alce: protegge"
+    },
+    "grava": {
+      "name": "Gravis",
+      "glyph": "⊛",
+      "color": "#7a5af0",
+      "element": "gravità",
+      "description": "il peso: ancora a terra, rende pesante ciò che tocca"
+    },
+    "lieve": {
+      "name": "Levis",
+      "glyph": "⊚",
+      "color": "#c8f0ff",
+      "element": "leggerezza",
+      "description": "la piuma: alleggerisce il corpo e allunga il passo"
+    },
+    "tunnel": {
+      "name": "Traforo",
+      "glyph": "⟁",
+      "color": "#5af0c8",
+      "element": "attraversamento",
+      "description": "il passaggio: apre un varco nel terreno davanti, anche nei muri"
+    },
+    "intreccio": {
+      "name": "Gemella",
+      "glyph": "⧖",
+      "color": "#f05ac8",
+      "element": "legame",
+      "description": "il nodo: lega due persone come se fossero una"
+    },
+    "onda": {
+      "name": "Risacca",
+      "glyph": "◬",
+      "color": "#5ab8ff",
+      "element": "onda",
+      "description": "la risonanza: un'onda che spinge via ciò che è davanti"
+    },
+    "vuoto": {
+      "name": "Nulla",
+      "glyph": "⨀",
+      "color": "#2a3a6a",
+      "element": "vuoto",
+      "description": "il freddo del vuoto: gela il suolo davanti"
+    },
+    "marea": {
+      "name": "Afelio",
+      "glyph": "⟡",
+      "color": "#3a8ad8",
+      "element": "marea",
+      "description": "la marea: abbassa il terreno attorno"
+    },
+    "massa": {
+      "name": "Accresco",
+      "glyph": "⦿",
+      "color": "#a8784a",
+      "element": "massa",
+      "description": "l'accumulo: solleva il terreno davanti"
+    },
+    "spin": {
+      "name": "Trottola",
+      "glyph": "⧗",
+      "color": "#f0e05a",
+      "element": "rotazione",
+      "description": "la rotazione: fa girare veloce chi la pronuncia"
+    },
+    "quanto": {
+      "name": "Scintilla",
+      "glyph": "⌬",
+      "color": "#5af07a",
+      "element": "energia",
+      "description": "il granello di energia: carica una cella e il corpo"
+    },
+    "orbita": {
+      "name": "Perielio",
+      "glyph": "⟐",
+      "color": "#b9a6ff",
+      "element": "orbita",
+      "description": "il giro attorno: un anello di polvere ruota attorno e protegge"
+    },
+    "stasi": {
+      "name": "Sospesa",
+      "glyph": "⊗",
+      "color": "#9fe8ff",
+      "element": "stasi",
+      "description": "la sospensione: ferma il corpo e lo ristora, come nelle capsule"
+    }
+  },
+  "spells": {
+    "luce": {
+      "name": "Lume",
+      "description": "Una piccola luce resta sospesa davanti a te.",
+      "cost": 4,
+      "effects": [
+        {
+          "tipo": "luce",
+          "raggio": 5,
+          "durata": 90
+        }
+      ]
+    },
+    "fuoco": {
+      "name": "Favilla",
+      "description": "Una fiammata davanti a te: brucia ciò che è secco.",
+      "cost": 10,
+      "effects": [
+        {
+          "tipo": "fuoco",
+          "raggio": 1,
+          "durata": 8
+        }
+      ]
+    },
+    "acqua": {
+      "name": "Polla",
+      "description": "Dal suolo davanti a te sgorga acqua.",
+      "cost": 10,
+      "effects": [
+        {
+          "tipo": "terreno",
+          "a": "w",
+          "raggio": 0
+        }
+      ]
+    },
+    "scudo": {
+      "name": "Corno",
+      "description": "Un guscio d'aria ti avvolge.",
+      "cost": 8,
+      "effects": [
+        {
+          "tipo": "scudo",
+          "durata": 30
+        }
+      ]
+    },
+    "grava": {
+      "name": "Ancora",
+      "description": "La terra ti tira giù: passi lenti, ma reggi più peso.",
+      "cost": 6,
+      "effects": [
+        {
+          "tipo": "stato",
+          "nome": "zavorrato",
+          "durata": 45,
+          "velocita": 0.7,
+          "peso": 20
+        }
+      ]
+    },
+    "lieve": {
+      "name": "Piuma",
+      "description": "Il corpo si fa leggero e il passo si allunga.",
+      "cost": 8,
+      "effects": [
+        {
+          "tipo": "stato",
+          "nome": "alleggerito",
+          "durata": 40,
+          "velocita": 1.5
+        }
+      ]
+    },
+    "tunnel": {
+      "name": "Traforo",
+      "description": "Davanti a te il terreno si apre in un sentiero, anche attraverso le paratie.",
+      "cost": 14,
+      "effects": [
+        {
+          "tipo": "terreno",
+          "a": "p",
+          "raggio": 1
+        }
+      ]
+    },
+    "intreccio": {
+      "name": "Nodo gemello",
+      "description": "Tra te e chi hai davanti si stringe un nodo che non si scioglie.",
+      "cost": 12,
+      "effects": [
+        {
+          "tipo": "legame",
+          "legame": "amico"
+        },
+        {
+          "tipo": "ricordo",
+          "testo": "ha sentito un nodo gemello stringersi con il viandante",
+          "peso": 2
+        }
+      ]
+    },
+    "onda": {
+      "name": "Risacca",
+      "description": "Un'onda parte da te e spinge via ciò che hai davanti.",
+      "cost": 6,
+      "effects": [
+        {
+          "tipo": "spingi",
+          "forza": 6
+        }
+      ]
+    },
+    "vuoto": {
+      "name": "Gelo del vuoto",
+      "description": "Il suolo davanti si copre di brina; il freddo ti morde le dita.",
+      "cost": 10,
+      "effects": [
+        {
+          "tipo": "terreno",
+          "a": "n",
+          "raggio": 1
+        },
+        {
+          "tipo": "stato",
+          "nome": "intirizzito",
+          "durata": 20,
+          "velocita": 0.85
+        }
+      ]
+    },
+    "marea": {
+      "name": "Bassa marea",
+      "description": "Il terreno attorno si abbassa, come sabbia quando l’acqua si ritira.",
+      "cost": 12,
+      "effects": [
+        {
+          "tipo": "rilievo",
+          "delta": -2,
+          "raggio": 2
+        }
+      ]
+    },
+    "massa": {
+      "name": "Accumulo",
+      "description": "Il terreno davanti si gonfia e si alza.",
+      "cost": 12,
+      "effects": [
+        {
+          "tipo": "rilievo",
+          "delta": 2,
+          "raggio": 1
+        }
+      ]
+    },
+    "spin": {
+      "name": "Trottola",
+      "description": "Giri su te stesso e riparti più svelto.",
+      "cost": 5,
+      "effects": [
+        {
+          "tipo": "stato",
+          "nome": "in rotazione",
+          "durata": 20,
+          "velocita": 1.3
+        },
+        {
+          "tipo": "spingi",
+          "forza": 2
+        }
+      ]
+    },
+    "quanto": {
+      "name": "Scintilla",
+      "description": "Una scarica ti ridà forze e ti lascia in mano una cella carica.",
+      "cost": 15,
+      "effects": [
+        {
+          "tipo": "bisogni",
+          "energia": 15
+        },
+        {
+          "tipo": "crea_oggetto",
+          "oggetto": "item.cella-energetica",
+          "quantita": 1
+        }
+      ]
+    },
+    "orbita": {
+      "name": "Perielio",
+      "description": "Un anello di polvere luminosa ti gira attorno e ti ripara.",
+      "cost": 10,
+      "effects": [
+        {
+          "tipo": "scudo",
+          "durata": 25
+        },
+        {
+          "tipo": "luce",
+          "raggio": 3,
+          "durata": 25
+        }
+      ]
+    },
+    "stasi": {
+      "name": "Sospensione",
+      "description": "Il corpo rallenta quasi fino a fermarsi, e intanto si ristora.",
+      "cost": 12,
+      "effects": [
+        {
+          "tipo": "stato",
+          "nome": "sospeso",
+          "durata": 8,
+          "velocita": 0.3
+        },
+        {
+          "tipo": "bisogni",
+          "salute": 20
+        }
+      ]
+    },
+    "grava grava": {
+      "name": "Collasso",
+      "description": "Il peso si raddoppia: il terreno davanti sprofonda.",
+      "cost": 18,
+      "effects": [
+        {
+          "tipo": "rilievo",
+          "delta": -3,
+          "raggio": 1
+        },
+        {
+          "tipo": "stato",
+          "nome": "zavorrato",
+          "durata": 30,
+          "velocita": 0.6,
+          "peso": 30
+        }
+      ]
+    },
+    "lieve onda": {
+      "name": "Planata",
+      "description": "Leggero, l'onda ti porta avanti come una foglia.",
+      "cost": 14,
+      "effects": [
+        {
+          "tipo": "stato",
+          "nome": "alleggerito",
+          "durata": 30,
+          "velocita": 1.8
+        },
+        {
+          "tipo": "spingi",
+          "forza": 4
+        }
+      ]
+    },
+    "orbita grava": {
+      "name": "Satellite",
+      "description": "Ciò che hai davanti ti gira attorno e poi viene scagliato via.",
+      "cost": 16,
+      "effects": [
+        {
+          "tipo": "spingi",
+          "forza": 9
+        },
+        {
+          "tipo": "scudo",
+          "durata": 15
+        }
+      ]
+    },
+    "quanto stasi": {
+      "name": "Riposo del dormiente",
+      "description": "Ti fermi un istante e ti rialzi come dopo una notte intera.",
+      "cost": 20,
+      "effects": [
+        {
+          "tipo": "bisogni",
+          "energia": 35,
+          "salute": 25
+        }
+      ]
+    },
+    "tunnel massa tunnel": {
+      "name": "Galleria",
+      "description": "Il terreno si apre e si richiude in archi sopra di te: una galleria breve.",
+      "cost": 26,
+      "effects": [
+        {
+          "tipo": "terreno",
+          "a": "p",
+          "raggio": 2
+        },
+        {
+          "tipo": "rilievo",
+          "delta": 1,
+          "raggio": 1
+        }
+      ]
+    }
+  },
+  "loot": {
+    "magia": {
+      "rolls": [
+        1,
+        1
+      ],
+      "entries": [
+        {
+          "item": "item.cristallo-magico",
+          "weight": 5,
+          "min": 1,
+          "max": 2
+        },
+        {
+          "item": "rune:luce",
+          "weight": 1
+        },
+        {
+          "item": "rune:fuoco",
+          "weight": 1
+        },
+        {
+          "item": "rune:acqua",
+          "weight": 1
+        },
+        {
+          "item": "rune:scudo",
+          "weight": 1
+        },
+        {
+          "item": "rune:grava",
+          "weight": 1
+        },
+        {
+          "item": "rune:lieve",
+          "weight": 1
+        },
+        {
+          "item": "rune:tunnel",
+          "weight": 1
+        },
+        {
+          "item": "rune:intreccio",
+          "weight": 1
+        },
+        {
+          "item": "rune:onda",
+          "weight": 1
+        },
+        {
+          "item": "rune:vuoto",
+          "weight": 1
+        },
+        {
+          "item": "rune:marea",
+          "weight": 1
+        },
+        {
+          "item": "rune:massa",
+          "weight": 1
+        },
+        {
+          "item": "rune:spin",
+          "weight": 1
+        },
+        {
+          "item": "rune:quanto",
+          "weight": 1
+        },
+        {
+          "item": "rune:orbita",
+          "weight": 1
+        },
+        {
+          "item": "rune:stasi",
+          "weight": 1
+        },
+        {
+          "item": "item.sacca",
+          "weight": 1
+        }
+      ]
+    }
+  }
+}

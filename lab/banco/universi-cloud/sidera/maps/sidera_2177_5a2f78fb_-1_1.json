@@ -1,0 +1,28 @@
+{
+ "plan": {
+  "place": {
+   "name": "Fermata del Treno Sospeso",
+   "description": "La fermata sotto il binario sospeso, con le panchine bagnate e il faro che lampeggia ambra."
+  },
+  "layout": "piazza_neon",
+  "objects": [
+   {
+    "module": "obj.faro-telemetria",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.armadietto",
+    "where": "ovunque"
+   }
+  ],
+  "ground": [
+   "Gettone della cabina"
+  ],
+  "fresh": [],
+  "runes": [
+   "vuoto",
+   "fuoco"
+  ],
+  "strutture": []
+ }
+}

@@ -1,0 +1,81 @@
+<!-- Sintetizzatore molecolare di Sidera: un armadio di metallo bagnato con lo sportello di vetro che brilla, e tubi che salgono,
+     girano e rientrano. Quali tubi e quali bombole ci sono lo decide il seme. Cantiere 4C, a mano (Claude Code). -->
+<sequence values="BDdWGCKAPMXYpN" size="20 20 20" symmetry="()" name="Sintetizzatore molecolare">
+  <color symbol="D" value="1c2029" name="zoccolo"/>
+  <color symbol="d" value="383f4d" name="spigoli"/>
+  <color symbol="W" value="5c687c" name="armadio"/>
+  <color symbol="G" value="7fe9ff" alpha="0.6" glow="True" name="vetro dello sportello"/>
+  <color symbol="C" value="2fe4ff" glow="True" name="spie ciano"/>
+  <color symbol="K" value="ff3fb0" glow="True" name="liquido magenta"/>
+  <color symbol="A" value="ffb12c" glow="True" name="maniglia ambra"/>
+  <color symbol="P" hidden="True" name="tubo possibile"/>
+  <color symbol="M" hidden="True" name="segno di un tubo"/>
+  <color symbol="X" value="8d99ab" name="tubo"/>
+  <color symbol="Y" value="2a303b" name="bombola"/>
+  <color symbol="p" hidden="True" name="vano possibile"/>
+  <color symbol="N" hidden="True" name="segno di un vano"/>
+
+  <!-- L'armadio. -->
+  <box at="10 10 0" size="13 11 2" color="D"/>
+  <box at="10 10 2" size="13 11 9" color="W"/>
+  <box at="10 10 11" size="13 11 1" color="d"/>
+  <box at="4 5 2" size="1 1 9" color="d"/>
+  <box at="16 5 2" size="1 1 9" color="d"/>
+  <box at="4 15 2" size="1 1 9" color="d"/>
+  <box at="16 15 2" size="1 1 9" color="d"/>
+  <!-- Lo sportello sul davanti. -->
+  <box at="10 15 2" size="9 1 9" color="d"/>
+  <box at="10 15 3" size="7 1 7" color="G"/>
+  <box at="10 14 3" size="7 1 7" color="K"/>
+  <box at="14 16 6" size="1 1 2" color="A"/>
+
+  <!-- Tubi e bombole possibili. -->
+  <line at="3 6 4" to="1 6 4" r="0" color="P" on="B"/>
+  <line at="1 6 4" to="1 6 18" r="0.5" color="P" on="B"/>
+  <line at="1 6 18" to="6 6 18" r="0.5" color="P" on="B"/>
+  <line at="17 12 4" to="19 12 4" r="0" color="P" on="B"/>
+  <line at="18 12 4" to="18 12 16" r="0.5" color="P" on="B"/>
+  <line at="18 12 16" to="14 12 19" r="0.5" color="P" on="B"/>
+  <line at="15 4 10" to="15 1 10" r="0" color="P" on="B"/>
+  <line at="15 2 10" to="15 2 19" r="0.5" color="P" on="B"/>
+  <cylinder at="10 10 18" size="5 5 2" color="P" on="B"/>
+  <cylinder at="18 17 0" size="4 4 9" color="p" on="B"/>
+  <cylinder at="3 17 0" size="4 4 7" color="p" on="B"/>
+  <line at="17 16 6" to="16 15 6" r="0.5" color="p" on="B"/>
+  <line at="4 16 5" to="5 15 5" r="0.5" color="p" on="B"/>
+  <box at="2 12 0" size="4 7 9" color="p" on="B"/>
+  <box at="8 3 0" size="7 3 9" color="p" on="B"/>
+  <box at="10 10 12" size="11 9 6" color="P" on="B"/>
+  <box at="2 6 4" size="1 1 1" color="M"/>
+  <box at="18 12 4" size="1 1 1" color="M"/>
+  <box at="15 3 10" size="1 1 1" color="M"/>
+    <box at="18 17 0" size="1 1 1" color="N"/>
+  <box at="2 12 0" size="1 1 1" color="N"/>
+  <box at="8 3 0" size="1 1 1" color="N"/>
+  <box at="10 10 12" size="1 1 1" color="M"/>
+  <box at="3 17 0" size="1 1 1" color="N"/>
+  <prl steps="1">
+    <rule in="M" out="X" p="0.5"/>
+    <rule in="N" out="Y" p="0.5"/>
+  </prl>
+  <all in="XP" out="XX" symmetry="(xyz)"/>
+  <all in="Yp" out="YY" symmetry="(xyz)"/>
+  <all>
+    <rule in="P" out="B"/>
+    <rule in="M" out="B"/>
+    <rule in="p" out="B"/>
+    <rule in="N" out="B"/>
+  </all>
+  <box at="10 10 12" size="11 9 6" color="W" on="X"/>
+  <box at="10 10 17" size="11 9 1" color="d" on="W"/>
+  <box at="10 14 14" size="5 1 1" color="C" on="W"/>
+  <prl steps="1" in="B Y" out="C Y" p="0.3"/>
+  <box at="2 12 6" size="1 7 1" color="C" on="Y"/>
+  <box at="8 3 6" size="7 1 1" color="K" on="Y"/>
+  <!-- L'armadio è vuoto dentro. -->
+  <convolution neighborhood="Moore" steps="1">
+    <rule in="W" out="B" values="B" sum="0"/>
+    <rule in="D" out="B" values="B" sum="0"/>
+    <rule in="Y" out="B" values="B" sum="0"/>
+  </convolution>
+</sequence>

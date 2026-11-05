@@ -1,0 +1,29 @@
+<!-- Una runa raccolta su Sidera: un rintocco che si sdoppia, due note che salgono e una scintilla in alto. Il seme sceglie da dove parte. -->
+<sequence name="Runa quantica" values="BNSAMTH" size="8 2 12" symmetry="()">
+  <sound bpm="260" scale="pentatonic_minor" root="64" swing="0" cutoff="9500" space="0.45">
+    <track y="0" instrument="lead" volume="0.85"/>
+    <track y="1" instrument="pad" volume="0.6"/>
+  </sound>
+  <color symbol="N" value="38bdf8" name="Nota" glow="True"/>
+  <color symbol="S" value="0284c7" name="Tenuta" alpha="0.85"/>
+  <color symbol="A" value="f43f5e" name="Accento" glow="True"/>
+  <color symbol="H" value="fde047" name="Piatto" alpha="0.85"/>
+  <color symbol="M" value="10b981" name="Testa" hidden="True"/>
+  <color symbol="T" value="ec4899" name="Partenza" hidden="True"/>
+
+  <!-- La partenza: una quota fra tre. -->
+  <line at="0 0 1" to="0 0 3" r="0" color="M"/>
+  <one in="M" out="T" steps="1"/>
+  <all in="M" out="B"/>
+  <!-- Il rintocco, poi due note che salgono di un salto scelto dal seme. -->
+  <one steps="1">
+    <rule in="BBB BBB BBB BBB TBB" out="BBN BBB BBB BNB ABB"/>
+    <rule in="BBB BBB BBB BBB TBB" out="BBB BBN BBB BNB ABB"/>
+    <rule in="BBB BBB BBB BBB TBB" out="BBN BBB BNB BBB ABB"/>
+  </one>
+  <all in="ABB" out="ASS"/>
+  <!-- La scintilla, tenuta sotto. -->
+  <line at="2 1 7" to="2 1 7" r="0" color="N"/>
+  <line at="0 1 0" to="0 1 0" r="0" color="H"/>
+  <all in="NBBBB" out="NSSSS"/>
+</sequence>

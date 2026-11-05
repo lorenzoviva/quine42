@@ -1,0 +1,68 @@
+<!-- Grappolo di cristalli di Sidera: punte di cristallo ciano e viola che escono da una roccia scura e bagnata, la più alta al centro.
+     Quante punte e dove, e la forma della roccia, li decide il seme. Cantiere 4C, a mano (Claude Code). -->
+<sequence values="BRrPMXYGgVvCZ" size="20 20 16" symmetry="()" name="Grappolo di cristalli">
+  <color symbol="R" value="23262f" name="roccia bagnata"/>
+  <color symbol="r" value="363a46" name="roccia in luce"/>
+  <color symbol="P" hidden="True" name="punta possibile"/>
+  <color symbol="M" hidden="True" name="segno di una punta"/>
+  <color symbol="X" hidden="True" name="punta ciano"/>
+  <color symbol="Y" hidden="True" name="punta viola"/>
+  <color symbol="G" value="8af3ff" alpha="0.8" name="faccia ciano al sole"/>
+  <color symbol="g" value="2fb1d8" alpha="0.85" name="faccia ciano in ombra"/>
+  <color symbol="V" value="c69bff" alpha="0.8" name="faccia viola al sole"/>
+  <color symbol="v" value="7a4fc9" alpha="0.85" name="faccia viola in ombra"/>
+  <color symbol="Z" hidden="True" name="punta del centro"/>
+  <color symbol="C" value="d8fdff" glow="True" name="cuore che brilla"/>
+
+  <!-- Le punte possibili, di altezze diverse. -->
+  <cone at="6 7 0" size="5 5 12" color="P"/>
+  <cone at="14 6 0" size="5 5 10" color="P"/>
+  <cone at="15 13 0" size="6 6 13" color="P"/>
+  <cone at="6 14 0" size="4 4 9" color="P"/>
+  <cone at="10 4 0" size="4 4 8" color="P"/>
+  <cone at="3 10 0" size="4 4 7" color="P"/>
+  <cone at="17 9 0" size="4 4 8" color="P"/>
+  <cone at="10 16 0" size="5 5 11" color="P"/>
+  <box at="6 7 1" size="1 1 1" color="M"/>
+  <box at="14 6 1" size="1 1 1" color="M"/>
+  <box at="15 13 1" size="1 1 1" color="M"/>
+  <box at="6 14 1" size="1 1 1" color="M"/>
+  <box at="10 4 1" size="1 1 1" color="M"/>
+  <box at="3 10 1" size="1 1 1" color="M"/>
+  <box at="17 9 1" size="1 1 1" color="M"/>
+  <box at="10 16 1" size="1 1 1" color="M"/>
+  <!-- La punta grande del centro, sempre. -->
+  <cone at="10 10 0" size="7 7 16" color="Z"/>
+  <box at="10 10 2" size="1 1 9" color="C"/>
+
+  <!-- Il seme sceglie le punte, ciano o viola. -->
+  <prl steps="1">
+    <rule in="M" out="X" p="0.3"/>
+    <rule in="M" out="Y" p="0.35"/>
+  </prl>
+  <all in="XP" out="*X" symmetry="(xyz)"/>
+  <all in="YP" out="*Y" symmetry="(xyz)"/>
+  <all>
+    <rule in="P" out="B"/>
+    <rule in="M" out="B"/>
+    <rule in="Z" out="X"/>
+  </all>
+
+  <!-- La roccia attorno al piede, che cresce come vuole. -->
+  <ellipsoid at="10 10 -3" size="15 13 7" color="R" on="B"/>
+  <one steps="160" in="RB" out="RR" symmetry="(xy)"/>
+  <one steps="60" in="B R" out="R R"/>
+  <all in="B R" out="B r"/>
+
+  <!-- Le facce: chiare dove guardano il sole, scure dall'altra parte. -->
+  <all>
+    <rule in="BX" out="*G"/>
+    <rule in="B/X" out="*/G"/>
+    <rule in="BY" out="*V"/>
+    <rule in="B/Y" out="*/V"/>
+  </all>
+  <all>
+    <rule in="X" out="g"/>
+    <rule in="Y" out="v"/>
+  </all>
+</sequence>

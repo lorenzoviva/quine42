@@ -1,0 +1,20 @@
+{
+  "id": "obj.reattore",
+  "name": "Reattore a fusione",
+  "kind": "entity",
+  "version": "1.0.0",
+  "description": "Un reattore a fusione da sala, un anello di lega attorno a un nucleo azzurro che pulsa: scalda i quartieri e accende i lampioni. Quello del Cantiere lo chiamano la Nonna.",
+  "context": "nelle sale del Cantiere della Fusione",
+  "logic": "logic.lua",
+  "appearance": { "model": "sidera-reattore", "glyph": "◎", "color": "#5fd3ff", "aspetto": "un reattore a toro di lega grigia con un nucleo azzurro luminoso al centro" },
+  "physics": { "solid": true, "radius": 0.5 },
+  "tags": ["reattore", "macchina", "cantiere"],
+  "components": { "luce": { "raggio": 4, "accesa": true, "colore": "#5fd3ff" }, "reattore": { "carico": 60, "spurgo": 0 } },
+  "actions": [
+    { "id": "controlla", "label": "Controlla il nucleo" },
+    { "id": "spurga", "label": "Spurga le valvole", "requires": "item.chiave-dinamometrica" },
+    { "id": "preleva", "label": "Preleva una bottiglia di plasma" },
+    { "id": "salda", "label": "Salda un debito di celle davanti al nucleo", "requires": "item.cella-energetica" }
+  ],
+  "spawn": { "tiles": ["l"], "chance": 0.05, "max": 1 }
+}
