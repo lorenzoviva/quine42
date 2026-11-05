@@ -22,7 +22,7 @@ const START = path.join(DIR, 'avvio.md');
 const LONG = path.join(DIR, 'messaggio.md');
 const QUADRO = path.join(REPO, 'docs', 'pipeline', 'quadro.md');
 const RUNS = path.join(STATE_DIR, 'esecuzioni.json');
-const OPTS = { ordine: ['claude', 'argon', 'gemini'], finestra: { claude: 200_000, argon: 1_000_000, gemini: 1_000_000 }, rotazione: 0.35, soglia: CONFIG.sogliaUnSolo, chat: 20, porta: 4242, ...CONFIG.orchestra };
+const OPTS = { ordine: ['claude', 'argon', 'gemini'], finestra: { claude: 200_000, fable: 200_000, argon: 1_000_000, gemini: 1_000_000 }, rotazione: 0.35, soglia: CONFIG.sogliaUnSolo, chat: 20, porta: 4242, ...CONFIG.orchestra };
 
 const inboxFile = (stateDir = STATE_DIR) => path.join(stateDir, 'orchestra', 'coda.json');
 

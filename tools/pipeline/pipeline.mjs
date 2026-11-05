@@ -125,8 +125,39 @@ export function sessionCost(provider, estimate, config = CONFIG) {
   return scaledEstimate(provider, estimate, config) * (config.providers?.[provider]?.ratioSessioneSettimana ?? 10);
 }
 
-/** The account whose credits a provider spends: Fable spends also those of Claude, so it must leave them to the orchestrator. */
-const accountOf = (provider, config = CONFIG) => config.providers?.[provider]?.stessoContoDi ?? provider;
+/** The account whose credits a provider spends: Fable, Sonnet and Haiku spend also those of Claude, so they must leave them to the orchestrator. */
+export const accountOf = (provider, config = CONFIG) => config.providers?.[provider]?.stessoContoDi ?? provider;
+
+export const EFFORTS = ['low', 'medium', 'high', 'extra', 'xhigh', 'max'];
+
+export function normalizeEffort(value) {
+  if (value === undefined || value === null || value === '') return undefined;
+  const clean = String(value).trim().toLowerCase().replace(/^sforzo\s+/, '');
+  if (!EFFORTS.includes(clean)) throw new Error(`Sforzo non valido: ${value} (valori ammessi: ${EFFORTS.join('|')})`);
+  return clean;
+}
+
+const MODEL_NAMES = {
+  'claude-opus-5-5': 'Opus 5.5',
+  'claude-sonnet-5-5': 'Sonnet 5.5',
+  'claude-haiku-5-5': 'Haiku 5.5',
+  'claude-fable-5-1': 'Fable 5.1',
+  'gemini-3.8-flash-high': 'Gemini 3.8 Flash',
+  'gemini-4-argon-high': 'Gemini 4 Argon',
+  'claude-opus-5-5-high': 'Opus 5.5 (agy)',
+  'claude-sonnet-5-5-high': 'Sonnet 5.5 (agy)',
+};
+
+/** The display name of a provider's model (so `claude` reads as Opus 5.5 in `stato`, `indice` and `assegna`). */
+export function modelOf(provider, config = CONFIG) {
+  const conf = config?.providers?.[provider] ?? CONFIG.providers?.[provider];
+  if (conf?.modello) return conf.modello;
+  const args = Array.isArray(conf?.args) ? conf.args : [];
+  const idx = args.indexOf('--model');
+  const raw = idx >= 0 ? args[idx + 1] : undefined;
+  if (raw && MODEL_NAMES[raw]) return MODEL_NAMES[raw];
+  return raw ?? provider;
+}
 
 const RESET_NEAR_MS = 20 * 60_000;
 const MAX_SESSION_NEEDED = 85;
@@ -366,12 +397,13 @@ export function parseBacklog(text) {
   return tasks;
 }
 
-/** `claude · stima 4% · approvato · priorità 2` → { provider, estimate, approved, priority, needsBrowser }. */
+/** `claude · sforzo max · stima 4% · approvato · priorità 2` → { provider, sforzo?, estimate, approved, priority, needsBrowser }. */
 export function parsePipelineLine(line) {
   const parts = line.split('·').map((s) => s.trim().toLowerCase());
   const out = { provider: undefined, estimate: undefined, approved: false, priority: 100, needsBrowser: false };
   for (const p of parts) {
     if (CONFIG.providers[p]) out.provider = p;
+    else if (/^sforzo\s+(low|medium|high|extra|xhigh|max)$/.test(p)) out.sforzo = /^sforzo\s+(\S+)$/.exec(p)[1];
     else if (/^stima\s+[\d.]+\s*%$/.test(p)) out.estimate = Number(/[\d.]+/.exec(p)[0]);
     else if (p === 'approvato') out.approved = true;
     else if (/^priorit[àa]\s+\d+$/.test(p)) out.priority = Number(/\d+/.exec(p)[0]);
@@ -583,12 +615,12 @@ export function startsOver(run, t) {
 }
 
 /** What stays of a run that gives way to a new one: what `dossier` and `traccia` say of it. */
-const pastAttempt = (r) => ({ provider: r.provider, tentativi: r.tentativi, stato: r.stato, inizio: r.inizio, fine: r.fine, integrato: r.integrato, esito: r.esito, browser: r.browser, sessione: r.sessione, dir: r.dir, log: r.log });
+const pastAttempt = (r) => ({ provider: r.provider, ...(r.sforzo ? { sforzo: r.sforzo } : {}), tentativi: r.tentativi, stato: r.stato, inizio: r.inizio, fine: r.fine, integrato: r.integrato, esito: r.esito, browser: r.browser, sessione: r.sessione, dir: r.dir, log: r.log });
 
 /** The run that waits to start over: no worktree, no conversation, attempts from zero, the old ones in `precedenti`. */
 export function retireRun(run) {
   if (run.stato === DA_CAPO) return run;
-  return { id: run.id, provider: run.provider, stima: run.stima, stato: DA_CAPO, tentativi: 0, precedenti: [...(run.precedenti ?? []), pastAttempt(run)] };
+  return { id: run.id, provider: run.provider, ...(run.sforzo ? { sforzo: run.sforzo } : {}), stima: run.stima, stato: DA_CAPO, tentativi: 0, precedenti: [...(run.precedenti ?? []), pastAttempt(run)] };
 }
 
 /** The log of a run's attempt; a run that started over does not overwrite the logs of the one before. */
@@ -633,9 +665,9 @@ const describe = (b) => `settimana ${b.residuo} %, 5 ore ${b.sessione ?? '?'} %$
 
 export function writePlan(queues, budget, opts) {
   const p = pathsOf(opts);
-  const line = (t) => `- **${t.id}** ${t.title}${t.provider ? ` — ${t.provider}, ${t.estimate ?? '?'} %` : ''}${t.missing ? ` (aspetta ${t.missing.join(', ')})` : ''}`;
+  const line = (t) => `- **${t.id}** ${t.title}${t.provider ? ` — ${t.provider} (${modelOf(t.provider, p.config)})${t.sforzo ? `, sforzo ${t.sforzo}` : ''}, ${t.estimate ?? '?'} %` : ''}${t.missing ? ` (aspetta ${t.missing.join(', ')})` : ''}`;
   const section = (title, list) => `## ${title} (${list.length})\n\n${list.map(line).join('\n') || '_nessuno_'}\n`;
-  const budgets = Object.entries(budget).map(([prov, b]) => `- **${prov}**: ${describe(b)}${b.letto ? ` (letto da /usage il ${b.letto})` : ' (impostato a mano)'}` +
+  const budgets = Object.entries(budget).map(([prov, b]) => `- **${prov}** (${modelOf(prov, p.config)}): ${describe(b)}${b.letto ? ` (letto da /usage il ${b.letto})` : ' (impostato a mano)'}` +
     (b.contatori ?? []).map((c) => `\n  - ${c.nome}, ${c.finestra}: ${c.residuo} % residuo, reset ${c.reset}`).join('')).join('\n');
   const text = `# Il piano della pipeline\n\n> Generato da \`node tools/pipeline/pipeline.mjs stato\` il ${now()}: non modificarlo a mano,\n> la fonte è \`docs/plans/backlog.md\` (righe \`- Pipeline:\`).\n\n## Budget\n\nOrchestratore: **${orchestrator(opts)}** (sotto il ${p.config.sogliaUnSolo} % nessun task su di lui; si cambia con \`orchestratore <provider>\`).\n\n${budgets}\n\n` +
     [['In corso', queues.inCorso], ['Finiti, da guardare e integrare (`integra Txx`)', queues.daIntegrare], ['Pronti, in ordine di priorità', queues.pronti], ['Da approvare (provider e stima proposti)', queues.daApprovare],
@@ -718,30 +750,62 @@ export function taskContext(t, opts) {
 }
 
 /**
+ * Builds the CLI arguments for a task run on its provider, applying `sforzo`:
+ * - `cmd: "claude"`: `--effort <level>` (`extra` mapped to `xhigh`).
+ * - `cmd: "agy"`: replaces trailing `-(low|medium|high)` on `--model` with `-low`, `-medium` or `-high` (`high|extra|xhigh|max`).
+ */
+export function launchArgs(t, run = {}, { resume = Boolean(run.sessione), config = CONFIG } = {}) {
+  const conf = config.providers[t.provider];
+  const rawSforzo = t.sforzo ?? run.sforzo ?? conf.sforzo;
+  const sforzo = rawSforzo ? normalizeEffort(rawSforzo) : undefined;
+  const baseArgs = [...(conf.args ?? [])];
+  if (sforzo) {
+    if (conf.cmd === 'claude') {
+      const cliEffort = sforzo === 'extra' ? 'xhigh' : sforzo;
+      const idx = baseArgs.indexOf('--effort');
+      if (idx >= 0) baseArgs[idx + 1] = cliEffort;
+      else baseArgs.push('--effort', cliEffort);
+    } else if (conf.cmd === 'agy') {
+      const suffix = sforzo === 'low' ? 'low' : sforzo === 'medium' ? 'medium' : 'high';
+      const idx = baseArgs.indexOf('--model');
+      if (idx >= 0 && typeof baseArgs[idx + 1] === 'string' && /-(low|medium|high)$/.test(baseArgs[idx + 1])) {
+        baseArgs[idx + 1] = baseArgs[idx + 1].replace(/-(low|medium|high)$/, `-${suffix}`);
+      }
+    }
+  }
+  return resume
+    ? [...baseArgs, ...(conf.resume ?? []).map((a) => a.replace('{sessione}', run.sessione)), '-p', RESUME]
+    : [...baseArgs, ...(conf.sessioneNuova ?? []).map((a) => a.replace('{sessione}', run.sessione)), '-p', taskPrompt(t, run)];
+}
+
+/**
  * Starts (or resumes) the CLI of a task's provider; resolves with the run when the process ends. The process writes
  * straight into its log and is detached: it outlives the pipeline's process, which finds it again when it restarts
  * (`adopt`). A provider that lets us name the session (`sessioneNuova`: Claude's `--session-id`) has it from the start,
  * so even a run killed before its first answer resumes its conversation.
  */
-export function launch(t, run, saveRuns = () => {}) {
-  const conf = CONFIG.providers[t.provider];
+export function launch(t, run, saveRuns = () => {}, opts = {}) {
+  const config = opts.config ?? CONFIG;
+  const logsDir = opts.logs ?? LOGS;
+  const spawnFn = opts.spawn ?? spawn;
+  const conf = config.providers[t.provider];
   const resume = Boolean(run.sessione);
+  const rawSforzo = t.sforzo ?? run.sforzo ?? conf.sforzo;
+  if (rawSforzo) run.sforzo = normalizeEffort(rawSforzo);
   if (!resume && conf.sessioneNuova) run.sessione = randomUUID();
   // A resumed conversation has already read it.
-  if (!resume) fs.writeFileSync(path.join(run.dir, TASK_CONTEXT), taskContext(t));
-  const args = resume
-    ? [...conf.args, ...conf.resume.map((a) => a.replace('{sessione}', run.sessione)), '-p', RESUME]
-    : [...conf.args, ...(conf.sessioneNuova ?? []).map((a) => a.replace('{sessione}', run.sessione)), '-p', taskPrompt(t, run)];
-  fs.mkdirSync(LOGS, { recursive: true });
-  const log = runLog(LOGS, run);
+  if (!resume) fs.writeFileSync(path.join(run.dir, TASK_CONTEXT), taskContext(t, opts));
+  const args = launchArgs(t, run, { resume, config });
+  fs.mkdirSync(logsDir, { recursive: true });
+  const log = runLog(logsDir, run);
   const fd = fs.openSync(log, 'w');
   // PIPELINE_TASK: who holds a turn (`turno`) started by the task.
-  const child = spawn(conf.cmd, args, { cwd: run.dir, stdio: ['ignore', fd, fd], windowsHide: true, detached: true, env: { ...process.env, PIPELINE_TASK: t.id } });
+  const child = spawnFn(conf.cmd, args, { cwd: run.dir, stdio: ['ignore', fd, fd], windowsHide: true, detached: true, env: { ...process.env, PIPELINE_TASK: t.id } });
   fs.closeSync(fd);
   Object.assign(run, { pid: child.pid, log });
   saveRuns(run.id);
   // agy cannot be given an id and says it only at the end: it is read from its files as soon as it writes them (T86).
-  const watch = !run.sessione && conf.cmd === 'agy' ? watchAgyConversation(t.id, run, saveRuns) : undefined;
+  const watch = !run.sessione && conf.cmd === 'agy' && !opts.spawn ? watchAgyConversation(t.id, run, saveRuns) : undefined;
   return new Promise((resolve) => {
     const done = (r) => { if (watch) clearInterval(watch); resolve(r); };
     child.on('error', (e) => done({ code: -1, text: `${readText(log)}\n${e.message}`, log }));
@@ -851,7 +915,7 @@ export async function execute({ max = CONFIG.maxParalleli, only, task, always = 
     // Suspended runs whose limit has reset come first; then ready tasks within the budget.
     const candidates = [
       ...Object.values(runs).filter((r) => r.stato === 'sospeso' && !r.integrato && !active.has(r.id) && new Date(r.fermoFino) <= new Date())
-        .map((r) => ({ ...tasks.find((t) => t.id === r.id), id: r.id, provider: r.provider, estimate: r.stima })),
+        .map((r) => ({ ...tasks.find((t) => t.id === r.id), id: r.id, provider: r.provider, estimate: r.stima, ...(r.sforzo ? { sforzo: r.sforzo } : {}) })),
       ...queues.pronti.filter((t) => (!runs[t.id] || startsOver(runs[t.id], t)) && (!task || t.id === task)),
     ];
     for (const t of stop ? [] : candidates) {
@@ -865,7 +929,9 @@ export async function execute({ max = CONFIG.maxParalleli, only, task, always = 
       if (holdBack(t, live, { resuming, lastLaunch })) continue;
       const b = budget[prov];
       const past = !resuming && runs[t.id] ? retireRun(runs[t.id]).precedenti : undefined;
-      const run = resuming ? runs[t.id] : { id: t.id, provider: prov, stima: t.estimate, tentativi: 0, inizio: now(), ...(past ? { precedenti: past } : {}), ...(() => { const w = taskWorktree(t.id); return { dir: w.dir, branch: w.branch }; })() };
+      const sforzo = t.sforzo ?? runs[t.id]?.sforzo ?? CONFIG.providers[prov]?.sforzo;
+      const run = resuming ? runs[t.id] : { id: t.id, provider: prov, ...(sforzo ? { sforzo } : {}), stima: t.estimate, tentativi: 0, inizio: now(), ...(past ? { precedenti: past } : {}), ...(() => { const w = taskWorktree(t.id); return { dir: w.dir, branch: w.branch }; })() };
+      if (sforzo) run.sforzo = sforzo;
       run.tentativi += 1;
       run.needsBrowser = Boolean(t.needsBrowser);
       if (!resuming) lastLaunch = Date.now();
