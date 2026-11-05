@@ -14,6 +14,8 @@ export function fakeHost() {
     destroy: () => {},
     first: () => undefined,
     held: () => false,
+    store_get: () => undefined,
+    store_set: () => false,
     free: () => true,
     free_real: () => true,
     tile: () => 'g',

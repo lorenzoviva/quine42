@@ -804,6 +804,8 @@ local function make_api()
     set_tile = function(x, y, code) return host.set_tile(x, y, tostring(code)) end,
     open = function(id) return host.open(id) end,
     make_container = function(id, size, loot) return host.make_container(id, size or 6, tostring(loot or "cassa")) end,
+    store_get = function(key) return host.store_get(tostring(key)) end,
+    store_set = function(key, value) return host.store_set(tostring(key), value) end,
   }
   local inventory = {
     add = function(id, item, n) return host.inv_add(id, tostring(item), n or 1) end,

@@ -62,6 +62,7 @@ import { CardUses, CARDS_FILE, COMUNE, allCards, collectionOf, moduleCardId, rec
 import { bondWith, memoriesFor, playerFile, PLAYERS_DIR, readWandererState, repairProfile, SOLO, validWandererId, WANDERER_NAME, wandererColor, wandererOf, wanderersIn, type Profile, type ProfileRepair, type Wanderer, type WandererState, PER_WANDERER } from './wanderers';
 import type { ActionDef, AiSettings, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, GameSetup, ChunkInfo, Recipe, RuneFragment, TerrainDef, UniverseConfig } from './types';
 import { checkKernelVersion, KERNEL_VERSION, stampKernel } from './version';
+import { ModuleStores } from './store';
 
 /** A solid entity with a model, as collision sees it: where it is, its form, where it blocks and its floors. */
 interface SolidForm extends Ground {
@@ -372,6 +373,25 @@ export const GIVE_REACH = 3;
 export const SAY_MAX = 140;
 
 /** The effects the kernel applies itself (T260): the relief, and the social ones of a judgement. */
+/**
+ * The fields of world/stato.json and of a wanderer's file that this kernel reads and writes, those of before it migrates included (T245a):
+ * any other field is a kernel of tomorrow's, and the save keeps it as it was. Credits are not data of the universe (ADR-0104): never kept.
+ */
+const STATE_FIELDS: ReadonlySet<string> = new Set(['consumati', 'contenitori', 'forme', 'rari', 'ora', 'importanti', 'viandante']);
+const WANDERER_FIELDS: ReadonlySet<string> = new Set(['nome', 'profilo', 'pos', 'inventory', 'needs', 'hand', 'stati', 'slots', 'trasceso', 'anonimo', 'crediti']);
+
+/** The fields of a saved JSON object that are not in `known`. */
+function unknownFields(src: string | undefined, known: ReadonlySet<string>): Record<string, unknown> {
+  if (!src) return {};
+  try {
+    const v = JSON.parse(src);
+    if (!v || typeof v !== 'object' || Array.isArray(v)) return {};
+    return Object.fromEntries(Object.entries(v).filter(([k]) => !known.has(k) && k !== '__proto__'));
+  } catch {
+    return {};
+  }
+}
+
 const KERNEL_EFFECTS = new Set(['rilievo', 'legame', 'ricordo', 'nascita']);
 /** The effects every core.effects of the contract 0.1 applies: what a core.effects without `handles` is trusted with (T260). */
 const CORE_EFFECTS_0_1 = new Set(['messaggio', 'bisogni', 'crea_oggetto', 'consuma', 'distruggi', 'apri', 'contenitore', 'terreno', 'fuoco', 'luce', 'scudo', 'spingi', 'evoca', 'stato', 'togli_stato']);
@@ -721,6 +741,9 @@ export class Kernel {
       },
       first: (name) => this.ecs.query(name)[0],
       held: (a) => this.wanderer().id === this.inputFor && this.input.isHeld(a),
+      // The lasting store (T245a, ADR-0138): the module running is the only one whose data a call sees. A rune, a mirror: nothing.
+      store_get: (key) => (this.luaModule && !this.mirror ? this.stores.get(this.luaModule, key) : undefined),
+      store_set: (key, value) => !!this.luaModule && !this.mirror && this.stores.set(this.luaModule, key, value),
       free: (x, y, r, z) => this.free(x, y, r, typeof z === 'number' ? z : undefined),
       free_real: (x, y, r, z) => this.freeReal(x, y, r, typeof z === 'number' ? z : undefined),
       tile: (x, y) => this.tileAt(Math.floor(x), Math.floor(y)) ?? '',
@@ -819,7 +842,14 @@ export class Kernel {
     const key = `module:${id}:${fn}`;
     this.faultFlag = null;
     this.seedLua(key, typeof args[0] === 'number' ? args[0] : 0);
-    const value = this.sandbox.run(id, fn, ...args);
+    const outer = this.luaModule;
+    this.luaModule = id;
+    let value: unknown;
+    try {
+      value = this.sandbox.run(id, fn, ...args);
+    } finally {
+      this.luaModule = outer;
+    }
     const failed = this.faultFlag === key;
     if (!failed) this.faults.clear(key);
     return { value, failed };
@@ -1288,6 +1318,7 @@ export class Kernel {
     if (radiusChanged) this.corona = new Corona(config.circleRadius);
 
     if (opts.reset) {
+      this.stores.load(files);
       this.sandbox.reset();
       this.loaded.clear();
       this.lines.clear();
@@ -7311,6 +7342,10 @@ export class Kernel {
   /** Containers opened in earlier sessions, by stable origin: they keep what was left in them. */
   private savedContainers = new Map<string, { inv: Inventory; filled: boolean }>();
   private lastState = '';
+  /** The lasting stores of the modules (T245a, ADR-0138): `world/magazzino/`, saved with the game. */
+  readonly stores = new ModuleStores();
+  /** The module whose Lua runs now: whose store `world.store_get/set` reach. */
+  private luaModule: string | undefined;
   /** Files the player wrote that are not a valid state (T262, ADR-0137): in the working files, never in a commit. */
   private unsaved = new Set<string>();
 
@@ -7338,10 +7373,14 @@ export class Kernel {
     const players = Object.fromEntries([...this.wanderersById.values()].map((w) => [playerFile(w.id), this.as(w.id, () => this.wandererState(w))]));
     // A request that ended badly commits nothing of its own: the save carries it (`beforeCommit`), even if nothing else moved.
     const json = JSON.stringify([state, players, this.shortfalls.version]);
-    if (json === this.lastState) return false;
+    const stores = this.stores.takeChanged();
+    if (json === this.lastState && !Object.keys(stores).length) return false;
     this.lastState = json;
-    const written: FileMap = {};
-    for (const [p, v] of Object.entries({ 'world/stato.json': state, ...players })) {
+    const written: FileMap = { ...stores };
+    for (const [p, v] of Object.entries(stores)) this.repo.write(p, v);
+    // What this kernel does not know of a file it saves stays in it (T245a): a kernel of tomorrow wrote it, a kernel of today keeps it.
+    const kept = (p: string, v: object, known: ReadonlySet<string>) => ({ ...unknownFields(this.repo.working[p], known), ...v });
+    for (const [p, v] of Object.entries({ 'world/stato.json': kept('world/stato.json', state, STATE_FIELDS), ...Object.fromEntries(Object.entries(players).map(([q, w]) => [q, kept(q, w, WANDERER_FIELDS)])) })) {
       this.repo.write(p, JSON.stringify(v, null, 1) + '\n');
       written[p] = this.repo.working[p]!;
     }

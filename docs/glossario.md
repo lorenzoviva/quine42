@@ -290,6 +290,13 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Da non usare**: `mod`
 - **Fermo**: i valori di `kind` (compreso `player`).
 
+### Magazzino
+- **Inglese**: `ModuleStores`, `stores`, `store_get`, `store_set`, `STORE_DIR`
+- **Definizione**: ciò che un modulo tiene da un'apertura del mondo all'altra e che non è una casella (un prezzo, un contatore, un tabellone), sotto chiavi semplici, in un file per modulo, con un tetto in byte per modulo e per universo (T245a, ADR-0138). Ogni modulo vede solo il suo; non va mai ai client.
+- **Dove vive**: `src/kernel/store.ts`, `world/magazzino/<modulo>.json`
+- **Da non usare**: `store` (nei documenti e nella UI), `deposito` (per il magazzino di un modulo), `memoria del modulo`
+- **Fermo**: `world.store_get`, `world.store_set`, la cartella `world/magazzino/`.
+
 ### Sistema
 - **Inglese**: `system`
 - **Definizione**: un modulo con `update(dt)`, eseguito a ogni tick nell'ordine di `order`.
@@ -805,6 +812,13 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Dove vive**: `src/kernel/coefficients.ts`
 - **Da non usare**: nessuno
 - **Fermo**: `ai.coefficienti`.
+
+### Vite degli individui
+- **Inglese**: `vite` (la chiave), `ABSENT`
+- **Definizione**: la manopola del realismo degli individui (T245a, ADR-0138): Cronaca a 0, Vita a 0,5, Teatro a 1. Assente vale 0, a differenza delle altre manopole, così un universo di prima non spende per ciò che non ha scelto; si fissa entrando come tutte (ADR-0133).
+- **Dove vive**: `src/kernel/coefficients.ts`
+- **Da non usare**: `realismo` (per la manopola), `grado di vita`
+- **Fermo**: `ai.coefficienti.vite`, i nomi `Cronaca`, `Vita`, `Teatro`.
 
 ### Consumi
 - **Inglese**: `usage`, `UsageLog`

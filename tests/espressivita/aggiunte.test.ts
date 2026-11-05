@@ -81,7 +81,7 @@ describe('a new field', () => {
     expect(up.description).toBe('la nostra');
   });
 
-  it('TRAP: in the saved state, what the kernel does not know is thrown away at the next save', async () => {
+  it('in the saved state, what the kernel does not know stays at the next save (T245a: once a TRAP, it was thrown away)', async () => {
     const w = newLasting({
       ...bundledFiles,
       'world/stato.json': JSON.stringify({ consumati: [], ora: 5, di_domani: { x: 1 } }),
@@ -90,8 +90,8 @@ describe('a new field', () => {
     const k = await open(w);
     k.give('item.pane', 1);
     await closeWorld(k, w);
-    expect(JSON.parse(w.files['world/stato.json']).di_domani).toBeUndefined();
-    expect(JSON.parse(w.files['world/giocatori/io.json']).di_domani).toBeUndefined();
+    expect(JSON.parse(w.files['world/stato.json']).di_domani).toEqual({ x: 1 });
+    expect(JSON.parse(w.files['world/giocatori/io.json']).di_domani).toBe(1);
   });
 });
 

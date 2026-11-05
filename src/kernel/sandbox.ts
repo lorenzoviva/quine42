@@ -17,6 +17,10 @@ export interface Host {
   destroy(id: number): void;
   first(name: string): number | undefined;
   held(action: string): boolean;
+  /** What the module running keeps under a key in its lasting store (T245a, ADR-0138), or undefined. */
+  store_get(key: string): unknown;
+  /** Keeps a value in the store of the module running (nil takes it away); false when the key, the value or the caps say no. */
+  store_set(key: string, value: unknown): boolean;
   /** z: the height of the feet (tiles, `pos.z`), the floor of a structure one is on (T53b). */
   free(x: number, y: number, r: number, z?: number): boolean;
   free_real(x: number, y: number, r: number, z?: number): boolean;
@@ -348,6 +352,8 @@ function emptyHost(): Host {
     destroy: () => {},
     first: () => undefined,
     held: () => false,
+    store_get: () => undefined,
+    store_set: () => false,
     free: () => true,
     free_real: () => true,
     tile: () => '',

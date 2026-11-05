@@ -24,6 +24,7 @@ Funzioni che il kernel chiama, se presenti:
 - `world.nearest(x, y, raggio, tag)` id dell'entità più vicina (tag opzionale) o `nil`
 - `world.has_tag(id, tag)`, `world.break_entity(id)` (la distrugge e lascia cadere i suoi "drops")
 - `world.set_tile(x, y, codice)` (cambia il terreno di una casella, resta cambiato), `world.open(id)` (apre un contenitore al viandante), `world.make_container(id, capienza, bottino)`
+- `world.store_get(chiave)`, `world.store_set(chiave, valore)`: il magazzino del modulo, che dura tra una partita e l'altra (prezzi, contatori, tabelloni, accordi: ciò che non è una casella). Chiavi semplici (lettere, cifre, `_ - . :`), valori da dati (numeri, testi, tabelle); `nil` toglie la chiave; `store_set` restituisce `false` se il magazzino è pieno. Ogni modulo vede solo il suo; i componenti e i `singleton` invece tornano come all'inizio quando il mondo si riapre
 - Effetti pronti: il modulo `core.effects` applica `{ tipo = "fuoco" | "luce" | "scudo" | "terreno" | ... }`; componenti `fuoco`, `luce {raggio, accesa}`, `effimero {fino}` (sparisce a tempo), `scudo {fino}`
 - `world.tile(x, y)` codice del terreno; `world.speed_at(x, y)`; `world.free(x, y, r, z)` (z: `p.z`, l'altezza dei piedi, per chi sta su un piano alto; facoltativo)
 - `world.say(testo)` messaggio al viandante; `world.speak(id, testo)` fumetto sopra un'entità

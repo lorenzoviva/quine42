@@ -9,15 +9,15 @@ import { priceOf, costOf } from './ai/prices';
 import { DEFAULT_SCULPTORS, type SculptorAiModels } from './agents/sculptor';
 import type { AiConfig } from './types';
 
-export const COEFFICIENT_KEYS = ['sessioni', 'dialoghi', 'trame', 'revisioni', 'modelli', 'persone', 'abitanti', 'pacchetti', 'cose', 'brani', 'luoghi', 'parole', 'sguardi', 'azioni', 'magia', 'morte', 'riparazioni', 'studio'] as const;
+export const COEFFICIENT_KEYS = ['sessioni', 'dialoghi', 'trame', 'revisioni', 'modelli', 'persone', 'abitanti', 'pacchetti', 'cose', 'brani', 'luoghi', 'parole', 'sguardi', 'azioni', 'magia', 'morte', 'riparazioni', 'studio', 'vite'] as const;
 export type CoefficientKey = (typeof COEFFICIENT_KEYS)[number];
 export type Coefficients = Record<CoefficientKey, number>;
 
-export const FULL_DETAIL: Coefficients = { sessioni: 1, dialoghi: 1, trame: 1, revisioni: 1, modelli: 1, persone: 1, abitanti: 1, pacchetti: 1, cose: 1, brani: 1, luoghi: 1, parole: 1, sguardi: 1, azioni: 1, magia: 1, morte: 1, riparazioni: 1, studio: 1 };
+export const FULL_DETAIL: Coefficients = { sessioni: 1, dialoghi: 1, trame: 1, revisioni: 1, modelli: 1, persone: 1, abitanti: 1, pacchetti: 1, cose: 1, brani: 1, luoghi: 1, parole: 1, sguardi: 1, azioni: 1, magia: 1, morte: 1, riparazioni: 1, studio: 1, vite: 1 };
 
 /** «Low Detail»: about a fifth of the calls the world makes by itself, and the cheap model for every figure; what the wanderer asks stays answered. */
 export const LOW_DETAIL: { coefficienti: Coefficients; scultori: Partial<SculptorAiModels> } = {
-  coefficienti: { sessioni: 0.25, dialoghi: 0.2, trame: 0.34, revisioni: 0.25, modelli: 0.34, persone: 0.5, abitanti: 0.25, pacchetti: 0.25, cose: 0.34, brani: 0.34, luoghi: 1, parole: 1, sguardi: 1, azioni: 1, magia: 1, morte: 1, riparazioni: 1, studio: 1 },
+  coefficienti: { sessioni: 0.25, dialoghi: 0.2, trame: 0.34, revisioni: 0.25, modelli: 0.34, persone: 0.5, abitanti: 0.25, pacchetti: 0.25, cose: 0.34, brani: 0.34, luoghi: 1, parole: 1, sguardi: 1, azioni: 1, magia: 1, morte: 1, riparazioni: 1, studio: 1, vite: 0.2 },
   scultori: { figura: 'gemini-3.1-flash-lite', struttura: 'gemini-3.1-flash-lite', importante: 'gemini-3.8-flash', artista: 'gemini-3.1-flash-lite', musicista: 'gemini-3.1-flash-lite' },
 };
 
@@ -74,7 +74,14 @@ export const COEFFICIENT_INFO: Record<CoefficientKey, { nome: string; agente: st
   morte: { nome: 'Racconto della morte', agente: 'narratore', modo: 'diretta', testo: 'la parte delle morti che il Narratore racconta', minimo: 'vale la punizione scelta alla Genesi, alla lettera' },
   riparazioni: { nome: 'Riparazioni del codice', agente: 'ingegnere', modo: 'diretta', testo: "la parte dei moduli guasti che l'Ingegnere ripara", minimo: 'il modulo guasto resta isolato finché la partita non ricomincia' },
   studio: { nome: 'Richieste nello studio', agente: 'referente', modo: 'diretta', testo: 'la parte delle richieste al Referente e alle squadre, nella corona, che va ai modelli', minimo: 'nello studio rispondono i modelli locali' },
+  vite: { nome: 'Vite degli individui', agente: 'narratore', modo: 'diretta', testo: 'Cronaca a 0, Vita a 0,5, Teatro a 1: quanto spesso gli individui scelgono, riflettono e hanno mestieri e imprese scritti apposta', minimo: 'Cronaca: gli individui vivono dei loro mestieri come li sa il mondo, nessuno cambia idea' },
 };
+
+/**
+ * What a knob is worth when universe.json does not say it: 1 (the game as it always was), but `vite` (T245a, ADR-0138) is 0, Cronaca. A
+ * universe of before never chose Teatro, and must not pay for it on its own.
+ */
+export const ABSENT: Partial<Record<CoefficientKey, number>> = { vite: 0 };
 
 /** Why the Genesis has no knob in the lobby: it comes before it (the question is in docs/pipeline/domande/T247.md). */
 const GENESIS_ONCE = "una volta, alla Genesi: la lobby viene dopo; chi non vuole pagarla gioca l'universo di esempio";
@@ -163,19 +170,19 @@ export class Rationing {
 
 const PRESETS: Record<string, Coefficients> = { 'low detail': LOW_DETAIL.coefficienti, low: LOW_DETAIL.coefficienti, pieno: FULL_DETAIL, full: FULL_DETAIL };
 
-/** A coefficient from what universe.json says: a number, «0,5», «50%»; clamped to 0-1, 1 when it says nothing. */
-function one(v: unknown): number {
+/** A coefficient from what universe.json says: a number, «0,5», «50%»; clamped to 0-1, `absent` (1) when it says nothing. */
+function one(v: unknown, absent = 1): number {
   let n = typeof v === 'number' ? v : typeof v === 'string' ? Number(v.trim().replace(',', '.').replace(/%$/, '')) / (/%\s*$/.test(v) ? 100 : 1) : NaN;
-  if (!Number.isFinite(n)) return 1;
+  if (!Number.isFinite(n)) return absent;
   if (n > 1 && n <= 100 && typeof v === 'string') n /= 100;
   return Math.round(Math.max(0, Math.min(1, n)) * 100) / 100;
 }
 
 /** The coefficients of `ai.coefficienti`, whatever it says: an object (unknown keys dropped), or a preset's name. */
 export function repairCoefficients(raw: unknown): Coefficients {
-  if (typeof raw === 'string') return { ...(PRESETS[raw.trim().toLowerCase().replace(/[-_«»"]/g, ' ').replace(/\s+/g, ' ')] ?? FULL_DETAIL) };
+  if (typeof raw === 'string') return { ...(PRESETS[raw.trim().toLowerCase().replace(/[-_«»"]/g, ' ').replace(/\s+/g, ' ')] ?? repairCoefficients(undefined)) };
   const r = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
-  return Object.fromEntries(COEFFICIENT_KEYS.map((k) => [k, one(r[k])])) as Coefficients;
+  return Object.fromEntries(COEFFICIENT_KEYS.map((k) => [k, one(r[k], ABSENT[k] ?? 1)])) as Coefficients;
 }
 
 /** Whether the coefficients are «Low Detail»'s. */
@@ -292,6 +299,8 @@ export function hourlyEstimate(ai: AiConfig, date?: string): { righe: HourLine[]
   add(COEFFICIENT_INFO.parole.nome, 'diretta', H.parole * c.parole, played(H.parole * c.parole));
   add(COEFFICIENT_INFO.azioni.nome, 'diretta', H.azioni * c.azioni, text(H.azioni * c.azioni));
   add(COEFFICIENT_INFO.sguardi.nome, 'diretta', H.sguardi * c.sguardi, text(H.sguardi * c.sguardi));
+  // The lives of the people (T245a): their tasks come with T245g-T245i; until then a row with no call, whatever the knob says.
+  add(COEFFICIENT_INFO.vite.nome, 'diretta', 0, 0);
   return { righe: rows, chiamate: Math.round(rows.reduce((s, r) => s + r.chiamate, 0)), dollari: rows.reduce((s, r) => s + r.dollari, 0) };
 }
 
