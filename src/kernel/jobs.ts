@@ -196,7 +196,7 @@ export function matchJob(mestiere: string | undefined, programs: readonly JobPro
 }
 
 /**
- * What a trade brings to the deposit of its place in a day (T245f, ADR-0144): the things it gathers or makes and then carries there
+ * What a trade brings to the deposit of its place in a day (T245f, ADR-0147): the things it gathers or makes and then carries there
  * (`porta` to its place, not into a thing), and what making them uses up. The accounting of the places nobody sees counts with this.
  */
 export function dailyProduce(p: JobProgram): { gathered: Record<string, number>; made: Array<{ oggetto: string; con?: string; quante: number }> } {

@@ -1,4 +1,4 @@
-// T245e (ADR-0143): a building that rises by stages. The program of a structure runs once; its finished grid is shown filtered by the
+// T245e (ADR-0146): a building that rises by stages. The program of a structure runs once; its finished grid is shown filtered by the
 // stage of its venture (a pure function of the grid), with the kernel's site around it; the footprint and the floors follow the stage;
 // the plan of the place says the stage, so it survives a reopening, and a client sees it on the wire.
 

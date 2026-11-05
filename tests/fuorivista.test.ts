@@ -1,4 +1,4 @@
-// T245f (ADR-0144): out of sight. A place nobody sees has no entities and no Lua: once a day, when the day's work ends, the kernel
+// T245f (ADR-0147): out of sight. A place nobody sees has no entities and no Lua: once a day, when the day's work ends, the kernel
 // keeps its accounts (a venture takes from the deposit and adds a day's work of its team, the trades fill their deposits); when the
 // place is seen again what ripened ripens, the buildings are at the stage their ventures reached, and `on_return` says how long it was.
 // In a world of many it is the same kernel, with two wanderers far from the place and from each other. No call to the models.

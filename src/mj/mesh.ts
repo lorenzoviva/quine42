@@ -328,7 +328,7 @@ export function footprint(g: VoxelGrid, palette: Record<string, PaletteEntry>, f
   return out;
 }
 
-// --- A building that rises by stages (T245e, ADR-0143) ---------------------------------------------------------------
+// --- A building that rises by stages (T245e, ADR-0146) ---------------------------------------------------------------
 // The program of a structure runs once, with its seed; the grid it gives is shown filtered by the stage of its venture: the lot
 // marked with stakes and a rope (0), the ground floor (0.2), the walls up to the base of the roof (0.7), the whole with its lights
 // off (0.9), finished (1). The palette has no classes of voxels (a letter is a colour): the stages are heights, not materials.

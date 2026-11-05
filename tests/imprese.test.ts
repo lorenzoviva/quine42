@@ -1,4 +1,4 @@
-// T245d (ADR-0142): the ventures. The work of many towards a result one sees: a file of the world written only by the kernel, a team made
+// T245d (ADR-0145): the ventures. The work of many towards a result one sees: a file of the world written only by the kernel, a team made
 // without calls, materials brought from the deposit, work counted where someone really works, a progress derived from what was brought
 // and worked. Months of clock and reopenings do not change what was done. No call to the models.
 

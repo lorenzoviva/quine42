@@ -139,7 +139,7 @@ export interface ModelObject {
   frames: THREE.Mesh[];
 }
 
-/** A building under way (T245e, ADR-0143): the finished grid as its stage shows it, with the site of the kernel around it. */
+/** A building under way (T245e, ADR-0146): the finished grid as its stage shows it, with the site of the kernel around it. */
 const staged = new Map<string, THREE.BufferGeometry>();
 export function stagedBody(k: Kernel, f: Form, done: string[], stadio: number): THREE.BufferGeometry {
   const key = `${f.key}|${done.join(',')}|${stadio}`;

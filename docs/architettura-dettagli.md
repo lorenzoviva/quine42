@@ -216,7 +216,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   `sys.lavoro`, il luogo è `mestiere.luogo`, `placeDeposit`), `produci` consuma `con` e fa un pezzo al banco, `usa` chiama l'`on_act`
   di una cosa con l'individuo come chi la usa (`world.act`, solo azioni senza effetti, entro 2,5 caselle). La via vede le forme dei
   modelli (`free`); chi è fermo a meno di tre caselle dalla meta è arrivato, chi è fermo lontano per otto secondi lascia il compito.
-- **Le imprese** (T245d, ADR-0142, `src/kernel/ventures.ts`): il lavoro di molti verso un risultato che si vede, in `world/imprese.json`,
+- **Le imprese** (T245d, ADR-0145, `src/kernel/ventures.ts`): il lavoro di molti verso un risultato che si vede, in `world/imprese.json`,
   scritto solo dal kernel (in memoria, nel file con il salvataggio come il magazzino; mai ai client; torna indietro con `R`). Il
   **progresso è derivato** da `portati` e `lavorato` (`ventureProgress`: la fase di adesso è la prima con materiali o lavoro che
   mancano; il lavoro conta solo fin dove i materiali lo permettono, `workAllowed`); lo stato si legge (`ventureState`: `in corso`,
@@ -236,14 +236,14 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   Il **pannello** «Il cantiere» (`ui` di `sys.lavoro`): i campi `cantiere.*` sul corpo di ogni viandante, l'impresa più vicina entro 30
   caselle, viaggiano con W (ADR-0139); il pulsante porta dalla borsa ciò che serve, a meno di 6 caselle dal cantiere, e chi è lì lo
   ricorda (peso 2).
-- **L'edificio per stadi** (T245e, ADR-0143): il programma della struttura gira una volta; la griglia finita si mostra filtrata per lo
+- **L'edificio per stadi** (T245e, ADR-0146): il programma della struttura gira una volta; la griglia finita si mostra filtrata per lo
   stadio dell'impresa (`stageGrid` in `src/mj/mesh.ts`, pura: le quote del primo pavimento e della base del tetto dagli strati pieni
   della griglia; 0 niente, 0,2 il piano terra, fino a 0,7 i muri, da 0,9 tutto a luci spente, 1 com'è), con il cantiere attorno (un
   voxel in più per lato: picchetti e corda a 0, impalcature mentre sale). Impronta, pavimenti e piani seguono lo stadio senza il
   cantiere (`groundOf`); le stanze valgono dal tetto. Lo stadio sta nel piano del luogo (`plan.stadi` per i lotti, `plan.case` per
   le case nuove), che il kernel aggiorna quando una fase si chiude (`syncVenturePlan`) e che `settleLots` legge; sul filo va solo
   `struttura.stadio`, e il renderer rifà la mesh dell'istanza (`stagedBody`).
-- **Fuori vista** (T245f, ADR-0144): un luogo non caricato non ha Lua; una volta al giorno, quando comincia la sera, il kernel tiene i
+- **Fuori vista** (T245f, ADR-0147): un luogo non caricato non ha Lua; una volta al giorno, quando comincia la sera, il kernel tiene i
   conti (`awayTick`): un'impresa di un luogo non caricato prende dal deposito ciò che le serve e aggiunge un giorno di lavoro per
   ognuno della squadra (`AWAY_WORK`), i mestieri dei luoghi non caricati e in nessuna impresa portano al deposito del loro luogo ciò
   che portano in un giorno (`dailyProduce`, fino a 60 per oggetto); un orologio spostato in avanti conta una volta. Al **ritorno**

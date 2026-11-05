@@ -55,11 +55,11 @@ export interface ChunkPlan {
   edits?: Record<string, string>;
   /** The day of the world each edit was written (T245b, ADR-0140): what ripens counts from there. An edit without one is of today. */
   giorni?: Record<string, number>;
-  /** The stage of the building of a lot that a venture is putting up again (T245e, ADR-0143): lot origin → 0..1. Absent: standing. */
+  /** The stage of the building of a lot that a venture is putting up again (T245e, ADR-0146): lot origin → 0..1. Absent: standing. */
   stadi?: Record<string, number>;
   /** The houses the ventures build on free ground (T245e): where, which model and seed, and their stage. */
   case?: PlannedHouse[];
-  /** When it was last left (T245f, ADR-0144): seconds of the world, only while nobody sees it; at the return the kernel says how long. */
+  /** When it was last left (T245f, ADR-0147): seconds of the world, only while nobody sees it; at the return the kernel says how long. */
   visto?: number;
   /** The ground dug (negative) or raised after the layout (T51b): cell index → levels. */
   scavi?: Record<string, number>;

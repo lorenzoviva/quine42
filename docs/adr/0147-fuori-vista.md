@@ -1,10 +1,10 @@
-# ADR-0144 — Fuori vista: la contabilità dei luoghi che nessuno vede, il ritorno, `on_return`
+# ADR-0147 — Fuori vista: la contabilità dei luoghi che nessuno vede, il ritorno, `on_return`
 
-Data: 2026-11-05 · Stato: accettato (task T245f del backlog) · Riferimenti: D8 dell'autore (04/11: il progetto lasciava aperta la fase), `docs/design/comportamento-npc.md` (sezione 5), `docs/design/espressivita.md` (primitiva O), ADR-0110 (il mondo di molti in un processo), ADR-0114 (il mondo vuoto si ferma), ADR-0140, ADR-0141, ADR-0142, ADR-0143
+Data: 2026-11-05 · Stato: accettato (task T245f del backlog) · Riferimenti: D8 dell'autore (04/11: il progetto lasciava aperta la fase), `docs/design/comportamento-npc.md` (sezione 5), `docs/design/espressivita.md` (primitiva O), ADR-0110 (il mondo di molti in un processo), ADR-0114 (il mondo vuoto si ferma), ADR-0140, ADR-0141, ADR-0145, ADR-0146
 
 ## Contesto
 
-Un luogo lontano dai viandanti non ha entità né Lua: i suoi individui esistono solo in `people.json`. Con le imprese (ADR-0142) e gli stadi (ADR-0143) una casa che nessuno guarda resterebbe ferma per sempre, il granaio vuoto, il campo seminato com'era. Il progetto chiede che chi torna dopo una settimana trovi la casa ai muri, il campo maturo, il granaio pieno: veda il risultato, non il lavoro, senza simulare dove nessuno guarda.
+Un luogo lontano dai viandanti non ha entità né Lua: i suoi individui esistono solo in `people.json`. Con le imprese (ADR-0145) e gli stadi (ADR-0146) una casa che nessuno guarda resterebbe ferma per sempre, il granaio vuoto, il campo seminato com'era. Il progetto chiede che chi torna dopo una settimana trovi la casa ai muri, il campo maturo, il granaio pieno: veda il risultato, non il lavoro, senza simulare dove nessuno guarda.
 
 ## Decisione
 
@@ -12,7 +12,7 @@ Un luogo lontano dai viandanti non ha entità né Lua: i suoi individui esistono
 2. **Il ritorno** (`returnToPlace`, in `applyPlan` prima di posare i lotti): ciò che matura matura per data (`matureChunk`, la stessa regola dei luoghi caricati, ADR-0140), e il piano prende lo stadio che le sue imprese hanno raggiunto (`ventureIntoPlan`), così l'edificio si posa già a quello stadio. I bivi fuori vista non ci sono ancora (T245h).
 3. **`on_return(luogo, trascorso)`**: un hook nuovo dei moduli. Quando un luogo lasciato torna a caricarsi, ogni modulo che lo dichiara lo riceve con la chiave del luogo e i secondi del mondo passati da quando è stato lasciato. Il kernel lo sa dal piano: `plan.visto` (i secondi del mondo in cui il luogo è stato lasciato) si scrive quando il luogo si scarica e si toglie quando torna, quindi c'è solo mentre nessuno lo vede; un luogo caricato alla chiusura e alla riapertura non ha un ritorno. Le imprese e i mestieri non ne hanno bisogno: è per le meccaniche future (la primitiva O di T183).
 4. **Il tempo a mondo fermo resta fermo** (come proponeva il progetto): un mondo di molti vuoto si ferma (ADR-0114) e l'orologio con lui; la contabilità conta i giorni del mondo vissuti, non quelli dell'orologio di chi gioca.
-5. **Nel mondo di molti** è lo stesso kernel nel processo del mondo (regola 8g): con due viandanti lontani dal luogo e fra loro, il luogo non è caricato da nessuno e va avanti per contabilità; chi ci torna ne vede il risultato (lo stadio arriva con l'entità, ADR-0143). Nessun segreto nuovo, nessuna rotta, nessun messaggio; nessuna chiamata ai modelli, quindi nessuno paga.
+5. **Nel mondo di molti** è lo stesso kernel nel processo del mondo (regola 8g): con due viandanti lontani dal luogo e fra loro, il luogo non è caricato da nessuno e va avanti per contabilità; chi ci torna ne vede il risultato (lo stadio arriva con l'entità, ADR-0146). Nessun segreto nuovo, nessuna rotta, nessun messaggio; nessuna chiamata ai modelli, quindi nessuno paga.
 
 ## Alternative scartate
 

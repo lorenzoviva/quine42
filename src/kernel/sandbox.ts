@@ -24,7 +24,7 @@ export interface Host {
   path(x: number, y: number, tx: number, ty: number): { x: number; y: number } | undefined;
   /** An individual uses a thing as the wanderer does with «Usa» (T245c, ADR-0141): its `on_act`, with the individual as user. The text, or undefined. */
   act(user: number, target: number, action?: string): string | undefined;
-  /** The next step of the venture an individual works at (T245d, ADR-0142): `{fa, x, y, …}`, or undefined. */
+  /** The next step of the venture an individual works at (T245d, ADR-0145): `{fa, x, y, …}`, or undefined. */
   impresa(id: number): unknown;
   /** Brings to the venture nearby what `id` carries (an individual's `carico`, a wanderer's bag): how many were taken. */
   impresa_porta(id: number, item?: string | null): number;

@@ -6644,7 +6644,7 @@ export class Kernel {
     return true;
   }
 
-  // --- The ventures (T245d, ADR-0142) ---------------------------------------------------------
+  // --- The ventures (T245d, ADR-0145) ---------------------------------------------------------
 
   private ventureList: Venture[] = [];
   private venturesDirty = false;
@@ -6968,7 +6968,7 @@ export class Kernel {
   }
 
   /**
-   * The plan of a venture's place says its building and its stage (T245e, ADR-0143): `plan.stadi` for a lot built again, `plan.case`
+   * The plan of a venture's place says its building and its stage (T245e, ADR-0146): `plan.stadi` for a lot built again, `plan.case`
    * for a house on free ground. The plan is what the kernel lays a place from at every load; the structure in the world takes the stage
    * at once (and a client gets it with the entity). Only a loaded place: an unloaded one is brought up to date when it loads (T245f).
    */
@@ -7126,7 +7126,7 @@ export class Kernel {
     }
   }
 
-  // --- Out of sight (T245f, ADR-0144) ---------------------------------------------------------
+  // --- Out of sight (T245f, ADR-0147) ---------------------------------------------------------
 
   /** A day's work of a team where nobody sees it, per person: the seconds of the phase `giorno`, less the walking. */
   static AWAY_WORK = 0.3 * 600 * 0.8;

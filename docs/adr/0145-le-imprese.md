@@ -1,4 +1,4 @@
-# ADR-0142 — Le imprese: `world/imprese.json`, la squadra, i materiali, le regole del kernel, `costruisci`, il pannello del cantiere
+# ADR-0145 — Le imprese: `world/imprese.json`, la squadra, i materiali, le regole del kernel, `costruisci`, il pannello del cantiere
 
 Data: 2026-11-05 · Stato: accettato (task T245d del backlog) · Riferimenti: D8 dell'autore (04/11), `docs/design/comportamento-npc.md` (sezione 3), `docs/design/espressivita.md` (il cantiere di T183), ADR-0134 (la casa comune), ADR-0138 (il magazzino), ADR-0139 (W: i campi dei pannelli), ADR-0140 e ADR-0141 (i mestieri, il deposito)
 
