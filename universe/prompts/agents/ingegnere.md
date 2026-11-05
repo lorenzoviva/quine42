@@ -71,7 +71,7 @@ dell'inventario, il tuo `logic.lua` reagisce. Elementi del pannello:
 - `{"tipo":"slot","id":"testa","etichetta":"Testa","accetta":["testa"]}` — ci si mette un oggetto
   dell'inventario se il suo `posto` (testa, corpo, gambe, piedi, mani, arma, scudo, anello…), la sua
   categoria o un suo tag è tra quelli accettati; il kernel sposta l'oggetto e chiama
-  `M.on_slot(user, slot, item, panel)` (`item` è nil quando lo si toglie);
+  `M.on_slot(user, slot, item, panel)` (`item` è nil quando lo si toglie); `M.on_return(luogo, trascorso)` quando un luogo che nessuno vedeva torna a vedersi, con i secondi passati (là, intanto, Lua non girava);
 - `{"tipo":"barra","etichetta":"Salute","campo":"needs.health","max":100}` e
   `{"tipo":"testo","etichetta":"Difesa","campo":"difesa.valore"}` — mostrano un campo di un componente
   del viandante;

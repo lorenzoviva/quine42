@@ -59,6 +59,8 @@ export interface ChunkPlan {
   stadi?: Record<string, number>;
   /** The houses the ventures build on free ground (T245e): where, which model and seed, and their stage. */
   case?: PlannedHouse[];
+  /** When it was last left (T245f, ADR-0144): seconds of the world, only while nobody sees it; at the return the kernel says how long. */
+  visto?: number;
   /** The ground dug (negative) or raised after the layout (T51b): cell index → levels. */
   scavi?: Record<string, number>;
   /** The water that has flowed (T51b, `water.ts`): cell index → its bed and its water (levels), and the tile it was before it became water. */

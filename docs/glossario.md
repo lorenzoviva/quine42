@@ -515,6 +515,20 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Da non usare**: `ponteggio`, `scaffold` (nei documenti)
 - **Fermo**: le due lettere del cantiere.
 
+### Contabilità fuori vista
+- **Inglese**: `awayTick`, `dailyProduce`, `AWAY_WORK`
+- **Definizione**: ciò che il kernel conta una volta al giorno per i luoghi che nessuno vede, senza Lua e senza chiamate: le imprese prendono dal deposito e vanno avanti del lavoro della squadra, i mestieri riempiono il deposito del loro luogo (T245f, ADR-0144).
+- **Dove vive**: `src/kernel/kernel.ts`, `src/kernel/jobs.ts`
+- **Da non usare**: `simulazione` (per la contabilità: nessuno simula), `offline`, `background`
+- **Fermo**: nessuno.
+
+### Ritorno
+- **Inglese**: `returnToPlace`, `onReturn`, `on_return`
+- **Definizione**: quando un luogo lasciato torna a caricarsi: ciò che matura matura per data, gli edifici prendono lo stadio delle loro imprese, e i moduli che lo chiedono sentono `on_return(luogo, trascorso)` (T245f, ADR-0144).
+- **Dove vive**: `src/kernel/kernel.ts`
+- **Da non usare**: `reload`, `ricarica` (per il ritorno: la ricarica è della pagina)
+- **Fermo**: l'hook `on_return`, `visto` nel piano del luogo.
+
 ### Cantiere
 - **Inglese**: `cantierePanels`, `posto` (dell'impresa)
 - **Definizione**: dove un'impresa si lavora (`posto`), e il pannello «Il cantiere» che dice dell'impresa più vicina a che punto è, cosa manca e chi ci lavora (T245d, ADR-0142).

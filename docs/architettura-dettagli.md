@@ -243,6 +243,13 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   cantiere (`groundOf`); le stanze valgono dal tetto. Lo stadio sta nel piano del luogo (`plan.stadi` per i lotti, `plan.case` per
   le case nuove), che il kernel aggiorna quando una fase si chiude (`syncVenturePlan`) e che `settleLots` legge; sul filo va solo
   `struttura.stadio`, e il renderer rifà la mesh dell'istanza (`stagedBody`).
+- **Fuori vista** (T245f, ADR-0144): un luogo non caricato non ha Lua; una volta al giorno, quando comincia la sera, il kernel tiene i
+  conti (`awayTick`): un'impresa di un luogo non caricato prende dal deposito ciò che le serve e aggiunge un giorno di lavoro per
+  ognuno della squadra (`AWAY_WORK`), i mestieri dei luoghi non caricati e in nessuna impresa portano al deposito del loro luogo ciò
+  che portano in un giorno (`dailyProduce`, fino a 60 per oggetto); un orologio spostato in avanti conta una volta. Al **ritorno**
+  (`returnToPlace`, prima di posare i lotti) ciò che matura matura per data e il piano prende lo stadio delle imprese; `plan.visto`
+  (quando il luogo è stato lasciato, solo mentre nessuno lo vede) dà a `on_return(luogo, trascorso)` dei moduli quanto è durata
+  l'assenza. A mondo fermo il tempo resta fermo (ADR-0114).
 - **Personaggi** (ADR-0010, 0013, 0017, 0020): tipo + individuo (`identity`: anche `job family routine story`), `mind` (memoria, umore, modo), azioni
   `segui resta vaga dai nessuna`, oggetti citati → `wanted`. Al massimo 2 dello stesso tipo nel mondo
   caricato; nuovi tipi forgiati esplorando (`ai.maxCast`); ogni individuo è un seme del programma del suo tipo (pochi semi per classe).
