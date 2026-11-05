@@ -4,6 +4,7 @@
 // `npm run dev` and the production server (server/production.ts, T133): the preview server does not start worlds. With accounts (server/account.ts, T44b) every world verifies, through
 // this process, the token of who comes in.
 
+import { isGenerating, worldLit, worldOut } from './generation';
 import type { Connect, Plugin, ViteDevServer } from 'vite';
 import type { IncomingMessage, Server as HttpServer } from 'node:http';
 import type { AddressInfo } from 'node:net';
@@ -49,6 +50,8 @@ export function worldRefusal(universesDir: string | undefined, name: string, run
       /* read as nothing: a game alone */
     }
     if (!gameIn(config).many) return `«${name}» è una partita in singola`;
+    // A deferred generation holds it (T207, ADR-0143): the world would write over what it commits.
+    if (isGenerating(universesDir, name)) return `«${name}» si sta generando: riprova quando ha finito`;
   }
   return running >= max ? 'troppi mondi accesi su questo server: riprova tra poco' : undefined;
 }
@@ -239,11 +242,26 @@ export function attachSessions(httpServer: HttpServer, o: SessionOptions): { sto
       headOf: universes ? () => runGit(path.join(universes, name), ['rev-parse', 'HEAD'], { author: ['kernel', 'kernel@quine'] }).then((out) => out.trim()) : undefined,
       gits: universes ? () => settleGit(path.join(universes, name)) : undefined,
       times: o.times,
-      onGiveUp: () => activeHosts.delete(name),
+      onGiveUp: () => {
+        activeHosts.delete(name);
+        if (universes) worldOut(universes, name);
+      },
       onIdle: () => retire(name),
     });
-    const opened = await world.start();
-    if ('error' in opened) return opened;
+    // Lit before it opens: a generation that starts now sees it (T207). Out again when it fails or stops.
+    if (universes) {
+      worldLit(universes, name);
+      // Each side writes its marker and then looks at the other's: of a world and a generation starting together, one sees the other.
+      if (isGenerating(universes, name)) {
+        worldOut(universes, name);
+        return { error: `«${name}» si sta generando: riprova quando ha finito` };
+      }
+    }
+    const opened = await world.start().catch((e: Error) => ({ error: e.message }));
+    if ('error' in opened) {
+      if (universes) worldOut(universes, name);
+      return opened;
+    }
     return {
       name,
       session: {
@@ -253,7 +271,7 @@ export function attachSessions(httpServer: HttpServer, o: SessionOptions): { sto
         },
       },
       calls: world.calls,
-      stop: () => world.stop(),
+      stop: () => world.stop().finally(() => universes && worldOut(universes, name)),
     };
   };
   const open = async (name: string, offline: boolean) => {
