@@ -1,0 +1,20 @@
+<!-- Cactus della piana: a mano (Claude Code, Cantiere 9). Un fusto a candelabro con due braccia, la sabbia ai piedi e i fichi rossi; ogni seme fa crescere le braccia e i fichi in modo diverso. -->
+<sequence values="BSVDFK" size="20 20 30" symmetry="()" name="Cactus">
+  <color symbol="S" value="e0c890" name="sabbia"/>
+  <color symbol="V" value="5a9a4a" name="fusto"/>
+  <color symbol="D" value="3e7a38" name="costole"/>
+  <color symbol="F" value="d8506a" name="fico"/>
+  <color symbol="K" value="a08860" name="sasso"/>
+  <cylinder at="10 10 0" size="12 12 1" color="S"/>
+  <box at="10 10 1" size="4 4 22" color="V"/>
+  <box at="6 10 8" size="5 3 3" color="V"/>
+  <box at="5 10 8" size="3 3 9" color="V"/>
+  <box at="14 10 11" size="5 3 3" color="V"/>
+  <box at="15 10 11" size="3 3 8" color="V"/>
+  <all steps="4">
+    <rule in="B V" out="V V" p="0.25"/>
+  </all>
+  <prl in="BV" out="DV" p="0.08" steps="1"/>
+  <one in="B V" out="F V" steps="3"/>
+  <prl in="B S" out="K S" p="0.05" steps="1"/>
+</sequence>

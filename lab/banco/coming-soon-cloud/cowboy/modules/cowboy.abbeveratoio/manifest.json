@@ -1,0 +1,45 @@
+{
+  "id": "cowboy.abbeveratoio",
+  "name": "Abbeveratoio",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "a mano (Claude Code, Cantiere 9)",
+  "description": "Una vasca di legno per i cavalli, davanti al saloon o alla stalla.",
+  "context": "davanti ai saloon, nei ranch, alle stazioni di posta",
+  "appearance": {
+    "model": "abbeveratoio",
+    "glyph": "≈",
+    "color": "#7a5a3a",
+    "aspetto": "una vasca di legno cerchiata di ferro, piena a metà di acqua",
+    "classe": "mobile"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.45
+  },
+  "actions": [
+    {
+      "id": "riempi",
+      "label": "Riempi con il secchio",
+      "requires": "item.secchio"
+    },
+    {
+      "id": "guarda",
+      "label": "Guarda l'acqua"
+    },
+    {
+      "id": "bevi",
+      "label": "Bevi un sorso"
+    }
+  ],
+  "spawn": {
+    "tiles": [
+      "p",
+      "g",
+      "s"
+    ],
+    "chance": 0.04,
+    "max": 1
+  },
+  "logic": "logic.lua"
+}

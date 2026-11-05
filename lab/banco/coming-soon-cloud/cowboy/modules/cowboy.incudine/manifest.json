@@ -1,0 +1,45 @@
+{
+  "id": "cowboy.incudine",
+  "name": "Incudine del maniscalco",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "a mano (Claude Code, Cantiere 9)",
+  "description": "Un'incudine nera su un ceppo, con le tenaglie e i ferri appesi accanto.",
+  "context": "nelle botteghe dei fabbri, nei ranch, accanto alle stalle",
+  "appearance": {
+    "model": "incudine",
+    "glyph": "⊥",
+    "color": "#3a3a40",
+    "aspetto": "un'incudine di ferro nero su un ceppo di legno, con tenaglie appese",
+    "classe": "mobile"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.45
+  },
+  "actions": [
+    {
+      "id": "batti",
+      "label": "Batti il ferro",
+      "requires": "item.barra-ferro"
+    },
+    {
+      "id": "ferra",
+      "label": "Ferra un cavallo",
+      "requires": "item.ferro-cavallo"
+    },
+    {
+      "id": "scintille",
+      "label": "Guarda le scintille"
+    }
+  ],
+  "spawn": {
+    "tiles": [
+      "f",
+      "l"
+    ],
+    "chance": 0.03,
+    "max": 1
+  },
+  "logic": "logic.lua"
+}

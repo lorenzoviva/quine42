@@ -1,0 +1,271 @@
+{
+ "trame": [
+  {
+   "id": "oro-diligenza",
+   "titolo": "L'oro della diligenza",
+   "mistero": "I cavalli della diligenza di primavera tornarono soli, con le selle in ordine; Abele Croce dice di aver visto una cassa sul fondo del canyon.",
+   "coinvolti": [
+    "Abele Croce",
+    "Corrado Steccato",
+    "Tobia Ferri"
+   ],
+   "inizio": 0,
+   "stato": "attiva",
+   "tappe": [
+    {
+     "giorno": 0,
+     "momento": "sera",
+     "chi": "Abele Croce",
+     "dove": "Saloon della Diligenza",
+     "cosa": "racconta di una cassa cerchiata di ferro vista dall'alto del canyon",
+     "battuta": "Era lì, tra due rocce. Ma le mie ginocchia non scendono più."
+    },
+    {
+     "giorno": 1,
+     "momento": "mattina",
+     "chi": "Corrado Steccato",
+     "dove": "Canyon delle Aquile",
+     "cosa": "cerca le tracce delle ruote nella polvere",
+     "indizio": "un ferro di cavallo con tre chiodi soli"
+    },
+    {
+     "giorno": 2,
+     "momento": "giorno",
+     "chi": "Tobia Ferri",
+     "dove": "Sorgente Rossa",
+     "cosa": "riconosce il ferro: l'ha forgiato lui, per un cavallo della diligenza",
+     "battuta": "Questo è mio. Tre chiodi: avevo finito i chiodi."
+    }
+   ],
+   "missione": {
+    "da": "Abele Croce",
+    "testo": "Portami un lazo robusto: con quello qualcuno può calarsi nel canyon.",
+    "obiettivo": {
+     "tipo": "porta",
+     "oggetto": "item.lazo",
+     "a": "Abele Croce"
+    },
+    "ricompensa": "un sacchetto di polvere d'oro",
+    "stato": "offerta"
+   }
+  },
+  {
+   "id": "telegramma-perso",
+   "titolo": "Il telegramma perso",
+   "mistero": "Un telegramma per Orsola Cardo non è mai arrivato al ranch; Lavinia Tasti l'ha battuto, Ruben Pozzi giura di averlo consegnato.",
+   "coinvolti": [
+    "Lavinia Tasti",
+    "Ruben Pozzi",
+    "Orsola Cardo"
+   ],
+   "inizio": 0,
+   "stato": "attiva",
+   "tappe": [
+    {
+     "giorno": 0,
+     "momento": "mattina",
+     "chi": "Lavinia Tasti",
+     "dove": "Sorgente Rossa",
+     "cosa": "ricopia dal registro un telegramma di tre righe",
+     "battuta": "Partito alle otto. Me lo ricordo bene."
+    },
+    {
+     "giorno": 1,
+     "momento": "giorno",
+     "chi": "Ruben Pozzi",
+     "dove": "Pascoli dell'Erba Alta",
+     "cosa": "cerca il foglio lungo la strada del ranch",
+     "indizio": "un foglio giallo impigliato nella staccionata"
+    },
+    {
+     "giorno": 2,
+     "momento": "sera",
+     "chi": "Orsola Cardo",
+     "dove": "Ranch del Ferro di Cavallo",
+     "cosa": "legge finalmente il telegramma e ride forte",
+     "battuta": "Il prezzo dei manzi è raddoppiato. E io che volevo venderli ieri!"
+    }
+   ],
+   "missione": {
+    "da": "Lavinia Tasti",
+    "testo": "Porta questo telegramma al ranch, da Orsola Cardo: Ruben ha già corso abbastanza.",
+    "obiettivo": {
+     "tipo": "parla",
+     "a": "Orsola Cardo"
+    },
+    "ricompensa": "un caffè e una notizia di là dalle montagne",
+    "stato": "offerta"
+   }
+  },
+  {
+   "id": "vena-nuova",
+   "titolo": "La vena nuova",
+   "mistero": "Rosalia Croce ha trovato una vena d'oro in una galleria chiusa, ma la concessione è di qualcun altro; Prudenza Sale deve decidere.",
+   "coinvolti": [
+    "Rosalia Croce",
+    "Prudenza Sale",
+    "Abele Croce"
+   ],
+   "inizio": 0,
+   "stato": "attiva",
+   "tappe": [
+    {
+     "giorno": 0,
+     "momento": "giorno",
+     "chi": "Rosalia Croce",
+     "dove": "Miniera della Montagna Spaccata",
+     "cosa": "riapre una galleria puntellata male e vede brillare la roccia"
+    },
+    {
+     "giorno": 1,
+     "momento": "mattina",
+     "chi": "Prudenza Sale",
+     "dove": "Sorgente Rossa",
+     "cosa": "sfoglia il registro delle concessioni",
+     "battuta": "Una concessione abbandonata da sette anni torna a chi la scava."
+    },
+    {
+     "giorno": 2,
+     "momento": "sera",
+     "chi": "Abele Croce",
+     "dove": "Saloon della Diligenza",
+     "cosa": "offre da bere a tutti per la figlia",
+     "battuta": "Mia figlia Rosalia ha il fiuto di suo padre!"
+    }
+   ],
+   "missione": {
+    "da": "Rosalia Croce",
+    "testo": "Mi serve un setaccio nuovo: il mio ha più buchi che rete.",
+    "obiettivo": {
+     "tipo": "porta",
+     "oggetto": "item.setaccio",
+     "a": "Rosalia Croce"
+    },
+    "ricompensa": "una pepita della vena nuova",
+    "stato": "offerta"
+   }
+  },
+  {
+   "id": "elisir-sceriffo",
+   "titolo": "L'elisir dello sceriffo",
+   "mistero": "Fausta Mele vende un elisir che, dice, fa crescere i baffi; lo sceriffo vuole chiuderle il carro, ma i suoi baffi sono più folti da una settimana.",
+   "coinvolti": [
+    "Fausta Mele",
+    "Corrado Steccato",
+    "Elmo Grano"
+   ],
+   "inizio": 0,
+   "stato": "attiva",
+   "tappe": [
+    {
+     "giorno": 0,
+     "momento": "giorno",
+     "chi": "Fausta Mele",
+     "dove": "Sorgente Rossa",
+     "cosa": "vende tre bottiglie di elisir davanti all'ufficio dello sceriffo",
+     "battuta": "Chiedetelo allo sceriffo, se funziona!"
+    },
+    {
+     "giorno": 1,
+     "momento": "mattina",
+     "chi": "Corrado Steccato",
+     "dove": "Sorgente Rossa",
+     "cosa": "si guarda i baffi nello specchio del barbiere e borbotta"
+    },
+    {
+     "giorno": 2,
+     "momento": "sera",
+     "chi": "Elmo Grano",
+     "dove": "Saloon della Diligenza",
+     "cosa": "compra di nascosto una bottiglia di elisir",
+     "indizio": "una bottiglia vuota nel cassetto dell'ufficio"
+    }
+   ]
+  },
+  {
+   "id": "duello-alba",
+   "titolo": "Il duello all'alba",
+   "mistero": "Zaccaria Vento e Isacco Lungavia si sono sfidati a duello all'alba per un manzo finito sotto il treno; tutta la città sa già come finirà, tranne loro.",
+   "coinvolti": [
+    "Zaccaria Vento",
+    "Isacco Lungavia",
+    "Corrado Steccato"
+   ],
+   "inizio": 0,
+   "stato": "attiva",
+   "tappe": [
+    {
+     "giorno": 0,
+     "momento": "sera",
+     "chi": "Zaccaria Vento",
+     "dove": "Saloon della Diligenza",
+     "cosa": "getta il cappello sul bancone",
+     "battuta": "Domani all'alba, capotreno. Davanti al saloon."
+    },
+    {
+     "giorno": 1,
+     "momento": "mattina",
+     "chi": "Isacco Lungavia",
+     "dove": "Sorgente Rossa",
+     "cosa": "arriva al duello in ritardo, come il suo treno"
+    },
+    {
+     "giorno": 1,
+     "momento": "mattina",
+     "chi": "Corrado Steccato",
+     "dove": "Sorgente Rossa",
+     "cosa": "mette tra i due un bricco di caffè caldo",
+     "battuta": "Prima si beve. Poi, se vi va ancora, si discute."
+    }
+   ],
+   "missione": {
+    "da": "Corrado Steccato",
+    "testo": "Portami un sacchetto di chicchi di caffè: all'alba mi servirà il bricco pieno.",
+    "obiettivo": {
+     "tipo": "porta",
+     "oggetto": "item.chicchi-caffe",
+     "a": "Corrado Steccato"
+    },
+    "ricompensa": "la gratitudine dello sceriffo e una taglia pagata",
+    "stato": "offerta"
+   }
+  },
+  {
+   "id": "gatta-pianoforte",
+   "titolo": "La gatta sul pianoforte",
+   "mistero": "Pepita non si sposta mai dal pianoforte del saloon, e Gedeone Pozzi comincia a pensare che lì sotto ci sia qualcosa.",
+   "coinvolti": [
+    "Pepita",
+    "Gedeone Pozzi",
+    "Matilde Pozzi"
+   ],
+   "inizio": 0,
+   "stato": "attiva",
+   "tappe": [
+    {
+     "giorno": 0,
+     "momento": "notte",
+     "chi": "Pepita",
+     "dove": "Saloon della Diligenza",
+     "cosa": "si acciambella sul coperchio del pianoforte e soffia a chi si avvicina"
+    },
+    {
+     "giorno": 1,
+     "momento": "giorno",
+     "chi": "Gedeone Pozzi",
+     "dove": "Saloon della Diligenza",
+     "cosa": "sposta il pianoforte con l'aiuto di due mandriani",
+     "battuta": "Pesa il doppio di quanto dovrebbe."
+    },
+    {
+     "giorno": 2,
+     "momento": "giorno",
+     "chi": "Matilde Pozzi",
+     "dove": "Saloon della Diligenza",
+     "cosa": "trova sotto le assi una scatola di latta piena di vecchie lettere",
+     "indizio": "lettere legate con un nastro rosso, mai spedite"
+    }
+   ]
+  }
+ ]
+}

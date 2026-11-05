@@ -1,0 +1,46 @@
+{
+  "id": "cowboy.miniera",
+  "name": "Ingresso della miniera",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "a mano (Claude Code, Cantiere 9)",
+  "description": "L'imbocco di una galleria puntellata, con un carrello sulle rotaie e la sabbia del torrente accanto.",
+  "context": "nelle miniere, ai piedi delle montagne, lungo i torrenti",
+  "appearance": {
+    "model": "ingresso-miniera",
+    "glyph": "∏",
+    "color": "#8a6a48",
+    "aspetto": "l'imbocco di una galleria puntellato con travi di legno e un carrello",
+    "classe": "mobile"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.45
+  },
+  "actions": [
+    {
+      "id": "setaccia",
+      "label": "Setaccia la sabbia",
+      "requires": "item.setaccio"
+    },
+    {
+      "id": "puntella",
+      "label": "Puntella la galleria",
+      "requires": "item.trave"
+    },
+    {
+      "id": "scendi",
+      "label": "Scendi nella galleria"
+    }
+  ],
+  "spawn": {
+    "tiles": [
+      "k",
+      "r",
+      "s"
+    ],
+    "chance": 0.03,
+    "max": 1
+  },
+  "logic": "logic.lua"
+}
