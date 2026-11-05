@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { browserOwedStorage, ORPHAN_LINE_MS, OWED_MAX, OWED_MAX_BYTES, UniverseClient, type OwedStorage, type OwedWrite } from '../src/kernel/universes';
 
-// T265 (ADR-0142 on ADR-0122): one line for every write, kept across a reload, with a ceiling; a 401 renews the token.
+// T265 (ADR-0144 on ADR-0122): one line for every write, kept across a reload, with a ceiling; a 401 renews the token.
 
 const noAnswer = () => Object.assign(new TypeError('fetch failed'), { cause: { code: 'ECONNREFUSED' } });
 const answer = (status: number, body: unknown = {}) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });

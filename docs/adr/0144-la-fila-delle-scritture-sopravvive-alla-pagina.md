@@ -1,4 +1,4 @@
-# ADR-0142 — La fila delle scritture: ogni scrittura, salvata nella pagina, con un tetto; un 401 rinnova il token
+# ADR-0144 — La fila delle scritture: ogni scrittura, salvata nella pagina, con un tetto; un 401 rinnova il token
 
 Data: 2026-11-05 · Stato: accettato · Aggiorna: ADR-0122 · Riferimenti: ADR-0021, ADR-0102, ADR-0103, T211, T265
 

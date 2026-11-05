@@ -45,7 +45,7 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 
 ### Fila delle scritture
 - **Inglese**: `OwedWrite`, `OwedStorage`, `browserOwedStorage`, `renewAuth`
-- **Definizione**: le scritture sull'universo che il server non ha ancora preso (commit, piani, rami, pubblicazioni), in ordine; nel browser sopravvive a una ricarica, ha un tetto (ADR-0122, ADR-0142).
+- **Definizione**: le scritture sull'universo che il server non ha ancora preso (commit, piani, rami, pubblicazioni), in ordine; nel browser sopravvive a una ricarica, ha un tetto (ADR-0122, ADR-0144).
 - **Dove vive**: `src/kernel/universes.ts` (`UniverseClient`), `localStorage` `quine:fila:<universo>:<scheda>`
 - **Da non usare**: `coda dei commit` (non ha solo commit; «coda» è quella degli abbonamenti)
 - **Fermo**: la chiave `quine:fila:` e la forma delle scritture salvate.
