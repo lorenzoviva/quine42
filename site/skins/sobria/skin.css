@@ -1,4 +1,7 @@
-/* La veste sobria (T283, ADR-0145): l'aspetto della home per la beta (T244), ora su tutte le pagine. Il logo e la favicon definitivi sono di T286. */
+/* La veste sobria (T283, T286, ADR-0145): l'aspetto della home per la beta (T244), con il logo della proposta 04 «Il cerchio e il tappeto»
+   di Claude (v2), estratto così com'è da tools/vesti/logo.ts (scritta.svg, icona.svg). La personalità viene da pochi gesti presi dalla Q:
+   l'anello rosa sopra quello ciano, gli anelli del tappeto attorno al centro. Niente fumetto e niente pitch: nessuna ombra piena nuova,
+   nessun carattere a fumetti, nessuna parola in più. */
 :root[data-skin='sobria'] {
   /* Colori */
   --skin-bg: #090514;
@@ -20,12 +23,12 @@
   --skin-on-accent-2: #ffffff;
   --skin-grid-line: rgba(0, 240, 255, 0.18);
 
-  /* Font: il carattere a fumetti resta solo nel logo */
+  /* Font: il logo è un disegno, nessun carattere a fumetti */
   --skin-font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --skin-font-display: var(--skin-font-body);
   --skin-font-label: 'Press Start 2P', 'VT323', monospace;
   --skin-font-mono: 'Cascadia Mono', 'JetBrains Mono', Consolas, 'DejaVu Sans Mono', monospace;
-  --skin-font-logo: 'Bangers', 'Impact', 'Arial Black', sans-serif;
+  --skin-font-logo: var(--skin-font-body);
 
   /* Titoli e logo */
   --skin-title-color: var(--skin-text);
@@ -35,9 +38,9 @@
   --skin-title-shadow: none;
   --skin-title-transform: none;
   --skin-logo-color: #ffe600;
-  --skin-logo-spacing: 0.12em;
-  --skin-logo-shadow: -2px -2px 0 #07040d, 2px -2px 0 #07040d, -2px 2px 0 #07040d, 2px 2px 0 #07040d, 3px 3px 0 #ff2a85;
-  --skin-logo-transform: skew(-4deg);
+  --skin-logo-spacing: 0;
+  --skin-logo-shadow: none;
+  --skin-logo-transform: none;
 
   /* Ombre e bagliori */
   --skin-shadow-s: var(--space-1);
@@ -49,13 +52,13 @@
   /* Sfondi */
   --skin-page-background: linear-gradient(180deg, rgba(9, 5, 20, 0.95) 0%, rgba(19, 10, 36, 0.92) 100%), radial-gradient(circle at 50% 15%, rgba(255, 42, 133, 0.14) 0%, transparent 60%);
   --skin-nav-background: rgba(9, 5, 20, 0.94);
-  --skin-stage-background: radial-gradient(circle at center, rgba(157, 0, 255, 0.25) 0%, rgba(9, 5, 20, 0.95) 75%);
+  /* Il palco è la pancia della Q: il modello cresce al centro, dove nel logo sta il viandante, dentro gli anelli del tappeto. Le misure sono
+     quelle del disegno (l'anello rosa r 62,9 largo 22,2, il ciano r 44,4 largo 5,18, il rosa sottile r 31,08 largo 1,85), con il bordo
+     esterno del rosa al 96 % del lato corto. */
+  --skin-stage-background:
+    radial-gradient(circle closest-side at center, transparent 0 39.1%, rgba(255, 42, 133, 0.34) 39.1% 41.5%, transparent 41.5% 54.2%, rgba(0, 240, 255, 0.24) 54.2% 61%, transparent 61% 67.2%, rgba(255, 42, 133, 0.09) 67.2% 96%, transparent 96%),
+    radial-gradient(circle at center, rgba(157, 0, 255, 0.25) 0%, rgba(9, 5, 20, 0.95) 75%);
   --skin-texture: radial-gradient(circle, rgba(0, 240, 255, 0.14) 1.5px, transparent 1.5px);
-}
-
-[data-skin='sobria'] .comic-btn,
-[data-skin='sobria'] .nav-link {
-  letter-spacing: 0.02em;
 }
 
 [data-skin='sobria'] .comic-btn.sm,
@@ -71,4 +74,55 @@
 
 [data-skin='sobria'] .comic-card:hover {
   transform: none;
+}
+
+/* Il logo: il disegno estratto, al posto delle lettere; il testo resta per chi non vede. Le proporzioni sono il viewBox della proposta. */
+[data-skin='sobria'] .nav-logo,
+[data-skin='sobria'] .footer-brand {
+  display: inline-block;
+  color: transparent;
+  overflow: hidden;
+  white-space: nowrap;
+  background: url('scritta.svg') no-repeat left center / contain;
+  aspect-ratio: 579.4 / 180;
+}
+
+/* Da un telefono a uno schermo grande, senza @media: il test della veste vuole ogni regola sotto il suo attributo. */
+[data-skin='sobria'] .nav-logo {
+  height: clamp(var(--space-34), 2.618vw, var(--space-55));
+}
+
+[data-skin='sobria'] .footer-brand {
+  height: clamp(var(--space-55), 6.854vw, var(--measure-89));
+  background-position: center;
+}
+
+/* La barra: sotto, l'anello rosa sopra quello ciano, scostati come nella Q. */
+[data-skin='sobria'] .site-nav {
+  border-bottom-color: var(--skin-ink);
+  box-shadow: 0 var(--space-2) 0 var(--skin-accent-2), 0 var(--space-5) 0 var(--skin-accent);
+}
+
+/* I titoli delle sezioni: davanti, la pancia della Q in piccolo, l'anello ciano e il punto rosa al centro (l'icona). */
+[data-skin='sobria'] .section-head .comic-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-13);
+}
+
+[data-skin='sobria'] .section-head .comic-title::before {
+  content: '';
+  flex: none;
+  width: 0.72em;
+  height: 0.72em;
+  border-radius: 50%;
+  box-sizing: border-box;
+  border: 0.13em solid var(--skin-accent);
+  background: radial-gradient(circle closest-side, var(--skin-accent-2) 0 34%, transparent 34%);
+  box-shadow: 0 0 0 0.08em var(--skin-ink);
+}
+
+[data-skin='sobria'] .comic-btn,
+[data-skin='sobria'] .nav-link {
+  letter-spacing: 0.02em;
 }
