@@ -1,10 +1,10 @@
 # ADR-0146 — L'edificio per stadi: il filtro della griglia finita, il cantiere attorno, lo stadio nel piano del luogo
 
-Data: 2026-11-05 · Stato: accettato (task T245e del backlog) · Riferimenti: D8 dell'autore (04/11), `docs/design/comportamento-npc.md` (sezione 3.4), ADR-0043 (i lotti e le strutture), ADR-0046 (i voxel luminosi), ADR-0059 (il client sottile), ADR-0108 (la cache delle forme), ADR-0145 (le imprese)
+Data: 2026-11-05 · Stato: accettato (task T245e del backlog) · Riferimenti: D8 dell'autore (04/11), `docs/design/comportamento-npc.md` (sezione 3.4), ADR-0043 (i lotti e le strutture), ADR-0046 (i voxel luminosi), ADR-0059 (il client sottile), ADR-0108 (la cache delle forme), ADR-0148 (le imprese)
 
 ## Contesto
 
-Con le imprese (ADR-0145) una casa si ricostruisce o si costruisce, ma non sale a vista. Un programma MarkovJunior gira in un colpo e un seme diverso dà una pianta diversa: non si può eseguirlo a tappe senza riscriverlo. Il progetto propone l'opposto: il programma gira una volta, la griglia finita (già in cache) si mostra filtrata per stadio. Serve che lo stadio duri con il luogo, che chi cammina incontri ciò che c'è e non ciò che ci sarà, e che lo veda anche un client in una partita di molti.
+Con le imprese (ADR-0148) una casa si ricostruisce o si costruisce, ma non sale a vista. Un programma MarkovJunior gira in un colpo e un seme diverso dà una pianta diversa: non si può eseguirlo a tappe senza riscriverlo. Il progetto propone l'opposto: il programma gira una volta, la griglia finita (già in cache) si mostra filtrata per stadio. Serve che lo stadio duri con il luogo, che chi cammina incontri ciò che c'è e non ciò che ci sarà, e che lo veda anche un client in una partita di molti.
 
 ## Decisione
 
@@ -24,6 +24,6 @@ Con le imprese (ADR-0145) una casa si ricostruisce o si costruisce, ma non sale 
 ## Conseguenze
 
 - `tests/stadi.test.ts`: le quote e il filtro su una casa di prova, il cantiere attorno, una ricostruzione che sale di stadio nel mondo, nel piano e nell'impronta, la riapertura, ciò che esce sul filo.
-- Le imprese di ADR-0145 non lasciano più il lotto vuoto: lo mostrano a 0 (picchetti) e poi a stadi.
+- Le imprese di ADR-0148 non lasciano più il lotto vuoto: lo mostrano a 0 (picchetti) e poi a stadi.
 - Kernel 0.1.7 (compatibile: due campi in avanti nel piano, un campo in più per un'entità sul filo).
 - Sicurezza: un campo nuovo sul filo, a elenco (`struttura`, solo `stadio`, un numero tra 0 e 1, e solo per un edificio che sale): nulla della struttura oltre a ciò che il client disegna già. Il filtro è puro e lavora su una griglia che c'è già; nessuna rotta, nessun messaggio nuovo.

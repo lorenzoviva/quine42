@@ -1,4 +1,4 @@
-// The ventures (T245d, ADR-0145; docs/design/comportamento-npc.md, section 3): the work of many towards a result one sees, days or
+// The ventures (T245d, ADR-0148; docs/design/comportamento-npc.md, section 3): the work of many towards a result one sees, days or
 // months long. One file of the world, `world/imprese.json`, written only by the kernel (rule 8b: a wanderer acts in the world, never in
 // the file), never sent to a client (it is in no list of `src/session/files.ts`), back with `R` as everything of the world.
 // The progress is derived: the phase now is the first whose materials are not all brought or whose work is not done, so there is no

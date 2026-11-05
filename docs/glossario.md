@@ -489,14 +489,14 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 
 ### Impresa
 - **Inglese**: `Venture`, `ventures`, `ventureProgress`, `ventureState`
-- **Definizione**: un lavoro di molti verso un risultato che si vede, lungo giorni o mesi: una costruzione, un raccolto (e, con i task che le portano, una festa, una ricerca…). Ha fasi con materiali e lavoro, una squadra e uno stato; il progresso si ricava da ciò che è stato portato e lavorato, mai da un contatore (T245d, ADR-0145).
+- **Definizione**: un lavoro di molti verso un risultato che si vede, lungo giorni o mesi: una costruzione, un raccolto (e, con i task che le portano, una festa, una ricerca…). Ha fasi con materiali e lavoro, una squadra e uno stato; il progresso si ricava da ciò che è stato portato e lavorato, mai da un contatore (T245d, ADR-0148).
 - **Dove vive**: `src/kernel/ventures.ts`, `src/kernel/kernel.ts`, `world/imprese.json`
 - **Da non usare**: `progetto` (per l'impresa: il progetto è un documento), `cantiere` (è il posto dell'impresa e il suo pannello), `quest`, `obiettivo`, `job`
 - **Fermo**: `world/imprese.json`, `imprese`, `fasi`, `materiali`, `lavoro`, `stadio`, `portati`, `lavorato`, `squadra`, `ruoli`, `nato_da`, i valori di `tipo` e di `stato`; l'API Lua `world.impresa`, `world.impresa_porta`; il comportamento `costruisci`.
 
 ### Squadra di un'impresa
 - **Inglese**: `fillTeam`, `VentureMember`, `staffVentures`
-- **Definizione**: chi lavora a un'impresa, con il suo ruolo (capomastro, manovale, mietitore): la fa il kernel per mestiere, vicinanza e un'estrazione del seme, e la rifà a ogni giorno nuovo (chi non c'è più se ne va, un altro prende il posto) (T245d, ADR-0145).
+- **Definizione**: chi lavora a un'impresa, con il suo ruolo (capomastro, manovale, mietitore): la fa il kernel per mestiere, vicinanza e un'estrazione del seme, e la rifà a ogni giorno nuovo (chi non c'è più se ne va, un altro prende il posto) (T245d, ADR-0148).
 - **Dove vive**: `src/kernel/ventures.ts`
 - **Da non usare**: `squadra` da sola dove si confonde con quella del Concilio nello studio, `team` (nei documenti), `gruppo`, `ciurma`
 - **Fermo**: `squadra`, `ruolo`, `ruoli` in `world/imprese.json`.
@@ -531,7 +531,7 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 
 ### Cantiere
 - **Inglese**: `cantierePanels`, `posto` (dell'impresa)
-- **Definizione**: dove un'impresa si lavora (`posto`), e il pannello «Il cantiere» che dice dell'impresa più vicina a che punto è, cosa manca e chi ci lavora (T245d, ADR-0145).
+- **Definizione**: dove un'impresa si lavora (`posto`), e il pannello «Il cantiere» che dice dell'impresa più vicina a che punto è, cosa manca e chi ci lavora (T245d, ADR-0148).
 - **Dove vive**: `universe/modules/sys.lavoro/manifest.json` (`ui`), `src/kernel/kernel.ts`
 - **Da non usare**: `impresa` (per il posto o il pannello), `sito`, `site` (nei documenti)
 - **Fermo**: il pannello `cantiere`, i campi `cantiere.titolo`, `cantiere.fase`, `cantiere.stato`, `cantiere.manca`, `cantiere.squadra`, il pulsante `porta`.

@@ -6644,7 +6644,7 @@ export class Kernel {
     return true;
   }
 
-  // --- The ventures (T245d, ADR-0145) ---------------------------------------------------------
+  // --- The ventures (T245d, ADR-0148) ---------------------------------------------------------
 
   private ventureList: Venture[] = [];
   private venturesDirty = false;
