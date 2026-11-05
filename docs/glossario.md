@@ -43,6 +43,13 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Dove vive**: `universe/`, `src/kernel/universes.ts`
 - **Da non usare**: nessuno (dire «il seme» da solo è ambiguo con «Seme»)
 
+### Fila delle scritture
+- **Inglese**: `OwedWrite`, `OwedStorage`, `browserOwedStorage`, `renewAuth`
+- **Definizione**: le scritture sull'universo che il server non ha ancora preso (commit, piani, rami, pubblicazioni), in ordine; nel browser sopravvive a una ricarica, ha un tetto (ADR-0122, ADR-0144).
+- **Dove vive**: `src/kernel/universes.ts` (`UniverseClient`), `localStorage` `quine:fila:<universo>:<scheda>`
+- **Da non usare**: `coda dei commit` (non ha solo commit; «coda» è quella degli abbonamenti)
+- **Fermo**: la chiave `quine:fila:` e la forma delle scritture salvate.
+
 ### Seme
 - **Inglese**: `seed`, `seedLua`, `rngFor`
 - **Definizione**: il numero da cui escono le estrazioni: quello dell'universo e quello che fa di un modello un'istanza.
@@ -795,6 +802,13 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Definizione**: la nascita di un universo: bibbia, stile, terreni, ambienti, oggetti, cast.
 - **Dove vive**: `src/kernel/agents/genesis.ts`, `src/ui/genesis.ts`
 - **Da non usare**: nessuno
+
+### Generazione differita
+- **Inglese**: `runDeferred`, `DeferredModels`, `StepGate`, `planAhead`
+- **Definizione**: un universo generato prima che qualcuno lo giochi, senza browser, passo dopo passo e solo dalla coda degli abbonamenti (ADR-0143).
+- **Dove vive**: `src/kernel/deferred.ts`, `tools/generazione/genera.ts`, `server/generation.ts`, `universes/.generazione/`
+- **Da non usare**: `pregenerazione`, `generazione offline` («offline» sono i modelli locali)
+- **Fermo**: il file `universes/.generazione/<nome>.json` (passi, tetto, partita, consumo) e il segno `universes/.accesi/<nome>.json`.
 
 ### Ambientazione
 - **Inglese**: `WorldTheme`, `WORLD_THEMES`, `themeOfText`

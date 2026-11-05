@@ -13,7 +13,7 @@
 | [Lua: confine e limiti](#lua-sandbox) | `src/kernel/sandbox.ts`, `src/kernel/prelude.lua`, `src/mj/run.ts` |
 | [Gemini, l'Attore, i coefficienti di generazione](#gemini) | `universe/universe.json`, `src/kernel/ai/`, `src/kernel/coefficients.ts` |
 | [La lobby multigiocatore](#lobby) | `src/ui/lobby.ts`, `src/ui/creditdialog.ts` |
-| [La coda della CLI degli abbonamenti](#abbonamenti) | `src/kernel/ai/subscription.ts`, `server/subscriptionQueue.ts`, `tools/abbonamenti/servi.ts` |
+| [La coda della CLI degli abbonamenti](#abbonamenti) | `src/kernel/ai/subscription.ts`, `server/subscriptionQueue.ts`, `tools/abbonamenti/servi.ts`, `src/kernel/deferred.ts`, `tools/generazione/genera.ts` |
 | [Il Concilio al lavoro: registro, Luogo, Fucina, Genesi](#concilio) | `src/kernel/agents/`, `src/kernel/layout.ts` |
 | [Spazi, rune, magia, borse](#spazi-rune-magia) | `src/kernel/kernel.ts`, `src/kernel/runes.ts`, `src/kernel/magic.ts`, `src/kernel/inventory.ts` |
 | [Il lessico](#lessico) | `world/lessico.md`, `src/kernel/fourthwall.ts` |
@@ -50,7 +50,7 @@
 - **Vitest** in Node con modelli offline (`MockAiModels`): kernel, Concilio e layout testabili headless.
 - Persistenza: repository git dell'universo su disco tramite il server di Vite (`server/universeStore.ts`):
   testi, `maps/` (piani dei luoghi), `world/stato.json` (lo stato del mondo), `world/giocatori/` (i viandanti), `world/consumi.json` (i consumi); saldi e pagamenti fuori dal repository, in `universes/.saldi/` (ADR-0104). Senza server:
-  `localStorage` + IndexedDB. I commit vanno al disco in fila (`UniverseClient`, ADR-0122): senza risposta dal server il commit resta primo in fila e ritenta (tre volte subito, poi a ogni commit nuovo e ogni 30 s), un 5xx ritenta tre volte e cede il passo, un rifiuto (4xx) si scarta con un avviso; `checkout`, `clone`, `branch` e `merge` non passano sopra un commit in attesa.
+  `localStorage` + IndexedDB. I commit vanno al disco in fila (`UniverseClient`, ADR-0122): senza risposta dal server il commit resta primo in fila e ritenta (tre volte subito, poi a ogni commit nuovo e ogni 30 s), un 5xx ritenta tre volte e cede il passo, un rifiuto (4xx) si scarta con un avviso; `checkout` e `clone` non passano sopra un commit in attesa. Nella stessa fila stanno anche i piani (`putMap`), i rami e le pubblicazioni, che ritentano come i commit (ADR-0144); nel browser la fila si salva per scheda in `localStorage` (`browserOwedStorage`, mai il token) e la pagina dopo la scrive prima di leggere l'universo; al tetto (256 scritture o 2 milioni di caratteri) una scrittura nuova si unisce a una in fila; un 401 chiede un token nuovo (`renewAuth`) e riprova.
 
 <a id="sito"></a>
 ## Il sito e il tema
@@ -108,6 +108,12 @@
   Gli abbonamenti (ADR-0077, T68; blindati da ADR-0106): `ai.provider` (`api` predefinito, `claude`; Antigravity non può escludere gli strumenti e non sta sulla coda) e `ai.agenti` (agente → provider)
   mandano i compiti lenti (Genesi, Fucina, modelli dello Scultore, sessioni del Concilio, meccaniche) alla coda `/api/coda`, servita
   da un processo che usa la CLI dell'abbonamento di chi gioca; il resto resta sulle API. Solo in locale, mai sul server del multigiocatore. La route c'è solo con `QUINE_CODA=1` nel `.env`, da loopback, con un segreto che vive nel server; la CLI gira in una cartella vuota, con l'ambiente ridotto, senza strumenti, MCP, hook e impostazioni, il testo su stdin, e ogni esecuzione deve confermarlo dal suo `init` (`IsolationCheck` in `tools/abbonamenti/servi.ts`) o viene uccisa.
+
+  **La generazione differita** (ADR-0137, T207): `npm run genera -- <universo>` genera un universo prima che qualcuno lo giochi, senza browser e solo
+  dalla coda: ogni compito, anche i veloci, va all'abbonamento (`DeferredModels`), uno che andrebbe alle API ferma il comando. I passi (Genesi, luoghi a
+  spirale da `(0, 0)` con i loro individui, modelli, brani) si scrivono solo se finiscono validi (`StepGate`); il progresso e il tetto in percentuale
+  della settimana (riletto a ogni passo, misurato da `/usage`) stanno in `universes/.generazione/<nome>.json`; il comando non parte su un universo con
+  un mondo acceso (`universes/.accesi/`, `server/generation.ts`) e un mondo non si accende su un universo che si genera. Un universo di un'altra `X.Y` del kernel non si genera.
 
 <a id="concilio"></a>
 ## Il Concilio al lavoro: registro, Luogo, Fucina, Genesi
@@ -656,7 +662,7 @@ Il kernel è in console come `window.quine` (o `window.rune`) in singola e per i
   dispositivi sono le costanti di `corona.ts` (`SHOWCASE_AT`, `GRAPH_AT`, `SITUATION_AT`, `WALL_AT`, `CONSOLES_AT`, `BENCH_AT`…,
   relative a `f.ox`, `f.oy`); il dispositivo sta sulla colonna 12, l'uscita in basso (y 14): stare a y 10.5 lo inquadra con la
   parete di fondo, ma `E` lo raggiunge da y 7.5. Per gli esterni: `k.corona.building(id).door` (il viale davanti alla porta) o `?dev&teleport=46,0`.
-- **La posizione del teleport si somma a quella salvata** (T214): `pagehide` scrive la posizione in `universes/<nome>/world/giocatori/io.json` e il caricamento dopo la rende scostamento del tappeto, quindi `?dev&teleport=46,0` chiuso in modo ordinato dà scostamenti 0, 46, 92, 138 e ogni volta terreno diverso, senza che sia un difetto. Per confrontare due caricamenti rimetti lo stesso universo prima di ciascuno (una copia di `universes/<nome>/`): il file sta lì, quindi un profilo pulito del browser da solo non basta. Oppure controlla `k.carpet().ox` e `.oy` prima di guardare o misurare.
+- **Il teleport non si somma più a quella salvata** (T264, prima T214): `pagehide` scrive la posizione in `universes/<nome>/world/giocatori/io.json` e il caricamento dopo la rende scostamento del tappeto; con `?dev&teleport=X,Y` `applyTeleport` (`src/kernel/teleport.ts`) ferma il tappeto e ne azzera lo scostamento, quindi due caricamenti dello stesso URL arrivano allo stesso punto (prima davano 0, 46, 92, 138). Senza `teleport` vale lo scostamento salvato: chi chiude nella corona riparte dov'era.
 - **Multigiocatore**: `vite preview` non aggancia il WebSocket di `/api/session` (il client dà «il mondo non risponde»): serve il server
   di sviluppo, `npx vite --port <n> --strictPort`, sempre nel turno `browser`. Un universo con `partita.modalita: 'multigiocatore'`, due
   schede con `?skip&offline&universo=<nome>&viandante=io` (il master, se `partita.master` non dice altro) e `&viandante=<altro>`; la prima

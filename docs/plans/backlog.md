@@ -4351,13 +4351,14 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: sì, un oggetto dentro una struttura del catalogo.
 - Quando è fatto: commit su `task/T281`. Sicurezza: nessuna superficie nuova.
 
-### T282 · Integrare T275: il conflitto in `package.json` — `da fare`
+### T282 · Integrare T275: il conflitto in `package.json` — `fatto` (`7b0d821`)
 - Pipeline: claude · stima 1% · approvato · priorità 1
 - Sforzo: high.
 - Contesto: `integra T275` si è fermato su `package.json`. Nasce da T275: `dossier T275`. `3d` ha aggiunto lo script `universi:cloud` (T279), `task/T275` lo script `genera` e la versione `0.1.6`.
 - Cosa fare: nel tuo worktree `git merge task/T275`; in `package.json` tieni i due script e la versione `0.1.6`, uguale in `version.ts`. Gli ADR 0142 e 0143 di T275 si scontrano col 0142 di T276: rinumerali ai primi liberi, anche nei rimandi di `AGENTS.md`, `docs/architettura-dettagli.md` e `docs/adr/README.md`. Suite intera e typecheck con i loro turni; i due test «forte» di `lab/tests/riferimento.test.ts` hanno un limite di tempo reale, sotto carico possono cadere: riprovali da soli e dillo nell'esito.
 - Browser: non serve, T275 ha già provato T264.
 - Quando è fatto: commit su `task/T282`. All'integrazione l'orchestratore segna `fatto` T264, T265, T267, T207 e dà `integra T275`. Sicurezza: scrivi l'esito, T265 tocca le scritture dell'universo.
+- Esito: `git merge task/T275` in `7b0d821`: `package.json` con `universi:cloud` e `genera`, versione `0.1.6` uguale in `version.ts`; ADR di T275 a 0143 (generazione differita) e 0144 (fila delle scritture), indice in ordine e rimando corretto in ADR-0143. Fuori dal previsto: `tests/fixtures/mj-engine-hashes.json` rigenerata perché già rossa su `3d` (T276 + T273), con il motore di prima di D33 (`5204a3d^`) e confermata dal motore attuale: 96 voci nuove, 46 cambiate, tutte di modelli dell'universo. Suite (2272 passati, 1 saltato) e typecheck verdi; il primo giro è caduto solo su quella fixture; i due test «forte» di `lab/tests/riferimento.test.ts` sono passati nel giro finale senza riprove. Sicurezza: nessuna voce nuova e nessuna superficie oltre a quella di T275: T265 salva le scritture in `localStorage` per scheda, senza token, rilette con `owedWrite` e riscritte con l'identità corrente sotto il controllo del server; su un computer condiviso il testo in fila resta finché non si scrive e una fila orfana la prende la pagina dopo. Non provati, come in T275: `npm run genera` con la CLI vera e il suo costo per luogo, la fila di T265 nel browser con server spento, il rinnovo del 401 con un account vero, la lettura di `/usage` con la CLI vera. All'integrazione: segnare `fatto` T264, T265, T267, T207 e dare `integra T275`.
 
 ### T283 · Il sito in tre vesti: la base comune, col rapporto aureo — `da fare`
 - Pipeline: claude · stima 2% · approvato · browser · priorità 3

@@ -1711,14 +1711,55 @@ export class Kernel {
     }
   }
 
+  /**
+   * The deferred generation (T207, ADR-0143): the place (cx, cy) planned now, with nobody near it and outside the quota of new places per
+   * minute (the world's time does not run there). `nuovo` if the Council planned it now, `noto` if the universe had its plan, `no` otherwise.
+   */
+  async planAhead(cx: number, cy: number): Promise<'nuovo' | 'noto' | 'no'> {
+    if (this.mirror || !Number.isInteger(cx) || !Number.isInteger(cy)) return 'no';
+    this.genBudget = Math.max(this.genBudget, 1);
+    const ch = this.ensureChunk(cx, cy);
+    if (!ch || ch.developing) return 'no';
+    if (ch.stage === 'planned') return 'noto';
+    const known = !!(await this.chunkStore.load(this.recordKey(ch)));
+    ch.developing = true;
+    this.developers++;
+    try {
+      await this.develop(ch, true);
+    } finally {
+      ch.developing = false;
+      this.developers--;
+    }
+    const stage = ch.stage as Chunk['stage']; // develop() changed it
+    return stage !== 'planned' ? 'no' : known ? 'noto' : 'nuovo';
+  }
+
+  /** The characters of a planned place: each gets the individual behind it (deferred generation). How many have one. */
+  async peopleOf(cx: number, cy: number): Promise<number> {
+    const ch = this.chunks.get(this.chunkKey(cx, cy));
+    if (!ch || ch.stage !== 'planned') return 0;
+    const S = this.config.chunkSize;
+    const inside = (id: Id) => {
+      const p = this.ecs.get(id, 'pos') as { x: number; y: number } | undefined;
+      return !!p && Math.floor(p.x / S) === cx && Math.floor(p.y / S) === cy;
+    };
+    let n = 0;
+    for (const id of this.ecs.query('module')) {
+      const m = this.modules.get(this.ecs.get(id, 'module')?.id)?.manifest;
+      if (!m?.persona || !inside(id)) continue;
+      if (await this.ensureIdentity(id)) n++;
+    }
+    return n;
+  }
+
   /** Brings a chunk from draft to planned, reusing the cached plan when possible. */
-  private async develop(ch: Chunk): Promise<void> {
+  private async develop(ch: Chunk, noQuota = false): Promise<void> {
     const rec = await this.chunkStore.load(this.recordKey(ch));
     if (!this.alive(ch)) return;
     // A plan whose environment is gone belongs to another world (a Genesis under the same title, ADR-0134): planned again.
     if (rec && (!rec.plan.layout || this.content.layouts[rec.plan.layout])) return this.applyPlan(ch, rec.plan);
     // New to the universe: planned once, here, at the expense of who wanted it first (T40), within the quota.
-    if (!this.chunkQuota()) {
+    if (!noQuota && !this.chunkQuota()) {
       if (!ch.held) this.council.say('kernel', 'info', `luogo ${ch.key}: troppi luoghi nuovi in un minuto, aspetta`, 'cartografo', 'chunk.plan');
       ch.held = true;
       return;
