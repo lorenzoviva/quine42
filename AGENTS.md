@@ -89,6 +89,7 @@ npm run serve        # lo avvia (dopo build e build:server), legge il .env se c'
 npx vite-node lab/scripts/mjx-sound.ts -- suono-fuga-cellulare  # un programma sonoro: WAV, traccia e rapporto in testo, senza browser né modelli (ADR-0125)
 npm run mancanze -- <universo>  # il rapporto di ciò che il Concilio non è riuscito a fare, per il kernel 1.0.0 (senza nome: tutti gli universi; ADR-0130)
 npm run universi:cloud  # installa in universes/ aurora, orichalcum, neapolis e sidera con le strutture, i modelli e i suoni di Claude Cloud, a costo zero (T273, lab/banco/universi-cloud/INTEGRAZIONE.md)
+node tools/vesti/misura.mjs --url http://127.0.0.1:<porta>/site/index.html  # quanto costano gli effetti delle vesti su una preview: CPU rallentata, thread principale, ms per tick, peso (ADR-0151)
 npm run abbonamento  # serve la coda /api/coda con la CLI di Claude (con QUINE_CODA=1 nel .env, ADR-0077, ADR-0106)
 npm run genera -- <universo> [--partita singola|multigiocatore] [--luoghi 25] [--tetto 10]  # genera un universo prima di giocarlo, solo dalla coda degli abbonamenti (servita da npm run abbonamento), mai con un mondo acceso (ADR-0143)
 ```
@@ -208,6 +209,7 @@ tools/glossario/        glossario.mjs: legge docs/glossario.md e riscrive il cen
 tools/mancanze/         rapporto.ts (il comando), leggi.ts (legge `world/mancanze.json` degli universi sul disco, ADR-0130)
 tools/generazione/      genera.ts (il comando della generazione differita, `npm run genera`, ADR-0143)
 tools/abbonamenti/      servi.ts (il processo che serve la coda degli abbonamenti con la CLI isolata, ADR-0077, ADR-0106)
+tools/vesti/            scritta.ts ed estrai.ts (la scritta della veste futuristica estratta dalla proposta, verificata cella per cella), misura.mjs e cattura.mjs (quanto costano gli effetti di una veste, le catture): un Chrome headless proprio, solo loopback (cdp.mjs, ADR-0151)
 lab/                    laboratorio di MarkovJunior (ADR-0038): sandbox 3D /lab/3d/, editor modelli /lab/editor/ (T59a, T59b, T59c, T59d), entrambi con l'interruttore cartone/classica (`lab/look.ts`), SoundLab /lab/suono/ (T222), modelli ufficiali e conformità, i pattern con cui crescono le strutture e tre programmi di riferimento del cantiere (lab/banco/pattern.md, lab/banco/riferimento/, T181), script per
                         affettare, fotografare, misurare e provare i programmi con Gemini; non importarlo da src/
 site/                   il sito web (ADR-0095, T97): landing, carte 3D, sessioni, profilo, crediti, notizie (`site/notizie/`, un Markdown per notizia, ADR-0129), video e istruzioni della beta (ADR-0131); theme.css condiviso con il gioco; le vesti in `site/skins/<id>/`, una cartella per veste sopra la base comune, `site/skin.ts` il selettore (ADR-0145)
@@ -256,7 +258,7 @@ Registro, Luogo, Fucina e Genesi → `docs/architettura-dettagli.md#concilio`.
 - **Grafo del mondo**: nodi e archi dai file, `focus` come contesto del Narratore → `#grafo`
 - **Ambientazioni**: quattro testi tra cui scegliere nella Genesi, un seme solo; ciò che sopravvive alla Genesi parla di epoca, le case comuni dipendono dal mondo (`commonHouse`, ADR-0134) → `#concilio`
 - **Il Concilio al lavoro**: registro, come nasce un luogo, Fucina, Genesi, le mancanze (ciò che non è riuscito a fare, ADR-0130) → `#concilio`
-- **Il sito e il tema, le vesti** (una cartella di `site/skins/`, `data-skin` sulla radice; la base legge solo token `--skin-*`, misure dalla scala aurea, ADR-0145) → `#sito`; **confine e limiti di Lua** → `#lua-sandbox`; **Gemini, Attore, coefficienti** → `#gemini`
+- **Il sito e il tema, le vesti** (una cartella di `site/skins/`, `data-skin` sulla radice; la base legge solo token `--skin-*`, misure dalla scala aurea, ADR-0145; la futuristica: la scritta della proposta estratta così com'è, effetti a tick, le luci scelte coi numeri, ADR-0151) → `#sito`; **confine e limiti di Lua** → `#lua-sandbox`; **Gemini, Attore, coefficienti** → `#gemini`
 - **Convalida nel browser**: build, preview, spostarsi fermando il tappeto, `interact()` → `#convalida-browser`
 - **Costi e prestazioni** → `#costi`; **stato del progetto e prossimi passi** → `#stato`; il lavoro da fare è in [`docs/plans/backlog.md`](docs/plans/backlog.md)
 - **Fasi e step** (ADR-0128): le quattro fasi dello sviluppo e gli step, obiettivi condivisi tra task, in [`docs/fasi.md`](docs/fasi.md): ogni task sta in una sola riga della tabella, il numero di uno step non cambia; `pipeline.mjs step` ne copia il numero nella riga `- Step:` del backlog e priorizza uno step (T231)

@@ -1,0 +1,33 @@
+# ADR-0151 — La veste futuristica: la scritta estratta dalla proposta, gli effetti a tick, il motore delle luci scelto coi numeri
+
+Data: 2026-11-05 · Stato: accettato · Riferimenti: ADR-0145 (le vesti del sito), ADR-0142 (il motore MarkovJunior si ottimizza solo a voxel identici), ADR-0111 (la CSP), T283, T284, T287
+
+## Contesto
+
+L'autore ha bocciato le prime stesure delle vesti di T283: mancavano scritte e icone delle proposte scelte (D41 A). Per la futuristica vuole la seconda proposta di Claude per il prompt 5, «Il quine» (nella v2 dopo le votazioni): la scritta QUINE42 fatta di righe del piccolo QUINE42, nei colori neon punk, ma con le scritte piccole che si muovono («tappeto che si muove» o «logica MJ», lettere che si accendono e attraversano la scritta, un programma che compila), strisce con lo stesso effetto lungo la pagina, un'icona che non sia quella accanto alla scritta e che si legga a 16 px, l'animazione ferma a scheda nascosta e con `prefers-reduced-motion`. Teme che un algoritmo MarkovJunior sia troppo per la landing: chiede di provarlo contro un'animazione semplice, di misurare entrambi e di scegliere coi numeri; solo se MJ regge, una variante senza lo showcase 3D, che resta una scelta sua.
+
+## Decisione
+
+- **La scritta si estrae, non si ridisegna.** `tools/vesti/scritta.ts` legge la proposta così com'è (`docs/design/logo/proposte/claude/QUINE42 Logo v2 standalone.html`, sezione 05, il disegno su fondo scuro: 13 057 quadrati) e ne ricava ciò che la determina: 16 righe di posti per le lettere piccole, le sette lettere 3 × 5 e due colori. La regola della proposta è che ogni riga è il testo dalla Q, sui soli posti delle lettere grandi; lo strumento rifiuta un disegno che non la segue, e un disegno ricavato che non ridà gli stessi quadrati. Scrive `site/skins/futuristica/scritta.ts` (i dati), `scritta.svg` (il logo fermo di barra e piede: 34,8 KB invece di 316, stesse celle) e `icona.svg` (`npx vite-node --script tools/vesti/estrai.ts`). `tests/site-skin-futuristica.test.ts` confronta cella per cella la proposta, i dati, l'SVG fermo e ciò che la pagina dipinge, e rifiuta un file della veste ritoccato a mano.
+- **L'icona è la Q della scritta, a due misure in un file.** Fino a 63 px una riga di pixel per riga di testo (16 righe: a 16 px è la Q della scritta pixel per pixel in altezza, con l'anello chiuso, che il test controlla); da 64 px, con una media query dell'SVG, la Q vera con le sue lettere piccole. Accanto alla scritta non c'è più un'icona.
+- **Gli effetti di una veste vanno a tick, e solo ciò che si vede.** Un timer aspetta il tick (90 ms), poi un solo fotogramma dipinge: fra due tick la pagina è ferma. Si ferma a scheda nascosta e per ciò che è fuori schermo; con `prefers-reduced-motion` la scritta è ferma com'è nella proposta. Le lettere piccole scorrono sulle loro righe (una riga in un verso, la successiva nell'altro, ogni tre tick: il tappeto), teste di luce le percorrono come un cursore che compila e ogni tanto un'onda accende una lettera grande. Dipinge con un pixel per cella e un ingrandimento a scala intera quando costa poco, così le lettere restano nette.
+- **Il motore delle luci si sceglie coi numeri.** Lo stesso comportamento è scritto due volte: come programma MarkovJunior eseguito dal motore del gioco con `runOn` a ogni tick, come il gioco esegue una clip sul fotogramma prima (`lights-mj.ts`), e in cicli semplici (`lights-simple.ts`). Misurati con `tools/vesti/misura.mjs` a 1920 × 1080 (DPR 1, GPU vera, CPU rallentata 4× per una macchina modesta): sulla landing col palco 3D il thread principale è al 36,7 % con la sobria, 39,6 % con la futuristica e le luci semplici (2,0 ms a tick, p95 3,3), 40,7 % con MarkovJunior (4,9 ms, p95 7,7); senza il palco 3D gli effetti da soli costano 4,7 % contro 7,7 %. Stesso aspetto, MarkovJunior costa circa 2,4 volte per tick: **la veste usa le luci semplici**. `?fx=mj` e `?fx=semplice` restano per rifare il confronto.
+- **MarkovJunior regge, quindi c'è la variante, proposta e non scelta.** Il palco 3D da solo vale circa sei volte gli effetti MarkovJunior e 133,6 KB di three.js. `?fx=mj-pagina` mostra la variante: niente palco 3D, MarkovJunior per scritta e strisce e, al posto del palco, un programma MarkovJunior in due dimensioni scritto con le lettere della scritta (un labirinto che cresce e poi il percorso più lungo acceso, `program.ts`), così il testo dell'hero resta vero. Misurata: 18,3 % del thread a 4× con three.js ancora caricato e il suo ciclo a vuoto, 9,8 % senza. Non è nel selettore: lo deciderà l'autore (T287).
+- **Gli strumenti delle vesti** (`tools/vesti/cdp.mjs`, `misura.mjs`, `cattura.mjs`) avviano un Chrome headless proprio, con un profilo temporaneo, e aprono solo pagine di questa macchina (`checkLocal`, con un test): misure riproducibili e catture a 1920 e a 390 px per le altre vesti e per T287.
+
+## Alternative scartate
+
+- **Ridisegnare il logo con un font o con il CSS** (le stesure di T283): bocciato dall'autore, ed è ciò che il task chiede di non rifare.
+- **Servire l'SVG originale**: 316 KB di quadrati uguali; quello ricavato disegna le stesse celle in 34,8 KB.
+- **Un'animazione solo CSS** (trasformazioni composte, senza JavaScript): il tappeto della proposta salta i vuoti fra le lettere grandi e le luci dipendono dallo stato di ogni posto, cose che una traslazione non dice.
+- **`requestAnimationFrame` a ogni vsync**: misurato 12,8 % del thread a 4× con le luci semplici, contro 4,7 % con un fotogramma per tick.
+- **MarkovJunior come predefinito**: stesso aspetto, più del doppio per tick.
+- **Un passo persistente nel motore** (compilare una volta e aggiornare le corrispondenze dal registro della griglia): renderebbe MarkovJunior economico quasi quanto le luci semplici, ma tocca il motore del gioco per un effetto del sito (ADR-0142). Se l'autore sceglie la variante, è il primo lavoro da fare.
+- **La variante come quarta veste nel selettore**: la vedrebbero i beta tester prima che l'autore decida.
+
+## Conseguenze
+
+- La veste futuristica scarica 32 KB compressi in più della sobria (18 dei quali il font VT323; circa 81 KB senza compressione) e, a 4×, costa circa 3 punti di thread principale sulla landing.
+- Una proposta nuova può diventare una veste allo stesso modo: uno strumento che la estrae e la rifiuta se non è quella, e un test cella per cella.
+- La variante, se scelta, vuole che la landing carichi three.js solo quando il palco si vede (oggi lo importa sempre) e, per i suoi picchi di 11–15 ms a 4×, il passo persistente del motore o un labirinto più piccolo.
+- Sicurezza: nessuna superficie nuova nel sito né nel server; gli strumenti aprono solo loopback e un Chrome con un profilo temporaneo.

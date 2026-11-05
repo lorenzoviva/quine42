@@ -1,58 +1,196 @@
-/* La veste futuristica (T283, ADR-0145): la prima stesura, solo colori, font e bagliori. La scritta fatta di scritte e ciò che si muove sono di T284. */
+/* La veste futuristica (T284, ADR-0145): l'inception di scritte al neon, tra Matrix e Tron.
+   Il logo è la scritta della proposta 05 «Il quine» di Claude (v2), estratta così com'è da tools/vesti/scritta.ts: le lettere grandi
+   QUINE42 fatte di righe del piccolo QUINE42, la Q piccola rosa e il resto ciano su #090514. I colori sono i suoi, neon punk.
+   Ciò che si muove (la scritta grande nell'hero, le strisce lungo le pagine) è di effects.ts: qui solo dove sta e come appare. */
 :root[data-skin='futuristica'] {
-  /* Colori */
-  --skin-bg: #02040a;
-  --skin-panel: #06101c;
-  --skin-panel-raised: #0b1a2c;
-  --skin-ink: #000000;
-  --skin-ink-raised: #081422;
-  --skin-ink-surface: #10243a;
-  --skin-text: #d8fff4;
-  --skin-text-dim: #8fc4b8;
-  --skin-text-faint: #5f8c88;
-  --skin-primary: #05ffa1;
+  /* Colori: il fondo, il ciano e il rosa della scritta; il giallo e il viola della stessa tavolozza */
+  --skin-bg: #090514;
+  --skin-panel: #0d0820;
+  --skin-panel-raised: #150c2e;
+  --skin-ink: #04020b;
+  --skin-ink-raised: #110a26;
+  --skin-ink-surface: #1a1038;
+  --skin-text: #ecf8ff;
+  --skin-text-dim: #a9b8d0;
+  --skin-text-faint: #75809e;
+  --skin-primary: #ffe600;
   --skin-accent: #00f0ff;
   --skin-accent-2: #ff2a85;
   --skin-success: #05ffa1;
   --skin-danger: #ff3344;
   --skin-rare: #9d00ff;
-  --skin-on-bright: #02040a;
-  --skin-on-accent-2: #02040a;
-  --skin-grid-line: rgba(5, 255, 161, 0.16);
+  --skin-on-bright: #090514;
+  --skin-on-accent-2: #090514;
+  --skin-grid-line: rgba(0, 240, 255, 0.16);
 
-  /* Font */
-  --skin-font-body: 'Cascadia Mono', 'JetBrains Mono', Consolas, 'DejaVu Sans Mono', monospace;
+  /* Font: il terminale per i titoli, il monospazio per le etichette, un bastoni leggibile per il testo lungo */
+  --skin-font-body: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
   --skin-font-display: 'VT323', 'Cascadia Mono', Consolas, monospace;
   --skin-font-label: 'Cascadia Mono', 'JetBrains Mono', Consolas, 'DejaVu Sans Mono', monospace;
   --skin-font-mono: 'Cascadia Mono', 'JetBrains Mono', Consolas, 'DejaVu Sans Mono', monospace;
   --skin-font-logo: 'VT323', 'Cascadia Mono', Consolas, monospace;
 
-  /* Titoli e logo */
-  --skin-title-color: #05ffa1;
+  /* Titoli e logo: la luce del neon, niente ombre piene */
+  --skin-title-color: #00f0ff;
   --skin-title-weight: 400;
   --skin-title-spacing: 0.04em;
   --skin-title-case: uppercase;
-  --skin-title-shadow: 0 0 13px rgba(5, 255, 161, 0.65);
+  --skin-title-shadow: 0 0 8px rgba(0, 240, 255, 0.55), 0 0 21px rgba(0, 240, 255, 0.25);
   --skin-title-transform: none;
   --skin-logo-color: #00f0ff;
   --skin-logo-spacing: 0.18em;
   --skin-logo-shadow: 0 0 13px rgba(0, 240, 255, 0.8);
   --skin-logo-transform: none;
 
-  /* Ombre e bagliori */
+  /* Ombre e bagliori: luce, non inchiostro */
   --skin-shadow-s: 0px;
   --skin-shadow-m: 0px;
   --skin-shadow-l: 0px;
   --skin-shadow-blur: var(--space-13);
-  --skin-glow: var(--space-21);
+  --skin-glow: var(--space-13);
 
-  /* Sfondi */
-  --skin-page-background: linear-gradient(rgba(5, 255, 161, 0.05) 1px, transparent 1px), linear-gradient(180deg, #02040a 0%, #06101c 100%);
-  --skin-nav-background: rgba(2, 4, 10, 0.94);
-  --skin-stage-background: radial-gradient(circle at center, rgba(0, 240, 255, 0.16) 0%, rgba(2, 4, 10, 0.95) 75%);
-  --skin-texture: linear-gradient(rgba(5, 255, 161, 0.08) 1px, transparent 1px);
+  /* Sfondi: righe di scansione come righe di testo, una luce ciano dall'alto */
+  --skin-page-background: repeating-linear-gradient(180deg, rgba(0, 240, 255, 0.035) 0, rgba(0, 240, 255, 0.035) 1px, transparent 1px, transparent 6px), radial-gradient(ellipse at 50% -8%, rgba(0, 240, 255, 0.12) 0%, transparent 55%), linear-gradient(180deg, #090514 0%, #0c0620 100%);
+  --skin-nav-background: rgba(9, 5, 20, 0.92);
+  --skin-stage-background: radial-gradient(circle at 50% 40%, rgba(0, 240, 255, 0.14) 0%, rgba(157, 0, 255, 0.1) 35%, rgba(9, 5, 20, 0.96) 75%);
+  --skin-texture: repeating-linear-gradient(180deg, rgba(0, 240, 255, 0.07) 0, rgba(0, 240, 255, 0.07) 1px, transparent 1px, transparent 6px);
 }
 
-[data-skin='futuristica'] body {
-  background-size: 100% var(--space-3), auto;
+/* Il logo: la scritta estratta, al posto delle lettere; il testo resta per chi non vede. */
+[data-skin='futuristica'] .nav-logo,
+[data-skin='futuristica'] .footer-brand {
+  display: inline-block;
+  color: transparent;
+  text-shadow: none;
+  letter-spacing: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  background: url('scritta.svg') no-repeat left center / contain;
+  aspect-ratio: 551 / 95;
+  filter: drop-shadow(0 0 5px rgba(0, 240, 255, 0.45));
 }
+
+/* Da un telefono a uno schermo grande, senza @media: il test della veste vuole ogni regola sotto il suo attributo. */
+[data-skin='futuristica'] .nav-logo {
+  height: clamp(var(--space-21), 2.618vw, var(--space-34));
+}
+
+[data-skin='futuristica'] .footer-brand {
+  height: clamp(var(--space-34), 4.236vw, var(--space-55));
+  background-position: center;
+}
+
+/* La barra: la sua riga di sotto è una riga di scritta che scorre (effects.ts). */
+[data-skin='futuristica'] .site-nav {
+  border-bottom-color: transparent;
+}
+
+[data-skin='futuristica'] .nav-tagline {
+  color: var(--skin-accent-2);
+}
+
+/* Ciò che effects.ts aggiunge: decorazione, mai sotto il puntatore. */
+[data-skin='futuristica'] .fx {
+  pointer-events: none;
+}
+
+[data-skin='futuristica'] .fx canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* La scritta grande, in testa all'hero, su tutte e due le colonne. */
+[data-skin='futuristica'] .fx-scritta {
+  grid-column: 1 / -1;
+  width: 100%;
+  aspect-ratio: 551 / 95;
+  max-height: var(--measure-199);
+}
+
+/* Le strisce: righe della stessa scritta, da un bordo all'altro dello schermo, più tenui. */
+[data-skin='futuristica'] .fx-striscia {
+  position: absolute;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 13%, #000 87%, transparent 100%);
+}
+
+[data-skin='futuristica'] .fx-barra {
+  bottom: calc(0px - var(--space-3));
+  height: var(--space-5);
+  width: 100%;
+  left: 0;
+  transform: none;
+  mask-image: none;
+}
+
+[data-skin='futuristica'] .fx-sezione {
+  top: var(--space-13);
+  height: var(--space-13);
+}
+
+[data-skin='futuristica'] .fx-piede {
+  top: var(--space-34);
+  height: var(--space-21);
+}
+
+[data-skin='futuristica'] .section-wrap {
+  position: relative;
+}
+
+/* La variante proposta (?fx=mj-pagina): niente palco 3D, al suo posto un programma MarkovJunior in due dimensioni (program.ts). */
+[data-skin='futuristica'] .hero.fx-senza-3d .hero-3d {
+  display: none;
+}
+
+[data-skin='futuristica'] .fx-programma {
+  position: relative;
+  height: clamp(var(--measure-322), 38.2vw, var(--measure-521));
+  background: var(--skin-stage-background);
+  border: var(--border-ink-thick);
+  border-color: rgba(0, 240, 255, 0.45);
+  box-shadow: var(--shadow-m) var(--skin-accent);
+  overflow: hidden;
+}
+
+[data-skin='futuristica'] .fx-programma canvas {
+  position: absolute;
+  inset: 0;
+}
+
+[data-skin='futuristica'] .fx-programma .hero-3d-meter,
+[data-skin='futuristica'] .fx-programma .hero-3d-caption {
+  background: rgba(9, 5, 20, 0.86);
+  padding: var(--space-3) var(--space-8);
+}
+
+[data-skin='futuristica'] .fx-programma .hero-3d-caption {
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+}
+
+/* Pulsanti e pannelli: filo di luce al posto dell'inchiostro. */
+[data-skin='futuristica'] .comic-btn {
+  border-color: currentColor;
+  letter-spacing: 0.08em;
+}
+
+[data-skin='futuristica'] .comic-panel,
+[data-skin='futuristica'] .comic-card,
+[data-skin='futuristica'] .hero-3d {
+  border-color: rgba(0, 240, 255, 0.45);
+}
+
+[data-skin='futuristica'] .hero-title {
+  font-size: clamp(var(--text-47), 5.236vw, var(--text-89));
+  line-height: var(--leading-tight);
+}
+
+[data-skin='futuristica'] .comic-badge {
+  font-family: var(--skin-font-label);
+  letter-spacing: 0.12em;
+}
+
