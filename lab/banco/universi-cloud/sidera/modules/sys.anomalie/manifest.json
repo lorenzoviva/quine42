@@ -1,0 +1,19 @@
+{
+  "id": "sys.anomalie",
+  "name": "Pozze di gravità e risonanza",
+  "kind": "system",
+  "version": "1.0.0",
+  "description": "A Sidera il peso e il freddo non sono uguali dappertutto: vicino agli speroni di cristallo la forza interiore torna più in fretta, sulla brina si scivola e ci si stanca, e le condizioni lasciate dalle rune (Gravis, Levis, Trottola, Nulla, Sospesa) durano nel corpo: chi è zavorrato regge il freddo, chi è sospeso guarisce, chi è intirizzito si stanca. Un messaggio ogni tanto racconta cosa si sente.",
+  "logic": "logic.lua",
+  "order": 42,
+  "casi": [
+    {
+      "titolo": "Accanto ai cristalli",
+      "racconto": "Il viandante con poca forza interiore resta fermo accanto a uno sperone di cristallo: il mana risale più in fretta del solito.",
+      "terreno": ["ggggg", "ggggg", "ggrgg", "ggggg", "ggggg"],
+      "viandante": { "componenti": { "needs": { "hunger": 80, "thirst": 80, "energy": 80, "health": 80, "mana": 10 } } },
+      "durata": 8,
+      "guarda": ["needs.mana"]
+    }
+  ]
+}

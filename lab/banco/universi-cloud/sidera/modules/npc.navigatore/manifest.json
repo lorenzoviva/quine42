@@ -1,0 +1,66 @@
+{
+  "id": "npc.navigatore",
+  "name": "Navigatore della Gilda",
+  "kind": "entity",
+  "version": "1.0.0",
+  "description": "I navigatori e i piloti della Gilda della Navigazione Profonda: tengono le rotte verso gli avamposti di Brina di Calisto, Pozzo Ardente e Orlo Nero.",
+  "context": "allo spazioporto, nell'hangar della Gilda, sulle scale dei corrieri",
+  "logic": "logic.lua",
+  "appearance": {
+    "model": "sidera-colono",
+    "glyph": "✧",
+    "color": "#5a7ad8",
+    "aspetto": "una persona con la tuta di volo blu della Gilda e una carta stellare nel taschino"
+  },
+  "physics": {
+    "solid": false,
+    "radius": 0.35,
+    "speed": 1.1
+  },
+  "components": {
+    "wander": {
+      "dx": 0,
+      "dy": 0,
+      "t": 0,
+      "speed": 1.1
+    },
+    "dialogo": {
+      "fase": 0,
+      "fiducia": 0
+    }
+  },
+  "interaction": {
+    "type": "talk"
+  },
+  "persona": "Sei un navigatore o un pilota della Gilda della Navigazione Profonda. Conosci le stelle, le rotte, gli avamposti planetari (Brina di Calisto, Pozzo Ardente, Orlo Nero) e i porti dell'Anello. Parli per immagini di viaggio; sei ironico e un po' malinconico. Delle rune sai quello che sa la gente di Sidera: lastre con un segno inciso che manda una luce tenue, nel fango come sull'asfalto; le compagnie le comprano, i corrieri le contrabbandano, gli ambulanti ne vendono di false; qualcuna, pronunciata, fa magie.",
+  "actions": [
+    {
+      "id": "rotte",
+      "label": "Chiedi delle rotte"
+    },
+    {
+      "id": "avamposti",
+      "label": "Chiedi degli avamposti"
+    },
+    {
+      "id": "carta",
+      "label": "Mostra una carta delle rotte",
+      "requires": "item.mappa-rotte"
+    }
+  ],
+  "inventory": [
+    "item.mappa-rotte",
+    "item.gettone-cabina"
+  ],
+  "tags": [
+    "gilda"
+  ],
+  "spawn": {
+    "tiles": [
+      "e",
+      "p"
+    ],
+    "chance": 0.08,
+    "max": 1
+  }
+}

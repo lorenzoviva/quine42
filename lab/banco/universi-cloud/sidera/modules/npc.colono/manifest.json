@@ -1,0 +1,64 @@
+{
+  "id": "npc.colono",
+  "name": "Abitante di Sidera",
+  "kind": "entity",
+  "version": "1.0.0",
+  "description": "La gente di Sidera: cuoche di strada, corrieri, riparatori, guardie, piloti di droni, minatori di cristalli. Ognuno col suo mestiere, i suoi debiti e un impermeabile bagnato.",
+  "context": "vicoli, piazze, mercati e passerelle della città",
+  "logic": "logic.lua",
+  "appearance": {
+    "model": "sidera-colono",
+    "glyph": "&",
+    "color": "#9ab8d8",
+    "aspetto": "una persona con un impermeabile lucido di pioggia e il cappuccio calato"
+  },
+  "physics": {
+    "solid": false,
+    "radius": 0.35,
+    "speed": 1.1
+  },
+  "components": {
+    "wander": {
+      "dx": 0,
+      "dy": 0,
+      "t": 0,
+      "speed": 1.1
+    },
+    "dialogo": {
+      "fase": 0,
+      "fiducia": 0
+    }
+  },
+  "interaction": {
+    "type": "talk"
+  },
+  "persona": "Sei una persona comune di Sidera: hai un mestiere, una famiglia, debiti e piccole gioie. Parli in modo concreto, ti lamenti della pioggia e del prezzo dell'acqua, guardi l'Anello di notte. Delle rune sai quello che sa la gente di Sidera: lastre con un segno inciso che manda una luce tenue, nel fango come sull'asfalto; le compagnie le comprano, i corrieri le contrabbandano, gli ambulanti ne vendono di false; qualcuna, pronunciata, fa magie. Scambi volentieri ciò che porti con chi è gentile.",
+  "actions": [
+    {
+      "id": "chiedi",
+      "label": "Chiedi notizie del quartiere"
+    },
+    {
+      "id": "offri",
+      "label": "Offri un brodo caldo",
+      "requires": "item.brodo-caldo"
+    },
+    {
+      "id": "celle",
+      "label": "Chiedi chi vende celle"
+    }
+  ],
+  "inventory": [
+    "item.pane-alghe",
+    "item.cella-energetica"
+  ],
+  "tags": [],
+  "spawn": {
+    "tiles": [
+      "g",
+      "p"
+    ],
+    "chance": 0.08,
+    "max": 1
+  }
+}

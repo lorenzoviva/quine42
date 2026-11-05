@@ -1,0 +1,66 @@
+{
+  "id": "npc.xenobotanica",
+  "name": "Xenobotanico",
+  "kind": "entity",
+  "version": "1.0.0",
+  "description": "I xenobotanici delle Cupole di Serralta: insegnano alla terra di Sidera a nutrire semi venuti da lontano, e parlano alle piante più che alla gente.",
+  "context": "nelle cupole idroponiche, negli orti pensili, lungo la costa delle alghe",
+  "logic": "logic.lua",
+  "appearance": {
+    "model": "sidera-colono",
+    "glyph": "♀",
+    "color": "#6adf8a",
+    "aspetto": "una persona con un grembiule verde pieno di tasche e guanti di gomma"
+  },
+  "physics": {
+    "solid": false,
+    "radius": 0.35,
+    "speed": 1.1
+  },
+  "components": {
+    "wander": {
+      "dx": 0,
+      "dy": 0,
+      "t": 0,
+      "speed": 1.1
+    },
+    "dialogo": {
+      "fase": 0,
+      "fiducia": 0
+    }
+  },
+  "interaction": {
+    "type": "talk"
+  },
+  "persona": "Sei un xenobotanico di Sidera. Conosci ogni pianta delle cupole, la soluzione nutritiva, i semi selezionati di Serralta, le felci a spirale e i boschetti di vetro. Sei paziente e un po' distratto; ti preoccupa il prezzo dell'acqua delle compagnie. Delle rune sai quello che sa la gente di Sidera: lastre con un segno inciso che manda una luce tenue, nel fango come sull'asfalto; le compagnie le comprano, i corrieri le contrabbandano, gli ambulanti ne vendono di false; qualcuna, pronunciata, fa magie.",
+  "actions": [
+    {
+      "id": "cupole",
+      "label": "Chiedi delle cupole"
+    },
+    {
+      "id": "dona",
+      "label": "Porta soluzione nutritiva",
+      "requires": "item.soluzione-nutritiva"
+    },
+    {
+      "id": "semi",
+      "label": "Chiedi dei semi di Serralta"
+    }
+  ],
+  "inventory": [
+    "item.semi-alieni",
+    "item.foglie-felce"
+  ],
+  "tags": [
+    "serra"
+  ],
+  "spawn": {
+    "tiles": [
+      "m",
+      "g"
+    ],
+    "chance": 0.08,
+    "max": 1
+  }
+}

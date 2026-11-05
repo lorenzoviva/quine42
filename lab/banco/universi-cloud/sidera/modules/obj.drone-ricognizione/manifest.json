@@ -1,0 +1,20 @@
+{
+  "id": "obj.drone-ricognizione",
+  "name": "Drone da ricognizione",
+  "kind": "entity",
+  "version": "1.0.0",
+  "description": "Un drone a quattro eliche rimesso a nuovo dai corrieri: gira basso tra i viadotti, consegna pacchi e manda la sua posizione ai fari di telemetria.",
+  "context": "sopra il mercato, tra i viadotti, sopra la Gola dei Cristalli",
+  "logic": "logic.lua",
+  "appearance": { "model": "sidera-drone", "glyph": "✣", "color": "#5ab8ff", "aspetto": "un piccolo drone a quattro eliche con un occhio azzurro sotto la pancia" },
+  "physics": { "solid": false, "radius": 0.25, "speed": 2.4 },
+  "tags": ["drone", "macchina"],
+  "components": { "wander": { "dx": 0, "dy": 0, "t": 0, "speed": 2.4 }, "drone": { "batteria": 100, "consegne": 0, "pacco": false } },
+  "actions": [
+    { "id": "stato", "label": "Leggi la spia del drone" },
+    { "id": "carica", "label": "Cambia la cella del drone", "requires": "item.cella-energetica" },
+    { "id": "affida", "label": "Affidagli un pacco" },
+    { "id": "ritira", "label": "Ritira ciò che porta" }
+  ],
+  "spawn": { "tiles": ["p", "g", "s"], "chance": 0.05, "max": 1 }
+}

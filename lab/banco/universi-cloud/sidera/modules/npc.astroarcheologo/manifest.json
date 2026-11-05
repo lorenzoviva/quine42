@@ -1,0 +1,64 @@
+{
+  "id": "npc.astroarcheologo",
+  "name": "Astro-archeologo",
+  "kind": "entity",
+  "version": "1.0.0",
+  "description": "Gli astro-archeologi del Campo dei Relitti: scavano tra le lamiere antiche e cercano di capire chi costruì gli scafi sepolti.",
+  "context": "nel Campo dei Relitti, tra le tende degli scavi",
+  "logic": "logic.lua",
+  "appearance": {
+    "model": "sidera-colono",
+    "glyph": "⌖",
+    "color": "#c49a5a",
+    "aspetto": "una persona con un cappello a tesa larga sopra il cappuccio e occhiali da scavo"
+  },
+  "physics": {
+    "solid": false,
+    "radius": 0.35,
+    "speed": 1.1
+  },
+  "components": {
+    "wander": {
+      "dx": 0,
+      "dy": 0,
+      "t": 0,
+      "speed": 1.1
+    },
+    "dialogo": {
+      "fase": 0,
+      "fiducia": 0
+    }
+  },
+  "interaction": {
+    "type": "talk"
+  },
+  "persona": "Sei un astro-archeologo o uno scavatore del Campo dei Relitti di Sidera. Conosci le lamiere antiche, le incisioni geometriche che nessuno sa leggere, la sabbia vitrea, la storia della Traversata. Sei appassionato e parli veloce quando racconti. Delle rune sai quello che sa la gente di Sidera: lastre con un segno inciso che manda una luce tenue, nel fango come sull'asfalto; le compagnie le comprano, i corrieri le contrabbandano, gli ambulanti ne vendono di false; qualcuna, pronunciata, fa magie.",
+  "actions": [
+    {
+      "id": "scafi",
+      "label": "Chiedi degli scafi"
+    },
+    {
+      "id": "frammento",
+      "label": "Mostra un frammento di relitto",
+      "requires": "item.frammento-relitto"
+    },
+    {
+      "id": "scava",
+      "label": "Offriti di scavare"
+    }
+  ],
+  "inventory": [
+    "item.frammento-relitto"
+  ],
+  "tags": [
+    "relitto"
+  ],
+  "spawn": {
+    "tiles": [
+      "s"
+    ],
+    "chance": 0.08,
+    "max": 1
+  }
+}

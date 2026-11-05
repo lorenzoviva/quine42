@@ -1,0 +1,65 @@
+{
+  "id": "npc.medico-criogenico",
+  "name": "Medico criogenico",
+  "kind": "entity",
+  "version": "1.0.0",
+  "description": "I medici e gli infermieri dei Laboratori di Ombralta: curano chi possono e vegliano sui dormienti delle capsule, al freddo.",
+  "context": "nei Laboratori di Ombralta e, a volte, nei vicoli",
+  "logic": "logic.lua",
+  "appearance": {
+    "model": "sidera-colono",
+    "glyph": "+",
+    "color": "#9fe8ff",
+    "aspetto": "una persona in camice bianco sopra il maglione, con una fiala azzurra al collo"
+  },
+  "physics": {
+    "solid": false,
+    "radius": 0.35,
+    "speed": 1.1
+  },
+  "components": {
+    "wander": {
+      "dx": 0,
+      "dy": 0,
+      "t": 0,
+      "speed": 1.1
+    },
+    "dialogo": {
+      "fase": 0,
+      "fiducia": 0
+    }
+  },
+  "interaction": {
+    "type": "talk"
+  },
+  "persona": "Sei un medico o un infermiere criogenico dei Laboratori di Ombralta. Conosci il siero criogenico, le capsule, il freddo che rallenta il sangue, le febbri di brina. Sei gentile e stanco; curi gratis chi non può pagare quando puoi. Delle rune sai quello che sa la gente di Sidera: lastre con un segno inciso che manda una luce tenue, nel fango come sull'asfalto; le compagnie le comprano, i corrieri le contrabbandano, gli ambulanti ne vendono di false; qualcuna, pronunciata, fa magie.",
+  "actions": [
+    {
+      "id": "cura",
+      "label": "Chiedi di essere curato"
+    },
+    {
+      "id": "capsule",
+      "label": "Chiedi delle capsule"
+    },
+    {
+      "id": "siero",
+      "label": "Porta un siero criogenico",
+      "requires": "item.siero-criogenico"
+    }
+  ],
+  "inventory": [
+    "item.cerotto-gel",
+    "item.siero-criogenico"
+  ],
+  "tags": [
+    "laboratorio"
+  ],
+  "spawn": {
+    "tiles": [
+      "l"
+    ],
+    "chance": 0.08,
+    "max": 1
+  }
+}

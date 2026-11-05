@@ -1,0 +1,19 @@
+{
+  "id": "sys.cordone",
+  "name": "La cabina del cordone",
+  "kind": "system",
+  "version": "1.0.0",
+  "description": "Ogni sei minuti di Sidera la cabina dell'ascensore scende dall'Anello lungo il cordone: per qualche secondo i lampioni, i fari di telemetria e le spie delle macchine tremolano in tutta la città. I droni consumano la loro cella volando e, scarichi, rallentano fino a posarsi.",
+  "logic": "logic.lua",
+  "order": 44,
+  "casi": [
+    {
+      "titolo": "La cabina scende",
+      "racconto": "Un faro acceso accanto al viandante: quando la cabina scende, la sua luce tremola e poi torna.",
+      "terreno": ["ppppp", "ppppp", "ppppp", "ppppp", "ppppp"],
+      "cose": [{ "modulo": "obj.faro-telemetria", "x": 1, "y": 0 }],
+      "durata": 12,
+      "guarda": ["needs.energy"]
+    }
+  ]
+}

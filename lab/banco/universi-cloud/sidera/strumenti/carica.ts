@@ -6,7 +6,7 @@ import type { FileMap } from '../../../../../src/kernel/types';
 export const SIDERA = path.resolve(__dirname, '..');
 
 /** Ciò che non è dell'universo: gli strumenti, il rapporto, la verifica. */
-const FUORI = new Set(['strumenti', 'README.md', 'verifica.ts']);
+const FUORI = new Set(['strumenti', 'README.md', 'verifica.ts', 'rapporto-verifica.md']);
 
 export function fileDi(dir = SIDERA, opts: { mappe?: boolean } = {}): FileMap {
   const out: FileMap = {};

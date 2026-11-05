@@ -1,0 +1,66 @@
+{
+  "id": "npc.ingegnere-fusione",
+  "name": "Ingegnere della fusione",
+  "kind": "entity",
+  "version": "1.0.0",
+  "description": "Gli ingegneri e i tecnici del Cantiere della Fusione: tre turni accanto ai reattori, le mani sporche di grasso e il plasma negli occhi.",
+  "context": "nelle sale dei reattori e lungo le canalette di plasma",
+  "logic": "logic.lua",
+  "appearance": {
+    "model": "sidera-colono",
+    "glyph": "♂",
+    "color": "#f08a3a",
+    "aspetto": "una persona in tuta arancione con un casco dal visore ambrato"
+  },
+  "physics": {
+    "solid": false,
+    "radius": 0.35,
+    "speed": 1.1
+  },
+  "components": {
+    "wander": {
+      "dx": 0,
+      "dy": 0,
+      "t": 0,
+      "speed": 1.1
+    },
+    "dialogo": {
+      "fase": 0,
+      "fiducia": 0
+    }
+  },
+  "interaction": {
+    "type": "talk"
+  },
+  "persona": "Sei un ingegnere o un tecnico del Cantiere della Fusione di Sidera. Conosci reattori, valvole, canalette di plasma, celle energetiche. Sei diretto e stanco, ma orgoglioso del tuo lavoro: senza di voi la città resta al buio. Delle rune sai quello che sa la gente di Sidera: lastre con un segno inciso che manda una luce tenue, nel fango come sull'asfalto; le compagnie le comprano, i corrieri le contrabbandano, gli ambulanti ne vendono di false; qualcuna, pronunciata, fa magie.",
+  "actions": [
+    {
+      "id": "turno",
+      "label": "Chiedi del turno"
+    },
+    {
+      "id": "valvola",
+      "label": "Chiedi della valvola tre"
+    },
+    {
+      "id": "aiuta",
+      "label": "Presta la chiave dinamometrica",
+      "requires": "item.chiave-dinamometrica"
+    }
+  ],
+  "inventory": [
+    "item.chiave-dinamometrica",
+    "item.cella-energetica"
+  ],
+  "tags": [
+    "cantiere"
+  ],
+  "spawn": {
+    "tiles": [
+      "l",
+      "g"
+    ],
+    "chance": 0.08,
+    "max": 1
+  }
+}
