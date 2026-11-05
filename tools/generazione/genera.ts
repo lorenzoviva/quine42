@@ -89,7 +89,7 @@ export async function generateUniverse(o: GenerateOptions): Promise<DeferredOutc
     // A universe of another contract does not open as if it were this kernel's (ADR-0136): nothing is spent and nothing is written on it.
     const read = readConfig(snap.files ?? {});
     if (read.error) return fail(`«${o.name}»: universe.json non si legge: ${read.error}`);
-    const version = checkKernelVersion(read.config.kernel);
+    const version = checkKernelVersion(read.config.kernel, undefined, read.config.kernels);
     if (!version.ok) return fail(`«${o.name}» non è di questo kernel: ${version.motivo}`);
     const up = upgradeFromSeed(snap.files ?? {}, bundledFiles);
     if (Object.keys(up.changes).length) await client.commit(up.changes, `aggiornamento dal kernel: ${up.updated.slice(0, 6).join(', ') || 'seme'}`, 'kernel');

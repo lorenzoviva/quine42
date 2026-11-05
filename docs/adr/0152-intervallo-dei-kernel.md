@@ -1,0 +1,30 @@
+# ADR-0152 — L'intervallo dei kernel: ogni universo dice su quali kernel gira, e le migrazioni hanno un posto solo
+
+Data: 2026-11-06 · Stato: accettato (task T302 del backlog) · Riferimenti: D36 dell'autore (05/11), ADR-0136 (la versione del kernel), ADR-0137 (un guasto invalida il codice, non i dati), T279 (i quattro universi di `npm run universi:cloud`)
+
+## Contesto
+
+Con ADR-0136 `universe.json → kernel` dice il kernel che ha scritto l'universo, e `checkKernelVersion` lascia in piedi con il guasto `universe:kernel` un universo di un'altra `X.Y`. Non dice però *su quali* kernel l'universo gira: quando arriverà il contratto `0.2`, gli universi di oggi si vedranno solo come «di un'altra versione». L'autore (D36) ha deciso che un universo non più compatibile **non si butta e non si migra ora**: si etichetta con l'intervallo dei kernel su cui gira e si lascia lì. Della retrocompatibilità non ci si occupa ancora, ma se ne predispone l'impalcatura.
+
+## Decisione
+
+1. **`universe.json → kernels`**: `{ "from": "X.Y", "to"?: "X.Y" }`, l'intervallo dei contratti su cui l'universo gira. `from` è il contratto con cui è nato o è stato portato; senza `to` l'intervallo è **aperto** e arriva al contratto di `kernel`, l'ultimo kernel che l'ha scritto (che lo scrive solo se è nell'intervallo, quindi non lo sposta mai fuori). `to` esplicito chiude l'intervallo: oggi nessuno lo scrive; è il posto di chi un domani dichiara un universo buono anche per un contratto dopo il suo (una migrazione che non cambia nulla, un deploy). Il nome è inglese perché è un campo nuovo e lo step 42 fa dell'inglese la lingua interna.
+2. **Lo scrive il kernel**, con `kernel`, prima di ogni commit (`stampKernel`), dove `kernel` va: subito dopo. Il seme lo porta (`{ "from": "0.1" }`). Un universo vecchio senza il campo lo **ricava da `kernel`** (`from` = il suo `X.Y`, `0.1` se non dice nemmeno `kernel`) e lo riceve al commit dopo; un intervallo scritto resta com'è. `npm run universi:cloud` lo scrive sui quattro universi alla loro Genesi, come farebbe il kernel.
+3. **`checkKernelVersion(kernel, versione, kernels)`** guarda l'intervallo: fuori intervallo resta il guasto `universe:kernel` di ADR-0136, che ora dice l'intervallo («gira sui kernel 0.1–0.1») e il server da cercare; e un universo scritto da un kernel più nuovo non si apre mai su uno più vecchio, qualunque cosa dica l'intervallo (la `Z` di ADR-0136, e un contratto dopo: l'intervallo guarda avanti, mai indietro; l'etichetta è «kernel 0.2.0 o successivo»). Ciò che non è un intervallo, o un intervallo che non contiene il kernel che l'ha scritto, è un guasto con il motivo, mai letto come altro. Una funzione pura (`universeKernels`, `rangeLabel` in `src/kernel/version.ts`).
+4. **Un universo fuori intervallo si vede, non si cancella e non prende niente dal seme**: la pagina delle sessioni del sito (`site/sessioni.ts`) mette sulla sua scheda l'etichetta «KERNEL 0.1–0.1», la lobby del gioco una riga con l'etichetta, `?universo=` lo apre con il guasto (il messaggio lo dice). `upgradeFromSeed` non gli porta niente del seme, che è di un altro contratto: prima ogni caricamento nel browser ci avrebbe committato i moduli nuovi. `kernel` e `kernels` escono ai client con gli altri campi di `universe.json` che sono di tutti (`UNIVERSE_FIELDS`, regola 8f).
+5. **Le migrazioni hanno un posto solo**: `src/kernel/migrations.ts`, `MIGRATIONS`, vuoto. Una migrazione va da un contratto al successivo (`from`, `to`, `descrizione`, `migrate(files) → files`, pura); `migrateUniverse` trova la catena dall'ultimo contratto dell'universo a quello del kernel e, se c'è tutta, la applica e scrive `kernel` e `kernels.from` di questo kernel (un universo portato è nato di nuovo con questo contratto). Il kernel la chiama una volta all'avvio (`Kernel.boot`), prima di leggere i file: oggi lascia ogni universo com'è, e un test lo dice.
+6. **Servire un universo con un kernel di un'altra versione** (solo descritto, niente server dedicato): il server di una versione `X.Y` è la build di un commit del kernel con quella `X.Y` (un tag `kernel-X.Y` sul suo ultimo `Z`), con la sua cartella di universi; il front (`server/production.ts`) un domani legge `kernels` di ogni universo e manda chi lo apre al server la cui `X.Y` è nell'intervallo, o dice che non c'è. Finché non c'è un secondo contratto non serve niente di questo.
+
+## Alternative scartate
+
+- **Chiudere `to` sul disco quando arriva un kernel di un altro contratto**: vorrebbe dire scrivere un universo che non è suo, che ADR-0136 vieta; l'etichetta si ricava da `kernel` uguale.
+- **Elencare nel campo ogni versione su cui l'universo ha girato**: la storia git lo dice già; serve solo dove comincia e dove finisce.
+- **Un elenco di contratti letti dal kernel (`READS = ['0.1', '0.2']`)**: è retrocompatibilità, che l'autore ha rimandato; il giorno che servirà è una migrazione vuota da un contratto al successivo, nello stesso posto.
+- **Etichettare nell'elenco del server (`/api/universe`)**: avrebbe letto `universe.json` di ogni universo a ogni elenco; la pagina delle sessioni lo legge già.
+
+## Conseguenze
+
+- `KERNEL_VERSION` `0.1.11`: gli universi della `0.1` restano buoni (il campo si ricava).
+- `AGENTS.md` (la convenzione della versione), `docs/architettura-dettagli.md#stack`, il glossario («Intervallo dei kernel»).
+- **Non chiuso, da un task**: nella verifica nel browser il Concilio (modelli locali) ha committato su un universo fuori intervallo i suoi contenuti (`persone: …`, `contenuti: …`), come faceva già prima di T302: il guasto `universe:kernel` ferma il codice, lo stato e la versione, non i commit del Concilio. `universe.json` resta com'è e il seme non arriva, ma «non si scrive» vale per intero solo quando anche quei commit si fermeranno.
+- Sicurezza: due campi di `universe.json` in più verso i client, una versione e un intervallo, validati da espressioni chiuse; nessuna rotta, nessun messaggio, nessuna superficie nuova. `migrateUniverse` gira sui file dell'universo nel kernel, con una lista che sta nel codice del kernel, non nell'universo.

@@ -10,7 +10,7 @@ import { PER_WANDERER } from '../kernel/wanderers';
 import type { FileChanges } from './protocol';
 
 /** What a client reads of `universe.json`. Not `ai` (budgets, models, providers), not the theme's path, not the heritage. */
-const UNIVERSE_FIELDS = ['name', 'seed', 'circleRadius', 'chunkSize', 'rilievo'];
+const UNIVERSE_FIELDS = ['name', 'kernel', 'kernels', 'seed', 'circleRadius', 'chunkSize', 'rilievo'];
 const GAME_FIELDS = ['modalita', 'morte', 'pvp', 'altroTraGiocatori', 'master'];
 /** What the lobby and the site's pages show of `ai`, and what the hourly estimate reads (`publicFiles` only). Not `provider`, `agenti`, `thinking`, `timeout`. */
 const LOBBY_AI_FIELDS = ['textModel', 'scultori', 'coefficienti', 'minimi', 'maxText', 'maxForges', 'maxPacks', 'maxCast', 'maxModels', 'maxBrani', 'placesPerMinute', 'thinking', 'attore'];

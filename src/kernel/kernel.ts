@@ -63,6 +63,7 @@ import { CardUses, CARDS_FILE, COMUNE, allCards, collectionOf, moduleCardId, rec
 import { bondWith, memoriesFor, playerFile, PLAYERS_DIR, readWandererState, repairProfile, SOLO, validWandererId, WANDERER_NAME, wandererColor, wandererOf, wanderersIn, type Profile, type ProfileRepair, type Wanderer, type WandererState, PER_WANDERER } from './wanderers';
 import type { ActionDef, AiSettings, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, GameSetup, ChunkInfo, Recipe, RuneFragment, TerrainDef, UniverseConfig } from './types';
 import { checkKernelVersion, KERNEL_VERSION, stampKernel } from './version';
+import { migrateUniverse } from './migrations';
 import { ModuleStores } from './store';
 import { dailyProduce, matchJob, validateJobProgram, WORKERS_PER_PLACE, type JobProgram, type JobTask } from './jobs';
 import { addWork, bring, fillTeam, HARVEST_DAY, HARVEST_DAYS, HARVEST_ROLES, HOUSE_ROLES, housePhases, missingWords, nextStep, openVentures, pruneVentures, readVentures, SITE_REACH, stillNeeded, ventureId, ventureProgress, ventureState, VENTURES_FILE, writeVentures, YEAR_DAYS, type Venture, type VentureCandidate, type VentureStep } from './ventures';
@@ -681,6 +682,12 @@ export class Kernel {
     const { repo, synced } = Repo.open(name, opts.files, opts.store);
     k.repo = repo;
     if (opts.backend) repo.attach(opts.backend, opts.past ?? []);
+    // The one place where a universe of an older contract would be ported (T302, ADR-0152): empty today, it leaves every universe as it is.
+    const ported = migrateUniverse(repo.working);
+    if (ported.applied.length) {
+      for (const p of new Set([...Object.keys(repo.working), ...Object.keys(ported.files)])) if (repo.working[p] !== ported.files[p]) repo.write(p, ported.files[p] ?? null);
+      k.log('kernel', `universo portato a questo kernel: ${ported.applied.join('; ')}`);
+    }
     k.bus.on('lua:morte', (d: { fame?: boolean; sete?: boolean }) => k.mortalDies(d?.sete ? 'sete' : d?.fame ? 'fame' : 'ferite'));
     k.faults.onRaise = (f, isNew) => {
       if (isNew) k.log('fault', `${f.key}: ${f.message}`);
@@ -1375,7 +1382,7 @@ export class Kernel {
     if (error) this.faults.raise('universe:config', error);
     else this.faults.clear('universe:config');
     // A universe of another contract does not open as if it were ours (T260): the world stands, nothing of it is committed.
-    const version = error ? { ok: true } : checkKernelVersion(config.kernel);
+    const version = error ? { ok: true } : checkKernelVersion(config.kernel, KERNEL_VERSION, config.kernels);
     if (!version.ok) {
       if (!this.faults.has('universe:kernel')) this.message(`Questo universo non è di questo kernel: ${version.motivo}.`, 'warn');
       this.faults.raise('universe:kernel', version.motivo!);

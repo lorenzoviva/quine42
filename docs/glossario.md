@@ -1089,6 +1089,13 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Da non usare**: `release`, `edizione` (per la versione del kernel)
 - **Fermo**: `kernel` in `universe.json`
 
+### Intervallo dei kernel
+- **Inglese**: `kernels`, `KernelRange`, `universeKernels`, `rangeLabel`, `migrateUniverse`
+- **Definizione**: i contratti (`X.Y`) su cui un universo gira (ADR-0152): `universe.json → kernels`, da quello con cui è nato o è stato portato (`from`) a `to`, o, aperto, al contratto di `kernel`; fuori intervallo l'universo si apre con il guasto `universe:kernel` e si vede con l'etichetta «kernel 0.1–0.1». Le migrazioni da un contratto al successivo stanno in `MIGRATIONS`.
+- **Dove vive**: `src/kernel/version.ts`, `src/kernel/migrations.ts`
+- **Da non usare**: `compatibilità` (per l'intervallo), `range` (in italiano)
+- **Fermo**: `kernels`, `from`, `to` in `universe.json`
+
 ## Lo sviluppo
 
 ### Fase

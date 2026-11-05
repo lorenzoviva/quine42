@@ -408,6 +408,8 @@ export interface UniverseConfig {
   eredita?: import('./heritage').HeritageConfig;
   /** The kernel that wrote it (T260, ADR-0136): `X.Y.Z`; a universe of another `X.Y` does not open here. */
   kernel?: string;
+  /** The range of the kernels it runs on (T302, ADR-0152): `{ from: "X.Y", to?: "X.Y" }`, written by the kernel; without it, from `kernel`. */
+  kernels?: { from: string; to?: string };
 }
 
 /** How the game is played in this universe: chosen before the Genesis, then fixed (ADR-0053). */
