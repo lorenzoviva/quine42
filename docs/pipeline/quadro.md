@@ -29,9 +29,7 @@ Aggiornato il 05/11/2026, epoca 281. Crediti: vedi `stato`.
 - **T247 (via T251) e T152 integrati** (ADR-0133, ADR-0134): consumo regolabile in lobby e bloccato a partita in corso; quattro temi modificabili nella Genesi su un seme solo (`commonHouse`, censimento in `docs/temi-censimento.md`).
 - **T254, T257 e T268 integrati (`215e2c1`):** `docs/pipeline/modelli.md`, misurati i modelli esterni di `agy` su `Claude and GPT models` (`claude-opus-5-5-high` -4 pt sett. / -8 pt 5h, `claude-sonnet-5-5-high` -2 pt sett. / -4 pt 5h, `gpt-oss-120b-medium` 0 pt con imprecisione; capienza ~4,2 $/sett., adatto a task 1-2 % su `agy-sonnet`). **T255** pronto su `claude` (con distinzione e stima dello sforzo `sforzo low|medium|high|xhigh|max`, richiesta dell'autore del 05/11).
 - **T269, T270, T271 e T272 integrati da Claude Cloud** (`9298643`, `28afffb`, `5c3ff31`, `2ced05c`, `eb822f7`, `5e90652`, solo `lab/banco/`):
-  - **T269 (Cantiere 1):** 24 strutture 3D procedurali in `lab/banco/catalogo-cloud/` (6 per tema, 12 con cantina), 5/5 semi a Grande ed Enorme, max 3,3 s a Enorme. Sul ramo gemello `origin/claude/quine42-3d-structures-catalog-3l6ejl` altre 22 strutture distinte.
-  - **T270 (Cantiere 2):** 24 modelli del seme procedurali in `lab/banco/seme-procedurale/` e 40 props tematici in `lab/banco/props-tematici/`.
-  - **T271 (Cantiere 3):** 44 programmi sonori MarkovJunior in `lab/banco/suoni-cloud/`.
+  - **T269-T271 (Cantieri 1-3):** 24 strutture in `catalogo-cloud/` (altre 22 sul ramo `origin/claude/quine42-3d-structures-catalog-3l6ejl`), 24 modelli del seme in `seme-procedurale/`, 40 props in `props-tematici/`, 44 programmi sonori in `suoni-cloud/`.
   - **T272 (Cantiere 4):** i 3 universi completi `orichalcum` (steampunk), `neapolis` (moderno) e `sidera` (futuristico) in `lab/banco/universi-cloud/`, validati con 600-900 tick sul `Kernel` vero (0 fault). **T273** (p1) li integra a costo zero nei 4 universi esplorabili con le strutture Cloud in-game.
 
 ## Pronti e priorità
