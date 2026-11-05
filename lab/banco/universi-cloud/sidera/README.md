@@ -98,7 +98,17 @@ npx vite-node lab/banco/universi-cloud/sidera/verifica.ts            # tutto, e 
 
 ## Esito
 
-RISULTATI
+Tutto verde (`verifica.ts` esce con 0; dettagli in `rapporto-verifica.md` e `models/rapporto-modelli.md`):
+
+- **Quarta parete**: 101 file, 4254 frasi con `metaBreak` (e `bibleBreaks`, glossario del lessico): 0 violazioni.
+- **Moduli**: 25 su 25 con 0 errori e 0 avvisi (manifest, compilazione, API, caricamento di prova, oggetti, rune e modelli nominati).
+- **Luoghi**: 19 su 19 passano `validatePlan` e `layout()` con l'ambiente della loro regione.
+- **Rune**: 12 su 12 passano `validateNewRune` in fila, e i loro incantesimi passano `validateEffects`; `repairSociety` non corregge niente nelle 24 persone.
+- **Modelli**: 16 su 16 con zero errori nella scatola della classe e varianza di forma su 5 semi tra 0,164 e 0,338 (soglia 0,15).
+- **Suoni**: 8 su 8 senza difetti di `analyzeSound` su 10 terne di semi.
+- **Kernel**: 900 tick con `MockAiModels` e i piani di `maps/` come archivio. Il giro ha attraversato 19 luoghi su 19, tutti col nome del loro piano, e ha incontrato e riconosciuto dall'origine 11 persone del registro. Ha eseguito 142 azioni dei moduli (53 diverse), fabbricato 10 ricette su 10, usato 16 oggetti, impugnato e usato lo scanner e pronunciato 17 incantesimi (le 12 rune e 5 formule). Ha raccolto 48 oggetti e 31 rune, e la cabina del cordone è scesa una volta. **0 fault.**
+
+Nessuno ha ancora ascoltato i suoni né guardato i modelli nel gioco: l'agente li ha visti in foto da quattro lati, dove il vetro risulta opaco.
 
 ## Ciò che è cambiato rispetto alla richiesta, e ciò che si è scoperto
 
@@ -117,3 +127,8 @@ RISULTATI
   scaricano.
 - **Il seme ha testi d'altri tempi** (il pozzo che parla di «nastro sotto il mondo»): Sidera non copia nessun modulo di
   contenuto del seme, solo il pavimento meccanico.
+- **I test del progetto**: `npm run typecheck` verde; `npm test` dà 2064 passati e 2 falliti. I due falliti sono
+  `tests/sicurezza/mondo.test.ts` (V-007) e `tests/sicurezza/serververo.test.ts` (V-006). Falliscono allo stesso modo sul commit
+  prima di questo cantiere (`bfd9612`): in questo contenitore Node rifiuta `fsync` sotto il Permission Model (`fsync API is
+  disabled when Permission Model is enabled`), e il processo del mondo esaurisce la memoria. È un problema dell'ambiente, non di
+  Sidera, che non tocca niente fuori da `lab/banco/universi-cloud/sidera/`.
