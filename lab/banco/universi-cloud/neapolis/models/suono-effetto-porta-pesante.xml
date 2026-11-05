@@ -1,0 +1,44 @@
+<!-- Una porta pesante si apre: i cardini cigolano su un semitono grave, il legno geme, il battente sbatte contro il muro. -->
+<sequence name="Porta pesante" values="BNSAGKHCTUVPM" size="12 3 8" symmetry="()">
+  <sound bpm="96" scale="phrygian" root="38" swing="0" cutoff="2200" space="0.45">
+    <track y="0" instrument="bass" volume="0.8"/>
+    <track y="1" instrument="pad" volume="0.6"/>
+    <track y="2" instrument="lead" volume="0.6"/>
+  </sound>
+  <color symbol="N" value="38bdf8" name="Nota" glow="True"/>
+  <color symbol="S" value="0284c7" name="Sustain" alpha="0.85"/>
+  <color symbol="A" value="f43f5e" name="Accento" glow="True"/>
+  <color symbol="G" value="818cf8" name="Ghost" alpha="0.7"/>
+  <color symbol="K" value="fbbf24" name="Kick" glow="True"/>
+  <color symbol="H" value="fde047" name="Hi-hat" alpha="0.85"/>
+  <color symbol="C" value="fb923c" name="Rullante" glow="True"/>
+  <color symbol="T" value="ec4899" name="Scelta" hidden="True"/>
+  <color symbol="U" value="a855f7" name="Scelta" hidden="True"/>
+  <color symbol="V" value="10b981" name="Scelta" hidden="True"/>
+  <color symbol="P" value="64748b" name="Scelta" hidden="True"/>
+  <color symbol="M" value="14b8a6" name="Scelta" hidden="True"/>
+
+  <!-- Il cigolio: il basso parte e scivola di un semitono, il seme sceglie dove. -->
+  <line at="0 0 2" to="0 0 2" r="0" color="A"/>
+  <line at="3 0 1" to="3 0 1" r="0" color="T"/>
+  <line at="4 0 3" to="4 0 3" r="0" color="T"/>
+  <line at="3 0 3" to="3 0 3" r="0" color="T"/>
+  <one in="T" out="N" steps="1"/>
+  <all in="T" out="B"/>
+  <all in="ABB" out="ASS"/>
+  <all in="NBBB" out="NSSS"/>
+  <!-- Il legno che geme sotto, una quinta vuota. -->
+  <line at="1 1 0" to="1 1 0" r="0" color="N"/>
+  <line at="1 1 4" to="1 1 4" r="0" color="N"/>
+  <all in="NBBBBB" out="NSSSSS"/>
+  <!-- Il battente: un colpo sordo, un po' prima o un po' dopo. -->
+  <line at="8 2 0" to="8 2 0" r="0" color="U"/>
+  <line at="9 2 0" to="9 2 0" r="0" color="U"/>
+  <line at="10 2 0" to="10 2 0" r="0" color="U"/>
+  <one in="U" out="K" steps="1"/>
+  <all in="U" out="B"/>
+  <line at="8 2 2" to="8 2 2" r="0" color="V"/>
+  <line at="9 2 2" to="9 2 2" r="0" color="V"/>
+  <one in="V" out="C" steps="1"/>
+  <all in="V" out="B"/>
+</sequence>

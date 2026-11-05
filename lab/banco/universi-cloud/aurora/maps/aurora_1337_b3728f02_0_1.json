@@ -1,0 +1,40 @@
+{
+ "plan": {
+  "place": {
+   "name": "Contrada dei Mattoni",
+   "description": "Case di mattoni rossi attorno a una piazzetta col pozzo, il forno del borgo e le botteghe degli artigiani."
+  },
+  "layout": "borgo_mattoni",
+  "objects": [
+   {
+    "module": "npc.cat",
+    "where": "fuori"
+   },
+   {
+    "module": "npc.villager",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.credenza",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.letto",
+    "where": "fuori"
+   }
+  ],
+  "ground": [],
+  "fresh": [],
+  "runes": [],
+  "strutture": [
+   {
+    "concetto": "casa del borgomastro",
+    "taglia": "grande"
+   },
+   {
+    "concetto": "torre di guardia",
+    "taglia": "grande"
+   }
+  ]
+ }
+}

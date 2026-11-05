@@ -1,0 +1,34 @@
+{
+ "plan": {
+  "place": {
+   "name": "Campagna delle Lanterne",
+   "description": "In lontananza suona una campana."
+  },
+  "layout": "bosco",
+  "objects": [
+   {
+    "module": "npc.villager",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.banco",
+    "where": "dentro"
+   },
+   {
+    "module": "object.sign",
+    "where": "fuori"
+   },
+   {
+    "module": "object.well",
+    "where": "fuori"
+   }
+  ],
+  "ground": [],
+  "fresh": [],
+  "runes": [
+   "speed",
+   "x = x"
+  ],
+  "strutture": []
+ }
+}

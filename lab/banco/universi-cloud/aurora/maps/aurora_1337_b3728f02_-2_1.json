@@ -1,0 +1,31 @@
+{
+ "plan": {
+  "place": {
+   "name": "Bosco del Re Muto",
+   "description": "Tra i tronchi qualcosa scorre, come un nastro sotto i piedi."
+  },
+  "layout": "locanda",
+  "objects": [
+   {
+    "module": "npc.villager",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.cassa",
+    "where": "dentro"
+   },
+   {
+    "module": "object.bush",
+    "where": "fuori"
+   },
+   {
+    "module": "object.crate",
+    "where": "fuori"
+   }
+  ],
+  "ground": [],
+  "fresh": [],
+  "runes": [],
+  "strutture": []
+ }
+}

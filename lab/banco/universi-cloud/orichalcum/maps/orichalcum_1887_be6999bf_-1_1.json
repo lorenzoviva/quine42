@@ -36,6 +36,12 @@
   "runes": [
    "molla",
    "scintilla"
+  ],
+  "strutture": [
+   {
+    "concetto": "officina",
+    "taglia": "grande"
+   }
   ]
  }
 }

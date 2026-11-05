@@ -1,0 +1,55 @@
+<!-- Cristallo arcano (fantasy, aurora): un grande cristallo viola che brilla, piantato in una base di pietra, con schegge minori che
+     spuntano storte tutt'attorno. Il seme sceglie la base (un cumulo basso, un piedistallo a gradini con le rune o un masso alto), quanto
+     sale il cristallo maggiore e dove nascono le schegge e da che parte si piegano. -->
+<sequence values="BSdRCKWxkhsVvabo" size="20 20 20" symmetry="(xy)" name="Cristallo arcano">
+  <color symbol="S" value="8a8478" name="pietra"/>
+  <color symbol="d" value="5e5a52" name="pietra scura"/>
+  <color symbol="R" value="7fd8ff" name="runa luminosa" glow="True"/>
+  <color symbol="C" value="b48cff" name="cristallo arcano" glow="True"/>
+  <color symbol="K" value="7a52d0" name="cristallo in ombra"/>
+  <color symbol="W" value="e8d8ff" name="cuore del cristallo" glow="True"/>
+  <color symbol="x" hidden="True" name="l'asse del cristallo"/>
+  <color symbol="k" hidden="True" name="la quota scelta"/>
+  <color symbol="h" hidden="True" name="quote possibili"/>
+  <color symbol="s" hidden="True" name="punta di una scheggia"/>
+  <color symbol="V" hidden="True" name="lo spazio"/>
+  <color symbol="v" hidden="True" name="per mescolare il caso"/>
+  <color symbol="a" hidden="True" name="cumulo basso"/>
+  <color symbol="b" hidden="True" name="piedistallo a gradini"/>
+  <color symbol="o" hidden="True" name="masso alto"/>
+  <!-- Il dado della base -->
+  <box at="10 10 0" size="20 20 20" color="v"/>
+  <all in="v" out="V"/>
+  <one steps="1"><rule in="V" out="a"/><rule in="V" out="b"/><rule in="V" out="o"/></one>
+  <all symmetry="(xyz)"><rule in="aV" out="aa"/><rule in="bV" out="bb"/><rule in="oV" out="oo"/></all>
+  <ellipsoid at="10 10 0" size="17 17 9" color="S" on="a"/>
+  <box at="10 10 0" size="20 20 1" color="d" on="S"/>
+  <box at="10 10 0" size="15 15 2" color="d" on="b"/>
+  <box at="10 10 2" size="11 11 3" color="S" on="b"/>
+  <box at="10 10 5" size="7 7 2" color="d" on="b"/>
+  <box at="10 10 3" size="11 11 1" color="R" on="S"/>
+  <box at="10 10 3" size="9 9 1" color="S" on="R"/>
+  <ellipsoid at="10 10 0" size="11 11 15" color="S" on="o"/>
+  <ellipsoid at="7 11 0" size="7 7 7" color="d" on="o"/>
+  <!-- Quanto sale il cristallo maggiore -->
+  <box at="0 0 11" size="1 1 8" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all in="k[abo]" out="kk"/>
+  <box at="10 10 0" size="1 1 20" color="x" on="[abo]"/>
+  <all in="x k" out="k k"/>
+  <all in="k" out="B"/>
+  <all in="x" out="C"/>
+  <all steps="1" in="C* C[abo]" out="** CC"/>
+  <all steps="1" in="C* C* C* C[abo]" out="** ** ** CC"/>
+  <all steps="1" in="C C" out="W *"/>
+  <!-- Le schegge: dove nascono e da che parte piegano -->
+  <prl steps="1" in="[abo] [Sd]" out="s *" p="0.035"/>
+  <prl steps="1" in="[abo][Sd]" out="s*" p="0.02"/>
+  <one steps="45">
+    <rule in="[abo]* *s" out="s* *K"/>
+    <rule in="[abo] s" out="s K"/>
+  </one>
+  <all in="s" out="C"/>
+  <all in="[Vabo]" out="B"/>
+</sequence>

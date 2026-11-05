@@ -1,5 +1,7 @@
-<!-- Casetta: scolpito da gemini-3.8-flash nello step 8.2A (lab/out/mjx-38-flash-2), voti dell'Artista 4 → 9/10 -->
-<sequence values="BXQIWNDnOURrGH" size="25 25 24" origin="True" symmetry="(xy)">
+<!-- Casetta, procedurale (Cantiere 2) dalla casetta di gemini-3.8-flash (step 8.2A, voto 9/10): stessa pietra, paglia, travi e finestre.
+     Il seme sceglie, sulla griglia grossa prima del map, quanto è lunga e profonda la pianta (da 7×6 a 15×13 celle), quanto sono alti i muri
+     (da 8 a 11), dove si apre la porta sul davanti e dove le finestre; il tetto a capanna si adatta alla pianta che trova. -->
+<sequence values="BXQIWNDnOURrGHhkm" size="25 25 24" origin="True" symmetry="(xy)">
   <color symbol="X" hidden="True" name="volume casa"/>
   <color symbol="Q" hidden="True" name="prisma tetto"/>
   <color symbol="I" hidden="True" name="interno"/>
@@ -12,16 +14,52 @@
   <color symbol="r" value="986c28" name="paglia scura ombra"/>
   <color symbol="G" value="4d7332" name="muschio verde"/>
   <color symbol="H" value="2c1a0e" name="ferramenta e ombra profonda"/>
+  <color symbol="h" hidden="True" name="misure possibili"/>
+  <color symbol="k" hidden="True" name="il taglio"/>
+  <color symbol="m" hidden="True" name="mescola"/>
+
+  <!-- Mescola: il generatore riparte da un punto diverso per ogni seme (vedi README) -->
+  <box at="12 0 23" size="25 2 1" color="m"/>
+  <prl in="m" out="B" p="0.5" steps="1"/>
+  <all in="m" out="B"/>
 
   <!-- Il seme scende al suolo -->
   <one in="X B" out="B X"/>
 
   <!-- Pianta rettangolare: 13 lungo x, 11 lungo y -->
-  <all in="XB" out="*X" steps="5" symmetry="(x)"/>
-  <all in="X/B" out="*/X" steps="4" symmetry="(y)"/>
+  <all in="XB" out="*X" steps="7" symmetry="(x)"/>
+  <all in="X/B" out="*/X" steps="6" symmetry="(y)"/>
+  <all in="B X" out="X *" steps="11"/>
 
-  <!-- Altezza dei muri (8 voxel base) -->
-  <all in="B X" out="X *" steps="7"/>
+  <!-- Le misure scelte dal seme: un taglio a destra, uno sul retro, uno in alto -->
+  <box at="16 0 0" size="7 1 1" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all symmetry="()">
+    <rule in="k/*" out="k/k"/>
+    <rule in="*/k" out="k/k"/>
+    <rule in="* k" out="k k"/>
+    <rule in="k *" out="k k"/>
+    <rule in="k*" out="kk"/>
+  </all>
+  <all in="k" out="B"/>
+  <box at="0 9 0" size="1 7 1" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all symmetry="()">
+    <rule in="k*" out="kk"/>
+    <rule in="*k" out="kk"/>
+    <rule in="* k" out="k k"/>
+    <rule in="k *" out="k k"/>
+    <rule in="*/k" out="k/k"/>
+  </all>
+  <all in="k" out="B"/>
+  <box at="24 24 8" size="1 1 4" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all in="k*" out="kk"/>
+  <all in="* k" out="k *"/>
+  <all in="k" out="B"/>
 
   <!-- Gronda e falde del tetto a due spioventi lungo x -->
   <all in="B X" out="R *"/>

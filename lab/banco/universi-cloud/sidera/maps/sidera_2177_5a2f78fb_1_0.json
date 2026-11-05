@@ -36,6 +36,11 @@
    "grava",
    "speed"
   ],
-  "strutture": []
+  "strutture": [
+   {
+    "concetto": "stazione di transito",
+    "taglia": "grande"
+   }
+  ]
  }
 }

@@ -30,6 +30,11 @@
   ],
   "fresh": [],
   "runes": [],
-  "strutture": []
+  "strutture": [
+   {
+    "concetto": "laboratorio",
+    "taglia": "grande"
+   }
+  ]
  }
 }

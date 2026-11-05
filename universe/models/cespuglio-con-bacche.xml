@@ -1,45 +1,31 @@
-<!-- Cespuglio con bacche: scolpito da gemini-3.8-flash nello step 8.2A (lab/out/mjx-38-flash-2), voti dell'Artista 5 → 8/10 -->
-<sequence values="BEDGHRO" size="20 20 16" symmetry="(xy)">
-  <color symbol="E" value="1a4d28" name="foglie ombra"/>
-  <color symbol="D" value="2f6e34" name="foglie base"/>
-  <color symbol="G" value="4e9c40" name="foglie medie"/>
-  <color symbol="H" value="7ec850" name="foglie luce"/>
-  <color symbol="R" value="b82334" name="bacche rosse"/>
-  <color symbol="O" value="e64a42" name="luce bacche"/>
-
-  <!-- Volume base compatto e tondeggiante a cupola schiacciata -->
-  <ellipsoid at="10 10 3" size="14 14 9" color="D"/>
-  <ellipsoid at="10 10 4" size="11 11 8" color="D"/>
-
-  <!-- Piccole variazioni organiche controllate per non farlo geometrico -->
-  <one in="DB" out="*D" steps="140" symmetry="(xyz)"/>
-
-  <!-- Levigatura per eliminare punte, spuntoni ed escrescenze singole -->
-  <convolution neighborhood="Moore" steps="3">
-    <rule in="B" out="D" values="D" sum="15..26"/>
-    <rule in="D" out="B" values="D" sum="0..7"/>
+<!-- Cespuglio con bacche, procedurale (Cantiere 2): le foglie e le bacche rosse dell'originale. Il seme sceglie da due a quattro ciuffi su un
+     disco al suolo e quanto sale ciascuno; le foglie li uniscono in un cespuglio solo e le bacche nascono dove la luce arriva. -->
+<sequence values="BLHDIVc" size="20 20 16" symmetry="(xy)" name="Cespuglio con bacche">
+  <color symbol="L" value="3d7a35" name="foglie"/>
+  <color symbol="H" value="62a447" name="foglie chiare"/>
+  <color symbol="D" value="28552a" name="foglie scure"/>
+  <color symbol="I" value="c8323c" name="bacche"/>
+  <color symbol="V" hidden="True" name="dove nasce un ciuffo"/>
+  <color symbol="c" hidden="True" name="un ciuffo che sale"/>
+  <ellipsoid at="10 10 0" size="11 11 1" color="V"/>
+  <box at="10 10 0" size="1 1 1" color="c"/>
+  <one in="V" out="c" steps="1"/>
+  <prl steps="1" in="V" out="c" p="0.04"/>
+  <all in="V" out="B"/>
+  <!-- Ogni ciuffo sale di qualche voxel, a caso -->
+  <prl steps="9" in="B c" out="c c" p="0.55"/>
+  <!-- Le foglie: prima attorno ai ciuffi, poi le uniscono -->
+  <all steps="2" symmetry="(xyz)" in="cB" out="cL"/>
+  <one steps="520" symmetry="(xyz)" in="LB" out="LL"/>
+  <one steps="200" in="LB" out="LL"/>
+  <all in="c" out="L"/>
+  <convolution neighborhood="Moore" steps="2">
+    <rule in="B" out="L" values="L" sum="14..26"/>
+    <rule in="L" out="B" values="L" sum="1..6"/>
   </convolution>
-
-  <!-- Poggia solidamente sul terreno z=0 -->
-  <all in="D B" out="* D" steps="2"/>
-
-  <!-- Colorazione volumetrica RPG: luce calda dall'alto e contorni definiti -->
-  <prl in="B D" out="* H" p="0.85" steps="1"/>
-  <prl in="H D" out="* G" p="0.75" steps="1"/>
-  <prl in="D D" out="* E" p="0.25" steps="1"/>
-  <prl in="D B" out="E *" p="0.8" steps="1"/>
-
-  <!-- Raggruppamento delle bacche: semi di grappolo incavati nella chioma (mai come punte isolate) -->
-  <one steps="5" symmetry="(xy)">
-    <rule in="GD" out="RD"/>
-    <rule in="HD" out="RD"/>
-  </one>
-
-  <!-- Espansione dei grappoli a piccoli cluster compatti di 2-4 voxel, incorporati nel fogliame -->
-  <one steps="12" symmetry="(xy)">
-    <rule in="R[GD]" out="*R"/>
-  </one>
-
-  <!-- Accento di luce calda sui voxel sommitali dei grappoli di bacche -->
-  <prl in="B R" out="* O" p="0.8" steps="1"/>
+  <prl steps="1">
+    <rule in="B L" out="B H" p="0.6"/>
+    <rule in="L" out="D" p="0.2"/>
+  </prl>
+  <prl steps="1" in="[LH]B" out="IB" p="0.05"/>
 </sequence>

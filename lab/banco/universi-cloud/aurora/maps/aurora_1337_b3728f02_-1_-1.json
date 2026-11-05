@@ -1,0 +1,31 @@
+{
+ "plan": {
+  "place": {
+   "name": "Borgo Immobile",
+   "description": "Un sentiero di pecore attraversa il prato."
+  },
+  "layout": "locanda",
+  "objects": [
+   {
+    "module": "object.sign",
+    "where": "fuori"
+   },
+   {
+    "module": "object.well",
+    "where": "fuori"
+   }
+  ],
+  "ground": [],
+  "fresh": [],
+  "runes": [
+   "time",
+   "- 1"
+  ],
+  "strutture": [
+   {
+    "concetto": "locanda del cinghiale",
+    "taglia": "enorme"
+   }
+  ]
+ }
+}

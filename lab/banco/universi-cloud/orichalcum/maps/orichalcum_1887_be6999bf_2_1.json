@@ -26,6 +26,16 @@
   "fresh": [],
   "runes": [
    "quadrante"
+  ],
+  "strutture": [
+   {
+    "concetto": "taverna delle caldaie",
+    "taglia": "grande"
+   },
+   {
+    "concetto": "cattedrale",
+    "taglia": "grande"
+   }
   ]
  }
 }

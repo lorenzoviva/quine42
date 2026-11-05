@@ -1,18 +1,35 @@
-<!-- Cespuglio con bacche: scritto a mano da Claude Code, step 8B (lab/mj3d/examples.ts). Convertito dal JSON (lab/mjx/convert.ts): stessi voxel. -->
-<sequence values="BLHDI" size="20 20 16" symmetry="(xy)" origin="bottom" name="Cespuglio con bacche">
+<!-- Cespuglio, procedurale (Cantiere 2): le foglie dell'originale. Il seme sceglie quanti rametti partono dal colletto e dove vanno (cammini
+     a caso verso l'alto e verso fuori): le foglie crescono attorno ai rametti, così ogni cespuglio ha il suo ciuffo. -->
+<sequence values="BLHDTVr" size="20 20 16" symmetry="(xy)" name="Cespuglio">
   <color symbol="L" value="3d7a35" name="foglie"/>
   <color symbol="H" value="62a447" name="foglie chiare"/>
   <color symbol="D" value="28552a" name="foglie scure"/>
-  <color symbol="I" value="c8323c" name="bacche"/>
-  <one steps="650" symmetry="(xyz)" in="LB" out="LL"/>
-  <one steps="350" in="LB" out="LL"/>
+  <color symbol="T" value="5a4128" name="rametti"/>
+  <color symbol="V" hidden="True" name="lo spazio del cespuglio"/>
+  <color symbol="r" hidden="True" name="punta di un rametto"/>
+  <ellipsoid at="10 10 0" size="17 17 13" color="V"/>
+  <box at="10 10 0" size="1 1 1" color="T"/>
+  <!-- I rametti: da tre a cinque punte che camminano verso l'alto e verso fuori -->
+  <one steps="3" in="V T" out="r T"/>
+  <prl steps="1" in="VV *T" out="r* **" p="0.5"/>
+  <one steps="30">
+    <rule in="V r" out="r T"/>
+    <rule in="Vr" out="rT"/>
+    <rule in="V* *r" out="r* *T"/>
+  </one>
+  <all in="r" out="T"/>
+  <!-- Le foglie attorno ai rametti -->
+  <one steps="700" symmetry="(xyz)">
+    <rule in="TV" out="TL"/>
+    <rule in="LV" out="LL"/>
+  </one>
+  <all in="V" out="B"/>
   <convolution neighborhood="Moore" steps="2">
-    <rule in="B" out="L" values="L" sum="14..26"/>
-    <rule in="L" out="B" values="L" sum="1..6"/>
+    <rule in="B" out="L" values="L" sum="15..26"/>
+    <rule in="L" out="B" values="L" sum="1..5"/>
   </convolution>
   <prl steps="1">
     <rule in="B L" out="B H" p="0.6"/>
     <rule in="L" out="D" p="0.2"/>
   </prl>
-  <prl steps="1" in="[LH]B" out="IB" p="0.05"/>
 </sequence>

@@ -1,0 +1,103 @@
+<!-- Cabina telefonica o chiosco (moderno): ciò che sta all'angolo di una strada di città. Il seme sceglie che cosa è (la cabina
+     di vetro aperta sul davanti con il telefono, oppure il chiosco dei giornali con la tettoia, le riviste in vetrina e l'insegna),
+     che cosa le sta accanto (un cestino, una pila di pacchi di giornali legati o niente), se la cornetta è appesa al gancio o
+     penzola dal filo e quante riviste sono esposte. -->
+<sequence values="BCPVKSTQqOoRYGmXUILhHDEnN" size="20 20 20" symmetry="(xy)" name="Cabina">
+  <color symbol="C" value="a3a39e" name="cemento"/>
+  <color symbol="P" value="5c636b" name="acciaio"/>
+  <color symbol="V" value="9fd4e6" name="vetro"/>
+  <color symbol="K" value="2a2d31" name="telefono"/>
+  <color symbol="S" value="7cf0ff" name="schermo" glow="True"/>
+  <color symbol="T" value="ffe066" name="insegna" glow="True"/>
+  <color symbol="Q" value="2f6e4f" name="lamiera verde"/>
+  <color symbol="q" value="234f3a" name="lamiera in ombra"/>
+  <color symbol="O" value="d8402c" name="tenda a righe rosse"/>
+  <color symbol="o" value="f0ece0" name="tenda a righe bianche"/>
+  <color symbol="R" value="e05a9a" name="copertina rosa"/>
+  <color symbol="Y" value="f0c430" name="copertina gialla"/>
+  <color symbol="G" value="3a8ad8" name="copertina blu"/>
+  <color symbol="E" value="c8b89a" name="pacco di giornali"/>
+  <color symbol="N" value="3a6a3a" name="cestino"/>
+  <color symbol="m" hidden="True" name="il dado"/>
+  <color symbol="X" hidden="True" name="la cabina"/>
+  <color symbol="U" hidden="True" name="il chiosco"/>
+  <color symbol="I" hidden="True" name="dove stanno le riviste"/>
+  <color symbol="L" hidden="True" name="accanto: il cestino"/>
+  <color symbol="D" hidden="True" name="accanto: i pacchi"/>
+  <color symbol="n" hidden="True" name="accanto: niente"/>
+  <color symbol="h" hidden="True" name="dove può stare la cornetta"/>
+  <color symbol="H" hidden="True" name="la cornetta scelta"/>
+  <!-- Il dado si scuote prima di decidere -->
+  <box at="1 0 0" size="3 1 1" color="m"/>
+  <prl steps="1" in="m" out="B"/>
+  <!-- Prima scelta: cabina o chiosco -->
+  <box at="0 0 0" size="1 1 1" color="m"/>
+  <one steps="1">
+    <rule in="m" out="X"/>
+    <rule in="m" out="U"/>
+  </one>
+  <all symmetry="(xyz)">
+    <rule in="XB" out="XX"/>
+    <rule in="UB" out="UU"/>
+  </all>
+  <!-- La cabina: pedana, montanti, vetri su tre lati, telefono, tetto con l'insegna -->
+  <box at="10 10 0" size="11 11 1" color="C" on="X"/>
+  <box at="5 5 1" size="1 1 17" color="P" on="X"/>
+  <box at="15 5 1" size="1 1 17" color="P" on="X"/>
+  <box at="5 15 1" size="1 1 17" color="P" on="X"/>
+  <box at="15 15 1" size="1 1 17" color="P" on="X"/>
+  <box at="10 5 1" size="9 1 16" color="V" on="X"/>
+  <box at="5 10 1" size="1 9 16" color="V" on="X"/>
+  <box at="15 10 1" size="1 9 16" color="V" on="X"/>
+  <box at="10 10 6" size="11 11 1" color="P" on="X"/>
+  <box at="10 6 8" size="5 1 7" color="K" on="X"/>
+  <box at="10 7 12" size="3 1 2" color="S" on="X"/>
+  <box at="10 7 9" size="3 1 2" color="P" on="X"/>
+  <box at="8 7 10" size="1 1 4" color="h" on="X"/>
+  <box at="9 7 3" size="1 1 5" color="h" on="X"/>
+  <box at="10 10 17" size="13 13 1" color="P" on="X"/>
+  <box at="10 10 18" size="9 9 1" color="V" on="X"/>
+  <box at="10 17 14" size="9 1 4" color="T" on="X"/>
+  <box at="10 3 14" size="9 1 4" color="T" on="X"/>
+  <!-- La cornetta: appesa al gancio o lasciata penzolare dal filo -->
+  <one in="h" out="H" steps="1"/>
+  <all in="Hh" out="HH" symmetry="(xyz)"/>
+  <all in="h" out="B"/>
+  <all in="H" out="K"/>
+  <!-- Il chiosco: corpo verde, banco, vetrina delle riviste, tettoia a righe, insegna -->
+  <box at="10 9 0" size="17 11 1" color="C" on="U"/>
+  <box at="10 9 1" size="17 11 12" color="Q" on="U"/>
+  <box at="10 9 1" size="17 11 1" color="q" on="[UQ]"/>
+  <box at="10 15 3" size="15 1 8" color="I" on="U"/>
+  <box at="10 9.5 13" size="19 14 1" color="P" on="U"/>
+  <box at="10 16.5 11" size="17 2 2" color="O" on="U"/>
+  <box at="10 9 14" size="13 2 3" color="T" on="U"/>
+  <!-- Le riviste nella vetrina: righe di copertine, una parte resta vuota -->
+  <prl steps="1">
+    <rule in="I" out="R" p="0.25"/>
+    <rule in="I" out="Y" p="0.25"/>
+    <rule in="I" out="G" p="0.25"/>
+  </prl>
+  <all in="I" out="B"/>
+  <all in="OO" out="Oo" symmetry="()"/>
+  <all in="[XU]" out="B"/>
+  <!-- Seconda scelta: che cosa sta accanto -->
+  <box at="0 0 0" size="1 1 1" color="m"/>
+  <one steps="1">
+    <rule in="m" out="L"/>
+    <rule in="m" out="D"/>
+    <rule in="m" out="n"/>
+  </one>
+  <all symmetry="(xyz)">
+    <rule in="LB" out="LL"/>
+    <rule in="DB" out="DD"/>
+    <rule in="nB" out="nn"/>
+  </all>
+  <cylinder at="17 15 0" size="4 4 7" color="N" on="L"/>
+  <box at="17 15 7" size="3 3 1" color="P" on="L"/>
+  <box at="2.5 15 0" size="4 3 3" color="E" on="D"/>
+  <box at="2.5 15 3" size="3 3 2" color="E" on="D"/>
+  <box at="2.5 15 1" size="4 1 1" color="P" on="D"/>
+  <all in="[LDn]" out="B"/>
+  <all in="m" out="B"/>
+</sequence>

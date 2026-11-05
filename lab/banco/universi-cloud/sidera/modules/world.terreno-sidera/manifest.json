@@ -5,29 +5,175 @@
   "version": "1.0.0",
   "description": "La bozza continua delle terre di Sidera: asfalto bagnato e passerelle in città, canali, boschetti di vetro e speroni di cristallo, distese di sabbia vitrea, il mare che si è preso la costa. Gli ambienti la trasformano in quartieri, cupole, piste e cantieri.",
   "logic": "logic.lua",
-  "roof": { "color": "#3a4152" },
+  "roof": {
+    "color": "#3a4152"
+  },
   "tiles": {
-    "g": { "name": "asfalto bagnato", "description": "asfalto scuro e lucido di pioggia, con pozzanghere che riflettono le insegne", "color": "#3b4250", "solid": false, "layer": "ground", "speed": 1 },
-    "p": { "name": "passerella", "description": "lastre di lega antiscivolo con le strisce gialle consumate", "color": "#8a8f9c", "solid": false, "layer": "ground", "speed": 1.15 },
-    "t": { "model": "sidera-albero-vetro", "name": "boschetto di vetro", "description": "alberi dal tronco ambrato e la chioma a faccette, che tintinnano col vento", "color": "#3fb8a8", "solid": true, "layer": "vegetation" },
-    "w": { "name": "canale", "description": "acqua di canale scura, increspata dalla pioggia", "color": "#1f4f73", "solid": true, "layer": "liquid" },
-    "r": { "model": "sidera-cristallo", "name": "speroni di cristallo", "description": "punte di cristallo violetto alte come una persona, fredde al tatto", "color": "#8c6ad8", "solid": true, "layer": "rock" },
-    "h": { "name": "paratia", "description": "paratie di lega opaca rivettata, rigate di pioggia", "color": "#596273", "solid": true, "layer": "wall" },
-    "f": { "name": "pavimento grigliato", "description": "grata d'acciaio sopra le condotte, che risuona sotto i passi", "color": "#6f7787", "solid": false, "layer": "floor", "indoor": true },
-    "d": { "name": "portello", "description": "un portello scorrevole con la guarnizione di gomma", "color": "#f0b43c", "solid": false, "layer": "door" },
-    "m": { "name": "vasca idroponica", "description": "vasche basse di soluzione nutritiva con file di germogli", "color": "#4f9a52", "solid": false, "layer": "ground", "speed": 0.8 },
-    "s": { "name": "sabbia vitrea", "description": "sabbia grossa di vetro macinato dal vento, che scricchiola", "color": "#c9b98e", "solid": false, "layer": "ground", "speed": 0.85 },
-    "j": { "model": "sidera-felce-spirale", "name": "felceto", "description": "felci a spirale alte fino alla vita, fitte e umide", "color": "#2e7d5b", "solid": true, "layer": "vegetation" },
-    "o": { "name": "mare", "description": "il mare grigio che si è preso la vecchia costa", "color": "#173b63", "solid": true, "layer": "liquid" },
-    "k": { "name": "rupe di basalto", "description": "pareti di basalto nero, lisce e bagnate, che non si scalano", "color": "#2c2f36", "solid": true, "layer": "rock" },
-    "n": { "name": "brina", "description": "brina azzurrina che si posa nelle zone fredde, scivolosa", "color": "#cfe6f2", "solid": false, "layer": "ground", "speed": 0.7 },
-    "b": { "name": "muro di cemento", "description": "cemento armato delle mura e dei piloni dei viadotti", "color": "#7b7f86", "solid": true, "layer": "wall" },
-    "q": { "name": "vetro della cupola", "description": "vetro curvo e spesso, appannato dall'umidità delle serre", "color": "#9fd8e8", "solid": true, "layer": "wall" },
-    "a": { "name": "lamiera di relitto", "description": "lamiere antiche, piegate e corrose, di uno scafo che nessuno ricorda", "color": "#8a5a3c", "solid": true, "layer": "wall" },
-    "c": { "name": "recinzione di rete", "description": "rete metallica tesa tra paletti, con cartelli di pericolo", "color": "#9aa3ad", "solid": true, "layer": "wall" },
-    "z": { "name": "ponte di grata", "description": "un ponte di grata metallica sopra l'acqua", "color": "#a3a9b3", "solid": false, "layer": "floor" },
-    "l": { "name": "piastrelle dei laboratori", "description": "piastrelle bianche lavabili, con le fughe azzurre", "color": "#d9dee6", "solid": false, "layer": "floor", "indoor": true },
-    "v": { "name": "canale di plasma", "description": "una canaletta dove scorre plasma azzurro, caldissimo", "color": "#5fd3ff", "solid": true, "layer": "liquid" },
-    "e": { "name": "pista", "description": "cemento della pista d'atterraggio, segnato da bruciature", "color": "#5d6470", "solid": false, "layer": "ground", "speed": 1.1 }
-  }
+    "g": {
+      "name": "asfalto bagnato",
+      "description": "asfalto scuro e lucido di pioggia, con pozzanghere che riflettono le insegne",
+      "color": "#3b4250",
+      "solid": false,
+      "layer": "ground",
+      "speed": 1
+    },
+    "p": {
+      "name": "passerella",
+      "description": "lastre di lega antiscivolo con le strisce gialle consumate",
+      "color": "#8a8f9c",
+      "solid": false,
+      "layer": "ground",
+      "speed": 1.15
+    },
+    "t": {
+      "model": "sidera-albero-vetro",
+      "name": "boschetto di vetro",
+      "description": "alberi dal tronco ambrato e la chioma a faccette, che tintinnano col vento",
+      "color": "#3fb8a8",
+      "solid": true,
+      "layer": "vegetation"
+    },
+    "w": {
+      "name": "canale",
+      "description": "acqua di canale scura, increspata dalla pioggia",
+      "color": "#1f4f73",
+      "solid": true,
+      "layer": "liquid"
+    },
+    "r": {
+      "model": "sidera-cristallo",
+      "name": "speroni di cristallo",
+      "description": "punte di cristallo violetto alte come una persona, fredde al tatto",
+      "color": "#8c6ad8",
+      "solid": true,
+      "layer": "rock"
+    },
+    "h": {
+      "name": "paratia",
+      "description": "paratie di lega opaca rivettata, rigate di pioggia",
+      "color": "#596273",
+      "solid": true,
+      "layer": "wall"
+    },
+    "f": {
+      "name": "pavimento grigliato",
+      "description": "grata d'acciaio sopra le condotte, che risuona sotto i passi",
+      "color": "#6f7787",
+      "solid": false,
+      "layer": "floor",
+      "indoor": true
+    },
+    "d": {
+      "name": "portello",
+      "description": "un portello scorrevole con la guarnizione di gomma",
+      "color": "#f0b43c",
+      "solid": false,
+      "layer": "door"
+    },
+    "m": {
+      "name": "vasca idroponica",
+      "description": "vasche basse di soluzione nutritiva con file di germogli",
+      "color": "#4f9a52",
+      "solid": false,
+      "layer": "ground",
+      "speed": 0.8
+    },
+    "s": {
+      "name": "sabbia vitrea",
+      "description": "sabbia grossa di vetro macinato dal vento, che scricchiola",
+      "color": "#c9b98e",
+      "solid": false,
+      "layer": "ground",
+      "speed": 0.85
+    },
+    "j": {
+      "model": "sidera-felce-spirale",
+      "name": "felceto",
+      "description": "felci a spirale alte fino alla vita, fitte e umide",
+      "color": "#2e7d5b",
+      "solid": true,
+      "layer": "vegetation"
+    },
+    "o": {
+      "name": "mare",
+      "description": "il mare grigio che si è preso la vecchia costa",
+      "color": "#173b63",
+      "solid": true,
+      "layer": "liquid"
+    },
+    "k": {
+      "name": "rupe di basalto",
+      "description": "pareti di basalto nero, lisce e bagnate, che non si scalano",
+      "color": "#2c2f36",
+      "solid": true,
+      "layer": "rock"
+    },
+    "n": {
+      "name": "brina",
+      "description": "brina azzurrina che si posa nelle zone fredde, scivolosa",
+      "color": "#cfe6f2",
+      "solid": false,
+      "layer": "ground",
+      "speed": 0.7
+    },
+    "b": {
+      "name": "muro di cemento",
+      "description": "cemento armato delle mura e dei piloni dei viadotti",
+      "color": "#7b7f86",
+      "solid": true,
+      "layer": "wall"
+    },
+    "q": {
+      "name": "vetro della cupola",
+      "description": "vetro curvo e spesso, appannato dall'umidità delle serre",
+      "color": "#9fd8e8",
+      "solid": true,
+      "layer": "wall"
+    },
+    "a": {
+      "name": "lamiera di relitto",
+      "description": "lamiere antiche, piegate e corrose, di uno scafo che nessuno ricorda",
+      "color": "#8a5a3c",
+      "solid": true,
+      "layer": "wall"
+    },
+    "c": {
+      "name": "recinzione di rete",
+      "description": "rete metallica tesa tra paletti, con cartelli di pericolo",
+      "color": "#9aa3ad",
+      "solid": true,
+      "layer": "wall"
+    },
+    "z": {
+      "name": "ponte di grata",
+      "description": "un ponte di grata metallica sopra l'acqua",
+      "color": "#a3a9b3",
+      "solid": false,
+      "layer": "floor"
+    },
+    "l": {
+      "name": "piastrelle dei laboratori",
+      "description": "piastrelle bianche lavabili, con le fughe azzurre",
+      "color": "#d9dee6",
+      "solid": false,
+      "layer": "floor",
+      "indoor": true
+    },
+    "v": {
+      "name": "canale di plasma",
+      "description": "una canaletta dove scorre plasma azzurro, caldissimo",
+      "color": "#5fd3ff",
+      "solid": true,
+      "layer": "liquid"
+    },
+    "e": {
+      "name": "pista",
+      "description": "cemento della pista d'atterraggio, segnato da bruciature",
+      "color": "#5d6470",
+      "solid": false,
+      "layer": "ground",
+      "speed": 1.1
+    }
+  },
+  "commonHouse": "moduli abitativi di lega bianca, bassi e tondi, con gli oblò accesi e le luci di posizione sul tetto"
 }

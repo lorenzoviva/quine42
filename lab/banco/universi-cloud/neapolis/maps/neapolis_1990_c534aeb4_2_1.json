@@ -40,6 +40,11 @@
   "runes": [
    "corrente"
   ],
-  "strutture": []
+  "strutture": [
+   {
+    "concetto": "laboratorio artigiano",
+    "taglia": "grande"
+   }
+  ]
  }
 }

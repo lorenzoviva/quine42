@@ -1,5 +1,7 @@
-<!-- Lupo: step 8B, gemini-3.8-flash, rivisto (b-figure-flash38/lupo.v2.json, voto dell'Artista 4/10). Convertito dal JSON (lab/mjx/convert.ts): stessi voxel. -->
-<sequence values="BAIUVFDWHCKE" size="25 40 30" symmetry="(xy)" name="Lupo">
+<!-- Lupo, procedurale (Cantiere 2): gli stessi colori e le stesse parti animate dell'originale (quattro zampe, coda). Il seme sceglie la
+     posa della testa (alta in ascolto o bassa a fiutare la traccia), la coda (bassa, dritta o alzata), quanto è massiccio il corpo se ha
+     la gorgiera di pelo chiaro sul petto e dove il pelo è arruffato. -->
+<sequence values="BAIUVFDWHCKEhjenfoxyzspqmab0" size="25 40 30" symmetry="(xy)" name="Lupo">
   <color symbol="A" value="5b606d" name="zampa anteriore sx" part="gamba"/>
   <color symbol="I" value="5b606d" name="zampa anteriore dx" part="gamba"/>
   <color symbol="U" value="4f535f" name="zampa posteriore sx" part="gamba"/>
@@ -11,6 +13,27 @@
   <color symbol="C" value="5e6372" name="coda folta" part="coda"/>
   <color symbol="K" value="1b1c22" name="tartufo e dettagli"/>
   <color symbol="E" value="e29c22" name="occhi ambrati"/>
+  <color symbol="h" hidden="True" name="la testa alta"/>
+  <color symbol="e" hidden="True" name="occhi della testa alta"/>
+  <color symbol="n" hidden="True" name="tartufo della testa alta"/>
+  <color symbol="j" hidden="True" name="la testa bassa"/>
+  <color symbol="f" hidden="True" name="occhi della testa bassa"/>
+  <color symbol="o" hidden="True" name="tartufo della testa bassa"/>
+  <color symbol="x" hidden="True" name="la coda bassa"/>
+  <color symbol="y" hidden="True" name="la coda dritta"/>
+  <color symbol="z" hidden="True" name="la coda alzata"/>
+  <color symbol="s" hidden="True" name="scelta"/>
+  <color symbol="p" hidden="True" name="il corpo massiccio"/>
+  <color symbol="q" hidden="True" name="la gorgiera"/>
+  <color symbol="m" hidden="True" name="dado"/>
+  <color symbol="a" hidden="True" name="scelta"/>
+  <color symbol="b" hidden="True" name="scelta"/>
+  <color symbol="0" hidden="True" name="mescola"/>
+  <!-- Mescola: il generatore riparte da un punto diverso per ogni seme (vedi README) -->
+  <box at="12 0 29" size="25 2 1" color="0"/>
+  <prl in="0" out="B" p="0.5" steps="1"/>
+  <all in="0" out="B"/>
+  <!-- Le zampe -->
   <box at="7 24 0" size="3 4 11" color="A"/>
   <box at="17 24 0" size="3 4 11" color="I"/>
   <box at="7 10 0" size="3 4 8" color="U"/>
@@ -19,35 +42,97 @@
   <ellipsoid at="17 12 6" size="5 7 9" color="V"/>
   <ellipsoid at="7 23 9" size="5 6 8" color="A"/>
   <ellipsoid at="17 23 9" size="5 6 8" color="I"/>
-  <ellipsoid at="12 14 10" size="13 13 10" color="F" on="B"/>
-  <ellipsoid at="12 21 11" size="15 14 12" color="F" on="B"/>
-  <cylinder at="12 22 10" size="14 14 9" color="F" on="B"/>
+  <!-- Il corpo, forse più massiccio -->
+  <ellipsoid at="12 18 8" size="19 22 15" color="p" on="B"/>
+  <ellipsoid at="12 14 10" size="13 13 10" color="F" on="[Bp]"/>
+  <ellipsoid at="12 21 11" size="15 14 12" color="F" on="[Bp]"/>
+  <cylinder at="12 22 10" size="14 14 9" color="F" on="[Bp]"/>
+  <box at="12 18 11" size="1 1 1" color="m"/>
+  <one steps="1">
+    <rule in="m" out="a"/>
+    <rule in="m" out="F"/>
+  </one>
+  <all symmetry="(xyz)">
+    <rule in="aF" out="aa"/>
+    <rule in="ap" out="aa"/>
+  </all>
+  <all in="a" out="F"/>
+  <all in="p" out="B"/>
+  <!-- Il collo e le due teste possibili -->
   <ellipsoid at="12 26 14" size="13 11 11" color="F" on="B"/>
   <cylinder at="12 25 13" size="11 10 8" color="F" on="B"/>
-  <ellipsoid at="12 28 17" size="11 10 10" color="F" on="B"/>
-  <box at="12 33 15" size="7 8 5" color="F" on="B"/>
-  <cone at="12 34 15" size="7 7 6" color="F" on="B"/>
-  <box at="12 37 17" size="3 2 3" color="K"/>
-  <box at="12 35 15" size="5 5 2" color="W" on="F"/>
-  <box at="9 31 19" size="2 1 2" color="E"/>
-  <box at="15 31 19" size="2 1 2" color="E"/>
-  <box at="10 31 20" size="1 1 1" color="K"/>
-  <box at="14 31 20" size="1 1 1" color="K"/>
-  <cone at="8 27 23" size="4 4 6" color="F" on="B"/>
-  <cone at="16 27 23" size="4 4 6" color="F" on="B"/>
-  <box at="8 28 23" size="2 1 3" color="K"/>
-  <box at="16 28 23" size="2 1 3" color="K"/>
-  <ellipsoid at="12 7 14" size="7 7 7" color="C" on="B"/>
-  <ellipsoid at="12 5 10" size="6 8 7" color="C" on="B"/>
-  <cone at="12 3 5" size="5 7 7" color="C" on="B"/>
-  <box at="12 26 10" size="9 8 7" color="W" on="F"/>
-  <ellipsoid at="12 18 9" size="9 11 4" color="W" on="F"/>
+  <ellipsoid at="12 28 17" size="11 10 10" color="h" on="B"/>
+  <box at="12 33 15" size="7 8 5" color="h" on="B"/>
+  <cone at="12 34 15" size="7 7 6" color="h" on="B"/>
+  <box at="12 37 17" size="3 2 3" color="n"/>
+  <box at="9 31 19" size="2 1 2" color="e"/>
+  <box at="15 31 19" size="2 1 2" color="e"/>
+  <cone at="8 27 23" size="4 4 6" color="h" on="B"/>
+  <cone at="16 27 23" size="4 4 6" color="h" on="B"/>
+  <ellipsoid at="12 30 9" size="11 10 9" color="j" on="B"/>
+  <box at="12 35 6" size="7 8 5" color="j" on="B"/>
+  <box at="12 39 6" size="3 2 3" color="o" on="B"/>
+  <box at="9 33 11" size="2 1 2" color="f" on="j"/>
+  <box at="15 33 11" size="2 1 2" color="f" on="j"/>
+  <cone at="8 28 15" size="4 4 5" color="j" on="B"/>
+  <cone at="16 28 15" size="4 4 5" color="j" on="B"/>
+  <one steps="1">
+    <rule in="h" out="a"/>
+    <rule in="j" out="b"/>
+  </one>
+  <all symmetry="(xyz)">
+    <rule in="ah" out="aa"/>
+    <rule in="ae" out="aE"/>
+    <rule in="an" out="aK"/>
+    <rule in="Kn" out="KK"/>
+    <rule in="bj" out="bb"/>
+    <rule in="bf" out="bE"/>
+    <rule in="bo" out="bK"/>
+    <rule in="Ko" out="KK"/>
+  </all>
+  <all in="[ab]" out="F"/>
+  <all in="[hjefno]" out="B"/>
+  <!-- La coda: bassa, dritta o alzata -->
+  <ellipsoid at="12 7 13" size="7 7 7" color="C" on="B"/>
+  <ellipsoid at="12 5 8" size="6 8 7" color="x" on="B"/>
+  <cone at="12 3 3" size="5 7 7" color="x" on="B"/>
+  <ellipsoid at="12 3 14" size="6 8 5" color="y" on="B"/>
+  <ellipsoid at="12 4 18" size="6 6 8" color="z" on="B"/>
+  <cone at="12 4 22" size="5 5 7" color="z" on="B"/>
+  <one steps="1">
+    <rule in="x" out="a"/>
+    <rule in="y" out="a"/>
+    <rule in="z" out="a"/>
+  </one>
+  <all symmetry="(xyz)">
+    <rule in="a[xyz]" out="aa"/>
+  </all>
+  <all in="a" out="C"/>
+  <all in="[xyz]" out="B"/>
+  <!-- La gorgiera sul petto, forse -->
+  <box at="12 27 9" size="9 7 7" color="q" on="F"/>
+  <box at="12 27 9" size="1 1 1" color="m"/>
+  <one steps="1">
+    <rule in="m" out="a"/>
+    <rule in="m" out="b"/>
+  </one>
+  <all symmetry="(xyz)">
+    <rule in="aq" out="aa"/>
+    <rule in="bq" out="bb"/>
+  </all>
+  <all in="a" out="W"/>
+  <all in="b" out="F"/>
+  <ellipsoid at="12 18 8" size="9 11 4" color="W" on="F"/>
   <box at="12 17 17" size="9 16 4" color="D" on="F"/>
   <box at="12 26 19" size="7 8 4" color="D" on="F"/>
-  <cone at="12 2 5" size="3 4 4" color="W" on="C"/>
   <convolution neighborhood="Moore" steps="1">
     <rule in="B" out="F" values="F" sum="18..26"/>
   </convolution>
+  <!-- Ciuffi di pelo arruffato sul dorso e sui fianchi -->
+  <prl steps="1">
+    <rule in="B [FD]" out="F *" p="0.12"/>
+    <rule in="BF" out="FF" p="0.04"/>
+  </prl>
   <prl steps="1">
     <rule in="B F" out="B H" p="0.65"/>
     <rule in="B D" out="B F" p="0.2"/>

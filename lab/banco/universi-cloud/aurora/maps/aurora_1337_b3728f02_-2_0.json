@@ -1,0 +1,35 @@
+{
+ "plan": {
+  "place": {
+   "name": "Piana dell'Eco",
+   "description": "Un sentiero di pecore attraversa il prato."
+  },
+  "layout": "locanda",
+  "objects": [
+   {
+    "module": "npc.villager",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.banco",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.cassa",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.credenza",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.letto",
+    "where": "fuori"
+   }
+  ],
+  "ground": [],
+  "fresh": [],
+  "runes": [],
+  "strutture": []
+ }
+}

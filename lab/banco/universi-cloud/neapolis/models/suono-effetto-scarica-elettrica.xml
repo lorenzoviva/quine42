@@ -1,0 +1,38 @@
+<!-- Una scarica elettrica: lampi di note seghettate in sedicesimi su altezze impazzite, il crepitio, il colpo finale. -->
+<sequence name="Scarica elettrica" values="BNSAGKHCTUVPM" size="10 2 12" symmetry="()">
+  <sound bpm="190" scale="phrygian" root="52" swing="0" cutoff="11000" space="0.3">
+    <track y="0" instrument="lead" volume="0.5"/>
+    <track y="1" instrument="bass" volume="0.65"/>
+  </sound>
+  <color symbol="N" value="38bdf8" name="Nota" glow="True"/>
+  <color symbol="S" value="0284c7" name="Sustain" alpha="0.85"/>
+  <color symbol="A" value="f43f5e" name="Accento" glow="True"/>
+  <color symbol="G" value="818cf8" name="Ghost" alpha="0.7"/>
+  <color symbol="K" value="fbbf24" name="Kick" glow="True"/>
+  <color symbol="H" value="fde047" name="Hi-hat" alpha="0.85"/>
+  <color symbol="C" value="fb923c" name="Rullante" glow="True"/>
+  <color symbol="T" value="ec4899" name="Scelta" hidden="True"/>
+  <color symbol="U" value="a855f7" name="Scelta" hidden="True"/>
+  <color symbol="V" value="10b981" name="Scelta" hidden="True"/>
+  <color symbol="P" value="64748b" name="Scelta" hidden="True"/>
+  <color symbol="M" value="14b8a6" name="Scelta" hidden="True"/>
+
+  <!-- I lampi: accenti (la sega) su altezze scelte dal seme. -->
+  <line at="0 0 4" to="6 0 4" r="0" color="T"/>
+  <line at="0 0 7" to="6 0 7" r="0" color="T"/>
+  <line at="0 0 9" to="6 0 9" r="0" color="T"/>
+  <line at="0 0 11" to="6 0 11" r="0" color="T"/>
+  <line at="0 0 5" to="6 0 5" r="0" color="T"/>
+  <one in="T" out="A" steps="5"/>
+  <all in="T" out="B"/>
+  <!-- Il crepitio e il colpo. -->
+  <line at="0 1 1" to="7 1 1" r="0" color="U"/>
+  <one in="U" out="H" steps="4"/>
+  <all in="U" out="B"/>
+  <line at="0 1 2" to="0 1 2" r="0" color="C"/>
+  <line at="7 1 2" to="7 1 2" r="0" color="V"/>
+  <line at="8 1 2" to="8 1 2" r="0" color="V"/>
+  <one in="V" out="C" steps="1"/>
+  <all in="V" out="B"/>
+  <line at="7 1 0" to="7 1 0" r="0" color="K"/>
+</sequence>

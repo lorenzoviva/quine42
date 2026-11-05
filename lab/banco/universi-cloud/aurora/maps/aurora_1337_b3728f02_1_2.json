@@ -1,0 +1,19 @@
+{
+ "plan": {
+  "place": {
+   "name": "Lago di Valmora",
+   "description": "L'acqua è fredda e limpida."
+  },
+  "layout": "borgo",
+  "objects": [
+   {
+    "module": "npc.villager",
+    "where": "fuori"
+   }
+  ],
+  "ground": [],
+  "fresh": [],
+  "runes": [],
+  "strutture": []
+ }
+}

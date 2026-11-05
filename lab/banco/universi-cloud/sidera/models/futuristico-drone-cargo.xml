@@ -1,0 +1,105 @@
+<!-- Drone cargo (ambientazione futuristica, sidera): un corpo di ceramica bianca con quattro bracci di grafite, i rotori ciano accesi
+     le zampe di atterraggio e le antenne sul dorso; sotto, a volte, la cassa del carico appesa al suo cavo. Il seme sceglie quanto sta alto il drone sulle
+     zampe, se porta la cassa e quante antenne ha e quanto sono lunghe. -->
+<sequence values="BWwGgCMVabolhkKLOPrcqxR" size="20 20 20" symmetry="(xy)" name="Drone cargo">
+  <color symbol="W" value="eef1f5" name="ceramica bianca"/>
+  <color symbol="w" value="c3c9d3" name="ceramica in ombra"/>
+  <color symbol="G" value="353a42" name="grafite"/>
+  <color symbol="g" value="565d68" name="grafite chiara"/>
+  <color symbol="C" value="5ff0ff" name="rotore ciano" glow="True"/>
+  <color symbol="M" value="ff3ec8" name="luce magenta" glow="True"/>
+  <color symbol="V" value="9fd8e6" name="vetro del sensore"/>
+  <color symbol="a" hidden="True" name="dove può stare il corpo"/>
+  <color symbol="b" hidden="True" name="dove possono stare i bracci"/>
+  <color symbol="o" hidden="True" name="dove possono stare i rotori"/>
+  <color symbol="l" hidden="True" name="dove possono stare le zampe"/>
+  <color symbol="h" hidden="True" name="quote possibili"/>
+  <color symbol="k" hidden="True" name="la quota scelta"/>
+  <color symbol="K" hidden="True" name="il corpo"/>
+  <color symbol="L" hidden="True" name="i bracci"/>
+  <color symbol="O" hidden="True" name="i rotori"/>
+  <color symbol="P" value="353a42" name="zampa"/>
+  <color symbol="r" hidden="True" name="il cavo che sale"/>
+  <color symbol="c" hidden="True" name="dove può stare la cassa"/>
+  <color symbol="q" value="565d68" name="cassa"/>
+  <color symbol="x" hidden="True" name="la faccia del dado senza cassa"/>
+  <color symbol="R" hidden="True" name="la faccia del dado con la cassa"/>
+  <!-- Le sagome nascoste: zampe, corpo, bracci, rotori -->
+  <box at="6 7 0" size="1 1 14" color="l"/>
+  <box at="14 7 0" size="1 1 14" color="l"/>
+  <box at="6 13 0" size="1 1 14" color="l"/>
+  <box at="14 13 0" size="1 1 14" color="l"/>
+  <box at="10 10 4" size="10 8 10" color="a" on="B"/>
+  <box at="10 10 4" size="16 2 10" color="b" on="B"/>
+  <box at="10 10 4" size="2 16 10" color="b" on="B"/>
+  <cylinder at="3 10 4" size="5 5 10" color="o" on="[Bb]"/>
+  <cylinder at="17 10 4" size="5 5 10" color="o" on="[Bb]"/>
+  <cylinder at="10 3 4" size="5 5 10" color="o" on="[Bb]"/>
+  <cylinder at="10 17 4" size="5 5 10" color="o" on="[Bb]"/>
+  <!-- La quota del drone: una fra 7 e 13 -->
+  <box at="0 0 7" size="1 1 7" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all>
+    <rule in="kB" out="kk"/>
+    <rule in="kl" out="kK"/>
+    <rule in="[KLO]l" out="*K"/>
+    <rule in="ka" out="kK"/>
+    <rule in="kb" out="kL"/>
+    <rule in="ko" out="kO"/>
+    <rule in="[KLO]B" out="*k"/>
+    <rule in="[KLO]a" out="*K"/>
+    <rule in="[KLO]b" out="*L"/>
+    <rule in="[KLO]o" out="*O"/>
+  </all>
+  <all in="k" out="B"/>
+  <!-- Il corpo è spesso tre, i bracci uno, i rotori sopra i bracci -->
+  <all in="K a" out="* K" steps="2" symmetry="()"/>
+  <all in="a K" out="K *" steps="1" symmetry="()"/>
+  <all in="[ab]" out="B"/>
+  <all in="o O" out="O *" symmetry="()" steps="1"/>
+  <all in="O o" out="* L" symmetry="()" steps="1"/>
+  <all in="o" out="B"/>
+  <!-- Le zampe: da sotto il corpo fino a terra -->
+  <all in="K l" out="* P" symmetry="()"/>
+  <all in="P l" out="* P" symmetry="()"/>
+  <all in="l" out="B"/>
+  <all in="BP" out="*P" steps="1" symmetry="()"/>
+  <!-- La cassa, forse, con il suo cavo -->
+  <box at="10 10 0" size="6 6 3" color="c"/>
+  <box at="10 10 0" size="1 1 1" color="r"/>
+  <box at="0 19 0" size="1 1 1" color="x"/>
+  <!-- Un dado a tre facce: due senza cassa, una con la cassa -->
+  <one steps="1">
+    <rule in="x" out="B"/>
+    <rule in="r" out="R"/>
+    <rule in="x" out="B"/>
+  </one>
+  <all in="r" out="c"/>
+  <all in="x" out="B"/>
+  <all in="R" out="r"/>
+  <one steps="20" symmetry="()">
+    <rule in="[Bc] r" out="r V"/>
+  </one>
+  <all in="r" out="V"/>
+  <all in="Vc" out="Vq"/>
+  <all in="qc" out="qq" symmetry="(xyz)"/>
+  <all in="c" out="B"/>
+  <all in="B q" out="M *" symmetry="()"/>
+  <all in="M" out="q"/>
+  <!-- Le antenne sul dorso: ognuna sale a caso -->
+  <box at="8 10 0" size="1 1 20" color="c" on="B"/>
+  <box at="12 10 0" size="1 1 20" color="c" on="B"/>
+  <all in="c K" out="r *" symmetry="()"/>
+  <all in="c" out="B"/>
+  <prl in="r" out="B" p="0.3" steps="1"/>
+  <prl in="B r" out="r g" p="0.5" steps="7" symmetry="()"/>
+  <all in="r" out="M"/>
+  <!-- I colori -->
+  <all in="K" out="W"/>
+  <all in="L" out="G"/>
+  <all in="O" out="C"/>
+  <all in="B W" out="* w" steps="1" symmetry="()"/>
+  <all in="W B" out="* V" steps="1" symmetry="()"/>
+  <all in="WB" out="MB" steps="1" symmetry="()"/>
+</sequence>

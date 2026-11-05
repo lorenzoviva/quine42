@@ -31,6 +31,12 @@
   "runes": [
    "acqua",
    "rame"
+  ],
+  "strutture": [
+   {
+    "concetto": "osservatorio",
+    "taglia": "grande"
+   }
   ]
  }
 }

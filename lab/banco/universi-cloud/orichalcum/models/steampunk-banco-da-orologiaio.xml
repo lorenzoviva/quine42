@@ -1,0 +1,65 @@
+<!-- Banco da orologiaio, steampunk (Cantiere 2, Parte B): un piano di legno scuro su una cassettiera con i pomelli d'ottone, a volte
+     un'alzata di casellari sul retro, una lampada a braccio con il vetro ambrato acceso e ingranaggi sparsi sul piano. Il seme sceglie
+     quanto è lungo il banco (il fianco si chiude dove finisce), se c'è l'alzata, dove sta la lampada e dove cadono i pezzi. -->
+<sequence values="BDWNOCEAhkuXmlrt" size="20 20 20" symmetry="(xy)" name="Banco da orologiaio">
+  <color symbol="D" value="4a2f22" name="legno scuro"/>
+  <color symbol="W" value="6b4530" name="piano di legno"/>
+  <color symbol="N" value="2e1d15" name="fuga dei cassetti"/>
+  <color symbol="O" value="c9a13b" name="ottone"/>
+  <color symbol="C" value="b8653a" name="rame"/>
+  <color symbol="E" value="3b3a3f" name="ghisa"/>
+  <color symbol="A" value="f2b54a" name="vetro ambrato acceso" glow="True"/>
+  <color symbol="h" hidden="True" name="lunghezze possibili"/>
+  <color symbol="k" hidden="True" name="dove finisce il banco"/>
+  <color symbol="u" hidden="True" name="l'alzata possibile"/>
+  <color symbol="X" hidden="True" name="l'alzata scelta"/>
+  <color symbol="m" hidden="True" name="il dado dell'alzata"/>
+  <color symbol="l" hidden="True" name="il fianco"/>
+  <color symbol="r" hidden="True" name="la lampada che cresce"/>
+  <color symbol="t" hidden="True" name="il posto della lampada"/>
+  <!-- La cassettiera, il piano e l'alzata possibile -->
+  <box at="4 10 0" size="6 8 9" color="D"/>
+  <box at="4 13 3" size="6 1 1" color="N"/>
+  <box at="4 13 6" size="6 1 1" color="N"/>
+  <box at="4 14 1" size="1 1 1" color="O"/>
+  <box at="4 14 4" size="1 1 1" color="O"/>
+  <box at="4 14 7" size="1 1 1" color="O"/>
+  <box at="10 10 9" size="18 8 2" color="W"/>
+  <box at="10 7 11" size="18 2 6" color="u"/>
+  <box at="10 7 12" size="16 1 1" color="B"/>
+  <box at="10 7 14" size="16 1 1" color="B"/>
+  <box at="2 7 11" size="1 1 1" color="m"/>
+  <!-- La lunghezza: da dove finisce il banco in là sparisce tutto -->
+  <box at="13 0 0" size="12 1 1" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all symmetry="()">
+    <rule in="k/[BDWNOum]" out="k/k"/>
+    <rule in="[BDWNOum]/k" out="k/k"/>
+    <rule in="[BDWNOum] k" out="k k"/>
+    <rule in="k [BDWNOum]" out="k k"/>
+  </all>
+  <all symmetry="()" in="k[BDWNOum]" out="kk"/>
+  <all in="k" out="B"/>
+  <!-- L'alzata, sì o no -->
+  <one steps="1"><rule in="m" out="X"/><rule in="m" out="B"/></one>
+  <all in="Xu" out="XX" symmetry="(xyz)"/>
+  <all in="[um]" out="B"/>
+  <all in="X" out="D"/>
+  <!-- Il fianco scende dove finisce il piano -->
+  <all symmetry="()" in="WB" out="lB"/>
+  <all in="l B" out="l l"/>
+  <all in="l" out="D"/>
+  <!-- La lampada a braccio, in un punto a caso del piano -->
+  <prl steps="1" in="B W" out="t W" p="0.1"/>
+  <one in="t" out="r" steps="1"/>
+  <all in="t" out="B"/>
+  <one steps="5" in="B r" out="r E"/>
+  <all in="r" out="O"/>
+  <all in="B O E" out="A O E"/>
+  <!-- Ingranaggi e molle sparsi sul piano -->
+  <prl steps="1">
+    <rule in="B W" out="O W" p="0.05"/>
+    <rule in="B W" out="C W" p="0.04"/>
+  </prl>
+</sequence>
