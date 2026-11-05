@@ -128,6 +128,26 @@ export function totalWeight(inv: Inventory, lookup: ItemLookup): number {
   return inv.slots.reduce((w, s) => w + (s ? (lookup(s.item)?.weight ?? 1) * s.count + (s.inv ? totalWeight(s.inv, lookup) : 0) : 0), 0);
 }
 
+/**
+ * An inventory as a file of the universe holds it (a bag lying somewhere, with what is in it, T291), or undefined: only slots with an item
+ * and a whole count, and bags in them a little deep; nothing held. What is not that is left out, never thrown at the world.
+ */
+export function readInventory(v: unknown, depth = 0): Inventory | undefined {
+  if (!v || typeof v !== 'object' || depth > 2) return undefined;
+  const slots = (v as { slots?: unknown }).slots;
+  if (!Array.isArray(slots) || slots.length < 1 || slots.length > SLOTS) return undefined;
+  return {
+    slots: slots.map((s) => {
+      if (!s || typeof s !== 'object') return null;
+      const { item, count, inv } = s as Record<string, unknown>;
+      if (typeof item !== 'string' || typeof count !== 'number' || !Number.isInteger(count) || count < 1) return null;
+      const bag = readInventory(inv, depth + 1);
+      return { item, count: Math.min(count, 999), ...(bag ? { inv: bag } : {}) };
+    }),
+    equipped: null,
+  };
+}
+
 export function equippedItem(inv: Inventory): string | null {
   return inv.equipped !== null ? (inv.slots[inv.equipped]?.item ?? null) : null;
 }
