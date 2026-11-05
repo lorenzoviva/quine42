@@ -63,6 +63,8 @@ import { bondWith, memoriesFor, playerFile, PLAYERS_DIR, readWandererState, repa
 import type { ActionDef, AiSettings, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, GameSetup, ChunkInfo, Recipe, RuneFragment, TerrainDef, UniverseConfig } from './types';
 import { checkKernelVersion, KERNEL_VERSION, stampKernel } from './version';
 import { ModuleStores } from './store';
+import { matchJob, validateJobProgram, WORKERS_PER_PLACE, type JobProgram } from './jobs';
+import { findRoute, RouteCache } from './route';
 
 /** A solid entity with a model, as collision sees it: where it is, its form, where it blocks and its floors. */
 interface SolidForm extends Ground {
@@ -749,6 +751,8 @@ export class Kernel {
       first: (name) => this.ecs.query(name)[0],
       held: (a, id) => this.heldBy(typeof id === 'number' ? this.wandererOf(id) : this.wanderer().id, a),
       wanderers: () => this.wanderersInWorld(),
+      path: (x, y, tx, ty) => this.routeStep(x, y, tx, ty),
+      find_tile: (code, x, y, r) => this.findTile(code, x, y, r),
       // The lasting store (T245a, ADR-0138): the module running is the only one whose data a call sees. A rune, a mirror: nothing.
       store_get: (key) => (this.luaModule && !this.mirror ? this.stores.get(this.luaModule, key) : undefined),
       store_set: (key, value) => !!this.luaModule && !this.mirror && this.stores.set(this.luaModule, key, value),
@@ -2946,6 +2950,9 @@ export class Kernel {
     ch.tiles = ch.tiles.slice(0, tile) + code + ch.tiles.slice(tile + 1);
     ch.version++;
     (ch.plan.edits ??= {})[String(tile)] = code;
+    // The day it was written (T245b): what ripens counts from here.
+    (ch.plan.giorni ??= {})[String(tile)] = this.day();
+    this.routes.clear();
     this.saveChunkSoon(ch);
     return true;
   }
@@ -6482,6 +6489,12 @@ export class Kernel {
     const pc = this.wandererCarpet();
     const people = this.ecs.query('mind', 'pos');
     let started = 0;
+    this.matureTick();
+    const workers = new Map<string, number>();
+    for (const id of this.ecs.query('mestiere', 'chunk')) {
+      const k = this.ecs.get(id, 'chunk')?.key;
+      if (k) workers.set(k, (workers.get(k) ?? 0) + 1);
+    }
     for (const id of people) {
       const p = this.ecs.get(id, 'pos');
       const identity: Identity | undefined = this.ecs.get(id, 'identity');
@@ -6493,6 +6506,8 @@ export class Kernel {
         continue;
       }
       const mind: Mind = this.ecs.get(id, 'mind');
+      // A trade with a program (T245b): sys.lavoro carries out its day; the kernel says which phase it is and where home is.
+      if (this.workTick(id, identity, mind, workers)) continue;
       const now = this.routineNow(identity);
       if (!now) continue;
       const activity: Activity = (now as { azione?: Activity }).azione ?? inferActivity(now.fa, now.dove);
@@ -6515,6 +6530,128 @@ export class Kernel {
     this.meetings(people, pc);
     this.plotTick();
     this.questTick();
+  }
+
+  // --- The trades (T245b, ADR-0140) -----------------------------------------------------------
+
+  private jobCache?: { files: FileMap; programs: JobProgram[] };
+  private routes = new RouteCache();
+  private maturedPhase = '';
+
+  /** The programs of the trades of this universe: the `mestieri` of its `data` modules, those that are valid. */
+  jobPrograms(): JobProgram[] {
+    if (this.jobCache?.files === this.files) return this.jobCache.programs;
+    const world = { codes: new Set(Object.keys(this.palette)), items: new Set(this.content.items.keys()), tags: new Set([...this.modules.values()].flatMap((m) => m.manifest.tags ?? [])) };
+    const programs: JobProgram[] = [];
+    const seen = new Set<string>();
+    for (const m of this.modules.values()) {
+      const list = (m.manifest as { mestieri?: unknown }).mestieri;
+      if (m.manifest.kind !== 'data' || !Array.isArray(list)) continue;
+      for (const raw of list) {
+        const { program, errors } = validateJobProgram(raw, world);
+        if (!program) {
+          this.log('lavoro', `${m.manifest.id}: programma scartato: ${errors.slice(0, 3).join('; ')}`);
+          continue;
+        }
+        if (seen.has(program.id)) continue;
+        seen.add(program.id);
+        programs.push({ ...program, modulo: m.manifest.id });
+      }
+    }
+    this.jobCache = { files: this.files, programs };
+    return programs;
+  }
+
+  /**
+   * An individual with a trade that has a program (T245b): at each phase of the day the kernel gives them its tasks (`mestiere`), the
+   * places they need (home, the square, the work) and nothing else; `sys.lavoro` does the rest. At most `WORKERS_PER_PLACE` per place:
+   * the others live as before. False when they are not at work (no program, following someone, the place full).
+   */
+  private workTick(id: Id, identity: Identity, mind: Mind, workers: Map<string, number>): boolean {
+    const had = this.ecs.get(id, 'mestiere');
+    const program = mind.mode === 'vaga' ? matchJob(identity.job, this.jobPrograms()) : undefined;
+    const place: string | undefined = this.ecs.get(id, 'chunk')?.key;
+    if (!program || (!had && place && (workers.get(place) ?? 0) >= WORKERS_PER_PLACE)) {
+      if (had) {
+        this.ecs.remove(id, 'mestiere');
+        this.ecs.remove(id, 'lavoro');
+      }
+      return false;
+    }
+    const fase = dayPhase(this.time, Kernel.DAY_SECONDS);
+    if (had?.id === program.id && had.fase === fase) return true;
+    if (!had && place) workers.set(place, (workers.get(place) ?? 0) + 1);
+    const first = program.giornata.mattina.concat(program.giornata.giorno).find((t) => t.posa)?.posa;
+    const home = this.placeFor(id, identity, 'casa', 'dorme') ?? this.placeFor(id, identity, 'casa');
+    const square = this.placeFor(id, identity, 'piazza');
+    const anchor = home ?? this.ecs.get(id, 'pos');
+    const work = (program.posto?.casella && anchor ? this.findTile(program.posto.casella, anchor.x, anchor.y, 18) : undefined) ?? this.placeFor(id, identity, 'lavoro', first);
+    this.ecs.set(id, 'mestiere', {
+      id: program.id,
+      fase,
+      giorno: this.day(),
+      compiti: structuredClone(program.giornata[fase]),
+      ...(home ? { casa: home } : {}),
+      ...(square ? { piazza: square } : {}),
+      ...(work ? { lavoro: work } : {}),
+    });
+    this.ecs.remove(id, 'meta');
+    return true;
+  }
+
+  /** The next point of the way between two places of the world (carpet space): two tiles ahead on a way the cache keeps. */
+  private routeStep(x: number, y: number, tx: number, ty: number): { x: number; y: number } | undefined {
+    if (![x, y, tx, ty].every(Number.isFinite) || Math.hypot(tx - x, ty - y) > 60) return undefined;
+    const from = [Math.floor(x), Math.floor(y)] as const;
+    const to = [Math.floor(tx), Math.floor(ty)] as const;
+    const way = this.routes.get(from, to, this.tickCount, () => findRoute(from, to, (c, r) => this.freeTile(c, r)));
+    if (!way) return undefined;
+    if (way.length <= 2) return { x: tx, y: ty };
+    const [c, r] = way[Math.min(2, way.length - 1)];
+    return { x: c + 0.5, y: r + 0.5 };
+  }
+
+  /** The centre of the nearest tile with a code within r (at most 24) of a point: the nearest, then the first row, then the first column. */
+  findTile(code: string, x: number, y: number, r: number): { x: number; y: number } | undefined {
+    if (typeof code !== 'string' || !this.palette[code] || ![x, y].every(Number.isFinite)) return undefined;
+    const R = Math.max(0, Math.min(24, Math.floor(Number.isFinite(r) ? r : 8)));
+    const c0 = Math.floor(x);
+    const r0 = Math.floor(y);
+    let best: { x: number; y: number; d: number } | undefined;
+    for (let dr = -R; dr <= R; dr++)
+      for (let dc = -R; dc <= R; dc++) {
+        if (this.tileAt(c0 + dc, r0 + dr) !== code) continue;
+        const cx = c0 + dc + 0.5;
+        const cy = r0 + dr + 0.5;
+        const d = Math.hypot(cx - x, cy - y);
+        if (!best || d < best.d - 1e-9) best = { x: cx, y: cy, d };
+      }
+    return best ? { x: best.x, y: best.y } : undefined;
+  }
+
+  /**
+   * What ripens ripens (T245b, ADR-0140): at each phase of the day, in the places loaded, a tile whose terrain says `matura` becomes
+   * the tile it says once its days have passed from when it was written. An edit with no day is of today (the plans of before).
+   */
+  private matureTick(): void {
+    const phase = `${this.day()}|${dayPhase(this.time, Kernel.DAY_SECONDS)}`;
+    if (phase === this.maturedPhase || this.mirror) return;
+    this.maturedPhase = phase;
+    const today = this.day();
+    const S = this.config.chunkSize;
+    for (const ch of this.chunks.values()) {
+      const edits = ch.plan?.edits;
+      if (ch.stage !== 'planned' || !edits) continue;
+      for (const [idx, code] of Object.entries(edits)) {
+        const m = this.palette[code]?.matura;
+        if (!m || !this.palette[m.in]) continue;
+        const days = (ch.plan!.giorni ??= {});
+        const since = days[idx] ??= today;
+        if (today - since < m.dopo) continue;
+        const i = Number(idx);
+        this.setTile(ch.cx * S + (i % S), ch.cy * S + Math.floor(i / S), m.in);
+      }
+    }
   }
 
   /** People who meet talk: by their relation, what they remember, the plots they are in. */

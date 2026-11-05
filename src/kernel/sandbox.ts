@@ -20,6 +20,10 @@ export interface Host {
   held(action: string, id?: number): boolean;
   /** Every wanderer in this kernel: their body, who they are, where they are in the world (T263, ADR-0139). */
   wanderers(): unknown;
+  /** The next point of the way from (x, y) to (tx, ty) on the tiles of the places loaded (T245b, ADR-0140), or undefined. */
+  path(x: number, y: number, tx: number, ty: number): { x: number; y: number } | undefined;
+  /** The centre of the nearest tile with this code within r of (x, y) (T245b), or undefined. */
+  find_tile(code: string, x: number, y: number, r: number): { x: number; y: number } | undefined;
   /** What the module running keeps under a key in its lasting store (T245a, ADR-0138), or undefined. */
   store_get(key: string): unknown;
   /** Keeps a value in the store of the module running (nil takes it away); false when the key, the value or the caps say no. */
@@ -356,6 +360,8 @@ function emptyHost(): Host {
     first: () => undefined,
     held: () => false,
     wanderers: () => [],
+    path: () => undefined,
+    find_tile: () => undefined,
     store_get: () => undefined,
     store_set: () => false,
     free: () => true,

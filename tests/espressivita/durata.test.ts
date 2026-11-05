@@ -280,7 +280,6 @@ describe('what a panel and the API cannot say', () => {
     const asked: Array<[string, string]> = [
       ['bus.on("morte", f)', 'bus.on'],
       ['ui.open("terminale")', 'ui.open'],
-      ['world.path(0, 0, 5, 5)', 'world.path'],
       ['world.daylight()', 'world.daylight'],
       ['world.store("mercato")', 'world.store'],
       ['input.pressed("action")', 'input.pressed'],

@@ -158,6 +158,7 @@ src/
     chain.ts            la catena della Sala sistemi (T27a): misure di ogni sistema nel tick, stazioni
                         (bench.ts: anche il banco di prova, T27b: casi, scena, nomi dei campi)
     shortfalls.ts       le mancanze (ADR-0130): ciò che il Concilio non è riuscito a fare (`world/mancanze.json`, mai ai client), il rapporto
+    jobs.ts             i programmi dei mestieri (`validateJobProgram`, `matchJob`, `JOB_BEHAVIOURS`, ADR-0140); route.ts, la via tra due caselle (`findRoute`, `RouteCache`)
     store.ts            il magazzino dei moduli (`ModuleStores`, `world/magazzino/<modulo>.json`, tetti in byte, ADR-0138)
     version.ts          la versione del kernel `X.Y.Z` (`KERNEL_VERSION`, `checkKernelVersion`, `stampKernel`, ADR-0136)
     credits.ts          la commissione di piattaforma (`costWithFee`, la decide il server, ADR-0132) e la divisione delle spese comuni (ADR-0081)
@@ -184,7 +185,8 @@ universe/
   prompts/              theme.md, agents/<agente>.md
   models/               index.json + <id>.xml: i programmi MarkovJunior di ogni cosa (ADR-0041), uno per tipo
   modules/<id>/         manifest.json (+ logic.lua): sistemi, terreni, ambienti, pacchetti di oggetti, mobili, individui,
-                        effetti (core.effects), fuoco (sys.fire), rune magiche e incantesimi (magic.runes, magic.spells)
+                        effetti (core.effects), fuoco (sys.fire), rune magiche e incantesimi (magic.runes, magic.spells),
+                        il lavoro (sys.lavoro) e i programmi dei mestieri (lavoro.<mestiere>, `kind: data` con `mestieri`, ADR-0140)
 tests/  docs/
 src/mj/                 MarkovJunior del gioco (ADR-0036, 0038): engine.ts (motore 3D), xml.ts e model.ts (XML alla lettera), palette.ts,
                         run.ts (esecuzione, animazioni, azioni), rig.ts (arti), mesh.ts (voxel → triangoli, impronte, pavimenti),
@@ -227,7 +229,7 @@ Registro, Luogo, Fucina e Genesi → `docs/architettura-dettagli.md#concilio`.
 - **Spazi, tappeto, rune, magia, borse**: cerchio di raggio 42 col tappeto, rune come token Lua eseguiti, canone, frase, `T` e mana → `#spazi-rune-magia`
 - **Lessico**: le parole e le usanze del mondo, mai spiegate come un glossario → `#lessico`
 - **Regole, effetti, stati, morte, menu, salto, contenuti**: i giudizi diventano regole, gli effetti sono un insieme chiuso → `#regole-effetti`
-- **Società, vita degli NPC, personaggi**: individui, legami, routine, trame, missioni → `#societa`
+- **Società, vita degli NPC, personaggi**: individui, legami, routine, trame, missioni; i mestieri come programmi (`sys.lavoro`, `matura` nei terreni, il giorno in `plan.giorni`, ADR-0140) → `#societa`
 - **Corona e interni dello studio**: campus, edifici, vetrine, plastico, Nucleo, Biblioteca, Direzione, Galleria, Sala del Concilio → `#corona`
 - **Meccaniche, casi dei sistemi, catena, banco di prova** (Sala sistemi) → `#sala-sistemi`
 - **Geografia**: biomi, ambienti, timbri, atlante → `#geografia`
@@ -257,11 +259,11 @@ Registro, Luogo, Fucina e Genesi → `docs/architettura-dettagli.md#concilio`.
 (`solid`, `radius`, `pushable`, `mass`, `friction`, `speed`), `components`, `singleton`, `persist`,
 `interaction` (`talk | read | lua`), `actions` (`id`, `label`, `requires`, `effects`), `container` (`size`, `loot`),
 `ui` (pannello: `titolo`, `elementi`), `spawn`, `persona`, `unique`, `inventory` (id di oggetti), `item`, `context`, `lore`, `tags`, `drops`,
-`origin`; generatori: `tiles` (`name`, `color`, `solid`, `layer`, `indoor`, `speed`, `model`, `actions`),
-`roof`, `commonHouse`; dati: `items` (anche `model`, `aspetto`, `container`, `actions`, `slot`, `bonus`, effetti `mana`), `recipes`, `loot`, `layouts`, `fragments`, `runes`, `spells`.
+`origin`; generatori: `tiles` (`name`, `color`, `solid`, `layer`, `indoor`, `speed`, `model`, `actions`, `matura`),
+`roof`, `commonHouse`; dati: `items` (anche `model`, `aspetto`, `container`, `actions`, `slot`, `bonus`, effetti `mana`), `recipes`, `loot`, `layouts`, `fragments`, `runes`, `spells`, `mestieri` (ADR-0140).
 
 ### API Lua — l'unica disponibile, il validatore rifiuta il resto
-`ecs.each/get/set/spawn/destroy/first`; `world.free/free_real/tile/speed_at/spawn/player/player_pos/wanderers/
+`ecs.each/get/set/spawn/destroy/first`; `world.free/free_real/tile/speed_at/spawn/player/player_pos/wanderers/path/find_tile/
 nearest/has_tag/break_entity/say/speak/set_tile/open/make_container/store_get/store_set` (il magazzino del modulo, ADR-0138); `inventory.add/remove/count/equipped`; `items.find/def/bonus`; `ui.slot`;
 `input.held(azione, id?)` (i tasti di ogni viandante, ADR-0139); `bus.emit`; `log`; `hash`; `math string table utf8 pairs pcall…` (`math.random` seminato dal kernel, ADR-0055).
 Hook: `update(dt)` (sistemi), `generate_chunk`, `on_spawn(id)`, `on_interact(id, user)`,

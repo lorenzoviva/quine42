@@ -805,6 +805,8 @@ local function make_api()
     open = function(id) return host.open(id) end,
     make_container = function(id, size, loot) return host.make_container(id, size or 6, tostring(loot or "cassa")) end,
     wanderers = function() return host.wanderers() end,
+    path = function(x, y, tx, ty) return host.path(x, y, tx, ty) end,
+    find_tile = function(code, x, y, r) return host.find_tile(tostring(code), x, y, r or 8) end,
     store_get = function(key) return host.store_get(tostring(key)) end,
     store_set = function(key, value) return host.store_set(tostring(key), value) end,
   }

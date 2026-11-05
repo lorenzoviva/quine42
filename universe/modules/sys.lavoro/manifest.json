@@ -1,0 +1,110 @@
+{
+  "id": "sys.lavoro",
+  "name": "Il lavoro",
+  "kind": "system",
+  "version": "0.1.0",
+  "description": "Gli individui con un mestiere fanno la loro giornata: camminano, arano, seminano, mietono, tagliano, pescano. Il kernel dice la fase e i posti; qui ogni compito cambia il mondo davvero.",
+  "logic": "logic.lua",
+  "order": 28,
+  "casi": [
+    {
+      "titolo": "Verso il lavoro",
+      "racconto": "Un contadino comincia la mattina: il primo compito è andare al lavoro, e ci cammina un punto della via alla volta (la meta la segue il vagabondaggio).",
+      "terreno": [
+        "ggggg",
+        "ggggg",
+        "ggggg",
+        "ggggg",
+        "ggggg"
+      ],
+      "cose": [
+        {
+          "modulo": "npc.villager",
+          "x": -2,
+          "y": -2,
+          "componenti": {
+            "mestiere": {
+              "id": "contadino",
+              "fase": "mattina",
+              "giorno": 0,
+              "compiti": [
+                {
+                  "fa": "vai",
+                  "dove": "lavoro"
+                }
+              ],
+              "lavoro": {
+                "x": 2.5,
+                "y": 2.5
+              }
+            }
+          }
+        }
+      ],
+      "durata": 6,
+      "guarda": [
+        "0:meta.x",
+        "0:meta.y",
+        "0:attivita.tipo"
+      ],
+      "righe": [
+        17,
+        20,
+        21,
+        22,
+        53,
+        54,
+        56,
+        132,
+        145,
+        146
+      ]
+    },
+    {
+      "titolo": "A riposo",
+      "racconto": "Di notte, a casa, il compito è riposare: senza durata, resta fermo nella posa fino alla fine della fase.",
+      "terreno": [
+        "ggggg",
+        "ggggg",
+        "ggggg",
+        "ggggg",
+        "ggggg"
+      ],
+      "cose": [
+        {
+          "modulo": "npc.villager",
+          "x": 0,
+          "y": 0,
+          "componenti": {
+            "mestiere": {
+              "id": "contadino",
+              "fase": "notte",
+              "giorno": 0,
+              "compiti": [
+                {
+                  "fa": "riposa"
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "durata": 2,
+      "guarda": [
+        "0:attivita.tipo",
+        "0:attivita.ferma"
+      ],
+      "righe": [
+        12,
+        13,
+        100,
+        101,
+        102,
+        104,
+        132,
+        145,
+        146
+      ]
+    }
+  ]
+}

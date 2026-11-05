@@ -466,6 +466,27 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Da non usare**: `npc` (per l'individuo), `persona` (idem: è il valore di `specie`), `person`, `Person`, `DialoguePerson`, `addPerson`, `updatePerson`, `personOf`, `personFacts`, `personByName`, `personNode`, `noPerson`
 - **Fermo**: `world/people.json`, `persone`, il valore `persona` di `specie`, `npc.reply`, `npc.dialogue`, `npc.sheet`, `persona` nel manifest, `identity` e `mind` dei componenti.
 
+### Programma di mestiere
+- **Inglese**: `JobProgram`, `jobPrograms`, `validateJobProgram`, `matchJob`
+- **Definizione**: com'è fatta la giornata di un mestiere, scritta una volta per mestiere e usata da ogni individuo che lo ha: i compiti di ogni fase, ognuno un comportamento con i suoi parametri (T245b, ADR-0140). Dati, mai codice.
+- **Dove vive**: `src/kernel/jobs.ts`, `universe/modules/lavoro.contadino/manifest.json`
+- **Da non usare**: `routine` (per il programma: la routine è il testo di oggi), `script`, `job`
+- **Fermo**: `mestieri` nei manifest, `giornata`, `nomi`, `posto`, i componenti `mestiere`, `lavoro`, `carico`.
+
+### Comportamento
+- **Inglese**: `JOB_BEHAVIOURS`, `JobBehaviour`
+- **Definizione**: uno dei compiti di un elenco chiuso (`vai`, `trasforma`, `raccogli`, `porta`, `produci`, `usa`…) che `sys.lavoro` sa fare e che cambia il mondo davvero (T245b, ADR-0140).
+- **Dove vive**: `src/kernel/jobs.ts`, `universe/modules/sys.lavoro/logic.lua`
+- **Da non usare**: `azione` (per il comportamento: l'azione è del viandante), `task`
+- **Fermo**: i valori di `fa`.
+
+### Maturazione
+- **Inglese**: `matura`, `matureTick`
+- **Definizione**: ciò che una casella diventa da sola dopo qualche giorno del mondo (il seminato in grano, la ceppaia in bosco), contato dal giorno in cui la casella è stata scritta (`plan.giorni`). La fa il kernel, non Lua (T245b, ADR-0140).
+- **Dove vive**: `src/kernel/kernel.ts`, `universe/modules/world.terrain/manifest.json`
+- **Da non usare**: `crescita` (per la maturazione), `ripen`
+- **Fermo**: `matura {dopo, in}` nei `tiles`, `giorni` nel piano del luogo.
+
 ### Tipo di individuo
 - **Inglese**: `persona`
 - **Definizione**: il modulo `entity` con la `persona`, il modello e l'aspetto comuni, di cui ogni individuo è un'istanza.

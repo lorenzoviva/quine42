@@ -83,6 +83,8 @@ export interface TerrainDef {
   model?: string;
   /** Actions learned on this kind of terrain ("Altro…" on a tile): effects at that place. */
   actions?: ActionDef[];
+  /** What it becomes by itself (T245b, ADR-0140): after `dopo` days of the world from when the tile was written, the tile `in`. */
+  matura?: { dopo: number; in: string };
 }
 
 export const ITEM_CATEGORIES = ['cibo', 'bevanda', 'medicina', 'attrezzo', 'arma', 'materiale', 'luce', 'vestiario', 'contenitore', 'magia', 'varie'] as const;

@@ -198,6 +198,19 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   (`world/plots.json`, diario nell'HUD). Ogni trama passa dal validatore (`reviewPlot` in `plots.ts`): individui che
   esistono, animali da animali, legami del registro, rune del canone, niente quarta parete; ciò che non torna va al
   Narratore con il motivo, all'avvio `reviewPlots` ripara o ritira le trame aperte.
+- **Il lavoro** (ADR-0140, T245b; progetto in `docs/design/comportamento-npc.md`): un mestiere con un **programma** (`mestieri` di un
+  modulo `data`, `lavoro.<mestiere>/manifest.json`: nomi, posto, i compiti di ogni fase) si abbina per nome, poi per parola
+  (`matchJob` in `jobs.ts`); il programma passa dal validatore per riferimento (`validateJobProgram`: comportamenti di un elenco chiuso,
+  caselle del terreno, oggetti del registro, durate 5-300 s, al più 6 compiti per fase). A ogni fase del giorno il kernel mette
+  all'individuo il componente `mestiere` (i compiti della fase, casa, piazza e lavoro da `placeFor` e `findTile`) e non gli sceglie più
+  la meta; `sys.lavoro` (seme, ordine 28) esegue i compiti uno dopo l'altro con lo stato in `lavoro` e ciò che porta in `carico`, e
+  cammina mettendo `meta` al prossimo punto di `world.path` (A* sulle caselle dei luoghi caricati, `route.ts`, con la cache), che
+  `sys.wander` segue. `trasforma` e `raccogli` cambiano davvero le caselle (`world.set_tile`, quindi `plan.edits`), senza chiamare i
+  modelli; al più 12 al lavoro per luogo, chi segue il viandante smette. **Ciò che matura** è del kernel: un terreno con
+  `matura {dopo, in}` diventa `in` dopo `dopo` giorni da quando la casella è stata scritta (`plan.giorni`, il giorno di ogni modifica;
+  una modifica senza giorno vale da oggi), a ogni fase del giorno nei luoghi caricati (`matureTick`). Il seme ha il contadino (ara
+  `g→m`, semina `m→e`, il seminato matura in grano `u` in un giorno, miete `u→m` con `item.grano`), il boscaiolo (`t→x` con
+  `item.ciocco`, la ceppaia ricresce in bosco in tre giorni) e il pescatore (`item.pesce` dalla riva di `w`).
 - **Personaggi** (ADR-0010, 0013, 0017, 0020): tipo + individuo (`identity`: anche `job family routine story`), `mind` (memoria, umore, modo), azioni
   `segui resta vaga dai nessuna`, oggetti citati → `wanted`. Al massimo 2 dello stesso tipo nel mondo
   caricato; nuovi tipi forgiati esplorando (`ai.maxCast`); ogni individuo è un seme del programma del suo tipo (pochi semi per classe).
