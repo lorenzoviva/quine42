@@ -91,7 +91,7 @@ L'autore: il rilascio aperto al pubblico, con i pagamenti Stripe. Il piano di la
 | 34 | Pronti per la beta: server, guida, notizie, home, consumo in lobby, registro dei fallimenti del Concilio | I | in corso | T45f T234 T236 T237 T238 T243 T244 T247 T248 T249 T250 T251 T252 T265 |
 | 35 | Il sito è il launcher del gioco | II | in attesa | T232 T233 T235 |
 | 36 | Il gioco in quattro lingue | III | in attesa | T239 |
-| 37 | Altri universi: spazio, pirati, cowboy | III | in attesa | T184 T185 |
+| 37 | Altri universi: spazio, pirati, cowboy | III | in attesa | T184 T185 T278 |
 | 38 | Il lancio | IV | in attesa | T240 |
 | 39 | Gli NPC decidono e invecchiano | III | in attesa | T245g T245h T245i |
 

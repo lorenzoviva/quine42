@@ -1,0 +1,22 @@
+<!-- Pappagallo sul trespolo: a mano (Claude Code, Cantiere 9). Un trespolo di legno e un pappagallo verde con la coda rossa; ogni seme cambia il ciuffo e le penne della coda. -->
+<sequence values="BPVGRYE" size="20 20 30" symmetry="()" name="Pappagallo">
+  <color symbol="P" value="7a5432" name="trespolo"/>
+  <color symbol="V" value="3aa655" name="piume"/>
+  <color symbol="G" value="2a7a3e" name="ali"/>
+  <color symbol="R" value="d8402a" name="coda"/>
+  <color symbol="Y" value="f2c84e" name="becco"/>
+  <color symbol="E" value="1a1a1a" name="occhio"/>
+  <cylinder at="10 10 0" size="8 8 2" color="P"/>
+  <box at="10 10 2" size="2 2 16" color="P"/>
+  <box at="10 10 18" size="10 2 1" color="P"/>
+  <box at="10 10 19" size="4 4 5" color="V"/>
+  <box at="10 10 19" size="5 3 4" color="G"/>
+  <box at="10 10 24" size="3 3 3" color="V"/>
+  <box at="10 8 25" size="1 1 1" color="Y"/>
+  <box at="9 9 26" size="1 1 1" color="E"/>
+  <box at="10 13 16" size="2 2 4" color="R"/>
+  <prl in="B V" out="V V" p="0.3" steps="1"/>
+  <all steps="2">
+    <rule in="R/B" out="R/R" p="0.5"/>
+  </all>
+</sequence>

@@ -1,0 +1,132 @@
+{
+ "binario": {
+  "classe": "mobile",
+  "nome": "Binario",
+  "autore": "a mano (Claude Code, Cantiere 9)"
+ },
+ "ingresso-miniera": {
+  "classe": "mobile",
+  "nome": "Ingresso della miniera",
+  "autore": "a mano (Claude Code, Cantiere 9)"
+ },
+ "recinto": {
+  "classe": "mobile",
+  "nome": "Recinto",
+  "autore": "a mano (Claude Code, Cantiere 9)"
+ },
+ "bacheca-taglie": {
+  "classe": "monumento",
+  "nome": "Bacheca delle taglie",
+  "autore": "a mano (Claude Code, Cantiere 9)"
+ },
+ "telegrafo": {
+  "classe": "mobile",
+  "nome": "Telegrafo",
+  "autore": "a mano (Claude Code, Cantiere 9)"
+ },
+ "lattine": {
+  "classe": "mobile",
+  "nome": "Lattine sulla staccionata",
+  "autore": "a mano (Claude Code, Cantiere 9)"
+ },
+ "abbeveratoio": {
+  "classe": "mobile",
+  "nome": "Abbeveratoio",
+  "autore": "a mano (Claude Code, Cantiere 9)"
+ },
+ "carro-elisir": {
+  "classe": "mobile",
+  "nome": "Carro dell'elisir",
+  "autore": "a mano (Claude Code, Cantiere 9)"
+ },
+ "cactus": {
+  "classe": "mobile",
+  "nome": "Cactus della piana",
+  "autore": "a mano (Claude Code, Cantiere 9)"
+ },
+ "incudine": {
+  "classe": "mobile",
+  "nome": "Incudine del maniscalco",
+  "autore": "a mano (Claude Code, Cantiere 9)"
+ },
+ "suono-cowboy-prateria": {
+  "classe": "suono",
+  "nome": "Prateria",
+  "autore": "a mano (Claude Code, Cantiere 9), da suono-musica-selva",
+  "suono": {
+   "uso": "musica",
+   "ambienti": [
+    "campi",
+    "maneggio",
+    "deserto"
+   ],
+   "momenti": [
+    "mattina",
+    "giorno"
+   ]
+  }
+ },
+ "suono-cowboy-bivacco": {
+  "classe": "suono",
+  "nome": "Bivacco",
+  "autore": "a mano (Claude Code, Cantiere 9), da suono-musica-notte",
+  "suono": {
+   "uso": "musica",
+   "momenti": [
+    "notte"
+   ]
+  }
+ },
+ "suono-cowboy-strada": {
+  "classe": "suono",
+  "nome": "Strada maestra",
+  "autore": "a mano (Claude Code, Cantiere 9), da suono-sentiero-melodico",
+  "suono": {
+   "uso": "musica",
+   "ambienti": [
+    "borgo",
+    "locanda",
+    "caserma"
+   ],
+   "momenti": [
+    "mattina",
+    "giorno",
+    "sera"
+   ]
+  }
+ },
+ "suono-cowboy-galleria": {
+  "classe": "suono",
+  "nome": "Galleria",
+  "autore": "a mano (Claude Code, Cantiere 9), da suono-musica-oltre",
+  "suono": {
+   "uso": "musica",
+   "ambienti": [
+    "dungeon",
+    "montagne"
+   ]
+  }
+ },
+ "suono-cowboy-campana": {
+  "classe": "suono",
+  "nome": "Campana della stazione",
+  "autore": "a mano (Claude Code, Cantiere 9), da suono-effetto-runa",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "campana-stazione"
+   ]
+  }
+ },
+ "suono-cowboy-sparo": {
+  "classe": "suono",
+  "nome": "Sparo alle lattine",
+  "autore": "a mano (Claude Code, Cantiere 9), da suono-effetto-salto",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "sparo"
+   ]
+  }
+ }
+}

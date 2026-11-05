@@ -4317,13 +4317,14 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: non serve.
 - Quando è fatto: commit su `task/T277`. Sicurezza: nessuna superficie nuova.
 
-### T278 · Integrare i tre reami, le lingue e il piano di lancio di Claude Cloud (step 37, T239, T240) — `da fare`
+### T278 · Integrare i tre reami, le lingue e il piano di lancio di Claude Cloud (step 37, T239, T240) — `fatto` (`112b736`)
 - Pipeline: claude · stima 1% · approvato · priorità 4
 - Sforzo: high.
 - Contesto: ramo `origin/claude/quine42-realms-languages-4mbbsi` (`40eb2de`): reami spazio, pirati, cowboy sul banco, censimento delle lingue, piano di lancio. Il ramo ha scritto nel backlog: tieni il backlog di `3d` e riporta solo gli esiti. T239 e T240 restano `in attesa`: li chiude l'autore, che deve leggerli.
 - Cosa fare: `git merge`, test e typecheck con i loro turni.
 - Browser: non serve.
 - Quando è fatto: commit su `task/T278`. Sicurezza: nessuna superficie nuova.
+- Esito: merge di `40eb2de` su `task/T278` (`112b736`), senza conflitti: `lab/banco/coming-soon-cloud/{spazio,pirati,cowboy}` con `verifica.ts` ed `esito.md`, `lab/scripts/censimento-lingue.ts`, `docs/lingue.md`, `docs/lingue-censimento.md`, `docs/lancio/piano.md`, `tests/reami.test.ts`, `tests/censimento-lingue.test.ts`; test (2092 passati, 1 saltato) e typecheck verdi. Backlog di `3d` invariato; in `docs/fasi.md` lo step 37 cita T278 al posto del T269 del ramo, che in `3d` è del Cantiere 1. Esiti da riportare: T239 e T240 restano `in attesa` finché l'autore non li legge; T239 ha prodotto il censimento (325 file, 34.064 parole per lingua, 83 regex che leggono l'italiano) e la proposta in `docs/lingue.md`, con le decisioni in fondo; T240 ha prodotto `docs/lancio/piano.md` con le decisioni D1.1-D7.3 e le verifiche aperte V1-V9 (le regole di HN e Reddit vengono da fonti secondarie e vanno rilette all'origine; al picco il tetto di 10 $/giorno non regge; «non esiste niente del genere» non regge). Reami, secondo l'esito del ramo: 400 tick su `Kernel` con `MockAiModels`, 0 fault e 0 rotture della quarta parete; limiti scritti nei README: ambienti e terreni sono quelli del seme rinominati, i veicoli non portano nessuno (T183), gli effetti sonori non hanno un evento, nello spazio il vuoto non è un terreno e l'ossigeno è un oggetto, `META_RE` vieta parole del mestiere dello spazio. Manca: il ramo non aveva altro task per i reami oltre al T269 in collisione, quindi il suo esito resta in queste righe e non nel backlog. Non provato: browser e Concilio vero. Sicurezza: nessuna superficie nuova.
 
 ### T279 · Integrare T273 di Claude Cloud: strutture, modelli e suoni nei quattro universi, con la versione del kernel — `da fare` (dipende da T274)
 - Pipeline: claude · stima 3% · approvato · priorità 1

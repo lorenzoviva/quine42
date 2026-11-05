@@ -1,0 +1,41 @@
+{
+  "id": "pirati.cassa-contrabbando",
+  "name": "Cassa di contrabbando",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "a mano (Claude Code, Cantiere 9)",
+  "description": "Una cassa senza marchi della dogana, chiusa con un lucchetto nuovo.",
+  "context": "nelle grotte, sotto le banchine, dietro le locande",
+  "appearance": {
+    "model": "cassa-contrabbando",
+    "glyph": "▣",
+    "color": "#5c4630",
+    "aspetto": "una cassa di legno scuro senza marchi, con un grosso lucchetto di ferro",
+    "classe": "mobile"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.45
+  },
+  "actions": [
+    {
+      "id": "forza",
+      "label": "Forza il lucchetto",
+      "requires": "item.grimaldello"
+    },
+    {
+      "id": "esamina_marchi",
+      "label": "Cerca i marchi della dogana"
+    }
+  ],
+  "spawn": {
+    "tiles": [
+      "l",
+      "s",
+      "f"
+    ],
+    "chance": 0.04,
+    "max": 1
+  },
+  "logic": "logic.lua"
+}

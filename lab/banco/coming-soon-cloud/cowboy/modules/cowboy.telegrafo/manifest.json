@@ -1,0 +1,43 @@
+{
+  "id": "cowboy.telegrafo",
+  "name": "Telegrafo",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "a mano (Claude Code, Cantiere 9)",
+  "description": "Un tasto di ottone su un banco di legno, collegato ai fili che corrono lungo la ferrovia.",
+  "context": "nelle stazioni, negli uffici, nei forti",
+  "appearance": {
+    "model": "telegrafo",
+    "glyph": "⌁",
+    "color": "#c8a050",
+    "aspetto": "un banco di legno con un tasto d'ottone, una bobina e un rotolo di nastro",
+    "classe": "mobile"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.45
+  },
+  "actions": [
+    {
+      "id": "batti",
+      "label": "Batti un messaggio",
+      "requires": "item.dollaro"
+    },
+    {
+      "id": "nastro",
+      "label": "Leggi il nastro"
+    },
+    {
+      "id": "ascolta",
+      "label": "Ascolta il ticchettio"
+    }
+  ],
+  "spawn": {
+    "tiles": [
+      "f"
+    ],
+    "chance": 0.03,
+    "max": 1
+  },
+  "logic": "logic.lua"
+}

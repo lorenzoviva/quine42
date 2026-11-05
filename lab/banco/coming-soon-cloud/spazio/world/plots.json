@@ -1,0 +1,43 @@
+{
+  "trame": [
+    { "id": "stive-perseveranza", "titolo": "Le stive della Perseveranza", "mistero": "Ivo Marchetti sa come entrare nelle stive sigillate della Perseveranza, ma gli serve aria per restarci; Tobia Ferri ha le bombole, ma non si fida dei relitti.", "coinvolti": ["Ivo Marchetti", "Tobia Ferri", "Irma Castaldi"], "inizio": 0, "stato": "attiva",
+      "tappe": [
+        { "giorno": 0, "momento": "sera", "chi": "Ivo Marchetti", "dove": "Locanda del Molo Sette", "cosa": "offre da bere a tutti e parla di una stiva piena di celle d'energia", "battuta": "Chi ha aria per un turno intero, stanotte, diventa ricco." },
+        { "giorno": 1, "momento": "mattina", "chi": "Tobia Ferri", "dove": "Relitto della Perseveranza", "cosa": "entra nel relitto e torna con una piastra annerita", "indizio": "una piastra con lo stemma della Perseveranza" },
+        { "giorno": 2, "momento": "giorno", "chi": "Irma Castaldi", "dove": "Anello del Mercato", "cosa": "ripara di nascosto un portello a tenuta stagna", "battuta": "Non chiedetemi per chi è." }
+      ],
+      "missione": { "da": "Tobia Ferri", "testo": "Portami una bombola d'ossigeno piena: senza, nel relitto non ci torno.", "obiettivo": { "tipo": "porta", "oggetto": "item.bombola-ossigeno", "a": "Tobia Ferri" }, "ricompensa": "una piastra della Perseveranza", "stato": "offerta" } },
+    { "id": "diritti-attracco", "titolo": "I diritti d'attracco", "mistero": "Ruggero Stanga è convinto che Vera Lunardi lasci attraccare navette senza registrarle; lei dice che erano soccorsi.", "coinvolti": ["Ruggero Stanga", "Vera Lunardi", "Pamela Grieco"], "inizio": 0, "stato": "attiva",
+      "tappe": [
+        { "giorno": 0, "momento": "mattina", "chi": "Ruggero Stanga", "dove": "Stazione Àncora", "cosa": "conta due volte le navette al molo e scuote la testa", "battuta": "Undici ieri, dodici oggi. Le navette non nascono da sole." },
+        { "giorno": 1, "momento": "giorno", "chi": "Vera Lunardi", "dove": "Stazione Àncora", "cosa": "apre il portello della dodicesima navetta davanti a tutti: dentro c'è una famiglia di minatori", "battuta": "Registrali, ispettore. Come ospiti." },
+        { "giorno": 2, "momento": "notte", "chi": "Pamela Grieco", "dove": "Stazione Àncora", "cosa": "vede una navetta a luci spente scivolare verso il relitto", "indizio": "il segno di un pattino d'atterraggio nella polvere del relitto" }
+      ] },
+    { "id": "carta-divisa", "titolo": "La carta divisa", "mistero": "Oreste Valdi ha diviso la sua carta delle rotte più preziosa in due metà e ne ha nascosta una; Gaia Castaldi crede che il maestro voglia metterla alla prova.", "coinvolti": ["Oreste Valdi", "Gaia Castaldi"], "inizio": 0, "stato": "attiva",
+      "tappe": [
+        { "giorno": 0, "momento": "giorno", "chi": "Oreste Valdi", "dove": "Anello del Mercato", "cosa": "consegna a Gaia mezza carta delle rotte", "battuta": "L'altra metà la trovi dove la stella non arriva." },
+        { "giorno": 1, "momento": "mattina", "chi": "Gaia Castaldi", "dove": "Gallerie di Talassa", "cosa": "cerca tra i carrelli abbandonati", "indizio": "una sacca di ghiaccio nel fondo di una galleria" },
+        { "giorno": 3, "momento": "sera", "chi": "Gaia Castaldi", "dove": "Locanda del Molo Sette", "cosa": "mostra a sua madre Irma un rotolo intatto come il primo giorno", "battuta": "Dove la stella non arriva: sotto terra!" }
+      ],
+      "missione": { "da": "Gaia Castaldi", "testo": "Ho bisogno di un taccuino per ricopiare la carta prima che la condensa la rovini.", "obiettivo": { "tipo": "porta", "oggetto": "item.taccuino", "a": "Gaia Castaldi" }, "ricompensa": "una copia della carta delle rotte", "stato": "offerta" } },
+    { "id": "zuppa-cometa", "titolo": "La zuppa della cometa", "mistero": "Cosimo Prati vuole cucinare per la festa della cometa una zuppa che nessuno ha mai assaggiato; Elio Lunardi vuole scoprire con che cosa.", "coinvolti": ["Cosimo Prati", "Elio Lunardi", "Livia Ferri"], "inizio": 0, "stato": "attiva",
+      "tappe": [
+        { "giorno": 0, "momento": "sera", "chi": "Cosimo Prati", "dove": "Locanda del Molo Sette", "cosa": "assaggia dieci zuppe e le butta tutte" },
+        { "giorno": 1, "momento": "giorno", "chi": "Elio Lunardi", "dove": "Serre di Cerere", "cosa": "segue Cosimo fino alle vasche delle serre", "battuta": "Ti ho visto rubare un germoglio, amico mio." },
+        { "giorno": 2, "momento": "mattina", "chi": "Livia Ferri", "dove": "Serre di Cerere", "cosa": "trova una vasca svuotata e un biglietto di scuse con una ricetta", "battuta": "Se è buona, lo perdono." }
+      ] },
+    { "id": "sciame", "titolo": "Lo sciame di meteore", "mistero": "Arturo Sabbadin dice che arriva uno sciame di meteore, ma gli strumenti della stazione non vedono niente; Noemi Rinaldi gli crede e prepara le bende.", "coinvolti": ["Arturo Sabbadin", "Noemi Rinaldi", "Livia Ferri"], "inizio": 0, "stato": "attiva",
+      "tappe": [
+        { "giorno": 0, "momento": "mattina", "chi": "Arturo Sabbadin", "dove": "Anello del Mercato", "cosa": "chiude le serrande di tutti i banchi del mercato", "battuta": "La stella ha il fiato corto. Domani piove sasso." },
+        { "giorno": 1, "momento": "giorno", "chi": "Noemi Rinaldi", "dove": "Stazione Àncora", "cosa": "prepara bende e unguento d'alghe" },
+        { "giorno": 1, "momento": "sera", "chi": "Livia Ferri", "dove": "Serre di Cerere", "cosa": "copre le vasche con teli di metallo", "battuta": "Il nonno Arturo non ha mai sbagliato uno sciame." }
+      ],
+      "missione": { "da": "Arturo Sabbadin", "testo": "Vai al molo e avvisa la pilota Dalia: che non parta domani.", "obiettivo": { "tipo": "parla", "a": "Dalia Fontana" }, "ricompensa": "una razione di zuppa calda", "stato": "offerta" } },
+    { "id": "gatto-condotti", "titolo": "Il gatto nei condotti", "mistero": "Quasar dorme sempre sopra la stessa presa d'aria, e la comandante comincia a pensare che il gatto senta qualcosa che lei non sente.", "coinvolti": ["Quasar", "Vera Lunardi", "Irma Castaldi"], "inizio": 0, "stato": "attiva",
+      "tappe": [
+        { "giorno": 0, "momento": "notte", "chi": "Quasar", "dove": "Stazione Àncora", "cosa": "si acciambella sulla presa d'aria del corridoio est" },
+        { "giorno": 1, "momento": "giorno", "chi": "Vera Lunardi", "dove": "Stazione Àncora", "cosa": "chiede alla meccanica di controllare quel condotto", "battuta": "Il mio gatto ha scelto un posto." },
+        { "giorno": 2, "momento": "giorno", "chi": "Irma Castaldi", "dove": "Stazione Àncora", "cosa": "trova dietro la grata una crepa da cui esce aria calda", "indizio": "una crepa nella paratia del corridoio est" }
+      ] }
+  ]
+}

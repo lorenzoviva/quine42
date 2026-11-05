@@ -1,0 +1,45 @@
+{
+  "id": "spazio.banco-mercante",
+  "name": "Banco del mercante orbitale",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "a mano (Claude Code, Cantiere 9)",
+  "description": "Un banco di lamiera pieno di ricambi, celle e razioni, con un listino scritto a gesso.",
+  "context": "nell'anello del mercato, sui moli, nelle locande",
+  "appearance": {
+    "model": "banco",
+    "glyph": "▬",
+    "color": "#a0583a",
+    "aspetto": "un banco di lamiera rossa coperto di ricambi, celle e casse",
+    "classe": "mobile"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.45
+  },
+  "actions": [
+    {
+      "id": "compra",
+      "label": "Compra una cella d'energia",
+      "requires": "item.gettone"
+    },
+    {
+      "id": "vendi",
+      "label": "Vendi minerale ferroso",
+      "requires": "item.minerale-ferro"
+    },
+    {
+      "id": "listino",
+      "label": "Leggi il listino"
+    }
+  ],
+  "spawn": {
+    "tiles": [
+      "f",
+      "l"
+    ],
+    "chance": 0.05,
+    "max": 1
+  },
+  "logic": "logic.lua"
+}

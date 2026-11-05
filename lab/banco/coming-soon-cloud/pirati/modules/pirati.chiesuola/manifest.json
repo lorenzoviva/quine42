@@ -1,0 +1,43 @@
+{
+  "id": "pirati.chiesuola",
+  "name": "Chiesuola con bussola",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "a mano (Claude Code, Cantiere 9)",
+  "description": "Una colonnina di legno con la bussola d'ottone sotto il vetro.",
+  "context": "sui ponti, nelle botteghe dei cartografi, sui moli",
+  "appearance": {
+    "model": "chiesuola",
+    "glyph": "✧",
+    "color": "#c8a050",
+    "aspetto": "una colonnina di legno con una bussola d'ottone sotto una cupola di vetro",
+    "classe": "mobile"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.45
+  },
+  "actions": [
+    {
+      "id": "leggi",
+      "label": "Leggi la bussola"
+    },
+    {
+      "id": "segna",
+      "label": "Segna questo punto"
+    },
+    {
+      "id": "misura",
+      "label": "Misura la strada fatta"
+    }
+  ],
+  "spawn": {
+    "tiles": [
+      "f",
+      "l"
+    ],
+    "chance": 0.03,
+    "max": 1
+  },
+  "logic": "logic.lua"
+}

@@ -1,0 +1,130 @@
+{
+ "scanner": {
+  "classe": "mobile",
+  "nome": "Scanner stellare",
+  "autore": "a mano (Claude Code, Cantiere 9)"
+ },
+ "scudo-deflettore": {
+  "classe": "mobile",
+  "nome": "Scudo deflettore",
+  "autore": "a mano (Claude Code, Cantiere 9)"
+ },
+ "portello": {
+  "classe": "mobile",
+  "nome": "Portello del relitto",
+  "autore": "a mano (Claude Code, Cantiere 9)"
+ },
+ "serbatoio": {
+  "classe": "mobile",
+  "nome": "Serbatoio d'ossigeno",
+  "autore": "a mano (Claude Code, Cantiere 9)"
+ },
+ "antenna": {
+  "classe": "monumento",
+  "nome": "Antenna di trasmissione",
+  "autore": "a mano (Claude Code, Cantiere 9)"
+ },
+ "vasca-serra": {
+  "classe": "mobile",
+  "nome": "Vasca idroponica",
+  "autore": "a mano (Claude Code, Cantiere 9)"
+ },
+ "trivella": {
+  "classe": "mobile",
+  "nome": "Trivella da asteroide",
+  "autore": "a mano (Claude Code, Cantiere 9)"
+ },
+ "capsula": {
+  "classe": "mobile",
+  "nome": "Capsula di salvataggio",
+  "autore": "a mano (Claude Code, Cantiere 9)"
+ },
+ "boa-segnale": {
+  "classe": "monumento",
+  "nome": "Boa di segnalazione",
+  "autore": "a mano (Claude Code, Cantiere 9)"
+ },
+ "telescopio": {
+  "classe": "mobile",
+  "nome": "Telescopio",
+  "autore": "a mano (Claude Code, Cantiere 9)"
+ },
+ "suono-spazio-orbita": {
+  "classe": "suono",
+  "nome": "Orbita alta",
+  "autore": "a mano (Claude Code, Cantiere 9), da suono-musica-notte",
+  "suono": {
+   "uso": "musica",
+   "ambienti": [
+    "fortezza",
+    "borgo_mattoni",
+    "locanda"
+   ],
+   "momenti": [
+    "sera",
+    "notte"
+   ]
+  }
+ },
+ "suono-spazio-serre": {
+  "classe": "suono",
+  "nome": "Serre",
+  "autore": "a mano (Claude Code, Cantiere 9), da suono-musica-selva",
+  "suono": {
+   "uso": "musica",
+   "ambienti": [
+    "giungla"
+   ],
+   "momenti": [
+    "mattina",
+    "giorno"
+   ]
+  }
+ },
+ "suono-spazio-deriva": {
+  "classe": "suono",
+  "nome": "Deriva",
+  "autore": "a mano (Claude Code, Cantiere 9), da suono-musica-oltre",
+  "suono": {
+   "uso": "musica",
+   "ambienti": [
+    "rovine",
+    "deserto",
+    "montagne"
+   ]
+  }
+ },
+ "suono-spazio-gallerie": {
+  "classe": "suono",
+  "nome": "Gallerie",
+  "autore": "a mano (Claude Code, Cantiere 9), da suono-fuga-cellulare",
+  "suono": {
+   "uso": "musica",
+   "ambienti": [
+    "dungeon"
+   ]
+  }
+ },
+ "suono-spazio-aggancio": {
+  "classe": "suono",
+  "nome": "Aggancio",
+  "autore": "a mano (Claude Code, Cantiere 9), da suono-effetto-runa",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "aggancio"
+   ]
+  }
+ },
+ "suono-spazio-spinta": {
+  "classe": "suono",
+  "nome": "Spinta",
+  "autore": "a mano (Claude Code, Cantiere 9), da suono-effetto-salto",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "spinta"
+   ]
+  }
+ }
+}

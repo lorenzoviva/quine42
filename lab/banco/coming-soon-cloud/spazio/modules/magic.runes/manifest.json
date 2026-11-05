@@ -1,0 +1,339 @@
+{
+  "id": "magic.runes",
+  "name": "Rune magiche",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "Le rune della magia: ognuna è anche una parola del codice (una variabile che non vale niente, finché qualcuno non le dà un valore), ma tenute in mano e pronunciate (T) diventano incantesimi. Più rune in fila sono una formula: l’ordine conta (terra fuoco non è fuoco terra) e ripetere una runa la rafforza; il Concilio dà nome e effetti a una formula la prima volta che qualcuno la pronuncia. I cristalli magici, nascosti nelle case e nelle casse, ridanno mana; le rune si consumano quando le pronunci.",
+  "runes": {
+    "orbita": {
+      "name": "Perigeo",
+      "glyph": "⊛",
+      "color": "#d8f4ff",
+      "element": "spinta",
+      "description": "il giro attorno a una stella: spinge, allontana"
+    },
+    "fotone": {
+      "name": "Lucore",
+      "glyph": "✧",
+      "color": "#ffe27a",
+      "element": "luce",
+      "description": "il primo raggio di una stella: illumina, guida"
+    },
+    "plasma": {
+      "name": "Vampa",
+      "glyph": "✺",
+      "color": "#ff7a3a",
+      "element": "fuoco",
+      "description": "il fuoco delle stelle: brucia, scalda"
+    },
+    "ghiaccio": {
+      "name": "Brina",
+      "glyph": "❄",
+      "color": "#9fd8ff",
+      "element": "acqua",
+      "description": "il ghiaccio delle comete: si scioglie, bagna"
+    },
+    "spora": {
+      "name": "Germoglio",
+      "glyph": "✿",
+      "color": "#7ee08a",
+      "element": "vita",
+      "description": "il seme delle serre: cura, fa crescere"
+    },
+    "campo": {
+      "name": "Egida",
+      "glyph": "◈",
+      "color": "#b9a6ff",
+      "element": "protezione",
+      "description": "il campo che respinge le meteore: protegge"
+    },
+    "vuoto": {
+      "name": "Deriva",
+      "glyph": "○",
+      "color": "#5a6a8f",
+      "element": "leggerezza",
+      "description": "il nulla tra le stelle: alleggerisce, fa fluttuare"
+    },
+    "regolite": {
+      "name": "Crosta",
+      "glyph": "⬢",
+      "color": "#a8805a",
+      "element": "terra",
+      "description": "la polvere degli asteroidi: apre sentieri, smuove"
+    },
+    "ossigeno": {
+      "name": "Respiro",
+      "glyph": "ʘ",
+      "color": "#e8f8ff",
+      "element": "respiro",
+      "description": "l'aria delle stazioni: ridà forza"
+    },
+    "cometa": {
+      "name": "Chioma",
+      "glyph": "☄",
+      "color": "#fff3b0",
+      "element": "rotta",
+      "description": "la stella che passa: orienta, rivela"
+    }
+  },
+  "spells": {
+    "orbita": {
+      "name": "Spinta",
+      "description": "Una spinta improvvisa allontana ciò che hai davanti.",
+      "cost": 6,
+      "effects": [
+        {
+          "tipo": "spingi",
+          "forza": 5
+        }
+      ]
+    },
+    "fotone": {
+      "name": "Lampada di turno",
+      "description": "Una piccola luce resta sospesa davanti a te.",
+      "cost": 4,
+      "effects": [
+        {
+          "tipo": "luce",
+          "raggio": 5,
+          "durata": 90
+        }
+      ]
+    },
+    "plasma": {
+      "name": "Fiammata",
+      "description": "Una fiammata davanti a te: brucia ciò che è secco.",
+      "cost": 10,
+      "effects": [
+        {
+          "tipo": "fuoco",
+          "raggio": 1,
+          "durata": 8
+        }
+      ]
+    },
+    "ghiaccio": {
+      "name": "Disgelo",
+      "description": "Dal suolo davanti a te sgorga acqua di disgelo.",
+      "cost": 10,
+      "effects": [
+        {
+          "tipo": "terreno",
+          "a": "w",
+          "raggio": 0
+        }
+      ]
+    },
+    "spora": {
+      "name": "Linfa di serra",
+      "description": "Un tepore verde ti scorre nelle vene.",
+      "cost": 12,
+      "effects": [
+        {
+          "tipo": "bisogni",
+          "salute": 25
+        }
+      ]
+    },
+    "campo": {
+      "name": "Guscio",
+      "description": "Un guscio d'aria ti avvolge.",
+      "cost": 8,
+      "effects": [
+        {
+          "tipo": "scudo",
+          "durata": 30
+        }
+      ]
+    },
+    "vuoto": {
+      "name": "Passo leggero",
+      "description": "Il corpo si fa lieve come in un condotto senza peso: il passo si allunga.",
+      "cost": 8,
+      "effects": [
+        {
+          "tipo": "stato",
+          "nome": "passo leggero",
+          "durata": 30,
+          "velocita": 1.3
+        }
+      ]
+    },
+    "regolite": {
+      "name": "Varco",
+      "description": "Il suolo davanti a te si spiana in un sentiero.",
+      "cost": 14,
+      "effects": [
+        {
+          "tipo": "terreno",
+          "a": "p",
+          "raggio": 1
+        }
+      ]
+    },
+    "ossigeno": {
+      "name": "Boccata",
+      "description": "Una boccata d'aria fresca: la stanchezza se ne va.",
+      "cost": 8,
+      "effects": [
+        {
+          "tipo": "bisogni",
+          "energia": 20
+        }
+      ]
+    },
+    "cometa": {
+      "name": "Coda di luce",
+      "description": "Una luce alta e ferma si accende sopra di te.",
+      "cost": 6,
+      "effects": [
+        {
+          "tipo": "luce",
+          "raggio": 8,
+          "durata": 40
+        }
+      ]
+    },
+    "plasma orbita": {
+      "name": "Getto",
+      "description": "La spinta porta la fiamma: un getto di fuoco si allunga davanti a te.",
+      "cost": 16,
+      "effects": [
+        {
+          "tipo": "fuoco",
+          "raggio": 2,
+          "durata": 10
+        }
+      ]
+    },
+    "regolite orbita": {
+      "name": "Sentiero di roccia",
+      "description": "La polvere si stende e si indurisce: un sentiero tutto attorno.",
+      "cost": 18,
+      "effects": [
+        {
+          "tipo": "terreno",
+          "a": "p",
+          "raggio": 2
+        }
+      ]
+    }
+  },
+  "items": [
+    {
+      "id": "item.cristallo-magico",
+      "name": "Cristallo magico",
+      "description": "Un cristallo che pulsa di luce fredda. Assorbito, ridà forza magica (mana); gli incantesimi di tre o più rune ne consumano uno.",
+      "category": "magia",
+      "weight": 0.1,
+      "stack": 10,
+      "tags": [
+        "magia",
+        "cristallo"
+      ],
+      "glyph": "✦",
+      "color": "#9fe8ff",
+      "aspetto": "a small glowing blue magic crystal shard",
+      "effects": {
+        "mana": 40
+      }
+    },
+    {
+      "id": "item.borsa-rune",
+      "name": "Borsa delle rune",
+      "description": "Una borsetta di pelle con tante taschine: tiene ordinate centinaia di rune.",
+      "category": "contenitore",
+      "weight": 0.2,
+      "stack": 1,
+      "tags": [
+        "contenitore",
+        "runa"
+      ],
+      "glyph": "◘",
+      "color": "#c49a5a",
+      "aspetto": "a small leather pouch with runic stitching",
+      "container": {
+        "size": 12,
+        "accepts": "runa"
+      }
+    },
+    {
+      "id": "item.sacca",
+      "name": "Sacca di tela",
+      "description": "Una sacca da spalla: dentro ci sta di tutto, un po' di tutto.",
+      "category": "contenitore",
+      "weight": 0.4,
+      "stack": 1,
+      "tags": [
+        "contenitore",
+        "casa"
+      ],
+      "glyph": "◘",
+      "color": "#b8a888",
+      "aspetto": "a canvas shoulder bag",
+      "container": {
+        "size": 6
+      }
+    }
+  ],
+  "loot": {
+    "magia": {
+      "rolls": [
+        1,
+        1
+      ],
+      "entries": [
+        {
+          "item": "item.cristallo-magico",
+          "weight": 5,
+          "min": 1,
+          "max": 2
+        },
+        {
+          "item": "rune:orbita",
+          "weight": 1
+        },
+        {
+          "item": "rune:fotone",
+          "weight": 1
+        },
+        {
+          "item": "rune:plasma",
+          "weight": 1
+        },
+        {
+          "item": "rune:ghiaccio",
+          "weight": 1
+        },
+        {
+          "item": "rune:spora",
+          "weight": 1
+        },
+        {
+          "item": "rune:campo",
+          "weight": 1
+        },
+        {
+          "item": "rune:vuoto",
+          "weight": 1
+        },
+        {
+          "item": "rune:regolite",
+          "weight": 1
+        },
+        {
+          "item": "rune:ossigeno",
+          "weight": 1
+        },
+        {
+          "item": "rune:cometa",
+          "weight": 1
+        },
+        {
+          "item": "item.sacca",
+          "weight": 1
+        }
+      ]
+    }
+  }
+}

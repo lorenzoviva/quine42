@@ -1,0 +1,735 @@
+{
+ "persone": [
+  {
+   "nome": "Vera Lunardi",
+   "specie": "persona",
+   "genere": "femmina",
+   "tipo": "npc.villager",
+   "mestiere": "comandante della stazione",
+   "eta": "adulta",
+   "persona": "una comandante calma che parla poco e ascolta tutti",
+   "aspetto": "tuta blu con i gradi cuciti a mano, capelli grigi raccolti",
+   "storia": "Ha tenuto in vita la stazione durante la grande carestia d'ossigeno, razionando ogni bombola.",
+   "famiglia": [
+    {
+     "nome": "Elio Lunardi",
+     "legame": "madre"
+    },
+    {
+     "nome": "Quasar",
+     "legame": "padrona"
+    },
+    {
+     "nome": "Ruggero Stanga",
+     "legame": "rivale"
+    },
+    {
+     "nome": "Dalia Fontana",
+     "legame": "collega"
+    }
+   ],
+   "routine": [
+    {
+     "quando": "mattina",
+     "fa": "controlla le paratie e i manometri",
+     "dove": "lavoro",
+     "azione": "lavora"
+    },
+    {
+     "quando": "giorno",
+     "fa": "tratta i diritti d'attracco",
+     "dove": "piazza",
+     "azione": "commercia"
+    },
+    {
+     "quando": "sera",
+     "fa": "mangia alla locanda",
+     "dove": "piazza",
+     "azione": "mangia"
+    },
+    {
+     "quando": "notte",
+     "fa": "dorme in cuccetta",
+     "dove": "casa",
+     "azione": "dorme"
+    }
+   ]
+  },
+  {
+   "nome": "Elio Lunardi",
+   "specie": "persona",
+   "genere": "maschio",
+   "tipo": "npc.villager",
+   "mestiere": "cadetto navigatore",
+   "eta": "ragazzo",
+   "persona": "un ragazzo curioso che vuole vedere la cometa da vicino",
+   "aspetto": "tuta arancione troppo larga, occhiali da saldatore sulla fronte",
+   "storia": "È nato durante il passaggio della cometa e non ha mai messo piede su un pianeta.",
+   "famiglia": [
+    {
+     "nome": "Vera Lunardi",
+     "legame": "figlio"
+    },
+    {
+     "nome": "Cosimo Prati",
+     "legame": "amico"
+    }
+   ],
+   "routine": [
+    {
+     "quando": "mattina",
+     "fa": "lava i filtri dell'aria",
+     "dove": "lavoro",
+     "azione": "lavora"
+    },
+    {
+     "quando": "giorno",
+     "fa": "studia le carte delle rotte",
+     "dove": "lavoro",
+     "azione": "legge"
+    },
+    {
+     "quando": "sera",
+     "fa": "ascolta le storie in piazza",
+     "dove": "piazza",
+     "azione": "chiacchiera"
+    },
+    {
+     "quando": "notte",
+     "fa": "dorme in cuccetta",
+     "dove": "casa",
+     "azione": "dorme"
+    }
+   ]
+  },
+  {
+   "nome": "Quasar",
+   "specie": "animale",
+   "genere": "maschio",
+   "tipo": "npc.cat",
+   "mestiere": "gatto della stazione",
+   "eta": "adulto",
+   "persona": "un gatto grigio che dorme solo sopra le prese d'aria calda",
+   "aspetto": "gatto grigio con una macchia bianca sul muso",
+   "famiglia": [
+    {
+     "nome": "Vera Lunardi",
+     "legame": "animale"
+    }
+   ],
+   "routine": [
+    {
+     "quando": "mattina",
+     "fa": "caccia i topi nei condotti",
+     "dove": "lavoro",
+     "azione": "passeggia"
+    },
+    {
+     "quando": "giorno",
+     "fa": "dorme sulla presa d'aria calda",
+     "dove": "piazza",
+     "azione": "dorme"
+    },
+    {
+     "quando": "sera",
+     "fa": "aspetta gli avanzi alla locanda",
+     "dove": "piazza",
+     "azione": "mangia"
+    },
+    {
+     "quando": "notte",
+     "fa": "dorme in cabina",
+     "dove": "casa",
+     "azione": "dorme"
+    }
+   ]
+  },
+  {
+   "nome": "Bruno Castaldi",
+   "specie": "persona",
+   "genere": "maschio",
+   "tipo": "npc.villager",
+   "mestiere": "mercante orbitale",
+   "eta": "adulto",
+   "persona": "un mercante grosso e cordiale che non dimentica un debito",
+   "aspetto": "gilè pieno di tasche, un orologio da polso enorme",
+   "famiglia": [
+    {
+     "nome": "Irma Castaldi",
+     "legame": "marito"
+    },
+    {
+     "nome": "Gaia Castaldi",
+     "legame": "padre"
+    }
+   ],
+   "routine": [
+    {
+     "quando": "mattina",
+     "fa": "scarica le casse dal molo",
+     "dove": "lavoro",
+     "azione": "lavora"
+    },
+    {
+     "quando": "giorno",
+     "fa": "vende ricambi al banco",
+     "dove": "lavoro",
+     "azione": "commercia"
+    },
+    {
+     "quando": "sera",
+     "fa": "conta i gettoni",
+     "dove": "casa",
+     "azione": "lavora"
+    },
+    {
+     "quando": "notte",
+     "fa": "dorme in cuccetta",
+     "dove": "casa",
+     "azione": "dorme"
+    }
+   ]
+  },
+  {
+   "nome": "Irma Castaldi",
+   "specie": "persona",
+   "genere": "femmina",
+   "tipo": "npc.villager",
+   "mestiere": "meccanica degli attracchi",
+   "eta": "adulta",
+   "persona": "una meccanica svelta che sente un guasto dal rumore",
+   "aspetto": "tuta macchiata d'olio, una chiave inglese alla cintura",
+   "famiglia": [
+    {
+     "nome": "Bruno Castaldi",
+     "legame": "moglie"
+    },
+    {
+     "nome": "Gaia Castaldi",
+     "legame": "madre"
+    }
+   ],
+   "routine": [
+    {
+     "quando": "mattina",
+     "fa": "ripara i portelli del molo",
+     "dove": "lavoro",
+     "azione": "lavora"
+    },
+    {
+     "quando": "giorno",
+     "fa": "salda le giunture delle navette",
+     "dove": "lavoro",
+     "azione": "lavora"
+    },
+    {
+     "quando": "sera",
+     "fa": "cucina per la famiglia",
+     "dove": "casa",
+     "azione": "cucina"
+    },
+    {
+     "quando": "notte",
+     "fa": "dorme in cuccetta",
+     "dove": "casa",
+     "azione": "dorme"
+    }
+   ]
+  },
+  {
+   "nome": "Gaia Castaldi",
+   "specie": "persona",
+   "genere": "femmina",
+   "tipo": "npc.villager",
+   "mestiere": "apprendista navigatrice",
+   "eta": "giovane",
+   "persona": "una ragazza precisa che traccia le rotte con la pazienza di un orafo",
+   "aspetto": "dita macchiate d'inchiostro, un rotolo di carte sotto il braccio",
+   "famiglia": [
+    {
+     "nome": "Bruno Castaldi",
+     "legame": "figlia"
+    },
+    {
+     "nome": "Irma Castaldi",
+     "legame": "figlia"
+    },
+    {
+     "nome": "Oreste Valdi",
+     "legame": "apprendista"
+    }
+   ],
+   "routine": [
+    {
+     "quando": "mattina",
+     "fa": "misura le stelle con il sestante",
+     "dove": "in giro",
+     "azione": "lavora"
+    },
+    {
+     "quando": "giorno",
+     "fa": "copia le carte delle rotte",
+     "dove": "lavoro",
+     "azione": "legge"
+    },
+    {
+     "quando": "sera",
+     "fa": "aiuta al banco del padre",
+     "dove": "casa",
+     "azione": "commercia"
+    },
+    {
+     "quando": "notte",
+     "fa": "dorme in cuccetta",
+     "dove": "casa",
+     "azione": "dorme"
+    }
+   ]
+  },
+  {
+   "nome": "Oreste Valdi",
+   "specie": "persona",
+   "genere": "maschio",
+   "tipo": "npc.villager",
+   "mestiere": "navigatore",
+   "eta": "anziano",
+   "persona": "un vecchio navigatore che ricorda ogni sciame di meteore degli ultimi cinquant'anni",
+   "aspetto": "barba lunga, berretto di lana, un sestante d'ottone al collo",
+   "famiglia": [
+    {
+     "nome": "Gaia Castaldi",
+     "legame": "maestro"
+    }
+   ],
+   "routine": [
+    {
+     "quando": "mattina",
+     "fa": "corregge le carte vecchie",
+     "dove": "lavoro",
+     "azione": "legge"
+    },
+    {
+     "quando": "giorno",
+     "fa": "vende rotte ai piloti",
+     "dove": "lavoro",
+     "azione": "commercia"
+    },
+    {
+     "quando": "sera",
+     "fa": "racconta di naufragi in piazza",
+     "dove": "piazza",
+     "azione": "chiacchiera"
+    },
+    {
+     "quando": "notte",
+     "fa": "dorme in cuccetta",
+     "dove": "casa",
+     "azione": "dorme"
+    }
+   ]
+  },
+  {
+   "nome": "Tobia Ferri",
+   "specie": "persona",
+   "genere": "maschio",
+   "tipo": "npc.villager",
+   "mestiere": "minatore di asteroidi",
+   "eta": "adulto",
+   "persona": "un minatore allegro che canta mentre trivella",
+   "aspetto": "casco ammaccato, guanti enormi, polvere grigia ovunque",
+   "famiglia": [
+    {
+     "nome": "Livia Ferri",
+     "legame": "fratello"
+    },
+    {
+     "nome": "Arturo Sabbadin",
+     "legame": "nipote"
+    },
+    {
+     "nome": "Ivo Marchetti",
+     "legame": "amico"
+    }
+   ],
+   "routine": [
+    {
+     "quando": "mattina",
+     "fa": "trivella nelle gallerie",
+     "dove": "lavoro",
+     "azione": "lavora"
+    },
+    {
+     "quando": "giorno",
+     "fa": "carica il minerale sui carrelli",
+     "dove": "lavoro",
+     "azione": "lavora"
+    },
+    {
+     "quando": "sera",
+     "fa": "beve alla locanda",
+     "dove": "piazza",
+     "azione": "chiacchiera"
+    },
+    {
+     "quando": "notte",
+     "fa": "dorme in cuccetta",
+     "dove": "casa",
+     "azione": "dorme"
+    }
+   ]
+  },
+  {
+   "nome": "Livia Ferri",
+   "specie": "persona",
+   "genere": "femmina",
+   "tipo": "npc.villager",
+   "mestiere": "botanica delle serre",
+   "eta": "adulta",
+   "persona": "una botanica paziente che parla alle piante a voce bassa",
+   "aspetto": "camice verde, terra sotto le unghie, un vasetto di semi in tasca",
+   "famiglia": [
+    {
+     "nome": "Tobia Ferri",
+     "legame": "sorella"
+    },
+    {
+     "nome": "Arturo Sabbadin",
+     "legame": "nipote"
+    }
+   ],
+   "routine": [
+    {
+     "quando": "mattina",
+     "fa": "semina nelle vasche",
+     "dove": "lavoro",
+     "azione": "zappa"
+    },
+    {
+     "quando": "giorno",
+     "fa": "raccoglie le alghe",
+     "dove": "lavoro",
+     "azione": "zappa"
+    },
+    {
+     "quando": "sera",
+     "fa": "vende verdure al mercato",
+     "dove": "piazza",
+     "azione": "commercia"
+    },
+    {
+     "quando": "notte",
+     "fa": "dorme in cuccetta",
+     "dove": "casa",
+     "azione": "dorme"
+    }
+   ]
+  },
+  {
+   "nome": "Arturo Sabbadin",
+   "specie": "persona",
+   "genere": "maschio",
+   "tipo": "npc.villager",
+   "mestiere": "pilota in pensione",
+   "eta": "anziano",
+   "persona": "un vecchio pilota che sa leggere il vento solare meglio di uno strumento",
+   "aspetto": "giubbotto di pelle consumato, una pipa spenta",
+   "famiglia": [
+    {
+     "nome": "Tobia Ferri",
+     "legame": "nonno"
+    },
+    {
+     "nome": "Livia Ferri",
+     "legame": "nonno"
+    },
+    {
+     "nome": "Noemi Rinaldi",
+     "legame": "vicino"
+    }
+   ],
+   "routine": [
+    {
+     "quando": "mattina",
+     "fa": "intaglia navette di legno per i bambini",
+     "dove": "casa",
+     "azione": "lavora"
+    },
+    {
+     "quando": "giorno",
+     "fa": "pesca nelle vasche delle serre",
+     "dove": "in giro",
+     "azione": "pesca"
+    },
+    {
+     "quando": "sera",
+     "fa": "chiacchiera sul molo",
+     "dove": "piazza",
+     "azione": "chiacchiera"
+    },
+    {
+     "quando": "notte",
+     "fa": "dorme in cuccetta",
+     "dove": "casa",
+     "azione": "dorme"
+    }
+   ]
+  },
+  {
+   "nome": "Noemi Rinaldi",
+   "specie": "persona",
+   "genere": "femmina",
+   "tipo": "npc.villager",
+   "mestiere": "medica di bordo",
+   "eta": "adulta",
+   "persona": "una medica che cura con calma, alghe e molta pazienza",
+   "aspetto": "camice bianco, una borsa di bende, occhiali a mezzaluna",
+   "famiglia": [
+    {
+     "nome": "Arturo Sabbadin",
+     "legame": "vicina"
+    }
+   ],
+   "routine": [
+    {
+     "quando": "mattina",
+     "fa": "visita i minatori",
+     "dove": "lavoro",
+     "azione": "lavora"
+    },
+    {
+     "quando": "giorno",
+     "fa": "cura i feriti dell'attracco",
+     "dove": "lavoro",
+     "azione": "lavora"
+    },
+    {
+     "quando": "sera",
+     "fa": "prega per chi è in viaggio",
+     "dove": "casa",
+     "azione": "prega"
+    },
+    {
+     "quando": "notte",
+     "fa": "dorme in cuccetta",
+     "dove": "casa",
+     "azione": "dorme"
+    }
+   ]
+  },
+  {
+   "nome": "Ruggero Stanga",
+   "specie": "persona",
+   "genere": "maschio",
+   "tipo": "npc.villager",
+   "mestiere": "ispettore delle rotte",
+   "eta": "adulto",
+   "persona": "un ispettore pignolo che crede in ogni riga del suo registro",
+   "aspetto": "uniforme grigia con bottoni d'ottone, un registro sotto il braccio",
+   "famiglia": [
+    {
+     "nome": "Vera Lunardi",
+     "legame": "rivale"
+    },
+    {
+     "nome": "Pamela Grieco",
+     "legame": "collega"
+    }
+   ],
+   "routine": [
+    {
+     "quando": "mattina",
+     "fa": "conta le casse in arrivo",
+     "dove": "lavoro",
+     "azione": "lavora"
+    },
+    {
+     "quando": "giorno",
+     "fa": "fa la ronda sul molo",
+     "dove": "in giro",
+     "azione": "pattuglia"
+    },
+    {
+     "quando": "sera",
+     "fa": "scrive il registro dei carichi",
+     "dove": "lavoro",
+     "azione": "legge"
+    },
+    {
+     "quando": "notte",
+     "fa": "dorme in cuccetta",
+     "dove": "casa",
+     "azione": "dorme"
+    }
+   ]
+  },
+  {
+   "nome": "Pamela Grieco",
+   "specie": "persona",
+   "genere": "femmina",
+   "tipo": "npc.villager",
+   "mestiere": "guardia della stazione",
+   "eta": "adulta",
+   "persona": "una guardia che preferirebbe coltivare pomodori, ma fa il suo dovere fino in fondo",
+   "aspetto": "giubba grigia, casco sotto il braccio, capelli corti",
+   "famiglia": [
+    {
+     "nome": "Ruggero Stanga",
+     "legame": "collega"
+    }
+   ],
+   "routine": [
+    {
+     "quando": "mattina",
+     "fa": "addestra le reclute nel cortile",
+     "dove": "lavoro",
+     "azione": "pattuglia"
+    },
+    {
+     "quando": "giorno",
+     "fa": "sorveglia il portello grande",
+     "dove": "lavoro",
+     "azione": "pattuglia"
+    },
+    {
+     "quando": "sera",
+     "fa": "cura il suo vaso nelle serre",
+     "dove": "in giro",
+     "azione": "zappa"
+    },
+    {
+     "quando": "notte",
+     "fa": "dorme in cuccetta",
+     "dove": "casa",
+     "azione": "dorme"
+    }
+   ]
+  },
+  {
+   "nome": "Ivo Marchetti",
+   "specie": "persona",
+   "genere": "maschio",
+   "tipo": "npc.villager",
+   "mestiere": "recuperatore di relitti",
+   "eta": "adulto",
+   "persona": "un recuperatore allegro che giura di non aver mai preso niente che non fosse già perso",
+   "aspetto": "tuta piena di toppe, una torcia legata al casco",
+   "famiglia": [
+    {
+     "nome": "Tobia Ferri",
+     "legame": "amico"
+    }
+   ],
+   "routine": [
+    {
+     "quando": "mattina",
+     "fa": "dorme fino a tardi",
+     "dove": "casa",
+     "azione": "dorme"
+    },
+    {
+     "quando": "giorno",
+     "fa": "baratta pezzi al mercato",
+     "dove": "piazza",
+     "azione": "commercia"
+    },
+    {
+     "quando": "sera",
+     "fa": "gioca a dadi alla locanda",
+     "dove": "piazza",
+     "azione": "chiacchiera"
+    },
+    {
+     "quando": "notte",
+     "fa": "esplora il relitto",
+     "dove": "in giro",
+     "azione": "passeggia"
+    }
+   ]
+  },
+  {
+   "nome": "Dalia Fontana",
+   "specie": "persona",
+   "genere": "femmina",
+   "tipo": "npc.villager",
+   "mestiere": "pilota di navetta",
+   "eta": "adulta",
+   "persona": "una pilota dalla voce che copre il rombo dei motori, temuta e rispettata",
+   "aspetto": "tuta arancione con le maniche arrotolate, un fischietto d'argento al collo",
+   "famiglia": [
+    {
+     "nome": "Vera Lunardi",
+     "legame": "collega"
+    }
+   ],
+   "routine": [
+    {
+     "quando": "mattina",
+     "fa": "controlla i motori della navetta",
+     "dove": "lavoro",
+     "azione": "lavora"
+    },
+    {
+     "quando": "giorno",
+     "fa": "porta carichi tra le stazioni",
+     "dove": "lavoro",
+     "azione": "lavora"
+    },
+    {
+     "quando": "sera",
+     "fa": "mangia con gli equipaggi",
+     "dove": "piazza",
+     "azione": "mangia"
+    },
+    {
+     "quando": "notte",
+     "fa": "fa il turno di guardia al molo",
+     "dove": "lavoro",
+     "azione": "pattuglia"
+    }
+   ]
+  },
+  {
+   "nome": "Cosimo Prati",
+   "specie": "persona",
+   "genere": "maschio",
+   "tipo": "npc.villager",
+   "mestiere": "cuoco della locanda",
+   "eta": "giovane",
+   "persona": "un cuoco timido che inventa zuppe nuove ogni turno",
+   "aspetto": "grembiule a quadri, un mestolo alla cintura",
+   "famiglia": [
+    {
+     "nome": "Elio Lunardi",
+     "legame": "amico"
+    }
+   ],
+   "routine": [
+    {
+     "quando": "mattina",
+     "fa": "impasta il pane d'alghe",
+     "dove": "lavoro",
+     "azione": "cucina"
+    },
+    {
+     "quando": "giorno",
+     "fa": "cucina la zuppa",
+     "dove": "lavoro",
+     "azione": "cucina"
+    },
+    {
+     "quando": "sera",
+     "fa": "canta in piazza",
+     "dove": "piazza",
+     "azione": "chiacchiera"
+    },
+    {
+     "quando": "notte",
+     "fa": "dorme in cuccetta",
+     "dove": "casa",
+     "azione": "dorme"
+    }
+   ]
+  }
+ ],
+ "attesi": []
+}

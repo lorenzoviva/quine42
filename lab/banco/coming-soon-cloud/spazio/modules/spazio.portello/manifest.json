@@ -1,0 +1,48 @@
+{
+  "id": "spazio.portello",
+  "name": "Portello del relitto",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "a mano (Claude Code, Cantiere 9)",
+  "description": "Il portello d'attracco di un cargo alla deriva, con la ruota di chiusura incrostata.",
+  "context": "nei relitti, sui moli abbandonati, nelle gallerie",
+  "appearance": {
+    "model": "portello",
+    "glyph": "◍",
+    "color": "#6a6a72",
+    "aspetto": "un portello rotondo di metallo con una ruota di chiusura e una spia rossa",
+    "classe": "mobile"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.45
+  },
+  "tags": [
+    "relitto"
+  ],
+  "actions": [
+    {
+      "id": "pressurizza",
+      "label": "Pressurizza con una bombola",
+      "requires": "item.bombola-ossigeno"
+    },
+    {
+      "id": "apri",
+      "label": "Gira la ruota del portello"
+    },
+    {
+      "id": "ascolta",
+      "label": "Appoggia l'orecchio al portello"
+    }
+  ],
+  "spawn": {
+    "tiles": [
+      "l",
+      "b",
+      "f"
+    ],
+    "chance": 0.04,
+    "max": 1
+  },
+  "logic": "logic.lua"
+}

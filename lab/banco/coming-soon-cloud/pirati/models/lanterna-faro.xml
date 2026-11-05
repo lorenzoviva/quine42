@@ -1,0 +1,18 @@
+<!-- Lanterna del faro: a mano (Claude Code, Cantiere 9). Piedistallo di pietra, lanterna d'ottone e vetro, tetto a cono; ogni seme cambia le pietre del piedistallo e i rivetti. -->
+<sequence values="BSOGLRT" size="20 20 40" symmetry="()" name="Lanterna del faro">
+  <color symbol="S" value="9a948a" name="pietra"/>
+  <color symbol="O" value="b8902e" name="ottone"/>
+  <color symbol="G" value="f8e2a0" name="vetro" glow="True"/>
+  <color symbol="L" value="ffd27a" name="fiamma" glow="True"/>
+  <color symbol="R" value="6e6a62" name="pietra scura"/>
+  <color symbol="T" value="5a3a22" name="tetto"/>
+  <box at="10 10 0" size="12 12 4" color="S"/>
+  <box at="10 10 4" size="8 8 18" color="S"/>
+  <box at="10 10 22" size="10 10 2" color="O"/>
+  <box at="10 10 24" size="8 8 8" color="G"/>
+  <box at="10 10 26" size="2 2 3" color="L"/>
+  <cone at="10 10 32" size="10 10 6" color="T"/>
+  <prl in="BS" out="RS" p="0.15" steps="1"/>
+  <prl in="SB" out="SR" p="0.15" steps="1"/>
+  <prl in="B O" out="O O" p="0.3" steps="1"/>
+</sequence>

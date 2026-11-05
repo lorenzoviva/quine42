@@ -1,0 +1,43 @@
+{
+  "id": "pirati.pappagallo",
+  "name": "Pappagallo sul trespolo",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "a mano (Claude Code, Cantiere 9)",
+  "description": "Un pappagallo verde e rosso su un trespolo di legno, che ripete ciò che sente.",
+  "context": "nelle locande, sui moli, nei villaggi delle isole",
+  "appearance": {
+    "model": "pappagallo",
+    "glyph": "♈",
+    "color": "#3aa655",
+    "aspetto": "un pappagallo verde con la coda rossa appollaiato su un trespolo di legno",
+    "classe": "mobile"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.35
+  },
+  "interaction": {
+    "type": "lua"
+  },
+  "actions": [
+    {
+      "id": "insegna",
+      "label": "Insegnagli una parola"
+    },
+    {
+      "id": "nutri",
+      "label": "Dagli una galletta",
+      "requires": "item.galletta"
+    }
+  ],
+  "spawn": {
+    "tiles": [
+      "f",
+      "g"
+    ],
+    "chance": 0.03,
+    "max": 1
+  },
+  "logic": "logic.lua"
+}

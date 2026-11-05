@@ -1,0 +1,31 @@
+{
+  "id": "items.pirati",
+  "name": "Merci dell'arcipelago",
+  "kind": "data",
+  "version": "0.1.0",
+  "origin": "a mano (Claude Code)",
+  "description": "Ciò che si compra, si vende e si nasconde tra le isole: palle di cannone, polvere, rum, dobloni, cime e pece.",
+  "items": [
+    { "id": "item.palla-cannone", "name": "Palla di cannone", "description": "Una sfera di ferro pesante, fredda anche al sole.", "category": "arma", "weight": 4, "stack": 6, "tags": ["arma", "bordo"], "glyph": "●", "color": "#3a3a40" },
+    { "id": "item.polvere-sparo", "name": "Polvere da sparo", "description": "Un sacchetto di polvere nera, da tenere lontano dalle lanterne.", "category": "materiale", "weight": 0.5, "stack": 10, "tags": ["materiale", "bordo"], "glyph": "∴", "color": "#2b2b2b" },
+    { "id": "item.rum", "name": "Rum delle Secche", "description": "Un fiasco di rum scuro che sa di melassa e di legno.", "category": "bevanda", "weight": 0.6, "stack": 4, "tags": ["bevanda", "locanda"], "glyph": "¡", "color": "#8a4b1c", "effects": { "thirst": 15, "energy": 5 } },
+    { "id": "item.doblone", "name": "Doblone d'oro", "description": "Una moneta d'oro con un veliero inciso, consumata dalle tasche.", "category": "varie", "weight": 0.05, "stack": 50, "tags": ["moneta", "tesoro"], "glyph": "¤", "color": "#f2c14e" },
+    { "id": "item.grimaldello", "name": "Grimaldello", "description": "Un ferretto piegato con cura: apre ciò che non è tuo.", "category": "attrezzo", "weight": 0.1, "stack": 3, "tags": ["attrezzo", "contrabbando"], "glyph": "⌐", "color": "#8a8f99" },
+    { "id": "item.pece", "name": "Secchio di pece", "description": "Pece calda e nera per chiudere le falle degli scafi.", "category": "materiale", "weight": 2, "stack": 3, "tags": ["materiale", "cantiere"], "glyph": "▾", "color": "#1f1a17" },
+    { "id": "item.badile", "name": "Badile", "description": "Un badile dal manico consumato, buono per la sabbia.", "category": "attrezzo", "weight": 2.5, "stack": 1, "tags": ["attrezzo", "tesoro"], "glyph": "♠", "color": "#9a7b4f" },
+    { "id": "item.carboncino", "name": "Carboncino", "description": "Un bastoncino di carbone di legno per disegnare le mappe.", "category": "attrezzo", "weight": 0.05, "stack": 10, "tags": ["attrezzo", "cartografia"], "glyph": "‐", "color": "#3c3c3c" },
+    { "id": "item.olio-lampada", "name": "Olio da lampada", "description": "Una fiasca d'olio di pesce che brucia a lungo e puzza poco.", "category": "materiale", "weight": 0.8, "stack": 4, "tags": ["materiale", "faro"], "glyph": "◊", "color": "#d9b84a" },
+    { "id": "item.galletta", "name": "Galletta di bordo", "description": "Un biscotto duro come il legno: dura un viaggio intero.", "category": "cibo", "weight": 0.2, "stack": 10, "tags": ["cibo", "bordo"], "glyph": "▫", "color": "#d8c08a", "effects": { "hunger": 20 } },
+    { "id": "item.cima", "name": "Cima di canapa", "description": "Dieci braccia di corda robusta, arrotolata a regola d'arte.", "category": "attrezzo", "weight": 1.5, "stack": 3, "tags": ["attrezzo", "bordo"], "glyph": "§", "color": "#c9a46a" },
+    { "id": "item.mappa-tesoro", "name": "Mappa delle secche", "description": "Una copia a carboncino delle secche, con una croce dove la sabbia è più chiara.", "category": "varie", "weight": 0.1, "stack": 1, "tags": ["cartografia", "tesoro"], "glyph": "▤", "color": "#e8d7a8" },
+    { "id": "item.collana-corallo", "name": "Collana di corallo", "description": "Rametti di corallo rosso infilati su un filo di cuoio.", "category": "vestiario", "weight": 0.1, "stack": 1, "tags": ["tesoro", "corallo"], "glyph": "❂", "color": "#e8505b" },
+    { "id": "item.melassa", "name": "Melassa", "description": "Un vaso di melassa scura e appiccicosa.", "category": "materiale", "weight": 1, "stack": 4, "tags": ["materiale", "locanda"], "glyph": "◍", "color": "#5a3315" }
+  ],
+  "recipes": [
+    { "id": "ricetta.rum", "name": "Rum delle Secche", "inputs": [{ "item": "item.melassa", "count": 2 }], "tools": [], "output": { "item": "item.rum", "count": 1 } }
+  ],
+  "loot": {
+    "contrabbando": { "rolls": [2, 4], "entries": [ { "item": "item.rum", "weight": 4 }, { "item": "item.doblone", "weight": 3, "min": 1, "max": 3 }, { "item": "item.polvere-sparo", "weight": 2 }, { "item": "item.grimaldello", "weight": 1 }, { "item": "item.collana-corallo", "weight": 1 } ] },
+    "bordo": { "rolls": [1, 3], "entries": [ { "item": "item.galletta", "weight": 4 }, { "item": "item.cima", "weight": 2 }, { "item": "item.pece", "weight": 1 }, { "item": "item.palla-cannone", "weight": 2 }, { "item": "item.olio-lampada", "weight": 1 } ] }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "id": "pirati.tavolo-mappe",
+  "name": "Tavolo del cartografo",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "a mano (Claude Code, Cantiere 9)",
+  "description": "Un tavolo ingombro di carte nautiche, compassi e sassi per tenere giù i fogli.",
+  "context": "nelle botteghe del porto, nelle locande, nelle cabine dei capitani",
+  "appearance": {
+    "model": "banco",
+    "glyph": "▤",
+    "color": "#b08850",
+    "aspetto": "un tavolo di legno coperto di carte nautiche arrotolate e compassi",
+    "classe": "mobile"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.45
+  },
+  "actions": [
+    {
+      "id": "studia",
+      "label": "Studia le carte"
+    },
+    {
+      "id": "ricopia",
+      "label": "Ricopia la mappa delle secche",
+      "requires": "item.carboncino"
+    }
+  ],
+  "spawn": {
+    "tiles": [
+      "f"
+    ],
+    "chance": 0.04,
+    "max": 1
+  },
+  "logic": "logic.lua"
+}

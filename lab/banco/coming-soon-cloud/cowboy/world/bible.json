@@ -1,0 +1,32 @@
+{
+  "titolo": "La Valle di Polvere Rossa",
+  "tono": "concreto, caldo e polveroso, con un pizzico di meraviglia: la frontiera delle mandrie e della ferrovia",
+  "sintesi": "Una valle di pianure e canyon rossi dove si vive di mandrie, d'oro e di commercio. La città di Sorgente Rossa è nata attorno alla stazione, la miniera della Montagna Spaccata dà lavoro a mezza valle, e lo sceriffo tiene la pace come può. Qua e là, sul suolo, si trovano le rune: lastre con un segno che manda una luce tenue.",
+  "storia": "Sorgente Rossa era un pozzo e una baracca quando arrivò il primo binario. Poi vennero i cercatori, dopo la pepita grande come un uovo trovata da Abele Croce nel fiume, e con i cercatori il saloon, la banca e lo sceriffo. I vecchi raccontano della grande siccità, quando le mandrie bevvero dal serbatoio della locomotiva, e dell'inverno in cui la neve coprì i binari fino ai tetti dei vagoni.",
+  "luoghi": [
+    "Sorgente Rossa",
+    "Saloon della Diligenza",
+    "Ranch del Ferro di Cavallo",
+    "Miniera della Montagna Spaccata",
+    "Forte Ventoso",
+    "Canyon delle Aquile",
+    "Piana Bruciata",
+    "Pascoli dell'Erba Alta"
+  ],
+  "personaggi": [
+    "I mandriani del ranch, che dormono più all'aperto che sotto un tetto",
+    "I cercatori del fiume, poveri e pieni di speranza",
+    "I ferrovieri della stazione, che conoscono gli orari a memoria e non li rispettano mai"
+  ],
+  "fatti": [
+    "Il treno passa da Sorgente Rossa due volte a settimana, quando non è in ritardo.",
+    "Al saloon chi arriva con la diligenza beve gratis il primo bicchiere.",
+    "Lo sceriffo appende le taglie sulla porta del suo ufficio ogni lunedì.",
+    "La miniera paga i minatori in polvere d'oro, che la banca pesa sulla bilancia di ottone.",
+    "Il telegrafo della stazione è l'unico modo per parlare con la città di là dalle montagne."
+  ],
+  "misteri": [
+    "Nessuno sa dove sia finito il carico d'oro della diligenza di primavera: i cavalli tornarono soli, con le selle in ordine.",
+    "Nelle notti di vento, dal Canyon delle Aquile arriva un fischio lungo: i mandriani dicono che sia il vento tra le rocce."
+  ]
+}

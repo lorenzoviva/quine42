@@ -1,0 +1,44 @@
+{
+  "id": "cowboy.lattine",
+  "name": "Lattine sulla staccionata",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "a mano (Claude Code, Cantiere 9)",
+  "description": "Una fila di lattine vuote su una staccionata, per il tiro al bersaglio.",
+  "context": "dietro le stalle, ai margini della città, nei ranch",
+  "appearance": {
+    "model": "lattine",
+    "glyph": "≡",
+    "color": "#b8b8b0",
+    "aspetto": "una staccionata di legno con una fila di lattine vuote sopra",
+    "classe": "mobile"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.45
+  },
+  "actions": [
+    {
+      "id": "tira",
+      "label": "Tira con la carabina",
+      "requires": "item.cartuccia"
+    },
+    {
+      "id": "rimetti",
+      "label": "Rimetti le lattine in fila"
+    },
+    {
+      "id": "conta",
+      "label": "Conta le lattine"
+    }
+  ],
+  "spawn": {
+    "tiles": [
+      "g",
+      "s"
+    ],
+    "chance": 0.04,
+    "max": 1
+  },
+  "logic": "logic.lua"
+}

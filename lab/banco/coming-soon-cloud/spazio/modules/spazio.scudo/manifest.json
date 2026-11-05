@@ -1,0 +1,45 @@
+{
+  "id": "spazio.scudo",
+  "name": "Generatore di scudo deflettore",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "a mano (Claude Code, Cantiere 9)",
+  "description": "Un generatore tozzo con una sfera in cima: acceso, tiene lontane le meteore piccole.",
+  "context": "sulle cupole, accanto alle serre, sui moli esposti",
+  "appearance": {
+    "model": "scudo-deflettore",
+    "glyph": "◉",
+    "color": "#8a7ad8",
+    "aspetto": "un generatore tozzo di metallo con una sfera viola in cima",
+    "classe": "mobile"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.45
+  },
+  "actions": [
+    {
+      "id": "carica",
+      "label": "Inserisci una cella",
+      "requires": "item.cella-energia"
+    },
+    {
+      "id": "accendi",
+      "label": "Accendi lo scudo"
+    },
+    {
+      "id": "spegni",
+      "label": "Spegni lo scudo"
+    }
+  ],
+  "spawn": {
+    "tiles": [
+      "l",
+      "g",
+      "s"
+    ],
+    "chance": 0.02,
+    "max": 1
+  },
+  "logic": "logic.lua"
+}

@@ -1,0 +1,21 @@
+<!-- Un colpo di cannone: un accordo grave sgranato in fretta, il rimbombo che si allunga sull'acqua. Il seme ne cambia la forma. -->
+<sequence name="Cannonata" values="BNSAMT" size="12 1 12" symmetry="()">
+  <sound bpm="260" scale="phrygian" root="48" swing="0" cutoff="3000" space="0.55">
+    <track y="0" instrument="bass" volume="0.85"/>
+  </sound>
+  <color symbol="N" value="38bdf8" name="Nota" glow="True"/>
+  <color symbol="S" value="0284c7" name="Sustain" alpha="0.85"/>
+  <color symbol="A" value="f43f5e" name="Accento" glow="True"/>
+  <color symbol="M" value="10b981" name="Testa" hidden="True"/>
+  <color symbol="T" value="ec4899" name="Partenza" hidden="True"/>
+
+  <line at="0 0 0" to="0 0 3" r="0" color="T"/>
+  <one in="T" out="M" steps="1"/>
+  <all in="T" out="B"/>
+  <one steps="3">
+    <rule in="BBB BBB MBB" out="BBM BBB NBB" p="3"/>
+    <rule in="BBB BBB BBB MBB" out="BBM BBB BBB NBB"/>
+  </one>
+  <all in="M" out="A"/>
+  <all in="ABBB" out="ASSS"/>
+</sequence>

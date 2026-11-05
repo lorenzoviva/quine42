@@ -1,0 +1,48 @@
+{
+  "id": "cowboy.binario",
+  "name": "Banchina della stazione",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "a mano (Claude Code, Cantiere 9)",
+  "description": "Una banchina di assi accanto al binario, con il palo dell'orario e la campana.",
+  "context": "nelle stazioni e lungo la ferrovia",
+  "appearance": {
+    "model": "binario",
+    "glyph": "═",
+    "color": "#5a4a3a",
+    "aspetto": "un tratto di binario su traversine di legno, con un palo e una campana",
+    "classe": "mobile"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.45
+  },
+  "actions": [
+    {
+      "id": "orario",
+      "label": "Guarda l'orario"
+    },
+    {
+      "id": "aspetta",
+      "label": "Aspetta il treno"
+    },
+    {
+      "id": "biglietto",
+      "label": "Compra un biglietto",
+      "requires": "item.dollaro"
+    },
+    {
+      "id": "campana",
+      "label": "Suona la campana"
+    }
+  ],
+  "spawn": {
+    "tiles": [
+      "p",
+      "g"
+    ],
+    "chance": 0.03,
+    "max": 1
+  },
+  "logic": "logic.lua"
+}

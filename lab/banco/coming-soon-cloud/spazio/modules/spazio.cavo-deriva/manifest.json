@@ -1,0 +1,44 @@
+{
+  "id": "spazio.cavo-deriva",
+  "name": "Cavo di deriva",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "a mano (Claude Code, Cantiere 9)",
+  "description": "Un pilone con una maniglia e un cavo arrotolato: chi si aggancia si muove leggero come nei condotti senza peso.",
+  "context": "nei corridoi delle stazioni, sui moli, all'ingresso dei relitti",
+  "appearance": {
+    "model": "cartello",
+    "glyph": "⌇",
+    "color": "#c8c8d0",
+    "aspetto": "un pilone di metallo con una maniglia gialla e un cavo arrotolato",
+    "classe": "monumento"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.3
+  },
+  "actions": [
+    {
+      "id": "aggancia",
+      "label": "Agganciati al cavo"
+    },
+    {
+      "id": "sgancia",
+      "label": "Sganciati"
+    },
+    {
+      "id": "tira",
+      "label": "Tira il cavo"
+    }
+  ],
+  "spawn": {
+    "tiles": [
+      "l",
+      "f",
+      "p"
+    ],
+    "chance": 0.03,
+    "max": 1
+  },
+  "logic": "logic.lua"
+}

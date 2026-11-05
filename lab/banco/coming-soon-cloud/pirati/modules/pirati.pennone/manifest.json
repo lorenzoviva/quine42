@@ -1,0 +1,44 @@
+{
+  "id": "pirati.pennone",
+  "name": "Pennone con bandiera",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "a mano (Claude Code, Cantiere 9)",
+  "description": "Un pennone di legno con le drizze per issare una bandiera.",
+  "context": "sui moli, sui forti, sulle spiagge dove si fa segnale",
+  "appearance": {
+    "model": "pennone",
+    "glyph": "⚑",
+    "color": "#c0392b",
+    "aspetto": "un alto pennone di legno con una bandiera rossa",
+    "classe": "monumento"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.3
+  },
+  "actions": [
+    {
+      "id": "issa_nera",
+      "label": "Issa la bandiera nera"
+    },
+    {
+      "id": "issa_bianca",
+      "label": "Issa la bandiera bianca"
+    },
+    {
+      "id": "ammaina",
+      "label": "Ammaina"
+    }
+  ],
+  "spawn": {
+    "tiles": [
+      "s",
+      "l",
+      "p"
+    ],
+    "chance": 0.03,
+    "max": 1
+  },
+  "logic": "logic.lua"
+}
