@@ -4135,7 +4135,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Quando è fatto: commit su `task/T245c`; glossario. Sicurezza: scrivi l'esito.
 
 ### T245d · Le imprese — `in attesa` (dipende da T245b, T263)
-- Cloud: in corso su Claude Cloud dal 05/11, sessione B; non lanciare in locale, lo porta il suo task di integrazione.
+- Cloud: finita il 05/11 (sessione B, `e7cddc1`); non lanciare in locale, lo porta T280.
 - Pipeline: claude · stima 12% · approvato · priorità 19
 - Step: 32
 - Contesto: Nasce da T245 (`dossier T245`): progetto in `docs/design/comportamento-npc.md`, sezione 3. Fase 0.9.0 (D8).
@@ -4145,7 +4145,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Quando è fatto: commit su `task/T245d`; ADR, glossario, `AGENTS.md`. Sicurezza: scrivi l'esito.
 
 ### T245e · L'edificio per stadi — `in attesa` (dipende da T245d)
-- Cloud: in corso su Claude Cloud dal 05/11, sessione B; non lanciare in locale, lo porta il suo task di integrazione.
+- Cloud: finita il 05/11 (sessione B, `e7cddc1`); non lanciare in locale, lo porta T280.
 - Pipeline: claude · stima 9% · approvato · priorità 20
 - Step: 32
 - Contesto: Nasce da T245 (`dossier T245`): progetto in `docs/design/comportamento-npc.md`, sezione 3.4. Fase 0.9.0 (D8).
@@ -4155,7 +4155,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Quando è fatto: commit su `task/T245e`; ADR se è un contratto nuovo dei programmi. Sicurezza: scrivi l'esito.
 
 ### T245f · Fuori vista — `in attesa` (dipende da T245d, T245e)
-- Cloud: in corso su Claude Cloud dal 05/11, sessione B; non lanciare in locale, lo porta il suo task di integrazione.
+- Cloud: finita il 05/11 (sessione B, `e7cddc1`); non lanciare in locale, lo porta T280.
 - Pipeline: claude · stima 9% · approvato · priorità 21
 - Step: 32
 - Contesto: Nasce da T245 (`dossier T245`): progetto in `docs/design/comportamento-npc.md`, sezione 5. Fase 0.9.0, decisione dell'autore del 04/11 (D8: il progetto la lasciava aperta).
@@ -4264,7 +4264,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Esito: `orichalcum` (`2ced05c`), `neapolis` (`eb822f7`) e `sidera` (`5e90652`) passano tutti i controlli (`metaBreak`, `canonBreak`, `bibleBreaks`, `validateForged` su 25 moduli, `validatePlan` e `validateLayout` su 19 luoghi, `checkSociety` su 24 persone, `reviewPlot` su 8 trame, `validateNewRune` su 12 rune, `modelErrors` + varianza ≥ 0,15 su 16 modelli, `analyzeSound` su 8 suoni) e 600-900 tick sul `Kernel` vero con **0 fault**. Sicurezza: nessuna superficie nuova.
 
 ### T273 · Integrare a costo zero nei quattro universi esplorabili le strutture, i modelli e i suoni creati su Claude Cloud — `in attesa` (dipende da T269, T270, T271, T272)
-- Cloud: in corso su Claude Cloud dal 05/11, sessione A; non lanciare in locale, lo porta il suo task di integrazione.
+- Cloud: finita il 05/11 (sessione A, `752288c`); non lanciare in locale, lo porta T279.
 - Pipeline: claude · stima 4% · approvato · priorità 1
 - Contesto: richiesta esplicita dell'autore del 05/11 («integrare le modifiche svolte in cloud da claude nei quattro universi esplorabili. E se si può fare a costo zero (solo su abbonamento e/o offline) mi piacerebbe vedere le magnifiche strutture create in cloud in game»). Nasce da T269 (`dossier T269`), T270 (`dossier T270`), T271 (`dossier T271`) e T272 (`dossier T272`). Poiché tutti gli XML sono già pronti e validati, se i modelli delle strutture sono registrati in `models/struttura-<ownModelId(concetto).slice(0, 30)>.xml` e in `models/index.json`, `Kernel.lotsOf` (`this.forms.resolve(own, classe)`) trova subito `own === model` senza mettere `wanted`, quindi `ModelDirector` non chiama mai lo Scultore (**0 chiamate API, costo 0,00 $**).
 - Cosa fare:
@@ -4306,10 +4306,11 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: non serve.
 - Quando è fatto: commit su `task/T276`. Sicurezza: nessuna superficie nuova.
 
-### T277 · Integrare i 60 modelli di Claude Cloud — `da fare`
+### T277 · Integrare i 60 modelli di Claude Cloud — `in attesa`
 - Pipeline: claude · stima 1% · approvato · priorità 4
 - Sforzo: high.
-- Contesto: ramo `origin/claude/markov-junior-3d-60-models-pajzz6` (`b6cff15`), solo `lab/banco/`. Se la sessione A di T273 l'ha già unito, basta il controllo.
+- Cloud: la sessione A l'ha unito tutto (`e0466b7`, punta del ramo `b6cff15`): non lanciare in locale, lo porta T279, che alla sua integrazione lo chiude.
+- Contesto: ramo `origin/claude/markov-junior-3d-60-models-pajzz6` (`b6cff15`), solo `lab/banco/`.
 - Cosa fare: `git merge`, i test di `lab/` e typecheck con i loro turni.
 - Browser: non serve.
 - Quando è fatto: commit su `task/T277`. Sicurezza: nessuna superficie nuova.
@@ -4321,3 +4322,28 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Cosa fare: `git merge`, test e typecheck con i loro turni.
 - Browser: non serve.
 - Quando è fatto: commit su `task/T278`. Sicurezza: nessuna superficie nuova.
+
+### T279 · Integrare T273 di Claude Cloud: strutture, modelli e suoni nei quattro universi, con la versione del kernel — `da fare` (dipende da T274)
+- Pipeline: claude · stima 3% · approvato · priorità 1
+- Sforzo: extra.
+- Contesto: sveglia del 05/11, richiesta dell'autore. Ramo `origin/claude/quine42-universi-cloud-integration-k3h9p5` (`752288c`, sessione `session_01Tozk13S2R7eyZHQCXBo3Si`), senza conflitti con `3d` al 05/11. Contiene la catena di T274 e i 60 modelli di T277 (`b6cff15`) e il catalogo gemello. Rapporto: `lab/banco/universi-cloud/INTEGRAZIONE.md`. I tre universi dicono `kernel: 0.1.5`. Il ramo ha scritto nel backlog e nel quadro: tieni quelli di `3d`.
+- Cosa fare: `git merge` del ramo; rinumera gli ADR se servono; suite intera (il ramo non l'ha fatta girare) e typecheck con i loro turni; `tests/universi-cloud.test.ts` e la verifica dei quattro universi. `npm run universi:cloud` solo con `--dir` su una cartella temporanea: l'installazione in `universes/` sposta nel cestino ciò che c'è, la decide l'autore. Nell'esito: i modelli del seme cambiati (`griglie-visive.json`, `tests/forms.test.ts`) e ciò che il rapporto dice non provato.
+- Browser: sì, `?universo=orichalcum&skip&offline` da un'installazione temporanea, una struttura per universo con le coordinate del rapporto: se non si può, `BROWSER: da verificare`.
+- Quando è fatto: commit su `task/T279`. All'integrazione l'orchestratore segna `fatto` T273 e T277. Sicurezza: scrivi l'esito (il ramo tocca `tools/sicurezza/ambiente.mjs`, V-016).
+
+### T280 · Integrare T245d, T245e, T245f di Claude Cloud: imprese, edificio per stadi, fuori vista — `da fare` (dipende da T274, T279)
+- Pipeline: claude · stima 3% · approvato · priorità 1
+- Step: 32
+- Sforzo: extra.
+- Contesto: sveglia del 05/11, richiesta dell'autore. Ramo `origin/claude/step32-kernel-chain-2vu1qd` (`e7cddc1`, sessione `session_01Tozk15L8GmN1nhtMGKeTdr`), kernel `0.1.8`, ADR-0142, ADR-0143, ADR-0144; senza conflitti con `3d` né con il ramo di T279 al 05/11. Viene per secondo perché cambia `sys.lavoro`, `mesh.ts` e il kernel sotto i quattro universi di T279, e questo una fusione pulita non lo vede. Il ramo ha scritto nel backlog e nel quadro: tieni quelli di `3d`.
+- Cosa fare: `git merge` del ramo; rinumera gli ADR se servono; `KERNEL_VERSION`, `package.json` e `universe/universe.json` allineati; suite intera e typecheck con i loro turni; la verifica dei quattro universi su questo kernel: 0 fault, e di' se i tre di `lab/banco/universi-cloud/` hanno bisogno del `sys.lavoro` nuovo.
+- Browser: sì, il pannello del cantiere, una casa che sale per stadi, due schede con `?viandante=` per il fuori vista: se non si può, `BROWSER: da verificare`.
+- Quando è fatto: commit su `task/T280`. All'integrazione l'orchestratore segna `fatto` T245d, T245e, T245f. Sicurezza: scrivi l'esito, il ramo tocca sessione, sandbox e validatore.
+
+### T281 · I punti di `placeInside` che il kernel trova bloccati dentro le strutture — `da fare` (dipende da T279)
+- Pipeline: claude · stima 4% · priorità 5
+- Contesto: difetto trovato dalla sessione A, sezione «Un difetto del kernel» di `lab/banco/universi-cloud/INTEGRAZIONE.md`: `interiorPoints` trova sgombro un punto che `kernel.free(x, y, 0.15)` trova bloccato (`formBlocks`): casa a graticcio del seme 21 su 32 la vecchia e 15 su 15 la procedurale a yaw 0, 0 girata di -π/2; catalogo da 10 su 59 a 61 su 128. Ciò che si mette dentro una struttura può finire nei muri. Per questo `grande` è rimasta la casa vecchia (`SEME_TENUTI` in `strumenti/cloud.ts`).
+- Cosa fare: guarda se `interiorPoints` e `formsUnder`/`rampBlocks` usano la stessa rotazione e lo stesso livello (senza `z`, `free` misura al suolo un pavimento rialzato); correggi; togli `grande` da `SEME_TENUTI`, rilancia `integra.ts`; alza `Z` di `KERNEL_VERSION`.
+- Test: `tests/lots.test.ts` con la casa nuova, tutti i punti e non quattro tiri; suite intera e typecheck con i loro turni.
+- Browser: sì, un oggetto dentro una struttura del catalogo.
+- Quando è fatto: commit su `task/T281`. Sicurezza: nessuna superficie nuova.
