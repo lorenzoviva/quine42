@@ -4533,3 +4533,33 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Test: una carta rotta per ogni modo di fallire: 0 crash, entità ancora presenti, rimozione, salvataggio e riapertura; un non master non può togliere. Typecheck e suite intera con i loro turni. Versione del kernel (ADR-0136).
 - Browser: sì, con `?offline`: una carta rotta di proposito, il mondo gira, la tolgo dalla console, ricarico. Catture nel commit.
 - Quando è fatto: commit su `task/T296`. Sicurezza: nell'esito.
+
+### T297 · Integrare T280: i conflitti di versione e gli ADR — `da fare`
+- Pipeline: claude · stima 1% · approvato · priorità 1
+- Sforzo: high.
+- Step: 32
+- Contesto: `integra T280` si è fermato su `package.json`, `package-lock.json`, `src/kernel/version.ts`, `universe/universe.json`. Nasce da T280: `dossier T280`. `3d` è a `0.1.6` (T275, via T282), `task/T280` a `0.1.9`.
+- Cosa fare: nel tuo worktree `git merge task/T280`. Versione: la più alta, `0.1.9`, uguale in tutti e quattro i file (ADR-0136). **Attenzione agli ADR:** `task/T280` porta i suoi 0142-0144 e su `3d` quei numeri ora sono presi da T276 e T275: rinumera i suoi ai primi liberi, con indice, `AGENTS.md` e rimandi corretti, e nessun ADR di `3d` toccato. Due aggiunte nello stesso punto restano entrambe. `tests/fixtures/mj-engine-hashes.json`: se è rossa spiega perché prima di rigenerarla (T282 l'ha rigenerata col motore di prima di D33).
+- Test: suite intera e typecheck con i loro turni.
+- Browser: non serve, T280 ha già guardato.
+- Quando è fatto: commit su `task/T297`. Nell'esito: i numeri nuovi degli ADR; ricorda di dare `integra T280` e di segnare `fatto` T245d, T245e, T245f.
+
+### T298 · I mestieri di orichalcum, neapolis e sidera — `da fare` (dipende da T297)
+- Pipeline: claude · stima 2% · approvato · priorità 5
+- Sforzo: high.
+- Step: 32
+- Contesto: trovato da T280 (`dossier T280`, e il suo `INTEGRAZIONE.md`). I tre universi non hanno `sys.lavoro` né `lavoro.*`: un edificio che crolla vi resta ai picchetti. I moduli del seme non bastano: 0/24, 4/24, 3/24 persone con un programma, e mancano `item.grano` e `item.pesce`. Mestieri: ADR-0140 e `#societa`.
+- Cosa fare: in `lab/banco/universi-cloud/`, per ogni universo, `sys.lavoro` e i programmi `lavoro.<mestiere>` nel suo tema, con gli oggetti e le ricette che servono, così che ogni persona che ha un mestiere abbia un programma e un edificio crollato si ricostruisca. Niente kernel: se manca una primitiva scrivilo nell'esito. Testi senza meta-gioco. `npm run universi:cloud` li installa.
+- Test: gli universi sul `Kernel` vero per almeno 600 tick: 0 fault, ogni mestiere con un programma, un edificio crollato che risale di stadio e torna intero. Typecheck e suite intera con i loro turni.
+- Browser: sì, con un'installazione temporanea di uno dei tre: una giornata di lavoro e un cantiere. Catture nel commit. Niente nelle `universes/` dell'autore (D36).
+- Quando è fatto: commit su `task/T298`; nell'esito la tabella persone con un programma per universo.
+
+### T299 · Un individuo si blocca su un dislivello — `da fare` (dipende da T297)
+- Pipeline: claude · stima 1% · approvato · priorità 6
+- Sforzo: high.
+- Step: 32
+- Contesto: nella verifica di T280 (`dossier T280`, `traccia T280`) Ugo si è fermato su un dislivello, tanto che il rientro a piedi non si è potuto provare. Un mestiere o un'impresa che non arriva vale poco. Vie: `src/kernel/route.ts` (`findRoute`), `#rilievo`.
+- Cosa fare: riproduci con un test offline. Trova se è la via che passa dove il rilievo non fa salire, o il passo che non segue la via. Correggi la causa; un individuo davvero senza via rinuncia, con la sua routine, invece di restare fermo. Con il rientro a piedi, che T280 non ha provato.
+- Test: il caso riprodotto, una via su rilievo con gradini validi e invalidi. Typecheck e suite intera con i loro turni. Versione del kernel (ADR-0136).
+- Browser: sì, con `?skip&offline`: un individuo che attraversa un dislivello e il rientro a piedi in un cantiere. Catture nel commit.
+- Quando è fatto: commit su `task/T299`.
