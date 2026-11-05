@@ -149,5 +149,6 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0142](0142-il-motore-guarda-solo-dove-serve.md) | Il motore MarkovJunior guarda solo dove serve: un censimento delle lettere per riga accelera le scansioni intere senza cambiare un voxel, e una fixture di impronte lo prova | accettato |
 | [0143](0143-la-generazione-differita.md) | La generazione differita: un comando locale genera Genesi, luoghi a spirale, individui, modelli e brani solo dalla coda degli abbonamenti; un compito fuori coda lo ferma, un passo si scrive solo se finisce valido, un tetto in percentuale della settimana, mai con un mondo acceso | accettato |
 | [0144](0144-la-fila-delle-scritture-sopravvive-alla-pagina.md) | La fila delle scritture: commit, piani, rami e pubblicazioni in una fila sola, salvata per scheda nella pagina, con un tetto oltre il quale si uniscono; un 401 rinnova il token e riprova (aggiorna ADR-0122) | accettato |
+| [0145](0145-le-vesti-del-sito.md) | Il sito ha una base comune e tante vesti: una cartella per veste in `site/skins/`, `data-skin` sulla radice, `/skins/boot.js` applica la scelta prima del primo disegno, la griglia dalla scala aurea | accettato |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.

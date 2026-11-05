@@ -1031,8 +1031,14 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 ### Scala aurea
 - **Inglese**: `scale`
 - **Definizione**: i numeri di Fibonacci e di Lucas e le potenze di φ da cui HUD e pannelli prendono spazi, corpi, interlinea e larghezze (nel CSS i token `--space-N`, `--text-N`, `--measure-N`, `--leading-*`).
-- **Dove vive**: `src/theme.css`, `src/style.css`
+- **Dove vive**: `src/theme.css`, `src/style.css`, `site/site.css`
 - **Da non usare**: nessuno
+
+### Veste
+- **Inglese**: `skin`, `SkinManifest`, `siteSkins`, `SKIN_KEY`
+- **Definizione**: uno degli aspetti del sito (colori, font, logo, sfondi, effetti) sopra una base comune che non cambia: una cartella di `site/skins/`, scelta con `data-skin` sulla radice. Non riguarda il gioco.
+- **Dove vive**: `site/skins/`, `site/skin.ts`, `site/skin-core.ts`, `server/skins.ts`
+- **Da non usare**: `tema` (per la veste: è il testo di un'ambientazione e `src/theme.css`)
 
 ## Gli omonimi
 

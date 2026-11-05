@@ -24,7 +24,7 @@ describe('the in-game theme', () => {
 
   it('measures the scale in Fibonacci and Lucas numbers, each about φ times the one before in its row', () => {
     const fibonacci = [1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610];
-    const lucas = [11, 18, 29, 47, 76, 123, 199, 322, 521, 843];
+    const lucas = [11, 18, 29, 47, 76, 123, 199, 322, 521, 843, 1364];
     const steps = [...theme.matchAll(/--(space|text|measure)-(\d+):\s*(\d+)px/g)];
     expect(steps.length).toBeGreaterThan(20);
     for (const [, kind, name, value] of steps) {

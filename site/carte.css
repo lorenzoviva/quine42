@@ -7,41 +7,41 @@
    ========================================================================== */
 
 .cards-page {
-  padding-top: 36px;
-  padding-bottom: 60px;
+  padding-top: var(--space-34);
+  padding-bottom: var(--space-55);
 }
 
 .cards-page .comic-title.page-title {
-  font-size: 2.8rem;
-  margin: 10px 0 0;
+  font-size: var(--text-47);
+  margin: var(--space-8) 0 0;
 }
 
 .cards-hero-stats {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 18px;
-  margin-bottom: 28px;
+  gap: var(--space-21);
+  margin-bottom: var(--space-34);
 }
 
 .cards-hero-stats .comic-card {
-  padding: 16px;
+  padding: var(--space-13);
 }
 
 .cards-hero-stats .stat-value {
-  font-size: 2.2rem;
-  margin: 6px 0 0;
+  font-size: var(--text-34);
+  margin: var(--space-5) 0 0;
 }
 
 .cards-hero-stats .stat-caption {
-  font-size: 0.65rem;
+  font-size: var(--text-11);
 }
 
 .cards-toolbar {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-13);
   flex-wrap: wrap;
-  margin-bottom: 18px;
+  margin-bottom: var(--space-21);
 }
 
 .cards-toolbar .comic-select {
@@ -51,8 +51,8 @@
 
 .card-collection-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(322px, 1fr));
-  gap: 28px 20px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--measure-377)), 1fr));
+  gap: var(--space-34) var(--space-21);
   justify-items: center;
   min-height: 300px;
 }
@@ -60,20 +60,20 @@
 .cards-empty {
   grid-column: 1 / -1;
   text-align: center;
-  padding: 48px 20px;
-  border: 3px dashed var(--neon-cyan);
+  padding: var(--space-55) var(--space-21);
+  border: 3px dashed var(--skin-accent);
   width: 100%;
 }
 
 .cards-empty .comic-title {
-  font-size: 1.8rem;
-  margin: 12px 0 6px;
+  font-size: var(--text-29);
+  margin: var(--space-13) 0 var(--space-5);
 }
 
 .cards-more {
   display: flex;
   justify-content: center;
-  margin-top: 32px;
+  margin-top: var(--space-34);
 }
 
 .cards-more[hidden] {
@@ -111,7 +111,7 @@
 }
 
 .card-collection-grid .retro-card:focus-visible {
-  outline: 3px solid var(--neon-yellow);
+  outline: 3px solid var(--skin-primary);
   outline-offset: 6px;
 }
 
@@ -121,11 +121,11 @@
   background: repeating-linear-gradient(
     115deg,
     transparent 0%,
-    rgba(255, 42, 133, 0.28) 8%,
-    rgba(255, 230, 0, 0.24) 14%,
-    rgba(5, 255, 161, 0.24) 20%,
-    rgba(0, 240, 255, 0.3) 26%,
-    rgba(157, 0, 255, 0.24) 32%,
+    color-mix(in srgb, var(--skin-accent-2) 28%, transparent) 8%,
+    color-mix(in srgb, var(--skin-primary) 24%, transparent) 14%,
+    color-mix(in srgb, var(--skin-success) 24%, transparent) 20%,
+    color-mix(in srgb, var(--skin-accent) 30%, transparent) 26%,
+    color-mix(in srgb, var(--skin-rare) 24%, transparent) 32%,
     transparent 40%
   );
   background-size: auto;
@@ -147,9 +147,9 @@
 
 .card-3d-wrapper[data-rarita='comune'] .card-holo-foil { opacity: 0.25; }
 .card-3d-wrapper[data-rarita='leggendaria'] .card-holo-foil { opacity: 0.8; }
-.card-3d-wrapper[data-rarita='comune'] .card-face { box-shadow: 6px 6px 0 var(--comic-paper-dim); }
-.card-3d-wrapper[data-rarita='epica'] .card-face { box-shadow: 6px 6px 0 var(--neon-yellow); }
-.card-3d-wrapper[data-rarita='leggendaria'] .card-face { box-shadow: 6px 6px 0 var(--neon-pink); }
+.card-3d-wrapper[data-rarita='comune'] .card-face { box-shadow: var(--shadow-l) var(--skin-text-dim); }
+.card-3d-wrapper[data-rarita='epica'] .card-face { box-shadow: var(--shadow-l) var(--skin-primary); }
+.card-3d-wrapper[data-rarita='leggendaria'] .card-face { box-shadow: var(--shadow-l) var(--skin-accent-2); }
 
 /* Fuori dallo schermo non si muove niente. */
 .card-3d-wrapper.is-away,
@@ -159,15 +159,15 @@
 
 /* --- Il fronte --- */
 .card-collection-grid .card-name {
-  font-size: 1.15rem;
-  line-height: 1.05;
+  font-size: var(--text-18);
+  line-height: var(--leading-tight);
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   line-clamp: 2;
   overflow: hidden;
   overflow-wrap: anywhere;
-  padding-right: 8px;
+  padding-right: var(--space-8);
 }
 
 .card-collection-grid .card-header .comic-badge {
@@ -182,22 +182,22 @@
   max-width: 88%;
   max-height: 88%;
   image-rendering: pixelated;
-  filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.35));
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--skin-accent) 35%, transparent));
 }
 
 .card-kind {
   position: absolute;
   left: 6px;
   bottom: 5px;
-  font-size: 0.5rem;
-  color: var(--comic-paper-dim);
+  font-size: var(--text-8);
+  color: var(--skin-text-dim);
 }
 
 .card-text {
-  font-size: 0.8rem;
-  line-height: 1.3;
-  margin: 0 0 10px;
-  color: var(--comic-paper-dim);
+  font-size: var(--text-13);
+  line-height: var(--leading-snug);
+  margin: 0 0 var(--space-8);
+  color: var(--skin-text-dim);
   min-height: 3.9em;
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -208,40 +208,40 @@
 
 /* --- Il retro: impronta e catena dei titolari --- */
 .card-collection-grid .card-back-frame {
-  padding: 12px 10px;
-  gap: 6px;
+  padding: var(--space-13) var(--space-8);
+  gap: var(--space-5);
   min-height: 0;
 }
 
 .card-collection-grid .card-back-brand {
-  font-size: 1.8rem;
+  font-size: var(--text-29);
 }
 
 .card-back-label {
-  font-size: 0.55rem;
+  font-size: var(--text-8);
 }
 
 .card-back-code {
-  font-size: 0.75rem;
+  font-size: var(--text-13);
 }
 
 .card-genealogy-box {
   list-style: none;
   width: 100%;
   margin: 0;
-  background: rgba(7, 4, 13, 0.9);
-  border: 1px dashed var(--neon-cyan);
-  padding: 8px;
+  background: color-mix(in srgb, var(--skin-ink) 90%, transparent);
+  border: 1px dashed var(--skin-accent);
+  padding: var(--space-8);
   text-align: left;
-  font-size: 0.72rem;
+  font-size: var(--text-11);
   max-height: 210px;
   overflow-y: auto;
 }
 
 .card-genealogy-node {
-  padding-bottom: 6px;
-  margin-bottom: 6px;
-  border-bottom: 1px dotted rgba(0, 240, 255, 0.35);
+  padding-bottom: var(--space-5);
+  margin-bottom: var(--space-5);
+  border-bottom: 1px dotted color-mix(in srgb, var(--skin-accent) 35%, transparent);
 }
 
 .card-genealogy-node:last-child {
@@ -253,11 +253,11 @@
 .link-head {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-5);
 }
 
 .link-head .comic-badge {
-  font-size: 0.55rem;
+  font-size: var(--text-8);
 }
 
 .link-head b {
@@ -272,14 +272,14 @@
 }
 
 .link-where {
-  margin-top: 2px;
-  font-size: 0.66rem;
+  margin-top: var(--space-2);
+  font-size: var(--text-11);
   overflow-wrap: anywhere;
 }
 
 .card-paid {
-  font-size: 0.68rem;
-  line-height: 1.25;
+  font-size: var(--text-11);
+  line-height: var(--leading-snug);
 }
 
 /* La finestra d'accesso di src/session/login.ts, con gli account. */
@@ -290,36 +290,36 @@
   margin: auto;
   width: min(420px, 92vw);
   height: fit-content;
-  padding: 24px;
+  padding: var(--space-21);
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  background: var(--synth-bg);
+  gap: var(--space-13);
+  background: var(--skin-bg);
   border: var(--border-ink-thick);
-  box-shadow: var(--shadow-hard-cyan);
+  box-shadow: var(--shadow-m) var(--skin-accent);
 }
 
 #login .title {
-  font-family: var(--font-display);
-  font-size: 1.8rem;
-  color: var(--neon-yellow);
+  font-family: var(--skin-font-display);
+  font-size: var(--text-29);
+  color: var(--skin-primary);
 }
 
 #login button {
-  font-family: var(--font-arcade);
-  font-size: 0.7rem;
-  padding: 12px;
+  font-family: var(--skin-font-label);
+  font-size: var(--text-11);
+  padding: var(--space-13);
   cursor: pointer;
 }
 
 @media (max-width: 900px) {
   .cards-hero-stats { grid-template-columns: repeat(2, 1fr); }
-  .cards-page .comic-title.page-title { font-size: 2.2rem; }
+  .cards-page .comic-title.page-title { font-size: var(--text-34); }
 }
 
 @media (max-width: 380px) {
   .card-collection-grid { grid-template-columns: 1fr; }
-  .card-3d-wrapper { padding: 16px 0; }
+  .card-3d-wrapper { padding: var(--space-13) 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {

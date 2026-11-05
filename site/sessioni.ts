@@ -290,12 +290,12 @@ export function renderUniverseCard(universe: UniverseView): HTMLElement {
     <div class="universe-card-header">
       <div>
         ${liveBadge}
-        <h3 class="comic-title" style="font-size: 1.6rem; margin: 8px 0 0;">${escapeHtml(universe.name.toUpperCase())}</h3>
+        <h3 class="comic-title" style="font-size: var(--text-29); margin: var(--space-8) 0 0;">${escapeHtml(universe.name.toUpperCase())}</h3>
       </div>
-      <span class="arcade-text text-cyan" style="font-size: 0.65rem;">SEME #${universe.seed}</span>
+      <span class="arcade-text text-cyan" style="font-size: var(--text-11);">SEME #${universe.seed}</span>
     </div>
     <div class="universe-card-body">
-      <p style="font-size: 0.88rem; color: var(--comic-paper); margin: 0 0 12px; line-height: 1.4;">
+      <p style="font-size: var(--text-13); color: var(--skin-text); margin: 0 0 var(--space-13); line-height: var(--leading-snug);">
         ${escapeHtml(universe.description)}
       </p>
       <table class="universe-spec-table">
@@ -324,7 +324,7 @@ export function renderUniverseCard(universe: UniverseView): HTMLElement {
       </table>
     </div>
     <div class="universe-card-footer">
-      <span class="arcade-text text-dim" style="font-size: 0.65rem;">${universe.live ? (globalThis.location?.port ? `PORTA ${location.port}` : '') : 'OFFLINE'}</span>
+      <span class="arcade-text text-dim" style="font-size: var(--text-11);">${universe.live ? (globalThis.location?.port ? `PORTA ${location.port}` : '') : 'OFFLINE'}</span>
       <a href="../index.html?universo=${encodeURIComponent(universe.name)}" class="comic-btn arcade cyan sm">
         ENTRA NELLA LOBBY
       </a>
@@ -414,7 +414,7 @@ if (typeof document !== 'undefined') {
       universesGrid.innerHTML = `
         <div class="universe-loading">
           <span class="comic-badge yellow">CARICAMENTO</span>
-          <p class="arcade-text" style="font-size: 0.8rem; margin-top: 12px;">INTERROGAZIONE UNIVERSI E SESSIONI ATTIVE…</p>
+          <p class="arcade-text" style="font-size: var(--text-13); margin-top: var(--space-13);">INTERROGAZIONE UNIVERSI E SESSIONI ATTIVE…</p>
         </div>
       `;
 
@@ -447,7 +447,7 @@ if (typeof document !== 'undefined') {
         universesGrid.innerHTML = `
           <div class="universe-empty">
             <span class="comic-badge yellow">NESSUN UNIVERSO TROVATO</span>
-            <h3 class="comic-title" style="font-size: 1.8rem; margin: 12px 0 6px;">NESSUN UNIVERSO DISPONIBILE</h3>
+            <h3 class="comic-title" style="font-size: var(--text-29); margin: var(--space-13) 0 var(--space-5);">NESSUN UNIVERSO DISPONIBILE</h3>
             <p>Non è ancora stato creato alcun universo su questo server.<br />Avvia subito la Genesi del tuo primo mondo git!</p>
             <button class="comic-btn pink" id="btn-empty-create">+ CREA IL PRIMO UNIVERSO</button>
           </div>

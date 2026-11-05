@@ -1,0 +1,58 @@
+/* La veste futuristica (T283, ADR-0145): la prima stesura, solo colori, font e bagliori. La scritta fatta di scritte e ciò che si muove sono di T284. */
+:root[data-skin='futuristica'] {
+  /* Colori */
+  --skin-bg: #02040a;
+  --skin-panel: #06101c;
+  --skin-panel-raised: #0b1a2c;
+  --skin-ink: #000000;
+  --skin-ink-raised: #081422;
+  --skin-ink-surface: #10243a;
+  --skin-text: #d8fff4;
+  --skin-text-dim: #8fc4b8;
+  --skin-text-faint: #5f8c88;
+  --skin-primary: #05ffa1;
+  --skin-accent: #00f0ff;
+  --skin-accent-2: #ff2a85;
+  --skin-success: #05ffa1;
+  --skin-danger: #ff3344;
+  --skin-rare: #9d00ff;
+  --skin-on-bright: #02040a;
+  --skin-on-accent-2: #02040a;
+  --skin-grid-line: rgba(5, 255, 161, 0.16);
+
+  /* Font */
+  --skin-font-body: 'Cascadia Mono', 'JetBrains Mono', Consolas, 'DejaVu Sans Mono', monospace;
+  --skin-font-display: 'VT323', 'Cascadia Mono', Consolas, monospace;
+  --skin-font-label: 'Cascadia Mono', 'JetBrains Mono', Consolas, 'DejaVu Sans Mono', monospace;
+  --skin-font-mono: 'Cascadia Mono', 'JetBrains Mono', Consolas, 'DejaVu Sans Mono', monospace;
+  --skin-font-logo: 'VT323', 'Cascadia Mono', Consolas, monospace;
+
+  /* Titoli e logo */
+  --skin-title-color: #05ffa1;
+  --skin-title-weight: 400;
+  --skin-title-spacing: 0.04em;
+  --skin-title-case: uppercase;
+  --skin-title-shadow: 0 0 13px rgba(5, 255, 161, 0.65);
+  --skin-title-transform: none;
+  --skin-logo-color: #00f0ff;
+  --skin-logo-spacing: 0.18em;
+  --skin-logo-shadow: 0 0 13px rgba(0, 240, 255, 0.8);
+  --skin-logo-transform: none;
+
+  /* Ombre e bagliori */
+  --skin-shadow-s: 0px;
+  --skin-shadow-m: 0px;
+  --skin-shadow-l: 0px;
+  --skin-shadow-blur: var(--space-13);
+  --skin-glow: var(--space-21);
+
+  /* Sfondi */
+  --skin-page-background: linear-gradient(rgba(5, 255, 161, 0.05) 1px, transparent 1px), linear-gradient(180deg, #02040a 0%, #06101c 100%);
+  --skin-nav-background: rgba(2, 4, 10, 0.94);
+  --skin-stage-background: radial-gradient(circle at center, rgba(0, 240, 255, 0.16) 0%, rgba(2, 4, 10, 0.95) 75%);
+  --skin-texture: linear-gradient(rgba(5, 255, 161, 0.08) 1px, transparent 1px);
+}
+
+[data-skin='futuristica'] body {
+  background-size: 100% var(--space-3), auto;
+}

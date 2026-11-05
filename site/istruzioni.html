@@ -1,13 +1,16 @@
 <!doctype html>
-<html lang="it">
+<html lang="it" data-skin="sobria">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Le istruzioni per chi prova QUINE42 in beta." />
     <title>QUINE42 · Istruzioni</title>
+    <!-- La veste (ADR-0145): prima di tutto, così la pagina non si disegna mai con quella sbagliata. Niente script scritti qui: la CSP -->
+    <script src="/skins/boot.js" vite-ignore></script>
+    <noscript><link rel="stylesheet" href="/skins/sobria/skin.css" vite-ignore /></noscript>
     <link rel="stylesheet" href="./site.css" />
   </head>
-  <body class="home">
+  <body>
     <header class="site-nav">
       <a href="./index.html" class="nav-brand">
         <span class="nav-logo">QUINE42</span>
@@ -49,6 +52,7 @@
       <div class="footer-copy">QUINE42 © 2026 · Voxel e modelli MarkovJunior 3D · Generato con intelligenza artificiale</div>
     </footer>
 
+    <script type="module" src="./skin.ts"></script>
     <script type="module" src="./istruzioni.ts"></script>
   </body>
 </html>

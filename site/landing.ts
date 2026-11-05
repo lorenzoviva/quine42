@@ -12,6 +12,7 @@ import { renderNewsCard } from './notizie-testo';
 import { fetchVideos, renderVideos } from './video-testo';
 import { guidePresent } from 'virtual:quine-istruzioni-presenti';
 import pino from '../universe/models/albero.xml?raw';
+import { SKIN_EVENT, skinColor } from './skin-core';
 
 /** A program of the hero: its MarkovJunior source and the line under the stage. */
 interface HeroProgram {
@@ -117,7 +118,8 @@ function initHero(): void {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
   const scene = new THREE.Scene();
-  scene.fog = new THREE.Fog(0x090514, 30, 60);
+  const fog = new THREE.Fog(0x090514, 30, 60);
+  scene.fog = fog;
   const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 200);
   camera.position.set(0, 9, 34);
   camera.lookAt(0, 0, 0);
@@ -126,19 +128,35 @@ function initHero(): void {
   const key = new THREE.DirectionalLight(0xfff5ea, 2.2);
   key.position.set(8, 16, 10);
   scene.add(key);
-  const cyan = new THREE.PointLight(0x00f0ff, 60, 50);
+  const cyan = new THREE.PointLight(0xffffff, 60, 50);
   cyan.position.set(-12, 6, 10);
   scene.add(cyan);
-  const pink = new THREE.PointLight(0xff2a85, 60, 50);
+  const pink = new THREE.PointLight(0xffffff, 60, 50);
   pink.position.set(12, -4, 10);
   scene.add(pink);
 
-  // The synthwave floor under the model.
-  const grid = new THREE.GridHelper(60, 30, 0xff2a85, 0x00f0ff);
-  (grid.material as THREE.Material).transparent = true;
-  (grid.material as THREE.Material).opacity = 0.35;
-  grid.position.y = -10.5;
-  scene.add(grid);
+  // The floor under the model, and all that here is of the skin: it follows the picker.
+  let grid: THREE.GridHelper | undefined;
+  const paintStage = () => {
+    fog.color.set(skinColor('--skin-bg', '#090514'));
+    key.color.set(skinColor('--skin-text', '#fff5ea'));
+    const accent = skinColor('--skin-accent', '#00f0ff');
+    const accent2 = skinColor('--skin-accent-2', '#ff2a85');
+    cyan.color.set(accent);
+    pink.color.set(accent2);
+    if (grid) {
+      scene.remove(grid);
+      grid.geometry.dispose();
+      (grid.material as THREE.Material).dispose();
+    }
+    grid = new THREE.GridHelper(60, 30, accent2, accent);
+    (grid.material as THREE.Material).transparent = true;
+    (grid.material as THREE.Material).opacity = 0.35;
+    grid.position.y = -10.5;
+    scene.add(grid);
+  };
+  paintStage();
+  document.addEventListener(SKIN_EVENT, paintStage);
 
   const pivot = new THREE.Group();
   scene.add(pivot);
@@ -246,6 +264,10 @@ function initHero(): void {
     const h = stage.clientHeight || 480;
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
+    // A stage narrower than this (the column over φ, a phone) opens the lens, so that the model is not cut at the sides.
+    const FIT_ASPECT = 1.3;
+    const halfFov = THREE.MathUtils.degToRad(20);
+    camera.fov = THREE.MathUtils.radToDeg(2 * Math.atan((Math.tan(halfFov) * FIT_ASPECT) / Math.min(FIT_ASPECT, camera.aspect)));
     camera.updateProjectionMatrix();
   };
   new ResizeObserver(resize).observe(stage);
@@ -268,7 +290,7 @@ function initHero(): void {
     if (!dragging && now - idleSince > 1200) yaw += dt * 0.35;
     pivot.rotation.set(tilt, yaw, 0);
     pivot.position.y = Math.sin(now / 900) * 0.4;
-    grid.position.z = ((now / 80) % 2) - 1;
+    if (grid) grid.position.z = ((now / 80) % 2) - 1;
     renderer.render(scene, camera);
   };
   requestAnimationFrame(frame);

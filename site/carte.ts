@@ -71,13 +71,13 @@ const KIND_NAME: Record<CardKind, string> = {
 
 /** The gem of the cards with no model: two colours of the theme for each family. */
 const GEM: Record<Category, [string, string]> = {
-  tutte: ['--neon-pink', '--neon-cyan'],
-  oggetti: ['--neon-pink', '--neon-cyan'],
-  luoghi: ['--neon-yellow', '--neon-green'],
-  creature: ['--neon-cyan', '--neon-pink'],
-  magie: ['--neon-pink', '--neon-purple'],
-  storie: ['--neon-purple', '--neon-cyan'],
-  eredita: ['--neon-green', '--neon-yellow'],
+  tutte: ['--skin-accent-2', '--skin-accent'],
+  oggetti: ['--skin-accent-2', '--skin-accent'],
+  luoghi: ['--skin-primary', '--skin-success'],
+  creature: ['--skin-accent', '--skin-accent-2'],
+  magie: ['--skin-accent-2', '--skin-rare'],
+  storie: ['--skin-rare', '--skin-accent'],
+  eredita: ['--skin-success', '--skin-primary'],
 };
 
 /** How a fingerprint is written: its first number, which two similar contents often share. */

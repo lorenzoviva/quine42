@@ -1,10 +1,13 @@
 <!doctype html>
-<html lang="it">
+<html lang="it" data-skin="sobria">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="QUINE42: il tuo viandante. Accedi, scegli il nome, il colore del mantello e l'aspetto." />
     <title>QUINE42 · Profilo del viandante</title>
+    <!-- La veste (ADR-0145): prima di tutto, così la pagina non si disegna mai con quella sbagliata. Niente script scritti qui: la CSP -->
+    <script src="/skins/boot.js" vite-ignore></script>
+    <noscript><link rel="stylesheet" href="/skins/sobria/skin.css" vite-ignore /></noscript>
     <link rel="stylesheet" href="./site.css" />
   </head>
   <body class="page-profile">
@@ -35,14 +38,14 @@
     <main class="section-wrap">
       <div class="section-head">
         <span class="comic-badge yellow">SCHEDA PERSONAGGIO</span>
-        <h1 class="comic-title" style="font-size: 2.8rem; margin-top: 10px">PROFILO DEL VIANDANTE</h1>
+        <h1 class="comic-title" style="font-size: var(--text-47); margin-top: var(--space-8)">PROFILO DEL VIANDANTE</h1>
         <p>// IDENTITÀ · PORTAFOGLIO · ASPETTO</p>
       </div>
 
       <!-- Avvisi: salvato, riparato, errori -->
       <div class="comic-alert" id="page-alert" role="status" aria-live="polite" hidden>
         <span class="comic-badge" id="page-alert-badge">INFO</span>
-        <span class="arcade-text" id="page-alert-text" style="font-size: 0.75rem"></span>
+        <span class="arcade-text" id="page-alert-text" style="font-size: var(--text-13)"></span>
       </div>
 
       <!-- L'accesso (dal template docs/design/sito/login.html) -->
@@ -50,8 +53,8 @@
         <div class="login-box">
           <div class="login-head">
             <span class="comic-badge yellow">ACCESSO</span>
-            <h2 class="comic-title" style="font-size: 2.2rem; margin-top: 10px">ENTRA NEL MONDO</h2>
-            <p class="arcade-text text-dim" id="login-sub" style="font-size: 0.72rem">Con un account Google il tuo viandante ti segue ovunque</p>
+            <h2 class="comic-title" style="font-size: var(--text-34); margin-top: var(--space-8)">ENTRA NEL MONDO</h2>
+            <p class="arcade-text text-dim" id="login-sub" style="font-size: var(--text-11)">Con un account Google il tuo viandante ti segue ovunque</p>
           </div>
 
           <div class="login-accounts" id="login-accounts">
@@ -61,7 +64,7 @@
               </svg>
               ACCEDI CON GOOGLE
             </button>
-            <button class="comic-btn full-width cyan" id="btn-anon-login" style="margin-top: 16px">⚡ ENTRA COME ANONIMO</button>
+            <button class="comic-btn full-width cyan" id="btn-anon-login" style="margin-top: var(--space-13)">⚡ ENTRA COME ANONIMO</button>
             <p class="login-note">
               Da anonimo giochi solo con i modelli locali e non puoi recuperare il viandante finché non lo leghi a Google.
             </p>
@@ -84,7 +87,7 @@
       <div class="profile-grid" id="profile-grid" hidden>
         <!-- A sinistra: chi è il viandante, l'account, i crediti -->
         <div>
-          <div class="comic-panel yellow-shadow" style="margin-bottom: 24px">
+          <div class="comic-panel yellow-shadow" style="margin-bottom: var(--space-21)">
             <div class="identity-head">
               <div>
                 <span class="comic-badge cyan">ID ACCOUNT</span>
@@ -93,7 +96,7 @@
               <span class="comic-badge" id="account-badge">—</span>
             </div>
 
-            <div class="comic-table-wrap" style="margin-bottom: 20px">
+            <div class="comic-table-wrap" style="margin-bottom: var(--space-21)">
               <table class="comic-table">
                 <tbody>
                   <tr>
@@ -118,7 +121,7 @@
 
             <div class="wallet-box">
               <div>
-                <span class="arcade-text text-dim" style="font-size: 0.65rem">SALDO CREDITI DISPONIBILE</span>
+                <span class="arcade-text text-dim" style="font-size: var(--text-11)">SALDO CREDITI DISPONIBILE</span>
                 <div class="comic-title wallet-amount" id="wallet-amount">$0.00</div>
                 <span class="input-hint" id="wallet-note"></span>
               </div>
@@ -137,7 +140,7 @@
         <div>
           <div class="comic-panel cyan-shadow">
             <div class="identity-head">
-              <h2 class="comic-title" style="font-size: 1.6rem; margin: 0">ASPETTO</h2>
+              <h2 class="comic-title" style="font-size: var(--text-29); margin: 0">ASPETTO</h2>
               <span class="comic-badge cyan" id="avatar-badge">MARKOVJUNIOR</span>
             </div>
 
@@ -154,7 +157,7 @@
             <div class="form-group">
               <span class="comic-label" id="cloak-label">COLORE DEL MANTELLO</span>
               <div class="color-palette-picker" id="cloak-palette" role="radiogroup" aria-labelledby="cloak-label"></div>
-              <span class="arcade-text text-dim" style="font-size: 0.7rem">
+              <span class="arcade-text text-dim" style="font-size: var(--text-11)">
                 Colore: <b id="current-color-label">#c06030</b>
                 <input type="color" id="cloak-custom" value="#c06030" aria-label="Un colore a scelta" />
               </span>
@@ -177,7 +180,7 @@
               <textarea id="profile-intro" class="comic-textarea" rows="4" maxlength="280" placeholder="Poche righe: chi sei, da dove vieni"></textarea>
             </div>
 
-            <button class="comic-btn full-width pink lg" id="btn-save" style="margin-top: 8px">SALVA IL VIANDANTE</button>
+            <button class="comic-btn full-width pink lg" id="btn-save" style="margin-top: var(--space-8)">SALVA IL VIANDANTE</button>
           </div>
         </div>
       </div>
@@ -217,6 +220,7 @@
       <div class="footer-copy">QUINE42 © 2026 · Voxel e modelli MarkovJunior 3D · Generato con intelligenza artificiale</div>
     </footer>
 
+    <script type="module" src="./skin.ts"></script>
     <script type="module" src="./profilo.ts"></script>
   </body>
 </html>

@@ -1,0 +1,74 @@
+/* La veste sobria (T283, ADR-0145): l'aspetto della home per la beta (T244), ora su tutte le pagine. Il logo e la favicon definitivi sono di T286. */
+:root[data-skin='sobria'] {
+  /* Colori */
+  --skin-bg: #090514;
+  --skin-panel: #130a24;
+  --skin-panel-raised: #1c1133;
+  --skin-ink: #07040d;
+  --skin-ink-raised: #150c26;
+  --skin-ink-surface: #1e1038;
+  --skin-text: #fff5ea;
+  --skin-text-dim: #c5b8a9;
+  --skin-text-faint: #8c829c;
+  --skin-primary: #ffe600;
+  --skin-accent: #00f0ff;
+  --skin-accent-2: #ff2a85;
+  --skin-success: #05ffa1;
+  --skin-danger: #ff3344;
+  --skin-rare: #9d00ff;
+  --skin-on-bright: #07040d;
+  --skin-on-accent-2: #ffffff;
+  --skin-grid-line: rgba(0, 240, 255, 0.18);
+
+  /* Font: il carattere a fumetti resta solo nel logo */
+  --skin-font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --skin-font-display: var(--skin-font-body);
+  --skin-font-label: 'Press Start 2P', 'VT323', monospace;
+  --skin-font-mono: 'Cascadia Mono', 'JetBrains Mono', Consolas, 'DejaVu Sans Mono', monospace;
+  --skin-font-logo: 'Bangers', 'Impact', 'Arial Black', sans-serif;
+
+  /* Titoli e logo */
+  --skin-title-color: var(--skin-text);
+  --skin-title-weight: 700;
+  --skin-title-spacing: 0;
+  --skin-title-case: none;
+  --skin-title-shadow: none;
+  --skin-title-transform: none;
+  --skin-logo-color: #ffe600;
+  --skin-logo-spacing: 0.12em;
+  --skin-logo-shadow: -2px -2px 0 #07040d, 2px -2px 0 #07040d, -2px 2px 0 #07040d, 2px 2px 0 #07040d, 3px 3px 0 #ff2a85;
+  --skin-logo-transform: skew(-4deg);
+
+  /* Ombre e bagliori */
+  --skin-shadow-s: var(--space-1);
+  --skin-shadow-m: var(--space-2);
+  --skin-shadow-l: var(--space-3);
+  --skin-shadow-blur: 0px;
+  --skin-glow: var(--space-13);
+
+  /* Sfondi */
+  --skin-page-background: linear-gradient(180deg, rgba(9, 5, 20, 0.95) 0%, rgba(19, 10, 36, 0.92) 100%), radial-gradient(circle at 50% 15%, rgba(255, 42, 133, 0.14) 0%, transparent 60%);
+  --skin-nav-background: rgba(9, 5, 20, 0.94);
+  --skin-stage-background: radial-gradient(circle at center, rgba(157, 0, 255, 0.25) 0%, rgba(9, 5, 20, 0.95) 75%);
+  --skin-texture: radial-gradient(circle, rgba(0, 240, 255, 0.14) 1.5px, transparent 1.5px);
+}
+
+[data-skin='sobria'] .comic-btn,
+[data-skin='sobria'] .nav-link {
+  letter-spacing: 0.02em;
+}
+
+[data-skin='sobria'] .comic-btn.sm,
+[data-skin='sobria'] .comic-btn.arcade {
+  font-size: var(--text-11);
+}
+
+[data-skin='sobria'] .comic-card .arcade-text {
+  font-family: var(--skin-font-body);
+  font-size: var(--text-13) !important;
+  color: var(--skin-text);
+}
+
+[data-skin='sobria'] .comic-card:hover {
+  transform: none;
+}
