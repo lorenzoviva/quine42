@@ -1,0 +1,76 @@
+<!-- Cane randagio (Cantiere 8, neapolis): postura a caso; orecchie, coda e chiazze crescono a caso. -->
+<sequence values="BFDWGKPQu123456" symmetry="(xy)" name="Cane randagio">
+  <color symbol="F" value="c9a06a" name="pelo fulvo"/>
+  <color symbol="D" value="6a4a2c" name="chiazze scure"/>
+  <color symbol="W" value="efe6d6" name="muso chiaro"/>
+  <color symbol="G" value="b08a58" name="zampe" part="gamba"/>
+  <color symbol="K" value="1e1a17" name="naso"/>
+  <color symbol="P" hidden="True" name="marcatore"/>
+  <color symbol="Q" hidden="True" name="marcatore"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="1" hidden="True" name="marcatore"/>
+  <color symbol="2" hidden="True" name="marcatore"/>
+  <color symbol="3" hidden="True" name="marcatore"/>
+  <color symbol="4" hidden="True" name="marcatore"/>
+  <color symbol="5" hidden="True" name="marcatore"/>
+  <color symbol="6" hidden="True" name="marcatore"/>
+  <!-- scelta «postura»: in piedi | seduto | sdraiato | a fiutare -->
+  <box at="7 10 0" size="15 20 15" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/><rule in="u" out="4"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/><rule in="4u" out="*4"/></all>
+  <!--   1: in piedi -->
+  <box at="7 3 8" size="1 1 1" color="Q" on="1"/>
+  <cylinder at="5 6 0" size="2 2 7" color="G" on="1"/>
+  <cylinder at="9 6 0" size="2 2 7" color="G" on="1"/>
+  <cylinder at="5 13 0" size="2 2 7" color="G" on="1"/>
+  <cylinder at="9 13 0" size="2 2 7" color="G" on="1"/>
+  <ellipsoid at="7 10 5" size="7 14 6" color="F" on="1"/>
+  <box at="5 16 12" size="1 1 1" color="P" on="1"/>
+  <box at="9 16 12" size="1 1 1" color="P" on="1"/>
+  <ellipsoid at="7 16 8" size="6 6 5" color="F" on="1"/>
+  <box at="7 19 9" size="3 2 2" color="W" on="1"/>
+  <box at="7 19 10" size="1 1 1" color="K" on="1"/>
+  <!--   2: seduto -->
+  <box at="7 3 1" size="1 1 1" color="Q" on="2"/>
+  <ellipsoid at="7 7 0" size="9 8 5" color="F" on="2"/>
+  <ellipsoid at="7 8 2" size="7 8 9" color="F" on="2"/>
+  <line at="5 12 0" to="5 11 6" r="0.5" color="G" on="2"/>
+  <line at="9 12 0" to="9 11 6" r="0.5" color="G" on="2"/>
+  <box at="5 11 13" size="1 1 1" color="P" on="2"/>
+  <box at="9 11 13" size="1 1 1" color="P" on="2"/>
+  <ellipsoid at="7 11 9" size="6 6 5" color="F" on="2"/>
+  <box at="7 14 10" size="3 2 2" color="W" on="2"/>
+  <box at="7 15 11" size="1 1 1" color="K" on="2"/>
+  <!--   3: sdraiato -->
+  <box at="7 3 1" size="1 1 1" color="Q" on="3"/>
+  <ellipsoid at="7 10 0" size="8 14 5" color="F" on="3"/>
+  <line at="5 15 0" to="5 19 0" r="0.5" color="G" on="3"/>
+  <line at="9 15 0" to="9 19 0" r="0.5" color="G" on="3"/>
+  <box at="5 15 7" size="1 1 1" color="P" on="3"/>
+  <box at="9 15 7" size="1 1 1" color="P" on="3"/>
+  <ellipsoid at="7 15 3" size="6 6 5" color="F" on="3"/>
+  <box at="7 18 3" size="3 2 2" color="W" on="3"/>
+  <box at="7 19 4" size="1 1 1" color="K" on="3"/>
+  <!--   4: a fiutare -->
+  <box at="7 3 9" size="1 1 1" color="Q" on="4"/>
+  <cylinder at="5 6 0" size="2 2 8" color="G" on="4"/>
+  <cylinder at="9 6 0" size="2 2 8" color="G" on="4"/>
+  <line at="5 15 0" to="5 13 6" r="0.5" color="G" on="4"/>
+  <line at="9 15 0" to="9 13 6" r="0.5" color="G" on="4"/>
+  <ellipsoid at="7 10 5" size="7 14 6" color="F" on="4"/>
+  <box at="5 16 6" size="1 1 1" color="P" on="4"/>
+  <box at="9 16 6" size="1 1 1" color="P" on="4"/>
+  <ellipsoid at="7 16 1" size="6 6 5" color="F" on="4"/>
+  <box at="7 19 1" size="3 2 2" color="W" on="4"/>
+  <box at="7 19 1" size="1 1 1" color="K" on="4"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/><rule in="4" out="B"/></prl>
+  <!-- orecchie: dritte, di sbieco o cadenti -->
+  <one steps="4"><rule in="B P" out="P F"/><rule in="B* *P" out="P* *F"/><rule in="P* *B" out="F* *P"/></one>
+  <prl in="P" out="D"/>
+  <!-- la coda cresce in una direzione a caso -->
+  <one steps="4"><rule in="B Q" out="Q F"/><rule in="B* *Q" out="Q* *F"/><rule in="QB" out="FQ"/></one>
+  <prl in="Q" out="W"/>
+  <!-- chiazze del mantello -->
+  <prl in="F" out="D" p="0.01" steps="1"/>
+  <prl in="DF" out="*D" p="0.35" steps="3"/>
+</sequence>

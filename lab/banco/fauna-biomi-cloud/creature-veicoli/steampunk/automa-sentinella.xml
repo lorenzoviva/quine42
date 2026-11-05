@@ -1,0 +1,92 @@
+<!-- Automa sentinella (Cantiere 8, orichalcum): gambe, tronco, braccia e testa a caso; rivetti a caso. -->
+<sequence values="BODCILu123456" symmetry="(xy)" name="Automa sentinella">
+  <color symbol="O" value="b8892e" name="ottone"/>
+  <color symbol="D" value="6b4a1e" name="ottone brunito"/>
+  <color symbol="C" value="c4703a" name="rame dei rivetti"/>
+  <color symbol="I" value="3b3631" name="ferro" part="gamba"/>
+  <color symbol="L" value="ffd27a" name="luce della caldaia" glow="True"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="1" hidden="True" name="marcatore"/>
+  <color symbol="2" hidden="True" name="marcatore"/>
+  <color symbol="3" hidden="True" name="marcatore"/>
+  <color symbol="4" hidden="True" name="marcatore"/>
+  <color symbol="5" hidden="True" name="marcatore"/>
+  <color symbol="6" hidden="True" name="marcatore"/>
+  <!-- scelta «gambe»: dritte | al passo | piegate -->
+  <box at="10 7 0" size="20 15 12" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <!--   1: dritte -->
+  <box at="6 7 0" size="4 6 2" color="D" on="1"/>
+  <box at="14 7 0" size="4 6 2" color="D" on="1"/>
+  <cylinder at="6 7 0" size="3 3 11" color="I" on="1"/>
+  <cylinder at="14 7 0" size="3 3 11" color="I" on="1"/>
+  <!--   2: al passo -->
+  <box at="6 10 0" size="4 5 2" color="D" on="2"/>
+  <box at="14 4 0" size="4 5 2" color="D" on="2"/>
+  <line at="6 10 0" to="7 7 10" r="1" color="I" on="2"/>
+  <line at="14 4 0" to="13 7 10" r="1" color="I" on="2"/>
+  <!--   3: piegate -->
+  <box at="4 7 0" size="4 6 2" color="D" on="3"/>
+  <box at="16 7 0" size="4 6 2" color="D" on="3"/>
+  <line at="4 7 0" to="6 10 5" r="1" color="I" on="3"/>
+  <line at="6 10 5" to="7 7 10" r="1" color="I" on="3"/>
+  <line at="16 7 0" to="14 10 5" r="1" color="I" on="3"/>
+  <line at="14 10 5" to="13 7 10" r="1" color="I" on="3"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <!-- scelta «tronco»: a caldaia | a botte | a cassa -->
+  <box at="10 7 8" size="20 15 15" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <!--   1: a caldaia -->
+  <cylinder at="10 7 9" size="12 11 12" color="O" on="1"/>
+  <box at="10 12 13" size="4 1 3" color="L" on="1"/>
+  <!--   2: a botte -->
+  <ellipsoid at="10 7 8" size="14 12 14" color="O" on="2"/>
+  <box at="10 13 13" size="5 1 3" color="L" on="2"/>
+  <!--   3: a cassa -->
+  <box at="10 7 9" size="13 10 12" color="O" on="3"/>
+  <box at="10 12 11" size="7 1 6" color="D" on="3"/>
+  <box at="10 12 13" size="3 1 2" color="L" on="3"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <!-- scelta «braccia»: con alabarda | con lanterna | abbassate -->
+  <box at="10 7 2" size="20 15 28" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <!--   1: con alabarda -->
+  <line at="3 7 19" to="2 9 12" r="1" color="I" on="1"/>
+  <line at="17 7 19" to="18 9 13" r="1" color="I" on="1"/>
+  <line at="18 10 3" to="18 10 29" r="0.5" color="D" on="1"/>
+  <box at="18 10 26" size="1 4 4" color="I" on="1"/>
+  <!--   2: con lanterna -->
+  <line at="3 7 19" to="2 9 12" r="1" color="I" on="2"/>
+  <line at="17 7 19" to="17 13 17" r="1" color="I" on="2"/>
+  <box at="17 13 13" size="3 3 4" color="L" on="2"/>
+  <box at="17 13 17" size="3 3 1" color="D" on="2"/>
+  <!--   3: abbassate -->
+  <line at="3 7 19" to="2 8 10" r="1.5" color="I" on="3"/>
+  <line at="17 7 19" to="18 8 10" r="1.5" color="I" on="3"/>
+  <box at="2 8 8" size="3 3 3" color="D" on="3"/>
+  <box at="18 8 8" size="3 3 3" color="D" on="3"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <!-- scelta «testa»: a cupola | a cilindro | a lanterna -->
+  <box at="10 7 19" size="20 15 11" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <!--   1: a cupola -->
+  <cylinder at="10 7 20" size="6 6 3" color="D" on="1"/>
+  <ellipsoid at="10 7 22" size="8 8 7" color="O" on="1"/>
+  <box at="10 11 25" size="4 1 1" color="L" on="1"/>
+  <!--   2: a cilindro -->
+  <cylinder at="10 7 20" size="7 7 7" color="O" on="2"/>
+  <line at="12 7 26" to="12 7 29" r="0.5" color="D" on="2"/>
+  <box at="12 8 29" size="1 2 1" color="L" on="2"/>
+  <box at="10 10 24" size="3 1 1" color="L" on="2"/>
+  <!--   3: a lanterna -->
+  <box at="10 7 20" size="6 6 2" color="D" on="3"/>
+  <box at="10 7 22" size="5 5 4" color="L" on="3"/>
+  <cone at="10 7 26" size="7 7 4" color="D" on="3"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <!-- rivetti di rame dove capita -->
+  <prl in="BO" out="*C" p="0.06" steps="1"/>
+</sequence>

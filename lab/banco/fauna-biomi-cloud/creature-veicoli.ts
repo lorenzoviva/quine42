@@ -1,0 +1,738 @@
+// Collection 1: creatures, special characters, automata and vehicles. Boxes in voxels (x width, y depth with the front at high y, z height).
+
+import { box, cone, cyl, ell, line, nota, programma, scelta } from './attrezzi';
+import type { Definizione } from './catalogo';
+
+/** A walker grows a thin limb from its tip letter `P`, leaving `A`: up, aslant, or splitting in two, for `passi` steps. */
+const ramifica = (passi: number, punta = 'P', scia = 'A', pesi = { su: 1, obliquo: 2, biforca: 0.6 }) => [
+  `<one steps="${passi}">`,
+  `  <rule in="B ${punta}" out="${punta} ${scia}" p="${pesi.su}"/>`,
+  `  <rule in="B* *${punta}" out="${punta}* *${scia}" p="${pesi.obliquo}"/>`,
+  `  <rule in="B*B *${punta}*" out="${punta}*${punta} *${scia}*" p="${pesi.biforca}"/>`,
+  '</one>',
+  `<prl in="${punta}" out="${scia}"/>`,
+];
+
+/** Seeds on the top surface of `su` (`n` at random), each growing `alto` up or aslant: spikes, crystals, chimneys. */
+const punte = (su: string, n: number, alto: number, colore: string, punta = 'P') => [
+  nota(`${n} punte a caso sulla faccia alta di ${su}, alte fino a ${alto}`),
+  `<one in="B ${su}" out="${punta} *" steps="${n}"/>`,
+  `<all steps="${alto}"><rule in="B ${punta}" out="${punta} ${colore}"/><rule in="B* *${punta}" out="${punta}* *${colore}"/></all>`,
+  `<prl in="${punta}" out="${colore}"/>`,
+];
+
+/** Spots on the faces of `su` that look sideways (`p` per cell): runes, rivets, lights. */
+const macchie = (su: string, colore: string, p: number) => `<prl in="B${su}" out="*${colore}" p="${p}" steps="1"/>`;
+
+/** Moss, snow, rust on the faces of `su` that look up. */
+const sopra = (su: string, colore: string, p: number) => `<prl in="B ${su}" out="* ${colore}" p="${p}" steps="1"/>`;
+
+/** A wheel: an ellipsoid flattened across x, a disc standing on the ground. */
+const ruota = (x0: number, x1: number, y: number, r: number, c: string) => ell([(x0 + x1) / 2, y, 0], [x1 - x0 + 1, 2 * r + 1, 2 * r + 1], c);
+
+export const CREATURE_VEICOLI: Definizione[] = [
+  {
+    collezione: 'creature-veicoli',
+    ambientazione: 'fantasy',
+    nome: 'cervo-reale',
+    titolo: 'Cervo reale',
+    classe: 'bestia',
+    descrizione: 'Il cervo dei boschi di Aurora: mantello fulvo, ventre chiaro, palchi d\'osso che crescono a rami.',
+    procedura:
+      'tre scelte a caso (postura delle zampe: ferma, al passo, in slancio; corporatura: snella, robusta, lunga; portamento della testa: fiero, al pascolo, voltato, al bramito) e i palchi che crescono da due punte con un camminatore che sale, piega o si biforca.',
+    xml: () =>
+      programma({
+        titolo: 'Cervo reale',
+        commento: 'Cervo reale (Cantiere 8, aurora): zampe, corpo e testa scelti a caso; i palchi crescono a rami da due punte sulla testa.',
+        colori: [
+          ['F', 'a0643a', 'mantello fulvo'],
+          ['W', 'e8d6b4', 'ventre chiaro'],
+          ['G', '7a4a2a', 'zampe', 'gamba'],
+          ['K', '2a1d14', 'zoccoli e naso'],
+          ['A', 'efe3c8', 'palco d\'osso'],
+        ],
+        marcatori: 'P',
+        corpo: [
+          ...scelta('zampe', [[12, 20, 0], [19, 38, 15]], [
+            ['ferma', [box([8, 12, 0], [3, 3, 2], 'K'), box([16, 12, 0], [3, 3, 2], 'K'), box([8, 28, 0], [3, 3, 2], 'K'), box([16, 28, 0], [3, 3, 2], 'K'),
+              cyl([8, 12, 0], [3, 3, 14], 'G'), cyl([16, 12, 0], [3, 3, 14], 'G'), cyl([8, 28, 0], [3, 3, 14], 'G'), cyl([16, 28, 0], [3, 3, 14], 'G')]],
+            ['al passo', [line([8, 32, 0], [8, 28, 13], 1, 'G'), line([16, 25, 0], [16, 28, 13], 1, 'G'), line([8, 8, 0], [8, 12, 13], 1, 'G'), line([16, 15, 0], [16, 12, 13], 1, 'G')]],
+            ['in slancio', [line([8, 37, 1], [8, 28, 13], 1, 'G'), line([16, 35, 0], [16, 28, 13], 1, 'G'), line([8, 3, 0], [8, 12, 13], 1, 'G'), line([16, 5, 1], [16, 12, 13], 1, 'G')]],
+          ]),
+          ...scelta('corporatura', [[12, 20, 7], [18, 32, 16]], [
+            ['snella', [ell([12, 20, 10], [11, 24, 10], 'F')]],
+            ['robusta', [ell([12, 20, 9], [15, 26, 12], 'F')]],
+            ['lunga', [ell([12, 19, 10], [12, 30, 9], 'F')]],
+          ]),
+          ell([12, 20, 8], [9, 20, 5], 'W', 'F'),
+          ell([12, 8, 13], [3, 4, 4], 'W'),
+          ...scelta('portamento', [[12, 32, 0], [25, 16, 30]], [
+            ['fiero', [ell([12, 33, 21], [6, 7, 6], 'F'), box([12, 37, 22], [3, 3, 3], 'K'), line([12, 27, 15], [12, 32, 22], 2, 'F'), box([10, 33, 27], [1, 1, 1], 'P'), box([14, 33, 27], [1, 1, 1], 'P')]],
+            ['al pascolo', [ell([12, 35, 2], [6, 7, 6], 'F'), box([12, 38, 2], [3, 2, 3], 'K'), line([12, 27, 14], [12, 34, 5], 2, 'F'), box([10, 35, 8], [1, 1, 1], 'P'), box([14, 35, 8], [1, 1, 1], 'P')]],
+            ['voltato', [ell([6, 33, 20], [6, 7, 6], 'F'), box([4, 36, 21], [3, 3, 3], 'K'), line([12, 27, 15], [7, 32, 21], 2, 'F'), box([4, 33, 26], [1, 1, 1], 'P'), box([8, 33, 26], [1, 1, 1], 'P')]],
+            ['al bramito', [ell([12, 32, 22], [6, 6, 7], 'F'), box([12, 35, 27], [3, 3, 3], 'K'), line([12, 27, 15], [12, 31, 22], 2, 'F'), box([10, 30, 29], [1, 1, 1], 'P'), box([14, 30, 29], [1, 1, 1], 'P')]],
+          ]),
+          nota('i palchi: due punte salgono, piegano, si biforcano'),
+          ...ramifica(22),
+        ],
+      }),
+  },
+
+  {
+    collezione: 'creature-veicoli',
+    ambientazione: 'fantasy',
+    nome: 'lupo-dei-boschi',
+    titolo: 'Lupo dei boschi',
+    classe: 'bestia',
+    descrizione: 'Il lupo grigio delle selve di Aurora, dorso scuro e petto chiaro.',
+    procedura: 'quattro scelte a caso: andatura (fermo, al trotto, acquattato), corporatura (magro, massiccio, lungo), testa (in avanti, all\'ululato, a fiutare il suolo), coda (bassa, alta e arricciata, tesa); il pelo del dorso si scurisce a chiazze.',
+    xml: () =>
+      programma({
+        titolo: 'Lupo dei boschi',
+        commento: 'Lupo dei boschi (Cantiere 8, aurora): andatura, corpo, testa e coda scelti a caso; chiazze scure sul dorso.',
+        colori: [
+          ['F', '6e7484', 'pelliccia grigia'],
+          ['D', '393c47', 'dorso scuro'],
+          ['W', 'c8cbda', 'petto chiaro'],
+          ['G', '5b606d', 'zampe', 'gamba'],
+          ['K', '1b1c22', 'tartufo e unghie'],
+          ['E', 'e29c22', 'occhi ambrati'],
+        ],
+        corpo: [
+          ...scelta('andatura', [[12, 20, 0], [21, 38, 14]], [
+            ['fermo', [box([9, 13, 0], [3, 3, 1], 'K'), box([15, 13, 0], [3, 3, 1], 'K'), box([9, 27, 0], [3, 3, 1], 'K'), box([15, 27, 0], [3, 3, 1], 'K'),
+              cyl([9, 13, 0], [3, 3, 13], 'G'), cyl([15, 13, 0], [3, 3, 13], 'G'), cyl([9, 27, 0], [3, 3, 13], 'G'), cyl([15, 27, 0], [3, 3, 13], 'G')]],
+            ['al trotto', [line([9, 32, 0], [9, 27, 12], 1, 'G'), line([15, 23, 0], [15, 27, 12], 1, 'G'), line([9, 9, 0], [9, 13, 12], 1, 'G'), line([15, 17, 0], [15, 13, 12], 1, 'G')]],
+            ['acquattato', [line([5, 31, 0], [9, 27, 12], 1, 'G'), line([19, 31, 0], [15, 27, 12], 1, 'G'), line([5, 10, 0], [9, 13, 12], 1, 'G'), line([19, 10, 0], [15, 13, 12], 1, 'G')]],
+          ]),
+          ...scelta('corporatura', [[12, 20, 6], [20, 34, 18]], [
+            ['magro', [ell([12, 20, 9], [11, 26, 10], 'F')]],
+            ['massiccio', [ell([12, 20, 8], [15, 28, 13], 'F')]],
+            ['lungo', [ell([12, 19, 9], [12, 31, 10], 'F')]],
+          ]),
+          ell([12, 20, 8], [8, 20, 4], 'W', 'F'),
+          ell([12, 20, 15], [8, 22, 6], 'D', 'F'),
+          ...scelta('testa', [[12, 33, 0], [25, 14, 30]], [
+            ['in avanti', [ell([12, 33, 14], [8, 8, 8], 'F'), box([12, 38, 15], [4, 4, 3], 'F'), box([12, 39, 16], [2, 1, 2], 'K'), box([10, 37, 19], [1, 1, 1], 'E'), box([14, 37, 19], [1, 1, 1], 'E'),
+              line([12, 29, 15], [12, 32, 18], 2, 'F'), cone([10, 33, 21], [3, 3, 4], 'F'), cone([14, 33, 21], [3, 3, 4], 'F')]],
+            ['all\'ululato', [ell([12, 31, 20], [7, 7, 8], 'F'), line([12, 32, 25], [12, 35, 28], 1, 'F'), box([12, 36, 29], [1, 1, 1], 'K'), line([12, 29, 15], [12, 31, 22], 2, 'F'), cone([10, 29, 27], [3, 3, 3], 'F'), cone([14, 29, 27], [3, 3, 3], 'F')]],
+            ['a fiutare il suolo', [ell([12, 35, 1], [7, 8, 6], 'F'), box([12, 38, 1], [3, 3, 3], 'F'), box([12, 39, 1], [2, 1, 2], 'K'), line([12, 29, 14], [12, 34, 5], 2, 'F'), cone([10, 34, 7], [3, 3, 3], 'F'), cone([14, 34, 7], [3, 3, 3], 'F')]],
+          ]),
+          ...scelta('coda', [[12, 4, 0], [25, 10, 30]], [
+            ['bassa', [line([12, 8, 15], [12, 3, 6], 1.5, 'F')]],
+            ['alta e arricciata', [line([12, 8, 16], [12, 4, 23], 1.5, 'F'), ell([12, 3, 22], [4, 4, 4], 'W')]],
+            ['tesa', [line([12, 8, 15], [12, 1, 16], 1.5, 'F')]],
+          ]),
+          nota('chiazze più scure sul pelo che guarda in alto'),
+          sopra('F', 'D', 0.25),
+        ],
+      }),
+  },
+  {
+    collezione: 'creature-veicoli',
+    ambientazione: 'fantasy',
+    nome: 'cinghiale-corazzato',
+    titolo: 'Cinghiale corazzato',
+    classe: 'bestia',
+    descrizione: 'Un cinghiale enorme con placche d\'osso sul dorso e zanne ricurve: la bestia delle forre di Aurora.',
+    procedura: 'tre scelte a caso (zampe ferme o alla carica; corpo massiccio, allungato o tozzo; testa bassa alla carica, alta, voltata) e punte d\'osso che spuntano in posti a caso sulle placche e crescono dritte o di sbieco.',
+    xml: () =>
+      programma({
+        titolo: 'Cinghiale corazzato',
+        commento: 'Cinghiale corazzato (Cantiere 8, aurora): zampe, corpo e testa a caso; le punte delle placche nascono in posti a caso.',
+        colori: [
+          ['F', '5a3f2c', 'setole brune'],
+          ['R', '8f8676', 'placche d\'osso'],
+          ['S', 'd9d0bc', 'punte'],
+          ['G', '3e2b1e', 'zampe', 'gamba'],
+          ['T', 'f2ead6', 'zanne'],
+          ['K', '1a120c', 'grugno e zoccoli'],
+        ],
+        marcatori: 'P',
+        corpo: [
+          ...scelta('zampe', [[12, 20, 0], [21, 38, 10]], [
+            ['ferme', [cyl([8, 12, 0], [4, 4, 9], 'G'), cyl([16, 12, 0], [4, 4, 9], 'G'), cyl([8, 28, 0], [4, 4, 9], 'G'), cyl([16, 28, 0], [4, 4, 9], 'G')]],
+            ['alla carica', [line([8, 34, 0], [9, 27, 8], 1.5, 'G'), line([16, 25, 0], [15, 27, 8], 1.5, 'G'), line([8, 6, 0], [9, 13, 8], 1.5, 'G'), line([16, 15, 0], [15, 13, 8], 1.5, 'G')]],
+          ]),
+          ...scelta('corpo', [[12, 20, 4], [24, 34, 22]], [
+            ['massiccio', [ell([12, 20, 5], [17, 28, 15], 'F')]],
+            ['allungato', [ell([12, 19, 6], [14, 32, 12], 'F')]],
+            ['tozzo', [ell([12, 21, 5], [20, 26, 17], 'F')]],
+          ]),
+          nota('le placche coprono il dorso'),
+          ell([12, 20, 13], [16, 26, 10], 'R', 'F'),
+          ...scelta('testa', [[12, 33, 0], [25, 14, 22]], [
+            ['bassa alla carica', [ell([12, 33, 3], [10, 9, 9], 'F'), box([12, 38, 4], [5, 3, 4], 'K'), line([9, 37, 5], [7, 39, 11], 1, 'T'), line([15, 37, 5], [17, 39, 11], 1, 'T')]],
+            ['alta', [ell([12, 33, 9], [10, 9, 9], 'F'), box([12, 38, 10], [5, 3, 4], 'K'), line([9, 37, 11], [7, 39, 17], 1, 'T'), line([15, 37, 11], [17, 39, 17], 1, 'T')]],
+            ['voltata', [ell([7, 33, 6], [10, 9, 9], 'F'), box([4, 37, 7], [4, 3, 4], 'K'), line([3, 36, 8], [1, 38, 14], 1, 'T'), line([8, 37, 8], [9, 39, 14], 1, 'T')]],
+          ]),
+          ...punte('R', 9, 5, 'S'),
+          line([12, 12, 12], [12, 3, 10], 1, 'F'),
+        ],
+      }),
+  },
+  {
+    collezione: 'creature-veicoli',
+    ambientazione: 'fantasy',
+    nome: 'golem-runico',
+    titolo: 'Golem runico',
+    classe: 'persona',
+    descrizione: 'Un guardiano di pietra di Aurora, massi sovrapposti tenuti insieme da rune che brillano; il muschio gli cresce sulle spalle.',
+    procedura: 'quattro scelte a caso (gambe divaricate, al passo o in ginocchio; tronco a blocco, a botte o a gradoni; braccia abbassate, alzate o una avanti; testa a masso, a cuneo o affondata) e rune luminose incise in posti a caso sulle facce, muschio sulle facce in alto.',
+    xml: () =>
+      programma({
+        titolo: 'Golem runico',
+        commento: 'Golem runico (Cantiere 8, aurora): gambe, tronco, braccia e testa a caso; rune e muschio in posti a caso.',
+        colori: [
+          ['S', '8a8778', 'pietra'],
+          ['D', '5f5d52', 'pietra scura'],
+          ['M', '5f8f3e', 'muschio'],
+          ['R', '7fe0ff', 'rune', 'glow'],
+        ],
+        corpo: [
+          ...scelta('gambe', [[10, 7, 0], [20, 15, 11]], [
+            ['divaricate', [box([5, 7, 0], [5, 6, 10], 'D'), box([15, 7, 0], [5, 6, 10], 'D')]],
+            ['al passo', [box([6, 10, 0], [5, 5, 10], 'D'), box([14, 4, 0], [5, 5, 10], 'D'), box([10, 7, 7], [12, 8, 3], 'D')]],
+            ['in ginocchio', [box([6, 9, 0], [5, 9, 5], 'D'), box([14, 5, 0], [5, 5, 10], 'D'), box([6, 7, 3], [5, 5, 7], 'D')]],
+          ]),
+          ...scelta('tronco', [[10, 7, 8], [20, 15, 16]], [
+            ['a blocco', [box([10, 7, 9], [14, 10, 12], 'S')]],
+            ['a botte', [ell([10, 7, 8], [16, 12, 14], 'S')]],
+            ['a gradoni', [box([10, 7, 9], [10, 9, 5], 'S'), box([10, 7, 13], [14, 11, 5], 'S'), box([10, 7, 17], [17, 12, 4], 'S')]],
+          ]),
+          ...scelta('braccia', [[10, 7, 0], [20, 15, 30]], [
+            ['abbassate', [box([2, 7, 3], [4, 5, 16], 'D'), box([18, 7, 3], [4, 5, 16], 'D'), box([2, 7, 2], [4, 6, 4], 'S'), box([18, 7, 2], [4, 6, 4], 'S')]],
+            ['alzate', [line([3, 7, 18], [2, 7, 27], 2, 'D'), line([17, 7, 18], [18, 7, 27], 2, 'D'), box([2, 7, 26], [5, 5, 4], 'S'), box([18, 7, 26], [5, 5, 4], 'S')]],
+            ['una avanti', [box([2, 7, 3], [4, 5, 16], 'D'), line([17, 8, 18], [17, 13, 16], 2, 'D'), box([17, 13, 14], [5, 3, 5], 'S')]],
+          ]),
+          ...scelta('testa', [[10, 7, 18], [20, 15, 12]], [
+            ['a masso', [ell([10, 7, 20], [8, 8, 8], 'D')]],
+            ['a cuneo', [cone([10, 7, 20], [9, 8, 9], 'D')]],
+            ['affondata', [box([10, 8, 19], [8, 6, 5], 'D')]],
+          ]),
+          nota('rune incise a caso sulle facce, muschio sulle facce in alto'),
+          macchie('S', 'R', 0.05),
+          macchie('D', 'R', 0.03),
+          sopra('S', 'M', 0.45),
+          sopra('D', 'M', 0.3),
+        ],
+      }),
+  },
+  {
+    collezione: 'creature-veicoli',
+    ambientazione: 'fantasy',
+    nome: 'drago-antico',
+    titolo: 'Drago antico',
+    classe: 'edificio',
+    descrizione: 'Il drago delle vette di Aurora, accucciato su quattro zampe: squame color bronzo, ali di membrana, corna che crescono storte.',
+    procedura: 'cinque scelte a caso (corpo, zampe piantate o impennate, ali spiegate, alzate o raccolte, collo eretto, basso o voltato, coda arrotolata a destra, a sinistra o alzata), corna che crescono a caso e creste sul dorso in posti a caso.',
+    xml: () =>
+      programma({
+        titolo: 'Drago antico',
+        commento: 'Drago antico (Cantiere 8, aurora): corpo, zampe, ali, collo e coda a caso; corna e creste crescono a caso.',
+        colori: [
+          ['F', '8a5a2b', 'squame bronzo'],
+          ['W', 'd9b26a', 'ventre'],
+          ['M', 'a8432f', 'membrana delle ali'],
+          ['O', '4a3020', 'ossa delle ali'],
+          ['A', 'ece2c6', 'corna e creste'],
+          ['E', 'ffcc33', 'occhi', 'glow'],
+        ],
+        marcatori: 'P',
+        corpo: [
+          ...scelta('corpo', [[25, 24, 11], [30, 36, 22]], [
+            ['possente', [ell([25, 24, 13], [20, 28, 15], 'F')]],
+            ['lungo', [ell([25, 23, 14], [17, 32, 13], 'F')]],
+            ['raccolto', [ell([25, 25, 13], [22, 24, 16], 'F')]],
+          ]),
+          ell([25, 24, 12], [14, 22, 6], 'W', 'F'),
+          ...scelta('zampe', [[25, 24, 0], [40, 40, 20]], [
+            ['piantate', [line([17, 15, 0], [20, 16, 17], 2.5, 'F'), line([33, 15, 0], [30, 16, 17], 2.5, 'F'), line([17, 34, 0], [20, 32, 17], 2.5, 'F'), line([33, 34, 0], [30, 32, 17], 2.5, 'F')]],
+            ['impennate', [line([16, 13, 0], [20, 16, 17], 2.5, 'F'), line([34, 13, 0], [30, 16, 17], 2.5, 'F'), line([20, 32, 17], [19, 40, 12], 2.5, 'F'), line([30, 32, 17], [31, 40, 12], 2.5, 'F'), box([25, 24, 0], [6, 6, 14], 'F')]],
+          ]),
+          ...scelta('ali', [[25, 24, 17], [50, 29, 33]], [
+            ['spiegate', [line([19, 26, 25], [2, 29, 31], 1.5, 'O'), line([31, 26, 25], [48, 29, 31], 1.5, 'O'), ell([10, 24, 25], [18, 18, 3], 'M'), ell([40, 24, 25], [18, 18, 3], 'M')]],
+            ['alzate', [line([18, 26, 24], [12, 27, 48], 1.5, 'O'), line([32, 26, 24], [38, 27, 48], 1.5, 'O'), ell([15, 23, 24], [3, 16, 25], 'M'), ell([35, 23, 24], [3, 16, 25], 'M')]],
+            ['raccolte', [ell([16, 22, 19], [5, 22, 12], 'M'), ell([34, 22, 19], [5, 22, 12], 'M'), line([17, 30, 27], [15, 12, 26], 1, 'O'), line([33, 30, 27], [35, 12, 26], 1, 'O')]],
+          ]),
+          ...scelta('collo', [[25, 42, 8], [44, 16, 42]], [
+            ['eretto', [line([25, 34, 21], [25, 40, 32], 3, 'F'), line([25, 40, 32], [25, 43, 38], 2.5, 'F'), ell([25, 44, 36], [8, 10, 7], 'F'), box([23, 48, 39], [1, 1, 1], 'E'), box([27, 48, 39], [1, 1, 1], 'E'), box([23, 43, 43], [1, 1, 1], 'P'), box([27, 43, 43], [1, 1, 1], 'P')]],
+            ['basso', [line([25, 34, 19], [25, 44, 16], 3, 'F'), ell([25, 46, 12], [8, 8, 7], 'F'), box([23, 49, 16], [1, 1, 1], 'E'), box([27, 49, 16], [1, 1, 1], 'E'), box([23, 45, 19], [1, 1, 1], 'P'), box([27, 45, 19], [1, 1, 1], 'P')]],
+            ['voltato', [line([25, 34, 21], [14, 40, 29], 3, 'F'), ell([11, 42, 27], [8, 9, 7], 'F'), box([8, 45, 30], [1, 1, 1], 'E'), box([12, 46, 30], [1, 1, 1], 'E'), box([9, 41, 34], [1, 1, 1], 'P'), box([13, 41, 34], [1, 1, 1], 'P')]],
+          ]),
+          ...scelta('coda', [[25, 9, 0], [48, 19, 44]], [
+            ['arrotolata a destra', [line([25, 16, 18], [32, 4, 6], 3, 'F'), line([32, 4, 6], [43, 6, 2], 2, 'F'), line([43, 6, 2], [46, 11, 1], 1, 'F')]],
+            ['arrotolata a sinistra', [line([25, 16, 18], [18, 4, 6], 3, 'F'), line([18, 4, 6], [7, 6, 2], 2, 'F'), line([7, 6, 2], [4, 11, 1], 1, 'F')]],
+            ['alzata', [line([25, 16, 19], [25, 3, 25], 3, 'F'), line([25, 3, 25], [25, 1, 35], 2, 'F'), cone([25, 1, 35], [5, 3, 6], 'A')]],
+          ]),
+          nota('corna: due punte che salgono e piegano'),
+          ...ramifica(10, 'P', 'A', { su: 1, obliquo: 2, biforca: 0.2 }),
+          ...punte('F', 7, 3, 'A'),
+        ],
+      }),
+  },
+
+  {
+    collezione: 'creature-veicoli',
+    ambientazione: 'steampunk',
+    nome: 'automa-sentinella',
+    titolo: 'Automa sentinella',
+    classe: 'persona',
+    descrizione: 'La sentinella d\'ottone di Orichalcum: caldaia nel petto, rivetti, una lanterna o un\'alabarda.',
+    procedura: 'quattro scelte a caso (gambe dritte, al passo, piegate; tronco a caldaia, a botte, a cassa con griglia; braccia con alabarda, con lanterna avanti, abbassate; testa a cupola, a cilindro con periscopio, a lanterna) e rivetti di rame in posti a caso.',
+    xml: () =>
+      programma({
+        titolo: 'Automa sentinella',
+        commento: 'Automa sentinella (Cantiere 8, orichalcum): gambe, tronco, braccia e testa a caso; rivetti a caso.',
+        colori: [
+          ['O', 'b8892e', 'ottone'],
+          ['D', '6b4a1e', 'ottone brunito'],
+          ['C', 'c4703a', 'rame dei rivetti'],
+          ['I', '3b3631', 'ferro', 'gamba'],
+          ['L', 'ffd27a', 'luce della caldaia', 'glow'],
+        ],
+        corpo: [
+          ...scelta('gambe', [[10, 7, 0], [20, 15, 12]], [
+            ['dritte', [box([6, 7, 0], [4, 6, 2], 'D'), box([14, 7, 0], [4, 6, 2], 'D'), cyl([6, 7, 0], [3, 3, 11], 'I'), cyl([14, 7, 0], [3, 3, 11], 'I')]],
+            ['al passo', [box([6, 10, 0], [4, 5, 2], 'D'), box([14, 4, 0], [4, 5, 2], 'D'), line([6, 10, 0], [7, 7, 10], 1, 'I'), line([14, 4, 0], [13, 7, 10], 1, 'I')]],
+            ['piegate', [box([4, 7, 0], [4, 6, 2], 'D'), box([16, 7, 0], [4, 6, 2], 'D'), line([4, 7, 0], [6, 10, 5], 1, 'I'), line([6, 10, 5], [7, 7, 10], 1, 'I'), line([16, 7, 0], [14, 10, 5], 1, 'I'), line([14, 10, 5], [13, 7, 10], 1, 'I')]],
+          ]),
+          ...scelta('tronco', [[10, 7, 8], [20, 15, 15]], [
+            ['a caldaia', [cyl([10, 7, 9], [12, 11, 12], 'O'), box([10, 12, 13], [4, 1, 3], 'L')]],
+            ['a botte', [ell([10, 7, 8], [14, 12, 14], 'O'), box([10, 13, 13], [5, 1, 3], 'L')]],
+            ['a cassa', [box([10, 7, 9], [13, 10, 12], 'O'), box([10, 12, 11], [7, 1, 6], 'D'), box([10, 12, 13], [3, 1, 2], 'L')]],
+          ]),
+          ...scelta('braccia', [[10, 7, 2], [20, 15, 28]], [
+            ['con alabarda', [line([3, 7, 19], [2, 9, 12], 1, 'I'), line([17, 7, 19], [18, 9, 13], 1, 'I'), line([18, 10, 3], [18, 10, 29], 0.5, 'D'), box([18, 10, 26], [1, 4, 4], 'I')]],
+            ['con lanterna', [line([3, 7, 19], [2, 9, 12], 1, 'I'), line([17, 7, 19], [17, 13, 17], 1, 'I'), box([17, 13, 13], [3, 3, 4], 'L'), box([17, 13, 17], [3, 3, 1], 'D')]],
+            ['abbassate', [line([3, 7, 19], [2, 8, 10], 1.5, 'I'), line([17, 7, 19], [18, 8, 10], 1.5, 'I'), box([2, 8, 8], [3, 3, 3], 'D'), box([18, 8, 8], [3, 3, 3], 'D')]],
+          ]),
+          ...scelta('testa', [[10, 7, 19], [20, 15, 11]], [
+            ['a cupola', [cyl([10, 7, 20], [6, 6, 3], 'D'), ell([10, 7, 22], [8, 8, 7], 'O'), box([10, 11, 25], [4, 1, 1], 'L')]],
+            ['a cilindro', [cyl([10, 7, 20], [7, 7, 7], 'O'), line([12, 7, 26], [12, 7, 29], 0.5, 'D'), box([12, 8, 29], [1, 2, 1], 'L'), box([10, 10, 24], [3, 1, 1], 'L')]],
+            ['a lanterna', [box([10, 7, 20], [6, 6, 2], 'D'), box([10, 7, 22], [5, 5, 4], 'L'), cone([10, 7, 26], [7, 7, 4], 'D')]],
+          ]),
+          nota('rivetti di rame dove capita'),
+          macchie('O', 'C', 0.06),
+        ],
+      }),
+  },
+  {
+    collezione: 'creature-veicoli',
+    ambientazione: 'steampunk',
+    nome: 'segugio-ottone',
+    titolo: 'Segugio d\'ottone',
+    classe: 'bestia',
+    descrizione: 'Un cane da caccia meccanico di Orichalcum: corpo a caldaia, giunti di ferro, comignoli che fumano sul dorso.',
+    procedura: 'quattro scelte a caso (andatura ferma, in punta o di corsa; corpo a caldaia, snello o corazzato; testa avanti, a fiutare o all\'ululato; coda ad antenna, tesa o a frusta) e comignoli che spuntano a caso sul dorso e salgono storti.',
+    xml: () =>
+      programma({
+        titolo: 'Segugio d\'ottone',
+        commento: 'Segugio d\'ottone (Cantiere 8, orichalcum): andatura, corpo, testa, coda a caso; comignoli a caso sul dorso.',
+        colori: [
+          ['O', 'c09030', 'ottone'],
+          ['D', '7a5520', 'ottone scuro'],
+          ['I', '3a3836', 'giunti di ferro', 'gamba'],
+          ['T', '5d5a55', 'comignoli'],
+          ['L', 'ff9a3c', 'occhi di brace', 'glow'],
+        ],
+        marcatori: 'P',
+        corpo: [
+          ...scelta('andatura', [[12, 20, 0], [21, 38, 14]], [
+            ['ferma', [line([9, 13, 0], [9, 13, 12], 1, 'I'), line([15, 13, 0], [15, 13, 12], 1, 'I'), line([9, 27, 0], [9, 27, 12], 1, 'I'), line([15, 27, 0], [15, 27, 12], 1, 'I'), ell([9, 13, 5], [3, 3, 3], 'D'), ell([15, 13, 5], [3, 3, 3], 'D'), ell([9, 27, 5], [3, 3, 3], 'D'), ell([15, 27, 5], [3, 3, 3], 'D')]],
+            ['in punta', [line([9, 13, 0], [9, 13, 12], 1, 'I'), line([15, 13, 0], [15, 13, 12], 1, 'I'), line([15, 27, 0], [15, 27, 12], 1, 'I'), line([9, 27, 12], [9, 32, 8], 1, 'I'), line([9, 32, 8], [9, 31, 4], 1, 'I'), ell([9, 32, 7], [3, 3, 3], 'D')]],
+            ['di corsa', [line([9, 36, 2], [9, 27, 12], 1, 'I'), line([15, 34, 1], [15, 27, 12], 1, 'I'), line([9, 3, 1], [9, 13, 12], 1, 'I'), line([15, 5, 2], [15, 13, 12], 1, 'I'), box([12, 20, 0], [3, 3, 11], 'I')]],
+          ]),
+          ...scelta('corpo', [[12, 20, 6], [22, 34, 18]], [
+            ['a caldaia', [line([12, 12, 14], [12, 28, 14], 4, 'O')]],
+            ['snello', [ell([12, 20, 10], [10, 26, 9], 'O')]],
+            ['corazzato', [ell([12, 20, 9], [14, 28, 13], 'O'), box([12, 20, 17], [12, 18, 3], 'D')]],
+          ]),
+          ...scelta('testa', [[12, 33, 0], [25, 14, 30]], [
+            ['avanti', [line([12, 28, 15], [12, 32, 18], 1.5, 'I'), box([12, 34, 16], [7, 7, 6], 'O'), box([12, 38, 17], [4, 3, 3], 'D'), box([10, 37, 21], [1, 1, 1], 'L'), box([14, 37, 21], [1, 1, 1], 'L'), box([9, 33, 22], [2, 3, 4], 'D'), box([15, 33, 22], [2, 3, 4], 'D')]],
+            ['a fiutare', [line([12, 28, 14], [12, 34, 6], 1.5, 'I'), box([12, 35, 2], [7, 7, 6], 'O'), box([12, 38, 1], [4, 3, 3], 'D'), box([10, 38, 6], [1, 1, 1], 'L'), box([14, 38, 6], [1, 1, 1], 'L'), box([9, 35, 8], [2, 3, 3], 'D'), box([15, 35, 8], [2, 3, 3], 'D')]],
+            ['all\'ululato', [line([12, 28, 15], [12, 31, 21], 1.5, 'I'), box([12, 31, 21], [7, 6, 7], 'O'), line([12, 33, 26], [12, 36, 29], 1, 'D'), box([10, 33, 27], [1, 1, 1], 'L'), box([14, 33, 27], [1, 1, 1], 'L')]],
+          ]),
+          ...scelta('coda', [[12, 5, 0], [25, 12, 30]], [
+            ['ad antenna', [line([12, 10, 15], [12, 6, 26], 0.5, 'I'), ell([12, 6, 26], [3, 3, 3], 'L')]],
+            ['tesa', [line([12, 10, 15], [12, 1, 16], 1, 'D')]],
+            ['a frusta', [line([12, 10, 14], [12, 5, 8], 1, 'D'), line([12, 5, 8], [12, 1, 12], 1, 'D')]],
+          ]),
+          ...punte('O', 3, 6, 'T'),
+        ],
+      }),
+  },
+  {
+    collezione: 'creature-veicoli',
+    ambientazione: 'steampunk',
+    nome: 'ragno-meccanico',
+    titolo: 'Ragno meccanico',
+    classe: 'bestia',
+    descrizione: 'Un ragno a vapore delle miniere di Orichalcum: otto zampe a pistone, addome-caldaia, occhi di vetro rosso.',
+    procedura: 'due scelte a caso (la postura di tutto il corpo e delle otto zampe: alta, acquattata, in cammino, all\'attacco; l\'addome: caldaia grande, serbatoio stretto, gabbia di tubi) e valvole che spuntano a caso sul dorso.',
+    xml: () => {
+      const zampe = (zc: number, ginocchio: number, ap: number, passo: (i: number) => number) =>
+        [14, 18, 22, 26].flatMap((y, i) => [
+          line([8, y, zc], [8 - ap, y + passo(i), ginocchio], 1, 'I'),
+          line([8 - ap, y + passo(i), ginocchio], [Math.max(0, 8 - ap - 4), y + passo(i) * 2, 0], 1, 'I'),
+          line([16, y, zc], [16 + ap, y - passo(i), ginocchio], 1, 'I'),
+          line([16 + ap, y - passo(i), ginocchio], [Math.min(24, 16 + ap + 4), y - passo(i) * 2, 0], 1, 'I'),
+        ]);
+      return programma({
+        titolo: 'Ragno meccanico',
+        commento: 'Ragno meccanico (Cantiere 8, orichalcum): postura e addome a caso; valvole a caso sul dorso.',
+        colori: [
+          ['O', '9a7a3a', 'piastre d\'ottone'],
+          ['D', '4f3d22', 'bronzo scuro'],
+          ['I', '2e2c2a', 'zampe di ferro', 'gamba'],
+          ['R', 'ff3b2b', 'occhi di vetro', 'glow'],
+          ['T', '8c8a84', 'valvole'],
+        ],
+        marcatori: 'P',
+        corpo: [
+          ...scelta('postura', [[12, 20, 0], [25, 40, 30]], [
+            ['alta', [box([10, 28, 17], [1, 2, 1], 'R'), box([14, 28, 17], [1, 2, 1], 'R'), ell([12, 22, 14], [10, 14, 8], 'O'), ...zampe(17, 24, 6, () => 0)]],
+            ['acquattata', [box([10, 28, 8], [1, 2, 1], 'R'), box([14, 28, 8], [1, 2, 1], 'R'), ell([12, 22, 5], [10, 14, 7], 'O'), ...zampe(8, 15, 7, () => 0)]],
+            ['in cammino', [box([10, 28, 13], [1, 2, 1], 'R'), box([14, 28, 13], [1, 2, 1], 'R'), ell([12, 22, 10], [10, 14, 8], 'O'), ...zampe(13, 20, 6, (i) => (i % 2 ? 2 : -2))]],
+            ['all\'attacco', [box([10, 30, 14], [1, 2, 1], 'R'), box([14, 30, 14], [1, 2, 1], 'R'), ell([12, 24, 10], [10, 14, 9], 'O'), ...zampe(13, 18, 6, () => 0).slice(0, 12), line([9, 30, 15], [6, 37, 26], 1, 'I'), line([15, 30, 15], [18, 37, 26], 1, 'I')]],
+          ]),
+          ...scelta('addome', [[12, 10, 0], [25, 22, 30]], [
+            ['caldaia grande', [box([12, 18, 2], [3, 5, 18], 'I'), ell([12, 10, 2], [17, 17, 21], 'D'), cyl([12, 10, 0], [6, 6, 3], 'I')]],
+            ['serbatoio stretto', [box([12, 18, 2], [3, 5, 18], 'I'), cyl([12, 11, 0], [11, 13, 20], 'D'), cyl([12, 11, 20], [7, 7, 3], 'O')]],
+            ['gabbia di tubi', [box([12, 18, 2], [3, 5, 18], 'I'), line([7, 9, 0], [9, 15, 20], 1, 'D'), line([17, 9, 0], [15, 15, 20], 1, 'D'), line([9, 4, 0], [11, 14, 18], 1, 'D'), line([15, 4, 0], [13, 14, 18], 1, 'D'), ell([12, 9, 12], [12, 12, 8], 'O')]],
+          ]),
+          nota('valvole che spuntano dove capita sul dorso'),
+          ...punte('O', 4, 3, 'T'),
+          macchie('D', 'O', 0.08),
+        ],
+      });
+    },
+  },
+  {
+    collezione: 'creature-veicoli',
+    ambientazione: 'steampunk',
+    nome: 'locomotiva-vapore',
+    titolo: 'Locomotiva a vapore',
+    classe: 'bestia',
+    descrizione: 'La locomotiva delle linee di Orichalcum: caldaia nera, ruote motrici rosse, cabina e fumo che sale.',
+    procedura: 'quattro scelte a caso (ruote: tre grandi motrici o quattro piccole; caldaia lunga, grossa o corta con duomo doppio; cabina chiusa, aperta o con tender di carbone; fumaiolo a imbuto, dritto o a pallone) e il fumo che sale dal fumaiolo con un camminatore e si gonfia a caso.',
+    xml: () =>
+      programma({
+        titolo: 'Locomotiva a vapore',
+        commento: 'Locomotiva a vapore (Cantiere 8, orichalcum): ruote, caldaia, cabina e fumaiolo a caso; il fumo cresce a caso.',
+        colori: [
+          ['N', '26282b', 'caldaia nera'],
+          ['R', 'a3322a', 'ruote motrici'],
+          ['O', 'c9a24a', 'fasce d\'ottone'],
+          ['C', '5a3a22', 'cabina di legno'],
+          ['K', '1a1a1a', 'carbone'],
+          ['S', 'cfd3d6', 'fumo'],
+        ],
+        marcatori: 'P',
+        corpo: [
+          box([12, 20, 3], [16, 36, 3], 'N'),
+          ...scelta('ruote', [[12, 20, 0], [25, 40, 12]], [
+            ['tre motrici grandi', [ruota(3, 6, 12, 4.5, 'R'), ruota(3, 6, 21, 4.5, 'R'), ruota(3, 6, 30, 4, 'R'), ruota(18, 21, 12, 4.5, 'R'), ruota(18, 21, 21, 4.5, 'R'), ruota(18, 21, 30, 4, 'R'), line([5, 12, 5], [5, 30, 5], 0.5, 'O'), line([19, 12, 5], [19, 30, 5], 0.5, 'O')]],
+            ['quattro piccole', [ruota(4, 6, 7, 3, 'R'), ruota(4, 6, 15, 3, 'R'), ruota(4, 6, 23, 3, 'R'), ruota(4, 6, 31, 3, 'R'), ruota(18, 20, 7, 3, 'R'), ruota(18, 20, 15, 3, 'R'), ruota(18, 20, 23, 3, 'R'), ruota(18, 20, 31, 3, 'R')]],
+          ]),
+          ...scelta('caldaia', [[12, 24, 5], [25, 32, 16]], [
+            ['lunga', [line([12, 14, 12], [12, 37, 12], 5, 'N'), cyl([12, 26, 16], [5, 5, 4], 'O')]],
+            ['grossa', [line([12, 16, 13], [12, 35, 13], 6, 'N'), cyl([12, 24, 18], [6, 6, 3], 'O')]],
+            ['corta col duomo doppio', [line([12, 18, 11], [12, 34, 11], 5, 'N'), cyl([12, 22, 15], [4, 4, 4], 'O'), cyl([12, 28, 15], [4, 4, 4], 'O')]],
+          ]),
+          ...scelta('cabina', [[12, 8, 5], [25, 17, 25]], [
+            ['chiusa', [box([12, 8, 6], [18, 11, 14], 'C'), box([12, 8, 20], [20, 13, 2], 'N'), box([12, 13, 13], [8, 1, 4], 'O')]],
+            ['aperta', [box([12, 9, 6], [18, 8, 3], 'C'), line([4, 5, 6], [4, 5, 20], 0.5, 'N'), line([20, 5, 6], [20, 5, 20], 0.5, 'N'), line([4, 12, 6], [4, 12, 20], 0.5, 'N'), line([20, 12, 6], [20, 12, 20], 0.5, 'N'), box([12, 8, 20], [19, 11, 2], 'C')]],
+            ['con tender', [box([12, 11, 6], [16, 7, 12], 'C'), box([12, 11, 18], [18, 9, 2], 'N'), box([12, 3, 3], [16, 6, 8], 'N'), ell([12, 3, 9], [12, 5, 6], 'K')]],
+          ]),
+          ...scelta('fumaiolo', [[12, 33, 13], [14, 9, 17]], [
+            ['a imbuto', [cyl([12, 33, 15], [3, 3, 7], 'N'), cone([12, 33, 26], [7, 7, -4], 'N'), cyl([12, 33, 21], [6, 6, 3], 'N'), box([12, 33, 24], [1, 1, 1], 'P')]],
+            ['dritto', [cyl([12, 33, 15], [4, 4, 11], 'N'), cyl([12, 33, 25], [5, 5, 1], 'O'), box([12, 33, 26], [1, 1, 1], 'P')]],
+            ['a pallone', [cyl([12, 33, 15], [3, 3, 4], 'N'), ell([12, 33, 18], [8, 8, 6], 'N'), box([12, 33, 24], [1, 1, 1], 'P')]],
+          ]),
+          ell([12, 38, 1], [10, 4, 6], 'O', 'B'),
+          nota('il fumo sale dal fumaiolo e si gonfia'),
+          ...ramifica(5, 'P', 'S', { su: 2, obliquo: 2, biforca: 1 }),
+          `<prl in="BS" out="*S" p="0.4" steps="1"/>`,
+        ],
+      }),
+  },
+  {
+    collezione: 'creature-veicoli',
+    ambientazione: 'steampunk',
+    nome: 'dirigibile-esploratore',
+    titolo: 'Dirigibile esploratore',
+    classe: 'edificio',
+    descrizione: 'Il dirigibile delle spedizioni di Orichalcum, ormeggiato al suo traliccio: involucro di tela, gondola di legno, eliche d\'ottone.',
+    procedura: 'quattro scelte a caso (involucro lungo, panciuto o a sigaro alto; traliccio d\'ormeggio a prua, al centro o a poppa; gondola lunga, piccola o a due ponti; impennaggi a croce, a X o a tre pinne) e toppe di tela più scura in posti a caso.',
+    xml: () =>
+      programma({
+        titolo: 'Dirigibile esploratore',
+        commento: 'Dirigibile esploratore (Cantiere 8, orichalcum): involucro, traliccio, gondola e impennaggi a caso; toppe a caso.',
+        colori: [
+          ['T', 'd8cdb0', 'tela'],
+          ['Q', 'a89a78', 'toppe'],
+          ['W', '6b4a2a', 'gondola di legno'],
+          ['I', '3b3631', 'traliccio di ferro'],
+          ['O', 'c09030', 'eliche d\'ottone'],
+          ['V', '8fc4d0', 'oblò'],
+        ],
+        corpo: [
+          ...scelta('involucro', [[25, 25, 18], [27, 50, 32]], [
+            ['lungo', [ell([25, 25, 26], [18, 46, 16], 'T')]],
+            ['panciuto', [ell([25, 25, 24], [24, 40, 20], 'T')]],
+            ['a sigaro alto', [ell([25, 25, 31], [16, 44, 15], 'T')]],
+          ]),
+          ...scelta('traliccio', [[25, 25, 0], [23, 50, 41]], [
+            ['a prua', [line([25, 49, 0], [25, 49, 38], 1, 'I'), line([21, 49, 0], [25, 49, 20], 0.5, 'I'), line([29, 49, 0], [25, 49, 20], 0.5, 'I'), box([25, 49, 0], [9, 3, 1], 'I'), line([25, 49, 36], [25, 40, 36], 1, 'I')]],
+            ['al centro', [line([16, 25, 0], [20, 25, 33], 1, 'I'), line([34, 25, 0], [30, 25, 33], 1, 'I'), line([16, 25, 8], [34, 25, 8], 0.5, 'I'), box([16, 25, 0], [4, 4, 1], 'I'), box([34, 25, 0], [4, 4, 1], 'I')]],
+            ['a poppa', [line([25, 1, 0], [25, 1, 38], 1, 'I'), line([21, 1, 0], [25, 1, 20], 0.5, 'I'), line([29, 1, 0], [25, 1, 20], 0.5, 'I'), box([25, 1, 0], [9, 3, 1], 'I'), line([25, 1, 36], [25, 10, 36], 1, 'I')]],
+          ]),
+          ...scelta('gondola', [[25, 25, 4], [16, 40, 30]], [
+            ['lunga', [box([25, 26, 9], [8, 22, 5], 'W'), line([22, 20, 14], [22, 20, 33], 0.5, 'I'), line([28, 32, 14], [28, 32, 33], 0.5, 'I'), line([22, 32, 14], [22, 32, 33], 0.5, 'I'), line([28, 20, 14], [28, 20, 33], 0.5, 'I'), box([25, 37, 10], [3, 1, 2], 'V')]],
+            ['piccola', [ell([25, 26, 10], [9, 12, 6], 'W'), line([25, 26, 15], [25, 26, 33], 0.5, 'I'), line([25, 20, 12], [25, 22, 33], 0.5, 'I'), box([25, 32, 12], [3, 1, 2], 'V')]],
+            ['a due ponti', [box([25, 25, 6], [10, 18, 5], 'W'), box([25, 25, 11], [8, 14, 4], 'W'), line([25, 25, 15], [25, 25, 33], 1, 'I'), box([25, 34, 8], [6, 1, 2], 'V')]],
+          ]),
+          ...scelta('impennaggi', [[25, 6, 14], [44, 12, 36]], [
+            ['a croce', [box([25, 5, 26], [2, 6, 24], 'O'), box([25, 5, 36], [30, 6, 2], 'O')]],
+            ['a X', [line([25, 7, 36], [14, 3, 47], 1, 'O'), line([25, 7, 36], [36, 3, 47], 1, 'O'), line([25, 7, 36], [14, 3, 25], 1, 'O'), line([25, 7, 36], [36, 3, 25], 1, 'O')]],
+            ['a tre pinne', [box([25, 5, 34], [2, 6, 15], 'O'), line([25, 7, 36], [14, 3, 27], 1, 'O'), line([25, 7, 36], [36, 3, 27], 1, 'O')]],
+          ]),
+          nota('toppe di tela più scura dove capita'),
+          `<prl in="T" out="Q" p="0.004" steps="1"/>`,
+          `<prl in="QT" out="*Q" p="0.35" steps="3"/>`,
+        ],
+      }),
+  },
+
+  {
+    collezione: 'creature-veicoli',
+    ambientazione: 'moderno',
+    nome: 'cane-randagio',
+    titolo: 'Cane randagio',
+    classe: 'animale',
+    descrizione: 'Il randagio dei vicoli di Neapolis: pelo fulvo a chiazze, orecchie che fanno quello che vogliono.',
+    procedura: 'la postura a caso (in piedi, seduto, sdraiato, a fiutare), poi orecchie che crescono dritte, di sbieco o cadenti, una coda che cresce in una direzione a caso e chiazze del mantello che si allargano a caso.',
+    xml: () =>
+      programma({
+        titolo: 'Cane randagio',
+        commento: 'Cane randagio (Cantiere 8, neapolis): postura a caso; orecchie, coda e chiazze crescono a caso.',
+        colori: [
+          ['F', 'c9a06a', 'pelo fulvo'],
+          ['D', '6a4a2c', 'chiazze scure'],
+          ['W', 'efe6d6', 'muso chiaro'],
+          ['G', 'b08a58', 'zampe', 'gamba'],
+          ['K', '1e1a17', 'naso'],
+        ],
+        marcatori: 'PQ',
+        corpo: [
+          ...scelta('postura', [[7, 10, 0], [15, 20, 15]], [
+            ['in piedi', [box([7, 3, 8], [1, 1, 1], 'Q'), cyl([5, 6, 0], [2, 2, 7], 'G'), cyl([9, 6, 0], [2, 2, 7], 'G'), cyl([5, 13, 0], [2, 2, 7], 'G'), cyl([9, 13, 0], [2, 2, 7], 'G'),
+              ell([7, 10, 5], [7, 14, 6], 'F'), box([5, 16, 12], [1, 1, 1], 'P'), box([9, 16, 12], [1, 1, 1], 'P'), ell([7, 16, 8], [6, 6, 5], 'F'), box([7, 19, 9], [3, 2, 2], 'W'), box([7, 19, 10], [1, 1, 1], 'K')]],
+            ['seduto', [box([7, 3, 1], [1, 1, 1], 'Q'), ell([7, 7, 0], [9, 8, 5], 'F'), ell([7, 8, 2], [7, 8, 9], 'F'), line([5, 12, 0], [5, 11, 6], 0.5, 'G'), line([9, 12, 0], [9, 11, 6], 0.5, 'G'),
+              box([5, 11, 13], [1, 1, 1], 'P'), box([9, 11, 13], [1, 1, 1], 'P'), ell([7, 11, 9], [6, 6, 5], 'F'), box([7, 14, 10], [3, 2, 2], 'W'), box([7, 15, 11], [1, 1, 1], 'K')]],
+            ['sdraiato', [box([7, 3, 1], [1, 1, 1], 'Q'), ell([7, 10, 0], [8, 14, 5], 'F'), line([5, 15, 0], [5, 19, 0], 0.5, 'G'), line([9, 15, 0], [9, 19, 0], 0.5, 'G'),
+              box([5, 15, 7], [1, 1, 1], 'P'), box([9, 15, 7], [1, 1, 1], 'P'), ell([7, 15, 3], [6, 6, 5], 'F'), box([7, 18, 3], [3, 2, 2], 'W'), box([7, 19, 4], [1, 1, 1], 'K')]],
+            ['a fiutare', [box([7, 3, 9], [1, 1, 1], 'Q'), cyl([5, 6, 0], [2, 2, 8], 'G'), cyl([9, 6, 0], [2, 2, 8], 'G'), line([5, 15, 0], [5, 13, 6], 0.5, 'G'), line([9, 15, 0], [9, 13, 6], 0.5, 'G'),
+              ell([7, 10, 5], [7, 14, 6], 'F'), box([5, 16, 6], [1, 1, 1], 'P'), box([9, 16, 6], [1, 1, 1], 'P'), ell([7, 16, 1], [6, 6, 5], 'F'), box([7, 19, 1], [3, 2, 2], 'W'), box([7, 19, 1], [1, 1, 1], 'K')]],
+          ]),
+          nota('orecchie: dritte, di sbieco o cadenti'),
+          `<one steps="4"><rule in="B P" out="P F"/><rule in="B* *P" out="P* *F"/><rule in="P* *B" out="F* *P"/></one>`,
+          `<prl in="P" out="D"/>`,
+          nota('la coda cresce in una direzione a caso'),
+          `<one steps="4"><rule in="B Q" out="Q F"/><rule in="B* *Q" out="Q* *F"/><rule in="QB" out="FQ"/></one>`,
+          `<prl in="Q" out="W"/>`,
+          nota('chiazze del mantello'),
+          `<prl in="F" out="D" p="0.01" steps="1"/>`,
+          `<prl in="DF" out="*D" p="0.35" steps="3"/>`,
+        ],
+      }),
+  },
+  {
+    collezione: 'creature-veicoli',
+    ambientazione: 'moderno',
+    nome: 'gatto-urbano',
+    titolo: 'Gatto urbano',
+    classe: 'animale',
+    descrizione: 'Il gatto dei tetti di Neapolis: tigrato, sornione, la coda che si muove per conto suo.',
+    procedura: 'la postura a caso (seduto, in cammino, a pagnotta, ad arco, sdraiato su un fianco), una coda lunga che cresce in direzioni a caso e strisce tigrate che si allungano a caso.',
+    xml: () =>
+      programma({
+        titolo: 'Gatto urbano',
+        commento: 'Gatto urbano (Cantiere 8, neapolis): postura a caso; la coda e le strisce crescono a caso.',
+        colori: [
+          ['F', '9a9a96', 'pelo grigio'],
+          ['D', '4e4d4b', 'strisce'],
+          ['W', 'e9e6df', 'petto bianco'],
+          ['G', '8a8a86', 'zampe', 'gamba'],
+          ['E', '9be35a', 'occhi', 'glow'],
+        ],
+        marcatori: 'Q',
+        corpo: [
+          ...scelta('postura', [[7, 10, 0], [15, 20, 15]], [
+            ['seduto', [box([7, 5, 1], [1, 1, 1], 'Q'), ell([7, 8, 0], [8, 8, 5], 'F'), ell([7, 9, 2], [6, 7, 8], 'F'), line([6, 12, 0], [6, 11, 5], 0.5, 'G'), line([8, 12, 0], [8, 11, 5], 0.5, 'G'),
+              box([6, 14, 11], [1, 1, 1], 'E'), box([8, 14, 11], [1, 1, 1], 'E'), ell([7, 12, 9], [6, 5, 4], 'F'), cone([5, 12, 12], [2, 2, 3], 'F'), cone([9, 12, 12], [2, 2, 3], 'F'), box([7, 13, 7], [3, 1, 3], 'W')]],
+            ['in cammino', [box([7, 5, 6], [1, 1, 1], 'Q'), line([6, 6, 0], [6, 7, 5], 0.5, 'G'), line([8, 8, 0], [8, 7, 5], 0.5, 'G'), line([6, 15, 0], [6, 13, 5], 0.5, 'G'), line([8, 12, 0], [8, 13, 5], 0.5, 'G'),
+              ell([7, 10, 4], [6, 12, 5], 'F'), box([6, 18, 9], [1, 1, 1], 'E'), box([8, 18, 9], [1, 1, 1], 'E'), ell([7, 16, 7], [6, 5, 4], 'F'), cone([5, 16, 10], [2, 2, 3], 'F'), cone([9, 16, 10], [2, 2, 3], 'F')]],
+            ['a pagnotta', [box([7, 5, 2], [1, 1, 1], 'Q'), ell([7, 9, 0], [8, 11, 6], 'F'), box([6, 16, 6], [1, 1, 1], 'E'), box([8, 16, 6], [1, 1, 1], 'E'), ell([7, 14, 4], [6, 5, 4], 'F'), cone([5, 14, 7], [2, 2, 3], 'F'), cone([9, 14, 7], [2, 2, 3], 'F')]],
+            ['ad arco', [box([7, 5, 8], [1, 1, 1], 'Q'), line([6, 5, 0], [6, 7, 7], 0.5, 'G'), line([8, 5, 0], [8, 7, 7], 0.5, 'G'), line([6, 15, 0], [6, 13, 7], 0.5, 'G'), line([8, 15, 0], [8, 13, 7], 0.5, 'G'),
+              ell([7, 10, 6], [6, 11, 7], 'F'), box([6, 17, 7], [1, 1, 1], 'E'), box([8, 17, 7], [1, 1, 1], 'E'), ell([7, 15, 5], [6, 5, 4], 'F'), cone([5, 15, 8], [2, 2, 3], 'F'), cone([9, 15, 8], [2, 2, 3], 'F')]],
+            ['sdraiato su un fianco', [box([7, 5, 2], [1, 1, 1], 'Q'), ell([7, 10, 0], [10, 12, 6], 'F'), line([10, 8, 0], [13, 6, 0], 0.5, 'G'), line([10, 12, 0], [13, 14, 0], 0.5, 'G'), box([5, 17, 4], [1, 1, 1], 'E'), box([8, 17, 4], [1, 1, 1], 'E'), ell([6, 15, 2], [6, 5, 5], 'F'), cone([4, 15, 6], [2, 2, 3], 'F'), cone([8, 15, 6], [2, 2, 3], 'F')]],
+          ]),
+          nota('la coda: sei passi in direzioni a caso'),
+          `<one steps="7"><rule in="B Q" out="Q F"/><rule in="B* *Q" out="Q* *F"/><rule in="QB" out="FQ"/></one>`,
+          `<prl in="Q" out="D"/>`,
+          nota('strisce tigrate che si allungano'),
+          `<prl in="B F" out="* D" p="0.06" steps="1"/>`,
+          `<prl in="DF" out="*D" p="0.5" steps="2" symmetry="(x)"/>`,
+        ],
+      }),
+  },
+  {
+    collezione: 'creature-veicoli',
+    ambientazione: 'moderno',
+    nome: 'furgone-consegne',
+    titolo: 'Furgone delle consegne',
+    classe: 'bestia',
+    descrizione: 'Il furgone che fa il giro dei quartieri di Neapolis, con i pacchi che non stanno mai dentro.',
+    procedura: 'tre scelte a caso (carrozzeria: tetto alto, media, cassonato con le casse; porte: chiuse, laterale aperta, posteriori aperte; carico a terra: solo il paraurti, pila di pacchi, carrello) e pacchi che si impilano a caso sul tetto o sul cassone.',
+    xml: () =>
+      programma({
+        titolo: 'Furgone delle consegne',
+        commento: 'Furgone delle consegne (Cantiere 8, neapolis): carrozzeria, porte e carico a caso; pacchi impilati a caso.',
+        colori: [
+          ['W', 'e8e8e2', 'carrozzeria bianca'],
+          ['R', 'd2482f', 'fascia rossa'],
+          ['K', '1f1f22', 'gomme'],
+          ['V', '6a8fa8', 'vetri'],
+          ['C', 'b8875a', 'cartone'],
+          ['L', 'fff2b0', 'fari', 'glow'],
+          ['I', '7a7a7a', 'ferro'],
+        ],
+        marcatori: 'P',
+        corpo: [
+          ruota(2, 5, 9, 4.5, 'K'),
+          ruota(19, 22, 9, 4.5, 'K'),
+          ruota(2, 5, 31, 4.5, 'K'),
+          ruota(19, 22, 31, 4.5, 'K'),
+          ...scelta('carrozzeria', [[12, 20, 3], [21, 40, 27]], [
+            ['tetto alto', [box([12, 39, 12], [15, 1, 5], 'V'), box([12, 39, 6], [3, 1, 1], 'L'), box([12, 18, 4], [21, 28, 22], 'W'), box([12, 35, 4], [21, 10, 14], 'W'), box([12, 18, 15], [21, 28, 3], 'R', 'W'), box([12, 18, 26], [1, 1, 1], 'P')]],
+            ['media', [box([12, 39, 12], [15, 1, 5], 'V'), box([12, 39, 6], [3, 1, 1], 'L'), box([12, 18, 4], [21, 28, 16], 'W'), box([12, 35, 4], [21, 10, 13], 'W'), box([12, 18, 12], [21, 28, 2], 'R', 'W'), box([12, 18, 20], [1, 1, 1], 'P'), box([12, 18, 20], [17, 22, 1], 'I')]],
+            ['cassonato', [box([12, 39, 12], [15, 1, 5], 'V'), box([12, 39, 6], [3, 1, 1], 'L'), box([12, 35, 4], [21, 10, 15], 'W'), box([12, 16, 4], [21, 30, 3], 'I'), box([2, 16, 7], [1, 30, 3], 'I'), box([22, 16, 7], [1, 30, 3], 'I'), box([12, 16, 7], [1, 1, 1], 'P'), box([8, 12, 7], [6, 6, 5], 'C')]],
+          ]),
+          ...scelta('porte', [[12, 20, 4], [25, 40, 22]], [
+            ['chiuse', [box([12, 30, 4], [1, 1, 1], 'I')]],
+            ['laterale aperta', [box([23, 21, 5], [1, 10, 13], 'W'), box([23, 21, 13], [1, 10, 2], 'R')]],
+            ['posteriori aperte', [box([3, 2, 5], [5, 1, 13], 'W'), box([21, 2, 5], [5, 1, 13], 'W'), box([1, 3, 5], [1, 2, 13], 'I'), box([23, 3, 5], [1, 2, 13], 'I')]],
+          ]),
+          ...scelta('carico a terra', [[12, 2, 0], [25, 5, 22]], [
+            ['paraurti', [box([12, 3, 4], [17, 3, 2], 'I')]],
+            ['pila di pacchi', [box([8, 2, 0], [7, 4, 6], 'C'), box([16, 2, 0], [6, 4, 8], 'C'), box([11, 2, 6], [6, 4, 5], 'C')]],
+            ['carrello', [box([12, 2, 0], [8, 4, 1], 'I'), line([9, 1, 0], [9, 1, 16], 0.5, 'I'), line([15, 1, 0], [15, 1, 16], 0.5, 'I'), box([12, 3, 1], [7, 3, 8], 'C')]],
+          ]),
+          nota('i pacchi si impilano dove capita'),
+          `<one steps="6"><rule in="B P" out="P C"/><rule in="BP" out="PC"/></one>`,
+          `<prl in="P" out="C"/>`,
+          `<prl in="BC" out="*C" p="0.3" steps="2"/>`,
+        ],
+      }),
+  },
+  {
+    collezione: 'creature-veicoli',
+    ambientazione: 'moderno',
+    nome: 'motocicletta-stradale',
+    titolo: 'Motocicletta stradale',
+    classe: 'bestia',
+    descrizione: 'Una moto delle strade di Neapolis: ogni seme è un\'altra moto, dalla sportiva carenata alla custom con la forcella lunga.',
+    procedura: 'tre scelte a caso (stile: sportiva, custom, naked, turismo con le borse; scarico: basso a destra, alto a sinistra, doppio; cavalletto o casco appoggiato) e adesivi che compaiono a caso sulle carene.',
+    xml: () =>
+      programma({
+        titolo: 'Motocicletta stradale',
+        commento: 'Motocicletta stradale (Cantiere 8, neapolis): stile, scarico e accessori a caso; adesivi a caso.',
+        colori: [
+          ['R', 'b8202a', 'carena rossa'],
+          ['K', '1c1c1f', 'gomme e sella'],
+          ['M', '8d9096', 'motore'],
+          ['C', 'd6d8dc', 'cromature'],
+          ['V', '7fa8c0', 'cupolino'],
+          ['L', 'fff3c0', 'faro', 'glow'],
+          ['Y', 'f0c020', 'adesivi'],
+        ],
+        corpo: [
+          box([12, 19, 4], [6, 9, 7], 'M'),
+          ...scelta('stile', [[12, 20, 0], [25, 40, 30]], [
+            ['sportiva', [ruota(11, 13, 8, 5.5, 'K'), ruota(11, 13, 31, 5.5, 'K'), line([12, 8, 6], [12, 31, 6], 0.5, 'C'), ell([12, 22, 10], [6, 9, 5], 'R'), ell([12, 29, 7], [7, 9, 10], 'R'), box([12, 14, 12], [5, 8, 2], 'K'), cone([12, 9, 12], [5, 6, 4], 'R'), box([12, 33, 15], [5, 2, 3], 'V'), box([12, 34, 11], [2, 1, 2], 'L'), line([9, 28, 15], [15, 28, 15], 0.5, 'C')]],
+            ['custom', [ruota(11, 13, 7, 6, 'K'), ruota(11, 13, 35, 5, 'K'), line([12, 35, 5], [12, 27, 21], 0.5, 'C'), line([12, 7, 6], [12, 28, 8], 0.5, 'C'), ell([12, 22, 11], [5, 8, 5], 'R'), box([12, 14, 9], [6, 8, 2], 'K'), line([8, 27, 21], [16, 27, 21], 0.5, 'C'), line([8, 27, 21], [8, 26, 26], 0.5, 'C'), line([16, 27, 21], [16, 26, 26], 0.5, 'C'), box([12, 29, 18], [2, 2, 2], 'L')]],
+            ['naked', [ruota(11, 13, 9, 5.5, 'K'), ruota(11, 13, 30, 5.5, 'K'), line([12, 9, 6], [12, 30, 6], 0.5, 'C'), line([12, 30, 6], [12, 27, 17], 0.5, 'C'), ell([12, 21, 11], [6, 8, 5], 'R'), box([12, 14, 14], [6, 12, 2], 'K'), line([8, 27, 18], [16, 27, 18], 0.5, 'C'), cyl([12, 29, 14], [3, 3, 3], 'L')]],
+            ['turismo', [ruota(11, 13, 8, 5.5, 'K'), ruota(11, 13, 31, 5.5, 'K'), line([12, 8, 6], [12, 31, 6], 0.5, 'C'), ell([12, 27, 8], [11, 10, 12], 'R'), box([12, 30, 17], [9, 2, 6], 'V'), box([12, 16, 11], [6, 12, 3], 'K'), box([5, 10, 5], [4, 9, 8], 'R'), box([19, 10, 5], [4, 9, 8], 'R'), box([12, 9, 13], [9, 6, 6], 'R'), box([12, 34, 11], [3, 1, 2], 'L')]],
+          ]),
+          ...scelta('scarico', [[12, 12, 0], [25, 24, 22]], [
+            ['basso a destra', [line([15, 19, 5], [16, 6, 6], 1, 'C')]],
+            ['alto a sinistra', [line([9, 19, 6], [8, 9, 12], 1, 'C'), cyl([8, 6, 10], [3, 3, 4], 'C')]],
+            ['doppio', [line([15, 19, 5], [17, 5, 9], 1, 'C'), line([9, 19, 5], [7, 5, 9], 1, 'C')]],
+          ]),
+          ...scelta('accessorio', [[12, 20, 0], [25, 30, 26]], [
+            ['cavalletto', [line([9, 19, 4], [5, 21, 0], 0.5, 'C')]],
+            ['casco sul serbatoio', [ell([12, 21, 14], [6, 6, 6], 'K'), box([12, 23, 16], [4, 1, 2], 'V')]],
+            ['bauletto', [line([9, 19, 4], [5, 21, 0], 0.5, 'C'), box([12, 8, 9], [8, 5, 8], 'K')]],
+          ]),
+          nota('adesivi a caso sulle carene'),
+          macchie('R', 'Y', 0.04),
+        ],
+      }),
+  },
+  {
+    collezione: 'creature-veicoli',
+    ambientazione: 'moderno',
+    nome: 'elicottero-soccorso',
+    titolo: 'Elicottero di soccorso',
+    classe: 'edificio',
+    descrizione: 'L\'elisoccorso di Neapolis, bianco e rosso, posato sui pattini.',
+    procedura: 'tre scelte a caso (fusoliera grande, compatta o a goccia con la sua trave di coda; rotore a quattro pale dritte, a X, a tre o a cinque pale; dotazione: scaletta, verricello con la barella a terra, galleggianti, faro di ricerca) e i numeri di bordo che compaiono a caso sulle fiancate.',
+    xml: () => {
+      const pala = (a: number, r = 23) => line([25, 27, 30], [25 + Math.cos(a) * r, 27 + Math.sin(a) * r, 30], 1, 'K');
+      return programma({
+        titolo: 'Elicottero di soccorso',
+        commento: 'Elicottero di soccorso (Cantiere 8, neapolis): fusoliera, rotore e dotazione a caso.',
+        colori: [
+          ['W', 'eef0f0', 'fusoliera bianca'],
+          ['R', 'd52f2a', 'fascia rossa'],
+          ['K', '2a2b2e', 'pale e pattini'],
+          ['V', '5f8aa6', 'vetri'],
+          ['Y', 'f4c430', 'numeri di bordo'],
+          ['L', 'fff6c8', 'faro', 'glow'],
+          ['O', 'ff7a2a', 'galleggianti'],
+        ],
+        corpo: [
+          line([19, 15, 0], [19, 39, 0], 1, 'K'),
+          line([31, 15, 0], [31, 39, 0], 1, 'K'),
+          line([19, 21, 0], [22, 22, 9], 0.5, 'K'),
+          line([31, 21, 0], [28, 22, 9], 0.5, 'K'),
+          line([19, 33, 0], [22, 32, 9], 0.5, 'K'),
+          line([31, 33, 0], [28, 32, 9], 0.5, 'K'),
+          ...scelta('fusoliera', [[25, 24, 4], [30, 48, 26]], [
+            ['grande', [box([25, 39, 13], [9, 1, 5], 'V'), ell([25, 26, 5], [16, 26, 15], 'W'), line([25, 14, 13], [25, 1, 16], 2, 'W'), box([25, 2, 16], [2, 4, 9], 'R'), line([25, 2, 21], [25, 2, 21], 2.5, 'K')]],
+            ['compatta', [box([25, 35, 13], [7, 1, 4], 'V'), ell([25, 27, 6], [13, 18, 13], 'W'), line([25, 19, 12], [25, 3, 15], 1.5, 'W'), box([25, 4, 14], [2, 3, 7], 'R'), box([25, 4, 20], [9, 2, 2], 'R')]],
+            ['a goccia', [box([25, 37, 12], [9, 1, 6], 'V'), ell([25, 28, 5], [15, 20, 15], 'W'), line([25, 19, 12], [25, 2, 17], 2, 'W'), cone([25, 2, 17], [3, 5, 8], 'R')]],
+          ]),
+          box([25, 26, 10], [30, 12, 2], 'R', 'W'),
+          cyl([25, 27, 17], [3, 3, 14], 'K'),
+          ...scelta('rotore', [[25, 27, 29], [50, 50, 3]], [
+            ['quattro pale', [pala(0), pala(Math.PI / 2), pala(Math.PI), pala(-Math.PI / 2)]],
+            ['a X', [pala(Math.PI / 4), pala((3 * Math.PI) / 4), pala((5 * Math.PI) / 4), pala((7 * Math.PI) / 4)]],
+            ['tre pale', [pala(Math.PI / 2), pala(Math.PI / 2 + (2 * Math.PI) / 3), pala(Math.PI / 2 + (4 * Math.PI) / 3)]],
+            ['cinque pale', [0, 1, 2, 3, 4].map((i) => pala(0.3 + (i * 2 * Math.PI) / 5))],
+          ]),
+          ...scelta('dotazione', [[25, 30, 0], [50, 40, 24]], [
+            ['scaletta', [line([31, 30, 0], [29, 30, 8], 0.5, 'K')]],
+            ['verricello e barella', [line([34, 30, 16], [41, 30, 16], 1, 'K'), line([41, 30, 16], [41, 30, 1], 0, 'K'), box([41, 30, 0], [5, 14, 2], 'O'), box([41, 30, 2], [5, 14, 1], 'W')]],
+            ['galleggianti', [ell([15, 27, 0], [6, 24, 6], 'O'), ell([35, 27, 0], [6, 24, 6], 'O')]],
+            ['faro di ricerca', [line([25, 36, 6], [25, 41, 3], 1, 'K'), ell([25, 42, 0], [6, 5, 5], 'L')]],
+          ]),
+          nota('numeri di bordo a caso sulle fiancate'),
+          macchie('W', 'Y', 0.01),
+        ],
+      });
+    },
+  },
+];

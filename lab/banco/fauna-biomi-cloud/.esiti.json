@@ -1,0 +1,227 @@
+{
+ "cervo-reale": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.3090781700028742,
+  "minima": 0.13750748951467945,
+  "ms": 121,
+  "voxel": [
+   3032,
+   3104,
+   3113,
+   3130,
+   2170
+  ],
+  "passa": true
+ },
+ "lupo-dei-boschi": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.38710988294381304,
+  "minima": 0.1946190595926578,
+  "ms": 147,
+  "voxel": [
+   2633,
+   2730,
+   2330,
+   3599,
+   3581
+  ],
+  "passa": true
+ },
+ "cinghiale-corazzato": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.34616173448375565,
+  "minima": 0.13119679519278918,
+  "ms": 147,
+  "voxel": [
+   3820,
+   5683,
+   3827,
+   5642,
+   5554
+  ],
+  "passa": true
+ },
+ "golem-runico": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.2866692766465206,
+  "minima": 0.05339805825242718,
+  "ms": 57,
+  "voxel": [
+   2568,
+   2931,
+   2773,
+   2661,
+   2552
+  ],
+  "passa": true
+ },
+ "drago-antico": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.43082350432093186,
+  "minima": 0.29263862332695983,
+  "ms": 700,
+  "voxel": [
+   8595,
+   9065,
+   9235,
+   8794,
+   9459
+  ],
+  "passa": true
+ },
+ "automa-sentinella": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.2117591716410781,
+  "minima": 0,
+  "ms": 58,
+  "voxel": [
+   1780,
+   1838,
+   1875,
+   1736,
+   1736
+  ],
+  "passa": true
+ },
+ "segugio-ottone": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.34736561313978387,
+  "minima": 0.03477051460361613,
+  "ms": 147,
+  "voxel": [
+   2277,
+   2117,
+   3542,
+   2141,
+   3523
+  ],
+  "passa": true
+ },
+ "ragno-meccanico": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.3864335352472792,
+  "minima": 0.009907120743034056,
+  "ms": 256,
+  "voxel": [
+   3214,
+   4395,
+   5170,
+   3337,
+   3214
+  ],
+  "passa": true
+ },
+ "locomotiva-vapore": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.22141343487881898,
+  "minima": 0.0015078407720144752,
+  "ms": 164,
+  "voxel": [
+   7852,
+   6627,
+   8748,
+   6711,
+   6627
+  ],
+  "passa": true
+ },
+ "dirigibile-esploratore": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.3800073529924196,
+  "minima": 0.1543926765951633,
+  "ms": 490,
+  "voxel": [
+   12022,
+   6629,
+   6879,
+   7161,
+   7329
+  ],
+  "passa": true
+ },
+ "cane-randagio": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.3536739567851906,
+  "minima": 0.02877697841726619,
+  "ms": 21,
+  "voxel": [
+   411,
+   411,
+   411,
+   444,
+   411
+  ],
+  "passa": true
+ },
+ "gatto-urbano": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.38993414633519324,
+  "minima": 0.021505376344086023,
+  "ms": 22,
+  "voxel": [
+   368,
+   368,
+   368,
+   467,
+   368
+  ],
+  "passa": true
+ },
+ "furgone-consegne": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.2739001746240922,
+  "minima": 0.024317180616740087,
+  "ms": 148,
+  "voxel": [
+   12126,
+   5620,
+   5673,
+   5539,
+   5754
+  ],
+  "passa": true
+ },
+ "motocicletta-stradale": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.40299801537476065,
+  "minima": 0,
+  "ms": 247,
+  "voxel": [
+   1358,
+   1418,
+   1418,
+   2577,
+   1358
+  ],
+  "passa": true
+ },
+ "elicottero-soccorso": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.380333493651859,
+  "minima": 0.22165915915915915,
+  "ms": 567,
+  "voxel": [
+   3763,
+   4870,
+   5039,
+   4436,
+   4373
+  ],
+  "passa": true
+ }
+}
