@@ -2114,8 +2114,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Quando è fatto: commit su `task/T88`; nell'esito come si accende e si spegne.
 - Dipende da: T82, T85, T207, T156 (autore, 03/11: niente strutture dei mondi nuovi prima del prompt nuovo dello Scultore).
 
-### T207 · La generazione differita: un universo generato senza browser, solo dagli abbonamenti — `in attesa` (dipende da T205, T156)
-- Cloud: ramo dei task del kernel su Claude Cloud; non lanciare in locale, lo porta il suo task di integrazione.
+### T207 · La generazione differita: un universo generato senza browser, solo dagli abbonamenti — `fatto` (`c007831`) (dipende da T205, T156)
 - Pipeline: claude · stima 6% · approvato · priorità 59
 - Step: 31
 - Contesto: richiesta dell'autore (03/11), l'idea di T88 e T153: generare gli universi non in tempo reale, in alta qualità, solo con gli abbonamenti. Oggi la coda (ADR-0077, ADR-0106, `src/kernel/ai/subscription.ts`) prende solo i compiti lenti, il resto va alle API, e non c'è sul server dei mondi di molti: una partita multigiocatore senza API non genererebbe i luoghi nuovi. Se il mondo si genera prima, il problema non si pone per ciò che è già pronto.
@@ -4189,8 +4188,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: da decidere quando riparte.
 - Quando è fatto: commit su `task/T245i`; Sicurezza: scrivi l'esito.
 
-### T264 · `?dev&teleport` ignora lo scostamento salvato — `in attesa`
-- Cloud: ramo dei task del kernel su Claude Cloud; non lanciare in locale, lo porta il suo task di integrazione.
+### T264 · `?dev&teleport` ignora lo scostamento salvato — `fatto` (`c007831`)
 - Pipeline: claude · stima 2% · approvato · priorità 15
 - Contesto: decisione dell'autore del 04/11 (D13): chi chiude nella corona riparte dov'era, come oggi. Ma `pagehide` salva lo scostamento del tappeto, che sposta `?dev&teleport=46,0` di 46 caselle a ogni caricamento chiuso bene. Nasce da T214 (`dossier T214`).
 - Cosa fare: con `?dev&teleport` lo scostamento salvato non si applica, così l'URL porta sempre allo stesso punto; senza, tutto come prima.
@@ -4198,8 +4196,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: sì: due caricamenti di `?dev&teleport=46,0` chiusi bene arrivano allo stesso punto; senza `teleport` si riparte dov'era.
 - Quando è fatto: commit su `task/T264`; nell'esito cosa è stato provato. Sicurezza: nessuna superficie nuova.
 
-### T265 · I commit non si perdono: fila su disco, tutte le scritture, token scaduto — `in attesa`
-- Cloud: ramo dei task del kernel su Claude Cloud; non lanciare in locale, lo porta il suo task di integrazione.
+### T265 · I commit non si perdono: fila su disco, tutte le scritture, token scaduto — `fatto` (`c007831`)
 - Pipeline: claude · stima 6% · approvato · priorità 14
 - Step: 34
 - Contesto: decisione dell'autore del 04/11 (D15): prima della beta. Nasce da T211 (`dossier T211`, ADR-0122): la fila di `UniverseClient` sta solo in memoria e senza tetto; `putMap`, `branch` e `merge` non ritentano; un 401 da token scaduto perde il commit.
@@ -4216,8 +4213,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: non serve, salvo righe che toccano ciò che si vede.
 - Quando è fatto: commit su `task/T266`; Sicurezza: nessuna superficie nuova.
 
-### T267 · `tests/subscription.test.ts` rosso sotto carico, verde da solo: la causa — `in attesa` (dipende da T255)
-- Cloud: ramo dei task del kernel su Claude Cloud; non lanciare in locale, lo porta il suo task di integrazione.
+### T267 · `tests/subscription.test.ts` rosso sotto carico, verde da solo: la causa — `fatto` (`c007831`) (dipende da T255)
 - Pipeline: claude · stima 2% · approvato · priorità 40
 - Contesto: decisione dell'autore del 04/11 (D28). Il file è rosso nella suite intera e verde da solo: visto in T89c e T253, già notato in passato come «rosso di carico» senza cercarne la causa (`dossier T253`, `dossier T89c`). Un rosso che si ignora nasconde quelli veri.
 - Cosa fare: riprodurlo (suite intera o carico simulato), trovare la causa, correggerla nel test o nel codice, secondo dove sta. Se è un tempo massimo troppo stretto, dirlo con la misura, non alzarlo a occhio. Se non si riproduce, scrivere nell'esito cosa è stato provato e fermarsi lì: niente correzioni alla cieca.
