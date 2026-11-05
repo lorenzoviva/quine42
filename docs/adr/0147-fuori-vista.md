@@ -1,10 +1,10 @@
 # ADR-0147 — Fuori vista: la contabilità dei luoghi che nessuno vede, il ritorno, `on_return`
 
-Data: 2026-11-05 · Stato: accettato (task T245f del backlog) · Riferimenti: D8 dell'autore (04/11: il progetto lasciava aperta la fase), `docs/design/comportamento-npc.md` (sezione 5), `docs/design/espressivita.md` (primitiva O), ADR-0110 (il mondo di molti in un processo), ADR-0114 (il mondo vuoto si ferma), ADR-0140, ADR-0141, ADR-0145, ADR-0146
+Data: 2026-11-05 · Stato: accettato (task T245f del backlog) · Riferimenti: D8 dell'autore (04/11: il progetto lasciava aperta la fase), `docs/design/comportamento-npc.md` (sezione 5), `docs/design/espressivita.md` (primitiva O), ADR-0110 (il mondo di molti in un processo), ADR-0114 (il mondo vuoto si ferma), ADR-0140, ADR-0141, ADR-0148, ADR-0146
 
 ## Contesto
 
-Un luogo lontano dai viandanti non ha entità né Lua: i suoi individui esistono solo in `people.json`. Con le imprese (ADR-0145) e gli stadi (ADR-0146) una casa che nessuno guarda resterebbe ferma per sempre, il granaio vuoto, il campo seminato com'era. Il progetto chiede che chi torna dopo una settimana trovi la casa ai muri, il campo maturo, il granaio pieno: veda il risultato, non il lavoro, senza simulare dove nessuno guarda.
+Un luogo lontano dai viandanti non ha entità né Lua: i suoi individui esistono solo in `people.json`. Con le imprese (ADR-0148) e gli stadi (ADR-0146) una casa che nessuno guarda resterebbe ferma per sempre, il granaio vuoto, il campo seminato com'era. Il progetto chiede che chi torna dopo una settimana trovi la casa ai muri, il campo maturo, il granaio pieno: veda il risultato, non il lavoro, senza simulare dove nessuno guarda.
 
 ## Decisione
 

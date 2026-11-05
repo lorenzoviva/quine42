@@ -222,7 +222,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   `sys.lavoro`, il luogo è `mestiere.luogo`, `placeDeposit`), `produci` consuma `con` e fa un pezzo al banco, `usa` chiama l'`on_act`
   di una cosa con l'individuo come chi la usa (`world.act`, solo azioni senza effetti, entro 2,5 caselle). La via vede le forme dei
   modelli (`free`); chi è fermo a meno di tre caselle dalla meta è arrivato, chi è fermo lontano per otto secondi lascia il compito.
-- **Le imprese** (T245d, ADR-0145, `src/kernel/ventures.ts`): il lavoro di molti verso un risultato che si vede, in `world/imprese.json`,
+- **Le imprese** (T245d, ADR-0148, `src/kernel/ventures.ts`): il lavoro di molti verso un risultato che si vede, in `world/imprese.json`,
   scritto solo dal kernel (in memoria, nel file con il salvataggio come il magazzino; mai ai client; torna indietro con `R`). Il
   **progresso è derivato** da `portati` e `lavorato` (`ventureProgress`: la fase di adesso è la prima con materiali o lavoro che
   mancano; il lavoro conta solo fin dove i materiali lo permettono, `workAllowed`); lo stato si legge (`ventureState`: `in corso`,
