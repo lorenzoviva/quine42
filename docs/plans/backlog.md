@@ -4015,6 +4015,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 
 ### T255 · I modelli di Claude distinti nella pipeline, lo sforzo (`effort`) e l'assegnazione dalla scheda — `da fare` (dipende da T254, T268)
 - Pipeline: claude · stima 3% · approvato · priorità 2
+- Sforzo: extra. Decisione dell'autore del 05/11, da codificare in `pianifica.md`, `orchestra.md` e nel predefinito di `assegna`: tanti task `high`, media `extra`, `max` qua e là; la qualità conta più del tempo.
 - Contesto: richiesta dell'autore, sopra e il 05/11 («Voglio che per i task venga anche stimato e distinto l'effort (low, medium, high, extra, max) ho notato che con max i risultati sono eccezionali, sopra ogni aspettativa»). Oggi il provider `claude` è Opus 5.5 e nulla lo dice, né la pipeline distingue o registra il livello di sforzo (`effort`). Nasce da T254 (`dossier T254`), T257 (`dossier T257`) e T268 (`dossier T268`).
 - Cosa fare:
   1. **Provider nuovi in `tools/pipeline/config.json`:** `sonnet` e `haiku` (`claude-sonnet-5-5`, `claude-haiku-5-5`), sullo stesso conto di `claude`, con `orchestrabile: false` (inclusi in `piani.claude.{pro,max5x,max20x}.disponibili` e `limiti.modello`); il loro `ratioSessioneSettimana` provvisorio uguale a `claude`, detto nell'esito come non misurato. In base all'esito e alle misure di T268 (`dossier T268`), aggiungi anche `agy-opus` (`claude-opus-5-5-high`) e `agy-sonnet` (`claude-sonnet-5-5-high`) sul contatore `^Claude and GPT models$`, `abbonamento: "google"`, `orchestrabile: false`, `browser: false`, con `ratioSessioneSettimana: 2` misurato in T268 (inclusi in `piani.google.{pro,ultra}.disponibili` e `limiti.modello`). `stato`, `indice` e `assegna` mostrano il modello per nome, così che `claude` si legga come Opus; il nome `claude` resta com'è per non riscrivere il backlog. Il tetto della CLI resta 3 su `claude` e 1 su `agy` e non si alza nessun tetto.
@@ -4283,7 +4284,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 ### T274 · Integrare la catena Step 32 di Claude Cloud (T260, T262, T245a, T263, T245b, T245c) — `da fare`
 - Pipeline: claude · stima 3% · approvato · priorità 1
 - Step: 32
-- Sforzo: high.
+- Sforzo: extra.
 - Contesto: richiesta dell'autore del 05/11: T260 prima di tutto, gli universi Cloud devono avere una versione del kernel. Il lavoro è già fatto sul ramo `origin/claude/step32-kernel-chain-cghym8` (`6c75530`, kernel `0.1.5`, ADR-0136 e seguenti); `git merge-tree` non vede conflitti con `3d` al 05/11.
 - Cosa fare: `git merge` del ramo nel worktree; rinumera gli ADR se servono; suite intera e typecheck con i loro turni; controlla che `npm run mancanze` e il caricamento di `universe/` reggano `checkKernelVersion`. Nell'esito elenca ciò che il ramo non ha provato (browser di T263, T245b, T245c; i test di `aggiunte.test.ts` saltati nel clone Cloud, da far girare qui).
 - Browser: sì, i pannelli di T263 e un mestiere di T245b: se non si può, `BROWSER: da verificare`.
@@ -4291,7 +4292,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 
 ### T275 · Integrare i task del kernel di Claude Cloud (T267, T264, T265, T207) — `da fare` (dipende da T274)
 - Pipeline: claude · stima 2% · approvato · priorità 3
-- Sforzo: medium.
+- Sforzo: high.
 - Contesto: ramo `origin/claude/quine42-kernel-tasks-dquv5s` (`635f19f`), senza conflitti con `3d` al 05/11, ma tocca il kernel come T274: sale `Z` di `KERNEL_VERSION`.
 - Cosa fare: `git merge`, allinea `KERNEL_VERSION` e `package.json`, suite intera e typecheck con i loro turni. T207 viene prima di T156 nell'ordine voluto dall'autore solo come codice: il generatore non si accende.
 - Browser: sì per `?dev&teleport` (T264); se non si può, `BROWSER: da verificare`.
@@ -4299,7 +4300,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 
 ### T276 · Integrare il motore MarkovJunior per D33 e lo Scenografo di Claude Cloud (T259) — `da fare` (dipende da T274)
 - Pipeline: claude · stima 2% · approvato · priorità 3
-- Sforzo: high.
+- Sforzo: extra.
 - Contesto: ramo `origin/claude/markov-junior-optimization-scenografo-ebsq24` (`5d6feb8`): il motore guarda solo dove serve (opzione A di D33, quella raccomandata), voxel per voxel identico, e T259. D33 resta dell'autore: l'esito dice i tempi misurati a Enorme, così può chiuderla.
 - Cosa fare: `git merge`, suite intera e typecheck con i loro turni; rifai a mano la misura della locanda (`locanda/1/seconda`) e di `riferimento/cantina.xml` a Enorme; controlla che `FORMS_DB_VERSION` non debba cambiare.
 - Browser: non serve.
@@ -4307,7 +4308,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 
 ### T277 · Integrare i 60 modelli di Claude Cloud — `da fare`
 - Pipeline: claude · stima 1% · approvato · priorità 4
-- Sforzo: low.
+- Sforzo: high.
 - Contesto: ramo `origin/claude/markov-junior-3d-60-models-pajzz6` (`b6cff15`), solo `lab/banco/`. Se la sessione A di T273 l'ha già unito, basta il controllo.
 - Cosa fare: `git merge`, i test di `lab/` e typecheck con i loro turni.
 - Browser: non serve.
@@ -4315,7 +4316,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 
 ### T278 · Integrare i tre reami, le lingue e il piano di lancio di Claude Cloud (step 37, T239, T240) — `da fare`
 - Pipeline: claude · stima 1% · approvato · priorità 4
-- Sforzo: low.
+- Sforzo: high.
 - Contesto: ramo `origin/claude/quine42-realms-languages-4mbbsi` (`40eb2de`): reami spazio, pirati, cowboy sul banco, censimento delle lingue, piano di lancio. Il ramo ha scritto nel backlog: tieni il backlog di `3d` e riporta solo gli esiti. T239 e T240 restano `in attesa`: li chiude l'autore, che deve leggerli.
 - Cosa fare: `git merge`, test e typecheck con i loro turni.
 - Browser: non serve.

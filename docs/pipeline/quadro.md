@@ -60,7 +60,8 @@ Aggiornato il 05/11/2026, epoca 277. Crediti: vedi `stato`.
 - **Ogni domanda per l'autore va in chat per intero, numerata, con la raccomandazione** (sua richiesta, 04/11), e in `domande/aperte.md`; mai solo «vedi il file». Sui modelli fatti, non impressioni: T254 scrive `docs/pipeline/modelli.md`, T255 distingue Sonnet e Haiku.
 - Al più una verifica nel browser alla volta, solo su Claude. Risposte brevi all'autore.
 - Obiettivi: nessun parallelismo che aumenta il lavoro; finire i crediti entro il reset settimanale, non prima; margine per le urgenze.
-- **L'autonomia dell'autore è finita (04/11, 19:00):** le mie proposte nuove aspettano di nuovo la sua approvazione. Priorità 0 solo per le urgenze dell'autore e ciò che blocca gli altri.
+- **Autonomia piena dell'autore fino al 06/11 alle 18:00 locali** (data da confermare, vedi diario): approvo da me le mie proposte. Priorità 0 solo per urgenze. **Prima del reset di Claude (16:00 UTC, 17:00 locali) l'orchestratore consuma al più 1 % della settimana:** poche operazioni.
+- **Sforzo (autore, 05/11, vale anche in futuro):** la qualità conta più del tempo: tanti task `high`, media `extra`, `max` qua e là; `medium` e `low` non sono più il predefinito. Finché T255 non è integrato la pipeline non passa lo sforzo: la riga `- Sforzo:` del task è solo scritta.
 - **Mai `git commit -a` nel base:** l'autore ha file suoi (`lab/mjx/models/handmade/lampione copy*.xml`, `docs/design/logo/proposte/`).
 - **Il parser delle dipendenze legge «dopo» e «dipende da» in tutto il blocco**, anche in un nome di file: niente «dopo» vicino a un Txx che non è una dipendenza. Dopo un blocco nuovo controlla `stato`.
 - Un test rosso nella suite intera e verde da solo non è per forza un difetto del task: guarda il carico. Un task «in corso» col log vuoto e la conversazione finita su `usage_limit_reached`: `interrompi` + `riprendi`.
