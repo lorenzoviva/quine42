@@ -8,10 +8,13 @@ import {
   approveTasks,
   assignTask,
   canOrchestrate,
+  CONFIG,
   dossierOf,
+  EFFORTS,
   integrateTask,
   interruptTasks,
   liveConversations,
+  modelOf,
   now,
   orchestrator,
   parseBacklog,
@@ -342,9 +345,9 @@ export function handleApi(method, rawUrl, body = {}, opts = {}) {
     }
 
     if (method === 'POST' && pathname === '/api/assegna') {
-      const { id, provider, stima, priorita, approva } = body ?? {};
+      const { id, provider, stima, priorita, approva, sforzo } = body ?? {};
       if (!id) return { status: 400, data: { error: 'Manca id del task' } };
-      const res = assignTask(String(id).trim(), { provider, stima, priorita, approva }, opts);
+      const res = assignTask(String(id).trim(), { provider, stima, priorita, approva, sforzo }, opts);
       syncPlanFile(opts);
       return { status: 200, data: { ok: true, ...res } };
     }
@@ -468,6 +471,9 @@ export function handleApi(method, rawUrl, body = {}, opts = {}) {
 }
 
 /** Single-page HTML interface for the pipeline. */
+/** One option per provider of config.json, with the model it is: `claude` reads as Opus. */
+const providerOptions = () => Object.keys(CONFIG.providers).map((k) => `<option value="${k}">${k} (${modelOf(k)})</option>`).join('\n            ');
+
 export function renderHtml() {
   return `<!doctype html>
 <html lang="it">
@@ -1072,10 +1078,7 @@ export function renderHtml() {
         <label>Provider:
           <select id="filter-provider">
             <option value="">Tutti</option>
-            <option value="claude">claude</option>
-            <option value="fable">fable</option>
-            <option value="argon">argon</option>
-            <option value="gemini">gemini</option>
+            ${providerOptions()}
           </select>
         </label>
         <label>Coda:
@@ -1228,10 +1231,13 @@ export function renderHtml() {
         <form id="modal-assign-form" style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
           <label>Provider:
             <select id="modal-provider">
-              <option value="claude">claude</option>
-              <option value="fable">fable</option>
-              <option value="argon">argon</option>
-              <option value="gemini">gemini</option>
+              ${providerOptions()}
+            </select>
+          </label>
+          <label>Sforzo:
+            <select id="modal-sforzo">
+              <option value="">—</option>
+              ${EFFORTS.map((e) => `<option value="${e}">${e}</option>`).join('')}
             </select>
           </label>
           <label>Stima %:
@@ -1685,6 +1691,7 @@ export function renderHtml() {
       if (form.dataset.loadedFor !== id) {
         form.dataset.loadedFor = id;
         document.getElementById('modal-provider').value = t.provider || 'claude';
+        document.getElementById('modal-sforzo').value = t.sforzo ?? '';
         document.getElementById('modal-stima').value = t.estimate ?? 4;
         document.getElementById('modal-priorita').value = t.priority ?? 100;
         document.getElementById('modal-approvato').checked = Boolean(t.approved);
@@ -1749,6 +1756,7 @@ export function renderHtml() {
       await api('POST', '/api/assegna', {
         id: OPEN_TASK_ID,
         provider: document.getElementById('modal-provider').value,
+        sforzo: document.getElementById('modal-sforzo').value || undefined,
         stima: Number(document.getElementById('modal-stima').value),
         priorita: Number(document.getElementById('modal-priorita').value),
         approva: document.getElementById('modal-approvato').checked,

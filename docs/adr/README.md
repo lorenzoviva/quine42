@@ -150,5 +150,6 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0143](0143-la-generazione-differita.md) | La generazione differita: un comando locale genera Genesi, luoghi a spirale, individui, modelli e brani solo dalla coda degli abbonamenti; un compito fuori coda lo ferma, un passo si scrive solo se finisce valido, un tetto in percentuale della settimana, mai con un mondo acceso | accettato |
 | [0144](0144-la-fila-delle-scritture-sopravvive-alla-pagina.md) | La fila delle scritture: commit, piani, rami e pubblicazioni in una fila sola, salvata per scheda nella pagina, con un tetto oltre il quale si uniscono; un 401 rinnova il token e riprova (aggiorna ADR-0122) | accettato |
 | [0145](0145-le-vesti-del-sito.md) | Il sito ha una base comune e tante vesti: una cartella per veste in `site/skins/`, `data-skin` sulla radice, `/skins/boot.js` applica la scelta prima del primo disegno, la griglia dalla scala aurea | accettato |
+| [0146](0146-i-modelli-e-lo-sforzo-nella-pipeline.md) | I modelli e lo sforzo nella pipeline: `sonnet`, `haiku`, `agy-opus`, `agy-sonnet` in prova a tetto 1, il modello per nome, `sforzo` nella riga `- Pipeline:`, che arriva alla CLI e si misura; Fable orchestra solo se l'autore lo spunta (aggiorna ADR-0115) |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.
