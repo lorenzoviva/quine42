@@ -1,41 +1,57 @@
 # Il piano della pipeline
 
-> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-11-05T01:24:47.211Z: non modificarlo a mano,
+> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-11-05T20:48:39.900Z: non modificarlo a mano,
 > la fonte è `docs/plans/backlog.md` (righe `- Pipeline:`).
 
 ## Budget
 
-Orchestratore: **argon** (sotto il 10 % nessun task su di lui; si cambia con `orchestratore <provider>`).
+Orchestratore: **gemini** (sotto il 10 % nessun task su di lui; si cambia con `orchestratore <provider>`).
 
-- **claude**: settimana 9 %, 5 ore 100 %; tetto 3, slot 1 (task in programma 14), esaurimento previsto 2026-11-05T13:53:46.462Z, reset 2026-11-05T16:00:00.000Z (letto da /usage il 2026-11-05T01:23:43.524Z)
-  - session, 5h: 100 % residuo, reset 2026-11-05T04:50:00.000Z
-  - week (all models), settimana: 9 % residuo, reset 2026-11-05T16:00:00.000Z
-- **gemini**: settimana 8 %, 5 ore 98 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto mai a questo ritmo, reset 2026-11-05T17:37:53.000Z (letto da /usage il 2026-11-05T01:24:47.186Z)
-  - Gemini Models, settimana: 8 % residuo, reset 2026-11-05T17:37:53.000Z
-  - Gemini Models, 5h: 98 % residuo, reset 2026-11-05T01:42:58.000Z
-- **argon**: settimana 14 %, 5 ore 14 %; tetto 1, slot 1 (task in programma 1), esaurimento previsto 2026-11-05T02:24:25.824Z, reset 2026-11-11T18:44:35.000Z (letto da /usage il 2026-11-05T01:20:45.229Z)
-  - Gemini 4 Argon, settimana: 14 % residuo, reset 2026-11-11T18:44:35.000Z
-- **fable**: settimana 9 %, 5 ore 100 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto 2026-11-05T13:59:12.717Z, reset 2026-11-05T16:00:00.000Z (letto da /usage il 2026-11-05T01:24:44.768Z)
-  - session, 5h: 100 % residuo, reset 2026-11-05T04:50:00.000Z
-  - week (all models), settimana: 9 % residuo, reset 2026-11-05T16:00:00.000Z
-  - week (Fable), settimana: 59 % residuo, reset 2026-11-05T16:00:00.000Z
+- **claude** (Opus 5.5): settimana 94 %, 5 ore 9 %; tetto 3, slot 1 (task in programma 18), esaurimento previsto 2026-11-08T22:41:49.015Z, reset 2026-11-12T16:00:00.000Z (letto da /usage il 2026-11-05T20:47:35.622Z)
+  - session, 5h: 9 % residuo, reset 2026-11-05T21:00:00.000Z
+  - week (all models), settimana: 94 % residuo, reset 2026-11-12T16:00:00.000Z
+- **gemini** (Gemini 3.8 Flash): settimana 100 %, 5 ore 100 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto mai a questo ritmo, reset 2026-11-12T17:37:53.000Z (letto da /usage il 2026-11-05T20:43:56.548Z)
+  - Gemini Models, settimana: 100 % residuo, reset 2026-11-12T17:37:53.000Z
+  - Gemini Models, 5h: 100 % residuo, reset 2026-11-06T01:43:56.000Z
+- **argon** (Gemini 4 Argon): settimana 0 %, 5 ore 0 %, fermo fino a 2026-11-11T18:44:35.000Z; tetto 1, slot 1 (task in programma 0), esaurimento previsto 2026-11-05T20:43:56.561Z, reset 2026-11-11T18:44:35.000Z (letto da /usage il 2026-11-05T20:43:56.548Z)
+  - Gemini 4 Argon, settimana: 0 % residuo, reset 2026-11-11T18:44:35.000Z
+- **fable** (Fable 5.1): settimana 94 %, 5 ore 9 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto 2026-11-08T21:51:20.615Z, reset 2026-11-12T16:00:00.000Z (letto da /usage il 2026-11-05T20:43:53.410Z)
+  - session, 5h: 9 % residuo, reset 2026-11-05T21:00:00.000Z
+  - week (all models), settimana: 94 % residuo, reset 2026-11-12T16:00:00.000Z
+  - week (Fable), settimana: 100 % residuo, reset 2026-11-12T16:00:00.000Z
+- **sonnet** (Sonnet 5.5): settimana 94 %, 5 ore 9 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto 2026-11-09T15:47:45.039Z, reset 2026-11-12T16:00:00.000Z (letto da /usage il 2026-11-05T20:43:53.410Z)
+  - session, 5h: 9 % residuo, reset 2026-11-05T21:00:00.000Z
+  - week (all models), settimana: 94 % residuo, reset 2026-11-12T16:00:00.000Z
+- **haiku** (Haiku 5.5): settimana 94 %, 5 ore 9 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto 2026-11-09T15:47:45.039Z, reset 2026-11-12T16:00:00.000Z (letto da /usage il 2026-11-05T20:43:53.410Z)
+  - session, 5h: 9 % residuo, reset 2026-11-05T21:00:00.000Z
+  - week (all models), settimana: 94 % residuo, reset 2026-11-12T16:00:00.000Z
+- **agy-opus** (Opus 5.5 (agy)): settimana 100 %, 5 ore 100 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto mai a questo ritmo, reset 2026-11-12T17:46:36.000Z (letto da /usage il 2026-11-05T20:43:56.548Z)
+  - Claude and GPT models, settimana: 100 % residuo, reset 2026-11-12T17:46:36.000Z
+  - Claude and GPT models, 5h: 100 % residuo, reset 2026-11-06T01:43:56.000Z
+- **agy-sonnet** (Sonnet 5.5 (agy)): settimana 100 %, 5 ore 100 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto mai a questo ritmo, reset 2026-11-12T17:46:36.000Z (letto da /usage il 2026-11-05T20:43:56.548Z)
+  - Claude and GPT models, settimana: 100 % residuo, reset 2026-11-12T17:46:36.000Z
+  - Claude and GPT models, 5h: 100 % residuo, reset 2026-11-06T01:43:56.000Z
 
-## In corso (1)
+## In corso (0)
 
-- **T255** I modelli di Claude distinti nella pipeline, lo sforzo (`effort`) e l'assegnazione dalla scheda — argon, 3 %
+_nessuno_
 
 ## Finiti, da guardare e integrare (`integra Txx`) (0)
 
 _nessuno_
 
-## Pronti, in ordine di priorità (6)
+## Pronti, in ordine di priorità (10)
 
-- **T273** Integrare a costo zero nei quattro universi esplorabili le strutture, i modelli e i suoni creati su Claude Cloud — claude, 4 %
-- **T259** Lo Scenografo: progetto e misura degli interni separati dall'edificio — claude, 5 %
-- **T260** Il versionamento del kernel (`X.Y.Z`) e la compatibilità degli universi — claude, 3 %
-- **T262** Il salvataggio che non si ferma — claude, 6 %
-- **T265** I commit non si perdono: fila su disco, tutte le scritture, token scaduto — claude, 6 %
-- **T264** `?dev&teleport` ignora lo scostamento salvato — claude, 2 %
+- **T284** La veste futuristica: l'inception di scritte neon — claude (Opus 5.5), sforzo max, 4 %
+- **T285** La veste a fumetto: crea la tua quine-storia — claude (Opus 5.5), sforzo extra, 3 %
+- **T286** La veste sobria: vediamoci chiaro — claude (Opus 5.5), sforzo high, 2 %
+- **T302** Gli universi dicono su quali kernel girano: l'intervallo e l'impalcatura della retrocompatibilità — claude (Opus 5.5), sforzo high, 3 %
+- **T156** Il prompt nuovo nello Scultore del gioco — claude (Opus 5.5), 5 %
+- **T281** I punti di `placeInside` che il kernel trova bloccati dentro le strutture — claude (Opus 5.5), sforzo extra, 4 %
+- **T298** I mestieri di orichalcum, neapolis e sidera — claude (Opus 5.5), sforzo high, 2 %
+- **T288** Ciò che il viandante impugna si vede addosso: armi e attrezzi — claude (Opus 5.5), sforzo max, 4 %
+- **T299** Un individuo si blocca su un dislivello — claude (Opus 5.5), sforzo high, 1 %
+- **T293** Le carte fatte a mano: forma, archivio, rotte, interruttore — claude (Opus 5.5), sforzo max, 3 %
 
 ## Da approvare (provider e stima proposti) (0)
 
@@ -45,35 +61,32 @@ _nessuno_
 
 _nessuno_
 
-## Bloccati da dipendenze (14)
+## Bloccati da dipendenze (10)
 
-- **T88** Spendere i crediti che avanzano con la generazione differita — claude, 4 % (aspetta T207, T156)
-- **T207** La generazione differita: un universo generato senza browser, solo dagli abbonamenti — claude, 6 % (aspetta T156)
-- **T156** Il prompt nuovo nello Scultore del gioco — claude, 5 % (aspetta T258)
-- **T233** La landing launcher nel sito — claude, 3 % (aspetta T232)
-- **T237** La guida dei beta tester, in due file — claude, 2 % (aspetta T45f)
-- **T242** Il rapporto aureo nei prompt dello Scultore e dell'Artista — claude, 1 % (aspetta T156)
-- **T263** I pannelli e i comandi di ogni viandante in multigiocatore — claude, 8 % (aspetta T245a)
-- **T245a** Il magazzino durevole e `vite` — claude, 7 % (aspetta T262)
-- **T245b** Il lavoro degli NPC: i primi tre mestieri — claude, 12 % (aspetta T245a)
-- **T245c** Gli altri mestieri del seme — claude, 7 % (aspetta T245b)
-- **T245d** Le imprese — claude, 12 % (aspetta T245b, T263)
-- **T245e** L'edificio per stadi — claude, 9 % (aspetta T245d)
-- **T245f** Fuori vista — claude, 9 % (aspetta T245d, T245e)
-- **T267** `tests/subscription.test.ts` rosso sotto carico, verde da solo: la causa — claude, 2 % (aspetta T255)
+- **T88** Spendere i crediti che avanzano con la generazione differita — claude (Opus 5.5), 4 % (aspetta T156)
+- **T233** La landing launcher nel sito — claude (Opus 5.5), 3 % (aspetta T287)
+- **T237** La guida dei beta tester, in due file — claude (Opus 5.5), 2 % (aspetta T45f, T294)
+- **T242** Il rapporto aureo nei prompt dello Scultore e dell'Artista — claude (Opus 5.5), 1 % (aspetta T156)
+- **T289** Vestiti e armature addosso: il banco che decide come — claude (Opus 5.5), sforzo max, 3 % (aspetta T288)
+- **T292** Prendere e spostare i mobili (`takeable`) — claude (Opus 5.5), sforzo max, 4 % (aspetta T288)
+- **T294** I tre laboratori per i giocatori: forkare e modificare — claude (Opus 5.5), sforzo high, 4 % (aspetta T293)
+- **T295** Portare le carte in un universo nuovo, prima della Genesi — claude (Opus 5.5), sforzo max, 4 % (aspetta T293)
+- **T296** Eliminare la carta problematica — claude (Opus 5.5), sforzo max, 1.5 % (aspetta T295)
+- **T303** La misura vera dello Scenografo, con gli abbonamenti — claude (Opus 5.5), sforzo high, 3 % (aspetta T156)
 
-## In attesa dell'autore (13)
+## In attesa dell'autore (14)
 
-- **T45f** Il server su Google Cloud — claude, 6 %
-- **T153** Gli universi steampunk, moderno e futuristico: leggerli e provarli — claude, 2 %
-- **T258** Il kernel segna il suolo per i programmi delle strutture — claude, 5 %
-- **T184** Le ambientazioni spazio, pirati, cowboy — claude, 2 %
-- **T185** Generare gli universi spazio, pirati, cowboy — claude, 2 %
-- **T232** Il sito come launcher: proposte della landing col rapporto aureo — claude, 3 %
+- **T45f** Il server su Google Cloud — claude (Opus 5.5), 6 %
+- **T153** Gli universi steampunk, moderno e futuristico: leggerli e provarli — claude (Opus 5.5), 2 %
+- **T259** Lo Scenografo: progetto e misura degli interni separati dall'edificio — claude (Opus 5.5), 5 %
+- **T184** Le ambientazioni spazio, pirati, cowboy — claude (Opus 5.5), 2 %
+- **T185** Generare gli universi spazio, pirati, cowboy — claude (Opus 5.5), 2 %
 - **T235** Showcase: carte famose e universi più giocati
 - **T239** Quattro lingue: censimento e progetto
 - **T240** Il piano di lancio: concorrenti, punti di forza, Boa Loger
-- **T245g** Il Narratore scrive mestieri e imprese — claude, 10 %
-- **T245h** I bivi degli NPC — claude, 10 %
-- **T245i** Vite lunghe — claude, 10 %
-- **T266** Un'altra tornata di rinomine — claude, 5 %
+- **T245g** Il Narratore scrive mestieri e imprese — claude (Opus 5.5), 10 %
+- **T245h** I bivi degli NPC — claude (Opus 5.5), 10 %
+- **T245i** Vite lunghe — claude (Opus 5.5), 10 %
+- **T266** Un'altra tornata di rinomine — claude (Opus 5.5), 5 %
+- **T287** La scelta della veste: subito dall'autore, o col voto dei beta tester
+- **T290** Vestiti e armature addosso nel gioco
