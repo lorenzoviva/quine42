@@ -4539,7 +4539,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: sì, con `?offline`: una carta rotta di proposito, il mondo gira, la tolgo dalla console, ricarico. Catture nel commit.
 - Quando è fatto: commit su `task/T296`. Sicurezza: nell'esito.
 
-### T297 · Integrare T280: i conflitti di versione e gli ADR — `da fare`
+### T297 · Integrare T280: i conflitti di versione e gli ADR — `fatto` (`f560a67`)
 - Pipeline: claude · stima 1% · approvato · priorità 1
 - Sforzo: high.
 - Step: 32
@@ -4548,6 +4548,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Test: suite intera e typecheck con i loro turni.
 - Browser: non serve, T280 ha già guardato.
 - Quando è fatto: commit su `task/T297`. Nell'esito: i numeri nuovi degli ADR; ricorda di dare `integra T280` e di segnare `fatto` T245d, T245e, T245f.
+- Esito: merge di `task/T280` in `task/T297` (`d767201`) con versione `0.1.9` in `package.json`, `package-lock.json`, `src/kernel/version.ts` e `universe/universe.json`; numeri nuovi degli ADR di T280: ADR-0145 (imprese), ADR-0146 (edificio per stadi), ADR-0147 (fuori vista), già rinumerati in `06e33cf`, rimandi controllati, nessun ADR di `3d` toccato; aggiunta la colonna dello stato (`accettato`) alle loro righe dell'indice; `tests/fixtures/mj-engine-hashes.json` verde e non rigenerata; backlog e quadro non cambiati dal merge; suite 2292 passati e 1 saltato, typecheck verde; censimento del glossario tenuto com'è fuso, non rigenerato; non provati browser (non richiesto, T280 ha già guardato), build e i quattro universi su questo merge; manca dare `integra T280` e segnare `fatto` T245d, T245e, T245f; sicurezza: nessuna superficie nuova oltre a quella dichiarata da T280.
 
 ### T298 · I mestieri di orichalcum, neapolis e sidera — `da fare` (dipende da T297)
 - Pipeline: claude · sforzo high · stima 2% · approvato · priorità 5
