@@ -298,5 +298,155 @@
    3323
   ],
   "passa": true
+ },
+ "quercia-secolare": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.644458186763347,
+  "minima": 0.5891490319675822,
+  "ms": 123,
+  "voxel": [
+   10371,
+   10288,
+   10019,
+   10155,
+   8430
+  ],
+  "passa": true
+ },
+ "salice-piangente": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.816944640044866,
+  "minima": 0.6358597962852007,
+  "ms": 112,
+  "voxel": [
+   4756,
+   5483,
+   3736,
+   4804,
+   4303
+  ],
+  "passa": true
+ },
+ "fungo-gigante-luminoso": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.4857280484597689,
+  "minima": 0.11576215728308699,
+  "ms": 266,
+  "voxel": [
+   8334,
+   9777,
+   7212,
+   8366,
+   7308
+  ],
+  "passa": true
+ },
+ "arco-roccia-muschioso": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.3579543536381643,
+  "minima": 0.21806730958472742,
+  "ms": 708,
+  "voxel": [
+   13716,
+   13653,
+   13788,
+   16695,
+   13509
+  ],
+  "passa": true
+ },
+ "cristallo-caverna": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.30727065804566556,
+  "minima": 0.17997494911539064,
+  "ms": 378,
+  "voxel": [
+   11660,
+   11371,
+   11589,
+   11634,
+   11783
+  ],
+  "passa": true
+ },
+ "albero-ferro-fuso": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.7064499841076948,
+  "minima": 0.6080624187256177,
+  "ms": 126,
+  "voxel": [
+   2005,
+   2698,
+   2654,
+   2542,
+   2658
+  ],
+  "passa": true
+ },
+ "camino-geotermico": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.20209978740426132,
+  "minima": 0.10011853022520743,
+  "ms": 309,
+  "voxel": [
+   12027,
+   12016,
+   12057,
+   12095,
+   12045
+  ],
+  "passa": true
+ },
+ "venatura-oricalco": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.3027016044621925,
+  "minima": 0.05767315527387958,
+  "ms": 469,
+  "voxel": [
+   27893,
+   10731,
+   10840,
+   10722,
+   10743
+  ],
+  "passa": true
+ },
+ "ponte-tubi-vapore": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.5085634990051028,
+  "minima": 0.017753389283408652,
+  "ms": 235,
+  "voxel": [
+   8841,
+   3071,
+   3070,
+   6463,
+   3070
+  ],
+  "passa": true
+ },
+ "gru-miniera": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.5010179361481734,
+  "minima": 0.20171480144404333,
+  "ms": 318,
+  "voxel": [
+   2565,
+   2002,
+   1983,
+   1895,
+   1888
+  ],
+  "passa": true
  }
 }

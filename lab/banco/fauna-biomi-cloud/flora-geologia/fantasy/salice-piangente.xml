@@ -1,0 +1,55 @@
+<!-- Salice piangente (Cantiere 8, aurora): tronco e rami a caso; le fronde ricadono a caso. -->
+<sequence values="BTUAFLSHewsnu123456" symmetry="(xy)" name="Salice piangente">
+  <color symbol="T" value="6b5a42" name="corteccia"/>
+  <color symbol="U" value="6b5a42" name="corteccia alta"/>
+  <color symbol="A" value="7a6a4a" name="rami"/>
+  <color symbol="F" value="7fae4f" name="fronde"/>
+  <color symbol="L" value="a8cf6a" name="fronde chiare"/>
+  <color symbol="S" value="8c8a80" name="pietre"/>
+  <color symbol="H" hidden="True" name="marcatore"/>
+  <color symbol="e" hidden="True" name="marcatore"/>
+  <color symbol="w" hidden="True" name="marcatore"/>
+  <color symbol="s" hidden="True" name="marcatore"/>
+  <color symbol="n" hidden="True" name="marcatore"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="1" hidden="True" name="marcatore"/>
+  <color symbol="2" hidden="True" name="marcatore"/>
+  <color symbol="3" hidden="True" name="marcatore"/>
+  <color symbol="4" hidden="True" name="marcatore"/>
+  <color symbol="5" hidden="True" name="marcatore"/>
+  <color symbol="6" hidden="True" name="marcatore"/>
+  <!-- scelta «base»: sul prato | sulla riva | sulle radici -->
+  <box at="20 20 0" size="40 40 5" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <!--   1: sul prato -->
+  <cylinder at="20 20 0" size="10 10 2" color="T" on="1"/>
+  <!--   2: sulla riva -->
+  <ellipsoid at="12 20 0" size="8 7 4" color="S" on="2"/>
+  <ellipsoid at="28 16 0" size="7 8 3" color="S" on="2"/>
+  <ellipsoid at="20 28 0" size="9 6 4" color="S" on="2"/>
+  <cylinder at="20 20 0" size="12 12 2" color="T" on="2"/>
+  <!--   3: sulle radici -->
+  <line at="20 20 3" to="30 20 0" r="1.5" color="T" on="3"/>
+  <line at="20 20 3" to="23 30 0" r="1.5" color="T" on="3"/>
+  <line at="20 20 3" to="12 26 0" r="1.5" color="T" on="3"/>
+  <line at="20 20 3" to="12 14 0" r="1.5" color="T" on="3"/>
+  <line at="20 20 3" to="23 11 0" r="1.5" color="T" on="3"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <cylinder at="20 20 0" size="7 7 4" color="T"/>
+  <box at="20 20 4" size="1 1 1" color="H"/>
+  <!-- il tronco cammina verso l'alto, dritto o di sbieco -->
+  <one steps="19"><rule in="B H" out="H T" p="4"/><rule in="B* *H" out="H* *T" p="2"/></one>
+  <one steps="24"><rule in="B H" out="H U" p="4"/><rule in="B* *H" out="H* *U" p="2"/></one>
+  <all in="TB" out="*T" steps="2"/>
+  <all in="UB" out="*U" steps="1"/>
+  <!-- 10 rami nati a caso sui fianchi di U: ognuno va dalla sua parte e a volte sale -->
+  <one steps="10" symmetry="()"><rule in="UB" out="*e"/><rule in="BU" out="w*"/><rule in="U/B" out="*/s"/><rule in="B/U" out="n/*"/></one>
+  <prl steps="13" symmetry="()"><rule in="eB" out="Ae" p="0.85"/><rule in="*B e*" out="*e A*" p="0.45"/><rule in="Bw" out="wA" p="0.85"/><rule in="B* *w" out="w* *A" p="0.45"/><rule in="s/B" out="A/s" p="0.85"/><rule in="*/B s/*" out="*/s A/*" p="0.45"/><rule in="B/n" out="n/A" p="0.85"/><rule in="B/* */n" out="n/* */A" p="0.45"/></prl>
+  <!-- le punte diventano foglie, che si gonfiano a caso in tutte le direzioni -->
+  <prl><rule in="e" out="F"/><rule in="w" out="F"/><rule in="s" out="F"/><rule in="n" out="F"/><rule in="H" out="F"/></prl>
+  <prl in="FB" out="*F" p="0.5" steps="2" symmetry="(xyz)"/>
+  <!-- le fronde ricadono: sotto ogni foglia, a volte, un'altra foglia -->
+  <prl in="F B" out="F F" p="0.8" steps="26"/>
+  <prl in="BF" out="*L" p="0.2" steps="1"/>
+</sequence>

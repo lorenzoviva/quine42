@@ -1,0 +1,51 @@
+<!-- Arco di roccia muschioso (Cantiere 8, aurora): forma a caso; bozze, muschio e liane a caso. -->
+<sequence values="BRDMVPu123456" symmetry="(xy)" name="Arco di roccia muschioso">
+  <color symbol="R" value="9a8f8a" name="roccia"/>
+  <color symbol="D" value="6f6560" name="roccia scura"/>
+  <color symbol="M" value="5f9a42" name="muschio"/>
+  <color symbol="V" value="3f7a35" name="liane"/>
+  <color symbol="P" hidden="True" name="marcatore"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="1" hidden="True" name="marcatore"/>
+  <color symbol="2" hidden="True" name="marcatore"/>
+  <color symbol="3" hidden="True" name="marcatore"/>
+  <color symbol="4" hidden="True" name="marcatore"/>
+  <color symbol="5" hidden="True" name="marcatore"/>
+  <color symbol="6" hidden="True" name="marcatore"/>
+  <!-- scelta «forma»: tondo | inclinato | doppio | ponte basso -->
+  <box at="25 25 0" size="50 50 50" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/><rule in="u" out="4"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/><rule in="4u" out="*4"/></all>
+  <!--   1: tondo -->
+  <line at="10 25 0" to="12 25 26" r="6" color="R" on="1"/>
+  <line at="40 25 0" to="38 25 26" r="6" color="R" on="1"/>
+  <line at="12 25 26" to="20 25 36" r="6" color="R" on="1"/>
+  <line at="38 25 26" to="30 25 36" r="6" color="R" on="1"/>
+  <line at="20 25 36" to="30 25 36" r="6" color="R" on="1"/>
+  <!--   2: inclinato -->
+  <line at="8 22 0" to="16 24 30" r="7" color="R" on="2"/>
+  <line at="42 28 0" to="36 26 18" r="6" color="R" on="2"/>
+  <line at="16 24 30" to="36 26 18" r="6" color="R" on="2"/>
+  <ellipsoid at="8 22 0" size="16 16 8" color="D" on="2"/>
+  <!--   3: doppio -->
+  <line at="6 25 0" to="8 25 24" r="5" color="R" on="3"/>
+  <line at="25 25 0" to="25 25 30" r="5" color="R" on="3"/>
+  <line at="44 25 0" to="42 25 24" r="5" color="R" on="3"/>
+  <line at="8 25 24" to="25 25 34" r="5" color="R" on="3"/>
+  <line at="42 25 24" to="25 25 34" r="5" color="R" on="3"/>
+  <!--   4: ponte basso -->
+  <ellipsoid at="8 25 0" size="16 22 22" color="R" on="4"/>
+  <ellipsoid at="42 25 0" size="16 22 22" color="R" on="4"/>
+  <line at="10 25 22" to="40 25 24" r="7" color="R" on="4"/>
+  <cone at="25 25 26" size="12 12 8" color="D" on="4"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/><rule in="4" out="B"/></prl>
+  <!-- la roccia si gonfia in bozze a caso -->
+  <prl in="RB" out="*D" p="0.08" steps="1"/>
+  <prl in="DB" out="*D" p="0.5" steps="2" symmetry="(xyz)"/>
+  <prl in="B R" out="* M" p="0.7" steps="1"/>
+  <prl in="B D" out="* M" p="0.5" steps="1"/>
+  <!-- liane che pendono da sotto l'arco -->
+  <one in="R B" out="* P" steps="10"/>
+  <prl in="P B" out="V P" p="0.75" steps="18"/>
+  <prl in="P" out="V"/>
+</sequence>

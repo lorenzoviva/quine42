@@ -1,34 +1,7 @@
 // Collection 1: creatures, special characters, automata and vehicles. Boxes in voxels (x width, y depth with the front at high y, z height).
 
-import { box, cone, cyl, ell, line, nota, programma, scelta } from './attrezzi';
+import { box, cone, cyl, ell, line, macchie, nota, programma, punte, ramifica, ruota, scelta, sopra } from './attrezzi';
 import type { Definizione } from './catalogo';
-
-/** A walker grows a thin limb from its tip letter `P`, leaving `A`: up, aslant, or splitting in two, for `passi` steps. */
-const ramifica = (passi: number, punta = 'P', scia = 'A', pesi = { su: 1, obliquo: 2, biforca: 0.6 }) => [
-  `<one steps="${passi}">`,
-  `  <rule in="B ${punta}" out="${punta} ${scia}" p="${pesi.su}"/>`,
-  `  <rule in="B* *${punta}" out="${punta}* *${scia}" p="${pesi.obliquo}"/>`,
-  `  <rule in="B*B *${punta}*" out="${punta}*${punta} *${scia}*" p="${pesi.biforca}"/>`,
-  '</one>',
-  `<prl in="${punta}" out="${scia}"/>`,
-];
-
-/** Seeds on the top surface of `su` (`n` at random), each growing `alto` up or aslant: spikes, crystals, chimneys. */
-const punte = (su: string, n: number, alto: number, colore: string, punta = 'P') => [
-  nota(`${n} punte a caso sulla faccia alta di ${su}, alte fino a ${alto}`),
-  `<one in="B ${su}" out="${punta} *" steps="${n}"/>`,
-  `<all steps="${alto}"><rule in="B ${punta}" out="${punta} ${colore}"/><rule in="B* *${punta}" out="${punta}* *${colore}"/></all>`,
-  `<prl in="${punta}" out="${colore}"/>`,
-];
-
-/** Spots on the faces of `su` that look sideways (`p` per cell): runes, rivets, lights. */
-const macchie = (su: string, colore: string, p: number) => `<prl in="B${su}" out="*${colore}" p="${p}" steps="1"/>`;
-
-/** Moss, snow, rust on the faces of `su` that look up. */
-const sopra = (su: string, colore: string, p: number) => `<prl in="B ${su}" out="* ${colore}" p="${p}" steps="1"/>`;
-
-/** A wheel: an ellipsoid flattened across x, a disc standing on the ground. */
-const ruota = (x0: number, x1: number, y: number, r: number, c: string) => ell([(x0 + x1) / 2, y, 0], [x1 - x0 + 1, 2 * r + 1, 2 * r + 1], c);
 
 export const CREATURE_VEICOLI: Definizione[] = [
   {

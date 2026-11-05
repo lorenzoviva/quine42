@@ -1,0 +1,86 @@
+<!-- Gru di miniera (Cantiere 8, orichalcum): base e braccio a caso; la fune scende a caso; cumuli di minerale a caso. -->
+<sequence values="BOIKWSMFPgu123456" symmetry="(xy)" name="Gru di miniera">
+  <color symbol="O" value="a87a2a" name="traliccio d'ottone"/>
+  <color symbol="I" value="3a3633" name="ferro"/>
+  <color symbol="K" value="6a6560" name="contrappeso"/>
+  <color symbol="W" value="6b4a2a" name="legno"/>
+  <color symbol="S" value="8a8580" name="pietra"/>
+  <color symbol="M" value="3a2f2a" name="minerale"/>
+  <color symbol="F" value="c9b89a" name="fune"/>
+  <color symbol="P" hidden="True" name="marcatore"/>
+  <color symbol="g" hidden="True" name="marcatore"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="1" hidden="True" name="marcatore"/>
+  <color symbol="2" hidden="True" name="marcatore"/>
+  <color symbol="3" hidden="True" name="marcatore"/>
+  <color symbol="4" hidden="True" name="marcatore"/>
+  <color symbol="5" hidden="True" name="marcatore"/>
+  <color symbol="6" hidden="True" name="marcatore"/>
+  <!-- scelta «base»: binari | zoccolo di pietra | cavalletto di legno -->
+  <box at="25 25 0" size="30 30 6" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <!--   1: binari -->
+  <box at="25 25 0" size="26 4 1" color="I" on="1"/>
+  <box at="25 19 0" size="26 2 1" color="W" on="1"/>
+  <box at="25 31 0" size="26 2 1" color="W" on="1"/>
+  <box at="25 25 1" size="12 12 4" color="I" on="1"/>
+  <!--   2: zoccolo di pietra -->
+  <box at="25 25 0" size="16 16 5" color="S" on="2"/>
+  <!--   3: cavalletto di legno -->
+  <line at="17 17 0" to="23 23 5" r="1.5" color="W" on="3"/>
+  <line at="33 17 0" to="27 23 5" r="1.5" color="W" on="3"/>
+  <line at="17 33 0" to="23 27 5" r="1.5" color="W" on="3"/>
+  <line at="33 33 0" to="27 27 5" r="1.5" color="W" on="3"/>
+  <box at="25 25 4" size="8 8 2" color="W" on="3"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <!-- la torre a traliccio -->
+  <line at="22 22 4" to="23 23 40" r="0.5" color="O"/>
+  <line at="28 22 4" to="27 23 40" r="0.5" color="O"/>
+  <line at="22 28 4" to="23 27 40" r="0.5" color="O"/>
+  <line at="28 28 4" to="27 27 40" r="0.5" color="O"/>
+  <box at="25 25 10" size="7 7 1" color="O"/>
+  <box at="25 25 18" size="7 7 1" color="O"/>
+  <box at="25 25 26" size="7 7 1" color="O"/>
+  <box at="25 25 34" size="7 7 1" color="O"/>
+  <line at="25 25 38" to="25 25 47" r="0.5" color="I"/>
+  <!-- scelta «braccio»: a est | a ovest | a nord | a sud -->
+  <box at="25 25 32" size="50 50 17" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/><rule in="u" out="4"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/><rule in="4u" out="*4"/></all>
+  <!--   1: a est -->
+  <line at="25 25 38" to="47 25 40" r="1.5" color="O" on="1"/>
+  <line at="25 25 46" to="47 25 40" r="0.5" color="I" on="1"/>
+  <line at="25 25 38" to="15 25 38" r="1.5" color="O" on="1"/>
+  <box at="14 25 34" size="6 6 5" color="K" on="1"/>
+  <box at="47 25 39" size="1 1 1" color="P" on="1"/>
+  <!--   2: a ovest -->
+  <line at="25 25 38" to="3 25 40" r="1.5" color="O" on="2"/>
+  <line at="25 25 46" to="3 25 40" r="0.5" color="I" on="2"/>
+  <line at="25 25 38" to="35 25 38" r="1.5" color="O" on="2"/>
+  <box at="36 25 34" size="6 6 5" color="K" on="2"/>
+  <box at="3 25 39" size="1 1 1" color="P" on="2"/>
+  <!--   3: a nord -->
+  <line at="25 25 38" to="25 47 40" r="1.5" color="O" on="3"/>
+  <line at="25 25 46" to="25 47 40" r="0.5" color="I" on="3"/>
+  <line at="25 25 38" to="25 15 38" r="1.5" color="O" on="3"/>
+  <box at="25 14 34" size="6 6 5" color="K" on="3"/>
+  <box at="25 47 39" size="1 1 1" color="P" on="3"/>
+  <!--   4: a sud -->
+  <line at="25 25 38" to="25 3 40" r="1.5" color="O" on="4"/>
+  <line at="25 25 46" to="25 3 40" r="0.5" color="I" on="4"/>
+  <line at="25 25 38" to="25 35 38" r="1.5" color="O" on="4"/>
+  <box at="25 36 34" size="6 6 5" color="K" on="4"/>
+  <box at="25 3 39" size="1 1 1" color="P" on="4"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/><rule in="4" out="B"/></prl>
+  <!-- la fune scende dalla punta per una lunghezza a caso; poi la secchia -->
+  <prl in="P B" out="F P" p="0.85" steps="34"/>
+  <prl in="P" out="I"/>
+  <all in="F B" out="F M" steps="1"/>
+  <prl in="BM" out="*M" p="1" steps="1"/>
+  <!-- 4 massi nascono a caso sul terreno accanto a ciò che c'è già ([IWS]) e crescono di lato e in alto -->
+  <box at="25 25 0" size="48 48 1" color="g" on="B"/>
+  <one in="[IWS]g" out="*M" steps="4"/>
+  <prl steps="6"><rule in="M[Bg]" out="*M" p="0.5"/><rule in="B M" out="M *" p="0.35"/></prl>
+  <prl in="g" out="B"/>
+</sequence>
