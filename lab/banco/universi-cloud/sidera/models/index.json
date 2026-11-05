@@ -870,12 +870,12 @@
  "struttura-la-grande-cupola-di-serralta-v": {
   "classe": "edificio",
   "nome": "La grande cupola di Serralta",
-  "autore": "Claude Cloud (T272, il programma di sidera-cupola)"
+  "autore": "Claude Cloud (T272, come sidera-cupola)"
  },
  "struttura-la-costola-ricurva-di-uno-scaf": {
   "classe": "monumento",
   "nome": "La costola dello scafo antico",
-  "autore": "Claude Cloud (T272, il programma di sidera-relitto)"
+  "autore": "Claude Cloud (T272, come sidera-relitto)"
  },
  "struttura-bar-orbitale": {
   "classe": "grande",

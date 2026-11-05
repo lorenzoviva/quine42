@@ -100,7 +100,7 @@ function sidera(dir: string, index: Record<string, Record<string, unknown>>): st
   };
   for (const [id, [from, classe, nome]] of Object.entries(alias)) {
     writeFileSync(join(dir, `${id}.xml`), readFileSync(join(dir, `${from}.xml`), 'utf8'));
-    index[id] = { classe, nome, autore: `Claude Cloud (T272, il programma di ${from})` };
+    index[id] = { classe, nome, autore: `Claude Cloud (T272, come ${from})` };
     out.push(id);
   }
   return [`case comuni e strutture proprie: ${out.join(', ')}`];
@@ -191,19 +191,19 @@ const MAX_PER_LUOGO = 2;
 
 function colloca(u: Universo, files: FileMap, k: Kernel, maps: Record<string, ChunkRecord>): { maps: Record<string, ChunkRecord>; righe: string[] } {
   const known = new Set(Object.keys(JSON.parse(files['models/index.json'])));
+  const catalogo = strutture(u.tema);
   const posti: Posto[] = [];
   for (const [name, rec] of Object.entries(maps)) {
     const at = luogoDi(files, name);
     if (!at) continue;
     const plan: ChunkPlan = JSON.parse(JSON.stringify(rec.plan));
     // What the universe had and has a model (neapolis's tower and market, sidera's dome and wreck) stays, first; the rest goes.
-    const tiene = (plan.strutture ?? []).filter((s) => known.has(modelloDi(s.concetto)));
+    const tiene = (plan.strutture ?? []).filter((s) => known.has(modelloDi(s.concetto)) && !catalogo.some((c) => c.id === modelloDi(s.concetto)));
     const bare = { ...plan, strutture: tiene };
     posti.push({ name, cx: at[0], cy: at[1], plan: bare, lots: lotti(k, at[0], at[1], bare), tiene, nuove: [] });
   }
   const dist = (p: Posto) => Math.hypot(p.cx, p.cy);
   posti.sort((a, b) => dist(a) - dist(b) || a.cy - b.cy || a.cx - b.cx);
-  const catalogo = strutture(u.tema);
   const restano = [...catalogo];
   // One Enorme in the zone (ADR-0092): a structure with a cellar on a free lot of 8 or more, where it fits best (the words of the place), then on
   // the lot whose shorter side is the longest (the model is 7.5 tiles a side: on a narrow lot it would stand over the next one), the nearest.

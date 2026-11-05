@@ -4,7 +4,7 @@ Generato da `verifica.ts` (`npx vite-node lab/banco/universi-cloud/sidera/verifi
 
 ## 1. Quarta parete
 
-101 file, 4254 frasi controllate con `metaBreak` (e `bibleBreaks` sulla bibbia): **0 violazioni**.
+101 file, 4493 frasi controllate con `metaBreak` (e `bibleBreaks` sulla bibbia): **0 violazioni**.
 
 ## 2. Moduli
 
@@ -74,12 +74,12 @@ Generato da `verifica.ts` (`npx vite-node lab/banco/universi-cloud/sidera/verifi
 
 - **900 tick** (minimo 600), tempo del mondo 361 s, con `MockAiModels` e i 19 piani di `maps/` come archivio dei luoghi.
 - Luoghi attraversati: 19/19 con il nome del piano (0 fuori piano).
-- Persone del registro incontrate e riconosciute dall'origine: 11 (Ilde Ferraris, Pino Lupi, Pennanera, Teo Sardi, Ruben Kessler, Ugo Ranieri, Tobia Calandra, Iris Calandra, Selene Moro, Lia Corvi, Elio Marchetti).
-- Azioni dei moduli eseguite: 139 (53 diverse); battute di dialogo: 139.
+- Persone del registro incontrate e riconosciute dall'origine: 12 (Ilde Ferraris, Pino Lupi, Pennanera, Teo Sardi, Ruben Kessler, Ugo Ranieri, Tobia Calandra, Iris Calandra, Selene Moro, Lia Corvi, Elio Marchetti, Lena Ortiz).
+- Azioni dei moduli eseguite: 142 (53 diverse); battute di dialogo: 142.
 - Raccolti: 48 oggetti a terra, 31 rune.
 - Ricette fabbricate: 10/10; oggetti usati: 16; scanner impugnato e usato.
 - Incantesimi pronunciati: 17 (12 rune nuove e 5 formule): grava, lieve, tunnel, intreccio, onda, vuoto, marea, massa, spin, quanto, orbita, stasi, grava grava, lieve onda, orbita grava, quanto stasi, tunnel massa tunnel.
-- Chiamate di testo ai modelli finti durante il giro: 69 (individui, sguardi, luoghi oltre i 19).
+- Chiamate di testo ai modelli finti durante il giro: 63 (individui, sguardi, luoghi oltre i 19).
 - **Fault: 0 sollevati, 0 aperti alla fine.**
 
 Alcune battute raccolte:
