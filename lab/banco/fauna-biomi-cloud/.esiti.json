@@ -223,5 +223,80 @@
    4373
   ],
   "passa": true
+ },
+ "drone-esapode": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.30702424640213544,
+  "minima": 0,
+  "ms": 141,
+  "voxel": [
+   2605,
+   2319,
+   2740,
+   2462,
+   2740
+  ],
+  "passa": true
+ },
+ "camminatore-pesante": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.40894030167316736,
+  "minima": 0.002255639097744361,
+  "ms": 585,
+  "voxel": [
+   7466,
+   9300,
+   9299,
+   7610,
+   8606
+  ],
+  "passa": true
+ },
+ "xenofauna-cristallina": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.36841861987600594,
+  "minima": 0.10558793280767913,
+  "ms": 128,
+  "voxel": [
+   2610,
+   2933,
+   3810,
+   2742,
+   2784
+  ],
+  "passa": true
+ },
+ "navetta-orbitale": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.3425818059843861,
+  "minima": 0.058878504672897194,
+  "ms": 293,
+  "voxel": [
+   5819,
+   4161,
+   4147,
+   3953,
+   3763
+  ],
+  "passa": true
+ },
+ "rover-esplorazione": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.2374833481631065,
+  "minima": 0.06718569780853517,
+  "ms": 93,
+  "voxel": [
+   3278,
+   3266,
+   3401,
+   3380,
+   3323
+  ],
+  "passa": true
  }
 }

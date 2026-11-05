@@ -735,4 +735,247 @@ export const CREATURE_VEICOLI: Definizione[] = [
       });
     },
   },
+
+  {
+    collezione: 'creature-veicoli',
+    ambientazione: 'futuristico',
+    nome: 'drone-esapode',
+    titolo: 'Drone esapode',
+    classe: 'bestia',
+    descrizione: 'Il drone a sei zampe che pattuglia le colonie di Sidera: guscio bianco, giunti grigi, un occhio azzurro.',
+    procedura: 'due scelte a caso (le sei zampe: larghe e basse, alte, in cammino a tripode; il modulo sul dorso: cupola di sensori, rotori spiegati, torretta, antenna) e un\'antenna che cresce a rami dal guscio, luci di posizione a caso.',
+    xml: () => {
+      const zampe = (ginocchio: number, ap: number, passo: (i: number) => number) =>
+        [14, 20, 26].flatMap((y, i) => [
+          line([7, y, 12], [7 - ap, y + passo(i), ginocchio], 1, 'G'),
+          line([7 - ap, y + passo(i), ginocchio], [Math.max(1, 5 - ap), y + 2 * passo(i), 0], 1, 'G'),
+          line([17, y, 12], [17 + ap, y - passo(i), ginocchio], 1, 'G'),
+          line([17 + ap, y - passo(i), ginocchio], [Math.min(23, 19 + ap), y - 2 * passo(i), 0], 1, 'G'),
+        ]);
+      return programma({
+        titolo: 'Drone esapode',
+        commento: 'Drone esapode (Cantiere 8, sidera): zampe e modulo del dorso a caso; antenna a rami e luci a caso.',
+        colori: [
+          ['W', 'e6ecef', 'guscio bianco'],
+          ['G', '6f7980', 'giunti', 'gamba'],
+          ['K', '2b3238', 'nero opaco'],
+          ['E', '4fd8ff', 'occhio', 'glow'],
+          ['L', 'ff5a5a', 'luci di posizione', 'glow'],
+        ],
+        marcatori: 'P',
+        corpo: [
+          box([12, 33, 11], [5, 1, 2], 'E'),
+          ell([12, 20, 9], [14, 26, 7], 'W'),
+          box([12, 20, 9], [16, 20, 2], 'K', 'W'),
+          ...scelta('zampe', [[12, 20, 0], [25, 40, 22]], [
+            ['larghe e basse', zampe(14, 5, () => 0)],
+            ['alte', zampe(20, 3, () => 0)],
+            ['a tripode', zampe(17, 4, (i) => (i % 2 ? 3 : -3))],
+          ]),
+          ...scelta('modulo', [[12, 20, 14], [25, 40, 16]], [
+            ['cupola di sensori', [ell([12, 20, 13], [9, 9, 7], 'K'), box([12, 24, 17], [3, 1, 2], 'E'), box([12, 20, 19], [1, 1, 1], 'P')]],
+            ['rotori spiegati', [line([12, 20, 15], [3, 9, 18], 1, 'G'), line([12, 20, 15], [21, 9, 18], 1, 'G'), line([12, 20, 15], [3, 31, 18], 1, 'G'), line([12, 20, 15], [21, 31, 18], 1, 'G'),
+              ell([3, 9, 19], [8, 8, 1], 'K'), ell([21, 9, 19], [8, 8, 1], 'K'), ell([3, 31, 19], [8, 8, 1], 'K'), ell([21, 31, 19], [8, 8, 1], 'K')]],
+            ['torretta', [box([12, 18, 14], [8, 8, 4], 'K'), line([12, 20, 16], [12, 34, 16], 1, 'G'), box([12, 18, 18], [1, 1, 1], 'P')]],
+            ['antenna', [cyl([12, 14, 14], [3, 3, 9], 'G'), box([12, 14, 23], [1, 1, 1], 'P')]],
+          ]),
+          nota('l\'antenna cresce a rami'),
+          ...ramifica(5, 'P', 'G', { su: 2, obliquo: 1, biforca: 0.5 }),
+          macchie('W', 'L', 0.015),
+        ],
+      });
+    },
+  },
+  {
+    collezione: 'creature-veicoli',
+    ambientazione: 'futuristico',
+    nome: 'camminatore-pesante',
+    titolo: 'Camminatore pesante',
+    classe: 'edificio',
+    descrizione: 'Il camminatore bipede dei cantieri orbitali di Sidera: gambe a pistone, cabina corazzata, bracci da lavoro o da guardia.',
+    procedura: 'tre scelte a caso (gambe erette, al passo, accovacciate; cabina larga, a cupola o a torre; bracci con due cannoni, con lanciamissili sulle spalle, con artiglio e cannone) e antenne che crescono a rami dalle spalle, piastre di colore diverso a caso.',
+    xml: () =>
+      programma({
+        titolo: 'Camminatore pesante',
+        commento: 'Camminatore pesante (Cantiere 8, sidera): gambe, cabina e bracci a caso; antenne a rami dalle spalle.',
+        colori: [
+          ['W', 'c9d0d4', 'corazza'],
+          ['Y', 'e2b23a', 'piastre gialle'],
+          ['G', '4c545a', 'pistoni', 'gamba'],
+          ['K', '23282c', 'giunti'],
+          ['V', '6ad0ff', 'cabina di vetro', 'glow'],
+        ],
+        marcatori: 'P',
+        corpo: [
+          box([25, 25, 20], [14, 10, 6], 'K'),
+          ...scelta('gambe', [[25, 25, 0], [40, 46, 23]], [
+            ['erette', [box([17, 27, 0], [8, 12, 3], 'K'), box([33, 27, 0], [8, 12, 3], 'K'), line([20, 25, 22], [17, 25, 11], 2.5, 'G'), line([17, 25, 11], [17, 26, 2], 2.5, 'G'), line([30, 25, 22], [33, 25, 11], 2.5, 'G'), line([33, 25, 11], [33, 26, 2], 2.5, 'G')]],
+            ['al passo', [box([17, 37, 0], [8, 12, 3], 'K'), box([33, 15, 0], [8, 12, 3], 'K'), line([20, 25, 22], [18, 33, 12], 2.5, 'G'), line([18, 33, 12], [17, 36, 2], 2.5, 'G'), line([30, 25, 22], [33, 21, 11], 2.5, 'G'), line([33, 21, 11], [33, 15, 2], 2.5, 'G')]],
+            ['accovacciate', [box([14, 27, 0], [8, 12, 3], 'K'), box([36, 27, 0], [8, 12, 3], 'K'), line([20, 25, 22], [14, 36, 13], 2.5, 'G'), line([14, 36, 13], [14, 27, 2], 2.5, 'G'), line([30, 25, 22], [36, 36, 13], 2.5, 'G'), line([36, 36, 13], [36, 27, 2], 2.5, 'G')]],
+          ]),
+          ...scelta('cabina', [[25, 25, 25], [28, 24, 25]], [
+            ['larga', [box([25, 34, 30], [14, 1, 4], 'V'), box([25, 25, 25], [24, 18, 12], 'W')]],
+            ['a cupola', [box([25, 34, 31], [10, 1, 4], 'V'), ell([25, 25, 24], [22, 20, 16], 'W')]],
+            ['a torre', [box([25, 31, 36], [10, 1, 4], 'V'), box([25, 24, 25], [16, 14, 18], 'W')]],
+          ]),
+          box([15, 25, 30], [7, 8, 6], 'K'),
+          box([35, 25, 30], [7, 8, 6], 'K'),
+          box([14, 23, 36], [1, 1, 1], 'P'),
+          box([36, 23, 36], [1, 1, 1], 'P'),
+          ...scelta('bracci', [[25, 30, 4], [50, 40, 46]], [
+            ['due cannoni', [line([11, 25, 31], [11, 45, 31], 2.5, 'G'), line([39, 25, 31], [39, 45, 31], 2.5, 'G'), box([11, 47, 31], [4, 4, 4], 'K'), box([39, 47, 31], [4, 4, 4], 'K')]],
+            ['lanciamissili', [box([10, 25, 36], [8, 12, 8], 'Y'), box([40, 25, 36], [8, 12, 8], 'Y'), line([11, 25, 30], [8, 30, 18], 2, 'G'), line([39, 25, 30], [42, 30, 18], 2, 'G')]],
+            ['artiglio e cannone', [line([11, 26, 31], [8, 36, 14], 2.5, 'G'), line([8, 36, 14], [6, 41, 6], 1.5, 'K'), line([8, 36, 14], [11, 42, 6], 1.5, 'K'), line([39, 25, 31], [39, 46, 33], 2.5, 'G'), cyl([39, 22, 34], [5, 5, 6], 'Y')]],
+          ]),
+          nota('antenne a rami dalle spalle'),
+          ...ramifica(10, 'P', 'K', { su: 2, obliquo: 1, biforca: 0.4 }),
+          `<prl in="W" out="Y" p="0.002" steps="1"/>`,
+          `<prl in="YW" out="*Y" p="0.5" steps="3"/>`,
+        ],
+      }),
+  },
+  {
+    collezione: 'creature-veicoli',
+    ambientazione: 'futuristico',
+    nome: 'xenofauna-cristallina',
+    titolo: 'Xenofauna cristallina',
+    classe: 'bestia',
+    descrizione: 'Una bestia delle lune di Sidera, a sei zampe, con cristalli vivi che le crescono dal dorso e le danno luce.',
+    procedura: 'tre scelte a caso (corpo allungato, gobbo o a segmenti; sei zampe dritte, aperte o arcuate; testa a cuneo, a ventaglio o con mandibole) e cristalli che nascono in posti a caso sul dorso, crescono storti e si ispessiscono a caso.',
+    xml: () => {
+      const zampe = (f: (y: number, s: 1 | -1) => [number, number, number]) =>
+        [13, 20, 27].flatMap((y) => [line([8, y, 11], f(y, -1), 1, 'G'), line([16, y, 11], f(y, 1), 1, 'G')]);
+      return programma({
+        titolo: 'Xenofauna cristallina',
+        commento: 'Xenofauna cristallina (Cantiere 8, sidera): corpo, zampe e testa a caso; cristalli che crescono a caso sul dorso.',
+        colori: [
+          ['F', '3b2d4f', 'carapace viola'],
+          ['D', '231a30', 'carapace scuro'],
+          ['G', '2a2236', 'zampe', 'gamba'],
+          ['X', '9ff2e8', 'cristallo', 'glow'],
+          ['E', 'f2f27a', 'occhi', 'glow'],
+        ],
+        marcatori: 'P',
+        corpo: [
+          ...scelta('zampe', [[12, 20, 0], [25, 40, 14]], [
+            ['dritte', zampe((y, s) => [12 + s * 6, y, 0])],
+            ['aperte', zampe((y, s) => [12 + s * 12, y + (y - 20) / 2, 0])],
+            ['arcuate', [...zampe((y, s) => [12 + s * 11, y, 9]), ...[13, 20, 27].flatMap((y) => [line([1, y, 9], [2, y, 0], 1, 'G'), line([23, y, 9], [22, y, 0], 1, 'G')])]],
+          ]),
+          ...scelta('corpo', [[12, 20, 5], [22, 36, 20]], [
+            ['allungato', [ell([12, 20, 7], [12, 28, 10], 'F')]],
+            ['gobbo', [ell([12, 20, 6], [15, 24, 15], 'F')]],
+            ['a segmenti', [ell([12, 12, 7], [11, 10, 9], 'F'), ell([12, 20, 7], [13, 10, 11], 'F'), ell([12, 28, 7], [11, 10, 9], 'F')]],
+          ]),
+          ...scelta('testa', [[12, 35, 2], [25, 10, 20]], [
+            ['a cuneo', [box([10, 37, 12], [1, 1, 1], 'E'), box([14, 37, 12], [1, 1, 1], 'E'), cone([12, 33, 8], [9, 10, 7], 'D'), line([12, 31, 10], [12, 39, 10], 2, 'D')]],
+            ['a ventaglio', [box([10, 36, 11], [1, 1, 1], 'E'), box([14, 36, 11], [1, 1, 1], 'E'), ell([12, 34, 7], [9, 7, 7], 'D'), ell([12, 34, 12], [19, 3, 8], 'X')]],
+            ['con mandibole', [box([11, 36, 11], [1, 1, 1], 'E'), box([13, 36, 11], [1, 1, 1], 'E'), ell([12, 34, 7], [8, 7, 7], 'D'), line([9, 36, 8], [7, 39, 6], 1, 'X'), line([15, 36, 8], [17, 39, 6], 1, 'X')]],
+          ]),
+          ...punte('F', 8, 7, 'X'),
+          nota('i cristalli si ispessiscono a caso'),
+          `<prl in="BX" out="*X" p="0.3" steps="1"/>`,
+          sopra('F', 'D', 0.3),
+        ],
+      });
+    },
+  },
+  {
+    collezione: 'creature-veicoli',
+    ambientazione: 'futuristico',
+    nome: 'navetta-orbitale',
+    titolo: 'Navetta orbitale',
+    classe: 'edificio',
+    descrizione: 'La navetta che fa la spola fra le stazioni di Sidera, posata sui suoi carrelli.',
+    procedura: 'quattro scelte a caso (fusoliera lunga, tozza o a freccia; ali a delta, a freccia o corte; deriva singola, doppia o a V; motori: due, tre o uno solo grande) e pannelli termici scuri che si allargano a caso sulla pancia.',
+    xml: () =>
+      programma({
+        titolo: 'Navetta orbitale',
+        commento: 'Navetta orbitale (Cantiere 8, sidera): fusoliera, ali, deriva e motori a caso; pannelli termici a caso.',
+        colori: [
+          ['W', 'eceff1', 'scafo'],
+          ['K', '2c3036', 'pannelli termici'],
+          ['G', '7d858c', 'carrelli', 'gamba'],
+          ['V', '3f6c8a', 'vetri'],
+          ['O', 'ff8c3a', 'ugelli', 'glow'],
+        ],
+        corpo: [
+          line([25, 40, 0], [25, 40, 12], 1, 'G'),
+          line([18, 12, 0], [22, 14, 12], 1, 'G'),
+          line([32, 12, 0], [28, 14, 12], 1, 'G'),
+          box([25, 40, 0], [5, 5, 1], 'G'),
+          box([18, 12, 0], [5, 5, 1], 'G'),
+          box([32, 12, 0], [5, 5, 1], 'G'),
+          ...scelta('fusoliera', [[25, 25, 6], [20, 50, 18]], [
+            ['lunga', [ell([25, 25, 8], [12, 44, 11], 'W')]],
+            ['tozza', [ell([25, 26, 7], [16, 34, 14], 'W')]],
+            ['a freccia', [ell([25, 24, 8], [10, 46, 10], 'W')]],
+          ]),
+          ell([25, 36, 13], [8, 10, 6], 'V', 'W'),
+          ...scelta('ali', [[25, 20, 8], [50, 30, 6]], [
+            ['a delta', [ell([25, 14, 10], [46, 22, 2], 'W')]],
+            ['a freccia', [line([23, 24, 11], [3, 8, 11], 1.5, 'W'), line([27, 24, 11], [47, 8, 11], 1.5, 'W'), line([23, 18, 11], [5, 6, 11], 1.5, 'W'), line([27, 18, 11], [45, 6, 11], 1.5, 'W')]],
+            ['corte', [box([25, 18, 10], [36, 10, 2], 'W'), box([7, 18, 8], [2, 10, 6], 'K'), box([43, 18, 8], [2, 10, 6], 'K')]],
+          ]),
+          ...scelta('deriva', [[25, 10, 14], [30, 14, 24]], [
+            ['singola', [box([25, 11, 15], [2, 8, 18], 'W')]],
+            ['doppia', [line([23, 12, 16], [19, 8, 31], 1, 'W'), line([27, 12, 16], [31, 8, 31], 1, 'W')]],
+            ['a V', [line([24, 11, 15], [15, 8, 30], 1.5, 'W'), line([26, 11, 15], [35, 8, 30], 1.5, 'W')]],
+          ]),
+          ...scelta('motori', [[25, 7, 4], [30, 10, 18]], [
+            ['due', [ell([21, 8, 9], [6, 8, 6], 'K'), ell([29, 8, 9], [6, 8, 6], 'K'), box([21, 4, 11], [3, 1, 3], 'O'), box([29, 4, 11], [3, 1, 3], 'O')]],
+            ['tre', [ell([20, 9, 8], [5, 8, 5], 'K'), ell([30, 9, 8], [5, 8, 5], 'K'), ell([25, 8, 14], [5, 8, 5], 'K'), box([20, 5, 10], [2, 1, 2], 'O'), box([30, 5, 10], [2, 1, 2], 'O'), box([25, 4, 16], [2, 1, 2], 'O')]],
+            ['uno grande', [ell([25, 8, 7], [10, 9, 10], 'K'), box([25, 3, 11], [5, 1, 5], 'O')]],
+          ]),
+          nota('pannelli termici che si allargano sulla pancia'),
+          `<prl in="W B" out="K *" p="0.03" steps="1"/>`,
+          `<prl in="KW" out="*K" p="0.4" steps="3"/>`,
+        ],
+      }),
+  },
+  {
+    collezione: 'creature-veicoli',
+    ambientazione: 'futuristico',
+    nome: 'rover-esplorazione',
+    titolo: 'Rover da esplorazione',
+    classe: 'bestia',
+    descrizione: 'Il rover a sei ruote che mappa i deserti di Sidera, con l\'albero delle telecamere e il braccio dei campioni.',
+    procedura: 'tre scelte a caso (albero delle telecamere alto, basso o doppio; braccio a riposo, teso a terra o alzato; energia da pannelli piatti, pannelli ad ali o generatore con alette) e polvere che si posa a caso sulle facce in alto.',
+    xml: () =>
+      programma({
+        titolo: 'Rover da esplorazione',
+        commento: 'Rover da esplorazione (Cantiere 8, sidera): albero, braccio ed energia a caso; polvere a caso.',
+        colori: [
+          ['W', 'd8d4ca', 'telaio'],
+          ['K', '2b2b2e', 'ruote'],
+          ['G', '8a8f94', 'bracci', 'gamba'],
+          ['S', '2f4a7a', 'celle solari'],
+          ['C', 'e0a040', 'rame'],
+          ['E', '7fe8ff', 'telecamere', 'glow'],
+          ['D', 'b88a5a', 'polvere'],
+        ],
+        corpo: [
+          ...[8, 20, 32].flatMap((y) => [ruota(1, 4, y, 3.5, 'K'), ruota(20, 23, y, 3.5, 'K'), line([3, y, 4], [6, 20, 9], 0.5, 'G'), line([21, y, 4], [18, 20, 9], 0.5, 'G')]),
+          box([12, 20, 7], [14, 28, 5], 'W'),
+          ...scelta('albero', [[12, 30, 12], [25, 18, 18]], [
+            ['alto', [line([12, 30, 12], [12, 30, 26], 0.5, 'G'), box([12, 31, 26], [6, 4, 3], 'W'), box([12, 33, 27], [4, 1, 1], 'E')]],
+            ['basso', [line([8, 31, 12], [8, 31, 18], 1, 'G'), box([8, 32, 18], [7, 5, 3], 'W'), box([8, 34, 19], [5, 1, 1], 'E')]],
+            ['doppio', [line([8, 30, 12], [8, 30, 22], 0.5, 'G'), line([16, 30, 12], [16, 30, 22], 0.5, 'G'), box([8, 31, 22], [4, 4, 3], 'W'), box([16, 31, 22], [4, 4, 3], 'W'), box([8, 33, 23], [2, 1, 1], 'E'), box([16, 33, 23], [2, 1, 1], 'E')]],
+          ]),
+          ...scelta('braccio', [[12, 36, 0], [25, 8, 22]], [
+            ['a riposo', [line([15, 33, 10], [20, 37, 10], 1, 'G'), line([20, 37, 10], [6, 38, 10], 1, 'G'), box([6, 38, 9], [3, 2, 3], 'C')]],
+            ['teso a terra', [line([15, 33, 10], [15, 38, 8], 1, 'G'), line([15, 38, 8], [15, 39, 1], 1, 'G'), box([15, 38, 0], [3, 2, 2], 'C')]],
+            ['alzato', [line([15, 33, 10], [16, 37, 18], 1, 'G'), line([16, 37, 18], [14, 38, 21], 1, 'G'), box([14, 38, 21], [3, 2, 3], 'C')]],
+          ]),
+          ...scelta('energia', [[12, 18, 11], [25, 26, 19]], [
+            ['pannelli piatti', [box([12, 18, 12], [24, 24, 1], 'S'), box([12, 18, 11], [4, 4, 1], 'G')]],
+            ['pannelli ad ali', [box([12, 18, 12], [12, 22, 1], 'S'), line([6, 18, 12], [1, 18, 20], 0.5, 'G'), line([18, 18, 12], [23, 18, 20], 0.5, 'G'), box([1, 18, 18], [1, 22, 8], 'S'), box([23, 18, 18], [1, 22, 8], 'S')]],
+            ['generatore con alette', [cyl([12, 10, 12], [7, 7, 9], 'C'), box([12, 10, 12], [13, 1, 8], 'G'), box([12, 10, 12], [1, 13, 8], 'G')]],
+          ]),
+          nota('polvere sulle facce in alto'),
+          sopra('W', 'D', 0.3),
+          sopra('S', 'D', 0.1),
+        ],
+      }),
+  },
 ];

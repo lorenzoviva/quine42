@@ -1,0 +1,96 @@
+<!-- Drone esapode (Cantiere 8, sidera): zampe e modulo del dorso a caso; antenna a rami e luci a caso. -->
+<sequence values="BWGKELPu123456" symmetry="(xy)" name="Drone esapode">
+  <color symbol="W" value="e6ecef" name="guscio bianco"/>
+  <color symbol="G" value="6f7980" name="giunti" part="gamba"/>
+  <color symbol="K" value="2b3238" name="nero opaco"/>
+  <color symbol="E" value="4fd8ff" name="occhio" glow="True"/>
+  <color symbol="L" value="ff5a5a" name="luci di posizione" glow="True"/>
+  <color symbol="P" hidden="True" name="marcatore"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="1" hidden="True" name="marcatore"/>
+  <color symbol="2" hidden="True" name="marcatore"/>
+  <color symbol="3" hidden="True" name="marcatore"/>
+  <color symbol="4" hidden="True" name="marcatore"/>
+  <color symbol="5" hidden="True" name="marcatore"/>
+  <color symbol="6" hidden="True" name="marcatore"/>
+  <box at="12 33 11" size="5 1 2" color="E"/>
+  <ellipsoid at="12 20 9" size="14 26 7" color="W"/>
+  <box at="12 20 9" size="16 20 2" color="K" on="W"/>
+  <!-- scelta «zampe»: larghe e basse | alte | a tripode -->
+  <box at="12 20 0" size="25 40 22" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <!--   1: larghe e basse -->
+  <line at="7 14 12" to="2 14 14" r="1" color="G" on="1"/>
+  <line at="2 14 14" to="1 14 0" r="1" color="G" on="1"/>
+  <line at="17 14 12" to="22 14 14" r="1" color="G" on="1"/>
+  <line at="22 14 14" to="23 14 0" r="1" color="G" on="1"/>
+  <line at="7 20 12" to="2 20 14" r="1" color="G" on="1"/>
+  <line at="2 20 14" to="1 20 0" r="1" color="G" on="1"/>
+  <line at="17 20 12" to="22 20 14" r="1" color="G" on="1"/>
+  <line at="22 20 14" to="23 20 0" r="1" color="G" on="1"/>
+  <line at="7 26 12" to="2 26 14" r="1" color="G" on="1"/>
+  <line at="2 26 14" to="1 26 0" r="1" color="G" on="1"/>
+  <line at="17 26 12" to="22 26 14" r="1" color="G" on="1"/>
+  <line at="22 26 14" to="23 26 0" r="1" color="G" on="1"/>
+  <!--   2: alte -->
+  <line at="7 14 12" to="4 14 20" r="1" color="G" on="2"/>
+  <line at="4 14 20" to="2 14 0" r="1" color="G" on="2"/>
+  <line at="17 14 12" to="20 14 20" r="1" color="G" on="2"/>
+  <line at="20 14 20" to="22 14 0" r="1" color="G" on="2"/>
+  <line at="7 20 12" to="4 20 20" r="1" color="G" on="2"/>
+  <line at="4 20 20" to="2 20 0" r="1" color="G" on="2"/>
+  <line at="17 20 12" to="20 20 20" r="1" color="G" on="2"/>
+  <line at="20 20 20" to="22 20 0" r="1" color="G" on="2"/>
+  <line at="7 26 12" to="4 26 20" r="1" color="G" on="2"/>
+  <line at="4 26 20" to="2 26 0" r="1" color="G" on="2"/>
+  <line at="17 26 12" to="20 26 20" r="1" color="G" on="2"/>
+  <line at="20 26 20" to="22 26 0" r="1" color="G" on="2"/>
+  <!--   3: a tripode -->
+  <line at="7 14 12" to="3 11 17" r="1" color="G" on="3"/>
+  <line at="3 11 17" to="1 8 0" r="1" color="G" on="3"/>
+  <line at="17 14 12" to="21 17 17" r="1" color="G" on="3"/>
+  <line at="21 17 17" to="23 20 0" r="1" color="G" on="3"/>
+  <line at="7 20 12" to="3 23 17" r="1" color="G" on="3"/>
+  <line at="3 23 17" to="1 26 0" r="1" color="G" on="3"/>
+  <line at="17 20 12" to="21 17 17" r="1" color="G" on="3"/>
+  <line at="21 17 17" to="23 14 0" r="1" color="G" on="3"/>
+  <line at="7 26 12" to="3 23 17" r="1" color="G" on="3"/>
+  <line at="3 23 17" to="1 20 0" r="1" color="G" on="3"/>
+  <line at="17 26 12" to="21 29 17" r="1" color="G" on="3"/>
+  <line at="21 29 17" to="23 32 0" r="1" color="G" on="3"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <!-- scelta «modulo»: cupola di sensori | rotori spiegati | torretta | antenna -->
+  <box at="12 20 14" size="25 40 16" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/><rule in="u" out="4"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/><rule in="4u" out="*4"/></all>
+  <!--   1: cupola di sensori -->
+  <ellipsoid at="12 20 13" size="9 9 7" color="K" on="1"/>
+  <box at="12 24 17" size="3 1 2" color="E" on="1"/>
+  <box at="12 20 19" size="1 1 1" color="P" on="1"/>
+  <!--   2: rotori spiegati -->
+  <line at="12 20 15" to="3 9 18" r="1" color="G" on="2"/>
+  <line at="12 20 15" to="21 9 18" r="1" color="G" on="2"/>
+  <line at="12 20 15" to="3 31 18" r="1" color="G" on="2"/>
+  <line at="12 20 15" to="21 31 18" r="1" color="G" on="2"/>
+  <ellipsoid at="3 9 19" size="8 8 1" color="K" on="2"/>
+  <ellipsoid at="21 9 19" size="8 8 1" color="K" on="2"/>
+  <ellipsoid at="3 31 19" size="8 8 1" color="K" on="2"/>
+  <ellipsoid at="21 31 19" size="8 8 1" color="K" on="2"/>
+  <!--   3: torretta -->
+  <box at="12 18 14" size="8 8 4" color="K" on="3"/>
+  <line at="12 20 16" to="12 34 16" r="1" color="G" on="3"/>
+  <box at="12 18 18" size="1 1 1" color="P" on="3"/>
+  <!--   4: antenna -->
+  <cylinder at="12 14 14" size="3 3 9" color="G" on="4"/>
+  <box at="12 14 23" size="1 1 1" color="P" on="4"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/><rule in="4" out="B"/></prl>
+  <!-- l'antenna cresce a rami -->
+  <one steps="5">
+    <rule in="B P" out="P G" p="2"/>
+    <rule in="B* *P" out="P* *G" p="1"/>
+    <rule in="B*B *P*" out="P*P *G*" p="0.5"/>
+  </one>
+  <prl in="P" out="G"/>
+  <prl in="BW" out="*L" p="0.015" steps="1"/>
+</sequence>

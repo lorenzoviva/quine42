@@ -1,0 +1,89 @@
+<!-- Xenofauna cristallina (Cantiere 8, sidera): corpo, zampe e testa a caso; cristalli che crescono a caso sul dorso. -->
+<sequence values="BFDGXEPu123456" symmetry="(xy)" name="Xenofauna cristallina">
+  <color symbol="F" value="3b2d4f" name="carapace viola"/>
+  <color symbol="D" value="231a30" name="carapace scuro"/>
+  <color symbol="G" value="2a2236" name="zampe" part="gamba"/>
+  <color symbol="X" value="9ff2e8" name="cristallo" glow="True"/>
+  <color symbol="E" value="f2f27a" name="occhi" glow="True"/>
+  <color symbol="P" hidden="True" name="marcatore"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="1" hidden="True" name="marcatore"/>
+  <color symbol="2" hidden="True" name="marcatore"/>
+  <color symbol="3" hidden="True" name="marcatore"/>
+  <color symbol="4" hidden="True" name="marcatore"/>
+  <color symbol="5" hidden="True" name="marcatore"/>
+  <color symbol="6" hidden="True" name="marcatore"/>
+  <!-- scelta «zampe»: dritte | aperte | arcuate -->
+  <box at="12 20 0" size="25 40 14" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <!--   1: dritte -->
+  <line at="8 13 11" to="6 13 0" r="1" color="G" on="1"/>
+  <line at="16 13 11" to="18 13 0" r="1" color="G" on="1"/>
+  <line at="8 20 11" to="6 20 0" r="1" color="G" on="1"/>
+  <line at="16 20 11" to="18 20 0" r="1" color="G" on="1"/>
+  <line at="8 27 11" to="6 27 0" r="1" color="G" on="1"/>
+  <line at="16 27 11" to="18 27 0" r="1" color="G" on="1"/>
+  <!--   2: aperte -->
+  <line at="8 13 11" to="0 10 0" r="1" color="G" on="2"/>
+  <line at="16 13 11" to="24 10 0" r="1" color="G" on="2"/>
+  <line at="8 20 11" to="0 20 0" r="1" color="G" on="2"/>
+  <line at="16 20 11" to="24 20 0" r="1" color="G" on="2"/>
+  <line at="8 27 11" to="0 31 0" r="1" color="G" on="2"/>
+  <line at="16 27 11" to="24 31 0" r="1" color="G" on="2"/>
+  <!--   3: arcuate -->
+  <line at="8 13 11" to="1 13 9" r="1" color="G" on="3"/>
+  <line at="16 13 11" to="23 13 9" r="1" color="G" on="3"/>
+  <line at="8 20 11" to="1 20 9" r="1" color="G" on="3"/>
+  <line at="16 20 11" to="23 20 9" r="1" color="G" on="3"/>
+  <line at="8 27 11" to="1 27 9" r="1" color="G" on="3"/>
+  <line at="16 27 11" to="23 27 9" r="1" color="G" on="3"/>
+  <line at="1 13 9" to="2 13 0" r="1" color="G" on="3"/>
+  <line at="23 13 9" to="22 13 0" r="1" color="G" on="3"/>
+  <line at="1 20 9" to="2 20 0" r="1" color="G" on="3"/>
+  <line at="23 20 9" to="22 20 0" r="1" color="G" on="3"/>
+  <line at="1 27 9" to="2 27 0" r="1" color="G" on="3"/>
+  <line at="23 27 9" to="22 27 0" r="1" color="G" on="3"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <!-- scelta «corpo»: allungato | gobbo | a segmenti -->
+  <box at="12 20 5" size="22 36 20" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <!--   1: allungato -->
+  <ellipsoid at="12 20 7" size="12 28 10" color="F" on="1"/>
+  <!--   2: gobbo -->
+  <ellipsoid at="12 20 6" size="15 24 15" color="F" on="2"/>
+  <!--   3: a segmenti -->
+  <ellipsoid at="12 12 7" size="11 10 9" color="F" on="3"/>
+  <ellipsoid at="12 20 7" size="13 10 11" color="F" on="3"/>
+  <ellipsoid at="12 28 7" size="11 10 9" color="F" on="3"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <!-- scelta «testa»: a cuneo | a ventaglio | con mandibole -->
+  <box at="12 35 2" size="25 10 20" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <!--   1: a cuneo -->
+  <box at="10 37 12" size="1 1 1" color="E" on="1"/>
+  <box at="14 37 12" size="1 1 1" color="E" on="1"/>
+  <cone at="12 33 8" size="9 10 7" color="D" on="1"/>
+  <line at="12 31 10" to="12 39 10" r="2" color="D" on="1"/>
+  <!--   2: a ventaglio -->
+  <box at="10 36 11" size="1 1 1" color="E" on="2"/>
+  <box at="14 36 11" size="1 1 1" color="E" on="2"/>
+  <ellipsoid at="12 34 7" size="9 7 7" color="D" on="2"/>
+  <ellipsoid at="12 34 12" size="19 3 8" color="X" on="2"/>
+  <!--   3: con mandibole -->
+  <box at="11 36 11" size="1 1 1" color="E" on="3"/>
+  <box at="13 36 11" size="1 1 1" color="E" on="3"/>
+  <ellipsoid at="12 34 7" size="8 7 7" color="D" on="3"/>
+  <line at="9 36 8" to="7 39 6" r="1" color="X" on="3"/>
+  <line at="15 36 8" to="17 39 6" r="1" color="X" on="3"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <!-- 8 punte a caso sulla faccia alta di F, alte fino a 7 -->
+  <one in="B F" out="P *" steps="8"/>
+  <all steps="7"><rule in="B P" out="P X"/><rule in="B* *P" out="P* *X"/></all>
+  <prl in="P" out="X"/>
+  <!-- i cristalli si ispessiscono a caso -->
+  <prl in="BX" out="*X" p="0.3" steps="1"/>
+  <prl in="B F" out="* D" p="0.3" steps="1"/>
+</sequence>

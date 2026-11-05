@@ -13,7 +13,7 @@ npx vite-node lab/banco/fauna-biomi-cloud/banco.ts            # tutti
 npx vite-node lab/banco/fauna-biomi-cloud/banco.ts -- <nome>  # uno
 ```
 
-Validi: **15 su 15**.
+Validi: **20 su 20**.
 
 ## `creature-veicoli/`
 
@@ -34,3 +34,8 @@ Validi: **15 su 15**.
 | moderno | [Furgone delle consegne](creature-veicoli/moderno/furgone-consegne.md) ([xml](creature-veicoli/moderno/furgone-consegne.xml)) | bestia | 0.274 | 0 | 148 ms | valido |
 | moderno | [Motocicletta stradale](creature-veicoli/moderno/motocicletta-stradale.md) ([xml](creature-veicoli/moderno/motocicletta-stradale.xml)) | bestia | 0.403 | 0 | 247 ms | valido |
 | moderno | [Elicottero di soccorso](creature-veicoli/moderno/elicottero-soccorso.md) ([xml](creature-veicoli/moderno/elicottero-soccorso.xml)) | edificio | 0.380 | 0 | 567 ms | valido |
+| futuristico | [Drone esapode](creature-veicoli/futuristico/drone-esapode.md) ([xml](creature-veicoli/futuristico/drone-esapode.xml)) | bestia | 0.307 | 0 | 141 ms | valido |
+| futuristico | [Camminatore pesante](creature-veicoli/futuristico/camminatore-pesante.md) ([xml](creature-veicoli/futuristico/camminatore-pesante.xml)) | edificio | 0.409 | 0 | 585 ms | valido |
+| futuristico | [Xenofauna cristallina](creature-veicoli/futuristico/xenofauna-cristallina.md) ([xml](creature-veicoli/futuristico/xenofauna-cristallina.xml)) | bestia | 0.368 | 0 | 128 ms | valido |
+| futuristico | [Navetta orbitale](creature-veicoli/futuristico/navetta-orbitale.md) ([xml](creature-veicoli/futuristico/navetta-orbitale.xml)) | edificio | 0.343 | 0 | 293 ms | valido |
+| futuristico | [Rover da esplorazione](creature-veicoli/futuristico/rover-esplorazione.md) ([xml](creature-veicoli/futuristico/rover-esplorazione.xml)) | bestia | 0.237 | 0 | 93 ms | valido |
