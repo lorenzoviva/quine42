@@ -1,0 +1,709 @@
+[
+ {
+  "cx": 0,
+  "cy": 0,
+  "plan": {
+   "place": {
+    "name": "Piazza dei Viadotti",
+    "description": "La piazza lastricata sotto i viadotti, dove si incrociano le passerelle: chioschi illuminati, il faro di telemetria sul pilone, il banchetto di Ilde e la pioggia che non smette."
+   },
+   "layout": "piazza_neon",
+   "objects": [
+    {
+     "module": "obj.faro-telemetria",
+     "where": "fuori"
+    },
+    {
+     "module": "npc.colono",
+     "where": "fuori"
+    },
+    {
+     "module": "npc.colono",
+     "where": "ovunque"
+    },
+    {
+     "module": "npc.corvo-tetto",
+     "where": "fuori"
+    },
+    {
+     "module": "obj.armadietto",
+     "where": "ovunque"
+    },
+    {
+     "module": "obj.drone-ricognizione",
+     "where": "fuori"
+    }
+   ],
+   "ground": [
+    "Borraccia d'acqua filtrata",
+    "Cella energetica"
+   ],
+   "fresh": [],
+   "runes": [
+    "lieve",
+    "onda",
+    "x"
+   ],
+   "strutture": []
+  }
+ },
+ {
+  "cx": 1,
+  "cy": 0,
+  "plan": {
+   "place": {
+    "name": "Vicolo delle Cuoche",
+    "description": "Un vicolo stretto pieno di piastre fumanti e insegne: qui si mangia con una cella, e chi non ce l'ha mangia lo stesso."
+   },
+   "layout": "vicoli_pioggia",
+   "objects": [
+    {
+     "module": "npc.colono",
+     "where": "fuori"
+    },
+    {
+     "module": "npc.sintetista",
+     "where": "ovunque"
+    },
+    {
+     "module": "npc.colono",
+     "where": "dentro"
+    },
+    {
+     "module": "obj.armadietto",
+     "where": "dentro"
+    },
+    {
+     "module": "obj.drone-ricognizione",
+     "where": "fuori"
+    }
+   ],
+   "ground": [
+    "Spiedino di alghe",
+    "Pane d'alghe"
+   ],
+   "fresh": [],
+   "runes": [
+    "grava",
+    "speed"
+   ],
+   "strutture": []
+  }
+ },
+ {
+  "cx": -1,
+  "cy": 0,
+  "plan": {
+   "place": {
+    "name": "Scalinata dei Corrieri",
+    "description": "Scale antincendio e passerelle sospese dove i corrieri si passano i pacchi sotto la pioggia."
+   },
+   "layout": "vicoli_pioggia",
+   "objects": [
+    {
+     "module": "obj.armadietto",
+     "where": "dentro"
+    },
+    {
+     "module": "obj.faro-telemetria",
+     "where": "fuori"
+    },
+    {
+     "module": "npc.navigatore",
+     "where": "fuori"
+    }
+   ],
+   "ground": [
+    "Impermeabile"
+   ],
+   "fresh": [],
+   "runes": [
+    "tunnel",
+    "y"
+   ],
+   "strutture": []
+  }
+ },
+ {
+  "cx": 0,
+  "cy": 1,
+  "plan": {
+   "place": {
+    "name": "Viale delle Bancarelle",
+    "description": "Bancarelle sotto i piloni, tende cerate che gocciolano, cassette di merce e gente che contratta."
+   },
+   "layout": "mercato_viadotti",
+   "objects": [
+    {
+     "module": "obj.sintetizzatore",
+     "where": "ovunque"
+    },
+    {
+     "module": "obj.armadietto",
+     "where": "ovunque"
+    }
+   ],
+   "ground": [
+    "Tè di serra"
+   ],
+   "fresh": [],
+   "runes": [
+    "quanto",
+    "y = y"
+   ],
+   "strutture": []
+  }
+ },
+ {
+  "cx": 0,
+  "cy": -1,
+  "plan": {
+   "place": {
+    "name": "Ponte dei Canali",
+    "description": "Passerelle sopra i canali scuri, dove l'acqua riflette le insegne e i droni passano bassi."
+   },
+   "layout": "vicoli_pioggia",
+   "objects": [
+    {
+     "module": "obj.drone-ricognizione",
+     "where": "fuori"
+    },
+    {
+     "module": "obj.armadietto",
+     "where": "dentro"
+    }
+   ],
+   "ground": [
+    "Borraccia d'acqua filtrata"
+   ],
+   "fresh": [],
+   "runes": [
+    "spin",
+    "x = x"
+   ],
+   "strutture": []
+  }
+ },
+ {
+  "cx": 1,
+  "cy": -1,
+  "plan": {
+   "place": {
+    "name": "Mercato sotto i Piloni",
+    "description": "Il mercato coperto dai viadotti: il banco dei sintetisti, la terrazza dei droni, celle energetiche che passano di mano in mano."
+   },
+   "layout": "mercato_viadotti",
+   "objects": [
+    {
+     "module": "npc.sintetista",
+     "where": "ovunque"
+    },
+    {
+     "module": "npc.colono",
+     "where": "fuori"
+    },
+    {
+     "module": "obj.sintetizzatore",
+     "where": "ovunque"
+    },
+    {
+     "module": "obj.armadietto",
+     "where": "ovunque"
+    },
+    {
+     "module": "obj.drone-ricognizione",
+     "where": "fuori"
+    }
+   ],
+   "ground": [
+    "Cella energetica",
+    "Filo superconduttore"
+   ],
+   "fresh": [],
+   "runes": [
+    "massa"
+   ],
+   "strutture": []
+  }
+ },
+ {
+  "cx": -1,
+  "cy": -1,
+  "plan": {
+   "place": {
+    "name": "Rampa dei Turni",
+    "description": "La rampa che scende verso il Cantiere, battuta dai turni che cambiano ogni otto ore."
+   },
+   "layout": "vicoli_pioggia",
+   "objects": [
+    {
+     "module": "obj.armadietto",
+     "where": "dentro"
+    },
+    {
+     "module": "obj.estrattore-plasma",
+     "where": "fuori"
+    },
+    {
+     "module": "npc.ingegnere-fusione",
+     "where": "fuori"
+    }
+   ],
+   "ground": [
+    "Casco con visore"
+   ],
+   "fresh": [],
+   "runes": [
+    "marea"
+   ],
+   "strutture": []
+  }
+ },
+ {
+  "cx": 1,
+  "cy": 1,
+  "plan": {
+   "place": {
+    "name": "Orti Pensili",
+    "description": "Terrazze coltivate tra le case, con vasche idroponiche e un boschetto di vetro che tintinna."
+   },
+   "layout": "mercato_viadotti",
+   "objects": [
+    {
+     "module": "obj.serra-idroponica",
+     "where": "ovunque"
+    },
+    {
+     "module": "obj.armadietto",
+     "where": "ovunque"
+    }
+   ],
+   "ground": [
+    "Frutto di vetro",
+    "Foglie di felce"
+   ],
+   "fresh": [],
+   "runes": [
+    "intreccio"
+   ],
+   "strutture": []
+  }
+ },
+ {
+  "cx": -1,
+  "cy": 1,
+  "plan": {
+   "place": {
+    "name": "Fermata del Treno Sospeso",
+    "description": "La fermata sotto il binario sospeso, con le panchine bagnate e il faro che lampeggia ambra."
+   },
+   "layout": "piazza_neon",
+   "objects": [
+    {
+     "module": "obj.faro-telemetria",
+     "where": "fuori"
+    },
+    {
+     "module": "obj.armadietto",
+     "where": "ovunque"
+    }
+   ],
+   "ground": [
+    "Gettone della cabina"
+   ],
+   "fresh": [],
+   "runes": [
+    "vuoto",
+    "fuoco"
+   ],
+   "strutture": []
+  }
+ },
+ {
+  "cx": 2,
+  "cy": 0,
+  "plan": {
+   "place": {
+    "name": "Cupole di Serralta",
+    "description": "Le cupole di vetro dei xenobotanici, appannate di umidità, piene di vasche e germogli; fuori, i campi di vasche all'aperto sotto la pioggia."
+   },
+   "layout": "cupola",
+   "objects": [
+    {
+     "module": "npc.xenobotanica",
+     "where": "dentro"
+    },
+    {
+     "module": "npc.xenobotanica",
+     "where": "fuori"
+    },
+    {
+     "module": "obj.serra-idroponica",
+     "where": "dentro"
+    },
+    {
+     "module": "obj.serra-idroponica",
+     "where": "fuori"
+    },
+    {
+     "module": "obj.armadietto",
+     "where": "dentro"
+    }
+   ],
+   "ground": [
+    "Semi di Serralta",
+    "Soluzione nutritiva"
+   ],
+   "fresh": [],
+   "runes": [
+    "orbita"
+   ],
+   "strutture": [
+    {
+     "concetto": "la grande cupola di Serralta, vetro a spicchi su un anello di lega",
+     "taglia": "media"
+    }
+   ]
+  }
+ },
+ {
+  "cx": -2,
+  "cy": 0,
+  "plan": {
+   "place": {
+    "name": "Spazioporto di Ponente",
+    "description": "Le piste bruciate dello spazioporto, l'hangar della Gilda della Navigazione Profonda e la camera di equilibrio per chi parte."
+   },
+   "layout": "spazioporto",
+   "objects": [
+    {
+     "module": "npc.navigatore",
+     "where": "fuori"
+    },
+    {
+     "module": "npc.navigatore",
+     "where": "dentro"
+    },
+    {
+     "module": "obj.camera-equilibrio",
+     "where": "fuori"
+    },
+    {
+     "module": "obj.faro-telemetria",
+     "where": "fuori"
+    },
+    {
+     "module": "obj.drone-ricognizione",
+     "where": "fuori"
+    }
+   ],
+   "ground": [
+    "Gettone della cabina",
+    "Carta delle rotte"
+   ],
+   "fresh": [],
+   "runes": [
+    "stasi"
+   ],
+   "strutture": []
+  }
+ },
+ {
+  "cx": 0,
+  "cy": -2,
+  "plan": {
+   "place": {
+    "name": "Imbocco della Gola",
+    "description": "Dove la città finisce e comincia la Gola dei Cristalli: sabbia vitrea, i primi speroni violetti, un faro sul masso."
+   },
+   "layout": "canyon_cristalli",
+   "objects": [
+    {
+     "module": "npc.colono",
+     "where": "fuori"
+    },
+    {
+     "module": "obj.faro-telemetria",
+     "where": "fuori"
+    },
+    {
+     "module": "obj.drone-ricognizione",
+     "where": "fuori"
+    }
+   ],
+   "ground": [
+    "Polvere di cristallo"
+   ],
+   "fresh": [],
+   "runes": [
+    "grava",
+    "lieve"
+   ],
+   "strutture": []
+  }
+ },
+ {
+  "cx": 1,
+  "cy": -2,
+  "plan": {
+   "place": {
+    "name": "Speroni Cantori",
+    "description": "Il cuore della Gola dei Cristalli, dove gli speroni più grandi tintinnano col vento freddo."
+   },
+   "layout": "canyon_cristalli",
+   "objects": [
+    {
+     "module": "npc.colono",
+     "where": "fuori"
+    },
+    {
+     "module": "obj.faro-telemetria",
+     "where": "fuori"
+    }
+   ],
+   "ground": [
+    "Polvere di cristallo"
+   ],
+   "fresh": [],
+   "runes": [
+    "onda",
+    "stasi"
+   ],
+   "strutture": []
+  }
+ },
+ {
+  "cx": 0,
+  "cy": 2,
+  "plan": {
+   "place": {
+    "name": "Quartiere delle Torri",
+    "description": "I basamenti delle torri di vetro delle compagnie, cortili pensili e portoni sorvegliati dalle guardie dell'acqua."
+   },
+   "layout": "quartiere_torri",
+   "objects": [
+    {
+     "module": "npc.colono",
+     "where": "fuori"
+    },
+    {
+     "module": "obj.camera-equilibrio",
+     "where": "fuori"
+    },
+    {
+     "module": "obj.armadietto",
+     "where": "dentro"
+    }
+   ],
+   "ground": [
+    "Borraccia d'acqua filtrata"
+   ],
+   "fresh": [],
+   "runes": [
+    "spin"
+   ],
+   "strutture": []
+  }
+ },
+ {
+  "cx": -1,
+  "cy": 2,
+  "plan": {
+   "place": {
+    "name": "Torre dei Filtri",
+    "description": "La torre dove la compagnia filtra l'acqua piovana: tubi, vasche, e una fila di gente con le borracce vuote."
+   },
+   "layout": "quartiere_torri",
+   "objects": [
+    {
+     "module": "obj.armadietto",
+     "where": "dentro"
+    },
+    {
+     "module": "obj.drone-ricognizione",
+     "where": "fuori"
+    }
+   ],
+   "ground": [
+    "Borraccia d'acqua filtrata"
+   ],
+   "fresh": [],
+   "runes": [
+    "acqua"
+   ],
+   "strutture": []
+  }
+ },
+ {
+  "cx": 2,
+  "cy": -2,
+  "plan": {
+   "place": {
+    "name": "Campo dei Relitti",
+    "description": "Lamiere antiche conficcate nella sabbia vitrea, costole di scafo che nessun registro ricorda e le tende degli scavi."
+   },
+   "layout": "relitti",
+   "objects": [
+    {
+     "module": "npc.astroarcheologo",
+     "where": "fuori"
+    },
+    {
+     "module": "npc.astroarcheologo",
+     "where": "fuori"
+    },
+    {
+     "module": "obj.relitto",
+     "where": "fuori"
+    },
+    {
+     "module": "obj.relitto",
+     "where": "fuori"
+    },
+    {
+     "module": "obj.armadietto",
+     "where": "ovunque"
+    }
+   ],
+   "ground": [
+    "Frammento di relitto",
+    "Lamiera antica"
+   ],
+   "fresh": [],
+   "runes": [
+    "tunnel",
+    "massa"
+   ],
+   "strutture": [
+    {
+     "concetto": "la costola ricurva di uno scafo antico, lamiere corrose",
+     "taglia": "media"
+    }
+   ]
+  }
+ },
+ {
+  "cx": -2,
+  "cy": -2,
+  "plan": {
+   "place": {
+    "name": "Cantiere della Fusione",
+    "description": "Le sale dei reattori dietro i recinti di rete, le canalette di plasma azzurro e la Nonna, il reattore più vecchio di Sidera."
+   },
+   "layout": "cantiere_fusione",
+   "objects": [
+    {
+     "module": "npc.ingegnere-fusione",
+     "where": "dentro"
+    },
+    {
+     "module": "npc.ingegnere-fusione",
+     "where": "fuori"
+    },
+    {
+     "module": "obj.reattore",
+     "where": "dentro"
+    },
+    {
+     "module": "obj.estrattore-plasma",
+     "where": "fuori"
+    },
+    {
+     "module": "obj.armadietto",
+     "where": "dentro"
+    }
+   ],
+   "ground": [
+    "Bottiglia di plasma",
+    "Lega grezza"
+   ],
+   "fresh": [],
+   "runes": [
+    "quanto",
+    "fuoco"
+   ],
+   "strutture": []
+  }
+ },
+ {
+  "cx": 2,
+  "cy": 2,
+  "plan": {
+   "place": {
+    "name": "Costa Allagata",
+    "description": "La vecchia costa sommersa dalla Grande Mareggiata: tetti che affiorano, passerelle di grata, reti di alghe stese ad asciugare."
+   },
+   "layout": "costa_allagata",
+   "objects": [
+    {
+     "module": "npc.xenobotanica",
+     "where": "fuori"
+    },
+    {
+     "module": "obj.faro-telemetria",
+     "where": "fuori"
+    },
+    {
+     "module": "obj.relitto",
+     "where": "fuori"
+    }
+   ],
+   "ground": [
+    "Spiedino di alghe"
+   ],
+   "fresh": [],
+   "runes": [
+    "marea",
+    "acqua"
+   ],
+   "strutture": []
+  }
+ },
+ {
+  "cx": -2,
+  "cy": 2,
+  "plan": {
+   "place": {
+    "name": "Laboratori di Ombralta",
+    "description": "I padiglioni bianchi della ricerca, le sale fredde delle capsule dei dormienti e le serre di prova."
+   },
+   "layout": "laboratorio",
+   "objects": [
+    {
+     "module": "npc.medico-criogenico",
+     "where": "dentro"
+    },
+    {
+     "module": "npc.medico-criogenico",
+     "where": "dentro"
+    },
+    {
+     "module": "obj.capsula-criogenica",
+     "where": "dentro"
+    },
+    {
+     "module": "obj.capsula-criogenica",
+     "where": "dentro"
+    },
+    {
+     "module": "obj.sintetizzatore",
+     "where": "dentro"
+    },
+    {
+     "module": "obj.armadietto",
+     "where": "dentro"
+    }
+   ],
+   "ground": [
+    "Cerotto al gel",
+    "Siero criogenico"
+   ],
+   "fresh": [],
+   "runes": [
+    "vuoto",
+    "orbita"
+   ],
+   "strutture": []
+  }
+ }
+]

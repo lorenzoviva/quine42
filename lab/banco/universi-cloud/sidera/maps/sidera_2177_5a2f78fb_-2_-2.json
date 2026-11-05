@@ -1,0 +1,41 @@
+{
+ "plan": {
+  "place": {
+   "name": "Cantiere della Fusione",
+   "description": "Le sale dei reattori dietro i recinti di rete, le canalette di plasma azzurro e la Nonna, il reattore più vecchio di Sidera."
+  },
+  "layout": "cantiere_fusione",
+  "objects": [
+   {
+    "module": "npc.ingegnere-fusione",
+    "where": "dentro"
+   },
+   {
+    "module": "npc.ingegnere-fusione",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.reattore",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.estrattore-plasma",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.armadietto",
+    "where": "dentro"
+   }
+  ],
+  "ground": [
+   "Bottiglia di plasma",
+   "Lega grezza"
+  ],
+  "fresh": [],
+  "runes": [
+   "quanto",
+   "fuoco"
+  ],
+  "strutture": []
+ }
+}

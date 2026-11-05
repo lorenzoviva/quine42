@@ -1,0 +1,32 @@
+{
+ "plan": {
+  "place": {
+   "name": "Scalinata dei Corrieri",
+   "description": "Scale antincendio e passerelle sospese dove i corrieri si passano i pacchi sotto la pioggia."
+  },
+  "layout": "vicoli_pioggia",
+  "objects": [
+   {
+    "module": "obj.armadietto",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.faro-telemetria",
+    "where": "fuori"
+   },
+   {
+    "module": "npc.navigatore",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Impermeabile"
+  ],
+  "fresh": [],
+  "runes": [
+   "tunnel",
+   "y"
+  ],
+  "strutture": []
+ }
+}

@@ -1,0 +1,46 @@
+{
+ "plan": {
+  "place": {
+   "name": "Piazza dei Viadotti",
+   "description": "La piazza lastricata sotto i viadotti, dove si incrociano le passerelle: chioschi illuminati, il faro di telemetria sul pilone, il banchetto di Ilde e la pioggia che non smette."
+  },
+  "layout": "piazza_neon",
+  "objects": [
+   {
+    "module": "obj.faro-telemetria",
+    "where": "fuori"
+   },
+   {
+    "module": "npc.colono",
+    "where": "fuori"
+   },
+   {
+    "module": "npc.colono",
+    "where": "ovunque"
+   },
+   {
+    "module": "npc.corvo-tetto",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.armadietto",
+    "where": "ovunque"
+   },
+   {
+    "module": "obj.drone-ricognizione",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Borraccia d'acqua filtrata",
+   "Cella energetica"
+  ],
+  "fresh": [],
+  "runes": [
+   "lieve",
+   "onda",
+   "x"
+  ],
+  "strutture": []
+ }
+}

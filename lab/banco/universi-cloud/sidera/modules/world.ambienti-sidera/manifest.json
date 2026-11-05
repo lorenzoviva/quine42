@@ -1,0 +1,752 @@
+{
+ "id": "world.ambienti-sidera",
+ "name": "Ambienti di Sidera",
+ "kind": "data",
+ "version": "1.0.0",
+ "description": "Gli ambienti delle terre di Sidera, regole di riscrittura che trasformano la bozza del terreno: la piazza dei viadotti, i vicoli, il mercato, le cupole, lo spazioporto, i laboratori, la gola dei cristalli, i relitti, la costa allagata, le torri, il cantiere della fusione, il cratere e la base dell'ascensore.",
+ "layouts": {
+  "piazza_neon": {
+   "name": "Piazza dei viadotti",
+   "description": "una piazza lastricata sotto i viadotti, con chioschi illuminati, panchine e canali",
+   "environment": "misto",
+   "program": {
+    "type": "sequence",
+    "children": [
+     {
+      "type": "prl",
+      "rules": [
+       {
+        "in": "[tjr]",
+        "out": "g",
+        "p": 0.9
+       },
+       {
+        "in": "[wo]",
+        "out": "g",
+        "p": 0.6
+       }
+      ]
+     },
+     {
+      "type": "one",
+      "rules": [
+       {
+        "in": "[gpns][gpns][gpns][gpns][gpns]/[gpns][gpns][gpns][gpns][gpns]/[gpns][gpns][gpns][gpns][gpns]/[gpns][gpns][gpns][gpns][gpns]",
+        "out": "hhhhh/hfffh/hfffh/hhdhh"
+       }
+      ],
+      "steps": 3
+     },
+     {
+      "type": "one",
+      "rules": [
+       {
+        "in": "[gp][gp][gp]/[gp][gp][gp]/[gp][gp][gp]",
+        "out": "***/*b*/***"
+       }
+      ],
+      "steps": 4
+     },
+     {
+      "type": "prl",
+      "rules": [
+       {
+        "in": "g",
+        "out": "p",
+        "p": 0.45
+       }
+      ]
+     },
+     {
+      "type": "path",
+      "from": "d",
+      "to": "p",
+      "on": "gs",
+      "color": "p",
+      "steps": 3
+     }
+    ]
+   }
+  },
+  "vicoli_pioggia": {
+   "name": "Vicoli sotto la pioggia",
+   "description": "vicoli stretti tra case di lega e scale antincendio, con le cucine di strada",
+   "environment": "misto",
+   "program": {
+    "type": "sequence",
+    "children": [
+     {
+      "type": "prl",
+      "rules": [
+       {
+        "in": "[tj]",
+        "out": "g",
+        "p": 0.8
+       }
+      ]
+     },
+     {
+      "type": "one",
+      "rules": [
+       {
+        "in": "[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]",
+        "out": "hhhhhh/hffffh/hffffh/hffffh/hhhdhh"
+       }
+      ],
+      "steps": 4
+     },
+     {
+      "type": "one",
+      "rules": [
+       {
+        "in": "[gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn]",
+        "out": "hhhh/hffh/hffh/hdhh"
+       }
+      ],
+      "steps": 3
+     },
+     {
+      "type": "prl",
+      "rules": [
+       {
+        "in": "g",
+        "out": "p",
+        "p": 0.2
+       }
+      ]
+     },
+     {
+      "type": "path",
+      "from": "d",
+      "to": "p",
+      "on": "gsn",
+      "color": "p",
+      "steps": 3
+     }
+    ]
+   }
+  },
+  "mercato_viadotti": {
+   "name": "Mercato sotto i viadotti",
+   "description": "bancarelle sotto i piloni di cemento, tende cerate, cassette di merce",
+   "environment": "esterno",
+   "program": {
+    "type": "sequence",
+    "children": [
+     {
+      "type": "prl",
+      "rules": [
+       {
+        "in": "[tjr]",
+        "out": "g",
+        "p": 0.85
+       }
+      ]
+     },
+     {
+      "type": "one",
+      "rules": [
+       {
+        "in": "[gpns][gpns][gpns]/[gpns][gpns][gpns]/[gpns][gpns][gpns]",
+        "out": "***/*b*/***"
+       }
+      ],
+      "steps": 5
+     },
+     {
+      "type": "one",
+      "rules": [
+       {
+        "in": "[gpns][gpns][gpns][gpns]/[gpns][gpns][gpns][gpns]/[gpns][gpns][gpns][gpns]/[gpns][gpns][gpns][gpns]",
+        "out": "hhhh/hffh/hffh/hhdh"
+       }
+      ],
+      "steps": 4
+     },
+     {
+      "type": "prl",
+      "rules": [
+       {
+        "in": "g",
+        "out": "p",
+        "p": 0.3
+       }
+      ]
+     },
+     {
+      "type": "path",
+      "from": "d",
+      "to": "p",
+      "on": "gsn",
+      "color": "p",
+      "steps": 3
+     }
+    ]
+   }
+  },
+  "cupola": {
+   "name": "Cupole idroponiche",
+   "description": "cupole di vetro piene di vasche coltivate, tra campi di vasche all'aperto",
+   "environment": "misto",
+   "program": {
+    "type": "sequence",
+    "children": [
+     {
+      "type": "prl",
+      "rules": [
+       {
+        "in": "[tr]",
+        "out": "g",
+        "p": 0.7
+       }
+      ]
+     },
+     {
+      "type": "one",
+      "rules": [
+       {
+        "in": "[gpsnmj][gpsnmj][gpsnmj][gpsnmj][gpsnmj][gpsnmj][gpsnmj]/[gpsnmj][gpsnmj][gpsnmj][gpsnmj][gpsnmj][gpsnmj][gpsnmj]/[gpsnmj][gpsnmj][gpsnmj][gpsnmj][gpsnmj][gpsnmj][gpsnmj]/[gpsnmj][gpsnmj][gpsnmj][gpsnmj][gpsnmj][gpsnmj][gpsnmj]/[gpsnmj][gpsnmj][gpsnmj][gpsnmj][gpsnmj][gpsnmj][gpsnmj]/[gpsnmj][gpsnmj][gpsnmj][gpsnmj][gpsnmj][gpsnmj][gpsnmj]/[gpsnmj][gpsnmj][gpsnmj][gpsnmj][gpsnmj][gpsnmj][gpsnmj]",
+        "out": "*qqqqq*/qmmmmmq/qmmllmq/qmmllmq/qmmmmmq/qmmmmmq/*qqdqq*"
+       }
+      ],
+      "steps": 2
+     },
+     {
+      "type": "one",
+      "rules": [
+       {
+        "in": "[gn][gn][gn]/[gn][gn][gn]",
+        "out": "mmm/mmm"
+       }
+      ],
+      "steps": 4
+     },
+     {
+      "type": "path",
+      "from": "d",
+      "to": "p",
+      "on": "gsnm",
+      "color": "p",
+      "steps": 3
+     }
+    ]
+   }
+  },
+  "spazioporto": {
+   "name": "Spazioporto",
+   "description": "piste d'atterraggio segnate dalle bruciature, hangar e torri di controllo",
+   "environment": "misto",
+   "program": {
+    "type": "sequence",
+    "children": [
+     {
+      "type": "prl",
+      "rules": [
+       {
+        "in": "[tjr]",
+        "out": "g",
+        "p": 1
+       },
+       {
+        "in": "[wn]",
+        "out": "g",
+        "p": 0.7
+       }
+      ]
+     },
+     {
+      "type": "one",
+      "rules": [
+       {
+        "in": "[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]",
+        "out": "hhhhhh/hffffh/hffffh/hffffh/hhdhhh"
+       }
+      ],
+      "steps": 1
+     },
+     {
+      "type": "one",
+      "rules": [
+       {
+        "in": "[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]",
+        "out": "eeeeeee/eeeeeee/eeeeeee/eeeeeee/eeeeeee"
+       }
+      ],
+      "steps": 2
+     },
+     {
+      "type": "prl",
+      "rules": [
+       {
+        "in": "g",
+        "out": "e",
+        "p": 0.15
+       }
+      ]
+     },
+     {
+      "type": "path",
+      "from": "d",
+      "to": "p",
+      "on": "gsne",
+      "color": "p",
+      "steps": 3
+     }
+    ]
+   }
+  },
+  "laboratorio": {
+   "name": "Laboratori",
+   "description": "padiglioni bianchi di ricerca con le serre di prova e i depositi",
+   "environment": "misto",
+   "program": {
+    "type": "sequence",
+    "children": [
+     {
+      "type": "prl",
+      "rules": [
+       {
+        "in": "[tj]",
+        "out": "g",
+        "p": 0.7
+       }
+      ]
+     },
+     {
+      "type": "one",
+      "rules": [
+       {
+        "in": "[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]",
+        "out": "hhhhhhh/hlllllh/hlllllh/hlllllh/hhhdhhh"
+       }
+      ],
+      "steps": 2
+     },
+     {
+      "type": "one",
+      "rules": [
+       {
+        "in": "[gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn]",
+        "out": "hhhh/hllh/hllh/hdhh"
+       }
+      ],
+      "steps": 2
+     },
+     {
+      "type": "one",
+      "rules": [
+       {
+        "in": "[gn][gn]/[gn][gn]",
+        "out": "mm/mm"
+       }
+      ],
+      "steps": 3
+     },
+     {
+      "type": "path",
+      "from": "d",
+      "to": "p",
+      "on": "gsnm",
+      "color": "p",
+      "steps": 3
+     }
+    ]
+   }
+  },
+  "canyon_cristalli": {
+   "name": "Gola dei cristalli",
+   "description": "una gola di sabbia vitrea tra speroni di cristallo violetto",
+   "environment": "esterno",
+   "program": {
+    "type": "sequence",
+    "children": [
+     {
+      "type": "prl",
+      "rules": [
+       {
+        "in": "[gt]",
+        "out": "s",
+        "p": 0.75
+       }
+      ]
+     },
+     {
+      "type": "prl",
+      "rules": [
+       {
+        "in": "s",
+        "out": "r",
+        "p": 0.06
+       }
+      ]
+     },
+     {
+      "type": "one",
+      "rules": [
+       {
+        "in": "rs",
+        "out": "rr"
+       }
+      ],
+      "steps": 40
+     },
+     {
+      "type": "prl",
+      "rules": [
+       {
+        "in": "[nj]",
+        "out": "s",
+        "p": 0.5
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "relitti": {
+   "name": "Campo dei relitti",
+   "description": "lamiere antiche conficcate nella sabbia, costole di scafo e rottami",
+   "environment": "esterno",
+   "program": {
+    "type": "sequence",
+    "children": [
+     {
+      "type": "prl",
+      "rules": [
+       {
+        "in": "[gtjr]",
+        "out": "s",
+        "p": 1
+       }
+      ]
+     },
+     {
+      "type": "one",
+      "rules": [
+       {
+        "in": "[sgn][sgn][sgn][sgn][sgn]/[sgn][sgn][sgn][sgn][sgn]/[sgn][sgn][sgn][sgn][sgn]/[sgn][sgn][sgn][sgn][sgn]",
+        "out": "aaaaa/affda/affaa/aaaaa"
+       }
+      ],
+      "steps": 2
+     },
+     {
+      "type": "one",
+      "rules": [
+       {
+        "in": "[sgn][sgn][sgn][sgn]",
+        "out": "aa*a"
+       }
+      ],
+      "steps": 7
+     },
+     {
+      "type": "one",
+      "rules": [
+       {
+        "in": "[sgn][sgn][sgn]/[sgn][sgn][sgn]",
+        "out": "a*a/aaa"
+       }
+      ],
+      "steps": 3
+     },
+     {
+      "type": "prl",
+      "rules": [
+       {
+        "in": "s",
+        "out": "r",
+        "p": 0.02
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "costa_allagata": {
+   "name": "Costa allagata",
+   "description": "la vecchia costa sommersa, con passerelle di grata tra i tetti affioranti",
+   "environment": "esterno",
+   "program": {
+    "type": "sequence",
+    "children": [
+     {
+      "type": "prl",
+      "rules": [
+       {
+        "in": "[tr]",
+        "out": "g",
+        "p": 0.6
+       }
+      ]
+     },
+     {
+      "type": "one",
+      "rules": [
+       {
+        "in": "[gsn][gsn][gsn][gsn]/[gsn][gsn][gsn][gsn]/[gsn][gsn][gsn][gsn]",
+        "out": "wwww/wwww/wwww"
+       }
+      ],
+      "steps": 4
+     },
+     {
+      "type": "one",
+      "rules": [
+       {
+        "in": "wg",
+        "out": "ww"
+       }
+      ],
+      "steps": 30
+     },
+     {
+      "type": "one",
+      "rules": [
+       {
+        "in": "www",
+        "out": "zzz"
+       }
+      ],
+      "steps": 4
+     },
+     {
+      "type": "one",
+      "rules": [
+       {
+        "in": "[gsn][gsn][gsn][gsn]/[gsn][gsn][gsn][gsn]/[gsn][gsn][gsn][gsn]/[gsn][gsn][gsn][gsn]",
+        "out": "hhhh/hffh/hffh/hdhh"
+       }
+      ],
+      "steps": 2
+     },
+     {
+      "type": "path",
+      "from": "d",
+      "to": "p",
+      "on": "gsn",
+      "color": "p",
+      "steps": 3
+     }
+    ]
+   }
+  },
+  "quartiere_torri": {
+   "name": "Quartiere delle torri",
+   "description": "basamenti di torri di vetro, cortili pensili, portoni sorvegliati",
+   "environment": "misto",
+   "program": {
+    "type": "sequence",
+    "children": [
+     {
+      "type": "prl",
+      "rules": [
+       {
+        "in": "[tjr]",
+        "out": "g",
+        "p": 0.75
+       }
+      ]
+     },
+     {
+      "type": "one",
+      "rules": [
+       {
+        "in": "[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]",
+        "out": "qqqqqq/qffffq/qffffq/qffffq/qffffq/qqdqqq"
+       }
+      ],
+      "steps": 3
+     },
+     {
+      "type": "one",
+      "rules": [
+       {
+        "in": "[gn][gn]/[gn][gn]",
+        "out": "tt/tt"
+       }
+      ],
+      "steps": 2
+     },
+     {
+      "type": "prl",
+      "rules": [
+       {
+        "in": "g",
+        "out": "p",
+        "p": 0.25
+       }
+      ]
+     },
+     {
+      "type": "path",
+      "from": "d",
+      "to": "p",
+      "on": "gsn",
+      "color": "p",
+      "steps": 3
+     }
+    ]
+   }
+  },
+  "cantiere_fusione": {
+   "name": "Cantiere della fusione",
+   "description": "le sale dei reattori, recinti di rete e canalette di plasma",
+   "environment": "misto",
+   "program": {
+    "type": "sequence",
+    "children": [
+     {
+      "type": "prl",
+      "rules": [
+       {
+        "in": "[tjr]",
+        "out": "g",
+        "p": 1
+       },
+       {
+        "in": "w",
+        "out": "g",
+        "p": 0.5
+       }
+      ]
+     },
+     {
+      "type": "one",
+      "rules": [
+       {
+        "in": "[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]",
+        "out": "bbbbbbb/blllllb/blllllb/blllllb/bbbdbbb"
+       }
+      ],
+      "steps": 2
+     },
+     {
+      "type": "one",
+      "rules": [
+       {
+        "in": "[gsn][gsn][gsn][gsn][gsn]",
+        "out": "vvvvv"
+       }
+      ],
+      "steps": 3
+     },
+     {
+      "type": "one",
+      "rules": [
+       {
+        "in": "[gsn][gsn][gsn]",
+        "out": "ccc"
+       }
+      ],
+      "steps": 5
+     },
+     {
+      "type": "path",
+      "from": "d",
+      "to": "p",
+      "on": "gsn",
+      "color": "p",
+      "steps": 3
+     }
+    ]
+   }
+  },
+  "cratere": {
+   "name": "Cratere",
+   "description": "il fondo di un cratere antico, sabbia vitrea, brina e cristalli",
+   "environment": "esterno",
+   "program": {
+    "type": "sequence",
+    "children": [
+     {
+      "type": "prl",
+      "rules": [
+       {
+        "in": "[gtj]",
+        "out": "s",
+        "p": 0.8
+       }
+      ]
+     },
+     {
+      "type": "prl",
+      "rules": [
+       {
+        "in": "s",
+        "out": "n",
+        "p": 0.12
+       }
+      ]
+     },
+     {
+      "type": "one",
+      "rules": [
+       {
+        "in": "[sn][sn][sn]/[sn][sn][sn]/[sn][sn][sn]",
+        "out": "r*r/***/r*r"
+       }
+      ],
+      "steps": 4
+     },
+     {
+      "type": "prl",
+      "rules": [
+       {
+        "in": "s",
+        "out": "r",
+        "p": 0.03
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "base_ascensore": {
+   "name": "Base dell'ascensore",
+   "description": "la torre del cordone che sale verso l'Anello, con le banchine di carico",
+   "environment": "misto",
+   "program": {
+    "type": "sequence",
+    "children": [
+     {
+      "type": "prl",
+      "rules": [
+       {
+        "in": "[tjr]",
+        "out": "g",
+        "p": 0.8
+       }
+      ]
+     },
+     {
+      "type": "stamp",
+      "shape": "torre",
+      "codes": {
+       "muro": "b",
+       "pavimento": "l"
+      }
+     },
+     {
+      "type": "one",
+      "rules": [
+       {
+        "in": "[gsn][gsn][gsn][gsn]/[gsn][gsn][gsn][gsn]/[gsn][gsn][gsn][gsn]",
+        "out": "eeee/eeee/eeee"
+       }
+      ],
+      "steps": 2
+     },
+     {
+      "type": "path",
+      "from": "d",
+      "to": "p",
+      "on": "gsne",
+      "color": "p",
+      "steps": 3
+     }
+    ]
+   }
+  }
+ }
+}

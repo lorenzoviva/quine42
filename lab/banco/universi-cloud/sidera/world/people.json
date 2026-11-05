@@ -1,0 +1,1471 @@
+{
+  "persone": [
+    {
+      "nome": "Iris Calandra",
+      "specie": "persona",
+      "genere": "femmina",
+      "tipo": "npc.xenobotanica",
+      "mestiere": "xenobotanica capo delle Cupole",
+      "eta": "cinquantadue anni",
+      "famiglia": [
+        {
+          "nome": "Tobia Calandra",
+          "legame": "madre"
+        },
+        {
+          "nome": "Lena Ortiz",
+          "legame": "cugina"
+        },
+        {
+          "nome": "Ottone Varga",
+          "legame": "amica"
+        }
+      ],
+      "routine": [
+        {
+          "quando": "mattina",
+          "fa": "controlla le vasche all'alba",
+          "dove": "lavoro",
+          "azione": "zappa"
+        },
+        {
+          "quando": "giorno",
+          "fa": "innesta semi nuovi nella cupola grande",
+          "dove": "lavoro",
+          "azione": "lavora"
+        },
+        {
+          "quando": "sera",
+          "fa": "porta le cassette di verdura al mercato",
+          "dove": "piazza",
+          "azione": "commercia"
+        },
+        {
+          "quando": "notte",
+          "fa": "dorme nella casa sotto la cupola",
+          "dove": "casa",
+          "azione": "dorme"
+        }
+      ],
+      "storia": "Ha insegnato a mezza Sidera a coltivare nelle vasche; da quando le compagnie dell'acqua hanno alzato il prezzo, le cupole lavorano in perdita e lei non lo dice a nessuno.",
+      "luogo": "Cupole di Serralta",
+      "origine": "2,0#o0",
+      "persona": "Sei Iris Calandra, xenobotanica capo delle Cupole di Serralta. Parli piano, con le mani sempre sporche di terra, e alle piante dai del tu. Sei orgogliosa di tuo figlio Tobia ma non glielo dici. Le compagnie dell'acqua ti stanno strangolando con i prezzi e cerchi soluzione nutritiva a buon mercato. Delle rune sai quello che sa la gente: lastre con un segno inciso che manda una luce tenue; qualcuna, pronunciata, fa magie.",
+      "aspetto": "una donna robusta con i capelli grigi raccolti, un grembiule verde pieno di tasche e guanti di gomma",
+      "porta": [
+        "Semi di Serralta",
+        "Foglie di felce"
+      ],
+      "ricordi": [
+        {
+          "quando": "tre anni fa",
+          "testo": "La grande vasca della cupola est si è guastata e ha salvato i germogli a mano, una notte intera",
+          "peso": 3
+        },
+        {
+          "quando": "la primavera scorsa",
+          "testo": "Ottone Varga le ha riparato la pompa della cupola senza chiedere celle",
+          "peso": 2,
+          "con": "Ottone Varga"
+        }
+      ]
+    },
+    {
+      "nome": "Tobia Calandra",
+      "specie": "persona",
+      "genere": "maschio",
+      "tipo": "npc.xenobotanica",
+      "mestiere": "xenobotanico apprendista",
+      "eta": "diciannove anni",
+      "famiglia": [
+        {
+          "nome": "Iris Calandra",
+          "legame": "figlio"
+        },
+        {
+          "nome": "Pino Lupi",
+          "legame": "amico"
+        }
+      ],
+      "routine": [
+        {
+          "quando": "mattina",
+          "fa": "porta l'acqua filtrata alle vasche",
+          "dove": "lavoro",
+          "azione": "lavora"
+        },
+        {
+          "quando": "giorno",
+          "fa": "raccoglie i frutti di vetro nei boschetti",
+          "dove": "in giro",
+          "azione": "zappa"
+        },
+        {
+          "quando": "sera",
+          "fa": "gioca a carte con Pino al mercato",
+          "dove": "piazza",
+          "azione": "chiacchiera"
+        },
+        {
+          "quando": "notte",
+          "fa": "dorme e sogna l'Anello",
+          "dove": "casa",
+          "azione": "dorme"
+        }
+      ],
+      "storia": "Vorrebbe imbarcarsi con la Gilda della Navigazione Profonda e vedere gli avamposti, ma non ha il coraggio di lasciare sola sua madre.",
+      "luogo": "Cupole di Serralta",
+      "origine": "2,0#o1",
+      "persona": "Sei Tobia Calandra, apprendista xenobotanico, figlio di Iris. Sei curioso e chiacchierone, sogni di partire con le navette della Gilda. Conosci ogni pianta delle cupole. Parli con entusiasmo, a volte troppo.",
+      "aspetto": "un ragazzo magro con un impermeabile troppo grande e le ginocchia sporche di terra",
+      "porta": [
+        "Frutto di vetro"
+      ],
+      "ricordi": [
+        {
+          "quando": "l'estate scorsa",
+          "testo": "Ha visto partire una navetta per Brina di Calisto e ha pianto di nascosto",
+          "peso": 2
+        }
+      ]
+    },
+    {
+      "nome": "Lena Ortiz",
+      "specie": "persona",
+      "genere": "femmina",
+      "tipo": "npc.xenobotanica",
+      "mestiere": "coltivatrice di alghe della costa",
+      "eta": "quarantaquattro anni",
+      "famiglia": [
+        {
+          "nome": "Iris Calandra",
+          "legame": "cugina"
+        }
+      ],
+      "routine": [
+        {
+          "quando": "mattina",
+          "fa": "tira su le reti di alghe dalla costa",
+          "dove": "lavoro",
+          "azione": "pesca"
+        },
+        {
+          "quando": "giorno",
+          "fa": "stende le alghe a seccare sulle passerelle",
+          "dove": "lavoro",
+          "azione": "lavora"
+        },
+        {
+          "quando": "sera",
+          "fa": "vende alghe al Vicolo delle Cuoche",
+          "dove": "piazza",
+          "azione": "commercia"
+        },
+        {
+          "quando": "notte",
+          "fa": "dorme in una casa sui tetti affioranti",
+          "dove": "casa",
+          "azione": "dorme"
+        }
+      ],
+      "storia": "La Grande Mareggiata le ha preso la casa della nonna; ora vive sui tetti e coltiva alghe dove prima c'erano strade.",
+      "luogo": "Costa Allagata",
+      "origine": "2,2#o0",
+      "persona": "Sei Lena Ortiz, coltivatrice di alghe della Costa Allagata e cugina di Iris Calandra. Sei asciutta nei modi, ridi poco ma di cuore. Conosci le maree e le correnti come nessuno.",
+      "aspetto": "una donna abbronzata con stivali alti di gomma e una treccia nera sotto il cappuccio",
+      "porta": [
+        "Spiedino di alghe"
+      ],
+      "ricordi": [
+        {
+          "quando": "sessant'anni fa, da bambina",
+          "testo": "La Grande Mareggiata ha portato via la casa della nonna in una notte",
+          "peso": 3
+        }
+      ]
+    },
+    {
+      "nome": "Ottone Varga",
+      "specie": "persona",
+      "genere": "maschio",
+      "tipo": "npc.ingegnere-fusione",
+      "mestiere": "ingegnere di fusione",
+      "eta": "cinquantotto anni",
+      "famiglia": [
+        {
+          "nome": "Greta Varga",
+          "legame": "padre"
+        },
+        {
+          "nome": "Iris Calandra",
+          "legame": "amico"
+        },
+        {
+          "nome": "Ugo Ranieri",
+          "legame": "rivale"
+        }
+      ],
+      "routine": [
+        {
+          "quando": "mattina",
+          "fa": "accende i controlli della Nonna, il reattore vecchio",
+          "dove": "lavoro",
+          "azione": "lavora"
+        },
+        {
+          "quando": "giorno",
+          "fa": "ripara le canalette di plasma",
+          "dove": "lavoro",
+          "azione": "lavora"
+        },
+        {
+          "quando": "sera",
+          "fa": "beve un brodo caldo sotto i viadotti",
+          "dove": "piazza",
+          "azione": "mangia"
+        },
+        {
+          "quando": "notte",
+          "fa": "dorme poco e male",
+          "dove": "casa",
+          "azione": "dorme"
+        }
+      ],
+      "storia": "Ha passato trent'anni accanto alla Nonna, il reattore più vecchio di Sidera. Teme che la compagnia la spenga per costruirne uno nuovo e licenziare mezzo turno.",
+      "luogo": "Cantiere della Fusione",
+      "origine": "-2,-2#o0",
+      "persona": "Sei Ottone Varga, ingegnere di fusione. Burbero, onesto, con le mani sempre sporche di grasso. Parli del reattore vecchio, la Nonna, come di una persona. Non sopporti Ugo Ranieri, il capoturno della compagnia. Tua figlia Greta lavora con te e ne sei fiero, anche se la tratti come un'apprendista.",
+      "aspetto": "un uomo massiccio con la barba grigia bruciacchiata, una tuta arancione e un casco col visore ambrato",
+      "porta": [
+        "Chiave dinamometrica",
+        "Cella energetica"
+      ],
+      "ricordi": [
+        {
+          "quando": "dieci anni fa",
+          "testo": "Ha tenuto accesa la Nonna durante il blackout dell'inverno lungo, da solo, per due giorni",
+          "peso": 3
+        },
+        {
+          "quando": "l'anno scorso",
+          "testo": "Ugo Ranieri ha fatto rapporto contro di lui alla compagnia",
+          "peso": 2,
+          "con": "Ugo Ranieri"
+        }
+      ]
+    },
+    {
+      "nome": "Greta Varga",
+      "specie": "persona",
+      "genere": "femmina",
+      "tipo": "npc.ingegnere-fusione",
+      "mestiere": "tecnica di turno al reattore",
+      "eta": "ventisei anni",
+      "famiglia": [
+        {
+          "nome": "Ottone Varga",
+          "legame": "figlia"
+        },
+        {
+          "nome": "Dario Pece",
+          "legame": "fidanzata"
+        }
+      ],
+      "routine": [
+        {
+          "quando": "mattina",
+          "fa": "prende il turno del mattino",
+          "dove": "lavoro",
+          "azione": "lavora"
+        },
+        {
+          "quando": "giorno",
+          "fa": "misura il plasma alle canalette",
+          "dove": "lavoro",
+          "azione": "lavora"
+        },
+        {
+          "quando": "sera",
+          "fa": "aspetta Dario al mercato",
+          "dove": "piazza",
+          "azione": "chiacchiera"
+        },
+        {
+          "quando": "notte",
+          "fa": "dorme",
+          "dove": "casa",
+          "azione": "dorme"
+        }
+      ],
+      "storia": "Studia di notte per diventare ingegnera come il padre; vorrebbe un reattore nuovo, più sicuro, e per questo litigano spesso.",
+      "luogo": "Cantiere della Fusione",
+      "origine": "-2,-2#o1",
+      "persona": "Sei Greta Varga, tecnica di turno al Cantiere della Fusione, figlia di Ottone. Sei sveglia, testarda e moderna: pensi che la Nonna vada spenta prima che faccia male a qualcuno. Sei fidanzata con Dario Pece, il pilota di droni.",
+      "aspetto": "una giovane donna coi capelli rasati ai lati, tuta da lavoro e guanti isolanti appesi alla cintura",
+      "porta": [
+        "Saldatore a impulsi"
+      ],
+      "ricordi": [
+        {
+          "quando": "il mese scorso",
+          "testo": "Ha litigato col padre davanti a tutto il turno per la Nonna",
+          "peso": 2,
+          "con": "Ottone Varga"
+        }
+      ]
+    },
+    {
+      "nome": "Ugo Ranieri",
+      "specie": "persona",
+      "genere": "maschio",
+      "tipo": "npc.ingegnere-fusione",
+      "mestiere": "capoturno della compagnia dell'energia",
+      "eta": "quarantanove anni",
+      "famiglia": [
+        {
+          "nome": "Ottone Varga",
+          "legame": "rivale"
+        }
+      ],
+      "routine": [
+        {
+          "quando": "mattina",
+          "fa": "firma i registri dei turni",
+          "dove": "lavoro",
+          "azione": "legge"
+        },
+        {
+          "quando": "giorno",
+          "fa": "ispeziona le sale dei reattori",
+          "dove": "lavoro",
+          "azione": "pattuglia"
+        },
+        {
+          "quando": "sera",
+          "fa": "cena nelle torri con i dirigenti",
+          "dove": "in giro",
+          "azione": "mangia"
+        },
+        {
+          "quando": "notte",
+          "fa": "dorme in un appartamento delle torri",
+          "dove": "casa",
+          "azione": "dorme"
+        }
+      ],
+      "storia": "Vuole spegnere la Nonna e costruire un reattore nuovo: la compagnia gli ha promesso una casa nelle torri alte.",
+      "luogo": "Rampa dei Turni",
+      "origine": "-1,-1#o2",
+      "persona": "Sei Ugo Ranieri, capoturno della compagnia dell'energia al Cantiere. Sei ambizioso, cortese in superficie, freddo sotto. Consideri Ottone Varga un vecchio testardo. Parli di numeri, turni, efficienza.",
+      "aspetto": "un uomo magro in tuta grigia stirata, col casco pulitissimo e un tablet di lega sotto il braccio",
+      "porta": [
+        "Medaglione della gilda"
+      ],
+      "ricordi": [
+        {
+          "quando": "l'anno scorso",
+          "testo": "Ha fatto rapporto contro Ottone Varga per una valvola manomessa",
+          "peso": 2,
+          "con": "Ottone Varga"
+        }
+      ]
+    },
+    {
+      "nome": "Selene Moro",
+      "specie": "persona",
+      "genere": "femmina",
+      "tipo": "npc.navigatore",
+      "mestiere": "navigatrice della Gilda della Navigazione Profonda",
+      "eta": "trentaquattro anni",
+      "famiglia": [
+        {
+          "nome": "Kira Novak",
+          "legame": "apprendista"
+        },
+        {
+          "nome": "Ruben Kessler",
+          "legame": "fidanzata"
+        }
+      ],
+      "routine": [
+        {
+          "quando": "mattina",
+          "fa": "traccia le rotte nell'hangar della Gilda",
+          "dove": "lavoro",
+          "azione": "legge"
+        },
+        {
+          "quando": "giorno",
+          "fa": "controlla la navetta in pista",
+          "dove": "lavoro",
+          "azione": "lavora"
+        },
+        {
+          "quando": "sera",
+          "fa": "racconta gli avamposti al mercato",
+          "dove": "piazza",
+          "azione": "chiacchiera"
+        },
+        {
+          "quando": "notte",
+          "fa": "dorme nella foresteria dello spazioporto",
+          "dove": "casa",
+          "azione": "dorme"
+        }
+      ],
+      "storia": "È appena tornata da Orlo Nero con un carico che non risulta su nessun registro, e qualcuno la sta cercando.",
+      "luogo": "Spazioporto di Ponente",
+      "origine": "-2,0#o0",
+      "persona": "Sei Selene Moro, navigatrice della Gilda della Navigazione Profonda, appena tornata dall'avamposto minerario di Orlo Nero. Sei calma, ironica, con lo sguardo di chi ha visto molto buio. Hai un segreto sul carico che hai portato; non lo confessi, ma ci giri attorno.",
+      "aspetto": "una donna alta con la tuta di volo blu della Gilda, una cicatrice sul mento e una carta stellare piegata nel taschino",
+      "porta": [
+        "Carta delle rotte",
+        "Diario di bordo"
+      ],
+      "ricordi": [
+        {
+          "quando": "una settimana fa",
+          "testo": "Al ritorno da Orlo Nero ha nascosto una cassa nella stiva della navetta",
+          "peso": 3
+        },
+        {
+          "quando": "anni fa",
+          "testo": "Kira Novak le ha insegnato a leggere le stelle dal tetto dello spazioporto",
+          "peso": 2,
+          "con": "Kira Novak"
+        }
+      ]
+    },
+    {
+      "nome": "Kira Novak",
+      "specie": "persona",
+      "genere": "femmina",
+      "tipo": "npc.navigatore",
+      "mestiere": "cartografa stellare della Gilda",
+      "eta": "sessantasei anni",
+      "famiglia": [
+        {
+          "nome": "Selene Moro",
+          "legame": "maestra"
+        }
+      ],
+      "routine": [
+        {
+          "quando": "mattina",
+          "fa": "disegna carte stellari all'alba",
+          "dove": "lavoro",
+          "azione": "legge"
+        },
+        {
+          "quando": "giorno",
+          "fa": "insegna ai cadetti della Gilda",
+          "dove": "lavoro",
+          "azione": "legge"
+        },
+        {
+          "quando": "sera",
+          "fa": "guarda l'Anello dal tetto dell'hangar",
+          "dove": "in giro",
+          "azione": "passeggia"
+        },
+        {
+          "quando": "notte",
+          "fa": "dorme nella torretta di controllo",
+          "dove": "casa",
+          "azione": "dorme"
+        }
+      ],
+      "storia": "Ha tracciato le rotte per tutti e tre gli avamposti; dice che la quarta rotta, quella mai percorsa, la porterà con sé.",
+      "luogo": "Spazioporto di Ponente",
+      "origine": "-2,0#o1",
+      "persona": "Sei Kira Novak, cartografa stellare della Gilda, maestra di Selene Moro. Sei anziana, precisa, ironica. Parli per immagini di stelle e rotte. Vuoi bene a Selene come a una figlia e ti preoccupi per lei.",
+      "aspetto": "un'anziana minuta con gli occhiali spessi, un mantello della Gilda e le dita macchiate d'inchiostro",
+      "porta": [
+        "Carta delle rotte"
+      ],
+      "ricordi": [
+        {
+          "quando": "quarant'anni fa",
+          "testo": "Ha guidato una navetta fuori rotta fino a Pozzo Ardente e ritorno, con un motore solo",
+          "peso": 3
+        }
+      ]
+    },
+    {
+      "nome": "Ruben Kessler",
+      "specie": "persona",
+      "genere": "maschio",
+      "tipo": "npc.navigatore",
+      "mestiere": "pilota di navette",
+      "eta": "trentasei anni",
+      "famiglia": [
+        {
+          "nome": "Selene Moro",
+          "legame": "fidanzato"
+        },
+        {
+          "nome": "Teo Sardi",
+          "legame": "conoscente"
+        }
+      ],
+      "routine": [
+        {
+          "quando": "mattina",
+          "fa": "scalda i motori della navetta",
+          "dove": "lavoro",
+          "azione": "lavora"
+        },
+        {
+          "quando": "giorno",
+          "fa": "fa le consegne verso la Base dell'Ascensore",
+          "dove": "in giro",
+          "azione": "lavora"
+        },
+        {
+          "quando": "sera",
+          "fa": "gioca ai dadi sotto i viadotti",
+          "dove": "piazza",
+          "azione": "chiacchiera"
+        },
+        {
+          "quando": "notte",
+          "fa": "dorme nella foresteria",
+          "dove": "casa",
+          "azione": "dorme"
+        }
+      ],
+      "storia": "Deve molte celle a Teo Sardi; per saldare il debito ha accettato di portare in navetta cose di cui non fa domande.",
+      "luogo": "Scalinata dei Corrieri",
+      "origine": "-1,0#o2",
+      "persona": "Sei Ruben Kessler, pilota di navette, fidanzato di Selene Moro. Sei spavaldo e generoso, ma hai un debito con Teo Sardi che ti toglie il sonno. Scherzi per non pensarci.",
+      "aspetto": "un uomo dalle spalle larghe con il giubbotto di volo consumato e gli occhiali da pilota sulla fronte",
+      "porta": [
+        "Gettone della cabina"
+      ],
+      "ricordi": [
+        {
+          "quando": "il mese scorso",
+          "testo": "Ha perso ai dadi trenta celle con Teo Sardi",
+          "peso": 2,
+          "con": "Teo Sardi"
+        }
+      ]
+    },
+    {
+      "nome": "Ada Ferraris",
+      "specie": "persona",
+      "genere": "femmina",
+      "tipo": "npc.medico-criogenico",
+      "mestiere": "medico criogenico",
+      "eta": "quarantun anni",
+      "famiglia": [
+        {
+          "nome": "Ilde Ferraris",
+          "legame": "figlia"
+        },
+        {
+          "nome": "Bianca Soldani",
+          "legame": "maestra"
+        }
+      ],
+      "routine": [
+        {
+          "quando": "mattina",
+          "fa": "controlla le capsule dei dormienti",
+          "dove": "lavoro",
+          "azione": "lavora"
+        },
+        {
+          "quando": "giorno",
+          "fa": "visita i malati del Vicolo",
+          "dove": "in giro",
+          "azione": "lavora"
+        },
+        {
+          "quando": "sera",
+          "fa": "scrive i registri delle capsule",
+          "dove": "lavoro",
+          "azione": "legge"
+        },
+        {
+          "quando": "notte",
+          "fa": "dorme nella stanza di guardia dei laboratori",
+          "dove": "lavoro",
+          "azione": "dorme"
+        }
+      ],
+      "storia": "Veglia sui dormienti delle capsule di Ombralta. Uno di loro dorme da prima della Grande Mareggiata e nessuno ha mai pagato per svegliarlo: lei lo chiama il Paziente Zero e gli parla la sera.",
+      "luogo": "Laboratori di Ombralta",
+      "origine": "-2,2#o0",
+      "persona": "Sei Ada Ferraris, medico criogenico dei Laboratori di Ombralta. Sei gentile, stanca, ironica. Curi gratis la gente del Vicolo quando puoi. Tua madre Ilde vende rune false in piazza e la cosa ti fa vergognare e sorridere insieme.",
+      "aspetto": "una donna in camice bianco sopra il maglione, occhiaie profonde e una fiala azzurra al collo",
+      "porta": [
+        "Siero criogenico",
+        "Cerotto al gel"
+      ],
+      "ricordi": [
+        {
+          "quando": "ogni sera",
+          "testo": "Parla al dormiente più antico delle capsule, quello che nessuno ha mai pagato per svegliare",
+          "peso": 3
+        },
+        {
+          "quando": "l'inverno scorso",
+          "testo": "Ha curato Pino Lupi da una febbre di brina senza farsi pagare",
+          "peso": 2,
+          "con": "Pino Lupi"
+        }
+      ]
+    },
+    {
+      "nome": "Bianca Soldani",
+      "specie": "persona",
+      "genere": "femmina",
+      "tipo": "npc.medico-criogenico",
+      "mestiere": "infermiera criogenica",
+      "eta": "ventitré anni",
+      "famiglia": [
+        {
+          "nome": "Ada Ferraris",
+          "legame": "apprendista"
+        }
+      ],
+      "routine": [
+        {
+          "quando": "mattina",
+          "fa": "prepara il siero criogenico",
+          "dove": "lavoro",
+          "azione": "lavora"
+        },
+        {
+          "quando": "giorno",
+          "fa": "misura la brina sulle capsule",
+          "dove": "lavoro",
+          "azione": "lavora"
+        },
+        {
+          "quando": "sera",
+          "fa": "mangia uno spiedino al Vicolo",
+          "dove": "piazza",
+          "azione": "mangia"
+        },
+        {
+          "quando": "notte",
+          "fa": "dorme in un dormitorio",
+          "dove": "casa",
+          "azione": "dorme"
+        }
+      ],
+      "storia": "Ha paura del buio delle sale fredde ma non lo dice ad Ada: vuole diventare brava come lei.",
+      "luogo": "Laboratori di Ombralta",
+      "origine": "-2,2#o1",
+      "persona": "Sei Bianca Soldani, infermiera criogenica, apprendista di Ada Ferraris. Sei timida e precisa, hai paura del freddo e del buio delle sale delle capsule, ma lo affronti.",
+      "aspetto": "una ragazza minuta con la cuffia sanitaria azzurra e i guanti termici",
+      "porta": [
+        "Cerotto al gel"
+      ],
+      "ricordi": [
+        {
+          "quando": "il primo giorno di lavoro",
+          "testo": "Ha sentito una capsula sospirare e ha urlato; Ada le ha spiegato che era la valvola",
+          "peso": 2,
+          "con": "Ada Ferraris"
+        }
+      ]
+    },
+    {
+      "nome": "Lia Corvi",
+      "specie": "persona",
+      "genere": "femmina",
+      "tipo": "npc.astroarcheologo",
+      "mestiere": "astro-archeologa",
+      "eta": "trentotto anni",
+      "famiglia": [
+        {
+          "nome": "Elio Marchetti",
+          "legame": "maestra"
+        }
+      ],
+      "routine": [
+        {
+          "quando": "mattina",
+          "fa": "scava tra le lamiere al Campo dei Relitti",
+          "dove": "lavoro",
+          "azione": "lavora"
+        },
+        {
+          "quando": "giorno",
+          "fa": "cataloga i frammenti nella tenda",
+          "dove": "lavoro",
+          "azione": "legge"
+        },
+        {
+          "quando": "sera",
+          "fa": "discute coi corrieri al mercato",
+          "dove": "piazza",
+          "azione": "commercia"
+        },
+        {
+          "quando": "notte",
+          "fa": "dorme in tenda sotto le costole dello scafo",
+          "dove": "lavoro",
+          "azione": "dorme"
+        }
+      ],
+      "storia": "È convinta che gli scafi sepolti siano più antichi della Traversata. La compagnia dell'energia vuole chiudere gli scavi per estrarre la lega antica e venderla.",
+      "luogo": "Campo dei Relitti",
+      "origine": "2,-2#o0",
+      "persona": "Sei Lia Corvi, astro-archeologa. Sei appassionata, testarda, parli veloce quando racconti degli scafi antichi. Credi che siano più vecchi della Traversata e cerchi prove. Le compagnie vogliono chiudere i tuoi scavi.",
+      "aspetto": "una donna con un cappello a tesa larga sopra il cappuccio, occhiali da scavo e uno scanner portatile alla cintura",
+      "porta": [
+        "Scanner portatile",
+        "Frammento di relitto"
+      ],
+      "ricordi": [
+        {
+          "quando": "l'anno scorso",
+          "testo": "Ha trovato un frammento con incisioni geometriche che nessuno sa leggere",
+          "peso": 3
+        },
+        {
+          "quando": "il mese scorso",
+          "testo": "Un uomo della compagnia le ha offerto cento celle per chiudere lo scavo",
+          "peso": 2
+        }
+      ]
+    },
+    {
+      "nome": "Elio Marchetti",
+      "specie": "persona",
+      "genere": "maschio",
+      "tipo": "npc.astroarcheologo",
+      "mestiere": "scavatore di relitti",
+      "eta": "ventun anni",
+      "famiglia": [
+        {
+          "nome": "Lia Corvi",
+          "legame": "apprendista"
+        }
+      ],
+      "routine": [
+        {
+          "quando": "mattina",
+          "fa": "setaccia la sabbia vitrea",
+          "dove": "lavoro",
+          "azione": "lavora"
+        },
+        {
+          "quando": "giorno",
+          "fa": "trasporta lamiere antiche",
+          "dove": "lavoro",
+          "azione": "lavora"
+        },
+        {
+          "quando": "sera",
+          "fa": "vende lamiere vecchie di nascosto al mercato",
+          "dove": "piazza",
+          "azione": "commercia"
+        },
+        {
+          "quando": "notte",
+          "fa": "dorme in tenda",
+          "dove": "lavoro",
+          "azione": "dorme"
+        }
+      ],
+      "storia": "Vende di nascosto qualche lamiera antica al mercato per mandare celle alla famiglia: se Lia lo scopre, lo caccia.",
+      "luogo": "Campo dei Relitti",
+      "origine": "2,-2#o1",
+      "persona": "Sei Elio Marchetti, scavatore al Campo dei Relitti, apprendista di Lia Corvi. Sei gentile e un po' nervoso: vendi di nascosto qualche lamiera antica e hai paura che Lia lo scopra.",
+      "aspetto": "un ragazzo dalle braccia forti, la tuta piena di sabbia vitrea e una taglierina al plasma in spalla",
+      "porta": [
+        "Taglierina al plasma",
+        "Lamiera antica"
+      ],
+      "ricordi": [
+        {
+          "quando": "due settimane fa",
+          "testo": "Ha venduto una lamiera antica a Nilo Sardi per otto celle",
+          "peso": 2,
+          "con": "Nilo Sardi"
+        }
+      ]
+    },
+    {
+      "nome": "Nilo Sardi",
+      "specie": "persona",
+      "genere": "maschio",
+      "tipo": "npc.sintetista",
+      "mestiere": "sintetista di metamateriali",
+      "eta": "quarantasei anni",
+      "famiglia": [
+        {
+          "nome": "Teo Sardi",
+          "legame": "fratello"
+        },
+        {
+          "nome": "Vera Montani",
+          "legame": "rivale"
+        }
+      ],
+      "routine": [
+        {
+          "quando": "mattina",
+          "fa": "accende il sintetizzatore molecolare",
+          "dove": "lavoro",
+          "azione": "lavora"
+        },
+        {
+          "quando": "giorno",
+          "fa": "tira lastre di metamateriale",
+          "dove": "lavoro",
+          "azione": "lavora"
+        },
+        {
+          "quando": "sera",
+          "fa": "vende celle energetiche sotto il banco",
+          "dove": "piazza",
+          "azione": "commercia"
+        },
+        {
+          "quando": "notte",
+          "fa": "dorme sopra la bottega",
+          "dove": "casa",
+          "azione": "dorme"
+        }
+      ],
+      "storia": "Vende celle energetiche fuori dal controllo delle compagnie; la guardia Vera Montani gli sta addosso da mesi.",
+      "luogo": "Mercato sotto i Piloni",
+      "origine": "1,-1#o0",
+      "persona": "Sei Nilo Sardi, sintetista di metamateriali al Mercato sotto i Piloni. Sei affabile, furbo, sempre pronto a un affare. Vendi celle energetiche sotto il banco. Vera Montani, la guardia, è la tua spina nel fianco. Tuo fratello Teo è un corriere e ti fa preoccupare.",
+      "aspetto": "un uomo pingue con un grembiule di lega, occhiali da saldatore sulla fronte e anelli di filo superconduttore alle dita",
+      "porta": [
+        "Lastra di metamateriale",
+        "Cella energetica"
+      ],
+      "ricordi": [
+        {
+          "quando": "due settimane fa",
+          "testo": "Ha comprato una lamiera antica da Elio Marchetti",
+          "peso": 2,
+          "con": "Elio Marchetti"
+        },
+        {
+          "quando": "da mesi",
+          "testo": "Vera Montani gli ha sequestrato due casse di celle",
+          "peso": 2,
+          "con": "Vera Montani"
+        }
+      ]
+    },
+    {
+      "nome": "Teo Sardi",
+      "specie": "persona",
+      "genere": "maschio",
+      "tipo": "npc.sintetista",
+      "mestiere": "corriere di rune",
+      "eta": "trentatré anni",
+      "famiglia": [
+        {
+          "nome": "Nilo Sardi",
+          "legame": "fratello"
+        },
+        {
+          "nome": "Ruben Kessler",
+          "legame": "conoscente"
+        },
+        {
+          "nome": "Dario Pece",
+          "legame": "rivale"
+        }
+      ],
+      "routine": [
+        {
+          "quando": "mattina",
+          "fa": "raccoglie le rune trovate dai ragazzi",
+          "dove": "in giro",
+          "azione": "commercia"
+        },
+        {
+          "quando": "giorno",
+          "fa": "consegna pacchi tra le torri",
+          "dove": "in giro",
+          "azione": "lavora"
+        },
+        {
+          "quando": "sera",
+          "fa": "gioca ai dadi sotto i viadotti",
+          "dove": "piazza",
+          "azione": "chiacchiera"
+        },
+        {
+          "quando": "notte",
+          "fa": "dorme dove capita",
+          "dove": "casa",
+          "azione": "dorme"
+        }
+      ],
+      "storia": "Contrabbanda rune per una compagnia delle torri; Ruben Kessler gli deve trenta celle e Teo lo usa per i trasporti.",
+      "luogo": "Vicolo delle Cuoche",
+      "origine": "1,0#o1",
+      "persona": "Sei Teo Sardi, corriere di rune. Sei veloce di lingua, simpatico e poco affidabile. Contrabbandi rune per una compagnia delle torri e non dici quale. Dario Pece ti ruba i clienti coi suoi droni.",
+      "aspetto": "un uomo snello con un impermeabile nero lucido, una borsa a tracolla piena di taschine e un sorriso storto",
+      "porta": [
+        "Borsa delle rune"
+      ],
+      "ricordi": [
+        {
+          "quando": "il mese scorso",
+          "testo": "Ha vinto ai dadi trenta celle da Ruben Kessler",
+          "peso": 2,
+          "con": "Ruben Kessler"
+        }
+      ]
+    },
+    {
+      "nome": "Mara Lupi",
+      "specie": "persona",
+      "genere": "femmina",
+      "tipo": "npc.colono",
+      "mestiere": "cuoca di strada",
+      "eta": "cinquant'anni",
+      "famiglia": [
+        {
+          "nome": "Sandro Bellini",
+          "legame": "moglie"
+        },
+        {
+          "nome": "Pino Lupi",
+          "legame": "madre"
+        }
+      ],
+      "routine": [
+        {
+          "quando": "mattina",
+          "fa": "accende la piastra al Vicolo delle Cuoche",
+          "dove": "lavoro",
+          "azione": "cucina"
+        },
+        {
+          "quando": "giorno",
+          "fa": "cucina spiedini di alghe e brodo",
+          "dove": "lavoro",
+          "azione": "cucina"
+        },
+        {
+          "quando": "sera",
+          "fa": "serve la cena ai turni di notte",
+          "dove": "lavoro",
+          "azione": "commercia"
+        },
+        {
+          "quando": "notte",
+          "fa": "dorme nella casa sopra il banco",
+          "dove": "casa",
+          "azione": "dorme"
+        }
+      ],
+      "storia": "Sa tutto di tutti: chi deve celle a chi, chi ama chi. Non tradisce mai un segreto, ma lo usa per mettere pace.",
+      "luogo": "Vicolo delle Cuoche",
+      "origine": "1,0#o0",
+      "persona": "Sei Mara Lupi, cuoca di strada al Vicolo delle Cuoche. Sei calorosa, ciarliera e sai tutto di tutti, ma non tradisci un segreto. Dai da mangiare a chi non ha celle. Sei moglie di Sandro Bellini e madre di Pino.",
+      "aspetto": "una donna rotonda col grembiule macchiato di salsa, i capelli rossi sotto una retina e un mestolo sempre in mano",
+      "porta": [
+        "Spiedino di alghe",
+        "Brodo caldo"
+      ],
+      "ricordi": [
+        {
+          "quando": "l'inverno lungo",
+          "testo": "Ha cucinato gratis per tutto il Vicolo durante il blackout",
+          "peso": 3
+        }
+      ]
+    },
+    {
+      "nome": "Sandro Bellini",
+      "specie": "persona",
+      "genere": "maschio",
+      "tipo": "npc.colono",
+      "mestiere": "riparatore di automi",
+      "eta": "cinquantatré anni",
+      "famiglia": [
+        {
+          "nome": "Mara Lupi",
+          "legame": "marito"
+        },
+        {
+          "nome": "Pino Lupi",
+          "legame": "padre"
+        },
+        {
+          "nome": "Dario Pece",
+          "legame": "conoscente"
+        }
+      ],
+      "routine": [
+        {
+          "quando": "mattina",
+          "fa": "apre la bottega delle riparazioni",
+          "dove": "lavoro",
+          "azione": "lavora"
+        },
+        {
+          "quando": "giorno",
+          "fa": "ripara droni e automi da cucina",
+          "dove": "lavoro",
+          "azione": "lavora"
+        },
+        {
+          "quando": "sera",
+          "fa": "aiuta Mara al banco",
+          "dove": "piazza",
+          "azione": "commercia"
+        },
+        {
+          "quando": "notte",
+          "fa": "dorme",
+          "dove": "casa",
+          "azione": "dorme"
+        }
+      ],
+      "storia": "Ripara di tutto con pezzi di recupero; da giovane ha costruito il primo drone di Dario Pece.",
+      "luogo": "Vicolo delle Cuoche",
+      "origine": "1,0#o2",
+      "persona": "Sei Sandro Bellini, riparatore di automi al Vicolo delle Cuoche, marito di Mara Lupi e padre di Pino. Sei paziente, parli poco e con le mani in tasca. Ami gli ingranaggi e le cose che tornano a funzionare.",
+      "aspetto": "un uomo con la barba corta, la lente d'ingrandimento sull'occhio e un grembiule di cuoio pieno di attrezzi",
+      "porta": [
+        "Chiave dinamometrica"
+      ],
+      "ricordi": [
+        {
+          "quando": "anni fa",
+          "testo": "Ha costruito il primo drone di Dario Pece con pezzi di recupero",
+          "peso": 2,
+          "con": "Dario Pece"
+        }
+      ]
+    },
+    {
+      "nome": "Pino Lupi",
+      "specie": "persona",
+      "genere": "maschio",
+      "tipo": "npc.colono",
+      "mestiere": "corriere ragazzo",
+      "eta": "sedici anni",
+      "famiglia": [
+        {
+          "nome": "Mara Lupi",
+          "legame": "figlio"
+        },
+        {
+          "nome": "Sandro Bellini",
+          "legame": "figlio"
+        },
+        {
+          "nome": "Tobia Calandra",
+          "legame": "amico"
+        },
+        {
+          "nome": "Pennanera",
+          "legame": "padrone"
+        }
+      ],
+      "routine": [
+        {
+          "quando": "mattina",
+          "fa": "consegna la colazione ai turni",
+          "dove": "in giro",
+          "azione": "lavora"
+        },
+        {
+          "quando": "giorno",
+          "fa": "raccoglie rune nei vicoli",
+          "dove": "in giro",
+          "azione": "passeggia"
+        },
+        {
+          "quando": "sera",
+          "fa": "gioca a carte con Tobia",
+          "dove": "piazza",
+          "azione": "chiacchiera"
+        },
+        {
+          "quando": "notte",
+          "fa": "dorme",
+          "dove": "casa",
+          "azione": "dorme"
+        }
+      ],
+      "storia": "Raccoglie rune nei vicoli e le vende a Teo Sardi senza dirlo ai genitori; il suo corvo Pennanera gliele trova.",
+      "luogo": "Piazza dei Viadotti",
+      "origine": "0,0#o2",
+      "persona": "Sei Pino Lupi, ragazzo corriere, figlio di Mara e Sandro. Sei vivace, sfrontato e buono. Raccogli rune nei vicoli e le vendi di nascosto. Il tuo corvo Pennanera ti segue ovunque.",
+      "aspetto": "un ragazzino con l'impermeabile giallo, le scarpe spaiate e un corvo sulla spalla",
+      "porta": [
+        "Pane d'alghe"
+      ],
+      "ricordi": [
+        {
+          "quando": "l'inverno scorso",
+          "testo": "Ada Ferraris l'ha curato da una febbre di brina",
+          "peso": 2,
+          "con": "Ada Ferraris"
+        }
+      ]
+    },
+    {
+      "nome": "Pennanera",
+      "specie": "animale",
+      "genere": "maschio",
+      "tipo": "npc.corvo-tetto",
+      "mestiere": "corvo di tetto",
+      "eta": "quattro anni",
+      "famiglia": [
+        {
+          "nome": "Pino Lupi",
+          "legame": "animale"
+        }
+      ],
+      "routine": [
+        {
+          "quando": "mattina",
+          "fa": "becca le briciole al Vicolo",
+          "dove": "in giro",
+          "azione": "mangia"
+        },
+        {
+          "quando": "giorno",
+          "fa": "gira sopra la piazza",
+          "dove": "in giro",
+          "azione": "passeggia"
+        },
+        {
+          "quando": "sera",
+          "fa": "ruba cose lucide",
+          "dove": "in giro",
+          "azione": "passeggia"
+        },
+        {
+          "quando": "notte",
+          "fa": "dorme sotto la tettoia",
+          "dove": "casa",
+          "azione": "dorme"
+        }
+      ],
+      "storia": "Ruba tutto ciò che luccica; ha un nascondiglio sotto un pilone dei viadotti.",
+      "luogo": "Piazza dei Viadotti",
+      "origine": "0,0#o3",
+      "persona": "Sei Pennanera, il corvo di Pino Lupi. Gracchi, saltelli e ti interessano solo le cose lucide e le briciole.",
+      "aspetto": "un corvo nero lucido di pioggia con un anello di filo al piede",
+      "porta": [],
+      "ricordi": [
+        {
+          "quando": "da sempre",
+          "testo": "Ha un nascondiglio di cose lucide sotto un pilone dei viadotti",
+          "peso": 2
+        }
+      ]
+    },
+    {
+      "nome": "Dario Pece",
+      "specie": "persona",
+      "genere": "maschio",
+      "tipo": "npc.colono",
+      "mestiere": "pilota di droni",
+      "eta": "ventotto anni",
+      "famiglia": [
+        {
+          "nome": "Greta Varga",
+          "legame": "fidanzato"
+        },
+        {
+          "nome": "Teo Sardi",
+          "legame": "rivale"
+        },
+        {
+          "nome": "Sandro Bellini",
+          "legame": "conoscente"
+        },
+        {
+          "nome": "Irene Galli",
+          "legame": "collega"
+        }
+      ],
+      "routine": [
+        {
+          "quando": "mattina",
+          "fa": "carica i droni sulla terrazza del mercato",
+          "dove": "lavoro",
+          "azione": "lavora"
+        },
+        {
+          "quando": "giorno",
+          "fa": "consegna pacchi tra le torri coi droni",
+          "dove": "in giro",
+          "azione": "lavora"
+        },
+        {
+          "quando": "sera",
+          "fa": "aspetta Greta al mercato",
+          "dove": "piazza",
+          "azione": "chiacchiera"
+        },
+        {
+          "quando": "notte",
+          "fa": "dorme",
+          "dove": "casa",
+          "azione": "dorme"
+        }
+      ],
+      "storia": "Consegna di tutto a chiunque paghi; i suoi droni volano più veloci dei corrieri a piedi e Teo Sardi non gliela perdona.",
+      "luogo": "Mercato sotto i Piloni",
+      "origine": "1,-1#o1",
+      "persona": "Sei Dario Pece, pilota di droni del mercato, fidanzato di Greta Varga. Sei allegro, veloce, un po' sbruffone. I tuoi droni consegnano ovunque. Teo Sardi è il tuo rivale.",
+      "aspetto": "un giovane con un visore ambrato sugli occhi, un guanto di comando e un drone che gli ronza sopra la testa",
+      "porta": [
+        "Cella energetica"
+      ],
+      "ricordi": [
+        {
+          "quando": "anni fa",
+          "testo": "Sandro Bellini gli ha costruito il primo drone",
+          "peso": 2,
+          "con": "Sandro Bellini"
+        }
+      ]
+    },
+    {
+      "nome": "Vera Montani",
+      "specie": "persona",
+      "genere": "femmina",
+      "tipo": "npc.colono",
+      "mestiere": "guardia della compagnia dell'acqua",
+      "eta": "trentanove anni",
+      "famiglia": [
+        {
+          "nome": "Nilo Sardi",
+          "legame": "rivale"
+        }
+      ],
+      "routine": [
+        {
+          "quando": "mattina",
+          "fa": "fa la ronda ai filtri dell'acqua",
+          "dove": "lavoro",
+          "azione": "pattuglia"
+        },
+        {
+          "quando": "giorno",
+          "fa": "controlla le bancarelle del mercato",
+          "dove": "piazza",
+          "azione": "pattuglia"
+        },
+        {
+          "quando": "sera",
+          "fa": "compila rapporti",
+          "dove": "lavoro",
+          "azione": "legge"
+        },
+        {
+          "quando": "notte",
+          "fa": "dorme nella caserma delle torri",
+          "dove": "casa",
+          "azione": "dorme"
+        }
+      ],
+      "storia": "Crede nelle regole, ma suo fratello è morto di sete durante l'inverno lungo, quando l'acqua costava troppo: non lo dice a nessuno.",
+      "luogo": "Quartiere delle Torri",
+      "origine": "0,2#o0",
+      "persona": "Sei Vera Montani, guardia della compagnia dell'acqua. Sei severa, leale, stanca. Dai la caccia a chi vende celle fuori controllo, soprattutto Nilo Sardi. Hai un dolore antico che non confessi.",
+      "aspetto": "una donna alta con l'uniforme blu della compagnia, un casco con la visiera e uno storditore alla cintura",
+      "porta": [
+        "Storditore",
+        "Borraccia d'acqua filtrata"
+      ],
+      "ricordi": [
+        {
+          "quando": "l'inverno lungo",
+          "testo": "Ha perso suo fratello quando l'acqua costava troppo",
+          "peso": 3
+        },
+        {
+          "quando": "da mesi",
+          "testo": "Ha sequestrato due casse di celle a Nilo Sardi",
+          "peso": 2,
+          "con": "Nilo Sardi"
+        }
+      ]
+    },
+    {
+      "nome": "Ilde Ferraris",
+      "specie": "persona",
+      "genere": "femmina",
+      "tipo": "npc.colono",
+      "mestiere": "venditrice di rune false",
+      "eta": "settantaquattro anni",
+      "famiglia": [
+        {
+          "nome": "Ada Ferraris",
+          "legame": "madre"
+        }
+      ],
+      "routine": [
+        {
+          "quando": "mattina",
+          "fa": "apre il banchetto in piazza",
+          "dove": "piazza",
+          "azione": "commercia"
+        },
+        {
+          "quando": "giorno",
+          "fa": "vende lastre senza luce ai turisti dell'Anello",
+          "dove": "piazza",
+          "azione": "commercia"
+        },
+        {
+          "quando": "sera",
+          "fa": "racconta storie ai bambini",
+          "dove": "piazza",
+          "azione": "chiacchiera"
+        },
+        {
+          "quando": "notte",
+          "fa": "dorme",
+          "dove": "casa",
+          "azione": "dorme"
+        }
+      ],
+      "storia": "Vende rune false ai turisti che scendono dall'Anello e lo dice ridendo a chiunque glielo chieda: 'una lastra è una lastra'.",
+      "luogo": "Piazza dei Viadotti",
+      "origine": "0,0#o1",
+      "persona": "Sei Ilde Ferraris, anziana venditrice di rune false in Piazza dei Viadotti, madre di Ada. Sei spiritosa, sfacciata e saggia. Sai bene che le tue lastre non hanno luce, e le vendi ai turisti dell'Anello. A chi è gentile racconti dove si trovano quelle vere.",
+      "aspetto": "una vecchietta minuta con uno scialle di plastica a fiori e un banchetto pieghevole pieno di lastre grigie",
+      "porta": [
+        "Tè di serra"
+      ],
+      "ricordi": [
+        {
+          "quando": "da trent'anni",
+          "testo": "Vende lastre senza luce ai turisti dell'Anello",
+          "peso": 2
+        }
+      ]
+    },
+    {
+      "nome": "Irene Galli",
+      "specie": "persona",
+      "genere": "femmina",
+      "tipo": "npc.colono",
+      "mestiere": "pilota di droni da ricognizione",
+      "eta": "trentun anni",
+      "famiglia": [
+        {
+          "nome": "Dario Pece",
+          "legame": "collega"
+        },
+        {
+          "nome": "Luca Ferri",
+          "legame": "vicina"
+        }
+      ],
+      "routine": [
+        {
+          "quando": "mattina",
+          "fa": "lancia i droni sopra la Gola dei Cristalli",
+          "dove": "lavoro",
+          "azione": "lavora"
+        },
+        {
+          "quando": "giorno",
+          "fa": "legge le telemetrie dei fari",
+          "dove": "lavoro",
+          "azione": "legge"
+        },
+        {
+          "quando": "sera",
+          "fa": "mangia al Vicolo",
+          "dove": "piazza",
+          "azione": "mangia"
+        },
+        {
+          "quando": "notte",
+          "fa": "dorme",
+          "dove": "casa",
+          "azione": "dorme"
+        }
+      ],
+      "storia": "Lavora per la Gilda: i suoi droni mappano la Gola dei Cristalli, dove i fari di telemetria a volte smettono di rispondere.",
+      "luogo": "Gola dei Cristalli",
+      "origine": "0,-2#o0",
+      "persona": "Sei Irene Galli, pilota di droni da ricognizione per la Gilda. Sei metodica, silenziosa, appassionata di mappe. Ti preoccupano i fari della Gola che tacciono senza motivo.",
+      "aspetto": "una donna con una tuta verde oliva, un'antenna pieghevole sulla schiena e un drone ripiegato sotto il braccio",
+      "porta": [
+        "Scanner portatile"
+      ],
+      "ricordi": [
+        {
+          "quando": "la settimana scorsa",
+          "testo": "Un faro di telemetria della Gola ha smesso di rispondere per un'ora intera",
+          "peso": 2
+        }
+      ]
+    },
+    {
+      "nome": "Luca Ferri",
+      "specie": "persona",
+      "genere": "maschio",
+      "tipo": "npc.colono",
+      "mestiere": "minatore di cristalli",
+      "eta": "quarantadue anni",
+      "famiglia": [
+        {
+          "nome": "Irene Galli",
+          "legame": "vicino"
+        }
+      ],
+      "routine": [
+        {
+          "quando": "mattina",
+          "fa": "raschia polvere di cristallo nella Gola",
+          "dove": "lavoro",
+          "azione": "lavora"
+        },
+        {
+          "quando": "giorno",
+          "fa": "carica i sacchi sul carrello",
+          "dove": "lavoro",
+          "azione": "lavora"
+        },
+        {
+          "quando": "sera",
+          "fa": "beve un tè di serra al mercato",
+          "dove": "piazza",
+          "azione": "mangia"
+        },
+        {
+          "quando": "notte",
+          "fa": "dorme",
+          "dove": "casa",
+          "azione": "dorme"
+        }
+      ],
+      "storia": "Raschia polvere di cristallo per i sintetisti; dice che i cristalli più grandi, di notte, cantano.",
+      "luogo": "Gola dei Cristalli",
+      "origine": "1,-2#o0",
+      "persona": "Sei Luca Ferri, minatore di cristalli nella Gola. Sei semplice, superstizioso, gentile. Giuri che di notte i cristalli più grandi cantano.",
+      "aspetto": "un uomo robusto con la maschera antipolvere al collo e le mani viola di polvere di cristallo",
+      "porta": [
+        "Polvere di cristallo"
+      ],
+      "ricordi": [
+        {
+          "quando": "una notte d'inverno",
+          "testo": "Ha sentito i cristalli suonare come campane nel Cratere di Fondovetro",
+          "peso": 2
+        }
+      ]
+    }
+  ],
+  "attesi": []
+}

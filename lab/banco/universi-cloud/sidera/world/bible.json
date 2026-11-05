@@ -1,0 +1,52 @@
+{
+  "titolo": "Sidera, la città sotto l'Anello",
+  "tono": "concreto e caldo sotto la pioggia, con un pizzico di meraviglia: neon riflessi nelle pozzanghere, gente che lavora, si ama, si indebita e guarda in su verso l'Anello",
+  "sintesi": "Sidera è una metropoli di torri di vetro e viadotti su un mondo colonizzato da tre secoli, dove piove quasi sempre. Sopra la città, di notte, si vede l'Anello: la colonia orbitale da cui scesero i primi coloni, collegata al suolo dal cordone dell'ascensore. Attorno, cupole di serre idroponiche, reattori a fusione, uno spazioporto, gole di cristallo violetto, relitti di scafi antichi e la costa che il mare si è ripreso. Qua e là, sul suolo, ci sono le rune: lastre con un segno inciso che manda una luce tenue.",
+  "storia": "Tre secoli fa le navi della Traversata scesero dall'Anello e piantarono le prime cupole sulla piana dei viadotti. Le gilde nacquero per necessità: i xenobotanici di Serralta insegnarono alla terra a nutrire semi venuti da lontano, la Gilda della Navigazione Profonda tenne le rotte verso gli avamposti, gli ingegneri della fusione accesero i reattori che ancora oggi scaldano i quartieri. Sessant'anni fa la Grande Mareggiata si prese la costa bassa, e da allora la città è cresciuta in alto, torre su torre. Le compagnie dell'acqua e dell'energia comandano più del consiglio cittadino; le gilde resistono con i loro saperi e i loro debiti. Nella gola a levante, tra i cristalli, affiorano relitti di scafi che nessun registro della Traversata ricorda: gli astro-archeologi li scavano, le compagnie li vorrebbero chiudere.",
+  "luoghi": [
+    "Piazza dei Viadotti",
+    "Vicolo delle Cuoche",
+    "Mercato sotto i Piloni",
+    "Cupole di Serralta",
+    "Spazioporto di Ponente",
+    "Gola dei Cristalli",
+    "Quartiere delle Torri",
+    "Campo dei Relitti",
+    "Cantiere della Fusione",
+    "Costa Allagata",
+    "Laboratori di Ombralta",
+    "Cratere di Fondovetro",
+    "Base dell'Ascensore"
+  ],
+  "personaggi": [
+    "Iris Calandra, xenobotanica capo delle Cupole di Serralta, che parla alle piante più che alla gente",
+    "Ottone Varga, ingegnere di fusione al Cantiere, burbero e onesto, sempre con le mani sporche di grasso",
+    "Selene Moro, navigatrice della Gilda della Navigazione Profonda, appena tornata da un avamposto lontano",
+    "Dario Pece, pilota di droni del mercato, che consegna di tutto a chiunque paghi",
+    "Ada Ferraris, medico criogenico dei Laboratori di Ombralta, che veglia sui dormienti delle capsule",
+    "Lia Corvi, astro-archeologa del Campo dei Relitti, convinta che gli scafi antichi siano più vecchi della Traversata",
+    "Nilo Sardi, sintetista di metamateriali, che vende celle energetiche sotto il banco",
+    "Mara Lupi, cuoca di strada del Vicolo delle Cuoche, che sa tutto di tutti"
+  ],
+  "fatti": [
+    "Piove quasi sempre: un giorno senza pioggia a Sidera si chiama 'giorno d'argento' e si fa festa sui tetti.",
+    "L'acqua da bere e l'energia dei reattori le vendono le compagnie; il cibo viene in buona parte dalle Cupole di Serralta.",
+    "Il cordone dell'ascensore porta merci e persone dall'Anello alla città ogni sei ore; quando la cabina scende, i lampioni di tutta Sidera tremolano.",
+    "La Gilda della Navigazione Profonda tiene le rotte verso gli avamposti planetari: Brina di Calisto, Pozzo Ardente e la stazione mineraria di Orlo Nero.",
+    "Al Cantiere della Fusione lavorano tre turni; il reattore più vecchio, la 'Nonna', è acceso da novant'anni.",
+    "I corrieri del mercato usano droni da ricognizione rimessi a nuovo per consegnare tra le torri.",
+    "Le rune si trovano nel fango come sull'asfalto; le compagnie le comprano, i corrieri le contrabbandano, gli ambulanti ne vendono di false.",
+    "Le celle energetiche sono la moneta dei vicoli: chi ne ha, mangia."
+  ],
+  "misteri": [
+    "Nessuno sa chi abbia costruito gli scafi sepolti nel Campo dei Relitti: le lamiere sono di una lega che le fonderie di Sidera non sanno rifare.",
+    "Le vecchie del Vicolo delle Cuoche dicono che chi trova una runa in un giorno d'argento avrà un anno senza debiti; sono dicerie.",
+    "Nel Cratere di Fondovetro, quando la brina si posa, i cristalli suonano come campane lontane: i xenobotanici dicono che è il freddo, i corrieri che è qualcos'altro.",
+    "Un dormiente dei Laboratori di Ombralta riposa in capsula da prima della Grande Mareggiata, e nessuno ha mai pagato per svegliarlo."
+  ],
+  "usanze": [
+    "Chi scende dall'Anello per la prima volta lascia una goccia d'acqua sul primo gradino della Base dell'Ascensore, per dire che ora è di qui.",
+    "Nei giorni d'argento si stendono i panni sulle passerelle e chi passa sotto deve dire una cosa bella della propria famiglia.",
+    "Un debito di celle si salda davanti a un reattore acceso: la luce del plasma fa da testimone."
+  ]
+}

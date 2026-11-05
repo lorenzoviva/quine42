@@ -1,0 +1,32 @@
+{
+ "plan": {
+  "place": {
+   "name": "Costa Allagata",
+   "description": "La vecchia costa sommersa dalla Grande Mareggiata: tetti che affiorano, passerelle di grata, reti di alghe stese ad asciugare."
+  },
+  "layout": "costa_allagata",
+  "objects": [
+   {
+    "module": "npc.xenobotanica",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.faro-telemetria",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.relitto",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Spiedino di alghe"
+  ],
+  "fresh": [],
+  "runes": [
+   "marea",
+   "acqua"
+  ],
+  "strutture": []
+ }
+}

@@ -1,0 +1,28 @@
+{
+ "plan": {
+  "place": {
+   "name": "Speroni Cantori",
+   "description": "Il cuore della Gola dei Cristalli, dove gli speroni più grandi tintinnano col vento freddo."
+  },
+  "layout": "canyon_cristalli",
+  "objects": [
+   {
+    "module": "npc.colono",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.faro-telemetria",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Polvere di cristallo"
+  ],
+  "fresh": [],
+  "runes": [
+   "onda",
+   "stasi"
+  ],
+  "strutture": []
+ }
+}

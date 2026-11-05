@@ -1,0 +1,45 @@
+{
+ "plan": {
+  "place": {
+   "name": "Laboratori di Ombralta",
+   "description": "I padiglioni bianchi della ricerca, le sale fredde delle capsule dei dormienti e le serre di prova."
+  },
+  "layout": "laboratorio",
+  "objects": [
+   {
+    "module": "npc.medico-criogenico",
+    "where": "dentro"
+   },
+   {
+    "module": "npc.medico-criogenico",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.capsula-criogenica",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.capsula-criogenica",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.sintetizzatore",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.armadietto",
+    "where": "dentro"
+   }
+  ],
+  "ground": [
+   "Cerotto al gel",
+   "Siero criogenico"
+  ],
+  "fresh": [],
+  "runes": [
+   "vuoto",
+   "orbita"
+  ],
+  "strutture": []
+ }
+}

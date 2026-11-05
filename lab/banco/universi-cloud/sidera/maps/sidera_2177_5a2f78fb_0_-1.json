@@ -1,0 +1,28 @@
+{
+ "plan": {
+  "place": {
+   "name": "Ponte dei Canali",
+   "description": "Passerelle sopra i canali scuri, dove l'acqua riflette le insegne e i droni passano bassi."
+  },
+  "layout": "vicoli_pioggia",
+  "objects": [
+   {
+    "module": "obj.drone-ricognizione",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.armadietto",
+    "where": "dentro"
+   }
+  ],
+  "ground": [
+   "Borraccia d'acqua filtrata"
+  ],
+  "fresh": [],
+  "runes": [
+   "spin",
+   "x = x"
+  ],
+  "strutture": []
+ }
+}

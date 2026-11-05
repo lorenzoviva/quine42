@@ -1,0 +1,27 @@
+{
+ "plan": {
+  "place": {
+   "name": "Torre dei Filtri",
+   "description": "La torre dove la compagnia filtra l'acqua piovana: tubi, vasche, e una fila di gente con le borracce vuote."
+  },
+  "layout": "quartiere_torri",
+  "objects": [
+   {
+    "module": "obj.armadietto",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.drone-ricognizione",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Borraccia d'acqua filtrata"
+  ],
+  "fresh": [],
+  "runes": [
+   "acqua"
+  ],
+  "strutture": []
+ }
+}

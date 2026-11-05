@@ -1,0 +1,31 @@
+{
+ "plan": {
+  "place": {
+   "name": "Rampa dei Turni",
+   "description": "La rampa che scende verso il Cantiere, battuta dai turni che cambiano ogni otto ore."
+  },
+  "layout": "vicoli_pioggia",
+  "objects": [
+   {
+    "module": "obj.armadietto",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.estrattore-plasma",
+    "where": "fuori"
+   },
+   {
+    "module": "npc.ingegnere-fusione",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Casco con visore"
+  ],
+  "fresh": [],
+  "runes": [
+   "marea"
+  ],
+  "strutture": []
+ }
+}

@@ -1,0 +1,40 @@
+{
+ "plan": {
+  "place": {
+   "name": "Mercato sotto i Piloni",
+   "description": "Il mercato coperto dai viadotti: il banco dei sintetisti, la terrazza dei droni, celle energetiche che passano di mano in mano."
+  },
+  "layout": "mercato_viadotti",
+  "objects": [
+   {
+    "module": "npc.sintetista",
+    "where": "ovunque"
+   },
+   {
+    "module": "npc.colono",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.sintetizzatore",
+    "where": "ovunque"
+   },
+   {
+    "module": "obj.armadietto",
+    "where": "ovunque"
+   },
+   {
+    "module": "obj.drone-ricognizione",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Cella energetica",
+   "Filo superconduttore"
+  ],
+  "fresh": [],
+  "runes": [
+   "massa"
+  ],
+  "strutture": []
+ }
+}
