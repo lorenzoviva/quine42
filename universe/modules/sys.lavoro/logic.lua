@@ -11,13 +11,33 @@ local VICINO_SOLIDO = 1.7
 -- Fermo, a fare quello che fa (la posa la disegna il renderer).
 local function ferma(id, posa)
   ecs.set(id, "attivita", { tipo = posa or "lavora", ferma = true })
+  -- Fermo perché lavora, non perché è bloccato: il conto del cammino riparte.
+  local s = ecs.get(id, "lavoro")
+  if s then s.px, s.py, s.dal = nil, nil, nil end
+end
+
+-- Chi non si muove da un po': vicino alla meta è arrivato (un muro di una forma, che la via sulle caselle non vede, la tiene
+-- a un passo); lontano è bloccato, e il compito fallisce con il motivo.
+local VICINO_FERMO = 3
+local FERMO = 2
+local BLOCCATO = 8
+
+local function fermo(id, p, d)
+  local s = ecs.get(id, "lavoro")
+  if not s then return false end
+  if not s.px or math.abs(p.x - s.px) + math.abs(p.y - s.py) >= 0.05 then
+    s.px, s.py, s.dal = p.x, p.y, time
+  end
+  local da = time - (s.dal or time)
+  if da >= BLOCCATO then s.bloccato = true end
+  return d < VICINO_FERMO and da >= FERMO
 end
 
 -- Un passo verso (tx, ty): la meta di sys.wander è il prossimo punto della via. Vero se è arrivato.
 local function cammina(id, p, tx, ty, solido)
   local dx, dy = tx - p.x, ty - p.y
   local d = math.sqrt(dx * dx + dy * dy)
-  if d < (solido and VICINO_SOLIDO or ARRIVATO) then return true end
+  if d < (solido and VICINO_SOLIDO or ARRIVATO) or fermo(id, p, d) then return true end
   local q = world.path(p.x, p.y, tx, ty) or { x = tx, y = ty }
   ecs.set(id, "meta", { x = q.x, y = q.y })
   ecs.set(id, "attivita", { tipo = "passeggia", ferma = false })
@@ -122,9 +142,137 @@ function B.pattuglia(id, compito, s, m, p)
   return "continua"
 end
 
--- I comportamenti che vengono dopo (porta, prendi, produci, usa, costruisci): finché non ci sono, il compito si salta.
-local function dopo() return "finito" end
-B.porta, B.prendi, B.produci, B.usa, B.costruisci = dopo, dopo, dopo, dopo, dopo
+-- Il deposito del luogo (T245c): ciò che i mestieri portano e prendono, nel magazzino di questo modulo, una chiave per luogo.
+local function deposito_di(id)
+  local m = ecs.get(id, "mestiere")
+  if not m or type(m.luogo) ~= "string" then return nil end
+  return "deposito:" .. m.luogo:gsub(",", ":")
+end
+
+local function deposita(id, oggetto, n)
+  local k = deposito_di(id)
+  if not k or n <= 0 then return false end
+  local d = world.store_get(k) or {}
+  d[oggetto] = (d[oggetto] or 0) + n
+  return world.store_set(k, d)
+end
+
+-- Toglie dal deposito fino a n, e dice quanti.
+local function preleva(id, oggetto, n)
+  local k = deposito_di(id)
+  if not k then return 0 end
+  local d = world.store_get(k) or {}
+  local preso = math.min(n, d[oggetto] or 0)
+  if preso <= 0 then return 0 end
+  d[oggetto] = d[oggetto] - preso
+  if d[oggetto] <= 0 then d[oggetto] = nil end
+  world.store_set(k, d)
+  return preso
+end
+
+local function scarica(id, oggetto, n)
+  local c = ecs.get(id, "carico") or {}
+  local tolto = math.min(n, c[oggetto] or 0)
+  c[oggetto] = (c[oggetto] or 0) - tolto
+  if c[oggetto] <= 0 then c[oggetto] = nil end
+  ecs.set(id, "carico", c)
+  return tolto
+end
+
+-- Prima di ogni cosa da fare, il posto: per default il lavoro.
+local function al_posto(id, compito, s, m, p)
+  if s.arrivato then return true end
+  local dove = compito.dove or "lavoro"
+  local t
+  local tag = type(dove) == "string" and dove:match("^entita:(.+)$")
+  if tag then
+    local e = world.nearest(p.x, p.y, 12, tag)
+    if e then
+      s.cosa = e
+      t = ecs.get(e, "pos")
+    end
+  else
+    t = posto(m, p, dove)
+  end
+  if not t then return nil end
+  if cammina(id, p, t.x, t.y, tag ~= nil) then
+    s.arrivato = true
+    return true
+  end
+  return false
+end
+
+-- Porta ciò che ha al deposito del luogo (o dentro la cosa, se ha una tasca): tutto in una volta.
+function B.porta(id, compito, s, m, p)
+  local c = ecs.get(id, "carico") or {}
+  if (c[compito.oggetto] or 0) <= 0 then return "finito" end
+  local qui = al_posto(id, compito, s, m, p)
+  if qui == nil then return "fallito:nessun posto" end
+  if not qui then return "continua" end
+  local n = c[compito.oggetto]
+  if s.cosa and inventory.add(s.cosa, compito.oggetto, n) > 0 then
+    scarica(id, compito.oggetto, n)
+  elseif deposita(id, compito.oggetto, n) then
+    scarica(id, compito.oggetto, n)
+  else
+    return "fallito:il deposito è pieno"
+  end
+  ferma(id, compito.posa or "lavora")
+  dice(id, compito, s)
+  return "finito"
+end
+
+-- Prende dal deposito del luogo.
+function B.prendi(id, compito, s, m, p)
+  local qui = al_posto(id, compito, s, m, p)
+  if qui == nil then return "fallito:nessun posto" end
+  if not qui then return "continua" end
+  local n = preleva(id, compito.oggetto, compito.quante or 1)
+  if n <= 0 then return "fallito:manca " .. compito.oggetto end
+  carica(id, compito.oggetto, n)
+  dice(id, compito, s)
+  return "finito"
+end
+
+-- Al banco (il posto), con ciò che serve (`con`: da ciò che porta, o dal deposito), dopo `durata` di lavoro: una cosa in più.
+function B.produci(id, compito, s, m, p)
+  local qui = al_posto(id, compito, s, m, p)
+  if qui == nil then return "fallito:nessun posto" end
+  if not qui then return "continua" end
+  if not s.fino then
+    if compito.con and scarica(id, compito.con, 1) < 1 and preleva(id, compito.con, 1) < 1 then
+      if (s.fatti or 0) > 0 then return "finito" end
+      return "fallito:manca " .. compito.con
+    end
+    s.fino = time + (compito.durata or 10)
+    dice(id, compito, s)
+  end
+  ferma(id, compito.posa or "lavora")
+  if time < s.fino then return "continua" end
+  carica(id, compito.oggetto, 1)
+  s.fatti = (s.fatti or 0) + 1
+  s.fino = nil
+  if s.fatti >= (compito.quante or 1) then return "finito" end
+  return "continua"
+end
+
+-- Usa una cosa come il viandante con «Usa»: il suo on_act, con l'individuo come chi la usa.
+function B.usa(id, compito, s, m, p)
+  local qui = al_posto(id, compito, s, m, p)
+  if qui == nil then return "fallito:nessuna cosa da usare" end
+  if not qui then return "continua" end
+  if not s.fino then
+    s.fino = time + (compito.durata or 5)
+    s.usato = world.act(id, s.cosa, compito.azione) ~= nil
+    dice(id, compito, s)
+  end
+  ferma(id, compito.posa or "lavora")
+  if time < s.fino then return "continua" end
+  return "finito"
+end
+
+-- Costruire è delle imprese (T245d): finché non ci sono, il compito si salta.
+function B.costruisci() return "finito" end
 
 M.comportamenti = B
 
@@ -134,8 +282,9 @@ function M.update(dt)
     if mind and mind.mode ~= "vaga" then return end
     local s = ecs.get(id, "lavoro")
     if not s or s.fase ~= m.fase or s.giorno ~= m.giorno then
-      s = { fase = m.fase, giorno = m.giorno, passo = 1 }
-      ecs.set(id, "lavoro", s)
+      ecs.set(id, "lavoro", { fase = m.fase, giorno = m.giorno, passo = 1 })
+      -- ecs.set copia: ciò che il compito scrive va nella tabella del componente, quella che si rilegge.
+      s = ecs.get(id, "lavoro")
     end
     local compito = m.compiti and m.compiti[s.passo]
     if not compito then
@@ -144,10 +293,10 @@ function M.update(dt)
     end
     local f = B[compito.fa]
     local esito = f and f(id, compito, s, m, p, dt) or "fallito:comportamento sconosciuto"
+    if esito == "continua" and s.bloccato then esito = "fallito:non ci arriva" end
     if esito ~= "continua" then
-      if esito ~= "finito" then s.motivo = esito end
-      s.passo = s.passo + 1
-      s.x, s.y, s.fino, s.fatti, s.detto, s.tappa = nil, nil, nil, nil, nil, nil
+      -- Il compito dopo comincia da capo: dello stato resta solo dove si è arrivati nella giornata, e l'ultimo motivo.
+      ecs.set(id, "lavoro", { fase = s.fase, giorno = s.giorno, passo = s.passo + 1, motivo = esito ~= "finito" and esito or s.motivo })
     end
   end)
 end

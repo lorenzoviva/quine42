@@ -807,6 +807,7 @@ local function make_api()
     wanderers = function() return host.wanderers() end,
     path = function(x, y, tx, ty) return host.path(x, y, tx, ty) end,
     find_tile = function(code, x, y, r) return host.find_tile(tostring(code), x, y, r or 8) end,
+    act = function(user, target, action) return host.act(user, target, action ~= nil and tostring(action) or nil) end,
     store_get = function(key) return host.store_get(tostring(key)) end,
     store_set = function(key, value) return host.store_set(tostring(key), value) end,
   }

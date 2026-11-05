@@ -3,7 +3,7 @@
   "name": "Il lavoro",
   "kind": "system",
   "version": "0.1.0",
-  "description": "Gli individui con un mestiere fanno la loro giornata: camminano, arano, seminano, mietono, tagliano, pescano. Il kernel dice la fase e i posti; qui ogni compito cambia il mondo davvero.",
+  "description": "Gli individui con un mestiere fanno la loro giornata: camminano, arano, seminano, mietono, tagliano, pescano, portano e prendono dal deposito del luogo, producono al banco, usano le cose. Il kernel dice la fase e i posti; qui ogni compito cambia il mondo davvero.",
   "logic": "logic.lua",
   "order": 28,
   "casi": [
@@ -48,16 +48,16 @@
         "0:attivita.tipo"
       ],
       "righe": [
-        17,
-        20,
-        21,
-        22,
-        53,
-        54,
-        56,
-        132,
-        145,
-        146
+        37,
+        40,
+        41,
+        42,
+        73,
+        74,
+        76,
+        280,
+        294,
+        295
       ]
     },
     {
@@ -97,13 +97,13 @@
       "righe": [
         12,
         13,
-        100,
-        101,
-        102,
-        104,
-        132,
-        145,
-        146
+        120,
+        121,
+        122,
+        124,
+        280,
+        294,
+        295
       ]
     }
   ]

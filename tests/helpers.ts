@@ -17,6 +17,7 @@ export function fakeHost() {
     wanderers: () => [],
     path: () => undefined,
     find_tile: () => undefined,
+    act: () => undefined,
     store_get: () => undefined,
     store_set: () => false,
     free: () => true,

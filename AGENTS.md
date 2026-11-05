@@ -263,7 +263,7 @@ Registro, Luogo, Fucina e Genesi → `docs/architettura-dettagli.md#concilio`.
 `roof`, `commonHouse`; dati: `items` (anche `model`, `aspetto`, `container`, `actions`, `slot`, `bonus`, effetti `mana`), `recipes`, `loot`, `layouts`, `fragments`, `runes`, `spells`, `mestieri` (ADR-0140).
 
 ### API Lua — l'unica disponibile, il validatore rifiuta il resto
-`ecs.each/get/set/spawn/destroy/first`; `world.free/free_real/tile/speed_at/spawn/player/player_pos/wanderers/path/find_tile/
+`ecs.each/get/set/spawn/destroy/first`; `world.free/free_real/tile/speed_at/spawn/player/player_pos/wanderers/path/find_tile/act/
 nearest/has_tag/break_entity/say/speak/set_tile/open/make_container/store_get/store_set` (il magazzino del modulo, ADR-0138); `inventory.add/remove/count/equipped`; `items.find/def/bonus`; `ui.slot`;
 `input.held(azione, id?)` (i tasti di ogni viandante, ADR-0139); `bus.emit`; `log`; `hash`; `math string table utf8 pairs pcall…` (`math.random` seminato dal kernel, ADR-0055).
 Hook: `update(dt)` (sistemi), `generate_chunk`, `on_spawn(id)`, `on_interact(id, user)`,

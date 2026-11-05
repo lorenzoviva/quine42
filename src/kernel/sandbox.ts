@@ -22,6 +22,8 @@ export interface Host {
   wanderers(): unknown;
   /** The next point of the way from (x, y) to (tx, ty) on the tiles of the places loaded (T245b, ADR-0140), or undefined. */
   path(x: number, y: number, tx: number, ty: number): { x: number; y: number } | undefined;
+  /** An individual uses a thing as the wanderer does with «Usa» (T245c, ADR-0141): its `on_act`, with the individual as user. The text, or undefined. */
+  act(user: number, target: number, action?: string): string | undefined;
   /** The centre of the nearest tile with this code within r of (x, y) (T245b), or undefined. */
   find_tile(code: string, x: number, y: number, r: number): { x: number; y: number } | undefined;
   /** What the module running keeps under a key in its lasting store (T245a, ADR-0138), or undefined. */
@@ -362,6 +364,7 @@ function emptyHost(): Host {
     wanderers: () => [],
     path: () => undefined,
     find_tile: () => undefined,
+    act: () => undefined,
     store_get: () => undefined,
     store_set: () => false,
     free: () => true,

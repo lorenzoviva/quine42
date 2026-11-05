@@ -210,7 +210,12 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   `matura {dopo, in}` diventa `in` dopo `dopo` giorni da quando la casella è stata scritta (`plan.giorni`, il giorno di ogni modifica;
   una modifica senza giorno vale da oggi), a ogni fase del giorno nei luoghi caricati (`matureTick`). Il seme ha il contadino (ara
   `g→m`, semina `m→e`, il seminato matura in grano `u` in un giorno, miete `u→m` con `item.grano`), il boscaiolo (`t→x` con
-  `item.ciocco`, la ceppaia ricresce in bosco in tre giorni) e il pescatore (`item.pesce` dalla riva di `w`).
+  `item.ciocco`, la ceppaia ricresce in bosco in tre giorni) e il pescatore (`item.pesce` dalla riva di `w`). Con T245c (ADR-0141) i
+  mestieri del seme sono dodici, con i nomi delle quattro ambientazioni (pastore, fabbro, oste, mercante, guardia, sacerdote, scrivano,
+  cuoco, impiegato in più); `porta` e `prendi` passano dal **deposito del luogo** (la voce `deposito:<cx>:<cy>` del magazzino di
+  `sys.lavoro`, il luogo è `mestiere.luogo`, `placeDeposit`), `produci` consuma `con` e fa un pezzo al banco, `usa` chiama l'`on_act`
+  di una cosa con l'individuo come chi la usa (`world.act`, solo azioni senza effetti, entro 2,5 caselle). La via vede le forme dei
+  modelli (`free`); chi è fermo a meno di tre caselle dalla meta è arrivato, chi è fermo lontano per otto secondi lascia il compito.
 - **Personaggi** (ADR-0010, 0013, 0017, 0020): tipo + individuo (`identity`: anche `job family routine story`), `mind` (memoria, umore, modo), azioni
   `segui resta vaga dai nessuna`, oggetti citati → `wanted`. Al massimo 2 dello stesso tipo nel mondo
   caricato; nuovi tipi forgiati esplorando (`ai.maxCast`); ogni individuo è un seme del programma del suo tipo (pochi semi per classe).

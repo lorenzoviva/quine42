@@ -92,7 +92,7 @@ describe('the programs of the trades', () => {
     expect(matchJob('contadina', programs)?.id).toBe('contadino');
     expect(matchJob('il boscaiolo del Rovo', programs)?.id).toBe('boscaiolo');
     expect(matchJob('Pescatrice di lago', programs)?.id).toBe('pescatore');
-    expect(matchJob('oste', programs)).toBeUndefined();
+    expect(matchJob('sarto', programs)).toBeUndefined();
     expect(matchJob(undefined, programs)).toBeUndefined();
   });
 });
@@ -191,7 +191,7 @@ describe('a day of work, in a planned place', () => {
     const id = worker(k, 'contadino');
     play(k, 4);
     expect(k.ecs.get(id, 'mestiere')).toMatchObject({ fase: 'sera' });
-    expect(k.ecs.get(id, 'mestiere').compiti.map((t: { fa: string }) => t.fa)).toEqual(['vai', 'chiacchiera']);
+    expect(k.ecs.get(id, 'mestiere').compiti.map((t: { fa: string }) => t.fa)).toEqual(['vai', 'porta', 'chiacchiera']);
     k.time = at(2, 'notte');
     play(k, 4);
     expect(k.ecs.get(id, 'mestiere').compiti.map((t: { fa: string }) => t.fa)).toEqual(['vai', 'riposa']);

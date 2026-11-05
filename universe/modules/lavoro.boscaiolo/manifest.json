@@ -7,24 +7,74 @@
   "mestieri": [
     {
       "id": "boscaiolo",
-      "nomi": ["boscaiolo", "boscaiola", "taglialegna", "legnaiolo", "legnaiola", "carbonaio", "carbonaia", "guardaboschi"],
-      "posto": { "casella": "t" },
+      "nomi": [
+        "boscaiolo",
+        "boscaiola",
+        "taglialegna",
+        "legnaiolo",
+        "legnaiola",
+        "carbonaio",
+        "carbonaia",
+        "guardaboschi"
+      ],
+      "posto": {
+        "casella": "t"
+      },
       "giornata": {
         "mattina": [
-          { "fa": "vai", "dove": "lavoro" },
-          { "fa": "raccogli", "casella": "t", "oggetto": "item.ciocco", "lascia": "x", "quante": 1, "durata": 15, "posa": "taglia_legna", "dice": "Attenti, cade!" }
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "raccogli",
+            "casella": "t",
+            "oggetto": "item.ciocco",
+            "lascia": "x",
+            "quante": 1,
+            "durata": 15,
+            "posa": "taglia_legna",
+            "dice": "Attenti, cade!"
+          }
         ],
         "giorno": [
-          { "fa": "raccogli", "casella": "t", "oggetto": "item.ciocco", "lascia": "x", "quante": 2, "durata": 15, "posa": "taglia_legna" },
-          { "fa": "aspetta", "durata": 20, "posa": "mangia" }
+          {
+            "fa": "raccogli",
+            "casella": "t",
+            "oggetto": "item.ciocco",
+            "lascia": "x",
+            "quante": 2,
+            "durata": 15,
+            "posa": "taglia_legna"
+          },
+          {
+            "fa": "aspetta",
+            "durata": 20,
+            "posa": "mangia"
+          }
         ],
         "sera": [
-          { "fa": "vai", "dove": "piazza" },
-          { "fa": "chiacchiera" }
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "porta",
+            "oggetto": "item.ciocco",
+            "dove": "piazza"
+          },
+          {
+            "fa": "chiacchiera"
+          }
         ],
         "notte": [
-          { "fa": "vai", "dove": "casa" },
-          { "fa": "riposa" }
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
         ]
       }
     }

@@ -480,6 +480,13 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Da non usare**: `azione` (per il comportamento: l'azione è del viandante), `task`
 - **Fermo**: i valori di `fa`.
 
+### Deposito del luogo
+- **Inglese**: `placeDeposit`
+- **Definizione**: ciò che i mestieri di un luogo portano e prendono (il grano, i ciocchi, il pane), una voce `deposito:<cx>:<cy>` del magazzino di `sys.lavoro`; il luogo è quello a cui l'individuo appartiene (`mestiere.luogo`). Dura con la partita, non va ai client (T245c, ADR-0141).
+- **Dove vive**: `universe/modules/sys.lavoro/logic.lua`, `src/kernel/kernel.ts`
+- **Da non usare**: `magazzino` (per il deposito: il magazzino è di un modulo), `granaio`, `scorta`
+- **Fermo**: la chiave `deposito:<cx>:<cy>`, `luogo` di `mestiere`.
+
 ### Maturazione
 - **Inglese**: `matura`, `matureTick`
 - **Definizione**: ciò che una casella diventa da sola dopo qualche giorno del mondo (il seminato in grano, la ceppaia in bosco), contato dal giorno in cui la casella è stata scritta (`plan.giorni`). La fa il kernel, non Lua (T245b, ADR-0140).

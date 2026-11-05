@@ -1,6 +1,6 @@
 {
   "name": "aurora",
-  "kernel": "0.1.4",
+  "kernel": "0.1.5",
   "seed": 1337,
   "theme": "prompts/theme.md",
   "circleRadius": 42,

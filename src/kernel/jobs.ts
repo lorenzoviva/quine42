@@ -43,6 +43,8 @@ export interface JobTask {
   dice?: string;
   /** `pattuglia`: the places of the round. */
   percorso?: string[];
+  /** `usa`: which action of the thing (an `id` of its manifest's `actions`); without, the first that has no effects. */
+  azione?: string;
 }
 
 export interface JobProgram {
@@ -91,7 +93,7 @@ export function validateJobProgram(raw: unknown, world: JobWorld): { program?: J
     const m = typeof d === 'string' ? WHERE_RE.exec(d) : null;
     if (!m) return void errors.push(`${id}: «${String(d)}» non è un posto (casa, lavoro, piazza, casella:…, entita:…)`);
     if (m[2] === 'casella') code(m[3], 'il posto');
-    if (m[2] === 'entita' && world.tags && !world.tags.has(m[3])) errors.push(`${id}: nessun modulo ha il tag «${m[3]}»`);
+    // A tag no module has is not an error: a universe may have rewritten the module that had it. At work that task finds nothing and is skipped.
     return d as string;
   };
   const posto = r.posto && typeof r.posto === 'object' ? (r.posto as Record<string, unknown>) : undefined;
@@ -143,9 +145,13 @@ export function validateJobProgram(raw: unknown, world: JobWorld): { program?: J
           if (o.con !== undefined) task.con = item(o.con, 'ciò che consuma');
           if (o.dove !== undefined) task.dove = where(o.dove);
           break;
-        case 'usa':
+        case 'usa': {
           task.dove = where(o.dove ?? (typeof o.entita === 'string' ? `entita:${o.entita}` : undefined));
+          if (task.dove && !task.dove.startsWith('entita:')) errors.push(`${at}: si usa una cosa, «entita:<tag>»`);
+          const act = text(o.azione, 40);
+          if (act) task.azione = act;
           break;
+        }
         case 'pattuglia': {
           const round = Array.isArray(o.percorso) ? o.percorso : [];
           if (round.length < 2) errors.push(`${at}: un giro ha almeno due posti`);

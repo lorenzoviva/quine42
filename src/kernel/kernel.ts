@@ -753,6 +753,7 @@ export class Kernel {
       wanderers: () => this.wanderersInWorld(),
       path: (x, y, tx, ty) => this.routeStep(x, y, tx, ty),
       find_tile: (code, x, y, r) => this.findTile(code, x, y, r),
+      act: (user, target, action) => this.actAs(user, target, action),
       // The lasting store (T245a, ADR-0138): the module running is the only one whose data a call sees. A rune, a mirror: nothing.
       store_get: (key) => (this.luaModule && !this.mirror ? this.stores.get(this.luaModule, key) : undefined),
       store_set: (key, value) => !!this.luaModule && !this.mirror && this.stores.set(this.luaModule, key, value),
@@ -6585,11 +6586,18 @@ export class Kernel {
     const home = this.placeFor(id, identity, 'casa', 'dorme') ?? this.placeFor(id, identity, 'casa');
     const square = this.placeFor(id, identity, 'piazza');
     const anchor = home ?? this.ecs.get(id, 'pos');
-    const work = (program.posto?.casella && anchor ? this.findTile(program.posto.casella, anchor.x, anchor.y, 18) : undefined) ?? this.placeFor(id, identity, 'lavoro', first);
+    // The work: the nearest tile of its kind, or the nearest thing with its tag (the bench of the smith), or the place the routine would give.
+    const bench = program.posto?.entita && anchor ? this.nearest(anchor.x, anchor.y, 18, program.posto.entita) : undefined;
+    const benchAt = bench !== undefined ? this.ecs.get(bench, 'pos') : undefined;
+    const work = (program.posto?.casella && anchor ? this.findTile(program.posto.casella, anchor.x, anchor.y, 18) : undefined) ?? (benchAt ? { x: benchAt.x, y: benchAt.y } : undefined) ?? this.placeFor(id, identity, 'lavoro', first);
+    const p = this.ecs.get(id, 'pos');
+    // The place they belong to: its deposit is where what they make goes (T245c).
+    const luogo = place ?? (p ? this.chunkAt(p.x, p.y)?.key : undefined);
     this.ecs.set(id, 'mestiere', {
       id: program.id,
       fase,
       giorno: this.day(),
+      ...(luogo ? { luogo } : {}),
       compiti: structuredClone(program.giornata[fase]),
       ...(home ? { casa: home } : {}),
       ...(square ? { piazza: square } : {}),
@@ -6599,12 +6607,45 @@ export class Kernel {
     return true;
   }
 
+  private actingAs = 0;
+
+  /**
+   * An individual uses a thing (T245c, ADR-0141): the `on_act` of its module with the individual as user, as «Usa» does for the wanderer.
+   * Only an action without effects (the effects of a manifest are the wanderer's: needs, items, states), only within reach, never a
+   * wanderer as user (they act through the kernel), never more than two deep.
+   */
+  actAs(user: Id, target: Id, action?: string): string | undefined {
+    if (this.actingAs >= 2 || !this.ecs.alive.has(user) || !this.ecs.alive.has(target) || user === target || this.wandererOf(user) !== undefined || this.ecs.has(user, 'player')) return undefined;
+    const modId: string | undefined = this.ecs.get(target, 'module')?.id;
+    const entry = modId ? this.modules.get(modId) : undefined;
+    const pu = this.ecs.get(user, 'pos');
+    const pt = this.ecs.get(target, 'pos');
+    if (!entry?.logicPath || !pu || !pt || Math.hypot(pu.x - pt.x, pu.y - pt.y) > 2.5 || !this.sandbox.has(modId!, 'on_act')) return undefined;
+    const actions = entry.manifest.actions ?? [];
+    const a = action === undefined ? actions.find((x) => !x.effects?.length) : actions.find((x) => x.id === action);
+    if (!a || a.effects?.length) return undefined;
+    this.actingAs++;
+    try {
+      const { value, failed } = this.runModule(modId!, 'on_act', target, user, a.id);
+      return !failed && typeof value === 'string' && value ? value.slice(0, 300) : undefined;
+    } finally {
+      this.actingAs--;
+    }
+  }
+
+  /** What the deposit of a place holds (T245c, ADR-0141): what the trades brought there, in the store of `sys.lavoro`. */
+  placeDeposit(chunkKey: string): Record<string, number> {
+    const v = this.stores.get('sys.lavoro', `deposito:${chunkKey.replace(',', ':')}`);
+    return v && typeof v === 'object' && !Array.isArray(v) ? (v as Record<string, number>) : {};
+  }
+
   /** The next point of the way between two places of the world (carpet space): two tiles ahead on a way the cache keeps. */
   private routeStep(x: number, y: number, tx: number, ty: number): { x: number; y: number } | undefined {
     if (![x, y, tx, ty].every(Number.isFinite) || Math.hypot(tx - x, ty - y) > 60) return undefined;
     const from = [Math.floor(x), Math.floor(y)] as const;
     const to = [Math.floor(tx), Math.floor(ty)] as const;
-    const way = this.routes.get(from, to, this.tickCount, () => findRoute(from, to, (c, r) => this.freeTile(c, r)));
+    // Passable as walking is: the tile and the models standing on it (a wall of a house is a model, not a tile).
+    const way = this.routes.get(from, to, this.tickCount, () => findRoute(from, to, (c, r) => this.free(c + 0.5, r + 0.5, 0.3)));
     if (!way) return undefined;
     if (way.length <= 2) return { x: tx, y: ty };
     const [c, r] = way[Math.min(2, way.length - 1)];

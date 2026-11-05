@@ -4,7 +4,7 @@
 // or the server of its version. Z goes up with every change of src/kernel/ that stays compatible, and goes back to 0 when Y goes up.
 // The same string is in package.json (a test says so) and in every universe.json the kernel writes (`kernel`).
 
-export const KERNEL_VERSION = '0.1.4';
+export const KERNEL_VERSION = '0.1.5';
 
 export interface KernelVersion {
   major: number;
