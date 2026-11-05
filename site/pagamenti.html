@@ -1,10 +1,13 @@
 <!doctype html>
-<html lang="it">
+<html lang="it" data-skin="sobria">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="QUINE42: i tuoi crediti. Il saldo, la ricarica con Stripe Checkout e lo storico dei pagamenti." />
     <title>QUINE42 · Crediti e ricariche</title>
+    <!-- La veste (ADR-0145): prima di tutto, così la pagina non si disegna mai con quella sbagliata. Niente script scritti qui: la CSP -->
+    <script src="/skins/boot.js" vite-ignore></script>
+    <noscript><link rel="stylesheet" href="/skins/sobria/skin.css" vite-ignore /></noscript>
     <link rel="stylesheet" href="./site.css" />
   </head>
   <body class="page-wallet">
@@ -35,14 +38,14 @@
     <main class="section-wrap">
       <div class="section-head">
         <span class="comic-badge pink">PORTAFOGLIO</span>
-        <h1 class="comic-title" style="font-size: 2.8rem; margin: 10px 0 0">GESTIONE CREDITI E RICARICHE</h1>
+        <h1 class="comic-title" style="font-size: var(--text-47); margin: var(--space-8) 0 0">GESTIONE CREDITI E RICARICHE</h1>
         <p>// UN CREDITO, UN DOLLARO · STRIPE CHECKOUT</p>
       </div>
 
       <!-- Avvisi: ritorno da Stripe, errori -->
       <div class="comic-alert" id="page-alert" role="status" aria-live="polite" hidden>
         <span class="comic-badge" id="page-alert-badge">INFO</span>
-        <span class="arcade-text" id="page-alert-text" style="font-size: 0.75rem"></span>
+        <span class="arcade-text" id="page-alert-text" style="font-size: var(--text-13)"></span>
       </div>
 
       <!-- L'accesso (dal template docs/design/sito/login.html) -->
@@ -50,8 +53,8 @@
         <div class="login-box">
           <div class="login-head">
             <span class="comic-badge yellow">ACCESSO</span>
-            <h2 class="comic-title" style="font-size: 2.2rem; margin-top: 10px">ENTRA NEL MONDO</h2>
-            <p class="arcade-text text-dim" id="login-sub" style="font-size: 0.72rem">Con un account Google il tuo viandante ti segue ovunque</p>
+            <h2 class="comic-title" style="font-size: var(--text-34); margin-top: var(--space-8)">ENTRA NEL MONDO</h2>
+            <p class="arcade-text text-dim" id="login-sub" style="font-size: var(--text-11)">Con un account Google il tuo viandante ti segue ovunque</p>
           </div>
 
           <div class="login-accounts" id="login-accounts">
@@ -61,7 +64,7 @@
               </svg>
               ACCEDI CON GOOGLE
             </button>
-            <button class="comic-btn full-width cyan" id="btn-anon-login" style="margin-top: 16px">⚡ ENTRA COME ANONIMO</button>
+            <button class="comic-btn full-width cyan" id="btn-anon-login" style="margin-top: var(--space-13)">⚡ ENTRA COME ANONIMO</button>
             <p class="login-note">
               Da anonimo giochi solo con i modelli locali e non puoi recuperare il viandante finché non lo leghi a Google.
             </p>
@@ -84,26 +87,26 @@
       <div class="billing-grid" id="wallet-grid" hidden>
         <!-- A sinistra: il saldo e come funzionano i crediti -->
         <div>
-          <div class="comic-panel" style="margin-bottom: 24px; box-shadow: var(--shadow-hard-green)">
+          <div class="comic-panel" style="margin-bottom: var(--space-21); box-shadow: var(--shadow-m) var(--skin-success)">
             <div class="identity-head">
               <span class="comic-badge green">SALDO</span>
-              <span class="arcade-text text-dim" style="font-size: 0.65rem; overflow-wrap: anywhere" id="wallet-who"></span>
+              <span class="arcade-text text-dim" style="font-size: var(--text-11); overflow-wrap: anywhere" id="wallet-who"></span>
             </div>
             <div class="form-group">
               <label class="comic-label" for="universe-select">UNIVERSO</label>
               <select id="universe-select" class="comic-select universe-select"></select>
             </div>
             <div class="comic-title balance-amount"><span id="wallet-amount">$0.00</span> <small>USD</small></div>
-            <p class="arcade-text text-dim" id="wallet-note" style="font-size: 0.72rem; line-height: 1.6; margin: 0"></p>
-            <button class="comic-btn sm pink" id="btn-link-google" style="margin-top: 14px" hidden>LEGA A GOOGLE</button>
+            <p class="arcade-text text-dim" id="wallet-note" style="font-size: var(--text-11); line-height: var(--leading-read); margin: 0"></p>
+            <button class="comic-btn sm pink" id="btn-link-google" style="margin-top: var(--space-13)" hidden>LEGA A GOOGLE</button>
           </div>
 
           <div class="comic-panel yellow-shadow">
-            <h3 class="comic-title" style="font-size: 1.3rem; margin-bottom: 12px">COME FUNZIONANO I CREDITI</h3>
-            <ul style="padding-left: 18px; margin: 0; font-size: 0.9rem; line-height: 1.6; color: var(--comic-paper)">
-              <li style="margin-bottom: 8px">Un credito vale un dollaro, e ogni universo ha il suo saldo.</li>
-              <li style="margin-bottom: 8px">I crediti coprono le chiamate alle intelligenze artificiali che generano trame, dialoghi e forme: <span id="wallet-fee">il loro costo</span>.</li>
-              <li style="margin-bottom: 8px">Ciò che arricchisce il mondo di tutti si divide in parti uguali tra chi è collegato.</li>
+            <h3 class="comic-title" style="font-size: var(--text-21); margin-bottom: var(--space-13)">COME FUNZIONANO I CREDITI</h3>
+            <ul style="padding-left: var(--space-21); margin: 0; font-size: var(--text-13); line-height: var(--leading-read); color: var(--skin-text)">
+              <li style="margin-bottom: var(--space-8)">Un credito vale un dollaro, e ogni universo ha il suo saldo.</li>
+              <li style="margin-bottom: var(--space-8)">I crediti coprono le chiamate alle intelligenze artificiali che generano trame, dialoghi e forme: <span id="wallet-fee">il loro costo</span>.</li>
+              <li style="margin-bottom: var(--space-8)">Ciò che arricchisce il mondo di tutti si divide in parti uguali tra chi è collegato.</li>
               <li>A crediti esauriti si continua a giocare, con risposte più semplici.</li>
             </ul>
           </div>
@@ -112,7 +115,7 @@
         <!-- A destra: la ricarica -->
         <div>
           <div class="comic-panel cyan-shadow">
-            <h2 class="comic-title cyan" style="font-size: 1.6rem; margin-bottom: 18px">RICARICA CON STRIPE</h2>
+            <h2 class="comic-title cyan" style="font-size: var(--text-29); margin-bottom: var(--space-21)">RICARICA CON STRIPE</h2>
 
             <span class="comic-label">SCEGLI UN TAGLIO DI RICARICA</span>
             <div class="credit-tiers" id="tier-container">
@@ -145,7 +148,7 @@
               <span class="input-error-msg" id="amount-error" hidden>Scrivi un importo da 1 a 1000 dollari.</span>
             </div>
 
-            <div style="margin-top: 24px">
+            <div style="margin-top: var(--space-21)">
               <button class="comic-btn full-width pink lg" id="btn-stripe-pay" disabled>
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z" />
@@ -153,8 +156,8 @@
                 <span id="pay-label">PAGA CON STRIPE</span>
               </button>
               <span class="input-error-msg" id="pay-why" hidden></span>
-              <div style="text-align: center; margin-top: 10px">
-                <span class="arcade-text text-dim" style="font-size: 0.65rem">// CARTE E GOOGLE PAY, SU UNA PAGINA PROTETTA DI STRIPE //</span>
+              <div style="text-align: center; margin-top: var(--space-8)">
+                <span class="arcade-text text-dim" style="font-size: var(--text-11)">// CARTE E GOOGLE PAY, SU UNA PAGINA PROTETTA DI STRIPE //</span>
               </div>
             </div>
           </div>
@@ -165,7 +168,7 @@
         <!-- I pagamenti ricevuti (world/pagamenti.json) -->
         <div class="comic-panel ledger-panel">
           <div class="ledger-head">
-            <h2 class="comic-title" style="font-size: 1.6rem; margin: 0">CRONOLOGIA DEI PAGAMENTI</h2>
+            <h2 class="comic-title" style="font-size: var(--text-29); margin: 0">CRONOLOGIA DEI PAGAMENTI</h2>
             <span class="comic-badge cyan">RICEVUTI</span>
           </div>
           <div class="comic-table-wrap">
@@ -186,7 +189,7 @@
         <!-- I consumi (world/consumi.json → paganti) -->
         <div class="comic-panel ledger-panel">
           <div class="ledger-head">
-            <h2 class="comic-title" style="font-size: 1.6rem; margin: 0">STORICO DEI CONSUMI</h2>
+            <h2 class="comic-title" style="font-size: var(--text-29); margin: 0">STORICO DEI CONSUMI</h2>
             <span class="comic-badge yellow">IN TUTTO: <span id="spending-total">$0.00</span></span>
           </div>
           <div class="comic-table-wrap">
@@ -201,7 +204,7 @@
               <tbody id="spending-body"></tbody>
             </table>
           </div>
-          <p class="input-hint" style="margin: 12px 0 0">Gli ultimi 30 giorni, per le richieste a tuo carico. La tua parte delle spese comuni è già nel saldo ma non compare qui.</p>
+          <p class="input-hint" style="margin: var(--space-13) 0 0">Gli ultimi 30 giorni, per le richieste a tuo carico. La tua parte delle spese comuni è già nel saldo ma non compare qui.</p>
         </div>
       </div>
     </main>
@@ -240,6 +243,7 @@
       <div class="footer-copy">QUINE42 © 2026 · Voxel e modelli MarkovJunior 3D · Generato con intelligenza artificiale</div>
     </footer>
 
+    <script type="module" src="./skin.ts"></script>
     <script type="module" src="./pagamenti.ts"></script>
   </body>
 </html>

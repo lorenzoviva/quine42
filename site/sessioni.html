@@ -1,9 +1,12 @@
 <!doctype html>
-<html lang="it">
+<html lang="it" data-skin="sobria">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>QUINE42 · Hub Sessioni & Nuovo Universo</title>
+    <!-- La veste (ADR-0145): prima di tutto, così la pagina non si disegna mai con quella sbagliata. Niente script scritti qui: la CSP -->
+    <script src="/skins/boot.js" vite-ignore></script>
+    <noscript><link rel="stylesheet" href="/skins/sobria/skin.css" vite-ignore /></noscript>
     <link rel="stylesheet" href="./sessioni.css" />
   </head>
   <body>
@@ -32,13 +35,13 @@
     </header>
 
     <!-- Main Content -->
-    <main class="section-wrap" style="padding-top: 36px; padding-bottom: 60px;">
+    <main class="section-wrap" style="padding-top: var(--space-34); padding-bottom: var(--space-55);">
       <!-- Hub Header & Creation CTA -->
       <div class="session-hub-header">
         <div>
           <span class="comic-badge yellow">MULTIGIOCATORE LIVE</span>
-          <h1 class="comic-title" style="font-size: 2.8rem; margin: 10px 0 0;">HUB DELLE SESSIONI</h1>
-          <p class="arcade-text text-dim" style="font-size: 0.75rem; margin-top: 6px;">
+          <h1 class="comic-title" style="font-size: var(--text-47); margin: var(--space-8) 0 0;">HUB DELLE SESSIONI</h1>
+          <p class="arcade-text text-dim" style="font-size: var(--text-13); margin-top: var(--space-5);">
             // ESPLORA GLI UNIVERSI ATTIVI O AVVIA LA GENESI DI UN NUOVO MONDO
           </p>
         </div>
@@ -58,7 +61,7 @@
       <div class="grid-3" id="universes-grid">
         <div class="universe-loading">
           <span class="comic-badge yellow">CARICAMENTO</span>
-          <p class="arcade-text" style="font-size: 0.8rem; margin-top: 12px;">INTERROGAZIONE UNIVERSI E SESSIONI ATTIVE…</p>
+          <p class="arcade-text" style="font-size: var(--text-13); margin-top: var(--space-13);">INTERROGAZIONE UNIVERSI E SESSIONI ATTIVE…</p>
         </div>
       </div>
     </main>
@@ -94,7 +97,7 @@
             </div>
 
             <div class="form-group">
-              <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 6px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: var(--space-8); margin-bottom: var(--space-5);">
                 <label class="comic-label" for="new-univ-seed" style="margin: 0;">SEME GENERATIVO MONDO</label>
                 <button type="button" class="comic-btn arcade sm" id="btn-wizard-rand-seed">🎲 CASUALE</button>
               </div>
@@ -132,9 +135,9 @@
 
             <div id="wizard-status-msg"></div>
 
-            <div class="comic-alert info" style="margin-top: 16px; margin-bottom: 0;">
+            <div class="comic-alert info" style="margin-top: var(--space-13); margin-bottom: 0;">
               <span class="comic-badge cyan">INFO</span>
-              <span class="arcade-text" style="font-size: 0.68rem; line-height: 1.4;">
+              <span class="arcade-text" style="font-size: var(--text-11); line-height: var(--leading-snug);">
                 Il nuovo universo inizierà con il seme puro e compilerà la bibbia, lo stile e il primo cast durante la Genesi.
               </span>
             </div>
@@ -185,6 +188,7 @@
     </footer>
 
     <!-- Interactive logic for sessions hub & wizard -->
+    <script type="module" src="./skin.ts"></script>
     <script type="module" src="./sessioni.ts"></script>
   </body>
 </html>

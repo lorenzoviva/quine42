@@ -1,9 +1,12 @@
 <!doctype html>
-<html lang="it">
+<html lang="it" data-skin="sobria">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>QUINE42 · Le Carte del Mondo</title>
+    <!-- La veste (ADR-0145): prima di tutto, così la pagina non si disegna mai con quella sbagliata. Niente script scritti qui: la CSP -->
+    <script src="/skins/boot.js" vite-ignore></script>
+    <noscript><link rel="stylesheet" href="/skins/sobria/skin.css" vite-ignore /></noscript>
     <link rel="stylesheet" href="./carte.css" />
   </head>
   <body>
@@ -60,7 +63,7 @@
       </div>
 
       <div class="cards-toolbar">
-        <label class="arcade-text text-cyan" for="card-universe" style="font-size: 0.7rem">UNIVERSO</label>
+        <label class="arcade-text text-cyan" for="card-universe" style="font-size: var(--text-11)">UNIVERSO</label>
         <select class="comic-select" id="card-universe"></select>
       </div>
 
@@ -70,7 +73,7 @@
       <div class="card-collection-grid" id="cards-container">
         <div class="cards-empty">
           <span class="comic-badge yellow">CARICAMENTO</span>
-          <p class="arcade-text" style="font-size: 0.8rem; margin-top: 12px">SI APRONO GLI UNIVERSI…</p>
+          <p class="arcade-text" style="font-size: var(--text-13); margin-top: var(--space-13)">SI APRONO GLI UNIVERSI…</p>
         </div>
       </div>
 
@@ -114,6 +117,7 @@
       </div>
     </footer>
 
+    <script type="module" src="./skin.ts"></script>
     <script type="module" src="./carte.ts"></script>
   </body>
 </html>

@@ -123,6 +123,7 @@ server/video.ts         i video del sito (ADR-0131): `/api/video`, solo ciò che
 server/betaGuide.ts     le istruzioni della beta (ADR-0131): `docs/beta/` nella build solo se ci sono e solo ciò che `site/beta.json` accende (`betaGuide`, `guideParts`)
 server/rates.ts         quanto spesso si può chiedere e chi chiede (ADR-0114): `Rates`, `clientAddress`, `proxyHops`
 server/worldCalls.ts    ciò che le rotte chiedono al mondo acceso (ADR-0110): `WorldCalls`, `worldOf`
+server/skins.ts         le vesti del sito (ADR-0145): trova le cartelle di `site/skins/`, genera `/skins/boot.js`, le porta in `dist/skins/` (`siteSkins`, `readSkins`, `bootScript`)
 server/generation.ts    chi ha un universo ora (ADR-0143): il segno di un mondo acceso (`universes/.accesi/`), il lucchetto e il progresso della generazione differita (`universes/.generazione/`)
 src/
   main.ts               bootstrap: modelli, kernel, renderer, UI, loop a 60 Hz
@@ -207,7 +208,7 @@ tools/generazione/      genera.ts (il comando della generazione differita, `npm 
 tools/abbonamenti/      servi.ts (il processo che serve la coda degli abbonamenti con la CLI isolata, ADR-0077, ADR-0106)
 lab/                    laboratorio di MarkovJunior (ADR-0038): sandbox 3D /lab/3d/, editor modelli /lab/editor/ (T59a, T59b, T59c, T59d), entrambi con l'interruttore cartone/classica (`lab/look.ts`), SoundLab /lab/suono/ (T222), modelli ufficiali e conformità, i pattern con cui crescono le strutture e tre programmi di riferimento del cantiere (lab/banco/pattern.md, lab/banco/riferimento/, T181), script per
                         affettare, fotografare, misurare e provare i programmi con Gemini; non importarlo da src/
-site/                   il sito web (ADR-0095, T97): landing, carte 3D, sessioni, profilo, crediti, notizie (`site/notizie/`, un Markdown per notizia, ADR-0129), video e istruzioni della beta (ADR-0131); theme.css condiviso con il gioco
+site/                   il sito web (ADR-0095, T97): landing, carte 3D, sessioni, profilo, crediti, notizie (`site/notizie/`, un Markdown per notizia, ADR-0129), video e istruzioni della beta (ADR-0131); theme.css condiviso con il gioco; le vesti in `site/skins/<id>/`, una cartella per veste sopra la base comune, `site/skin.ts` il selettore (ADR-0145)
 ```
 
 ## Il Concilio (ADR-0008, 0011, 0012, 0013, 0014, 0016, 0042)
@@ -253,7 +254,7 @@ Registro, Luogo, Fucina e Genesi → `docs/architettura-dettagli.md#concilio`.
 - **Grafo del mondo**: nodi e archi dai file, `focus` come contesto del Narratore → `#grafo`
 - **Ambientazioni**: quattro testi tra cui scegliere nella Genesi, un seme solo; ciò che sopravvive alla Genesi parla di epoca, le case comuni dipendono dal mondo (`commonHouse`, ADR-0134) → `#concilio`
 - **Il Concilio al lavoro**: registro, come nasce un luogo, Fucina, Genesi, le mancanze (ciò che non è riuscito a fare, ADR-0130) → `#concilio`
-- **Il sito e il tema** → `#sito`; **confine e limiti di Lua** → `#lua-sandbox`; **Gemini, Attore, coefficienti** → `#gemini`
+- **Il sito e il tema, le vesti** (una cartella di `site/skins/`, `data-skin` sulla radice; la base legge solo token `--skin-*`, misure dalla scala aurea, ADR-0145) → `#sito`; **confine e limiti di Lua** → `#lua-sandbox`; **Gemini, Attore, coefficienti** → `#gemini`
 - **Convalida nel browser**: build, preview, spostarsi fermando il tappeto, `interact()` → `#convalida-browser`
 - **Costi e prestazioni** → `#costi`; **stato del progetto e prossimi passi** → `#stato`; il lavoro da fare è in [`docs/plans/backlog.md`](docs/plans/backlog.md)
 - **Fasi e step** (ADR-0128): le quattro fasi dello sviluppo e gli step, obiettivi condivisi tra task, in [`docs/fasi.md`](docs/fasi.md): ogni task sta in una sola riga della tabella, il numero di uno step non cambia; `pipeline.mjs step` ne copia il numero nella riga `- Step:` del backlog e priorizza uno step (T231)

@@ -1,0 +1,63 @@
+/* La veste a fumetto (T283, ADR-0145): la prima stesura, solo colori, font e retini. La Q, i pois animati e la palette sono di T285. */
+:root[data-skin='fumetto'] {
+  /* Colori */
+  --skin-bg: #090514;
+  --skin-panel: #130a24;
+  --skin-panel-raised: #1c1133;
+  --skin-ink: #07040d;
+  --skin-ink-raised: #150c26;
+  --skin-ink-surface: #1e1038;
+  --skin-text: #fff5ea;
+  --skin-text-dim: #c5b8a9;
+  --skin-text-faint: #8c829c;
+  --skin-primary: #ffe600;
+  --skin-accent: #00f0ff;
+  --skin-accent-2: #ff2a85;
+  --skin-success: #05ffa1;
+  --skin-danger: #ff3344;
+  --skin-rare: #9d00ff;
+  --skin-on-bright: #07040d;
+  --skin-on-accent-2: #ffffff;
+  --skin-grid-line: rgba(0, 240, 255, 0.18);
+
+  /* Font */
+  --skin-font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --skin-font-display: 'Bangers', 'Impact', 'Arial Black', sans-serif;
+  --skin-font-label: 'Press Start 2P', 'VT323', monospace;
+  --skin-font-mono: 'Cascadia Mono', 'JetBrains Mono', Consolas, 'DejaVu Sans Mono', monospace;
+  --skin-font-logo: 'Bangers', 'Impact', 'Arial Black', sans-serif;
+
+  /* Titoli e logo */
+  --skin-title-color: #ffe600;
+  --skin-title-weight: 400;
+  --skin-title-spacing: 0.05em;
+  --skin-title-case: uppercase;
+  --skin-title-shadow: -2px -2px 0 #07040d, 2px -2px 0 #07040d, -2px 2px 0 #07040d, 2px 2px 0 #07040d, 4px 4px 0 #ff2a85;
+  --skin-title-transform: skew(-2deg);
+  --skin-logo-color: #ffe600;
+  --skin-logo-spacing: 0.12em;
+  --skin-logo-shadow: -2px -2px 0 #07040d, 2px -2px 0 #07040d, -2px 2px 0 #07040d, 2px 2px 0 #07040d, 3px 3px 0 #ff2a85;
+  --skin-logo-transform: skew(-4deg);
+
+  /* Ombre e bagliori */
+  --skin-shadow-s: var(--space-2);
+  --skin-shadow-m: var(--space-5);
+  --skin-shadow-l: var(--space-8);
+  --skin-shadow-blur: 0px;
+  --skin-glow: var(--space-13);
+
+  /* Sfondi */
+  --skin-page-background: radial-gradient(circle, rgba(255, 42, 133, 0.16) 1.5px, transparent 1.5px), linear-gradient(180deg, #090514 0%, #130a24 100%);
+  --skin-nav-background: #090514;
+  --skin-stage-background: radial-gradient(circle at center, rgba(157, 0, 255, 0.25) 0%, rgba(9, 5, 20, 0.95) 75%);
+  --skin-texture: radial-gradient(circle, rgba(0, 240, 255, 0.2) 1.5px, transparent 1.5px);
+}
+
+[data-skin='fumetto'] body {
+  background-size: var(--space-13) var(--space-13), auto;
+}
+
+[data-skin='fumetto'] .nav-link,
+[data-skin='fumetto'] .comic-btn {
+  letter-spacing: 0.05em;
+}

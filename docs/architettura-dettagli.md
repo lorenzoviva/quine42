@@ -9,7 +9,7 @@
 | Argomento | File sorgente |
 |---|---|
 | [Stack e persistenza](#stack) | `package.json`, `server/universeStore.ts` |
-| [Il sito e il tema](#sito) | `site/`, `src/theme.css`, `docs/design/sito/` |
+| [Il sito e il tema](#sito) | `site/`, `site/skins/`, `server/skins.ts`, `src/theme.css`, `docs/design/sito/` |
 | [Lua: confine e limiti](#lua-sandbox) | `src/kernel/sandbox.ts`, `src/kernel/prelude.lua`, `src/mj/run.ts` |
 | [Gemini, l'Attore, i coefficienti di generazione](#gemini) | `universe/universe.json`, `src/kernel/ai/`, `src/kernel/coefficients.ts` |
 | [La lobby multigiocatore](#lobby) | `src/ui/lobby.ts`, `src/ui/creditdialog.ts` |
@@ -57,7 +57,7 @@
 
 - **Il sito e il tema** (ADR-0095, T97): pop art a fumetti, retro arcade, neon punk e retrowave; variabili CSS unificate in `src/theme.css` per sito e gioco; pagine Vite in `site/` senza framework pesanti; three.js fuori dal gioco (hero canvas, profilo) e carte collezionabili in CSS 3D; il segreto dei gerboa nel footer; lo stile delle pagine è quello del template `docs/design/sito/` (T109), `site/site.css` lo copia; la landing (`site/landing.ts`, T101) fa crescere nell'hero programmi MarkovJunior veri con `src/mj/`; la galleria delle carte (`site/carte.html`, `carte.ts`, T104) legge lo snapshot di `/api/universe/<nome>` con `allCards(files, true)` e `receivedBy`, la rarità è derivata dagli utilizzi (`rarityOf`), le miniature sono foto dei modelli (`photo.ts`) fatte in un worker, senza WebGL. il profilo (`site/profilo.ts`, T102) entra con `signIn`, legge e salva il viandante di un universo da `/api/viandante` (`kernel.keepProfile` o i file su disco) e mostra il modello vero in three.js; i crediti (`site/pagamenti.ts`, T105) dicono saldo, ricariche e consumi del viandante in un universo da `/api/crediti` e avviano Stripe Checkout; `site/shared.ts` è ciò che le pagine con un account hanno in comune. Le interfacce in gioco (T106) leggono gli stessi token: `src/style.css` dà i suoi nomi (`--gold`, `--panel`…) alla palette di `theme.css` e costruisce le finestre con inchiostro, ombra rigida e mezze tinte (`--window-veil` le attenua dietro il testo), le battute sono fumetti, gli avvisi usano il carattere display; `tests/theme.test.ts` rifiuta un token che non esiste.
 - **Le notizie** (ADR-0129, T234): un file Markdown per notizia in `site/notizie/` (la guida è `LEGGIMI.md`), con `titolo`, `data`, `tag`, `riassunto` e, per un sondaggio o la pianificazione dei server, `link`; Vite li raccoglie alla build (`notizie-file.ts`, `import.meta.glob`), senza rotte né database. `site/notizie.html` è l'elenco, con i filtri per tag (`?tag=`), e la notizia singola (`?n=<nome del file>`); le ultime tre stanno nella landing. `notizie-testo.ts` trasforma il testo in HTML: tutto ciò che è scritto in un file esce escapato, un link è solo http(s) o del sito, un file che non va resta fuori e lo dice (`problems`: nella pagina in sviluppo, in `tests/site-news.test.ts`).
-- **La scala aurea** (T241): spazi, corpi, interlinea e larghezze di HUD e pannelli stanno in `src/theme.css` come token, e `src/style.css` li legge tutti (`tests/theme.test.ts` rifiuta un `font`, `padding`, `margin` o `gap` in px scritti a mano). Restano fuori bordi, ombre e i pallini delle legende. Solo stile; la landing nuova (T232) la riprenderà, le classi `comic-*` condivise col sito non sono cambiate. I rapporti:
+- **La scala aurea** (T241): spazi, corpi, interlinea e larghezze di HUD e pannelli stanno in `src/theme.css` come token, e `src/style.css` li legge tutti (`tests/theme.test.ts` rifiuta un `font`, `padding`, `margin` o `gap` in px scritti a mano). Restano fuori bordi, ombre e i pallini delle legende. Solo stile. Il sito la legge anche lui (T283), vedi sotto; le classi `comic-*` in `src/theme.css` non sono cambiate. I rapporti:
 
   | Che cosa | Token | Valori | Rapporto |
   |---|---|---|---|
@@ -68,6 +68,23 @@
   | Inventario | griglia : dettagli | 322 : 521 (843) | φ; 6 celle da 47 con spazi da 8 fanno 322 |
   | Bisogni | etichetta : barra | 55 : 89 | φ |
   | Barra in basso | `--measure-123`, `--space-144` | 123 messaggi e chat, 144 il fumetto | ciò che sta sopra la barra: due valori della scala, non un rapporto |
+
+- **Le vesti** (ADR-0145, T283): il sito è una base comune (`site/site.css`, `carte.css`, `sessioni.css`: struttura e proporzioni) più una veste, una cartella di `site/skins/<id>/` (`skin.json`, `skin.css`, icona, file propri, `effects.ts` facoltativo; guida in `site/skins/LEGGIMI.md`), scelta con `data-skin` sulla radice. La base legge solo token `--skin-*` e non ne dichiara nessuno: ciò che legge è il contratto, e `tests/site-skins.test.ts` lo controlla per ogni veste. `server/skins.ts` trova le cartelle, genera `/skins/boot.js` (primo script della pagina: sceglie tra gli id noti e scrive il foglio col parser, così blocca il primo disegno) e copia i file in `dist/skins/`: nessuna rotta. `site/skin.ts` è il selettore nella barra: ricorda la scelta in `localStorage` (`quine:sito:veste`), cambia foglio solo quando quello nuovo è arrivato, avvia `effects.ts` della veste in uso e segnala `quine:skin` ai palchi three.js. Una pagina nuova mette in testa `boot.js` e il `<noscript>`, e `skin.ts` tra i moduli (lo chiede il test). La sobria è la veste di partenza (`DEFAULT_SKIN`); fumetto e futuristica sono prime stesure, per T285 e T284.
+- **La griglia del sito** (T283): spazi, corpi e interlinea solo dalla scala aurea, in base e vesti (`tests/site-skins.test.ts`). I rapporti:
+
+  | Che cosa | Token o valore | Rapporto |
+  |---|---|---|
+  | Larghezza di pagina | `--page-width` = `--measure-1364` | Lucas: 843 + 521 |
+  | Due colonne (hero, crediti) | `--column-major` : `--column-minor` = 1,618 : 1 | φ |
+  | Vetrina e schede laterali | `--measure-322` e il resto | 322 è la colonna minore di 843 |
+  | Altezza dell'hero | 61,8 vh | 1/φ dello schermo |
+  | Titolo dell'hero | da `--text-34` a `--text-76`, 4,236 vw | φ³ % della larghezza |
+  | Palco 3D | `--measure-521`, 377 sotto 992 px, 322 sotto 768 | Lucas e Fibonacci |
+  | Carta | `--measure-322` × `--measure-521` | φ |
+  | Corpo del testo | `--text-18` su `--leading-read` | 18 × φ = 29 |
+  | Sezioni | `--space-55` sopra e sotto, `--space-21` ai lati | Fibonacci |
+
+  Restano fuori bordi, ombre (sono della veste), pallini e le altezze minime dei riquadri piccoli.
 
 - **La home per la beta** (ADR-0131, T244): la landing perde il tono da pitch e parte dei fumetti (`body.home`, con `site/istruzioni.html`); restano i programmi MarkovJunior e la striscia «coming soon», escono pilastri e carta dimostrativa. La corona non si nomina.
 - **I video** (ADR-0131, T244): i file stanno in una cartella del server (`QUINE_VIDEO`), mai nel repository né in `dist/`, con `video.json` accanto (`file`, `titolo`, `descrizione`, nell'ordine). `server/video.ts` risponde a `/api/video` (solo ciò che è nell'elenco e ha il file: niente build né riavvio) e a `/api/video/<file>`, in produzione, in sviluppo e nella preview. Il nome chiesto si confronta con l'elenco e non si unisce mai a un percorso; un `Range` non valido è un 416. Tetti: `FRONT_RATES` (`video`, `videosAtOnce`, `videosInAll`). Una visione costa circa 200 KB, non il file. Guida: `docs/beta/LEGGIMI.md`.
