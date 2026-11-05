@@ -1,0 +1,2100 @@
+{
+ "tokens": {
+  "programma": 1196,
+  "dati": 29
+ },
+ "righe": [
+  {
+   "edificio": "palazzina",
+   "via": "programma",
+   "seme": 1,
+   "giudica": [
+    "stanze"
+   ],
+   "ms": 215,
+   "msUno": 215,
+   "confronto": {
+    "piani": [
+     2,
+     2
+    ],
+    "stanze": [
+     7,
+     2
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     8,
+     8
+    ],
+    "pezzi": 12
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.8743599842457661,
+   "voxel": 6388
+  },
+  {
+   "edificio": "palazzina",
+   "via": "dati",
+   "seme": 1,
+   "giudica": [],
+   "ms": 1047,
+   "msUno": 1047,
+   "confronto": {
+    "piani": [
+     2,
+     2
+    ],
+    "stanze": [
+     7,
+     4
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     8,
+     8
+    ],
+    "pezzi": 5
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.8904102866117001,
+   "voxel": 11057
+  },
+  {
+   "edificio": "palazzina",
+   "via": "programma",
+   "seme": 2,
+   "giudica": [],
+   "ms": 139,
+   "msUno": 139,
+   "confronto": {
+    "piani": [
+     2,
+     2
+    ],
+    "stanze": [
+     7,
+     4
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     9,
+     9
+    ],
+    "pezzi": 8
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.8715850600501518,
+   "voxel": 3705
+  },
+  {
+   "edificio": "palazzina",
+   "via": "dati",
+   "seme": 2,
+   "giudica": [],
+   "ms": 152,
+   "msUno": 152,
+   "confronto": {
+    "piani": [
+     2,
+     2
+    ],
+    "stanze": [
+     7,
+     5
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     9,
+     9
+    ],
+    "pezzi": 2
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.9330647257603327,
+   "voxel": 2893
+  },
+  {
+   "edificio": "palazzina",
+   "via": "programma",
+   "seme": 3,
+   "giudica": [],
+   "ms": 103,
+   "msUno": 103,
+   "confronto": {
+    "piani": [
+     2,
+     2
+    ],
+    "stanze": [
+     6,
+     3
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     6,
+     6
+    ],
+    "pezzi": 8
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.8444502344971339,
+   "voxel": 4795
+  },
+  {
+   "edificio": "palazzina",
+   "via": "dati",
+   "seme": 3,
+   "giudica": [],
+   "ms": 195,
+   "msUno": 195,
+   "confronto": {
+    "piani": [
+     2,
+     2
+    ],
+    "stanze": [
+     6,
+     4
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     6,
+     6
+    ],
+    "pezzi": 2
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.401165871754107,
+   "voxel": 5316
+  },
+  {
+   "edificio": "palazzina",
+   "via": "programma",
+   "seme": 4,
+   "giudica": [],
+   "ms": 133,
+   "msUno": 133,
+   "confronto": {
+    "piani": [
+     2,
+     2
+    ],
+    "stanze": [
+     8,
+     4
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     8,
+     8
+    ],
+    "pezzi": 8
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.9322161349231926,
+   "voxel": 4795
+  },
+  {
+   "edificio": "palazzina",
+   "via": "dati",
+   "seme": 4,
+   "giudica": [],
+   "ms": 485,
+   "msUno": 485,
+   "confronto": {
+    "piani": [
+     2,
+     2
+    ],
+    "stanze": [
+     8,
+     5
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     8,
+     8
+    ],
+    "pezzi": 2
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.7374001832700615,
+   "voxel": 6752
+  },
+  {
+   "edificio": "palazzina",
+   "via": "programma",
+   "seme": 5,
+   "giudica": [
+    "stanze"
+   ],
+   "ms": 81,
+   "msUno": 81,
+   "confronto": {
+    "piani": [
+     2,
+     2
+    ],
+    "stanze": [
+     4,
+     2
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     4,
+     4
+    ],
+    "pezzi": 6
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.928524156187955,
+   "voxel": 4320
+  },
+  {
+   "edificio": "palazzina",
+   "via": "dati",
+   "seme": 5,
+   "giudica": [],
+   "ms": 366,
+   "msUno": 366,
+   "confronto": {
+    "piani": [
+     2,
+     2
+    ],
+    "stanze": [
+     4,
+     3
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     4,
+     4
+    ],
+    "pezzi": 1
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.4797615312205836,
+   "voxel": 2187
+  },
+  {
+   "edificio": "forte",
+   "via": "programma",
+   "seme": 1,
+   "giudica": [],
+   "ms": 198,
+   "msUno": 198,
+   "confronto": {
+    "piani": [
+     3,
+     3
+    ],
+    "stanze": [
+     4,
+     5
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     5,
+     5
+    ],
+    "pezzi": 12
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.9856845031271716,
+   "voxel": 6787
+  },
+  {
+   "edificio": "forte",
+   "via": "dati",
+   "seme": 1,
+   "giudica": [
+    "stanze"
+   ],
+   "ms": 320,
+   "msUno": 320,
+   "confronto": {
+    "piani": [
+     3,
+     3
+    ],
+    "stanze": [
+     4,
+     2
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     5,
+     5
+    ],
+    "pezzi": 17
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.8405524704542219,
+   "voxel": 18652
+  },
+  {
+   "edificio": "forte",
+   "via": "programma",
+   "seme": 2,
+   "giudica": [],
+   "ms": 225,
+   "msUno": 225,
+   "confronto": {
+    "piani": [
+     3,
+     3
+    ],
+    "stanze": [
+     4,
+     3
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     5,
+     5
+    ],
+    "pezzi": 15
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.9656713041511141,
+   "voxel": 7809
+  },
+  {
+   "edificio": "forte",
+   "via": "dati",
+   "seme": 2,
+   "giudica": [
+    "stanze"
+   ],
+   "ms": 275,
+   "msUno": 275,
+   "confronto": {
+    "piani": [
+     3,
+     3
+    ],
+    "stanze": [
+     4,
+     1
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     5,
+     5
+    ],
+    "pezzi": 16
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.8912993759597477,
+   "voxel": 19020
+  },
+  {
+   "edificio": "forte",
+   "via": "programma",
+   "seme": 3,
+   "giudica": [],
+   "ms": 43,
+   "msUno": 43,
+   "confronto": {
+    "piani": [
+     3,
+     3
+    ],
+    "stanze": [
+     4,
+     4
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     5,
+     5
+    ],
+    "pezzi": 0
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0,
+   "voxel": 0
+  },
+  {
+   "edificio": "forte",
+   "via": "dati",
+   "seme": 3,
+   "giudica": [],
+   "ms": 26,
+   "msUno": 26,
+   "confronto": {
+    "piani": [
+     3,
+     3
+    ],
+    "stanze": [
+     4,
+     4
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     5,
+     5
+    ],
+    "pezzi": 0
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0,
+   "voxel": 0
+  },
+  {
+   "edificio": "forte",
+   "via": "programma",
+   "seme": 4,
+   "giudica": [],
+   "ms": 193,
+   "msUno": 193,
+   "confronto": {
+    "piani": [
+     3,
+     3
+    ],
+    "stanze": [
+     4,
+     5
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     6,
+     6
+    ],
+    "pezzi": 15
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.9408661093600109,
+   "voxel": 10401
+  },
+  {
+   "edificio": "forte",
+   "via": "dati",
+   "seme": 4,
+   "giudica": [
+    "stanze"
+   ],
+   "ms": 835,
+   "msUno": 835,
+   "confronto": {
+    "piani": [
+     3,
+     3
+    ],
+    "stanze": [
+     4,
+     1
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     6,
+     6
+    ],
+    "pezzi": 18
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.7276807052950236,
+   "voxel": 24936
+  },
+  {
+   "edificio": "forte",
+   "via": "programma",
+   "seme": 5,
+   "giudica": [],
+   "ms": 169,
+   "msUno": 169,
+   "confronto": {
+    "piani": [
+     3,
+     3
+    ],
+    "stanze": [
+     4,
+     6
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     6,
+     6
+    ],
+    "pezzi": 14
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.9353836347701379,
+   "voxel": 6050
+  },
+  {
+   "edificio": "forte",
+   "via": "dati",
+   "seme": 5,
+   "giudica": [
+    "stanze"
+   ],
+   "ms": 296,
+   "msUno": 296,
+   "confronto": {
+    "piani": [
+     3,
+     3
+    ],
+    "stanze": [
+     4,
+     2
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     6,
+     6
+    ],
+    "pezzi": 18
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.8191547393303374,
+   "voxel": 26137
+  },
+  {
+   "edificio": "tempio",
+   "via": "programma",
+   "seme": 1,
+   "giudica": [],
+   "ms": 137,
+   "msUno": 137,
+   "confronto": {
+    "piani": [
+     2,
+     2
+    ],
+    "stanze": [
+     3,
+     3
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     3,
+     3
+    ],
+    "pezzi": 9
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.924186194465062,
+   "voxel": 5095
+  },
+  {
+   "edificio": "tempio",
+   "via": "dati",
+   "seme": 1,
+   "giudica": [],
+   "ms": 266,
+   "msUno": 266,
+   "confronto": {
+    "piani": [
+     2,
+     2
+    ],
+    "stanze": [
+     3,
+     3
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     3,
+     3
+    ],
+    "pezzi": 4
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.9124291321412996,
+   "voxel": 6257
+  },
+  {
+   "edificio": "tempio",
+   "via": "programma",
+   "seme": 2,
+   "giudica": [],
+   "ms": 122,
+   "msUno": 122,
+   "confronto": {
+    "piani": [
+     2,
+     2
+    ],
+    "stanze": [
+     3,
+     3
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     3,
+     3
+    ],
+    "pezzi": 9
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.8044465137935048,
+   "voxel": 5220
+  },
+  {
+   "edificio": "tempio",
+   "via": "dati",
+   "seme": 2,
+   "giudica": [
+    "stanze"
+   ],
+   "ms": 135,
+   "msUno": 135,
+   "confronto": {
+    "piani": [
+     2,
+     2
+    ],
+    "stanze": [
+     3,
+     2
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     3,
+     3
+    ],
+    "pezzi": 5
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.9302160593356982,
+   "voxel": 6963
+  },
+  {
+   "edificio": "tempio",
+   "via": "programma",
+   "seme": 3,
+   "giudica": [
+    "stanze"
+   ],
+   "ms": 93,
+   "msUno": 93,
+   "confronto": {
+    "piani": [
+     2,
+     2
+    ],
+    "stanze": [
+     3,
+     2
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     3,
+     3
+    ],
+    "pezzi": 7
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.9347432024169184,
+   "voxel": 4495
+  },
+  {
+   "edificio": "tempio",
+   "via": "dati",
+   "seme": 3,
+   "giudica": [
+    "stanze"
+   ],
+   "ms": 81,
+   "msUno": 81,
+   "confronto": {
+    "piani": [
+     2,
+     2
+    ],
+    "stanze": [
+     3,
+     2
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     3,
+     3
+    ],
+    "pezzi": 3
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.6944153316364725,
+   "voxel": 6683
+  },
+  {
+   "edificio": "tempio",
+   "via": "programma",
+   "seme": 4,
+   "giudica": [
+    "stanze"
+   ],
+   "ms": 90,
+   "msUno": 90,
+   "confronto": {
+    "piani": [
+     2,
+     2
+    ],
+    "stanze": [
+     3,
+     1
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     3,
+     3
+    ],
+    "pezzi": 7
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.937984496124031,
+   "voxel": 4620
+  },
+  {
+   "edificio": "tempio",
+   "via": "dati",
+   "seme": 4,
+   "giudica": [],
+   "ms": 147,
+   "msUno": 147,
+   "confronto": {
+    "piani": [
+     2,
+     2
+    ],
+    "stanze": [
+     3,
+     3
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     3,
+     3
+    ],
+    "pezzi": 3
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.852438305398804,
+   "voxel": 10026
+  },
+  {
+   "edificio": "tempio",
+   "via": "programma",
+   "seme": 5,
+   "giudica": [],
+   "ms": 119,
+   "msUno": 119,
+   "confronto": {
+    "piani": [
+     2,
+     2
+    ],
+    "stanze": [
+     3,
+     3
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     3,
+     3
+    ],
+    "pezzi": 10
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.7664337320857515,
+   "voxel": 5270
+  },
+  {
+   "edificio": "tempio",
+   "via": "dati",
+   "seme": 5,
+   "giudica": [],
+   "ms": 579,
+   "msUno": 228,
+   "confronto": {
+    "piani": [
+     2,
+     2
+    ],
+    "stanze": [
+     3,
+     3
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     3,
+     3
+    ],
+    "pezzi": 6
+   },
+   "regge": true,
+   "tentativi": 2,
+   "varianza": 0.7807184968401408,
+   "voxel": 15971
+  },
+  {
+   "edificio": "locanda",
+   "via": "programma",
+   "seme": 1,
+   "giudica": [
+    "stanze"
+   ],
+   "ms": 103,
+   "msUno": 103,
+   "confronto": {
+    "piani": [
+     3,
+     3
+    ],
+    "stanze": [
+     3,
+     2
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     1.745,
+     1.745
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     6,
+     6
+    ],
+    "pezzi": 5
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.9629120879120879,
+   "voxel": 3055
+  },
+  {
+   "edificio": "locanda",
+   "via": "dati",
+   "seme": 1,
+   "giudica": [
+    "stanze"
+   ],
+   "ms": 438,
+   "msUno": 438,
+   "confronto": {
+    "piani": [
+     3,
+     3
+    ],
+    "stanze": [
+     3,
+     2
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     1.745,
+     1.745
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     6,
+     6
+    ],
+    "pezzi": 2
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.4705528846153846,
+   "voxel": 2432
+  },
+  {
+   "edificio": "locanda",
+   "via": "programma",
+   "seme": 2,
+   "giudica": [
+    "stanze"
+   ],
+   "ms": 106,
+   "msUno": 106,
+   "confronto": {
+    "piani": [
+     3,
+     3
+    ],
+    "stanze": [
+     5,
+     2
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     1.7375,
+     1.7375
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     8,
+     8
+    ],
+    "pezzi": 9
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.875015377045147,
+   "voxel": 4845
+  },
+  {
+   "edificio": "locanda",
+   "via": "dati",
+   "seme": 2,
+   "giudica": [],
+   "ms": 332,
+   "msUno": 332,
+   "confronto": {
+    "piani": [
+     3,
+     3
+    ],
+    "stanze": [
+     5,
+     4
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     1.7375,
+     1.7375
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     8,
+     8
+    ],
+    "pezzi": 2
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.7712401724575196,
+   "voxel": 4845
+  },
+  {
+   "edificio": "locanda",
+   "via": "programma",
+   "seme": 3,
+   "giudica": [
+    "stanze"
+   ],
+   "ms": 115,
+   "msUno": 115,
+   "confronto": {
+    "piani": [
+     3,
+     3
+    ],
+    "stanze": [
+     7,
+     2
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     1.75,
+     1.75
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     9,
+     9
+    ],
+    "pezzi": 10
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.906231662950358,
+   "voxel": 5020
+  },
+  {
+   "edificio": "locanda",
+   "via": "dati",
+   "seme": 3,
+   "giudica": [],
+   "ms": 265,
+   "msUno": 265,
+   "confronto": {
+    "piani": [
+     3,
+     3
+    ],
+    "stanze": [
+     7,
+     3
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     1.75,
+     1.75
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     9,
+     9
+    ],
+    "pezzi": 4
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.8778142198009895,
+   "voxel": 9341
+  },
+  {
+   "edificio": "locanda",
+   "via": "programma",
+   "seme": 4,
+   "giudica": [
+    "stanze"
+   ],
+   "ms": 93,
+   "msUno": 93,
+   "confronto": {
+    "piani": [
+     3,
+     3
+    ],
+    "stanze": [
+     3,
+     2
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     1.7475,
+     1.7475
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     6,
+     6
+    ],
+    "pezzi": 6
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.6987577639751552,
+   "voxel": 3775
+  },
+  {
+   "edificio": "locanda",
+   "via": "dati",
+   "seme": 4,
+   "giudica": [
+    "stanze"
+   ],
+   "ms": 227,
+   "msUno": 227,
+   "confronto": {
+    "piani": [
+     3,
+     3
+    ],
+    "stanze": [
+     3,
+     2
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     1.7475,
+     1.7475
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     6,
+     6
+    ],
+    "pezzi": 1
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.8711194731890874,
+   "voxel": 4094
+  },
+  {
+   "edificio": "locanda",
+   "via": "programma",
+   "seme": 5,
+   "giudica": [
+    "stanze"
+   ],
+   "ms": 102,
+   "msUno": 102,
+   "confronto": {
+    "piani": [
+     3,
+     3
+    ],
+    "stanze": [
+     3,
+     2
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     1.755,
+     1.755
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     6,
+     6
+    ],
+    "pezzi": 6
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.8380566801619433,
+   "voxel": 3230
+  },
+  {
+   "edificio": "locanda",
+   "via": "dati",
+   "seme": 5,
+   "giudica": [
+    "stanze"
+   ],
+   "ms": 259,
+   "msUno": 259,
+   "confronto": {
+    "piani": [
+     3,
+     3
+    ],
+    "stanze": [
+     3,
+     2
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     1.755,
+     1.755
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     6,
+     6
+    ],
+    "pezzi": 1
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 1,
+   "voxel": 4094
+  },
+  {
+   "edificio": "officina",
+   "via": "programma",
+   "seme": 1,
+   "giudica": [
+    "stanze"
+   ],
+   "ms": 103,
+   "msUno": 103,
+   "confronto": {
+    "piani": [
+     2,
+     2
+    ],
+    "stanze": [
+     6,
+     2
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     6,
+     6
+    ],
+    "pezzi": 8
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.8723526044647968,
+   "voxel": 3580
+  },
+  {
+   "edificio": "officina",
+   "via": "dati",
+   "seme": 1,
+   "giudica": [],
+   "ms": 139,
+   "msUno": 139,
+   "confronto": {
+    "piani": [
+     2,
+     2
+    ],
+    "stanze": [
+     6,
+     3
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     6,
+     6
+    ],
+    "pezzi": 3
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.9957554485348135,
+   "voxel": 6022
+  },
+  {
+   "edificio": "officina",
+   "via": "programma",
+   "seme": 2,
+   "giudica": [
+    "stanze"
+   ],
+   "ms": 105,
+   "msUno": 105,
+   "confronto": {
+    "piani": [
+     2,
+     2
+    ],
+    "stanze": [
+     6,
+     2
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     6,
+     6
+    ],
+    "pezzi": 7
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.8587633144279984,
+   "voxel": 3405
+  },
+  {
+   "edificio": "officina",
+   "via": "dati",
+   "seme": 2,
+   "giudica": [],
+   "ms": 202,
+   "msUno": 202,
+   "confronto": {
+    "piani": [
+     2,
+     2
+    ],
+    "stanze": [
+     6,
+     4
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     6,
+     6
+    ],
+    "pezzi": 2
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.7545137308450918,
+   "voxel": 2893
+  },
+  {
+   "edificio": "officina",
+   "via": "programma",
+   "seme": 3,
+   "giudica": [
+    "stanze"
+   ],
+   "ms": 106,
+   "msUno": 106,
+   "confronto": {
+    "piani": [
+     2,
+     2
+    ],
+    "stanze": [
+     5,
+     1
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     5,
+     5
+    ],
+    "pezzi": 8
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.8909541511771994,
+   "voxel": 3580
+  },
+  {
+   "edificio": "officina",
+   "via": "dati",
+   "seme": 3,
+   "giudica": [],
+   "ms": 176,
+   "msUno": 176,
+   "confronto": {
+    "piani": [
+     2,
+     2
+    ],
+    "stanze": [
+     5,
+     3
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     5,
+     5
+    ],
+    "pezzi": 2
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.8299505731412347,
+   "voxel": 4845
+  },
+  {
+   "edificio": "officina",
+   "via": "programma",
+   "seme": 4,
+   "giudica": [
+    "stanze"
+   ],
+   "ms": 101,
+   "msUno": 101,
+   "confronto": {
+    "piani": [
+     2,
+     2
+    ],
+    "stanze": [
+     7,
+     2
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     7,
+     7
+    ],
+    "pezzi": 8
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.9156460712811338,
+   "voxel": 3580
+  },
+  {
+   "edificio": "officina",
+   "via": "dati",
+   "seme": 4,
+   "giudica": [],
+   "ms": 329,
+   "msUno": 329,
+   "confronto": {
+    "piani": [
+     2,
+     2
+    ],
+    "stanze": [
+     7,
+     4
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     7,
+     7
+    ],
+    "pezzi": 3
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 1,
+   "voxel": 4731
+  },
+  {
+   "edificio": "officina",
+   "via": "programma",
+   "seme": 5,
+   "giudica": [
+    "stanze"
+   ],
+   "ms": 112,
+   "msUno": 112,
+   "confronto": {
+    "piani": [
+     2,
+     2
+    ],
+    "stanze": [
+     7,
+     2
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     7,
+     7
+    ],
+    "pezzi": 9
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.9850958126330731,
+   "voxel": 4300
+  },
+  {
+   "edificio": "officina",
+   "via": "dati",
+   "seme": 5,
+   "giudica": [],
+   "ms": 335,
+   "msUno": 335,
+   "confronto": {
+    "piani": [
+     2,
+     2
+    ],
+    "stanze": [
+     7,
+     4
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     0,
+     0
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     7,
+     7
+    ],
+    "pezzi": 3
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.6782537800177884,
+   "voxel": 10846
+  },
+  {
+   "edificio": "laboratorio",
+   "via": "programma",
+   "seme": 1,
+   "giudica": [],
+   "ms": 92,
+   "msUno": 92,
+   "confronto": {
+    "piani": [
+     3,
+     3
+    ],
+    "stanze": [
+     5,
+     3
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     1.6525,
+     1.6525
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     8,
+     8
+    ],
+    "pezzi": 7
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.7997097242380261,
+   "voxel": 4495
+  },
+  {
+   "edificio": "laboratorio",
+   "via": "dati",
+   "seme": 1,
+   "giudica": [],
+   "ms": 591,
+   "msUno": 425,
+   "confronto": {
+    "piani": [
+     3,
+     3
+    ],
+    "stanze": [
+     5,
+     4
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     1.6525,
+     1.6525
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     8,
+     8
+    ],
+    "pezzi": 1
+   },
+   "regge": true,
+   "tentativi": 2,
+   "varianza": 0.39686369119420994,
+   "voxel": 2658
+  },
+  {
+   "edificio": "laboratorio",
+   "via": "programma",
+   "seme": 2,
+   "giudica": [],
+   "ms": 112,
+   "msUno": 112,
+   "confronto": {
+    "piani": [
+     3,
+     3
+    ],
+    "stanze": [
+     8,
+     3
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     1.6675,
+     1.6675
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     9,
+     9
+    ],
+    "pezzi": 10
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.7980366335448342,
+   "voxel": 5020
+  },
+  {
+   "edificio": "laboratorio",
+   "via": "dati",
+   "seme": 2,
+   "giudica": [
+    "salti"
+   ],
+   "ms": 357,
+   "msUno": 357,
+   "confronto": {
+    "piani": [
+     3,
+     3
+    ],
+    "stanze": [
+     8,
+     5
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     1.6675,
+     1.6675
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     9,
+     9
+    ],
+    "pezzi": 3
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.8582986411122457,
+   "voxel": 7032
+  },
+  {
+   "edificio": "laboratorio",
+   "via": "programma",
+   "seme": 3,
+   "giudica": [
+    "stanze"
+   ],
+   "ms": 129,
+   "msUno": 129,
+   "confronto": {
+    "piani": [
+     3,
+     3
+    ],
+    "stanze": [
+     9,
+     2
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     1.66,
+     1.66
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     10,
+     10
+    ],
+    "pezzi": 9
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.9271137026239067,
+   "voxel": 3880
+  },
+  {
+   "edificio": "laboratorio",
+   "via": "dati",
+   "seme": 3,
+   "giudica": [],
+   "ms": 674,
+   "msUno": 674,
+   "confronto": {
+    "piani": [
+     3,
+     3
+    ],
+    "stanze": [
+     9,
+     3
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     1.66,
+     1.66
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     10,
+     10
+    ],
+    "pezzi": 6
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.7852027817943951,
+   "voxel": 15500
+  },
+  {
+   "edificio": "laboratorio",
+   "via": "programma",
+   "seme": 4,
+   "giudica": [
+    "stanze"
+   ],
+   "ms": 112,
+   "msUno": 112,
+   "confronto": {
+    "piani": [
+     3,
+     3
+    ],
+    "stanze": [
+     6,
+     2
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     1.665,
+     1.665
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     9,
+     9
+    ],
+    "pezzi": 8
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.9603600987367504,
+   "voxel": 3580
+  },
+  {
+   "edificio": "laboratorio",
+   "via": "dati",
+   "seme": 4,
+   "giudica": [],
+   "ms": 269,
+   "msUno": 269,
+   "confronto": {
+    "piani": [
+     3,
+     3
+    ],
+    "stanze": [
+     6,
+     3
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     1.665,
+     1.665
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     9,
+     9
+    ],
+    "pezzi": 3
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.9619787691667245,
+   "voxel": 8939
+  },
+  {
+   "edificio": "laboratorio",
+   "via": "programma",
+   "seme": 5,
+   "giudica": [],
+   "ms": 95,
+   "msUno": 95,
+   "confronto": {
+    "piani": [
+     3,
+     3
+    ],
+    "stanze": [
+     5,
+     3
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     1.6675,
+     1.6675
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     6,
+     6
+    ],
+    "pezzi": 5
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 0.9453993933265925,
+   "voxel": 3055
+  },
+  {
+   "edificio": "laboratorio",
+   "via": "dati",
+   "seme": 5,
+   "giudica": [],
+   "ms": 283,
+   "msUno": 283,
+   "confronto": {
+    "piani": [
+     3,
+     3
+    ],
+    "stanze": [
+     5,
+     4
+    ],
+    "murato": 0,
+    "porta": true,
+    "cantina": [
+     1.6675,
+     1.6675
+    ],
+    "raggiunte": 1,
+    "stanzePercorribili": [
+     6,
+     6
+    ],
+    "pezzi": 1
+   },
+   "regge": true,
+   "tentativi": 1,
+   "varianza": 1,
+   "voxel": 4094
+  }
+ ]
+}
