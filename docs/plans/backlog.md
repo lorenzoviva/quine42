@@ -4477,11 +4477,11 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: sì, con `?skip&offline`: prendo una credenza, la porto altrove, ricarico; provo a tapparmi una porta; il pozzo non si prende. Catture nel commit.
 - Quando è fatto: commit su `task/T292`, ADR, riga in `#regole-effetti` e nell'elenco del manifest. Sicurezza: scrivi l'esito, tocca il protocollo e il validatore.
 
-### T293 · Le carte fatte a mano: forma, archivio, rotte, interruttore — `in attesa` (dipende da T255)
+### T293 · Le carte fatte a mano: forma, archivio, rotte, interruttore — `da fare` (dipende da T255)
 - Pipeline: claude · stima 3% · approvato · priorità 7
 - Sforzo: max.
 - Step: 41
-- In attesa di: **D40** (dove sta la copia di un giocatore), `docs/pipeline/domande/aperte.md`. Il testo sotto segue la raccomandazione: se l'autore sceglie altro si riscrive.
+- Deciso dall'autore (05/11): **D40 A**: la carta sta nella collezione del suo account, fuori dagli universi; entra in un mondo solo con T295, all'inizio di un universo.
 - Contesto: testo dell'autore in `docs/userchats/to-do-2026-11-05.md`, § «Modificare le carte». I giocatori forkano un modello o un suono e modificano la copia, che è associata a una carta. Oggi `lab/` non ha un archivio (il SoundLab usa `localStorage`), e la regola 8b vieta a chi non è il master di scrivere l'universo. Carte ed eredità: `#carte-crediti`, `#clone-eredita`, ADR-0056, ADR-0084.
 - Cosa fare:
   1. Decidi e scrivi in un ADR la forma di una carta fatta a mano: programma XML (modello o suono), da quale modello e universo nasce (id, impronta, `carta.origini` di `heritage.ts`), autore, nome, classe e taglia, versione `X.Y` del kernel. Un fork prende un id suo: non sostituisce mai l'originale. Voce nel glossario.
@@ -4508,11 +4508,11 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: sì, sotto `npm run serve` con l'interruttore nei due stati, con un account di prova (emulatore): forko un modello, lo modifico, salvo, ricarico, lo vedo in `carte.html`; stesso giro per un suono (l'agente non sente: misura il segnale e di' cosa deve ascoltare l'autore); da un secondo account lo vedo e non lo scrivo. Catture nel commit.
 - Quando è fatto: commit su `task/T294`. Sicurezza: nell'esito.
 
-### T295 · Portare le carte in un universo nuovo, prima della Genesi — `in attesa` (dipende da T293)
+### T295 · Portare le carte in un universo nuovo, prima della Genesi — `da fare` (dipende da T293)
 - Pipeline: claude · stima 4% · approvato · browser · priorità 7
 - Sforzo: max, scelto dall'autore.
 - Step: 41
-- In attesa di: **D39** (l'antenato comune), `docs/pipeline/domande/aperte.md`. Il testo sotto segue la raccomandazione: se l'autore sceglie altro si riscrive.
+- Deciso dall'autore (05/11): **D39 A**: il primo commit dal seme è identico per lo stesso seme e la stessa `X.Y`; gli universi che esistono già restano fuori.
 - Contesto: testo dell'autore, § «A regime». Oggi i modelli e i suoni di un universo si ereditano solo clonandolo. L'autore vuole aggiungere carte, fatte a mano o generate, solo all'inizio, prima della Genesi, solo tra universi con un antenato comune: meno collisioni, e la Genesi non rigenera ciò che esiste. Fatto trovato pianificando: ogni universo nato dal seme fa il suo `git init` (`server/universeStore.ts:391`), e il clone copia un mondo già generato, senza Genesi: oggi le due condizioni non sono mai vere insieme.
 - Cosa fare:
   1. Il primo commit di un universo nato dal seme è identico per lo stesso seme e la stessa `X.Y` (albero, data e autore fissi): tutti hanno la stessa radice. «Antenato comune» si controlla confrontando le radici (`git rev-list --max-parents=0`, solo da `server/git.ts`), senza portare la storia dell'altro universo. I cloni tengono la radice. Gli universi che esistono già non la hanno: dillo nell'esito.
