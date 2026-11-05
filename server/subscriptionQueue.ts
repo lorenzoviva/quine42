@@ -77,9 +77,18 @@ export async function enqueue(dir: string, raw: Omit<QueuedRequest, 'id' | 'crea
   return id;
 }
 
-/** Where a request is; once answered, the answer is given once and its files go away. */
+/**
+ * Where a request is; once answered, the answer is given once and its files go away.
+ *
+ * The files are looked at in the order a request lives them (richiesta → presa → risposta), never backwards (T267):
+ * `take` renames richiesta into presa and `answer` writes risposta before removing presa, so a file missing here means
+ * the next one already exists. Looking backwards (risposta, presa, richiesta) a `take` between the last two checks
+ * read as «richiesta sconosciuta» and the call failed, more often the busier the disk.
+ */
 export async function look(dir: string, id: string): Promise<QueuedAnswer> {
   if (!safeId(id)) return { stato: 'fallita', errore: 'id non valido' };
+  if (await exists(file(dir, id, 'richiesta'))) return { stato: 'in coda' };
+  if (await exists(file(dir, id, 'presa'))) return { stato: 'in corso' };
   const answer = file(dir, id, 'risposta');
   if (await exists(answer)) {
     let a: { text?: unknown; errore?: unknown; usage?: QueuedAnswer['usage'] } = {};
@@ -92,8 +101,6 @@ export async function look(dir: string, id: string): Promise<QueuedAnswer> {
     if (typeof a.text === 'string' && a.text) return { stato: 'fatta', text: a.text, ...(a.usage ? { usage: a.usage } : {}) };
     return { stato: 'fallita', errore: typeof a.errore === 'string' ? a.errore : 'risposta vuota', ...(a.usage ? { usage: a.usage } : {}) };
   }
-  if (await exists(file(dir, id, 'presa'))) return { stato: 'in corso' };
-  if (await exists(file(dir, id, 'richiesta'))) return { stato: 'in coda' };
   return { stato: 'fallita', errore: 'richiesta sconosciuta' };
 }
 
