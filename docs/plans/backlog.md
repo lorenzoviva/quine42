@@ -3795,20 +3795,14 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Quando è fatto: l'orchestratore può lanciare il comando che mette i tag e chiederne la priorità; commit su `task/T231`. Sicurezza: nessuna superficie nuova.
 - Esito: parser di `- Step:`, campo in `indice`, `dossier` e pagina web, comando `step` (`<n> Txx…`, `--da-tabella`, `<n>`, `<n> --priorita <p>`), README, `orchestra.md`, `fasi.md` e `AGENTS.md` aggiornati. Rispetto al previsto: un task non stimato riceve la riga `- Pipeline: priorità N`, che `assegna` mantiene; i sotto-task nello stesso titolo condividono il tag; i task «spezzato in…» non ricevono la priorità; `orchestra.md` ammette `docs/fasi.md` fra i documenti scrivibili e avvisa di non usare la priorità 0. Manca: l'orchestratore deve lanciare `step --da-tabella` sul backlog vero dopo l'integrazione. Provato su una copia del backlog: 282 id riconosciuti, 277 righe `- Step:`, nessun'altra differenza. Pagina web provata solo con il test. Non provato: il comando sul backlog vero. Sicurezza: nessuna superficie nuova.
 
-### T232 · Il sito come launcher: proposte della landing col rapporto aureo — `in attesa`
-- Pipeline: claude · stima 3% · approvato · priorità 90
-- Step: 35
-- **L'autore (04/11): si fa a fine Fase II.** Lo riporta a `da fare` l'orchestratore, con T235 e il logo scelto.
-- Contesto: per l'autore la home «sembra a metà tra un pitch per una startup e un blog per fumetti». La vuole come il launcher di un gioco multiplayer moderno: accattivante, «oddly satisfying», «che rimarresti ore a guardarla», con molti rapporti tra dimensioni che rispettano il rapporto aureo. Dossier: `dossier T97`, `dossier T186`. Le proposte del logo sono in `docs/design/logo/proposte/` (file dell'autore: non toccarli, mai `git add` di quella cartella).
-- Cosa fare: 3 proposte in `docs/design/sito/launcher/`, pagine statiche provabili nel browser, che rispettano la CSP (`server/csp.ts`). Griglia e tipografia da φ e Fibonacci, con la tabella dei rapporti usati. Almeno una con al centro un programma MarkovJunior che cresce dal vivo (la crescita è già di suo «oddly satisfying»), con ciò che costa misurato. Posto per: carte e strutture in 3D o video in loop, universi più giocati, notizie. Niente testi che guastino la scoperta della corona. Non cambiare `site/`.
-- Test: nessun codice del gioco: typecheck con il suo turno.
-- Browser: sì, a 1920 e 390 px; catture di ogni proposta nel commit.
-- Quando è fatto: l'autore può aprire e confrontare le tre proposte; commit su `task/T232`. Sicurezza: nessuna superficie nuova.
+### T232 · Il sito come launcher: proposte della landing col rapporto aureo — `fatto` (assorbito, nessun commit proprio)
+- Step: 34
+- **Assorbito (autore, 05/11: «vedi tu»; decisione dell'orchestratore):** le tre proposte diventano le tre vesti di T284, T285 e T286, e griglia e tipografia da φ e Fibonacci stanno nella base comune di T283. Ciò che era «launcher» (carte e strutture in 3D, universi più giocati, notizie) resta a fine Fase II, in T233 e T235, sulla veste scelta. La richiesta di partenza: «sembra a metà tra un pitch per una startup e un blog per fumetti»; la vuole come il launcher di un gioco multiplayer moderno, «oddly satisfying», senza testi che guastino la scoperta della corona.
 
-### T233 · La landing launcher nel sito — `da fare` (dipende da T232)
+### T233 · La landing launcher nel sito — `da fare` (dipende da T287)
 - Pipeline: claude · stima 3% · priorità 2
 - Step: 35
-- Contesto: si approva solo quando l'autore ha scelto una proposta (`dossier T232`).
+- Contesto: si approva solo quando è scelta la veste del sito (`dossier T287`; da dove viene: `dossier T232`).
 - Cosa fare: la proposta scelta in `site/` col tema condiviso, senza framework; le sezioni di showcase e notizie restano nascoste finché non hanno contenuti, niente «coming soon» finti. La striscia «coming soon» degli altri universi resta.
 - Test: typecheck, build e suite intera con i loro turni.
 - Browser: sì, a 1920 e 390 px, in `npm run dev` e sotto `npm run serve`.
@@ -4364,3 +4358,62 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Cosa fare: nel tuo worktree `git merge task/T275`; in `package.json` tieni i due script e la versione `0.1.6`, uguale in `version.ts`. Gli ADR 0142 e 0143 di T275 si scontrano col 0142 di T276: rinumerali ai primi liberi, anche nei rimandi di `AGENTS.md`, `docs/architettura-dettagli.md` e `docs/adr/README.md`. Suite intera e typecheck con i loro turni; i due test «forte» di `lab/tests/riferimento.test.ts` hanno un limite di tempo reale, sotto carico possono cadere: riprovali da soli e dillo nell'esito.
 - Browser: non serve, T275 ha già provato T264.
 - Quando è fatto: commit su `task/T282`. All'integrazione l'orchestratore segna `fatto` T264, T265, T267, T207 e dà `integra T275`. Sicurezza: scrivi l'esito, T265 tocca le scritture dell'universo.
+
+### T283 · Il sito in tre vesti: la base comune, col rapporto aureo — `da fare`
+- Pipeline: claude · stima 2% · approvato · browser · priorità 3
+- Sforzo: extra.
+- Step: 34
+- Contesto: richiesta dell'autore del 05/11, testo intero in `docs/userchats/to-do-2026-11-05.md`: la pagina in tre modalità grafiche, tra cui sceglierà lui o i beta tester. Questo task assorbe la parte grafica di T232 (griglia e tipografia da φ e Fibonacci): `dossier T232`, `dossier T241`, `dossier T244`.
+- Cosa fare:
+  1. Nel sito (`site/`, senza framework) una **veste** si sceglie con un attributo sulla radice delle pagine, e ognuna sta in file propri (colori, font, logo, sfondi, effetti), caricando solo ciò che le serve; tutte le pagine del sito la seguono, non solo la home. Il nome nel codice non è «tema»: la parola indica già le ambientazioni e `src/theme.css`. Voce nuova nel glossario.
+  2. **La griglia comune:** struttura e proporzioni delle pagine dalla scala φ/Fibonacci di `src/theme.css` (T241), con la tabella dei rapporti in `#sito`. Le tre vesti cambiano l'aspetto, non i contenuti né la struttura.
+  3. Un selettore che confronta le vesti e ricorda la scelta in `localStorage`; **nessun voto e nessuna rotta nuova** (sono di T287). La veste di partenza è quella attuale, che sarà la sobria.
+  4. La CSP (`server/csp.ts`) va rispettata: niente script né gestori scritti nell'HTML. La veste si applica senza far lampeggiare quella sbagliata al caricamento.
+- Test: un test che ogni veste dichiari tutto ciò che la base chiede; typecheck, build e suite intera con i loro turni.
+- Browser: sì, a 1920 e 390 px, sotto `npm run dev` e sotto `npm run serve`; il cambio di veste su ogni pagina del sito.
+- Quando è fatto: si aggiunge una veste con i suoi file, senza toccare la base; commit su `task/T283`, ADR e riga in `#sito`. Sicurezza: nessuna superficie nuova, o le voci.
+
+### T284 · La veste futuristica: l'inception di scritte neon — `da fare` (dipende da T283, T255)
+- Pipeline: claude · stima 4% · approvato · browser · priorità 3
+- Sforzo: max, scelto dall'autore. Dipende da T255 perché questo sforzo arrivi davvero alla CLI.
+- Step: 34
+- Contesto: testo dell'autore in `docs/userchats/to-do-2026-11-05.md`, § «Tema futuristico». Parte dalla seconda proposta di Claude per il prompt 5: `docs/design/logo/proposte/claude/Logo Videogioco Quine42/QUINE42 Logo.html` (file da 1,4 MB: cerca la sezione, non leggerlo intero) e `docs/design/logo/proposte/landing-tests/5-claude-2.png`; i giudizi in `docs/design/logo/proposte/votazioni.md`. La scritta QUINE è fatta di scritte «quine» più piccole, tra Matrix e Tron, nei colori neon punk. Allude a MarkovJunior, alle rune del tappeto, al doppio livello di gioco e a un gioco fatto del suo stesso codice.
+- Cosa fare:
+  1. **Le scritte piccole si muovono:** effetto «tappeto che si muove» o «logica MJ», lettere che si accendono e attraversano la scritta grande, come un programma che compila.
+  2. **Strisce con lo stesso effetto**, più tenui, lungo la pagina.
+  3. **Il motore:** l'autore teme che un algoritmo MJ 2D o testuale sia troppo per la landing. Prova il programma MJ e l'animazione semplice, misura entrambi (ms per fotogramma e CPU a 1920 px, una macchina modesta simulata con il rallentamento del processore, peso scaricato) e scegli coi numeri, scritti nell'esito. Solo se MJ regge, proponi una variante senza lo showcase 3D e con effetti MJ lungo tutta la pagina: è una scelta che resta all'autore.
+  4. **L'icona:** quella accanto alla scritta non convince l'autore. Toglila o ridisegnala dalla scritta stessa; la favicon deve comunque leggersi a 16 px.
+  5. L'animazione si ferma a scheda nascosta e rispetta `prefers-reduced-motion`; i testi restano leggibili sopra l'effetto.
+- Test: typecheck, build e suite intera con i loro turni.
+- Browser: sì, a 1920 e 390 px; catture nel commit e, se puoi, una breve registrazione dell'effetto.
+- Quando è fatto: la veste è selezionabile, le misure sono nell'esito; commit su `task/T284`. Sicurezza: nessuna superficie nuova.
+
+### T285 · La veste a fumetto: crea la tua quine-storia — `da fare` (dipende da T283)
+- Pipeline: claude · stima 3% · approvato · browser · priorità 3
+- Sforzo: extra.
+- Step: 34
+- Contesto: testo dell'autore in `docs/userchats/to-do-2026-11-05.md`, § «Tema Fumetto». Parte dalla seconda proposta di Claude per il prompt 1: `docs/design/logo/proposte/claude/Logo Videogioco Quine42/QUINE42 Logo.html` (cerca la sezione) e `docs/design/logo/proposte/landing-tests/1-claude-2.png`. Il vecchio aspetto pop art del sito è nella storia: `git show 9b8523c~1:site/site.css`. Allude alla storia nella storia, alla libera conversazione di NPC e Concilio, ai fumetti del gioco.
+- Cosa fare:
+  1. **La Q:** nella scritta e nell'icona l'asticella sembra staccata dal resto; ridisegnala perché faccia corpo con la lettera, a ogni misura.
+  2. **I pois nel sito, animati:** texture retinata nel design delle pagine, con un movimento lento che non disturbi la lettura; si ferma a scheda nascosta e rispetta `prefers-reduced-motion`.
+  3. **La palette:** l'autore sente qualcosa di discrepante e non sa dire cosa. Trova la causa (per esempio tinte, saturazioni o contrasti fuori famiglia, misurati), correggila e di' nell'esito cosa hai cambiato, con la cattura prima e la cattura poi.
+  4. I fumetti degli NPC in gioco **non si toccano qui**: si fanno solo se vince questa veste (T287).
+- Test: typecheck, build e suite intera con i loro turni.
+- Browser: sì, a 1920 e 390 px; contrasto dei testi sopra i pois; catture nel commit.
+- Quando è fatto: la veste è selezionabile; commit su `task/T285`. Sicurezza: nessuna superficie nuova.
+
+### T286 · La veste sobria: vediamoci chiaro — `da fare` (dipende da T283)
+- Pipeline: claude · stima 2% · approvato · browser · priorità 3
+- Sforzo: high.
+- Step: 34
+- Contesto: testo dell'autore in `docs/userchats/to-do-2026-11-05.md`, § «Tema sobrio». Il sito attuale (T244) è chiaro e pulito, misterioso e poco spoilerante, ma ha poca personalità. Il logo è la seconda proposta di Claude per il prompt 4 (`docs/design/logo/proposte/claude/Logo Videogioco Quine42/QUINE42 Logo.html`, `docs/design/logo/proposte/landing-tests/4-claude-2.png`), con la sua icona, che all'autore piace molto.
+- Cosa fare: porta quel logo e quell'icona nel sito attuale e dagli più personalità con pochi gesti legati al logo (il cerchio, il tappeto), **senza aggiungere spoiler né riportare l'aspetto da pitch o da fumetto**. Favicon compresa.
+- Test: typecheck, build e suite intera con i loro turni.
+- Browser: sì, a 1920 e 390 px; catture nel commit.
+- Quando è fatto: la veste è selezionabile; commit su `task/T286`. Sicurezza: nessuna superficie nuova.
+
+### T287 · La scelta della veste: subito dall'autore, o col voto dei beta tester — `in attesa` (dipende da T284, T285, T286)
+- Step: 34
+- Contesto: l'autore confronta le tre vesti. Se una è nettamente superiore la sceglie subito; altrimenti decidono i tester. Il testo in `docs/userchats/to-do-2026-11-05.md`. Lo riscrive e lo stima l'orchestratore alla risposta dell'autore.
+- Se sceglie subito: restano la veste scelta e, solo se è la futuristica o la fumetto, le sue conseguenze (senza showcase se è MJ; i fumetti degli NPC in gioco se è la fumetto).
+- Se si vota: lo switch in alto e una scelta per account, che si può cambiare, registrata dal server. Una rotta nuova passa da `gate` e dall'elenco di `server/production.ts`, con il suo ritmo in `FRONT_RATES`; i voti stanno sotto `universes/` in una cartella che non si serve, e i conti li legge solo il master. Due parole per i tester nella guida della beta. Sicurezza: voci nuove.
