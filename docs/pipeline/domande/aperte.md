@@ -2,7 +2,6 @@
 
 L'elenco unico (richiesta dell'autore, 04/11): l'orchestratore lo tiene aggiornato e lo riporta in chat. I numeri non cambiano; una risposta toglie la riga.
 
-- **D34 (T239 — Le quattro lingue, `docs/lingue.md`, in fondo; lavoro in Fase III, nessuna fretta):** risposte 05/11 sera: 1. *ogni cosa nasce in tutte le lingue, la sceglie il viandante* (B), chiesto com'era la C (spiegata); 2. **aperta, da discutere**: l'autore vorrebbe l'inglese come lingua centrale (id, campi, dati) per la comunità; stima data in chat (≈ 130 valori distinti + 212 campi su disco, non 3.849: quelle sono occorrenze); 3. chiesto come verrebbero in latino (esempi in chat); 4. B, ma con il Concilio in inglese, o lingua scelta dal master in multi e dal viandante in single: proposta in chat (Concilio in inglese, traduzione solo nelle lingue dei viandanti presenti); 5. sì (mondo + italiano + inglese); 6. sì, si misura la spesa in corsa.
 - **D35 (T240 — Il piano di lancio, `docs/lancio/piano.md`; il testo di ogni voce è lì, col consiglio):**
   - **Da decidere ora:** D3.1 account personali su Hacker News e Reddit da subito, per usarli mesi prima del lancio (consiglio: sì, la voce più importante del piano).
   - **Senza consiglio, tuoi:** D5.1 10 ore a settimana di promozione?; D6.2 tetto della chiave il giorno del lancio (proposta 75 $, poi 15 $; i 10 $ al giorno non reggono il picco); D6.4 macchine e RAM il giorno del lancio (dopo la beta; 16 mondi ≈ 16 GB); D7.3 repository pubblico o in parte (cambia la licenza, segreti da ricontrollare).
@@ -11,7 +10,7 @@ L'elenco unico (richiesta dell'autore, 04/11): l'orchestratore lo tiene aggiorna
   - **Facoltative:** D4.3 Boa Loger easter egg nel mondo (senza storia d'origine); D4.5 bot Discord dichiarato (consiglio: non subito).
   - **Non verificato nel piano (V1-V9):** regole di HN, Reddit, itch.io lette da fonti secondarie, obblighi fiscali e AI Act da controllare, costo reale di una Genesi.
 
-Chiuse il 05/11: D36 → T302 (intervallo dei kernel, poi l'installazione), D37 → T303 (misura con gli abbonamenti), D38 A.
+Chiuse il 05/11: D34 → C, inglese lingua interna subito (T306-T310, step 42), rune in latino, prompt in inglese; D36 → T302 (intervallo dei kernel, poi l'installazione), D37 → T303 (misura con gli abbonamenti), D38 A.
 - **D42 (T284 — la variante `?fx=mj-pagina` della veste futuristica):** niente palco 3D, MarkovJunior su tutta la pagina e un labirinto 2D di lettere al posto del palco (18,3 % del thread a CPU 4× con three.js caricato, 9,8 % senza, contro 39,6 % della veste scelta). Non è nel selettore. Se la vuoi servono three.js caricato solo quando il palco si vede e un intervento sui picchi da 11-15 ms. Consiglio: guardala (`?fx=mj-pagina`) dopo T285 e T286; decidere a fine giro delle tre vesti (T287).
 
 ## Rimandate per tua scelta

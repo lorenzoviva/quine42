@@ -3856,7 +3856,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Cosa fare alla ripartenza: censimento dei testi (UI, sito, prompt, seme, lessico, canone delle rune, messaggi del kernel), proposta con le alternative in `docs/lingue.md`: lingua per universo o per viandante, cosa si traduce e cosa si genera, come si verifica. A parte documentazione, pipeline agentica e pregresso dello sviluppo: si traducono solo se il piano di lancio punta anche alla comunità dello sviluppo agentico.
 - Prodotto su Claude Cloud e portato da T278 (`112b736`): `docs/lingue.md`, `docs/lingue-censimento.md`. Resta `in attesa`: lo chiude l'autore quando l'ha letto.
 - Risposta dell'autore a D34.1 (05/11): non una lingua fissa per universo: un universo si traduce in tempo reale, e ciò che si crea (un oggetto, un luogo, un individuo) nasce già con i testi in tutte le lingue; la lingua la sceglie il viandante. `docs/lingue.md` va riscritto su questa base alla ripartenza (Fase III). Restano aperti i punti 2-6 di D34.
-- Domanda per l'autore: D34 in `docs/pipeline/domande/aperte.md`.
+- Risposte dell'autore a D34 (05/11 sera): **1. C** (ripensata: la B è troppo complessa): lingua del mondo per universo, interfaccia nella lingua del viandante; **2.** l'inglese come lingua interna, subito, nello step 42 (T306-T310); **3.** rune magiche in latino; **4.** con la C, prompt in inglese; **5.** filtro su mondo + italiano + inglese; **6.** sì, la documentazione solo nel sottoinsieme; si misura la spesa in corsa. Resta per la Fase III: la lingua scelta alla Genesi, i dizionari dell'interfaccia, il seme e il sito nelle lingue (L1, L5-L9 di `docs/lingue.md`).
 
 ### T240 · Il piano di lancio: concorrenti, punti di forza, Boa Loger — `in attesa`
 - Step: 38
@@ -4629,3 +4629,48 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Test: se ci sono test della pipeline, uno che con `google: pro` Argon è disponibile; typecheck con il suo turno.
 - Browser: nella pagina web (porta libera) scegliere Pro lascia Argon acceso.
 - Quando è fatto: commit su `task/T305`. Nell'esito che il processo dell'orchestratore legge `config.json` solo all'avvio.
+
+### T306 · L'inglese come lingua interna: la tabella delle corrispondenze, le rune in latino e l'ADR — `da fare` (dipende da T302)
+- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 3
+- Step: 42
+- Contesto: risposte dell'autore a D34 (05/11 sera): **C** per le lingue (una lingua del mondo per universo, scelta alla Genesi; l'interfaccia nella lingua del viandante, T239 in Fase III), e **subito, prima della beta, l'inglese come lingua interna** perché la comunità dello sviluppo agentico possa leggere il repository: valori confrontati dal codice, nomi di campo su disco, commenti di Lua e XML, prompt. La documentazione resta italiana (a parte il sottoinsieme in inglese del punto 6, in Fase III). I **token delle rune magiche in latino** (`terra`, `ignis`, `ventus`, `aqua`, `lux`…), uguali in ogni lingua; i token di codice (`x`, `speed`, `=`) restano Lua. Le cifre sono in `docs/lingue-censimento.md` (≈ 130 valori distinti nei domini, 212 nomi di campo; le 3.849 sono occorrenze) e `docs/lingue.md` §3, §5. Contratto nuovo (D32, ADR-0136): `0.2.0`; la migrazione degli universi salvati è la prima che si registra nell'impalcatura di T302 (`dossier T302`).
+- Cosa fare, solo documenti e un test: (1) `docs/lingua-interna.md`: la tabella completa, dominio per dominio (classi, taglie, effetti `tipo`, momenti, «dove», attività, specie e generi, usi dei suoni, azioni e layout del seme, nomi dei terreni, rune magiche → latino, i 212 campi su disco con il file in cui stanno, i percorsi come `world/giocatori/`, `world/imprese.json`, `world/magazzino/`, i messaggi del protocollo e i nomi visibili a Lua che sono italiani), ogni voce: italiano → inglese (o latino), dove si legge, se tocca disco, filo o Lua. (2) La stessa tabella come dato, `src/kernel/internalNames.ts` (o il nome che il glossario suggerisce), con un test che non ci siano doppioni né collisioni con nomi inglesi già usati. (3) Il piano dei task successivi (T307-T310) verificato sul codice: se uno è troppo grande, lo spezza nell'esito. (4) ADR nuovo («L'inglese è la lingua interna; il mondo ha la lingua del suo universo; le rune in latino»), che supera la convenzione sui commenti Lua italiani; `AGENTS.md` (Convenzioni) e `docs/glossario.md` aggiornati; `docs/lingue.md` §2-§4 allineato alle risposte di D34 (C, P2, latino, filtro su mondo + italiano + inglese).
+- Test: quello della tabella; typecheck con il suo turno.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T306`. Nell'esito il numero di voci per dominio e cosa resta fuori.
+
+### T307 · L'inglese come lingua interna: i valori dei domini e le rune in latino, con la migrazione — `da fare` (dipende da T306)
+- Pipeline: claude · sforzo extra · stima 8% · approvato · priorità 3
+- Step: 42
+- Contesto: il primo passo di codice di T306 (`dossier T306`, `docs/lingua-interna.md`). Tocca kernel, validatore, seme, modelli offline, test: **va lanciato da solo**, senza altri task su `src/` o `universe/` in corso, perché si scontra con tutti.
+- Cosa fare: i valori dei domini della tabella (classi, taglie, effetti, momenti, «dove», attività, specie, usi dei suoni, azioni e layout del seme, terreni come id con l'etichetta italiana, i token delle rune magiche in latino nel canone, in `magic.runes`, in `magic.ts`) nel codice, nel seme `universe/`, nei programmi `models/`, in `MockAiModels` e nei test. La migrazione `0.1 → 0.2` registrata nell'impalcatura di T302: un universo salvato si apre tradotto, deterministico, con un test su `valmora` o sugli universi del 20/10 (come T183/T205) e sui quattro di `lab/banco/universi-cloud/` (`npm run universi:cloud` installa la versione migrata). Kernel `0.2.0` (ADR-0136). Le regex che leggono testo generato restano com'erano (le tocca T310). Il validatore, per una versione, accetta anche il valore italiano e lo riporta all'inglese (riparazione, come `repairGameSetup`), così un Concilio con i prompt di oggi non si rompe.
+- Test: unitari della migrazione, suite intera e typecheck con i loro turni; 400 tick offline sul seme senza fault.
+- Browser: `?skip&offline`, un universo salvato prima si apre migrato senza guasti; una runa latina pronunciata funziona.
+- Quando è fatto: commit su `task/T307`. Sicurezza: nessuna superficie nuova, o le voci.
+
+### T308 · L'inglese come lingua interna: i nomi di campo su disco e sul filo — `da fare` (dipende da T307)
+- Pipeline: claude · sforzo extra · stima 6% · approvato · priorità 3
+- Step: 42
+- Contesto: il secondo passo di codice di T306 (`dossier T306`, `dossier T307`). ADR-0117: ciò che è su disco, sul filo o visibile a Lua si rinomina solo con una migrazione: è questa. **Va lanciato da solo**, come T307.
+- Cosa fare: i 212 nomi di campo della tabella e i percorsi dell'universo (`world/giocatori/` ecc.) in inglese; `paths.ts` (`allowedPath`, `councilMayWrite`), `files.ts` (`playerFiles`, `publicFiles`, regola 8f), il protocollo, i nomi visibili a Lua che la tabella cambia (`Host`, `prelude.lua`, `LUA_API`, prompt dell'Ingegnere, `AGENTS.md`), il sito e il server che li leggono. La migrazione nella stessa voce di T307 (stesso contratto `0.2`, `Z` sale) o in una nuova, come decide T306. Ciò che resta in fila in `localStorage` (T265) si legge anche col nome vecchio.
+- Test: migrazione di un universo salvato (anche nato in multigiocatore, se c'è una fixture), la suite di sicurezza (`files.ts`, `paths.ts`), suite intera e typecheck con i loro turni.
+- Browser: singola e due schede in multigiocatore (`?viandante=`), un universo salvato prima si apre e si salva coi nomi nuovi.
+- Quando è fatto: commit su `task/T308`. Sicurezza: le voci o «nessuna superficie nuova» (tocca `server/`, `src/session/`, la sandbox).
+
+### T309 · L'inglese come lingua interna: i commenti di Lua e degli XML — `da fare` (dipende da T308)
+- Pipeline: claude · sforzo high · stima 4% · approvato · priorità 4
+- Step: 42
+- Contesto: T306 (`dossier T306`). ≈ 27.000 parole di commenti in `universe/modules/*/logic.lua` e `universe/models/*.xml`, più i programmi ufficiali di `lab/`. Oggi la convenzione li vuole italiani; l'ADR di T306 la cambia.
+- Cosa fare: tradurre i commenti in inglese senza toccare una riga di codice né un attributo; un controllo automatico che il codice sia identico togliendo i commenti (Lua: token uguali; XML: albero senza commenti uguale) e che le forme dei modelli restino voxel per voxel uguali (`tests/mj-engine-determinism.test.ts`). Anche i commenti italiani in TypeScript che il censimento trova (≈ 1.000 parole in `src/`). I prompt dello Scultore e dell'Ingegnere che chiedono commenti italiani nel codice generato li cambia T310.
+- Test: il controllo di identità, suite intera e typecheck con i loro turni.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T309`.
+
+### T310 · L'inglese come lingua interna: i prompt del Concilio in inglese, il mondo nella lingua del suo universo — `da fare` (dipende da T309)
+- Pipeline: claude · sforzo extra · stima 6% · approvato · priorità 4
+- Step: 42
+- Contesto: D34.4 con la C (05/11): i prompt diventano inglesi (P2 di `docs/lingue.md` §4), il testo del mondo resta nella lingua dell'universo (oggi l'italiano per tutti; la scelta alla Genesi la fa T239 in Fase III). `dossier T306`.
+- Cosa fare: `universe/prompts/agents/*.md`, `theme.md`, i frammenti di `src/kernel/agents/*.ts`, `COUNCIL_PRINCIPLES` e `themes.ts` in inglese, più il blocco «Lingua» (il testo del mondo nella lingua dell'universo, `it` se non detto; gli id dello schema in inglese). `META_RE` e `glossaryBreak` sulla lingua del mondo + italiano + inglese (D34.5), con le frasi di prova e venti frasi innocue per lingua. Le regex di `docs/lingue.md` §5 che leggono richieste o risposte: dove c'è uno schema, l'id; dove no, la tabella per lingua. `MockAiModels` riconosce le richieste nuove. Una prova a pagamento piccola (al più ≈ 20 richieste, sotto un dollaro, spesa scritta nell'esito) che il Concilio scriva ancora in italiano e passi il validatore: Genesi offline + qualche luogo con Gemini, profilo browser persistente.
+- Test: quarta parete per lingua, mock, suite intera e typecheck con i loro turni.
+- Browser: una Genesi con `?offline` e la prova a pagamento sopra.
+- Quando è fatto: commit su `task/T310`. Nell'esito quanti testi del Concilio sono usciti in inglese per sbaglio e la differenza di token misurata.
