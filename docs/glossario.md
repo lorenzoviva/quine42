@@ -768,6 +768,13 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Dove vive**: `src/kernel/agents/genesis.ts`, `src/ui/genesis.ts`
 - **Da non usare**: nessuno
 
+### Generazione differita
+- **Inglese**: `runDeferred`, `DeferredModels`, `StepGate`, `planAhead`
+- **Definizione**: un universo generato prima che qualcuno lo giochi, senza browser, passo dopo passo e solo dalla coda degli abbonamenti (ADR-0137).
+- **Dove vive**: `src/kernel/deferred.ts`, `tools/generazione/genera.ts`, `server/generation.ts`, `universes/.generazione/`
+- **Da non usare**: `pregenerazione`, `generazione offline` («offline» sono i modelli locali)
+- **Fermo**: il file `universes/.generazione/<nome>.json` (passi, tetto, partita, consumo) e il segno `universes/.accesi/<nome>.json`.
+
 ### Ambientazione
 - **Inglese**: `WorldTheme`, `WORLD_THEMES`, `themeOfText`
 - **Definizione**: uno dei testi di tema tra cui si sceglie alla Genesi; il kernel non la conosce, di una Genesi resta il tema.

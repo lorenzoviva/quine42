@@ -299,3 +299,23 @@ export function subscriptionQueue(dir: string, opts: { enabled?: boolean } = {})
     },
   };
 }
+
+/**
+ * The queue on disk as QueueAiModels sees it through /api/coda, without a server (T207): a local command enqueues straight into the folder
+ * the serving process reads. No route and no secret: it is a process of this machine, as the serving one is (ADR-0106).
+ */
+export function diskQueueFetch(dir: string, endpoint = '/api/coda'): typeof fetch {
+  return (async (url: string | URL | Request, init?: RequestInit) => {
+    const json = (status: number, body: unknown) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
+    const route = String(url).slice(endpoint.length).replace(/^\//, '');
+    if (!route && init?.method === 'POST') {
+      const raw = JSON.parse(String(init.body));
+      const why = checkRequest(raw);
+      return why ? json(400, { errore: why }) : json(200, { id: await enqueue(dir, raw) });
+    }
+    if (route === 'segreto') return json(404, {});
+    if (route === 'stato') return json(200, { serviti: await served(dir), inCoda: await waiting(dir) });
+    if (init?.method === 'DELETE') return (await withdraw(dir, decodeURIComponent(route)), json(200, { ok: true }));
+    return json(200, await look(dir, decodeURIComponent(route)));
+  }) as typeof fetch;
+}

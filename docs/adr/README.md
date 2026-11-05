@@ -141,5 +141,6 @@ se una decisione cambia, se ne scrive uno nuovo che sostituisce il precedente (e
 | [0134](0134-le-ambientazioni-della-genesi.md) | Le ambientazioni della Genesi sono testo tra cui scegliere su un seme solo: ciò che sopravvive alla Genesi parla di epoca, le case comuni dipendono dal mondo | accettato |
 | [0135](0135-la-lettera-del-suolo.md) | La lettera del suolo: `suolo="E"` sulla radice, il kernel la scrive sullo strato `base`, così lo stesso programma con la cantina serve ogni taglia; chi non la dice non cambia, chiave di cache compresa |
 | [0136](0136-la-fila-delle-scritture-sopravvive-alla-pagina.md) | La fila delle scritture: commit, piani, rami e pubblicazioni in una fila sola, salvata per scheda nella pagina, con un tetto oltre il quale si uniscono; un 401 rinnova il token e riprova (aggiorna ADR-0122) | accettato |
+| [0137](0137-la-generazione-differita.md) | La generazione differita: un comando locale genera Genesi, luoghi a spirale, individui, modelli e brani solo dalla coda degli abbonamenti; un compito fuori coda lo ferma, un passo si scrive solo se finisce valido, un tetto in percentuale della settimana, mai con un mondo acceso | accettato |
 
 Modello: copia un ADR esistente, numero successivo, stato `proposto` → `accettato`.

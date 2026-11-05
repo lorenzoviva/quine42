@@ -88,6 +88,7 @@ npm run serve        # lo avvia (dopo build e build:server), legge il .env se c'
 npx vite-node lab/scripts/mjx-sound.ts -- suono-fuga-cellulare  # un programma sonoro: WAV, traccia e rapporto in testo, senza browser né modelli (ADR-0125)
 npm run mancanze -- <universo>  # il rapporto di ciò che il Concilio non è riuscito a fare, per il kernel 1.0.0 (senza nome: tutti gli universi; ADR-0130)
 npm run abbonamento  # serve la coda /api/coda con la CLI di Claude (con QUINE_CODA=1 nel .env, ADR-0077, ADR-0106)
+npm run genera -- <universo> [--partita singola|multigiocatore] [--luoghi 25] [--tetto 10]  # genera un universo prima di giocarlo, solo dalla coda degli abbonamenti (servita da npm run abbonamento), mai con un mondo acceso (ADR-0137)
 ```
 
 `.env`: `GEMINI_API_KEY=...` (ignorato da git), per il server di produzione `QUINE_ORIGINI` (i siti per cui risponde, separati da virgole: `https://…`, `http://` solo per questa macchina), `QUINE_PORTA` o `PORT` (8080), `QUINE_HOST` (127.0.0.1 se non detto; `0.0.0.0` per uscire), `QUINE_UNIVERSI` (ADR-0112), `QUINE_MONDO_MEMORIA` (MB di heap di ogni mondo di molti, predefinito 1024, ADR-0110), `QUINE_MONDI_MASSIMI` (mondi accesi insieme, predefinito 16, ADR-0113), `QUINE_UNIVERSI_PER_ACCOUNT` (universi di cui un account è master, predefinito 3, ADR-0114), `QUINE_PROXY_FIDATI` (quanti proxy nostri stanno davanti al server, predefinito 0: si misura al deploy, ADR-0114), `QUINE_VIDEO` (la cartella dei video del sito, con il loro `video.json`, fuori dal progetto; anche per `npm run dev`, ADR-0131), `GEMINI_TETTO_GIORNALIERO` (dollari al giorno per la chiave, predefinito 10; la spesa in `universes/.spesa-gemini.json`, ADR-0099), `QUINE_COMMISSIONE` (la commissione sui consumi come frazione, predefinita 0.01, 0 in beta; un valore non valido dà il predefinito, ADR-0132); `QUINE_CODA=1` accende la coda degli abbonamenti (ADR-0106); per gli account in multigiocatore `FIREBASE_PROJECT_ID` (e `FIREBASE_API_KEY`,
@@ -120,6 +121,7 @@ server/video.ts         i video del sito (ADR-0131): `/api/video`, solo ciò che
 server/betaGuide.ts     le istruzioni della beta (ADR-0131): `docs/beta/` nella build solo se ci sono e solo ciò che `site/beta.json` accende (`betaGuide`, `guideParts`)
 server/rates.ts         quanto spesso si può chiedere e chi chiede (ADR-0114): `Rates`, `clientAddress`, `proxyHops`
 server/worldCalls.ts    ciò che le rotte chiedono al mondo acceso (ADR-0110): `WorldCalls`, `worldOf`
+server/generation.ts    chi ha un universo ora (ADR-0137): il segno di un mondo acceso (`universes/.accesi/`), il lucchetto e il progresso della generazione differita (`universes/.generazione/`)
 src/
   main.ts               bootstrap: modelli, kernel, renderer, UI, loop a 60 Hz
   master.ts             gli strumenti del master (editor, console, registro, Genesi, studio, atlante, grafo, corona), caricati con import() (ADR-0061)
@@ -157,6 +159,7 @@ src/
     chain.ts            la catena della Sala sistemi (T27a): misure di ogni sistema nel tick, stazioni
                         (bench.ts: anche il banco di prova, T27b: casi, scena, nomi dei campi)
     shortfalls.ts       le mancanze (ADR-0130): ciò che il Concilio non è riuscito a fare (`world/mancanze.json`, mai ai client), il rapporto
+    deferred.ts         la generazione differita (ADR-0137): `DeferredModels` (tutto alla coda, il resto ferma), `StepGate` (si scrive solo un passo valido), `runDeferred`, `spiral`
     credits.ts          la commissione di piattaforma (`costWithFee`, la decide il server, ADR-0132) e la divisione delle spese comuni (ADR-0081)
     ai/                 models.ts, gemini.ts, mock.ts, prices.ts (prezzi, con la data), usage.ts (registro dei consumi),
                         subscription.ts (la tabella dei provider, RoutedAiModels, QueueAiModels: i compiti lenti sugli abbonamenti, ADR-0077)
@@ -193,6 +196,7 @@ tools/pipeline/          la pipeline agentica (ADR-0072, 0079): pipeline.mjs (co
 tools/sicurezza/        il kit delle prove dell'autore (T137): prove.mjs (esecuzione, esito), catalogo.mjs (le prove), ambiente.mjs (i limiti: loopback, cartella temporanea, segreti finti), server.mjs, sandbox.mjs (processi a parte)
 tools/glossario/        glossario.mjs: legge docs/glossario.md e riscrive il censimento dei sinonimi, docs/glossario-censimento.md (ADR-0117)
 tools/mancanze/         rapporto.ts (il comando), leggi.ts (legge `world/mancanze.json` degli universi sul disco, ADR-0130)
+tools/generazione/      genera.ts (il comando della generazione differita, `npm run genera`, ADR-0137)
 tools/abbonamenti/      servi.ts (il processo che serve la coda degli abbonamenti con la CLI isolata, ADR-0077, ADR-0106)
 lab/                    laboratorio di MarkovJunior (ADR-0038): sandbox 3D /lab/3d/, editor modelli /lab/editor/ (T59a, T59b, T59c, T59d), entrambi con l'interruttore cartone/classica (`lab/look.ts`), SoundLab /lab/suono/ (T222), modelli ufficiali e conformità, i pattern con cui crescono le strutture e tre programmi di riferimento del cantiere (lab/banco/pattern.md, lab/banco/riferimento/, T181), script per
                         affettare, fotografare, misurare e provare i programmi con Gemini; non importarlo da src/
