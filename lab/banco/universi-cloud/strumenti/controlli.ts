@@ -5,11 +5,12 @@ import { bibleBreaks, lexiconWords, metaBreak } from '../../../../src/kernel/fou
 import { readPeople, repairSociety, similarNames } from '../../../../src/kernel/society';
 import { readPlots, reviewPlot } from '../../../../src/kernel/plots';
 import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import type { Kernel } from '../../../../src/kernel/kernel';
 import type { ChunkRecord } from '../../../../src/kernel/chunks';
 import type { FileMap } from '../../../../src/kernel/types';
 
-const SEED = new URL('../../../../universe/', import.meta.url).pathname;
+const SEED = fileURLToPath(new URL('../../../../universe/', import.meta.url));
 const seedText = (rel: string) => {
   try {
     return readFileSync(SEED + rel, 'utf8').replace(/\r\n/g, '\n');

@@ -1,0 +1,20 @@
+<!-- Ruota del timone: a mano (Claude Code, Cantiere 9). Piedistallo e ruota a otto caviglie; ogni seme cambia le caviglie sporgenti e le borchie del mozzo. -->
+<sequence values="BPWHMO" size="20 20 20" symmetry="()" name="Ruota del timone">
+  <color symbol="P" value="6a4426" name="piedistallo"/>
+  <color symbol="W" value="9a6434" name="ruota"/>
+  <color symbol="H" value="c89458" name="caviglia"/>
+  <color symbol="M" value="3e2a1a" name="mozzo"/>
+  <color symbol="O" value="c8a050" name="ottone"/>
+  <box at="10 10 0" size="8 8 2" color="P"/>
+  <box at="10 10 2" size="4 4 8" color="P"/>
+  <box at="10 10 4" size="14 2 1" color="W"/>
+  <box at="10 10 17" size="14 2 1" color="W"/>
+  <box at="3 10 4" size="1 2 14" color="W"/>
+  <box at="17 10 4" size="1 2 14" color="W"/>
+  <box at="10 10 10" size="14 2 1" color="W"/>
+  <box at="10 10 4" size="1 2 14" color="W"/>
+  <box at="10 10 10" size="3 3 3" color="M"/>
+  <prl in="B W" out="H W" p="0.3" steps="1"/>
+  <prl in="BW" out="HW" p="0.25" steps="1"/>
+  <prl in="B M" out="O M" p="0.5" steps="1"/>
+</sequence>

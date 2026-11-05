@@ -1,0 +1,84 @@
+{
+  "id": "lavoro.impiegato",
+  "name": "L'impiegato",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi lavora a un ufficio, a uno sportello, a un registro: sempre allo stesso posto, con gli stessi colleghi.",
+  "mestieri": [
+    {
+      "id": "impiegato",
+      "nomi": [
+        "impiegato",
+        "impiegata",
+        "funzionario",
+        "funzionaria",
+        "contabile",
+        "cassiere",
+        "cassiera",
+        "burocrate",
+        "commesso",
+        "commessa",
+        "ragioniere",
+        "ragioniera",
+        "tecnico",
+        "tecnica",
+        "esattore",
+        "esattrice"
+      ],
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "aspetta",
+            "durata": 60,
+            "posa": "legge"
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "aspetta",
+            "durata": 90,
+            "posa": "lavora"
+          },
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "mangia",
+            "durata": 20
+          },
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "aspetta",
+            "posa": "legge"
+          }
+        ],
+        "sera": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}

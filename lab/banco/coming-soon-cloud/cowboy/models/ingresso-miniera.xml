@@ -1,0 +1,21 @@
+<!-- Ingresso della miniera: a mano (Claude Code, Cantiere 9). Una parete di roccia con l'imbocco puntellato e un carrello sulle rotaie; ogni seme cambia i sassi della parete e l'oro nel carrello. -->
+<sequence values="BSDTCWOR" size="20 20 20" symmetry="()" name="Ingresso della miniera">
+  <color symbol="S" value="a0583a" name="roccia"/>
+  <color symbol="D" value="1e1612" name="buio"/>
+  <color symbol="T" value="8a6a48" name="travi"/>
+  <color symbol="C" value="55585e" name="carrello"/>
+  <color symbol="W" value="2e2e33" name="ruote"/>
+  <color symbol="O" value="f2c84e" name="oro" glow="True"/>
+  <color symbol="R" value="7a3e28" name="roccia scura"/>
+  <box at="10 15 0" size="20 6 16" color="S"/>
+  <box at="10 12 0" size="8 1 10" color="D"/>
+  <box at="5 11 0" size="2 2 12" color="T"/>
+  <box at="15 11 0" size="2 2 12" color="T"/>
+  <box at="10 11 10" size="12 2 2" color="T"/>
+  <box at="10 5 0" size="6 6 1" color="W"/>
+  <box at="10 5 1" size="6 6 4" color="C"/>
+  <box at="10 5 4" size="4 4 1" color="B"/>
+  <prl in="B S" out="S S" p="0.3" steps="1"/>
+  <prl in="BS" out="RS" p="0.1" steps="1"/>
+  <one in="B C" out="O C" steps="4"/>
+</sequence>

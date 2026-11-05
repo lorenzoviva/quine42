@@ -26,6 +26,11 @@
   "runes": [
    "marea"
   ],
-  "strutture": []
+  "strutture": [
+   {
+    "concetto": "laboratorio di fusione",
+    "taglia": "grande"
+   }
+  ]
  }
 }

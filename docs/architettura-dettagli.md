@@ -9,11 +9,11 @@
 | Argomento | File sorgente |
 |---|---|
 | [Stack e persistenza](#stack) | `package.json`, `server/universeStore.ts` |
-| [Il sito e il tema](#sito) | `site/`, `src/theme.css`, `docs/design/sito/` |
+| [Il sito e il tema](#sito) | `site/`, `site/skins/`, `server/skins.ts`, `src/theme.css`, `docs/design/sito/` |
 | [Lua: confine e limiti](#lua-sandbox) | `src/kernel/sandbox.ts`, `src/kernel/prelude.lua`, `src/mj/run.ts` |
 | [Gemini, l'Attore, i coefficienti di generazione](#gemini) | `universe/universe.json`, `src/kernel/ai/`, `src/kernel/coefficients.ts` |
 | [La lobby multigiocatore](#lobby) | `src/ui/lobby.ts`, `src/ui/creditdialog.ts` |
-| [La coda della CLI degli abbonamenti](#abbonamenti) | `src/kernel/ai/subscription.ts`, `server/subscriptionQueue.ts`, `tools/abbonamenti/servi.ts` |
+| [La coda della CLI degli abbonamenti](#abbonamenti) | `src/kernel/ai/subscription.ts`, `server/subscriptionQueue.ts`, `tools/abbonamenti/servi.ts`, `src/kernel/deferred.ts`, `tools/generazione/genera.ts` |
 | [Il Concilio al lavoro: registro, Luogo, Fucina, Genesi](#concilio) | `src/kernel/agents/`, `src/kernel/layout.ts` |
 | [Spazi, rune, magia, borse](#spazi-rune-magia) | `src/kernel/kernel.ts`, `src/kernel/runes.ts`, `src/kernel/magic.ts`, `src/kernel/inventory.ts` |
 | [Il lessico](#lessico) | `world/lessico.md`, `src/kernel/fourthwall.ts` |
@@ -50,14 +50,14 @@
 - **Vitest** in Node con modelli offline (`MockAiModels`): kernel, Concilio e layout testabili headless.
 - Persistenza: repository git dell'universo su disco tramite il server di Vite (`server/universeStore.ts`):
   testi, `maps/` (piani dei luoghi), `world/stato.json` (lo stato del mondo), `world/giocatori/` (i viandanti), `world/consumi.json` (i consumi); saldi e pagamenti fuori dal repository, in `universes/.saldi/` (ADR-0104). Senza server:
-  `localStorage` + IndexedDB. I commit vanno al disco in fila (`UniverseClient`, ADR-0122): senza risposta dal server il commit resta primo in fila e ritenta (tre volte subito, poi a ogni commit nuovo e ogni 30 s), un 5xx ritenta tre volte e cede il passo, un rifiuto (4xx) si scarta con un avviso; `checkout`, `clone`, `branch` e `merge` non passano sopra un commit in attesa.
+  `localStorage` + IndexedDB. I commit vanno al disco in fila (`UniverseClient`, ADR-0122): senza risposta dal server il commit resta primo in fila e ritenta (tre volte subito, poi a ogni commit nuovo e ogni 30 s), un 5xx ritenta tre volte e cede il passo, un rifiuto (4xx) si scarta con un avviso; `checkout` e `clone` non passano sopra un commit in attesa. Nella stessa fila stanno anche i piani (`putMap`), i rami e le pubblicazioni, che ritentano come i commit (ADR-0144); nel browser la fila si salva per scheda in `localStorage` (`browserOwedStorage`, mai il token) e la pagina dopo la scrive prima di leggere l'universo; al tetto (256 scritture o 2 milioni di caratteri) una scrittura nuova si unisce a una in fila; un 401 chiede un token nuovo (`renewAuth`) e riprova.
 
 <a id="sito"></a>
 ## Il sito e il tema
 
 - **Il sito e il tema** (ADR-0095, T97): pop art a fumetti, retro arcade, neon punk e retrowave; variabili CSS unificate in `src/theme.css` per sito e gioco; pagine Vite in `site/` senza framework pesanti; three.js fuori dal gioco (hero canvas, profilo) e carte collezionabili in CSS 3D; il segreto dei gerboa nel footer; lo stile delle pagine è quello del template `docs/design/sito/` (T109), `site/site.css` lo copia; la landing (`site/landing.ts`, T101) fa crescere nell'hero programmi MarkovJunior veri con `src/mj/`; la galleria delle carte (`site/carte.html`, `carte.ts`, T104) legge lo snapshot di `/api/universe/<nome>` con `allCards(files, true)` e `receivedBy`, la rarità è derivata dagli utilizzi (`rarityOf`), le miniature sono foto dei modelli (`photo.ts`) fatte in un worker, senza WebGL. il profilo (`site/profilo.ts`, T102) entra con `signIn`, legge e salva il viandante di un universo da `/api/viandante` (`kernel.keepProfile` o i file su disco) e mostra il modello vero in three.js; i crediti (`site/pagamenti.ts`, T105) dicono saldo, ricariche e consumi del viandante in un universo da `/api/crediti` e avviano Stripe Checkout; `site/shared.ts` è ciò che le pagine con un account hanno in comune. Le interfacce in gioco (T106) leggono gli stessi token: `src/style.css` dà i suoi nomi (`--gold`, `--panel`…) alla palette di `theme.css` e costruisce le finestre con inchiostro, ombra rigida e mezze tinte (`--window-veil` le attenua dietro il testo), le battute sono fumetti, gli avvisi usano il carattere display; `tests/theme.test.ts` rifiuta un token che non esiste.
 - **Le notizie** (ADR-0129, T234): un file Markdown per notizia in `site/notizie/` (la guida è `LEGGIMI.md`), con `titolo`, `data`, `tag`, `riassunto` e, per un sondaggio o la pianificazione dei server, `link`; Vite li raccoglie alla build (`notizie-file.ts`, `import.meta.glob`), senza rotte né database. `site/notizie.html` è l'elenco, con i filtri per tag (`?tag=`), e la notizia singola (`?n=<nome del file>`); le ultime tre stanno nella landing. `notizie-testo.ts` trasforma il testo in HTML: tutto ciò che è scritto in un file esce escapato, un link è solo http(s) o del sito, un file che non va resta fuori e lo dice (`problems`: nella pagina in sviluppo, in `tests/site-news.test.ts`).
-- **La scala aurea** (T241): spazi, corpi, interlinea e larghezze di HUD e pannelli stanno in `src/theme.css` come token, e `src/style.css` li legge tutti (`tests/theme.test.ts` rifiuta un `font`, `padding`, `margin` o `gap` in px scritti a mano). Restano fuori bordi, ombre e i pallini delle legende. Solo stile; la landing nuova (T232) la riprenderà, le classi `comic-*` condivise col sito non sono cambiate. I rapporti:
+- **La scala aurea** (T241): spazi, corpi, interlinea e larghezze di HUD e pannelli stanno in `src/theme.css` come token, e `src/style.css` li legge tutti (`tests/theme.test.ts` rifiuta un `font`, `padding`, `margin` o `gap` in px scritti a mano). Restano fuori bordi, ombre e i pallini delle legende. Solo stile. Il sito la legge anche lui (T283), vedi sotto; le classi `comic-*` in `src/theme.css` non sono cambiate. I rapporti:
 
   | Che cosa | Token | Valori | Rapporto |
   |---|---|---|---|
@@ -68,6 +68,23 @@
   | Inventario | griglia : dettagli | 322 : 521 (843) | φ; 6 celle da 47 con spazi da 8 fanno 322 |
   | Bisogni | etichetta : barra | 55 : 89 | φ |
   | Barra in basso | `--measure-123`, `--space-144` | 123 messaggi e chat, 144 il fumetto | ciò che sta sopra la barra: due valori della scala, non un rapporto |
+
+- **Le vesti** (ADR-0145, T283): il sito è una base comune (`site/site.css`, `carte.css`, `sessioni.css`: struttura e proporzioni) più una veste, una cartella di `site/skins/<id>/` (`skin.json`, `skin.css`, icona, file propri, `effects.ts` facoltativo; guida in `site/skins/LEGGIMI.md`), scelta con `data-skin` sulla radice. La base legge solo token `--skin-*` e non ne dichiara nessuno: ciò che legge è il contratto, e `tests/site-skins.test.ts` lo controlla per ogni veste. `server/skins.ts` trova le cartelle, genera `/skins/boot.js` (primo script della pagina: sceglie tra gli id noti e scrive il foglio col parser, così blocca il primo disegno) e copia i file in `dist/skins/`: nessuna rotta. `site/skin.ts` è il selettore nella barra: ricorda la scelta in `localStorage` (`quine:sito:veste`), cambia foglio solo quando quello nuovo è arrivato, avvia `effects.ts` della veste in uso e segnala `quine:skin` ai palchi three.js. Una pagina nuova mette in testa `boot.js` e il `<noscript>`, e `skin.ts` tra i moduli (lo chiede il test). La sobria è la veste di partenza (`DEFAULT_SKIN`); fumetto e futuristica sono prime stesure, per T285 e T284.
+- **La griglia del sito** (T283): spazi, corpi e interlinea solo dalla scala aurea, in base e vesti (`tests/site-skins.test.ts`). I rapporti:
+
+  | Che cosa | Token o valore | Rapporto |
+  |---|---|---|
+  | Larghezza di pagina | `--page-width` = `--measure-1364` | Lucas: 843 + 521 |
+  | Due colonne (hero, crediti) | `--column-major` : `--column-minor` = 1,618 : 1 | φ |
+  | Vetrina e schede laterali | `--measure-322` e il resto | 322 è la colonna minore di 843 |
+  | Altezza dell'hero | 61,8 vh | 1/φ dello schermo |
+  | Titolo dell'hero | da `--text-34` a `--text-76`, 4,236 vw | φ³ % della larghezza |
+  | Palco 3D | `--measure-521`, 377 sotto 992 px, 322 sotto 768 | Lucas e Fibonacci |
+  | Carta | `--measure-322` × `--measure-521` | φ |
+  | Corpo del testo | `--text-18` su `--leading-read` | 18 × φ = 29 |
+  | Sezioni | `--space-55` sopra e sotto, `--space-21` ai lati | Fibonacci |
+
+  Restano fuori bordi, ombre (sono della veste), pallini e le altezze minime dei riquadri piccoli.
 
 - **La home per la beta** (ADR-0131, T244): la landing perde il tono da pitch e parte dei fumetti (`body.home`, con `site/istruzioni.html`); restano i programmi MarkovJunior e la striscia «coming soon», escono pilastri e carta dimostrativa. La corona non si nomina.
 - **I video** (ADR-0131, T244): i file stanno in una cartella del server (`QUINE_VIDEO`), mai nel repository né in `dist/`, con `video.json` accanto (`file`, `titolo`, `descrizione`, nell'ordine). `server/video.ts` risponde a `/api/video` (solo ciò che è nell'elenco e ha il file: niente build né riavvio) e a `/api/video/<file>`, in produzione, in sviluppo e nella preview. Il nome chiesto si confronta con l'elenco e non si unisce mai a un percorso; un `Range` non valido è un 416. Tetti: `FRONT_RATES` (`video`, `videosAtOnce`, `videosInAll`). Una visione costa circa 200 KB, non il file. Guida: `docs/beta/LEGGIMI.md`.
@@ -108,6 +125,12 @@
   Gli abbonamenti (ADR-0077, T68; blindati da ADR-0106): `ai.provider` (`api` predefinito, `claude`; Antigravity non può escludere gli strumenti e non sta sulla coda) e `ai.agenti` (agente → provider)
   mandano i compiti lenti (Genesi, Fucina, modelli dello Scultore, sessioni del Concilio, meccaniche) alla coda `/api/coda`, servita
   da un processo che usa la CLI dell'abbonamento di chi gioca; il resto resta sulle API. Solo in locale, mai sul server del multigiocatore. La route c'è solo con `QUINE_CODA=1` nel `.env`, da loopback, con un segreto che vive nel server; la CLI gira in una cartella vuota, con l'ambiente ridotto, senza strumenti, MCP, hook e impostazioni, il testo su stdin, e ogni esecuzione deve confermarlo dal suo `init` (`IsolationCheck` in `tools/abbonamenti/servi.ts`) o viene uccisa.
+
+  **La generazione differita** (ADR-0137, T207): `npm run genera -- <universo>` genera un universo prima che qualcuno lo giochi, senza browser e solo
+  dalla coda: ogni compito, anche i veloci, va all'abbonamento (`DeferredModels`), uno che andrebbe alle API ferma il comando. I passi (Genesi, luoghi a
+  spirale da `(0, 0)` con i loro individui, modelli, brani) si scrivono solo se finiscono validi (`StepGate`); il progresso e il tetto in percentuale
+  della settimana (riletto a ogni passo, misurato da `/usage`) stanno in `universes/.generazione/<nome>.json`; il comando non parte su un universo con
+  un mondo acceso (`universes/.accesi/`, `server/generation.ts`) e un mondo non si accende su un universo che si genera. Un universo di un'altra `X.Y` del kernel non si genera.
 
 <a id="concilio"></a>
 ## Il Concilio al lavoro: registro, Luogo, Fucina, Genesi
@@ -198,6 +221,24 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   (`world/plots.json`, diario nell'HUD). Ogni trama passa dal validatore (`reviewPlot` in `plots.ts`): individui che
   esistono, animali da animali, legami del registro, rune del canone, niente quarta parete; ciò che non torna va al
   Narratore con il motivo, all'avvio `reviewPlots` ripara o ritira le trame aperte.
+- **Il lavoro** (ADR-0140, T245b; progetto in `docs/design/comportamento-npc.md`): un mestiere con un **programma** (`mestieri` di un
+  modulo `data`, `lavoro.<mestiere>/manifest.json`: nomi, posto, i compiti di ogni fase) si abbina per nome, poi per parola
+  (`matchJob` in `jobs.ts`); il programma passa dal validatore per riferimento (`validateJobProgram`: comportamenti di un elenco chiuso,
+  caselle del terreno, oggetti del registro, durate 5-300 s, al più 6 compiti per fase). A ogni fase del giorno il kernel mette
+  all'individuo il componente `mestiere` (i compiti della fase, casa, piazza e lavoro da `placeFor` e `findTile`) e non gli sceglie più
+  la meta; `sys.lavoro` (seme, ordine 28) esegue i compiti uno dopo l'altro con lo stato in `lavoro` e ciò che porta in `carico`, e
+  cammina mettendo `meta` al prossimo punto di `world.path` (A* sulle caselle dei luoghi caricati, `route.ts`, con la cache), che
+  `sys.wander` segue. `trasforma` e `raccogli` cambiano davvero le caselle (`world.set_tile`, quindi `plan.edits`), senza chiamare i
+  modelli; al più 12 al lavoro per luogo, chi segue il viandante smette. **Ciò che matura** è del kernel: un terreno con
+  `matura {dopo, in}` diventa `in` dopo `dopo` giorni da quando la casella è stata scritta (`plan.giorni`, il giorno di ogni modifica;
+  una modifica senza giorno vale da oggi), a ogni fase del giorno nei luoghi caricati (`matureTick`). Il seme ha il contadino (ara
+  `g→m`, semina `m→e`, il seminato matura in grano `u` in un giorno, miete `u→m` con `item.grano`), il boscaiolo (`t→x` con
+  `item.ciocco`, la ceppaia ricresce in bosco in tre giorni) e il pescatore (`item.pesce` dalla riva di `w`). Con T245c (ADR-0141) i
+  mestieri del seme sono dodici, con i nomi delle quattro ambientazioni (pastore, fabbro, oste, mercante, guardia, sacerdote, scrivano,
+  cuoco, impiegato in più); `porta` e `prendi` passano dal **deposito del luogo** (la voce `deposito:<cx>:<cy>` del magazzino di
+  `sys.lavoro`, il luogo è `mestiere.luogo`, `placeDeposit`), `produci` consuma `con` e fa un pezzo al banco, `usa` chiama l'`on_act`
+  di una cosa con l'individuo come chi la usa (`world.act`, solo azioni senza effetti, entro 2,5 caselle). La via vede le forme dei
+  modelli (`free`); chi è fermo a meno di tre caselle dalla meta è arrivato, chi è fermo lontano per otto secondi lascia il compito.
 - **Personaggi** (ADR-0010, 0013, 0017, 0020): tipo + individuo (`identity`: anche `job family routine story`), `mind` (memoria, umore, modo), azioni
   `segui resta vaga dai nessuna`, oggetti citati → `wanted`. Al massimo 2 dello stesso tipo nel mondo
   caricato; nuovi tipi forgiati esplorando (`ai.maxCast`); ogni individuo è un seme del programma del suo tipo (pochi semi per classe).
@@ -356,6 +397,13 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   fabbricazione, pannelli delle meccaniche, azioni e «Altro…» sulle caselle vanno al server, che li fa con `as`; gli spostamenti di
   slot si vedono subito e, finché sono in viaggio, l'inventario del server non li sovrascrive (`pending`). Ogni
   viandante oltre `io` è un seme suo del `viandante` col mantello del suo colore (`wandererColor`, `tinta: N`).
+- **I pannelli e i tasti di ogni viandante** (ADR-0139, T263): `MyState.campi` porta, per ogni viandante, il valore di ogni `campo` che
+  un `manifest.ui` nomina (`panelFields`: solo testi, numeri e booleani, testi a 200 caratteri); un campo che nessun pannello nomina
+  resta sul server (regola 8f). Sul client `takePanelFields` scrive quei campi nei componenti del suo viandante, mai in quelli del
+  kernel (`needs`, `stati`, `inventory`…). Il client dice al server le direzioni che tiene con `tasti` (solo quando cambiano, senza
+  risposta, nel ritmo di ogni messaggio); il server tiene solo `up down left right` (`setHeldOf`). Lua le legge con
+  `input.held(azione, id)` e vede ogni viandante con `world.wanderers()` (`{id, chi, x, y}`): un sistema che gira una volta sola sul
+  server guida un carro con i tasti di chi guida e rilancia la palla a chiunque la tocchi. Da soli tutto come prima.
 - **Luoghi nuovi con il lock** (ADR-0060, T40): il chunk ricorda chi lo ha voluto vedere per primo (`Chunk.chi`); se il piano non è
   in `maps/` lo paga lui (la chiamata del Cartografo, la carta del luogo, la Fucina di ciò che il piano chiede). Le bozze si pianificano
   vicino a qualunque viandante fuori dallo studio (il master nello studio o scollegato non ferma gli altri); in multigiocatore al più
@@ -521,6 +569,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   sono nel menu dell'entità e restano fatte (`stato.json → forme`). Persone e animali camminano con gli arti, la
   vegetazione al vento, le `<animation>` girano; le icone sono foto dei modelli.
 - **La cache delle forme** (ADR-0108, T161): in Node ogni `InlineRunner` usa `sharedForms`, una per processo: un programma con un seme gira una volta per tutti i kernel (il primo boot ~10 s, i successivi ~0,25 s). La chiave (`formKey`) è il testo intero, il seme, la scatola e la tinta, più `base` per i soli programmi con la lettera del suolo (ADR-0135: le chiavi degli altri non cambiano, `FORMS_DB_VERSION` nemmeno); si tiene solo ciò che ha finito, congelato (`cells` lo scrive solo `act`, sulla copia di `instanceGrid`: mai sul risultato); LRU, 4096 voci e 256 MB; non si svuota. Nei test anche su disco (`tests/setup/forms-disk.ts`, `node_modules/.cache/quine-forms/`), mai nel gioco né sul server: chi fa dipendere il motore da un file nuovo lo aggiunge a `engineVersion`. Sempre solo nei test il rilievo (`tests/setup/relief-memo.ts`, T160: `Hills` per seme e programma; `relief.test.ts` e `determinism.test.ts` lo fanno girare davvero). Nel browser restano i worker: `WorkerRunner` tiene anch'esso solo ciò che ha finito, in memoria e in IndexedDB (`FORMS_DB_VERSION`, T163), sotto `formCacheKey`: `formKey` più ciò che cambia le mesh (T164). Su questa macchina IndexedDB solo sulle porte 5173 e 4173 o con `?formecache` (`keepsFormsOnDisk`, T177): ogni altra porta è un'origine nuova, e lasciava 0,5 GB nel profilo di Chrome. Il tetto del browser (T175, ADR-0108) è a tre piani, perché gli stessi array li tengono in tre: `WorkerRunner.memory` (128 MB, LRU: ciò che esce perde le mesh anche per il `Form` che lo tiene, `meshesGone`), le geometrie che nulla disegna (`trimGeometries`, 128 MB, mai ciò che è nella scena né ciò che è stato chiesto da meno di 30 s) e IndexedDB (`IdbFormStore`, 4 GB di array, LRU con l'archivio `uses`). Una forma tolta torna da sola: `geoOf` chiama `Form.remake` e intanto dà `undefined`, come per un modello non pronto. L'anello della corona, lontano dal bordo da 60 s, si toglie (T226). In IndexedDB griglie e mesh stanno in due archivi (T212, `forms` e `meshes`): un caricamento legge le griglie di tutte le forme, che il kernel vuole subito (`FormRunner.withoutMeshes`), e le mesh solo di ciò che si disegna (`geoOf` → `Form.remake`, e la geometria si fa all'arrivo). Le mesh le legge un worker, che decodifica fuori dal thread della pagina e cede i buffer (T215, `IdbFormStore.meshReader`, prima dei programmi in coda); se non trova nulla legge la pagina, come chi non ha worker. La sfera di ingombro di una geometria la calcola three quando la disegna.
+- **Il motore sulle griglie grandi** (ADR-0142, D33): `src/mj/engine.ts` tiene un censimento delle lettere per riga (`Census`, aggiornato da `write`); una scansione intera di un pattern guarda solo le righe dove può stare la sua cella più rara, nello stesso ordine di prima, e `conv` salta le righe senza celle d'ingresso. L'ordine delle chiavi di `MatchSet` fa parte dell'esecuzione: ogni ottimizzazione lo conserva, e `tests/mj-engine-determinism.test.ts` confronta l'impronta di ogni modello del seme e dei riferimenti del banco con `tests/fixtures/mj-engine-hashes.json` (presa col motore di prima; si rifà solo con `lab/scripts/mj-hashes.ts -- --scrivi` e un motore di cui ci si fida). La cantina a Enorme è passata da 5,6 s a 0,5 s; `lab/scripts/bench-engine.ts` misura.
 - **Il vetro di un modello** (`<color alpha>`, T217): la geometria ha un gruppo per l'opaco e uno per il vetro (`opaqueCount` di `src/mj/mesh.ts`), e con un solo materiale three disegna entrambi con quello: il vetro esce pieno. Ogni mesh della geometria di un modello prende i materiali da `modelMaterials` (`src/render/models.ts`), che accoppia `MAT.corona` e `MAT.coronaSway` a `MAT.coronaGlass`, `MAT.cut` a `MAT.cutGlass` e il resto a `MAT.glass`.
 - **Oltre il cerchio niente materiali tagliati** (T218): `MAT.world`, `MAT.sway` e i vetri di simulazione scartano ciò che sta oltre `U.clipR` appena la corona si rivela, ma le ombre del campus no: un modello del campus con quei materiali lascia solo l'ombra. La vegetazione del campus usa `MAT.coronaSway` (`windy` di `materials.ts`: lo stesso vento, senza taglio), scelta da `geo.sway`.
 
@@ -630,7 +679,7 @@ Il kernel è in console come `window.quine` (o `window.rune`) in singola e per i
   dispositivi sono le costanti di `corona.ts` (`SHOWCASE_AT`, `GRAPH_AT`, `SITUATION_AT`, `WALL_AT`, `CONSOLES_AT`, `BENCH_AT`…,
   relative a `f.ox`, `f.oy`); il dispositivo sta sulla colonna 12, l'uscita in basso (y 14): stare a y 10.5 lo inquadra con la
   parete di fondo, ma `E` lo raggiunge da y 7.5. Per gli esterni: `k.corona.building(id).door` (il viale davanti alla porta) o `?dev&teleport=46,0`.
-- **La posizione del teleport si somma a quella salvata** (T214): `pagehide` scrive la posizione in `universes/<nome>/world/giocatori/io.json` e il caricamento dopo la rende scostamento del tappeto, quindi `?dev&teleport=46,0` chiuso in modo ordinato dà scostamenti 0, 46, 92, 138 e ogni volta terreno diverso, senza che sia un difetto. Per confrontare due caricamenti rimetti lo stesso universo prima di ciascuno (una copia di `universes/<nome>/`): il file sta lì, quindi un profilo pulito del browser da solo non basta. Oppure controlla `k.carpet().ox` e `.oy` prima di guardare o misurare.
+- **Il teleport non si somma più a quella salvata** (T264, prima T214): `pagehide` scrive la posizione in `universes/<nome>/world/giocatori/io.json` e il caricamento dopo la rende scostamento del tappeto; con `?dev&teleport=X,Y` `applyTeleport` (`src/kernel/teleport.ts`) ferma il tappeto e ne azzera lo scostamento, quindi due caricamenti dello stesso URL arrivano allo stesso punto (prima davano 0, 46, 92, 138). Senza `teleport` vale lo scostamento salvato: chi chiude nella corona riparte dov'era.
 - **Multigiocatore**: `vite preview` non aggancia il WebSocket di `/api/session` (il client dà «il mondo non risponde»): serve il server
   di sviluppo, `npx vite --port <n> --strictPort`, sempre nel turno `browser`. Un universo con `partita.modalita: 'multigiocatore'`, due
   schede con `?skip&offline&universo=<nome>&viandante=io` (il master, se `partita.master` non dice altro) e `&viandante=<altro>`; la prima

@@ -1,0 +1,44 @@
+{
+  "id": "cowboy.recinto",
+  "name": "Recinto della mandria",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "a mano (Claude Code, Cantiere 9)",
+  "description": "Un recinto di staccionata con qualche manzo che rumina e un cancello legato con la corda.",
+  "context": "nei ranch, nei pascoli, vicino alle stalle",
+  "appearance": {
+    "model": "recinto",
+    "glyph": "#",
+    "color": "#a07848",
+    "aspetto": "un recinto di staccionata di legno con un cancello",
+    "classe": "mobile"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.45
+  },
+  "actions": [
+    {
+      "id": "lazo",
+      "label": "Lancia il lazo",
+      "requires": "item.lazo"
+    },
+    {
+      "id": "conta",
+      "label": "Conta la mandria"
+    },
+    {
+      "id": "cancello",
+      "label": "Apri o chiudi il cancello"
+    }
+  ],
+  "spawn": {
+    "tiles": [
+      "g",
+      "m"
+    ],
+    "chance": 0.04,
+    "max": 1
+  },
+  "logic": "logic.lua"
+}

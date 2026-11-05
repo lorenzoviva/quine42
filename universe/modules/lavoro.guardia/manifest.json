@@ -1,0 +1,71 @@
+{
+  "id": "lavoro.guardia",
+  "name": "La guardia",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi tiene d’occhio il luogo: un giro fra la piazza e le case, di giorno e di sera.",
+  "mestieri": [
+    {
+      "id": "guardia",
+      "nomi": [
+        "guardia",
+        "sentinella",
+        "poliziotto",
+        "poliziotta",
+        "agente",
+        "vigile",
+        "vigilante",
+        "gendarme",
+        "soldato",
+        "soldatessa",
+        "sorvegliante",
+        "sceriffo",
+        "ronda"
+      ],
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "aspetta",
+            "durata": 30,
+            "posa": "pattuglia"
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "pattuglia",
+            "percorso": [
+              "piazza",
+              "lavoro",
+              "casa"
+            ],
+            "posa": "pattuglia"
+          }
+        ],
+        "sera": [
+          {
+            "fa": "pattuglia",
+            "percorso": [
+              "piazza",
+              "casa"
+            ],
+            "posa": "pattuglia",
+            "dice": "Tutto tranquillo."
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}

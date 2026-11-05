@@ -1,71 +1,66 @@
-<!-- Quercia: scolpito da gemini-3.8-flash nello step 8.2A (lab/out/mjx-38-flash-2), voti dell'Artista 4 → 5/10 -->
-<sequence values="BTtFfLY" size="40 40 60" symmetry="(xy)" name="Quercia">
+<!-- Quercia, procedurale (Cantiere 2): i colori dell'originale (tronco, legno in ombra, chioma, ombra, foglie medie, foglie al sole). Il seme
+     decide dove il fusto si apre (fra 14 e 22 voxel), quante branche partono e dove vanno; la chioma cresce dalle branche dentro una cupola
+     larga, così ogni quercia ha il suo profilo a nuvole. -->
+<sequence values="BTtFfLYhkVrx" size="40 40 60" symmetry="(xy)" name="Quercia">
   <color symbol="T" value="6b4a2e" name="tronco base"/>
   <color symbol="t" value="4a2f19" name="legno ombra"/>
   <color symbol="F" value="2f6b3a" name="chioma base"/>
   <color symbol="f" value="1a4023" name="chioma ombra"/>
   <color symbol="L" value="4b8f4a" name="foglie medie"/>
   <color symbol="Y" value="7ec850" name="foglie luce"/>
-
-  <!-- Base radici e tronco massiccio ben ancorato al terreno -->
-  <cylinder at="20 20 0" size="14 14 5" color="t"/>
-  <cylinder at="20 20 0" size="10 10 18" color="T"/>
-  <cylinder at="20 20 14" size="8 8 12" color="T"/>
-
-  <!-- Radici robuste a terra -->
-  <line at="20 20 8" to="11 11 0" r="3" color="t"/>
-  <line at="20 20 8" to="29 11 0" r="3" color="t"/>
-  <line at="20 20 8" to="11 29 0" r="3" color="T"/>
-  <line at="20 20 8" to="29 29 0" r="3" color="T"/>
-
-  <!-- Grandi rami portanti divergenti che aprono la chioma in orizzontale -->
-  <line at="20 20 18" to="10 10 28" r="3" color="t"/>
-  <line at="20 20 18" to="30 10 28" r="3" color="t"/>
-  <line at="20 20 18" to="10 30 28" r="3" color="T"/>
-  <line at="20 20 18" to="30 30 28" r="3" color="T"/>
-  <line at="20 20 20" to="20 20 36" r="4" color="T"/>
-
-  <!-- Chioma ampia e frondosa: espansa lateralmente (quasi a tutta scatola 38x38) -->
-  <ellipsoid at="20 20 25" size="36 36 18" color="F"/>
-
-  <!-- Lobi frondosi irregolari che danno volume e sporgenza ai lati -->
-  <ellipsoid at="11 12 28" size="22 22 18" color="F"/>
-  <ellipsoid at="29 12 28" size="21 21 18" color="F"/>
-  <ellipsoid at="12 28 29" size="21 21 19" color="F"/>
-  <ellipsoid at="28 28 29" size="22 22 19" color="F"/>
-
-  <ellipsoid at="20 9 30" size="22 20 18" color="F"/>
-  <ellipsoid at="20 31 30" size="22 20 18" color="F"/>
-  <ellipsoid at="9 20 30" size="20 22 18" color="F"/>
-  <ellipsoid at="31 20 30" size="20 22 18" color="F"/>
-
-  <!-- Strato intermedio e superiore: cupola piena e continua verso l'alto -->
-  <ellipsoid at="20 20 34" size="32 32 20" color="F"/>
-  <ellipsoid at="15 16 38" size="20 20 18" color="F"/>
-  <ellipsoid at="25 17 38" size="19 19 18" color="F"/>
-  <ellipsoid at="16 25 39" size="20 20 18" color="F"/>
-  <ellipsoid at="24 24 39" size="21 21 18" color="F"/>
-
-  <!-- Calotta sommitale bombata a cupola fino a z=52 (alta >48, chiusa e morbida) -->
-  <ellipsoid at="20 20 42" size="24 24 18" color="F"/>
-  <ellipsoid at="20 20 46" size="16 16 14" color="F"/>
-
-  <!-- Saldatura organica dei volumi fogliari -->
+  <color symbol="h" hidden="True" name="quote possibili della biforcazione"/>
+  <color symbol="k" hidden="True" name="la quota scelta"/>
+  <color symbol="V" hidden="True" name="la cupola della chioma"/>
+  <color symbol="r" hidden="True" name="punta di una branca"/>
+  <color symbol="x" hidden="True" name="sotto la chioma"/>
+  <!-- La biforcazione -->
+  <box at="0 0 14" size="1 1 9" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all in="kB" out="kk"/>
+  <box at="20 20 0" size="1 1 1" color="r"/>
+  <one steps="40">
+    <rule in="B r" out="r T" p="1"/>
+    <rule in="B* *r" out="r* *T" p="0.05"/>
+  </one>
+  <all in="k" out="B"/>
+  <!-- Le branche: da tre a sei, verso l'alto e verso fuori -->
+  <ellipsoid at="20 20 14" size="39 39 38" color="V" on="B"/>
+  <box at="20 20 0" size="40 40 13" color="x" on="[BV]"/>
+  <one steps="2" in="Vr" out="r*"/>
+  <prl steps="1" in="V r" out="r *" p="0.6"/>
+  <prl steps="1" in="V* *r" out="r* **" p="0.18"/>
+  <all in="r" out="T"/>
+  <one steps="3" in="V* *T" out="r* **"/>
+  <one steps="110">
+    <rule in="V* *r" out="r* *T" p="1"/>
+    <rule in="Vr" out="rT" p="1"/>
+    <rule in="V r" out="r T" p="0.3"/>
+  </one>
+  <all in="r" out="T"/>
+  <!-- Il fusto massiccio e le radici -->
+  <all steps="2" in="TB" out="TT"/>
+  <all steps="1" in="TB" out="tt"/>
+  <cylinder at="20 20 0" size="13 13 4" color="t" on="[Bx]"/>
+  <line at="20 20 7" to="12 12 0" r="2" color="t" on="[Bx]"/>
+  <line at="20 20 7" to="28 28 0" r="2" color="T" on="[Bx]"/>
+  <!-- La chioma dalle branche -->
+  <all steps="3" symmetry="(xyz)">
+    <rule in="[Tt]V" out="*F"/>
+    <rule in="FV" out="FF"/>
+  </all>
+  <one steps="9000" symmetry="(xyz)" in="FV" out="FF"/>
+  <all in="[Vx]" out="B"/>
   <convolution neighborhood="Moore" steps="2">
     <rule in="B" out="F" values="F" sum="15..26"/>
+    <rule in="F" out="B" values="B" sum="22..26"/>
   </convolution>
-
-  <!-- Ombreggiature profonde sotto i lobi delle fronde -->
   <prl steps="1">
     <rule in="F B" out="f B" p="0.85"/>
   </prl>
-
-  <!-- Luce RPG 3/4 sulle superfici esposte verso l'alto e il sud -->
   <prl steps="1">
     <rule in="B F" out="B L" p="0.9"/>
   </prl>
-
-  <!-- Punti luce brillanti dorati sui dossi superiori delle masse fogliari -->
   <prl steps="1">
     <rule in="B L" out="B Y" p="0.75"/>
   </prl>

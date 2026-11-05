@@ -32,6 +32,15 @@
   "runes": [
    "sutura"
   ],
-  "strutture": []
+  "strutture": [
+   {
+    "concetto": "condominio",
+    "taglia": "grande"
+   },
+   {
+    "concetto": "trattoria con cantina",
+    "taglia": "grande"
+   }
+  ]
  }
 }

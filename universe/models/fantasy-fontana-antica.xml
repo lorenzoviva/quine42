@@ -1,0 +1,116 @@
+<!-- Fontana antica (fantasy, aurora): una vasca di pietra colma d'acqua con una colonna al centro, da cui l'acqua ricade in rivoli, e in
+     cima qualcosa che veglia. Il seme sceglie la vasca (tonda, quadrata o a quadrifoglio), la colonna (una
+     grande coppa, due coppe sovrapposte o quattro bocche da cui escono getti), la cima (un cristallo luminoso, o una fanciulla con l'anfora) e dove cresce il muschio. -->
+<sequence values="BSdGAaMCLvVUTbcefgpqr" size="50 50 50" symmetry="(xy)" name="Fontana antica">
+  <color symbol="S" value="8a8478" name="pietra"/>
+  <color symbol="d" value="5e5a52" name="pietra scura"/>
+  <color symbol="G" value="b4ad9e" name="marmo antico"/>
+  <color symbol="A" value="3f8fc8" name="acqua"/>
+  <color symbol="a" value="9ad8f0" name="rivolo"/>
+  <color symbol="M" value="5a8a3c" name="muschio"/>
+  <color symbol="C" value="b48cff" name="cristallo arcano" glow="True"/>
+  <color symbol="L" value="c07a4a" name="anfora di rame"/>
+  <color symbol="v" hidden="True" name="per mescolare il caso"/>
+  <color symbol="V" hidden="True" name="spazio della vasca"/>
+  <color symbol="U" hidden="True" name="spazio della colonna"/>
+  <color symbol="T" hidden="True" name="spazio della cima"/>
+  <color symbol="b" hidden="True" name="vasca tonda"/>
+  <color symbol="c" hidden="True" name="vasca quadrata"/>
+  <color symbol="e" hidden="True" name="vasca a quadrifoglio"/>
+  <color symbol="f" hidden="True" name="una grande coppa"/>
+  <color symbol="g" hidden="True" name="due coppe"/>
+  <color symbol="p" hidden="True" name="quattro bocche"/>
+  <color symbol="q" hidden="True" name="cima: cristallo"/>
+  <color symbol="r" hidden="True" name="cima: fanciulla"/>
+  <!-- Gli spazi e i tre dadi -->
+  <box at="25 25 0" size="51 51 50" color="v"/>
+  <all in="v" out="B"/>
+  <box at="25 25 0" size="51 51 3" color="V"/>
+  <box at="25 25 3" size="51 51 27" color="U"/>
+  <box at="25 25 30" size="51 51 20" color="T"/>
+  <one steps="1"><rule in="V" out="b"/><rule in="V" out="c"/><rule in="V" out="e"/></one>
+  <one steps="1"><rule in="U" out="f"/><rule in="U" out="g"/><rule in="U" out="p"/></one>
+  <one steps="1"><rule in="T" out="q"/><rule in="T" out="r"/></one>
+  <all symmetry="(xyz)">
+    <rule in="bV" out="bb"/><rule in="cV" out="cc"/><rule in="eV" out="ee"/>
+    <rule in="fU" out="ff"/><rule in="gU" out="gg"/><rule in="pU" out="pp"/>
+    <rule in="qT" out="qq"/><rule in="rT" out="rr"/>
+  </all>
+  <!-- La vasca -->
+  <cylinder at="25 25 0" size="41 41 3" color="S" on="b"/>
+  <cylinder at="25 25 2" size="41 41 1" color="d" on="b"/>
+  <cylinder at="25 25 1" size="37 37 2" color="A" on="[Sd]"/>
+  <box at="25 25 0" size="39 39 3" color="S" on="c"/>
+  <box at="25 25 2" size="39 39 1" color="d" on="c"/>
+  <box at="25 25 1" size="35 35 2" color="A" on="[Sd]"/>
+  <cylinder at="25 13 0" size="23 23 3" color="S" on="e"/>
+  <cylinder at="25 37 0" size="23 23 3" color="S" on="e"/>
+  <cylinder at="13 25 0" size="23 23 3" color="S" on="e"/>
+  <cylinder at="37 25 0" size="23 23 3" color="S" on="e"/>
+  <cylinder at="25 25 0" size="25 25 3" color="S" on="e"/>
+  <cylinder at="25 13 1" size="19 19 2" color="A" on="S"/>
+  <cylinder at="25 37 1" size="19 19 2" color="A" on="S"/>
+  <cylinder at="13 25 1" size="19 19 2" color="A" on="S"/>
+  <cylinder at="37 25 1" size="19 19 2" color="A" on="S"/>
+  <cylinder at="25 25 1" size="23 23 2" color="A" on="S"/>
+  <box at="25 25 2" size="51 51 1" color="e" on="A"/>
+  <box at="7 7 0" size="5 5 3" color="G" on="c"/>
+  <box at="43 7 0" size="5 5 3" color="G" on="c"/>
+  <box at="7 43 0" size="5 5 3" color="G" on="c"/>
+  <box at="43 43 0" size="5 5 3" color="G" on="c"/>
+  <!-- La colonna -->
+  <cylinder at="25 25 0" size="11 11 5" color="d"/>
+  <cylinder at="25 25 5" size="7 7 25" color="G"/>
+  <cylinder at="25 25 28" size="9 9 2" color="d"/>
+  <!-- Una grande coppa -->
+  <cylinder at="25 25 15" size="9 9 2" color="G" on="f"/>
+  <cylinder at="25 25 17" size="21 21 2" color="G" on="f"/>
+  <cylinder at="25 25 19" size="27 27 1" color="d" on="f"/>
+  <cylinder at="25 25 19" size="23 23 1" color="A" on="d"/>
+  <box at="25 25 19" size="7 7 1" color="G" on="A"/>
+  <box at="39 25 3" size="1 1 17" color="a" on="f"/>
+  <box at="11 25 3" size="1 1 17" color="a" on="f"/>
+  <box at="25 39 3" size="1 1 17" color="a" on="f"/>
+  <box at="25 11 3" size="1 1 17" color="a" on="f"/>
+  <!-- Due coppe sovrapposte -->
+  <cylinder at="25 25 11" size="25 25 2" color="G" on="g"/>
+  <cylinder at="25 25 13" size="29 29 1" color="d" on="g"/>
+  <cylinder at="25 25 13" size="25 25 1" color="A" on="d"/>
+  <cylinder at="25 25 21" size="13 13 2" color="G" on="g"/>
+  <cylinder at="25 25 23" size="17 17 1" color="d" on="g"/>
+  <cylinder at="25 25 23" size="13 13 1" color="A" on="d"/>
+  <box at="25 25 13" size="7 7 11" color="G" on="A"/>
+  <box at="40 25 3" size="1 1 11" color="a" on="g"/>
+  <box at="10 25 3" size="1 1 11" color="a" on="g"/>
+  <box at="25 40 3" size="1 1 11" color="a" on="g"/>
+  <box at="25 10 3" size="1 1 11" color="a" on="g"/>
+  <box at="34 34 14" size="1 1 10" color="a" on="g"/>
+  <box at="16 16 14" size="1 1 10" color="a" on="g"/>
+  <box at="34 16 14" size="1 1 10" color="a" on="g"/>
+  <box at="16 34 14" size="1 1 10" color="a" on="g"/>
+  <!-- Quattro bocche con i getti -->
+  <cylinder at="25 25 20" size="11 11 3" color="d" on="p"/>
+  <box at="25 25 21" size="15 3 1" color="d" on="p"/>
+  <box at="25 25 21" size="3 15 1" color="d" on="p"/>
+  <line at="33 25 21" to="41 25 2" r="0.6" color="a" on="p"/>
+  <line at="17 25 21" to="9 25 2" r="0.6" color="a" on="p"/>
+  <line at="25 33 21" to="25 41 2" r="0.6" color="a" on="p"/>
+  <line at="25 17 21" to="25 9 2" r="0.6" color="a" on="p"/>
+  <cylinder at="25 25 8" size="11 11 2" color="d" on="p"/>
+  <!-- La cima: un cristallo luminoso -->
+  <box at="25 25 30" size="5 5 9" color="C" on="q"/>
+  <cone at="25 25 39" size="5 5 5" color="C" on="q"/>
+  <line at="23 25 30" to="20 25 35" r="0.6" color="C" on="q"/>
+  <line at="27 25 30" to="30 26 34" r="0.6" color="C" on="q"/>
+  <line at="25 27 30" to="25 30 37" r="0.6" color="C" on="q"/>
+  <!-- La cima: una fanciulla con l'anfora -->
+  <cylinder at="25 25 30" size="7 7 9" color="G" on="r"/>
+  <box at="25 25 39" size="5 3 5" color="G" on="r"/>
+  <ellipsoid at="25 25 44" size="5 5 5" color="G" on="r"/>
+  <box at="28 25 41" size="1 1 2" color="G" on="r"/>
+  <ellipsoid at="29 25 42" size="3 3 4" color="L" on="r"/>
+  <all in="[vVUTbcefgpqr]" out="B"/>
+  <!-- Il muschio, dove capita -->
+  <prl steps="1" in="B [Sd]" out="M *" p="0.03"/>
+  <prl steps="1" in="B[SdG]" out="M*" p="0.01"/>
+</sequence>

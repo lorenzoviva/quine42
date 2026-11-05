@@ -50,6 +50,11 @@
    "luce",
    "caffe"
   ],
-  "strutture": []
+  "strutture": [
+   {
+    "concetto": "cappella",
+    "taglia": "grande"
+   }
+  ]
  }
 }

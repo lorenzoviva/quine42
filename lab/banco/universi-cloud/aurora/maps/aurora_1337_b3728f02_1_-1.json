@@ -1,0 +1,38 @@
+{
+ "plan": {
+  "place": {
+   "name": "Santuario della Luna Bianca",
+   "description": "Un tempio di pietra chiara sul poggio, dove i pellegrini lasciano candele e nastri d'argento ai piedi delle colonne."
+  },
+  "layout": "tempio",
+  "objects": [
+   {
+    "module": "npc.cat",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.banco",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.cassa",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.credenza",
+    "where": "dentro"
+   }
+  ],
+  "ground": [],
+  "fresh": [],
+  "runes": [
+   "carpet"
+  ],
+  "strutture": [
+   {
+    "concetto": "santuario",
+    "taglia": "grande"
+   }
+  ]
+ }
+}

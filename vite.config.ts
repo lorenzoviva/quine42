@@ -17,6 +17,7 @@ import { walletRoute } from './server/wallet';
 import { grantCapOf, platformFeeOf } from './server/ledger';
 import { videoFolder, videoRoute } from './server/video';
 import { betaGuide, guidePage } from './server/betaGuide';
+import { siteSkins } from './server/skins';
 
 export default defineConfig(({ mode }) => {
   // '' prefix: read every variable, but only server-side. Nothing without VITE_ reaches the client.
@@ -55,6 +56,8 @@ export default defineConfig(({ mode }) => {
       // The site's videos, from the same folder as in production (T244, ADR-0131), and the instructions of the beta: what is off never reaches the build.
       videoRoute({ folder: videoFolder(env), accounts }),
       betaGuide(process.cwd()),
+      // The site's skins, each a folder of site/skins/ (T283, ADR-0145).
+      siteSkins(process.cwd()),
     ],
     // Writing a universe must not reload the page (dev server watches the project folder).
     // In a worktree of the pipeline node_modules is a junction to another folder (T44c): wasmoon's glue.wasm is served

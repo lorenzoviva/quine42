@@ -1,0 +1,84 @@
+<!-- Ponte di pietra antico (Cantiere 8, aurora): archi e teste a caso; parapetti, muschio ed edera a caso. -->
+<sequence values="BSDQMVLPxu123456z" symmetry="(xy)" name="Ponte di pietra antico">
+  <color symbol="S" value="9a948a" name="pietra"/>
+  <color symbol="D" value="6f6a62" name="pietra scura"/>
+  <color symbol="Q" value="b0aa9e" name="parapetto"/>
+  <color symbol="M" value="5f8f3e" name="muschio"/>
+  <color symbol="V" value="3f7a35" name="edera"/>
+  <color symbol="L" value="ffd27a" name="lanterne" glow="True"/>
+  <color symbol="P" hidden="True" name="marcatore"/>
+  <color symbol="x" hidden="True" name="marcatore"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="1" hidden="True" name="marcatore"/>
+  <color symbol="2" hidden="True" name="marcatore"/>
+  <color symbol="3" hidden="True" name="marcatore"/>
+  <color symbol="4" hidden="True" name="marcatore"/>
+  <color symbol="5" hidden="True" name="marcatore"/>
+  <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
+  <!-- scelta «ponte»: un arco grande | due archi | tre archi bassi | crollato a metà -->
+  <box at="25 25 0" size="50 18 34" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/><rule in="u" out="4"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/><rule in="4u" out="*4"/></all>
+  <!--   1: un arco grande -->
+  <ellipsoid at="25 25 -26" size="36 14 52" color="x" on="1"/>
+  <box at="25 20 31" size="50 1 3" color="Q" on="1"/>
+  <box at="25 30 31" size="50 1 3" color="Q" on="1"/>
+  <box at="25 25 30" size="50 12 1" color="D" on="1"/>
+  <box at="25 25 0" size="50 12 30" color="S" on="1"/>
+  <!--   2: due archi -->
+  <ellipsoid at="13 25 -24" size="18 14 48" color="x" on="2"/>
+  <ellipsoid at="37 25 -24" size="18 14 48" color="x" on="2"/>
+  <box at="25 20 31" size="50 1 3" color="Q" on="2"/>
+  <box at="25 30 31" size="50 1 3" color="Q" on="2"/>
+  <box at="25 25 30" size="50 12 1" color="D" on="2"/>
+  <box at="25 25 0" size="50 12 30" color="S" on="2"/>
+  <!--   3: tre archi bassi -->
+  <ellipsoid at="9 25 -20" size="12 14 40" color="x" on="3"/>
+  <ellipsoid at="25 25 -20" size="12 14 40" color="x" on="3"/>
+  <ellipsoid at="41 25 -20" size="12 14 40" color="x" on="3"/>
+  <box at="25 20 31" size="50 1 3" color="Q" on="3"/>
+  <box at="25 30 31" size="50 1 3" color="Q" on="3"/>
+  <box at="25 25 30" size="50 12 1" color="D" on="3"/>
+  <box at="25 25 0" size="50 12 30" color="S" on="3"/>
+  <!--   4: crollato a metà -->
+  <ellipsoid at="25 25 0" size="40 16 14" color="D" on="4"/>
+  <ellipsoid at="25 25 -26" size="36 14 52" color="x" on="4"/>
+  <box at="25 25 26" size="9 16 12" color="x" on="4"/>
+  <box at="25 20 31" size="50 1 3" color="Q" on="4"/>
+  <box at="25 30 31" size="50 1 3" color="Q" on="4"/>
+  <box at="25 25 30" size="50 12 1" color="D" on="4"/>
+  <box at="25 25 0" size="50 12 30" color="S" on="4"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/><rule in="4" out="B"/></prl>
+  <prl in="x" out="B"/>
+  <!-- scelta «teste»: due statue | due lanterne | una torretta -->
+  <box at="25 25 30" size="50 20 20" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <!--   1: due statue -->
+  <box at="2 25 31" size="4 4 3" color="D" on="1"/>
+  <ellipsoid at="2 25 33" size="4 4 10" color="S" on="1"/>
+  <box at="48 25 31" size="4 4 3" color="D" on="1"/>
+  <ellipsoid at="48 25 33" size="4 4 10" color="S" on="1"/>
+  <!--   2: due lanterne -->
+  <line at="2 20 31" to="2 20 40" r="0.5" color="D" on="2"/>
+  <box at="2 20 40" size="3 3 3" color="L" on="2"/>
+  <line at="48 30 31" to="48 30 40" r="0.5" color="D" on="2"/>
+  <box at="48 30 40" size="3 3 3" color="L" on="2"/>
+  <!--   3: una torretta -->
+  <box at="5 25 31" size="8 12 10" color="S" on="3"/>
+  <cone at="5 25 41" size="10 14 7" color="D" on="3"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <!-- pietre del parapetto che mancano -->
+  <prl in="B Q" out="* B" p="0.3" steps="1"/>
+  <prl in="B S" out="* M" p="0.35" steps="1"/>
+  <prl in="B D" out="* M" p="0.25" steps="1"/>
+  <!-- 12 rampicanti pendono da sotto S, ognuno per la sua lunghezza -->
+  <one in="S B" out="* P" steps="12"/>
+  <prl in="P B" out="V P" p="0.75" steps="14"/>
+  <prl in="P" out="V"/>
+</sequence>

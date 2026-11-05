@@ -55,14 +55,15 @@ async function walk(k: Kernel, steps: number) {
 const planned = (k: Kernel): number => (k as any).plannedCount;
 
 describe('the coefficients of generation (T45b)', () => {
-  it('are repaired: numbers, words, percentages, presets; what is missing is 1', () => {
-    expect(repairCoefficients(undefined)).toEqual(FULL_DETAIL);
+  it('are repaired: numbers, words, percentages, presets; what is missing is 1, but the lives of the people, which are 0', () => {
+    expect(repairCoefficients(undefined)).toEqual({ ...FULL_DETAIL, vite: 0 });
     const c = repairCoefficients({ sessioni: 2, dialoghi: -1, trame: '0,5', revisioni: '25%', modelli: '40', persone: 'tanti', ignoto: 0.1 });
     expect(c).toMatchObject({ sessioni: 1, dialoghi: 0, trame: 0.5, revisioni: 0.25, modelli: 0.4, persone: 1, abitanti: 1 });
     expect(Object.keys(c).sort()).toEqual([...COEFFICIENT_KEYS].sort());
     expect(repairCoefficients('Low Detail')).toEqual(LOW_DETAIL.coefficienti);
     expect(repairCoefficients('low-detail')).toEqual(LOW_DETAIL.coefficienti);
-    expect(repairCoefficients('chissà')).toEqual(FULL_DETAIL);
+    expect(repairCoefficients('chissà')).toEqual({ ...FULL_DETAIL, vite: 0 });
+    expect(repairCoefficients('pieno')).toEqual(FULL_DETAIL);
     expect(readConfig({ 'universe.json': JSON.stringify({ ai: { coefficienti: 'low detail' } }) }).config.ai.coefficienti).toEqual(LOW_DETAIL.coefficienti);
   });
 

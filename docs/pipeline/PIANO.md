@@ -1,38 +1,37 @@
 # Il piano della pipeline
 
-> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-11-05T01:18:44.169Z: non modificarlo a mano,
+> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-11-05T01:24:47.211Z: non modificarlo a mano,
 > la fonte è `docs/plans/backlog.md` (righe `- Pipeline:`).
 
 ## Budget
 
 Orchestratore: **argon** (sotto il 10 % nessun task su di lui; si cambia con `orchestratore <provider>`).
 
-- **claude**: settimana 9 %, 5 ore 100 %; tetto 3, slot 1 (task in programma 15), esaurimento previsto 2026-11-05T13:46:36.967Z, reset 2026-11-05T15:59:00.000Z (letto da /usage il 2026-11-05T01:18:35.335Z)
-  - session, 5h: 100 % residuo, reset 2026-11-05T04:49:00.000Z
-  - week (all models), settimana: 9 % residuo, reset 2026-11-05T15:59:00.000Z
-- **gemini**: settimana 8 %, 5 ore 99 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto mai a questo ritmo, reset 2026-11-05T17:37:53.000Z (letto da /usage il 2026-11-05T01:14:26.261Z)
+- **claude**: settimana 9 %, 5 ore 100 %; tetto 3, slot 1 (task in programma 14), esaurimento previsto 2026-11-05T13:53:46.462Z, reset 2026-11-05T16:00:00.000Z (letto da /usage il 2026-11-05T01:23:43.524Z)
+  - session, 5h: 100 % residuo, reset 2026-11-05T04:50:00.000Z
+  - week (all models), settimana: 9 % residuo, reset 2026-11-05T16:00:00.000Z
+- **gemini**: settimana 8 %, 5 ore 98 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto mai a questo ritmo, reset 2026-11-05T17:37:53.000Z (letto da /usage il 2026-11-05T01:24:47.186Z)
   - Gemini Models, settimana: 8 % residuo, reset 2026-11-05T17:37:53.000Z
-  - Gemini Models, 5h: 99 % residuo, reset 2026-11-05T01:42:58.000Z
-- **argon**: settimana 17 %, 5 ore 17 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto 2026-11-05T02:34:31.678Z, reset 2026-11-11T18:44:35.000Z (letto da /usage il 2026-11-05T01:15:29.390Z)
-  - Gemini 4 Argon, settimana: 17 % residuo, reset 2026-11-11T18:44:35.000Z
-- **fable**: settimana 9 %, 5 ore 100 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto 2026-11-05T13:52:11.233Z, reset 2026-11-05T16:00:00.000Z (letto da /usage il 2026-11-05T01:14:23.801Z)
+  - Gemini Models, 5h: 98 % residuo, reset 2026-11-05T01:42:58.000Z
+- **argon**: settimana 14 %, 5 ore 14 %; tetto 1, slot 1 (task in programma 1), esaurimento previsto 2026-11-05T02:24:25.824Z, reset 2026-11-11T18:44:35.000Z (letto da /usage il 2026-11-05T01:20:45.229Z)
+  - Gemini 4 Argon, settimana: 14 % residuo, reset 2026-11-11T18:44:35.000Z
+- **fable**: settimana 9 %, 5 ore 100 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto 2026-11-05T13:59:12.717Z, reset 2026-11-05T16:00:00.000Z (letto da /usage il 2026-11-05T01:24:44.768Z)
   - session, 5h: 100 % residuo, reset 2026-11-05T04:50:00.000Z
   - week (all models), settimana: 9 % residuo, reset 2026-11-05T16:00:00.000Z
   - week (Fable), settimana: 59 % residuo, reset 2026-11-05T16:00:00.000Z
 
-## In corso (0)
+## In corso (1)
 
-_nessuno_
+- **T255** I modelli di Claude distinti nella pipeline, lo sforzo (`effort`) e l'assegnazione dalla scheda — argon, 3 %
 
 ## Finiti, da guardare e integrare (`integra Txx`) (0)
 
 _nessuno_
 
-## Pronti, in ordine di priorità (7)
+## Pronti, in ordine di priorità (6)
 
 - **T273** Integrare a costo zero nei quattro universi esplorabili le strutture, i modelli e i suoni creati su Claude Cloud — claude, 4 %
 - **T259** Lo Scenografo: progetto e misura degli interni separati dall'edificio — claude, 5 %
-- **T255** I modelli di Claude distinti nella pipeline, lo sforzo (`effort`) e l'assegnazione dalla scheda — claude, 5 %
 - **T260** Il versionamento del kernel (`X.Y.Z`) e la compatibilità degli universi — claude, 3 %
 - **T262** Il salvataggio che non si ferma — claude, 6 %
 - **T265** I commit non si perdono: fila su disco, tutte le scritture, token scaduto — claude, 6 %

@@ -1,0 +1,94 @@
+<!-- Distributore automatico (moderno): il frigo delle bibite e quello degli snack, con la vetrina dei prodotti, la pulsantiera, lo
+     schermo e lo sportello in basso. Il seme sceglie come sono messi (uno solo al centro, due affiancati di altezze diverse, o uno
+     con i bidoni della differenziata accanto), se in cima c'è l'insegna luminosa e quali scomparti della vetrina sono pieni. -->
+<sequence values="BRNVKSTCWAGYOmXUJLnIi" size="20 20 20" symmetry="(xy)" name="Distributore">
+  <color symbol="R" value="c8302a" name="lamiera rossa"/>
+  <color symbol="N" value="3c4a5c" name="lamiera blu notte"/>
+  <color symbol="V" value="a8dcea" name="vetrina"/>
+  <color symbol="K" value="26282c" name="pulsantiera"/>
+  <color symbol="S" value="80f0ff" name="schermo" glow="True"/>
+  <color symbol="T" value="fff2a0" name="insegna" glow="True"/>
+  <color symbol="C" value="9a9a96" name="cemento"/>
+  <color symbol="W" value="eeeeea" name="lattina bianca"/>
+  <color symbol="A" value="e8a020" name="snack arancio"/>
+  <color symbol="G" value="3aa050" name="bidone verde"/>
+  <color symbol="Y" value="e8c830" name="bidone giallo"/>
+  <color symbol="O" value="d84a8a" name="confezione rosa"/>
+  <color symbol="m" hidden="True" name="il dado"/>
+  <color symbol="X" hidden="True" name="uno al centro"/>
+  <color symbol="U" hidden="True" name="due affiancati"/>
+  <color symbol="J" hidden="True" name="uno con i bidoni"/>
+  <color symbol="L" hidden="True" name="con l'insegna"/>
+  <color symbol="n" hidden="True" name="senza insegna"/>
+  <color symbol="I" hidden="True" name="scomparti della vetrina"/>
+  <color symbol="i" hidden="True" name="uno scomparto pieno"/>
+  <!-- Il dado si scuote prima di decidere -->
+  <box at="1 0 0" size="3 1 1" color="m"/>
+  <prl steps="1" in="m" out="B"/>
+  <!-- Prima scelta: come sono messi -->
+  <box at="0 0 0" size="1 1 1" color="m"/>
+  <one steps="1">
+    <rule in="m" out="X"/>
+    <rule in="m" out="U"/>
+    <rule in="m" out="J"/>
+  </one>
+  <all symmetry="(xyz)">
+    <rule in="XB" out="XX"/>
+    <rule in="UB" out="UU"/>
+    <rule in="JB" out="JJ"/>
+  </all>
+  <!-- uno al centro -->
+  <box at="10 8.5 0" size="11 8 18" color="R" on="X"/>
+  <box at="8.5 13 4" size="7 1 12" color="I" on="X"/>
+  <box at="13.5 13 9" size="2 1 4" color="K" on="X"/>
+  <box at="13.5 13 14" size="2 1 1" color="S" on="X"/>
+  <box at="10 13 1" size="9 1 2" color="K" on="X"/>
+  <!-- due affiancati: le bibite alte, gli snack più bassi -->
+  <box at="5 8.5 0" size="9 8 18" color="R" on="U"/>
+  <box at="4 13 4" size="5 1 12" color="I" on="U"/>
+  <box at="8 13 9" size="1 1 4" color="K" on="U"/>
+  <box at="8 13 14" size="1 1 1" color="S" on="U"/>
+  <box at="5 13 1" size="7 1 2" color="K" on="U"/>
+  <box at="14 8.5 0" size="9 8 15" color="N" on="U"/>
+  <box at="13 13 3" size="5 1 10" color="I" on="U"/>
+  <box at="17 13 7" size="1 1 4" color="K" on="U"/>
+  <box at="17 13 12" size="1 1 1" color="S" on="U"/>
+  <box at="14 13 1" size="7 1 1" color="K" on="U"/>
+  <!-- uno a sinistra, i bidoni a destra -->
+  <box at="6 8.5 0" size="11 8 18" color="N" on="J"/>
+  <box at="4.5 13 4" size="7 1 12" color="I" on="J"/>
+  <box at="9.5 13 9" size="2 1 4" color="K" on="J"/>
+  <box at="9.5 13 14" size="2 1 1" color="S" on="J"/>
+  <box at="6 13 1" size="9 1 2" color="K" on="J"/>
+  <box at="15 9 0" size="7 11 1" color="C" on="J"/>
+  <cylinder at="14.5 6.5 1" size="5 5 9" color="G" on="J"/>
+  <cylinder at="14.5 11.5 1" size="5 5 8" color="Y" on="J"/>
+  <box at="14.5 6.5 10" size="3 3 1" color="K" on="J"/>
+  <box at="14.5 11.5 9" size="3 3 1" color="K" on="J"/>
+  <all in="[XUJ]" out="B"/>
+  <!-- La vetrina: scomparti pieni di prodotti che sporgono dal vetro, gli altri vuoti -->
+  <prl steps="1" in="I" out="i" p="0.45"/>
+  <all in="Ii" out="ii" symmetry="(x)" steps="1"/>
+  <all in="i/B" out="i/i" symmetry="()" steps="1"/>
+  <prl steps="1">
+    <rule in="i" out="W" p="0.35"/>
+    <rule in="i" out="A" p="0.35"/>
+    <rule in="i" out="O" p="0.3"/>
+  </prl>
+  <all in="i" out="W"/>
+  <all in="I" out="V"/>
+  <!-- Seconda scelta: l'insegna in cima -->
+  <box at="0 0 0" size="1 1 1" color="m"/>
+  <one steps="1">
+    <rule in="m" out="L"/>
+    <rule in="m" out="n"/>
+  </one>
+  <all symmetry="(xyz)">
+    <rule in="LB" out="LL"/>
+    <rule in="nB" out="nn"/>
+  </all>
+  <all in="L [RN]" out="T *" symmetry="()"/>
+  <all in="L T" out="T *" symmetry="()" steps="1"/>
+  <all in="[Ln]" out="B"/>
+  <all in="m" out="B"/>
+</sequence>

@@ -1,0 +1,43 @@
+{
+  "trame": [
+    { "id": "carico-gabbiana", "titolo": "Il carico della Gabbiana", "mistero": "Fiorenzo Lesti sa dove è affondata la Gabbiana, ma non sa nuotare; Marisa Pece sa nuotare, ma non si fida di lui.", "coinvolti": ["Fiorenzo Lesti", "Marisa Pece", "Gaspare Pece"], "inizio": 0, "stato": "attiva",
+      "tappe": [
+        { "giorno": 0, "momento": "sera", "chi": "Fiorenzo Lesti", "dove": "Locanda del Pesce Volante", "cosa": "offre da bere a tutti e parla di una stiva piena d'argento", "battuta": "Chi sa trattenere il fiato, stanotte, diventa ricco." },
+        { "giorno": 1, "momento": "mattina", "chi": "Marisa Pece", "dove": "Laguna Verde", "cosa": "si tuffa davanti alle grotte e torna con una moneta annerita", "indizio": "una moneta con lo stemma della Gabbiana" },
+        { "giorno": 2, "momento": "giorno", "chi": "Gaspare Pece", "dove": "Porto di Malvasia", "cosa": "costruisce di nascosto una cassa a tenuta d'acqua", "battuta": "Non chiedetemi per chi è." }
+      ],
+      "missione": { "da": "Marisa Pece", "testo": "Portami una corda lunga e robusta: senza, non scendo più a fondo di così.", "obiettivo": { "tipo": "porta", "oggetto": "item.cima", "a": "Marisa Pece" }, "ricompensa": "una moneta d'argento della Gabbiana", "stato": "offerta" } },
+    { "id": "dazio-capitana", "titolo": "Il dazio della capitana", "mistero": "Lucio Bastiani è convinto che Ilaria Fuocobianco nasconda botti non dichiarate nella stiva; lei dice che sono solo acqua dolce.", "coinvolti": ["Lucio Bastiani", "Ilaria Fuocobianco", "Amalia Torre"], "inizio": 0, "stato": "attiva",
+      "tappe": [
+        { "giorno": 0, "momento": "mattina", "chi": "Lucio Bastiani", "dove": "Porto di Malvasia", "cosa": "conta due volte le botti della capitana e scuote la testa", "battuta": "Undici ieri, dodici oggi. Il mare non fa figli." },
+        { "giorno": 1, "momento": "giorno", "chi": "Ilaria Fuocobianco", "dove": "Porto di Malvasia", "cosa": "apre una botte davanti a tutti: è piena d'acqua", "battuta": "Bevete pure, comandante. Offro io." },
+        { "giorno": 2, "momento": "notte", "chi": "Amalia Torre", "dove": "Forte di San Bastiano", "cosa": "vede una scialuppa senza lanterna scivolare verso le grotte", "indizio": "il segno di una chiglia sulla sabbia delle grotte" }
+      ] },
+    { "id": "mappa-strappata", "titolo": "La mappa strappata", "mistero": "Ezechiele Squadra ha diviso la sua mappa più preziosa in due metà e ne ha nascosta una; Ottavia Remigi crede che il maestro voglia metterla alla prova.", "coinvolti": ["Ezechiele Squadra", "Ottavia Remigi"], "inizio": 0, "stato": "attiva",
+      "tappe": [
+        { "giorno": 0, "momento": "giorno", "chi": "Ezechiele Squadra", "dove": "Porto di Malvasia", "cosa": "consegna a Ottavia mezza mappa delle secche", "battuta": "L'altra metà la trovi dove il sale non arriva." },
+        { "giorno": 1, "momento": "mattina", "chi": "Ottavia Remigi", "dove": "Secca della Sabbia Bianca", "cosa": "cerca tra i relitti mezzo sepolti", "indizio": "una pozza d'acqua dolce in mezzo alle dune" },
+        { "giorno": 3, "momento": "sera", "chi": "Ottavia Remigi", "dove": "Locanda del Pesce Volante", "cosa": "mostra a sua madre Ninfa un rotolo asciutto come il primo giorno", "battuta": "Dove il sale non arriva: l'acqua dolce!" }
+      ],
+      "missione": { "da": "Ottavia Remigi", "testo": "Ho bisogno di un carboncino per ricopiare la mappa prima che la sabbia la rovini.", "obiettivo": { "tipo": "porta", "oggetto": "item.carboncino", "a": "Ottavia Remigi" }, "ricompensa": "una copia della mappa delle secche", "stato": "offerta" } },
+    { "id": "vela-canzone", "titolo": "La vela e la canzone", "mistero": "Nestore Vela ha cucito una canzone dentro una vela, punto per punto, per qualcuno del porto; Teodoro Fuocobianco vuole scoprire per chi.", "coinvolti": ["Nestore Vela", "Teodoro Fuocobianco", "Dorotea Salvi"], "inizio": 0, "stato": "attiva",
+      "tappe": [
+        { "giorno": 0, "momento": "sera", "chi": "Nestore Vela", "dove": "Porto di Malvasia", "cosa": "canta una canzone nuova e arrossisce quando qualcuno ascolta" },
+        { "giorno": 1, "momento": "giorno", "chi": "Teodoro Fuocobianco", "dove": "Porto di Malvasia", "cosa": "segue Nestore fino alla bottega delle vele", "battuta": "Ti ho visto cucire note, amico mio." },
+        { "giorno": 2, "momento": "mattina", "chi": "Dorotea Salvi", "dove": "Porto di Malvasia", "cosa": "fa issare la vela nuova e sente il vento suonarla", "battuta": "Questa vela canta. Chi l'ha cucita?" }
+      ] },
+    { "id": "burrasca-coralli", "titolo": "La burrasca dei coralli", "mistero": "Pio Ramponi dice che arriva una burrasca, ma il cielo è sereno da giorni; Celeste Marin gli crede e prepara le bende.", "coinvolti": ["Pio Ramponi", "Celeste Marin", "Marisa Pece"], "inizio": 0, "stato": "attiva",
+      "tappe": [
+        { "giorno": 0, "momento": "mattina", "chi": "Pio Ramponi", "dove": "Villaggio dei Coralli", "cosa": "tira a riva le barche di tutto il villaggio", "battuta": "I gabbiani volano bassi. Domani si balla." },
+        { "giorno": 1, "momento": "giorno", "chi": "Celeste Marin", "dove": "Villaggio dei Coralli", "cosa": "prepara bende e unguento di alghe" },
+        { "giorno": 1, "momento": "sera", "chi": "Marisa Pece", "dove": "Laguna Verde", "cosa": "lega le stuoie dei coralli ai pali delle palafitte", "battuta": "Mio nonno Pio non ha mai sbagliato una burrasca." }
+      ],
+      "missione": { "da": "Pio Ramponi", "testo": "Vai al porto e avvisa la capitana Ilaria: che non salpi domani.", "obiettivo": { "tipo": "parla", "a": "Ilaria Fuocobianco" }, "ricompensa": "un sacchetto di sale fino", "stato": "offerta" } },
+    { "id": "gatto-carte", "titolo": "Il gatto sulle carte", "mistero": "Bussola dorme sempre sulla stessa carta nautica, e la capitana comincia a pensare che il gatto sappia qualcosa che lei non sa.", "coinvolti": ["Bussola", "Ilaria Fuocobianco", "Ezechiele Squadra"], "inizio": 0, "stato": "attiva",
+      "tappe": [
+        { "giorno": 0, "momento": "notte", "chi": "Bussola", "dove": "Porto di Malvasia", "cosa": "si acciambella sulla carta dell'Isola delle Scimmie Urlatrici" },
+        { "giorno": 1, "momento": "giorno", "chi": "Ilaria Fuocobianco", "dove": "Porto di Malvasia", "cosa": "porta la carta al cartografo per farla controllare", "battuta": "Il mio gatto ha scelto una rotta." },
+        { "giorno": 2, "momento": "giorno", "chi": "Ezechiele Squadra", "dove": "Porto di Malvasia", "cosa": "trova sulla carta un'isola disegnata a matita, che nessuno ricorda", "indizio": "un'isola a matita a sud della secca" }
+      ] }
+  ]
+}

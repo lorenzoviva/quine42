@@ -1,0 +1,38 @@
+{
+ "plan": {
+  "place": {
+   "name": "Prato del Re Muto",
+   "description": "In lontananza suona una campana."
+  },
+  "layout": "locanda",
+  "objects": [
+   {
+    "module": "npc.cat",
+    "where": "fuori"
+   },
+   {
+    "module": "npc.villager",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.cassa",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.credenza",
+    "where": "dentro"
+   },
+   {
+    "module": "object.bush",
+    "where": "fuori"
+   }
+  ],
+  "ground": [],
+  "fresh": [],
+  "runes": [
+   "y",
+   "not true"
+  ],
+  "strutture": []
+ }
+}

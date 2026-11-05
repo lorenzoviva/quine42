@@ -32,6 +32,7 @@ import { bindSoundMenu } from './ui/soundmenu';
 import { dayPhase } from './kernel/society';
 import { keepsFormsOnDisk } from './render/forms';
 import { $ } from './ui/dom';
+import { applyTeleport, teleportTarget } from './kernel/teleport';
 import type { MasterTools } from './master';
 import './style.css';
 
@@ -415,6 +416,9 @@ async function main() {
   // Another master is another universe (T42d): the store copies this one, from the main line on disk.
   if (tools && thin && client) {
     client.identify(account ? { Authorization: `Bearer ${account.token}` } : { [WANDERER_HEADER]: thin.session.id });
+    // A token that expired is renewed and the write tried again (T265).
+    const signed = account;
+    if (signed) client.renewAuth = async () => ({ Authorization: `Bearer ${await signed.freshToken()}` });
     tools.konsole.onClone = (nome, master, titolari) => client.clone(nome, master, titolari);
   }
   kernel.bus.on('genesis:done', ({ title }) => hud.showBanner(title.toUpperCase(), 'Un nuovo universo è stato scritto. Il tappeto ti riporta al centro.', 4000));
@@ -477,12 +481,10 @@ async function main() {
     cleanUrl.searchParams.delete('session_id');
     window.history.replaceState({}, '', cleanUrl.toString());
   }
-  // Dev: ?dev&teleport=46,0 stops the carpet and drops you at real coordinates (e.g. in the corona).
-  const tp = dev && params.get('teleport')?.split(',').map(Number);
-  if (tp && tp.length === 2 && tp.every(Number.isFinite)) {
-    kernel.carpet()!.active = false;
-    Object.assign(kernel.wandererPos(), { x: tp[0], y: tp[1] });
-  }
+  // Dev: ?dev&teleport=46,0 stops the carpet and drops you at real coordinates (e.g. in the corona), always the same
+  // point: the offset saved by pagehide does not apply (T264).
+  const tp = teleportTarget(params, dev);
+  if (tp) applyTeleport(kernel, tp);
 
   for (const cue of ['rune:picked', 'item:picked', 'item:used', 'item:action', 'ui:container', 'item:crafted', 'rune:inscribed', 'spell:cast', 'rollback', 'forge:done'] as SoundCue[]) kernel.bus.on(cue, () => sound.cue(cue));
   kernel.bus.on('fault', ({ isNew }) => isNew && sound.cue('fault'));

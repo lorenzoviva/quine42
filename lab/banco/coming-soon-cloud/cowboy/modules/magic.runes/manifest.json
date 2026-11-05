@@ -1,0 +1,338 @@
+{
+  "id": "magic.runes",
+  "name": "Rune magiche",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "Le rune della magia: ognuna è anche una parola del codice (una variabile che non vale niente, finché qualcuno non le dà un valore), ma tenute in mano e pronunciate (T) diventano incantesimi. Più rune in fila sono una formula: l’ordine conta (terra fuoco non è fuoco terra) e ripetere una runa la rafforza; il Concilio dà nome e effetti a una formula la prima volta che qualcuno la pronuncia. I cristalli magici, nascosti nelle case e nelle casse, ridanno mana; le rune si consumano quando le pronunci.",
+  "runes": {
+    "sole": {
+      "name": "Mezzogiorno",
+      "glyph": "☀",
+      "color": "#ffe27a",
+      "element": "luce",
+      "description": "il sole a picco: illumina, rivela"
+    },
+    "brace": {
+      "name": "Falò",
+      "glyph": "♨",
+      "color": "#ff7a3a",
+      "element": "fuoco",
+      "description": "la brace del bivacco: brucia, scalda"
+    },
+    "pioggia": {
+      "name": "Acquazzone",
+      "glyph": "☂",
+      "color": "#5ab8ff",
+      "element": "acqua",
+      "description": "la pioggia che non arriva mai: scorre, disseta"
+    },
+    "cactus": {
+      "name": "Spina verde",
+      "glyph": "⚘",
+      "color": "#7ee08a",
+      "element": "vita",
+      "description": "il cactus che vive dove niente vive: cura, resiste"
+    },
+    "sella": {
+      "name": "Arcione",
+      "glyph": "⊓",
+      "color": "#b9a6ff",
+      "element": "protezione",
+      "description": "la sella: tiene saldi, protegge"
+    },
+    "turbine": {
+      "name": "Mulinello",
+      "glyph": "⟳",
+      "color": "#d8f4ff",
+      "element": "aria",
+      "description": "il turbine di polvere: spinge, solleva"
+    },
+    "caffe": {
+      "name": "Bricco",
+      "glyph": "☕",
+      "color": "#7a4a24",
+      "element": "vigore",
+      "description": "il caffè del bivacco: sveglia, ridà forza"
+    },
+    "polvere": {
+      "name": "Polverone",
+      "glyph": "∷",
+      "color": "#d8a870",
+      "element": "velo",
+      "description": "la nuvola di polvere: nasconde, rallenta"
+    },
+    "canyon": {
+      "name": "Gola",
+      "glyph": "⋀",
+      "color": "#c4603a",
+      "element": "terra",
+      "description": "la roccia del canyon: apre sentieri, smuove"
+    },
+    "astro": {
+      "name": "Orsa",
+      "glyph": "★",
+      "color": "#fff3b0",
+      "element": "rotta",
+      "description": "la stella dei mandriani: orienta, rivela"
+    }
+  },
+  "spells": {
+    "sole": {
+      "name": "Lume di bivacco",
+      "description": "Una piccola luce resta sospesa davanti a te.",
+      "cost": 4,
+      "effects": [
+        {
+          "tipo": "luce",
+          "raggio": 5,
+          "durata": 90
+        }
+      ]
+    },
+    "brace": {
+      "name": "Vampata",
+      "description": "Una vampata davanti a te: brucia ciò che è secco.",
+      "cost": 10,
+      "effects": [
+        {
+          "tipo": "fuoco",
+          "raggio": 1,
+          "durata": 8
+        }
+      ]
+    },
+    "pioggia": {
+      "name": "Pozza",
+      "description": "Dal suolo davanti a te sgorga acqua fresca.",
+      "cost": 10,
+      "effects": [
+        {
+          "tipo": "terreno",
+          "a": "w",
+          "raggio": 0
+        }
+      ]
+    },
+    "cactus": {
+      "name": "Linfa di cactus",
+      "description": "Un tepore fresco ti scorre nelle vene.",
+      "cost": 12,
+      "effects": [
+        {
+          "tipo": "bisogni",
+          "salute": 25
+        }
+      ]
+    },
+    "sella": {
+      "name": "Guscio",
+      "description": "Un guscio d'aria ti avvolge.",
+      "cost": 8,
+      "effects": [
+        {
+          "tipo": "scudo",
+          "durata": 30
+        }
+      ]
+    },
+    "turbine": {
+      "name": "Folata",
+      "description": "Una folata spinge via ciò che hai davanti.",
+      "cost": 6,
+      "effects": [
+        {
+          "tipo": "spingi",
+          "forza": 5
+        }
+      ]
+    },
+    "caffe": {
+      "name": "Caffè dell'alba",
+      "description": "La stanchezza ti scivola via come la notte all'alba.",
+      "cost": 8,
+      "effects": [
+        {
+          "tipo": "bisogni",
+          "energia": 20
+        }
+      ]
+    },
+    "polvere": {
+      "name": "Nuvola rossa",
+      "description": "Una nuvola di polvere ti segue: cammini piano, senza rumore.",
+      "cost": 6,
+      "effects": [
+        {
+          "tipo": "stato",
+          "nome": "nella polvere",
+          "durata": 30,
+          "velocita": 0.8
+        }
+      ]
+    },
+    "canyon": {
+      "name": "Varco",
+      "description": "Il terreno davanti a te si spiana in un sentiero.",
+      "cost": 14,
+      "effects": [
+        {
+          "tipo": "terreno",
+          "a": "p",
+          "raggio": 1
+        }
+      ]
+    },
+    "astro": {
+      "name": "Stella di guardia",
+      "description": "Una luce alta e ferma si accende sopra di te.",
+      "cost": 6,
+      "effects": [
+        {
+          "tipo": "luce",
+          "raggio": 8,
+          "durata": 40
+        }
+      ]
+    },
+    "brace turbine": {
+      "name": "Fuoco di prateria",
+      "description": "Il vento porta la brace: una vampata corre davanti a te.",
+      "cost": 16,
+      "effects": [
+        {
+          "tipo": "fuoco",
+          "raggio": 2,
+          "durata": 10
+        }
+      ]
+    },
+    "pioggia cactus": {
+      "name": "Ristoro",
+      "description": "L'acqua e la linfa insieme: ti senti rinascere.",
+      "cost": 18,
+      "effects": [
+        {
+          "tipo": "bisogni",
+          "salute": 40
+        }
+      ]
+    }
+  },
+  "items": [
+    {
+      "id": "item.cristallo-magico",
+      "name": "Cristallo magico",
+      "description": "Un cristallo che pulsa di luce fredda. Assorbito, ridà forza magica (mana); gli incantesimi di tre o più rune ne consumano uno.",
+      "category": "magia",
+      "weight": 0.1,
+      "stack": 10,
+      "tags": [
+        "magia",
+        "cristallo"
+      ],
+      "glyph": "✦",
+      "color": "#9fe8ff",
+      "aspetto": "a small glowing blue magic crystal shard",
+      "effects": {
+        "mana": 40
+      }
+    },
+    {
+      "id": "item.borsa-rune",
+      "name": "Borsa delle rune",
+      "description": "Una borsetta di pelle con tante taschine: tiene ordinate centinaia di rune.",
+      "category": "contenitore",
+      "weight": 0.2,
+      "stack": 1,
+      "tags": [
+        "contenitore",
+        "runa"
+      ],
+      "glyph": "◘",
+      "color": "#c49a5a",
+      "aspetto": "a small leather pouch with runic stitching",
+      "container": {
+        "size": 12,
+        "accepts": "runa"
+      }
+    },
+    {
+      "id": "item.sacca",
+      "name": "Sacca di tela",
+      "description": "Una sacca da spalla: dentro ci sta di tutto, un po' di tutto.",
+      "category": "contenitore",
+      "weight": 0.4,
+      "stack": 1,
+      "tags": [
+        "contenitore",
+        "casa"
+      ],
+      "glyph": "◘",
+      "color": "#b8a888",
+      "aspetto": "a canvas shoulder bag",
+      "container": {
+        "size": 6
+      }
+    }
+  ],
+  "loot": {
+    "magia": {
+      "rolls": [
+        1,
+        1
+      ],
+      "entries": [
+        {
+          "item": "item.cristallo-magico",
+          "weight": 5,
+          "min": 1,
+          "max": 2
+        },
+        {
+          "item": "rune:sole",
+          "weight": 1
+        },
+        {
+          "item": "rune:brace",
+          "weight": 1
+        },
+        {
+          "item": "rune:pioggia",
+          "weight": 1
+        },
+        {
+          "item": "rune:cactus",
+          "weight": 1
+        },
+        {
+          "item": "rune:sella",
+          "weight": 1
+        },
+        {
+          "item": "rune:turbine",
+          "weight": 1
+        },
+        {
+          "item": "rune:caffe",
+          "weight": 1
+        },
+        {
+          "item": "rune:polvere",
+          "weight": 1
+        },
+        {
+          "item": "rune:canyon",
+          "weight": 1
+        },
+        {
+          "item": "rune:astro",
+          "weight": 1
+        },
+        {
+          "item": "item.sacca",
+          "weight": 1
+        }
+      ]
+    }
+  }
+}

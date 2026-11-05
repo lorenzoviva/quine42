@@ -1,0 +1,22 @@
+{
+ "plan": {
+  "place": {
+   "name": "Borgo del Nastro",
+   "description": "In lontananza suona una campana."
+  },
+  "layout": "borgo",
+  "objects": [
+   {
+    "module": "npc.cat",
+    "where": "fuori"
+   }
+  ],
+  "ground": [],
+  "fresh": [],
+  "runes": [
+   "false",
+   "carpet . rate"
+  ],
+  "strutture": []
+ }
+}

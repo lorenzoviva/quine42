@@ -1,0 +1,18 @@
+<!-- Capsula di salvataggio: a mano (Claude Code, Cantiere 9). Un uovo bianco su tre zampe corte con l'oblò e le fasce arancio; ogni seme cambia le ammaccature e le antennine in cima. -->
+<sequence values="BWZOFAK" size="20 20 24" symmetry="()" name="Capsula di salvataggio">
+  <color symbol="W" value="e8e0d0" name="scafo"/>
+  <color symbol="Z" value="5a5e66" name="zampe"/>
+  <color symbol="O" value="4ad8e8" name="oblò" glow="True"/>
+  <color symbol="F" value="e8803a" name="fascia"/>
+  <color symbol="A" value="aab0b8" name="antenna"/>
+  <color symbol="K" value="b8b0a0" name="ammaccatura"/>
+  <box at="10 10 0" size="12 12 2" color="Z"/>
+  <ellipsoid at="10 10 2" size="14 14 18" color="W"/>
+  <ellipsoid at="10 10 7" size="15 15 3" color="F" on="B"/>
+  <box at="10 3 11" size="4 1 4" color="O"/>
+  <prl in="B W" out="A W" p="0.03" steps="1"/>
+  <all steps="2">
+    <rule in="B A" out="A A" p="0.6"/>
+  </all>
+  <prl in="BW" out="KW" p="0.06" steps="1"/>
+</sequence>

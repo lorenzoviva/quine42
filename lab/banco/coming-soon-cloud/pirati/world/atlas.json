@@ -1,0 +1,12 @@
+{
+  "regioni": [
+    { "id": "porto", "nome": "Porto di Malvasia", "descrizione": "magazzini di mattoni rossi stretti attorno al molo, botti impilate, reti stese ad asciugare", "ambiente": "borgo_mattoni", "centro": [0, -6], "raggio": 1 },
+    { "id": "locanda", "nome": "Locanda del Pesce Volante", "descrizione": "una grande locanda di legno sul porto, con la sala comune, le stanze per chi sbarca e un cortile di botti", "ambiente": "locanda", "centro": [4, -5], "raggio": 1 },
+    { "id": "forte", "nome": "Forte di San Bastiano", "descrizione": "un forte a doppia cinta sulla scogliera, cannoni sulle mura e la casa dei doganieri nel cortile", "ambiente": "fortezza", "centro": [-7, -3], "raggio": 1 },
+    { "id": "laguna", "nome": "Laguna Verde", "descrizione": "acqua bassa e calma tra i canneti, barche di pescatori tirate a riva", "ambiente": "lago", "centro": [6, 4], "raggio": 1 },
+    { "id": "grotte", "nome": "Grotte del Riflusso", "descrizione": "cunicoli scavati nella scogliera dove il mare entra con la marea; casse nascoste negli anfratti", "ambiente": "dungeon", "centro": [-9, 3], "raggio": 1 },
+    { "id": "isola", "nome": "Isola delle Scimmie Urlatrici", "descrizione": "una giungla fitta che arriva fino all'acqua, palme storte e radure di sabbia", "ambiente": "giungla", "centro": [3, 10], "raggio": 1 },
+    { "id": "secca", "nome": "Secca della Sabbia Bianca", "descrizione": "dune bianche e scogli bruciati dal sole, relitti mezzo sepolti, rare pozze d'acqua dolce", "ambiente": "deserto", "centro": [-4, 9], "raggio": 1 },
+    { "id": "coralli", "nome": "Villaggio dei Coralli", "descrizione": "capanne di paglia su palafitte attorno a un pozzo, i coralli stesi a seccare sulle stuoie", "ambiente": "capanne", "centro": [9, -1], "raggio": 1 }
+  ]
+}

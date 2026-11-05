@@ -1,0 +1,12 @@
+{
+  "regioni": [
+    { "id": "stazione", "nome": "Stazione Àncora", "descrizione": "una stazione a doppia cinta di paratie attorno a un vecchio cargo arenato, con l'ispettorato delle rotte nel cortile", "ambiente": "fortezza", "centro": [0, -6], "raggio": 1 },
+    { "id": "mercato", "nome": "Anello del Mercato", "descrizione": "moduli di lamiera rossa stretti attorno a una piazza pressurizzata, banchi di ricambi e di alghe secche", "ambiente": "borgo_mattoni", "centro": [5, -4], "raggio": 1 },
+    { "id": "locanda", "nome": "Locanda del Molo Sette", "descrizione": "un grande modulo con la sala comune, le cuccette per chi attracca e un cortile di casse", "ambiente": "locanda", "centro": [-4, -4], "raggio": 1 },
+    { "id": "relitto", "nome": "Relitto della Perseveranza", "descrizione": "lo scafo spezzato di un cargo, paratie crollate e corridoi aperti sulla roccia", "ambiente": "rovine", "centro": [-8, 2], "raggio": 1 },
+    { "id": "serre", "nome": "Serre di Cerere", "descrizione": "una cupola di vetro piena di piante idroponiche fitte e umide, con passerelle tra le vasche", "ambiente": "giungla", "centro": [6, 5], "raggio": 1 },
+    { "id": "asteroide", "nome": "Asteroide Ferroso", "descrizione": "distese di polvere grigia e rocce ferrose bruciate dalla stella, rare sacche di ghiaccio", "ambiente": "deserto", "centro": [2, 10], "raggio": 1 },
+    { "id": "cometa", "nome": "Cometa dei Ghiacci", "descrizione": "pareti di ghiaccio sporco, passi stretti e brina sulle creste", "ambiente": "montagne", "centro": [-5, 9], "raggio": 1 },
+    { "id": "gallerie", "nome": "Gallerie di Talassa", "descrizione": "cunicoli di miniera scavati nella roccia ferrosa, umidi di condensa e bui", "ambiente": "dungeon", "centro": [9, -1], "raggio": 1 }
+  ]
+}

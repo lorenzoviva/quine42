@@ -1,0 +1,20 @@
+<!-- Bacheca delle taglie: a mano (Claude Code, Cantiere 9). Due pali, una tavola coperta di manifesti, una tettoia; ogni seme cambia i manifesti e i chiodi. -->
+<sequence values="BPLMSNK" size="20 20 40" symmetry="()" name="Bacheca delle taglie">
+  <color symbol="P" value="6a4a2e" name="palo"/>
+  <color symbol="L" value="8a6a40" name="tavola"/>
+  <color symbol="M" value="e8d7a8" name="manifesto"/>
+  <color symbol="S" value="c8a050" name="stella"/>
+  <color symbol="N" value="2e2e33" name="chiodo"/>
+  <color symbol="K" value="5a3a22" name="tettoia"/>
+  <box at="10 10 0" size="12 6 1" color="L"/>
+  <box at="4 10 0" size="2 2 30" color="P"/>
+  <box at="16 10 0" size="2 2 30" color="P"/>
+  <box at="10 10 14" size="12 2 14" color="L"/>
+  <box at="10 10 30" size="16 6 2" color="K"/>
+  <box at="10 9 26" size="2 1 2" color="S"/>
+  <prl in="BL" out="ML" p="0.25" steps="1"/>
+  <all steps="2">
+    <rule in="BM" out="MM" p="0.4"/>
+  </all>
+  <prl in="B K" out="N K" p="0.1" steps="1"/>
+</sequence>

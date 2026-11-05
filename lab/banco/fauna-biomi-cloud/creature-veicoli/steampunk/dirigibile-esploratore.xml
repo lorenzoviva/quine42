@@ -1,0 +1,97 @@
+<!-- Dirigibile esploratore (Cantiere 8, orichalcum): involucro, traliccio, gondola e impennaggi a caso; toppe a caso. -->
+<sequence values="BTQWIOVu123456z" symmetry="(xy)" name="Dirigibile esploratore">
+  <color symbol="T" value="d8cdb0" name="tela"/>
+  <color symbol="Q" value="a89a78" name="toppe"/>
+  <color symbol="W" value="6b4a2a" name="gondola di legno"/>
+  <color symbol="I" value="3b3631" name="traliccio di ferro"/>
+  <color symbol="O" value="c09030" name="eliche d'ottone"/>
+  <color symbol="V" value="8fc4d0" name="oblò"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="1" hidden="True" name="marcatore"/>
+  <color symbol="2" hidden="True" name="marcatore"/>
+  <color symbol="3" hidden="True" name="marcatore"/>
+  <color symbol="4" hidden="True" name="marcatore"/>
+  <color symbol="5" hidden="True" name="marcatore"/>
+  <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
+  <!-- scelta «involucro»: lungo | panciuto | a sigaro alto -->
+  <box at="25 25 18" size="27 50 32" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <!--   1: lungo -->
+  <ellipsoid at="25 25 26" size="18 46 16" color="T" on="1"/>
+  <!--   2: panciuto -->
+  <ellipsoid at="25 25 24" size="24 40 20" color="T" on="2"/>
+  <!--   3: a sigaro alto -->
+  <ellipsoid at="25 25 31" size="16 44 15" color="T" on="3"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <!-- scelta «traliccio»: a prua | al centro | a poppa -->
+  <box at="25 25 0" size="23 50 41" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <!--   1: a prua -->
+  <line at="25 49 0" to="25 49 38" r="1" color="I" on="1"/>
+  <line at="21 49 0" to="25 49 20" r="0.5" color="I" on="1"/>
+  <line at="29 49 0" to="25 49 20" r="0.5" color="I" on="1"/>
+  <box at="25 49 0" size="9 3 1" color="I" on="1"/>
+  <line at="25 49 36" to="25 40 36" r="1" color="I" on="1"/>
+  <!--   2: al centro -->
+  <line at="16 25 0" to="20 25 33" r="1" color="I" on="2"/>
+  <line at="34 25 0" to="30 25 33" r="1" color="I" on="2"/>
+  <line at="16 25 8" to="34 25 8" r="0.5" color="I" on="2"/>
+  <box at="16 25 0" size="4 4 1" color="I" on="2"/>
+  <box at="34 25 0" size="4 4 1" color="I" on="2"/>
+  <!--   3: a poppa -->
+  <line at="25 1 0" to="25 1 38" r="1" color="I" on="3"/>
+  <line at="21 1 0" to="25 1 20" r="0.5" color="I" on="3"/>
+  <line at="29 1 0" to="25 1 20" r="0.5" color="I" on="3"/>
+  <box at="25 1 0" size="9 3 1" color="I" on="3"/>
+  <line at="25 1 36" to="25 10 36" r="1" color="I" on="3"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <!-- scelta «gondola»: lunga | piccola | a due ponti -->
+  <box at="25 25 4" size="16 40 30" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <!--   1: lunga -->
+  <box at="25 26 9" size="8 22 5" color="W" on="1"/>
+  <line at="22 20 14" to="22 20 33" r="0.5" color="I" on="1"/>
+  <line at="28 32 14" to="28 32 33" r="0.5" color="I" on="1"/>
+  <line at="22 32 14" to="22 32 33" r="0.5" color="I" on="1"/>
+  <line at="28 20 14" to="28 20 33" r="0.5" color="I" on="1"/>
+  <box at="25 37 10" size="3 1 2" color="V" on="1"/>
+  <!--   2: piccola -->
+  <ellipsoid at="25 26 10" size="9 12 6" color="W" on="2"/>
+  <line at="25 26 15" to="25 26 33" r="0.5" color="I" on="2"/>
+  <line at="25 20 12" to="25 22 33" r="0.5" color="I" on="2"/>
+  <box at="25 32 12" size="3 1 2" color="V" on="2"/>
+  <!--   3: a due ponti -->
+  <box at="25 25 6" size="10 18 5" color="W" on="3"/>
+  <box at="25 25 11" size="8 14 4" color="W" on="3"/>
+  <line at="25 25 15" to="25 25 33" r="1" color="I" on="3"/>
+  <box at="25 34 8" size="6 1 2" color="V" on="3"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <!-- scelta «impennaggi»: a croce | a X | a tre pinne -->
+  <box at="25 6 14" size="44 12 36" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <!--   1: a croce -->
+  <box at="25 5 26" size="2 6 24" color="O" on="1"/>
+  <box at="25 5 36" size="30 6 2" color="O" on="1"/>
+  <!--   2: a X -->
+  <line at="25 7 36" to="14 3 47" r="1" color="O" on="2"/>
+  <line at="25 7 36" to="36 3 47" r="1" color="O" on="2"/>
+  <line at="25 7 36" to="14 3 25" r="1" color="O" on="2"/>
+  <line at="25 7 36" to="36 3 25" r="1" color="O" on="2"/>
+  <!--   3: a tre pinne -->
+  <box at="25 5 34" size="2 6 15" color="O" on="3"/>
+  <line at="25 7 36" to="14 3 27" r="1" color="O" on="3"/>
+  <line at="25 7 36" to="36 3 27" r="1" color="O" on="3"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <!-- toppe di tela più scura dove capita -->
+  <prl in="T" out="Q" p="0.004" steps="1"/>
+  <prl in="QT" out="*Q" p="0.35" steps="3"/>
+</sequence>

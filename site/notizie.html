@@ -1,10 +1,13 @@
 <!doctype html>
-<html lang="it">
+<html lang="it" data-skin="sobria">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Le notizie di QUINE42: aggiornamenti del kernel, universi nuovi, sessioni di generazione, sondaggi e pianificazione dei server." />
     <title>QUINE42 · Notizie</title>
+    <!-- La veste (ADR-0145): prima di tutto, così la pagina non si disegna mai con quella sbagliata. Niente script scritti qui: la CSP -->
+    <script src="/skins/boot.js" vite-ignore></script>
+    <noscript><link rel="stylesheet" href="/skins/sobria/skin.css" vite-ignore /></noscript>
     <link rel="stylesheet" href="./site.css" />
   </head>
   <body>
@@ -33,7 +36,7 @@
     <main class="section-wrap news-page">
       <div class="comic-alert" id="page-alert" role="status" aria-live="polite" hidden>
         <span class="comic-badge" id="page-alert-badge">INFO</span>
-        <span class="arcade-text" id="page-alert-text" style="font-size: 0.75rem"></span>
+        <span class="arcade-text" id="page-alert-text" style="font-size: var(--text-13)"></span>
       </div>
 
       <!-- La lista: filtri e carte li riempie site/notizie.ts -->
@@ -69,6 +72,7 @@
       <div class="footer-copy">QUINE42 © 2026 · Voxel e modelli MarkovJunior 3D · Generato con intelligenza artificiale</div>
     </footer>
 
+    <script type="module" src="./skin.ts"></script>
     <script type="module" src="./notizie.ts"></script>
   </body>
 </html>

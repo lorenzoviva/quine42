@@ -1,0 +1,902 @@
+{
+ "cervo-reale": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.4385724006977805,
+  "minima": 0.2437839382680766,
+  "ms": 135,
+  "voxel": [
+   2325,
+   3113,
+   2156,
+   3032,
+   2146
+  ],
+  "passa": true
+ },
+ "lupo-dei-boschi": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.4759722998524946,
+  "minima": 0.31238140417457305,
+  "ms": 185,
+  "voxel": [
+   2307,
+   2638,
+   2339,
+   3569,
+   3546
+  ],
+  "passa": true
+ },
+ "cinghiale-corazzato": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.38169521260832867,
+  "minima": 0.15750554596992852,
+  "ms": 136,
+  "voxel": [
+   3655,
+   3820,
+   5540,
+   4656,
+   4750
+  ],
+  "passa": true
+ },
+ "golem-runico": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.30560790659069426,
+  "minima": 0.11222222222222222,
+  "ms": 74,
+  "voxel": [
+   2585,
+   2590,
+   2506,
+   2512,
+   2636
+  ],
+  "passa": true
+ },
+ "drago-antico": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.4459376364863366,
+  "minima": 0.06986162672966588,
+  "ms": 669,
+  "voxel": [
+   8595,
+   9494,
+   8539,
+   8373,
+   8618
+  ],
+  "passa": true
+ },
+ "automa-sentinella": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.2643687208331767,
+  "minima": 0.05405405405405406,
+  "ms": 57,
+  "voxel": [
+   1710,
+   2039,
+   1945,
+   1746,
+   1881
+  ],
+  "passa": true
+ },
+ "segugio-ottone": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.49581989193433584,
+  "minima": 0.2768562401263823,
+  "ms": 180,
+  "voxel": [
+   3391,
+   2171,
+   2271,
+   2302,
+   2192
+  ],
+  "passa": true
+ },
+ "ragno-meccanico": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.5093544328263293,
+  "minima": 0.2686488388458832,
+  "ms": 193,
+  "voxel": [
+   4389,
+   4531,
+   5162,
+   3214,
+   5310
+  ],
+  "passa": true
+ },
+ "locomotiva-vapore": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.22743722994832702,
+  "minima": 0.09814292430653503,
+  "ms": 138,
+  "voxel": [
+   7158,
+   6761,
+   8274,
+   7568,
+   7907
+  ],
+  "passa": true
+ },
+ "dirigibile-esploratore": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.4418421405611161,
+  "minima": 0.03865560591807064,
+  "ms": 556,
+  "voxel": [
+   11527,
+   6875,
+   8410,
+   11407,
+   7329
+  ],
+  "passa": true
+ },
+ "cane-randagio": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.6275063823177491,
+  "minima": 0.02626641651031895,
+  "ms": 21,
+  "voxel": [
+   526,
+   444,
+   526,
+   411,
+   444
+  ],
+  "passa": true
+ },
+ "gatto-urbano": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.7107510488020425,
+  "minima": 0.03208556149732621,
+  "ms": 25,
+  "voxel": [
+   340,
+   368,
+   299,
+   368,
+   467
+  ],
+  "passa": true
+ },
+ "furgone-consegne": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.4287002233544809,
+  "minima": 0.004347826086956522,
+  "ms": 157,
+  "voxel": [
+   12159,
+   5515,
+   15580,
+   12378,
+   5501
+  ],
+  "passa": true
+ },
+ "motocicletta-stradale": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.5538740365640267,
+  "minima": 0.11125319693094629,
+  "ms": 391,
+  "voxel": [
+   1543,
+   2742,
+   1411,
+   1329,
+   2609
+  ],
+  "passa": true
+ },
+ "elicottero-soccorso": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.430590594453795,
+  "minima": 0.24818753020782988,
+  "ms": 463,
+  "voxel": [
+   3165,
+   4706,
+   5121,
+   3155,
+   4094
+  ],
+  "passa": true
+ },
+ "drone-esapode": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.4283522520791315,
+  "minima": 0.05350045857535922,
+  "ms": 168,
+  "voxel": [
+   3264,
+   2410,
+   2622,
+   3103,
+   2553
+  ],
+  "passa": true
+ },
+ "camminatore-pesante": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.49577344393824296,
+  "minima": 0.006217237596001463,
+  "ms": 637,
+  "voxel": [
+   8178,
+   8622,
+   7149,
+   8177,
+   7628
+  ],
+  "passa": true
+ },
+ "xenofauna-cristallina": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.3833347514187821,
+  "minima": 0.1618832634633989,
+  "ms": 167,
+  "voxel": [
+   2784,
+   2742,
+   2655,
+   2761,
+   2958
+  ],
+  "passa": true
+ },
+ "navetta-orbitale": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.3656405317094208,
+  "minima": 0.01155765694772787,
+  "ms": 273,
+  "voxel": [
+   5346,
+   3787,
+   4473,
+   5538,
+   3783
+  ],
+  "passa": true
+ },
+ "rover-esplorazione": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.2151078871443198,
+  "minima": 0.06390230048281738,
+  "ms": 93,
+  "voxel": [
+   3278,
+   3266,
+   3362,
+   3455,
+   3323
+  ],
+  "passa": true
+ },
+ "quercia-secolare": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.6650361985262748,
+  "minima": 0.532413095324131,
+  "ms": 109,
+  "voxel": [
+   9002,
+   10036,
+   9058,
+   10271,
+   11619
+  ],
+  "passa": true
+ },
+ "salice-piangente": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.8475760605387717,
+  "minima": 0.7682793173633944,
+  "ms": 102,
+  "voxel": [
+   4176,
+   4774,
+   3691,
+   4051,
+   4013
+  ],
+  "passa": true
+ },
+ "fungo-gigante-luminoso": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.3971840443066766,
+  "minima": 0.0850480109739369,
+  "ms": 295,
+  "voxel": [
+   7172,
+   7180,
+   9774,
+   8368,
+   9770
+  ],
+  "passa": true
+ },
+ "arco-roccia-muschioso": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.47636848945305765,
+  "minima": 0.16781444548509725,
+  "ms": 690,
+  "voxel": [
+   13527,
+   16570,
+   13508,
+   13760,
+   16686
+  ],
+  "passa": true
+ },
+ "cristallo-caverna": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.2984316965426415,
+  "minima": 0.18403869407496978,
+  "ms": 425,
+  "voxel": [
+   11548,
+   11389,
+   11186,
+   11138,
+   11774
+  ],
+  "passa": true
+ },
+ "albero-ferro-fuso": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.7819306483108991,
+  "minima": 0.6128664958724737,
+  "ms": 145,
+  "voxel": [
+   2028,
+   2324,
+   2127,
+   2283,
+   2549
+  ],
+  "passa": true
+ },
+ "camino-geotermico": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.19059242454998754,
+  "minima": 0.09684809226637175,
+  "ms": 323,
+  "voxel": [
+   12077,
+   12097,
+   12019,
+   12084,
+   12073
+  ],
+  "passa": true
+ },
+ "venatura-oricalco": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.4717530820816166,
+  "minima": 0.0412262156448203,
+  "ms": 512,
+  "voxel": [
+   27741,
+   10481,
+   11391,
+   27849,
+   10566
+  ],
+  "passa": true
+ },
+ "ponte-tubi-vapore": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.5845668672444284,
+  "minima": 0.013779527559055118,
+  "ms": 269,
+  "voxel": [
+   7566,
+   3103,
+   3391,
+   7569,
+   4407
+  ],
+  "passa": true
+ },
+ "gru-miniera": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.5238279026837829,
+  "minima": 0.22385321100917432,
+  "ms": 307,
+  "voxel": [
+   2468,
+   1960,
+   2075,
+   2585,
+   1912
+  ],
+  "passa": true
+ },
+ "platano-viale": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.7614807007914737,
+  "minima": 0.5938711131140153,
+  "ms": 129,
+  "voxel": [
+   4930,
+   7320,
+   5449,
+   5302,
+   8281
+  ],
+  "passa": true
+ },
+ "aiuola-fiorita-urbana": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.3423168166341182,
+  "minima": 0.2188976377952756,
+  "ms": 15,
+  "voxel": [
+   1069,
+   1123,
+   1313,
+   1277,
+   1139
+  ],
+  "passa": true
+ },
+ "scogliera-frangiflutti": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.32586012861472874,
+  "minima": 0.029440027954922687,
+  "ms": 262,
+  "voxel": [
+   22581,
+   14710,
+   19707,
+   22533,
+   14798
+  ],
+  "passa": true
+ },
+ "traliccio-alta-tensione": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.38981801773892977,
+  "minima": 0.0037333333333333333,
+  "ms": 101,
+  "voxel": [
+   2137,
+   1873,
+   2137,
+   1536,
+   1870
+  ],
+  "passa": true
+ },
+ "cantiere-gru": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.1924480003836951,
+  "minima": 0.13473305338932215,
+  "ms": 871,
+  "voxel": [
+   7607,
+   7417,
+   7879,
+   7631,
+   7940
+  ],
+  "passa": true
+ },
+ "albero-bioluminescente": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.8039099976392127,
+  "minima": 0.6078022632519356,
+  "ms": 147,
+  "voxel": [
+   2290,
+   2108,
+   2139,
+   2385,
+   2385
+  ],
+  "passa": true
+ },
+ "corallo-silicio": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.3494557917099973,
+  "minima": 0.2891353097290514,
+  "ms": 273,
+  "voxel": [
+   44090,
+   45533,
+   44687,
+   46494,
+   39070
+  ],
+  "passa": true
+ },
+ "monolite-magnetico": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.4409775201155871,
+  "minima": 0.06469500924214418,
+  "ms": 188,
+  "voxel": [
+   2528,
+   2094,
+   2600,
+   2706,
+   2094
+  ],
+  "passa": true
+ },
+ "geyser-criogenico": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.43360040977934594,
+  "minima": 0.26742671009771984,
+  "ms": 641,
+  "voxel": [
+   6301,
+   8715,
+   5285,
+   6091,
+   5353
+  ],
+  "passa": true
+ },
+ "antenna-array-profondo": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.34538682335438237,
+  "minima": 0.011541732474790426,
+  "ms": 618,
+  "voxel": [
+   8182,
+   6965,
+   8185,
+   8182,
+   6960
+  ],
+  "passa": true
+ },
+ "ponte-pietra-antico": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.3539672354279326,
+  "minima": 0.02317478324284904,
+  "ms": 251,
+  "voxel": [
+   12204,
+   15436,
+   12192,
+   12238,
+   14463
+  ],
+  "passa": true
+ },
+ "circolo-megalitico": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.6334180579738435,
+  "minima": 0.5345780148599734,
+  "ms": 163,
+  "voxel": [
+   6500,
+   7615,
+   7769,
+   7184,
+   7015
+  ],
+  "passa": true
+ },
+ "rovine-tempio-sommerso": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.24553704725962575,
+  "minima": 0.01826295914864401,
+  "ms": 80,
+  "voxel": [
+   14052,
+   14431,
+   14111,
+   17055,
+   14433
+  ],
+  "passa": true
+ },
+ "statua-colosso": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.28003991115855525,
+  "minima": 0.03355290242898312,
+  "ms": 124,
+  "voxel": [
+   4160,
+   4713,
+   4711,
+   4042,
+   4840
+  ],
+  "passa": true
+ },
+ "portale-arcano": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.48885532991859826,
+  "minima": 0.3067470164244358,
+  "ms": 257,
+  "voxel": [
+   7395,
+   6935,
+   4671,
+   5774,
+   4658
+  ],
+  "passa": true
+ },
+ "orologio-astrario-piazza": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.29235520524635156,
+  "minima": 0.09145402997164843,
+  "ms": 296,
+  "voxel": [
+   12156,
+   8299,
+   8452,
+   11405,
+   9137
+  ],
+  "passa": true
+ },
+ "ponte-levatoio-ingranaggi": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.5494283728968368,
+  "minima": 0.1653722913159181,
+  "ms": 676,
+  "voxel": [
+   17021,
+   4859,
+   15016,
+   16760,
+   5723
+  ],
+  "passa": true
+ },
+ "cisterna-pressione": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.41491232629362623,
+  "minima": 0.015587353100260609,
+  "ms": 546,
+  "voxel": [
+   18899,
+   20190,
+   19020,
+   12645,
+   20167
+  ],
+  "passa": true
+ },
+ "stazione-teleferica": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.24027981577439234,
+  "minima": 0.046894944225539706,
+  "ms": 294,
+  "voxel": [
+   17604,
+   14110,
+   16759,
+   17589,
+   14109
+  ],
+  "passa": true
+ },
+ "faro-aeronautico": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.46506348590599267,
+  "minima": 0.1424993042026162,
+  "ms": 382,
+  "voxel": [
+   6522,
+   5506,
+   4191,
+   6826,
+   5809
+  ],
+  "passa": true
+ },
+ "monumento-piazza": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.33847729820347155,
+  "minima": 0.08258400378608613,
+  "ms": 546,
+  "voxel": [
+   8430,
+   5102,
+   7917,
+   8289,
+   5022
+  ],
+  "passa": true
+ },
+ "fermata-metropolitana": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.22905063604822895,
+  "minima": 0.050273899982329034,
+  "ms": 480,
+  "voxel": [
+   16937,
+   11032,
+   11058,
+   11035,
+   13047
+  ],
+  "passa": true
+ },
+ "chiosco-mercato-coperto": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.6445342196101701,
+  "minima": 0.08763586956521739,
+  "ms": 506,
+  "voxel": [
+   11465,
+   15005,
+   11055,
+   20104,
+   14146
+  ],
+  "passa": true
+ },
+ "passerella-pedonale": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.6116403049150904,
+  "minima": 0.062300884955752214,
+  "ms": 454,
+  "voxel": [
+   2778,
+   3133,
+   2696,
+   2879,
+   3847
+  ],
+  "passa": true
+ },
+ "faro-portuale": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.5065499057205585,
+  "minima": 0.043615344193378876,
+  "ms": 235,
+  "voxel": [
+   7374,
+   6360,
+   7356,
+   7518,
+   7109
+  ],
+  "passa": true
+ },
+ "anello-teletrasporto": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.626188671389033,
+  "minima": 0.28991367063708884,
+  "ms": 733,
+  "voxel": [
+   8115,
+   7199,
+   8297,
+   11117,
+   7352
+  ],
+  "passa": true
+ },
+ "cupola-geodetica": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.47722712678329043,
+  "minima": 0.04385260853703028,
+  "ms": 726,
+  "voxel": [
+   13629,
+   13207,
+   13180,
+   13352,
+   10402
+  ],
+  "passa": true
+ },
+ "torre-schermatura": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.5174993325559308,
+  "minima": 0.3007760235483008,
+  "ms": 99,
+  "voxel": [
+   3414,
+   3805,
+   2872,
+   3478,
+   4468
+  ],
+  "passa": true
+ },
+ "relitto-astronave": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.5252806209599334,
+  "minima": 0.15039905796153344,
+  "ms": 822,
+  "voxel": [
+   14352,
+   10037,
+   13921,
+   11618,
+   10930
+  ],
+  "passa": true
+ },
+ "faro-iperspaziale": {
+  "errori": [],
+  "fluttuanti": 0,
+  "distanza": 0.4704728997565705,
+  "minima": 0.22589167767503301,
+  "ms": 473,
+  "voxel": [
+   4294,
+   2876,
+   3288,
+   4383,
+   3764
+  ],
+  "passa": true
+ }
+}

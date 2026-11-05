@@ -1,0 +1,21 @@
+<!-- Carro dell'elisir: a mano (Claude Code, Cantiere 9). Un carro di legno dipinto con quattro ruote, la tela arcuata e le bottiglie sulla sponda; ogni seme cambia le bottiglie e le toppe della tela. -->
+<sequence values="BCWRTGVK" size="20 20 20" symmetry="()" name="Carro dell'elisir">
+  <color symbol="C" value="3a7a5a" name="cassone"/>
+  <color symbol="W" value="5a3a22" name="ruota"/>
+  <color symbol="R" value="b8402a" name="bordo"/>
+  <color symbol="T" value="e8dcc0" name="tela"/>
+  <color symbol="G" value="5aa86a" name="bottiglia" alpha="0.85"/>
+  <color symbol="V" value="7a3e9a" name="bottiglia viola" alpha="0.85"/>
+  <color symbol="K" value="c8b898" name="toppa"/>
+  <box at="4 4 0" size="2 4 5" color="W"/>
+  <box at="16 4 0" size="2 4 5" color="W"/>
+  <box at="4 16 0" size="2 4 5" color="W"/>
+  <box at="16 16 0" size="2 4 5" color="W"/>
+  <box at="10 10 3" size="12 18 5" color="C"/>
+  <box at="10 10 8" size="12 18 1" color="R"/>
+  <box at="10 13 9" size="12 12 6" color="T"/>
+  <box at="10 13 9" size="10 12 5" color="B"/>
+  <prl in="B R" out="G R" p="0.15" steps="1"/>
+  <prl in="B G" out="V G" p="0.3" steps="1"/>
+  <prl in="B T" out="K T" p="0.1" steps="1"/>
+</sequence>

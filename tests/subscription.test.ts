@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -108,6 +108,27 @@ describe('la coda su disco (T68)', () => {
     expect((await take(d, 'claude'))?.id).toBe(a);
     await withdraw(d, a);
     expect(await answer(d, a, { text: 'tardi' })).toBe(false);
+  });
+
+  it('chi guarda mentre il processo prende e risponde non legge mai «richiesta sconosciuta» (T267)', async () => {
+    // Before T267 look() read risposta, presa, richiesta: a take() between the last two looked like an unknown request
+    // (53 times out of 500 with this loop, more under load), and the call failed with «richiesta sconosciuta».
+    const d = dir();
+    const seen: string[] = [];
+    for (let i = 0; i < 200; i++) {
+      const id = await enqueue(d, { provider: 'claude', agent: 'a', task: 't', system: '', prompt: String(i) });
+      const watcher = (async () => {
+        for (;;) {
+          const a = await look(d, id);
+          if (a.stato === 'fatta' || a.stato === 'fallita') return seen.push(a.stato === 'fatta' ? 'fatta' : String(a.errore));
+        }
+      })();
+      let r;
+      while (!(r = await take(d, 'claude'))) await Promise.resolve();
+      await answer(d, r.id, { text: 'ok' });
+      await watcher;
+    }
+    expect(seen.filter((s) => s !== 'fatta')).toEqual([]);
   });
 
   it('rifiuta ciò che non è una richiesta, e sa chi serve', async () => {
@@ -320,13 +341,12 @@ describe('il pannello del Concilio e gli abbonamenti (T68c)', () => {
       const host = makeMockElement('div');
       const panel = new FeedPanel(host, k);
 
-      // Give async showSubs a tick
-      await new Promise((r) => setTimeout(r, 20));
-
       const root = host.children[0];
       const subsEl = root.children.find((c: any) => c.className === 'subs');
       expect(subsEl).toBeDefined();
       expect(subsEl.hidden).toBe(false);
+      // showSubs reads the queue on disk: wait for it, not for a fixed time (T267).
+      await vi.waitFor(() => expect(subsEl.textContent).toContain('in coda'), { timeout: 10_000, interval: 5 });
       expect(subsEl.textContent).toContain('abbonamenti: claude (scultore)');
       expect(subsEl.textContent).toContain('in coda: 0');
 

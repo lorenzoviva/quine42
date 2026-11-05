@@ -1,0 +1,44 @@
+{
+  "id": "spazio.serbatoio",
+  "name": "Serbatoio d'ossigeno",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "a mano (Claude Code, Cantiere 9)",
+  "description": "Un serbatoio cilindrico con il manometro e il rubinetto per riempire le bombole.",
+  "context": "nei corridoi, sui moli, nelle serre",
+  "appearance": {
+    "model": "serbatoio",
+    "glyph": "▮",
+    "color": "#d8e0e8",
+    "aspetto": "un serbatoio cilindrico bianco con fasce rosse e un manometro",
+    "classe": "mobile"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.45
+  },
+  "actions": [
+    {
+      "id": "riempi",
+      "label": "Riempi una bombola",
+      "requires": "item.bombola-vuota"
+    },
+    {
+      "id": "manometro",
+      "label": "Leggi il manometro"
+    },
+    {
+      "id": "respira",
+      "label": "Prendi una boccata"
+    }
+  ],
+  "spawn": {
+    "tiles": [
+      "l",
+      "f"
+    ],
+    "chance": 0.05,
+    "max": 2
+  },
+  "logic": "logic.lua"
+}

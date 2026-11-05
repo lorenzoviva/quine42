@@ -1,0 +1,50 @@
+<!-- Terminale olografico (ambientazione futuristica, sidera): una colonna di grafite su una piastra, il leggio di ceramica bianca con i
+     tasti accesi e sopra l'ologramma ciano e magenta che si alza dall'emettitore. Il seme sceglie quanto è alta la colonna e la forma
+     dell'ologramma, che cresce ogni volta in un altro modo. -->
+<sequence values="BWwGgCMVhkrexH" size="20 20 20" symmetry="(xy)" name="Terminale olografico">
+  <color symbol="W" value="eef1f5" name="ceramica bianca"/>
+  <color symbol="w" value="c3c9d3" name="ceramica in ombra"/>
+  <color symbol="G" value="353a42" name="grafite"/>
+  <color symbol="g" value="565d68" name="grafite chiara"/>
+  <color symbol="C" value="5ff0ff" name="luce ciano" glow="True"/>
+  <color symbol="M" value="ff3ec8" name="luce magenta" glow="True"/>
+  <color symbol="V" value="9fd8e6" name="vetro dell'emettitore"/>
+  <color symbol="H" value="8ff7ff" name="ologramma" glow="True"/>
+  <color symbol="h" hidden="True" name="quote possibili"/>
+  <color symbol="k" hidden="True" name="la quota scelta"/>
+  <color symbol="r" hidden="True" name="la colonna che sale"/>
+  <color symbol="e" hidden="True" name="l'emettitore"/>
+  <color symbol="x" hidden="True" name="il leggio che si allarga"/>
+  <!-- La piastra -->
+  <box at="10 10 0" size="9 9 1" color="G"/>
+  <box at="10 10 1" size="5 5 1" color="g"/>
+  <!-- La quota del leggio: una fra 6 e 12 -->
+  <box at="0 0 6" size="1 1 7" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all in="kB" out="kk"/>
+  <box at="10 10 2" size="1 1 1" color="r"/>
+  <one steps="20" symmetry="()">
+    <rule in="B r" out="r g"/>
+  </one>
+  <all in="k" out="B"/>
+  <!-- Il leggio: largo tre, quattro o cinque passi -->
+  <all in="Bg" out="Gg" steps="1"/>
+  <all in="B r" out="e x" symmetry="()"/>
+  <all in="r" out="G"/>
+  <all in="xB" out="*x" steps="3"/>
+  <all in="x*/*B" out="**/*x" steps="1"/>
+  <all in="x" out="W"/>
+  <all in="B e" out="H V" symmetry="()"/>
+  <!-- L'ologramma: sale e si allarga a caso dall'emettitore -->
+  <one steps="150">
+    <rule in="B H" out="H H"/>
+    <rule in="HB" out="HH" p="0.6"/>
+  </one>
+  <all in="e" out="g"/>
+  <prl in="H" out="C" p="0.3" steps="1"/>
+  <prl in="BH" out="BM" p="0.12" steps="1"/>
+  <!-- Il bordo del leggio e i tasti -->
+  <all in="WB" out="wB" symmetry="(xy)"/>
+  <prl in="B W" out="M *" p="0.06" steps="1" symmetry="()"/>
+</sequence>

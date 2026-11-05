@@ -1,0 +1,720 @@
+{
+ "persone": [
+  {
+   "nome": "Abele Croce",
+   "specie": "persona",
+   "genere": "maschio",
+   "tipo": "npc.villager",
+   "mestiere": "cercatore d'oro",
+   "eta": "anziano",
+   "persona": "un vecchio cercatore che parla al fiume come a un socio",
+   "aspetto": "barba bianca, cappello sfondato, setaccio legato alla schiena",
+   "storia": "Trovò la pepita grande come un uovo che fece nascere la città, e la spese tutta in una settimana.",
+   "famiglia": [
+    {
+     "nome": "Rosalia Croce",
+     "legame": "padre"
+    },
+    {
+     "nome": "Prudenza Sale",
+     "legame": "vicino"
+    }
+   ],
+   "routine": [
+    {
+     "quando": "mattina",
+     "fa": "setaccia la sabbia del fiume",
+     "dove": "lavoro",
+     "azione": "lavora"
+    },
+    {
+     "quando": "giorno",
+     "fa": "pesa la polvere d'oro alla banca",
+     "dove": "piazza",
+     "azione": "commercia"
+    },
+    {
+     "quando": "sera",
+     "fa": "racconta della pepita grande al saloon",
+     "dove": "piazza",
+     "azione": "chiacchiera"
+    },
+    {
+     "quando": "notte",
+     "fa": "dorme",
+     "dove": "casa",
+     "azione": "dorme"
+    }
+   ]
+  },
+  {
+   "nome": "Rosalia Croce",
+   "specie": "persona",
+   "genere": "femmina",
+   "tipo": "npc.villager",
+   "mestiere": "minatrice",
+   "eta": "giovane",
+   "persona": "una ragazza testarda che vuole trovare una vena tutta sua",
+   "aspetto": "fazzoletto rosso, lanterna da miniera, stivali infangati",
+   "famiglia": [
+    {
+     "nome": "Abele Croce",
+     "legame": "figlia"
+    },
+    {
+     "nome": "Ruben Pozzi",
+     "legame": "amica"
+    }
+   ],
+   "routine": [
+    {
+     "quando": "mattina",
+     "fa": "scava nella galleria nuova",
+     "dove": "lavoro",
+     "azione": "lavora"
+    },
+    {
+     "quando": "giorno",
+     "fa": "spinge i carrelli fuori dalla miniera",
+     "dove": "lavoro",
+     "azione": "lavora"
+    },
+    {
+     "quando": "sera",
+     "fa": "mangia con i minatori",
+     "dove": "piazza",
+     "azione": "mangia"
+    },
+    {
+     "quando": "notte",
+     "fa": "dorme",
+     "dove": "casa",
+     "azione": "dorme"
+    }
+   ]
+  },
+  {
+   "nome": "Corrado Steccato",
+   "specie": "persona",
+   "genere": "maschio",
+   "tipo": "npc.villager",
+   "mestiere": "sceriffo",
+   "eta": "adulto",
+   "persona": "uno sceriffo paziente che preferisce una parola a una pistola",
+   "aspetto": "stella d'ottone sul gilè, baffi grigi, cappello nero",
+   "storia": "Ha chiuso più duelli con una stretta di mano che con un colpo.",
+   "famiglia": [
+    {
+     "nome": "Elmo Grano",
+     "legame": "maestro"
+    },
+    {
+     "nome": "Fausta Mele",
+     "legame": "rivale"
+    }
+   ],
+   "routine": [
+    {
+     "quando": "mattina",
+     "fa": "appende le taglie alla porta dell'ufficio",
+     "dove": "lavoro",
+     "azione": "lavora"
+    },
+    {
+     "quando": "giorno",
+     "fa": "fa la ronda sulla strada maestra",
+     "dove": "in giro",
+     "azione": "pattuglia"
+    },
+    {
+     "quando": "sera",
+     "fa": "beve un caffè al saloon",
+     "dove": "piazza",
+     "azione": "chiacchiera"
+    },
+    {
+     "quando": "notte",
+     "fa": "dorme",
+     "dove": "casa",
+     "azione": "dorme"
+    }
+   ]
+  },
+  {
+   "nome": "Elmo Grano",
+   "specie": "persona",
+   "genere": "maschio",
+   "tipo": "npc.villager",
+   "mestiere": "vicesceriffo",
+   "eta": "giovane",
+   "persona": "un vicesceriffo zelante che si allena con le lattine ogni sera",
+   "aspetto": "stella troppo lucida, cappello nuovo di zecca",
+   "famiglia": [
+    {
+     "nome": "Corrado Steccato",
+     "legame": "apprendista"
+    }
+   ],
+   "routine": [
+    {
+     "quando": "mattina",
+     "fa": "pulisce la cella vuota",
+     "dove": "lavoro",
+     "azione": "lavora"
+    },
+    {
+     "quando": "giorno",
+     "fa": "sorveglia la stazione",
+     "dove": "lavoro",
+     "azione": "pattuglia"
+    },
+    {
+     "quando": "sera",
+     "fa": "tira alle lattine dietro la stalla",
+     "dove": "in giro",
+     "azione": "passeggia"
+    },
+    {
+     "quando": "notte",
+     "fa": "dorme",
+     "dove": "casa",
+     "azione": "dorme"
+    }
+   ]
+  },
+  {
+   "nome": "Lavinia Tasti",
+   "specie": "persona",
+   "genere": "femmina",
+   "tipo": "npc.villager",
+   "mestiere": "telegrafista",
+   "eta": "adulta",
+   "persona": "una telegrafista che sa tutto della valle e non dice niente",
+   "aspetto": "maniche arrotolate, matita dietro l'orecchio, occhiali a mezzaluna",
+   "famiglia": [
+    {
+     "nome": "Isacco Lungavia",
+     "legame": "fidanzata"
+    }
+   ],
+   "routine": [
+    {
+     "quando": "mattina",
+     "fa": "batte i messaggi del mattino",
+     "dove": "lavoro",
+     "azione": "lavora"
+    },
+    {
+     "quando": "giorno",
+     "fa": "copia i telegrammi arrivati",
+     "dove": "lavoro",
+     "azione": "legge"
+    },
+    {
+     "quando": "sera",
+     "fa": "passeggia lungo i binari",
+     "dove": "in giro",
+     "azione": "passeggia"
+    },
+    {
+     "quando": "notte",
+     "fa": "dorme",
+     "dove": "casa",
+     "azione": "dorme"
+    }
+   ]
+  },
+  {
+   "nome": "Isacco Lungavia",
+   "specie": "persona",
+   "genere": "maschio",
+   "tipo": "npc.villager",
+   "mestiere": "capotreno",
+   "eta": "adulto",
+   "persona": "un capotreno che giura sugli orari e arriva sempre in ritardo",
+   "aspetto": "berretto con la visiera, orologio a cipolla, fischietto",
+   "famiglia": [
+    {
+     "nome": "Lavinia Tasti",
+     "legame": "fidanzato"
+    }
+   ],
+   "routine": [
+    {
+     "quando": "mattina",
+     "fa": "controlla la locomotiva",
+     "dove": "lavoro",
+     "azione": "lavora"
+    },
+    {
+     "quando": "giorno",
+     "fa": "vende i biglietti alla stazione",
+     "dove": "lavoro",
+     "azione": "commercia"
+    },
+    {
+     "quando": "sera",
+     "fa": "porta i fiori alla telegrafista",
+     "dove": "piazza",
+     "azione": "chiacchiera"
+    },
+    {
+     "quando": "notte",
+     "fa": "dorme",
+     "dove": "casa",
+     "azione": "dorme"
+    }
+   ]
+  },
+  {
+   "nome": "Gedeone Pozzi",
+   "specie": "persona",
+   "genere": "maschio",
+   "tipo": "npc.villager",
+   "mestiere": "barista del saloon",
+   "eta": "adulto",
+   "persona": "un barista grosso e gentile che non dimentica un conto",
+   "aspetto": "grembiule bianco, baffi a manubrio, panno sulla spalla",
+   "famiglia": [
+    {
+     "nome": "Matilde Pozzi",
+     "legame": "marito"
+    },
+    {
+     "nome": "Ruben Pozzi",
+     "legame": "padre"
+    },
+    {
+     "nome": "Pepita",
+     "legame": "padrone"
+    }
+   ],
+   "routine": [
+    {
+     "quando": "mattina",
+     "fa": "lucida il bancone",
+     "dove": "lavoro",
+     "azione": "lavora"
+    },
+    {
+     "quando": "giorno",
+     "fa": "versa da bere ai mandriani",
+     "dove": "lavoro",
+     "azione": "commercia"
+    },
+    {
+     "quando": "sera",
+     "fa": "versa da bere a chi siede al tavolo da poker",
+     "dove": "lavoro",
+     "azione": "commercia"
+    },
+    {
+     "quando": "notte",
+     "fa": "dorme",
+     "dove": "casa",
+     "azione": "dorme"
+    }
+   ]
+  },
+  {
+   "nome": "Matilde Pozzi",
+   "specie": "persona",
+   "genere": "femmina",
+   "tipo": "npc.villager",
+   "mestiere": "cuoca del saloon",
+   "eta": "adulta",
+   "persona": "una cuoca che fa i fagioli migliori della valle",
+   "aspetto": "foulard a quadri, mestolo alla cintura",
+   "famiglia": [
+    {
+     "nome": "Gedeone Pozzi",
+     "legame": "moglie"
+    },
+    {
+     "nome": "Ruben Pozzi",
+     "legame": "madre"
+    }
+   ],
+   "routine": [
+    {
+     "quando": "mattina",
+     "fa": "compra la farina all'emporio",
+     "dove": "piazza",
+     "azione": "commercia"
+    },
+    {
+     "quando": "giorno",
+     "fa": "cucina fagioli e pane di mais",
+     "dove": "lavoro",
+     "azione": "cucina"
+    },
+    {
+     "quando": "sera",
+     "fa": "cucina per la diligenza",
+     "dove": "lavoro",
+     "azione": "cucina"
+    },
+    {
+     "quando": "notte",
+     "fa": "dorme",
+     "dove": "casa",
+     "azione": "dorme"
+    }
+   ]
+  },
+  {
+   "nome": "Ruben Pozzi",
+   "specie": "persona",
+   "genere": "maschio",
+   "tipo": "npc.villager",
+   "mestiere": "fattorino del telegrafo",
+   "eta": "ragazzo",
+   "persona": "un ragazzo velocissimo che consegna i telegrammi correndo",
+   "aspetto": "berretto storto, scarpe consumate",
+   "famiglia": [
+    {
+     "nome": "Gedeone Pozzi",
+     "legame": "figlio"
+    },
+    {
+     "nome": "Matilde Pozzi",
+     "legame": "figlio"
+    },
+    {
+     "nome": "Rosalia Croce",
+     "legame": "amico"
+    }
+   ],
+   "routine": [
+    {
+     "quando": "mattina",
+     "fa": "consegna i telegrammi",
+     "dove": "in giro",
+     "azione": "passeggia"
+    },
+    {
+     "quando": "giorno",
+     "fa": "aiuta in cucina",
+     "dove": "casa",
+     "azione": "cucina"
+    },
+    {
+     "quando": "sera",
+     "fa": "ascolta le storie al saloon",
+     "dove": "piazza",
+     "azione": "chiacchiera"
+    },
+    {
+     "quando": "notte",
+     "fa": "dorme",
+     "dove": "casa",
+     "azione": "dorme"
+    }
+   ]
+  },
+  {
+   "nome": "Tobia Ferri",
+   "specie": "persona",
+   "genere": "maschio",
+   "tipo": "npc.villager",
+   "mestiere": "maniscalco",
+   "eta": "adulto",
+   "persona": "un maniscalco che parla ai cavalli più che alle persone",
+   "aspetto": "grembiule di cuoio, braccia nere di fuliggine",
+   "famiglia": [
+    {
+     "nome": "Cleta Ferri",
+     "legame": "fratello"
+    }
+   ],
+   "routine": [
+    {
+     "quando": "mattina",
+     "fa": "ferra i cavalli del ranch",
+     "dove": "lavoro",
+     "azione": "lavora"
+    },
+    {
+     "quando": "giorno",
+     "fa": "batte il ferro alla forgia",
+     "dove": "lavoro",
+     "azione": "lavora"
+    },
+    {
+     "quando": "sera",
+     "fa": "rimette in fila le lattine sulla staccionata",
+     "dove": "in giro",
+     "azione": "passeggia"
+    },
+    {
+     "quando": "notte",
+     "fa": "dorme",
+     "dove": "casa",
+     "azione": "dorme"
+    }
+   ]
+  },
+  {
+   "nome": "Cleta Ferri",
+   "specie": "persona",
+   "genere": "femmina",
+   "tipo": "npc.villager",
+   "mestiere": "allevatrice di cavalli",
+   "eta": "adulta",
+   "persona": "un'allevatrice che riconosce un cavallo dal rumore degli zoccoli",
+   "aspetto": "stivali alti, frusta arrotolata, capelli legati",
+   "famiglia": [
+    {
+     "nome": "Tobia Ferri",
+     "legame": "sorella"
+    },
+    {
+     "nome": "Orsola Cardo",
+     "legame": "amica"
+    }
+   ],
+   "routine": [
+    {
+     "quando": "mattina",
+     "fa": "doma i puledri nel recinto",
+     "dove": "lavoro",
+     "azione": "lavora"
+    },
+    {
+     "quando": "giorno",
+     "fa": "porta i cavalli al pascolo",
+     "dove": "lavoro",
+     "azione": "pascola"
+    },
+    {
+     "quando": "sera",
+     "fa": "mangia al ranch",
+     "dove": "casa",
+     "azione": "mangia"
+    },
+    {
+     "quando": "notte",
+     "fa": "dorme",
+     "dove": "casa",
+     "azione": "dorme"
+    }
+   ]
+  },
+  {
+   "nome": "Orsola Cardo",
+   "specie": "persona",
+   "genere": "femmina",
+   "tipo": "npc.villager",
+   "mestiere": "padrona del ranch",
+   "eta": "adulta",
+   "persona": "una padrona di ranch che conta le bestie a occhio e non sbaglia mai",
+   "aspetto": "cappello a tesa larga, giacca di pelle, voce roca",
+   "storia": "Ereditò il ranch con tre vacche e un debito; ora ha la mandria più grande della valle.",
+   "famiglia": [
+    {
+     "nome": "Zaccaria Vento",
+     "legame": "collega"
+    },
+    {
+     "nome": "Cleta Ferri",
+     "legame": "amica"
+    }
+   ],
+   "routine": [
+    {
+     "quando": "mattina",
+     "fa": "conta la mandria",
+     "dove": "lavoro",
+     "azione": "pascola"
+    },
+    {
+     "quando": "giorno",
+     "fa": "tratta il prezzo dei manzi",
+     "dove": "piazza",
+     "azione": "commercia"
+    },
+    {
+     "quando": "sera",
+     "fa": "fa i conti del ranch",
+     "dove": "casa",
+     "azione": "legge"
+    },
+    {
+     "quando": "notte",
+     "fa": "dorme",
+     "dove": "casa",
+     "azione": "dorme"
+    }
+   ]
+  },
+  {
+   "nome": "Zaccaria Vento",
+   "specie": "persona",
+   "genere": "maschio",
+   "tipo": "npc.villager",
+   "mestiere": "mandriano",
+   "eta": "adulto",
+   "persona": "un mandriano silenzioso che canta solo alla mandria",
+   "aspetto": "fazzoletto sul naso, speroni, lazo alla sella",
+   "famiglia": [
+    {
+     "nome": "Orsola Cardo",
+     "legame": "collega"
+    }
+   ],
+   "routine": [
+    {
+     "quando": "mattina",
+     "fa": "porta la mandria al fiume",
+     "dove": "lavoro",
+     "azione": "pascola"
+    },
+    {
+     "quando": "giorno",
+     "fa": "ripara le staccionate",
+     "dove": "lavoro",
+     "azione": "lavora"
+    },
+    {
+     "quando": "sera",
+     "fa": "canta attorno al fuoco",
+     "dove": "in giro",
+     "azione": "chiacchiera"
+    },
+    {
+     "quando": "notte",
+     "fa": "dorme",
+     "dove": "casa",
+     "azione": "dorme"
+    }
+   ]
+  },
+  {
+   "nome": "Fausta Mele",
+   "specie": "persona",
+   "genere": "femmina",
+   "tipo": "npc.villager",
+   "mestiere": "venditrice di elisir",
+   "eta": "adulta",
+   "persona": "una venditrice ambulante che ha un elisir per ogni guaio",
+   "aspetto": "carro dipinto, bottiglie che tintinnano, cappello piumato",
+   "famiglia": [
+    {
+     "nome": "Corrado Steccato",
+     "legame": "rivale"
+    }
+   ],
+   "routine": [
+    {
+     "quando": "mattina",
+     "fa": "lucida le bottiglie",
+     "dove": "lavoro",
+     "azione": "lavora"
+    },
+    {
+     "quando": "giorno",
+     "fa": "vende elisir sulla strada maestra",
+     "dove": "piazza",
+     "azione": "commercia"
+    },
+    {
+     "quando": "sera",
+     "fa": "conta le monete nel carro",
+     "dove": "casa",
+     "azione": "legge"
+    },
+    {
+     "quando": "notte",
+     "fa": "dorme",
+     "dove": "casa",
+     "azione": "dorme"
+    }
+   ]
+  },
+  {
+   "nome": "Prudenza Sale",
+   "specie": "persona",
+   "genere": "femmina",
+   "tipo": "npc.villager",
+   "mestiere": "giudice di pace",
+   "eta": "anziana",
+   "persona": "una giudice di pace che risolve le liti con un proverbio",
+   "aspetto": "occhiali tondi, scialle nero, martelletto di legno",
+   "famiglia": [
+    {
+     "nome": "Abele Croce",
+     "legame": "vicina"
+    }
+   ],
+   "routine": [
+    {
+     "quando": "mattina",
+     "fa": "ascolta le liti delle concessioni",
+     "dove": "lavoro",
+     "azione": "lavora"
+    },
+    {
+     "quando": "giorno",
+     "fa": "scrive gli atti",
+     "dove": "lavoro",
+     "azione": "legge"
+    },
+    {
+     "quando": "sera",
+     "fa": "prega nella cappella",
+     "dove": "casa",
+     "azione": "prega"
+    },
+    {
+     "quando": "notte",
+     "fa": "dorme",
+     "dove": "casa",
+     "azione": "dorme"
+    }
+   ]
+  },
+  {
+   "nome": "Pepita",
+   "specie": "animale",
+   "genere": "femmina",
+   "tipo": "npc.cat",
+   "mestiere": "gatta del saloon",
+   "eta": "adulta",
+   "persona": "una gatta rossa che dorme sul pianoforte",
+   "aspetto": "gatta rossa con la coda spennacchiata",
+   "famiglia": [
+    {
+     "nome": "Gedeone Pozzi",
+     "legame": "animale"
+    }
+   ],
+   "routine": [
+    {
+     "quando": "mattina",
+     "fa": "caccia i topi nel magazzino",
+     "dove": "lavoro",
+     "azione": "passeggia"
+    },
+    {
+     "quando": "giorno",
+     "fa": "dorme al sole sulla veranda",
+     "dove": "piazza",
+     "azione": "dorme"
+    },
+    {
+     "quando": "sera",
+     "fa": "aspetta gli avanzi in cucina",
+     "dove": "piazza",
+     "azione": "mangia"
+    },
+    {
+     "quando": "notte",
+     "fa": "dorme sul pianoforte",
+     "dove": "casa",
+     "azione": "dorme"
+    }
+   ]
+  }
+ ],
+ "attesi": []
+}

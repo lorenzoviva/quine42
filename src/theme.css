@@ -128,6 +128,8 @@
   --space-13: 13px;
   --space-21: 21px;
   --space-34: 34px;
+  --space-55: 55px;
+  --space-89: 89px;
   --space-144: 144px;
   /* Type: Fibonacci and Lucas, interleaved, for a useful size between 13 and 21. */
   --text-8: 8px;
@@ -160,6 +162,7 @@
   --measure-521: 521px;
   --measure-610: 610px;
   --measure-843: 843px;
+  --measure-1364: 1364px;
 
   /* --- Comic & Arcade Hard Borders & Shadows --- */
   --border-ink: 2px solid var(--comic-ink);

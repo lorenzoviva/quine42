@@ -1,0 +1,44 @@
+{
+  "id": "cowboy.bivacco",
+  "name": "Fuoco del bivacco",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "a mano (Claude Code, Cantiere 9)",
+  "description": "Un cerchio di pietre con la brace e un bricco annerito sopra.",
+  "context": "negli accampamenti, nei pascoli, lungo i sentieri del canyon",
+  "appearance": {
+    "model": "falo",
+    "glyph": "♨",
+    "color": "#d86a2a",
+    "aspetto": "un cerchio di pietre con un fuoco basso e un bricco di caffè annerito",
+    "classe": "mobile"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.45
+  },
+  "actions": [
+    {
+      "id": "accendi",
+      "label": "Ravviva il fuoco"
+    },
+    {
+      "id": "spegni",
+      "label": "Spegni con la terra"
+    },
+    {
+      "id": "caffe",
+      "label": "Prepara il caffè",
+      "requires": "item.chicchi-caffe"
+    }
+  ],
+  "spawn": {
+    "tiles": [
+      "g",
+      "s"
+    ],
+    "chance": 0.03,
+    "max": 1
+  },
+  "logic": "logic.lua"
+}

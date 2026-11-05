@@ -385,7 +385,8 @@ export function folderOf(path: string): string {
     if (p === 'world') return 'luoghi';
     if (p === 'items' || p === 'item') return 'oggetti';
     if (p === 'obj' || p === 'object') return 'cose';
-    if (p === 'npc') return 'persone';
+    // The programs of the trades (T245b) are of the people: the Narrator writes them.
+    if (p === 'npc' || p === 'lavoro') return 'persone';
     if (p === 'runes' || p === 'magic') return 'magia';
     return 'altro';
   }

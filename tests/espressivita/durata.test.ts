@@ -145,11 +145,12 @@ describe('what Lua can leave behind for the next opening of the world', () => {
     expect(JSON.parse(w.files['world/stato.json']).forme ?? {}).toEqual({});
   });
 
-  it('LIMIT (lasting state): one fault anywhere and nothing is saved until it is gone', async () => {
+  it('a fault anywhere does not stop the saves (T262, once a LIMIT): it invalidates code, not the data of the game', async () => {
     const k = await open(newLasting(universeWith('mech.posa')));
     k.give('item.pane', 1);
     k.faults.raise('module:mech.qualsiasi:update', 'rotto');
-    expect(k.saveState()).toBe(false);
+    expect(k.saveState()).toBe(true);
+    k.give('item.pane', 1);
     k.faults.clear('module:mech.qualsiasi:update');
     expect(k.saveState()).toBe(true);
   });
@@ -195,7 +196,7 @@ describe('many wanderers in the same world', () => {
     expect(board().tabellone).toMatch(/^vince/);
   });
 
-  it('a vehicle with more people: the cart carries both bodies by how much, and only one wanderer’s keys exist', async () => {
+  it('a vehicle with more people: the cart carries both bodies, and the keys are the driver’s (T263, once a LIMIT)', async () => {
     const k = await open(newLasting(manyPlayers(universeWith('mech.carro'))));
     k.addWanderer('bea');
     const cart = () => k.ecs.get(k.ecs.query('carro')[0], 'carro');
@@ -208,20 +209,25 @@ describe('many wanderers in the same world', () => {
     expect(cart().visti).toBe(2);
     expect(k.wandererAt('bea')!.x - before.bea).toBeGreaterThan(1);
     expect(k.wandererAt('io')!.x - before.io).toBeGreaterThan(1);
-    // LIMIT (multiplayer): the system runs once, as whoever holds the default body; bea’s keys do not reach it.
+    // The system runs once, as whoever holds the default body; the keys it reads are bea’s, who drives, as her client says them.
     const io = k.wandererAt('io')!.entity;
     expect(cart().chi).toBe(io);
-    k.inputFor = 'bea';
-    k.input.setHeld('right', true);
+    expect(cart().guidatore).toBe(k.wandererAt('bea')!.entity);
     const keys = cart().tasti;
+    k.setHeldOf('bea', ['right']);
     play(k, 0.2);
-    k.input.releaseAll();
-    expect(cart().tasti).toBe(keys);
+    expect(cart().tasti).toBeGreaterThan(keys);
+    // The keys of who does not drive move nothing.
+    k.setHeldOf('bea', []);
+    k.setHeldOf('io', ['right']);
+    const still = cart().tasti;
+    play(k, 0.2);
+    expect(cart().tasti).toBe(still);
   });
 });
 
 describe('a game on the server, seen from a client', () => {
-  it('LIMIT (multiplayer): what a panel shows does not reach the client, nor do the components of a mechanic', async () => {
+  it('what a panel shows reaches the client, and only that: the other fields of a mechanic stay on the server (T263, once a LIMIT)', async () => {
     const k = await open(newLasting(manyPlayers(universeWith('mech.torneo'))));
     const server = new SessionServer(k);
     const { server: there, client: here } = fakeLink();
@@ -231,11 +237,14 @@ describe('a game on the server, seen from a client', () => {
     const bea = new SessionClient(here, { id: 'bea' });
     await bea.ready;
     for (let i = 0; i < 30; i++) server.tick(DT);
-    // On the server the value is there, on the wire never.
+    // On the server the value is there, and on the wire under the name the panel gives it; a field no panel names does not travel.
     expect(k.as('bea', () => k.uiValue('torneo_visto.tabellone'))).toBe('aperto');
+    expect(bea.stato.campi?.['torneo_visto.tabellone']).toBe('aperto');
+    k.as('bea', () => (k.ecs.get(k.wandererEntity, 'torneo_visto').segreto = 'non nominato'));
+    for (let i = 0; i < 5; i++) server.tick(DT);
     const wire = JSON.stringify(heard.filter((m) => m.t === 'ingresso' || m.t === 'aggiorna').map((m) => ({ ...m, files: undefined })));
-    expect(wire).toContain('needs');
-    expect(wire).not.toContain('torneo_visto');
+    expect(wire).toContain('torneo_visto.tabellone');
+    expect(wire).not.toContain('non nominato');
   });
 });
 
@@ -271,10 +280,8 @@ describe('what a panel and the API cannot say', () => {
     const asked: Array<[string, string]> = [
       ['bus.on("morte", f)', 'bus.on'],
       ['ui.open("terminale")', 'ui.open'],
-      ['world.path(0, 0, 5, 5)', 'world.path'],
       ['world.daylight()', 'world.daylight'],
       ['world.store("mercato")', 'world.store'],
-      ['world.wanderers()', 'world.wanderers'],
       ['input.pressed("action")', 'input.pressed'],
       ['ecs.save(id)', 'ecs.save'],
     ];

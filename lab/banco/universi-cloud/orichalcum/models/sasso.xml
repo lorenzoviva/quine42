@@ -1,11 +1,24 @@
-<!-- Sasso levigato: step 8B, gemini-3.8-flash (b-semplici-flash38/sasso.json, voto dell'Artista 5/10). Convertito dal JSON (lab/mjx/convert.ts): stessi voxel. -->
-<sequence values="BHLGDS" size="10 10 8" symmetry="(xy)" name="Sasso levigato">
+<!-- Sasso levigato, procedurale (Cantiere 2): stessa palette dell'originale. Il seme sceglie dove nascono due o tre lobi su un disco nascosto
+     al suolo, quanto crescono in alto e quanto si allargano: ogni sasso ha un'altra sagoma, liscia come l'originale. -->
+<sequence values="BHLGDSVc" size="10 10 8" symmetry="(xy)" name="Sasso levigato">
   <color symbol="H" value="c4c9d4" name="pietra lucida"/>
   <color symbol="L" value="9ba0aa" name="pietra chiara"/>
   <color symbol="G" value="6e737d" name="pietra grigia"/>
   <color symbol="D" value="4b5059" name="pietra d'ombra"/>
   <color symbol="S" value="32353b" name="ombra profonda"/>
-  <ellipsoid at="5 5 0" size="7 6 4" color="G"/>
+  <color symbol="V" hidden="True" name="dove può nascere un lobo"/>
+  <color symbol="c" hidden="True" name="il centro"/>
+  <!-- Le scelte: il disco dei lobi, il centro e due lobi a caso, un terzo forse -->
+  <ellipsoid at="5 5 0" size="7 7 1" color="V"/>
+  <box at="5 5 0" size="1 1 1" color="G"/>
+  <one in="V" out="G" steps="2"/>
+  <prl steps="1" in="V" out="c" p="0.08"/>
+  <all in="V" out="B"/>
+  <one in="cB" out="*G" steps="1"/>
+  <all in="c" out="B"/>
+  <!-- Crescita: prima tonda, poi un poco di lato; quanto dipende dal seme -->
+  <one steps="70" symmetry="(xyz)" in="GB" out="GG"/>
+  <prl steps="2" in="GB" out="GG" p="0.25"/>
   <convolution neighborhood="Moore" steps="1">
     <rule in="B" out="G" values="G" sum="14..26"/>
     <rule in="G" out="B" values="G" sum="1..7"/>

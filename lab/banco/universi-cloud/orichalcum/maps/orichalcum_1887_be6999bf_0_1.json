@@ -35,6 +35,12 @@
   "runes": [
    "vapore",
    "rame"
+  ],
+  "strutture": [
+   {
+    "concetto": "stazione dirigibili",
+    "taglia": "grande"
+   }
   ]
  }
 }

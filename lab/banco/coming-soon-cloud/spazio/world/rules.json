@@ -1,0 +1,9 @@
+{
+  "regole": [
+    { "chiave": "azione.aprire_portello", "testo": "aprire un portello senza pressurizzare", "possibile": false, "racconto": "I portelli delle stazioni non si aprono finché la spia non diventa verde: chi ci prova sente solo un fischio e una serratura che non cede." },
+    { "chiave": "azione.dare_ossigeno", "testo": "dare una boccata d'ossigeno a uno sconosciuto", "possibile": true, "racconto": "L'ossigeno non si nega a nessuno: chi lo chiede lo riceve, e da allora tra i due c'è un debito d'onore.", "effetti": ["messaggio"] },
+    { "chiave": "azione.camminare_fuori", "testo": "camminare fuori dalla cupola senza tuta", "possibile": false, "racconto": "Fuori dalla cupola non c'è aria: nessuno ci va senza tuta, nemmeno per scommessa." },
+    { "chiave": "fabbricare.razione", "testo": "fabbricare «Razione di alghe»", "possibile": true, "racconto": "Si fa con alghe essiccate e un poco d'acqua; la locanda ne compra a casse.", "effetti": ["ricetta: Alghe essiccate ×2"] },
+    { "chiave": "azione.rubare_registro", "testo": "rubare il registro dei carichi", "possibile": false, "racconto": "L'ispettore Stanga dorme con il registro sotto il cuscino, e la guardia Grieco dorme nella cuccetta accanto." }
+  ]
+}

@@ -27,6 +27,11 @@
   "runes": [
    "terra"
   ],
-  "strutture": []
+  "strutture": [
+   {
+    "concetto": "chiesa moderna",
+    "taglia": "grande"
+   }
+  ]
  }
 }

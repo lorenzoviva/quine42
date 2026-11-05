@@ -48,7 +48,8 @@ describe('le misure del banco', () => {
   }, 30_000);
 
   it('la casa generica del seme ha la sua porta, che si apre, ma non i piani', () => {
-    const { e, m, falliti } = prova(bundledFiles['models/grande.xml']!);
+    // The seed's house as it was before its procedural program (T273): the bench is measured on a program that does not change.
+    const { e, m, falliti } = prova(fs.readFileSync('lab/tests/fixtures/grande-prima-di-t273.xml', 'utf8'));
     expect(e.aperta).toBe('apri');
     expect(m.porta).toBeDefined();
     expect(m.piani).toHaveLength(1);
@@ -312,7 +313,8 @@ describe('varianza e scala (T180)', () => {
   }, 60_000);
 
   it('la stessa casa ritoccata dal seme non è un’altra architettura, anche se molti voxel cambiano', () => {
-    const p = provaSemi(bundledFiles['models/fattoria.xml']!, CASA, { taglie: ['grande'] });
+    // The seed's farm before its procedural program (T273), whose seeds only touch it up: now the seed moves its walls too.
+    const p = provaSemi(fs.readFileSync('lab/tests/fixtures/fattoria-prima-di-t273.xml', 'utf8'), CASA, { taglie: ['grande'] });
     const v = p.taglie[0]!.varianza!;
     expect(v.statico).toBe(false);
     expect(v.voxel).toBeGreaterThan(SOGLIA_VARIANZA.voxel);

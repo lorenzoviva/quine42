@@ -22,6 +22,11 @@
   "runes": [
    "acqua"
   ],
-  "strutture": []
+  "strutture": [
+   {
+    "concetto": "faro",
+    "taglia": "grande"
+   }
+  ]
  }
 }

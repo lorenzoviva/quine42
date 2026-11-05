@@ -116,6 +116,8 @@ export function git(cwd, args, env = process.env) {
     encoding: 'utf8',
     windowsHide: true,
     stdio: ['ignore', 'pipe', 'pipe'],
+    // A universe's whole history with its patches (`log -p`) passes the 1 MB of the default: the seed alone is 2 MB since T273.
+    maxBuffer: 1 << 28,
   });
 }
 

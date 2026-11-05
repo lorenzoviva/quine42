@@ -1,0 +1,99 @@
+<!-- Ingranaggio monumentale, steampunk (Cantiere 2, Parte B): una grande ruota dentata d'ottone, con i raggi e il mozzo di ghisa,
+     ritta su un pilastro sopra uno zoccolo a gradini. Il seme sceglie a che altezza sta la ruota (e quindi quanto è alto il pilastro)
+     e dove sta sullo zoccolo, davanti, al centro o dietro; poi dove porta i ribattini d'ottone lucido lo zoccolo. -->
+<sequence values="BGODLabcdefpquSXYr" size="20 20 60" symmetry="(xy)" name="Ingranaggio monumentale">
+  <color symbol="G" value="3b3a3f" name="ghisa dello zoccolo"/>
+  <color symbol="O" value="c9a13b" name="ottone"/>
+  <color symbol="D" value="4a4448" name="ghisa"/>
+  <color symbol="L" value="e8c66a" name="ottone lucido"/>
+  <color symbol="a" hidden="True" name="ruota dietro"/>
+  <color symbol="b" hidden="True" name="pilastro dietro"/>
+  <color symbol="c" hidden="True" name="ruota al centro"/>
+  <color symbol="d" hidden="True" name="pilastro al centro"/>
+  <color symbol="e" hidden="True" name="ruota davanti"/>
+  <color symbol="f" hidden="True" name="pilastro davanti"/>
+  <color symbol="p" hidden="True" name="dado dietro"/>
+  <color symbol="q" hidden="True" name="dado al centro"/>
+  <color symbol="u" hidden="True" name="dado davanti"/>
+  <color symbol="S" hidden="True" name="la scelta"/>
+  <color symbol="X" hidden="True" name="ottone scelto"/>
+  <color symbol="Y" hidden="True" name="ghisa scelta"/>
+  <color symbol="r" hidden="True" name="ribattino possibile"/>
+  <!-- Lo zoccolo a gradini -->
+  <box at="10 10 0" size="18 20 2" color="G"/>
+  <box at="10 10 2" size="14 18 1" color="G"/>
+  <!-- Tre ruote possibili, ognuna col suo pilastro, a profondità e altezze diverse -->
+  <!-- Candidato a y=4, mozzo a z=27 -->
+  <box at="10 4 3" size="4 3 24" color="b"/>
+  <ellipsoid at="10 3 19" size="17 1 17" color="a"/>
+  <ellipsoid at="10 4 19" size="17 1 17" color="a"/>
+  <ellipsoid at="10 5 19" size="17 1 17" color="a"/>
+  <ellipsoid at="10 3 21" size="11 1 11" color="B"/>
+  <ellipsoid at="10 4 21" size="11 1 11" color="B"/>
+  <ellipsoid at="10 5 21" size="11 1 11" color="B"/>
+  <box at="10 4 21" size="2 3 13" color="a"/>
+  <box at="10 4 26" size="13 3 2" color="a"/>
+  <box at="10 4 25" size="4 3 4" color="b"/>
+  <box at="10 4 34" size="3 3 3" color="a"/>
+  <box at="10 4 17" size="3 3 3" color="a"/>
+  <box at="1.5 4 25.5" size="3 3 3" color="a"/>
+  <box at="18.5 4 25.5" size="3 3 3" color="a"/>
+  <box at="3.5 4 32.5" size="2 3 2" color="a"/>
+  <box at="3.5 4 19.5" size="2 3 2" color="a"/>
+  <box at="16.5 4 32.5" size="2 3 2" color="a"/>
+  <box at="16.5 4 19.5" size="2 3 2" color="a"/>
+  <box at="10 4 3" size="1 1 1" color="p"/>
+  <!-- Candidato a y=10, mozzo a z=36 -->
+  <box at="10 10 3" size="4 3 33" color="d"/>
+  <ellipsoid at="10 9 28" size="17 1 17" color="c"/>
+  <ellipsoid at="10 10 28" size="17 1 17" color="c"/>
+  <ellipsoid at="10 11 28" size="17 1 17" color="c"/>
+  <ellipsoid at="10 9 30" size="11 1 11" color="B"/>
+  <ellipsoid at="10 10 30" size="11 1 11" color="B"/>
+  <ellipsoid at="10 11 30" size="11 1 11" color="B"/>
+  <box at="10 10 30" size="2 3 13" color="c"/>
+  <box at="10 10 35" size="13 3 2" color="c"/>
+  <box at="10 10 34" size="4 3 4" color="d"/>
+  <box at="10 10 43" size="3 3 3" color="c"/>
+  <box at="10 10 26" size="3 3 3" color="c"/>
+  <box at="1.5 10 34.5" size="3 3 3" color="c"/>
+  <box at="18.5 10 34.5" size="3 3 3" color="c"/>
+  <box at="3.5 10 41.5" size="2 3 2" color="c"/>
+  <box at="3.5 10 28.5" size="2 3 2" color="c"/>
+  <box at="16.5 10 41.5" size="2 3 2" color="c"/>
+  <box at="16.5 10 28.5" size="2 3 2" color="c"/>
+  <box at="10 10 3" size="1 1 1" color="q"/>
+  <!-- Candidato a y=16, mozzo a z=45 -->
+  <box at="10 16 3" size="4 3 42" color="f"/>
+  <ellipsoid at="10 15 37" size="17 1 17" color="e"/>
+  <ellipsoid at="10 16 37" size="17 1 17" color="e"/>
+  <ellipsoid at="10 17 37" size="17 1 17" color="e"/>
+  <ellipsoid at="10 15 39" size="11 1 11" color="B"/>
+  <ellipsoid at="10 16 39" size="11 1 11" color="B"/>
+  <ellipsoid at="10 17 39" size="11 1 11" color="B"/>
+  <box at="10 16 39" size="2 3 13" color="e"/>
+  <box at="10 16 44" size="13 3 2" color="e"/>
+  <box at="10 16 43" size="4 3 4" color="f"/>
+  <box at="10 16 52" size="3 3 3" color="e"/>
+  <box at="10 16 35" size="3 3 3" color="e"/>
+  <box at="1.5 16 43.5" size="3 3 3" color="e"/>
+  <box at="18.5 16 43.5" size="3 3 3" color="e"/>
+  <box at="3.5 16 50.5" size="2 3 2" color="e"/>
+  <box at="3.5 16 37.5" size="2 3 2" color="e"/>
+  <box at="16.5 16 50.5" size="2 3 2" color="e"/>
+  <box at="16.5 16 37.5" size="2 3 2" color="e"/>
+  <box at="10 16 3" size="1 1 1" color="u"/>
+  <!-- I ribattini sul gradino -->
+  <prl steps="1" in="B G" out="r G" p="0.06"/>
+  <all in="r" out="L"/>
+  <!-- Il dado sceglie una delle tre; la scelta si propaga alla sua ruota e al suo pilastro -->
+  <one in="[pqu]" out="S" steps="1"/>
+  <all symmetry="(xyz)">
+    <rule in="[SXY][ace]" out="*X"/>
+    <rule in="[SXY][bdf]" out="*Y"/>
+  </all>
+  <all in="[abcdefpqu]" out="B"/>
+  <all in="X" out="O"/>
+  <all in="[YS]" out="D"/>
+  <prl steps="1" in="B O" out="B L" p="0.3"/>
+</sequence>

@@ -1,0 +1,14 @@
+<!-- Un colpo sulle lattine: due tocchi secchi, il secondo più basso, come il clang di una lattina che cade. -->
+<sequence name="Sparo alle lattine" values="BNMT" size="3 1 5" symmetry="()">
+  <sound bpm="400" scale="phrygian" root="60" swing="0" cutoff="5000" space="0.2">
+    <track y="0" instrument="bass" volume="0.8"/>
+  </sound>
+  <color symbol="N" value="38bdf8" name="Nota" glow="True"/>
+  <color symbol="M" value="10b981" name="Testa" hidden="True"/>
+  <color symbol="T" value="ec4899" name="Partenza" hidden="True"/>
+
+  <line at="0 0 0" to="0 0 2" r="0" color="M"/>
+  <one in="M" out="T" steps="1"/>
+  <all in="M" out="B"/>
+  <one in="BB BB TB" out="BN BB NB"/>
+</sequence>

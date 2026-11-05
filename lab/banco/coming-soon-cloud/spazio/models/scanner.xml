@@ -1,0 +1,16 @@
+<!-- Scanner stellare: a mano (Claude Code, Cantiere 9). Un leggio di metallo con uno schermo tondo ciano; ogni seme cambia i pulsanti sul bordo e i rivetti della base. -->
+<sequence values="BMDSKPR" size="20 20 20" symmetry="()" name="Scanner stellare">
+  <color symbol="M" value="8a9098" name="metallo"/>
+  <color symbol="D" value="4a5058" name="base"/>
+  <color symbol="S" value="4ad8e8" name="schermo" glow="True"/>
+  <color symbol="K" value="2a2e34" name="cornice"/>
+  <color symbol="P" value="e8503a" name="pulsante" glow="True"/>
+  <color symbol="R" value="b8bec6" name="rivetto"/>
+  <box at="10 10 0" size="12 12 2" color="D"/>
+  <box at="10 10 2" size="4 4 9" color="M"/>
+  <box at="10 10 11" size="14 10 2" color="K"/>
+  <cylinder at="10 10 13" size="10 8 1" color="S"/>
+  <prl in="B K" out="P K" p="0.15" steps="1"/>
+  <prl in="B D" out="R D" p="0.2" steps="1"/>
+  <prl in="BM" out="RM" p="0.1" steps="1"/>
+</sequence>

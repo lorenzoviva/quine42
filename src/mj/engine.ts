@@ -127,9 +127,64 @@ export interface Grid3 {
   epoch: number;
 }
 
+// ---------------------------------------------------------------- where the codes are (D33, T258)
+
+/**
+ * How many cells of each code every row (z, y) of the grid holds, kept up to date by `write`. A full scan of a pattern then visits
+ * only the rows where its rarest cell can be, in the same order as a scan of the whole grid: the matches, and so the run, are the
+ * same voxel for voxel; a program on a large grid stops paying the whole grid for every node it starts.
+ */
+class Census {
+  readonly cells: Uint8Array;
+  readonly X: number;
+  readonly Y: number;
+  readonly Z: number;
+  /** Per code, cells of that code in each row `z·Y + y` (allocated for the codes that appear). */
+  rows: Array<Int32Array | undefined> = [];
+  /** Per code, cells of that code in the grid. */
+  total = new Float64Array(MAX_CODES);
+  constructor(g: Grid3) {
+    this.cells = g.cells;
+    this.X = g.X;
+    this.Y = g.Y;
+    this.Z = g.Z;
+    const R = g.Y * g.Z;
+    const X = g.X;
+    const cells = g.cells;
+    for (let r = 0, i = 0; r < R; r++)
+      for (let x = 0; x < X; x++, i++) {
+        const c = cells[i];
+        (this.rows[c] ??= new Int32Array(R))[r]++;
+        this.total[c]++;
+      }
+  }
+  fits(g: Grid3): boolean {
+    return this.cells === g.cells && this.X === g.X && this.Y === g.Y && this.Z === g.Z;
+  }
+  moved(idx: number, from: number, to: number): void {
+    const r = (idx / this.X) | 0;
+    this.rows[from]![r]--;
+    (this.rows[to] ??= new Int32Array(this.Y * this.Z))[r]++;
+    this.total[from]--;
+    this.total[to]++;
+  }
+}
+
+/** The grid of the run in progress and its census (built when a scan first needs it): runs do not nest. */
+let current: { g: Grid3; census?: Census } | undefined;
+
+function censusOf(g: Grid3): Census {
+  if (current?.g !== g) current = { g };
+  if (!current.census?.fits(g)) current.census = new Census(g);
+  return current.census;
+}
+
 function write(g: Grid3, idx: number, v: number): boolean {
-  if (g.cells[idx] === v) return false;
+  const was = g.cells[idx];
+  if (was === v) return false;
   g.cells[idx] = v;
+  const c = current;
+  if (c !== undefined && c.g === g && c.census !== undefined && c.census.cells === g.cells) c.census.moved(idx, was, v);
   g.log.push(idx);
   if (g.log.length > 2_000_000) {
     g.log.length = 0;
@@ -289,38 +344,111 @@ abstract class Runner {
   abstract go(g: Grid3, rng: Rng): boolean;
 }
 
-/** Matches kept as a set with O(1) random pick and removal. */
+/**
+ * Matches kept as a set with O(1) random pick and removal. The order of `keys` is part of the run (a pick is an index into it), so
+ * every version of this class must keep it: appended when added, the last one moved into the hole when one is removed.
+ */
+const NO_BUCKETS = new Int32Array(0);
+
 class MatchSet {
   keys: number[] = [];
-  private where = new Map<number, number>();
+  /** Where each key is in `keys`; built when first needed after a scan, which only appends keys it has not seen. */
+  private where: Map<number, number> | undefined = new Map();
+  /** How many keys fall in each bucket of a hash: an empty bucket says a key is absent without asking the map (most removes). */
+  private buckets = NO_BUCKETS;
+  private static readonly BUCKETS = 1 << 16;
+  private static bucket(k: number): number {
+    return Math.imul(k, 0x9e3779b1) >>> 16;
+  }
+  private index(): Map<number, number> {
+    if (this.where === undefined) {
+      const w = new Map<number, number>();
+      const keys = this.keys;
+      if (this.buckets.length !== MatchSet.BUCKETS) this.buckets = new Int32Array(MatchSet.BUCKETS);
+      const b = this.buckets;
+      b.fill(0);
+      for (let i = 0; i < keys.length; i++) {
+        w.set(keys[i], i);
+        b[MatchSet.bucket(keys[i])]++;
+      }
+      this.where = w;
+    }
+    return this.where;
+  }
+  /** A key that is surely not in the set (a scan visits each key once). */
+  push(k: number): void {
+    this.keys.push(k);
+  }
   add(k: number): void {
-    if (this.where.has(k)) return;
-    this.where.set(k, this.keys.length);
+    const where = this.index();
+    const h = MatchSet.bucket(k);
+    if (this.buckets[h] !== 0 && where.has(k)) return;
+    where.set(k, this.keys.length);
+    this.buckets[h]++;
     this.keys.push(k);
   }
   remove(k: number): void {
-    const i = this.where.get(k);
+    const where = this.index();
+    const h = MatchSet.bucket(k);
+    if (this.buckets[h] === 0) return;
+    const i = where.get(k);
     if (i === undefined) return;
+    this.buckets[h]--;
     const last = this.keys.pop()!;
     if (i < this.keys.length) {
       this.keys[i] = last;
-      this.where.set(last, i);
+      where.set(last, i);
     }
-    this.where.delete(k);
+    where.delete(k);
   }
   clear(): void {
     this.keys = [];
-    this.where.clear();
+    this.where = undefined;
   }
 }
 
+/**
+ * A pattern as offsets into the grid: the cells it reads (with their sets) and the cells it writes, for a grid of one width and
+ * depth. The cells read go rarest set first: the answer of `check` does not depend on the order, only how soon it is known.
+ */
+interface Probe {
+  X: number;
+  XY: number;
+  inOff: Int32Array;
+  inSets: Uint8Array[];
+  inI: Int32Array;
+  inJ: Int32Array;
+  inK: Int32Array;
+  /** The number of each set read (`Alphabet.sets`). */
+  inSet: Int32Array;
+  outOff: Int32Array;
+  outVal: Int16Array;
+}
+
+/** The codes of a set of flags. */
+const codesCache = new WeakMap<Uint8Array, Int32Array>();
+function codesOf(set: Uint8Array): Int32Array {
+  let c = codesCache.get(set);
+  if (!c) {
+    const out: number[] = [];
+    for (let i = 0; i < set.length; i++) if (set[i]) out.push(i);
+    codesCache.set(set, (c = Int32Array.from(out)));
+  }
+  return c;
+}
+
+/** One buffer of stamps for all the runners (a sync does not nest): a cell written twice since the last look is looked at once. */
+let stamps = new Uint32Array(0);
+let stampN = 0;
+/** One buffer for `all`: the cells written in this step. Cleared after each step. */
+let writtenBuf = new Uint8Array(0);
+
 class RuleRunner extends Runner {
   private patterns: Pattern[];
+  private probes: Array<Probe | undefined> = [];
   private matches = new MatchSet();
   private seen = 0;
   private epoch = -1;
-  private stamp?: Uint32Array;
-  private stampN = 0;
   private uniform: boolean;
   private sets: Uint8Array[];
   /** The cells the rules look for (a code, or a set of codes), to explain a node that never matches. */
@@ -349,31 +477,107 @@ class RuleRunner extends Runner {
     this.epoch = -1;
   }
 
-  private check(g: Grid3, p: Pattern, ox: number, oy: number, oz: number): boolean {
-    let changes = false;
+  private probe(pi: number, g: Grid3): Probe {
     const XY = g.X * g.Y;
+    const old = this.probes[pi];
+    if (old && old.X === g.X && old.XY === XY) return old;
+    const p = this.patterns[pi];
+    const ins: Array<{ n: number; i: number; j: number; k: number; set: number; size: number }> = [];
+    const outs: Array<{ off: number; v: number }> = [];
     for (let k = 0, n = 0; k < p.dz; k++)
-      for (let j = 0; j < p.dy; j++) {
-        let idx = ox + (oy + j) * g.X + (oz + k) * XY;
-        for (let i = 0; i < p.dx; i++, n++, idx++) {
-          const c = g.cells[idx];
-          const want = p.input[n];
-          if (want !== -1 && !this.sets[want][c]) return false;
-          const put = p.output[n];
-          if (put !== -1 && put !== c) changes = true;
+      for (let j = 0; j < p.dy; j++)
+        for (let i = 0; i < p.dx; i++, n++) {
+          const off = i + j * g.X + k * XY;
+          if (p.input[n] !== -1) ins.push({ n, i, j, k, set: p.input[n], size: codesOf(this.sets[p.input[n]]).length });
+          if (p.output[n] !== -1) outs.push({ off, v: p.output[n] });
         }
-      }
-    return changes;
+    ins.sort((a, b) => a.size - b.size || a.n - b.n);
+    const pr: Probe = {
+      X: g.X,
+      XY,
+      inOff: Int32Array.from(ins, (c) => c.i + c.j * g.X + c.k * XY),
+      inSets: ins.map((c) => this.sets[c.set]),
+      inI: Int32Array.from(ins, (c) => c.i),
+      inJ: Int32Array.from(ins, (c) => c.j),
+      inK: Int32Array.from(ins, (c) => c.k),
+      inSet: Int32Array.from(ins, (c) => c.set),
+      outOff: Int32Array.from(outs, (c) => c.off),
+      outVal: Int16Array.from(outs, (c) => c.v),
+    };
+    this.probes[pi] = pr;
+    return pr;
+  }
+
+  /** Whether the pattern matches with its first cell at `o` and would change something. */
+  private static checkAt(pr: Probe, cells: Uint8Array, o: number): boolean {
+    const { inOff, inSets, outOff, outVal } = pr;
+    for (let t = 0; t < inOff.length; t++) if (!inSets[t][cells[o + inOff[t]]]) return false;
+    for (let t = 0; t < outOff.length; t++) if (cells[o + outOff[t]] !== outVal[t]) return true;
+    return false;
   }
 
   private scan(g: Grid3): void {
     const N = g.cells.length;
     this.matches.clear();
-    this.patterns.forEach((p, pi) => {
-      for (let z = 0; z + p.dz <= g.Z; z++)
-        for (let y = 0; y + p.dy <= g.Y; y++)
-          for (let x = 0; x + p.dx <= g.X; x++) if (this.check(g, p, x, y, z)) this.matches.add(pi * N + x + y * g.X + z * g.X * g.Y);
-    });
+    const census = censusOf(g);
+    for (let pi = 0; pi < this.patterns.length; pi++) this.scanPattern(g, census, pi, N);
+  }
+
+  /**
+   * Every match of one pattern, in the order of a scan of the whole grid (z, then y, then x): only the rows where its rarest cells
+   * can be are looked at, and in them only where the rarest one is.
+   */
+  private scanPattern(g: Grid3, census: Census, pi: number, N: number): void {
+    const p = this.patterns[pi];
+    const pr = this.probe(pi, g);
+    const { X, Y, Z, cells } = g;
+    const XY = pr.XY;
+    const base = pi * N;
+    const nIn = pr.inOff.length;
+    if (nIn === 0) {
+      for (let z = 0; z + p.dz <= Z; z++)
+        for (let y = 0; y + p.dy <= Y; y++)
+          for (let x = 0; x + p.dx <= X; x++) {
+            const o = x + y * X + z * XY;
+            if (RuleRunner.checkAt(pr, cells, o)) this.matches.push(base + o);
+          }
+      return;
+    }
+    // How many cells of the grid each read cell could be: none, and the pattern matches nowhere.
+    const counts: number[] = [];
+    for (let t = 0; t < nIn; t++) {
+      let s = 0;
+      for (const c of codesOf(pr.inSets[t])) s += census.total[c];
+      if (s === 0) return;
+      counts.push(s);
+    }
+    const order = counts.map((_, t) => t).sort((a, b) => counts[a] - counts[b] || a - b);
+    const filters = order.slice(0, Math.min(3, nIn)).filter((t, n) => n === 0 || counts[t] < N);
+    const fJ = filters.map((t) => pr.inJ[t]);
+    const fK = filters.map((t) => pr.inK[t]);
+    const fCodes = filters.map((t) => codesOf(pr.inSets[t]));
+    const anchor = order[0];
+    const aSet = pr.inSets[anchor];
+    const aI = pr.inI[anchor], aJ = pr.inJ[anchor], aK = pr.inK[anchor];
+    const rows = census.rows;
+    for (let oz = 0; oz + p.dz <= Z; oz++)
+      rows: for (let oy = 0; oy + p.dy <= Y; oy++) {
+        for (let f = 0; f < filters.length; f++) {
+          const r = (oz + fK[f]) * Y + oy + fJ[f];
+          let s = 0;
+          for (const c of fCodes[f]) {
+            const rc = rows[c];
+            if (rc !== undefined && rc[r] > 0) {
+              s = 1;
+              break;
+            }
+          }
+          if (s === 0) continue rows;
+        }
+        const o0 = oy * X + oz * XY;
+        const a0 = (oz + aK) * XY + (oy + aJ) * X + aI;
+        for (let ox = 0; ox + p.dx <= X; ox++) if (aSet[cells[a0 + ox]] && RuleRunner.checkAt(pr, cells, o0 + ox)) this.matches.push(base + o0 + ox);
+      }
   }
 
   /** Brings the match set up to date with every cell written since the last look. */
@@ -383,59 +587,65 @@ class RuleRunner extends Runner {
       this.scan(g);
     } else if (fresh > 0) {
       const N = g.cells.length;
-      const XY = g.X * g.Y;
-      if (this.stamp?.length !== N) this.stamp = new Uint32Array(N);
-      const mark = ++this.stampN;
-      for (let l = this.seen; l < g.log.length; l++) {
-        const c = g.log[l];
-        if (this.stamp[c] === mark) continue;
-        this.stamp[c] = mark;
-        const cx = c % g.X;
-        const cy = Math.floor(c / g.X) % g.Y;
-        const cz = Math.floor(c / XY);
-        this.patterns.forEach((p, pi) => {
+      const { X, Y, Z, cells, log } = g;
+      const XY = X * Y;
+      if (stamps.length !== N) {
+        stamps = new Uint32Array(N);
+        stampN = 0;
+      }
+      const mark = ++stampN;
+      const probes = this.patterns.map((_, pi) => this.probe(pi, g));
+      for (let l = this.seen; l < log.length; l++) {
+        const c = log[l];
+        if (stamps[c] === mark) continue;
+        stamps[c] = mark;
+        const cx = c % X;
+        const cy = ((c / X) | 0) % Y;
+        const cz = (c / XY) | 0;
+        for (let pi = 0; pi < this.patterns.length; pi++) {
+          const p = this.patterns[pi];
+          const pr = probes[pi];
+          const base = pi * N;
           for (let k = 0; k < p.dz; k++) {
             const oz = cz - k;
-            if (oz < 0 || oz + p.dz > g.Z) continue;
+            if (oz < 0 || oz + p.dz > Z) continue;
             for (let j = 0; j < p.dy; j++) {
               const oy = cy - j;
-              if (oy < 0 || oy + p.dy > g.Y) continue;
+              if (oy < 0 || oy + p.dy > Y) continue;
               for (let i = 0; i < p.dx; i++) {
                 const ox = cx - i;
-                if (ox < 0 || ox + p.dx > g.X) continue;
-                const key = pi * N + ox + oy * g.X + oz * XY;
-                if (this.check(g, p, ox, oy, oz)) this.matches.add(key);
-                else this.matches.remove(key);
+                if (ox < 0 || ox + p.dx > X) continue;
+                const o = ox + oy * X + oz * XY;
+                if (RuleRunner.checkAt(pr, cells, o)) this.matches.add(base + o);
+                else this.matches.remove(base + o);
               }
             }
           }
-        });
+        }
       }
     }
     this.epoch = g.epoch;
     this.seen = g.log.length;
   }
 
-  private apply(g: Grid3, key: number, written?: Uint8Array): boolean {
+  private apply(g: Grid3, key: number, written?: Uint8Array, touched?: number[]): boolean {
     const N = g.cells.length;
-    const p = this.patterns[Math.floor(key / N)];
-    const o = key % N;
-    const XY = g.X * g.Y;
+    const pi = Math.floor(key / N);
+    const p = this.patterns[pi];
+    const pr = this.probe(pi, g);
+    const o = key - pi * N;
+    const { outOff, outVal } = pr;
     // As MarkovJunior's all: a match is skipped only if a cell it writes was already written in this
     // step; the cells it merely reads ('*' in the output) may be shared.
     if (written) {
-      for (let k = 0, n = 0; k < p.dz; k++)
-        for (let j = 0; j < p.dy; j++)
-          for (let i = 0; i < p.dx; i++, n++) if (p.output[n] !== -1 && written[o + i + j * g.X + k * XY]) return false;
+      for (let t = 0; t < outOff.length; t++) if (written[o + outOff[t]]) return false;
+      for (let t = 0; t < outOff.length; t++) {
+        const idx = o + outOff[t];
+        written[idx] = 1;
+        touched!.push(idx);
+      }
     }
-    for (let k = 0, n = 0; k < p.dz; k++)
-      for (let j = 0; j < p.dy; j++)
-        for (let i = 0; i < p.dx; i++, n++) {
-          if (p.output[n] === -1) continue;
-          const idx = o + i + j * g.X + k * XY;
-          if (written) written[idx] = 1;
-          write(g, idx, p.output[n]);
-        }
+    for (let t = 0; t < outOff.length; t++) write(g, o + outOff[t], outVal[t]);
     this.fired[p.rule]++;
     return true;
   }
@@ -446,8 +656,8 @@ class RuleRunner extends Runner {
     const keys = this.matches.keys;
     if (!keys.length) {
       if (!this.total && !this.why) {
-        const present = new Set(g.cells);
-        const absent = this.wanted.filter((w) => w !== '.' && ![...present].some((c) => this.sets[this.alpha.mask(w)][c]));
+        const total = censusOf(g).total;
+        const absent = this.wanted.filter((w) => w !== '.' && !codesOf(this.sets[this.alpha.mask(w)]).some((c) => total[c] > 0));
         this.why = absent.length ? `in quel momento nella griglia non c'erano celle ${absent.map((w) => `"${w}"`).join(', ')}` : 'le celle cercate c\'erano, ma mai disposte come nel pattern';
       }
       return false;
@@ -467,8 +677,11 @@ class RuleRunner extends Runner {
         const j = rng.int(i + 1);
         [order[i], order[j]] = [order[j], order[i]];
       }
-      const written = new Uint8Array(N);
-      for (const k of order) this.apply(g, k, written);
+      if (writtenBuf.length !== N) writtenBuf = new Uint8Array(N);
+      const written = writtenBuf;
+      const touched: number[] = [];
+      for (const k of order) this.apply(g, k, written, touched);
+      for (const idx of touched) written[idx] = 0;
     } else {
       // Every match is judged on the grid as it was: decide first, then write.
       const chosen = keys.filter((k) => rng.next() < this.patterns[Math.floor(k / N)].p);
@@ -518,24 +731,42 @@ class ConvRunner extends Runner {
   go(g: Grid3, rng: Rng): boolean {
     if (this.count >= this.limit!) return false;
     const changes: number[] = [];
+    const { X, Y, Z, cells } = g;
+    const XY = X * Y;
     const wrap = (v: number, n: number) => (v < 0 ? v + n : v >= n ? v - n : v);
-    for (let z = 0; z < g.Z; z++)
-      for (let y = 0; y < g.Y; y++)
-        for (let x = 0; x < g.X; x++) {
-          const idx = x + y * g.X + z * g.X * g.Y;
-          const c = g.cells[idx];
+    // A cell no rule takes as input draws no random number and changes nothing: rows without one are skipped (the same run).
+    const census = censusOf(g);
+    const inputs = [...new Set(this.rules.flatMap((r) => [...codesOf(this.sets[r.input])]))].filter((c) => census.rows[c] !== undefined && census.total[c] > 0);
+    const rowsOf = inputs.map((c) => census.rows[c]!);
+    const offs = this.offsets;
+    const ox = Int32Array.from(offs, (o) => o[0]), oy = Int32Array.from(offs, (o) => o[1]), oz = Int32Array.from(offs, (o) => o[2]);
+    const nOff = offs.length;
+    for (let z = 0; z < Z; z++)
+      rows: for (let y = 0; y < Y; y++) {
+        const r = z * Y + y;
+        let any = false;
+        for (let t = 0; t < rowsOf.length; t++)
+          if (rowsOf[t][r] > 0) {
+            any = true;
+            break;
+          }
+        if (!any) continue rows;
+        for (let x = 0; x < X; x++) {
+          const idx = x + y * X + z * XY;
+          const c = cells[idx];
           // As in MarkovJunior: the first rule whose input, chance and neighbour count all agree.
           for (const rule of this.rules) {
             if (!this.sets[rule.input][c] || rule.output === c || (rule.p < 1 && rng.next() >= rule.p)) continue;
+            const nb = this.sets[rule.neighbors];
             let n = 0;
-            for (const [ox, oy, oz] of this.offsets) {
-              let nx = x + ox, ny = y + oy, nz = z + oz;
+            for (let t = 0; t < nOff; t++) {
+              let nx = x + ox[t], ny = y + oy[t], nz = z + oz[t];
               if (this.periodic) {
-                nx = wrap(nx, g.X);
-                ny = wrap(ny, g.Y);
-                nz = wrap(nz, g.Z);
-              } else if (nx < 0 || ny < 0 || nz < 0 || nx >= g.X || ny >= g.Y || nz >= g.Z) continue;
-              if (this.sets[rule.neighbors][g.cells[nx + ny * g.X + nz * g.X * g.Y]]) n++;
+                nx = wrap(nx, X);
+                ny = wrap(ny, Y);
+                nz = wrap(nz, Z);
+              } else if (nx < 0 || ny < 0 || nz < 0 || nx >= X || ny >= Y || nz >= Z) continue;
+              if (nb[cells[nx + ny * X + nz * XY]]) n++;
             }
             if (!rule.sums[n]) continue;
             changes.push(idx, rule.output);
@@ -543,6 +774,7 @@ class ConvRunner extends Runner {
             break;
           }
         }
+      }
     if (!changes.length) return false;
     for (let i = 0; i < changes.length; i += 2) write(g, changes[i], changes[i + 1]);
     this.count++;
@@ -621,7 +853,7 @@ class PathRunner extends Runner {
       best = Math.max(best, d);
     }
     if (!starts.length) {
-      if (!this.total) this.why ??= [...g.cells].some((c) => this.sets[this.from][c]) ? 'le celle di partenza ("from") c\'erano, ma nessuna toccava una cella "on" collegata all\'arrivo' : 'in quel momento non c\'era nessuna cella di partenza ("from")';
+      if (!this.total) this.why ??= codesOf(this.sets[this.from]).some((c) => censusOf(g).total[c] > 0) ? 'le celle di partenza ("from") c\'erano, ma nessuna toccava una cella "on" collegata all\'arrivo' : 'in quel momento non c\'era nessuna cella di partenza ("from")';
       return false;
     }
     const pool = this.longest ? starts.filter(([, d]) => d === best) : starts;
@@ -989,6 +1221,16 @@ export interface Snapshot {
 }
 
 function exec(root: Runner, g: Grid3, seed: number, maxSteps: number, t0: number, trace: Trace = [], opts: RunOptions = {}): RunResult & { snapshots?: Snapshot[] } {
+  const outer = current;
+  current = { g };
+  try {
+    return execIn(root, g, seed, maxSteps, t0, trace, opts);
+  } finally {
+    current = outer;
+  }
+}
+
+function execIn(root: Runner, g: Grid3, seed: number, maxSteps: number, t0: number, trace: Trace, opts: RunOptions): RunResult & { snapshots?: Snapshot[] } {
   root.reset();
   const rng = new Rng(seed);
   let steps = 0;

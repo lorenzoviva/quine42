@@ -2,14 +2,13 @@
  "viandante": {
   "classe": "persona",
   "nome": "Viandante",
-  "autore": "a mano (Claude Code)",
+  "autore": "procedurale, a mano (Claude Cloud, T270)",
   "tinta": "N"
  },
  "contadina": {
   "classe": "persona",
   "nome": "Contadina",
-  "autore": "gemini-3.8-flash (step 8.2A)",
-  "voto": 8
+  "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
  "persona": {
   "classe": "persona",
@@ -24,92 +23,87 @@
  "bestia": {
   "classe": "bestia",
   "nome": "Lupo",
-  "autore": "a mano, step 8B (Claude Code)"
+  "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
  "albero": {
   "classe": "albero",
   "nome": "Pino",
-  "autore": "a mano, step 8B (Claude Code)"
+  "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
  "quercia": {
   "classe": "albero",
   "nome": "Quercia",
-  "autore": "gemini-3.8-flash (step 8.2A)",
-  "voto": 5
+  "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
  "betulla": {
   "classe": "albero",
   "nome": "Betulla",
-  "autore": "gemini-3.8-flash (step 8.2A)",
-  "voto": 8
+  "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
  "palma": {
   "classe": "albero",
   "nome": "Palma",
-  "autore": "a mano, step 8B (Claude Code)"
+  "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
  "cespuglio": {
   "classe": "cespuglio",
   "nome": "Cespuglio",
-  "autore": "a mano (Claude Code)"
+  "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
  "cespuglio-con-bacche": {
   "classe": "cespuglio",
   "nome": "Cespuglio con bacche",
-  "autore": "gemini-3.8-flash (step 8.2A)",
-  "voto": 8
+  "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
  "roccia": {
   "classe": "roccia",
   "nome": "Masso",
-  "autore": "a mano (Claude Code)"
+  "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
  "masso-muschioso": {
   "classe": "roccia",
   "nome": "Masso muschioso",
-  "autore": "gemini-3.8-flash (step 8.2A)",
-  "voto": 8
+  "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
  "sasso": {
   "classe": "sasso",
   "nome": "Sasso",
-  "autore": "a mano, step 8B (Claude Code)"
+  "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
  "barile": {
   "classe": "mobile",
   "nome": "Barile",
-  "autore": "gemini-3.8-flash (step 8B)",
-  "voto": 7
+  "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
  "falo": {
   "classe": "mobile",
   "nome": "Falò",
-  "autore": "a mano (Claude Code)"
+  "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
  "mobile": {
   "classe": "mobile",
   "nome": "Cassa",
-  "autore": "a mano (Claude Code)"
+  "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
  "letto": {
   "classe": "mobile",
   "nome": "Letto",
-  "autore": "a mano (Claude Code)"
+  "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
  "banco": {
   "classe": "mobile",
   "nome": "Banco da lavoro",
-  "autore": "a mano (Claude Code)"
+  "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
  "credenza": {
   "classe": "mobile",
   "nome": "Credenza",
-  "autore": "a mano (Claude Code)"
+  "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
  "cartello": {
   "classe": "mobile",
   "nome": "Cartello",
-  "autore": "a mano (Claude Code)"
+  "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
  "oggetto": {
   "classe": "oggetto",
@@ -125,19 +119,17 @@
  "pozzo": {
   "classe": "edificio",
   "nome": "Pozzo",
-  "autore": "gemini-3.8-flash (step 8.2A)",
-  "voto": 8
+  "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
  "edificio": {
   "classe": "edificio",
   "nome": "Casetta",
-  "autore": "gemini-3.8-flash (step 8.2A)",
-  "voto": 9
+  "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
  "monumento": {
   "classe": "monumento",
   "nome": "Colonna",
-  "autore": "a mano (Claude Code)"
+  "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
  "grande": {
   "classe": "grande",
@@ -147,7 +139,7 @@
  "fattoria": {
   "classe": "grande",
   "nome": "Fattoria",
-  "autore": "a mano (Claude Code)"
+  "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
  "corona-magia": {
   "classe": "edificio",
@@ -740,5 +732,433 @@
     "guasto"
    ]
   }
+ },
+ "moderno-semaforo": {
+  "classe": "monumento",
+  "nome": "Semaforo stradale",
+  "autore": "Claude Cloud, props tematici (T270)"
+ },
+ "moderno-cabina": {
+  "classe": "mobile",
+  "nome": "Cabina telefonica o chiosco",
+  "autore": "Claude Cloud, props tematici (T270)"
+ },
+ "moderno-distributore": {
+  "classe": "mobile",
+  "nome": "Distributore automatico",
+  "autore": "Claude Cloud, props tematici (T270)"
+ },
+ "moderno-panchina": {
+  "classe": "monumento",
+  "nome": "Panchina con lampione",
+  "autore": "Claude Cloud, props tematici (T270)"
+ },
+ "moderno-cassonetto": {
+  "classe": "mobile",
+  "nome": "Cassonetto e differenziata",
+  "autore": "Claude Cloud, props tematici (T270)"
+ },
+ "moderno-automobile": {
+  "classe": "edificio",
+  "nome": "Automobile compatta",
+  "autore": "Claude Cloud, props tematici (T270)"
+ },
+ "moderno-scrivania": {
+  "classe": "mobile",
+  "nome": "Scrivania con terminale",
+  "autore": "Claude Cloud, props tematici (T270)"
+ },
+ "moderno-scaffale": {
+  "classe": "mobile",
+  "nome": "Scaffale industriale",
+  "autore": "Claude Cloud, props tematici (T270)"
+ },
+ "moderno-antenna": {
+  "classe": "monumento",
+  "nome": "Antenna ripetitore",
+  "autore": "Claude Cloud, props tematici (T270)"
+ },
+ "moderno-generatore": {
+  "classe": "mobile",
+  "nome": "Generatore diesel",
+  "autore": "Claude Cloud, props tematici (T270)"
+ },
+ "suono-moderno-esplorazione-giorno": {
+  "classe": "suono",
+  "nome": "Moderno: esplorazione di giorno",
+  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "suono": {
+   "uso": "musica",
+   "ambienti": [
+    "parco"
+   ],
+   "momenti": [
+    "mattina",
+    "giorno"
+   ]
+  }
+ },
+ "suono-moderno-esplorazione-notte": {
+  "classe": "suono",
+  "nome": "Moderno: esplorazione di notte",
+  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "suono": {
+   "uso": "musica",
+   "ambienti": [
+    "lungomare",
+    "porto"
+   ],
+   "momenti": [
+    "notte"
+   ]
+  }
+ },
+ "suono-moderno-tensione-pericolo": {
+  "classe": "suono",
+  "nome": "Moderno: pericolo",
+  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "suono": {
+   "uso": "musica",
+   "ambienti": [
+    "stazione"
+   ],
+   "momenti": [
+    "mattina",
+    "giorno"
+   ]
+  }
+ },
+ "suono-moderno-luogo-sacro": {
+  "classe": "suono",
+  "nome": "Moderno: luogo sacro",
+  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "suono": {
+   "uso": "musica",
+   "ambienti": [
+    "collina"
+   ],
+   "momenti": [
+    "mattina",
+    "giorno"
+   ]
+  }
+ },
+ "suono-moderno-citta-locanda": {
+  "classe": "suono",
+  "nome": "Moderno: città e locanda",
+  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "suono": {
+   "uso": "musica",
+   "ambienti": [
+    "rione"
+   ],
+   "momenti": [
+    "mattina",
+    "giorno"
+   ]
+  }
+ },
+ "suono-moderno-sotterraneo-abisso": {
+  "classe": "suono",
+  "nome": "Moderno: sotterraneo",
+  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "suono": {
+   "uso": "musica",
+   "ambienti": [
+    "officine"
+   ],
+   "momenti": [
+    "mattina",
+    "giorno"
+   ]
+  }
+ },
+ "suono-effetto-allarme-sirena": {
+  "classe": "suono",
+  "nome": "Allarme sirena",
+  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "allarme-sirena"
+   ]
+  }
+ },
+ "suono-effetto-cristallo-risonante": {
+  "classe": "suono",
+  "nome": "Cristallo risonante",
+  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "cristallo-risonante"
+   ]
+  }
+ },
+ "suono-effetto-cura-benedizione": {
+  "classe": "suono",
+  "nome": "Cura benedizione",
+  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "cura-benedizione"
+   ]
+  }
+ },
+ "suono-effetto-dialogo-saluto": {
+  "classe": "suono",
+  "nome": "Dialogo saluto",
+  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "dialogo-saluto"
+   ]
+  }
+ },
+ "suono-effetto-esplosione-crollo": {
+  "classe": "suono",
+  "nome": "Esplosione crollo",
+  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "esplosione-crollo"
+   ]
+  }
+ },
+ "suono-effetto-forgia-martello": {
+  "classe": "suono",
+  "nome": "Forgia martello",
+  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "forgia-martello"
+   ]
+  }
+ },
+ "suono-effetto-fuoco-scoppiettante": {
+  "classe": "suono",
+  "nome": "Fuoco scoppiettante",
+  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "fuoco-scoppiettante"
+   ]
+  }
+ },
+ "suono-effetto-meccanismo-leva": {
+  "classe": "suono",
+  "nome": "Meccanismo leva",
+  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "meccanismo-leva"
+   ]
+  }
+ },
+ "suono-effetto-moneta-scambio": {
+  "classe": "suono",
+  "nome": "Moneta scambio",
+  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "moneta-scambio"
+   ]
+  }
+ },
+ "suono-effetto-passo-acqua": {
+  "classe": "suono",
+  "nome": "Passo acqua",
+  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "passo-acqua"
+   ]
+  }
+ },
+ "suono-effetto-passo-metallo": {
+  "classe": "suono",
+  "nome": "Passo metallo",
+  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "passo-metallo"
+   ]
+  }
+ },
+ "suono-effetto-porta-pesante": {
+  "classe": "suono",
+  "nome": "Porta pesante",
+  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "porta-pesante"
+   ]
+  }
+ },
+ "suono-effetto-salita-livello": {
+  "classe": "suono",
+  "nome": "Salita livello",
+  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "salita-livello"
+   ]
+  }
+ },
+ "suono-effetto-scarica-elettrica": {
+  "classe": "suono",
+  "nome": "Scarica elettrica",
+  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "scarica-elettrica"
+   ]
+  }
+ },
+ "suono-effetto-scoperta-segreto": {
+  "classe": "suono",
+  "nome": "Scoperta segreto",
+  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "scoperta-segreto"
+   ]
+  }
+ },
+ "suono-effetto-teletrasporto": {
+  "classe": "suono",
+  "nome": "Teletrasporto",
+  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "teletrasporto"
+   ]
+  }
+ },
+ "suono-effetto-vapore-pressione": {
+  "classe": "suono",
+  "nome": "Vapore pressione",
+  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "vapore-pressione"
+   ]
+  }
+ },
+ "suono-effetto-veleno-danno": {
+  "classe": "suono",
+  "nome": "Veleno danno",
+  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "veleno-danno"
+   ]
+  }
+ },
+ "suono-effetto-vento-alta-quota": {
+  "classe": "suono",
+  "nome": "Vento alta quota",
+  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "vento-alta-quota"
+   ]
+  }
+ },
+ "suono-effetto-morte-v2": {
+  "classe": "suono",
+  "nome": "Morte (rifatta, da ascoltare)",
+  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "morte"
+   ]
+  }
+ },
+ "struttura-bistrot": {
+  "classe": "grande",
+  "nome": "Bistrot con l’enoteca interrata",
+  "autore": "procedurale, a mano (Claude Cloud, catalogo delle strutture, T269)",
+  "sotto": 1,
+  "taglia": "enorme",
+  "vpt": 16
+ },
+ "struttura-cappella": {
+  "classe": "grande",
+  "nome": "Cappella del silenzio, con il campanile",
+  "autore": "procedurale, a mano (Claude Cloud, catalogo delle strutture, T269)"
+ },
+ "struttura-chiesa-moderna": {
+  "classe": "grande",
+  "nome": "Chiesa moderna (chiesa a gradoni)",
+  "autore": "procedurale, a mano (Claude Cloud, catalogo gemello, T273)"
+ },
+ "struttura-condominio": {
+  "classe": "grande",
+  "nome": "Condominio (condominio a due piani)",
+  "autore": "procedurale, a mano (Claude Cloud, catalogo gemello, T273)"
+ },
+ "struttura-laboratorio-artigiano": {
+  "classe": "grande",
+  "nome": "Laboratorio artigiano (laboratorio con la cantina)",
+  "autore": "procedurale, a mano (Claude Cloud, catalogo gemello, T273)",
+  "sotto": 1
+ },
+ "struttura-laboratorio": {
+  "classe": "grande",
+  "nome": "Laboratorio di ricerca, con il magazzino interrato",
+  "autore": "procedurale, a mano (Claude Cloud, catalogo delle strutture, T269)",
+  "sotto": 1
+ },
+ "struttura-mercato-a-padiglione": {
+  "classe": "grande",
+  "nome": "Mercato a padiglione (mercato coperto)",
+  "autore": "procedurale, a mano (Claude Cloud, catalogo gemello, T273)"
+ },
+ "struttura-mercato-coperto-rionale": {
+  "classe": "grande",
+  "nome": "Mercato coperto",
+  "autore": "procedurale, a mano (Claude Cloud, catalogo delle strutture, T269)"
+ },
+ "struttura-osservatorio-civico": {
+  "classe": "grande",
+  "nome": "Osservatorio civico (osservatorio con il sotterraneo)",
+  "autore": "procedurale, a mano (Claude Cloud, catalogo gemello, T273)",
+  "sotto": 1
+ },
+ "struttura-palazzina": {
+  "classe": "grande",
+  "nome": "Palazzina di quattro alloggi, con i balconi",
+  "autore": "procedurale, a mano (Claude Cloud, catalogo delle strutture, T269)"
+ },
+ "struttura-torre-panoramica": {
+  "classe": "grande",
+  "nome": "Torre panoramica, con l’autorimessa interrata",
+  "autore": "procedurale, a mano (Claude Cloud, catalogo delle strutture, T269)",
+  "sotto": 1
+ },
+ "struttura-trattoria-con-cantina": {
+  "classe": "grande",
+  "nome": "Trattoria con cantina (trattoria con la cantina dei vini)",
+  "autore": "procedurale, a mano (Claude Cloud, catalogo gemello, T273)",
+  "sotto": 1
  }
 }

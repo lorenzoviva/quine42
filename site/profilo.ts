@@ -11,6 +11,7 @@ import { boxOf, classOf } from '../src/mj/classes';
 import { PROFILE_LIMITS, repairProfile, type Profile } from '../src/kernel/wanderers';
 import { keepProfile } from '../src/session/socket';
 import { $, alertBox, formatCredits, hideAlert, initNav, pageLogin, pageSignOut, pickUniverse, playLink, universes, UNIVERSE_KEY, store, stored, type Who } from './shared';
+import { SKIN_EVENT, skinColor } from './skin-core';
 
 export { formatCredits, pickUniverse, playLink };
 
@@ -68,11 +69,17 @@ class AvatarViewer {
     this.scene.add(new THREE.HemisphereLight(0xbfe8ff, 0x2a1440, 1.4));
     const key = new THREE.DirectionalLight(0xffffff, 2.2);
     key.position.set(2, 4, 3);
-    const rim = new THREE.DirectionalLight(0xff2a85, 1.4);
+    const rim = new THREE.DirectionalLight(skinColor('--skin-accent-2', '#ff2a85'), 1.4);
     rim.position.set(-3, 2, -2);
     this.scene.add(key, rim);
     // A floor ring of neon under the feet.
-    const ring = new THREE.Mesh(new THREE.RingGeometry(0.55, 0.62, 48), new THREE.MeshBasicMaterial({ color: 0x00f0ff, side: THREE.DoubleSide }));
+    const ringColor = new THREE.MeshBasicMaterial({ color: skinColor('--skin-accent', '#00f0ff'), side: THREE.DoubleSide });
+    const ring = new THREE.Mesh(new THREE.RingGeometry(0.55, 0.62, 48), ringColor);
+    // The stage follows the picker.
+    document.addEventListener(SKIN_EVENT, () => {
+      rim.color.set(skinColor('--skin-accent-2', '#ff2a85'));
+      ringColor.color.set(skinColor('--skin-accent', '#00f0ff'));
+    });
     ring.rotation.x = -Math.PI / 2;
     ring.position.y = 0.002;
     this.scene.add(ring, this.turntable);

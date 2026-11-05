@@ -32,6 +32,15 @@
   "runes": [
    "fuoco"
   ],
-  "strutture": []
+  "strutture": [
+   {
+    "concetto": "mercato coperto rionale",
+    "taglia": "grande"
+   },
+   {
+    "concetto": "torre panoramica",
+    "taglia": "grande"
+   }
+  ]
  }
 }

@@ -2114,7 +2114,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Quando è fatto: commit su `task/T88`; nell'esito come si accende e si spegne.
 - Dipende da: T82, T85, T207, T156 (autore, 03/11: niente strutture dei mondi nuovi prima del prompt nuovo dello Scultore).
 
-### T207 · La generazione differita: un universo generato senza browser, solo dagli abbonamenti — `da fare` (dipende da T205, T156)
+### T207 · La generazione differita: un universo generato senza browser, solo dagli abbonamenti — `fatto` (`c007831`) (dipende da T205, T156)
 - Pipeline: claude · stima 6% · approvato · priorità 59
 - Step: 31
 - Contesto: richiesta dell'autore (03/11), l'idea di T88 e T153: generare gli universi non in tempo reale, in alta qualità, solo con gli abbonamenti. Oggi la coda (ADR-0077, ADR-0106, `src/kernel/ai/subscription.ts`) prende solo i compiti lenti, il resto va alle API, e non c'è sul server dei mondi di molti: una partita multigiocatore senza API non genererebbe i luoghi nuovi. Se il mondo si genera prima, il problema non si pone per ciò che è già pronto.
@@ -3060,7 +3060,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Quando è fatto: commit su `task/T173`; nell'esito quanti alla prima, quanti alla seconda, quali difetti ha corretto la seconda, token e costo della seconda richiesta (è il dato che serve a T156). Attento alla finestra delle 5 ore: al più 3 tentativi insieme.
 - Esito: **12 su 14, soglia non raggiunta**, domanda in `docs/pipeline/domande/T173.md`. Alla prima 9, alla seconda 3; falliscono `futuristica/2` (un `at` con due numeri nella seconda richiesta, il gioco la rifiuta) e `pagoda/2` (scala corretta, foto no). La seconda ha corretto una scala che non portava al piano sopra e, dalle foto, tetti, torre, terrazza e sala comune; gli interni restano «parte» in tutti i 12. Seconda richiesta, media di 5: input 14 251 token, output 43 828, 0,90 dollari a listino (0,28 con un solo difetto di misure); prima richiesta: 3791, 60 553, 1,22. Prompt, misure e criteri invariati. Diverso dal previsto: al messaggio ho aggiunto il significato di ogni misura e dove sta il pavimento non raggiunto (`persi`, in `misure.ts`, che non cambia nessun valore); il limite delle 5 ore è scattato una volta e tre chiamate si sono perse con un'interruzione della sessione. Giudizio delle foto: una sessione che non ha scritto il prompt, stesso modello, `lab/banco/conferma/giudizio.md`. Test: suite intera con tutti i test verde una volta su quattro; le altre tre un fallimento per tempo scaduto sotto carico (due volte V-006 di `tests/sicurezza/produzione.test.ts`, «ingresso di bruno»; passa da solo). Senza i test nuovi di T173 verde due su due: pochi tentativi, ma il test è fragile e va guardato. Non l'ho toccato. Sicurezza: nessuna superficie nuova (solo `lab/` e documenti).
 
-### T258 · Il kernel segna il suolo per i programmi delle strutture — `in attesa` (dipende da T182)
+### T258 · Il kernel segna il suolo per i programmi delle strutture — `fatto` (`cbfe5ca`, `ed092eb`; D33 chiusa con l'opzione A dall'orchestratore nell'autonomia, 05/11)
 - Pipeline: claude · stima 5% · approvato · priorità 6
 - Step: 30
 - Contesto: decisione dell'autore del 04/11 (`docs/pipeline/domande/T182.md`, domanda 1, opzione A). Nasce da T182 (`dossier T182`). Una cantina non regge due taglie con un programma solo: a Grande il suolo è a z=20, a Enorme a z=16, e il programma non sa quale riceve. La locanda è perciò fuori dai 12 bersagli del banco.
@@ -3069,8 +3069,10 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Browser: non serve.
 - Quando è fatto: commit su `task/T258`; ADR se la lettera è un contratto nuovo dei programmi, voce nel glossario. Sicurezza: nessuna superficie nuova.
 - Esito: fatto: lettera del suolo (`suolo="E"`, `Program3.soil`, `FormRequest.base`, ADR-0135, glossario), modelli vecchi identici con la stessa chiave di cache e senza cambiare `FORMS_DB_VERSION`, `lab/tests/suolo.test.ts`, `riferimento/cantina.xml` a mano 12 semi su 12 alle due taglie e varia, ricetta in `lab/banco/prompt.md`, `esegui` con un tempo facoltativo; la locanda del modello non regge: 0 su 4 richieste (input 11 660-25 958, output 48 041-73 298, 5,45 $ a listino), Grande 4/5 nelle seconde richieste, Enorme 0/5 perché il programma supera gli 8 s e si tronca (`1/seconda` senza limite passa le misure a 5 semi su 5 in 7,3-7,8 s), perimetro a Grande 0,04-0,05 contro 0,15; decisione in `docs/pipeline/domande/T258.md` (A motore, B tempo proprio, C una taglia), niente altro giro; non provato nel gioco (T156, lo Scultore non passa ancora `base`), foto non giudicate per soglia, `pagoda/1` e `tempio/2` non toccati; suite e typecheck verdi; sicurezza: nessuna superficie nuova.
+- D33 (05/11, opzione A): il motore guarda solo dove serve (censimento delle lettere per riga, ADR-0142), voxel per voxel identico (`tests/mj-engine-determinism.test.ts`, 172 impronte prese prima): la cantina a Enorme da 5,6 s a 0,5 s, `locanda/1/seconda` da 5,8 s a 0,3 s e 5/5 a Grande ed Enorme col limite di 8 s. Locande con il perimetro corretto (`suolo/locanda/<n>/corretta`, 0,19 e 0,20) e quattro strutture con la cantina (`suolo/strutture/`): `lab/banco/suolo/D33.md`. Sicurezza: nessuna superficie nuova (solo il motore, nel processo di chi lo usa).
 
-### T259 · Lo Scenografo: progetto e misura degli interni separati dall'edificio — `da fare`
+### T259 · Lo Scenografo: progetto e misura degli interni separati dall'edificio — `in attesa`
+- Cloud: progetto e banco portati da T276 (`ed092eb`). Non si lancia in locale. Manca ciò che il task chiedeva: i costi di `docs/design/scenografo.md` sono stime, senza chiamate ai modelli. Resta `in attesa` di D37.
 - Pipeline: claude · stima 5% · approvato · priorità 8
 - Step: 30
 - Contesto: decisione dell'autore del 04/11 (`domande/T182.md`, domanda 2, opzione C): interni, decorazioni e oggetti di scena non li scrive lo Scultore ma un agente a parte, come il passaggio dal Cartografo allo Scultore. L'autore si aspetta di risparmiare rispetto a generare tutto insieme: va misurato. T182 dice che accorciare il prompt non ha abbassato il costo (1,15 $ contro 1,22 $: quasi tutto l'output è ragionamento), quindi il risparmio non è scontato. Nasce da T182 (`dossier T182`).
@@ -3078,6 +3080,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Test: i programmi provati girano nel motore e passano i controlli.
 - Browser: non serve; fogli di contatto nel commit.
 - Quando è fatto: commit su `task/T259`; nell'esito costo misurato di ogni via e la raccomandazione; i task che ne nascono sono una proposta per l'autore.
+- Esito: `docs/design/scenografo.md`, banco `lab/banco/scenografo/` (`lab/scripts/banco-scenografo.ts`, `lab/tests/scenografo.test.ts`). Due vie su 6 edifici × 5 semi, con le stesse classi dello strato dei piedi (`φ ψ π #`) e una guardia del kernel sulla connessione 3D dei centri: il programma MarkovJunior di secondo stadio regge 30/30 al primo arredo (122 ms, varianza interna 0,86, ≈ 1 200 token), i modelli esistenti come dati 28/30 al primo e 30/30 entro 4 (319 ms, 0,77, ≈ 30 token di catalogo). Raccomandazione: i dati come base, il programma solo per cantina e arredi al soffitto. Diverso dal previsto: **nessuna richiesta ai modelli** (niente API in questa sessione), quindi il costo in dollari è una stima e la misura vera è il primo dei task proposti; la misura `stanze` di `giudica` non vale su un edificio arredato (cade quasi sempre, con tutte le stanze ancora percorribili).
 
 ### T156 · Il prompt nuovo nello Scultore del gioco — `da fare` (dipende da T155, T173, T182, T258)
 - Pipeline: claude · stima 5% · approvato · browser · priorità 32
@@ -3791,20 +3794,14 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Quando è fatto: l'orchestratore può lanciare il comando che mette i tag e chiederne la priorità; commit su `task/T231`. Sicurezza: nessuna superficie nuova.
 - Esito: parser di `- Step:`, campo in `indice`, `dossier` e pagina web, comando `step` (`<n> Txx…`, `--da-tabella`, `<n>`, `<n> --priorita <p>`), README, `orchestra.md`, `fasi.md` e `AGENTS.md` aggiornati. Rispetto al previsto: un task non stimato riceve la riga `- Pipeline: priorità N`, che `assegna` mantiene; i sotto-task nello stesso titolo condividono il tag; i task «spezzato in…» non ricevono la priorità; `orchestra.md` ammette `docs/fasi.md` fra i documenti scrivibili e avvisa di non usare la priorità 0. Manca: l'orchestratore deve lanciare `step --da-tabella` sul backlog vero dopo l'integrazione. Provato su una copia del backlog: 282 id riconosciuti, 277 righe `- Step:`, nessun'altra differenza. Pagina web provata solo con il test. Non provato: il comando sul backlog vero. Sicurezza: nessuna superficie nuova.
 
-### T232 · Il sito come launcher: proposte della landing col rapporto aureo — `in attesa`
-- Pipeline: claude · stima 3% · approvato · priorità 90
-- Step: 35
-- **L'autore (04/11): si fa a fine Fase II.** Lo riporta a `da fare` l'orchestratore, con T235 e il logo scelto.
-- Contesto: per l'autore la home «sembra a metà tra un pitch per una startup e un blog per fumetti». La vuole come il launcher di un gioco multiplayer moderno: accattivante, «oddly satisfying», «che rimarresti ore a guardarla», con molti rapporti tra dimensioni che rispettano il rapporto aureo. Dossier: `dossier T97`, `dossier T186`. Le proposte del logo sono in `docs/design/logo/proposte/` (file dell'autore: non toccarli, mai `git add` di quella cartella).
-- Cosa fare: 3 proposte in `docs/design/sito/launcher/`, pagine statiche provabili nel browser, che rispettano la CSP (`server/csp.ts`). Griglia e tipografia da φ e Fibonacci, con la tabella dei rapporti usati. Almeno una con al centro un programma MarkovJunior che cresce dal vivo (la crescita è già di suo «oddly satisfying»), con ciò che costa misurato. Posto per: carte e strutture in 3D o video in loop, universi più giocati, notizie. Niente testi che guastino la scoperta della corona. Non cambiare `site/`.
-- Test: nessun codice del gioco: typecheck con il suo turno.
-- Browser: sì, a 1920 e 390 px; catture di ogni proposta nel commit.
-- Quando è fatto: l'autore può aprire e confrontare le tre proposte; commit su `task/T232`. Sicurezza: nessuna superficie nuova.
+### T232 · Il sito come launcher: proposte della landing col rapporto aureo — `fatto` (assorbito, nessun commit proprio)
+- Step: 34
+- **Assorbito (autore, 05/11: «vedi tu»; decisione dell'orchestratore):** le tre proposte diventano le tre vesti di T284, T285 e T286, e griglia e tipografia da φ e Fibonacci stanno nella base comune di T283. Ciò che era «launcher» (carte e strutture in 3D, universi più giocati, notizie) resta a fine Fase II, in T233 e T235, sulla veste scelta. La richiesta di partenza: «sembra a metà tra un pitch per una startup e un blog per fumetti»; la vuole come il launcher di un gioco multiplayer moderno, «oddly satisfying», senza testi che guastino la scoperta della corona.
 
-### T233 · La landing launcher nel sito — `da fare` (dipende da T232)
+### T233 · La landing launcher nel sito — `da fare` (dipende da T287)
 - Pipeline: claude · stima 3% · priorità 2
 - Step: 35
-- Contesto: si approva solo quando l'autore ha scelto una proposta (`dossier T232`).
+- Contesto: si approva solo quando è scelta la veste del sito (`dossier T287`; da dove viene: `dossier T232`).
 - Cosa fare: la proposta scelta in `site/` col tema condiviso, senza framework; le sezioni di showcase e notizie restano nascoste finché non hanno contenuti, niente «coming soon» finti. La striscia «coming soon» degli altri universi resta.
 - Test: typecheck, build e suite intera con i loro turni.
 - Browser: sì, a 1920 e 390 px, in `npm run dev` e sotto `npm run serve`.
@@ -3832,11 +3829,12 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - **Deciso dall'autore (04/11, `docs/pipeline/domande/T236.md`):** 2 € per esplorare, parlare, generare oggetti; 3 € con il secondo file, e chi li riceve può restare nel tappeto: è una scelta. Tutto a mano dal master. Altri 5 € a mano ai più assidui. Chi poi vuole continuare in beta ha uno sconto del 50 % sui crediti, a prezzo lineare e senza commissione (T243; come paga: `docs/pipeline/domande/T243.md`). Quattro universi condivisi: medievale (`aurora`), steampunk, moderno, futuristico, generati perlopiù sul server con gli abbonamenti (T207, T88, T153).
 - Conseguenze per il deploy: `QUINE_TETTO_RICARICHE` da alzare, oggi 0 con gli account (consigliato 50: 10 tester per 5); `QUINE_UNIVERSI_PER_ACCOUNT` è 3 e i mondi del master sono 4. I saldi stanno per universo (ADR-0104), quindi i crediti di un tester valgono in un mondo solo.
 
-### T237 · La guida dei beta tester, in due file — `da fare` (dipende da T45f, T236)
+### T237 · La guida dei beta tester, in due file — `da fare` (dipende da T45f, T236, T294)
 - Pipeline: claude · stima 2% · approvato · priorità 3
 - Step: 34
 - Contesto: si scrive a fine Fase I, per gli amici dell'autore, non pagati: «non è il classico beta testing noioso». Il primo file: come giocare, che si gioca prenotando il turno sul calendario dell'autore, fuori dal repository (anche insieme, senza esagerare con le sessioni a molti), tutte le limitazioni del server di beta con cui ci si potrebbe frustrare. Il secondo file: la corona, e come avere la seconda parte dei crediti, per chi non ha capito come uscire dal tappeto. Il primo non deve guastarla.
 - Decisioni di T236: 2 € + 3 €, a mano; il secondo file dice che si può anche restare nel tappeto; quattro universi condivisi con l'autore come master. Da provare, non da supporre: cosa può fare nella corona chi non è il master; come si spende il saldo, che vale per un universo solo. Gli altri 5 € e lo sconto li propone l'autore a voce: non stanno nei file. I due file vanno anche sul sito (T244): scrivili come pagine pubbliche, e il primo non guasti la corona.
+- Richiesta dell'autore (05/11): il secondo file ha una sezione sui laboratori, che si accendono solo nel secondo passo (`laboratori` in `site/beta.json`, T294): come si forka, come si salva, cosa ci si fa.
 - Cosa fare: `docs/beta/guida.md` e `docs/beta/la-corona.md`, in italiano, dal comportamento vero del server di beta (limiti di `LIMITS`, `FRONT_RATES`, mondi accesi, tetti, modelli locali a crediti finiti), non dai documenti: ciò che non puoi provare lo segni. Tono da amico.
 - Test: nessun codice: typecheck con il suo turno.
 - Browser: sì: segui la guida da viandante nuovo sul server di beta; ogni passo che non torna lo correggi.
@@ -3856,11 +3854,12 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Step: 36
 - Contesto: prima della Fase IV il gioco va in italiano, inglese (la versione di punta sui social), francese e spagnolo: le lingue che l'autore può verificare. **L'autore (04/11): è l'ultimissima operazione, in Fase III, non in Fase I:** è dispendiosa e obbliga a quadruplicare ogni modifica che tocca la lingua. Riparte quando lo dice l'autore. Oggi UI, prompt e testi di gioco sono in italiano per convenzione; i contenuti li genera il Concilio, gli universi hanno già una lingua, il multigiocatore può mescolarle.
 - Cosa fare alla ripartenza: censimento dei testi (UI, sito, prompt, seme, lessico, canone delle rune, messaggi del kernel), proposta con le alternative in `docs/lingue.md`: lingua per universo o per viandante, cosa si traduce e cosa si genera, come si verifica. A parte documentazione, pipeline agentica e pregresso dello sviluppo: si traducono solo se il piano di lancio punta anche alla comunità dello sviluppo agentico.
-- Domanda per l'autore: nessuna ora.
+- Prodotto su Claude Cloud e portato da T278 (`112b736`): `docs/lingue.md`, `docs/lingue-censimento.md`. Resta `in attesa`: lo chiude l'autore quando l'ha letto.
+- Domanda per l'autore: D34 in `docs/pipeline/domande/aperte.md`.
 
 ### T240 · Il piano di lancio: concorrenti, punti di forza, Boa Loger — `in attesa`
 - Step: 38
-- **L'autore (04/11): si lancia su Fable dal reset settimanale del 05/11 (15:59 UTC), non prima.** Alla ripartenza: riga `- Pipeline: fable · stima 5% · approvato · priorità 2` e stato `da fare`.
+- Prodotto su Claude Cloud e portato da T278 (`112b736`): `docs/lancio/piano.md`. Non si rilancia su Fable. Resta `in attesa`: lo chiude l'autore quando l'ha letto (D35 in `docs/pipeline/domande/aperte.md`).
 - Contesto: leggi tutto il to-do del 04/11, «Fase IV». L'autore: «ci giochiamo tutte le carte», non ha studi di marketing, vuole le idee migliori e il dissenso dove c'è. Afferma che non esiste niente del genere e chiede se la narrativa generativa sia davvero solo sua: va verificato, non assecondato. Da confrontare almeno con: AI Dungeon, Project Sid, Generative Agents (Smallville), inZOI; nella ricerca veloce del 04/11 nessun gioco pubblicato che generi mondo e codice durante il gioco, con fonti deboli. Propone: account dedicati, una settimana di spoiler in contemporanea, post finale col link; il personaggio Boa Loger (gerboa, finto anonimato facile da forare, collettivo artistico, interviste animate).
 - Cosa fare: `docs/lancio/piano.md`, con le fonti. (1) Ricerca sul web dei concorrenti, per ogni punto di forza: chi lo fa già, e quanto; cosa resta davvero unico, in una frase difendibile su Hacker News. (2) I punti di forza in ordine, per pubblico (tecnico, giocatori, creatori), compresi quelli che l'autore non ha elencato: il mondo fatto del proprio codice, le rune eseguite, il tappeto e la corona, i modelli come programmi di testo. (3) Giudizio sul piano dell'autore: regole di autopromozione e di account nuovi di Reddit e Hacker News, la pubblicazione simultanea, quali canali mancano e quali togliere; cosa impone il farsi pagare in UE sull'identità pubblica. (4) Boa Loger: cosa tenere e cosa rischia, un personaggio dichiarato contro un finto sviluppatore, voce sintetica, compatibilità con la regola 0 se entra nella narrativa dell'universo. (5) Calendario dal termine della Fase III, narrativa e 3-5 idee migliori della sua, con il costo in tempo per una persona sola. (6) Ciò che il gioco deve avere prima (video, press kit, costi a molti utenti al picco, tetti di spesa). (7) Il pubblico degli sviluppatori: l'autore crede che il progetto interessi anche chi segue lo sviluppo agentico (i subreddit dedicati): la pipeline, l'orchestratore, i task. Di' se conviene e cosa chiede: tradurre documentazione, pipeline e pregresso, oggi in italiano, ha un costo (→ il censimento delle lingue, T239). Parti dalle osservazioni che l'orchestratore ha dato all'autore il 04/11 e che lui ha apprezzato, ma verificale: la frase «non esiste niente del genere» è smontabile, di unico c'è l'insieme; il punto più forte è il mondo fatto del proprio codice e le rune eseguite, con la storia di 18 anni come racconto; Boa Loger come mascotte dichiarata anziché finto sviluppatore, perché chi incassa in UE mostra comunque la propria identità; account nuovi e stessa data ovunque sembrano spam; mancano Discord, YouTube, TikTok. Non creare account e non pubblicare nulla.
 - Test: nessun codice: typecheck con il suo turno.
@@ -4012,20 +4011,22 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Esito: creato e committato `docs/pipeline/modelli.md` con tabella modelli × 8 tipi di task, benchmark pubbliche con data e URL (incluse le contraddizioni), misure reali sulle 141 righe di `consumi.jsonl` e sui benchmark interni (`costi-step8.2B.md`, `lab/banco/`, `quadro.md`), prezzi di listino, contatori CLI (`claude` e `agy`) e proposta motivata di assegnazione per T255; nessun file di codice o configurazione modificato.
 
 ### T255 · I modelli di Claude distinti nella pipeline, lo sforzo (`effort`) e l'assegnazione dalla scheda — `da fare` (dipende da T254, T268)
-- Pipeline: claude · stima 5% · approvato · priorità 9
-- Contesto: richiesta dell'autore, sopra e il 05/11 («Voglio che per i task venga anche stimato e distinto l'effort, ho notato che con max i risultati sono eccezionali, sopra ogni aspettativa»). Oggi il provider `claude` è Opus 5.5 e nulla lo dice, né la pipeline distingue o registra il livello di sforzo (`effort`). Nasce da T254 (`dossier T254`), T257 (`dossier T257`) e T268 (`dossier T268`).
+- Pipeline: claude · stima 3% · approvato · priorità 0
+- Sforzo: extra. Decisione dell'autore del 05/11, da codificare in `pianifica.md`, `orchestra.md` e nel predefinito di `assegna`: tanti task `high`, media `extra`, `max` qua e là; la qualità conta più del tempo.
+- Ripresa: Argon si è fermato a metà (0 % fino all'11/11). Il worktree `t255` ha le sue modifiche non committate a `tools/pipeline/config.json`, `orchestra.mjs`, `pipeline.mjs`: rileggile con `git diff`, tieni ciò che è giusto, completa e committa. Il ramo è indietro rispetto al base: fondi il base prima dei test.
+- Contesto: richiesta dell'autore, sopra e il 05/11 («Voglio che per i task venga anche stimato e distinto l'effort (low, medium, high, extra, max) ho notato che con max i risultati sono eccezionali, sopra ogni aspettativa»). Oggi il provider `claude` è Opus 5.5 e nulla lo dice, né la pipeline distingue o registra il livello di sforzo (`effort`). Nasce da T254 (`dossier T254`), T257 (`dossier T257`) e T268 (`dossier T268`).
 - Cosa fare:
-  1. **Provider nuovi in `tools/pipeline/config.json`:** `sonnet` e `haiku` (`claude-sonnet-5-5`, `claude-haiku-5-5`), sullo stesso conto di `claude`, con `orchestrabile: false`; il loro `ratioSessioneSettimana` provvisorio uguale a `claude`, detto nell'esito come non misurato. In base all'esito e alle misure di T268 (`dossier T268`), aggiungi anche `agy-opus` (`claude-opus-5-5-high`) e `agy-sonnet` (`claude-sonnet-5-5-high`) sul contatore `^Claude and GPT models$`, `abbonamento: "google"`, `orchestrabile: false`, `browser: false`, con `ratioSessioneSettimana: 2` misurato in T268. `stato`, `indice` e `assegna` mostrano il modello per nome, così che `claude` si legga come Opus; il nome `claude` resta com'è per non riscrivere il backlog. Il tetto della CLI resta 3 su `claude` e 1 su `agy` e non si alza nessun tetto.
-  2. **Sforzo (`sforzo low|medium|high|xhigh|max`) distinto e stimato per task (richiesta dell'autore del 05/11):**
-     - In `parsePipelineLine` e `setPipelineLine` (`tools/pipeline/pipeline.mjs`), la riga `- Pipeline:` accetta e conserva `sforzo <low|medium|high|xhigh|max>` (es. `- Pipeline: claude · sforzo max · stima 4% · approvato · priorità 9`).
-     - `assegna` accetta `--sforzo <low|medium|high|xhigh|max>` (o un token `sforzo <...>`), conserva lo sforzo precedente se non specificato, e `indice` e `writePlan` (`PIANO.md`) mostrano lo sforzo accanto al provider e alla stima quando è impostato.
-     - Al lancio (`launch` in `tools/pipeline/pipeline.mjs`): per i provider su `cmd: "claude"` (`claude`, `sonnet`, `haiku`, `fable`), se il task (o il provider in `config.json` tramite `sforzo`) specifica uno sforzo, passa `--effort <sforzo>` negli argomenti della CLI; per i provider su `cmd: "agy"` che hanno varianti `-low|-medium|-high` (`gemini`, `argon`, `agy-opus`, `agy-sonnet`), mappa `low`→`-low`, `medium`→`-medium`, `high|xhigh|max`→`-high` sul flag `--model`.
-     - Registra `sforzo` nella voce di `.pipeline/esecuzioni.json` e nella riga di `docs/pipeline/consumi.jsonl` (così misuriamo sul campo il consumo di `max` rispetto a `high`/`medium`).
+  1. **Provider nuovi in `tools/pipeline/config.json`:** `sonnet` e `haiku` (`claude-sonnet-5-5`, `claude-haiku-5-5`), sullo stesso conto di `claude`, con `orchestrabile: false` (inclusi in `piani.claude.{pro,max5x,max20x}.disponibili` e `limiti.modello`); il loro `ratioSessioneSettimana` provvisorio uguale a `claude`, detto nell'esito come non misurato. In base all'esito e alle misure di T268 (`dossier T268`), aggiungi anche `agy-opus` (`claude-opus-5-5-high`) e `agy-sonnet` (`claude-sonnet-5-5-high`) sul contatore `^Claude and GPT models$`, `abbonamento: "google"`, `orchestrabile: false`, `browser: false`, con `ratioSessioneSettimana: 2` misurato in T268 (inclusi in `piani.google.{pro,ultra}.disponibili` e `limiti.modello`). `stato`, `indice` e `assegna` mostrano il modello per nome, così che `claude` si legga come Opus; il nome `claude` resta com'è per non riscrivere il backlog. Il tetto della CLI resta 3 su `claude` e 1 su `agy` e non si alza nessun tetto.
+  2. **Sforzo (`sforzo low|medium|high|extra|xhigh|max`) distinto e stimato per task (richiesta dell'autore del 05/11):**
+     - In `parsePipelineLine` e `setPipelineLine` (`tools/pipeline/pipeline.mjs`), la riga `- Pipeline:` accetta e conserva `sforzo <low|medium|high|extra|xhigh|max>` (es. `- Pipeline: claude · sforzo max · stima 4% · approvato · priorità 9`; `extra` e `xhigh` sono entrambi validi).
+     - `assegna` accetta `--sforzo <low|medium|high|extra|xhigh|max>` (o un token `sforzo <...>`), conserva lo sforzo precedente se non specificato, e `indice` e `writePlan` (`PIANO.md`) mostrano lo sforzo accanto al provider e alla stima quando è impostato.
+     - Al lancio (`launch` in `tools/pipeline/pipeline.mjs`): per i provider su `cmd: "claude"` (`claude`, `sonnet`, `haiku`, `fable`), se il task (o il provider in `config.json` tramite `sforzo`) specifica uno sforzo, passa `--effort <livello>` negli argomenti della CLI (mappando `extra`→`xhigh`, poiché `claude --effort` accetta `low, medium, high, xhigh, max`); per i provider su `cmd: "agy"` che hanno varianti `-low|-medium|-high` (`gemini`, `argon`, `agy-opus`, `agy-sonnet`), mappa `low`→`-low`, `medium`→`-medium`, `high|extra|xhigh|max`→`-high` sul flag `--model`.
+     - Registra `sforzo` nella voce di `.pipeline/esecuzioni.json` e nella riga di `docs/pipeline/consumi.jsonl` (così misuriamo sul campo il consumo di `max` e `extra` rispetto a `high`/`medium`).
   3. **Documentazione e regole (`docs/pipeline/pianifica.md`, `docs/pipeline/orchestra.md`, `docs/pipeline/modelli.md`, ADR e `AGENTS.md`):**
-     - L'assegnazione di modello e sforzo si sceglie da `docs/pipeline/modelli.md`, stimando anche lo sforzo (`sforzo max` raccomandato per architettura, kernel, creazione MarkovJunior, universi e task complessi dove la qualità con `max` è nettamente superiore; `high` per sviluppo ordinario; `medium`/`low` per compiti meccanici, tenendo conto del maggior peso di `max` nella stima %).
+     - L'assegnazione di modello e sforzo si sceglie da `docs/pipeline/modelli.md`, stimando anche lo sforzo (`sforzo max` raccomandato per architettura, kernel, creazione MarkovJunior, universi e task complessi dove la qualità con `max` è nettamente superiore; `extra`/`xhigh` per task impegnativi; `high` per sviluppo ordinario; `medium`/`low` per compiti meccanici, tenendo conto del maggior peso di `max`/`extra` nella stima %).
      - In `orchestra.md` la regola nuova: **ogni domanda per l'autore si scrive per intero in chat, numerata, con la raccomandazione; i file di `domande/` non bastano**, e l'elenco vivo è `docs/pipeline/domande/aperte.md`.
      - **Deciso dall'autore il 04/11 (D31):** approvate le proposte delle sezioni 4.2 e 4.3 di `docs/pipeline/modelli.md`, con le correzioni di questo blocco e le misure di T268; Opus resta il predefinito e i provider nuovi entrano in prova, Argon solo per task piccoli. Fable può orchestrare se lui spunta la sua casella nella pagina web (`orchestrabile`, già c'è): l'ADR e `AGENTS.md` non dicono più «mai orchestratore», `fable` resta fuori da `orchestra.ordine` e si sceglie con `/agente`, e `orchestra.finestra` gli dà la sua finestra. In 4.3 di `modelli.md` Argon si aggiorna con T257 (16 punti su stima 5, 3,2×). ADR nuovo che aggiorna ADR-0115, riga in `AGENTS.md`.
-- Test: `tests/pipeline.test.ts` con i provider nuovi e con `sforzo` (`parsePipelineLine`, `setPipelineLine`, `assignTask` con `--sforzo`, `launch` che passa `--effort` su `claude` e il suffisso su `agy`, registrazione in `consumi.jsonl`, conto condiviso, tetto della CLI rispettato, nessuno dei nuovi orchestratore). Suite intera e typecheck con i loro turni.
+- Test: `npx vitest run tests/pipeline.test.ts` con i provider nuovi e con `sforzo` (`low|medium|high|extra|xhigh|max` in `parsePipelineLine`, `setPipelineLine`, `assignTask` con `--sforzo`, `launch` che passa `--effort` su `claude` con `extra`→`xhigh` e il suffisso su `agy`, registrazione in `consumi.jsonl`, conto condiviso, tetto della CLI rispettato, nessuno dei nuovi orchestratore) e `node tools/pipeline/pipeline.mjs turno typecheck -- npm run typecheck` (non serve la suite intera del gioco perché tocca solo `tools/pipeline/` e `docs/`).
 - Browser: non serve.
 - Quando è fatto: commit su `task/T255`. Sicurezza: nessuna superficie nuova.
 
@@ -4052,7 +4053,8 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Quando è fatto: commit su `task/T257` col solo `docs/pipeline/modelli.md`; nell'esito cosa cambia nella proposta. Sicurezza: nessuna superficie nuova.
 - Esito: aggiornato `docs/pipeline/modelli.md` correggendo l'attribuzione di T180/T181/T182 e del modello del banco (`claude-opus-5-5`), ricalcolando i consumi sulle 213 righe di `consumi.jsonl` (inclusi T181, T182 e T254), correggendo il fattore di Argon da 8,13× a 3,92× su 4 task (1,10× in T254, senza doppio conteggio T68b+T69), riallineando OSWorld 2.1 (Opus 81,8 % vs Sonnet 80,1 %) e tutti i numeri del PDF `gemini_4_argon_model_evaluation.pdf`, e aggiornando la proposta di assegnazione con indicazione esplicita delle voci `mai provato da noi`; nulla manca.
 
-### T260 · Il versionamento del kernel (`X.Y.Z`) e la compatibilità degli universi — `da fare`
+### T260 · Il versionamento del kernel (`X.Y.Z`) e la compatibilità degli universi — `fatto` (`73b5841`)
+- Cloud: fatto su Claude Cloud, portato da T274 (`73b5841`).
 - Pipeline: claude · stima 3% · approvato · priorità 10
 - Step: 32
 - Contesto: decisioni dell'autore del 04/11 (D32): (1) una nuova versione incompatibile del kernel non è vincolata dalla retrocompatibilità con gli universi precedenti («se vuoi giocare sul nuovo kernel devi iniziare un nuovo universo»; gli universi vecchi girano sul server della versione con cui sono nati o migrano in futuro via IA a pagamento); (2) introdurre da subito il versionamento rigoroso del kernel a partire da `0.1.0`, avanzando progressivamente quando le modifiche toccano `src/kernel/`. Nasce da T183 (`dossier T183`).
@@ -4080,7 +4082,8 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Quando è fatto: chiuso senza lavoro.
 - Esito: chiuso senza lavoro per decisione dell'autore (04/11, D32): congelare le caselle in `plan.tiles` tra versioni del kernel legherebbe le mani alle evoluzioni future; dentro lo stesso contratto `X.Y` del kernel `(piano, seme) + plan.edits` è già deterministico, e un cambio incompatibile di `X.Y` richiede un nuovo universo.
 
-### T262 · Il salvataggio che non si ferma — `da fare`
+### T262 · Il salvataggio che non si ferma — `fatto` (`73b5841`)
+- Cloud: fatto su Claude Cloud, portato da T274 (`73b5841`).
 - Pipeline: claude · stima 6% · approvato · priorità 12
 - Step: 32
 - Contesto: decisione dell'autore del 04/11 (D9): un guasto a runtime di un modulo invalida il codice, non i dati della partita. Oggi un guasto qualsiasi, anche di un giocatore, ferma tutti i salvataggi: in una vita di mesi è la perdita più probabile. Nasce da T183 (`dossier T183`): `docs/design/espressivita.md`, primitiva 3 e `TRAP: every module that calls it`.
@@ -4089,7 +4092,8 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: non serve.
 - Quando è fatto: commit su `task/T262`; ADR, regola 6. Sicurezza: scrivi l'esito.
 
-### T263 · I pannelli e i comandi di ogni viandante in multigiocatore — `da fare` (dipende da T245a)
+### T263 · I pannelli e i comandi di ogni viandante in multigiocatore — `fatto` (`73b5841`) (dipende da T245a)
+- Cloud: fatto su Claude Cloud, portato da T274 (`73b5841`).
 - Pipeline: claude · stima 8% · approvato · priorità 16
 - Step: 32
 - Contesto: primitive `W` e `K` di `docs/design/espressivita.md`, approvate dall'autore il 04/11 (D10). Senza, nessuna meccanica con un pannello si legge e nessun veicolo si guida; il pannello del cantiere di T245d usa `W`. Nasce da T183 (`dossier T183`).
@@ -4098,7 +4102,8 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: sì, due schede con `?viandante=`.
 - Quando è fatto: commit su `task/T263`; ADR se serve, riga in `AGENTS.md`. Sicurezza: scrivi l'esito, tocca il filo.
 
-### T245a · Il magazzino durevole e `vite` — `da fare` (dipende da T262)
+### T245a · Il magazzino durevole e `vite` — `fatto` (`73b5841`) (dipende da T262)
+- Cloud: fatto su Claude Cloud, portato da T274 (`73b5841`).
 - Pipeline: claude · stima 7% · approvato · priorità 13
 - Step: 32
 - Contesto: Nasce da T245 (`dossier T245`): progetto in `docs/design/comportamento-npc.md`, sezione 7. Fase 0.9.0, decisione dell'autore del 04/11 (D8). Primitive 2 e 5 di `docs/design/espressivita.md` (D10).
@@ -4107,7 +4112,8 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: non serve.
 - Quando è fatto: commit su `task/T245a`; ADR, glossario, `AGENTS.md`. Sicurezza: scrivi l'esito.
 
-### T245b · Il lavoro degli NPC: i primi tre mestieri — `da fare` (dipende da T245a)
+### T245b · Il lavoro degli NPC: i primi tre mestieri — `fatto` (`73b5841`) (dipende da T245a)
+- Cloud: fatto su Claude Cloud, portato da T274 (`73b5841`).
 - Pipeline: claude · stima 12% · approvato · priorità 17
 - Step: 32
 - Contesto: Nasce da T245 (`dossier T245`): progetto in `docs/design/comportamento-npc.md`, sezioni 1 e 7. Fase 0.9.0 (D8).
@@ -4116,7 +4122,8 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: sì: un contadino ara, semina e miete.
 - Quando è fatto: commit su `task/T245b`; ADR, glossario, `AGENTS.md`. Sicurezza: scrivi l'esito.
 
-### T245c · Gli altri mestieri del seme — `da fare` (dipende da T245b)
+### T245c · Gli altri mestieri del seme — `fatto` (`73b5841`) (dipende da T245b)
+- Cloud: fatto su Claude Cloud, portato da T274 (`73b5841`). Nel browser da vedere con T280.
 - Pipeline: claude · stima 7% · approvato · priorità 18
 - Step: 32
 - Contesto: Nasce da T245 (`dossier T245`): progetto in `docs/design/comportamento-npc.md`, sezione 7. Fase 0.9.0 (D8).
@@ -4125,7 +4132,8 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: sì: una giornata di tre mestieri.
 - Quando è fatto: commit su `task/T245c`; glossario. Sicurezza: scrivi l'esito.
 
-### T245d · Le imprese — `da fare` (dipende da T245b, T263)
+### T245d · Le imprese — `in attesa` (dipende da T245b, T263)
+- Cloud: finita il 05/11 (sessione B, `e7cddc1`); non lanciare in locale, lo porta T280.
 - Pipeline: claude · stima 12% · approvato · priorità 19
 - Step: 32
 - Contesto: Nasce da T245 (`dossier T245`): progetto in `docs/design/comportamento-npc.md`, sezione 3. Fase 0.9.0 (D8).
@@ -4134,7 +4142,8 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: sì: un'impresa che avanza e il suo pannello.
 - Quando è fatto: commit su `task/T245d`; ADR, glossario, `AGENTS.md`. Sicurezza: scrivi l'esito.
 
-### T245e · L'edificio per stadi — `da fare` (dipende da T245d)
+### T245e · L'edificio per stadi — `in attesa` (dipende da T245d)
+- Cloud: finita il 05/11 (sessione B, `e7cddc1`); non lanciare in locale, lo porta T280.
 - Pipeline: claude · stima 9% · approvato · priorità 20
 - Step: 32
 - Contesto: Nasce da T245 (`dossier T245`): progetto in `docs/design/comportamento-npc.md`, sezione 3.4. Fase 0.9.0 (D8).
@@ -4143,7 +4152,8 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: sì: una casa che sale in quattro fasi.
 - Quando è fatto: commit su `task/T245e`; ADR se è un contratto nuovo dei programmi. Sicurezza: scrivi l'esito.
 
-### T245f · Fuori vista — `da fare` (dipende da T245d, T245e)
+### T245f · Fuori vista — `in attesa` (dipende da T245d, T245e)
+- Cloud: finita il 05/11 (sessione B, `e7cddc1`); non lanciare in locale, lo porta T280.
 - Pipeline: claude · stima 9% · approvato · priorità 21
 - Step: 32
 - Contesto: Nasce da T245 (`dossier T245`): progetto in `docs/design/comportamento-npc.md`, sezione 5. Fase 0.9.0, decisione dell'autore del 04/11 (D8: il progetto la lasciava aperta).
@@ -4179,7 +4189,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: da decidere quando riparte.
 - Quando è fatto: commit su `task/T245i`; Sicurezza: scrivi l'esito.
 
-### T264 · `?dev&teleport` ignora lo scostamento salvato — `da fare`
+### T264 · `?dev&teleport` ignora lo scostamento salvato — `fatto` (`c007831`)
 - Pipeline: claude · stima 2% · approvato · priorità 15
 - Contesto: decisione dell'autore del 04/11 (D13): chi chiude nella corona riparte dov'era, come oggi. Ma `pagehide` salva lo scostamento del tappeto, che sposta `?dev&teleport=46,0` di 46 caselle a ogni caricamento chiuso bene. Nasce da T214 (`dossier T214`).
 - Cosa fare: con `?dev&teleport` lo scostamento salvato non si applica, così l'URL porta sempre allo stesso punto; senza, tutto come prima.
@@ -4187,7 +4197,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: sì: due caricamenti di `?dev&teleport=46,0` chiusi bene arrivano allo stesso punto; senza `teleport` si riparte dov'era.
 - Quando è fatto: commit su `task/T264`; nell'esito cosa è stato provato. Sicurezza: nessuna superficie nuova.
 
-### T265 · I commit non si perdono: fila su disco, tutte le scritture, token scaduto — `da fare`
+### T265 · I commit non si perdono: fila su disco, tutte le scritture, token scaduto — `fatto` (`c007831`)
 - Pipeline: claude · stima 6% · approvato · priorità 14
 - Step: 34
 - Contesto: decisione dell'autore del 04/11 (D15): prima della beta. Nasce da T211 (`dossier T211`, ADR-0122): la fila di `UniverseClient` sta solo in memoria e senza tetto; `putMap`, `branch` e `merge` non ritentano; un 401 da token scaduto perde il commit.
@@ -4204,7 +4214,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: non serve, salvo righe che toccano ciò che si vede.
 - Quando è fatto: commit su `task/T266`; Sicurezza: nessuna superficie nuova.
 
-### T267 · `tests/subscription.test.ts` rosso sotto carico, verde da solo: la causa — `da fare` (dipende da T255)
+### T267 · `tests/subscription.test.ts` rosso sotto carico, verde da solo: la causa — `fatto` (`c007831`) (dipende da T255)
 - Pipeline: claude · stima 2% · approvato · priorità 40
 - Contesto: decisione dell'autore del 04/11 (D28). Il file è rosso nella suite intera e verde da solo: visto in T89c e T253, già notato in passato come «rosso di carico» senza cercarne la causa (`dossier T253`, `dossier T89c`). Un rosso che si ignora nasconde quelli veri.
 - Cosa fare: riprodurlo (suite intera o carico simulato), trovare la causa, correggerla nel test o nel codice, secondo dove sta. Se è un tempo massimo troppo stretto, dirlo con la misura, non alzarlo a occhio. Se non si riproduce, scrivere nell'esito cosa è stato provato e fermarsi lì: niente correzioni alla cieca.
@@ -4248,7 +4258,8 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Quando è fatto: tutti e tre passano `verifica.ts` con 0 fault e 0 rotture della quarta parete. Sicurezza: nessuna superficie nuova (solo `lab/`).
 - Esito: `orichalcum` (`2ced05c`), `neapolis` (`eb822f7`) e `sidera` (`5e90652`) passano tutti i controlli (`metaBreak`, `canonBreak`, `bibleBreaks`, `validateForged` su 25 moduli, `validatePlan` e `validateLayout` su 19 luoghi, `checkSociety` su 24 persone, `reviewPlot` su 8 trame, `validateNewRune` su 12 rune, `modelErrors` + varianza ≥ 0,15 su 16 modelli, `analyzeSound` su 8 suoni) e 600-900 tick sul `Kernel` vero con **0 fault**. Sicurezza: nessuna superficie nuova.
 
-### T273 · Integrare a costo zero nei quattro universi esplorabili le strutture, i modelli e i suoni creati su Claude Cloud — `da fare` (dipende da T269, T270, T271, T272)
+### T273 · Integrare a costo zero nei quattro universi esplorabili le strutture, i modelli e i suoni creati su Claude Cloud — `fatto` (`c5ecbd8`)
+- Cloud: finita il 05/11 (sessione A, `752288c`), portata da T279.
 - Pipeline: claude · stima 4% · approvato · priorità 1
 - Contesto: richiesta esplicita dell'autore del 05/11 («integrare le modifiche svolte in cloud da claude nei quattro universi esplorabili. E se si può fare a costo zero (solo su abbonamento e/o offline) mi piacerebbe vedere le magnifiche strutture create in cloud in game»). Nasce da T269 (`dossier T269`), T270 (`dossier T270`), T271 (`dossier T271`) e T272 (`dossier T272`). Poiché tutti gli XML sono già pronti e validati, se i modelli delle strutture sono registrati in `models/struttura-<ownModelId(concetto).slice(0, 30)>.xml` e in `models/index.json`, `Kernel.lotsOf` (`this.forms.resolve(own, classe)`) trova subito `own === model` senza mettere `wanted`, quindi `ModelDirector` non chiama mai lo Scultore (**0 chiamate API, costo 0,00 $**).
 - Cosa fare:
@@ -4261,6 +4272,295 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
   3. **Installazione in `universes/` ed esplorazione a costo zero:**
      - Scrivi ed esegui uno script `lab/scripts/installa-universi-cloud.ts` (`npm run universi:cloud` o invocabile da CLI) che inizializza/aggiorna `universes/aurora/`, `universes/orichalcum/`, `universes/neapolis/` e `universes/sidera/` come repository git validi su disco (tramite `runGit`), pronti per essere esplorati subito nel browser a costo zero con `?skip&offline` e `?universo=<nome>&skip&offline`.
      - Verifica che tutti i modelli in `universe/models/` e nei 3 universi passino `modelErrors` e che `verifica.ts` dei 3 universi (e il boot di `universe/` sul `Kernel` con `MockAiModels`) girino con **0 fault** e **0 richieste mancanti a `ModelDirector` (`wanted` = 0)** per le strutture piazzate.
-- Test: test che verifica che nei 4 universi tutte le `strutture` dei `maps/*.json` risolvano a un modello esistente in `models/index.json` (`forms.resolve(own, 'grande') === own`, zero `wanted`) e passino `Validator.validatePlan`. Suite intera e typecheck con i loro turni.
-- Browser: sì, aprire i 4 universi con `?skip&offline` (`aurora`, `orichalcum`, `neapolis`, `sidera`), verificare che le strutture Cloud siano visibili in gioco sui lotti e visitabili all'interno, con 0 chiamate di rete a Gemini.
+- Test: test unitario (`tests/universi-cloud.test.ts`) che verifica che nei 4 universi tutte le `strutture` dei `maps/*.json` risolvano a un modello esistente in `models/index.json` (`forms.resolve(own, 'grande') === own`, zero `wanted`) e passino `Validator.validatePlan`, più `verifica.ts` e `turno typecheck -- npm run typecheck`.
+- Browser: non serve (convalida con `Kernel.boot` + `MockAiModels` nei test; se il provider ha lo strumento browser controlla anche dal vivo `?skip&offline`, altrimenti scrivi le coordinate `(cx, cy)` nell'esito per l'esplorazione diretta).
 - Quando è fatto: commit su `task/T273` e installazione dei 4 universi in `universes/`; nell'esito l'elenco dei luoghi/coordinate `(cx, cy)` dove si trova ogni struttura nei 4 universi. Sicurezza: nessuna superficie nuova.
+
+### T274 · Integrare la catena Step 32 di Claude Cloud (T260, T262, T245a, T263, T245b, T245c) — `fatto` (`73b5841`)
+- Pipeline: claude · stima 3% · approvato · priorità 1
+- Step: 32
+- Sforzo: extra.
+- Contesto: richiesta dell'autore del 05/11: T260 prima di tutto, gli universi Cloud devono avere una versione del kernel. Il lavoro è già fatto sul ramo `origin/claude/step32-kernel-chain-cghym8` (`6c75530`, kernel `0.1.5`, ADR-0136 e seguenti); `git merge-tree` non vede conflitti con `3d` al 05/11.
+- Cosa fare: `git merge` del ramo nel worktree; rinumera gli ADR se servono; suite intera e typecheck con i loro turni; controlla che `npm run mancanze` e il caricamento di `universe/` reggano `checkKernelVersion`. Nell'esito elenca ciò che il ramo non ha provato (browser di T263, T245b, T245c; i test di `aggiunte.test.ts` saltati nel clone Cloud, da far girare qui).
+- Browser: sì, i pannelli di T263 e un mestiere di T245b: se non si può, `BROWSER: da verificare`.
+- Quando è fatto: commit su `task/T274`. All'integrazione l'orchestratore segna `fatto` i sei task. Sicurezza: scrivi l'esito, il ramo tocca sessione, pannelli e caricamento di un universo.
+- Esito: merge di `origin/claude/step32-kernel-chain-cghym8` (`6c75530`) senza conflitti, ADR 0136-0141 invariati, kernel `0.1.5`; suite (2142 passati, 1 saltato ma lanciato a parte su `valmora` e `valmora new`), typecheck e build verdi; `checkKernelVersion` regge il seme e gli universi senza campo, `npm run mancanze` funziona ma non lo chiama; sicurezza: messaggio `tasti`, `campi` in `MyState`, `world.wanderers`, `world.path`, `world.find_tile`, campo `kernel`, nessuna voce nuova oltre V-012 e V-021 già aggiornate dal ramo; non provati nel browser T245c, la maturazione e il server di produzione; all'integrazione vanno segnati `fatto` T260, T262, T245a, T263, T245b, T245c.
+
+### T275 · Integrare i task del kernel di Claude Cloud (T267, T264, T265, T207) — `fatto` (`c007831`) (dipende da T274)
+- Pipeline: claude · stima 2% · approvato · priorità 3
+- Sforzo: high.
+- Contesto: ramo `origin/claude/quine42-kernel-tasks-dquv5s` (`635f19f`), senza conflitti con `3d` al 05/11, ma tocca il kernel come T274: sale `Z` di `KERNEL_VERSION`.
+- Cosa fare: `git merge`, allinea `KERNEL_VERSION` e `package.json`, suite intera e typecheck con i loro turni. T207 viene prima di T156 nell'ordine voluto dall'autore solo come codice: il generatore non si accende.
+- Browser: sì per `?dev&teleport` (T264); se non si può, `BROWSER: da verificare`.
+- Quando è fatto: commit su `task/T275`. Sicurezza: scrivi l'esito, T265 tocca le scritture dell'universo.
+- Esito: merge di `origin/claude/quine42-kernel-tasks-dquv5s` in `835a5dc` con il conflitto in `AGENTS.md` risolto tenendo entrambe le parti, ADR rinumerati a 0142 (fila delle scritture) e 0143 (generazione differita), kernel `0.1.6` e `npm run genera` che rifiuta un universo di un altro kernel o illeggibile (con test); suite (2188 passati, 1 saltato), typecheck e build verdi, due test «forte» di `lab/tests/riferimento.test.ts` falliti in un giro su tre per il limite di 8000 ms sotto carico e verdi da soli e nel giro dopo; sicurezza: nessuna voce nuova, T265 salva le scritture in `localStorage` per scheda, senza token e rilette con `owedWrite`, e le riscrive con l'identità di adesso sotto il controllo del server, ma su un computer condiviso il testo in fila resta lì finché non si scrive, e una fila orfana la prende la pagina dopo; T207 ha un gettone interno buono per un solo universo su una porta di loopback, i segni `universes/.accesi/` e `universes/.generazione/` stanno sotto `universes/`, che non si serve, e `generateUniverse` non è nella build di produzione; non provati: `npm run genera` con la CLI vera e il suo costo per luogo (il generatore non si accende), la fila di T265 nel browser con server spento e il rinnovo del 401 con un account vero (solo test offline), la lettura di `/usage` con la CLI vera.
+
+### T276 · Integrare il motore MarkovJunior per D33 e lo Scenografo di Claude Cloud (T259) — `fatto` (`ed092eb`) (dipende da T274)
+- Pipeline: claude · stima 2% · approvato · priorità 3
+- Sforzo: extra.
+- Contesto: ramo `origin/claude/markov-junior-optimization-scenografo-ebsq24` (`5d6feb8`): il motore guarda solo dove serve (opzione A di D33, quella raccomandata), voxel per voxel identico, e T259. D33 resta dell'autore: l'esito dice i tempi misurati a Enorme, così può chiuderla.
+- Cosa fare: `git merge`, suite intera e typecheck con i loro turni; rifai a mano la misura della locanda (`locanda/1/seconda`) e di `riferimento/cantina.xml` a Enorme; controlla che `FORMS_DB_VERSION` non debba cambiare.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T276`. Sicurezza: nessuna superficie nuova.
+- Esito: merge di `origin/claude/markov-junior-optimization-scenografo-ebsq24` (`5d6feb8`) in `ed092eb`, ADR del motore rinumerato 0142 (la riga D33 del backlog dice ancora ADR-0136: da correggere; T280 usa anch'esso 0142-0144: da rinumerare all'integrazione); suite (2181 passati, 1 saltato) e typecheck verdi; misura a mano con macchina carica (~60%), vecchio → nuovo a Enorme: cantina 11,87 s → 1,09-1,19 s (max 1,71), `locanda/1/seconda` 11,67 s → 0,52-0,55 s (max 0,58), `giudica` 0/5 → 5/5 su entrambe col limite di 8 s, a Grande cantina 6,86 s → 0,74-1,19 s, locanda 7,95 s → 0,45-0,49 s; griglie uguali seme per seme e fixture delle 172 impronte verde anche col motore vecchio; `FORMS_DB_VERSION` non cambia (griglie e formato uguali), kernel resta 0.1.5; D33 resta dell'autore (`domande/T258.md` non chiusa); il titolo di T259 nel backlog resta `in attesa` di `3d`: lo segna `fatto` l'orchestratore, ma i costi di T259 sono stime senza chiamate ai modelli (programmi a mano, ~1200 contro ~30 token), la misura vera è da fare; non provato nel gioco (T156); sicurezza: nessuna superficie nuova.
+
+### T277 · Integrare i 60 modelli di Claude Cloud — `fatto` (`c5ecbd8`, via T279)
+- Pipeline: claude · stima 1% · approvato · priorità 4
+- Sforzo: high.
+- Cloud: la sessione A l'ha unito tutto (`e0466b7`, punta del ramo `b6cff15`): non lanciare in locale, lo porta T279, che alla sua integrazione lo chiude.
+- Contesto: ramo `origin/claude/markov-junior-3d-60-models-pajzz6` (`b6cff15`), solo `lab/banco/`.
+- Cosa fare: `git merge`, i test di `lab/` e typecheck con i loro turni.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T277`. Sicurezza: nessuna superficie nuova.
+
+### T278 · Integrare i tre reami, le lingue e il piano di lancio di Claude Cloud (step 37, T239, T240) — `fatto` (`112b736`)
+- Pipeline: claude · stima 1% · approvato · priorità 4
+- Step: 37
+- Sforzo: high.
+- Contesto: ramo `origin/claude/quine42-realms-languages-4mbbsi` (`40eb2de`): reami spazio, pirati, cowboy sul banco, censimento delle lingue, piano di lancio. Il ramo ha scritto nel backlog: tieni il backlog di `3d` e riporta solo gli esiti. T239 e T240 restano `in attesa`: li chiude l'autore, che deve leggerli.
+- Cosa fare: `git merge`, test e typecheck con i loro turni.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T278`. Sicurezza: nessuna superficie nuova.
+- Esito: merge di `40eb2de` su `task/T278` (`112b736`), senza conflitti: `lab/banco/coming-soon-cloud/{spazio,pirati,cowboy}` con `verifica.ts` ed `esito.md`, `lab/scripts/censimento-lingue.ts`, `docs/lingue.md`, `docs/lingue-censimento.md`, `docs/lancio/piano.md`, `tests/reami.test.ts`, `tests/censimento-lingue.test.ts`; test (2092 passati, 1 saltato) e typecheck verdi. Backlog di `3d` invariato; in `docs/fasi.md` lo step 37 cita T278 al posto del T269 del ramo, che in `3d` è del Cantiere 1. Esiti da riportare: T239 e T240 restano `in attesa` finché l'autore non li legge; T239 ha prodotto il censimento (325 file, 34.064 parole per lingua, 83 regex che leggono l'italiano) e la proposta in `docs/lingue.md`, con le decisioni in fondo; T240 ha prodotto `docs/lancio/piano.md` con le decisioni D1.1-D7.3 e le verifiche aperte V1-V9 (le regole di HN e Reddit vengono da fonti secondarie e vanno rilette all'origine; al picco il tetto di 10 $/giorno non regge; «non esiste niente del genere» non regge). Reami, secondo l'esito del ramo: 400 tick su `Kernel` con `MockAiModels`, 0 fault e 0 rotture della quarta parete; limiti scritti nei README: ambienti e terreni sono quelli del seme rinominati, i veicoli non portano nessuno (T183), gli effetti sonori non hanno un evento, nello spazio il vuoto non è un terreno e l'ossigeno è un oggetto, `META_RE` vieta parole del mestiere dello spazio. Manca: il ramo non aveva altro task per i reami oltre al T269 in collisione, quindi il suo esito resta in queste righe e non nel backlog. Non provato: browser e Concilio vero. Sicurezza: nessuna superficie nuova.
+
+### T279 · Integrare T273 di Claude Cloud: strutture, modelli e suoni nei quattro universi, con la versione del kernel — `fatto` (`99d0682`) (dipende da T274)
+- Pipeline: claude · stima 3% · approvato · priorità 1
+- Sforzo: extra.
+- Contesto: sveglia del 05/11, richiesta dell'autore. Ramo `origin/claude/quine42-universi-cloud-integration-k3h9p5` (`752288c`, sessione `session_01Tozk13S2R7eyZHQCXBo3Si`), senza conflitti con `3d` al 05/11. Contiene la catena di T274 e i 60 modelli di T277 (`b6cff15`) e il catalogo gemello. Rapporto: `lab/banco/universi-cloud/INTEGRAZIONE.md`. I tre universi dicono `kernel: 0.1.5`. Il ramo ha scritto nel backlog e nel quadro: tieni quelli di `3d`.
+- Cosa fare: `git merge` del ramo; rinumera gli ADR se servono; suite intera (il ramo non l'ha fatta girare) e typecheck con i loro turni; `tests/universi-cloud.test.ts` e la verifica dei quattro universi. `npm run universi:cloud` solo con `--dir` su una cartella temporanea: l'installazione in `universes/` sposta nel cestino ciò che c'è, la decide l'autore. Nell'esito: i modelli del seme cambiati (`griglie-visive.json`, `tests/forms.test.ts`) e ciò che il rapporto dice non provato.
+- Browser: sì, `?universo=orichalcum&skip&offline` da un'installazione temporanea, una struttura per universo con le coordinate del rapporto: se non si può, `BROWSER: da verificare`.
+- Quando è fatto: commit su `task/T279`. All'integrazione l'orchestratore segna `fatto` T273 e T277. Sicurezza: scrivi l'esito (il ramo tocca `tools/sicurezza/ambiente.mjs`, V-016).
+- Esito: merge di `origin/claude/quine42-universi-cloud-integration-k3h9p5` (`752288c`) senza conflitti, nessun ADR da rinumerare, kernel `0.1.5`, più `fileURLToPath` negli strumenti dei banchi (su Windows `universi:cloud` non partiva); suite 2207 passati e 1 saltato, typecheck verde, build verde prima dell'ultimo commit che tocca solo `lab/`; modelli del seme cambiati: 23 programmi più `index.json` (elenco qui sopra), `griglie-visive.json` e `tests/forms.test.ts` aggiornati, `grande` e la Morte restano i vecchi; difetto kernel `placeInside`/`formBlocks` non corretto, serve un task; sicurezza: nessuna superficie nuova, solo `maxBuffer` nel kit delle prove (V-016); non provati interni, cantine, scale, taglia Enorme, ascolto, 19 effetti senza momento di gioco, props in scena, installazione su `universes/` vera, online; all'integrazione vanno segnati `fatto` T273 e T277.
+
+### T280 · Integrare T245d, T245e, T245f di Claude Cloud: imprese, edificio per stadi, fuori vista — `da fare` (dipende da T274, T279)
+- Pipeline: claude · stima 3% · approvato · priorità 1
+- Step: 32
+- Sforzo: extra.
+- Contesto: sveglia del 05/11, richiesta dell'autore. Ramo `origin/claude/step32-kernel-chain-2vu1qd` (`e7cddc1`, sessione `session_01Tozk15L8GmN1nhtMGKeTdr`), kernel `0.1.8`, ADR-0142, ADR-0143, ADR-0144; senza conflitti con `3d` né con il ramo di T279 al 05/11. Viene per secondo perché cambia `sys.lavoro`, `mesh.ts` e il kernel sotto i quattro universi di T279, e questo una fusione pulita non lo vede. Il ramo ha scritto nel backlog e nel quadro: tieni quelli di `3d`.
+- Cosa fare: `git merge` del ramo; rinumera gli ADR se servono; `KERNEL_VERSION`, `package.json` e `universe/universe.json` allineati; suite intera e typecheck con i loro turni; la verifica dei quattro universi su questo kernel: 0 fault, e di' se i tre di `lab/banco/universi-cloud/` hanno bisogno del `sys.lavoro` nuovo.
+- Browser: sì, un mestiere di T245c (non visto da T274), il pannello del cantiere, una casa che sale per stadi, due schede con `?viandante=` per il fuori vista: se non si può, `BROWSER: da verificare`.
+- Quando è fatto: commit su `task/T280`. All'integrazione l'orchestratore segna `fatto` T245d, T245e, T245f. Sicurezza: scrivi l'esito, il ramo tocca sessione, sandbox e validatore.
+
+### T281 · I punti di `placeInside` che il kernel trova bloccati dentro le strutture — `da fare` (dipende da T279)
+- Pipeline: claude · stima 4% · approvato · priorità 5
+- Sforzo: extra.
+- Contesto: difetto trovato dalla sessione A, sezione «Un difetto del kernel» di `lab/banco/universi-cloud/INTEGRAZIONE.md`: `interiorPoints` trova sgombro un punto che `kernel.free(x, y, 0.15)` trova bloccato (`formBlocks`): casa a graticcio del seme 21 su 32 la vecchia e 15 su 15 la procedurale a yaw 0, 0 girata di -π/2; catalogo da 10 su 59 a 61 su 128. Ciò che si mette dentro una struttura può finire nei muri. Per questo `grande` è rimasta la casa vecchia (`SEME_TENUTI` in `strumenti/cloud.ts`).
+- Cosa fare: guarda se `interiorPoints` e `formsUnder`/`rampBlocks` usano la stessa rotazione e lo stesso livello (senza `z`, `free` misura al suolo un pavimento rialzato); correggi; togli `grande` da `SEME_TENUTI`, rilancia `integra.ts`; alza `Z` di `KERNEL_VERSION`.
+- Test: `tests/lots.test.ts` con la casa nuova, tutti i punti e non quattro tiri; suite intera e typecheck con i loro turni.
+- Browser: sì, un oggetto dentro una struttura del catalogo.
+- Quando è fatto: commit su `task/T281`. Sicurezza: nessuna superficie nuova.
+
+### T282 · Integrare T275: il conflitto in `package.json` — `fatto` (`7b0d821`)
+- Pipeline: claude · stima 1% · approvato · priorità 1
+- Sforzo: high.
+- Contesto: `integra T275` si è fermato su `package.json`. Nasce da T275: `dossier T275`. `3d` ha aggiunto lo script `universi:cloud` (T279), `task/T275` lo script `genera` e la versione `0.1.6`.
+- Cosa fare: nel tuo worktree `git merge task/T275`; in `package.json` tieni i due script e la versione `0.1.6`, uguale in `version.ts`. Gli ADR 0142 e 0143 di T275 si scontrano col 0142 di T276: rinumerali ai primi liberi, anche nei rimandi di `AGENTS.md`, `docs/architettura-dettagli.md` e `docs/adr/README.md`. Suite intera e typecheck con i loro turni; i due test «forte» di `lab/tests/riferimento.test.ts` hanno un limite di tempo reale, sotto carico possono cadere: riprovali da soli e dillo nell'esito.
+- Browser: non serve, T275 ha già provato T264.
+- Quando è fatto: commit su `task/T282`. All'integrazione l'orchestratore segna `fatto` T264, T265, T267, T207 e dà `integra T275`. Sicurezza: scrivi l'esito, T265 tocca le scritture dell'universo.
+- Esito: `git merge task/T275` in `7b0d821`: `package.json` con `universi:cloud` e `genera`, versione `0.1.6` uguale in `version.ts`; ADR di T275 a 0143 (generazione differita) e 0144 (fila delle scritture), indice in ordine e rimando corretto in ADR-0143. Fuori dal previsto: `tests/fixtures/mj-engine-hashes.json` rigenerata perché già rossa su `3d` (T276 + T273), con il motore di prima di D33 (`5204a3d^`) e confermata dal motore attuale: 96 voci nuove, 46 cambiate, tutte di modelli dell'universo. Suite (2272 passati, 1 saltato) e typecheck verdi; il primo giro è caduto solo su quella fixture; i due test «forte» di `lab/tests/riferimento.test.ts` sono passati nel giro finale senza riprove. Sicurezza: nessuna voce nuova e nessuna superficie oltre a quella di T275: T265 salva le scritture in `localStorage` per scheda, senza token, rilette con `owedWrite` e riscritte con l'identità corrente sotto il controllo del server; su un computer condiviso il testo in fila resta finché non si scrive e una fila orfana la prende la pagina dopo. Non provati, come in T275: `npm run genera` con la CLI vera e il suo costo per luogo, la fila di T265 nel browser con server spento, il rinnovo del 401 con un account vero, la lettura di `/usage` con la CLI vera. All'integrazione: segnare `fatto` T264, T265, T267, T207 e dare `integra T275`.
+
+### T283 · Il sito in tre vesti: la base comune, col rapporto aureo — `fatto` (`8a76c40`)
+- Pipeline: claude · stima 2% · approvato · browser · priorità 3
+- Sforzo: extra.
+- Step: 34
+- Contesto: richiesta dell'autore del 05/11, testo intero in `docs/userchats/to-do-2026-11-05.md`: la pagina in tre modalità grafiche, tra cui sceglierà lui o i beta tester. Questo task assorbe la parte grafica di T232 (griglia e tipografia da φ e Fibonacci): `dossier T232`, `dossier T241`, `dossier T244`.
+- Cosa fare:
+  1. Nel sito (`site/`, senza framework) una **veste** si sceglie con un attributo sulla radice delle pagine, e ognuna sta in file propri (colori, font, logo, sfondi, effetti), caricando solo ciò che le serve; tutte le pagine del sito la seguono, non solo la home. Il nome nel codice non è «tema»: la parola indica già le ambientazioni e `src/theme.css`. Voce nuova nel glossario.
+  2. **La griglia comune:** struttura e proporzioni delle pagine dalla scala φ/Fibonacci di `src/theme.css` (T241), con la tabella dei rapporti in `#sito`. Le tre vesti cambiano l'aspetto, non i contenuti né la struttura.
+  3. Un selettore che confronta le vesti e ricorda la scelta in `localStorage`; **nessun voto e nessuna rotta nuova** (sono di T287). La veste di partenza è quella attuale, che sarà la sobria.
+  4. La CSP (`server/csp.ts`) va rispettata: niente script né gestori scritti nell'HTML. La veste si applica senza far lampeggiare quella sbagliata al caricamento.
+- Test: un test che ogni veste dichiari tutto ciò che la base chiede; typecheck, build e suite intera con i loro turni.
+- Browser: sì, a 1920 e 390 px, sotto `npm run dev` e sotto `npm run serve`; il cambio di veste su ogni pagina del sito.
+- Quando è fatto: si aggiunge una veste con i suoi file, senza toccare la base; commit su `task/T283`, ADR e riga in `#sito`. Sicurezza: nessuna superficie nuova, o le voci.
+- Esito: base comune (solo token `--skin-*`, misure dalla scala aurea in `site/*.css`) e vesti in `site/skins/<id>/` scelte con `data-skin`; `server/skins.ts` genera `/skins/boot.js` e copia i file in `dist/skins/` senza rotte, `site/skin.ts` è il selettore con `localStorage`; sobria (l'aspetto di T244, ora su tutte le pagine, `body.home` tolto), fumetto e futuristica come prime stesure per T285 e T284 (logo e favicon definitivi a T286); `tests/site-skins.test.ts` ricava il contratto da ciò che la base legge; ADR-0145, voce nel glossario, tabella in `#sito`; aggiunti `--space-55`, `--space-89`, `--measure-1364`; carta 322×521; typecheck e build verdi, suite intera verde (2311 test, 1 saltato), dopo la quale ho allentato un test di `site-skins` e rilanciato da soli quel file e `glossario.test.ts`. Non provati: carte e schede di universi vere (nessun universo nel worktree, si vedono solo gli stati vuoti, quindi la carta 322×521 non è mai stata disegnata), `effects.ts` (nessuna veste ne ha uno), un telefono vero, un browser diverso da Chrome, `istruzioni.html` sotto `npm run serve` (senza `docs/beta/guida.md` la pagina non è nella build). Sicurezza: nessuna superficie nuova in produzione; in sviluppo il plugin serve solo nomi semplici di `site/skins/` con estensioni a elenco, e `boot.js` non scrive mai nella pagina ciò che è in `localStorage` se non è un id noto (test).
+
+### T284 · La veste futuristica: l'inception di scritte neon — `da fare` (dipende da T283, T255)
+- Pipeline: claude · stima 4% · approvato · browser · priorità 3
+- Sforzo: max, scelto dall'autore. Dipende da T255 perché questo sforzo arrivi davvero alla CLI.
+- Step: 34
+- Contesto: testo dell'autore in `docs/userchats/to-do-2026-11-05.md`, § «Tema futuristico». Parte dalla seconda proposta di Claude per il prompt 5: `docs/design/logo/proposte/claude/Logo Videogioco Quine42/QUINE42 Logo.html` (file da 1,4 MB: cerca la sezione, non leggerlo intero) e `docs/design/logo/proposte/landing-tests/5-claude-2.png`; i giudizi in `docs/design/logo/proposte/votazioni.md`. La scritta QUINE è fatta di scritte «quine» più piccole, tra Matrix e Tron, nei colori neon punk. Allude a MarkovJunior, alle rune del tappeto, al doppio livello di gioco e a un gioco fatto del suo stesso codice.
+- Cosa fare:
+  1. **Le scritte piccole si muovono:** effetto «tappeto che si muove» o «logica MJ», lettere che si accendono e attraversano la scritta grande, come un programma che compila.
+  2. **Strisce con lo stesso effetto**, più tenui, lungo la pagina.
+  3. **Il motore:** l'autore teme che un algoritmo MJ 2D o testuale sia troppo per la landing. Prova il programma MJ e l'animazione semplice, misura entrambi (ms per fotogramma e CPU a 1920 px, una macchina modesta simulata con il rallentamento del processore, peso scaricato) e scegli coi numeri, scritti nell'esito. Solo se MJ regge, proponi una variante senza lo showcase 3D e con effetti MJ lungo tutta la pagina: è una scelta che resta all'autore.
+  4. **L'icona:** quella accanto alla scritta non convince l'autore. Toglila o ridisegnala dalla scritta stessa; la favicon deve comunque leggersi a 16 px.
+  5. L'animazione si ferma a scheda nascosta e rispetta `prefers-reduced-motion`; i testi restano leggibili sopra l'effetto.
+- Test: typecheck, build e suite intera con i loro turni.
+- Browser: sì, a 1920 e 390 px; catture nel commit e, se puoi, una breve registrazione dell'effetto.
+- Quando è fatto: la veste è selezionabile, le misure sono nell'esito; commit su `task/T284`. Sicurezza: nessuna superficie nuova.
+
+### T285 · La veste a fumetto: crea la tua quine-storia — `da fare` (dipende da T283)
+- Pipeline: claude · stima 3% · approvato · browser · priorità 3
+- Sforzo: extra.
+- Step: 34
+- Contesto: testo dell'autore in `docs/userchats/to-do-2026-11-05.md`, § «Tema Fumetto». Parte dalla seconda proposta di Claude per il prompt 1: `docs/design/logo/proposte/claude/Logo Videogioco Quine42/QUINE42 Logo.html` (cerca la sezione) e `docs/design/logo/proposte/landing-tests/1-claude-2.png`. Il vecchio aspetto pop art del sito è nella storia: `git show 9b8523c~1:site/site.css`. Allude alla storia nella storia, alla libera conversazione di NPC e Concilio, ai fumetti del gioco.
+- Cosa fare:
+  1. **La Q:** nella scritta e nell'icona l'asticella sembra staccata dal resto; ridisegnala perché faccia corpo con la lettera, a ogni misura.
+  2. **I pois nel sito, animati:** texture retinata nel design delle pagine, con un movimento lento che non disturbi la lettura; si ferma a scheda nascosta e rispetta `prefers-reduced-motion`.
+  3. **La palette:** l'autore sente qualcosa di discrepante e non sa dire cosa. Trova la causa (per esempio tinte, saturazioni o contrasti fuori famiglia, misurati), correggila e di' nell'esito cosa hai cambiato, con la cattura prima e la cattura poi.
+  4. I fumetti degli NPC in gioco **non si toccano qui**: si fanno solo se vince questa veste (T287).
+- Test: typecheck, build e suite intera con i loro turni.
+- Browser: sì, a 1920 e 390 px; contrasto dei testi sopra i pois; catture nel commit.
+- Quando è fatto: la veste è selezionabile; commit su `task/T285`. Sicurezza: nessuna superficie nuova.
+
+### T286 · La veste sobria: vediamoci chiaro — `da fare` (dipende da T283)
+- Pipeline: claude · stima 2% · approvato · browser · priorità 3
+- Sforzo: high.
+- Step: 34
+- Contesto: testo dell'autore in `docs/userchats/to-do-2026-11-05.md`, § «Tema sobrio». Il sito attuale (T244) è chiaro e pulito, misterioso e poco spoilerante, ma ha poca personalità. Il logo è la seconda proposta di Claude per il prompt 4 (`docs/design/logo/proposte/claude/Logo Videogioco Quine42/QUINE42 Logo.html`, `docs/design/logo/proposte/landing-tests/4-claude-2.png`), con la sua icona, che all'autore piace molto.
+- Cosa fare: porta quel logo e quell'icona nel sito attuale e dagli più personalità con pochi gesti legati al logo (il cerchio, il tappeto), **senza aggiungere spoiler né riportare l'aspetto da pitch o da fumetto**. Favicon compresa.
+- Test: typecheck, build e suite intera con i loro turni.
+- Browser: sì, a 1920 e 390 px; catture nel commit.
+- Quando è fatto: la veste è selezionabile; commit su `task/T286`. Sicurezza: nessuna superficie nuova.
+
+### T287 · La scelta della veste: subito dall'autore, o col voto dei beta tester — `in attesa` (dipende da T284, T285, T286)
+- Step: 34
+- Contesto: l'autore confronta le tre vesti. Se una è nettamente superiore la sceglie subito; altrimenti decidono i tester. Il testo in `docs/userchats/to-do-2026-11-05.md`. Lo riscrive e lo stima l'orchestratore alla risposta dell'autore.
+- Se sceglie subito: restano la veste scelta e, solo se è la futuristica o la fumetto, le sue conseguenze (senza showcase se è MJ; i fumetti degli NPC in gioco se è la fumetto).
+- Se si vota: lo switch in alto e una scelta per account, che si può cambiare, registrata dal server. Una rotta nuova passa da `gate` e dall'elenco di `server/production.ts`, con il suo ritmo in `FRONT_RATES`; i voti stanno sotto `universes/` in una cartella che non si serve, e i conti li legge solo il master. Due parole per i tester nella guida della beta. Sicurezza: voci nuove.
+
+### T288 · Ciò che il viandante impugna si vede addosso: armi e attrezzi — `da fare` (dipende da T255)
+- Pipeline: claude · stima 4% · approvato · browser · priorità 6
+- Sforzo: max, scelto dall'autore. Dipende da T255 perché questo sforzo arrivi davvero alla CLI.
+- Step: 40
+- Contesto: richiesta dell'autore del 05/11, testo in `docs/userchats/to-do-2026-11-05.md`, § «Interazioni grafiche di oggetti». Oggi impugnare e gli slot esistono (`src/kernel/inventory.ts`, `#regole-effetti`, `#multigiocatore`), ma il renderer non mostra nulla sul corpo. Regola dell'autore: **minimizzare i modelli; un attrezzo usa la stessa mesh di quando è a terra.** Vale la regola 11: niente immagini, ogni aspetto è un programma MarkovJunior; niente modelli nuovi né chiamate ai modelli.
+- Cosa fare:
+  1. L'oggetto impugnato si disegna sul viandante con la sua mesh di terra, agganciato a un arto del rig (`src/mj/rig.ts`, `src/render/entities.ts`): segue il passo e le animazioni e guarda dalla parte del corpo. Scala e presa valgono per qualunque modello, anche generato domani, e si ricavano dalla forma, senza una tabella per oggetto. Un oggetto senza modello o un corpo senza arti non rompono nulla: semplicemente non si vede.
+  2. Ogni oggetto si aggancia dove ha senso per il suo posto (`slot`), con un punto di aggancio per posto scritto una volta sola.
+  3. **In multigiocatore lo vedono anche gli altri:** ciò che esce verso i client resta a elenco (regola 8f), e il cambio arriva a chi è vicino senza ricaricare. Vale anche per gli NPC che hanno qualcosa in mano, se il dato c'è già; altrimenti scrivi nell'esito cosa manca.
+  4. Costo misurato con molti viandanti in scena: le mesh sono condivise, nessuna griglia si rifà a ogni cambio.
+- Test: aggancio e scelta del punto come funzioni pure; ciò che esce verso gli altri client; typecheck e suite intera con i loro turni. Versione del kernel se tocchi `src/kernel/` (ADR-0136).
+- Browser: sì, con `?skip&offline`: spada e attrezzo fermi e in cammino, da più lati, a cartone e con `?classica`; due schede in multigiocatore. Catture nel commit.
+- Quando è fatto: impugno, si vede, lo vede anche l'altro viandante; commit su `task/T288`, riga in `#mondo3d`. Sicurezza: scrivi l'esito, tocca ciò che esce dal server.
+
+### T289 · Vestiti e armature addosso: il banco che decide come — `da fare` (dipende da T288)
+- Pipeline: claude · stima 3% · approvato · browser · priorità 6
+- Sforzo: max, scelto dall'autore.
+- Step: 40
+- Contesto: testo dell'autore in `docs/userchats/to-do-2026-11-05.md`: «per i vestiti e l'armatura va deciso», forse due mesh, una a terra e una indossata, che «eventualmente potrebbe essere solo una modifica alla mesh dell'NPC». Questo task produce la decisione, con le prove. Ricorda che l'autore ha già detto di non rigenerare tutti i modelli perché costa caro (`docs/pipeline/domande/T232.md`).
+- Cosa fare: in `lab/banco/`, confronta almeno tre vie sugli stessi tre oggetti (un elmo, una corazza, un mantello) e su due corpi diversi (il viandante e una creatura non umana):
+  - **A:** due programmi per oggetto, a terra e indossato;
+  - **B:** un programma solo, con una riscrittura che lo modella sul corpo (mesh dell'NPC modificata dalle regole, senza un modello in più);
+  - **C:** un cambio di palette e poche celle sul corpo, senza geometria propria.
+  Per ognuna: foto da quattro lati, tempo per viandante, memoria, modelli da scrivere per un universo, costo stimato con lo Scultore, cosa succede con i corpi generati e con gli oggetti che esistono già. Scrivi `lab/banco/indossati.md` con la raccomandazione e la domanda per l'autore (le foto una accanto all'altra).
+- Test: quelli del banco; typecheck col suo turno. Il gioco non cambia.
+- Browser: sì, per le foto nel `lab/`.
+- Quando è fatto: l'autore può decidere guardando le foto; commit su `task/T289`. Sicurezza: nessuna superficie nuova.
+
+### T290 · Vestiti e armature addosso nel gioco — `in attesa` (dipende da T289)
+- Step: 40
+- Sforzo: max, scelto dall'autore.
+- Contesto: lo riscrive e lo stima l'orchestratore con la decisione dell'autore su T289. Conterrà il rendering, ciò che esce verso gli altri client, il prompt dello Scultore se servono programmi nuovi, e cosa fare degli oggetti che esistono già.
+
+### T291 · Posare gli oggetti sui mobili — `da fare` (dipende da T255)
+- Pipeline: claude · stima 3% · approvato · browser · priorità 6
+- Sforzo: max, scelto dall'autore. Dipende da T255 perché questo sforzo arrivi davvero alla CLI.
+- Step: 40
+- Contesto: testo dell'autore in `docs/userchats/to-do-2026-11-05.md`, § «Interazioni grafiche di oggetti»: «la possibilità di posare gli oggetti sui mobili». Le superfici delle forme ci sono già (`surfaces` in `src/mj/mesh.ts`, `src/kernel/forms.ts`), e le usano i pavimenti. Stessa mesh di quando l'oggetto è a terra.
+- Cosa fare: un'azione per posare ciò che impugni sul mobile che guardi; l'oggetto sta sul piano vero del mobile, alla sua altezza, si riprende e resta lì nel salvataggio e per gli altri viandanti. Si rifiuta con una frase del mondo se non c'è un piano libero (una sedia occupata, un pozzo, un mobile senza superficie). Decidi quanti oggetti stanno su un piano in base alla loro impronta. Un oggetto posato non rende invalicabile nulla (regola 10) e non si perde se il mobile sparisce.
+- Test: scelta del punto su forme vere, salvataggio e riapertura, due viandanti; typecheck e suite intera con i loro turni. Versione del kernel (ADR-0136). Un messaggio nuovo del protocollo non getta eccezioni per ciò che arriva dal filo (regola 8i).
+- Browser: sì, con `?skip&offline`, su due mobili diversi; catture nel commit.
+- Quando è fatto: poso, ricarico la pagina, è ancora lì; commit su `task/T291`, riga in `#regole-effetti`. Sicurezza: scrivi l'esito, tocca il protocollo.
+
+### T292 · Prendere e spostare i mobili (`takeable`) — `da fare` (dipende da T288)
+- Pipeline: claude · stima 4% · approvato · browser · priorità 6
+- Sforzo: max, scelto dall'autore.
+- Step: 40
+- Contesto: testo dell'autore in `docs/userchats/to-do-2026-11-05.md`, § «Interazioni grafiche con oggetti di grandi dimensioni»: alcuni mobili hanno una proprietà che dice se si possono prendere e spostare. La credenza sì, il pozzo no. Oggi un mobile è un'entità di modulo (`physics.pushable` lo spinge soltanto), un oggetto in borsa è un'altra cosa (`ItemDef`).
+- Decisioni dell'orchestratore, da riportare all'autore: assente vale `false` (gli universi che esistono restano buoni); **un contenitore pieno non si prende, si vuota prima**, così niente borse dentro borse.
+- Cosa fare:
+  1. Campo `takeable` nel manifest (`src/kernel/types.ts`, validatore, riga in `AGENTS.md`), e una voce «Prendi» nel menu. In inventario il mobile è un oggetto con la sua icona, e mentre è in mano si vede con T288 (grande: decidi come portarlo, per esempio sopra la testa, e fallo giudicare con le catture).
+  2. Posarlo a terra rispetta la regola 10: la casella dev'essere libera e **il luogo resta connesso**, niente solido su un punto di articolazione né davanti a una porta (ADR-0064). Se non si può, una frase del mondo, e il mobile resta in mano.
+  3. Stato e identità seguono il mobile (componenti, codice del modulo, contenuto una volta vuoto), e l'entità sta dove è stata posata nel salvataggio, anche se il piano del luogo la generava altrove; non rinasce al ricaricamento del luogo. Vale in multigiocatore, e il mobile preso da uno sparisce per gli altri.
+  4. Il Narratore e il Cartografo decidono `takeable` per ciò che generano (schema, prompt, `MockAiModels`, voce nel registro). Nel seme, a mano: i moduli di `universe/` che si possono spostare.
+  5. Nell'esito di' cosa non è coperto, per esempio chi porta via i mobili dalla casa di un NPC: oggi nessuna conseguenza.
+- Test: connessione a ogni posa, salvataggio, doppia presa in multigiocatore, contenitore pieno; typecheck e suite intera con i loro turni. Versione del kernel (ADR-0136).
+- Browser: sì, con `?skip&offline`: prendo una credenza, la porto altrove, ricarico; provo a tapparmi una porta; il pozzo non si prende. Catture nel commit.
+- Quando è fatto: commit su `task/T292`, ADR, riga in `#regole-effetti` e nell'elenco del manifest. Sicurezza: scrivi l'esito, tocca il protocollo e il validatore.
+
+### T293 · Le carte fatte a mano: forma, archivio, rotte, interruttore — `da fare` (dipende da T255)
+- Pipeline: claude · stima 3% · approvato · priorità 7
+- Sforzo: max.
+- Step: 41
+- Deciso dall'autore (05/11): **D40 A**: la carta sta nella collezione del suo account, fuori dagli universi; entra in un mondo solo con T295, all'inizio di un universo.
+- Contesto: testo dell'autore in `docs/userchats/to-do-2026-11-05.md`, § «Modificare le carte». I giocatori forkano un modello o un suono e modificano la copia, che è associata a una carta. Oggi `lab/` non ha un archivio (il SoundLab usa `localStorage`), e la regola 8b vieta a chi non è il master di scrivere l'universo. Carte ed eredità: `#carte-crediti`, `#clone-eredita`, ADR-0056, ADR-0084.
+- Cosa fare:
+  1. Decidi e scrivi in un ADR la forma di una carta fatta a mano: programma XML (modello o suono), da quale modello e universo nasce (id, impronta, `carta.origini` di `heritage.ts`), autore, nome, classe e taglia, versione `X.Y` del kernel. Un fork prende un id suo: non sostituisce mai l'originale. Voce nel glossario.
+  2. L'archivio fuori dagli universi, per account, come i saldi (regola 8d: `universes/.carte-mano/`): nessun Lua, Concilio, ramo o rollback ci arriva. Tetti per account: numero di carte e byte.
+  3. Rotte (GET elenco, POST crea e aggiorna, DELETE): passano da `gate`, si aggiungono all'elenco di `server/production.ts`, stanno sotto `FRONT_RATES`; solo l'autore scrive le sue carte; ciò che esce a un altro è a elenco (regola 8f).
+  4. Un programma scritto da un giocatore finirà nei browser e nei mondi di altri: va al validatore, con tetti di griglia, passi e tempo misurati sul motore vero. Per i suoni le soglie di `soundanalysis.ts`. Nome e testi sono dati ostili (HTML sul sito, quarta parete).
+  5. L'interruttore: `site/beta.json` prende `{ "laboratori": false }`, separato da `laCorona`. Spento, le rotte rifiutano e `/lab` resta in `NOT_SERVED` (`server/production.ts:96`), come oggi; e i link non ci sono.
+- Test: permessi (un altro account, nessun account, interruttore spento), tetti, programma che non termina, XML ostile, nome con HTML, un programma di altro `X.Y`; `tests/sicurezza/` con le voci nuove. Typecheck e suite intera con i loro turni. Versione del kernel se tocchi `src/kernel/` (ADR-0136).
+- Browser: non serve.
+- Quando è fatto: commit su `task/T293`, ADR, sezione in `#carte-crediti`, riga in `AGENTS.md`. Nell'esito le voci di sicurezza.
+
+### T294 · I tre laboratori per i giocatori: forkare e modificare — `da fare` (dipende da T293)
+- Pipeline: claude · stima 4% · approvato · browser · priorità 7
+- Sforzo: high.
+- Step: 41
+- Contesto: testo dell'autore come T293. Le tre pagine sono `lab/3d/`, `lab/editor/`, `lab/suono/`; sono strumenti da sviluppatore, senza account e senza un punto d'ingresso per chi gioca. `NOT_SERVED` oggi le esclude dal server di produzione.
+- Cosa fare:
+  1. Con `laboratori` acceso il server di produzione le serve, sotto la CSP (`server/csp.ts`); spento non escono, come oggi. Controlla cosa entra davvero in `dist/`: nessuna chiave, nessuno script di `lab/scripts/`, nessuna chiamata ai modelli.
+  2. «Forka» da un modello o da un suono di un universo che il giocatore può leggere (solo ciò che `publicFiles` già dà) e dalle proprie carte: apre la copia nel laboratorio giusto. «Salva» scrive la carta (T293) e riporta il motivo di un rifiuto del validatore.
+  3. Le carte fatte a mano stanno in `site/carte.html` con le altre, riconoscibili, con l'autore e il link al laboratorio; visibili a tutti gli account.
+  4. Un punto d'ingresso nel sito, col tema condiviso. Ciò che nei laboratori serve solo agli sviluppatori (cartelle del disco, prove con Gemini, modelli ufficiali da confrontare) non si vede.
+  5. Il lavoro non si perde: una modifica non salvata resta in locale. Dai laboratori non si chiama mai Gemini: per un giocatore non costano crediti.
+- Test: la logica isolabile (fork → carta → riapertura dà lo stesso XML); server di produzione con interruttore acceso e spento. Typecheck, build e suite intera con i loro turni.
+- Browser: sì, sotto `npm run serve` con l'interruttore nei due stati, con un account di prova (emulatore): forko un modello, lo modifico, salvo, ricarico, lo vedo in `carte.html`; stesso giro per un suono (l'agente non sente: misura il segnale e di' cosa deve ascoltare l'autore); da un secondo account lo vedo e non lo scrivo. Catture nel commit.
+- Quando è fatto: commit su `task/T294`. Sicurezza: nell'esito.
+
+### T295 · Portare le carte in un universo nuovo, prima della Genesi — `da fare` (dipende da T293)
+- Pipeline: claude · stima 4% · approvato · browser · priorità 7
+- Sforzo: max, scelto dall'autore.
+- Step: 41
+- Deciso dall'autore (05/11): **D39 A**: il primo commit dal seme è identico per lo stesso seme e la stessa `X.Y`; gli universi che esistono già restano fuori.
+- Contesto: testo dell'autore, § «A regime». Oggi i modelli e i suoni di un universo si ereditano solo clonandolo. L'autore vuole aggiungere carte, fatte a mano o generate, solo all'inizio, prima della Genesi, solo tra universi con un antenato comune: meno collisioni, e la Genesi non rigenera ciò che esiste. Fatto trovato pianificando: ogni universo nato dal seme fa il suo `git init` (`server/universeStore.ts:391`), e il clone copia un mondo già generato, senza Genesi: oggi le due condizioni non sono mai vere insieme.
+- Cosa fare:
+  1. Il primo commit di un universo nato dal seme è identico per lo stesso seme e la stessa `X.Y` (albero, data e autore fissi): tutti hanno la stessa radice. «Antenato comune» si controlla confrontando le radici (`git rev-list --max-parents=0`, solo da `server/git.ts`), senza portare la storia dell'altro universo. I cloni tengono la radice. Gli universi che esistono già non la hanno: dillo nell'esito.
+  2. Nella Genesi, prima di partire, il master sceglie le carte: dalla sua collezione, da quelle fatte a mano e dai modelli e suoni degli universi che può leggere e che hanno la stessa radice. Per un clone il momento è prima che entri il primo viandante. Poi la scelta si chiude.
+  3. Ogni carta ripassa dal validatore e dal controllo di `X.Y`, e due carte con lo stesso id si segnalano prima di partire; entrano nell'universo con un commit del kernel e con la loro `carta`.
+  4. La Genesi e i direttori (`ModelDirector`, `ScoreDirector`, `runDeferred` di ADR-0143) non rigenerano ciò che c'è, e il Cartografo e lo Scultore sanno che esiste e lo usano: conta le chiamate con e senza carte con `MockAiModels` e scrivi il risparmio. Controlla cosa dice l'Artista della guida di stile davanti a modelli nati altrove.
+  5. Chi guadagna: la catena di `carta.origini` si allunga come in un clone e le quote seguono ADR-0084; importare non costa crediti. Il controllo della regola 8d resta: nessun saldo si muove con l'import.
+- Test: radice uguale e diversa, clone, `X.Y` diverso, scelta a Genesi già fatta (rifiutata), a partita iniziata (rifiutata), non master (rifiutata), Genesi offline con carte (meno chiamate, 0 fault), carta ostile da un altro universo; `tests/sicurezza/` se serve. Typecheck e suite intera con i loro turni. Versione del kernel (ADR-0136; una radice nuova per i nuovi universi: motiva nell'ADR se `Y` sale).
+- Browser: sì, con `?offline`: scelgo due modelli e un suono prima della Genesi, li vedo nel mondo, ricarico. Catture nel commit.
+- Quando è fatto: commit su `task/T295`, ADR, sezione in `#clone-eredita`.
+
+### T296 · Eliminare la carta problematica — `da fare` (dipende da T295)
+- Pipeline: claude · stima 1.5% · approvato · browser · priorità 7
+- Sforzo: max, scelto dall'autore.
+- Step: 41
+- Contesto: testo dell'autore: «se poi ci dovesse essere [una collisione] eliminiamo la carta problematica». Regola 2: l'IA non rompe mai il gioco, regola 3: ciò che viene da un giocatore si isola.
+- Cosa fare: una carta importata che fallisce (programma che non produce, forma senza impronta, guasto nel worker, suono muto) non rompe il mondo: si isola, si mostra al master con il motivo, e il master la toglie da un'azione nella console (scheda «Universo»), con un commit. Ciò che la usava torna al modello generico o alla richiesta al `ModelDirector` / `ScoreDirector`, entro i loro tetti; il suono tace (ADR-0126). La carta resta nell'archivio del suo autore e nella catena delle origini. Registra il fallimento in `world/mancanze.json` se il Concilio non può rimediare (ADR-0130).
+- Test: una carta rotta per ogni modo di fallire: 0 crash, entità ancora presenti, rimozione, salvataggio e riapertura; un non master non può togliere. Typecheck e suite intera con i loro turni. Versione del kernel (ADR-0136).
+- Browser: sì, con `?offline`: una carta rotta di proposito, il mondo gira, la tolgo dalla console, ricarico. Catture nel commit.
+- Quando è fatto: commit su `task/T296`. Sicurezza: nell'esito.
+
+### T297 · Integrare T280: i conflitti di versione e gli ADR — `da fare`
+- Pipeline: claude · stima 1% · approvato · priorità 1
+- Sforzo: high.
+- Step: 32
+- Contesto: `integra T280` si è fermato su `package.json`, `package-lock.json`, `src/kernel/version.ts`, `universe/universe.json`. Nasce da T280: `dossier T280`. `3d` è a `0.1.6` (T275, via T282), `task/T280` a `0.1.9`.
+- Cosa fare: nel tuo worktree `git merge task/T280`. Versione: la più alta, `0.1.9`, uguale in tutti e quattro i file (ADR-0136). **Attenzione agli ADR:** `task/T280` porta i suoi 0142-0144 e su `3d` quei numeri ora sono presi da T276 e T275: rinumera i suoi ai primi liberi, con indice, `AGENTS.md` e rimandi corretti, e nessun ADR di `3d` toccato. Due aggiunte nello stesso punto restano entrambe. `tests/fixtures/mj-engine-hashes.json`: se è rossa spiega perché prima di rigenerarla (T282 l'ha rigenerata col motore di prima di D33).
+- Test: suite intera e typecheck con i loro turni.
+- Browser: non serve, T280 ha già guardato.
+- Quando è fatto: commit su `task/T297`. Nell'esito: i numeri nuovi degli ADR; ricorda di dare `integra T280` e di segnare `fatto` T245d, T245e, T245f.
+
+### T298 · I mestieri di orichalcum, neapolis e sidera — `da fare` (dipende da T297)
+- Pipeline: claude · stima 2% · approvato · priorità 5
+- Sforzo: high.
+- Step: 32
+- Contesto: trovato da T280 (`dossier T280`, e il suo `INTEGRAZIONE.md`). I tre universi non hanno `sys.lavoro` né `lavoro.*`: un edificio che crolla vi resta ai picchetti. I moduli del seme non bastano: 0/24, 4/24, 3/24 persone con un programma, e mancano `item.grano` e `item.pesce`. Mestieri: ADR-0140 e `#societa`.
+- Cosa fare: in `lab/banco/universi-cloud/`, per ogni universo, `sys.lavoro` e i programmi `lavoro.<mestiere>` nel suo tema, con gli oggetti e le ricette che servono, così che ogni persona che ha un mestiere abbia un programma e un edificio crollato si ricostruisca. Niente kernel: se manca una primitiva scrivilo nell'esito. Testi senza meta-gioco. `npm run universi:cloud` li installa.
+- Test: gli universi sul `Kernel` vero per almeno 600 tick: 0 fault, ogni mestiere con un programma, un edificio crollato che risale di stadio e torna intero. Typecheck e suite intera con i loro turni.
+- Browser: sì, con un'installazione temporanea di uno dei tre: una giornata di lavoro e un cantiere. Catture nel commit. Niente nelle `universes/` dell'autore (D36).
+- Quando è fatto: commit su `task/T298`; nell'esito la tabella persone con un programma per universo.
+
+### T299 · Un individuo si blocca su un dislivello — `da fare` (dipende da T297)
+- Pipeline: claude · stima 1% · approvato · priorità 6
+- Sforzo: high.
+- Step: 32
+- Contesto: nella verifica di T280 (`dossier T280`, `traccia T280`) Ugo si è fermato su un dislivello, tanto che il rientro a piedi non si è potuto provare. Un mestiere o un'impresa che non arriva vale poco. Vie: `src/kernel/route.ts` (`findRoute`), `#rilievo`.
+- Cosa fare: riproduci con un test offline. Trova se è la via che passa dove il rilievo non fa salire, o il passo che non segue la via. Correggi la causa; un individuo davvero senza via rinuncia, con la sua routine, invece di restare fermo. Con il rientro a piedi, che T280 non ha provato.
+- Test: il caso riprodotto, una via su rilievo con gradini validi e invalidi. Typecheck e suite intera con i loro turni. Versione del kernel (ADR-0136).
+- Browser: sì, con `?skip&offline`: un individuo che attraversa un dislivello e il rientro a piedi in un cantiere. Catture nel commit.
+- Quando è fatto: commit su `task/T299`.

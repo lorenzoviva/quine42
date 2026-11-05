@@ -41,6 +41,15 @@
    "onda",
    "x"
   ],
-  "strutture": []
+  "strutture": [
+   {
+    "concetto": "bar orbitale",
+    "taglia": "grande"
+   },
+   {
+    "concetto": "santuario della luce",
+    "taglia": "grande"
+   }
+  ]
  }
 }

@@ -30,6 +30,12 @@
   "fresh": [],
   "runes": [
    "nebbia"
+  ],
+  "strutture": [
+   {
+    "concetto": "palazzo dei meccanici",
+    "taglia": "grande"
+   }
   ]
  }
 }

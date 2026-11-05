@@ -1,0 +1,49 @@
+{
+  "id": "pirati.cannone",
+  "name": "Cannone di bordata",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "a mano (Claude Code, Cantiere 9)",
+  "description": "Un cannone corto di ferro nero su un affusto di legno, puntato verso il mare.",
+  "context": "sulle mura del forte, sui moli, sulle scogliere",
+  "appearance": {
+    "model": "cannone",
+    "glyph": "¶",
+    "color": "#2e2e33",
+    "aspetto": "un cannone corto di ferro nero su un affusto di legno con due ruote",
+    "classe": "mobile"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.45
+  },
+  "actions": [
+    {
+      "id": "carica",
+      "label": "Carica una palla",
+      "requires": "item.palla-cannone"
+    },
+    {
+      "id": "innesca",
+      "label": "Versa la polvere",
+      "requires": "item.polvere-sparo"
+    },
+    {
+      "id": "spara",
+      "label": "Dai fuoco alla miccia"
+    },
+    {
+      "id": "pulisci",
+      "label": "Passa lo scovolo"
+    }
+  ],
+  "spawn": {
+    "tiles": [
+      "s",
+      "l"
+    ],
+    "chance": 0.04,
+    "max": 1
+  },
+  "logic": "logic.lua"
+}

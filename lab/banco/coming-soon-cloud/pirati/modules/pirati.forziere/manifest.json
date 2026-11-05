@@ -1,0 +1,39 @@
+{
+  "id": "pirati.forziere",
+  "name": "Forziere sepolto",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "a mano (Claude Code, Cantiere 9)",
+  "description": "Lo spigolo di un forziere che spunta dalla sabbia, con le borchie verdi di salsedine.",
+  "context": "sulle spiagge, nelle secche, sulle isole",
+  "appearance": {
+    "model": "forziere",
+    "glyph": "⌂",
+    "color": "#b8862e",
+    "aspetto": "un forziere di legno con borchie di ottone mezzo sepolto nella sabbia",
+    "classe": "mobile"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.45
+  },
+  "actions": [
+    {
+      "id": "scava",
+      "label": "Scava attorno al forziere",
+      "requires": "item.badile"
+    },
+    {
+      "id": "tasta",
+      "label": "Tasta la sabbia"
+    }
+  ],
+  "spawn": {
+    "tiles": [
+      "s"
+    ],
+    "chance": 0.03,
+    "max": 1
+  },
+  "logic": "logic.lua"
+}

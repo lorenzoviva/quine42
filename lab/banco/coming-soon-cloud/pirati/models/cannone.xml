@@ -1,0 +1,22 @@
+<!-- Cannone di bordata: a mano (Claude Code, Cantiere 9). Canna di ferro nero su un affusto con quattro ruote; ogni seme cambia le palle pronte sull'affusto e le borchie. -->
+<sequence values="BAWRCPXK" size="20 20 20" symmetry="()" name="Cannone di bordata">
+  <color symbol="A" value="7a5230" name="affusto"/>
+  <color symbol="W" value="4e3420" name="ruota"/>
+  <color symbol="R" value="2a2a2f" name="canna"/>
+  <color symbol="C" value="16161a" name="bocca"/>
+  <color symbol="P" value="3b3b42" name="palla"/>
+  <color symbol="X" value="a07848" name="borchia"/>
+  <color symbol="K" value="5a5a62" name="cerchio"/>
+  <box at="10 10 2" size="10 14 3" color="A"/>
+  <box at="6 6 0" size="2 5 5" color="W"/>
+  <box at="14 6 0" size="2 5 5" color="W"/>
+  <box at="6 14 0" size="2 5 5" color="W"/>
+  <box at="14 14 0" size="2 5 5" color="W"/>
+  <box at="10 9 5" size="5 15 4" color="R"/>
+  <box at="10 2 5" size="5 1 4" color="C"/>
+  <box at="10 12 5" size="6 2 5" color="K"/>
+  <box at="10 17 5" size="3 2 2" color="K"/>
+  <prl in="B A" out="X A" p="0.3" steps="1"/>
+  <one in="B X" out="P X" steps="3"/>
+  <prl in="B R" out="K R" p="0.06" steps="1"/>
+</sequence>

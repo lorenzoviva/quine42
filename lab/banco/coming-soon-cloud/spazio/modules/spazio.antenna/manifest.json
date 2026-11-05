@@ -1,0 +1,44 @@
+{
+  "id": "spazio.antenna",
+  "name": "Antenna di trasmissione",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "a mano (Claude Code, Cantiere 9)",
+  "description": "Un piatto d'antenna su un traliccio, girato verso le rotte.",
+  "context": "sui tetti delle stazioni, sugli asteroidi, accanto ai moli",
+  "appearance": {
+    "model": "antenna",
+    "glyph": "⊼",
+    "color": "#c8ccd4",
+    "aspetto": "un piatto d'antenna bianco su un traliccio di metallo",
+    "classe": "monumento"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.4
+  },
+  "actions": [
+    {
+      "id": "punta",
+      "label": "Gira il piatto"
+    },
+    {
+      "id": "ascolta",
+      "label": "Ascolta le trasmissioni"
+    },
+    {
+      "id": "chiama",
+      "label": "Chiama le navette"
+    }
+  ],
+  "spawn": {
+    "tiles": [
+      "s",
+      "r",
+      "l"
+    ],
+    "chance": 0.02,
+    "max": 1
+  },
+  "logic": "logic.lua"
+}

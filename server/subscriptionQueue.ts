@@ -77,9 +77,18 @@ export async function enqueue(dir: string, raw: Omit<QueuedRequest, 'id' | 'crea
   return id;
 }
 
-/** Where a request is; once answered, the answer is given once and its files go away. */
+/**
+ * Where a request is; once answered, the answer is given once and its files go away.
+ *
+ * The files are looked at in the order a request lives them (richiesta → presa → risposta), never backwards (T267):
+ * `take` renames richiesta into presa and `answer` writes risposta before removing presa, so a file missing here means
+ * the next one already exists. Looking backwards (risposta, presa, richiesta) a `take` between the last two checks
+ * read as «richiesta sconosciuta» and the call failed, more often the busier the disk.
+ */
 export async function look(dir: string, id: string): Promise<QueuedAnswer> {
   if (!safeId(id)) return { stato: 'fallita', errore: 'id non valido' };
+  if (await exists(file(dir, id, 'richiesta'))) return { stato: 'in coda' };
+  if (await exists(file(dir, id, 'presa'))) return { stato: 'in corso' };
   const answer = file(dir, id, 'risposta');
   if (await exists(answer)) {
     let a: { text?: unknown; errore?: unknown; usage?: QueuedAnswer['usage'] } = {};
@@ -92,8 +101,6 @@ export async function look(dir: string, id: string): Promise<QueuedAnswer> {
     if (typeof a.text === 'string' && a.text) return { stato: 'fatta', text: a.text, ...(a.usage ? { usage: a.usage } : {}) };
     return { stato: 'fallita', errore: typeof a.errore === 'string' ? a.errore : 'risposta vuota', ...(a.usage ? { usage: a.usage } : {}) };
   }
-  if (await exists(file(dir, id, 'presa'))) return { stato: 'in corso' };
-  if (await exists(file(dir, id, 'richiesta'))) return { stato: 'in coda' };
   return { stato: 'fallita', errore: 'richiesta sconosciuta' };
 }
 
@@ -291,4 +298,24 @@ export function subscriptionQueue(dir: string, opts: { enabled?: boolean } = {})
       server.middlewares.use(handler);
     },
   };
+}
+
+/**
+ * The queue on disk as QueueAiModels sees it through /api/coda, without a server (T207): a local command enqueues straight into the folder
+ * the serving process reads. No route and no secret: it is a process of this machine, as the serving one is (ADR-0106).
+ */
+export function diskQueueFetch(dir: string, endpoint = '/api/coda'): typeof fetch {
+  return (async (url: string | URL | Request, init?: RequestInit) => {
+    const json = (status: number, body: unknown) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
+    const route = String(url).slice(endpoint.length).replace(/^\//, '');
+    if (!route && init?.method === 'POST') {
+      const raw = JSON.parse(String(init.body));
+      const why = checkRequest(raw);
+      return why ? json(400, { errore: why }) : json(200, { id: await enqueue(dir, raw) });
+    }
+    if (route === 'segreto') return json(404, {});
+    if (route === 'stato') return json(200, { serviti: await served(dir), inCoda: await waiting(dir) });
+    if (init?.method === 'DELETE') return (await withdraw(dir, decodeURIComponent(route)), json(200, { ok: true }));
+    return json(200, await look(dir, decodeURIComponent(route)));
+  }) as typeof fetch;
 }

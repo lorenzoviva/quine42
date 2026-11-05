@@ -1,0 +1,23 @@
+<!-- Banchina con binario: a mano (Claude Code, Cantiere 9). Traversine di legno, due rotaie di ferro, un palo con la campana; ogni seme cambia i sassi della massicciata e i chiodi delle traversine. -->
+<sequence values="BGTRPCKN" size="20 20 20" symmetry="()" name="Binario">
+  <color symbol="G" value="9a8a74" name="massicciata"/>
+  <color symbol="T" value="6a4a2e" name="traversina"/>
+  <color symbol="R" value="4a4c52" name="rotaia"/>
+  <color symbol="P" value="7a5432" name="palo"/>
+  <color symbol="C" value="c8a050" name="campana"/>
+  <color symbol="K" value="7e7468" name="sasso"/>
+  <color symbol="N" value="2e2e33" name="chiodo"/>
+  <box at="10 10 0" size="14 20 1" color="G"/>
+  <box at="10 2 1" size="12 2 1" color="T"/>
+  <box at="10 7 1" size="12 2 1" color="T"/>
+  <box at="10 12 1" size="12 2 1" color="T"/>
+  <box at="10 17 1" size="12 2 1" color="T"/>
+  <box at="7 10 2" size="1 20 1" color="R"/>
+  <box at="13 10 2" size="1 20 1" color="R"/>
+  <box at="18 10 0" size="2 2 16" color="P"/>
+  <box at="16 10 15" size="3 2 1" color="P"/>
+  <box at="15 10 12" size="2 2 3" color="C"/>
+  <box at="18 10 0" size="4 4 1" color="G"/>
+  <prl in="B G" out="K G" p="0.18" steps="1"/>
+  <prl in="B T" out="N T" p="0.12" steps="1"/>
+</sequence>

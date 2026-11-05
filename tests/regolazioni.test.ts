@@ -313,6 +313,26 @@ describe('sul server, entrando', () => {
     expect(JSON.parse(k.repo.head().files['universe.json']!).ai.textModel).toBe('gemini-3.8-flash');
   });
 
+  it('`vite` segue la sorte di `dialoghi` (T245a): entra con il master, poi è fissa; assente vale 0', async () => {
+    const { k } = await bootMany();
+    expect(k.coefficients().vite).toBe(0);
+    expect(k.coefficients().dialoghi).toBe(1);
+    const server = new SessionServer(k);
+    const master = enter(server, 'io', { regolazioni: { coefficienti: { ...FULL_DETAIL, dialoghi: 0.5, vite: 0.5 } } });
+    await master.session.ready;
+    expect(master.session.settingsAnswer?.ok).toBe(true);
+    expect(k.coefficients()).toMatchObject({ dialoghi: 0.5, vite: 0.5 });
+    expect(JSON.parse(k.repo.head().files['universe.json']!).ai.coefficienti).toMatchObject({ dialoghi: 0.5, vite: 0.5 });
+    expect(k.settingsLocked).toBe(true);
+    // Fixed for both: a universe.json that says otherwise is written back, setAi says no.
+    const raw = JSON.parse(k.repo.working['universe.json']!);
+    k.repo.write('universe.json', JSON.stringify({ ...raw, ai: { ...raw.ai, coefficienti: { ...raw.ai.coefficienti, dialoghi: 1, vite: 1 } } }));
+    k.applyFiles({ ...k.repo.working });
+    expect(k.coefficients()).toMatchObject({ dialoghi: 0.5, vite: 0.5 });
+    expect(k.setAi({ coefficienti: { ...FULL_DETAIL, dialoghi: 1, vite: 1 } })).toBe(false);
+    expect(k.coefficients()).toMatchObject({ dialoghi: 0.5, vite: 0.5 });
+  });
+
   it('chi non è il master non cambia nulla, nemmeno entrando per primo, e i minimi restano', async () => {
     const { k } = await bootMany({ minimi: { tetto: 2, coefficienti: { parole: 0.5 } } });
     const before = k.repo.working['universe.json'];
