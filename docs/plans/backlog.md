@@ -4677,7 +4677,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: una Genesi con `?offline` e la prova a pagamento sopra.
 - Quando è fatto: commit su `task/T310`. Nell'esito quanti testi del Concilio sono usciti in inglese per sbaglio e la differenza di token misurata.
 
-### T311 · Integrare T285 sul base con T284 e T286: la sezione delle vesti e il LEGGIMI — `da fare`
+### T311 · Integrare T285 sul base con T284 e T286: la sezione delle vesti e il LEGGIMI — `fatto` (`b04e4b6`)
 - Pipeline: claude · sforzo high · stima 2% · approvato · priorità 1
 - Step: 34
 - Contesto: `integra T285` si ferma su `docs/architettura-dettagli.md` e `site/skins/LEGGIMI.md`: T284 (veste futuristica, ADR-0151), T286 (veste sobria, integrata dopo) e T285 (veste fumetto) aggiungono tutti righe nella sezione `#sito` e nel LEGGIMI delle vesti. Nasce da T285: `dossier T285`, da T284: `dossier T284` e da T286: `dossier T286`. Parti dal base attuale (con T286).
@@ -4685,6 +4685,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Test: suite intera, typecheck e build con i loro turni.
 - Browser: non serve, T285 ha già guardato.
 - Quando è fatto: commit su `task/T311`. Nell'esito: ricorda di dare `integra T311`, poi `integra T285`.
+- Esito: T285 integrato in `task/T311`: nei conflitti di `docs/architettura-dettagli.md` (`#sito`) e `site/skins/LEGGIMI.md` restano tutte le aggiunte, nell'ordine sobria, fumetto, futuristica (la riga delle vesti non chiama più il fumetto «prima stesura»; nel LEGGIMI una frase in più su come si rifanno i disegni del fumetto); `AGENTS.md` senza conflitti e non toccato; nessun ADR da rinumerare. Test delle tre vesti e `site-skins` verdi insieme (70), suite intera (2396, 1 saltato), typecheck e build verdi, e `dist/skins/` ha le tre vesti. Browser non aperto, come chiede il task. Ora `integra T311`, poi `integra T285`.
 
 ### T312 · Il Concilio non scrive su un universo fuori dall'intervallo dei kernel — `da fare`
 - Pipeline: claude · sforzo high · stima 3% · approvato · priorità 3
