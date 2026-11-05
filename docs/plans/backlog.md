@@ -4376,8 +4376,8 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Quando è fatto: si aggiunge una veste con i suoi file, senza toccare la base; commit su `task/T283`, ADR e riga in `#sito`. Sicurezza: nessuna superficie nuova, o le voci.
 - Esito: base comune (solo token `--skin-*`, misure dalla scala aurea in `site/*.css`) e vesti in `site/skins/<id>/` scelte con `data-skin`; `server/skins.ts` genera `/skins/boot.js` e copia i file in `dist/skins/` senza rotte, `site/skin.ts` è il selettore con `localStorage`; sobria (l'aspetto di T244, ora su tutte le pagine, `body.home` tolto), fumetto e futuristica come prime stesure per T285 e T284 (logo e favicon definitivi a T286); `tests/site-skins.test.ts` ricava il contratto da ciò che la base legge; ADR-0145, voce nel glossario, tabella in `#sito`; aggiunti `--space-55`, `--space-89`, `--measure-1364`; carta 322×521; typecheck e build verdi, suite intera verde (2311 test, 1 saltato), dopo la quale ho allentato un test di `site-skins` e rilanciato da soli quel file e `glossario.test.ts`. Non provati: carte e schede di universi vere (nessun universo nel worktree, si vedono solo gli stati vuoti, quindi la carta 322×521 non è mai stata disegnata), `effects.ts` (nessuna veste ne ha uno), un telefono vero, un browser diverso da Chrome, `istruzioni.html` sotto `npm run serve` (senza `docs/beta/guida.md` la pagina non è nella build). Sicurezza: nessuna superficie nuova in produzione; in sviluppo il plugin serve solo nomi semplici di `site/skins/` con estensioni a elenco, e `boot.js` non scrive mai nella pagina ciò che è in `localStorage` se non è un id noto (test).
 
-### T284 · La veste futuristica: l'inception di scritte neon — `in attesa` (dipende da T283, T255)
-- Attesa (D41, 05/11): l'autore ha visto le bozze di T283 e le boccia: scritte e icone delle proposte scelte mancano, perché `docs/design/logo/proposte/` non è nel repository e nessun worktree la vede. Si rifà tutto partendo dalla scritta e dall'icona della proposta, **estratte così come sono** (SVG/HTML) e poi ritoccate come chiede l'autore; le bozze di T283 in `site/skins/<id>/` si buttano. Riparte quando la proposta è nel repository.
+### T284 · La veste futuristica: l'inception di scritte neon — `da fare` (dipende da T283, T255)
+- Ripartenza (D41 A, 05/11): l'autore ha visto le bozze di T283 e le boccia: scritte e icone delle proposte scelte mancano. Si rifà tutto partendo dalla scritta e dall'icona della proposta, **estratte così come sono** (SVG/HTML) e poi ritoccate come chiede l'autore; le bozze di T283 in `site/skins/<id>/` si buttano. Le proposte sono nel repository: **parti dalla v2 di Claude, fatta dopo le votazioni**, `docs/design/logo/proposte/claude/QUINE42 Logo v2 standalone.html` (1,7 MB, HTML autosufficiente con le risorse incorporate: cerca la sezione, non leggerlo intero); la v1 e le catture di `landing-tests/` servono solo da confronto.
 - Pipeline: claude · sforzo max · stima 4% · approvato · browser · priorità 3
 - Sforzo: max, scelto dall'autore. Dipende da T255 perché questo sforzo arrivi davvero alla CLI.
 - Step: 34
@@ -4392,8 +4392,8 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: sì, a 1920 e 390 px; catture nel commit e, se puoi, una breve registrazione dell'effetto.
 - Quando è fatto: la veste è selezionabile, le misure sono nell'esito; commit su `task/T284`. Sicurezza: nessuna superficie nuova.
 
-### T285 · La veste a fumetto: crea la tua quine-storia — `in attesa` (dipende da T283)
-- Attesa (D41, 05/11): l'autore ha visto le bozze di T283 e le boccia: scritte e icone delle proposte scelte mancano, perché `docs/design/logo/proposte/` non è nel repository e nessun worktree la vede. Si rifà tutto partendo dalla scritta e dall'icona della proposta, **estratte così come sono** (SVG/HTML) e poi ritoccate come chiede l'autore; le bozze di T283 in `site/skins/<id>/` si buttano. Riparte quando la proposta è nel repository.
+### T285 · La veste a fumetto: crea la tua quine-storia — `da fare` (dipende da T283)
+- Ripartenza (D41 A, 05/11): l'autore ha visto le bozze di T283 e le boccia: scritte e icone delle proposte scelte mancano. Si rifà tutto partendo dalla scritta e dall'icona della proposta, **estratte così come sono** (SVG/HTML) e poi ritoccate come chiede l'autore; le bozze di T283 in `site/skins/<id>/` si buttano. Le proposte sono nel repository: **parti dalla v2 di Claude, fatta dopo le votazioni**, `docs/design/logo/proposte/claude/QUINE42 Logo v2 standalone.html` (1,7 MB, HTML autosufficiente con le risorse incorporate: cerca la sezione, non leggerlo intero); la v1 e le catture di `landing-tests/` servono solo da confronto.
 - Pipeline: claude · sforzo extra · stima 3% · approvato · browser · priorità 3
 - Sforzo: extra.
 - Step: 34
@@ -4407,8 +4407,8 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: sì, a 1920 e 390 px; contrasto dei testi sopra i pois; catture nel commit.
 - Quando è fatto: la veste è selezionabile; commit su `task/T285`. Sicurezza: nessuna superficie nuova.
 
-### T286 · La veste sobria: vediamoci chiaro — `in attesa` (dipende da T283)
-- Attesa (D41, 05/11): l'autore ha visto le bozze di T283 e le boccia: scritte e icone delle proposte scelte mancano, perché `docs/design/logo/proposte/` non è nel repository e nessun worktree la vede. Si rifà tutto partendo dalla scritta e dall'icona della proposta, **estratte così come sono** (SVG/HTML) e poi ritoccate come chiede l'autore; le bozze di T283 in `site/skins/<id>/` si buttano. Riparte quando la proposta è nel repository.
+### T286 · La veste sobria: vediamoci chiaro — `da fare` (dipende da T283)
+- Ripartenza (D41 A, 05/11): l'autore ha visto le bozze di T283 e le boccia: scritte e icone delle proposte scelte mancano. Si rifà tutto partendo dalla scritta e dall'icona della proposta, **estratte così come sono** (SVG/HTML) e poi ritoccate come chiede l'autore; le bozze di T283 in `site/skins/<id>/` si buttano. Le proposte sono nel repository: **parti dalla v2 di Claude, fatta dopo le votazioni**, `docs/design/logo/proposte/claude/QUINE42 Logo v2 standalone.html` (1,7 MB, HTML autosufficiente con le risorse incorporate: cerca la sezione, non leggerlo intero); la v1 e le catture di `landing-tests/` servono solo da confronto.
 - Pipeline: claude · sforzo high · stima 2% · approvato · browser · priorità 3
 - Sforzo: high.
 - Step: 34
