@@ -4210,9 +4210,23 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Quando è fatto: commit su `task/T268` col solo `docs/pipeline/modelli.md`; nell'esito i cali misurati (settimana e 5h) per ciascun modello. Sicurezza: nessuna superficie nuova.
 - Esito: provati e misurati sul campo i tre modelli esterni di `agy` sul contatore `Claude and GPT models` (`claude-opus-5-5-high`: settimana -4 pt [97%→93%], 5h -8 pt [100%→92%], rapporto 2,00, 23,61 s; `claude-sonnet-5-5-high`: settimana -2 pt [93%→91%], 5h -4 pt [92%→88%], rapporto 2,00, 17,01 s; `gpt-oss-120b-medium`: settimana 0 pt [91%→91%], 5h 0 pt [88%→88%], rapporto 0/0, 25,47 s) e aggiornate le sezioni 1.2, 3.1 e 4.1 di `docs/pipeline/modelli.md`; nulla manca.
 
-### T269 · Cantiere 1: il catalogo di 24 strutture procedurali e le cantine veloci — `fatto`
+### T269 · Cantiere 1: il catalogo di 24 strutture procedurali e le cantine veloci — `fatto` (`9298643`)
 - Step: —
 - Contesto: richiesta dell'autore (04/11, sessione cloud): 24 programmi MarkovJunior di strutture (`classe` grande), 6 per ambientazione (fantasy, steampunk, moderno, futuristico), almeno 12 con la cantina (`suolo="E"`, ADR-0135), ognuno validato con `lab/banco/misure.ts` e `lab/banco/varianza.ts` su 5 semi e 2 taglie (Grande, Enorme), sotto 4500 ms a Enorme. Il riferimento `lab/banco/riferimento/cantina.xml` impiegava 7 s a Enorme (`docs/pipeline/domande/T258.md`).
 - Cosa fare: in `lab/banco/catalogo-cloud/` gli XML, un rapporto per struttura (misure alle due taglie, varianza, traccia del seme 1), l'indice `README.md`; nessun modello chiamato.
 - Quando è fatto: le 24 strutture passano; commit ogni 4. Sicurezza: nessuna superficie nuova (solo `lab/`).
 - Esito: 24 strutture su 24 passano (5/5 semi a Grande e a Enorme, varianza sopra ogni soglia), 12 con la cantina; massimo a Enorme 3,3 s (le cantine 2,5-3,3 s, le altre 1,6-1,8 s, misurati con tre prove in parallelo). La cantina del riferimento passa da 7,4 s a 2,0-2,4 s senza cambiare l'edificio: colonne alte in un passo, la scala della cantina ancorata al vuoto del pozzo, l'imbottitura dei pattern del progetto (`lab/banco/catalogo-cloud/ottimizza.ts`, griglie confrontate cella per cella). Rispetto al previsto: lo scheletro senza cantina non variava a 5 semi (stanze e perimetro), corretto con una quarta campata a moneta, un arredo a moneta e un'ala nel margine; le torri a Grande sporgono poco (la scatola è alta 80). `npm test`: 2 test di `tests/sicurezza/` (V-006, V-007) cadono in questo ambiente per il Permission Model di Node 22.23 (`fsync` disabilitato), anche senza queste modifiche; typecheck verde. Sicurezza: nessuna superficie nuova.
+
+### T270 · Cantiere 2: 24 modelli del seme procedurali e 40 props tematici — `fatto` (`28afffb`)
+- Step: —
+- Contesto: richiesta dell'autore (04/11, sessione cloud): riscrivere i 24 modelli non-corona di `universe/models/` come programmi MarkovJunior procedurali in `lab/banco/seme-procedurale/` e creare 40 props tematici (10 per ambientazione: fantasy, steampunk, moderno, futuristico) in `lab/banco/props-tematici/`, validati su 5 semi con varianza ≥ 0,15 e zero frammenti staccati.
+- Cosa fare: in `lab/banco/seme-procedurale/` e `lab/banco/props-tematici/` i 64 XML, i rapporti `.md`, le anteprime `.png` e il banco `prova.ts`; non toccare `universe/models/`.
+- Quando è fatto: tutti i 64 modelli passano il validatore su 5 semi. Sicurezza: nessuna superficie nuova (solo `lab/`).
+- Esito: 64 modelli su 64 (24 in `lab/banco/seme-procedurale/` e 40 in `lab/banco/props-tematici/`) passano `modelErrors`, `checkProgram` e `analyse` con `grounded` su 5 semi senza frammenti staccati e con varianza ≥ 0,15 (media delle medie 0,44 sul seme); `universe/models/` intatto. Sicurezza: nessuna superficie nuova.
+
+### T271 · Cantiere 3: 44 programmi sonori MarkovJunior per i 4 temi e gli effetti — `fatto` (`5c3ff31`)
+- Step: —
+- Contesto: richiesta dell'autore (04/11, sessione cloud): 44 programmi sonori MarkovJunior in `lab/banco/suoni-cloud/` (`suono-effetto-morte-v2.xml`, 24 brani per le 4 ambientazioni, 19 effetti), validati su 10 terne di semi (`[1..3]` .. `[28..30]`) senza difetti in `analyzeSound` né `modelErrors`, con distanza tra i semi ≥ 0,15.
+- Cosa fare: in `lab/banco/suoni-cloud/` gli XML, i rapporti in `rapporti/`, il compositore `componi.mjs` e il validatore `valida.ts`; non toccare `universe/models/`.
+- Quando è fatto: tutti i 44 programmi passano su 10 terne. Sicurezza: nessuna superficie nuova (solo `lab/`).
+- Esito: 44 programmi sonori su 44 passano `analyzeSound` e `modelErrors` su tutte le 10 terne di semi con distanza ≥ 0,15; rapporti completi in `lab/banco/suoni-cloud/rapporti/` e guida `README.md`. Non provato l'ascolto umano. Sicurezza: nessuna superficie nuova.
