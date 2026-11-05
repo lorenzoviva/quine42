@@ -39,6 +39,7 @@ import { addBudgetFromCap, costWithFee, DEFAULT_GRANT_CAP, DEFAULT_PLATFORM_FEE,
 import { MemoryChunks, type ChunkStore } from './chunks';
 import { bodyFoot, bodyGround, Forms, holesOf, InlineRunner, instanceGrid, levelAt, rampBlocks, stepOf, toLocal, topUnder, type Form, type FormComp, type FormRunner, type Ground } from './forms';
 import { classOf, guessClass, RARE_SIZES, sizeRank, SIZE_TIERS, tilesOf, type SizeTier } from '../mj/classes';
+import { stageGrid } from '../mj/mesh';
 import { commonHouseModel, GENERIC, ModelDirector, ownModelId } from './modeldirector';
 import { ScoreDirector } from './scoredirector';
 import { categoryOf, DEFAULT_SCULPTORS, sculptAction, type SculptorAiModels } from './agents/sculptor';
@@ -46,7 +47,7 @@ import { MODELS_INDEX, type ModelInfo } from './forms';
 import { Content, normName, specOf } from './content';
 import { layout, type Lot, type LayoutResult, articulationPoints } from './layout';
 import { AGENTS, Council, readBible, wordsOf, type AgentId, type CatalogEntry, type FeedEntry } from './agents/council';
-import { designEnvironment, drawAtlas, planChunk, readStructure, type ChunkPlan, type WaterRecord, type Where } from './agents/cartography';
+import { designEnvironment, drawAtlas, planChunk, readStructure, type ChunkPlan, type PlannedHouse, type WaterRecord, type Where } from './agents/cartography';
 import { WaterFlow, WET, type WaterChange } from './water';
 import { forge, ForgeRejected, judgeCombination, repairLogic, slug, type ForgeOrigin } from './agents/forge';
 import { agentReply, examine, narrate, NARRATOR_PLAYS, npcDialogue, npcReply, npcSheet, liaisonReply, weavePlot, type Interpreter, type NpcReply, type Turn } from './agents/minds';
@@ -226,7 +227,7 @@ interface ChunkLot {
   x: number;
   y: number;
   form: FormComp;
-  struttura: { concetto: string; classe: string; taglia?: SizeTier; model?: string };
+  struttura: { concetto: string; classe: string; taglia?: SizeTier; model?: string; stadio?: number };
 }
 
 /** A planned place in miniature (T26): positions in tiles from the place's top-left corner, levels in `LEVEL`s. */
@@ -1538,15 +1539,20 @@ export class Kernel {
 
   /** Where a solid entity blocks and what one stands on in it: its model's, or the changed ones of this instance. */
   private groundOf(id: Id, fc: FormComp, f: Form): Ground & { foot: Uint8Array } {
-    if (!fc.done?.length) return { foot: f.foot!, floor: f.floor!, block: f.block!, levels: f.levels!, hole: f.hole };
-    const key = `${f.key}|${fc.done.join(',')}`;
+    // A building that rises (T245e): what a body meets is the grid of its stage, without the site around it.
+    const st = this.ecs.get(id, 'struttura')?.stadio;
+    const staged = typeof st === 'number' && Number.isFinite(st) && st < 1;
+    if (!fc.done?.length && !staged) return { foot: f.foot!, floor: f.floor!, block: f.block!, levels: f.levels!, hole: f.hole };
+    const key = `${f.key}|${fc.done?.join(',') ?? ''}|${staged ? st : ''}`;
     const c = this.instanceFeet.get(id);
     if (c?.key === key) return c;
     const r = f.result!;
-    const g = instanceGrid(this.forms, f, fc.done);
-    // A cellar that held stays one (T52b); its hole as the actions left it.
-    const ground = f.hole ? bodyGround(g, r.palette, f.vpt, f.base, holesOf(g, r.palette, f.base)) : bodyGround(g, r.palette, f.vpt, f.base);
-    const out = { key, foot: bodyFoot(g, r.palette, f.vpt, f.base), floor: ground.floor, block: ground.block, levels: ground.levels, hole: f.hole ? ground.hole : undefined };
+    const acted = fc.done?.length ? instanceGrid(this.forms, f, fc.done) : r.grid;
+    const g = staged ? stageGrid(acted, r.palette, st, { base: f.base }).grid : acted;
+    // A cellar that held stays one (T52b); its hole as the actions left it. Under way there is no cellar yet.
+    const cellar = f.hole && !staged;
+    const ground = cellar ? bodyGround(g, r.palette, f.vpt, f.base, holesOf(g, r.palette, f.base)) : bodyGround(g, r.palette, f.vpt, f.base);
+    const out = { key, foot: bodyFoot(g, r.palette, f.vpt, f.base), floor: ground.floor, block: ground.block, levels: ground.levels, hole: cellar ? ground.hole : undefined };
     this.instanceFeet.set(id, out);
     return out;
   }
@@ -2298,10 +2304,11 @@ export class Kernel {
   private settleLots(ch: Chunk, plan: ChunkPlan, pathCode: string): Id[] {
     const { tiles, lots } = this.lotsOf(ch, plan, pathCode);
     const out: Id[] = [];
-    // A lot being rebuilt has no building until its venture ends (T245d).
-    const rebuilding = new Set(openVentures(this.ventureList, ch.key).flatMap((v) => (v.origine ? [v.origine] : [])));
+    // A lot being built again shows its building at the stage of its venture (T245e): the plan says it, for every kernel that draws it.
+    const stadi = plan.stadi ?? {};
     for (const l of lots) {
-      if (rebuilding.has(l.origin)) continue;
+      const st = stadi[l.origin];
+      if (st !== undefined && Number.isFinite(st) && st < 1) l.struttura = { ...l.struttura, stadio: Math.max(0, st) };
       out[l.index] = this.ecs.spawn({
         pos: { x: l.x, y: l.y },
         glyph: { ch: '⌂', color: this.terrain?.manifest.roof?.color ?? '#9a4632' },
@@ -2313,8 +2320,8 @@ export class Kernel {
       });
     }
     ch.tiles = tiles;
-    // The houses the ventures built on free ground stand like the others (T245d).
-    for (const v of this.ventureList) if (v.luogo === ch.key && v.area && v.stato === 'finita') this.spawnVentureBuilding(v);
+    // The houses the ventures build on free ground stand like the others, at their stage (T245d, T245e).
+    for (const h of plan.case ?? []) this.spawnPlannedHouse(ch, h);
     return out;
   }
 
@@ -2401,7 +2408,8 @@ export class Kernel {
     const fc: FormComp | undefined = this.ecs.get(sid, 'form');
     const f = fc && this.forms.ready(fc.model, fc.seed, fc.tint);
     const p = this.ecs.get(sid, 'pos');
-    if (!fc || !f?.floor || !p) return [];
+    // A house under way has no rooms yet: one lives there from its roof (T245e).
+    if (!fc || !f?.floor || !p || (this.ecs.get(sid, 'struttura')?.stadio ?? 1) < 0.9) return [];
     const g = f.result!.grid;
     const { foot, floor, block } = this.groundOf(sid, fc, f);
     const step = stepOf(f.vpt);
@@ -2913,10 +2921,11 @@ export class Kernel {
     const origin = this.ecs.get(id, 'origin')?.key;
     const box: Container | undefined = this.ecs.get(id, 'container');
     if (origin) this.consumed.add(origin);
-    // A building that falls is rebuilt (T245d): its lot becomes a venture of its place.
+    // A building that falls is rebuilt (T245d): its lot becomes a venture of its place, once the building is gone.
     const ruin = this.ecs.get(id, 'struttura');
-    if (ruin && origin && p) this.ventureOfRuin(origin, ruin, this.ecs.get(id, 'form'), p);
+    const ruinForm: FormComp | undefined = this.ecs.get(id, 'form');
     this.ecs.destroy(id);
+    if (ruin && origin && p) this.ventureOfRuin(origin, ruin, ruinForm, p);
     if (!p) return;
     for (const d of m?.drops ?? []) {
       if (this.content.get(d)) this.spawnItem(d, p.x, p.y);
@@ -6704,6 +6713,7 @@ export class Kernel {
     this.ventureList = pruneVentures([...this.ventureList, v]);
     this.touchVentures();
     this.staffVentures(v);
+    this.syncVenturePlan(v);
     this.council.say('kernel', 'info', `nasce un'impresa: «${v.titolo}» (${v.tipo}, ${v.fasi.map((f) => f.nome).join(' → ')}), squadra di ${v.squadra.length}`, undefined, 'impresa.nasce');
   }
 
@@ -6929,36 +6939,80 @@ export class Kernel {
   /** A phase that closes is a line of the registry, with no call (`impresa.fase`). */
   private phasesClosed(v: Venture, closed: number[]): void {
     for (const k of closed) this.council.say('kernel', 'info', `«${v.titolo}»: finita la fase «${v.fasi[k]?.nome}» (${k + 1} di ${v.fasi.length})`, undefined, 'impresa.fase');
+    // The building rises a stage (T245e).
+    if (closed.length) this.syncVenturePlan(v);
   }
 
-  /** A venture ends: the team remembers it, a rebuilt or a new building stands. */
+  /** A venture ends: the team remembers it, a rebuilt or a new building stands whole. */
   private ventureDone(v: Venture): void {
     v.fine = this.day();
     for (const m of v.squadra) this.rememberAbout(m.nome, `Abbiamo finito «${v.titolo}».`, undefined, 3);
     this.council.say('kernel', 'info', `«${v.titolo}» è finita.`, undefined, 'impresa.fine');
-    if (v.origine && !v.area) {
-      this.consumed.delete(v.origine);
-      const ch = this.chunks.get(v.luogo);
-      if (ch?.stage === 'planned' && ch.plan && !this.ecs.query('struttura', 'origin').some((e) => this.ecs.get(e, 'origin').key === v.origine)) {
-        const { lots } = this.lotsOf(ch, ch.plan, this.pathCode());
-        const l = lots.find((x) => x.origin === v.origine);
-        if (l) this.ecs.spawn({ pos: { x: l.x, y: l.y }, glyph: { ch: '⌂', color: this.terrain?.manifest.roof?.color ?? '#9a4632' }, body: { r: 0.5, solid: true }, form: l.form, struttura: l.struttura, chunk: { key: ch.key }, origin: { key: l.origin } });
-      }
-    }
-    if (v.area) this.spawnVentureBuilding(v);
+    if (v.origine && !v.area) this.consumed.delete(v.origine);
+    this.syncVenturePlan(v);
     this.ventureList = pruneVentures(this.ventureList);
   }
 
-  /** A house a venture built on free ground (T245d): a structure like those of the lots, with the venture's model, seed and turn. */
-  private spawnVentureBuilding(v: Venture): void {
+  /** The stage a venture shows (T245e): that of its last phase done; 1 once it is finished (a harvest has none). */
+  private ventureStage(v: Venture): number {
+    return v.stato === 'finita' ? 1 : ventureProgress(v).stadio;
+  }
+
+  /**
+   * The plan of a venture's place says its building and its stage (T245e, ADR-0143): `plan.stadi` for a lot built again, `plan.case`
+   * for a house on free ground. The plan is what every kernel draws a place from (a client's too), so the building rises for everyone;
+   * the structure in the world takes the stage at once. Only a loaded place: an unloaded one is brought up to date when it loads.
+   */
+  private syncVenturePlan(v: Venture): void {
+    if (v.tipo !== 'costruzione' || !v.origine || this.mirror) return;
     const ch = this.chunks.get(v.luogo);
-    if (!v.area || !v.origine || !ch || this.ecs.query('struttura', 'origin').some((e) => this.ecs.get(e, 'origin').key === v.origine)) return;
-    const classe = v.classe ?? 'edificio';
-    const model = this.forms.resolve(v.modello, classe);
-    const form: FormComp = { model, seed: v.seme ?? this.forms.seedFor(model, v.origine), yaw: v.yaw ?? 0, ...(v.modello && v.modello !== model ? { wanted: v.modello, classe } : {}) };
-    const done = this.savedForms.get(v.origine);
+    if (ch?.stage !== 'planned' || !ch.plan) return;
+    const stage = this.ventureStage(v);
+    let changed = false;
+    if (v.area) {
+      const list = (ch.plan.case ??= []);
+      const at = list.findIndex((h) => h.origine === v.origine);
+      const classe = v.classe ?? 'edificio';
+      const model = v.modello ?? this.forms.resolve(undefined, classe);
+      const house: PlannedHouse = { origine: v.origine, x: v.posto.x, y: v.posto.y, modello: model, seme: v.seme ?? this.forms.seedFor(model, v.origine), yaw: v.yaw ?? 0, classe, concetto: v.concetto ?? 'una casetta', stadio: stage };
+      if (at < 0 || list[at].stadio !== stage) {
+        if (at < 0) list.push(house);
+        else list[at] = house;
+        changed = true;
+      }
+    } else {
+      const stadi = (ch.plan.stadi ??= {});
+      if (stage >= 1 ? v.origine in stadi : stadi[v.origine] !== stage) {
+        if (stage >= 1) delete stadi[v.origine];
+        else stadi[v.origine] = stage;
+        if (!Object.keys(stadi).length) delete ch.plan.stadi;
+        changed = true;
+      }
+    }
+    const sid = this.ecs.query('struttura', 'origin').find((e) => this.ecs.get(e, 'origin').key === v.origine);
+    if (sid !== undefined) {
+      const st = this.ecs.get(sid, 'struttura');
+      if (stage >= 1) delete st.stadio;
+      else st.stadio = stage;
+    } else if (v.area) this.spawnPlannedHouse(ch, ch.plan.case!.find((h) => h.origine === v.origine)!);
+    else {
+      const { lots } = this.lotsOf(ch, ch.plan, this.pathCode());
+      const l = lots.find((x) => x.origin === v.origine);
+      if (l) this.ecs.spawn({ pos: { x: l.x, y: l.y }, glyph: { ch: '⌂', color: this.terrain?.manifest.roof?.color ?? '#9a4632' }, body: { r: 0.5, solid: true }, form: l.form, struttura: { ...l.struttura, ...(stage < 1 ? { stadio: stage } : {}) }, chunk: { key: ch.key }, origin: { key: l.origin } });
+    }
+    if (changed) this.saveChunkSoon(ch);
+  }
+
+  /** A house of the plan built on free ground (T245d, T245e): a structure like those of the lots, with its model, seed, turn and stage. */
+  private spawnPlannedHouse(ch: Chunk, h: PlannedHouse | undefined): void {
+    if (!h || typeof h.origine !== 'string' || ![h.x, h.y].every(Number.isFinite) || this.ecs.query('struttura', 'origin').some((e) => this.ecs.get(e, 'origin').key === h.origine)) return;
+    const classe = typeof h.classe === 'string' ? h.classe : 'edificio';
+    const model = this.forms.resolve(typeof h.modello === 'string' ? h.modello : undefined, classe);
+    const form: FormComp = { model, seed: Number.isFinite(h.seme) ? h.seme : this.forms.seedFor(model, h.origine), yaw: Number.isFinite(h.yaw) ? h.yaw : 0, ...(h.modello && h.modello !== model ? { wanted: h.modello, classe } : {}) };
+    const done = this.savedForms.get(h.origine);
     if (done?.length) form.done = [...done];
-    this.ecs.spawn({ pos: { x: v.posto.x, y: v.posto.y }, glyph: { ch: '⌂', color: this.terrain?.manifest.roof?.color ?? '#9a4632' }, body: { r: 0.5, solid: true }, form, struttura: { concetto: v.concetto ?? 'una casetta', classe, ...(v.modello ? { model: v.modello } : {}) }, chunk: { key: ch.key }, origin: { key: v.origine } });
+    const stadio = Number.isFinite(h.stadio) ? Math.max(0, Math.min(1, h.stadio)) : 1;
+    this.ecs.spawn({ pos: { x: h.x, y: h.y }, glyph: { ch: '⌂', color: this.terrain?.manifest.roof?.color ?? '#9a4632' }, body: { r: 0.5, solid: true }, form, struttura: { concetto: String(h.concetto ?? 'una casetta').slice(0, 80), classe, ...(h.modello ? { model: h.modello } : {}), ...(stadio < 1 ? { stadio } : {}) }, chunk: { key: ch.key }, origin: { key: h.origine } });
   }
 
   /** What `costruisci` asks the kernel (`world.impresa(id)`): the next step of the venture this individual works at, or nothing. */
@@ -7036,17 +7090,20 @@ export class Kernel {
         .map((v) => ({ v, d: Math.hypot(v.posto.x - p.x, v.posto.y - p.y) }))
         .filter((x) => x.d <= 30)
         .sort((a, b) => a.d - b.d)[0]?.v;
+      // No site near: no fields, nothing travels (the panel shows nothing).
+      if (!near) {
+        if (this.ecs.has(w.id, 'cantiere')) this.ecs.remove(w.id, 'cantiere');
+        continue;
+      }
       const name = (it: string) => this.itemInfo(it).name;
-      const pr = near ? ventureProgress(near) : undefined;
-      const fields = near && pr
-        ? {
+      const pr = ventureProgress(near);
+      const fields = {
             titolo: near.titolo,
             fase: pr.finita ? 'finita' : `${near.fasi[pr.fase].nome} (${pr.fase + 1} di ${near.fasi.length})`,
             stato: near.stato === 'attesa' ? 'aspetta il materiale' : near.stato === 'ferma' ? 'ferma: nessuno ci lavora' : near.stato,
             manca: missingWords(near, name),
             squadra: near.squadra.map((m) => `${m.nome} (${m.ruolo})`).join(', ') || 'nessuno',
-          }
-        : { titolo: 'Nessun cantiere qui vicino', fase: '', stato: '', manca: '', squadra: '' };
+          };
       const cur = this.ecs.get(w.id, 'cantiere');
       if (!cur || Object.entries(fields).some(([k, x]) => cur[k] !== x)) this.ecs.set(w.id, 'cantiere', fields);
     }

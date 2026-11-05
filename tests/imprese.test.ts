@@ -149,6 +149,11 @@ function play(k: Kernel, seconds: number, until?: () => boolean): void {
   for (let t = 0; t < seconds && !until?.(); t += STEP) k.tick(STEP);
 }
 
+/** The stage of the building of an origin: undefined when it stands whole, null when there is none. */
+const stageOf = (k: Kernel, origin: string) => {
+  const id = k.ecs.query('struttura', 'origin').find((e) => k.ecs.get(e, 'origin').key === origin);
+  return id === undefined ? null : k.ecs.get(id, 'struttura').stadio;
+};
 const liveVentures = (k: Kernel) => (k as unknown as { ventureList: Venture[] }).ventureList;
 const consumed = (k: Kernel) => (k as unknown as { consumed: Set<string> }).consumed;
 
@@ -174,8 +179,8 @@ describe('the ventures in a world', () => {
     const [v] = k.ventures();
     expect(v).toMatchObject({ tipo: 'costruzione', luogo: key, origine: origin, nato_da: 'regola:ricostruzione', stato: 'in corso' });
     expect(v.squadra.map((m) => `${m.nome}:${m.ruolo}`).sort()).toEqual(['Baldo:capomastro', 'Ivo:manovale', 'Nives:manovale']);
-    // The lot stays empty while it is rebuilt.
-    expect(k.ecs.query('struttura', 'origin').some((e) => k.ecs.get(e, 'origin').key === origin)).toBe(false);
+    // The lot shows its building at stage 0 while it is rebuilt (T245e): stakes and a rope.
+    expect(stageOf(k, origin)).toBe(0);
 
     k.time = at(2, 'giorno');
     play(k, 170);
@@ -251,11 +256,11 @@ describe('the ventures in a world', () => {
     const saved = readVentures(k.files[VENTURES_FILE]).find((x) => x.id === v.id)!;
     expect(saved).toMatchObject({ portati: { 'item.ciocco': 10 }, lavorato: 150 });
 
-    // Reopened: the same venture, the lot still empty, the clock where it was.
+    // Reopened: the same venture, the lot at the same stage, the clock where it was.
     k = await Kernel.boot({ files: { ...k.files }, store: memoryStore(), ai: new MockAiModels(), chunks });
     await developAll(k);
     expect(k.ventures().find((x) => x.id === v.id)).toMatchObject({ portati: { 'item.ciocco': 10 }, lavorato: 150, origine: origin });
-    expect(k.ecs.query('struttura', 'origin').some((e) => k.ecs.get(e, 'origin').key === origin)).toBe(false);
+    expect(stageOf(k, origin)).toBe(0);
 
     // The rest is brought and worked: the venture ends, the house stands again, the team remembers it.
     const w = liveVentures(k).find((x) => x.id === v.id)!;
@@ -263,7 +268,7 @@ describe('the ventures in a world', () => {
     addWork(w, 1e6);
     play(k, 3.5);
     expect(k.ventures().find((x) => x.id === v.id)!.stato).toBe('finita');
-    expect(k.ecs.query('struttura', 'origin').some((e) => k.ecs.get(e, 'origin').key === origin)).toBe(true);
+    expect(stageOf(k, origin)).toBeUndefined();
     expect(consumed(k).has(origin)).toBe(false);
     expect(k.individualOf('Baldo')?.ricordi?.some((r) => r.peso === 3 && /finito/.test(r.testo))).toBe(true);
 
@@ -273,7 +278,7 @@ describe('the ventures in a world', () => {
     k = await Kernel.boot({ files: { ...k.files }, store: memoryStore(), ai: new MockAiModels(), chunks });
     await developAll(k);
     expect(k.ventures().find((x) => x.id === v.id)!.stato).toBe('finita');
-    expect(k.ecs.query('struttura', 'origin').some((e) => k.ecs.get(e, 'origin').key === origin)).toBe(true);
+    expect(stageOf(k, origin)).toBeUndefined();
   }, 120000);
 
   it('the harvest is born once a year from the calendar, where something ripens into what a trade gathers; its season passes', async () => {
@@ -319,7 +324,7 @@ describe('the ventures in a world', () => {
     for (const it of ['item.ciocco', 'item.chiodi']) bring(w, it, 100);
     addWork(w, 1e6);
     play(k, 3.5);
-    expect(k.ecs.query('struttura', 'origin').some((e) => k.ecs.get(e, 'origin').key === v!.origine)).toBe(true);
+    expect(stageOf(k, v!.origine!)).toBeUndefined();
     // Families of one: no more common houses than the families need.
     k.time = at(3, 'mattina');
     play(k, 3.5);

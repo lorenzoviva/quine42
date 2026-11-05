@@ -327,3 +327,142 @@ export function footprint(g: VoxelGrid, palette: Record<string, PaletteEntry>, f
     for (let i = 0; i < XY; i++) if (colors[g.cells[i + z * XY]]) out[i] = 1;
   return out;
 }
+
+// --- A building that rises by stages (T245e, ADR-0143) ---------------------------------------------------------------
+// The program of a structure runs once, with its seed; the grid it gives is shown filtered by the stage of its venture: the lot
+// marked with stakes and a rope (0), the ground floor (0.2), the walls up to the base of the roof (0.7), the whole with its lights
+// off (0.9), finished (1). The palette has no classes of voxels (a letter is a colour): the stages are heights, not materials.
+
+/** The letters of what the kernel adds to a site: the scaffolding (wood) and the stakes with their rope. */
+export const SCAFFOLD_LETTER = 'ǂ';
+export const STAKE_LETTER = 'ǀ';
+const SITE_PALETTE: Record<string, PaletteEntry> = { [SCAFFOLD_LETTER]: { name: 'impalcatura', color: '#9b7653' }, [STAKE_LETTER]: { name: 'picchetti', color: '#d8c79a' } };
+
+export interface StageHeights {
+  /** The top of the ground floor (voxels): the end of the first full layer from the ground, at least one voxel. */
+  floor: number;
+  /** Where the roof begins: the start of the last full layer above the ground floor (the whole height if there is none). */
+  roof: number;
+  /** One above the highest voxel. */
+  top: number;
+}
+
+/**
+ * The heights of a finished grid that the stages cut at, from the grid alone: a layer is full when at least 60 % of the columns of
+ * the building have something there. `base`: voxels under the ground (a cellar), which no stage shows before the roof.
+ */
+export function stageHeights(g: VoxelGrid, palette: Record<string, PaletteEntry>, base = 0): StageHeights {
+  const colors = colorTable(g.alphabet, palette);
+  const XY = g.X * g.Y;
+  const any = new Uint8Array(XY);
+  let top = base;
+  const layer = new Uint32Array(g.Z);
+  for (let z = base; z < g.Z; z++)
+    for (let i = 0; i < XY; i++)
+      if (colors[g.cells[i + z * XY]]) {
+        any[i] = 1;
+        layer[z]++;
+        top = z + 1;
+      }
+  const cols = any.reduce((n, a) => n + a, 0);
+  const full = (z: number) => cols > 0 && layer[z] / cols >= 0.6;
+  const runs: Array<[number, number]> = [];
+  for (let z = base; z < top; z++) {
+    if (!full(z)) continue;
+    const s = z;
+    while (z < top && full(z)) z++;
+    runs.push([s, z]);
+  }
+  let floor = base + 1;
+  if (runs.length && runs[0][0] <= base + 2) floor = Math.max(floor, runs[0][1]);
+  const above = runs.filter(([s]) => s > floor);
+  let roof = above.length ? above[above.length - 1][0] : top;
+  if (roof <= floor) roof = top;
+  return { floor: Math.min(floor, top), roof, top };
+}
+
+/** The visible height at a stage (voxels): nothing at 0, the ground floor up to 0.2, then up to the base of the roof at 0.7, the whole from 0.9. */
+export function stageHeight(h: StageHeights, stadio: number): number {
+  const s = Math.max(0, Math.min(1, Number.isFinite(stadio) ? stadio : 1));
+  if (s <= 0) return 0;
+  if (s <= 0.2) return h.floor;
+  if (s < 0.9) return Math.round(h.floor + (h.roof - h.floor) * Math.min(1, (s - 0.2) / 0.5));
+  return h.top;
+}
+
+export interface StageOptions {
+  /** Voxels under the ground. */
+  base?: number;
+  /** Voxels per tile: the spacing of the scaffolding and the height of the stakes. */
+  vpt?: number;
+  /** The scaffolding and the stakes (for drawing); without them the grid is what a body meets (for the footprint and the floors). */
+  site?: boolean;
+}
+
+/**
+ * A finished grid as the stage shows it (a pure function): the voxels above the stage's height are taken away. With `site` the
+ * kernel's site is added around it, one voxel outside the building on every side (the grid grows by one each way, so its centre
+ * stays): stakes at the corners and a rope at stage 0, scaffolding (poles and boards every tile) up to above the height while it is
+ * under way. Under 1 the lights are off: the palette returned has no glow. At 1, the grid and the palette as they are.
+ */
+export function stageGrid(g: VoxelGrid, palette: Record<string, PaletteEntry>, stadio: number, o: StageOptions = {}): { grid: VoxelGrid; palette: Record<string, PaletteEntry> } {
+  const s = Math.max(0, Math.min(1, Number.isFinite(stadio) ? stadio : 1));
+  if (s >= 1) return { grid: g, palette };
+  const base = o.base ?? 0;
+  const h = stageHeights(g, palette, base);
+  const cut = s >= 0.9 ? g.Z : stageHeight(h, s);
+  const unlit: Record<string, PaletteEntry> = {};
+  for (const [k, e] of Object.entries(palette)) unlit[k] = e.glow ? { ...e, glow: false } : e;
+  const XY = g.X * g.Y;
+  const kept = new Uint8Array(g.cells);
+  for (let z = 0; z < g.Z; z++) if (z >= cut || (s < 0.9 && z < base)) kept.fill(0, z * XY, (z + 1) * XY);
+  if (!o.site) return { grid: { ...g, cells: kept }, palette: unlit };
+  // One voxel more on every side, and the two letters of the site in the alphabet.
+  const X = g.X + 2, Y = g.Y + 2, Z = g.Z;
+  const alphabet = [...g.alphabet];
+  const letter = (c: string) => (alphabet.includes(c) ? alphabet.indexOf(c) : alphabet.push(c) - 1);
+  const pole = letter(SCAFFOLD_LETTER);
+  const rope = letter(STAKE_LETTER);
+  const cells = new Uint8Array(X * Y * Z);
+  for (let z = 0; z < Z; z++) for (let y = 0; y < g.Y; y++) for (let x = 0; x < g.X; x++) cells[x + 1 + (y + 1) * X + z * X * Y] = kept[x + y * g.X + z * XY];
+  // The box of the building, in the grown grid: its columns, then one voxel out.
+  const colors = colorTable(g.alphabet, palette);
+  let x0 = Infinity, y0 = Infinity, x1 = -1, y1 = -1;
+  for (let z = base; z < g.Z; z++)
+    for (let y = 0; y < g.Y; y++)
+      for (let x = 0; x < g.X; x++)
+        if (colors[g.cells[x + y * g.X + z * XY]]) {
+          x0 = Math.min(x0, x);
+          y0 = Math.min(y0, y);
+          x1 = Math.max(x1, x);
+          y1 = Math.max(y1, y);
+        }
+  if (x1 < 0) return { grid: { X, Y, Z, cells, alphabet }, palette: { ...unlit, ...SITE_PALETTE } };
+  const bx0 = x0, by0 = y0, bx1 = x1 + 2, by1 = y1 + 2;
+  const vpt = Math.max(2, o.vpt ?? 8);
+  const ring = (fn: (x: number, y: number, corner: boolean, i: number) => void) => {
+    let i = 0;
+    for (let x = bx0; x <= bx1; x++) for (const y of [by0, by1]) fn(x, y, x === bx0 || x === bx1, i++);
+    for (let y = by0 + 1; y < by1; y++) for (const x of [bx0, bx1]) fn(x, y, false, i++);
+  };
+  const put = (x: number, y: number, z: number, c: number) => {
+    if (x >= 0 && y >= 0 && x < X && y < Y && z >= 0 && z < Z && !cells[x + y * X + z * X * Y]) cells[x + y * X + z * X * Y] = c;
+  };
+  if (s <= 0) {
+    // Stakes at the corners, a rope between them at the height of a knee.
+    const tall = Math.max(2, Math.round(0.6 * vpt));
+    const knee = base + Math.max(1, Math.round(0.35 * vpt));
+    ring((x, y, corner) => {
+      if (corner) for (let z = base; z < base + tall; z++) put(x, y, z, rope);
+      else put(x, y, knee, rope);
+    });
+  } else {
+    // Poles every tile and at the corners, boards every tile of height, up to a little above what stands.
+    const up = Math.min(Z, Math.max(base + vpt, (s >= 0.9 ? h.top : cut) + Math.round(0.3 * vpt)));
+    ring((x, y, corner) => {
+      const pole_ = corner || (x - bx0) % vpt === 0 || (y - by0) % vpt === 0;
+      for (let z = base; z < up; z++) if (pole_ || (z - base) % vpt === vpt - 1) put(x, y, z, pole);
+    });
+  }
+  return { grid: { X, Y, Z, cells, alphabet }, palette: { ...unlit, ...SITE_PALETTE } };
+}

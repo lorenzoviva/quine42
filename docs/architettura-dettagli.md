@@ -236,6 +236,13 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   Il **pannello** «Il cantiere» (`ui` di `sys.lavoro`): i campi `cantiere.*` sul corpo di ogni viandante, l'impresa più vicina entro 30
   caselle, viaggiano con W (ADR-0139); il pulsante porta dalla borsa ciò che serve, a meno di 6 caselle dal cantiere, e chi è lì lo
   ricorda (peso 2).
+- **L'edificio per stadi** (T245e, ADR-0143): il programma della struttura gira una volta; la griglia finita si mostra filtrata per lo
+  stadio dell'impresa (`stageGrid` in `src/mj/mesh.ts`, pura: le quote del primo pavimento e della base del tetto dagli strati pieni
+  della griglia; 0 niente, 0,2 il piano terra, fino a 0,7 i muri, da 0,9 tutto a luci spente, 1 com'è), con il cantiere attorno (un
+  voxel in più per lato: picchetti e corda a 0, impalcature mentre sale). Impronta, pavimenti e piani seguono lo stadio senza il
+  cantiere (`groundOf`); le stanze valgono dal tetto. Lo stadio sta nel piano del luogo (`plan.stadi` per i lotti, `plan.case` per
+  le case nuove), che il kernel aggiorna quando una fase si chiude (`syncVenturePlan`) e che `settleLots` legge; sul filo va solo
+  `struttura.stadio`, e il renderer rifà la mesh dell'istanza (`stagedBody`).
 - **Personaggi** (ADR-0010, 0013, 0017, 0020): tipo + individuo (`identity`: anche `job family routine story`), `mind` (memoria, umore, modo), azioni
   `segui resta vaga dai nessuna`, oggetti citati → `wanted`. Al massimo 2 dello stesso tipo nel mondo
   caricato; nuovi tipi forgiati esplorando (`ai.maxCast`); ogni individuo è un seme del programma del suo tipo (pochi semi per classe).

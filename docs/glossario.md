@@ -501,6 +501,20 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Da non usare**: `squadra` da sola dove si confonde con quella del Concilio nello studio, `team` (nei documenti), `gruppo`, `ciurma`
 - **Fermo**: `squadra`, `ruolo`, `ruoli` in `world/imprese.json`.
 
+### Stadio di un edificio
+- **Inglese**: `stageGrid`, `stageHeights`, `stagedBody`, `stadio`
+- **Definizione**: a che punto è un edificio che un'impresa costruisce, da 0 (il lotto segnato) a 1 (finito): la griglia del suo modello, finita, mostrata fino a una quota (il piano terra, i muri, il tetto), con il cantiere attorno (picchetti, impalcature) (T245e, ADR-0143).
+- **Dove vive**: `src/mj/mesh.ts`, `src/render/models.ts`, `src/kernel/kernel.ts`
+- **Da non usare**: `fase` (per lo stadio: la fase è dell'impresa), `livello` (è del rilievo), `step`, `stage` (nei documenti)
+- **Fermo**: `stadio` nelle fasi di `world/imprese.json` e in `struttura`, `stadi` e `case` nel piano del luogo, `c.struttura.stadio` sul filo.
+
+### Impalcatura
+- **Inglese**: `SCAFFOLD_LETTER`, `STAKE_LETTER`, `site` (di `stageGrid`)
+- **Definizione**: il cantiere che il kernel aggiunge attorno a un edificio che sale: i picchetti con la corda allo stadio 0, i pali e le tavole finché non è finito. Voxel derivati dalla griglia e dallo stadio, non un modello (T245e, ADR-0143).
+- **Dove vive**: `src/mj/mesh.ts`
+- **Da non usare**: `ponteggio`, `scaffold` (nei documenti)
+- **Fermo**: le due lettere del cantiere.
+
 ### Cantiere
 - **Inglese**: `cantierePanels`, `posto` (dell'impresa)
 - **Definizione**: dove un'impresa si lavora (`posto`), e il pannello «Il cantiere» che dice dell'impresa più vicina a che punto è, cosa manca e chi ci lavora (T245d, ADR-0142).
