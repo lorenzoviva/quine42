@@ -4265,8 +4265,8 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Quando è fatto: tutti e tre passano `verifica.ts` con 0 fault e 0 rotture della quarta parete. Sicurezza: nessuna superficie nuova (solo `lab/`).
 - Esito: `orichalcum` (`2ced05c`), `neapolis` (`eb822f7`) e `sidera` (`5e90652`) passano tutti i controlli (`metaBreak`, `canonBreak`, `bibleBreaks`, `validateForged` su 25 moduli, `validatePlan` e `validateLayout` su 19 luoghi, `checkSociety` su 24 persone, `reviewPlot` su 8 trame, `validateNewRune` su 12 rune, `modelErrors` + varianza ≥ 0,15 su 16 modelli, `analyzeSound` su 8 suoni) e 600-900 tick sul `Kernel` vero con **0 fault**. Sicurezza: nessuna superficie nuova.
 
-### T273 · Integrare a costo zero nei quattro universi esplorabili le strutture, i modelli e i suoni creati su Claude Cloud — `in attesa` (dipende da T269, T270, T271, T272)
-- Cloud: finita il 05/11 (sessione A, `752288c`); non lanciare in locale, lo porta T279.
+### T273 · Integrare a costo zero nei quattro universi esplorabili le strutture, i modelli e i suoni creati su Claude Cloud — `fatto` (`c5ecbd8`)
+- Cloud: finita il 05/11 (sessione A, `752288c`), portata da T279.
 - Pipeline: claude · stima 4% · approvato · priorità 1
 - Contesto: richiesta esplicita dell'autore del 05/11 («integrare le modifiche svolte in cloud da claude nei quattro universi esplorabili. E se si può fare a costo zero (solo su abbonamento e/o offline) mi piacerebbe vedere le magnifiche strutture create in cloud in game»). Nasce da T269 (`dossier T269`), T270 (`dossier T270`), T271 (`dossier T271`) e T272 (`dossier T272`). Poiché tutti gli XML sono già pronti e validati, se i modelli delle strutture sono registrati in `models/struttura-<ownModelId(concetto).slice(0, 30)>.xml` e in `models/index.json`, `Kernel.lotsOf` (`this.forms.resolve(own, classe)`) trova subito `own === model` senza mettere `wanted`, quindi `ModelDirector` non chiama mai lo Scultore (**0 chiamate API, costo 0,00 $**).
 - Cosa fare:
@@ -4309,7 +4309,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: non serve.
 - Quando è fatto: commit su `task/T276`. Sicurezza: nessuna superficie nuova.
 
-### T277 · Integrare i 60 modelli di Claude Cloud — `in attesa`
+### T277 · Integrare i 60 modelli di Claude Cloud — `fatto` (`c5ecbd8`, via T279)
 - Pipeline: claude · stima 1% · approvato · priorità 4
 - Sforzo: high.
 - Cloud: la sessione A l'ha unito tutto (`e0466b7`, punta del ramo `b6cff15`): non lanciare in locale, lo porta T279, che alla sua integrazione lo chiude.
@@ -4346,7 +4346,8 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Quando è fatto: commit su `task/T280`. All'integrazione l'orchestratore segna `fatto` T245d, T245e, T245f. Sicurezza: scrivi l'esito, il ramo tocca sessione, sandbox e validatore.
 
 ### T281 · I punti di `placeInside` che il kernel trova bloccati dentro le strutture — `da fare` (dipende da T279)
-- Pipeline: claude · stima 4% · priorità 5
+- Pipeline: claude · stima 4% · approvato · priorità 5
+- Sforzo: extra.
 - Contesto: difetto trovato dalla sessione A, sezione «Un difetto del kernel» di `lab/banco/universi-cloud/INTEGRAZIONE.md`: `interiorPoints` trova sgombro un punto che `kernel.free(x, y, 0.15)` trova bloccato (`formBlocks`): casa a graticcio del seme 21 su 32 la vecchia e 15 su 15 la procedurale a yaw 0, 0 girata di -π/2; catalogo da 10 su 59 a 61 su 128. Ciò che si mette dentro una struttura può finire nei muri. Per questo `grande` è rimasta la casa vecchia (`SEME_TENUTI` in `strumenti/cloud.ts`).
 - Cosa fare: guarda se `interiorPoints` e `formsUnder`/`rampBlocks` usano la stessa rotazione e lo stesso livello (senza `z`, `free` misura al suolo un pavimento rialzato); correggi; togli `grande` da `SEME_TENUTI`, rilancia `integra.ts`; alza `Z` di `KERNEL_VERSION`.
 - Test: `tests/lots.test.ts` con la casa nuova, tutti i punti e non quattro tiri; suite intera e typecheck con i loro turni.
