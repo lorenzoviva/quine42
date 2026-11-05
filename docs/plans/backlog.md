@@ -4612,3 +4612,19 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Test: i programmi provati girano nel motore e passano i controlli; typecheck con il suo turno.
 - Browser: non serve; fogli di contatto nel commit.
 - Quando è fatto: commit su `task/T303`. Nell'esito il costo misurato di ogni via e quanto ha speso la misura.
+
+### T304 · La lavagna della pagina web della pipeline: titoli in Markdown, priorità, sforzo e step sulle tile, gli ultimi task finiti — `da fare`
+- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 4
+- Contesto: richiesta dell'autore in chat (05/11, epoca 291) sulla pagina web della pipeline (`tools/pipeline/web.mjs`, T69; il Markdown in `tools/pipeline/markdown.mjs`). Nasce da T69 e T208: `dossier T69`, `dossier T208`.
+- Cosa fare: (1) nella lavagna il titolo di ogni task si rende in Markdown (come già la vista Markdown), e ogni `Txx`/`txxx` citato nel titolo è un link al task (lo stesso che apre il dossier o il blocco nella pagina). (2) In alto a destra di ogni tile, accanto al provider e alla stima («claude», «5%»), tre etichette: priorità, sforzo, step. Priorità e sforzo colorati in scala (priorità alta = colore più caldo; sforzo da `low` a `max` in una scala sola), lo step con un colore fisso ricavato da un hash del suo numero (step diversi, colori diversi, sempre uguali tra un caricamento e l'altro); un task senza step non ha l'etichetta. Leggibili sul tema scuro della pagina. (3) Sotto la chat con l'orchestratore e il diario, una lista degli ultimi task completati (almeno 10, più recenti in alto): numero (link), titolo, quando, commit, e la riga dell'esito se c'è, così l'autore vede cosa è successo mentre l'orchestratore lavora da solo.
+- Test: se `tools/pipeline` ha test (`tests/pipeline*.test.ts`), uno per il link ai Txx nel titolo e uno per il colore dello step stabile; typecheck con il suo turno.
+- Browser: `node tools/pipeline/pipeline.mjs web --porta <libera>` (mai la 4242 del processo acceso), screenshot della lavagna con le etichette e della lista dei finiti; chiudi il processo alla fine.
+- Quando è fatto: commit su `task/T304`. Nell'esito: dove sta ciò che è cambiato e che la pagina accesa si aggiorna solo al riavvio del processo dell'orchestratore.
+
+### T305 · Argon anche con l'abbonamento Google Pro — `da fare` (dopo T304)
+- Pipeline: claude · sforzo high · stima 1% · approvato · priorità 4
+- Contesto: l'autore (05/11, epoca 291): ha Google Pro, non Ultra, e ha accesso ad Argon; ma in `tools/pipeline/config.json → piani.google.pro.disponibili` Argon manca, quindi scegliendo «Pro» nella scheda consumo e budget della pagina web Argon si spegne. Nasce da T255 e ADR-0119: `dossier T255`. Dopo T304 perché toccano la stessa pagina.
+- Cosa fare: (1) `argon` tra i `disponibili` del piano `google.pro` (tenendo i limiti di D31: solo task piccoli); controlla in `pipeline.mjs` e `web.mjs` che nient'altro leghi Argon a Ultra (scheda consumo e budget, `windowAdmits`, slot). (2) `abbonamenti.google` a `pro`, come dice l'autore; il `moltiplicatoreStima` di Pro (2,5) scala le stime di gemini e agy: scrivi nell'esito se le misure di T268 erano fatte su Ultra o su Pro e, se su Pro, proponi il moltiplicatore giusto senza cambiarlo. (3) Aggiorna ADR-0119 o la riga di `docs/pipeline/README.md` che lo descrive, e `docs/pipeline/modelli.md` se dice che Argon è solo Ultra.
+- Test: se ci sono test della pipeline, uno che con `google: pro` Argon è disponibile; typecheck con il suo turno.
+- Browser: nella pagina web (porta libera) scegliere Pro lascia Argon acceso.
+- Quando è fatto: commit su `task/T305`. Nell'esito che il processo dell'orchestratore legge `config.json` solo all'avvio.
