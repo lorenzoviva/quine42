@@ -105,3 +105,15 @@ da lì lo 0,32.
 
 La storia nella storia: le didascalie sotto i titoli delle pagine sono le didascalie del narratore (riquadri gialli, inchiostro nero); chi parla parla in un fumetto
 (il gerboa del footer, l'etichetta del palco). I fumetti degli NPC nel gioco non si toccano qui: sono di T287, se vince questa veste.
+
+## La verifica (05/11, sulla build in `vite preview`)
+
+- **Chrome (Claude in Chrome)**, finestra a 2560 px: il selettore porta dalla sobria alla fumetto (foglio, icona e `localStorage` della fumetto), la scelta vale anche
+  su un'altra pagina; la deriva di `body::before` è in corsa (34 s). Con `document.visibilityState` a `hidden` e l'evento `visibilitychange` (passare a un'altra
+  scheda con l'estensione non nasconde la pagina) l'animazione va in pausa e il suo tempo resta fermo per 1,5 s, poi riparte; resta una sola animazione. Il gerboa del
+  footer parla in un fumetto; la console non ha errori della pagina né rifiuti della CSP. La finestra non scende sotto i 2560 px e la CSP vieta di mettere il sito in un
+  iframe: le misure esatte sono in Chrome headless.
+- **Chrome headless**, con l'emulazione del dispositivo: a 1920 × 1080 e 390 × 844 la deriva è in corsa, nessuno scorrimento orizzontale, il logo è 173 × 55 e
+  122 × 39 px sulla stessa riga del menu; con `prefers-reduced-motion: reduce` l'animazione non parte. Le sei pagine del sito reggono a entrambe le misure.
+- **Il contrasto sopra i pois**, misurato sui pixel delle catture: il pois ciano più chiaro (`#0c5269`) lascia il testo a 8,0:1, il grigio secondario a 4,95, il giallo
+  a 6,8 e il ciano a 6,1; il pois rosa più chiaro (`#56103b`) sopra 7,5 per tutti.
