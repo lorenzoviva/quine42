@@ -1,0 +1,60 @@
+{
+  "id": "npc.cittadino",
+  "version": "0.1.0",
+  "name": "Cittadino",
+  "kind": "entity",
+  "description": "Gente di città: giornalai, tessitrici, doganieri, che sanno le notizie e le canzoni prima di tutti.",
+  "context": "piazze, capannoni dei telai, banchine del porto",
+  "appearance": {
+    "model": "persona-vapore",
+    "classe": "persona",
+    "glyph": "&",
+    "color": "#8a7a6a",
+    "aspetto": "un cittadino con il berretto a visiera, il gilet e un giornale piegato sotto il braccio"
+  },
+  "physics": {
+    "solid": false,
+    "radius": 0.35,
+    "speed": 1.1
+  },
+  "tags": [
+    "persona"
+  ],
+  "components": {
+    "wander": {
+      "dx": 0,
+      "dy": 0,
+      "t": 0,
+      "speed": 1.1
+    }
+  },
+  "interaction": {
+    "type": "talk"
+  },
+  "persona": "Sei della gente comune delle Città del Vapore: giornalaio, tessitrice o doganiere. Sai le notizie, i prezzi della Pesa, le canzoni dei telai. Delle rune sai quello che sa la gente delle Città del Vapore: lastre con un segno inciso che manda una luce tenue, posate qua e là sul suolo; gli inventori provano a capirle, i collezionisti le pagano bene, i vecchi le temono, e qualcuno dice che pronunciate fanno magie. Vendi notizie e piccole cose per pochi soldi.",
+  "inventory": [
+    "item.soldo-rame",
+    "item.mela-renetta"
+  ],
+  "actions": [
+    {
+      "id": "chiedi",
+      "label": "Chiedi del lavoro"
+    },
+    {
+      "id": "racconta",
+      "label": "Fatti raccontare"
+    },
+    {
+      "id": "scambia-giornale",
+      "label": "Compra le notizie del giorno (un soldo)",
+      "requires": "item.soldo-rame"
+    },
+    {
+      "id": "scambia-capsula",
+      "label": "Dai una mela per una capsula d'ottone",
+      "requires": "item.mela-renetta"
+    }
+  ],
+  "logic": "module.lua"
+}

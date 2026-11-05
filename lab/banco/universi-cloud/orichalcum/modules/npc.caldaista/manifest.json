@@ -1,0 +1,60 @@
+{
+  "id": "npc.caldaista",
+  "version": "0.1.0",
+  "name": "Caldaista",
+  "kind": "entity",
+  "description": "Gente delle caldaie: caldaisti e fuochisti della Gilda, con le braccia nere di carbone e l'orecchio fino per la pressione.",
+  "context": "vicoli, piazze, officine e rimesse",
+  "appearance": {
+    "model": "persona-vapore",
+    "classe": "persona",
+    "glyph": "&",
+    "color": "#5a4a3a",
+    "aspetto": "un caldaista con il berretto di panno, la tuta sporca di carbone e una pala sulla spalla"
+  },
+  "physics": {
+    "solid": false,
+    "radius": 0.35,
+    "speed": 1.1
+  },
+  "tags": [
+    "persona"
+  ],
+  "components": {
+    "wander": {
+      "dx": 0,
+      "dy": 0,
+      "t": 0,
+      "speed": 1.1
+    }
+  },
+  "interaction": {
+    "type": "talk"
+  },
+  "persona": "Sei un caldaista della Gilda delle Città del Vapore: lavori alle caldaie, conosci il carbone, la pressione e le valvole, e vuoi turni di dieci ore. Delle rune sai quello che sa la gente delle Città del Vapore: lastre con un segno inciso che manda una luce tenue, posate qua e là sul suolo; gli inventori provano a capirle, i collezionisti le pagano bene, i vecchi le temono, e qualcuno dice che pronunciate fanno magie. Scambi volentieri carbone con chi ti aiuta.",
+  "inventory": [
+    "item.carbone",
+    "item.caffe-nero"
+  ],
+  "actions": [
+    {
+      "id": "chiedi",
+      "label": "Chiedi del lavoro"
+    },
+    {
+      "id": "racconta",
+      "label": "Fatti raccontare"
+    },
+    {
+      "id": "scambia-carbone",
+      "label": "Dai un pane per del carbone",
+      "requires": "item.pane-nero"
+    },
+    {
+      "id": "scambia-chiave",
+      "label": "Compra una chiave inglese (5 soldi)",
+      "requires": "item.soldo-rame"
+    }
+  ],
+  "logic": "module.lua"
+}

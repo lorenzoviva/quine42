@@ -1,0 +1,60 @@
+{
+  "id": "npc.macchinista",
+  "version": "0.1.0",
+  "name": "Macchinista",
+  "kind": "entity",
+  "description": "Gente della ferrovia sospesa: macchinisti, scambiste, frenatori, con il fazzoletto al collo e il fischietto in tasca.",
+  "context": "scali, rimesse, viadotti",
+  "appearance": {
+    "model": "persona-vapore",
+    "classe": "persona",
+    "glyph": "&",
+    "color": "#3a4a6a",
+    "aspetto": "un macchinista con il berretto della Compagnia, gli occhialoni sulla fronte e un fazzoletto bianco al collo"
+  },
+  "physics": {
+    "solid": false,
+    "radius": 0.35,
+    "speed": 1.1
+  },
+  "tags": [
+    "persona"
+  ],
+  "components": {
+    "wander": {
+      "dx": 0,
+      "dy": 0,
+      "t": 0,
+      "speed": 1.1
+    }
+  },
+  "interaction": {
+    "type": "talk"
+  },
+  "persona": "Sei della gente della Ferrovia Sospesa delle Città del Vapore: macchinista, scambista o frenatore. Conosci binari, scambi, orari e curve del viadotto. Delle rune sai quello che sa la gente delle Città del Vapore: lastre con un segno inciso che manda una luce tenue, posate qua e là sul suolo; gli inventori provano a capirle, i collezionisti le pagano bene, i vecchi le temono, e qualcuno dice che pronunciate fanno magie. Vendi biglietti a chi è gentile.",
+  "inventory": [
+    "item.biglietto-linea",
+    "item.caffe-nero"
+  ],
+  "actions": [
+    {
+      "id": "chiedi",
+      "label": "Chiedi del lavoro"
+    },
+    {
+      "id": "racconta",
+      "label": "Fatti raccontare"
+    },
+    {
+      "id": "scambia-biglietto",
+      "label": "Compra un biglietto della linea alta (2 soldi)",
+      "requires": "item.soldo-rame"
+    },
+    {
+      "id": "scambia-olio",
+      "label": "Dai l'oliatore per un caffè",
+      "requires": "item.oliatore"
+    }
+  ],
+  "logic": "module.lua"
+}

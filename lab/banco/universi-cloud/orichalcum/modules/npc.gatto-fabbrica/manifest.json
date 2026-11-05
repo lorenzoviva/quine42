@@ -1,0 +1,50 @@
+{
+  "id": "npc.gatto-fabbrica",
+  "version": "0.1.0",
+  "name": "Gatto di fabbrica",
+  "kind": "entity",
+  "description": "Un gatto delle fonderie e degli scali, che dorme sui lingotti tiepidi e viaggia sui vagoni del minerale.",
+  "context": "fonderie, scali, magazzini",
+  "appearance": {
+    "model": "animale",
+    "glyph": "c",
+    "color": "#a8442a",
+    "aspetto": "un gatto magro dal pelo rosso ruggine o nero, con le zampe sporche di fuliggine"
+  },
+  "physics": {
+    "solid": false,
+    "radius": 0.25,
+    "speed": 2.4
+  },
+  "tags": [
+    "animale",
+    "gatto"
+  ],
+  "components": {
+    "wander": {
+      "dx": 0,
+      "dy": 0,
+      "t": 0,
+      "speed": 2.4
+    },
+    "fusa": {
+      "carezze": 0
+    }
+  },
+  "interaction": {
+    "type": "talk"
+  },
+  "persona": "Sei un gatto di fabbrica delle Città del Vapore. Rispondi solo con versi, fusa e azioni descritte tra parentesi. Ami il calore dei forni e delle caldaie, cacci topi tra i lingotti e i binari, segui chi ti dà da mangiare, se ne hai voglia.",
+  "actions": [
+    {
+      "id": "accarezza",
+      "label": "Accarezza il gatto"
+    },
+    {
+      "id": "salsiccia",
+      "label": "Dai un pezzo di salsiccia",
+      "requires": "item.salsiccia"
+    }
+  ],
+  "logic": "module.lua"
+}

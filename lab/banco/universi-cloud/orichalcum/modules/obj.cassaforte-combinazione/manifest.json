@@ -1,0 +1,54 @@
+{
+  "id": "obj.cassaforte-combinazione",
+  "version": "0.1.0",
+  "name": "Cassaforte a combinazione",
+  "kind": "entity",
+  "description": "Una cassaforte di ghisa annerita con una manopola a dodici tacche e una maniglia d'ottone. Chi ascolta bene sente lo scatto delle tacche giuste.",
+  "context": "magazzini, fonderie, uffici delle corporazioni",
+  "appearance": {
+    "model": "cassaforte-ghisa",
+    "classe": "mobile",
+    "glyph": "■",
+    "color": "#3e4248",
+    "aspetto": "una cassaforte di ghisa scura con una manopola rotonda a tacche, una maniglia d'ottone e i rivetti sugli spigoli"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.45
+  },
+  "tags": [
+    "cassaforte",
+    "ghisa",
+    "metallo"
+  ],
+  "components": {
+    "combinazione": {
+      "tacca": 0,
+      "giusti": 0,
+      "aperta": false,
+      "tentativi": 0
+    }
+  },
+  "interaction": {
+    "type": "lua"
+  },
+  "actions": [
+    {
+      "id": "destra",
+      "label": "Gira la manopola a destra"
+    },
+    {
+      "id": "sinistra",
+      "label": "Gira la manopola a sinistra"
+    },
+    {
+      "id": "ascolta",
+      "label": "Appoggia l'orecchio"
+    },
+    {
+      "id": "maniglia",
+      "label": "Tira la maniglia"
+    }
+  ],
+  "logic": "module.lua"
+}

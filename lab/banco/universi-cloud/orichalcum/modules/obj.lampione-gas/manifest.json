@@ -1,0 +1,54 @@
+{
+  "id": "obj.lampione-gas",
+  "version": "0.1.0",
+  "name": "Lampione a gas",
+  "kind": "entity",
+  "description": "Un lampione di ghisa con la lanterna di vetro giallo: il lampionaio lo accende di sera; una scintilla basta a riaccenderlo.",
+  "context": "strade, piazze, banchine e giardini delle Città del Vapore",
+  "appearance": {
+    "model": "lampione-gas",
+    "classe": "monumento",
+    "glyph": "ǐ",
+    "color": "#2e3236",
+    "aspetto": "un lampione di ghisa nera alto e sottile con una lanterna di vetro giallo in cima"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.25
+  },
+  "tags": [
+    "lampione",
+    "ghisa",
+    "luce"
+  ],
+  "components": {
+    "lampione": {
+      "rotto": false,
+      "acceso_a_mano": false
+    },
+    "luce": {
+      "raggio": 4,
+      "accesa": false,
+      "colore": "#ffcf70"
+    }
+  },
+  "interaction": {
+    "type": "lua"
+  },
+  "actions": [
+    {
+      "id": "accendi",
+      "label": "Accendi il becco"
+    },
+    {
+      "id": "spegni",
+      "label": "Chiudi il gas"
+    },
+    {
+      "id": "ripara",
+      "label": "Pulisci il vetro",
+      "requires": "item.straccio"
+    }
+  ],
+  "logic": "module.lua"
+}

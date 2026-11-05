@@ -1,0 +1,49 @@
+{
+  "id": "obj.bacheca-corporazione",
+  "version": "0.1.0",
+  "name": "Bacheca delle corporazioni",
+  "kind": "entity",
+  "description": "Una bacheca di legno con la tettoia di lamiera, coperta di avvisi delle corporazioni: turni, prezzi della Pesa, offerte di lavoro, ricompense.",
+  "context": "piazze, vicoli, banchine",
+  "appearance": {
+    "model": "bacheca-corporazione",
+    "classe": "monumento",
+    "glyph": "▥",
+    "color": "#8a6a44",
+    "aspetto": "una bacheca di legno scuro con una tettoia di lamiera e fogli di carta appuntati"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.4
+  },
+  "tags": [
+    "bacheca",
+    "legno",
+    "avvisi"
+  ],
+  "components": {
+    "bacheca": {
+      "letti": 0,
+      "affissi": 0
+    }
+  },
+  "interaction": {
+    "type": "lua"
+  },
+  "actions": [
+    {
+      "id": "leggi",
+      "label": "Leggi gli avvisi"
+    },
+    {
+      "id": "lavoro",
+      "label": "Cerca lavoro"
+    },
+    {
+      "id": "affiggi",
+      "label": "Appendi un avviso",
+      "requires": "item.capsula-pneumatica"
+    }
+  ],
+  "logic": "module.lua"
+}

@@ -1,0 +1,60 @@
+{
+  "id": "npc.aeronauta",
+  "version": "0.1.0",
+  "name": "Aeronauta",
+  "kind": "entity",
+  "description": "Gente dei dirigibili: aeronauti, ormeggiatori e osservatori del vento, con i guanti di pelle e la testa per aria.",
+  "context": "torri d'ormeggio e piazzali degli aeronauti",
+  "appearance": {
+    "model": "persona-vapore",
+    "classe": "persona",
+    "glyph": "&",
+    "color": "#8a6a3a",
+    "aspetto": "un'aeronauta con il giubbotto di pelle, la sciarpa lunga, i guanti da pilota e il cuffiotto"
+  },
+  "physics": {
+    "solid": false,
+    "radius": 0.35,
+    "speed": 1.1
+  },
+  "tags": [
+    "persona"
+  ],
+  "components": {
+    "wander": {
+      "dx": 0,
+      "dy": 0,
+      "t": 0,
+      "speed": 1.1
+    }
+  },
+  "interaction": {
+    "type": "talk"
+  },
+  "persona": "Sei della gente dei dirigibili delle Città del Vapore: aeronauta, ormeggiatore o osservatore del vento. Parli di cavi, nodi, venti e nuvole. Delle rune sai quello che sa la gente delle Città del Vapore: lastre con un segno inciso che manda una luce tenue, posate qua e là sul suolo; gli inventori provano a capirle, i collezionisti le pagano bene, i vecchi le temono, e qualcuno dice che pronunciate fanno magie. Paghi bene tubi di rame e tela per le riparazioni.",
+  "inventory": [
+    "item.benda",
+    "item.orologio-tasca"
+  ],
+  "actions": [
+    {
+      "id": "chiedi",
+      "label": "Chiedi del lavoro"
+    },
+    {
+      "id": "racconta",
+      "label": "Fatti raccontare"
+    },
+    {
+      "id": "consegna-tubo",
+      "label": "Consegna un tubo di rame",
+      "requires": "item.tubo-rame"
+    },
+    {
+      "id": "scambia-mappa",
+      "label": "Scambia una mappa dei cunicoli",
+      "requires": "item.mappa-cunicoli"
+    }
+  ],
+  "logic": "module.lua"
+}
