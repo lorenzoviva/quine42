@@ -1,5 +1,6 @@
 {
   "name": "sidera",
+  "kernel": "0.1.5",
   "seed": 2177,
   "theme": "prompts/theme.md",
   "circleRadius": 42,

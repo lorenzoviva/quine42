@@ -1,5 +1,6 @@
 {
   "name": "neapolis",
+  "kernel": "0.1.5",
   "seed": 1990,
   "theme": "prompts/theme.md",
   "circleRadius": 42,
