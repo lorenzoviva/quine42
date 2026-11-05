@@ -1,0 +1,464 @@
+<!--
+La Galleria dell'Artista (corona): il museo dei modelli e la bottega dello Scultore.
+Scritto da Gemini CLI (Gemini 3.8 Flash, abbonamento) il 23/10/2026, task T19.
+Scatola: 14 × 14 × 10 caselle, 112 × 112 × 80 voxel, 8 voxel per casella.
+Lettere chiave:
+  O = porta (lettera O, nome "porta", al centro x=56, y=74, z=0..17, atrio interno vuoto e passante)
+  F = insegna ("GALLERIA DELL'ARTISTA", neon rosa ff8ad8 glow fisso su due righe sopra la cornice)
+  P = targa scura opaca per l'insegna
+  Q = plinto (lettera Q, nome "plinto", piano superiore 16×16 voxel a z=7 nel piazzale frontale a sinistra)
+  M = metallo nero cybernetico primario (monolite cubo, paraste, telai e modanature)
+  m = metallo secondario scuro (pannellature titanio, cornici secondarie, zoccoli)
+  C = cemento grafite (pavimentazione piazzale, cordoli, gradini d'onore)
+  S = acciaio chiaro (finiture modanature, corrimano scaletta, profili sottili)
+  s = acciaio scuro (fughe piazzale, zoccolature e giunzioni)
+  V = vetro scuro riflettente (zoccolo arretrato e grande vetrata interna della cornice)
+  v = fasce di riflesso azzurrato-cenerino freddo
+  w = fasce di riflesso magenta/rosa
+  N = neon rosa vivo d'accento (ff8ad8 glow)
+  n = neon rosa tenue / soffuso (c0589a glow)
+  x = buffer temporaneo per l'animazione (hidden)
+Fasi pulsanti della cornice (1..8):
+  1..8 = gradiente continuo di 8 fasi (da 8a2862 a ffa0e2 con glow) per la respirazione della grande cornice monumentale.
+Architettura:
+  Monolito cubico nero puro (~9 × 9 caselle = 73 × 69 voxel, alto ~7 caselle = 57 voxel, z=8..65) nella metà di fondo.
+  Zoccolo di vetro scuro arretrato (x=28..84, y=14..66, z=0..7) con fessura perimetrale neon rosa sotto lo sbalzo: il cubo galleggia.
+  Grande cornice monumentale da quadro al neon rosa sulla facciata sud (x=32..80, z=8..52) con dentro la vetrata riflettente.
+  Porta O a z=0 centrata alla base della cornice con atrio interno vuoto (profondo 8 voxel) e scaletta frontale a 2 gradini.
+  Metà davanti: ampio piazzale in lastre di cemento grafite (y=74..111) con percorso d'onore centrale.
+  Plinto scultoreo (2 × 2 caselle = 16 × 16 voxel, alto 1 casella = 8 voxel, z=0..7) a sinistra (x=20..35, y=86..101) con piano Q vuoto e 72 voxel liberi sopra.
+  Insegna neon rosa "GALLERIA DELL'ARTISTA" su due righe sopra la cornice (riga 1 z=63..67, riga 2 z=56..60).
+Animazione "quadro" (8 frame):
+  Respirazione armonica della cornice monumentale al neon rosa.
+-->
+<sequence values="BMmCSsVvwNnFPOQx12345678" size="112 112 80" symmetry="()" name="Galleria dell'Artista">
+  <!-- Materiali e palette neon punk -->
+  <color symbol="M" value="14141a" name="metallo primario"/>
+  <color symbol="m" value="22242e" name="metallo secondary"/>
+  <color symbol="C" value="34363e" name="cemento grafite"/>
+  <color symbol="S" value="8a8f9c" name="acciaio chiaro"/>
+  <color symbol="s" value="525662" name="acciaio scuro"/>
+  <color symbol="V" value="16202c" name="vetro scuro"/>
+  <color symbol="v" value="2c4254" name="riflesso vetro freddo"/>
+  <color symbol="w" value="48223c" name="riflesso magenta"/>
+  <color symbol="N" value="ff8ad8" glow="True" name="neon rosa vivo"/>
+  <color symbol="n" value="c0589a" glow="True" name="neon rosa tenue"/>
+  <color symbol="P" value="0a0810" name="targa insegna"/>
+  <color symbol="F" value="ff8ad8" glow="True" name="insegna"/>
+  <color symbol="O" value="1a1824" name="porta"/>
+  <color symbol="Q" value="5a5c68" name="plinto"/>
+  <color symbol="x" hidden="True" name="buffer animazione"/>
+
+  <!-- 8 Fasi della respirazione neon rosa della cornice (1..8) -->
+  <color symbol="1" value="8a2862" glow="True" name="fase rosa profondo"/>
+  <color symbol="2" value="a83278" glow="True" name="fase rosa 2"/>
+  <color symbol="3" value="c84292" glow="True" name="fase rosa 3"/>
+  <color symbol="4" value="e858ae" glow="True" name="fase rosa 4"/>
+  <color symbol="5" value="ffa0e2" glow="True" name="fase rosa apice"/>
+  <color symbol="6" value="e858ae" glow="True" name="fase rosa 6"/>
+  <color symbol="7" value="c84292" glow="True" name="fase rosa 7"/>
+  <color symbol="8" value="a83278" glow="True" name="fase rosa 8"/>
+
+  <!-- ================================================================= -->
+  <!-- 1. BASAMENTO PERIMETRALE E PIAZZALE FRONTALE (z = 0..1)           -->
+  <!-- ================================================================= -->
+  <!-- Basamento generale del piazzale (x=8..104, y=74..110, z=0) -->
+  <box at="56 92 0" size="97 37 1" color="C"/>
+  <box at="56 92 1" size="95 35 1" color="m"/>
+
+  <!-- Sagrato e percorso d'onore centrale (x=46..66, y=74..111, z=0..1) -->
+  <box at="56 92 1" size="21 35 1" color="C"/>
+  <!-- Filetti luminosi segnapassi incassati lungo i bordi del percorso d'onore -->
+  <box at="45 92 1" size="1 35 1" color="n"/>
+  <box at="67 92 1" size="1 35 1" color="n"/>
+
+  <!-- Lastricato a piastre con giunti di dilatazione in acciaio scuro -->
+  <box at="56 80 1" size="93 1 1" color="s"/>
+  <box at="56 90 1" size="93 1 1" color="s"/>
+  <box at="56 100 1" size="93 1 1" color="s"/>
+  <box at="30 92 1" size="1 35 1" color="s"/>
+  <box at="82 92 1" size="1 35 1" color="s"/>
+
+  <!-- ================================================================= -->
+  <!-- 2. IL PLINTO SCULTOREO (2×2 caselle = 16×16 voxel, alto 1 casella)-->
+  <!-- Posizionato a sinistra: x=20..35, y=86..101, z=0..7               -->
+  <!-- Spazio sopra (z=8..79) interamente libero!                        -->
+  <!-- ================================================================= -->
+  <!-- Zoccolo inferiore con modanatura rientrata e neon alla base (z=0) -->
+  <box at="27.5 93.5 0" size="18 18 1" color="s"/>
+  <box at="27.5 93.5 0" size="16 16 1" color="n"/>
+
+  <!-- Corpo solido del plinto in titanio/metallo scuro (z=1..6) -->
+  <box at="27.5 93.5 1" size="16 16 6" color="m"/>
+  <box at="27.5 93.5 1" size="14 14 6" color="C"/>
+  <!-- Angolari di rinforzo in acciaio scuro -->
+  <box at="20 86 1" size="1 1 6" color="S"/>
+  <box at="35 86 1" size="1 1 6" color="S"/>
+  <box at="20 101 1" size="1 1 6" color="S"/>
+  <box at="35 101 1" size="1 1 6" color="S"/>
+
+  <!-- Cordolo perimetrale superiore del plinto (z=6) -->
+  <box at="27.5 93.5 6" size="18 18 1" color="M"/>
+  <box at="27.5 93.5 6" size="16 16 1" color="S"/>
+
+  <!-- PIANO VUOTO DEL PLINTO (z=7, lettera Q con nome "plinto") -->
+  <box at="27.5 93.5 7" size="16 16 1" color="Q"/>
+
+  <!-- ================================================================= -->
+  <!-- 3. LO ZOCCOLO DI VETRO SCURO ARRETRATO (x=28..84, y=14..66, z=0..7)-->
+  <!-- Arretrato di 8 voxel rispetto al cubo (x=20..92, y=8..74)         -->
+  <!-- ================================================================= -->
+  <!-- Basamento zoccolo in pietra grafite a z=0 -->
+  <box at="56 40 0" size="59 55 1" color="s"/>
+  <box at="56 40 0" size="57 53 1" color="M"/>
+
+  <!-- Pareti dello zoccolo in vetro scuro riflettente (z=1..7) -->
+  <box at="56 40 1" size="57 53 7" color="V"/>
+  <box at="56 40 1" size="55 51 7" color="m"/>
+  <box at="56 40 1" size="49 45 7" color="B"/>
+
+  <!-- Pilastri/montanti verticali dello zoccolo (passo regolare ogni 8 voxel) -->
+  <box at="28 20 1" size="2 2 7" color="M"/>
+  <box at="28 30 1" size="2 2 7" color="M"/>
+  <box at="28 40 1" size="2 2 7" color="M"/>
+  <box at="28 50 1" size="2 2 7" color="M"/>
+  <box at="28 60 1" size="2 2 7" color="M"/>
+  <box at="84 20 1" size="2 2 7" color="M"/>
+  <box at="84 30 1" size="2 2 7" color="M"/>
+  <box at="84 40 1" size="2 2 7" color="M"/>
+  <box at="84 50 1" size="2 2 7" color="M"/>
+  <box at="84 60 1" size="2 2 7" color="M"/>
+  <box at="38 14 1" size="2 2 7" color="M"/>
+  <box at="48 14 1" size="2 2 7" color="M"/>
+  <box at="56 14 1" size="2 2 7" color="M"/>
+  <box at="64 14 1" size="2 2 7" color="M"/>
+  <box at="74 14 1" size="2 2 7" color="M"/>
+  <box at="38 66 1" size="2 2 7" color="M"/>
+  <box at="48 66 1" size="2 2 7" color="M"/>
+  <box at="64 66 1" size="2 2 7" color="M"/>
+  <box at="74 66 1" size="2 2 7" color="M"/>
+
+  <!-- Fascia neon rosa tenue sotto lo sbalzo a z=7: crea l'effetto di levitazione -->
+  <box at="56 40 7" size="61 57 1" color="n"/>
+
+  <!-- ================================================================= -->
+  <!-- 4. IL GRANDE CUBO NERO (x=20..92, y=8..74, z=8..65)               -->
+  <!-- Dimensioni: 73 × 67 voxel, alto 58 voxel (~9×9×7 caselle)         -->
+  <!-- ================================================================= -->
+  <!-- Piastra di base dello sbalzo (z=8) -->
+  <box at="56 41 8" size="73 67 1" color="M"/>
+  <box at="56 41 8" size="71 65 1" color="m"/>
+
+  <!-- Pareti perimetrali del cubo nero (z=9..63) -->
+  <box at="56 41 9" size="73 67 55" color="M"/>
+  <box at="56 41 9" size="69 63 55" color="m"/>
+  <!-- Vano interno dell'edificio (sala espositiva e atelier dello Scultore) -->
+  <box at="56 41 9" size="65 59 55" color="B"/>
+  <box at="56 41 8" size="65 59 1" color="C"/>
+
+  <!-- Pilastri angolari monumentali del cubo -->
+  <box at="22 10 8" size="5 5 57" color="M"/>
+  <box at="90 10 8" size="5 5 57" color="M"/>
+  <box at="22 72 8" size="5 5 57" color="M"/>
+  <box at="90 72 8" size="5 5 57" color="M"/>
+
+  <!-- Modanature e fughe geometriche verticali sui fianchi del cubo (x=20 e x=92) -->
+  <box at="20 25 12" size="1 1 48" color="s"/>
+  <box at="20 41 12" size="1 1 48" color="s"/>
+  <box at="20 57 12" size="1 1 48" color="s"/>
+  <box at="92 25 12" size="1 1 48" color="s"/>
+  <box at="92 41 12" size="1 1 48" color="s"/>
+  <box at="92 57 12" size="1 1 48" color="s"/>
+
+  <!-- Feritoie di vetro verticale scuro con riflesso sui fianchi -->
+  <box at="20 33 20" size="1 3 32" color="V"/>
+  <box at="20 33 24" size="1 1 24" color="v"/>
+  <box at="20 49 20" size="1 3 32" color="V"/>
+  <box at="20 49 24" size="1 1 24" color="v"/>
+  <box at="92 33 20" size="1 3 32" color="V"/>
+  <box at="92 33 24" size="1 1 24" color="v"/>
+  <box at="92 49 20" size="1 3 32" color="V"/>
+  <box at="92 49 24" size="1 1 24" color="v"/>
+
+  <!-- Dettagli sulla facciata posteriore (y=8): scanalature e feritoie zenitali -->
+  <box at="38 8 16" size="3 1 40" color="V"/>
+  <box at="56 8 16" size="5 1 40" color="V"/>
+  <box at="74 8 16" size="3 1 40" color="V"/>
+  <box at="56 8 20" size="1 1 32" color="w"/>
+
+  <!-- ================================================================= -->
+  <!-- 5. COPERTURA E TETTO DEL CUBO (z = 64..72)                        -->
+  <!-- ================================================================= -->
+  <!-- Soffitto strutturale e piano del tetto a z=64 -->
+  <box at="56 41 64" size="73 67 1" color="M"/>
+  <box at="56 41 64" size="71 65 1" color="C"/>
+
+  <!-- Parapetto perimetrale del tetto (z=65..66) -->
+  <box at="56 41 65" size="73 67 2" color="M"/>
+  <box at="56 41 65" size="69 63 2" color="B"/>
+  <box at="56 41 66" size="73 67 1" color="S"/>
+  <box at="56 41 66" size="71 65 1" color="B"/>
+
+  <!-- Lucernari lineari a filo tetto (vetrate longitudinali d'atelier) -->
+  <box at="38 41 64" size="9 41 1" color="V"/>
+  <box at="38 41 64" size="5 37 1" color="v"/>
+  <box at="74 41 64" size="9 41 1" color="V"/>
+  <box at="74 41 64" size="5 37 1" color="v"/>
+
+  <!-- Scultura astratta / antenna scultorea al centro del tetto (z=65..72) -->
+  <box at="56 41 65" size="7 7 2" color="m"/>
+  <box at="56 41 66" size="5 5 2" color="S"/>
+  <box at="56 41 68" size="3 3 3" color="M"/>
+  <box at="56 41 71" size="1 1 2" color="N"/>
+
+  <!-- ================================================================= -->
+  <!-- 6. LA GRANDE CORNICE DA QUADRO MONUMENTALE (y = 74..75, z = 8..52)-->
+  <!-- Sulla facciata sud: x=32..80, z=8..52                              -->
+  <!-- ================================================================= -->
+  <!-- Telaio modanato esterno della cornice in metallo nero lucido (y=74..75) -->
+  <!-- Montanti verticali della cornice (x=32..34 e x=78..80) -->
+  <box at="33 74 8" size="3 2 45" color="M"/>
+  <box at="79 74 8" size="3 2 45" color="M"/>
+  <!-- Traversa superiore della cornice (z=50..52) -->
+  <box at="56 74 51" size="49 2 3" color="M"/>
+  <!-- Traversa inferiore della cornice (z=8..10, ai lati del varco porta x=50..62) -->
+  <box at="41 74 9" size="17 2 3" color="M"/>
+  <box at="71 74 9" size="17 2 3" color="M"/>
+
+  <!-- Profilo sottile di finitura in acciaio spazzolato (y=75) -->
+  <box at="32 75 8" size="1 1 45" color="S"/>
+  <box at="80 75 8" size="1 1 45" color="S"/>
+  <box at="56 75 52" size="49 1 1" color="S"/>
+  <box at="41 75 8" size="17 1 1" color="S"/>
+  <box at="71 75 8" size="17 1 1" color="S"/>
+
+  <!-- FILO NEON ROSA PULSANTE (fasi 1..8) lungo il contorno interno della cornice -->
+  <!-- Montanti neon verticali (x=35 e x=77, z=10..49) -->
+  <box at="35 75 10" size="1 1 1" color="1"/>
+  <box at="35 75 11" size="1 1 5" color="2"/>
+  <box at="35 75 16" size="1 1 5" color="3"/>
+  <box at="35 75 21" size="1 1 5" color="4"/>
+  <box at="35 75 26" size="1 1 5" color="5"/>
+  <box at="35 75 31" size="1 1 5" color="6"/>
+  <box at="35 75 36" size="1 1 5" color="7"/>
+  <box at="35 75 41" size="1 1 5" color="8"/>
+  <box at="35 75 46" size="1 1 4" color="1"/>
+
+  <box at="77 75 10" size="1 1 1" color="1"/>
+  <box at="77 75 11" size="1 1 5" color="2"/>
+  <box at="77 75 16" size="1 1 5" color="3"/>
+  <box at="77 75 21" size="1 1 5" color="4"/>
+  <box at="77 75 26" size="1 1 5" color="5"/>
+  <box at="77 75 31" size="1 1 5" color="6"/>
+  <box at="77 75 36" size="1 1 5" color="7"/>
+  <box at="77 75 41" size="1 1 5" color="8"/>
+  <box at="77 75 46" size="1 1 4" color="1"/>
+
+  <!-- Traversa neon orizzontale superiore (z=49, x=36..76) -->
+  <box at="40 75 49" size="8 1 1" color="2"/>
+  <box at="48 75 49" size="8 1 1" color="3"/>
+  <box at="56 75 49" size="8 1 1" color="5"/>
+  <box at="64 75 49" size="8 1 1" color="7"/>
+  <box at="72 75 49" size="8 1 1" color="8"/>
+
+  <!-- Tratti neon orizzontali inferiori (z=10, x=36..49 e x=63..76) -->
+  <box at="43 75 10" size="14 1 1" color="4"/>
+  <box at="69 75 10" size="14 1 1" color="6"/>
+
+  <!-- LA GRANDE VETRATA DA MUSEO DENTRO LA CORNICE (x=36..76, z=11..48, y=74) -->
+  <box at="56 74 11" size="41 1 38" color="V"/>
+  <!-- Fasce diagonali e geometriche di riflesso vetrato freddo e magenta -->
+  <box at="46 74 24" size="13 1 1" color="v"/>
+  <box at="48 74 25" size="13 1 1" color="v"/>
+  <box at="50 74 26" size="13 1 1" color="v"/>
+  <box at="62 74 34" size="15 1 1" color="v"/>
+  <box at="64 74 35" size="15 1 1" color="v"/>
+  <box at="66 74 36" size="15 1 1" color="v"/>
+  <box at="42 74 38" size="9 1 1" color="w"/>
+  <box at="43 74 39" size="9 1 1" color="w"/>
+  <box at="70 74 18" size="9 1 1" color="w"/>
+  <box at="71 74 19" size="9 1 1" color="w"/>
+
+  <!-- ================================================================= -->
+  <!-- 7. LA PORTA "porta" E LA SCALETTA A DUE GRADINI                   -->
+  <!-- Porta a z=0 al centro della base della cornice: x=50..62, z=0..17 -->
+  <!-- Scaletta che scende dallo zoccolo verso il piazzale               -->
+  <!-- ================================================================= -->
+  <!-- Varco d'ingresso e atrio interno vuoto (x=50..62, y=66..74, z=0..18) -->
+  <box at="56 70 0" size="13 9 19" color="B"/>
+  <box at="56 70 0" size="13 9 1" color="C"/>
+  <box at="56 70 7" size="13 9 1" color="m"/>
+
+  <!-- LA PORTA O (x=50..62, y=74, z=0..17, nome="porta") -->
+  <box at="56 74 0" size="13 1 18" color="O"/>
+  <!-- Finitura centrale del serramento con montanti sottili -->
+  <box at="50 74 0" size="1 1 18" color="M"/>
+  <box at="62 74 0" size="1 1 18" color="M"/>
+  <box at="56 74 0" size="1 1 18" color="S"/>
+  <box at="56 74 17" size="13 1 1" color="M"/>
+
+  <!-- SCALETTA FRONTALE A DUE GRADINI CHE SCENDE DALLO ZOCCOLO VERSO IL PIAZZALE -->
+  <!-- Gradino superiore (z=0..5, y=75..76, x=48..64) -->
+  <box at="56 75.5 0" size="17 2 6" color="C"/>
+  <box at="56 75.5 5" size="17 2 1" color="S"/>
+  <box at="47 75.5 0" size="1 2 7" color="M"/>
+  <box at="65 75.5 0" size="1 2 7" color="M"/>
+
+  <!-- Gradino inferiore (z=0..2, y=77..78, x=48..64) -->
+  <box at="56 77.5 0" size="17 2 3" color="C"/>
+  <box at="56 77.5 2" size="17 2 1" color="S"/>
+  <box at="47 77.5 0" size="1 2 4" color="M"/>
+  <box at="65 77.5 0" size="1 2 4" color="M"/>
+
+  <!-- Parapetti/spallette laterali della scaletta con corrimano acciaio e neon -->
+  <box at="47 76.5 7" size="1 4 1" color="S"/>
+  <box at="65 76.5 7" size="1 4 1" color="S"/>
+  <box at="47 76.5 0" size="1 4 1" color="n"/>
+  <box at="65 76.5 0" size="1 4 1" color="n"/>
+
+  <!-- ================================================================= -->
+  <!-- 8. L'INSEGNA NEON "GALLERIA DELL'ARTISTA" (y = 75, glow=True)      -->
+  <!-- Sopra la cornice: riga 1 z=63..67, riga 2 z=56..60                -->
+  <!-- ================================================================= -->
+  <!-- Targa di fondo opaca scura P a y=75 (x=30..82, z=54..70) -->
+  <box at="56 75 54" size="55 1 17" color="P"/>
+  <box at="56 74 54" size="55 1 17" color="M"/>
+  <!-- Cornice sottile neon rosa tenue attorno alla targa a y=75 -->
+  <box at="56 75 53" size="57 1 1" color="n"/>
+  <box at="56 75 71" size="57 1 1" color="n"/>
+  <box at="28 75 54" size="1 1 17" color="n"/>
+  <box at="84 75 54" size="1 1 17" color="n"/>
+
+  <!-- ================================================================= -->
+  <!-- RIGA 1: "GALLERIA" (x=41..71, y=75, z=63..67, lettere 3×5)        -->
+  <!-- ================================================================= -->
+  <!-- G (x=41..43) -->
+  <box at="41 75 63" size="1 1 5" color="F"/>
+  <box at="42 75 67" size="3 1 1" color="F"/>
+  <box at="42 75 63" size="3 1 1" color="F"/>
+  <box at="43 75 63" size="1 1 3" color="F"/>
+  <box at="42 75 65" size="1 1 1" color="F"/>
+
+  <!-- A (x=45..47) -->
+  <box at="45 75 63" size="1 1 4" color="F"/>
+  <box at="47 75 63" size="1 1 4" color="F"/>
+  <box at="46 75 67" size="3 1 1" color="F"/>
+  <box at="46 75 65" size="3 1 1" color="F"/>
+
+  <!-- L (x=49..51) -->
+  <box at="49 75 63" size="1 1 5" color="F"/>
+  <box at="50 75 63" size="3 1 1" color="F"/>
+
+  <!-- L (x=53..55) -->
+  <box at="53 75 63" size="1 1 5" color="F"/>
+  <box at="54 75 63" size="3 1 1" color="F"/>
+
+  <!-- E (x=57..59) -->
+  <box at="57 75 63" size="1 1 5" color="F"/>
+  <box at="58 75 67" size="3 1 1" color="F"/>
+  <box at="58 75 65" size="3 1 1" color="F"/>
+  <box at="58 75 63" size="3 1 1" color="F"/>
+
+  <!-- R (x=61..63) -->
+  <box at="61 75 63" size="1 1 5" color="F"/>
+  <box at="62 75 67" size="3 1 1" color="F"/>
+  <box at="62 75 65" size="3 1 1" color="F"/>
+  <box at="63 75 66" size="1 1 1" color="F"/>
+  <box at="63 75 63" size="1 1 2" color="F"/>
+
+  <!-- I (x=65..67) -->
+  <box at="66 75 63" size="1 1 5" color="F"/>
+  <box at="66 75 67" size="3 1 1" color="F"/>
+  <box at="66 75 63" size="3 1 1" color="F"/>
+
+  <!-- A (x=69..71) -->
+  <box at="69 75 63" size="1 1 4" color="F"/>
+  <box at="71 75 63" size="1 1 4" color="F"/>
+  <box at="70 75 67" size="3 1 1" color="F"/>
+  <box at="70 75 65" size="3 1 1" color="F"/>
+
+  <!-- ================================================================= -->
+  <!-- RIGA 2: "DELL'ARTISTA" (x=34..78, y=75, z=56..60, lettere 3×5)    -->
+  <!-- ================================================================= -->
+  <!-- D (x=34..36) -->
+  <box at="34 75 56" size="1 1 5" color="F"/>
+  <box at="34 75 60" size="1 1 1" color="F"/>
+  <box at="35 75 60" size="1 1 1" color="F"/>
+  <box at="34 75 56" size="1 1 1" color="F"/>
+  <box at="35 75 56" size="1 1 1" color="F"/>
+  <box at="36 75 57" size="1 1 3" color="F"/>
+
+  <!-- E (x=38..40) -->
+  <box at="38 75 56" size="1 1 5" color="F"/>
+  <box at="39 75 60" size="3 1 1" color="F"/>
+  <box at="39 75 58" size="3 1 1" color="F"/>
+  <box at="39 75 56" size="3 1 1" color="F"/>
+
+  <!-- L (x=42..44) -->
+  <box at="42 75 56" size="1 1 5" color="F"/>
+  <box at="43 75 56" size="3 1 1" color="F"/>
+
+  <!-- L (x=46..48) -->
+  <box at="46 75 56" size="1 1 5" color="F"/>
+  <box at="47 75 56" size="3 1 1" color="F"/>
+
+  <!-- ' (apostrofo x=50, z=59..60) -->
+  <box at="50 75 59" size="1 1 2" color="F"/>
+
+  <!-- A (x=52..54) -->
+  <box at="52 75 56" size="1 1 4" color="F"/>
+  <box at="54 75 56" size="1 1 4" color="F"/>
+  <box at="53 75 60" size="3 1 1" color="F"/>
+  <box at="53 75 58" size="3 1 1" color="F"/>
+
+  <!-- R (x=56..58) -->
+  <box at="56 75 56" size="1 1 5" color="F"/>
+  <box at="57 75 60" size="3 1 1" color="F"/>
+  <box at="57 75 58" size="3 1 1" color="F"/>
+  <box at="58 75 59" size="1 1 1" color="F"/>
+  <box at="58 75 56" size="1 1 2" color="F"/>
+
+  <!-- T (x=60..62) -->
+  <box at="61 75 60" size="3 1 1" color="F"/>
+  <box at="61 75 56" size="1 1 4" color="F"/>
+
+  <!-- I (x=64..66) -->
+  <box at="65 75 56" size="1 1 5" color="F"/>
+  <box at="65 75 60" size="3 1 1" color="F"/>
+  <box at="65 75 56" size="3 1 1" color="F"/>
+
+  <!-- S (x=68..70) -->
+  <box at="69 75 60" size="3 1 1" color="F"/>
+  <box at="68 75 59" size="1 1 1" color="F"/>
+  <box at="69 75 58" size="3 1 1" color="F"/>
+  <box at="70 75 57" size="1 1 1" color="F"/>
+  <box at="69 75 56" size="3 1 1" color="F"/>
+
+  <!-- T (x=72..74) -->
+  <box at="73 75 60" size="3 1 1" color="F"/>
+  <box at="73 75 56" size="1 1 4" color="F"/>
+
+  <!-- A (x=76..78) -->
+  <box at="76 75 56" size="1 1 4" color="F"/>
+  <box at="78 75 56" size="1 1 4" color="F"/>
+  <box at="77 75 60" size="3 1 1" color="F"/>
+  <box at="77 75 58" size="3 1 1" color="F"/>
+
+</sequence>
+
+<!-- ================================================================= -->
+<!-- ANIMAZIONE CICLICA "QUADRO" (8 frame, respirazione della cornice)  -->
+<!-- ================================================================= -->
+<animation name="quadro" frames="8">
+  <sequence>
+    <all in="1" out="x"/>
+    <all in="2" out="1"/>
+    <all in="3" out="2"/>
+    <all in="4" out="3"/>
+    <all in="5" out="4"/>
+    <all in="6" out="5"/>
+    <all in="7" out="6"/>
+    <all in="8" out="7"/>
+    <all in="x" out="8"/>
+  </sequence>
+</animation>

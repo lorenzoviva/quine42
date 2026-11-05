@@ -1,0 +1,474 @@
+<!--
+Il Nucleo (corona): edificio di contenimento a corona circolare (toro futuristico a gradoni)
+con grande atrio centrale a cielo aperto, sopra cui fluttua la sfera quantica di voxel neri
+in sospensione magnetica con celle energetiche pulsanti ad intermittenza azzurro neon,
+portale d'ingresso monumentale sul fronte sud a z=0 con atrio interno sgombro,
+insegna neon azzurro "IL NUCLEO" su targa scura opaca sopra il portale,
+quattro piloni d'ancoraggio con travi strutturali e fasci di contenimento neon verso la sfera,
+e pozzo d'emissione centrale con anelli di collimazione magnetica a terra.
+Scritto da Gemini CLI (Gemini 3.8 Flash, abbonamento) il 23/10/2026, task T19.
+Scatola: 14 × 14 × 14 caselle, 112 × 112 × 112 voxel, 8 voxel per casella.
+Lettere chiave:
+  O = porta (lettera O, nome "porta", al centro x=56, y=105, z=0..17, vano d'ingresso con atrio interno vuoto e passante y=92..104)
+  F = insegna ("IL NUCLEO", neon azzurro 6fc3ff glow fisso su targa scura P sopra il portale a z=22..28, y=106..107)
+  P = targa scura opaca per l'insegna (0a0e14)
+  M = metallo nero cybernetico primario (14141a, blindature anulari, solette, piloni)
+  m = metallo secondario scuro (20222a, carter, pannelli tecnici, fasce equatoriali)
+  K = nucleo nero profondo della sfera fluttuante (0a0c12)
+  C = cemento grafite perimetrale (34363e, platea e camminamenti)
+  c = conglomerato tecnico scuro e asfalto (262830)
+  S = acciaio chiaro strutturale (8a8f9c, travi diagonali di sospensione, tralicci, antenne)
+  s = acciaio scuro di supporto (525662, profilati e griglie)
+  V = vetro scuro riflettente (182434, fasce finestrate del toro)
+  v = riflessi azzurrati del vetro (2c425c)
+  w = riflessi chiari del vetro (486a8a)
+  N = neon azzurro vivo (6fc3ff glow, fasci di contenimento, cornici d'accento)
+  n = neon azzurro tenue (3a8ad8 glow, anelli di collimazione, guide tetto)
+  R = spia rossa d'ostacolo beacons (ff3a3a glow)
+  1 = cella energetica sfera attiva (6fc3ff glow, azzurro vivo)
+  0 = cella energetica sfera spenta (16202c, stasi)
+  x = buffer temporaneo per animazione (hidden)
+Architettura:
+  - Platea poligonale/circolare di fondazione a z=0..2 (diametro 102 voxel, distanziata dai bordi della griglia).
+  - Toro circolare a tre ordini concentrici degradanti da z=0 a z=34 (diametro esterno 96, foro interno 44 voxel).
+  - Pozzo di collimazione centrale (x=56, y=56, z=0..8) a cielo aperto con proiettore di campo magnetico a gradoni.
+  - Sfera quantica nera K (diametro 40 voxel, z=56..95) sospesa nel vuoto al centro della corte a z~7-12 caselle.
+  - 4 piloni d'ancoraggio angolari (z=28..38) con travi strutturali S e raggi di contenimento N/n collegati alla sfera.
+  - Portale d'accesso monumentale a sud (x=46..66, y=100..107, z=0..22) con porta O e atrio interno vuoto (y=92..104).
+  - Insegna "IL NUCLEO" a caratteri neon azzurro F centrata a x=56, y=107, z=23..27.
+Animazione "pulsa" (8 frame):
+  Scambio periodico delle celle energetiche attive (1, glow) e spente (0) sulla superficie della sfera quantica.
+-->
+<sequence values="BMmKCcSsVvwNnFPO10xR" size="112 112 112" symmetry="()" name="Il Nucleo">
+  <!-- Materiali e palette neon punk -->
+  <color symbol="M" value="14141a" name="metallo primario"/>
+  <color symbol="m" value="20222a" name="metallo secondary"/>
+  <color symbol="K" value="0a0c12" name="nucleo sfera nero"/>
+  <color symbol="C" value="34363e" name="cemento grafite"/>
+  <color symbol="c" value="262830" name="asfalto tecnico"/>
+  <color symbol="S" value="8a8f9c" name="acciaio chiaro"/>
+  <color symbol="s" value="525662" name="acciaio scuro"/>
+  <color symbol="V" value="182434" name="vetro scuro"/>
+  <color symbol="v" value="2c425c" name="riflesso azzurro"/>
+  <color symbol="w" value="486a8a" name="riflesso chiaro"/>
+  <color symbol="N" value="6fc3ff" glow="True" name="neon azzurro vivo"/>
+  <color symbol="n" value="3a8ad8" glow="True" name="neon azzurro tenue"/>
+  <color symbol="P" value="0a0e14" name="targa insegna"/>
+  <color symbol="F" value="6fc3ff" glow="True" name="insegna fissa"/>
+  <color symbol="O" value="182434" name="porta"/>
+  <color symbol="1" value="6fc3ff" glow="True" name="cella energetica attiva"/>
+  <color symbol="0" value="16202c" name="cella energetica stasi"/>
+  <color symbol="R" value="ff3a3a" glow="True" name="luce ostacolo rossa"/>
+  <color symbol="x" hidden="True" name="buffer animazione"/>
+
+  <!-- ================================================================= -->
+  <!-- 1. BASAMENTO PERIMETRALE E PLATEA DI FONDAZIONE (z = 0..2)        -->
+  <!-- ================================================================= -->
+  <!-- Diametro 102 (r=51): resta entro x=5..107, y=5..107 con 5 voxel di margine -->
+  <cylinder at="56 56 0" size="102 102 2" color="C"/>
+  <cylinder at="56 56 1" size="98 98 1" color="c"/>
+  <cylinder at="56 56 1" size="96 96 1" color="m"/>
+
+  <!-- Canali e guide d'energia radiali a terra sulla platea esterna -->
+  <box at="56 12 1" size="4 10 1" color="s"/>
+  <box at="56 12 1" size="2 10 1" color="n"/>
+  <box at="56 100 1" size="4 10 1" color="s"/>
+  <box at="56 100 1" size="2 10 1" color="n"/>
+  <box at="12 56 1" size="10 4 1" color="s"/>
+  <box at="12 56 1" size="10 2 1" color="n"/>
+  <box at="100 56 1" size="10 4 1" color="s"/>
+  <box at="100 56 1" size="10 2 1" color="n"/>
+
+  <!-- ================================================================= -->
+  <!-- 2. CORPO DELL'EDIFICIO AD ANELLO (LIVELLO 1: z = 0..18)           -->
+  <!-- ================================================================= -->
+  <!-- Cilindro massiccio esterno r=48, scavato al centro con foro r=22 -->
+  <cylinder at="56 56 0" size="96 96 18" color="M"/>
+  <cylinder at="56 56 0" size="44 44 18" color="B"/>
+
+  <!-- Rivestimento a fasce di vetro cybernetico e modanature esterne -->
+  <cylinder at="56 56 4" size="96 96 10" color="V"/>
+  <cylinder at="56 56 4" size="94 94 10" color="M"/>
+
+  <!-- Riflessi orizzontali azzurri e chiari sulla vetrata curva -->
+  <cylinder at="56 56 7" size="96 96 1" color="v"/>
+  <cylinder at="56 56 7" size="94 94 1" color="M"/>
+  <cylinder at="56 56 11" size="96 96 1" color="w"/>
+  <cylinder at="56 56 11" size="94 94 1" color="M"/>
+
+  <!-- Paraste e costoloni verticali in metallo nero lungo l'anello esterno -->
+  <box at="56 10 0" size="8 4 18" color="M"/>
+  <box at="56 102 0" size="8 4 18" color="M"/>
+  <box at="10 56 0" size="4 8 18" color="M"/>
+  <box at="102 56 0" size="4 8 18" color="M"/>
+  <box at="22 22 0" size="6 6 18" color="M"/>
+  <box at="90 22 0" size="6 6 18" color="M"/>
+  <box at="22 90 0" size="6 6 18" color="M"/>
+  <box at="90 90 0" size="6 6 18" color="M"/>
+
+  <!-- Svuotamento della galleria/corridoio anulare interno (r=26..40) -->
+  <cylinder at="56 56 1" size="82 82 16" color="B"/>
+  <cylinder at="56 56 0" size="54 54 18" color="M"/>
+  <cylinder at="56 56 0" size="44 44 18" color="B"/>
+
+  <!-- Pavimento tecnico interno del corridoio anulare a z=0..1 -->
+  <cylinder at="56 56 0" size="82 82 1" color="c"/>
+  <cylinder at="56 56 0" size="54 54 1" color="M"/>
+  <cylinder at="56 56 0" size="44 44 1" color="B"/>
+
+  <!-- ================================================================= -->
+  <!-- 3. LIVELLO 2 DELL'ANELLO (GALLERIA PANORAMICA: z = 18..28)        -->
+  <!-- ================================================================= -->
+  <!-- Fascia neon di transizione tra livello 1 e livello 2 -->
+  <cylinder at="56 56 18" size="90 90 1" color="N"/>
+  <cylinder at="56 56 18" size="86 86 1" color="M"/>
+  <cylinder at="56 56 18" size="46 46 1" color="B"/>
+
+  <!-- Volume del livello 2 (diametro esterno 88, foro interno 48) -->
+  <cylinder at="56 56 19" size="88 88 9" color="m"/>
+  <cylinder at="56 56 18" size="48 48 10" color="B"/>
+
+  <!-- Fascia finestrata continua esterna con vista sulla corte interna e all'esterno -->
+  <cylinder at="56 56 21" size="88 88 5" color="V"/>
+  <cylinder at="56 56 21" size="86 86 5" color="m"/>
+  <cylinder at="56 56 23" size="88 88 1" color="v"/>
+  <cylinder at="56 56 23" size="86 86 1" color="m"/>
+
+  <!-- Vetrata curva interna affacciata sul pozzo centrale e sulla sfera -->
+  <cylinder at="56 56 20" size="50 50 7" color="V"/>
+  <cylinder at="56 56 20" size="48 48 7" color="B"/>
+  <cylinder at="56 56 22" size="50 50 1" color="v"/>
+  <cylinder at="56 56 22" size="48 48 1" color="B"/>
+
+  <!-- ================================================================= -->
+  <!-- 4. LIVELLO 3: CORNICIONE E COPERTURA TECNICA (z = 28..34)         -->
+  <!-- ================================================================= -->
+  <!-- Soletta di coronamento dell'anello -->
+  <cylinder at="56 56 28" size="84 84 5" color="M"/>
+  <cylinder at="56 56 28" size="52 52 5" color="B"/>
+
+  <!-- Piano di calpestio tecnico del tetto a z=32 -->
+  <cylinder at="56 56 32" size="82 82 1" color="c"/>
+  <cylinder at="56 56 32" size="54 54 1" color="B"/>
+
+  <!-- Parapetto di sicurezza esterno con canalina neon azzurro -->
+  <cylinder at="56 56 33" size="84 84 1" color="M"/>
+  <cylinder at="56 56 33" size="82 82 1" color="B"/>
+  <cylinder at="56 56 34" size="84 84 1" color="n"/>
+  <cylinder at="56 56 34" size="82 82 1" color="B"/>
+
+  <!-- Parapetto interno attorno al foro centrale a z=33..34 (foro interno libero r=26) -->
+  <cylinder at="56 56 33" size="54 54 1" color="M"/>
+  <cylinder at="56 56 33" size="52 52 1" color="B"/>
+  <cylinder at="56 56 34" size="54 54 1" color="n"/>
+  <cylinder at="56 56 34" size="52 52 1" color="B"/>
+
+  <!-- ================================================================= -->
+  <!-- 5. POZZO CENTRALE E PROIETTORE MAGNETICO A TERRA (z = 0..8)       -->
+  <!-- ================================================================= -->
+  <!-- Piattaforma di collimazione nel cortile centrale (r=20) -->
+  <cylinder at="56 56 0" size="40 40 2" color="C"/>
+  <cylinder at="56 56 1" size="36 36 1" color="c"/>
+  <cylinder at="56 56 1" size="34 34 2" color="m"/>
+
+  <!-- Anelli concentrici di contenimento magnetico a gradoni -->
+  <cylinder at="56 56 3" size="28 28 2" color="M"/>
+  <cylinder at="56 56 4" size="30 30 1" color="n"/>
+  <cylinder at="56 56 4" size="26 26 1" color="M"/>
+  <cylinder at="56 56 5" size="20 20 2" color="s"/>
+  <cylinder at="56 56 6" size="22 22 1" color="N"/>
+  <cylinder at="56 56 6" size="18 18 1" color="s"/>
+
+  <!-- Lente centrale del collimatore primario a z=7 -->
+  <cylinder at="56 56 7" size="14 14 1" color="S"/>
+  <cylinder at="56 56 7" size="8 8 1" color="N"/>
+  <box at="56 56 8" size="4 4 1" color="1"/>
+
+  <!-- 4 Colonne verticali di campo magnetico nel cortile (z = 0..30) -->
+  <box at="56 36 0" size="4 4 32" color="M"/>
+  <box at="56 36 1" size="2 2 31" color="S"/>
+  <box at="56 36 32" size="2 2 1" color="N"/>
+
+  <box at="56 76 0" size="4 4 32" color="M"/>
+  <box at="56 76 1" size="2 2 31" color="S"/>
+  <box at="56 76 32" size="2 2 1" color="N"/>
+
+  <box at="36 56 0" size="4 4 32" color="M"/>
+  <box at="36 56 1" size="2 2 31" color="S"/>
+  <box at="36 56 32" size="2 2 1" color="N"/>
+
+  <box at="76 56 0" size="4 4 32" color="M"/>
+  <box at="76 56 1" size="2 2 31" color="S"/>
+  <box at="76 56 32" size="2 2 1" color="N"/>
+
+  <!-- ================================================================= -->
+  <!-- 6. QUATTRO PILONI DI SOSPENSIONE MAGNETICA SUL TETTO (z = 28..38) -->
+  <!-- ================================================================= -->
+  <!-- Piloni strutturali a 45 gradi sul tetto dell'anello -->
+  <!-- Pilone Nord-Est (78, 34) -->
+  <box at="78 34 28" size="8 8 10" color="M"/>
+  <box at="78 34 29" size="6 6 9" color="m"/>
+  <box at="78 34 37" size="6 6 1" color="N"/>
+
+  <!-- Pilone Nord-Ovest (34, 34) -->
+  <box at="34 34 28" size="8 8 10" color="M"/>
+  <box at="34 34 29" size="6 6 9" color="m"/>
+  <box at="34 34 37" size="6 6 1" color="N"/>
+
+  <!-- Pilone Sud-Ovest (34, 78) -->
+  <box at="34 78 28" size="8 8 10" color="M"/>
+  <box at="34 78 29" size="6 6 9" color="m"/>
+  <box at="34 78 37" size="6 6 1" color="N"/>
+
+  <!-- Pilone Sud-Est (78, 78) -->
+  <box at="78 78 28" size="8 8 10" color="M"/>
+  <box at="78 78 29" size="6 6 9" color="m"/>
+  <box at="78 78 37" size="6 6 1" color="N"/>
+
+  <!-- ================================================================= -->
+  <!-- 7. FASCI E TRAVI DI SOSPENSIONE VERSO LA SFERA (z = 38..66)        -->
+  <!-- ================================================================= -->
+  <!-- Travi strutturali in acciaio chiaro S con raggio 1 -->
+  <line at="78 34 38" to="68 44 66" r="1" color="S"/>
+  <line at="34 34 38" to="44 44 66" r="1" color="S"/>
+  <line at="34 78 38" to="44 68 66" r="1" color="S"/>
+  <line at="78 78 38" to="68 68 66" r="1" color="S"/>
+
+  <!-- Fasci di contenimento energetico azzurro vivo N -->
+  <line at="78 34 38" to="68 44 66" r="0" color="N"/>
+  <line at="34 34 38" to="44 44 66" r="0" color="N"/>
+  <line at="34 78 38" to="44 68 66" r="0" color="N"/>
+  <line at="78 78 38" to="68 68 66" r="0" color="N"/>
+
+  <!-- Collari di ancoraggio magnetico sulla superficie della sfera -->
+  <box at="68 44 65" size="4 4 4" color="m"/>
+  <box at="68 44 66" size="2 2 2" color="n"/>
+
+  <box at="44 44 65" size="4 4 4" color="m"/>
+  <box at="44 44 66" size="2 2 2" color="n"/>
+
+  <box at="44 68 65" size="4 4 4" color="m"/>
+  <box at="44 68 66" size="2 2 2" color="n"/>
+
+  <box at="68 68 65" size="4 4 4" color="m"/>
+  <box at="68 68 66" size="2 2 2" color="n"/>
+
+  <!-- Fascio di collimazione assiale dal pozzo a terra al polo sud della sfera -->
+  <line at="56 56 8" to="56 56 56" r="0" color="N"/>
+
+  <!-- ================================================================= -->
+  <!-- 8. LA SFERA QUANTICA FLUTTUANTE (z = 56..95, diametro 40)        -->
+  <!-- ================================================================= -->
+  <!-- Corpo monolitico della sfera in composito nero profondo K -->
+  <ellipsoid at="56 56 56" size="40 40 40" color="K"/>
+
+  <!-- Fascia tecnologica equatoriale incassata (z = 75..76) -->
+  <cylinder at="56 56 75" size="41 41 2" color="m"/>
+  <cylinder at="56 56 75" size="39 39 2" color="K"/>
+  <cylinder at="56 56 75" size="41 41 1" color="n"/>
+  <cylinder at="56 56 75" size="39 39 1" color="m"/>
+
+  <!-- Sezioni meridiane decorative e giunti di contenimento -->
+  <box at="56 56 70" size="41 2 12" color="m"/>
+  <box at="56 56 70" size="39 2 12" color="K"/>
+  <box at="56 56 70" size="2 41 12" color="m"/>
+  <box at="56 56 70" size="2 39 12" color="K"/>
+
+  <!-- ================================================================= -->
+  <!-- 9. CELLE ENERGETICHE PULSANTI DELLA SFERA (ATTIVE 1 / STASI 0)    -->
+  <!-- ================================================================= -->
+  <!-- Poli della sfera -->
+  <box at="56 56 95" size="2 2 1" color="1"/>
+  <box at="56 56 56" size="2 2 1" color="0"/>
+
+  <!-- Calotta Superiore: z = 90 (raggio orizzontale ~14) -->
+  <box at="70 56 90" size="2 1 1" color="1"/>
+  <box at="66 66 90" size="2 1 1" color="0"/>
+  <box at="56 70 90" size="1 2 1" color="1"/>
+  <box at="46 66 90" size="2 1 1" color="0"/>
+  <box at="42 56 90" size="2 1 1" color="1"/>
+  <box at="46 46 90" size="2 1 1" color="0"/>
+  <box at="56 42 90" size="1 2 1" color="1"/>
+  <box at="66 46 90" size="2 1 1" color="0"/>
+
+  <!-- Emisfero Superiore: z = 84 (raggio orizzontale ~18) -->
+  <box at="74 56 84" size="2 1 1" color="0"/>
+  <box at="73 63 84" size="2 1 1" color="1"/>
+  <box at="69 69 84" size="2 1 1" color="0"/>
+  <box at="63 73 84" size="1 2 1" color="1"/>
+  <box at="56 74 84" size="1 2 1" color="0"/>
+  <box at="49 73 84" size="1 2 1" color="1"/>
+  <box at="43 69 84" size="2 1 1" color="0"/>
+  <box at="39 63 84" size="2 1 1" color="1"/>
+  <box at="38 56 84" size="2 1 1" color="0"/>
+  <box at="39 49 84" size="2 1 1" color="1"/>
+  <box at="43 43 84" size="2 1 1" color="0"/>
+  <box at="49 39 84" size="1 2 1" color="1"/>
+  <box at="56 38 84" size="1 2 1" color="0"/>
+  <box at="63 39 84" size="1 2 1" color="1"/>
+  <box at="69 43 84" size="2 1 1" color="0"/>
+  <box at="73 49 84" size="2 1 1" color="1"/>
+
+  <!-- Fascia Equatoriale: z = 76 (raggio orizzontale ~20) -->
+  <box at="76 56 76" size="2 1 1" color="1"/>
+  <box at="74 64 76" size="2 1 1" color="0"/>
+  <box at="70 70 76" size="2 1 1" color="1"/>
+  <box at="64 74 76" size="1 2 1" color="0"/>
+  <box at="56 76 76" size="1 2 1" color="1"/>
+  <box at="48 74 76" size="1 2 1" color="0"/>
+  <box at="42 70 76" size="2 1 1" color="1"/>
+  <box at="38 64 76" size="2 1 1" color="0"/>
+  <box at="36 56 76" size="2 1 1" color="1"/>
+  <box at="38 48 76" size="2 1 1" color="0"/>
+  <box at="42 42 76" size="2 1 1" color="1"/>
+  <box at="48 38 76" size="1 2 1" color="0"/>
+  <box at="56 36 76" size="1 2 1" color="1"/>
+  <box at="64 38 76" size="1 2 1" color="0"/>
+  <box at="70 42 76" size="2 1 1" color="1"/>
+  <box at="74 48 76" size="2 1 1" color="0"/>
+
+  <!-- Emisfero Inferiore: z = 68 (raggio orizzontale ~18) -->
+  <box at="74 56 68" size="2 1 1" color="0"/>
+  <box at="73 63 68" size="2 1 1" color="1"/>
+  <box at="69 69 68" size="2 1 1" color="0"/>
+  <box at="63 73 68" size="1 2 1" color="1"/>
+  <box at="56 74 68" size="1 2 1" color="0"/>
+  <box at="49 73 68" size="1 2 1" color="1"/>
+  <box at="43 69 68" size="2 1 1" color="0"/>
+  <box at="39 63 68" size="2 1 1" color="1"/>
+  <box at="38 56 68" size="2 1 1" color="0"/>
+  <box at="39 49 68" size="2 1 1" color="1"/>
+  <box at="43 43 68" size="2 1 1" color="0"/>
+  <box at="49 39 68" size="1 2 1" color="1"/>
+  <box at="56 38 68" size="1 2 1" color="0"/>
+  <box at="63 39 68" size="1 2 1" color="1"/>
+  <box at="69 43 68" size="2 1 1" color="0"/>
+  <box at="73 49 68" size="2 1 1" color="1"/>
+
+  <!-- Calotta Inferiore: z = 62 (raggio orizzontale ~14) -->
+  <box at="70 56 62" size="2 1 1" color="1"/>
+  <box at="66 66 62" size="2 1 1" color="0"/>
+  <box at="56 70 62" size="1 2 1" color="1"/>
+  <box at="46 66 62" size="2 1 1" color="0"/>
+  <box at="42 56 62" size="2 1 1" color="1"/>
+  <box at="46 46 62" size="2 1 1" color="0"/>
+  <box at="56 42 62" size="1 2 1" color="1"/>
+  <box at="66 46 62" size="2 1 1" color="0"/>
+
+  <!-- ================================================================= -->
+  <!-- 10. PORTALE MONUMENTALE D'INGRESSO (FRONTE SUD: y = 100..107)     -->
+  <!-- ================================================================= -->
+  <!-- Piedritti e piloni dell'avancorpo d'ingresso -->
+  <box at="46 104 0" size="4 6 22" color="M"/>
+  <box at="66 104 0" size="4 6 22" color="M"/>
+  <box at="46 106 0" size="2 2 22" color="n"/>
+  <box at="66 106 0" size="2 2 22" color="n"/>
+
+  <!-- Architrave e soletta sopra la porta -->
+  <box at="56 104 18" size="24 6 4" color="M"/>
+  <box at="56 106 18" size="24 2 1" color="N"/>
+
+  <!-- Portale e vano porta O centrato a x=56, a z=0..17 -->
+  <box at="56 105 0" size="16 1 18" color="O"/>
+  <box at="56 105 0" size="16 1 1" color="m"/>
+  <box at="56 105 17" size="16 1 1" color="n"/>
+  <box at="48 105 0" size="1 1 18" color="n"/>
+  <box at="64 105 0" size="1 1 18" color="n"/>
+
+  <!-- Atrio interno vuoto e sgombro per oltre 12 voxel dietro la porta -->
+  <box at="56 98 0" size="18 13 18" color="B"/>
+
+  <!-- ================================================================= -->
+  <!-- 11. TARGA E INSEGNA NEON "IL NUCLEO" (y = 106..107, z = 22..28)   -->
+  <!-- ================================================================= -->
+  <!-- Targa di contrasto scura opaca P -->
+  <box at="56 106 22" size="44 1 7" color="P"/>
+  <box at="56 105 22" size="44 1 7" color="M"/>
+
+  <!-- Cornice neon azzurro attorno alla targa -->
+  <box at="56 107 28" size="46 1 1" color="n"/>
+  <box at="56 107 22" size="46 1 1" color="n"/>
+  <box at="33 107 22" size="1 1 7" color="n"/>
+  <box at="79 107 22" size="1 1 7" color="n"/>
+
+  <!-- Lettere neon F ("IL NUCLEO") a quota y=107, z=23..27 -->
+  <!-- Lettera 'I' (x = 39..41) -->
+  <box at="40 107 27" size="3 1 1" color="F"/>
+  <box at="40 107 24" size="1 1 3" color="F"/>
+  <box at="40 107 23" size="3 1 1" color="F"/>
+
+  <!-- Lettera 'L' (x = 43..45) -->
+  <box at="43 107 23" size="1 1 5" color="F"/>
+  <box at="44 107 23" size="1 1 1" color="F"/>
+  <box at="45 107 23" size="1 1 1" color="F"/>
+
+  <!-- Lettera 'N' (x = 49..52) -->
+  <box at="49 107 23" size="1 1 5" color="F"/>
+  <box at="50 107 25" size="1 1 2" color="F"/>
+  <box at="51 107 24" size="1 1 2" color="F"/>
+  <box at="52 107 23" size="1 1 5" color="F"/>
+
+  <!-- Lettera 'U' (x = 54..56) -->
+  <box at="54 107 24" size="1 1 4" color="F"/>
+  <box at="56 107 24" size="1 1 4" color="F"/>
+  <box at="55 107 23" size="3 1 1" color="F"/>
+
+  <!-- Lettera 'C' (x = 58..60) -->
+  <box at="59 107 27" size="3 1 1" color="F"/>
+  <box at="58 107 24" size="1 1 3" color="F"/>
+  <box at="59 107 23" size="3 1 1" color="F"/>
+
+  <!-- Lettera 'L' (x = 62..64) -->
+  <box at="62 107 23" size="1 1 5" color="F"/>
+  <box at="63 107 23" size="1 1 1" color="F"/>
+  <box at="64 107 23" size="1 1 1" color="F"/>
+
+  <!-- Lettera 'E' (x = 66..68) -->
+  <box at="66 107 23" size="1 1 5" color="F"/>
+  <box at="67 107 27" size="1 1 1" color="F"/>
+  <box at="68 107 27" size="1 1 1" color="F"/>
+  <box at="67 107 25" size="1 1 1" color="F"/>
+  <box at="67 107 23" size="1 1 1" color="F"/>
+  <box at="68 107 23" size="1 1 1" color="F"/>
+
+  <!-- Lettera 'O' (x = 70..72) -->
+  <box at="70 107 24" size="1 1 3" color="F"/>
+  <box at="72 107 24" size="1 1 3" color="F"/>
+  <box at="71 107 27" size="3 1 1" color="F"/>
+  <box at="71 107 23" size="3 1 1" color="F"/>
+
+  <!-- ================================================================= -->
+  <!-- 12. APPARATI TECNICI E ANTENNE SUL TETTO (z = 33..48)             -->
+  <!-- ================================================================= -->
+  <!-- Parabola radar/uplink a Ovest (x = 20, y = 56, z = 33..42) -->
+  <box at="20 56 33" size="4 4 4" color="M"/>
+  <cylinder at="20 56 37" size="8 8 2" color="S"/>
+  <cylinder at="20 56 38" size="6 6 1" color="s"/>
+  <box at="20 56 39" size="1 1 3" color="N"/>
+
+  <!-- Gruppo dissipatori di calore e griglie a Est (x = 92, y = 56) -->
+  <box at="92 56 33" size="6 12 3" color="M"/>
+  <box at="92 56 34" size="4 10 2" color="s"/>
+  <box at="92 56 36" size="2 8 1" color="n"/>
+
+  <!-- Antenna di monitoraggio con luce rossa d'ostacolo R a Nord (x=56, y=16) -->
+  <box at="56 16 33" size="4 4 3" color="M"/>
+  <box at="56 16 36" size="1 1 11" color="S"/>
+  <box at="56 16 41" size="5 1 1" color="S"/>
+  <box at="56 16 44" size="3 1 1" color="S"/>
+  <box at="56 16 47" size="1 1 1" color="R"/>
+
+</sequence>
+
+<!-- ================================================================= -->
+<!-- ANIMAZIONE CICLICA "PULSA" (8 frame)                              -->
+<!-- Scambio periodico delle celle energetiche attive e spente         -->
+<!-- sulla superficie della sfera quantica                             -->
+<!-- ================================================================= -->
+<animation name="pulsa" frames="8">
+  <sequence>
+    <all in="1" out="x"/>
+    <all in="0" out="1"/>
+    <all in="x" out="0"/>
+  </sequence>
+</animation>

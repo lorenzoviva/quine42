@@ -1,0 +1,18 @@
+<!-- Lampione di ghisa verde: il palo sale fino a un'altezza diversa a ogni seme, in cima la lanterna gialla e il cappello. -->
+<sequence values="BZHKPLR" size="20 20 60" symmetry="(xy)" name="Lampione">
+  <color symbol="Z" hidden="True"/><color symbol="H" hidden="True"/>
+  <color symbol="K" value="2a3a2e" name="basamento"/><color symbol="P" value="2e5a3a" name="ghisa verde"/><color symbol="L" value="ffd88a" name="lanterna" glow="True"/><color symbol="R" value="1e2a22" name="cappello"/>
+  <box at="10 10 0" size="4 4 3" color="K"/>
+  <box at="10 10 3" size="2 2 12" color="P"/>
+  <box at="10 10 15" size="2 2 40" color="Z"/>
+  <box at="10 10 15" size="1 1 1" color="H"/>
+  <one>
+    <rule in="Z H" out="H P" p="14"/>
+    <rule in="H" out="P" p="1"/>
+  </one>
+  <all in="PZ" out="PP" symmetry="(xy)"/>
+  <all in="Z" out="B"/>
+  <all in="B P" out="L P"/>
+  <all in="LB" out="LL" steps="1"/>
+  <all in="B L" out="R L"/>
+</sequence>

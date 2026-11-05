@@ -1,0 +1,15 @@
+<!-- Una cosa presa o usata: il tintinnio della tazzina sul piattino, due note chiare. -->
+<sequence name="Tazzina" values="BNAMT" size="4 1 6" symmetry="()">
+  <sound bpm="320" scale="pentatonic_minor" root="86" swing="0" cutoff="9000" space="0.12">
+    <track y="0" instrument="bass" volume="0.85"/>
+  </sound>
+  <color symbol="N" value="38bdf8" name="Nota" glow="True"/>
+  <color symbol="A" value="f43f5e" name="Accento" glow="True"/>
+  <color symbol="M" value="10b981" name="Testa" hidden="True"/>
+  <color symbol="T" value="ec4899" name="Partenza" hidden="True"/>
+
+  <line at="0 0 0" to="0 0 3" r="0" color="M"/>
+  <one in="M" out="T" steps="1"/>
+  <all in="M" out="B"/>
+  <one in="BB TB" out="BN AB"/>
+</sequence>

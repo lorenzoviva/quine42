@@ -1,0 +1,12 @@
+<!-- Cartello: scritto a mano da Claude Code (step 9). Un palo piantato a terra e una tavola sul davanti, segnata da qualche incisione (niente scritte: chi passa la legge). -->
+<sequence values="BNLnd" size="20 20 20" symmetry="(xy)" name="Cartello">
+  <color symbol="N" value="6b4a2e" name="palo"/>
+  <color symbol="L" value="c09a62" name="tavola"/>
+  <color symbol="n" value="8a6a40" name="bordo"/>
+  <color symbol="d" value="4a3420" name="incisione"/>
+  <box at="10 10 0" size="2 4 17" color="N"/>
+  <box at="10 12 9" size="16 2 8" color="L"/>
+  <box at="10 12 9" size="16 2 1" color="n"/>
+  <box at="10 12 16" size="16 2 1" color="n"/>
+  <prl in="L/B" out="d/*" p="0.12" steps="1" symmetry="()"/>
+</sequence>

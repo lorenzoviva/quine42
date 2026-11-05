@@ -1,0 +1,35 @@
+<!-- Torre di vetro del Centro Direzionale: cemento e fasce di vetro azzurro, piani in più o in meno a ogni seme, la piazza di marmo attorno. -->
+<sequence values="BZHMTVRDA" size="40 40 48" symmetry="(xy)" name="Torre di vetro">
+  <color symbol="Z" hidden="True"/><color symbol="H" hidden="True"/>
+  <color symbol="M" value="d8d4cc" name="marmo della piazza"/><color symbol="T" value="b8b4ac" name="cemento"/><color symbol="V" value="7ab8d8" name="vetro azzurro" alpha="0.6"/>
+  <color symbol="R" value="5a5e64" name="tetto"/><color symbol="D" value="2a3a4a" name="ingresso"/><color symbol="A" value="c8c8d0" name="antenna"/>
+  <box at="20 20 0" size="30 30 1" color="M"/>
+  <box at="20 20 1" size="20 20 46" color="Z"/>
+  <box at="20 20 1" size="20 20 15" color="T"/>
+  <box at="20 20 16" size="1 1 1" color="H"/>
+  <one>
+    <rule in="Z H" out="H T" p="9"/>
+    <rule in="H" out="T" p="1"/>
+  </one>
+  <all in="TZ" out="TT" symmetry="(xy)"/>
+  <all in="Z" out="B"/>
+  <all in="B T" out="R T"/>
+  <box at="20 20 3" size="40 40 2" color="V" on="T"/>
+  <box at="20 20 7" size="40 40 2" color="V" on="T"/>
+  <box at="20 20 11" size="40 40 2" color="V" on="T"/>
+  <box at="20 20 15" size="40 40 2" color="V" on="T"/>
+  <box at="20 20 19" size="40 40 2" color="V" on="T"/>
+  <box at="20 20 23" size="40 40 2" color="V" on="T"/>
+  <box at="20 20 27" size="40 40 2" color="V" on="T"/>
+  <box at="20 20 31" size="40 40 2" color="V" on="T"/>
+  <box at="20 20 35" size="40 40 2" color="V" on="T"/>
+  <box at="20 20 39" size="40 40 2" color="V" on="T"/>
+  <box at="20 20 43" size="40 40 2" color="V" on="T"/>
+  <box at="20 20 1" size="18 18 46" color="B" on="T"/>
+  <box at="20 20 1" size="18 18 46" color="B" on="V"/>
+  <box at="20 20 9" size="18 18 1" color="M" on="B"/>
+  <box at="20 30 1" size="4 1 5" color="B" on="T"/>
+  <box at="20 30 1" size="4 1 5" color="B" on="V"/>
+  <one in="B R" out="A R" steps="1"/>
+  <all in="B A" out="A A" steps="4"/>
+</sequence>

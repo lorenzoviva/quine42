@@ -1,0 +1,22 @@
+<!-- Bancone del bar con la macchina dell'espresso: la caldaia cromata cresce a caso, le tazzine cadono dove capita. -->
+<sequence values="BZHWMTRGCK" size="20 20 24" symmetry="(xy)" name="Macchina espresso">
+  <color symbol="Z" hidden="True"/><color symbol="H" hidden="True"/>
+  <color symbol="W" value="7a4a2a" name="legno del bancone"/><color symbol="M" value="e8e4dc" name="marmo"/><color symbol="T" value="c8ccd0" name="cromo"/>
+  <color symbol="R" value="5a5e64" name="griglia delle tazzine"/><color symbol="G" value="d8a840" name="manometri"/><color symbol="C" value="f8f8f0" name="tazzine"/><color symbol="K" value="2a2a2e" name="leve"/>
+  <box at="10 10 0" size="14 10 5" color="W"/>
+  <box at="10 10 5" size="14 10 1" color="M"/>
+  <box at="10 9 6" size="12 8 16" color="Z"/>
+  <box at="10 9 6" size="12 8 2" color="T"/>
+  <box at="10 9 8" size="1 1 1" color="H"/>
+  <one>
+    <rule in="Z H" out="H T" p="8"/>
+    <rule in="H" out="T" p="1"/>
+  </one>
+  <all in="TZ" out="TT" symmetry="(xy)"/>
+  <all in="Z" out="B"/>
+  <all in="B T" out="R T"/>
+  <box at="7 12 7" size="2 1 1" color="G" on="T"/>
+  <box at="13 12 7" size="2 1 1" color="G" on="T"/>
+  <box at="10 13 7" size="4 1 1" color="K" on="B"/>
+  <one in="BB MM" out="CC MM" steps="4"/>
+</sequence>

@@ -1,0 +1,26 @@
+<!-- Motorino rosso con lo scudo, la sella e il portapacchi: sopra, una pila di cassette delle consegne alta quanto capita. -->
+<sequence values="BZHDTKSCcR" size="20 20 22" symmetry="(x)" name="Motorino">
+  <color symbol="Z" hidden="True"/><color symbol="H" hidden="True"/>
+  <color symbol="D" value="1e1e22" name="gomme"/><color symbol="T" value="d83a2a" name="carrozzeria rossa"/><color symbol="K" value="b8bcc4" name="manubrio cromato"/>
+  <color symbol="S" value="2a2a2e" name="sella"/><color symbol="C" value="c8a050" name="cassette"/><color symbol="c" value="8a6a30" name="bordo delle cassette"/><color symbol="R" value="7a5a2a" name="ultimo coperchio"/>
+  <box at="10 3 0" size="2 3 3" color="D"/>
+  <box at="10 16 0" size="2 3 3" color="D"/>
+  <box at="10 10 2" size="4 12 3" color="T"/>
+  <box at="10 15 3" size="6 2 8" color="T"/>
+  <box at="10 15 11" size="8 1 1" color="K"/>
+  <box at="10 8 5" size="4 5 2" color="S"/>
+  <box at="10 4 5" size="6 5 15" color="Z"/>
+  <box at="10 4 5" size="6 5 1" color="C"/>
+  <box at="10 4 6" size="1 1 1" color="H"/>
+  <one>
+    <rule in="Z H" out="H C" p="14"/>
+    <rule in="H" out="C" p="1"/>
+  </one>
+  <all in="CZ" out="CC" symmetry="(xy)"/>
+  <all in="Z" out="B"/>
+  <all in="B C" out="R C"/>
+  <box at="10 4 7" size="6 5 1" color="c" on="C"/>
+  <box at="10 4 10" size="6 5 1" color="c" on="C"/>
+  <box at="10 4 13" size="6 5 1" color="c" on="C"/>
+  <box at="10 4 16" size="6 5 1" color="c" on="C"/>
+</sequence>

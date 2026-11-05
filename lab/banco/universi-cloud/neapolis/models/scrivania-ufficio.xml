@@ -1,0 +1,30 @@
+<!-- Scrivania d'ufficio con la macchina da scrivere e l'archivio a cassetti accanto: l'archivio ha un numero di cassetti diverso a ogni seme. -->
+<sequence values="BZHKWDTSRP" size="20 20 24" symmetry="(xy)" name="Scrivania">
+  <color symbol="Z" hidden="True"/><color symbol="H" hidden="True"/>
+  <color symbol="K" value="4a4e54" name="gambe di metallo"/><color symbol="W" value="9a8a70" name="piano di formica"/><color symbol="D" value="2a2a30" name="macchina da scrivere"/>
+  <color symbol="T" value="8a9098" name="archivio grigio"/><color symbol="S" value="3a3e44" name="maniglie dei cassetti"/><color symbol="R" value="6a7078" name="coperchio"/><color symbol="P" value="f0ecd8" name="carte"/>
+  <box at="3 6 0" size="1 1 8" color="K"/>
+  <box at="3 13 0" size="1 1 8" color="K"/>
+  <box at="13 6 0" size="1 1 8" color="K"/>
+  <box at="13 13 0" size="1 1 8" color="K"/>
+  <box at="8 10 8" size="13 9 1" color="W"/>
+  <box at="7 9 9" size="4 3 2" color="D"/>
+  <box at="17 10 0" size="5 7 22" color="Z"/>
+  <box at="17 10 0" size="5 7 9" color="T"/>
+  <box at="17 10 9" size="1 1 1" color="H"/>
+  <one>
+    <rule in="Z H" out="H T" p="8"/>
+    <rule in="H" out="T" p="1"/>
+  </one>
+  <all in="TZ" out="TT" symmetry="(xy)"/>
+  <all in="Z" out="B"/>
+  <all in="B T" out="R T"/>
+  <box at="17 14 2" size="2 1 1" color="S" on="T"/>
+  <box at="17 14 5" size="2 1 1" color="S" on="T"/>
+  <box at="17 14 8" size="2 1 1" color="S" on="T"/>
+  <box at="17 14 11" size="2 1 1" color="S" on="T"/>
+  <box at="17 14 14" size="2 1 1" color="S" on="T"/>
+  <box at="17 14 17" size="2 1 1" color="S" on="T"/>
+  <box at="17 14 20" size="2 1 1" color="S" on="T"/>
+  <one in="B W" out="P W" steps="5"/>
+</sequence>

@@ -1,0 +1,15 @@
+<!-- Cassonetto verde con il coperchio: i sacchi neri traboccano in un mucchio diverso a ogni seme. -->
+<sequence values="BYGTDgw" size="20 20 20" symmetry="(xy)" name="Cassonetto">
+  <color symbol="Y" hidden="True"/>
+  <color symbol="T" value="3a6a3a" name="plastica verde"/><color symbol="D" value="2a3a2a" name="coperchio"/><color symbol="G" value="1e1e22" name="sacchi neri"/><color symbol="g" value="3a3a40" name="sacchi lucidi"/><color symbol="w" value="2a2a2a" name="ruote"/>
+  <box at="10 10 0" size="12 8 8" color="T"/>
+  <box at="10 10 8" size="14 10 1" color="D"/>
+  <box at="10 10 9" size="16 12 10" color="Y"/>
+  <box at="10 10 9" size="1 1 1" color="G"/>
+  <one steps="420">
+    <rule in="GY" out="GG"/>
+    <rule in="Y G" out="G G"/>
+  </one>
+  <all in="Y" out="B"/>
+  <prl in="G" out="g" p="0.25"/>
+</sequence>

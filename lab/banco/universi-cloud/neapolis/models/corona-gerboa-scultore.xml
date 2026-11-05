@@ -1,0 +1,293 @@
+<!--
+corona-gerboa-scultore: Il Costruttore di Forme del Concilio (avatar della Corona).
+Membro del Concilio in forma di Gerboa gigante costruttore (scala 20 vpt, anatomia base con orecchie in avanti).
+Manto grigio grafite elegante con morbida pettorina e ventre ambrati caldi.
+Indossa un caschetto protettivo da cantiere aerodinamico arancione vivo (#ffa65c, colore araldico dello Scultore)
+con cresta di rinforzo longitudinale, calotta profilata tra le orecchie con asole sartoriali anatomiche,
+spessa visiera scura sollevata a mezza fronte sopra gli occhioni, torcia/faretto LED montato sulla fronte
+che emette un fascio brillante (glow="True"), sottogola di sicurezza, robusti guantini gommati arancioni
+da lavoro sulle zampette anteriori, sciarpetta/bandana da lavoro arancione annodata al collo,
+e cintura porta-attrezzi con mazzuolo/scalpello da modellazione voxel al fianco.
+Scatola: 1.6 × 2.2 × 2.1 caselle, 32 × 44 × 42 voxel, 20 voxel per casella (vpt: 20).
+Ruolo: npc.
+-->
+<sequence values="BFfDCcTtUuNWEZRrOoGgPpaAKkJIHhsVvMmyYlLQqx" size="32 44 42" symmetry="()" name="GerboaScultore">
+  <!-- Manto grigio grafite elegante del corpo e dorso -->
+  <color symbol="F" value="343844" name="grafite base dorso"/>
+  <color symbol="f" value="4c5262" name="grafite chiaro luce"/>
+  <color symbol="D" value="20222a" name="grafite scuro ombra"/>
+
+  <!-- Ventre, petto e gola in morbido ambra caldo e luminoso -->
+  <color symbol="C" value="f5ad62" name="ambra caldo pettorina"/>
+  <color symbol="c" value="d48032" name="ambra profondo sfumatura"/>
+
+  <!-- Testa, musetto, tartufo e baffi (part="testa") -->
+  <color symbol="T" value="343844" part="testa" name="testa grafite base"/>
+  <color symbol="t" value="4c5262" part="testa" name="testa grafite chiaro guance"/>
+  <color symbol="U" value="ffd099" part="testa" name="musetto e guance ambra chiaro"/>
+  <color symbol="u" value="f5ad62" part="testa" name="sfumatura musetto ambra"/>
+  <color symbol="N" value="181a20" part="testa" name="tartufo naso scuro"/>
+  <color symbol="W" value="282a34" part="testa" name="baffetti vibrisse"/>
+  <color symbol="E" value="141418" part="testa" name="occhi scuri profondi"/>
+  <color symbol="Z" value="ffffff" glow="True" part="testa" name="riflesso occhi e torcia led"/>
+
+  <!-- Grandi orecchie a conchiglia (part="testa") -->
+  <color symbol="O" value="343844" part="testa" name="dorso orecchio grafite"/>
+  <color symbol="o" value="4c5262" part="testa" name="bordo orecchio chiaro"/>
+  <color symbol="R" value="ffaec0" part="testa" name="interno orecchio rosa"/>
+  <color symbol="r" value="ffd2dc" part="testa" name="concavita orecchio rosa chiaro"/>
+
+  <!-- Zampe posteriori bipedali piegate a Z (part="gamba") -->
+  <color symbol="G" value="343844" part="gamba" name="coscia grafite"/>
+  <color symbol="g" value="20222a" part="gamba" name="stinco e garretto"/>
+  <color symbol="P" value="d48032" part="gamba" name="piede ambra dita"/>
+  <color symbol="p" value="a85c18" part="gamba" name="polpastrelli unghie"/>
+
+  <!-- Zampette anteriori e robusti guanti da lavoro (part="braccio") -->
+  <color symbol="A" value="4c5262" part="braccio" name="braccino grafite"/>
+  <color symbol="a" value="ff781f" part="braccio" name="guantino gommato arancione scultore"/>
+  <color symbol="x" value="b84400" part="braccio" name="grip dita gommato"/>
+
+  <!-- Coda sinuosa e pennacchio bicolore (part="coda") -->
+  <color symbol="K" value="343844" part="coda" name="fusto coda grafite"/>
+  <color symbol="k" value="20222a" part="coda" name="giunto fusto coda"/>
+  <color symbol="J" value="181a20" part="coda" name="base pennacchio scura"/>
+  <color symbol="I" value="ffd099" part="coda" name="punta pennacchio ambrata"/>
+
+  <!-- Accessori dello Scultore: Caschetto cantiere, Visiera sollevata, Faretto LED, Sottogola (part="testa") -->
+  <color symbol="H" value="ff781f" part="testa" name="elmetto cantiere arancio vivo"/>
+  <color symbol="h" value="ffa24d" part="testa" name="elmetto luce e cresta"/>
+  <color symbol="s" value="cc5500" part="testa" name="elmetto bordo e asole ombra"/>
+  <color symbol="V" value="1e2430" part="testa" name="visiera policarbonato oscurato"/>
+  <color symbol="v" value="344052" part="testa" name="riflesso visiera policarbonato"/>
+  <color symbol="M" value="687282" part="testa" name="cerniere metallo visiera e fibbie"/>
+  <color symbol="m" value="1c1e24" part="testa" name="corpo supporto torcia led"/>
+  <color symbol="Y" value="ff781f" part="testa" name="fazzoletto collo arancio scultore"/>
+  <color symbol="y" value="cc5500" part="testa" name="nodo fazzoletto ombra"/>
+
+  <!-- Accessori corpo: Cintura e attrezzi da scultura voxel -->
+  <color symbol="L" value="382418" name="cintura cuoio da lavoro"/>
+  <color symbol="l" value="c87624" name="fodero e manico scalpello legno"/>
+  <color symbol="Q" value="8a96a8" name="acciaio scalpello modellazione"/>
+  <color symbol="q" value="c8d6e8" name="filo lama scalpello luce"/>
+
+  <!-- ======================================================== -->
+  <!-- 1. LUNGHE ZAMPE POSTERIORI DA SALTATORE (part="gamba")   -->
+  <!-- ======================================================== -->
+  <!-- Piedone sinistro al suolo (x=10..12, y=15..28, z=0..1)   -->
+  <box at="11 21.5 0" size="3 14 1" color="P"/>
+  <box at="10 28 0" size="1 1 1" color="p"/>
+  <box at="11 28 0" size="1 1 1" color="p"/>
+  <box at="12 28 0" size="1 1 1" color="p"/>
+  <box at="11 20 1" size="3 8 1" color="P"/>
+  <box at="11 15.5 0" size="3 3 3" color="g"/>
+
+  <!-- Piedone destro al suolo (x=19..21, y=15..28, z=0..1)     -->
+  <box at="20 21.5 0" size="3 14 1" color="P"/>
+  <box at="19 28 0" size="1 1 1" color="p"/>
+  <box at="20 28 0" size="1 1 1" color="p"/>
+  <box at="21 28 0" size="1 1 1" color="p"/>
+  <box at="20 20 1" size="3 8 1" color="P"/>
+  <box at="20 15.5 0" size="3 3 3" color="g"/>
+
+  <!-- Lunghi stinchi inclinati in avanti dal garretto al ginocchio (z=2..12) -->
+  <line at="11 15.5 2" to="11 24.5 11.5" r="1.1" color="g"/>
+  <line at="20 15.5 2" to="20 24.5 11.5" r="1.1" color="g"/>
+
+  <!-- Cosce muscolose alte piegate a Z che raccordano ginocchio e bacino -->
+  <ellipsoid at="11 20 9.5" size="5 9 10" color="G"/>
+  <ellipsoid at="20 20 9.5" size="5 9 10" color="G"/>
+
+  <!-- ======================================================== -->
+  <!-- 2. CORPO ALLUNGATO INCLINATO E PETTORINA AMBRATA (z=10..22) -->
+  <!-- ======================================================== -->
+  <!-- Groppa posteriore alta (si salda alle cosce e alla coda) -->
+  <ellipsoid at="15.5 18 15" size="12 10 9" color="F"/>
+
+  <!-- Dorso medio allungato (inclinato verso il basso e in avanti) -->
+  <ellipsoid at="15.5 24 14" size="11 10 8" color="F"/>
+
+  <!-- Petto e spalle anteriori -->
+  <ellipsoid at="15.5 29 14.5" size="10 8 8" color="F"/>
+
+  <!-- Soffice ventre e pettorina ambrata calda (+y e parte inferiore) -->
+  <ellipsoid at="15.5 24 11" size="8 9 5" color="C"/>
+  <ellipsoid at="15.5 28 12.5" size="7 7 6" color="C"/>
+  <ellipsoid at="15.5 31 14" size="6 5 5" color="c"/>
+
+  <!-- ======================================================== -->
+  <!-- 3. ZAMPETTE ANTERIORI E GUANTI DA LAVORO (part="braccio") -->
+  <!-- ======================================================== -->
+  <!-- Braccino sinistro e guanto gommato arancione con polsino -->
+  <line at="12 29 14" to="13.5 32 12" r="0.6" color="A"/>
+  <box at="13.5 31.5 12" size="2 2 1" color="s"/>
+  <box at="13.5 33.5 12" size="2 2 2" color="a"/>
+  <box at="13.5 34 12" size="2 1 1" color="x"/>
+
+  <!-- Braccino destro e guanto gommato arancione con polsino -->
+  <line at="19 29 14" to="17.5 32 12" r="0.6" color="A"/>
+  <box at="17.5 31.5 12" size="2 2 1" color="s"/>
+  <box at="17.5 33.5 12" size="2 2 2" color="a"/>
+  <box at="17.5 34 12" size="2 1 1" color="x"/>
+
+  <!-- ======================================================== -->
+  <!-- 4. TESTA GRANDE, GUANCE, MUSETTO, OCCHI (part="testa")   -->
+  <!-- ======================================================== -->
+  <!-- Cranio principale grafite -->
+  <ellipsoid at="15.5 31 19" size="13 11 10" color="T"/>
+
+  <!-- Fronte grafite tra gli occhi -->
+  <box at="15.5 34 21" size="4 4 4" color="T"/>
+  <box at="15.5 36 22" size="2 2 2" color="t"/>
+
+  <!-- Guanciotte ambrate ai lati del muso -->
+  <ellipsoid at="10.5 34 18.5" size="5 5 5" color="t"/>
+  <ellipsoid at="20.5 34 18.5" size="5 5 5" color="t"/>
+  <box at="10 35 18" size="3 3 3" color="U"/>
+  <box at="21 35 18" size="3 3 3" color="U"/>
+
+  <!-- Musetto conico ambra caldo allungato in avanti -->
+  <box at="15.5 37 18" size="5 4 3" color="U"/>
+  <box at="15.5 39 18" size="3 3 2" color="U"/>
+  <!-- Tartufo nasino scuro -->
+  <box at="15.5 40 19" size="2 1 1" color="N"/>
+
+  <!-- Sottili accenni di vibrisse laterali sul muso -->
+  <box at="13 38 18" size="1 1 1" color="W"/>
+  <box at="18 38 18" size="1 1 1" color="W"/>
+
+  <!-- Grandi occhi scuri espressivi (3x2x3 voxel a z=20..22, y=34..35) -->
+  <box at="11 34.5 20" size="3 2 3" color="E"/>
+  <box at="20 34.5 20" size="3 2 3" color="E"/>
+
+  <!-- Punti luce bianchi riflesso vispo (Z, glow="True") in alto a sx -->
+  <box at="10 35 22" size="1 1 1" color="Z"/>
+  <box at="19 35 22" size="1 1 1" color="Z"/>
+
+  <!-- ======================================================== -->
+  <!-- 5. BANDANA / SCIARPETTA ARANCIO AL COLLO (part="testa")  -->
+  <!-- ======================================================== -->
+  <!-- Collare attorno al collo sotto il mento -->
+  <cylinder at="15.5 32 16" size="8 7 1.8" color="Y"/>
+  <!-- Nodo da cantiere / fazzoletto sotto la gola -->
+  <box at="15.5 35 15.5" size="3 1 2" color="y"/>
+  <!-- Lembi e drappeggio arancione sul petto -->
+  <box at="15 34.5 13.5" size="2 1 2.5" color="Y"/>
+  <box at="16.5 34.5 12" size="1 1 2" color="y"/>
+
+  <!-- ======================================================== -->
+  <!-- 6. GIGANTESCHE ORECCHIE A CONCHIGLIA (part="testa", z=25..39) -->
+  <!-- ======================================================== -->
+  <!-- Orecchio sinistro: guscio grafite posteriore/esterno -->
+  <ellipsoid at="9.5 29 25" size="8 4 15" color="O"/>
+  <!-- Padiglione interno concavo velluto rosa carne -->
+  <ellipsoid at="9.5 30.5 26" size="6 3 13" color="R"/>
+  <box at="9.5 31 27" size="4 1 8" color="r"/>
+  <line at="6 30 28" to="9 30 38" r="0.5" color="o"/>
+
+  <!-- Orecchio destro: guscio grafite posteriore/esterno -->
+  <ellipsoid at="21.5 29 25" size="8 4 15" color="O"/>
+  <!-- Padiglione interno concavo velluto rosa carne -->
+  <ellipsoid at="21.5 30.5 26" size="6 3 13" color="R"/>
+  <box at="21.5 31 27" size="4 1 8" color="r"/>
+  <line at="25 30 28" to="22 30 38" r="0.5" color="o"/>
+
+  <!-- ======================================================== -->
+  <!-- 7. CASCHETTO PROTETTIVO DA CANTIERE (part="testa")       -->
+  <!-- ======================================================== -->
+  <!-- Fascia inferiore e base con asole sartoriali per le orecchie -->
+  <cylinder at="15.5 32 25" size="8 8 1" color="s"/>
+  <!-- Visiera frontale rigida integrata dell'elmetto (brim) -->
+  <box at="15.5 36 25" size="10 4 1" color="H"/>
+  <box at="15.5 37 25" size="8 2 1" color="h"/>
+  <box at="15.5 38 24" size="6 1 1" color="s"/>
+  <!-- Para-nuca protettivo posteriore -->
+  <box at="15.5 27 25" size="8 3 1" color="H"/>
+  <!-- Bordi di rinforzo laterali delle asole auricolari -->
+  <box at="11 31 25" size="1 3 1" color="s"/>
+  <box at="20 31 25" size="1 3 1" color="s"/>
+
+  <!-- Calotta bombata principale aerodinamica arancione vivo -->
+  <ellipsoid at="15.5 32 26" size="7.2 8.6 6.5" color="H"/>
+  <ellipsoid at="15.5 32 27.5" size="6.4 7.6 5.5" color="h"/>
+
+  <!-- Cresta aerodinamica centrale di rinforzo longitudinale -->
+  <line at="15.5 27 28.5" to="15.5 35 28.5" r="0.7" color="h"/>
+  <line at="15.5 28.5 30" to="15.5 34 30" r="0.6" color="H"/>
+
+  <!-- Cinghietta sottogola di sicurezza con fibbia metallica -->
+  <line at="12 32 25" to="14 33 17" r="0.4" color="s"/>
+  <line at="19 32 25" to="17 33 17" r="0.4" color="s"/>
+  <box at="15.5 34 16" size="2 1 1" color="M"/>
+
+  <!-- ======================================================== -->
+  <!-- 8. SPESSA VISIERA SCURA SOLLEVATA A MEZZA FRONTE         -->
+  <!-- ======================================================== -->
+  <!-- Cerniere metalliche laterali di rotazione visiera -->
+  <box at="11 35 27" size="1 1 2" color="M"/>
+  <box at="20 35 27" size="1 1 2" color="M"/>
+  <box at="12 35 27" size="1 1 1" color="M"/>
+  <box at="19 35 27" size="1 1 1" color="M"/>
+
+  <!-- Arco della visiera sollevata in policarbonato oscurato -->
+  <box at="15.5 36 27" size="8 1 1" color="V"/>
+  <box at="15.5 36 28" size="6 1 2" color="v"/>
+  <box at="15.5 36 30" size="6 1 1" color="V"/>
+
+  <!-- ======================================================== -->
+  <!-- 9. TORCIA / FARETTO LED FRONTALE MONTATO SULL'ELMETTO   -->
+  <!-- ======================================================== -->
+  <!-- Supporto staffa faretto montato sulla fronte sopra la visiera -->
+  <box at="15.5 35 30" size="2 1 2" color="m"/>
+  <box at="15.5 36 31" size="2 1 1" color="M"/>
+  <!-- Lente LED brillante glow montata a filo frontale -->
+  <box at="15.5 37 31" size="2 1 1" color="Z"/>
+
+  <!-- ======================================================== -->
+  <!-- 10. CINTURA DA LAVORO E SCALPELLO VOXEL AL FIANCO        -->
+  <!-- ======================================================== -->
+  <!-- Cintura in cuoio scuro da carpentiere/scultore -->
+  <line at="11 23 13" to="15.5 18 14" r="0.7" color="L"/>
+  <line at="15.5 18 14" to="20 23 13" r="0.7" color="L"/>
+  <line at="11 23 13" to="15.5 26 12" r="0.7" color="L"/>
+  <line at="20 23 13" to="15.5 26 12" r="0.7" color="L"/>
+  <!-- Fibbia metallica della cintura -->
+  <box at="15.5 27 12" size="2 1 1" color="M"/>
+
+  <!-- Fodero e scalpello/mazzuolo da modellazione al fianco destro -->
+  <box at="20 21 13" size="3 3 2" color="l"/>
+  <line at="20 18 11" to="20 23 17" r="0.6" color="l"/>
+  <box at="20 24 17" size="3 1 2" color="Q"/>
+  <box at="20 25 18" size="3 1 1" color="q"/>
+
+  <!-- ======================================================== -->
+  <!-- 11. LUNGHISSIMA CODA E PENNACCHIO BICOLORE (part="coda") -->
+  <!-- ======================================================== -->
+  <!-- Attacco alla groppa posteriore alta (y=15, z=16) -->
+  <line at="15.5 15 16" to="15.5 10 9" r="1.1" color="K"/>
+  <!-- Discesa sinuosa verso il terreno -->
+  <line at="15.5 10 9" to="15.5 6 4" r="0.9" color="K"/>
+  <line at="15.5 6 4" to="15.5 3.5 2.5" r="0.8" color="K"/>
+  <!-- Risalita verso l'alto -->
+  <line at="15.5 3.5 2.5" to="15.5 2.5 5.5" r="0.8" color="k"/>
+  <line at="15.5 2.5 5.5" to="15.5 2.5 9" r="0.8" color="k"/>
+
+  <!-- Spettacolare pennacchio bicolore: collare scuro e ciuffo ambrato -->
+  <ellipsoid at="15.5 2.5 9" size="5 4 5" color="J"/>
+  <ellipsoid at="15.5 2.5 12" size="6 5 6" color="I"/>
+  <ellipsoid at="15.5 2.5 16" size="4 4 5" color="I"/>
+  <box at="15.5 2.5 18" size="2 2 2" color="I"/>
+
+  <!-- ======================================================== -->
+  <!-- 12. REGOLE GENERATIVE: SFUMATURE, PELO E TEXTURE         -->
+  <!-- ======================================================== -->
+  <!-- Illuminazione sommitale del dorso e delle spalle -->
+  <prl steps="1" p="0.3" in="B F" out="B f"/>
+  <!-- Ombreggiatura naturale nelle pieghe inferiori del dorso -->
+  <prl steps="1" p="0.15" in="F/B" out="D/*"/>
+  <!-- Transizione morbida tra pancia ambra e fianchi grafite -->
+  <prl steps="1" p="0.35" in="F/C" out="*/c"/>
+  <prl steps="1" p="0.25" in="FC" out="Fc" symmetry="(x)"/>
+  <!-- Sfumatura delicata tra guance ambra e muso -->
+  <prl steps="1" p="0.25" in="t U" out="u *"/>
+</sequence>

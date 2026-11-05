@@ -1,0 +1,20 @@
+<!-- Distributore automatico: carrozzeria rossa di altezza diversa a ogni seme, vetrina, feritoia, insegna luminosa. -->
+<sequence values="BZHTSRVKL" size="20 20 24" symmetry="(xy)" name="Distributore">
+  <color symbol="Z" hidden="True"/><color symbol="H" hidden="True"/>
+  <color symbol="T" value="c8302a" name="carrozzeria rossa"/><color symbol="S" value="8a1a18" name="sportello"/><color symbol="R" value="3a3a40" name="tetto"/>
+  <color symbol="V" value="a8d8f0" name="vetrina" alpha="0.6"/><color symbol="K" value="2a2a2e" name="feritoia"/><color symbol="L" value="fff0a0" name="insegna" glow="True"/>
+  <box at="10 10 0" size="12 8 20" color="Z"/>
+  <box at="10 10 0" size="12 8 10" color="T"/>
+  <box at="10 10 10" size="1 1 1" color="H"/>
+  <one>
+    <rule in="Z H" out="H T" p="6"/>
+    <rule in="H" out="T" p="1"/>
+  </one>
+  <all in="TZ" out="TT" symmetry="(xy)"/>
+  <all in="Z" out="B"/>
+  <all in="B T" out="R T"/>
+  <box at="8 13 3" size="6 1 6" color="V" on="T"/>
+  <box at="14 13 5" size="2 1 1" color="K" on="T"/>
+  <box at="14 13 1" size="2 1 2" color="S" on="T"/>
+  <box at="10 13 9" size="10 1 1" color="L" on="T"/>
+</sequence>

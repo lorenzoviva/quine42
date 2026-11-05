@@ -1,0 +1,15 @@
+<!-- Credenza: scritta a mano da Claude Code (step 9). Un mobile di legno scuro contro il muro, due ante sul davanti con le maniglie, una cornice in cima. -->
+<sequence values="BNnLKI" size="20 20 20" symmetry="(xy)" name="Credenza">
+  <color symbol="N" value="5e3c22" name="legno scuro"/>
+  <color symbol="n" value="3e2614" name="ombra"/>
+  <color symbol="L" value="7a5232" name="anta"/>
+  <color symbol="K" value="6a4428" name="cornice"/>
+  <color symbol="I" value="c8b070" name="maniglia d'ottone"/>
+  <box at="10 7 0" size="18 12 18" color="N"/>
+  <box at="10 7 18" size="20 14 2" color="K"/>
+  <box at="6 13 2" size="7 1 14" color="L" on="B"/>
+  <box at="14 13 2" size="7 1 14" color="L" on="B"/>
+  <box at="9 14 9" size="1 1 2" color="I"/>
+  <box at="11 14 9" size="1 1 2" color="I"/>
+  <box at="10 13 0" size="18 1 2" color="n" on="B"/>
+</sequence>

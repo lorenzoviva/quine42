@@ -1,0 +1,22 @@
+<!-- Transenna da cantiere a strisce rosse e bianche sui sacchi di sabbia, con la lampada gialla in cima; il pannello è alto quanto capita. -->
+<sequence values="BZHTWFRL" size="20 20 20" symmetry="(xy)" name="Transenna">
+  <color symbol="Z" hidden="True"/><color symbol="H" hidden="True"/>
+  <color symbol="T" value="d83a2a" name="strisce rosse"/><color symbol="W" value="f4f0e8" name="strisce bianche"/><color symbol="F" value="b89a6a" name="sacchi di sabbia"/>
+  <color symbol="R" value="3a3a3a" name="bordo"/><color symbol="L" value="ffc040" name="lampada" glow="True"/>
+  <box at="3 10 0" size="4 6 2" color="F"/>
+  <box at="17 10 0" size="4 6 2" color="F"/>
+  <box at="10 10 2" size="16 2 14" color="Z"/>
+  <box at="10 10 2" size="16 2 4" color="T"/>
+  <box at="10 10 6" size="1 1 1" color="H"/>
+  <one>
+    <rule in="Z H" out="H T" p="5"/>
+    <rule in="H" out="T" p="1"/>
+  </one>
+  <all in="TZ" out="TT" symmetry="(xy)"/>
+  <all in="Z" out="B"/>
+  <all in="B T" out="R T"/>
+  <one in="B R" out="L R" steps="1"/>
+  <box at="5 10 2" size="2 2 16" color="W" on="T"/>
+  <box at="9 10 2" size="2 2 16" color="W" on="T"/>
+  <box at="13 10 2" size="2 2 16" color="W" on="T"/>
+</sequence>

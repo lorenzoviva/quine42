@@ -1,0 +1,587 @@
+<!--
+La Biblioteca del Mondo (corona): la memoria del Narratore, chiostro orizzontale zen-cybernetico con corte aperta, specchio d'acqua scura e le rune del canone.
+Scritto da Gemini CLI (Gemini 3.8 Flash, abbonamento) il 23/10/2026, task T19.
+Scatola: 14 × 14 × 7 caselle, 112 × 112 × 56 voxel, 8 voxel per casella.
+Lettere chiave:
+  O = porta (lettera O, nome "porta", al centro x=56, y=102, z=0..19, atrio interno vuoto e passante verso la corte)
+  F = insegna ("BIBLIOTECA DEL MONDO", neon verde 7dd87d glow fisso su targa sopra la porta)
+  P = targa scura opaca per l'insegna
+  M = metallo nero cybernetico primario (pilastri 1×1, architravi, telaio corte e tetto a lama)
+  m = metallo secondario scuro (pannellature, montanti, cordoli vasca)
+  C = cemento grafite (basamento perimetrale, deambulatorio, sagrato e passerella)
+  S = acciaio chiaro (finiture lama del tetto, collarini e guglia lanterna)
+  s = acciaio scuro (cordoli di transizione e giunti)
+  V = vetro scuro riflettente
+  v = fasce di riflesso azzurrato-cenerino freddo
+  W = acqua scura specchiante della corte (10202a)
+  N = neon verde vivo d'accento (7dd87d glow)
+  n = neon verde tenue per i fili alla base dei pilastri (4a984a glow)
+  x = buffer temporaneo per l'animazione (hidden)
+Fasi pulsanti del canone (1..8):
+  1..8 = gradiente continuo di 8 fasi (da 489848 a 7dd87d con glow) per la respirazione meditativa delle rune e della lanterna.
+Architettura:
+  Edificio basso e orizzontale (12 × 12 caselle, alto ~3 caselle, z=0..25) con tetto piano a lama sottile sporgente.
+  Portico esterno continuo con pilastri neri fittissimi (1 × 1 voxel, passo 5 voxel) con filo di neon verde alla base.
+  Pareti arretrate in vetro scuro riflettente con montanti e fasce di riflesso.
+  Corte interna aperta al cielo (6 × 6 caselle = 48 × 48 voxel, x=32..80, y=32..80) con specchio d'acqua scura a filo (W, z=1).
+  Sul pelo dell'acqua (z=1), a filo, le 8 rune del canone accese in verde geometrico secondo una composizione sacra simmetrica.
+  Unica lanterna zenitale alta e sottile (z=0..48, ~6 caselle) nell'angolo nord-est dello specchio d'acqua, con luce in cima.
+  Porta O centrata a sud a z=0 con ampio varco nel colonnato e atrio interno passante verso la corte.
+  Insegna "BIBLIOTECA DEL MONDO" su due righe centrata sul bordo del tetto sopra la porta.
+Animazione "canone" (8 frame):
+  Respiro fluido e ciclico della luce delle rune immerse nello specchio d'acqua e del nucleo sommitale della lanterna.
+-->
+<sequence values="BMmCSsVvWNnFPOx12345678" size="112 112 56" symmetry="()" name="Biblioteca del Mondo">
+  <!-- Materiali e palette neon punk -->
+  <color symbol="M" value="14141a" name="metallo primario"/>
+  <color symbol="m" value="22242e" name="metallo secondario"/>
+  <color symbol="C" value="34363e" name="cemento grafite"/>
+  <color symbol="S" value="8a8f9c" name="acciaio chiaro"/>
+  <color symbol="s" value="525662" name="acciaio scuro"/>
+  <color symbol="V" value="16242a" name="vetro scuro"/>
+  <color symbol="v" value="2a424e" name="riflesso vetro"/>
+  <color symbol="W" value="10202a" name="acqua scura"/>
+  <color symbol="N" value="7dd87d" glow="True" name="neon verde vivo"/>
+  <color symbol="n" value="4a984a" glow="True" name="neon verde tenue"/>
+  <color symbol="P" value="0a0e0c" name="targa insegna"/>
+  <color symbol="F" value="7dd87d" glow="True" name="insegna fissa"/>
+  <color symbol="O" value="1a2c1a" name="porta"/>
+  <color symbol="x" hidden="True" name="buffer animazione"/>
+
+  <!-- 8 Fasi della respirazione del canone (1..8) -->
+  <color symbol="1" value="7dd87d" glow="True" name="fase verde apice"/>
+  <color symbol="2" value="88e288" glow="True" name="fase verde brillante"/>
+  <color symbol="3" value="70cc70" glow="True" name="fase verde medio"/>
+  <color symbol="4" value="5cb45c" glow="True" name="fase verde morbido"/>
+  <color symbol="5" value="489848" glow="True" name="fase verde profondo"/>
+  <color symbol="6" value="5cb45c" glow="True" name="fase verde morbido 2"/>
+  <color symbol="7" value="70cc70" glow="True" name="fase verde medio 2"/>
+  <color symbol="8" value="88e288" glow="True" name="fase verde brillante 2"/>
+
+  <!-- ================================================================= -->
+  <!-- 1. BASAMENTO PERIMETRALE, SAGRATO E PAVIMENTAZIONI (z = 0..2)     -->
+  <!-- ================================================================= -->
+  <!-- Basamento generale dell'edificio (x=8..104, y=8..104, z=0) -->
+  <box at="56 56 0" size="97 97 1" color="C"/>
+  <box at="56 56 1" size="95 95 1" color="m"/>
+
+  <!-- Sagrato d'ingresso e viale frontale (y=104..111, z=0..1) -->
+  <box at="56 107 0" size="49 7 1" color="C"/>
+  <box at="56 107 1" size="41 7 1" color="m"/>
+  <!-- Passerella centrale d'onore in lastre lisce verso la porta -->
+  <box at="56 107 1" size="21 7 1" color="C"/>
+  <box at="45 107 1" size="1 7 1" color="n"/>
+  <box at="67 107 1" size="1 7 1" color="n"/>
+
+  <!-- Deambulatorio coperto (galleria tra le vetrate e la corte interna) -->
+  <!-- Pavimentazione interna raffinata in granito grafite a z=1 -->
+  <box at="56 56 1" size="93 93 1" color="C"/>
+  <!-- Fasce perimetrali di camminamento in acciaio scuro -->
+  <box at="56 24 1" size="77 13 1" color="s"/>
+  <box at="56 88 1" size="77 13 1" color="s"/>
+  <box at="24 56 1" size="13 51 1" color="s"/>
+  <box at="88 56 1" size="13 51 1" color="s"/>
+
+  <!-- ================================================================= -->
+  <!-- 2. CORTE APERTA CENTRALE E SPECCHIO D'ACQUA (x=32..80, y=32..80)  -->
+  <!-- ================================================================= -->
+  <!-- Banchina e cornice perimetrale in pietra grafite liscia e metallo -->
+  <box at="56 56 1" size="49 49 1" color="m"/>
+  <box at="56 56 2" size="49 49 1" color="M"/>
+  <!-- Scavo centrale della vasca (x=35..77, y=35..77, z=1..2) -->
+  <box at="56 56 1" size="43 43 2" color="B"/>
+
+  <!-- Fondo della vasca a z=0 in pietra scura -->
+  <box at="56 56 0" size="43 43 1" color="m"/>
+  <!-- Cordolo interno perimetrale della vasca in metallo nero -->
+  <box at="56 35 0" size="43 1 2" color="M"/>
+  <box at="56 77 0" size="43 1 2" color="M"/>
+  <box at="35 56 0" size="1 43 2" color="M"/>
+  <box at="77 56 0" size="1 43 2" color="M"/>
+  <box at="56 35 1" size="41 1 1" color="s"/>
+  <box at="56 77 1" size="41 1 1" color="s"/>
+  <box at="35 56 1" size="1 41 1" color="s"/>
+  <box at="77 56 1" size="1 41 1" color="s"/>
+
+  <!-- Filo di luce neon verde tenue che orla il perimetro interno dello specchio d'acqua -->
+  <box at="56 36 1" size="39 1 1" color="n"/>
+  <box at="56 76 1" size="39 1 1" color="n"/>
+  <box at="36 56 1" size="1 39 1" color="n"/>
+  <box at="76 56 1" size="1 39 1" color="n"/>
+
+  <!-- Specchio d'acqua scura a filo (z=1, x=36..76, y=36..76) -->
+  <box at="56 56 1" size="41 41 1" color="W"/>
+
+  <!-- Medaglione centrale del canone immerso a z=1 (cx=56, cy=56) -->
+  <box at="56 56 1" size="7 7 1" color="M"/>
+  <box at="56 56 1" size="5 5 1" color="s"/>
+  <box at="56 56 1" size="3 3 1" color="1"/>
+  <box at="56 56 1" size="1 1 1" color="M"/>
+
+  <!-- 8 Rune del Canone sul pelo dell'acqua a filo (z=1) -->
+  <!-- Runa 1 (Nord, Luce / Freccia zen): cx=56, cy=44 -->
+  <box at="56 44 1" size="1 5 1" color="1"/>
+  <box at="55 43 1" size="1 1 1" color="1"/>
+  <box at="57 43 1" size="1 1 1" color="1"/>
+  <box at="54 44 1" size="1 1 1" color="1"/>
+  <box at="58 44 1" size="1 1 1" color="1"/>
+
+  <!-- Runa 2 (Nord-Est, Fuoco / Chevron angolare): cx=65, cy=47 -->
+  <box at="64 47 1" size="1 5 1" color="2"/>
+  <box at="65 46 1" size="1 1 1" color="2"/>
+  <box at="65 48 1" size="1 1 1" color="2"/>
+  <box at="66 47 1" size="1 1 1" color="2"/>
+
+  <!-- Runa 3 (Est, Acqua / Gancio fluido): cx=68, cy=56 -->
+  <box at="68 56 1" size="1 5 1" color="3"/>
+  <box at="69 54 1" size="1 2 1" color="3"/>
+  <box at="67 58 1" size="1 1 1" color="3"/>
+
+  <!-- Runa 4 (Sud-Est, Terra / Losanga chiusa): cx=65, cy=65 -->
+  <box at="65 65 1" size="3 3 1" color="4"/>
+  <box at="65 65 1" size="1 1 1" color="W"/>
+
+  <!-- Runa 5 (Sud, Vita / Tridente sacro): cx=56, cy=68 -->
+  <box at="56 68 1" size="1 5 1" color="5"/>
+  <box at="54 66 1" size="1 3 1" color="5"/>
+  <box at="58 66 1" size="1 3 1" color="5"/>
+  <box at="56 68 1" size="3 1 1" color="5"/>
+
+  <!-- Runa 6 (Sud-Ovest, Scudo / Triangolo cybernetico): cx=47, cy=65 -->
+  <box at="46 65 1" size="1 5 1" color="6"/>
+  <box at="47 64 1" size="1 1 1" color="6"/>
+  <box at="47 66 1" size="1 1 1" color="6"/>
+  <box at="48 65 1" size="1 1 1" color="6"/>
+
+  <!-- Runa 7 (Ovest, Vento / Saetta spezzata): cx=44, cy=56 -->
+  <box at="43 54 1" size="1 2 1" color="7"/>
+  <box at="44 55 1" size="1 3 1" color="7"/>
+  <box at="45 57 1" size="1 2 1" color="7"/>
+
+  <!-- Runa 8 (Nord-Ovest, Canone / Intreccio geometrico): cx=47, cy=47 -->
+  <box at="47 47 1" size="5 1 1" color="8"/>
+  <box at="45 46 1" size="1 1 1" color="8"/>
+  <box at="49 48 1" size="1 1 1" color="8"/>
+  <box at="47 45 1" size="1 1 1" color="8"/>
+  <box at="47 49 1" size="1 1 1" color="8"/>
+
+  <!-- ================================================================= -->
+  <!-- 3. LA LANTERNA ZENITALE NELL'ANGOLO NORD-EST (cx=71, cy=41)       -->
+  <!-- ================================================================= -->
+  <!-- Plinto e basamento immerso nell'acqua (z=0..3) -->
+  <box at="71 41 0" size="3 3 2" color="M"/>
+  <box at="71 41 2" size="3 3 1" color="s"/>
+  <box at="71 41 3" size="3 3 1" color="M"/>
+  <box at="71 41 3" size="1 1 1" color="1"/>
+
+  <!-- Fusto slanciato e sottile in titanio nero (z=4..39) -->
+  <box at="71 41 4" size="1 1 36" color="M"/>
+  <!-- Anelli e ghiere strutturali ogni 8 voxel -->
+  <box at="71 41 12" size="3 3 1" color="S"/>
+  <box at="71 41 20" size="3 3 1" color="S"/>
+  <box at="71 41 28" size="3 3 1" color="S"/>
+  <box at="71 41 36" size="3 3 1" color="S"/>
+
+  <!-- Gabbia zen della lanterna e nucleo luminoso sommitale (z=40..48) -->
+  <!-- Piattello di base della gabbia a sbalzo -->
+  <box at="71 41 40" size="5 5 1" color="M"/>
+  <box at="71 41 40" size="3 3 1" color="s"/>
+  <!-- 4 Montanti angolari sottili della gabbia -->
+  <box at="69 39 41" size="1 1 4" color="S"/>
+  <box at="73 39 41" size="1 1 4" color="S"/>
+  <box at="69 43 41" size="1 1 4" color="S"/>
+  <box at="73 43 41" size="1 1 4" color="S"/>
+  <!-- Cuore di luce verde pulsante (fasi 1..8) al centro della lanterna -->
+  <box at="71 41 41" size="1 1 4" color="1"/>
+  <box at="71 41 42" size="3 3 2" color="1"/>
+
+  <!-- Tettuccio a padiglione della lanterna (z=45..47) -->
+  <box at="71 41 45" size="7 7 1" color="M"/>
+  <box at="71 41 46" size="5 5 1" color="m"/>
+  <box at="71 41 47" size="3 3 1" color="S"/>
+  <!-- Cuspide / ago sottile di chiusura a z=48..49 -->
+  <box at="71 41 48" size="1 1 2" color="S"/>
+
+  <!-- ================================================================= -->
+  <!-- 4. PARETI INTERNE ED ESTERNE IN VETRO SCURO RIFLETTENTE           -->
+  <!-- ================================================================= -->
+  <!-- Pareti di vetro arretrate dal portico esterno (z=1..23) -->
+  <!-- Parete Nord (y=16, x=16..96) -->
+  <box at="56 16 1" size="81 1 23" color="V"/>
+  <box at="56 16 7" size="81 1 1" color="v"/>
+  <box at="56 16 15" size="81 1 1" color="v"/>
+  <!-- Montanti verticali metallo scuro -->
+  <box at="26 16 1" size="1 1 23" color="m"/>
+  <box at="36 16 1" size="1 1 23" color="m"/>
+  <box at="46 16 1" size="1 1 23" color="m"/>
+  <box at="56 16 1" size="1 1 23" color="m"/>
+  <box at="66 16 1" size="1 1 23" color="m"/>
+  <box at="76 16 1" size="1 1 23" color="m"/>
+  <box at="86 16 1" size="1 1 23" color="m"/>
+
+  <!-- Parete Ovest (x=16, y=16..96) -->
+  <box at="16 56 1" size="1 81 23" color="V"/>
+  <box at="16 56 7" size="1 81 1" color="v"/>
+  <box at="16 56 15" size="1 81 1" color="v"/>
+  <!-- Montanti verticali metallo scuro -->
+  <box at="16 26 1" size="1 1 23" color="m"/>
+  <box at="16 36 1" size="1 1 23" color="m"/>
+  <box at="16 46 1" size="1 1 23" color="m"/>
+  <box at="16 56 1" size="1 1 23" color="m"/>
+  <box at="16 66 1" size="1 1 23" color="m"/>
+  <box at="16 76 1" size="1 1 23" color="m"/>
+  <box at="16 86 1" size="1 1 23" color="m"/>
+
+  <!-- Parete Est (x=96, y=16..96) -->
+  <box at="96 56 1" size="1 81 23" color="V"/>
+  <box at="96 56 7" size="1 81 1" color="v"/>
+  <box at="96 56 15" size="1 81 1" color="v"/>
+  <!-- Montanti verticali metallo scuro -->
+  <box at="96 26 1" size="1 1 23" color="m"/>
+  <box at="96 36 1" size="1 1 23" color="m"/>
+  <box at="96 46 1" size="1 1 23" color="m"/>
+  <box at="96 56 1" size="1 1 23" color="m"/>
+  <box at="96 66 1" size="1 1 23" color="m"/>
+  <box at="96 76 1" size="1 1 23" color="m"/>
+  <box at="96 86 1" size="1 1 23" color="m"/>
+
+  <!-- Parete Sud frontale (y=96, x=16..45 e x=67..96, con apertura centrale atrio) -->
+  <box at="31 96 1" size="29 1 23" color="V"/>
+  <box at="31 96 7" size="29 1 1" color="v"/>
+  <box at="31 96 15" size="29 1 1" color="v"/>
+  <box at="81 96 1" size="29 1 23" color="V"/>
+  <box at="81 96 7" size="29 1 1" color="v"/>
+  <box at="81 96 15" size="29 1 1" color="v"/>
+  <box at="26 96 1" size="1 1 23" color="m"/>
+  <box at="36 96 1" size="1 1 23" color="m"/>
+  <box at="76 96 1" size="1 1 23" color="m"/>
+  <box at="86 96 1" size="1 1 23" color="m"/>
+
+  <!-- Pareti laterali dell'atrio d'ingresso (x=46 e x=66, y=96..102, z=1..23) -->
+  <box at="46 99 1" size="1 7 23" color="M"/>
+  <box at="46 99 3" size="1 5 18" color="V"/>
+  <box at="66 99 1" size="1 7 23" color="M"/>
+  <box at="66 99 3" size="1 5 18" color="V"/>
+
+  <!-- ================================================================= -->
+  <!-- 5. PORTA O, VANO D'INGRESSO E PORTALE FRONTALE (x=56, y=102..104)  -->
+  <!-- ================================================================= -->
+  <!-- Portale d'onore in metallo nero a cornice (x=46..66, y=102, z=0..23) -->
+  <box at="46 102 0" size="1 1 24" color="M"/>
+  <box at="66 102 0" size="1 1 24" color="M"/>
+  <!-- Architrave d'ingresso a z=20..23 -->
+  <box at="56 102 20" size="19 1 4" color="M"/>
+  <box at="56 102 20" size="17 1 1" color="N"/>
+
+  <!-- Porta O (vano d'ingresso a z=0, larga 16 voxel, alta 20 voxel: x=48..63) -->
+  <box at="52 102 0" size="8 1 20" color="O"/>
+  <box at="60 102 0" size="8 1 20" color="O"/>
+  <!-- Sguancio e vano interno libero e vuoto per oltre 12 voxel fino alla corte -->
+  <box at="56 95 0" size="17 13 22" color="B"/>
+  <!-- Pavimento dell'atrio interno a z=0..1 -->
+  <box at="56 95 0" size="19 13 1" color="C"/>
+  <box at="56 95 1" size="17 13 1" color="m"/>
+  <!-- Guide luminose interne lungo l'atrio verso la corte -->
+  <box at="49 95 1" size="1 13 1" color="n"/>
+  <box at="63 95 1" size="1 13 1" color="n"/>
+
+  <!-- ================================================================= -->
+  <!-- 6. COLONNATO FITTO PERIMETRALE (Pilastri 1×1, passo 5, base neon) -->
+  <!-- ================================================================= -->
+  <!-- Lato Nord (y=11, x=11..101 a passo 5) -->
+  <box at="11 11 1" size="1 1 1" color="n"/><box at="11 11 2" size="1 1 22" color="M"/>
+  <box at="16 11 1" size="1 1 1" color="n"/><box at="16 11 2" size="1 1 22" color="M"/>
+  <box at="21 11 1" size="1 1 1" color="n"/><box at="21 11 2" size="1 1 22" color="M"/>
+  <box at="26 11 1" size="1 1 1" color="n"/><box at="26 11 2" size="1 1 22" color="M"/>
+  <box at="31 11 1" size="1 1 1" color="n"/><box at="31 11 2" size="1 1 22" color="M"/>
+  <box at="36 11 1" size="1 1 1" color="n"/><box at="36 11 2" size="1 1 22" color="M"/>
+  <box at="41 11 1" size="1 1 1" color="n"/><box at="41 11 2" size="1 1 22" color="M"/>
+  <box at="46 11 1" size="1 1 1" color="n"/><box at="46 11 2" size="1 1 22" color="M"/>
+  <box at="51 11 1" size="1 1 1" color="n"/><box at="51 11 2" size="1 1 22" color="M"/>
+  <box at="56 11 1" size="1 1 1" color="n"/><box at="56 11 2" size="1 1 22" color="M"/>
+  <box at="61 11 1" size="1 1 1" color="n"/><box at="61 11 2" size="1 1 22" color="M"/>
+  <box at="66 11 1" size="1 1 1" color="n"/><box at="66 11 2" size="1 1 22" color="M"/>
+  <box at="71 11 1" size="1 1 1" color="n"/><box at="71 11 2" size="1 1 22" color="M"/>
+  <box at="76 11 1" size="1 1 1" color="n"/><box at="76 11 2" size="1 1 22" color="M"/>
+  <box at="81 11 1" size="1 1 1" color="n"/><box at="81 11 2" size="1 1 22" color="M"/>
+  <box at="86 11 1" size="1 1 1" color="n"/><box at="86 11 2" size="1 1 22" color="M"/>
+  <box at="91 11 1" size="1 1 1" color="n"/><box at="91 11 2" size="1 1 22" color="M"/>
+  <box at="96 11 1" size="1 1 1" color="n"/><box at="96 11 2" size="1 1 22" color="M"/>
+  <box at="101 11 1" size="1 1 1" color="n"/><box at="101 11 2" size="1 1 22" color="M"/>
+
+  <!-- Lato Ovest (x=11, y=16..96 a passo 5) -->
+  <box at="11 16 1" size="1 1 1" color="n"/><box at="11 16 2" size="1 1 22" color="M"/>
+  <box at="11 21 1" size="1 1 1" color="n"/><box at="11 21 2" size="1 1 22" color="M"/>
+  <box at="11 26 1" size="1 1 1" color="n"/><box at="11 26 2" size="1 1 22" color="M"/>
+  <box at="11 31 1" size="1 1 1" color="n"/><box at="11 31 2" size="1 1 22" color="M"/>
+  <box at="11 36 1" size="1 1 1" color="n"/><box at="11 36 2" size="1 1 22" color="M"/>
+  <box at="11 41 1" size="1 1 1" color="n"/><box at="11 41 2" size="1 1 22" color="M"/>
+  <box at="11 46 1" size="1 1 1" color="n"/><box at="11 46 2" size="1 1 22" color="M"/>
+  <box at="11 51 1" size="1 1 1" color="n"/><box at="11 51 2" size="1 1 22" color="M"/>
+  <box at="11 56 1" size="1 1 1" color="n"/><box at="11 56 2" size="1 1 22" color="M"/>
+  <box at="11 61 1" size="1 1 1" color="n"/><box at="11 61 2" size="1 1 22" color="M"/>
+  <box at="11 66 1" size="1 1 1" color="n"/><box at="11 66 2" size="1 1 22" color="M"/>
+  <box at="11 71 1" size="1 1 1" color="n"/><box at="11 71 2" size="1 1 22" color="M"/>
+  <box at="11 76 1" size="1 1 1" color="n"/><box at="11 76 2" size="1 1 22" color="M"/>
+  <box at="11 81 1" size="1 1 1" color="n"/><box at="11 81 2" size="1 1 22" color="M"/>
+  <box at="11 86 1" size="1 1 1" color="n"/><box at="11 86 2" size="1 1 22" color="M"/>
+  <box at="11 91 1" size="1 1 1" color="n"/><box at="11 91 2" size="1 1 22" color="M"/>
+  <box at="11 96 1" size="1 1 1" color="n"/><box at="11 96 2" size="1 1 22" color="M"/>
+  <box at="11 101 1" size="1 1 1" color="n"/><box at="11 101 2" size="1 1 22" color="M"/>
+
+  <!-- Lato Est (x=101, y=16..96 a passo 5) -->
+  <box at="101 16 1" size="1 1 1" color="n"/><box at="101 16 2" size="1 1 22" color="M"/>
+  <box at="101 21 1" size="1 1 1" color="n"/><box at="101 21 2" size="1 1 22" color="M"/>
+  <box at="101 26 1" size="1 1 1" color="n"/><box at="101 26 2" size="1 1 22" color="M"/>
+  <box at="101 31 1" size="1 1 1" color="n"/><box at="101 31 2" size="1 1 22" color="M"/>
+  <box at="101 36 1" size="1 1 1" color="n"/><box at="101 36 2" size="1 1 22" color="M"/>
+  <box at="101 41 1" size="1 1 1" color="n"/><box at="101 41 2" size="1 1 22" color="M"/>
+  <box at="101 46 1" size="1 1 1" color="n"/><box at="101 46 2" size="1 1 22" color="M"/>
+  <box at="101 51 1" size="1 1 1" color="n"/><box at="101 51 2" size="1 1 22" color="M"/>
+  <box at="101 56 1" size="1 1 1" color="n"/><box at="101 56 2" size="1 1 22" color="M"/>
+  <box at="101 61 1" size="1 1 1" color="n"/><box at="101 61 2" size="1 1 22" color="M"/>
+  <box at="101 66 1" size="1 1 1" color="n"/><box at="101 66 2" size="1 1 22" color="M"/>
+  <box at="101 71 1" size="1 1 1" color="n"/><box at="101 71 2" size="1 1 22" color="M"/>
+  <box at="101 76 1" size="1 1 1" color="n"/><box at="101 76 2" size="1 1 22" color="M"/>
+  <box at="101 81 1" size="1 1 1" color="n"/><box at="101 81 2" size="1 1 22" color="M"/>
+  <box at="101 86 1" size="1 1 1" color="n"/><box at="101 86 2" size="1 1 22" color="M"/>
+  <box at="101 91 1" size="1 1 1" color="n"/><box at="101 91 2" size="1 1 22" color="M"/>
+  <box at="101 96 1" size="1 1 1" color="n"/><box at="101 96 2" size="1 1 22" color="M"/>
+  <box at="101 101 1" size="1 1 1" color="n"/><box at="101 101 2" size="1 1 22" color="M"/>
+
+  <!-- Lato Sud frontale (y=101, x=16..41 e x=71..96 a passo 5, con varco aperto al centro x=46..66 per l'ingresso) -->
+  <box at="16 101 1" size="1 1 1" color="n"/><box at="16 101 2" size="1 1 22" color="M"/>
+  <box at="21 101 1" size="1 1 1" color="n"/><box at="21 101 2" size="1 1 22" color="M"/>
+  <box at="26 101 1" size="1 1 1" color="n"/><box at="26 101 2" size="1 1 22" color="M"/>
+  <box at="31 101 1" size="1 1 1" color="n"/><box at="31 101 2" size="1 1 22" color="M"/>
+  <box at="36 101 1" size="1 1 1" color="n"/><box at="36 101 2" size="1 1 22" color="M"/>
+  <box at="41 101 1" size="1 1 1" color="n"/><box at="41 101 2" size="1 1 22" color="M"/>
+
+  <box at="71 101 1" size="1 1 1" color="n"/><box at="71 101 2" size="1 1 22" color="M"/>
+  <box at="76 101 1" size="1 1 1" color="n"/><box at="76 101 2" size="1 1 22" color="M"/>
+  <box at="81 101 1" size="1 1 1" color="n"/><box at="81 101 2" size="1 1 22" color="M"/>
+  <box at="86 101 1" size="1 1 1" color="n"/><box at="86 101 2" size="1 1 22" color="M"/>
+  <box at="91 101 1" size="1 1 1" color="n"/><box at="91 101 2" size="1 1 22" color="M"/>
+  <box at="96 101 1" size="1 1 1" color="n"/><box at="96 101 2" size="1 1 22" color="M"/>
+
+  <!-- Colonnato interno della corte aperta (affacciato sull'acqua, x=33..79, y=33..79) -->
+  <!-- Lato Nord corte (y=33, x=33..79 a passo 6) -->
+  <box at="33 33 1" size="1 1 1" color="n"/><box at="33 33 2" size="1 1 22" color="M"/>
+  <box at="39 33 1" size="1 1 1" color="n"/><box at="39 33 2" size="1 1 22" color="M"/>
+  <box at="45 33 1" size="1 1 1" color="n"/><box at="45 33 2" size="1 1 22" color="M"/>
+  <box at="51 33 1" size="1 1 1" color="n"/><box at="51 33 2" size="1 1 22" color="M"/>
+  <box at="57 33 1" size="1 1 1" color="n"/><box at="57 33 2" size="1 1 22" color="M"/>
+  <box at="63 33 1" size="1 1 1" color="n"/><box at="63 33 2" size="1 1 22" color="M"/>
+  <box at="69 33 1" size="1 1 1" color="n"/><box at="69 33 2" size="1 1 22" color="M"/>
+  <box at="75 33 1" size="1 1 1" color="n"/><box at="75 33 2" size="1 1 22" color="M"/>
+  <box at="79 33 1" size="1 1 1" color="n"/><box at="79 33 2" size="1 1 22" color="M"/>
+
+  <!-- Lato Sud corte (y=79, x=33..79 a passo 6) -->
+  <box at="33 79 1" size="1 1 1" color="n"/><box at="33 79 2" size="1 1 22" color="M"/>
+  <box at="39 79 1" size="1 1 1" color="n"/><box at="39 79 2" size="1 1 22" color="M"/>
+  <box at="45 79 1" size="1 1 1" color="n"/><box at="45 79 2" size="1 1 22" color="M"/>
+  <box at="51 79 1" size="1 1 1" color="n"/><box at="51 79 2" size="1 1 22" color="M"/>
+  <box at="57 79 1" size="1 1 1" color="n"/><box at="57 79 2" size="1 1 22" color="M"/>
+  <box at="63 79 1" size="1 1 1" color="n"/><box at="63 79 2" size="1 1 22" color="M"/>
+  <box at="69 79 1" size="1 1 1" color="n"/><box at="69 79 2" size="1 1 22" color="M"/>
+  <box at="75 79 1" size="1 1 1" color="n"/><box at="75 79 2" size="1 1 22" color="M"/>
+  <box at="79 79 1" size="1 1 1" color="n"/><box at="79 79 2" size="1 1 22" color="M"/>
+
+  <!-- Lato Ovest corte (x=33, y=39..73 a passo 6) -->
+  <box at="33 39 1" size="1 1 1" color="n"/><box at="33 39 2" size="1 1 22" color="M"/>
+  <box at="33 45 1" size="1 1 1" color="n"/><box at="33 45 2" size="1 1 22" color="M"/>
+  <box at="33 51 1" size="1 1 1" color="n"/><box at="33 51 2" size="1 1 22" color="M"/>
+  <box at="33 57 1" size="1 1 1" color="n"/><box at="33 57 2" size="1 1 22" color="M"/>
+  <box at="33 63 1" size="1 1 1" color="n"/><box at="33 63 2" size="1 1 22" color="M"/>
+  <box at="33 69 1" size="1 1 1" color="n"/><box at="33 69 2" size="1 1 22" color="M"/>
+  <box at="33 73 1" size="1 1 1" color="n"/><box at="33 73 2" size="1 1 22" color="M"/>
+
+  <!-- Lato Est corte (x=79, y=39..73 a passo 6) -->
+  <box at="79 39 1" size="1 1 1" color="n"/><box at="79 39 2" size="1 1 22" color="M"/>
+  <box at="79 45 1" size="1 1 1" color="n"/><box at="79 45 2" size="1 1 22" color="M"/>
+  <box at="79 51 1" size="1 1 1" color="n"/><box at="79 51 2" size="1 1 22" color="M"/>
+  <box at="79 57 1" size="1 1 1" color="n"/><box at="79 57 2" size="1 1 22" color="M"/>
+  <box at="79 63 1" size="1 1 1" color="n"/><box at="79 63 2" size="1 1 22" color="M"/>
+  <box at="79 69 1" size="1 1 1" color="n"/><box at="79 69 2" size="1 1 22" color="M"/>
+  <box at="79 73 1" size="1 1 1" color="n"/><box at="79 73 2" size="1 1 22" color="M"/>
+
+  <!-- ================================================================= -->
+  <!-- 7. COPERTURA A LAMA SOTTILE (Tetto piano sporgente, z=24..25)     -->
+  <!-- ================================================================= -->
+  <!-- Settore Nord (y=7..31, x=7..105, z=24..25) -->
+  <box at="56 19 24" size="99 25 1" color="M"/>
+  <box at="56 19 25" size="99 25 1" color="m"/>
+
+  <!-- Settore Sud (y=81..105, x=7..105, z=24..25) -->
+  <box at="56 93 24" size="99 25 1" color="M"/>
+  <box at="56 93 25" size="99 25 1" color="m"/>
+
+  <!-- Settore Ovest (x=7..31, y=32..80, z=24..25) -->
+  <box at="19 56 24" size="25 49 1" color="M"/>
+  <box at="19 56 25" size="25 49 1" color="m"/>
+
+  <!-- Settore Est (x=81..105, y=32..80, z=24..25) -->
+  <box at="93 56 24" size="25 49 1" color="M"/>
+  <box at="93 56 25" size="25 49 1" color="m"/>
+
+  <!-- Bordo a lama perimetrale esterno finitura acciaio scuro s/S (z=25) -->
+  <box at="56 7 25" size="99 1 1" color="S"/>
+  <box at="56 105 25" size="99 1 1" color="S"/>
+  <box at="7 56 25" size="1 99 1" color="S"/>
+  <box at="105 56 25" size="1 99 1" color="S"/>
+
+  <!-- Bordo a lama interno della corte aperta (z=25) -->
+  <box at="56 32 25" size="49 1 1" color="s"/>
+  <box at="56 80 25" size="49 1 1" color="s"/>
+  <box at="32 56 25" size="1 49 1" color="s"/>
+  <box at="80 56 25" size="1 49 1" color="s"/>
+
+  <!-- Fascia sottile neon verde d'accento sotto il cornicione del tetto della corte interna -->
+  <box at="56 32 24" size="47 1 1" color="n"/>
+  <box at="56 80 24" size="47 1 1" color="n"/>
+  <box at="32 56 24" size="1 47 1" color="n"/>
+  <box at="80 56 24" size="1 47 1" color="n"/>
+
+  <!-- ================================================================= -->
+  <!-- 8. TARGA E INSEGNA NEON "BIBLIOTECA DEL MONDO" (x=36..76, y=105) -->
+  <!-- ================================================================= -->
+  <!-- Targa di supporto scura opaca montata a filo del tetto sopra la porta (z=20..33) -->
+  <box at="56 104 20" size="43 1 14" color="P"/>
+  <box at="56 104 20" size="45 1 1" color="M"/>
+  <box at="56 104 33" size="45 1 1" color="M"/>
+  <box at="34 104 20" size="1 1 14" color="M"/>
+  <box at="78 104 20" size="1 1 14" color="M"/>
+  <!-- Filetto luminoso verde alla base e in cima alla targa -->
+  <box at="56 105 20" size="41 1 1" color="n"/>
+  <box at="56 105 33" size="41 1 1" color="n"/>
+
+  <!-- RIGA 1: "BIBLIOTECA" (x=39..73, z=27..31, y=105) -->
+  <!-- B (x=39..41) -->
+  <box at="39 105 27" size="1 1 5" color="F"/>
+  <box at="40 105 31" size="1 1 1" color="F"/>
+  <box at="40 105 29" size="1 1 1" color="F"/>
+  <box at="40 105 27" size="1 1 1" color="F"/>
+  <box at="41 105 30" size="1 1 1" color="F"/>
+  <box at="41 105 28" size="1 1 1" color="F"/>
+
+  <!-- I (x=43) -->
+  <box at="43 105 27" size="1 1 5" color="F"/>
+
+  <!-- B (x=45..47) -->
+  <box at="45 105 27" size="1 1 5" color="F"/>
+  <box at="46 105 31" size="1 1 1" color="F"/>
+  <box at="46 105 29" size="1 1 1" color="F"/>
+  <box at="46 105 27" size="1 1 1" color="F"/>
+  <box at="47 105 30" size="1 1 1" color="F"/>
+  <box at="47 105 28" size="1 1 1" color="F"/>
+
+  <!-- L (x=49..51) -->
+  <box at="49 105 27" size="1 1 5" color="F"/>
+  <box at="50 105 27" size="1 1 1" color="F"/>
+  <box at="51 105 27" size="1 1 1" color="F"/>
+
+  <!-- I (x=53) -->
+  <box at="53 105 27" size="1 1 5" color="F"/>
+
+  <!-- O (x=55..57) -->
+  <box at="55 105 27" size="1 1 5" color="F"/>
+  <box at="57 105 27" size="1 1 5" color="F"/>
+  <box at="56 105 31" size="1 1 1" color="F"/>
+  <box at="56 105 27" size="1 1 1" color="F"/>
+
+  <!-- T (x=59..61) -->
+  <box at="60 105 31" size="3 1 1" color="F"/>
+  <box at="60 105 27" size="1 1 4" color="F"/>
+
+  <!-- E (x=63..65) -->
+  <box at="63 105 27" size="1 1 5" color="F"/>
+  <box at="64 105 31" size="1 1 1" color="F"/>
+  <box at="65 105 31" size="1 1 1" color="F"/>
+  <box at="64 105 29" size="1 1 1" color="F"/>
+  <box at="64 105 27" size="1 1 1" color="F"/>
+  <box at="65 105 27" size="1 1 1" color="F"/>
+
+  <!-- C (x=67..69) -->
+  <box at="67 105 27" size="1 1 5" color="F"/>
+  <box at="68 105 31" size="1 1 1" color="F"/>
+  <box at="69 105 31" size="1 1 1" color="F"/>
+  <box at="68 105 27" size="1 1 1" color="F"/>
+  <box at="69 105 27" size="1 1 1" color="F"/>
+
+  <!-- A (x=71..73) -->
+  <box at="71 105 27" size="1 1 4" color="F"/>
+  <box at="73 105 27" size="1 1 4" color="F"/>
+  <box at="72 105 31" size="1 1 1" color="F"/>
+  <box at="72 105 29" size="1 1 1" color="F"/>
+
+  <!-- RIGA 2: "DEL MONDO" (x=40..73, z=21..25, y=105) -->
+  <!-- D (x=40..42) -->
+  <box at="40 105 21" size="1 1 5" color="F"/>
+  <box at="41 105 25" size="1 1 1" color="F"/>
+  <box at="41 105 21" size="1 1 1" color="F"/>
+  <box at="42 105 22" size="1 1 3" color="F"/>
+
+  <!-- E (x=44..46) -->
+  <box at="44 105 21" size="1 1 5" color="F"/>
+  <box at="45 105 25" size="1 1 1" color="F"/>
+  <box at="46 105 25" size="1 1 1" color="F"/>
+  <box at="45 105 23" size="1 1 1" color="F"/>
+  <box at="45 105 21" size="1 1 1" color="F"/>
+  <box at="46 105 21" size="1 1 1" color="F"/>
+
+  <!-- L (x=48..50) -->
+  <box at="48 105 21" size="1 1 5" color="F"/>
+  <box at="49 105 21" size="1 1 1" color="F"/>
+  <box at="50 105 21" size="1 1 1" color="F"/>
+
+  <!-- Spazio x=51..52 tra DEL e MONDO -->
+
+  <!-- M (x=53..57, larghezza 5 voxel) -->
+  <box at="53 105 21" size="1 1 5" color="F"/>
+  <box at="57 105 21" size="1 1 5" color="F"/>
+  <box at="54 105 24" size="1 1 1" color="F"/>
+  <box at="56 105 24" size="1 1 1" color="F"/>
+  <box at="55 105 23" size="1 1 1" color="F"/>
+
+  <!-- O (x=59..61) -->
+  <box at="59 105 21" size="1 1 5" color="F"/>
+  <box at="61 105 21" size="1 1 5" color="F"/>
+  <box at="60 105 25" size="1 1 1" color="F"/>
+  <box at="60 105 21" size="1 1 1" color="F"/>
+
+  <!-- N (x=63..65) -->
+  <box at="63 105 21" size="1 1 5" color="F"/>
+  <box at="65 105 21" size="1 1 5" color="F"/>
+  <box at="64 105 23" size="1 1 1" color="F"/>
+
+  <!-- D (x=67..69) -->
+  <box at="67 105 21" size="1 1 5" color="F"/>
+  <box at="68 105 25" size="1 1 1" color="F"/>
+  <box at="68 105 21" size="1 1 1" color="F"/>
+  <box at="69 105 22" size="1 1 3" color="F"/>
+
+  <!-- O (x=71..73) -->
+  <box at="71 105 21" size="1 1 5" color="F"/>
+  <box at="73 105 21" size="1 1 5" color="F"/>
+  <box at="72 105 25" size="1 1 1" color="F"/>
+  <box at="72 105 21" size="1 1 1" color="F"/>
+</sequence>
+
+<!-- ================================================================= -->
+<!-- ANIMAZIONE CICLICA "CANONE" (8 frame)                             -->
+<!-- Respirazione meditativa delle rune d'acqua e del faro zenitale    -->
+<!-- ================================================================= -->
+<animation name="canone" frames="8">
+  <sequence>
+    <!-- Scorrimento ciclico delle 8 fasi di intensità luminosa verde -->
+    <all in="1" out="x"/>
+    <all in="2" out="1"/>
+    <all in="3" out="2"/>
+    <all in="4" out="3"/>
+    <all in="5" out="4"/>
+    <all in="6" out="5"/>
+    <all in="7" out="6"/>
+    <all in="8" out="7"/>
+    <all in="x" out="8"/>
+  </sequence>
+</animation>
