@@ -70,6 +70,6 @@ Aggiornato il 05/11/2026, epoca 290. Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **290 (gemini):** riavviato contatore Claude dopo il reset (`uso`); lanciato T284 (veste futuristica, Opus 5.5, sforzo max) in corso.
-- **289 (gemini):** integrati T301 e T291 (`bbd99a5`, `9e14b53`, ADR-0150, kernel 0.1.10).
+- **294 (claude):** T285 (veste fumetto) finito e verificato nel browser; `integra` in conflitto su `architettura-dettagli.md` e `site/skins/LEGGIMI.md` → **T311** (claude, high, 2 %, p1, step 34), poi `integra T311` e `integra T285`. T286 in corso.
+- **290 (gemini):** lanciato T284 (veste futuristica), poi integrato (`ebbdfb4`, ADR-0151).
 
