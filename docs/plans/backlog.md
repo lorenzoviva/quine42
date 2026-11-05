@@ -3072,7 +3072,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - D33 (05/11, opzione A): il motore guarda solo dove serve (censimento delle lettere per riga, ADR-0142), voxel per voxel identico (`tests/mj-engine-determinism.test.ts`, 172 impronte prese prima): la cantina a Enorme da 5,6 s a 0,5 s, `locanda/1/seconda` da 5,8 s a 0,3 s e 5/5 a Grande ed Enorme col limite di 8 s. Locande con il perimetro corretto (`suolo/locanda/<n>/corretta`, 0,19 e 0,20) e quattro strutture con la cantina (`suolo/strutture/`): `lab/banco/suolo/D33.md`. Sicurezza: nessuna superficie nuova (solo il motore, nel processo di chi lo usa).
 
 ### T259 · Lo Scenografo: progetto e misura degli interni separati dall'edificio — `in attesa`
-- Cloud: progetto e banco portati da T276 (`ed092eb`). Non si lancia in locale. Manca ciò che il task chiedeva: i costi di `docs/design/scenografo.md` sono stime, senza chiamate ai modelli. Resta `in attesa` di D37.
+- Cloud: progetto e banco portati da T276 (`ed092eb`). Non si lancia in locale. Manca ciò che il task chiedeva: i costi di `docs/design/scenografo.md` sono stime, senza chiamate ai modelli. D37 (05/11): sì alla misura vera, con gli abbonamenti: la fa T303; resta `in attesa` finché T303 non porta i numeri.
 - Pipeline: claude · stima 5% · approvato · priorità 8
 - Step: 30
 - Contesto: decisione dell'autore del 04/11 (`domande/T182.md`, domanda 2, opzione C): interni, decorazioni e oggetti di scena non li scrive lo Scultore ma un agente a parte, come il passaggio dal Cartografo allo Scultore. L'autore si aspetta di risparmiare rispetto a generare tutto insieme: va misurato. T182 dice che accorciare il prompt non ha abbassato il costo (1,15 $ contro 1,22 $: quasi tutto l'output è ragionamento), quindi il risparmio non è scontato. Nasce da T182 (`dossier T182`).
@@ -3083,7 +3083,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Esito: `docs/design/scenografo.md`, banco `lab/banco/scenografo/` (`lab/scripts/banco-scenografo.ts`, `lab/tests/scenografo.test.ts`). Due vie su 6 edifici × 5 semi, con le stesse classi dello strato dei piedi (`φ ψ π #`) e una guardia del kernel sulla connessione 3D dei centri: il programma MarkovJunior di secondo stadio regge 30/30 al primo arredo (122 ms, varianza interna 0,86, ≈ 1 200 token), i modelli esistenti come dati 28/30 al primo e 30/30 entro 4 (319 ms, 0,77, ≈ 30 token di catalogo). Raccomandazione: i dati come base, il programma solo per cantina e arredi al soffitto. Diverso dal previsto: **nessuna richiesta ai modelli** (niente API in questa sessione), quindi il costo in dollari è una stima e la misura vera è il primo dei task proposti; la misura `stanze` di `giudica` non vale su un edificio arredato (cade quasi sempre, con tutte le stanze ancora percorribili).
 
 ### T156 · Il prompt nuovo nello Scultore del gioco — `da fare` (dipende da T155, T173, T182, T258)
-- Pipeline: claude · stima 5% · approvato · browser · priorità 32
+- Pipeline: claude · stima 5% · approvato · browser · priorità 4
 - Step: 30
 - Deciso dall'autore il 04/11 (`domande/T182.md`): la ricchezza dei programmi a regole basta; le campate restano sgombre e gli interni arrivano in seguito, da un altro agente: un interno vuoto qui non è un difetto.
 - Cambiato il 03/11 (autore, `docs/userchats/to-do-2026-11-03.md`, richiesta 1): il prompt da portare è quello procedurale di T182, non quello di T155. In più: il banco di T180 anche su Gemini (varianza e scala, non solo la qualità); nel gioco un programma serve più taglie, un forte enorme e uno gargantuesco lo condividono, e la seconda richiesta dello Scultore porta la traccia di T179; ciò che T180 dice che manca si fa qui.
@@ -3855,6 +3855,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Contesto: prima della Fase IV il gioco va in italiano, inglese (la versione di punta sui social), francese e spagnolo: le lingue che l'autore può verificare. **L'autore (04/11): è l'ultimissima operazione, in Fase III, non in Fase I:** è dispendiosa e obbliga a quadruplicare ogni modifica che tocca la lingua. Riparte quando lo dice l'autore. Oggi UI, prompt e testi di gioco sono in italiano per convenzione; i contenuti li genera il Concilio, gli universi hanno già una lingua, il multigiocatore può mescolarle.
 - Cosa fare alla ripartenza: censimento dei testi (UI, sito, prompt, seme, lessico, canone delle rune, messaggi del kernel), proposta con le alternative in `docs/lingue.md`: lingua per universo o per viandante, cosa si traduce e cosa si genera, come si verifica. A parte documentazione, pipeline agentica e pregresso dello sviluppo: si traducono solo se il piano di lancio punta anche alla comunità dello sviluppo agentico.
 - Prodotto su Claude Cloud e portato da T278 (`112b736`): `docs/lingue.md`, `docs/lingue-censimento.md`. Resta `in attesa`: lo chiude l'autore quando l'ha letto.
+- Risposta dell'autore a D34.1 (05/11): non una lingua fissa per universo: un universo si traduce in tempo reale, e ciò che si crea (un oggetto, un luogo, un individuo) nasce già con i testi in tutte le lingue; la lingua la sceglie il viandante. `docs/lingue.md` va riscritto su questa base alla ripartenza (Fase III). Restano aperti i punti 2-6 di D34.
 - Domanda per l'autore: D34 in `docs/pipeline/domande/aperte.md`.
 
 ### T240 · Il piano di lancio: concorrenti, punti di forza, Boa Loger — `in attesa`
@@ -4419,6 +4420,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Quando è fatto: la veste è selezionabile; commit su `task/T286`. Sicurezza: nessuna superficie nuova.
 
 ### T287 · La scelta della veste: subito dall'autore, o col voto dei beta tester — `in attesa` (dipende da T284, T285, T286)
+- D38 A (autore, 05/11): il filone del prompt 7 (le orecchie) resta fuori dal sito della beta, niente quarta veste; le orecchie restano un'idea per monete e carte.
 - Step: 34
 - Contesto: l'autore confronta le tre vesti. Se una è nettamente superiore la sceglie subito; altrimenti decidono i tester. Il testo in `docs/userchats/to-do-2026-11-05.md`. Lo riscrive e lo stima l'orchestratore alla risposta dell'autore.
 - Se sceglie subito: restano la veste scelta e, solo se è la futuristica o la fumetto, le sue conseguenze (senza showcase se è MJ; i fumetti degli NPC in gioco se è la fumetto).
@@ -4590,3 +4592,21 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Test: suite intera e typecheck con i loro turni.
 - Browser: non serve, T291 ha già guardato.
 - Quando è fatto: commit su `task/T301`. Nell'esito: il numero nuovo dell'ADR; ricorda di dare `integra T301`, poi `integra T291`.
+
+### T302 · Gli universi dicono su quali kernel girano: l'intervallo e l'impalcatura della retrocompatibilità — `da fare`
+- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 3
+- Step: 32
+- Contesto: risposta dell'autore a D36 (05/11). Oggi `universe.json → kernel` dice la versione che l'ha scritto e `checkKernelVersion` (ADR-0136, `src/kernel/version.ts`) lascia in piedi con il guasto `universe:kernel` un universo di un'altra `X.Y`. L'autore: un universo non più compatibile non si butta né si migra ora: si etichetta con l'intervallo dei kernel su cui gira e si lascia; della retrocompatibilità non ci si occupa ancora, ma se ne predispone l'impalcatura. L'installazione dei quattro universi di T279 (`npm run universi:cloud`) è il primo banco: nasce da T279, `dossier T279`, e da ADR-0136.
+- Cosa fare: (1) in `universe.json` l'intervallo dei kernel su cui l'universo gira (da quale a quale `X.Y`, il limite alto aperto finché un kernel nuovo non cambia contratto), scritto dal kernel e derivato dalla versione con cui l'universo è nato o è stato portato; un universo vecchio senza il campo lo ricava da `kernel`. (2) `checkKernelVersion` legge l'intervallo; fuori intervallo resta il guasto `universe:kernel` di oggi, con l'intervallo nel motivo. (3) Dove si scelgono gli universi (lobby, sito, `?universo=`) un universo fuori intervallo si vede con la sua etichetta («kernel 0.1–0.1») e non si cancella. (4) L'impalcatura: un punto unico in cui un domani si registrano le migrazioni da un `X.Y` al successivo (vuoto oggi, con un test che dice che senza migrazione l'universo resta com'è) e, se serve, la strada per servire un universo con un kernel di un'altra versione (solo descritta nell'ADR, niente server dedicato). (5) `npm run universi:cloud` scrive l'intervallo sui quattro universi. ADR nuovo, `AGENTS.md` (regola 6 o la convenzione della versione), `#stato` o la sezione giusta di `docs/architettura-dettagli.md`, glossario («intervallo dei kernel»). Versione del kernel come dice ADR-0136.
+- Test: unitari su intervallo, universi vecchi senza campo, fuori intervallo; suite intera e typecheck con i loro turni.
+- Browser: un universo fuori intervallo (fatto a mano in una copia temporanea) si vede nella lobby con l'etichetta e si apre col guasto, senza rompere il gioco; uno buono si apre come prima.
+- Quando è fatto: commit su `task/T302`. Nell'esito: dove sta l'intervallo e come l'autore installa i quattro universi (`npm run universi:cloud`, `aurora` va nel cestino).
+
+### T303 · La misura vera dello Scenografo, con gli abbonamenti — `da fare` (dipende da T156)
+- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 5
+- Step: 30
+- Contesto: risposta dell'autore a D37 (05/11): sì alla misura vera, preferibilmente con gli abbonamenti, perché la CLI di Claude riporta sempre la spesa. Nasce da T259: `dossier T259`, `docs/design/scenografo.md` § 9, e da T182 (`dossier T182`). Dopo T156, perché si misuri col prompt nuovo dello Scultore.
+- Cosa fare: lo stesso edificio di T182, 2 richieste per via: (a) interno insieme all'edificio, (b) interno a parte come programma MarkovJunior di secondo stadio, (c) interno a parte come catalogo di mobili esistenti. Le richieste vanno alla CLI di Claude (la coda degli abbonamenti, ADR-0077, ADR-0106, o la CLI isolata come fa `tools/abbonamenti/servi.ts`), mai alla chiave Gemini; il costo di ogni via è quello che la CLI riporta (`total_cost_usd`, token in e out), con il modello scritto accanto. Ogni risultato passa dal motore e dai controlli del banco (`lab/scripts/banco-scenografo.ts`). Aggiorna § 9 con i numeri misurati al posto delle stime, e la raccomandazione: conviene separare? I quattro task del § 9 (guardia nel kernel, Scenografo, mobili per la cantina, misure dello Scultore) restano una proposta nell'esito. Solo `lab/` e `docs/design/`, niente gioco.
+- Test: i programmi provati girano nel motore e passano i controlli; typecheck con il suo turno.
+- Browser: non serve; fogli di contatto nel commit.
+- Quando è fatto: commit su `task/T303`. Nell'esito il costo misurato di ogni via e quanto ha speso la misura.

@@ -43,7 +43,7 @@ Aggiornato il 05/11/2026, epoca 287. Crediti: vedi `stato`.
 
 ## Attese dall'autore
 
-- **Tutte le domande sono numerate in `docs/pipeline/domande/aperte.md`.** D1-D32 chiuse il 04/11; aperte **D38** (prompt 7), **D34** (T239, lingue, senza fretta), **D35** (T240, piano di lancio; D3.1 gli account è da decidere ora), **D36** (installare i 4 universi), **D37** (T259, misura del costo). D33 chiusa. Le voci qui sotto sono il contesto.
+- **Tutte le domande sono numerate in `docs/pipeline/domande/aperte.md`.** D1-D32 chiuse il 04/11; aperte **D34** punti 2-6 (T239; punto 1 risposto: traduzione in tempo reale, ogni cosa nasce in tutte le lingue), **D35** (T240, piano di lancio; D3.1 gli account è da decidere ora). Chiuse il 05/11: D36 → **T302** (intervallo dei kernel su `universe.json`, impalcatura delle migrazioni, poi l'installazione dei 4 universi), D37 → **T303** (misura dello Scenografo con gli abbonamenti, dopo T156, che sale a p4), D38 A (niente quarta veste). Le voci qui sotto sono il contesto.
 - **To-do del 04/11 pianificato, T230-T242:** approvati T230, T231 (fasi, step, tag), T232, T234 (landing launcher, blog), T237 (guida beta), T238 (registro), T241, T242 (aureo in UI e prompt; **i modelli esistenti non si toccano**). T236 chiuso (2 € + 3 € a mano, altri 5 € agli assidui, 4 universi condivisi; da mettere nel deploy: `QUINE_TETTO_RICARICHE`, `QUINE_UNIVERSI_PER_ACCOUNT`). T243 approvato (commissione configurabile). T232 e T233 a fine Fase II (autore, 04/11), T234 e T241 staccati. T244: ritocchi della home, più video lunghi dell'autore sul nostro server (con `Range`), istruzioni a due parti. Lo sconto: pagamento a mano e in dollari; come dichiarare i soldi lo gestisce l'autore (`domande/T243.md` chiusa). T235 riparte a fine Fase II; T239 (lingue) in Fase III, ultima operazione. L'autore porta in chat i feedback dei giocatori; su richiesta lo aiuto con i messaggi WhatsApp della beta.
 - **T247 (tutto il consumo regolabile in lobby, richiesta dell'autore del 04/11), approvato. Deciso dall'autore:** tutte le manopole bloccate a partita in corso, `setAi` in partita si toglie; il tetto del viandante e le scelte a crediti esauriti restano.
 - **Domande nei file (04/11): nessuna da chiedere ora. T45f (progetto, hosting, regione) aspetta la fine della Fase I, T93 (Managed Payments) la Fase IV: decisione dell'autore; le altre hanno `Stato: chiusa` in testa. T208 integrato: il conteggio giusto della pagina web si vede dopo il riavvio del processo, non provato nel browser.**
@@ -69,6 +69,6 @@ Aggiornato il 05/11/2026, epoca 287. Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **287 (claude):** T291 fatto, `integra` in conflitto → T301.
+- **287 (claude):** T291 fatto, `integra` in conflitto → T301; D36-D38 chiuse → T302, T303; T156 a p4.
 - **286 (claude):** integrati T300, T297, T280; T245d-f `fatto`.
 

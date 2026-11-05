@@ -84,9 +84,9 @@ L'autore: il rilascio aperto al pubblico, con i pagamenti Stripe. Il piano di la
 | 27 | Regge: test stabili e più veloci, cache delle forme, memoria, disco, git, prestazioni misurate | I | raggiunto | T91 T95 T148 T151 T160 T161 T162 T163 T164 T174 T175 T176 T177 T209 T210 T211 T212 T213 T214 T215 T216 |
 | 28 | Si parla del lavoro per fasi, step e titoli dei task | I | raggiunto | T230 T231 T246 |
 | 29 | La grafica a cartone | I | in corso | T89 T89a T89b T89c T89d T89e T98 |
-| 30 | Lo Scultore scolpisce strutture con un metodo misurato sul banco | I | in corso | T154 T155 T173 T180 T181 T182 T258 T259 T156 |
+| 30 | Lo Scultore scolpisce strutture con un metodo misurato sul banco | I | in corso | T154 T155 T173 T180 T181 T182 T258 T259 T156 T303 |
 | 31 | Quattro ambientazioni, generate senza browser dai crediti che avanzano | I | da fare | T152 T153 T207 T88 |
-| 32 | Il kernel regge mesi di vita, e gli NPC agiscono davvero | I | in corso | T183 T245 T260 T261 T262 T263 T245a T245b T245c T245d T245e T245f T274 T280 T297 T298 T299 T300 |
+| 32 | Il kernel regge mesi di vita, e gli NPC agiscono davvero | I | in corso | T183 T245 T260 T261 T262 T263 T245a T245b T245c T245d T245e T245f T274 T280 T297 T298 T299 T300 T302 |
 | 33 | Il rapporto aureo in HUD, pannelli e in ciò che si genera da qui in poi | I | da fare | T241 T242 |
 | 34 | Pronti per la beta: server, guida, notizie, home, consumo in lobby, registro dei fallimenti del Concilio | I | in corso | T45f T232 T234 T236 T237 T238 T243 T244 T247 T248 T249 T250 T251 T252 T265 T283 T284 T285 T286 T287 |
 | 35 | Il sito è il launcher del gioco | II | in attesa | T233 T235 |
@@ -94,7 +94,7 @@ L'autore: il rilascio aperto al pubblico, con i pagamenti Stripe. Il piano di la
 | 37 | Altri universi: spazio, pirati, cowboy | III | in attesa | T184 T185 T278 |
 | 38 | Il lancio | IV | in attesa | T240 |
 | 39 | Gli NPC decidono e invecchiano | III | in attesa | T245g T245h T245i |
-| 40 | Gli oggetti si vedono: in mano, addosso, sui mobili; i mobili si spostano | I | da fare | T288 T289 T290 T291 T292 |
+| 40 | Gli oggetti si vedono: in mano, addosso, sui mobili; i mobili si spostano | I | da fare | T288 T289 T290 T291 T292 T301 |
 | 41 | I giocatori modificano le carte nei laboratori; le carte passano da un universo all'altro prima della Genesi | I | da fare | T293 T294 T295 T296 |
 
 La Fase II non ha ancora uno step per la beta stessa e la Fase III non ha quelli dei requisiti: uno step si apre quando ha dei task.
