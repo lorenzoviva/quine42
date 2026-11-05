@@ -26,6 +26,15 @@
   "runes": [
    "spin"
   ],
-  "strutture": []
+  "strutture": [
+   {
+    "concetto": "residenza ad anelli",
+    "taglia": "grande"
+   },
+   {
+    "concetto": "lounge criogenica",
+    "taglia": "grande"
+   }
+  ]
  }
 }

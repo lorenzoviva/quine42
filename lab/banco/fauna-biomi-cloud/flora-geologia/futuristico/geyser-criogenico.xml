@@ -1,0 +1,62 @@
+<!-- Geyser criogenico (Cantiere 8, sidera): getto a caso; massi di ghiaccio e brina a caso. -->
+<sequence values="BIDJXgPQ7890u123456z" symmetry="(xy)" name="Geyser criogenico">
+  <color symbol="I" value="bfe6f2" name="ghiaccio"/>
+  <color symbol="D" value="8ac0d8" name="ghiaccio scuro"/>
+  <color symbol="J" value="e8fbff" name="getto gelato" glow="True"/>
+  <color symbol="X" value="d8f4ff" name="brina"/>
+  <color symbol="g" hidden="True" name="marcatore"/>
+  <color symbol="P" hidden="True" name="marcatore"/>
+  <color symbol="Q" hidden="True" name="marcatore"/>
+  <color symbol="7" hidden="True" name="marcatore"/>
+  <color symbol="8" hidden="True" name="marcatore"/>
+  <color symbol="9" hidden="True" name="marcatore"/>
+  <color symbol="0" hidden="True" name="marcatore"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="1" hidden="True" name="marcatore"/>
+  <color symbol="2" hidden="True" name="marcatore"/>
+  <color symbol="3" hidden="True" name="marcatore"/>
+  <color symbol="4" hidden="True" name="marcatore"/>
+  <color symbol="5" hidden="True" name="marcatore"/>
+  <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
+  <cone at="25 25 0" size="32 32 14" color="I"/>
+  <!-- 7 massi nascono a caso sul terreno accanto a ciò che c'è già ([ID]) e crescono di lato e in alto -->
+  <box at="25 25 0" size="48 48 1" color="g" on="B"/>
+  <one in="[ID]g" out="*D" steps="7"/>
+  <prl steps="7"><rule in="D[Bg]" out="*D" p="0.5"/><rule in="B D" out="D *" p="0.4"/></prl>
+  <prl in="g" out="B"/>
+  <!-- scelta «getto»: colonna alta | fontana a ombrello | due getti storti | spruzzo a rami -->
+  <box at="25 25 8" size="50 50 42" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/><rule in="u" out="4"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/><rule in="4u" out="*4"/></all>
+  <!--   1: colonna alta -->
+  <cylinder at="25 25 8" size="5 5 32" color="J" on="1"/>
+  <ellipsoid at="25 25 38" size="9 9 10" color="J" on="1"/>
+  <!--   2: fontana a ombrello -->
+  <cylinder at="25 25 8" size="4 4 24" color="J" on="2"/>
+  <ellipsoid at="25 25 30" size="30 30 6" color="J" on="2"/>
+  <box at="25 25 33" size="1 1 1" color="P" on="2"/>
+  <!--   3: due getti storti -->
+  <line at="23 25 10" to="14 22 40" r="2" color="J" on="3"/>
+  <line at="27 25 10" to="36 30 34" r="2" color="J" on="3"/>
+  <ellipsoid at="14 22 38" size="6 6 6" color="J" on="3"/>
+  <ellipsoid at="36 30 32" size="6 6 6" color="J" on="3"/>
+  <!--   4: spruzzo a rami -->
+  <cylinder at="25 25 8" size="4 4 14" color="J" on="4"/>
+  <box at="25 25 22" size="1 1 1" color="P" on="4"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/><rule in="4" out="B"/></prl>
+  <!-- il getto che gela: dove c'è una punta sale e si apre, sotto l'ombrello gocciola -->
+  <one steps="40"><rule in="B P" out="P J" p="1"/><rule in="B* *P" out="P* *J" p="2"/><rule in="B*B *P*" out="P*P *J*" p="0.5"/></one>
+  <prl in="P" out="J"/>
+  <prl in="J B" out="* J" p="0.25" steps="4"/>
+  <!-- 12 cristalli a caso sulla faccia alta di I: ognuno con la sua direzione e la sua lunghezza -->
+  <one in="B I" out="P *" steps="12"/>
+  <all symmetry="()"><rule in="P" out="Q"/><rule in="P" out="7"/><rule in="P" out="8"/><rule in="P" out="9"/><rule in="P" out="0"/></all>
+  <prl steps="8" symmetry="()"><rule in="B Q" out="Q X" p="0.8"/><rule in="*B 7*" out="*7 X*" p="0.8"/><rule in="B* *8" out="8* *X" p="0.8"/><rule in="*/B 9/*" out="*/9 X/*" p="0.8"/><rule in="B/* */0" out="0/* */X" p="0.8"/></prl>
+  <prl><rule in="Q" out="X"/><rule in="7" out="X"/><rule in="8" out="X"/><rule in="9" out="X"/><rule in="0" out="X"/></prl>
+  <prl in="BX" out="X*" p="0.3" steps="1"/>
+</sequence>

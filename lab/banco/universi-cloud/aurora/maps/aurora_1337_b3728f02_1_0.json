@@ -1,0 +1,31 @@
+{
+ "plan": {
+  "place": {
+   "name": "Torre dell'Astrologo",
+   "description": "Una torre di pietra scura in mezzo al prato, con la lanterna sempre accesa in cima e i libri dell'astrologo impilati sul davanzale."
+  },
+  "layout": "torre_mago",
+  "objects": [
+   {
+    "module": "obj.banco",
+    "where": "dentro"
+   },
+   {
+    "module": "object.well",
+    "where": "fuori"
+   }
+  ],
+  "ground": [],
+  "fresh": [],
+  "runes": [
+   "- 1",
+   "x = x"
+  ],
+  "strutture": [
+   {
+    "concetto": "torre del mago",
+    "taglia": "grande"
+   }
+  ]
+ }
+}

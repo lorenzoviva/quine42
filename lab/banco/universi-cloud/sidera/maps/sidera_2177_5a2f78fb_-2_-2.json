@@ -36,6 +36,11 @@
    "quanto",
    "fuoco"
   ],
-  "strutture": []
+  "strutture": [
+   {
+    "concetto": "laboratorio del plasma",
+    "taglia": "grande"
+   }
+  ]
  }
 }

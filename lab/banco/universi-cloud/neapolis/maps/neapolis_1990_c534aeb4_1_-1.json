@@ -34,6 +34,10 @@
   "strutture": [
    {
     "concetto": "torre di vetro"
+   },
+   {
+    "concetto": "osservatorio civico",
+    "taglia": "grande"
    }
   ]
  }

@@ -1,0 +1,29 @@
+{
+ "plan": {
+  "place": {
+   "name": "Guado del Primo Passo",
+   "description": "Sul fondo si vedono sassi lisci e qualche pesce."
+  },
+  "layout": "campi",
+  "objects": [
+   {
+    "module": "obj.cassa",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.credenza",
+    "where": "dentro"
+   },
+   {
+    "module": "object.bush",
+    "where": "fuori"
+   }
+  ],
+  "ground": [],
+  "fresh": [],
+  "runes": [
+   "carpet . strength"
+  ],
+  "strutture": []
+ }
+}

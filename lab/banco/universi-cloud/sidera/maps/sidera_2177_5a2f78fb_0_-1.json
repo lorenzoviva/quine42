@@ -23,6 +23,11 @@
    "spin",
    "x = x"
   ],
-  "strutture": []
+  "strutture": [
+   {
+    "concetto": "residenza modulare",
+    "taglia": "grande"
+   }
+  ]
  }
 }

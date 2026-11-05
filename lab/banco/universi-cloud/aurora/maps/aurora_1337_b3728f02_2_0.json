@@ -1,0 +1,31 @@
+{
+ "plan": {
+  "place": {
+   "name": "Rocca del Passo",
+   "description": "Una rocca di guardia sulla strada del passo, con le mura merlate, la torre e le stalle dei soldati."
+  },
+  "layout": "castello",
+  "objects": [
+   {
+    "module": "npc.cat",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.cassa",
+    "where": "dentro"
+   }
+  ],
+  "ground": [],
+  "fresh": [],
+  "runes": [
+   "x",
+   "carpet . rate"
+  ],
+  "strutture": [
+   {
+    "concetto": "forte di frontiera",
+    "taglia": "grande"
+   }
+  ]
+ }
+}

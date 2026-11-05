@@ -96,3 +96,11 @@ proprie per tipo (una navata per il tempio, un cortile per il forte) sono il pas
 Nessuno di questi programmi è stato provato dentro il gioco: lo Scultore non passa ancora `base` a `checkProgram` e `withSize` scrive la scatola
 senza la cantina (ADR-0135, «Conseguenze»: serve T156). I giudizi estetici (lo stile si riconosce? la torre è una torre?) sono dell'autore, sui
 fogli di contatto; le misure dicono che si entra, si sale, si scende, che nulla è murato o staccato e che i semi danno edifici diversi.
+
+## Il catalogo gemello (T273)
+
+Accanto a queste 24 ce ne sono altre 24, scritte da un generatore nel cantiere parallelo: [`README-generatore.md`](README-generatore.md)
+(`catalogo-generatore.ts`, `struttura.ts`, `genera.ts`, `scrivi.ts`, `valida-generatore.ts`, `indice.ts`, `risultati.json`). Stanno nelle
+stesse cartelle delle ambientazioni; tre hanno cambiato nome per non scontrarsi con queste: `fantasy/residenza-del-borgomastro`,
+`moderno/mercato-a-padiglione`, `futuristico/laboratorio-del-plasma`. In tutto 48 strutture, 12 per ambientazione; come entrano nei quattro
+universi esplorabili lo dice [`../universi-cloud/INTEGRAZIONE.md`](../universi-cloud/INTEGRAZIONE.md).

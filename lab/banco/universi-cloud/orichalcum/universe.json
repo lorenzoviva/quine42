@@ -1,5 +1,6 @@
 {
   "name": "orichalcum",
+  "kernel": "0.1.5",
   "seed": 1887,
   "theme": "prompts/theme.md",
   "circleRadius": 42,

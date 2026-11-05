@@ -7,10 +7,11 @@ import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockAiModels } from '../src/kernel/ai/mock';
 import { modelErrors } from '../src/kernel/validator';
-import { classOf } from '../src/mj/classes';
+import { boxOf, classOf } from '../src/mj/classes';
+import { withSize } from '../src/kernel/agents/sculptor';
 import { SOUND_CLASS } from '../src/mj/sound';
 import { expectedModelErrors } from './helpers';
-import { InlineRunner, rootTag, type FormComp, type FormRequest, type FormResult } from '../src/kernel/forms';
+import { cellarOf, InlineRunner, rootTag, vptOf, type FormComp, type FormRequest, type FormResult } from '../src/kernel/forms';
 import { formCacheKey, restoreFormResult, MemoryFormStore, WorkerRunner } from '../src/render/forms';
 
 const boot = () => Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
@@ -25,14 +26,19 @@ describe('the library of models', () => {
       expect(index[id], id).toBeDefined();
       // A sound program has no box (ADR-0123): the validator judges it all the same.
       if (index[id].classe !== SOUND_CLASS) expect(classOf(index[id].classe), id).toBeDefined();
-      const errors = modelErrors(p, bundledFiles[p], index[id].tempo);
+      // In the box the library runs it in (`sizeFor`): its own `size`, or its class's box at its size and as much deeper as its cellar (ADR-0135).
+      const xml = bundledFiles[p];
+      const cls = classOf(index[id].classe);
+      const boxed = index[id].classe === SOUND_CLASS || !cls || /\ssize="/.test(rootTag(xml)) ? xml : withSize(xml, boxOf(cls, index[id].taglia).map((n, i) => (i === 2 ? n + cellarOf(index[id]) * vptOf(index[id]) : n)) as [number, number, number]);
+      const errors = modelErrors(p, boxed, index[id].tempo);
       const expected = expectedModelErrors(id);
       expect(errors, id).toHaveLength(expected.length);
       expected.forEach((e, i) => expect(errors[i]).toMatch(e));
     }
     // Every class has its generic model, used when an entity has none of its own.
     for (const c of ['persona', 'animale', 'bestia', 'albero', 'cespuglio', 'roccia', 'sasso', 'oggetto', 'mobile', 'edificio', 'monumento', 'grande']) expect(bundledFiles[`models/${c}.xml`], c).toBeDefined();
-  }, 60_000);
+    // The structures of the catalogue run in the box of their class (1-3 s each): the library of the seed takes longer than it did.
+  }, 240_000);
 
   it('refuses a program that does not stand', () => {
     expect(modelErrors('models/x.xml', '<sequence values="BW" size="4 4 4"><box at="2 2 2" size="2 2 1" color="W"/></sequence>').join()).toMatch(/terra/);

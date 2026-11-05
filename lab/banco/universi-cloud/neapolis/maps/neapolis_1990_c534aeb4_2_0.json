@@ -40,6 +40,11 @@
   "runes": [
    "sirena"
   ],
-  "strutture": []
+  "strutture": [
+   {
+    "concetto": "mercato a padiglione",
+    "taglia": "grande"
+   }
+  ]
  }
 }

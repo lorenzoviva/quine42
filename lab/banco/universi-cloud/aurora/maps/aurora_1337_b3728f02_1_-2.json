@@ -1,0 +1,41 @@
+{
+ "plan": {
+  "place": {
+   "name": "Macchia dell'Eco",
+   "description": "Il vento muove le foglie tutte nello stesso istante."
+  },
+  "layout": "bosco",
+  "objects": [
+   {
+    "module": "npc.cat",
+    "where": "fuori"
+   },
+   {
+    "module": "npc.villager",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.banco",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.cassa",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.credenza",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.letto",
+    "where": "fuori"
+   }
+  ],
+  "ground": [],
+  "fresh": [],
+  "runes": [
+   "carpet . active"
+  ],
+  "strutture": []
+ }
+}

@@ -1,0 +1,31 @@
+{
+ "plan": {
+  "place": {
+   "name": "Radura del Primo Passo",
+   "description": "Un sentiero di pecore attraversa il prato."
+  },
+  "layout": "borgo",
+  "objects": [
+   {
+    "module": "obj.credenza",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.letto",
+    "where": "fuori"
+   },
+   {
+    "module": "object.crate",
+    "where": "fuori"
+   },
+   {
+    "module": "object.sign",
+    "where": "fuori"
+   }
+  ],
+  "ground": [],
+  "fresh": [],
+  "runes": [],
+  "strutture": []
+ }
+}

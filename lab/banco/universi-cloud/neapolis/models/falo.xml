@@ -1,6 +1,7 @@
 <!--
-Falò, scritto a mano da Claude Code (step 8.2A): un anello di pietre attorno alla brace, tre ciocchi e
-le fiamme. L'animazione è MarkovJunior anche lei: a ogni fotogramma le punte delle fiamme si spengono o
+Falò, procedurale (Cantiere 2) dal falò scritto a mano da Claude Code (step 8.2A): un anello di pietre attorno alla
+brace, i ciocchi e le fiamme. Il seme sceglie quanto è largo e storto il cerchio di pietre, quante pietre sono doppie,
+quanti ciocchi ci sono (da uno a quattro) e come sono impilati, e quanto alte salgono le lingue di fuoco. L'animazione è MarkovJunior anche lei: a ogni fotogramma le punte delle fiamme si spengono o
 salgono a caso, e la brace pulsa. Fiamme e brace fanno luce (glow, ADR-0046).
 -->
 <sequence values="BXDdENnYORe" size="20 20 18" origin="True" symmetry="(xy)">
@@ -17,8 +18,9 @@ salgono a caso, e la brace pulsa. Fiamme e brace fanno luce (glow, ADR-0046).
 
   <one in="X B" out="B X"/>
   <!-- Un disco ottagonale: crescita a rombo, poi in diagonale. -->
-  <all in="XB" out="*X" steps="4"/>
-  <all in="X*/*B" out="**/*X" steps="2"/>
+  <prl in="XB" out="*X" p="0.75" steps="6"/>
+  <prl in="X*/*B" out="**/*X" p="0.6" steps="2"/>
+  <all in="BXB" out="*X*" steps="1"/>
   <!-- Il bordo diventa pietre (alcune doppie), il resto cenere. -->
   <all in="XB" out="D*"/>
   <prl in="X" out="E" steps="1"/>
@@ -26,14 +28,17 @@ salgono a caso, e la brace pulsa. Fiamme e brace fanno luce (glow, ADR-0046).
   <prl in="D" out="d" p="0.3" steps="1"/>
 
   <!-- Tre ciocchi sulla cenere, il secondo e il terzo appoggiati sopra quando non c'è posto. -->
-  <one in="BBBBBBB EEEEEEE" out="NNNNNNN *******" steps="2"/>
-  <one in="BBBBB NNNNN" out="NNNNN *****" steps="1"/>
+  <one in="BBBBBBB EEEEEEE" out="NNNNNNN *******" steps="1"/>
+  <one in="BBBBB EEEEE" out="NNNNN *****" steps="1"/>
+  <prl in="BBBBB EEEEE" out="NNNNN *****" p="0.02" steps="1"/>
+  <prl in="BBBBB NNNNN" out="NNNNN *****" p="0.08" steps="1"/>
   
 
   <!-- Le fiamme: semi sopra i ciocchi, lingue che salgono a caso, poi i colori dalla base alla punta. -->
   <prl in="B N" out="Y *" p="0.6" steps="1"/>
-  <one in="B Y" out="Y *" steps="16"/>
-  <one in="YB YY" out="*Y **" steps="40"/>
+  <one in="B Y" out="Y *" steps="14"/>
+  <prl in="B Y" out="Y *" p="0.3" steps="4"/>
+  <one in="YB YY" out="*Y **" steps="24"/>
   <all in="B Y" out="* R"/>
   <all in="R Y" out="* O"/>
   <all in="O Y Y" out="* O *" steps="1"/>

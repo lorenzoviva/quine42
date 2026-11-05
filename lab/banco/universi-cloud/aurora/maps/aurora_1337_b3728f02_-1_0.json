@@ -1,0 +1,39 @@
+{
+ "plan": {
+  "place": {
+   "name": "Radura Senza Ritorno",
+   "description": "In lontananza suona una campana."
+  },
+  "layout": "borgo",
+  "objects": [
+   {
+    "module": "npc.villager",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.credenza",
+    "where": "dentro"
+   },
+   {
+    "module": "obj.letto",
+    "where": "fuori"
+   }
+  ],
+  "ground": [],
+  "fresh": [],
+  "runes": [
+   "speed = speed",
+   "carpet . rate"
+  ],
+  "strutture": [
+   {
+    "concetto": "fortino",
+    "taglia": "grande"
+   },
+   {
+    "concetto": "tempio della luna",
+    "taglia": "grande"
+   }
+  ]
+ }
+}

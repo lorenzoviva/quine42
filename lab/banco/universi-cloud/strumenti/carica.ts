@@ -3,6 +3,7 @@
 
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { Kernel } from '../../../../src/kernel/kernel';
 import { MemoryChunks } from '../../../../src/kernel/chunks';
 import { memoryStore } from '../../../../src/kernel/repo';
@@ -12,7 +13,7 @@ import { hashStr, hex } from '../../../../src/kernel/rng';
 import type { FileMap } from '../../../../src/kernel/types';
 import type { ChunkRecord } from '../../../../src/kernel/chunks';
 
-export const RADICE = new URL('../', import.meta.url).pathname;
+export const RADICE = fileURLToPath(new URL('../', import.meta.url));
 
 /** Every file of the universe that a universe may hold (`allowedPath`): what is beside it (README, verifica.ts) stays out, maps apart. */
 export function leggiUniverso(dir: string): { files: FileMap; maps: Record<string, ChunkRecord> } {

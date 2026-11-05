@@ -1,0 +1,104 @@
+<!-- Segugio d'ottone (Cantiere 8, orichalcum): andatura, corpo, testa, coda a caso; comignoli a caso sul dorso. -->
+<sequence values="BODITLPu123456z" symmetry="(xy)" name="Segugio d'ottone">
+  <color symbol="O" value="c09030" name="ottone"/>
+  <color symbol="D" value="7a5520" name="ottone scuro"/>
+  <color symbol="I" value="3a3836" name="giunti di ferro" part="gamba"/>
+  <color symbol="T" value="5d5a55" name="comignoli"/>
+  <color symbol="L" value="ff9a3c" name="occhi di brace" glow="True"/>
+  <color symbol="P" hidden="True" name="marcatore"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="1" hidden="True" name="marcatore"/>
+  <color symbol="2" hidden="True" name="marcatore"/>
+  <color symbol="3" hidden="True" name="marcatore"/>
+  <color symbol="4" hidden="True" name="marcatore"/>
+  <color symbol="5" hidden="True" name="marcatore"/>
+  <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
+  <!-- scelta «andatura»: ferma | in punta | di corsa -->
+  <box at="12 20 0" size="21 38 14" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <!--   1: ferma -->
+  <line at="9 13 0" to="9 13 12" r="1" color="I" on="1"/>
+  <line at="15 13 0" to="15 13 12" r="1" color="I" on="1"/>
+  <line at="9 27 0" to="9 27 12" r="1" color="I" on="1"/>
+  <line at="15 27 0" to="15 27 12" r="1" color="I" on="1"/>
+  <ellipsoid at="9 13 5" size="3 3 3" color="D" on="1"/>
+  <ellipsoid at="15 13 5" size="3 3 3" color="D" on="1"/>
+  <ellipsoid at="9 27 5" size="3 3 3" color="D" on="1"/>
+  <ellipsoid at="15 27 5" size="3 3 3" color="D" on="1"/>
+  <!--   2: in punta -->
+  <line at="9 13 0" to="9 13 12" r="1" color="I" on="2"/>
+  <line at="15 13 0" to="15 13 12" r="1" color="I" on="2"/>
+  <line at="15 27 0" to="15 27 12" r="1" color="I" on="2"/>
+  <line at="9 27 12" to="9 32 8" r="1" color="I" on="2"/>
+  <line at="9 32 8" to="9 31 4" r="1" color="I" on="2"/>
+  <ellipsoid at="9 32 7" size="3 3 3" color="D" on="2"/>
+  <!--   3: di corsa -->
+  <line at="9 36 2" to="9 27 12" r="1" color="I" on="3"/>
+  <line at="15 34 1" to="15 27 12" r="1" color="I" on="3"/>
+  <line at="9 3 1" to="9 13 12" r="1" color="I" on="3"/>
+  <line at="15 5 2" to="15 13 12" r="1" color="I" on="3"/>
+  <box at="12 20 0" size="3 3 11" color="I" on="3"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <!-- scelta «corpo»: a caldaia | snello | corazzato -->
+  <box at="12 20 6" size="22 34 18" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <!--   1: a caldaia -->
+  <line at="12 12 14" to="12 28 14" r="4" color="O" on="1"/>
+  <!--   2: snello -->
+  <ellipsoid at="12 20 10" size="10 26 9" color="O" on="2"/>
+  <!--   3: corazzato -->
+  <ellipsoid at="12 20 9" size="14 28 13" color="O" on="3"/>
+  <box at="12 20 17" size="12 18 3" color="D" on="3"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <!-- scelta «testa»: avanti | a fiutare | all'ululato -->
+  <box at="12 33 0" size="25 14 30" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <!--   1: avanti -->
+  <line at="12 28 15" to="12 32 18" r="1.5" color="I" on="1"/>
+  <box at="12 34 16" size="7 7 6" color="O" on="1"/>
+  <box at="12 38 17" size="4 3 3" color="D" on="1"/>
+  <box at="10 37 21" size="1 1 1" color="L" on="1"/>
+  <box at="14 37 21" size="1 1 1" color="L" on="1"/>
+  <box at="9 33 22" size="2 3 4" color="D" on="1"/>
+  <box at="15 33 22" size="2 3 4" color="D" on="1"/>
+  <!--   2: a fiutare -->
+  <line at="12 28 14" to="12 34 6" r="1.5" color="I" on="2"/>
+  <box at="12 35 2" size="7 7 6" color="O" on="2"/>
+  <box at="12 38 1" size="4 3 3" color="D" on="2"/>
+  <box at="10 38 6" size="1 1 1" color="L" on="2"/>
+  <box at="14 38 6" size="1 1 1" color="L" on="2"/>
+  <box at="9 35 8" size="2 3 3" color="D" on="2"/>
+  <box at="15 35 8" size="2 3 3" color="D" on="2"/>
+  <!--   3: all'ululato -->
+  <line at="12 28 15" to="12 31 21" r="1.5" color="I" on="3"/>
+  <box at="12 31 21" size="7 6 7" color="O" on="3"/>
+  <line at="12 33 26" to="12 36 29" r="1" color="D" on="3"/>
+  <box at="10 33 27" size="1 1 1" color="L" on="3"/>
+  <box at="14 33 27" size="1 1 1" color="L" on="3"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <!-- scelta «coda»: ad antenna | tesa | a frusta -->
+  <box at="12 5 0" size="25 12 30" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <!--   1: ad antenna -->
+  <line at="12 10 15" to="12 6 26" r="0.5" color="I" on="1"/>
+  <ellipsoid at="12 6 26" size="3 3 3" color="L" on="1"/>
+  <!--   2: tesa -->
+  <line at="12 10 15" to="12 1 16" r="1" color="D" on="2"/>
+  <!--   3: a frusta -->
+  <line at="12 10 14" to="12 5 8" r="1" color="D" on="3"/>
+  <line at="12 5 8" to="12 1 12" r="1" color="D" on="3"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <!-- 3 punte a caso sulla faccia alta di O, alte fino a 6 -->
+  <one in="B O" out="P *" steps="3"/>
+  <all steps="6"><rule in="B P" out="P T"/><rule in="B* *P" out="P* *T"/></all>
+  <prl in="P" out="T"/>
+</sequence>

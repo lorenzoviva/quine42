@@ -1,0 +1,105 @@
+<!-- Furgone delle consegne (Cantiere 8, neapolis): carrozzeria, porte e carico a caso; pacchi impilati a caso. -->
+<sequence values="BWRKVCLIYPu123456z" symmetry="(xy)" name="Furgone delle consegne">
+  <color symbol="W" value="e8e8e2" name="carrozzeria bianca"/>
+  <color symbol="R" value="d2482f" name="fascia rossa"/>
+  <color symbol="K" value="1f1f22" name="gomme"/>
+  <color symbol="V" value="6a8fa8" name="vetri"/>
+  <color symbol="C" value="b8875a" name="cartone"/>
+  <color symbol="L" value="fff2b0" name="fari" glow="True"/>
+  <color symbol="I" value="7a7a7a" name="ferro"/>
+  <color symbol="Y" value="f2a020" name="lampeggiante" glow="True"/>
+  <color symbol="P" hidden="True" name="marcatore"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="1" hidden="True" name="marcatore"/>
+  <color symbol="2" hidden="True" name="marcatore"/>
+  <color symbol="3" hidden="True" name="marcatore"/>
+  <color symbol="4" hidden="True" name="marcatore"/>
+  <color symbol="5" hidden="True" name="marcatore"/>
+  <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
+  <ellipsoid at="4 9 0" size="4 10 10" color="K"/>
+  <ellipsoid at="21 9 0" size="4 10 10" color="K"/>
+  <ellipsoid at="4 31 0" size="4 10 10" color="K"/>
+  <ellipsoid at="21 31 0" size="4 10 10" color="K"/>
+  <!-- scelta «carrozzeria»: tetto alto | media | cassonato -->
+  <box at="12 20 3" size="21 40 27" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <!--   1: tetto alto -->
+  <box at="12 39 12" size="15 1 5" color="V" on="1"/>
+  <box at="12 39 6" size="3 1 1" color="L" on="1"/>
+  <box at="12 18 4" size="21 28 22" color="W" on="1"/>
+  <box at="12 35 4" size="21 10 14" color="W" on="1"/>
+  <box at="12 18 15" size="21 28 3" color="R" on="W"/>
+  <box at="12 18 26" size="1 1 1" color="P" on="1"/>
+  <!--   2: media -->
+  <box at="12 39 12" size="15 1 5" color="V" on="2"/>
+  <box at="12 39 6" size="3 1 1" color="L" on="2"/>
+  <box at="12 18 4" size="21 28 16" color="W" on="2"/>
+  <box at="12 35 4" size="21 10 13" color="W" on="2"/>
+  <box at="12 18 12" size="21 28 2" color="R" on="W"/>
+  <box at="12 18 20" size="1 1 1" color="P" on="2"/>
+  <box at="12 18 20" size="17 22 1" color="I" on="2"/>
+  <!--   3: cassonato -->
+  <box at="12 39 12" size="15 1 5" color="V" on="3"/>
+  <box at="12 39 6" size="3 1 1" color="L" on="3"/>
+  <box at="12 35 4" size="21 10 15" color="W" on="3"/>
+  <box at="12 16 4" size="21 30 3" color="I" on="3"/>
+  <box at="2 16 7" size="1 30 3" color="I" on="3"/>
+  <box at="22 16 7" size="1 30 3" color="I" on="3"/>
+  <box at="12 16 7" size="1 1 1" color="P" on="3"/>
+  <box at="8 12 7" size="6 6 5" color="C" on="3"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <!-- scelta «porte»: chiuse | laterale aperta | posteriori aperte -->
+  <box at="12 20 4" size="25 40 22" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <!--   1: chiuse -->
+  <box at="12 30 4" size="1 1 1" color="I" on="1"/>
+  <!--   2: laterale aperta -->
+  <box at="23 21 5" size="1 10 13" color="W" on="2"/>
+  <box at="23 21 13" size="1 10 2" color="R" on="2"/>
+  <!--   3: posteriori aperte -->
+  <box at="3 2 5" size="5 1 13" color="W" on="3"/>
+  <box at="21 2 5" size="5 1 13" color="W" on="3"/>
+  <box at="1 3 5" size="1 2 13" color="I" on="3"/>
+  <box at="23 3 5" size="1 2 13" color="I" on="3"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <!-- scelta «carico a terra»: paraurti | pila di pacchi | carrello -->
+  <box at="12 2 0" size="25 5 22" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <!--   1: paraurti -->
+  <box at="12 3 4" size="17 3 2" color="I" on="1"/>
+  <!--   2: pila di pacchi -->
+  <box at="8 3 0" size="7 4 6" color="C" on="2"/>
+  <box at="16 3 0" size="6 4 8" color="C" on="2"/>
+  <box at="11 3 6" size="6 4 5" color="C" on="2"/>
+  <!--   3: carrello -->
+  <box at="12 3 0" size="8 4 1" color="I" on="3"/>
+  <line at="9 2 0" to="9 2 16" r="0.5" color="I" on="3"/>
+  <line at="15 2 0" to="15 2 16" r="0.5" color="I" on="3"/>
+  <box at="12 3 1" size="7 3 8" color="C" on="3"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <!-- scelta «sul tetto»: lampeggiante | scala | antenna -->
+  <box at="12 34 17" size="21 10 12" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
+  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <!--   1: lampeggiante -->
+  <box at="12 35 17" size="8 3 2" color="Y" on="1"/>
+  <!--   2: scala -->
+  <box at="4 34 17" size="2 10 1" color="I" on="2"/>
+  <box at="20 34 17" size="2 10 1" color="I" on="2"/>
+  <line at="4 34 17" to="20 34 17" r="0.5" color="I" on="2"/>
+  <!--   3: antenna -->
+  <line at="18 34 17" to="18 34 27" r="0.5" color="I" on="3"/>
+  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <!-- i pacchi si impilano dove capita -->
+  <one steps="6"><rule in="B P" out="P C"/><rule in="BP" out="PC"/></one>
+  <prl in="P" out="C"/>
+  <prl in="BC" out="*C" p="0.3" steps="2"/>
+</sequence>

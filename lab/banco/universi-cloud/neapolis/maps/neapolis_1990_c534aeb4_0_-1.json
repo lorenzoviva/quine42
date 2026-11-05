@@ -36,6 +36,11 @@
   "runes": [
    "voce"
   ],
-  "strutture": []
+  "strutture": [
+   {
+    "concetto": "palazzina",
+    "taglia": "grande"
+   }
+  ]
  }
 }
