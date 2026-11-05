@@ -1,0 +1,35 @@
+{
+ "file": "steampunk/taverna.xml",
+ "ambientazione": "steampunk",
+ "nome": "taverna",
+ "titolo": "Taverna della Caldaia, con la cantina delle botti",
+ "cantina": true,
+ "passa": true,
+ "regge": true,
+ "varia": true,
+ "maxMs": {
+  "grande": 2022,
+  "enorme": 3330
+ },
+ "semiOk": {
+  "grande": "5/5",
+  "enorme": "5/5"
+ },
+ "varianza": {
+  "grande": {
+   "voxel": 0.6241380592803598,
+   "pianta": 0.420564061887307,
+   "perimetro": 0.15663520586223834,
+   "interno": 0.688287080930327,
+   "architetture": 5
+  },
+  "enorme": {
+   "voxel": 0.6608139820475463,
+   "pianta": 0.37240914365290445,
+   "perimetro": 0.22663074242205622,
+   "interno": 0.6734382580351939,
+   "architetture": 5
+  }
+ },
+ "difetti": []
+}

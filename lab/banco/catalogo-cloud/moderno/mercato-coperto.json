@@ -1,0 +1,35 @@
+{
+ "file": "moderno/mercato-coperto.xml",
+ "ambientazione": "moderno",
+ "nome": "mercato-coperto",
+ "titolo": "Mercato coperto",
+ "cantina": false,
+ "passa": true,
+ "regge": true,
+ "varia": true,
+ "maxMs": {
+  "grande": 748,
+  "enorme": 1675
+ },
+ "semiOk": {
+  "grande": "5/5",
+  "enorme": "5/5"
+ },
+ "varianza": {
+  "grande": {
+   "voxel": 0.6147077440775128,
+   "pianta": 0.5804243907849289,
+   "perimetro": 0.23287821524097047,
+   "interno": 0.5987324597904367,
+   "architetture": 5
+  },
+  "enorme": {
+   "voxel": 0.5955575894472034,
+   "pianta": 0.25991597659967214,
+   "perimetro": 0.17906265706148433,
+   "interno": 0.49646717117153993,
+   "architetture": 5
+  }
+ },
+ "difetti": []
+}

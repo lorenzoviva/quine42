@@ -1,0 +1,35 @@
+{
+ "file": "moderno/bistrot.xml",
+ "ambientazione": "moderno",
+ "nome": "bistrot",
+ "titolo": "Bistrot con l’enoteca interrata",
+ "cantina": true,
+ "passa": true,
+ "regge": true,
+ "varia": true,
+ "maxMs": {
+  "grande": 1772,
+  "enorme": 3198
+ },
+ "semiOk": {
+  "grande": "5/5",
+  "enorme": "5/5"
+ },
+ "varianza": {
+  "grande": {
+   "voxel": 0.6057022868103148,
+   "pianta": 0.42025014889815365,
+   "perimetro": 0.15672451193058567,
+   "interno": 0.688287080930327,
+   "architetture": 5
+  },
+  "enorme": {
+   "voxel": 0.5838470713383891,
+   "pianta": 0.37179595817304145,
+   "perimetro": 0.2275104020648377,
+   "interno": 0.6734382580351939,
+   "architetture": 5
+  }
+ },
+ "difetti": []
+}

@@ -1,0 +1,35 @@
+{
+ "file": "fantasy/casa-del-borgomastro.xml",
+ "ambientazione": "fantasy",
+ "nome": "casa-del-borgomastro",
+ "titolo": "Casa del borgomastro, a due piani",
+ "cantina": false,
+ "passa": true,
+ "regge": true,
+ "varia": true,
+ "maxMs": {
+  "grande": 907,
+  "enorme": 1725
+ },
+ "semiOk": {
+  "grande": "5/5",
+  "enorme": "5/5"
+ },
+ "varianza": {
+  "grande": {
+   "voxel": 0.6153725591526291,
+   "pianta": 0.5804243907849289,
+   "perimetro": 0.23287821524097047,
+   "interno": 0.5987324597904367,
+   "architetture": 5
+  },
+  "enorme": {
+   "voxel": 0.5482197454965567,
+   "pianta": 0.25991597659967214,
+   "perimetro": 0.17906265706148433,
+   "interno": 0.49646717117153993,
+   "architetture": 5
+  }
+ },
+ "difetti": []
+}

@@ -1,0 +1,35 @@
+{
+ "file": "fantasy/fortino.xml",
+ "ambientazione": "fantasy",
+ "nome": "fortino",
+ "titolo": "Fortino di confine",
+ "cantina": false,
+ "passa": true,
+ "regge": true,
+ "varia": true,
+ "maxMs": {
+  "grande": 955,
+  "enorme": 1802
+ },
+ "semiOk": {
+  "grande": "5/5",
+  "enorme": "5/5"
+ },
+ "varianza": {
+  "grande": {
+   "voxel": 0.6330591083613952,
+   "pianta": 0.5804243907849289,
+   "perimetro": 0.23287821524097047,
+   "interno": 0.5987324597904367,
+   "architetture": 5
+  },
+  "enorme": {
+   "voxel": 0.5574773041144612,
+   "pianta": 0.25991597659967214,
+   "perimetro": 0.17906265706148433,
+   "interno": 0.49646717117153993,
+   "architetture": 5
+  }
+ },
+ "difetti": []
+}

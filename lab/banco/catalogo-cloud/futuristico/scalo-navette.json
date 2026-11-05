@@ -1,0 +1,35 @@
+{
+ "file": "futuristico/scalo-navette.xml",
+ "ambientazione": "futuristico",
+ "nome": "scalo-navette",
+ "titolo": "Scalo delle navette, con la piattaforma",
+ "cantina": false,
+ "passa": true,
+ "regge": true,
+ "varia": true,
+ "maxMs": {
+  "grande": 844,
+  "enorme": 1678
+ },
+ "semiOk": {
+  "grande": "5/5",
+  "enorme": "5/5"
+ },
+ "varianza": {
+  "grande": {
+   "voxel": 0.5871296407446143,
+   "pianta": 0.5558626862398848,
+   "perimetro": 0.24990623638359247,
+   "interno": 0.5985562181727373,
+   "architetture": 5
+  },
+  "enorme": {
+   "voxel": 0.5091509423542202,
+   "pianta": 0.2438059152138916,
+   "perimetro": 0.18357717075414498,
+   "interno": 0.4932731877176322,
+   "architetture": 5
+  }
+ },
+ "difetti": []
+}

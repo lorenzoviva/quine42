@@ -1,0 +1,35 @@
+{
+ "file": "steampunk/stazione-dirigibili.xml",
+ "ambientazione": "steampunk",
+ "nome": "stazione-dirigibili",
+ "titolo": "Stazione dei dirigibili, con la torre dell’orologio",
+ "cantina": false,
+ "passa": true,
+ "regge": true,
+ "varia": true,
+ "maxMs": {
+  "grande": 803,
+  "enorme": 1630
+ },
+ "semiOk": {
+  "grande": "5/5",
+  "enorme": "5/5"
+ },
+ "varianza": {
+  "grande": {
+   "voxel": 0.6246629533936247,
+   "pianta": 0.5805910710791482,
+   "perimetro": 0.23319752781957914,
+   "interno": 0.5987324597904367,
+   "architetture": 5
+  },
+  "enorme": {
+   "voxel": 0.6031162337174779,
+   "pianta": 0.26016799061206375,
+   "perimetro": 0.17860599961663792,
+   "interno": 0.49646717117153993,
+   "architetture": 5
+  }
+ },
+ "difetti": []
+}

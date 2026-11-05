@@ -1,0 +1,35 @@
+{
+ "file": "moderno/palazzina.xml",
+ "ambientazione": "moderno",
+ "nome": "palazzina",
+ "titolo": "Palazzina di quattro alloggi, con i balconi",
+ "cantina": false,
+ "passa": true,
+ "regge": true,
+ "varia": true,
+ "maxMs": {
+  "grande": 821,
+  "enorme": 1651
+ },
+ "semiOk": {
+  "grande": "5/5",
+  "enorme": "5/5"
+ },
+ "varianza": {
+  "grande": {
+   "voxel": 0.5767062505240512,
+   "pianta": 0.5558626862398848,
+   "perimetro": 0.24990623638359247,
+   "interno": 0.5985562181727373,
+   "architetture": 5
+  },
+  "enorme": {
+   "voxel": 0.49488120649719824,
+   "pianta": 0.2438059152138916,
+   "perimetro": 0.18357717075414498,
+   "interno": 0.4932731877176322,
+   "architetture": 5
+  }
+ },
+ "difetti": []
+}
