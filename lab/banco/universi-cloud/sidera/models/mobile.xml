@@ -1,0 +1,15 @@
+<!-- Cassa (il mobile generico): scritta a mano da Claude Code (step 9). Una cassapanca di assi con il coperchio, due fasce di ferro e la serratura sul davanti. -->
+<sequence values="BNnIKS" size="20 20 20" symmetry="(xy)" name="Cassa">
+  <color symbol="N" value="8a5a30" name="assi"/>
+  <color symbol="n" value="5e3c20" name="fessure"/>
+  <color symbol="I" value="4a4f5a" name="ferro"/>
+  <color symbol="K" value="9a6a3a" name="coperchio"/>
+  <color symbol="S" value="c8a040" name="serratura"/>
+  <box at="10 10 0" size="16 12 9" color="N"/>
+  <box at="10 10 9" size="17 13 3" color="K"/>
+  <box at="5 10 0" size="2 13 12" color="I" on="BNK"/>
+  <box at="15 10 0" size="2 13 12" color="I" on="BNK"/>
+  <box at="10 16 6" size="2 1 3" color="S"/>
+  <prl in="N" out="n" p="0.06" steps="1"/>
+  <all in="n/N" out="*/n" steps="3" symmetry="(x)"/>
+</sequence>

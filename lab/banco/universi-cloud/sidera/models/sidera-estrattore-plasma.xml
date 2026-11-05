@@ -1,0 +1,78 @@
+<!-- Estrattore di plasma di Sidera: una pompa di metallo bagnato piantata nel suolo, un serbatoio di vetro dove il plasma sale fin dove
+     è arrivato oggi, tubi che scendono nella roccia. Il livello, il serbatoio minore e i tubi li decide il seme. Cantiere 4C, a mano (Claude Code). -->
+<sequence values="BDdWGCcKAQTSPMXN" size="20 20 20" symmetry="()" name="Estrattore di plasma">
+  <color symbol="D" value="1b1f28" name="piastra"/>
+  <color symbol="d" value="3d4555" name="metallo bagnato"/>
+  <color symbol="W" value="66728a" name="pompa"/>
+  <color symbol="G" value="9ee9ff" alpha="0.45" name="vetro del serbatoio"/>
+  <color symbol="C" value="ff3fc0" glow="True" name="plasma"/>
+  <color symbol="c" value="ffb6ef" glow="True" name="pelo del plasma"/>
+  <color symbol="K" value="35e6ff" glow="True" name="spie ciano"/>
+  <color symbol="A" value="ffb02e" glow="True" name="griglia ambra"/>
+  <color symbol="Q" hidden="True" name="dentro il serbatoio"/>
+  <color symbol="T" hidden="True" name="livello che sale"/>
+  <color symbol="S" hidden="True" name="livello fermo"/>
+  <color symbol="P" hidden="True" name="parte possibile"/>
+  <color symbol="M" hidden="True" name="segno di una parte"/>
+  <color symbol="X" value="525d70" name="tubo"/>
+  <color symbol="N" hidden="True" name="segno del serbatoio minore"/>
+
+  <!-- Piastra, pompa e trivella. -->
+  <box at="10 10 0" size="19 19 1" color="D"/>
+  <box at="13 10 1" size="9 11 8" color="W"/>
+  <box at="13 15 3" size="5 1 3" color="A"/>
+  <box at="13 10 9" size="7 9 1" color="d"/>
+  <cylinder at="13 10 10" size="3 3 4" color="d"/>
+  <box at="16 15 7" size="1 1 1" color="K"/>
+  <!-- Il serbatoio grande: vetro e, dentro, la colonna da cui sale il plasma. -->
+  <cylinder at="5 7 1" size="8 8 2" color="d"/>
+  <cylinder at="5 7 3" size="8 8 14" color="G"/>
+  <cylinder at="5 7 3" size="6 6 13" color="Q" on="G"/>
+  <cylinder at="5 7 16" size="8 8 2" color="d"/>
+  <box at="5 7 3" size="1 1 1" color="T"/>
+  <line at="8 7 14" to="9 7 14" r="0" color="d"/>
+  <!-- Il serbatoio minore, possibile. -->
+  <cylinder at="5 16 1" size="5 5 11" color="P" on="B"/>
+  <box at="5 16 1" size="1 1 1" color="N"/>
+  <!-- Tubi possibili. -->
+  <line at="17 4 1" to="17 4 12" r="0.5" color="P" on="B"/>
+  <line at="17 4 12" to="13 7 12" r="0.5" color="P" on="B"/>
+  <line at="18 16 1" to="18 16 6" r="0.5" color="P" on="B"/>
+  <line at="9 3 6" to="9 3 1" r="0.5" color="P" on="B"/>
+  <cylinder at="13 10 14" size="5 5 3" color="P" on="B"/>
+  <box at="17 4 1" size="1 1 1" color="M"/>
+  <box at="18 16 1" size="1 1 1" color="M"/>
+  <box at="9 3 1" size="1 1 1" color="M"/>
+  <box at="13 10 14" size="1 1 1" color="M"/>
+  <prl steps="1">
+    <rule in="M" out="X" p="0.5"/>
+    <rule in="N" out="G" p="0.5"/>
+  </prl>
+  <all in="XP" out="XX" symmetry="(xyz)"/>
+  <all in="GP" out="GG" symmetry="(xyz)"/>
+  <all>
+    <rule in="P" out="B"/>
+    <rule in="M" out="B"/>
+    <rule in="N" out="B"/>
+  </all>
+  <cylinder at="5 16 2" size="3 3 9" color="Q" on="G"/>
+  <box at="5 16 2" size="1 1 1" color="T" on="Q"/>
+  <cylinder at="5 16 1" size="5 5 1" color="d" on="G"/>
+  <cylinder at="5 16 11" size="5 5 1" color="d" on="G"/>
+
+  <!-- Il livello: sale un passo alla volta finché non si ferma, poi il plasma riempie ogni strato fin lì. -->
+  <one>
+    <rule in="Q T" out="T C" p="5"/>
+    <rule in="T" out="S"/>
+  </one>
+  <all in="CQ" out="CC" symmetry="(xy)"/>
+  <all in="SQ" out="Sc" symmetry="(xy)"/>
+  <all in="cQ" out="cc" symmetry="(xy)"/>
+  <all>
+    <rule in="Q" out="B"/>
+    <rule in="S" out="c"/>
+  </all>
+  <convolution neighborhood="Moore" steps="1">
+    <rule in="W" out="B" values="B" sum="0"/>
+  </convolution>
+</sequence>

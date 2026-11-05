@@ -1,0 +1,53 @@
+<!-- Rastrelliera idroponica di Sidera: un telaio di metallo a tre ripiani, vasche d'acqua ciano, lampade magenta sotto ogni ripiano
+     e piante che crescono ognuna a modo suo. Cantiere 4C, a mano (Claude Code). -->
+<sequence values="BDdTCKPLlFQ" size="20 20 20" symmetry="()" name="Rastrelliera idroponica">
+  <color symbol="D" value="1d212b" name="piedi"/>
+  <color symbol="d" value="4a5466" name="telaio bagnato"/>
+  <color symbol="T" value="2a2f3a" name="vasca"/>
+  <color symbol="C" value="35e3ff" glow="True" name="acqua illuminata"/>
+  <color symbol="K" value="ff3fb6" glow="True" name="lampade magenta"/>
+  <color symbol="P" value="2c7c4c" name="stelo"/>
+  <color symbol="L" value="5fd889" name="foglie"/>
+  <color symbol="l" value="a3f06a" name="foglie giovani"/>
+  <color symbol="F" value="ffb22e" glow="True" name="frutti ambra"/>
+  <color symbol="Q" hidden="True" name="spazio delle piante"/>
+
+  <!-- Lo spazio dove le piante possono crescere, sopra ogni vasca. -->
+  <box at="10 10 3" size="15 11 4" color="Q"/>
+  <box at="10 10 9" size="15 11 4" color="Q"/>
+  <box at="10 10 15" size="15 11 5" color="Q"/>
+
+  <!-- Il telaio. -->
+  <line at="2 6 0" to="2 6 19" r="0" color="d"/>
+  <line at="18 6 0" to="18 6 19" r="0" color="d"/>
+  <line at="2 14 0" to="2 14 19" r="0" color="d"/>
+  <line at="18 14 0" to="18 14 19" r="0" color="d"/>
+  <box at="2 6 0" size="3 3 1" color="D"/>
+  <box at="18 6 0" size="3 3 1" color="D"/>
+  <box at="2 14 0" size="3 3 1" color="D"/>
+  <box at="18 14 0" size="3 3 1" color="D"/>
+  <!-- Ripiani con le vasche e le lampade. -->
+  <box at="10 10 1" size="17 9 2" color="T"/>
+  <box at="10 10 7" size="17 9 2" color="T"/>
+  <box at="10 10 13" size="17 9 2" color="T"/>
+  <box at="10 10 2" size="13 7 1" color="C"/>
+  <box at="10 10 8" size="13 7 1" color="C"/>
+  <box at="10 10 14" size="13 7 1" color="C"/>
+  <box at="10 10 6" size="11 1 1" color="K" on="Q"/>
+  <box at="10 10 12" size="11 1 1" color="K" on="Q"/>
+  <line at="2 10 19" to="18 10 19" r="0" color="d"/>
+  <line at="2 6 19" to="2 14 19" r="0" color="d"/>
+  <line at="18 6 19" to="18 14 19" r="0" color="d"/>
+  <box at="10 10 18" size="11 1 1" color="K"/>
+
+  <!-- Le piante: semi nell'acqua, steli che salgono, foglie che si allargano. -->
+  <one steps="14" in="Q C" out="P C"/>
+  <one steps="20" in="Q P" out="P P"/>
+  <one steps="200" in="QP" out="LP" symmetry="(xyz)"/>
+  <one steps="260" in="QL" out="LL" symmetry="(xyz)"/>
+  <prl steps="1">
+    <rule in="L" out="l" p="0.3"/>
+    <rule in="BL" out="BF" p="0.05"/>
+  </prl>
+  <all in="Q" out="B"/>
+</sequence>

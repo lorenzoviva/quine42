@@ -1,0 +1,27 @@
+<!-- Una soglia passata su Sidera: il soffio della camera di equilibrio che si apre, e un accordo basso che scende e resta. Il seme sceglie dove arriva. -->
+<sequence name="Soglia" values="BNSAHT" size="14 2 12" symmetry="()">
+  <sound bpm="120" scale="phrygian" root="43" swing="0" cutoff="5000" space="0.6">
+    <track y="0" instrument="pad" volume="0.85"/>
+    <track y="1" instrument="lead" volume="0.55"/>
+  </sound>
+  <color symbol="N" value="38bdf8" name="Nota" glow="True"/>
+  <color symbol="S" value="0284c7" name="Tenuta" alpha="0.85"/>
+  <color symbol="A" value="f43f5e" name="Accento" glow="True"/>
+  <color symbol="H" value="fde047" name="Soffio" alpha="0.85"/>
+  <color symbol="T" value="ec4899" name="Arrivo" hidden="True"/>
+
+  <!-- Il soffio: piatti aperti in fila. -->
+  <line at="0 1 6" to="3 1 6" r="0" color="H"/>
+  <line at="5 1 5" to="5 1 5" r="0" color="H"/>
+  <!-- L'accordo: parte in alto e scende, l'arrivo lo sceglie il seme. -->
+  <line at="0 0 4" to="0 0 4" r="0" color="N"/>
+  <line at="0 0 7" to="0 0 7" r="0" color="N"/>
+  <line at="3 0 2" to="3 0 2" r="0" color="N"/>
+  <line at="6 0 0" to="6 0 2" r="0" color="T"/>
+  <one in="T" out="A" steps="1"/>
+  <all in="T" out="B"/>
+  <line at="6 0 4" to="6 0 4" r="0" color="N"/>
+  <all in="NBB" out="NSS"/>
+  <all in="ABBBBBBB" out="ASSSSSSS"/>
+  <all in="NBBBBBBB" out="NSSSSSSS"/>
+</sequence>

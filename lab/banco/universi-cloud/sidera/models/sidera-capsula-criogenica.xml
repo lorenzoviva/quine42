@@ -1,0 +1,59 @@
+<!-- Capsula criogenica di Sidera: un guscio di metallo disteso su un basamento, il coperchio di vetro brinato, dentro una sagoma che
+     dorme. Dal fondo esce la nebbia fredda, e la brina cresce sul vetro come vuole; il pannello e i cavi ci sono o no. Cantiere 4C, a mano (Claude Code). -->
+<sequence values="BDdWGFCKAZQPMX" size="20 20 20" symmetry="()" name="Capsula criogenica">
+  <color symbol="D" value="1c2029" name="basamento"/>
+  <color symbol="d" value="3c4453" name="metallo bagnato"/>
+  <color symbol="W" value="7a879b" name="guscio"/>
+  <color symbol="G" value="cdefff" alpha="0.55" name="vetro brinato"/>
+  <color symbol="F" value="f2fbff" name="brina"/>
+  <color symbol="C" value="3ae8ff" glow="True" name="luce fredda"/>
+  <color symbol="K" value="ff42b2" glow="True" name="spia magenta"/>
+  <color symbol="A" value="ffb22e" glow="True" name="spia ambra"/>
+  <color symbol="Z" value="3a4f6a" name="sagoma addormentata"/>
+  <color symbol="Q" hidden="True" name="aria fredda"/>
+  <color symbol="P" hidden="True" name="parte possibile"/>
+  <color symbol="M" hidden="True" name="segno di una parte"/>
+  <color symbol="X" value="2b313d" name="pannello e cavi"/>
+
+  <!-- Basamento e guscio. -->
+  <box at="10 10 0" size="9 17 3" color="D"/>
+  <box at="10 10 2" size="11 19 1" color="d"/>
+  <ellipsoid at="10 10 1" size="11 19 11" color="W"/>
+  <box at="10 10 7" size="20 20 6" color="G" on="W"/>
+  <ellipsoid at="10 10 3" size="7 15 6" color="Z" on="W"/>
+  <box at="10 10 6" size="20 20 1" color="C" on="W"/>
+  <box at="10 10 6" size="20 20 1" color="C" on="Z"/>
+
+  <!-- Pannello di comando, cavi, bombola: possibili. -->
+  <box at="10 1 0" size="5 2 9" color="P" on="B"/>
+  <line at="5 3 1" to="1 7 1" r="0.5" color="P" on="B"/>
+  <line at="1 7 1" to="1 14 1" r="0.5" color="P" on="B"/>
+  <cylinder at="17 15 0" size="4 4 8" color="P" on="B"/>
+  <line at="15 14 3" to="16 15 3" r="0.5" color="P" on="B"/>
+  <line at="10 19 2" to="10 19 6" r="0.5" color="P" on="B"/>
+  <box at="10 1 0" size="1 1 1" color="M"/>
+  <box at="5 3 1" size="1 1 1" color="M"/>
+  <box at="17 15 0" size="1 1 1" color="M"/>
+  <box at="10 19 2" size="1 1 1" color="M"/>
+  <prl steps="1" in="M" out="X" p="0.5"/>
+  <all in="XP" out="XX" symmetry="(xyz)"/>
+  <all>
+    <rule in="P" out="B"/>
+    <rule in="M" out="B"/>
+  </all>
+  <box at="10 1 7" size="3 2 1" color="K" on="X"/>
+  <box at="10 1 5" size="3 2 1" color="A" on="X"/>
+  <box at="17 15 7" size="4 4 1" color="C" on="X"/>
+
+  <!-- La brina cresce sul vetro, la nebbia esce dal fondo. -->
+  <one steps="5" in="B G" out="F G"/>
+  <one steps="22" in="BF" out="FF" symmetry="(xyz)"/>
+  <box at="10 10 0" size="20 20 3" color="Q" on="B"/>
+  <one steps="6" in="QD" out="FD" symmetry="(xy)"/>
+  <one steps="110" in="QF" out="FF" symmetry="(xyz)"/>
+  <all in="Q" out="B"/>
+  <convolution neighborhood="Moore" steps="1">
+    <rule in="W" out="B" values="B" sum="0"/>
+    <rule in="D" out="B" values="B" sum="0"/>
+  </convolution>
+</sequence>

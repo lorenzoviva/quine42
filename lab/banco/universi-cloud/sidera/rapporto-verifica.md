@@ -4,7 +4,7 @@ Generato da `verifica.ts` (`npx vite-node lab/banco/universi-cloud/sidera/verifi
 
 ## 1. Quarta parete
 
-101 file, 4239 frasi controllate con `metaBreak` (e `bibleBreaks` sulla bibbia): **0 violazioni**.
+101 file, 4254 frasi controllate con `metaBreak` (e `bibleBreaks` sulla bibbia): **0 violazioni**.
 
 ## 2. Moduli
 
@@ -74,8 +74,8 @@ Generato da `verifica.ts` (`npx vite-node lab/banco/universi-cloud/sidera/verifi
 
 - **900 tick** (minimo 600), tempo del mondo 361 s, con `MockAiModels` e i 19 piani di `maps/` come archivio dei luoghi.
 - Luoghi attraversati: 19/19 con il nome del piano (0 fuori piano).
-- Persone del registro incontrate e riconosciute dall'origine: 12 (Ilde Ferraris, Pino Lupi, Pennanera, Teo Sardi, Ruben Kessler, Ugo Ranieri, Selene Moro, Kira Novak, Lia Corvi, Greta Varga, Ottone Varga, Lena Ortiz).
-- Azioni dei moduli eseguite: 142 (53 diverse); battute di dialogo: 142.
+- Persone del registro incontrate e riconosciute dall'origine: 11 (Ilde Ferraris, Pino Lupi, Pennanera, Teo Sardi, Ruben Kessler, Ugo Ranieri, Tobia Calandra, Iris Calandra, Selene Moro, Lia Corvi, Elio Marchetti).
+- Azioni dei moduli eseguite: 139 (53 diverse); battute di dialogo: 139.
 - Raccolti: 48 oggetti a terra, 31 rune.
 - Ricette fabbricate: 10/10; oggetti usati: 16; scanner impugnato e usato.
 - Incantesimi pronunciati: 17 (12 rune nuove e 5 formule): grava, lieve, tunnel, intreccio, onda, vuoto, marea, massa, spin, quanto, orbita, stasi, grava grava, lieve onda, orbita grava, quanto stasi, tunnel massa tunnel.
@@ -98,19 +98,19 @@ Alcune battute raccolte:
 >
 > **Serra idroponica**: Germogli piccoli, pallidi, sotto le lampade rosa. Ci vuole tempo, o soluzione nutritiva.
 >
-> **Serra idroponica**: Spingi i semi nella spugna delle vasche, uno per foro, come insegna Iris Calandra.
+> **Serra idroponica**: Non c'è ancora niente di maturo. Qualche foglia, al più.
 >
-> **Faro di telemetria**: Sul piccolo schermo scorrono le posizioni: tre navette in rotta, un drone vicino, in volo basso.
+> **Selene Moro**: «Tre rotte, tre avamposti. La quarta, quella che nessuno ha percorso, la tengono nelle carte della Gilda, sotto chiave.»
 >
-> **Kira Novak**: Studia la carta a lungo, sfiorando le rotte col dito. «Chi ti ha dato questa sa il fatto suo. Prendi: un gettone della cabina. Un giorno vedrai l'Anello da vicino.»
+> **Drone da ricognizione**: La spia è azzurra: batteria 90, 0 consegne fatte.
 >
-> **Camera di equilibrio**: Il gettone cade con un tintinnio d'ottone. «Banchina tre, prossima cabina tra poco», dice una voce stanca dall'altoparlante.
+> **Drone da ricognizione**: Agganci un pacco sotto la pancia del drone. Lo porterà dove lo porta il vento e i fari.
 >
-> **Lia Corvi**: «Hai Traforo con te! Pronunciata davanti a una lamiera apre un passaggio nella sabbia: è così che abbiamo trovato la costola grande.»
+> **Drone da ricognizione**: Sfili la cella scarica e infili quella nuova: le eliche ronzano più forte, il drone fa un giro di festa.
 >
-> **Greta Varga**: «Siamo nel turno del mattino. Tre turni, nessuna sosta: se ci fermiamo noi, Sidera resta al buio e al freddo.»
+> **Relitto antico**: Tra due lamiere trovi un frammento con incisioni geometriche, liscio come un sasso di fiume.
 >
-> **Reattore a fusione**: Il nucleo è calmo, quasi pigro: carico 55. Si potrebbe prelevare plasma.
+> **Reattore a fusione**: Il nucleo pulsa azzurro, regolare: carico 67. Lavora bene.
 >
 
 ## Esito

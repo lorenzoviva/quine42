@@ -1,0 +1,61 @@
+<!-- Faro di telemetria di Sidera: un treppiede di metallo bagnato, in cima la testa con l'anello di luce ciano e un alone che sfuma
+     nella pioggia. Antenna, batteria col cavo e pannello ci sono o no secondo il seme. Cantiere 4C, a mano (Claude Code). -->
+<sequence values="BDdWCKAHQPMXR" size="20 20 20" symmetry="()" name="Faro di telemetria">
+  <color symbol="D" value="1c2029" name="piedi"/>
+  <color symbol="d" value="434c5c" name="treppiede bagnato"/>
+  <color symbol="W" value="7c889c" name="testa del faro"/>
+  <color symbol="C" value="3decff" glow="True" name="anello di luce"/>
+  <color symbol="K" value="ff3fb5" glow="True" name="spia magenta"/>
+  <color symbol="A" value="ffb22d" glow="True" name="spia ambra"/>
+  <color symbol="H" value="9df4ff" alpha="0.3" glow="True" name="alone"/>
+  <color symbol="R" value="3b5a78" alpha="0.6" name="pozza di pioggia"/>
+  <color symbol="Q" hidden="True" name="aria attorno alla luce"/>
+  <color symbol="P" hidden="True" name="parte possibile"/>
+  <color symbol="M" hidden="True" name="segno di una parte"/>
+  <color symbol="X" value="2d333f" name="parte aggiunta"/>
+
+  <!-- Treppiede e testa. -->
+  <line at="3 4 0" to="10 10 9" r="0.5" color="d"/>
+  <line at="17 4 0" to="10 10 9" r="0.5" color="d"/>
+  <line at="10 18 0" to="10 10 9" r="0.5" color="d"/>
+  <box at="3 4 0" size="3 3 1" color="D"/>
+  <box at="17 4 0" size="3 3 1" color="D"/>
+  <box at="10 18 0" size="3 3 1" color="D"/>
+  <box at="10 10 9" size="3 3 3" color="d"/>
+  <cylinder at="10 10 11" size="7 7 2" color="W"/>
+  <cylinder at="10 10 13" size="5 5 2" color="C"/>
+  <cylinder at="10 10 15" size="7 7 1" color="W"/>
+  <cone at="10 10 16" size="5 5 2" color="d"/>
+  <box at="13 10 12" size="1 1 1" color="K"/>
+
+  <!-- Le parti possibili. -->
+  <line at="11 10 17" to="11 10 19" r="0" color="P" on="B"/>
+  <box at="16 16 0" size="3 3 3" color="P" on="B"/>
+  <line at="15 15 0" to="12 13 0" r="0.5" color="P" on="B"/>
+  <line at="12 13 0" to="10 11 8" r="0.5" color="P" on="B"/>
+  <line at="6 10 12" to="3 10 14" r="0.5" color="P" on="B"/>
+  <box at="2 10 15" size="1 5 3" color="P" on="B"/>
+  <box at="4 15 0" size="3 3 4" color="P" on="B"/>
+  <box at="11 10 17" size="1 1 1" color="M"/>
+  <box at="16 16 0" size="1 1 1" color="M"/>
+  <box at="6 10 12" size="1 1 1" color="M"/>
+  <box at="4 15 0" size="1 1 1" color="M"/>
+  <prl steps="1" in="M" out="X" p="0.5"/>
+  <all in="XP" out="XX" symmetry="(xyz)"/>
+  <all>
+    <rule in="P" out="B"/>
+    <rule in="M" out="B"/>
+  </all>
+  <prl steps="1" in="B X" out="A X" p="0.3"/>
+
+  <!-- L'alone della luce, che la pioggia sfrangia ogni volta in un altro modo. -->
+  <cylinder at="10 10 13" size="13 13 2" color="Q" on="B"/>
+  <one steps="30" in="CQ" out="CH" symmetry="(xy)"/>
+  <one steps="40" in="HQ" out="HH" symmetry="(xyz)"/>
+  <all in="Q" out="B"/>
+  <!-- La pozza di pioggia sotto il treppiede. -->
+  <cylinder at="10 10 0" size="19 19 1" color="Q" on="B"/>
+  <one steps="2" in="DQ" out="DR" symmetry="(xy)"/>
+  <one steps="70" in="RQ" out="RR" symmetry="(xy)"/>
+  <all in="Q" out="B"/>
+</sequence>

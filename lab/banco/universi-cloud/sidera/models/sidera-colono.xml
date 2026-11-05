@@ -1,0 +1,86 @@
+<!-- Colono di Sidera: un abitante della città sotto la pioggia, testa grande, impermeabile scuro con le cuciture ciano, cappuccio e
+     visiera luminosa. Il seme gli dà o no l'ombrello trasparente, la lanterna, lo zaino, l'antenna sul cappuccio, il cappotto lungo. Cantiere 4C, a mano (Claude Code). -->
+<sequence values="BNPRrSVHhCKAEQMXYZ" size="20 15 30" symmetry="()" name="Colono">
+  <color symbol="N" value="1b1e26" name="stivali" part="gamba"/>
+  <color symbol="P" value="2c3240" name="pantaloni" part="gamba"/>
+  <color symbol="R" value="27365a" name="impermeabile"/>
+  <color symbol="r" value="1b2642" name="impermeabile in ombra"/>
+  <color symbol="S" value="27365a" name="manica" part="braccio"/>
+  <color symbol="V" value="e3b08f" name="viso"/>
+  <color symbol="H" value="324570" name="cappuccio"/>
+  <color symbol="h" value="22304f" name="bordo del cappuccio"/>
+  <color symbol="C" value="3aeaff" glow="True" name="visiera e cuciture"/>
+  <color symbol="K" value="ff40b4" glow="True" name="luce magenta"/>
+  <color symbol="A" value="ffb22e" glow="True" name="fibbia ambra"/>
+  <color symbol="E" value="11141a" name="guanti"/>
+  <color symbol="Q" hidden="True" name="parte possibile"/>
+  <color symbol="M" hidden="True" name="segno di una parte"/>
+  <color symbol="X" value="2f3a4f" name="zaino e antenna"/>
+  <color symbol="Y" value="8fe6ff" alpha="0.5" name="ombrello trasparente"/>
+  <color symbol="Z" hidden="True" name="ombrello possibile"/>
+
+  <!-- Gambe e stivali. -->
+  <box at="7 7 0" size="3 5 3" color="N"/>
+  <box at="13 7 0" size="3 5 3" color="N"/>
+  <box at="7 7 3" size="3 4 4" color="P"/>
+  <box at="13 7 3" size="3 4 4" color="P"/>
+  <!-- L'impermeabile. -->
+  <cylinder at="10 7 6" size="11 9 10" color="R"/>
+  <cylinder at="10 7 5" size="12 10 2" color="r"/>
+  <cylinder at="10 7 10" size="12 10 1" color="r"/>
+  <box at="10 11 10" size="2 1 1" color="A"/>
+  <box at="10 11 6" size="1 1 10" color="C"/>
+  <!-- Braccia e guanti. -->
+  <cylinder at="4 7 9" size="3 4 7" color="S"/>
+  <cylinder at="16 7 9" size="3 4 7" color="S"/>
+  <box at="4 7 7" size="3 3 2" color="E"/>
+  <box at="16 7 7" size="3 3 2" color="E"/>
+  <!-- La testa grande nel cappuccio, la visiera. -->
+  <ellipsoid at="10 7 15" size="11 10 10" color="V"/>
+  <ellipsoid at="10 6 15" size="13 12 12" color="H" on="B"/>
+  <box at="10 12 16" size="9 3 7" color="V" on="H"/>
+  <box at="10 12 16" size="11 3 1" color="h" on="H"/>
+  <box at="10 12 23" size="11 3 1" color="h" on="H"/>
+  <box at="10 12 20" size="9 2 2" color="C"/>
+  <box at="10 13 17" size="3 1 1" color="r"/>
+
+  <!-- Le parti possibili: zaino, antenna, cappotto lungo, lanterna. -->
+  <box at="10 1 8" size="9 3 9" color="Q" on="B"/>
+  <line at="7 4 24" to="5 3 29" r="0.5" color="Q" on="B"/>
+  <cylinder at="10 7 2" size="12 10 3" color="Q" on="B"/>
+  <line at="3 7 6" to="2 7 5" r="0.5" color="Q" on="B"/>
+  <box at="2 7 1" size="3 3 4" color="Q" on="B"/>
+  <box at="3 7 6" size="1 1 1" color="M"/>
+  <box at="10 1 8" size="1 1 1" color="M"/>
+  <box at="5 3 29" size="1 1 1" color="M"/>
+  <box at="10 7 4" size="1 1 1" color="M"/>
+  <!-- L'ombrello possibile, nella mano destra. -->
+  <line at="18 8 7" to="18 8 26" r="0" color="Z" on="B"/>
+  <cone at="12 7 26" size="19 14 4" color="Z" on="B"/>
+  <box at="18 8 7" size="1 1 1" color="M"/>
+
+  <prl steps="1" in="M" out="X" p="0.5"/>
+  <all symmetry="(xyz)">
+    <rule in="XQ" out="*X"/>
+    <rule in="XZ" out="*Y"/>
+    <rule in="YZ" out="*Y"/>
+  </all>
+  <all>
+    <rule in="Q" out="B"/>
+    <rule in="Z" out="B"/>
+    <rule in="M" out="B"/>
+  </all>
+  <cylinder at="10 7 2" size="12 10 3" color="R" on="X"/>
+  <box at="10 1 13" size="9 1 1" color="K" on="X"/>
+  <box at="2 7 2" size="3 3 2" color="A" on="X"/>
+  <box at="12 7 26" size="20 15 1" color="C" on="Y"/>
+  <convolution neighborhood="Moore" steps="1">
+    <rule in="R" out="B" values="B" sum="0"/>
+    <rule in="V" out="B" values="B" sum="0"/>
+    <rule in="H" out="B" values="B" sum="0"/>
+    <rule in="S" out="B" values="B" sum="0"/>
+    <rule in="P" out="B" values="B" sum="0"/>
+    <rule in="N" out="B" values="B" sum="0"/>
+    <rule in="r" out="B" values="B" sum="0"/>
+  </convolution>
+</sequence>

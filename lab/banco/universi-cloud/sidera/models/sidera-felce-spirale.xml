@@ -1,0 +1,65 @@
+<!-- Felce a spirale di Sidera: dal ciuffo scuro salgono fronde ricurve, ognuna chiusa in cima da un ricciolo; le foglioline crescono
+     dove capita e qualche punta brilla di ciano. Quante fronde e dove, lo decide il seme. Cantiere 4C, a mano (Claude Code). -->
+<sequence values="BDFfLlCPMX" size="20 20 16" symmetry="()" name="Felce a spirale">
+  <color symbol="D" value="1e3a33" name="ciuffo"/>
+  <color symbol="F" value="2f8f6e" name="fronda"/>
+  <color symbol="f" value="1f6a52" name="fronda in ombra"/>
+  <color symbol="L" value="5ee0a6" name="foglioline"/>
+  <color symbol="l" value="b07cff" name="foglioline viola"/>
+  <color symbol="C" value="3ff0ff" glow="True" name="punte luminose"/>
+  <color symbol="P" hidden="True" name="fronda possibile"/>
+  <color symbol="M" hidden="True" name="segno di una fronda"/>
+  <color symbol="X" value="2f8f6e" name="fronda nata"/>
+
+  <!-- Le fronde possibili: un arco dal ciuffo e un ricciolo in cima. -->
+  <line at="10 10 2" to="4 6 9" r="0.5" color="P"/>
+  <cylinder at="3 5 9" size="5 5 1" color="P"/>
+  <line at="10 10 2" to="16 7 11" r="0.5" color="P"/>
+  <cylinder at="17 6 11" size="5 5 1" color="P"/>
+  <line at="10 10 2" to="6 16 10" r="0.5" color="P"/>
+  <cylinder at="5 17 10" size="5 5 1" color="P"/>
+  <line at="10 10 2" to="15 15 8" r="0.5" color="P"/>
+  <cylinder at="16 16 8" size="5 5 1" color="P"/>
+  <line at="10 10 2" to="10 4 12" r="0.5" color="P"/>
+  <cylinder at="10 3 12" size="5 5 1" color="P"/>
+  <line at="10 10 2" to="3 11 7" r="0.5" color="P"/>
+  <cylinder at="2 12 7" size="4 4 1" color="P"/>
+  <line at="10 10 2" to="11 15 13" r="0.5" color="P"/>
+  <cylinder at="11 16 13" size="4 4 1" color="P"/>
+  <!-- Il ricciolo è un anello aperto. -->
+  <box at="3 5 9" size="1 1 1" color="B"/>
+  <box at="17 6 11" size="1 1 1" color="B"/>
+  <box at="5 17 10" size="1 1 1" color="B"/>
+  <box at="16 16 8" size="1 1 1" color="B"/>
+  <box at="10 3 12" size="1 1 1" color="B"/>
+  <box at="11 16 13" size="1 1 1" color="B"/>
+
+  <box at="3 6 9" size="1 1 1" color="M"/>
+  <box at="17 7 11" size="1 1 1" color="M"/>
+  <box at="5 18 10" size="1 1 1" color="M"/>
+  <box at="16 17 8" size="1 1 1" color="M"/>
+  <box at="10 4 12" size="1 1 1" color="M"/>
+  <box at="2 13 7" size="1 1 1" color="M"/>
+  <box at="11 17 13" size="1 1 1" color="M"/>
+
+  <!-- Il ciuffo. -->
+  <ellipsoid at="10 10 0" size="7 7 5" color="D"/>
+
+  <!-- Nascono alcune fronde: almeno una, le altre a caso. -->
+  <one steps="1" in="M" out="X"/>
+  <prl steps="1" in="M" out="X" p="0.5"/>
+  <all in="XP" out="XX" symmetry="(xyz)"/>
+  <all>
+    <rule in="P" out="B"/>
+    <rule in="M" out="B"/>
+  </all>
+  <prl steps="1" in="X" out="f" p="0.35"/>
+
+  <!-- Le foglioline lungo le fronde. -->
+  <one steps="70" in="BX" out="LX" symmetry="(xy)"/>
+  <one steps="40" in="BL" out="LL" symmetry="(xy)"/>
+  <prl steps="1">
+    <rule in="L" out="l" p="0.2"/>
+    <rule in="B L" out="C L" p="0.06"/>
+  </prl>
+</sequence>

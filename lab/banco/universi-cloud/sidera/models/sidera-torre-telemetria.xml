@@ -1,0 +1,81 @@
+<!-- Torre di telemetria di Sidera: un albero sottile su tre gambe, parabole a varie altezze e una luce che lampeggia in cima.
+     Quali parabole ci sono, e quanto è alta la cima, lo decide il seme. Cantiere 4C, a mano (Claude Code). -->
+<sequence values="BDdWwKkCQqMNX" size="20 20 60" symmetry="()" name="Torre di telemetria">
+  <color symbol="D" value="232833" name="metallo bagnato"/>
+  <color symbol="d" value="4b5466" name="traliccio"/>
+  <color symbol="W" value="c9d3de" name="parabola"/>
+  <color symbol="w" value="8d99a8" name="parabola in ombra"/>
+  <color symbol="K" value="ff3fb8" glow="True" name="luce magenta"/>
+  <color symbol="k" value="5a1d44" name="luce spenta"/>
+  <color symbol="C" value="35e8ff" glow="True" name="ricevitore ciano"/>
+  <color symbol="Q" hidden="True" name="parabola possibile"/>
+  <color symbol="q" hidden="True" name="cima possibile"/>
+  <color symbol="M" hidden="True" name="segno di una parabola"/>
+  <color symbol="N" hidden="True" name="segno della cima"/>
+  <color symbol="X" value="c9d3de" name="parabola montata"/>
+
+  <!-- Le tre gambe, il basamento, l'albero. -->
+  <cylinder at="10 10 0" size="9 9 2" color="D"/>
+  <line at="2 3 0" to="9 9 22" r="0.5" color="D"/>
+  <line at="18 3 0" to="11 9 22" r="0.5" color="D"/>
+  <line at="10 18 0" to="10 11 22" r="0.5" color="D"/>
+  <box at="10 10 0" size="3 3 48" color="d"/>
+  <box at="10 10 1" size="1 1 46" color="D"/>
+  <cylinder at="10 10 24" size="7 7 1" color="D"/>
+  <cylinder at="10 10 37" size="5 5 1" color="D"/>
+  <cylinder at="2 3 0" size="3 3 1" color="D"/>
+  <cylinder at="18 3 0" size="3 3 1" color="D"/>
+  <cylinder at="10 18 0" size="3 3 1" color="D"/>
+
+  <!-- Le parabole possibili: un braccio dall'albero e un disco. -->
+  <line at="11 10 17" to="14 10 17" r="0" color="Q" on="B"/>
+  <ellipsoid at="15 10 12" size="3 11 11" color="Q" on="B"/>
+  <line at="9 10 27" to="6 10 27" r="0" color="Q" on="B"/>
+  <ellipsoid at="5 10 22" size="3 11 11" color="Q" on="B"/>
+  <line at="10 11 35" to="10 14 35" r="0" color="Q" on="B"/>
+  <ellipsoid at="10 15 30" size="11 3 11" color="Q" on="B"/>
+  <line at="10 9 20" to="10 6 20" r="0" color="Q" on="B"/>
+  <ellipsoid at="10 5 16" size="9 3 9" color="Q" on="B"/>
+  <line at="11 10 42" to="13 10 42" r="0" color="Q" on="B"/>
+  <ellipsoid at="14 10 39" size="3 7 7" color="Q" on="B"/>
+  <line at="10 9 45" to="10 7 45" r="0" color="Q" on="B"/>
+  <ellipsoid at="10 6 42" size="7 3 7" color="Q" on="B"/>
+  <line at="9 10 10" to="7 10 10" r="0" color="Q" on="B"/>
+  <ellipsoid at="6 10 7" size="3 7 7" color="Q" on="B"/>
+  <box at="12 10 17" size="1 1 1" color="M"/>
+  <box at="8 10 27" size="1 1 1" color="M"/>
+  <box at="10 12 35" size="1 1 1" color="M"/>
+  <box at="10 8 20" size="1 1 1" color="M"/>
+  <box at="12 10 42" size="1 1 1" color="M"/>
+  <box at="10 8 45" size="1 1 1" color="M"/>
+  <box at="8 10 10" size="1 1 1" color="M"/>
+  <!-- La cima possibile. -->
+  <box at="10 10 48" size="1 1 9" color="q"/>
+  <box at="10 10 48" size="1 1 1" color="N"/>
+
+  <!-- Il seme sceglie parabole e cima. -->
+  <prl steps="1">
+    <rule in="M" out="X" p="0.5"/>
+    <rule in="N" out="d" p="0.5"/>
+  </prl>
+  <all in="XQ" out="XX" symmetry="(xyz)"/>
+  <all in="dq" out="dd" symmetry="(xyz)"/>
+  <all>
+    <rule in="Q" out="B"/>
+    <rule in="q" out="B"/>
+    <rule in="M" out="B"/>
+    <rule in="N" out="B"/>
+  </all>
+  <prl steps="1" in="X" out="w" p="0.3"/>
+  <prl steps="1" in="BX" out="BC" p="0.04" symmetry="(xy)"/>
+  <!-- La luce in cima. -->
+  <all in="B d" out="K d"/>
+  <one steps="1" in="B K" out="K K"/>
+
+  <animation name="lampeggio" frames="2">
+    <prl steps="1">
+      <rule in="K" out="k"/>
+      <rule in="k" out="K"/>
+    </prl>
+  </animation>
+</sequence>

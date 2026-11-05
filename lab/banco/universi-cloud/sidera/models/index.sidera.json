@@ -1,0 +1,188 @@
+{
+ "sidera-cupola": {
+  "classe": "edificio",
+  "nome": "Cupola idroponica",
+  "autore": "a mano (Claude Code, Cantiere 4C)"
+ },
+ "sidera-torre-telemetria": {
+  "classe": "monumento",
+  "nome": "Torre di telemetria",
+  "autore": "a mano (Claude Code, Cantiere 4C)"
+ },
+ "sidera-modulo-abitativo": {
+  "classe": "edificio",
+  "nome": "Modulo abitativo",
+  "autore": "a mano (Claude Code, Cantiere 4C)"
+ },
+ "sidera-drone": {
+  "classe": "oggetto",
+  "nome": "Drone da ricognizione",
+  "autore": "a mano (Claude Code, Cantiere 4C)"
+ },
+ "sidera-reattore": {
+  "classe": "mobile",
+  "nome": "Reattore a fusione",
+  "autore": "a mano (Claude Code, Cantiere 4C)"
+ },
+ "sidera-sintetizzatore": {
+  "classe": "mobile",
+  "nome": "Sintetizzatore molecolare",
+  "autore": "a mano (Claude Code, Cantiere 4C)"
+ },
+ "sidera-capsula-criogenica": {
+  "classe": "mobile",
+  "nome": "Capsula criogenica",
+  "autore": "a mano (Claude Code, Cantiere 4C)"
+ },
+ "sidera-serra-idroponica": {
+  "classe": "mobile",
+  "nome": "Rastrelliera idroponica",
+  "autore": "a mano (Claude Code, Cantiere 4C)"
+ },
+ "sidera-estrattore-plasma": {
+  "classe": "mobile",
+  "nome": "Estrattore di plasma",
+  "autore": "a mano (Claude Code, Cantiere 4C)"
+ },
+ "sidera-camera-equilibrio": {
+  "classe": "monumento",
+  "nome": "Camera di equilibrio",
+  "autore": "a mano (Claude Code, Cantiere 4C)"
+ },
+ "sidera-faro": {
+  "classe": "mobile",
+  "nome": "Faro di telemetria",
+  "autore": "a mano (Claude Code, Cantiere 4C)"
+ },
+ "sidera-felce-spirale": {
+  "classe": "cespuglio",
+  "nome": "Felce a spirale",
+  "autore": "a mano (Claude Code, Cantiere 4C)"
+ },
+ "sidera-albero-vetro": {
+  "classe": "albero",
+  "nome": "Albero di vetro",
+  "autore": "a mano (Claude Code, Cantiere 4C)"
+ },
+ "sidera-cristallo": {
+  "classe": "roccia",
+  "nome": "Grappolo di cristalli",
+  "autore": "a mano (Claude Code, Cantiere 4C)"
+ },
+ "sidera-colono": {
+  "classe": "persona",
+  "nome": "Colono",
+  "autore": "a mano (Claude Code, Cantiere 4C)"
+ },
+ "sidera-relitto": {
+  "classe": "monumento",
+  "nome": "Relitto antico",
+  "autore": "a mano (Claude Code, Cantiere 4C)"
+ },
+ "suono-sidera-pioggia": {
+  "classe": "suono",
+  "nome": "Pioggia sulla città",
+  "autore": "a mano (Claude Code, Cantiere 4C)",
+  "suono": {
+   "uso": "musica",
+   "ambienti": [
+    "piazza_neon",
+    "vicoli_pioggia",
+    "mercato_viadotti",
+    "quartiere_torri",
+    "spazioporto",
+    "base_ascensore"
+   ],
+   "momenti": [
+    "mattina",
+    "giorno"
+   ]
+  }
+ },
+ "suono-sidera-serre": {
+  "classe": "suono",
+  "nome": "Serre",
+  "autore": "a mano (Claude Code, Cantiere 4C)",
+  "suono": {
+   "uso": "musica",
+   "ambienti": [
+    "cupola",
+    "laboratorio",
+    "costa_allagata",
+    "cantiere_fusione"
+   ],
+   "momenti": [
+    "mattina",
+    "giorno"
+   ]
+  }
+ },
+ "suono-sidera-cristalli": {
+  "classe": "suono",
+  "nome": "Canyon di cristallo",
+  "autore": "a mano (Claude Code, Cantiere 4C)",
+  "suono": {
+   "uso": "musica",
+   "ambienti": [
+    "canyon_cristalli",
+    "cratere",
+    "relitti"
+   ]
+  }
+ },
+ "suono-sidera-sera": {
+  "classe": "suono",
+  "nome": "Sera",
+  "autore": "a mano (Claude Code, Cantiere 4C)",
+  "suono": {
+   "uso": "musica",
+   "momenti": [
+    "sera"
+   ]
+  }
+ },
+ "suono-sidera-notte": {
+  "classe": "suono",
+  "nome": "Notte di Sidera",
+  "autore": "a mano (Claude Code, Cantiere 4C)",
+  "suono": {
+   "uso": "musica",
+   "momenti": [
+    "notte"
+   ]
+  }
+ },
+ "suono-sidera-effetto-runa": {
+  "classe": "suono",
+  "nome": "Runa quantica",
+  "autore": "a mano (Claude Code, Cantiere 4C)",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "runa"
+   ]
+  }
+ },
+ "suono-sidera-effetto-incantesimo": {
+  "classe": "suono",
+  "nome": "Incantesimo",
+  "autore": "a mano (Claude Code, Cantiere 4C)",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "incantesimo"
+   ]
+  }
+ },
+ "suono-sidera-effetto-soglia": {
+  "classe": "suono",
+  "nome": "Soglia",
+  "autore": "a mano (Claude Code, Cantiere 4C)",
+  "suono": {
+   "uso": "effetto",
+   "effetti": [
+    "soglia"
+   ]
+  }
+ }
+}
