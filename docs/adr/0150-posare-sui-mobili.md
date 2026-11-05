@@ -1,4 +1,4 @@
-# ADR-0147 — Posare sui mobili: il ripiano vero, l'impronta, il componente `posato`
+# ADR-0150 — Posare sui mobili: il ripiano vero, l'impronta, il componente `posato`
 
 Data: 2026-11-05 · Stato: accettato (task T291 del backlog) · Riferimenti: testo dell'autore in `docs/userchats/to-do-2026-11-05.md` («Interazioni grafiche di oggetti»), ADR-0041 (ogni aspetto è un programma), ADR-0043 e T53b (i pavimenti delle forme), ADR-0058 e ADR-0059 (il kernel sul server, il client sottile), ADR-0109 (ciò che esce, a elenco), ADR-0136 (la versione del kernel), regola 10
 

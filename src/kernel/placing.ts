@@ -1,4 +1,4 @@
-// Putting things down on furniture (T291, ADR-0147). What the wanderer holds goes onto a shelf of the piece of furniture
+// Putting things down on furniture (T291, ADR-0150). What the wanderer holds goes onto a shelf of the piece of furniture
 // in front, where its shape fits. Pure functions on the true shapes of both: the floors of the furniture's form (`Levels`,
 // the actions done on it included) and the item's model seen from above. A shelf is a floor of the furniture above its
 // ground with room over it for the item; every column of the item stands on it, at the same height; the rectangle of the

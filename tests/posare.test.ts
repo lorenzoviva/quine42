@@ -1,4 +1,4 @@
-// T291 (ADR-0147): putting things down on furniture. Where a thing lies is decided by the true shapes of both (the furniture's
+// T291 (ADR-0150): putting things down on furniture. Where a thing lies is decided by the true shapes of both (the furniture's
 // floors, the item's model seen from above); it stays there in the save and for every wanderer, blocks nothing, and is not lost when
 // the furniture goes.
 

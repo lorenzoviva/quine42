@@ -3572,7 +3572,7 @@ export class Kernel {
     this.message(`Posi: ${this.itemInfo(taken.item).name}${taken.count > 1 ? ` ×${taken.count}` : ''}`);
   }
 
-  // --- Putting things down on furniture (T291, ADR-0147) ------------------------------------------
+  // --- Putting things down on furniture (T291, ADR-0150) ------------------------------------------
 
   /** A piece of furniture (T291): a thing of the world whose model is of the class `mobile` (a chest, a table, a bed, a barrel), not someone. */
   private isFurniture(id: Id): boolean {
