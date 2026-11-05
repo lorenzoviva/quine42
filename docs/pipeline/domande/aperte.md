@@ -16,3 +16,4 @@ L'elenco unico (richiesta dell'autore, 04/11): l'orchestratore lo tiene aggiorna
 
 ## Rimandate per tua scelta
 T45f a fine Fase I (progetto GCP, hosting, regione); T93 in Fase IV (Managed Payments).
+- **D41 (T284, T285, T286 — Le proposte del logo nel repository):** le bozze di T283 non hanno le scritte e le icone scelte perché `docs/design/logo/proposte/` (30 MB, tuoi file) non è committata e i worktree non la vedono; T284-T286 sono `in attesa` e si rifanno da capo partendo da scritta e icona estratte così come sono. A: committo io solo ciò che serve (`claude/Logo Videogioco Quine42/QUINE42 Logo.html`, 1,4 MB, `landing-tests/1-, 4-, 5-claude-2.png`, `votazioni.md`), stesso percorso. B: committi tu la cartella intera. C: niente commit, i task leggono dal worktree base (fragile, chi lo rilegge dopo non le trova). *Consigliato: A.*
