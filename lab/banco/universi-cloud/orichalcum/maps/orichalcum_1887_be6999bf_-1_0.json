@@ -1,0 +1,41 @@
+{
+ "plan": {
+  "place": {
+   "name": "Vicolo dei Caldaisti",
+   "description": "Il vicolo della Gilda dei Caldaisti: baracche di assi, mucchi di carbone e il fischio continuo delle valvole."
+  },
+  "layout": "baracche",
+  "objects": [
+   {
+    "module": "npc.caldaista",
+    "where": "fuori"
+   },
+   {
+    "module": "npc.caldaista",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.caldaia",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.bacheca-corporazione",
+    "where": "fuori"
+   },
+   {
+    "module": "item.chiave-inglese",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Carbone",
+   "Carbone",
+   "Caffè nero bollente"
+  ],
+  "fresh": [],
+  "runes": [
+   "carbone",
+   "pressione"
+  ]
+ }
+}

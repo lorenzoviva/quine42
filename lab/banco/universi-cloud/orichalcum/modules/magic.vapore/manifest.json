@@ -1,0 +1,423 @@
+{
+  "id": "magic.vapore",
+  "name": "Rune del vapore",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "Le rune magiche che si trovano nelle Città del Vapore oltre alle sette di sempre: dodici segni antichi e i loro incantesimi, e qualche formula che gli inventori hanno provato e riprovato.",
+  "runes": {
+    "vapore": {
+      "name": "Fumaria",
+      "glyph": "ᚤ",
+      "color": "#e8e4dc",
+      "element": "vapore",
+      "description": "la nube calda: avvolge, spinge piano, nasconde"
+    },
+    "ingranaggio": {
+      "name": "Rotara",
+      "glyph": "ᚥ",
+      "color": "#c8a04a",
+      "element": "meccanismo",
+      "description": "la ruota dentata: fa girare, apre ciò che è chiuso"
+    },
+    "ottone": {
+      "name": "Aurica",
+      "glyph": "ᚧ",
+      "color": "#d4a83a",
+      "element": "tempra",
+      "description": "il metallo giallo: indurisce, tempra"
+    },
+    "pressione": {
+      "name": "Torchia",
+      "glyph": "ᚫ",
+      "color": "#ff9f6a",
+      "element": "pressione",
+      "description": "la caldaia piena: preme, scaraventa"
+    },
+    "scintilla": {
+      "name": "Fulgia",
+      "glyph": "ᚬ",
+      "color": "#fff07a",
+      "element": "scintilla",
+      "description": "il lampo piccolo: accende, scocca"
+    },
+    "fuliggine": {
+      "name": "Nigrella",
+      "glyph": "ᚭ",
+      "color": "#4a4a52",
+      "element": "fumo",
+      "description": "il fumo nero: copre, rallenta"
+    },
+    "molla": {
+      "name": "Elastra",
+      "glyph": "ᚯ",
+      "color": "#9fd0c0",
+      "element": "slancio",
+      "description": "la molla carica: dà slancio"
+    },
+    "rame": {
+      "name": "Cuprina",
+      "glyph": "ᚵ",
+      "color": "#c8643a",
+      "element": "forza",
+      "description": "il filo rosso: ridà forza"
+    },
+    "quadrante": {
+      "name": "Horaria",
+      "glyph": "ᚶ",
+      "color": "#f2e6c0",
+      "element": "tempo",
+      "description": "il quadrante: fa durare l'attimo"
+    },
+    "magnete": {
+      "name": "Ferrata",
+      "glyph": "ᚻ",
+      "color": "#8a7aff",
+      "element": "attrazione",
+      "description": "la calamita: attira il ferro"
+    },
+    "carbone": {
+      "name": "Antrace",
+      "glyph": "ᛄ",
+      "color": "#5a4030",
+      "element": "brace",
+      "description": "la brace: arde a lungo"
+    },
+    "nebbia": {
+      "name": "Caligo",
+      "glyph": "ᛅ",
+      "color": "#b8c4cc",
+      "element": "nebbia",
+      "description": "la nebbia bassa: disseta, inumidisce"
+    }
+  },
+  "spells": {
+    "vapore": {
+      "name": "Sbuffo",
+      "description": "Un vapore tiepido ti avvolge e spinge via ciò che hai davanti.",
+      "cost": 8,
+      "effects": [
+        {
+          "tipo": "spingi",
+          "forza": 3
+        },
+        {
+          "tipo": "stato",
+          "nome": "nel vapore",
+          "durata": 20,
+          "velocita": 1.2
+        }
+      ]
+    },
+    "ingranaggio": {
+      "name": "Ingrano",
+      "description": "La serratura davanti a te gira da sola: ciò che è chiuso si apre.",
+      "cost": 9,
+      "effects": [
+        {
+          "tipo": "apri"
+        }
+      ]
+    },
+    "ottone": {
+      "name": "Tempra",
+      "description": "La pelle si fa dura come l'ottone per un minuto.",
+      "cost": 10,
+      "effects": [
+        {
+          "tipo": "stato",
+          "nome": "tempra d'ottone",
+          "durata": 60,
+          "peso": 5
+        },
+        {
+          "tipo": "bisogni",
+          "salute": 8
+        }
+      ]
+    },
+    "pressione": {
+      "name": "Sfogo",
+      "description": "Una spinta come lo sfogo di una valvola scaraventa via ciò che hai davanti.",
+      "cost": 12,
+      "effects": [
+        {
+          "tipo": "spingi",
+          "forza": 8
+        }
+      ]
+    },
+    "scintilla": {
+      "name": "Scocca",
+      "description": "Una scintilla salta davanti a te e accende ciò che è secco.",
+      "cost": 6,
+      "effects": [
+        {
+          "tipo": "fuoco",
+          "raggio": 0.5,
+          "durata": 3
+        },
+        {
+          "tipo": "luce",
+          "raggio": 2,
+          "durata": 10
+        }
+      ]
+    },
+    "fuliggine": {
+      "name": "Fumata",
+      "description": "Una fuliggine fitta ti copre: passi inosservato, ma più lento.",
+      "cost": 7,
+      "effects": [
+        {
+          "tipo": "stato",
+          "nome": "nella fuliggine",
+          "durata": 40,
+          "velocita": 0.85
+        }
+      ]
+    },
+    "molla": {
+      "name": "Balzo",
+      "description": "Il passo prende slancio, come con una molla negli stivali.",
+      "cost": 8,
+      "effects": [
+        {
+          "tipo": "stato",
+          "nome": "passo a molla",
+          "durata": 30,
+          "velocita": 1.5
+        }
+      ]
+    },
+    "rame": {
+      "name": "Filo rosso",
+      "description": "Un calore ti scorre nelle braccia e torna la forza.",
+      "cost": 9,
+      "effects": [
+        {
+          "tipo": "bisogni",
+          "energia": 20
+        }
+      ]
+    },
+    "quadrante": {
+      "name": "Attimo lungo",
+      "description": "L'attimo si allunga: ti senti riposato e meno affamato.",
+      "cost": 12,
+      "effects": [
+        {
+          "tipo": "bisogni",
+          "energia": 12,
+          "fame": 10
+        }
+      ]
+    },
+    "magnete": {
+      "name": "Calamita",
+      "description": "Limatura e chiodi ti saltano addosso: per mezzo minuto pesi di più.",
+      "cost": 6,
+      "effects": [
+        {
+          "tipo": "stato",
+          "nome": "calamitato",
+          "durata": 30,
+          "peso": 6
+        },
+        {
+          "tipo": "crea_oggetto",
+          "oggetto": "item.limatura-ferro",
+          "quantita": 1
+        }
+      ]
+    },
+    "carbone": {
+      "name": "Brace",
+      "description": "Una brace arde davanti a te, a lungo.",
+      "cost": 12,
+      "effects": [
+        {
+          "tipo": "fuoco",
+          "raggio": 1,
+          "durata": 16
+        }
+      ]
+    },
+    "nebbia": {
+      "name": "Rugiada",
+      "description": "Una nebbia fresca sale dal suolo e ti disseta.",
+      "cost": 8,
+      "effects": [
+        {
+          "tipo": "bisogni",
+          "sete": 25
+        }
+      ]
+    },
+    "carbone pressione": {
+      "name": "Colpo di caldaia",
+      "description": "La brace e la pressione insieme: una vampata spinge via tutto attorno.",
+      "cost": 18,
+      "effects": [
+        {
+          "tipo": "spingi",
+          "forza": 10
+        },
+        {
+          "tipo": "fuoco",
+          "raggio": 1,
+          "durata": 4
+        }
+      ]
+    },
+    "ingranaggio molla": {
+      "name": "Carica",
+      "description": "La molla si carica sull'ingranaggio: il passo si fa lungo e veloce.",
+      "cost": 14,
+      "effects": [
+        {
+          "tipo": "stato",
+          "nome": "passo a molla",
+          "durata": 45,
+          "velocita": 1.9
+        }
+      ]
+    },
+    "rame scintilla": {
+      "name": "Arco di rame",
+      "description": "Una luce viva corre lungo un filo invisibile e resta accesa.",
+      "cost": 12,
+      "effects": [
+        {
+          "tipo": "luce",
+          "raggio": 6,
+          "durata": 120
+        }
+      ]
+    },
+    "nebbia vapore": {
+      "name": "Coltre",
+      "description": "Nebbia e vapore si chiudono attorno a te come un guscio.",
+      "cost": 12,
+      "effects": [
+        {
+          "tipo": "scudo",
+          "durata": 25
+        }
+      ]
+    },
+    "ottone ottone": {
+      "name": "Doppia tempra",
+      "description": "L'ottone due volte: un guscio duro e un poco di salute.",
+      "cost": 16,
+      "effects": [
+        {
+          "tipo": "scudo",
+          "durata": 40
+        },
+        {
+          "tipo": "bisogni",
+          "salute": 10
+        }
+      ]
+    },
+    "fuliggine vapore fuliggine": {
+      "name": "Notte di fabbrica",
+      "description": "Fumo, vapore e fumo: l'aria si fa nera e calda, e nessuno ti vede passare.",
+      "cost": 20,
+      "effects": [
+        {
+          "tipo": "stato",
+          "nome": "nella fuliggine",
+          "durata": 90,
+          "velocita": 1.1
+        },
+        {
+          "tipo": "messaggio",
+          "testo": "Attorno a te l'aria si fa nera e calda come in una sala caldaie di notte."
+        }
+      ]
+    }
+  },
+  "items": [
+    {
+      "id": "item.limatura-ferro",
+      "name": "Limatura di ferro",
+      "description": "Un pugno di limatura grigia che si attacca a tutto.",
+      "category": "materiale",
+      "weight": 0.1,
+      "stack": 20,
+      "tags": [
+        "materiale",
+        "metallo",
+        "ferro"
+      ],
+      "glyph": "∴",
+      "color": "#8a8a92",
+      "aspetto": "a small pile of grey iron filings"
+    }
+  ],
+  "loot": {
+    "magia-vapore": {
+      "rolls": [
+        1,
+        1
+      ],
+      "entries": [
+        {
+          "item": "item.cristallo-magico",
+          "weight": 4,
+          "min": 1,
+          "max": 2
+        },
+        {
+          "item": "rune:vapore",
+          "weight": 1
+        },
+        {
+          "item": "rune:ingranaggio",
+          "weight": 1
+        },
+        {
+          "item": "rune:ottone",
+          "weight": 1
+        },
+        {
+          "item": "rune:pressione",
+          "weight": 1
+        },
+        {
+          "item": "rune:scintilla",
+          "weight": 1
+        },
+        {
+          "item": "rune:fuliggine",
+          "weight": 1
+        },
+        {
+          "item": "rune:molla",
+          "weight": 1
+        },
+        {
+          "item": "rune:rame",
+          "weight": 1
+        },
+        {
+          "item": "rune:quadrante",
+          "weight": 1
+        },
+        {
+          "item": "rune:magnete",
+          "weight": 1
+        },
+        {
+          "item": "rune:carbone",
+          "weight": 1
+        },
+        {
+          "item": "rune:nebbia",
+          "weight": 1
+        }
+      ]
+    }
+  }
+}

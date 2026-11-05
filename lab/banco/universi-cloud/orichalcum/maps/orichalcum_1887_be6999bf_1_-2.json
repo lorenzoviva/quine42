@@ -1,0 +1,37 @@
+{
+ "plan": {
+  "place": {
+   "name": "Ingresso delle Miniere di Solfara",
+   "description": "L'imbocco delle miniere nella roccia rossa: binari dei carrelli, pozze d'acqua calda che fumano e il casotto della squadra."
+  },
+  "layout": "miniera_termale",
+  "objects": [
+   {
+    "module": "npc.cartografo-miniera",
+    "where": "fuori"
+   },
+   {
+    "module": "npc.cartografo-miniera",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.carrello-minerario",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.lampione-gas",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Minerale rosso di Solfara",
+   "Uova sode della sorgente",
+   "Bottiglia d'acqua termale"
+  ],
+  "fresh": [],
+  "runes": [
+   "terra",
+   "nebbia"
+  ]
+ }
+}

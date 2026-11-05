@@ -1,0 +1,36 @@
+{
+ "plan": {
+  "place": {
+   "name": "Torre d'Ormeggio di Vetta Bruna",
+   "description": "La torre di ferro sulla collina di levante, con i cavi tesi e il dirigibile Rondine ormeggiato, bucato su un fianco."
+  },
+  "layout": "torre_ormeggio",
+  "objects": [
+   {
+    "module": "npc.aeronauta",
+    "where": "fuori"
+   },
+   {
+    "module": "npc.aeronauta",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.dirigibile-attracco",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.telegrafo-pneumatico",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Tubo di rame",
+   "Benda di garza"
+  ],
+  "fresh": [],
+  "runes": [
+   "vento",
+   "vapore"
+  ]
+ }
+}

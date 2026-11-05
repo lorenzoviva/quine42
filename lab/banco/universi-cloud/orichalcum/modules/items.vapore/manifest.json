@@ -1,0 +1,1178 @@
+{
+  "id": "items.vapore",
+  "name": "Oggetti delle Città del Vapore",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "Le cose di tutti i giorni delle Città del Vapore: il cibo dei turni, gli attrezzi delle botteghe, i metalli delle fonderie, le leghe e gli ingranaggi che si fanno a mano, e le tabelle di ciò che si trova nelle casse, nelle officine e nelle miniere.",
+  "items": [
+    {
+      "id": "item.pane-nero",
+      "name": "Pane nero di segale",
+      "description": "Una pagnotta scura e pesante, la colazione dei turni di notte.",
+      "category": "cibo",
+      "weight": 0.4,
+      "stack": 5,
+      "tags": [
+        "cibo",
+        "cucina",
+        "operaio"
+      ],
+      "glyph": "ò",
+      "color": "#5a3e28",
+      "aspetto": "a dark round rye loaf",
+      "effects": {
+        "hunger": 28
+      }
+    },
+    {
+      "id": "item.uova-sode",
+      "name": "Uova sode della sorgente",
+      "description": "Uova cotte nell'acqua calda di Solfara, ancora tiepide.",
+      "category": "cibo",
+      "weight": 0.2,
+      "stack": 6,
+      "tags": [
+        "cibo",
+        "miniera"
+      ],
+      "glyph": "o",
+      "color": "#f0e8d0",
+      "aspetto": "two boiled eggs in a tin cup",
+      "effects": {
+        "hunger": 18
+      }
+    },
+    {
+      "id": "item.salsiccia",
+      "name": "Salsiccia affumicata",
+      "description": "Affumicata sopra i comignoli delle Fonderie, dicono, e infatti sa di carbone.",
+      "category": "cibo",
+      "weight": 0.3,
+      "stack": 4,
+      "tags": [
+        "cibo",
+        "cucina"
+      ],
+      "glyph": "ò",
+      "color": "#9a3a2a",
+      "aspetto": "a smoked sausage on a string",
+      "effects": {
+        "hunger": 30
+      }
+    },
+    {
+      "id": "item.zuppa-orzo",
+      "name": "Gavetta di zuppa d'orzo",
+      "description": "La zuppa delle mense di fabbrica, densa e salata.",
+      "category": "cibo",
+      "weight": 0.6,
+      "stack": 2,
+      "tags": [
+        "cibo",
+        "cucina",
+        "operaio"
+      ],
+      "glyph": "ò",
+      "color": "#c8a868",
+      "aspetto": "a dented tin mess kit with barley soup",
+      "effects": {
+        "hunger": 35,
+        "thirst": 10
+      }
+    },
+    {
+      "id": "item.mela-renetta",
+      "name": "Mela renetta",
+      "description": "Una mela rugosa delle Campagne delle Trebbie.",
+      "category": "cibo",
+      "weight": 0.2,
+      "stack": 10,
+      "tags": [
+        "cibo",
+        "frutta",
+        "campagna"
+      ],
+      "glyph": "ò",
+      "color": "#b8c050",
+      "aspetto": "a wrinkled green-yellow apple",
+      "effects": {
+        "hunger": 10,
+        "thirst": 5
+      }
+    },
+    {
+      "id": "item.caffe-nero",
+      "name": "Caffè nero bollente",
+      "description": "In una tazza di latta: amaro, forte, tiene svegli fino all'alba.",
+      "category": "bevanda",
+      "weight": 0.3,
+      "stack": 3,
+      "tags": [
+        "bevanda",
+        "cucina",
+        "operaio"
+      ],
+      "glyph": "u",
+      "color": "#3a2418",
+      "aspetto": "a tin mug of black coffee",
+      "effects": {
+        "thirst": 12,
+        "energy": 18
+      }
+    },
+    {
+      "id": "item.acqua-termale",
+      "name": "Bottiglia d'acqua termale",
+      "description": "Acqua di Solfara, calda e un po' ferrosa, in una bottiglia col tappo a molla.",
+      "category": "bevanda",
+      "weight": 0.5,
+      "stack": 4,
+      "tags": [
+        "bevanda",
+        "miniera"
+      ],
+      "glyph": "u",
+      "color": "#9ac8c8",
+      "aspetto": "a swing-top glass bottle of mineral water",
+      "effects": {
+        "thirst": 30
+      }
+    },
+    {
+      "id": "item.birra-scura",
+      "name": "Birra scura",
+      "description": "La birra delle osterie dello scalo, scura come il fumo.",
+      "category": "bevanda",
+      "weight": 0.5,
+      "stack": 4,
+      "tags": [
+        "bevanda",
+        "osteria"
+      ],
+      "glyph": "u",
+      "color": "#5a3418",
+      "aspetto": "a brown glass bottle of dark beer",
+      "effects": {
+        "thirst": 20,
+        "energy": -4
+      }
+    },
+    {
+      "id": "item.unguento-ustioni",
+      "name": "Unguento per le ustioni",
+      "description": "Un vasetto di grasso e di erbe: lo tengono in tasca tutti i caldaisti.",
+      "category": "medicina",
+      "weight": 0.1,
+      "stack": 5,
+      "tags": [
+        "medicina",
+        "fonderia"
+      ],
+      "glyph": "+",
+      "color": "#d8e0a0",
+      "aspetto": "a small tin of yellow ointment",
+      "effects": {
+        "health": 25
+      }
+    },
+    {
+      "id": "item.benda",
+      "name": "Benda di garza",
+      "description": "Garza pulita arrotolata stretta.",
+      "category": "medicina",
+      "weight": 0.05,
+      "stack": 10,
+      "tags": [
+        "medicina"
+      ],
+      "glyph": "+",
+      "color": "#f0f0e8",
+      "aspetto": "a rolled white gauze bandage",
+      "effects": {
+        "health": 12
+      }
+    },
+    {
+      "id": "item.cacciavite-fine",
+      "name": "Cacciavite fine",
+      "description": "Un cacciavite sottile come un ago, per le viti dei quadranti.",
+      "category": "attrezzo",
+      "weight": 0.1,
+      "stack": 1,
+      "tags": [
+        "attrezzo",
+        "orologiaio",
+        "bottega"
+      ],
+      "glyph": "/",
+      "color": "#b8b8c0",
+      "aspetto": "a thin watchmaker screwdriver"
+    },
+    {
+      "id": "item.pinze-colata",
+      "name": "Pinze da colata",
+      "description": "Lunghe pinze di ferro per prendere i crogioli caldi.",
+      "category": "attrezzo",
+      "weight": 1.5,
+      "stack": 1,
+      "tags": [
+        "attrezzo",
+        "fonderia",
+        "metallo"
+      ],
+      "glyph": "⌐",
+      "color": "#5a5a60",
+      "aspetto": "long iron crucible tongs",
+      "equippable": true
+    },
+    {
+      "id": "item.lente-orologiaio",
+      "name": "Lente d'orologiaio",
+      "description": "Una lente da incastrare nell'occhio: i denti degli ingranaggi diventano grandi come dita.",
+      "category": "attrezzo",
+      "weight": 0.05,
+      "stack": 1,
+      "tags": [
+        "attrezzo",
+        "orologiaio",
+        "bottega"
+      ],
+      "glyph": "○",
+      "color": "#c8d8e0",
+      "aspetto": "a black loupe eyeglass"
+    },
+    {
+      "id": "item.oliatore",
+      "name": "Oliatore",
+      "description": "Un bricco a becco lungo pieno d'olio di macchina.",
+      "category": "attrezzo",
+      "weight": 0.3,
+      "stack": 1,
+      "tags": [
+        "attrezzo",
+        "officina",
+        "macchina"
+      ],
+      "glyph": "ı",
+      "color": "#b88a3a",
+      "aspetto": "a brass oil can with a long spout",
+      "equippable": true
+    },
+    {
+      "id": "item.piccone",
+      "name": "Piccone da minatore",
+      "description": "Il manico è consumato dove lo stringono le mani.",
+      "category": "attrezzo",
+      "weight": 2.5,
+      "stack": 1,
+      "tags": [
+        "attrezzo",
+        "miniera",
+        "scavo"
+      ],
+      "glyph": "⚒",
+      "color": "#7a6a5a",
+      "aspetto": "a miner pickaxe with worn handle",
+      "equippable": true
+    },
+    {
+      "id": "item.carbone",
+      "name": "Carbone",
+      "description": "Un pezzo di carbon fossile lucido, che sporca le dita.",
+      "category": "materiale",
+      "weight": 0.4,
+      "stack": 20,
+      "tags": [
+        "materiale",
+        "carbone",
+        "combustibile",
+        "caldaia"
+      ],
+      "glyph": "●",
+      "color": "#2a2a2e",
+      "aspetto": "a lump of shiny black coal"
+    },
+    {
+      "id": "item.minerale-rosso",
+      "name": "Minerale rosso di Solfara",
+      "description": "Una pietra pesante color ruggine, con venature che luccicano.",
+      "category": "materiale",
+      "weight": 1,
+      "stack": 10,
+      "tags": [
+        "materiale",
+        "minerale",
+        "miniera"
+      ],
+      "glyph": "◆",
+      "color": "#a8442a",
+      "aspetto": "a heavy rust-red ore chunk with glints"
+    },
+    {
+      "id": "item.lingotto-rame",
+      "name": "Lingotto di rame",
+      "description": "Rame rosso, ancora con il marchio del porto.",
+      "category": "materiale",
+      "weight": 1.2,
+      "stack": 10,
+      "tags": [
+        "materiale",
+        "metallo",
+        "rame"
+      ],
+      "glyph": "▬",
+      "color": "#c8643a",
+      "aspetto": "a copper ingot"
+    },
+    {
+      "id": "item.lingotto-zinco",
+      "name": "Pane di zinco",
+      "description": "Un pane di zinco grigio azzurro, per fare l'ottone.",
+      "category": "materiale",
+      "weight": 1,
+      "stack": 10,
+      "tags": [
+        "materiale",
+        "metallo"
+      ],
+      "glyph": "▬",
+      "color": "#9aa8b0",
+      "aspetto": "a grey-blue zinc slab"
+    },
+    {
+      "id": "item.lingotto-oricalco",
+      "name": "Lingotto d'oricalco",
+      "description": "La lega della città: rossa e dorata insieme, calda al tatto anche d'inverno.",
+      "category": "materiale",
+      "weight": 1.4,
+      "stack": 10,
+      "tags": [
+        "materiale",
+        "metallo",
+        "oricalco",
+        "prezioso"
+      ],
+      "glyph": "▬",
+      "color": "#e08a3a",
+      "aspetto": "a red-gold orichalcum ingot with a faint warm sheen"
+    },
+    {
+      "id": "item.lamina-ottone",
+      "name": "Lamina d'ottone",
+      "description": "Una lamina gialla e sottile, da tagliare e piegare.",
+      "category": "materiale",
+      "weight": 0.3,
+      "stack": 10,
+      "tags": [
+        "materiale",
+        "metallo",
+        "ottone",
+        "bottega"
+      ],
+      "glyph": "▭",
+      "color": "#d4a83a",
+      "aspetto": "a thin sheet of yellow brass"
+    },
+    {
+      "id": "item.ingranaggio",
+      "name": "Ingranaggio d'ottone",
+      "description": "Una ruota dentata con dodici denti e un foro quadrato.",
+      "category": "materiale",
+      "weight": 0.1,
+      "stack": 20,
+      "tags": [
+        "materiale",
+        "ottone",
+        "meccanismo",
+        "bottega"
+      ],
+      "glyph": "⚙",
+      "color": "#c8a04a",
+      "aspetto": "a small brass gear with twelve teeth"
+    },
+    {
+      "id": "item.molla-acciaio",
+      "name": "Molla d'acciaio",
+      "description": "Una molla a spirale che salta via appena la lasci.",
+      "category": "materiale",
+      "weight": 0.05,
+      "stack": 20,
+      "tags": [
+        "materiale",
+        "meccanismo",
+        "bottega"
+      ],
+      "glyph": "§",
+      "color": "#9fb0b8",
+      "aspetto": "a coiled steel spring"
+    },
+    {
+      "id": "item.viti",
+      "name": "Viti e bulloni",
+      "description": "Un pugno di viti, dadi e bulloni misti.",
+      "category": "materiale",
+      "weight": 0.1,
+      "stack": 30,
+      "tags": [
+        "materiale",
+        "metallo",
+        "officina"
+      ],
+      "glyph": "∷",
+      "color": "#8a8a90",
+      "aspetto": "a handful of mixed screws and bolts"
+    },
+    {
+      "id": "item.tubo-rame",
+      "name": "Tubo di rame",
+      "description": "Un tratto di tubo con i raccordi filettati.",
+      "category": "materiale",
+      "weight": 0.6,
+      "stack": 6,
+      "tags": [
+        "materiale",
+        "rame",
+        "caldaia",
+        "officina"
+      ],
+      "glyph": "═",
+      "color": "#c87040",
+      "aspetto": "a short copper pipe with threaded ends"
+    },
+    {
+      "id": "item.vetro-manometro",
+      "name": "Vetro da manometro",
+      "description": "Un disco di vetro bombato, senza un graffio.",
+      "category": "materiale",
+      "weight": 0.05,
+      "stack": 10,
+      "tags": [
+        "materiale",
+        "vetro",
+        "orologiaio"
+      ],
+      "glyph": "○",
+      "color": "#d8eef0",
+      "aspetto": "a round domed glass disc"
+    },
+    {
+      "id": "item.straccio",
+      "name": "Straccio unto",
+      "description": "Uno straccio pieno d'olio e di fuliggine.",
+      "category": "materiale",
+      "weight": 0.1,
+      "stack": 10,
+      "tags": [
+        "materiale",
+        "officina"
+      ],
+      "glyph": "≈",
+      "color": "#6a5a48",
+      "aspetto": "an oily grey rag"
+    },
+    {
+      "id": "item.lanterna-carburo",
+      "name": "Lanterna a carburo",
+      "description": "Fa una luce bianca e un odore d'aglio: i minatori non ne fanno a meno.",
+      "category": "luce",
+      "weight": 0.8,
+      "stack": 1,
+      "tags": [
+        "luce",
+        "miniera"
+      ],
+      "glyph": "♦",
+      "color": "#f0d880",
+      "aspetto": "a brass carbide miner lamp with a reflector",
+      "equippable": true,
+      "bonus": {
+        "luce": 5
+      }
+    },
+    {
+      "id": "item.candela-sego",
+      "name": "Candela di sego",
+      "description": "Fa più fumo che luce, ma costa poco.",
+      "category": "luce",
+      "weight": 0.1,
+      "stack": 6,
+      "tags": [
+        "luce",
+        "casa"
+      ],
+      "glyph": "ı",
+      "color": "#e8dcb0",
+      "aspetto": "a short tallow candle",
+      "equippable": true,
+      "bonus": {
+        "luce": 2
+      }
+    },
+    {
+      "id": "item.occhialoni",
+      "name": "Occhialoni da fonderia",
+      "description": "Lenti affumicate in una montatura di cuoio e ottone.",
+      "category": "vestiario",
+      "weight": 0.2,
+      "stack": 1,
+      "tags": [
+        "vestiario",
+        "fonderia",
+        "testa"
+      ],
+      "glyph": "∞",
+      "color": "#5a4a3a",
+      "aspetto": "brass and leather foundry goggles",
+      "equippable": true,
+      "slot": "testa",
+      "bonus": {
+        "difesa": 1
+      }
+    },
+    {
+      "id": "item.grembiule-cuoio",
+      "name": "Grembiule di cuoio",
+      "description": "Il grembiule dei fonditori, spesso un dito e bruciacchiato.",
+      "category": "vestiario",
+      "weight": 1.2,
+      "stack": 1,
+      "tags": [
+        "vestiario",
+        "fonderia",
+        "corpo"
+      ],
+      "glyph": "Ω",
+      "color": "#7a4a2a",
+      "aspetto": "a thick scorched leather apron",
+      "equippable": true,
+      "slot": "corpo",
+      "bonus": {
+        "difesa": 2,
+        "calore": 2
+      }
+    },
+    {
+      "id": "item.soldo-rame",
+      "name": "Soldo di rame",
+      "description": "La moneta della città: dieci soldi fanno una lira d'ottone.",
+      "category": "varie",
+      "weight": 0.01,
+      "stack": 99,
+      "tags": [
+        "varie",
+        "moneta",
+        "rame"
+      ],
+      "glyph": "¢",
+      "color": "#c8643a",
+      "aspetto": "a small copper coin"
+    },
+    {
+      "id": "item.capsula-pneumatica",
+      "name": "Capsula d'ottone",
+      "description": "La capsula del telegrafo pneumatico, con il tappo a vite.",
+      "category": "varie",
+      "weight": 0.2,
+      "stack": 5,
+      "tags": [
+        "varie",
+        "ottone",
+        "telegrafo"
+      ],
+      "glyph": "▮",
+      "color": "#d4a83a",
+      "aspetto": "a brass pneumatic tube capsule"
+    },
+    {
+      "id": "item.biglietto-linea",
+      "name": "Biglietto della linea alta",
+      "description": "Un cartoncino verde forato: vale una corsa sulla ferrovia sospesa.",
+      "category": "varie",
+      "weight": 0.01,
+      "stack": 10,
+      "tags": [
+        "varie",
+        "ferrovia"
+      ],
+      "glyph": "▭",
+      "color": "#5a9a5a",
+      "aspetto": "a green punched train ticket"
+    },
+    {
+      "id": "item.brevetto-lenti",
+      "name": "Brevetto dell'ingegner Lenti",
+      "description": "Fogli piegati e bruciacchiati, pieni di disegni di valvole: in fondo c'è la firma di Amedeo Lenti.",
+      "category": "varie",
+      "weight": 0.1,
+      "stack": 1,
+      "tags": [
+        "varie",
+        "carta",
+        "prezioso",
+        "brevetto"
+      ],
+      "glyph": "▤",
+      "color": "#e8dcb8",
+      "aspetto": "folded scorched papers with valve drawings"
+    },
+    {
+      "id": "item.manometro-rotto",
+      "name": "Manometro rotto",
+      "description": "La lancetta è piegata e il vetro è incrinato.",
+      "category": "varie",
+      "weight": 0.4,
+      "stack": 3,
+      "tags": [
+        "varie",
+        "meccanismo",
+        "orologiaio"
+      ],
+      "glyph": "◎",
+      "color": "#a89060",
+      "aspetto": "a broken brass pressure gauge with cracked glass"
+    },
+    {
+      "id": "item.manometro",
+      "name": "Manometro tarato",
+      "description": "Un manometro nuovo, con la lancetta che trema sullo zero.",
+      "category": "attrezzo",
+      "weight": 0.4,
+      "stack": 3,
+      "tags": [
+        "attrezzo",
+        "meccanismo",
+        "caldaia"
+      ],
+      "glyph": "◎",
+      "color": "#d4a83a",
+      "aspetto": "a brass pressure gauge with a white dial"
+    },
+    {
+      "id": "item.orologio-tasca",
+      "name": "Orologio da tasca",
+      "description": "Un orologio d'ottone che ticchetta forte, con il coperchio a scatto.",
+      "category": "varie",
+      "weight": 0.15,
+      "stack": 1,
+      "tags": [
+        "varie",
+        "meccanismo",
+        "prezioso",
+        "orologiaio"
+      ],
+      "glyph": "◷",
+      "color": "#d4b04a",
+      "aspetto": "a brass pocket watch with a snap lid"
+    },
+    {
+      "id": "item.chiave-ghisa",
+      "name": "Chiave di ghisa",
+      "description": "Una chiave lunga una spanna, fredda e pesante, con un diciassette inciso sull'anello.",
+      "category": "varie",
+      "weight": 0.4,
+      "stack": 1,
+      "tags": [
+        "varie",
+        "chiave",
+        "miniera"
+      ],
+      "glyph": "⚷",
+      "color": "#4e5258",
+      "aspetto": "a long heavy cast iron key"
+    },
+    {
+      "id": "item.mappa-cunicoli",
+      "name": "Mappa dei cunicoli",
+      "description": "Un foglio di carta oleata con i cunicoli di Solfara disegnati a matita.",
+      "category": "varie",
+      "weight": 0.05,
+      "stack": 1,
+      "tags": [
+        "varie",
+        "carta",
+        "miniera"
+      ],
+      "glyph": "▤",
+      "color": "#d8c8a0",
+      "aspetto": "an oiled paper map with pencil tunnels"
+    },
+    {
+      "id": "item.borsa-attrezzi",
+      "name": "Borsa degli attrezzi",
+      "description": "Una borsa di tela grossa con le tasche per ogni chiave.",
+      "category": "contenitore",
+      "weight": 0.6,
+      "stack": 1,
+      "tags": [
+        "contenitore",
+        "officina"
+      ],
+      "glyph": "◘",
+      "color": "#7a6a4a",
+      "aspetto": "a heavy canvas tool bag",
+      "container": {
+        "size": 6
+      }
+    }
+  ],
+  "recipes": [
+    {
+      "id": "ricetta.lega-oricalco",
+      "name": "Lega d'oricalco",
+      "inputs": [
+        {
+          "item": "item.minerale-rosso",
+          "count": 2
+        },
+        {
+          "item": "item.lingotto-rame",
+          "count": 1
+        },
+        {
+          "item": "item.carbone",
+          "count": 1
+        }
+      ],
+      "tools": [
+        "item.pinze-colata"
+      ],
+      "output": {
+        "item": "item.lingotto-oricalco",
+        "count": 1
+      }
+    },
+    {
+      "id": "ricetta.lamina-ottone",
+      "name": "Lamina d'ottone",
+      "inputs": [
+        {
+          "item": "item.lingotto-rame",
+          "count": 1
+        },
+        {
+          "item": "item.lingotto-zinco",
+          "count": 1
+        }
+      ],
+      "tools": [
+        "item.pinze-colata"
+      ],
+      "output": {
+        "item": "item.lamina-ottone",
+        "count": 3
+      }
+    },
+    {
+      "id": "ricetta.ingranaggio",
+      "name": "Ingranaggi d'ottone",
+      "inputs": [
+        {
+          "item": "item.lamina-ottone",
+          "count": 1
+        },
+        {
+          "item": "item.viti",
+          "count": 1
+        }
+      ],
+      "tools": [
+        "item.cacciavite-fine"
+      ],
+      "output": {
+        "item": "item.ingranaggio",
+        "count": 2
+      }
+    },
+    {
+      "id": "ricetta.molla",
+      "name": "Molla d'acciaio",
+      "inputs": [
+        {
+          "item": "item.limatura-ferro",
+          "count": 3
+        }
+      ],
+      "tools": [
+        "item.pinze-colata"
+      ],
+      "output": {
+        "item": "item.molla-acciaio",
+        "count": 1
+      }
+    },
+    {
+      "id": "ricetta.manometro",
+      "name": "Manometro tarato",
+      "inputs": [
+        {
+          "item": "item.vetro-manometro",
+          "count": 1
+        },
+        {
+          "item": "item.ingranaggio",
+          "count": 1
+        },
+        {
+          "item": "item.molla-acciaio",
+          "count": 1
+        }
+      ],
+      "tools": [
+        "item.cacciavite-fine"
+      ],
+      "output": {
+        "item": "item.manometro",
+        "count": 1
+      }
+    },
+    {
+      "id": "ricetta.ripara-manometro",
+      "name": "Riparare un manometro",
+      "inputs": [
+        {
+          "item": "item.manometro-rotto",
+          "count": 1
+        },
+        {
+          "item": "item.vetro-manometro",
+          "count": 1
+        }
+      ],
+      "tools": [
+        "item.cacciavite-fine",
+        "item.lente-orologiaio"
+      ],
+      "output": {
+        "item": "item.manometro",
+        "count": 1
+      }
+    },
+    {
+      "id": "ricetta.orologio",
+      "name": "Orologio da tasca",
+      "inputs": [
+        {
+          "item": "item.ingranaggio",
+          "count": 2
+        },
+        {
+          "item": "item.molla-acciaio",
+          "count": 1
+        },
+        {
+          "item": "item.lamina-ottone",
+          "count": 1
+        }
+      ],
+      "tools": [
+        "item.lente-orologiaio"
+      ],
+      "output": {
+        "item": "item.orologio-tasca",
+        "count": 1
+      }
+    },
+    {
+      "id": "ricetta.tubo-rame",
+      "name": "Tubi di rame",
+      "inputs": [
+        {
+          "item": "item.lingotto-rame",
+          "count": 1
+        }
+      ],
+      "tools": [
+        "item.pinze-colata"
+      ],
+      "output": {
+        "item": "item.tubo-rame",
+        "count": 2
+      }
+    },
+    {
+      "id": "ricetta.benda",
+      "name": "Bende",
+      "inputs": [
+        {
+          "item": "item.straccio",
+          "count": 2
+        },
+        {
+          "item": "item.acqua-termale",
+          "count": 1
+        }
+      ],
+      "output": {
+        "item": "item.benda",
+        "count": 2
+      }
+    },
+    {
+      "id": "ricetta.lanterna",
+      "name": "Lanterna a carburo",
+      "inputs": [
+        {
+          "item": "item.lamina-ottone",
+          "count": 1
+        },
+        {
+          "item": "item.vetro-manometro",
+          "count": 1
+        },
+        {
+          "item": "item.carbone",
+          "count": 1
+        }
+      ],
+      "tools": [
+        "item.cacciavite-fine"
+      ],
+      "output": {
+        "item": "item.lanterna-carburo",
+        "count": 1
+      }
+    }
+  ],
+  "loot": {
+    "officina": {
+      "rolls": [
+        2,
+        4
+      ],
+      "entries": [
+        {
+          "tag": "officina",
+          "weight": 4
+        },
+        {
+          "tag": "meccanismo",
+          "weight": 3
+        },
+        {
+          "item": "item.viti",
+          "weight": 3,
+          "min": 1,
+          "max": 4
+        },
+        {
+          "item": "item.oliatore",
+          "weight": 1
+        }
+      ]
+    },
+    "fonderia": {
+      "rolls": [
+        1,
+        3
+      ],
+      "entries": [
+        {
+          "item": "item.carbone",
+          "weight": 5,
+          "min": 1,
+          "max": 4
+        },
+        {
+          "item": "item.minerale-rosso",
+          "weight": 3,
+          "min": 1,
+          "max": 2
+        },
+        {
+          "item": "item.lingotto-rame",
+          "weight": 2
+        },
+        {
+          "item": "item.unguento-ustioni",
+          "weight": 1
+        },
+        {
+          "item": "item.occhialoni",
+          "weight": 1
+        }
+      ]
+    },
+    "miniera": {
+      "rolls": [
+        1,
+        3
+      ],
+      "entries": [
+        {
+          "item": "item.minerale-rosso",
+          "weight": 5,
+          "min": 1,
+          "max": 3
+        },
+        {
+          "item": "item.uova-sode",
+          "weight": 3
+        },
+        {
+          "item": "item.acqua-termale",
+          "weight": 3
+        },
+        {
+          "item": "item.lanterna-carburo",
+          "weight": 1
+        },
+        {
+          "item": "item.carbone",
+          "weight": 2
+        }
+      ]
+    },
+    "mensa": {
+      "rolls": [
+        2,
+        4
+      ],
+      "entries": [
+        {
+          "tag": "operaio",
+          "weight": 5
+        },
+        {
+          "tag": "cucina",
+          "weight": 3
+        },
+        {
+          "item": "item.birra-scura",
+          "weight": 1
+        }
+      ]
+    },
+    "bottega-orologiaio": {
+      "rolls": [
+        2,
+        4
+      ],
+      "entries": [
+        {
+          "tag": "orologiaio",
+          "weight": 4
+        },
+        {
+          "item": "item.ingranaggio",
+          "weight": 4,
+          "min": 1,
+          "max": 3
+        },
+        {
+          "item": "item.molla-acciaio",
+          "weight": 3,
+          "min": 1,
+          "max": 2
+        },
+        {
+          "item": "item.vetro-manometro",
+          "weight": 2
+        },
+        {
+          "item": "item.manometro-rotto",
+          "weight": 1
+        }
+      ]
+    },
+    "cassa-vapore": {
+      "rolls": [
+        1,
+        4
+      ],
+      "entries": [
+        {
+          "tag": "materiale",
+          "weight": 4
+        },
+        {
+          "tag": "attrezzo",
+          "weight": 2
+        },
+        {
+          "item": "item.soldo-rame",
+          "weight": 3,
+          "min": 2,
+          "max": 8
+        },
+        {
+          "item": "item.capsula-pneumatica",
+          "weight": 1
+        }
+      ]
+    },
+    "cassaforte": {
+      "rolls": [
+        2,
+        3
+      ],
+      "entries": [
+        {
+          "item": "item.lingotto-oricalco",
+          "weight": 3,
+          "min": 1,
+          "max": 2
+        },
+        {
+          "item": "item.soldo-rame",
+          "weight": 4,
+          "min": 5,
+          "max": 20
+        },
+        {
+          "item": "item.orologio-tasca",
+          "weight": 1
+        },
+        {
+          "item": "item.cristallo-magico",
+          "weight": 2
+        }
+      ]
+    },
+    "cassa": {
+      "rolls": [
+        1,
+        3
+      ],
+      "entries": [
+        {
+          "tag": "materiale",
+          "weight": 3
+        },
+        {
+          "tag": "varie",
+          "weight": 2
+        },
+        {
+          "item": "item.soldo-rame",
+          "weight": 2,
+          "min": 1,
+          "max": 6
+        }
+      ]
+    },
+    "comune": {
+      "rolls": [
+        1,
+        3
+      ],
+      "entries": [
+        {
+          "tag": "cibo",
+          "weight": 4
+        },
+        {
+          "tag": "bevanda",
+          "weight": 2
+        },
+        {
+          "tag": "materiale",
+          "weight": 3
+        },
+        {
+          "tag": "medicina",
+          "weight": 1
+        }
+      ]
+    }
+  }
+}

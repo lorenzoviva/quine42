@@ -1,0 +1,96 @@
+<!-- Casetta: scolpito da gemini-3.8-flash nello step 8.2A (lab/out/mjx-38-flash-2), voti dell'Artista 4 → 9/10 -->
+<sequence values="BXQIWNDnOURrGH" size="25 25 24" origin="True" symmetry="(xy)">
+  <color symbol="X" hidden="True" name="volume casa"/>
+  <color symbol="Q" hidden="True" name="prisma tetto"/>
+  <color symbol="I" hidden="True" name="interno"/>
+  <color symbol="D" value="7d766c" name="pietra grigia"/>
+  <color symbol="N" value="4a2e18" name="legno scuro travi"/>
+  <color symbol="n" value="7a4d28" name="legno medio"/>
+  <color symbol="O" value="8f582d" name="porta asse"/>
+  <color symbol="U" value="68a6b8" name="vetro finestra"/>
+  <color symbol="R" value="d2a146" name="paglia chiara"/>
+  <color symbol="r" value="986c28" name="paglia scura ombra"/>
+  <color symbol="G" value="4d7332" name="muschio verde"/>
+  <color symbol="H" value="2c1a0e" name="ferramenta e ombra profonda"/>
+
+  <!-- Il seme scende al suolo -->
+  <one in="X B" out="B X"/>
+
+  <!-- Pianta rettangolare: 13 lungo x, 11 lungo y -->
+  <all in="XB" out="*X" steps="5" symmetry="(x)"/>
+  <all in="X/B" out="*/X" steps="4" symmetry="(y)"/>
+
+  <!-- Altezza dei muri (8 voxel base) -->
+  <all in="B X" out="X *" steps="7"/>
+
+  <!-- Gronda e falde del tetto a due spioventi lungo x -->
+  <all in="B X" out="R *"/>
+  <all in="RB XB" out="*R **" symmetry="(x)"/>
+  <all in="B R" out="Q *"/>
+  <all in="B Q" out="Q *" steps="6"/>
+  <!-- Erosione a due falde (tetto a capanna) -->
+  <all in="*Q B*" out="*B **" symmetry="(x)"/>
+
+  <!-- Timpano frontale e posteriore (nord e sud) in legno -->
+  <all in="R Q" out="* n" symmetry="(y)"/>
+  <all in="n Q" out="* n" symmetry="(y)"/>
+
+  <!-- Pareti di pietra e tetto -->
+  <all in="X" out="D"/>
+  <all in="Q" out="R"/>
+
+  <!-- Travi di legno robuste sui quattro spigoli esterni -->
+  <all in="BB/BD" out="**/*N"/>
+
+  <!-- Facciata frontale (y grande, verso sud): PORTA chiaramente scavata e sagomata -->
+  <one steps="1" symmetry="()"
+       in="DDDD/BBBB DDDD/BBBB DDDD/BBBB DDDD/BBBB DDDD/BBBB"
+       out="NNNN/**** NOON/**** NOON/**** NOON/**** NOON/****"/>
+
+  <!-- Finestra con infisso in legno e davanzale sulla facciata sud a lato della porta -->
+  <one steps="1" symmetry="(x)"
+       in="DDD/BBB DDD/BBB DDD/BBB"
+       out="NNN/*** NUN/*** NNN/***"/>
+
+  <!-- Finestre laterali (est e ovest) per illuminare l'interno -->
+  <one steps="1" symmetry="(y)"
+       in="D/B D/B D/B"
+       out="N/* U/* N/*"/>
+
+  <!-- Risoluzione fine: scala x2 per raggiungere la scatola 50x50x48 (alto > 30) -->
+  <map scale="2 2 2" values="BDNnOURrGHdFp">
+    <rule in="D" out="DD/DD DD/DD"/>
+    <rule in="N" out="NN/NN NN/NN"/>
+    <rule in="n" out="nn/nn nn/nn"/>
+    <rule in="O" out="OO/OO OO/OO"/>
+    <rule in="U" out="UU/UU UU/UU"/>
+    <rule in="R" out="RR/RR RR/RR"/>
+    <rule in="r" out="rr/rr rr/rr"/>
+    <rule in="G" out="GG/GG GG/GG"/>
+    <rule in="H" out="HH/HH HH/HH"/>
+    <color symbol="d" value="5a544d" name="fuga tra pietre"/>
+    <color symbol="F" value="9c968c" name="luce pietra"/>
+    <color symbol="p" value="a8daf0" name="riflesso vetro"/>
+
+    <!-- Tetto: gradoni e gronda con sottotetto in ombra netta -->
+    <prl in="RB" out="r*" steps="1"/>
+    <prl in="B R" out="* r" p="0.2" steps="1"/>
+
+    <!-- Blocchi di pietra regolari e puliti (corsi orizzontali e verticali a scacchiera RPG) -->
+    <all in="DD DD" out="*d **" steps="1"/>
+    <prl in="DD/DD" out="*d/**" p="0.3" steps="1"/>
+    <prl in="B D" out="* F" p="0.2" steps="1"/>
+
+    <!-- Dettaglio porta: maniglia in ferro scuro e separazione assi -->
+    <all in="OO" out="*H" symmetry="()" steps="1"/>
+    <all in="O O" out="O H" symmetry="()" steps="1"/>
+
+    <!-- Dettaglio finestre: telaio a croce e riflesso chiaro nel vetro -->
+    <all in="UU" out="Up" symmetry="()" steps="1"/>
+    <all in="U U" out="N *" symmetry="()" steps="1"/>
+
+    <!-- Muschio e umidità alla base a nord (retro) -->
+    <prl in="B/D" out="*/G" p="0.35" steps="1" symmetry="()"/>
+    <prl in="G D" out="* G" p="0.25" steps="1" symmetry="()"/>
+  </map>
+</sequence>

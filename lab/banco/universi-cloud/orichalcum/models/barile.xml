@@ -1,0 +1,27 @@
+<!-- Barile a doghe: step 8B, gemini-3.8-flash (b-semplici-flash38/barile.json, voto dell'Artista 7/10). Convertito dal JSON (lab/mjx/convert.ts): stessi voxel. -->
+<sequence values="BWLDIST" size="20 20 20" symmetry="(xy)" name="Barile a doghe">
+  <color symbol="W" value="8c532b" name="legno doghe"/>
+  <color symbol="L" value="ad6f3d" name="legno chiaro"/>
+  <color symbol="D" value="4e2c14" name="fessura doghe"/>
+  <color symbol="I" value="424754" name="cerchio ferro"/>
+  <color symbol="S" value="6d7687" name="ferro lucido"/>
+  <color symbol="T" value="6a3b1a" name="tappo botte"/>
+  <cylinder at="10 10 0" size="12 12 16" color="W"/>
+  <cylinder at="10 10 2" size="14 14 12" color="W"/>
+  <cylinder at="10 10 5" size="16 16 6" color="W"/>
+  <cylinder at="10 10 15" size="10 10 1" color="D"/>
+  <cylinder at="10 10 3" size="16 16 2" color="I" on="B"/>
+  <cylinder at="10 10 11" size="16 16 2" color="I" on="B"/>
+  <box at="10 18 8" size="2 1 2" color="T" on="B"/>
+  <box at="10 10 15" size="2 2 1" color="T"/>
+  <prl steps="1" in="B W" out="B D" p="0.05"/>
+  <all steps="8">
+    <rule in="D W" out="D D"/>
+    <rule in="W D" out="D D"/>
+  </all>
+  <prl steps="1">
+    <rule in="B W" out="B L" p="0.65"/>
+    <rule in="B I" out="B S" p="0.5"/>
+    <rule in="I" out="S" p="0.12"/>
+  </prl>
+</sequence>

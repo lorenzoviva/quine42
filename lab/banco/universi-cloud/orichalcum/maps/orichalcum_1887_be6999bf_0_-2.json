@@ -1,0 +1,36 @@
+{
+ "plan": {
+  "place": {
+   "name": "Fonderia vecchia",
+   "description": "Ciò che resta della fonderia vecchia dopo lo scoppio: muri anneriti, un forno solo ancora acceso e l'erba tra le scorie."
+  },
+  "layout": "rovine",
+  "objects": [
+   {
+    "module": "npc.fonditrice",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.caldaia",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.valvola-manometro",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.cassaforte-combinazione",
+    "where": "ovunque"
+   }
+  ],
+  "ground": [
+   "Carbone",
+   "Occhialoni da fonderia"
+  ],
+  "fresh": [],
+  "runes": [
+   "fuliggine",
+   "fuoco"
+  ]
+ }
+}

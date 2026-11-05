@@ -1,0 +1,35 @@
+{
+ "plan": {
+  "place": {
+   "name": "Rimessa delle locomotive",
+   "description": "La rimessa dove dormono le locomotive della linea alta, con gli scambi a leva e il fischio di Teresa."
+  },
+  "layout": "scalo_ferroviario",
+  "objects": [
+   {
+    "module": "npc.macchinista",
+    "where": "fuori"
+   },
+   {
+    "module": "npc.macchinista",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.caldaia",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.carrello-minerario",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Carbone",
+   "Oliatore"
+  ],
+  "fresh": [],
+  "runes": [
+   "pressione"
+  ]
+ }
+}

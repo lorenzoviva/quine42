@@ -1,0 +1,54 @@
+{
+ "plan": {
+  "place": {
+   "name": "Piazza della Pesa",
+   "description": "La piazza selciata di Fornace Alta, con la grande bilancia d'ottone, la caldaia che la muove e i lampioni a gas."
+  },
+  "layout": "piazza_pesa",
+  "objects": [
+   {
+    "module": "npc.caldaista",
+    "where": "fuori"
+   },
+   {
+    "module": "npc.cittadino",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.caldaia",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.valvola-manometro",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.lampione-gas",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.lampione-gas",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.bacheca-corporazione",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.telegrafo-pneumatico",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Soldo di rame",
+   "Pane nero di segale",
+   "Carbone"
+  ],
+  "fresh": [],
+  "runes": [
+   "vapore",
+   "ingranaggio",
+   "luce"
+  ]
+ }
+}

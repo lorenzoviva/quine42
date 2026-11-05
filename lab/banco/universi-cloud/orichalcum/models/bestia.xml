@@ -1,0 +1,56 @@
+<!-- Lupo: step 8B, gemini-3.8-flash, rivisto (b-figure-flash38/lupo.v2.json, voto dell'Artista 4/10). Convertito dal JSON (lab/mjx/convert.ts): stessi voxel. -->
+<sequence values="BAIUVFDWHCKE" size="25 40 30" symmetry="(xy)" name="Lupo">
+  <color symbol="A" value="5b606d" name="zampa anteriore sx" part="gamba"/>
+  <color symbol="I" value="5b606d" name="zampa anteriore dx" part="gamba"/>
+  <color symbol="U" value="4f535f" name="zampa posteriore sx" part="gamba"/>
+  <color symbol="V" value="4f535f" name="zampa posteriore dx" part="gamba"/>
+  <color symbol="F" value="6e7484" name="pelliccia grigia"/>
+  <color symbol="D" value="393c47" name="dorso scuro"/>
+  <color symbol="W" value="c8cbda" name="folto pelo chiaro"/>
+  <color symbol="H" value="8e95a8" name="luce pelliccia"/>
+  <color symbol="C" value="5e6372" name="coda folta" part="coda"/>
+  <color symbol="K" value="1b1c22" name="tartufo e dettagli"/>
+  <color symbol="E" value="e29c22" name="occhi ambrati"/>
+  <box at="7 24 0" size="3 4 11" color="A"/>
+  <box at="17 24 0" size="3 4 11" color="I"/>
+  <box at="7 10 0" size="3 4 8" color="U"/>
+  <box at="17 10 0" size="3 4 8" color="V"/>
+  <ellipsoid at="7 12 6" size="5 7 9" color="U"/>
+  <ellipsoid at="17 12 6" size="5 7 9" color="V"/>
+  <ellipsoid at="7 23 9" size="5 6 8" color="A"/>
+  <ellipsoid at="17 23 9" size="5 6 8" color="I"/>
+  <ellipsoid at="12 14 10" size="13 13 10" color="F" on="B"/>
+  <ellipsoid at="12 21 11" size="15 14 12" color="F" on="B"/>
+  <cylinder at="12 22 10" size="14 14 9" color="F" on="B"/>
+  <ellipsoid at="12 26 14" size="13 11 11" color="F" on="B"/>
+  <cylinder at="12 25 13" size="11 10 8" color="F" on="B"/>
+  <ellipsoid at="12 28 17" size="11 10 10" color="F" on="B"/>
+  <box at="12 33 15" size="7 8 5" color="F" on="B"/>
+  <cone at="12 34 15" size="7 7 6" color="F" on="B"/>
+  <box at="12 37 17" size="3 2 3" color="K"/>
+  <box at="12 35 15" size="5 5 2" color="W" on="F"/>
+  <box at="9 31 19" size="2 1 2" color="E"/>
+  <box at="15 31 19" size="2 1 2" color="E"/>
+  <box at="10 31 20" size="1 1 1" color="K"/>
+  <box at="14 31 20" size="1 1 1" color="K"/>
+  <cone at="8 27 23" size="4 4 6" color="F" on="B"/>
+  <cone at="16 27 23" size="4 4 6" color="F" on="B"/>
+  <box at="8 28 23" size="2 1 3" color="K"/>
+  <box at="16 28 23" size="2 1 3" color="K"/>
+  <ellipsoid at="12 7 14" size="7 7 7" color="C" on="B"/>
+  <ellipsoid at="12 5 10" size="6 8 7" color="C" on="B"/>
+  <cone at="12 3 5" size="5 7 7" color="C" on="B"/>
+  <box at="12 26 10" size="9 8 7" color="W" on="F"/>
+  <ellipsoid at="12 18 9" size="9 11 4" color="W" on="F"/>
+  <box at="12 17 17" size="9 16 4" color="D" on="F"/>
+  <box at="12 26 19" size="7 8 4" color="D" on="F"/>
+  <cone at="12 2 5" size="3 4 4" color="W" on="C"/>
+  <convolution neighborhood="Moore" steps="1">
+    <rule in="B" out="F" values="F" sum="18..26"/>
+  </convolution>
+  <prl steps="1">
+    <rule in="B F" out="B H" p="0.65"/>
+    <rule in="B D" out="B F" p="0.2"/>
+    <rule in="B C" out="B H" p="0.4"/>
+  </prl>
+</sequence>

@@ -1,0 +1,307 @@
+<!--
+corona-gerboa-fisico: Lo Scienziato delle Regole del Concilio (avatar della Corona).
+Membro del Concilio in forma di Gerboa gigante scienziato (scala 20 vpt, anatomia base con orecchie in avanti).
+Manto azzurrino argentato soffice con musetto e pancia bianco puro candido.
+Indossa un tocco accademico a mortaio in velluto blu notte incastonato tra le orecchie con nappa
+pendente azzurro vivo (#6fc3ff, colore araldico del Fisico), enormi occhiali protettivi rotondi da laboratorio
+con montatura in titanio argentato e lenti spesse cerchiate di luce azzurra luminescente (glow="True"),
+papillon geometrico azzurro sotto il mento, e al fianco una fialetta di laboratorio con reagente azzurro brillante.
+Scatola: 1.6 × 2.2 × 2.1 caselle, 32 × 44 × 42 voxel, 20 voxel per casella (vpt: 20).
+Ruolo: npc.
+-->
+<sequence values="BFfDCcTtUuNWEZRrOoGgPpaAKkJIHhSsMmVvYyLlQq" size="32 44 42" symmetry="()" name="GerboaFisico">
+  <!-- Manto azzurrino argentato del corpo e dorso -->
+  <color symbol="F" value="758ba8" name="azzurrino argentato base dorso"/>
+  <color symbol="f" value="9cb2cf" name="azzurrino chiaro luce"/>
+  <color symbol="D" value="4e6079" name="azzurrino scuro ombra"/>
+
+  <!-- Ventre, petto e gola in morbido candido puro -->
+  <color symbol="C" value="ffffff" name="candido puro ventre"/>
+  <color symbol="c" value="e2edf8" name="crema ghiaccio sfumatura"/>
+
+  <!-- Testa, musetto, tartufo e baffi (part="testa") -->
+  <color symbol="T" value="758ba8" part="testa" name="testa azzurrino base"/>
+  <color symbol="t" value="9cb2cf" part="testa" name="testa azzurrino chiaro guance"/>
+  <color symbol="U" value="ffffff" part="testa" name="musetto candido puro"/>
+  <color symbol="u" value="e2edf8" part="testa" name="sfumatura musetto ghiaccio"/>
+  <color symbol="N" value="1a202c" part="testa" name="tartufo naso grafite"/>
+  <color symbol="W" value="3e4c60" part="testa" name="baffetti vibrisse"/>
+  <color symbol="E" value="141418" part="testa" name="occhi scuri profondi"/>
+  <color symbol="Z" value="ffffff" glow="True" part="testa" name="riflesso occhi vispo"/>
+
+  <!-- Grandi orecchie a conchiglia (part="testa") -->
+  <color symbol="O" value="758ba8" part="testa" name="dorso orecchio azzurrino"/>
+  <color symbol="o" value="9cb2cf" part="testa" name="bordo orecchio chiaro"/>
+  <color symbol="R" value="ffaec0" part="testa" name="interno orecchio rosa"/>
+  <color symbol="r" value="ffd2dc" part="testa" name="concavita orecchio rosa chiaro"/>
+
+  <!-- Zampe posteriori bipedali piegate a Z (part="gamba") -->
+  <color symbol="G" value="758ba8" part="gamba" name="coscia azzurrino"/>
+  <color symbol="g" value="4e6079" part="gamba" name="stinco e garretto"/>
+  <color symbol="P" value="ffffff" part="gamba" name="piede candido dita"/>
+  <color symbol="p" value="cadbf0" part="gamba" name="polpastrelli unghie ghiaccio"/>
+
+  <!-- Zampette anteriori sul petto (part="braccio") -->
+  <color symbol="A" value="9cb2cf" part="braccio" name="braccino azzurrino"/>
+  <color symbol="a" value="ffffff" part="braccio" name="manina candida"/>
+
+  <!-- Coda sinuosa e pennacchio bicolore (part="coda") -->
+  <color symbol="K" value="758ba8" part="coda" name="fusto coda azzurrino"/>
+  <color symbol="k" value="4e6079" part="coda" name="giunto fusto coda"/>
+  <color symbol="J" value="182033" part="coda" name="base pennacchio blu notte scura"/>
+  <color symbol="I" value="ffffff" part="coda" name="punta pennacchio candida"/>
+
+  <!-- Accessori del Fisico: Tocco accademico a mortaio, Nappa azzurra (part="testa") -->
+  <color symbol="H" value="161f38" part="testa" name="tocco accademico velluto blu notte"/>
+  <color symbol="h" value="263456" part="testa" name="tocco bordo e piastra luce"/>
+  <color symbol="S" value="6fc3ff" part="testa" name="nappa pendente azzurro fisico"/>
+  <color symbol="s" value="3898dc" part="testa" name="nappa ombra e nodo"/>
+
+  <!-- Grandi Occhiali da Laboratorio e Lenti (part="testa") -->
+  <color symbol="M" value="b0bccd" part="testa" name="montatura occhiali titanio argento"/>
+  <color symbol="m" value="627084" part="testa" name="montatura metallo scuro e cinghia"/>
+  <color symbol="V" value="6fc3ff" part="testa" name="lenti occhiali spesse azzurre"/>
+  <color symbol="v" value="c8f0ff" glow="True" part="testa" name="riflesso lenti luce azzurra glow"/>
+
+  <!-- Papillon Geometrico Azzurro al Collo (part="testa") -->
+  <color symbol="Y" value="6fc3ff" part="testa" name="papillon azzurro fisico"/>
+  <color symbol="y" value="2468a4" part="testa" name="nodo papillon cobalto ombra"/>
+
+  <!-- Accessorio di Laboratorio: Cintura e Fialetta delle Regole Fisiche -->
+  <color symbol="L" value="303b4d" name="cintura cuoio ardesia"/>
+  <color symbol="l" value="d6e6f5" name="vetro provetta fialetta"/>
+  <color symbol="Q" value="6fc3ff" name="liquido reagente azzurro fisico"/>
+  <color symbol="q" value="b8e6ff" glow="True" name="riflesso luminescente reagente glow"/>
+
+  <!-- ======================================================== -->
+  <!-- 1. LUNGHE ZAMPE POSTERIORI DA SALTATORE (part="gamba")   -->
+  <!-- ======================================================== -->
+  <!-- Piedone sinistro al suolo (x=10..12, y=15..28, z=0..1)   -->
+  <box at="11 21.5 0" size="3 14 1" color="P"/>
+  <box at="10 28 0" size="1 1 1" color="p"/>
+  <box at="11 28 0" size="1 1 1" color="p"/>
+  <box at="12 28 0" size="1 1 1" color="p"/>
+  <box at="11 20 1" size="3 8 1" color="P"/>
+  <box at="11 15.5 0" size="3 3 3" color="g"/>
+
+  <!-- Piedone destro al suolo (x=19..21, y=15..28, z=0..1)     -->
+  <box at="20 21.5 0" size="3 14 1" color="P"/>
+  <box at="19 28 0" size="1 1 1" color="p"/>
+  <box at="20 28 0" size="1 1 1" color="p"/>
+  <box at="21 28 0" size="1 1 1" color="p"/>
+  <box at="20 20 1" size="3 8 1" color="P"/>
+  <box at="20 15.5 0" size="3 3 3" color="g"/>
+
+  <!-- Lunghi stinchi inclinati in avanti dal garretto al ginocchio (z=2..12) -->
+  <line at="11 15.5 2" to="11 24.5 11.5" r="1.1" color="g"/>
+  <line at="20 15.5 2" to="20 24.5 11.5" r="1.1" color="g"/>
+
+  <!-- Cosce muscolose alte piegate a Z che raccordano ginocchio e bacino -->
+  <ellipsoid at="11 20 9.5" size="5 9 10" color="G"/>
+  <ellipsoid at="20 20 9.5" size="5 9 10" color="G"/>
+
+  <!-- ======================================================== -->
+  <!-- 2. CORPO ALLUNGATO INCLINATO E VENTRE CANDIDO (z = 10..22) -->
+  <!-- ======================================================== -->
+  <!-- Groppa posteriore alta (si salda alle cosce e alla coda) -->
+  <ellipsoid at="15.5 18 15" size="12 10 9" color="F"/>
+
+  <!-- Dorso medio allungato (inclinato verso il basso e in avanti) -->
+  <ellipsoid at="15.5 24 14" size="11 10 8" color="F"/>
+
+  <!-- Petto e spalle anteriori -->
+  <ellipsoid at="15.5 29 14.5" size="10 8 8" color="F"/>
+
+  <!-- Soffice ventre e pettorina candida (+y e parte inferiore) -->
+  <ellipsoid at="15.5 24 11" size="8 9 5" color="C"/>
+  <ellipsoid at="15.5 28 12.5" size="7 7 6" color="C"/>
+  <ellipsoid at="15.5 31 14" size="6 5 5" color="c"/>
+
+  <!-- Cintura sottile in cuoio ardesia e fibbia metallica -->
+  <box at="15.5 24 13" size="12 10 1" color="L"/>
+  <box at="15.5 29 13" size="2 1 1" color="M"/>
+
+  <!-- Fialetta di laboratorio delle Regole Fisiche al fianco sinistro -->
+  <box at="8.5 24 11" size="2 2 3" color="l"/>
+  <box at="8.5 24 11" size="2 2 2" color="Q"/>
+  <box at="7 24 12" size="1 1 1" color="q"/>
+  <box at="8.5 24 14" size="2 2 1" color="m"/>
+  <box at="9.5 24 12" size="1 2 1" color="L"/>
+
+  <!-- ======================================================== -->
+  <!-- 3. ZAMPETTE ANTERIORI MINUSCOLE AL PETTO (part="braccio") -->
+  <!-- ======================================================== -->
+  <!-- Braccino sinistro e manina candida -->
+  <line at="12 29 14" to="13.5 32 12" r="0.6" color="A"/>
+  <box at="13.5 33 12" size="2 1 1" color="a"/>
+
+  <!-- Braccino destro e manina candida -->
+  <line at="19 29 14" to="17.5 32 12" r="0.6" color="A"/>
+  <box at="17.5 33 12" size="2 1 1" color="a"/>
+
+  <!-- ======================================================== -->
+  <!-- 4. TESTA GRANDE, GUANCE, MUSETTO, OCCHI (part="testa")   -->
+  <!-- ======================================================== -->
+  <!-- Cranio principale azzurrino argentato -->
+  <ellipsoid at="15.5 31 19" size="13 11 10" color="T"/>
+
+  <!-- Ponte frontale azzurro tra gli occhi -->
+  <box at="15.5 34 21" size="4 4 4" color="T"/>
+  <box at="15.5 36 22" size="2 2 2" color="t"/>
+
+  <!-- Guanciotte paffute azzurrino chiaro ai lati del viso -->
+  <ellipsoid at="10.5 34 18.5" size="5 5 5" color="t"/>
+  <ellipsoid at="20.5 34 18.5" size="5 5 5" color="t"/>
+  <box at="10 35 18" size="3 3 3" color="U"/>
+  <box at="21 35 18" size="3 3 3" color="U"/>
+
+  <!-- Musetto conico allungato in avanti candido puro (+y, z=18..19) -->
+  <box at="15.5 37 18" size="5 4 3" color="U"/>
+  <box at="15.5 39 18" size="3 3 2" color="U"/>
+  <box at="15.5 38 17" size="3 2 1" color="u"/>
+  <!-- Tartufo nasino grafite scuro -->
+  <box at="15.5 40 19" size="2 1 1" color="N"/>
+
+  <!-- Sottili accenni di vibrisse laterali sul muso -->
+  <box at="13 38 18" size="1 1 1" color="W"/>
+  <box at="18 38 18" size="1 1 1" color="W"/>
+
+  <!-- Grandi occhi scuri espressivi (3x2x3 voxel a z=20..22, y=34..35) -->
+  <box at="11 34.5 20" size="3 2 3" color="E"/>
+  <box at="20 34.5 20" size="3 2 3" color="E"/>
+
+  <!-- Punti luce bianchi riflesso vispo (Z, glow="True") in alto a sx -->
+  <box at="10 35 22" size="1 1 1" color="Z"/>
+  <box at="19 35 22" size="1 1 1" color="Z"/>
+
+  <!-- ======================================================== -->
+  <!-- 5. GRANDI OCCHIALI ROTONDI DA LABORATORIO (part="testa") -->
+  <!-- ======================================================== -->
+  <!-- Cerchio montatura occhio sinistro (argento M e m) -->
+  <box at="11 36 23" size="3 1 1" color="M"/>
+  <box at="11 36 19" size="3 1 1" color="M"/>
+  <box at="9 36 20" size="1 1 3" color="M"/>
+  <box at="13 36 20" size="1 1 3" color="M"/>
+  <!-- Lente spessa azzurra riflettente sinistra -->
+  <box at="11 36 20" size="3 1 3" color="V"/>
+  <box at="10 37 21" size="1 1 1" color="v"/>
+
+  <!-- Cerchio montatura occhio destro (argento M e m) -->
+  <box at="20 36 23" size="3 1 1" color="M"/>
+  <box at="20 36 19" size="3 1 1" color="M"/>
+  <box at="22 36 20" size="1 1 3" color="M"/>
+  <box at="18 36 20" size="1 1 3" color="M"/>
+  <!-- Lente spessa azzurra riflettente destra -->
+  <box at="20 36 20" size="3 1 3" color="V"/>
+  <box at="19 37 21" size="1 1 1" color="v"/>
+
+  <!-- Ponte centrale metallico sopra il setto nasale -->
+  <box at="15.5 36 21" size="4 1 1" color="M"/>
+  <box at="15.5 36 22" size="2 1 1" color="m"/>
+
+  <!-- Cinghiette laterali della montatura verso le orecchie -->
+  <line at="9 36 21" to="8 31 22" r="0.5" color="m"/>
+  <line at="22 36 21" to="23 31 22" r="0.5" color="m"/>
+
+  <!-- ======================================================== -->
+  <!-- 6. PAPILLON GEOMETRICO AZZURRO AL COLLO (part="testa")   -->
+  <!-- ======================================================== -->
+  <!-- Collare attorno al collo sotto il mento -->
+  <cylinder at="15.5 32 16" size="8 7 2" color="Y"/>
+  <!-- Nodo centrale geometrico cobalto -->
+  <box at="15.5 36 15" size="2 1 2" color="y"/>
+  <!-- Ala sinistra del papillon svasata geometrica -->
+  <box at="13 36 15" size="3 1 2" color="Y"/>
+  <box at="11 36 14" size="1 1 4" color="S"/>
+  <box at="13 36 15" size="1 1 1" color="s"/>
+  <!-- Ala destra del papillon svasata geometrica -->
+  <box at="18 36 15" size="3 1 2" color="Y"/>
+  <box at="20 36 14" size="1 1 4" color="S"/>
+  <box at="18 36 15" size="1 1 1" color="s"/>
+  <!-- Nastri che scendono dal nodo sul petto -->
+  <box at="15 36 13" size="1 1 2" color="Y"/>
+  <box at="16 36 13" size="1 1 2" color="s"/>
+
+  <!-- ======================================================== -->
+  <!-- 7. GIGANTESCHE ORECCHIE A CONCHIGLIA (part="testa", z=25..39) -->
+  <!-- ======================================================== -->
+  <!-- Orecchio sinistro: guscio azzurrino posteriore/esterno -->
+  <ellipsoid at="9.5 29 25" size="8 4 15" color="O"/>
+  <!-- Padiglione interno concavo velluto rosa carne -->
+  <ellipsoid at="9.5 30.5 26" size="6 3 13" color="R"/>
+  <box at="9.5 31 27" size="4 1 8" color="r"/>
+  <line at="6 30 28" to="9 30 38" r="0.5" color="o"/>
+
+  <!-- Orecchio destro: guscio azzurrino posteriore/esterno -->
+  <ellipsoid at="21.5 29 25" size="8 4 15" color="O"/>
+  <!-- Padiglione interno concavo velluto rosa carne -->
+  <ellipsoid at="21.5 30.5 26" size="6 3 13" color="R"/>
+  <box at="21.5 31 27" size="4 1 8" color="r"/>
+  <line at="25 30 28" to="22 30 38" r="0.5" color="o"/>
+
+  <!-- ======================================================== -->
+  <!-- 8. TOCCO ACCADEMICO A MORTAIO (part="testa")             -->
+  <!-- ======================================================== -->
+  <!-- Calotta / alloggiamento anatomico tra le radici delle orecchie -->
+  <cylinder at="15.5 32 25" size="8 8 2" color="h"/>
+  <cylinder at="15.5 32 26" size="7 7 2" color="H"/>
+
+  <!-- Piastra quadrata del tocco a mortaio in velluto blu notte -->
+  <!-- Corpo centrale della piastra (spessore 1 voxel a z=28) -->
+  <box at="15.5 32 28" size="8 8 1" color="H"/>
+  <!-- Estensioni frontale e posteriore (losanga/punta del tocco) -->
+  <box at="15.5 36.5 28" size="6 2 1" color="H"/>
+  <box at="15.5 38.5 28" size="4 2 1" color="h"/>
+  <box at="15.5 26.5 28" size="6 2 1" color="H"/>
+  <box at="15.5 24.5 28" size="4 2 1" color="h"/>
+  <!-- Bordi rifiniti laterali delle asole auricolari -->
+  <box at="11 32 28" size="1 6 1" color="h"/>
+  <box at="20 32 28" size="1 6 1" color="h"/>
+
+  <!-- Rivestimento superiore con riflesso velluto e piastrina centrale -->
+  <box at="15.5 32 29" size="4 4 1" color="h"/>
+  <box at="15.5 32 30" size="2 2 1" color="S"/>
+
+  <!-- Cordino della nappa che corre dal bottone al bordo destro/frontale -->
+  <line at="16 32 30" to="19 35 29" r="0.4" color="S"/>
+  <line at="19 35 29" to="20 37 28" r="0.4" color="S"/>
+
+  <!-- Cascata della nappa azzurro vivo lungo la fronte/tempia destra -->
+  <line at="20 37 28" to="20 37 25" r="0.5" color="S"/>
+  <!-- Nodo/fascetta della nappa -->
+  <box at="20 37 24" size="1 1 1" color="s"/>
+  <!-- Corpo a frangia morbida della nappa azzurra -->
+  <box at="20 37 22" size="1 1 2" color="S"/>
+  <box at="21 37 22" size="1 1 2" color="S"/>
+  <!-- Punte della nappa con riflesso luminescente azzurro chiaro -->
+  <box at="20 37 21" size="1 1 1" color="v"/>
+
+  <!-- ======================================================== -->
+  <!-- 9. LUNGHISSIMA CODA E PENNACCHIO BICOLORE (part="coda")  -->
+  <!-- ======================================================== -->
+  <!-- Attacco alla groppa posteriore alta (y=15, z=16) -->
+  <line at="15.5 15 16" to="15.5 10 9" r="1.1" color="K"/>
+  <!-- Discesa sinuosa verso il terreno -->
+  <line at="15.5 10 9" to="15.5 6 4" r="0.9" color="K"/>
+  <line at="15.5 6 4" to="15.5 3.5 2.5" r="0.8" color="K"/>
+  <!-- Risalita verso l'alto -->
+  <line at="15.5 3.5 2.5" to="15.5 2.5 5.5" r="0.8" color="k"/>
+  <line at="15.5 2.5 5.5" to="15.5 2.5 9" r="0.8" color="k"/>
+
+  <!-- Spettacolare pennacchio bicolore: collare blu notte e grande ciuffo bianco candido -->
+  <ellipsoid at="15.5 2.5 9" size="5 4 5" color="J"/>
+  <ellipsoid at="15.5 2.5 12" size="6 5 6" color="I"/>
+  <ellipsoid at="15.5 2.5 16" size="4 4 5" color="I"/>
+  <box at="15.5 2.5 18" size="2 2 2" color="I"/>
+
+  <!-- ======================================================== -->
+  <!-- 10. REGOLE GENERATIVE: SFUMATURE, PELO E TEXTURE         -->
+  <!-- ======================================================== -->
+  <!-- Illuminazione sommitale del dorso e delle spalle -->
+  <prl steps="1" p="0.3" in="B F" out="B f"/>
+  <!-- Ombreggiatura naturale nelle pieghe inferiori del dorso -->
+  <prl steps="1" p="0.15" in="F/B" out="D/*"/>
+  <!-- Transizione morbida tra pancia candida e fianchi azzurrini -->
+  <prl steps="1" p="0.35" in="F/C" out="*/c"/>
+  <prl steps="1" p="0.25" in="FC" out="Fc" symmetry="(x)"/>
+</sequence>

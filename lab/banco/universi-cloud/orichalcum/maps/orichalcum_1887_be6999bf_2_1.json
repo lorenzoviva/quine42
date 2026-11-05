@@ -1,0 +1,31 @@
+{
+ "plan": {
+  "place": {
+   "name": "Piazzale degli aeronauti",
+   "description": "Il piazzale di case di mattoni sotto la torre, dove gli aeronauti giocano a carte e aspettano il vento."
+  },
+  "layout": "quartiere_mattoni",
+  "objects": [
+   {
+    "module": "npc.aeronauta",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.lampione-gas",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.bacheca-corporazione",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Caffè nero bollente",
+   "Salsiccia affumicata"
+  ],
+  "fresh": [],
+  "runes": [
+   "quadrante"
+  ]
+ }
+}

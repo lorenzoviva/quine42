@@ -1,0 +1,48 @@
+<!-- Contadina: scolpito da gemini-3.8-flash nello step 8.2A (lab/out/mjx-38-flash-2), voti dell'Artista 5 → 8/10 -->
+<sequence values="BGKMRDWFSHECL" size="20 15 30" symmetry="(xy)" name="Contadina">
+  <color symbol="G" value="4a3424" name="scarpe" part="gamba"/>
+  <color symbol="K" value="8c382b" name="gonna rosso mattone"/>
+  <color symbol="M" value="63241b" name="ombra gonna"/>
+  <color symbol="R" value="ab5236" name="luce gonna"/>
+  <color symbol="D" value="2c4952" name="corsetto blu scuro"/>
+  <color symbol="W" value="fff1e8" name="camicia e grembiule"/>
+  <color symbol="F" value="d5c8be" name="ombra grembiule"/>
+  <color symbol="S" value="e0b48c" name="carnagione"/>
+  <color symbol="H" value="5a3825" name="capelli castani"/>
+  <color symbol="E" value="1e1a22" name="occhi"/>
+  <color symbol="C" value="e4bb40" name="fazzoletto ocra"/>
+  <color symbol="L" value="ba922b" name="ombra fazzoletto"/>
+  <box at="8 7 0" size="3 4 2" color="G"/>
+  <box at="12 7 0" size="3 4 2" color="G"/>
+  <cone at="10 7 1" size="16 12 11" color="K"/>
+  <cylinder at="10 7 1" size="14 11 10" color="K"/>
+  <cylinder at="10 7 10" size="12 9 6" color="D"/>
+  <box at="10 11 2" size="8 2 8" color="W"/>
+  <box at="10 10 10" size="7 2 6" color="W"/>
+  <cylinder at="3 7 10" size="3 4 5" color="W"/>
+  <box at="3 7 7" size="3 3 3" color="S"/>
+  <cylinder at="17 7 10" size="3 4 5" color="W"/>
+  <box at="17 7 7" size="3 3 3" color="S"/>
+  <cylinder at="10 7 15" size="5 5 2" color="S"/>
+  <ellipsoid at="10 7 16" size="9 9 8" color="S"/>
+  <ellipsoid at="10 6 17" size="9 9 7" color="H"/>
+  <box at="10 9 16" size="7 3 5" color="S"/>
+  <ellipsoid at="10 6 19" size="9 9 6" color="C"/>
+  <box at="10 5 18" size="8 4 5" color="C"/>
+  <box at="6 6 18" size="2 3 3" color="C"/>
+  <box at="14 6 18" size="2 3 3" color="C"/>
+  <box at="10 6 22" size="6 6 1" color="C"/>
+  <box at="8 10 17" size="1 2 2" color="E"/>
+  <box at="12 10 17" size="1 2 2" color="E"/>
+  <box at="10 10 15" size="2 1 1" color="K"/>
+  <box at="6 8 16" size="1 2 3" color="H"/>
+  <box at="14 8 16" size="1 2 3" color="H"/>
+  <prl steps="1" symmetry="()">
+    <rule in="B/* */* W/B" out="B/* */* F/B" p="0.35"/>
+    <rule in="B/* */* K/B" out="B/* */* M/B" p="0.3"/>
+    <rule in="B/* */* C/B" out="B/* */* L/B" p="0.25"/>
+  </prl>
+  <prl steps="1">
+    <rule in="B K" out="B R" p="0.4"/>
+  </prl>
+</sequence>

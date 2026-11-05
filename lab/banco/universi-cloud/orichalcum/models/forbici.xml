@@ -1,0 +1,12 @@
+<!-- Forbici da giardiniere: scritte a mano da Claude Code (step 9). Due lame d'acciaio incrociate e due manici di legno, posate a terra. -->
+<sequence values="BSsHh" size="12 12 12" symmetry="()" name="Forbici">
+  <color symbol="S" value="c0c8d0" name="lama"/>
+  <color symbol="s" value="8a929c" name="filo"/>
+  <color symbol="H" value="8a5a30" name="manico"/>
+  <color symbol="h" value="5e3c20" name="manico in ombra"/>
+  <line at="3 2 0" to="8 9 0" r="0" color="S"/>
+  <line at="8 2 0" to="3 9 0" r="0" color="s"/>
+  <box at="2 10 0" size="3 3 2" color="H"/>
+  <box at="9 10 0" size="3 3 2" color="H"/>
+  <box at="6 6 1" size="1 1 1" color="h"/>
+</sequence>

@@ -1,0 +1,38 @@
+{
+ "plan": {
+  "place": {
+   "name": "Bottega Vitti",
+   "description": "La bottega dell'orologiaia Selene Vitti, piena di quadranti e di ticchettii, all'imbocco del Quartiere dei Telai."
+  },
+  "layout": "quartiere_telai",
+  "objects": [
+   {
+    "module": "npc.orologiaia",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.banco-orologiaio",
+    "where": "ovunque"
+   },
+   {
+    "module": "obj.enigma-ingranaggi",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.lampione-gas",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Ingranaggio d'ottone",
+   "Molla d'acciaio",
+   "Manometro rotto",
+   "Vetro da manometro"
+  ],
+  "fresh": [],
+  "runes": [
+   "quadrante",
+   "molla"
+  ]
+ }
+}

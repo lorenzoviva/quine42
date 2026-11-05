@@ -1,0 +1,410 @@
+{
+  "trame": [
+    {
+      "id": "dieci-ore",
+      "titolo": "Le dieci ore",
+      "mistero": "La Gilda dei Caldaisti vuole turni di dieci ore; la Casa Ramelli tace, e i minatori di Solfara sono pronti a scioperare con i caldaisti.",
+      "coinvolti": [
+        "Bruno Caldera",
+        "Quinto Sbarra",
+        "Raniero Ramelli",
+        "Gelsomina Arpa"
+      ],
+      "tappe": [
+        {
+          "giorno": 0,
+          "momento": "giorno",
+          "chi": "Bruno Caldera",
+          "dove": "Vicolo dei Caldaisti",
+          "cosa": "riunisce i caldaisti attorno alla caldaia del vicolo",
+          "battuta": "Una lettera senza risposta è una risposta. Ne scriviamo un'altra, l'ultima.",
+          "indizio": "la terza lettera della Gilda è ancora sigillata sulla scrivania di Raniero Ramelli"
+        },
+        {
+          "giorno": 1,
+          "momento": "sera",
+          "chi": "Quinto Sbarra",
+          "dove": "Ingresso delle Miniere di Solfara",
+          "cosa": "conta le mani alzate dei minatori",
+          "battuta": "Se si fermano le caldaie, ci fermiamo anche noi. Tutti."
+        },
+        {
+          "giorno": 2,
+          "momento": "giorno",
+          "chi": "Raniero Ramelli",
+          "dove": "Piazza della Pesa",
+          "cosa": "stringe mani ai compratori e evita i caldaisti",
+          "battuta": "Le fonderie non si fermano per una lettera."
+        },
+        {
+          "giorno": 3,
+          "momento": "mattina",
+          "chi": "Gelsomina Arpa",
+          "dove": "Piazza della Pesa",
+          "cosa": "lascia spegnere la caldaia della Pesa per un'ora",
+          "battuta": "Oggi la bilancia riposa. Chiedete a Bruno Caldera perché."
+        }
+      ],
+      "missione": {
+        "da": "Bruno Caldera",
+        "testo": "Porta la voce della Gilda a Raniero Ramelli: digli che i caldaisti si fermano lunedì, se non risponde.",
+        "obiettivo": {
+          "tipo": "parla",
+          "a": "Raniero Ramelli"
+        },
+        "ricompensa": "un posto alla mensa della Gilda e tre soldi di rame",
+        "stato": "offerta"
+      },
+      "inizio": 0,
+      "stato": "attiva"
+    },
+    {
+      "id": "lega-pallida",
+      "titolo": "La lega pallida",
+      "mistero": "La lega nuova delle Fonderie Ramelli esce più pallida e le caldaie nuove fischiano: qualcuno allunga l'oricalco con rame comune?",
+      "coinvolti": [
+        "Nives Caldera",
+        "Selene Vitti",
+        "Raniero Ramelli"
+      ],
+      "tappe": [
+        {
+          "giorno": 0,
+          "momento": "giorno",
+          "chi": "Nives Caldera",
+          "dove": "Fonderie Ramelli",
+          "cosa": "guarda controluce un lingotto appena colato",
+          "battuta": "Questo non è il colore di mio padre. È più pallido.",
+          "indizio": "i lingotti della colata di martedì hanno un marchio diverso"
+        },
+        {
+          "giorno": 1,
+          "momento": "mattina",
+          "chi": "Selene Vitti",
+          "dove": "Bottega Vitti",
+          "cosa": "smonta un manometro della fonderia nuova",
+          "battuta": "Mezza atmosfera in meno. Una caldaia così fischia, e poi un giorno non fischia più."
+        },
+        {
+          "giorno": 2,
+          "momento": "sera",
+          "chi": "Raniero Ramelli",
+          "dove": "Magazzini Ramelli",
+          "cosa": "conta i lingotti da solo, con una candela",
+          "battuta": "Nessuno deve contarli prima di me.",
+          "indizio": "nei magazzini ci sono casse di rame del porto senza il bollo della dogana"
+        }
+      ],
+      "missione": {
+        "da": "Nives Caldera",
+        "testo": "Porta un lingotto d'oricalco a Selene Vitti: lei sa dire se la lega è giusta.",
+        "obiettivo": {
+          "tipo": "porta",
+          "oggetto": "Lingotto d'oricalco",
+          "a": "Selene Vitti"
+        },
+        "ricompensa": "le pinze da colata di Nives e la sua gratitudine",
+        "stato": "offerta"
+      },
+      "inizio": 0,
+      "stato": "attiva"
+    },
+    {
+      "id": "brevetto-perduto",
+      "titolo": "Il brevetto perduto",
+      "mistero": "Il brevetto dell'ingegner Amedeo Lenti, sparito il giorno dello scoppio, parlava di una valvola che non lascia scoppiare le caldaie. Dov'è finito?",
+      "coinvolti": [
+        "Corrado Ingegni",
+        "Fosca Ruggi",
+        "Amalia Vitti"
+      ],
+      "tappe": [
+        {
+          "giorno": 0,
+          "momento": "sera",
+          "chi": "Corrado Ingegni",
+          "dove": "Officine del Canale Bruma",
+          "cosa": "cerca tra vecchie carte bruciacchiate",
+          "battuta": "Amedeo l'aveva disegnata. Una valvola che pensa da sola."
+        },
+        {
+          "giorno": 1,
+          "momento": "giorno",
+          "chi": "Fosca Ruggi",
+          "dove": "Fonderia vecchia",
+          "cosa": "guarda la cassaforte annerita in fondo alla fonderia",
+          "battuta": "Quella mattina Lenti è corso verso le valvole, non verso la porta.",
+          "indizio": "la cassaforte della fonderia vecchia ha una combinazione di tre ruote"
+        },
+        {
+          "giorno": 2,
+          "momento": "giorno",
+          "chi": "Amalia Vitti",
+          "dove": "Bottega Vitti",
+          "cosa": "prova a girare le ruote di un vecchio meccanismo",
+          "battuta": "Tre ruote, dodici denti ciascuna. Si può fare."
+        }
+      ],
+      "missione": {
+        "da": "Corrado Ingegni",
+        "testo": "Trova il brevetto dell'ingegner Lenti e portamelo: con quello nessuna caldaia scoppierà più.",
+        "obiettivo": {
+          "tipo": "porta",
+          "oggetto": "Brevetto dell'ingegner Lenti",
+          "a": "Corrado Ingegni"
+        },
+        "ricompensa": "un orologio da tasca fatto con le sue mani",
+        "stato": "offerta"
+      },
+      "inizio": 0,
+      "stato": "attiva"
+    },
+    {
+      "id": "rondine-bucata",
+      "titolo": "La Rondine bucata",
+      "mistero": "Il dirigibile di Marta Ventidue è bucato e il vento da ponente arriva tra pochi giorni; se non parte, il debito con la Casa Ramelli la schiaccia.",
+      "coinvolti": [
+        "Marta Ventidue",
+        "Elia Sartori",
+        "Dafne Corsi"
+      ],
+      "tappe": [
+        {
+          "giorno": 0,
+          "momento": "mattina",
+          "chi": "Marta Ventidue",
+          "dove": "Torre d'Ormeggio di Vetta Bruna",
+          "cosa": "misura lo strappo nella tela della Rondine",
+          "battuta": "Due tubi di rame e un po' di fortuna, e la Rondine vola."
+        },
+        {
+          "giorno": 1,
+          "momento": "giorno",
+          "chi": "Dafne Corsi",
+          "dove": "Torre d'Ormeggio di Vetta Bruna",
+          "cosa": "segna sul registro il cambio del vento",
+          "battuta": "Ponente fra tre giorni. Non uno di più.",
+          "indizio": "il registro del cielo dice che il ponente arriva il terzo giorno"
+        },
+        {
+          "giorno": 2,
+          "momento": "sera",
+          "chi": "Elia Sartori",
+          "dove": "Piazzale degli aeronauti",
+          "cosa": "rattoppa una vela con le mani tremanti",
+          "battuta": "Se la Rondine parte, Marta parte con lei."
+        }
+      ],
+      "missione": {
+        "da": "Marta Ventidue",
+        "testo": "Portami un tubo di rame per il bruciatore della Rondine, prima del ponente.",
+        "obiettivo": {
+          "tipo": "porta",
+          "oggetto": "Tubo di rame",
+          "a": "Marta Ventidue"
+        },
+        "ricompensa": "un passaggio sul dirigibile e dieci soldi di rame",
+        "stato": "offerta"
+      },
+      "inizio": 0,
+      "stato": "attiva"
+    },
+    {
+      "id": "rame-che-sparisce",
+      "titolo": "Il rame che sparisce",
+      "mistero": "I cavi di rame della rimessa vengono tagliati, e al porto mancano casse sui registri; di notte passa un dirigibile senza fanali.",
+      "coinvolti": [
+        "Teresa Fumagalli",
+        "Nestore Binda",
+        "Zeno Marras"
+      ],
+      "tappe": [
+        {
+          "giorno": 0,
+          "momento": "mattina",
+          "chi": "Teresa Fumagalli",
+          "dove": "Rimessa delle locomotive",
+          "cosa": "trova un altro cavo tagliato dietro la rimessa",
+          "battuta": "Tagliato pulito. Chi l'ha fatto conosceva la rimessa.",
+          "indizio": "il taglio è fatto con le cesoie dei frenatori"
+        },
+        {
+          "giorno": 1,
+          "momento": "sera",
+          "chi": "Nestore Binda",
+          "dove": "Banchina del rame",
+          "cosa": "parla sottovoce con un marinaio senza nome",
+          "battuta": "Domani notte, stessa banchina. Lampioni spenti."
+        },
+        {
+          "giorno": 2,
+          "momento": "notte",
+          "chi": "Zeno Marras",
+          "dove": "Porto dei Bastimenti",
+          "cosa": "conta le casse alla luce di una lanterna",
+          "battuta": "Dodici in meno. Sempre dodici.",
+          "indizio": "sulle casse che mancano c'era il marchio della Compagnia della Ferrovia"
+        }
+      ],
+      "missione": {
+        "da": "Zeno Marras",
+        "testo": "Va' alla Banchina del rame di notte e guarda chi scarica senza lampioni.",
+        "obiettivo": {
+          "tipo": "vai",
+          "luogo": "Banchina del rame"
+        },
+        "ricompensa": "il ringraziamento della dogana e cinque soldi di rame",
+        "stato": "offerta"
+      },
+      "inizio": 0,
+      "stato": "attiva"
+    },
+    {
+      "id": "porta-diciassette",
+      "titolo": "La porta del diciassette",
+      "mistero": "Il cunicolo diciassette di Solfara finisce contro una porta di ghisa murata che sulle mappe vecchie non c'era; ora Clelia ha una chiave con un diciassette inciso.",
+      "coinvolti": [
+        "Teodoro Gessi",
+        "Clelia Gessi",
+        "Quinto Sbarra"
+      ],
+      "tappe": [
+        {
+          "giorno": 0,
+          "momento": "giorno",
+          "chi": "Teodoro Gessi",
+          "dove": "Ingresso delle Miniere di Solfara",
+          "cosa": "confronta una mappa vecchia con una nuova",
+          "battuta": "Trent'anni fa il diciassette andava avanti. Qualcuno l'ha chiuso."
+        },
+        {
+          "giorno": 1,
+          "momento": "mattina",
+          "chi": "Clelia Gessi",
+          "dove": "Cunicolo diciassette",
+          "cosa": "posa la mano sulla porta di ghisa, tiepida",
+          "battuta": "Mio padre non lo sa ancora, ma la chiave ce l'ho io.",
+          "indizio": "la serratura della porta ha la forma di un ingranaggio a dodici denti"
+        },
+        {
+          "giorno": 2,
+          "momento": "sera",
+          "chi": "Quinto Sbarra",
+          "dove": "Ingresso delle Miniere di Solfara",
+          "cosa": "vieta ai minatori di scendere oltre il sedici",
+          "battuta": "Fino a che non sappiamo cosa c'è dietro, il diciassette resta chiuso."
+        }
+      ],
+      "missione": {
+        "da": "Clelia Gessi",
+        "testo": "Scendi con me nel cunicolo diciassette e aiutami ad aprire la porta di ghisa.",
+        "obiettivo": {
+          "tipo": "vai",
+          "luogo": "Cunicolo diciassette"
+        },
+        "ricompensa": "la mappa dei cunicoli di mio padre",
+        "stato": "offerta"
+      },
+      "inizio": 0,
+      "stato": "attiva"
+    },
+    {
+      "id": "canto-tessitrici",
+      "titolo": "Il canto delle tessitrici",
+      "mistero": "Le tessitrici hanno una canzone nuova sullo sciopero, e la cantano più forte ogni giorno: la Casa Ramelli vuole sapere chi l'ha scritta.",
+      "coinvolti": [
+        "Ornella Battaglia",
+        "Gelsomina Arpa",
+        "Ermanno Tosi"
+      ],
+      "tappe": [
+        {
+          "giorno": 0,
+          "momento": "giorno",
+          "chi": "Ornella Battaglia",
+          "dove": "Capannone dei Telai",
+          "cosa": "comincia il canto nuovo dalla prima fila di telai",
+          "battuta": "Una fila dopo l'altra, finché lo sente anche la Pesa."
+        },
+        {
+          "giorno": 1,
+          "momento": "sera",
+          "chi": "Gelsomina Arpa",
+          "dove": "Piazza della Pesa",
+          "cosa": "canticchia il ritornello spalando carbone",
+          "battuta": "Lo sa anche Ciok Ciok, ormai."
+        },
+        {
+          "giorno": 2,
+          "momento": "mattina",
+          "chi": "Ermanno Tosi",
+          "dove": "Piazza della Pesa",
+          "cosa": "stampa il ritornello sul retro del giornale",
+          "battuta": "Una canzone non si mette in prigione.",
+          "indizio": "il giornale di Ermanno ha venduto il doppio da quando c'è il ritornello"
+        }
+      ],
+      "missione": {
+        "da": "Ornella Battaglia",
+        "testo": "Va' da Ermanno Tosi e chiedigli se stampa ancora il nostro ritornello, anche se la Casa Ramelli non vuole.",
+        "obiettivo": {
+          "tipo": "parla",
+          "a": "Ermanno Tosi"
+        },
+        "ricompensa": "una sciarpa tessuta al telaio grande",
+        "stato": "offerta"
+      },
+      "inizio": 0,
+      "stato": "attiva"
+    },
+    {
+      "id": "ragazzo-volare",
+      "titolo": "Il ragazzo che voleva volare",
+      "mistero": "Pietro Lanzi vuole lasciare le caldaie per i dirigibili; suo zio Bruno Caldera non vuole perderlo proprio adesso che c'è lo sciopero.",
+      "coinvolti": [
+        "Pietro Lanzi",
+        "Bruno Caldera",
+        "Marta Ventidue"
+      ],
+      "tappe": [
+        {
+          "giorno": 0,
+          "momento": "sera",
+          "chi": "Pietro Lanzi",
+          "dove": "Vicolo dei Caldaisti",
+          "cosa": "guarda la torre d'ormeggio dal fondo del vicolo",
+          "battuta": "Da lassù la fuliggine sembra una nuvola come le altre."
+        },
+        {
+          "giorno": 1,
+          "momento": "giorno",
+          "chi": "Bruno Caldera",
+          "dove": "Vicolo dei Caldaisti",
+          "cosa": "carica il ragazzo di lavoro doppio",
+          "battuta": "Prima impari il fuoco, poi il cielo."
+        },
+        {
+          "giorno": 2,
+          "momento": "giorno",
+          "chi": "Marta Ventidue",
+          "dove": "Torre d'Ormeggio di Vetta Bruna",
+          "cosa": "cerca un mozzo per la Rondine",
+          "battuta": "Mi serve qualcuno che non abbia paura del fuoco.",
+          "indizio": "Marta cerca un mozzo che sappia tenere un bruciatore"
+        }
+      ],
+      "missione": {
+        "da": "Pietro Lanzi",
+        "testo": "Parla con Marta Ventidue per me: dille che so tenere acceso un fuoco meglio di chiunque.",
+        "obiettivo": {
+          "tipo": "parla",
+          "a": "Marta Ventidue"
+        },
+        "ricompensa": "la mela più bella delle Campagne delle Trebbie",
+        "stato": "offerta"
+      },
+      "inizio": 0,
+      "stato": "attiva"
+    }
+  ]
+}

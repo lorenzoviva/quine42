@@ -1,0 +1,107 @@
+<!--
+Casa a graticcio, scritta a mano da Claude Code (step 8.2A): una struttura intera in un solo programma
+MarkovJunior, senza blocchi né architetto. Come in ModernHouse e CarmaTower, si decide in grande e si
+rifinisce in piccolo: la casa si progetta su una griglia grossa (una cella = 3 voxel), poi `map` la
+ingrandisce e le regole aggiungono i dettagli voxel per voxel.
+Nella griglia grossa il blocco pieno della casa si scava; il tetto a padiglione nasce da un prisma eroso
+strato per strato; travi, porta e finestre le trovano i pattern sulla facciata.
+La porta si apre e si chiude con due azioni; il comignolo fuma (animazione). Scala del gioco: 20 voxel
+per casella; la casa occupa circa 3 × 2 caselle, la porta è alta quanto il viandante.
+-->
+<sequence values="BXQIWNnDOURrK" size="24 24 30" origin="True" symmetry="(xy)">
+  <color symbol="X" hidden="True" name="volume della casa"/>
+  <color symbol="Q" hidden="True" name="volume del tetto"/>
+  <color symbol="I" hidden="True" name="interno"/>
+  <color symbol="W" value="e6d8b8" name="intonaco"/>
+  <color symbol="N" value="6b4a2e" name="travi"/>
+  <color symbol="n" value="8a6440" name="assito"/>
+  <color symbol="D" value="7d766c" name="pietra"/>
+  <color symbol="O" value="7a4a26" name="porta"/>
+  <color symbol="U" value="86b8c8" name="vetro"/>
+  <color symbol="R" value="b0533a" name="coppi"/>
+  <color symbol="r" value="80372a" name="coppi in ombra"/>
+  <color symbol="K" value="8e8578" name="comignolo"/>
+
+  <!-- Il seme cade sul fondo e diventa una pianta rettangolare: una linea lungo x (le due punte si
+       allungano a caso: prl decide per ogni corrispondenza), poi la linea intera avanza lungo y. -->
+  <one in="X B" out="B X"/>
+  <all in="XB" out="*X" steps="6" symmetry="(x)"/>
+  <prl in="XB" out="*X" p="0.5" steps="3" symmetry="(x)"/>
+  <all in="X/B" out="*/X" steps="5" symmetry="(y)"/>
+
+  <!-- Il volume: la casa alta 14, sopra la base del tetto che sporge di uno (la gronda) e il prisma. -->
+  <all in="B X" out="X *" steps="13"/>
+  <all in="B X" out="R *"/>
+  <all in="RB XB" out="*R **"/>
+  <all in="B R" out="Q *"/>
+  <all in="B Q" out="Q *" steps="10"/>
+  <!-- Tetto a padiglione: ogni strato del prisma perde il bordo che non ha nulla sotto in diagonale. -->
+  <all in="*Q B*" out="*B **"/>
+
+  <!-- Scavo: l'interno diventa vuoto; restano i muri, il pavimento sul fondo e il soffitto sotto il tetto. -->
+  <prl in="XXX/XXX/XXX" out="***/*I*/***" steps="1"/>
+  <prl in="R I" out="* n" steps="1"/>
+  <prl in="I *" out="B *" steps="1"/>
+  <prl in="I" out="n" steps="1"/>
+  <prl in="X *" out="W *" steps="1"/>
+  <prl in="X" out="D" steps="1"/>
+  <prl in="Q" out="R" steps="1"/>
+
+  <!-- Graticcio: pali agli spigoli, trave in cima ai muri e sopra lo zoccolo. -->
+  <all in="BB/BW" out="**/*N"/>
+  <all in="R W" out="* N"/>
+  <all in="W D" out="N *"/>
+
+  <!-- La porta sul davanti (verso y grande: symmetry "()"), alta quanto una persona; le finestre sotto la trave. -->
+  <one steps="1" symmetry="()"
+       in="WWWWWWWW/BBBBBBBB WWWWWWWW/BBBBBBBB WWWWWWWW/BBBBBBBB WWWWWWWW/BBBBBBBB WWWWWWWW/BBBBBBBB WWWWWWWW/BBBBBBBB WWWWWWWW/BBBBBBBB WWWWWWWW/BBBBBBBB WWWWWWWW/BBBBBBBB WWWWWWWW/BBBBBBBB WWWWWWWW/BBBBBBBB NNNNNNNN/BBBBBBBB DDDDDDDD/BBBBBBBB"
+       out="*NNNNNN*/******** *NOOOON*/******** *NOOOON*/******** *NOOOON*/******** *NOOOON*/******** *NOOOON*/******** *NOOOON*/******** *NOOOON*/******** *NOOOON*/******** *NOOOON*/******** *NOOOON*/******** *NOOOON*/******** ********/********"/>
+  <one steps="8"
+       in="NNNNNN/BBBBBB WWWWWW/BBBBBB WWWWWW/BBBBBB WWWWWW/BBBBBB WWWWWW/BBBBBB WWWWWW/BBBBBB"
+       out="******/****** ******/****** *NUUN*/****** *NUUN*/****** *NUUN*/****** *NNNN*/******"/>
+  <!-- Il comignolo, su un punto del tetto con aria sopra. -->
+  <one in="B B R" out="* K *" steps="1"/>
+  <all in="B K" out="K *" steps="3"/>
+
+  <!-- In piccolo: ogni cella diventa un cubo di 3 × 3 × 3 voxel. -->
+  <map scale="3 3 3" values="BWNnDOURrKwdoghjS">
+    <rule in="W" out="WWW/WWW/WWW WWW/WWW/WWW WWW/WWW/WWW"/>
+    <rule in="N" out="NNN/NNN/NNN NNN/NNN/NNN NNN/NNN/NNN"/>
+    <rule in="n" out="nnn/nnn/nnn nnn/nnn/nnn nnn/nnn/nnn"/>
+    <rule in="D" out="DDD/DDD/DDD DDD/DDD/DDD DDD/DDD/DDD"/>
+    <rule in="O" out="OOO/OOO/OOO OOO/OOO/OOO OOO/OOO/OOO"/>
+    <rule in="U" out="UUU/UUU/UUU UUU/UUU/UUU UUU/UUU/UUU"/>
+    <rule in="R" out="RRR/RRR/RRR RRR/RRR/RRR RRR/RRR/RRR"/>
+    <rule in="r" out="rrr/rrr/rrr rrr/rrr/rrr rrr/rrr/rrr"/>
+    <rule in="K" out="KKK/KKK/KKK KKK/KKK/KKK KKK/KKK/KKK"/>
+    <color symbol="w" value="d6c8a6" name="intonaco scrostato"/>
+    <color symbol="d" value="5e5850" name="pietra scura"/>
+    <color symbol="o" value="5e3a1e" name="asse scura"/>
+    <color symbol="g" value="5a8a3c" name="muschio"/>
+    <color symbol="h" hidden="True" name="porta aperta"/>
+    <color symbol="j" hidden="True" name="porta aperta"/>
+    <color symbol="S" value="d8d8d8" name="fumo"/>
+
+    <!-- Il tetto a gradoni: le alzate in ombra, qualche coppo scuro, muschio sul lato a nord. -->
+    <prl in="RB" out="r*" steps="1"/>
+    <prl in="B R" out="* r" p="0.12" steps="1"/>
+    <prl in="B/r" out="*/g" p="0.3" steps="1" symmetry="()"/>
+    <!-- Intonaco scrostato, pietre scure nello zoccolo, assi della porta. -->
+    <prl in="W" out="w" p="0.02" steps="1"/>
+    <one in="Ww" out="w*" steps="400"/>
+    <prl in="D" out="d" p="0.3" steps="1"/>
+    <all in="OOO" out="*o*" symmetry="()"/>
+    <!-- Le finestre hanno la croce. -->
+    <all in="UUUUUU" out="**NN**" symmetry="()"/>
+    <all in="U U U U U U U U U" out="* * * * N * * * *" symmetry="(x)"/>
+  </map>
+
+  <action name="apri" label="Apri la porta"><all><rule in="O" out="h"/><rule in="o" out="j"/></all></action>
+  <action name="chiudi" label="Chiudi la porta"><all><rule in="h" out="O"/><rule in="j" out="o"/></all></action>
+</sequence>
+<animation name="fumo" frames="8">
+  <prl in="B S" out="S B" steps="1"/>
+  <prl in="B K" out="S *" p="0.4" steps="1"/>
+  <prl in="BS" out="S*" p="0.15" steps="1"/>
+  <prl in="S" out="B" p="0.12" steps="1"/>
+</animation>

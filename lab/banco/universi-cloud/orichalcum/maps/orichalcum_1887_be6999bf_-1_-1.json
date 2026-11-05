@@ -1,0 +1,34 @@
+{
+ "plan": {
+  "place": {
+   "name": "Magazzini Ramelli",
+   "description": "I magazzini di pietra della Casa Ramelli dietro la cancellata, dove si ammassano i lingotti d'oricalco."
+  },
+  "layout": "magazzini_ramelli",
+  "objects": [
+   {
+    "module": "npc.automa-guardia",
+    "where": "fuori"
+   },
+   {
+    "module": "npc.automa-guardia",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.cassaforte-combinazione",
+    "where": "ovunque"
+   },
+   {
+    "module": "obj.lampione-gas",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Viti e bulloni"
+  ],
+  "fresh": [],
+  "runes": [
+   "magnete"
+  ]
+ }
+}

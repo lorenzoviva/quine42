@@ -1,0 +1,36 @@
+{
+ "plan": {
+  "place": {
+   "name": "Porto dei Bastimenti",
+   "description": "Le banchine di pietra e le passerelle di ferro dove attraccano i bastimenti del rame; la dogana conta le casse."
+  },
+  "layout": "porto_bastimenti",
+  "objects": [
+   {
+    "module": "npc.cittadino",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.lampione-gas",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.bacheca-corporazione",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.carrello-minerario",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Lingotto di rame",
+   "Birra scura"
+  ],
+  "fresh": [],
+  "runes": [
+   "acqua",
+   "rame"
+  ]
+ }
+}

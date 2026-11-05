@@ -1,0 +1,35 @@
+{
+ "plan": {
+  "place": {
+   "name": "Capannone dei Telai",
+   "description": "Il capannone grande dei telai a vapore e le case operaie attorno a un cortile di matasse."
+  },
+  "layout": "quartiere_telai",
+  "objects": [
+   {
+    "module": "npc.cittadino",
+    "where": "fuori"
+   },
+   {
+    "module": "npc.orologiaia",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.caldaia",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.lampione-gas",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Straccio unto",
+   "Mela renetta"
+  ],
+  "fresh": [],
+  "runes": [
+   "nebbia"
+  ]
+ }
+}

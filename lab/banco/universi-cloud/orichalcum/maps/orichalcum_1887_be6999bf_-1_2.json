@@ -1,0 +1,24 @@
+{
+ "plan": {
+  "place": {
+   "name": "Boschetto della Bruma",
+   "description": "Un boschetto di platani lungo il fiume Bruma, dove le famiglie operaie vanno la domenica."
+  },
+  "layout": "bosco",
+  "objects": [
+   {
+    "module": "obj.lampione-gas",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Mela renetta"
+  ],
+  "fresh": [],
+  "runes": [
+   "acqua",
+   "vento",
+   "ottone"
+  ]
+ }
+}

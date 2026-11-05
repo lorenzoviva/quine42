@@ -1,0 +1,33 @@
+{
+ "plan": {
+  "place": {
+   "name": "Giardino della Fuliggine",
+   "description": "Il parco dei platani anneriti, con la fontana di ghisa e le panchine dove i macchinisti fumano la pipa."
+  },
+  "layout": "giardino_fuliggine",
+  "objects": [
+   {
+    "module": "obj.lampione-gas",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.lampione-gas",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.enigma-ingranaggi",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Mela renetta",
+   "Candela di sego"
+  ],
+  "fresh": [],
+  "runes": [
+   "vita",
+   "nebbia",
+   "scudo"
+  ]
+ }
+}

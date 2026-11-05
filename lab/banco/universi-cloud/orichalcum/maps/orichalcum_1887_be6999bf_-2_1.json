@@ -1,0 +1,31 @@
+{
+ "plan": {
+  "place": {
+   "name": "Banchina del rame",
+   "description": "La banchina più lontana del porto, dove i bastimenti scaricano di notte e i lampioni sono spesso spenti."
+  },
+  "layout": "porto_bastimenti",
+  "objects": [
+   {
+    "module": "obj.lampione-gas",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.carrello-minerario",
+    "where": "fuori"
+   },
+   {
+    "module": "obj.telegrafo-pneumatico",
+    "where": "fuori"
+   }
+  ],
+  "ground": [
+   "Lingotto di rame",
+   "Viti e bulloni"
+  ],
+  "fresh": [],
+  "runes": [
+   "fuliggine"
+  ]
+ }
+}
