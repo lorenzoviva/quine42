@@ -137,27 +137,15 @@ export function normalizeEffort(value) {
   return clean;
 }
 
-const MODEL_NAMES = {
-  'claude-opus-5-5': 'Opus 5.5',
-  'claude-sonnet-5-5': 'Sonnet 5.5',
-  'claude-haiku-5-5': 'Haiku 5.5',
-  'claude-fable-5-1': 'Fable 5.1',
-  'gemini-3.8-flash-high': 'Gemini 3.8 Flash',
-  'gemini-4-argon-high': 'Gemini 4 Argon',
-  'claude-opus-5-5-high': 'Opus 5.5 (agy)',
-  'claude-sonnet-5-5-high': 'Sonnet 5.5 (agy)',
-};
-
 /** The display name of a provider's model (so `claude` reads as Opus 5.5 in `stato`, `indice` and `assegna`). */
 export function modelOf(provider, config = CONFIG) {
   const conf = config?.providers?.[provider] ?? CONFIG.providers?.[provider];
-  if (conf?.modello) return conf.modello;
-  const args = Array.isArray(conf?.args) ? conf.args : [];
-  const idx = args.indexOf('--model');
-  const raw = idx >= 0 ? args[idx + 1] : undefined;
-  if (raw && MODEL_NAMES[raw]) return MODEL_NAMES[raw];
-  return raw ?? provider;
+  const args = conf?.args ?? [];
+  return conf?.modello ?? (args.includes('--model') ? args[args.indexOf('--model') + 1] : provider);
 }
+
+/** The effort of a run: the task's, then the one the run already has, then its provider's (`sforzo` in config.json). */
+const effortOf = (t, run, conf) => normalizeEffort(t.sforzo ?? run?.sforzo ?? conf?.sforzo);
 
 const RESET_NEAR_MS = 20 * 60_000;
 const MAX_SESSION_NEEDED = 85;
@@ -196,7 +184,8 @@ export function fitsOn(prov, t, { budget, live = [], orch, resuming = false, con
   if (!b || (b.fermoFino && Date.parse(b.fermoFino) > nowMs)) return false;
   if (!resuming && isSuspended(b, nowMs)) return false;
   const mine = live.filter((r) => r.provider === prov);
-  const left = b.residuo - mine.reduce((sum, r) => sum + scaledEstimate(r.provider, r.stima, config), 0);
+  const account = live.filter((r) => accountOf(r.provider, config) === accountOf(prov, config));
+  const left = b.residuo - account.reduce((sum, r) => sum + scaledEstimate(r.provider, r.stima, config), 0);
   const cap = capOf({ left, session: b.sessione, provider: prov, orchestrator: orch, slot: b.slot, tetto: b.tetto ?? ceilingOf(prov, config), threshold: config.sogliaUnSolo, urgent: t.priority === 0, resuming, config });
   const cmd = config.providers[prov].cmd;
   const cli = live.filter((r) => config.providers[r.provider]?.cmd === cmd).length;
@@ -403,7 +392,7 @@ export function parsePipelineLine(line) {
   const out = { provider: undefined, estimate: undefined, approved: false, priority: 100, needsBrowser: false };
   for (const p of parts) {
     if (CONFIG.providers[p]) out.provider = p;
-    else if (/^sforzo\s+(low|medium|high|extra|xhigh|max)$/.test(p)) out.sforzo = /^sforzo\s+(\S+)$/.exec(p)[1];
+    else if (/^sforzo\s+\S+$/.test(p) && EFFORTS.includes(p.split(/\s+/)[1])) out.sforzo = p.split(/\s+/)[1];
     else if (/^stima\s+[\d.]+\s*%$/.test(p)) out.estimate = Number(/[\d.]+/.exec(p)[0]);
     else if (p === 'approvato') out.approved = true;
     else if (/^priorit[àa]\s+\d+$/.test(p)) out.priority = Number(/\d+/.exec(p)[0]);
@@ -627,7 +616,7 @@ export function retireRun(run) {
 const runLog = (logs, r) => path.join(logs, `${r.id}.${r.precedenti?.length ? `d${r.precedenti.length}.` : ''}${r.tentativi}.log`);
 
 /** One line on an attempt that gave way to a new one. */
-const attemptLine = (a) => `tentativo di prima: ${a.provider}, ${a.tentativi} tentativo/i, ${a.stato}${a.integrato ? `, integrato il ${a.integrato}` : ''}${a.esito ? ` — ${a.esito}` : ''}${a.sessione ? ` · sessione ${a.sessione}` : ''}${a.log ? ` · log ${a.log}` : ''}`;
+const attemptLine = (a) => `tentativo di prima: ${a.provider}${a.sforzo ? `, sforzo ${a.sforzo}` : ''}, ${a.tentativi} tentativo/i, ${a.stato}${a.integrato ? `, integrato il ${a.integrato}` : ''}${a.esito ? ` — ${a.esito}` : ''}${a.sessione ? ` · sessione ${a.sessione}` : ''}${a.log ? ` · log ${a.log}` : ''}`;
 
 /** Tasks by queue: running, ready (dependencies done, approved, a provider and an estimate), waiting, blocked. */
 export function plan(tasks, runs, budget, only) {
@@ -749,6 +738,11 @@ export function taskContext(t, opts) {
   ].join('\n');
 }
 
+/** A line of `consumi.jsonl`: what a finished run cost; `sforzo` tells what `max` and `extra` cost against the others. */
+export function consumptionRow(run, out, dopo, config = CONFIG) {
+  return { task: run.id, provider: run.provider, ...(run.sforzo ? { sforzo: run.sforzo } : {}), piano: planOf(run.provider, config)?.nome, stima: run.stima, prima: run.prima, dopo, costoUsd: out.cost, minuti: Math.round((Date.parse(run.fine) - Date.parse(run.inizio)) / 60000), tentativi: run.tentativi, esito: run.esito, data: run.fine };
+}
+
 /**
  * Builds the CLI arguments for a task run on its provider, applying `sforzo`:
  * - `cmd: "claude"`: `--effort <level>` (`extra` mapped to `xhigh`).
@@ -756,8 +750,7 @@ export function taskContext(t, opts) {
  */
 export function launchArgs(t, run = {}, { resume = Boolean(run.sessione), config = CONFIG } = {}) {
   const conf = config.providers[t.provider];
-  const rawSforzo = t.sforzo ?? run.sforzo ?? conf.sforzo;
-  const sforzo = rawSforzo ? normalizeEffort(rawSforzo) : undefined;
+  const sforzo = effortOf(t, run, conf);
   const baseArgs = [...(conf.args ?? [])];
   if (sforzo) {
     if (conf.cmd === 'claude') {
@@ -790,8 +783,8 @@ export function launch(t, run, saveRuns = () => {}, opts = {}) {
   const spawnFn = opts.spawn ?? spawn;
   const conf = config.providers[t.provider];
   const resume = Boolean(run.sessione);
-  const rawSforzo = t.sforzo ?? run.sforzo ?? conf.sforzo;
-  if (rawSforzo) run.sforzo = normalizeEffort(rawSforzo);
+  const sforzo = effortOf(t, run, conf);
+  if (sforzo) run.sforzo = sforzo;
   if (!resume && conf.sessioneNuova) run.sessione = randomUUID();
   // A resumed conversation has already read it.
   if (!resume) fs.writeFileSync(path.join(run.dir, TASK_CONTEXT), taskContext(t, opts));
@@ -939,7 +932,7 @@ export async function execute({ max = CONFIG.maxParalleli, only, task, always = 
       run.prima ??= { settimana: b.residuo, sessione: b.sessione };
       runs[t.id] = run;
       saveRuns(t.id);
-      say(`${run.sessione ? 'riprendo' : 'lancio'} ${t.id}${past ? ' da capo' : ''} su ${t.provider} (${run.dir})`);
+      say(`${run.sessione ? 'riprendo' : 'lancio'} ${t.id}${past ? ' da capo' : ''} su ${t.provider} (${modelOf(t.provider)}${run.sforzo ? `, sforzo ${run.sforzo}` : ''}) in ${run.dir}`);
       active.set(t.id, launch(t, run, saveRuns).then((r) => finish(run, r, runs, saveRuns)).finally(() => active.delete(t.id)));
     }
     if (stop && !active.size) {
@@ -1082,7 +1075,7 @@ function finish(run, { code, text, log }, runs, saveRuns) {
     if (!dopo) b.residuo = Math.max(0, b.residuo - scaledEstimate(run.provider, run.stima));
     b.aggiornato = now();
     fs.mkdirSync(path.dirname(HISTORY), { recursive: true });
-    fs.appendFileSync(HISTORY, JSON.stringify({ task: run.id, provider: run.provider, piano: planOf(run.provider)?.nome, stima: run.stima, prima: run.prima, dopo, costoUsd: out.cost, minuti: Math.round((Date.parse(run.fine) - Date.parse(run.inizio)) / 60000), tentativi: run.tentativi, esito: run.esito, data: run.fine }) + '\n');
+    fs.appendFileSync(HISTORY, JSON.stringify(consumptionRow(run, out, dopo)) + '\n');
     say(`${run.id}: ${run.esito}${run.browser ? ` · ${run.browser}` : ''} (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia ${run.id})`);
   }
   writeJson(BUDGET, budget);
@@ -1268,7 +1261,7 @@ function status() {
   writePlan(queues, budget);
   for (const [k, l] of Object.entries(queues)) console.log(`${k}: ${l.map((t) => t.id).join(' ') || '—'}`);
   for (const [p, b] of Object.entries(budget))
-    console.log(`${p}: ${describe(b)}${(b.contatori ?? []).map((c) => `\n  ${c.nome} (${c.finestra}): ${c.residuo} %, reset ${c.reset}`).join('')}`);
+    console.log(`${p} (${modelOf(p)}): ${describe(b)}${(b.contatori ?? []).map((c) => `\n  ${c.nome} (${c.finestra}): ${c.residuo} %, reset ${c.reset}`).join('')}`);
   const others = new Map();
   for (const b of Object.values(budget)) for (const c of b.tutti ?? []) others.set(`${c.nome} (${c.finestra})`, c);
   for (const b of Object.values(budget)) for (const c of b.contatori ?? []) others.delete(`${c.nome} (${c.finestra})`);
@@ -1518,7 +1511,7 @@ function trace(id) {
   const t = traceOf(id);
   if (!t) { console.log(`${id}: nessuna esecuzione in .pipeline/esecuzioni.json`); return; }
   const { run, file, exists, agents, log, out } = t;
-  console.log(`${id} su ${run.provider}, ${run.tentativi} tentativo/i, ${run.stato}${run.esito ? ` — ${run.esito}` : ''}`);
+  console.log(`${id} su ${run.provider} (${modelOf(run.provider)})${run.sforzo ? `, sforzo ${run.sforzo}` : ''}, ${run.tentativi} tentativo/i, ${run.stato}${run.esito ? ` — ${run.esito}` : ''}`);
   for (const a of run.precedenti ?? []) console.log(attemptLine(a));
   console.log(`Conversazione: ${t.sessione ?? '(id non ancora noto)'} · ${exists ? file : '(file non trovato)'}`);
   if (t.riprendi) console.log(`Riprendila con: ${t.riprendi}`);
@@ -1742,7 +1735,7 @@ export function setPipelineLine(text, id, change) {
   const old = /^- Pipeline:\s*(.+)$/m.exec(block);
   const info = change(old ? parsePipelineLine(old[1]) : undefined);
   // Without provider and estimate the line holds only the priority (`step <n> --priorita`), and `assegna` keeps it.
-  const line = `- Pipeline: ${[info.provider, info.estimate !== undefined && `stima ${info.estimate}%`, info.approved && 'approvato', info.needsBrowser && 'browser', `priorità ${info.priority}`].filter(Boolean).join(' · ')}`;
+  const line = `- Pipeline: ${[info.provider, info.sforzo && `sforzo ${info.sforzo}`, info.estimate !== undefined && `stima ${info.estimate}%`, info.approved && 'approvato', info.needsBrowser && 'browser', `priorità ${info.priority}`].filter(Boolean).join(' · ')}`;
   const next = old ? block.replace(old[0], line) : block.replace(/\n/, `\n${line}\n`);
   return text.replace(block, () => next);
 }
@@ -1763,11 +1756,26 @@ export function approveTasks(ids, opts) {
   return ids;
 }
 
-export function assignTask(id, { provider, stima, priorita, approva }, opts) {
+const assignUsage = (config = CONFIG) => `Uso: assegna <Txx> <${Object.keys(config.providers).join('|')}> <stima %> [priorità] [--sforzo <${EFFORTS.join('|')}>] [--approva]`;
+
+/** The words after `assegna`: the effort as `--sforzo <x>` or `sforzo <x>`, anywhere; the flags; the rest in order. */
+export function parseAssignArgs(rest) {
+  const words = [...rest];
+  let sforzo;
+  const at = words.findIndex((w) => w === '--sforzo' || w === 'sforzo');
+  if (at >= 0) [, sforzo] = words.splice(at, 2);
+  const [id, provider, stima, priorita] = words.filter((w) => !w.startsWith('--'));
+  return { id, provider, stima, priorita, sforzo: at >= 0 ? normalizeEffort(sforzo ?? '?') : undefined, approva: words.includes('--approva') };
+}
+
+/**
+ * Writes provider, effort, estimate and priority of a task. Without an effort it keeps the one it had; a task that never
+ * had one gets `sforzoPredefinito`: the quality counts more than the time (the author, 05/11).
+ */
+export function assignTask(id, { provider, stima, priorita, approva, sforzo }, opts) {
   const p = pathsOf(opts);
-  if (!p.config.providers[provider] || !(Number(stima) > 0)) {
-    throw new Error('Uso: assegna <Txx> <claude|fable|gemini|argon> <stima %> [priorità] [--approva]');
-  }
+  if (!p.config.providers[provider] || !(Number(stima) > 0)) throw new Error(assignUsage(p.config));
+  const effort = normalizeEffort(sforzo);
   if (!providerEnabled(provider, p.config)) throw new Error(`${provider} non è nel piano attivo (${planOf(provider, p.config)?.nome})`);
   const tasks = parseBacklog(readText(p.backlog));
   const t = tasks.find((x) => x.id === id);
@@ -1777,12 +1785,14 @@ export function assignTask(id, { provider, stima, priorita, approva }, opts) {
   }
   editPipeline(id, (i) => ({
     provider,
+    sforzo: effort ?? i?.sforzo ?? p.config.sforzoPredefinito,
     estimate: Number(stima),
     priority: priorita !== undefined && priorita !== '' && !String(priorita).startsWith('--') ? Number(priorita) : i?.priority ?? 100,
     approved: Boolean(approva || i?.approved),
     needsBrowser: t?.needsBrowser ?? i?.needsBrowser ?? false,
   }), opts);
-  return { id, provider, stima: Number(stima) };
+  const written = parsePipelineLine(/^- Pipeline:\s*(.+)$/m.exec(taskBlock(readText(p.backlog), id))[1]);
+  return { id, provider, modello: modelOf(provider, p.config), sforzo: written.sforzo, stima: Number(stima) };
 }
 
 export function setBudgetManual(provider, residuo, opts) {
@@ -1825,7 +1835,7 @@ export function nextTaskId(text) {
 function indexLine(t, runs) {
   const r = runs[t.id];
   const run = r && !r.integrato ? ` [${r.stato}${r.esito ? `: ${r.esito.replace(/^ESITO:\s*/, '').slice(0, 60)}` : ''}]` : '';
-  const priority = t.provider ? ` · ${t.provider} ${t.estimate ?? '?'}%${t.approved ? ' ✓' : ''} p${t.priority}` : t.priority !== undefined ? ` · p${t.priority}` : '';
+  const priority = t.provider ? ` · ${t.provider} (${modelOf(t.provider)})${t.sforzo ? ` sforzo ${t.sforzo}` : ''} ${t.estimate ?? '?'}%${t.approved ? ' ✓' : ''} p${t.priority}` : t.priority !== undefined ? ` · p${t.priority}` : '';
   return `${t.id} · ${t.status}${t.step !== undefined ? ` · step ${t.step}` : ''}${priority}${t.deps.length ? ` · dopo ${t.deps.join(' ')}` : ''} · ${t.title}${run}`;
 }
 
@@ -1982,7 +1992,7 @@ export function dossierOf(id, opts) {
   const block = taskBlock(text, id) ?? taskBlock(text, id.replace(/[a-z]$/, ''));
   const run = readJson(p.runs, {})[id];
   const out = [`# Dossier di ${id}`, '', block?.trim() ?? '(non c\'è nel backlog)', ''];
-  if (run) out.push('## Esecuzione', '', `${run.provider}, ${run.tentativi} tentativo/i, ${run.stato}${run.integrato ? `, integrato il ${run.integrato}` : ''}`,
+  if (run) out.push('## Esecuzione', '', `${run.provider} (${modelOf(run.provider)})${run.sforzo ? `, sforzo ${run.sforzo}` : ''}, ${run.tentativi} tentativo/i, ${run.stato}${run.integrato ? `, integrato il ${run.integrato}` : ''}`,
     ...[run.esito, run.browser, run.sessione && `sessione ${run.sessione} (traccia: node tools/pipeline/pipeline.mjs traccia ${id})`, ...(run.precedenti ?? []).map(attemptLine)].filter(Boolean), '');
   const word = new RegExp(`\\b${id}\\b`);
   // The id in the subject or in the body (a fix of T63 made by another task says so in its message).
@@ -2099,9 +2109,11 @@ if (process.argv[1]?.endsWith('pipeline.mjs')) {
   else if (cmd === 'prossimo') console.log(nextTaskId(fs.readFileSync(BACKLOG, 'utf8')));
   else if (cmd === 'approva') { approveTasks(rest); for (const id of rest) console.log(`${id}: approvato`); }
   else if (cmd === 'assegna') {
-    const [id, provider, stima, priorita] = rest;
-    if (!CONFIG.providers[provider] || !(Number(stima) > 0)) console.log('Uso: assegna <Txx> <claude|fable|gemini|argon> <stima %> [priorità] [--approva]');
-    else { assignTask(id, { provider, stima, priorita, approva: rest.includes('--approva') }); console.log(`${id}: ${provider}, ${stima}%`); }
+    try {
+      const a = parseAssignArgs(rest);
+      const r = assignTask(a.id, a);
+      console.log(`${r.id}: ${r.provider} (${r.modello})${r.sforzo ? `, sforzo ${r.sforzo}` : ''}, ${r.stima}%`);
+    } catch (e) { console.error(e.message); process.exitCode = 1; }
   }
   else if (cmd === 'step') {
     try { for (const line of stepCommand(rest)) console.log(line); }
@@ -2128,7 +2140,7 @@ if (process.argv[1]?.endsWith('pipeline.mjs')) {
   web [--porta 4242]                                        solo l'interfaccia web della pipeline
   stato | uso | indice | dossier <Txx> | traccia <Txx>|orchestratore | worktree | prossimo
   esegui [--sempre] [--max N] [--solo <provider>] [--task Txx]
-  approva <Txx…> | assegna <Txx> <provider> <stima %> [priorità] [--approva]
+  approva <Txx…> | assegna <Txx> <provider> <stima %> [priorità] [--sforzo low|medium|high|extra|xhigh|max] [--approva]
   step <n> [Txx…] | step <n> --priorita <p> | step --da-tabella   i task di uno step, il tag, la priorità di quelli non finiti (ADR-0128)
   interrompi <Txx…|--tutti> | riprendi <Txx…> | integra <Txx>
   ferma --ora | --dopo                                      spegne la pipeline: interrompe i task (riprendono al riavvio) o aspetta che finiscano

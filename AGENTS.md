@@ -302,7 +302,8 @@ l'esecuzione la fa `node tools/pipeline/pipeline.mjs esegui`: task in parallelo 
 (`task/<Txx>`), entro il budget di ogni provider, ripresi dopo un limite. **Chi esegue un task lanciato dalla pipeline è in un ambiente
 condiviso**: segue le «Regole per chi esegue un task» del README (solo il suo worktree, mai il backlog, niente merge né
 domande: le scrive in `docs/pipeline/domande/<Txx>.md`) al posto dei punti 1 e 3 sul to-do e sul prompt successivo.
-**Fable** (ADR-0115): il provider `fable` (tetto 1, dentro i 2 della CLI di Claude) solo per i task più difficili, mai orchestratore.
+**Fable** (ADR-0115, ADR-0146): il provider `fable` (tetto 1, dentro i 3 della CLI di Claude) solo per i task più difficili; orchestra solo se l'autore spunta la sua casella, fuori da `orchestra.ordine`, con `/agente`.
+**I modelli e lo sforzo** (ADR-0146): `claude` è Opus 5.5 e il predefinito; `sonnet`, `haiku`, `agy-opus`, `agy-sonnet` in prova, a tetto 1, non orchestrano; `- Pipeline:` dice `sforzo low|medium|high|extra|xhigh|max` (`assegna --sforzo`, predefinito `high`), che arriva alla CLI e sta in `consumi.jsonl`; si sceglie da [`docs/pipeline/modelli.md`](docs/pipeline/modelli.md).
 **I piani e il contesto dei task** (ADR-0119): `abbonamenti` e `piani` in `config.json` scalano le stime e dicono i provider attivi; un task nuovo parte solo se la finestra delle 5 ore lo regge (`windowAdmits`), e solo sul suo provider, senza ripiego; gli agenti leggono `.pipeline-task.md` e non toccano il backlog: stato ed esito li scrive `integra`, che rinumera anche gli ADR in conflitto; `quadro.md` è una fotografia sotto le 75 righe.
 **L'orchestratore** (ADR-0078, [`docs/pipeline/orchestra.md`](docs/pipeline/orchestra.md), `/pipeline` in Claude Code e in Antigravity)
 è l'agente da cui l'autore lancia sempre la pipeline: pianifica, lancia `esegui`, riporta ogni task, delega a un subagente la verifica nel

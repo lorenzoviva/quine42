@@ -2230,3 +2230,215 @@ describe('un task che torna da fare riparte da capo (T256)', () => {
     w.clean();
   }, 90_000);
 });
+
+describe('i modelli di Claude distinti e lo sforzo (T255)', () => {
+  type Sforzo = Pipeline & {
+    normalizeEffort(v?: string): string | undefined;
+    modelOf(provider: string, config?: unknown): string;
+    accountOf(provider: string, config?: unknown): string;
+    parseAssignArgs(rest: string[]): { id: string; provider: string; stima: string; priorita?: string; sforzo?: string; approva: boolean };
+    assignTask(id: string, a: { provider: string; stima: number; sforzo?: string; approva?: boolean }, opts?: unknown): { sforzo?: string; modello: string };
+    approveTasks(ids: string[], opts?: unknown): void;
+    setPipelineLine(text: string, id: string, change: (i: any) => any): string;
+    launchArgs(t: unknown, run?: unknown, o?: { resume?: boolean; config?: unknown }): string[];
+    launch(t: unknown, run: any, save?: () => void, o?: unknown): Promise<unknown>;
+    consumptionRow(run: unknown, out: unknown, dopo?: unknown, config?: unknown): Record<string, unknown>;
+    writePlan(queues: unknown, budget: unknown, opts: unknown): void;
+    canOrchestrate(provider: string, config?: unknown): boolean;
+  };
+  const S = () => P as unknown as Sforzo;
+  const config = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../tools/pipeline/config.json'), 'utf8'));
+  const NUOVI = ['sonnet', 'haiku', 'agy-opus', 'agy-sonnet'];
+  const tmp: string[] = [];
+  afterEach(() => { for (const d of tmp.splice(0)) fs.rmSync(d, { recursive: true, force: true }); });
+  const sandbox = () => {
+    const repo = fs.mkdtempSync(path.join(os.tmpdir(), 'pipeline-t255-'));
+    tmp.push(repo);
+    fs.mkdirSync(path.join(repo, 'docs', 'plans'), { recursive: true });
+    fs.writeFileSync(path.join(repo, 'docs', 'plans', 'backlog.md'), '# Backlog\n\n### T1 · Uno — `da fare`\n- Fare: qualcosa.\n\n### T2 · Due — `da fare`\n- Pipeline: claude · sforzo max · stima 2% · approvato · priorità 5\n');
+    return repo;
+  };
+
+  it('i provider nuovi stanno nei piani e nei limiti, nessuno orchestra e nessun tetto sale', () => {
+    for (const p of NUOVI) {
+      expect(config.providers[p].orchestrabile).toBe(false);
+      expect(P.canOrchestrate(p)).toBe(false);
+      expect(config.orchestra.ordine).not.toContain(p);
+      expect(config.limiti.modello[p]).toBe(1);
+    }
+    for (const piano of ['pro', 'max5x', 'max20x']) for (const p of ['sonnet', 'haiku']) expect(config.piani.claude[piano].disponibili).toContain(p);
+    for (const piano of ['pro', 'ultra']) for (const p of ['agy-opus', 'agy-sonnet']) expect(config.piani.google[piano].disponibili).toContain(p);
+    expect(config.limiti.provider).toEqual({ claude: 3, agy: 1 });
+    for (const p of ['agy-opus', 'agy-sonnet']) expect(config.providers[p]).toMatchObject({ cmd: 'agy', browser: false, abbonamento: 'google', ratioSessioneSettimana: 2, contatori: '^Claude and GPT models$' });
+    expect(config.providers.sonnet.ratioSessioneSettimana).toBe(config.providers.claude.ratioSessioneSettimana);
+    expect(config.providers.haiku.ratioSessioneSettimana).toBe(config.providers.claude.ratioSessioneSettimana);
+    expect(P.ceilingOf('agy-opus', config)).toBe(1);
+  });
+
+  it("Fable può orchestrare solo se è spuntato: fuori dall'ordine, con la sua finestra", () => {
+    expect(config.providers.fable.orchestrabile).toBe(false);
+    expect(config.orchestra.ordine).not.toContain('fable');
+    expect(config.orchestra.finestra.fable).toBeGreaterThan(0);
+    const spuntato = structuredClone(config);
+    spuntato.providers.fable.orchestrabile = true;
+    expect(S().canOrchestrate('fable', spuntato)).toBe(true);
+  });
+
+  it('il modello si dice per nome: claude è Opus', () => {
+    expect(S().modelOf('claude')).toBe('Opus 5.5');
+    expect(S().modelOf('sonnet')).toBe('Sonnet 5.5');
+    expect(S().modelOf('agy-opus')).toBe('Opus 5.5 (agy)');
+    // Senza `modello`: l'id di --model, poi il provider.
+    expect(S().modelOf('x', { providers: { x: { args: ['--model', 'm-1'] } } })).toBe('m-1');
+    expect(S().modelOf('x', { providers: { x: { args: [] } } })).toBe('x');
+  });
+
+  it('il conto è condiviso: la settimana conta anche gli altri modelli dello stesso conto, e il tetto della CLI regge', () => {
+    expect(S().accountOf('sonnet')).toBe('claude');
+    expect(S().accountOf('haiku')).toBe('claude');
+    expect(S().accountOf('agy-sonnet')).toBe(S().accountOf('agy-opus'));
+    expect(S().accountOf('agy-opus')).not.toBe(S().accountOf('gemini'));
+    const t = { estimate: 5, priority: 10 };
+    const budget = { sonnet: { residuo: 20, sessione: 100, slot: 1, tetto: 1 } };
+    expect(P.fitsOn('sonnet', t, { budget, live: [], config })).toBe(true);
+    expect(P.fitsOn('sonnet', t, { budget, live: [{ provider: 'claude', stima: 14 }], config })).toBe(false); // 20 - 14 < 5 + riserva
+    expect(P.fitsOn('sonnet', t, { budget, live: [{ provider: 'gemini', stima: 14 }], config })).toBe(true);
+    // Tre task sulla CLI di Claude, di qualunque modello, e il quarto aspetta.
+    const full = { sonnet: { residuo: 90, sessione: 100, slot: 1, tetto: 1 } };
+    const small = { estimate: 1, priority: 10 };
+    const three = [{ provider: 'claude', stima: 1 }, { provider: 'claude', stima: 1 }, { provider: 'fable', stima: 1 }];
+    expect(P.fitsOn('sonnet', small, { budget: full, live: three, config })).toBe(false);
+    expect(P.fitsOn('sonnet', small, { budget: full, live: three.slice(1), config })).toBe(true);
+    // agy: uno solo, anche se è di un altro modello.
+    const agy = { 'agy-sonnet': { residuo: 90, sessione: 100, slot: 1, tetto: 1 } };
+    expect(P.fitsOn('agy-sonnet', small, { budget: agy, live: [{ provider: 'argon', stima: 1 }], config })).toBe(false);
+    expect(P.fitsOn('agy-sonnet', small, { budget: agy, live: [], config })).toBe(true);
+  });
+
+  it.each(['low', 'medium', 'high', 'extra', 'xhigh', 'max'])('la riga Pipeline legge e riscrive lo sforzo %s', (sforzo) => {
+    const line = `claude · sforzo ${sforzo} · stima 4% · approvato · priorità 9`;
+    expect(P.parsePipelineLine(line)).toMatchObject({ provider: 'claude', sforzo, estimate: 4, approved: true, priority: 9 });
+    const text = `### T1 · Uno — \`da fare\`\n- Pipeline: ${line}\n`;
+    expect(S().setPipelineLine(text, 'T1', (i) => ({ ...i, priority: 2 }))).toContain(`- Pipeline: claude · sforzo ${sforzo} · stima 4% · approvato · priorità 2`);
+  });
+
+  it("uno sforzo sconosciuto non entra e la riga senza sforzo resta com'era", () => {
+    expect(P.parsePipelineLine('claude · sforzo enorme · stima 4%')).not.toHaveProperty('sforzo');
+    expect(P.parsePipelineLine('claude · stima 4%')).not.toHaveProperty('sforzo');
+    expect(S().setPipelineLine('### T1 · Uno — `da fare`\n- Pipeline: gemini · stima 4% · priorità 3\n', 'T1', (i) => i)).toContain('- Pipeline: gemini · stima 4% · priorità 3');
+    expect(() => S().normalizeEffort('enorme')).toThrow(/Sforzo non valido/);
+  });
+
+  it('assegna: --sforzo, il token sforzo, il predefinito, lo sforzo di prima', () => {
+    expect(S().parseAssignArgs(['T1', 'sonnet', '2', '7', '--sforzo', 'max', '--approva'])).toEqual({ id: 'T1', provider: 'sonnet', stima: '2', priorita: '7', sforzo: 'max', approva: true });
+    expect(S().parseAssignArgs(['T1', 'sonnet', 'sforzo', 'extra', '2'])).toMatchObject({ provider: 'sonnet', stima: '2', priorita: undefined, sforzo: 'extra', approva: false });
+    expect(S().parseAssignArgs(['T1', 'claude', '2']).sforzo).toBeUndefined();
+    expect(() => S().parseAssignArgs(['T1', 'claude', '2', '--sforzo'])).toThrow(/Sforzo non valido/);
+    expect(() => S().parseAssignArgs(['T1', 'claude', '2', '--sforzo', 'enorme'])).toThrow(/Sforzo non valido/);
+
+    const repo = sandbox();
+    const backlog = () => fs.readFileSync(path.join(repo, 'docs', 'plans', 'backlog.md'), 'utf8');
+    // Mai uno sforzo: il predefinito dell'autore.
+    expect(config.sforzoPredefinito).toBe('high');
+    expect(S().assignTask('T1', { provider: 'claude', stima: 3 }, { repo })).toMatchObject({ sforzo: 'high', modello: 'Opus 5.5' });
+    expect(backlog()).toContain('- Pipeline: claude · sforzo high · stima 3% · priorità 100');
+    // Chiesto: vale. Non chiesto: resta quello di prima, anche cambiando provider.
+    S().assignTask('T1', { provider: 'claude', stima: 3, sforzo: 'extra' }, { repo });
+    expect(backlog()).toContain('- Pipeline: claude · sforzo extra · stima 3%');
+    expect(S().assignTask('T2', { provider: 'sonnet', stima: 1 }, { repo }).sforzo).toBe('max');
+    expect(backlog()).toContain('- Pipeline: sonnet · sforzo max · stima 1% · approvato · priorità 5');
+    expect(() => S().assignTask('T2', { provider: 'claude', stima: 1, sforzo: 'enorme' }, { repo })).toThrow(/Sforzo non valido/);
+    expect(backlog()).toContain('- Pipeline: sonnet · sforzo max');
+    // approva non lo perde.
+    S().approveTasks(['T1'], { repo });
+    expect(backlog()).toContain('- Pipeline: claude · sforzo extra · stima 3% · approvato');
+  });
+
+  it('al lancio: --effort sulla CLI di Claude, extra diventa xhigh, anche riprendendo', () => {
+    const args = (provider: string, sforzo?: string) => S().launchArgs({ id: 'T1', provider, sforzo }, { dir: '.' }, { resume: false, config });
+    const effort = (a: string[]) => (a.includes('--effort') ? a[a.indexOf('--effort') + 1] : undefined);
+    for (const p of ['claude', 'sonnet', 'haiku', 'fable']) {
+      expect(effort(args(p, 'max'))).toBe('max');
+      expect(effort(args(p, 'extra'))).toBe('xhigh');
+      expect(effort(args(p, 'xhigh'))).toBe('xhigh');
+      expect(effort(args(p, 'low'))).toBe('low');
+      expect(args(p)).not.toContain('--effort');
+    }
+    // Il prompt non è toccato: -p resta seguito dal suo argomento.
+    const a = args('claude', 'max');
+    expect(a.indexOf('-p')).toBe(a.length - 2);
+    // Il provider può dirlo in config.json; il task lo scavalca; la ripresa lo ripete.
+    const conProvider = structuredClone(config);
+    conProvider.providers.sonnet.sforzo = 'medium';
+    expect(effort(S().launchArgs({ id: 'T1', provider: 'sonnet' }, {}, { resume: false, config: conProvider }))).toBe('medium');
+    expect(effort(S().launchArgs({ id: 'T1', provider: 'sonnet', sforzo: 'max' }, {}, { resume: false, config: conProvider }))).toBe('max');
+    const ripresa = S().launchArgs({ id: 'T1', provider: 'claude' }, { sessione: 'sid', sforzo: 'extra' }, { resume: true, config });
+    expect(effort(ripresa)).toBe('xhigh');
+    expect(ripresa).toContain('--resume');
+  });
+
+  it('al lancio: il suffisso del modello su agy, senza --effort', () => {
+    const model = (provider: string, sforzo?: string) => {
+      const a = S().launchArgs({ id: 'T1', provider, sforzo }, {}, { resume: false, config });
+      expect(a).not.toContain('--effort');
+      return a[a.indexOf('--model') + 1];
+    };
+    expect(model('argon', 'low')).toBe('gemini-4-argon-low');
+    expect(model('gemini', 'medium')).toBe('gemini-3.8-flash-medium');
+    expect(model('agy-opus', 'low')).toBe('claude-opus-5-5-low');
+    expect(model('agy-sonnet', 'medium')).toBe('claude-sonnet-5-5-medium');
+    for (const s of ['high', 'extra', 'xhigh', 'max']) expect(model('agy-opus', s)).toBe('claude-opus-5-5-high');
+    expect(model('argon')).toBe('gemini-4-argon-high');
+    // config.json non si tocca.
+    expect(config.providers.argon.args).toContain('gemini-4-argon-high');
+  });
+
+  it('launch passa lo sforzo alla CLI e lo registra nella corsa', async () => {
+    const repo = sandbox();
+    const calls: { cmd: string; args: string[] }[] = [];
+    const spawn = (cmd: string, args: string[]) => {
+      calls.push({ cmd, args });
+      const handlers: Record<string, (x?: unknown) => void> = {};
+      setTimeout(() => handlers.close?.(0), 0);
+      return { pid: 1234, on: (e: string, f: (x?: unknown) => void) => { handlers[e] = f; }, unref() {} };
+    };
+    const run: any = { id: 'T2', provider: 'sonnet', dir: repo, tentativi: 1 };
+    await S().launch({ id: 'T2', provider: 'sonnet', sforzo: 'extra', deps: [] }, run, () => {}, { spawn, logs: path.join(repo, 'log'), config, repo });
+    expect(run.sforzo).toBe('extra');
+    expect(calls[0].cmd).toBe('claude');
+    expect(calls[0].args).toEqual(expect.arrayContaining(['--effort', 'xhigh', '--model', 'claude-sonnet-5-5']));
+  });
+
+  it("consumi.jsonl registra lo sforzo solo se c'è", () => {
+    const run = { id: 'T2', provider: 'sonnet', sforzo: 'max', stima: 2, prima: { settimana: 90 }, inizio: '2026-11-05T10:00:00Z', fine: '2026-11-05T10:30:00Z', tentativi: 1, esito: 'ESITO: fatto' };
+    expect(S().consumptionRow(run, { cost: 1.5 }, { settimana: 88 }, config)).toMatchObject({ task: 'T2', provider: 'sonnet', sforzo: 'max', piano: config.abbonamenti.claude, stima: 2, costoUsd: 1.5, minuti: 30 });
+    expect(S().consumptionRow({ ...run, sforzo: undefined }, {}, undefined, config)).not.toHaveProperty('sforzo');
+  });
+
+  it('PIANO.md dice modello e sforzo accanto a provider e stima', () => {
+    const repo = sandbox();
+    const stateDir = path.join(repo, 'stato');
+    fs.mkdirSync(stateDir, { recursive: true });
+    const q = { inCorso: [], daIntegrare: [], pronti: [{ id: 'T2', title: 'Due', provider: 'sonnet', sforzo: 'max', estimate: 2 }, { id: 'T1', title: 'Uno', provider: 'claude', estimate: 3 }], daApprovare: [], daStimare: [], bloccati: [], inAttesa: [] };
+    S().writePlan(q, { claude: { residuo: 50 } }, { stateDir, config });
+    const text = fs.readFileSync(path.join(stateDir, 'PIANO.md'), 'utf8');
+    expect(text).toContain('**T2** Due — sonnet (Sonnet 5.5), sforzo max, 2 %');
+    expect(text).toContain('**T1** Uno — claude (Opus 5.5), 3 %');
+    expect(text).toContain('**claude** (Opus 5.5)');
+  });
+
+  it('la pagina web offre ogni provider col suo modello e lo sforzo, e /api/assegna lo scrive', async () => {
+    const url = pathToFileURL(path.resolve(__dirname, '../tools/pipeline/web.mjs')).href;
+    const W = (await import(/* @vite-ignore */ url)) as { renderHtml(): string; handleApi(m: string, p: string, b: unknown, o: unknown): { status: number; data: any } };
+    const html = W.renderHtml();
+    for (const p of NUOVI) expect(html).toContain(`<option value="${p}">`);
+    expect(html).toContain('<option value="claude">claude (Opus 5.5)</option>');
+    expect(html).toContain('id="modal-sforzo"');
+    expect(html).toContain('<option value="extra">extra</option>');
+    const repo = sandbox();
+    const res = W.handleApi('POST', '/api/assegna', { id: 'T1', provider: 'haiku', stima: 1, sforzo: 'medium' }, { repo });
+    expect(res.status).toBe(200);
+    expect(res.data).toMatchObject({ sforzo: 'medium', modello: 'Haiku 5.5' });
+    expect(W.handleApi('POST', '/api/assegna', { id: 'T1', provider: 'haiku', stima: 1, sforzo: 'enorme' }, { repo }).status).toBe(400);
+  });
+});

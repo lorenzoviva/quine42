@@ -13,12 +13,20 @@ Sei l'agente che pianifica, nel worktree del branch base (`3d`). Non esegui task
 2. **Sblocca.** Per ogni task `in attesa`: se la domanda ha una risposta (nel file `domande/`, nel task o nel
    to-do), riscrivi il task con la decisione e portalo a `da fare`; altrimenti lascialo.
 3. **Stima e assegna.** Per ogni task `da fare` senza riga `- Pipeline:` scrivi, sotto il titolo:
-   `- Pipeline: <claude|fable|gemini|argon> · stima <n>% · [approvato ·] priorità <n>`.
-   - `fable` (Claude Fable 5.1, ADR-0115) solo per i task più difficili, che chiedono molto ragionamento: consuma in fretta, ha un contatore suo e pesa anche sul settimanale di Claude; mai come orchestratore.
+   `- Pipeline: <provider> · sforzo <livello> · stima <n>% · [approvato ·] priorità <n>`.
+   - **Il modello e lo sforzo si scelgono da [`modelli.md`](modelli.md)** (ADR-0146): per il tipo di task, la sua sezione 4.2 dice cosa è provato e cosa no.
+   - **Lo sforzo** (`low|medium|high|extra|xhigh|max`; `extra` e `xhigh` sono lo stesso livello). Decisione dell'autore del 05/11: **la qualità conta più del tempo: tanti task `high`, una parte `extra`, `max` qua e là.** `medium` e `low` non sono il predefinito.
+     - `max`: architettura, kernel, creazione di programmi MarkovJunior, universi, task complessi dove la qualità è nettamente superiore;
+     - `extra`: task impegnativi;
+     - `high`: lo sviluppo ordinario, e il predefinito di `assegna` (`sforzoPredefinito`);
+     - `medium`, `low`: solo compiti meccanici.
+     Uno sforzo alto consuma di più: quanto di più non è ancora misurato, quindi alza la stima a giudizio per `extra` e `max`, e guarda il campo `sforzo` di `consumi.jsonl` appena c'è.
+   - `claude` è Opus 5.5 e resta il predefinito. `sonnet` (Sonnet 5.5), `haiku` (Haiku 5.5), `agy-opus` e `agy-sonnet` (Opus e Sonnet su `agy`, sul contatore `Claude and GPT models`) sono in prova, a tetto 1: mai provati da noi su task veri, partono con task piccoli e isolati, e i loro consumi si leggono ai primi lanci.
+   - `fable` (Claude Fable 5.1, ADR-0115, ADR-0146) solo per i task più difficili, che chiedono molto ragionamento: consuma in fretta, ha un contatore suo e pesa anche sul settimanale di Claude.
    - Provider: quello scritto dall'autore («> Provider proposto: …», Antigravity = `gemini`) e allora `approvato`;
      altrimenti `claude` per ciò che è delicato (architettura, kernel, multigiocatore, sicurezza, ciò che tocca
      molti file), `gemini` per ciò che è semplice o meccanico (modelli MarkovJunior, documenti, test, UI isolata),
-     senza `approvato`; `argon` (Gemini 4 Argon in Antigravity: molto più forte, limiti settimanali più stretti e suoi) per ciò che è difficile ma Claude non deve fare (strutture complesse, programmi MarkovJunior importanti). La stima è sempre la quota del limite del provider scelto. I task che richiedono una verifica nel browser (o screenshot) vanno **sempre e solo su `claude`** (T87: l'unico con `--chrome`; `agy -p` non ha il browser).
+     senza `approvato`; `argon` (Gemini 4 Argon in Antigravity: limiti settimanali stretti e suoi) solo per task piccoli (D31; i consumi misurati in `modelli.md`, 4.3). La stima è sempre la quota del limite del provider scelto. I task che richiedono una verifica nel browser (o screenshot) vanno **sempre e solo sulla CLI di Claude**, di norma `claude` (T87: `claude`, `sonnet`, `haiku`, `fable` hanno `--chrome`; `agy -p` non ha il browser).
    - Stima: % del limite settimanale del provider, **sempre sul piano di riferimento** (Claude Max 5x, Google Ultra): lo script la
      scala da solo per il piano attivo (`abbonamenti` e `piani` in `config.json`, ADR-0119). Parti da `docs/pipeline/consumi.jsonl` (task
      simili; il campo `piano` dice su quale piano è misurato, e la colonna delle 5 ore pesa quanto la settimana) e dalla scala:

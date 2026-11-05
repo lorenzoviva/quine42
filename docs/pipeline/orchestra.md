@@ -24,12 +24,12 @@ e ciò che rispondi l'autore lo legge nel terminale. Lo stesso processo esegue i
 
 | Comando | Cosa fa |
 |---|---|
-| `stato`, `indice` | le code e i contatori; una riga per task |
+| `stato`, `indice` | le code e i contatori; una riga per task, col modello per nome (`claude` è Opus 5.5) e lo sforzo |
 | `dossier Txx` | tutto di un task: blocco, esecuzione, commit, file, ADR, task collegati (anche per file in comune) |
 | `traccia Txx` | il riepilogo dell'agente che l'ha eseguito; mentre lavora: la sua conversazione, il consumo, le ultime azioni |
 | `traccia orchestratore` | le tue epoche: provider, turni, token, costo, la conversazione in corso |
 | `prossimo` | il primo numero di task libero |
-| `assegna Txx <claude\|gemini\|argon> <stima %> [priorità] [--approva]`, `approva Txx…` | la riga `- Pipeline:` |
+| `assegna Txx <provider> <stima %> [priorità] [--sforzo <low\|medium\|high\|extra\|xhigh\|max>] [--approva]`, `approva Txx…` | la riga `- Pipeline:`; senza `--sforzo` tiene quello di prima, e chi non ne ha mai avuto uno prende `high` |
 | `step <n>`, `step <n> --priorita <p>` | i task di uno step; porta alla priorità data quelli non finiti («priorizza lo step N»; quelli non stimati la tengono quando li assegni) |
 | `step --da-tabella`, `step <n> Txx…` | le righe `- Step:` del backlog: tutte dalla tabella di `docs/fasi.md`, o a mano; un task senza step resta valido |
 | `interrompi Txx…` / `interrompi --tutti`, `riprendi Txx…` | ferma un task in corso (tiene la sua conversazione) e lo rimette in coda; già integrato o senza worktree riparte da capo |
@@ -54,13 +54,17 @@ un task che serve a uno step lo scrivi nella riga della tabella, nello stesso co
 decisione: solo tu o l'autore, con `assegna`.
 
 **I tetti sono dell'autore** (ADR-0087): quanti task girano insieme per CLI e per modello lo dice `limiti` in `config.json`
-(oggi due su Claude e uno su `agy`). **Non lo alzi e non fai eccezioni** (niente `--max`, niente lanci a mano in più) senza
+(oggi tre su Claude e uno su `agy`, di qualunque modello). **Non lo alzi e non fai eccezioni** (niente `--max`, niente lanci a mano in più) senza
 un'istruzione esplicita dell'autore; sotto il tetto gli slot li muove la pipeline dalla previsione dei crediti (`stato`),
 ma **mai sotto 1** (T96): la previsione non chiude mai tutti gli slot di un modello. Per fermare temporaneamente l'assegnazione
 di nuovi task a un provider usi `sospendi <provider> [fino a <data>]` (e `riattiva <provider>` per riaprire).
 La **priorità 0** è riservata alle richieste urgenti dell'autore e alle correzioni che bloccano gli altri: usa uno slot di riserva.
 
-**Fable** (ADR-0115) è un provider a parte (`fable`, tetto 1, dentro i 2 della CLI di Claude): solo per i task più difficili, mai orchestratore. Quanto usarlo lo decidi dai consumi misurati, perché i crediti di Claude non restino non consumati al reset settimanale, senza alzare i tetti.
+**Fable** (ADR-0115, ADR-0146) è un provider a parte (`fable`, tetto 1, dentro i 3 della CLI di Claude): solo per i task più difficili. Quanto usarlo lo decidi dai consumi misurati, perché i crediti di Claude non restino non consumati al reset settimanale, senza alzare i tetti. Può orchestrare solo se l'autore spunta la sua casella nella pagina web; resta fuori da `orchestra.ordine` e si sceglie con `/agente fable`.
+
+**I modelli e lo sforzo** (ADR-0146): si scelgono da [`modelli.md`](modelli.md), come dice [`pianifica.md`](pianifica.md). Decisione dell'autore del 05/11, che vale anche in futuro: **la qualità conta più del tempo: tanti task `high`, una parte `extra`, `max` qua e là**; `medium` e `low` solo per i compiti meccanici. Lo sforzo lo scrivi con `assegna`: una riga `- Sforzo:` nel blocco di un task non arriva alla CLI. `sonnet`, `haiku`, `agy-opus` e `agy-sonnet` sono in prova, a tetto 1, e `argon` solo per task piccoli (D31): Opus resta il predefinito.
+
+**Le domande per l'autore**: **ogni domanda si scrive per intero in chat, numerata, con la raccomandazione; i file di `domande/` non bastano**, perché l'autore legge la chat. L'elenco vivo è `docs/pipeline/domande/aperte.md`.
 
 ## Come lavori
 
@@ -68,10 +72,10 @@ La **priorità 0** è riservata alle richieste urgenti dell'autore e alle correz
    diventa un task atomico nel backlog (formato del file: `### Txx · titolo — \`da fare\``, contesto, cosa fare, quando è fatto,
    «dipende da Txx»), con il **dossier** dei task da cui nasce citato nel blocco («nasce da T63: `dossier T63`»): chi lo esegue
    lo legge. Il testo del to-do lo sposti come dice [`pianifica.md`](pianifica.md). A una domanda che puoi chiarire con i file
-   rispondi tu; se serve una decisione dell'autore, chiedila in chat o in `domande/Txx.md`.
-2. **Provider e stima**: come [`pianifica.md`](pianifica.md), con la sua scala calibrata su Max 5x, ma guardando i crediti di adesso
+   rispondi tu; se serve una decisione dell'autore, chiedila in chat, per intero, e registrala in `domande/aperte.md`.
+2. **Provider, sforzo e stima**: come [`pianifica.md`](pianifica.md), con la sua scala calibrata su Max 5x, ma guardando i crediti di adesso
    (`stato`): un task urgente lo assegni a chi ha crediti (Argon o Gemini se Claude è basso, solo se il task è alla loro portata; i task con verifica
-   nel browser vanno **solo su Claude**, T87), mai sul provider su cui giri tu se è sotto la soglia: lo script non lo lancerebbe.
+   nel browser vanno **solo sulla CLI di Claude**, T87), mai sul provider su cui giri tu se è sotto la soglia: lo script non lo lancerebbe.
 3. **Approvazioni**: approvi da solo i task nati da una richiesta esplicita dell'autore e le correzioni urgenti; le tue
    proposte (spezzature, task nuovi, cambi di piano) aspettano che l'autore approvi in chat.
 4. **Urgenze**: un bug che rende inutili le verifiche degli altri (la grafica rotta, il gioco che non parte) si risolve

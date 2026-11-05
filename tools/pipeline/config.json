@@ -103,6 +103,7 @@
   },
   "intervalloLanciMinuti": 10,
   "approvazione": "manuale",
+  "sforzoPredefinito": "high",
   "riserva": 3,
   "sogliaUnSolo": 10,
   "attesaLimiteMinuti": 60,
