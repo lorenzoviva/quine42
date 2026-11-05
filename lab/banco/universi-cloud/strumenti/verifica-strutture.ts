@@ -43,6 +43,36 @@ for (const u of UNIVERSI) {
     await settle(5);
   };
   const luoghi = Object.keys(maps).map((n) => luogoDi(files, n)!).filter(Boolean);
+  // Every structure of a place, on its lot, while the wanderer is there (the places far away are let go): the model its plan names, from the library.
+  const viste: Array<{ cx: number; cy: number; luogo: string; concetto: string; modello: string; taglia?: string; voxel: number; cantina: number; ms: number }> = [];
+  const forms: Array<Promise<void>> = [];
+  const visti = new Set<number>();
+  const guarda = (key: string) => {
+    for (const id of k.ecs.query('struttura', 'form', 'chunk')) {
+      if ((k.ecs.get(id, 'chunk') as { key: string }).key !== key || visti.has(id)) continue;
+      visti.add(id);
+      const s = k.ecs.get(id, 'struttura') as { concetto: string; model?: string; taglia?: string };
+      const form = k.ecs.get(id, 'form') as { model: string; seed: number; wanted?: string };
+      const [cx, cy] = key.split(',').map(Number);
+      const luogo = (k.chunks.get(key) as any)?.place?.name ?? '?';
+      if (form.wanted) problemi.push(`(${key}) «${s.concetto}» vuole ${form.wanted}`);
+      if (!s.model?.startsWith('struttura-')) continue;
+      if (form.model !== s.model) problemi.push(`(${key}) «${s.concetto}» è ${form.model}, non ${s.model}`);
+      const t = Date.now();
+      forms.push(
+        (async () => {
+          let f: Form | undefined = k.forms.get(form.model, form.seed);
+          while (f && f.status === 'pending') {
+            await settle(20);
+            f = k.forms.get(form.model, form.seed);
+          }
+          const voxel = f?.result ? f.result.grid.cells.reduce((n, v) => n + (v ? 1 : 0), 0) : 0;
+          if (f?.status !== 'ready' || !voxel) problemi.push(`(${key}) «${s.concetto}»: la forma non c'è (${f?.status ?? 'nessuna'}${f?.error ? `: ${f.error}` : ''})`);
+          viste.push({ cx, cy, luogo, concetto: s.concetto, modello: form.model, ...(s.taglia ? { taglia: s.taglia } : {}), voxel, cantina: f?.base ?? 0, ms: Date.now() - t });
+        })(),
+      );
+    }
+  };
   for (const [cx, cy] of luoghi) {
     const c = k.carpet()!;
     const p = k.wandererPos();
@@ -51,31 +81,7 @@ for (const u of UNIVERSI) {
     for (let i = 0; i < 60 && (k.chunks.get(`${cx},${cy}`) as any)?.stage !== 'planned'; i++) await tick(1);
     await tick(4);
     if ((k.chunks.get(`${cx},${cy}`) as any)?.stage !== 'planned') problemi.push(`(${cx}, ${cy}) non si carica`);
-  }
-  // Every structure of the world, on its lot: the model its plan names, from the library.
-  const viste: Array<{ cx: number; cy: number; luogo: string; concetto: string; modello: string; taglia?: string; voxel: number; cantina: number; ms: number }> = [];
-  const forms: Array<Promise<void>> = [];
-  for (const id of k.ecs.query('struttura', 'form', 'chunk')) {
-    const s = k.ecs.get(id, 'struttura') as { concetto: string; model?: string; taglia?: string };
-    const form = k.ecs.get(id, 'form') as { model: string; seed: number; wanted?: string };
-    const key = (k.ecs.get(id, 'chunk') as { key: string }).key;
-    const [cx, cy] = key.split(',').map(Number);
-    if (form.wanted) problemi.push(`(${key}) «${s.concetto}» vuole ${form.wanted}`);
-    if (!s.model?.startsWith('struttura-')) continue;
-    if (form.model !== s.model) problemi.push(`(${key}) «${s.concetto}» è ${form.model}, non ${s.model}`);
-    const t = Date.now();
-    forms.push(
-      (async () => {
-        let f: Form | undefined = k.forms.get(form.model, form.seed);
-        while (f && f.status === 'pending') {
-          await settle(20);
-          f = k.forms.get(form.model, form.seed);
-        }
-        const voxel = f?.result ? f.result.grid.cells.reduce((n, v) => n + (v ? 1 : 0), 0) : 0;
-        if (f?.status !== 'ready' || !voxel) problemi.push(`(${key}) «${s.concetto}»: la forma non c'è (${f?.status ?? 'nessuna'}${f?.error ? `: ${f.error}` : ''})`);
-        viste.push({ cx, cy, luogo: (k.chunks.get(key) as any)?.place?.name ?? '?', concetto: s.concetto, modello: form.model, ...(s.taglia ? { taglia: s.taglia } : {}), voxel, cantina: f?.base ?? 0, ms: Date.now() - t });
-      })(),
-    );
+    guarda(`${cx},${cy}`);
   }
   await Promise.all(forms);
   if (ticks < TICKS) await tick(TICKS - ticks);

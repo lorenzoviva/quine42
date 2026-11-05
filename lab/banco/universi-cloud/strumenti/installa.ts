@@ -33,7 +33,9 @@ const seme = (): FileMap => leggiUniverso(path.join(PROGETTO, 'universe') + '/')
 
 /** A universe's files with its maps, as they go on disk. */
 export function componi(u: Universo, seed = seme()): { files: FileMap; maps: Record<string, string>; dalSeme: string[] } {
-  const { files } = leggi(u);
+  // In models/ a universe has its programs and their index: sidera keeps beside them two reports of its bench (`index.sidera.json`,
+  // `rapporto-modelli.md`, its README says to leave them out), which no kernel reads.
+  const files = Object.fromEntries(Object.entries(leggi(u).files).filter(([p]) => !p.startsWith('models/') || p === 'models/index.json' || p.endsWith('.xml')));
   const dir = path.join(PROGETTO, u.mappe);
   const maps: Record<string, string> = {};
   for (const f of readdirSync(dir).filter((f) => f.endsWith('.json')).sort()) maps[`maps/${f}`] = readFileSync(path.join(dir, f), 'utf8').replace(/\r\n/g, '\n');
