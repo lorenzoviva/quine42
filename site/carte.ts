@@ -42,31 +42,31 @@ export const CATEGORIES = [
 export type Category = (typeof CATEGORIES)[number]['id'];
 
 const CATEGORY: Record<CardKind, Category> = {
-  oggetto: 'oggetti',
-  ricetta: 'oggetti',
-  luogo: 'luoghi',
-  ambiente: 'luoghi',
-  modello: 'creature',
-  modulo: 'creature',
-  persona: 'creature',
-  incantesimo: 'magie',
-  runa: 'magie',
-  trama: 'storie',
-  regola: 'storie',
+  item: 'oggetti',
+  recipe: 'oggetti',
+  chunk: 'luoghi',
+  environment: 'luoghi',
+  model: 'creature',
+  module: 'creature',
+  individual: 'creature',
+  spell: 'magie',
+  rune: 'magie',
+  plot: 'storie',
+  rule: 'storie',
 };
 
 const KIND_NAME: Record<CardKind, string> = {
-  oggetto: 'Oggetto',
-  ricetta: 'Ricetta',
-  luogo: 'Luogo',
-  ambiente: 'Ambiente',
-  modello: 'Figura',
-  modulo: 'Cosa del mondo',
-  persona: 'Abitante',
-  incantesimo: 'Incantesimo',
-  runa: 'Runa',
-  trama: 'Storia',
-  regola: 'Regola del mondo',
+  item: 'Oggetto',
+  recipe: 'Ricetta',
+  chunk: 'Luogo',
+  environment: 'Ambiente',
+  model: 'Figura',
+  module: 'Cosa del mondo',
+  individual: 'Abitante',
+  spell: 'Incantesimo',
+  rune: 'Runa',
+  plot: 'Storia',
+  rule: 'Regola del mondo',
 };
 
 /** The gem of the cards with no model: two colours of the theme for each family. */
@@ -131,25 +131,25 @@ function entryOf(card: Card, files: FileMap): any {
   if (!data) return undefined;
   const byKey = (o: Record<string, any> | undefined, name: (k: string, v: any) => string) => Object.entries(o ?? {}).find(([k, v]) => slug(name(k, v)) === key)?.[1];
   switch (card.tipo) {
-    case 'oggetto':
+    case 'item':
       return (data.items as any[] | undefined)?.find((it) => slug(it?.id ?? '') === key) ?? data.item ?? data;
-    case 'ambiente':
+    case 'environment':
       return byKey(data.layouts, (k) => k) ?? data;
-    case 'incantesimo':
+    case 'spell':
       return byKey(data.spells, (k, v) => v?.name ?? k) ?? data;
-    case 'runa':
+    case 'rune':
       return byKey(data.runes, (k) => k) ?? data;
-    case 'ricetta':
+    case 'recipe':
       return (data.recipes as any[] | undefined)?.find((r) => slug(r?.id ?? '') === key) ?? data;
-    case 'modello':
+    case 'model':
       return byKey(data, (k) => k);
-    case 'persona':
+    case 'individual':
       return (data.persone as any[] | undefined)?.find((p) => slug(p?.nome ?? '') === key);
-    case 'trama':
+    case 'plot':
       return (data.trame as any[] | undefined)?.find((t) => slug(t?.id ?? '') === key);
-    case 'regola':
+    case 'rule':
       return undefined;
-    case 'luogo':
+    case 'chunk':
       return undefined;
     default:
       return data;
@@ -177,15 +177,15 @@ export function artOf(card: Card, files: FileMap, forms: Forms): FormRequest | u
     return forms.request(model, forms.seedFor(model, who), m.appearance.color);
   };
   switch (card.tipo) {
-    case 'modello':
-      return forms.request(Object.keys(forms.models()).find((id) => slug(id) === card.id.slice('modello:'.length)) ?? '', 1);
-    case 'oggetto': {
+    case 'model':
+      return forms.request(Object.keys(forms.models()).find((id) => slug(id) === card.id.slice('model:'.length)) ?? '', 1);
+    case 'item': {
       const model = forms.resolve(entry?.model ?? entry?.appearance?.model, 'oggetto');
       return forms.request(model, 1, entry?.color ?? entry?.appearance?.color);
     }
-    case 'modulo':
+    case 'module':
       return modulePic(parse(files[card.file]), card.id);
-    case 'persona':
+    case 'individual':
       return modulePic(parse(files[`modules/${entry?.tipo}/manifest.json`]), entry?.origine ?? entry?.nome ?? card.id);
     default:
       return undefined;

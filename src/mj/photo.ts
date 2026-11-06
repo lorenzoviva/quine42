@@ -52,7 +52,7 @@ export interface Picture {
   data: Uint8ClampedArray;
 }
 
-export const VIEWS = ['fronte', 'destra', 'retro', 'sinistra'] as const;
+export const VIEWS = ['front', 'right', 'back', 'left'] as const;
 
 type Rgb = [number, number, number];
 

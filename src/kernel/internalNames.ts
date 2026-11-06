@@ -242,11 +242,12 @@ export const INTERNAL_NAMES: readonly NameDomain[] = [
     id: 'dove',
     title: '«Dove» della routine',
     kind: 'values',
-    where: ['src/kernel/society.ts (WHERES)', 'world/people.json → routine[].dove'],
-    reach: ['disco', 'prompt'],
+    where: ['src/kernel/society.ts (WHERES)', 'world/people.json → routine[].dove', 'world/plots.json → tappe[].dove', 'manifest → mestieri[].giornata[].dove, percorso', 'componente mestiere (i posti)'],
+    reach: ['disco', 'lua', 'prompt'],
     lang: 'en',
     step: 'T307b',
-    names: { casa: 'home', lavoro: 'work', piazza: 'square', 'in giro': 'about' },
+    names: { casa: 'home', lavoro: 'work', piazza: 'square', 'in giro': 'about', impresa: 'venture' },
+    note: '`impresa` è il posto di un compito di mestiere (il cantiere, T307b); i posti `casella:<codice>` ed `entita:<tag>` restano finché T308a non cambia i campi',
   }),
   d({
     id: 'attivita',
@@ -297,7 +298,7 @@ export const INTERNAL_NAMES: readonly NameDomain[] = [
     step: 'T307b',
     names: {
       boscaiolo: 'woodcutter', contadino: 'farmer', cuoco: 'cook', fabbro: 'smith', guardia: 'guard', impiegato: 'clerk', mercante: 'merchant',
-      oste: 'innkeeper', pastore: 'shepherd', pescatore: 'fisher', sacerdote: 'priest', scrivano: 'scribe',
+      oste: 'innkeeper', pastore: 'shepherd', pescatore: 'fisher', sacerdote: 'priest', scrivano: 'scribe', qualunque: 'any',
     },
     note: 'il mestiere di un individuo (`mestiere`) è testo del mondo; `matchJob` lo lega all’id',
   }),
@@ -436,7 +437,8 @@ export const INTERNAL_NAMES: readonly NameDomain[] = [
     reach: ['disco', 'filo'],
     lang: 'en',
     step: 'T307b',
-    names: { io: 'me', singola: 'single', multigiocatore: 'multiplayer', rifiuto: 'refusal', invalido: 'invalid', errore: 'error', guasto: 'fault' },
+    names: { singola: 'single', multigiocatore: 'multiplayer', rifiuto: 'refusal', invalido: 'invalid', errore: 'error', guasto: 'fault' },
+    note: 'l’id del viandante della partita singola (`io`) passa con T308a (dominio `viandante-solo`): è il nome di un file dei viandanti e la chiave dei saldi fuori dall’universo',
   }),
   d({
     id: 'solo-codice',
@@ -460,7 +462,65 @@ export const INTERNAL_NAMES: readonly NameDomain[] = [
     note: '`screen` c’è già (`ItemKind`): il dispositivo `schermo` diventa `display`',
   }),
 
+  d({
+    id: 'esiti-lavoro',
+    title: 'Esiti dei compiti di `sys.work` e i loro motivi',
+    kind: 'values',
+    where: ['universe/modules/sys.work/logic.lua (B.*, M.update)', 'componente lavoro.motivo'],
+    reach: ['lua'],
+    lang: 'en',
+    step: 'T307b',
+    names: {
+      finito: 'done', continua: 'ongoing', fallito: 'failed', 'nessuna via': 'no_way', 'non ci arriva': 'unreachable',
+      'comportamento sconosciuto': 'unknown_behaviour', 'nessun posto': 'no_place', manca: 'missing', 'il deposito è pieno': 'deposit_full',
+      'nessuna cosa da usare': 'nothing_to_use',
+    },
+    note: 'un esito è `done`, `ongoing` o `failed:<motivo>` (`failed:missing:item.grano`); lo legge solo il Lua del seme, e il motivo resta nel componente `lavoro` (T314)',
+  }),
+  d({
+    id: 'suoni-seme',
+    title: 'Id dei programmi sonori del seme',
+    kind: 'values',
+    where: ['universe/models/suono-*.xml', 'models/index.json', 'src/kernel/agents/composer.ts (EXAMPLES)', 'tests/fixtures/mj-engine-hashes.json'],
+    reach: ['disco'],
+    lang: 'en',
+    step: 'T307b',
+    names: {
+      'suono-architettura-frattale': 'sound-fractal-architecture', 'suono-effetto-allarme-sirena': 'sound-effect-siren-alarm',
+      'suono-effetto-arpeggio': 'sound-effect-arpeggio', 'suono-effetto-cristallo-risonante': 'sound-effect-resonant-crystal',
+      'suono-effetto-cura-benedizione': 'sound-effect-healing-blessing', 'suono-effetto-dialogo-saluto': 'sound-effect-greeting',
+      'suono-effetto-esplosione-crollo': 'sound-effect-explosion-collapse', 'suono-effetto-forgia-martello': 'sound-effect-forge-hammer',
+      'suono-effetto-fuoco-scoppiettante': 'sound-effect-crackling-fire', 'suono-effetto-guasto': 'sound-effect-fault',
+      'suono-effetto-incantesimo': 'sound-effect-spell', 'suono-effetto-meccanismo-leva': 'sound-effect-lever-mechanism',
+      'suono-effetto-moneta-scambio': 'sound-effect-coin-trade', 'suono-effetto-morte': 'sound-effect-death', 'suono-effetto-morte-v2': 'sound-effect-death-v2',
+      'suono-effetto-oggetto': 'sound-effect-item', 'suono-effetto-passo-acqua': 'sound-effect-water-step', 'suono-effetto-passo-metallo': 'sound-effect-metal-step',
+      'suono-effetto-porta-pesante': 'sound-effect-heavy-door', 'suono-effetto-ritorno': 'sound-effect-rollback', 'suono-effetto-runa': 'sound-effect-rune',
+      'suono-effetto-salita-livello': 'sound-effect-level-up', 'suono-effetto-salto': 'sound-effect-jump', 'suono-effetto-scarica-elettrica': 'sound-effect-electric-discharge',
+      'suono-effetto-scoperta-segreto': 'sound-effect-secret-found', 'suono-effetto-soglia': 'sound-effect-threshold', 'suono-effetto-teletrasporto': 'sound-effect-teleport',
+      'suono-effetto-vapore-pressione': 'sound-effect-steam-pressure', 'suono-effetto-veleno-danno': 'sound-effect-poison-damage', 'suono-effetto-vento-alta-quota': 'sound-effect-high-wind',
+      'suono-fantasy-citta-locanda': 'sound-fantasy-town-inn', 'suono-fantasy-esplorazione-giorno': 'sound-fantasy-exploration-day',
+      'suono-fantasy-esplorazione-notte': 'sound-fantasy-exploration-night', 'suono-fantasy-luogo-sacro': 'sound-fantasy-sacred-place',
+      'suono-fantasy-sotterraneo-abisso': 'sound-fantasy-abyss-dungeon', 'suono-fantasy-tensione-pericolo': 'sound-fantasy-danger-tension',
+      'suono-fuga-cellulare': 'sound-cellular-fugue', 'suono-musica-notte': 'sound-music-night', 'suono-musica-oltre': 'sound-music-beyond',
+      'suono-musica-pastorale': 'sound-music-pastoral', 'suono-musica-pietra': 'sound-music-stone', 'suono-musica-profondo': 'sound-music-deep',
+      'suono-musica-selva': 'sound-music-woods', 'suono-musica-tramonto': 'sound-music-sunset', 'suono-scontro-finale': 'sound-final-battle',
+      'suono-sentiero-melodico': 'sound-melodic-path',
+    },
+    note: 'i programmi sonori che il Musicista ha scritto negli universi salvati restano; i suoi nuovi nascono `sound-<uso>-<nome>`. La classe `suono` dell’indice resta (T308a)',
+  }),
+
   // --- T308a: the fields and the files of a universe (contract 0.4) --------------------------------------------------------------------
+  d({
+    id: 'viandante-solo',
+    title: 'L’id del viandante della partita singola',
+    kind: 'values',
+    where: ['src/kernel/wanderers.ts (SOLO)', 'world/giocatori/io.json', 'universe.json → partita.master', 'carta → autore, pagante, titolare', 'universes/.saldi/<nome>.json'],
+    reach: ['disco', 'filo'],
+    lang: 'en',
+    step: 'T308a',
+    names: { io: 'me' },
+    note: 'spostato da T307b (che aveva `io` fra le modalità): cambia con i percorsi dei viandanti (`world/giocatori/` → `world/players/`) e con le cartelle dei saldi, che T308a porta insieme leggendo anche il nome vecchio',
+  }),
   d({
     id: 'campi-universe',
     title: 'Campi di `universe.json`',
@@ -887,5 +947,148 @@ export function internalModelInfo<T>(raw: T): T {
   const o: Record<string, unknown> = { ...raw };
   if ('classe' in o) o.classe = named('classi', o.classe);
   if ('taglia' in o) o.taglia = named('taglie', o.taglia);
+  return o as T;
+}
+
+// --- The contract 0.3 (T307b): the repair of the values of society, work and the Council -----------------------------------------------
+// Like those of 0.2: idempotent, and what they do not know stays. The migration of a universe (migrations.ts) and what reads a value the
+// Council still writes in Italian (the Narrator's individuals and plots, the Musician's sounds, a stray program of a trade) use them.
+
+/** The id of an agent of the Council, internal (`narratore` → `narrator`); any other id as it is. */
+export const internalAgent = (v: string): string => internalName('agenti', v);
+
+/** The id of a module of the seed the kernel names (`sys.lavoro` → `sys.work`, `obj.letto` → `obj.bed`); a module of the Council stays. */
+export const internalModuleId = (v: string): string => internalName('moduli-seme', v);
+
+/**
+ * The id of a model of the contract 0.3: the seed's sound programs (`suono-musica-pietra` → `sound-music-stone`) and the gerboas of the
+ * Council's teams (`corona-gerboa-narratore` → `corona-gerboa-narrator`). The 0.2 ids are `internalModelId`'s; any other id stays.
+ */
+export function internalModelId0_3(id: string): string {
+  const sound = internalName('suoni-seme', id);
+  if (sound !== id) return sound;
+  const m = /^(corona-gerboa-)(.+)$/.exec(id);
+  return m ? `${m[1]}${internalAgent(m[2])}` : id;
+}
+
+/** A routine's step: its moment, its place, its activity. */
+function internalRoutineStep(raw: unknown): unknown {
+  if (!isRecord(raw)) return raw;
+  const o = { ...raw };
+  if ('quando' in o) o.quando = named('momenti', o.quando);
+  if ('dove' in o) o.dove = named('dove', o.dove);
+  if ('azione' in o) o.azione = named('attivita', o.azione);
+  return o;
+}
+
+/** An individual of world/people.json: species, gender, routine, the module of its archetype. */
+export function internalIndividual<T>(raw: T): T {
+  if (!isRecord(raw)) return raw;
+  const o: Record<string, unknown> = { ...raw };
+  if ('specie' in o) o.specie = named('specie', o.specie);
+  if ('genere' in o) o.genere = named('specie', o.genere);
+  if (typeof o.tipo === 'string') o.tipo = internalModuleId(o.tipo);
+  if (Array.isArray(o.routine)) o.routine = o.routine.map(internalRoutineStep);
+  return o as T;
+}
+
+/** world/people.json: every individual internal. */
+export const internalPeople = (raw: unknown): unknown => (isRecord(raw) && Array.isArray(raw.persone) ? { ...raw, persone: raw.persone.map(internalIndividual) } : raw);
+
+/** A plot of world/plots.json: its state, the moments and places of its beats, its quest (state, goal). */
+export function internalPlot<T>(raw: T): T {
+  if (!isRecord(raw)) return raw;
+  const o: Record<string, unknown> = { ...raw };
+  if ('stato' in o) o.stato = named('trame', o.stato);
+  if (Array.isArray(o.tappe)) o.tappe = o.tappe.map((b) => (isRecord(b) ? { ...b, ...('momento' in b ? { momento: named('momenti', b.momento) } : {}), ...('dove' in b ? { dove: named('dove', b.dove) } : {}) } : b));
+  if (isRecord(o.missione)) {
+    const q: Record<string, unknown> = { ...o.missione };
+    if ('stato' in q) q.stato = named('trame', q.stato);
+    if (isRecord(q.obiettivo) && 'tipo' in q.obiettivo) q.obiettivo = { ...q.obiettivo, tipo: named('trame', q.obiettivo.tipo) };
+    o.missione = q;
+  }
+  return o as T;
+}
+
+/** world/plots.json: every plot internal. */
+export const internalPlots = (raw: unknown): unknown => (isRecord(raw) && Array.isArray(raw.trame) ? { ...raw, trame: raw.trame.map(internalPlot) } : raw);
+
+/** A venture of world/imprese.json: its type and state, the trades of its roles, the pose of its task. */
+export function internalVenture<T>(raw: T): T {
+  if (!isRecord(raw)) return raw;
+  const o: Record<string, unknown> = { ...raw };
+  if ('tipo' in o) o.tipo = named('imprese', o.tipo);
+  if ('stato' in o) o.stato = named('imprese', o.stato);
+  if (Array.isArray(o.ruoli)) o.ruoli = o.ruoli.map((r) => (isRecord(r) && 'mestiere' in r ? { ...r, mestiere: named('mestieri', r.mestiere) } : r));
+  if (isRecord(o.compito) && 'posa' in o.compito) o.compito = { ...o.compito, posa: named('attivita', o.compito.posa) };
+  return o as T;
+}
+
+/** A place of a task of a trade (`lavoro`, `casella:m`): the four of the kernel internal, the others as they are. */
+const jobPlace = (v: unknown): unknown => named('dove', v);
+
+/**
+ * A program of a trade (`mestieri[]` of a data module): its id, the moments of its day, and for every task the behaviour, the places,
+ * the pose. `a` is a place only for `carry` and `take` (for `transform` it is a tile).
+ */
+export function internalJobProgram<T>(raw: T): T {
+  if (!isRecord(raw)) return raw;
+  const o: Record<string, unknown> = { ...raw };
+  if (typeof o.id === 'string') o.id = internalName('mestieri', o.id);
+  if (isRecord(o.giornata)) {
+    const day: Record<string, unknown> = {};
+    for (const [phase, list] of Object.entries(o.giornata)) {
+      const key = internalName('momenti', phase);
+      if (key !== phase && Object.hasOwn(o.giornata, key)) continue;
+      day[key] = Array.isArray(list)
+        ? list.map((t) => {
+            if (!isRecord(t)) return t;
+            const x: Record<string, unknown> = { ...t };
+            if ('fa' in x) x.fa = named('comportamenti', x.fa);
+            if ('dove' in x) x.dove = jobPlace(x.dove);
+            if ('a' in x && (x.fa === 'carry' || x.fa === 'take')) x.a = jobPlace(x.a);
+            if ('posa' in x) x.posa = named('attivita', x.posa);
+            if (Array.isArray(x.percorso)) x.percorso = x.percorso.map(jobPlace);
+            return x;
+          })
+        : list;
+    }
+    o.giornata = day;
+  }
+  return o as T;
+}
+
+/** What a sound program is for (`models/index.json → suono`): its use, the effects it answers to, the moments it plays in. */
+export function internalSoundPurpose<T>(raw: T): T {
+  if (!isRecord(raw)) return raw;
+  const o: Record<string, unknown> = { ...raw };
+  if ('uso' in o) o.uso = named('suoni', o.uso);
+  if (Array.isArray(o.effetti)) o.effetti = o.effetti.map((e) => named('suoni', e));
+  if (Array.isArray(o.momenti)) o.momenti = o.momenti.map((e) => named('momenti', e));
+  return o as T;
+}
+
+/** The Sculptor's models by class (`ai.scultori`, `ai.minimi.scultori`): the keys of the classes internal (`semplice` → `simple`). */
+export const internalSculptors = <T>(raw: T): T => (isRecord(raw) ? (renameFields(raw, 'classi-scultore') as T) : raw);
+
+/** The coefficients of generation (`ai.coefficienti`, `ai.minimi.coefficienti`): their keys internal (`trame` → `plots`). */
+export const internalCoefficients = <T>(raw: T): T => (isRecord(raw) ? (renameFields(raw, 'coefficienti') as T) : raw);
+
+/** The id of a card or of a node of the graph (`modello:albero`, `persona:ada`): its kind internal (`model:albero`, `individual:ada`). */
+export function internalCardId(id: string): string {
+  const m = /^([a-z]+):(.*)$/s.exec(id);
+  if (!m) return id;
+  const kind = internalName('carte', m[1]);
+  return kind === m[1] ? id : `${kind}:${m[2]}`;
+}
+
+/** A node of world/grafo.json: its kind and id internal; a link: its ends. */
+export function internalGraph<T>(raw: T): T {
+  if (!isRecord(raw)) return raw;
+  const o: Record<string, unknown> = { ...raw };
+  if (Array.isArray(o.nodes))
+    o.nodes = o.nodes.map((n) => (isRecord(n) ? { ...n, ...(typeof n.id === 'string' ? { id: internalCardId(n.id) } : {}), ...(typeof n.tipo === 'string' ? { tipo: internalName('carte', n.tipo) } : {}) } : n));
+  if (Array.isArray(o.links))
+    o.links = o.links.map((l) => (isRecord(l) ? { ...l, ...(typeof l.source === 'string' ? { source: internalCardId(l.source) } : {}), ...(typeof l.target === 'string' ? { target: internalCardId(l.target) } : {}) } : l));
   return o as T;
 }

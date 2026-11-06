@@ -29,7 +29,7 @@ describe('the showcases of the studio', () => {
       expect(show.source, id).toBe(SHOWCASES[id].source);
       // The arrows on its middle row (the printer and the model of places are PRINTER rows deep, T24, T26).
       const h = show.h ?? 1;
-      expect(h, id).toBe(SHOWCASES[id].device === 'stampante' || SHOWCASES[id].device === 'plastico' ? PRINTER : 1);
+      expect(h, id).toBe(SHOWCASES[id].device === 'printer' || SHOWCASES[id].device === 'diorama' ? PRINTER : 1);
       const row = show.y + Math.floor(h / 2);
       expect([prev.x, prev.y, next.x, next.y]).toEqual([show.x - 1, row, show.x + show.w!, row]);
       // Nothing else on its cells; they block, the row in front is free, and the entrance is not in the way.
@@ -49,16 +49,16 @@ describe('the showcases of the studio', () => {
 
   it('has something to show from every source, with a model where things have one', async () => {
     const k = await boot();
-    const runes = k.showcaseEntries('rune');
+    const runes = k.showcaseEntries('runes');
     expect(runes.some((e) => e.id === 'rune:lux' && e.runes?.[0] === 'lux')).toBe(true);
     expect(runes.every((e) => e.facts.some(([w]) => w === 'Effetto'))).toBe(true);
-    const people = k.showcaseEntries('persone');
+    const people = k.showcaseEntries('people');
     expect(people.map((e) => e.id)).toContain('module:npc.villager');
     expect(people.every((e) => e.model && e.path?.startsWith('modules/npc.'))).toBe(true);
-    const things = k.showcaseEntries('cose');
+    const things = k.showcaseEntries('entities');
     expect(things.length).toBeGreaterThan(1);
     expect(things.every((e) => e.model)).toBe(true);
-    const objects = k.showcaseEntries('oggetti');
+    const objects = k.showcaseEntries('items');
     expect(objects.length).toBeGreaterThan(3);
     expect(objects.every((e) => e.model && e.facts.length >= 3)).toBe(true);
   });
@@ -87,7 +87,7 @@ describe('the showcases of the studio', () => {
     await k.interact();
     expect(k.clickStudio(at('showcase').x + 0.5, at('showcase').y + 0.5)).toBe(true);
     expect(panels.length).toBe(2);
-    expect(panels[0].entry.id).toBe(k.showcaseEntries('persone')[first.count - 1].id);
+    expect(panels[0].entry.id).toBe(k.showcaseEntries('people')[first.count - 1].id);
     expect(panels[0].name).toBe('Studio dei Personaggi');
     // A click on the tall device falls on the ground behind it: it still counts.
     expect(k.clickStudio(at('showcase').x + 1.5, at('showcase').y - 0.4)).toBe(true);
@@ -106,7 +106,7 @@ describe('the screen of the Tower of Magic (T22)', () => {
     // A combination of three (it burns a crystal) and a rune nobody has spoken yet.
     k.content.spells['lux ignis ventus'] = { name: 'Cometa', description: 'Una scia di fuoco e luce.', cost: 20, effects: [{ type: 'fire', radius: 1, duration: 5 }, { type: 'light', radius: 4, duration: 30 }] };
     delete k.content.spells.vita;
-    const all = k.showcaseEntries('rune');
+    const all = k.showcaseEntries('runes');
     const tokens = Object.keys(k.content.runes);
     expect(all.slice(0, tokens.length).map((e) => e.id)).toEqual(tokens.map((t) => `rune:${t}`));
     expect(all.slice(tokens.length).map((e) => e.id)).toEqual(['spell:terra ignis', 'spell:lux ignis ventus']);
@@ -130,13 +130,13 @@ describe('the screen of the Tower of Magic (T22)', () => {
   });
 
   it('shows each individual after its type, with the look it has in the world, the individual and the module (T23)', async () => {
-    const routine = [{ quando: 'mattina', fa: 'impasta il pane', dove: 'lavoro' }];
+    const routine = [{ quando: 'morning', fa: 'impasta il pane', dove: 'work' }];
     const persone = [
-      { nome: 'Mara', specie: 'persona', genere: 'femmina', tipo: 'npc.villager', mestiere: 'fornaia', famiglia: [{ nome: 'Teo', legame: 'madre' }], routine, storia: 'Ha aperto il forno del borgo.', origine: '0,0#3', aspetto: 'grembiule infarinato' },
-      { nome: 'Teo', specie: 'persona', genere: 'maschio', tipo: 'npc.villager', mestiere: 'garzone', famiglia: [{ nome: 'Mara', legame: 'figlio' }], routine },
+      { nome: 'Mara', specie: 'person', genere: 'female', tipo: 'npc.villager', mestiere: 'fornaia', famiglia: [{ nome: 'Teo', legame: 'madre' }], routine, storia: 'Ha aperto il forno del borgo.', origine: '0,0#3', aspetto: 'grembiule infarinato' },
+      { nome: 'Teo', specie: 'person', genere: 'male', tipo: 'npc.villager', mestiere: 'garzone', famiglia: [{ nome: 'Mara', legame: 'figlio' }], routine },
     ];
     const k = await Kernel.boot({ files: { ...bundledFiles, 'world/people.json': JSON.stringify({ persone, attesi: [] }) }, store: memoryStore(), ai: new MockAiModels() });
-    const all = k.showcaseEntries('persone');
+    const all = k.showcaseEntries('people');
     const at = all.findIndex((e) => e.id === 'module:npc.villager');
     expect(all.slice(at + 1, at + 3).map((e) => e.id)).toEqual(['individual:Mara', 'individual:Teo']);
     const type = all[at], mara = all[at + 1], teo = all[at + 2];
@@ -164,7 +164,7 @@ describe('the printers of the things and of the objects (T24)', () => {
     for (const id of ['cose', 'oggetti']) {
       const f = k.corona.building(id)!.storeys[0];
       const show = f.items.find((i) => i.kind === 'showcase')!;
-      expect([show.device, show.w, show.h], id).toEqual(['stampante', 3, 3]);
+      expect([show.device, show.w, show.h], id).toEqual(['printer', 3, 3]);
       // The middle cell is the printer, from the kernel's point of view.
       const mid = { x: show.x + 1, y: show.y + 1 };
       expect(k.corona.at(mid.x, mid.y)?.item, id).toBe(show);

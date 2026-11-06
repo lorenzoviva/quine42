@@ -121,9 +121,9 @@ describe('T56a: niente cose solide sui passaggi obbligati', () => {
       place: { name: 'Ponte sul Lago', description: 'Una passerella sottile attraversa le acque.' },
       layout: 'passerella',
       objects: [
-        { module: 'obj.banco', where: 'fuori' },
-        { module: 'obj.cassa', where: 'fuori' },
-        { module: 'obj.letto', where: 'ovunque' },
+        { module: 'obj.counter', where: 'fuori' },
+        { module: 'obj.chest', where: 'fuori' },
+        { module: 'obj.bed', where: 'ovunque' },
         { module: 'object.sign', where: 'ovunque' },
       ],
       ground: ['Mela rossa'],
@@ -196,7 +196,7 @@ describe('T56a: niente cose solide sui passaggi obbligati', () => {
       place: { name: 'Molo con Nicchia', description: 'Un sentiero con una banchina laterale.' },
       layout: 'lago',
       objects: [
-        { module: 'obj.cassa', where: 'fuori' },
+        { module: 'obj.chest', where: 'fuori' },
       ],
       ground: [],
       fresh: [],

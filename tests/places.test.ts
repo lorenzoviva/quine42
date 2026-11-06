@@ -30,11 +30,11 @@ describe('the model of places (T26)', () => {
     const { k } = await boot();
     const f = k.corona.building('luoghi')!.storeys[0];
     const show = f.items.find((i) => i.kind === 'showcase')!;
-    expect([show.source, show.device, show.w, show.h]).toEqual(['luoghi', 'plastico', 3, 3]);
+    expect([show.source, show.device, show.w, show.h]).toEqual(['chunks', 'diorama', 3, 3]);
     const planned = [...k.chunks.values()].filter((c) => c.stage === 'planned');
     expect(planned.length).toBeGreaterThan(1);
-    const entries = k.showcaseEntries('luoghi');
-    expect(entries.map((e) => e.id).sort()).toEqual(planned.map((c) => `luogo:${c.cx}_${c.cy}`).sort());
+    const entries = k.showcaseEntries('chunks');
+    expect(entries.map((e) => e.id).sort()).toEqual(planned.map((c) => `chunk:${c.cx}_${c.cy}`).sort());
     // The wanderer is in the starting place: it comes first, then the others by distance.
     expect(entries[0].place).toEqual({ cx: 0, cy: 0 });
     const far = entries.map((e) => Math.hypot(e.place!.cx, e.place!.cy));
@@ -54,9 +54,9 @@ describe('the model of places (T26)', () => {
     k.bus.on('ui:showcase', (e: any) => panels.push(e));
     Object.assign(k.wandererPos(), { x: show.x + 1.5, y: show.y + 3.5 });
     k.zone = 'studio';
-    expect(k.showcaseEntries('luoghi')[0].id).toBe('luogo:0_0');
+    expect(k.showcaseEntries('chunks')[0].id).toBe('chunk:0_0');
     expect(k.clickStudio(show.x + 1.5, show.y + 1.5)).toBe(true);
-    expect(panels.at(-1).entry.id).toBe('luogo:0_0');
+    expect(panels.at(-1).entry.id).toBe('chunk:0_0');
   }, 60_000);
 
   it('builds the miniature of a loaded place as the world is: tiles, levels, structures, things, runes', async () => {

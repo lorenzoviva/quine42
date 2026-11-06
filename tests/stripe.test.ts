@@ -26,7 +26,7 @@ async function bootMultiplayerKernel(): Promise<Kernel> {
   const cfg = JSON.parse(bundledFiles['universe.json']);
   const files = {
     ...bundledFiles,
-    'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2),
+    'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2),
   };
   return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 }

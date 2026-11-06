@@ -156,7 +156,7 @@ describe('a building that rises in a world', () => {
     addWork(w, 1e6);
     k.tick(1 / 60);
     for (let i = 0; i < 70; i++) k.tick(1 / 60);
-    expect(k.ventures()[0].stato).toBe('finita');
+    expect(k.ventures()[0].stato).toBe('finished');
     expect(k.ecs.get(structureOf(k, origin)!, 'struttura').stadio).toBeUndefined();
     expect(k.chunks.get(key)!.plan!.stadi).toBeUndefined();
   }, 120000);

@@ -69,7 +69,7 @@ const until = async (what: () => unknown, ms: number, label: string) => {
 function makeUniverse(universes: string, name: string, master: string): string {
   const root = path.join(universes, name);
   const cfg = JSON.parse(bundledFiles['universe.json']);
-  const files: Record<string, string> = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, name, partita: { modalita: 'multigiocatore', morte: 3, master } }) };
+  const files: Record<string, string> = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, name, partita: { modalita: 'multiplayer', morte: 3, master } }) };
   for (const [rel, text] of Object.entries(files)) {
     mkdirSync(path.dirname(path.join(root, rel)), { recursive: true });
     writeFileSync(path.join(root, rel), text);
@@ -299,7 +299,7 @@ describe('con gli account', () => {
     });
 
     it('V-001 chi fa un universo ne è il master, qualunque cosa dicano i file; un anonimo e nessuno no', async () => {
-      const files = { 'universe.json': JSON.stringify({ name: 'fatto', partita: { modalita: 'multigiocatore', master: MASTER } }), [`world/giocatori/${ALICE}.json`]: '{"crediti":1000}' };
+      const files = { 'universe.json': JSON.stringify({ name: 'fatto', partita: { modalita: 'multiplayer', master: MASTER } }), [`world/giocatori/${ALICE}.json`]: '{"crediti":1000}' };
       expect((await post('/api/universe/fatto/create', undefined, { files })).status).toBe(403);
       expect((await post('/api/universe/fatto/create', 'anon-uid-alice', { files })).status).toBe(403);
       expect(existsSync(path.join(universes, 'fatto'))).toBe(false);

@@ -31,23 +31,23 @@ const boot = (script: Record<string, (call: TextCall) => unknown> = {}, files = 
 
 const REFUSED = { 'referente.coordinate': () => ({ risposta: 'Questo no.', incarico: 'nessuno', rifiuto: 'distruggerebbe il mondo' }) };
 
-const NOTE: ShortfallNote = { richiesta: 'una torre che vola', chi: 'io', agente: 'ingegnere', compito: 'forge.code', esito: 'invalido', motivo: 'funzione sconosciuta' };
+const NOTE: ShortfallNote = { richiesta: 'una torre che vola', chi: 'io', agente: 'engineer', compito: 'forge.code', esito: 'invalid', motivo: 'funzione sconosciuta' };
 
 describe('il registro delle mancanze', () => {
   it('una richiesta rifiutata dal Referente diventa una riga del rapporto, con chi, agente, motivo e volte', async () => {
     const k = await boot(REFUSED);
-    await k.talkToAgent('referente', 'cancella il mondo');
-    await k.talkToAgent('referente', 'Cancella  il mondo');
+    await k.talkToAgent('liaison', 'cancella il mondo');
+    await k.talkToAgent('liaison', 'Cancella  il mondo');
     expect(k.shortfalls.list()).toHaveLength(1);
     const report = shortfallReport([{ universo: 'prova', voci: k.shortfalls.list() }]);
-    expect(report).toContain('| 2 | cancella il mondo | io | referente | referente.coordinate | rifiuto | distruggerebbe il mondo | prova |');
+    expect(report).toContain('| 2 | cancella il mondo | io | liaison | referente.coordinate | refusal | distruggerebbe il mondo | prova |');
   });
 
   it('la Fucina: il validatore che rifiuta anche l\'ultimo tentativo finisce sull\'Ingegnere', async () => {
     const k = await boot({ 'forge.code': () => ({ logic: 'questo non è lua (', note: '' }) });
     const r = await k.forgeModule('una madia di legno', 'agente', 'oggetto', true);
     expect(r.ok).toBe(false);
-    expect(k.shortfalls.list()).toEqual([expect.objectContaining({ richiesta: 'una madia di legno', chi: ['io'], agente: 'ingegnere', compito: 'forge.concept', esito: 'invalido', volte: 1 })]);
+    expect(k.shortfalls.list()).toEqual([expect.objectContaining({ richiesta: 'una madia di legno', chi: ['io'], agente: 'engineer', compito: 'forge.concept', esito: 'invalid', volte: 1 })]);
     expect(k.shortfalls.list()[0].motivo).toContain('modulo non valido');
   });
 
@@ -58,7 +58,7 @@ describe('il registro delle mancanze', () => {
       },
     });
     await k.forgeModule('un abitante', 'cartografo', 'npc');
-    expect(k.shortfalls.list()).toEqual([expect.objectContaining({ chi: ['comune'], agente: 'fisico', esito: 'errore', motivo: 'rete caduta' })]);
+    expect(k.shortfalls.list()).toEqual([expect.objectContaining({ chi: ['comune'], agente: 'physicist', esito: 'error', motivo: 'rete caduta' })]);
   });
 
   it('le azioni libere: il rifiuto si conta anche quando è già una regola, il silenzio del modello è un errore', async () => {
@@ -68,7 +68,7 @@ describe('il registro delle mancanze', () => {
     await k.freeAction(npc, 'volo via');
     await k.freeAction(npc, 'volo via');
     const [v] = k.shortfalls.list();
-    expect(v).toMatchObject({ chi: ['io'], agente: 'narratore', compito: 'action.judge', esito: 'rifiuto', motivo: 'Non si vola.', volte: 2 });
+    expect(v).toMatchObject({ chi: ['io'], agente: 'narrator', compito: 'action.judge', esito: 'refusal', motivo: 'Non si vola.', volte: 2 });
 
     const silent = await boot({
       'action.judge': () => {
@@ -77,7 +77,7 @@ describe('il registro delle mancanze', () => {
     });
     const p2 = silent.wandererCarpet();
     await silent.freeAction(silent.spawnModuleEntity(silent.modules.get('npc.villager')!, p2.x + 2, p2.y, undefined, 'prova'), 'volo via');
-    expect(silent.shortfalls.list()[0]).toMatchObject({ esito: 'errore', motivo: 'scaduta' });
+    expect(silent.shortfalls.list()[0]).toMatchObject({ esito: 'error', motivo: 'scaduta' });
   });
 
   it('l\'Ingegnere che non ripara lascia una voce, chi è del mondo', async () => {
@@ -86,19 +86,19 @@ describe('il registro delle mancanze', () => {
     expect(f.ok).toBe(true);
     expect(await k.repairGenerated(`module:${f.id}:on_act`, 'attempt to index nil')).toBe(false);
     const [v] = k.shortfalls.list();
-    expect(v).toMatchObject({ chi: ['comune'], agente: 'ingegnere', compito: 'forge.fix', esito: 'guasto' });
+    expect(v).toMatchObject({ chi: ['comune'], agente: 'engineer', compito: 'forge.fix', esito: 'fault' });
     expect(v.richiesta).toContain('attempt to index nil');
   });
 
   it('sul ramo del master la voce va al registro del mondo, a nome del master', async () => {
     const cfg = JSON.parse(bundledFiles['universe.json']);
-    const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3, master: 'capo' } }, null, 2) };
+    const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3, master: 'capo' } }, null, 2) };
     const k = await boot(REFUSED, files);
     expect(k.giveCredits('capo', 10)).toBe(true);
     const fork = await k.branchKernel({ ...k.files }, 'capo');
-    await fork.talkToAgent('referente', 'cancella il mondo');
+    await fork.talkToAgent('liaison', 'cancella il mondo');
     expect(fork.shortfalls.list()).toEqual([]);
-    expect(k.shortfalls.list()).toEqual([expect.objectContaining({ richiesta: 'cancella il mondo', chi: ['capo'], esito: 'rifiuto' })]);
+    expect(k.shortfalls.list()).toEqual([expect.objectContaining({ richiesta: 'cancella il mondo', chi: ['capo'], esito: 'refusal' })]);
   });
 
   it('il salvataggio porta le voci anche se non è cambiato altro, un rollback non le perde, un riavvio le ritrova', async () => {
@@ -107,7 +107,7 @@ describe('il registro delle mancanze', () => {
     k.tick(1 / 60);
     k.saveState();
     expect(k.repo.head().files[SHORTFALLS_FILE]).toBeUndefined();
-    await k.talkToAgent('referente', 'cancella il mondo');
+    await k.talkToAgent('liaison', 'cancella il mondo');
     expect(k.saveState()).toBe(true);
     const saved = k.repo.head().files[SHORTFALLS_FILE]!;
     expect(readShortfalls(saved)).toHaveLength(1);
@@ -121,7 +121,7 @@ describe('il registro delle mancanze', () => {
     expect(k.repo.head().files[SHORTFALLS_FILE]).toBe(saved);
 
     const again = await Kernel.boot({ files: bundledFiles, store, ai: new Scripted(REFUSED) });
-    await again.talkToAgent('referente', 'cancella il mondo');
+    await again.talkToAgent('liaison', 'cancella il mondo');
     expect(again.shortfalls.list()[0].volte).toBe(2);
   });
 });
@@ -183,7 +183,7 @@ describe('il rapporto', () => {
     try {
       const put = (name: string, volte: number) => {
         mkdirSync(path.join(root, name, 'world'), { recursive: true });
-        writeFileSync(path.join(root, name, 'world', 'mancanze.json'), JSON.stringify({ voci: [{ richiesta: `in ${name}`, chi: ['io'], agente: 'narratore', compito: 'action.judge', esito: 'rifiuto', motivo: 'no', volte, primo: '2026-11-04', ultimo: '2026-11-04' }] }));
+        writeFileSync(path.join(root, name, 'world', 'mancanze.json'), JSON.stringify({ voci: [{ richiesta: `in ${name}`, chi: ['io'], agente: 'narrator', compito: 'action.judge', esito: 'rifiuto', motivo: 'no', volte, primo: '2026-11-04', ultimo: '2026-11-04' }] }));
       };
       put('alfa', 1);
       put('beta', 7);

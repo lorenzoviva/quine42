@@ -249,61 +249,61 @@
   "autore": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 20
  },
- "corona-gerboa-narratore": {
+ "corona-gerboa-narrator": {
   "classe": "person",
   "nome": "Gerboa Narratore (corona)",
   "autore": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 20
  },
- "corona-gerboa-cartografo": {
+ "corona-gerboa-cartographer": {
   "classe": "person",
   "nome": "Gerboa Cartografo (corona)",
   "autore": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 20
  },
- "corona-gerboa-artista": {
+ "corona-gerboa-artist": {
   "classe": "person",
   "nome": "Gerboa Artista (corona)",
   "autore": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 20
  },
- "corona-gerboa-musicista": {
+ "corona-gerboa-musician": {
   "classe": "person",
   "nome": "Gerboa Musicista (corona)",
   "autore": "dal Gerboa Artista, a mano (T225)",
   "vpt": 20
  },
- "corona-gerboa-scultore": {
+ "corona-gerboa-sculptor": {
   "classe": "person",
   "nome": "Gerboa Scultore (corona)",
   "autore": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 20
  },
- "corona-gerboa-fisico": {
+ "corona-gerboa-physicist": {
   "classe": "person",
   "nome": "Gerboa Fisico (corona)",
   "autore": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 20
  },
- "corona-gerboa-ingegnere": {
+ "corona-gerboa-engineer": {
   "classe": "person",
   "nome": "Gerboa Ingegnere (corona)",
   "autore": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 20
  },
- "corona-gerboa-arbitro": {
+ "corona-gerboa-arbiter": {
   "classe": "person",
   "nome": "Gerboa Arbitro (corona)",
   "autore": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 20
  },
- "corona-gerboa-referente": {
+ "corona-gerboa-liaison": {
   "classe": "person",
   "nome": "Gerboa Referente (corona)",
   "autore": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 20
  },
- "corona-gerboa-attore": {
+ "corona-gerboa-actor": {
   "classe": "person",
   "nome": "Gerboa Attore (corona)",
   "autore": "claude-opus-5-5 (Claude Code, T158)",
@@ -328,32 +328,32 @@
   "vpt": 20,
   "tempo": 30000
  },
- "suono-sentiero-melodico": {
+ "sound-melodic-path": {
   "classe": "suono",
   "nome": "Sentiero Melodico",
   "autore": "Argon (SoundLab), in XML a mano (T221)"
  },
- "suono-fuga-cellulare": {
+ "sound-cellular-fugue": {
   "classe": "suono",
   "nome": "Fuga Cellular Automata",
   "autore": "Argon (SoundLab), in XML a mano (T221)"
  },
- "suono-architettura-frattale": {
+ "sound-fractal-architecture": {
   "classe": "suono",
   "nome": "Architettura Frattale",
   "autore": "Argon (SoundLab), in XML a mano (T221)"
  },
- "suono-scontro-finale": {
+ "sound-final-battle": {
   "classe": "suono",
   "nome": "Boss Fight Cyber-Dungeon",
   "autore": "Argon (SoundLab), in XML a mano (T221)"
  },
- "suono-musica-pastorale": {
+ "sound-music-pastoral": {
   "classe": "suono",
   "nome": "Prati",
   "autore": "a mano (T224)",
   "suono": {
-   "uso": "musica",
+   "uso": "music",
    "ambienti": [
     "village",
     "fields",
@@ -363,17 +363,17 @@
     "lake"
    ],
    "momenti": [
-    "mattina",
-    "giorno"
+    "morning",
+    "day"
    ]
   }
  },
- "suono-musica-selva": {
+ "sound-music-woods": {
   "classe": "suono",
   "nome": "Selva",
   "autore": "a mano (T224)",
   "suono": {
-   "uso": "musica",
+   "uso": "music",
    "ambienti": [
     "woods",
     "jungle",
@@ -382,17 +382,17 @@
     "wizard_tower"
    ],
    "momenti": [
-    "mattina",
-    "giorno"
+    "morning",
+    "day"
    ]
   }
  },
- "suono-musica-pietra": {
+ "sound-music-stone": {
   "classe": "suono",
   "nome": "Pietra",
   "autore": "a mano (T224)",
   "suono": {
-   "uso": "musica",
+   "uso": "music",
    "ambienti": [
     "castle",
     "fortress",
@@ -401,17 +401,17 @@
     "pyramid"
    ],
    "momenti": [
-    "mattina",
-    "giorno"
+    "morning",
+    "day"
    ]
   }
  },
- "suono-musica-profondo": {
+ "sound-music-deep": {
   "classe": "suono",
   "nome": "Profondo",
   "autore": "a mano (T224)",
   "suono": {
-   "uso": "musica",
+   "uso": "music",
    "ambienti": [
     "dungeon",
     "dragon_lair",
@@ -419,133 +419,133 @@
    ]
   }
  },
- "suono-musica-tramonto": {
+ "sound-music-sunset": {
   "classe": "suono",
   "nome": "Tramonto",
   "autore": "a mano (T224)",
   "suono": {
-   "uso": "musica",
+   "uso": "music",
    "momenti": [
-    "sera"
+    "evening"
    ]
   }
  },
- "suono-musica-notte": {
+ "sound-music-night": {
   "classe": "suono",
   "nome": "Notte",
   "autore": "a mano (T224)",
   "suono": {
-   "uso": "musica",
+   "uso": "music",
    "momenti": [
-    "notte"
+    "night"
    ]
   }
  },
- "suono-musica-oltre": {
+ "sound-music-beyond": {
   "classe": "suono",
   "nome": "Oltre",
   "autore": "a mano (T224)",
   "suono": {
-   "uso": "musica",
+   "uso": "music",
    "oltre": true
   }
  },
- "suono-effetto-runa": {
+ "sound-effect-rune": {
   "classe": "suono",
   "nome": "Runa",
   "autore": "a mano (T224)",
   "suono": {
-   "uso": "effetto",
+   "uso": "effect",
    "effetti": [
-    "runa"
+    "rune"
    ]
   }
  },
- "suono-effetto-oggetto": {
+ "sound-effect-item": {
   "classe": "suono",
   "nome": "Oggetto",
   "autore": "a mano (T224)",
   "suono": {
-   "uso": "effetto",
+   "uso": "effect",
    "effetti": [
-    "oggetto"
+    "item"
    ]
   }
  },
- "suono-effetto-arpeggio": {
+ "sound-effect-arpeggio": {
   "classe": "suono",
   "nome": "Arpeggio",
   "autore": "a mano (T224)",
   "suono": {
-   "uso": "effetto",
+   "uso": "effect",
    "effetti": [
     "arpeggio"
    ]
   }
  },
- "suono-effetto-incantesimo": {
+ "sound-effect-spell": {
   "classe": "suono",
   "nome": "Incantesimo",
   "autore": "a mano (T224)",
   "suono": {
-   "uso": "effetto",
+   "uso": "effect",
    "effetti": [
-    "incantesimo"
+    "spell"
    ]
   }
  },
- "suono-effetto-guasto": {
+ "sound-effect-fault": {
   "classe": "suono",
   "nome": "Guasto",
   "autore": "a mano (T224)",
   "suono": {
-   "uso": "effetto",
+   "uso": "effect",
    "effetti": [
-    "guasto"
+    "fault"
    ]
   }
  },
- "suono-effetto-ritorno": {
+ "sound-effect-rollback": {
   "classe": "suono",
   "nome": "Ritorno",
   "autore": "a mano (T224)",
   "suono": {
-   "uso": "effetto",
+   "uso": "effect",
    "effetti": [
-    "ritorno"
+    "rollback"
    ]
   }
  },
- "suono-effetto-soglia": {
+ "sound-effect-threshold": {
   "classe": "suono",
   "nome": "Soglia",
   "autore": "a mano (T224)",
   "suono": {
-   "uso": "effetto",
+   "uso": "effect",
    "effetti": [
-    "soglia"
+    "threshold"
    ]
   }
  },
- "suono-effetto-salto": {
+ "sound-effect-jump": {
   "classe": "suono",
   "nome": "Salto",
   "autore": "a mano (T224)",
   "suono": {
-   "uso": "effetto",
+   "uso": "effect",
    "effetti": [
-    "salto"
+    "jump"
    ]
   }
  },
- "suono-effetto-morte": {
+ "sound-effect-death": {
   "classe": "suono",
   "nome": "Morte",
   "autore": "a mano (T224)",
   "suono": {
-   "uso": "effetto",
+   "uso": "effect",
    "effetti": [
-    "morte"
+    "death"
    ]
   }
  },
@@ -599,28 +599,28 @@
   "nome": "Obelisco inciso",
   "autore": "Claude Cloud, props tematici (T270)"
  },
- "suono-fantasy-esplorazione-giorno": {
+ "sound-fantasy-exploration-day": {
   "classe": "suono",
   "nome": "Fantasy: esplorazione di giorno",
   "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
   "suono": {
-   "uso": "musica",
+   "uso": "music",
    "ambienti": [
     "mountains",
     "desert"
    ],
    "momenti": [
-    "mattina",
-    "giorno"
+    "morning",
+    "day"
    ]
   }
  },
- "suono-fantasy-esplorazione-notte": {
+ "sound-fantasy-exploration-night": {
   "classe": "suono",
   "nome": "Fantasy: esplorazione di notte",
   "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
   "suono": {
-   "uso": "musica",
+   "uso": "music",
    "ambienti": [
     "woods",
     "jungle",
@@ -628,288 +628,288 @@
     "desert"
    ],
    "momenti": [
-    "notte"
+    "night"
    ]
   }
  },
- "suono-fantasy-tensione-pericolo": {
+ "sound-fantasy-danger-tension": {
   "classe": "suono",
   "nome": "Fantasy: pericolo",
   "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
   "suono": {
-   "uso": "musica",
+   "uso": "music",
    "ambienti": [
     "fortress",
     "barracks"
    ],
    "momenti": [
-    "mattina",
-    "giorno"
+    "morning",
+    "day"
    ]
   }
  },
- "suono-fantasy-luogo-sacro": {
+ "sound-fantasy-sacred-place": {
   "classe": "suono",
   "nome": "Fantasy: luogo sacro",
   "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
   "suono": {
-   "uso": "musica",
+   "uso": "music",
    "ambienti": [
     "temple",
     "pyramid"
    ],
    "momenti": [
-    "mattina",
-    "giorno"
+    "morning",
+    "day"
    ]
   }
  },
- "suono-fantasy-citta-locanda": {
+ "sound-fantasy-town-inn": {
   "classe": "suono",
   "nome": "Fantasy: città e locanda",
   "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
   "suono": {
-   "uso": "musica",
+   "uso": "music",
    "ambienti": [
     "inn",
     "brick_village"
    ],
    "momenti": [
-    "mattina",
-    "giorno",
-    "sera"
+    "morning",
+    "day",
+    "evening"
    ]
   }
  },
- "suono-fantasy-sotterraneo-abisso": {
+ "sound-fantasy-abyss-dungeon": {
   "classe": "suono",
   "nome": "Fantasy: sotterraneo",
   "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
   "suono": {
-   "uso": "musica",
+   "uso": "music",
    "ambienti": [
     "dragon_lair",
     "ruins"
    ]
   }
  },
- "suono-effetto-allarme-sirena": {
+ "sound-effect-siren-alarm": {
   "classe": "suono",
   "nome": "Allarme sirena",
   "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
   "suono": {
-   "uso": "effetto",
+   "uso": "effect",
    "effetti": [
     "allarme-sirena"
    ]
   }
  },
- "suono-effetto-cristallo-risonante": {
+ "sound-effect-resonant-crystal": {
   "classe": "suono",
   "nome": "Cristallo risonante",
   "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
   "suono": {
-   "uso": "effetto",
+   "uso": "effect",
    "effetti": [
     "cristallo-risonante"
    ]
   }
  },
- "suono-effetto-cura-benedizione": {
+ "sound-effect-healing-blessing": {
   "classe": "suono",
   "nome": "Cura benedizione",
   "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
   "suono": {
-   "uso": "effetto",
+   "uso": "effect",
    "effetti": [
     "cura-benedizione"
    ]
   }
  },
- "suono-effetto-dialogo-saluto": {
+ "sound-effect-greeting": {
   "classe": "suono",
   "nome": "Dialogo saluto",
   "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
   "suono": {
-   "uso": "effetto",
+   "uso": "effect",
    "effetti": [
     "dialogo-saluto"
    ]
   }
  },
- "suono-effetto-esplosione-crollo": {
+ "sound-effect-explosion-collapse": {
   "classe": "suono",
   "nome": "Esplosione crollo",
   "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
   "suono": {
-   "uso": "effetto",
+   "uso": "effect",
    "effetti": [
     "esplosione-crollo"
    ]
   }
  },
- "suono-effetto-forgia-martello": {
+ "sound-effect-forge-hammer": {
   "classe": "suono",
   "nome": "Forgia martello",
   "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
   "suono": {
-   "uso": "effetto",
+   "uso": "effect",
    "effetti": [
     "forgia-martello"
    ]
   }
  },
- "suono-effetto-fuoco-scoppiettante": {
+ "sound-effect-crackling-fire": {
   "classe": "suono",
   "nome": "Fuoco scoppiettante",
   "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
   "suono": {
-   "uso": "effetto",
+   "uso": "effect",
    "effetti": [
     "fuoco-scoppiettante"
    ]
   }
  },
- "suono-effetto-meccanismo-leva": {
+ "sound-effect-lever-mechanism": {
   "classe": "suono",
   "nome": "Meccanismo leva",
   "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
   "suono": {
-   "uso": "effetto",
+   "uso": "effect",
    "effetti": [
     "meccanismo-leva"
    ]
   }
  },
- "suono-effetto-moneta-scambio": {
+ "sound-effect-coin-trade": {
   "classe": "suono",
   "nome": "Moneta scambio",
   "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
   "suono": {
-   "uso": "effetto",
+   "uso": "effect",
    "effetti": [
     "moneta-scambio"
    ]
   }
  },
- "suono-effetto-passo-acqua": {
+ "sound-effect-water-step": {
   "classe": "suono",
   "nome": "Passo acqua",
   "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
   "suono": {
-   "uso": "effetto",
+   "uso": "effect",
    "effetti": [
     "passo-acqua"
    ]
   }
  },
- "suono-effetto-passo-metallo": {
+ "sound-effect-metal-step": {
   "classe": "suono",
   "nome": "Passo metallo",
   "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
   "suono": {
-   "uso": "effetto",
+   "uso": "effect",
    "effetti": [
     "passo-metallo"
    ]
   }
  },
- "suono-effetto-porta-pesante": {
+ "sound-effect-heavy-door": {
   "classe": "suono",
   "nome": "Porta pesante",
   "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
   "suono": {
-   "uso": "effetto",
+   "uso": "effect",
    "effetti": [
     "porta-pesante"
    ]
   }
  },
- "suono-effetto-salita-livello": {
+ "sound-effect-level-up": {
   "classe": "suono",
   "nome": "Salita livello",
   "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
   "suono": {
-   "uso": "effetto",
+   "uso": "effect",
    "effetti": [
     "salita-livello"
    ]
   }
  },
- "suono-effetto-scarica-elettrica": {
+ "sound-effect-electric-discharge": {
   "classe": "suono",
   "nome": "Scarica elettrica",
   "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
   "suono": {
-   "uso": "effetto",
+   "uso": "effect",
    "effetti": [
     "scarica-elettrica"
    ]
   }
  },
- "suono-effetto-scoperta-segreto": {
+ "sound-effect-secret-found": {
   "classe": "suono",
   "nome": "Scoperta segreto",
   "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
   "suono": {
-   "uso": "effetto",
+   "uso": "effect",
    "effetti": [
     "scoperta-segreto"
    ]
   }
  },
- "suono-effetto-teletrasporto": {
+ "sound-effect-teleport": {
   "classe": "suono",
   "nome": "Teletrasporto",
   "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
   "suono": {
-   "uso": "effetto",
+   "uso": "effect",
    "effetti": [
     "teletrasporto"
    ]
   }
  },
- "suono-effetto-vapore-pressione": {
+ "sound-effect-steam-pressure": {
   "classe": "suono",
   "nome": "Vapore pressione",
   "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
   "suono": {
-   "uso": "effetto",
+   "uso": "effect",
    "effetti": [
     "vapore-pressione"
    ]
   }
  },
- "suono-effetto-veleno-danno": {
+ "sound-effect-poison-damage": {
   "classe": "suono",
   "nome": "Veleno danno",
   "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
   "suono": {
-   "uso": "effetto",
+   "uso": "effect",
    "effetti": [
     "veleno-danno"
    ]
   }
  },
- "suono-effetto-vento-alta-quota": {
+ "sound-effect-high-wind": {
   "classe": "suono",
   "nome": "Vento alta quota",
   "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
   "suono": {
-   "uso": "effetto",
+   "uso": "effect",
    "effetti": [
     "vento-alta-quota"
    ]
   }
  },
- "suono-effetto-morte-v2": {
+ "sound-effect-death-v2": {
   "classe": "suono",
   "nome": "Morte (rifatta, da ascoltare)",
   "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
   "suono": {
-   "uso": "effetto",
+   "uso": "effect",
    "effetti": [
-    "morte"
+    "death"
    ]
   }
  },

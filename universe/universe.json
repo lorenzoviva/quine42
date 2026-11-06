@@ -1,15 +1,15 @@
 {
   "name": "aurora",
-  "kernel": "0.2.1",
+  "kernel": "0.3.0",
   "kernels": {
-    "from": "0.2"
+    "from": "0.3"
   },
   "seed": 1337,
   "theme": "prompts/theme.md",
   "circleRadius": 42,
   "chunkSize": 18,
   "partita": {
-    "modalita": "singola",
+    "modalita": "single",
     "morte": 3,
     "pvp": false,
     "altroTraGiocatori": true

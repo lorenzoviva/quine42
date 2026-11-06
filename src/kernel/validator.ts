@@ -4,7 +4,7 @@
 
 import type { Sandbox } from './sandbox';
 import type { Effect, FileMap, ItemDef, EnvironmentDef, Manifest, ModuleKind, GameSetup, TerrainDef } from './types';
-import { DEATH_LEVELS, DEFAULT_GAME_SETUP } from './gameSetup';
+import { DEATH_LEVELS, DEFAULT_GAME_SETUP, isMultiplayer } from './gameSetup';
 import { SOLO, validWandererId } from './wanderers';
 import { ITEM_CATEGORIES } from './types';
 import type { ChunkPlan } from './agents/cartography';
@@ -20,7 +20,7 @@ import { compileMjx, type MjxModel } from '../mj/model';
 import { FORM_LIMITS, MAX_FORM_TIME, MAX_FORM_XML, runMjx } from '../mj/run';
 import { analyzeSound } from '../mj/soundanalysis';
 import { reservedName } from './paths';
-import { internalEffect, internalManifest, internalName } from './internalNames';
+import { internalEffect, internalManifest, internalName, italianName } from './internalNames';
 
 const KINDS: ModuleKind[] = ['system', 'entity', 'item', 'player', 'generator', 'data'];
 const LAYERS = ['ground', 'floor', 'wall', 'door', 'liquid', 'vegetation', 'rock'];
@@ -43,14 +43,14 @@ export function repairGameSetup(raw: unknown): GameSetup {
     else if (/\bmolto\b/.test(t)) morte = 4;
     else if (/\bpoco\b/.test(t)) morte = 1;
   }
-  const modalita = r.modalita === 'multigiocatore' ? 'multigiocatore' : 'singola';
+  const modalita = isMultiplayer(r.modalita) ? 'multiplayer' : 'single';
   return {
     modalita,
     morte,
     pvp: flag(r.pvp, DEFAULT_GAME_SETUP.pvp),
     altroTraGiocatori: flag(r.altroTraGiocatori, DEFAULT_GAME_SETUP.altroTraGiocatori),
     // Alone, the one who plays is the master of everything; in a multiplayer game, who created it (T37).
-    ...(modalita === 'multigiocatore' ? { master: validWandererId(r.master) ? r.master : SOLO } : {}),
+    ...(modalita === 'multiplayer' ? { master: validWandererId(r.master) ? r.master : SOLO } : {}),
   };
 }
 
@@ -91,7 +91,7 @@ const SOUND_CHECK_SEEDS = [1, 2, 3];
 /** A sound program stands in no world: it must finish and pass the thresholds of the analysis (ADR-0123, ADR-0125). */
 function soundErrors(path: string, m: MjxModel, time: number): string[] {
   const { issues } = analyzeSound(m, { seeds: SOUND_CHECK_SEEDS, frugal: true, deadline: time / SOUND_CHECK_SEEDS.length });
-  return issues.map((i) => `${path}: suono ${i.defect}: ${i.message}`);
+  return issues.map((i) => `${path}: suono ${italianName('solo-codice', i.defect)}: ${i.message}`);
 }
 
 const HEX_RE = /^#[0-9a-f]{6}$/i;

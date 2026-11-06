@@ -226,7 +226,7 @@ describe('due mondi veri', () => {
   const universe = (name: string) => {
     const root = path.join(dir, name);
     const cfg = JSON.parse(bundledFiles['universe.json']);
-    const files: Record<string, string> = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, name, partita: { modalita: 'multigiocatore', morte: 3, master: 'io' } }) };
+    const files: Record<string, string> = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, name, partita: { modalita: 'multiplayer', morte: 3, master: 'io' } }) };
     for (const [rel, text] of Object.entries(files)) {
       mkdirSync(path.dirname(path.join(root, rel)), { recursive: true });
       writeFileSync(path.join(root, rel), text);

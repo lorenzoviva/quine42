@@ -105,7 +105,7 @@ describe('new magic runes (T57b)', () => {
     expect(canonSummary(k.files)).toContain('Wunjo («sangue», sangue)');
     expect(k.content.loot.magia.entries.some((e) => e.item === 'rune:sangue')).toBe(true);
     expect(k.content.get('rune:sangue')).toMatchObject({ category: 'magic', tags: ['runa', 'magica'] });
-    expect(allCards(k.files).some((c) => c.id === 'runa:sangue' && c.tipo === 'runa' && c.autore === 'narratore')).toBe(true);
+    expect(allCards(k.files).some((c) => c.id === 'rune:sangue' && c.tipo === 'rune' && c.autore === 'narrator')).toBe(true);
     expect(k.feed().some((e) => e.task === 'rune.invent' && /runa nuova/.test(e.text))).toBe(true);
 
     // On the ground like any rune: picked up, it goes to the phrase.

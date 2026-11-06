@@ -145,8 +145,8 @@ export class Overlay {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.globalAlpha = 0.7 + 0.3 * Math.sin(t * 3);
-    ctx.fillStyle = tipo === 'dorme' ? '#b8d0ff' : '#ffe7a3';
-    ctx.fillText(icon, p.x + 10, p.y - 4 - (tipo === 'dorme' ? (t * 6) % 8 : 0));
+    ctx.fillStyle = tipo === 'sleep' ? '#b8d0ff' : '#ffe7a3';
+    ctx.fillText(icon, p.x + 10, p.y - 4 - (tipo === 'sleep' ? (t * 6) % 8 : 0));
     ctx.globalAlpha = 1;
   }
 

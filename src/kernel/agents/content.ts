@@ -92,7 +92,7 @@ export function toItemDef(r: RawItem, taken: Set<string>): ItemDef | null {
 export async function itemPack(c: Council, opts: { count: number; existing: string[]; hints: string[]; tags: string[] }): Promise<{ items: RawItem[]; recipes: unknown[]; loot: unknown }> {
   const askItems = (feedback = '') =>
     c.ask<{ oggetti: RawItem[] }>(
-      'narratore',
+      'narrator',
       'content.items',
       [
         `Inventa ${opts.count} oggetti per questo mondo, del genere che si trova spesso nelle case, nelle botteghe, nei campi e nei boschi (stile Project Zomboid: tanti oggetti comuni, utili, credibili; pochi rari).`,
@@ -108,11 +108,11 @@ export async function itemPack(c: Council, opts: { count: number; existing: stri
       { data: { ...opts, feedback }, temperature: 0.95 },
     );
   let { oggetti } = await askItems();
-  c.say('narratore', 'propone', `${oggetti.length} oggetti: ${oggetti.slice(0, 8).map((o) => o.nome).join(', ')}${oggetti.length > 8 ? '…' : ''}`);
+  c.say('narrator', 'propone', `${oggetti.length} oggetti: ${oggetti.slice(0, 8).map((o) => o.nome).join(', ')}${oggetti.length > 8 ? '…' : ''}`);
 
   // The Physicist checks weights, stacks and effects against what the things are.
   const phys = await c.ask<{ correzioni: Array<{ nome: string; peso?: number; pila?: number; effetti?: RawItem['effetti']; nota?: string }> }>(
-    'fisico',
+    'physicist',
     'content.physics',
     `Controlla peso, pila ed effetti di questi oggetti: correggi solo ciò che è fisicamente incoerente (una incudine non pesa 1, un'ascia non si impila, il pane non dà 60 di energia).\n${oggetti.map((o) => `${o.nome}: peso ${o.peso}, pila ${o.pila}, effetti ${JSON.stringify(o.effetti ?? {})}`).join('\n')}`,
     {
@@ -134,25 +134,25 @@ export async function itemPack(c: Council, opts: { count: number; existing: stri
     if (typeof fix.pila === 'number') it.pila = fix.pila;
     if (fix.effetti) it.effetti = fix.effetti;
   }
-  if (phys.correzioni?.length) c.say('fisico', 'corregge', phys.correzioni.slice(0, 4).map((f) => `${f.nome}${f.nota ? `: ${f.nota}` : ''}`).join('; '), 'narratore');
+  if (phys.correzioni?.length) c.say('physicist', 'corregge', phys.correzioni.slice(0, 4).map((f) => `${f.nome}${f.nota ? `: ${f.nota}` : ''}`).join('; '), 'narrator');
 
   const review = await c.ask<{ approvato: boolean; problemi: Array<{ agente: AgentId; problema: string }> }>(
-    'arbitro',
+    'arbiter',
     'content.review',
     `Questi oggetti sono coerenti con il mondo (epoca, tono, tecnologia)? Segnala solo quelli fuori posto.\n${oggetti.map((o) => `${o.nome} (${o.categoria}): ${o.descrizione}`).join('\n')}`,
-    { type: 'OBJECT', properties: { approvato: { type: 'BOOLEAN' }, problemi: { type: 'ARRAY', items: { type: 'OBJECT', properties: { agente: { type: 'STRING', enum: ['narratore'] }, problema: { type: 'STRING' } }, required: ['agente', 'problema'] } } }, required: ['approvato', 'problemi'] },
+    { type: 'OBJECT', properties: { approvato: { type: 'BOOLEAN' }, problemi: { type: 'ARRAY', items: { type: 'OBJECT', properties: { agente: { type: 'STRING', enum: ['narrator'] }, problema: { type: 'STRING' } }, required: ['agente', 'problema'] } } }, required: ['approvato', 'problemi'] },
     { data: { oggetti }, temperature: 0.2 },
   );
   if (!review.approvato && review.problemi?.length) {
     const issues = review.problemi.map((p) => p.problema).join('; ');
-    c.say('arbitro', 'obietta', issues, 'narratore');
+    c.say('arbiter', 'obietta', issues, 'narrator');
     ({ oggetti } = await askItems(issues));
-    c.say('narratore', 'corregge', `${oggetti.length} oggetti riscritti`);
-  } else c.say('arbitro', 'approva', 'Gli oggetti appartengono al mondo.');
+    c.say('narrator', 'corregge', `${oggetti.length} oggetti riscritti`);
+  } else c.say('arbiter', 'approva', 'Gli oggetti appartengono al mondo.');
 
   const names = [...opts.existing, ...oggetti.map((o) => o.nome)];
   const rec = await c.ask<{ ricette: unknown[]; bottino: unknown }>(
-    'narratore',
+    'narrator',
     'content.recipes',
     [
       `Scrivi 6-10 ricette di fabbricazione usando SOLO questi oggetti (nomi esatti): ${names.slice(-120).join(', ')}.`,
@@ -191,7 +191,7 @@ export async function itemPack(c: Council, opts: { count: number; existing: stri
     },
     { data: { names }, temperature: 0.6 },
   );
-  c.say('narratore', 'propone', `${(rec.ricette ?? []).length} ricette e ${Array.isArray(rec.bottino) ? rec.bottino.length : 0} tabelle di bottino`);
+  c.say('narrator', 'propone', `${(rec.ricette ?? []).length} ricette e ${Array.isArray(rec.bottino) ? rec.bottino.length : 0} tabelle di bottino`);
   return { items: oggetti, recipes: rec.ricette ?? [], loot: rec.bottino ?? [] };
 }
 
@@ -199,13 +199,13 @@ export async function itemPack(c: Council, opts: { count: number; existing: stri
 export async function defineItems(c: Council, names: string[], context: string): Promise<RawItem[]> {
   if (!names.length) return [];
   const r = await c.ask<{ oggetti: RawItem[] }>(
-    'narratore',
+    'narrator',
     'content.define',
     `Nel mondo si è parlato di: ${names.join(', ')} (${context}). Definisci ognuno come oggetto del mondo, coerente con la bibbia. Se qualcosa non può esistere in questo mondo, omettilo.`,
     { type: 'OBJECT', properties: { oggetti: { type: 'ARRAY', items: ITEM_SCHEMA } }, required: ['oggetti'] },
     { data: { names, context }, temperature: 0.6 },
   );
-  if (r.oggetti?.length) c.say('narratore', 'propone', `nuovi oggetti nel mondo: ${r.oggetti.map((o) => o.nome).join(', ')}`);
+  if (r.oggetti?.length) c.say('narrator', 'propone', `nuovi oggetti nel mondo: ${r.oggetti.map((o) => o.nome).join(', ')}`);
   return r.oggetti ?? [];
 }
 
@@ -275,7 +275,8 @@ const INDIVIDUAL_SCHEMA: Schema = {
     routine: {
       type: 'ARRAY',
       description: 'la sua giornata: 4 voci, una per momento',
-      items: { type: 'OBJECT', properties: { quando: { type: 'STRING', enum: [...DAY_PHASES] }, fa: { type: 'STRING', description: 'cosa fa, breve (es. "impasta il pane")' }, dove: { type: 'STRING', enum: [...WHERES] }, azione: { type: 'STRING', enum: [...ACTIVITIES], description: 'il gesto che si vede fare' } }, required: ['quando', 'fa', 'dove', 'azione'] },
+      // The Narrator's prompts are still Italian (T310): it writes the Italian values, and the kernel takes them internal (internalName).
+      items: { type: 'OBJECT', properties: { quando: { type: 'STRING', enum: italianValues('momenti') }, fa: { type: 'STRING', description: 'cosa fa, breve (es. "impasta il pane")' }, dove: { type: 'STRING', enum: italianValues('dove') }, azione: { type: 'STRING', enum: italianValues('attivita'), description: 'il gesto che si vede fare' } }, required: ['quando', 'fa', 'dove', 'azione'] },
     },
   },
   required: ['nome', 'persona', 'aspetto', 'porta', 'mestiere', 'genere', 'famiglia', 'routine'],
@@ -285,7 +286,7 @@ const INDIVIDUAL_SCHEMA: Schema = {
 function relationRules(specie: Species): string {
   return [
     `In "famiglia" ogni legame dice cosa sei TU per quella persona, nella forma del tuo genere: {"nome": "Tazio", "legame": "figlia"} vuol dire che sei la figlia di Tazio. Parole possibili: ${RELATION_WORDS.join(', ')}.`,
-    specie === 'animale'
+    specie === 'animal'
       ? 'È un ANIMALE: niente mestieri da persona (il "mestiere" è ciò che fa: caccia topi, fa la guardia), niente parenti, maestri o apprendisti umani. Con una persona può essere solo "animale" (di un padrone: uno solo), "amico" o "rivale"; madre, padre, figlio, fratello solo con altri animali della sua specie.'
       : 'È una PERSONA: un animale non è suo parente né suo apprendista; di un animale può essere "padrone" (l\'animale ne ha uno solo). Al massimo un padre, una madre e un coniuge.',
     'Il nome deve essere nuovo: diverso, anche nella prima parola, da quelli delle persone già conosciute (niente "Elias il Giovane" accanto a "Elias il Vecchio", niente "Ombroso" accanto a "Ombra").',
@@ -297,12 +298,12 @@ function relationRules(specie: Species): string {
  * society: a job, a family related to the people already known, a daily routine.
  */
 export async function individuate(c: Council, archetype: { name: string; description: string; persona: string; specie?: Species }, ctx: { place: string; common: string[]; society?: string; avoid?: string[]; focus?: string[] }): Promise<Identity> {
-  const specie = archetype.specie ?? 'persona';
+  const specie = archetype.specie ?? 'person';
   const r = await c.ask<{ nome: string; persona: string; aspetto: string; porta: string[]; mestiere?: string; genere?: string; eta?: string; storia?: string; famiglia?: Relation[]; routine?: Array<{ quando: string; fa: string; dove: string; azione?: string }> }>(
-    'narratore',
+    'narrator',
     'npc.individuate',
     [
-      `Crea un individuo di questo tipo di personaggio: «${archetype.name}» (${archetype.description}), ${specie === 'animale' ? 'un animale' : 'una persona'}.`,
+      `Crea un individuo di questo tipo di personaggio: «${archetype.name}» (${archetype.description}), ${specie === 'animal' ? 'un animale' : 'una persona'}.`,
       `Scheda del tipo:\n${archetype.persona}`,
       `Luogo in cui si trova: ${ctx.place || 'sconosciuto'}.`,
       ctx.society ? `LA SOCIETÀ DEL MONDO\n${ctx.society}` : '',
@@ -321,19 +322,21 @@ export async function individuate(c: Council, archetype: { name: string; descrip
   );
   const job = String(r.mestiere ?? '').slice(0, 40);
   const routine = (r.routine ?? [])
+    .map((s) => (s && typeof s === 'object' ? { ...s, quando: internalName('momenti', String(s.quando)), dove: internalName('dove', String(s.dove)), azione: s.azione === undefined ? undefined : internalName('attivita', String(s.azione)) } : s))
     .filter((s) => (DAY_PHASES as string[]).includes(s?.quando) && s?.fa)
     .map((s) => {
-      const dove = ((WHERES as string[]).includes(s.dove) ? s.dove : 'in giro') as Where;
+      const dove = ((WHERES as string[]).includes(s.dove) ? s.dove : 'about') as Where;
       const fa = String(s.fa).slice(0, 60);
       return { quando: s.quando as DayPhase, fa, dove, azione: (ACTIVITIES as readonly string[]).includes(s.azione ?? '') ? (s.azione as Activity) : inferActivity(fa, dove) };
     });
+  const genere = typeof r.genere === 'string' ? internalName('specie', r.genere) : undefined;
   return {
     name: String(r.nome ?? archetype.name).slice(0, 40),
     persona: String(r.persona ?? archetype.persona),
     look: String(r.aspetto ?? ''),
     carrying: (r.porta ?? []).map(String).slice(0, 8),
     job,
-    gender: r.genere === 'maschio' || r.genere === 'femmina' ? r.genere : undefined,
+    gender: genere === 'male' || genere === 'female' ? genere : undefined,
     age: r.eta ? String(r.eta).slice(0, 20) : undefined,
     story: r.storia ? String(r.storia).slice(0, 300) : undefined,
     family: (r.famiglia ?? []).filter((f) => f?.nome && f?.legame).slice(0, 4).map((f) => ({ nome: String(f.nome).slice(0, 40), legame: String(f.legame).toLowerCase().slice(0, 20) })),

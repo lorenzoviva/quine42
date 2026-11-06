@@ -48,9 +48,9 @@ export class ChainMeter {
 }
 
 /** Whose a system is: the Nucleus's (core.*), of the seed or forged (sys.*), a forged mechanic with its panel (mech.*). */
-export type StationKind = 'nucleo' | 'sistema' | 'meccanica';
+export type StationKind = 'core' | 'system' | 'mechanic';
 
-export const STATION_KIND: Record<StationKind, string> = { nucleo: 'del Nucleo', sistema: 'sistema', meccanica: 'meccanica' };
+export const STATION_KIND: Record<StationKind, string> = { core: 'del Nucleo', system: 'sistema', mechanic: 'meccanica' };
 
 export interface Station {
   id: string;
@@ -79,7 +79,7 @@ export interface Chain {
   measured: boolean;
 }
 
-export const stationKind = (id: string): StationKind => (id.startsWith('core.') ? 'nucleo' : id.startsWith('mech.') ? 'meccanica' : 'sistema');
+export const stationKind = (id: string): StationKind => (id.startsWith('core.') ? 'core' : id.startsWith('mech.') ? 'mechanic' : 'system');
 
 /** The stations in the order of the tick (`systems` as the kernel runs them), with the meter's last window and the faults. */
 export function chainOf(systems: ModuleEntry[], meter: ChainMeter, faults: Fault[]): Chain {

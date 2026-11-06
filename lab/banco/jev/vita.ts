@@ -8,18 +8,23 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { matchJob, type JobProgram } from '../../../src/kernel/jobs';
 import { hashStr } from '../../../src/kernel/rng';
+import { internalJobProgram, internalModuleId } from '../../../src/kernel/internalNames';
 import type { CaseSpec, Question } from './banco';
 import { ROOT } from './domande';
 
 const read = (p: string) => JSON.parse(fs.readFileSync(path.join(ROOT, p), 'utf8'));
 const NEAPOLIS = 'lab/banco/universi-cloud/neapolis';
 
-/** The work programs a universe has: the seed's, and its own over them (the same module id wins). */
+/**
+ * The work programs a universe has: the seed's, and its own over them (the same module id wins). The modules of the contract 0.3 are
+ * `job.*`; a universe of before (`lavoro.*`, neapolis) is read with the names of today (ADR-0158).
+ */
 export function programsOf(dir?: string): JobProgram[] {
   const mods = new Map<string, string>();
-  for (const m of fs.readdirSync(path.join(ROOT, 'universe/modules')).filter((m) => m.startsWith('lavoro.'))) mods.set(m, `universe/modules/${m}/manifest.json`);
-  if (dir) for (const m of fs.readdirSync(path.join(ROOT, dir, 'modules')).filter((m) => m.startsWith('lavoro.'))) mods.set(m, `${dir}/modules/${m}/manifest.json`);
-  return [...mods.values()].flatMap((p) => (read(p).mestieri ?? []) as JobProgram[]);
+  const isJob = (m: string) => m.startsWith('job.') || m.startsWith('lavoro.');
+  for (const m of fs.readdirSync(path.join(ROOT, 'universe/modules')).filter(isJob)) mods.set(internalModuleId(m), `universe/modules/${m}/manifest.json`);
+  if (dir) for (const m of fs.readdirSync(path.join(ROOT, dir, 'modules')).filter(isJob)) mods.set(internalModuleId(m), `${dir}/modules/${m}/manifest.json`);
+  return [...mods.values()].flatMap((p) => ((read(p).mestieri ?? []) as unknown[]).map((j) => internalJobProgram(j) as JobProgram));
 }
 
 // ------------------------------------------------------------------------------------------------ trades → programs
@@ -30,44 +35,44 @@ export function programsOf(dir?: string): JobProgram[] {
  */
 const VALMORA_TRADES: Array<[string, string[]]> = [
   ['Cacciatore di topi', ['nessuno']],
-  ['Bottaio', ['fabbro', 'boscaiolo']],
-  ['tessitrice', ['mercante', 'nessuno']],
-  ['fornaio', ['cuoco']],
-  ['Cartografo itinerante', ['scrivano']],
-  ['Ortolana', ['contadino']],
-  ['Pittore', ['scrivano', 'nessuno']],
-  ['Giardiniere', ['contadino']],
-  ['Erborista', ['contadino', 'mercante']],
-  ['Cartografo', ['scrivano']],
-  ['Eremita e osservatore delle rune', ['sacerdote']],
-  ['Mercante di Erbe', ['mercante']],
-  ['Pescatore di stagni', ['pescatore']],
-  ['Pescatore di Nebbia', ['pescatore']],
-  ['Mugnaio', ['cuoco', 'contadino']],
-  ['Raccoglitore di erbe', ['contadino']],
-  ['Cantore dei Raccolti', ['contadino', 'nessuno']],
-  ['Pittrice itinerante', ['scrivano', 'nessuno']],
-  ['Cantastorie di Confine', ['oste', 'nessuno']],
-  ['Eremita', ['sacerdote']],
-  ['Narratore di Leggende', ['oste', 'scrivano', 'nessuno']],
-  ['Maniscalco di Legno', ['fabbro']],
-  ['contadina', ['contadino']],
-  ['Riparatore di reti', ['pescatore']],
-  ['Raccoglitore di Pietre di Fiume', ['nessuno', 'boscaiolo']],
-  ['Cercatore di Sorgenti', ['nessuno', 'contadino']],
-  ['Raccoglitore di resina', ['boscaiolo']],
-  ['Guardiano dei Ponti di Pietra', ['guardia']],
-  ['Tagliapietre', ['fabbro', 'boscaiolo']],
+  ['Bottaio', ['smith', 'woodcutter']],
+  ['tessitrice', ['merchant', 'nessuno']],
+  ['fornaio', ['cook']],
+  ['Cartografo itinerante', ['scribe']],
+  ['Ortolana', ['farmer']],
+  ['Pittore', ['scribe', 'nessuno']],
+  ['Giardiniere', ['farmer']],
+  ['Erborista', ['farmer', 'merchant']],
+  ['Cartografo', ['scribe']],
+  ['Eremita e osservatore delle rune', ['priest']],
+  ['Mercante di Erbe', ['merchant']],
+  ['Pescatore di stagni', ['fisher']],
+  ['Pescatore di Nebbia', ['fisher']],
+  ['Mugnaio', ['cook', 'farmer']],
+  ['Raccoglitore di erbe', ['farmer']],
+  ['Cantore dei Raccolti', ['farmer', 'nessuno']],
+  ['Pittrice itinerante', ['scribe', 'nessuno']],
+  ['Cantastorie di Confine', ['innkeeper', 'nessuno']],
+  ['Eremita', ['priest']],
+  ['Narratore di Leggende', ['innkeeper', 'scribe', 'nessuno']],
+  ['Maniscalco di Legno', ['smith']],
+  ['contadina', ['farmer']],
+  ['Riparatore di reti', ['fisher']],
+  ['Raccoglitore di Pietre di Fiume', ['nessuno', 'woodcutter']],
+  ['Cercatore di Sorgenti', ['nessuno', 'farmer']],
+  ['Raccoglitore di resina', ['woodcutter']],
+  ['Guardiano dei Ponti di Pietra', ['guard']],
+  ['Tagliapietre', ['smith', 'woodcutter']],
   // Trades a Narrator writes often for a medieval world (the mock's own, the archetypes of the seed), none of them in the programs by name.
-  ['Falegname', ['boscaiolo', 'fabbro']],
-  ['Levatrice', ['sacerdote', 'nessuno']],
-  ['Guaritrice', ['sacerdote', 'contadino']],
-  ['Ciabattino', ['fabbro', 'mercante']],
-  ['Lavandaia', ['nessuno', 'oste']],
-  ['Speziale', ['mercante']],
-  ['Taglialegna del bosco grande', ['boscaiolo']],
-  ['Locandiera della Piana', ['oste']],
-  ['Sentinella delle mura', ['guardia']],
+  ['Falegname', ['woodcutter', 'smith']],
+  ['Levatrice', ['priest', 'nessuno']],
+  ['Guaritrice', ['priest', 'farmer']],
+  ['Ciabattino', ['smith', 'merchant']],
+  ['Lavandaia', ['nessuno', 'innkeeper']],
+  ['Speziale', ['merchant']],
+  ['Taglialegna del bosco grande', ['woodcutter']],
+  ['Locandiera della Piana', ['innkeeper']],
+  ['Sentinella delle mura', ['guard']],
 ];
 
 function tradeCases(): CaseSpec[] {

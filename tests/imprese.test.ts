@@ -15,13 +15,13 @@ import { developAll, pause } from './espressivita/banco';
 
 const STEP = 1 / 20;
 const DAY = Kernel.DAY_SECONDS;
-const at = (n: number, phase: 'mattina' | 'giorno' | 'sera' | 'notte') => (n + { mattina: 0, giorno: 0.12, sera: 0.42, notte: 0.58 }[phase] - 0.12) * DAY + 1;
+const at = (n: number, phase: 'morning' | 'day' | 'evening' | 'night') => (n + { morning: 0, day: 0.12, evening: 0.42, night: 0.58 }[phase] - 0.12) * DAY + 1;
 
 const house = (over: Partial<Venture> = {}): Venture => ({
   id: 'i-prova',
   titolo: 'Si ricostruisce una casa',
-  tipo: 'costruzione',
-  stato: 'in corso',
+  tipo: 'construction',
+  stato: 'active',
   luogo: '0,0',
   posto: { x: 9, y: 9 },
   fasi: housePhases('structure'),
@@ -58,17 +58,17 @@ describe('a venture, as data', () => {
 
   it('the state: going on, waiting for a material nobody has, stopped with no team, finished; a harvest whose season passed is over', () => {
     const v = house({ squadra: [{ nome: 'Ada', ruolo: 'manovale' }] });
-    expect(ventureState(v, 0, () => 1)).toBe('in corso');
-    expect(ventureState(v, 0, () => 0)).toBe('attesa');
-    expect(ventureState({ ...v, squadra: [] }, 0, () => 1)).toBe('ferma');
-    expect(ventureState({ ...v, scade: 3 }, 4, () => 1)).toBe('finita');
+    expect(ventureState(v, 0, () => 1)).toBe('active');
+    expect(ventureState(v, 0, () => 0)).toBe('waiting');
+    expect(ventureState({ ...v, squadra: [] }, 0, () => 1)).toBe('stopped');
+    expect(ventureState({ ...v, scade: 3 }, 4, () => 1)).toBe('finished');
   });
 
   it('the team: by trade, then by nearness, then by a draw of the seed for the name; who is gone leaves and is replaced; never one in two', () => {
     const v = house();
     const people = [
-      { nome: 'Baldo', mestiere: 'fabbro', luogo: '1,0' },
-      { nome: 'Ivo', mestiere: 'contadino', luogo: '0,0' },
+      { nome: 'Baldo', mestiere: 'smith', luogo: '1,0' },
+      { nome: 'Ivo', mestiere: 'farmer', luogo: '0,0' },
       { nome: 'Nives', mestiere: 'cuoco', luogo: '0,0' },
       { nome: 'Remo', mestiere: 'pescatore', luogo: '5,5' },
       { nome: 'Teo', mestiere: 'oste', luogo: '0,1' },
@@ -174,15 +174,15 @@ describe('the ventures in a world', () => {
     const names = [['Baldo', 'fabbro'], ['Ivo', 'boscaiolo'], ['Nives', 'contadina']];
     setPeople(k, names.map(([nome, mestiere], i) => ({ nome, mestiere, origine: `${key}#t${i}` })));
     for (const [i, [nome, mestiere]] of names.entries()) worker(k, nome, mestiere, site.x + 3 + i, site.y + 3);
-    k.stores.set('sys.lavoro', `deposito:${key.replace(',', ':')}`, { 'item.ciocco': 40, 'item.chiodi': 20 });
+    k.stores.set('sys.work', `deposito:${key.replace(',', ':')}`, { 'item.ciocco': 40, 'item.chiodi': 20 });
     (k as unknown as { breakEntity(id: number): void }).breakEntity(id);
     const [v] = k.ventures();
-    expect(v).toMatchObject({ tipo: 'costruzione', luogo: key, origine: origin, nato_da: 'regola:ricostruzione', stato: 'in corso' });
+    expect(v).toMatchObject({ tipo: 'construction', luogo: key, origine: origin, nato_da: 'regola:ricostruzione', stato: 'active' });
     expect(v.squadra.map((m) => `${m.nome}:${m.ruolo}`).sort()).toEqual(['Baldo:capomastro', 'Ivo:manovale', 'Nives:manovale']);
     // The lot shows its building at stage 0 while it is rebuilt (T245e): stakes and a rope.
     expect(stageOf(k, origin)).toBe(0);
 
-    k.time = at(2, 'giorno');
+    k.time = at(2, 'day');
     play(k, 170);
     const now = k.ventures()[0];
     expect(Object.values(now.portati).reduce((a, b) => a + b, 0)).toBeGreaterThan(0);
@@ -216,19 +216,19 @@ describe('the ventures in a world', () => {
       { nome: 'Ivo', mestiere: 'boscaiolo', origine: `${key}#t1` },
       { nome: 'Teo', mestiere: 'oste', origine: `${key}#t2` },
     ]);
-    k.time = at(3, 'mattina');
+    k.time = at(3, 'morning');
     play(k, 3.5);
     expect(k.ventures()[0].squadra.map((m) => m.nome).sort()).toEqual(['Baldo', 'Teo']);
     // Nobody left: stopped, visible, still there.
     setPeople(k, []);
-    k.time = at(4, 'mattina');
+    k.time = at(4, 'morning');
     play(k, 3.5);
-    expect(k.ventures()[0]).toMatchObject({ stato: 'ferma', squadra: [] });
+    expect(k.ventures()[0]).toMatchObject({ stato: 'stopped', squadra: [] });
     setPeople(k, [{ nome: 'Remo', mestiere: 'pescatore', origine: `${key}#t3` }]);
-    k.time = at(5, 'mattina');
+    k.time = at(5, 'morning');
     play(k, 3.5);
     expect(k.ventures()[0].squadra.map((m) => m.nome)).toEqual(['Remo']);
-    expect(k.ventures()[0].stato).not.toBe('ferma');
+    expect(k.ventures()[0].stato).not.toBe('stopped');
   }, 60000);
 
   it('months of clock and two reopenings: what was brought and worked stays; the house stands again when it is done', async () => {
@@ -244,7 +244,7 @@ describe('the ventures in a world', () => {
     // Months of clock, a day at a time: nobody works (Baldo has no body here), nothing goes backwards, nothing becomes NaN.
     let last = { ...v.portati, lavorato: v.lavorato };
     for (let d = 3; d < 3 + 60; d++) {
-      k.time = at(d, 'giorno');
+      k.time = at(d, 'day');
       play(k, 3.5);
       const now = k.ventures().find((x) => x.id === v.id)!;
       expect(Number.isFinite(now.lavorato)).toBe(true);
@@ -267,7 +267,7 @@ describe('the ventures in a world', () => {
     for (const it of ['item.ciocco', 'item.chiodi']) bring(w, it, 100);
     addWork(w, 1e6);
     play(k, 3.5);
-    expect(k.ventures().find((x) => x.id === v.id)!.stato).toBe('finita');
+    expect(k.ventures().find((x) => x.id === v.id)!.stato).toBe('finished');
     expect(stageOf(k, origin)).toBeUndefined();
     expect(consumed(k).has(origin)).toBe(false);
     expect(k.individualOf('Baldo')?.ricordi?.some((r) => r.peso === 3 && /finito/.test(r.testo))).toBe(true);
@@ -277,7 +277,7 @@ describe('the ventures in a world', () => {
     await pause(700);
     k = await Kernel.boot({ files: { ...k.files }, store: memoryStore(), ai: new MockAiModels(), chunks });
     await developAll(k);
-    expect(k.ventures().find((x) => x.id === v.id)!.stato).toBe('finita');
+    expect(k.ventures().find((x) => x.id === v.id)!.stato).toBe('finished');
     expect(stageOf(k, origin)).toBeUndefined();
   }, 120000);
 
@@ -292,18 +292,18 @@ describe('the ventures in a world', () => {
       if (k.tileAt(c, r) === 'g' && k.setTile(c, r, 'u')) n++;
     }
     expect(n).toBeGreaterThanOrEqual(4);
-    k.time = at(YEAR_DAYS + HARVEST_DAY, 'mattina');
+    k.time = at(YEAR_DAYS + HARVEST_DAY, 'morning');
     play(k, 3.5);
-    const h = k.ventures().find((v) => v.tipo === 'raccolto' && v.luogo === key);
+    const h = k.ventures().find((v) => v.tipo === 'harvest' && v.luogo === key);
     expect(h).toMatchObject({ luogo: key, nato_da: 'regola:raccolto', compito: { casella: 'u', oggetto: 'item.grano' } });
     expect(h!.squadra.map((m) => m.nome)).toEqual(['Nives']);
     // Once a year: not again the day after, and after its days it is over.
-    k.time = at(YEAR_DAYS + HARVEST_DAY + 1, 'mattina');
+    k.time = at(YEAR_DAYS + HARVEST_DAY + 1, 'morning');
     play(k, 3.5);
-    expect(k.ventures().filter((v) => v.tipo === 'raccolto' && v.luogo === key)).toHaveLength(1);
-    k.time = at(YEAR_DAYS + HARVEST_DAY + 5, 'mattina');
+    expect(k.ventures().filter((v) => v.tipo === 'harvest' && v.luogo === key)).toHaveLength(1);
+    k.time = at(YEAR_DAYS + HARVEST_DAY + 5, 'morning');
     play(k, 3.5);
-    expect(k.ventures().find((v) => v.tipo === 'raccolto' && v.luogo === key)!.stato).toBe('finita');
+    expect(k.ventures().find((v) => v.tipo === 'harvest' && v.luogo === key)!.stato).toBe('finished');
   }, 60000);
 
   it('three families more than the houses of a place, and free ground that keeps the place joined: a common house; built, it stands', async () => {
@@ -311,7 +311,7 @@ describe('the ventures in a world', () => {
     const { key, S } = placeOf(k);
     const lots = k.chunks.get(key)!.lots.length;
     setPeople(k, Array.from({ length: lots + 3 }, (_, i) => ({ nome: `Abitante ${i}`, mestiere: i === 0 ? 'fabbro' : 'contadino', origine: `${key}#t${i}` })));
-    k.time = at(2, 'mattina');
+    k.time = at(2, 'morning');
     play(k, 3.5);
     const v = k.ventures().find((x) => x.nato_da === 'regola:casa');
     expect(v, 'a common house').toBeDefined();
@@ -326,7 +326,7 @@ describe('the ventures in a world', () => {
     play(k, 3.5);
     expect(stageOf(k, v!.origine!)).toBeUndefined();
     // Families of one: no more common houses than the families need.
-    k.time = at(3, 'mattina');
+    k.time = at(3, 'morning');
     play(k, 3.5);
     expect(k.ventures().filter((x) => x.nato_da === 'regola:casa')).toHaveLength(1);
   }, 60000);

@@ -15,7 +15,7 @@ describe('a society', () => {
     const a = k.spawnModuleEntity(k.modules.get('npc.villager')!, pc.x + 1, pc.y, undefined, 'test#a');
     const ia = (await k.ensureIdentity(a))!;
     expect(ia.job).toBeTruthy();
-    expect(ia.routine?.map((r) => r.quando)).toEqual(['mattina', 'giorno', 'sera', 'notte']);
+    expect(ia.routine?.map((r) => r.quando)).toEqual(['morning', 'day', 'evening', 'night']);
     const b = k.spawnModuleEntity(k.modules.get('npc.villager')!, pc.x + 1.5, pc.y, undefined, 'test#b');
     const ib = (await k.ensureIdentity(b))!;
     // The second is related to someone already known, and that individual knows it too.
@@ -26,7 +26,7 @@ describe('a society', () => {
     if (relative) expect(relative.famiglia.some((f: { nome: string }) => f.nome === ib.name)).toBe(true);
     else expect(people.attesi.some((x: { nome: string }) => x.nome === relName)).toBe(true);
     expect(people.persone.map((p: { nome: string }) => p.nome)).toEqual(expect.arrayContaining([ia.name, ib.name]));
-    expect(k.council.context('narratore')).toBeTruthy();
+    expect(k.council.context('narrator')).toBeTruthy();
     // Met again (same origin), no new call: the same individual.
     k.ecs.destroy(a);
     const calls = k.ai.usage.text;
@@ -234,7 +234,7 @@ describe('the atlas', () => {
     const pc = k.wandererCarpet();
     expect(k.directionsAt(pc.x, pc.y).join(' ')).toMatch(/Bosco degli Elfi.*nord-est/);
     // The cartographer in the corona routes requests to environments, not objects.
-    const chat = await k.talkToAgent('cartografo', 'crea un bosco incantato degli elfi');
+    const chat = await k.talkToAgent('cartographer', 'crea un bosco incantato degli elfi');
     expect(chat.forged).toMatch(/Bosco degli Elfi/);
   });
 });

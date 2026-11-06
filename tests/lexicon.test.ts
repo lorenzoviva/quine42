@@ -36,15 +36,15 @@ describe('the lexicon (T65)', () => {
   it('goes with every narrative task (Narrator and Arbiter), with the customs the universe added', async () => {
     const files: FileMap = { ...bundledFiles, 'world/bible.json': JSON.stringify(bible({ usanze: ['Chi vende il primo pane lo lascia sulla soglia.'] })) };
     const { c, asked } = council(files);
-    for (const agent of ['narratore', 'arbitro'] as const) {
+    for (const agent of ['narrator', 'arbiter'] as const) {
       const ctx = c.context(agent);
       expect(ctx).toMatch(/## Lessico del mondo[\s\S]*senza mai spiegarlo/);
       expect(ctx).toContain('**bonombo**');
       expect(ctx).toMatch(/### Usanze di questo mondo\n- Chi vende il primo pane/);
       expect(c.context(agent, true)).toContain('## Lessico del mondo');
     }
-    for (const agent of ['scultore', 'artista', 'fisico', 'ingegnere', 'cartografo', 'referente'] as const) expect(c.context(agent)).not.toContain('Lessico del mondo');
-    await c.ask('narratore', 'npc.reply', 'una battuta', { type: 'OBJECT' });
+    for (const agent of ['sculptor', 'artist', 'physicist', 'engineer', 'cartographer', 'liaison'] as const) expect(c.context(agent)).not.toContain('Lessico del mondo');
+    await c.ask('narrator', 'npc.reply', 'una battuta', { type: 'OBJECT' });
     expect(asked[0].system).toContain('Lessico del mondo');
   });
 
@@ -79,7 +79,7 @@ describe('the lexicon (T65)', () => {
   });
 
   it('a plot that translates the lexicon goes back to the Narrator', () => {
-    const people = { persone: [{ nome: 'Anselmo', specie: 'persona', genere: 'maschile', legami: [] }], attesi: [] } as never;
+    const people = { persone: [{ nome: 'Anselmo', specie: 'person', genere: 'maschile', legami: [] }], attesi: [] } as never;
     const plot = { id: 't1', titolo: 'Il saluto', stato: 'aperta', mistero: 'Anselmo insegna che «bonombo» significa ciao.', tappe: [{ chi: 'Anselmo', cosa: 'saluta i forestieri' }] } as unknown as Plot;
     expect(reviewPlot(plot, people, words).problems.join(' ')).toMatch(/spiega il lessico/);
     expect(reviewPlot(plot, people).problems.join(' ')).not.toMatch(/spiega il lessico/);
@@ -87,7 +87,7 @@ describe('the lexicon (T65)', () => {
 
   it('the offline Narrator writes a bible with a custom of its own', async () => {
     const models = new MockAiModels();
-    const text = await models.text({ agent: 'narratore', task: 'genesis.bible', system: '', prompt: '', data: { theme: 'x' } } as TextCall);
+    const text = await models.text({ agent: 'narrator', task: 'genesis.bible', system: '', prompt: '', data: { theme: 'x' } } as TextCall);
     const b = JSON.parse(text) as Bible;
     expect(cleanBible(b, words).usanze?.length).toBe(1);
   });

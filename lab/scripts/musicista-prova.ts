@@ -24,7 +24,7 @@ council.onFeed = (e) => console.log(`  [${e.from}${e.to ? `→${e.to}` : ''}] ${
 const layouts = Object.keys(JSON.parse(bundledFiles['modules/world.layouts/manifest.json']).layouts);
 const effetti = [...new Set(soundPrograms(bundledFiles).flatMap((p) => p.suono?.effetti ?? []))];
 const requests: ComposeRequest[] = [
-  { richiesta: 'il brano della Forra Nera, che suona di giorno a chi cammina in questo ambiente', nome: 'Forra Nera', uso: 'musica', ambienti: ['forra_nera'], momenti: ['mattina', 'giorno'], contesto: 'una gola stretta tra pareti scure, con un torrente in fondo e rondini tra le rocce' },
+  { richiesta: 'il brano della Forra Nera, che suona di giorno a chi cammina in questo ambiente', nome: 'Forra Nera', uso: 'music', ambienti: ['forra_nera'], momenti: ['morning', 'day'], contesto: 'una gola stretta tra pareti scure, con un torrente in fondo e rondini tra le rocce' },
   { richiesta: 'una musica allegra da locanda, di sera, con un flauto che scherza' },
   { richiesta: 'un rumore nuovo per quando si raccoglie un oggetto, più legnoso' },
 ];

@@ -478,21 +478,21 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 ### Programma di mestiere
 - **Inglese**: `JobProgram`, `jobPrograms`, `validateJobProgram`, `matchJob`
 - **Definizione**: com'è fatta la giornata di un mestiere, scritta una volta per mestiere e usata da ogni individuo che lo ha: i compiti di ogni fase, ognuno un comportamento con i suoi parametri (T245b, ADR-0140). Dati, mai codice.
-- **Dove vive**: `src/kernel/jobs.ts`, `universe/modules/lavoro.contadino/manifest.json`
+- **Dove vive**: `src/kernel/jobs.ts`, `universe/modules/job.farmer/manifest.json`
 - **Da non usare**: `routine` (per il programma: la routine è il testo di oggi), `script`, `job`
 - **Fermo**: `mestieri` nei manifest, `giornata`, `nomi`, `posto`, i componenti `mestiere`, `lavoro`, `carico`.
 
 ### Comportamento
 - **Inglese**: `JOB_BEHAVIOURS`, `JobBehaviour`
-- **Definizione**: uno dei compiti di un elenco chiuso (`vai`, `trasforma`, `raccogli`, `porta`, `produci`, `usa`…) che `sys.lavoro` sa fare e che cambia il mondo davvero (T245b, ADR-0140).
-- **Dove vive**: `src/kernel/jobs.ts`, `universe/modules/sys.lavoro/logic.lua`
+- **Definizione**: uno dei compiti di un elenco chiuso (`go`, `transform`, `gather`, `carry`, `produce`, `use`…; T307b) che `sys.work` sa fare e che cambia il mondo davvero (T245b, ADR-0140).
+- **Dove vive**: `src/kernel/jobs.ts`, `universe/modules/sys.work/logic.lua`
 - **Da non usare**: `azione` (per il comportamento: l'azione è del viandante), `task`
 - **Fermo**: i valori di `fa`.
 
 ### Deposito del luogo
 - **Inglese**: `placeDeposit`
-- **Definizione**: ciò che i mestieri di un luogo portano e prendono (il grano, i ciocchi, il pane), una voce `deposito:<cx>:<cy>` del magazzino di `sys.lavoro`; il luogo è quello a cui l'individuo appartiene (`mestiere.luogo`). Dura con la partita, non va ai client (T245c, ADR-0141).
-- **Dove vive**: `universe/modules/sys.lavoro/logic.lua`, `src/kernel/kernel.ts`
+- **Definizione**: ciò che i mestieri di un luogo portano e prendono (il grano, i ciocchi, il pane), una voce `deposito:<cx>:<cy>` del magazzino di `sys.work`; il luogo è quello a cui l'individuo appartiene (`mestiere.luogo`). Dura con la partita, non va ai client (T245c, ADR-0141).
+- **Dove vive**: `universe/modules/sys.work/logic.lua`, `src/kernel/kernel.ts`
 - **Da non usare**: `magazzino` (per il deposito: il magazzino è di un modulo), `granaio`, `scorta`
 - **Fermo**: la chiave `deposito:<cx>:<cy>`, `luogo` di `mestiere`.
 
@@ -541,7 +541,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 ### Cantiere
 - **Inglese**: `cantierePanels`, `posto` (dell'impresa)
 - **Definizione**: dove un'impresa si lavora (`posto`), e il pannello «Il cantiere» che dice dell'impresa più vicina a che punto è, cosa manca e chi ci lavora (T245d, ADR-0147).
-- **Dove vive**: `universe/modules/sys.lavoro/manifest.json` (`ui`), `src/kernel/kernel.ts`
+- **Dove vive**: `universe/modules/sys.work/manifest.json` (`ui`), `src/kernel/kernel.ts`
 - **Da non usare**: `impresa` (per il posto o il pannello), `sito`, `site` (nei documenti)
 - **Fermo**: il pannello `cantiere`, i campi `cantiere.titolo`, `cantiere.fase`, `cantiere.stato`, `cantiere.manca`, `cantiere.squadra`, il pulsante `porta`.
 
@@ -933,11 +933,11 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Fermo**: `ai.coefficienti`.
 
 ### Vite degli individui
-- **Inglese**: `vite` (la chiave), `ABSENT`
+- **Inglese**: `lives` (la chiave; `vite` prima di T307b), `ABSENT`
 - **Definizione**: la manopola del realismo degli individui (T245a, ADR-0138): Cronaca a 0, Vita a 0,5, Teatro a 1. Assente vale 0, a differenza delle altre manopole, così un universo di prima non spende per ciò che non ha scelto; si fissa entrando come tutte (ADR-0133).
 - **Dove vive**: `src/kernel/coefficients.ts`
 - **Da non usare**: `realismo` (per la manopola), `grado di vita`
-- **Fermo**: `ai.coefficienti.vite`, i nomi `Cronaca`, `Vita`, `Teatro`.
+- **Fermo**: `ai.coefficienti.lives`, i nomi `Cronaca`, `Vita`, `Teatro`.
 
 ### Consumi
 - **Inglese**: `usage`, `UsageLog`

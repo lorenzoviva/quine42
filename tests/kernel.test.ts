@@ -28,7 +28,7 @@ describe('kernel', () => {
     const S = k.config.chunkSize;
     expect(k.lotAt((b.floor[0] % S) + 0.5, Math.floor(b.floor[0] / S) + 0.5)?.lot).toBe(b);
     for (const st of k.lines.values()) expect(st.compiled).toBe(true);
-    expect(k.feed().some((e) => e.from === 'cartografo' && e.kind === 'propone')).toBe(true);
+    expect(k.feed().some((e) => e.from === 'cartographer' && e.kind === 'propone')).toBe(true);
   });
 
   it('the world is full of things: furniture with contents, items on the ground', () => {
@@ -99,32 +99,32 @@ describe('kernel', () => {
     const big = k.corona.buildings.find((b) => b.storeys.length > 1);
     if (big) expect(big.storeys[0].items.some((i) => i.kind === 'up')).toBe(true);
     // A member of the Engineers' team goes to the book of the module it changes.
-    k.council.say('ingegnere', 'propone', 'ritocco object.well: secchio più capiente');
+    k.council.say('engineer', 'propone', 'ritocco object.well: secchio più capiente');
     const s0 = k.corona.slotOf('modules/object.well/manifest.json')!;
-    const member = [...k.archive.avatars.values()].find((a) => a.agent === 'ingegnere' && a.path === 'modules/object.well/manifest.json')!;
+    const member = [...k.archive.avatars.values()].find((a) => a.agent === 'engineer' && a.path === 'modules/object.well/manifest.json')!;
     expect(member.say).toMatch(/object.well/);
     for (let i = 0; i < 300; i++) k.archive.tick(1 / 30);
     expect(Math.hypot(member.x - (s0.x + 0.5), member.y - (s0.y + 0.5))).toBeLessThan(1.6);
     // Only who is actually talking is seen together: the one called in appears beside the caller.
-    k.council.say('arbitro', 'obietta', 'object.well: la corda è troppo corta', 'narratore');
-    const called = [...k.archive.avatars.values()].find((a) => a.agent === 'narratore' && a.building === bOf('modules/object.well/manifest.json'))!;
-    const caller = [...k.archive.avatars.values()].find((a) => a.agent === 'arbitro' && a.building === bOf('modules/object.well/manifest.json'))!;
+    k.council.say('arbiter', 'obietta', 'object.well: la corda è troppo corta', 'narrator');
+    const called = [...k.archive.avatars.values()].find((a) => a.agent === 'narrator' && a.building === bOf('modules/object.well/manifest.json'))!;
+    const caller = [...k.archive.avatars.values()].find((a) => a.agent === 'arbiter' && a.building === bOf('modules/object.well/manifest.json'))!;
     expect(Math.hypot(called.x - caller.tx, called.y - caller.ty)).toBeLessThan(1.5);
     // Changed files glow: the latest commits are known file by file.
     k.saveFile('modules/object.well/manifest.json', k.files['modules/object.well/manifest.json'].replace('"name"', '"name"'), true);
     // Talking to an agent: it answers in its role and can send a request to the Forge.
-    const r = await k.talkToAgent('narratore', 'crea un mugnaio che parla del vento');
+    const r = await k.talkToAgent('narrator', 'crea un mugnaio che parla del vento');
     expect(r.forged).toMatch(/ugnaio|crea/i);
     expect(k.recentChanges().size).toBeGreaterThan(0);
   });
 
   it('the Referente takes the transcended wanderer\'s requests to the right team', async () => {
-    const env = await k.talkToAgent('referente', 'vorrei un bosco degli elfi a nord');
+    const env = await k.talkToAgent('liaison', 'vorrei un bosco degli elfi a nord');
     expect(env.forged).toMatch(/Bosco degli Elfi/);
-    const rule = await k.talkToAgent('referente', 'stabilisci una regola: di notte i lupi cantano');
+    const rule = await k.talkToAgent('liaison', 'stabilisci una regola: di notte i lupi cantano');
     expect(rule.forged).toMatch(/regola/i);
     expect(k.rules().some((r) => /lupi/.test(r.testo))).toBe(true);
-    const art = await k.talkToAgent('referente', 'riscolpisci il gatto più arancione');
+    const art = await k.talkToAgent('liaison', 'riscolpisci il gatto più arancione');
     expect(art.forged).toMatch(/riscolpirà/i);
     expect(JSON.parse(k.repo.head().files['modules/npc.cat/manifest.json']!).appearance.aspetto).toMatch(/arancione/);
   });

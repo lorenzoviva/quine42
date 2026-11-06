@@ -103,7 +103,7 @@ function seedFiles() {
 }
 
 const seedConfig = () => readFileSync(path.join(REPO, 'universe', 'universe.json'), 'utf8');
-const many = (name) => JSON.stringify({ ...JSON.parse(seedConfig()), name, partita: { modalita: 'multigiocatore', morte: 3, master: 'io' } }, null, 2);
+const many = (name) => JSON.stringify({ ...JSON.parse(seedConfig()), name, partita: { modalita: 'multiplayer', morte: 3, master: 'io' } }, null, 2);
 
 async function writeUniverse(root, files) {
   for (const [rel, text] of Object.entries(files)) {

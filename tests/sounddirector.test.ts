@@ -14,8 +14,8 @@ import { soundPrograms, type SoundProgram } from '../src/mj/sound';
 import { expectedModelErrors } from './helpers';
 
 const programs = readPrograms(bundledFiles);
-const music = programs.filter((p) => p.suono?.uso === 'musica');
-const state = (s: Partial<SoundState> = {}): SoundState => ({ beyond: false, environment: 'village', phase: 'giorno', seed: 42, ...s });
+const music = programs.filter((p) => p.suono?.uso === 'music');
+const state = (s: Partial<SoundState> = {}): SoundState => ({ beyond: false, environment: 'village', phase: 'day', seed: 42, ...s });
 const environments = Object.keys(JSON.parse(bundledFiles['modules/world.layouts/manifest.json']).layouts as object);
 
 describe('the choice of the music', () => {
@@ -23,20 +23,20 @@ describe('the choice of the music', () => {
     const a = chooseMusic(state(), programs);
     chooseMusic(state({ environment: 'woods' }), programs);
     expect(chooseMusic(state(), programs)).toEqual(a);
-    expect(a?.id).toBe('suono-musica-pastorale');
+    expect(a?.id).toBe('sound-music-pastoral');
   });
 
   it('follows the environment and the moment of the day', () => {
     const id = (s: Partial<SoundState>) => chooseMusic(state(s), programs)?.id;
-    expect(id({ environment: 'woods' })).toBe('suono-musica-selva');
-    expect(id({ environment: 'castle' })).toBe('suono-musica-pietra');
-    expect(id({ environment: 'dungeon', phase: 'notte' })).toBe('suono-musica-profondo');
-    expect(id({ environment: 'village', phase: 'sera' })).toBe('suono-musica-tramonto');
-    expect(id({ environment: 'village', phase: 'notte' })).toBe('suono-musica-notte');
+    expect(id({ environment: 'woods' })).toBe('sound-music-woods');
+    expect(id({ environment: 'castle' })).toBe('sound-music-stone');
+    expect(id({ environment: 'dungeon', phase: 'night' })).toBe('sound-music-deep');
+    expect(id({ environment: 'village', phase: 'evening' })).toBe('sound-music-sunset');
+    expect(id({ environment: 'village', phase: 'night' })).toBe('sound-music-night');
   });
 
   it('an environment of the Cartographer goes by what its name contains; an unknown one and a place not known yet still have music', () => {
-    expect(chooseMusic(state({ environment: 'castello_nero' }), programs)?.id).toBe('suono-musica-pietra');
+    expect(chooseMusic(state({ environment: 'castello_nero' }), programs)?.id).toBe('sound-music-stone');
     for (const phase of DAY_PHASES) {
       expect(chooseMusic(state({ environment: 'qualcosa di mai visto', phase }), programs)).toBeDefined();
       expect(chooseMusic(state({ environment: undefined, phase }), programs)).toBeDefined();
@@ -50,24 +50,24 @@ describe('the choice of the music', () => {
   it('the instance is a seed: another place, moment, universe or variant is another seed of the same program', () => {
     const base = chooseMusic(state(), programs)!;
     expect(chooseMusic(state({ environment: 'campi' }), programs)).toMatchObject({ id: base.id });
-    for (const other of [chooseMusic(state({ environment: 'campi' }), programs), chooseMusic(state({ phase: 'mattina' }), programs), chooseMusic(state({ seed: 43 }), programs), chooseMusic(state(), programs, 1)]) expect(other?.seed).not.toBe(base.seed);
+    for (const other of [chooseMusic(state({ environment: 'campi' }), programs), chooseMusic(state({ phase: 'morning' }), programs), chooseMusic(state({ seed: 43 }), programs), chooseMusic(state(), programs, 1)]) expect(other?.seed).not.toBe(base.seed);
   });
 
   it('within the circle nothing plays what is beyond it, and beyond it only that, at any hour (rule 8)', () => {
     for (const environment of [...environments, undefined])
       for (const phase of DAY_PHASES) {
-        expect(chooseMusic(state({ environment, phase }), programs)?.id).not.toBe('suono-musica-oltre');
-        expect(chooseMusic(state({ environment, phase, beyond: true }), programs)?.id).toBe('suono-musica-oltre');
+        expect(chooseMusic(state({ environment, phase }), programs)?.id).not.toBe('sound-music-beyond');
+        expect(chooseMusic(state({ environment, phase, beyond: true }), programs)?.id).toBe('sound-music-beyond');
       }
     // The place and the hour under the feet do not leak into the music out there.
-    expect(chooseMusic(state({ beyond: true, environment: 'bosco', phase: 'notte' }), programs)).toEqual(chooseMusic(state({ beyond: true }), programs));
+    expect(chooseMusic(state({ beyond: true, environment: 'bosco', phase: 'night' }), programs)).toEqual(chooseMusic(state({ beyond: true }), programs));
   });
 
   it('a universe without sound programs has no music, and a bad index is no index', () => {
     expect(chooseMusic(state(), [])).toBeUndefined();
     expect(readPrograms({ 'models/index.json': '{nope' })).toEqual([]);
-    const odd = { 'models/index.json': JSON.stringify({ a: { classe: 'suono', suono: 'musica' }, b: { classe: 'suono', suono: { uso: 'musica', ambienti: 3, momenti: [1, 'notte'] } } }), 'models/a.xml': '', 'models/b.xml': '' };
-    expect(readPrograms(odd).map((p) => [p.id, p.suono])).toEqual([['b', { uso: 'musica', momenti: ['notte'] }]]);
+    const odd = { 'models/index.json': JSON.stringify({ a: { classe: 'suono', suono: 'musica' }, b: { classe: 'suono', suono: { uso: 'music', ambienti: 3, momenti: [1, 'notte'] } } }), 'models/a.xml': '', 'models/b.xml': '' };
+    expect(readPrograms(odd).map((p) => [p.id, p.suono])).toEqual([['b', { uso: 'music', momenti: ['night'] }]]);
   });
 });
 
@@ -89,7 +89,7 @@ describe('the programs of the seed', () => {
     expect(errors).toHaveLength(expected.length);
     expected.forEach((e, i) => expect(errors[i]).toMatch(e));
     const use = p.suono!.uso;
-    const seeds = use === 'musica' ? [1, 987654321] : [1, 2, 3, 4, 5];
+    const seeds = use === 'music' ? [1, 987654321] : [1, 2, 3, 4, 5];
     for (const seed of seeds) {
       const s = prepareSound({ xml: p.xml, seed, use });
       let peak = 0;
@@ -106,16 +106,16 @@ describe('the programs of the seed', () => {
   }, 60_000);
 
   it('a piece of music is one whole loop, long enough not to tire at once; an effect is short', () => {
-    const piece = prepareSound({ xml: music[0].xml, seed: 7, use: 'musica' });
+    const piece = prepareSound({ xml: music[0].xml, seed: 7, use: 'music' });
     expect(piece.samples.length / piece.sampleRate).toBeGreaterThan(15);
-    const blip = prepareSound({ xml: effectProgram('runa', programs)!.xml, seed: 1, use: 'effetto' });
+    const blip = prepareSound({ xml: effectProgram('rune', programs)!.xml, seed: 1, use: 'effect' });
     expect(blip.samples.length / blip.sampleRate).toBeLessThan(1.5);
     // An effect loses the silence after it.
     expect(Math.abs(blip.samples[blip.samples.length - 1])).toBeGreaterThanOrEqual(3e-4);
   }, 60_000);
 
   it('the persistent cache says the version of what made it: changing the sound means raising it', () => {
-    const { samples } = prepareSound({ xml: effectProgram('runa', programs)!.xml, seed: 1, use: 'effetto' });
+    const { samples } = prepareSound({ xml: effectProgram('rune', programs)!.xml, seed: 1, use: 'effect' });
     const print = hashStr(Array.from(samples.subarray(0, 4000), (x) => x.toFixed(5)).join());
     expect([SOUND_CACHE_VERSION, samples.length, print]).toEqual(PINNED);
   });
@@ -128,15 +128,15 @@ describe('a broken program', () => {
   const broken = ['', 'not xml <', '<sequence values="B"></sequence>', '<one values="BN" size="4 4 1" in="B" out="N"/>', '<sequence values="B" size="99999 99999 99999"><sound/></sequence>', '<sequence values="BN" size="4 1 4"><sound bpm="nan"/></sequence>'];
 
   it.each(broken)('throws nothing and says why: %s', (xml) => {
-    for (const use of ['musica', 'effetto'] as const) {
+    for (const use of ['music', 'effect'] as const) {
       const out = tryPrepareSound({ xml, seed: 1, use });
       expect('error' in out).toBe(true);
     }
   });
 
   it('nor with a strange seed', () => {
-    const xml = effectProgram('runa', programs)!.xml;
-    for (const seed of [NaN, Infinity, -1, 1.5]) expect(() => tryPrepareSound({ xml, seed, use: 'effetto' })).not.toThrow();
+    const xml = effectProgram('rune', programs)!.xml;
+    for (const seed of [NaN, Infinity, -1, 1.5]) expect(() => tryPrepareSound({ xml, seed, use: 'effect' })).not.toThrow();
   });
 });
 
@@ -185,7 +185,7 @@ describe('the director', () => {
     d.unlock();
     await flush();
     expect(out.music).toHaveLength(1);
-    expect(asked.filter((q) => q.use === 'effetto').length).toBeGreaterThan(10);
+    expect(asked.filter((q) => q.use === 'effect').length).toBeGreaterThan(10);
     d.cue('rune:picked');
     await flush();
     expect(out.effects).toHaveLength(1);
@@ -208,7 +208,7 @@ describe('the director', () => {
     d.update(state({ environment: 'woods' }));
     await flush();
     expect(out.music).toHaveLength(2);
-    expect(d.now?.id).toBe('suono-musica-selva');
+    expect(d.now?.id).toBe('sound-music-woods');
   });
 
   it('crossing the edge changes the music at once', async () => {
@@ -219,7 +219,7 @@ describe('the director', () => {
     d.update(state({ beyond: true }));
     await flush();
     expect(out.music).toHaveLength(2);
-    expect(d.now?.id).toBe('suono-musica-oltre');
+    expect(d.now?.id).toBe('sound-music-beyond');
   });
 
   it('a piece becomes other instances of itself, and comes back: as many as the cache holds', async () => {
@@ -235,11 +235,11 @@ describe('the director', () => {
       seeds.add(d.now!.seed);
     }
     expect(seeds.size).toBe(4);
-    expect(new Set(asked.filter((q) => q.use === 'musica').map((q) => q.xml)).size).toBe(1);
+    expect(new Set(asked.filter((q) => q.use === 'music').map((q) => q.xml)).size).toBe(1);
   });
 
   it('a program that fails stops the music, does not throw and is not asked for again at every update', async () => {
-    const { d, out, asked, advance } = directed((q) => q.use === 'musica');
+    const { d, out, asked, advance } = directed((q) => q.use === 'music');
     d.unlock();
     d.update(state());
     await flush();
@@ -255,7 +255,7 @@ describe('the director', () => {
   });
 
   it('an effect that fails, or that has no program, is silence', async () => {
-    const { d, out } = directed((q) => q.use === 'effetto');
+    const { d, out } = directed((q) => q.use === 'effect');
     d.unlock();
     d.cue('fault');
     await flush();
@@ -310,7 +310,7 @@ function fakeWorker(answer: (q: SoundRequest) => 'ok' | 'error' | 'hang' | 'cras
 }
 
 describe('the renders', () => {
-  const q = (seed: number, use: SoundRequest['use'] = 'musica'): SoundRequest => ({ xml: '<x/>', seed, use });
+  const q = (seed: number, use: SoundRequest['use'] = 'music'): SoundRequest => ({ xml: '<x/>', seed, use });
 
   it('ask once for the same thing, and keep it', async () => {
     const answer = vi.fn(() => 'ok' as const);
@@ -329,8 +329,8 @@ describe('the renders', () => {
         return 'ok';
       }).factory,
     );
-    await Promise.all([r.get(q(1, 'effetto')), r.get(q(2, 'effetto')), r.get(q(3, 'effetto')), r.get(q(4))]);
-    expect(order).toEqual(['effetto1', 'musica4', 'effetto2', 'effetto3']);
+    await Promise.all([r.get(q(1, 'effect')), r.get(q(2, 'effect')), r.get(q(3, 'effect')), r.get(q(4))]);
+    expect(order).toEqual(['effect1', 'music4', 'effect2', 'effect3']);
   });
 
   it('a failure answers nothing, is remembered, and the next job still runs', async () => {

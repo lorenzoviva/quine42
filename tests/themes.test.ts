@@ -122,13 +122,13 @@ describe('a universe that exists', () => {
       'world/bible.json': '{"titolo":"Le isole"}\n',
       'world/style.md': '# Guida di stile\n',
     };
-    const moved = { ...seed, 'prompts/agents/cartografo.md': `${seed['prompts/agents/cartografo.md']}\nAltro.\n` };
+    const moved = { ...seed, 'prompts/agents/cartographer.md': `${seed['prompts/agents/cartographer.md']}\nAltro.\n` };
     const { files, updated } = upgradeFromSeed(own, moved);
     for (const f of ['prompts/theme.md', 'world/bible.json', 'world/style.md']) {
       expect(files[f]).toBe(own[f]);
       expect(updated).not.toContain(f);
     }
-    expect(updated).toContain('prompts/agents/cartografo.md');
+    expect(updated).toContain('prompts/agents/cartographer.md');
   });
 
   it('keeps its houses, its environments and its theme when it starts', async () => {

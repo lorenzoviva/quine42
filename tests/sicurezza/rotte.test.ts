@@ -47,7 +47,7 @@ beforeAll(async () => {
   dir = mkdtempSync(path.join(os.tmpdir(), 'quine-rotte-'));
   mkdirSync(path.dirname(logic()), { recursive: true });
   mkdirSync(path.join(root(), 'world', 'giocatori'), { recursive: true });
-  writeFileSync(path.join(root(), 'universe.json'), JSON.stringify({ name: 'sonda', partita: { modalita: 'multigiocatore', master: 'io' } }));
+  writeFileSync(path.join(root(), 'universe.json'), JSON.stringify({ name: 'sonda', partita: { modalita: 'multiplayer', master: 'io' } }));
   writeFileSync(logic(), 'return {}\n');
   writeFileSync(path.join(root(), 'world', 'giocatori', 'altro.json'), JSON.stringify({ nome: 'Altro', crediti: 5 }));
   git(root(), ['init', '-q']);
@@ -398,7 +398,7 @@ describe('la coda delle CLI', () => {
 describe('la sessione', () => {
   async function world() {
     const cfg = JSON.parse(bundledFiles['universe.json']);
-    const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2) };
+    const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2) };
     return new SessionServer(await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() }));
   }
 

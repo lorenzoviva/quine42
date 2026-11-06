@@ -23,9 +23,9 @@ const plot = (titolo: string, cosa: string): Plot => ({
   titolo,
   mistero: 'un segreto di famiglia',
   coinvolti: ['Fiocco'],
-  tappe: [{ giorno: 0, momento: 'mattina', chi: 'Fiocco', dove: 'piazza', cosa }],
+  tappe: [{ giorno: 0, momento: 'morning', chi: 'Fiocco', dove: 'square', cosa }],
   inizio: 0,
-  stato: 'attiva',
+  stato: 'active',
 });
 
 describe('the fourth wall', () => {
@@ -50,7 +50,7 @@ describe('the fourth wall', () => {
     const systems: string[] = [];
     const models = { text: async (r: TextCall) => (systems.push(r.system ?? ''), '{}') } as unknown as AiModels;
     const c = new Council(models, () => ({ files: bundledFiles, palette: {}, catalog: [] }));
-    for (const agent of ['narratore', 'arbitro', 'cartografo', 'referente'] as const) await c.ask(agent, 'prova', 'una prova', { type: 'OBJECT' });
+    for (const agent of ['narrator', 'arbiter', 'cartographer', 'liaison'] as const) await c.ask(agent, 'prova', 'una prova', { type: 'OBJECT' });
     for (const system of systems) expect(system).toContain('Niente doppioni degli elementi del gioco');
     expect(systems).toHaveLength(4);
   });
@@ -59,7 +59,7 @@ describe('the fourth wall', () => {
     expect(metaBreak(bundledFiles['prompts/theme.md'])).toBeUndefined();
     expect(bundledFiles['prompts/theme.md']).not.toMatch(/mistero|in piazza/);
     expect(bibleBreaks(readBible(bundledFiles)!)).toEqual([]);
-    expect(bundledFiles['prompts/agents/narratore.md']).not.toMatch(/la strada che riporta in piazza/);
+    expect(bundledFiles['prompts/agents/narrator.md']).not.toMatch(/la strada che riporta in piazza/);
     for (const [path, text] of Object.entries(bundledFiles)) {
       if (!path.endsWith('manifest.json')) continue;
       const m = JSON.parse(text);

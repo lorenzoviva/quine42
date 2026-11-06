@@ -21,7 +21,7 @@ describe('the rune canon', () => {
 
   it('goes with every narrative task (Narrator and Arbiter), with the magic runes and incantations of the world', async () => {
     const { c, asked } = council(bundledFiles);
-    for (const agent of ['narratore', 'arbitro'] as const) {
+    for (const agent of ['narrator', 'arbiter'] as const) {
       const ctx = c.context(agent);
       expect(ctx).toMatch(/## Canone delle rune[\s\S]*nessuna trama/);
       expect(ctx).toContain('Non si spostano');
@@ -29,8 +29,8 @@ describe('the rune canon', () => {
       expect(ctx).toMatch(/ᛊ Sowilo \(«lux», luce\)/);
       expect(ctx).toMatch(/terra \+ ignis → Palla di fuoco/);
     }
-    for (const agent of ['scultore', 'artista', 'fisico', 'ingegnere', 'cartografo', 'referente'] as const) expect(c.context(agent)).not.toContain('Canone delle rune');
-    await c.ask('narratore', 'plot.weave', 'una trama', { type: 'OBJECT' });
+    for (const agent of ['sculptor', 'artist', 'physicist', 'engineer', 'cartographer', 'liaison'] as const) expect(c.context(agent)).not.toContain('Canone delle rune');
+    await c.ask('narrator', 'plot.weave', 'una trama', { type: 'OBJECT' });
     expect(asked[0].system).toContain('Canone delle rune');
   });
 

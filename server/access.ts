@@ -7,6 +7,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import { accountWanderer } from '../src/session/account';
 import { INTERNAL_HEADER, WANDERER_HEADER } from '../src/kernel/universes';
 import { SOLO, validWandererId } from '../src/kernel/wanderers';
+import { isMultiplayer } from '../src/kernel/gameSetup';
 import type { AccountSettings } from './account';
 import { accessRefusal, originRefusal } from './geminiProxy';
 
@@ -99,7 +100,7 @@ export function gameIn(universeJson: string | undefined): Game {
   try {
     const partita = JSON.parse(universeJson ?? '{}')?.partita;
     // As repairGameSetup reads it: a master that is not a wanderer's id is the one who plays alone.
-    return { many: partita?.modalita === 'multigiocatore', master: validWandererId(partita?.master) ? partita.master : SOLO };
+    return { many: isMultiplayer(partita?.modalita), master: validWandererId(partita?.master) ? partita.master : SOLO };
   } catch {
     return { many: false, master: SOLO };
   }
@@ -137,7 +138,7 @@ export function newUniverse(who: Caller, files: Record<string, string | null>): 
     /* not a config: the kernel repairs what it reads */
   }
   const kept = Object.fromEntries(Object.entries(files).filter(([p]) => !creditFile(p)));
-  const partita = { ...(cfg.partita as object | undefined), modalita: 'multigiocatore', master: who.id };
+  const partita = { ...(cfg.partita as object | undefined), modalita: 'multiplayer', master: who.id };
   return { files: { ...kept, 'universe.json': JSON.stringify({ ...cfg, partita }, null, 2) + '\n' } };
 }
 

@@ -16,7 +16,7 @@ import { anonymousToken } from '../server/account';
 
 async function bootMany(): Promise<Kernel> {
   const cfg = JSON.parse(bundledFiles['universe.json']);
-  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2) };
+  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2) };
   return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 }
 
@@ -86,7 +86,7 @@ describe('accounts (T44b)', () => {
     }
     const online = new TrackingOnlineAiModels();
     const cfg = JSON.parse(bundledFiles['universe.json']);
-    const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2) };
+    const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2) };
     const k = await Kernel.boot({ files, store: memoryStore(), ai: online });
     const server = new SessionServer(k, { verify });
     const anon = await enter(server, '', 'anonimo');
@@ -99,7 +99,7 @@ describe('accounts (T44b)', () => {
     expect(k.giveCredits(id, 10)).toBe(false);
 
     // Personal call by anonymous wanderer uses local models (does not call online models)
-    await k.council.write('narratore', 'npc.talk', 'Ciao', { chi: id });
+    await k.council.write('narrator', 'npc.talk', 'Ciao', { chi: id });
     expect(online.calls).not.toContain('npc.talk');
 
     // Who they are and what they carry (T44a, T43c): kept by the server under the wanderer's id.
@@ -121,7 +121,7 @@ describe('accounts (T44b)', () => {
     expect(k.giveCredits(id, 10)).toBe(true);
     expect(k.creditsOf(id)).toBe(10);
     expect(k.hasCredits(id)).toBe(true);
-    await k.council.write('narratore', 'npc.talk', 'Ciao da legato', { chi: id });
+    await k.council.write('narrator', 'npc.talk', 'Ciao da legato', { chi: id });
     expect(online.calls).toContain('npc.talk');
   });
 

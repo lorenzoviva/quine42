@@ -47,7 +47,7 @@ describe('the game chosen at the Genesis (T33)', () => {
     expect(repairGameSetup({ morte: 'molto punitiva' }).morte).toBe(4);
     expect(repairGameSetup({ morte: 'poco punitiva' }).morte).toBe(1);
     expect(repairGameSetup({ morte: 'media' }).morte).toBe(2);
-    expect(repairGameSetup({ modalita: 'multigiocatore', morte: 1.6 })).toMatchObject({ modalita: 'multigiocatore', morte: 2 });
+    expect(repairGameSetup({ modalita: 'multiplayer', morte: 1.6 })).toMatchObject({ modalita: 'multiplayer', morte: 2 });
     expect(repairGameSetup({ altroTraGiocatori: 'no' }).altroTraGiocatori).toBe(false);
   });
 
@@ -80,24 +80,24 @@ describe('the game chosen at the Genesis (T33)', () => {
   });
 
   it('the game goes with every request of who builds on it, not with the Sculptor', async () => {
-    const { k, models } = await bootWith({ modalita: 'multigiocatore', morte: 4, pvp: true, altroTraGiocatori: false });
-    expect(k.gameSetup()).toEqual({ modalita: 'multigiocatore', morte: 4, pvp: true, altroTraGiocatori: false, master: 'io' });
+    const { k, models } = await bootWith({ modalita: 'multiplayer', morte: 4, pvp: true, altroTraGiocatori: false });
+    expect(k.gameSetup()).toEqual({ modalita: 'multiplayer', morte: 4, pvp: true, altroTraGiocatori: false, master: 'io' });
     k.die('fame');
     await k.continueAfterDeath();
     const narr = models.calls.find((c) => c.task === 'player.death')!;
     expect(narr.system).toMatch(/spietata/);
     expect(narr.system).toMatch(/possono ferirsi; «Altro…» non si fa su un altro viandante/);
-    for (const a of ['arbitro', 'ingegnere', 'referente'] as const) expect(k.council.context(a)).toMatch(/## La partita/);
-    for (const a of ['scultore', 'artista', 'cartografo', 'fisico'] as const) expect(k.council.context(a)).not.toMatch(/## La partita/);
+    for (const a of ['arbiter', 'engineer', 'liaison'] as const) expect(k.council.context(a)).toMatch(/## La partita/);
+    for (const a of ['sculptor', 'artist', 'cartographer', 'physicist'] as const) expect(k.council.context(a)).not.toMatch(/## La partita/);
   });
 
   it('after the Genesis the game never changes: a rewritten universe.json is written back', async () => {
     const { k } = await bootWith({ morte: 2 });
     const cfg = JSON.parse(k.repo.working['universe.json']);
-    k.repo.write('universe.json', JSON.stringify({ ...cfg, circleRadius: cfg.circleRadius, partita: { ...cfg.partita, morte: 0, modalita: 'multigiocatore' } }));
+    k.repo.write('universe.json', JSON.stringify({ ...cfg, circleRadius: cfg.circleRadius, partita: { ...cfg.partita, morte: 0, modalita: 'multiplayer' } }));
     k.applyFiles({ ...k.repo.working });
-    expect(k.gameSetup()).toMatchObject({ morte: 2, modalita: 'singola' });
-    expect(JSON.parse(k.repo.working['universe.json']).partita).toMatchObject({ morte: 2, modalita: 'singola' });
+    expect(k.gameSetup()).toMatchObject({ morte: 2, modalita: 'single' });
+    expect(JSON.parse(k.repo.working['universe.json']).partita).toMatchObject({ morte: 2, modalita: 'single' });
     expect(k.feed().some((e) => e.kind === 'scarta' && /si sceglie solo alla Genesi/.test(e.text))).toBe(true);
     // The rest of universe.json is the universe's to change.
     k.repo.write('universe.json', JSON.stringify({ ...cfg, ai: { ...cfg.ai, maxCast: 5 } }));
@@ -109,8 +109,8 @@ describe('the game chosen at the Genesis (T33)', () => {
   it('the Genesis chooses the game of a universe never generated, and only that one', async () => {
     const { k } = await bootWith({});
     expect(k.needsGenesis()).toBe(true);
-    expect(await k.runGenesis('un regno di pastori', undefined, { morte: 1, modalita: 'multigiocatore', pvp: true })).toBe(true);
-    expect(k.gameSetup()).toMatchObject({ morte: 1, modalita: 'multigiocatore', pvp: true });
+    expect(await k.runGenesis('un regno di pastori', undefined, { morte: 1, modalita: 'multiplayer', pvp: true })).toBe(true);
+    expect(k.gameSetup()).toMatchObject({ morte: 1, modalita: 'multiplayer', pvp: true });
     expect(JSON.parse(k.repo.head().files['universe.json']).partita).toMatchObject({ morte: 1, pvp: true });
     // A second Genesis keeps it.
     expect(await k.runGenesis('un arcipelago', undefined, { morte: 4 })).toBe(true);

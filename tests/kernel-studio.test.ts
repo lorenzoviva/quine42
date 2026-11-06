@@ -75,40 +75,40 @@ describe('the neon studio', () => {
     expect(k.actor().acceso).toBe(false);
     const hall = k.corona.building('concilio')!.storeys[0].items;
     const seats = hall.filter((i) => i.kind === 'desk').map((s) => s.target);
-    expect(seats.indexOf('attore')).toBe(seats.indexOf('narratore') + 1);
-    expect(hall.find((i) => i.kind === 'desk' && i.target === 'attore')?.label).toBe("il posto dell'Attore");
+    expect(seats.indexOf('actor')).toBe(seats.indexOf('narrator') + 1);
+    expect(hall.find((i) => i.kind === 'desk' && i.target === 'actor')?.label).toBe("il posto dell'Attore");
     expect(hall.filter((i) => i.kind === 'portal' && i.target === 'persone').length).toBe(2);
-    expect(k.corona.building('universo')!.storeys[0].items.find((i) => i.kind === 'console' && i.target === 'attore')?.label).toBe("la console dell'Attore");
-    expect(k.forms.info('corona-gerboa-attore')).toBeTruthy();
+    expect(k.corona.building('universo')!.storeys[0].items.find((i) => i.kind === 'console' && i.target === 'actor')?.label).toBe("la console dell'Attore");
+    expect(k.forms.info('corona-gerboa-actor')).toBeTruthy();
 
     // Its post: a step along from the Narrator's, on a free cell, in the room of the people.
     const studio = k.corona.building('persone')!;
-    const post = k.archive.avatars.get('attore@persone')!;
-    const narrator = k.archive.avatars.get('narratore@persone')!;
-    expect(post).toMatchObject({ agent: 'attore', name: 'Attore', color: AGENTS.attore.color, sigil: AGENTS.attore.sigil, building: studio.id });
+    const post = k.archive.avatars.get('actor@persone')!;
+    const narrator = k.archive.avatars.get('narrator@persone')!;
+    expect(post).toMatchObject({ agent: 'actor', name: 'Attore', color: AGENTS.actor.color, sigil: AGENTS.actor.sigil, building: studio.id });
     expect(post.x).toBeGreaterThan(narrator.x);
     expect(k.corona.free(post.x, post.y)).toBe(true);
 
     // Off, nobody calls it: at rest at the table and at its post, the console empty; the hall does not move when the option does.
     const before = JSON.stringify(hall);
     k.archive.consoles(k.working());
-    expect(k.archive.avatars.has('attore@universo#console')).toBe(false);
+    expect(k.archive.avatars.has('actor@universo#console')).toBe(false);
     k.setAi({ attore: true });
     expect(JSON.stringify(k.corona.building('concilio')!.storeys[0].items)).toBe(before);
 
     // On, it works: speaks from its post when no file is at stake, and sits at its console.
     const x = post.x;
-    k.council.say('attore', 'info', 'una battuta di Lena', undefined, 'npc.reply');
-    expect(k.working()).toContain('attore');
-    const speaking = k.archive.avatars.get('attore@persone')!;
+    k.council.say('actor', 'info', 'una battuta di Lena', undefined, 'npc.reply');
+    expect(k.working()).toContain('actor');
+    const speaking = k.archive.avatars.get('actor@persone')!;
     expect(speaking.say).toContain('una battuta');
     expect(speaking.tx).toBe(x);
     k.archive.consoles(k.working());
-    expect(k.archive.avatars.has('attore@universo#console')).toBe(true);
+    expect(k.archive.avatars.has('actor@universo#console')).toBe(true);
 
     // A file of the people's room: it goes to the shelf, then back to its own post, not the Narrator's.
     const [id, file] = [...k.modules.entries()].find(([, m]) => m.manifestPath.startsWith('modules/npc.'))!;
-    k.council.say('attore', 'info', `recita ${id}`, undefined, 'npc.reply');
+    k.council.say('actor', 'info', `recita ${id}`, undefined, 'npc.reply');
     expect(speaking.path).toBe(file.manifestPath);
     k.archive.tick(25);
     k.archive.tick(25);
@@ -121,7 +121,7 @@ describe('the neon studio', () => {
     const f0 = hall.storeys[0].items;
     expect(f0.some((i) => i.kind === 'table')).toBe(true);
     const seats = f0.filter((i) => i.kind === 'desk' && i.target);
-    expect(seats.map((s) => s.target).sort()).toEqual(['arbitro', 'artista', 'attore', 'cartografo', 'fisico', 'ingegnere', 'musicista', 'narratore', 'referente', 'scultore']);
+    expect(seats.map((s) => s.target).sort()).toEqual(['actor', 'arbiter', 'artist', 'cartographer', 'engineer', 'liaison', 'musician', 'narrator', 'physicist', 'sculptor']);
     for (const s of seats) expect([...k.archive.avatars.values()].some((a) => a.agent === s.target && a.building === 'concilio')).toBe(true);
     const portals = f0.filter((i) => i.kind === 'portal');
     expect(portals.length).toBe(10);
@@ -162,7 +162,7 @@ describe('the neon studio', () => {
     expect(k.corona.roomAt(k.wandererPos().x, k.wandererPos().y)?.building.id).toBe('luoghi');
     const f0items = k.corona.building('luoghi')!.storeys[0].items;
     const atlasItem = f0items.find((i) => i.kind === 'atlas')!;
-    expect(f0items.some((i) => i.kind === 'showcase' && i.device === 'plastico')).toBe(true);
+    expect(f0items.some((i) => i.kind === 'showcase' && i.device === 'diorama')).toBe(true);
     // Nothing of the room overlaps the atlas, and one can stand in front of it.
     const cells = (i: StudioItem) => Array.from({ length: (i.w ?? 1) * (i.h ?? 1) }, (_, n) => `${i.x + (n % (i.w ?? 1))},${i.y + Math.floor(n / (i.w ?? 1))}`);
     const taken = new Set(f0items.filter((i) => i !== atlasItem).flatMap(cells));
@@ -207,7 +207,7 @@ describe('tile context menus', () => {
     const row = Math.floor(pc.y);
     const plain = k.tileMenu(col, row);
     expect(plain.options.map((o) => o.id)).toEqual(['t:altro']);
-    const box = k.spawnModuleEntity(k.modules.get('obj.credenza')!, col + 0.5, row + 0.5);
+    const box = k.spawnModuleEntity(k.modules.get('obj.cupboard')!, col + 0.5, row + 0.5);
     const withBox = k.tileMenu(col, row);
     expect(withBox.entity).toBe(box);
     expect(withBox.options.some((o) => o.id === 'e:apri')).toBe(true);
@@ -233,10 +233,10 @@ describe('mechanics with interfaces', () => {
     const k = await boot();
     clearArea(k);
     // The seed has one panel, the site of the ventures (T245d).
-    expect(k.uiPanels().map((x) => x.module)).toEqual(['sys.lavoro']);
+    expect(k.uiPanels().map((x) => x.module)).toEqual(['sys.work']);
     const r = await k.forgeMechanic('equipaggiamento: slot per indossare e impugnare');
     expect(r.ok).toBe(true);
-    const p = k.uiPanels().find((x) => x.module !== 'sys.lavoro')!;
+    const p = k.uiPanels().find((x) => x.module !== 'sys.work')!;
     expect(p.panel.elementi.filter((e) => e.tipo === 'slot').map((e) => e.id)).toEqual(['testa', 'corpo', 'piedi', 'arma']);
     // A helmet from a pack of the Narrator (with its place and bonus).
     const items = JSON.parse(k.files['modules/items.base/manifest.json']);

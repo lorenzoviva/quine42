@@ -52,7 +52,7 @@ describe('the wanderer with an id (T34)', () => {
       'world/people.json': JSON.stringify({
         persone: [
           {
-            nome: 'Berta', tipo: 'npc.villager', specie: 'persona', genere: 'femmina', mestiere: 'fornaia', routine: [],
+            nome: 'Berta', tipo: 'npc.villager', specie: 'person', genere: 'female', mestiere: 'fornaia', routine: [],
             famiglia: [{ nome: 'Viandante', legame: 'amica' }], legameViandante: 'amica',
             ricordi: [{ quando: 'giorno 1, mattina', testo: 'il viandante mi ha aiutata col forno', con: 'Viandante', peso: 2 }],
           },
@@ -69,8 +69,8 @@ describe('the wanderer with an id (T34)', () => {
     expect(berta.ricordi![0].viandante).toBe('io');
     expect(berta.legameViandante).toBeUndefined();
     const g = k.graph();
-    expect(g.node('persona:viandante')?.giocatore).toBe('io');
-    expect(g.links.some((l) => l.source === 'persona:berta' && l.target === 'persona:viandante' && l.legame === 'amica')).toBe(true);
+    expect(g.node('individual:viandante')?.giocatore).toBe('io');
+    expect(g.links.some((l) => l.source === 'individual:berta' && l.target === 'individual:viandante' && l.legame === 'amica')).toBe(true);
 
     // The next save moves the wanderer into their own file; it loads back the same.
     expect(k.saveState()).toBe(true);
@@ -111,8 +111,8 @@ describe('the wanderer with an id (T34)', () => {
     expect(k.as('lia', () => k.bondOf(name))).toBe('moglie');
     expect(k.bondOf(name)).toBeUndefined();
     const g = k.graph();
-    expect(g.node('persona:viandante-lia')?.label).toBe('Lia');
-    expect(g.links.some((l) => l.relation === 'legame' && l.target === 'persona:viandante-lia' && l.legame === 'moglie')).toBe(true);
+    expect(g.node('individual:viandante-lia')?.label).toBe('Lia');
+    expect(g.links.some((l) => l.relation === 'legame' && l.target === 'individual:viandante-lia' && l.legame === 'moglie')).toBe(true);
 
     // Each carries their own things, saved in their own file.
     const mine = countItem(k.inventory(), 'item.formaggio');
@@ -127,13 +127,13 @@ describe('the wanderer with an id (T34)', () => {
     again.addWanderer('lia');
     expect(again.wanderers()[1]).toEqual({ id: 'lia', nome: 'Lia' });
     expect(again.as('lia', () => countItem(again.inventory(), 'item.formaggio'))).toBe(countItem(k.as('lia', () => k.inventory()), 'item.formaggio'));
-    expect(again.graph().node('persona:viandante-lia')).toBeDefined();
+    expect(again.graph().node('individual:viandante-lia')).toBeDefined();
   }, 60_000);
 
   it('a quest belongs to who accepted it (io when the plot is older)', () => {
     const quest = (viandante?: string): Plot => ({
-      id: `t-${viandante ?? 'vecchia'}`, titolo: 't', mistero: '', coinvolti: [], tappe: [], inizio: 0, stato: 'attiva',
-      missione: { da: 'Berta', testo: 'porta il pane', obiettivo: { tipo: 'porta', oggetto: 'pane' }, stato: 'accettata', ...(viandante ? { viandante } : {}) },
+      id: `t-${viandante ?? 'vecchia'}`, titolo: 't', mistero: '', coinvolti: [], tappe: [], inizio: 0, stato: 'active',
+      missione: { da: 'Berta', testo: 'porta il pane', obiettivo: { tipo: 'bring', oggetto: 'pane' }, stato: 'accepted', ...(viandante ? { viandante } : {}) },
     });
     const plots = [quest(), quest('lia'), quest('io')];
     expect(activeQuests(plots, 'io').map((q) => q.plot.id)).toEqual(['t-vecchia', 't-io']);

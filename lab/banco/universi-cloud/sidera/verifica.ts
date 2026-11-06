@@ -95,7 +95,7 @@ for (const t of NUOVE) {
 }
 if (NUOVE.length !== 12) runeErr.push(`le rune nuove sono ${NUOVE.length}, non 12`);
 problemi.push(...runeErr);
-const soc = repairSociety(readPeople(files), (t) => (JSON.parse(files[`modules/${t}/manifest.json`] ?? '{}').tags?.includes('animale') ? 'animale' : 'persona'));
+const soc = repairSociety(readPeople(files), (t) => (JSON.parse(files[`modules/${t}/manifest.json`] ?? '{}').tags?.includes('animale') ? 'animal' : 'person'));
 problemi.push(...soc.fixes.map((f) => `società: ${f}`));
 const persone = readPeople(files).persone;
 const trame = readPlots(files);

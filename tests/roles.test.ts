@@ -51,7 +51,7 @@ async function bootWith(partita: Record<string, unknown>) {
   return k;
 }
 
-const many = () => bootWith({ modalita: 'multigiocatore', morte: 3 });
+const many = () => bootWith({ modalita: 'multiplayer', morte: 3 });
 
 /** How far a wanderer is from the centre of their circle. */
 const away = (k: Kernel, id: string) => k.as(id, () => Math.hypot(k.wandererPos().x, k.wandererPos().y));
@@ -75,9 +75,9 @@ describe('runes and bindings by role (T37)', () => {
   });
 
   it('the master is who created the multiplayer game; alone, everyone is', async () => {
-    expect(repairGameSetup({ modalita: 'multigiocatore' }).master).toBe('io');
-    expect(repairGameSetup({ modalita: 'multigiocatore', master: 'Bea!' }).master).toBe('io');
-    expect(repairGameSetup({ modalita: 'multigiocatore', master: 'bea' }).master).toBe('bea');
+    expect(repairGameSetup({ modalita: 'multiplayer' }).master).toBe('io');
+    expect(repairGameSetup({ modalita: 'multiplayer', master: 'Bea!' }).master).toBe('io');
+    expect(repairGameSetup({ modalita: 'multiplayer', master: 'bea' }).master).toBe('bea');
     expect(repairGameSetup({ master: 'bea' }).master).toBeUndefined();
     const k = await many();
     k.addWanderer('bea', 'Bea');
@@ -88,7 +88,7 @@ describe('runes and bindings by role (T37)', () => {
 
   it('in a multiplayer game no place has runes of the carpet; alone the start still has speed = speed', async () => {
     const lines = (k: Kernel) => extractLines(k.ecs.query('rune').map((id) => ({ id, rune: k.ecs.get(id, 'rune') }))).map((l) => l.src);
-    const solo = await bootWith({ modalita: 'singola' });
+    const solo = await bootWith({ modalita: 'single' });
     const runes = (k: Kernel) => k.ecs.query('rune').map((id) => k.ecs.get(id, 'rune').token as string);
     expect(runes(solo)).toContain('speed');
     const k = await many();
@@ -171,7 +171,7 @@ describe('runes and bindings by role (T37)', () => {
   });
 
   it('alone nothing changes: the wanderer’s x = 9999 still breaks out', async () => {
-    const k = await bootWith({ modalita: 'singola' });
+    const k = await bootWith({ modalita: 'single' });
     expect(k.isMaster()).toBe(true);
     write(k, 'io', ['x', '=', '9999']);
     run(k, 0.5);

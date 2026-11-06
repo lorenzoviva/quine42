@@ -84,7 +84,7 @@ let withAccounts: Awaited<ReturnType<typeof serve>>;
 
 beforeAll(async () => {
   dir = mkdtempSync(path.join(os.tmpdir(), 'quine-accesso-'));
-  for (const n of ['molti', 'fatto', 'molti-account', 'mondo']) universe(n, { modalita: 'multigiocatore', master: 'io' });
+  for (const n of ['molti', 'fatto', 'molti-account', 'mondo']) universe(n, { modalita: 'multiplayer', master: 'io' });
   universe('solo', undefined);
   local = await serve(universeStore(dir, { internal: INTERNAL }));
   withAccounts = await serve(universeStore(dir, { accounts, internal: INTERNAL }));
@@ -174,7 +174,7 @@ describe('V-001 chi scrive su un universo in multigiocatore', () => {
 });
 
 describe('V-001 fare un universo', () => {
-  const many = (master: string) => ({ files: { 'universe.json': JSON.stringify({ name: 'x', partita: { modalita: 'multigiocatore', master } }), 'world/giocatori/io.json': JSON.stringify({ crediti: 1000 }) }, message: 'x' });
+  const many = (master: string) => ({ files: { 'universe.json': JSON.stringify({ name: 'x', partita: { modalita: 'multiplayer', master } }), 'world/giocatori/io.json': JSON.stringify({ crediti: 1000 }) }, message: 'x' });
 
   it('V-001 in multigiocatore non si fa senza identità, né da anonimi, né da fuori senza account', async () => {
     expect((await asked(local.base, 'POST', 'nuovo-a/create', many('intruso'), {})).status).toBe(403);
@@ -194,7 +194,7 @@ describe('V-001 fare un universo', () => {
   it('V-001 da fuori con un account un universo è sempre in multigiocatore', async () => {
     const alone = { files: { 'universe.json': JSON.stringify({ name: 'x' }) }, message: 'x' };
     expect((await asked(withAccounts.base, 'POST', 'nuovo-d/create', alone, { Authorization: 'Bearer altro', ...OUTSIDE })).status).toBe(200);
-    expect(JSON.parse(readFileSync(at('nuovo-d', 'universe.json'), 'utf8')).partita).toMatchObject({ modalita: 'multigiocatore', master: accountWanderer(GOOGLE_OTHER) });
+    expect(JSON.parse(readFileSync(at('nuovo-d', 'universe.json'), 'utf8')).partita).toMatchObject({ modalita: 'multiplayer', master: accountWanderer(GOOGLE_OTHER) });
   });
 });
 
@@ -209,7 +209,7 @@ describe('V-001 chi legge', () => {
       expect(JSON.stringify(snap.files)).not.toContain('segreto');
       expect(snap.log).toBeUndefined();
       // What the hub and the lobby show.
-      expect(JSON.parse(snap.files['universe.json']).partita.modalita).toBe('multigiocatore');
+      expect(JSON.parse(snap.files['universe.json']).partita.modalita).toBe('multiplayer');
       expect(JSON.parse(snap.files['world/bible.json']).concetto).toBe('Un borgo.');
       expect(JSON.parse(snap.files['world/people.json']).persone[0].mestiere).toBe('contadina');
     }
@@ -232,8 +232,8 @@ describe('V-001 chi legge', () => {
 
   it('V-001 le carte si misurano sul server: stesse impronte, senza il codice', async () => {
     const r = (await (await asked(local.base, 'GET', 'molti/carte', undefined, {})).json()) as { carte: Array<{ id: string; impronta?: number[]; titolare: string }>; files: Record<string, string> };
-    expect(r.carte.map((c) => c.id)).toEqual(expect.arrayContaining(['tipo:sonda', 'persona:mirella']));
-    expect(r.carte.find((c) => c.id === 'tipo:sonda')?.impronta?.length).toBeGreaterThan(0);
+    expect(r.carte.map((c) => c.id)).toEqual(expect.arrayContaining(['kind:sonda', 'individual:mirella']));
+    expect(r.carte.find((c) => c.id === 'kind:sonda')?.impronta?.length).toBeGreaterThan(0);
     for (const p of SECRETS) expect(r.files[p], p).toBeUndefined();
     expect(JSON.stringify(r)).not.toContain('segreto');
   });
@@ -352,7 +352,7 @@ describe('V-006 la sessione', () => {
 
   async function world(opts: ConstructorParameters<typeof SessionServer>[1] = {}) {
     const cfg = JSON.parse(bundledFiles['universe.json']);
-    const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2) };
+    const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2) };
     const kernel = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
     return { kernel, server: new SessionServer(kernel, opts) };
   }
@@ -415,7 +415,7 @@ describe('V-006 la sessione', () => {
     const asked: Array<Record<string, unknown>> = [
       { t: 'ramo', files: { 'modules/core.movement/logic.lua': lua }, base: {} },
       { t: 'pubblica' },
-      { t: 'agente', agente: 'ingegnere', testo: lua },
+      { t: 'agente', agente: 'engineer', testo: lua },
       { t: 'segui', id: 'io' },
       { t: 'frase', tokens: [MARK, 'x', '=', '1'] },
       { t: 'incidi' },

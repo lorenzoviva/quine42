@@ -41,7 +41,7 @@ async function boot(ai: Record<string, unknown> = {}, game: Record<string, unkno
   return { k: await Kernel.boot({ files, store: memoryStore(), ai: models }), online: models };
 }
 
-const bootMany = (ai: Record<string, unknown> = {}) => boot(ai, { modalita: 'multigiocatore' });
+const bootMany = (ai: Record<string, unknown> = {}) => boot(ai, { modalita: 'multiplayer' });
 
 function enter(server: SessionServer, id: string, opts: { tetto?: number; regolazioni?: never | Record<string, unknown> } = {}): { session: SessionClient; link: ClientLink; refused: () => string | undefined } {
   const { server: s, client: c } = fakeLink();
@@ -122,10 +122,10 @@ describe('la riparazione delle regolazioni', () => {
     expect(settings.placesPerMinute).toBe(1);
     expect(settings.thinking).toBeUndefined();
     const c = repairCoefficients(settings.coefficienti);
-    expect(c.parole).toBe(1);
-    expect(c.luoghi).toBe(0);
-    expect(c.sguardi).toBe(0.5);
-    expect(settings.scultori).toEqual({ figura: 'gemini-3.8-flash' });
+    expect(c.words).toBe(1);
+    expect(c.chunks).toBe(0);
+    expect(c.looks).toBe(0.5);
+    expect(settings.scultori).toEqual({ figure: 'gemini-3.8-flash' });
     expect(settings.attore).toEqual({ acceso: true });
     expect(riparati.length).toBeGreaterThan(3);
   });
@@ -136,8 +136,8 @@ describe('la riparazione delle regolazioni', () => {
 
   it('un minimo non detto non è un minimo: la riparazione tiene solo ciò che nomina', () => {
     const m = repairMinimums({ coefficienti: { sessioni: 0.5 }, scultori: { struttura: 'gemini-3.8-flash', altro: 1 } })!;
-    expect(m.coefficienti).toEqual({ sessioni: 0.5 });
-    expect(m.scultori).toEqual({ struttura: 'gemini-3.8-flash' });
+    expect(m.coefficienti).toEqual({ sessions: 0.5 });
+    expect(m.scultori).toEqual({ structure: 'gemini-3.8-flash' });
   });
 
   it('i valori non scendono sotto i minimi, anche scritti a mano in universe.json', () => {
@@ -145,17 +145,17 @@ describe('la riparazione delle regolazioni', () => {
       textModel: 'gemini-3.1-flash-lite',
       maxText: 1,
       maxForges: 0,
-      coefficienti: { ...FULL_DETAIL, parole: 0.1, luoghi: 0.9 },
-      scultori: { figura: 'gemini-3.1-flash-lite' },
-      minimi: { textModel: 'gemini-3.8-flash', coefficienti: { parole: 0.5, luoghi: 0.2 }, scultori: { figura: 'gemini-3.8-flash' } },
+      coefficienti: { ...FULL_DETAIL, words: 0.1, chunks: 0.9 },
+      scultori: { figure: 'gemini-3.1-flash-lite' },
+      minimi: { textModel: 'gemini-3.8-flash', coefficienti: { words: 0.5, chunks: 0.2 }, scultori: { figure: 'gemini-3.8-flash' } },
     });
     expect(ai.textModel).toBe('gemini-3.8-flash');
     const c = ai.coefficienti as Coefficients;
-    expect(c.parole).toBe(0.5);
-    expect(c.luoghi).toBe(0.9);
-    expect(ai.scultori?.figura).toBe('gemini-3.8-flash');
+    expect(c.words).toBe(0.5);
+    expect(c.chunks).toBe(0.9);
+    expect(ai.scultori?.figure).toBe('gemini-3.8-flash');
     const read = readConfig({ 'universe.json': JSON.stringify({ ai: { textModel: 'gemini-3.1-flash-lite', coefficienti: { parole: 0 }, minimi: { coefficienti: { parole: 0.5 } } } }) }).config.ai;
-    expect((read.coefficienti as Coefficients).parole).toBe(0.5);
+    expect((read.coefficienti as Coefficients).words).toBe(0.5);
   });
 });
 
@@ -165,7 +165,7 @@ describe('la stima di un’ora segue i valori', () => {
 
   it('ogni manopola di ciò che si chiede spesso abbassa la stima', () => {
     const full = hourlyEstimate(ai);
-    for (const k of ['luoghi', 'parole', 'azioni', 'sguardi'] as const) {
+    for (const k of ['chunks', 'words', 'actions', 'looks'] as const) {
       expect(with0(k).chiamate, k).toBeLessThan(full.chiamate);
       expect(with0(k).dollari, k).toBeLessThan(full.dollari);
     }
@@ -187,11 +187,11 @@ describe('la stima di un’ora segue i valori', () => {
 describe('ogni manopola al minimo', () => {
   it('il razionamento è una quota senza estrazioni', () => {
     const r = new Rationing();
-    const pass = (c: number, n: number) => Array.from({ length: n }, () => r.allows('parole', c)).filter(Boolean).length;
+    const pass = (c: number, n: number) => Array.from({ length: n }, () => r.allows('words', c)).filter(Boolean).length;
     expect(pass(1, 10)).toBe(10);
     expect(pass(0, 10)).toBe(0);
     expect(pass(0.5, 10)).toBe(5);
-    expect(new Rationing().allows('parole', 0.5)).toBe(false);
+    expect(new Rationing().allows('words', 0.5)).toBe(false);
   });
 
   const knobbed = CENSUS.filter((c) => c.coefficiente && c.compito !== 'forge.fix');
@@ -209,7 +209,7 @@ describe('ogni manopola al minimo', () => {
   it('a 1 la stessa chiamata va ai modelli', async () => {
     const { k, online } = await boot();
     online.calls = [];
-    await k.council.write('narratore', 'npc.reply', 'prova', {}).catch(() => undefined);
+    await k.council.write('narrator', 'npc.reply', 'prova', {}).catch(() => undefined);
     expect(online.calls).toContain('npc.reply');
   });
 
@@ -219,13 +219,13 @@ describe('ogni manopola al minimo', () => {
     expect(f.ok).toBe(true);
     const entry = k.modules.get(f.id!)!;
     const before = k.repo.working[entry.logicPath!];
-    expect(k.setAi({ coefficienti: { ...FULL_DETAIL, riparazioni: 0 } })).toBe(true);
+    expect(k.setAi({ coefficienti: { ...FULL_DETAIL, repairs: 0 } })).toBe(true);
     online.calls = [];
     expect(rationedKnob('forge.fix')).toBeUndefined();
     expect(await k.repairGenerated(`module:${f.id}:on_act`, 'attempt to index nil')).toBe(false);
     expect(online.calls).toEqual([]);
     expect(k.repo.working[entry.logicPath!]).toBe(before);
-    expect(k.shortfalls.list().at(-1)).toMatchObject({ compito: 'forge.fix', esito: 'guasto' });
+    expect(k.shortfalls.list().at(-1)).toMatchObject({ compito: 'forge.fix', esito: 'fault' });
   });
 
   it('tutte a zero, con il budget a zero: il gioco regge e nessuna chiamata parte', async () => {
@@ -301,36 +301,36 @@ describe('sul server, entrando', () => {
   it('il master regola entrando per primo: riparato, scritto, committato, e da lì fisso', async () => {
     const { k } = await bootMany();
     const server = new SessionServer(k);
-    const master = enter(server, 'io', { regolazioni: { textModel: 'gemini-3.8-flash', maxText: 1e9, coefficienti: { ...FULL_DETAIL, parole: 0 } } });
+    const master = enter(server, 'io', { regolazioni: { textModel: 'gemini-3.8-flash', maxText: 1e9, coefficienti: { ...FULL_DETAIL, words: 0 } } });
     await master.session.ready;
     expect(master.session.settingsAnswer?.ok).toBe(true);
     expect(master.session.settingsAnswer?.riparati?.join(' ')).toMatch(/maxText/);
     expect(k.config.ai.textModel).toBe('gemini-3.8-flash');
     expect(k.config.ai.maxText).toBe(BUDGET_SCALE.maxText[1]);
     expect(k.ai.limits.text).toBe(BUDGET_SCALE.maxText[1]);
-    expect(k.coefficients().parole).toBe(0);
+    expect(k.coefficients().words).toBe(0);
     expect(k.settingsLocked).toBe(true);
     expect(JSON.parse(k.repo.head().files['universe.json']!).ai.textModel).toBe('gemini-3.8-flash');
   });
 
   it('`vite` segue la sorte di `dialoghi` (T245a): entra con il master, poi è fissa; assente vale 0', async () => {
     const { k } = await bootMany();
-    expect(k.coefficients().vite).toBe(0);
-    expect(k.coefficients().dialoghi).toBe(1);
+    expect(k.coefficients().lives).toBe(0);
+    expect(k.coefficients().dialogues).toBe(1);
     const server = new SessionServer(k);
-    const master = enter(server, 'io', { regolazioni: { coefficienti: { ...FULL_DETAIL, dialoghi: 0.5, vite: 0.5 } } });
+    const master = enter(server, 'io', { regolazioni: { coefficienti: { ...FULL_DETAIL, dialogues: 0.5, lives: 0.5 } } });
     await master.session.ready;
     expect(master.session.settingsAnswer?.ok).toBe(true);
-    expect(k.coefficients()).toMatchObject({ dialoghi: 0.5, vite: 0.5 });
-    expect(JSON.parse(k.repo.head().files['universe.json']!).ai.coefficienti).toMatchObject({ dialoghi: 0.5, vite: 0.5 });
+    expect(k.coefficients()).toMatchObject({ dialogues: 0.5, lives: 0.5 });
+    expect(JSON.parse(k.repo.head().files['universe.json']!).ai.coefficienti).toMatchObject({ dialogues: 0.5, lives: 0.5 });
     expect(k.settingsLocked).toBe(true);
     // Fixed for both: a universe.json that says otherwise is written back, setAi says no.
     const raw = JSON.parse(k.repo.working['universe.json']!);
-    k.repo.write('universe.json', JSON.stringify({ ...raw, ai: { ...raw.ai, coefficienti: { ...raw.ai.coefficienti, dialoghi: 1, vite: 1 } } }));
+    k.repo.write('universe.json', JSON.stringify({ ...raw, ai: { ...raw.ai, coefficienti: { ...raw.ai.coefficienti, dialogues: 1, lives: 1 } } }));
     k.applyFiles({ ...k.repo.working });
-    expect(k.coefficients()).toMatchObject({ dialoghi: 0.5, vite: 0.5 });
-    expect(k.setAi({ coefficienti: { ...FULL_DETAIL, dialoghi: 1, vite: 1 } })).toBe(false);
-    expect(k.coefficients()).toMatchObject({ dialoghi: 0.5, vite: 0.5 });
+    expect(k.coefficients()).toMatchObject({ dialogues: 0.5, lives: 0.5 });
+    expect(k.setAi({ coefficienti: { ...FULL_DETAIL, dialogues: 1, lives: 1 } })).toBe(false);
+    expect(k.coefficients()).toMatchObject({ dialogues: 0.5, lives: 0.5 });
   });
 
   it('chi non è il master non cambia nulla, nemmeno entrando per primo, e i minimi restano', async () => {
@@ -342,7 +342,7 @@ describe('sul server, entrando', () => {
     expect(anna.session.settingsAnswer).toEqual({ ok: false, motivo: 'solo il master regola il mondo' });
     expect(k.repo.working['universe.json']).toBe(before);
     expect(k.config.ai.minimi?.tetto).toBe(2);
-    expect(k.coefficients().parole).toBe(1);
+    expect(k.coefficients().words).toBe(1);
   });
 
   it('il master che entra a partita in corso è rifiutato: il mondo resta com\'era', async () => {
@@ -447,7 +447,7 @@ describe('il deposito di un universo di molti', () => {
   const post = (url: string, body: unknown, more: Record<string, string> = {}) => fetch(`${base}${url}`, { method: 'POST', headers: { ...headers, ...more }, body: JSON.stringify(body) });
 
   it('da fuori il master non scrive `ai` nemmeno sul disco; il resto di universe.json sì', async () => {
-    const universe = { name: 'molti', partita: { modalita: 'multigiocatore', master: 'io' }, ai: { textModel: 'gemini-3.1-flash-lite', maxText: 10 } };
+    const universe = { name: 'molti', partita: { modalita: 'multiplayer', master: 'io' }, ai: { textModel: 'gemini-3.1-flash-lite', maxText: 10 } };
     const me = { 'X-Quine-Viandante': 'io' };
     const made = await post('/api/universe/molti/create', { files: { 'universe.json': JSON.stringify(universe) }, message: 'nasce' }, me);
     expect(made.status).toBe(200);
@@ -531,7 +531,7 @@ describe('la lobby', () => {
   const open = (opts: Partial<ConstructorParameters<typeof LobbyScreen>[0]>, ai: Record<string, unknown> = {}) => {
     const body = new Fake('body');
     (globalThis as any).document = { body, getElementById: () => null, createElement: (t: string) => new Fake(t) };
-    const files = { ...bundledFiles, 'universe.json': JSON.stringify({ name: 'molti', partita: { modalita: 'multigiocatore', master: 'io' }, ai: { textModel: 'gemini-3.1-flash-lite', maxText: 800, maxForges: 3, ...ai } }) };
+    const files = { ...bundledFiles, 'universe.json': JSON.stringify({ name: 'molti', partita: { modalita: 'multiplayer', master: 'io' }, ai: { textModel: 'gemini-3.1-flash-lite', maxText: 800, maxForges: 3, ...ai } }) };
     const lobby = new LobbyScreen({ name: 'molti', files, wandererId: 'io', credits: 5, ...opts });
     const done = lobby.open();
     const root = (lobby as unknown as { root: Fake }).root;
@@ -551,14 +551,14 @@ describe('la lobby', () => {
   it('il master regola ogni cosa, la stima segue, e manda solo se ha cambiato', async () => {
     const { root, done, enter } = open({});
     const before = root.find((f) => f.className === 'estimate-row')!.textContent;
-    expect(root.byId('lobby-knob-parole').disabled).toBe(false);
-    for (const id of ['lobby-preset', 'lobby-modello-testo', 'lobby-scultore-figura', 'lobby-ragionamento', 'lobby-budget-maxText', 'lobby-budget-maxBrani', 'lobby-minimo-tetto', 'lobby-minimo-parole', 'lobby-attore']) expect(root.byId(id), id).toBeDefined();
+    expect(root.byId('lobby-knob-words').disabled).toBe(false);
+    for (const id of ['lobby-preset', 'lobby-modello-testo', 'lobby-scultore-figure', 'lobby-ragionamento', 'lobby-budget-maxText', 'lobby-budget-maxBrani', 'lobby-minimo-tetto', 'lobby-minimo-words', 'lobby-attore']) expect(root.byId(id), id).toBeDefined();
     // One slider for every coefficient, and what it does at 0 written beside it.
     for (const k of COEFFICIENT_KEYS) {
       expect(root.byId(`lobby-knob-${k}`), k).toBeDefined();
       expect(root.textContent).toContain(COEFFICIENT_INFO[k].minimo);
     }
-    const slider = root.byId('lobby-knob-parole');
+    const slider = root.byId('lobby-knob-words');
     slider.value = '0';
     slider.oninput!();
     expect(root.find((f) => f.className === 'estimate-row')!.textContent).not.toBe(before);
@@ -569,7 +569,7 @@ describe('la lobby', () => {
     expect(root.find((f) => f.className === 'estimate-row')!.textContent).toContain('50 chiamate');
     enter();
     const r = await done;
-    expect(repairCoefficients(r.regolazioni?.coefficienti).parole).toBe(0);
+    expect(repairCoefficients(r.regolazioni?.coefficienti).words).toBe(0);
     expect(r.regolazioni?.maxText).toBe(50);
   });
 
@@ -584,9 +584,9 @@ describe('la lobby', () => {
     const preset = root.byId('lobby-preset');
     preset.value = 'low';
     preset.onchange!();
-    expect(root.byId('lobby-knob-sessioni').value).toBe(String(LOW_DETAIL.coefficienti.sessioni));
+    expect(root.byId('lobby-knob-sessions').value).toBe(String(LOW_DETAIL.coefficienti.sessions));
     enter();
-    expect(repairCoefficients((await done).regolazioni?.coefficienti).sessioni).toBe(LOW_DETAIL.coefficienti.sessioni);
+    expect(repairCoefficients((await done).regolazioni?.coefficienti).sessions).toBe(LOW_DETAIL.coefficienti.sessions);
   });
 
   it('un altro viandante vede e non tocca', async () => {
@@ -603,7 +603,7 @@ describe('la lobby', () => {
   it('a partita in corso anche il master vede e non tocca', async () => {
     const { root, done, enter } = open({ inCorso: true });
     expect(root.textContent).toContain('La partita è in corso');
-    expect(root.byId('lobby-knob-parole').disabled).toBe(true);
+    expect(root.byId('lobby-knob-words').disabled).toBe(true);
     expect(root.byId('lobby-budget-maxText').disabled).toBe(true);
     enter();
     expect((await done).regolazioni).toBeUndefined();
@@ -614,10 +614,10 @@ describe('la lobby', () => {
     expect(root.textContent).toContain('PRIMA DI ENTRARE');
     expect(root.textContent).not.toContain('Tetto di spesa');
     expect(root.textContent).not.toContain('collezione');
-    const slider = root.byId('lobby-knob-luoghi');
+    const slider = root.byId('lobby-knob-chunks');
     slider.value = '0.5';
     slider.oninput!();
     enter();
-    expect(repairCoefficients((await done).regolazioni?.coefficienti).luoghi).toBe(0.5);
+    expect(repairCoefficients((await done).regolazioni?.coefficienti).chunks).toBe(0.5);
   });
 });

@@ -158,7 +158,7 @@ export function provaVoce(v: Voce): Esito {
 
 function rapporto(e: Esito, model: Parameters<typeof traceText>[0], box: number[]): string {
   const v = e.voce;
-  const traccia = traceText(model, 1, { forma: 'nodi', tetto: 1500 });
+  const traccia = traceText(model, 1, { forma: 'nodes', tetto: 1500 });
   return [
     `# ${v.titolo} (\`${v.nome}\`)`,
     '',

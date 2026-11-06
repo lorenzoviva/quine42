@@ -267,7 +267,7 @@ input[type='checkbox'], input[type='radio'] { accent-color: var(--neon-pink); }
 /* Words are balloons: those of the others on paper, yours on cyan. */
 #chat .line { max-width: 88%; overflow-wrap: anywhere; padding: var(--space-5) var(--space-8); border: var(--border-ink); align-self: flex-start; background: var(--comic-paper); color: var(--comic-ink); box-shadow: 2px 2px 0 var(--neon-pink); }
 #chat .line b { font-weight: bold; }
-#chat .line.giocatore { align-self: flex-end; background: var(--neon-cyan); box-shadow: 2px 2px 0 var(--neon-yellow); }
+#chat .line.player { align-self: flex-end; background: var(--neon-cyan); box-shadow: 2px 2px 0 var(--neon-yellow); }
 #chat .line.npc b { color: #c4145f; }
 #chat .note { color: var(--dim); font-size: var(--text-13); font-style: italic; }
 #chat .line.note { background: var(--comic-ink-light); color: var(--fg); box-shadow: 2px 2px 0 var(--neon-cyan); font-style: normal; font-size: var(--text-13); }

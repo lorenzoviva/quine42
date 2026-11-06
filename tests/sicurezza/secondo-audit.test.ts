@@ -30,7 +30,7 @@ const TICK = 1 / 60;
 
 async function bootMany() {
   const cfg = JSON.parse(bundledFiles['universe.json']);
-  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3, master: 'io' } }, null, 2) };
+  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3, master: 'io' } }, null, 2) };
   const models = new MockAiModels();
   const kernel = await Kernel.boot({ files, store: memoryStore(), ai: models });
   return { kernel, models };
@@ -188,7 +188,7 @@ describe('V-023 le spese comuni senza nessuno che paga', () => {
   beforeAll(async () => void ({ kernel, models } = await bootMany()), 120_000);
   afterEach(() => void vi.restoreAllMocks());
 
-  const ask = () => kernel.council.write('narratore', 'council.prova', 'prova', { chi: COMUNE });
+  const ask = () => kernel.council.write('narrator', 'council.prova', 'prova', { chi: COMUNE });
 
   it('V-023 con gli account, nessuno con crediti: la chiave non si spende', async () => {
     const server = new SessionServer(kernel, { verify: async () => ({ uid: 'povero', anonimo: false }) });
@@ -232,7 +232,7 @@ describe('V-024 un modello fuori listino', () => {
     expect(billedModel('mock')).toBe('mock');
     const { kernel } = await bootMany();
     kernel.ledger.credit('paga', 5);
-    const call = (model: string) => ({ day: '2026-11-02', model, agent: 'narratore', task: 'text.examine', prompt: 100000, cached: 0, output: 100000, thoughts: 0, chi: 'paga' });
+    const call = (model: string) => ({ day: '2026-11-02', model, agent: 'narrator', task: 'text.examine', prompt: 100000, cached: 0, output: 100000, thoughts: 0, chi: 'paga' });
     kernel.billCall(call('mock') as never);
     expect(kernel.ledger.balance('paga')).toBe(5);
     kernel.billCall(call('gemini-mai-sentito') as never);

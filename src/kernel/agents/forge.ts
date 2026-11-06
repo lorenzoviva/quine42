@@ -160,7 +160,7 @@ const REVIEW_SCHEMA: Schema = {
     approvato: { type: 'BOOLEAN' },
     problemi: {
       type: 'ARRAY',
-      items: { type: 'OBJECT', properties: { agente: { type: 'STRING', enum: ['narratore', 'fisico', 'ingegnere'] }, problema: { type: 'STRING' } }, required: ['agente', 'problema'] },
+      items: { type: 'OBJECT', properties: { agente: { type: 'STRING', enum: ['narrator', 'physicist', 'engineer'] }, problema: { type: 'STRING' } }, required: ['agente', 'problema'] },
     },
   },
   required: ['approvato', 'problemi'],
@@ -230,7 +230,7 @@ export function assembleManifest(id: string, concept: Concept, physics: PhysicsS
     tags: concept.tags ?? [],
     origin,
     logic: 'logic.lua',
-    appearance: { glyph, color: `hsl(${hue} 65% 68%)`, aspetto: concept.aspetto, model: ownModelId(id), classe: classOf(internalName('classi', concept.classe ?? ''))?.id ?? guessClass(`${concept.nome} ${concept.aspetto}`, npc ? 'figura' : undefined).id, ...forgedSize(concept.taglia) },
+    appearance: { glyph, color: `hsl(${hue} 65% 68%)`, aspetto: concept.aspetto, model: ownModelId(id), classe: classOf(internalName('classi', concept.classe ?? ''))?.id ?? guessClass(`${concept.nome} ${concept.aspetto}`, npc ? 'figure' : undefined).id, ...forgedSize(concept.taglia) },
     physics: {
       solid: item ? false : !!physics.solido,
       radius: clamp(physics.raggio, 0.2, 0.5, 0.35),
@@ -280,7 +280,7 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
 
   const askConcept = (feedback = '') =>
     c.ask<Concept>(
-      'narratore',
+      'narrator',
       'forge.concept',
       [
         `Richiesta (${req.origin}): ${req.prompt}`,
@@ -301,7 +301,7 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
     );
   const askPhysics = (concept: Concept, feedback = '') =>
     c.ask<PhysicsSpec>(
-      'fisico',
+      'physicist',
       'forge.physics',
       [
         `Definisci la fisica di questo elemento in modo coerente con ciò che è e con l'aspetto descritto:\n${JSON.stringify(concept, null, 1)}`,
@@ -315,7 +315,7 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
     );
   const askCode = (concept: Concept, physics: PhysicsSpec, feedback = '') =>
     c.ask<CodeSpec>(
-      'ingegnere',
+      'engineer',
       'forge.code',
       [
         `Scrivi logic.lua per questo modulo.\nConcetto:\n${JSON.stringify(concept, null, 1)}\nFisica:\n${JSON.stringify(physics)}`,
@@ -331,56 +331,56 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
 
   let concept = await askConcept();
   if (req.kind) concept.tipo = req.kind;
-  c.say('narratore', 'propone', `«${concept.nome}» (${concept.tipo}): ${concept.descrizione}`);
+  c.say('narrator', 'propone', `«${concept.nome}» (${concept.tipo}): ${concept.descrizione}`);
   // Inside the world nothing knows of the Council's table; nor is anything made twice.
   for (let tries = 0; tries < 2; tries++) {
     const meta = metaBreak(`${concept.nome} ${concept.descrizione} ${concept.persona ?? ''} ${concept.lore ?? ''}`, wordsOf(c.files));
     const dup = req.existingNames?.find((n) => normName(n) === normName(concept.nome));
     if (!meta && !dup) break;
     const why = meta ? `«${concept.nome}» rompe la quarta parete («${meta}»): dentro il mondo nessuno sa di codice, simulazioni o del Concilio. Crea una persona o una cosa vera del mondo.` : `«${concept.nome}» esiste già: crea qualcosa di diverso.`;
-    c.say('kernel', 'scarta', why, 'narratore');
+    c.say('kernel', 'scarta', why, 'narrator');
     concept = await askConcept(why);
     if (req.kind) concept.tipo = req.kind;
-    if (tries === 1 && (metaBreak(`${concept.nome} ${concept.descrizione} ${concept.persona ?? ''}`) || req.existingNames?.some((n) => normName(n) === normName(concept.nome)))) throw new ForgeRejected(`ancora fuori dal mondo o doppione: ${concept.nome}`, 'narratore');
+    if (tries === 1 && (metaBreak(`${concept.nome} ${concept.descrizione} ${concept.persona ?? ''}`) || req.existingNames?.some((n) => normName(n) === normName(concept.nome)))) throw new ForgeRejected(`ancora fuori dal mondo o doppione: ${concept.nome}`, 'narrator');
   }
   // Buildings are environments (the Cartographer's layouts), never one-tile objects.
   if (isStructure(concept)) {
     const why = `«${concept.nome}» è un edificio o una struttura: quelli sono ambienti del Cartografo, non oggetti. Crea invece qualcosa che sta dentro o fuori un edificio (un mobile, un attrezzo, una persona).`;
-    c.say('kernel', 'scarta', why, 'narratore');
+    c.say('kernel', 'scarta', why, 'narrator');
     concept = await askConcept(why);
     if (req.kind) concept.tipo = req.kind;
-    if (isStructure(concept)) throw new ForgeRejected(`ancora una struttura: ${concept.nome}`, 'narratore');
-    c.say('narratore', 'corregge', `«${concept.nome}» (${concept.tipo}): ${concept.descrizione}`);
+    if (isStructure(concept)) throw new ForgeRejected(`ancora una struttura: ${concept.nome}`, 'narrator');
+    c.say('narrator', 'corregge', `«${concept.nome}» (${concept.tipo}): ${concept.descrizione}`);
   }
   let physics = await askPhysics(concept);
-  c.say('fisico', 'propone', `${physics.solido ? 'solido' : 'attraversabile'}${physics.spingibile ? ', spingibile' : ''}, ${physics.massa} kg, peso ${physics.peso}${physics.note ? ` — ${physics.note}` : ''}`);
+  c.say('physicist', 'propone', `${physics.solido ? 'solido' : 'attraversabile'}${physics.spingibile ? ', spingibile' : ''}, ${physics.massa} kg, peso ${physics.peso}${physics.note ? ` — ${physics.note}` : ''}`);
   let code = await askCode(concept, physics);
-  c.say('ingegnere', 'propone', `logic.lua, ${code.logic.split('\n').length} righe${code.note ? ` — ${code.note}` : ''}`);
+  c.say('engineer', 'propone', `logic.lua, ${code.logic.split('\n').length} righe${code.note ? ` — ${code.note}` : ''}`);
 
   // The Arbiter checks that narrative, physics and code tell the same story.
   const review = await c.ask<{ approvato: boolean; problemi: Array<{ agente: AgentId; problema: string }> }>(
-    'arbitro',
+    'arbiter',
     'forge.review',
     `${req.permissive ? 'Il viandante è trasceso: è un membro del Concilio. Accogli la sua richiesta come vuole lui; rifiuta solo ciò che distruggerebbe l’universo, lui stesso o le leggi del gioco. Non obiettare sull\'idea in sé: solo su incoerenze tecniche che romperebbero il gioco.\n' : ''}Verifica la coerenza tra narrativa, aspetto, fisica e codice di questo modulo. Segnala solo incoerenze concrete, indicando l'agente responsabile.\nConcetto:\n${JSON.stringify(concept, null, 1)}\nFisica:\n${JSON.stringify(physics)}\nlogic.lua:\n${code.logic}`,
     REVIEW_SCHEMA,
     { chi: req.chi, data: { ...data, concept, physics, code }, temperature: 0.2 },
   );
-  if (review.approvato || !review.problemi?.length) c.say('arbitro', 'approva', `«${concept.nome}» è coerente.`);
+  if (review.approvato || !review.problemi?.length) c.say('arbiter', 'approva', `«${concept.nome}» è coerente.`);
   else {
-    for (const p of review.problemi.slice(0, 3)) c.say('arbitro', 'obietta', p.problema, p.agente);
+    for (const p of review.problemi.slice(0, 3)) c.say('arbiter', 'obietta', p.problema, p.agente);
     const issues = (agent: AgentId) => review.problemi.filter((p) => p.agente === agent).map((p) => p.problema).join('; ');
-    if (issues('narratore')) {
-      concept = await askConcept(issues('narratore'));
+    if (issues('narrator')) {
+      concept = await askConcept(issues('narrator'));
       if (req.kind) concept.tipo = req.kind;
-      c.say('narratore', 'corregge', `«${concept.nome}»: ${concept.descrizione}`);
+      c.say('narrator', 'corregge', `«${concept.nome}»: ${concept.descrizione}`);
     }
-    if (issues('fisico') || issues('narratore')) {
-      physics = await askPhysics(concept, issues('fisico'));
-      c.say('fisico', 'corregge', `${physics.solido ? 'solido' : 'attraversabile'}, ${physics.massa} kg, peso ${physics.peso}`);
+    if (issues('physicist') || issues('narrator')) {
+      physics = await askPhysics(concept, issues('physicist'));
+      c.say('physicist', 'corregge', `${physics.solido ? 'solido' : 'attraversabile'}, ${physics.massa} kg, peso ${physics.peso}`);
     }
-    if (issues('ingegnere') || issues('narratore') || issues('fisico')) {
-      code = await askCode(concept, physics, issues('ingegnere'));
-      c.say('ingegnere', 'corregge', `logic.lua riscritto (${code.logic.split('\n').length} righe)`);
+    if (issues('engineer') || issues('narrator') || issues('physicist')) {
+      code = await askCode(concept, physics, issues('engineer'));
+      c.say('engineer', 'corregge', `logic.lua riscritto (${code.logic.split('\n').length} righe)`);
     }
   }
 
@@ -391,10 +391,10 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
     const missing = requiredHooks(concept).filter((h) => !new RegExp(`function\\s+M\\.${h}\\b|M\\.${h}\\s*=\\s*function`).test(code.logic));
     const errors = [...validate(manifest, code.logic), ...missing.map((h) => `manca la funzione M.${h}`)];
     if (!errors.length) break;
-    c.say('kernel', 'scarta', errors.join('; '), 'ingegnere');
-    if (round >= 2) throw new ForgeRejected(`modulo non valido: ${errors.join('; ')}`, 'ingegnere');
+    c.say('kernel', 'scarta', errors.join('; '), 'engineer');
+    if (round >= 2) throw new ForgeRejected(`modulo non valido: ${errors.join('; ')}`, 'engineer');
     code = await askCode(concept, physics, errors.join('; '));
-    c.say('ingegnere', 'corregge', 'logic.lua corretto');
+    c.say('engineer', 'corregge', 'logic.lua corretto');
     manifest = assembleManifest(id, concept, physics, code, req.paletteCodes, req.origin);
   }
 
@@ -404,7 +404,7 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
 /** A generated module failed at runtime: the Engineer gets the code and the error, and fixes it. */
 export async function repairLogic(c: Council, manifest: Manifest, logic: string, error: string, feedback = ''): Promise<string> {
   const code = await c.ask<CodeSpec>(
-    'ingegnere',
+    'engineer',
     'forge.fix',
     [
       `Il modulo ${manifest.id} («${manifest.name}», ${manifest.description ?? ''}) è entrato nell'universo ma fallisce durante il gioco.`,
@@ -442,13 +442,13 @@ export async function judgeCombination(
   focus?: string[],
 ): Promise<{ possible: boolean; result?: string; description?: string; reason: string }> {
   const r = await c.ask<{ possibile: boolean; risultato?: string; descrizione?: string; spiegazione: string }>(
-    'narratore',
+    'narrator',
     'craft.judge',
     `Il giocatore prova a combinare «${a.name}» (${a.description}) con «${b.name}» (${b.description}). Ha senso nel mondo e fisicamente? Se sì, cosa ne esce (uno strumento)? Strumenti già esistenti: ${knownItems.join(', ') || 'nessuno'}. Sii severo: la maggior parte delle combinazioni non produce nulla.`,
     JUDGE_SCHEMA,
     { data: { a, b, knownItems }, temperature: 0.4, focus },
   );
-  c.say('narratore', r.possibile ? 'propone' : 'obietta', r.possibile ? `«${a.name}» + «${b.name}» → «${r.risultato}». ${r.spiegazione}` : r.spiegazione);
+  c.say('narrator', r.possibile ? 'propone' : 'obietta', r.possibile ? `«${a.name}» + «${b.name}» → «${r.risultato}». ${r.spiegazione}` : r.spiegazione);
   return { possible: !!r.possibile && !!r.risultato, result: r.risultato, description: r.descrizione, reason: r.spiegazione };
 }
 

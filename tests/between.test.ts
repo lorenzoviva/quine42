@@ -15,7 +15,7 @@ const DT = 1 / 60;
 
 async function bootMany(game: Record<string, unknown> = {}): Promise<Kernel> {
   const cfg = JSON.parse(bundledFiles['universe.json']);
-  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3, ...game } }, null, 2) };
+  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3, ...game } }, null, 2) };
   return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 }
 
@@ -321,10 +321,10 @@ describe('death and reconnection among many (T43c)', () => {
       Object.assign(k.phrase(), { tokens: ['luce'], sel: 0 });
       k.applyEffects([{ type: 'state', name: 'benedizione', speed: 1.2 }]);
       k.setBond(vName, 'amica');
-      k.recordRule({ chiave: 'azione|canto', testo: 'cantare', possibile: true, racconto: 'canti' }, true, { task: 'action.judge', autore: 'narratore' });
+      k.recordRule({ chiave: 'azione|canto', testo: 'cantare', possibile: true, racconto: 'canti' }, true, { task: 'action.judge', autore: 'narrator' });
     });
     run(server, all, 8);
-    expect(k.cardsOf('anna').some((c) => c.id === 'regola:azione-canto')).toBe(true);
+    expect(k.cardsOf('anna').some((c) => c.id === 'rule:azione-canto')).toBe(true);
 
     // Anna leaves while Bruno and Carlo stay in the world.
     anna.session.leave();
@@ -341,7 +341,7 @@ describe('death and reconnection among many (T43c)', () => {
     expect(countItem(back.k.inventory(), 'rune:luce')).toBe(1);
     expect(back.k.phrase().tokens).toEqual(['luce']);
     expect(back.k.states().benedizione).toMatchObject({ velocita: 1.2 });
-    expect(k.cardsOf('anna').some((c) => c.id === 'regola:azione-canto')).toBe(true);
+    expect(k.cardsOf('anna').some((c) => c.id === 'rule:azione-canto')).toBe(true);
     expect(k.as('anna', () => k.bondOf(vName))).toBe('amica');
   });
 });

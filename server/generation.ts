@@ -6,6 +6,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import type { DeferredProgress, DeferredStorage } from '../src/kernel/deferred';
+import { internalName } from '../src/kernel/internalNames';
 
 export const LIT_DIR = '.accesi';
 export const GENERATION_DIR = '.generazione';
@@ -84,7 +85,8 @@ export function progressFile(dir: string, name: string, defaults: { tetto: numbe
         return {
           passi: Array.isArray(j.passi) ? j.passi.filter((s: unknown): s is string => typeof s === 'string') : [],
           tetto: Number.isFinite(tetto) && tetto >= 0 ? tetto : defaults.tetto,
-          ...(j.partita === 'singola' || j.partita === 'multigiocatore' ? { partita: j.partita } : {}),
+          // The progress of before T307b says the game in Italian (`singola`): read internal.
+          ...(typeof j.partita === 'string' && ['single', 'multiplayer'].includes(internalName('partita', j.partita)) ? { partita: internalName('partita', j.partita) as 'single' | 'multiplayer' } : {}),
           ...(j.consumo && typeof j.consumo === 'object' ? { consumo: { reset: typeof j.consumo.reset === 'string' ? j.consumo.reset : undefined, ultimo: Number(j.consumo.ultimo) || 0, speso: Number(j.consumo.speso) || 0 } } : {}),
         };
       } catch {

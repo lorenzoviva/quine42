@@ -1,6 +1,7 @@
 // I 24 individui di Neapolis: due per ognuno dei dodici tipi (npc.*), ognuno in un luogo dei piani (`maps/`).
 // I legami si dicono una volta (a è <legame> di b, b è <ritorno> di a) e si scrivono dalle due parti.
-import type { DayPhase, Individual, Memory, RoutineStep, Where } from '../../../../../src/kernel/society';
+import type { Individual, Memory } from '../../../../../src/kernel/society';
+import { internalIndividual } from '../../../../../src/kernel/internalNames';
 
 export interface Person {
   nome: string;
@@ -15,7 +16,8 @@ export interface Person {
   storia: string;
   aspetto: string;
   porta: string[];
-  routine: Array<[DayPhase, string, Where, RoutineStep['azione']]>;
+  /** In the words of the universe as it was written (contract 0.1): the builder takes them internal (T307b). */
+  routine: Array<[string, string, string, string]>;
   ricordi: Array<[string, string, number, string?]>;
   tratti: Record<string, number>;
   opinioni: Array<[string, string, number]>;
@@ -258,9 +260,9 @@ export function registry(originOf: (p: Person) => string, placeName: (p: Person)
     fam.get(a)!.push({ nome: b, legame: ab });
     fam.get(b)!.push({ nome: a, legame: ba });
   }
-  const persone = PEOPLE.map((p): Individual & Record<string, unknown> => ({
+  const persone = PEOPLE.map((p): Individual & Record<string, unknown> => internalIndividual({
     nome: p.nome,
-    specie: p.specie ?? 'persona',
+    specie: (p.specie ?? 'persona') as Individual['specie'],
     genere: p.genere,
     tipo: p.tipo,
     mestiere: p.mestiere,
@@ -276,7 +278,7 @@ export function registry(originOf: (p: Person) => string, placeName: (p: Person)
     ricordi: p.ricordi.map(([quando, testo, peso, con]): Memory => ({ quando, testo, peso, ...(con ? { con } : {}) })),
     tratti: p.tratti,
     opinioni: p.opinioni.map(([su, testo, forza]) => ({ su, testo, forza })),
-  }));
+  } as unknown as Individual & Record<string, unknown>));
   // Nominati, non ancora incontrati: il pagosso del rione e la moglie di Gennaro.
   const attesi = [
     { nome: 'Peppe Russo', legame: 'conoscente', di: 'Raffaele Sorrentino' },

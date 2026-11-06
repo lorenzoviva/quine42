@@ -91,8 +91,8 @@ describe('a universe out of the range of the kernels (T312)', () => {
 
   it('keeps a new plan in this session only', async () => {
     const { k, disk } = await open(withKernel('0.0.4', { from: '0.0' }));
-    await k.chunkStore.save('luogo:1,1', plan);
-    expect(await k.chunkStore.load('luogo:1,1')).toBe(plan);
+    await k.chunkStore.save('chunk:1,1', plan);
+    expect(await k.chunkStore.load('chunk:1,1')).toBe(plan);
     expect(disk.plans.size).toBe(0);
     expect(disk.writes).toEqual([]);
   });
@@ -100,7 +100,7 @@ describe('a universe out of the range of the kernels (T312)', () => {
   it('does not call the models: the Council answers with the local ones, and says why', async () => {
     const { k, ai } = await open(withKernel('0.0.4', { from: '0.0' }));
     const before = ai.calls.length;
-    const said = await k.council.write('narratore', 'npc.reply', 'Buongiorno.');
+    const said = await k.council.write('narrator', 'npc.reply', 'Buongiorno.');
     expect(typeof said).toBe('string');
     expect(ai.calls.length).toBe(before);
     expect(ai.calls).toEqual([]);
@@ -118,12 +118,12 @@ describe('a universe of this kernel (T312): as before', () => {
     expect(c).not.toBe(head);
     expect(k.repo.head()).toBe(c);
     expect(await k.repo.backend!.branch!('master', { 'world/prova.txt': 'z\n' }, 'ramo', 'player')).toBe('abc1234');
-    await k.chunkStore.save('luogo:1,1', plan);
-    expect(disk.plans.get('luogo:1,1')).toBe(plan);
+    await k.chunkStore.save('chunk:1,1', plan);
+    expect(disk.plans.get('chunk:1,1')).toBe(plan);
     await new Promise((r) => setTimeout(r, 0));
-    expect(disk.writes).toEqual(expect.arrayContaining(['commit il Concilio scrive', 'branch master', 'piano luogo:1,1']));
+    expect(disk.writes).toEqual(expect.arrayContaining(['commit il Concilio scrive', 'branch master', 'piano chunk:1,1']));
     const before = ai.calls.length;
-    await k.council.write('narratore', 'npc.reply', 'Buongiorno.');
+    await k.council.write('narrator', 'npc.reply', 'Buongiorno.');
     expect(ai.calls.length).toBe(before + 1);
   });
 
@@ -142,18 +142,18 @@ describe('a universe of the contract before, ported by the migrations (T317)', (
     const { k, ai, disk } = await open(withKernel('0.1.14', { from: '0.1' }));
     expect(k.faults.has('universe:kernel')).toBe(false);
     expect(k.readOnly()).toBeUndefined();
-    expect(JSON.parse(k.files['universe.json']).kernels).toEqual({ from: '0.2' });
+    expect(JSON.parse(k.files['universe.json']).kernels).toEqual({ from: '0.3' });
     const head = k.repo.head();
     k.repo.write('world/prova.txt', 'x\n');
     const c = k.repo.commit('il Concilio scrive', 'agent');
     expect(c).not.toBe(head);
-    await k.chunkStore.save('luogo:1,1', plan);
-    expect(disk.plans.has('luogo:1,1')).toBe(true);
+    await k.chunkStore.save('chunk:1,1', plan);
+    expect(disk.plans.has('chunk:1,1')).toBe(true);
     await new Promise((r) => setTimeout(r, 0));
     expect(disk.writes.some((w) => w.startsWith('commit migrazione'))).toBe(true);
-    expect(disk.writes).toEqual(expect.arrayContaining(['commit il Concilio scrive', 'piano luogo:1,1']));
+    expect(disk.writes).toEqual(expect.arrayContaining(['commit il Concilio scrive', 'piano chunk:1,1']));
     const before = ai.calls.length;
-    await k.council.write('narratore', 'npc.reply', 'Buongiorno.');
+    await k.council.write('narrator', 'npc.reply', 'Buongiorno.');
     expect(ai.calls.length).toBe(before + 1);
   });
 

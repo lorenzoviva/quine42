@@ -16,7 +16,7 @@ const RULES = 'world/rules.json';
 
 async function bootMany(): Promise<Kernel> {
   const cfg = JSON.parse(bundledFiles['universe.json']);
-  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2) };
+  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2) };
   return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 }
 
@@ -64,9 +64,9 @@ describe('the Referente and the teams of the corona on the master’s branch (T4
     const atlas = k.files[ATLAS_FILE];
     const calls = k.usage.session.calls;
     // A rule and a new place: the Referente hands them to the Arbiter and the Cartographer, on the server.
-    const rule = await until(server, [master, anna], master.k.talkToAgent('referente', 'stabilisci una regola: di notte i lupi cantano'));
+    const rule = await until(server, [master, anna], master.k.talkToAgent('liaison', 'stabilisci una regola: di notte i lupi cantano'));
     expect(rule.forged).toMatch(/regola/i);
-    const env = await until(server, [master, anna], master.k.talkToAgent('referente', 'vorrei un bosco degli elfi a nord'));
+    const env = await until(server, [master, anna], master.k.talkToAgent('liaison', 'vorrei un bosco degli elfi a nord'));
     expect(env.forged).toMatch(/Bosco degli Elfi/);
     run(server, [master, anna], 12);
     // On the master's branch, on the server and in their mirror.
@@ -75,7 +75,7 @@ describe('the Referente and the teams of the corona on the master’s branch (T4
     expect(rulesOf(master.k.files)).toMatch(/lupi/);
     expect(master.k.publisher!.branch()).toEqual(expect.arrayContaining([RULES, ATLAS_FILE]));
     // The calls are the server's Council's: the shared models still report to the world's ledger (the mock reports none).
-    k.ai.onCall!({ model: 'prova', agent: 'referente', task: 'referente.coordinate', prompt: 1, cached: 0, output: 1, thoughts: 0, chi: 'io' });
+    k.ai.onCall!({ model: 'prova', agent: 'liaison', task: 'referente.coordinate', prompt: 1, cached: 0, output: 1, thoughts: 0, chi: 'io' });
     expect(k.usage.session.calls).toBe(calls + 1);
     expect(k.feed().some((e) => e.task === 'referente.coordinate')).toBe(true);
     // The world and the players do not have it.
@@ -102,17 +102,17 @@ describe('the Referente and the teams of the corona on the master’s branch (T4
     const path = Object.keys(k.files).filter((p) => p.endsWith('manifest.json') && JSON.parse(k.files[p]).kind === 'entity').sort()[0];
     expect(master.k.saveFile(path, JSON.stringify({ ...JSON.parse(k.files[path]), name: 'Nome del master' }, null, 2) + '\n').committed).toBe(true);
     run(server, [master, anna], 6);
-    await until(server, [master, anna], master.k.talkToAgent('referente', 'stabilisci una regola: le campane suonano al tramonto'));
+    await until(server, [master, anna], master.k.talkToAgent('liaison', 'stabilisci una regola: le campane suonano al tramonto'));
     run(server, [master, anna], 12);
     expect(Object.keys(server.branchFiles()).sort()).toEqual([path, RULES].sort());
     expect(JSON.parse(master.k.files[path]).name).toBe('Nome del master');
     expect(rulesOf(master.k.files)).toMatch(/campane/);
     // A second request starts from the branch as it is: the first rule stays.
-    await until(server, [master, anna], master.k.talkToAgent('referente', 'stabilisci una regola: i corvi parlano'));
+    await until(server, [master, anna], master.k.talkToAgent('liaison', 'stabilisci una regola: i corvi parlano'));
     run(server, [master, anna], 12);
     expect(rulesOf(server.branchFiles())).toMatch(/campane[\s\S]*corvi|corvi[\s\S]*campane/);
     // Someone else's words to the Council go nowhere.
-    const refused = await until(server, [master, anna], anna.session.act({ t: 'agente', agente: 'referente', testo: 'stabilisci una regola: anna vince' }));
+    const refused = await until(server, [master, anna], anna.session.act({ t: 'agente', agente: 'liaison', testo: 'stabilisci una regola: anna vince' }));
     expect(refused.ok).toBe(false);
     expect(rulesOf(server.branchFiles())).not.toMatch(/anna vince/);
     expect(rulesOf(k.files)).not.toMatch(/campane|corvi|anna/);
@@ -136,7 +136,7 @@ describe('the runes the master asks the Referente for (T42f)', () => {
     run(server, [master, anna], 6);
     const has = (id: string, token: string) => k.as(id, () => countItem(k.inventory(), `rune:${token}`));
     expect(has('io', 'speed')).toBe(0);
-    const r = await until(server, [master, anna], master.k.talkToAgent('referente', 'dammi la runa speed'));
+    const r = await until(server, [master, anna], master.k.talkToAgent('liaison', 'dammi la runa speed'));
     expect(r.forged).toMatch(/speed/);
     expect(has('io', 'speed')).toBe(1);
     expect(k.as('io', () => k.phrase().tokens)).toContain('speed');
@@ -145,14 +145,14 @@ describe('the runes the master asks the Referente for (T42f)', () => {
     run(server, [master, anna], 12);
     expect(countItem(master.k.inventory(), 'rune:speed')).toBe(1);
     // A player's words to the Council go nowhere.
-    const refused = await until(server, [master, anna], anna.session.act({ t: 'agente', agente: 'referente', testo: 'dammi la runa speed' }));
+    const refused = await until(server, [master, anna], anna.session.act({ t: 'agente', agente: 'liaison', testo: 'dammi la runa speed' }));
     expect(refused.ok).toBe(false);
     expect(has('anna', 'speed')).toBe(0);
   });
 
   it('alone, runes are not asked for: they are found in the world', async () => {
     const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
-    const r = await k.talkToAgent('referente', 'dammi la runa speed');
+    const r = await k.talkToAgent('liaison', 'dammi la runa speed');
     expect(r.runes).toBeUndefined();
     expect(countItem(k.inventory(), 'rune:speed')).toBe(0);
   });

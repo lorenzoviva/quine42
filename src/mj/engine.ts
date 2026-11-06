@@ -66,7 +66,7 @@ export type Node3 =
   | { type: 'shape'; shape: ShapeKind; at: Vec3; size?: Vec3; to?: Vec3; r?: number; color: string; on?: string };
 
 /** Body parts the kernel can move to animate a figure (legs and arms swing, the head nods, tails wag). */
-export const PARTS = ['gamba', 'braccio', 'testa', 'coda'] as const;
+export const PARTS = ['leg', 'arm', 'head', 'tail'] as const;
 export type Part = (typeof PARTS)[number];
 
 export interface PaletteEntry {

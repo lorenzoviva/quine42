@@ -209,7 +209,7 @@ export interface DeferredProgress {
   passi: string[];
   /** The ceiling: this universe may use at most this much of the subscription's week (%). Read again before every step. */
   tetto: number;
-  partita?: 'singola' | 'multigiocatore';
+  partita?: 'single' | 'multiplayer';
   /** The week measured so far: its reset, the last reading, what the steps used of it (%). */
   consumo?: { reset?: string; ultimo?: number; speso: number };
 }
@@ -228,7 +228,7 @@ export interface DeferredRun {
   weekly: () => Promise<WeeklyUsage | undefined>;
   /** The Genesis's text, when the universe needs one. */
   theme: string;
-  partita: 'singola' | 'multigiocatore';
+  partita: 'single' | 'multiplayer';
   /** How many places from the centre. */
   luoghi: number;
   /** Models and pieces at most in this run (default the universe's `ai.maxModels`, `ai.maxBrani`). */
@@ -303,7 +303,7 @@ export async function runDeferred(r: DeferredRun): Promise<DeferredOutcome> {
   // ledger. Without this, in a universe of many with nobody connected every common call would go to the local models instead of the queue.
   k.council.hasCredits = undefined;
   let p = r.progress.load();
-  if (!k.needsGenesis() && k.gameSetup().modalita !== r.partita) return out('errore', `l'universo è già una partita ${k.gameSetup().modalita === 'multigiocatore' ? 'multigiocatore' : 'in singola'}`);
+  if (!k.needsGenesis() && k.gameSetup().modalita !== r.partita) return out('errore', `l'universo è già una partita ${k.gameSetup().modalita === 'multiplayer' ? 'multigiocatore' : 'in singola'}`);
   if (p.partita && p.partita !== r.partita && !k.needsGenesis()) return out('errore', `la generazione era cominciata per una partita ${p.partita}`);
   p.partita = r.partita;
   const why = await measure(r, p, true);

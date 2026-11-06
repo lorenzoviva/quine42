@@ -25,7 +25,7 @@ export interface MusicChoice {
 }
 
 /** How a universe's program says what it is for, in `models/index.json → suono`. */
-const eligible = (p: SoundProgram, s: SoundState) => p.suono?.uso === 'musica' && !!p.suono.oltre === s.beyond && (!p.suono.momenti || s.beyond || p.suono.momenti.includes(s.phase));
+const eligible = (p: SoundProgram, s: SoundState) => p.suono?.uso === 'music' && !!p.suono.oltre === s.beyond && (!p.suono.momenti || s.beyond || p.suono.momenti.includes(s.phase));
 
 /**
  * The piece for a state, or nothing if the universe has none. The program is one per type: the one that names this environment, then one that names no environment
@@ -47,29 +47,29 @@ export function chooseMusic(state: SoundState, programs: readonly SoundProgram[]
 
 /** The moments of the game that have a sound: each says what the index calls the effect and the instances it goes through. */
 export const SOUND_CUES = {
-  'rune:picked': { effect: 'runa', seeds: [1, 2, 3] },
-  'item:picked': { effect: 'oggetto', seeds: [1, 2] },
-  'item:placed': { effect: 'oggetto', seeds: [2] },
-  'item:used': { effect: 'oggetto', seeds: [3] },
-  'item:action': { effect: 'oggetto', seeds: [4] },
-  'ui:container': { effect: 'oggetto', seeds: [5] },
+  'rune:picked': { effect: 'rune', seeds: [1, 2, 3] },
+  'item:picked': { effect: 'item', seeds: [1, 2] },
+  'item:placed': { effect: 'item', seeds: [2] },
+  'item:used': { effect: 'item', seeds: [3] },
+  'item:action': { effect: 'item', seeds: [4] },
+  'ui:container': { effect: 'item', seeds: [5] },
   'item:crafted': { effect: 'arpeggio', seeds: [1] },
   'rune:inscribed': { effect: 'arpeggio', seeds: [2] },
   'forge:done': { effect: 'arpeggio', seeds: [3] },
   start: { effect: 'arpeggio', seeds: [4] },
-  'spell:cast': { effect: 'incantesimo', seeds: [1, 2] },
-  fault: { effect: 'guasto', seeds: [1, 2, 3] },
-  rollback: { effect: 'ritorno', seeds: [1] },
-  beyond: { effect: 'soglia', seeds: [1] },
-  jump: { effect: 'salto', seeds: [1, 2] },
-  death: { effect: 'morte', seeds: [1] },
+  'spell:cast': { effect: 'spell', seeds: [1, 2] },
+  fault: { effect: 'fault', seeds: [1, 2, 3] },
+  rollback: { effect: 'rollback', seeds: [1] },
+  beyond: { effect: 'threshold', seeds: [1] },
+  jump: { effect: 'jump', seeds: [1, 2] },
+  death: { effect: 'death', seeds: [1] },
 } as const satisfies Record<string, { effect: string; seeds: readonly number[] }>;
 
 export type SoundCue = keyof typeof SOUND_CUES;
 
 /** The program of an effect, or nothing. */
 export function effectProgram(effect: string, programs: readonly SoundProgram[]): SoundProgram | undefined {
-  return programs.find((p) => p.suono?.uso === 'effetto' && p.suono.effetti?.includes(effect));
+  return programs.find((p) => p.suono?.uso === 'effect' && p.suono.effetti?.includes(effect));
 }
 
 /** A change of place must last this long before the music follows: walking along a border does not make it flicker. */
@@ -125,7 +125,7 @@ export class SoundDirector {
   private prepareEffects(): void {
     for (const cue of Object.values(SOUND_CUES)) {
       const program = effectProgram(cue.effect, this.programs);
-      if (program) for (const seed of cue.seeds) void this.renders.get({ xml: program.xml, seed, use: 'effetto' });
+      if (program) for (const seed of cue.seeds) void this.renders.get({ xml: program.xml, seed, use: 'effect' });
     }
   }
 
@@ -155,7 +155,7 @@ export class SoundDirector {
     this.current = { key, state, variant, since: this.clock(), silent: !choice };
     this.now = choice && { id: choice.id, seed: choice.seed, variant };
     if (!choice) return this.out.stopMusic(FAIL_FADE);
-    void this.renders.get({ xml: choice.xml, seed: choice.seed, use: 'musica' }).then((sound) => {
+    void this.renders.get({ xml: choice.xml, seed: choice.seed, use: 'music' }).then((sound) => {
       if (turn !== this.turn) return;
       if (sound) return this.out.playMusic(sound, fade);
       // It fails: silence, and no more tries until the place or the program changes (rule 7).
@@ -173,7 +173,7 @@ export class SoundDirector {
     const n = this.played.get(name) ?? 0;
     this.played.set(name, n + 1);
     const asked = this.clock();
-    void this.renders.get({ xml: program.xml, seed: seeds[n % seeds.length], use: 'effetto' }).then((sound) => {
+    void this.renders.get({ xml: program.xml, seed: seeds[n % seeds.length], use: 'effect' }).then((sound) => {
       if (sound && this.clock() - asked <= EFFECT_PATIENCE_MS) this.out.playEffect(sound);
     });
   }

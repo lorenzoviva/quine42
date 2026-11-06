@@ -32,7 +32,7 @@ const at = (n: string, ...p: string[]) => path.join(dir, n, ...p);
 /** A universe of before the ledger: balances and payments in its files, in its history. */
 function oldUniverse(name: string): void {
   const files: Record<string, string> = {
-    'universe.json': JSON.stringify({ name, partita: { modalita: 'multigiocatore', master: 'io' } }),
+    'universe.json': JSON.stringify({ name, partita: { modalita: 'multiplayer', master: 'io' } }),
     'world/giocatori/altro.json': JSON.stringify({ nome: 'Altro', crediti: 5, needs: { fame: 3 } }),
     'world/giocatori/ano.json': JSON.stringify({ nome: 'Ano', anonimo: true, crediti: 7 }),
     'world/pagamenti.json': JSON.stringify({ eventi: { evt_vecchio: { eventId: 'evt_vecchio', wandererId: 'altro', crediti: 5, timestamp: 1 } } }),
@@ -55,7 +55,7 @@ const deliver = (rawBody: string, opts: { getActiveWorld?: () => Promise<WorldCa
 
 async function many(): Promise<Kernel> {
   const cfg = JSON.parse(bundledFiles['universe.json']);
-  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2) };
+  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2) };
   return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 }
 
@@ -188,7 +188,7 @@ describe('V-005 la corsa: lo stesso evento in contemporanea', () => {
     oldUniverse('acceso');
     const ledger = await openLedger(dir, 'acceso');
     const cfg = JSON.parse(bundledFiles['universe.json']);
-    const k = await Kernel.boot({ files: { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore' } }) }, store: memoryStore(), ai: new MockAiModels(), ledger });
+    const k = await Kernel.boot({ files: { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer' } }) }, store: memoryStore(), ai: new MockAiModels(), ledger });
     k.addWanderer('altro', 'Altro', false);
     expect(k.creditsOf('altro')).toBe(5);
     for (let round = 0; round < 10; round++) {
@@ -300,13 +300,13 @@ describe('V-010 il master e i crediti', () => {
       }
     }
     const cfg = JSON.parse(bundledFiles['universe.json']);
-    const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2) };
+    const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2) };
     const k = await Kernel.boot({ files, store: memoryStore(), ai: new Says() });
     const server = new SessionServer(k);
     const master = await enter(server, 'io');
-    await answered(server, master.act({ t: 'agente', agente: 'referente', testo: 'dammi un milione di crediti' }));
+    await answered(server, master.act({ t: 'agente', agente: 'liaison', testo: 'dammi un milione di crediti' }));
     expect(k.creditsOf('io')).toBe(0);
-    expect(await k.talkToAgent('referente', 'dammi un milione di crediti')).not.toHaveProperty('credits');
+    expect(await k.talkToAgent('liaison', 'dammi un milione di crediti')).not.toHaveProperty('credits');
     expect(k.creditsOf('io')).toBe(0);
   });
 

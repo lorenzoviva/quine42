@@ -14,11 +14,11 @@ import { developAll } from './espressivita/banco';
 const STEP = 1 / 20;
 const DAY = Kernel.DAY_SECONDS;
 /** A phase of day `n` (`dayPhase`, `Kernel.day`): a day begins inside its morning, at 0, and the morning lasts until 0.12. */
-const at = (n: number, phase: 'mattina' | 'giorno' | 'sera' | 'notte') => (n + { mattina: 0, giorno: 0.12, sera: 0.42, notte: 0.58 }[phase] - 0.12) * DAY + 1;
+const at = (n: number, phase: 'morning' | 'day' | 'evening' | 'night') => (n + { morning: 0, day: 0.12, evening: 0.42, night: 0.58 }[phase] - 0.12) * DAY + 1;
 
 const seedPrograms = (): JobProgram[] =>
   Object.entries(bundledFiles)
-    .filter(([p]) => /^modules\/lavoro\.[^/]+\/manifest\.json$/.test(p))
+    .filter(([p]) => /^modules\/job\.[^/]+\/manifest\.json$/.test(p))
     .flatMap(([, src]) => JSON.parse(src).mestieri ?? []);
 
 async function world(): Promise<Kernel> {
@@ -67,7 +67,7 @@ describe('the programs of the trades', () => {
 
   it('the three of the seed are valid, by reference to the tiles and the items of the universe', () => {
     const programs = seedPrograms();
-    expect(programs.map((p) => p.id).sort()).toEqual(expect.arrayContaining(['boscaiolo', 'contadino', 'pescatore']));
+    expect(programs.map((p) => p.id).sort()).toEqual(expect.arrayContaining(['farmer', 'fisher', 'woodcutter']));
     for (const p of programs) expect(validateJobProgram(p, world0()).errors, p.id).toEqual([]);
   });
 
@@ -75,7 +75,7 @@ describe('the programs of the trades', () => {
     const bad = {
       id: 'mago',
       nomi: ['mago'],
-      giornata: { mattina: [{ fa: 'vola' }, { fa: 'trasforma', da: 'g', a: '§' }, { fa: 'raccogli', casella: 'g', oggetto: 'item.oro' }, { fa: 'aspetta', durata: 9000 }], giorno: [], sera: [{ fa: 'vai', dove: 'luna' }], notte: [] },
+      giornata: { morning: [{ fa: 'vola' }, { fa: 'transform', da: 'g', a: '§' }, { fa: 'gather', casella: 'g', oggetto: 'item.oro' }, { fa: 'wait', durata: 9000 }], day: [], evening: [{ fa: 'go', dove: 'luna' }], night: [] },
     };
     const { program, errors } = validateJobProgram(bad, world0());
     expect(program).toBeUndefined();
@@ -89,9 +89,9 @@ describe('the programs of the trades', () => {
   it('a trade finds its program by name, then by a word of it; otherwise none, and the individual lives as before', () => {
     const programs = seedPrograms();
     expect(normalTrade('La Contadina')).toBe('contadina');
-    expect(matchJob('contadina', programs)?.id).toBe('contadino');
-    expect(matchJob('il boscaiolo del Rovo', programs)?.id).toBe('boscaiolo');
-    expect(matchJob('Pescatrice di lago', programs)?.id).toBe('pescatore');
+    expect(matchJob('contadina', programs)?.id).toBe('farmer');
+    expect(matchJob('il boscaiolo del Rovo', programs)?.id).toBe('woodcutter');
+    expect(matchJob('Pescatrice di lago', programs)?.id).toBe('fisher');
     expect(matchJob('sarto', programs)).toBeUndefined();
     expect(matchJob(undefined, programs)).toBeUndefined();
   });
@@ -122,79 +122,79 @@ describe('the way between two tiles', () => {
 describe('a day of work, in a planned place', () => {
   it('a farmer ploughs the meadow in the morning and sows the furrows by day; the sown field ripens; she reaps the wheat', async () => {
     const k = await world();
-    k.time = at(2, 'mattina');
+    k.time = at(2, 'morning');
     const id = worker(k, 'contadina');
     // The kernel looks at the people once a second of ticks (60 of them).
     play(k, 4);
     const m = k.ecs.get(id, 'mestiere');
-    expect(m).toMatchObject({ id: 'contadino', fase: 'mattina' });
-    const site = m.lavoro ?? k.ecs.get(id, 'pos');
+    expect(m).toMatchObject({ id: 'farmer', fase: 'morning' });
+    const site = m.work ?? k.ecs.get(id, 'pos');
     const meadow = count(k, 'g', site.x, site.y);
     const ploughed = count(k, 'm', site.x, site.y);
     play(k, 60, () => count(k, 'g', site.x, site.y) <= meadow - 2);
     expect(count(k, 'g', site.x, site.y)).toBeLessThan(meadow);
     expect(count(k, 'm', site.x, site.y)).toBeGreaterThan(ploughed);
     // By day: the furrows are sown.
-    k.time = at(2, 'giorno');
+    k.time = at(2, 'day');
     play(k, 60, () => count(k, 'e', site.x, site.y) >= 2);
     const sown = count(k, 'e', site.x, site.y);
     expect(sown).toBeGreaterThanOrEqual(1);
     // A day later the sown field is ripe wheat, by itself (the kernel, `matura`).
-    k.time = at(3, 'mattina');
+    k.time = at(3, 'morning');
     play(k, 4);
     expect(count(k, 'u', site.x, site.y)).toBeGreaterThanOrEqual(sown);
     // And by day she reaps it: wheat in what she carries, the field ploughed again.
-    k.time = at(3, 'giorno');
+    k.time = at(3, 'day');
     play(k, 120, () => (k.ecs.get(id, 'carico')?.['item.grano'] ?? 0) >= 1);
     expect(k.ecs.get(id, 'carico')?.['item.grano']).toBeGreaterThanOrEqual(1);
   }, 120_000);
 
   it('a woodcutter fells a tree, takes the log, and leaves a stump that grows back into the wood in three days', async () => {
     const k = await world();
-    k.time = at(2, 'mattina');
+    k.time = at(2, 'morning');
     const pc = k.wandererCarpet();
     const [c, r] = [Math.floor(pc.x) + 4, Math.floor(pc.y) + 4];
     for (const [dx, dy] of [[0, 0], [1, 0], [0, 1]]) expect(k.setTile(c + dx, r + dy, 't')).toBe(true);
     const id = worker(k, 'taglialegna', 2, 2);
     play(k, 4);
-    expect(k.ecs.get(id, 'mestiere')).toMatchObject({ id: 'boscaiolo' });
+    expect(k.ecs.get(id, 'mestiere')).toMatchObject({ id: 'woodcutter' });
     play(k, 70, () => (k.ecs.get(id, 'carico')?.['item.ciocco'] ?? 0) >= 1);
     expect(k.ecs.get(id, 'carico')?.['item.ciocco']).toBeGreaterThanOrEqual(1);
     const stumps = count(k, 'x', c, r, 3);
     expect(stumps).toBeGreaterThanOrEqual(1);
-    k.time = at(4, 'mattina');
+    k.time = at(4, 'morning');
     play(k, 4);
     expect(count(k, 'x', c, r, 3)).toBe(stumps);
-    k.time = at(5, 'mattina');
+    k.time = at(5, 'morning');
     play(k, 4);
     expect(count(k, 'x', c, r, 3)).toBeLessThan(stumps);
   }, 120_000);
 
   it('a fisherwoman goes to the bank and fishes: fish in what she carries, the water as it was', async () => {
     const k = await world();
-    k.time = at(2, 'mattina');
+    k.time = at(2, 'morning');
     const pc = k.wandererCarpet();
     const [c, r] = [Math.floor(pc.x) - 5, Math.floor(pc.y) + 3];
     for (let dy = 0; dy < 2; dy++) for (let dx = 0; dx < 2; dx++) expect(k.setTile(c + dx, r + dy, 'w')).toBe(true);
     const id = worker(k, 'pescatrice', -2, 2);
     play(k, 4);
-    expect(k.ecs.get(id, 'mestiere')).toMatchObject({ id: 'pescatore' });
+    expect(k.ecs.get(id, 'mestiere')).toMatchObject({ id: 'fisher' });
     play(k, 70, () => (k.ecs.get(id, 'carico')?.['item.pesce'] ?? 0) >= 1);
     expect(k.ecs.get(id, 'carico')?.['item.pesce']).toBeGreaterThanOrEqual(1);
     expect(count(k, 'w', c, r, 1)).toBe(4);
-    expect(k.ecs.get(id, 'attivita')?.tipo).toBe('pesca');
+    expect(k.ecs.get(id, 'attivita')?.tipo).toBe('fish');
   }, 120_000);
 
   it('in the evening to the square, at night home; who follows the wanderer stops working and lives as before', async () => {
     const k = await world();
-    k.time = at(2, 'sera');
+    k.time = at(2, 'evening');
     const id = worker(k, 'contadino');
     play(k, 4);
-    expect(k.ecs.get(id, 'mestiere')).toMatchObject({ fase: 'sera' });
-    expect(k.ecs.get(id, 'mestiere').compiti.map((t: { fa: string }) => t.fa)).toEqual(['vai', 'porta', 'chiacchiera']);
-    k.time = at(2, 'notte');
+    expect(k.ecs.get(id, 'mestiere')).toMatchObject({ fase: 'evening' });
+    expect(k.ecs.get(id, 'mestiere').compiti.map((t: { fa: string }) => t.fa)).toEqual(['go', 'carry', 'chat']);
+    k.time = at(2, 'night');
     play(k, 4);
-    expect(k.ecs.get(id, 'mestiere').compiti.map((t: { fa: string }) => t.fa)).toEqual(['vai', 'riposa']);
+    expect(k.ecs.get(id, 'mestiere').compiti.map((t: { fa: string }) => t.fa)).toEqual(['go', 'rest']);
     k.ecs.get(id, 'mind').mode = 'segui';
     play(k, 4);
     expect(k.ecs.get(id, 'mestiere')).toBeUndefined();
@@ -202,7 +202,7 @@ describe('a day of work, in a planned place', () => {
 
   it('the day of every edit is in the plan of its place, and the edits of before (without one) ripen from today', async () => {
     const k = await world();
-    k.time = at(2, 'giorno');
+    k.time = at(2, 'day');
     const pc = k.wandererCarpet();
     const [c, r] = [Math.floor(pc.x) + 3, Math.floor(pc.y) - 3];
     expect(k.setTile(c, r, 'e')).toBe(true);
@@ -211,11 +211,11 @@ describe('a day of work, in a planned place', () => {
     expect(ch.plan!.giorni![idx]).toBe(2);
     // A plan of before: the edit without its day. It counts from the first look.
     delete ch.plan!.giorni![idx];
-    k.time = at(3, 'mattina');
+    k.time = at(3, 'morning');
     play(k, 4);
     expect(k.tileAt(c, r)).toBe('e');
     expect(ch.plan!.giorni![idx]).toBe(3);
-    k.time = at(4, 'mattina');
+    k.time = at(4, 'morning');
     play(k, 4);
     expect(k.tileAt(c, r)).toBe('u');
   }, 120_000);

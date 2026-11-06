@@ -17,7 +17,7 @@ import { wavOf } from './wav';
 const args = process.argv.slice(2).filter((a) => a !== '--');
 const opt = (k: string) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`) + 1] : undefined);
 const what = args.find((a, i) => !a.startsWith('--') && !args[i - 1]?.startsWith('--'));
-if (!what) throw new Error('quale programma? npx vite-node lab/scripts/mjx-sound.ts -- suono-fuga-cellulare');
+if (!what) throw new Error('quale programma? npx vite-node lab/scripts/mjx-sound.ts -- sound-cellular-fugue');
 const file = fs.existsSync(what) ? what : path.join('universe/models', `${what}.xml`);
 const nome = path.basename(file, '.xml');
 const semi = opt('semi')?.split(',').map(Number) ?? [...DEFAULT_SOUND_SEEDS];

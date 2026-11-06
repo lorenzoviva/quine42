@@ -5,7 +5,7 @@ La traccia lo dice in testo, senza immagini e senza chiamate: `src/mj/trace.ts` 
 
 ```bash
 npx vite-node lab/scripts/mjx-trace.ts -- lab/banco/conferma/moderna/1/modello.xml --bersaglio moderna           # la predefinita
-npx vite-node lab/scripts/mjx-trace.ts -- modello.xml --size "33 33 17" --forma sezioni --passo 120 --tetto 2000 # un'altra forma, un fotogramma scelto
+npx vite-node lab/scripts/mjx-trace.ts -- modello.xml --size "33 33 17" --forma sections --passo 120 --tetto 2000 # un'altra forma, un fotogramma scelto
 npx vite-node lab/scripts/mjx-trace.ts -- --confronto                                                            # la tabella qui sotto
 npx vite-node lab/scripts/mjx-trace-prova.ts                                                                     # la prova cieca (consuma l'abbonamento)
 npx vite-node lab/scripts/banco-strutture.ts -- --seconda --giro <giro> --traccia [--tetto 4000]                 # nella seconda richiesta
@@ -89,7 +89,7 @@ Stesse sei domande per programma, con la risposta calcolata dalla griglia, a `cl
 Senza traccia: 0 su 12, sempre «non si può», nessuna risposta inventata. Va letta per quello che è: **un solo seme, due programmi, 12 domande scelte da me, un giudice solo**. Non dice che una forma vale un punto più dell'altra. Su moderna il modello ha anche l'XML e deduce da lì parte delle risposte (lo scrive, per (c)). Dice tre cose:
 
 1. Solo (b) risponde a «quando»: è l'unica che vede lo scorrere di una crescita, cioè ciò per cui la traccia nasce. Ma il giro prima, con lo stesso tetto, (b) ha indicato il nodo vicino (#97 invece di #98) per «quale nodo mette R su L»: un gruppo fuso dice i suoi nodi, non quale di loro.
-2. Nessuna forma, sotto il tetto, dice la lettera di una cella qualsiasi di un programma rumoroso: per quello serve una sezione chiesta apposta, con `--forma sezioni --passo`, e anche lì i piani possono mancare.
+2. Nessuna forma, sotto il tetto, dice la lettera di una cella qualsiasi di un programma rumoroso: per quello serve una sezione chiesta apposta, con `--forma sections --passo`, e anche lì i piani possono mancare.
 3. «Quante celle per lettera alla fine» è nell'intestazione perché il giro prima nodi, (a) e (b) non sapevano rispondere su moderna: è stata aggiunta dopo aver visto la domanda, quindi quei «sì» non misurano nulla.
 
 Non misurato: se la traccia fa scrivere programmi migliori. Lo dirà T182, che è il suo uso.

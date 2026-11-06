@@ -26,7 +26,7 @@ describe('items, containers, actions, needs', () => {
 
   it('an equipped tool acts on the world: scissors cut a bramble, which leaves wood', () => {
     const inv = k.inventory();
-    inv.slots[0] = { item: 'item.forbici', count: 1 };
+    inv.slots[0] = { item: 'item.scissors', count: 1 };
     k.equipSlot(0);
     const bush = spawnInFront(k, 'object.bush');
     k.action();
@@ -35,7 +35,7 @@ describe('items, containers, actions, needs', () => {
   });
 
   it('containers are filled from their loot table the first time and can be emptied', () => {
-    const box = spawnInFront(k, 'obj.credenza');
+    const box = spawnInFront(k, 'obj.cupboard');
     expect(k.actionsFor(box).map((a) => a.id)).toEqual(expect.arrayContaining(['apri', 'esamina']));
     const c = k.openContainer(box)!;
     const found = new Map<string, number>();
@@ -49,7 +49,7 @@ describe('items, containers, actions, needs', () => {
   });
 
   it('objects offer their own actions, with requirements', async () => {
-    const bed = spawnInFront(k, 'obj.letto');
+    const bed = spawnInFront(k, 'obj.bed');
     k.needs()!.energy = 10;
     await k.perform(bed, 'act:sleep');
     expect(k.needs()!.energy).toBe(100);
@@ -132,7 +132,7 @@ describe('characters', () => {
   });
 
   it('examining something asks the Narrator once, then remembers', async () => {
-    const box = spawnInFront(k, 'obj.cassa');
+    const box = spawnInFront(k, 'obj.chest');
     let said = '';
     k.bus.on('ui:dialog', ({ text }: { text: string }) => (said = text));
     await k.perform(box, 'esamina');
@@ -208,7 +208,7 @@ describe('free actions and effects', () => {
     expect(k.ai.usage.text).toBe(after);
     expect(after).toBe(calls + 2);
     // The Council sees the rules in every later judgement.
-    expect(k.council.context('narratore')).toMatch(/Regole già stabilite[\s\S]*bevo dal secchio/);
+    expect(k.council.context('narrator')).toMatch(/Regole già stabilite[\s\S]*bevo dal secchio/);
   });
 
   it('free crafting: the Council decides from what you carry; a possible recipe becomes a known recipe', async () => {

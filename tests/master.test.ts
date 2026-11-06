@@ -16,7 +16,7 @@ async function bootWith(partita: Record<string, unknown>): Promise<Kernel> {
   return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 }
 
-const many = () => bootWith({ modalita: 'multigiocatore', morte: 3 });
+const many = () => bootWith({ modalita: 'multiplayer', morte: 3 });
 
 const run = (k: Kernel, seconds: number) => {
   for (let t = 0; t < seconds; t += DT) k.tick(DT);
@@ -39,7 +39,7 @@ describe('the master in god mode (T42a)', () => {
     run(k, 3);
     expect(k.dead).toBe(true);
 
-    const solo = await bootWith({ modalita: 'singola', morte: 3 });
+    const solo = await bootWith({ modalita: 'single', morte: 3 });
     expect(solo.isMaster()).toBe(true);
     expect(solo.godMode()).toBe(false);
     starve(solo, 'io');

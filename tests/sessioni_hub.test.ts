@@ -24,7 +24,7 @@ describe('Hub Sessioni & Creazione Nuovo Universo (T103)', () => {
     const cfg = JSON.parse(bundledFiles['universe.json']);
     const files = {
       ...bundledFiles,
-      'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2),
+      'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2),
     };
     const kernel = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
     const server = new SessionServer(kernel);
@@ -96,7 +96,7 @@ describe('Hub Sessioni & Creazione Nuovo Universo (T103)', () => {
         {
           name: 'valmora',
           seed: 42,
-          partita: { modalita: 'multigiocatore', master: 'lorenzo', morte: 1 },
+          partita: { modalita: 'multiplayer', master: 'lorenzo', morte: 1 },
           ai: {
             textModel: 'gemini-3.1-flash-lite',
             scultori: { figura: 'gemini-3.8-flash' },
@@ -153,10 +153,10 @@ describe('Hub Sessioni & Creazione Nuovo Universo (T103)', () => {
     expect(cfgLow.name).toBe('reame-low');
     expect(cfgLow.seed).toBe(1234);
     expect(cfgLow.partita.morte).toBe(1);
-    expect(cfgLow.partita.modalita).toBe('multigiocatore');
+    expect(cfgLow.partita.modalita).toBe('multiplayer');
     expect(cfgLow.partita.master).toBe('TestMaster');
     expect(cfgLow.ai.textModel).toBe('gemini-3.1-flash-lite');
-    expect(cfgLow.ai.scultori.figura).toBe('gemini-3.1-flash-lite');
+    expect(cfgLow.ai.scultori.figure).toBe('gemini-3.1-flash-lite');
     expect(cfgLow.ai.minimi.tetto).toBe(0.5);
     expect(filesLow['seed.json']).toBeDefined();
 
@@ -174,7 +174,7 @@ describe('Hub Sessioni & Creazione Nuovo Universo (T103)', () => {
     expect(cfgHigh.partita.morte).toBe(4);
     expect(cfgHigh.partita.pvp).toBe(true);
     expect(cfgHigh.ai.textModel).toBe('gemini-3.8-flash');
-    expect(cfgHigh.ai.scultori.importante).toBe('gemini-4-argon');
+    expect(cfgHigh.ai.scultori.important).toBe('gemini-4-argon');
     expect(cfgHigh.ai.minimi.tetto).toBe(2.0);
   });
 

@@ -56,24 +56,24 @@ describe('the Musician writes what is asked', () => {
     const models = new Scripted(false);
     const k = await bootWith(models);
     const before = k.repo.head().id;
-    const r = await k.talkToAgent('referente', 'vorrei una musica per il castello');
+    const r = await k.talkToAgent('liaison', 'vorrei una musica per il castello');
     expect(r.forged).toMatch(/Il Musicista ha scritto/);
     const head = k.repo.head();
     expect(head.id).not.toBe(before);
     expect(head.message).toMatch(/^musicista: /);
     const added = soundPrograms(head.files).find((p) => p.nome?.startsWith('Aria'));
-    expect(added?.id).toMatch(/^suono-musica-/);
+    expect(added?.id).toMatch(/^sound-music-/);
     expect(councilMayWrite(`models/${added!.id}.xml`)).toBe(true);
     // It is a card: who wrote it, who paid.
     const info = JSON.parse(head.files['models/index.json']!)[added!.id];
-    expect(info.carta).toMatchObject({ autore: 'musicista', pagante: k.wanderer().id });
+    expect(info.carta).toMatchObject({ autore: 'musician', pagante: k.wanderer().id });
     expect(info.classe).toBe('suono');
     // The environment it names: the game plays it there, over the piece of the seed, by day and by night.
     const env = added!.suono!.ambienti![0];
     expect(env).toBe('castle');
-    const choice = chooseMusic({ beyond: false, environment: env, phase: 'giorno', seed: 7 }, readPrograms(head.files));
+    const choice = chooseMusic({ beyond: false, environment: env, phase: 'day', seed: 7 }, readPrograms(head.files));
     expect(choice?.id).toBe(added!.id);
-    expect(chooseMusic({ beyond: false, environment: env, phase: 'notte', seed: 7 }, readPrograms(head.files))?.id).toBe(added!.id);
+    expect(chooseMusic({ beyond: false, environment: env, phase: 'night', seed: 7 }, readPrograms(head.files))?.id).toBe(added!.id);
     // And it sounds: the samples the browser would play.
     const sound = renderSoundProgram(choice!.xml, choice!.seed);
     expect(sound.samples.reduce((m, x) => Math.max(m, Math.abs(x)), 0)).toBeGreaterThan(0.01);
@@ -86,10 +86,10 @@ describe('the Musician writes what is asked', () => {
     walkIn(k, 'forra_nera');
     const asked = k.composing.missing();
     expect(asked.map((r) => r.ambienti)).toEqual([['forra_nera']]);
-    expect(asked[0]).toMatchObject({ nome: 'Forra Nera', uso: 'musica', momenti: ['mattina', 'giorno'] });
+    expect(asked[0]).toMatchObject({ nome: 'Forra Nera', uso: 'music', momenti: ['morning', 'day'] });
     expect(await k.composing.make(asked[0])).toMatchObject({ ok: true });
-    const info = JSON.parse(k.repo.head().files['models/index.json']!)['suono-musica-forra-nera'];
-    expect(info.suono).toEqual({ uso: 'musica', ambienti: ['forra_nera'], momenti: ['mattina', 'giorno'] });
+    const info = JSON.parse(k.repo.head().files['models/index.json']!)['sound-music-forra-nera'];
+    expect(info.suono).toEqual({ uso: 'music', ambienti: ['forra_nera'], momenti: ['morning', 'day'] });
     expect(info.carta.pagante).toBe(COMUNE);
     expect(k.composing.missing()).toEqual([]);
   }, 60_000);
@@ -103,7 +103,7 @@ describe('the Musician writes what is asked', () => {
     k.composing.pump();
     await settle(5);
     expect(k.composing.count).toBe(0);
-    expect(k.screens().costi).toBeDefined();
+    expect(k.screens().costs).toBeDefined();
     const none = await bootWith(new Scripted(), { coefficienti: { brani: 0 } });
     none.content.layouts['forra_nera'] = { ...none.content.layouts['bosco'], name: 'Forra Nera' };
     walkIn(none, 'forra_nera');
@@ -114,14 +114,14 @@ describe('the Musician writes what is asked', () => {
   it('a wanderer can replace an effect: it takes the id of the one there is, and the game plays the new one', async () => {
     const models = new Scripted(false);
     const k = await bootWith(models);
-    const old = bundledFiles['models/suono-effetto-oggetto.xml'];
+    const old = bundledFiles['models/sound-effect-item.xml'];
     const xml = old.replace('bpm="300"', 'bpm="280"');
-    models.answers.push(() => ({ nome: 'Tocco di Legno', programma: xml, uso: 'effetto', effetto: 'oggetto' }));
-    const r = await k.talkToAgent('referente', 'rifammi la melodia di quando raccolgo un oggetto');
-    expect(r.forged).toMatch(/effetto: oggetto/);
+    models.answers.push(() => ({ nome: 'Tocco di Legno', programma: xml, uso: 'effetto', effetto: 'item' }));
+    const r = await k.talkToAgent('liaison', 'rifammi la melodia di quando raccolgo un oggetto');
+    expect(r.forged).toMatch(/effetto: item/);
     const head = k.repo.head().files;
-    expect(head['models/suono-effetto-oggetto.xml']).toContain('bpm="280"');
-    expect(soundPrograms(head).filter((p) => p.suono?.effetti?.includes('oggetto')).map((p) => p.id)).toEqual(['suono-effetto-oggetto']);
+    expect(head['models/sound-effect-item.xml']).toContain('bpm="280"');
+    expect(soundPrograms(head).filter((p) => p.suono?.effetti?.includes('item')).map((p) => p.id)).toEqual(['sound-effect-item']);
   }, 60_000);
 
   it('talking to the Musician in the house of the Artist works like the Referente', async () => {
@@ -129,33 +129,33 @@ describe('the Musician writes what is asked', () => {
     const k = await bootWith(models);
     const original = models.text.bind(models);
     models.text = async (c: TextCall) => (c.task === 'agent.chat' ? JSON.stringify({ risposta: 'Volentieri.', richiesta_fucina: 'un canto per il bosco di notte' }) : original(c));
-    const r = await k.talkToAgent('musicista', 'scrivimi un canto per il bosco');
+    const r = await k.talkToAgent('musician', 'scrivimi un canto per il bosco');
     expect(r.forged).toMatch(/Il Musicista ha scritto/);
   }, 60_000);
 });
 
 describe('what does not pass goes back to the Musician, with the reason', () => {
-  const world = { ambienti: ['bosco', 'castello'], effetti: ['oggetto'], qui: 'bosco' };
+  const world = { ambienti: ['bosco', 'castello'], effetti: ['item'], qui: 'bosco' };
 
   it('a program that fails the thresholds goes back; the second answer is the one kept', async () => {
     const models = new Scripted(false);
     const k = await bootWith(models);
-    const good = soundExample(k.files, 'musica')!;
-    models.answers.push(() => ({ nome: 'Il Fermo', programma: FLAT, uso: 'musica' }), () => ({ nome: 'La Forra', programma: good, uso: 'musica' }));
+    const good = soundExample(k.files, 'music')!;
+    models.answers.push(() => ({ nome: 'Il Fermo', programma: FLAT, uso: 'music' }), () => ({ nome: 'La Forra', programma: good, uso: 'music' }));
     const r = await compose(k.council, { richiesta: 'una musica' }, world, 'prova');
     expect(r?.nome).toBe('La Forra');
     expect(r?.calls).toBe(2);
     expect(models.calls[1].prompt).toMatch(/Non va: .*suono /);
     expect(models.calls[1].prompt).toContain(FLAT.slice(0, 40));
-    expect(k.feed().some((e) => e.kind === 'scarta' && e.to === 'musicista')).toBe(true);
+    expect(k.feed().some((e) => e.kind === 'scarta' && e.to === 'musician')).toBe(true);
   }, 60_000);
 
   it('after the last try nothing enters the library, and the world goes on', async () => {
     const models = new Scripted(false);
     const k = await bootWith(models);
-    models.answers.push(...[1, 2, 3].map(() => () => ({ nome: 'Il Fermo', programma: FLAT, uso: 'musica' })));
+    models.answers.push(...[1, 2, 3].map(() => () => ({ nome: 'Il Fermo', programma: FLAT, uso: 'music' })));
     const before = k.repo.head().id;
-    const r = await k.composing.make({ richiesta: 'una musica', uso: 'musica', ambienti: ['bosco'] });
+    const r = await k.composing.make({ richiesta: 'una musica', uso: 'music', ambienti: ['bosco'] });
     expect(r.ok).toBe(false);
     expect(models.calls.length).toBe(3);
     expect(k.repo.head().id).toBe(before);
@@ -173,36 +173,36 @@ describe('what does not pass goes back to the Musician, with the reason', () => 
   }, 60_000);
 
   it('rule 0: a name that breaks the fourth wall goes back, the root’s and the one in `nome`', () => {
-    const good = bundledFiles['models/suono-musica-pietra.xml'];
-    expect(scoreErrors('models/x.xml', good, 'Il Glitch del Bosco', 'musica').join()).toMatch(/non è una parola del mondo/);
-    expect(scoreErrors('models/x.xml', good.replace('name="Pietra"', 'name="Il Kernel"'), 'La Forra', 'musica').join()).toMatch(/Il Kernel/);
+    const good = bundledFiles['models/sound-music-stone.xml'];
+    expect(scoreErrors('models/x.xml', good, 'Il Glitch del Bosco', 'music').join()).toMatch(/non è una parola del mondo/);
+    expect(scoreErrors('models/x.xml', good.replace('name="Pietra"', 'name="Il Kernel"'), 'La Forra', 'music').join()).toMatch(/Il Kernel/);
   });
 
   it('a model is no piece, and a loop of a bar is not a piece of music', () => {
-    expect(scoreErrors('models/x.xml', bundledFiles['models/pebble.xml'] ?? '<sequence values="BC" size="8 8 8"/>', 'Sasso', 'musica').join()).toMatch(/manca <sound>/);
-    expect(scoreErrors('models/x.xml', FLAT.replace('size="32', 'size="8'), 'Corto', 'musica').join()).toMatch(/almeno 32 passi/);
+    expect(scoreErrors('models/x.xml', bundledFiles['models/pebble.xml'] ?? '<sequence values="BC" size="8 8 8"/>', 'Sasso', 'music').join()).toMatch(/manca <sound>/);
+    expect(scoreErrors('models/x.xml', FLAT.replace('size="32', 'size="8'), 'Corto', 'music').join()).toMatch(/almeno 32 passi/);
   });
 
   it('what the world cannot name is dropped: environments out of the list, an effect nobody plays goes back', () => {
-    expect(purposeOf({ uso: 'musica', ambienti: ['bosco', 'marte'], momenti: ['notte', 'mai'] }, { richiesta: 'x' }, world).suono).toEqual({ uso: 'musica', ambienti: ['bosco'], momenti: ['notte'] });
-    expect(purposeOf({ uso: 'musica', ambienti: ['marte'] }, { richiesta: 'x' }, world).suono?.ambienti).toEqual(['bosco']);
-    expect(purposeOf({ uso: 'musica' }, { richiesta: 'x' }, { ...world, qui: undefined }).error).toMatch(/ambienti/);
-    expect(purposeOf({ uso: 'effetto', effetto: 'starnuto' }, { richiesta: 'x' }, world).error).toMatch(/oggetto/);
+    expect(purposeOf({ uso: 'music', ambienti: ['bosco', 'marte'], momenti: ['notte', 'mai'] }, { richiesta: 'x' }, world).suono).toEqual({ uso: 'music', ambienti: ['bosco'], momenti: ['night'] });
+    expect(purposeOf({ uso: 'music', ambienti: ['marte'] }, { richiesta: 'x' }, world).suono?.ambienti).toEqual(['bosco']);
+    expect(purposeOf({ uso: 'music' }, { richiesta: 'x' }, { ...world, qui: undefined }).error).toMatch(/ambienti/);
+    expect(purposeOf({ uso: 'effect', effetto: 'starnuto' }, { richiesta: 'x' }, world).error).toMatch(/item/);
     // What the kernel decided, the answer does not move.
-    expect(purposeOf({ uso: 'effetto', ambienti: ['castello'] }, { richiesta: 'x', uso: 'musica', ambienti: ['bosco'], momenti: ['giorno'] }, world).suono).toEqual({ uso: 'musica', ambienti: ['bosco'], momenti: ['giorno'] });
+    expect(purposeOf({ uso: 'effect', ambienti: ['castello'] }, { richiesta: 'x', uso: 'music', ambienti: ['bosco'], momenti: ['giorno'] }, world).suono).toEqual({ uso: 'music', ambienti: ['bosco'], momenti: ['giorno'] });
   });
 
   it('an id is free, or the effect it replaces', () => {
-    const programs: SoundProgram[] = [{ id: 'suono-effetto-runa', xml: '', suono: { uso: 'effetto', effetti: ['runa'] } }];
-    expect(soundId('Tocco', { uso: 'effetto', effetti: ['runa'] }, programs, () => true)).toBe('suono-effetto-runa');
-    const taken = new Set(['suono-musica-la-forra']);
-    expect(soundId('La Forra!', { uso: 'musica' }, programs, (id) => taken.has(id))).toBe('suono-musica-la-forra-2');
+    const programs: SoundProgram[] = [{ id: 'sound-effect-rune', xml: '', suono: { uso: 'effect', effetti: ['rune'] } }];
+    expect(soundId('Tocco', { uso: 'effect', effetti: ['rune'] }, programs, () => true)).toBe('sound-effect-rune');
+    const taken = new Set(['sound-music-la-forra']);
+    expect(soundId('La Forra!', { uso: 'music' }, programs, (id) => taken.has(id))).toBe('sound-music-la-forra-2');
   });
 });
 
 describe('the choice of the music with the Musician in the house', () => {
-  const p = (id: string, ambienti: string[]): SoundProgram => ({ id, xml: `<x id="${id}"/>`, suono: { uso: 'musica', ambienti } });
-  const state = { beyond: false, phase: 'giorno' as const, seed: 3 };
+  const p = (id: string, ambienti: string[]): SoundProgram => ({ id, xml: `<x id="${id}"/>`, suono: { uso: 'music', ambienti } });
+  const state = { beyond: false, phase: 'day' as const, seed: 3 };
 
   it('who names the environment exactly beats who names part of its id, and the last written plays', () => {
     const old = p('vecchio', ['castello']);
@@ -215,13 +215,13 @@ describe('the choice of the music with the Musician in the house', () => {
 
 describe('the rules of a content of the Council', () => {
   it('a task of the census, with its coefficient, common when the world asks; «Low Detail» thins it and takes the cheap model', () => {
-    expect(CENSUS.find((c) => c.compito === 'sound.compose')).toMatchObject({ agente: 'musicista', coefficiente: 'brani' });
+    expect(CENSUS.find((c) => c.compito === 'sound.compose')).toMatchObject({ agente: 'musician', coefficiente: 'pieces' });
     expect(isCommonTask('sound.compose')).toBe(true);
-    expect(LOW_DETAIL.coefficienti.brani).toBeLessThan(FULL_DETAIL.brani);
+    expect(LOW_DETAIL.coefficienti.pieces).toBeLessThan(FULL_DETAIL.pieces);
     expect(pieceGap(1)).toBe(120);
-    expect(pieceGap(LOW_DETAIL.coefficienti.brani)).toBeGreaterThan(pieceGap(1));
+    expect(pieceGap(LOW_DETAIL.coefficienti.pieces)).toBeGreaterThan(pieceGap(1));
     expect(pieceGap(0)).toBe(Infinity);
-    expect(LOW_DETAIL.scultori.musicista).toBe('gemini-3.1-flash-lite');
+    expect(LOW_DETAIL.scultori.musician).toBe('gemini-3.1-flash-lite');
   });
 
   it('the role carries the scales, the instruments and the limits; no placeholder stays', () => {
@@ -230,7 +230,7 @@ describe('the rules of a content of the Council', () => {
     expect(role).toContain('lead, pad, bass');
     expect(role).toMatch(/almeno 4 eventi a battuta/);
     expect(role).not.toContain('@@');
-    expect(AGENTS.musicista.name).toBe('Musicista');
+    expect(AGENTS.musician.name).toBe('Musicista');
   });
 });
 
@@ -238,17 +238,17 @@ describe('a room with two teams', () => {
   it('the house of the Artist holds both, each at its own place before the screen, with no building more', async () => {
     const k = await bootWith(new MockAiModels());
     const gallery = k.corona.building('galleria')!;
-    expect(gallery.teams).toEqual(['artista', 'musicista']);
+    expect(gallery.teams).toEqual(['artist', 'musician']);
     k.archive.tick(30);
     k.archive.tick(30);
     const screen = gallery.storeys[0].items.find((i) => i.kind === 'screen')!;
-    const artist = k.archive.avatars.get('artista@galleria')!;
-    const musician = k.archive.avatars.get('musicista@galleria')!;
+    const artist = k.archive.avatars.get('artist@galleria')!;
+    const musician = k.archive.avatars.get('musician@galleria')!;
     expect([artist.x, artist.y]).toEqual([screen.x + 1.5, screen.y - 0.5]);
     expect([musician.x, musician.y]).toEqual([screen.x + 3, screen.y - 0.5]);
     expect(k.corona.free(musician.x, musician.y)).toBe(true);
     // No building of its own, no team of its own anywhere else.
-    expect(k.corona.buildings.filter((b) => b.teams.includes('musicista')).map((b) => b.id)).toEqual(['galleria']);
+    expect(k.corona.buildings.filter((b) => b.teams.includes('musician')).map((b) => b.id)).toEqual(['galleria']);
     expect(k.corona.buildings.map((b) => b.id)).not.toContain('musica');
   });
 
@@ -263,11 +263,11 @@ describe('a room with two teams', () => {
   it('the Musician at work is seen in the house, speaking; sent back by the kernel, stays there', async () => {
     const models = new Scripted(false);
     const k = await bootWith(models);
-    const before = k.archive.avatars.get('musicista@galleria')!;
+    const before = k.archive.avatars.get('musician@galleria')!;
     const [x, y] = [before.x, before.y];
-    models.answers.push(() => ({ nome: 'Il Fermo', programma: FLAT, uso: 'musica' }));
-    await k.composing.make({ richiesta: 'il brano della gola', uso: 'musica', ambienti: ['bosco'] });
-    const m = k.archive.avatars.get('musicista@galleria')!;
+    models.answers.push(() => ({ nome: 'Il Fermo', programma: FLAT, uso: 'music' }));
+    await k.composing.make({ richiesta: 'il brano della gola', uso: 'music', ambienti: ['bosco'] });
+    const m = k.archive.avatars.get('musician@galleria')!;
     expect(m.say).toBeDefined();
     expect(m.building).toBe('galleria');
     k.tick(DT);
@@ -276,7 +276,7 @@ describe('a room with two teams', () => {
 
   it('the wandering Sculptor, who has no room of its own, does not stand on the Musician', async () => {
     const k = await bootWith(new MockAiModels());
-    k.council.say('scultore', 'scolpisce', 'il pozzo ha un programma suo', 'artista', 'model.sculpt');
+    k.council.say('sculptor', 'scolpisce', 'il pozzo ha un programma suo', 'artist', 'model.sculpt');
     k.archive.tick(1);
     const positions = [...k.archive.avatars.entries()].filter(([, a]) => a.building === 'galleria' && !a.path).map(([, a]) => `${a.x},${a.y}`);
     expect(new Set(positions).size).toBe(positions.length);

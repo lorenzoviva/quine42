@@ -73,7 +73,7 @@ export interface MechanicDraft {
 
 export async function designMechanic(c: Council, request: string, ctx: { items: string[]; mechanics: string[]; feedback?: string; chi?: string }): Promise<MechanicDraft> {
   const r = await c.ask<{ nome: string; descrizione: string; pannello: { titolo: string; elementi: UiElement[] }; componenti_json?: string; logica: string; casi?: unknown[] }>(
-    'ingegnere',
+    'engineer',
     'mechanic.design',
     [
       `Il Concilio introduce una meccanica nel gioco: «${request}».`,

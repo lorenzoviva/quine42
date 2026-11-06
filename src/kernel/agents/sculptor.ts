@@ -19,31 +19,31 @@ import { act, runMjx } from '../../mj/run';
 import type { FileMap } from '../types';
 import type { Council } from './council';
 
-export type ModelCategory = 'semplice' | 'figura' | 'struttura';
+export type ModelCategory = 'simple' | 'figure' | 'structure';
 
 export const categoryOf = (cls: AssetClass): ModelCategory =>
-  ['person', 'animal', 'beast'].includes(cls.id) ? 'figura' : ['building', 'monument', 'structure'].includes(cls.id) ? 'struttura' : 'semplice';
+  ['person', 'animal', 'beast'].includes(cls.id) ? 'figure' : ['building', 'monument', 'structure'].includes(cls.id) ? 'structure' : 'simple';
 
 export interface SculptorAiModels {
-  semplice: string;
-  figura: string;
-  struttura: string;
+  simple: string;
+  figure: string;
+  structure: string;
   /** For the structures of the rare sizes (ADR-0092: Huge, Gargantuan), until `importanteFino` (ISO date: then its price doubles). */
-  importante: string;
+  important: string;
   importanteFino?: string;
-  artista: string;
+  artist: string;
   /** Not a sculptor, as the Artist is not: the Musician's model (T225). */
-  musicista: string;
+  musician: string;
 }
 
 export const DEFAULT_SCULPTORS: SculptorAiModels = {
-  semplice: 'gemini-3.1-flash-lite',
-  figura: 'gemini-3.8-flash',
-  struttura: 'gemini-3.8-flash',
-  importante: 'gemini-4-argon',
+  simple: 'gemini-3.1-flash-lite',
+  figure: 'gemini-3.8-flash',
+  structure: 'gemini-3.8-flash',
+  important: 'gemini-4-argon',
   importanteFino: '2026-12-01',
-  artista: 'gemini-3.5-flash',
-  musicista: 'gemini-3.8-flash',
+  artist: 'gemini-3.5-flash',
+  musician: 'gemini-3.8-flash',
 };
 
 export interface SculptRequest {
@@ -95,10 +95,10 @@ const classLine = (c: AssetClass) => {
 /** The sizes of D&D (ADR-0092): how a class's box scales when an entity is of another size than its class's. */
 const sizesLine = () => `  Taglie (D&D): ${SIZE_TIERS.map((t) => `${t.name} ×${t.scala}`).join(' · ')} — il lato rispetto a Media; una cosa di un'altra taglia ha la scatola della sua classe scalata (la richiesta la dice)`;
 
-/** The Sculptor's instructions (prompts/agents/scultore.md) with the scale, the classes, the sizes and the palette. */
+/** The Sculptor's instructions (prompts/agents/sculptor.md) with the scale, the classes, the sizes and the palette. */
 export function sculptorRole(files: FileMap): string {
   const palette = Object.entries(MJ_PALETTE).map(([k, v]) => `${k} ${v.color.slice(1)}`).join(' · ');
-  return (files['prompts/agents/scultore.md'] ?? 'Sei lo Scultore: scrivi programmi MarkovJunior in XML.')
+  return (files['prompts/agents/sculptor.md'] ?? 'Sei lo Scultore: scrivi programmi MarkovJunior in XML.')
     .replaceAll('@@TILE@@', String(TILE))
     .replace('@@CLASSES@@', [...CLASSES.map(classLine), sizesLine()].join('\n'))
     .replace('@@PALETTE@@', palette);
@@ -193,13 +193,13 @@ export function describe(req: SculptRequest, cls: AssetClass): string {
 
 export function modelFor(req: SculptRequest, cls: AssetClass, m: SculptorAiModels, today = new Date().toISOString().slice(0, 10)): string {
   const cat = categoryOf(cls);
-  if (cat === 'struttura' && req.taglia && RARE_SIZES.includes(req.taglia) && (!m.importanteFino || today < m.importanteFino)) return m.importante;
+  if (cat === 'structure' && req.taglia && RARE_SIZES.includes(req.taglia) && (!m.importanteFino || today < m.importanteFino)) return m.important;
   return m[cat];
 }
 
 export async function judge(c: Council, req: SculptRequest, cls: AssetClass, checked: Checked, artist: string): Promise<Critique | undefined> {
   try {
-    const raw = await c.ask<Partial<Critique>>('artista', 'model.judge', `${describe(req, cls)}\nL'immagine mostra il modello da quattro lati (fronte, destra, retro, sinistra), come appare nel mondo: fasce di luce piatte e un contorno scuro dove cambia la parte. Giudicalo, anche per come le sue parti si leggono a contorni.`, CRITIQUE_SCHEMA, {
+    const raw = await c.ask<Partial<Critique>>('artist', 'model.judge', `${describe(req, cls)}\nL'immagine mostra il modello da quattro lati (fronte, destra, retro, sinistra), come appare nel mondo: fasce di luce piatte e un contorno scuro dove cambia la parte. Giudicalo, anche per come le sue parti si leggono a contorni.`, CRITIQUE_SCHEMA, {
       images: [views(checked)],
       model: artist,
       temperature: 0.3,
@@ -212,7 +212,7 @@ export async function judge(c: Council, req: SculptRequest, cls: AssetClass, che
       consigli: Array.isArray(raw.consigli) ? raw.consigli.map(String) : [],
     };
   } catch (e) {
-    c.say('artista', 'errore', `non riesce a guardare «${req.nome}»: ${(e as Error).message}`, undefined, 'model.judge');
+    c.say('artist', 'errore', `non riesce a guardare «${req.nome}»: ${(e as Error).message}`, undefined, 'model.judge');
     return undefined;
   }
 }
@@ -237,10 +237,10 @@ async function write(c: Council, req: SculptRequest, cls: AssetClass, model: str
   for (let i = 0; i <= retries; i++) {
     const p = i === 0 ? prompt : `${prompt}\n\nIl programma che hai scritto:\n${last!.xml.slice(0, 6000)}\nNon va: ${last!.error}\nCorreggilo e rispondi con il programma completo.`;
     calls++;
-    const raw = await c.write('scultore', 'model.sculpt', p, { role, system, images, model, temperature: 0.7, data: { request: req, classe: cls.id, example: examples[0] } });
+    const raw = await c.write('sculptor', 'model.sculpt', p, { role, system, images, model, temperature: 0.7, data: { request: req, classe: cls.id, example: examples[0] } });
     last = checkProgram(extractXml(raw), cls, req.taglia);
     if (!last.error) return { checked: last, calls };
-    c.say('kernel', 'scarta', `«${req.nome}»: ${last.error.slice(0, 160)}`, 'scultore', 'model.sculpt');
+    c.say('kernel', 'scarta', `«${req.nome}»: ${last.error.slice(0, 160)}`, 'sculptor', 'model.sculpt');
   }
   return { calls, error: last?.error };
 }
@@ -257,27 +257,27 @@ export async function sculpt(c: Council, req: SculptRequest, m: SculptorAiModels
   const cls = classOf(req.classe) ?? classOf('object')!;
   const model = modelFor(req, cls, m);
   const cat = categoryOf(cls);
-  c.say('scultore', 'propone', `«${req.nome}» (${cls.name}, ${model})`, undefined, 'model.sculpt');
+  c.say('sculptor', 'propone', `«${req.nome}» (${cls.name}, ${model})`, undefined, 'model.sculpt');
   let calls = 0;
   const candidates: Array<{ checked: Checked; critique?: Critique }> = [];
   // Simple things: two independent programs. Figures and structures: one, and a revision if needed.
-  for (let n = 0; n < (cat === 'semplice' && !req.previous ? plan.semplici : 1); n++) {
+  for (let n = 0; n < (cat === 'simple' && !req.previous ? plan.semplici : 1); n++) {
     const w = await write(c, req, cls, model);
     calls += w.calls;
-    if (w.checked) candidates.push({ checked: w.checked, critique: plan.giudizio ? await judge(c, req, cls, w.checked, m.artista) : undefined });
+    if (w.checked) candidates.push({ checked: w.checked, critique: plan.giudizio ? await judge(c, req, cls, w.checked, m.artist) : undefined });
   }
-  if (plan.revisione && cat !== 'semplice' && candidates[0]?.critique && candidates[0].critique.voto < 7) {
+  if (plan.revisione && cat !== 'simple' && candidates[0]?.critique && candidates[0].critique.voto < 7) {
     const w = await write(c, req, cls, model, { checked: candidates[0].checked, critique: candidates[0].critique }, 1);
     calls += w.calls;
-    if (w.checked) candidates.push({ checked: w.checked, critique: await judge(c, req, cls, w.checked, m.artista) });
+    if (w.checked) candidates.push({ checked: w.checked, critique: await judge(c, req, cls, w.checked, m.artist) });
   }
   if (!candidates.length) {
-    c.say('scultore', 'errore', `«${req.nome}»: nessun programma valido`, undefined, 'model.sculpt');
+    c.say('sculptor', 'errore', `«${req.nome}»: nessun programma valido`, undefined, 'model.sculpt');
     return undefined;
   }
   const best = candidates.reduce((a, b) => ((b.critique?.voto ?? -1) > (a.critique?.voto ?? -1) ? b : a));
   const voto = best.critique?.voto;
-  if (best.critique) c.say('artista', voto !== undefined && voto >= 7 ? 'approva' : 'obietta', `«${req.nome}»: ${voto}/10${best.critique.problemi.length ? ` — ${best.critique.problemi[0]}` : ''}`, 'scultore', 'model.judge');
+  if (best.critique) c.say('artist', voto !== undefined && voto >= 7 ? 'approva' : 'obietta', `«${req.nome}»: ${voto}/10${best.critique.problemi.length ? ` — ${best.critique.problemi[0]}` : ''}`, 'sculptor', 'model.judge');
   const xml = `<!-- ${req.nome}: scolpito da ${model} (step 9)${voto !== undefined ? `, voto dell'Artista ${voto}/10` : ''} -->\n${withSize(best.checked.xml.replace(/^\s*<!--[\s\S]*?-->\s*/, ''), boxOf(cls, req.taglia))}\n`;
   return { xml, model, voto, calls };
 }
@@ -388,12 +388,12 @@ export async function sculptAction(c: Council, req: ActionRequest, model: string
   for (let i = 0; i <= retries; i++) {
     const p = i === 0 ? prompt : `${prompt}\n\nHai scritto:\n${last.clip ?? '(niente)'}\nNon va: ${last.error}\nCorreggila e rispondi con la sola <action>.`;
     calls++;
-    const raw = await c.write('scultore', 'model.action', p, { role: sculptorRole(c.files), model, temperature: 0.4, data: { request: req, background: info.background, letters: info.letters } });
+    const raw = await c.write('sculptor', 'model.action', p, { role: sculptorRole(c.files), model, temperature: 0.4, data: { request: req, background: info.background, letters: info.letters } });
     const clip = extractAction(raw, req.azione, req.etichetta);
     const checked = clip ? checkAction(req.xml, clip, req.azione, cls) : { error: 'manca <action>…</action>' };
     if (checked.xml) return { xml: checked.xml, calls };
     last = { clip: clip ?? raw.slice(0, 400), error: checked.error };
-    c.say('kernel', 'scarta', `azione «${req.etichetta}» di «${req.nome}»: ${checked.error?.slice(0, 160)}`, 'scultore', 'model.action');
+    c.say('kernel', 'scarta', `azione «${req.etichetta}» di «${req.nome}»: ${checked.error?.slice(0, 160)}`, 'sculptor', 'model.action');
   }
   return undefined;
 }

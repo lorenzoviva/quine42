@@ -11,6 +11,7 @@ import {
   repairCoefficients,
 } from '../src/kernel/coefficients';
 import { DEFAULT_SCULPTORS, type SculptorAiModels } from '../src/kernel/agents/sculptor';
+import { internalSculptors } from '../src/kernel/internalNames';
 import { bundledFiles } from '../src/kernel/bundle';
 import { SEED_FILE, seedHashes, WANDERER_HEADER } from '../src/kernel/universes';
 import { rangeLabel } from '../src/kernel/version';
@@ -89,19 +90,19 @@ export function parseUniverseSnapshot(name: string, files: FileMap, active?: Act
   const kernels = rangeLabel(config);
   const master = config.partita?.master ?? 'io';
   const coef = repairCoefficients(ai.coefficienti);
-  const sculpt: SculptorAiModels = { ...DEFAULT_SCULPTORS, ...(ai.scultori ?? {}) };
+  const sculpt: SculptorAiModels = { ...DEFAULT_SCULPTORS, ...internalSculptors(ai.scultori ?? {}) };
   const estimate = hourlyEstimate(ai);
 
   const presetLabel = isLowDetail(coef)
     ? 'Economico (Low Detail)'
     : COEFFICIENT_KEYS.every((k) => coef[k] === 1)
       ? 'Pieno Dettaglio'
-      : `Standard (D: ${coef.dialoghi.toFixed(1)} · I: ${coef.cose.toFixed(1)})`;
+      : `Standard (D: ${coef.dialogues.toFixed(1)} · I: ${coef.entities.toFixed(1)})`;
 
   const sculptorSummary =
-    sculpt.figura === 'gemini-3.1-flash-lite'
+    sculpt.figure === 'gemini-3.1-flash-lite'
       ? `${ai.textModel} (Low Detail)`
-      : `${ai.textModel} + ${sculpt.figura}`;
+      : `${ai.textModel} + ${sculpt.figure}`;
 
   const minCap = toNumber(ai.minimi?.tetto ?? 1.0);
 
@@ -182,7 +183,7 @@ export function buildNewUniverseFiles(options: {
   }
 
   cfg.partita = {
-    modalita: 'multigiocatore',
+    modalita: 'multiplayer',
     morte,
     pvp,
     altroTraGiocatori: true,
@@ -203,10 +204,10 @@ export function buildNewUniverseFiles(options: {
       ...cfg.ai,
       textModel: 'gemini-3.8-flash',
       scultori: {
-        semplice: 'gemini-3.8-flash',
-        figura: 'gemini-3.8-flash',
-        importante: 'gemini-4-argon',
-        artista: 'gemini-3.8-flash',
+        simple: 'gemini-3.8-flash',
+        figure: 'gemini-3.8-flash',
+        important: 'gemini-4-argon',
+        artist: 'gemini-3.8-flash',
       },
       coefficienti: { ...FULL_DETAIL },
       minimi: { tetto: 2.0, textModel: 'gemini-3.8-flash' },
@@ -217,21 +218,21 @@ export function buildNewUniverseFiles(options: {
       ...cfg.ai,
       textModel: 'gemini-3.1-flash-lite',
       scultori: {
-        semplice: 'gemini-3.1-flash-lite',
-        figura: 'gemini-3.8-flash',
-        importante: 'gemini-4-argon',
-        artista: 'gemini-3.1-flash-lite',
+        simple: 'gemini-3.1-flash-lite',
+        figure: 'gemini-3.8-flash',
+        important: 'gemini-4-argon',
+        artist: 'gemini-3.1-flash-lite',
       },
       coefficienti: {
-        sessioni: 0.8,
-        dialoghi: 0.8,
-        trame: 0.8,
-        revisioni: 0.75,
-        modelli: 0.8,
-        persone: 0.8,
-        abitanti: 0.8,
-        pacchetti: 0.8,
-        cose: 0.8,
+        sessions: 0.8,
+        dialogues: 0.8,
+        plots: 0.8,
+        reviews: 0.75,
+        models: 0.8,
+        people: 0.8,
+        inhabitants: 0.8,
+        packs: 0.8,
+        entities: 0.8,
       },
       minimi: { tetto: 1.0, textModel: 'gemini-3.1-flash-lite' },
     };
