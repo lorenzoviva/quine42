@@ -2357,7 +2357,7 @@ export class Kernel {
    * the path goes on from its door towards the house. Pure: the world and the model of places (T26) build the same.
    */
   /**
-   * The entry a structure the Cartographer asked for wears (ADR-0158): the one of its size if the library has it; else an entry of before,
+   * The entry a structure the Cartographer asked for wears (ADR-0159): the one of its size if the library has it; else an entry of before,
    * named without the size, as it was worn before the suffix (nothing already sculpted changes or waits for a copy), unless it is a
    * program that scales and is of another size: then its size has an entry of its own, which the `ModelDirector` gives the same program.
    */
@@ -5110,7 +5110,7 @@ export class Kernel {
   /** A program enters the library (or replaces one): validated, written with its index entry, committed. */
   addModel(id: string, xml: string, info: ModelInfo, message: string, card?: { task: string; autore: string; chi?: string }): boolean {
     const path = `models/${id}.xml`;
-    // A large structure's program without a box of its own runs in its class's at its size (ADR-0158): it is tried there.
+    // A large structure's program without a box of its own runs in its class's at its size (ADR-0159): it is tried there.
     const errors = this.validator.validateFile(path, xml, info.classe === 'structure' ? boxOf(classOf('structure')!, info.taglia) : undefined);
     if (errors.length) {
       this.council.say('kernel', 'scarta', errors.join('; '), card?.autore === 'musicista' ? 'musicista' : 'scultore', card?.task ?? 'model.sculpt');

@@ -1,4 +1,4 @@
-# ADR-0158 — Le strutture grandi crescono a regole nel gioco: il prompt procedurale dello Scultore, un programma per più taglie e più semi
+# ADR-0159 — Le strutture grandi crescono a regole nel gioco: il prompt procedurale dello Scultore, un programma per più taglie e più semi
 
 Data: 2026-11-06 · Stato: accettato (task T156 del backlog) · Riferimenti: ADR-0042 (lo Scultore), ADR-0092 (le taglie), ADR-0135 (la lettera del suolo), ADR-0142 (il motore che guarda solo dove serve), T179 (la traccia), T180 (varianza e scala), T182 (il prompt procedurale), T258
 

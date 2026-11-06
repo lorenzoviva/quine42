@@ -41,7 +41,7 @@ export const commonHouseModel = (house: string, classe: string) => `${COMMON_HOU
 export const ownModelId = (id: string) => id.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'cosa';
 
 /**
- * The model of a structure the Cartographer asks for (ADR-0043): one per concept and size (ADR-0158). The class's own size has no
+ * The model of a structure the Cartographer asks for (ADR-0043): one per concept and size (ADR-0159). The class's own size has no
  * suffix, as ever; the others say theirs, so a Huge fort and a Gargantuan one are two entries, which share one program when it scales.
  */
 export function structureModel(concetto: string, taglia?: SizeTier): string {
@@ -107,7 +107,7 @@ export class ModelDirector {
   }
 
   /**
-   * A structure at a size the library has another entry of, for the same concept (ADR-0158): the same program, if it is the same
+   * A structure at a size the library has another entry of, for the same concept (ADR-0159): the same program, if it is the same
    * size (an entry of before, without the suffix) or if it scales (no box of its own); no call. Undefined if it has to be sculpted.
    */
   shared(req: SculptRequest): { xml: string; info: ModelInfo } | undefined {

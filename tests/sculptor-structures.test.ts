@@ -1,4 +1,4 @@
-// The procedural prompt in the game's Sculptor (T156, ADR-0158): the large structures get the bench's prompt with its skeleton,
+// The procedural prompt in the game's Sculptor (T156, ADR-0159): the large structures get the bench's prompt with its skeleton,
 // no box of their own, more seeds and the next size in the checks, the trace in the second request; one program serves two sizes.
 
 import { describe, expect, it } from 'vitest';
@@ -83,7 +83,7 @@ describe('the procedural prompt of the structures (T156)', () => {
   }, 120_000);
 });
 
-describe('one program for two sizes (ADR-0158)', () => {
+describe('one program for two sizes (ADR-0159)', () => {
   it('names a structure by its concept and its size; the class size keeps the name it had', () => {
     expect(structureModel('una rocca')).toBe('struttura-una-rocca');
     expect(structureModel('una rocca', 'large')).toBe('struttura-una-rocca');

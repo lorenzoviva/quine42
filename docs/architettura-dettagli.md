@@ -705,7 +705,7 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   pavimento per ogni tratto di pieno (`surfaces`, `Form.levels`), il corpo sta su quello più vicino all'altezza dei suoi piedi,
   `pos.z`, che il kernel tiene dopo ogni tick (`settleHeights`) e che `free`/`free_real`/`floorAt` prendono (senza: il piano terra);
   il renderer taglia sopra il piano in cui si è.
-- **Le strutture che crescono** (ADR-0158, T156): la classe `structure` da Grande in su ha il prompt procedurale del banco (T182),
+- **Le strutture che crescono** (ADR-0159, T156): la classe `structure` da Grande in su ha il prompt procedurale del banco (T182),
   la parte di `prompts/agents/scultore.md` dopo `<!-- strutture -->` (`sculptorRole(files, true)`, `procedural`), senza esempi della libreria:
   lo scheletro è nel prompt, e offline è la risposta dei modelli locali (`skeletonOf`). Il programma non ha una `size` sua (`withoutSize`):
   gira nella scatola della taglia di ogni voce. `checkProgram` lo prova a `STRUCTURE_SEEDS` semi alla sua taglia e al primo seme della

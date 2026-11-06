@@ -55,7 +55,7 @@ export interface ModelInfo {
   tempo?: number;
   /** Tiles under the ground (ADR-0091): the box of the class grows down by them, the lowest voxels are the cellar. */
   sotto?: number;
-  /** Seeds it has in the world, if not its class's few (ADR-0158: a procedural structure, each seed another building); 1 to 8. */
+  /** Seeds it has in the world, if not its class's few (ADR-0159: a procedural structure, each seed another building); 1 to 8. */
   seeds?: number;
   /** Artist's critique advice and problems (T48a). */
   consigli?: string[];
@@ -661,7 +661,7 @@ export class Forms {
     return this.get(model, seed, tint);
   }
 
-  /** The box a large structure's entry runs a program without `size` in (ADR-0158), as the validator must try it; undefined for the other classes. */
+  /** The box a large structure's entry runs a program without `size` in (ADR-0159), as the validator must try it; undefined for the other classes. */
   structureBox(model: string): Vec3 | undefined {
     const info = this.library[model];
     if (!info || info.classe !== 'structure') return undefined;

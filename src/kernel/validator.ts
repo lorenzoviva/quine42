@@ -133,7 +133,7 @@ export interface PlanVerdict {
 export class Validator {
   /** The time a model of the library may run (its `tempo` in the index), set by the kernel. */
   modelTime: (id: string) => number | undefined = () => undefined;
-  /** The box a model without a `size` of its own runs in (its class at its size, ADR-0158), set by the kernel; else an object's. */
+  /** The box a model without a `size` of its own runs in (its class at its size, ADR-0159), set by the kernel; else an object's. */
   modelBox: (id: string) => [number, number, number] | undefined = () => undefined;
 
   constructor(private sandbox: Sandbox) {}

@@ -61,7 +61,7 @@ export interface SculptRequest {
   /** The program it had (a request to sculpt it again) and what is wished. */
   previous?: string;
   desiderio?: string;
-  /** A structure's entries of the same concept at the other sizes (ADR-0158): a program that scales is shared, not sculpted again. */
+  /** A structure's entries of the same concept at the other sizes (ADR-0159): a program that scales is shared, not sculpted again. */
   shareWith?: string[];
 }
 
@@ -99,7 +99,7 @@ const classLine = (c: AssetClass) => {
 const sizesLine = () => `  Taglie (D&D): ${SIZE_TIERS.map((t) => `${t.name} ×${t.scala}`).join(' · ')} — il lato rispetto a Media; una cosa di un'altra taglia ha la scatola della sua classe scalata (la richiesta la dice)`;
 
 /**
- * The structures that grow by rules (T156, ADR-0158): the class `structure` from Large up, a box of 100 voxels a side or more.
+ * The structures that grow by rules (T156, ADR-0159): the class `structure` from Large up, a box of 100 voxels a side or more.
  * Their prompt is the procedural one (the skeleton of the bench, T182), the program has no box of its own (`size`), so one
  * program serves every size (`shareableProgram`), and it is tried at more seeds and at the next size.
  */
@@ -176,7 +176,7 @@ export function withSize(xml: string, box: Vec3): string {
   return xml.slice(0, m.index) + `<${m[1]}${attrs}>` + xml.slice(m.index + m[0].length);
 }
 
-/** A program without a box of its own and without `map`: the library runs it in the box of each entry's size (ADR-0158). */
+/** A program without a box of its own and without `map`: the library runs it in the box of each entry's size (ADR-0159). */
 export const shareableProgram = (xml: string): boolean => !scales(xml) && !/\ssize="/.test(/<(?!!)[a-z]+\b[^>]*>/i.exec(xml.replace(/<!--[\s\S]*?-->/g, ''))?.[0] ?? '');
 
 /** The root without its `size`: a procedural program takes the box it is given. */
@@ -197,7 +197,7 @@ interface Checked {
 /** The kernel's checks on a program: what makes it unusable goes back to the Sculptor with the reason. */
 export function checkProgram(xml: string, cls: AssetClass, taglia?: string): Checked {
   if (!procedural(cls, taglia)) return checkOnce(xml, cls, taglia, 1);
-  // A procedural structure (ADR-0158): every seed the world shows at its size, and the first at the next size, which shares it.
+  // A procedural structure (ADR-0159): every seed the world shows at its size, and the first at the next size, which shares it.
   xml = withoutSize(xml);
   const [own, next] = triedSizes(cls, taglia);
   const tries: Array<[SizeTier, number]> = [...Array.from({ length: STRUCTURE_SEEDS }, (_, i): [SizeTier, number] => [own, i + 1]), [next, 1]];
@@ -363,7 +363,7 @@ export async function sculpt(c: Council, req: SculptRequest, m: SculptorAiModels
   }
   const best = candidates.reduce((a, b) => ((b.critique?.voto ?? -1) > (a.critique?.voto ?? -1) ? b : a));
   const voto = best.critique?.voto;
-  // A procedural structure keeps no box of its own: every size that shares it runs it in its own (ADR-0158).
+  // A procedural structure keeps no box of its own: every size that shares it runs it in its own (ADR-0159).
   const place = (x: string) => (procedural(cls, req.taglia) ? withoutSize(x) : withSize(x, boxOf(cls, req.taglia)));
   if (best.critique) c.say('artista', voto !== undefined && voto >= 7 ? 'approva' : 'obietta', `«${req.nome}»: ${voto}/10${best.critique.problemi.length ? ` — ${best.critique.problemi[0]}` : ''}`, 'scultore', 'model.judge');
   const xml = `<!-- ${req.nome}: scolpito da ${model} (step 9)${voto !== undefined ? `, voto dell'Artista ${voto}/10` : ''} -->\n${place(best.checked.xml.replace(/^\s*<!--[\s\S]*?-->\s*/, ''))}\n`;
