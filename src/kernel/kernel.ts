@@ -67,7 +67,7 @@ import { migrateUniverse } from './migrations';
 import { ModuleStores } from './store';
 import { dailyProduce, matchJob, validateJobProgram, WORKERS_PER_PLACE, type JobProgram, type JobTask } from './jobs';
 import { addWork, bring, fillTeam, HARVEST_DAY, HARVEST_DAYS, HARVEST_ROLES, HOUSE_ROLES, housePhases, missingWords, nextStep, openVentures, pruneVentures, readVentures, SITE_REACH, stillNeeded, ventureId, ventureProgress, ventureState, VENTURES_FILE, writeVentures, YEAR_DAYS, type Venture, type VentureCandidate, type VentureStep } from './ventures';
-import { findRoute, RouteCache } from './route';
+import { findRoute, RouteCache, type Cell } from './route';
 import { blockShape, cellsOf, discCells, findSpot, itemShape, turnsBetween, type ItemShape, type PlacedRecord, type SpotFailure, type Support } from './placing';
 
 /** A solid entity with a model, as collision sees it: where it is, its form, where it blocks and its floors. */
@@ -93,6 +93,11 @@ export interface JumpComp {
 
 /** How high a jump clears (tiles above where it starts) and how far it can land (tiles). */
 export const JUMP_UP = 1.05;
+/** The half-size of a body a way is for when who asks does not say (a villager's, T299), and how far ahead of it the next point is. */
+export const ROUTE_BODY = 0.35;
+export const ROUTE_AHEAD = 1.6;
+/** How near a goal no way reaches one goes, at most this far from it (tiles): a bench in a wall, the middle of a workshop (T299). */
+export const ROUTE_NEAR = 2.5;
 export const JUMP_FAR = 2.6;
 /** The water (T51b): steps of the automaton every so many ticks (100 steps a second at 60 Hz); a dig moves at most so many levels. */
 const WATER_EVERY = 6;
@@ -785,7 +790,7 @@ export class Kernel {
       first: (name) => this.ecs.query(name)[0],
       held: (a, id) => this.heldBy(typeof id === 'number' ? this.wandererOf(id) : this.wanderer().id, a),
       wanderers: () => this.wanderersInWorld(),
-      path: (x, y, tx, ty) => this.routeStep(x, y, tx, ty),
+      path: (x, y, tx, ty, r) => this.routeStep(x, y, tx, ty, r),
       find_tile: (code, x, y, r) => this.findTile(code, x, y, r),
       act: (user, target, action) => this.actAs(user, target, action),
       impresa: (id) => (this.mirror ? undefined : this.ventureStepFor(id)),
@@ -2154,6 +2159,8 @@ export class Kernel {
     ch.stage = 'planned';
     ch.version++;
     this.plannedCount++;
+    // The ways found over it when it was not there went through what is there now (T299).
+    this.routes.clear();
     for (const id of this.ecs.query('chunk')) if (this.ecs.get(id, 'chunk').key === ch.key) this.ecs.destroy(id);
     // Back where nobody looked (T245f): what ripened ripens, the buildings are at the stage their ventures reached.
     const away = this.returnToPlace(ch, plan);
@@ -2872,6 +2879,7 @@ export class Kernel {
       this.ecs.destroy(id);
     }
     this.chunks.delete(ch.key);
+    this.routes.clear();
     this.water.forget();
   }
 
@@ -7493,17 +7501,70 @@ export class Kernel {
     return v && typeof v === 'object' && !Array.isArray(v) ? (v as Record<string, number>) : {};
   }
 
-  /** The next point of the way between two places of the world (carpet space): two tiles ahead on a way the cache keeps. */
-  private routeStep(x: number, y: number, tx: number, ty: number): { x: number; y: number } | undefined {
+  /**
+   * The next point of the way between two places of the world (carpet space), for a body of half-size `r` (none: a villager's):
+   * on a way the cache keeps, the farthest of the next two tiles the body reaches in a straight line from where it is (T299: the
+   * step goes where the way goes, it does not cut the corner the way went round), never nearer than `ROUTE_AHEAD` (who walks to it
+   * takes it for arrived within a tile and more).
+   */
+  private routeStep(x: number, y: number, tx: number, ty: number, r?: number, again = true): { x: number; y: number } | undefined {
     if (![x, y, tx, ty].every(Number.isFinite) || Math.hypot(tx - x, ty - y) > 60) return undefined;
+    const body = Math.min(0.5, Math.max(0.1, typeof r === 'number' && Number.isFinite(r) ? r : ROUTE_BODY));
     const from = [Math.floor(x), Math.floor(y)] as const;
     const to = [Math.floor(tx), Math.floor(ty)] as const;
-    // Passable as walking is: the tile and the models standing on it (a wall of a house is a model, not a tile).
-    const way = this.routes.get(from, to, this.tickCount, () => findRoute(from, to, (c, r) => this.free(c + 0.5, r + 0.5, 0.3)));
+    // Passable as walking is (T299): the tile and the models standing on it (a wall of a house is a model, not a tile), and a step
+    // only where the body passes between the two middles, as `free` sees a walk: what stands on the edge, a rise of more than a step.
+    // Who stands where the middle of their tile is not free (by a wall, against a bench) leaves it as the tiles allow: the steps are
+    // tried from that middle, where they are not.
+    const startFree = this.free(from[0] + 0.5, from[1] + 0.5, body);
+    const way: Cell[] | undefined = this.routes.get(
+      from,
+      to,
+      this.tickCount,
+      () => findRoute(from, to, (c, rr) => this.free(c + 0.5, rr + 0.5, body), (c, rr, nc, nr) => (c === from[0] && rr === from[1] && !startFree) || this.routes.step(c, rr, nc, nr, String(body), this.tickCount, () => this.stepFree(c, rr, nc, nr, body)), ROUTE_NEAR),
+      String(body),
+    );
+    // A way kept that something now stops at its first step (a building gone up a stage, a thing put down): the ways are found again.
+    if (again && startFree && way && way.length > 1 && !this.stepFree(way[0][0], way[0][1], way[1][0], way[1][1], body)) {
+      this.routes.clear();
+      return this.routeStep(x, y, tx, ty, r, false);
+    }
     if (!way) return undefined;
     if (way.length <= 2) return { x: tx, y: ty };
-    const [c, r] = way[Math.min(2, way.length - 1)];
-    return { x: c + 0.5, y: r + 0.5 };
+    let next = way[1];
+    if (way.length > 2 && this.walkable(x, y, way[2][0] + 0.5, way[2][1] + 0.5, body)) next = way[2];
+    else if (!this.walkable(x, y, way[1][0] + 0.5, way[1][1] + 0.5, body)) next = way[0];
+    // A direction more than a point: the walker asks again at every tick, from wherever it got to.
+    let px = next[0] + 0.5, py = next[1] + 0.5;
+    if (Math.hypot(px - x, py - y) < 1e-3) (px = way[1][0] + 0.5), (py = way[1][1] + 0.5);
+    const d = Math.hypot(px - x, py - y);
+    const k = Math.max(1, ROUTE_AHEAD / d);
+    return { x: x + (px - x) * k, y: y + (py - y) * k };
+  }
+
+  /**
+   * Whether a body (half-size r, under half a tile) steps from the middle of a free tile to the middle of the next: with no model on
+   * the tiles the step touches, the tiles say it all (the box stays inside them, and the ground is never in the way); else, walked.
+   */
+  private stepFree(c: number, r: number, nc: number, nr: number, body: number): boolean {
+    const forms = this.solidForms;
+    if (!forms.has(`${c},${r}`) && !forms.has(`${nc},${nr}`) && !forms.has(`${nc},${r}`) && !forms.has(`${c},${nr}`)) return true;
+    return this.walkable(c + 0.5, r + 0.5, nc + 0.5, nr + 0.5, body);
+  }
+
+  /**
+   * Whether a body of half-size r walks in a straight line between two points (carpet space), from the floor under the first: `free`
+   * every tenth of a tile (the steps of `stepWanderer`) at the height of its feet, which follow the floor as in a walk (up a stair, on the platform).
+   */
+  private walkable(x0: number, y0: number, x1: number, y1: number, r: number): boolean {
+    const n = Math.max(1, Math.ceil(Math.hypot(x1 - x0, y1 - y0) / 0.1));
+    let z = this.floorAt(x0, y0);
+    for (let i = 1; i <= n; i++) {
+      const x = x0 + ((x1 - x0) * i) / n, y = y0 + ((y1 - y0) * i) / n;
+      if (!this.free(x, y, r, z)) return false;
+      z = this.floorAt(x, y, z);
+    }
+    return true;
   }
 
   /** The centre of the nearest tile with a code within r (at most 24) of a point: the nearest, then the first row, then the first column. */

@@ -805,7 +805,7 @@ local function make_api()
     open = function(id) return host.open(id) end,
     make_container = function(id, size, loot) return host.make_container(id, size or 6, tostring(loot or "cassa")) end,
     wanderers = function() return host.wanderers() end,
-    path = function(x, y, tx, ty) return host.path(x, y, tx, ty) end,
+    path = function(x, y, tx, ty, r) return host.path(x, y, tx, ty, r) end,
     find_tile = function(code, x, y, r) return host.find_tile(tostring(code), x, y, r or 8) end,
     act = function(user, target, action) return host.act(user, target, action ~= nil and tostring(action) or nil) end,
     impresa = function(id) return host.impresa(id) end,
