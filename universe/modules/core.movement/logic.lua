@@ -27,8 +27,8 @@ function M.update(dt)
     local here = world.player_pos()
     local terrain = world.speed_at(here.x, here.y)
     local burden = math.max(0.4, 1 - 0.5 * math.max(0, (pl.load or 0) - 1))
-    -- Gli stati (a cavallo, in barca…) cambiano il passo: il kernel ne tiene il prodotto in pl.passo.
-    local mult = tonumber(pl.passo) or 1
+    -- Gli stati (a cavallo, in barca…) cambiano il passo: il kernel ne tiene il prodotto in pl.step.
+    local mult = tonumber(pl.step) or 1
     local v = speed * terrain * burden * mult * dt
     step(p, b, dx * v, dy * v)
   end)

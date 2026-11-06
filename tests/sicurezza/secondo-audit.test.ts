@@ -43,7 +43,7 @@ function enter(server: SessionServer, id: string, extra: Record<string, unknown>
   client.onMessage((m) => got.push(m));
   client.onClose(() => (closed = true));
   server.connect(s);
-  client.send({ t: 'entra', id, ...extra } as never);
+  client.send({ t: 'join', id, ...extra } as never);
   return { send: (m: unknown) => client.send(m as never), got, closed: () => closed };
 }
 
@@ -56,24 +56,24 @@ describe('V-021 un messaggio che non si capisce', () => {
   beforeAll(async () => void ({ kernel } = await bootMany()), 120_000);
 
   const SHAPES: Array<Record<string, unknown>> = [
-    { t: 'frase', seq: POISON, tokens: [] },
-    { t: 'pannello', pannello: POISON, posto: POISON, op: 'metti' },
-    { t: 'oggetto', op: POISON, slot: 0 },
-    { t: 'ricarica', viandante: POISON, quanti: POISON },
-    { t: 'passo', seq: POISON, x: 1e9, y: 0 },
-    { t: 'casella', col: POISON, row: POISON },
-    { t: 'azione', entita: POISON, azione: POISON },
-    { t: 'contenitore', entita: POISON, op: POISON },
-    { t: 'segui', id: POISON },
-    { t: 'dai', viandante: POISON, slot: 0, quanti: POISON },
-    { t: 'dici', viandante: POISON, testo: POISON },
-    { t: 'ramo', files: POISON, base: POISON },
+    { t: 'phrase', seq: POISON, tokens: [] },
+    { t: 'panel', panel: POISON, socket: POISON, op: 'put' },
+    { t: 'item', op: POISON, slot: 0 },
+    { t: 'recharge', wanderer: POISON, count: POISON },
+    { t: 'step', seq: POISON, x: 1e9, y: 0 },
+    { t: 'tile', col: POISON, row: POISON },
+    { t: 'action', entity: POISON, action: POISON },
+    { t: 'container', entity: POISON, op: POISON },
+    { t: 'follow', id: POISON },
+    { t: 'give', wanderer: POISON, slot: 0, count: POISON },
+    { t: 'say', wanderer: POISON, text: POISON },
+    { t: 'branch', files: POISON, base: POISON },
     { t: POISON },
-    { t: 'fabbrica', ricetta: POISON, unisci: [POISON, POISON] },
-    { t: 'altro', viandante: 'nessuno', testo: POISON },
-    { t: 'chat', entita: POISON, testo: POISON },
-    { t: 'agente', agente: 'constructor', testo: 'x' },
-    { t: 'profilo', profilo: { nome: POISON, seme: POISON, tinta: POISON, presentazione: POISON } },
+    { t: 'craft', recipe: POISON, combine: [POISON, POISON] },
+    { t: 'other', wanderer: 'nessuno', text: POISON },
+    { t: 'chat', entity: POISON, text: POISON },
+    { t: 'agent', agent: 'constructor', text: 'x' },
+    { t: 'profile', profile: { name: POISON, seed: POISON, tint: POISON, introduction: POISON } },
   ];
 
   it('V-021 non ferma il tick, per nessun messaggio', async () => {
@@ -92,37 +92,37 @@ describe('V-021 un messaggio che non si capisce', () => {
     const server = new SessionServer(kernel);
     const a = enter(server, 'avvelena2');
     const b = enter(server, 'altro2');
-    a.send({ t: 'frase', seq: POISON, tokens: [] });
-    b.send({ t: 'frase', seq: 7, tokens: [] });
+    a.send({ t: 'phrase', seq: POISON, tokens: [] });
+    b.send({ t: 'phrase', seq: 7, tokens: [] });
     server.tick(TICK);
     await settle();
-    expect(b.got.some((m) => m.t === 'esito' && m.seq === 7)).toBe(true);
+    expect(b.got.some((m) => m.t === 'result' && m.seq === 7)).toBe(true);
   });
 
   it('V-021 oltre il ritmo non getta nulla fuori da chi ascolta: nel processo del mondo lo ucciderebbe', () => {
     const server = new SessionServer(kernel);
     const a = enter(server, 'avvelena3');
-    for (let i = 0; i < 200; i++) a.send({ t: 'frase', seq: 1, tokens: [] });
-    expect(() => a.send({ t: 'frase', seq: POISON })).not.toThrow();
+    for (let i = 0; i < 200; i++) a.send({ t: 'phrase', seq: 1, tokens: [] });
+    expect(() => a.send({ t: 'phrase', seq: POISON })).not.toThrow();
   });
 
   it('V-021 entrare con un nome o un profilo così è un rifiuto o un ingresso, mai un\'eccezione', () => {
     const server = new SessionServer(kernel);
     let a: ReturnType<typeof enter> | undefined;
     expect(() => (a = enter(server, 'avvelena4', { nome: POISON, tetto: POISON, profilo: { nome: POISON, seme: POISON, tinta: POISON, presentazione: POISON } }))).not.toThrow();
-    expect(a!.got.some((m) => m.t === 'ingresso' || m.t === 'rifiuto')).toBe(true);
+    expect(a!.got.some((m) => m.t === 'welcome' || m.t === 'refusal')).toBe(true);
   });
 
   it('V-021 con gli account il rifiuto arriva anche dopo la verifica, senza promesse lasciate cadere', async () => {
     const failed: unknown[] = [];
     const seen = (e: unknown) => failed.push(e);
     process.on('unhandledRejection', seen);
-    const server = new SessionServer(kernel, { verify: async () => ({ uid: 'avvelena5', anonimo: true }) });
+    const server = new SessionServer(kernel, { verify: async () => ({ uid: 'avvelena5', anonymous: true }) });
     const a = enter(server, 'x', { token: 't', nome: POISON, profilo: { nome: POISON, seme: POISON, tinta: POISON, presentazione: POISON } });
     await settle();
     process.off('unhandledRejection', seen);
     expect(failed).toEqual([]);
-    expect(a.got.some((m) => m.t === 'ingresso' || m.t === 'rifiuto')).toBe(true);
+    expect(a.got.some((m) => m.t === 'welcome' || m.t === 'refusal')).toBe(true);
   });
 });
 
@@ -147,8 +147,8 @@ describe('V-022 chi paga dopo un await', () => {
     const at = kernel.wandererAt('parla')!;
     const npc = kernel.spawnModuleEntity(individual, at.x + 1, at.y);
     asked.length = 0;
-    a.send({ t: 'chat', seq: 1, entita: npc, testo: 'ciao' });
-    for (let i = 0; i < 200 && !a.got.some((m) => m.t === 'esito' && m.seq === 1); i++) {
+    a.send({ t: 'chat', seq: 1, entity: npc, text: 'ciao' });
+    for (let i = 0; i < 200 && !a.got.some((m) => m.t === 'result' && m.seq === 1); i++) {
       server.tick(TICK);
       await settle();
     }
@@ -166,8 +166,8 @@ describe('V-022 chi paga dopo un await', () => {
     const npc = kernel.spawnModuleEntity(individual, at.x + 1, at.y);
     const master = kernel.creditsOf('me');
     asked.length = 0;
-    a.send({ t: 'chat', seq: 1, entita: npc, testo: 'ciao' });
-    for (let i = 0; i < 200 && !a.got.some((m) => m.t === 'esito' && m.seq === 1); i++) {
+    a.send({ t: 'chat', seq: 1, entity: npc, text: 'ciao' });
+    for (let i = 0; i < 200 && !a.got.some((m) => m.t === 'result' && m.seq === 1); i++) {
       server.tick(TICK);
       await settle();
     }
@@ -191,7 +191,7 @@ describe('V-023 le spese comuni senza nessuno che paga', () => {
   const ask = () => kernel.council.write('narrator', 'council.prova', 'prova', { chi: COMUNE });
 
   it('V-023 con gli account, nessuno con crediti: la chiave non si spende', async () => {
-    const server = new SessionServer(kernel, { verify: async () => ({ uid: 'povero', anonimo: false }) });
+    const server = new SessionServer(kernel, { verify: async () => ({ uid: 'povero', anonymous: false }) });
     enter(server, 'x', { token: 't' });
     await settle();
     expect(server.connected()).toContain('povero');
@@ -208,7 +208,7 @@ describe('V-023 le spese comuni senza nessuno che paga', () => {
   });
 
   it('V-023 con qualcuno che può pagare si spende, e paga lui', async () => {
-    const server = new SessionServer(kernel, { verify: async () => ({ uid: 'ricco', anonimo: false }) });
+    const server = new SessionServer(kernel, { verify: async () => ({ uid: 'ricco', anonymous: false }) });
     enter(server, 'x', { token: 't' });
     await settle();
     kernel.ledger.credit('ricco', 5);
@@ -320,10 +320,10 @@ describe('V-028 prima di sapere chi è', () => {
     Object.assign(host, { up: true, child: { connected: true, send: (m: unknown, done: () => void) => (sent.push(m), done()) } });
     const fns: Array<(m: unknown) => void> = [];
     host.connect({ send() {}, onMessage: (f) => void fns.push(f), onClose() {}, close() {} });
-    fns[0]({ t: 'frase', tokens: ['x'.repeat(1000)] });
+    fns[0]({ t: 'phrase', tokens: ['x'.repeat(1000)] });
     expect(sent.filter((m) => (m as { t: string }).t === 'msg')).toEqual([]);
-    fns[0]({ t: 'entra', id: 'a' });
-    fns[0]({ t: 'frase', tokens: [] });
+    fns[0]({ t: 'join', id: 'a' });
+    fns[0]({ t: 'phrase', tokens: [] });
     expect(sent.filter((m) => (m as { t: string }).t === 'msg').length).toBe(2);
   });
 

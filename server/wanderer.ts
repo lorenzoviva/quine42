@@ -144,7 +144,7 @@ export async function whoAsks(
     if (!token) return { status: 401, error: 'serve un account' };
     const a = await accounts.verify(token);
     if (!a) return { status: 401, error: 'accesso scaduto o non valido' };
-    return { id: accountWanderer(a.uid), account: a.anonimo ? 'anonimo' : 'google' };
+    return { id: accountWanderer(a.uid), account: a.anonymous ? 'anonimo' : 'google' };
   }
   const id = typeof asked === 'string' && asked ? asked.toLowerCase() : SOLO;
   if (!validWandererId(id)) return { status: 400, error: 'viandante non valido' };

@@ -84,7 +84,7 @@ export async function callerOf(req: Req, access: Access): Promise<Caller | Refus
     if (!token) return { local };
     const a = await verify(token).catch(() => undefined);
     if (!a?.uid) return { status: 401, refused: 'accesso scaduto o non valido' };
-    return { local, id: accountWanderer(a.uid), uid: a.uid, anonimo: !!a.anonimo };
+    return { local, id: accountWanderer(a.uid), uid: a.uid, anonimo: !!a.anonymous };
   }
   const said = req.headers[WANDERER_HEADER];
   const id = typeof said === 'string' ? said.toLowerCase() : undefined;

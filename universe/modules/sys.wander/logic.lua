@@ -28,9 +28,9 @@ function M.update(dt)
     local mind = ecs.get(id, "mind")
     if mind and mind.mode ~= "vaga" then return end
     -- Arrivato, fa quello che deve: dorme nel letto, zappa il campo, pesca sulla riva. Fermo.
-    local att = ecs.get(id, "attivita")
-    if att and att.ferma then return end
-    local meta = ecs.get(id, "meta")
+    local att = ecs.get(id, "activity")
+    if att and att.still then return end
+    local meta = ecs.get(id, "goal")
     if meta and meta.x then
       if (w.scansa or 0) > 0 then
         w.scansa = w.scansa - dt

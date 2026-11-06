@@ -1,5 +1,5 @@
 // Accounts (T44b, ADR-0081): in a multiplayer game, who a wanderer is comes from their account (Firebase Auth: Google or
-// anonymous), not from what the tab says. The server verifies the token the client sends with `entra` and the wanderer's
+// anonymous), not from what the tab says. The server verifies the token the client sends with `join` and the wanderer's
 // id is the account's uid. No network and no Firebase here: the verifier is given (firebase-admin in server/account.ts,
 // a fake one in the tests). Without a verifier (development, tests) the id the client says goes, as before.
 
@@ -10,9 +10,9 @@ import { hashStr } from '../kernel/rng';
 export interface Account {
   uid: string;
   /** Signed in anonymously: nothing to recover the account with, so no credits and only the local models. */
-  anonimo: boolean;
+  anonymous: boolean;
   /** The name the account has (Google's), if any. */
-  nome?: string;
+  name?: string;
 }
 
 /** Checks a client's token: the account it proves, or undefined (forged, expired, of another project). */

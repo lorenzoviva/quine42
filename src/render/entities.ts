@@ -135,7 +135,7 @@ export class Entities {
     const k = this.k;
     const fc: FormComp | undefined = k.ecs.get(id, 'form');
     const f = fc && k.forms.ready(fc.model, fc.seed, fc.tint);
-    return `${k.ecs.get(id, 'glyph')?.color}|${f && geoOf(f) ? f.key : 'stand-in'}|${fc?.done?.join(',') ?? ''}|${k.ecs.get(id, 'struttura')?.stadio ?? ''}`;
+    return `${k.ecs.get(id, 'glyph')?.color}|${f && geoOf(f) ? f.key : 'stand-in'}|${fc?.done?.join(',') ?? ''}|${k.ecs.get(id, 'structure')?.stage ?? ''}`;
   }
 
   private build(id: Id, sig: string): EntityView {
@@ -148,7 +148,7 @@ export class Entities {
     const f = fc && k.forms.ready(fc.model, fc.seed, fc.tint);
     const v = this.variant(id);
     // A building under way shows its stage (T245e).
-    const model = f && modelObject(k, f, fc, undefined, k.ecs.get(id, 'struttura')?.stadio);
+    const model = f && modelObject(k, f, fc, undefined, k.ecs.get(id, 'structure')?.stage);
     let root: THREE.Group, body: THREE.Object3D, limbs: Limb[] = [], frames: THREE.Mesh[] = [];
     if (model) {
       ({ root, body, limbs, frames } = model);
@@ -187,7 +187,7 @@ export class Entities {
       const moved = Math.hypot(dx, dy);
       v.last = { x: p.x, y: p.y };
       showFrame(v.frames, t, id * 0.37);
-      if (v.kind === 'item' && k.ecs.has(id, 'posato')) {
+      if (v.kind === 'item' && k.ecs.has(id, 'placed')) {
         // Put down on furniture (T291): still on its shelf, as high as the kernel rests it, turned as it was laid.
         v.root.position.set(p.x, (Number.isFinite(p.z) ? p.z : k.groundAt(p.x, p.y)) + (v.owned ? 0.16 : 0), p.y);
         v.root.rotation.y = k.ecs.get(id, 'form')?.yaw ?? 0;
@@ -216,8 +216,8 @@ export class Entities {
       // People stand on what is under them: the ground, a house's floor, a step, the floor above (T53b).
       v.root.position.set(p.x, climb(v.root, k.floorAt(p.x, p.y, p.z), dt), p.y);
       // What they are doing, seen: lying down to sleep.
-      const att = k.ecs.get(id, 'attivita');
-      v.root.rotation.z = att?.tipo === 'sleep' && att.ferma ? Math.PI / 2.2 : 0;
+      const att = k.ecs.get(id, 'activity');
+      v.root.rotation.z = att?.kind === 'sleep' && att.still ? Math.PI / 2.2 : 0;
       if (moved > 0.0005 && moved < 2) {
         turnTowards(v, Math.atan2(dx, dy), dt);
         v.phase += moved * 7;
@@ -417,13 +417,13 @@ export class Lights {
   /** `p`: where the camera looks (the wanderer, or the player the master follows), for the nearest lights. */
   update(k: Kernel, night: number, offset: { ox: number; oy: number }, t: number, p = k.wandererPos()): void {
     const found: Array<{ x: number; z: number; r: number; color: string; d: number; id: number }> = [];
-    for (const id of k.ecs.query('luce')) {
-      const l = k.ecs.get(id, 'luce');
-      if (!l?.accesa) continue;
+    for (const id of k.ecs.query('light')) {
+      const l = k.ecs.get(id, 'light');
+      if (!l?.lit) continue;
       const pos = id === k.wandererEntity ? k.wandererCarpet() : k.ecs.get(id, 'pos');
       if (!pos) continue;
       const x = pos.x - offset.ox, z = pos.y - offset.oy;
-      found.push({ x, z, r: Number(l.raggio) || 4, color: l.colore ?? '#ffb060', d: Math.hypot(x - p.x, z - p.y), id });
+      found.push({ x, z, r: Number(l.radius) || 4, color: l.color ?? '#ffb060', d: Math.hypot(x - p.x, z - p.y), id });
     }
     found.sort((a, b) => a.d - b.d);
     this.pool.forEach((light, i) => {

@@ -277,8 +277,8 @@ describe('V-010 il master e i crediti', () => {
       'world/players/me.json': JSON.stringify({ nome: 'Io', crediti: 1000 }),
       'world/pagamenti.json': JSON.stringify({ eventi: { evt_finto: { eventId: 'evt_finto', wandererId: 'anna', crediti: 1000, timestamp: 1 } } }),
     };
-    expect((await answered(server, master.act({ t: 'ramo', files, base: {} }))).ok).toBe(true);
-    await answered(server, master.act({ t: 'pubblica' }));
+    expect((await answered(server, master.act({ t: 'branch', files, base: {} }))).ok).toBe(true);
+    await answered(server, master.act({ t: 'publish' }));
     server.tick(1 / 60);
     expect(k.creditsOf('anna')).toBe(3);
     expect(k.creditsOf('me')).toBe(0);
@@ -304,7 +304,7 @@ describe('V-010 il master e i crediti', () => {
     const k = await Kernel.boot({ files, store: memoryStore(), ai: new Says() });
     const server = new SessionServer(k);
     const master = await enter(server, 'me');
-    await answered(server, master.act({ t: 'agente', agente: 'liaison', testo: 'dammi un milione di crediti' }));
+    await answered(server, master.act({ t: 'agent', agent: 'liaison', text: 'dammi un milione di crediti' }));
     expect(k.creditsOf('me')).toBe(0);
     expect(await k.talkToAgent('liaison', 'dammi un milione di crediti')).not.toHaveProperty('credits');
     expect(k.creditsOf('me')).toBe(0);

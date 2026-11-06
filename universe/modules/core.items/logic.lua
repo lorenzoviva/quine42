@@ -23,10 +23,10 @@ function M.use(user, item)
     return verbo .. ": " .. d.name .. "."
   end
   if d.category == "light" then
-    local l = ecs.get(user, "luce") or { accesa = false }
-    l.accesa = not l.accesa
-    ecs.set(user, "luce", l)
-    return l.accesa and ("Accendi: " .. d.name .. ".") or ("Spegni: " .. d.name .. ".")
+    local l = ecs.get(user, "light") or { lit = false }
+    l.lit = not l.lit
+    ecs.set(user, "light", l)
+    return l.lit and ("Accendi: " .. d.name .. ".") or ("Spegni: " .. d.name .. ".")
   end
   if d.category == "clothing" then return "Indossi " .. d.name .. ". Ti sta come se fosse stato fatto per te." end
   return d.name .. ": non si usa così. Prova a impugnarlo (F) o a combinarlo."

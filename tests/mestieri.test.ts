@@ -74,23 +74,23 @@ function play(seconds: number, until?: () => boolean): void {
 /** The phase starts and the kernel gives the tasks (it looks at the people every 60 ticks): to `id`, if said, and no longer. */
 function phase(n: number, p: 'morning' | 'day' | 'evening' | 'night', id?: number): void {
   k.time = at(n, p);
-  play(4, () => id !== undefined && k.ecs.get(id, 'mestiere')?.fase === p && k.ecs.get(id, 'mestiere')?.giorno === k.day());
+  play(4, () => id !== undefined && k.ecs.get(id, 'job')?.phase === p && k.ecs.get(id, 'job')?.day === k.day());
 }
 
-const carried = (id: number, item: string): number => k.ecs.get(id, 'carico')?.[item] ?? 0;
+const carried = (id: number, item: string): number => k.ecs.get(id, 'load')?.[item] ?? 0;
 /** The place an individual belongs to: what the kernel gives with the tasks, or (before) the place where they stand. */
 const placeOf = (id: number): string => {
-  const given = k.ecs.get(id, 'mestiere')?.luogo;
+  const given = k.ecs.get(id, 'job')?.chunk;
   if (given) return given;
   const p = k.ecs.get(id, 'pos');
   const S = k.config.chunkSize;
   return `${Math.floor(p.x / S)},${Math.floor(p.y / S)}`;
 };
-const tasks = (id: number) => (k.ecs.get(id, 'mestiere')?.compiti ?? []).map((t: { does: string }) => t.does);
+const tasks = (id: number) => (k.ecs.get(id, 'job')?.tasks ?? []).map((t: { does: string }) => t.does);
 
 /** What the deposit of the place of `id` holds of an item; `set` fills it as a day of other trades would. */
 function deposit(id: number, item: string, set?: number): number {
-  const key = `deposito:${placeOf(id).replace(',', ':')}`;
+  const key = `deposit:${placeOf(id).replace(',', ':')}`;
   if (set !== undefined) k.stores.set('sys.work', key, { ...(k.stores.get('sys.work', key) as object), [item]: set });
   return k.placeDeposit(placeOf(id))[item] ?? 0;
 }
@@ -135,7 +135,7 @@ describe('a working day of each trade', () => {
     const d0 = nextDay();
     const id = worker('contadina');
     phase(d0, 'evening');
-    k.ecs.set(id, 'carico', { 'item.grano': 3 });
+    k.ecs.set(id, 'load', { 'item.grano': 3 });
     const before = deposit(id, 'item.grano');
     play(90, () => carried(id, 'item.grano') === 0);
     expect(carried(id, 'item.grano')).toBe(0);
@@ -147,8 +147,8 @@ describe('a working day of each trade', () => {
     const id = worker('pastora');
     phase(d0, 'morning');
     expect(tasks(id)).toEqual(['go', 'wait']);
-    play(70, () => k.ecs.get(id, 'attivita')?.tipo === 'graze');
-    expect(k.ecs.get(id, 'attivita')).toMatchObject({ tipo: 'graze', ferma: true });
+    play(70, () => k.ecs.get(id, 'activity')?.kind === 'graze');
+    expect(k.ecs.get(id, 'activity')).toMatchObject({ kind: 'graze', still: true });
     phase(d0, 'day');
     play(80, () => carried(id, 'item.formaggio') >= 1);
     expect(carried(id, 'item.formaggio')).toBe(1);
@@ -177,8 +177,8 @@ describe('a working day of each trade', () => {
     expect(carried(id, 'item.ciocco')).toBe(0);
     // Another day with an empty deposit: the bench stays cold, the reason is in the state of the work.
     phase(d1, 'morning');
-    play(20, () => !!k.ecs.get(id, 'lavoro')?.motivo);
-    expect(k.ecs.get(id, 'lavoro')?.motivo).toMatch(/missing:item\.ciocco/);
+    play(20, () => !!k.ecs.get(id, 'work')?.reason);
+    expect(k.ecs.get(id, 'work')?.reason).toMatch(/missing:item\.ciocco/);
   }, 90_000);
 
   it('the innkeeper draws at the well (world.act) and makes cider', () => {
@@ -186,8 +186,8 @@ describe('a working day of each trade', () => {
     const id = worker('locandiera');
     thing('object.well', -3, 2);
     phase(d0, 'morning');
-    play(60, () => k.ecs.get(id, 'lavoro')?.usato === true);
-    expect(k.ecs.get(id, 'lavoro')?.usato).toBe(true);
+    play(60, () => k.ecs.get(id, 'work')?.usato === true);
+    expect(k.ecs.get(id, 'work')?.usato).toBe(true);
     phase(d0, 'day');
     play(80, () => carried(id, 'item.sidro') >= 2);
     expect(carried(id, 'item.sidro')).toBe(2);
@@ -204,8 +204,8 @@ describe('a working day of each trade', () => {
     expect(carried(id, 'item.pesce')).toBe(1);
     expect(deposit(id, 'item.grano')).toBe(3);
     phase(d0, 'day');
-    play(80, () => k.ecs.get(id, 'attivita')?.tipo === 'trade');
-    expect(k.ecs.get(id, 'attivita')).toMatchObject({ tipo: 'trade', ferma: true });
+    play(80, () => k.ecs.get(id, 'activity')?.kind === 'trade');
+    expect(k.ecs.get(id, 'activity')).toMatchObject({ kind: 'trade', still: true });
   }, 60_000);
 
   it('the guard walks a round, and does not stop', () => {
@@ -220,18 +220,18 @@ describe('a working day of each trade', () => {
       seen.add(`${Math.round(p.x)},${Math.round(p.y)}`);
     }
     expect(seen.size).toBeGreaterThan(2);
-    expect(k.ecs.get(id, 'lavoro')?.passo).toBe(1);
+    expect(k.ecs.get(id, 'work')?.step).toBe(1);
   }, 60_000);
 
   it('the priest prays in the morning, among the people by day', () => {
     const d0 = nextDay();
     const id = worker('sacerdotessa');
     phase(d0, 'morning');
-    play(60, () => k.ecs.get(id, 'attivita')?.tipo === 'pray');
-    expect(k.ecs.get(id, 'attivita')).toMatchObject({ tipo: 'pray', ferma: true });
+    play(60, () => k.ecs.get(id, 'activity')?.kind === 'pray');
+    expect(k.ecs.get(id, 'activity')).toMatchObject({ kind: 'pray', still: true });
     phase(d0, 'day');
-    play(80, () => k.ecs.get(id, 'attivita')?.tipo === 'chat');
-    expect(k.ecs.get(id, 'attivita')?.tipo).toBe('chat');
+    play(80, () => k.ecs.get(id, 'activity')?.kind === 'chat');
+    expect(k.ecs.get(id, 'activity')?.kind).toBe('chat');
   }, 60_000);
 
   it('the scribe writes letters and takes them to the square', () => {
@@ -265,10 +265,10 @@ describe('a working day of each trade', () => {
     const d1 = nextDay();
     const id = worker('impiegata');
     phase(d0, 'morning');
-    play(60, () => k.ecs.get(id, 'attivita')?.tipo === 'read');
-    expect(k.ecs.get(id, 'attivita')).toMatchObject({ tipo: 'read', ferma: true });
-    const desk = k.ecs.get(id, 'mestiere').work;
+    play(60, () => k.ecs.get(id, 'activity')?.kind === 'read');
+    expect(k.ecs.get(id, 'activity')).toMatchObject({ kind: 'read', still: true });
+    const desk = k.ecs.get(id, 'job').work;
     phase(d1, 'morning');
-    expect(k.ecs.get(id, 'mestiere').work).toEqual(desk);
+    expect(k.ecs.get(id, 'job').work).toEqual(desk);
   }, 60_000);
 });

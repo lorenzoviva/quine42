@@ -11,36 +11,36 @@ import type { ClientLink, ClientMsg, ContainerView, Dialog, FileChanges, FormVie
 
 export interface Outcome {
   ok: boolean;
-  testo?: string;
+  text?: string;
   /** The profile as the server repaired it, and the look that came of it (T44a). */
-  profilo?: Profile;
-  forma?: FormView;
+  profile?: Profile;
+  form?: FormView;
   /** What the Council made of a request (T42e). */
-  fatto?: string;
-  messaggi?: string[];
-  dialoghi?: Dialog[];
-  motivo?: string;
-  contenitore?: ContainerView;
-  borsa?: number;
+  done?: string;
+  messages?: string[];
+  dialogues?: Dialog[];
+  reason?: string;
+  container?: ContainerView;
+  bag?: number;
 }
 
-type Action = Exclude<ClientMsg, { t: 'entra' } | { t: 'passo' } | { t: 'tasti' }>;
+type Action = Exclude<ClientMsg, { t: 'join' } | { t: 'step' } | { t: 'keys' }>;
 type WithoutSeq<T> = T extends { seq: number } ? Omit<T, 'seq'> : never;
 
 export class SessionClient {
   id = '';
-  nome = '';
+  name = '';
   /** Who this wanderer is to the others (T44a), as the server repaired it; what it repaired when they came in. */
-  profilo?: Profile;
-  riparato: string[] = [];
+  profile?: Profile;
+  repaired: string[] = [];
   /** Signed in anonymously (T44b): what they ask is made with the local models, until they link a Google account. */
-  anonimo = false;
+  anonymous = false;
   /** What the server made of the settings the master brought from the lobby (T247): refused when a match is under way. */
-  settingsAnswer?: { ok: boolean; motivo?: string; riparati?: string[] };
+  settingsAnswer?: { ok: boolean; reason?: string; repaired?: string[] };
   /** Whether this wanderer is the master (T41): only the master hears the Council and gets all the files. */
   master = false;
   /** The platform fee, as the server said to the master (ADR-0132). */
-  commissione?: number;
+  fee?: number;
   /** What the Council said (the master's only), oldest first. */
   readonly feed: FeedEntry[] = [];
   /** The world's files: those it came in with, as the server said they changed since. */
@@ -48,11 +48,11 @@ export class SessionClient {
   /** The master's branch as the server kept it (T42b): what they changed that the world does not have yet. */
   branch: FileChanges = {};
   tick = 0;
-  ora = 0;
+  time = 0;
   me?: Me;
   /** The look of this client's wanderer. */
-  forma?: FormView;
-  stato: MyState = {};
+  form?: FormView;
+  state: MyState = {};
   readonly places = new Map<string, ChunkView>();
   readonly entities = new Map<number, EntityView>();
   readonly others = new Map<string, OtherView>();
@@ -72,12 +72,12 @@ export class SessionClient {
 
   constructor(
     private link: ClientLink,
-    private who: { id: string; nome?: string; profilo?: Partial<Profile>; token?: string; tetto?: number; regolazioni?: AiSettings; freshToken?: () => Promise<string> },
+    private who: { id: string; name?: string; profile?: Partial<Profile>; token?: string; cap?: number; settings?: AiSettings; freshToken?: () => Promise<string> },
   ) {
     this.ready = new Promise((r) => (this.entered = r));
     link.onMessage((m) => this.receive(m));
     link.onClose(() => {
-      for (const done of this.waiting.values()) done({ ok: false, motivo: 'collegamento chiuso' });
+      for (const done of this.waiting.values()) done({ ok: false, reason: 'collegamento chiuso' });
       this.waiting.clear();
       this.entered?.();
     });
@@ -87,21 +87,21 @@ export class SessionClient {
   private enter(token: string | undefined): void {
     const who = this.who;
     this.link.send({
-      t: 'entra',
+      t: 'join',
       id: who.id,
-      ...(who.nome ? { nome: who.nome } : {}),
-      ...(who.profilo ? { profilo: who.profilo } : {}),
+      ...(who.name ? { name: who.name } : {}),
+      ...(who.profile ? { profile: who.profile } : {}),
       ...(token ? { token } : {}),
-      ...(typeof who.tetto === 'number' ? { tetto: who.tetto } : {}),
-      ...(who.regolazioni ? { regolazioni: who.regolazioni } : {}),
+      ...(typeof who.cap === 'number' ? { cap: who.cap } : {}),
+      ...(who.settings ? { settings: who.settings } : {}),
     });
     // The master's settings are said once: entering again, into a world started again, is not choosing again.
-    delete who.regolazioni;
+    delete who.settings;
   }
 
   /** The world started again (T127): what was asked of the old one has no answer, and this client comes in again as the wanderer it was. */
   private reenter(): void {
-    for (const done of this.waiting.values()) done({ ok: false, motivo: 'il mondo è ripartito' });
+    for (const done of this.waiting.values()) done({ ok: false, reason: 'il mondo è ripartito' });
     this.waiting.clear();
     // The first token may have expired by now.
     void (this.who.freshToken?.() ?? Promise.resolve(this.who.token)).catch(() => this.who.token).then((token) => this.enter(token));
@@ -111,7 +111,7 @@ export class SessionClient {
   move(x: number, y: number): number {
     const seq = ++this.seq;
     if (this.me) this.me = { ...this.me, x, y };
-    this.link.send({ t: 'passo', seq, x, y });
+    this.link.send({ t: 'step', seq, x, y });
     return seq;
   }
 
@@ -122,7 +122,7 @@ export class SessionClient {
     const key = held.join(',');
     if (key === this.heldSaid) return;
     this.heldSaid = key;
-    this.link.send({ t: 'tasti', tenuti: held });
+    this.link.send({ t: 'keys', held });
   }
 
   /** Something the wanderer does; the answer is what came of it. */
@@ -140,31 +140,31 @@ export class SessionClient {
 
   private receive(m: ServerMsg): void {
     switch (m.t) {
-      case 'rifiuto':
-        this.refused = m.motivo;
+      case 'refusal':
+        this.refused = m.reason;
         this.entered?.();
         break;
-      case 'mondo':
-        if (m.stato === 'ripartito') this.reenter();
+      case 'world':
+        if (m.state === 'restarted') this.reenter();
         break;
-      case 'ingresso':
-        Object.assign(this, { id: m.id, nome: m.nome, profilo: m.profilo, riparato: m.riparato ?? [], anonimo: !!m.anonimo, master: !!m.master, commissione: m.commissione, files: m.files, branch: m.ramo ?? {}, me: m.me, forma: m.forma, stato: m.stato });
-        if (m.regolazioni) this.settingsAnswer = m.regolazioni;
-        this.feed.splice(0, this.feed.length, ...(m.concilio ?? []));
+      case 'welcome':
+        Object.assign(this, { id: m.id, name: m.name, profile: m.profile, repaired: m.repaired ?? [], anonymous: !!m.anonymous, master: !!m.master, fee: m.fee, files: m.files, branch: m.branch ?? {}, me: m.me, form: m.form, state: m.state });
+        if (m.settings) this.settingsAnswer = m.settings;
+        this.feed.splice(0, this.feed.length, ...(m.council ?? []));
         this.places.clear();
         this.entities.clear();
         this.others.clear();
         this.apply(m);
         this.entered?.();
         break;
-      case 'aggiorna':
+      case 'update':
         if (m.me) this.me = m.me;
-        if (m.stato) this.stato = m.stato;
-        this.notices.push(...(m.avvisi ?? []));
+        if (m.state) this.state = m.state;
+        this.notices.push(...(m.notices ?? []));
         if (this.notices.length > 100) this.notices.splice(0, this.notices.length - 100);
         this.apply(m);
         break;
-      case 'correzione':
+      case 'correction':
         this.corrections++;
         if (this.me) this.me = { ...this.me, x: m.x, y: m.y };
         break;
@@ -177,16 +177,16 @@ export class SessionClient {
         this.files = files;
         break;
       }
-      case 'concilio':
-        this.feed.push(...m.voci);
+      case 'council':
+        this.feed.push(...m.entries);
         if (this.feed.length > 400) this.feed.splice(0, this.feed.length - 400);
         break;
-      case 'esito': {
+      case 'result': {
         const done = this.waiting.get(m.seq);
         this.waiting.delete(m.seq);
         const { t: _t, seq: _seq, ...outcome } = m;
-        if (m.profilo) Object.assign(this, { profilo: m.profilo, nome: m.profilo.name });
-        if (m.forma) this.forma = m.forma;
+        if (m.profile) Object.assign(this, { profile: m.profile, name: m.profile.name });
+        if (m.form) this.form = m.form;
         done?.(outcome);
         break;
       }
@@ -194,15 +194,15 @@ export class SessionClient {
     this.onMessage?.(m);
   }
 
-  private apply(m: { tick: number; ora: number; luoghi?: ChunkView[]; cose?: EntityView[]; via?: number[]; viandanti?: OtherView[]; partiti?: string[]; giocatori?: PlayerSpot[] }): void {
+  private apply(m: { tick: number; time: number; chunks?: ChunkView[]; entities?: EntityView[]; gone?: number[]; wanderers?: OtherView[]; departed?: string[]; players?: PlayerSpot[] }): void {
     this.tick = m.tick;
-    this.ora = m.ora;
-    if (m.giocatori) this.players = m.giocatori;
-    for (const p of m.luoghi ?? []) this.places.set(p.key, p);
+    this.time = m.time;
+    if (m.players) this.players = m.players;
+    for (const p of m.chunks ?? []) this.places.set(p.key, p);
     // An entity that only moved keeps what it is.
-    for (const t of m.cose ?? []) this.entities.set(t.id, Object.keys(t).length > 3 ? t : { ...(this.entities.get(t.id) ?? t), x: t.x, y: t.y });
-    for (const id of m.via ?? []) this.entities.delete(id);
-    for (const o of m.viandanti ?? []) this.others.set(o.id, o);
-    for (const id of m.partiti ?? []) this.others.delete(id);
+    for (const t of m.entities ?? []) this.entities.set(t.id, Object.keys(t).length > 3 ? t : { ...(this.entities.get(t.id) ?? t), x: t.x, y: t.y });
+    for (const id of m.gone ?? []) this.entities.delete(id);
+    for (const o of m.wanderers ?? []) this.others.set(o.id, o);
+    for (const id of m.departed ?? []) this.others.delete(id);
   }
 }

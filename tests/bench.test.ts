@@ -41,7 +41,7 @@ describe('the bench of the Sala sistemi', () => {
       terrain: ['ggggg', 'ggggg', 'ggggg', 'ggggg', 'ggggg'],
       entities: [
         { module: 'object.bush', x: 1, y: 1 },
-        { module: 'object.sign', x: 1, y: 0, components: { effimero: { fino: 99 }, fuoco: { raggio: 1 } } },
+        { module: 'object.sign', x: 1, y: 0, components: { ephemeral: { expires: 99 }, fire: { radius: 1 } } },
       ],
       duration: 2,
       watch: ['0:body.solid', 'needs.health'],
@@ -112,7 +112,7 @@ describe('the bench of the Sala sistemi', () => {
     expect(run.errori).toEqual([]);
     expect(run.prima['difesa.valore']).toBeNull();
     expect(run.dopo['difesa.valore']).toBe(3);
-    expect(run.cambiati).toEqual(['difesa.valore', 'stati.equipaggiamento']);
+    expect(run.cambiati).toEqual(['difesa.valore', 'states.equipaggiamento']);
     expect(run.messaggi).toContain('Ti senti più protetto.');
     // The player rewrites the mechanic: the case shows what the new code does.
     const doubled = logic.replace('difesa = difesa + items.bonus(it, "difesa")', 'difesa = difesa + 2 * items.bonus(it, "difesa")');
@@ -169,7 +169,7 @@ describe('the bench with the cases of the seed', () => {
     const fire = seed(k, 'sys.fire');
     const [burn, shield] = fire.manifest.cases!;
     const a = await k.runBenchCase(fire.manifest, fire.logic, burn);
-    expect(a.dopo).toMatchObject({ '0:body.solid': 'assente', '1:body.solid': true, '2:effimero.fino': 'assente' });
+    expect(a.dopo).toMatchObject({ '0:body.solid': 'assente', '1:body.solid': true, '2:ephemeral.expires': 'assente' });
     expect(a.dopo['needs.health'] as number).toBeLessThan(100);
     expect((await k.runBenchCase(fire.manifest, fire.logic, shield)).dopo['needs.health']).toBe(100);
     const follow = seed(k, 'sys.follow');

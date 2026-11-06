@@ -13,7 +13,7 @@ const running = createProductionServer({
   universesDir,
   accounts: {
     config: { projectId: 'prova', apiKey: 'pubblica', authDomain: 'prova.firebaseapp.com' },
-    verify: async (t) => (t.startsWith('vero-') ? { uid: t.slice(5), anonimo: false } : t.startsWith('anon-') ? { uid: t.slice(5), anonimo: true } : undefined),
+    verify: async (t) => (t.startsWith('vero-') ? { uid: t.slice(5), anonymous: false } : t.startsWith('anon-') ? { uid: t.slice(5), anonymous: true } : undefined),
   },
   // Many requests from one address, which is what these proofs are. The rhythms have their test (`risorse.test.ts`).
   rates: { api: { burst: 100000, perSecond: 1000 }, heavy: { burst: 100000, perSecond: 1000 }, sockets: { burst: 1000, perSecond: 10 }, socketsAtOnce: 100 },

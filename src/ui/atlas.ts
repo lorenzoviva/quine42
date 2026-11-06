@@ -103,7 +103,7 @@ export class AtlasPanel {
         'div',
         { class: 'row' },
         ...list.map((p) => {
-          const b = el('button', {}, `Segui ${p.nome} (${p.cx},${p.cy})`);
+          const b = el('button', {}, `Segui ${p.name} (${p.cx},${p.cy})`);
           b.onclick = () => {
             this.close();
             this.k.follow?.(p.id);
@@ -179,7 +179,7 @@ export class AtlasPanel {
       ctx.beginPath();
       ctx.arc(px, py, Math.max(3, z / 6), 0, Math.PI * 2);
       ctx.fill();
-      ctx.fillText(p.nome, px + 6, py - 6);
+      ctx.fillText(p.name, px + 6, py - 6);
     }
   }
 
@@ -206,7 +206,7 @@ export class AtlasPanel {
     const p = v.planned.find((q) => q.cx === cx && q.cy === cy);
     const r = v.regions.find((q) => Math.max(Math.abs(q.center[0] - cx), Math.abs(q.center[1] - cy)) <= q.radius);
     const d = v.drafts.some((q) => q.cx === cx && q.cy === cy);
-    const who = v.players.filter((q) => q.cx === cx && q.cy === cy).map((q) => q.nome);
+    const who = v.players.filter((q) => q.cx === cx && q.cy === cy).map((q) => q.name);
     this.info.textContent = `(${cx}, ${cy}) — ${p ? `«${p.name}» [${p.layout}]` : d ? 'abbozzato, non ancora progettato' : 'mai visto'}${r ? ` — regione «${r.name}»` : ''}${who.length ? ` — qui: ${who.join(', ')}` : ''}`;
   }
 }

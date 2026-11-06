@@ -20,10 +20,10 @@ async function bootMany(): Promise<Kernel> {
   return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 }
 
-async function thin(server: SessionServer, id: string, profilo?: Partial<Profile>): Promise<ThinClient> {
+async function thin(server: SessionServer, id: string, profile?: Partial<Profile>): Promise<ThinClient> {
   const { server: s, client: c } = fakeLink();
   server.connect(s);
-  const session = new SessionClient(c, { id, profilo });
+  const session = new SessionClient(c, { id, profile });
   await session.ready;
   const k = await Kernel.boot({ files: session.files, store: memoryStore(), ai: new MockAiModels(), mirror: true });
   return new ThinClient(k, session);
@@ -87,9 +87,9 @@ describe('the profile in a multiplayer game (T44a)', () => {
     const k = await bootMany();
     const server = new SessionServer(k);
     const anna = await thin(server, 'anna', { name: 'Ilaria', seed: 3, tint: '#3060c0', introduction: 'Tessitrice del nord.' });
-    expect(anna.session.nome).toBe('Ilaria');
-    expect(anna.session.riparato).toEqual([]);
-    expect(anna.session.forma).toMatchObject({ seed: 3, tint: '#3060c0' });
+    expect(anna.session.name).toBe('Ilaria');
+    expect(anna.session.repaired).toEqual([]);
+    expect(anna.session.form).toMatchObject({ seed: 3, tint: '#3060c0' });
     const bruno = await thin(server, 'bruno', { name: 'Bruno', tint: '#c04020' });
     run(server, [anna, bruno], 12);
     const a = avatarOf(bruno, 'anna')!;
@@ -101,7 +101,7 @@ describe('the profile in a multiplayer game (T44a)', () => {
     expect(bruno.k.introOf(a)).toBe('Tessitrice del nord.');
     expect(k.wanderers().find((w) => w.id === 'anna')?.name).toBe('Ilaria');
     // Words between them carry the name.
-    expect(bruno.session.others.get('anna')?.nome).toBe('Ilaria');
+    expect(bruno.session.others.get('anna')?.name).toBe('Ilaria');
   });
 
   it('a name like another wanderer’s, or out of measure, is repaired and the client is told', async () => {
@@ -109,20 +109,20 @@ describe('the profile in a multiplayer game (T44a)', () => {
     const server = new SessionServer(k);
     const anna = await thin(server, 'anna', { name: 'Ilaria' });
     const bruno = await thin(server, 'bruno', { name: 'Ilario', seed: 99 });
-    expect(bruno.session.nome).not.toBe('Ilario');
-    expect(bruno.session.nome).not.toBe('Ilaria');
-    expect(bruno.session.riparato.join(' ')).toMatch(/somiglia/);
-    expect(bruno.session.riparato.join(' ')).toMatch(/seme/);
+    expect(bruno.session.name).not.toBe('Ilario');
+    expect(bruno.session.name).not.toBe('Ilaria');
+    expect(bruno.session.repaired.join(' ')).toMatch(/somiglia/);
+    expect(bruno.session.repaired.join(' ')).toMatch(/seme/);
     run(server, [anna, bruno], 12);
     // Choosing again during the game: what the others see changes with it.
     const o = await ask(server, [anna, bruno], bruno.setProfile({ name: 'Ilaria', tint: '#20a040', seed: 2 }));
     expect(o.ok).toBe(true);
-    expect(o.profilo?.name).not.toBe('Ilaria');
-    expect(o.testo).toMatch(/somiglia/);
+    expect(o.profile?.name).not.toBe('Ilaria');
+    expect(o.text).toMatch(/somiglia/);
     expect(bruno.k.ecs.get(bruno.k.wandererEntity, 'form')).toMatchObject({ seed: 2, tint: '#20a040' });
     run(server, [anna, bruno], 12);
     const b = avatarOf(anna, 'bruno')!;
-    expect(anna.k.ecs.get(b, 'identity').name).toBe(o.profilo!.name);
+    expect(anna.k.ecs.get(b, 'identity').name).toBe(o.profile!.name);
     expect(anna.k.ecs.get(b, 'form')).toMatchObject({ seed: 2, tint: '#20a040' });
   });
 
@@ -136,9 +136,9 @@ describe('the profile in a multiplayer game (T44a)', () => {
     expect(server.connected()).not.toContain('anna');
     expect(JSON.parse(k.files['world/players/anna.json']).profile).toEqual({ name: 'Ilaria', seed: 4, tint: '#a03080', introduction: 'Torno sempre.' });
     const again = await thin(server, 'anna');
-    expect(again.session.nome).toBe('Ilaria');
-    expect(again.session.profilo).toEqual({ name: 'Ilaria', seed: 4, tint: '#a03080', introduction: 'Torno sempre.' });
-    expect(again.session.forma).toMatchObject({ seed: 4, tint: '#a03080' });
+    expect(again.session.name).toBe('Ilaria');
+    expect(again.session.profile).toEqual({ name: 'Ilaria', seed: 4, tint: '#a03080', introduction: 'Torno sempre.' });
+    expect(again.session.form).toMatchObject({ seed: 4, tint: '#a03080' });
   });
 
   it('alone, the kernel keeps the profile of `io` with the state of play', async () => {
@@ -212,10 +212,10 @@ describe('the profiles of two wanderers in the same browser (T44c)', () => {
     run(server, [], 2);
     // Anna comes back with Bruno's profile (an old key shared by the origin): hers stays.
     const again = await thin(server, 'anna', { name: 'Bruno', introduction: 'Pescatore.' });
-    expect(again.session.profilo).toEqual({ name: 'Ilaria', introduction: 'Tessitrice.' });
+    expect(again.session.profile).toEqual({ name: 'Ilaria', introduction: 'Tessitrice.' });
     expect(JSON.parse(k.files['world/players/anna.json']).profile).toMatchObject({ name: 'Ilaria' });
     // Only an explicit change does.
     const o = await ask(server, [again], again.setProfile({ name: 'Ilenia' }));
-    expect(o.profilo?.name).toBe('Ilenia');
+    expect(o.profile?.name).toBe('Ilenia');
   }, 180000);
 });

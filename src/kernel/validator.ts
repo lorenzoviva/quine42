@@ -20,7 +20,7 @@ import { compileMjx, type MjxModel } from '../mj/model';
 import { FORM_LIMITS, MAX_FORM_TIME, MAX_FORM_XML, runMjx } from '../mj/run';
 import { analyzeSound } from '../mj/soundanalysis';
 import { reservedName } from './paths';
-import { internalCardsIn, internalEffect, internalFields, internalManifest, internalName, italianName, SOLO_BEFORE_0_4 } from './internalNames';
+import { internalCardsIn, internalEffect, internalFields, internalManifest, internalManifest0_5, internalName, italianName, SOLO_BEFORE_0_4 } from './internalNames';
 
 const KINDS: ModuleKind[] = ['system', 'entity', 'item', 'player', 'generator', 'data'];
 const LAYERS = ['ground', 'floor', 'wall', 'door', 'liquid', 'vegetation', 'rock'];
@@ -102,7 +102,7 @@ const HEX_RE = /^#[0-9a-f]{6}$/i;
 /** The Lua API (prelude.lua): generated code may only call these. */
 export const LUA_API: Record<string, string[]> = {
   ecs: ['each', 'get', 'set', 'spawn', 'destroy', 'first'],
-  world: ['free', 'free_real', 'tile', 'speed_at', 'spawn', 'player', 'player_pos', 'nearest', 'has_tag', 'break_entity', 'say', 'speak', 'set_tile', 'open', 'make_container', 'store_get', 'store_set', 'wanderers', 'path', 'find_tile', 'act', 'impresa', 'impresa_porta'],
+  world: ['free', 'free_real', 'tile', 'speed_at', 'spawn', 'player', 'player_pos', 'nearest', 'has_tag', 'break_entity', 'say', 'speak', 'set_tile', 'open', 'make_container', 'store_get', 'store_set', 'wanderers', 'path', 'find_tile', 'act', 'venture', 'venture_bring'],
   inventory: ['add', 'remove', 'count', 'equipped'],
   input: ['held'],
   bus: ['emit'],
@@ -143,8 +143,9 @@ export class Validator {
     let m: any;
     try {
       // The values of the contract 0.2 the Council still writes in Italian (T307a), then the fields of 0.3 (`aspetto`, `casi`, T308a):
-      // internal before anything reads them. The values first: their repair reads the fields of before.
-      m = internalCardsIn(internalFields('manifest', internalManifest(JSON.parse(src))));
+      // internal before anything reads them, and the components and panel fields of 0.4 (`luce`, `cantiere.titolo`, T308b). The values
+      // first: their repair reads the fields of before.
+      m = internalManifest0_5(internalCardsIn(internalFields('manifest', internalManifest(JSON.parse(src)))));
     } catch (e) {
       return { errors: [`${path}: JSON non valido (${(e as Error).message})`] };
     }

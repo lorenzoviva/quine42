@@ -65,13 +65,13 @@ describe('the player’s client, without corona nor Council (T41)', () => {
     // While they play: the Council at work is heard by the master, never by the player.
     k.council.say('cartographer', 'propone', 'un luogo nuovo a nord, con un pozzo');
     for (let i = 0; i < 12; i++) server.tick(DT);
-    expect(master.heard.some((m) => m.t === 'concilio' && m.voci.some((e) => e.text === 'un luogo nuovo a nord, con un pozzo'))).toBe(true);
-    expect(anna.heard.some((m) => m.t === 'concilio')).toBe(false);
+    expect(master.heard.some((m) => m.t === 'council' && m.entries.some((e) => e.text === 'un luogo nuovo a nord, con un pozzo'))).toBe(true);
+    expect(anna.heard.some((m) => m.t === 'council')).toBe(false);
     const wire = JSON.stringify(anna.heard);
     expect(wire).not.toContain('un luogo nuovo a nord');
     expect(wire).not.toContain('la bibbia è pronta');
-    const came = anna.heard.find((m) => m.t === 'ingresso');
-    expect(came?.t === 'ingresso' && Object.keys(came.files).sort()).toEqual(Object.keys(playerFiles(k.files)).sort());
+    const came = anna.heard.find((m) => m.t === 'welcome');
+    expect(came?.t === 'welcome' && Object.keys(came.files).sort()).toEqual(Object.keys(playerFiles(k.files)).sort());
   });
 
   it('the master’s mirror hears the Council: its feed, as alone', async () => {

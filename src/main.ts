@@ -110,11 +110,11 @@ async function joinMany(name: string, lobbyChoice?: LobbyResult): Promise<ThinCl
   const id = account ? accountWanderer(account.uid) : tabWanderer(params);
   const session = new SessionClient(socketLink(name, params.has('offline') || !!lobbyChoice?.offline), {
     id,
-    profilo: savedProfile(name, id),
+    profile: savedProfile(name, id),
     ...(account ? { token: account.token, freshToken: account.freshToken } : {}),
-    ...(typeof lobbyChoice?.tetto === 'number' ? { tetto: lobbyChoice.tetto } : {}),
+    ...(typeof lobbyChoice?.tetto === 'number' ? { cap: lobbyChoice.tetto } : {}),
     // The master's settings go in with them: the server fixes them on entering, and refuses them if a match is under way (T247).
-    ...(lobbyChoice?.regolazioni ? { regolazioni: lobbyChoice.regolazioni } : {}),
+    ...(lobbyChoice?.regolazioni ? { settings: lobbyChoice.regolazioni } : {}),
   });
   await session.ready;
   if (session.refused || !session.me) throw new Error(session.refused ?? 'il mondo non risponde');
@@ -204,18 +204,18 @@ async function main() {
     async (p) => {
       if (thin) {
         const o = await thin.setProfile(p);
-        if (o.profilo) keepProfile(name, thin.session.id, o.profilo);
+        if (o.profile) keepProfile(name, thin.session.id, o.profile);
         return o;
       }
       const r = kernel.setProfile(kernel.wanderer().id, p);
-      if (!r) return { ok: false, motivo: 'Non è stato possibile.' };
+      if (!r) return { ok: false, reason: 'Non è stato possibile.' };
       kernel.saveState();
-      return { ok: true, profilo: r.profilo, testo: r.riparato.join('; ') };
+      return { ok: true, profile: r.profilo, text: r.riparato.join('; ') };
     },
-    () => (thin ? thin.session.profilo : kernel.profileOf(kernel.wanderer().id)),
+    () => (thin ? thin.session.profile : kernel.profileOf(kernel.wanderer().id)),
     account && thin
       ? {
-          anonimo: thin.session.anonimo,
+          anonimo: thin.session.anonymous,
           linkGoogle: () => account!.linkGoogle(),
           signOut: () => account!.signOut(),
           crediti: () => kernel.creditsOf(),
@@ -268,7 +268,7 @@ async function main() {
     : undefined;
 
   if (thin && creditModal) {
-    kernel.bus.on('ui:credits:exhausted', (e: { motivo?: 'finiti' | 'tetto'; testo?: string }) => {
+    kernel.bus.on('ui:credits:exhausted', (e: { reason?: 'exhausted' | 'cap'; text?: string }) => {
       creditModal.show(e);
     });
   }
@@ -339,7 +339,7 @@ async function main() {
     syncFocus();
   });
   // Death in a multiplayer game (T44c): the server has already decided; the screen says what was lost and where one wakes up.
-  kernel.bus.on('ui:died', ({ cause, testo, perso, dove }: { cause: string; testo: string; perso: string[]; dove: 'qui' | 'piazza' }) => {
+  kernel.bus.on('ui:died', ({ cause, text, lost, where }: { cause: string; text: string; lost: string[]; where: 'here' | 'square' }) => {
     const on = document.createElement('button');
     on.className = 'primary';
     on.textContent = 'Continua';
@@ -352,9 +352,9 @@ async function main() {
     t.textContent = 'SEI MORTO';
     const lines = [
       cause === 'sete' ? 'La sete ti ha vinto.' : cause === 'fame' ? 'La fame ti ha vinto.' : 'Le ferite ti hanno vinto.',
-      perso.length ? `Hai perso: ${perso.join(', ')}.` :'Non hai perso nulla di ciò che portavi.',
-      dove === 'piazza' ? 'Riparti dalla piazza.' : 'Riparti da dove sei caduto.',
-      testo,
+      lost.length ? `Hai perso: ${lost.join(', ')}.` : 'Non hai perso nulla di ciò che portavi.',
+      where === 'square' ? 'Riparti dalla piazza.' : 'Riparti da dove sei caduto.',
+      text,
     ].filter(Boolean);
     const why = lines.map((l) => {
       const d = document.createElement('div');
@@ -400,11 +400,11 @@ async function main() {
   inventory.onClose = syncFocus;
   chat.onClose = syncFocus;
   profile.onClose = syncFocus;
-  if (thin?.session.profilo) keepProfile(name, thin.session.id, thin.session.profilo);
-  if (thin?.session.riparato.length) hud.message(`Il tuo profilo: ${thin.session.riparato.join('; ')}.`, 'warn');
+  if (thin?.session.profile) keepProfile(name, thin.session.id, thin.session.profile);
+  if (thin?.session.repaired.length) hud.message(`Il tuo profilo: ${thin.session.repaired.join('; ')}.`, 'warn');
   const settled = thin?.session.settingsAnswer;
-  if (settled && !settled.ok) hud.message(`Regolazioni non applicate: ${settled.motivo}.`, 'warn');
-  else if (settled?.riparati?.length) hud.message(`Regolazioni riparate: ${settled.riparati.join('; ')}.`, 'warn');
+  if (settled && !settled.ok) hud.message(`Regolazioni non applicate: ${settled.reason}.`, 'warn');
+  else if (settled?.repaired?.length) hud.message(`Regolazioni riparate: ${settled.repaired.join('; ')}.`, 'warn');
   actions.onClose = syncFocus;
   const runGenesis = async () => tools?.runGenesis(online, syncFocus, params.has('offline'));
   // A universe that was never generated waits for its genesis before the Council paints anything.
@@ -455,7 +455,7 @@ async function main() {
   intro.addEventListener('click', startGame);
   const updateAiModelsHud = async () => {
     if (thin) {
-      $('#models').textContent = `partita di molti · ${thin.session.nome} (${thin.session.id})${thin.session.anonimo ? ' · anonimo: modelli locali' : ''}`;
+      $('#models').textContent = `partita di molti · ${thin.session.name} (${thin.session.id})${thin.session.anonymous ? ' · anonimo: modelli locali' : ''}`;
       return;
     }
     const base = online ? `Gemini · ${ai.textModel}` : 'offline: luoghi abbozzati, agenti locali';

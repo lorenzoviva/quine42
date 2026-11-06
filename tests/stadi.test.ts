@@ -88,13 +88,13 @@ async function world(files = bundledFiles, chunks = new MemoryChunks()): Promise
 }
 
 const live = (k: Kernel) => (k as unknown as { ventureList: Venture[] }).ventureList;
-const structureOf = (k: Kernel, origin: string) => k.ecs.query('struttura', 'origin').find((e) => k.ecs.get(e, 'origin').key === origin);
+const structureOf = (k: Kernel, origin: string) => k.ecs.query('structure', 'origin').find((e) => k.ecs.get(e, 'origin').key === origin);
 
 function fallen(k: Kernel): { origin: string; key: string } {
   const pc = k.wandererCarpet();
   const S = k.config.chunkSize;
   const key = `${Math.floor(pc.x / S)},${Math.floor(pc.y / S)}`;
-  const id = k.ecs.query('struttura', 'origin').find((e) => k.ecs.get(e, 'origin').key.startsWith(`${key}#s`))!;
+  const id = k.ecs.query('structure', 'origin').find((e) => k.ecs.get(e, 'origin').key.startsWith(`${key}#s`))!;
   const origin = k.ecs.get(id, 'origin').key;
   (k as unknown as { breakEntity(id: number): void }).breakEntity(id);
   return { origin, key };
@@ -106,7 +106,7 @@ describe('a building that rises in a world', () => {
     let k = await world(bundledFiles, chunks);
     const { origin, key } = fallen(k);
     const sid = structureOf(k, origin)!;
-    expect(k.ecs.get(sid, 'struttura').stadio).toBe(0);
+    expect(k.ecs.get(sid, 'structure').stage).toBe(0);
     expect(k.chunks.get(key)!.plan!.stages).toEqual({ [origin]: 0 });
     // What a body meets follows the stage: nothing at 0, the walls when they are up.
     const fc: FormComp = k.ecs.get(sid, 'form');
@@ -124,9 +124,9 @@ describe('a building that rises in a world', () => {
       (k as unknown as { phasesClosed(v: Venture, c: number[]): void }).phasesClosed(v, addWork(v, work));
     };
     step({ 'item.ciocco': 4 }, 200);
-    expect(k.ecs.get(sid, 'struttura').stadio).toBe(0.2);
+    expect(k.ecs.get(sid, 'structure').stage).toBe(0.2);
     step({ 'item.ciocco': 6, 'item.chiodi': 4 }, 600);
-    expect(k.ecs.get(sid, 'struttura').stadio).toBe(0.7);
+    expect(k.ecs.get(sid, 'structure').stage).toBe(0.7);
     expect(blocked()).toBeGreaterThan(0);
     expect(blocked()).toBeLessThanOrEqual(whole);
     // No rooms before the roof: the individuals of the house live elsewhere until then.
@@ -138,18 +138,18 @@ describe('a building that rises in a world', () => {
     await developAll(many);
     const server = new SessionServer(many);
     const look = (server as unknown as { lookOf(id: number): { c?: Record<string, unknown> } }).lookOf.bind(server);
-    const there = many.ecs.query('struttura')[0];
-    many.ecs.get(there, 'struttura').stadio = 0.7;
-    expect(look(there).c?.struttura).toEqual({ stadio: 0.7 });
-    delete many.ecs.get(there, 'struttura').stadio;
-    expect(look(there).c?.struttura).toBeUndefined();
+    const there = many.ecs.query('structure')[0];
+    many.ecs.get(there, 'structure').stage = 0.7;
+    expect(look(there).c?.structure).toEqual({ stage: 0.7 });
+    delete many.ecs.get(there, 'structure').stage;
+    expect(look(there).c?.structure).toBeUndefined();
 
     // Saved and reopened: the plan of the place says the stage.
     expect(k.saveState()).toBe(true);
     await pause(700);
     k = await Kernel.boot({ files: { ...k.files }, store: memoryStore(), ai: new MockAiModels(), chunks });
     await developAll(k);
-    expect(k.ecs.get(structureOf(k, origin)!, 'struttura').stadio).toBe(0.7);
+    expect(k.ecs.get(structureOf(k, origin)!, 'structure').stage).toBe(0.7);
     // Finished: the stage goes from the plan and from the structure.
     const w = live(k)[0];
     for (const it of ['item.ciocco', 'item.chiodi']) bring(w, it, 100);
@@ -157,7 +157,7 @@ describe('a building that rises in a world', () => {
     k.tick(1 / 60);
     for (let i = 0; i < 70; i++) k.tick(1 / 60);
     expect(k.ventures()[0].state).toBe('finished');
-    expect(k.ecs.get(structureOf(k, origin)!, 'struttura').stadio).toBeUndefined();
+    expect(k.ecs.get(structureOf(k, origin)!, 'structure').stage).toBeUndefined();
     expect(k.chunks.get(key)!.plan!.stages).toBeUndefined();
   }, 120000);
 
@@ -177,7 +177,7 @@ describe('a building that rises in a world', () => {
     const again = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels(), chunks });
     await developAll(again);
     expect(again.ventures()).toEqual([]);
-    expect(again.ecs.get(structureOf(again, origin)!, 'struttura').stadio).toBeUndefined();
+    expect(again.ecs.get(structureOf(again, origin)!, 'structure').stage).toBeUndefined();
     expect(again.chunks.get(key)!.plan!.stages).toBeUndefined();
     expect(again.chunks.get(key)!.plan!.houses ?? []).toEqual([]);
     expect(structureOf(again, `${key}#v1`)).toBeUndefined();

@@ -223,7 +223,7 @@ export class Console {
           // Others' balances do not reach this client (ADR-0104): only their names, and its own balance.
           const me = k.wanderer().id;
           const wanderers = new Map(k.wanderers().map((w) => [w.id, w.name]));
-          for (const p of k.players()) wanderers.set(p.id, p.nome);
+          for (const p of k.players()) wanderers.set(p.id, p.name);
           const target = el('select', {}) as HTMLSelectElement;
           for (const [id, nome] of wanderers) {
             target.append(el('option', { value: id }, `${nome} (${id})${id === me ? ` — ${k.creditsOf(id).toFixed(3)} crediti` : ''}`));

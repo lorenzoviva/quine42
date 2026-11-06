@@ -59,7 +59,7 @@ async function scene(model: string) {
   const id = k.spawnModuleEntity(k.modules.get('object.well')!, cx, cy, undefined, `test#${model}`);
   Object.assign(k.ecs.get(id, 'form') as FormComp, { model, seed: 1, yaw: 0 });
   // A structure of the place, as the lots make them (the renderer cuts the one the wanderer is in).
-  k.ecs.set(id, 'struttura', {});
+  k.ecs.set(id, 'structure', {});
   const form = await k.forms.wait(model, 1);
   expect(form?.status).toBe('ready');
   k.tick(1 / 60);

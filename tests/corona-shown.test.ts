@@ -144,7 +144,7 @@ describe('the camera does not decide what is drawn', () => {
     const pc = k.wandererCarpet();
     const id = k.spawnModuleEntity(k.modules.get('object.well')!, pc.x + 2, pc.y, undefined, 'test#struttura');
     Object.assign(k.ecs.get(id, 'form'), { model: 'structure', seed: 1, yaw: 0 });
-    k.ecs.set(id, 'struttura', {});
+    k.ecs.set(id, 'structure', {});
     await k.forms.wait('structure', 1);
     k.tick(DT);
     k.carpet()!.ox += 2; // the wanderer stands in the middle of it

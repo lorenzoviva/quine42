@@ -120,7 +120,7 @@ describe('il server vero', () => {
   // Accounts are the only thing not real here: a token says its uid.
   const accounts: AccountSettings = {
     config: { projectId: 'prova', apiKey: 'pubblica', authDomain: 'prova.firebaseapp.com' },
-    verify: async (t) => (t.startsWith('vero-') ? { uid: t.slice(5), anonimo: false } : undefined),
+    verify: async (t) => (t.startsWith('vero-') ? { uid: t.slice(5), anonymous: false } : undefined),
   };
 
   beforeAll(async () => {
@@ -307,7 +307,7 @@ describe('il server vero', () => {
         heard,
         // `send` on a closed socket drops the message without a word: the wait after it would only say that time ran out.
         say: (m: unknown) => {
-          if (ws.readyState !== ws.OPEN) throw new Error(`il socket è chiuso, non si dice ${JSON.stringify(m)}: ${JSON.stringify(heard.filter((h) => h.t === 'rifiuto'))}`);
+          if (ws.readyState !== ws.OPEN) throw new Error(`il socket è chiuso, non si dice ${JSON.stringify(m)}: ${JSON.stringify(heard.filter((h) => h.t === 'refusal'))}`);
           ws.send(JSON.stringify(m));
         },
         of: <T extends ServerMsg['t']>(t: T) => heard.filter((m) => m.t === t) as Array<Extract<ServerMsg, { t: T }>>,
@@ -324,9 +324,9 @@ describe('il server vero', () => {
 
     /** Until they are in; a refusal is said as it is, at once, not as time that ran out. */
     const entered = async (p: ReturnType<typeof player>, ms: number, label: string) => {
-      await until(() => p.of('ingresso').length || p.of('rifiuto').length, ms, label);
-      const refused = p.of('rifiuto')[0];
-      if (refused) throw new Error(`${label}: rifiuto «${refused.motivo}»`);
+      await until(() => p.of('welcome').length || p.of('refusal').length, ms, label);
+      const refused = p.of('refusal')[0];
+      if (refused) throw new Error(`${label}: rifiuto «${refused.reason}»`);
     };
 
     it('V-014 un altro sito e un altro nome no; un altro percorso nemmeno', async () => {
@@ -340,27 +340,27 @@ describe('il server vero', () => {
       const pa = player(a);
       await closedBefore(a);
       const [ida, idb] = [accountWanderer('uid-alice'), accountWanderer('uid-bruno')];
-      pa.say({ t: 'entra', id: ida, token: 'vero-uid-alice' });
+      pa.say({ t: 'join', id: ida, token: 'vero-uid-alice' });
       await entered(pa, 120000, 'ingresso di alice');
-      expect(pa.of('ingresso')[0].id).toBe(ida);
+      expect(pa.of('welcome')[0].id).toBe(ida);
       // Only now: a socket has ENTRY_MS to say who it is, and the world alice starts can take longer than that (T174).
       const b = open('?universo=prova');
       const pb = player(b);
       await closedBefore(b);
-      pb.say({ t: 'entra', id: 'chiunque', token: 'vero-uid-bruno' });
+      pb.say({ t: 'join', id: 'chiunque', token: 'vero-uid-bruno' });
       await entered(pb, 30000, 'ingresso di bruno');
       // Who you are is the token's, not what you say.
-      expect(pb.of('ingresso')[0].id).toBe(idb);
-      expect(pb.of('ingresso')[0].viandanti.map((v) => v.id)).toContain(ida);
-      await until(() => pa.of('aggiorna').some((m) => m.viandanti?.some((v) => v.id === idb)), 15000, 'alice vede bruno');
+      expect(pb.of('welcome')[0].id).toBe(idb);
+      expect(pb.of('welcome')[0].wanderers.map((v) => v.id)).toContain(ida);
+      await until(() => pa.of('update').some((m) => m.wanderers?.some((v) => v.id === idb)), 15000, 'alice vede bruno');
       // A player is sent only what the client draws (ADR-0109).
-      expect(pb.of('ingresso')[0].files['world/bible.json']).toBeUndefined();
+      expect(pb.of('welcome')[0].files['world/bible.json']).toBeUndefined();
 
       const c = open('?universo=prova');
       const pc = player(c);
       await closedBefore(c);
-      pc.say({ t: 'entra', id: ida, token: 'falso' });
-      await until(() => pc.of('rifiuto').length, 15000, 'rifiuto');
+      pc.say({ t: 'join', id: ida, token: 'falso' });
+      await until(() => pc.of('refusal').length, 15000, 'refusal');
 
       const seen = JSON.parse((await ask('/api/session')).text);
       expect(seen.sessions).toContainEqual(expect.objectContaining({ name: 'prova', active: true }));
@@ -371,9 +371,9 @@ describe('il server vero', () => {
     const refusalFor = async (to: number, name: string) => {
       const ws = new WebSocket(`ws://127.0.0.1:${to}/api/session?universo=${name}`, { origin: SITE, headers: { Host: 'gioco.example' } });
       const p = player(ws);
-      await until(() => p.of('rifiuto').length, 15000, `rifiuto di ${name}`);
+      await until(() => p.of('refusal').length, 15000, `rifiuto di ${name}`);
       ws.close();
-      return p.of('rifiuto')[0].motivo;
+      return p.of('refusal')[0].reason;
     };
 
     it('V-025 un socket non avvia un mondo per un nome che non esiste né per una partita in singola', async () => {
@@ -402,19 +402,19 @@ describe('il server vero', () => {
       const pa = player(a);
       await closedBefore(a);
       // Nobody has said who they are yet.
-      pa.say({ t: 'chat', id: {}, testo: 'prima di entrare' });
-      pa.say({ t: 'entra', id: accountWanderer('uid-carla'), token: 'vero-uid-carla' });
+      pa.say({ t: 'chat', id: {}, text: 'prima di entrare' });
+      pa.say({ t: 'join', id: accountWanderer('uid-carla'), token: 'vero-uid-carla' });
       await entered(pa, 120000, 'ingresso di carla');
       const b = open('?universo=prova');
       const pb = player(b);
       await closedBefore(b);
-      pb.say({ t: 'entra', id: accountWanderer('uid-dario'), token: 'vero-uid-dario' });
+      pb.say({ t: 'join', id: accountWanderer('uid-dario'), token: 'vero-uid-dario' });
       await entered(pb, 30000, 'ingresso di dario');
-      for (const m of [null, 7, [], {}, { t: {} }, { t: 'passo', x: {}, y: [] }, { t: 'passo', seq: { toString: 1 } }, { t: 'chat', id: [], testo: {} }, { t: 'entra', id: {} }, { t: 'profilo', profilo: 'x' }, { t: 'azione', x: 'y' }, { t: 'dai', viandante: {}, slot: {}, quanti: {} }]) pa.say(m);
+      for (const m of [null, 7, [], {}, { t: {} }, { t: 'step', x: {}, y: [] }, { t: 'step', seq: { toString: 1 } }, { t: 'chat', id: [], text: {} }, { t: 'join', id: {} }, { t: 'profile', profile: 'x' }, { t: 'action', x: 'y' }, { t: 'give', wanderer: {}, slot: {}, count: {} }]) pa.say(m);
       // What it sends after those is the same world's: none restarted, no warning that it stopped.
       const before = pa.heard.length + pb.heard.length;
       await until(() => pa.heard.length + pb.heard.length > before + 5, 20000, 'il mondo risponde ancora');
-      expect([...pa.of('mondo'), ...pb.of('mondo')]).toEqual([]);
+      expect([...pa.of('world'), ...pb.of('world')]).toEqual([]);
       for (const ws of [a, b]) ws.close();
     }, 240000);
   });

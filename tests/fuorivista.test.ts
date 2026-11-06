@@ -82,7 +82,7 @@ describe('a place nobody sees', () => {
       { nome: 'Nives', mestiere: 'contadina', origine: `${cx - 5},${cy}#t2` },
     ]);
     // A house falls; a field is sown today.
-    const sid = k.ecs.query('struttura', 'origin').find((e) => k.ecs.get(e, 'origin').key.startsWith(`${key}#s`))!;
+    const sid = k.ecs.query('structure', 'origin').find((e) => k.ecs.get(e, 'origin').key.startsWith(`${key}#s`))!;
     const origin = k.ecs.get(sid, 'origin').key;
     (k as unknown as { breakEntity(id: number): void }).breakEntity(sid);
     const v = live(k)[0];
@@ -93,7 +93,7 @@ describe('a place nobody sees', () => {
       if (k.tileAt(c, r) === 'g' && k.setTile(c, r, 'e')) field = [c, r];
     }
     expect(field).toBeDefined();
-    k.stores.set('sys.work', `deposito:${key.replace(',', ':')}`, { 'item.ciocco': 16, 'item.chiodi': 3 });
+    k.stores.set('sys.work', `deposit:${key.replace(',', ':')}`, { 'item.ciocco': 16, 'item.chiodi': 3 });
 
     // Away: the place unloads.
     const day0 = k.day();
@@ -120,7 +120,7 @@ describe('a place nobody sees', () => {
     // Back: the field sown three days ago is ripe, the house is at the stage its venture reached, on_return heard it.
     await goAway(k, -gone, () => loaded(k, key));
     expect(k.tileAt(field![0], field![1])).toBe('u');
-    const stage = k.ecs.get(k.ecs.query('struttura', 'origin').find((e) => k.ecs.get(e, 'origin').key === origin)!, 'struttura').stadio;
+    const stage = k.ecs.get(k.ecs.query('structure', 'origin').find((e) => k.ecs.get(e, 'origin').key === origin)!, 'structure').stage;
     expect(stage).toBeGreaterThan(0);
     expect(k.chunks.get(key)!.plan!.stages?.[origin]).toBe(stage);
     const heard = k.stores.get('prova.ritorno', 'ultimo') as { luogo: string; trascorso: number } | undefined;
@@ -138,10 +138,10 @@ describe('a place nobody sees', () => {
     const pc = k.wandererCarpet();
     const key = `${Math.floor(pc.x / S)},${Math.floor(pc.y / S)}`;
     setPeople(k, [{ nome: 'Baldo', mestiere: 'fabbro', origine: `${key}#t0` }]);
-    const sid = k.ecs.query('struttura', 'origin').find((e) => k.ecs.get(e, 'origin').key.startsWith(`${key}#s`))!;
+    const sid = k.ecs.query('structure', 'origin').find((e) => k.ecs.get(e, 'origin').key.startsWith(`${key}#s`))!;
     const origin = k.ecs.get(sid, 'origin').key;
     (k as unknown as { breakEntity(id: number): void }).breakEntity(sid);
-    k.stores.set('sys.work', `deposito:${key.replace(',', ':')}`, { 'item.ciocco': 4 });
+    k.stores.set('sys.work', `deposit:${key.replace(',', ':')}`, { 'item.ciocco': 4 });
     // Ugo arrives, and goes the other way; the master goes one way.
     expect(k.addWanderer('ugo', 'Ugo')).toBeDefined();
     k.as('ugo', () => (k.carpet()!.oy -= 12 * S));
@@ -161,8 +161,8 @@ describe('a place nobody sees', () => {
       await new Promise((r) => setTimeout(r, 5));
     }
     expect(loaded(k, key)).toBe(true);
-    const back = k.ecs.query('struttura', 'origin').find((e) => k.ecs.get(e, 'origin').key === origin)!;
-    expect(k.ecs.get(back, 'struttura').stadio).toBe(0.2);
+    const back = k.ecs.query('structure', 'origin').find((e) => k.ecs.get(e, 'origin').key === origin)!;
+    expect(k.ecs.get(back, 'structure').stage).toBe(0.2);
     expect(me).toBeDefined();
   }, 120000);
 });

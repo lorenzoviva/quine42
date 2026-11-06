@@ -38,7 +38,7 @@ const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 // A token says its account: `vero-<uid>`, `anon-<uid>`.
 const accounts: AccountSettings = {
   config: { projectId: 'prova', apiKey: 'pubblica', authDomain: 'prova.firebaseapp.com' },
-  verify: async (t) => (t.startsWith('vero-') ? { uid: t.slice(5), anonimo: false } : t.startsWith('anon-') ? { uid: t.slice(5), anonimo: true } : undefined),
+  verify: async (t) => (t.startsWith('vero-') ? { uid: t.slice(5), anonymous: false } : t.startsWith('anon-') ? { uid: t.slice(5), anonymous: true } : undefined),
 };
 
 function socketOf(url: string, headers: Record<string, string> = {}, origin?: string) {
@@ -58,7 +58,7 @@ function socketOf(url: string, headers: Record<string, string> = {}, origin?: st
     ws.on('error', () => r());
     ws.on('unexpected-response', () => r());
   });
-  return { ws, heard, state, opened, say: (m: unknown) => ws.send(JSON.stringify(m)), refusal: () => heard.find((m) => m.t === 'rifiuto') as { motivo: string } | undefined };
+  return { ws, heard, state, opened, say: (m: unknown) => ws.send(JSON.stringify(m)), refusal: () => heard.find((m) => m.t === 'refusal') as { reason: string } | undefined };
 }
 
 describe('V-026 il ritmo e l’indirizzo', () => {
@@ -140,7 +140,7 @@ describe('V-026 un mondo parte per chi dice chi è e si ferma quando resta vuoto
     await wait(100);
     expect(activeHosts.has('tace')).toBe(false);
     await until(() => c.state.closed, 3000, 'chiuso');
-    expect(c.refusal()?.motivo).toMatch(/nessun ingresso/);
+    expect(c.refusal()?.reason).toMatch(/nessun ingresso/);
     expect(activeHosts.has('tace')).toBe(false);
   });
 
@@ -148,22 +148,22 @@ describe('V-026 un mondo parte per chi dice chi è e si ferma quando resta vuoto
     await start({ entryMs: 60000 });
     const c = open('parla');
     await c.opened;
-    for (let i = 0; i < 20; i++) c.say({ t: 'passo', seq: i, x: 1, y: 1 });
+    for (let i = 0; i < 20; i++) c.say({ t: 'step', seq: i, x: 1, y: 1 });
     await until(() => c.state.closed, 3000, 'chiuso');
     expect(activeHosts.has('parla')).toBe(false);
   });
 
   it.each([
-    ['un token falso', { t: 'entra', id: 'x', token: 'falso' }, /non valido/],
-    ['nessun token', { t: 'entra', id: 'x' }, /serve un account/],
-    ['un token che non è un testo', { t: 'entra', id: 'x', token: { a: 1 } }, /serve un account/],
+    ['un token falso', { t: 'join', id: 'x', token: 'falso' }, /non valido/],
+    ['nessun token', { t: 'join', id: 'x' }, /serve un account/],
+    ['un token che non è un testo', { t: 'join', id: 'x', token: { a: 1 } }, /serve un account/],
   ])('V-026 %s non avvia il mondo', async (_n, entra, motivo) => {
     await start();
     const c = open('falso');
     await c.opened;
     c.say(entra);
     await until(() => c.state.closed, 3000, 'rifiuto');
-    expect(c.refusal()?.motivo).toMatch(motivo);
+    expect(c.refusal()?.reason).toMatch(motivo);
     expect(activeHosts.has('falso')).toBe(false);
   });
 
@@ -171,7 +171,7 @@ describe('V-026 un mondo parte per chi dice chi è e si ferma quando resta vuoto
     await start({ idle: 300 });
     const a = open('vuoto');
     await a.opened;
-    a.say({ t: 'entra', id: 'x', token: 'vero-alice' });
+    a.say({ t: 'join', id: 'x', token: 'vero-alice' });
     await until(() => activeHosts.has('vuoto'), 5000, 'avviato');
     const first = await activeHosts.get('vuoto');
     await until(() => first && 'session' in first && first.session.clientCount === 1, 5000, 'collegato');
@@ -183,7 +183,7 @@ describe('V-026 un mondo parte per chi dice chi è e si ferma quando resta vuoto
 
     const b = open('vuoto');
     await b.opened;
-    b.say({ t: 'entra', id: 'x', token: 'vero-bruno' });
+    b.say({ t: 'join', id: 'x', token: 'vero-bruno' });
     await until(() => activeHosts.has('vuoto'), 5000, 'di nuovo');
     expect(await activeHosts.get('vuoto')).not.toBe(first);
     b.ws.close();
@@ -195,15 +195,15 @@ describe('V-026 un mondo parte per chi dice chi è e si ferma quando resta vuoto
     for (let i = 0; i < ACCOUNT_SOCKETS; i++) {
       const c = open(`posto${i}`);
       await c.opened;
-      c.say({ t: 'entra', id: 'x', token: 'vero-carla' });
+      c.say({ t: 'join', id: 'x', token: 'vero-carla' });
       held.push(c);
     }
     await until(() => activeHosts.size === ACCOUNT_SOCKETS, 5000, 'i suoi mondi');
     const over = open('posto-oltre');
     await over.opened;
-    over.say({ t: 'entra', id: 'x', token: 'vero-carla' });
+    over.say({ t: 'join', id: 'x', token: 'vero-carla' });
     await until(() => over.state.closed, 3000, 'rifiuto');
-    expect(over.refusal()?.motivo).toMatch(/troppe finestre/);
+    expect(over.refusal()?.reason).toMatch(/troppe finestre/);
     expect(activeHosts.has('posto-oltre')).toBe(false);
     // One closed: the place is free again.
     held[0].ws.close();
@@ -211,7 +211,7 @@ describe('V-026 un mondo parte per chi dice chi è e si ferma quando resta vuoto
     await wait(50);
     const again = open('posto0');
     await again.opened;
-    again.say({ t: 'entra', id: 'x', token: 'vero-carla' });
+    again.say({ t: 'join', id: 'x', token: 'vero-carla' });
     await wait(200);
     expect(again.state.closed).toBe(false);
     for (const c of [...held, again]) c.ws.close();
@@ -223,9 +223,9 @@ describe('V-026 un mondo parte per chi dice chi è e si ferma quando resta vuoto
     for (let i = 0; i < 12 && !refused.length; i++) {
       const c = open(`giro${i}`);
       await c.opened;
-      c.say({ t: 'entra', id: 'x', token: 'vero-dario' });
+      c.say({ t: 'join', id: 'x', token: 'vero-dario' });
       await until(() => activeHosts.has(`giro${i}`) || c.state.closed, 5000, 'una risposta');
-      if (c.refusal()) refused.push(c.refusal()!.motivo);
+      if (c.refusal()) refused.push(c.refusal()!.reason);
       c.ws.close();
       await until(() => c.state.closed, 3000, 'chiuso');
     }
@@ -236,7 +236,7 @@ describe('V-026 un mondo parte per chi dice chi è e si ferma quando resta vuoto
     await start({ verify: false });
     const c = open('locale');
     await c.opened;
-    c.say({ t: 'entra', id: 'x' });
+    c.say({ t: 'join', id: 'x' });
     await until(() => activeHosts.has('locale'), 5000, 'avviato');
     c.ws.close();
   });
@@ -245,12 +245,12 @@ describe('V-026 un mondo parte per chi dice chi è e si ferma quando resta vuoto
     const on: Record<string, (d?: unknown) => void> = {};
     const ws = { on: (e: string, f: (d?: unknown) => void) => void (on[e] = f), send() {}, close() {}, readyState: 1, OPEN: 1 };
     const link = wsLink(ws as never);
-    for (let i = 0; i < 10; i++) on.message(JSON.stringify({ t: 'passo', seq: i }));
-    on.message(JSON.stringify({ t: 'entra', id: 'x' }));
-    on.message(JSON.stringify({ t: 'passo', seq: 99 }));
+    for (let i = 0; i < 10; i++) on.message(JSON.stringify({ t: 'step', seq: i }));
+    on.message(JSON.stringify({ t: 'join', id: 'x' }));
+    on.message(JSON.stringify({ t: 'step', seq: 99 }));
     const got: Array<{ t: string }> = [];
     link.onMessage((m) => void got.push(m as { t: string }));
-    expect(got.map((m) => m.t)).toEqual(['entra', 'passo']);
+    expect(got.map((m) => m.t)).toEqual(['join', 'step']);
   });
 
   it('V-026 chi arriva mentre il mondo vuoto si salva aspetta, e trova un mondo nuovo', async () => {
@@ -258,7 +258,7 @@ describe('V-026 un mondo parte per chi dice chi è e si ferma quando resta vuoto
     await start({ idle: 100, program: path.resolve('tests/sicurezza/fixtures/mondo-finto-lento.mjs') });
     const a = open('salva');
     await a.opened;
-    a.say({ t: 'entra', id: 'x', token: 'vero-elisa' });
+    a.say({ t: 'join', id: 'x', token: 'vero-elisa' });
     await until(() => activeHosts.has('salva'), 5000, 'avviato');
     const old = await activeHosts.get('salva');
     await until(() => old && 'session' in old && old.session.clientCount === 1, 5000, 'collegato');
@@ -266,7 +266,7 @@ describe('V-026 un mondo parte per chi dice chi è e si ferma quando resta vuoto
     await until(() => !activeHosts.has('salva'), 5000, 'in fermata');
     const b = open('salva');
     await b.opened;
-    b.say({ t: 'entra', id: 'x', token: 'vero-elisa' });
+    b.say({ t: 'join', id: 'x', token: 'vero-elisa' });
     await wait(150);
     expect(activeHosts.has('salva')).toBe(false);
     expect(b.state.closed).toBe(false);
@@ -293,13 +293,13 @@ describe('V-026 il sorvegliante e i vuoti', () => {
     await h.start();
     const c = client();
     h.connect(c.link);
-    c.say({ t: 'entra', id: 'alice' });
+    c.say({ t: 'join', id: 'alice' });
     (h as unknown as { child: { send(m: unknown): void } }).child.send({ t: 'sonda-muori' });
-    await until(() => c.heard.some((m) => m.t === 'mondo' && m.stato === 'ripartito'), 10000, 'ripartito');
+    await until(() => c.heard.some((m) => m.t === 'world' && m.state === 'restarted'), 10000, 'ripartito');
     await wait(500);
     expect(idle).toBe(0);
     // Who is told «ripartito» says who they are again, and that reaches the new world.
-    c.say({ t: 'entra', id: 'alice' });
+    c.say({ t: 'join', id: 'alice' });
     expect(h.clientCount).toBe(1);
     c.leave();
     await until(() => idle > 0, 5000, 'vuoto');

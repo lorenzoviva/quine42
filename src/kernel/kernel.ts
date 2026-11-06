@@ -64,7 +64,7 @@ import { bondWith, memoriesFor, playerFile, PLAYERS_DIR, readWandererState, repa
 import type { ActionDef, AiSettings, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, GameSetup, ChunkInfo, Recipe, RuneFragment, TerrainDef, UniverseConfig } from './types';
 import { checkKernelVersion, KERNEL_VERSION, stampKernel } from './version';
 import { migratePlanRecord, migrateUniverse } from './migrations';
-import { internalFields, internalJobProgram, internalName, internalSculptors, italianName, italianValues as italianFieldsOf } from './internalNames';
+import { internalComponent, internalEvent, internalFields, internalJobProgram, internalName, internalSculptors, italianName, italianValues as italianFieldsOf } from './internalNames';
 import { ModuleStores } from './store';
 import { dailyProduce, matchJob, validateJobProgram, WORK_MODULE, WORKERS_PER_PLACE, type JobProgram, type JobTask } from './jobs';
 import { addWork, bring, fillTeam, HARVEST_DAY, HARVEST_DAYS, HARVEST_ROLES, HOUSE_ROLES, housePhases, missingWords, nextStep, openVentures, pruneVentures, readVentures, SITE_REACH, stillNeeded, ventureId, ventureProgress, ventureState, VENTURES_FILE, writeVentures, YEAR_DAYS, type Venture, type VentureCandidate, type VentureStep } from './ventures';
@@ -83,11 +83,11 @@ interface SolidForm extends Ground {
 
 /** A jump under way (T56b), on the wanderer: from and to in carpet space, the floors there, how high it goes, its clock. */
 export interface JumpComp {
-  da: { x: number; y: number };
-  a: { x: number; y: number };
+  from: { x: number; y: number };
+  to: { x: number; y: number };
   h0: number;
   h1: number;
-  alto: number;
+  peak: number;
   t: number;
   dur: number;
 }
@@ -129,8 +129,8 @@ export interface Chunk {
   /** Known to have no saved plan, and waiting for the universe's quota of new places (T40). */
   held?: boolean;
   /** In a thin client (T51b): the ground dug and the water that has flowed, as the server's plan has them. */
-  scavi?: Record<string, number>;
-  acqua?: Record<string, WaterRecord>;
+  digs?: Record<string, number>;
+  water?: Record<string, WaterRecord>;
 }
 
 export interface LineState {
@@ -237,7 +237,7 @@ interface ChunkLot {
   x: number;
   y: number;
   form: FormComp;
-  struttura: { concetto: string; classe: string; taglia?: SizeTier; model?: string; stadio?: number };
+  structure: { concept: string; class: string; size?: SizeTier; model?: string; stage?: number };
 }
 
 /** A planned place in miniature (T26): positions in tiles from the place's top-left corner, levels in `LEVEL`s. */
@@ -435,7 +435,7 @@ function unknownFields(src: string | undefined, known: ReadonlySet<string>): Rec
 /** A field a panel reads (T263): `componente.campo`, plain names. */
 const PANEL_FIELD_RE = /^[A-Za-z_][A-Za-z0-9_]{0,40}\.[A-Za-z_][A-Za-z0-9_]{0,40}$/;
 /** Components of the wanderer that the kernel keeps itself: a panel's field from the server never writes them on a mirror. */
-const KERNEL_COMPONENTS = new Set(['pos', 'player', 'carpet', 'hand', 'inventory', 'slots', 'needs', 'stati', 'module', 'chunk', 'container', 'remote', 'body', 'form']);
+const KERNEL_COMPONENTS = new Set(['pos', 'player', 'carpet', 'hand', 'inventory', 'slots', 'needs', 'states', 'module', 'chunk', 'container', 'remote', 'body', 'form']);
 /** What a client may say it holds (T263): the four directions, in the world's terms. */
 const HELD_ACTIONS = new Set(['up', 'down', 'left', 'right']);
 
@@ -658,7 +658,7 @@ export class Kernel {
    * In a multiplayer game, the master's mirror (T42b): the files of their branch that the world does not have yet, and the
    * gesture that publishes them. The editor and the console show it; alone there is none (every save is the world).
    */
-  publisher?: { branch(): string[]; publish(): Promise<{ ok: boolean; motivo?: string; testo?: string }> };
+  publisher?: { branch(): string[]; publish(): Promise<{ ok: boolean; reason?: string; text?: string }> };
   /**
    * In a multiplayer game, the master's mirror (T42c): the players connected as the server tells them, and the view that
    * follows one of them (their id; the camera goes above them, the master stays where they are). Alone there is none.
@@ -707,7 +707,7 @@ export class Kernel {
       repo.commit(`migrazione ${ported.applied.map((a) => a.split(':')[0]).join(', ')}`, 'kernel');
       k.log('kernel', `universo portato a questo kernel: ${ported.applied.join('; ')}`);
     }
-    k.bus.on('lua:morte', (d: { fame?: boolean; sete?: boolean }) => k.mortalDies(d?.sete ? 'sete' : d?.fame ? 'fame' : 'ferite'));
+    k.bus.on('lua:death', (d: { hunger?: boolean; thirst?: boolean }) => k.mortalDies(d?.thirst ? 'sete' : d?.hunger ? 'fame' : 'ferite'));
     k.faults.onRaise = (f, isNew) => {
       if (isNew) k.log('fault', `${f.key}: ${f.message}`);
       // Where it happened (T46a): the code that runs in the world, where the wanderer was; not loading nor manifests.
@@ -810,8 +810,8 @@ export class Kernel {
       path: (x, y, tx, ty, r) => this.routeStep(x, y, tx, ty, r),
       find_tile: (code, x, y, r) => this.findTile(code, x, y, r),
       act: (user, target, action) => this.actAs(user, target, action),
-      impresa: (id) => (this.mirror ? undefined : this.ventureStepFor(id)),
-      impresa_porta: (id, item) => (this.mirror ? 0 : this.ventureBring(id, item)),
+      venture: (id) => (this.mirror ? undefined : this.ventureStepFor(id)),
+      venture_bring: (id, item) => (this.mirror ? 0 : this.ventureBring(id, item)),
       // The lasting store (T245a, ADR-0138): the module running is the only one whose data a call sees. A rune, a mirror: nothing.
       store_get: (key) => (this.luaModule && !this.mirror ? this.stores.get(this.luaModule, key) : undefined),
       store_set: (key, value) => !!this.luaModule && !this.mirror && this.stores.set(this.luaModule, key, value),
@@ -832,7 +832,7 @@ export class Kernel {
       carpet: () => (this.lockedLine && this.carpet() ? clone(this.carpet()) : this.carpet()),
       time: () => this.time,
       log: (msg) => this.log('lua', msg),
-      emit: (name, data) => this.bus.emit(`lua:${name}`, data),
+      emit: (name, data) => this.bus.emit(`lua:${internalEvent(name)}`, data),
       describe: (v) => this.describe(v),
       fault: (key, msg) => {
         this.faultFlag = key;
@@ -1039,7 +1039,7 @@ export class Kernel {
     const out: PlayerSpot[] = [];
     for (const w of this.wanderers()) {
       const at = w.id !== me && this.inWorld(w.id) ? this.wandererAt(w.id) : undefined;
-      if (at) out.push({ id: w.id, nome: w.name, x: at.x, y: at.y });
+      if (at) out.push({ id: w.id, name: w.name, x: at.x, y: at.y });
     }
     return out;
   }
@@ -1248,7 +1248,7 @@ export class Kernel {
           terrain = Math.max(terrain, (t && Number(this.palette[t]?.speed)) || 1);
         }
       const speed = Math.max(0, Math.min(60, Number(pl?.speed) || 0));
-      const passo = Math.max(0.2, Math.min(4, Number(pl?.passo) || 1));
+      const passo = Math.max(0.2, Math.min(4, Number(pl?.step) || 1));
       return speed * passo * Math.min(4, terrain);
     });
   }
@@ -1594,7 +1594,7 @@ export class Kernel {
   /** Where a solid entity blocks and what one stands on in it: its model's, or the changed ones of this instance. */
   private groundOf(id: Id, fc: FormComp, f: Form): Ground & { foot: Uint8Array } {
     // A building that rises (T245e): what a body meets is the grid of its stage, without the site around it.
-    const st = this.ecs.get(id, 'struttura')?.stadio;
+    const st = this.ecs.get(id, 'structure')?.stage;
     const staged = typeof st === 'number' && Number.isFinite(st) && st < 1;
     if (!fc.done?.length && !staged) return { foot: f.foot!, floor: f.floor!, block: f.block!, levels: f.levels!, hole: f.hole };
     const key = `${f.key}|${fc.done?.join(',') ?? ''}|${staged ? st : ''}`;
@@ -2394,7 +2394,7 @@ export class Kernel {
         x: ch.cx * S + (b.x0 + b.x1 + 1) / 2,
         y: ch.cy * S + (b.y0 + b.y1 + 1) / 2,
         form,
-        struttura: { concetto: req?.concept ?? house ?? (classe === 'structure' ? 'una casa' : 'una casetta'), classe, ...(req?.size ? { taglia: req.size } : {}), ...(own ? { model: own } : {}) },
+        structure: { concept: req?.concept ?? house ?? (classe === 'structure' ? 'una casa' : 'una casetta'), class: classe, ...(req?.size ? { size: req.size } : {}), ...(own ? { model: own } : {}) },
       });
     }
     return { tiles: tiles.join(''), lots };
@@ -2408,13 +2408,13 @@ export class Kernel {
     const stadi = plan.stages ?? {};
     for (const l of lots) {
       const st = stadi[l.origin];
-      if (st !== undefined && Number.isFinite(st) && st < 1) l.struttura = { ...l.struttura, stadio: Math.max(0, st) };
+      if (st !== undefined && Number.isFinite(st) && st < 1) l.structure = { ...l.structure, stage: Math.max(0, st) };
       out[l.index] = this.ecs.spawn({
         pos: { x: l.x, y: l.y },
         glyph: { ch: '⌂', color: this.terrain?.manifest.roof?.color ?? '#9a4632' },
         body: { r: 0.5, solid: true },
         form: l.form,
-        struttura: l.struttura,
+        structure: l.structure,
         chunk: { key: ch.key },
         origin: { key: l.origin },
       });
@@ -2509,7 +2509,7 @@ export class Kernel {
     const f = fc && this.forms.ready(fc.model, fc.seed, fc.tint);
     const p = this.ecs.get(sid, 'pos');
     // A house under way has no rooms yet: one lives there from its roof (T245e).
-    if (!fc || !f?.floor || !p || (this.ecs.get(sid, 'struttura')?.stadio ?? 1) < 0.9) return [];
+    if (!fc || !f?.floor || !p || (this.ecs.get(sid, 'structure')?.stage ?? 1) < 0.9) return [];
     const g = f.result!.grid;
     const { foot, floor, block } = this.groundOf(sid, fc, f);
     const step = stepOf(f.vpt);
@@ -2605,10 +2605,10 @@ export class Kernel {
 
   /** The ground dug or raised and the water that has flowed of a place (T51b): its plan's, or what the server said. */
   private digsOf(ch: Chunk): Record<string, number> | undefined {
-    return ch.plan?.digs ?? ch.scavi;
+    return ch.plan?.digs ?? ch.digs;
   }
   private waterOf(ch: Chunk): Record<string, WaterRecord> | undefined {
-    return ch.plan?.water ?? ch.acqua;
+    return ch.plan?.water ?? ch.water;
   }
   private tileOf(col: number, row: number): { ch: Chunk; tile: number } | undefined {
     const ch = this.chunkAt(col, row);
@@ -2810,7 +2810,7 @@ export class Kernel {
   /** The structure whose floor is under a point of the simulation (the wanderer is inside it), if any. */
   structureAt(x: number, y: number): Id | undefined {
     for (const s of this.solidForms.get(`${Math.floor(x)},${Math.floor(y)}`) ?? []) {
-      if (!this.ecs.has(s.id, 'struttura')) continue;
+      if (!this.ecs.has(s.id, 'structure')) continue;
       const [lx, lz] = toLocal(x - s.x, y - s.y, s.yaw);
       const g = s.form.result!.grid;
       const vx = Math.floor(lx * s.form.vpt + g.X / 2), vy = Math.floor(lz * s.form.vpt + g.Y / 2);
@@ -3028,7 +3028,7 @@ export class Kernel {
     const box: Container | undefined = this.ecs.get(id, 'container');
     if (origin) this.consumed.add(origin);
     // A building that falls is rebuilt (T245d): its lot becomes a venture of its place, once the building is gone.
-    const ruin = this.ecs.get(id, 'struttura');
+    const ruin = this.ecs.get(id, 'structure');
     const ruinForm: FormComp | undefined = this.ecs.get(id, 'form');
     this.ecs.destroy(id);
     if (ruin && origin && p) this.ventureOfRuin(origin, ruin, ruinForm, p);
@@ -3201,7 +3201,7 @@ export class Kernel {
    * changes there), in a thin client (the server would put the wanderer back) or while already in the air.
    */
   jump(): boolean {
-    if (this.mirror || this.zone !== 'sim' || this.ecs.has(this.wandererEntity, 'salto')) return false;
+    if (this.mirror || this.zone !== 'sim' || this.ecs.has(this.wandererEntity, 'jump')) return false;
     const pl = this.wandererComp();
     const r = Number(this.ecs.get(this.wandererEntity, 'body')?.r) || 0.3;
     let dx = 0, dy = 0;
@@ -3231,8 +3231,8 @@ export class Kernel {
       if (this.free(x, y, r, h)) land = { d, h };
     }
     const to = land ? { x: from.x + dx * land.d, y: from.y + dy * land.d } : from;
-    const jc: JumpComp = { da: from, a: to, h0, h1: land?.h ?? h0, alto: Math.min(JUMP_UP + 0.25, Math.max(0.45, clear + 0.25)), t: 0, dur: 0.32 + 0.08 * (land?.d ?? 0) };
-    this.ecs.set(this.wandererEntity, 'salto', jc);
+    const jc: JumpComp = { from, to, h0, h1: land?.h ?? h0, peak: Math.min(JUMP_UP + 0.25, Math.max(0.45, clear + 0.25)), t: 0, dur: 0.32 + 0.08 * (land?.d ?? 0) };
+    this.ecs.set(this.wandererEntity, 'jump', jc);
     if (pl && land) pl.facing = Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : dy > 0 ? 'down' : 'up';
     this.bus.emit('wanderer:jumped', { id: this.wanderer().id, far: land?.d ?? 0 });
     return true;
@@ -3240,24 +3240,24 @@ export class Kernel {
 
   /** The jump under way, if any: how far along it is (0-1) and the height of the feet (tiles), for the renderer. */
   jumping(): { s: number; y: number } | undefined {
-    const j: JumpComp | undefined = this.ecs.get(this.wandererEntity, 'salto');
+    const j: JumpComp | undefined = this.ecs.get(this.wandererEntity, 'jump');
     if (!j) return undefined;
     const s = Math.max(0, Math.min(1, j.t / j.dur));
-    return { s, y: j.h0 + (j.h1 - j.h0) * s + 4 * j.alto * s * (1 - s) };
+    return { s, y: j.h0 + (j.h1 - j.h0) * s + 4 * j.peak * s * (1 - s) };
   }
 
   /** The jump carries the wanderer along its line, whatever the walking did this tick; landed, it ends. */
   private jumpTick(dt: number): void {
-    const j: JumpComp | undefined = this.ecs.get(this.wandererEntity, 'salto');
+    const j: JumpComp | undefined = this.ecs.get(this.wandererEntity, 'jump');
     if (!j) return;
-    const ok = [j.da?.x, j.da?.y, j.a?.x, j.a?.y, j.t, j.dur, j.h0, j.h1, j.alto].every(Number.isFinite) && j.dur > 0;
-    if (!ok || this.zone !== 'sim') return void this.ecs.remove(this.wandererEntity, 'salto');
+    const ok = [j.from?.x, j.from?.y, j.to?.x, j.to?.y, j.t, j.dur, j.h0, j.h1, j.peak].every(Number.isFinite) && j.dur > 0;
+    if (!ok || this.zone !== 'sim') return void this.ecs.remove(this.wandererEntity, 'jump');
     j.t += dt;
     const s = Math.min(1, j.t / j.dur);
     const { ox, oy } = this.offset();
     // The feet go from one floor to the other (T70): landed, they stand on the floor of the landing.
-    Object.assign(this.wandererPos(), { x: j.da.x + (j.a.x - j.da.x) * s - ox, y: j.da.y + (j.a.y - j.da.y) * s - oy, z: j.h0 + (j.h1 - j.h0) * s });
-    if (s >= 1) this.ecs.remove(this.wandererEntity, 'salto');
+    Object.assign(this.wandererPos(), { x: j.from.x + (j.to.x - j.from.x) * s - ox, y: j.from.y + (j.to.y - j.from.y) * s - oy, z: j.h0 + (j.h1 - j.h0) * s });
+    if (s >= 1) this.ecs.remove(this.wandererEntity, 'jump');
   }
 
   // --- Runes ---------------------------------------------------------------------------------
@@ -3642,20 +3642,20 @@ export class Kernel {
   private isFurniture(id: Id): boolean {
     const fc: FormComp | undefined = this.ecs.get(id, 'form');
     const m = this.modules.get(this.ecs.get(id, 'module')?.id)?.manifest;
-    return !!fc && !!m && !m.persona && !this.ecs.has(id, 'struttura') && this.forms.classOf(fc.model).id === 'furniture';
+    return !!fc && !!m && !m.persona && !this.ecs.has(id, 'structure') && this.forms.classOf(fc.model).id === 'furniture';
   }
 
   /** Whether the menu of a thing offers to put down on it what is held (T291): something with a body that is not someone nor a building, or what lies on furniture. */
   private offersPlace(id: Id): boolean {
-    if (this.ecs.has(id, 'posato')) return true;
+    if (this.ecs.has(id, 'placed')) return true;
     const m = this.modules.get(this.ecs.get(id, 'module')?.id)?.manifest;
-    return !!m && !m.persona && this.ecs.has(id, 'form') && this.ecs.has(id, 'body') && !this.ecs.has(id, 'struttura') && !this.ecs.has(id, 'pickup');
+    return !!m && !m.persona && this.ecs.has(id, 'form') && this.ecs.has(id, 'body') && !this.ecs.has(id, 'structure') && !this.ecs.has(id, 'pickup');
   }
 
   /** The furniture a thing lying on furniture lies on (T291): the solid thing under it with a shelf at its height, while it is there. */
   supportOf(id: Id): Id | undefined {
     const p = this.ecs.get(id, 'pos');
-    const placed = this.ecs.get(id, 'posato');
+    const placed = this.ecs.get(id, 'placed');
     if (!p || !placed || !Number.isFinite(placed.z) || !Number.isFinite(p.x) || !Number.isFinite(p.y)) return undefined;
     for (const s of this.solidForms.get(`${Math.floor(p.x)},${Math.floor(p.y)}`) ?? []) {
       if (s.id === id || !this.isFurniture(s.id)) continue;
@@ -3705,7 +3705,7 @@ export class Kernel {
     // The shapes of what is put down and of where, the first time they are seen: a program runs in a worker, or in a promise.
     const held = equippedItem(this.inventory());
     const look = held ? this.itemLook(held) : undefined;
-    const under = this.ecs.has(target, 'posato') ? this.supportOf(target) : target;
+    const under = this.ecs.has(target, 'placed') ? this.supportOf(target) : target;
     const fc: FormComp | undefined = under !== undefined && this.ecs.alive.has(under) ? this.ecs.get(under, 'form') : undefined;
     const waits: Array<Promise<unknown>> = [];
     if (look && !this.forms.ready(look.model, look.seed, look.tint)) waits.push(this.forms.wait(look.model, look.seed, look.tint));
@@ -3726,7 +3726,7 @@ export class Kernel {
     if (at === null || !held) return refuse('Non impugni nulla da posare (1–6 o inventario).');
     if (this.zone !== 'sim' || !this.ecs.alive.has(target)) return false;
     const what = this.itemInfo(held.item).name;
-    const id = this.ecs.has(target, 'posato') ? this.supportOf(target) : target;
+    const id = this.ecs.has(target, 'placed') ? this.supportOf(target) : target;
     if (id === undefined) return refuse(`${this.nameOf(target)} non sta su un mobile.`);
     const name = this.nameOf(id);
     if (!this.isFurniture(id)) return refuse(`${name} non è un mobile: lì sopra non si posa niente.`);
@@ -3752,9 +3752,9 @@ export class Kernel {
     };
     // What lies there already takes the rectangle of its footprint; who stands there, the disc of their body.
     const near = f.reach + 1;
-    for (const other of this.ecs.query('posato', 'pickup', 'pos')) {
+    for (const other of this.ecs.query('placed', 'pickup', 'pos')) {
       const p = this.ecs.get(other, 'pos');
-      const z = this.ecs.get(other, 'posato').z;
+      const z = this.ecs.get(other, 'placed').z;
       if (!(Math.hypot(p.x - sp.x, p.y - sp.y) <= near) || !Number.isFinite(z)) continue;
       const ofc: FormComp | undefined = this.ecs.get(other, 'form');
       const [lx, ly] = local(p.x, p.y);
@@ -3776,7 +3776,7 @@ export class Kernel {
     const item = this.spawnItem(taken.item, sp.x + r.spot.x * c + r.spot.y * s, sp.y - r.spot.x * s + r.spot.y * c, 1);
     const turn = fc.yaw + (r.spot.turns * Math.PI) / 2;
     this.ecs.get(item, 'form').yaw = ((turn % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
-    this.ecs.set(item, 'posato', { z });
+    this.ecs.set(item, 'placed', { z });
     this.ecs.get(item, 'pos').z = z;
     if (taken.inv) this.ecs.get(item, 'pickup').inv = taken.inv;
     this.syncPhrase();
@@ -4037,7 +4037,7 @@ export class Kernel {
     }
     const held = equippedItem(inv);
     // What is held goes down on furniture (T291), or beside what already lies on it; the kernel says why when it does not.
-    if (held && this.offersPlace(id)) out.push({ id: 'posa', label: `Posa ${this.itemInfo(held).name} ${this.ecs.has(id, 'posato') ? 'accanto' : 'qui sopra'}`, enabled: true });
+    if (held && this.offersPlace(id)) out.push({ id: 'posa', label: `Posa ${this.itemInfo(held).name} ${this.ecs.has(id, 'placed') ? 'accanto' : 'qui sopra'}`, enabled: true });
     if (held) out.push({ id: 'strumento', label: `Usa ${this.itemInfo(held).name}`, enabled: true });
     out.push({ id: 'esamina', label: 'Esamina', enabled: true });
     out.push({ id: 'altro', label: 'Altro…', enabled: true });
@@ -4296,7 +4296,7 @@ export class Kernel {
         description: info?.description ?? `${m?.description ?? ''}${identity ? ` ${identity.look}` : ''}`,
         tags: info?.tags ?? m?.tags ?? [],
         container: this.ecs.has(id, 'container'),
-        kind: pk ? (this.ecs.has(id, 'posato') ? 'oggetto posato su un mobile' : 'oggetto a terra') : m?.persona ? 'persona' : this.ecs.has(id, 'container') ? 'mobile' : 'cosa',
+        kind: pk ? (this.ecs.has(id, 'placed') ? 'oggetto posato su un mobile' : 'oggetto a terra') : m?.persona ? 'persona' : this.ecs.has(id, 'container') ? 'mobile' : 'cosa',
         learnModule: !pk && !m?.persona ? entry : undefined,
         learnItem: pk?.item,
       },
@@ -5479,7 +5479,7 @@ export class Kernel {
   /** What another wanderer says of themselves (T44a): their profile here, or what the server told a mirror. */
   introOf(entity: Id): string | undefined {
     const remote = this.ecs.get(entity, 'remote');
-    if (typeof remote?.presentazione === 'string') return remote.presentazione || undefined;
+    if (typeof remote?.introduction === 'string') return remote.introduction || undefined;
     const id = this.otherWanderer(entity);
     return id ? this.profileOf(id)?.introduction : undefined;
   }
@@ -5490,7 +5490,7 @@ export class Kernel {
     for (const w of this.wanderersById.values()) {
       if (!this.godMode(w.id)) continue;
       const n: any = this.ecs.get(w.entity, 'needs');
-      if (n) Object.assign(n, { hunger: 100, thirst: 100, energy: 100, health: 100, morto: false });
+      if (n) Object.assign(n, { hunger: 100, thirst: 100, energy: 100, health: 100, dead: false });
     }
   }
 
@@ -5500,7 +5500,7 @@ export class Kernel {
     let mortal = false;
     for (const w of this.wanderersById.values()) {
       const n: any = this.ecs.get(w.entity, 'needs');
-      if (n?.morto && !this.godMode(w.id)) mortal = true;
+      if (n?.dead && !this.godMode(w.id)) mortal = true;
     }
     this.keepGods();
     return !mortal;
@@ -5517,7 +5517,7 @@ export class Kernel {
     this.keepGods();
     for (const w of this.wanderersById.values()) {
       const n: any = this.ecs.get(w.entity, 'needs');
-      if (!n?.morto || this.godMode(w.id) || this.deathVerdicts.has(w.id)) continue;
+      if (!n?.dead || this.godMode(w.id) || this.deathVerdicts.has(w.id)) continue;
       const why = n.thirst <= 0 ? 'sete' : n.hunger <= 0 ? 'fame' : cause;
       this.as(w.id, () => this.die(why));
     }
@@ -5702,10 +5702,10 @@ export class Kernel {
     this.as(id, () => {
       const wandererModule = [...this.modules.values()].find((m) => m.manifest.kind === 'player');
       const defaults: Record<string, any> = clone(wandererModule?.manifest.components ?? FALLBACK_PLAYER);
-      Object.assign(this.needs() ?? {}, { ...FALLBACK_PLAYER.needs, ...(defaults.needs ?? {}), morto: false });
+      Object.assign(this.needs() ?? {}, { ...FALLBACK_PLAYER.needs, ...(defaults.needs ?? {}), dead: false });
       if (v.loseAll) {
         this.ecs.set(this.wandererEntity, 'inventory', newInventory());
-        this.ecs.set(this.wandererEntity, 'stati', {});
+        this.ecs.set(this.wandererEntity, 'states', {});
         Object.assign(this.phrase(), { tokens: [], sel: 0 });
         for (const it of wandererModule?.manifest.inventory ?? []) if (this.content.get(it)) this.give(it, 1);
       }
@@ -6211,16 +6211,16 @@ export class Kernel {
   }
 
   /** States of the wanderer (on horseback, with a backpack…): what they change, until when. */
-  states(): Record<string, { velocita: number; peso: number; luce: number; fino: number }> {
+  states(): Record<string, { speed: number; weight: number; light: number; expires: number }> {
     // Lua removes a state by setting it to nil (null on the JS side): those are gone.
-    const st = this.ecs.get(this.wandererEntity, 'stati') ?? {};
+    const st = this.ecs.get(this.wandererEntity, 'states') ?? {};
     for (const k of Object.keys(st)) if (!st[k]) delete st[k];
     return st;
   }
 
   /** How much the wanderer carries without slowing down (a backpack, a horse carry more). */
   carryCapacity(): number {
-    return CARRY_CAPACITY + Object.values(this.states()).reduce((n, s) => n + (Number(s.peso) || 0), 0);
+    return CARRY_CAPACITY + Object.values(this.states()).reduce((n, s) => n + (Number(s.weight) || 0), 0);
   }
 
   /** States run out; a state with light lights the wanderer's way. */
@@ -6228,12 +6228,12 @@ export class Kernel {
     const st = this.states();
     let light = 0;
     for (const [k, s] of Object.entries(st)) {
-      if (s.fino && s.fino < this.time) delete st[k];
-      else light = Math.max(light, Number(s.luce) || 0);
+      if (s.expires && s.expires < this.time) delete st[k];
+      else light = Math.max(light, Number(s.light) || 0);
     }
-    const l = this.ecs.get(this.wandererEntity, 'luce');
-    if (light > 0) this.ecs.set(this.wandererEntity, 'luce', { ...(l ?? {}), accesa: true, raggio: light, daStato: true });
-    else if (l?.daStato) this.ecs.set(this.wandererEntity, 'luce', { accesa: false });
+    const l = this.ecs.get(this.wandererEntity, 'light');
+    if (light > 0) this.ecs.set(this.wandererEntity, 'light', { ...(l ?? {}), lit: true, radius: light, fromState: true });
+    else if (l?.fromState) this.ecs.set(this.wandererEntity, 'light', { lit: false });
   }
 
   /** Magic runes in the phrase, in their order: the incantation T would cast. */
@@ -6780,7 +6780,7 @@ export class Kernel {
     this.ventureTick();
     this.awayTick();
     const workers = new Map<string, number>();
-    for (const id of this.ecs.query('mestiere', 'chunk')) {
+    for (const id of this.ecs.query('job', 'chunk')) {
       const k = this.ecs.get(id, 'chunk')?.key;
       if (k) workers.set(k, (workers.get(k) ?? 0) + 1);
     }
@@ -6803,18 +6803,18 @@ export class Kernel {
       const phaseKey = `${now.when}`;
       if (this.lastPhase.get(id) !== phaseKey) {
         this.lastPhase.set(id, phaseKey);
-        this.ecs.set(id, 'attivita', { tipo: activity, ferma: false });
-        if (mind.mode === 'vaga') this.ecs.set(id, 'meta', this.placeFor(id, identity, now.where, activity) ?? { none: true });
+        this.ecs.set(id, 'activity', { kind: activity, still: false });
+        if (mind.mode === 'vaga') this.ecs.set(id, 'goal', this.placeFor(id, identity, now.where, activity) ?? { none: true });
         if (Math.hypot(p.x - pc.x, p.y - pc.y) < 10) this.speak(id, `(${now.does})`);
       }
       // Arrived: they do it, there, visibly (lying in bed, hoeing the field, fishing on the bank).
-      const meta = this.ecs.get(id, 'meta');
-      const att = this.ecs.get(id, 'attivita');
+      const meta = this.ecs.get(id, 'goal');
+      const att = this.ecs.get(id, 'activity');
       if (att && mind.mode === 'vaga') {
         const arrived = !meta?.x || Math.hypot(meta.x - p.x, meta.y - p.y) < 1.3;
-        att.ferma = arrived && activity !== 'stroll' && activity !== 'patrol';
-        att.tipo = activity;
-      } else if (att) att.ferma = false;
+        att.still = arrived && activity !== 'stroll' && activity !== 'patrol';
+        att.kind = activity;
+      } else if (att) att.still = false;
     }
     this.meetings(people, pc);
     this.plotTick();
@@ -6859,20 +6859,20 @@ export class Kernel {
    * the others live as before. False when they are not at work (no program, following someone, the place full).
    */
   private workTick(id: Id, identity: Identity, mind: Mind, workers: Map<string, number>): boolean {
-    const had = this.ecs.get(id, 'mestiere');
+    const had = this.ecs.get(id, 'job');
     const program = mind.mode === 'vaga' ? matchJob(identity.job, this.jobPrograms()) : undefined;
     const place: string | undefined = this.ecs.get(id, 'chunk')?.key;
     if (!program || (!had && place && (workers.get(place) ?? 0) >= WORKERS_PER_PLACE)) {
       if (had) {
-        this.ecs.remove(id, 'mestiere');
-        this.ecs.remove(id, 'lavoro');
+        this.ecs.remove(id, 'job');
+        this.ecs.remove(id, 'work');
       }
       return false;
     }
     const fase = dayPhase(this.time, Kernel.DAY_SECONDS);
     // In a team (T245d): the venture takes the place of the work of the day, as long as there is something to do there.
     const venture = fase === 'day' ? this.ventureWorkable(identity.name) : undefined;
-    if (had?.id === program.id && had.fase === fase && had.impresa === venture?.id) return true;
+    if (had?.id === program.id && had.phase === fase && had.venture === venture?.id) return true;
     if (!had && place) workers.set(place, (workers.get(place) ?? 0) + 1);
     const first = program.day.morning.concat(program.day.day).find((t) => t.pose)?.pose;
     const home = this.placeFor(id, identity, 'home', 'sleep') ?? this.placeFor(id, identity, 'home');
@@ -6885,19 +6885,19 @@ export class Kernel {
     const p = this.ecs.get(id, 'pos');
     // The place they belong to: its deposit is where what they make goes (T245c).
     const luogo = place ?? (p ? this.chunkAt(p.x, p.y)?.key : undefined);
-    this.ecs.set(id, 'mestiere', {
+    this.ecs.set(id, 'job', {
       id: program.id,
-      fase,
-      giorno: this.day(),
-      ...(luogo ? { luogo } : {}),
-      compiti: venture ? [{ does: 'build' } as JobTask, ...structuredClone(program.day[fase])] : structuredClone(program.day[fase]),
-      ...(venture ? { impresa: venture.id, impresa_posto: { x: venture.spot.x, y: venture.spot.y } } : {}),
+      phase: fase,
+      day: this.day(),
+      ...(luogo ? { chunk: luogo } : {}),
+      tasks: venture ? [{ does: 'build' } as JobTask, ...structuredClone(program.day[fase])] : structuredClone(program.day[fase]),
+      ...(venture ? { venture: venture.id, venture_spot: { x: venture.spot.x, y: venture.spot.y } } : {}),
       // The places by the values of `dove` (T307b): sys.work reads `m[dove]`.
       ...(home ? { home } : {}),
       ...(square ? { square } : {}),
       ...(work ? { work } : {}),
     });
-    this.ecs.remove(id, 'meta');
+    this.ecs.remove(id, 'goal');
     return true;
   }
 
@@ -6940,13 +6940,13 @@ export class Kernel {
 
   /** How many of an item an individual can bring: what they carry and what the deposit of their place holds. */
   private canBring(id: Id | undefined, luogo: string | undefined, item: string): number {
-    const carried = id !== undefined ? Number(this.ecs.get(id, 'carico')?.[item]) || 0 : 0;
+    const carried = id !== undefined ? Number(this.ecs.get(id, 'load')?.[item]) || 0 : 0;
     return carried + (luogo ? Number(this.placeDeposit(luogo)[item]) || 0 : 0);
   }
 
   /** The place an individual belongs to: the one their trade says, else where they were met. */
   private placeOfPerson(id: Id | undefined, origine: string | undefined): string | undefined {
-    const m = id !== undefined ? this.ecs.get(id, 'mestiere')?.luogo : undefined;
+    const m = id !== undefined ? this.ecs.get(id, 'job')?.chunk : undefined;
     return typeof m === 'string' ? m : origine?.split('#')[0];
   }
 
@@ -6984,12 +6984,12 @@ export class Kernel {
   }
 
   /** A building fell (T245d): its rebuilding, on its lot, with the same model and seed. */
-  private ventureOfRuin(origin: string, ruin: { concetto?: string; classe?: string; taglia?: string }, form: FormComp | undefined, p: { x: number; y: number }): void {
+  private ventureOfRuin(origin: string, ruin: { concept?: string; class?: string; size?: string }, form: FormComp | undefined, p: { x: number; y: number }): void {
     if (this.mirror) return;
     const [luogo, lot] = origin.split('#s');
     if (!luogo || lot === undefined || !/^\d+$/.test(lot)) return;
     const id = ventureId(`ricostruzione|${origin}|${this.day()}`);
-    const concetto = ruin.concetto ?? 'una casa';
+    const concetto = ruin.concept ?? 'una casa';
     this.startVenture({
       id,
       title: `Si ricostruisce ${concetto}`,
@@ -7000,10 +7000,10 @@ export class Kernel {
       lot: Number(lot),
       origin: origin,
       concept: concetto,
-      ...(ruin.classe ? { class: ruin.classe } : {}),
-      ...(ruin.taglia ? { size: ruin.taglia } : {}),
+      ...(ruin.class ? { class: ruin.class } : {}),
+      ...(ruin.size ? { size: ruin.size } : {}),
       ...(form ? { model: form.wanted ?? form.model, seed: form.seed, yaw: form.yaw } : {}),
-      phases: housePhases(ruin.classe),
+      phases: housePhases(ruin.class),
       roles: structuredClone(HOUSE_ROLES),
       brought: {},
       worked: 0,
@@ -7177,10 +7177,10 @@ export class Kernel {
         for (const m of v.team) {
           const id = bodies.get(m.name);
           if (id === undefined) continue;
-          const job = this.ecs.get(id, 'mestiere');
-          const s = this.ecs.get(id, 'lavoro');
-          const task = job?.impresa === v.id && s ? job.compiti?.[(Number(s.passo) || 1) - 1] : undefined;
-          if (task?.does !== 'build' || !this.ecs.get(id, 'attivita')?.ferma) continue;
+          const job = this.ecs.get(id, 'job');
+          const s = this.ecs.get(id, 'work');
+          const task = job?.venture === v.id && s ? job.tasks?.[(Number(s.step) || 1) - 1] : undefined;
+          if (task?.does !== 'build' || !this.ecs.get(id, 'activity')?.still) continue;
           const p = this.ecs.get(id, 'pos');
           if (v.task ? this.ecs.get(id, 'chunk')?.key === v.chunk || this.chunkAt(p.x, p.y)?.key === v.chunk : Math.hypot(p.x - v.spot.x, p.y - v.spot.y) <= SITE_REACH + 1) worked++;
         }
@@ -7199,7 +7199,7 @@ export class Kernel {
         if (state === 'finished') this.ventureDone(v);
       }
     }
-    this.cantierePanels();
+    this.worksitePanels();
   }
 
   /** A phase that closes is a line of the registry, with no call (`impresa.fase`). */
@@ -7235,16 +7235,16 @@ export class Kernel {
     if (ch?.stage !== 'planned' || !ch.plan) return;
     const stage = this.ventureStage(v);
     const changed = this.ventureIntoPlan(v, ch.plan);
-    const sid = this.ecs.query('struttura', 'origin').find((e) => this.ecs.get(e, 'origin').key === v.origin);
+    const sid = this.ecs.query('structure', 'origin').find((e) => this.ecs.get(e, 'origin').key === v.origin);
     if (sid !== undefined) {
-      const st = this.ecs.get(sid, 'struttura');
-      if (stage >= 1) delete st.stadio;
-      else st.stadio = stage;
+      const st = this.ecs.get(sid, 'structure');
+      if (stage >= 1) delete st.stage;
+      else st.stage = stage;
     } else if (v.area) this.spawnPlannedHouse(ch, ch.plan.houses!.find((h) => h.origin === v.origin)!);
     else {
       const { lots } = this.lotsOf(ch, ch.plan, this.pathCode());
       const l = lots.find((x) => x.origin === v.origin);
-      if (l) this.ecs.spawn({ pos: { x: l.x, y: l.y }, glyph: { ch: '⌂', color: this.terrain?.manifest.roof?.color ?? '#9a4632' }, body: { r: 0.5, solid: true }, form: l.form, struttura: { ...l.struttura, ...(stage < 1 ? { stadio: stage } : {}) }, chunk: { key: ch.key }, origin: { key: l.origin } });
+      if (l) this.ecs.spawn({ pos: { x: l.x, y: l.y }, glyph: { ch: '⌂', color: this.terrain?.manifest.roof?.color ?? '#9a4632' }, body: { r: 0.5, solid: true }, form: l.form, structure: { ...l.structure, ...(stage < 1 ? { stage } : {}) }, chunk: { key: ch.key }, origin: { key: l.origin } });
     }
     if (changed) this.saveChunkSoon(ch);
   }
@@ -7279,17 +7279,17 @@ export class Kernel {
 
   /** A house of the plan built on free ground (T245d, T245e): a structure like those of the lots, with its model, seed, turn and stage. */
   private spawnPlannedHouse(ch: Chunk, h: PlannedHouse | undefined): void {
-    if (!h || typeof h.origin !== 'string' || ![h.x, h.y].every(Number.isFinite) || this.ecs.query('struttura', 'origin').some((e) => this.ecs.get(e, 'origin').key === h.origin)) return;
+    if (!h || typeof h.origin !== 'string' || ![h.x, h.y].every(Number.isFinite) || this.ecs.query('structure', 'origin').some((e) => this.ecs.get(e, 'origin').key === h.origin)) return;
     const classe = typeof h.class === 'string' ? h.class : 'building';
     const model = this.forms.resolve(typeof h.model === 'string' ? h.model : undefined, classe);
     const form: FormComp = { model, seed: Number.isFinite(h.seed) ? h.seed : this.forms.seedFor(model, h.origin), yaw: Number.isFinite(h.yaw) ? h.yaw : 0, ...(h.model && h.model !== model ? { wanted: h.model, classe } : {}) };
     const done = this.savedForms.get(h.origin);
     if (done?.length) form.done = [...done];
     const stadio = Number.isFinite(h.stage) ? Math.max(0, Math.min(1, h.stage)) : 1;
-    this.ecs.spawn({ pos: { x: h.x, y: h.y }, glyph: { ch: '⌂', color: this.terrain?.manifest.roof?.color ?? '#9a4632' }, body: { r: 0.5, solid: true }, form, struttura: { concetto: String(h.concept ?? 'una casetta').slice(0, 80), classe, ...(h.model ? { model: h.model } : {}), ...(stadio < 1 ? { stadio } : {}) }, chunk: { key: ch.key }, origin: { key: h.origin } });
+    this.ecs.spawn({ pos: { x: h.x, y: h.y }, glyph: { ch: '⌂', color: this.terrain?.manifest.roof?.color ?? '#9a4632' }, body: { r: 0.5, solid: true }, form, structure: { concept: String(h.concept ?? 'una casetta').slice(0, 80), class: classe, ...(h.model ? { model: h.model } : {}), ...(stadio < 1 ? { stage: stadio } : {}) }, chunk: { key: ch.key }, origin: { key: h.origin } });
   }
 
-  /** What `costruisci` asks the kernel (`world.impresa(id)`): the next step of the venture this individual works at, or nothing. */
+  /** What `costruisci` asks the kernel (`world.venture(id)`): the next step of the venture this individual works at, or nothing. */
   private ventureStepFor(id: Id): VentureStep | undefined {
     if (!this.ecs.alive.has(id) || this.wandererOf(id) !== undefined) return undefined;
     const name = this.ecs.get(id, 'identity')?.name;
@@ -7300,7 +7300,7 @@ export class Kernel {
   }
 
   /**
-   * Things brought to a venture (`world.impresa_porta`): an individual of its team at the site gives what they carry (`carico`); a
+   * Things brought to a venture (`world.venture_bring`): an individual of its team at the site gives what they carry (`load`); a
    * wanderer near a site gives from their bag what it still needs (the panel's button). Only what the venture still needs is taken.
    * The kernel writes the file; whoever brings only acts in the world (rule 8b). How many were taken.
    */
@@ -7326,7 +7326,7 @@ export class Kernel {
         if (taken && inv) removeItem(inv, it, taken);
         total += taken;
       } else {
-        const c = this.ecs.get(id, 'carico');
+        const c = this.ecs.get(id, 'load');
         const { taken } = bring(v, it, Number(c?.[it]) || 0);
         if (taken) {
           c[it] -= taken;
@@ -7356,7 +7356,7 @@ export class Kernel {
    * The panel of the site (T245d, «Il cantiere» of `sys.work`): on every wanderer's body, the venture nearest to them, in words of the
    * world. The panel names these fields, so they travel to each client with W (T263, rule 8f); nothing else of the file leaves.
    */
-  private cantierePanels(): void {
+  private worksitePanels(): void {
     for (const w of this.wanderersInWorld()) {
       const p = { x: w.x, y: w.y };
       const near = this.ventureList
@@ -7366,20 +7366,20 @@ export class Kernel {
         .sort((a, b) => a.d - b.d)[0]?.v;
       // No site near: no fields, nothing travels (the panel shows nothing).
       if (!near) {
-        if (this.ecs.has(w.id, 'cantiere')) this.ecs.remove(w.id, 'cantiere');
+        if (this.ecs.has(w.id, 'worksite')) this.ecs.remove(w.id, 'worksite');
         continue;
       }
       const name = (it: string) => this.itemInfo(it).name;
       const pr = ventureProgress(near);
       const fields = {
-            titolo: near.title,
-            fase: pr.finita ? 'finita' : `${near.phases[pr.fase].name} (${pr.fase + 1} di ${near.phases.length})`,
-            stato: near.state === 'waiting' ? 'aspetta il materiale' : near.state === 'stopped' ? 'ferma: nessuno ci lavora' : italianName('imprese', near.state),
-            manca: missingWords(near, name),
-            squadra: near.team.map((m) => `${m.name} (${m.role})`).join(', ') || 'nessuno',
+            title: near.title,
+            phase: pr.finita ? 'finita' : `${near.phases[pr.fase].name} (${pr.fase + 1} di ${near.phases.length})`,
+            state: near.state === 'waiting' ? 'aspetta il materiale' : near.state === 'stopped' ? 'ferma: nessuno ci lavora' : italianName('imprese', near.state),
+            missing: missingWords(near, name),
+            team: near.team.map((m) => `${m.name} (${m.role})`).join(', ') || 'nessuno',
           };
-      const cur = this.ecs.get(w.id, 'cantiere');
-      if (!cur || Object.entries(fields).some(([k, x]) => cur[k] !== x)) this.ecs.set(w.id, 'cantiere', fields);
+      const cur = this.ecs.get(w.id, 'worksite');
+      if (!cur || Object.entries(fields).some(([k, x]) => cur[k] !== x)) this.ecs.set(w.id, 'worksite', fields);
     }
   }
 
@@ -7404,7 +7404,7 @@ export class Kernel {
     if (fase !== 'evening' || this.awayDone === key) return;
     this.awayDone = key;
     const loaded = (luogo: string | undefined) => !!luogo && this.chunks.get(luogo)?.stage === 'planned';
-    const depKey = (luogo: string) => `deposito:${luogo.replace(',', ':')}`;
+    const depKey = (luogo: string) => `deposit:${luogo.replace(',', ':')}`;
     const deposit = (luogo: string) => ({ ...this.placeDeposit(luogo) });
     const setDeposit = (luogo: string, d: Record<string, number>) => this.stores.set(WORK_MODULE, depKey(luogo), Object.keys(d).length ? d : undefined);
     const busy = new Set<string>();
@@ -7518,7 +7518,7 @@ export class Kernel {
 
   /** What the deposit of a place holds (T245c, ADR-0141): what the trades brought there, in the store of `sys.work`. */
   placeDeposit(chunkKey: string): Record<string, number> {
-    const v = this.stores.get(WORK_MODULE, `deposito:${chunkKey.replace(',', ':')}`);
+    const v = this.stores.get(WORK_MODULE, `deposit:${chunkKey.replace(',', ':')}`);
     return v && typeof v === 'object' && !Array.isArray(v) ? (v as Record<string, number>) : {};
   }
 
@@ -7660,7 +7660,7 @@ export class Kernel {
         if (Math.hypot(pa.x - pb.x, pa.y - pb.y) > 2.4) continue;
         const ia: Identity = this.ecs.get(a, 'identity');
         const ib: Identity = this.ecs.get(b, 'identity');
-        if (this.ecs.get(a, 'attivita')?.tipo === 'sleep' || this.ecs.get(b, 'attivita')?.tipo === 'sleep') continue;
+        if (this.ecs.get(a, 'activity')?.tipo === 'sleep' || this.ecs.get(b, 'activity')?.tipo === 'sleep') continue;
         const rel = ia.family?.find((f) => f.name === ib.name);
         const key = [ia.name, ib.name].sort().join('|');
         if ((this.greeted.get(key) ?? -1e9) > this.time - (rel ? 90 : 240)) continue;
@@ -7743,7 +7743,7 @@ export class Kernel {
         if (id !== undefined) {
           const identity: Identity = this.ecs.get(id, 'identity');
           const place = ['home', 'work', 'square'].includes(beat.where) ? this.placeFor(id, identity, beat.where, inferActivity(beat.what, beat.where)) : undefined;
-          if (place) this.ecs.set(id, 'meta', place);
+          if (place) this.ecs.set(id, 'goal', place);
           this.queuedSpeech.push({ id, text: beat.line ? beat.line : `(${beat.what})`, at: this.time + 1 });
           const p = this.ecs.get(id, 'pos');
           if (p && Math.hypot(p.x - pc.x, p.y - pc.y) < 12) this.message(`${beat.who} ${beat.what}${beat.clue ? ` — ${beat.clue}` : ''}`);
@@ -8018,7 +8018,7 @@ export class Kernel {
       if (bs.length) {
         const b = bs[(h + (where === 'work' ? 1 : 0)) % bs.length];
         // Home is the floor of the house's model, inside its walls (its lot, until the model is ready).
-        const sid = this.ecs.query('struttura', 'origin').find((e) => this.ecs.get(e, 'origin').key === `${ch.key}#s${ch.lots.indexOf(b)}`);
+        const sid = this.ecs.query('structure', 'origin').find((e) => this.ecs.get(e, 'origin').key === `${ch.key}#s${ch.lots.indexOf(b)}`);
         const inside = sid !== undefined ? this.interiorPoints(sid) : [];
         if (inside.length) return inside[h % inside.length];
         const floor = b.floor.filter(free);
@@ -8492,7 +8492,7 @@ export class Kernel {
       this.savedContainers.clear();
       for (const m of this.rari.values()) m.clear();
       // What lay on the furniture of the world of before goes with it (T291).
-      for (const id of this.ecs.query('posato')) this.ecs.destroy(id);
+      for (const id of this.ecs.query('placed')) this.ecs.destroy(id);
       this.repo.write('world/state.json', null);
       for (const p of Object.keys(this.repo.working)) if (p.startsWith(PLAYERS_DIR)) this.repo.write(p, null);
       this.wanted.clear();
@@ -8640,9 +8640,9 @@ export class Kernel {
       if (c && p) Object.assign(c, { ox: v.pos!.x - p.x, oy: v.pos!.y - p.y });
     }
     if (v.inventory?.slots) this.ecs.set(this.wandererEntity, 'inventory', v.inventory);
-    if (v.needs) Object.assign(this.needs() ?? {}, v.needs, { morto: false });
+    if (v.needs) Object.assign(this.needs() ?? {}, v.needs, { dead: false });
     if (v.hand?.tokens) Object.assign(this.phrase(), v.hand);
-    if (v.states) this.ecs.set(this.wandererEntity, 'stati', Object.fromEntries(Object.entries(v.states).filter(([, x]) => x && typeof x === 'object')));
+    if (v.states) this.ecs.set(this.wandererEntity, 'states', internalComponent('states', Object.fromEntries(Object.entries(v.states).filter(([, x]) => x && typeof x === 'object'))));
     if (v.slots && typeof v.slots === 'object') this.ecs.set(this.wandererEntity, 'slots', v.slots);
     // What the mechanics derive from the slots (defence, states) is rebuilt by their own on_slot.
     for (const p of this.uiPanels()) {
@@ -8847,10 +8847,10 @@ export class Kernel {
   private placedToSave(): PlacedRecord[] {
     const out: PlacedRecord[] = [];
     const r4 = (v: number) => Math.round(v * 10000) / 10000;
-    for (const id of this.ecs.query('posato', 'pickup', 'pos')) {
+    for (const id of this.ecs.query('placed', 'pickup', 'pos')) {
       const pk = this.ecs.get(id, 'pickup');
       const p = this.ecs.get(id, 'pos');
-      const z = this.ecs.get(id, 'posato').z;
+      const z = this.ecs.get(id, 'placed').z;
       const yaw = this.ecs.get(id, 'form')?.yaw ?? 0;
       if (typeof pk?.item !== 'string' || !(pk.count >= 1) || ![p.x, p.y, z, yaw].every(Number.isFinite)) continue;
       out.push({ item: pk.item, count: Math.floor(pk.count), x: r4(p.x), y: r4(p.y), z: r4(z), yaw: r4(yaw), ...(pk.inv ? { inv: pk.inv } : {}) });
@@ -8873,7 +8873,7 @@ export class Kernel {
       const n = typeof count === 'number' && Number.isInteger(count) && count >= 1 ? Math.min(count, 999) : 1;
       const id = this.spawnItem(item, at[0], at[1], n);
       if (typeof yaw === 'number' && Number.isFinite(yaw)) this.ecs.get(id, 'form').yaw = yaw;
-      this.ecs.set(id, 'posato', { z: at[2] });
+      this.ecs.set(id, 'placed', { z: at[2] });
       this.ecs.get(id, 'pos').z = at[2];
       const bag = readInventory(inv);
       if (bag) this.ecs.get(id, 'pickup').inv = bag;
@@ -9160,15 +9160,15 @@ export class Kernel {
    * number on the player (Lua must not iterate tables that live on the JS side: wasmoon cannot).
    */
   private paceTick(): void {
-    const stati = this.ecs.get(this.wandererEntity, 'stati');
-    let passo = 1;
-    if (stati)
-      for (const k of Object.keys(stati)) {
-        if (!stati[k] || typeof stati[k] !== 'object') delete stati[k];
-        else passo *= Number(stati[k].velocita) || 1;
+    const states = this.ecs.get(this.wandererEntity, 'states');
+    let step = 1;
+    if (states)
+      for (const k of Object.keys(states)) {
+        if (!states[k] || typeof states[k] !== 'object') delete states[k];
+        else step *= Number(states[k].speed) || 1;
       }
     const pl = this.ecs.get(this.wandererEntity, 'player');
-    if (pl) pl.passo = Math.max(0.2, Math.min(4, passo));
+    if (pl) pl.step = Math.max(0.2, Math.min(4, step));
   }
 
   private rebuildSolids(): void {
@@ -9249,7 +9249,7 @@ export class Kernel {
       if (!Number.isFinite(p.x) || !Number.isFinite(p.y)) continue;
       // What lies on furniture rests on the highest floor no higher than where it was put (T291): its shelf, or, if the furniture is
       // not there (gone, or its form still on its way), what is under it. Where it was put stays, so the shelf takes it back.
-      const placed = this.ecs.get(id, 'posato');
+      const placed = this.ecs.get(id, 'placed');
       if (placed && Number.isFinite(placed.z)) p.z = this.floorBelow(p.x, p.y, placed.z + REST_SLACK);
       else settle(p, p.x, p.y);
     }

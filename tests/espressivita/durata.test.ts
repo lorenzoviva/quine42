@@ -20,8 +20,8 @@ function finished(k: Kernel): number {
   return n;
 }
 
-const phase = (k: Kernel) => k.ecs.get(k.ecs.query('cantiere')[0], 'cantiere').fase as string;
-const placed = (k: Kernel) => k.ecs.get(k.ecs.query('cantiere')[0], 'cantiere').posati as number;
+const phase = (k: Kernel) => k.ecs.get(k.ecs.query('worksite')[0], 'worksite').phase as string;
+const placed = (k: Kernel) => k.ecs.get(k.ecs.query('worksite')[0], 'worksite').posati as number;
 
 /** Plays until `done` says so, at most `seconds`. */
 function playUntil(k: Kernel, done: () => boolean, seconds = 120): void {
@@ -239,10 +239,10 @@ describe('a game on the server, seen from a client', () => {
     for (let i = 0; i < 30; i++) server.tick(DT);
     // On the server the value is there, and on the wire under the name the panel gives it; a field no panel names does not travel.
     expect(k.as('bea', () => k.uiValue('torneo_visto.tabellone'))).toBe('aperto');
-    expect(bea.stato.campi?.['torneo_visto.tabellone']).toBe('aperto');
+    expect(bea.state.fields?.['torneo_visto.tabellone']).toBe('aperto');
     k.as('bea', () => (k.ecs.get(k.wandererEntity, 'torneo_visto').segreto = 'non nominato'));
     for (let i = 0; i < 5; i++) server.tick(DT);
-    const wire = JSON.stringify(heard.filter((m) => m.t === 'ingresso' || m.t === 'aggiorna').map((m) => ({ ...m, files: undefined })));
+    const wire = JSON.stringify(heard.filter((m) => m.t === 'welcome' || m.t === 'update').map((m) => ({ ...m, files: undefined })));
     expect(wire).toContain('torneo_visto.tabellone');
     expect(wire).not.toContain('non nominato');
   });
@@ -278,7 +278,7 @@ describe('what a panel and the API cannot say', () => {
 
   it('LIMIT (events): what the API refuses, each a thing a scenario asked for', () => {
     const asked: Array<[string, string]> = [
-      ['bus.on("morte", f)', 'bus.on'],
+      ['bus.on("death", f)', 'bus.on'],
       ['ui.open("terminale")', 'ui.open'],
       ['world.daylight()', 'world.daylight'],
       ['world.store("mercato")', 'world.store'],

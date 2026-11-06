@@ -18,10 +18,10 @@ async function bootMany(): Promise<Kernel> {
 }
 
 /** A browser of a multiplayer game, without the browser: a session, and a mirror kernel filled by the thin client. */
-async function thin(server: SessionServer, id: string, nome?: string): Promise<ThinClient> {
+async function thin(server: SessionServer, id: string, name?: string): Promise<ThinClient> {
   const { server: s, client: c } = fakeLink();
   server.connect(s);
-  const session = new SessionClient(c, { id, nome });
+  const session = new SessionClient(c, { id, name });
   await session.ready;
   const k = await Kernel.boot({ files: session.files, store: memoryStore(), ai: new MockAiModels(), mirror: true });
   return new ThinClient(k, session);
@@ -323,7 +323,7 @@ describe('what is carried, among many (T39b)', () => {
     expect(typeof (await until(server, [anna], anna.k.freeItemAction(slotOf(anna.k, 'item.pane'), 'lo annuso')))).toBe('string');
     // A slot that does not exist is refused, and nothing changes.
     const was = JSON.stringify(serverInv());
-    const r = await until(server, [anna], anna.session.act({ t: 'oggetto', op: 'sposta', slot: 99, verso: 0 }));
+    const r = await until(server, [anna], anna.session.act({ t: 'item', op: 'move', slot: 99, toward: 0 }));
     expect(r.ok).toBe(false);
     expect(JSON.stringify(serverInv())).toBe(was);
   }, 60_000);
@@ -388,8 +388,8 @@ describe('what is carried, among many (T39b)', () => {
     expect(countItem(anna.k.container(box)!.inv, 'item.pane')).toBe(3);
     expect(countItem(anna.k.inventory(), 'item.pane')).toBe(0);
     // Too far: the server does not open it.
-    const r = await until(server, [anna], anna.session.act({ t: 'contenitore', entita: far, op: 'apri' }));
-    expect(r).toMatchObject({ ok: false, motivo: 'è troppo lontano' });
+    const r = await until(server, [anna], anna.session.act({ t: 'container', entity: far, op: 'open' }));
+    expect(r).toMatchObject({ ok: false, reason: 'è troppo lontano' });
     expect(k.container(far)!.filled).toBeFalsy();
   }, 60_000);
 
@@ -416,7 +416,7 @@ describe('what is carried, among many (T39b)', () => {
     expect(anna.k.slots()[panel].testa ?? null).toBeNull();
     expect(countItem(anna.k.inventory(), 'item.elmo')).toBe(1);
     // A button of the panel reaches the server (with nothing to do, it answers all the same).
-    expect((await until(server, [anna], anna.session.act({ t: 'pannello', pannello: panel, op: 'pulsante', azione: 'nulla' }))).ok).toBe(true);
+    expect((await until(server, [anna], anna.session.act({ t: 'panel', panel: panel, op: 'button', action: 'nulla' }))).ok).toBe(true);
     // A learned action of the terrain under her: the server does it on that tile.
     const col = Math.floor(start.x);
     const row = Math.floor(start.y);
@@ -450,7 +450,7 @@ describe('il mondo riparte (T127, ADR-0110)', () => {
       link: { send: (m: unknown) => toWorld?.(m), onMessage: (fn: (m: never) => void) => void fns.push(fn), onClose: (fn: () => void) => void closes.push(fn), close: () => undefined } as never,
       restart(server: SessionServer) {
         wire(server);
-        fns.forEach((f) => f({ t: 'mondo', stato: 'ripartito', testo: 'Il mondo è ripartito.' } as never));
+        fns.forEach((f) => f({ t: 'world', state: 'restarted', text: 'Il mondo è ripartito.' } as never));
       },
     };
   }
@@ -471,7 +471,7 @@ describe('il mondo riparte (T127, ADR-0110)', () => {
     }) as typeof k.message;
     await settle(old, [thinClient]);
     expect(session.me).toBeDefined();
-    const asking = session.act({ t: 'segui' } as never);
+    const asking = session.act({ t: 'follow' } as never);
 
     // The world died: another kernel on the same universe, which has one more file a player gets than the mirror knows of.
     const after = await bootMany();

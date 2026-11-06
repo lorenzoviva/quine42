@@ -14,7 +14,7 @@ function M.on_ui(user, azione)
     pos = { x = p.x + dir[1] * 0.4, y = p.y + dir[2] * 0.4 },
     proiettile = { vx = dir[1] * VELOCITA, vy = dir[2] * VELOCITA, fino = time + 1 },
     glyph = { ch = "*", color = "#ffee88" },
-    luce = { raggio = 1, accesa = true },
+    light = { radius = 1, lit = true },
   })
   return "Bang!"
 end

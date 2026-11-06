@@ -34,7 +34,7 @@ describe('Hub Sessioni & Creazione Nuovo Universo (T103)', () => {
 
     const { server: s, client: c } = fakeLink();
     server.connect(s);
-    const client = new SessionClient(c, { id: 'viandante-1', nome: 'Viandante Prova' });
+    const client = new SessionClient(c, { id: 'viandante-1', name: 'Viandante Prova' });
     await client.ready;
 
     expect(server.clientCount).toBe(1);

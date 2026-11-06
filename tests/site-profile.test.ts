@@ -106,7 +106,7 @@ describe('the wanderer route of the site (T102)', () => {
   });
 
   it('with accounts the wanderer is the token’s, never the one the page says', async () => {
-    const accounts = { config: { projectId: 'demo' }, verify: async (t: string) => (t === 'buono' ? { uid: 'UgoUID', anonimo: false } : t === 'anon' ? { uid: 'anonUID', anonimo: true } : undefined) };
+    const accounts = { config: { projectId: 'demo' }, verify: async (t: string) => (t === 'buono' ? { uid: 'UgoUID', anonymous: false } : t === 'anon' ? { uid: 'anonUID', anonymous: true } : undefined) };
     expect(await whoAsks(accounts, undefined, 'ugo')).toMatchObject({ status: 401 });
     expect(await whoAsks(accounts, 'falso', 'ugo')).toMatchObject({ status: 401 });
     expect(await whoAsks(accounts, 'buono', 'ugo')).toEqual({ id: 'ugouid', account: 'google' });

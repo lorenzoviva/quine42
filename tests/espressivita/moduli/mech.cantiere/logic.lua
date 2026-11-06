@@ -43,19 +43,19 @@ local function posate(s)
 end
 
 function M.on_ui(user, azione)
-  local s = ecs.get(ecs.first("cantiere"), "cantiere")
-  return "Siamo a: " .. s.fase
+  local s = ecs.get(ecs.first("worksite"), "worksite")
+  return "Siamo a: " .. s.phase
 end
 
 function M.update(dt)
-  local sid = ecs.first("cantiere")
+  local sid = ecs.first("worksite")
   if not sid then return end
-  local s = ecs.get(sid, "cantiere")
+  local s = ecs.get(sid, "worksite")
   local x, y, vuole, fase = prossima(s)
-  s.fase = fase or "finita"
+  s.phase = fase or "finita"
   s.finite = posate(s)
   -- Un pannello legge solo i componenti di chi guarda: ciò che è di tutti va copiato su ognuno.
-  ecs.set(world.player(), "cantiere_visto", { fase = s.fase, finite = s.finite })
+  ecs.set(world.player(), "cantiere_visto", { fase = s.phase, finite = s.finite })
   if not x then return end
   -- Un muratore che manca si cerca al prossimo giro: il cantiere non dipende da nessuno.
   if not ecs.first("muratore") then world.spawn("npc.muratore", s.x - 1, s.y - 1) end
@@ -64,7 +64,7 @@ function M.update(dt)
       -- Alla catasta.
       local cat = world.nearest(p.x, p.y, 40, "catasta")
       if not cat then
-        s.fase = "manca il materiale"
+        s.phase = "manca il materiale"
         return
       end
       local c = ecs.get(cat, "pos")

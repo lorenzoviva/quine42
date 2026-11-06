@@ -437,7 +437,7 @@ export function stripeHandler(opts: StripeRouteOptions): Connect.NextHandleFunct
           if (!account) {
             return send(res, 401, { ok: false, motivo: 'token non valido o scaduto' });
           }
-          if (account.anonimo) {
+          if (account.anonymous) {
             return send(res, 403, {
               ok: false,
               motivo: 'Gli account anonimi non possono acquistare crediti. Lega il tuo account a Google per ricaricare.',

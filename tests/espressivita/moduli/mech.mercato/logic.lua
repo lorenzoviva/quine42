@@ -12,9 +12,9 @@ function M.on_ui(user, azione)
     m.prezzo = m.prezzo + 1
   elseif azione == "ricorda" then
     -- Il solo posto scrivibile da Lua che dura per un viandante: uno stato senza scadenza. È un trucco, non un magazzino.
-    local st = ecs.get(user, "stati") or {}
-    st.taccuino = { velocita = 1, peso = 0, luce = 0, fino = 0, prezzo = m.prezzo }
-    ecs.set(user, "stati", st)
+    local st = ecs.get(user, "states") or {}
+    st.taccuino = { speed = 1, weight = 0, light = 0, expires = 0, prezzo = m.prezzo }
+    ecs.set(user, "states", st)
   end
   mostra(user, m)
   return nil

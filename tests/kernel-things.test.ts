@@ -232,7 +232,7 @@ describe('free actions and effects', () => {
     const bush = spawnInFront(k, 'object.bush', 1.2);
     const crate = spawnInFront(k, 'object.crate', 2.2);
     await k.freeAction(crate, 'brucio la cassa');
-    const fires = () => k.ecs.query('fuoco');
+    const fires = () => k.ecs.query('fire');
     expect(fires().length).toBe(1);
     run(k, 0.5);
     expect(k.ecs.alive.has(bush)).toBe(false);

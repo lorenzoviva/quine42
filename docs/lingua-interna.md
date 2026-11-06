@@ -1,6 +1,6 @@
 # La lingua interna: l'inglese, e le rune in latino (T306, step 42)
 
-> Stato: **decisa** dall'autore (D34, 05/11 sera), ADR-0153; **T307a fatto** (contratto `0.2.0`, ADR-0155: la simulazione e le rune latine, la migrazione `0.1 → 0.2`); **T307b fatto** (contratto `0.3.0`, ADR-0158: la società e il Concilio, la migrazione `0.2 → 0.3`); **T308a fatto** (contratto `0.4.0`, ADR-0159: i campi e i percorsi dei file dell’universo, la migrazione `0.3 → 0.4`). Questo documento è il piano: la tabella completa di ciò che cambia nome,
+> Stato: **decisa** dall'autore (D34, 05/11 sera), ADR-0153; **T307a fatto** (contratto `0.2.0`, ADR-0155: la simulazione e le rune latine, la migrazione `0.1 → 0.2`); **T307b fatto** (contratto `0.3.0`, ADR-0158: la società e il Concilio, la migrazione `0.2 → 0.3`); **T308a fatto** (contratto `0.4.0`, ADR-0159: i campi e i percorsi dei file dell’universo, la migrazione `0.3 → 0.4`); **T308b fatto** (contratto `0.5.0`, ADR-0161: il filo e Lua, la migrazione `0.4 → 0.5`). Questo documento è il piano: la tabella completa di ciò che cambia nome,
 > dominio per dominio, e i task che la applicano. La stessa tabella, come dato, è `src/kernel/internalNames.ts` (`INTERNAL_NAMES`);
 > `tests/internal-names.test.ts` controlla che non abbia doppioni né collisioni e che copra i valori del codice; le tabelle qui sotto
 > le riscrive `npx vite-node lab/scripts/lingua-interna.ts` (con `-- --misura` conta anche i file che ogni passo tocca).
@@ -125,6 +125,13 @@ T307 come era scritto (tutti i valori insieme) toccava ≈ 400 file, T308 ≈ 38
    schemi del Concilio con i campi italiani (T310), i campi del grafo, dei componenti e dei messaggi (T308b), il contenuto dei saldi.
 4. **T308b** — il filo e Lua, contratto `0.5.0`: protocollo (client e server insieme, nessun dato da migrare), componenti, API Lua
    (`Host`, `prelude.lua`, `LUA_API`, prompt dell'Ingegnere, `AGENTS.md`), eventi del bus. Browser: singola e due schede in multigiocatore.
+   **Fatto** (ADR-0161): `MIGRATIONS[3]` con i manifest (`internalManifest0_5`: componenti, `singleton`, `persist`, i campi dei pannelli, i casi), gli
+   stati dei viandanti, il magazzino di `sys.work` (`deposit:`) e il Lua del Concilio (`luaFor0_5`: i nomi in `ecs.*`, i campi dove la tabella
+   del componente si costruisce o si legge su ciò che `ecs` ha dato, l'API, l'evento `death`); i campi **per componente** (`COMPONENT_FIELDS`).
+   Voci aggiunte alla tabella: `compiti`, `impresa_posto`, `concetto`, `classe`, `taglia`, gli stati `velocita`/`peso`/`luce`, il salto
+   `da`/`a`/`alto`, il cantiere `titolo`/`stato`/`manca`/`squadra`, `morto`, `fame`/`sete` dell'evento; `fino` diventa `expires` e non `until`,
+   parola riservata di Lua (il dominio vieta ora le parole riservate). Restano: il canale dei mondi (`worldwire.ts`), le rotte HTTP, lo stato
+   privato di `sys.work` nel suo `work`, gli eventi del bus che solo il TypeScript ascolta.
 5. **T309** — i commenti di Lua e XML, invariato: non cambia contratto (sale `Z`); il controllo di identità (token Lua uguali, albero XML
    senza commenti uguale, voxel uguali). Si fa dopo i passi di codice perché i commenti nominano i valori nuovi.
 6. **T310** — i prompt in inglese e il blocco «Lingua», invariato; in più: toglie (dopo un contratto) la riparazione dei valori italiani del
@@ -213,9 +220,9 @@ posto di un pannello sul filo).
 | [Operazioni e stati sul filo](#valori-filo) | valori | 24 | filo | T308b (0.5) |
 | [Campi dei messaggi](#campi-filo) | campi | 53 | filo | T308b (0.5) |
 | [Componenti visibili a Lua](#componenti) | valori | 16 | disco, filo, Lua, prompt | T308b (0.5) |
-| [Campi dei componenti](#campi-componenti) | campi | 16 | filo, Lua, prompt | T308b (0.5) |
+| [Campi dei componenti](#campi-componenti) | campi | 34 | filo, Lua, prompt | T308b (0.5) |
 | [Nomi dell’API Lua, eventi del bus, chiavi del magazzino](#api-lua) | valori | 6 | Lua, prompt | T308b (0.5) |
-| **totale** | | **912** | | T307a: 192 · T307b: 301 · T308a: 274 · T308b: 145 |
+| **totale** | | **930** | | T307a: 192 · T307b: 301 · T308a: 274 · T308b: 163 |
 
 <a id="classi"></a>
 ### Classi dei modelli (`classi`)
@@ -1637,6 +1644,8 @@ posto di un pannello sul filo).
 
 - **Dove si legge**: `src/kernel/kernel.ts`, `universe/modules/*/logic.lua`, `src/render/entities.ts`
 - **Tocca**: filo, Lua, prompt · **lingua**: inglese · **task**: T308b, contratto 0.5
+- **Già usati, da non prendere**: `and`, `break`, `do`, `else`, `elseif`, `end`, `false`, `for`, `function`, `goto`, `if`, `in`, `local`, `nil`, `not`, `or`, `repeat`, `return`, `then`, `true`, `until`, `while`
+- **Nota**: per componente: `luce {raggio, accesa, colore, daStato}`, `fuoco {raggio}`, `effimero {fino}`, `scudo {fino, spento}`, ogni stato di `stati {velocita, peso, luce, fino}`, `attivita {tipo, ferma}`, `struttura {concetto, classe, taglia, stadio}`, `salto {da, a, alto}`, `lavoro {fase, giorno, impresa, passo, motivo, fino}`, `mestiere {fase, giorno, luogo, compiti, impresa, impresa_posto}` (i compiti con i campi dei programmi dei mestieri), `cantiere {titolo, fase, stato, manca, squadra}`, `raccolto` e `frugato {si}`, `player {passo}`, `needs {morto}`; `fame` e `sete` sono i campi dell’evento `death`. `fino` diventa `expires` e non `until`, parola riservata di Lua. Lo stato privato di `sys.work` nel suo `lavoro` (`fatti`, `tappa`, `arrivato`…) lo legge solo il suo Lua e resta
 
 | italiano | interno |
 |---|---|
@@ -1644,7 +1653,7 @@ posto di un pannello sul filo).
 | `accesa` | `lit` |
 | `colore` | `color` |
 | `daStato` | `fromState` |
-| `fino` | `until` |
+| `fino` | `expires` |
 | `spento` | `off` |
 | `tipo` | `kind` |
 | `ferma` | `still` |
@@ -1656,13 +1665,31 @@ posto di un pannello sul filo).
 | `motivo` | `reason` |
 | `si` | `yes` |
 | `luogo` | `chunk` |
+| `compiti` | `tasks` |
+| `impresa_posto` | `venture_spot` |
+| `concetto` | `concept` |
+| `classe` | `class` |
+| `taglia` | `size` |
+| `velocita` | `speed` |
+| `peso` | `weight` |
+| `luce` | `light` |
+| `da` | `from` |
+| `a` | `to` |
+| `alto` | `peak` |
+| `titolo` | `title` |
+| `stato` | `state` |
+| `manca` | `missing` |
+| `squadra` | `team` |
+| `fame` | `hunger` |
+| `sete` | `thirst` |
+| `morto` | `dead` |
 
 <a id="api-lua"></a>
 ### Nomi dell’API Lua, eventi del bus, chiavi del magazzino (`api-lua`)
 
-- **Dove si legge**: `src/kernel/validator.ts (LUA_API)`, `src/kernel/sandbox.ts (Host)`, `src/kernel/prelude.lua`, `universe/modules/sys.needs/logic.lua`, `universe/modules/sys.lavoro/logic.lua`, `prompt dell’Ingegnere`
+- **Dove si legge**: `src/kernel/validator.ts (LUA_API)`, `src/kernel/sandbox.ts (Host)`, `src/kernel/prelude.lua`, `universe/modules/sys.needs/logic.lua`, `universe/modules/sys.work/logic.lua`, `prompt dell’Ingegnere`
 - **Tocca**: Lua, prompt · **lingua**: inglese · **task**: T308b, contratto 0.5
-- **Nota**: `cantiere` è il pannello di `sys.lavoro` e `porta` il suo pulsante; il resto dell’API (hook, `world.player`) è già inglese
+- **Nota**: `cantiere` è il pannello di `sys.work` e `porta` il suo pulsante; `deposito:` la chiave del deposito di un luogo nel magazzino di `sys.work`; il resto dell’API (hook, `world.player`) è già inglese
 
 | italiano | interno |
 |---|---|

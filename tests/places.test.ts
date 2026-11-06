@@ -75,7 +75,7 @@ describe('the model of places (T26)', () => {
     for (let i = 0; i < S * S; i++) if (mini.levels[i] * LEVEL === k.groundAt((i % S) + 0.5, Math.floor(i / S) + 0.5)) same++;
     expect(same).toBeGreaterThan((S * S) / 2);
     // The structures where the world has them, with their models, turned the same way.
-    const structures = k.ecs.query('struttura', 'origin').filter((id) => k.ecs.get(id, 'chunk')?.key === ch.key);
+    const structures = k.ecs.query('structure', 'origin').filter((id) => k.ecs.get(id, 'chunk')?.key === ch.key);
     expect(mini.structures.length).toBe(structures.length);
     for (const id of structures) {
       const p = k.ecs.get(id, 'pos');

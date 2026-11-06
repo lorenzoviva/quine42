@@ -76,7 +76,7 @@ const saldoOf = (n: string) => ledgerOf(dir, n).balance('altro');
 const accounts: AccountSettings = {
   config: { projectId: 'demo' },
   masterUid: GOOGLE_MASTER,
-  verify: async (t) => (t === 'master' ? { uid: GOOGLE_MASTER, anonimo: false } : t === 'altro' ? { uid: GOOGLE_OTHER, anonimo: false } : t === 'anon' ? { uid: 'AnonUid00000000000000000003', anonimo: true } : undefined),
+  verify: async (t) => (t === 'master' ? { uid: GOOGLE_MASTER, anonymous: false } : t === 'altro' ? { uid: GOOGLE_OTHER, anonymous: false } : t === 'anon' ? { uid: 'AnonUid00000000000000000003', anonymous: true } : undefined),
 };
 
 let local: Awaited<ReturnType<typeof serve>>;
@@ -363,7 +363,7 @@ describe('V-006 la sessione', () => {
     const got: Array<Record<string, unknown>> = [];
     c.onMessage((m) => got.push(m as unknown as Record<string, unknown>));
     server.connect(s);
-    c.send({ t: 'entra', ...entra } as never);
+    c.send({ t: 'join', ...entra } as never);
     return { c, got };
   }
 
@@ -371,7 +371,7 @@ describe('V-006 la sessione', () => {
     const { server } = await world({ verify: accounts.verify });
     const { got } = client(server, { id: 'me', token: 'altro' });
     await new Promise((r) => setTimeout(r, 10));
-    const ingresso = got.find((m) => m.t === 'ingresso');
+    const ingresso = got.find((m) => m.t === 'welcome');
     expect(ingresso?.id).toBe(accountWanderer(GOOGLE_OTHER));
     expect(ingresso?.master).toBeFalsy();
   });
@@ -380,14 +380,14 @@ describe('V-006 la sessione', () => {
     const { server } = await world({ verify: accounts.verify });
     const { got } = client(server, { id: 'me' });
     await new Promise((r) => setTimeout(r, 10));
-    expect(got.find((m) => m.t === 'ingresso')).toBeUndefined();
-    expect(got.find((m) => m.t === 'rifiuto')).toBeTruthy();
+    expect(got.find((m) => m.t === 'welcome')).toBeUndefined();
+    expect(got.find((m) => m.t === 'refusal')).toBeTruthy();
   });
 
   it('V-006 il tetto resta entro il saldo: nessuno alza i budget del mondo dicendolo', async () => {
     const { kernel, server } = await world();
     const before = kernel.ai.limits!.text;
-    client(server, { id: 'carlo', tetto: 1e9 });
+    client(server, { id: 'carlo', cap: 1e9 });
     expect(kernel.sessionCapOf('carlo')).toBe(0);
     expect(kernel.ai.limits!.text).toBe(before);
   });
@@ -405,7 +405,7 @@ describe('V-006 la sessione', () => {
   it('V-001 nessun messaggio del protocollo fa scrivere codice a un non master', async () => {
     const { kernel, server } = await world();
     const { c, got } = client(server, { id: 'sonda', nome: 'Sonda' });
-    expect(got.find((m) => m.t === 'ingresso')?.master).toBeFalsy();
+    expect(got.find((m) => m.t === 'welcome')?.master).toBeFalsy();
     const MARK = '-- V-001-protocollo';
     const lua = `${MARK}\nreturn {}\n`;
     const modules = () => Object.entries(kernel.files).filter(([p]) => p.startsWith('modules/'));
@@ -413,22 +413,22 @@ describe('V-006 la sessione', () => {
     const first = kernel.repo.log().length;
     // Each message a client can send, by hand, with code wherever there is room for text.
     const asked: Array<Record<string, unknown>> = [
-      { t: 'ramo', files: { 'modules/core.movement/logic.lua': lua }, base: {} },
-      { t: 'pubblica' },
-      { t: 'agente', agente: 'engineer', testo: lua },
-      { t: 'segui', id: 'me' },
-      { t: 'frase', tokens: [MARK, 'x', '=', '1'] },
-      { t: 'incidi' },
-      { t: 'pronuncia' },
-      { t: 'profilo', profilo: { nome: MARK, presentazione: lua, logic: lua } },
-      { t: 'dici', viandante: 'me', testo: lua },
-      { t: 'dai', viandante: 'me', slot: 0 },
-      { t: 'oggetto', op: 'azione', slot: 0, azione: lua },
-      { t: 'contenitore', op: 'apri', entita: 1, slot: 0 },
-      { t: 'pannello', op: 'pulsante', pannello: 'core.movement', posto: lua, azione: lua, slot: 0 },
-      { t: 'casella', col: 0, row: 0, azione: lua },
-      { t: 'azione', entita: 1, azione: lua },
-      { t: 'chat', entita: 1, testo: lua },
+      { t: 'branch', files: { 'modules/core.movement/logic.lua': lua }, base: {} },
+      { t: 'publish' },
+      { t: 'agent', agent: 'engineer', text: lua },
+      { t: 'follow', id: 'me' },
+      { t: 'phrase', tokens: [MARK, 'x', '=', '1'] },
+      { t: 'inscribe' },
+      { t: 'cast' },
+      { t: 'profile', profile: { name: MARK, presentazione: lua, logic: lua } },
+      { t: 'say', wanderer: 'me', text: lua },
+      { t: 'give', wanderer: 'me', slot: 0 },
+      { t: 'item', op: 'action', slot: 0, action: lua },
+      { t: 'container', op: 'open', entity: 1, slot: 0 },
+      { t: 'panel', op: 'button', panel: 'core.movement', socket: lua, action: lua, slot: 0 },
+      { t: 'tile', col: 0, row: 0, action: lua },
+      { t: 'action', entity: 1, action: lua },
+      { t: 'chat', entity: 1, text: lua },
       { t: 'file', files: { 'modules/core.movement/logic.lua': lua } },
       { t: 'commit', changes: { 'modules/core.movement/logic.lua': lua } },
       { t: 'sconosciuto', logic: lua },
@@ -438,7 +438,7 @@ describe('V-006 la sessione', () => {
       server.tick(1 / 60);
       await new Promise((r) => setTimeout(r, 0));
     }
-    const said = got.filter((m) => m.t === 'esito' && typeof m.seq === 'number');
+    const said = got.filter((m) => m.t === 'result' && typeof m.seq === 'number');
     for (const [i, name] of [[0, 'ramo'], [1, 'pubblica'], [2, 'agente'], [3, 'segui']] as Array<[number, string]>) expect(said.find((m) => m.seq === 100 + i)?.ok, name).toBe(false);
     expect(JSON.stringify(modules())).toBe(before);
     expect(JSON.stringify(kernel.files)).not.toContain(`${MARK}\\nreturn`);

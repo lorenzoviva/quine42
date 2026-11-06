@@ -84,13 +84,13 @@ describe('the migration 0.1 → 0.2: a universe of 0.1, file by file', () => {
   const before = universe01();
   const { files, applied } = migrateUniverse(before, TO_0_3);
 
-  it('is the first migration of the chain (then 0.2 → 0.3, T307b, and 0.3 → 0.4, T308a), and it says what it does', () => {
-    expect(MIGRATIONS.map((m) => `${m.from}→${m.to}`)).toEqual(['0.1→0.2', '0.2→0.3', '0.3→0.4']);
+  it('is the first migration of the chain (then 0.2 → 0.3, T307b, 0.3 → 0.4, T308a, and 0.4 → 0.5, T308b), and it says what it does', () => {
+    expect(MIGRATIONS.map((m) => `${m.from}→${m.to}`)).toEqual(['0.1→0.2', '0.2→0.3', '0.3→0.4', '0.4→0.5']);
     expect(applied).toHaveLength(2);
     expect(applied[0]).toMatch(/^0.1→0.2: /);
     expect(json(files['universe.json'])).toMatchObject({ kernel: TO_0_3, kernels: { from: '0.3' } });
     expect(checkKernelVersion(json(files['universe.json']).kernel, TO_0_3, json(files['universe.json']).kernels).ok).toBe(true);
-    expect(migrateUniverse(before).applied).toHaveLength(3);
+    expect(migrateUniverse(before).applied).toHaveLength(4);
   });
 
   it('ports the runes to Latin, the incantations, the effects and their fields; a rune of the Council keeps its token', () => {
@@ -188,7 +188,7 @@ describe('seed.json after the migration', () => {
     };
     files[SEED_FILE] = JSON.stringify({ 'modules/core.effects/logic.lua': h(pristineEffects), 'modules/core.items/logic.lua': h('return {}\n'), 'models/albero.xml': h(old['models/albero.xml']), 'models/persona.xml': 'cancellato' }, null, 1) + '\n';
     const out = prepareUniverse(files, bundledFiles);
-    expect(out.applied).toHaveLength(3);
+    expect(out.applied).toHaveLength(4);
     expect(out.files['modules/core.effects/logic.lua']).toBe(bundledFiles['modules/core.effects/logic.lua']);
     expect(out.files['modules/core.items/logic.lua']).toBe('return {} -- mio\n');
     expect(out.files['models/tree.xml']).toBe(bundledFiles['models/tree.xml']);
@@ -251,10 +251,10 @@ describe('a Latin rune, pronounced', () => {
     giveRunes(k, ['lux', 'ignis']);
     expect(k.composeRune('lux')).toBe(true);
     expect(await k.castSpell()).toBe(true);
-    expect(k.ecs.query('luce', 'effimero').length).toBe(1);
+    expect(k.ecs.query('light', 'ephemeral').length).toBe(1);
     expect(k.composeRune('ignis')).toBe(true);
     expect(await k.castSpell()).toBe(true);
-    expect(k.ecs.query('fuoco', 'effimero').length).toBe(1);
+    expect(k.ecs.query('fire', 'ephemeral').length).toBe(1);
     expect(countItem(k.inventory(), 'rune:lux')).toBe(0);
     expect(k.content.runes.luce).toBeUndefined();
     expect(Object.keys(k.content.runes).sort()).toEqual(['aqua', 'ignis', 'lux', 'scutum', 'terra', 'ventus', 'vita']);
@@ -286,7 +286,7 @@ describe('the seed of today (the values of 0.2 under the fields of 0.4)', () => 
     expect(bad).toEqual([]);
     const magic = JSON.parse(bundledFiles['modules/magic.runes/manifest.json']);
     expect(Object.keys(magic.runes)).toEqual(['lux', 'ignis', 'aqua', 'terra', 'vita', 'scutum', 'ventus']);
-    expect(json(bundledFiles['universe.json'])).toMatchObject({ kernel: KERNEL_VERSION, kernels: { from: '0.4' } });
+    expect(json(bundledFiles['universe.json'])).toMatchObject({ kernel: KERNEL_VERSION, kernels: { from: '0.5' } });
   });
 
   it('runs 400 ticks offline without faults', async () => {
@@ -342,7 +342,7 @@ describe('valmora, a universe really played of the contract 0.1', () => {
     const a = prepareUniverse(files, bundledFiles);
     const b = prepareUniverse(files, bundledFiles);
     expect(a.files).toEqual(b.files);
-    expect(a.applied).toHaveLength(3);
+    expect(a.applied).toHaveLength(4);
     const runes = Object.keys(json(a.files['modules/magic.runes/manifest.json']).runes ?? {});
     expect(runes.filter((t) => ITALIAN('rune').includes(t))).toEqual([]);
     const chunks = new MemoryChunks();

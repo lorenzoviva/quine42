@@ -24,10 +24,10 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 | Che cosa | Dove | Perché | Che cosa costa |
 |---|---|---|---|
 | Campi JSON degli universi | manifest (`tiles`, `layouts`, `items`), `universe.json` (`chunkSize`, `placesPerMinute`, `maxCast`, `game`), `world/*.json` (`legami`, `ricordi`, `scheda`), `maps/` (`place`, `layout`, `strutture`, `scavi`), carte (`carta`, `titolare`, `pagante`) | ogni universo su disco li ha nella sua storia git | lettura che accetta i due nomi (come `readPeople`), più un aggiornamento dal seme |
-| Componenti delle entità | `src/session/protocol.ts` (`ENTITY_PARTS`), `stato.json`, codice Lua (`hand`, `luce`, `fuoco`, `attivita`, `stati`, `meta`) | salvati nello stato e letti dai moduli generati | migrazione dello stato e del Lua generato |
+| Componenti delle entità | `src/session/protocol.ts` (`ENTITY_PARTS`), `world/players/<id>.json`, codice Lua (`hand`, `light`, `fire`, `activity`, `states`, `goal`; italiani fino al contratto 0.4) | salvati nello stato e letti dai moduli generati | migrazione dello stato e del Lua generato (fatta per il contratto 0.5, T308b) |
 | API Lua e hook | `LUA_API` in `src/kernel/validator.ts`, `prelude.lua`, prompt dell'Ingegnere (`world.player`, `world.player_pos`, `generate_chunk`, `on_act`) | il Lua generato negli universi li chiama, il validatore rifiuta il resto | un alias per sempre: **sconsigliato** |
 | Nomi nel validatore e negli schemi | effetti (`crea_oggetto`, `togli_stato`), categorie, `AgentId`, compiti (`npc.reply`, `npc.sheet`), risposte dei modelli (`usa_ambiente`, `richiesta_fucina`) | stanno nei file generati, nei prompt, in `world/usage.json` | prompt, schemi e validatore insieme, più i file vecchi |
-| Messaggi del protocollo | `src/session/protocol.ts` (`entra`, `passo`, `incidi`, `viandanti`, `cose`, `luoghi`) | client e server parlano così | nessun dato; client e server vanno rilasciati insieme |
+| Messaggi del protocollo | `src/session/protocol.ts` (`join`, `step`, `inscribe`, `wanderers`, `entities`, `chunks`; italiani fino al contratto 0.4) | client e server parlano così | nessun dato; client e server vanno rilasciati insieme (fatto per il contratto 0.5, T308b) |
 | Indirizzi | `/api/viandante`, `/api/crediti`, `?viandante=`, `?universo=`, chiavi di `localStorage` (`rune:profilo:`), `window.rune` | link, profili dei browser, abitudini | redirect o doppia lettura |
 
 ## Il mondo e lo spazio
@@ -290,7 +290,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Definizione**: un dato con un nome su un'entità: la logica è stateless, lo stato sta qui.
 - **Dove vive**: `src/kernel/ecs.ts`
 - **Da non usare**: nessuno
-- **Fermo**: i nomi dei componenti (`luce`, `meta`, `hand`, `form`…).
+- **Fermo**: i nomi dei componenti (`light`, `goal`, `hand`, `form`…; `luce`, `meta` fino al contratto 0.4).
 
 ### Modulo
 - **Inglese**: `module`, `Manifest`, `ModuleEntry`, `ModuleKind`
@@ -329,7 +329,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Definizione**: un'entità che è un modello intero in cui si entra, posata su un lotto di un luogo.
 - **Dove vive**: `src/kernel/kernel.ts`, `src/kernel/forms.ts`
 - **Da non usare**: `edificio` (nel mondo: è dello studio), `building` (idem)
-- **Fermo**: `struttura`, `strutture`, `struttura-<concetto>`, la classe `struttura`.
+- **Fermo**: il componente `structure` (`struttura` fino al contratto 0.4), `strutture`, `struttura-<concetto>`, la classe `struttura`.
 
 ### Modello
 - **Inglese**: `model`, `ModelInfo`, `maxModels`
@@ -480,7 +480,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Definizione**: com'è fatta la giornata di un mestiere, scritta una volta per mestiere e usata da ogni individuo che lo ha: i compiti di ogni fase, ognuno un comportamento con i suoi parametri (T245b, ADR-0140). Dati, mai codice.
 - **Dove vive**: `src/kernel/jobs.ts`, `universe/modules/job.farmer/manifest.json`
 - **Da non usare**: `routine` (per il programma: la routine è il testo di oggi), `script`, `job`
-- **Fermo**: `jobs` nei manifest, `giornata`, `nomi`, `posto`, i componenti `mestiere`, `lavoro`, `carico`.
+- **Fermo**: `jobs` nei manifest, `giornata`, `nomi`, `posto`, i componenti `job`, `work`, `load` (`mestiere`, `lavoro`, `carico` fino al contratto 0.4).
 
 ### Comportamento
 - **Inglese**: `JOB_BEHAVIOURS`, `JobBehaviour`
@@ -491,17 +491,17 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Deposito del luogo
 - **Inglese**: `placeDeposit`
-- **Definizione**: ciò che i mestieri di un luogo portano e prendono (il grano, i ciocchi, il pane), una voce `deposito:<cx>:<cy>` del magazzino di `sys.work`; il luogo è quello a cui l'individuo appartiene (`mestiere.luogo`). Dura con la partita, non va ai client (T245c, ADR-0141).
+- **Definizione**: ciò che i mestieri di un luogo portano e prendono (il grano, i ciocchi, il pane), una voce `deposit:<cx>:<cy>` del magazzino di `sys.work`; il luogo è quello a cui l'individuo appartiene (`job.chunk`). Dura con la partita, non va ai client (T245c, ADR-0141).
 - **Dove vive**: `universe/modules/sys.work/logic.lua`, `src/kernel/kernel.ts`
 - **Da non usare**: `magazzino` (per il deposito: il magazzino è di un modulo), `granaio`, `scorta`
-- **Fermo**: la chiave `deposito:<cx>:<cy>`, `luogo` di `mestiere`.
+- **Fermo**: la chiave `deposit:<cx>:<cy>`, `chunk` di `job` (`deposito:` e `mestiere.luogo` fino al contratto 0.4).
 
 ### Impresa
 - **Inglese**: `Venture`, `ventures`, `ventureProgress`, `ventureState`
 - **Definizione**: un lavoro di molti verso un risultato che si vede, lungo giorni o mesi: una costruzione, un raccolto (e, con i task che le portano, una festa, una ricerca…). Ha fasi con materiali e lavoro, una squadra e uno stato; il progresso si ricava da ciò che è stato portato e lavorato, mai da un contatore (T245d, ADR-0147).
 - **Dove vive**: `src/kernel/ventures.ts`, `src/kernel/kernel.ts`, `world/ventures.json`
 - **Da non usare**: `progetto` (per l'impresa: il progetto è un documento), `cantiere` (è il posto dell'impresa e il suo pannello), `quest`, `obiettivo`, `job`
-- **Fermo**: `world/ventures.json`, `imprese`, `fasi`, `materiali`, `lavoro`, `stadio`, `portati`, `lavorato`, `squadra`, `ruoli`, `nato_da`, i valori di `tipo` e di `stato`; l'API Lua `world.impresa`, `world.impresa_porta`; il comportamento `costruisci`.
+- **Fermo**: `world/ventures.json`, `imprese`, `fasi`, `materiali`, `lavoro`, `stadio`, `portati`, `lavorato`, `squadra`, `ruoli`, `nato_da`, i valori di `tipo` e di `stato`; l'API Lua `world.venture`, `world.venture_bring` (`world.impresa`, `world.impresa_porta` fino al contratto 0.4); il comportamento `costruisci`.
 
 ### Squadra di un'impresa
 - **Inglese**: `fillTeam`, `VentureMember`, `staffVentures`
@@ -515,7 +515,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Definizione**: a che punto è un edificio che un'impresa costruisce, da 0 (il lotto segnato) a 1 (finito): la griglia del suo modello, finita, mostrata fino a una quota (il piano terra, i muri, il tetto), con il cantiere attorno (picchetti, impalcature) (T245e, ADR-0148).
 - **Dove vive**: `src/mj/mesh.ts`, `src/render/models.ts`, `src/kernel/kernel.ts`
 - **Da non usare**: `fase` (per lo stadio: la fase è dell'impresa), `livello` (è del rilievo), `step`, `stage` (nei documenti)
-- **Fermo**: `stadio` nelle fasi di `world/ventures.json` e in `struttura`, `stadi` e `case` nel piano del luogo, `c.struttura.stadio` sul filo.
+- **Fermo**: `stadio` nelle fasi di `world/ventures.json`, `stage` nel componente `structure`, `stadi` e `case` nel piano del luogo, `c.structure.stage` sul filo (`struttura.stadio` fino al contratto 0.4).
 
 ### Impalcatura
 - **Inglese**: `SCAFFOLD_LETTER`, `STAKE_LETTER`, `site` (di `stageGrid`)
@@ -539,11 +539,11 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Fermo**: l'hook `on_return`, `visto` nel piano del luogo.
 
 ### Cantiere
-- **Inglese**: `cantierePanels`, `posto` (dell'impresa)
+- **Inglese**: `worksitePanels`, `worksite` (il componente e il pannello), `spot` (dell'impresa)
 - **Definizione**: dove un'impresa si lavora (`posto`), e il pannello «Il cantiere» che dice dell'impresa più vicina a che punto è, cosa manca e chi ci lavora (T245d, ADR-0147).
 - **Dove vive**: `universe/modules/sys.work/manifest.json` (`ui`), `src/kernel/kernel.ts`
 - **Da non usare**: `impresa` (per il posto o il pannello), `sito`, `site` (nei documenti)
-- **Fermo**: il pannello `cantiere`, i campi `cantiere.titolo`, `cantiere.fase`, `cantiere.stato`, `cantiere.manca`, `cantiere.squadra`, il pulsante `porta`.
+- **Fermo**: il pannello `worksite`, i campi `worksite.title`, `worksite.phase`, `worksite.state`, `worksite.missing`, `worksite.team`, il pulsante `bring` (dal contratto 0.5, T308b; prima `cantiere`, `cantiere.titolo`… e `porta`).
 
 ### Maturazione
 - **Inglese**: `ripens`, `matureTick`
@@ -653,7 +653,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Definizione**: un oggetto che un viandante ha posato sul ripiano di un mobile: sta alla sua altezza, si raccoglie come da terra, resta nel salvataggio e per tutti.
 - **Dove vive**: `src/kernel/placing.ts`, `src/kernel/kernel.ts`
 - **Da non usare**: `appoggiato`
-- **Fermo**: il componente `posato`, il campo `placed` di `world/state.json`, l'azione `posa`.
+- **Fermo**: il componente `placed` (`posato` fino al contratto 0.4), il campo `placed` di `world/state.json`, l'azione `posa`.
 
 ### Bottino
 - **Inglese**: `loot`, `LootTable`, `LootEntry`
@@ -676,11 +676,11 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Fermo**: il componente `needs`, l'effetto `bisogni`.
 
 ### Stato
-- **Inglese**: `stati`
+- **Inglese**: `states`
 - **Definizione**: un effetto a tempo sul viandante (velocità, peso, luce), con una durata.
 - **Dove vive**: `src/kernel/kernel.ts`
 - **Da non usare**: `status`, `buff`
-- **Fermo**: il componente `stati`, gli effetti `stato` e `togli_stato`.
+- **Fermo**: il componente `states` (`stati` fino al contratto 0.4; ogni stato `{speed, weight, light, expires}`), gli effetti `stato` e `togli_stato`.
 
 ### Effetto
 - **Inglese**: `Effect`, `applyEffects`, `core.effects`
@@ -923,7 +923,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Definizione**: ciò che il master fissa prima di entrare: coefficienti, modelli, budget, minimi. Non cambiano a partita in corso, cioè da quando entra il primo viandante a quando esce l'ultimo (ADR-0133).
 - **Da non usare**: impostazioni del consumo, tuning.
 - **Dove vive**: `src/kernel/universe.ts`, `src/kernel/kernel.ts`, `src/ui/lobby.ts`
-- **Fermo**: il campo `regolazioni` del messaggio `entra` e di `ingresso`.
+- **Fermo**: il campo `settings` del messaggio `join` e di `welcome` (`regolazioni` di `entra` e `ingresso` fino al contratto 0.4).
 
 ### Coefficienti
 - **Inglese**: `Coefficients`, `LOW_DETAIL`, `CENSUS`, `hourlyEstimate`

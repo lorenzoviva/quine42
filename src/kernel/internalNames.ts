@@ -804,20 +804,27 @@ export const INTERNAL_NAMES: readonly NameDomain[] = [
     lang: 'en',
     step: 'T308b',
     names: {
-      raggio: 'radius', accesa: 'lit', colore: 'color', daStato: 'fromState', fino: 'until', spento: 'off', tipo: 'kind', ferma: 'still',
+      raggio: 'radius', accesa: 'lit', colore: 'color', daStato: 'fromState', fino: 'expires', spento: 'off', tipo: 'kind', ferma: 'still',
       stadio: 'stage', fase: 'phase', giorno: 'day', impresa: 'venture', passo: 'step', motivo: 'reason', si: 'yes', luogo: 'chunk',
+      compiti: 'tasks', impresa_posto: 'venture_spot', concetto: 'concept', classe: 'class', taglia: 'size', velocita: 'speed', peso: 'weight',
+      luce: 'light', da: 'from', a: 'to', alto: 'peak', titolo: 'title', stato: 'state', manca: 'missing', squadra: 'team', fame: 'hunger',
+      sete: 'thirst', morto: 'dead',
     },
+    // Lua reads them as `c.field`: a reserved word would not compile (`fino` is `expires`, not `until`).
+    taken: ['and', 'break', 'do', 'else', 'elseif', 'end', 'false', 'for', 'function', 'goto', 'if', 'in', 'local', 'nil', 'not', 'or', 'repeat', 'return', 'then', 'true', 'until', 'while'],
+    note:
+      'per componente: `luce {raggio, accesa, colore, daStato}`, `fuoco {raggio}`, `effimero {fino}`, `scudo {fino, spento}`, ogni stato di `stati {velocita, peso, luce, fino}`, `attivita {tipo, ferma}`, `struttura {concetto, classe, taglia, stadio}`, `salto {da, a, alto}`, `lavoro {fase, giorno, impresa, passo, motivo, fino}`, `mestiere {fase, giorno, luogo, compiti, impresa, impresa_posto}` (i compiti con i campi dei programmi dei mestieri), `cantiere {titolo, fase, stato, manca, squadra}`, `raccolto` e `frugato {si}`, `player {passo}`, `needs {morto}`; `fame` e `sete` sono i campi dell’evento `death`. `fino` diventa `expires` e non `until`, parola riservata di Lua. Lo stato privato di `sys.work` nel suo `lavoro` (`fatti`, `tappa`, `arrivato`…) lo legge solo il suo Lua e resta',
   }),
   d({
     id: 'api-lua',
     title: 'Nomi dell’API Lua, eventi del bus, chiavi del magazzino',
     kind: 'values',
-    where: ['src/kernel/validator.ts (LUA_API)', 'src/kernel/sandbox.ts (Host)', 'src/kernel/prelude.lua', 'universe/modules/sys.needs/logic.lua', 'universe/modules/sys.lavoro/logic.lua', 'prompt dell’Ingegnere'],
+    where: ['src/kernel/validator.ts (LUA_API)', 'src/kernel/sandbox.ts (Host)', 'src/kernel/prelude.lua', 'universe/modules/sys.needs/logic.lua', 'universe/modules/sys.work/logic.lua', 'prompt dell’Ingegnere'],
     reach: ['lua', 'prompt'],
     lang: 'en',
     step: 'T308b',
     names: { 'world.impresa': 'world.venture', 'world.impresa_porta': 'world.venture_bring', morte: 'death', 'deposito:': 'deposit:', cantiere: 'worksite', porta: 'bring' },
-    note: '`cantiere` è il pannello di `sys.lavoro` e `porta` il suo pulsante; il resto dell’API (hook, `world.player`) è già inglese',
+    note: '`cantiere` è il pannello di `sys.work` e `porta` il suo pulsante; `deposito:` la chiave del deposito di un luogo nel magazzino di `sys.work`; il resto dell’API (hook, `world.player`) è già inglese',
   }),
 ];
 
@@ -1363,4 +1370,127 @@ export function internalPath(p: string): string {
     }
   }
   return p;
+}
+
+// --- The contract 0.5 (T308b): the wire and Lua ----------------------------------------------------------------------------------------
+// The components Lua sees and the fields of their data (`luce {raggio}` → `light {radius}`), the bus's events, the keys of the work's
+// store. The migration of a universe (migrations.ts) ports with these the components a manifest or a case gives, the states a wanderer
+// keeps and the Lua of the Council's modules; the kernel reads with them what the Council may still write with the names of before.
+// Idempotent, like the others: an internal name stays, and what they do not know is content.
+
+/** A component's name of 0.5 (`luce` → `light`); any other name as it is. */
+export const internalComponentName = (name: string): string => internalName('componenti', name);
+
+/**
+ * The Italian fields of each component of 0.4 (by its name of 0.5) that the table renames: a field is renamed only in the component
+ * that has it (a `tipo` of `activity` is `kind`, the `tipo` of another component is its own). `states` holds a dictionary of states,
+ * each with these fields; `load` and `goal` and `placed` have none of the table.
+ */
+export const COMPONENT_FIELDS: Readonly<Record<string, readonly string[]>> = {
+  light: ['raggio', 'accesa', 'colore', 'daStato'],
+  fire: ['raggio'],
+  ephemeral: ['fino'],
+  shield: ['fino', 'spento'],
+  states: ['velocita', 'peso', 'luce', 'fino'],
+  activity: ['tipo', 'ferma'],
+  structure: ['concetto', 'classe', 'taglia', 'stadio'],
+  jump: ['da', 'a', 'alto'],
+  work: ['fase', 'giorno', 'impresa', 'passo', 'motivo', 'fino'],
+  job: ['fase', 'giorno', 'luogo', 'compiti', 'impresa', 'impresa_posto'],
+  worksite: ['titolo', 'fase', 'stato', 'manca', 'squadra'],
+  harvested: ['si'],
+  searched: ['si'],
+  player: ['passo'],
+  needs: ['morto'],
+};
+
+/** The fields of a component's data (or of one state of `states`) of 0.4 in 0.5, by the component's name of 0.5. */
+function componentFields(n: string, o: Record<string, unknown>): Record<string, unknown> {
+  const only = COMPONENT_FIELDS[n] ?? [];
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(o)) {
+    const key = only.includes(k) ? internalName('campi-componenti', k) : k;
+    if (key !== k && Object.hasOwn(o, key)) continue;
+    out[key] = v;
+  }
+  return out;
+}
+
+/** A field of a component of 0.4 in 0.5 (`raggio` of `luce` → `radius`), by the component's name of either contract; any other as it is. */
+export function internalComponentField(component: string, field: string): string {
+  return (COMPONENT_FIELDS[internalComponentName(component)] ?? []).includes(field) ? internalName('campi-componenti', field) : field;
+}
+
+/** A component's data of 0.4 in 0.5, by its name (of either contract): the fields of its data, the states' fields, a job's tasks. */
+export function internalComponent(name: string, data: unknown): unknown {
+  const n = internalComponentName(name);
+  if (!isRecord(data)) return data;
+  if (n === 'states') return Object.fromEntries(Object.entries(data).map(([k, s]) => [k, isRecord(s) ? componentFields(n, s) : s]));
+  if (!COMPONENT_FIELDS[n]) return data;
+  const out = componentFields(n, data);
+  if (n === 'job' && Array.isArray(out.tasks)) out.tasks = out.tasks.map((t) => internalFields('jobTask', t));
+  return out;
+}
+
+/** A record of components (a manifest's `components`, a case's, `ecs.spawn`'s): names and data of 0.5. */
+export function internalComponents(raw: unknown): unknown {
+  if (!isRecord(raw)) return raw;
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(raw)) {
+    const n = internalComponentName(k);
+    if (n !== k && Object.hasOwn(raw, n)) continue;
+    out[n] = internalComponent(k, v);
+  }
+  return out;
+}
+
+/** A field path `componente.campo` of 0.4 (a panel's field, a case's watched field `0:meta.x`) in 0.5 (`goal.x`); any other as it is. */
+export function internalFieldPath(path: string): string {
+  const m = /^((?:\d+:)?)([A-Za-z_][A-Za-z0-9_]*)\.([A-Za-z_][A-Za-z0-9_]*)$/.exec(path);
+  if (!m) return path;
+  return `${m[1]}${internalComponentName(m[2])}.${internalComponentField(m[2], m[3])}`;
+}
+
+/** An event of the bus a module emits (`morte` → `death`); any other as it is. */
+export const internalEvent = (name: string): string => (name === 'morte' ? internalName('api-lua', name) : name);
+
+/** A key of the store of `sys.work` of 0.4 (`deposito:0:1`) in 0.5 (`deposit:0:1`); any other as it is. */
+export const internalStoreKey = (key: string): string => (key.startsWith('deposito:') ? `${internalName('api-lua', 'deposito:')}${key.slice('deposito:'.length)}` : key);
+
+/** A case of the bench with the components and the watched fields of 0.5. */
+export function internalCase<T>(raw: T): T {
+  if (!isRecord(raw)) return raw;
+  const o: Record<string, unknown> = { ...raw };
+  if (Array.isArray(o.entities)) o.entities = o.entities.map((e) => (isRecord(e) && 'components' in e ? { ...e, components: internalComponents(e.components) } : e));
+  if (isRecord(o.wanderer) && 'components' in o.wanderer) o.wanderer = { ...o.wanderer, components: internalComponents(o.wanderer.components) };
+  if (Array.isArray(o.watch)) o.watch = o.watch.map((w) => (typeof w === 'string' ? internalFieldPath(w) : w));
+  return o as T;
+}
+
+/**
+ * A manifest (parsed, with the fields of 0.4) with the names of 0.5: the components it gives (`components`, `singleton`, the fields it
+ * keeps, `persist`), the fields its panel shows, the components and the watched fields of its cases, the panel and the button of the
+ * work (`cantiere`, `porta`). What it does not know stays.
+ */
+export function internalManifest0_5<T>(raw: T): T {
+  if (!isRecord(raw)) return raw;
+  const m: Record<string, unknown> = { ...raw };
+  if ('components' in m) m.components = internalComponents(m.components);
+  if ('singleton' in m) m.singleton = internalComponents(m.singleton);
+  if (Array.isArray(m.persist)) m.persist = m.persist.map((p) => (typeof p === 'string' ? internalFieldPath(p) : p));
+  if (isRecord(m.ui)) {
+    const ui: Record<string, unknown> = { ...m.ui };
+    if (ui.id === 'cantiere' && m.id === 'sys.work') ui.id = internalName('api-lua', 'cantiere');
+    if (Array.isArray(ui.elements))
+      ui.elements = ui.elements.map((e) => {
+        if (!isRecord(e)) return e;
+        const x: Record<string, unknown> = { ...e };
+        if (typeof x.field === 'string') x.field = internalFieldPath(x.field);
+        if (m.id === 'sys.work' && x.type === 'button' && x.id === 'porta') x.id = internalName('api-lua', 'porta');
+        return x;
+      });
+    m.ui = ui;
+  }
+  if (Array.isArray(m.cases)) m.cases = m.cases.map(internalCase);
+  return m as T;
 }

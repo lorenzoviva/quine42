@@ -96,12 +96,12 @@ describe('the migration 0.2 → 0.3: a universe of 0.2, file by file', () => {
   const { files, applied } = migrateUniverse(before, TO_0_3);
 
   it('is the second migration of the chain, and it says what it does', () => {
-    expect(MIGRATIONS.map((m) => `${m.from}→${m.to}`)).toEqual(['0.1→0.2', '0.2→0.3', '0.3→0.4']);
+    expect(MIGRATIONS.map((m) => `${m.from}→${m.to}`)).toEqual(['0.1→0.2', '0.2→0.3', '0.3→0.4', '0.4→0.5']);
     expect(applied).toHaveLength(1);
     expect(applied[0]).toMatch(/^0\.2→0\.3: /);
     expect(json(files['universe.json'])).toMatchObject({ kernel: TO_0_3, kernels: { from: '0.3' } });
     expect(checkKernelVersion(json(files['universe.json']).kernel, TO_0_3, json(files['universe.json']).kernels).ok).toBe(true);
-    expect(migrateUniverse(before).applied.map((a) => a.slice(0, 8))).toEqual(['0.2→0.3:', '0.3→0.4:']);
+    expect(migrateUniverse(before).applied.map((a) => a.slice(0, 8))).toEqual(['0.2→0.3:', '0.3→0.4:', '0.4→0.5:']);
   });
 
   it('is deterministic: the same files give the same files, and a ported universe stays as it is', () => {
@@ -290,7 +290,7 @@ describe('the seed of today (0.4: the values of 0.3 under the fields of 0.4)', (
       walk(JSON.parse(text));
     }
     expect(bad).toEqual([]);
-    expect(json(bundledFiles['universe.json'])).toMatchObject({ kernel: KERNEL_VERSION, kernels: { from: '0.4' } });
+    expect(json(bundledFiles['universe.json'])).toMatchObject({ kernel: KERNEL_VERSION, kernels: { from: '0.5' } });
   });
 
   it('sys.work says its outcomes in English, and the cases of the bench still point at its lines', () => {

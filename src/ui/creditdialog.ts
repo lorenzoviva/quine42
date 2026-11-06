@@ -66,11 +66,11 @@ export class CreditExhaustedModal {
     this.root.replaceChildren(box);
   }
 
-  show(info?: { motivo?: 'finiti' | 'tetto'; testo?: string }): void {
-    const isCap = info?.motivo === 'tetto';
+  show(info?: { reason?: 'exhausted' | 'cap'; text?: string }): void {
+    const isCap = info?.reason === 'cap';
     this.titleEl.textContent = isCap ? 'Tetto di spesa raggiunto' : 'Crediti esauriti';
     this.descEl.textContent =
-      info?.testo ??
+      info?.text ??
       (isCap
         ? 'Hai raggiunto il tetto di crediti fissato per questa sessione nella lobby. Le richieste all’IA useranno i modelli locali.'
         : 'Hai esaurito i tuoi crediti. Scegli se ricaricare il tuo saldo, continuare a giocare offline con i modelli locali o abbandonare la partita.');

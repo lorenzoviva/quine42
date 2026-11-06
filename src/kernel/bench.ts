@@ -5,7 +5,7 @@
 import type { Kernel, KernelOptions } from './kernel';
 import type { BenchCase, BenchItem, BenchStep, BenchWay, FileMap, ItemDef, Manifest, UiPanel } from './types';
 import { ITEM_CATEGORIES } from './types';
-import { internalFields, internalName } from './internalNames';
+import { internalComponents, internalFieldPath, internalFields, internalName } from './internalNames';
 import { memoryStore } from './repo';
 import { MockAiModels } from './ai/mock';
 
@@ -156,7 +156,7 @@ export function cleanCases(raw: unknown, panel: UiPanel | undefined, lines: numb
         else errors.push(`«${titolo}»: «${p.toward}» non è una direzione (su, giu, sinistra, destra)`);
       }
     }
-    const guarda = [...new Set((Array.isArray(r.watch) ? r.watch : []).map((g: unknown) => String(g).trim()).filter((g: string) => PATH_RE.test(g)))].slice(0, 6) as string[];
+    const guarda = [...new Set((Array.isArray(r.watch) ? r.watch : []).map((g: unknown) => internalFieldPath(String(g).trim())).filter((g: string) => PATH_RE.test(g)))].slice(0, 6) as string[];
     if (!guarda.length) {
       errors.push(`«${titolo}»: "guarda" non ha campi del tipo componente.campo`);
       continue;
@@ -165,8 +165,9 @@ export function cleanCases(raw: unknown, panel: UiPanel | undefined, lines: numb
     const cose = (Array.isArray(r.entities) ? r.entities : [])
       .slice(0, 6)
       .filter((c: any) => c && typeof c.module === 'string')
-      .map((c: any) => ({ module: c.module, x: Math.round(num(c.x, -2, 2, 1)), y: Math.round(num(c.y, -2, 2, 0)), ...(parseJson(c.components ?? c.componenti_json) ? { components: parseJson(c.components ?? c.componenti_json) } : {}) }));
-    const componenti = parseJson(v.components ?? r.viandante_json);
+      .map((c: any) => ({ module: c.module, x: Math.round(num(c.x, -2, 2, 1)), y: Math.round(num(c.y, -2, 2, 0)), ...(parseJson(c.components ?? c.componenti_json) ? { components: internalComponents(parseJson(c.components ?? c.componenti_json)) as Record<string, Record<string, unknown>> } : {}) }));
+    // The components and the watched fields of 0.4 (`meta.x`) the Engineer may still write (T308b): those of 0.5 (`goal.x`).
+    const componenti = internalComponents(parseJson(v.components ?? r.viandante_json)) as ReturnType<typeof parseJson>;
     const righe = [...new Set((Array.isArray(r.lines) ? r.lines : []).filter((n: unknown) => Number.isInteger(n) && (n as number) >= 1 && (n as number) <= lines))].slice(0, 12) as number[];
     cases.push({
       title: titolo,
@@ -360,8 +361,8 @@ const FIELD_NAME: Record<string, string> = {
   'needs.energy': 'energia',
   'needs.mana': 'mana',
   'body.solid': 'c’è',
-  'scudo.fino': 'scudo fino a',
-  'effimero.fino': 'dura fino a',
+  'shield.expires': 'scudo fino a',
+  'ephemeral.expires': 'dura fino a',
   'pos.x': 'x',
   'pos.y': 'y',
   'vel.x': 'velocità x',

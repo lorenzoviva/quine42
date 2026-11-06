@@ -77,9 +77,9 @@ function F.fire(target, _, e, x, y)
   ecs.spawn({
     pos = { x = px, y = py },
     glyph = { ch = "✶", color = "#ff8a2a", scale = 0.9 },
-    fuoco = { raggio = r },
-    luce = { raggio = r * 2 + 2, colore = "#ffb060", accesa = true },
-    effimero = { fino = time + (e.duration or 10) },
+    fire = { radius = r },
+    light = { radius = r * 2 + 2, color = "#ffb060", lit = true },
+    ephemeral = { expires = time + (e.duration or 10) },
   })
   return nil
 end
@@ -89,14 +89,14 @@ function F.light(target, _, e, x, y)
   ecs.spawn({
     pos = { x = px, y = py },
     glyph = { ch = "✧", color = "#fff3b0", scale = 0.6 },
-    luce = { raggio = e.radius or 4, colore = "#fff3b0", accesa = true },
-    effimero = { fino = time + (e.duration or 60) },
+    light = { radius = e.radius or 4, color = "#fff3b0", lit = true },
+    ephemeral = { expires = time + (e.duration or 60) },
   })
   return nil
 end
 
 function F.shield(_, user, e)
-  ecs.set(user, "scudo", { fino = time + (e.duration or 20) })
+  ecs.set(user, "shield", { expires = time + (e.duration or 20) })
   return nil
 end
 
@@ -119,17 +119,16 @@ function F.push(target, user, e)
 end
 
 -- Uno stato del viandante: a cavallo, in barca, con lo zaino. Cambia velocità, peso, luce.
--- Il componente "stati" tiene ancora i suoi campi italiani (velocita, peso, luce, fino): li rinomina il contratto 0.5.
 function F.state(_, user, e)
-  local st = ecs.get(user, "stati") or {}
-  st[e.name] = { velocita = e.speed or 1, peso = e.weight or 0, luce = e.light or 0, fino = (e.duration or 0) > 0 and (time + e.duration) or 0 }
-  ecs.set(user, "stati", st)
+  local st = ecs.get(user, "states") or {}
+  st[e.name] = { speed = e.speed or 1, weight = e.weight or 0, light = e.light or 0, expires = (e.duration or 0) > 0 and (time + e.duration) or 0 }
+  ecs.set(user, "states", st)
   return nil
 end
 
 function F.remove_state(_, user, e)
   -- Lo stato si spegne (false); il kernel poi lo toglie dalla tabella.
-  local st = ecs.get(user, "stati")
+  local st = ecs.get(user, "states")
   if st then st[e.name] = false end
   return nil
 end

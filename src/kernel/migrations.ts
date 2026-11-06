@@ -4,14 +4,15 @@
 // a migration is worth writing, it goes in MIGRATIONS: a pure function from the files of `from` to the files of `to`, with its test.
 // The first is 0.1 → 0.2 (T307a, ADR-0153, ADR-0155): the internal language of the world's simulation; then 0.2 → 0.3 (T307b,
 // ADR-0158): the internal language of society, work and the Council; then 0.3 → 0.4 (T308a, ADR-0159): the fields and the paths of the
-// universe's files.
+// universe's files; then 0.4 → 0.5 (T308b, ADR-0161): the wire and Lua, the components and their fields, the API, the bus's events.
 // The universe's places live apart (`maps/`, a chunk store): a migration says how a place's plan is ported too (`migratePlan`), and the
 // kernel ports every plan it reads (`migratePlanRecord`). The kernel runs the chain at boot (`Kernel.boot`), before the files are read; the
 // pages, the worlds of many and the tools run it before they take the seed (`prepareUniverse`, universes.ts), so the seed's new files
 // reach a universe in the same load. A ported universe says it in `kernels.from`.
 
 import type { ChunkPlan } from './agents/cartography';
-import { INTERNAL_NAMES, internalAgent, internalCardId, internalCardsIn, internalCoefficients, internalFields, internalGraph, internalJobProgram, internalManifest, internalModelId, internalModelId0_3, internalModelInfo, internalModuleId, internalName, internalPath, internalPeople, internalPlots, internalSculptors, internalSoloIn, internalSoundPurpose, internalVenture, type FieldShapeId } from './internalNames';
+import { COMPONENT_FIELDS, INTERNAL_NAMES, internalAgent, internalCardId, internalCardsIn, internalCoefficients, internalComponent, internalComponentField, internalComponentName, internalEvent, internalFields, internalGraph, internalJobProgram, internalManifest, internalManifest0_5, internalModelId, internalModelId0_3, internalModelInfo, internalModuleId, internalName, internalPath, internalPeople, internalPlots, internalSculptors, internalSoloIn, internalSoundPurpose, internalStoreKey, internalVenture, type FieldShapeId } from './internalNames';
+import { STORE_DIR } from './store';
 import { hashStr, hex } from './rng';
 import type { FileMap } from './types';
 import { checkKernelVersion, compareContracts, contractOf, KERNEL_VERSION, parseContract, parseVersion, runsOnThisKernel, showContract, universeKernels, type Contract } from './version';
@@ -57,6 +58,13 @@ export const MIGRATIONS: readonly Migration[] = [
       'la lingua interna dei file dell’universo (T308a): i nomi di campo di ogni file (universe.json, manifest, persone, trame, bibbia, atlante, regole, stato, viandanti, imprese, carte, consumi, mancanze, piani, indice dei modelli), i timbri delle carte, il viandante della partita singola (io → me), i percorsi del mondo (world/players/, world/state.json, world/ventures.json, world/stores/…) e l’attributo suolo dei programmi',
     migrate: (files) => migrate0_4(files),
     migratePlan: (plan) => plan0_4(plan),
+  },
+  {
+    from: '0.4',
+    to: '0.5',
+    descrizione:
+      'la lingua interna del filo e di Lua (T308b): i componenti che Lua vede e i loro campi (luce → light, stati → states, mestiere → job, raggio → radius, fino → expires…), nei manifest, nei casi, nei pannelli, negli stati dei viandanti e nel Lua dei moduli del Concilio; l’API (world.impresa → world.venture, world.impresa_porta → world.venture_bring), l’evento morte → death, le chiavi del deposito di sys.work (deposito: → deposit:)',
+    migrate: (files) => migrate0_5(files),
   },
 ];
 
@@ -816,4 +824,229 @@ function migrate0_4(files: FileMap): FileMap {
 function plan0_4(plan: ChunkPlan): ChunkPlan {
   const next = fields0_4('plan')(plan) as ChunkPlan;
   return JSON.stringify(next) === JSON.stringify(plan) ? plan : next;
+}
+
+// --- 0.4 → 0.5 (T308b, ADR-0153, ADR-0161): the wire and Lua ---------------------------------------------------------------------------
+// The components Lua sees and their fields (`luce {raggio}` → `light {radius}`), the API (`world.impresa` → `world.venture`), the bus's
+// event (`morte` → `death`). In the files: the components a manifest gives, its panel's fields, its cases; the states a wanderer keeps;
+// the keys of the deposits in the store of `sys.work`. In the Lua of the Council's modules, where the kernel reads a name (a component in
+// `ecs.*`, a field of one, the API, an event); the player's Lua is theirs (rule 3), the seed brings its own. The protocol changes too,
+// but nothing of it is on the disk. The plans have nothing of these.
+
+/** The calls of `ecs` that name a component, and the index of the argument that names it. */
+const ECS_NAMED: Readonly<Record<string, number>> = { get: 1, set: 1, first: 0, each: 0 };
+
+/**
+ * The Lua of a module of 0.4 in 0.5, where the kernel reads a name: the components named in `ecs.get/set/first/each` (and the keys of
+ * `ecs.spawn`'s table), the fields of a component's table where it is built (`ecs.set(u, "luce", { raggio = 3 })`, `ecs.get(u, "luce")
+ * or { accesa = false }`) and read on what `ecs.get`/`ecs.each` gave (`local l = ecs.get(u, "luce"); l.accesa`), a state of `stati`
+ * built on what `ecs.get` gave (`st.x = { velocita = 1 }`), the API (`world.impresa` → `world.venture`) and the event of death
+ * (`bus.emit("morte", { fame = … })` → `"death", { hunger = … }`). A name that is not a component of the table, and a variable that
+ * does not come from `ecs`, stay as they are. Nothing else changes.
+ */
+export function luaFor0_5(src: string): string {
+  const toks = luaTokens(src);
+  const edits: Array<{ start: number; end: number; text: string }> = [];
+  const quote = (t: LuaToken, value: string) => `${t.text[0]}${value}${t.text[0]}`;
+  // A component of the table, or one whose name stays and whose fields change (`player {passo}`, `needs {morto}`).
+  const isComp = (v: string | undefined): v is string => v !== undefined && (has('componenti', v) || Object.hasOwn(COMPONENT_FIELDS, v));
+  const renamed = (t: LuaToken, comp: string) => internalComponentName(comp) !== comp && edits.push({ start: t.start, end: t.end, text: t.kind === 'string' ? quote(t, internalComponentName(comp)) : internalComponentName(comp) });
+  const isStates = (comp: string) => internalComponentName(comp) === 'states';
+  /** The variables that hold a component, by name: the component's name of 0.4. */
+  const bound = new Map<string, string>();
+  /** The variables that hold the table of `stati`, whose fields are states. */
+  const stateTables = new Set<string>();
+  /** The index of the token that closes the group opening at `i` (`(`, `{`, `[`). */
+  const close = (i: number): number => {
+    let depth = 0;
+    for (let j = i; j < toks.length; j++) {
+      const x = toks[j].text;
+      if (x === '(' || x === '{' || x === '[') depth++;
+      else if (x === ')' || x === '}' || x === ']') {
+        depth--;
+        if (depth === 0) return j;
+      }
+    }
+    return toks.length - 1;
+  };
+  /** The keys at the top of a table constructor (`{` at `i`), with the index of the token after each `=`. */
+  const keysOf = (i: number): Array<{ key: LuaToken; value: number }> => {
+    const end = close(i);
+    const out: Array<{ key: LuaToken; value: number }> = [];
+    let depth = 0;
+    for (let j = i + 1; j < end; j++) {
+      const x = toks[j];
+      if (x.text === '{' || x.text === '(' || x.text === '[') depth++;
+      else if (x.text === '}' || x.text === ')' || x.text === ']') depth--;
+      else if (depth === 0 && x.kind === 'name' && toks[j + 1]?.text === '=' && toks[j + 2]?.text !== '=' && (toks[j - 1]?.text === '{' || toks[j - 1]?.text === ',' || toks[j - 1]?.text === ';')) out.push({ key: x, value: j + 2 });
+    }
+    return out;
+  };
+  /** A component's table (`{` at `i`): its fields; for `stati`, the table of each state. */
+  const componentTable = (i: number, comp: string) => {
+    for (const { key, value } of keysOf(i)) {
+      if (isStates(comp)) {
+        if (toks[value]?.text === '{') componentTable(value, 'stati:entry');
+        continue;
+      }
+      const to = internalComponentField(comp === 'stati:entry' ? 'stati' : comp, key.text);
+      if (to !== key.text) edits.push({ start: key.start, end: key.end, text: to });
+    }
+  };
+  for (let i = 0; i < toks.length; i++) {
+    const t = toks[i];
+    // The API: `world.impresa`, `world.impresa_porta`.
+    if (t.kind === 'name' && (t.text === 'impresa' || t.text === 'impresa_porta') && (toks[i - 1]?.text === '.' || toks[i - 1]?.text === ':') && toks[i - 2]?.text === 'world') {
+      edits.push({ start: t.start, end: t.end, text: internalName('api-lua', `world.${t.text}`).slice('world.'.length) });
+      continue;
+    }
+    // `bus.emit("morte", { fame = …, sete = … })`.
+    if (t.kind === 'name' && t.text === 'emit' && toks[i - 1]?.text === '.' && toks[i - 2]?.text === 'bus' && toks[i + 1]?.text === '(' && toks[i + 2]?.kind === 'string' && toks[i + 2].value === 'morte') {
+      const name = toks[i + 2];
+      edits.push({ start: name.start, end: name.end, text: quote(name, internalEvent('morte')) });
+      if (toks[i + 3]?.text === ',' && toks[i + 4]?.text === '{')
+        for (const { key } of keysOf(i + 4)) if (key.text === 'fame' || key.text === 'sete') edits.push({ start: key.start, end: key.end, text: internalName('campi-componenti', key.text) });
+      continue;
+    }
+    if (!(t.kind === 'name' && t.text === 'ecs' && toks[i - 1]?.text !== '.' && toks[i + 1]?.text === '.' && toks[i + 2]?.kind === 'name' && toks[i + 3]?.text === '(')) continue;
+    const call = toks[i + 2].text;
+    const open = i + 3;
+    const end = close(open);
+    // `ecs.spawn({ luce = { … }, … })`: the keys are components.
+    if (call === 'spawn' && toks[open + 1]?.text === '{') {
+      for (const { key, value } of keysOf(open + 1)) {
+        if (!isComp(key.text)) continue;
+        renamed(key, key.text);
+        if (toks[value]?.text === '{') componentTable(value, key.text);
+      }
+      continue;
+    }
+    if (!Object.hasOwn(ECS_NAMED, call)) continue;
+    // The argument that names the component(s): the first, or the one after the first comma at the top.
+    let arg = open + 1;
+    if (ECS_NAMED[call] === 1) {
+      let depth = 0;
+      for (let j = open + 1; j < end; j++) {
+        const x = toks[j].text;
+        if (x === '(' || x === '{' || x === '[') depth++;
+        else if (x === ')' || x === '}' || x === ']') depth--;
+        else if (depth === 0 && x === ',') {
+          arg = j + 1;
+          break;
+        }
+      }
+      if (arg === open + 1) continue;
+    }
+    const nameTok = toks[arg];
+    if (nameTok?.kind !== 'string' || nameTok.value === undefined) continue;
+    if (call === 'each') {
+      // `ecs.each("effimero, pos", function(id, e, p) … end)`: every name of the list, and the parameters that get them.
+      const names = nameTok.value.split(/[\s,]+/).filter(Boolean);
+      const ported = nameTok.value.replace(/[A-Za-z_][A-Za-z0-9_]*/g, (n) => internalComponentName(n));
+      if (ported !== nameTok.value) edits.push({ start: nameTok.start, end: nameTok.end, text: quote(nameTok, ported) });
+      if (toks[arg + 1]?.text === ',' && toks[arg + 2]?.text === 'function' && toks[arg + 3]?.text === '(') {
+        const params: string[] = [];
+        for (let j = arg + 4; j < toks.length && toks[j].text !== ')'; j++) if (toks[j].kind === 'name') params.push(toks[j].text);
+        names.forEach((n, k) => {
+          const p = params[k + 1];
+          if (p && isComp(n)) {
+            if (isStates(n)) stateTables.add(p);
+            else bound.set(p, n);
+          }
+        });
+      }
+      continue;
+    }
+    if (!isComp(nameTok.value)) continue;
+    const comp = nameTok.value;
+    renamed(nameTok, comp);
+    // `ecs.set(u, "luce", { … })`: the table is the component's.
+    if (call === 'set') {
+      if (toks[arg + 1]?.text === ',' && toks[arg + 2]?.text === '{') componentTable(arg + 2, comp);
+      continue;
+    }
+    if (call !== 'get') continue;
+    // `ecs.get(u, "struttura").stadio`.
+    if (toks[end + 1]?.text === '.' && toks[end + 2]?.kind === 'name') {
+      const to = internalComponentField(comp, toks[end + 2].text);
+      if (to !== toks[end + 2].text) edits.push({ start: toks[end + 2].start, end: toks[end + 2].end, text: to });
+    }
+    // `ecs.get(u, "luce") or { accesa = false }`.
+    if (toks[end + 1]?.text === 'or' && toks[end + 2]?.text === '{') componentTable(end + 2, comp);
+    // `local x = ecs.get(…)`, `x = ecs.get(…)`: the variable holds the component.
+    if (toks[i - 1]?.text === '=' && toks[i - 2]?.kind === 'name' && toks[i - 3]?.text !== '.' && toks[i - 3]?.text !== ':') {
+      if (isStates(comp)) stateTables.add(toks[i - 2].text);
+      else bound.set(toks[i - 2].text, comp);
+    }
+  }
+  for (let i = 0; i < toks.length; i++) {
+    const v = toks[i];
+    if (v.kind !== 'name' || toks[i - 1]?.text === '.' || toks[i - 1]?.text === ':') continue;
+    // The fields read and written on a variable that holds a component.
+    const comp = bound.get(v.text);
+    if (comp && toks[i + 1]?.text === '.' && toks[i + 2]?.kind === 'name') {
+      const f = toks[i + 2];
+      const to = internalComponentField(comp, f.text);
+      if (to !== f.text) edits.push({ start: f.start, end: f.end, text: to });
+    }
+    if (!stateTables.has(v.text)) continue;
+    // A state built on the table of `stati`: `st.a_bordo = { velocita = … }`, `st[e.name] = { … }`.
+    if (toks[i + 1]?.text === '.' && toks[i + 2]?.kind === 'name' && toks[i + 3]?.text === '=' && toks[i + 4]?.text === '{') componentTable(i + 4, 'stati:entry');
+    if (toks[i + 1]?.text === '[') {
+      const j = close(i + 1);
+      if (toks[j + 1]?.text === '=' && toks[j + 2]?.text === '{') componentTable(j + 2, 'stati:entry');
+    }
+  }
+  if (!edits.length) return src;
+  let out = '';
+  let at = 0;
+  for (const e of edits.sort((a, b) => a.start - b.start)) {
+    if (e.start < at) continue;
+    out += src.slice(at, e.start) + e.text;
+    at = e.end;
+  }
+  return out + src.slice(at);
+}
+
+/** The JSON of a wanderer of 0.4 in 0.5: the fields of the states they keep. */
+const wanderer0_5 = (raw: unknown): unknown => (isRecord(raw) && isRecord(raw.states) ? { ...raw, states: internalComponent('states', raw.states) } : raw);
+
+/** The store of `sys.work` of 0.4 in 0.5: the deposits of the places under their keys of 0.5 (`deposito:0:1` → `deposit:0:1`). */
+function workStore0_5(raw: unknown): unknown {
+  if (!isRecord(raw)) return raw;
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(raw)) {
+    const to = internalStoreKey(k);
+    if (to !== k && Object.hasOwn(raw, to)) continue;
+    out[to] = v;
+  }
+  return out;
+}
+
+function migrate0_5(files: FileMap): FileMap {
+  const council = councilModules(files);
+  const out: FileMap = {};
+  for (const [p, text] of Object.entries(files)) {
+    if (p === SEED) continue;
+    const mod = /^modules\/([^/]+)\//.exec(p)?.[1];
+    let next = text;
+    if (/^modules\/[^/]+\/manifest\.json$/.test(p)) next = rewriteJson(text, internalManifest0_5);
+    else if (/^modules\/[^/]+\/.+\.lua$/.test(p) && mod && council.has(mod)) next = luaFor0_5(text);
+    else if (/^world\/players\/[^/]+\.json$/.test(p)) next = rewriteJson(text, wanderer0_5);
+    else if (p === `${STORE_DIR}sys.work.json`) next = rewriteJson(text, workStore0_5);
+    out[p] = next;
+  }
+  // seed.json follows, as in 0.2-0.4: a file of the seed the migration changed, untouched by the universe, stays the seed's.
+  if (files[SEED] !== undefined) {
+    const base = parseJson(files[SEED]);
+    if (isRecord(base)) {
+      const next: Record<string, unknown> = {};
+      for (const [p, hash] of Object.entries(base)) {
+        const pristine = files[p] !== undefined && hashOf(files[p]) === hash;
+        next[p] = pristine && out[p] !== undefined ? hashOf(out[p]) : hash;
+      }
+      out[SEED] = JSON.stringify(next, null, 1) + '\n';
+    } else out[SEED] = files[SEED];
+  }
+  return out;
 }

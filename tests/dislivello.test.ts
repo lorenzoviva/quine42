@@ -152,32 +152,32 @@ describe('a rise of a model, in the kernel', () => {
       k.ecs.set(id, 'identity', { name: 'Prova', persona: '', look: '', carrying: [], job: 'fabbro' });
       k.ecs.set(id, 'mind', { mode: 'vaga', mood: '', history: [] });
       k.time = at(3, 'morning');
-      for (let t = 0; t < 4 && !k.ecs.get(id, 'mestiere'); t += STEP) k.tick(STEP);
-      const m = k.ecs.get(id, 'mestiere');
+      for (let t = 0; t < 4 && !k.ecs.get(id, 'job'); t += STEP) k.tick(STEP);
+      const m = k.ecs.get(id, 'job');
       expect(m).toBeDefined();
       // Her work this morning: up on the platform (with no stair, in its middle: 3 tiles from any she can stand on), then a while at the bench.
       const work = model === 'platea-scala' ? { x: c + 2.5, y: r + 0.5 } : { x: c + 0.5, y: r + 0.5 };
-      Object.assign(m, { work, compiti: [{ does: 'go', where: 'work' }, { does: 'wait', duration: 30 }] });
-      k.ecs.set(id, 'lavoro', { fase: m.fase, giorno: m.giorno, passo: 1 });
+      Object.assign(m, { work, tasks: [{ does: 'go', where: 'work' }, { does: 'wait', duration: 30 }] });
+      k.ecs.set(id, 'work', { phase: m.phase, day: m.day, step: 1 });
       const p = k.ecs.get(id, 'pos');
       let took = 0;
-      for (; took < 40 && (k.ecs.get(id, 'lavoro')?.passo ?? 1) < 2; took += STEP) k.tick(STEP);
-      const s = k.ecs.get(id, 'lavoro');
+      for (; took < 40 && (k.ecs.get(id, 'work')?.step ?? 1) < 2; took += STEP) k.tick(STEP);
+      const s = k.ecs.get(id, 'work');
       if (model === 'platea-scala') {
-        expect(s.passo, JSON.stringify(s)).toBe(2);
-        expect(s.motivo).toBeUndefined();
+        expect(s.step, JSON.stringify(s)).toBe(2);
+        expect(s.reason).toBeUndefined();
         expect(Math.hypot(p.x - work.x, p.y - work.y)).toBeLessThan(1.3);
         expect(k.floorAt(p.x, p.y) - ground).toBeCloseTo(0.5);
       } else {
         // No way and nothing near it: the task fails with its reason within a second, she does not push at the edge for long.
-        expect(s.passo).toBe(2);
-        expect(s.motivo).toBe('failed:no_way');
+        expect(s.step).toBe(2);
+        expect(s.reason).toBe('failed:no_way');
         expect(took).toBeLessThan(1.5);
         expect(k.floorAt(p.x, p.y) - ground).toBeCloseTo(0);
         // The day goes on: the next task, a while at work where she is.
         for (let t = 0; t < 1; t += STEP) k.tick(STEP);
-        expect(k.ecs.get(id, 'lavoro').passo).toBe(2);
-        expect(k.ecs.get(id, 'attivita')).toMatchObject({ tipo: 'work', ferma: true });
+        expect(k.ecs.get(id, 'work').step).toBe(2);
+        expect(k.ecs.get(id, 'activity')).toMatchObject({ kind: 'work', still: true });
       }
     }
   }, 120_000);
@@ -259,10 +259,10 @@ describe('back on foot (what T280 could not try)', () => {
     const home = k.wandererCarpet();
     const key = `${Math.floor(home.x / S)},${Math.floor(home.y / S)}`;
     setPeople(k, [{ nome: 'Baldo', mestiere: 'fabbro', origine: `${key}#t0` }]);
-    const sid = k.ecs.query('struttura', 'origin').find((e) => k.ecs.get(e, 'origin').key.startsWith(`${key}#s`))!;
+    const sid = k.ecs.query('structure', 'origin').find((e) => k.ecs.get(e, 'origin').key.startsWith(`${key}#s`))!;
     const origin = k.ecs.get(sid, 'origin').key;
     (k as unknown as { breakEntity(id: number): void }).breakEntity(sid);
-    k.stores.set('sys.work', `deposito:${key.replace(',', ':')}`, { 'item.ciocco': 4 });
+    k.stores.set('sys.work', `deposit:${key.replace(',', ':')}`, { 'item.ciocco': 4 });
     // Away, in one go (the carpet jumps), until the place is let go.
     for (let jump = 0; jump < 3 && loaded(k, key); jump++) {
       k.carpet()!.ox += 12 * S;
@@ -314,7 +314,7 @@ describe('back on foot (what T280 could not try)', () => {
       await new Promise((res) => setTimeout(res, 2));
     }
     expect(loaded(k, key)).toBe(true);
-    const back = k.ecs.query('struttura', 'origin').find((e) => k.ecs.get(e, 'origin').key === origin)!;
-    expect(k.ecs.get(back, 'struttura').stadio).toBeGreaterThan(0);
+    const back = k.ecs.query('structure', 'origin').find((e) => k.ecs.get(e, 'origin').key === origin)!;
+    expect(k.ecs.get(back, 'structure').stage).toBeGreaterThan(0);
   }, 240_000);
 });
