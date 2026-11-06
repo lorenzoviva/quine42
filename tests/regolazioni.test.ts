@@ -46,7 +46,7 @@ const bootMany = (ai: Record<string, unknown> = {}) => boot(ai, { mode: 'multipl
 function enter(server: SessionServer, id: string, opts: { tetto?: number; regolazioni?: never | Record<string, unknown> } = {}): { session: SessionClient; link: ClientLink; refused: () => string | undefined } {
   const { server: s, client: c } = fakeLink();
   server.connect(s);
-  const session = new SessionClient(c, { id, ...opts } as ConstructorParameters<typeof SessionClient>[1]);
+  const session = new SessionClient(c, { id, ...(opts.tetto !== undefined ? { cap: opts.tetto } : {}), ...(opts.regolazioni ? { settings: opts.regolazioni } : {}) } as ConstructorParameters<typeof SessionClient>[1]);
   return { session, link: c, refused: () => session.refused };
 }
 
@@ -304,7 +304,7 @@ describe('sul server, entrando', () => {
     const master = enter(server, 'me', { regolazioni: { textModel: 'gemini-3.8-flash', maxText: 1e9, coefficienti: { ...FULL_DETAIL, words: 0 } } });
     await master.session.ready;
     expect(master.session.settingsAnswer?.ok).toBe(true);
-    expect(master.session.settingsAnswer?.riparati?.join(' ')).toMatch(/maxText/);
+    expect(master.session.settingsAnswer?.repaired?.join(' ')).toMatch(/maxText/);
     expect(k.config.ai.textModel).toBe('gemini-3.8-flash');
     expect(k.config.ai.maxText).toBe(BUDGET_SCALE.maxText[1]);
     expect(k.ai.limits.text).toBe(BUDGET_SCALE.maxText[1]);
@@ -339,7 +339,7 @@ describe('sul server, entrando', () => {
     const server = new SessionServer(k);
     const anna = enter(server, 'anna', { regolazioni: { maxText: 1, coefficienti: zeroAll(), minimi: {} } });
     await anna.session.ready;
-    expect(anna.session.settingsAnswer).toEqual({ ok: false, motivo: 'solo il master regola il mondo' });
+    expect(anna.session.settingsAnswer).toEqual({ ok: false, reason: 'solo il master regola il mondo' });
     expect(k.repo.working['universe.json']).toBe(before);
     expect(k.config.ai.minimums?.cap).toBe(2);
     expect(k.coefficients().words).toBe(1);
@@ -355,7 +355,7 @@ describe('sul server, entrando', () => {
     await master.session.ready;
     expect(master.session.me).toBeDefined();
     expect(master.session.settingsAnswer?.ok).toBe(false);
-    expect(master.session.settingsAnswer?.motivo).toMatch(/in corso/);
+    expect(master.session.settingsAnswer?.reason).toMatch(/in corso/);
     expect(k.repo.working['universe.json']).toBe(before);
   });
 
@@ -368,7 +368,7 @@ describe('sul server, entrando', () => {
     const answers: Array<{ ok: boolean }> = [];
     void master.session.act({ t: 'attore', acceso: true } as never).then((r) => answers.push(r));
     // Their branch brings other settings: on the branch they are already the match's.
-    void master.session.act({ t: 'ramo', files: { 'universe.json': JSON.stringify({ ...JSON.parse(before!), ai: { textModel: 'gemini-4-argon' } }) }, base: {} }).then((r) => answers.push(r));
+    void master.session.act({ t: 'branch', files: { 'universe.json': JSON.stringify({ ...JSON.parse(before!), ai: { textModel: 'gemini-4-argon' } }) }, base: {} }).then((r) => answers.push(r));
     for (let i = 0; i < 12 && answers.length < 2; i++) {
       server.tick(DT);
       await new Promise((r) => setTimeout(r, 1));

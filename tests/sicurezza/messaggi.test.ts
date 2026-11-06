@@ -19,7 +19,7 @@ afterEach(() => void vi.restoreAllMocks());
 
 const world = async () => new SessionServer(kernel);
 
-type Esito = Extract<ServerMsg, { t: 'esito' }>;
+type Esito = Extract<ServerMsg, { t: 'result' }>;
 
 function enter(server: SessionServer, id: string) {
   const { server: s, client } = fakeLink();
@@ -28,13 +28,13 @@ function enter(server: SessionServer, id: string) {
   client.onMessage((m) => got.push(m));
   client.onClose(() => (closed = true));
   server.connect(s);
-  client.send({ t: 'entra', id });
-  expect(got.some((m) => m.t === 'ingresso')).toBe(true);
+  client.send({ t: 'join', id });
+  expect(got.some((m) => m.t === 'welcome')).toBe(true);
   return {
     send: (m: unknown) => client.send(m as never),
     leave: () => client.close(),
-    esiti: () => got.filter((m): m is Esito => m.t === 'esito'),
-    limited: () => got.filter((m): m is Esito => m.t === 'esito' && !m.ok && /fretta|attesa/.test(m.motivo ?? '')),
+    esiti: () => got.filter((m): m is Esito => m.t === 'result'),
+    limited: () => got.filter((m): m is Esito => m.t === 'result' && !m.ok && /fretta|attesa/.test(m.reason ?? '')),
     closed: () => closed,
     got,
   };
@@ -59,8 +59,8 @@ describe('V-011 i limiti ai messaggi', () => {
     const server = await world();
     const a = enter(server, 'inonda');
     const b = enter(server, 'gioca');
-    for (let i = 0; i < 600; i++) a.send({ t: 'dici', seq: i + 1, viandante: 'nessuno', testo: 'x' });
-    b.send({ t: 'dici', seq: 1, viandante: 'nessuno', testo: 'y' });
+    for (let i = 0; i < 600; i++) a.send({ t: 'say', seq: i + 1, wanderer: 'nessuno', text: 'x' });
+    b.send({ t: 'say', seq: 1, wanderer: 'nessuno', text: 'y' });
     expect(a.limited().length).toBe(600 - LIMITS.burst);
     server.tick(TICK);
     expect(a.esiti().length).toBe(600);
@@ -72,7 +72,7 @@ describe('V-011 i limiti ai messaggi', () => {
     const server = await world();
     const { spy, open } = holdCrafts(server);
     const a = enter(server, 'inonda');
-    for (let i = 0; i < 100; i++) a.send({ t: 'fabbrica', seq: i + 1, testo: 'una spada' });
+    for (let i = 0; i < 100; i++) a.send({ t: 'craft', seq: i + 1, text: 'una spada' });
     expect(a.limited().length).toBe(100 - LIMITS.heavyBurst);
     server.tick(TICK);
     // Two at a time, the queue full, the rest of what came told so.
@@ -89,7 +89,7 @@ describe('V-011 i limiti ai messaggi', () => {
     const { spy, open } = holdCrafts(server);
     const a = enter(server, 'torna');
     for (let i = 0; i < LIMITS.heavyBurst + 1; i++) {
-      a.send({ t: 'fabbrica', seq: i + 1, testo: 'una spada' });
+      a.send({ t: 'craft', seq: i + 1, text: 'una spada' });
       server.tick(TICK);
       open.splice(0).forEach((f) => f());
       await settle();
@@ -97,7 +97,7 @@ describe('V-011 i limiti ai messaggi', () => {
     expect(a.limited().length).toBe(1);
     const asked = spy.mock.calls.length;
     for (let t = 0; t < 2.1 / 0.1; t++) server.tick(0.1);
-    a.send({ t: 'fabbrica', seq: 99, testo: 'una spada' });
+    a.send({ t: 'craft', seq: 99, text: 'una spada' });
     server.tick(TICK);
     expect(spy.mock.calls.length).toBe(asked + 1);
   });
@@ -107,10 +107,10 @@ describe('V-011 i limiti ai messaggi', () => {
     const { spy, open } = holdCrafts(server);
     const a = enter(server, 'inonda');
     const b = enter(server, 'gioca');
-    for (let i = 0; i < 10; i++) a.send({ t: 'fabbrica', seq: i + 1, testo: 'una spada' });
+    for (let i = 0; i < 10; i++) a.send({ t: 'craft', seq: i + 1, text: 'una spada' });
     server.tick(TICK);
     expect(spy).toHaveBeenCalledTimes(LIMITS.atOnce);
-    b.send({ t: 'fabbrica', seq: 1, testo: 'una mela' });
+    b.send({ t: 'craft', seq: 1, text: 'una mela' });
     server.tick(TICK);
     expect(spy).toHaveBeenCalledTimes(LIMITS.atOnce + 1);
     open.at(-1)!();
@@ -122,9 +122,9 @@ describe('V-011 i limiti ai messaggi', () => {
     const server = await world();
     const { open } = holdCrafts(server);
     const a = enter(server, 'gioca');
-    for (let i = 0; i < 5; i++) a.send({ t: 'fabbrica', seq: i + 1, testo: 'una spada' });
+    for (let i = 0; i < 5; i++) a.send({ t: 'craft', seq: i + 1, text: 'una spada' });
     server.tick(TICK);
-    a.send({ t: 'azione', seq: 50, entita: -1, azione: 'raccogli' });
+    a.send({ t: 'action', seq: 50, entity: -1, action: 'raccogli' });
     server.tick(TICK);
     expect(a.esiti().map((e) => e.seq)).toEqual([50]);
     expect(open.length).toBe(LIMITS.atOnce);
@@ -134,7 +134,7 @@ describe('V-011 i limiti ai messaggi', () => {
     const server = await world();
     const { spy } = holdCrafts(server);
     const a = enter(server, 'lungo');
-    a.send({ t: 'fabbrica', seq: 1, testo: 'x'.repeat(200_000) });
+    a.send({ t: 'craft', seq: 1, text: 'x'.repeat(200_000) });
     server.tick(TICK);
     expect(spy.mock.calls[0][0].length).toBe(LIMITS.text);
   });
@@ -142,10 +142,10 @@ describe('V-011 i limiti ai messaggi', () => {
   it('V-011 rientrare non ridà il credito', async () => {
     const server = await world();
     const a = enter(server, 'torna');
-    for (let i = 0; i < LIMITS.burst; i++) a.send({ t: 'dici', seq: i + 1, viandante: 'nessuno', testo: 'x' });
+    for (let i = 0; i < LIMITS.burst; i++) a.send({ t: 'say', seq: i + 1, wanderer: 'nessuno', text: 'x' });
     a.leave();
     const again = enter(server, 'torna');
-    again.send({ t: 'dici', seq: 1, viandante: 'nessuno', testo: 'x' });
+    again.send({ t: 'say', seq: 1, wanderer: 'nessuno', text: 'x' });
     expect(again.limited().length).toBe(1);
   });
 
@@ -153,7 +153,7 @@ describe('V-011 i limiti ai messaggi', () => {
     const server = await world();
     const { spy, open } = holdCrafts(server);
     const a = enter(server, 'via');
-    for (let i = 0; i < 5; i++) a.send({ t: 'fabbrica', seq: i + 1, testo: 'una spada' });
+    for (let i = 0; i < 5; i++) a.send({ t: 'craft', seq: i + 1, text: 'una spada' });
     server.tick(TICK);
     a.leave();
     open.splice(0).forEach((f) => f());
@@ -166,11 +166,11 @@ describe('V-011 i limiti ai messaggi', () => {
     const server = await world();
     const a = enter(server, 'inonda');
     const others = enter(server, 'gioca');
-    for (let i = 0; i < LIMITS.burst + 10; i++) a.send({ t: 'passo', seq: i + 1, x: 0, y: 0 });
+    for (let i = 0; i < LIMITS.burst + 10; i++) a.send({ t: 'step', seq: i + 1, x: 0, y: 0 });
     expect(a.esiti()).toEqual([]);
     for (let i = 0; i < LIMITS.flood; i++) a.send(7);
     expect(a.closed()).toBe(true);
-    expect(a.got.some((m) => m.t === 'rifiuto')).toBe(true);
+    expect(a.got.some((m) => m.t === 'refusal')).toBe(true);
     expect(server.connected()).toEqual(['gioca']);
     expect(others.closed()).toBe(false);
   });
@@ -184,11 +184,11 @@ describe('V-011 i limiti ai messaggi', () => {
     let seq = 0;
     const DT = 1 / 20;
     for (let t = 0; t < 120 / DT; t++) {
-      a.send({ t: 'passo', seq: ++seq, x: 0, y: 0 });
+      a.send({ t: 'step', seq: ++seq, x: 0, y: 0 });
       // An action a second, a burst of them going through a bag, something asked of the Council every 8 seconds.
-      if (t % 20 === 0) a.send({ t: 'frase', seq: ++seq, tokens: [] });
-      if (t % 200 === 0) for (let i = 0; i < 12; i++) a.send({ t: 'oggetto', seq: ++seq, op: 'sposta', slot: 0, verso: 1 });
-      if (t % 160 === 0) a.send({ t: 'fabbrica', seq: ++seq, testo: 'una mela' });
+      if (t % 20 === 0) a.send({ t: 'phrase', seq: ++seq, tokens: [] });
+      if (t % 200 === 0) for (let i = 0; i < 12; i++) a.send({ t: 'item', seq: ++seq, op: 'move', slot: 0, toward: 1 });
+      if (t % 160 === 0) a.send({ t: 'craft', seq: ++seq, text: 'una mela' });
       server.tick(DT);
       open.splice(0).forEach((f) => f());
       if (t % 40 === 0) await settle();

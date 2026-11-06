@@ -17,11 +17,11 @@ function M.update(dt)
     end
     -- Il mana torna piano, da solo; i cristalli magici lo ridanno di colpo.
     n.mana = math.min(100, (n.mana or 0) + 0.12 * dt)
-    if n.health <= 0 and not n.morto then
+    if n.health <= 0 and not n.dead then
       -- La fine del viaggio: il kernel chiude la sessione (si può continuare nello stesso mondo).
       n.health = 0
-      n.morto = true
-      bus.emit("morte", { fame = n.hunger <= 0, sete = n.thirst <= 0 })
+      n.dead = true
+      bus.emit("death", { hunger = n.hunger <= 0, thirst = n.thirst <= 0 })
     end
   end)
 end

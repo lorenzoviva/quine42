@@ -33,7 +33,7 @@ describe('the master in god mode (T42a)', () => {
     starve(k, 'me');
     run(k, 3);
     expect(k.dead).toBe(false);
-    expect(k.as('me', () => k.needs())).toMatchObject({ hunger: 100, thirst: 100, energy: 100, health: 100, morto: false });
+    expect(k.as('me', () => k.needs())).toMatchObject({ hunger: 100, thirst: 100, energy: 100, health: 100, dead: false });
     // A player still starves: death among many is T43's, today it ends the world's wait as alone.
     starve(k, 'anna');
     run(k, 3);
@@ -69,7 +69,7 @@ describe('the master in god mode (T42a)', () => {
     const server = new SessionServer(k);
     const { server: s, client: c } = fakeLink();
     server.connect(s);
-    const anna = new SessionClient(c, { id: 'anna', nome: 'Anna' });
+    const anna = new SessionClient(c, { id: 'anna', name: 'Anna' });
     await anna.ready;
     for (let i = 0; i < 12; i++) server.tick(DT);
     expect(k.inWorld('me')).toBe(true);

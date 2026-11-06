@@ -35,7 +35,7 @@ describe('a society', () => {
     expect(k.ai.usage.text).toBe(calls);
     // Routines give them somewhere to go; relatives who meet greet each other.
     for (let i = 0; i < 70; i++) k.tick(1 / 60);
-    expect(k.ecs.get(again, 'meta') ?? k.ecs.get(b, 'meta')).toBeTruthy();
+    expect(k.ecs.get(again, 'goal') ?? k.ecs.get(b, 'goal')).toBeTruthy();
     expect(k.bubbles.has(again) || k.bubbles.has(b)).toBe(true);
   });
 });
@@ -98,7 +98,7 @@ describe('runes and magic', () => {
     expect(k.composeRune('x')).toBe(true);
     expect(k.incantation()).toEqual(['lux']);
     expect(await k.castSpell()).toBe(true);
-    expect(k.ecs.query('luce', 'effimero').length).toBe(1);
+    expect(k.ecs.query('light', 'ephemeral').length).toBe(1);
     expect(n.mana).toBe(96);
     expect(countItem(k.inventory(), 'rune:lux')).toBe(1);
     expect(k.phrase().tokens).toEqual(['x']);
@@ -114,7 +114,7 @@ describe('runes and magic', () => {
     expect(named.length).toBe(1);
     expect(k.content.spells['vita scutum']).toBeTruthy();
     expect(k.repo.head().message).toMatch(/incantesimo: vita scutum/);
-    expect(k.ecs.get(k.wandererEntity, 'scudo')?.fino).toBeGreaterThan(k.time);
+    expect(k.ecs.get(k.wandererEntity, 'shield')?.expires).toBeGreaterThan(k.time);
     k.phrase().tokens = ['vita', 'scutum'];
     await k.castSpell();
     expect(named.length).toBe(1);

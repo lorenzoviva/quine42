@@ -549,16 +549,16 @@ describe('con gli account', () => {
     it('V-006 chi entra è il suo token; il client non dice `offline`; ciò che chiede solo il master non passa; la chiave resta nel server', async () => {
       const stranger = player();
       await stranger.opened;
-      stranger.say({ t: 'entra', id: MASTER, token: 'falso' });
-      await until(() => stranger.of('rifiuto').length, 15000, 'il rifiuto di un token falso');
+      stranger.say({ t: 'join', id: MASTER, token: 'falso' });
+      await until(() => stranger.of('refusal').length, 15000, 'il rifiuto di un token falso');
       stranger.ws.close();
 
       // Alice has credits (the webhooks above): what she asks goes to the model, even if her client says `offline`.
       const a = player('?universo=prova&offline');
       await a.opened;
-      a.say({ t: 'entra', id: MASTER, token: 'vero-uid-alice', tetto: 1000 });
-      await until(() => a.of('ingresso').length, 180000, 'l’ingresso di alice');
-      const ingresso = a.of('ingresso')[0];
+      a.say({ t: 'join', id: MASTER, token: 'vero-uid-alice', cap: 1000 });
+      await until(() => a.of('welcome').length, 180000, 'l’ingresso di alice');
+      const ingresso = a.of('welcome')[0];
       expect(ingresso.id).toBe(ALICE);
       expect(ingresso.master).toBeFalsy();
       expect(Object.keys(ingresso.files).filter((p) => p.startsWith('prompts/') || p === 'world/bible.json' || p.endsWith('consumi.json'))).toEqual([]);
@@ -566,16 +566,16 @@ describe('con gli account', () => {
 
       const b = player();
       await b.opened;
-      b.say({ t: 'entra', id: BRUNO, token: 'vero-uid-bruno' });
-      await until(() => b.of('ingresso').length, 30000, 'l’ingresso di bruno');
-      await until(() => a.of('aggiorna').some((m) => m.viandanti?.some((v) => v.id === BRUNO)), 20000, 'alice vede bruno');
+      b.say({ t: 'join', id: BRUNO, token: 'vero-uid-bruno' });
+      await until(() => b.of('welcome').length, 30000, 'l’ingresso di bruno');
+      await until(() => a.of('update').some((m) => m.wanderers?.some((v) => v.id === BRUNO)), 20000, 'alice vede bruno');
 
       // What only the master says, said by a player.
-      a.say({ t: 'ramo', seq: 1, files: { 'modules/x/logic.lua': 'x' }, base: {} });
-      a.say({ t: 'pubblica', seq: 2 });
-      a.say({ t: 'ricarica', seq: 3, viandante: ALICE, quanti: 1000 });
-      a.say({ t: 'segui', seq: 4, id: BRUNO });
-      const answers = () => a.of('esito').filter((m) => [1, 2, 3, 4].includes(m.seq));
+      a.say({ t: 'branch', seq: 1, files: { 'modules/x/logic.lua': 'x' }, base: {} });
+      a.say({ t: 'publish', seq: 2 });
+      a.say({ t: 'recharge', seq: 3, wanderer: ALICE, count: 1000 });
+      a.say({ t: 'follow', seq: 4, id: BRUNO });
+      const answers = () => a.of('result').filter((m) => [1, 2, 3, 4].includes(m.seq));
       await until(() => answers().length >= 4, 15000, 'le risposte al non master');
       for (const m of answers()) expect(m.ok, JSON.stringify(m)).toBe(false);
       expect(() => git(root, ['rev-parse', '--verify', '-q', 'refs/heads/rami/master'])).toThrow();
@@ -758,8 +758,8 @@ describe('il file che `npm run serve` avvia, con il verificatore vero', () => {
       heard.push(JSON.parse(String(d)));
     });
     await new Promise((r) => ws.on('open', r));
-    ws.send(JSON.stringify({ t: 'entra', id: MASTER, token: jwt({ alg: 'none', typ: 'JWT' }, claims()) }));
-    await until(() => heard.some((m) => m.t === 'rifiuto'), 30000, 'il rifiuto');
+    ws.send(JSON.stringify({ t: 'join', id: MASTER, token: jwt({ alg: 'none', typ: 'JWT' }, claims()) }));
+    await until(() => heard.some((m) => m.t === 'refusal'), 30000, 'il rifiuto');
     ws.close();
     expect(JSON.parse((await ask('/api/session')).text).sessions).toEqual([]);
   }, 60000);

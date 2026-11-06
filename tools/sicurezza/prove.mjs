@@ -68,18 +68,18 @@ function enter(base, universo, entra, { origin, headers, wait = 90000 } = {}) {
       clearTimeout(timer);
       resolve(client);
     };
-    ws.on('open', () => client.send({ t: 'entra', nome: entra.id, ...entra }));
+    ws.on('open', () => client.send({ t: 'join', name: entra.id, ...entra }));
     ws.on('message', (data) => {
       const m = JSON.parse(String(data));
-      if (m.t === 'mondo') client.mondo.push(m.stato);
-      if (m.t === 'aggiorna') client.tick = m.tick;
-      if (m.t === 'ingresso') {
+      if (m.t === 'world') client.mondo.push(m.state);
+      if (m.t === 'update') client.tick = m.tick;
+      if (m.t === 'welcome') {
         client.ingresso = m;
         done();
-      } else if (m.t === 'rifiuto') {
-        client.rifiuto = m.motivo;
+      } else if (m.t === 'refusal') {
+        client.rifiuto = m.reason;
         done();
-      } else if (m.t === 'esito') {
+      } else if (m.t === 'result') {
         client.answers.set(m.seq, m);
         client.waiting.get(m.seq)?.(m);
       }

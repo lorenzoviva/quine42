@@ -405,18 +405,18 @@ describe('la sessione', () => {
   /** The `ingresso` the client gets, entering as it says. */
   function enter(server: SessionServer, entra: Record<string, unknown>) {
     const { server: s, client } = fakeLink();
-    const got: Array<{ t: string; master?: boolean; anonimo?: boolean }> = [];
+    const got: Array<{ t: string; master?: boolean; anonymous?: boolean }> = [];
     client.onMessage((m) => got.push(m as (typeof got)[number]));
     server.connect(s);
-    client.send({ t: 'entra', ...entra } as never);
-    const ingresso = got.find((m) => m.t === 'ingresso');
+    client.send({ t: 'join', ...entra } as never);
+    const ingresso = got.find((m) => m.t === 'welcome');
     expect(ingresso, 'il client deve essere entrato').toBeTruthy();
     return ingresso!;
   }
 
   // Nobody becomes the master by saying so: accesso.test.ts (with a verifier the id is not heard; without, only this machine gets in).
   it('V-006 essere anonimo non lo decide il client', async () => {
-    expect(enter(await world(), { id: 'sonda', nome: 'Sonda', anonimo: true }).anonimo).toBeFalsy();
+    expect(enter(await world(), { id: 'sonda', name: 'Sonda', anonymous: true }).anonymous).toBeFalsy();
   });
 
   it('V-012 a un giocatore non arrivano le impostazioni dell\'IA', () => {

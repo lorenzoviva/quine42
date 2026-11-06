@@ -82,7 +82,7 @@ describe('the master’s branch and the publication (T42b)', () => {
     run(server, [master, anna], 2);
     const out = await done;
     expect(out.ok).toBe(true);
-    expect(out.testo).toMatch(/Pubblicato: 1 file/);
+    expect(out.text).toMatch(/Pubblicato: 1 file/);
     expect(k.repo.head().message).toContain('pubblicazione del master');
     expect(JSON.parse(k.files[path]).name).toBe('Nome sul ramo');
     run(server, [master, anna], 12);
@@ -132,8 +132,8 @@ describe('the master’s branch and the publication (T42b)', () => {
     run(server, [master, anna], 6);
     const { path, edited } = entityManifest(k);
     // A player cannot write the branch nor publish.
-    const sent = anna.session.act({ t: 'ramo', files: { [path]: edited('Di Anna') }, base: {} });
-    const pub = anna.session.act({ t: 'pubblica' });
+    const sent = anna.session.act({ t: 'branch', files: { [path]: edited('Di Anna') }, base: {} });
+    const pub = anna.session.act({ t: 'publish' });
     run(server, [master, anna], 1);
     expect((await sent).ok).toBe(false);
     expect((await pub).ok).toBe(false);
@@ -147,7 +147,7 @@ describe('the master’s branch and the publication (T42b)', () => {
     run(server, [master, anna], 6);
     expect(Object.keys(server.branchFiles())).toEqual([path]);
     // A path that leaves the universe is not a branch.
-    const bad = master.session.act({ t: 'ramo', files: { '../fuori.txt': 'x' }, base: {} });
+    const bad = master.session.act({ t: 'branch', files: { '../fuori.txt': 'x' }, base: {} });
     run(server, [master, anna], 1);
     expect((await bad).ok).toBe(false);
     expect(Object.keys(server.branchFiles())).toEqual([path]);

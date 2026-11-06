@@ -16,12 +16,12 @@ function M.on_ui(user, azione)
     if not scafo then return "Non c'è nessuna barca qui." end
     b.scafo, b.stato, b.a_bordo = scafo, "in mare", true
     -- Il passo a piedi si ferma: da qui in poi muove il timone (sotto, in update).
-    local st = ecs.get(user, "stati") or {}
-    st.a_bordo = { velocita = 0.01, peso = 0, luce = 0, fino = 0 }
-    ecs.set(user, "stati", st)
+    local st = ecs.get(user, "states") or {}
+    st.a_bordo = { speed = 0.01, weight = 0, light = 0, expires = 0 }
+    ecs.set(user, "states", st)
   elseif azione == "scendi" then
     b.a_bordo, b.stato = false, "a terra"
-    local st = ecs.get(user, "stati")
+    local st = ecs.get(user, "states")
     if st then st.a_bordo = nil end
   end
   ecs.set(user, "barca", b)

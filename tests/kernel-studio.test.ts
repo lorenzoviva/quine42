@@ -16,7 +16,7 @@ describe('new mechanics', () => {
     const horse = k.spawnModuleEntity(k.modules.get('object.crate')!, pc.x + 0.9, pc.y);
     const cap = k.carryCapacity();
     await k.freeAction(horse, 'monto in sella al cavallo');
-    expect(k.states()['a cavallo'].velocita).toBeCloseTo(1.8);
+    expect(k.states()['a cavallo'].speed).toBeCloseTo(1.8);
     expect(k.carryCapacity()).toBe(cap + 30);
     expect(k.actionsFor(horse).some((a) => a.label === 'Monta in sella')).toBe(true);
     await k.freeAction(horse, 'scendo dal cavallo');
@@ -182,10 +182,10 @@ describe('the neon studio', () => {
 describe('regression: walking with states', () => {
   it('the wanderer walks with no state, an empty state table, or on horseback (and faster then)', async () => {
     const moved: number[] = [];
-    for (const st of [undefined, {}, { 'a cavallo': { velocita: 1.8, peso: 0, luce: 0, fino: 0 } }]) {
+    for (const st of [undefined, {}, { 'a cavallo': { speed: 1.8, weight: 0, light: 0, expires: 0 } }]) {
       const k = await boot();
       clearArea(k);
-      if (st) k.ecs.set(k.wandererEntity, 'stati', JSON.parse(JSON.stringify(st)));
+      if (st) k.ecs.set(k.wandererEntity, 'states', JSON.parse(JSON.stringify(st)));
       k.carpet()!.active = false;
       (k.input as any).held.add('right');
       const x = k.wandererPos().x;
@@ -247,7 +247,7 @@ describe('mechanics with interfaces', () => {
     expect(k.equip(p.panel.id, 'piedi', at)).toBe(false);
     expect(k.equip(p.panel.id, 'testa', at)).toBe(true);
     expect(k.uiValue('difesa.valore')).toBe(3);
-    expect(k.states().equipaggiamento.velocita).toBeCloseTo(0.95);
+    expect(k.states().equipaggiamento.speed).toBeCloseTo(0.95);
     expect(countItem(k.inventory(), 'item.elmo')).toBe(0);
     // The game is saved and resumed: the helmet is still on, the defence rebuilt.
     expect(k.saveState()).toBe(true);

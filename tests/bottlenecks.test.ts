@@ -223,7 +223,7 @@ describe('T56a: niente cose solide sui passaggi obbligati', () => {
     }
     const ch = k.chunks.get('0,0')!;
     const structures: number[] = [];
-    for (const id of k.ecs.query('struttura', 'origin')) {
+    for (const id of k.ecs.query('structure', 'origin')) {
       const m = new RegExp(`^${ch.key}#s(\\d+)$`).exec(k.ecs.get(id, 'origin').key);
       if (m) structures[Number(m[1])] = id;
     }

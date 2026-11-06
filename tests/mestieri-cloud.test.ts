@@ -91,8 +91,8 @@ async function lontano(k: Kernel, key: string): Promise<void> {
 }
 
 const stageOf = (k: Kernel, origin: string) => {
-  const id = k.ecs.query('struttura', 'origin').find((e) => k.ecs.get(e, 'origin').key === origin);
-  return id === undefined ? null : k.ecs.get(id, 'struttura').stadio;
+  const id = k.ecs.query('structure', 'origin').find((e) => k.ecs.get(e, 'origin').key === origin);
+  return id === undefined ? null : k.ecs.get(id, 'structure').stage;
 };
 const liveVentures = (k: Kernel) => (k as unknown as { ventureList: Venture[] }).ventureList;
 
@@ -166,11 +166,11 @@ describe('the trades of the three universes of Claude Cloud (T298)', () => {
         await vaiA(k, key);
         k.time = at(9, 'morning');
         play(k, 30);
-        const workers = k.ecs.query('mestiere', 'identity').filter((id) => k.ecs.get(id, 'mestiere').luogo === key);
+        const workers = k.ecs.query('job', 'identity').filter((id) => k.ecs.get(id, 'job').chunk === key);
         expect(workers.length).toBeGreaterThan(0);
-        expect(workers.some((id) => k.ecs.get(id, 'mestiere').id === caso.fa)).toBe(true);
+        expect(workers.some((id) => k.ecs.get(id, 'job').id === caso.fa)).toBe(true);
         k.time = at(9, 'day');
-        const made = () => workers.some((id) => Object.values((k.ecs.get(id, 'carico') ?? {}) as Record<string, number>).some((n) => n > 0));
+        const made = () => workers.some((id) => Object.values((k.ecs.get(id, 'load') ?? {}) as Record<string, number>).some((n) => n > 0));
         play(k, 150, made);
         expect(made()).toBe(true);
         const before = total();
@@ -181,7 +181,7 @@ describe('the trades of the three universes of Claude Cloud (T298)', () => {
         play(k, 10);
 
         // A building falls: its rebuilding is born with a team of people who have a program, at stage 0 (stakes and a rope).
-        const sid = k.ecs.query('struttura', 'origin').find((e) => k.ecs.get(e, 'origin').key.startsWith(`${key}#s`));
+        const sid = k.ecs.query('structure', 'origin').find((e) => k.ecs.get(e, 'origin').key.startsWith(`${key}#s`));
         expect(sid, `${key} has a building`).toBeDefined();
         const origin = k.ecs.get(sid!, 'origin').key as string;
         (k as unknown as { breakEntity(id: number): void }).breakEntity(sid!);

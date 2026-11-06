@@ -25,7 +25,7 @@ async function boot() {
 /** The structures of a planned chunk, by lot index. */
 const structuresOf = (k: Kernel, key: string) => {
   const out: number[] = [];
-  for (const id of k.ecs.query('struttura', 'origin')) {
+  for (const id of k.ecs.query('structure', 'origin')) {
     const m = new RegExp(`^${key}#s(\\d+)$`).exec(k.ecs.get(id, 'origin').key);
     if (m) out[Number(m[1])] = id;
   }
@@ -61,14 +61,14 @@ describe('lots and structures', () => {
     // The Cartographer's structure goes on the largest lot and waits for its model; the others are houses.
     const area = (i: number) => (ch.lots[i].x1 - ch.lots[i].x0 + 1) * (ch.lots[i].y1 - ch.lots[i].y0 + 1);
     const largest = ch.lots.map((_, i) => i).sort((a, b) => area(b) - area(a) || a - b)[0];
-    const s = k.ecs.get(structures[largest], 'struttura');
-    expect(s.concetto).toBe('il forno del borgo');
+    const s = k.ecs.get(structures[largest], 'structure');
+    expect(s.concept).toBe('il forno del borgo');
     expect(s.model).toBe('struttura-il-forno-del-borgo');
     const fc = k.ecs.get(structures[largest], 'form') as FormComp;
-    expect(fc.model).toBe(s.classe);
+    expect(fc.model).toBe(s.class);
     expect(fc.wanted).toBe('struttura-il-forno-del-borgo');
-    expect(k.sculpting.missing().some((r) => r.id === 'struttura-il-forno-del-borgo' && r.classe === s.classe)).toBe(true);
-    for (const [i, sid] of structures.entries()) if (i !== largest) expect(k.ecs.get(sid, 'struttura').concetto).toMatch(/^una cas/);
+    expect(k.sculpting.missing().some((r) => r.id === 'struttura-il-forno-del-borgo' && r.classe === s.class)).toBe(true);
+    for (const [i, sid] of structures.entries()) if (i !== largest) expect(k.ecs.get(sid, 'structure').concept).toMatch(/^una cas/);
   });
 
   it('puts what goes indoors on the floor of the model, never inside its walls', async () => {
@@ -133,7 +133,7 @@ describe('lots and structures', () => {
     // The structure carries its size.
     const ch = { ...k.chunks.get('0,0')!, lots: [lot(12)] };
     const lots = (k as any).lotsOf(ch, { ...k.chunks.get('0,0')!.plan!, structures: [{ concept: 'la cittadella', size: 'gargantuan' }] }, '.').lots;
-    expect(lots[0].struttura).toMatchObject({ concetto: 'la cittadella', classe: 'structure', taglia: 'gargantuan' });
+    expect(lots[0].structure).toMatchObject({ concept: 'la cittadella', class: 'structure', size: 'gargantuan' });
     // Saved with the game, and read back; the important ones of an old state are the Huge ones.
     expect(k.saveState()).toBe(true);
     const saved = JSON.parse(k.repo.head().files['world/state.json']!).rares;

@@ -220,10 +220,10 @@ giveAll(['item.carbone', 'item.acqua-termale', 'item.chiave-inglese', 'item.cacc
 const entita = NUOVI.filter((id) => k.modules.get(id)?.manifest.kind === 'entity');
 const STATI = [{}, { 'nel vapore': 20, 'nella fuliggine': 40, "tempra d'ottone": 60, 'passo a molla': 30, calamitato: 30 }];
 for (const st of STATI) {
-  kk.ecs.set(kk.wandererEntity, 'stati', Object.fromEntries(Object.entries(st).map(([n, d]) => [n, { velocita: 1, peso: 0, luce: 0, fino: k.time + (d as number) }])));
+  kk.ecs.set(kk.wandererEntity, 'states', Object.fromEntries(Object.entries(st).map(([n, d]) => [n, { speed: 1, weight: 0, light: 0, expires: k.time + (d as number) }])));
   for (const id of entita) await provaEntita(id);
 }
-kk.ecs.set(kk.wandererEntity, 'stati', {});
+kk.ecs.set(kk.wandererEntity, 'states', {});
 
 // c) the wrench in hand, F on a boiler, a guardian, a valve
 {

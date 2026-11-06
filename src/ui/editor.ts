@@ -139,7 +139,7 @@ export class Editor {
     if (!p) return;
     this.setStatus('… pubblicazione in corso', 'info');
     const r = await p.publish();
-    this.setStatus(r.ok ? `✓ ${r.testo ?? 'pubblicato'}` : `✗ ${r.motivo ?? 'non pubblicato'}`, r.ok ? 'ok' : 'err');
+    this.setStatus(r.ok ? `✓ ${r.text ?? 'pubblicato'}` : `✗ ${r.reason ?? 'non pubblicato'}`, r.ok ? 'ok' : 'err');
     this.updatePublish();
   }
 

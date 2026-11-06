@@ -86,7 +86,7 @@ export interface EntrySaid {
   token?: unknown;
 }
 
-/** A WebSocket as a link of the protocol: what arrives before anyone listens is kept for them, from `entra` on (before it nothing goes to a world). */
+/** A WebSocket as a link of the protocol: what arrives before anyone listens is kept for them, from `join` on (before it nothing goes to a world). */
 export function wsLink(ws: Pick<WebSocket, 'on' | 'send' | 'close' | 'readyState' | 'OPEN'>): HostLink & { entry(ms: number): Promise<EntrySaid | undefined> } {
   const fns: Array<(m: unknown) => void> = [];
   const closes: Array<() => void> = [];
@@ -102,7 +102,7 @@ export function wsLink(ws: Pick<WebSocket, 'on' | 'send' | 'close' | 'readyState
       return;
     }
     if (!said) {
-      if ((m as { t?: unknown } | null)?.t !== 'entra') {
+      if ((m as { t?: unknown } | null)?.t !== 'join') {
         // Who only talks without saying who they are has nothing to wait for.
         if (++before > MAX_EARLY) ws.close();
         return;
@@ -111,7 +111,7 @@ export function wsLink(ws: Pick<WebSocket, 'on' | 'send' | 'close' | 'readyState
       waiting?.(said);
     }
     if (fns.length) fns.forEach((f) => f(m));
-    // Only `entra` is owed an answer before the world is open: a few are plenty.
+    // Only `join` is owed an answer before the world is open: a few are plenty.
     else if (early.length < MAX_EARLY) early.push(m);
   });
   ws.on('close', () => {
@@ -290,8 +290,8 @@ export function attachSessions(httpServer: HttpServer, o: SessionOptions): { sto
   };
   /** A socket comes in: only now, and only for who proves who they are, does it take a place in a world, and start it if it is the first (V-026). */
   const admit = async (ws: WebSocket, link: ReturnType<typeof wsLink>, name: string, offline: boolean, address: string) => {
-    const no = (motivo: string) => {
-      link.send({ t: 'rifiuto', motivo });
+    const no = (reason: string) => {
+      link.send({ t: 'refusal', reason });
       ws.close();
     };
     const said = await link.entry(o.entryMs ?? ENTRY_MS);
@@ -339,17 +339,17 @@ export function attachSessions(httpServer: HttpServer, o: SessionOptions): { sto
       const link = wsLink(ws);
       const name = url.searchParams.get('universo') ?? '';
       if (!UNIVERSE_NAME_RE.test(name)) {
-        link.send({ t: 'rifiuto', motivo: 'universo sconosciuto' });
+        link.send({ t: 'refusal', reason: 'universo sconosciuto' });
         return ws.close();
       }
       // A name that could never start a world is told at once, without waiting to hear who asks (V-025).
       const never = activeHosts.has(name) || stopping.has(name) ? undefined : worldRefusal(credits?.universesDir, name, running(), maxWorlds);
       if (never) {
-        link.send({ t: 'rifiuto', motivo: failureText('mondo', never) });
+        link.send({ t: 'refusal', reason: failureText('mondo', never) });
         return ws.close();
       }
       admit(ws, link, name, admitted.offline, address).catch((e) => {
-        link.send({ t: 'rifiuto', motivo: failureText('mondo', e) });
+        link.send({ t: 'refusal', reason: failureText('mondo', e) });
         ws.close();
       });
     });

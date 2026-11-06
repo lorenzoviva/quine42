@@ -1,5 +1,5 @@
 -- Letto: dormire ristora; sotto il letto, a volte, qualcosa di dimenticato.
--- Lo stato ("già frugato") vive nel componente "frugato" dell'entità.
+-- Lo stato ("già frugato") vive nel componente "searched" dell'entità.
 local M = {}
 
 function M.on_act(id, user, action)
@@ -9,8 +9,8 @@ function M.on_act(id, user, action)
     return "Dormi un sonno senza sogni. Al risveglio il mondo è identico, fin troppo."
   end
   if action == "search" then
-    if ecs.get(id, "frugato") then return "Solo polvere." end
-    ecs.set(id, "frugato", { si = true })
+    if ecs.get(id, "searched") then return "Solo polvere." end
+    ecs.set(id, "searched", { yes = true })
     if hash(id, 9) < 0.5 then
       local coin = items.find("Moneta di rame")
       if coin then inventory.add(user, coin, 1 + math.floor(hash(id, 4) * 3)) end

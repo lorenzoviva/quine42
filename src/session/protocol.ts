@@ -12,7 +12,7 @@ import type { Profile } from '../kernel/wanderers';
 /** A tick of the server's world and its hour. */
 export interface Clock {
   tick: number;
-  ora: number;
+  time: number;
 }
 
 /** The wanderer of this client: where they are, and what they carry and are (when it changed). */
@@ -26,13 +26,13 @@ export interface MyState {
   needs?: Record<string, number>;
   hand?: { tokens: string[]; sel: number };
   inventory?: unknown;
-  stati?: Record<string, unknown>;
+  states?: Record<string, unknown>;
   /** What sits in the slots of the mechanics' panels (T39b). */
   slots?: Record<string, Record<string, { item: string; count: number } | null>>;
   /** The wanderer's credit balance in USD (T45a). */
-  crediti?: number;
-  /** What the panels of the mechanics show (T263, ADR-0139): `componente.campo` → value, only the fields a manifest's `ui` names. */
-  campi?: Record<string, string | number | boolean>;
+  credits?: number;
+  /** What the panels of the mechanics show (T263, ADR-0139): `component.field` → value, only the fields a manifest's `ui` names. */
+  fields?: Record<string, string | number | boolean>;
 }
 
 /** A place near the wanderer: its tiles, sent again when they change. */
@@ -42,15 +42,15 @@ export interface ChunkView {
   cy: number;
   tiles: string;
   stage: 'draft' | 'planned';
-  nome?: string;
-  descrizione?: string;
+  name?: string;
+  description?: string;
   /** The lots of its structures (`x0 y0 x1 y1` in the place's cells): the ground is flat on them (ADR-0048). */
-  lotti?: number[][];
+  lots?: number[][];
   /** The cells where its draft has the open sea: its water lies at the sea's level (T51a). */
-  mare?: number[];
+  sea?: number[];
   /** The ground dug or raised and the water that has flowed (T51b): cell → levels, cell → bed and water. */
-  scavi?: Record<string, number>;
-  acqua?: Record<string, [number, number] | [number, number, string]>;
+  digs?: Record<string, number>;
+  water?: Record<string, [number, number] | [number, number, string]>;
   version: number;
 }
 
@@ -72,133 +72,133 @@ export interface EntityView {
   m?: string;
   form?: FormView;
   glyph?: unknown;
-  /** The other components a client draws it and makes its menu with (`ENTITY_PARTS`): to pick up, a rune, a body, a light…; and `struttura: {stadio}` for a building under way (T245e). */
+  /** The other components a client draws it and makes its menu with (`ENTITY_PARTS`): to pick up, a rune, a body, a light…; and `structure: {stage}` for a building under way (T245e). */
   c?: Record<string, unknown>;
   /** What it is saying, while it says it. */
-  testo?: string;
+  text?: string;
 }
 
 /**
  * The components of an entity a client gets (T39): what the renderer and the menus read. Its mind, its memories and
- * what it carries stay on the server; of `identity` only the name, of `mind` only that it has one. `posato` (T291): the height of
+ * what it carries stay on the server; of `identity` only the name, of `mind` only that it has one. `placed` (T291): the height of
  * the shelf a thing lies on, from which the mirror rests it on the furniture it has too.
  */
-export const ENTITY_PARTS = ['pickup', 'rune', 'body', 'interact', 'luce', 'fuoco', 'attivita', 'wander', 'container', 'identity', 'mind', 'posato'] as const;
+export const ENTITY_PARTS = ['pickup', 'rune', 'body', 'interact', 'light', 'fire', 'activity', 'wander', 'container', 'identity', 'mind', 'placed'] as const;
 
 /** Another wanderer in sight. */
 export interface OtherView {
   id: string;
-  nome: string;
+  name: string;
   x: number;
   y: number;
   facing: string;
   form?: FormView;
   /** What they are saying, while they say it. */
-  testo?: string;
+  text?: string;
   /** What they say of themselves (their profile, T44a). */
-  presentazione?: string;
+  introduction?: string;
 }
 
 export type ClientMsg =
   /**
    * Coming in, as who (T44a): the profile, if the client has one, is checked and repaired by the server. With accounts
    * (T44b, ADR-0082) `token` is the account's (Firebase) and the server makes the id from it; `id` is then not heard;
-   * tetto di spesa in USD per questa sessione (T45d, ADR-0086), che il server tiene entro il saldo. Essere anonimi lo dice il
-   * token, non il client (T120, ADR-0102).
+   * `cap` is the spending cap in USD for this session (T45d, ADR-0086), which the server keeps within the balance. Being anonymous is
+   * the token's to say, not the client's (T120, ADR-0102).
    */
-  | { t: 'entra'; id: string; nome?: string; profilo?: Partial<Profile>; token?: string; tetto?: number; regolazioni?: AiSettings }
+  | { t: 'join'; id: string; name?: string; profile?: Partial<Profile>; token?: string; cap?: number; settings?: AiSettings }
   /** The wanderer chooses again who they are (T44a): the answer says the profile as the server repaired it. */
-  | { t: 'profilo'; seq: number; profilo: Partial<Profile> }
+  | { t: 'profile'; seq: number; profile: Partial<Profile> }
   /** Where the client's wanderer is now, in the world: the server checks the step and may correct it. */
-  | { t: 'passo'; seq: number; x: number; y: number }
-  /** The directions the wanderer holds, in the world's terms (T263): what `input.held(azione, id)` reads on the server. No answer. */
-  | { t: 'tasti'; tenuti: string[] }
-  | { t: 'frase'; seq: number; tokens: string[] }
-  | { t: 'incidi'; seq: number }
-  | { t: 'pronuncia'; seq: number }
+  | { t: 'step'; seq: number; x: number; y: number }
+  /** The directions the wanderer holds, in the world's terms (T263): what `input.held(action, id)` reads on the server. No answer. */
+  | { t: 'keys'; held: string[] }
+  | { t: 'phrase'; seq: number; tokens: string[] }
+  | { t: 'inscribe'; seq: number }
+  | { t: 'cast'; seq: number }
   /** An action of an entity's menu (`raccogli`, `apri`, `usa`, `leggi`, `modello:<nome>`…). */
-  | { t: 'azione'; seq: number; entita: number; azione: string }
+  | { t: 'action'; seq: number; entity: number; action: string }
   /** «Altro…»: what the wanderer tries on an entity, on something they carry (`slot`) or on a tile (`col`, `row`), judged by the Council. */
-  | { t: 'altro'; seq: number; entita?: number; slot?: number; col?: number; row?: number; viandante?: string; testo: string }
-  | { t: 'chat'; seq: number; entita: number; testo: string }
+  | { t: 'other'; seq: number; entity?: number; slot?: number; col?: number; row?: number; wanderer?: string; text: string }
+  | { t: 'chat'; seq: number; entity: number; text: string }
   /** Words to another wanderer nearby (T43a): a bubble above who speaks, and who is spoken to hears them. */
-  | { t: 'dici'; seq: number; viandante: string; testo: string }
-  /** Something carried (`slot`, `quanti` of it: all by default) to another wanderer beside them (T43a). */
-  | { t: 'dai'; seq: number; viandante: string; slot: number; quanti?: number }
-  /** Something they carry (T39b): `slot` is a slot; `verso` where it goes, `borsa` the slot of the bag, `quanti` how many. */
-  | { t: 'oggetto'; seq: number; op: ItemOp; slot: number; verso?: number; borsa?: number; quanti?: number; azione?: string }
+  | { t: 'say'; seq: number; wanderer: string; text: string }
+  /** Something carried (`slot`, `count` of it: all by default) to another wanderer beside them (T43a). */
+  | { t: 'give'; seq: number; wanderer: string; slot: number; count?: number }
+  /** Something they carry (T39b): `slot` is a slot; `toward` where it goes, `bag` the slot of the bag, `count` how many. */
+  | { t: 'item'; seq: number; op: ItemOp; slot: number; toward?: number; bag?: number; count?: number; action?: string }
   /** A container in the world: opened (its content comes in the answer), something taken from it or put into it. */
-  | { t: 'contenitore'; seq: number; entita: number; op: 'apri' | 'prendi' | 'metti'; slot?: number }
+  | { t: 'container'; seq: number; entity: number; op: 'open' | 'take' | 'put'; slot?: number }
   /** Making something: a known recipe, a free description, or two things carried put together. */
-  | { t: 'fabbrica'; seq: number; ricetta?: string; testo?: string; unisci?: [number, number] }
-  /** A panel of a mechanic (ADR-0028): something put into or taken from its slot `posto`, or a button. */
-  | { t: 'pannello'; seq: number; pannello: string; op: 'metti' | 'togli' | 'pulsante'; posto?: string; slot?: number; azione?: string }
+  | { t: 'craft'; seq: number; recipe?: string; text?: string; combine?: [number, number] }
+  /** A panel of a mechanic (ADR-0028): something put into or taken from its slot `socket`, or a button. */
+  | { t: 'panel'; seq: number; panel: string; op: 'put' | 'remove' | 'button'; socket?: string; slot?: number; action?: string }
   /** An action learned on a kind of terrain, done on a tile (ADR-0029). */
-  | { t: 'casella'; seq: number; col: number; row: number; azione: string }
+  | { t: 'tile'; seq: number; col: number; row: number; action: string }
   /**
    * The master's branch (T42b), whole: every file it changes against the main line (null: deleted), and the hash of the
    * main line's version it was changed from (null: it was not there), to tell what the world changed meanwhile.
    */
-  | { t: 'ramo'; seq: number; files: FileChanges; base: Record<string, string | null> }
+  | { t: 'branch'; seq: number; files: FileChanges; base: Record<string, string | null> }
   /** The master publishes their branch: it goes into the world, for everyone. */
-  | { t: 'pubblica'; seq: number }
+  | { t: 'publish'; seq: number }
   /** The master follows a player (T42c): what is sent is what is around them; without `id`, around the master again. */
-  | { t: 'segui'; seq: number; id?: string }
+  | { t: 'follow'; seq: number; id?: string }
   /** The master talks to an agent of the Council in the corona (T42e): what it makes goes on their branch. */
-  | { t: 'agente'; seq: number; agente: string; testo: string }
+  | { t: 'agent'; seq: number; agent: string; text: string }
   /** The master gives credits by hand (ADR-0104), within the day's cap. */
-  | { t: 'ricarica'; seq: number; viandante: string; quanti: number };
+  | { t: 'recharge'; seq: number; wanderer: string; count: number };
 
 
 /** Files changed: their new text, or null when they are gone. */
 export type FileChanges = Record<string, string | null>;
 
 /** What can be done with something carried: use, hold, drop, move, put into or take from a bag, a learned action. */
-export type ItemOp = 'usa' | 'impugna' | 'posa' | 'sposta' | 'in_borsa' | 'da_borsa' | 'azione';
+export type ItemOp = 'use' | 'wield' | 'put_down' | 'move' | 'to_bag' | 'from_bag' | 'action';
 
-/** A container as the wanderer sees it once open; `apri` when this answer opened it. */
+/** A container as the wanderer sees it once open; `open` when this answer opened it. */
 export interface ContainerView {
-  entita: number;
+  entity: number;
   inv: Inventory;
-  apri?: boolean;
+  open?: boolean;
 }
 
 export type ServerMsg =
   /**
    * Coming in: the files (a player gets only what a client draws and walks with, `playerFiles`), whether this
    * wanderer is the master (T41) and, only for the master, the platform fee their console shows (ADR-0132), the Council's feed so far and their branch (T42b); the
-   * master's updates say (`giocatori`) every player connected and where they are, when it changes (T42c).
+   * master's updates say (`players`) every player connected and where they are, when it changes (T42c).
    */
-  | ({ t: 'ingresso'; id: string; nome: string; profilo?: Profile; riparato?: string[]; regolazioni?: { ok: boolean; motivo?: string; riparati?: string[] }; anonimo?: true; master?: true; commissione?: number; concilio?: FeedEntry[]; ramo?: FileChanges; files: FileMap; me: Me; forma?: FormView; stato: MyState; luoghi: ChunkView[]; cose: EntityView[]; viandanti: OtherView[]; giocatori?: PlayerSpot[] } & Clock)
-  | ({ t: 'aggiorna'; me?: Me; stato?: MyState; luoghi?: ChunkView[]; cose?: EntityView[]; via?: number[]; viandanti?: OtherView[]; partiti?: string[]; giocatori?: PlayerSpot[]; avvisi?: Notice[] } & Clock)
+  | ({ t: 'welcome'; id: string; name: string; profile?: Profile; repaired?: string[]; settings?: { ok: boolean; reason?: string; repaired?: string[] }; anonymous?: true; master?: true; fee?: number; council?: FeedEntry[]; branch?: FileChanges; files: FileMap; me: Me; form?: FormView; state: MyState; chunks: ChunkView[]; entities: EntityView[]; wanderers: OtherView[]; players?: PlayerSpot[] } & Clock)
+  | ({ t: 'update'; me?: Me; state?: MyState; chunks?: ChunkView[]; entities?: EntityView[]; gone?: number[]; wanderers?: OtherView[]; departed?: string[]; players?: PlayerSpot[]; notices?: Notice[] } & Clock)
   /** The step was not possible (too fast, through a wall): the wanderer is here. */
-  | { t: 'correzione'; seq: number; x: number; y: number }
+  | { t: 'correction'; seq: number; x: number; y: number }
   /**
    * What came of a message: what the world said back meanwhile, and the answer if there is one; the container it
    * opened or changed, with what is in it, and the slot of a bag it opened.
    */
-  | { t: 'esito'; seq: number; ok: boolean; testo?: string; profilo?: Profile; forma?: FormView; fatto?: string; messaggi?: string[]; dialoghi?: Dialog[]; motivo?: string; contenitore?: ContainerView; borsa?: number }
-  | { t: 'rifiuto'; motivo: string }
-  /** The world's process has stopped, went on, or started again (T127): the client stays, and after `ripartito` comes in again. */
-  | { t: 'mondo'; stato: 'fermo' | 'ripreso' | 'ripartito'; testo: string }
+  | { t: 'result'; seq: number; ok: boolean; text?: string; profile?: Profile; form?: FormView; done?: string; messages?: string[]; dialogues?: Dialog[]; reason?: string; container?: ContainerView; bag?: number }
+  | { t: 'refusal'; reason: string }
+  /** The world's process has stopped, went on, or started again (T127): the client stays, and after `restarted` comes in again. */
+  | { t: 'world'; state: 'stopped' | 'resumed' | 'restarted'; text: string }
   /** What the Council said meanwhile (T41): only to the master, never to a player. */
-  | { t: 'concilio'; voci: FeedEntry[] }
+  | { t: 'council'; entries: FeedEntry[] }
   /** The world's files changed (the Council, a publication: T42b); a player hears only of those its client has. */
   | { t: 'file'; files: FileChanges }
   /** What the Council made on the master's branch (T42e): only to the master, the files it changed there. */
-  | { t: 'ramo'; files: FileChanges };
+  | { t: 'branch'; files: FileChanges };
 
 /** What another wanderer did to this one (T43a, T43b), what death cost them (T43c), or credits notice (T45d). */
 export interface Notice {
-  tipo: 'dici' | 'dai' | 'altro' | 'morte' | 'crediti';
-  da: string;
-  nome: string;
-  testo: string;
+  type: 'say' | 'give' | 'other' | 'death' | 'credits';
+  from: string;
+  name: string;
+  text: string;
   /** A death (T44c): what it took, and where the wanderer wakes up. */
-  perso?: string[];
-  dove?: 'qui' | 'piazza';
-  /** Reason when credits or tetto are exhausted (T45d). */
-  motivo?: 'finiti' | 'tetto';
+  lost?: string[];
+  where?: 'here' | 'square';
+  /** Why, when the credits or the cap are exhausted (T45d). */
+  reason?: 'exhausted' | 'cap';
 }
 
 /** A line someone (or something) said back, as the game shows it in its dialog box. */

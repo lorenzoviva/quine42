@@ -83,14 +83,14 @@ describe('the themes of the Genesis', () => {
 });
 
 describe('the common houses of a world', () => {
-  const lots = (k: Kernel) => [...k.chunks.values()].flatMap((c) => (k as any).lotsOf(c, c.plan ?? { strutture: [] }, 'p').lots as Array<{ form: { wanted?: string }; struttura: { concetto: string; classe: string; model?: string } }>);
+  const lots = (k: Kernel) => [...k.chunks.values()].flatMap((c) => (k as any).lotsOf(c, c.plan ?? { strutture: [] }, 'p').lots as Array<{ form: { wanted?: string }; structure: { concept: string; class: string; model?: string } }>);
 
   it('a world of cottages keeps the models of the seed', async () => {
     const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new Listening() });
     expect(await k.runGenesis(WORLD_THEMES[0].text)).toBe(true);
     expect(k.terrain?.manifest.commonHouse).toBeUndefined();
     await develop(k);
-    expect(lots(k).some((l) => l.struttura.model?.startsWith('casa-comune-'))).toBe(false);
+    expect(lots(k).some((l) => l.structure.model?.startsWith('casa-comune-'))).toBe(false);
   });
 
   it('a world of condominiums asks the Sculptor for its own, before anything else, and a new Genesis for others', async () => {
@@ -99,9 +99,9 @@ describe('the common houses of a world', () => {
     expect(await k.runGenesis(WORLD_THEMES[2].text)).toBe(true);
     expect(k.terrain?.manifest.commonHouse).toBe(house);
     await develop(k);
-    const common = lots(k).filter((l) => l.struttura.concetto === house);
+    const common = lots(k).filter((l) => l.structure.concept === house);
     expect(common.length).toBeGreaterThan(0);
-    for (const l of common) expect(l.struttura.model).toBe(commonHouseModel(house, l.struttura.classe));
+    for (const l of common) expect(l.structure.model).toBe(commonHouseModel(house, l.structure.class));
     expect(commonHouseModel('una baracca', 'edificio')).not.toBe(commonHouseModel(house, 'edificio'));
   });
 

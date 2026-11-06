@@ -24,10 +24,10 @@ async function bootMany(): Promise<Kernel> {
 const tokens = new Map<string, Account>();
 const verify: Verifier = async (token) => tokens.get(token);
 const GOOGLE = 'Kq3ZtV9xLmPa7RcYw2NbHs4UeJd1';
-tokens.set('google', { uid: GOOGLE, anonimo: false, nome: 'Ilaria' });
-tokens.set('anonimo', { uid: 'AnOn5tUvWxYz0aBcDeFgHiJkLm12', anonimo: true });
-tokens.set('legato', { uid: 'AnOn5tUvWxYz0aBcDeFgHiJkLm12', anonimo: false, nome: 'Bruno' });
-tokens.set('autore', { uid: 'AuThOr0000000000000000000001', anonimo: false });
+tokens.set('google', { uid: GOOGLE, anonymous: false, name: 'Ilaria' });
+tokens.set('anonimo', { uid: 'AnOn5tUvWxYz0aBcDeFgHiJkLm12', anonymous: true });
+tokens.set('legato', { uid: 'AnOn5tUvWxYz0aBcDeFgHiJkLm12', anonymous: false, name: 'Bruno' });
+tokens.set('autore', { uid: 'AuThOr0000000000000000000001', anonymous: false });
 
 async function enter(server: SessionServer, id: string, token?: string): Promise<SessionClient> {
   const { server: s, client: c } = fakeLink();
@@ -59,7 +59,7 @@ describe('accounts (T44b)', () => {
     const ok = await enter(server, 'chiunque', 'google');
     expect(ok.refused).toBeUndefined();
     expect(ok.id).toBe(GOOGLE.toLowerCase());
-    expect(ok.anonimo).toBe(false);
+    expect(ok.anonymous).toBe(false);
     expect(server.connected()).toEqual([GOOGLE.toLowerCase()]);
     expect(k.wanderers().find((w) => w.id === ok.id)?.name).toBe('Ilaria');
 
@@ -91,7 +91,7 @@ describe('accounts (T44b)', () => {
     const server = new SessionServer(k, { verify });
     const anon = await enter(server, '', 'anonimo');
     const id = anon.id;
-    expect(anon.anonimo).toBe(true);
+    expect(anon.anonymous).toBe(true);
     expect(server.isAnonymous(id)).toBe(true);
     expect(k.isAnonymous(id)).toBe(true);
     expect(k.creditsOf(id)).toBe(0);
@@ -111,10 +111,10 @@ describe('accounts (T44b)', () => {
 
     const linked = await enter(server, '', 'legato');
     expect(linked.id).toBe(id);
-    expect(linked.anonimo).toBe(false);
+    expect(linked.anonymous).toBe(false);
     expect(server.isAnonymous(id)).toBe(false);
     expect(k.isAnonymous(id)).toBe(false);
-    expect(linked.profilo?.name).toBe('Nebbia');
+    expect(linked.profile?.name).toBe('Nebbia');
     expect(JSON.stringify(k.as(id, () => k.inventory()))).toBe(carried);
 
     // Linked to Google: can receive credits and use online models

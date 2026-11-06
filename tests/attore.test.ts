@@ -223,7 +223,7 @@ describe('the Actor in a multiplayer game', () => {
   async function thin(server: SessionServer, id: string): Promise<ThinClient> {
     const { server: s, client: c } = fakeLink();
     server.connect(s);
-    const session = new SessionClient(c, { id, nome: id });
+    const session = new SessionClient(c, { id, name: id });
     await session.ready;
     const k = await Kernel.boot({ files: session.files, store: memoryStore(), ai: new MockAiModels(), mirror: true });
     return new ThinClient(k, session);
@@ -275,7 +275,7 @@ describe('the Actor in a multiplayer game', () => {
     const server = new SessionServer(k);
     const { server: s, client: c } = fakeLink();
     server.connect(s);
-    const session = new SessionClient(c, { id: 'me', regolazioni: { actor: { on: true, model: 'gemini-3.8-flash' } } });
+    const session = new SessionClient(c, { id: 'me', settings: { actor: { on: true, model: 'gemini-3.8-flash' } } });
     await session.ready;
     expect(session.settingsAnswer?.ok).toBe(true);
     expect(k.actor()).toEqual({ on: true, model: 'gemini-3.8-flash' });
@@ -284,9 +284,9 @@ describe('the Actor in a multiplayer game', () => {
     const other = new SessionServer(odd);
     const link = fakeLink();
     other.connect(link.server);
-    const oddSession = new SessionClient(link.client, { id: 'me', regolazioni: { actor: { on: true, model: '../../etc' } } });
+    const oddSession = new SessionClient(link.client, { id: 'me', settings: { actor: { on: true, model: '../../etc' } } });
     await oddSession.ready;
-    expect(oddSession.settingsAnswer?.riparati?.join(' ')).toMatch(/Attore/);
+    expect(oddSession.settingsAnswer?.repaired?.join(' ')).toMatch(/Attore/);
     expect(odd.actor()).toEqual({ on: true, model: ACTOR_MODEL });
   });
 });

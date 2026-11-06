@@ -5,7 +5,8 @@
 import type { Schema } from '../ai/models';
 import type { UiElement, UiPanel } from '../types';
 import type { Council } from './council';
-import { internalFields, internalName, italianValues } from '../internalNames';
+import { internalComponents, internalFields, internalName, italianValues } from '../internalNames';
+import { luaFor0_5 } from '../migrations';
 
 const ELEMENT: Schema = {
   type: 'OBJECT',
@@ -90,7 +91,8 @@ export async function designMechanic(c: Council, request: string, ctx: { items: 
   );
   let components: Record<string, unknown> | undefined;
   try {
-    components = r.componenti_json ? JSON.parse(r.componenti_json) : undefined;
+    // The components of 0.4 the Engineer may still write take the names of 0.5 (T308b), and so does its code.
+    components = r.componenti_json ? (internalComponents(JSON.parse(r.componenti_json)) as Record<string, unknown>) : undefined;
   } catch {
     components = undefined;
   }
@@ -99,7 +101,7 @@ export async function designMechanic(c: Council, request: string, ctx: { items: 
     description: String(r.descrizione ?? '').slice(0, 300),
     panel: { title: String(r.pannello?.titolo ?? r.nome ?? 'Meccanica').slice(0, 30), elements: Array.isArray(r.pannello?.elementi) ? r.pannello.elementi : [] },
     components,
-    logic: String(r.logica ?? ''),
+    logic: luaFor0_5(String(r.logica ?? '')),
     cases: Array.isArray(r.casi) ? r.casi : [],
   };
 }

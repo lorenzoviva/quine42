@@ -70,12 +70,12 @@ describe('il sorvegliante, con un mondo finto', () => {
     expect(await h.start()).toEqual({ ok: true });
     const c = client();
     h.connect(c.link);
-    c.say({ t: 'entra', id: 'alice' });
+    c.say({ t: 'join', id: 'alice' });
     childOf(h).send({ t: 'sonda-blocca' });
-    await until(() => c.of('mondo').length, 5000, 'avviso');
-    expect(c.of('mondo')[0]).toMatchObject({ t: 'mondo', stato: 'fermo' });
+    await until(() => c.of('world').length, 5000, 'avviso');
+    expect(c.of('world')[0]).toMatchObject({ t: 'world', state: 'stopped' });
     expect(c.closed()).toBe(false);
-    await until(() => c.of('mondo').some((m) => m.t === 'mondo' && m.stato === 'ripartito'), 10000, 'ripartito');
+    await until(() => c.of('world').some((m) => m.t === 'world' && m.state === 'restarted'), 10000, 'ripartito');
     expect(h.restarts).toBe(1);
     expect(c.closed()).toBe(false);
     await h.stop();
@@ -103,7 +103,7 @@ describe('il sorvegliante, con un mondo finto', () => {
     expect(third.find((m) => m.t === 'visto')?.open?.restore).toMatch(/^commit-\d+$/);
     childOf(h).send({ t: 'sonda-muori' });
     await until(() => gaveUp, 5000, 'resa');
-    expect(c.of('rifiuto')).toHaveLength(1);
+    expect(c.of('refusal')).toHaveLength(1);
     expect(c.closed()).toBe(true);
     await h.stop();
   });
@@ -127,7 +127,7 @@ describe('il sorvegliante, con un mondo finto', () => {
     await until(() => third.some((m) => m.t === 'pronto'), 15000, 'terza apertura');
     expect(third.find((m) => m.t === 'visto')?.open?.restore).toMatch(/^commit-\d+$/);
     await until(() => gaveUp, 15000, 'resa');
-    expect(c.of('rifiuto')).toHaveLength(1);
+    expect(c.of('refusal')).toHaveLength(1);
     await h.stop();
   }, 60000);
 
@@ -203,12 +203,12 @@ describe('il canale verso un mondo bloccato (T169)', () => {
     await h.start();
     const c = client();
     h.connect(c.link);
-    c.say({ t: 'entra', id: 'alice' });
+    c.say({ t: 'join', id: 'alice' });
     childOf(h).send({ t: 'sonda-blocca' });
     const text = 'x'.repeat(200 * 1024);
-    for (let i = 1; i < (2 * MAX_BACKLOG) / text.length; i++) c.say({ t: 'altro', seq: i, entita: 1, testo: text });
-    await until(() => c.of('esito').length, 5000, 'risposta');
-    expect(c.of('esito')[0]).toMatchObject({ t: 'esito', ok: false });
+    for (let i = 1; i < (2 * MAX_BACKLOG) / text.length; i++) c.say({ t: 'other', seq: i, entity: 1, text: text });
+    await until(() => c.of('result').length, 5000, 'risposta');
+    expect(c.of('result')[0]).toMatchObject({ t: 'result', ok: false });
     expect((h as unknown as { backlog: number }).backlog).toBeLessThanOrEqual(MAX_BACKLOG);
     (h as unknown as { child: { kill(s: string): void } }).child.kill('SIGKILL');
     await h.stop();
@@ -277,24 +277,24 @@ describe('due mondi veri', () => {
       const [a, b] = [client(), client()];
       uno.connect(a.link);
       due.connect(b.link);
-      a.say({ t: 'entra', id: 'alice' });
-      b.say({ t: 'entra', id: 'bruno' });
-      await until(() => a.of('ingresso').length && b.of('ingresso').length, 20000, 'ingresso');
+      a.say({ t: 'join', id: 'alice' });
+      b.say({ t: 'join', id: 'bruno' });
+      await until(() => a.of('welcome').length && b.of('welcome').length, 20000, 'welcome');
       // A first opening longer than the notice (the cache of the forms is empty) is not silence: nobody was told, nothing was killed.
-      expect(a.of('mondo')).toHaveLength(0);
+      expect(a.of('world')).toHaveLength(0);
       expect(uno.restarts).toBe(0);
       childOf(uno).send({ t: 'sonda-blocca' });
-      await until(() => a.of('mondo').length, 20000, 'avviso');
+      await until(() => a.of('world').length, 20000, 'avviso');
       // The server answers while that world is stuck, and the other one goes on hearing its client.
       const r = await fetch(`${base}/api/universe`);
       expect(r.status).toBe(200);
       const seen = b.heard.length;
-      b.say({ t: 'passo', seq: 1, x: 0.1, y: 0.1 });
+      b.say({ t: 'step', seq: 1, x: 0.1, y: 0.1 });
       await until(() => b.heard.length > seen, 20000, 'l’altro mondo risponde');
       expect(due.restarts).toBe(0);
-      await until(() => a.of('mondo').some((m) => m.t === 'mondo' && m.stato === 'ripartito'), REAL_TIMES.kill + WORLD_TIMES.boot, 'ripartito');
-      a.say({ t: 'entra', id: 'alice' });
-      await until(() => a.of('ingresso').length === 2, 30000, 'di nuovo dentro');
+      await until(() => a.of('world').some((m) => m.t === 'world' && m.state === 'restarted'), REAL_TIMES.kill + WORLD_TIMES.boot, 'ripartito');
+      a.say({ t: 'join', id: 'alice' });
+      await until(() => a.of('welcome').length === 2, 30000, 'di nuovo dentro');
       expect(uno.restarts).toBe(1);
       expect(a.closed()).toBe(false);
     } finally {
@@ -346,7 +346,7 @@ describe('due mondi veri', () => {
   it('V-011 V-012 attraverso il processo valgono i limiti e gli elenchi, anche dopo un riavvio', async () => {
     const uno = world('uno', { times: { ...REAL_TIMES, kill: 60000, notice: 60000 } });
     const isolated = (m: ServerMsg | undefined) => {
-      if (m?.t !== 'ingresso') throw new Error('nessun ingresso');
+      if (m?.t !== 'welcome') throw new Error('nessun ingresso');
       expect(m.master).toBeFalsy();
       const paths = Object.keys(m.files);
       expect(paths.some((p) => p.startsWith('prompts/') || p === 'world/bible.json' || p === 'world/people.json' || p.startsWith('world/players/'))).toBe(false);
@@ -357,27 +357,27 @@ describe('due mondi veri', () => {
       const [p, q] = [client(), client()];
       uno.connect(p.link);
       uno.connect(q.link);
-      p.say({ t: 'entra', id: 'pina' });
-      q.say({ t: 'entra', id: 'quirino' });
-      await until(() => p.of('ingresso').length && q.of('ingresso').length, 20000, 'ingresso');
-      isolated(p.of('ingresso')[0]);
+      p.say({ t: 'join', id: 'pina' });
+      q.say({ t: 'join', id: 'quirino' });
+      await until(() => p.of('welcome').length && q.of('welcome').length, 20000, 'welcome');
+      isolated(p.of('welcome')[0]);
       // What may call the models is refused past its pace, in the world's own process, with an answer.
-      for (let i = 1; i <= LIMITS.heavyBurst + 5; i++) p.say({ t: 'altro', seq: 1000 + i, viandante: 'quirino', testo: 'prova' });
-      await until(() => p.of('esito').some((m) => m.t === 'esito' && !m.ok && /fretta|attesa/.test(m.motivo ?? '')), 15000, 'limite dei pesanti');
+      for (let i = 1; i <= LIMITS.heavyBurst + 5; i++) p.say({ t: 'other', seq: 1000 + i, wanderer: 'quirino', text: 'prova' });
+      await until(() => p.of('result').some((m) => m.t === 'result' && !m.ok && /fretta|attesa/.test(m.reason ?? '')), 15000, 'limite dei pesanti');
       // Who does not stop is closed; the other goes on hearing the world.
-      for (let i = 0; i < LIMITS.burst + LIMITS.flood + 500; i++) p.say({ t: 'passo', seq: 5000 + i, x: 0.1, y: 0.1 });
+      for (let i = 0; i < LIMITS.burst + LIMITS.flood + 500; i++) p.say({ t: 'step', seq: 5000 + i, x: 0.1, y: 0.1 });
       await until(() => p.closed(), 15000, 'chiuso');
       expect(q.closed()).toBe(false);
       const seen = q.heard.length;
-      q.say({ t: 'passo', seq: 1, x: 0.2, y: 0.2 });
+      q.say({ t: 'step', seq: 1, x: 0.2, y: 0.2 });
       await until(() => q.heard.length > seen, 20000, 'l’altro ascolta');
       // After a restart the warnings say nothing of the world, and what comes in again is on the list again.
       (uno as unknown as { child: { kill(s: string): void } }).child.kill('SIGKILL');
-      await until(() => q.of('mondo').some((m) => m.t === 'mondo' && m.stato === 'ripartito'), WORLD_TIMES.boot, 'ripartito');
-      for (const m of q.of('mondo')) expect(Object.keys(m).sort()).toEqual(['stato', 't', 'testo']);
-      q.say({ t: 'entra', id: 'quirino' });
-      await until(() => q.of('ingresso').length === 2, 30000, 'di nuovo dentro');
-      isolated(q.of('ingresso')[1]);
+      await until(() => q.of('world').some((m) => m.t === 'world' && m.state === 'restarted'), WORLD_TIMES.boot, 'ripartito');
+      for (const m of q.of('world')) expect(Object.keys(m).sort()).toEqual(['state', 't', 'text']);
+      q.say({ t: 'join', id: 'quirino' });
+      await until(() => q.of('welcome').length === 2, 30000, 'di nuovo dentro');
+      isolated(q.of('welcome')[1]);
     } finally {
       await uno.stop();
     }

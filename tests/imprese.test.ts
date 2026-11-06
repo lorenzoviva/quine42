@@ -100,8 +100,10 @@ describe('a venture, as data', () => {
     expect(readVentures('{ non è json')).toEqual([]);
   });
 
-  it('world.impresa and world.impresa_porta are in the API of Lua', () => {
-    expect(apiErrors('local p = world.impresa(1)\nlocal n = world.impresa_porta(1, "item.ciocco")')).toEqual([]);
+  it('world.venture and world.venture_bring are in the API of Lua', () => {
+    expect(apiErrors('local p = world.venture(1)\nlocal n = world.venture_bring(1, "item.ciocco")')).toEqual([]);
+    // The names of the contract 0.4 are gone (T308b): a module of before is ported by the migration.
+    expect(apiErrors('local p = world.impresa(1)').join()).toMatch(/world\.impresa non esiste/);
   });
 });
 
@@ -151,8 +153,8 @@ function play(k: Kernel, seconds: number, until?: () => boolean): void {
 
 /** The stage of the building of an origin: undefined when it stands whole, null when there is none. */
 const stageOf = (k: Kernel, origin: string) => {
-  const id = k.ecs.query('struttura', 'origin').find((e) => k.ecs.get(e, 'origin').key === origin);
-  return id === undefined ? null : k.ecs.get(id, 'struttura').stadio;
+  const id = k.ecs.query('structure', 'origin').find((e) => k.ecs.get(e, 'origin').key === origin);
+  return id === undefined ? null : k.ecs.get(id, 'structure').stage;
 };
 const liveVentures = (k: Kernel) => (k as unknown as { ventureList: Venture[] }).ventureList;
 const consumed = (k: Kernel) => (k as unknown as { consumed: Set<string> }).consumed;
@@ -160,7 +162,7 @@ const consumed = (k: Kernel) => (k as unknown as { consumed: Set<string> }).cons
 /** The structure of the first lot of the wanderer's place, and its origin. */
 function aStructure(k: Kernel): { id: number; origin: string } {
   const { key } = placeOf(k);
-  const id = k.ecs.query('struttura', 'origin').find((e) => k.ecs.get(e, 'origin').key.startsWith(`${key}#s`));
+  const id = k.ecs.query('structure', 'origin').find((e) => k.ecs.get(e, 'origin').key.startsWith(`${key}#s`));
   expect(id, 'the place of the wanderer has a building').toBeDefined();
   return { id: id!, origin: k.ecs.get(id!, 'origin').key };
 }
@@ -174,7 +176,7 @@ describe('the ventures in a world', () => {
     const names = [['Baldo', 'fabbro'], ['Ivo', 'boscaiolo'], ['Nives', 'contadina']];
     setPeople(k, names.map(([nome, mestiere], i) => ({ nome, mestiere, origine: `${key}#t${i}` })));
     for (const [i, [nome, mestiere]] of names.entries()) worker(k, nome, mestiere, site.x + 3 + i, site.y + 3);
-    k.stores.set('sys.work', `deposito:${key.replace(',', ':')}`, { 'item.ciocco': 40, 'item.chiodi': 20 });
+    k.stores.set('sys.work', `deposit:${key.replace(',', ':')}`, { 'item.ciocco': 40, 'item.chiodi': 20 });
     (k as unknown as { breakEntity(id: number): void }).breakEntity(id);
     const [v] = k.ventures();
     expect(v).toMatchObject({ type: 'construction', chunk: key, origin: origin, born_from: 'regola:ricostruzione', state: 'active' });
@@ -194,9 +196,9 @@ describe('the ventures in a world', () => {
 
     // The panel of the site: the fields its manifest names travel with W (rule 8f), nothing else of the file.
     const fields = k.panelFields();
-    expect(fields['cantiere.titolo']).toBe(now.title);
-    expect(String(fields['cantiere.squadra'])).toMatch(/Baldo \(capomastro\)/);
-    expect(Object.keys(fields).filter((f) => f.startsWith('cantiere.')).sort()).toEqual(['cantiere.fase', 'cantiere.manca', 'cantiere.squadra', 'cantiere.stato', 'cantiere.titolo']);
+    expect(fields['worksite.title']).toBe(now.title);
+    expect(String(fields['worksite.team'])).toMatch(/Baldo \(capomastro\)/);
+    expect(Object.keys(fields).filter((f) => f.startsWith('worksite.')).sort()).toEqual(['worksite.missing', 'worksite.phase', 'worksite.state', 'worksite.team', 'worksite.title']);
   }, 60000);
 
   it('who dies leaves the team and someone else takes the place; with nobody it is stopped, and it goes on when someone is back', async () => {
@@ -341,12 +343,12 @@ describe('the ventures in a world', () => {
     (k as unknown as { breakEntity(id: number): void }).breakEntity(id);
     addItem(k.inventory(), 'item.ciocco', 30, { weight: 0, stack: 99 } as never);
     // Far: nothing is taken.
-    k.uiAction('cantiere', 'porta');
+    k.uiAction('worksite', 'bring');
     expect(k.ventures()[0].brought).toEqual({});
     const p = k.ecs.get(k.wandererEntity, 'pos');
     p.x = site.x + 1;
     p.y = site.y + 1;
-    k.uiAction('cantiere', 'porta');
+    k.uiAction('worksite', 'bring');
     expect(k.ventures()[0].brought).toEqual({ 'item.ciocco': 16 });
     expect(k.individualOf('Baldo')?.memories?.some((r) => r.weight === 2 && /materiale/.test(r.text))).toBe(true);
   }, 60000);
@@ -366,18 +368,18 @@ describe('the ventures in a world', () => {
     p.y = site.y + 1;
     carpet.ox = 100;
     carpet.oy = 100;
-    k.uiAction('cantiere', 'porta');
+    k.uiAction('worksite', 'bring');
     expect(k.ventures()[0].brought).toEqual({});
     play(k, 1.5);
-    expect(k.ecs.get(k.wandererEntity, 'cantiere')).toBeUndefined();
+    expect(k.ecs.get(k.wandererEntity, 'worksite')).toBeUndefined();
     // Carried next to it, at the centre of the carpet: what the game is, the panel says the site and the button brings.
     p.x = 0;
     p.y = 0;
     carpet.ox = site.x + 1;
     carpet.oy = site.y + 1;
     play(k, 1.5);
-    expect(k.ecs.get(k.wandererEntity, 'cantiere')?.titolo).toBe(k.ventures()[0].title);
-    k.uiAction('cantiere', 'porta');
+    expect(k.ecs.get(k.wandererEntity, 'worksite')?.title).toBe(k.ventures()[0].title);
+    k.uiAction('worksite', 'bring');
     expect(k.ventures()[0].brought).toEqual({ 'item.ciocco': 16 });
   }, 60000);
 });

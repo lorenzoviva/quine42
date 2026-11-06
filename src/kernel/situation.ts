@@ -15,7 +15,7 @@ export type OperationKind = 'wanderer' | 'player' | 'chunk' | 'plot' | 'quest' |
 /** Another wanderer connected now (T42c): who, and where in the world (carpet space). */
 export interface PlayerSpot {
   id: string;
-  nome: string;
+  name: string;
   x: number;
   y: number;
 }
@@ -96,7 +96,7 @@ export function situation(s: SituationInput): Situation {
 
   ops.push(at({ kind: 'wanderer', label: 'il viandante', detail: 'è qui' }, s.wanderer));
   for (const p of s.players ?? [])
-    ops.push(at({ kind: 'player', label: p.nome, detail: `collegato, a ${Math.floor(p.x)},${Math.floor(p.y)}`, who: p.id }, { cx: Math.floor(p.x / s.chunkSize), cy: Math.floor(p.y / s.chunkSize) }));
+    ops.push(at({ kind: 'player', label: p.name, detail: `collegato, a ${Math.floor(p.x)},${Math.floor(p.y)}`, who: p.id }, { cx: Math.floor(p.x / s.chunkSize), cy: Math.floor(p.y / s.chunkSize) }));
   for (const c of s.chunks) {
     if (c.stage !== 'draft') continue;
     ops.push(at({ kind: 'chunk', label: `luogo ${c.cx},${c.cy}`, detail: c.developing ? 'il Cartografo lo sta pianificando' : 'in coda', ...(c.developing ? { live: true } : {}) }, c));

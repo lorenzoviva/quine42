@@ -435,10 +435,10 @@ export class Renderer {
         const p = id === k.wandererEntity ? { ...k.wandererCarpet(), z: k.wandererPos().z } : k.ecs.get(id, 'pos');
         if (p) o.bubble(p.x - ox, k.floorAt(p.x, p.y, p.z) + 1.9, p.y - oy, b.text);
       }
-      for (const id of k.ecs.query('attivita', 'pos')) {
-        const a = k.ecs.get(id, 'attivita');
+      for (const id of k.ecs.query('activity', 'pos')) {
+        const a = k.ecs.get(id, 'activity');
         const p = k.ecs.get(id, 'pos');
-        if (a?.tipo && a.ferma) o.activity(p.x - ox, k.floorAt(p.x, p.y, p.z) + 1.6, p.y - oy, a.tipo, this.t);
+        if (a?.kind && a.still) o.activity(p.x - ox, k.floorAt(p.x, p.y, p.z) + 1.6, p.y - oy, a.kind, this.t);
       }
       const target = watch ? undefined : k.targetInFront();
       if (target !== undefined) {

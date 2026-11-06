@@ -126,8 +126,8 @@ describe('a day of work, in a planned place', () => {
     const id = worker(k, 'contadina');
     // The kernel looks at the people once a second of ticks (60 of them).
     play(k, 4);
-    const m = k.ecs.get(id, 'mestiere');
-    expect(m).toMatchObject({ id: 'farmer', fase: 'morning' });
+    const m = k.ecs.get(id, 'job');
+    expect(m).toMatchObject({ id: 'farmer', phase: 'morning' });
     const site = m.work ?? k.ecs.get(id, 'pos');
     const meadow = count(k, 'g', site.x, site.y);
     const ploughed = count(k, 'm', site.x, site.y);
@@ -145,8 +145,8 @@ describe('a day of work, in a planned place', () => {
     expect(count(k, 'u', site.x, site.y)).toBeGreaterThanOrEqual(sown);
     // And by day she reaps it: wheat in what she carries, the field ploughed again.
     k.time = at(3, 'day');
-    play(k, 120, () => (k.ecs.get(id, 'carico')?.['item.grano'] ?? 0) >= 1);
-    expect(k.ecs.get(id, 'carico')?.['item.grano']).toBeGreaterThanOrEqual(1);
+    play(k, 120, () => (k.ecs.get(id, 'load')?.['item.grano'] ?? 0) >= 1);
+    expect(k.ecs.get(id, 'load')?.['item.grano']).toBeGreaterThanOrEqual(1);
   }, 120_000);
 
   it('a woodcutter fells a tree, takes the log, and leaves a stump that grows back into the wood in three days', async () => {
@@ -157,9 +157,9 @@ describe('a day of work, in a planned place', () => {
     for (const [dx, dy] of [[0, 0], [1, 0], [0, 1]]) expect(k.setTile(c + dx, r + dy, 't')).toBe(true);
     const id = worker(k, 'taglialegna', 2, 2);
     play(k, 4);
-    expect(k.ecs.get(id, 'mestiere')).toMatchObject({ id: 'woodcutter' });
-    play(k, 70, () => (k.ecs.get(id, 'carico')?.['item.ciocco'] ?? 0) >= 1);
-    expect(k.ecs.get(id, 'carico')?.['item.ciocco']).toBeGreaterThanOrEqual(1);
+    expect(k.ecs.get(id, 'job')).toMatchObject({ id: 'woodcutter' });
+    play(k, 70, () => (k.ecs.get(id, 'load')?.['item.ciocco'] ?? 0) >= 1);
+    expect(k.ecs.get(id, 'load')?.['item.ciocco']).toBeGreaterThanOrEqual(1);
     const stumps = count(k, 'x', c, r, 3);
     expect(stumps).toBeGreaterThanOrEqual(1);
     k.time = at(4, 'morning');
@@ -178,11 +178,11 @@ describe('a day of work, in a planned place', () => {
     for (let dy = 0; dy < 2; dy++) for (let dx = 0; dx < 2; dx++) expect(k.setTile(c + dx, r + dy, 'w')).toBe(true);
     const id = worker(k, 'pescatrice', -2, 2);
     play(k, 4);
-    expect(k.ecs.get(id, 'mestiere')).toMatchObject({ id: 'fisher' });
-    play(k, 70, () => (k.ecs.get(id, 'carico')?.['item.pesce'] ?? 0) >= 1);
-    expect(k.ecs.get(id, 'carico')?.['item.pesce']).toBeGreaterThanOrEqual(1);
+    expect(k.ecs.get(id, 'job')).toMatchObject({ id: 'fisher' });
+    play(k, 70, () => (k.ecs.get(id, 'load')?.['item.pesce'] ?? 0) >= 1);
+    expect(k.ecs.get(id, 'load')?.['item.pesce']).toBeGreaterThanOrEqual(1);
     expect(count(k, 'w', c, r, 1)).toBe(4);
-    expect(k.ecs.get(id, 'attivita')?.tipo).toBe('fish');
+    expect(k.ecs.get(id, 'activity')?.kind).toBe('fish');
   }, 120_000);
 
   it('in the evening to the square, at night home; who follows the wanderer stops working and lives as before', async () => {
@@ -190,14 +190,14 @@ describe('a day of work, in a planned place', () => {
     k.time = at(2, 'evening');
     const id = worker(k, 'contadino');
     play(k, 4);
-    expect(k.ecs.get(id, 'mestiere')).toMatchObject({ fase: 'evening' });
-    expect(k.ecs.get(id, 'mestiere').compiti.map((t: { does: string }) => t.does)).toEqual(['go', 'carry', 'chat']);
+    expect(k.ecs.get(id, 'job')).toMatchObject({ phase: 'evening' });
+    expect(k.ecs.get(id, 'job').tasks.map((t: { does: string }) => t.does)).toEqual(['go', 'carry', 'chat']);
     k.time = at(2, 'night');
     play(k, 4);
-    expect(k.ecs.get(id, 'mestiere').compiti.map((t: { does: string }) => t.does)).toEqual(['go', 'rest']);
+    expect(k.ecs.get(id, 'job').tasks.map((t: { does: string }) => t.does)).toEqual(['go', 'rest']);
     k.ecs.get(id, 'mind').mode = 'segui';
     play(k, 4);
-    expect(k.ecs.get(id, 'mestiere')).toBeUndefined();
+    expect(k.ecs.get(id, 'job')).toBeUndefined();
   }, 120_000);
 
   it('the day of every edit is in the plan of its place, and the edits of before (without one) ripen from today', async () => {

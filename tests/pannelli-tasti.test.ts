@@ -42,7 +42,7 @@ describe('W: what a panel shows, in a game of many', () => {
       k.as('bea', () => {
         for (const [i, campo] of fields.entries()) {
           const [c, f] = campo.split('.');
-          if (['needs', 'stati'].includes(c)) continue;
+          if (['needs', 'states'].includes(c)) continue;
           const comp = k.ecs.get(k.wandererEntity, c) ?? k.ecs.set(k.wandererEntity, c, {});
           comp[f] = `valore-${i}`;
         }
@@ -50,7 +50,7 @@ describe('W: what a panel shows, in a game of many', () => {
       for (let t = 0; t < 10; t++) server.tick(DT);
       for (const [i, campo] of fields.entries()) {
         if (campo.startsWith('needs.') || campo.startsWith('stati.')) continue;
-        expect(client.stato.campi?.[campo], `${id}: ${campo}`).toBe(k.as('bea', () => k.uiValue(campo)) ?? `valore-${i}`);
+        expect(client.state.fields?.[campo], `${id}: ${campo}`).toBe(k.as('bea', () => k.uiValue(campo)) ?? `valore-${i}`);
       }
     }
   });
@@ -64,8 +64,8 @@ describe('W: what a panel shows, in a game of many', () => {
     k.as('bea', () => k.ecs.set(k.wandererEntity, 'partita', { noi: 3, loro: 1, via: false }));
     k.as('ugo', () => k.ecs.set(k.wandererEntity, 'partita', { noi: 0, loro: 5, via: false }));
     for (let t = 0; t < 10; t++) server.tick(DT);
-    expect(bea.stato.campi).toEqual({ 'partita.noi': 3, 'partita.loro': 1 });
-    expect(ugo.stato.campi).toEqual({ 'partita.noi': 0, 'partita.loro': 5 });
+    expect(bea.state.fields).toEqual({ 'partita.noi': 3, 'partita.loro': 1 });
+    expect(ugo.state.fields).toEqual({ 'partita.noi': 0, 'partita.loro': 5 });
   });
 
   it('on a client the fields become what its panels read; the kernel’s own components are never written from there', async () => {
@@ -119,7 +119,7 @@ describe('K: the keys and the places of every wanderer', () => {
     expect(seen().destra).toBe('bea');
     // Said once, not at every frame.
     bea.client.keys(['right']);
-    expect(bea.sent.filter((m) => m.t === 'tasti').length).toBe(1);
+    expect(bea.sent.filter((m) => m.t === 'keys').length).toBe(1);
     bea.client.keys([]);
     server.tick(DT);
     expect(seen().destra).toBe('');

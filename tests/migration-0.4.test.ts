@@ -13,7 +13,7 @@ import { bundledFiles } from '../src/kernel/bundle';
 import { internalFields, internalPath } from '../src/kernel/internalNames';
 import { migratePlanRecord, migrateUniverse, MIGRATIONS, pathsBefore, portedFiles } from '../src/kernel/migrations';
 import { prepareUniverse, SEED_FILE } from '../src/kernel/universes';
-import { checkKernelVersion, KERNEL_VERSION } from '../src/kernel/version';
+import { checkKernelVersion } from '../src/kernel/version';
 import { hashStr, hex } from '../src/kernel/rng';
 import { readPeople } from '../src/kernel/society';
 import { readPlots } from '../src/kernel/plots';
@@ -33,6 +33,8 @@ import type { ChunkPlan } from '../src/kernel/agents/cartography';
 import type { FileMap } from '../src/kernel/types';
 import { boot } from './world';
 
+/** The kernel of the contract 0.4: the chain stops there. */
+const TO_0_4 = '0.4.0';
 const json = (s: string | undefined) => JSON.parse(s ?? 'null');
 const write = (v: unknown) => JSON.stringify(v, null, 2) + '\n';
 const h = (s: string) => hex(hashStr(s));
@@ -101,20 +103,21 @@ function universe03(): FileMap {
 
 describe('the migration 0.3 → 0.4: a universe of 0.3 born among many, file by file', () => {
   const before = universe03();
-  const { files, applied } = migrateUniverse(before);
+  // The step 0.3 → 0.4 alone: the chain goes on to 0.5 (T308b, migration-0.5.test.ts).
+  const { files, applied } = migrateUniverse(before, TO_0_4);
 
   it('is the third migration of the chain, it says what it does, and the universe runs on this kernel', () => {
-    expect(MIGRATIONS.map((m) => `${m.from}→${m.to}`)).toEqual(['0.1→0.2', '0.2→0.3', '0.3→0.4']);
+    expect(MIGRATIONS.map((m) => `${m.from}→${m.to}`)).toEqual(['0.1→0.2', '0.2→0.3', '0.3→0.4', '0.4→0.5']);
     expect(applied).toHaveLength(1);
     expect(applied[0]).toMatch(/^0\.3→0\.4: /);
     const cfg = json(files['universe.json']);
-    expect(cfg).toMatchObject({ kernel: KERNEL_VERSION, kernels: { from: '0.4' } });
-    expect(checkKernelVersion(cfg.kernel, KERNEL_VERSION, cfg.kernels).ok).toBe(true);
+    expect(cfg).toMatchObject({ kernel: TO_0_4, kernels: { from: '0.4' } });
+    expect(checkKernelVersion(cfg.kernel, TO_0_4, cfg.kernels).ok).toBe(true);
   });
 
   it('is deterministic, and a ported universe stays as it is', () => {
-    expect(migrateUniverse(universe03()).files).toEqual(files);
-    expect(migrateUniverse(files).applied).toEqual([]);
+    expect(migrateUniverse(universe03(), TO_0_4).files).toEqual(files);
+    expect(migrateUniverse(files, TO_0_4).applied).toEqual([]);
     const again = MIGRATIONS[2].migrate(files);
     for (const p of Object.keys(files)) expect(again[p], p).toBe(files[p]);
   });
@@ -221,7 +224,7 @@ describe('the migration 0.3 → 0.4: a universe of 0.3 born among many, file by 
     const old = universe03();
     delete old['world/giocatori/io.json'];
     old['world/stato.json'] = write({ importanti: { '5,5': '5,5' }, rari: { huge: { '0,0': '1,1' } }, viandante: { nome: 'Io', crediti: 3, needs: { hunger: 1 } }, ora: 4 });
-    const out = migrateUniverse(old).files;
+    const out = migrateUniverse(old, TO_0_4).files;
     expect(json(out['world/state.json'])).toEqual({ rares: { huge: { '5,5': '5,5', '0,0': '1,1' } }, time: 4 });
     expect(json(out['world/players/me.json'])).toEqual({ name: 'Io', needs: { hunger: 1 } });
   });
@@ -229,7 +232,7 @@ describe('the migration 0.3 → 0.4: a universe of 0.3 born among many, file by 
   it('seed.json follows: a file of the seed the universe kept as it was stays the seed\'s under its new path', () => {
     const u = universe03();
     u[SEED_FILE] = JSON.stringify({ 'world/canone.md': h(u['world/canone.md']), 'world/lessico.md': 'cambiato' }, null, 1) + '\n';
-    const seed = json(migrateUniverse(u).files[SEED_FILE]);
+    const seed = json(migrateUniverse(u, TO_0_4).files[SEED_FILE]);
     expect(Object.keys(seed).sort()).toEqual(['world/canon.md', 'world/lexicon.md']);
     expect(seed['world/canon.md']).toBe(h(u['world/canone.md']));
     expect(seed['world/lexicon.md']).toBe('cambiato');
@@ -238,12 +241,12 @@ describe('the migration 0.3 → 0.4: a universe of 0.3 born among many, file by 
   it('a universe that has both the old path and the new one keeps the new one', () => {
     const u = universe03();
     u['world/state.json'] = write({ time: 9 });
-    expect(json(migrateUniverse(u).files['world/state.json'])).toEqual({ time: 9 });
+    expect(json(migrateUniverse(u, TO_0_4).files['world/state.json'])).toEqual({ time: 9 });
   });
 
-  it('prepareUniverse: the chain, then the seed of 0.4', () => {
+  it('prepareUniverse: the chain (0.3 → 0.4 → 0.5), then the seed of today', () => {
     const out = prepareUniverse(universe03(), bundledFiles);
-    expect(out.applied).toHaveLength(1);
+    expect(out.applied).toHaveLength(2);
     expect(out.files['world/canon.md']).toBeDefined();
     expect(out.changes['world/stato.json']).toBeNull();
     expect(out.changes['world/giocatori/io.json']).toBeNull();
