@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 06/11/2026, epoca 318 (gemini). Crediti: vedi `stato`.
+Aggiornato il 06/11/2026, epoca 319 (gemini). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -38,5 +38,5 @@ Aggiornato il 06/11/2026, epoca 318 (gemini). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **319 (gemini):** rotazione contesto; T320 in corso su Gemini (Flash high, Scultore 2 piani); T328 attende finestra 5h Claude (reset 21:59 UTC).
 - **318 (gemini):** T326 integrato (`87255e5`), T293 integrato (`7e6c4e6`), lanciato T320 su Gemini.
-- **317 (claude):** T323 integrato.
