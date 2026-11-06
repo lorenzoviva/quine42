@@ -25,18 +25,18 @@ Funzioni che il kernel chiama, se presenti:
 - `world.has_tag(id, tag)`, `world.break_entity(id)` (la distrugge e lascia cadere i suoi "drops")
 - `world.set_tile(x, y, codice)` (cambia il terreno di una casella, resta cambiato), `world.open(id)` (apre un contenitore al viandante), `world.make_container(id, capienza, bottino)`
 - `world.store_get(chiave)`, `world.store_set(chiave, valore)`: il magazzino del modulo, che dura tra una partita e l'altra (prezzi, contatori, tabelloni, accordi: ciò che non è una casella). Chiavi semplici (lettere, cifre, `_ - . :`), valori da dati (numeri, testi, tabelle); `nil` toglie la chiave; `store_set` restituisce `false` se il magazzino è pieno. Ogni modulo vede solo il suo; i componenti e i `singleton` invece tornano come all'inizio quando il mondo si riapre
-- Effetti pronti: il modulo `core.effects` applica `{ tipo = "fuoco" | "luce" | "scudo" | "terreno" | ... }`; componenti `fuoco`, `luce {raggio, accesa}`, `effimero {fino}` (sparisce a tempo), `scudo {fino}`
+- Effetti pronti: il modulo `core.effects` applica `{ type = "fire" | "light" | "shield" | "terrain" | ... }`; componenti `fire {radius}`, `light {radius, lit, color}`, `ephemeral {expires}` (sparisce a tempo), `shield {expires}`. I nomi dei componenti e dei loro campi sono in inglese: `light`, `fire`, `ephemeral`, `shield`, `goal {x, y}` (dove va un abitante), `activity {kind, still}`, `states`, `job`, `work`, `load`
 - `world.tile(x, y)` codice del terreno; `world.speed_at(x, y)`; `world.free(x, y, r, z)` (z: `p.z`, l'altezza dei piedi, per chi sta su un piano alto; facoltativo)
 - `world.say(testo)` messaggio al viandante; `world.speak(id, testo)` fumetto sopra un'entità
 - `inventory.add(id, oggetto, n)`, `inventory.remove(id, oggetto, n)`, `inventory.count(id, oggetto)`, `inventory.equipped(id)` (gli oggetti sono id come "item.corda")
 - `items.find(nome)` id dell'oggetto con quel nome (o `nil`); `items.def(id)` → `{name=, category=, weight=, tags=}`
 - Bisogni del viandante: `ecs.get(user, "needs")` → `{hunger=, thirst=, energy=, health=}` da 0 a 100 (modificabili)
 - `world.path(x, y, tx, ty, r)` → il prossimo punto `{x=, y=}` della via verso (tx, ty) che gira attorno a ciò che blocca, per un corpo di raggio `r` (facoltativo: quello di un abitante; passa `ecs.get(id, "body").r`), che si raggiunge dritti da dove si è; una meta dentro qualcosa di solido si raggiunge il più vicino possibile; `nil` se non c'è via (allora chi cammina rinuncia, non spinge contro il muro); `world.find_tile(codice, x, y, raggio)` → il centro della casella con quel codice più vicina
-- `world.impresa(id)`: il prossimo passo dell'impresa a cui lavora un individuo (`{fa="porta"|"lavora"|"raccogli", x=, y=, …}`, o `nil`); `world.impresa_porta(id, oggetto)`: porta all'impresa vicina ciò che `id` ha nel `carico` (o, per un viandante, nella borsa) e che le serve, e restituisce quanti. Il file delle imprese lo scrive solo il kernel
+- `world.venture(id)`: il prossimo passo dell'impresa a cui lavora un individuo (`{does="carry"|"work"|"gather", x=, y=, …}`, o `nil`); `world.venture_bring(id, oggetto)`: porta all'impresa vicina ciò che `id` ha nel componente `load` (o, per un viandante, nella borsa) e che le serve, e restituisce quanti. Il file delle imprese lo scrive solo il kernel
 - `world.act(chi, cosa, azione)`: un individuo usa una cosa come il viandante con «Usa» (il suo `on_act`, con `chi` come `user`): solo azioni senza effetti, entro due caselle e mezzo; restituisce il testo
 - `world.wanderers()` → lista di `{id=, chi=, x=, y=}`, ogni viandante con il suo corpo e dove sta (in una partita di molti sono più d'uno: un sistema gira una volta sola, per tutti); `input.held(azione, id)` se il viandante con quel corpo tiene `up`, `down`, `left` o `right` (senza `id`, chi agisce ora)
 - I campi dei pannelli (`campo` di una `barra` o di un `testo`) arrivano a ogni viandante dal suo corpo: ciò che il pannello mostra va scritto in un componente del viandante, non in un'entità comune
-- `input.held(azione)`, `bus.emit(nome, dati)`, `log(...)`, `hash(a, b, c, d)` (deterministico, 0..1; `math.random` va bene, il kernel lo semina), `time`
+- `input.held(azione)`, `bus.emit(nome, dati)` (la morte del viandante è l'evento `"death"`, con `{hunger=, thirst=}`), `log(...)`, `hash(a, b, c, d)` (deterministico, 0..1; `math.random` va bene, il kernel lo semina), `time`
 - `math`, `string`, `table`, `utf8`, `pairs`, `ipairs`, `tostring`, `tonumber`, `type`, `pcall`
 
 ## Esempio
@@ -61,7 +61,7 @@ Rispondi solo con JSON conforme allo schema richiesto.
 ## Meccaniche nuove
 Quando il Concilio introduce qualcosa che si usa (un cavallo da montare, una barca, una trappola,
 un'arma), scrivi la logica che lo rende usabile e le sue conseguenze: stati del viandante
-(`core.effects` con `{tipo="stato", nome=..., velocita=..., peso=...}`), spostamenti, oggetti consumati.
+(`core.effects` con `{type="state", name=..., speed=..., weight=...}`), spostamenti, oggetti consumati.
 I testi che il codice mostra (`world.say`, `world.speak`) stanno dentro il mondo: mai parlare di codice.
 
 ## Meccaniche e interfacce
@@ -78,7 +78,7 @@ dell'inventario, il tuo `logic.lua` reagisce. Elementi del pannello:
 - `{"tipo":"pulsante","id":"riposa","etichetta":"Riposa"}` — chiama `M.on_ui(user, "riposa")`.
 API: `ui.slot(panel, slot)` → l'oggetto in quello slot (o nil); `items.bonus(id, "difesa")` → un numero
 del bonus dell'oggetto (difesa, attacco, velocita, peso, luce, calore). Le conseguenze passano dagli
-**stati** del viandante: `local st = ecs.get(user, "stati") or {}; st["armatura"] = { velocita = 0.9, peso = 0, luce = 0, fino = 0 }; ecs.set(user, "stati", st)`
+**stati** del viandante, il componente `states`: `local st = ecs.get(user, "states") or {}; st["armatura"] = { speed = 0.9, weight = 0, light = 0, expires = 0 }; ecs.set(user, "states", st)`
 (velocità e peso trasportabile li applica il kernel). Mai scorrere con `pairs` le tabelle che arrivano
 da `ecs.get`: usa liste di nomi che conosci (es. `for _, p in ipairs({"testa","corpo"}) do … end`).
 Con la meccanica scrivi 1-3 **casi d'uso** (`casi`), gli esempi che la Sala sistemi mette in scena: chi è il viandante

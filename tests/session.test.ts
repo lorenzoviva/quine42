@@ -26,10 +26,10 @@ async function settle(server: SessionServer) {
   for (let i = 0; i < 12; i++) server.tick(DT);
 }
 
-function join(server: SessionServer, id: string, nome?: string): SessionClient {
+function join(server: SessionServer, id: string, name?: string): SessionClient {
   const { server: s, client: c } = fakeLink();
   server.connect(s);
-  return new SessionClient(c, { id, nome });
+  return new SessionClient(c, { id, name });
 }
 
 /** A run of free tiles toward east in the world, near where the wanderer is: where they can walk straight. */
@@ -87,7 +87,7 @@ describe('the kernel on the server (T38)', () => {
     }
     // Each sees the other where the server has them.
     const b = k.wandererAt('bruno')!;
-    expect(anna.others.get('bruno')).toMatchObject({ nome: 'Bruno', x: Math.round(b.x * 1000) / 1000 });
+    expect(anna.others.get('bruno')).toMatchObject({ name: 'Bruno', x: Math.round(b.x * 1000) / 1000 });
     expect(bruno.others.has('anna')).toBe(true);
     // Each has a carpet of their own: one walks, the other stays where they were.
     const start = freeRun(k, 'anna', 6);
@@ -160,23 +160,23 @@ describe('the kernel on the server (T38)', () => {
     await settle(server);
     k.as('anna', () => k.give('rune:luce', 1));
     // The phrase holds only the runes they carry.
-    const ok = anna.act({ t: 'frase', tokens: ['luce'] });
+    const ok = anna.act({ t: 'phrase', tokens: ['luce'] });
     server.tick(DT);
     expect(await ok).toMatchObject({ ok: true });
-    const no = anna.act({ t: 'frase', tokens: ['fuoco'] });
+    const no = anna.act({ t: 'phrase', tokens: ['fuoco'] });
     server.tick(DT);
     expect((await no).ok).toBe(false);
     for (let i = 0; i < 6; i++) server.tick(DT);
-    expect(anna.stato.hand?.tokens).toEqual([]);
-    expect(bruno.stato.hand?.tokens ?? []).toEqual([]);
+    expect(anna.state.hand?.tokens).toEqual([]);
+    expect(bruno.state.hand?.tokens ?? []).toEqual([]);
     // What is far is out of reach; what does not exist is not there.
     const far = [...anna.entities.values()].find((t) => Math.hypot(t.x - anna.me!.x, t.y - anna.me!.y) > 6);
     if (far) {
-      const r = anna.act({ t: 'chat', entita: far.id, testo: 'ciao' });
+      const r = anna.act({ t: 'chat', entity: far.id, text: 'ciao' });
       server.tick(DT);
-      expect(await r).toMatchObject({ ok: false, motivo: 'è troppo lontano' });
+      expect(await r).toMatchObject({ ok: false, reason: 'è troppo lontano' });
     }
-    const none = anna.act({ t: 'altro', entita: 999999, testo: 'lo accarezzo' });
+    const none = anna.act({ t: 'other', entity: 999999, text: 'lo accarezzo' });
     server.tick(DT);
     expect((await none).ok).toBe(false);
     // The same wanderer cannot come in twice.

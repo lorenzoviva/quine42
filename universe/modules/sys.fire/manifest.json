@@ -33,11 +33,11 @@
           "x": 0,
           "y": 1,
           "components": {
-            "effimero": {
-              "fino": 3
+            "ephemeral": {
+              "expires": 3
             },
-            "fuoco": {
-              "raggio": 1
+            "fire": {
+              "radius": 1
             }
           }
         }
@@ -47,7 +47,7 @@
         "0:body.solid",
         "1:body.solid",
         "needs.health",
-        "2:effimero.fino"
+        "2:ephemeral.expires"
       ],
       "lines": [
         15,
@@ -73,8 +73,8 @@
       ],
       "wanderer": {
         "components": {
-          "scudo": {
-            "fino": 99
+          "shield": {
+            "expires": 99
           }
         }
       },
@@ -89,11 +89,11 @@
           "x": 0,
           "y": 1,
           "components": {
-            "effimero": {
-              "fino": 99
+            "ephemeral": {
+              "expires": 99
             },
-            "fuoco": {
-              "raggio": 1
+            "fire": {
+              "radius": 1
             }
           }
         }
@@ -102,7 +102,7 @@
       "watch": [
         "0:body.solid",
         "needs.health",
-        "scudo.fino"
+        "shield.expires"
       ],
       "lines": [
         9,

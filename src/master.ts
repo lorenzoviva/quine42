@@ -72,7 +72,7 @@ export class MasterTools {
       if (!id) return;
       const back = el('button', {}, 'Torna');
       back.onclick = () => k.follow?.();
-      sign.replaceChildren(el('span', {}, `Segui ${k.connected?.find((p) => p.id === id)?.nome ?? id} — Esc per tornare`), back);
+      sign.replaceChildren(el('span', {}, `Segui ${k.connected?.find((p) => p.id === id)?.name ?? id} — Esc per tornare`), back);
     });
     window.addEventListener('keydown', (e) => {
       if (e.key !== 'Escape' || !k.watching || this.isOpen) return;

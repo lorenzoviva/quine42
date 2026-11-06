@@ -39,8 +39,8 @@ export function accountSettings(env: Record<string, string | undefined>): Accoun
     try {
       const t = await (await auth).verifyIdToken(token);
       // Of Google's name only the first word: the wanderer's name is theirs to choose (the profile, T44a).
-      const nome = typeof t.name === 'string' ? t.name.trim().split(/\s+/)[0] : undefined;
-      const a: Account = { uid: t.uid, anonimo: anonymousToken(t.firebase), ...(nome ? { nome } : {}) };
+      const name = typeof t.name === 'string' ? t.name.trim().split(/\s+/)[0] : undefined;
+      const a: Account = { uid: t.uid, anonymous: anonymousToken(t.firebase), ...(name ? { name } : {}) };
       return a;
     } catch {
       return undefined;

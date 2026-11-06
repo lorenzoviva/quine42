@@ -112,7 +112,7 @@ describe('the Referente and the teams of the corona on the master’s branch (T4
     run(server, [master, anna], 12);
     expect(rulesOf(server.branchFiles())).toMatch(/campane[\s\S]*corvi|corvi[\s\S]*campane/);
     // Someone else's words to the Council go nowhere.
-    const refused = await until(server, [master, anna], anna.session.act({ t: 'agente', agente: 'liaison', testo: 'stabilisci una regola: anna vince' }));
+    const refused = await until(server, [master, anna], anna.session.act({ t: 'agent', agent: 'liaison', text: 'stabilisci una regola: anna vince' }));
     expect(refused.ok).toBe(false);
     expect(rulesOf(server.branchFiles())).not.toMatch(/anna vince/);
     expect(rulesOf(k.files)).not.toMatch(/campane|corvi|anna/);
@@ -145,7 +145,7 @@ describe('the runes the master asks the Referente for (T42f)', () => {
     run(server, [master, anna], 12);
     expect(countItem(master.k.inventory(), 'rune:speed')).toBe(1);
     // A player's words to the Council go nowhere.
-    const refused = await until(server, [master, anna], anna.session.act({ t: 'agente', agente: 'liaison', testo: 'dammi la runa speed' }));
+    const refused = await until(server, [master, anna], anna.session.act({ t: 'agent', agent: 'liaison', text: 'dammi la runa speed' }));
     expect(refused.ok).toBe(false);
     expect(has('anna', 'speed')).toBe(0);
   });

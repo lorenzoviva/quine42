@@ -26,10 +26,10 @@
     ]
   },
   "singleton": {
-    "cantiere": {
+    "worksite": {
       "ritmo": 0.1,
       "posati": 0,
-      "fase": "scavo",
+      "phase": "scavo",
       "x": -2,
       "y": -6
     }

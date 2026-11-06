@@ -19,10 +19,10 @@ async function bootMany(game: Record<string, unknown> = {}): Promise<Kernel> {
   return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 }
 
-async function thin(server: SessionServer, id: string, nome: string): Promise<ThinClient> {
+async function thin(server: SessionServer, id: string, name: string): Promise<ThinClient> {
   const { server: s, client: c } = fakeLink();
   server.connect(s);
-  const session = new SessionClient(c, { id, nome });
+  const session = new SessionClient(c, { id, name });
   await session.ready;
   const k = await Kernel.boot({ files: session.files, store: memoryStore(), ai: new MockAiModels(), mirror: true });
   return new ThinClient(k, session);
@@ -95,7 +95,7 @@ describe('words and gifts between wanderers (T43a)', () => {
     const reply = await ask(server, all, anna.k.talk(b, words));
     expect(reply.say).toBe('');
     run(server, all, 8);
-    expect(bruno.session.notices).toEqual([{ tipo: 'dici', da: 'anna', nome: 'Anna', testo: words }]);
+    expect(bruno.session.notices).toEqual([{ type: 'say', from: 'anna', name: 'Anna', text: words }]);
     expect(heard).toEqual([{ id: avatarOf(bruno, 'anna'), name: 'Anna', text: words }]);
     // The bubble: above Anna for Bruno, above herself for Anna; Carlo is too far to see her.
     expect(bruno.k.bubbles.get(avatarOf(bruno, 'anna')!)?.text).toBe(words);
@@ -103,12 +103,12 @@ describe('words and gifts between wanderers (T43a)', () => {
     expect(carlo.session.others.has('anna')).toBe(false);
     expect(carlo.session.notices).toEqual([]);
     // Words to someone too far do not reach them.
-    const far = await ask(server, all, anna.session.act({ t: 'dici', viandante: 'carlo', testo: 'mi senti?' }));
+    const far = await ask(server, all, anna.session.act({ t: 'say', wanderer: 'carlo', text: 'mi senti?' }));
     expect(far.ok).toBe(false);
-    expect(far.messaggi?.join(' ')).toMatch(/troppo lontano/);
+    expect(far.messages?.join(' ')).toMatch(/troppo lontano/);
     // To nobody, or to oneself, nothing.
-    expect((await ask(server, all, anna.session.act({ t: 'dici', viandante: 'nessuno', testo: 'ehi' }))).ok).toBe(false);
-    expect((await ask(server, all, anna.session.act({ t: 'dici', viandante: 'anna', testo: 'ehi' }))).ok).toBe(false);
+    expect((await ask(server, all, anna.session.act({ t: 'say', wanderer: 'nessuno', text: 'ehi' }))).ok).toBe(false);
+    expect((await ask(server, all, anna.session.act({ t: 'say', wanderer: 'anna', text: 'ehi' }))).ok).toBe(false);
     run(server, all, 8);
     expect(carlo.session.notices).toEqual([]);
     // The server's own word on what was said: the bubble is on Anna's body.
@@ -128,7 +128,7 @@ describe('words and gifts between wanderers (T43a)', () => {
     const b = avatarOf(anna, 'bruno')!;
     const slot = k.as('anna', () => k.inventory().equipped)!;
     expect(anna.k.actionsFor(b).find((o) => o.id === `dai:${slot}`)?.label).toMatch(/ ×3$/);
-    const two = await ask(server, all, anna.session.act({ t: 'dai', viandante: 'bruno', slot, quanti: 2 }));
+    const two = await ask(server, all, anna.session.act({ t: 'give', wanderer: 'bruno', slot, count: 2 }));
     expect(two.ok).toBe(true);
     expect(k.as('anna', () => countItem(k.inventory(), item))).toBe(1);
     expect(k.as('bruno', () => countItem(k.inventory(), item))).toBe(2);
@@ -137,9 +137,9 @@ describe('words and gifts between wanderers (T43a)', () => {
     expect(k.as('anna', () => countItem(k.inventory(), item))).toBe(0);
     expect(k.as('bruno', () => countItem(k.inventory(), item))).toBe(3);
     run(server, all, 8);
-    expect(bruno.session.notices.map((n) => [n.tipo, n.da])).toEqual([
-      ['dai', 'anna'],
-      ['dai', 'anna'],
+    expect(bruno.session.notices.map((n) => [n.type, n.from])).toEqual([
+      ['give', 'anna'],
+      ['give', 'anna'],
     ]);
     // What Bruno's browser has is what the server says.
     expect(countItem(bruno.k.inventory(), item)).toBe(3);
@@ -151,7 +151,7 @@ describe('words and gifts between wanderers (T43a)', () => {
     const pouch = k.as('anna', () => k.inventory().slots.findIndex((s) => !!s?.inv && countItem(s.inv, 'rune:luce') > 0));
     expect(pouch).toBeGreaterThanOrEqual(0);
     const bags = k.as('bruno', () => k.inventory().slots.filter((s) => s?.inv).length);
-    expect((await ask(server, all, anna.session.act({ t: 'dai', viandante: 'bruno', slot: pouch }))).ok).toBe(true);
+    expect((await ask(server, all, anna.session.act({ t: 'give', wanderer: 'bruno', slot: pouch }))).ok).toBe(true);
     expect(k.as('anna', () => [countItem(k.inventory(), 'rune:luce'), k.phrase().tokens.length])).toEqual([0, 0]);
     expect(k.as('bruno', () => [k.inventory().slots.filter((s) => s?.inv).length, countItem(k.inventory(), 'rune:luce')])).toEqual([bags + 1, 1]);
     // Too far: nothing moves.
@@ -160,19 +160,19 @@ describe('words and gifts between wanderers (T43a)', () => {
     const at = k.wandererAt('anna')!;
     put(k, 'bruno', { x: at.x + GIVE_REACH + 2, y: at.y });
     run(server, all, 4);
-    const far = await ask(server, all, anna.session.act({ t: 'dai', viandante: 'bruno', slot: one }));
+    const far = await ask(server, all, anna.session.act({ t: 'give', wanderer: 'bruno', slot: one }));
     expect(far.ok).toBe(false);
-    expect(far.messaggi?.join(' ')).toMatch(/Avvicinati/);
+    expect(far.messages?.join(' ')).toMatch(/Avvicinati/);
     // No room: Bruno's slots are all full of something else.
     put(k, 'bruno', { x: at.x + 1, y: at.y });
     run(server, all, 4);
     k.as('bruno', () => k.inventory().slots.fill({ item: 'rune:x', count: 1 }));
-    const full = await ask(server, all, anna.session.act({ t: 'dai', viandante: 'bruno', slot: one }));
+    const full = await ask(server, all, anna.session.act({ t: 'give', wanderer: 'bruno', slot: one }));
     expect(full.ok).toBe(false);
-    expect(full.messaggi?.join(' ')).toMatch(/non ha posto/);
+    expect(full.messages?.join(' ')).toMatch(/non ha posto/);
     expect(k.as('anna', () => countItem(k.inventory(), item))).toBe(1);
     // A slot that is not there: refused before the kernel.
-    expect((await ask(server, all, anna.session.act({ t: 'dai', viandante: 'bruno', slot: 99 }))).ok).toBe(false);
+    expect((await ask(server, all, anna.session.act({ t: 'give', wanderer: 'bruno', slot: 99 }))).ok).toBe(false);
   });
 });
 
@@ -198,7 +198,7 @@ describe('«Altro…» and PvP between wanderers (T43b)', () => {
     expect(health(k, 'bruno')).toBeCloseTo(65, 0);
     expect(health(k, 'anna')).toBeCloseTo(40, 0);
     run(server, all, 8);
-    expect(bruno.session.notices.filter((n) => n.tipo === 'altro').map((n) => n.da)).toEqual(['anna', 'anna', 'anna']);
+    expect(bruno.session.notices.filter((n) => n.type === 'other').map((n) => n.from)).toEqual(['anna', 'anna', 'anna']);
   });
 
   it('with PvP: a blow hurts the other, a push moves them on their carpet; the master in god mode takes only words', async () => {
@@ -231,8 +231,8 @@ describe('«Altro…» and PvP between wanderers (T43b)', () => {
     const b = avatarOf(anna, 'bruno')!;
     expect(anna.k.actionsFor(b).map((o) => o.id)).not.toContain('altro');
     hurt(k, 'bruno', 50);
-    const r = await ask(server, all, anna.session.act({ t: 'altro', viandante: 'bruno', testo: 'colpisci' }));
-    expect(r.messaggi?.join(' ')).toMatch(/non si fa «Altro…»/);
+    const r = await ask(server, all, anna.session.act({ t: 'other', wanderer: 'bruno', text: 'colpisci' }));
+    expect(r.messages?.join(' ')).toMatch(/non si fa «Altro…»/);
     expect(health(k, 'bruno')).toBeCloseTo(50, 0);
     expect(k.feed().some((e) => e.task === 'action.judge')).toBe(false);
   });
@@ -276,9 +276,9 @@ describe('death and reconnection among many (T43c)', () => {
     // Both the master and Anna run out of water and health: only the player dies, the world does not stop.
     thirst(k, 'me');
     thirst(k, 'anna');
-    await tickUntil(server, all, () => anna.session.notices.some((n) => n.tipo === 'morte'));
+    await tickUntil(server, all, () => anna.session.notices.some((n) => n.type === 'death'));
     expect(k.dead).toBe(false);
-    expect(k.as('me', () => k.needs())).toMatchObject({ hunger: 100, thirst: 100, health: 100, morto: false });
+    expect(k.as('me', () => k.needs())).toMatchObject({ hunger: 100, thirst: 100, health: 100, dead: false });
     expect(k.time).toBeGreaterThan(brunoBefore);
     expect(countItem(bruno.k.inventory(), item)).toBe(1);
     expect(calls.find((c) => c.task === 'player.death')).toMatchObject({ chi: 'anna' });
@@ -292,9 +292,9 @@ describe('death and reconnection among many (T43c)', () => {
     expect(anna.k.needs()!.thirst).toBeGreaterThan(50);
     expect(said.some((m) => /Sei morto di sete/.test(m))).toBe(true);
     // Her screen (T44c): what death took and where she wakes up.
-    const death = anna.session.notices.find((n) => n.tipo === 'morte')!;
-    expect(death.dove).toBe('piazza');
-    expect(death.perso?.some((p) => p.startsWith(k.itemInfo(item).name))).toBe(true);
+    const death = anna.session.notices.find((n) => n.type === 'death')!;
+    expect(death.where).toBe('square');
+    expect(death.lost?.some((p) => p.startsWith(k.itemInfo(item).name))).toBe(true);
 
     // Punishment 0 (nessuna): she wakes up where she fell, with what she carried.
     const mild = await three({ death: 0 });
@@ -302,9 +302,9 @@ describe('death and reconnection among many (T43c)', () => {
     mild.k.as('anna', () => mild.k.give(item, 2));
     run(mild.server, mild.all, 8);
     thirst(mild.k, 'anna');
-    await tickUntil(mild.server, mild.all, () => mild.anna.session.notices.some((n) => n.tipo === 'morte'));
+    await tickUntil(mild.server, mild.all, () => mild.anna.session.notices.some((n) => n.type === 'death'));
     expect(mild.anna.k.wandererCarpet()).toMatchObject({ x: 6.5, y: -3.5 });
-    expect(mild.anna.session.notices.find((n) => n.tipo === 'morte')).toMatchObject({ dove: 'qui', perso: [] });
+    expect(mild.anna.session.notices.find((n) => n.type === 'death')).toMatchObject({ where: 'here', lost: [] });
     expect(countItem(mild.anna.k.inventory(), item)).toBe(2);
     expect(mild.anna.k.needs()!.health).toBeGreaterThan(50);
   });
@@ -340,7 +340,7 @@ describe('death and reconnection among many (T43c)', () => {
     expect(countItem(back.k.inventory(), item)).toBe(2);
     expect(countItem(back.k.inventory(), 'rune:luce')).toBe(1);
     expect(back.k.phrase().tokens).toEqual(['luce']);
-    expect(back.k.states().benedizione).toMatchObject({ velocita: 1.2 });
+    expect(back.k.states().benedizione).toMatchObject({ speed: 1.2 });
     expect(k.cardsOf('anna').some((c) => c.id === 'rule:azione-canto')).toBe(true);
     expect(k.as('anna', () => k.bondOf(vName))).toBe('amica');
   });

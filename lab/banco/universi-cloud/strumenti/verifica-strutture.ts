@@ -48,16 +48,16 @@ for (const u of UNIVERSI) {
   const forms: Array<Promise<void>> = [];
   const visti = new Set<number>();
   const guarda = (key: string) => {
-    for (const id of k.ecs.query('struttura', 'form', 'chunk')) {
+    for (const id of k.ecs.query('structure', 'form', 'chunk')) {
       if ((k.ecs.get(id, 'chunk') as { key: string }).key !== key || visti.has(id)) continue;
       visti.add(id);
-      const s = k.ecs.get(id, 'struttura') as { concetto: string; model?: string; taglia?: string };
+      const s = k.ecs.get(id, 'structure') as { concept: string; model?: string; size?: string };
       const form = k.ecs.get(id, 'form') as { model: string; seed: number; wanted?: string };
       const [cx, cy] = key.split(',').map(Number);
       const luogo = (k.chunks.get(key) as any)?.place?.name ?? '?';
-      if (form.wanted) problemi.push(`(${key}) «${s.concetto}» vuole ${form.wanted}`);
+      if (form.wanted) problemi.push(`(${key}) «${s.concept}» vuole ${form.wanted}`);
       if (!s.model?.startsWith('struttura-')) continue;
-      if (form.model !== s.model) problemi.push(`(${key}) «${s.concetto}» è ${form.model}, non ${s.model}`);
+      if (form.model !== s.model) problemi.push(`(${key}) «${s.concept}» è ${form.model}, non ${s.model}`);
       const t = Date.now();
       forms.push(
         (async () => {
@@ -67,8 +67,8 @@ for (const u of UNIVERSI) {
             f = k.forms.get(form.model, form.seed);
           }
           const voxel = f?.result ? f.result.grid.cells.reduce((n, v) => n + (v ? 1 : 0), 0) : 0;
-          if (f?.status !== 'ready' || !voxel) problemi.push(`(${key}) «${s.concetto}»: la forma non c'è (${f?.status ?? 'nessuna'}${f?.error ? `: ${f.error}` : ''})`);
-          viste.push({ cx, cy, luogo, concetto: s.concetto, modello: form.model, ...(s.taglia ? { taglia: s.taglia } : {}), voxel, cantina: f?.base ?? 0, ms: Date.now() - t });
+          if (f?.status !== 'ready' || !voxel) problemi.push(`(${key}) «${s.concept}»: la forma non c'è (${f?.status ?? 'nessuna'}${f?.error ? `: ${f.error}` : ''})`);
+          viste.push({ cx, cy, luogo, concetto: s.concept, modello: form.model, ...(s.size ? { taglia: s.size } : {}), voxel, cantina: f?.base ?? 0, ms: Date.now() - t });
         })(),
       );
     }

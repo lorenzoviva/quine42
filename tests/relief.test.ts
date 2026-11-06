@@ -312,7 +312,7 @@ describe('the kernel on the relief', () => {
     }
     expect(lots).toBeGreaterThan(0);
     // The structures stand on their lots.
-    for (const id of k.ecs.query('struttura', 'pos')) {
+    for (const id of k.ecs.query('structure', 'pos')) {
       const p = k.ecs.get(id, 'pos');
       expect(k.floorAt(p.x, p.y)).toBeGreaterThanOrEqual(k.groundAt(p.x, p.y));
     }

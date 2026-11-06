@@ -156,9 +156,9 @@ describe('the life of people', () => {
     // Deep night.
     k.time = Kernel.DAY_SECONDS * 0.7;
     for (let i = 0; i < 60 * 8; i++) k.tick(1 / 60);
-    const att = k.ecs.get(a.id, 'attivita');
-    expect(att.tipo).toBe('sleep');
-    expect(att.ferma).toBe(true);
+    const att = k.ecs.get(a.id, 'activity');
+    expect(att.kind).toBe('sleep');
+    expect(att.still).toBe(true);
   });
 
   it('people who meet talk to each other and remember it', async () => {

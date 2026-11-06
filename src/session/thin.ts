@@ -33,8 +33,8 @@ const JUMP = 4;
 /** Farther than this (tiles) from where the client thinks it is, the server carried its wanderer there (a rune, a door). */
 const CARRIED = 8;
 /** The components an entity of the server may have here (besides its place). */
-// `struttura` arrives only as the stage of a building under way (T245e), and goes when it is finished.
-const MIRRORED = ['module', 'form', 'glyph', 'struttura', ...ENTITY_PARTS];
+// `structure` arrives only as the stage of a building under way (T245e), and goes when it is finished.
+const MIRRORED = ['module', 'form', 'glyph', 'structure', ...ENTITY_PARTS];
 
 /** What the kernel does that a multiplayer game does not do from a player's client yet (the master's R is their branch's). */
 const LATER = ['rollback'] as const;
@@ -87,13 +87,13 @@ export class ThinClient {
     }
     const pl = k.wandererComp();
     if (pl && s.me) pl.facing = s.me.facing;
-    if (s.forma) k.ecs.set(k.wandererEntity, 'form', { ...k.ecs.get(k.wandererEntity, 'form'), ...s.forma });
+    if (s.form) k.ecs.set(k.wandererEntity, 'form', { ...k.ecs.get(k.wandererEntity, 'form'), ...s.form });
     this.state();
-    this.told = [...(s.stato.hand?.tokens ?? [])];
+    this.told = [...(s.state.hand?.tokens ?? [])];
     this.heard(s.feed);
     s.onMessage = (m) => this.receive(m);
     if (s.master) {
-      k.showPlatformFee(s.commissione);
+      k.showPlatformFee(s.fee);
       this.openBranch();
       k.connected = [...s.players];
       k.follow = (id) => void this.follow(id);
@@ -102,11 +102,11 @@ export class ThinClient {
 
   /**
    * The wanderer chooses who they are (T44a): the server repairs the profile and gives it to the others; here the
-   * wanderer wears the look that came of it. What was repaired, if anything, is in the answer's `testo`.
+   * wanderer wears the look that came of it. What was repaired, if anything, is in the answer's `text`.
    */
   async setProfile(p: Partial<Profile>): Promise<Outcome> {
-    const o = await this.session.act({ t: 'profilo', profilo: p });
-    if (o.forma) this.k.ecs.set(this.k.wandererEntity, 'form', { ...this.k.ecs.get(this.k.wandererEntity, 'form'), ...o.forma });
+    const o = await this.session.act({ t: 'profile', profile: p });
+    if (o.form) this.k.ecs.set(this.k.wandererEntity, 'form', { ...this.k.ecs.get(this.k.wandererEntity, 'form'), ...o.form });
     return o;
   }
 
@@ -147,46 +147,46 @@ export class ThinClient {
 
   private receive(m: ServerMsg): void {
     switch (m.t) {
-      case 'mondo':
+      case 'world':
         // Not an error (T127): the wanderer stays connected and comes back in by themselves.
-        this.k.message(m.testo, m.stato === 'ripreso' ? 'info' : 'warn');
+        this.k.message(m.text, m.state === 'resumed' ? 'info' : 'warn');
         break;
-      case 'ingresso':
+      case 'welcome':
         this.again(m.files);
         break;
-      case 'rifiuto':
-        this.k.message(m.motivo, 'warn');
+      case 'refusal':
+        this.k.message(m.reason, 'warn');
         break;
-      case 'aggiorna':
-        this.places(m.luoghi ?? []);
-        this.things(m.cose ?? []);
-        for (const id of m.via ?? []) this.drop(id);
-        for (const o of m.viandanti ?? []) this.other(o);
-        for (const id of m.partiti ?? []) {
+      case 'update':
+        this.places(m.chunks ?? []);
+        this.things(m.entities ?? []);
+        for (const id of m.gone ?? []) this.drop(id);
+        for (const o of m.wanderers ?? []) this.other(o);
+        for (const id of m.departed ?? []) {
           const e = this.others.get(id);
           if (e !== undefined) this.k.ecs.destroy(e);
           this.others.delete(id);
         }
-        if (m.giocatori && this.session.master) this.players();
+        if (m.players && this.session.master) this.players();
         if (m.me) this.carried(m.me.x, m.me.y);
-        if (m.stato || this.adopt) this.state();
-        for (const n of m.avvisi ?? []) this.notice(n);
+        if (m.state || this.adopt) this.state();
+        for (const n of m.notices ?? []) this.notice(n);
         this.adopt = false;
-        if (Math.abs(m.ora - this.k.time) > 0.5) this.k.time = m.ora;
+        if (Math.abs(m.time - this.k.time) > 0.5) this.k.time = m.time;
         // What was shown at once is now what the server says.
         for (const id of this.recheck) this.resync(id);
         this.recheck.clear();
         break;
-      case 'concilio':
-        this.heard(m.voci);
+      case 'council':
+        this.heard(m.entries);
         break;
       case 'file':
         this.worldFiles(m.files);
         break;
-      case 'ramo':
+      case 'branch':
         this.councilOnBranch(m.files);
         break;
-      case 'correzione':
+      case 'correction':
         // The latest word wins: an older correction, overtaken by steps already corrected, is not applied again.
         if (m.seq < this.lastCorrection) break;
         this.lastCorrection = m.seq;
@@ -225,7 +225,7 @@ export class ThinClient {
       this.lastStep = { x: s.me.x, y: s.me.y, t: this.clock };
     }
     this.state();
-    this.told = [...(s.stato.hand?.tokens ?? [])];
+    this.told = [...(s.state.hand?.tokens ?? [])];
     Object.assign(k.phrase(), { tokens: [...this.told], sel: 0 });
     if (s.master) k.connected = [...s.players];
   }
@@ -245,10 +245,10 @@ export class ThinClient {
     const k = this.k;
     if (id && !k.connected?.some((p) => p.id === id)) return k.message('Nessun giocatore collegato con questo nome.', 'warn');
     this.watching(id);
-    const r = await this.session.act({ t: 'segui', ...(id ? { id } : {}) });
+    const r = await this.session.act({ t: 'follow', ...(id ? { id } : {}) });
     if (!r.ok && k.watching === id) {
       this.watching(undefined);
-      k.message(r.motivo ?? 'Non si può seguire.', 'warn');
+      k.message(r.reason ?? 'Non si può seguire.', 'warn');
     }
   }
 
@@ -285,20 +285,20 @@ export class ThinClient {
 
   private places(list: ChunkView[]): void {
     for (const v of list) {
-      const sea = new Set(v.mare);
+      const sea = new Set(v.sea);
       this.k.chunks.set(v.key, {
         cx: v.cx,
         cy: v.cy,
         key: v.key,
         // Only where the sea is, of the draft (T51a): the rest is the server's.
-        draft: v.mare ? [...v.tiles].map((c, i) => (sea.has(i) ? SEA_DRAFT : c)).join('') : v.tiles,
+        draft: v.sea ? [...v.tiles].map((c, i) => (sea.has(i) ? SEA_DRAFT : c)).join('') : v.tiles,
         tiles: v.tiles,
         version: v.version,
         stage: v.stage,
-        ...(v.nome ? { place: { name: v.nome, description: v.descrizione ?? '' } } : {}),
-        lots: (v.lotti ?? []).map(([x0, y0, x1, y1]) => ({ x0, y0, x1, y1, floor: [], walls: [], doors: [] })),
-        ...(v.scavi ? { scavi: v.scavi } : {}),
-        ...(v.acqua ? { acqua: v.acqua } : {}),
+        ...(v.name ? { place: { name: v.name, description: v.description ?? '' } } : {}),
+        lots: (v.lots ?? []).map(([x0, y0, x1, y1]) => ({ x0, y0, x1, y1, floor: [], walls: [], doors: [] })),
+        ...(v.digs ? { digs: v.digs } : {}),
+        ...(v.water ? { water: v.water } : {}),
       });
     }
   }
@@ -336,7 +336,7 @@ export class ThinClient {
       else if (name in parts) k.ecs.set(id, name, parts[name]);
       else k.ecs.remove(id, name);
     }
-    if (t.testo) this.say(id, t.testo);
+    if (t.text) this.say(id, t.text);
     else k.bubbles.delete(id);
     return id;
   }
@@ -358,37 +358,37 @@ export class ThinClient {
       id = k.ecs.spawn({ pos: { x: o.x, y: o.y }, glyph: { ...(me ?? { glyph: '@', color: '#ffffff' }) }, body: { r: 0.3, solid: false }, wander: {} });
       this.others.set(o.id, id);
     } else this.targets.set(id, { x: o.x, y: o.y });
-    k.ecs.set(id, 'remote', { id: o.id, nome: o.nome, presentazione: o.presentazione ?? '' });
-    k.ecs.set(id, 'identity', { name: o.nome });
+    k.ecs.set(id, 'remote', { id: o.id, name: o.name, introduction: o.introduction ?? '' });
+    k.ecs.set(id, 'identity', { name: o.name });
     if (o.form) k.ecs.set(id, 'form', { ...o.form });
-    if (o.testo) this.say(id, o.testo);
+    if (o.text) this.say(id, o.text);
   }
 
   /** What another wanderer did to this one (T43a, T43b), or what death cost them (T43c). */
   private notice(n: Notice): void {
     const k = this.k;
-    if (n.tipo === 'morte') {
+    if (n.type === 'death') {
       if (this.session.me) {
         this.putMe(this.session.me.x, this.session.me.y);
         this.lastStep = { x: this.session.me.x, y: this.session.me.y, t: this.clock };
       }
       this.pending = 0;
-      this.told = [...(this.session.stato.hand?.tokens ?? [])];
+      this.told = [...(this.session.state.hand?.tokens ?? [])];
       Object.assign(k.phrase(), { tokens: [...this.told], sel: 0 });
       this.state();
       // The screen of death (T44c), as alone, but the world goes on: what was lost and where one wakes up.
-      k.bus.emit('ui:died', { cause: n.nome, testo: n.testo, perso: n.perso ?? [], dove: n.dove ?? 'qui' });
-      return k.message(`Sei morto di ${n.nome}. ${n.testo}`, 'warn');
+      k.bus.emit('ui:died', { cause: n.name, text: n.text, lost: n.lost ?? [], where: n.where ?? 'here' });
+      return k.message(`Sei morto di ${n.name}. ${n.text}`, 'warn');
     }
-    if (n.tipo === 'crediti') {
-      k.bus.emit('ui:credits:exhausted', { motivo: n.motivo ?? 'finiti', testo: n.testo });
-      return k.message(n.testo, 'warn');
+    if (n.type === 'credits') {
+      k.bus.emit('ui:credits:exhausted', { reason: n.reason ?? 'exhausted', text: n.text });
+      return k.message(n.text, 'warn');
     }
-    if (n.tipo === 'dai') return k.message(`${n.nome} ti dà ${n.testo}.`, 'good');
-    if (n.tipo === 'altro') return k.message(`${n.nome}: ${n.testo}`);
-    const id = this.others.get(n.da);
-    if (id !== undefined) k.bus.emit('ui:heard', { id, name: n.nome, text: n.testo });
-    k.message(`${n.nome}: «${n.testo}»`);
+    if (n.type === 'give') return k.message(`${n.name} ti dà ${n.text}.`, 'good');
+    if (n.type === 'other') return k.message(`${n.name}: ${n.text}`);
+    const id = this.others.get(n.from);
+    if (id !== undefined) k.bus.emit('ui:heard', { id, name: n.name, text: n.text });
+    k.message(`${n.name}: «${n.text}»`);
   }
 
   private say(id: Id, text: string): void {
@@ -402,16 +402,16 @@ export class ThinClient {
    */
   private state(): void {
     const k = this.k;
-    const s = this.session.stato;
+    const s = this.session.state;
     const pid = k.wandererEntity;
     if (s.needs) k.ecs.set(pid, 'needs', { ...(k.needs() ?? {}), ...s.needs });
-    if (s.stati) k.ecs.set(pid, 'stati', structuredClone(s.stati));
-    if (s.campi) k.takePanelFields(s.campi);
-    if (typeof s.crediti === 'number') {
+    if (s.states) k.ecs.set(pid, 'states', structuredClone(s.states));
+    if (s.fields) k.takePanelFields(s.fields);
+    if (typeof s.credits === 'number') {
       const prev = k.creditsOf(k.wanderer().id);
-      k.setCredits(k.wanderer().id, s.crediti);
-      if (prev > 0 && s.crediti === 0) {
-        k.bus.emit('ui:credits:exhausted', { motivo: 'finiti' });
+      k.setCredits(k.wanderer().id, s.credits);
+      if (prev > 0 && s.credits === 0) {
+        k.bus.emit('ui:credits:exhausted', { reason: 'exhausted' });
       }
     }
     if (!this.pending) {
@@ -520,18 +520,18 @@ export class ThinClient {
     const key = JSON.stringify(b.files);
     if (key === this.branchKey) return;
     this.branchKey = key;
-    void this.session.act({ t: 'ramo', ...b }).then((r) => {
+    void this.session.act({ t: 'branch', ...b }).then((r) => {
       if (r.ok) return;
       this.branchKey = '';
-      this.k.message(`Il tuo ramo non arriva al mondo: ${r.motivo ?? 'rifiutato'}`, 'warn');
+      this.k.message(`Il tuo ramo non arriva al mondo: ${r.reason ?? 'rifiutato'}`, 'warn');
     });
   }
 
   /** The gesture of the master: their branch into the world, for everyone. */
   private async publish(): Promise<Outcome> {
     this.sendBranch();
-    const r = await this.show(this.session.act({ t: 'pubblica' }));
-    if (r.ok && r.testo) this.k.message(r.testo, 'good');
+    const r = await this.show(this.session.act({ t: 'publish' }));
+    if (r.ok && r.text) this.k.message(r.text, 'good');
     return r;
   }
 
@@ -568,14 +568,14 @@ export class ThinClient {
     k.freeAction = async (id, text) => {
       // On another wanderer (T43b) by their id: their body has no id of its own on the server.
       const other = k.otherWanderer(id);
-      const r = other !== undefined ? await this.show(this.session.act({ t: 'altro', viandante: other, testo: text })) : await this.send(id, { t: 'altro', testo: text });
-      return r?.testo ?? r?.motivo ?? '';
+      const r = other !== undefined ? await this.show(this.session.act({ t: 'other', wanderer: other, text })) : await this.send(id, { t: 'other', text });
+      return r?.text ?? r?.reason ?? '';
     };
     k.talk = async (id, text): Promise<NpcReply> => {
       const other = k.otherWanderer(id);
       if (other !== undefined) return this.sayTo(other, text);
-      const r = await this.send(id, { t: 'chat', testo: text });
-      return { say: r?.testo ?? (r?.motivo ? `(${r.motivo})` : '…'), action: 'nessuna', mood: 'tranquillo' };
+      const r = await this.send(id, { t: 'chat', text });
+      return { say: r?.text ?? (r?.reason ? `(${r.reason})` : '…'), action: 'nessuna', mood: 'tranquillo' };
     };
     k.inscribePhrase = () => void this.inscribe(k.phrase().tokens.length);
     k.dropSelected = () => {
@@ -591,23 +591,23 @@ export class ThinClient {
         return false;
       }
       this.syncPhrase();
-      const r = await this.sent(this.session.act({ t: 'pronuncia' }));
+      const r = await this.sent(this.session.act({ t: 'cast' }));
       if (r.ok) k.bus.emit('spell:cast', {});
       return r.ok;
     };
     k.action = (target) => {
       const sid = target !== undefined ? this.server.get(target) : this.server.get(k.targetInFront() ?? -1);
       if (sid === undefined) return k.message('Non c’è niente davanti a te.', 'warn');
-      void this.show(this.session.act({ t: 'azione', entita: sid, azione: 'strumento' }));
+      void this.show(this.session.act({ t: 'action', entity: sid, action: 'strumento' }));
     };
     this.relayCarried();
     if (this.session.master) {
       k.rollback = (id?: string) => this.rollbackBranch(id);
-      k.grantCredits = (id, amount) => this.session.act({ t: 'ricarica', viandante: id, quanti: amount }).then((r) => ({ ok: r.ok, ...(r.motivo ? { motivo: r.motivo } : {}) }));
+      k.grantCredits = (id, amount) => this.session.act({ t: 'recharge', wanderer: id, count: amount }).then((r) => ({ ok: r.ok, ...(r.reason ? { motivo: r.reason } : {}) }));
       // The Referente and the teams of the corona work on the server, on the master's branch (T42e).
       k.talkToAgent = async (agent, text) => {
-        const r = await this.session.act({ t: 'agente', agente: agent, testo: text });
-        return r.ok ? { say: r.testo ?? '…', ...(r.fatto ? { forged: r.fatto } : {}) } : { say: `(${r.motivo ?? 'nessuna risposta'})` };
+        const r = await this.session.act({ t: 'agent', agent, text });
+        return r.ok ? { say: r.text ?? '…', ...(r.done ? { forged: r.done } : {}) } : { say: `(${r.reason ?? 'nessuna risposta'})` };
       };
     }
     else for (const name of LATER) (k as unknown as Record<string, () => undefined>)[name] = () => this.later();
@@ -632,67 +632,67 @@ export class ThinClient {
     };
     const words = async (r: Promise<Outcome>) => {
       const o = await r;
-      return o.testo ?? o.motivo ?? '';
+      return o.text ?? o.reason ?? '';
     };
     k.useSlot = (i) => {
       const s = k.inventory().slots[i];
       if (!s) return;
       // A bag opens here, a rune joins the phrase here: both are the client's own.
       if (k.content.get(s.item)?.container || s.item.startsWith('rune:')) return here.useSlot(i);
-      void this.carry({ t: 'oggetto', op: 'usa', slot: i });
+      void this.carry({ t: 'item', op: 'use', slot: i });
     };
-    k.equipSlot = (i) => void this.carry({ t: 'oggetto', op: 'impugna', slot: i }, () => here.equipSlot(i));
-    k.moveSlot = (a, b) => void this.carry({ t: 'oggetto', op: 'sposta', slot: a, verso: b }, () => here.moveSlot(a, b));
+    k.equipSlot = (i) => void this.carry({ t: 'item', op: 'wield', slot: i }, () => here.equipSlot(i));
+    k.moveSlot = (a, b) => void this.carry({ t: 'item', op: 'move', slot: a, toward: b }, () => here.moveSlot(a, b));
     k.dropSlot = (i, n) => {
       if (k.zone !== 'sim' || !k.inventory().slots[i]) return;
       // Gone from the slot at once; the entity on the ground comes with the next update.
-      void this.carry({ t: 'oggetto', op: 'posa', slot: i, ...(n !== undefined ? { quanti: n } : {}) }, () => void takeFromSlot(k.inventory(), i, n));
+      void this.carry({ t: 'item', op: 'put_down', slot: i, ...(n !== undefined ? { count: n } : {}) }, () => void takeFromSlot(k.inventory(), i, n));
     };
-    k.putIntoBag = (bag, i) => void this.carry({ t: 'oggetto', op: 'in_borsa', slot: i, borsa: bag }, () => here.putIntoBag(bag, i));
-    k.takeFromBag = (bag, i) => void this.carry({ t: 'oggetto', op: 'da_borsa', slot: i, borsa: bag }, () => here.takeFromBag(bag, i));
-    k.itemAct = (i, action) => void this.carry({ t: 'oggetto', op: 'azione', slot: i, azione: action });
-    k.freeItemAction = (i, text) => words(this.carry({ t: 'altro', slot: i, testo: text }));
+    k.putIntoBag = (bag, i) => void this.carry({ t: 'item', op: 'to_bag', slot: i, bag }, () => here.putIntoBag(bag, i));
+    k.takeFromBag = (bag, i) => void this.carry({ t: 'item', op: 'from_bag', slot: i, bag }, () => here.takeFromBag(bag, i));
+    k.itemAct = (i, action) => void this.carry({ t: 'item', op: 'action', slot: i, action });
+    k.freeItemAction = (i, text) => words(this.carry({ t: 'other', slot: i, text }));
     k.craft = (id) => {
       if (!k.recipes().available.has(id)) {
         k.message('Ti manca qualcosa per farlo.', 'warn');
         return false;
       }
-      void this.carry({ t: 'fabbrica', ricetta: id });
+      void this.carry({ t: 'craft', recipe: id });
       return true;
     };
     k.freeCraft = async (text) => {
-      const r = await this.carry({ t: 'fabbrica', testo: text });
-      return { ok: r.ok, story: r.testo ?? r.motivo ?? '' };
+      const r = await this.carry({ t: 'craft', text });
+      return { ok: r.ok, story: r.text ?? r.reason ?? '' };
     };
-    k.combine = (a, b) => words(this.carry({ t: 'fabbrica', unisci: [a, b] }));
+    k.combine = (a, b) => words(this.carry({ t: 'craft', combine: [a, b] }));
     k.openContainer = (id) => {
       const sid = this.server.get(id);
-      if (sid !== undefined) void this.carry({ t: 'contenitore', entita: sid, op: 'apri' });
+      if (sid !== undefined) void this.carry({ t: 'container', entity: sid, op: 'open' });
       return k.container(id);
     };
-    const box = (id: number, op: 'prendi' | 'metti', slot: number, now: () => void) => {
+    const box = (id: number, op: 'take' | 'put', slot: number, now: () => void) => {
       const sid = this.server.get(id);
       if (sid === undefined) return;
-      void this.carry({ t: 'contenitore', entita: sid, op, slot }, k.container(id)?.inv ? now : undefined);
+      void this.carry({ t: 'container', entity: sid, op, slot }, k.container(id)?.inv ? now : undefined);
     };
-    k.takeFromContainer = (id, slot) => box(id, 'prendi', slot, () => here.takeFromContainer(id, slot));
-    k.putIntoContainer = (id, slot) => box(id, 'metti', slot, () => here.putIntoContainer(id, slot));
+    k.takeFromContainer = (id, slot) => box(id, 'take', slot, () => here.takeFromContainer(id, slot));
+    k.putIntoContainer = (id, slot) => box(id, 'put', slot, () => here.putIntoContainer(id, slot));
     k.equip = (panel, slot, i) => {
-      void this.carry({ t: 'pannello', pannello: panel, op: 'metti', posto: slot, slot: i });
+      void this.carry({ t: 'panel', panel, op: 'put', socket: slot, slot: i });
       return true;
     };
     k.unequip = (panel, slot) => {
-      void this.carry({ t: 'pannello', pannello: panel, op: 'togli', posto: slot });
+      void this.carry({ t: 'panel', panel, op: 'remove', socket: slot });
       return true;
     };
-    k.uiAction = (panel, action) => void this.carry({ t: 'pannello', pannello: panel, op: 'pulsante', azione: action });
+    k.uiAction = (panel, action) => void this.carry({ t: 'panel', panel, op: 'button', action });
     k.performMenu = async (option, entity, col, row) => {
       if (option.startsWith('e:') && entity >= 0) return this.perform(entity, option.slice(2));
       // «Altro…» on the tile opens its window here; the words go with freeTileAction.
       if (option === 't:altro') return here.performMenu(option, entity, col, row);
-      if (option.startsWith('t:')) await this.carry({ t: 'casella', col, row, azione: option.slice(2) });
+      if (option.startsWith('t:')) await this.carry({ t: 'tile', col, row, action: option.slice(2) });
     };
-    k.freeTileAction = (col, row, text) => words(this.carry({ t: 'altro', col, row, testo: text }));
+    k.freeTileAction = (col, row, text) => words(this.carry({ t: 'other', col, row, text }));
   }
 
   /**
@@ -716,10 +716,10 @@ export class ThinClient {
   /** A container as the server has it: what it holds, and its window if the answer opened it. */
   private container(v: ContainerView): void {
     const k = this.k;
-    const id = this.local.get(v.entita);
+    const id = this.local.get(v.entity);
     if (id === undefined || !k.ecs.alive.has(id)) return;
     k.ecs.set(id, 'container', { ...k.ecs.get(id, 'container'), inv: structuredClone(v.inv), filled: true });
-    if (v.apri) k.bus.emit('ui:container', { id, name: k.nameOf(id) });
+    if (v.open) k.bus.emit('ui:container', { id, name: k.nameOf(id) });
     else k.bus.emit('inventory:changed', {});
   }
 
@@ -751,9 +751,9 @@ export class ThinClient {
   /** Words to another wanderer (T43a): the bubble shows at once above this one, the server says it to the others. */
   private async sayTo(other: string, text: string): Promise<NpcReply> {
     const k = this.k;
-    const r = await this.show(this.session.act({ t: 'dici', viandante: other, testo: text }));
-    if (r.ok && r.testo) k.speak(k.wandererEntity, r.testo);
-    return { say: r.ok ? '' : `(${r.motivo ?? 'non ti sente'})`, action: 'nessuna', mood: 'tranquillo' };
+    const r = await this.show(this.session.act({ t: 'say', wanderer: other, text }));
+    if (r.ok && r.text) k.speak(k.wandererEntity, r.text);
+    return { say: r.ok ? '' : `(${r.reason ?? 'non ti sente'})`, action: 'nessuna', mood: 'tranquillo' };
   }
 
   private async perform(id: Id, action: string): Promise<void> {
@@ -763,7 +763,7 @@ export class ThinClient {
       if (action === 'parla') return void k.bus.emit('ui:chat', { id, name: k.nameOf(id) });
       if (action === 'chi') return void k.bus.emit('ui:dialog', { speaker: k.nameOf(id), text: k.introOf(id) ?? '' });
       // What is given leaves the slot when the update says so: the inventory is the server's.
-      if (action.startsWith('dai:')) await this.show(this.session.act({ t: 'dai', viandante: other, slot: Number(action.slice(4)) }));
+      if (action.startsWith('dai:')) await this.show(this.session.act({ t: 'give', wanderer: other, slot: Number(action.slice(4)) }));
       if (action === 'altro' && k.gameSetup()?.freeActionsBetweenPlayers !== false) k.bus.emit('ui:freeaction', { id, name: k.nameOf(id) });
       return;
     }
@@ -773,7 +773,7 @@ export class ThinClient {
     // What only opens a window here: the words go to the server later.
     if (action === 'parla') return void k.bus.emit('ui:chat', { id, name });
     if (action === 'altro') return void k.bus.emit('ui:freeaction', { id, name });
-    const answer = this.session.act({ t: 'azione', entita: sid, azione: action });
+    const answer = this.session.act({ t: 'action', entity: sid, action });
     if (action === 'raccogli') {
       // Picked up at once; it comes back if the server says no, or still has it on the ground.
       const rune = k.ecs.get(id, 'rune');
@@ -791,10 +791,10 @@ export class ThinClient {
   }
 
   /** «Altro…» or words to someone: the entity's id on the server, and the answer shown. */
-  private async send(id: Id, msg: { t: 'altro' | 'chat'; testo: string }): Promise<Outcome | undefined> {
+  private async send(id: Id, msg: { t: 'other' | 'chat'; text: string }): Promise<Outcome | undefined> {
     const sid = this.server.get(id);
     if (sid === undefined) return undefined;
-    return this.show(this.session.act({ ...msg, entita: sid }));
+    return this.show(this.session.act({ ...msg, entity: sid }));
   }
 
   /**
@@ -808,7 +808,7 @@ export class ThinClient {
     const before = { tokens: [...hand.tokens], sel: hand.sel };
     const written = hand.tokens.slice(from, from + count);
     this.phrase(written);
-    const answer = this.sent(this.session.act({ t: 'incidi' }));
+    const answer = this.sent(this.session.act({ t: 'inscribe' }));
     this.told = [];
     hand.tokens.splice(from, count);
     hand.sel = Math.max(0, Math.min(hand.sel, hand.tokens.length - 1));
@@ -825,7 +825,7 @@ export class ThinClient {
 
   private phrase(tokens: string[]): void {
     this.told = [...tokens];
-    void this.sent(this.session.act({ t: 'frase', tokens: [...tokens] }));
+    void this.sent(this.session.act({ t: 'phrase', tokens: [...tokens] }));
   }
 
   /** A message that changed the hand or what is carried here: while it is under way, the server's do not overwrite them. */
@@ -845,12 +845,12 @@ export class ThinClient {
   private async show(answer: Promise<Outcome>): Promise<Outcome> {
     const r = await answer;
     const k = this.k;
-    for (const m of r.messaggi ?? []) k.message(m);
-    for (const d of r.dialoghi ?? []) k.bus.emit('ui:dialog', d);
-    if (!r.ok && r.motivo) k.message(r.motivo, 'warn');
-    if (r.contenitore) this.container(r.contenitore);
+    for (const m of r.messages ?? []) k.message(m);
+    for (const d of r.dialogues ?? []) k.bus.emit('ui:dialog', d);
+    if (!r.ok && r.reason) k.message(r.reason, 'warn');
+    if (r.container) this.container(r.container);
     // A bag the world opened (an action on something carried): its window is the client's.
-    if (r.borsa !== undefined) k.bus.emit('ui:bag', { slot: r.borsa });
+    if (r.bag !== undefined) k.bus.emit('ui:bag', { slot: r.bag });
     return r;
   }
 }

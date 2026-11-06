@@ -226,7 +226,7 @@ export class WorldHost {
         this.lastBeat = Date.now();
         if (this.told) {
           this.told = false;
-          this.toClients({ t: 'mondo', stato: 'ripreso', testo: 'Il mondo è di nuovo in moto.' });
+          this.toClients({ t: 'world', state: 'resumed', text: 'Il mondo è di nuovo in moto.' });
         }
         return;
       case 'invia': {
@@ -274,12 +274,12 @@ export class WorldHost {
     c.attached = true;
     this.tell({ t: 'client', cid });
     // They were in the world that died: they say who they are again (with a fresh token), and get the world as it is.
-    if (c.entered) c.link.send({ t: 'mondo', stato: 'ripartito', testo: 'Il mondo è ripartito dall’ultimo stato salvato.' });
+    if (c.entered) c.link.send({ t: 'world', state: 'restarted', text: 'Il mondo è ripartito dall’ultimo stato salvato.' });
     for (const m of c.early.splice(0)) this.pass(cid, c, m);
   }
 
   private pass(cid: number, c: Connected, m: ClientMsg): void {
-    if (m?.t === 'entra') c.entered = true;
+    if (m?.t === 'join') c.entered = true;
     // Until they say who they are nothing goes through: no limit holds yet in the world (ADR-0107), and the world would only drop it (V-028).
     if (!c.entered) return;
     const size = JSON.stringify(m).length;
@@ -287,7 +287,7 @@ export class WorldHost {
     if (this.backlog + size > MAX_BACKLOG || !child?.connected) {
       // Who waits for an answer has one; a step lost is made good by the next one.
       const seq = Number((m as { seq?: unknown }).seq);
-      if (m?.t !== 'passo' && seq) c.link.send({ t: 'esito', seq, ok: false, motivo: 'il mondo non risponde: riprova tra poco' });
+      if (m?.t !== 'step' && seq) c.link.send({ t: 'result', seq, ok: false, reason: 'il mondo non risponde: riprova tra poco' });
       return;
     }
     this.backlog += size;
@@ -306,7 +306,7 @@ export class WorldHost {
       if (!m || typeof m !== 'object') return;
       if (c.attached && this.up) return this.pass(cid, c, m);
       // With the world down only who comes in waits for it: steps and actions belong to a world that is gone.
-      if (m.t === 'entra' && !c.entered) c.early = [m];
+      if (m.t === 'join' && !c.entered) c.early = [m];
     });
     link.onClose(() => {
       this.clients.delete(cid);
@@ -339,7 +339,7 @@ export class WorldHost {
     if (silent > this.times.notice) {
       if (!this.told) {
         this.told = true;
-        this.toClients({ t: 'mondo', stato: 'fermo', testo: 'Il mondo si è fermato: aspetta, sta per riprendere.' });
+        this.toClients({ t: 'world', state: 'stopped', text: 'Il mondo si è fermato: aspetta, sta per riprendere.' });
       }
       return;
     }
@@ -387,7 +387,7 @@ export class WorldHost {
     this.deaths++;
     console.warn(`[mondo ${this.o.name}] ${why}: ${this.deaths < this.times.deaths ? 'riparte' : 'non riparte'} (${this.deaths})`);
     if (this.deaths >= this.times.deaths) return this.giveUp(why);
-    this.toClients({ t: 'mondo', stato: 'fermo', testo: 'Il mondo si è fermato: sta ripartendo.' });
+    this.toClients({ t: 'world', state: 'stopped', text: 'Il mondo si è fermato: sta ripartendo.' });
     // The second death in a row: what the world runs now may be what kills it. Back to the last commit that lived.
     if (this.deaths >= 2 && this.good) this.restore = this.good;
     this.restarts++;
@@ -399,7 +399,7 @@ export class WorldHost {
     this.clear();
     this.readyWaiters.splice(0).forEach((done) => done({ error: `il mondo non riesce a partire (${why})` }));
     for (const c of this.clients.values()) {
-      c.link.send({ t: 'rifiuto', motivo: 'il mondo non riesce a ripartire: riprova tra poco' });
+      c.link.send({ t: 'refusal', reason: 'il mondo non riesce a ripartire: riprova tra poco' });
       c.link.close();
     }
     this.clients.clear();

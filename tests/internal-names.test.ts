@@ -28,10 +28,8 @@ const domain = (id: string): NameDomain => {
 };
 const keys = (id: string) => Object.keys(domain(id).names);
 /** The names a domain has in the code: the internal ones when its step is done (T307a, T307b), the Italian ones of today otherwise. */
-const DONE = new Set(['T307a', 'T307b', 'T308a']);
+const DONE = new Set(['T307a', 'T307b', 'T308a', 'T308b']);
 const inCode = (id: string) => (DONE.has(domain(id).step) ? Object.values(domain(id).names) : keys(id));
-/** The words of the code that read as Italian: the internal language has none (or the same in English: `lava`, `dungeon`, `studio`). */
-const italianOf = (list: readonly string[], d: string) => list.filter((v) => !Object.values(domain(d).names).includes(v) || keys(d).includes(v));
 
 function seedManifests(): Array<Record<string, unknown>> {
   return fs.readdirSync(path.join(ROOT, 'universe/modules')).map((m) => json(`universe/modules/${m}/manifest.json`));
@@ -82,7 +80,7 @@ describe('la tabella della lingua interna', () => {
     const hits: string[] = [];
     for (const x of INTERNAL_NAMES) for (const [it, en] of Object.entries(x.names)) if (it !== en && x.taken?.includes(en)) hits.push(`${x.id}: ${it} → ${en}`);
     // A component keeps its name on disk and in Lua: the new ones must not be one the kernel has already.
-    const parts = ENTITY_PARTS.filter((p) => !keys('componenti').includes(p));
+    const parts = ENTITY_PARTS.filter((p) => !keys('componenti').includes(p) && !Object.values(domain('componenti').names).includes(p));
     for (const en of Object.values(domain('componenti').names)) if (parts.includes(en as never)) hits.push(`componenti: ${en}`);
     // The generic model of a class has the class's id: a class must not take the id of another model of the seed (once renamed, the
     // model of the class is the only one with that id: the Italian one is gone).
@@ -135,8 +133,11 @@ describe('la tabella della lingua interna', () => {
     cover('classi-scultore', SCULPTOR_CLASSES);
     cover('coefficienti', COEFFICIENT_KEYS);
     cover('parti', [...PARTS, ...VIEWS]);
-    cover('componenti', italianOf(ENTITY_PARTS.filter((p) => ['luce', 'fuoco', 'attivita', 'posato'].includes(p)), 'componenti'));
-    cover('api-lua', LUA_API.world.filter((f) => f.startsWith('impresa')).map((f) => `world.${f}`));
+    // The components a client gets and the API of the ventures speak the contract 0.5 (T308b): nothing Italian is left.
+    expect(ENTITY_PARTS.filter((p) => keys('componenti').includes(p))).toEqual([]);
+    cover('componenti', ENTITY_PARTS.filter((p) => Object.values(domain('componenti').names).includes(p)));
+    cover('api-lua', LUA_API.world.filter((f) => f.startsWith('venture')).map((f) => `world.${f}`));
+    expect(LUA_API.world.filter((f) => f.startsWith('impresa'))).toEqual([]);
     cover('agenti', fs.readdirSync(path.join(ROOT, 'universe/prompts/agents')).map((f) => f.replace(/\.md$/, '')));
   });
 
@@ -178,7 +179,7 @@ describe('la tabella della lingua interna', () => {
   it('copre i messaggi del protocollo e i campi di stato del kernel', () => {
     const protocol = read('src/session/protocol.ts');
     const messages = [...new Set([...protocol.matchAll(/\bt: '([a-z_]+)'/g)].map((m) => m[1]))];
-    expect(messages.filter((m) => !keys('messaggi').includes(m))).toEqual([]);
+    expect(messages.filter((m) => !inCode('messaggi').includes(m))).toEqual([]);
     const kernel = read('src/kernel/kernel.ts');
     const fieldsOf = (name: string): string[] => [...(new RegExp(`const ${name}: ReadonlySet<string> = new Set\(\[([^\]]*)\]`).exec(kernel)?.[1] ?? '').matchAll(/'([^']+)'/g)].map((m) => m[1]);
     const english = new Set(['pos', 'inventory', 'needs', 'hand', 'slots']);

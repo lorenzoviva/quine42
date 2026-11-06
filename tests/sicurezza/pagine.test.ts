@@ -44,7 +44,7 @@ function fakeStripe(answer: () => Response = () => new Response(JSON.stringify({
 
 // With accounts, as a server that has a public address like HOST: without, it would answer only this machine (V-028).
 const checkout = { universo: 'prova', wandererId: 'ugo', crediti: 5, token: 'finto' };
-const settings = (fetchFn: typeof fetch) => ({ settings: { secretKey: 'FINTA-chiave', webhookSecret: 'FINTO-segreto', fetchFn }, universesDir: '.', accounts: { config: {}, verify: async () => ({ uid: 'ugo', anonimo: false }) } });
+const settings = (fetchFn: typeof fetch) => ({ settings: { secretKey: 'FINTA-chiave', webhookSecret: 'FINTO-segreto', fetchFn }, universesDir: '.', accounts: { config: {}, verify: async () => ({ uid: 'ugo', anonymous: false }) } });
 
 afterEach(() => {
   vi.unstubAllGlobals();

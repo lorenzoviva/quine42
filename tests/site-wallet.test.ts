@@ -119,7 +119,7 @@ describe('the wallet route (T105)', () => {
   it('with accounts the token says who: the id in the address is ignored, no token no wallet', async () => {
     const dir = diskUniverse();
     const uid = 'ugo';
-    const accounts = { verify: async (t: string) => (t === 'buono' ? { uid, anonimo: false } : undefined) } as unknown as AccountSettings;
+    const accounts = { verify: async (t: string) => (t === 'buono' ? { uid, anonymous: false } : undefined) } as unknown as AccountSettings;
     try {
       const h = walletHandler({ universesDir: dir, accounts });
       expect((await call(h, 'GET', '/api/crediti?universo=prova&viandante=zed')).status).toBe(401);

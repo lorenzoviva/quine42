@@ -411,9 +411,9 @@ export const PROBES = [
     fase: 'A',
     proprieta: 'essere anonimo non lo decide il client',
     async run(ctx) {
-      const c = await ctx.enter('sonda-mondo', { id: 'sonda-anonimo', anonimo: true });
+      const c = await ctx.enter('sonda-mondo', { id: 'sonda-anonimo', anonymous: true });
       c.close();
-      return { ok: !c.ingresso?.anonimo, dettaglio: c.ingresso ? `anonimo: ${!!c.ingresso.anonimo}` : `rifiutato: ${c.rifiuto ?? 'nessuna risposta'}` };
+      return { ok: !c.ingresso?.anonymous, dettaglio: c.ingresso ? `anonimo: ${!!c.ingresso.anonymous}` : `rifiutato: ${c.rifiuto ?? 'nessuna risposta'}` };
     },
   },
   {
@@ -459,10 +459,10 @@ export const PROBES = [
       const c = await ctx.enter('sonda-mondo', { id: 'sonda-giocatore' });
       if (!c.ingresso) return { ok: true, dettaglio: `rifiutato: ${c.rifiuto ?? 'nessuna risposta'}` };
       const asked = [
-        { t: 'ramo', files: { 'modules/core.movement/logic.lua': '-- V-006.f\nreturn {}\n' }, base: {} },
-        { t: 'pubblica' },
-        { t: 'agente', agente: 'referente', testo: 'sonda' },
-        { t: 'segui', id: 'me' },
+        { t: 'branch', files: { 'modules/core.movement/logic.lua': '-- V-006.f\nreturn {}\n' }, base: {} },
+        { t: 'publish' },
+        { t: 'agent', agent: 'referente', text: 'sonda' },
+        { t: 'follow', id: 'me' },
       ];
       const said = [];
       for (const [i, m] of asked.entries()) said.push(await c.ask({ ...m, seq: 100 + i }));
@@ -548,8 +548,8 @@ export const PROBES = [
       const c = await ctx.enter('sonda-mondo', { id: 'me' });
       if (!c.ingresso) return { ok: true, dettaglio: `rifiutato: ${c.rifiuto ?? 'nessuna risposta'}` };
       const before = saldo(ctx, 'sonda-mondo');
-      const a = await c.ask({ t: 'ramo', seq: 200, files: { 'world/players/altro.json': JSONB({ nome: 'Altro', crediti: before + 1000 }) }, base: {} });
-      const b = await c.ask({ t: 'pubblica', seq: 201 });
+      const a = await c.ask({ t: 'branch', seq: 200, files: { 'world/players/altro.json': JSONB({ name: 'Altro', crediti: before + 1000 }) }, base: {} });
+      const b = await c.ask({ t: 'publish', seq: 201 });
       await ctx.waitFor(() => saldo(ctx, 'sonda-mondo') !== before, 4000);
       c.close();
       return { ok: saldo(ctx, 'sonda-mondo') === before, dettaglio: `ramo ${a?.ok ? 'accettato' : 'rifiutato'}, pubblicazione ${b?.ok ? 'accettata' : 'rifiutata'}` };
@@ -566,10 +566,10 @@ export const PROBES = [
       const c = await ctx.enter('sonda-mondo', { id: 'sonda-inonda' });
       if (!c.ingresso) return { ok: true, dettaglio: `rifiutato: ${c.rifiuto ?? 'nessuna risposta'}` };
       const N = 600;
-      for (let i = 0; i < N; i++) c.send({ t: 'dici', seq: 1000 + i, viandante: 'nessuno', testo: 'sonda' });
+      for (let i = 0; i < N; i++) c.send({ t: 'say', seq: 1000 + i, wanderer: 'nessuno', text: 'sonda' });
       await ctx.waitFor(() => c.answers.size >= N, 8000);
       const answered = c.answers.size;
-      const limited = [...c.answers.values()].some((a) => /tropp|ritmo|limit/i.test(a.motivo ?? ''));
+      const limited = [...c.answers.values()].some((a) => /tropp|ritmo|limit/i.test(a.reason ?? ''));
       c.close();
       return { ok: limited || answered < N, dettaglio: `${answered} messaggi su ${N} serviti` };
     },
@@ -709,10 +709,10 @@ export const PROBES = [
       const odd = { toString: 1, valueOf: 1 };
       const from = altro.tick;
       for (let i = 0; i < 60; i++) {
-        io.send({ t: 'frase', seq: odd, tokens: [] });
+        io.send({ t: 'phrase', seq: odd, tokens: [] });
         await new Promise((r) => setTimeout(r, 25));
       }
-      for (let i = 0; i < 200; i++) io.send({ t: 'frase', seq: odd, tokens: [] });
+      for (let i = 0; i < 200; i++) io.send({ t: 'phrase', seq: odd, tokens: [] });
       await ctx.waitFor(() => altro.mondo.length > 0, 4000);
       const ticks = altro.tick - from;
       io.close();

@@ -7,38 +7,38 @@
   "logic": "logic.lua",
   "order": 28,
   "ui": {
-    "id": "cantiere",
+    "id": "worksite",
     "title": "Il cantiere",
     "description": "Il lavoro di molti più vicino: a che punto è, cosa manca, chi ci lavora.",
     "elements": [
       {
         "type": "text",
         "label": "Che cosa",
-        "field": "cantiere.titolo"
+        "field": "worksite.title"
       },
       {
         "type": "text",
         "label": "A che punto è",
-        "field": "cantiere.fase"
+        "field": "worksite.phase"
       },
       {
         "type": "text",
         "label": "Come va",
-        "field": "cantiere.stato"
+        "field": "worksite.state"
       },
       {
         "type": "text",
         "label": "Cosa manca",
-        "field": "cantiere.manca"
+        "field": "worksite.missing"
       },
       {
         "type": "text",
         "label": "Chi ci lavora",
-        "field": "cantiere.squadra"
+        "field": "worksite.team"
       },
       {
         "type": "button",
-        "id": "porta",
+        "id": "bring",
         "label": "Porta ciò che serve"
       }
     ]
@@ -60,14 +60,14 @@
           "x": -2,
           "y": -2,
           "components": {
-            "mestiere": {
+            "job": {
               "id": "farmer",
-              "fase": "morning",
-              "giorno": 0,
-              "compiti": [
+              "phase": "morning",
+              "day": 0,
+              "tasks": [
                 {
-                  "fa": "go",
-                  "dove": "work"
+                  "does": "go",
+                  "where": "work"
                 }
               ],
               "work": {
@@ -80,9 +80,9 @@
       ],
       "duration": 6,
       "watch": [
-        "0:meta.x",
-        "0:meta.y",
-        "0:attivita.tipo"
+        "0:goal.x",
+        "0:goal.y",
+        "0:activity.kind"
       ],
       "lines": [
         37,
@@ -113,13 +113,13 @@
           "x": 0,
           "y": 0,
           "components": {
-            "mestiere": {
+            "job": {
               "id": "farmer",
-              "fase": "night",
-              "giorno": 0,
-              "compiti": [
+              "phase": "night",
+              "day": 0,
+              "tasks": [
                 {
-                  "fa": "rest"
+                  "does": "rest"
                 }
               ]
             }
@@ -128,8 +128,8 @@
       ],
       "duration": 2,
       "watch": [
-        "0:attivita.tipo",
-        "0:attivita.ferma"
+        "0:activity.kind",
+        "0:activity.still"
       ],
       "lines": [
         12,

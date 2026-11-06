@@ -25,7 +25,7 @@ async function world() {
   const got: ServerMsg[] = [];
   client.onMessage((m) => got.push(m));
   server.connect(s);
-  client.send({ t: 'entra', id: 'bea' });
+  client.send({ t: 'join', id: 'bea' });
   return { k, server, send: (m: unknown) => client.send(m as never), got };
 }
 
@@ -48,20 +48,20 @@ describe('the fields of the panels on the wire', () => {
     expect(JSON.stringify(got)).not.toContain('una tabella intera');
     k.as('bea', () => k.ecs.set(k.wandererEntity, 'segreti', { mostrato: 'x'.repeat(5000) }));
     for (let i = 0; i < 10; i++) server.tick(1 / 60);
-    const last = got.filter((m) => m.t === 'aggiorna' && m.stato?.campi).at(-1) as Extract<ServerMsg, { t: 'aggiorna' }>;
-    expect(String(last.stato!.campi!['segreti.mostrato']).length).toBe(200);
+    const last = got.filter((m) => m.t === 'update' && m.state?.fields).at(-1) as Extract<ServerMsg, { t: 'update' }>;
+    expect(String(last.state!.fields!['segreti.mostrato']).length).toBe(200);
   });
 });
 
 describe('the keys a client says', () => {
   it('V-021 only the four directions are kept, whatever comes; nothing is answered, nothing throws', async () => {
     const { k, server, send, got } = await world();
-    const answers = () => got.filter((m) => m.t === 'esito').length;
+    const answers = () => got.filter((m) => m.t === 'result').length;
     const before = answers();
-    for (const tenuti of [['right', 'jump', 'rollback', 'console'], 'right', [{ toString: 'right' }], null, Array.from({ length: 1000 }, () => 'up'), ['__proto__']]) send({ t: 'tasti', tenuti });
+    for (const tenuti of [['right', 'jump', 'rollback', 'console'], 'right', [{ toString: 'right' }], null, Array.from({ length: 1000 }, () => 'up'), ['__proto__']]) send({ t: 'keys', tenuti });
     server.tick(1 / 60);
     expect(answers()).toBe(before);
-    send({ t: 'tasti', tenuti: ['right', 'jump', 'rollback'] });
+    send({ t: 'keys', held: ['right', 'jump', 'rollback'] });
     server.tick(1 / 60);
     expect(k.heldBy('bea', 'right')).toBe(true);
     expect(k.heldBy('bea', 'jump')).toBe(false);

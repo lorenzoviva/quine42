@@ -8,7 +8,7 @@ import { icons } from './hud';
 import { $, el } from './dom';
 
 /** Keeps a profile: the answer is the profile as it was repaired, and what was repaired (in words). */
-export type ProfileKeeper = (p: Partial<Profile>) => Promise<{ ok: boolean; profilo?: Profile; testo?: string; motivo?: string }>;
+export type ProfileKeeper = (p: Partial<Profile>) => Promise<{ ok: boolean; profile?: Profile; text?: string; reason?: string }>;
 
 const PREVIEW = 96;
 
@@ -161,15 +161,15 @@ export class ProfilePanel {
   private async save(): Promise<void> {
     this.status.textContent = '…';
     const r = await this.keep({ name: this.nome.value, seed: this.seme, tint: this.tinta.value, introduction: this.presentazione.value });
-    if (!r.ok || !r.profilo) {
-      this.status.textContent = r.motivo ?? 'Non è stato possibile.';
+    if (!r.ok || !r.profile) {
+      this.status.textContent = r.reason ?? 'Non è stato possibile.';
       return;
     }
-    this.nome.value = r.profilo.name === 'Viandante' ? '' : r.profilo.name;
-    if (r.profilo.tint) this.tinta.value = r.profilo.tint;
-    if (r.profilo.seed) this.seme = r.profilo.seed;
-    this.presentazione.value = r.profilo.introduction ?? '';
-    this.status.textContent = r.testo ? `Fatto, ma: ${r.testo}.` : 'Fatto.';
+    this.nome.value = r.profile.name === 'Viandante' ? '' : r.profile.name;
+    if (r.profile.tint) this.tinta.value = r.profile.tint;
+    if (r.profile.seed) this.seme = r.profile.seed;
+    this.presentazione.value = r.profile.introduction ?? '';
+    this.status.textContent = r.text ? `Fatto, ma: ${r.text}.` : 'Fatto.';
     this.paint();
   }
 }

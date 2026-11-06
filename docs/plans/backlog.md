@@ -4885,7 +4885,7 @@ Nasce da T156 (`dossier T156`, `docs/pipeline/domande/T156.md`, risposta B scelt
 - Browser: una passeggiata in un luogo con individui al lavoro (`#convalida-browser`): camminano, lavorano, il cantiere cresce come prima.
 - Quando è fatto: commit su `task/T327`; nell'esito i moduli prima e ora e le righe tolte da `kernel.ts`. Sicurezza: scrivi l'esito.
 
-### T328 · Integrare T308b nel base, che ha T319 e T156 — `da fare`
+### T328 · Integrare T308b nel base, che ha T319 e T156 — `fatto` (`e7b00a26`)
 - Pipeline: claude · sforzo high · stima 3% · approvato · priorità 1
 - Step: 42
 
@@ -4894,3 +4894,4 @@ Nasce da T308b: `dossier T308b`. `integra T308b` si è fermato su conflitti in `
 **Cosa fare:** nel worktree, `git merge task/T308b` sul base di adesso. Versione: T308b porta il contratto a `0.5.0` (vince, in `version.ts`, `package.json`, `package-lock.json`, `universe/universe.json → kernel`/`kernels`). In `modeldirector.ts` tieni entrambe le modifiche (il prompt procedurale e i semi di T156/T319; i nomi inglesi di T308b), e porta al contratto 0.5 ciò che T319/T156 hanno scritto con i nomi di prima se la tabella di T308b li rinomina. `glossario-censimento.md`: rigeneralo con `node tools/glossario/glossario.mjs`. ADR di T308b: se il numero è preso, il primo libero, con i rimandi. Due aggiunte nello stesso punto restano entrambe.
 
 **Quando è fatto:** merge committato, `npm test`, `npm run typecheck` e `npm run build` verdi con i loro turni; esito con le scelte fatte nel conflitto. Non serve il browser (T308b l'ha provato), salvo che la risoluzione cambi codice oltre l'unione. Sicurezza: nessuna superficie nuova.
+- Esito: T308b fuso nel base (con T319, T156, T320, T293): contratto 0.5.0; `modeldirector.ts` unisce `shareWith`/`structureSiblings` con i campi inglesi di `structure`; nei test delle carte fatte a mano il verificatore usa `anonymous`; `architettura-dettagli.md` tiene entrambe le righe; censimento del glossario rigenerato; l'ADR di T308b diventa ADR-0163 con i rimandi. Suite (2607 passati, 1 saltato), typecheck e build verdi nei turni. Non provati: il browser (non serviva) e `sicurezza:prove`. Sicurezza: nessuna superficie nuova.

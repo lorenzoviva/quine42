@@ -41,7 +41,7 @@ async function thin(
 ): Promise<ThinClient> {
   const { server: s, client: c } = fakeLink();
   server.connect(s);
-  const session = new SessionClient(c, { id, ...(opts.tetto !== undefined ? { tetto: opts.tetto } : {}) });
+  const session = new SessionClient(c, { id, ...(opts.tetto !== undefined ? { cap: opts.tetto } : {}) });
   await session.ready;
   const k = await Kernel.boot({ files: session.files, store: memoryStore(), ai: new MockAiModels(), mirror: true });
   return new ThinClient(k, session);
@@ -188,10 +188,10 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
     // Propagate server update to client
     run(server, [master, carlo], 6);
 
-    // Client carlo received 'crediti' notice with motivo 'tetto'
-    const creditNotice = carlo.session.notices.find((n) => n.tipo === 'crediti');
+    // Client carlo received the 'credits' notice, with the reason 'cap'
+    const creditNotice = carlo.session.notices.find((n) => n.type === 'credits');
     expect(creditNotice).toBeDefined();
-    expect(creditNotice?.motivo).toBe('tetto');
+    expect(creditNotice?.reason).toBe('cap');
 
     // Subsequent call uses local models, NOT online
     online.onlineCalls = [];
@@ -458,7 +458,7 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
         },
       });
 
-      modal.show({ motivo: 'finiti' });
+      modal.show({ reason: 'exhausted' });
       expect(modal.isOpen).toBe(true);
       const modalRoot = (modal as any).root as FakeElement;
       expect(modalRoot.textContent).toContain('Crediti esauriti');
@@ -472,7 +472,7 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
       expect(modal.isOpen).toBe(false);
 
       // Show tetto modal
-      modal.show({ motivo: 'tetto' });
+      modal.show({ reason: 'cap' });
       expect(modal.isOpen).toBe(true);
       expect(modalRoot.textContent).toContain('Tetto di spesa raggiunto');
 
@@ -482,7 +482,7 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
       expect(modal.isOpen).toBe(false);
 
       // Recharge click
-      modal.show({ motivo: 'finiti' });
+      modal.show({ reason: 'exhausted' });
       await btns[0].onclick!();
       expect(recharged).toBe(true);
     } finally {

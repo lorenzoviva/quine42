@@ -92,7 +92,7 @@ describe('new places with the lock, at the expense of who explores (T40)', () =>
     // Bruno has it, planned, with its name: he did not ask for it again.
     const seen = bruno.places.get(ch.key)!;
     expect(seen.stage).toBe('planned');
-    expect(seen.nome).toBe(ch.place!.name);
+    expect(seen.name).toBe(ch.place!.name);
     expect(models.plans.filter((p) => p.chi === 'bruno').every((p) => p.key !== '12,9')).toBe(true);
   }, 30_000);
 

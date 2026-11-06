@@ -24,7 +24,7 @@ function join(server: SessionServer, id: string, nome?: string): { client: Sessi
   server.connect(s);
   const heard: ServerMsg[] = [];
   c.onMessage((m) => heard.push(m));
-  return { client: new SessionClient(c, { id, ...(nome ? { nome } : {}) }), heard };
+  return { client: new SessionClient(c, { id, ...(nome ? { name: nome } : {}) }), heard };
 }
 
 /** The server's world as some ticks go by, and what the clients sent meanwhile. */
@@ -68,7 +68,7 @@ describe('the players from the corona (T42c)', () => {
     await run(server);
     expect(mirror.situation().ops.find((o) => o.who === 'anna')).toMatchObject({ cx: 2, cy: 2 });
     // A player is never told of the others far away, nor of a list of who is connected.
-    expect(anna.heard.some((m) => (m.t === 'aggiorna' || m.t === 'ingresso') && m.giocatori)).toBe(false);
+    expect(anna.heard.some((m) => (m.t === 'update' || m.t === 'welcome') && m.players)).toBe(false);
     // One leaves: the master's table loses them.
     ben.client.leave();
     await run(server);
@@ -125,10 +125,10 @@ describe('the players from the corona (T42c)', () => {
       await run(server, 1);
       return p;
     };
-    expect(await ask(anna.client.act({ t: 'segui', id: 'me' }))).toMatchObject({ ok: false });
-    expect(await ask(master.client.act({ t: 'segui', id: 'nessuno' }))).toMatchObject({ ok: false });
-    expect(await ask(master.client.act({ t: 'segui', id: 'me' }))).toMatchObject({ ok: false });
-    expect(await ask(master.client.act({ t: 'segui', id: 'anna' }))).toMatchObject({ ok: true });
+    expect(await ask(anna.client.act({ t: 'follow', id: 'me' }))).toMatchObject({ ok: false });
+    expect(await ask(master.client.act({ t: 'follow', id: 'nessuno' }))).toMatchObject({ ok: false });
+    expect(await ask(master.client.act({ t: 'follow', id: 'me' }))).toMatchObject({ ok: false });
+    expect(await ask(master.client.act({ t: 'follow', id: 'anna' }))).toMatchObject({ ok: true });
     // Alone, nobody: no list, no follow.
     const alone = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
     expect(alone.players()).toEqual([]);

@@ -294,7 +294,7 @@ export interface Lotto {
   modello: string;
   /** The model that is not there (ModelDirector would ask the Sculptor for it). */
   wanted?: string;
-  struttura: { concetto: string; classe: string; taglia?: string; model?: string };
+  structure: { concept: string; class: string; size?: string; model?: string };
 }
 
 /**
@@ -306,11 +306,11 @@ export function lotti(k: Kernel, cx: number, cy: number, plan: ChunkPlan): Lotto
   const pathCode = kk.pathCode();
   const ch = { cx, cy, key: `${cx},${cy}`, draft: kk.genDraft(cx, cy) };
   const { result, tiles } = kk.layoutOf(ch, plan, pathCode, true);
-  const { lots } = kk.lotsOf({ ...ch, tiles, lots: result.lots }, plan, pathCode) as { lots: Array<{ index: number; x: number; y: number; form: { model: string; wanted?: string }; struttura: Lotto['struttura'] }> };
+  const { lots } = kk.lotsOf({ ...ch, tiles, lots: result.lots }, plan, pathCode) as { lots: Array<{ index: number; x: number; y: number; form: { model: string; wanted?: string }; structure: Lotto['structure'] }> };
   return lots.map((l) => {
     const b = result.lots[l.index];
     const w = b.x1 - b.x0 + 1, h = b.y1 - b.y0 + 1;
-    return { index: l.index, w, h, lato: Math.max(w, h), area: w * h, x: l.x, y: l.y, modello: l.form.model, ...(l.form.wanted ? { wanted: l.form.wanted } : {}), struttura: l.struttura };
+    return { index: l.index, w, h, lato: Math.max(w, h), area: w * h, x: l.x, y: l.y, modello: l.form.model, ...(l.form.wanted ? { wanted: l.form.wanted } : {}), structure: l.structure };
   });
 }
 
@@ -354,10 +354,10 @@ export async function collocate(files: FileMap, maps: Record<string, ChunkRecord
       }
       if (s.size && RARE_SIZES.includes(s.size)) rare++;
       if (l.wanted) problemi.push(`${name}: «${s.concept}» manca dalla libreria (${l.wanted})`);
-      if (l.modello !== l.struttura.model) problemi.push(`${name}: «${s.concept}» diventa ${l.modello}, non ${l.struttura.model}`);
+      if (l.modello !== l.structure.model) problemi.push(`${name}: «${s.concept}» diventa ${l.modello}, non ${l.structure.model}`);
       out.push({ cx: at[0], cy: at[1], luogo: plan.place.name, ambiente: plan.layout, concetto: s.concept, modello: l.modello, ...(s.size ? { taglia: s.size } : {}), lotto: `${l.w}×${l.h}`, x: l.x, y: l.y, ...(l.wanted ? { wanted: l.wanted } : {}) });
     }
-    for (const l of ls) if (l.wanted) problemi.push(`${name}: il lotto ${l.index} (${l.struttura.concetto}) vuole ${l.wanted}`);
+    for (const l of ls) if (l.wanted) problemi.push(`${name}: il lotto ${l.index} (${l.structure.concept}) vuole ${l.wanted}`);
   }
   if (rare > 1) problemi.push(`${rare} strutture rare in una zona sola`);
   return { strutture: out, problemi };

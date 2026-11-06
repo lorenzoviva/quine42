@@ -92,11 +92,11 @@ export class ModelDirector {
     }
     // Structures the Cartographer asked for (ADR-0043), at their size (ADR-0092): the rare ones (Huge per zone,
     // Gargantuan per realm, the kernel sees to it) by the best model.
-    for (const id of k.ecs.query('struttura')) {
-      const s = k.ecs.get(id, 'struttura') as { model?: string; concetto: string; classe: string; taglia?: SizeTier };
+    for (const id of k.ecs.query('structure')) {
+      const s = k.ecs.get(id, 'structure') as { model?: string; concept: string; class: string; size?: SizeTier };
       if (!lacks(s.model)) continue;
       const place = k.chunkAt(k.ecs.get(id, 'pos').x, k.ecs.get(id, 'pos').y)?.place;
-      out.push({ id: s.model!, nome: s.concetto, shareWith: structureSiblings(s.concetto).filter((x) => x !== s.model), aspetto: `${s.concetto}: un edificio in cui si entra, con la porta sul davanti${place ? `, a «${place.name}» (${place.description})` : ''}`, classe: s.classe, ...(s.taglia ? { taglia: s.taglia } : {}), contesto: place?.name });
+      out.push({ id: s.model!, nome: s.concept, shareWith: structureSiblings(s.concept).filter((x) => x !== s.model), aspetto: `${s.concept}: un edificio in cui si entra, con la porta sul davanti${place ? `, a «${place.name}» (${place.description})` : ''}`, classe: s.class, ...(s.size ? { taglia: s.size } : {}), contesto: place?.name });
     }
     for (const [code, t] of Object.entries(k.palette)) {
       if (code === '?' || !lacks(t.model)) continue;

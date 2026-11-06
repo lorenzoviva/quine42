@@ -13,7 +13,8 @@ import { metaBreak } from '../fourthwall';
 import { normName } from '../content';
 import type { Manifest } from '../types';
 import { classOf, guessClass, RARE_SIZES, sizeOf, SIZE_TIERS } from '../../mj/classes';
-import { internalName, italianName, italianValues } from '../internalNames';
+import { internalComponents, internalName, italianName, italianValues } from '../internalNames';
+import { luaFor0_5 } from '../migrations';
 import { ownModelId } from '../modeldirector';
 import { AGENTS, wordsOf, type AgentId, type Council } from './council';
 
@@ -210,7 +211,8 @@ export function assembleManifest(id: string, concept: Concept, physics: PhysicsS
   let extra: Record<string, any> = {};
   try {
     const parsed = code.componenti_json ? JSON.parse(code.componenti_json) : {};
-    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) extra = parsed;
+    // The components of 0.4 the Engineer may still write (`luce`, T308b) take the names of 0.5.
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) extra = internalComponents(parsed) as Record<string, any>;
   } catch {
     extra = {};
   }
@@ -320,14 +322,14 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
       [
         `Scrivi logic.lua per questo modulo.\nConcetto:\n${JSON.stringify(concept, null, 1)}\nFisica:\n${JSON.stringify(physics)}`,
         `Funzioni obbligatorie: ${requiredHooks(concept).join(', ') || 'nessuna (restituisci comunque una tabella M)'}.`,
-        'In "componenti_json" eventuali componenti extra come oggetto JSON (stringa), es. {"luce":{"accesa":false}}. Niente stato nelle variabili Lua.',
+        'In "componenti_json" eventuali componenti extra come oggetto JSON (stringa), es. {"light":{"lit":false}}. Niente stato nelle variabili Lua.',
         feedback && `DA CORREGGERE: ${feedback}`,
       ]
         .filter(Boolean)
         .join('\n'),
       CODE_SCHEMA,
       { chi: req.chi, data: { ...data, concept, physics }, temperature: 0.3 },
-    );
+    ).then(internalCode);
 
   let concept = await askConcept();
   if (req.kind) concept.tipo = req.kind;
@@ -418,7 +420,15 @@ export async function repairLogic(c: Council, manifest: Manifest, logic: string,
     CODE_SCHEMA,
     { data: { manifest, logic, error }, temperature: 0.2 },
   );
-  return code.logic;
+  return internalCode(code).logic;
+}
+
+/**
+ * The Engineer's code with the names of the contract 0.5 (T308b): what it may still write with those of before (`ecs.get(u, "luce")`,
+ * `world.impresa`) is ported as a universe of 0.4 is (`luaFor0_5`), until its prompts are all in the internal language (T310).
+ */
+function internalCode(code: CodeSpec): CodeSpec {
+  return { ...code, logic: luaFor0_5(String(code.logic ?? '')) };
 }
 
 

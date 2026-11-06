@@ -224,7 +224,7 @@ const holding = (k: Kernel, item: string) => {
   return i;
 };
 
-const placed = (k: Kernel) => k.ecs.query('posato', 'pickup');
+const placed = (k: Kernel) => k.ecs.query('placed', 'pickup');
 
 describe('putting down in the world', () => {
   let k: Kernel;
@@ -241,7 +241,7 @@ describe('putting down in the world', () => {
     return e;
   };
   const fresh = () => {
-    for (const id of k.ecs.query('posato')) k.ecs.destroy(id);
+    for (const id of k.ecs.query('placed')) k.ecs.destroy(id);
     for (const id of spawned.splice(0)) k.ecs.destroy(id);
     clearArea(k);
     const inv = k.inventory();
@@ -571,7 +571,7 @@ describe('two wanderers', () => {
     // Bruno's world has it too, resting on his copy of the chest at the same height.
     const theirs = mirrorOf(bruno, k, knife)!;
     expect(theirs).toBeDefined();
-    expect(bruno.k.ecs.get(theirs, 'posato')).toEqual({ z: shelf });
+    expect(bruno.k.ecs.get(theirs, 'placed')).toEqual({ z: shelf });
     const brunoChest = mirrorOf(bruno, k, chest)!;
     await settleForms(bruno.k, [brunoChest]);
     frames(server, [anna, bruno], 3);
@@ -584,7 +584,7 @@ describe('two wanderers', () => {
     await taking;
     expect(k.ecs.alive.has(knife)).toBe(false);
     expect(k.as('bruno', () => countItem(k.inventory(), 'item.coltello'))).toBe(1);
-    expect(anna.k.ecs.query('posato')).toEqual([]);
+    expect(anna.k.ecs.query('placed')).toEqual([]);
   });
 
   it('whatever comes on the wire with `posa`, the world answers and goes on (rule 8i)', async () => {
@@ -594,7 +594,7 @@ describe('two wanderers', () => {
     const got: ServerMsg[] = [];
     client.onMessage((m) => got.push(m));
     server.connect(s);
-    client.send({ t: 'entra', id: 'cleo' });
+    client.send({ t: 'join', id: 'cleo' });
     for (let i = 0; i < 80; i++) {
       server.tick(DT);
       await new Promise((r) => setTimeout(r, 25));
@@ -611,23 +611,23 @@ describe('two wanderers', () => {
     let seq = 0;
     for (const entita of shapes) {
       const before = k.ticks;
-      client.send({ t: 'azione', seq: ++seq, entita, azione: 'posa' } as never);
+      client.send({ t: 'action', seq: ++seq, entita, action: 'posa' } as never);
       expect(() => server.tick(DT)).not.toThrow();
       expect(k.ticks).toBe(before + 1);
     }
     // Even holding something, on a thing on the ground or on oneself nothing goes.
     k.as('cleo', () => holding(k, 'item.coltello'));
-    client.send({ t: 'azione', seq: ++seq, entita: loose, azione: 'posa' });
-    client.send({ t: 'azione', seq: ++seq, entita: at.entity, azione: 'posa' });
+    client.send({ t: 'action', seq: ++seq, entity: loose, action: 'posa' });
+    client.send({ t: 'action', seq: ++seq, entity: at.entity, action: 'posa' });
     server.tick(DT);
     for (let i = 0; i < 20; i++) await new Promise((r) => setTimeout(r, 0));
     server.tick(DT);
-    const answers = got.filter((m): m is Extract<ServerMsg, { t: 'esito' }> => m.t === 'esito');
+    const answers = got.filter((m): m is Extract<ServerMsg, { t: 'result' }> => m.t === 'result');
     expect(new Set(answers.map((a) => a.seq)).size).toBe(seq);
     expect(placed(k)).toEqual([]);
     expect(k.as('cleo', () => countItem(k.inventory(), 'item.coltello'))).toBe(1);
     // Then, on the chest, it goes.
-    client.send({ t: 'azione', seq: ++seq, entita: chest, azione: 'posa' });
+    client.send({ t: 'action', seq: ++seq, entity: chest, action: 'posa' });
     server.tick(DT);
     for (let i = 0; i < 20; i++) await new Promise((r) => setTimeout(r, 0));
     expect(placed(k)).toHaveLength(1);

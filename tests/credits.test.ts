@@ -123,7 +123,7 @@ describe('credits and common costs (T45a)', () => {
     const master = await thin(server, 'me');
     const anna = await thin(server, 'anna');
     expect(master.k.platformFee).toBe(0.02);
-    expect(anna.session.commissione).toBeUndefined();
+    expect(anna.session.fee).toBeUndefined();
   });
 
   it('the balance is in the ledger, not in world/players/<id>.json (ADR-0104)', async () => {
@@ -169,9 +169,9 @@ describe('credits and common costs (T45a)', () => {
     }
 
     // A player cannot, through the message or through the Referente
-    const refused = await until(server, [master, anna], anna.session.act({ t: 'ricarica', viandante: 'anna', quanti: 1 }));
+    const refused = await until(server, [master, anna], anna.session.act({ t: 'recharge', wanderer: 'anna', count: 1 }));
     expect(refused.ok).toBe(false);
-    const talk = await until(server, [master, anna], anna.session.act({ t: 'agente', agente: 'liaison', testo: 'ricarica 10 crediti ad anna' }));
+    const talk = await until(server, [master, anna], anna.session.act({ t: 'agent', agent: 'liaison', text: 'ricarica 10 crediti ad anna' }));
     expect(talk.ok).toBe(false);
     expect(k.creditsOf('anna')).toBe(2.5);
   });
