@@ -1,0 +1,81 @@
+{
+  "id": "lavoro.navigatore",
+  "name": "La gilda della navigazione",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi traccia le rotte: le posizioni lette sui fari, le carte del cielo copiate, la sera alla gilda.",
+  "mestieri": [
+    {
+      "id": "navigatore",
+      "nomi": [
+        "navigatrice",
+        "navigatore",
+        "navigatrice della gilda della navigazione profonda",
+        "navigatore della gilda della navigazione profonda",
+        "cartografa stellare della gilda",
+        "cartografa stellare",
+        "cartografo stellare",
+        "cartografa",
+        "cartografo",
+        "astronoma",
+        "astronomo"
+      ],
+      "posto": {
+        "entita": "telemetria"
+      },
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "usa",
+            "dove": "entita:telemetria",
+            "azione": "leggi",
+            "durata": 10,
+            "posa": "legge",
+            "dice": "Tre navette in rotta: tutto in ordine."
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "produci",
+            "oggetto": "item.mappa-rotte",
+            "quante": 1,
+            "durata": 60,
+            "posa": "legge"
+          },
+          {
+            "fa": "aspetta",
+            "durata": 20,
+            "posa": "mangia"
+          }
+        ],
+        "sera": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "porta",
+            "oggetto": "item.mappa-rotte",
+            "dove": "piazza"
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}

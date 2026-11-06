@@ -1,0 +1,82 @@
+{
+  "id": "lavoro.cuoco",
+  "name": "Il vicolo delle cuoche",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi cucina per strada: il brodo caldo dalla mattina, le razioni per chi torna dal turno.",
+  "mestieri": [
+    {
+      "id": "cuoco",
+      "nomi": [
+        "cuoca",
+        "cuoco",
+        "cuoca di strada",
+        "cuoco di strada",
+        "fornaia",
+        "fornaio",
+        "friggitrice",
+        "friggitore"
+      ],
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "produci",
+            "oggetto": "item.brodo-caldo",
+            "quante": 1,
+            "durata": 30,
+            "posa": "cucina",
+            "dice": "Brodo caldo, per chi smonta dal turno!"
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "produci",
+            "oggetto": "item.brodo-caldo",
+            "quante": 2,
+            "durata": 30,
+            "posa": "cucina"
+          },
+          {
+            "fa": "produci",
+            "oggetto": "item.razione-serra",
+            "quante": 1,
+            "durata": 20,
+            "posa": "cucina"
+          }
+        ],
+        "sera": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "porta",
+            "oggetto": "item.brodo-caldo",
+            "dove": "piazza"
+          },
+          {
+            "fa": "porta",
+            "oggetto": "item.razione-serra",
+            "dove": "piazza"
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}

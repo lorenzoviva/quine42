@@ -255,3 +255,54 @@ suoi quattro tiri cadevano su punti sgombri, e cadrebbe con la nuova: per questo
 ## Sul kernel delle imprese (T280, kernel `0.1.9`)
 
 Le verifiche di orichalcum, neapolis e sidera restano verdi, 0 fault, ma questi tre universi **non hanno `sys.lavoro` né i programmi `lavoro.*`**: `jobPrograms()` è vuoto, nessuno lavora, nessuna squadra. Ciò che cade fa un'impresa `ferma` per sempre: il lotto resta ai picchetti (misurato: nove giorni dopo, `lavorato` 0). Gli stessi moduli del seme non bastano: con l'innesto i programmi validi sono 6, 6 e 5, e le persone con un programma 0/24 in orichalcum, 4/24 in neapolis, 3/24 in sidera, perché i mestieri di questi mondi non si chiamano così (fuochista, barista, xenobotanica…), e `item.grano` e `item.pesce` mancano. Servono programmi dei loro mestieri. Aurora è il seme: li ha.
+
+## I mestieri dei tre universi (T298)
+
+Ognuno dei tre ha ora `modules/sys.lavoro/` (il sistema del seme, copiato com'è: così gli arrivano gli aggiornamenti del seme) e i suoi
+programmi `modules/lavoro.<mestiere>/`, uno per mestiere, nel suo tema (ADR-0140, ADR-0141). Nessun file del kernel è cambiato.
+
+| universo | programmi | persone con un programma | animali (senza) | chi fa i materiali delle case | oggetti nuovi |
+|---|---|---|---|---|---|
+| orichalcum | 9: `fabbro` (colatrici, fonditori, capo forno), `caldaista`, `orologiaio`, `minatore`, `ferroviere`, `aeronauta`, `tessitore`, `giornalaio`, `guardia` | **22/22** | 2 gatti | `fabbro` (travi e ribattini), `caldaista` (ribattini) | `item.ciocco` «Trave di ghisa», `item.chiodi` «Ribattini d'ottone», `item.telo-canapa` |
+| neapolis | 12: `fabbro` (meccanici), `portuale`, `elettricista`, `barista`, `cuoco`, `pizzaiolo`, `medico`, `giornalista`, `edicolante`, `autista`, `guardia`, `impiegato` | **22/22** | 2 gatti | `portuale` (tufo e bulloni scaricati), `fabbro` (bulloni) | `item.ciocco` «Blocco di tufo», `item.chiodi` «Bulloni da carpenteria» |
+| sidera | 13: `fabbro` (ingegneri di fusione, tecnici, riparatori), `xenobotanico`, `alghicoltore`, `recuperatore`, `minatore`, `navigatore`, `pilota`, `medico`, `sintetista`, `cuoco`, `corriere`, `venditore`, `guardia` | **23/23** | 1 corvo | `fabbro` (pannelli e rivetti), `recuperatore` (pannelli dalla lamiera dei relitti) | `item.ciocco` «Pannello di lega», `item.chiodi` «Rivetti magnetici», `item.alghe` |
+
+Gli altri prodotti sono oggetti che gli universi avevano già (minerale rosso, ingranaggi, tazzine, ragù, pizza, pratiche, frutti di vetro,
+polvere di cristallo, carte delle rotte, siero…): ciò che un mestiere porta in piazza va nel deposito del suo luogo, e i luoghi che nessuno
+guarda lo riempiono una volta al giorno (ADR-0149). Una casa da rifare chiede `item.ciocco` e `item.chiodi` (`housePhases`, del kernel):
+qui hanno il nome di ogni mondo. Il capomastro è il programma `fabbro` di ogni universo (`HOUSE_ROLES`).
+
+Sidera ha due caselle nuove nel suo terreno (`world.terreno-sidera`): `u` vasca seminata, che in un giorno matura in `y` vasca in frutto.
+Gli xenobotanici seminano le vasche idroponiche (`m` → `u`) e raccolgono i frutti di vetro (`y` → `m`): è un raccolto anche per la regola
+del kernel (ADR-0147), che una volta all'anno fa nascere la mietitura dove ci sono almeno quattro vasche. Orichalcum ha già tutte le 26
+lettere del terreno occupate e i suoi mestieri non seminano; neapolis non coltiva.
+
+Le parole dei mestieri: ogni persona ha il suo mestiere per intero tra i `nomi` («capo della gilda dei caldaisti», «impiegato dell ufficio
+appalti»: `normalTrade` toglie gli apostrofi), più le parole generiche del mestiere; un nome sta in un solo programma. Alcune parole dei
+modelli offline (contadina, fornaio, locandiera, tessitrice, pescatore) sono in un programma vicino, così anche gli individui che il Narratore
+offline mette nei luoghi oltre i 19 lavorano. Gli animali non hanno un programma di proposito: una squadra prende chiunque ne abbia uno,
+e un gatto al cantiere sarebbe un manovale; manca una primitiva per un mestiere che non fa squadra (scritto nell'esito del task).
+
+**Verifica** (`tests/mestieri-cloud.test.ts`, sul `Kernel` vero, con i file come li installa `componi`, solo `MockAiModels`): ogni persona
+con un mestiere ha un programma valido, gli animali no, i testi passano `metaBreak`; poi, in un luogo per universo (orichalcum `0,-1` le
+Fonderie Ramelli, neapolis `1,2` il Porto commerciale, sidera `-2,-2` il Cantiere della Fusione), otto giorni fuori vista riempiono il
+deposito, una giornata di lavoro a vista (i compiti, ciò che si fa, il deposito che cresce la sera), un edificio che crolla: l'impresa nasce
+con una squadra del posto (orichalcum Nives, Raniero, Fosca; neapolis Gennaro, Salvatore, Lucia; sidera Ottone, Greta, Ugo), porta dal
+deposito e lavora a vista, poi fuori vista sale 0,2 → 0,7 → 0,9 → 1 e al ritorno è intero. Fra 2200 e 3800 tick per universo, 0 fault.
+Le tre `verifica.ts` restano verdi (orichalcum conta ora 34 moduli nuovi; neapolis valida anche i programmi e lascia `sys.lavoro`, testo
+della Sala sistemi, fuori dal controllo della quarta parete).
+
+Un limite del kernel, visto qui: un luogo carica al più `NPC_CAP` (2) individui dello stesso modulo, e i luoghi che il Cartografo offline fa
+intorno ne usano di quelli; arrivando da lontano, gli abitanti scritti di un luogo possono restare fuori (al Porto commerciale, i due
+portuali erano di due luoghi offline). Il test alza `NPC_CAP` per sé; nel gioco è la regola di varietà di sempre.
+
+**Nel browser** (preview della build, sidera installato in una cartella `universes/` del worktree e poi tolto, `?offline`; catture in
+`catture-t298/`): alle Cupole di Serralta Iris e Tobia seminano quattro vasche il primo giorno, il giorno dopo sono `y` e le raccolgono
+(frutti di vetro nel carico); al Cantiere della Fusione il laboratorio del plasma crollato mostra picchetti e corda, il pannello del cantiere
+dice «4 × Pannello di lega, 8 ore di lavoro», poi a muri con le impalcature (0,7), poi di nuovo intero con le luci. 0 fault.
+
+Un caso che il browser ha mostrato e il test no: in un mondo appena nato il deposito del Cantiere della Fusione è vuoto, e i soli che lì
+fanno pannelli (Ottone e Greta) sono nella squadra, quindi fuori vista non producono (ADR-0149: chi è in un'impresa non riempie il deposito)
+e l'impresa fuori vista prende solo dal deposito del suo luogo: resta «in attesa». A vista porterebbero dai depositi dei loro luoghi, ma i
+loro corpi non c'erano (`NPC_CAP`). Si sblocca quando qualcuno porta ciò che serve (il viandante col pulsante, come nella prova), o se il
+mondo è vissuto qualche giorno prima del crollo (il test). È una regola del kernel, non dei programmi: scritto nell'esito.

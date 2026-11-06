@@ -4,7 +4,7 @@ Generato da `verifica.ts` (`npx vite-node lab/banco/universi-cloud/sidera/verifi
 
 ## 1. Quarta parete
 
-101 file, 4498 frasi controllate con `metaBreak` (e `bibleBreaks` sulla bibbia): **0 violazioni**.
+101 file, 4507 frasi controllate con `metaBreak` (e `bibleBreaks` sulla bibbia): **0 violazioni**.
 
 ## 2. Moduli
 
@@ -77,7 +77,7 @@ Generato da `verifica.ts` (`npx vite-node lab/banco/universi-cloud/sidera/verifi
 - Persone del registro incontrate e riconosciute dall'origine: 12 (Ilde Ferraris, Pino Lupi, Pennanera, Teo Sardi, Ruben Kessler, Ugo Ranieri, Tobia Calandra, Iris Calandra, Selene Moro, Lia Corvi, Elio Marchetti, Lena Ortiz).
 - Azioni dei moduli eseguite: 142 (53 diverse); battute di dialogo: 142.
 - Raccolti: 48 oggetti a terra, 31 rune.
-- Ricette fabbricate: 10/10; oggetti usati: 16; scanner impugnato e usato.
+- Ricette fabbricate: 10/10; oggetti usati: 17; scanner impugnato e usato.
 - Incantesimi pronunciati: 17 (12 rune nuove e 5 formule): grava, lieve, tunnel, intreccio, onda, vuoto, marea, massa, spin, quanto, orbita, stasi, grava grava, lieve onda, orbita grava, quanto stasi, tunnel massa tunnel.
 - Chiamate di testo ai modelli finti durante il giro: 63 (individui, sguardi, luoghi oltre i 19).
 - **Fault: 0 sollevati, 0 aperti alla fine.**

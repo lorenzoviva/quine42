@@ -1,0 +1,75 @@
+{
+  "id": "lavoro.giornalista",
+  "name": "La redazione",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi racconta la città: il pezzo del mattino, il giro per strade e piazze a cercare la notizia.",
+  "mestieri": [
+    {
+      "id": "giornalista",
+      "nomi": [
+        "giornalista",
+        "fotoreporter",
+        "fotografo",
+        "fotografa",
+        "cronista",
+        "redattore",
+        "redattrice",
+        "inviato",
+        "inviata"
+      ],
+      "posto": {
+        "entita": "ufficio"
+      },
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "produci",
+            "oggetto": "item.giornale",
+            "quante": 1,
+            "durata": 40,
+            "posa": "legge",
+            "dice": "Il pezzo di stamattina non si scrive da solo."
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "pattuglia",
+            "percorso": [
+              "piazza",
+              "lavoro",
+              "casella:p"
+            ]
+          }
+        ],
+        "sera": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "porta",
+            "oggetto": "item.giornale",
+            "dove": "piazza"
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}

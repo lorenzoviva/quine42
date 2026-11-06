@@ -1,0 +1,124 @@
+{
+  "id": "lavoro.fabbro",
+  "name": "L'officina",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi ripara motori e lamiere: al banco dell'officina dalla mattina, bulloni e staffe per i cantieri, pezzi di ricambio, la sera in piazza.",
+  "items": [
+    {
+      "id": "item.ciocco",
+      "name": "Blocco di tufo",
+      "description": "Un blocco di tufo giallo, squadrato a mano: con questo è costruita mezza città.",
+      "category": "materiale",
+      "weight": 4,
+      "stack": 10,
+      "tags": [
+        "materiale",
+        "tufo",
+        "costruzione"
+      ]
+    },
+    {
+      "id": "item.chiodi",
+      "name": "Bulloni da carpenteria",
+      "description": "Una scatola di bulloni e staffe zincate, per armature, travi e infissi.",
+      "category": "materiale",
+      "weight": 0.3,
+      "stack": 30,
+      "tags": [
+        "materiale",
+        "ferro",
+        "costruzione"
+      ]
+    }
+  ],
+  "mestieri": [
+    {
+      "id": "fabbro",
+      "nomi": [
+        "meccanico",
+        "meccanica",
+        "meccanica dei taxi",
+        "meccanico dei taxi",
+        "fabbro",
+        "fabbra",
+        "saldatore",
+        "saldatrice",
+        "carrozziere",
+        "carrozziera",
+        "gommista",
+        "operaio",
+        "operaia"
+      ],
+      "posto": {
+        "entita": "officina"
+      },
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "produci",
+            "oggetto": "item.ricambio",
+            "quante": 1,
+            "durata": 30,
+            "posa": "lavora",
+            "dice": "Chi ha lasciato il motorino aperto?"
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "produci",
+            "oggetto": "item.chiodi",
+            "quante": 3,
+            "durata": 20,
+            "posa": "lavora"
+          },
+          {
+            "fa": "produci",
+            "oggetto": "item.ricambio",
+            "quante": 1,
+            "durata": 30,
+            "posa": "lavora"
+          },
+          {
+            "fa": "aspetta",
+            "durata": 20,
+            "posa": "mangia"
+          }
+        ],
+        "sera": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "porta",
+            "oggetto": "item.chiodi",
+            "dove": "piazza",
+            "dice": "Bulloni per il cantiere: ditelo al capomastro."
+          },
+          {
+            "fa": "porta",
+            "oggetto": "item.ricambio",
+            "dove": "piazza"
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}

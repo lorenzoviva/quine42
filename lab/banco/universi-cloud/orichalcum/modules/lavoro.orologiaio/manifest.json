@@ -1,0 +1,89 @@
+{
+  "id": "lavoro.orologiaio",
+  "name": "La bottega degli orologi",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi lima ingranaggi e tara manometri: al banco con la lente, e la sera porta in piazza ciò che è uscito dalle sue mani.",
+  "mestieri": [
+    {
+      "id": "orologiaio",
+      "nomi": [
+        "orologiaio",
+        "orologiaia",
+        "apprendista orologiaia",
+        "apprendista orologiaio",
+        "orologiaia e taratrice di manometri",
+        "taratrice",
+        "taratore",
+        "inventore",
+        "inventrice",
+        "meccanico di precisione",
+        "meccanica di precisione"
+      ],
+      "posto": {
+        "entita": "bottega"
+      },
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "usa",
+            "dove": "entita:bottega",
+            "azione": "studia",
+            "durata": 15,
+            "posa": "legge",
+            "dice": "Vediamo chi ha messo le mani su questo quadrante."
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "produci",
+            "oggetto": "item.ingranaggio",
+            "quante": 3,
+            "durata": 25,
+            "posa": "lavora"
+          },
+          {
+            "fa": "usa",
+            "dove": "entita:valvola",
+            "azione": "tara",
+            "durata": 10,
+            "posa": "lavora"
+          },
+          {
+            "fa": "aspetta",
+            "durata": 20,
+            "posa": "mangia"
+          }
+        ],
+        "sera": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "porta",
+            "oggetto": "item.ingranaggio",
+            "dove": "piazza",
+            "dice": "Ingranaggi tarati: girano senza un lamento."
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}

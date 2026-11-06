@@ -1,0 +1,96 @@
+{
+  "id": "lavoro.xenobotanico",
+  "name": "Le vasche delle cupole",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi coltiva sotto le cupole: semi nelle vasche idroponiche, frutti di vetro raccolti quando sono ambrati, le serre guardate una a una.",
+  "mestieri": [
+    {
+      "id": "xenobotanico",
+      "nomi": [
+        "xenobotanica",
+        "xenobotanico",
+        "xenobotanica capo delle cupole",
+        "xenobotanico apprendista",
+        "botanica",
+        "botanico",
+        "serricoltrice",
+        "serricoltore",
+        "agronoma",
+        "agronomo",
+        "contadina",
+        "contadino"
+      ],
+      "posto": {
+        "casella": "m"
+      },
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "trasforma",
+            "da": "m",
+            "a": "u",
+            "quante": 2,
+            "durata": 10,
+            "posa": "zappa",
+            "dice": "Semi di Serralta, uno per vasca."
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "raccogli",
+            "casella": "y",
+            "oggetto": "item.frutto-vetro",
+            "lascia": "m",
+            "quante": 3,
+            "durata": 8,
+            "posa": "zappa",
+            "dice": "Ambrati: questi sono pronti."
+          },
+          {
+            "fa": "usa",
+            "dove": "entita:serra",
+            "azione": "osserva",
+            "durata": 8,
+            "posa": "lavora"
+          },
+          {
+            "fa": "trasforma",
+            "da": "m",
+            "a": "u",
+            "quante": 2,
+            "durata": 10,
+            "posa": "zappa"
+          }
+        ],
+        "sera": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "porta",
+            "oggetto": "item.frutto-vetro",
+            "dove": "piazza"
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "id": "lavoro.medico",
+  "name": "L'ospedale",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi cura: le visite, le garze, i kit preparati per chi ne avrà bisogno di notte.",
+  "mestieri": [
+    {
+      "id": "medico",
+      "nomi": [
+        "medico",
+        "medica",
+        "medico del turno di notte",
+        "dottore",
+        "dottoressa",
+        "infermiere",
+        "infermiera",
+        "chirurgo",
+        "chirurga",
+        "farmacista"
+      ],
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "aspetta",
+            "durata": 40,
+            "posa": "lavora",
+            "dice": "Avanti il prossimo, piano."
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "produci",
+            "oggetto": "item.kit-pronto-soccorso",
+            "quante": 1,
+            "durata": 40,
+            "posa": "lavora"
+          },
+          {
+            "fa": "aspetta",
+            "durata": 30,
+            "posa": "lavora"
+          },
+          {
+            "fa": "aspetta",
+            "durata": 20,
+            "posa": "mangia"
+          }
+        ],
+        "sera": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "porta",
+            "oggetto": "item.kit-pronto-soccorso",
+            "dove": "piazza"
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}

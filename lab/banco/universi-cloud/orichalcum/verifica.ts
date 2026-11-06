@@ -32,11 +32,12 @@ const { k, files, maps } = await avvia(DIR);
 const NUOVI = Object.keys(files)
   .filter((p) => /^modules\/[^/]+\/manifest\.json$/.test(p))
   .map((p) => p.split('/')[1])
-  .filter((id) => !/^(core|sys\.(fire|follow|needs|physics|wander)|runes\.fragments|magic\.runes|world)\b/.test(id));
+  .filter((id) => !/^(core|sys\.(fire|follow|needs|physics|wander|lavoro)|runes\.fragments|magic\.runes|world)\b/.test(id));
 sezione('quarta parete (metaBreak e glossaryBreak su ogni testo del mondo)', quartaParete(files, maps));
 sezione('società (repairSociety) e trame (reviewPlot)', societa(files));
 sezione(`moduli nuovi (${NUOVI.length}: parseManifest, checkLua, apiErrors, probe, validateForged)`, NUOVI.flatMap((id) => modulo(k, files, id)));
-if (NUOVI.length !== 25) problemi.push(`moduli nuovi: ${NUOVI.length}, non 25`);
+// 25 of Cantiere 4A and the 9 programs of the trades (T298).
+if (NUOVI.length !== 34) problemi.push(`moduli nuovi: ${NUOVI.length}, non 34`);
 sezione(`piani dei luoghi (${Object.keys(maps).length}, validatePlan)`, piani(k, maps));
 {
   const kk = k as any;

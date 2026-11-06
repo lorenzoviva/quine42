@@ -1,0 +1,93 @@
+{
+  "id": "lavoro.portuale",
+  "name": "Il porto",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi lavora sulle banchine: le cime all'alba, la gru e le chiatte, il carico di tufo e di ferramenta portato al deposito.",
+  "mestieri": [
+    {
+      "id": "portuale",
+      "nomi": [
+        "portuale",
+        "gruista",
+        "gruista del porto",
+        "ormeggiatore",
+        "ormeggiatrice",
+        "scaricatore",
+        "scaricatrice",
+        "camallo",
+        "marinaio",
+        "marinaia"
+      ],
+      "posto": {
+        "casella": "z"
+      },
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "produci",
+            "oggetto": "item.ciocco",
+            "quante": 1,
+            "durata": 30,
+            "posa": "lavora",
+            "dice": "Piano con la gru, che è tufo!"
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "produci",
+            "oggetto": "item.ciocco",
+            "quante": 2,
+            "durata": 30,
+            "posa": "lavora"
+          },
+          {
+            "fa": "produci",
+            "oggetto": "item.chiodi",
+            "quante": 1,
+            "durata": 20,
+            "posa": "lavora"
+          },
+          {
+            "fa": "aspetta",
+            "durata": 20,
+            "posa": "mangia"
+          }
+        ],
+        "sera": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "porta",
+            "oggetto": "item.ciocco",
+            "dove": "piazza",
+            "dice": "Il carico della chiatta, al deposito."
+          },
+          {
+            "fa": "porta",
+            "oggetto": "item.chiodi",
+            "dove": "piazza"
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}

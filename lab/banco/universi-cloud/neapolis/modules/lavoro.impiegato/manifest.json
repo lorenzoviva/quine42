@@ -1,0 +1,81 @@
+{
+  "id": "lavoro.impiegato",
+  "name": "L'ufficio",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi passa le carte: le pratiche timbrate dalla mattina, il telefono, la pausa al bar.",
+  "mestieri": [
+    {
+      "id": "impiegato",
+      "nomi": [
+        "impiegato",
+        "impiegata",
+        "capoufficio",
+        "capoufficio delle pratiche",
+        "impiegato dell ufficio appalti",
+        "funzionario",
+        "funzionaria",
+        "segretario",
+        "segretaria",
+        "ragioniere",
+        "ragioniera"
+      ],
+      "posto": {
+        "entita": "ufficio"
+      },
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "usa",
+            "dove": "entita:ufficio",
+            "azione": "timbra",
+            "durata": 8,
+            "posa": "lavora",
+            "dice": "Prima il timbro, poi il caffè."
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "produci",
+            "oggetto": "item.pratica",
+            "quante": 2,
+            "durata": 30,
+            "posa": "legge"
+          },
+          {
+            "fa": "aspetta",
+            "durata": 20,
+            "posa": "mangia"
+          }
+        ],
+        "sera": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "porta",
+            "oggetto": "item.pratica",
+            "dove": "piazza"
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}

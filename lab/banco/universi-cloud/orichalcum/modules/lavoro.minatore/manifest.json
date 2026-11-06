@@ -1,0 +1,90 @@
+{
+  "id": "lavoro.minatore",
+  "name": "La galleria",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi scende nelle miniere di Solfara: il piccone sulla vena di minerale rosso, il carrello pieno, la sera in superficie.",
+  "mestieri": [
+    {
+      "id": "minatore",
+      "nomi": [
+        "minatore",
+        "minatrice",
+        "caposquadra dei minatori",
+        "caposquadra delle minatrici",
+        "picconiere",
+        "picconiera",
+        "cartografo di miniera",
+        "cartografa di miniera"
+      ],
+      "posto": {
+        "casella": "r"
+      },
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "raccogli",
+            "casella": "r",
+            "oggetto": "item.minerale-rosso",
+            "lascia": "r",
+            "quante": 1,
+            "durata": 20,
+            "posa": "zappa",
+            "dice": "Lampada accesa: si scende."
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "raccogli",
+            "casella": "r",
+            "oggetto": "item.minerale-rosso",
+            "lascia": "r",
+            "quante": 2,
+            "durata": 20,
+            "posa": "zappa"
+          },
+          {
+            "fa": "usa",
+            "dove": "entita:carrello",
+            "azione": "freno",
+            "durata": 5,
+            "posa": "lavora"
+          },
+          {
+            "fa": "aspetta",
+            "durata": 20,
+            "posa": "mangia"
+          }
+        ],
+        "sera": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "porta",
+            "oggetto": "item.minerale-rosso",
+            "dove": "piazza",
+            "dice": "Minerale rosso, e buono: la vena tiene."
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -46,7 +46,8 @@ export function checkFourthWall(dir = DIR): WallReport {
       const rel = relative(dir, p).replace(/\\/g, '/');
       const top = rel.split('/')[0];
       if (statSync(p).isDirectory()) {
-        if (['strumenti', 'models'].includes(top) || rel === 'prompts/agents') continue;
+        // sys.lavoro is the seed's system as it is (T298): its texts are those of the Sala sistemi, not of the world.
+        if (['strumenti', 'models'].includes(top) || rel === 'prompts/agents' || rel === 'modules/sys.lavoro') continue;
         walk(p);
         continue;
       }

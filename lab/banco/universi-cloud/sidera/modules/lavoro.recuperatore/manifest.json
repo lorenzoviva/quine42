@@ -1,0 +1,96 @@
+{
+  "id": "lavoro.recuperatore",
+  "name": "Il campo dei relitti",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi scava tra gli scafi antichi: lamiere staccate, incisioni copiate, pannelli rifatti con il metallo di allora.",
+  "mestieri": [
+    {
+      "id": "recuperatore",
+      "nomi": [
+        "astro-archeologa",
+        "astro-archeologo",
+        "scavatore di relitti",
+        "scavatrice di relitti",
+        "scavatore",
+        "scavatrice",
+        "recuperatore",
+        "recuperatrice",
+        "archeologa",
+        "archeologo"
+      ],
+      "posto": {
+        "casella": "a"
+      },
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "usa",
+            "dove": "entita:relitto",
+            "azione": "incisioni",
+            "durata": 15,
+            "posa": "legge",
+            "dice": "Spirali doppie, di nuovo. Chi le ha incise?"
+          },
+          {
+            "fa": "raccogli",
+            "casella": "a",
+            "oggetto": "item.lamiera-antica",
+            "lascia": "a",
+            "quante": 2,
+            "durata": 20,
+            "posa": "zappa"
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "produci",
+            "oggetto": "item.ciocco",
+            "con": "item.lamiera-antica",
+            "quante": 2,
+            "durata": 30,
+            "posa": "lavora"
+          },
+          {
+            "fa": "aspetta",
+            "durata": 20,
+            "posa": "mangia"
+          }
+        ],
+        "sera": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "porta",
+            "oggetto": "item.ciocco",
+            "dove": "piazza",
+            "dice": "Lamiera di allora: regge più della nostra."
+          },
+          {
+            "fa": "porta",
+            "oggetto": "item.lamiera-antica",
+            "dove": "piazza"
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}

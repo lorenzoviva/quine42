@@ -1,0 +1,74 @@
+{
+  "id": "lavoro.giornalaio",
+  "name": "Le notizie della piazza",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi vende i fogli e grida le notizie: gli avvisi della bacheca all'alba, la piazza fino a sera.",
+  "mestieri": [
+    {
+      "id": "giornalaio",
+      "nomi": [
+        "giornalaio",
+        "giornalaia",
+        "giornalaio della piazza della pesa",
+        "strillone",
+        "strillona",
+        "banditore",
+        "banditrice"
+      ],
+      "posto": {
+        "entita": "bacheca"
+      },
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "usa",
+            "dove": "entita:bacheca",
+            "azione": "leggi",
+            "durata": 10,
+            "posa": "legge",
+            "dice": "Vediamo cosa dice la Corporazione, oggi."
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "aspetta",
+            "durata": 120,
+            "posa": "commercia",
+            "dice": "Il foglio del mattino! Notizie dalla Pesa!"
+          },
+          {
+            "fa": "chiacchiera",
+            "durata": 60
+          }
+        ],
+        "sera": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,133 @@
+{
+  "id": "lavoro.fabbro",
+  "name": "Il cantiere della fusione",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi lavora attorno ai reattori: il nucleo controllato all'alba, pannelli di lega e rivetti per chi costruisce, la sera al deposito.",
+  "items": [
+    {
+      "id": "item.ciocco",
+      "name": "Pannello di lega",
+      "description": "Un pannello di lega leggera, saldato a impulsi: una parete, un tetto, una paratia.",
+      "category": "materiale",
+      "weight": 3,
+      "stack": 10,
+      "tags": [
+        "materiale",
+        "lega",
+        "costruzione"
+      ]
+    },
+    {
+      "id": "item.chiodi",
+      "name": "Rivetti magnetici",
+      "description": "Una scatola di rivetti magnetici: si chiudono da soli quando li avvicini alla lega.",
+      "category": "materiale",
+      "weight": 0.2,
+      "stack": 30,
+      "tags": [
+        "materiale",
+        "metallo",
+        "costruzione"
+      ]
+    }
+  ],
+  "mestieri": [
+    {
+      "id": "fabbro",
+      "nomi": [
+        "ingegnere di fusione",
+        "ingegnera di fusione",
+        "ingegnere",
+        "ingegnera",
+        "tecnica di turno al reattore",
+        "tecnico di turno al reattore",
+        "riparatore di automi",
+        "riparatrice di automi",
+        "riparatore",
+        "riparatrice",
+        "saldatore",
+        "saldatrice",
+        "meccanico",
+        "meccanica"
+      ],
+      "posto": {
+        "entita": "cantiere"
+      },
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "usa",
+            "dove": "entita:reattore",
+            "azione": "controlla",
+            "durata": 10,
+            "posa": "lavora",
+            "dice": "Nucleo azzurro: si può lavorare."
+          },
+          {
+            "fa": "produci",
+            "oggetto": "item.ciocco",
+            "quante": 1,
+            "durata": 30,
+            "posa": "lavora"
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "produci",
+            "oggetto": "item.ciocco",
+            "quante": 2,
+            "durata": 30,
+            "posa": "lavora",
+            "dice": "Saldatura a impulsi: occhi bassi."
+          },
+          {
+            "fa": "produci",
+            "oggetto": "item.chiodi",
+            "quante": 2,
+            "durata": 20,
+            "posa": "lavora"
+          },
+          {
+            "fa": "aspetta",
+            "durata": 20,
+            "posa": "mangia"
+          }
+        ],
+        "sera": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "porta",
+            "oggetto": "item.ciocco",
+            "dove": "piazza",
+            "dice": "Pannelli e rivetti: chi deve rifare una paratia sa dove trovarli."
+          },
+          {
+            "fa": "porta",
+            "oggetto": "item.chiodi",
+            "dove": "piazza"
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}

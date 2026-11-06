@@ -1,0 +1,65 @@
+{
+  "id": "lavoro.guardia",
+  "name": "La guardia delle compagnie",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi sorveglia le condotte e i turni: il giro dei cancelli, delle piazze e delle rampe.",
+  "mestieri": [
+    {
+      "id": "guardia",
+      "nomi": [
+        "guardia",
+        "guardia della compagnia dell acqua",
+        "capoturno",
+        "capoturno della compagnia dell energia",
+        "sorvegliante",
+        "vigilante",
+        "agente",
+        "gendarme"
+      ],
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "pattuglia",
+            "percorso": [
+              "lavoro",
+              "piazza"
+            ]
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "pattuglia",
+            "percorso": [
+              "piazza",
+              "lavoro",
+              "casella:p"
+            ]
+          }
+        ],
+        "sera": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}
