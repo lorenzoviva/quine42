@@ -38,8 +38,8 @@ Aggiornato il 06/11/2026, epoca 316 (claude). Crediti: vedi `stato`.
 ## Pronti e priorità
 
 0. **Decisioni autore 04/11:** D32 SemVer `X.Y.Z`. Step 32: T260, T262 → T245a → T263/T245b → T245c-f. T265 prima della beta.
-1. **In corso:** T322 (gemini), T293; T328 integrare T308b (p1). **Pronti:** T320 (controllo due piani, p3) → T321 (prompt Scultore Gemini, p4); T315, T281, T288, T293.
-   **Jev (autore 06/11 sera, approvati, solo `lab/`):** T322 conti (gemini, p2), T323 italiano (gemini, p2), T325 casi d'uso e spesa del contesto (p2, max), T324 immagini (p3). D45 resta aperta, T325 la informa.
+1. **In corso:** T293; T322 integrato (conti Jev riconciliati); T328 integrare T308b (p1). **Pronti:** T320 (controllo due piani, p3) → T321 (prompt Scultore Gemini, p4); T315, T281, T288, T293.
+   **Jev (autore 06/11 sera, approvati, solo `lab/`):** T322 integrato, T323 italiano (gemini, p2), T325 casi d'uso e spesa del contesto (p2, max), T324 immagini (p3). D45 resta aperta, T325 la informa.
 2. **Crediti (17:12 UTC):** Claude 5h 97 % libero (reset 22:00 UTC), settimana 66 % (reset 12/11); Gemini 5h 100 %, settimana 95 %; agy 100 %; Argon fermo fino all'11/11.
 
 ## Attese dall'autore
