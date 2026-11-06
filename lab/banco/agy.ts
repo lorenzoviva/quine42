@@ -37,6 +37,8 @@ export function leggiAgy(stdout: string): { testo?: string; errore?: string; tok
   const conversazione = typeof fine?.conversation_id === 'string' ? fine.conversation_id : undefined;
   if (!fine) return { token, errore: 'nessun risultato da agy' };
   if (fine.status !== 'SUCCESS') return { token, errore: String(fine.error ?? fine.status) };
+  // Over its output ceiling (thinking included, ~126 000 tokens) agy says SUCCESS with nothing in it.
+  if (!String(fine.response ?? '').trim()) return { token, errore: `risposta vuota dopo ${token.output} token di output: il tetto di output di Gemini` };
   return { token, testo: String(fine.response ?? ''), ...(conversazione ? { conversazione } : {}) };
 }
 

@@ -28,4 +28,5 @@ Il banco (T154-T182) ha portato le strutture da scatole di sole `<box>`, statich
 - `KERNEL_VERSION` `0.2.2`: gli universi della `0.2` restano buoni; un'Enorme scolpita prima resta com'è.
 - Il prompt delle strutture è circa il doppio di quello di prima (17.5 mila caratteri contro 8.5 mila, senza gli esempi della libreria che prima lo accompagnavano): lo paga ogni struttura grande, una volta per concetto (le altre taglie lo condividono).
 - Il controllo di un programma procedurale blocca per qualche secondo chi lo fa girare (nel browser, in singola, il thread della pagina), come già una sola esecuzione fino a 8 s.
+- Su Gemini 3.8 Flash il prompt regge meno che su Claude: 1 su 7 alla prima, 2 su 7 entro due richieste, contro 7 su 12 e 10 su 12 (`lab/banco/gemini/giudizio.md`); il modello delle strutture resta quello di prima finché l'autore non decide (`docs/pipeline/domande/T156.md`).
 - Sicurezza: nessuna superficie nuova (prompt, controlli e voci della libreria; il banco su `agy` è in `lab/` e usa il prompt fidato del banco, mai la coda, ADR-0106).

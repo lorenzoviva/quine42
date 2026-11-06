@@ -1,0 +1,1 @@
+risposta vuota: 126 mila token di output, il tetto di Gemini (ragionamento compreso); agy ha risposto SUCCESS senza testo

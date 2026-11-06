@@ -1,0 +1,20 @@
+{
+  "bersaglio": "tempio",
+  "errore": "Cannot read properties of undefined (reading 'vpt')",
+  "token": {
+    "input": 38374,
+    "cacheScritta": 0,
+    "cacheLetta": 0,
+    "output": 126348,
+    "inputTotale": 38374,
+    "pensiero": 63115
+  },
+  "modello": "gemini-3.8-flash-high",
+  "dollari": 0.5025855,
+  "ms": 454678,
+  "caratteriXml": 0,
+  "passa": false,
+  "difetti": [
+    "Cannot read properties of undefined (reading 'vpt')"
+  ]
+}

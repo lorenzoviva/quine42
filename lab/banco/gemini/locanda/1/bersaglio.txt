@@ -1,0 +1,6 @@
+Edificio: Locanda con la cantina
+Stile: medievale: graticcio, pietra, coppi
+Com'è: Sala comune con il camino e il bancone, cucina sul retro, una scala che scende in cantina tra le botti e una che sale alle stanze degli ospiti; insegna sopra la porta, comignolo acceso, un balcone di legno.
+Scatola: 100 × 100 × 100 voxel; una casella è 20 voxel.
+Corpo: gradino 4 voxel, passaggio largo almeno 11, persona alta 30; salto: sale al più 21, va da 20 a 52 voxel di distanza.
+C'è una cantina: il suolo, la lettera dell'attributo suolo, sta 20 voxel sopra il fondo in questa scatola e a un'altra quota in un'altra taglia; ci si scende con una scala e fuori dalla cantina sotto il suolo non si scrive nulla.

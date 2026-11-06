@@ -1,0 +1,6 @@
+Edificio: Officina a vapore
+Stile: steampunk: mattoni, rame, ottone, ghisa, vapore
+Com'è: Capannone di mattoni con grandi tubi di rame lungo i muri, una caldaia e due ciminiere, ingranaggi di ottone in facciata, finestre ad arco con grate; dentro la sala macchine, un deposito, un ballatoio di ferro al piano sopra con l’ufficio del capofficina.
+Scatola: 100 × 100 × 80 voxel; una casella è 20 voxel.
+Corpo: gradino 4 voxel, passaggio largo almeno 11, persona alta 30; salto: sale al più 21, va da 20 a 52 voxel di distanza.
+Il suolo è in fondo alla scatola.
