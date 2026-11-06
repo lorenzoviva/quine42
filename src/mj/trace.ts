@@ -13,10 +13,10 @@ import { describe, run, type Grid3, type GridLimits, type Node3, type PaletteEnt
 import type { MjxModel } from './model';
 import { FORM_LIMITS } from './run';
 
-export type TraceForm = 'nodi' | 'sezioni' | 'differenze' | 'scatole';
-export const TRACE_FORMS: readonly TraceForm[] = ['nodi', 'sezioni', 'differenze', 'scatole'];
+export type TraceForm = 'nodes' | 'sections' | 'diffs' | 'boxes';
+export const TRACE_FORMS: readonly TraceForm[] = ['nodes', 'sections', 'diffs', 'boxes'];
 /** The form the bench puts in a second request: the numbers are in lab/banco/traccia.md. */
-export const DEFAULT_FORM: TraceForm = 'differenze';
+export const DEFAULT_FORM: TraceForm = 'diffs';
 /** The default ceiling, in estimated tokens: about what the program itself costs in a second request. */
 export const DEFAULT_CEILING = 4000;
 /** Longer than the game's time: who reads a trace wants to know also what a program too slow was doing. */
@@ -551,8 +551,8 @@ export function renderTrace(t: ProgramTrace, model: Pick<MjxModel, 'program'>, o
   const room = tetto - size(top) - size(never) - 8;
   const finish = (body: string[]) => cut([...top, ...body, ...never], tetto).join('\n');
   if (room <= 0) return finish([]);
-  if (forma === 'nodi') return finish(fitGroups(t, room).flatMap((g) => groupLines(t, g)));
-  if (forma === 'differenze') {
+  if (forma === 'nodes') return finish(fitGroups(t, room).flatMap((g) => groupLines(t, g)));
+  if (forma === 'diffs') {
     // Fewer groups and fewer boxes per letter until it fits: every try is a run, four are enough before cutting.
     let body: string[] = [];
     for (const [share, most] of [[0.5, 4], [0.35, 3], [0.2, 2], [0.1, 1]] as const) {
@@ -566,7 +566,7 @@ export function renderTrace(t: ProgramTrace, model: Pick<MjxModel, 'program'>, o
   const nodes = fitGroups(t, room * 0.35).flatMap((g) => groupLines(t, g));
   const left = room - size(nodes);
   if (!frame) return finish([...nodes, `Il fotogramma al passo ${step} non si è potuto rifare.`]);
-  if (forma === 'sezioni') return finish([...nodes, ...sectionsText(frame, left)]);
+  if (forma === 'sections') return finish([...nodes, ...sectionsText(frame, left)]);
   const head = `Fotogramma al passo ${frame.step}, ogni lettera in scatole che non si sovrappongono:`;
   let most = 64;
   let lines = boxesText(frame, most);

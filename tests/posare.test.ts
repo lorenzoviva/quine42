@@ -114,7 +114,7 @@ describe('the spot, on the true shapes of the seed', () => {
   it('a sign, a fire, a barrel with a bump on its lid: no shelf holds the thing', async () => {
     const pot = await formOf('object');
     for (const [model, seed] of [['cartello', 1], ['falo', 1], ['barile', 2]] as Array<[string, number]>) {
-      expect(findSpot(supportOf(await formOf(model, seed)), shapeOf(pot), OPEN), `${model} ${seed}`).toEqual({ fail: 'nessun-piano' });
+      expect(findSpot(supportOf(await formOf(model, seed)), shapeOf(pot), OPEN), `${model} ${seed}`).toEqual({ fail: 'no-shelf' });
     }
   });
 
@@ -127,7 +127,7 @@ describe('the spot, on the true shapes of the seed', () => {
         const { spots, last } = fill(f, item);
         // The pot goes on every one; the scissors, wide at the handles, not on a round lid.
         if (item === pot) expect(spots.length, `${item.model} su ${model} ${seed}`).toBeGreaterThanOrEqual(1);
-        expect(last, `${item.model} su ${model} ${seed}`).toBe(spots.length ? 'pieno' : 'nessun-piano');
+        expect(last, `${item.model} su ${model} ${seed}`).toBe(spots.length ? 'full' : 'no-shelf');
         const seen = new Set<string>();
         for (const s of spots) {
           expect(liesFlat(f, item, s)).toBe(true);
@@ -181,23 +181,23 @@ describe('the spot, by hand', () => {
 
   it('why not: too high, too far, full, someone there', () => {
     const s = slab(20, 20, 10);
-    expect(findSpot(s, stick(), { ...OPEN, top: 9 })).toEqual({ fail: 'alto' });
-    expect(findSpot(s, stick(), { ...OPEN, bottom: 11 })).toEqual({ fail: 'alto' });
-    expect(findSpot(s, stick(), { ...OPEN, from: { x: 0, y: 30 }, reach: 2 })).toEqual({ fail: 'lontano' });
+    expect(findSpot(s, stick(), { ...OPEN, top: 9 })).toEqual({ fail: 'high' });
+    expect(findSpot(s, stick(), { ...OPEN, bottom: 11 })).toEqual({ fail: 'high' });
+    expect(findSpot(s, stick(), { ...OPEN, from: { x: 0, y: 30 }, reach: 2 })).toEqual({ fail: 'far' });
     const all = new Set(Array.from({ length: 400 }, (_, i) => i));
-    expect(findSpot(s, stick(), { ...OPEN, things: new Map([[10, all]]) })).toEqual({ fail: 'pieno' });
-    expect(findSpot(s, stick(), { ...OPEN, bodies: new Map([[10, all]]) })).toEqual({ fail: 'occupato' });
+    expect(findSpot(s, stick(), { ...OPEN, things: new Map([[10, all]]) })).toEqual({ fail: 'full' });
+    expect(findSpot(s, stick(), { ...OPEN, bodies: new Map([[10, all]]) })).toEqual({ fail: 'taken' });
     // Someone stands on another shelf, or the thing is not on this one: it changes nothing here.
     expect('spot' in findSpot(s, stick(), { ...OPEN, bodies: new Map([[4, all]]) })).toBe(true);
     // Under a board lower than the thing is tall, nothing goes; under a higher one it does, and so on the board.
     expect(findSpot(slab(20, 20, 10, 13), { ...stick(), height: 4 }, OPEN)).toEqual({ spot: expect.objectContaining({ h: 14 }) });
     const under = findSpot(slab(20, 20, 10, 19), { ...stick(), height: 4 }, { ...OPEN, top: 12 });
     expect(under).toEqual({ spot: expect.objectContaining({ h: 10 }) });
-    expect(findSpot(slab(20, 20, 10, 13), { ...stick(), height: 4 }, { ...OPEN, top: 12 })).toEqual({ fail: 'alto' });
+    expect(findSpot(slab(20, 20, 10, 13), { ...stick(), height: 4 }, { ...OPEN, top: 12 })).toEqual({ fail: 'high' });
   });
 
   it('the words of the world say why, with no word of the game', () => {
-    for (const why of ['nessun-piano', 'alto', 'lontano', 'pieno', 'occupato'] as const) {
+    for (const why of ['no-shelf', 'high', 'far', 'full', 'taken'] as const) {
       const said = placeRefusal(why, 'Credenza', 'Coltello');
       expect(said.length).toBeGreaterThan(10);
       expect(said).not.toMatch(/voxel|kernel|codice|simulazion|tile|casell/i);
@@ -251,7 +251,7 @@ describe('putting down in the world', () => {
 
   it('what is held goes onto the furniture in front, at the height of its top, and is taken back as from the ground', async () => {
     fresh();
-    const bench = furniture('obj.banco', 1.1);
+    const bench = furniture('obj.counter', 1.1);
     await settleForms(k, [bench]);
     holding(k, 'item.coltello');
     expect(k.actionsFor(bench)).toContainEqual({ id: 'posa', label: 'Posa Coltello qui sopra', enabled: true });
@@ -302,7 +302,7 @@ describe('putting down in the world', () => {
     expect(await k.placeOn(sign)).toBe(false);
     expect(said.at(-1)).toBe('Cartello non ha un piano dove stia Coltello.');
     k.ecs.destroy(sign);
-    const chest = furniture('obj.cassa', 1.1);
+    const chest = furniture('obj.chest', 1.1);
     await settleForms(k, [chest]);
     k.inventory().equipped = null;
     expect(await k.placeOn(chest)).toBe(false);
@@ -334,7 +334,7 @@ describe('putting down in the world', () => {
 
   it('what lies on furniture blocks nothing (rule 10), and is not lost when the furniture goes', async () => {
     fresh();
-    const chest = furniture('obj.cassa', 1.1);
+    const chest = furniture('obj.chest', 1.1);
     await settleForms(k, [chest]);
     const cp = k.ecs.get(chest, 'pos');
     const probes: Array<[number, number]> = [];
@@ -385,7 +385,7 @@ describe('saved, and opened again', () => {
     // A chest the place itself put there, in the open: it comes back with the place.
     const chest = k.ecs.query('module', 'origin').find((id) => {
       const c = k.ecs.get(id, 'pos');
-      return k.ecs.get(id, 'module').id === 'obj.cassa' && !k.lotAt(c.x, c.y) && Math.hypot(c.x, c.y) < 40;
+      return k.ecs.get(id, 'module').id === 'obj.chest' && !k.lotAt(c.x, c.y) && Math.hypot(c.x, c.y) < 40;
     })!;
     expect(chest).toBeDefined();
     const origin = k.ecs.get(chest, 'origin').key;
@@ -424,7 +424,7 @@ describe('saved, and opened again', () => {
     for (const id of k.ecs.query('mind')) k.ecs.destroy(id);
     const chest = k.ecs.query('module', 'origin').find((id) => {
       const c = k.ecs.get(id, 'pos');
-      return k.ecs.get(id, 'module').id === 'obj.cassa' && !k.lotAt(c.x, c.y) && Math.hypot(c.x, c.y) < 40;
+      return k.ecs.get(id, 'module').id === 'obj.chest' && !k.lotAt(c.x, c.y) && Math.hypot(c.x, c.y) < 40;
     })!;
     expect(chest).toBeDefined();
     const origin = k.ecs.get(chest, 'origin').key;
@@ -487,7 +487,7 @@ describe('saved, and opened again', () => {
 
 async function bootMany(): Promise<Kernel> {
   const cfg = JSON.parse(bundledFiles['universe.json']);
-  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2) };
+  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2) };
   return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 }
 
@@ -549,7 +549,7 @@ describe('two wanderers', () => {
     const at = freeRun(k, 'anna', 6);
     k.as('anna', () => carry(k, at));
     k.as('bruno', () => carry(k, { x: at.x + 2.4, y: at.y }));
-    const chest = k.spawnModuleEntity(k.modules.get('obj.cassa')!, at.x + 1.1, at.y);
+    const chest = k.spawnModuleEntity(k.modules.get('obj.chest')!, at.x + 1.1, at.y);
     k.as('anna', () => (k.wandererComp().facing = 'right'));
     k.as('anna', () => holding(k, 'item.coltello'));
     await settleForms(k, [chest]);
@@ -604,7 +604,7 @@ describe('two wanderers', () => {
     k.as('cleo', () => carry(k, run0));
     server.tick(DT);
     const at = k.wandererAt('cleo')!;
-    const chest = k.spawnModuleEntity(k.modules.get('obj.cassa')!, at.x + 1.1, at.y);
+    const chest = k.spawnModuleEntity(k.modules.get('obj.chest')!, at.x + 1.1, at.y);
     const loose = k.spawnItem('item.mela-rossa', at.x - 1, at.y);
     await settleForms(k, [chest]);
     const shapes: unknown[] = [chest, loose, at.entity, 'x', NaN, -1, 1e12, {}, null, [chest], { toString: () => String(chest) }];

@@ -13,7 +13,7 @@
 
 import { at, Mj3Error, type Grid3 } from './engine';
 import type { XmlElement } from './xml';
-import { italianName } from '../kernel/internalNames';
+import { internalSoundPurpose, italianName } from '../kernel/internalNames';
 
 /** The class of a sound program in `models/index.json`. Not one of `CLASSES`: it has no box, nothing in the world wears it. */
 export const SOUND_CLASS = 'suono';
@@ -180,7 +180,7 @@ export function scoreOf(grid: Grid3, settings: SoundSettings): Score {
 
 /** What a program is for in the game (ADR-0126), in `models/index.json → suono`. Without it the program is for the SoundLab only. */
 export interface SoundPurpose {
-  uso: 'musica' | 'effetto';
+  uso: 'music' | 'effect';
   /** Music: the environments it belongs to (whose id contains one of these); none: any. */
   ambienti?: string[];
   /** Music: the moments of the day it plays in; none: any. */
@@ -202,8 +202,9 @@ const strings = (v: unknown): string[] | undefined => (Array.isArray(v) ? v.filt
 
 /** The index is a file of the universe: what does not read as a purpose is no purpose. */
 function soundPurpose(raw: unknown): SoundPurpose | undefined {
-  const r = raw as Record<string, unknown> | null | undefined;
-  if (!r || typeof r !== 'object' || (r.uso !== 'musica' && r.uso !== 'effetto')) return undefined;
+  // A purpose of the contract 0.2 (`musica`, `mattina`, `runa`) reads internal (T307b): the migration ports the index, this a stray entry.
+  const r = internalSoundPurpose(raw) as Record<string, unknown> | null | undefined;
+  if (!r || typeof r !== 'object' || (r.uso !== 'music' && r.uso !== 'effect')) return undefined;
   const ambienti = strings(r.ambienti);
   const momenti = strings(r.momenti);
   const effetti = strings(r.effetti);

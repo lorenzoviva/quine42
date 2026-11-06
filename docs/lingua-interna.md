@@ -1,6 +1,6 @@
 # La lingua interna: l'inglese, e le rune in latino (T306, step 42)
 
-> Stato: **decisa** dall'autore (D34, 05/11 sera), ADR-0153; **T307a fatto** (contratto `0.2.0`, ADR-0155: la simulazione e le rune latine, la migrazione `0.1 → 0.2`). Questo documento è il piano: la tabella completa di ciò che cambia nome,
+> Stato: **decisa** dall'autore (D34, 05/11 sera), ADR-0153; **T307a fatto** (contratto `0.2.0`, ADR-0155: la simulazione e le rune latine, la migrazione `0.1 → 0.2`); **T307b fatto** (contratto `0.3.0`, ADR-0157: la società e il Concilio, la migrazione `0.2 → 0.3`). Questo documento è il piano: la tabella completa di ciò che cambia nome,
 > dominio per dominio, e i task che la applicano. La stessa tabella, come dato, è `src/kernel/internalNames.ts` (`INTERNAL_NAMES`);
 > `tests/internal-names.test.ts` controlla che non abbia doppioni né collisioni e che copra i valori del codice; le tabelle qui sotto
 > le riscrive `npx vite-node lab/scripts/lingua-interna.ts` (con `-- --misura` conta anche i file che ogni passo tocca).
@@ -105,6 +105,12 @@ T307 come era scritto (tutti i valori insieme) toccava ≈ 400 file, T308 ≈ 38
    (`italianValues`) e il validatore li ripara; i quattro universi del laboratorio restano `0.1` sul disco e si leggono portati.
 2. **T307b** — i valori della società e del Concilio, contratto `0.3.0`: rinomina anche `prompts/agents/<agente>.md`, i moduli
    `lavoro.*` → `job.*` e `sys.lavoro` → `sys.work`, i modelli `corona-gerboa-<agente>` e `suono-*` del seme.
+   **Fatto** (ADR-0157): `MIGRATIONS[1]` con i file che cambiano nome con ciò che nominano (moduli del seme e il loro magazzino, prompt,
+   programmi sonori del seme, gerboa), i dati campo per campo, il Lua del Concilio dove il kernel legge un valore (`luaFor0_3`),
+   `migratePlan` sulle cose dei piani; tre domini nuovi: `esiti-lavoro` (gli esiti di `sys.work`, da T314), `suoni-seme` (gli id dei
+   programmi sonori del seme), `viandante-solo` (`io → me`, spostato a T308a: è un file dei viandanti, un timbro di ogni carta e la
+   chiave dei saldi fuori dall'universo); in più `impresa → venture` fra i «dove» dei compiti e `qualunque → any` fra i mestieri dei ruoli.
+   Le stanze dello studio (`persone`, `luoghi`, `galleria`) e i tipi degli archi del grafo non sono nella tabella e restano.
 3. **T308a** — i campi e i percorsi dei file dell'universo, contratto `0.4.0`: `paths.ts` (`allowedPath`, `councilMayWrite`), `files.ts`
    (`playerFiles`, `publicFiles`, `UNIVERSE_FIELDS`), le letture di sito e server; la suite di sicurezza (`paths.ts`, `files.ts`); le cartelle
    del server fuori dagli universi (`.saldi` → `.balances`…) con la lettura del nome vecchio finché c'è; `quine:fila:` letta anche col nome vecchio.
@@ -127,14 +133,14 @@ Le stime di T307 (8 %) e T308 (6 %) si dividono a metà fra a e b; il backlog le
 - **Le espressioni regolari che leggono testo** (le 83 di `lingue.md` §5): le tocca T310, non i passi di codice.
 - **I contenuti scritti dal Concilio negli universi salvati** che solo il loro modulo legge (§2), e gli id di oggetti e modelli che il
   kernel non nomina.
-- **Gli `esito` di `sys.lavoro`** («finito», «manca») e altre stringhe interne del Lua del seme che nessun TypeScript legge: le trova e le
-  traduce T307b leggendo `sys.lavoro`, senza voce qui finché non tocca il kernel.
+- **Le stringhe del Lua del seme che nessun TypeScript legge** fuori dagli esiti di `sys.work` (che hanno il loro dominio, T307b): i nomi
+  delle variabili e delle funzioni locali, i messaggi al viandante; i commenti li porta T309.
 - **I nomi italiani del laboratorio** (`lab/`): le cartelle e i programmi di prova seguono i passi solo dove i test li leggono.
 - **La documentazione** e gli ADR, che sono storia.
 
 ## 6. Le tabelle
 
-Le voci: **847 tra valori, campi e percorsi** in 54 domini (il totale per passo è nell’ultima riga della prima tabella). Una voce con lo stesso nome a sinistra
+Le voci: **905 tra valori, campi e percorsi** in 57 domini (il totale per passo è nell’ultima riga della prima tabella). Una voce con lo stesso nome a sinistra
 e a destra resta com'è (è già inglese o latina: `lava`, `dungeon`, `terra`, `vita`, `studio`, `persona`); un campo che cambia senso tra due
 oggetti dello stesso file ha due domini (`posto`: la tasca nei casi del banco, il posto di lavoro nei mestieri, il posto dell'impresa, il
 posto di un pannello sul filo).
@@ -159,11 +165,11 @@ posto di un pannello sul filo).
 | [Elementi dei pannelli (`ui.elementi[].tipo`)](#pannelli) | valori | 4 | disco, prompt | T307a (0.2) |
 | [Passi e direzioni dei casi del banco](#passi-banco) | valori | 8 | disco, prompt | T307a (0.2) |
 | [Momenti del giorno](#momenti) | valori | 4 | disco, Lua, prompt | T307b (0.3) |
-| [«Dove» della routine](#dove) | valori | 4 | disco, prompt | T307b (0.3) |
+| [«Dove» della routine](#dove) | valori | 5 | disco, Lua, prompt | T307b (0.3) |
 | [Attività degli individui](#attivita) | valori | 14 | disco, filo, Lua, prompt | T307b (0.3) |
 | [Specie e genere](#specie) | valori | 4 | disco, prompt | T307b (0.3) |
 | [Tipi di legame (solo codice: la parola del legame è testo del mondo)](#legami) | valori | 25 | solo codice | T307b (0.3) |
-| [Mestieri del seme e i loro moduli](#mestieri) | valori | 12 | disco, Lua, prompt | T307b (0.3) |
+| [Mestieri del seme e i loro moduli](#mestieri) | valori | 13 | disco, Lua, prompt | T307b (0.3) |
 | [Comportamenti dei mestieri (`fa`)](#comportamenti) | valori | 14 | disco, Lua, prompt | T307b (0.3) |
 | [Id dei moduli del seme che il kernel nomina](#moduli-seme) | valori | 18 | disco, Lua, prompt | T307b (0.3) |
 | [Tipi e stati delle imprese](#imprese) | valori | 11 | disco, Lua, prompt | T307b (0.3) |
@@ -174,8 +180,11 @@ posto di un pannello sul filo).
 | [Classi dello Scultore (`ai.scultori`)](#classi-scultore) | valori | 6 | disco, filo | T307b (0.3) |
 | [Coefficienti di generazione](#coefficienti) | valori | 19 | disco, filo | T307b (0.3) |
 | [Tipi delle carte e dei nodi del grafo](#carte) | valori | 15 | disco, filo | T307b (0.3) |
-| [Modalità della partita, esiti delle mancanze](#partita) | valori | 7 | disco, filo | T307b (0.3) |
+| [Modalità della partita, esiti delle mancanze](#partita) | valori | 6 | disco, filo | T307b (0.3) |
 | [Valori che solo il TypeScript confronta](#solo-codice) | valori | 53 | solo codice | T307b (0.3) |
+| [Esiti dei compiti di `sys.work` e i loro motivi](#esiti-lavoro) | valori | 10 | Lua | T307b (0.3) |
+| [Id dei programmi sonori del seme](#suoni-seme) | valori | 46 | disco | T307b (0.3) |
+| [L’id del viandante della partita singola](#viandante-solo) | valori | 1 | disco, filo | T308a (0.4) |
 | [Campi di `universe.json`](#campi-universe) | campi | 17 | disco, filo | T308a (0.4) |
 | [Campi dei manifest (aspetto, terreni, pannelli, casi, mestieri)](#campi-manifest) | campi | 47 | disco, Lua, prompt | T308a (0.4) |
 | [Campi dei programmi di mestiere che cambiano senso](#campi-mestieri) | campi | 2 | disco, Lua | T308a (0.4) |
@@ -197,7 +206,7 @@ posto di un pannello sul filo).
 | [Componenti visibili a Lua](#componenti) | valori | 16 | disco, filo, Lua, prompt | T308b (0.5) |
 | [Campi dei componenti](#campi-componenti) | campi | 16 | filo, Lua, prompt | T308b (0.5) |
 | [Nomi dell’API Lua, eventi del bus, chiavi del magazzino](#api-lua) | valori | 6 | Lua, prompt | T308b (0.5) |
-| **totale** | | **847** | | T307a: 192 · T307b: 244 · T308a: 266 · T308b: 145 |
+| **totale** | | **905** | | T307a: 192 · T307b: 301 · T308a: 267 · T308b: 145 |
 
 <a id="classi"></a>
 ### Classi dei modelli (`classi`)
@@ -550,8 +559,9 @@ posto di un pannello sul filo).
 <a id="dove"></a>
 ### «Dove» della routine (`dove`)
 
-- **Dove si legge**: `src/kernel/society.ts (WHERES)`, `world/people.json → routine[].dove`
-- **Tocca**: disco, prompt · **lingua**: inglese · **task**: T307b, contratto 0.3
+- **Dove si legge**: `src/kernel/society.ts (WHERES)`, `world/people.json → routine[].dove`, `world/plots.json → tappe[].dove`, `manifest → mestieri[].giornata[].dove, percorso`, `componente mestiere (i posti)`
+- **Tocca**: disco, Lua, prompt · **lingua**: inglese · **task**: T307b, contratto 0.3
+- **Nota**: `impresa` è il posto di un compito di mestiere (il cantiere, T307b); i posti `casella:<codice>` ed `entita:<tag>` restano finché T308a non cambia i campi
 
 | italiano | interno |
 |---|---|
@@ -559,6 +569,7 @@ posto di un pannello sul filo).
 | `lavoro` | `work` |
 | `piazza` | `square` |
 | `in giro` | `about` |
+| `impresa` | `venture` |
 
 <a id="attivita"></a>
 ### Attività degli individui (`attivita`)
@@ -652,6 +663,7 @@ posto di un pannello sul filo).
 | `pescatore` | `fisher` |
 | `sacerdote` | `priest` |
 | `scrivano` | `scribe` |
+| `qualunque` | `any` |
 
 <a id="comportamenti"></a>
 ### Comportamenti dei mestieri (`fa`) (`comportamenti`)
@@ -871,10 +883,10 @@ posto di un pannello sul filo).
 
 - **Dove si legge**: `src/kernel/types.ts (GameSetup.modalita)`, `universe.json → partita.modalita`, `src/kernel/shortfalls.ts (ShortfallOutcome)`, `world/mancanze.json`
 - **Tocca**: disco, filo · **lingua**: inglese · **task**: T307b, contratto 0.3
+- **Nota**: l’id del viandante della partita singola (`io`) passa con T308a (dominio `viandante-solo`): è il nome di un file dei viandanti e la chiave dei saldi fuori dall’universo
 
 | italiano | interno |
 |---|---|
-| `io` | `me` |
 | `singola` | `single` |
 | `multigiocatore` | `multiplayer` |
 | `rifiuto` | `refusal` |
@@ -945,6 +957,93 @@ posto di un pannello sul filo).
 | `stonato` | `off_key` |
 | `fuori volume` | `off_volume` |
 | `giuntura` | `seam` |
+
+<a id="esiti-lavoro"></a>
+### Esiti dei compiti di `sys.work` e i loro motivi (`esiti-lavoro`)
+
+- **Dove si legge**: `universe/modules/sys.work/logic.lua (B.*, M.update)`, `componente lavoro.motivo`
+- **Tocca**: Lua · **lingua**: inglese · **task**: T307b, contratto 0.3
+- **Nota**: un esito è `done`, `ongoing` o `failed:<motivo>` (`failed:missing:item.grano`); lo legge solo il Lua del seme, e il motivo resta nel componente `lavoro` (T314)
+
+| italiano | interno |
+|---|---|
+| `finito` | `done` |
+| `continua` | `ongoing` |
+| `fallito` | `failed` |
+| `nessuna via` | `no_way` |
+| `non ci arriva` | `unreachable` |
+| `comportamento sconosciuto` | `unknown_behaviour` |
+| `nessun posto` | `no_place` |
+| `manca` | `missing` |
+| `il deposito è pieno` | `deposit_full` |
+| `nessuna cosa da usare` | `nothing_to_use` |
+
+<a id="suoni-seme"></a>
+### Id dei programmi sonori del seme (`suoni-seme`)
+
+- **Dove si legge**: `universe/models/suono-*.xml`, `models/index.json`, `src/kernel/agents/composer.ts (EXAMPLES)`, `tests/fixtures/mj-engine-hashes.json`
+- **Tocca**: disco · **lingua**: inglese · **task**: T307b, contratto 0.3
+- **Nota**: i programmi sonori che il Musicista ha scritto negli universi salvati restano; i suoi nuovi nascono `sound-<uso>-<nome>`. La classe `suono` dell’indice resta (T308a)
+
+| italiano | interno |
+|---|---|
+| `suono-architettura-frattale` | `sound-fractal-architecture` |
+| `suono-effetto-allarme-sirena` | `sound-effect-siren-alarm` |
+| `suono-effetto-arpeggio` | `sound-effect-arpeggio` |
+| `suono-effetto-cristallo-risonante` | `sound-effect-resonant-crystal` |
+| `suono-effetto-cura-benedizione` | `sound-effect-healing-blessing` |
+| `suono-effetto-dialogo-saluto` | `sound-effect-greeting` |
+| `suono-effetto-esplosione-crollo` | `sound-effect-explosion-collapse` |
+| `suono-effetto-forgia-martello` | `sound-effect-forge-hammer` |
+| `suono-effetto-fuoco-scoppiettante` | `sound-effect-crackling-fire` |
+| `suono-effetto-guasto` | `sound-effect-fault` |
+| `suono-effetto-incantesimo` | `sound-effect-spell` |
+| `suono-effetto-meccanismo-leva` | `sound-effect-lever-mechanism` |
+| `suono-effetto-moneta-scambio` | `sound-effect-coin-trade` |
+| `suono-effetto-morte` | `sound-effect-death` |
+| `suono-effetto-morte-v2` | `sound-effect-death-v2` |
+| `suono-effetto-oggetto` | `sound-effect-item` |
+| `suono-effetto-passo-acqua` | `sound-effect-water-step` |
+| `suono-effetto-passo-metallo` | `sound-effect-metal-step` |
+| `suono-effetto-porta-pesante` | `sound-effect-heavy-door` |
+| `suono-effetto-ritorno` | `sound-effect-rollback` |
+| `suono-effetto-runa` | `sound-effect-rune` |
+| `suono-effetto-salita-livello` | `sound-effect-level-up` |
+| `suono-effetto-salto` | `sound-effect-jump` |
+| `suono-effetto-scarica-elettrica` | `sound-effect-electric-discharge` |
+| `suono-effetto-scoperta-segreto` | `sound-effect-secret-found` |
+| `suono-effetto-soglia` | `sound-effect-threshold` |
+| `suono-effetto-teletrasporto` | `sound-effect-teleport` |
+| `suono-effetto-vapore-pressione` | `sound-effect-steam-pressure` |
+| `suono-effetto-veleno-danno` | `sound-effect-poison-damage` |
+| `suono-effetto-vento-alta-quota` | `sound-effect-high-wind` |
+| `suono-fantasy-citta-locanda` | `sound-fantasy-town-inn` |
+| `suono-fantasy-esplorazione-giorno` | `sound-fantasy-exploration-day` |
+| `suono-fantasy-esplorazione-notte` | `sound-fantasy-exploration-night` |
+| `suono-fantasy-luogo-sacro` | `sound-fantasy-sacred-place` |
+| `suono-fantasy-sotterraneo-abisso` | `sound-fantasy-abyss-dungeon` |
+| `suono-fantasy-tensione-pericolo` | `sound-fantasy-danger-tension` |
+| `suono-fuga-cellulare` | `sound-cellular-fugue` |
+| `suono-musica-notte` | `sound-music-night` |
+| `suono-musica-oltre` | `sound-music-beyond` |
+| `suono-musica-pastorale` | `sound-music-pastoral` |
+| `suono-musica-pietra` | `sound-music-stone` |
+| `suono-musica-profondo` | `sound-music-deep` |
+| `suono-musica-selva` | `sound-music-woods` |
+| `suono-musica-tramonto` | `sound-music-sunset` |
+| `suono-scontro-finale` | `sound-final-battle` |
+| `suono-sentiero-melodico` | `sound-melodic-path` |
+
+<a id="viandante-solo"></a>
+### L’id del viandante della partita singola (`viandante-solo`)
+
+- **Dove si legge**: `src/kernel/wanderers.ts (SOLO)`, `world/giocatori/io.json`, `universe.json → partita.master`, `carta → autore, pagante, titolare`, `universes/.saldi/<nome>.json`
+- **Tocca**: disco, filo · **lingua**: inglese · **task**: T308a, contratto 0.4
+- **Nota**: spostato da T307b (che aveva `io` fra le modalità): cambia con i percorsi dei viandanti (`world/giocatori/` → `world/players/`) e con le cartelle dei saldi, che T308a porta insieme leggendo anche il nome vecchio
+
+| italiano | interno |
+|---|---|
+| `io` | `me` |
 
 <a id="campi-universe"></a>
 ### Campi di `universe.json` (`campi-universe`)

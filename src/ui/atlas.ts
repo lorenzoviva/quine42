@@ -11,7 +11,7 @@ import { $, el } from './dom';
 type View = Awaited<ReturnType<Kernel['atlasView']>>;
 
 /** The players' colour, as on the situation table. */
-const PLAYER = OPERATION_COLOR.giocatore;
+const PLAYER = OPERATION_COLOR.player;
 
 const hue = (s: string) => {
   let h = 0;

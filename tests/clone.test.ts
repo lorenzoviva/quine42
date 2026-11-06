@@ -20,14 +20,14 @@ function many(): FileMap {
   const carpet = JSON.parse(bundledFiles[CARPET]);
   return {
     ...bundledFiles,
-    'universe.json': JSON.stringify({ ...cfg, name: 'prima', partita: { modalita: 'multigiocatore', morte: 2, pvp: true, altroTraGiocatori: false, master: 'io' } }, null, 2) + '\n',
-    [CARPET]: JSON.stringify({ ...carpet, carta: { autore: 'ingegnere', pagante: 'io', titolare: 'io' } }, null, 2) + '\n',
+    'universe.json': JSON.stringify({ ...cfg, name: 'prima', partita: { modalita: 'multiplayer', morte: 2, pvp: true, altroTraGiocatori: false, master: 'io' } }, null, 2) + '\n',
+    [CARPET]: JSON.stringify({ ...carpet, carta: { autore: 'engineer', pagante: 'io', titolare: 'io' } }, null, 2) + '\n',
     [CARDS_FILE]:
       JSON.stringify({
-        utilizzi: { 'luogo:0_0': { luoghi: 1, trame: 0, prompt: 3 } },
+        utilizzi: { 'chunk:0_0': { luoghi: 1, trame: 0, prompt: 3 } },
         luoghi: {
-          '0_0': { autore: 'cartografo', pagante: 'comune', titolare: 'io', nome: 'La piazza' },
-          '1_0': { autore: 'cartografo', pagante: 'anna', titolare: 'anna', nome: 'Il guado' },
+          '0_0': { autore: 'cartographer', pagante: 'comune', titolare: 'io', nome: 'La piazza' },
+          '1_0': { autore: 'cartographer', pagante: 'anna', titolare: 'anna', nome: 'Il guado' },
         },
       }, null, 1) + '\n',
   };
@@ -46,7 +46,7 @@ describe('cloning a universe with another master (T42d)', () => {
     const cfg = JSON.parse(clone['universe.json']);
     expect(cfg.name).toBe('seconda');
     expect(cfg.seed).toBe(JSON.parse(files['universe.json']).seed);
-    expect(cfg.partita).toEqual({ modalita: 'multigiocatore', morte: 2, pvp: true, altroTraGiocatori: false, master: 'anna' });
+    expect(cfg.partita).toEqual({ modalita: 'multiplayer', morte: 2, pvp: true, altroTraGiocatori: false, master: 'anna' });
     expect(owners(clone)).toEqual(owners(files));
     expect(owners(clone).length).toBeGreaterThanOrEqual(3);
   });
@@ -55,10 +55,10 @@ describe('cloning a universe with another master (T42d)', () => {
     const files = many();
     const { changes } = cloneChanges(files, { nome: 'seconda', master: 'bruno', titolari: 'master' });
     const cards = new Map(allCards({ ...files, ...changes }).map((c) => [c.id, c]));
-    expect(cards.get(moduleCardId({ id: 'core.carpet', kind: 'system' }))).toMatchObject({ autore: 'ingegnere', pagante: 'io', titolare: 'bruno' });
-    expect(cards.get('luogo:0_0')).toMatchObject({ autore: 'cartografo', pagante: 'comune', titolare: 'bruno' });
-    expect(cards.get('luogo:1_0')).toMatchObject({ pagante: 'anna', titolare: 'anna' });
-    expect(cards.get('luogo:0_0')!.utilizzi.prompt).toBe(3);
+    expect(cards.get(moduleCardId({ id: 'core.carpet', kind: 'system' }))).toMatchObject({ autore: 'engineer', pagante: 'io', titolare: 'bruno' });
+    expect(cards.get('chunk:0_0')).toMatchObject({ autore: 'cartographer', pagante: 'comune', titolare: 'bruno' });
+    expect(cards.get('chunk:1_0')).toMatchObject({ pagante: 'anna', titolare: 'anna' });
+    expect(cards.get('chunk:0_0')!.utilizzi.prompt).toBe(3);
   });
 
   it('refuses what is not a change of master', () => {

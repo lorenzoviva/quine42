@@ -142,11 +142,11 @@ describe('the buildings of the seed', () => {
     const old = Object.fromEntries(Object.entries(index).filter(([id]) => !id.startsWith('corona-')));
     const oldSeed: Record<string, string> = { ...bundledFiles, 'models/index.json': JSON.stringify(old) };
     for (const p of Object.keys(oldSeed)) if (/^models\/corona-/.test(p)) delete oldSeed[p];
-    const mine = { ...old, mulino: { classe: 'building', nome: 'Mulino', autore: 'scultore' } };
+    const mine = { ...old, mulino: { classe: 'building', nome: 'Mulino', autore: 'sculptor' } };
     const files = { ...oldSeed, 'models/index.json': JSON.stringify(mine), 'seed.json': JSON.stringify(seedHashes(oldSeed)) };
     const up = upgradeFromSeed(files, bundledFiles).files;
     const now = JSON.parse(up['models/index.json']);
-    expect(now.mulino.autore).toBe('scultore');
+    expect(now.mulino.autore).toBe('sculptor');
     expect(now['corona-magia']).toMatchObject({ vpt: 8 });
     expect(up['models/corona-magia.xml']).toBe(bundledFiles['models/corona-magia.xml']);
   });

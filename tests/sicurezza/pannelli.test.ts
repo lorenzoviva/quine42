@@ -18,7 +18,7 @@ const PANEL = {
 
 async function world() {
   const cfg = JSON.parse(bundledFiles['universe.json']);
-  const files = { ...bundledFiles, ...PANEL, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3, master: 'io' } }) };
+  const files = { ...bundledFiles, ...PANEL, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3, master: 'io' } }) };
   const k = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
   const server = new SessionServer(k);
   const { server: s, client } = fakeLink();

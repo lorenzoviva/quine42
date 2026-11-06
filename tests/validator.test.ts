@@ -21,7 +21,7 @@ const palette: Record<string, TerrainDef> = {
 };
 const plan = (p: Partial<ChunkPlan>): ChunkPlan => ({ place: { name: 'Radura', description: 'Una radura.' }, layout: 'bosco', objects: [], ground: [], fresh: [], runes: [], ...p });
 const layouts = new Set(['bosco', 'borgo']);
-const placeable = new Set(['npc.a', 'obj.cassa']);
+const placeable = new Set(['npc.a', 'obj.chest']);
 const S = 18;
 const drafts = [Array.from({ length: S }, () => 'g'.repeat(S)), Array.from({ length: S }, (_, r) => (r % 3 ? 'g' : 't').repeat(S))];
 
@@ -29,7 +29,7 @@ describe('validator', async () => {
   const v = new Validator(await Sandbox.create(fakeHost().host));
 
   it('accepts a good plan and normalizes runes written without spaces', () => {
-    const r = v.validatePlan(plan({ runes: ['carpet.active', 'speed=speed'], objects: [{ module: 'npc.a', where: 'fuori' }, { module: 'obj.cassa', where: 'dentro' }] }), layouts, placeable);
+    const r = v.validatePlan(plan({ runes: ['carpet.active', 'speed=speed'], objects: [{ module: 'npc.a', where: 'fuori' }, { module: 'obj.chest', where: 'dentro' }] }), layouts, placeable);
     expect(r.errors).toEqual([]);
     expect(r.dropped).toEqual([]);
     expect(r.plan.runes).toEqual(['carpet . active', 'speed = speed']);

@@ -136,7 +136,7 @@ function rapporto(id: string, voce: Voce, e: Esito, model: ReturnType<typeof com
     '',
   ];
   for (const seme of SEMI.slice(0, 3)) {
-    righe.push(`### Seme ${seme}`, '', '```text', traceText(model, seme, { forma: 'nodi', tetto: 900, deadline: 8_000, limits: FORM_LIMITS }).trim(), '```', '');
+    righe.push(`### Seme ${seme}`, '', '```text', traceText(model, seme, { forma: 'nodes', tetto: 900, deadline: 8_000, limits: FORM_LIMITS }).trim(), '```', '');
   }
   return righe.join('\n');
 }

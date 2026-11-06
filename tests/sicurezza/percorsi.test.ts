@@ -104,7 +104,7 @@ describe('V-003 i percorsi ammessi', () => {
       'models/corona-nucleo.xml',
       'modules/sys.fire/logic.lua',
       'modules/magic.runes/manifest.json',
-      'prompts/agents/scultore.md',
+      'prompts/agents/sculptor.md',
     ];
     expect(paths.filter((p) => !allowedPath(p))).toEqual([]);
   });

@@ -201,10 +201,10 @@ describe('Gemini in multigiocatore', () => {
     const { calls, impl } = upstream();
     const g = gate(impl);
     const models = new GeminiAiModels({ fetchImpl: g.direct()!, textModel: MODEL, limits: { text: 5 } });
-    expect(await models.text({ agent: 'narratore', task: 't', system: 's', prompt: 'p' })).toBe('ok');
+    expect(await models.text({ agent: 'narrator', task: 't', system: 's', prompt: 'p' })).toBe('ok');
     expect(calls[0].url).toMatch(/^https:\/\/generativelanguage\.googleapis\.com\/.*gemini-3\.1-flash-lite:generateContent$/);
     expect(g.spentToday()).toBeGreaterThan(0);
-    await expect(models.text({ agent: 'narratore', task: 't', system: 's', prompt: 'p', model: 'gemini-9-costosissimo' })).rejects.toThrow(/403/);
+    await expect(models.text({ agent: 'narrator', task: 't', system: 's', prompt: 'p', model: 'gemini-9-costosissimo' })).rejects.toThrow(/403/);
     expect(calls).toHaveLength(1);
     // The world of many knows no route and no key: only the `fetch` it is handed.
     const host = readFileSync('src/session/host.ts', 'utf8');
@@ -216,7 +216,7 @@ describe('Gemini in multigiocatore', () => {
     const { calls, impl } = upstream();
     const g = gate(impl, { dailyCap: 0 });
     const models = new GeminiAiModels({ fetchImpl: g.direct()!, textModel: MODEL, limits: { text: 5 } });
-    await expect(models.text({ agent: 'narratore', task: 't', system: 's', prompt: 'p' })).rejects.toBeInstanceOf(BudgetError);
+    await expect(models.text({ agent: 'narrator', task: 't', system: 's', prompt: 'p' })).rejects.toBeInstanceOf(BudgetError);
     expect(calls).toHaveLength(0);
   });
 
@@ -227,7 +227,7 @@ describe('Gemini in multigiocatore', () => {
       throw new Error('connessione caduta');
     }) as unknown as typeof fetch);
     const models = new GeminiAiModels({ fetchImpl: g.direct()!, textModel: MODEL, limits: { text: 5 } });
-    await expect(models.text({ agent: 'narratore', task: 't', system: 's', prompt: 'p' })).rejects.toThrow(/non ripetuta/);
+    await expect(models.text({ agent: 'narrator', task: 't', system: 's', prompt: 'p' })).rejects.toThrow(/non ripetuta/);
     expect(n).toBe(1);
   });
 });

@@ -80,10 +80,11 @@ describe('the migration 0.1 → 0.2: a universe of 0.1, file by file', () => {
   const before = universe01();
   const { files, applied } = migrateUniverse(before);
 
-  it('is the one migration, and it says what it does', () => {
-    expect(MIGRATIONS.map((m) => `${m.from}→${m.to}`)).toEqual(['0.1→0.2']);
-    expect(applied).toHaveLength(1);
-    expect(json(files['universe.json'])).toMatchObject({ kernel: KERNEL_VERSION, kernels: { from: '0.2' } });
+  it('is the first migration of the chain (then 0.2 → 0.3, T307b), and it says what it does', () => {
+    expect(MIGRATIONS.map((m) => `${m.from}→${m.to}`)).toEqual(['0.1→0.2', '0.2→0.3']);
+    expect(applied).toHaveLength(2);
+    expect(applied[0]).toMatch(/^0.1→0.2: /);
+    expect(json(files['universe.json'])).toMatchObject({ kernel: KERNEL_VERSION, kernels: { from: '0.3' } });
     expect(checkKernelVersion(json(files['universe.json']).kernel, KERNEL_VERSION, json(files['universe.json']).kernels).ok).toBe(true);
   });
 
@@ -139,7 +140,7 @@ describe('the migration 0.1 → 0.2: a universe of 0.1, file by file', () => {
     expect(json(files['world/rules.json']).regole[0].effetti).toEqual(['forma', 'light', 'ricetta: pane ×1']);
     expect(json(files['world/atlas.json']).regioni.map((r: { id: string; ambiente: string }) => [r.id, r.ambiente])).toEqual([['borgo', 'village'], ['mia', 'mio_ambiente']]);
     expect(files['world/canone.md']).toBe('# Canone\n\n- terra ignis è una palla di fuoco; «ventus» spinge.\n- ᛁ Isa («gelo», ghiaccio): il gelo.\n');
-    expect(Object.keys(json(files['world/carte.json']).utilizzi)).toEqual(['modello:tree', 'tipo:npc-fabbro']);
+    expect(Object.keys(json(files['world/carte.json']).utilizzi)).toEqual(['model:tree', 'kind:npc-fabbro']);
   });
 
   it('ports the Lua of the Council where the kernel reads a value, and leaves the player’s', () => {
@@ -182,7 +183,7 @@ describe('seed.json after the migration', () => {
     };
     files[SEED_FILE] = JSON.stringify({ 'modules/core.effects/logic.lua': h(pristineEffects), 'modules/core.items/logic.lua': h('return {}\n'), 'models/albero.xml': h(old['models/albero.xml']), 'models/persona.xml': 'cancellato' }, null, 1) + '\n';
     const out = prepareUniverse(files, bundledFiles);
-    expect(out.applied).toHaveLength(1);
+    expect(out.applied).toHaveLength(2);
     expect(out.files['modules/core.effects/logic.lua']).toBe(bundledFiles['modules/core.effects/logic.lua']);
     expect(out.files['modules/core.items/logic.lua']).toBe('return {} -- mio\n');
     expect(out.files['models/tree.xml']).toBe(bundledFiles['models/tree.xml']);
@@ -280,7 +281,7 @@ describe('the seed of 0.2', () => {
     expect(bad).toEqual([]);
     const magic = JSON.parse(bundledFiles['modules/magic.runes/manifest.json']);
     expect(Object.keys(magic.runes)).toEqual(['lux', 'ignis', 'aqua', 'terra', 'vita', 'scutum', 'ventus']);
-    expect(json(bundledFiles['universe.json'])).toMatchObject({ kernel: KERNEL_VERSION, kernels: { from: '0.2' } });
+    expect(json(bundledFiles['universe.json'])).toMatchObject({ kernel: KERNEL_VERSION, kernels: { from: '0.3' } });
   });
 
   it('runs 400 ticks offline without faults', async () => {
@@ -336,7 +337,7 @@ describe('valmora, a universe really played of the contract 0.1', () => {
     const a = prepareUniverse(files, bundledFiles);
     const b = prepareUniverse(files, bundledFiles);
     expect(a.files).toEqual(b.files);
-    expect(a.applied).toHaveLength(1);
+    expect(a.applied).toHaveLength(2);
     const runes = Object.keys(json(a.files['modules/magic.runes/manifest.json']).runes ?? {});
     expect(runes.filter((t) => ITALIAN('rune').includes(t))).toEqual([]);
     const chunks = new MemoryChunks();

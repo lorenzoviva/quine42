@@ -68,7 +68,7 @@ describe('the parts the ink follows', () => {
   });
 
   it('a limb is one part whatever its colours, and not the same as the rest in its colour', () => {
-    const palette = { A: { color: '#3050c0', part: 'braccio' as const }, H: { color: '#e8b88a', part: 'braccio' as const }, B: { color: '#3050c0' } };
+    const palette = { A: { color: '#3050c0', part: 'arm' as const }, H: { color: '#e8b88a', part: 'arm' as const }, B: { color: '#3050c0' } };
     const parts = partTable(['.', 'A', 'H', 'B'], palette);
     expect(parts[2]).toBe(parts[1]);
     expect(parts[3]).not.toBe(parts[1]);

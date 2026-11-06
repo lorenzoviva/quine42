@@ -26,7 +26,7 @@ describe('GeminiAiModels', () => {
   it('sends system prompt, images and JSON schema through the proxy, and counts usage', async () => {
     const { calls, impl } = fakeFetch([textOk('{"a":1}')]);
     const g = new GeminiAiModels({ textModel: 'gemini-3.1-flash-lite', limits: { text: 5 }, fetchImpl: impl });
-    const out = await g.text({ agent: 'fisico', task: 't', system: 'sei il fisico', prompt: 'ciao', schema: { type: 'OBJECT', properties: { a: { type: 'NUMBER' } } }, images: ['data:image/png;base64,QUJD'] });
+    const out = await g.text({ agent: 'physicist', task: 't', system: 'sei il fisico', prompt: 'ciao', schema: { type: 'OBJECT', properties: { a: { type: 'NUMBER' } } }, images: ['data:image/png;base64,QUJD'] });
     expect(out).toBe('{"a":1}');
     expect(calls[0].url).toBe('/api/gemini/models/gemini-3.1-flash-lite:generateContent');
     expect(calls[0].body.systemInstruction.parts[0].text).toBe('sei il fisico');
@@ -42,10 +42,10 @@ describe('GeminiAiModels', () => {
     const g = new GeminiAiModels({ textModel: 'gemini-3.1-flash-lite', limits: { text: 5 }, fetchImpl: impl, thinking: 'medium' });
     const seen: CallRecord[] = [];
     g.onCall = (r) => seen.push(r);
-    await g.text({ agent: 'scultore', task: 'sculpt', system: 's', prompt: 'p', model: 'gemini-3.8-flash', thinking: 'off' });
+    await g.text({ agent: 'sculptor', task: 'sculpt', system: 's', prompt: 'p', model: 'gemini-3.8-flash', thinking: 'off' });
     expect(calls[0].url).toContain('gemini-3.8-flash:generateContent');
     expect(calls[0].body.generationConfig.thinkingConfig).toBeUndefined();
-    expect(seen).toEqual([{ model: 'gemini-3.8-flash', agent: 'scultore', task: 'sculpt', prompt: 1000, cached: 600, output: 200, thoughts: 300, retries: 0 }]);
+    expect(seen).toEqual([{ model: 'gemini-3.8-flash', agent: 'sculptor', task: 'sculpt', prompt: 1000, cached: 600, output: 200, thoughts: 300, retries: 0 }]);
     expect(g.usage).toMatchObject({ cachedTokens: 600, thoughtTokens: 300 });
   });
 
@@ -86,8 +86,8 @@ describe('GeminiAiModels', () => {
 describe('usage ledger', () => {
   it('prices every call by day, model and task, with cache and reasoning', () => {
     const l = new UsageLog();
-    l.record({ model: 'gemini-3.1-flash-lite', agent: 'cartografo', task: 'chunk.plan', prompt: 10_000, cached: 4_000, output: 1_000, thoughts: 2_000, day: '2026-10-22' });
-    l.record({ model: 'gemini-3.8-flash', agent: 'scultore', task: 'sculpt', prompt: 20_000, cached: 0, output: 5_000, thoughts: 0, day: '2026-10-22' });
+    l.record({ model: 'gemini-3.1-flash-lite', agent: 'cartographer', task: 'chunk.plan', prompt: 10_000, cached: 4_000, output: 1_000, thoughts: 2_000, day: '2026-10-22' });
+    l.record({ model: 'gemini-3.8-flash', agent: 'sculptor', task: 'sculpt', prompt: 20_000, cached: 0, output: 5_000, thoughts: 0, day: '2026-10-22' });
     l.record({ model: 'mistero', agent: 'x', task: 'y', prompt: 1, cached: 0, output: 1, thoughts: 0, day: '2026-10-22' });
     // (6000 × 0.25 + 4000 × 0.025 + 3000 × 1.5) / 1e6 and (20000 × 0.75 + 5000 × 3.75) / 1e6
     const a = (6000 * 0.25 + 4000 * 0.025 + 3000 * 1.5) / 1e6, b = (20000 * 0.75 + 5000 * 3.75) / 1e6;
@@ -105,10 +105,10 @@ describe('usage ledger', () => {
 
   it('goes into the universe with every commit and survives a rollback', async () => {
     const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
-    k.ai.onCall!({ model: 'gemini-3.1-flash-lite', agent: 'narratore', task: 'npc.reply', prompt: 100, cached: 0, output: 50, thoughts: 0 });
+    k.ai.onCall!({ model: 'gemini-3.1-flash-lite', agent: 'narrator', task: 'npc.reply', prompt: 100, cached: 0, output: 50, thoughts: 0 });
     expect(k.saveUsage()).toBe(true);
     expect(JSON.parse(k.repo.head().files['world/consumi.json']!).prezzi).toBe('2026-10-22');
-    k.ai.onCall!({ model: 'gemini-3.1-flash-lite', agent: 'narratore', task: 'npc.reply', prompt: 100, cached: 0, output: 50, thoughts: 0 });
+    k.ai.onCall!({ model: 'gemini-3.1-flash-lite', agent: 'narrator', task: 'npc.reply', prompt: 100, cached: 0, output: 50, thoughts: 0 });
     k.rollback();
     expect(k.usage.session.calls).toBe(2);
     expect(k.saveUsage()).toBe(true);

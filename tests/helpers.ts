@@ -1,3 +1,4 @@
+import { italianName } from '../src/kernel/internalNames';
 ﻿import type { Host } from '../src/kernel/sandbox';
 
 /** A host with a fake player and carpet, recording faults and logs. */
@@ -67,7 +68,7 @@ export function fakeHost() {
  * Programs of the seed that do not pass the sound analysis and stay as they are, because the author chose them by ear: what the thresholds say of them, so that nothing else slips in.
  * «morte» is the same on every seed (ADR-0125 calls it `ripetitivo`); the game plays one seed of it. To change it, ask the author.
  */
-const SOUNDS_KEPT_BY_THE_AUTHOR: Record<string, string[]> = { 'suono-effetto-morte': ['ripetitivo'] };
+const SOUNDS_KEPT_BY_THE_AUTHOR: Record<string, string[]> = { 'sound-effect-death': ['repetitive'] };
 export const keptByTheAuthor = (id: string): string[] => SOUNDS_KEPT_BY_THE_AUTHOR[id] ?? [];
 /** What the validator says of a program of the seed: nothing, or the defects of the author's choice. */
-export const expectedModelErrors = (id: string): RegExp[] => keptByTheAuthor(id).map((defect) => new RegExp(`^models/${id}\.xml: suono ${defect}: `));
+export const expectedModelErrors = (id: string): RegExp[] => keptByTheAuthor(id).map((defect) => new RegExp(`^models/${id}\.xml: suono ${italianName('solo-codice', defect)}: `));

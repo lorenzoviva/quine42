@@ -17,13 +17,13 @@ import { componi } from '../lab/banco/universi-cloud/strumenti/installa';
 
 const STEP = 1 / 20;
 const DAY = Kernel.DAY_SECONDS;
-const at = (n: number, phase: 'mattina' | 'giorno' | 'sera' | 'notte') => (n + { mattina: 0, giorno: 0.12, sera: 0.42, notte: 0.58 }[phase] - 0.12) * DAY + 1;
+const at = (n: number, phase: 'morning' | 'day' | 'evening' | 'night') => (n + { morning: 0, day: 0.12, evening: 0.42, night: 0.58 }[phase] - 0.12) * DAY + 1;
 
 /** Each universe, the place where a building falls (it has one, and the trades that make what rebuilds it), what its trades make there. */
 const CASI = [
-  { nome: 'orichalcum', luogo: '0,-1', fa: 'fabbro', programmi: 9 },
+  { nome: 'orichalcum', luogo: '0,-1', fa: 'smith', programmi: 9 },
   { nome: 'neapolis', luogo: '1,2', fa: 'portuale', programmi: 12 },
-  { nome: 'sidera', luogo: '-2,-2', fa: 'fabbro', programmi: 13 },
+  { nome: 'sidera', luogo: '-2,-2', fa: 'smith', programmi: 13 },
 ];
 
 interface Persona {
@@ -115,11 +115,12 @@ describe('the trades of the three universes of Claude Cloud (T298)', () => {
         const { files } = componi(u);
         const k = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
         const programs = k.jobPrograms();
-        // Every module with `mestieri` gives its program: none is dropped (the kernel would say why in the registry).
-        const modules = Object.keys(files).filter((p) => /^modules\/lavoro\.[^/]+\/manifest\.json$/.test(p));
+        // Every module with `mestieri` gives its program: none is dropped (the kernel would say why in the registry). The seed's are
+        // `job.*` (T307b); those the universe wrote itself keep their ids (`lavoro.portuale`).
+        const modules = Object.keys(files).filter((p) => /^modules\/(job|lavoro)\.[^/]+\/manifest\.json$/.test(p));
         expect(modules.length).toBe(caso.programmi);
         expect(programs.length).toBe(caso.programmi);
-        expect(files['modules/sys.lavoro/manifest.json']).toBeTruthy();
+        expect(files['modules/sys.work/manifest.json']).toBeTruthy();
         const world = { codes: new Set(Object.keys(k.palette)), items: new Set(k.content.items.keys()) };
         for (const p of modules) for (const raw of JSON.parse(files[p]).mestieri) expect(validateJobProgram(raw, world).errors, p).toEqual([]);
         // What rebuilds a house is in the registry, with a name of the world.
@@ -127,7 +128,7 @@ describe('the trades of the three universes of Claude Cloud (T298)', () => {
         const persone = JSON.parse(files['world/people.json']).persone as Persona[];
         for (const p of persone) {
           const job = matchJob(p.mestiere, programs);
-          if (p.specie === 'persona') expect(job?.id, `${p.nome}, ${p.mestiere}`).toBeDefined();
+          if (p.specie === 'person') expect(job?.id, `${p.nome}, ${p.mestiere}`).toBeDefined();
           else expect(job, `${p.nome}, ${p.mestiere}`).toBeUndefined();
         }
         // A name is in one program only.
@@ -153,7 +154,7 @@ describe('the trades of the three universes of Claude Cloud (T298)', () => {
         play(k, 2);
         expect(loaded(k, key)).toBe(false);
         for (let d = 1; d <= 8; d++) {
-          k.time = at(d, 'sera');
+          k.time = at(d, 'evening');
           play(k, 3.5);
         }
         const dep = k.placeDeposit(key);
@@ -163,20 +164,20 @@ describe('the trades of the three universes of Claude Cloud (T298)', () => {
         // A day of work in the place: everyone with a program has their tasks; what the trade of the place makes is made and carried
         // to the deposit in the evening.
         await vaiA(k, key);
-        k.time = at(9, 'mattina');
+        k.time = at(9, 'morning');
         play(k, 30);
         const workers = k.ecs.query('mestiere', 'identity').filter((id) => k.ecs.get(id, 'mestiere').luogo === key);
         expect(workers.length).toBeGreaterThan(0);
         expect(workers.some((id) => k.ecs.get(id, 'mestiere').id === caso.fa)).toBe(true);
-        k.time = at(9, 'giorno');
+        k.time = at(9, 'day');
         const made = () => workers.some((id) => Object.values((k.ecs.get(id, 'carico') ?? {}) as Record<string, number>).some((n) => n > 0));
         play(k, 150, made);
         expect(made()).toBe(true);
         const before = total();
-        k.time = at(9, 'sera');
+        k.time = at(9, 'evening');
         play(k, 150, () => total() > before);
         expect(total()).toBeGreaterThan(before);
-        k.time = at(9, 'notte');
+        k.time = at(9, 'night');
         play(k, 10);
 
         // A building falls: its rebuilding is born with a team of people who have a program, at stage 0 (stakes and a rope).
@@ -185,7 +186,7 @@ describe('the trades of the three universes of Claude Cloud (T298)', () => {
         const origin = k.ecs.get(sid!, 'origin').key as string;
         (k as unknown as { breakEntity(id: number): void }).breakEntity(sid!);
         const v = liveVentures(k).find((x) => x.origine === origin)!;
-        expect(v).toMatchObject({ tipo: 'costruzione', luogo: key, nato_da: 'regola:ricostruzione' });
+        expect(v).toMatchObject({ tipo: 'construction', luogo: key, nato_da: 'regola:ricostruzione' });
         expect(v.squadra.length).toBeGreaterThan(0);
         // Who is in it has a program (the people the offline Narrator adds in the places around count too).
         const ora = JSON.parse(k.files['world/people.json']).persone as Persona[];
@@ -193,7 +194,7 @@ describe('the trades of the three universes of Claude Cloud (T298)', () => {
         expect(stageOf(k, origin)).toBe(0);
 
         // In sight, in the day: the team brings from the deposit and works at the site.
-        k.time = at(10, 'giorno');
+        k.time = at(10, 'day');
         const cur = () => liveVentures(k).find((x) => x.id === v.id)!;
         const going = () => Object.values(cur().portati).some((n) => n > 0) && cur().lavorato > 0;
         play(k, 150, going);
@@ -202,13 +203,13 @@ describe('the trades of the three universes of Claude Cloud (T298)', () => {
         // Out of sight, by accounts: a day at a time it rises, never back, until it is done.
         await lontano(k, key);
         const stages: number[] = [];
-        for (let d = 11; d <= 30 && liveVentures(k).find((x) => x.id === v.id)!.stato !== 'finita'; d++) {
-          k.time = at(d, 'sera');
+        for (let d = 11; d <= 30 && liveVentures(k).find((x) => x.id === v.id)!.stato !== 'finished'; d++) {
+          k.time = at(d, 'evening');
           play(k, 3.5);
           const now = liveVentures(k).find((x) => x.id === v.id)!;
           stages.push(ventureProgress(now).stadio);
         }
-        expect(liveVentures(k).find((x) => x.id === v.id)!.stato).toBe('finita');
+        expect(liveVentures(k).find((x) => x.id === v.id)!.stato).toBe('finished');
         for (let i = 1; i < stages.length; i++) expect(stages[i]).toBeGreaterThanOrEqual(stages[i - 1]);
         // At least one stage between the stakes and the whole was seen.
         expect(stages.some((s) => s > 0 && s < 1)).toBe(true);

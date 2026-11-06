@@ -8,6 +8,7 @@ import path from 'node:path';
 import type { Vec3 } from '../../src/mj/engine';
 import { compileMjx, type MjxModel } from '../../src/mj/model';
 import { OFFICIAL } from '../mjx/official';
+import { internalName } from '../../src/kernel/internalNames';
 import { boxesText, DEFAULT_CEILING, estimateTokens, renderTrace, sectionLines, framesAt, TRACE_FORMS, traceProgram, type TraceForm } from '../../src/mj/trace';
 import { bersaglio } from '../banco/bersagli';
 import { esegui } from '../banco/misure';
@@ -41,7 +42,7 @@ if (args.includes('--confronto')) {
     const f = framesAt(m, seme, [t.steps]).get(t.steps)!;
     const grezze = estimateTokens(sectionLines(f, { plain: true }).flat().join('\n'));
     const piegate = estimateTokens(sectionLines(f).flat().join('\n'));
-    const diff = estimateTokens(renderTrace(t, m, { forma: 'differenze', tetto: 1e9 }));
+    const diff = estimateTokens(renderTrace(t, m, { forma: 'diffs', tetto: 1e9 }));
     const scatole = estimateTokens(boxesText(f, 1e9).join('\n'));
     console.log(`| ${id} | ${t.steps} | ${t.nodes.length} | ${grezze} | ${piegate} | ${diff} | ${scatole} | ${t.ms} |`);
   }
@@ -49,7 +50,9 @@ if (args.includes('--confronto')) {
   const file = args.find((a, i) => !a.startsWith('--') && !args[i - 1]?.startsWith('--'));
   if (!file) throw new Error('quale file? npx vite-node lab/scripts/mjx-trace.ts -- modello.xml');
   const m = modelloDi(file, opt('bersaglio'));
-  const forma = (opt('forma') ?? undefined) as TraceForm | undefined;
+  // The forms in the words of before (`--forma nodi`) are taken too (T307b).
+  const asked = opt('forma');
+  const forma = (asked ? internalName('solo-codice', asked) : undefined) as TraceForm | undefined;
   if (forma && !TRACE_FORMS.includes(forma)) throw new Error(`forme: ${TRACE_FORMS.join(' ')}`);
   const passo = opt('passo');
   const t = traceProgram(m, seme);

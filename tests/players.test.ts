@@ -12,7 +12,7 @@ const DT = 1 / 60;
 
 async function bootMany(): Promise<Kernel> {
   const cfg = JSON.parse(bundledFiles['universe.json']);
-  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2) };
+  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2) };
   return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 }
 
@@ -51,7 +51,7 @@ describe('the player’s client, without corona nor Council (T41)', () => {
   it('the Council speaks to the master only', async () => {
     const k = await bootMany();
     const server = new SessionServer(k);
-    k.council.say('narratore', 'info', 'prima della partita: la bibbia è pronta');
+    k.council.say('narrator', 'info', 'prima della partita: la bibbia è pronta');
     const master = join(server, 'io');
     const anna = join(server, 'anna');
     await Promise.all([master.client.ready, anna.client.ready]);
@@ -63,7 +63,7 @@ describe('the player’s client, without corona nor Council (T41)', () => {
     expect(anna.client.feed).toEqual([]);
     expect(anna.client.files['world/bible.json']).toBeUndefined();
     // While they play: the Council at work is heard by the master, never by the player.
-    k.council.say('cartografo', 'propone', 'un luogo nuovo a nord, con un pozzo');
+    k.council.say('cartographer', 'propone', 'un luogo nuovo a nord, con un pozzo');
     for (let i = 0; i < 12; i++) server.tick(DT);
     expect(master.heard.some((m) => m.t === 'concilio' && m.voci.some((e) => e.text === 'un luogo nuovo a nord, con un pozzo'))).toBe(true);
     expect(anna.heard.some((m) => m.t === 'concilio')).toBe(false);
@@ -83,7 +83,7 @@ describe('the player’s client, without corona nor Council (T41)', () => {
     const thin = new ThinClient(mirror, client);
     const seen: string[] = [];
     mirror.bus.on('council', (e: { text: string }) => seen.push(e.text));
-    k.council.say('scultore', 'scolpisce', 'il pozzo ha un programma suo');
+    k.council.say('sculptor', 'scolpisce', 'il pozzo ha un programma suo');
     for (let i = 0; i < 12; i++) server.tick(DT);
     expect(thin.k.feed().map((e) => e.text)).toContain('il pozzo ha un programma suo');
     expect(seen).toEqual(['il pozzo ha un programma suo']);

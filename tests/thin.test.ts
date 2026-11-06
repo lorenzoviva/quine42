@@ -13,7 +13,7 @@ const DT = 1 / 60;
 
 async function bootMany(): Promise<Kernel> {
   const cfg = JSON.parse(bundledFiles['universe.json']);
-  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2) };
+  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2) };
   return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 }
 
@@ -353,7 +353,7 @@ describe('what is carried, among many (T39b)', () => {
 
   it('a container: opened with what is in it, taken from and put into; out of reach it does not open', async () => {
     const { k, server, anna, start } = await annaAlone();
-    const cassa = k.modules.get('obj.cassa')!;
+    const cassa = k.modules.get('obj.chest')!;
     const near = k.spawnModuleEntity(cassa, start.x + 1.2, start.y);
     const far = k.spawnModuleEntity(cassa, start.x + 7, start.y);
     k.container(near)!.filled = true;

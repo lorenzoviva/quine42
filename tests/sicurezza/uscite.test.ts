@@ -25,7 +25,7 @@ const CONFIG = JSON.stringify({
   rilievo: { mare: 2 },
   eredita: { base: 0.1, copia: 0.4 },
   campoNuovo: SECRET,
-  partita: { modalita: 'multigiocatore', morte: 3, pvp: false, altroTraGiocatori: true, master: 'io', campoNuovo: SECRET },
+  partita: { modalita: 'multiplayer', morte: 3, pvp: false, altroTraGiocatori: true, master: 'io', campoNuovo: SECRET },
   ai: { textModel: 'gemini-3.1-flash-lite', maxText: 800, provider: 'claude', agenti: { narratore: 'claude' }, thinking: 'low', timeout: 120, placesPerMinute: 20, chiave: SECRET, coefficienti: { dialoghi: 0.5 } },
 });
 const MANIFEST = JSON.stringify({
@@ -62,7 +62,7 @@ describe('ciò che esce verso il giocatore', () => {
   it('V-012 di universe.json e dei manifest esce solo ciò che è sull\'elenco, anche un campo mai visto', () => {
     expect(JSON.stringify(playerFiles(FILES))).not.toContain(SECRET);
     const config = JSON.parse(playerFiles(FILES)['universe.json']);
-    expect(config).toEqual({ name: 'sonda', seed: 7, circleRadius: 42, chunkSize: 18, rilievo: { mare: 2 }, partita: { modalita: 'multigiocatore', morte: 3, pvp: false, altroTraGiocatori: true, master: 'io' } });
+    expect(config).toEqual({ name: 'sonda', seed: 7, circleRadius: 42, chunkSize: 18, rilievo: { mare: 2 }, partita: { modalita: 'multiplayer', morte: 3, pvp: false, altroTraGiocatori: true, master: 'io' } });
   });
 
   it('V-012 restano ciò che il client disegna e il menu, gli effetti solo come tipo', () => {
@@ -88,7 +88,7 @@ describe('ciò che esce verso il giocatore', () => {
 
   it('V-012 il seme, nello specchio di un giocatore: nessuna storia, nessun guasto', async () => {
     const cfg = JSON.parse(bundledFiles['universe.json']);
-    const files = playerFiles({ ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }) });
+    const files = playerFiles({ ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3 } }) });
     const mirror = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels(), mirror: true });
     expect(mirror.faults.size).toBe(0);
     expect(Object.keys(mirror.palette).length).toBeGreaterThan(0);
@@ -178,7 +178,7 @@ describe('ciò che il Concilio scrive', () => {
 
   it('V-013 l\'elenco: il contenuto del mondo, non le impostazioni, i prompt degli agenti o percorsi strani', () => {
     for (const p of ['modules/a.b/manifest.json', 'modules/a.b/logic.lua', 'models/pino.xml', 'world/bible.json', 'maps/0_0.json', 'prompts/theme.md']) expect(councilMayWrite(p), p).toBe(true);
-    for (const p of ['universe.json', 'seed.json', 'prompts/agents/narratore.md', 'models/../universe.json', '.git/config', 'altro/x.json', '']) expect(councilMayWrite(p), p).toBe(false);
+    for (const p of ['universe.json', 'seed.json', 'prompts/agents/narrator.md', 'models/../universe.json', '.git/config', 'altro/x.json', '']) expect(councilMayWrite(p), p).toBe(false);
   });
 
   it('V-013 una scrittura di ai dal Concilio torna indietro, in memoria e nel commit', async () => {
@@ -211,8 +211,8 @@ describe('ciò che il Concilio scrive', () => {
 
   it('V-013 su comando le impostazioni cambiano: setAi, l\'editor; e il commit dopo del Concilio non le annulla', async () => {
     const k = await boot();
-    k.setAi({ textModel: 'gemini-3.1-flash-lite', coefficienti: { dialoghi: 0.5 } as never });
-    expect(k.repo.commit('il Concilio dopo setAi', 'agent').files['universe.json']).toContain('"dialoghi": 0.5');
+    k.setAi({ textModel: 'gemini-3.1-flash-lite', coefficienti: { dialogues: 0.5 } as never });
+    expect(k.repo.commit('il Concilio dopo setAi', 'agent').files['universe.json']).toContain('"dialogues": 0.5');
     const raw = JSON.parse(k.repo.working['universe.json']);
     expect(k.saveFile('universe.json', JSON.stringify({ ...raw, ai: { ...raw.ai, maxText: 123 } }, null, 2)).committed).toBe(true);
     expect(budget(k.repo.head().files)).toBe(123);

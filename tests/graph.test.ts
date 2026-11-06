@@ -19,14 +19,14 @@ async function develop(k: Kernel) {
   k.tick(1 / 60);
 }
 
-const cats = (t: string) => (t === 'npc.cat' ? 'animale' : t ? 'persona' : undefined) as 'animale' | 'persona' | undefined;
+const cats = (t: string) => (t === 'npc.cat' ? 'animal' : t ? 'person' : undefined) as 'animal' | 'person' | undefined;
 
 const individual = (nome: string, tipo: string, famiglia: Array<[string, string]>, extra: Record<string, unknown> = {}) => ({
   nome,
   tipo,
   mestiere: 'contadino',
   famiglia: famiglia.map(([n, legame]) => ({ nome: n, legame })),
-  routine: [{ quando: 'giorno', fa: 'lavora', dove: 'lavoro' }, { quando: 'notte', fa: 'dorme', dove: 'casa' }],
+  routine: [{ quando: 'day', fa: 'lavora', dove: 'work' }, { quando: 'night', fa: 'dorme', dove: 'home' }],
   ...extra,
 });
 
@@ -41,19 +41,19 @@ function universe(): { files: FileMap; chunks: GraphChunk[] } {
       mistero: 'Qualcuno ruba le reti di Nereo.',
       coinvolti: ['Nereo', 'Bastiano', 'Gaspare'],
       tappe: [
-        { giorno: 0, momento: 'mattina', chi: 'Nereo', dove: 'Sulle rive del Lago Muto', cosa: 'conta le reti' },
-        { giorno: 1, momento: 'sera', chi: 'Bastiano', dove: "Prato dell'Eco", cosa: 'aspetta' },
+        { giorno: 0, momento: 'morning', chi: 'Nereo', dove: 'Sulle rive del Lago Muto', cosa: 'conta le reti' },
+        { giorno: 1, momento: 'evening', chi: 'Bastiano', dove: "Prato dell'Eco", cosa: 'aspetta' },
       ],
       inizio: 0,
-      stato: 'attiva',
+      stato: 'active',
     },
   ];
   const files: FileMap = {
     'universe.json': JSON.stringify({ name: 'prova' }),
     'modules/npc.cat/manifest.json': manifest({ id: 'npc.cat', name: 'Gatto', kind: 'entity', appearance: { classe: 'animal' } }),
     'modules/npc.villager/manifest.json': manifest({ id: 'npc.villager', name: 'Abitante', kind: 'entity' }),
-    'modules/obj.banco/manifest.json': manifest({ id: 'obj.banco', name: 'Banco', kind: 'entity' }),
-    'modules/item.forbici/manifest.json': manifest({ id: 'item.forbici', name: 'Forbici', kind: 'item', tags: ['strumento'] }),
+    'modules/obj.counter/manifest.json': manifest({ id: 'obj.counter', name: 'Banco', kind: 'entity' }),
+    'modules/item.forbici/manifest.json': manifest({ id: 'item.scissors', name: 'Forbici', kind: 'item', tags: ['strumento'] }),
     'modules/items.pacco-1/manifest.json': manifest({
       id: 'items.pacco-1',
       name: 'Pacchetto 1',
@@ -63,7 +63,7 @@ function universe(): { files: FileMap; chunks: GraphChunk[] } {
         { id: 'item.farina', name: 'Farina', category: 'materiale' },
       ],
       recipes: [
-        { id: 'pane', name: 'Pane', inputs: [{ item: 'item.farina', count: 2 }], tools: ['item.forbici'], output: { item: 'item.pane', count: 1 } },
+        { id: 'pane', name: 'Pane', inputs: [{ item: 'item.farina', count: 2 }], tools: ['item.scissors'], output: { item: 'item.pane', count: 1 } },
         { id: 'torta', name: 'Torta', inputs: [{ item: 'item.mela', count: 1 }], output: { item: 'item.torta', count: 1 } },
       ],
     }),
@@ -73,22 +73,22 @@ function universe(): { files: FileMap; chunks: GraphChunk[] } {
     'world/atlas.json': JSON.stringify({ regioni: [{ id: 'lago-muto', nome: 'Lago Muto', descrizione: 'un lago fermo', ambiente: 'lake', centro: [3, 0], raggio: 1 }] }),
     'world/people.json': JSON.stringify({
       persone: [
-        individual('Fiocco', 'npc.cat', [['Bastiano', 'fratello'], ['Micetto', 'madre']], { luogo: 'Piazza del Borgo', genere: 'femmina' }),
-        individual('Micetto', 'npc.cat', [['Fiocco', 'figlio'], ['Nessuno Mai', 'padrone']], { genere: 'maschio' }),
-        individual('Bastiano', 'npc.villager', [['Fiocco', 'fratello'], ['Bastiano del Mulino', 'cugino']], { luogo: 'Piazza del Borgo', genere: 'maschio', specie: 'persona' }),
+        individual('Fiocco', 'npc.cat', [['Bastiano', 'fratello'], ['Micetto', 'madre']], { luogo: 'Piazza del Borgo', genere: 'female' }),
+        individual('Micetto', 'npc.cat', [['Fiocco', 'figlio'], ['Nessuno Mai', 'padrone']], { genere: 'male' }),
+        individual('Bastiano', 'npc.villager', [['Fiocco', 'fratello'], ['Bastiano del Mulino', 'cugino']], { luogo: 'Piazza del Borgo', genere: 'male', specie: 'person' }),
         individual('Bastiano del Mulino', 'npc.villager', [], { luogo: 'Sulle rive del Lago Muto' }),
-        individual('Nereo', 'npc.villager', [['Gaspare', 'padre'], ['Viandante', 'rivale']], { genere: 'femmina', luogo: 'Riva del Lago' }),
-        individual('Gaspare', 'npc.villager', [['Nereo', 'padre']], { genere: 'maschio' }),
+        individual('Nereo', 'npc.villager', [['Gaspare', 'padre'], ['Viandante', 'rivale']], { genere: 'female', luogo: 'Riva del Lago' }),
+        individual('Gaspare', 'npc.villager', [['Nereo', 'padre']], { genere: 'male' }),
       ],
       attesi: [{ nome: 'Ilaria', legame: 'sorella', di: 'Gaspare' }, { nome: 'Batuffolo', legame: 'figlio', di: 'Micetto' }],
     }),
     [PLOTS_FILE]: writePlots(plots),
-    'world/rules.json': JSON.stringify({ regole: [{ chiave: 'obj.banco|apri', testo: '«apri» su Banco', possibile: true }, { chiave: 'craft|fionda', testo: 'fabbricare una fionda', possibile: false }, { chiave: 'obj.forno|accendi', testo: '«accendi» su Forno', possibile: true }] }),
+    'world/rules.json': JSON.stringify({ regole: [{ chiave: 'obj.counter|apri', testo: '«apri» su Banco', possibile: true }, { chiave: 'craft|fionda', testo: 'fabbricare una fionda', possibile: false }, { chiave: 'obj.forno|accendi', testo: '«accendi» su Forno', possibile: true }] }),
     'world/bible.json': JSON.stringify({ titolo: 'Prova', luoghi: ['Piazza del Borgo', 'Collina dei Venti'], fatti: ['Nereo pesca nel Lago Muto da quando era bambina.', 'Il pane di Piazza del Borgo è il più buono.'], misteri: ['Nessuno sa chi abbia costruito la Collina dei Venti.'] }),
-    'world/stato.json': JSON.stringify({ viandante: { inventory: { slots: [{ item: 'item.pane', count: 2 }, null, { item: 'item.forbici', count: 1, inv: { slots: [{ item: 'item.farina', count: 1 }] } }] } } }),
+    'world/stato.json': JSON.stringify({ viandante: { inventory: { slots: [{ item: 'item.pane', count: 2 }, null, { item: 'item.scissors', count: 1, inv: { slots: [{ item: 'item.farina', count: 1 }] } }] } } }),
   };
   const chunks: GraphChunk[] = [
-    { cx: 0, cy: 0, nome: 'Piazza del Borgo', ambiente: 'village', cose: ['npc.villager', 'obj.banco', 'obj.forno'], a_terra: ['Pane'], strutture: ['mulino'] },
+    { cx: 0, cy: 0, nome: 'Piazza del Borgo', ambiente: 'village', cose: ['npc.villager', 'obj.counter', 'obj.forno'], a_terra: ['Pane'], strutture: ['mulino'] },
     { cx: 3, cy: 0, nome: 'Riva del Lago', ambiente: 'lake', cose: ['npc.cat'] },
   ];
   return { files, chunks };
@@ -99,71 +99,71 @@ describe('the graph of the world (ADR-0045)', () => {
     const { files, chunks } = universe();
     const g = buildGraph(files, chunks, cats);
     const n = (id: string) => g.node(id);
-    expect(n('persona:fiocco')).toMatchObject({ label: 'Fiocco', tipo: 'persona', specie: 'animale', genere: 'femmina', source_file: 'world/people.json' });
-    expect(n('persona:bastiano-del-mulino')?.tipo).toBe('persona');
-    expect(n('persona:ilaria')?.atteso).toBe(true);
-    expect(n('persona:viandante')?.viandante).toBe(true);
-    expect(n('tipo:npc.cat')?.label).toBe('Gatto');
-    expect(n('oggetto:item.forbici')?.tipo).toBe('oggetto');
-    expect(n('oggetto:item.pane')?.tipo).toBe('oggetto');
-    expect(n('ricetta:pane')?.tipo).toBe('ricetta');
-    expect(n('runa:luce')?.tipo).toBe('runa');
-    expect(n('incantesimo:arcobaleno')?.tipo).toBe('incantesimo');
-    expect(n('ambiente:village')?.tipo).toBe('ambiente');
-    expect(n('regione:lago-muto')?.tipo).toBe('regione');
-    expect(n('luogo:0_0')).toMatchObject({ label: 'Piazza del Borgo', cx: 0, cy: 0 });
-    expect(n('luogo:collina-dei-venti')?.dalla_bibbia).toBe(true);
-    expect(n('struttura:mulino')?.tipo).toBe('struttura');
-    expect(n('trama:trama-lago')?.tipo).toBe('trama');
-    expect(n('regola:obj.banco-apri')?.tipo).toBe('regola');
-    expect(n('fatto:1')?.tipo).toBe('fatto');
-    expect(n('fatto:3')?.mistero).toBe(true);
+    expect(n('individual:fiocco')).toMatchObject({ label: 'Fiocco', tipo: 'individual', specie: 'animal', genere: 'female', source_file: 'world/people.json' });
+    expect(n('individual:bastiano-del-mulino')?.tipo).toBe('individual');
+    expect(n('individual:ilaria')?.atteso).toBe(true);
+    expect(n('individual:viandante')?.viandante).toBe(true);
+    expect(n('kind:npc.cat')?.label).toBe('Gatto');
+    expect(n('item:item.scissors')?.tipo).toBe('item');
+    expect(n('item:item.pane')?.tipo).toBe('item');
+    expect(n('recipe:pane')?.tipo).toBe('recipe');
+    expect(n('rune:luce')?.tipo).toBe('rune');
+    expect(n('spell:arcobaleno')?.tipo).toBe('spell');
+    expect(n('environment:village')?.tipo).toBe('environment');
+    expect(n('region:lago-muto')?.tipo).toBe('region');
+    expect(n('chunk:0_0')).toMatchObject({ label: 'Piazza del Borgo', cx: 0, cy: 0 });
+    expect(n('chunk:collina-dei-venti')?.dalla_bibbia).toBe(true);
+    expect(n('structure:mulino')?.tipo).toBe('structure');
+    expect(n('plot:trama-lago')?.tipo).toBe('plot');
+    expect(n('rule:obj.counter-apri')?.tipo).toBe('rule');
+    expect(n('fact:1')?.tipo).toBe('fact');
+    expect(n('fact:3')?.mistero).toBe(true);
 
     const has = (s: string, t: string, relation: string, attrs: Record<string, unknown> = {}) => g.links.some((l) => l.source === s && l.target === t && l.relation === relation && Object.entries(attrs).every(([k, v]) => l[k] === v));
-    expect(has('persona:fiocco', 'persona:bastiano', 'legame', { legame: 'fratello' })).toBe(true);
-    expect(has('persona:fiocco', 'tipo:npc.cat', 'e_un')).toBe(true);
-    expect(has('persona:fiocco', 'luogo:0_0', 'abita')).toBe(true);
-    expect(has('persona:bastiano', 'luogo:0_0', 'lavora')).toBe(true);
-    expect(has('persona:nereo', 'persona:viandante', 'legame', { legame: 'rivale' })).toBe(true);
-    expect(has('persona:ilaria', 'persona:gaspare', 'legame', { legame: 'sorella' })).toBe(true);
-    expect(has('persona:viandante', 'oggetto:item.farina', 'porta')).toBe(true);
-    expect(has('trama:trama-lago', 'persona:nereo', 'coinvolge')).toBe(true);
+    expect(has('individual:fiocco', 'individual:bastiano', 'legame', { legame: 'fratello' })).toBe(true);
+    expect(has('individual:fiocco', 'kind:npc.cat', 'e_un')).toBe(true);
+    expect(has('individual:fiocco', 'chunk:0_0', 'abita')).toBe(true);
+    expect(has('individual:bastiano', 'chunk:0_0', 'lavora')).toBe(true);
+    expect(has('individual:nereo', 'individual:viandante', 'legame', { legame: 'rivale' })).toBe(true);
+    expect(has('individual:ilaria', 'individual:gaspare', 'legame', { legame: 'sorella' })).toBe(true);
+    expect(has('individual:viandante', 'item:item.farina', 'porta')).toBe(true);
+    expect(has('plot:trama-lago', 'individual:nereo', 'coinvolge')).toBe(true);
     // «Sulle rive del Lago Muto» is in the region of that name.
-    expect(has('trama:trama-lago', 'regione:lago-muto', 'tappa', { giorno: 0, momento: 'mattina', chi: 'persona:nereo' })).toBe(true);
-    expect(has('luogo:3_0', 'regione:lago-muto', 'in_regione')).toBe(true);
-    expect(has('luogo:0_0', 'ambiente:village', 'ambiente')).toBe(true);
-    expect(has('regione:lago-muto', 'ambiente:lake', 'ambiente')).toBe(true);
-    expect(has('luogo:0_0', 'tipo:obj.banco', 'contiene')).toBe(true);
-    expect(has('luogo:0_0', 'oggetto:item.pane', 'contiene')).toBe(true);
-    expect(has('luogo:0_0', 'struttura:mulino', 'contiene')).toBe(true);
-    expect(has('ricetta:pane', 'oggetto:item.farina', 'ingrediente', { quanti: 2 })).toBe(true);
-    expect(has('ricetta:pane', 'oggetto:item.forbici', 'ingrediente', { strumento: true })).toBe(true);
-    expect(has('ricetta:pane', 'oggetto:item.pane', 'produce')).toBe(true);
-    expect(has('incantesimo:arcobaleno', 'runa:acqua', 'usa')).toBe(true);
-    expect(has('regola:obj.banco-apri', 'tipo:obj.banco', 'riguarda')).toBe(true);
-    expect(has('fatto:1', 'persona:nereo', 'cita')).toBe(true);
-    expect(has('fatto:1', 'regione:lago-muto', 'cita')).toBe(true);
-    expect(has('fatto:2', 'luogo:0_0', 'cita')).toBe(true);
+    expect(has('plot:trama-lago', 'region:lago-muto', 'tappa', { giorno: 0, momento: 'morning', chi: 'individual:nereo' })).toBe(true);
+    expect(has('chunk:3_0', 'region:lago-muto', 'in_regione')).toBe(true);
+    expect(has('chunk:0_0', 'environment:village', 'ambiente')).toBe(true);
+    expect(has('region:lago-muto', 'environment:lake', 'ambiente')).toBe(true);
+    expect(has('chunk:0_0', 'kind:obj.counter', 'contiene')).toBe(true);
+    expect(has('chunk:0_0', 'item:item.pane', 'contiene')).toBe(true);
+    expect(has('chunk:0_0', 'structure:mulino', 'contiene')).toBe(true);
+    expect(has('recipe:pane', 'item:item.farina', 'ingrediente', { quanti: 2 })).toBe(true);
+    expect(has('recipe:pane', 'item:item.scissors', 'ingrediente', { strumento: true })).toBe(true);
+    expect(has('recipe:pane', 'item:item.pane', 'produce')).toBe(true);
+    expect(has('spell:arcobaleno', 'rune:acqua', 'usa')).toBe(true);
+    expect(has('rule:obj.counter-apri', 'kind:obj.counter', 'riguarda')).toBe(true);
+    expect(has('fact:1', 'individual:nereo', 'cita')).toBe(true);
+    expect(has('fact:1', 'region:lago-muto', 'cita')).toBe(true);
+    expect(has('fact:2', 'chunk:0_0', 'cita')).toBe(true);
   });
 
   it('answers by name, by neighbourhood and with a compact context for the Council', () => {
     const { files, chunks } = universe();
     const g = buildGraph(files, chunks, cats);
     // The same name first, then names alike.
-    expect(g.find('bastiano').map((x) => x.id)).toEqual(['persona:bastiano', 'persona:bastiano-del-mulino']);
-    expect(g.find('Piazza del Borgo', 'luogo').map((x) => x.id)).toEqual(['luogo:0_0']);
-    expect(g.find('lago muto')[0].id).toBe('regione:lago-muto');
+    expect(g.find('bastiano').map((x) => x.id)).toEqual(['individual:bastiano', 'individual:bastiano-del-mulino']);
+    expect(g.find('Piazza del Borgo', 'chunk').map((x) => x.id)).toEqual(['chunk:0_0']);
+    expect(g.find('lago muto')[0].id).toBe('region:lago-muto');
     expect(g.find('')).toEqual([]);
-    const near = g.neighbors('persona:fiocco').map((x) => x.id);
-    expect(near).toEqual(expect.arrayContaining(['persona:bastiano', 'persona:micetto', 'tipo:npc.cat', 'luogo:0_0']));
-    expect(near).not.toContain('persona:fiocco');
-    expect(g.neighbors('persona:fiocco', 1, ['legame']).map((x) => x.id).sort()).toEqual(['persona:bastiano', 'persona:micetto']);
-    expect(g.neighbors('persona:fiocco', 2, ['legame']).map((x) => x.id)).toContain('persona:bastiano-del-mulino');
-    const ctx = g.context(['persona:fiocco', 'trama:trama-lago'], 600);
+    const near = g.neighbors('individual:fiocco').map((x) => x.id);
+    expect(near).toEqual(expect.arrayContaining(['individual:bastiano', 'individual:micetto', 'kind:npc.cat', 'chunk:0_0']));
+    expect(near).not.toContain('individual:fiocco');
+    expect(g.neighbors('individual:fiocco', 1, ['legame']).map((x) => x.id).sort()).toEqual(['individual:bastiano', 'individual:micetto']);
+    expect(g.neighbors('individual:fiocco', 2, ['legame']).map((x) => x.id)).toContain('individual:bastiano-del-mulino');
+    const ctx = g.context(['individual:fiocco', 'plot:trama-lago'], 600);
     expect(ctx.split('\n')[0]).toMatch(/^- Fiocco, animale femmina, contadino: fratello di Bastiano; madre di Micetto; abita a Piazza del Borgo/);
     expect(ctx).toMatch(/trama «Il Ritmo del Lago»: Qualcuno ruba le reti di Nereo\.: tappa a Lago Muto \(giorno 0, mattina, Nereo\); coinvolge Nereo, Bastiano, Gaspare/);
     expect(ctx.length).toBeLessThanOrEqual(600);
-    expect(g.context(['persona:fiocco'], 50).split('\n')).toHaveLength(1);
+    expect(g.context(['individual:fiocco'], 50).split('\n')).toHaveLength(1);
   });
 
   it('finds what does not hold: references to nothing, one-sided or impossible bonds, names alike, plots without people or chunks', () => {
@@ -219,7 +219,7 @@ describe('the graph of the world (ADR-0045)', () => {
     expect(buildGraph(files, chunks, cats).toJson()).toBe(text);
     // Rebuilt from the files alone (no chunk plan known), the places of the previous graph are kept.
     const again = buildGraph({ ...files, [GRAPH_FILE]: text }, [], cats);
-    expect(again.node('luogo:3_0')).toMatchObject({ label: 'Riva del Lago', cose: ['npc.cat'] });
+    expect(again.node('chunk:3_0')).toMatchObject({ label: 'Riva del Lago', cose: ['npc.cat'] });
     expect(again.hash).toBe(g.hash);
     expect(readGraph({ [GRAPH_FILE]: text })?.nodes.length).toBe(data.nodes.length);
   });
@@ -234,9 +234,9 @@ describe('the graph of the world (ADR-0045)', () => {
     const head = k.repo.head().files;
     const data = readGraph(head)!;
     expect(data.graph.hash).toBe(k.graph().hash);
-    for (const ch of planned) expect(data.nodes.find((x) => x.id === `luogo:${ch.cx}_${ch.cy}`)?.label).toBe(ch.place!.name);
-    expect(data.nodes.some((x) => x.id === 'tipo:npc.cat')).toBe(true);
-    expect(k.graph().node('persona:viandante')).toBeDefined();
+    for (const ch of planned) expect(data.nodes.find((x) => x.id === `chunk:${ch.cx}_${ch.cy}`)?.label).toBe(ch.place!.name);
+    expect(data.nodes.some((x) => x.id === 'kind:npc.cat')).toBe(true);
+    expect(k.graph().node('individual:viandante')).toBeDefined();
     // The cache: the same files and places, the same graph.
     expect(k.graph()).toBe(k.graph());
     // A save that changes nothing the graph is made of does not rewrite it.
@@ -266,14 +266,14 @@ describe('the graph of the world (ADR-0045)', () => {
     });
     const g = buildGraph(files, chunks, cats);
     const { nodi } = g.counts();
-    expect([...g.nodes.values()].filter((x) => x.tipo === 'persona' && !x.viandante && !x.atteso)).toHaveLength(57);
+    expect([...g.nodes.values()].filter((x) => x.tipo === 'individual' && !x.viandante && !x.atteso)).toHaveLength(57);
     // The registry's own bonds (not those of the awaited ones; Thalric's «nemico» of the wanderer is said twice, counted once).
     const own = g.links.filter((l) => l.relation === 'legame' && !g.node(l.source)!.atteso);
     expect(own).toHaveLength(215);
-    expect(nodi.trama).toBe(3);
+    expect(nodi.plot).toBe(3);
     const issues = g.check();
     expect(issues.filter((i) => i.tipo === 'riferimento' && /è .* di .*, che non esiste/.test(i.testo))).toEqual([]);
-    expect(g.links.some((l) => l.relation === 'legame' && l.target === 'persona:viandante')).toBe(true);
+    expect(g.links.some((l) => l.relation === 'legame' && l.target === 'individual:viandante')).toBe(true);
     expect(issues.some((i) => i.tipo === 'impossibile' && /Fiocco è fratello di Bastiano/.test(i.testo))).toBe(true);
     expect(issues.filter((i) => i.tipo === 'nomi').length).toBeGreaterThan(10);
     expect(g.toJson().length).toBeLessThan(1_000_000);

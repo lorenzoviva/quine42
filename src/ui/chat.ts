@@ -46,7 +46,7 @@ export class Chat {
     this.agent = null;
     const mind: Mind | undefined = this.k.ecs.get(id, 'mind');
     this.title.textContent = name;
-    this.log.replaceChildren(...(mind?.history ?? []).map((t) => this.line(t.who === 'giocatore' ? 'Tu' : name, t.text, t.who)));
+    this.log.replaceChildren(...(mind?.history ?? []).map((t) => this.line(t.who === 'player' ? 'Tu' : name, t.text, t.who)));
     if (!mind?.history?.length) this.log.append(el('div', { class: 'note' }, `${name} ti guarda. Di' qualcosa.`));
     this.root.hidden = false;
     this.onClose?.();
@@ -65,7 +65,7 @@ export class Chat {
 
   private async sendToAgent(agent: AgentId, text: string): Promise<void> {
     const name = this.title.textContent ?? '';
-    this.log.append(this.line('Tu', text, 'giocatore'));
+    this.log.append(this.line('Tu', text, 'player'));
     const typing = el('div', { class: 'note' }, 'riflette…');
     this.log.append(typing);
     this.waiting = true;
@@ -103,7 +103,7 @@ export class Chat {
     const id = this.npc;
     const name = this.title.textContent ?? '';
     this.input.value = '';
-    this.log.append(this.line('Tu', text, 'giocatore'));
+    this.log.append(this.line('Tu', text, 'player'));
     // Another wanderer answers when they like (`ui:heard`): nobody thinks for them.
     const person = this.k.otherWanderer(id) !== undefined;
     const typing = el('div', { class: 'note' }, `${name} pensa…`);

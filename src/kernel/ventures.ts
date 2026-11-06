@@ -4,12 +4,15 @@
 // The progress is derived: the phase now is the first whose materials are not all brought or whose work is not done, so there is no
 // counter to keep true. Pure: the kernel, the tests and the panel read it.
 
+import { internalName } from './internalNames';
 import { hash32, hashStr } from './rng';
 
 export const VENTURES_FILE = 'world/imprese.json';
-export const VENTURE_TYPES = ['costruzione', 'raccolto', 'festa', 'ricerca', 'bonifica', 'viaggio', 'elezione'] as const;
+export const VENTURE_TYPES = ['construction', 'harvest', 'feast', 'research', 'reclamation', 'journey', 'election'] as const;
 export type VentureType = (typeof VENTURE_TYPES)[number];
-export type VentureState = 'in corso' | 'attesa' | 'ferma' | 'finita';
+export type VentureState = 'active' | 'waiting' | 'stopped' | 'finished';
+/** The trade of a role that takes anyone (T307b: internal, `qualunque` before). */
+export const ANY_TRADE = 'any';
 
 /** At most this many in a team, this many ventures open at once, this many kept once finished (the oldest finished go first). */
 export const MAX_TEAM = 6;
@@ -35,7 +38,7 @@ export interface VenturePhase {
 
 export interface VentureRole {
   ruolo: string;
-  /** The program of a trade the role wants (`contadino`), or `qualunque`. */
+  /** The program of a trade the role wants (`farmer`), or `any`. */
   mestiere: string;
   quanti: number;
 }
@@ -45,7 +48,7 @@ export interface VentureMember {
   ruolo: string;
 }
 
-/** What a member does at the site of a harvest (a `raccogli` of a trade): the tile, what it gives, what it leaves. */
+/** What a member does at the site of a harvest (a `gather` of a trade): the tile, what it gives, what it leaves. */
 export interface VentureTask {
   casella: string;
   oggetto: string;
@@ -107,7 +110,9 @@ export function readVenture(raw: unknown): Venture | undefined {
   const r = raw as Record<string, unknown>;
   const id = str(r.id, 40);
   const luogo = str(r.luogo, 24);
-  const tipo = VENTURE_TYPES.includes(r.tipo as VentureType) ? (r.tipo as VentureType) : undefined;
+  // A value of the contract 0.2 (Italian) is read internal: the migration ports the file, this keeps a stray one (T307b).
+  const rawType = typeof r.tipo === 'string' ? internalName('imprese', r.tipo) : r.tipo;
+  const tipo = VENTURE_TYPES.includes(rawType as VentureType) ? (rawType as VentureType) : undefined;
   const posto = r.posto as { x?: unknown; y?: unknown } | undefined;
   if (!id || !luogo || !/^-?\d+,-?\d+$/.test(luogo) || !tipo || !posto || !Number.isFinite(posto.x) || !Number.isFinite(posto.y)) return undefined;
   const fasi = (Array.isArray(r.fasi) ? r.fasi : []).slice(0, 8).flatMap((f): VenturePhase[] => {
@@ -119,14 +124,16 @@ export function readVenture(raw: unknown): Venture | undefined {
   const ruoli = (Array.isArray(r.ruoli) ? r.ruoli : []).slice(0, MAX_TEAM).flatMap((x): VentureRole[] => {
     const o = (x && typeof x === 'object' ? x : {}) as Record<string, unknown>;
     const ruolo = str(o.ruolo, 30);
-    return ruolo ? [{ ruolo, mestiere: str(o.mestiere, 40) ?? 'qualunque', quanti: Math.max(1, Math.min(MAX_TEAM, Math.floor(num(o.quanti, 1)))) }] : [];
+    const mestiere = str(o.mestiere, 40);
+    return ruolo ? [{ ruolo, mestiere: mestiere ? internalName('mestieri', mestiere) : ANY_TRADE, quanti: Math.max(1, Math.min(MAX_TEAM, Math.floor(num(o.quanti, 1)))) }] : [];
   });
   const squadra = (Array.isArray(r.squadra) ? r.squadra : []).slice(0, MAX_TEAM).flatMap((x): VentureMember[] => {
     const o = (x && typeof x === 'object' ? x : {}) as Record<string, unknown>;
     const nome = str(o.nome, 60);
     return nome ? [{ nome, ruolo: str(o.ruolo, 30) ?? 'manovale' }] : [];
   });
-  const stato = (['in corso', 'attesa', 'ferma', 'finita'] as const).find((s) => s === r.stato) ?? 'in corso';
+  const rawState = typeof r.stato === 'string' ? internalName('imprese', r.stato) : r.stato;
+  const stato = (['active', 'waiting', 'stopped', 'finished'] as const).find((s) => s === rawState) ?? 'active';
   const v: Venture = {
     ...(r as object),
     id,
@@ -136,7 +143,7 @@ export function readVenture(raw: unknown): Venture | undefined {
     luogo,
     posto: { x: Number(posto.x), y: Number(posto.y) },
     fasi,
-    ruoli: ruoli.length ? ruoli : [{ ruolo: 'manovale', mestiere: 'qualunque', quanti: 3 }],
+    ruoli: ruoli.length ? ruoli : [{ ruolo: 'manovale', mestiere: ANY_TRADE, quanti: 3 }],
     portati: counts(r.portati),
     lavorato: Math.max(0, Math.min(1e7, num(r.lavorato))),
     squadra,
@@ -252,11 +259,11 @@ export function bring(v: Venture, item: string, n: number): { taken: number; clo
  */
 export function ventureState(v: Venture, today: number, available: (item: string) => number): VentureState {
   const p = ventureProgress(v);
-  if (p.finita || (v.scade !== undefined && today > v.scade)) return 'finita';
-  if (!v.squadra.length) return 'ferma';
+  if (p.finita || (v.scade !== undefined && today > v.scade)) return 'finished';
+  if (!v.squadra.length) return 'stopped';
   const missing = Object.keys(p.manca);
-  if (missing.length && missing.every((it) => available(it) <= 0)) return 'attesa';
-  return 'in corso';
+  if (missing.length && missing.every((it) => available(it) <= 0)) return 'waiting';
+  return 'active';
 }
 
 /** Someone who could work: their name, the program of their trade, the place they belong to (`cx,cy`). */
@@ -292,7 +299,7 @@ export function fillTeam(v: Venture, candidates: readonly VentureCandidate[], bu
     if (have >= role.quanti) continue;
     const free = candidates
       .filter((c) => !taken.has(c.nome) && !busy.has(c.nome) && dist(c) <= 2)
-      .map((c) => ({ c, fit: role.mestiere === 'qualunque' || c.mestiere === role.mestiere ? 0 : 1, d: dist(c), h: hash32(seed, hashStr(c.nome), hashStr(v.id)) }))
+      .map((c) => ({ c, fit: role.mestiere === ANY_TRADE || c.mestiere === role.mestiere ? 0 : 1, d: dist(c), h: hash32(seed, hashStr(c.nome), hashStr(v.id)) }))
       .sort((a, b) => a.fit - b.fit || a.d - b.d || a.h - b.h || (a.c.nome < b.c.nome ? -1 : 1));
     for (const { c } of free) {
       if (have >= role.quanti || v.squadra.length >= MAX_TEAM) break;
@@ -306,11 +313,11 @@ export function fillTeam(v: Venture, candidates: readonly VentureCandidate[], bu
   return { joined, left };
 }
 
-/** What a member does next (the kernel says it to `costruisci`): bring a material they can get, work on the site, or harvest. */
+/** What a member does next (the kernel says it to `build`): bring a material they can get, work on the site, or harvest. */
 export type VentureStep =
-  | { fa: 'porta'; oggetto: string; x: number; y: number }
-  | { fa: 'lavora'; x: number; y: number; posa: string }
-  | ({ fa: 'raccogli'; x: number; y: number } & VentureTask);
+  | { fa: 'carry'; oggetto: string; x: number; y: number }
+  | { fa: 'work'; x: number; y: number; posa: string }
+  | ({ fa: 'gather'; x: number; y: number } & VentureTask);
 
 /** Each member stands at their own spot around the site: the same spot for the same name. */
 export function spotOf(v: Venture, nome: string): { x: number; y: number } {
@@ -325,14 +332,14 @@ export function nextStep(v: Venture, nome: string, has: (item: string) => number
   if (!v.squadra.some((m) => m.nome === nome)) return undefined;
   const p = ventureProgress(v);
   if (p.finita) return undefined;
-  if (v.compito) return { fa: 'raccogli', x: v.posto.x, y: v.posto.y, ...v.compito };
+  if (v.compito) return { fa: 'gather', x: v.posto.x, y: v.posto.y, ...v.compito };
   const missing = Object.keys(p.manca);
   if (missing.length) {
     const item = missing.find((it) => has(it) > 0);
-    return item ? { fa: 'porta', oggetto: item, x: v.posto.x, y: v.posto.y } : undefined;
+    return item ? { fa: 'carry', oggetto: item, x: v.posto.x, y: v.posto.y } : undefined;
   }
   const at = spotOf(v, nome);
-  return { fa: 'lavora', x: at.x, y: at.y, posa: 'lavora' };
+  return { fa: 'work', x: at.x, y: at.y, posa: 'work' };
 }
 
 /** The phases of a house rebuilt or built new: the materials of the seed's trades (logs, nails), the stages of T245e. */
@@ -348,13 +355,13 @@ export function housePhases(classe: string | undefined): VenturePhase[] {
 }
 
 export const HOUSE_ROLES: VentureRole[] = [
-  { ruolo: 'capomastro', mestiere: 'fabbro', quanti: 1 },
-  { ruolo: 'manovale', mestiere: 'qualunque', quanti: 2 },
+  { ruolo: 'capomastro', mestiere: 'smith', quanti: 1 },
+  { ruolo: 'manovale', mestiere: ANY_TRADE, quanti: 2 },
 ];
 
 export const HARVEST_ROLES: VentureRole[] = [
-  { ruolo: 'mietitore', mestiere: 'contadino', quanti: 3 },
-  { ruolo: 'manovale', mestiere: 'qualunque', quanti: 1 },
+  { ruolo: 'mietitore', mestiere: 'farmer', quanti: 3 },
+  { ruolo: 'manovale', mestiere: ANY_TRADE, quanti: 1 },
 ];
 
 /** A new id, the same for the same origin: two kernels that see the same thing make the same venture. */
@@ -363,14 +370,14 @@ export function ventureId(origin: string): string {
 }
 
 /** The ventures open (not finished) of a place, or of all. */
-export const openVentures = (list: readonly Venture[], luogo?: string) => list.filter((v) => v.stato !== 'finita' && (!luogo || v.luogo === luogo));
+export const openVentures = (list: readonly Venture[], luogo?: string) => list.filter((v) => v.stato !== 'finished' && (!luogo || v.luogo === luogo));
 
 /**
  * The ventures to keep: all the open ones and, of the finished, those that stand as buildings (a new house is the venture that built
  * it) and the last others, up to `MAX_KEPT`.
  */
 export function pruneVentures(list: readonly Venture[]): Venture[] {
-  const done = list.filter((v) => v.stato === 'finita' && !v.area);
+  const done = list.filter((v) => v.stato === 'finished' && !v.area);
   const drop = new Set(done.slice(0, Math.max(0, done.length - MAX_KEPT)).map((v) => v.id));
   return list.filter((v) => !drop.has(v.id));
 }

@@ -180,7 +180,7 @@ export class CoronaView {
         b.position.set(x + Math.sin(t * 0.8 + phase * 9) * 0.05, 0.35 + ((phase + t * speed * 0.5) % 1) * 1.9, z);
       }
     }
-    const table = studio?.storey.items.find((i) => i.kind === 'situazione');
+    const table = studio?.storey.items.find((i) => i.kind === 'situation');
     if (this.sit) this.sit.group.visible = !!table;
     if (studio && table) {
       // Read again once a second; built again only when something changed.
@@ -195,7 +195,7 @@ export class CoronaView {
       }
       for (const [i, m] of this.sit.pulse.entries()) m.scale.y = 1 + 2.5 * (0.5 + 0.5 * Math.sin(t * 4 + i));
     }
-    const wall = studio?.storey.items.filter((i) => i.kind === 'parete') ?? [];
+    const wall = studio?.storey.items.filter((i) => i.kind === 'wall') ?? [];
     const here = studio ? `${studio.building.id}#${studio.storey.index}` : '';
     if (this.wall && (this.wall.room !== here || !wall.length)) {
       this.root.remove(this.wall.view.group);
@@ -214,7 +214,7 @@ export class CoronaView {
       }
       this.wall.view.blink(t);
     }
-    const stations = studio?.storey.items.filter((i) => i.kind === 'stazione') ?? [];
+    const stations = studio?.storey.items.filter((i) => i.kind === 'station') ?? [];
     // Built again when a system joins or leaves the chain.
     const line = `${here}|${stations.map((i) => `${i.target}@${i.x}+${i.w}`).join(',')}`;
     if (this.chain && (this.chain.room !== line || !stations.length)) {
@@ -234,7 +234,7 @@ export class CoronaView {
       }
       this.chain.view.run(t);
     }
-    const bench = studio?.storey.items.find((i) => i.kind === 'banco');
+    const bench = studio?.storey.items.find((i) => i.kind === 'bench');
     if (this.bench && !bench) {
       this.root.remove(this.bench.view.group);
       this.bench.view.dispose();
@@ -251,14 +251,14 @@ export class CoronaView {
           this.bench = undefined;
         }
         if (now) {
-          const arrow = (kind: string) => studio.storey.items.find((i) => i.kind === kind && i.target === 'banco');
+          const arrow = (kind: string) => studio.storey.items.find((i) => i.kind === kind && i.target === 'bench');
           this.bench = { key, at: t, view: new BenchView(bench, now, studio.building.color, arrow('prev'), arrow('next')) };
           this.root.add(this.bench.view.group);
         }
       } else if (this.bench) this.bench.at = t;
     }
     this.bench?.view.update(t);
-    const tornio = studio?.storey.items.find((i) => i.kind === 'tornio');
+    const tornio = studio?.storey.items.find((i) => i.kind === 'lathe');
     if (this.tornio && !tornio) {
       this.root.remove(this.tornio.view.group);
       this.tornio.view.dispose();
@@ -274,7 +274,7 @@ export class CoronaView {
           this.tornio = undefined;
         }
         if (now) {
-          const arrow = (kind: string) => studio.storey.items.find((i) => i.kind === kind && i.target === 'tornio');
+          const arrow = (kind: string) => studio.storey.items.find((i) => i.kind === kind && i.target === 'lathe');
           this.tornio = { key, at: t, view: new LatheView(tornio, now, studio.building.color, arrow('prev'), arrow('next')) };
           this.root.add(this.tornio.view.group);
         }
@@ -306,14 +306,14 @@ export class CoronaView {
     const fl = studio.storey;
     o.title(`${studio.building.name.toUpperCase()}${studio.building.storeys.length > 1 ? `  ·  PIANO ${fl.index + 1}/${studio.building.storeys.length}` : ''}`, studio.building.color);
     const shown = near?.kind === 'showcase' ? k.showcaseOf(near.target!) : undefined;
-    const tried = near?.kind === 'banco' ? k.benchOf() : undefined;
-    const read = near?.kind === 'leggio' ? k.bibleOf() : undefined;
-    const sculpted = near?.kind === 'tornio' ? k.latheOf() : undefined;
+    const tried = near?.kind === 'bench' ? k.benchOf() : undefined;
+    const read = near?.kind === 'lectern' ? k.bibleOf() : undefined;
+    const sculpted = near?.kind === 'lathe' ? k.latheOf() : undefined;
     if (shown) o.caption(`E: guarda «${shown.entry.label}» (${shown.index + 1}/${shown.count})`);
     else if (tried) o.caption(`E: il banco di prova, ${tried.entry.name}: «${tried.entry.case.titolo}» (${tried.index + 1}/${tried.count})`);
     else if (read) o.caption(`E: sfoglia la bibbia, «${read.page.titolo}» (${read.index + 1}/${read.count})`);
     else if (sculpted) o.caption(`E: il tornio dello Scultore, «${sculpted.entry.name}» (${sculpted.index + 1}/${sculpted.count})`);
-    else if (near?.kind === 'lastra') o.caption(near.rule ? `E: la tavola della regola «${near.rule.testo}» (${near.rule.possibile ? 'si può' : 'non si può'}${near.marked ? ' · recente' : ''})` : `E: ${near.label}`);
+    else if (near?.kind === 'slab') o.caption(near.rule ? `E: la tavola della regola «${near.rule.testo}» (${near.rule.possibile ? 'si può' : 'non si può'}${near.marked ? ' · recente' : ''})` : `E: ${near.label}`);
     else if (near && near.kind !== 'desk') o.caption(`E: ${near.kind === 'file' ? `apri ${near.label}` : near.kind === 'sprite' || near.kind === 'tile' || near.kind === 'layout' ? `guarda «${near.label}»` : near.label}`);
   }
 }

@@ -123,7 +123,7 @@ function testoRapporto(e: Esito, p: Prova): string {
     righe.push('');
     righe.push(`## Traccia del seme 1 a ${prima.taglia} (\`src/mj/trace.ts\`, forma «differenze»)`, '');
     const t = traceProgram(prima.e.model, 1);
-    righe.push('```text', renderTrace(t, prima.e.model, { forma: 'differenze', tetto: 3500 }), '```', '');
+    righe.push('```text', renderTrace(t, prima.e.model, { forma: 'diffs', tetto: 3500 }), '```', '');
   }
   return righe.join('\n');
 }
@@ -138,7 +138,7 @@ for (const file of files) {
   if (rapporto) fs.writeFileSync(file.replace(/\.xml$/, '.md'), testoRapporto(esito, p));
   if (tracciaAnche && !esito.passa) {
     const x = p.esecuzioni.find((q) => q.m && esito.difetti.some((d) => d.startsWith(`${q.taglia} seme ${q.seme}:`)));
-    if (x) console.log(renderTrace(traceProgram(x.e.model, x.seme), x.e.model, { forma: 'sezioni', tetto: 3000 }));
+    if (x) console.log(renderTrace(traceProgram(x.e.model, x.seme), x.e.model, { forma: 'sections', tetto: 3000 }));
   }
 }
 if (rapporto && files.length) {

@@ -5,7 +5,7 @@
 // The same string is in package.json (a test says so) and in every universe.json the kernel writes (`kernel`).
 // Every universe says the range of the kernels it runs on (T302, ADR-0152): `kernels`, from the contract it was born or ported with.
 
-export const KERNEL_VERSION = '0.2.1';
+export const KERNEL_VERSION = '0.3.0';
 
 export interface KernelVersion {
   major: number;

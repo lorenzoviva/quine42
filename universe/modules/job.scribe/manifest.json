@@ -1,0 +1,71 @@
+{
+  "id": "job.scribe",
+  "name": "Lo scrivano",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi scrive per gli altri: lettere e conti al tavolo, portati in piazza la sera.",
+  "mestieri": [
+    {
+      "id": "scribe",
+      "nomi": [
+        "scrivano",
+        "scrivana",
+        "copista",
+        "notaio",
+        "notaia",
+        "segretario",
+        "segretaria",
+        "archivista",
+        "cronista",
+        "giornalista",
+        "bibliotecario",
+        "bibliotecaria",
+        "scrittore",
+        "scrittrice",
+        "cancelliere",
+        "cancelliera"
+      ],
+      "giornata": {
+        "morning": [
+          {
+            "fa": "go",
+            "dove": "work"
+          },
+          {
+            "fa": "wait",
+            "durata": 30,
+            "posa": "read"
+          }
+        ],
+        "day": [
+          {
+            "fa": "produce",
+            "oggetto": "item.lettera",
+            "quante": 2,
+            "durata": 30,
+            "posa": "read"
+          }
+        ],
+        "evening": [
+          {
+            "fa": "carry",
+            "oggetto": "item.lettera",
+            "dove": "square"
+          },
+          {
+            "fa": "chat"
+          }
+        ],
+        "night": [
+          {
+            "fa": "go",
+            "dove": "home"
+          },
+          {
+            "fa": "rest"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -88,7 +88,7 @@ export function societa(files: FileMap): string[] {
       else if (!other.famiglia.some((g) => g.nome === p.nome)) out.push(`${p.nome}: ${f.nome} non sa di essere ${f.legame}`);
     }
   }
-  for (const f of repairSociety(people, (t) => (/gatto/.test(t) ? 'animale' : 'persona')).fixes) out.push(`persone: il kernel correggerebbe «${f}»`);
+  for (const f of repairSociety(people, (t) => (/gatto/.test(t) ? 'animal' : 'person')).fixes) out.push(`persone: il kernel correggerebbe «${f}»`);
   for (const plot of readPlots(files)) for (const pr of reviewPlot(plot, people, words).problems) out.push(`trama ${plot.id}: ${pr}`);
   return out;
 }

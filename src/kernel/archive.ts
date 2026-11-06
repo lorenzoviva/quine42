@@ -10,7 +10,7 @@ import { AGENTS, type AgentId, type FeedEntry } from './agents/council';
 import { ROOM_H, type Building, type Corona } from './corona';
 
 export interface Avatar {
-  /** Agent kind (or 'referente'). */
+  /** Agent kind (or 'liaison'). */
   agent: AgentId;
   name: string;
   color: string;
@@ -62,10 +62,10 @@ export class Archive {
         if (!this.avatars.has(key) || this.avatars.get(key)!.building !== b.id) this.avatars.set(key, this.member(team, b));
       }
     }
-    keep.add('referente@');
-    if (!this.avatars.has('referente@')) {
+    keep.add('liaison@');
+    if (!this.avatars.has('liaison@')) {
       const p = { x: 0.5, y: -(c.radius + 1.5) };
-      this.avatars.set('referente@', { agent: 'referente', name: AGENTS.referente.name, color: AGENTS.referente.color, sigil: AGENTS.referente.sigil, building: '', ...p, tx: p.x, ty: p.y, sayUntil: 0, idleUntil: 0, speed: SPEED });
+      this.avatars.set('liaison@', { agent: 'liaison', name: AGENTS.liaison.name, color: AGENTS.liaison.color, sigil: AGENTS.liaison.sigil, building: '', ...p, tx: p.x, ty: p.y, sayUntil: 0, idleUntil: 0, speed: SPEED });
     }
     for (const k of [...this.avatars.keys()]) if (!keep.has(k) && !k.includes('#')) this.avatars.delete(k);
   }
@@ -170,7 +170,7 @@ export class Archive {
 
   /** The Referente comes to meet the wanderer on the ring. */
   meet(px: number, py: number): void {
-    const r = this.avatars.get('referente@');
+    const r = this.avatars.get('liaison@');
     if (!r) return;
     const d = Math.hypot(r.x - px, r.y - py);
     if (d > 2.2) {

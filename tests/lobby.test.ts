@@ -24,7 +24,7 @@ async function bootMany(extraCfg: Record<string, unknown> = {}): Promise<Kernel>
     'universe.json': JSON.stringify(
       {
         ...cfg,
-        partita: { modalita: 'multigiocatore', morte: 3 },
+        partita: { modalita: 'multiplayer', morte: 3 },
         ...extraCfg,
       },
       null,
@@ -70,9 +70,9 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
     });
     expect(clean).toBeDefined();
     expect(clean!.textModel).toBe('gemini-3.8-flash');
-    expect(clean!.scultori?.struttura).toBe('gemini-3.8-flash');
+    expect(clean!.scultori?.structure).toBe('gemini-3.8-flash');
     expect(clean!.tetto).toBe(1.5);
-    expect(clean!.coefficienti?.sessioni).toBe(0.5);
+    expect(clean!.coefficienti?.sessions).toBe(0.5);
   });
 
   it('addBudgetFromCap expands the session AI limits proportionally', () => {
@@ -135,7 +135,7 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
     const cfg = JSON.parse(bundledFiles['universe.json']);
     const files = {
       ...bundledFiles,
-      'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2),
+      'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2),
     };
     const k = await Kernel.boot({ files, store: memoryStore(), ai: online });
     k.giveCredits('carlo', 10.0); // Has plenty of credits
@@ -151,7 +151,7 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
     // Call 1: prompt costing $0.025 (+1% fee = $0.02525)
     k.ai.onCall!({
       model: 'gemini-3.1-flash-lite',
-      agent: 'narratore',
+      agent: 'narrator',
       task: 'npc.reply',
       prompt: 100_000,
       cached: 0,
@@ -166,7 +166,7 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
     // Call 2: another $0.02525 -> total spent $0.0505 > tetto ($0.05)
     k.ai.onCall!({
       model: 'gemini-3.1-flash-lite',
-      agent: 'narratore',
+      agent: 'narrator',
       task: 'npc.reply',
       prompt: 100_000,
       cached: 0,
@@ -195,7 +195,7 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
 
     // Subsequent call uses local models, NOT online
     online.onlineCalls = [];
-    await k.council.write('narratore', 'npc.reply', 'Dimmi ancora qualcosa', { chi: 'carlo' });
+    await k.council.write('narrator', 'npc.reply', 'Dimmi ancora qualcosa', { chi: 'carlo' });
     expect(online.onlineCalls).not.toContain('npc.reply');
   });
 
@@ -204,12 +204,12 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
       ...bundledFiles,
       'world/carte.json': JSON.stringify({
         utilizzi: {
-          'tipo:custom_forge': { luoghi: 5, trame: 2, prompt: 10 },
-          'oggetto:spada_runica': { luoghi: 3, trame: 1, prompt: 4 },
+          'kind:custom_forge': { luoghi: 5, trame: 2, prompt: 10 },
+          'item:spada_runica': { luoghi: 3, trame: 1, prompt: 4 },
         },
         luoghi: {
           '0_0': {
-            autore: 'cartografo',
+            autore: 'cartographer',
             pagante: 'carlo',
             titolare: 'carlo',
           },
@@ -220,7 +220,7 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
         name: 'Forgia Antica',
         kind: 'sistema',
         carta: {
-          autore: 'ingegnere',
+          autore: 'engineer',
           pagante: 'carlo',
           titolare: 'carlo',
         },
@@ -241,7 +241,7 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
             glyph: '⚔',
             color: '#c0c0c0',
             carta: {
-              autore: 'narratore',
+              autore: 'narrator',
               pagante: 'carlo',
               titolare: 'carlo',
             },
@@ -253,24 +253,24 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
     const cards = collectionOf(files, 'carlo');
     expect(cards.length).toBeGreaterThanOrEqual(3);
 
-    const forgeCard = cards.find((c) => c.id === 'tipo:custom_forge');
+    const forgeCard = cards.find((c) => c.id === 'kind:custom_forge');
     expect(forgeCard).toBeDefined();
-    expect(forgeCard?.tipo).toBe('modulo');
+    expect(forgeCard?.tipo).toBe('module');
     expect(forgeCard?.nome).toBe('Forgia Antica');
-    expect(forgeCard?.autore).toBe('ingegnere');
+    expect(forgeCard?.autore).toBe('engineer');
     expect(forgeCard?.pagante).toBe('carlo');
     expect(forgeCard?.titolare).toBe('carlo');
     expect(forgeCard?.utilizzi).toEqual({ luoghi: 5, trame: 2, prompt: 10 });
 
-    const swordCard = cards.find((c) => c.id === 'oggetto:spada_runica');
+    const swordCard = cards.find((c) => c.id === 'item:spada_runica');
     expect(swordCard).toBeDefined();
-    expect(swordCard?.tipo).toBe('oggetto');
+    expect(swordCard?.tipo).toBe('item');
     expect(swordCard?.nome).toBe('Spada Runica');
     expect(swordCard?.utilizzi).toEqual({ luoghi: 3, trame: 1, prompt: 4 });
 
-    const chunkCard = cards.find((c) => c.id === 'luogo:0_0');
+    const chunkCard = cards.find((c) => c.id === 'chunk:0_0');
     expect(chunkCard).toBeDefined();
-    expect(chunkCard?.tipo).toBe('luogo');
+    expect(chunkCard?.tipo).toBe('chunk');
     expect(chunkCard?.titolare).toBe('carlo');
 
     // Wanderer with no cards gets an empty list
@@ -387,7 +387,7 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
         'universe.json': JSON.stringify({
           name: 'mondo-multi',
           kernel: KERNEL_VERSION,
-          partita: { modalita: 'multigiocatore', master: 'io' },
+          partita: { modalita: 'multiplayer', master: 'io' },
           ai: {
             textModel: 'gemini-3.1-flash-lite',
             maxText: 800,

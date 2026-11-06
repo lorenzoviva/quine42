@@ -18,7 +18,7 @@ import { OPERATION_COLOR, type Situation } from '../kernel/situation';
 
 const TOWER_H = 4.5;
 const GROUND: Record<string, [string, string]> = { viale: ['#161824', '#12131d'], vicolo: ['#14141c', '#111119'], prato: ['#0b0f15', '#0b0f15'], bordo: ['#0d0d16', '#0d0d16'] };
-const LOOK_COLOR: Record<string, string> = { libro: '#a0683a', cristallo: '#5fe0ff', pergamena: '#e8dcb0', tavoletta: '#9aa3ad' };
+const LOOK_COLOR: Record<string, string> = { book: '#a0683a', crystal: '#5fe0ff', scroll: '#e8dcb0', tablet: '#9aa3ad' };
 
 /** How bright the studio's floor grid is, over the building's colour (T49a: faint, and it does not bloom). */
 const GRID = 0.12;
@@ -566,14 +566,14 @@ export function buildRoom(k: Kernel, building: Building, storey: Storey): { grou
     group.add(m);
   }
   // The Nucleus's graph of the world (T28), turning above its pedestal.
-  const graph = storey.items.find((i) => i.kind === 'grafo');
+  const graph = storey.items.find((i) => i.kind === 'graph');
   if (graph) {
     globe = graphHologram(k);
     globe.position.set(graph.x + (graph.w ?? 1) / 2, 1.9, graph.y + (graph.h ?? 1) / 2);
     group.add(globe);
   }
   // The Library's lectern: the open holographic book above the dark pool (T47a).
-  const lectern = storey.items.find((i) => i.kind === 'leggio');
+  const lectern = storey.items.find((i) => i.kind === 'lectern');
   if (lectern) {
     const book = bookHologram(col);
     book.position.set(lectern.x + (lectern.w ?? 3) / 2, 1.05, lectern.y + (lectern.h ?? 3) / 2);
@@ -735,9 +735,9 @@ function itemMesh(lit: Builder, glow: Builder, it: StudioItem, col: string, k: K
       const f = it.model ? k.forms?.ready?.(it.model, it.seed ?? 1) : undefined;
       if (!f) {
         if (it.model && typeof k.forms?.get === 'function') k.forms.get(it.model, it.seed ?? 1);
-        const c = rgbOf(LOOK_COLOR[it.look ?? 'tavoletta']);
+        const c = rgbOf(LOOK_COLOR[it.look ?? 'tablet']);
         const h = 0.25 + Math.min(0.35, (it.lines ?? 10) / 400);
-        (it.look === 'cristallo' ? glow : lit).box(x + 0.3, 0.38, z + 0.38, x + 0.7, 0.38 + h, z + 0.62, c);
+        (it.look === 'crystal' ? glow : lit).box(x + 0.3, 0.38, z + 0.38, x + 0.7, 0.38 + h, z + 0.62, c);
       }
       break;
     }
@@ -758,7 +758,7 @@ function itemMesh(lit: Builder, glow: Builder, it: StudioItem, col: string, k: K
       glow.box(x + 0.05, 0.2, z + 0.38, x + w - 0.05, 1.15, z + 0.4, rgbOf(col, 0.45));
       break;
     }
-    case 'grafo': {
+    case 'graph': {
       // A pedestal of dark metal under the hologram, with rings of light (T58a: rim on all four faces of both steps).
       const w = it.w ?? 1, d = it.h ?? 1, cx = x + w / 2, cz = z + d / 2;
       lit.box(cx - 1.2, 0, cz - 1.2, cx + 1.2, 0.18, cz + 1.2, rgbOf('#10101a'));
@@ -767,7 +767,7 @@ function itemMesh(lit: Builder, glow: Builder, it: StudioItem, col: string, k: K
       rim(glow, cx - 0.8, cz - 0.8, cx + 0.8, cz + 0.8, 0.42, rgbOf(col, 0.5));
       break;
     }
-    case 'situazione': {
+    case 'situation': {
       // The situation table (T46a): a long dark table lit from below, a glass top with a golden rim; the marks are on it (buildSituation).
       const w = it.w ?? 1, d = it.h ?? 1;
       lit.box(x + 0.1, 0, z + 0.1, x + w - 0.1, 0.12, z + d - 0.1, rgbOf('#0e0e18'));
@@ -780,7 +780,7 @@ function itemMesh(lit: Builder, glow: Builder, it: StudioItem, col: string, k: K
       glow.box(x + w - 0.05, 0.7, z, x + w, 0.72, z + d, rgbOf(col, 0.8));
       break;
     }
-    case 'tornio': {
+    case 'lathe': {
       // The Sculptor's lathe in the Artist's gallery (T48a):
       // A tiered circular/octagonal base plinth of dark metal with glowing pink/magenta neon rims,
       // supporting the rotating turntable disc where the model builds up step by step.
@@ -793,7 +793,7 @@ function itemMesh(lit: Builder, glow: Builder, it: StudioItem, col: string, k: K
       rim(glow, cx - 0.65, cz - 0.65, cx + 0.65, cz + 0.65, 0.46, rgbOf(col, 0.85));
       break;
     }
-    case 'parete': {
+    case 'wall': {
       // A field of the Direction's wall of screens (T46b): a dark plinth with a golden edge and a support against the
       // back wall; the screen leans on them, tilted towards the camera (src/render/screens.ts).
       const w = it.w ?? 1;
@@ -802,7 +802,7 @@ function itemMesh(lit: Builder, glow: Builder, it: StudioItem, col: string, k: K
       glow.box(x + 0.02, 0.4, z + 1.13, x + w - 0.02, 0.43, z + 1.17, rgbOf(col, 0.7));
       break;
     }
-    case 'stazione': {
+    case 'station': {
       // A station of the Systems Room's chain (T27a): a dark plinth against the back wall, its front edge a piece of the
       // belt of light; the screen leans on it (src/render/chain.ts).
       const w = it.w ?? 1;
@@ -811,7 +811,7 @@ function itemMesh(lit: Builder, glow: Builder, it: StudioItem, col: string, k: K
       glow.box(x, 0.4, z + 1.12, x + w, 0.43, z + 1.18, rgbOf(col, 0.75));
       break;
     }
-    case 'banco': {
+    case 'bench': {
       // The bench of the Systems Room (T27b): a dark plinth of w × h cells, the posts and the top frame of its glass case
       // with neon edges; the glass, the scene in miniature and the screen above are src/render/bench.ts.
       const w = it.w ?? 1, d = it.h ?? 1;
@@ -836,7 +836,7 @@ function itemMesh(lit: Builder, glow: Builder, it: StudioItem, col: string, k: K
       lit.box(x, 0, z + 0.1, x + (it.w ?? 1), 0.7, z + 0.9, rgbOf('#1a2a33'));
       glow.box(x + 0.1, 0.7, z + 0.2, x + (it.w ?? 1) - 0.1, 0.72, z + 0.8, rgbOf('#7dd87d', 0.6));
       break;
-    case 'leggio': {
+    case 'lectern': {
       // The lectern of the Library (T47a): a basin of dark water with a green neon rim,
       // a dark stone pedestal rising from the water, and the slanted desk for the book.
       const w = it.w ?? 3, d = it.h ?? 3;
@@ -868,7 +868,7 @@ function itemMesh(lit: Builder, glow: Builder, it: StudioItem, col: string, k: K
       glow.box(cx - 0.52, 0.85, cz + 0.38, cx + 0.52, 0.87, cz + 0.42, green);
       break;
     }
-    case 'lastra': {
+    case 'slab': {
       // A rule tablet on the wall of the Library of the World (T47b):
       // A dark slate tablet against the back wall, with engraved runic text;
       // the newest 12 rules shine with radiant emerald/golden light and floating embers.
@@ -973,7 +973,7 @@ function showcaseBody(lit: Builder, glow: Builder, it: StudioItem, col: string):
   const x = it.x, z = it.y, w = it.w ?? 1;
   const dark = rgbOf('#10101a');
   const c = rgbOf(col);
-  if (it.device === 'schermo') {
+  if (it.device === 'display') {
     lit.box(x + 0.1, 0, z + 0.35, x + w - 0.1, 2.3, z + 0.7, dark);
     glow.box(x + 0.1, 2.3, z + 0.35, x + w - 0.1, 2.36, z + 0.7, c);
     glow.box(x + 0.1, 0.2, z + 0.7, x + w - 0.1, 0.25, z + 0.72, c);
@@ -988,7 +988,7 @@ function showcaseBody(lit: Builder, glow: Builder, it: StudioItem, col: string):
     circleRim(glow, cx, cz, 0.95, 2.56, rgbOf(col, 0.8), 0.05, -0.03);
     return;
   }
-  if (it.device === 'plastico') {
+  if (it.device === 'diorama') {
     // The model of places (T26): a dark table over w × h cells, glowing edges, a projector plate under the place.
     const d = it.h ?? 1;
     lit.box(x + 0.05, 0, z + 0.05, x + w - 0.05, PLATE - 0.04, z + d - 0.05, dark);
@@ -1183,7 +1183,7 @@ export function buildSituation(it: StudioItem, s: Situation, color: string): { g
     glow.box(e - t, top, b, e, top + 0.012, f, rim);
   }
   // How tall each mark is, and how much of its cell it covers.
-  const look = { viandante: [0.32, 0.5], giocatore: [0.26, 0.42], trama: [0.16, 0.55], missione: [0.12, 0.55], guasto: [0.2, 0.6], luogo: [0.015, 0.9] } as const;
+  const look = { wanderer: [0.32, 0.5], player: [0.26, 0.42], plot: [0.16, 0.55], quest: [0.12, 0.55], fault: [0.2, 0.6], chunk: [0.015, 0.9] } as const;
   const pulse: THREE.Object3D[] = [];
   // More operations on one chunk stand side by side.
   const seen = new Map<string, number>();
@@ -1191,11 +1191,11 @@ export function buildSituation(it: StudioItem, s: Situation, color: string): { g
     if (o.cx === undefined || o.cy === undefined) continue;
     const [h, size] = look[o.kind];
     const key = `${o.cx},${o.cy}`;
-    const n = o.kind === 'luogo' ? 0 : (seen.get(key) ?? 0);
-    if (o.kind !== 'luogo') seen.set(key, n + 1);
+    const n = o.kind === 'chunk' ? 0 : (seen.get(key) ?? 0);
+    if (o.kind !== 'chunk') seen.set(key, n + 1);
     const half = (cell * size) / 2 / (n ? 1.6 : 1);
     const cx = X(o.cx) + cell / 2 + (n ? Math.cos(n * 2.1) * cell * 0.28 : 0), cz = Z(o.cy) + cell / 2 + (n ? Math.sin(n * 2.1) * cell * 0.28 : 0);
-    const rgb = rgbOf(OPERATION_COLOR[o.kind], o.kind === 'luogo' && !o.live ? 0.3 : 1);
+    const rgb = rgbOf(OPERATION_COLOR[o.kind], o.kind === 'chunk' && !o.live ? 0.3 : 1);
     if (!o.live) {
       glow.box(cx - half, top, cz - half, cx + half, top + h, cz + half, rgb);
       continue;
@@ -1235,13 +1235,13 @@ export function buildShowcase(k: Kernel, it: StudioItem, entry: ShowcaseEntry, c
   const row = it.y + Math.floor(d / 2);
   const cx = it.x + w / 2, cz = row + 0.5;
   g.add(arrowSign(it.x - 1, row, '<', color), arrowSign(it.x + w, row, '>', color));
-  const printer = it.device === 'stampante';
-  const table = it.device === 'plastico';
+  const printer = it.device === 'printer';
+  const table = it.device === 'diorama';
   const name = textPlane([entry.label], color, w - 0.2, printer || table ? 0.24 : 0.32);
   name.position.set(
     cx,
-    it.device === 'schermo' ? 0.45 : table ? 0.38 : printer ? 0.14 : it.device === 'silos' ? 0.15 : 0.17,
-    it.device === 'schermo' ? cz + 0.73 : table ? it.y + d - 0.04 : printer ? it.y + d - 0.09 : it.device === 'silos' ? cz + 1.07 : cz + 0.52,
+    it.device === 'display' ? 0.45 : table ? 0.38 : printer ? 0.14 : it.device === 'silos' ? 0.15 : 0.17,
+    it.device === 'display' ? cz + 0.73 : table ? it.y + d - 0.04 : printer ? it.y + d - 0.09 : it.device === 'silos' ? cz + 1.07 : cz + 0.52,
   );
   g.add(name);
   if (entry.place) {
@@ -1307,7 +1307,7 @@ export function buildShowcase(k: Kernel, it: StudioItem, entry: ShowcaseEntry, c
   const box = geo.body.boundingBox!;
   box.getSize(size);
   // Things too big are brought down to the device: on the printer, to its middle cell (structures to one cell).
-  const room = it.device === 'schermo' ? [w - 0.6, 1.6] : it.device === 'silos' ? [1.4, 1.8] : [0.9, 1.8];
+  const room = it.device === 'display' ? [w - 0.6, 1.6] : it.device === 'silos' ? [1.4, 1.8] : [0.9, 1.8];
   const s = Math.min(room[0] / Math.max(size.x, size.z, 0.01), room[1] / Math.max(size.y, 0.01), 1.5);
   const m = new THREE.Mesh(geo.body, modelMaterials(geo.body, MAT.corona));
   m.castShadow = true;
@@ -1406,7 +1406,7 @@ export class Avatars {
       if (v.modelObj) {
         const swing = walking ? Math.sin(t * 7) * 0.35 : 0;
         for (const l of v.modelObj.limbs) {
-          if (l.part === 'gamba') l.pivot.rotation.x = l.phase ? swing : -swing;
+          if (l.part === 'leg') l.pivot.rotation.x = l.phase ? swing : -swing;
         }
       }
     }

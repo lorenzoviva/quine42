@@ -113,7 +113,7 @@ export function repairProfile(raw: unknown, id: string, taken: string[], seeds: 
   }
   const others = taken.filter((t) => t && t !== WANDERER_NAME);
   if (nome && nome !== WANDERER_NAME && others.some((t) => similarNames(t, nome))) {
-    const fresh = freshName('persona', guessGender({ nome, mestiere: '', famiglia: [] }), others, `viandante:${id}`);
+    const fresh = freshName('person', guessGender({ nome, mestiere: '', famiglia: [] }), others, `viandante:${id}`);
     riparato.push(`«${nome}» somiglia al nome di qualcun altro: diventa «${fresh}»`);
     nome = fresh;
   }

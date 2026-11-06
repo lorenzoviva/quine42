@@ -56,13 +56,13 @@ const planned = (k: Kernel): number => (k as any).plannedCount;
 
 describe('the coefficients of generation (T45b)', () => {
   it('are repaired: numbers, words, percentages, presets; what is missing is 1, but the lives of the people, which are 0', () => {
-    expect(repairCoefficients(undefined)).toEqual({ ...FULL_DETAIL, vite: 0 });
+    expect(repairCoefficients(undefined)).toEqual({ ...FULL_DETAIL, lives: 0 });
     const c = repairCoefficients({ sessioni: 2, dialoghi: -1, trame: '0,5', revisioni: '25%', modelli: '40', persone: 'tanti', ignoto: 0.1 });
-    expect(c).toMatchObject({ sessioni: 1, dialoghi: 0, trame: 0.5, revisioni: 0.25, modelli: 0.4, persone: 1, abitanti: 1 });
+    expect(c).toMatchObject({ sessions: 1, dialogues: 0, plots: 0.5, reviews: 0.25, models: 0.4, people: 1, inhabitants: 1 });
     expect(Object.keys(c).sort()).toEqual([...COEFFICIENT_KEYS].sort());
     expect(repairCoefficients('Low Detail')).toEqual(LOW_DETAIL.coefficienti);
     expect(repairCoefficients('low-detail')).toEqual(LOW_DETAIL.coefficienti);
-    expect(repairCoefficients('chissà')).toEqual({ ...FULL_DETAIL, vite: 0 });
+    expect(repairCoefficients('chissà')).toEqual({ ...FULL_DETAIL, lives: 0 });
     expect(repairCoefficients('pieno')).toEqual(FULL_DETAIL);
     expect(readConfig({ 'universe.json': JSON.stringify({ ai: { coefficienti: 'low detail' } }) }).config.ai.coefficienti).toEqual(LOW_DETAIL.coefficienti);
   });
@@ -125,9 +125,9 @@ describe('the coefficients of generation (T45b)', () => {
     // ...what the world adds by itself is not: sessions every 48 places instead of 12, packs every 40 instead of 10, new kinds every 28 instead of 7.
     expect(full.models.count('council.session')).toBeGreaterThanOrEqual(2);
     const beats = (base: number, c: number) => Array.from({ length: planned(low.k) }, (_, i) => i + 1).filter((n) => onBeat(n, base, c)).length;
-    expect(low.models.count('council.session')).toBe(1 + beats(12, LOW_DETAIL.coefficienti.sessioni));
+    expect(low.models.count('council.session')).toBe(1 + beats(12, LOW_DETAIL.coefficienti.sessions));
     expect(full.models.count('content.items')).toBeGreaterThanOrEqual(3);
-    expect(low.models.count('content.items')).toBe(beats(10, LOW_DETAIL.coefficienti.pacchetti));
+    expect(low.models.count('content.items')).toBe(beats(10, LOW_DETAIL.coefficienti.packs));
     const grown = (m: Counting) => m.count('council.session', 'content.items', 'content.physics', 'content.review', 'content.recipes', 'forge.concept', 'npc.individuate', 'content.define');
     expect(grown(low.models)).toBeLessThan(grown(full.models) * 0.5);
     const all = (m: Counting) => [...m.calls.values()].reduce((s, n) => s + n, 0);

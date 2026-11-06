@@ -68,7 +68,7 @@ export class ModelDirector {
       const man = m.manifest;
       const app = man.appearance;
       if (!app || !lacks(app.model)) continue;
-      const classe = app.classe ?? guessClass(`${man.name} ${man.description ?? ''} ${app.aspetto ?? ''}`, man.persona ? 'figura' : undefined).id;
+      const classe = app.classe ?? guessClass(`${man.name} ${man.description ?? ''} ${app.aspetto ?? ''}`, man.persona ? 'figure' : undefined).id;
       const taglia = sizeOf(app.taglia)?.id;
       out.push({ id: app.model!, nome: man.name, aspetto: app.aspetto ?? man.description ?? man.name, classe, ...(taglia ? { taglia } : {}), contesto: man.context });
     }
@@ -96,7 +96,7 @@ export class ModelDirector {
 
   /** Called every few seconds: starts the next model if idle. */
   pump(): void {
-    if (!this.active || this.busy || this.k.generationHeld || this.used >= (this.k.config.ai.maxModels ?? 40) || this.k.time < this.nextAt || this.k.coefficients().modelli <= 0) return;
+    if (!this.active || this.busy || this.k.generationHeld || this.used >= (this.k.config.ai.maxModels ?? 40) || this.k.time < this.nextAt || this.k.coefficients().models <= 0) return;
     const req = this.missing()[0];
     if (req) void this.make(req);
   }
@@ -107,29 +107,29 @@ export class ModelDirector {
     this.used++;
     try {
       const coef = this.k.coefficients();
-      const r = await sculpt(this.k.council, req, this.k.sculptors(), sculptPlan(coef.revisioni));
-      this.nextAt = this.k.time + modelGap(coef.modelli);
+      const r = await sculpt(this.k.council, req, this.k.sculptors(), sculptPlan(coef.reviews));
+      this.nextAt = this.k.time + modelGap(coef.models);
       if (!r) {
         this.skip.add(req.id);
-        this.lacking(req, 'invalido', this.k.lastDiscard('scultore', 'model.sculpt'));
+        this.lacking(req, 'invalid', this.k.lastDiscard('sculptor', 'model.sculpt'));
         return false;
       }
       const added = this.k.addModel(req.id, r.xml, { classe: req.classe, ...modelSize(req), nome: req.nome, autore: r.model, ...(r.voto !== undefined ? { voto: r.voto } : {}), ...(req.tinta ? { tinta: 'C' } : {}) }, `scultore: ${req.nome}`);
-      if (!added) this.lacking(req, 'invalido', this.k.lastDiscard('scultore', 'model.sculpt'));
+      if (!added) this.lacking(req, 'invalid', this.k.lastDiscard('sculptor', 'model.sculpt'));
       return added;
     } catch (e) {
       if (e instanceof BudgetError) this.stopped = true;
-      this.k.council.say('scultore', 'errore', `«${req.nome}»: ${(e as Error).message}`, undefined, 'model.sculpt');
+      this.k.council.say('sculptor', 'errore', `«${req.nome}»: ${(e as Error).message}`, undefined, 'model.sculpt');
       this.skip.add(req.id);
-      this.lacking(req, 'errore', (e as Error).message);
+      this.lacking(req, 'error', (e as Error).message);
       return false;
     } finally {
       this.busy = false;
     }
   }
 
-  private lacking(req: SculptRequest, esito: 'invalido' | 'errore', motivo: string): void {
-    this.k.noteShortfall({ richiesta: `il modello di «${req.nome}»`, agente: 'scultore', compito: 'model.sculpt', esito, motivo });
+  private lacking(req: SculptRequest, esito: 'invalid' | 'error', motivo: string): void {
+    this.k.noteShortfall({ richiesta: `il modello di «${req.nome}»`, agente: 'sculptor', compito: 'model.sculpt', esito, motivo });
   }
 
   /** A model of its own for an entity that showed a generic one, or a new version of its own. */

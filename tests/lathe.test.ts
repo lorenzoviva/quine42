@@ -70,7 +70,7 @@ describe("the Sculptor's lathe (tornio)", () => {
     const b = k.corona.building('galleria')!;
     const f = b.storeys[0];
 
-    const lathe = f.items.find((i) => i.kind === 'tornio');
+    const lathe = f.items.find((i) => i.kind === 'lathe');
     expect(lathe).toBeDefined();
     expect(lathe!.x - f.ox).toBe(TORNIO_AT.x);
     expect(lathe!.y - f.oy).toBe(TORNIO_AT.y);
@@ -78,8 +78,8 @@ describe("the Sculptor's lathe (tornio)", () => {
     expect(lathe!.h).toBe(3);
 
     // Navigation arrows next to the lathe
-    const prevArrow = f.items.find((i) => i.kind === 'prev' && i.target === 'tornio');
-    const nextArrow = f.items.find((i) => i.kind === 'next' && i.target === 'tornio');
+    const prevArrow = f.items.find((i) => i.kind === 'prev' && i.target === 'lathe');
+    const nextArrow = f.items.find((i) => i.kind === 'next' && i.target === 'lathe');
     expect(prevArrow).toBeDefined();
     expect(nextArrow).toBeDefined();
     expect(prevArrow!.x - f.ox).toBe(TORNIO_AT.x - 1);
@@ -134,7 +134,7 @@ describe("the Sculptor's lathe (tornio)", () => {
   it('opens ui:tornio upon E interaction or click within reach', async () => {
     const k = await boot();
     const b = k.corona.building('galleria')!;
-    const lathe = b.storeys[0].items.find((i) => i.kind === 'tornio')!;
+    const lathe = b.storeys[0].items.find((i) => i.kind === 'lathe')!;
 
     const opened: unknown[] = [];
     k.bus.on('ui:tornio', (e) => opened.push(e));
@@ -157,7 +157,7 @@ describe("the Sculptor's lathe (tornio)", () => {
   it('steps through the library when clicking navigation arrows', async () => {
     const k = await boot();
     const b = k.corona.building('galleria')!;
-    const nextArrow = b.storeys[0].items.find((i) => i.kind === 'next' && i.target === 'tornio')!;
+    const nextArrow = b.storeys[0].items.find((i) => i.kind === 'next' && i.target === 'lathe')!;
 
     stand(k, nextArrow.x + 0.5, nextArrow.y + 1.0);
     expect(k.latheOf()!.index).toBe(0);

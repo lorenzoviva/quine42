@@ -8,9 +8,9 @@ import { repairSociety, type People, type Individual } from '../src/kernel/socie
 import type { TextCall } from '../src/kernel/ai/models';
 import type { FileMap } from '../src/kernel/types';
 
-const cats = (t: string) => (t === 'npc.cat' ? 'animale' : 'persona') as 'animale' | 'persona';
+const cats = (t: string) => (t === 'npc.cat' ? 'animal' : 'person') as 'animal' | 'person';
 
-function individual(nome: string, tipo: string, genere: 'maschio' | 'femmina', famiglia: Array<[string, string]>, mestiere = 'contadino'): Individual {
+function individual(nome: string, tipo: string, genere: 'male' | 'female', famiglia: Array<[string, string]>, mestiere = 'contadino'): Individual {
   return { nome, tipo, genere, mestiere, famiglia: famiglia.map(([n, legame]) => ({ nome: n, legame })), routine: [] };
 }
 
@@ -20,26 +20,26 @@ const society = (): People =>
   repairSociety(
     {
       persone: [
-        individual('Fiocco', 'npc.cat', 'maschio', [['Bastiano', 'animale']], 'Cacciatore di topi'),
-        individual('Bastiano', 'npc.villager', 'maschio', [], 'fornaio'),
-        individual('Tazio il Mugnaio', 'npc.villager', 'maschio', [], 'mugnaio'),
-        individual('Ada', 'npc.villager', 'femmina', [['Berta', 'sorella']], 'tessitrice'),
-        individual('Berta', 'npc.villager', 'femmina', [], 'ortolana'),
+        individual('Fiocco', 'npc.cat', 'male', [['Bastiano', 'animale']], 'Cacciatore di topi'),
+        individual('Bastiano', 'npc.villager', 'male', [], 'fornaio'),
+        individual('Tazio il Mugnaio', 'npc.villager', 'male', [], 'mugnaio'),
+        individual('Ada', 'npc.villager', 'female', [['Berta', 'sorella']], 'tessitrice'),
+        individual('Berta', 'npc.villager', 'female', [], 'ortolana'),
       ],
       attesi: [],
     },
     cats,
   ).people;
 
-const plot = (p: Partial<Plot>): Plot => ({ id: 'trama-t', titolo: 'Una storia', mistero: '', coinvolti: [], tappe: [], inizio: 0, stato: 'attiva', ...p });
-const beat = (chi: string, cosa: string, battuta?: string) => ({ giorno: 0, momento: 'giorno' as const, chi, dove: 'piazza', cosa, ...(battuta ? { battuta } : {}) });
+const plot = (p: Partial<Plot>): Plot => ({ id: 'trama-t', titolo: 'Una storia', mistero: '', coinvolti: [], tappe: [], inizio: 0, stato: 'active', ...p });
+const beat = (chi: string, cosa: string, battuta?: string) => ({ giorno: 0, momento: 'day' as const, chi, dove: 'square', cosa, ...(battuta ? { battuta } : {}) });
 
 describe('plots coherent with the people', () => {
   it('a coherent plot passes untouched: real relations, animals as animals', () => {
     const p = plot({
       mistero: 'Ada, sorella di Berta, nasconde un debito. Fiocco lo sa.',
       tappe: [beat('Ada', 'conta le monete sotto il letto', 'Mia sorella Berta non deve saperlo.'), beat('Fiocco', 'si struscia sulle gambe di Bastiano'), beat('Berta', 'osserva sua sorella Ada')],
-      missione: { da: 'Bastiano', testo: 'Porta questa mela a Berta.', obiettivo: { tipo: 'porta', oggetto: 'mela', a: 'Berta' }, stato: 'offerta' },
+      missione: { da: 'Bastiano', testo: 'Porta questa mela a Berta.', obiettivo: { tipo: 'bring', oggetto: 'mela', a: 'Berta' }, stato: 'offered' },
     });
     const r = reviewPlot(p, society());
     expect(r.problems).toEqual([]);
@@ -51,7 +51,7 @@ describe('plots coherent with the people', () => {
     // «Il Ciclo delle Lettere Dimenticate», without its fourth-wall lines: a cat that talks and gives a quest.
     const p = plot({
       tappe: [beat('Fiocco', 'scava vicino al pozzo', 'Non è terra, è una lingua.'), beat('Ottone', 'osserva il lago'), beat('Fiocco', 'scrive un biglietto'), beat('Bastiano', 'osserva il lago')],
-      missione: { da: 'Fiocco', testo: 'Porta questo sigillo a Bastiano.', obiettivo: { tipo: 'porta', oggetto: 'sigillo', a: 'Bastiano' }, stato: 'offerta' },
+      missione: { da: 'Fiocco', testo: 'Porta questo sigillo a Bastiano.', obiettivo: { tipo: 'bring', oggetto: 'sigillo', a: 'Bastiano' }, stato: 'offered' },
     });
     const r = reviewPlot(p, society());
     expect(r.problems.join('\n')).toMatch(/Fiocco è un animale e non parla/);
@@ -142,7 +142,7 @@ describe('the Narrator weaves coherent plots', () => {
       plot({ id: 'a', titolo: 'Il gatto che parla', tappe: [beat('Fiocco', 'guarda il pozzo', 'Miao, ascoltami.'), beat('Ada', 'cuce')] }),
       plot({ id: 'b', titolo: 'Il fratello finto', tappe: [beat('Tazio il Mugnaio', 'macina', 'Mio fratello Bastiano ha paura.'), beat('Ada', 'cuce')] }),
       plot({ id: 'c', titolo: 'Il debito di Ada', tappe: coherent.tappe }),
-      plot({ id: 'd', titolo: 'Chiusa', stato: 'chiusa', tappe: [beat('Nessuno', 'niente')] }),
+      plot({ id: 'd', titolo: 'Chiusa', stato: 'closed', tappe: [beat('Nessuno', 'niente')] }),
     ];
     const k = await bootWith(new MockAiModels(), { [PLOTS_FILE]: writePlots(plots) });
     const after = readPlots(k.files);

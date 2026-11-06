@@ -8,6 +8,7 @@ import path from 'node:path';
 import { promises as fs } from 'node:fs';
 import type { Kernel } from '../src/kernel/kernel';
 import type { FileMap } from '../src/kernel/types';
+import { isMultiplayer } from '../src/kernel/gameSetup';
 import { costWithFee, DEFAULT_PLATFORM_FEE, type Ledger, type PaymentRecord } from '../src/kernel/credits';
 import { USAGE_FILE } from '../src/kernel/ai/usage';
 import { playerFile, readWandererState } from '../src/kernel/wanderers';
@@ -88,7 +89,7 @@ export function linesOf(payments: PaymentRecord[], usageText: string | undefined
 
 function manyIn(files: FileMap): boolean {
   try {
-    return JSON.parse(files['universe.json'] ?? '{}')?.partita?.modalita === 'multigiocatore';
+    return isMultiplayer(JSON.parse(files['universe.json'] ?? '{}')?.partita?.modalita);
   } catch {
     return false;
   }

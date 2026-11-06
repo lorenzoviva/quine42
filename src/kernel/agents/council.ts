@@ -13,21 +13,21 @@ import { gameSetupSummary } from '../gameSetup';
 import { repairGameSetup } from '../validator';
 import { italianName } from '../internalNames';
 
-export type AgentId = 'narratore' | 'cartografo' | 'artista' | 'scultore' | 'fisico' | 'ingegnere' | 'arbitro' | 'referente' | 'attore' | 'musicista';
+export type AgentId = 'narrator' | 'cartographer' | 'artist' | 'sculptor' | 'physicist' | 'engineer' | 'arbiter' | 'liaison' | 'actor' | 'musician';
 
 export const AGENTS: Record<AgentId, { name: string; color: string; sigil: string }> = {
-  narratore: { name: 'Narratore', color: '#ffcf5c', sigil: '✒' },
-  cartografo: { name: 'Cartografo', color: '#7dd87d', sigil: '⌖' },
-  artista: { name: 'Artista', color: '#ff8ad8', sigil: '✎' },
-  scultore: { name: 'Scultore', color: '#ffa65c', sigil: '◈' },
-  fisico: { name: 'Fisico', color: '#6fc3ff', sigil: '⚖' },
-  ingegnere: { name: 'Ingegnere', color: '#b9a6ff', sigil: '⚙' },
-  arbitro: { name: 'Arbitro', color: '#ff6b6b', sigil: '⚑' },
-  referente: { name: 'Referente', color: '#f2f2f2', sigil: '✉' },
+  narrator: { name: 'Narratore', color: '#ffcf5c', sigil: '✒' },
+  cartographer: { name: 'Cartografo', color: '#7dd87d', sigil: '⌖' },
+  artist: { name: 'Artista', color: '#ff8ad8', sigil: '✎' },
+  sculptor: { name: 'Scultore', color: '#ffa65c', sigil: '◈' },
+  physicist: { name: 'Fisico', color: '#6fc3ff', sigil: '⚖' },
+  engineer: { name: 'Ingegnere', color: '#b9a6ff', sigil: '⚙' },
+  arbiter: { name: 'Arbitro', color: '#ff6b6b', sigil: '⚑' },
+  liaison: { name: 'Referente', color: '#f2f2f2', sigil: '✉' },
   /** Plays the people with the Narrator's sheets, when the master turns it on (T157, ADR-0116). */
-  attore: { name: 'Attore', color: '#5ce0c8', sigil: '◐' },
+  actor: { name: 'Attore', color: '#5ce0c8', sigil: '◐' },
   /** Writes the sound programs of what the world asks for (T225): in the Artist's house. */
-  musicista: { name: 'Musicista', color: '#8fb8ff', sigil: '♪' },
+  musician: { name: 'Musicista', color: '#8fb8ff', sigil: '♪' },
 };
 
 export type FeedKind = 'propone' | 'obietta' | 'approva' | 'corregge' | 'scolpisce' | 'scarta' | 'info' | 'errore';
@@ -264,23 +264,23 @@ export class Council {
     const parts: string[] = [];
     const rules = rulesSummary(v.files);
     // The rune canon goes with every narrative task (the Narrator's, the Actor's and the Arbiter's).
-    const narrative = agent === 'narratore' || agent === 'attore' || agent === 'arbitro';
+    const narrative = agent === 'narrator' || agent === 'actor' || agent === 'arbiter';
     const canon = narrative ? canonSummary(v.files) : '';
     // So does the lexicon: how people speak and behave, the same in every universe (T65).
     const lexicon = narrative ? lexiconSummary(v.files) : '';
     // The game chosen at the Genesis goes to whoever builds on it: stories, coherence, mechanics, requests.
-    if (narrative || agent === 'ingegnere' || agent === 'referente') parts.push(gameSummary(v.files));
+    if (narrative || agent === 'engineer' || agent === 'liaison') parts.push(gameSummary(v.files));
     switch (agent) {
       // The Actor plays the people (T157): it reads what the Narrator reads for those tasks, never more.
-      case 'attore':
-      case 'narratore':
+      case 'actor':
+      case 'narrator':
         if (focused) parts.push(`## Il mondo\n${bibleHead(bible)}`);
         else parts.push(`## Bibbia del mondo\n${bibleSummary(bible, true)}`, `## Moduli esistenti\n${catalogSummary(v.catalog)}`);
         if (canon) parts.push(canon);
         if (lexicon) parts.push(lexicon);
         if (rules) parts.push(focused ? rulesSummary(v.files, FOCUSED_RULES) : rules);
         break;
-      case 'cartografo': {
+      case 'cartographer': {
         parts.push(`## Bibbia del mondo\n${bibleSummary(bible)}`, `## Terreni\n${paletteSummary(v.palette)}`, `## Moduli posizionabili\n${catalogSummary(v.catalog)}`);
         let regions: Array<{ nome: string; ambiente: string; centro: [number, number]; raggio: number }> = [];
         try {
@@ -291,29 +291,29 @@ export class Council {
         if (regions.length) parts.push(`## Atlante (centro in luoghi; nord = y negativa)\n${regions.map((r) => `- ${r.nome} [${r.ambiente}] centro ${r.centro.join(',')} raggio ${r.raggio}`).join('\n')}`);
         break;
       }
-      case 'scultore':
+      case 'sculptor':
         parts.push(`## Guida di stile\n${style}`);
         break;
-      case 'artista':
+      case 'artist':
         parts.push(`## Guida di stile\n${style}`, `## Tono\n${bible?.tono ?? ''}`);
         break;
-      case 'musicista':
+      case 'musician':
         parts.push(`## Il mondo\n${bibleHead(bible)}`);
         break;
-      case 'fisico':
+      case 'physicist':
         parts.push(`## Terreni\n${paletteSummary(v.palette)}`, `## Tono\n${bible?.tono ?? ''}`);
         if (rules) parts.push(rules);
         break;
-      case 'ingegnere':
+      case 'engineer':
         parts.push(`## Bibbia (sintesi)\n${bible?.sintesi ?? ''}`, `## Terreni\n${paletteSummary(v.palette)}`);
         break;
-      case 'arbitro':
+      case 'arbiter':
         parts.push(`## Bibbia del mondo\n${bibleSummary(bible)}`, `## Guida di stile\n${style}`, `## Terreni\n${paletteSummary(v.palette)}`);
         if (canon) parts.push(canon);
         if (lexicon) parts.push(lexicon);
         if (rules) parts.push(rules);
         break;
-      case 'referente':
+      case 'liaison':
         parts.push(`## Bibbia del mondo\n${bibleSummary(bible)}`, `## Moduli esistenti\n${catalogSummary(v.catalog)}`);
         if (rules) parts.push(rules);
         break;

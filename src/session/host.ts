@@ -69,7 +69,7 @@ export async function openUniverse(opts: { name: string; base: string; offline?:
   if (opts.restore) await client.checkout(opts.restore).catch(() => null);
   const snap = await client.load();
   if (!snap.exists || !snap.files) return { error: `l'universo «${opts.name}» non esiste` };
-  if (readConfig(snap.files).config.partita?.modalita !== 'multigiocatore') return { error: `«${opts.name}» è una partita in singola` };
+  if (readConfig(snap.files).config.partita?.modalita !== 'multiplayer') return { error: `«${opts.name}» è una partita in singola` };
   // A universe of an older contract is ported first (T307a), then takes the seed: one commit says both.
   const up = prepareUniverse(snap.files, bundledFiles);
   if (Object.keys(up.changes).length) await client.commit(up.changes, `${up.applied.length ? `migrazione ${up.applied.map((a) => a.split(':')[0]).join(', ')}; ` : ''}aggiornamento dal kernel: ${up.updated.slice(0, 6).join(', ') || 'seme'}${up.updated.length > 6 ? '…' : ''}`, 'kernel');

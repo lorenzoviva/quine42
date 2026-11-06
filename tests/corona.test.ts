@@ -160,16 +160,16 @@ describe('the avenue', () => {
 
 // T49b: every room's device stands in the middle, with DEVICE_MARGIN free cells on every side, reachable from the door;
 // the ground floor's shelves are at its sides, the files that do not fit there go upstairs.
-const DEVICE_KINDS = ['showcase', 'prev', 'next', 'less', 'more', 'grafo', 'situazione', 'banco', 'leggio'];
+const DEVICE_KINDS = ['showcase', 'prev', 'next', 'less', 'more', 'graph', 'situation', 'bench', 'lectern'];
 
 describe('the devices of the rooms', () => {
   it('stand in the middle, the cells around them free and reachable from the door', () => {
     const c = campus();
-    const rooms = c.buildings.filter((b) => b.storeys[0].items.some((i) => ['showcase', 'grafo', 'situazione', 'banco', 'leggio'].includes(i.kind)));
+    const rooms = c.buildings.filter((b) => b.storeys[0].items.some((i) => ['showcase', 'graph', 'situation', 'bench', 'lectern'].includes(i.kind)));
     expect(rooms.map((b) => b.id).sort()).toEqual(['cose', 'luoghi', 'magia', 'mondo', 'nucleo', 'oggetti', 'persone', 'sistemi', 'universo']);
     for (const b of rooms) {
       const f = b.storeys[0];
-      const device = f.items.filter((i) => DEVICE_KINDS.includes(i.kind) && (i.kind !== 'prev' && i.kind !== 'next' || i.target !== 'tempo'));
+      const device = f.items.filter((i) => DEVICE_KINDS.includes(i.kind) && (i.kind !== 'prev' && i.kind !== 'next' || i.target !== 'time'));
       const x0 = Math.min(...device.map((i) => i.x)) - f.ox, x1 = Math.max(...device.map((i) => i.x + (i.w ?? 1) - 1)) - f.ox;
       const y0 = Math.min(...device.map((i) => i.y)) - f.oy, y1 = Math.max(...device.map((i) => i.y + (i.h ?? 1) - 1)) - f.oy;
       // Centred on the exit's column, the margin inside the room.
@@ -235,7 +235,7 @@ describe('the devices of the rooms', () => {
     const pos = glowMesh.geometry.getAttribute('position');
     expect(pos).toBeDefined();
 
-    const grafo = f.items.find((i) => i.kind === 'grafo')!;
+    const grafo = f.items.find((i) => i.kind === 'graph')!;
     const cx = grafo.x + (grafo.w ?? 1) / 2, cz = grafo.y + (grafo.h ?? 1) / 2;
     // Lower step rim at y in [0.18, 0.21], outer extents cx +- 1.2, cz +- 1.2
     // Upper step rim at y in [0.42, 0.45], outer extents cx +- 0.8, cz +- 0.8
@@ -351,8 +351,8 @@ describe('the devices of the rooms', () => {
       },
       archive: {
         avatars: new Map([
-          ['narratore@concilio', { agent: 'narratore', name: 'Narratore', color: '#ffcf5c', sigil: '📖', building: 'concilio', x: 12, y: 8, tx: 12, ty: 8, sayUntil: 0, idleUntil: 0, speed: 3.2 }],
-          ['ingegnere@sistemi', { agent: 'ingegnere', name: 'Ingegnere', color: '#b9a6ff', sigil: '⚙', building: 'sistemi', x: 5, y: 10, tx: 5, ty: 10, sayUntil: 0, idleUntil: 0, speed: 3.2 }],
+          ['narrator@concilio', { agent: 'narrator', name: 'Narratore', color: '#ffcf5c', sigil: '📖', building: 'concilio', x: 12, y: 8, tx: 12, ty: 8, sayUntil: 0, idleUntil: 0, speed: 3.2 }],
+          ['engineer@sistemi', { agent: 'engineer', name: 'Ingegnere', color: '#b9a6ff', sigil: '⚙', building: 'sistemi', x: 5, y: 10, tx: 5, ty: 10, sayUntil: 0, idleUntil: 0, speed: 3.2 }],
         ]),
       },
     };
@@ -369,8 +369,8 @@ describe('the devices of the rooms', () => {
     const avatars = new Avatars(scene);
     avatars.update(mockKernel, 0);
     expect(scene.children.length).toBe(2);
-    expect(requested).toContain('corona-gerboa-narratore');
-    expect(requested).toContain('corona-gerboa-ingegnere');
+    expect(requested).toContain('corona-gerboa-narrator');
+    expect(requested).toContain('corona-gerboa-engineer');
   });
 
   it('uses handmade 3D models for files on shelves (T63)', () => {

@@ -1,0 +1,105 @@
+{
+  "id": "job.farmer",
+  "name": "Il contadino",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi lavora la terra: ara il prato, semina i solchi, miete il grano maturo; la sera in piazza, la notte a casa.",
+  "items": [
+    {
+      "id": "item.grano",
+      "name": "grano",
+      "description": "Un fascio di spighe mietute, ancora odorose di campo.",
+      "category": "material",
+      "weight": 0.5,
+      "stack": 20,
+      "tags": [
+        "raccolto",
+        "grano"
+      ]
+    }
+  ],
+  "mestieri": [
+    {
+      "id": "farmer",
+      "nomi": [
+        "contadino",
+        "contadina",
+        "bracciante",
+        "ortolano",
+        "ortolana",
+        "agricoltore",
+        "agricoltrice",
+        "mezzadro",
+        "mezzadra",
+        "fattore",
+        "fattora",
+        "coltivatore",
+        "coltivatrice"
+      ],
+      "posto": {
+        "casella": "m"
+      },
+      "giornata": {
+        "morning": [
+          {
+            "fa": "go",
+            "dove": "work"
+          },
+          {
+            "fa": "transform",
+            "da": "g",
+            "a": "m",
+            "quante": 2,
+            "durata": 10,
+            "posa": "hoe",
+            "dice": "Terra dura, stamattina."
+          }
+        ],
+        "day": [
+          {
+            "fa": "transform",
+            "da": "m",
+            "a": "e",
+            "quante": 3,
+            "durata": 8,
+            "posa": "hoe"
+          },
+          {
+            "fa": "gather",
+            "casella": "u",
+            "oggetto": "item.grano",
+            "lascia": "m",
+            "quante": 3,
+            "durata": 8,
+            "posa": "hoe",
+            "dice": "Questo è pronto."
+          }
+        ],
+        "evening": [
+          {
+            "fa": "go",
+            "dove": "square"
+          },
+          {
+            "fa": "carry",
+            "oggetto": "item.grano",
+            "dove": "square",
+            "dice": "Il grano di oggi, al deposito."
+          },
+          {
+            "fa": "chat"
+          }
+        ],
+        "night": [
+          {
+            "fa": "go",
+            "dove": "home"
+          },
+          {
+            "fa": "rest"
+          }
+        ]
+      }
+    }
+  ]
+}

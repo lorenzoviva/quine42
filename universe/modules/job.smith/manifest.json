@@ -1,0 +1,76 @@
+{
+  "id": "job.smith",
+  "name": "Il fabbro",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi lavora il ferro: al banco con la legna del deposito per il fuoco, chiodi per chi costruisce.",
+  "mestieri": [
+    {
+      "id": "smith",
+      "nomi": [
+        "fabbro",
+        "fabbra",
+        "maniscalco",
+        "maniscalca",
+        "ferraio",
+        "ferraia",
+        "meccanico",
+        "meccanica",
+        "saldatore",
+        "saldatrice",
+        "fonditore",
+        "fonditrice",
+        "operaio",
+        "operaia"
+      ],
+      "posto": {
+        "entita": "banco"
+      },
+      "giornata": {
+        "morning": [
+          {
+            "fa": "take",
+            "oggetto": "item.ciocco",
+            "quante": 2,
+            "dove": "square"
+          },
+          {
+            "fa": "go",
+            "dove": "work"
+          }
+        ],
+        "day": [
+          {
+            "fa": "produce",
+            "oggetto": "item.chiodi",
+            "con": "item.ciocco",
+            "quante": 2,
+            "durata": 25,
+            "posa": "work",
+            "dove": "entita:banco",
+            "dice": "Il fuoco è pronto."
+          }
+        ],
+        "evening": [
+          {
+            "fa": "carry",
+            "oggetto": "item.chiodi",
+            "dove": "square"
+          },
+          {
+            "fa": "chat"
+          }
+        ],
+        "night": [
+          {
+            "fa": "go",
+            "dove": "home"
+          },
+          {
+            "fa": "rest"
+          }
+        ]
+      }
+    }
+  ]
+}

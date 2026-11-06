@@ -201,7 +201,7 @@ export const PROBES = [
     fase: 'A',
     proprieta: 'senza identità non si crea un universo con un master a piacere',
     async run(ctx) {
-      const r = await post(ctx, '/api/universe/sonda-creato/create', { files: { 'universe.json': JSONB({ name: 'sonda-creato', partita: { modalita: 'multigiocatore', master: 'intruso' } }) }, message: 'sonda' });
+      const r = await post(ctx, '/api/universe/sonda-creato/create', { files: { 'universe.json': JSONB({ name: 'sonda-creato', partita: { modalita: 'multiplayer', master: 'intruso' } }) }, message: 'sonda' });
       return { ok: !existsSync(ctx.uni('sonda-creato')), dettaglio: `risposta ${r.status}` };
     },
   },

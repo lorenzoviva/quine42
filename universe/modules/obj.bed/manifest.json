@@ -1,0 +1,14 @@
+{
+  "id": "obj.bed",
+  "name": "Letto di paglia",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "esempio",
+  "description": "Un pagliericcio con una coperta di lana.",
+  "context": "dentro le case e le locande",
+  "logic": "logic.lua",
+  "appearance": { "model": "letto", "glyph": "▭", "color": "#c8a870", "aspetto": "un letto di legno con pagliericcio e coperta di lana" },
+  "physics": { "solid": true, "radius": 0.45 },
+  "actions": [{ "id": "sleep", "label": "Dormi" }, { "id": "search", "label": "Fruga sotto il letto" }],
+  "spawn": { "tiles": ["f"], "chance": 0.4, "max": 1 }
+}

@@ -38,29 +38,29 @@ describe('the bible pages', () => {
     expect(pages.length).toBe(9);
 
     // First page is the prologue with title, summary and story
-    expect(pages[0].sezione).toBe('prologo');
+    expect(pages[0].sezione).toBe('prologue');
     expect(pages[0].titolo).toBe('Regno di Valmora');
     expect(pages[0].testo).toContain('Un regno di boschi e colline.');
     expect(pages[0].testo).toContain('Nato attorno alla piazza dei carrettieri.');
 
     // Places: one page per place
-    const luoghiPages = pages.filter((p) => p.sezione === 'luoghi');
+    const luoghiPages = pages.filter((p) => p.sezione === 'chunks');
     expect(luoghiPages.length).toBe(3);
     expect(luoghiPages.map((p) => p.titolo)).toEqual(['Piazza di Valmora', 'Bosco dei Sussurri', 'Lago del Re Muto']);
 
     // Characters: one page per character
-    const personaggiPages = pages.filter((p) => p.sezione === 'personaggi');
+    const personaggiPages = pages.filter((p) => p.sezione === 'characters');
     expect(personaggiPages.length).toBe(2);
     expect(personaggiPages.map((p) => p.titolo)).toEqual(['Mastro Elio', 'Selva']);
     expect(personaggiPages[0].testo).toBe('Mastro Elio — fabbro laborioso');
 
     // Facts: one page per fact
-    const fattiPages = pages.filter((p) => p.sezione === 'fatti');
+    const fattiPages = pages.filter((p) => p.sezione === 'facts');
     expect(fattiPages.length).toBe(2);
     expect(fattiPages[0].testo).toBe('Il mercato si tiene ogni settimana in piazza.');
 
     // Mysteries: one page per mystery
-    const misteriPages = pages.filter((p) => p.sezione === 'misteri');
+    const misteriPages = pages.filter((p) => p.sezione === 'mysteries');
     expect(misteriPages.length).toBe(1);
     expect(misteriPages[0].testo).toBe('Le rune mandano una luce tenue nella notte.');
   });
@@ -73,7 +73,7 @@ describe('the bible pages', () => {
       nome: 'Mastro Elio',
       tipo: 'npc.smith',
       mestiere: 'fabbro',
-      specie: 'persona',
+      specie: 'person',
       genere: 'maschile',
       eta: 45,
       luogo: 'Piazza di Valmora',
@@ -82,13 +82,13 @@ describe('the bible pages', () => {
     const g = k.graph();
 
     // Verify the node exists in the graph
-    const individualNode = g.find('Mastro Elio', 'persona')[0];
+    const individualNode = g.find('Mastro Elio', 'individual')[0];
     expect(individualNode).toBeDefined();
 
     // Create a bible page mentioning Mastro Elio
     const page: BiblePage = {
       index: 1,
-      sezione: 'fatti',
+      sezione: 'facts',
       titolo: 'Fucina',
       testo: 'Nella bottega Mastro Elio forgia chiodi e aratri per tutti.',
       voceIndex: 0,
@@ -105,13 +105,13 @@ describe('the Library lectern device', () => {
     const b = k.corona.building('mondo')!;
     const f = b.storeys[0];
 
-    const lectern = f.items.find((i) => i.kind === 'leggio')!;
+    const lectern = f.items.find((i) => i.kind === 'lectern')!;
     expect(lectern).toBeDefined();
     expect(lectern.label).toContain('leggio');
     expect(lectern.w).toBe(3);
     expect(lectern.h).toBe(3);
 
-    const arrows = f.items.filter((i) => (i.kind === 'prev' || i.kind === 'next') && i.target === 'leggio');
+    const arrows = f.items.filter((i) => (i.kind === 'prev' || i.kind === 'next') && i.target === 'lectern');
     expect(arrows.length).toBe(2);
 
     const prev = arrows.find((a) => a.kind === 'prev')!;
@@ -177,7 +177,7 @@ describe('the Library lectern device', () => {
     const k = await boot();
     const b = k.corona.building('mondo')!;
     const f = b.storeys[0];
-    const lectern = f.items.find((i) => i.kind === 'leggio')!;
+    const lectern = f.items.find((i) => i.kind === 'lectern')!;
 
     const opened: unknown[] = [];
     k.bus.on('ui:bible', (e) => opened.push(e));
@@ -201,7 +201,7 @@ describe('the Library lectern device', () => {
     const k = await boot();
     const b = k.corona.building('mondo')!;
     const f = b.storeys[0];
-    const nextArrow = f.items.find((i) => i.kind === 'next' && i.target === 'leggio')!;
+    const nextArrow = f.items.find((i) => i.kind === 'next' && i.target === 'lectern')!;
 
     stand(k, nextArrow.x + 0.5, nextArrow.y + 1.0);
     expect(k.bibleOf()!.index).toBe(0);

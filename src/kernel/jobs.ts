@@ -1,16 +1,19 @@
 // The programs of the trades (T245b, ADR-0140; docs/design/comportamento-npc.md, section 1): how the day of a trade is made, as data of
 // the universe (a `data` module with `mestieri`), written once per trade and used by everyone who has it. The tasks are a closed list
-// of behaviours, carried out by the Lua system `sys.lavoro` of the seed; a program never holds code. Pure: the validator, the kernel and
+// of behaviours, carried out by the Lua system `sys.work` of the seed; a program never holds code. Pure: the validator, the kernel and
 // the tests import it.
 
 import { ACTIVITIES, type Activity } from './society';
 import type { DayPhase } from './society';
 
+/** The seed's system that carries out the trades (T307b: `sys.lavoro` before); its store holds the deposits of the places. */
+export const WORK_MODULE = 'sys.work';
+
 /** The behaviours, a closed list: what a task may do (`fa`). */
-export const JOB_BEHAVIOURS = ['vai', 'prendi', 'porta', 'trasforma', 'raccogli', 'produci', 'usa', 'costruisci', 'pattuglia', 'riposa', 'mangia', 'prega', 'chiacchiera', 'aspetta'] as const;
+export const JOB_BEHAVIOURS = ['go', 'take', 'carry', 'transform', 'gather', 'produce', 'use', 'build', 'patrol', 'rest', 'eat', 'pray', 'chat', 'wait'] as const;
 export type JobBehaviour = (typeof JOB_BEHAVIOURS)[number];
 
-export const JOB_PHASES: readonly DayPhase[] = ['mattina', 'giorno', 'sera', 'notte'];
+export const JOB_PHASES: readonly DayPhase[] = ['morning', 'day', 'evening', 'night'];
 /** At most this many tasks a phase, and a task's work within these seconds of the world. */
 export const MAX_TASKS = 6;
 export const MIN_DURATION = 5;
@@ -23,9 +26,9 @@ export const WORKERS_PER_PLACE = 12;
 /** One task of a phase: what it does and with what. Only the fields its behaviour reads matter; the others are dropped. */
 export interface JobTask {
   fa: JobBehaviour;
-  /** Where: `casa | lavoro | piazza | casella:<codice> | entita:<tag>`. */
+  /** Where: `home | work | square | venture | casella:<codice> | entita:<tag>`. */
   dove?: string;
-  /** A tile: what it is before and after (`trasforma`), what is gathered and what it leaves (`raccogli`). */
+  /** A tile: what it is before and after (`transform`), what is gathered and what it leaves (`gather`). */
   da?: string;
   a?: string;
   casella?: string;
@@ -41,9 +44,9 @@ export interface JobTask {
   posa?: Activity;
   /** What they say starting it, once. */
   dice?: string;
-  /** `pattuglia`: the places of the round. */
+  /** `patrol`: the places of the round. */
   percorso?: string[];
-  /** `usa`: which action of the thing (an `id` of its manifest's `actions`); without, the first that has no effects. */
+  /** `use`: which action of the thing (an `id` of its manifest's `actions`); without, the first that has no effects. */
   azione?: string;
 }
 
@@ -65,7 +68,7 @@ export interface JobWorld {
   tags?: ReadonlySet<string>;
 }
 
-const WHERE_RE = /^(casa|lavoro|piazza|impresa)$|^(casella|entita):(.+)$/;
+const WHERE_RE = /^(home|work|square|venture)$|^(casella|entita):(.+)$/;
 
 /** A text of the world, short. */
 const text = (v: unknown, n: number): string | undefined => (typeof v === 'string' && v.trim() ? v.trim().slice(0, n) : undefined);
@@ -91,7 +94,7 @@ export function validateJobProgram(raw: unknown, world: JobWorld): { program?: J
   };
   const where = (d: unknown) => {
     const m = typeof d === 'string' ? WHERE_RE.exec(d) : null;
-    if (!m) return void errors.push(`${id}: «${String(d)}» non è un posto (casa, lavoro, piazza, casella:…, entita:…)`);
+    if (!m) return void errors.push(`${id}: «${String(d)}» non è un posto (home, work, square, venture, casella:…, entita:…)`);
     if (m[2] === 'casella') code(m[3], 'il posto');
     // A tag no module has is not an error: a universe may have rewritten the module that had it. At work that task finds nothing and is skipped.
     return d as string;
@@ -122,37 +125,37 @@ export function validateJobProgram(raw: unknown, world: JobWorld): { program?: J
       const said = text(o.dice, 80);
       if (said) task.dice = said;
       switch (fa) {
-        case 'vai':
+        case 'go':
           task.dove = where(o.dove);
           break;
-        case 'trasforma':
+        case 'transform':
           task.da = code(o.da, 'la casella di partenza');
           task.a = code(o.a, 'la casella che diventa');
           if (o.con !== undefined) task.con = item(o.con, 'ciò che consuma');
           break;
-        case 'raccogli':
+        case 'gather':
           task.casella = code(o.casella, 'la casella');
           task.lascia = code(o.lascia ?? o.casella, 'ciò che lascia');
           task.oggetto = item(o.oggetto, 'il raccolto');
           break;
-        case 'porta':
-        case 'prendi':
+        case 'carry':
+        case 'take':
           task.oggetto = item(o.oggetto, 'ciò che porta');
           if (o.a !== undefined || o.dove !== undefined) task.dove = where(o.a ?? o.dove);
           break;
-        case 'produci':
+        case 'produce':
           task.oggetto = item(o.oggetto, 'ciò che produce');
           if (o.con !== undefined) task.con = item(o.con, 'ciò che consuma');
           if (o.dove !== undefined) task.dove = where(o.dove);
           break;
-        case 'usa': {
+        case 'use': {
           task.dove = where(o.dove ?? (typeof o.entita === 'string' ? `entita:${o.entita}` : undefined));
           if (task.dove && !task.dove.startsWith('entita:')) errors.push(`${at}: si usa una cosa, «entita:<tag>»`);
           const act = text(o.azione, 40);
           if (act) task.azione = act;
           break;
         }
-        case 'pattuglia': {
+        case 'patrol': {
           const round = Array.isArray(o.percorso) ? o.percorso : [];
           if (round.length < 2) errors.push(`${at}: un giro ha almeno due posti`);
           task.percorso = round.slice(0, 6).map((d) => where(d)).filter((d): d is string => !!d);
@@ -197,18 +200,18 @@ export function matchJob(mestiere: string | undefined, programs: readonly JobPro
 
 /**
  * What a trade brings to the deposit of its place in a day (T245f, ADR-0149): the things it gathers or makes and then carries there
- * (`porta` to its place, not into a thing), and what making them uses up. The accounting of the places nobody sees counts with this.
+ * (`carry` to its place, not into a thing), and what making them uses up. The accounting of the places nobody sees counts with this.
  */
 export function dailyProduce(p: JobProgram): { gathered: Record<string, number>; made: Array<{ oggetto: string; con?: string; quante: number }> } {
   const tasks = JOB_PHASES.flatMap((f) => p.giornata[f] ?? []);
-  const delivered = new Set(tasks.flatMap((t) => (t.fa === 'porta' && t.oggetto && !t.dove?.startsWith('entita:') ? [t.oggetto] : [])));
+  const delivered = new Set(tasks.flatMap((t) => (t.fa === 'carry' && t.oggetto && !t.dove?.startsWith('entita:') ? [t.oggetto] : [])));
   const gathered: Record<string, number> = {};
   const made: Array<{ oggetto: string; con?: string; quante: number }> = [];
   for (const t of tasks) {
     if (!t.oggetto || !delivered.has(t.oggetto)) continue;
     const n = t.quante ?? 1;
-    if (t.fa === 'raccogli') gathered[t.oggetto] = (gathered[t.oggetto] ?? 0) + n;
-    else if (t.fa === 'produci') made.push({ oggetto: t.oggetto, ...(t.con ? { con: t.con } : {}), quante: n });
+    if (t.fa === 'gather') gathered[t.oggetto] = (gathered[t.oggetto] ?? 0) + n;
+    else if (t.fa === 'produce') made.push({ oggetto: t.oggetto, ...(t.con ? { con: t.con } : {}), quante: n });
   }
   return { gathered, made };
 }

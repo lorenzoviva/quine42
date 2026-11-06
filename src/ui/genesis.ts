@@ -39,7 +39,7 @@ export class GenesisScreen {
     };
     death.oninput = showDeath;
     showDeath();
-    const mode = el('select', {}, el('option', { value: 'singola' }, 'singola'), el('option', { value: 'multigiocatore' }, 'multigiocatore')) as HTMLSelectElement;
+    const mode = el('select', {}, el('option', { value: 'single' }, 'singola'), el('option', { value: 'multiplayer' }, 'multigiocatore')) as HTMLSelectElement;
     mode.value = now.modalita;
     const check = (on: boolean) => {
       const c = el('input', { type: 'checkbox' }) as HTMLInputElement;
@@ -51,7 +51,7 @@ export class GenesisScreen {
     const lock = (on: boolean) => {
       for (const c of [death, mode]) c.disabled = on || !free;
       // PvP and «Altro…» between players only mean something with more than one player.
-      for (const c of [pvp, other]) c.disabled = on || !free || mode.value !== 'multigiocatore';
+      for (const c of [pvp, other]) c.disabled = on || !free || mode.value !== 'multiplayer';
     };
     mode.onchange = () => lock(false);
     lock(false);
@@ -66,7 +66,7 @@ export class GenesisScreen {
       el('div', { class: 'row' }, el('label', {}, pvp, 'PvP: i viandanti possono ferirsi'), el('label', {}, other, '«Altro…» anche su un altro viandante')),
       el('div', { class: 'note' }, 'Il multigiocatore arriverà: per ora ogni universo si gioca da soli, ma la scelta resta.'),
     );
-    return { form, read: () => ({ modalita: mode.value === 'multigiocatore' ? 'multigiocatore' : 'singola', morte: Number(death.value), pvp: pvp.checked, altroTraGiocatori: other.checked }), lock };
+    return { form, read: () => ({ modalita: mode.value === 'multiplayer' ? 'multiplayer' : 'single', morte: Number(death.value), pvp: pvp.checked, altroTraGiocatori: other.checked }), lock };
   }
 
   /**
@@ -90,7 +90,7 @@ export class GenesisScreen {
     actorOn.checked = actor.acceso;
     const actorModel = pick(actor.modello);
     actorModel.id = 'genesi-attore-modello';
-    const classes: Array<[keyof SculptorAiModels, string]> = [['semplice', 'cose semplici'], ['figura', 'figure'], ['struttura', 'strutture'], ['importante', 'strutture importanti'], ['artista', 'Artista (giudizio)'], ['musicista', 'Musicista']];
+    const classes: Array<[keyof SculptorAiModels, string]> = [['simple', 'cose semplici'], ['figure', 'figure'], ['structure', 'strutture'], ['important', 'strutture importanti'], ['artist', 'Artista (giudizio)'], ['musician', 'Musicista']];
     const sculpt = new Map(classes.map(([k]) => [k, pick(String(sculptors[k]))]));
     const sliders = new Map<keyof Coefficients, HTMLInputElement>();
     const preset = el('select', {}, el('option', { value: 'pieno' }, 'Pieno dettaglio'), el('option', { value: 'low' }, 'Low Detail (a risparmio)'), el('option', { value: 'misura' }, 'Su misura')) as HTMLSelectElement;
@@ -140,7 +140,7 @@ export class GenesisScreen {
       el('label', {}, 'Dettaglio', preset),
       ...rows,
       el('label', {}, 'Modello del Concilio', text),
-      el('div', { class: 'row' }, ...classes.map(([k, name]) => el('label', {}, k === 'musicista' ? name : `Scultore, ${name}`, sculpt.get(k)!))),
+      el('div', { class: 'row' }, ...classes.map(([k, name]) => el('label', {}, k === 'musician' ? name : `Scultore, ${name}`, sculpt.get(k)!))),
       el('div', { class: 'row' }, el('label', { for: 'genesi-attore' }, actorOn, "L'Attore interpreta gli individui (con le schede del Narratore)"), el('label', { for: 'genesi-attore-modello' }, "Modello dell'Attore", actorModel)),
       el('div', { class: 'note' }, "Spento, il Narratore interpreta gli individui come sempre e nessuna chiamata si aggiunge. Acceso, il Narratore scrive una scheda per individuo alla sua prima battuta e l'Attore la recita con il suo modello."),
       estimate,

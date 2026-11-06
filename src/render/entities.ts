@@ -15,7 +15,7 @@ import type { FormComp } from '../kernel/forms';
 
 export interface Limb {
   pivot: THREE.Object3D;
-  part: 'gamba' | 'braccio' | 'testa' | 'coda';
+  part: 'leg' | 'arm' | 'head' | 'tail';
   phase: number;
 }
 
@@ -69,18 +69,18 @@ export function figureStandIn(color: string, scale = 1, skin = '#e8b88a', materi
   head.add(mesh(box(0.34 * s, 0.32 * s, 0.32 * s, rgbOf(skin))));
   head.add(mesh(box(0.36 * s, 0.1 * s, 0.34 * s, dark, 0.28 * s)));
   body.add(head);
-  const limbs: Limb[] = [{ pivot: head, part: 'testa', phase: 1 }];
+  const limbs: Limb[] = [{ pivot: head, part: 'head', phase: 1 }];
   for (const side of [-1, 1]) {
     const leg = new THREE.Group();
     leg.position.set(side * 0.11 * s, 0.48 * s, 0);
     leg.add(mesh(box(0.14 * s, 0.48 * s, 0.16 * s, dark, -0.48 * s)));
     root.add(leg);
-    limbs.push({ pivot: leg, part: 'gamba', phase: side });
+    limbs.push({ pivot: leg, part: 'leg', phase: side });
     const arm = new THREE.Group();
     arm.position.set(side * 0.28 * s, 0.94 * s, 0);
     arm.add(mesh(box(0.12 * s, 0.42 * s, 0.12 * s, c.map((v) => v * 0.85), -0.42 * s)));
     root.add(arm);
-    limbs.push({ pivot: arm, part: 'braccio', phase: -side });
+    limbs.push({ pivot: arm, part: 'arm', phase: -side });
   }
   return { root, body, limbs };
 }
@@ -98,10 +98,10 @@ export function animateLimbs(v: { limbs: Limb[]; body: THREE.Object3D; phase: nu
   const k = moving ? 1 : 0;
   for (const l of v.limbs) {
     const swing = Math.sin(v.phase) * l.phase;
-    if (l.part === 'gamba') l.pivot.rotation.x = THREE.MathUtils.lerp(l.pivot.rotation.x, swing * 0.6 * k, Math.min(1, dt * 12));
-    else if (l.part === 'braccio') l.pivot.rotation.x = THREE.MathUtils.lerp(l.pivot.rotation.x, swing * 0.45 * k, Math.min(1, dt * 12));
-    else if (l.part === 'coda') l.pivot.rotation.y = Math.sin(t * 5 + v.phase) * 0.35;
-    else if (l.part === 'testa') l.pivot.rotation.x = Math.sin(t * 1.3 + l.pivot.id) * 0.05;
+    if (l.part === 'leg') l.pivot.rotation.x = THREE.MathUtils.lerp(l.pivot.rotation.x, swing * 0.6 * k, Math.min(1, dt * 12));
+    else if (l.part === 'arm') l.pivot.rotation.x = THREE.MathUtils.lerp(l.pivot.rotation.x, swing * 0.45 * k, Math.min(1, dt * 12));
+    else if (l.part === 'tail') l.pivot.rotation.y = Math.sin(t * 5 + v.phase) * 0.35;
+    else if (l.part === 'head') l.pivot.rotation.x = Math.sin(t * 1.3 + l.pivot.id) * 0.05;
   }
   v.body.position.y = moving ? Math.abs(Math.sin(v.phase)) * 0.03 : 0;
 }
@@ -217,7 +217,7 @@ export class Entities {
       v.root.position.set(p.x, climb(v.root, k.floorAt(p.x, p.y, p.z), dt), p.y);
       // What they are doing, seen: lying down to sleep.
       const att = k.ecs.get(id, 'attivita');
-      v.root.rotation.z = att?.tipo === 'dorme' && att.ferma ? Math.PI / 2.2 : 0;
+      v.root.rotation.z = att?.tipo === 'sleep' && att.ferma ? Math.PI / 2.2 : 0;
       if (moved > 0.0005 && moved < 2) {
         turnTowards(v, Math.atan2(dx, dy), dt);
         v.phase += moved * 7;

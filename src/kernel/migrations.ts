@@ -2,14 +2,15 @@
 // The author decided (D36) that a universe no longer compatible is neither thrown away nor migrated by default: it is labelled with the
 // range of the kernels it runs on (`kernels`, version.ts) and left standing with the fault `universe:kernel`. When a contract changes and
 // a migration is worth writing, it goes in MIGRATIONS: a pure function from the files of `from` to the files of `to`, with its test.
-// The first is 0.1 → 0.2 (T307a, ADR-0153, ADR-0155): the internal language of the world's simulation.
+// The first is 0.1 → 0.2 (T307a, ADR-0153, ADR-0155): the internal language of the world's simulation; then 0.2 → 0.3 (T307b,
+// ADR-0157): the internal language of society, work and the Council.
 // The universe's places live apart (`maps/`, a chunk store): a migration says how a place's plan is ported too (`migratePlan`), and the
 // kernel ports every plan it reads (`migratePlanRecord`). The kernel runs the chain at boot (`Kernel.boot`), before the files are read; the
 // pages, the worlds of many and the tools run it before they take the seed (`prepareUniverse`, universes.ts), so the seed's new files
 // reach a universe in the same load. A ported universe says it in `kernels.from`.
 
 import type { ChunkPlan } from './agents/cartography';
-import { INTERNAL_NAMES, internalManifest, internalModelId, internalModelInfo, internalName } from './internalNames';
+import { INTERNAL_NAMES, internalAgent, internalCardId, internalCoefficients, internalGraph, internalJobProgram, internalManifest, internalModelId, internalModelId0_3, internalModelInfo, internalModuleId, internalName, internalPeople, internalPlots, internalSculptors, internalSoundPurpose, internalVenture } from './internalNames';
 import { hashStr, hex } from './rng';
 import type { FileMap } from './types';
 import { checkKernelVersion, compareContracts, contractOf, KERNEL_VERSION, parseContract, parseVersion, runsOnThisKernel, showContract, universeKernels, type Contract } from './version';
@@ -39,6 +40,14 @@ export const MIGRATIONS: readonly Migration[] = [
       'la lingua interna della simulazione (T307a): classi, taglie, effetti e i loro campi, categorie, forme degli oggetti, id dei terreni, ambienti e timbri del seme, azioni dei programmi, rune in latino ed elementi, pannelli, passi dei casi',
     migrate: (files) => migrate0_2(files),
     migratePlan: (plan) => plan0_2(plan),
+  },
+  {
+    from: '0.2',
+    to: '0.3',
+    descrizione:
+      'la lingua interna della società e del Concilio (T307b): momenti, «dove», attività, specie e genere, mestieri e i loro programmi, comportamenti ed esiti del lavoro, id dei moduli del seme (sys.work, job.*, obj.*), imprese, trame e missioni, suoni (usi, effetti, programmi del seme), parti dei modelli, agenti e i loro prompt, classi dello Scultore, coefficienti, carte e grafo, modalità della partita, esiti delle mancanze',
+    migrate: (files) => migrate0_3(files),
+    migratePlan: (plan) => plan0_3(plan),
   },
 ];
 
@@ -489,4 +498,209 @@ function plan0_2(plan: ChunkPlan): ChunkPlan {
   const houses = Array.isArray(p.case) ? p.case.map(house0_2) : p.case;
   const next = { ...p, layout, ...(p.strutture !== undefined ? { strutture } : {}), runes, ...(p.case !== undefined ? { case: houses } : {}) } as ChunkPlan;
   return JSON.stringify(next) === JSON.stringify(plan) ? plan : next;
+}
+
+// --- 0.2 → 0.3 (T307b, ADR-0153, ADR-0157): the internal language of society, work and the Council ------------------------------------
+// The moments, places and activities of the routines, species and gender, the trades and their programs, the behaviours, the seed's
+// modules the kernel names (`sys.lavoro` → `sys.work`, `lavoro.*` → `job.*`, `obj.letto` → `obj.bed`…), the ventures, the plots and the
+// quests, the sounds (their uses, the effects the game cues, the seed's programs `suono-*` → `sound-*`), the parts of the models, the
+// agents (and the files of their prompts, their gerboas in the corona), the Sculptor's classes, the coefficients, the cards and the
+// graph, the mode of the game, the outcomes of the shortfalls. As in 0.2, what the Council wrote and only its module reads stays.
+
+/** Every string of a JSON value that is the id of a seed's module the kernel names (`obj.letto`), internal: they are dotted ids, never words. */
+function seedModulesOf(v: unknown): unknown {
+  if (typeof v === 'string') return has('moduli-seme', v) ? internalModuleId(v) : v;
+  if (Array.isArray(v)) return v.map(seedModulesOf);
+  if (!isRecord(v)) return v;
+  const out: Record<string, unknown> = {};
+  for (const [k, x] of Object.entries(v)) out[k] = k === 'carta' && isRecord(x) && typeof x.autore === 'string' ? { ...x, autore: internalAgent(x.autore) } : seedModulesOf(x);
+  return out;
+}
+
+/** The component `mestiere` of a thing of a case of the bench, as the kernel writes it in 0.3 (the seed's `sys.work` has two). */
+function caseJob(job: Record<string, unknown>): Record<string, unknown> {
+  const o: Record<string, unknown> = { ...job };
+  if (typeof o.id === 'string') o.id = internalName('mestieri', o.id);
+  if (typeof o.fase === 'string') o.fase = internalName('momenti', o.fase);
+  if (Array.isArray(o.compiti)) o.compiti = (internalJobProgram({ giornata: { x: o.compiti } }) as { giornata: { x: unknown } }).giornata.x;
+  for (const [it, en] of [['casa', 'home'], ['piazza', 'square'], ['lavoro', 'work']] as const)
+    if (it in o && !(en in o)) {
+      o[en] = o[it];
+      delete o[it];
+    }
+  return o;
+}
+
+/** A manifest of 0.2 in 0.3: the seed's module ids it names, the programs of its trades, the jobs of its cases, the gerboa it shows. */
+function manifest0_3(raw: unknown): unknown {
+  const m = seedModulesOf(raw);
+  if (!isRecord(m)) return m;
+  if (Array.isArray(m.mestieri)) m.mestieri = m.mestieri.map(internalJobProgram);
+  if (Array.isArray(m.casi))
+    m.casi = m.casi.map((c) =>
+      isRecord(c) && Array.isArray(c.cose)
+        ? { ...c, cose: c.cose.map((x) => (isRecord(x) && isRecord(x.componenti) && isRecord(x.componenti.mestiere) ? { ...x, componenti: { ...x.componenti, mestiere: caseJob(x.componenti.mestiere) } } : x)) }
+        : c,
+    );
+  if (isRecord(m.appearance) && typeof m.appearance.model === 'string') m.appearance = { ...m.appearance, model: internalModelId0_3(m.appearance.model) };
+  return m;
+}
+
+/** models/index.json: the ids of the seed's sound programs and of the gerboas, the purposes of the sounds. */
+function index0_3(raw: unknown): unknown {
+  if (!isRecord(raw)) return raw;
+  const out: Record<string, unknown> = {};
+  for (const [id, info] of Object.entries(raw)) {
+    const to = internalModelId0_3(id);
+    if (to !== id && Object.hasOwn(raw, to)) continue;
+    out[to] = isRecord(info) && isRecord(info.suono) ? seedModulesOf({ ...info, suono: internalSoundPurpose(info.suono) }) : seedModulesOf(info);
+  }
+  return out;
+}
+
+/** universe.json: the Sculptor's classes, the coefficients and the agents by their internal keys; the mode of the game. */
+function config0_3(raw: unknown): unknown {
+  if (!isRecord(raw)) return raw;
+  const c: Record<string, unknown> = { ...raw };
+  if (isRecord(c.ai)) {
+    const ai: Record<string, unknown> = { ...c.ai };
+    if (isRecord(ai.scultori)) ai.scultori = internalSculptors(ai.scultori);
+    if (isRecord(ai.coefficienti)) ai.coefficienti = internalCoefficients(ai.coefficienti);
+    if (isRecord(ai.agenti)) ai.agenti = renameKeys(ai.agenti, internalAgent);
+    if (isRecord(ai.minimi)) {
+      const mi: Record<string, unknown> = { ...ai.minimi };
+      if (isRecord(mi.scultori)) mi.scultori = internalSculptors(mi.scultori);
+      if (isRecord(mi.coefficienti)) mi.coefficienti = internalCoefficients(mi.coefficienti);
+      ai.minimi = mi;
+    }
+    c.ai = ai;
+  }
+  if (isRecord(c.partita) && typeof c.partita.modalita === 'string') c.partita = { ...c.partita, modalita: internalName('partita', c.partita.modalita) };
+  return c;
+}
+
+/** world/carte.json: the ids of the cards (`modello:` → `model:`, `persona:` → `individual:`), and the authors of the places' cards. */
+function cards0_3(raw: unknown): unknown {
+  const v = seedModulesOf(raw);
+  if (!isRecord(v)) return v;
+  const out = { ...v };
+  for (const field of ['utilizzi', 'allaNascita']) if (isRecord(out[field])) out[field] = renameKeys(out[field] as Record<string, unknown>, internalCardId);
+  // The places' cards are stamps themselves (`{ nome, autore, pagante, titolare }`).
+  if (isRecord(out.luoghi)) out.luoghi = Object.fromEntries(Object.entries(out.luoghi).map(([k, c]) => [k, isRecord(c) && typeof c.autore === 'string' ? { ...c, autore: internalAgent(c.autore) } : c]));
+  return out;
+}
+
+/** world/mancanze.json: the outcome and the agent of every entry. */
+const shortfalls0_3 = (raw: unknown): unknown =>
+  isRecord(raw) && Array.isArray(raw.voci)
+    ? { ...raw, voci: raw.voci.map((e) => (isRecord(e) ? { ...e, ...(typeof e.esito === 'string' ? { esito: internalName('partita', e.esito) } : {}), ...(typeof e.agente === 'string' ? { agente: internalAgent(e.agente) } : {}) } : e)) }
+    : raw;
+
+/** world/imprese.json: every venture. */
+const ventures0_3 = (raw: unknown): unknown => (isRecord(raw) && Array.isArray(raw.imprese) ? { ...raw, imprese: raw.imprese.map(internalVenture) } : raw);
+
+/** The XML of a program: the parts of its letters (`part="gamba"` → `leg`), the rest as it is. */
+const xml0_3 = (xml: string): string => xml.replace(/(<color\b[^>]*?\bpart=")([^"]+)(")/g, (_, a: string, n: string, b: string) => `${a}${internalName('parti', n)}${b}`);
+
+/**
+ * The Lua of a module of 0.2 in 0.3, where the kernel reads a value: a seed's module named by its id (`"obj.letto"`), an activity given to
+ * the component the renderer draws (`ecs.set(id, "attivita", { tipo = "dorme" })` → `"sleep"`). Nothing else changes.
+ */
+export function luaFor0_3(src: string): string {
+  const toks = luaTokens(src);
+  const edits: Array<{ start: number; end: number; text: string }> = [];
+  const quote = (t: LuaToken, value: string) => `${t.text[0]}${value}${t.text[0]}`;
+  for (let i = 0; i < toks.length; i++) {
+    const t = toks[i];
+    if (t.kind === 'string' && t.value !== undefined && has('moduli-seme', t.value)) edits.push({ start: t.start, end: t.end, text: quote(t, internalModuleId(t.value)) });
+    // `"attivita", { … tipo = "<activity>" … }`: the table right after the component's name.
+    if (t.kind === 'string' && t.value === 'attivita' && toks[i + 1]?.text === ',' && toks[i + 2]?.text === '{') {
+      let depth = 0;
+      for (let j = i + 3; j < toks.length; j++) {
+        const x = toks[j];
+        if (x.text === '{' || x.text === '(' || x.text === '[') depth++;
+        else if (x.text === '}' || x.text === ')' || x.text === ']') {
+          if (depth === 0) break;
+          depth--;
+        } else if (depth === 0 && x.kind === 'name' && x.text === 'tipo' && toks[j + 1]?.text === '=' && toks[j + 2]?.kind === 'string' && has('attivita', toks[j + 2].value))
+          edits.push({ start: toks[j + 2].start, end: toks[j + 2].end, text: quote(toks[j + 2], internalName('attivita', toks[j + 2].value!)) });
+      }
+    }
+  }
+  if (!edits.length) return src;
+  let out = '';
+  let at = 0;
+  for (const e of edits.sort((a, b) => a.start - b.start)) {
+    if (e.start < at) continue;
+    out += src.slice(at, e.start) + e.text;
+    at = e.end;
+  }
+  return out + src.slice(at);
+}
+
+/** Where a file of 0.2 goes in 0.3: the seed's modules and their stores, the prompts of the agents, the models the kernel names. */
+function path0_3(p: string): string {
+  const mod = /^modules\/([^/]+)(\/.*)$/.exec(p);
+  if (mod && has('moduli-seme', mod[1])) return `modules/${internalModuleId(mod[1])}${mod[2]}`;
+  const store = /^world\/magazzino\/([^/]+)\.json$/.exec(p);
+  if (store && has('moduli-seme', store[1])) return `world/magazzino/${internalModuleId(store[1])}.json`;
+  const prompt = /^prompts\/agents\/([^/]+)\.md$/.exec(p);
+  if (prompt && has('agenti', prompt[1])) return `prompts/agents/${internalAgent(prompt[1])}.md`;
+  const model = /^models\/([^/]+)\.xml$/.exec(p);
+  if (model && internalModelId0_3(model[1]) !== model[1]) return `models/${internalModelId0_3(model[1])}.xml`;
+  return p;
+}
+
+function migrate0_3(files: FileMap): FileMap {
+  const council = councilModules(files);
+  const out: FileMap = {};
+  for (const [p, text] of Object.entries(files)) {
+    if (p === SEED) continue;
+    const to = path0_3(p);
+    // A universe that has both the old path and the new one keeps the new one.
+    if (to !== p && files[to] !== undefined) continue;
+    const mod = /^modules\/([^/]+)\//.exec(p)?.[1];
+    let next = text;
+    if (/^modules\/[^/]+\/manifest\.json$/.test(p)) next = rewriteJson(text, manifest0_3);
+    else if (/^modules\/[^/]+\/.+\.lua$/.test(p) && mod && council.has(mod)) next = luaFor0_3(text);
+    else if (p === 'models/index.json') next = rewriteJson(text, index0_3);
+    else if (/^models\/[^/]+\.xml$/.test(p)) next = xml0_3(text);
+    else if (p === 'universe.json') next = rewriteJson(text, config0_3);
+    else if (p === 'world/people.json') next = rewriteJson(text, (v) => seedModulesOf(internalPeople(v)));
+    else if (p === 'world/plots.json') next = rewriteJson(text, (v) => seedModulesOf(internalPlots(v)));
+    else if (p === 'world/imprese.json') next = rewriteJson(text, ventures0_3);
+    else if (p === 'world/carte.json') next = rewriteJson(text, cards0_3);
+    else if (p === 'world/mancanze.json') next = rewriteJson(text, shortfalls0_3);
+    else if (p === 'world/grafo.json') next = rewriteJson(text, internalGraph);
+    else if (/\.json$/.test(p)) next = rewriteJson(text, seedModulesOf);
+    out[to] = next;
+  }
+  // seed.json follows, as in 0.2: a file of the seed the migration changed or moved, untouched by the universe, stays the seed's.
+  if (files[SEED] !== undefined) {
+    const base = parseJson(files[SEED]);
+    if (isRecord(base)) {
+      const next: Record<string, unknown> = {};
+      for (const [p, hash] of Object.entries(base)) {
+        const to = path0_3(p);
+        const pristine = files[p] !== undefined && hashOf(files[p]) === hash;
+        next[to] = pristine && out[to] !== undefined ? hashOf(out[to]) : hash;
+      }
+      out[SEED] = JSON.stringify(next, null, 1) + '\n';
+    } else out[SEED] = files[SEED];
+  }
+  return out;
+}
+
+/** A plan of 0.2 in 0.3 (idempotent): the seed's modules of its things by their internal ids, the agent who signed its card. */
+function plan0_3(plan: ChunkPlan): ChunkPlan {
+  let p = plan as ChunkPlan & Record<string, unknown>;
+  if (isRecord(p.carta) && typeof p.carta.autore === 'string' && internalAgent(p.carta.autore) !== p.carta.autore) p = { ...p, carta: { ...p.carta, autore: internalAgent(p.carta.autore) } } as typeof p;
+  if (!Array.isArray(p.objects)) return p;
+  let changed = p !== plan;
+  const objects = p.objects.map((o) => {
+    if (!isRecord(o) || typeof o.module !== 'string' || !has('moduli-seme', o.module)) return o;
+    changed = true;
+    return { ...o, module: internalModuleId(o.module) };
+  });
+  return changed ? ({ ...p, objects } as ChunkPlan) : plan;
 }

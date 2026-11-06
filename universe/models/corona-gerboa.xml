@@ -6,18 +6,18 @@ Ruolo: npc.
 Design e concetto scultoreo (ispirato fedelmente ai riferimenti reali e pixel art dei dipodidi del deserto):
 - Morfologia autentica da saltatore bipede del deserto (Euchoreutes naso / Jaculus):
   silhouette slanciata e agile, corpo ovoide compatto inclinato in avanti a 30 gradi, sospeso su lunghissime zampe a trampolo;
-- Zampe posteriori estesissime e ravvicinate sotto il corpo (G, g, P, p, part="gamba"):
+- Zampe posteriori estesissime e ravvicinate sotto il corpo (G, g, P, p, part="leg"):
   - Cosce muscolose alte ancorate alla groppa posteriore (z=11..19, y=16..24, x=11 e x=20);
   - Ginocchia piegate marcatamente in avanti (y=25, z=12);
   - Stinchi e garretti lunghissimi e snelli (z=2..12, dislivello 10 voxel!) che scendono all'indietro verso il calcagno;
   - Piedi lunghissimi piatti a terra (z=0..1, lunghezza 13 voxel, y=15..28!) con dita allungate e artiglietti;
   - Il corpo "galleggia" visibilmente sollevato da terra sui trampoli elastici delle zampe;
-- Zampette anteriori minuscole e delicate (A, a, part="braccio") raccolte con grazia sotto la gola/petto;
-- Testa grande e tenerissima (T, t, U, u, part="testa", z=17..27) con musetto conico appuntito in avanti, guanciotte crema pulite e morbide, tartufo nasino scuro (N) e vibrisse discrete (W);
+- Zampette anteriori minuscole e delicate (A, a, part="arm") raccolte con grazia sotto la gola/petto;
+- Testa grande e tenerissima (T, t, U, u, part="head", z=17..27) con musetto conico appuntito in avanti, guanciotte crema pulite e morbide, tartufo nasino scuro (N) e vibrisse discrete (W);
 - Occhi grandi profondi moro (E) di 3x2x3 voxel con punto luce riflesso bianco brillante (Z, glow="True") perfettamente visibili in visuale 3/4;
-- GIGANTESCHE ORECCHIE A CONCHIGLIA (O, o, R, r, part="testa", z=25..39, altezza 14 voxel!):
+- GIGANTESCHE ORECCHIE A CONCHIGLIA (O, o, R, r, part="head", z=25..39, altezza 14 voxel!):
   padiglioni ampi a spatola/parabola aperti a V sopra la testa, con dorso fulvo e interno concavo in velluto rosa carne;
-- Coda lunghissima (K, k, part="coda", oltre 30 voxel di estensione!):
+- Coda lunghissima (K, k, part="tail", oltre 30 voxel di estensione!):
   esce dalla groppa posteriore alta, scende sfiorando il suolo e risale con una spettacolare curva a bandiera terminando con un vistoso pennacchio a batuffolo bicolore piumato (base scura J, grande ciuffo bianco candido I);
 - Variazioni stocastiche nei semi: sfumature del manto sabbia/dorso fulvo, morbidezza del pelo e ciuffi della coda.
 -->
@@ -31,40 +31,40 @@ Design e concetto scultoreo (ispirato fedelmente ai riferimenti reali e pixel ar
   <color symbol="C" value="fff1e8" name="crema chiaro ventre"/>
   <color symbol="c" value="f2d5be" name="crema caldo sfumatura"/>
 
-  <!-- Testa, musetto, tartufo e baffi (part="testa") -->
-  <color symbol="T" value="ab5236" part="testa" name="testa fulva base"/>
-  <color symbol="t" value="c87a48" part="testa" name="testa fulvo chiaro guance"/>
-  <color symbol="U" value="fff1e8" part="testa" name="musetto e guance crema"/>
-  <color symbol="u" value="f2d5be" part="testa" name="sfumatura musetto"/>
-  <color symbol="N" value="291814" part="testa" name="tartufo naso scuro"/>
-  <color symbol="W" value="5a3825" part="testa" name="baffetti vibrisse"/>
-  <color symbol="E" value="141418" part="testa" name="occhi scuri profondi"/>
-  <color symbol="Z" value="ffffff" glow="True" part="testa" name="riflesso occhi vispo"/>
+  <!-- Testa, musetto, tartufo e baffi (part="head") -->
+  <color symbol="T" value="ab5236" part="head" name="testa fulva base"/>
+  <color symbol="t" value="c87a48" part="head" name="testa fulvo chiaro guance"/>
+  <color symbol="U" value="fff1e8" part="head" name="musetto e guance crema"/>
+  <color symbol="u" value="f2d5be" part="head" name="sfumatura musetto"/>
+  <color symbol="N" value="291814" part="head" name="tartufo naso scuro"/>
+  <color symbol="W" value="5a3825" part="head" name="baffetti vibrisse"/>
+  <color symbol="E" value="141418" part="head" name="occhi scuri profondi"/>
+  <color symbol="Z" value="ffffff" glow="True" part="head" name="riflesso occhi vispo"/>
 
-  <!-- Grandi orecchie a conchiglia (part="testa") -->
-  <color symbol="O" value="ab5236" part="testa" name="dorso orecchio fulvo"/>
-  <color symbol="o" value="c87a48" part="testa" name="bordo orecchio chiaro"/>
-  <color symbol="R" value="ffaec0" part="testa" name="interno orecchio rosa"/>
-  <color symbol="r" value="ffd2dc" part="testa" name="concavita orecchio rosa chiaro"/>
+  <!-- Grandi orecchie a conchiglia (part="head") -->
+  <color symbol="O" value="ab5236" part="head" name="dorso orecchio fulvo"/>
+  <color symbol="o" value="c87a48" part="head" name="bordo orecchio chiaro"/>
+  <color symbol="R" value="ffaec0" part="head" name="interno orecchio rosa"/>
+  <color symbol="r" value="ffd2dc" part="head" name="concavita orecchio rosa chiaro"/>
 
-  <!-- Zampe posteriori bipedali piegate a Z (part="gamba") -->
-  <color symbol="G" value="ab5236" part="gamba" name="coscia fulva"/>
-  <color symbol="g" value="8f4325" part="gamba" name="stinco e garretto"/>
-  <color symbol="P" value="f2d5be" part="gamba" name="piede crema dita"/>
-  <color symbol="p" value="d8a878" part="gamba" name="polpastrelli unghie"/>
+  <!-- Zampe posteriori bipedali piegate a Z (part="leg") -->
+  <color symbol="G" value="ab5236" part="leg" name="coscia fulva"/>
+  <color symbol="g" value="8f4325" part="leg" name="stinco e garretto"/>
+  <color symbol="P" value="f2d5be" part="leg" name="piede crema dita"/>
+  <color symbol="p" value="d8a878" part="leg" name="polpastrelli unghie"/>
 
-  <!-- Zampette anteriori sul petto (part="braccio") -->
-  <color symbol="A" value="c87a48" part="braccio" name="braccino fulvo"/>
-  <color symbol="a" value="fff1e8" part="braccio" name="manina crema"/>
+  <!-- Zampette anteriori sul petto (part="arm") -->
+  <color symbol="A" value="c87a48" part="arm" name="braccino fulvo"/>
+  <color symbol="a" value="fff1e8" part="arm" name="manina crema"/>
 
-  <!-- Coda sinuosa e pennacchio bicolore (part="coda") -->
-  <color symbol="K" value="ab5236" part="coda" name="fusto coda fulvo"/>
-  <color symbol="k" value="8f4325" part="coda" name="giunto fusto coda"/>
-  <color symbol="J" value="291814" part="coda" name="base pennacchio nera"/>
-  <color symbol="I" value="fff1e8" part="coda" name="punta pennacchio bianca"/>
+  <!-- Coda sinuosa e pennacchio bicolore (part="tail") -->
+  <color symbol="K" value="ab5236" part="tail" name="fusto coda fulvo"/>
+  <color symbol="k" value="8f4325" part="tail" name="giunto fusto coda"/>
+  <color symbol="J" value="291814" part="tail" name="base pennacchio nera"/>
+  <color symbol="I" value="fff1e8" part="tail" name="punta pennacchio bianca"/>
 
   <!-- ======================================================== -->
-  <!-- 1. LUNGHE ZAMPE POSTERIORI DA SALTATORE (part="gamba")   -->
+  <!-- 1. LUNGHE ZAMPE POSTERIORI DA SALTATORE (part="leg")   -->
   <!-- ======================================================== -->
   <!-- Piedone sinistro al suolo (x=10..12, y=15..28, z=0..1)   -->
   <box at="11 21.5 0" size="3 14 1" color="P"/>
@@ -108,7 +108,7 @@ Design e concetto scultoreo (ispirato fedelmente ai riferimenti reali e pixel ar
   <ellipsoid at="15.5 31 14" size="6 5 5" color="c"/>
 
   <!-- ======================================================== -->
-  <!-- 3. ZAMPETTE ANTERIORI MINUSCOLE AL PETTO (part="braccio") -->
+  <!-- 3. ZAMPETTE ANTERIORI MINUSCOLE AL PETTO (part="arm") -->
   <!-- ======================================================== -->
   <!-- Braccino sinistro e manina crema                         -->
   <line at="12 29 14" to="13.5 32 12" r="0.6" color="A"/>
@@ -119,7 +119,7 @@ Design e concetto scultoreo (ispirato fedelmente ai riferimenti reali e pixel ar
   <box at="17.5 33 12" size="2 1 1" color="a"/>
 
   <!-- ======================================================== -->
-  <!-- 4. TESTA GRANDE, GUANCE, MUSETTO, OCCHI (part="testa")   -->
+  <!-- 4. TESTA GRANDE, GUANCE, MUSETTO, OCCHI (part="head")   -->
   <!-- ======================================================== -->
   <!-- Cranio principale                                        -->
   <ellipsoid at="15.5 31 19" size="13 11 10" color="T"/>
@@ -153,7 +153,7 @@ Design e concetto scultoreo (ispirato fedelmente ai riferimenti reali e pixel ar
   <box at="19 35 22" size="1 1 1" color="Z"/>
 
   <!-- ======================================================== -->
-  <!-- 5. GIGANTESCHE ORECCHIE A CONCHIGLIA (part="testa", z=25..39) -->
+  <!-- 5. GIGANTESCHE ORECCHIE A CONCHIGLIA (part="head", z=25..39) -->
   <!-- ======================================================== -->
   <!-- Orecchio sinistro: guscio fulvo posteriore/esterno       -->
   <ellipsoid at="9.5 29 25" size="8 4 15" color="O"/>
@@ -170,7 +170,7 @@ Design e concetto scultoreo (ispirato fedelmente ai riferimenti reali e pixel ar
   <line at="25 30 28" to="22 30 38" r="0.5" color="o"/>
 
   <!-- ======================================================== -->
-  <!-- 6. LUNGHISSIMA CODA E PENNACCHIO BICOLORE (part="coda")  -->
+  <!-- 6. LUNGHISSIMA CODA E PENNACCHIO BICOLORE (part="tail")  -->
   <!-- ======================================================== -->
   <!-- Attacco alla groppa posteriore alta (y=15, z=16)         -->
   <line at="15.5 15 16" to="15.5 10 9" r="1.1" color="K"/>

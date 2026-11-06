@@ -10,7 +10,7 @@ import { addIndividual, applyRenames, checkSociety, readPeople, repairSociety, r
 import type { AiModels, TextCall } from '../src/kernel/ai/models';
 import type { FileMap } from '../src/kernel/types';
 
-const cats = (t: string) => (t === 'npc.cat' ? 'animale' : 'persona') as 'animale' | 'persona';
+const cats = (t: string) => (t === 'npc.cat' ? 'animal' : 'person') as 'animal' | 'person';
 
 function individual(nome: string, tipo: string, famiglia: Array<[string, string]>, mestiere = 'contadino'): Individual {
   return { nome, tipo, mestiere, famiglia: famiglia.map(([n, legame]) => ({ nome: n, legame })), routine: [] };
@@ -40,7 +40,7 @@ const valmora = (): People => ({
 describe('a coherent society', () => {
   it('a cat has no human brother, no cat owner, no human apprentice, and one owner only', () => {
     const { people } = repairSociety(valmora(), cats);
-    expect(people.persone.find((p) => p.nome === 'Micetto')!.specie).toBe('animale');
+    expect(people.persone.find((p) => p.nome === 'Micetto')!.specie).toBe('animal');
     // "Fiocco is Bastiano's brother": across species, family becomes ownership.
     expect(rel(people, 'Fiocco', 'Bastiano')).toBe('animale');
     expect(rel(people, 'Bastiano', 'Fiocco')).toBe('padrone');
@@ -74,8 +74,8 @@ describe('a coherent society', () => {
     }
     // Someone named and never met is awaited, as what they are to who named them.
     expect(people.attesi).toContainEqual({ nome: 'Nessuno Mai', legame: 'fratello', di: 'Aldo' });
-    expect(reverseRelation('madre', 'femmina')).toBe('figlia');
-    expect(reverseRelation('padrone', 'maschio', 'persona', 'animale')).toBe('animale');
+    expect(reverseRelation('madre', 'female')).toBe('figlia');
+    expect(reverseRelation('padrone', 'male', 'person', 'animal')).toBe('animale');
   });
 
   it('one father, one mother, one spouse; spouses are not children of the same parent', () => {
@@ -119,17 +119,17 @@ describe('a coherent society', () => {
     expect(first.fixes.length).toBeGreaterThan(10);
     expect(checkSociety(first.people, cats)).toEqual([]);
     // Adding someone keeps it coherent: the other side is written, in the right gender.
-    const next = addIndividual(first.people, { ...individual('Gemma', 'npc.villager', [['Marta', 'sorella']]), genere: 'femmina' }, cats);
+    const next = addIndividual(first.people, { ...individual('Gemma', 'npc.villager', [['Marta', 'sorella']]), genere: 'female' }, cats);
     expect(rel(next, 'Marta', 'Gemma')).toBe('sorella');
     expect(checkSociety(next, cats)).toEqual([]);
   });
 
   it('the Narrator is told the species, the gender and what relations are possible', async () => {
     const asked: TextCall[] = [];
-    const models = { text: async (r: TextCall) => (asked.push(r), JSON.stringify({ nome: 'Briciola', persona: 'Sei Briciola', aspetto: 'pelo grigio', porta: [], mestiere: 'caccia topi', genere: 'femmina', famiglia: [], routine: [] })) } as unknown as AiModels;
+    const models = { text: async (r: TextCall) => (asked.push(r), JSON.stringify({ nome: 'Briciola', persona: 'Sei Briciola', aspetto: 'pelo grigio', porta: [], mestiere: 'caccia topi', genere: 'female', famiglia: [], routine: [] })) } as unknown as AiModels;
     const c = new Council(models, () => ({ files: bundledFiles, palette: {}, catalog: [] }));
-    const id = await individuate(c, { name: 'Gatto', description: 'un gatto', persona: 'Sei un gatto', specie: 'animale' }, { place: 'piazza', common: [], avoid: ['Ombra'] });
-    expect(id.gender).toBe('femmina');
+    const id = await individuate(c, { name: 'Gatto', description: 'un gatto', persona: 'Sei un gatto', specie: 'animal' }, { place: 'piazza', common: [], avoid: ['Ombra'] });
+    expect(id.gender).toBe('female');
     const prompt = asked[0].prompt;
     expect(prompt).toContain('un animale');
     expect(prompt).toMatch(/È un ANIMALE: niente mestieri da persona/);
@@ -139,7 +139,7 @@ describe('a coherent society', () => {
 
   it('at boot the kernel repairs an old registry and commits it; new people are unlike the others', async () => {
     const files: FileMap = { ...bundledFiles, 'world/people.json': JSON.stringify(valmora()) };
-    const plots: Plot[] = [{ id: 'trama-x', titolo: 'Cartografi', mistero: 'Elias la Rossa nasconde una mappa', coinvolti: ['Elias la Rossa'], tappe: [{ giorno: 0, momento: 'giorno', chi: 'Elias la Rossa', dove: 'piazza', cosa: 'disegna' }], inizio: 0, stato: 'attiva' }];
+    const plots: Plot[] = [{ id: 'trama-x', titolo: 'Cartografi', mistero: 'Elias la Rossa nasconde una mappa', coinvolti: ['Elias la Rossa'], tappe: [{ giorno: 0, momento: 'day', chi: 'Elias la Rossa', dove: 'square', cosa: 'disegna' }], inizio: 0, stato: 'active' }];
     files[PLOTS_FILE] = writePlots(plots);
     const k = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
     expect(k.repo.log().some((c) => c.message.startsWith('società:'))).toBe(true);
@@ -147,8 +147,8 @@ describe('a coherent society', () => {
     expect(rel(people, 'Fiocco', 'Bastiano')).toBe('animale');
     expect(people.persone.some((p) => p.nome === 'Elias la Rossa')).toBe(false);
     expect(readPlots(k.files)[0].tappe[0].chi).not.toBe('Elias la Rossa');
-    expect(k.speciesOf('npc.cat')).toBe('animale');
-    expect(k.speciesOf('npc.villager')).toBe('persona');
+    expect(k.speciesOf('npc.cat')).toBe('animal');
+    expect(k.speciesOf('npc.villager')).toBe('person');
     // Nothing more to repair at the next boot.
     expect(k.reviewSociety()).toEqual([]);
     // Two newcomers of the same kind: their names are unlike each other and everyone's.

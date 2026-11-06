@@ -28,6 +28,7 @@ import { UNIVERSE_NAME_RE } from '../../src/kernel/paths';
 import { checkKernelVersion } from '../../src/kernel/version';
 import { QueueAiModels } from '../../src/kernel/ai/subscription';
 import type { AiModels } from '../../src/kernel/ai/models';
+import { internalName } from '../../src/kernel/internalNames';
 import { WORLD_THEMES } from '../../src/kernel/themes';
 import { INTERNAL_HEADER, prepareUniverse, SEED_FILE, seedHashes, UniverseChunks, UniverseClient } from '../../src/kernel/universes';
 import { DeferredModels, deferredTable, runDeferred, StepChunks, StepGate, type DeferredOutcome, type WeeklyUsage } from '../../src/kernel/deferred';
@@ -39,7 +40,7 @@ export interface GenerateOptions {
   name: string;
   /** The folder of the universes (`universes/`). */
   dir: string;
-  partita?: 'singola' | 'multigiocatore';
+  partita?: 'single' | 'multiplayer';
   theme?: string;
   luoghi?: number;
   modelli?: number;
@@ -109,7 +110,7 @@ export async function generateUniverse(o: GenerateOptions): Promise<DeferredOutc
       progress,
       weekly: o.weekly ?? (() => cliWeekly()),
       theme: o.theme ?? WORLD_THEMES[0].text,
-      partita: o.partita ?? 'singola',
+      partita: o.partita ?? 'single',
       luoghi: o.luoghi ?? DEFAULT_PLACES,
       modelli: o.modelli,
       brani: o.brani,
@@ -133,8 +134,10 @@ function parseArgs(argv: string[]): GenerateOptions | string {
     const [k, v] = [rest[i], rest[i + 1]];
     if (v === undefined) return `manca il valore di ${k}`;
     if (k === '--partita') {
-      if (v !== 'singola' && v !== 'multigiocatore') return `partita: singola o multigiocatore, non ${v}`;
-      o.partita = v;
+      // The words of the command stay the author's (singola, multigiocatore); the English ones are taken too.
+      const mode = internalName('partita', v);
+      if (mode !== 'single' && mode !== 'multiplayer') return `partita: singola o multigiocatore, non ${v}`;
+      o.partita = mode;
     } else if (k === '--tema') {
       const t = WORLD_THEMES.find((x) => x.id === v);
       if (!t) return `tema sconosciuto: ${v} (${WORLD_THEMES.map((x) => x.id).join(', ')})`;

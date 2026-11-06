@@ -2,7 +2,7 @@
      seme sceglie quanto è ampia la gonna (dritta, a campana, larga fino a terra), se in testa ha il fazzoletto o la crocchia di capelli e
      che cosa porta: una cesta di mele al fianco, un sacco sulla schiena, una brocca in testa o niente. Il seme decide anche se saluta con il braccio alzato. Viso, occhi e corsetto restano dove sono. -->
 <sequence values="BGKMRDWFSHECLpqmabcdrTuvy1234567890" size="20 15 30" symmetry="(xy)" name="Contadina">
-  <color symbol="G" value="4a3424" name="scarpe" part="gamba"/>
+  <color symbol="G" value="4a3424" name="scarpe" part="leg"/>
   <color symbol="K" value="8c382b" name="gonna rosso mattone"/>
   <color symbol="M" value="63241b" name="ombra gonna"/>
   <color symbol="R" value="ab5236" name="luce gonna"/>

@@ -12,7 +12,7 @@ import { LIMITS, SessionServer } from '../../src/session/server';
 let kernel: Kernel;
 beforeAll(async () => {
   const cfg = JSON.parse(bundledFiles['universe.json']);
-  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2) };
+  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2) };
   kernel = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 }, 120_000);
 afterEach(() => void vi.restoreAllMocks());

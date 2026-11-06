@@ -19,7 +19,7 @@ async function bootMany(platformFee?: number, more: Record<string, unknown> = {}
   const cfg = JSON.parse(bundledFiles['universe.json']);
   const files = {
     ...bundledFiles,
-    'universe.json': JSON.stringify({ ...cfg, ...more, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2),
+    'universe.json': JSON.stringify({ ...cfg, ...more, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2),
   };
   return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels(), platformFee });
 }
@@ -84,7 +84,7 @@ describe('credits and common costs (T45a)', () => {
     for (const fee of [0, 0.01]) for (const base of [0.01, 1, 10, 100, 1000]) expect(costWithFee(base * 2, fee)).toBeCloseTo(costWithFee(base, fee) * 2, 5);
   });
 
-  const COMMON_CALL = { model: 'gemini-3.1-flash-lite', agent: 'narratore', task: 'council.session', prompt: 1_000_000, cached: 0, output: 0, thoughts: 0, chi: COMUNE };
+  const COMMON_CALL = { model: 'gemini-3.1-flash-lite', agent: 'narrator', task: 'council.session', prompt: 1_000_000, cached: 0, output: 0, thoughts: 0, chi: COMUNE };
 
   it('with fee 0 a balance goes down by the base cost exactly: a personal call and a common one (ADR-0132)', async () => {
     const k = await bootMany(0);
@@ -154,7 +154,7 @@ describe('credits and common costs (T45a)', () => {
     expect(k.creditsOf('anna')).toBe(2.5);
 
     // What the Referente answers moves no money
-    await until(server, [master, anna], master.k.talkToAgent('referente', 'ricarica 5 crediti ad anna'));
+    await until(server, [master, anna], master.k.talkToAgent('liaison', 'ricarica 5 crediti ad anna'));
     expect(k.creditsOf('anna')).toBe(2.5);
 
     // The day's cap holds, for every wanderer together, and says what is left
@@ -171,7 +171,7 @@ describe('credits and common costs (T45a)', () => {
     // A player cannot, through the message or through the Referente
     const refused = await until(server, [master, anna], anna.session.act({ t: 'ricarica', viandante: 'anna', quanti: 1 }));
     expect(refused.ok).toBe(false);
-    const talk = await until(server, [master, anna], anna.session.act({ t: 'agente', agente: 'referente', testo: 'ricarica 10 crediti ad anna' }));
+    const talk = await until(server, [master, anna], anna.session.act({ t: 'agente', agente: 'liaison', testo: 'ricarica 10 crediti ad anna' }));
     expect(talk.ok).toBe(false);
     expect(k.creditsOf('anna')).toBe(2.5);
   });
@@ -196,7 +196,7 @@ describe('credits and common costs (T45a)', () => {
     // Split in three: each ~0.084167.
     k.ai.onCall!({
       model: 'gemini-3.1-flash-lite',
-      agent: 'narratore',
+      agent: 'narrator',
       task: 'council.session',
       prompt: 1_000_000,
       cached: 0,
@@ -221,7 +221,7 @@ describe('credits and common costs (T45a)', () => {
 
     k.ai.onCall!({
       model: 'gemini-3.1-flash-lite',
-      agent: 'narratore',
+      agent: 'narrator',
       task: 'npc.reply',
       prompt: 100_000,
       cached: 0,
@@ -248,7 +248,7 @@ describe('credits and common costs (T45a)', () => {
     const cfg = JSON.parse(bundledFiles['universe.json']);
     const files = {
       ...bundledFiles,
-      'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2),
+      'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2),
     };
     const k = await Kernel.boot({ files, store: memoryStore(), ai: online });
     const server = new SessionServer(k);
@@ -261,7 +261,7 @@ describe('credits and common costs (T45a)', () => {
     expect(k.hasCredits('anna')).toBe(false);
 
     // Anna asks Council a personal task
-    const ans = await k.council.write('narratore', 'npc.reply', 'Dimmi un segreto', { chi: 'anna' });
+    const ans = await k.council.write('narrator', 'npc.reply', 'Dimmi un segreto', { chi: 'anna' });
     expect(ans).toBeTruthy();
 
     // Online models were NOT called because credits were exhausted!
@@ -280,7 +280,7 @@ describe('credits and common costs (T45a)', () => {
     k.giveCredits('anna', 5);
     expect(k.hasCredits('anna')).toBe(true);
 
-    await k.council.write('narratore', 'npc.reply', 'Un altro segreto', { chi: 'anna' });
+    await k.council.write('narrator', 'npc.reply', 'Un altro segreto', { chi: 'anna' });
     expect(online.onlineCalls).toContain('npc.reply');
   });
 
@@ -305,7 +305,7 @@ describe('credits and common costs (T45a)', () => {
     k.giveCredits('io', 10);
     k.ai.onCall!({
       model: 'gemini-3.1-flash-lite',
-      agent: 'narratore',
+      agent: 'narrator',
       task: 'council.session',
       prompt: 1_000_000,
       cached: 0,

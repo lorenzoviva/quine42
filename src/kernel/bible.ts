@@ -4,7 +4,7 @@
 import type { Bible } from './agents/council';
 import type { GraphNode, WorldGraph } from './graph';
 
-export type BibleSection = 'prologo' | 'luoghi' | 'personaggi' | 'fatti' | 'misteri';
+export type BibleSection = 'prologue' | 'chunks' | 'characters' | 'facts' | 'mysteries';
 
 export interface BiblePage {
   index: number;
@@ -43,7 +43,7 @@ export function biblePages(bible: Bible): BiblePage[] {
   if (bible.titolo || bible.sintesi || bible.storia) {
     pages.push({
       index: pages.length,
-      sezione: 'prologo',
+      sezione: 'prologue',
       titolo: bible.titolo || 'Prologo',
       testo: [bible.sintesi, bible.storia].filter(Boolean).join('\n\n'),
       voceIndex: 0,
@@ -56,7 +56,7 @@ export function biblePages(bible: Bible): BiblePage[] {
     const parts = item.split(' — ');
     pages.push({
       index: pages.length,
-      sezione: 'luoghi',
+      sezione: 'chunks',
       titolo: parts[0].trim(),
       testo: item.trim(),
       voceIndex: i,
@@ -69,7 +69,7 @@ export function biblePages(bible: Bible): BiblePage[] {
     const parts = item.split(' — ');
     pages.push({
       index: pages.length,
-      sezione: 'personaggi',
+      sezione: 'characters',
       titolo: parts[0].trim(),
       testo: item.trim(),
       voceIndex: i,
@@ -82,7 +82,7 @@ export function biblePages(bible: Bible): BiblePage[] {
     const parts = item.split(' — ');
     pages.push({
       index: pages.length,
-      sezione: 'fatti',
+      sezione: 'facts',
       titolo: parts.length > 1 ? parts[0].trim() : (item.length > 44 ? item.slice(0, 41).trim() + '…' : item.trim()),
       testo: item.trim(),
       voceIndex: i,
@@ -95,7 +95,7 @@ export function biblePages(bible: Bible): BiblePage[] {
     const parts = item.split(' — ');
     pages.push({
       index: pages.length,
-      sezione: 'misteri',
+      sezione: 'mysteries',
       titolo: parts.length > 1 ? parts[0].trim() : (item.length > 44 ? item.slice(0, 41).trim() + '…' : item.trim()),
       testo: item.trim(),
       voceIndex: i,
@@ -131,10 +131,10 @@ export function touchingNodes(page: BiblePage, g: WorldGraph, bible?: Bible | nu
   }
 
   // 2. Fact/mystery graph node and its cited neighbors
-  if (page.sezione === 'fatti' || page.sezione === 'misteri') {
+  if (page.sezione === 'facts' || page.sezione === 'mysteries') {
     const fattiLen = bible?.fatti?.length ?? 0;
-    const factIdx = page.sezione === 'fatti' ? page.voceIndex + 1 : fattiLen + page.voceIndex + 1;
-    const factNode = g.node(`fatto:${factIdx}`);
+    const factIdx = page.sezione === 'facts' ? page.voceIndex + 1 : fattiLen + page.voceIndex + 1;
+    const factNode = g.node(`fact:${factIdx}`);
     if (factNode) {
       add(factNode);
       for (const neighbor of g.neighbors(factNode.id)) {
@@ -154,7 +154,7 @@ export function touchingNodes(page: BiblePage, g: WorldGraph, bible?: Bible | nu
   // 4. For directly matched core nodes, include 1-hop neighbors (places where they live, people in places...)
   const coreNodes = [...result];
   for (const n of coreNodes) {
-    if (n.tipo === 'persona' || n.tipo === 'luogo' || n.tipo === 'regione') {
+    if (n.tipo === 'individual' || n.tipo === 'chunk' || n.tipo === 'region') {
       for (const neighbor of g.neighbors(n.id, 1)) {
         add(neighbor);
       }

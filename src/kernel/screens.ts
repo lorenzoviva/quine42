@@ -9,12 +9,12 @@ import type { Author, Commit } from './repo';
 import { AGENTS, type AgentId, type FeedEntry, type FeedKind } from './agents/council';
 import { emptyTally, type Tally, type UsageLog } from './ai/usage';
 
-export type ScreenField = 'tempo' | 'registro' | 'costi';
+export type ScreenField = 'time' | 'feed' | 'costs';
 
 export const SCREEN_NAME: Record<ScreenField, string> = {
-  tempo: 'la linea del tempo',
-  registro: 'il registro dal vivo',
-  costi: 'il quadro dei costi',
+  time: 'la linea del tempo',
+  feed: 'il registro dal vivo',
+  costs: 'il quadro dei costi',
 };
 
 /** The frames of the film on the screen at once; the chosen one is in the middle when it can be. */
@@ -177,10 +177,10 @@ export function costBoard(usage: UsageLog, budgets: Budget[]): CostBoard {
 export const fill = (b: Budget) => (b.max > 0 ? Math.min(1, b.usati / b.max) : b.usati > 0 ? 1 : 0);
 
 /** The alert of the Direction (T46c): the band of light under its ceiling. */
-export type AlertLevel = 'verde' | 'ambra' | 'rossa';
+export type AlertLevel = 'green' | 'amber' | 'red';
 
-export const ALERT_COLOR: Record<AlertLevel, string> = { verde: '#5cff8a', ambra: '#ffb000', rossa: '#ff3b3b' };
-export const ALERT_NAME: Record<AlertLevel, string> = { verde: 'tutto in ordine', ambra: 'attenzione', rossa: 'allarme' };
+export const ALERT_COLOR: Record<AlertLevel, string> = { green: '#5cff8a', amber: '#ffb000', red: '#ff3b3b' };
+export const ALERT_NAME: Record<AlertLevel, string> = { green: 'tutto in ordine', amber: 'attenzione', red: 'allarme' };
 
 export interface Alert {
   level: AlertLevel;
@@ -209,12 +209,12 @@ export function alertOf(faults: Array<{ key: string; message: string }>, feed: F
     if (v >= 1) red.push(`il budget «${b.nome}» è esaurito (${b.usati} di ${b.max})`);
     else if (v > BUDGET_WARN) amber.push(`il budget «${b.nome}» è al ${Math.round(v * 100)} % (${b.usati} di ${b.max})`);
   }
-  return { level: red.length ? 'rossa' : amber.length ? 'ambra' : 'verde', reasons: [...red, ...amber] };
+  return { level: red.length ? 'red' : amber.length ? 'amber' : 'green', reasons: [...red, ...amber] };
 }
 
 export interface Screens {
-  tempo: Timeline;
-  registro: LiveFeed;
-  costi: CostBoard;
+  time: Timeline;
+  feed: LiveFeed;
+  costs: CostBoard;
   allerta: Alert;
 }

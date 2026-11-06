@@ -100,7 +100,7 @@ export function guessClass(text: string, category?: string): AssetClass {
   return (
     by(/\b(gatto|cane|volpe|gallina|coniglio|topo|corvo|gufo|anatra|slime)\b/, 'animal') ??
     by(/\b(lupo|cavallo|orso|cervo|troll|drago|bue|mucca|cinghiale|mostro)\b/, 'beast') ??
-    (category === 'figura' ? classOf('person') : undefined) ??
+    (category === 'figure' ? classOf('person') : undefined) ??
     by(/\b(sasso|ciottolo)\b/, 'pebble') ??
     by(/(roccia|masso|pietr|rocce|macigno|sperone|scoglio)/, 'rock') ??
     by(/(albero|pino|quercia|betulla|salice|palma|abete|faggio|bosco|giungla)/, 'tree') ??

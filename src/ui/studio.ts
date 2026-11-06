@@ -47,7 +47,7 @@ export class StudioPanel {
     k.bus.on('ui:screens', ({ field, screens }: { field: ScreenField; screens: Screens }) => this.screens(field, screens));
     // The film moved with the panel open: it follows.
     k.bus.on('studio:screens', ({ screens }: { screens: Screens }) => {
-      if (this.isOpen && this.screen === 'tempo') this.screens('tempo', screens);
+      if (this.isOpen && this.screen === 'time') this.screens('time', screens);
     });
     k.bus.on('ui:station', ({ station, chain }: { station: Station; chain: Chain }) => this.station(station, chain));
     k.bus.on('ui:bench', ({ bench, station }: { bench: BenchShown; station?: Station }) => this.bench(bench, station));
@@ -278,7 +278,7 @@ export class StudioPanel {
     };
     const row = (o: Operation) => el('div', { class: 'item' }, el('span', { style: `color:${OPERATION_COLOR[o.kind]}` }, '● '), el('span', { class: 'path' }, o.label), ` — ${o.detail} `, el('span', { class: 'note' }, `(${where(o)})`), ...(o.who && this.k.follow ? [' ', follow(o)] : []));
     const of = (kind: OperationKind) => s.ops.filter((o) => o.kind === kind);
-    const places = of('luogo');
+    const places = of('chunk');
     const live = places.filter((o) => o.live);
     const queued = places.length - live.length;
     const section = (kind: OperationKind, list: Operation[], none: string) => [el('div', { class: 'section' }, `${OPERATION_NAME[kind][0].toUpperCase()}${OPERATION_NAME[kind].slice(1)} (${list.length})`), ...(list.length ? list.map(row) : [el('div', { class: 'note' }, none)])];
@@ -286,13 +286,13 @@ export class StudioPanel {
       el('div', { class: 'title' }, 'Il tavolo della situazione — Direzione'),
       el('div', { class: 'note' }, 'Il mondo dall\x27alto, come operazioni in corso. Guardare non cambia nulla.'),
       el('div', { class: 'frame situation' }, this.situationMap(s)),
-      ...section('viandante', of('viandante'), ''),
-      ...(this.k.follow ? section('giocatore', of('giocatore'), 'Nessun giocatore collegato.') : []),
-      ...section('luogo', live, 'Il Cartografo non sta pianificando nessun luogo.'),
+      ...section('wanderer', of('wanderer'), ''),
+      ...(this.k.follow ? section('player', of('player'), 'Nessun giocatore collegato.') : []),
+      ...section('chunk', live, 'Il Cartografo non sta pianificando nessun luogo.'),
       ...(queued ? [el('div', { class: 'note' }, `In coda: ${queued} luogh${queued === 1 ? 'o' : 'i'} solo abbozzat${queued === 1 ? 'o' : 'i'}.`)] : []),
-      ...section('trama', of('trama'), 'Nessuna trama aperta.'),
-      ...section('missione', of('missione'), 'Nessuna missione accettata.'),
-      ...section('guasto', of('guasto'), 'Nessun guasto aperto.'),
+      ...section('plot', of('plot'), 'Nessuna trama aperta.'),
+      ...section('quest', of('quest'), 'Nessuna missione accettata.'),
+      ...section('fault', of('fault'), 'Nessun guasto aperto.'),
     );
   }
 
@@ -315,13 +315,13 @@ export class StudioPanel {
       g.fillText(r.nome, (r.centro[0] - r.raggio - x0) * cell + 2, (r.centro[1] - r.raggio - y0) * cell + 10);
     }
     // The places under the rest; the wanderer on top.
-    const order: OperationKind[] = ['luogo', 'trama', 'missione', 'guasto', 'giocatore', 'viandante'];
+    const order: OperationKind[] = ['chunk', 'plot', 'quest', 'fault', 'player', 'wanderer'];
     for (const kind of order)
       for (const o of s.ops) {
         if (o.kind !== kind || o.cx === undefined || o.cy === undefined) continue;
         g.fillStyle = OPERATION_COLOR[kind];
-        g.globalAlpha = kind === 'luogo' && !o.live ? 0.3 : 1;
-        const m = kind === 'luogo' ? 1 : Math.max(1, cell / 4);
+        g.globalAlpha = kind === 'chunk' && !o.live ? 0.3 : 1;
+        const m = kind === 'chunk' ? 1 : Math.max(1, cell / 4);
         g.fillRect((o.cx - x0) * cell + m, (o.cy - y0) * cell + m, cell - m * 2, cell - m * 2);
       }
     g.globalAlpha = 1;
@@ -426,8 +426,8 @@ export class StudioPanel {
       );
     const item = (what: string, text: string, color?: string) => el('div', { class: 'item' }, el('span', { class: 'path', ...(color ? { style: `color:${color}` } : {}) }, what), ` ${text}`);
     const time = (t: number) => new Date(t).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-    if (field === 'tempo') {
-      const t = s.tempo, c = t.chosen;
+    if (field === 'time') {
+      const t = s.time, c = t.chosen;
       const step = (d: number, text: string) => {
         const b = el('button', {}, text);
         b.onclick = () => this.k.stepTimeline(d);
@@ -447,7 +447,7 @@ export class StudioPanel {
             })
           : [el('div', { class: 'note' }, 'Nessun file cambiato.')];
       this.show(
-        head(SCREEN_NAME.tempo),
+        head(SCREEN_NAME.time),
         el('div', { class: 'note' }, "Guardare non torna indietro: per tornare all'ultimo stato valido c'è solo R."),
         el('div', { class: 'row' }, step(1, '<'), el('span', { class: 'note' }, t.count ? `${t.count - t.index} di ${t.count}` : 'nessun commit'), step(-1, '>')),
         ...(c
@@ -463,11 +463,11 @@ export class StudioPanel {
         el('div', { class: 'section' }, 'La pellicola'),
         ...t.frames.map((f, i) => el('div', { class: 'item' }, el('span', { class: 'path', ...(i === t.at ? { style: 'color:#ffcf5c' } : {}) }, `${i === t.at ? '▶ ' : ''}${f.id}`), ` ${f.who}: ${f.message}`)),
       );
-    } else if (field === 'registro') {
-      const f = s.registro;
+    } else if (field === 'feed') {
+      const f = s.feed;
       const ago = (n?: number) => (n === undefined ? 'mai' : n < 60 ? `${n} s fa` : n < 3600 ? `${Math.round(n / 60)} min fa` : `${Math.round(n / 3600)} h fa`);
       this.show(
-        head(SCREEN_NAME.registro),
+        head(SCREEN_NAME.feed),
         el('div', { class: 'note' }, "Chi lavora adesso (nell'ultimo minuto e mezzo), a che cosa, con quale modello. Il registro intero è nel pannello del Concilio (G)."),
         el('div', { class: 'section' }, 'Le console del Concilio'),
         ...f.desks.map((d) => el('div', { class: 'item' }, el('span', { style: `color:${d.working ? '#5cff8a' : '#555'}` }, '● '), el('span', { class: 'path', style: `color:${d.color}` }, `${d.sigil} ${d.name}`), ` ${d.task ? [d.task, d.model].filter(Boolean).join(' · ') : 'non ha ancora lavorato'} `, el('span', { class: 'note' }, `(${ago(d.ago)})${d.text ? ` — ${d.text.slice(0, 140)}` : ''}`))),
@@ -475,9 +475,9 @@ export class StudioPanel {
         ...(f.lines.length ? f.lines.map((l) => item(l.from, `${l.kind}: ${l.text.slice(0, 200)}`, l.color)) : [el('div', { class: 'note' }, 'Il registro è vuoto.')]),
       );
     } else {
-      const c = s.costi;
+      const c = s.costs;
       this.show(
-        head(SCREEN_NAME.costi),
+        head(SCREEN_NAME.costs),
         el('div', { class: 'note' }, `sessione ${usd(c.session.usd)} · oggi ${usd(c.today.usd)} · in tutto ${usd(c.total.usd)}`),
         item('sessione', tallyLine(c.session)),
         item('oggi', tallyLine(c.today)),

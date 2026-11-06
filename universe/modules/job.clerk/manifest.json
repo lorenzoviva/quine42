@@ -1,0 +1,84 @@
+{
+  "id": "job.clerk",
+  "name": "L'impiegato",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi lavora a un ufficio, a uno sportello, a un registro: sempre allo stesso posto, con gli stessi colleghi.",
+  "mestieri": [
+    {
+      "id": "clerk",
+      "nomi": [
+        "impiegato",
+        "impiegata",
+        "funzionario",
+        "funzionaria",
+        "contabile",
+        "cassiere",
+        "cassiera",
+        "burocrate",
+        "commesso",
+        "commessa",
+        "ragioniere",
+        "ragioniera",
+        "tecnico",
+        "tecnica",
+        "esattore",
+        "esattrice"
+      ],
+      "giornata": {
+        "morning": [
+          {
+            "fa": "go",
+            "dove": "work"
+          },
+          {
+            "fa": "wait",
+            "durata": 60,
+            "posa": "read"
+          }
+        ],
+        "day": [
+          {
+            "fa": "wait",
+            "durata": 90,
+            "posa": "work"
+          },
+          {
+            "fa": "go",
+            "dove": "square"
+          },
+          {
+            "fa": "eat",
+            "durata": 20
+          },
+          {
+            "fa": "go",
+            "dove": "work"
+          },
+          {
+            "fa": "wait",
+            "posa": "read"
+          }
+        ],
+        "evening": [
+          {
+            "fa": "go",
+            "dove": "square"
+          },
+          {
+            "fa": "chat"
+          }
+        ],
+        "night": [
+          {
+            "fa": "go",
+            "dove": "home"
+          },
+          {
+            "fa": "rest"
+          }
+        ]
+      }
+    }
+  ]
+}

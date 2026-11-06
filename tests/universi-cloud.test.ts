@@ -14,6 +14,7 @@ import { leggiUniverso } from '../lab/banco/universi-cloud/strumenti/carica';
 import { installa } from '../lab/banco/universi-cloud/strumenti/installa';
 import { MockAiModels } from '../src/kernel/ai/mock';
 import { Kernel } from '../src/kernel/kernel';
+import { internalModelId0_3, internalSoundPurpose } from '../src/kernel/internalNames';
 import { memoryStore } from '../src/kernel/repo';
 import { checkKernelVersion, KERNEL_VERSION, parseVersion } from '../src/kernel/version';
 import { soundPrograms } from '../src/mj/sound';
@@ -49,7 +50,8 @@ describe('what Claude Cloud made, in the four universes', () => {
         }
         for (const p of props(u.tema)) expect(index[p.id]?.classe, p.id).toBe(p.voce.classe);
         const programs = new Map(soundPrograms(files).map((p) => [p.id, p]));
-        for (const m of suoni(u)) expect(programs.get(m.id)?.suono, m.id).toEqual(m.voce.suono);
+        // The universes are of 0.1 on the disk and read ported: the seed's sound programs by their new ids, their purposes internal (T307b).
+        for (const m of suoni(u)) expect(programs.get(internalModelId0_3(m.id))?.suono, m.id).toEqual(internalSoundPurpose(m.voce.suono));
         for (const f of Object.keys(files).filter((p) => /^models\/[^/]+\.xml$/.test(p))) expect(index[f.slice(7, -4)], f).toBeDefined();
       });
 

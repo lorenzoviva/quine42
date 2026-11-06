@@ -37,7 +37,7 @@ describe('servi (T68b) — comando e argomenti delle CLI', () => {
     const cmd = buildCliCommand('claude', {
       id: '1',
       provider: 'claude',
-      agent: 'scultore',
+      agent: 'sculptor',
       task: 'model.sculpt',
       system: 'Sei lo Scultore',
       prompt: 'Scolpisci una roccia',
@@ -116,7 +116,7 @@ describe('servi (T68b) — esecuzione con una CLI finta', () => {
 
     const id = await enqueue(d, {
       provider: 'claude',
-      agent: 'scultore',
+      agent: 'sculptor',
       task: 'model.sculpt',
       system: 'sys',
       prompt: 'Fai una torre',
@@ -153,7 +153,7 @@ describe('servi (T68b) — esecuzione con una CLI finta', () => {
 
     await enqueue(d, {
       provider: 'claude',
-      agent: 'scultore',
+      agent: 'sculptor',
       task: 'model.sculpt',
       system: 'sys',
       prompt: 'Scolpisci una sedia',
@@ -170,7 +170,7 @@ describe('servi (T68b) — esecuzione con una CLI finta', () => {
     const d = dir();
     const id = await enqueue(d, {
       provider: 'claude',
-      agent: 'artista',
+      agent: 'artist',
       task: 'model.judge',
       system: '',
       prompt: 'Giudica',
@@ -201,7 +201,7 @@ describe('servi (T68b) — esecuzione con una CLI finta', () => {
 
     const id = await enqueue(d, {
       provider: 'claude',
-      agent: 'scultore',
+      agent: 'sculptor',
       task: 'model.sculpt',
       system: '',
       prompt: 'Pietra',
@@ -235,7 +235,7 @@ describe('servi (T68b) — esecuzione con una CLI finta', () => {
 
     const q = new QueueAiModels({ provider: 'claude', fetchImpl: diskFetch(d), poll: 5 });
     const callPromise = q.text({
-      agent: 'scultore',
+      agent: 'sculptor',
       task: 'model.sculpt',
       system: 'sys',
       prompt: 'prompt',
@@ -263,7 +263,7 @@ describe('servi (T68b) — prova con la CLI reale di Claude Code su model.sculpt
     const d = dir();
     const id = await enqueue(d, {
       provider: 'claude',
-      agent: 'scultore',
+      agent: 'sculptor',
       task: 'model.sculpt',
       system: 'Sei lo Scultore di QUINE42.',
       prompt: 'Scolpisci una pietra semplice in formato XML MarkovJunior.',

@@ -6,7 +6,8 @@
 import type { FileMap } from './types';
 import { metaBreak } from './fourthwall';
 import { SOLO } from './wanderers';
-import { BINDING_WORDS, relationKind, type DayPhase, type People } from './society';
+import { BINDING_WORDS, DAY_PHASES, relationKind, type DayPhase, type People } from './society';
+import { internalName, internalPlot, italianName } from './internalNames';
 
 export interface Beat {
   /** Day relative to the plot's start. */
@@ -23,10 +24,10 @@ export interface Beat {
 export interface Quest {
   da: string;
   testo: string;
-  obiettivo: { tipo: 'porta' | 'vai' | 'parla'; oggetto?: string; a?: string; luogo?: string };
+  obiettivo: { tipo: QuestGoal; oggetto?: string; a?: string; luogo?: string };
   ricompensa?: string;
-  stato: 'offerta' | 'accettata' | 'compiuta';
-  /** Who accepted it (the wanderer's id, T34; `io` when missing). */
+  stato: 'offered' | 'accepted' | 'completed';
+  /** Who accepted it (the wanderer's id, T34; `me` when missing). */
   viandante?: string;
 }
 
@@ -39,15 +40,19 @@ export interface Plot {
   missione?: Quest;
   /** Absolute day it started. */
   inizio: number;
-  stato: 'attiva' | 'chiusa';
+  stato: 'active' | 'closed';
 }
+
+/** The kinds of a quest's goal (T307b: internal; the Narrator still says them in Italian, `plotFromRaw` takes them in). */
+export type QuestGoal = 'bring' | 'go' | 'talk';
+export const QUEST_GOALS: readonly QuestGoal[] = ['bring', 'go', 'talk'];
 
 export const PLOTS_FILE = 'world/plots.json';
 
 export function readPlots(files: FileMap): Plot[] {
   try {
     const p = JSON.parse(files[PLOTS_FILE] ?? '{}');
-    return Array.isArray(p.trame) ? p.trame : [];
+    return Array.isArray(p.trame) ? p.trame.map((t: Plot) => internalPlot(t)) : [];
   } catch {
     return [];
   }
@@ -61,10 +66,10 @@ export function writePlots(plots: Plot[]): string {
 export function secretsOf(plots: Plot[], name: string, day: number): string {
   const out: string[] = [];
   for (const p of plots) {
-    if (p.stato !== 'attiva' || !p.coinvolti.includes(name)) continue;
+    if (p.stato !== 'active' || !p.coinvolti.includes(name)) continue;
     out.push(`- Trama «${p.titolo}»: ${p.mistero}`);
-    for (const b of p.tappe) if (b.chi === name) out.push(`  · ${b.fatto ? 'hai già' : p.inizio + b.giorno > day ? 'dovrai' : 'devi'} ${b.cosa} (${b.dove}, ${b.momento})${b.indizio ? ` — indizio: ${b.indizio}` : ''}`);
-    if (p.missione?.da === name && p.missione.stato === 'offerta') out.push(`  · Hai una richiesta per il viandante: ${p.missione.testo} (se te la chiede o se ti fidi, affidagliela con l'azione "missione")`);
+    for (const b of p.tappe) if (b.chi === name) out.push(`  · ${b.fatto ? 'hai già' : p.inizio + b.giorno > day ? 'dovrai' : 'devi'} ${b.cosa} (${italianName('dove', b.dove)}, ${italianName('momenti', b.momento)})${b.indizio ? ` — indizio: ${b.indizio}` : ''}`);
+    if (p.missione?.da === name && p.missione.stato === 'offered') out.push(`  · Hai una richiesta per il viandante: ${p.missione.testo} (se te la chiede o se ti fidi, affidagliela con l'azione "missione")`);
   }
   return out.join('\n');
 }
@@ -72,7 +77,7 @@ export function secretsOf(plots: Plot[], name: string, day: number): string {
 /** Quests a wanderer accepted and has not finished yet (all of them, without an id). */
 export function activeQuests(plots: Plot[], wanderer?: string): Array<{ plot: Plot; quest: Quest }> {
   return plots
-    .filter((p) => p.missione?.stato === 'accettata' && (!wanderer || (p.missione.viandante ?? SOLO) === wanderer))
+    .filter((p) => p.missione?.stato === 'accepted' && (!wanderer || (p.missione.viandante ?? SOLO) === wanderer))
     .map((p) => ({ plot: p, quest: p.missione! }));
 }
 
@@ -85,11 +90,12 @@ export function plotText(p: Pick<Plot, 'titolo' | 'mistero' | 'tappe' | 'mission
 export function plotFromRaw(raw: any, inizio: number, id: string): Plot {
   const tappe: Beat[] = (Array.isArray(raw?.tappe) ? raw.tappe : []).filter((b: any) => b?.chi).slice(0, 8).map((b: any) => ({
     giorno: Math.max(0, Math.min(4, Math.round(Number(b.giorno) || 0))),
-    momento: ['mattina', 'giorno', 'sera', 'notte'].includes(b.momento) ? b.momento : 'giorno',
-    chi: String(b.chi), dove: String(b.dove ?? 'piazza').slice(0, 40), cosa: String(b.cosa ?? '').slice(0, 120),
+    momento: (DAY_PHASES as string[]).includes(internalName('momenti', String(b.momento))) ? internalName('momenti', String(b.momento)) : 'day',
+    chi: String(b.chi), dove: internalName('dove', String(b.dove ?? 'square')).slice(0, 40), cosa: String(b.cosa ?? '').slice(0, 120),
     ...(b.battuta ? { battuta: String(b.battuta).slice(0, 140) } : {}), ...(b.indizio ? { indizio: String(b.indizio).slice(0, 120) } : {}),
   }));
   const m = raw?.missione;
+  const goal = typeof m?.tipo === 'string' ? (internalName('trame', m.tipo) as QuestGoal) : undefined;
   return {
     id,
     titolo: String(raw?.titolo ?? 'Una storia').slice(0, 60),
@@ -97,9 +103,9 @@ export function plotFromRaw(raw: any, inizio: number, id: string): Plot {
     coinvolti: [...new Set(tappe.map((b) => b.chi))],
     tappe,
     inizio,
-    stato: 'attiva',
-    ...(m?.da && ['porta', 'vai', 'parla'].includes(m.tipo)
-      ? { missione: { da: String(m.da), testo: String(m.testo ?? '').slice(0, 200), obiettivo: { tipo: m.tipo, ...(m.oggetto ? { oggetto: String(m.oggetto) } : {}), ...(m.a ? { a: String(m.a) } : {}), ...(m.luogo ? { luogo: String(m.luogo) } : {}) }, ...(m.ricompensa ? { ricompensa: String(m.ricompensa) } : {}), stato: 'offerta' as const } }
+    stato: 'active',
+    ...(m?.da && goal && QUEST_GOALS.includes(goal)
+      ? { missione: { da: String(m.da), testo: String(m.testo ?? '').slice(0, 200), obiettivo: { tipo: goal, ...(m.oggetto ? { oggetto: String(m.oggetto) } : {}), ...(m.a ? { a: String(m.a) } : {}), ...(m.luogo ? { luogo: String(m.luogo) } : {}) }, ...(m.ricompensa ? { ricompensa: String(m.ricompensa) } : {}), stato: 'offered' as const } }
       : {}),
   };
 }
@@ -145,7 +151,7 @@ export function reviewPlot(plot: Plot, people: People, words: string[] = []): Pl
   const problems: string[] = [];
   let fatal = false;
   const byName = new Map(people.persone.map((p) => [p.nome, p]));
-  const isAnimal = (n: string) => byName.get(n)?.specie === 'animale';
+  const isAnimal = (n: string) => byName.get(n)?.specie === 'animal';
   const tappe: Beat[] = [];
   for (const b of plot.tappe) {
     if (!byName.has(b.chi)) {
@@ -174,9 +180,9 @@ export function reviewPlot(plot: Plot, people: People, words: string[] = []): Pl
       ? `la missione è di ${missione.da}, che non esiste`
       : isAnimal(missione.da)
         ? `${missione.da} è un animale e non chiede nulla al viandante`
-        : (missione.obiettivo.tipo === 'parla' && !to) || (to && !byName.has(to))
+        : (missione.obiettivo.tipo === 'talk' && !to) || (to && !byName.has(to))
           ? `la missione manda da ${to ?? 'nessuno'}, che non esiste`
-          : missione.obiettivo.tipo === 'parla' && to && isAnimal(to)
+          : missione.obiettivo.tipo === 'talk' && to && isAnimal(to)
             ? `la missione manda a parlare con ${to}, che è un animale`
             : '';
     if (why) {

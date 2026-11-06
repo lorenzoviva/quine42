@@ -12,23 +12,23 @@ import { SCREEN_NAME, type ScreenField } from './screens';
 import { AGENTS } from './agents/council';
 import { hashStr } from './rng';
 
-export type FileLook = 'libro' | 'cristallo' | 'pergamena' | 'tavoletta';
-export type ItemKind = 'file' | 'sprite' | 'tile' | 'layout' | 'screen' | 'up' | 'down' | 'exit' | 'desk' | 'portal' | 'table' | 'atlas' | 'showcase' | 'prev' | 'next' | 'less' | 'more' | 'grafo' | 'situazione' | 'parete' | 'console' | 'stazione' | 'banco' | 'leggio' | 'lastra' | 'tornio';
+export type FileLook = 'book' | 'crystal' | 'scroll' | 'tablet';
+export type ItemKind = 'file' | 'sprite' | 'tile' | 'layout' | 'screen' | 'up' | 'down' | 'exit' | 'desk' | 'portal' | 'table' | 'atlas' | 'showcase' | 'prev' | 'next' | 'less' | 'more' | 'graph' | 'situation' | 'wall' | 'console' | 'station' | 'bench' | 'lectern' | 'slab' | 'lathe';
 /** What a showcase shows (T21): the runes and spells, the people, the things, the objects of the packs, the places planned (T26). */
-export type ShowcaseSource = 'rune' | 'persone' | 'cose' | 'oggetti' | 'luoghi';
+export type ShowcaseSource = 'runes' | 'people' | 'entities' | 'items' | 'chunks';
 /** How a showcase looks: a screen, a silo of liquid, a 3D printer, a holographic table with a place in miniature. */
-export type ShowcaseDevice = 'schermo' | 'silos' | 'stampante' | 'plastico';
+export type ShowcaseDevice = 'display' | 'silos' | 'printer' | 'diorama';
 
 /**
  * The showcases of the interiors (T21): a device with «<» «>» at its sides that picks what it shows; E or a
  * click on it opens a panel with what it is. One per building, on the ground floor.
  */
 export const SHOWCASES: Record<string, { source: ShowcaseSource; device: ShowcaseDevice; label: string }> = {
-  magia: { source: 'rune', device: 'schermo', label: 'lo schermo delle rune' },
-  persone: { source: 'persone', device: 'silos', label: 'il silos dei personaggi' },
-  cose: { source: 'cose', device: 'stampante', label: 'la stampante delle cose' },
-  oggetti: { source: 'oggetti', device: 'stampante', label: 'la stampante degli oggetti' },
-  luoghi: { source: 'luoghi', device: 'plastico', label: 'il plastico dei luoghi' },
+  magia: { source: 'runes', device: 'display', label: 'lo schermo delle rune' },
+  persone: { source: 'people', device: 'silos', label: 'il silos dei personaggi' },
+  cose: { source: 'entities', device: 'printer', label: 'la stampante delle cose' },
+  oggetti: { source: 'items', device: 'printer', label: 'la stampante degli oggetti' },
+  luoghi: { source: 'chunks', device: 'diorama', label: 'il plastico dei luoghi' },
 };
 /**
  * Where a showcase stands in its room (left cell, row of its arrows) and how wide it is; the arrows are at its sides.
@@ -57,9 +57,9 @@ export const DEVICE_MARGIN = 3;
  * in three fields (`ScreenField`, src/kernel/screens.ts); «<» «>» stand under the ends of the timeline.
  */
 export const WALL_AT: Array<{ field: ScreenField; x: number; w: number }> = [
-  { field: 'tempo', x: 2, w: 7 },
-  { field: 'registro', x: 9, w: 6 },
-  { field: 'costi', x: 15, w: 7 },
+  { field: 'time', x: 2, w: 7 },
+  { field: 'feed', x: 9, w: 6 },
+  { field: 'costs', x: 15, w: 7 },
 ];
 export const WALL_Y = 1;
 /**
@@ -132,7 +132,7 @@ export function ruleTablets(ox: number, oy: number, allRules: Rule[], offset = 0
       const r = allRules[i];
       const marked = i >= count - FOCUSED_RULES;
       items.push({
-        kind: 'lastra',
+        kind: 'slab',
         label: `la tavola della regola: «${r.testo}»`,
         target: r.chiave,
         rule: r,
@@ -159,7 +159,7 @@ export function ruleTablets(ox: number, oy: number, allRules: Rule[], offset = 0
       const globalIndex = safeOffset + i;
       const marked = globalIndex >= count - FOCUSED_RULES;
       items.push({
-        kind: 'lastra',
+        kind: 'slab',
         label: `la tavola della regola: «${r.testo}»`,
         target: r.chiave,
         rule: r,
@@ -192,16 +192,16 @@ export function tileNear(it: StudioItem, x: number, y: number): { x: number; y: 
 
 /** The Council at its round table: who sits where, and the room behind each seat's teleport. */
 export const SEATS: Array<{ agent: string; room: string }> = [
-  { agent: 'narratore', room: 'persone' },
-  { agent: 'attore', room: 'persone' },
-  { agent: 'cartografo', room: 'luoghi' },
-  { agent: 'artista', room: 'galleria' },
-  { agent: 'scultore', room: 'galleria' },
-  { agent: 'musicista', room: 'galleria' },
-  { agent: 'fisico', room: 'oggetti' },
-  { agent: 'ingegnere', room: 'sistemi' },
-  { agent: 'arbitro', room: 'universo' },
-  { agent: 'referente', room: '' },
+  { agent: 'narrator', room: 'persone' },
+  { agent: 'actor', room: 'persone' },
+  { agent: 'cartographer', room: 'luoghi' },
+  { agent: 'artist', room: 'galleria' },
+  { agent: 'sculptor', room: 'galleria' },
+  { agent: 'musician', room: 'galleria' },
+  { agent: 'physicist', room: 'oggetti' },
+  { agent: 'engineer', room: 'sistemi' },
+  { agent: 'arbiter', room: 'universo' },
+  { agent: 'liaison', room: '' },
 ];
 const TABLE = { cx: 12, cy: 8.5, rx: 3.4, ry: 2.3 };
 
@@ -360,18 +360,18 @@ const SHELF_W = SHELF_X1 - SHELF_X0 + 1;
 const SIDE_W = 4;
 
 const ROOMS: Record<string, { name: string; color: string; teams: string[] }> = {
-  universo: { name: 'Direzione', color: '#ffcf5c', teams: ['arbitro'] },
-  mondo: { name: 'Biblioteca del Mondo', color: '#7dd87d', teams: ['narratore'] },
-  concilio: { name: 'Sala del Concilio', color: '#ff8ad8', teams: ['arbitro'] },
-  nucleo: { name: 'Il Nucleo', color: '#6fc3ff', teams: ['ingegnere'] },
-  sistemi: { name: 'Sala Sistemi', color: '#b9a6ff', teams: ['ingegnere'] },
-  luoghi: { name: 'Ufficio dei Luoghi', color: '#9ad27a', teams: ['cartografo'] },
-  oggetti: { name: 'Magazzino degli Oggetti', color: '#e0b070', teams: ['fisico'] },
-  cose: { name: 'Laboratorio delle Cose', color: '#d89a6a', teams: ['fisico'] },
-  persone: { name: 'Studio dei Personaggi', color: '#ffb38a', teams: ['narratore', 'attore'] },
-  magia: { name: 'Torre della Magia', color: '#c48aff', teams: ['narratore'] },
-  altro: { name: 'Archivio', color: '#9fb2a8', teams: ['ingegnere'] },
-  galleria: { name: "Galleria dell'Artista", color: '#ff8ad8', teams: ['artista', 'musicista'] },
+  universo: { name: 'Direzione', color: '#ffcf5c', teams: ['arbiter'] },
+  mondo: { name: 'Biblioteca del Mondo', color: '#7dd87d', teams: ['narrator'] },
+  concilio: { name: 'Sala del Concilio', color: '#ff8ad8', teams: ['arbiter'] },
+  nucleo: { name: 'Il Nucleo', color: '#6fc3ff', teams: ['engineer'] },
+  sistemi: { name: 'Sala Sistemi', color: '#b9a6ff', teams: ['engineer'] },
+  luoghi: { name: 'Ufficio dei Luoghi', color: '#9ad27a', teams: ['cartographer'] },
+  oggetti: { name: 'Magazzino degli Oggetti', color: '#e0b070', teams: ['physicist'] },
+  cose: { name: 'Laboratorio delle Cose', color: '#d89a6a', teams: ['physicist'] },
+  persone: { name: 'Studio dei Personaggi', color: '#ffb38a', teams: ['narrator', 'actor'] },
+  magia: { name: 'Torre della Magia', color: '#c48aff', teams: ['narrator'] },
+  altro: { name: 'Archivio', color: '#9fb2a8', teams: ['engineer'] },
+  galleria: { name: "Galleria dell'Artista", color: '#ff8ad8', teams: ['artist', 'musician'] },
 };
 
 /** Which building a file lives in. */
@@ -386,7 +386,7 @@ export function folderOf(path: string): string {
     if (p === 'items' || p === 'item') return 'oggetti';
     if (p === 'obj' || p === 'object') return 'cose';
     // The programs of the trades (T245b) are of the people: the Narrator writes them.
-    if (p === 'npc' || p === 'lavoro') return 'persone';
+    if (p === 'npc' || p === 'job' || p === 'lavoro') return 'persone';
     if (p === 'runes' || p === 'magic') return 'magia';
     return 'altro';
   }
@@ -398,10 +398,10 @@ export function folderOf(path: string): string {
 }
 
 export function lookOf(path: string): FileLook {
-  if (path.endsWith('.lua')) return 'cristallo';
-  if (path.endsWith('manifest.json')) return 'libro';
-  if (path.endsWith('.md')) return 'pergamena';
-  return 'tavoletta';
+  if (path.endsWith('.lua')) return 'crystal';
+  if (path.endsWith('manifest.json')) return 'book';
+  if (path.endsWith('.md')) return 'scroll';
+  return 'tablet';
 }
 
 /** 3D handmade model for files on shelves in the corona (T63). */
@@ -534,25 +534,25 @@ export class Corona {
           placed.push({ kind: 'screen', label: 'schermo: la storia di questa sala', x: ox + 3, y: oy + ROOM_H - 3, w: 6 });
           placed.push({ kind: 'portal', label: 'teletrasporto: Sala del Concilio', target: 'concilio', x: ox + ROOM_W - 3, y: oy + ROOM_H - 3 });
           if (id === SAMPLES) placed.push({ kind: 'atlas', label: "l'atlante del mondo", ...ATLAS_AT, x: ox + ATLAS_AT.x, y: oy + ATLAS_AT.y });
-          if (id === 'nucleo') placed.push({ kind: 'grafo', label: 'il grafo del mondo', ...GRAPH_AT, x: ox + GRAPH_AT.x, y: oy + GRAPH_AT.y });
+          if (id === 'nucleo') placed.push({ kind: 'graph', label: 'il grafo del mondo', ...GRAPH_AT, x: ox + GRAPH_AT.x, y: oy + GRAPH_AT.y });
           if (id === 'universo') {
-            placed.push({ kind: 'situazione', label: 'il tavolo della situazione', ...SITUATION_AT, x: ox + SITUATION_AT.x, y: oy + SITUATION_AT.y });
-            for (const f of WALL_AT) placed.push({ kind: 'parete', label: `la parete di schermi: ${SCREEN_NAME[f.field]}`, target: f.field, x: ox + f.x, y: oy + WALL_Y, w: f.w });
+            placed.push({ kind: 'situation', label: 'il tavolo della situazione', ...SITUATION_AT, x: ox + SITUATION_AT.x, y: oy + SITUATION_AT.y });
+            for (const f of WALL_AT) placed.push({ kind: 'wall', label: `la parete di schermi: ${SCREEN_NAME[f.field]}`, target: f.field, x: ox + f.x, y: oy + WALL_Y, w: f.w });
             const film = WALL_AT[0];
             placed.push({ kind: 'prev', label: '«<» indietro nel tempo', target: film.field, x: ox + film.x, y: oy + WALL_Y + 1 });
             placed.push({ kind: 'next', label: '«>» avanti nel tempo', target: film.field, x: ox + film.x + film.w - 1, y: oy + WALL_Y + 1 });
             Object.entries(AGENTS).forEach(([agent, a], i) => placed.push({ kind: 'console', label: `la console ${ofThe(a.name)}`, target: agent, color: a.color, x: ox + CONSOLES_AT.x + i, y: oy + CONSOLES_AT.y }));
           }
-          if (id === CHAIN.room) chainSlots(systems.length).forEach((s, i) => placed.push({ kind: 'stazione', label: `la catena dei sistemi: ${systems[i].name}`, target: systems[i].id, x: ox + s.x, y: oy + WALL_Y, w: s.w }));
+          if (id === CHAIN.room) chainSlots(systems.length).forEach((s, i) => placed.push({ kind: 'station', label: `la catena dei sistemi: ${systems[i].name}`, target: systems[i].id, x: ox + s.x, y: oy + WALL_Y, w: s.w }));
           if (id === BENCH_AT.room) {
-            placed.push({ kind: 'banco', label: 'il banco di prova', target: 'banco', x: ox + BENCH_AT.x, y: oy + BENCH_AT.y, w: BENCH_AT.w, h: BENCH_AT.h });
-            placed.push({ kind: 'prev', label: '«<» il caso precedente', target: 'banco', x: ox + BENCH_AT.x - 1, y: oy + SHOWCASE_AT.y });
-            placed.push({ kind: 'next', label: '«>» il caso successivo', target: 'banco', x: ox + BENCH_AT.x + BENCH_AT.w, y: oy + SHOWCASE_AT.y });
+            placed.push({ kind: 'bench', label: 'il banco di prova', target: 'bench', x: ox + BENCH_AT.x, y: oy + BENCH_AT.y, w: BENCH_AT.w, h: BENCH_AT.h });
+            placed.push({ kind: 'prev', label: '«<» il caso precedente', target: 'bench', x: ox + BENCH_AT.x - 1, y: oy + SHOWCASE_AT.y });
+            placed.push({ kind: 'next', label: '«>» il caso successivo', target: 'bench', x: ox + BENCH_AT.x + BENCH_AT.w, y: oy + SHOWCASE_AT.y });
           }
           if (id === LEGGIO_AT.room) {
-            placed.push({ kind: 'leggio', label: 'il leggio della Biblioteca: la bibbia del mondo', target: 'leggio', x: ox + LEGGIO_AT.x, y: oy + LEGGIO_AT.y, w: LEGGIO_AT.w, h: LEGGIO_AT.h });
-            placed.push({ kind: 'prev', label: '«<» la pagina precedente', target: 'leggio', x: ox + LEGGIO_AT.x - 1, y: oy + SHOWCASE_AT.y });
-            placed.push({ kind: 'next', label: '«>» la pagina successiva', target: 'leggio', x: ox + LEGGIO_AT.x + LEGGIO_AT.w, y: oy + SHOWCASE_AT.y });
+            placed.push({ kind: 'lectern', label: 'il leggio della Biblioteca: la bibbia del mondo', target: 'lectern', x: ox + LEGGIO_AT.x, y: oy + LEGGIO_AT.y, w: LEGGIO_AT.w, h: LEGGIO_AT.h });
+            placed.push({ kind: 'prev', label: '«<» la pagina precedente', target: 'lectern', x: ox + LEGGIO_AT.x - 1, y: oy + SHOWCASE_AT.y });
+            placed.push({ kind: 'next', label: '«>» la pagina successiva', target: 'lectern', x: ox + LEGGIO_AT.x + LEGGIO_AT.w, y: oy + SHOWCASE_AT.y });
 
             // The Library of the World (T47b): tablets of the rules (world/rules.json) along the back wall
             let allRules: Rule[] = [];
@@ -563,18 +563,18 @@ export class Corona {
             placed.push(...ruleTablets(ox, oy, allRules, this.rulesOffset));
           }
           if (id === TORNIO_AT.room) {
-            placed.push({ kind: 'tornio', label: 'il tornio dello Scultore', target: 'tornio', x: ox + TORNIO_AT.x, y: oy + TORNIO_AT.y, w: TORNIO_AT.w, h: TORNIO_AT.h });
-            placed.push({ kind: 'prev', label: '«<» il modello precedente', target: 'tornio', x: ox + TORNIO_AT.x - 1, y: oy + SHOWCASE_AT.y });
-            placed.push({ kind: 'next', label: '«>» il modello successivo', target: 'tornio', x: ox + TORNIO_AT.x + TORNIO_AT.w, y: oy + SHOWCASE_AT.y });
+            placed.push({ kind: 'lathe', label: 'il tornio dello Scultore', target: 'lathe', x: ox + TORNIO_AT.x, y: oy + TORNIO_AT.y, w: TORNIO_AT.w, h: TORNIO_AT.h });
+            placed.push({ kind: 'prev', label: '«<» il modello precedente', target: 'lathe', x: ox + TORNIO_AT.x - 1, y: oy + SHOWCASE_AT.y });
+            placed.push({ kind: 'next', label: '«>» il modello successivo', target: 'lathe', x: ox + TORNIO_AT.x + TORNIO_AT.w, y: oy + SHOWCASE_AT.y });
           }
           const show = SHOWCASES[id];
           if (show) {
             const { x, y, w } = SHOWCASE_AT;
-            const h = show.device === 'stampante' || show.device === 'plastico' ? PRINTER : 1;
+            const h = show.device === 'printer' || show.device === 'diorama' ? PRINTER : 1;
             placed.push({ kind: 'showcase', label: show.label, source: show.source, device: show.device, target: id, x: ox + x, y: oy + y - Math.floor(h / 2), w, h });
             placed.push({ kind: 'prev', label: '«<» il precedente', target: id, x: ox + x - 1, y: oy + y });
             placed.push({ kind: 'next', label: '«>» il successivo', target: id, x: ox + x + w, y: oy + y });
-            if (show.device === 'plastico') {
+            if (show.device === 'diorama') {
               placed.push({ kind: 'less', label: '«−» la fase prima', target: id, x: ox + x, y: oy + y + 2 });
               placed.push({ kind: 'more', label: '«+» la fase dopo', target: id, x: ox + x + w - 1, y: oy + y + 2 });
             }
@@ -820,7 +820,7 @@ export class Corona {
       // Wide or deep things (screens, the atlas, the printer) are near from any of their cells; the table from its rim; the
       // Direction's wall of screens (T46b) and the chain's stations (T27a) from the foot of their screens, at the front of their cells.
       const c = tileNear(it, x, y);
-      const d = it.kind === 'table' ? Math.hypot((x - TABLE.cx - this.roomAt(x, y)!.storey.ox) / TABLE.rx, (y - TABLE.cy - this.roomAt(x, y)!.storey.oy) / TABLE.ry) * 1.2 - 0.2 : Math.hypot(c.x + 0.5 - x, c.y + (it.kind === 'parete' || it.kind === 'stazione' ? 1 : 0.5) - y);
+      const d = it.kind === 'table' ? Math.hypot((x - TABLE.cx - this.roomAt(x, y)!.storey.ox) / TABLE.rx, (y - TABLE.cy - this.roomAt(x, y)!.storey.oy) / TABLE.ry) * 1.2 - 0.2 : Math.hypot(c.x + 0.5 - x, c.y + (it.kind === 'wall' || it.kind === 'station' ? 1 : 0.5) - y);
       if (d < bd) [best, bd] = [it, d];
     }
     return best;
@@ -888,7 +888,7 @@ export class Corona {
       allRules = (JSON.parse(this.files['world/rules.json'] ?? '{}').regole ?? []) as Rule[];
     } catch { }
     // Remove existing rule tablets and rule arrows
-    f.items = f.items.filter((it) => it.kind !== 'lastra' && !(it.target === 'regole' && (it.kind === 'prev' || it.kind === 'next')));
+    f.items = f.items.filter((it) => it.kind !== 'slab' && !(it.target === 'regole' && (it.kind === 'prev' || it.kind === 'next')));
     const tablets = ruleTablets(f.ox, f.oy, allRules, this.rulesOffset);
     f.items.push(...tablets);
   }

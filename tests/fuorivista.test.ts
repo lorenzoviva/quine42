@@ -15,12 +15,12 @@ import type { FileMap } from '../src/kernel/types';
 import { developAll, manyPlayers } from './espressivita/banco';
 
 const DAY = Kernel.DAY_SECONDS;
-const at = (n: number, phase: 'mattina' | 'giorno' | 'sera' | 'notte') => (n + { mattina: 0, giorno: 0.12, sera: 0.42, notte: 0.58 }[phase] - 0.12) * DAY + 1;
+const at = (n: number, phase: 'morning' | 'day' | 'evening' | 'night') => (n + { morning: 0, day: 0.12, evening: 0.42, night: 0.58 }[phase] - 0.12) * DAY + 1;
 const STEP = 1 / 20;
 const play = (k: Kernel, s: number) => {
   for (let t = 0; t < s; t += STEP) k.tick(STEP);
 };
-const program = (id: string): JobProgram => JSON.parse(bundledFiles[`modules/lavoro.${id}/manifest.json`]).mestieri[0];
+const program = (id: string): JobProgram => JSON.parse(bundledFiles[`modules/job.${id}/manifest.json`]).mestieri[0];
 
 /** A module that hears the returns: it keeps the last one in its store. */
 const RETURNS: FileMap = {
@@ -30,12 +30,12 @@ const RETURNS: FileMap = {
 
 describe('what a trade brings to its deposit in a day', () => {
   it('what it gathers or makes and carries to the deposit, and what making it uses up', () => {
-    expect(dailyProduce(program('contadino')).gathered['item.grano']).toBeGreaterThan(0);
-    expect(dailyProduce(program('boscaiolo')).gathered['item.ciocco']).toBeGreaterThan(0);
-    const smith = dailyProduce(program('fabbro'));
+    expect(dailyProduce(program('farmer')).gathered['item.grano']).toBeGreaterThan(0);
+    expect(dailyProduce(program('woodcutter')).gathered['item.ciocco']).toBeGreaterThan(0);
+    const smith = dailyProduce(program('smith'));
     expect(smith.made.some((m) => m.oggetto === 'item.chiodi' && m.con === 'item.ciocco')).toBe(true);
     // A guard carries nothing to a deposit.
-    expect(dailyProduce(program('guardia'))).toEqual({ gathered: {}, made: [] });
+    expect(dailyProduce(program('guard'))).toEqual({ gathered: {}, made: [] });
   });
 });
 
@@ -93,14 +93,14 @@ describe('a place nobody sees', () => {
       if (k.tileAt(c, r) === 'g' && k.setTile(c, r, 'e')) field = [c, r];
     }
     expect(field).toBeDefined();
-    k.stores.set('sys.lavoro', `deposito:${key.replace(',', ':')}`, { 'item.ciocco': 16, 'item.chiodi': 3 });
+    k.stores.set('sys.work', `deposito:${key.replace(',', ':')}`, { 'item.ciocco': 16, 'item.chiodi': 3 });
 
     // Away: the place unloads.
     const day0 = k.day();
     const gone = await goAway(k, 12, () => !loaded(k, key));
     // Three evenings pass where nobody sees it.
     for (let d = 1; d <= 3; d++) {
-      k.time = at(day0 + d, 'sera');
+      k.time = at(day0 + d, 'evening');
       play(k, 3.5);
     }
     const now = k.ventures().find((x) => x.id === v.id)!;
@@ -141,14 +141,14 @@ describe('a place nobody sees', () => {
     const sid = k.ecs.query('struttura', 'origin').find((e) => k.ecs.get(e, 'origin').key.startsWith(`${key}#s`))!;
     const origin = k.ecs.get(sid, 'origin').key;
     (k as unknown as { breakEntity(id: number): void }).breakEntity(sid);
-    k.stores.set('sys.lavoro', `deposito:${key.replace(',', ':')}`, { 'item.ciocco': 4 });
+    k.stores.set('sys.work', `deposito:${key.replace(',', ':')}`, { 'item.ciocco': 4 });
     // Ugo arrives, and goes the other way; the master goes one way.
     expect(k.addWanderer('ugo', 'Ugo')).toBeDefined();
     k.as('ugo', () => (k.carpet()!.oy -= 12 * S));
     await goAway(k, 12, () => !loaded(k, key));
     const day0 = k.day();
     for (let d = 1; d <= 2; d++) {
-      k.time = at(day0 + d, 'sera');
+      k.time = at(day0 + d, 'evening');
       play(k, 3.5);
     }
     const v = k.ventures().find((x) => x.origine === origin)!;

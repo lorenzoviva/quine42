@@ -43,7 +43,7 @@ describe('actions as rules on the model', () => {
 
   it('"Altro…" that changes a thing\'s look writes an action into its program: the thing stays, changed, and its kind learns it', async () => {
     const k = await boot();
-    const a = await spawn(k, 'obj.credenza', 'test#credenza-a');
+    const a = await spawn(k, 'obj.cupboard', 'test#credenza-a');
     let said = '';
     k.bus.on('ui:dialog', ({ text }: { text: string }) => (said = text));
     await k.freeAction(a, 'scheggio la credenza');
@@ -56,10 +56,10 @@ describe('actions as rules on the model', () => {
     expect((k.ecs.get(a, 'form') as FormComp).done).toEqual(['scheggio-la-credenza']);
     expect(k.rules().find((r) => /scheggio la credenza/.test(r.testo))?.effetti).toContain('forma');
     // No action with effects is learned besides: the rule of the model is the menu entry.
-    expect(k.modules.get('obj.credenza')!.manifest.actions?.some((x) => x.effects?.length) ?? false).toBe(false);
+    expect(k.modules.get('obj.cupboard')!.manifest.actions?.some((x) => x.effects?.length) ?? false).toBe(false);
 
     // Every sideboard has it in its menu, and it runs without asking anyone.
-    const b = await spawn(k, 'obj.credenza', 'test#credenza-b');
+    const b = await spawn(k, 'obj.cupboard', 'test#credenza-b');
     expect(k.actionsFor(b).some((o) => o.id === 'modello:scheggio-la-credenza')).toBe(true);
     const calls = k.ai.usage.text;
     await k.freeAction(b, 'Scheggio la credenza');

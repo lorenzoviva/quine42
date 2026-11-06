@@ -68,7 +68,7 @@ export class SoundRenders {
     const promise = new Promise<PreparedSound | undefined>((done) => {
       const w: Waiting = { job: { id: this.next++, req, disk: this.disk }, key, done };
       // Music first, in the order asked: someone is waiting to hear it; the effects are getting ready in advance.
-      const at = req.use === 'musica' ? this.queue.findIndex((q) => q.job.req.use !== 'musica') : -1;
+      const at = req.use === 'music' ? this.queue.findIndex((q) => q.job.req.use !== 'music') : -1;
       if (at >= 0) this.queue.splice(at, 0, w);
       else this.queue.push(w);
     }).finally(() => this.inflight.delete(key));

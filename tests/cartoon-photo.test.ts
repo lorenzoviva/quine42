@@ -135,8 +135,8 @@ describe('who looks at the photographs', () => {
 describe('the prompts', () => {
   it('ask for what the contours can draw', () => {
     expect(bundledFiles['world/style.md']).toMatch(/un colore pieno per parte/);
-    expect(bundledFiles['prompts/agents/scultore.md']).toMatch(/lettera scura dedicata/);
-    expect(bundledFiles['prompts/agents/scultore.md']).not.toMatch(/uno scuro \(crepe, ombre\)/);
-    expect(bundledFiles['prompts/agents/artista.md']).toMatch(/si leggono a contorni/);
+    expect(bundledFiles['prompts/agents/sculptor.md']).toMatch(/lettera scura dedicata/);
+    expect(bundledFiles['prompts/agents/sculptor.md']).not.toMatch(/uno scuro \(crepe, ombre\)/);
+    expect(bundledFiles['prompts/agents/artist.md']).toMatch(/si leggono a contorni/);
   });
 });
