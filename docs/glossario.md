@@ -1100,7 +1100,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Migrazione
 - **Inglese**: `Migration`, `MIGRATIONS`, `migrate`, `migratePlan`, `migratePlanRecord`, `prepareUniverse`
-- **Definizione**: il passo che porta un universo da un contratto al successivo (ADR-0152, ADR-0154): una funzione pura sui suoi file e una, idempotente, sui piani dei luoghi, che il kernel applica a ogni piano che legge. Un caricamento migra e poi prende il seme (`prepareUniverse`). La prima è `0.1 → 0.2` (T307a, la lingua interna della simulazione).
+- **Definizione**: il passo che porta un universo da un contratto al successivo (ADR-0152, ADR-0155): una funzione pura sui suoi file e una, idempotente, sui piani dei luoghi, che il kernel applica a ogni piano che legge. Un caricamento migra e poi prende il seme (`prepareUniverse`). La prima è `0.1 → 0.2` (T307a, la lingua interna della simulazione).
 - **Dove vive**: `src/kernel/migrations.ts`, `src/kernel/universes.ts`
 - **Da non usare**: `conversione`, `upgrade` (per la migrazione: l'aggiornamento dal seme è un'altra cosa)
 - **Fermo**: nessuno.

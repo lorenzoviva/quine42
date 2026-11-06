@@ -126,7 +126,7 @@ export function upgradeFromSeed(files: FileMap, seed: FileMap): { files: FileMap
 }
 
 /**
- * A universe as it is loaded (T307a, ADR-0154): ported to this kernel's contract (migrations.ts), then given the seed's new files
+ * A universe as it is loaded (T307a, ADR-0155): ported to this kernel's contract (migrations.ts), then given the seed's new files
  * (`upgradeFromSeed`), in this order, so that a universe of an older contract takes in the same load the seed of the new one.
  * `changes` are what differs from the files given (a file gone is null): what the caller commits.
  */

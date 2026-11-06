@@ -1,4 +1,4 @@
-// The migration 0.1 → 0.2 (T307a, ADR-0153, ADR-0154): the internal language of the world's simulation. A universe of 0.1 opens ported,
+// The migration 0.1 → 0.2 (T307a, ADR-0153, ADR-0155): the internal language of the world's simulation. A universe of 0.1 opens ported,
 // the same files giving the same files; the Lua of the Council's modules is ported only where the kernel reads a value; the seed's files a
 // universe kept as they were take the seed of 0.2 in the same load; the plans of the places are ported as they are read; what the Council
 // still writes in Italian is repaired; a Latin rune pronounced works; and the seed runs 400 ticks offline without faults.

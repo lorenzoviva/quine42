@@ -2,7 +2,7 @@
 // The author decided (D36) that a universe no longer compatible is neither thrown away nor migrated by default: it is labelled with the
 // range of the kernels it runs on (`kernels`, version.ts) and left standing with the fault `universe:kernel`. When a contract changes and
 // a migration is worth writing, it goes in MIGRATIONS: a pure function from the files of `from` to the files of `to`, with its test.
-// The first is 0.1 → 0.2 (T307a, ADR-0153, ADR-0154): the internal language of the world's simulation.
+// The first is 0.1 → 0.2 (T307a, ADR-0153, ADR-0155): the internal language of the world's simulation.
 // The universe's places live apart (`maps/`, a chunk store): a migration says how a place's plan is ported too (`migratePlan`), and the
 // kernel ports every plan it reads (`migratePlanRecord`). The kernel runs the chain at boot (`Kernel.boot`), before the files are read; the
 // pages, the worlds of many and the tools run it before they take the seed (`prepareUniverse`, universes.ts), so the seed's new files
@@ -109,7 +109,7 @@ export function migratePlanRecord<T extends { plan?: ChunkPlan }>(record: T, lis
   return plan === record.plan ? record : { ...record, plan };
 }
 
-// --- 0.1 → 0.2 (T307a, ADR-0153, ADR-0154): the internal language of the world's simulation ------------------------------------------
+// --- 0.1 → 0.2 (T307a, ADR-0153, ADR-0155): the internal language of the world's simulation ------------------------------------------
 // Classes, sizes, effects and their fields, categories, the common shapes of the items, the terrains' ids, the seed's environments, the
 // stamps, the actions of the programs, the magic runes' tokens (Latin) and their elements, the elements of the panels, the steps of the
 // cases: everything the table of internalNames.ts says for the step T307a, wherever a universe of 0.1 has it.

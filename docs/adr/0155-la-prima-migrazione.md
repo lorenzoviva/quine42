@@ -1,4 +1,4 @@
-# ADR-0154 — La prima migrazione: 0.1 → 0.2, la lingua interna della simulazione
+# ADR-0155 — La prima migrazione: 0.1 → 0.2, la lingua interna della simulazione
 
 Data: 2026-11-06 · Stato: accettato (task T307a del backlog) · Riferimenti: ADR-0153 (l'inglese è la lingua interna), ADR-0152 (l'intervallo dei kernel, `migrations.ts`), ADR-0136 (la versione del kernel), ADR-0021 (i due repository, `upgradeFromSeed`), regola 3 (ciò che scrive il giocatore), `docs/lingua-interna.md`
 
