@@ -4756,3 +4756,17 @@ Nasce da T307a e T299: `dossier T307a`, `dossier T299`. `integra T307a` si è fe
 - Test: typecheck, build e suite intera con i loro turni; i test della veste (`tests/site-skin-futuristica.test.ts`) verdi.
 - Browser: sì, a 1920 e 390 px, catture nel commit.
 - Quando è fatto: commit su `task/T315`; la veste futuristica ha palco e labirinto insieme, misure nell'esito. T287 lo aspetta per la scelta. Sicurezza: nessuna superficie nuova.
+
+### T316 · Il glitch dei guasti senza flash: niente lampi bianchi, glifi e scossa più lenti — `da fare`
+- Pipeline: claude · sforzo high · stima 2% · approvato · browser · priorità 2
+- Step: 34
+- Contesto: l'autore (06/11) segnala che l'effetto quando il mondo ha guasti aperti (il riquadro «⚠ N anomalie nella simulazione» di `src/ui/hud.ts`) è esagerato e può essere pericoloso per chi soffre di epilessia fotosensibile: lampi improvvisi e frequenti di luce bianca, glifi che appaiono e spariscono di continuo, scossa orizzontale veloce. Il codice: `applyGlitch` in `src/render/glitch.ts` (la «Rare inversion flash» a pieno schermo con `difference` e bianco, gli strappi orizzontali con `Math.random()` a ogni frame, i blocchi di rumore), i glifi in `src/render/overlay.ts` (righe ~190 e ~198: `randomGlyph` a ogni frame), il livello in `src/render/renderer.ts` (`glitchLevel`, `crack`).
+- Cosa fare:
+  1. Togli il lampo d'inversione a pieno schermo e ogni altro cambio di luminosità ampio e improvviso: nessuna zona grande dello schermo cambia luminosità più di 3 volte al secondo (soglia WCAG 2.3.1).
+  2. Glifi: cambiano a ritmo lento e regolare (indicativo: qualche volta al secondo, non a ogni frame), con meno apparizioni e sparizioni.
+  3. Scossa orizzontale e blocchi di rumore: più lenti e meno ampi (gli strappi restano qualche frame invece di ricambiare a ogni frame); l'effetto si deve ancora riconoscere come «il mondo si è rotto» (regola 3 di AGENTS.md: il guasto si mostra).
+  4. Con `prefers-reduced-motion` il glitch resta solo statico (scanline e tinta, niente movimento). Anche la «crepa» rara del mondo sano segue le stesse regole.
+  5. Numeri nell'esito: lampi/secondo e cambi dei glifi/secondo prima e dopo.
+- Test: un test sulle frequenze (es. con un orologio finto: nessun riempimento bianco a pieno schermo, glifi stabili per almeno N ms); typecheck e suite intera con i loro turni.
+- Browser: sì, un mondo con un guasto aperto (anche provocato dalla console), cattura e due righe su come appare.
+- Quando è fatto: commit su `task/T316`; nessun flash bianco, glifi e scossa rallentati. Non tocca `src/kernel/` (niente salto di versione). Sicurezza: nessuna superficie nuova.
