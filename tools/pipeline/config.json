@@ -8,7 +8,7 @@
   ],
   "abbonamenti": {
     "claude": "max5x",
-    "google": "ultra"
+    "google": "pro"
   },
   "piani": {
     "claude": {
@@ -48,6 +48,7 @@
         "moltiplicatoreStima": 2.5,
         "disponibili": [
           "gemini",
+          "argon",
           "agy-opus",
           "agy-sonnet"
         ]
