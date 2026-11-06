@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 06/11/2026, epoca 307. Crediti: vedi `stato`.
+Aggiornato il 06/11/2026, epoca 308. Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -39,7 +39,7 @@ Aggiornato il 06/11/2026, epoca 307. Crediti: vedi `stato`.
 
 0. **Decisioni dell'autore del 04/11 (D8-D32 chiuse):**
    - **D32 (versionamento del kernel `X.Y.Z` e universi):** nuovo contratto del kernel `X.Y` = nuovo universo (o server dedicato alla versione precedente / futura migrazione IA a pagamento). Schema SemVer scelto: `X` = era (`0` in Fase I-II, `1` dal kernel `1.0.0`), `Y` = contratto dell'universo (parte da `1` in `0.1.0`, sale quando una modifica a `src/kernel/` cambia formati/primitive in modo incompatibile, ed è `9` in `0.9.0` per la Beta a fine Fase I), `Z` = incremento progressivo (`+1` a ogni task integrato che tocca `src/kernel/` restando compatibile con lo stesso `X.Y`). **T261** (`plan.tiles`) chiuso senza lavoro; **T260** riscritto (3 %, `da fare`, priorità 10). Step 32: T260, T262 → T245a → T263 e T245b → T245c, T245d → T245e → T245f. T245g-i in attesa della Fase III (step 39). T265 prima della beta (step 34), T264 piccolo, T266 in attesa verso fine Fase I. D16: `suono-effetto-morte` resta. D17-D26 confermate. Step 28 segnato `raggiunto`.
-1. **In corso:** T305 (1 %, solo pipeline). **T317 e T312 integrati** (kernel 0.2.1, ADR-0156: piani migrati poi sigillati, migrazione committata in `Kernel.boot` prima della sola lettura, `opensOnThisKernel` per `/api/viandante`; non provato nel browser). **T316 integrato** (glitch dei guasti senza lampi, browser verificato, `tests/glitch-safe.test.ts`). **T313 a p1 è il primo pronto** (autore: «ricomincia da T313»): parte appena la finestra delle 5 ore lo regge (reset 06:59 UTC). T304 integrato (`3cbbe5f`). **T313 al reset delle 07:00 UTC, poi T307b da solo** (slot claude 1). **Pronti:** T313, T156, T305, T315, T281, T288, T293. Claude settimana 80 %, reset 12/11 16:00 UTC; Gemini e agy a 100 %; Argon fermo fino all'11/11.
+1. **In corso:** nessuno. **T305 integrato** (Argon su Pro; proposta aperta: `piani.google.pro.moltiplicatoreStima` 2,5 → 1, la decide l'autore; il processo va riavviato per rileggere i piani, non urgente: Argon fermo fino all'11/11). **T317 e T312 integrati** (kernel 0.2.1, ADR-0156: piani migrati poi sigillati, migrazione committata in `Kernel.boot` prima della sola lettura, `opensOnThisKernel` per `/api/viandante`; non provato nel browser). **T316 integrato** (glitch dei guasti senza lampi, browser verificato, `tests/glitch-safe.test.ts`). **T313 a p1 è il primo pronto** (autore: «ricomincia da T313»): parte appena la finestra delle 5 ore lo regge (reset 06:59 UTC). T304 integrato (`3cbbe5f`). **T313 al reset delle 07:00 UTC, poi T307b da solo** (slot claude 1). **Pronti:** T313, T156, T305, T315, T281, T288, T293. Claude settimana 80 %, reset 12/11 16:00 UTC; Gemini e agy a 100 %; Argon fermo fino all'11/11.
 4. **T182 integrato e chiuso (04/11):** D5 C (T259), D6-D7 chiuse; `pagoda/1` e `tempio/2` restano fuori dai 10. Non provati nel gioco la lettera del suolo e il motore nuovo (T156).
 4b. **Generazione differita** (richiesta dell'autore, 03/11 e 05/11): **solo dopo T156, il prompt nuovo dello Scultore** (e T242, T259, D33). T207 (generatore senza browser, solo abbonamenti, aspetta T156) → T88 (la pipeline lo accende coi crediti che avanzano) → T153 (legge e prova i tre universi). I pacchetti e modelli generati ora su Claude Cloud in `lab/banco/` (`universi-cloud/`, `catalogo-cloud/`, `seme-procedurale/`, `props-tematici/`, `catalogo-60/`) usano già `lab/banco/prompt.md` (T182 + T258), ma **non** `sculptor.ts` aggiornato (T156), né il generatore differito (T207), né T242/T259: si tengono in `lab/banco/` e poi si rifaranno/rigenereranno nell'ordine giusto dopo i prerequisiti.
 
@@ -72,5 +72,5 @@ Aggiornato il 06/11/2026, epoca 307. Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **308 (claude):** T305 integrato; T313 aspetta il reset delle 06:59 UTC.
 - **307 (claude):** T316, T317, T312 integrati; T313: tetti fino a 5 $ + 5 $ e «sii intraprendente» nel blocco. L'autore ha aspettato un'ora T313 che non entrava nella finestra: **prevedere `windowAdmits` e dirlo subito**.
-- **306 (claude):** riavvio; T317 partito prima di T313, abbassato a p2; T316 partito al suo posto (T313 non entra nella finestra).
