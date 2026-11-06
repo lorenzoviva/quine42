@@ -1,4 +1,4 @@
-// The migration 0.2 → 0.3 (T307b, ADR-0153, ADR-0157): the internal language of society, work and the Council. A universe of 0.2 opens
+// The migration 0.2 → 0.3 (T307b, ADR-0153, ADR-0158): the internal language of society, work and the Council. A universe of 0.2 opens
 // ported, the same files giving the same files: the seed's modules the kernel names and their stores, the prompts of the agents, the
 // seed's sound programs and the gerboas change name with what they name; people, plots, ventures, programs of the trades, sounds,
 // parts, cards, graph, shortfalls and universe.json change value field by field; the plans are ported as they are read; what the

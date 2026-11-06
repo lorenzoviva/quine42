@@ -1,4 +1,4 @@
-# ADR-0157 — La seconda migrazione: 0.2 → 0.3, la lingua interna della società e del Concilio
+# ADR-0158 — La seconda migrazione: 0.2 → 0.3, la lingua interna della società e del Concilio
 
 Data: 2026-11-06 · Stato: accettato (task T307b del backlog) · Riferimenti: ADR-0153 (l'inglese è la lingua interna), ADR-0155 (la prima migrazione, che questa estende), ADR-0152 (`migrations.ts`), ADR-0136 (la versione del kernel), ADR-0140 (i programmi dei mestieri, `sys.lavoro`), ADR-0147 (le imprese), ADR-0154 (gli esiti di `sys.lavoro`), ADR-0127 (il Musicista), `docs/lingua-interna.md`
 

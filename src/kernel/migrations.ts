@@ -3,7 +3,7 @@
 // range of the kernels it runs on (`kernels`, version.ts) and left standing with the fault `universe:kernel`. When a contract changes and
 // a migration is worth writing, it goes in MIGRATIONS: a pure function from the files of `from` to the files of `to`, with its test.
 // The first is 0.1 → 0.2 (T307a, ADR-0153, ADR-0155): the internal language of the world's simulation; then 0.2 → 0.3 (T307b,
-// ADR-0157): the internal language of society, work and the Council.
+// ADR-0158): the internal language of society, work and the Council.
 // The universe's places live apart (`maps/`, a chunk store): a migration says how a place's plan is ported too (`migratePlan`), and the
 // kernel ports every plan it reads (`migratePlanRecord`). The kernel runs the chain at boot (`Kernel.boot`), before the files are read; the
 // pages, the worlds of many and the tools run it before they take the seed (`prepareUniverse`, universes.ts), so the seed's new files
@@ -500,7 +500,7 @@ function plan0_2(plan: ChunkPlan): ChunkPlan {
   return JSON.stringify(next) === JSON.stringify(plan) ? plan : next;
 }
 
-// --- 0.2 → 0.3 (T307b, ADR-0153, ADR-0157): the internal language of society, work and the Council ------------------------------------
+// --- 0.2 → 0.3 (T307b, ADR-0153, ADR-0158): the internal language of society, work and the Council ------------------------------------
 // The moments, places and activities of the routines, species and gender, the trades and their programs, the behaviours, the seed's
 // modules the kernel names (`sys.lavoro` → `sys.work`, `lavoro.*` → `job.*`, `obj.letto` → `obj.bed`…), the ventures, the plots and the
 // quests, the sounds (their uses, the effects the game cues, the seed's programs `suono-*` → `sound-*`), the parts of the models, the
