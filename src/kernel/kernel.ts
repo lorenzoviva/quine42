@@ -103,8 +103,8 @@ export const JUMP_FAR = 2.6;
 const WATER_EVERY = 6;
 const WATER_STEPS = 10;
 const MAX_DIG = 8;
-/** What the fault `universe:kernel` adds to its reason (T312): the panel of the faults says the world is read-only. */
-export const READ_ONLY_WORDS = 'sola lettura: niente si salva nel repository, il Concilio usa i modelli locali';
+/** What the fault `universe:kernel` says first (T312): the panel of the faults, which shows the head of a reason, says the world is read-only. */
+export const READ_ONLY_WORDS = 'sola lettura: niente si salva, il Concilio usa i modelli locali';
 
 export interface Chunk {
   cx: number;
@@ -1396,7 +1396,7 @@ export class Kernel {
     const version = error ? { ok: true } : checkKernelVersion(config.kernel, KERNEL_VERSION, config.kernels);
     if (!version.ok) {
       if (!this.faults.has('universe:kernel')) this.message(`Questo universo non è di questo kernel: ${version.motivo}. Si legge soltanto: niente si salva.`, 'warn');
-      this.faults.raise('universe:kernel', `${version.motivo} — ${READ_ONLY_WORDS}`);
+      this.faults.raise('universe:kernel', `${READ_ONLY_WORDS} — ${version.motivo}`);
     } else this.faults.clear('universe:kernel');
     this.keepGame(config, files);
     this.keepSettings(config, files);

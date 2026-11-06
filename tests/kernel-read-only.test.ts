@@ -66,7 +66,7 @@ describe('a universe out of the range of the kernels (T312)', () => {
   it('is read-only, and the panel of the faults says so', async () => {
     const { k } = await open(withKernel('0.0.4', { from: '0.0' }));
     expect(k.readOnly()).toContain('gira sui kernel 0.0–0.0');
-    expect(k.faults.get('universe:kernel')?.message).toContain(READ_ONLY_WORDS);
+    expect(k.faults.get('universe:kernel')?.message.startsWith(READ_ONLY_WORDS)).toBe(true);
   });
 
   it('commits nothing: not the Council, not the player, not the state; the disk is never written', async () => {
