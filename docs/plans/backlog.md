@@ -4732,7 +4732,7 @@ Nasce da T307a e T299: `dossier T307a`, `dossier T299`. `integra T307a` si è fe
 - Quando è fatto: commit su `task/T312`. Nell'esito: dove sta il blocco e cosa resta scrivibile (se qualcosa).
 
 ### T313 · Jev sul banco: decisioni chiuse del gioco e giudizi sulla scultura, contro Flash-Lite — `da fare`
-- Pipeline: claude · sforzo max · stima 6% · approvato · priorità 2
+- Pipeline: claude · sforzo max · stima 6% · approvato · priorità 1
 - Step: 30
 - Contesto: l'autore (06/11, D44 A) propone Jev di TypeSafe AI (https://typesafe.ai/blog/jev-1-14, docs su docs.typesafe.ai; anche dal Vercel AI Gateway): un modello che non genera ma sceglie (stato + domande tipizzate → scelte, punteggi, probabilità booleane), 0,042 $ per milione di token in ingresso, contesto di produzione 32k, affidabilità che cala col contesto lungo, immagini e contesto lungo solo come funzioni sperimentali (`TypeSafe-Danger-Zone-*`), da non usare. Modello: `jev-1.13.0` (produzione), e `jev-preview` (1.14) per confronto. La chiave è `TYPESAFE_KEY` nel `.env` del base (5 € di crediti caricati dall'autore): mai stamparla, registrarla né metterla in `lab/`, `dist/` o in un commit. C'è anche un plugin di TypeSafe per Claude: usalo solo se serve a leggere la documentazione, le misure passano da uno script.
 - Cosa fare: uno script Node in `lab/scripts/` (fuori da `src/`, niente browser, la chiave letta dal `.env` solo lì) e una cartella `lab/banco/jev/` con casi registrati e risposte giuste. Tre gruppi:
