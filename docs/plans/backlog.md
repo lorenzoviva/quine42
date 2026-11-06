@@ -4865,13 +4865,14 @@ Nasce da T156 (`dossier T156`, `docs/pipeline/domande/T156.md`, risposta B scelt
 - Test: le prove nuove nella modalità offline e nel test; suite intera e typecheck con i loro turni. Tetti: TypeSafe 0,50 $, Gemini 0,80 $.
 - Quando è fatto: commit su `task/T325`; nell'esito la spesa di oggi per il contesto, la tabella e le domande per l'autore. Sicurezza: nessuna superficie nuova (solo `lab/`).
 
-### T326 · L'NPC come oggetto coeso: dove vive oggi il suo comportamento e il confine da dargli — `da fare`
+### T326 · L'NPC come oggetto coeso: dove vive oggi il suo comportamento e il confine da dargli — `fatto` (`87255e5c`)
 - Pipeline: gemini · sforzo high · stima 3% · approvato · priorità 5
 - Step: 39
 - Contesto: l'autore (06/11 sera), letto `docs/design/comportamento-npc.md`: il piano va bene, ma teme che porti il codice del comportamento degli NPC sparso su troppi moduli; vuole **basso accoppiamento e alta coesione interna dell'oggetto NPC**. Oggi il comportamento è già in parte implementato (T245a-f, integrati via T280, T297, T300): `src/kernel/society.ts`, `jobs.ts`, `ventures.ts`, `route.ts`, `plots.ts`, parti di `kernel.ts`, il modulo Lua `sys.work` e i `job.<trade>`. Nascono da qui T327 (il rifacimento) e i vincoli su T245g-i. Leggi `dossier T245`, `dossier T280`.
 - Cosa fare: **solo documento, nessun codice.** (1) La mappa: ogni funzione, tipo, campo di stato e chiamata che riguarda il comportamento di un NPC (decidere, camminare, lavorare, imprese, routine, ricordi, legami, fuori vista), file per file con i numeri di riga, e chi chiama chi (le dipendenze tra moduli, anche da `kernel.ts`, dal `Host`, dai pannelli, dal Concilio). (2) Le misure: quanti moduli toccano lo stato di un NPC, quante funzioni di `kernel.ts` sono comportamento NPC, i cicli di import. (3) La proposta: un confine unico (per esempio `src/kernel/npc/` con una facciata stretta: cosa entra, cosa esce, chi possiede lo stato dell'NPC), cosa ci va dentro, cosa resta fuori e perché (Lua, Concilio, rendering), le dipendenze ammesse in una direzione sola; come T245g, T245h, T245i ci si appoggiano senza aprire file nuovi fuori dal confine. Scrivila come sezione nuova «10. Coesione: l'NPC come oggetto» in `docs/design/comportamento-npc.md`, con una tabella «com'è → come sarà» che T327 seguirà passo per passo.
 - Test: nessuno (solo documentazione); typecheck col suo turno.
 - Quando è fatto: commit su `task/T326`; nell'esito le misure e la proposta in cinque righe. Sicurezza: nessuna superficie nuova.
+- Esito: aggiunta sezione 10 in docs/design/comportamento-npc.md con mappa completa, misure (24 moduli toccano lo stato, 65 funzioni e 1.470 righe in kernel.ts, ciclo society/wanderers) e proposta del confine unico src/kernel/npc/ con facciata NpcSubsystem e tabella di transizione per T327; typecheck verde nel suo turno; sicurezza: nessuna superficie nuova.
 
 ### T327 · L'NPC come oggetto coeso: il comportamento in un modulo solo, dietro una facciata — `da fare` (dipende da T326, T308b, T328)
 - Pipeline: claude · sforzo extra · stima 6% · approvato · priorità 5

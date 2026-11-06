@@ -579,9 +579,382 @@ del master, `/api/universe` rifiuta da fuori un commit che cambi `ai` in un univ
 server cambia**: il test di T245a afferma che `vite` segue la stessa sorte di `dialoghi`. Da soli vale la stessa regola dalla lobby alla
 ricarica della pagina. Chi non è il master la vede e non la tocca; il tetto di ogni viandante resta suo.
 
+## 10. Coesione: l'NPC come oggetto (T326)
+
+Risponde alla richiesta dell'autore del 06/11: **basso accoppiamento e alta coesione interna dell'oggetto NPC**. Oggi il comportamento è in parte implementato (T245a-f, integrati via T280, T297, T300), ma sparso tra `src/kernel/society.ts`, `jobs.ts`, `ventures.ts`, `route.ts`, `plots.ts`, il modulo Lua `sys.work` e i `job.<trade>`, e soprattutto diluito in decine di metodi e campi di stato dentro `src/kernel/kernel.ts`.
+Questa sezione mappa lo stato attuale, ne riporta le misure puntuali e definisce il confine unico (`src/kernel/npc/`) con la sua facciata stretta e la tabella di transizione per il rifacimento (T327).
+
+### 10.1 La mappa del comportamento attuale
+
+Tutto ciò che riguarda il comportamento di un individuo (decidere, camminare, lavorare, imprese, routine, ricordi, legami, fuori vista), classificato file per file con i numeri di riga e la rete di chiamate.
+
+#### A. File per file: tipi, funzioni, stato e numeri di riga
+
+1. **`src/kernel/society.ts` (571 righe)**: la società, l'identità, la parentela e la memoria episodica.
+   - *Tipi*: `DayPhase` (L13), `Where` (L15), `Activity` (L20), `RoutineStep` (L39), `Memory` (L47), `Relation` (L56), `Species` (L63), `Gender` (L64), `Individual` (L66), `IndividualSheet` (L92), `People` (L120), `SocietyRepair` (L348), `Between` (L155), `Kind` (L157).
+   - *Costanti*: `DAY_PHASES` (L14), `WHERES` (L16), `ACTIVITIES` (14 attività visive, L19), `ACTIVITY_ICON` (L23), `KINDS` (22 tipi di legame, L169), `RELATION_WORDS` (L196), `BINDING_WORDS` (L255), `NAME_POOL` (L298).
+   - *Funzioni*:
+     - `inferActivity` (L28): deduce l'attività visiva (`Activity`) dal testo descrittivo del compito (`fa`) e dal luogo (`dove`).
+     - `sheetFingerprint` (L98): calcola l'impronta hash dei dati stabili dell'individuo per invalidare la scheda dell'Attore.
+     - `remember` (L104), `memorySummary` (L113): gestione della memoria episodica (capping a 30 ricordi, espulsione dei più leggeri/vecchi).
+     - `readPeople` (L126), `withWandererIds` (L139): lettura e normalizzazione di `world/people.json`.
+     - `reverseRelation` (L230), `relationProblem` (L235), `relationsAgree` (L245), `relationKind` (L258): coerenza semantica, limiti di specie/genere e reciprocità dei legami familiari e sociali.
+     - `similarNames` (L292), `freshName` (L310), `guessGender` (L328): rilevamento omonimie per distanza di Levenshtein, estrazione nomi freschi deterministici dal seme e stima genere da nome/lavoro/legami.
+     - `renameIn` (L359), `renameDeep` (L363), `applyRenames` (L371): propagazione coerente delle ridenominazioni in testi e trame.
+     - `repairSociety` (L381), `checkSociety` (L523), `addIndividual` (L528): validazione e riparazione simmetrica dell'intero registro sociale.
+     - `societySummary` (L534): resoconto compatto delle persone note e attese per i prompt del Narratore.
+     - `dayPhase` (L542): orologio del mondo → fase della giornata (`morning`, `day`, `evening`, `night`).
+     - `defaultRoutine` (L552): routine predefinita su quattro fasi per individui privi di routine specifica.
+     - `greeting` (L562): battute deterministiche di saluto per legame quando due individui si incrociano a meno di 2,4 caselle.
+
+2. **`src/kernel/jobs.ts` (219 righe)**: i programmi dei mestieri e la validazione dei compiti.
+   - *Tipi*: `JobBehaviour` (L15), `JobTask` (L28), `JobProgram` (L54), `JobWorld` (L66).
+   - *Costanti*: `WORK_MODULE` (`sys.work`, L11), `JOB_BEHAVIOURS` (14 comportamenti: `go`, `take`, `carry`, `transform`, `gather`, `produce`, `use`, `build`, `patrol`, `rest`, `eat`, `pray`, `chat`, `wait`, L14), `JOB_PHASES` (L17), `MAX_TASKS` (6 per fase, L19), `MIN_DURATION` (5 s, L20), `MAX_DURATION` (300 s, L21), `MAX_REPEAT` (12, L23), `WORKERS_PER_PLACE` (12 per chunk, L25).
+   - *Funzioni*:
+     - `validateJobProgram` (L81): valida il programma dai moduli `data` contro la palette dell'universo, il registro oggetti e i tag dei moduli.
+     - `normalTrade` (L180): normalizzazione del testo del mestiere (minuscole, rimozione articoli e specificazioni).
+     - `matchJob` (L193): abbinamento deterministico dell'individuo al programma di mestiere (nome esatto, poi per parole chiave).
+     - `dailyProduce` (L207): estrazione di cosa il mestiere raccoglie o produce in un giorno, per l'accounting dei luoghi scaricati.
+
+3. **`src/kernel/ventures.ts` (393 righe)**: le imprese, le squadre e il lavoro collettivo.
+   - *Tipi*: `VentureType` (L12), `VentureState` (L13), `VenturePhase` (L29), `VentureRole` (L39), `VentureMember` (L46), `VentureTask` (L52), `Venture` (L60), `VentureProgress` (L181), `VentureCandidate` (L307), `VentureStep` (L328).
+   - *Costanti*: `VENTURES_FILE` (`world/ventures.json`, L10), `VENTURE_TYPES` (L11), `ANY_TRADE` (`any`, L15), `MAX_TEAM` (6, L18), `MAX_OPEN` (12, L19), `MAX_KEPT` (40, L20), `YEAR_DAYS` (24, L22), `HARVEST_DAY` (16, L23), `HARVEST_DAYS` (3, L25), `SITE_REACH` (3.5 caselle, L27).
+   - *Funzioni*:
+     - `readVenture` (L108), `readVentures` (L159), `writeVentures` (L177): lettura e scrittura sicura di `world/ventures.json`.
+     - `ventureProgress` (L203): calcolo derivato della fase corrente, stadio visibile, materiali e lavoro residui.
+     - `ventureState` (L221): determinazione dello stato (`active`, `waiting`, `stopped`, `finished`) in base a squadra e materiali.
+     - `stillNeeded` (L233): conteggio materiali mancanti per completare la fase attiva.
+     - `addWork` (L249): accumula secondi-uomo di lavoro e restituisce le fasi chiuse.
+     - `bring` (L262): consuma materiali consegnati aggiornando il conteggio `brought`.
+     - `ventureId` (L279): generazione id deterministico dell'impresa.
+     - `housePhases` (L288): fasi standard di costruzione per classe di edificio (`building`, ecc.).
+     - `fillTeam` (L318): composizione e rimpiazzo della squadra per mestiere, vicinanza e disponibilità.
+     - `nextStep` (L338): determina il prossimo passo per un membro al lavoro (`take`, `carry`, `build`).
+     - `missingWords` (L362): formattazione dei materiali mancanti per il pannello del cantiere.
+     - `openVentures` (L372), `pruneVentures` (L379): filtraggio delle imprese aperte e archiviazione delle concluse eccedenti.
+
+4. **`src/kernel/route.ts` (174 righe)**: navigazione A* su caselle e cache dei percorsi.
+   - *Tipi*: `Cell` (L7), `StepTest` (L59).
+   - *Costanti*: `ROUTE_NODES` (4000 nodi massimi, L10).
+   - *Classi/Funzioni*:
+     - `Heap` (L20): heap binario per coda di priorità di A*.
+     - `findRoute` (L67): A* a 8 direzioni senza taglio spigoli, con test di passaggio tra centri casella (`step`) e tolleranza `near`.
+     - `RouteCache` (L123): cache LRU con TTL (600 tick) per memorizzare cammini per meta e verificare i singoli passi (`step`).
+
+5. **`src/kernel/plots.ts` (236 righe)**: trame orizzontali, tappe e missioni per gli NPC.
+   - *Tipi*: `Beat` (L12), `Quest` (L24), `Plot` (L34), `QuestGoal` (L47), `PlotReview` (L142).
+   - *Costanti*: `QUEST_GOALS` (L48), `PLOTS_FILE` (`world/plots.json`, L50).
+   - *Funzioni*:
+     - `readPlots` (L52), `writePlots` (L63): persistenza di `world/plots.json`.
+     - `secretsOf` (L68): estrazione delle trame e delle tappe note all'individuo per alimentare il prompt di dialogo.
+     - `activeQuests` (L80): missioni accettate dal viandante.
+     - `plotText` (L87): estrazione testo completo per filtro quarta parete.
+     - `plotFromRaw` (L95): conversione della risposta del Narratore in struttura `Plot`.
+     - `canonBreak` (L128): filtro per impedire che le trame attribuiscano alle rune comportamenti contrari al canone.
+     - `reviewPlot` (L155): validazione della trama rispetto alle persone note nel registro, ruoli animali, legami dichiarati e quarta parete.
+
+6. **`src/kernel/kernel.ts` (65 metodi e 17 campi di stato dedicati al comportamento NPC, ~1.470 righe)**:
+   - *Campi di stato in `Kernel`*:
+     - `sheeting`: cache promesse generazione schede Attore (L2258).
+     - `individuating`: lock asincrono per non individuare due volte la stessa entità (L6580).
+     - `greeted`: cooldown saluti tra coppie di individui (L6657).
+     - `lastPhase`: tracciamento cambio fase routine per entità (L6658).
+     - `queuedSpeech`: battute cadenzate nel tempo (L6659).
+     - `talking`: lock conversazione in corso (L6660).
+     - `lastTalk`: timestamp ultimo dialogo generato (L6661).
+     - `worldPhase`: fase orologio per scatto tappe trame (L6662).
+     - `plotsWoven`: contatore trame generate nella sessione (L6665).
+     - `jobCache`: cache dei programmi validati dai manifest dei moduli (L6842).
+     - `routes`: istanza `RouteCache` per la navigazione (L6843).
+     - `maturedPhase`: tracciamento fase maturazione terreno (L6844).
+     - `ventureList`: elenco in memoria delle imprese attive e storiche (L6922).
+     - `venturesDirty`: flag di persistenza per `world/ventures.json` (L6923).
+     - `ventureDayDone`: giorno dell'ultimo controllo regole imprese (L6924).
+     - `ventureTime`: timestamp ultimo tick lavoro imprese (L6925).
+     - `awayDone`: giorno dell'ultimo accounting fuori vista (L7408).
+     - `actingAs`: profondità ricorsione `actAs` (L7509).
+   - *Metodi*:
+     - *Identità e schede*: `ensureSheet` (L2265), `ensureIdentity` (L6566), `individuate` (L6582), `speciesOf` (L6677), `individualOf` (L6733), `updateIndividual` (L6737).
+     - *Orologio e coerenza*: `day` (L6668), `when` (L6672), `reviewSociety` (L6690), `reviewPlots` (L6708).
+     - *Memoria e legami*: `rememberAbout` (L6750), `rememberWanderer` (L6756), `wandererWord` (L6762), `setBond` (L6767), `bondOf` (L6779).
+     - *Ciclo ed esecuzione*: `societyTick` (L6788), `routineNow` (L6651), `placeFor` (L7991).
+     - *Mestieri*: `jobPrograms` (L6847), `workTick` (L6877), `actAs` (L7516), `placeDeposit` (L7536).
+     - *Imprese*: `ventures` (L6928), `touchVentures` (L6932), `bodyOfName` (L6937), `ventureOfMember` (L6947), `ventureWorkable` (L6952), `canBring` (L6958), `placeOfPerson` (L6964), `ventureCandidates` (L6970), `staffVentures` (L6980), `startVenture` (L6993), `ventureOfRuin` (L7003), `householdsOf` (L7035), `freeArea` (L7048), `ventureRules` (L7097), `ventureTick` (L7176), `phasesClosed` (L7222), `ventureDone` (L7229), `ventureStage` (L7239), `syncVenturePlan` (L7248), `ventureIntoPlan` (L7269), `spawnPlannedHouse` (L7297), `ventureStepFor` (L7309), `ventureBring` (L7323), `cantierePanels` (L7375).
+     - *Fuori vista e maturazione*: `awayTick` (L7416), `returnToPlace` (L7473), `onReturn` (L7502), `matureTick` (L7642), `matureChunk` (L7650).
+     - *Movimento e percorsi*: `routeStep` (L7547), `stepFree` (L7586), `walkable` (L7596), `tileCodeOf` (L7611), `findTile` (L7620).
+     - *Interazione e dialoghi*: `meetings` (L7668), `converse` (L7698), `entityOf` (L7733), `talk` (L8063), `noteMentions` (L8142).
+     - *Trame e missioni*: `plotTick` (L7741), `weaveStory` (L7784), `updatePlots` (L7822), `quests` (L7831).
+
+7. **Il confine sandbox / Host (`src/kernel/sandbox.ts` e `prelude.lua`)**:
+   - `Host.path(x, y, tx, ty, r)` (L24, L369, L811) → `world.path` in Lua.
+   - `Host.find_tile(code, x, y, r)` (L32, L370, L812) → `world.find_tile` in Lua.
+   - `Host.act(user, target, action)` (L26, L813) → `host.act` in Lua.
+   - `Host.impresa(id)` (L28, L372, L814) → `world.impresa` in Lua.
+   - `Host.impresa_porta(id, item)` (L30, L373, L815) → `world.impresa_porta` in Lua.
+   - `Host.store_get(key)` / `store_set(key, value)` (L34-36, L817-818) → `world.store_get` / `world.store_set` in Lua per i depositi dei mestieri in `sys.work`.
+
+8. **I moduli Lua dell'universo**:
+   - `universe/modules/sys.work/logic.lua` (365 righe): esegue i compiti del programma (`go`, `transform`, `gather`, `produce`, `use`, `build`, `patrol`, `rest`, ecc.); legge il componente `mestiere`, manipola `lavoro` e `carico`, cambia caselle con `world.set_tile`, assegna `attivita` e `meta`.
+   - `universe/modules/sys.wander/logic.lua` (56 righe): legge `meta` e `mind`, muove fisicamente il corpo verso la destinazione e anima il cammino.
+   - `universe/modules/sys.follow/logic.lua`: legge `mind.mode == 'segui'`, muove l'individuo al seguito del viandante.
+
+#### B. La rete delle chiamate: chi chiama chi
+
+```mermaid
+flowchart TD
+  subgraph Client_UI["Client & Rendering"]
+    HUD["UI HUD / Chat / Quests"]
+    Panel["Pannello Cantiere (W)"]
+    Render["Renderer three.js (Entities/Overlay)"]
+  end
+
+  subgraph Kernel_Core["Kernel Orchestrator (src/kernel/kernel.ts)"]
+    MainTick["mainTick()"]
+    SocTick["societyTick()"]
+    VentTick["ventureTick()"]
+    AwayTick["awayTick()"]
+    HostBridge["Host Bridge (path, find_tile, impresa)"]
+    K_Talk["talk() / converse()"]
+  end
+
+  subgraph NPC_State["Moduli Comportamento NPC (Oggi Frammentati)"]
+    Soc["society.ts (people.json)"]
+    Jobs["jobs.ts (programmi mestiere)"]
+    Vent["ventures.ts (ventures.json)"]
+    Route["route.ts (A*, RouteCache)"]
+    Plots["plots.ts (plots.json)"]
+  end
+
+  subgraph Lua_Sandbox["Sandbox Lua (wasmoon)"]
+    SysWork["sys.work (logica compiti)"]
+    SysWander["sys.wander (cammino verso meta)"]
+  end
+
+  subgraph Council["Concilio di Agenti (IA)"]
+    Narrator["Narratore (individuate, weavePlot)"]
+    Actor["Attore (npcReply, npcDialogue, npcSheet)"]
+  end
+
+  MainTick --> SocTick
+  MainTick --> VentTick
+  MainTick --> AwayTick
+
+  SocTick --> Soc
+  SocTick --> Jobs
+  SocTick --> Vent
+  SocTick --> Plots
+  SocTick --> Route
+
+  K_Talk --> Actor
+  K_Talk --> Soc
+  K_Talk --> Plots
+  SocTick --> Narrator
+
+  HostBridge --> Route
+  HostBridge --> Vent
+  SysWork --> HostBridge
+  SysWander --> SysWork
+
+  Render -.->|legge attivita, identity| Kernel_Core
+  Panel -.->|legge cantiere| Kernel_Core
+  HUD -.->|talk, quests| Kernel_Core
+```
+
+---
+
+### 10.2 Le misure dello stato attuale
+
+1. **Quanti moduli toccano lo stato di un NPC**:
+   - **11 moduli nel kernel (`src/kernel/`)**:
+     - `kernel.ts`: manipola tutti i componenti ECS (`identity`, `mind`, `attivita`, `mestiere`, `lavoro`, `carico`, `meta`) e tutti i file (`people.json`, `ventures.json`, `plots.json`).
+     - `society.ts`: gestisce `people.json` e `Individual`.
+     - `jobs.ts`: definisce `JobProgram`, `JobTask` e valida i programmi dei mestieri.
+     - `ventures.ts`: gestisce `ventures.json`, squadre, materiali e progresso.
+     - `plots.ts`: gestisce `plots.json` e le tappe associate ai nomi degli NPC.
+     - `route.ts`: calcola percorsi A* per gli spostamenti degli NPC.
+     - `graph.ts`: importa `readPeople` per creare nodi e archi di relazione nel grafo del mondo.
+     - `cards.ts`: importa `readPeople` per associare quote e attribuzioni di carte ai residenti.
+     - `clone.ts`: legge `people.json` e `plots.json` durante il cloning dell'universo.
+     - `internalNames.ts`: definisce le traduzioni dei campi di `people.json`, `ventures.json`, `jobs` ed ECS.
+     - `migrations.ts`: applica le migrazioni di schema a `people.json`, `ventures.json`, `plots.json` e componenti ECS.
+   - **8 moduli server, sessione e client**:
+     - `server/wanderer.ts`: legge `people.json` per ricavare legami del viandante per il sito.
+     - `src/session/files.ts`: include `people.json` e `plots.json` in `publicFiles`/`playerFiles` ed esclude `ventures.json`.
+     - `src/session/protocol.ts`: serializza per il client sottile i componenti `identity`, `mind`, `attivita`.
+     - `src/session/server.ts`: sincronizza lo stato ECS degli NPC tra i client in multigiocatore.
+     - `src/session/thin.ts`: deserializza i componenti degli NPC nel kernel specchio.
+     - `src/render/entities.ts`: legge `attivita.tipo` e `identity.name` per disegnare le mesh dei personaggi e le pose.
+     - `src/render/renderer.ts`: interroga lo stato delle entità per il culling e l'animazione.
+     - `src/ui/chat.ts`: legge `mind` e `identity` per l'interfaccia di dialogo.
+   - **2 moduli degli agenti IA**:
+     - `src/kernel/agents/content.ts`: `individuate` genera identità e routine con il Narratore.
+     - `src/kernel/agents/minds.ts`: `npcReply`, `npcDialogue`, `npcSheet`, `weavePlot`.
+   - **3 sistemi Lua dell'universo**:
+     - `sys.work`: scrive `lavoro`, `carico`, `attivita`, `meta`; legge `mestiere`.
+     - `sys.wander`: scrive `attivita`; legge `meta` e `mind`.
+     - `sys.follow`: legge `mind.mode`.
+   - *Totale*: **24 moduli software** distribuiti su tutto lo stack toccano direttamente lo stato di un NPC.
+
+2. **Quante funzioni di `kernel.ts` sono comportamento NPC**:
+   - **65 funzioni** in `src/kernel/kernel.ts`.
+   - Volume: **1.470 righe di codice** su 8.773 (il **16,7%** dell'intero orchestratore principale) appartengono strettamente a identità, routine, mestieri, cantieri, percorsi, dialoghi, trame e contabilità fuori vista.
+
+3. **I cicli di import**:
+   - **Ciclo diretto di valori**: `src/kernel/society.ts` ⇄ `src/kernel/wanderers.ts`.
+     - `society.ts` (L10) importa valori `{ SOLO, WANDERER_NAME, wandererOf }` da `wanderers.ts` per legare ricordi e parentela dell'individuo al viandante.
+     - `wanderers.ts` (L10) importa valori `{ freshName, guessGender, similarNames }` da `society.ts` per battezzare i viandanti.
+   - **Cicli indiretti**:
+     - `cards.ts` → `graph.ts` → `society.ts` → `wanderers.ts` → `types.ts` → `cards.ts`.
+     - `plots.ts` → `wanderers.ts` → `society.ts` → `plots.ts`.
+   - *Causa di fondo*: la mancanza di un confine autonomo porta `society.ts` a dipendere dall'infrastruttura del giocatore umano (`wanderers.ts`) per ottenere costanti di sistema, mentre `wanderers.ts` riusa utility linguistiche sepolte dentro `society.ts`.
+
+---
+
+### 10.3 La proposta: un confine unico (`src/kernel/npc/`) e una facciata stretta
+
+La proposta per T327 consiste nel confinare l'intero dominio dell'NPC nel package **`src/kernel/npc/`**, esponendo all'esterno una sola facciata coesa: la classe **`NpcSubsystem`** (in `src/kernel/npc/index.ts`).
+
+#### 10.3.1 Proprietà dello stato: cosa entra e cosa esce
+
+- **Chi possiede lo stato**:
+  - `src/kernel/npc/` è l'**unico titolare** dei file su disco `world/people.json` e `world/ventures.json`. Nessun altro modulo vi accede direttamente in scrittura.
+  - È l'**unico titolare** della logica dei componenti ECS comportamentali: `identity`, `mind`, `attivita`, `mestiere`, `lavoro`, `carico`. Il `Kernel` principale si limita a fornire l'istanza `Ecs` per la manipolazione delle entità e a gestire i componenti fisici (`pos`, `body`, `glyph`, `chunk`, `origin`).
+  - Incapsula interamente le cache e i registri transitori: `jobCache` (programmi validati), `RouteCache` (cammini memorizzati), `sheeting` (promesse schede Attore in generazione), `greeted` (cooldown saluti).
+
+- **Cosa entra attraverso la facciata (`NpcSubsystem`)**:
+  - *Il battito del tempo*: `tick(time: number, dt: number)`. Il sottosistema calcola giorno e fase, aggiorna le routine, esegue `workTick`, `ventureTick`, fa avanzare l'accounting fuori vista al cambio di fase/giorno, verifica gli incontri tra individui e fa scattare le tappe delle trame.
+  - *Ciclo dei luoghi*:
+    - `onChunkLoaded(chunk: Chunk, plan: ChunkPlan): void`: applica stadi delle imprese, maturazione dei campi e allineamento degli edifici ricostruiti.
+    - `onChunkUnloaded(chunk: Chunk): void`: scarica le entità NPC del luogo.
+  - *Interazioni del viandante*:
+    - `talk(id: Id, text: string, wandererId: string): Promise<NpcReply>`: coordina l'interazione, la scheda Attore, la memoria dell'NPC e l'eventuale accettazione di missioni.
+    - `bringToVenture(wandererId: string, item?: string): number`: preleva risorse dal sacco del viandante vicino al cantiere e le consegna all'impresa.
+  - *Le primitive per il `Host` (bridge per Lua)*:
+    - `routeStep(x, y, tx, ty, r)`: calcola il passo successivo A*.
+    - `findTile(code, x, y, r)`: trova la casella richiesta più vicina.
+    - `actAs(user, target, action)`: esegue `on_act` per conto dell'NPC.
+    - `ventureStep(id)`: restituisce il compito del cantiere per `costruisci`.
+    - `ventureBring(id, item)`: consegna materiali da parte di un membro dell'impresa.
+  - *Query pure per UI, Grafo e Pannelli*:
+    - `individualOf(name: string): Individual | undefined`
+    - `bondOf(name: string, wandererId: string): string | undefined`
+    - `activeQuests(wandererId?: string): QuestInfo[]`
+    - `cantierePanel(wandererPos: { x: number; y: number }): CantiereFields | undefined`
+    - `societySummary(): string`
+    - `reviewAll(): { societyFixes: string[]; plotFixes: string[] }`
+
+- **Cosa esce dalla facciata verso il Kernel**:
+  - L'NPC non conosce la classe `Kernel`. Riceve all'avvio un'interfaccia di contesto ristretta e minimale (`NpcContext`):
+    ```ts
+    export interface NpcContext {
+      readonly config: { seed: string; chunkSize: number; circleRadius: number };
+      readonly ecs: Ecs;
+      readonly files: FileMap;
+      readonly content: Content;
+      readonly modules: ReadonlyMap<string, ModuleEntry>;
+      readonly council: Council;
+      readonly interpreter: () => Interpreter;
+      // Mutazioni fisiche e persistenza autorizzate
+      setTile(x: number, y: number, code: string): void;
+      tileAt(x: number, y: number): string | undefined;
+      free(x: number, y: number, r: number, z?: number): boolean;
+      speak(id: Id, text: string): void;
+      saveChunkSoon(chunk: Chunk): void;
+      commit(message: string, agent: string, task: string, who?: string): void;
+      logCouncil(agent: string, verb: string, text: string, to?: string, task?: string): void;
+    }
+    ```
+
+#### 10.3.2 Cosa va dentro, cosa resta fuori e perché
+
+| Componente | Dove sta | Perché |
+|---|---|---|
+| **Società, persone, legami, schede** | **Dentro** (`src/kernel/npc/society.ts`) | È il nucleo dell'identità dell'individuo, della sua parentela e della sua memoria durevole. |
+| **Mestieri e programmi di lavoro** | **Dentro** (`src/kernel/npc/jobs.ts`) | Definisce la giornata dell'NPC, i compiti ammessi e l'abbinamento ai programmi. |
+| **Imprese e cantieri** | **Dentro** (`src/kernel/npc/ventures.ts`) | È lo scopo comune che coordina squadre, materiali e stadi degli edifici. |
+| **Navigazione A\* e cammino** | **Dentro** (`src/kernel/npc/route.ts`) | È il supporto al movimento degli NPC tra le caselle del mondo; non serve ad altri sottosistemi. |
+| **Luoghi della routine (`placeFor`)** | **Dentro** (`src/kernel/npc/places.ts`) | Trova deterministiche caselle libere, letti e banchi per far svolgere i compiti della giornata. |
+| **Trame e dialoghi** | **Dentro** (`src/kernel/npc/plots.ts`, `dialogues.ts`) | Le storie orizzontali muovono gli NPC alle tappe e scandiscono gli scambi verbali. |
+| **Contabilità fuori vista** | **Dentro** (`src/kernel/npc/accounting.ts`) | Avanza il lavoro e la produzione nei luoghi non caricati al cambio di fase. |
+| **Generazione nomi e generi** | **Dentro** (`src/kernel/npc/names.ts`) | Modulo puro che isola il pool dei nomi e la stima del genere, spezzando il ciclo tra `society.ts` e `wanderers.ts`. |
+| *Sistemi Lua (`sys.work`, `sys.wander`)* | **Fuori** (`universe/modules/`) | **Regola 1**: il kernel è TypeScript, la logica di gioco gira in Lua nella sandbox wasmoon isolata. L'NPC nel kernel fornisce i dati (`mestiere`) e le primitive (`Host`), Lua esegue. |
+| *Agenti del Concilio (`agents/`)* | **Fuori** (`src/kernel/agents/`) | Narratore e Attore sono modelli IA generali esterni al mondo fisico; l'NPC invia richieste formattate (`npcReply`, `npcSheet`) e riceve risposte tipizzate. |
+| *Rendering (`render/`)* | **Fuori** (`src/render/`) | Il renderer three.js osserva lo stato specchiato (`attivita.tipo`, `pos`, mesh); non partecipa mai alle decisioni dell'NPC. |
+| *Viandanti (`wanderers.ts`)* | **Fuori** (`src/kernel/wanderers.ts`) | I viandanti sono giocatori umani con account, crediti e websocket. L'NPC conosce il viandante solo come identificatore stringa (`wandererId`). |
+
+#### 10.3.3 Dipendenze ammesse: una direzione sola (DAG)
+
+Nessun ciclo di dipendenze. La gerarchia è aciclica e strettamente unidirezionale:
+
+```
+[UI / Renderer / Server Session]
+              │
+              ▼
+        [kernel.ts]
+              │ (chiama solo la facciata pubblica)
+              ▼
+   [src/kernel/npc/index.ts] ◄── (NpcSubsystem)
+     ├── society.ts ──► names.ts
+     ├── jobs.ts
+     ├── ventures.ts
+     ├── plots.ts
+     ├── route.ts
+     ├── places.ts
+     ├── dialogues.ts
+     └── accounting.ts
+              │
+              ▼
+ [Kernel base: ecs, rng, types, internalNames, fourthwall]
+```
+
+- **Regola di confine**: nessun file al di fuori di `src/kernel/npc/` può importare moduli interni al package, ma deve passare esclusivamente da `src/kernel/npc/index.ts` (o da un eventuale `types.ts` dedicato).
+- **Test architetturale (in T327)**: un test di verifica statica (`tests/npc-architecture.test.ts`) analizzerà gli import con `fs` e fallirà se:
+  1. `kernel.ts` o altri moduli esterni importano un file interno di `npc/` saltando `index.ts`.
+  2. Un modulo interno a `npc/` importa `kernel.ts`, `wanderers.ts` o codice di rendering/sessione.
+  3. Si riscontra un ciclo di import all'interno del package `npc/`.
+
+#### 10.3.4 Come si appoggiano T245g, T245h, T245i senza toccare file esterni
+
+Il confine unico accoglierà le tre estensioni future della Fase III senza aprire file nuovi nella radice del kernel:
+
+1. **T245g (Il Narratore scrive mestieri e imprese)**:
+   - `JobDirector`: classe interna `src/kernel/npc/jobDirector.ts` governata dalla facciata. Riceve la richiesta quando un mestiere non ha programma e interroga il Narratore con ritmo e tetto `ai.maxMestieri`.
+   - `impresa.plan`: validatore e parser delle imprese scritte dal Narratore integrati dentro `src/kernel/npc/ventures.ts`.
+   - L'effetto `impresa`: gestito nel dispatcher della facciata. Zero modifiche alla radice di `src/kernel/`.
+
+2. **T245h (I bivi degli NPC)**:
+   - `npc.decide`: implementato in `src/kernel/npc/decisions.ts`. Raccoglie i bivi sollevati da `sys.work` (`fallito:<motivo>`), applica il ritmo e chiama l'Attore (o estrae dal seme a grado 0).
+   - `tratti` e `opinioni`: aggiunti all'interfaccia `Individual` e gestiti direttamente nei metodi interni di `src/kernel/npc/society.ts` (`readPeople`, `repairSociety`).
+
+3. **T245i (Vite lunghe)**:
+   - `npc.reflect` e `npc.life`: implementati in `src/kernel/npc/life.ts`. Il calendario scandisce gli eventi di vita (nozze, nascite, decessi) durante `tick()` nella facciata.
+   - `cronaca`: array di righe di testo archiviato in `Individual`, gestito e compresso da `src/kernel/npc/life.ts`.
+   - Nessun file nuovo all'esterno del package.
+
+---
+
+### 10.4 Tabella di transizione «com'è → come sarà» (Guida passo per passo per T327)
+
+| Aspetto | Com'è oggi (Frammentato) | Come sarà con T327 (Coeso in `src/kernel/npc/`) |
+|---|---|---|
+| **Collocazione dei moduli** | Sparso su 5 file in `src/kernel/` (`society.ts`, `jobs.ts`, `ventures.ts`, `route.ts`, `plots.ts`) più 1.470 righe in `kernel.ts`. | Raggruppato nel package dedicato `src/kernel/npc/` con moduli interni specializzati e facciata unica `index.ts`. |
+| **Metodi in `kernel.ts`** | 65 metodi privati e pubblici in `kernel.ts` che gestiscono identità, routine, percorsi, squadre, bivi, dialoghi. | **0 metodi di comportamento NPC** in `kernel.ts`. Solo istanziazione di `NpcSubsystem` e chiamate ad alto livello (`npc.tick()`, `npc.talk()`). |
+| **Stato in `kernel.ts`** | 17 campi di stato privati (`ventureList`, `routes`, `sheeting`, `jobCache`, `talking`, `queuedSpeech`, ecc.). | **1 solo campo in `kernel.ts`**: `private npc: NpcSubsystem`. Tutto lo stato, timer e cache sono incapsulati dentro il sottosistema. |
+| **Proprietà di `world/people.json`** | Letto e scritto promiscuamente da `kernel.ts`, `society.ts`, `graph.ts`, `cards.ts`. | Posseduto **esclusivamente** da `src/kernel/npc/`. Gli altri moduli leggono dati o estratti immutabili via facciata (`npc.people()`, `npc.summary()`). |
+| **Proprietà di `world/ventures.json`** | Letto e scritto da `kernel.ts` e `ventures.ts`; manipolato durante il salvataggio dei piani. | Posseduto **esclusivamente** da `src/kernel/npc/ventures.ts`. Il salvataggio del file è gestito internamente al sottosistema. |
+| **Componenti ECS NPC** | `kernel.ts`, `sys.work`, `sys.wander` leggono e scrivono direttamente `identity`, `mind`, `attivita`, `mestiere`, `lavoro`, `carico`. | Il sottosistema NPC è il solo gestore TypeScript di questi componenti. Lua li manipola tramite le consuete API ECS. |
+| **Ciclo `society` ⇄ `wanderers`** | Dipendenza circolare bidirezionale: `society.ts` importa `wanderers.ts`, e `wanderers.ts` importa `society.ts`. | **Ciclo spezzato**: estrazione di `src/kernel/npc/names.ts` (puro) per nomi e generi. `society.ts` riceve `wandererId` come stringa opaca. |
+| **Host Bridge (`sandbox.ts`)** | `kernel.ts` implementa i metodi dell'`Host` (`path`, `find_tile`, `act`, `impresa`, `impresa_porta`) chiamando logiche interne. | `kernel.ts` delega ogni metodo dell'`Host` direttamente alla facciata: `this.npc.routeStep(...)`, `this.npc.ventureStep(...)`. |
+| **Navigazione e percorsi** | `route.ts` separato, ma `RouteCache`, `stepFree`, `walkable`, `findTile` implementati dentro `kernel.ts`. | A\* (`findRoute`), cache (`RouteCache`) e calcolo cammino su caselle e modelli interamente incapsulati in `src/kernel/npc/route.ts`. |
+| **Trame e dialoghi** | Divisi tra `plots.ts`, agenti del Concilio e metodi `plotTick`/`converse`/`talk` in `kernel.ts`. | Coordinamento dialoghi, orologio tappe e gestione missioni accentrati in `src/kernel/npc/dialogues.ts` e `plots.ts`. |
+| **Fuori vista (accounting)** | Logica complessa in `kernel.ts` (`awayTick`, `returnToPlace`) che manipola sia le imprese sia i depositi dei mestieri. | Incapsulato in `src/kernel/npc/accounting.ts`, attivato pulitamente da `npc.onPhaseChange()` e `npc.onChunkLoaded()`. |
+| **Estensioni T245g-i** | Rischio di creare nuovi moduli sparsi nella radice di `src/kernel/` e aggiungere altri metodi a `kernel.ts`. | Nuove funzionalità (JobDirector, bivi, cronaca, vita) alloggiano come moduli interni in `src/kernel/npc/` senza toccare `kernel.ts`. |
+
 ## Sicurezza
 
 Nessuna superficie nuova nasce da questo documento. Ne nascerebbero, con i task, queste, ciascuna con la sua voce nel registro al momento:
+
+- **Il confine `src/kernel/npc/` (T326, T327)**: nessuna superficie nuova; l'incapsulamento riduce la superficie d'attacco isolando l'accesso in scrittura a `world/people.json` e `world/ventures.json` e toglie la manipolazione diretta dei componenti ECS dell'NPC da parte di moduli esterni.
 
 - **`D`**: un modulo generato scrive su disco: tetto in byte per modulo e per universo, chiavi solo stringhe semplici, mai in
   `playerFiles` né `publicFiles`, nessun percorso (resta dentro un file del mondo, `paths.ts`).
