@@ -762,7 +762,7 @@ Il kernel è in console come `window.quine` (o `window.rune`) in singola e per i
   di sviluppo, `npx vite --port <n> --strictPort`, sempre nel turno `browser`. Un universo con `game.mode: 'multigiocatore'`, due
   schede con `?skip&offline&universo=<nome>&viandante=me` (il master, se `game.master` non dice altro) e `&viandante=<altro>`; la prima
   partenza del mondo richiede una ventina di secondi. Nel master `window.quine` è il kernel specchio e `window.session` il `ThinClient`; nel
-  giocatore `window.rune` è il `ThinClient`. Un dono: `await session.session.act({ t: 'dai', viandante: '<altro>', slot, quanti })`.
+  giocatore `window.rune` è il `ThinClient`. Un dono: `await session.session.act({ t: 'give', wanderer: '<altro>', slot, count })` (i messaggi in inglese dal contratto 0.5, ADR-0161).
 - **Agire**: `await k.interact()` è `E` (sul dispositivo o sullo scaffale più vicino), `k.clickStudio(x, y)` il clic sinistro su un punto;
   i pannelli arrivano come eventi (`k.bus.on('ui:showcase', …)`, `ui:screens`, `ui:graph`…). Per far vedere uno stato senza Gemini:
   `k.council.say(agente, tipo, testo, a, compito)` scrive nel registro, `k.faults.raise(chiave, messaggio)` apre un guasto.
