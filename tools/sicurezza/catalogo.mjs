@@ -779,4 +779,7 @@ export const UNCOVERED = {
   'V-023': 'chi paga si vede solo dentro il kernel: lo prova tests/sicurezza/secondo-audit.test.ts',
   'V-024': 'il costo di una chiamata si vede solo dentro il kernel: lo prova tests/sicurezza/secondo-audit.test.ts',
   'V-027': 'ciò che Lua scrive si vede solo dentro la sandbox: lo prova tests/sicurezza/secondo-audit.test.ts',
+  'V-030': 'le carte fatte a mano hanno l’interruttore spento nel progetto del kit: le prova il server di produzione vero, tests/sicurezza/serververo.test.ts',
+  'V-031': 'le carte fatte a mano hanno l’interruttore spento nel progetto del kit: le prova il server di produzione vero, tests/sicurezza/serververo.test.ts',
+  'V-032': 'il nome di una carta si prova sulle sue funzioni: tests/sicurezza/carte-mano.test.ts',
 };

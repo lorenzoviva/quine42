@@ -20,7 +20,9 @@ export const SERVER_FOLDERS = {
   generation: ['.generation', '.generazione'],
   /** What the key spent today (ADR-0099, `geminiProxy.ts`). */
   geminiSpend: ['.gemini-spend.json', '.spesa-gemini.json'],
-} as const;
+  /** The handmade cards, one file per account (ADR-0161, `handmade.ts`): born with the contract 0.4, it has no name of before. */
+  handmade: ['.handmade'],
+} as const satisfies Record<string, readonly [string, string?]>;
 
 export type ServerFolder = keyof typeof SERVER_FOLDERS;
 
@@ -29,11 +31,11 @@ export const serverName = (f: ServerFolder): string => SERVER_FOLDERS[f][0];
 
 const settled = new Set<string>();
 
-/** The path of a folder of the server under `universesDir`: the old one moved there first, if it is still there and the new one is not. */
+/** The path of a folder of the server under `universesDir`: the old one moved there first, if it is still there and the new one is not; a folder without an old name is just where it is. */
 export function serverPath(universesDir: string, f: ServerFolder): string {
-  const [now, before] = SERVER_FOLDERS[f];
+  const [now, before] = SERVER_FOLDERS[f] as readonly [string, string?];
   const to = path.join(universesDir, now);
-  if (settled.has(to)) return to;
+  if (settled.has(to) || !before) return to;
   const from = path.join(universesDir, before);
   try {
     if (!fs.existsSync(to) && fs.existsSync(from)) fs.renameSync(from, to);

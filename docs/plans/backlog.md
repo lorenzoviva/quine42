@@ -4490,7 +4490,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: sì, con `?skip&offline`: prendo una credenza, la porto altrove, ricarico; provo a tapparmi una porta; il pozzo non si prende. Catture nel commit.
 - Quando è fatto: commit su `task/T292`, ADR, riga in `#regole-effetti` e nell'elenco del manifest. Sicurezza: scrivi l'esito, tocca il protocollo e il validatore.
 
-### T293 · Le carte fatte a mano: forma, archivio, rotte, interruttore — `da fare` (dipende da T255)
+### T293 · Le carte fatte a mano: forma, archivio, rotte, interruttore — `fatto` (`7e6c4e68`) (dipende da T255)
 - Pipeline: claude · sforzo max · stima 3% · approvato · priorità 7
 - Sforzo: max.
 - Step: 41
@@ -4505,6 +4505,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Test: permessi (un altro account, nessun account, interruttore spento), tetti, programma che non termina, XML ostile, nome con HTML, un programma di altro `X.Y`; `tests/sicurezza/` con le voci nuove. Typecheck e suite intera con i loro turni. Versione del kernel se tocchi `src/kernel/` (ADR-0136).
 - Browser: non serve.
 - Quando è fatto: commit su `task/T293`, ADR, sezione in `#carte-crediti`, riga in `AGENTS.md`. Nell'esito le voci di sicurezza.
+- Esito: carte fatte a mano: forma (ADR-0161, kernel 0.4.2), archivio `universes/.handmade/` con tetti, rotte `/api/handmade` dietro `gate` e l'interruttore `laboratori` (spento), controllo del programma sul motore vero con tetti misurati sul seme, in produzione nel programma dei mondi in un processo a parte; sicurezza: V-030, V-031, V-032 aggiunte e chiuse; nomi inglesi `.handmade` e `check`/`checked` invece di `.carte-mano` (ADR-0153); aggiunta la firma dell'account; il kit dell'autore non prova le rotte (le prova `serververo.test.ts`); conflitti attesi con T308b su numero di ADR, versione del kernel e canale dei mondi; laboratori per i giocatori a T294.
 
 ### T294 · I tre laboratori per i giocatori: forkare e modificare — `da fare` (dipende da T293)
 - Pipeline: claude · sforzo high · stima 4% · approvato · browser · priorità 7
@@ -4813,7 +4814,7 @@ Nasce da T156: `dossier T156`. `integra T156` si è fermato su conflitti in `AGE
 - Esito: merge di task/T156 sul contratto 0.4: kernel 0.4.1, ADR di T156 rinumerato 0160 (un solo ADR per numero); prompt procedurale, voci per taglia e `ModelInfo.seeds` con i nomi inglesi di T307b/T308a (campi `class`/`size`/`name`/`cellar`/`time`, agenti `sculptor`/`artist`, `plan.structures`/`concept`, `prompts/agents/sculptor.md`, `soil="E"` nel prompt, nello scheletro e nel test); `modelTime` e `modelBox` restano entrambi; censimento del glossario rigenerato; typecheck, suite intera (2529 passati, 1 saltato) e build verdi nei loro turni; non portato `lab/banco/prompt.md` (ancora `suolo`, come gli altri strumenti di lab); sicurezza: nessuna superficie nuova.
 
 ### T320 · Lo Scultore: «almeno due piani raggiungibili a piedi» nei controlli del kernel — `da fare` (dipende da T319)
-- Pipeline: claude · sforzo high · stima 4% · approvato · priorità 3
+- Pipeline: gemini · sforzo high · stima 4% · approvato · priorità 3
 - Step: 32
 
 Nasce da T156 (`dossier T156`, `docs/pipeline/domande/T156.md`, risposta C scelta dall'orchestratore nell'autonomia del 06/11): i controlli del kernel garantiscono che un programma di struttura finisca e stia in piedi a ogni seme, non che la scala porti al piano di sopra; su Gemini 3.8 Flash è il difetto tipico (4 su 7). Le misure ci sono già in `lab/` (il banco di T182/T156, `lab/banco/gemini/giudizio.md`).

@@ -1,10 +1,12 @@
-// What `npm run serve` starts (T133, ADR-0112), built into dist-server/server.mjs by tools/produzione/costruisci.ts: the environment is all it reads.
+// What `npm run serve` starts (T133, ADR-0112), built into dist-server/server.mjs by tools/produzione/costruisci.ts: the environment is all it reads,
+// and `site/beta.json` for the labs' switch (ADR-0161; not there: off).
 // QUINE_PORTA (or PORT, as Cloud Run says it), QUINE_HOST (only this machine unless told: 0.0.0.0 or ::), QUINE_UNIVERSI (the universes' folder).
 
 import { mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createProductionServer, type ProductionServer } from './production';
+import { labsOn } from './betaGuide';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.dirname(here);
@@ -17,6 +19,8 @@ try {
     dist: path.join(root, 'dist'),
     worldProgram: path.join(here, 'mondo', 'mondo.mjs'),
     universesDir: path.resolve(root, env.QUINE_UNIVERSI?.trim() || 'universes'),
+    // The labs for the players (ADR-0161): `site/beta.json` as it is now; turning them on wants a restart (and a build, for the links).
+    labs: labsOn(root),
   });
 } catch (e) {
   console.error((e as Error).message);

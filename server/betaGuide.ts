@@ -18,14 +18,23 @@ export interface GuidePart {
 const guideFile = (root: string, id: GuidePart['id']) => path.join(root, 'docs', 'beta', `${id}.md`);
 const switchFile = (root: string) => path.join(root, 'site', 'beta.json');
 
-/** Off unless the file says exactly so: a file that is not there, or that does not read, shows nothing more. */
-export function secondPartOn(root: string): boolean {
+/** A switch of `site/beta.json`: off unless the file says exactly `true`. A file that is not there, or that does not read, turns nothing on. */
+function switchOn(root: string, name: 'laCorona' | 'laboratori'): boolean {
   try {
-    return (JSON.parse(fs.readFileSync(switchFile(root), 'utf8')) as { laCorona?: unknown }).laCorona === true;
+    return (JSON.parse(fs.readFileSync(switchFile(root), 'utf8')) as Record<string, unknown>)[name] === true;
   } catch {
     return false;
   }
 }
+
+/** Off unless the file says exactly so: a file that is not there, or that does not read, shows nothing more. */
+export const secondPartOn = (root: string): boolean => switchOn(root, 'laCorona');
+
+/**
+ * The labs for the players (T293, ADR-0161), a switch of their own, apart from the second part: off, the routes of the handmade cards refuse
+ * everyone and the production server does not serve `/lab`. The dev server reads it at every request, the production server when it starts.
+ */
+export const labsOn = (root: string): boolean => switchOn(root, 'laboratori');
 
 /** The parts to show, in order: a file that does not exist yet, or is empty, is not one. */
 export function guideParts(root: string): GuidePart[] {

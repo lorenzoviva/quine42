@@ -10,6 +10,12 @@ Guida per l'autore (ADR-0131). Nessuno dei due passi tocca il codice.
 - Il Markdown è quello delle notizie: titoli, paragrafi, elenchi, citazioni, codice, `**forte**`, `*corsivo*`, link. Niente immagini né tabelle; l'HTML si legge come testo.
 - Controllo che non ci sia: dopo la build, `grep -r "una frase della seconda parte" dist/` non trova nulla.
 
+## I laboratori per i giocatori
+
+- `site/beta.json` ha un secondo interruttore, `laboratori`, separato da `laCorona` (ADR-0161). Spento: le carte fatte a mano non si leggono né si salvano, `/lab` non si serve.
+- **Per accenderlo**: scrivi `{ "laCorona": …, "laboratori": true }`, poi build e **riavvio** del server (`npm run build`, `npm run serve`): il server di produzione lo legge quando parte. In `npm run dev` basta ricaricare la pagina.
+- Le pagine dei laboratori per i giocatori e i loro link arrivano con T294; finché non c'è, accenderlo apre solo le rotte delle carte.
+
 ## I video
 
 I file non stanno nel repository né in `dist/`, ma in una cartella del server.
