@@ -25,7 +25,8 @@ T307b è il secondo dei quattro contratti di ADR-0153: i valori della società e
 
 ## Conseguenze
 
-- Un universo della `0.1` o della `0.2` si apre portato con un commit («migrazione 0.2→0.3; …»), e il seme della `0.3` prende il posto dei file del seme che non aveva toccato (anche sotto il nome nuovo). `tests/migration-0.3.test.ts` lo prova su un universo sintetico della `0.2`, sui quattro di `lab/banco/universi-cloud/` (ancora `0.1` sul disco) e su `universes/valmora` se c'è.
+- Un universo della `0.1` o della `0.2` si apre portato con un commit («migrazione 0.2→0.3; …»), e il seme della `0.3` prende il posto dei file del seme che non aveva toccato (anche sotto il nome nuovo). `tests/migration-0.3.test.ts` lo prova su un universo sintetico della `0.2` (con 400 tick offline sul seme e i suoi mestieri al lavoro); la catena intera la provano `tests/migration-0.2.test.ts` (anche su `universes/valmora`, se c'è) e `tests/universi-cloud.test.ts` sui quattro universi di `lab/banco/universi-cloud/`, ancora `0.1` sul disco.
+- I mondi offline restano quelli di prima: il Cartografo locale (`MockAiModels`) scorre il catalogo nell'ordine degli id di prima della rinomina. Gli id delle entità invece cambiano (i moduli del seme si creano in un altro ordine), e con loro i sorteggi di `sys.wander`: un test che contava su un giro attorno a un letto per caso ha il letto fuori dalla linea.
 - Il grafo cambia costruzione (`GRAPH_BUILD` 4): il file si riscrive al primo caricamento.
 - I comandi dell'autore restano nelle sue parole (`npm run genera -- … --partita singola|multigiocatore`, `mjx-trace --forma sezioni`) e prendono anche quelle inglesi.
 - Sicurezza: nessuna superficie nuova; la lettura della modalità sul server accetta i due nomi, così nessun universo di molti non ancora portato si legge da solo.
