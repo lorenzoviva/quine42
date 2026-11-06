@@ -1,11 +1,13 @@
 # Il gioco in quattro lingue: il progetto (T239, Step 36)
 
-> Stato: **proposta**, da approvare voce per voce. Nessun codice del gioco è cambiato. I numeri vengono da
+> Stato: **proposta**, decisa in parte dall'autore il 05/11 (D34): la **C** del §2, l'**inglese come lingua interna** subito (§3, ADR-0153,
+> [`lingua-interna.md`](lingua-interna.md), step 42), le **rune in latino**, i **prompt in inglese** (P2, §4), il filtro della quarta parete su
+> mondo + italiano + inglese. Il resto (§5-§10) è il piano di T239, in Fase III. I numeri vengono da
 > [`lingue-censimento.md`](lingue-censimento.md), generato da `npx vite-node lab/scripts/censimento-lingue.ts`.
 > L'autore (04/11): è l'ultima operazione della Fase III, perché obbliga a quadruplicare ogni modifica che tocca la lingua.
 > Questo documento serve a farla una volta sola e a farla costare il meno possibile dopo.
 
-Lingue: **italiano** (la lingua interna, oggi l'unica), **inglese** (la versione di punta sui social), **francese**, **spagnolo**.
+Lingue: **italiano** (oggi l'unica lingua dei mondi; la lingua interna diventa l'inglese, ADR-0153), **inglese** (la versione di punta sui social), **francese**, **spagnolo**.
 Sono le quattro che l'autore sa verificare: la verifica umana è il collo di bottiglia, non la traduzione.
 
 ## 1. Ciò che c'è da tradurre, in cifre
@@ -23,8 +25,9 @@ Sono le quattro che l'autore sa verificare: la verifica umana è il collo di bot
 | Server (messaggi d'errore, configurazione) | ≈ 800 | `server/` | solo ciò che arriva a una pagina |
 
 Totale del censimento: **34.064 parole per lingua** (26.773 di testi, 7.291 di prompt), **102.192** per le tre lingue nuove.
-Ciò che **non** si traduce mai: **3.849 identificatori italiani** che il codice confronta per nome, **212 nomi di campo** su disco,
-**28.049 parole di commenti** (Lua e XML sono italiani per convenzione). Se si tolgono i prompt (§4) e i commenti, il giocatore legge
+Ciò che **non** si traduce per lingua: **3.849 identificatori italiani** che il codice confronta per nome, **212 nomi di campo** su disco,
+**28.049 parole di commenti** (Lua e XML). Con D34 passano **una volta** all'inglese, la lingua interna, uguale in ogni universo (T307a-T309,
+[`lingua-interna.md`](lingua-interna.md)): non si moltiplicano con le lingue. Se si tolgono i prompt (§4) e i commenti, il giocatore legge
 ≈ 21.000 parole: la cifra che conta per la verifica dell'autore.
 
 Il dato nuovo del censimento, il più importante: **83 espressioni regolari** leggono parole italiane in testi scritti dai modelli o dal
@@ -40,7 +43,7 @@ difficile del lavoro (§5).
 | B. Lingua per viandante | ogni testo del mondo generato in 4 lingue, o tradotto al volo per chi lo legge | ognuno legge la sua lingua | ×4 i token d'uscita del Concilio, o una chiamata in più per ogni battuta; nomi e dialoghi che divergono tra le lingue; il filtro della quarta parete su 4 testi; la regola 0 da verificare 4 volte |
 | C. Misto (proposta) | **A per il mondo, la lingua del viandante per l'interfaccia** | il menu, l'HUD, il sito, la lobby sono nella lingua di chi gioca; il mondo nella sua | due lingue a schermo per chi sceglie un mondo straniero (è anche il fascino di un mondo straniero) |
 
-**Proposta: C.** La lingua del mondo è una proprietà dell'universo come il seme e il tema: la sceglie il master alla Genesi, non cambia
+**Decisa: C** (D34). La lingua del mondo è una proprietà dell'universo come il seme e il tema: la sceglie il master alla Genesi, non cambia
 più (cambiarla vorrebbe dire riscrivere bibbia, persone, trame, ricordi: un altro universo, cioè un clone). La lingua dell'interfaccia
 è del viandante: dal browser (`navigator.language`) al primo avvio, poi dal profilo; non va mai al server se non come preferenza del
 profilo del sito. Le sessioni del sito mostrano la lingua di ogni universo, con una bandierina, così chi entra sa cosa leggerà.
@@ -50,19 +53,21 @@ costa solo ciò che l'Attore costa già, ma i ricordi dell'individuo restano nel
 
 ## 3. Identificatori invarianti, etichette localizzate
 
-**Regola proposta (da ADR):** l'italiano resta la **lingua interna**. Ogni identificatore che il codice, Lua, i manifest o il protocollo
-confrontano per nome resta com'è in ogni lingua; ciò che si mostra passa da un'etichetta. Nessun campo su disco si rinomina (coerente con
-ADR-0117: ciò che è su disco, sul filo o visibile a Lua non si rinomina senza migrazione).
+**Decisa (D34, ADR-0153):** la **lingua interna è l'inglese**, non l'italiano come proponeva questa pagina. Ogni identificatore che il
+codice, Lua, i manifest o il protocollo confrontano per nome è inglese e uguale in ogni lingua; ciò che si mostra passa da un'etichetta.
+Il passaggio dall'italiano di oggi si fa **una volta**, prima della beta, con le migrazioni di ADR-0117 (un contratto per passo, T307a-T308b):
+la tabella completa, dominio per dominio, è [`lingua-interna.md`](lingua-interna.md).
 
 I domini letti dal codice (tabella completa nel censimento): 12 classi, 6 taglie, 19 tipi di effetto, 4 momenti, 4 «dove», 14 attività,
 specie e generi, 2 usi dei suoni, 20 ambienti, 21 nomi di terreno, le azioni dei manifest, i token delle rune. In tutto ≈ 130 etichette
-fisse: un file per lingua, `src/i18n/<lingua>/ids.ts`, con un test che le chiavi siano le stesse nelle quattro.
+fisse: un file per lingua, `src/i18n/<lingua>/ids.ts`, con un test che le chiavi siano le stesse nelle quattro; le chiavi sono i nomi
+interni (inglesi) di `src/kernel/internalNames.ts`, l'etichetta italiana è quella di oggi.
 
 Casi particolari:
-- **Token delle rune** (`luce`, `fuoco`, `x`, `speed`): sono codice Lua che si esegue (regola 1 e il tappeto). Restano identici: il
-  nome della runa (`Sowilo`) e la sua descrizione sono testo del mondo e seguono la lingua dell'universo. Un giocatore inglese scrive
-  `fuoco` come scrive `speed`: una parola del codice, non una parola della sua lingua. È coerente col gioco («le rune sono token Lua veri»)
-  e va detto nel canone di ogni lingua.
+- **Token delle rune**: sono codice Lua che si esegue (regola 1 e il tappeto). I token di codice (`x`, `speed`) restano Lua; i token delle
+  **rune magiche** diventano **latini** (D34): `lux`, `ignis`, `aqua`, `terra`, `vita`, `scutum`, `ventus`, uguali in ogni lingua. Il nome
+  della runa (`Sowilo`) e la sua descrizione sono testo del mondo e seguono la lingua dell'universo. Un giocatore inglese scrive `ignis`
+  come uno italiano: una parola del codice e della magia, non della sua lingua. Va detto nel canone di ogni lingua.
 - **Il lessico** (`bonombo`, `macico`, `lerpio`, `pagosso`, `Ciok Ciok`): parole inventate, **uguali in tutte le lingue**. È un punto di
   forza: il filo comune dei mondi attraversa anche le lingue. Si traducono solo le spiegazioni e le usanze del file.
 - **Nomi dei terreni** (`prato`, `muro di pietra`): oggi sono insieme id e testo (`tileCode` del validatore li cerca per nome). Diventano
@@ -77,15 +82,15 @@ token stimati), più i frammenti dei moduli `agents/*.ts`. Tre alternative:
 
 | alternativa | costo una tantum | costo per richiesta | rischio |
 |---|---|---|---|
-| **P1. Prompt in italiano + blocco «Lingua»** (proposta) | ≈ 40 righe | + ≈ 30 token (una riga: «Scrivi ogni testo del mondo in inglese; gli id restano quelli dello schema») | gli esempi italiani dei prompt possono trapelare nell'uscita: lo misura il validatore (sotto) |
-| P2. Prompt in inglese come unica fonte | tradurre 13.800 parole (prompt + frammenti) e riverificare tutto il comportamento del Concilio | − 10/20 % di token d'ingresso (l'inglese si tokenizza meglio: **stima**, non misurata) | regressione su tutto ciò che il Concilio sa fare oggi; l'autore scrive i prompt in italiano |
+| P1. Prompt in italiano + blocco «Lingua» (proposta, non scelta) | ≈ 40 righe | + ≈ 30 token (una riga: «Scrivi ogni testo del mondo in inglese; gli id restano quelli dello schema») | gli esempi italiani dei prompt possono trapelare nell'uscita: lo misura il validatore (sotto) |
+| **P2. Prompt in inglese come unica fonte** (decisa, D34) | tradurre 13.800 parole (prompt + frammenti) e riverificare tutto il comportamento del Concilio | − 10/20 % di token d'ingresso (l'inglese si tokenizza meglio: **stima**, non misurata) | regressione su tutto ciò che il Concilio sa fare oggi; l'autore scrive i prompt in italiano |
 | P3. Prompt in 4 lingue | ×4 ogni modifica di prompt | nessuno | è la quadruplicazione che l'autore vuole evitare: scartata |
 
-**Proposta: P1**, con il **controllo della lingua nel validatore**: un rilevatore deterministico (parole funzionali delle quattro lingue,
+**Decisa: P2** (D34): i prompt diventano inglesi, con il blocco «Lingua» che dice in che lingua scrivere il testo del mondo (T310). Resta il
+**controllo della lingua nel validatore**, che con P2 conta ancora di più (un modello con i prompt inglesi scivola in inglese): un rilevatore deterministico (parole funzionali delle quattro lingue,
 lo stesso metodo di `isItalian` del censimento, spostato in `src/kernel/language.ts`) dice in che lingua è un testo generato; un testo
 lungo nella lingua sbagliata torna all'agente col motivo, come ogni invalido (regola 2). Gli esempi dei prompt restano italiani, ma
-il blocco «Lingua» dice che sono solo forme. Se dopo il lancio il rifiuto per lingua sbagliata supera una soglia misurata (es. 5 % delle
-richieste), si passa a P2 solo per l'agente che sbaglia.
+il blocco «Lingua» dice che sono solo forme. T310 misura con una prova piccola quanti testi del mondo escono in inglese per sbaglio.
 
 Il **costo in token** delle lingue nuove, per richiesta: P1 aggiunge ≈ 30 token d'ingresso su richieste di 1.000-3.000: **+1-3 %**. Le
 uscite in inglese sono probabilmente più corte in token di quelle italiane (stima del 10-20 %, da misurare con il conteggio dei token di
@@ -96,14 +101,14 @@ lingua per universo il Concilio scrive una volta sola.
 
 `META_RE` è italiano dalla prima all'ultima alternativa (9 espressioni, ≈ 70 alternative), come `glossaryBreak` («significa», «vuol dire»).
 In un universo inglese oggi **non filtra nulla**: è il rischio più grave di tutto il progetto, perché rompe una regola inviolabile senza
-errori. Proposta:
+errori. Decisa (D34): **la lingua del mondo, l'italiano e l'inglese**, come proposto qui sotto (T310).
 - `META_PATTERNS: Record<Lingua, string[]>` in `fourthwall.ts`, una tabella per lingua, scritta e verificata dall'autore (≈ 70 voci
   ciascuna); `metaBreak(text, words, lingua)`.
 - Si applica **la lingua dell'universo, l'italiano (i prompt sono italiani e i modelli possono ripeterne le parole) e l'inglese (i modelli
   scivolano in inglese)**; non tutte e quattro sempre, perché i falsi positivi tra lingue sono reali: `programa` (es.) e `programme` (fr.)
   sono anche il programma di una festa, `code` (fr./en.) è anche il codice civile, `server` in inglese è anche chi serve a tavola, `bug` è
   un insetto. Ogni tabella ha le sue eccezioni, come oggi ha `programm[ai]\b`.
-- I `COUNCIL_PRINCIPLES` restano italiani (P1), ma la frase finale («di' calcolatore, trasmissione, calciatore») è per lingua: ogni
+- I `COUNCIL_PRINCIPLES` diventano inglesi (P2), e la frase finale («di' calcolatore, trasmissione, calciatore») è per lingua: ogni
   lingua ha le sue parole vietate e le sue alternative. Un test per lingua: le frasi di prova di `tests/fourthwall.test.ts`, tradotte,
   vengono prese tutte, e venti frasi innocue per lingua non vengono prese.
 - Il lessico è inventato e uguale in ogni lingua: `lexiconWords` non cambia; cambiano solo le forme di `glossaryBreak`
@@ -183,10 +188,12 @@ un riassunto degli ADR principali (ADR-0009, 0021, 0025, 0036, 0072, 0101, 0110,
 
 ## Decisioni per l'autore
 
-1. Lingua per universo per il mondo e lingua del viandante per l'interfaccia (C, §2)? Oppure un'altra.
-2. L'italiano come lingua interna degli id, per sempre (§3)? In alternativa una migrazione degli id all'inglese: sconsigliata (≈ 3.800
-   id, 212 campi su disco, tutti gli universi salvati).
-3. I token delle rune restano italiani in ogni lingua (§3)?
-4. Prompt in italiano con il blocco «Lingua» (P1, §4), o il passaggio all'inglese (P2)?
-5. Quali lingue applica il filtro della quarta parete: quella del mondo + italiano + inglese (§4)?
-6. La documentazione per la comunità agentica: solo il sottoinsieme di ≈ 15.000 parole (§9)?
+Risposte del 05/11 (D34):
+
+1. **C** (§2): il mondo nella lingua del suo universo, l'interfaccia in quella del viandante.
+2. **L'inglese come lingua interna, subito**, prima della beta (§3): la migrazione degli id e dei campi la fanno T307a-T308b, un contratto
+   ciascuno (ADR-0153, [`lingua-interna.md`](lingua-interna.md)).
+3. **I token delle rune magiche in latino**, uguali in ogni lingua; i token di codice restano Lua (§3).
+4. **P2**: i prompt in inglese, con il blocco «Lingua» (§4, T310).
+5. Il filtro della quarta parete sulla **lingua del mondo + italiano + inglese** (§4, T310).
+6. La documentazione resta italiana, a parte il sottoinsieme in inglese del §9 (Fase III).
