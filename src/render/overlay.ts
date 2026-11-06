@@ -5,7 +5,7 @@
 import * as THREE from 'three';
 import type { Kernel } from '../kernel/kernel';
 import { ACTIVITY_ICON, type Activity } from '../kernel/society';
-import { applyGlitch, randomGlyph } from './glitch';
+import { applyGlitch, drawGlyphs, glitchPlan } from './glitch';
 
 const FONT = '"Cascadia Mono", "JetBrains Mono", Consolas, "DejaVu Sans Mono", monospace';
 
@@ -173,29 +173,13 @@ export class Overlay {
     ctx.restore();
   }
 
-  /** When the universe breaks: torn, shifted, flickering, with stray glyphs. */
-  glitch(source: HTMLCanvasElement, g: number): void {
-    if (g <= 0.01) return;
-    const ctx = this.ctx;
-    if (g > 0.05) {
-      const n = Math.floor(g * 40);
-      ctx.font = `24px ${FONT}`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      for (let i = 0; i < n; i++) {
-        const x = Math.random() * this.w, y = Math.random() * this.h;
-        ctx.fillStyle = '#000';
-        ctx.fillRect(x - 14, y - 14, 28, 28);
-        ctx.fillStyle = Math.random() < 0.5 ? '#ff2a6d' : '#05d9e8';
-        ctx.fillText(randomGlyph(), x, y + 1);
-      }
-    }
-    applyGlitch(ctx, source, g, this.dpr);
-  }
-
-  /** The wanderer's own sign of the broken world: a stray glyph instead of a label, sometimes. */
-  static noisy(text: string, g: number): string {
-    return g > 0.4 && Math.random() < 0.1 ? randomGlyph() : text;
+  /** When the universe breaks: torn, shifted, with stray glyphs; t is the renderer's clock (T316: the plan
+   *  follows the clock, never the frame), still is prefers-reduced-motion (only what does not move). */
+  glitch(source: HTMLCanvasElement, g: number, t: number, still: boolean): void {
+    if (!(g > 0.01)) return;
+    const plan = glitchPlan(t, g, still);
+    drawGlyphs(this.ctx, this.w, this.h, plan, FONT);
+    applyGlitch(this.ctx, source, g, this.dpr, plan);
   }
 
   /** For the walkability map: which cells near the wanderer block. */

@@ -59,7 +59,7 @@ html, body {
 #faults {
   position: absolute; top: var(--space-13); right: var(--space-13); width: min(var(--measure-377), 60vw);
   background: rgba(30, 4, 18, 0.94); border: var(--border-ink-thick); box-shadow: 4px 4px 0 var(--red); padding: var(--space-8) var(--space-13);
-  font-size: var(--text-13); animation: flicker 2.4s infinite;
+  font-size: var(--text-13); animation: faultpulse 3.2s ease-in-out infinite;
 }
 #faults .title { color: var(--red); font-family: var(--font-display); font-size: var(--text-21); letter-spacing: 0.05em; margin-bottom: var(--space-5); }
 #faults .fault { color: #ffb3ba; word-break: break-word; margin: var(--space-2) 0; }
@@ -209,6 +209,9 @@ input[type='checkbox'], input[type='radio'] { accent-color: var(--neon-pink); }
 
 @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
 @keyframes blink { 50% { opacity: 0.25; } }
+/* The panel of the faults breathes, it does not flicker (T316): a slow, small change of opacity. */
+@keyframes faultpulse { 50% { opacity: 0.82; } }
+@media (prefers-reduced-motion: reduce) { #faults { animation: none; } }
 @keyframes flicker { 0%, 92%, 100% { opacity: 1; } 94% { opacity: 0.6; } 96% { opacity: 0.9; } }
 
 /* --- Iterazione 2: hotbar, inventario, chat, Concilio, genesi --- */
