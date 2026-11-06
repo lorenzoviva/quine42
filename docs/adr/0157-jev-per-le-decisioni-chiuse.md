@@ -4,10 +4,11 @@ Data: 2026-11-06 · Stato: **proposto** (task T313 del backlog: il banco è fatt
 
 ## Contesto
 
-Il banco di T313 (`lab/banco/jev/`, `lab/scripts/jev-banco.ts`) ha chiesto a Jev di TypeSafe (un modello che non genera: stato e domande
+Il banco di T313 (`lab/banco/jev/`, `lab/scripts/jev-banco.ts`, con i conti riconciliati in T322) ha chiesto a Jev di TypeSafe (un modello che non genera: stato e domande
 tipizzate → scelte, livelli, probabilità; 0,042 $ al milione di token in ingresso, uscita gratis) e a Gemini 3.1 Flash-Lite le stesse
-domande su 411 casi presi dal gioco, dal banco delle strutture e dagli universi veri (206 decisioni, 113 di scultura, 92 della vita degli individui), più i prompt veri del gioco su metà delle decisioni. In sintesi (le tabelle sono nel
-README del banco):
+domande su 411 casi presi dal gioco, dal banco delle strutture e dagli universi veri (206 decisioni, 113 di scultura, 92 della vita degli individui), più i prompt veri del gioco su metà delle decisioni.
+La spesa del primo giro di benchmark (`giro-1`) è di **0,161 $ (0,16 $) per TypeSafe** (1568 chiamate, 3,84 M token in ingresso, perfettamente riconciliati con la dashboard di TypeSafe a 0,042 $/M) e **0,662 $ per Gemini** (598 righe); il registro intero, includendo il giro di stabilità e le prove, somma 0,196 $ per TypeSafe e 0,680 $ per Gemini.
+In sintesi (le tabelle sono nel README del banco):
 
 - **per decisione Jev costa 6-12 volte meno di Flash-Lite con le stesse domande e 25-40 volte meno dei prompt di oggi**, risponde in
   150-250 ms, dà la stessa risposta nel 99 % delle richieste ripetute;

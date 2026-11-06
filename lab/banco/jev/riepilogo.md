@@ -1,6 +1,19 @@
 # Il banco di Jev: riepilogo (generato da `--rapporto`, non a mano)
 
-Righe del registro: 2906. Spesi: TypeSafe **$0.1958** (2176 chiamate, 4662430 token in ingresso a 0.042 $ al milione), Gemini **$0.6797** (611 righe, 1694197 token in ingresso). Le righe `locale` sono i modelli locali del gioco (`MockAiModels`, e il filtro di parole per la quarta parete): costano zero.
+Righe del registro: 2906. Spesi nel registro: TypeSafe **$0.1958** (2176 chiamate, 4662430 token in ingresso a 0.042 $ al milione), Gemini **$0.6797** (611 righe, 1694197 token in ingresso). Le righe `locale` sono i modelli locali del gioco (`MockAiModels`, e il filtro di parole per la quarta parete): costano zero.
+
+## Spesa del banco e riconciliazione con la dashboard di TypeSafe
+
+Le tabelle di confronto sotto riportano il **primo giro di benchmark (`giro-1`)**:
+- **TypeSafe**: **$0.1613** (1568 chiamate, 3841142 token in ingresso a 0.042 $ al milione, uscita gratis a 0 $; di cui la variante principale `base` conta 2919758 token in ingresso, ~2.92 M);
+- **Gemini**: **$0.6621** (598 righe, 1650757 token in ingresso, calcolati dai prezzi ufficiali di `src/kernel/ai/prices.ts`).
+
+L'intero registro (`consumi.jsonl`, 2906 righe) comprende inoltre:
+- il giro di stabilità (`giro-1-ripeti`): 596 chiamate TypeSafe (802866 token in ingresso, $0.0337) per misurare la concordanza tra due esecuzioni identiche;
+- le prove preliminari (`prova-1`): 12 chiamate TypeSafe ($0.000774) e 13 righe Gemini ($0.0176).
+Totale complessivo del registro: TypeSafe **$0.1958** (2176 chiamate, 4662430 token in ingresso), Gemini **$0.6797** (611 righe, 1694197 token in ingresso).
+
+> **Riconciliazione con la dashboard di TypeSafe:** sulla dashboard l'autore vede **0,16 $ con circa 3 milioni di token in ingresso**. La cifra coincide esattamente con la fatturazione del primo giro `giro-1` ($0.1613 su 3.84 M token totali, o ~2.92 M per la sola variante `base`), al prezzo ufficiale documentato da TypeSafe di **0,042 $ al milione di token in ingresso** e token in uscita gratuiti (0 $). Non c'è alcun prezzo effettivo a ~0,053 $/M: l'apparente differenza nasceva solo dalla divisione approssimata a mente 0,16 $ / 3 M; infatti 0.161328 $ / 3841142 token fa esattamente **0.042 $/M**.
 
 «decisioni» conta le domande con una risposta giusta; «$ per 1000 decisioni» divide la spesa per tutte le domande fatte; i token in uscita di Gemini comprendono il ragionamento. Le varianti: `base` le domande del banco, `rovescio` le stesse con le opzioni in ordine inverso, `domande-2` domande più atomiche scritte dopo il primo giro, `oggi` i prompt veri del gioco (judgeAction, judgeCombination, judgeCraft, liaisonReply, la revisione della quarta parete) su Flash-Lite, `locale` i modelli locali del gioco.
 
