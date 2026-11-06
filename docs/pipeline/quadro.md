@@ -3,14 +3,14 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 06/11/2026, epoca 320 (gemini). Crediti: vedi `stato`.
+Aggiornato il 06/11/2026, epoca 322 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
-- **NPC coeso (autore, 06/11 sera):** basso accoppiamento, alta coesione dell'oggetto NPC. T326 integrato (`87255e5`, sezione 10 in `docs/design/comportamento-npc.md`, confine `src/kernel/npc/`, facciata `NpcSubsystem`) → T327 (claude extra, dopo T308b/T328) → T245g-i.
+- **NPC coeso (autore, 06/11 sera):** T326 integrato (`87255e5`, confine `src/kernel/npc/`, facciata `NpcSubsystem`) → **T327 pronto** (claude extra) → T245g-i.
 - **Carte fatte a mano (autore, 05/11, step 41):** T293 integrato (`7e6c4e6`, ADR-0161, kernel 0.4.2): archivio `universes/.handmade/`, rotte `/api/handmade` sotto `gate` e `laboratori`, controllo programmi, V-030..V-032 chiuse → T294 (laboratori giocatori) e T295 (carte prima della Genesi) sbloccati.
 - **Gemini (autore, 06/11 sera):** consumare Gemini finché orchestro con task non troppo difficili. T322, T323, T326 integrati; T320 (controllo 2 piani) integrato (`86acd5f`, kernel 0.4.3, ADR-0162) → T321 sbloccato.
-- **Inglese lingua interna (autore, 05/11 sera, D34 chiusa, step 42):** T306 (0.1.12) → T307a (0.2) → T307b (0.3) → T308a (0.4) integrati. **T308b (0.5) fatto**, conflitti con T319/T156 → **T328 integrare** (claude, p1, attende reset finestra 5h Claude, 22:00 UTC), poi T309 → T310.
+- **Inglese lingua interna (step 42):** T306 → T307a → T307b → T308a → **T308b (contratto 0.5.0, ADR-0163) integrato via T328** (`4537848`) → **T309 pronto** → T310.
 - **T319 e T156 integrati** (`7d9ee13`, kernel 0.4.1, ADR-0160): prompt procedurale Scultore sul contratto 0.4; allineato T156 a fatto nel backlog → sbloccati T88, T242, T303.
 - **Oggetti e mobili (autore, 05/11, step 40):** T288 in mano → T289 banco vestiti → T290 in attesa foto; T291 integrato via T301 (ADR-0150); T292 `takeable`.
 - **Tre vesti del sito per la beta (autore, 05/11):** T283 integrato (ADR-0145); D41 A: T284, T285, T286 rifatti da Claude v2 → T287. T233 dipende da T287.
@@ -22,9 +22,9 @@ Aggiornato il 06/11/2026, epoca 320 (gemini). Crediti: vedi `stato`.
 ## Pronti e priorità
 
 0. **Decisioni autore 04/11:** D32 SemVer `X.Y.Z`. Step 32: T260, T262 → T245a → T263/T245b → T245c-f. T265 prima della beta.
-1. **In corso:** — (in attesa del reset finestra 5h Claude per T328).
-2. **Pronti:** T328 (integrare T308b, claude p1, attende finestra 5h, reset 22:00 UTC); T325 (casi d'uso Jev, claude p2, max); T324 (immagini Jev, claude p3); T294 (laboratori giocatori, claude p3); T295 (carte prima della Genesi, claude p3); T315 (veste futuristica, p4); T321 (Scultore su Flash, claude p4); T281 (placeInside bloccati, p5, browser); T303 (misura Scenografo, claude p5); T288 (armi/attrezzi in mano, p6, browser); T242 (rapporto aureo, p33); T88 (generazione differita crediti che avanzano, p60).
-3. **Crediti (20:12 UTC):** Claude 5h 6 % (reset 22:00 UTC), settimana 60 % (reset 12/11); Gemini 5h 70 % (reset 23:14 UTC), settimana 86 %; agy 100 %; Argon fermo fino all'11/11.
+1. **In corso:** T325 (casi d'uso Jev, claude max).
+2. **Pronti:** T309 (inglese, dopo 0.5); T327 (NPC coeso, claude extra); T324 (immagini Jev, claude p3); T294 (laboratori giocatori, claude p3); T295 (carte prima della Genesi, claude p3); T315 (veste futuristica, p4); T321 (Scultore su Flash, claude p4); T281 (placeInside bloccati, p5, browser); T303 (misura Scenografo, claude p5); T288 (armi/attrezzi in mano, p6, browser); T242 (rapporto aureo, p33); T88 (generazione differita crediti che avanzano, p60).
+3. **Crediti (22:14 UTC):** Claude finestra 5h nuova (reset 02:59 UTC 07/11), settimana 60 % (reset 12/11); Gemini 5h 69 % (reset 23:14 UTC), settimana 86 %; agy 100 %; Argon fermo fino all'11/11.
 
 ## Attese dall'autore
 
@@ -38,5 +38,5 @@ Aggiornato il 06/11/2026, epoca 320 (gemini). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **320 (gemini):** T320 integrato (`86acd5f`, kernel 0.4.3, ADR-0162); sbloccato T321; allineato T156 a `fatto` nel backlog (sbloccati T88, T242, T303); T328 pronto attende reset finestra 5h Claude (22:00 UTC).
-- **319 (gemini):** rotazione contesto; T320 in corso su Gemini (Flash high, Scultore 2 piani); T328 attende finestra 5h Claude.
+- **322 (claude):** T328 e T308b integrati (`4537848`, contratto 0.5.0, ADR-0163); sbloccati T309 e T327; T325 in corso.
+- **320 (gemini):** T320 integrato (`86acd5f`, kernel 0.4.3, ADR-0162); sbloccati T321, T88, T242, T303.
