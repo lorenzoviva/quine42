@@ -1,7 +1,7 @@
 {
   "quarta parete (metaBreak e glossaryBreak su ogni testo del mondo)": "ok",
   "società (repairSociety) e trame (reviewPlot)": "ok",
-  "moduli nuovi (25: parseManifest, checkLua, apiErrors, probe, validateForged)": "ok",
+  "moduli nuovi (34: parseManifest, checkLua, apiErrors, probe, validateForged)": "ok",
   "piani dei luoghi (19, validatePlan)": "ok",
   "ambienti (21, validateLayout sulle bozze dei 19 luoghi)": "ok",
   "rune del canone (12, validateNewRune contro le altre 18)": "ok",

@@ -1,0 +1,87 @@
+{
+  "id": "lavoro.barista",
+  "name": "Il bar",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi sta dietro il bancone: la macchina dell'espresso accesa all'alba, tazzine fino a sera, il sospeso per chi passa.",
+  "mestieri": [
+    {
+      "id": "barista",
+      "nomi": [
+        "barista",
+        "barman",
+        "caffettiere",
+        "caffettiera",
+        "oste",
+        "ostessa",
+        "cameriere",
+        "cameriera",
+        "locandiera",
+        "locandiere"
+      ],
+      "posto": {
+        "entita": "bar"
+      },
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "usa",
+            "dove": "entita:bar",
+            "azione": "vapore",
+            "durata": 8,
+            "posa": "cucina",
+            "dice": "La macchina è calda: chi è il primo?"
+          },
+          {
+            "fa": "produci",
+            "oggetto": "item.tazzina-caffe",
+            "quante": 2,
+            "durata": 15,
+            "posa": "cucina"
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "produci",
+            "oggetto": "item.tazzina-caffe",
+            "quante": 3,
+            "durata": 15,
+            "posa": "cucina"
+          },
+          {
+            "fa": "chiacchiera",
+            "durata": 40
+          }
+        ],
+        "sera": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "porta",
+            "oggetto": "item.tazzina-caffe",
+            "dove": "piazza",
+            "dice": "Un caffè sospeso, per chi viene dopo."
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}

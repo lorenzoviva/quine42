@@ -1,0 +1,85 @@
+{
+  "id": "lavoro.medico",
+  "name": "I laboratori criogenici",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi veglia le capsule: i registri letti sotto la brina, il siero preparato, i dormienti controllati uno a uno.",
+  "mestieri": [
+    {
+      "id": "medico",
+      "nomi": [
+        "medico criogenico",
+        "medica criogenica",
+        "infermiera criogenica",
+        "infermiere criogenico",
+        "medico",
+        "medica",
+        "infermiera",
+        "infermiere",
+        "dottoressa",
+        "dottore"
+      ],
+      "posto": {
+        "entita": "criogenia"
+      },
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "usa",
+            "dove": "entita:criogenia",
+            "azione": "registro",
+            "durata": 10,
+            "posa": "legge",
+            "dice": "Freddo stabile. Dormono tutti."
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "produci",
+            "oggetto": "item.siero-criogenico",
+            "quante": 1,
+            "durata": 40,
+            "posa": "lavora"
+          },
+          {
+            "fa": "aspetta",
+            "durata": 30,
+            "posa": "lavora"
+          },
+          {
+            "fa": "aspetta",
+            "durata": 20,
+            "posa": "mangia"
+          }
+        ],
+        "sera": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "porta",
+            "oggetto": "item.siero-criogenico",
+            "dove": "piazza"
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}

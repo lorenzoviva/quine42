@@ -1,0 +1,86 @@
+{
+  "id": "lavoro.caldaista",
+  "name": "Le caldaie",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi tiene vive le caldaie: le ascolta all'alba, scarica la pressione quando fischia, ribatte le lamiere allentate.",
+  "mestieri": [
+    {
+      "id": "caldaista",
+      "nomi": [
+        "caldaista",
+        "caldaisti",
+        "fuochista",
+        "fochista",
+        "apprendista caldaista",
+        "capo della gilda dei caldaisti",
+        "fuochista della caldaia della pesa",
+        "caldaista delle officine del canale"
+      ],
+      "posto": {
+        "entita": "caldaia"
+      },
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "usa",
+            "dove": "entita:caldaia",
+            "azione": "ascolta",
+            "durata": 10,
+            "posa": "lavora",
+            "dice": "Sentiamo come respira, stamattina."
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "usa",
+            "dove": "entita:caldaia",
+            "azione": "sfiata",
+            "durata": 10,
+            "posa": "lavora"
+          },
+          {
+            "fa": "produci",
+            "oggetto": "item.chiodi",
+            "quante": 2,
+            "durata": 25,
+            "posa": "lavora",
+            "dice": "Una lamiera ballerina: ci vuole un ribattino."
+          },
+          {
+            "fa": "aspetta",
+            "durata": 20,
+            "posa": "mangia"
+          }
+        ],
+        "sera": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "porta",
+            "oggetto": "item.chiodi",
+            "dove": "piazza"
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}

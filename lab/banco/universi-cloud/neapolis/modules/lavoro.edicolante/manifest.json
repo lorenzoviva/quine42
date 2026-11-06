@@ -1,0 +1,72 @@
+{
+  "id": "lavoro.edicolante",
+  "name": "L'edicola",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi apre l'edicola: i giornali sfogliati all'alba, le figurine per i ragazzi, le chiacchiere del quartiere.",
+  "mestieri": [
+    {
+      "id": "edicolante",
+      "nomi": [
+        "edicolante",
+        "giornalaio",
+        "giornalaia",
+        "tabaccaio",
+        "tabaccaia",
+        "commessa",
+        "commesso",
+        "negoziante",
+        "bottegaio",
+        "bottegaia"
+      ],
+      "posto": {
+        "entita": "edicola"
+      },
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "usa",
+            "dove": "entita:edicola",
+            "azione": "sfoglia",
+            "durata": 10,
+            "posa": "legge",
+            "dice": "Vediamo che dicono, oggi."
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "aspetta",
+            "durata": 120,
+            "posa": "commercia"
+          },
+          {
+            "fa": "chiacchiera",
+            "durata": 60
+          }
+        ],
+        "sera": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}

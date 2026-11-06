@@ -1,0 +1,67 @@
+{
+  "id": "lavoro.guardia",
+  "name": "Il vigile",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi tiene in ordine le strade: il giro del quartiere, il cantiere, la piazza, una multa e due chiacchiere.",
+  "mestieri": [
+    {
+      "id": "guardia",
+      "nomi": [
+        "vigile",
+        "vigile urbano",
+        "vigile urbana",
+        "vigilessa",
+        "agente",
+        "poliziotto",
+        "poliziotta",
+        "carabiniere",
+        "guardia"
+      ],
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "pattuglia",
+            "percorso": [
+              "lavoro",
+              "piazza"
+            ]
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "pattuglia",
+            "percorso": [
+              "piazza",
+              "lavoro",
+              "casella:p",
+              "entita:cantiere"
+            ]
+          }
+        ],
+        "sera": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,12 +1,12 @@
 {
  "quartaParete": {
-  "files": 106,
-  "texts": 5132,
+  "files": 118,
+  "texts": 5591,
   "breaks": []
  },
  "moduli": {
   "lua": 25,
-  "dati": 4,
+  "dati": 16,
   "errori": 0,
   "avvisi": 0
  },

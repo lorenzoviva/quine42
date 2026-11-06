@@ -1,0 +1,64 @@
+{
+  "id": "lavoro.venditore",
+  "name": "Le bancarelle",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi vende sotto i piloni: la bancarella aperta all'alba, le chiacchiere e i prezzi fino a sera.",
+  "mestieri": [
+    {
+      "id": "venditore",
+      "nomi": [
+        "venditrice",
+        "venditore",
+        "venditrice di rune false",
+        "ambulante",
+        "mercante",
+        "bancarellaia",
+        "bancarellaio"
+      ],
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "aspetta",
+            "durata": 60,
+            "posa": "commercia",
+            "dice": "Roba buona, roba vera: guardate pure."
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "aspetta",
+            "durata": 120,
+            "posa": "commercia"
+          },
+          {
+            "fa": "chiacchiera",
+            "durata": 60
+          }
+        ],
+        "sera": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}

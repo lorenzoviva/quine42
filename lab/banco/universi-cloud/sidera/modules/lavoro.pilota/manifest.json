@@ -1,0 +1,67 @@
+{
+  "id": "lavoro.pilota",
+  "name": "Le piste",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi vola: le batterie dei droni controllate all'alba, il giro delle piste e dei tetti, la sera a terra.",
+  "mestieri": [
+    {
+      "id": "pilota",
+      "nomi": [
+        "pilota",
+        "pilota di navette",
+        "pilota di droni",
+        "pilota di droni da ricognizione",
+        "collaudatore",
+        "collaudatrice"
+      ],
+      "posto": {
+        "casella": "e"
+      },
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "usa",
+            "dove": "entita:drone",
+            "azione": "stato",
+            "durata": 8,
+            "posa": "lavora",
+            "dice": "Spia azzurra: si vola."
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "pattuglia",
+            "percorso": [
+              "lavoro",
+              "casella:e",
+              "piazza"
+            ]
+          }
+        ],
+        "sera": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}

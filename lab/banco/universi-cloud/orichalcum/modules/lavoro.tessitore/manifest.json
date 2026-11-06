@@ -1,0 +1,90 @@
+{
+  "id": "lavoro.tessitore",
+  "name": "I telai",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi tesse al capannone: i telai a vapore dalla mattina, teli di canapa per vele, sacchi e grembiuli.",
+  "items": [
+    {
+      "id": "item.telo-canapa",
+      "name": "Telo di canapa",
+      "description": "Un telo di canapa tessuto al capannone dei telai, fitto e robusto come una vela.",
+      "category": "materiale",
+      "weight": 0.6,
+      "stack": 10,
+      "tags": [
+        "materiale",
+        "stoffa"
+      ]
+    }
+  ],
+  "mestieri": [
+    {
+      "id": "tessitore",
+      "nomi": [
+        "tessitrice",
+        "tessitore",
+        "telaista",
+        "filatrice",
+        "filatore",
+        "sarta",
+        "sarto",
+        "tintore",
+        "tintora"
+      ],
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "produci",
+            "oggetto": "item.telo-canapa",
+            "quante": 1,
+            "durata": 30,
+            "posa": "lavora",
+            "dice": "Navetta carica: in fila, si canta."
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "produci",
+            "oggetto": "item.telo-canapa",
+            "quante": 2,
+            "durata": 30,
+            "posa": "lavora"
+          },
+          {
+            "fa": "aspetta",
+            "durata": 20,
+            "posa": "mangia"
+          }
+        ],
+        "sera": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "porta",
+            "oggetto": "item.telo-canapa",
+            "dove": "piazza"
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "id": "lavoro.minatore",
+  "name": "La gola dei cristalli",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi stacca cristalli dagli speroni: la polvere raccolta nei sacchi, la sera al deposito.",
+  "mestieri": [
+    {
+      "id": "minatore",
+      "nomi": [
+        "minatore",
+        "minatrice",
+        "minatore di cristalli",
+        "minatrice di cristalli",
+        "cristallaio",
+        "cristallaia",
+        "cavatore",
+        "cavatrice"
+      ],
+      "posto": {
+        "casella": "r"
+      },
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "raccogli",
+            "casella": "r",
+            "oggetto": "item.polvere-cristallo",
+            "lascia": "r",
+            "quante": 1,
+            "durata": 20,
+            "posa": "zappa",
+            "dice": "Lo sperone canta: buon segno."
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "raccogli",
+            "casella": "r",
+            "oggetto": "item.polvere-cristallo",
+            "lascia": "r",
+            "quante": 2,
+            "durata": 20,
+            "posa": "zappa"
+          },
+          {
+            "fa": "aspetta",
+            "durata": 20,
+            "posa": "mangia"
+          }
+        ],
+        "sera": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "porta",
+            "oggetto": "item.polvere-cristallo",
+            "dove": "piazza"
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}

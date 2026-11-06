@@ -1,0 +1,79 @@
+{
+  "id": "lavoro.cuoco",
+  "name": "La trattoria",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi cucina per il vicolo: il ragù che sobbolle dalla mattina, l'assaggio, le porzioni per chi passa.",
+  "mestieri": [
+    {
+      "id": "cuoco",
+      "nomi": [
+        "cuoca",
+        "cuoco",
+        "cuoca della trattoria",
+        "cuoco della trattoria",
+        "trattore",
+        "trattora",
+        "chef",
+        "friggitore",
+        "friggitrice"
+      ],
+      "posto": {
+        "entita": "cucina"
+      },
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "usa",
+            "dove": "entita:cucina",
+            "azione": "assaggia",
+            "durata": 8,
+            "posa": "cucina",
+            "dice": "Il ragù vuole tempo, come le cose buone."
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "produci",
+            "oggetto": "item.ragu",
+            "quante": 2,
+            "durata": 30,
+            "posa": "cucina"
+          },
+          {
+            "fa": "aspetta",
+            "durata": 20,
+            "posa": "mangia"
+          }
+        ],
+        "sera": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "porta",
+            "oggetto": "item.ragu",
+            "dove": "piazza"
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "id": "lavoro.elettricista",
+  "name": "I cavi del quartiere",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi tiene accesa la città: i contatori all'alba, le centraline e i fusibili, il cantiere della linea nuova.",
+  "mestieri": [
+    {
+      "id": "elettricista",
+      "nomi": [
+        "elettricista",
+        "elettricista comunale",
+        "tecnica della centralina",
+        "tecnico della centralina",
+        "tecnica",
+        "tecnico",
+        "installatore",
+        "installatrice"
+      ],
+      "posto": {
+        "entita": "elettricita"
+      },
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "usa",
+            "dove": "entita:elettricita",
+            "azione": "contatori",
+            "durata": 10,
+            "posa": "lavora",
+            "dice": "Speriamo che stanotte non sia saltato niente."
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "produci",
+            "oggetto": "item.fusibile",
+            "quante": 2,
+            "durata": 25,
+            "posa": "lavora"
+          },
+          {
+            "fa": "aspetta",
+            "durata": 20,
+            "posa": "mangia"
+          }
+        ],
+        "sera": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "porta",
+            "oggetto": "item.fusibile",
+            "dove": "piazza"
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}

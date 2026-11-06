@@ -1,0 +1,73 @@
+{
+  "id": "lavoro.ferroviere",
+  "name": "La linea alta",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi fa andare i treni: i freni dei carrelli all'alba, il giro dei binari e degli scambi, la sera alla piazza.",
+  "mestieri": [
+    {
+      "id": "ferroviere",
+      "nomi": [
+        "ferroviere",
+        "ferroviera",
+        "macchinista",
+        "macchinista della linea alta",
+        "scambista",
+        "scambista della rimessa",
+        "frenatore",
+        "frenatrice",
+        "frenatore dei vagoni del minerale",
+        "manovratore",
+        "manovratrice",
+        "capotreno"
+      ],
+      "posto": {
+        "casella": "x"
+      },
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "usa",
+            "dove": "entita:carrello",
+            "azione": "freno",
+            "durata": 8,
+            "posa": "lavora",
+            "dice": "Freni provati: si può partire."
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "pattuglia",
+            "percorso": [
+              "lavoro",
+              "casella:x",
+              "piazza"
+            ]
+          }
+        ],
+        "sera": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,133 @@
+{
+  "id": "lavoro.fabbro",
+  "name": "La colata",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi lavora alle fonderie: al forno dalla mattina, travi di ghisa e ribattini per chi costruisce, la sera al deposito della piazza.",
+  "items": [
+    {
+      "id": "item.ciocco",
+      "name": "Trave di ghisa",
+      "description": "Una trave di ghisa colata alle fonderie, con i fori già pronti per i ribattini. Regge un piano intero.",
+      "category": "materiale",
+      "weight": 3,
+      "stack": 10,
+      "tags": [
+        "materiale",
+        "ghisa",
+        "costruzione"
+      ]
+    },
+    {
+      "id": "item.chiodi",
+      "name": "Ribattini d'ottone",
+      "description": "Una manciata di ribattini d'ottone, ancora tiepidi di forgia: tengono insieme travi e lamiere.",
+      "category": "materiale",
+      "weight": 0.2,
+      "stack": 30,
+      "tags": [
+        "materiale",
+        "ottone",
+        "costruzione"
+      ]
+    }
+  ],
+  "mestieri": [
+    {
+      "id": "fabbro",
+      "nomi": [
+        "colatrice",
+        "colatore",
+        "fonditrice",
+        "fonditore",
+        "colatrice d oricalco",
+        "colatore d oricalco",
+        "capo forno",
+        "capo forno della fonderia vecchia",
+        "direttore delle fonderie ramelli",
+        "direttrice delle fonderie ramelli",
+        "fabbro",
+        "fabbra",
+        "ramaio",
+        "ramaia"
+      ],
+      "posto": {
+        "entita": "fonderia"
+      },
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "usa",
+            "dove": "entita:fonderia",
+            "azione": "alimenta",
+            "durata": 10,
+            "posa": "lavora",
+            "dice": "Mantice, ragazzi: il forno deve salire."
+          },
+          {
+            "fa": "produci",
+            "oggetto": "item.ciocco",
+            "quante": 1,
+            "durata": 30,
+            "posa": "lavora"
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "produci",
+            "oggetto": "item.ciocco",
+            "quante": 2,
+            "durata": 30,
+            "posa": "lavora",
+            "dice": "Si cola: tutti indietro di due passi."
+          },
+          {
+            "fa": "produci",
+            "oggetto": "item.chiodi",
+            "quante": 2,
+            "durata": 20,
+            "posa": "lavora"
+          },
+          {
+            "fa": "aspetta",
+            "durata": 20,
+            "posa": "mangia"
+          }
+        ],
+        "sera": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "porta",
+            "oggetto": "item.ciocco",
+            "dove": "piazza",
+            "dice": "Travi e ribattini, per chi deve tirare su un muro."
+          },
+          {
+            "fa": "porta",
+            "oggetto": "item.chiodi",
+            "dove": "piazza"
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}

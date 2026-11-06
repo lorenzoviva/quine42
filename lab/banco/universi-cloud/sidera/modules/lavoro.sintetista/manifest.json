@@ -1,0 +1,74 @@
+{
+  "id": "lavoro.sintetista",
+  "name": "Il sintetizzatore",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi fa i metamateriali: il braccio del sintetizzatore guardato all'alba, le lastre tirate fuori una alla volta.",
+  "mestieri": [
+    {
+      "id": "sintetista",
+      "nomi": [
+        "sintetista",
+        "sintetista di metamateriali",
+        "chimica",
+        "chimico"
+      ],
+      "posto": {
+        "entita": "sintesi"
+      },
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "usa",
+            "dove": "entita:sintesi",
+            "azione": "guarda",
+            "durata": 10,
+            "posa": "lavora",
+            "dice": "Il braccio è fermo: si comincia."
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "produci",
+            "oggetto": "item.metamateriale",
+            "quante": 2,
+            "durata": 40,
+            "posa": "lavora"
+          },
+          {
+            "fa": "aspetta",
+            "durata": 20,
+            "posa": "mangia"
+          }
+        ],
+        "sera": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "porta",
+            "oggetto": "item.metamateriale",
+            "dove": "piazza"
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}

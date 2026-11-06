@@ -1,0 +1,65 @@
+{
+  "id": "lavoro.corriere",
+  "name": "Le consegne",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi porta pacchi e messaggi da un livello all'altro: la piazza, le passerelle, le scale, e di nuovo la piazza.",
+  "mestieri": [
+    {
+      "id": "corriere",
+      "nomi": [
+        "corriere",
+        "corriera",
+        "corriere di rune",
+        "corriere ragazzo",
+        "fattorino",
+        "fattorina",
+        "messaggero",
+        "messaggera"
+      ],
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "aspetta",
+            "durata": 20,
+            "posa": "chiacchiera",
+            "dice": "Qualcosa da portare?"
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "pattuglia",
+            "percorso": [
+              "piazza",
+              "lavoro",
+              "casella:p",
+              "casa"
+            ]
+          }
+        ],
+        "sera": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -14,8 +14,11 @@ export const LUA_MODULES = [
   'obj.distributore', 'obj.espresso', 'obj.scrivania', 'obj.banco-officina', 'obj.quadro-elettrico', 'obj.edicola', 'obj.transenna', 'obj.cucina-trattoria', 'obj.lampione', 'obj.motorino', 'obj.cabina-telefonica', 'obj.cassonetto',
   'sys.quartiere',
 ];
-/** I moduli di dati e il generatore della città. */
-export const DATA_MODULES = ['items.neapolis', 'magic.runes', 'world.terrain', 'world.layouts'];
+/** I moduli di dati e il generatore della città; i programmi dei mestieri (T298). */
+export const DATA_MODULES = [
+  'items.neapolis', 'magic.runes', 'world.terrain', 'world.layouts',
+  ...['autista', 'barista', 'cuoco', 'edicolante', 'elettricista', 'fabbro', 'giornalista', 'guardia', 'impiegato', 'medico', 'pizzaiolo', 'portuale'].map((m) => `lavoro.${m}`),
+];
 
 export interface ModuleReport {
   id: string;

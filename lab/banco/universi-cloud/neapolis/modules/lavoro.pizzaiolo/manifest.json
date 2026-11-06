@@ -1,0 +1,77 @@
+{
+  "id": "lavoro.pizzaiolo",
+  "name": "Il forno a legna",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi impasta e inforna: la pasta che lievita dall'alba, le pizze a portafoglio per la strada.",
+  "mestieri": [
+    {
+      "id": "pizzaiolo",
+      "nomi": [
+        "pizzaiolo",
+        "pizzaiola",
+        "fornaio",
+        "fornaia",
+        "panettiere",
+        "panettiera",
+        "pasticciere",
+        "pasticciera"
+      ],
+      "posto": {
+        "entita": "cucina"
+      },
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "aspetta",
+            "durata": 30,
+            "posa": "cucina",
+            "dice": "L'impasto è pronto quando dice lui."
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "produci",
+            "oggetto": "item.pizza",
+            "quante": 3,
+            "durata": 20,
+            "posa": "cucina"
+          },
+          {
+            "fa": "aspetta",
+            "durata": 20,
+            "posa": "mangia"
+          }
+        ],
+        "sera": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "porta",
+            "oggetto": "item.pizza",
+            "dove": "piazza",
+            "dice": "Pizza a portafoglio, calda calda!"
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}

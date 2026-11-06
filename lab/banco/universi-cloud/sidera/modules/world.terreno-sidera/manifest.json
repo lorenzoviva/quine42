@@ -173,6 +173,26 @@
       "solid": false,
       "layer": "ground",
       "speed": 1.1
+    },
+    "u": {
+      "name": "vasca seminata",
+      "description": "una vasca idroponica appena seminata, con i semi sotto il velo di soluzione: tra un giorno germogliano i frutti",
+      "color": "#3f7a5a",
+      "solid": false,
+      "layer": "ground",
+      "speed": 0.8,
+      "matura": {
+        "dopo": 1,
+        "in": "y"
+      }
+    },
+    "y": {
+      "name": "vasca in frutto",
+      "description": "una vasca carica di frutti di vetro ambrati, pronti da staccare",
+      "color": "#c9a54a",
+      "solid": false,
+      "layer": "ground",
+      "speed": 0.7
     }
   },
   "commonHouse": "moduli abitativi di lega bianca, bassi e tondi, con gli oblò accesi e le luci di posizione sul tetto"

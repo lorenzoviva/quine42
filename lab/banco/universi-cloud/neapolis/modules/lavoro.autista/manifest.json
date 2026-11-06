@@ -1,0 +1,65 @@
+{
+  "id": "lavoro.autista",
+  "name": "Le corse",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi porta la gente in giro: il tram sui binari, il taxi al parcheggio, il giro della città e ritorno.",
+  "mestieri": [
+    {
+      "id": "autista",
+      "nomi": [
+        "tranviere",
+        "tranviera",
+        "tassista",
+        "autista",
+        "conducente",
+        "autista del tram",
+        "bigliettaio",
+        "bigliettaia"
+      ],
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "aspetta",
+            "durata": 20,
+            "posa": "lavora",
+            "dice": "Si parte: chi sale, sale."
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "pattuglia",
+            "percorso": [
+              "lavoro",
+              "piazza",
+              "casella:e",
+              "casella:a"
+            ]
+          }
+        ],
+        "sera": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}

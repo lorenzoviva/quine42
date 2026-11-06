@@ -1,0 +1,65 @@
+{
+  "id": "lavoro.guardia",
+  "name": "La guardia del porto",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi sorveglia moli e magazzini: il giro dei bastimenti e delle merci, e una parola per tutti.",
+  "mestieri": [
+    {
+      "id": "guardia",
+      "nomi": [
+        "doganiere",
+        "doganiera",
+        "doganiere del porto",
+        "guardiano",
+        "guardiana",
+        "gendarme",
+        "sorvegliante",
+        "guardia"
+      ],
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "pattuglia",
+            "percorso": [
+              "lavoro",
+              "piazza"
+            ]
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "pattuglia",
+            "percorso": [
+              "piazza",
+              "lavoro",
+              "casella:p"
+            ]
+          }
+        ],
+        "sera": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}

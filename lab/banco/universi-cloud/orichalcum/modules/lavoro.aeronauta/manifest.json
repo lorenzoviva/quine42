@@ -1,0 +1,73 @@
+{
+  "id": "lavoro.aeronauta",
+  "name": "La torre d'ormeggio",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi vive dei dirigibili: il vento letto dalla torre, le cime e gli attracchi, il giro della banchina.",
+  "mestieri": [
+    {
+      "id": "aeronauta",
+      "nomi": [
+        "aeronauta",
+        "ormeggiatore",
+        "ormeggiatrice",
+        "ormeggiatore della torre",
+        "osservatrice",
+        "osservatore",
+        "osservatrice del vento della torre",
+        "pilota di dirigibile",
+        "timoniere",
+        "timoniera"
+      ],
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "aspetta",
+            "durata": 30,
+            "posa": "lavora",
+            "dice": "Vento da levante, tre nodi: si vola."
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "usa",
+            "dove": "entita:ormeggio",
+            "azione": "osserva",
+            "durata": 10,
+            "posa": "lavora"
+          },
+          {
+            "fa": "pattuglia",
+            "percorso": [
+              "lavoro",
+              "piazza",
+              "casella:p"
+            ]
+          }
+        ],
+        "sera": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}

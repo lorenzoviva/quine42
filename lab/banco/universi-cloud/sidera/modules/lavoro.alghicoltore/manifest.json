@@ -1,0 +1,96 @@
+{
+  "id": "lavoro.alghicoltore",
+  "name": "Le alghe della costa",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi vive del canale: le reti delle alghe tirate su dalla mattina, la sera al deposito della piazza.",
+  "items": [
+    {
+      "id": "item.alghe",
+      "name": "Alghe di canale",
+      "description": "Un mazzo di alghe verdi e lucide, tirate su dal canale con la rete: si mangiano crude o nel brodo.",
+      "category": "cibo",
+      "weight": 0.3,
+      "stack": 10,
+      "tags": [
+        "cibo",
+        "alghe"
+      ],
+      "effects": {
+        "hunger": 10
+      }
+    }
+  ],
+  "mestieri": [
+    {
+      "id": "alghicoltore",
+      "nomi": [
+        "coltivatrice di alghe",
+        "coltivatore di alghe",
+        "coltivatrice di alghe della costa",
+        "alghicoltrice",
+        "alghicoltore",
+        "pescatrice",
+        "pescatore",
+        "retaia",
+        "retaio"
+      ],
+      "posto": {
+        "casella": "w"
+      },
+      "giornata": {
+        "mattina": [
+          {
+            "fa": "vai",
+            "dove": "lavoro"
+          },
+          {
+            "fa": "raccogli",
+            "casella": "w",
+            "oggetto": "item.alghe",
+            "lascia": "w",
+            "quante": 2,
+            "durata": 20,
+            "posa": "pesca",
+            "dice": "Acqua ferma: le reti sono piene."
+          }
+        ],
+        "giorno": [
+          {
+            "fa": "raccogli",
+            "casella": "w",
+            "oggetto": "item.alghe",
+            "lascia": "w",
+            "quante": 3,
+            "durata": 20,
+            "posa": "pesca"
+          }
+        ],
+        "sera": [
+          {
+            "fa": "vai",
+            "dove": "piazza"
+          },
+          {
+            "fa": "porta",
+            "oggetto": "item.alghe",
+            "dove": "piazza",
+            "dice": "Alghe fresche, chi ne vuole?"
+          },
+          {
+            "fa": "chiacchiera"
+          }
+        ],
+        "notte": [
+          {
+            "fa": "vai",
+            "dove": "casa"
+          },
+          {
+            "fa": "riposa"
+          }
+        ]
+      }
+    }
+  ]
+}
