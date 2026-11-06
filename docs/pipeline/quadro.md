@@ -22,13 +22,13 @@ Aggiornato il 06/11/2026, epoca 322 (claude). Crediti: vedi `stato`.
 ## Pronti e priorità
 
 0. **Decisioni autore 04/11:** D32 SemVer `X.Y.Z`. Step 32: T260, T262 → T245a → T263/T245b → T245c-f. T265 prima della beta.
-1. **In corso:** T325 (casi d'uso Jev, claude max).
+1. **In corso:** T324 (immagini Jev, claude).
 2. **Pronti:** T309 (inglese, dopo 0.5); T327 (NPC coeso, claude extra); T324 (immagini Jev, claude p3); T294 (laboratori giocatori, claude p3); T295 (carte prima della Genesi, claude p3); T315 (veste futuristica, p4); T321 (Scultore su Flash, claude p4); T281 (placeInside bloccati, p5, browser); T303 (misura Scenografo, claude p5); T288 (armi/attrezzi in mano, p6, browser); T242 (rapporto aureo, p33); T88 (generazione differita crediti che avanzano, p60).
 3. **Crediti (22:14 UTC):** Claude finestra 5h nuova (reset 02:59 UTC 07/11), settimana 60 % (reset 12/11); Gemini 5h 69 % (reset 23:14 UTC), settimana 86 %; agy 100 %; Argon fermo fino all'11/11.
 
 ## Attese dall'autore
 
-- **Domande aperte in `domande/aperte.md`:** D34 (lingue), D35 (piano lancio, account D3.1). Chiuse: D36, D37, D38 A, D46 B+C. Aperta D45 (Jev, T325 la informa). Proposta aperta: `piani.google.pro.moltiplicatoreStima` 2,5 → 1.
+- **Domande aperte in `domande/aperte.md`:** D34 (lingue), D35 (piano lancio, account D3.1). Chiuse: D36, D37, D38 A, D46 B+C. Aperta D45 (Jev), ampliata da T325 (integrato, `lab/banco/jev/casi-d-uso.md`: ordine, guardie, battute, Attore, stima lobby). Proposta aperta: `piani.google.pro.moltiplicatoreStima` 2,5 → 1.
 - **Autonomia autore confermata fino al 06/11 18:00 locali.**
 
 ## Regole attive
@@ -38,5 +38,5 @@ Aggiornato il 06/11/2026, epoca 322 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **322 (claude):** T328 e T308b integrati (`4537848`, contratto 0.5.0, ADR-0163); sbloccati T309 e T327; T325 in corso.
+- **322 (claude):** T328 e T308b integrati (`4537848`, contratto 0.5.0, ADR-0163); sbloccati T309 e T327; T325 integrato (casi d'uso Jev, domande in D45); T324 in corso.
 - **320 (gemini):** T320 integrato (`86acd5f`, kernel 0.4.3, ADR-0162); sbloccati T321, T88, T242, T303.
