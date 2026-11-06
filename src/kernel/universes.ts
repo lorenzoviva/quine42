@@ -9,7 +9,7 @@ import type { FileMap } from './types';
 import { allowedPath } from './paths';
 import type { Author } from './repo';
 import { hashStr, hex } from './rng';
-import { checkKernelVersion } from './version';
+import { runsOnThisKernel } from './version';
 import { migrateUniverse } from './migrations';
 import type { ChunkRecord, ChunkStore } from './chunks';
 
@@ -59,20 +59,8 @@ export function seedHashes(seed: FileMap): Record<string, string> {
  * The models in universe.json always follow the kernel (they are infrastructure, not content).
  * A universe out of the range of the kernels it runs on (T302, ADR-0152) takes nothing: the seed is of another contract.
  */
-/** Whether a universe.json runs on this kernel; one that is not readable is left to the fault of the configuration. */
-function ofThisKernel(src: string | undefined): boolean {
-  let parsed: { kernel?: unknown; kernels?: unknown };
-  try {
-    parsed = JSON.parse(src ?? '');
-  } catch {
-    return true;
-  }
-  if (!parsed || typeof parsed !== 'object') return true;
-  return checkKernelVersion(parsed.kernel, undefined, parsed.kernels).ok;
-}
-
 export function upgradeFromSeed(files: FileMap, seed: FileMap): { files: FileMap; changes: Record<string, string | null>; updated: string[] } {
-  if (!ofThisKernel(files['universe.json'])) return { files, changes: {}, updated: [] };
+  if (!runsOnThisKernel(files['universe.json'])) return { files, changes: {}, updated: [] };
   let base: Record<string, string> = {};
   try {
     base = JSON.parse(files[SEED_FILE] ?? '{}');

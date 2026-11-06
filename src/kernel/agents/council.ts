@@ -222,6 +222,11 @@ export class Council {
   hasCredits?: (chi: string) => boolean;
   /** Whether a knob of the master keeps this call from the models (T247, ADR-0133): it goes to the local ones, as without credits. */
   rationed?: (task: string) => boolean;
+  /**
+   * Why the universe is read-only now (T312, ADR-0156), or undefined: nothing the Council makes would be saved, so no call reaches the models,
+   * every one goes to the local ones and the world stays playable.
+   */
+  readOnly?: () => string | undefined;
   /** The reasoning of every call that does not say its own (`ai.thinking`): the lobby sets it (T247). */
   thinking?: () => CallOptions['thinking'];
   localAiModels: AiModels = new MockAiModels();
@@ -352,9 +357,11 @@ export class Council {
     // The focus goes last: what comes before it is the same for every focused task of the agent (the cache).
     const focus = this.focusContext(opts.focus);
     const chi = opts.chi ?? this.payer?.(task) ?? COMUNE;
-    const noCredits = !!this.hasCredits && !this.hasCredits(chi);
-    const useLocal = noCredits || !!this.rationed?.(task);
-    if (useLocal && !noCredits) this.say('kernel', 'info', `«${task}»: i modelli locali, come ha regolato il master`, undefined, task);
+    const sealed = this.readOnly?.() !== undefined;
+    const noCredits = !sealed && !!this.hasCredits && !this.hasCredits(chi);
+    const useLocal = sealed || noCredits || !!this.rationed?.(task);
+    if (sealed) this.say('kernel', 'info', `«${task}»: questo universo si legge soltanto, i modelli locali`, undefined, task);
+    else if (useLocal && !noCredits) this.say('kernel', 'info', `«${task}»: i modelli locali, come ha regolato il master`, undefined, task);
     if (noCredits) {
       this.say('kernel', 'info', chi === COMUNE ? `Nessuno dei collegati ha crediti: la richiesta «${task}» viene gestita con i modelli locali.` : `I crediti di ${chi} sono esauriti: la richiesta «${task}» viene gestita con i modelli locali.`, undefined, task);
     }

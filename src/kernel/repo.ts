@@ -77,6 +77,11 @@ export class Repo {
    * HEAD has them, so data are saved while that code stays where it is, in the working files only.
    */
   withheld?: () => Iterable<string>;
+  /**
+   * Why nothing reaches this repository now (T312, ADR-0156), or undefined: a universe out of the range of the kernels it runs on. While it says so
+   * a commit is not made (`commit` answers HEAD as it is) and the backend writes nothing: no commit, branch, merge nor rollback on the disk.
+   */
+  readOnly?: () => string | undefined;
 
   private constructor(
     data: RepoData,
@@ -174,6 +179,7 @@ export class Repo {
   }
 
   commit(message: string, author: Author): Commit {
+    if (this.readOnly?.() !== undefined) return this.head();
     this.beforeCommit?.(author);
     const prev = this.head().files;
     const files = this.snapshot();
@@ -243,7 +249,25 @@ export class Repo {
 
   /** Writes commits to a universe repository from now on (the files are already there). */
   attach(backend: UniverseBackend, past: PastCommit[]): void {
-    this.backend = backend;
+    this.backend = this.sealable(backend);
     this.past = past;
+  }
+
+  /** The backend as the kernel sees it (T312): what writes on the universe does nothing while the repository is read-only; reading passes. */
+  private sealable(b: UniverseBackend): UniverseBackend {
+    const sealed = () => this.readOnly?.() !== undefined;
+    const out: UniverseBackend = {
+      name: b.name,
+      commit: (changes, message, author) => (sealed() ? Promise.resolve(null) : b.commit(changes, message, author)),
+      // Going back to a commit of an earlier session writes one («ritorno a …») on the disk.
+      checkout: (id) => (sealed() ? Promise.resolve(null) : b.checkout(id)),
+      reset: () => b.reset(),
+    };
+    if (b.listMaps) out.listMaps = () => b.listMaps!();
+    if (b.branch) out.branch = (name, files, message, author) => (sealed() ? Promise.resolve(null) : b.branch!(name, files, message, author));
+    if (b.readBranch) out.readBranch = (name) => b.readBranch!(name);
+    if (b.merge) out.merge = (name, message) => (sealed() ? Promise.resolve() : b.merge!(name, message));
+    if (b.clone) out.clone = (nome, master, titolari) => b.clone!(nome, master, titolari);
+    return out;
   }
 }

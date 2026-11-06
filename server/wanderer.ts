@@ -16,6 +16,7 @@ import { runGit } from './git';
 import { openLedger } from './ledger';
 import { Rates, type Pace } from './rates';
 import { UNIVERSE_NAME_RE } from '../src/kernel/paths';
+import { opensOnThisKernel } from '../src/kernel/migrations';
 import { accountWanderer } from '../src/session/account';
 import type { Kernel } from '../src/kernel/kernel';
 import type { WorldCalls } from './worldCalls';
@@ -256,6 +257,9 @@ export function wandererHandler(opts: WandererRouteOptions): Connect.NextHandleF
           if (!r) return send(res, 500, { ok: false, motivo: 'non è stato possibile salvarlo' });
           return send(res, 200, { ok: true, profilo: r.profilo, riparato: r.riparato, viandante: r.viandante });
         }
+        // A universe out of the range of the kernels is read-only (T312, ADR-0156): nothing is committed on it, a profile neither. One the
+        // migrations bring to this kernel is not (T317): it is ported when it is opened, and the profile with it.
+        if (!opensOnThisKernel(await fs.readFile(path.join(root, 'universe.json'), 'utf8').catch(() => undefined))) return send(res, 409, { ok: false, motivo: 'questo universo non è di questo kernel: si legge soltanto' });
         await openLedger(opts.universesDir, universo);
         const files = await wandererFiles(root);
         const kept = keepProfileInFiles(files, who.id, body.profilo);
