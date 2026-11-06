@@ -4758,7 +4758,7 @@ Nasce da T307a e T299: `dossier T307a`, `dossier T299`. `integra T307a` si è fe
 - Browser: sì, a 1920 e 390 px, catture nel commit.
 - Quando è fatto: commit su `task/T315`; la veste futuristica ha palco e labirinto insieme, misure nell'esito. T287 lo aspetta per la scelta. Sicurezza: nessuna superficie nuova.
 
-### T316 · Il glitch dei guasti senza flash: niente lampi bianchi, glifi e scossa più lenti — `da fare`
+### T316 · Il glitch dei guasti senza flash: niente lampi bianchi, glifi e scossa più lenti — `fatto` (`64c102b3`)
 - Pipeline: claude · sforzo high · stima 2% · approvato · browser · priorità 2
 - Step: 34
 - Contesto: l'autore (06/11) segnala che l'effetto quando il mondo ha guasti aperti (il riquadro «⚠ N anomalie nella simulazione» di `src/ui/hud.ts`) è esagerato e può essere pericoloso per chi soffre di epilessia fotosensibile: lampi improvvisi e frequenti di luce bianca, glifi che appaiono e spariscono di continuo, scossa orizzontale veloce. Il codice: `applyGlitch` in `src/render/glitch.ts` (la «Rare inversion flash» a pieno schermo con `difference` e bianco, gli strappi orizzontali con `Math.random()` a ogni frame, i blocchi di rumore), i glifi in `src/render/overlay.ts` (righe ~190 e ~198: `randomGlyph` a ogni frame), il livello in `src/render/renderer.ts` (`glitchLevel`, `crack`).
@@ -4771,6 +4771,7 @@ Nasce da T307a e T299: `dossier T307a`, `dossier T299`. `integra T307a` si è fe
 - Test: un test sulle frequenze (es. con un orologio finto: nessun riempimento bianco a pieno schermo, glifi stabili per almeno N ms); typecheck e suite intera con i loro turni.
 - Browser: sì, un mondo con un guasto aperto (anche provocato dalla console), cattura e due righe su come appare.
 - Quando è fatto: commit su `task/T316`; nessun flash bianco, glifi e scossa rallentati. Non tocca `src/kernel/` (niente salto di versione). Sicurezza: nessuna superficie nuova.
+- Esito: glitch dei guasti senza lampi: tolta l'inversione bianca a pieno schermo (lampi/s da 0,45–1,5 a 0); strappi e blocchi di rumore fermi 0,4 s (da 60 a 2,5 cambi/s), più stretti e meno spostati; glifi che durano 1,6–2,8 s e sfumano (cambi/s da 720–2400 a 2–5,4); il glitch arriva al suo livello in ~1 s e la crepa sale e scende in 0,8 s; con prefers-reduced-motion solo scanline, tinta e immagine sdoppiata, ferme; il riquadro dei guasti respira invece di tremolare; tolto `Overlay.noisy`, inutilizzato; test nuovo `tests/glitch-safe.test.ts`; suite, typecheck e build verdi; il ritmo nel browser non è misurato (la scheda di Claude in Chrome gira a ~1 Hz), le frequenze sono provate dal test; sicurezza: nessuna superficie nuova.
 
 ### T317 · Integrare T312 nel base, che ha il contratto 0.2 — `da fare`
 - Step: 32
@@ -4780,4 +4781,4 @@ Nasce da T312: `dossier T312`. `integra T312` si è fermato su conflitti in `AGE
 **Cosa fare:** nel worktree, `git merge task/T312` sul base di adesso. La versione è `0.2.1` (T312 resta compatibile col contratto 0.2), uguale in `version.ts`, `package.json`, `package-lock.json` e `universe.json`, che tiene `kernels.from 0.2`. Entrambi gli ADR si chiamano 0155: quello di T312 (sola lettura fuori intervallo) prende il primo numero libero, con i rimandi in AGENTS.md, `docs/architettura-dettagli.md` e nel codice. In `kernel.ts` e `universes.ts` tieni sia `Kernel.readOnly()` / `runsOnThisKernel` sia la migrazione all'avvio (`prepareUniverse`, `migrateUniverse`): un universo che si migra a 0.2 **non** è in sola lettura; solo uno fuori intervallo anche dopo le migrazioni lo è. Un test lo dice.
 
 **Quando è fatto:** merge committato, `npm test`, `npm run typecheck` e `npm run build` verdi con i loro turni, un solo ADR per numero; esito con le scelte fatte nei conflitti di `kernel.ts` e `universes.ts`. Non serve il browser (T312 l'ha provato). Sicurezza: nessuna superficie nuova.
-- Pipeline: claude · sforzo high · stima 2% · approvato · priorità 1
+- Pipeline: claude · sforzo high · stima 2% · approvato · priorità 2

@@ -13,6 +13,7 @@ import type { CoronaView, StudioRoom } from './coronaview';
 import { aerial, CARTOON, CARTOON_BLOOM_RADIUS, CARTOON_HEMI, CARTOON_INDOORS, CARTOON_STUDIO, cartoonLight, SHADE, SHADOW_INTENSITY, SHADOW_RADIUS, SUN_FROM } from './cartoon';
 import { CUT, U } from './materials';
 import { Overlay } from './overlay';
+import { CRACK, GLITCH_EASE, crackLevel } from './glitch';
 import { buildChunk, chunkSig, disposeChunk, tileForms, type TerrainView } from './terrain';
 import { trimGeometries } from './models';
 import { Lights, Runes, Entities, Wanderer } from './entities';
@@ -71,6 +72,8 @@ export class Renderer {
   private t = 0;
   private glitchLevel = 0;
   private crack = 0;
+  /** prefers-reduced-motion: the glitch stays still (T316). */
+  private stillMotion = typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : undefined;
   private w = 0;
   private h = 0;
 
@@ -254,11 +257,11 @@ export class Renderer {
 
     // The broken universe trembles; a faint crack right at the edge of the world, sometimes.
     const broken = k.brokenness();
-    this.glitchLevel += (broken - this.glitchLevel) * Math.min(1, dt * 4);
+    this.glitchLevel += (broken - this.glitchLevel) * Math.min(1, dt * GLITCH_EASE);
     const edge = watch ? Infinity : k.config.circleRadius - Math.hypot(p.x, p.y);
-    if (broken === 0 && edge < 3 && edge > 0 && Math.random() < dt / 8) this.crack = 0.08;
+    if (broken === 0 && edge < 3 && edge > 0 && this.crack === 0 && Math.random() < dt / 8) this.crack = CRACK;
     this.crack = Math.max(0, this.crack - dt);
-    const g = Math.max(this.glitchLevel, this.crack > 0 ? 0.22 : 0);
+    const g = Math.max(this.glitchLevel, crackLevel(this.crack));
 
     // The simulation.
     this.world.visible = !interior;
@@ -451,6 +454,6 @@ export class Renderer {
       const y = inCorona ? Math.floor(r.y) : Math.floor(r.y + oy) - oy;
       o.cell(x, y, 'rgba(255,255,255,0.45)', undefined, this.groundReal(x + 0.5, y + 0.5) + 0.02);
     }
-    o.glitch(this.canvas, g);
+    o.glitch(this.canvas, g, this.t, this.stillMotion?.matches ?? false);
   }
 }

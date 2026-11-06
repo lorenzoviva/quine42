@@ -618,6 +618,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   tappeto e si disegna spostata del suo scorrimento; viandante, corona e studio in coordinate reali; quando la corona si
   vede, nulla della simulazione si disegna oltre il cerchio (un taglio nello shader). Testi, fumetti, «E», passaggio del
   mouse e glitch su uno strato 2D sopra. Il tasto destro sceglie la casella con un raggio sul terreno.
+- **Il glitch dei guasti** (T316, WCAG 2.3.1): `src/render/glitch.ts` è un piano dell'orologio, non del frame (`glitchPlan(t, intensità, fermo)`, puro): niente lampi né inversioni a pieno schermo, strappi e blocchi di rumore stretti che restano `HOLD` (0,4 s: meno di 3 cambi al secondo), glifi che vivono 1,6-2,8 s e appaiono e spariscono sfumando, l'intensità che sale in circa un secondo (`GLITCH_EASE`); la crepa rara del mondo sano è un arco di 0,8 s (`crackLevel`). Con `prefers-reduced-motion` restano solo scanline, tinta e fantasma, fermi; il riquadro dei guasti respira piano (`faultpulse`). `tests/glitch-safe.test.ts` lo misura con un orologio finto.
 - **Bozze di prova**: `kernel.sampleDrafts()` (una boscosa, una aperta, una con acqua, scelte in modo deterministico) è dove il
   validatore prova i programmi degli ambienti e dove il campionario li mostra.
 - **Mappa** (ADR-0011, 0040): caselle colorate per terreno, strati `ground floor wall door liquid vegetation rock`: l'acqua è
