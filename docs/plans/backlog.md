@@ -4668,7 +4668,7 @@ Nasce da T307a e T299: `dossier T307a`, `dossier T299`. `integra T307a` si è fe
 - Pipeline: claude · sforzo high · stima 2% · approvato · priorità 1
 - Esito: merge di T307a sul base con T299 committato (`734aaa7d`), kernel 0.2.0 uguale in `version.ts`, `package.json`, `package-lock.json` e `universe.json` (`kernels.from 0.2`); ADR-0154 resta la via di T299 e ADR-0155 la migrazione di T307a, con i rimandi già allineati; nessuna voce aggiunta a `internalNames.ts`, perché l'unico valore di un dominio T307a nel codice di T299 era la classe `grande` → `structure` in `tests/dislivello.test.ts`; gli esiti `fallito:…` di `sys.lavoro` (`nessuna via`, `non ci arriva`, `comportamento sconosciuto`) e `continua` non hanno voce in nessun dominio, da dare a T307b; typecheck verde, suite 2455 passati e 1 saltato, `tests/dislivello.test.ts` verde sul contratto 0.2; non provato: browser e build (il task non li chiede); sicurezza: nessuna superficie nuova.
 
-### T307b · L'inglese come lingua interna: i valori della società e del Concilio (contratto 0.3) — `da fare` (dipende da T314, T317)
+### T307b · L'inglese come lingua interna: i valori della società e del Concilio (contratto 0.3) — `fatto` (`43ca9c35`) (dipende da T314, T317)
 - Pipeline: claude · sforzo extra · stima 4% · approvato · priorità 3
 - Step: 42
 - Contesto: il secondo passo di T306 (`dossier T306`, `dossier T307a`, `docs/lingua-interna.md`, punto 2). **Va lanciato da solo**, come T307a.
@@ -4677,6 +4677,7 @@ Nasce da T307a e T299: `dossier T307a`, `dossier T299`. `integra T307a` si è fe
 - Test: unitari della migrazione, suite intera e typecheck con i loro turni; 400 tick offline sul seme senza fault.
 - Browser: `?skip&offline`, un universo salvato prima si apre migrato; gli individui fanno le loro routine e i mestieri; nello studio i gerboa delle squadre ci sono.
 - Quando è fatto: commit su `task/T307b`. Sicurezza: nessuna superficie nuova, o le voci.
+- Esito: contratto 0.3.0: i domini T307b in inglese nel codice, nel seme, nei modelli, in MockAiModels, in lab/ e nei test; file rinominati con ciò che nominano (sys.work, job.*, obj.bed|chest|counter|cupboard, item.scissors, prompts/agents/<agent>.md, sound-*, corona-gerboa-<agent>); migrazione 0.2→0.3 (ADR-0157) con piani, Lua del Concilio, seed.json, magazzino, carte, grafo e mancanze; domini nuovi esiti-lavoro (gli esiti di sys.work, da T314), suoni-seme e viandante-solo (io→me spostato a T308a); riparazione dell'italiano in ogni lettura finché T310 non cambia i prompt; il server legge anche `multigiocatore`; MockAiModels tiene i mondi offline di prima; nel test del letto di kernel-council il letto è spostato fuori dalla linea di cammino. Non coperti: i moduli del Concilio con nomi propri (`lavoro.portuale`) tengono l'id, un sys.lavoro modificato nell'universo è rinominato ma non tradotto; restano italiani le stanze dello studio e gli archi del grafo; il difetto di sys.wander contro un ostacolo allineato non è corretto. Typecheck e suite verdi (2497 passati, 1 saltato). Sicurezza: nessuna superficie nuova (access/wallet leggono anche `multigiocatore`).
 
 ### T308a · L'inglese come lingua interna: i campi e i percorsi dei file dell'universo (contratto 0.4) — `da fare` (dipende da T307b)
 - Pipeline: claude · sforzo extra · stima 3% · approvato · priorità 3
