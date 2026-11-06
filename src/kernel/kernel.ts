@@ -36,7 +36,7 @@ import { billedModel, costOf } from './ai/prices';
 import { USAGE_FILE, UsageLog, type CallRecord } from './ai/usage';
 import { SHORTFALLS_FILE, ShortfallLog, type ShortfallNote } from './shortfalls';
 import { addBudgetFromCap, costWithFee, DEFAULT_GRANT_CAP, DEFAULT_PLATFORM_FEE, MemoryLedger, splitCost, type Ledger, type PaymentRecord } from './credits';
-import { MemoryChunks, type ChunkStore } from './chunks';
+import { MemoryChunks, SealedChunks, type ChunkStore } from './chunks';
 import { bodyFoot, bodyGround, Forms, holesOf, InlineRunner, instanceGrid, levelAt, rampBlocks, stepOf, toLocal, topUnder, type Form, type FormComp, type FormRunner, type Ground } from './forms';
 import { classOf, guessClass, RARE_SIZES, sizeRank, SIZE_TIERS, tilesOf, type SizeTier } from '../mj/classes';
 import { stageGrid } from '../mj/mesh';
@@ -104,6 +104,8 @@ export const JUMP_FAR = 2.6;
 const WATER_EVERY = 6;
 const WATER_STEPS = 10;
 const MAX_DIG = 8;
+/** What the fault `universe:kernel` says first (T312): the panel of the faults, which shows the head of a reason, says the world is read-only. */
+export const READ_ONLY_WORDS = 'sola lettura: niente si salva, il Concilio usa i modelli locali';
 
 export interface Chunk {
   cx: number;
@@ -675,7 +677,9 @@ export class Kernel {
     this.wasmUri = opts.wasmUri;
     // Every plan read is ported to this contract (T307a): the plans of a universe of before stay on disk as they were until written again.
     const chunks = opts.chunks ?? new MemoryChunks();
-    this.chunkStore = { load: async (key) => { const rec = await chunks.load(key); return rec && migratePlanRecord(rec); }, save: (key, rec) => chunks.save(key, rec), clear: () => chunks.clear() };
+    const ported: ChunkStore = { load: async (key) => { const rec = await chunks.load(key); return rec && migratePlanRecord(rec); }, save: (key, rec) => chunks.save(key, rec), clear: () => chunks.clear() };
+    // A new plan of a read-only universe stays in this session (T312, ADR-0156).
+    this.chunkStore = new SealedChunks(ported, () => this.readOnly() !== undefined);
     this.forms = new Forms(opts.forms ?? new InlineRunner());
   }
 
@@ -723,11 +727,14 @@ export class Kernel {
     k.council.hasCredits = (chi) => k.hasCredits(chi);
     k.council.rationed = (task) => k.rationed(task);
     k.council.thinking = () => k.config.ai.thinking;
+    k.council.readOnly = () => k.readOnly();
     k.council.onFocus = (ids) => k.cards.use(ids, 'prompt', (id) => k.isCard(id));
     // A mirror saves nothing of its own: its commits hold only the files it was told and the master's edits (T42b). The Council
     // is fenced in on a mirror too: a kernel on the master's branch is one (T42e).
     // The code written without a commit is not a valid state (T262): every commit takes it as HEAD has it.
     repo.withheld = () => k.unsaved;
+    // A universe out of the range of the kernels is read-only (T312): nothing reaches its repository. A mirror's commits are its own bookkeeping.
+    repo.readOnly = () => k.readOnly();
     repo.beforeCommit = (author) => {
       if (author === 'agent') k.fenceCouncil();
       k.commanded.clear();
@@ -1397,8 +1404,8 @@ export class Kernel {
     // A universe of another contract does not open as if it were ours (T260): the world stands, nothing of it is committed.
     const version = error ? { ok: true } : checkKernelVersion(config.kernel, KERNEL_VERSION, config.kernels);
     if (!version.ok) {
-      if (!this.faults.has('universe:kernel')) this.message(`Questo universo non è di questo kernel: ${version.motivo}.`, 'warn');
-      this.faults.raise('universe:kernel', version.motivo!);
+      if (!this.faults.has('universe:kernel')) this.message(`Questo universo non è di questo kernel: ${version.motivo}. Si legge soltanto: niente si salva.`, 'warn');
+      this.faults.raise('universe:kernel', `${READ_ONLY_WORDS} — ${version.motivo}`);
     } else this.faults.clear('universe:kernel');
     this.keepGame(config, files);
     this.keepSettings(config, files);
@@ -8586,6 +8593,16 @@ export class Kernel {
     return true;
   }
 
+  /**
+   * Why nothing reaches the universe's repository now (T312, ADR-0156), or undefined: the fault `universe:kernel` is open. Commits, plans,
+   * branches, merges and rollbacks on the disk wait for it to close (`Repo.readOnly`, `SealedChunks`), and the Council calls only the local
+   * models. A mirror is never read-only: its repository is in memory, and the one it mirrors decides.
+   */
+  readOnly(): string | undefined {
+    if (this.mirror) return undefined;
+    return this.faults.get('universe:kernel')?.message;
+  }
+
   /** universe.json unreadable or of another kernel (T260): the world running is not the universe's, nothing of it is saved. */
   private foreignUniverse(): boolean {
     return this.faults.has('universe:config') || this.faults.has('universe:kernel');
@@ -8906,6 +8923,10 @@ export class Kernel {
 
   /** Back to a commit of an earlier session: only the universe repository on disk has its files. */
   async rollbackPast(commitId: string): Promise<boolean> {
+    if (this.readOnly() !== undefined) {
+      this.message('Questo universo si legge soltanto: non torna a un commit di prima.', 'warn');
+      return false;
+    }
     const files = await this.repo.backend?.checkout(commitId).catch(() => null);
     if (!files) return false;
     for (const [p, v] of Object.entries(files)) this.repo.write(p, v);

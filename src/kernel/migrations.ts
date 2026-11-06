@@ -12,7 +12,7 @@ import type { ChunkPlan } from './agents/cartography';
 import { INTERNAL_NAMES, internalManifest, internalModelId, internalModelInfo, internalName } from './internalNames';
 import { hashStr, hex } from './rng';
 import type { FileMap } from './types';
-import { checkKernelVersion, compareContracts, contractOf, KERNEL_VERSION, parseContract, parseVersion, showContract, universeKernels, type Contract } from './version';
+import { checkKernelVersion, compareContracts, contractOf, KERNEL_VERSION, parseContract, parseVersion, runsOnThisKernel, showContract, universeKernels, type Contract } from './version';
 
 export interface Migration {
   /** The contract it reads, `X.Y`. */
@@ -96,6 +96,23 @@ export function migrateUniverse(files: FileMap, kernelVersion: string = KERNEL_V
   }
   const ported = { ...config, kernel: kernelVersion, kernels: { from: showContract(contractOf(kernel)) } };
   return { files: { ...out, 'universe.json': JSON.stringify(ported, null, 2) + '\n' }, applied: chain.map((m) => `${m.from}→${m.to}: ${m.descrizione}`) };
+}
+
+/**
+ * Whether the text of a universe.json opens on this kernel once ported (T317, ADR-0156): it runs here, or the migrations bring it here.
+ * Only one for which this is false is read-only; one that is not readable is left to the fault of the configuration.
+ */
+export function opensOnThisKernel(src: string | undefined, list: readonly Migration[] = MIGRATIONS): boolean {
+  if (runsOnThisKernel(src)) return true;
+  let parsed: Record<string, unknown>;
+  try {
+    parsed = JSON.parse(src ?? '');
+  } catch {
+    return true;
+  }
+  const kernel = parseVersion(KERNEL_VERSION);
+  const read = parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? universeKernels(parsed).kernels : undefined;
+  return !!(kernel && read && migrationPath(read.last, contractOf(kernel), list));
 }
 
 /**
