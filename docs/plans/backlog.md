@@ -4422,7 +4422,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Quando è fatto: la veste è selezionabile; commit su `task/T286`. Sicurezza: nessuna superficie nuova.
 - Esito: la sobria ha il logo e l'icona della proposta 04 v2 di Claude, estratti così come sono da `tools/vesti/logo.ts` (lo richiama `estrai.ts`) in `site/skins/sobria/scritta.svg` e `icona.svg` (barra, piede, favicon), con `tests/site-skin-sobria.test.ts` che li confronta con la proposta elemento per elemento; il carattere a fumetti è tolto; tre gesti dalla Q, solo CSS: doppia riga rosa e ciano sotto la barra, anelli del tappeto nel palco 3D, la Q in piccolo davanti ai titoli; catture a 1920 e 390 px in `docs/design/vesti/sobria/`; righe in `#sito`, LEGGIMI e AGENTS.md; typecheck, build e suite intera verdi (2382 test, 1 saltato). Le orecchie del piede (di T244) sono rimaste: da decidere con l'autore. Non provati: telefono vero, `npm run serve`, carte con un universo vero. Sicurezza: nessuna superficie nuova.
 
-### T287 · La scelta della veste: subito dall'autore, o col voto dei beta tester — `in attesa` (dipende da T284, T285, T286)
+### T287 · La scelta della veste: subito dall'autore, o col voto dei beta tester — `in attesa` (dipende da T284, T285, T286, T315)
 - D38 A (autore, 05/11): il filone del prompt 7 (le orecchie) resta fuori dal sito della beta, niente quarta veste; le orecchie restano un'idea per monete e carte.
 - Step: 34
 - Contesto: l'autore confronta le tre vesti. Se una è nettamente superiore la sceglie subito; altrimenti decidono i tester. Il testo in `docs/userchats/to-do-2026-11-05.md`. Lo riscrive e lo stima l'orchestratore alla risposta dell'autore.
@@ -4742,3 +4742,17 @@ Nasce da T307a e T299: `dossier T307a`, `dossier T299`. `integra T307a` si è fe
   Per ogni caso: precisione, token, costo, latenza, contro Gemini 3.1 Flash-Lite (la via esistente dei `lab/scripts`) con le stesse domande. **Traccia tutto:** ogni chiamata (modello, caso, token in/out, costo, ms, esito) in `lab/banco/jev/consumi.jsonl`. Tetti: TypeSafe al più 3 $ in tutto, Gemini al più 1 $. Domande corte (stato del luogo e scelte, non la bibbia).
 - Test: lo script ha una modalità offline con risposte finte e un test che la prova; suite intera e typecheck con i loro turni. Niente cambia in `src/`.
 - Quando è fatto: commit su `task/T313`. Nell'esito: tabella per gruppo (precisione Jev / Flash-Lite, costo per 1000 decisioni, latenza), dove conviene e dove no, consumo totale, la tabella del gruppo 3 e la proposta (con ADR solo se si propone di portarlo nel gioco: un varco sul server come `GeminiGate`, regola 9, e una risposta in `MockAiModels`). Sicurezza: una chiave nuova, solo in `lab/`, detta nell'esito.
+
+### T315 · La veste futuristica mista: il palco 3D e il labirinto MarkovJunior 2D insieme — `da fare`
+- Pipeline: claude · sforzo max · stima 4% · approvato · browser · priorità 4
+- Step: 34
+- Contesto: l'autore (06/11, D42) ha visto la variante `?fx=mj-pagina` di T284 (ADR-0151): gli piace anche il labirinto MarkovJunior 2D di lettere, e chiede un mix delle due cose nella veste futuristica, con lo showcase 3D che resta. Nel labirinto vuole i colori invertiti: le pareti tenui, i percorsi liberi accesi («visivamente ha più senso»). Misure di T284 (CPU 4×): veste col palco 39,6 % del thread principale, `mj-pagina` 18,3 % con three.js caricato, 9,8 % senza.
+- Cosa fare:
+  1. Nella veste futuristica (non una variante in URL): il palco 3D resta nella sua sezione, e il labirinto MarkovJunior 2D entra in un'altra parte della pagina (proponi tu dove, coi numeri: ad esempio una sezione propria o lo sfondo dell'hero prima che il palco arrivi), con gli effetti MarkovJunior lungo la pagina dove reggono.
+  2. Labirinto con i colori invertiti: pareti tenui, percorsi liberi accesi; i testi sopra restano leggibili.
+  3. three.js caricato solo quando il palco sta per vedersi, e fermo quando esce dallo schermo; intervento sui picchi da 11-15 ms a 4× trovati da T284.
+  4. Misura con `tools/vesti/misura.mjs` come in T284 (1920 e 390 px, CPU 4×): il mix non deve costare più della veste di oggi (39,6 %); se costa di più dillo coi numeri e proponi cosa togliere. A scheda nascosta e con `prefers-reduced-motion` tutto fermo.
+  5. `?fx=mj-pagina` resta solo se serve ancora al confronto; ADR-0151 aggiornato (o un ADR nuovo) e `#sito`.
+- Test: typecheck, build e suite intera con i loro turni; i test della veste (`tests/site-skin-futuristica.test.ts`) verdi.
+- Browser: sì, a 1920 e 390 px, catture nel commit.
+- Quando è fatto: commit su `task/T315`; la veste futuristica ha palco e labirinto insieme, misure nell'esito. T287 lo aspetta per la scelta. Sicurezza: nessuna superficie nuova.
