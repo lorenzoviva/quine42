@@ -93,7 +93,7 @@ L'autore: il rilascio aperto al pubblico, con i pagamenti Stripe. Il piano di la
 | 36 | Il gioco in quattro lingue | III | in attesa | T239 |
 | 37 | Altri universi: spazio, pirati, cowboy | III | in attesa | T184 T185 T278 |
 | 38 | Il lancio | IV | in attesa | T240 |
-| 39 | Gli NPC decidono e invecchiano | III | in attesa | T245g T245h T245i |
+| 39 | Gli NPC decidono e invecchiano | III | in attesa | T326 T327 T245g T245h T245i |
 | 40 | Gli oggetti si vedono: in mano, addosso, sui mobili; i mobili si spostano | I | da fare | T288 T289 T290 T291 T292 T301 |
 | 41 | I giocatori modificano le carte nei laboratori; le carte passano da un universo all'altro prima della Genesi | I | da fare | T293 T294 T295 T296 |
 | 42 | L'inglese è la lingua interna: chi apre il repository lo legge | I | da fare | T306 T307a T314 T307b T308a T308b T309 T310 |

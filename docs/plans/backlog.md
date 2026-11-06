@@ -4165,10 +4165,10 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: sì, due schede con `?viandante=`.
 - Quando è fatto: commit su `task/T245f`; ADR se serve. Sicurezza: scrivi l'esito, tocca il server.
 
-### T245g · Il Narratore scrive mestieri e imprese — `in attesa` (dipende da T245c, T245d)
+### T245g · Il Narratore scrive mestieri e imprese — `in attesa` (dipende da T245c, T245d, T327)
 - Pipeline: claude · stima 10% · approvato · priorità 90
 - Step: 39
-- Contesto: Nasce da T245 (`dossier T245`): progetto in `docs/design/comportamento-npc.md`, sezione 7. Fase 1.0.0 (D8): non parte prima della Fase III.
+- Contesto: Nasce da T245 (`dossier T245`): progetto in `docs/design/comportamento-npc.md`, sezione 7. Fase 1.0.0 (D8): non parte prima della Fase III. Vincolo dell'autore (06/11): dentro il confine dell'NPC della sezione 10 (T326, T327), niente comportamento NPC in moduli nuovi fuori di lì; vale anche per T245h e T245i.
 - Cosa fare: `job.program` con `JobDirector` e validatore, `impresa.plan` dalle trame e dal Referente, effetto `impresa`, `CENSUS`, mock, registro; i costi misurati su un universo.
 - Test: Suite intera e typecheck con i loro turni.
 - Browser: da decidere quando riparte.
@@ -4833,14 +4833,14 @@ Nasce da T156 (`dossier T156`, `docs/pipeline/domande/T156.md`, risposta B scelt
 **Quando è fatto:** prompt cambiato nel gioco con i test verdi (`npm test`, `npm run typecheck`), il giro misurato e scritto; esito con passati alla prima e entro due richieste e il costo. Non serve il browser. Sicurezza: nessuna superficie nuova.
 
 ### T322 · Jev: la spesa del banco riconciliata con la dashboard di TypeSafe, i conti rifatti — `da fare`
-- Pipeline: claude · sforzo high · stima 2% · approvato · priorità 2
+- Pipeline: gemini · sforzo high · stima 2% · approvato · priorità 2
 - Contesto: l'autore (06/11 sera) vede sulla dashboard di TypeSafe **0,16 $ con circa 3 milioni di token in ingresso**; il rapporto di T313 (`lab/banco/jev/README.md`, `riepilogo.md`) dice ovunque **0,196 $ su 4,66 milioni** (2176 chiamate). Il rapporto calcola la spesa da `lab/banco/jev/consumi.jsonl` come token in ingresso × 0,042 $/M; 0,16 $ su 3 M fa ~0,053 $/M, quindi differiscono sia i token sia il prezzo effettivo. Nasce da T313: `dossier T313`.
 - Cosa fare: capire da dove nasce la differenza: righe contate due volte (giri ripetuti, tentativi falliti o ripresi, `prova-1`), token stimati da noi invece di quelli che l'API restituisce, il companion Noul o le domande raggruppate fatturate diversamente, token in uscita fatturati, cache dei prompt, arrotondamenti della dashboard, giorno o fuso. Leggi la documentazione dei prezzi di TypeSafe (docs.typesafe.ai) e i campi d'uso delle risposte. Se senza i numeri della dashboard non si chiude, scrivi in `docs/pipeline/domande/T322.md` che cosa esportare (una CSV per chiamata o per giorno) e fermati lì. Poi: il rapporto (`--rapporto`) usa la spesa vera (i campi dell'API, il prezzo documentato), `README.md`, `riepilogo.md` e ADR-0157 con i numeri giusti, compreso «$ per 1000 decisioni» e i rapporti con Flash-Lite. Controlla allo stesso modo la spesa Gemini (0,680 $) contro i prezzi di `src/kernel/ai/prices.ts`.
 - Test: `lab/tests/jev-banco.test.ts` aggiornato sul calcolo; suite intera e typecheck con i loro turni. Spesa: al più 0,05 $ TypeSafe solo se serve una chiamata di prova per leggere i campi d'uso.
 - Quando è fatto: commit su `task/T322`; nell'esito la causa della differenza, i numeri vecchi e nuovi e quanto cambia il risparmio. Sicurezza: nessuna superficie nuova (solo `lab/`).
 
 ### T323 · Jev in italiano: quanto perde con stato e domande nella lingua del mondo, quando tradurre — `da fare`
-- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 2
+- Pipeline: gemini · sforzo high · stima 3% · approvato · priorità 2
 - Contesto: l'autore (06/11) non capisce dal rapporto di T313 quanto sia un problema l'italiano. T313 ha fatto le domande in inglese e ha lasciato «domande in italiano» tra i casi non provati; nel gioco lo stato (nomi di oggetti, luoghi, testo del viandante, battute degli NPC) è nella lingua dell'universo, mentre i nomi interni sono inglesi (ADR-0153). Nasce da T313: `dossier T313`.
 - Cosa fare: sul banco di `lab/banco/jev/`, gli stessi casi del gruppo 1 (azioni, Referente, oggetto → modello, combinazioni, fabbricazione, quarta parete) e dei mestieri in tre varianti: tutto in inglese (quella di T313), stato in italiano con domande e opzioni in inglese (come sarà nel gioco quando i prompt saranno in inglese), tutto in italiano. Jev 1.13 e Flash-Lite. Per ogni compito precisione, token e costo per variante, e la regola che ne esce: cosa si traduce (niente, le sole domande, i nomi degli oggetti, il testo libero del viandante) e quanto costa tradurre (con quale modello o con la tabella dei nomi). Il testo libero del viandante (azioni libere, richieste al Referente, quarta parete) è il caso più delicato: misuralo a parte.
 - Test: varianti nuove nella modalità offline e nel test; suite intera e typecheck con i loro turni. Tetti: TypeSafe 0,30 $, Gemini 0,40 $.
@@ -4862,3 +4862,20 @@ Nasce da T156 (`dossier T156`, `docs/pipeline/domande/T156.md`, risposta B scelt
   3. Una tabella «caso d'uso → oggi, con Jev, risparmio stimato per ora di gioco, rischio, prova fatta», in `lab/banco/jev/casi-d-uso.md`, e una proposta d'ordine. Niente in `src/`: i task che portano qualcosa nel gioco li scrive l'orchestratore dopo che l'autore ha deciso (D45).
 - Test: le prove nuove nella modalità offline e nel test; suite intera e typecheck con i loro turni. Tetti: TypeSafe 0,50 $, Gemini 0,80 $.
 - Quando è fatto: commit su `task/T325`; nell'esito la spesa di oggi per il contesto, la tabella e le domande per l'autore. Sicurezza: nessuna superficie nuova (solo `lab/`).
+
+### T326 · L'NPC come oggetto coeso: dove vive oggi il suo comportamento e il confine da dargli — `da fare`
+- Pipeline: gemini · sforzo high · stima 3% · approvato · priorità 5
+- Step: 39
+- Contesto: l'autore (06/11 sera), letto `docs/design/comportamento-npc.md`: il piano va bene, ma teme che porti il codice del comportamento degli NPC sparso su troppi moduli; vuole **basso accoppiamento e alta coesione interna dell'oggetto NPC**. Oggi il comportamento è già in parte implementato (T245a-f, integrati via T280, T297, T300): `src/kernel/society.ts`, `jobs.ts`, `ventures.ts`, `route.ts`, `plots.ts`, parti di `kernel.ts`, il modulo Lua `sys.work` e i `job.<trade>`. Nascono da qui T327 (il rifacimento) e i vincoli su T245g-i. Leggi `dossier T245`, `dossier T280`.
+- Cosa fare: **solo documento, nessun codice.** (1) La mappa: ogni funzione, tipo, campo di stato e chiamata che riguarda il comportamento di un NPC (decidere, camminare, lavorare, imprese, routine, ricordi, legami, fuori vista), file per file con i numeri di riga, e chi chiama chi (le dipendenze tra moduli, anche da `kernel.ts`, dal `Host`, dai pannelli, dal Concilio). (2) Le misure: quanti moduli toccano lo stato di un NPC, quante funzioni di `kernel.ts` sono comportamento NPC, i cicli di import. (3) La proposta: un confine unico (per esempio `src/kernel/npc/` con una facciata stretta: cosa entra, cosa esce, chi possiede lo stato dell'NPC), cosa ci va dentro, cosa resta fuori e perché (Lua, Concilio, rendering), le dipendenze ammesse in una direzione sola; come T245g, T245h, T245i ci si appoggiano senza aprire file nuovi fuori dal confine. Scrivila come sezione nuova «10. Coesione: l'NPC come oggetto» in `docs/design/comportamento-npc.md`, con una tabella «com'è → come sarà» che T327 seguirà passo per passo.
+- Test: nessuno (solo documentazione); typecheck col suo turno.
+- Quando è fatto: commit su `task/T326`; nell'esito le misure e la proposta in cinque righe. Sicurezza: nessuna superficie nuova.
+
+### T327 · L'NPC come oggetto coeso: il comportamento in un modulo solo, dietro una facciata — `da fare` (dipende da T326, T308b)
+- Pipeline: claude · sforzo extra · stima 6% · approvato · priorità 5
+- Step: 39
+- Contesto: richiesta dell'autore del 06/11 (vedi T326): basso accoppiamento, alta coesione dell'oggetto NPC. Segue la sezione 10 di `docs/design/comportamento-npc.md` scritta da T326 (`dossier T326`); se la proposta ha un difetto lo correggi nel documento e lo dici nell'esito. Dopo T308b perché il contratto 0.5 tocca il filo e Lua.
+- Cosa fare: spostare il comportamento degli NPC dentro il confine deciso, dietro la facciata, **senza cambiare comportamento**: stessi semi, stessi esiti, stessi file su disco e sul filo (nessun contratto nuovo: sale solo `Z`). `kernel.ts` chiama solo la facciata. Un test di architettura che fallisce se un modulo fuori dal confine importa l'interno dell'NPC o se il confine importa ciò che non deve. ADR nuovo e una riga in `AGENTS.md` (Struttura e indice `#societa`), la sezione `#societa` di `docs/architettura-dettagli.md` aggiornata.
+- Test: i test di società, mestieri, imprese, fuori vista invariati e verdi; il test di architettura; suite intera e typecheck con i loro turni.
+- Browser: una passeggiata in un luogo con individui al lavoro (`#convalida-browser`): camminano, lavorano, il cantiere cresce come prima.
+- Quando è fatto: commit su `task/T327`; nell'esito i moduli prima e ora e le righe tolte da `kernel.ts`. Sicurezza: scrivi l'esito.
