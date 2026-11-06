@@ -23,17 +23,17 @@
   },
   "actions": [
     {
-      "id": "attingi",
+      "id": "draw",
       "label": "Attingi acqua",
       "requires": "item.secchio"
     },
     {
-      "id": "moneta",
+      "id": "coin",
       "label": "Getta una moneta",
       "requires": "item.moneta"
     },
     {
-      "id": "ascolta",
+      "id": "listen",
       "label": "Ascolta il pozzo"
     }
   ],

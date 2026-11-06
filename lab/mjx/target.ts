@@ -7,6 +7,7 @@ import { boxOf, classOf, guessClass, type AssetClass } from '../../src/mj/classe
 import type { PaletteEntry, RunResult, Vec3 } from '../../src/mj/engine';
 import { DEFAULT_RENDER, render, sheet, type Picture } from '../../src/mj/photo';
 import ARTIST from '../prompts/artista.md?raw';
+import { internalName } from '../../src/kernel/internalNames';
 
 export type Category = 'semplice' | 'struttura' | 'figura';
 
@@ -39,7 +40,8 @@ export interface Critique {
 }
 
 export function classFor(t: Target): { cls: AssetClass; box: Vec3; minHeight: number } {
-  const cls = classOf(t.kind) ?? guessClass(`${t.name} ${t.description ?? ''} ${t.look ?? ''}`, t.category);
+  // The lab's targets name their class in the Italian of the contract 0.1 (T307a): the internal one.
+  const cls = classOf(internalName('classi', t.kind ?? '')) ?? guessClass(`${t.name} ${t.description ?? ''} ${t.look ?? ''}`, t.category);
   const box = t.size ?? boxOf(cls);
   return { cls, box, minHeight: t.size ? 0 : Math.round((cls.minHeight ?? 0) * box[2]) };
 }

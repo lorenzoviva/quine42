@@ -210,7 +210,7 @@ describe('«Altro…» and PvP between wanderers (T43b)', () => {
     expect(health(k, 'bruno')).toBeCloseTo(30, 0);
     expect(health(k, 'anna')).toBeCloseTo(50, 0);
     const before = k.wandererAt('bruno')!;
-    k.as('anna', () => k.touchWanderer('bruno', [{ tipo: 'spingi', forza: 2 }]));
+    k.as('anna', () => k.touchWanderer('bruno', [{ type: 'push', force: 2 }]));
     const after = k.wandererAt('bruno')!;
     expect(after.x - before.x).toBeGreaterThan(0.5);
     // The master: nothing but words reach them, PvP or not.
@@ -219,7 +219,7 @@ describe('«Altro…» and PvP between wanderers (T43b)', () => {
     put(k, master, { x: at.x, y: at.y + 1 });
     const m = k.wandererAt(master)!;
     k.ecs.get(m.entity, 'needs').health = 100;
-    const out = k.as('anna', () => k.touchWanderer(master, [{ tipo: 'bisogni', salute: -30 }, { tipo: 'spingi', forza: 3 }, { tipo: 'messaggio', testo: 'Prendi!' }]));
+    const out = k.as('anna', () => k.touchWanderer(master, [{ type: 'needs', health: -30 }, { type: 'push', force: 3 }, { type: 'message', text: 'Prendi!' }]));
     expect(out).toContain('Prendi!');
     expect(k.ecs.get(m.entity, 'needs').health).toBe(100);
     const still = k.wandererAt(master)!;
@@ -258,7 +258,7 @@ describe('death and reconnection among many (T43c)', () => {
       k.give(item, 2);
       k.give('rune:luce', 1);
       Object.assign(k.phrase(), { tokens: ['luce'], sel: 0 });
-      k.applyEffects([{ tipo: 'stato', nome: 'febbre', velocita: 0.9 }]);
+      k.applyEffects([{ type: 'state', name: 'febbre', speed: 0.9 }]);
     });
     k.as('bruno', () => k.give(item, 1));
     // With credits (T45a): her verdict goes to the world's models, paid by her, not to the local ones.
@@ -319,7 +319,7 @@ describe('death and reconnection among many (T43c)', () => {
       k.give(item, 2);
       k.give('rune:luce', 1);
       Object.assign(k.phrase(), { tokens: ['luce'], sel: 0 });
-      k.applyEffects([{ tipo: 'stato', nome: 'benedizione', velocita: 1.2 }]);
+      k.applyEffects([{ type: 'state', name: 'benedizione', speed: 1.2 }]);
       k.setBond(vName, 'amica');
       k.recordRule({ chiave: 'azione|canto', testo: 'cantare', possibile: true, racconto: 'canti' }, true, { task: 'action.judge', autore: 'narratore' });
     });

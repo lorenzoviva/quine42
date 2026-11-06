@@ -89,8 +89,8 @@ const FURNITURE: Array<[string, number]> = [
   ['banco', 2],
   ['credenza', 1],
   ['credenza', 2],
-  ['mobile', 1],
-  ['mobile', 2],
+  ['furniture', 1],
+  ['furniture', 2],
   ['letto', 1],
   ['letto', 2],
   ['barile', 1],
@@ -98,7 +98,7 @@ const FURNITURE: Array<[string, number]> = [
 
 describe('the spot, on the true shapes of the seed', () => {
   it('on every piece of furniture of the seed a thing lies on its top, every column of it on wood with room above', async () => {
-    const pot = await formOf('oggetto');
+    const pot = await formOf('object');
     for (const [model, seed] of FURNITURE) {
       const f = await formOf(model, seed);
       const r = findSpot(supportOf(f), shapeOf(pot), OPEN);
@@ -112,14 +112,14 @@ describe('the spot, on the true shapes of the seed', () => {
   });
 
   it('a sign, a fire, a barrel with a bump on its lid: no shelf holds the thing', async () => {
-    const pot = await formOf('oggetto');
+    const pot = await formOf('object');
     for (const [model, seed] of [['cartello', 1], ['falo', 1], ['barile', 2]] as Array<[string, number]>) {
       expect(findSpot(supportOf(await formOf(model, seed)), shapeOf(pot), OPEN), `${model} ${seed}`).toEqual({ fail: 'nessun-piano' });
     }
   });
 
   it('how many fit is how many footprints fit: they never overlap, each lies flat, then the furniture is full', async () => {
-    const pot = await formOf('oggetto');
+    const pot = await formOf('object');
     const scissors = await formOf('forbici');
     for (const item of [pot, scissors])
       for (const [model, seed] of FURNITURE) {
@@ -138,12 +138,12 @@ describe('the spot, on the true shapes of the seed', () => {
         }
       }
     // The chest's lid is 19 voxels wide and a pot 9: two side by side, not a third.
-    expect(fill(await formOf('mobile', 1), pot).spots.length).toBe(2);
+    expect(fill(await formOf('furniture', 1), pot).spots.length).toBe(2);
   });
 
   it('the first goes in the corner nearest to who puts it down, the next beside it', async () => {
-    const f = await formOf('mobile', 1);
-    const pot = await formOf('oggetto');
+    const f = await formOf('furniture', 1);
+    const pot = await formOf('object');
     const near = fill(f, pot, { x: 0, y: 2 }).spots;
     const far = fill(f, pot, { x: 0, y: -2 }).spots;
     // From the front (+y) the first lies further forward than from behind.

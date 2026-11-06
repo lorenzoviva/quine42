@@ -48,7 +48,7 @@ export function latheModels(files: FileMap, forms: Forms): LatheModelEntry[] {
   return ids.map((id) => {
     const path = `models/${id}.xml`;
     const xml = files[path] ?? '';
-    const info = forms.info(id) ?? { classe: 'oggetto' };
+    const info = forms.info(id) ?? { classe: 'object' };
     const name = info.nome ?? id;
     const classe = info.classe ?? forms.classOf(id).id;
     const autore = info.autore ?? 'autore sconosciuto';

@@ -9,7 +9,10 @@ import { ALERT_COLOR, ALERT_NAME, LIVE_LINES, SCREEN_NAME, fill, type Screens, t
 import { tallyLine, usd } from '../kernel/ai/usage';
 import { msText, STATION_KIND, type Chain, type Station } from '../kernel/chain';
 import { fieldLabel, valueText, type BenchShown } from '../kernel/bench';
-import type { BenchStep } from '../kernel/types';
+import type { BenchStep, BenchWay } from '../kernel/types';
+
+/** The ways of a walk of a case, in words (T307a: the ways are the keys' names). */
+const WAY_WORDS: Record<BenchWay, string> = { up: 'su', down: 'giù', left: 'sinistra', right: 'destra' };
 import type { BibleShown } from '../kernel/bible';
 import { NODE_COLOR, NODE_NAME, type GraphNode } from '../kernel/graph';
 import type { Picture } from '../mj/photo';
@@ -374,10 +377,10 @@ export class StudioPanel {
     };
     const STEP: Record<BenchStep['tipo'], (p: any) => string> = {
       slot: (p) => `mette «${p.oggetto}» nello slot «${p.slot}»`,
-      togli: (p) => `toglie ciò che è nello slot «${p.slot}»`,
-      pulsante: (p) => `preme «${p.azione}»`,
-      attendi: (p) => `aspetta ${valueText(p.secondi)} s`,
-      cammina: (p) => `cammina verso ${p.verso === 'giu' ? 'giù' : p.verso} per ${valueText(p.secondi)} s`,
+      remove: (p) => `toglie ciò che è nello slot «${p.slot}»`,
+      button: (p) => `preme «${p.azione}»`,
+      wait: (p) => `aspetta ${valueText(p.secondi)} s`,
+      walk: (p) => `cammina verso ${WAY_WORDS[p.verso as BenchWay] ?? p.verso} per ${valueText(p.secondi)} s`,
     };
     const lines = new Set(c.righe ?? []);
     const code = el('pre', { class: 'program' }, ...b.code.map((l, i) => el('div', lines.has(i + 1) ? { style: 'background:rgba(255,207,92,0.18);color:#ffcf5c' } : {}, `${String(i + 1).padStart(3, ' ')}  ${l}`)));

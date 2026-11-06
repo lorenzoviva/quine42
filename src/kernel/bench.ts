@@ -5,6 +5,7 @@
 import type { Kernel, KernelOptions } from './kernel';
 import type { BenchCase, BenchItem, BenchStep, BenchWay, FileMap, ItemDef, Manifest, UiPanel } from './types';
 import { ITEM_CATEGORIES } from './types';
+import { internalName } from './internalNames';
 import { memoryStore } from './repo';
 import { MockAiModels } from './ai/mock';
 
@@ -14,8 +15,8 @@ export const BENCH = 5;
 const HZ = 20;
 const MAX_SECONDS = 30;
 const MAX_CASES = 3;
-/** The keys a walk of a case holds. */
-const WAYS: Record<BenchWay, 'up' | 'down' | 'left' | 'right'> = { su: 'up', giu: 'down', sinistra: 'left', destra: 'right' };
+/** The keys a walk of a case holds: the ways are the keys' own names (T307a). */
+const WAYS: Record<BenchWay, 'up' | 'down' | 'left' | 'right'> = { up: 'up', down: 'down', left: 'left', right: 'right' };
 
 /** One moment of a case: the watched values and where the wanderer and the entities are (carpet tiles). */
 export interface BenchFrame {
@@ -114,7 +115,7 @@ export function cleanCases(raw: unknown, panel: UiPanel | undefined, lines: numb
   const errors: string[] = [];
   const cases: BenchCase[] = [];
   const slots = new Set(panel?.elementi.filter((e) => e.tipo === 'slot').map((e) => e.id!) ?? []);
-  const buttons = new Set(panel?.elementi.filter((e) => e.tipo === 'pulsante').map((e) => e.id!) ?? []);
+  const buttons = new Set(panel?.elementi.filter((e) => e.tipo === 'button').map((e) => e.id!) ?? []);
   const id = (s: unknown) => String(s ?? '').toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 24);
   for (const r of (Array.isArray(raw) ? raw : []).slice(0, MAX_CASES) as Array<Record<string, any>>) {
     if (!r || typeof r !== 'object') continue;
@@ -126,27 +127,28 @@ export function cleanCases(raw: unknown, panel: UiPanel | undefined, lines: numb
       .filter((o: any) => o && typeof o.nome === 'string' && o.nome.trim())
       .map((o: any) => {
         const bonus = typeof o.bonus_json === 'string' ? parseFlat(o.bonus_json) : o.bonus && typeof o.bonus === 'object' ? parseFlat(JSON.stringify(o.bonus)) : undefined;
-        return { nome: o.nome.trim().slice(0, 40), ...(o.posto ? { posto: String(o.posto).toLowerCase().trim() } : {}), ...(o.categoria ? { categoria: String(o.categoria).toLowerCase().trim() } : {}), ...(bonus ? { bonus } : {}) };
+        return { nome: o.nome.trim().slice(0, 40), ...(o.posto ? { posto: String(o.posto).toLowerCase().trim() } : {}), ...(o.categoria ? { categoria: internalName('categorie', String(o.categoria).toLowerCase().trim()) } : {}), ...(bonus ? { bonus } : {}) };
       });
     const passi: BenchStep[] = [];
     for (const p of (Array.isArray(r.passi) ? r.passi : []).slice(0, 8) as Array<Record<string, any>>) {
-      const tipo = p?.tipo;
-      if (tipo === 'slot' || tipo === 'togli') {
+      // The Engineer still writes the Italian steps of the contract 0.1 (T307a, until T310): `togli` is `remove`.
+      const tipo = typeof p?.tipo === 'string' ? internalName('passi-banco', p.tipo) : undefined;
+      if (tipo === 'slot' || tipo === 'remove') {
         const slot = id(p.slot);
         if (!slots.has(slot)) {
           errors.push(`«${titolo}»: lo slot «${p.slot}» non è nel pannello`);
           continue;
         }
-        if (tipo === 'togli') passi.push({ tipo, slot });
+        if (tipo === 'remove') passi.push({ tipo, slot });
         else if (typeof p.oggetto === 'string' && p.oggetto.trim()) passi.push({ tipo, slot, oggetto: p.oggetto.trim() });
         else errors.push(`«${titolo}»: il passo slot non dice quale oggetto`);
-      } else if (tipo === 'pulsante') {
+      } else if (tipo === 'button') {
         const azione = id(p.azione ?? p.id);
         if (buttons.has(azione)) passi.push({ tipo, azione });
         else errors.push(`«${titolo}»: il pulsante «${p.azione}» non è nel pannello`);
-      } else if (tipo === 'attendi') passi.push({ tipo, secondi: num(p.secondi, 0.1, MAX_SECONDS, 1) });
-      else if (tipo === 'cammina') {
-        const verso = id(p.verso).replace(/^sotto$/, 'giu').replace(/^sopra$/, 'su');
+      } else if (tipo === 'wait') passi.push({ tipo, secondi: num(p.secondi, 0.1, MAX_SECONDS, 1) });
+      else if (tipo === 'walk') {
+        const verso = internalName('passi-banco', id(p.verso).replace(/^sotto$/, 'giu').replace(/^sopra$/, 'su'));
         if (verso in WAYS) passi.push({ tipo, verso: verso as BenchWay, secondi: num(p.secondi, 0.1, MAX_SECONDS, 1) });
         else errors.push(`«${titolo}»: «${p.verso}» non è una direzione (su, giu, sinistra, destra)`);
       }
@@ -224,7 +226,7 @@ export function benchFiles(files: FileMap, manifest: Manifest, logic: string, c:
       id: trialId(o.nome),
       name: o.nome,
       description: `oggetto di prova: ${o.nome}`,
-      category: (ITEM_CATEGORIES as readonly string[]).includes(o.categoria ?? '') ? (o.categoria as ItemDef['category']) : o.posto ? 'vestiario' : 'varie',
+      category: (ITEM_CATEGORIES as readonly string[]).includes(internalName('categorie', o.categoria ?? '')) ? (internalName('categorie', o.categoria!) as ItemDef['category']) : o.posto ? 'clothing' : 'misc',
       weight: 1,
       stack: 1,
       tags: [],
@@ -320,14 +322,14 @@ export async function runCase(
       const at = it ? k.inventory().slots.findIndex((s) => s?.item === it) : -1;
       ok = !!panel && at >= 0 && k.equip(panel, p.slot, at);
       if (!ok) errori.push(`passo ${i + 1}: «${p.oggetto}» non va nello slot «${p.slot}»${at < 0 ? ' (il viandante non lo porta)' : ''}`);
-    } else if (p.tipo === 'togli') {
+    } else if (p.tipo === 'remove') {
       ok = !!panel && k.unequip(panel, p.slot);
       if (!ok) errori.push(`passo ${i + 1}: lo slot «${p.slot}» è vuoto`);
-    } else if (p.tipo === 'pulsante') {
+    } else if (p.tipo === 'button') {
       if (panel) k.uiAction(panel, p.azione);
     }
-    if (p.tipo === 'attendi') run(p.secondi);
-    else if (p.tipo === 'cammina') {
+    if (p.tipo === 'wait') run(p.secondi);
+    else if (p.tipo === 'walk') {
       k.input.setHeld(WAYS[p.verso], true);
       run(p.secondi);
       k.input.releaseAll();

@@ -107,4 +107,4 @@
   <!-- 7. pulizia -->
   <prl><rule in="[UwXJjM]" out="C"/><rule in="u" out="W"/><rule in="Y" out="T"/><rule in="G" out="L"/><rule in="[EZz]" out="B"/><rule in="[ih]" out="R"/></prl>
 </sequence>
-<action name="apri" label="Apri la porta"><prl in="k" out="B"/></action>
+<action name="open" label="Apri la porta"><prl in="k" out="B"/></action>

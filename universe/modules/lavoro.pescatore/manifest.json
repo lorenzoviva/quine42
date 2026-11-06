@@ -9,7 +9,7 @@
       "id": "item.pesce",
       "name": "pesce",
       "description": "Un pesce d'acqua dolce, argentato, preso all'alba.",
-      "category": "cibo",
+      "category": "food",
       "weight": 0.4,
       "stack": 10,
       "tags": [

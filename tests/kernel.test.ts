@@ -13,7 +13,7 @@ describe('kernel', () => {
     expect(k.faults.list()).toEqual([]);
     expect(k.modules.size).toBeGreaterThanOrEqual(20);
     expect(k.content.items.size).toBeGreaterThanOrEqual(30);
-    expect(Object.keys(k.content.layouts)).toEqual(expect.arrayContaining(['borgo', 'bosco', 'campi', 'rovine', 'locanda']));
+    expect(Object.keys(k.content.layouts)).toEqual(expect.arrayContaining(['village', 'woods', 'fields', 'ruins', 'inn']));
     expect(k.repo.head().message).toBe('genesi');
     expect(k.needsGenesis()).toBe(true);
   });
@@ -22,7 +22,7 @@ describe('kernel', () => {
     const chunks = [...k.chunks.values()];
     expect(chunks.every((c) => c.stage === 'planned' && c.place?.name && k.content.layouts[c.plan!.layout])).toBe(true);
     const start = k.chunks.get('0,0')!;
-    expect(start.plan!.layout).toBe('borgo');
+    expect(start.plan!.layout).toBe('village');
     expect(start.lots.length).toBeGreaterThan(0);
     const b = start.lots[0];
     const S = k.config.chunkSize;

@@ -70,7 +70,7 @@ describe('runes and magic', () => {
   it('one rune per cell; the start has magic, carpet runes only far away', async () => {
     const k = await boot();
     const runes = k.ecs.query('rune').map((id) => k.ecs.get(id, 'rune'));
-    expect(runes.some((r) => r.token === 'luce')).toBe(true);
+    expect(runes.some((r) => r.token === 'lux')).toBe(true);
     const S = k.config.chunkSize;
     for (const r of runes) {
       const near = Math.max(Math.abs(Math.floor(r.col / S)), Math.abs(Math.floor(r.row / S))) < 3;
@@ -91,44 +91,47 @@ describe('runes and magic', () => {
     n.mana = 100;
     const pouch = k.inventory().slots.findIndex((s) => s?.item === 'item.borsa-rune');
     expect(pouch).toBeGreaterThanOrEqual(0);
-    giveRunes(k, ['luce', 'luce', 'x']);
+    giveRunes(k, ['lux', 'lux', 'x']);
     // Runes go into the rune pouch, not the slots.
-    expect(countItem(k.bag(pouch)!, 'rune:luce')).toBe(2);
-    expect(k.composeRune('luce')).toBe(true);
+    expect(countItem(k.bag(pouch)!, 'rune:lux')).toBe(2);
+    expect(k.composeRune('lux')).toBe(true);
     expect(k.composeRune('x')).toBe(true);
-    expect(k.incantation()).toEqual(['luce']);
+    expect(k.incantation()).toEqual(['lux']);
     expect(await k.castSpell()).toBe(true);
     expect(k.ecs.query('luce', 'effimero').length).toBe(1);
     expect(n.mana).toBe(96);
-    expect(countItem(k.inventory(), 'rune:luce')).toBe(1);
+    expect(countItem(k.inventory(), 'rune:lux')).toBe(1);
     expect(k.phrase().tokens).toEqual(['x']);
 
     // A new sequence: named once by the Council, then known.
-    giveRunes(k, ['vita', 'scudo', 'vita', 'scudo']);
-    k.phrase().tokens = ['vita', 'scudo'];
-    const calls = k.ai.usage.text;
+    giveRunes(k, ['vita', 'scutum', 'vita', 'scutum']);
+    k.phrase().tokens = ['vita', 'scutum'];
+    // The calls that name incantations (a place the cleared row brings in may be planned meanwhile).
+    const named: string[] = [];
+    const text = k.ai.text.bind(k.ai);
+    k.ai.text = (c) => (c.task === 'spell.name' && named.push(c.task), text(c));
     expect(await k.castSpell()).toBe(true);
-    expect(k.ai.usage.text).toBe(calls + 1);
-    expect(k.content.spells['vita scudo']).toBeTruthy();
-    expect(k.repo.head().message).toMatch(/incantesimo: vita scudo/);
+    expect(named.length).toBe(1);
+    expect(k.content.spells['vita scutum']).toBeTruthy();
+    expect(k.repo.head().message).toMatch(/incantesimo: vita scutum/);
     expect(k.ecs.get(k.wandererEntity, 'scudo')?.fino).toBeGreaterThan(k.time);
-    k.phrase().tokens = ['vita', 'scudo'];
+    k.phrase().tokens = ['vita', 'scutum'];
     await k.castSpell();
-    expect(k.ai.usage.text).toBe(calls + 1);
+    expect(named.length).toBe(1);
     // Spent: no runes left, nothing to cast.
-    k.phrase().tokens = ['vita', 'scudo'];
+    k.phrase().tokens = ['vita', 'scutum'];
     expect(await k.castSpell()).toBe(false);
 
     // Long incantations burn a magic crystal; without mana nothing happens.
-    giveRunes(k, ['fuoco', 'fuoco', 'vento']);
-    k.phrase().tokens = ['fuoco', 'fuoco', 'vento'];
+    giveRunes(k, ['ignis', 'ignis', 'ventus']);
+    k.phrase().tokens = ['ignis', 'ignis', 'ventus'];
     expect(await k.castSpell()).toBe(false);
     k.give('item.cristallo-magico', 1);
     expect(await k.castSpell()).toBe(true);
     expect(countItem(k.inventory(), 'item.cristallo-magico')).toBe(0);
     n.mana = 1;
-    giveRunes(k, ['luce']);
-    k.phrase().tokens = ['luce'];
+    giveRunes(k, ['lux']);
+    k.phrase().tokens = ['lux'];
     expect(await k.castSpell()).toBe(false);
   });
 
@@ -144,21 +147,21 @@ describe('runes and magic', () => {
       expect(await k.castSpell()).toBe(true);
       return k.content.spells[seq.join(' ')];
     };
-    const ab = await cast(['terra', 'vento']);
-    const ba = await cast(['vento', 'terra']);
+    const ab = await cast(['terra', 'ventus']);
+    const ba = await cast(['ventus', 'terra']);
     // Two incantations, each under its own key, doing different things.
     expect(ab).toBeTruthy();
     expect(ba).toBeTruthy();
     expect(ba.name).not.toBe(ab.name);
     expect(JSON.stringify(ba.effects)).not.toBe(JSON.stringify(ab.effects));
-    expect(ab.effects[0]).toMatchObject({ tipo: 'terreno' });
-    expect(ba.effects[0]).toMatchObject({ tipo: 'spingi' });
-    // Repetition strengthens: «vento vento terra» pushes harder than «vento terra».
-    const vvt = await cast(['vento', 'vento', 'terra']);
-    expect((vvt.effects[0] as { forza: number }).forza).toBeGreaterThan((ba.effects[0] as { forza: number }).forza);
-    // The seed's example is a real spell, not a message: «terra fuoco» is a fireball.
-    expect(k.content.spells['terra fuoco'].effects[0]).toMatchObject({ tipo: 'fuoco', raggio: 2 });
-    expect(k.content.spells['acqua fuoco']).toBeUndefined();
+    expect(ab.effects[0]).toMatchObject({ type: 'terrain' });
+    expect(ba.effects[0]).toMatchObject({ type: 'push' });
+    // Repetition strengthens: «ventus ventus terra» pushes harder than «ventus terra».
+    const vvt = await cast(['ventus', 'ventus', 'terra']);
+    expect((vvt.effects[0] as { force: number }).force).toBeGreaterThan((ba.effects[0] as { force: number }).force);
+    // The seed's example is a real spell, not a message: «terra ignis» is a fireball.
+    expect(k.content.spells['terra ignis'].effects[0]).toMatchObject({ type: 'fire', radius: 2 });
+    expect(k.content.spells['aqua ignis']).toBeUndefined();
   });
 
   it('the Narrator learns how runes compose and which reorderings already exist (T57a)', async () => {
@@ -213,10 +216,10 @@ describe('the atlas', () => {
     for (const [id, def] of Object.entries(k.content.layouts)) expect(k.validator.validateLayout(id, def, k.palette, k.sampleDrafts()), id).toEqual([]);
     const atlas = JSON.parse(k.files['world/atlas.json']);
     expect(atlas.regioni.length).toBeGreaterThan(8);
-    const r = atlas.regioni.find((x: { ambiente: string }) => x.ambiente === 'castello');
-    expect((k as any).environmentsFor({ cx: r.centro[0], cy: r.centro[1] }).layouts.map((l: { id: string }) => l.id)).toEqual(['castello']);
+    const r = atlas.regioni.find((x: { ambiente: string }) => x.ambiente === 'castle');
+    expect((k as any).environmentsFor({ cx: r.centro[0], cy: r.centro[1] }).layouts.map((l: { id: string }) => l.id)).toEqual(['castle']);
     // Elsewhere, regional environments are not used at random.
-    expect((k as any).environmentsFor({ cx: 0, cy: 1 }).layouts.some((l: { id: string }) => l.id === 'castello')).toBe(false);
+    expect((k as any).environmentsFor({ cx: 0, cy: 1 }).layouts.some((l: { id: string }) => l.id === 'castle')).toBe(false);
   });
 
   it('asked for an elves wood, the Cartographer writes it, adds its terrain and places it on the map; locals know the way', async () => {

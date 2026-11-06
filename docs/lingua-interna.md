@@ -1,6 +1,6 @@
 # La lingua interna: l'inglese, e le rune in latino (T306, step 42)
 
-> Stato: **decisa** dall'autore (D34, 05/11 sera), ADR-0153. Questo documento è il piano: la tabella completa di ciò che cambia nome,
+> Stato: **decisa** dall'autore (D34, 05/11 sera), ADR-0153; **T307a fatto** (contratto `0.2.0`, ADR-0155: la simulazione e le rune latine, la migrazione `0.1 → 0.2`). Questo documento è il piano: la tabella completa di ciò che cambia nome,
 > dominio per dominio, e i task che la applicano. La stessa tabella, come dato, è `src/kernel/internalNames.ts` (`INTERNAL_NAMES`);
 > `tests/internal-names.test.ts` controlla che non abbia doppioni né collisioni e che copra i valori del codice; le tabelle qui sotto
 > le riscrive `npx vite-node lab/scripts/lingua-interna.ts` (con `-- --misura` conta anche i file che ogni passo tocca).
@@ -100,6 +100,9 @@ T307 come era scritto (tutti i valori insieme) toccava ≈ 400 file, T308 ≈ 38
 1. **T307a** — i valori della simulazione e le rune in latino, contratto `0.2.0`, migrazione `0.1 → 0.2` con la riscrittura del Lua
    (punto 2 sopra: la scrive questo task, gli altri la estendono) e la riparazione dei valori italiani nel validatore. Browser: `?skip&offline`,
    un universo salvato prima si apre migrato, una runa latina pronunciata funziona (è la verifica che T307 chiedeva).
+   **Fatto** (ADR-0155): `MIGRATIONS[0]` con `migratePlan` (i piani, idempotente, a ogni lettura), `luaFor0_2` solo nei moduli del Concilio,
+   `seed.json` che segue la migrazione, `prepareUniverse` in ogni caricamento; gli schemi del Concilio elencano ancora i valori italiani
+   (`italianValues`) e il validatore li ripara; i quattro universi del laboratorio restano `0.1` sul disco e si leggono portati.
 2. **T307b** — i valori della società e del Concilio, contratto `0.3.0`: rinomina anche `prompts/agents/<agente>.md`, i moduli
    `lavoro.*` → `job.*` e `sys.lavoro` → `sys.work`, i modelli `corona-gerboa-<agente>` e `suono-*` del seme.
 3. **T308a** — i campi e i percorsi dei file dell'universo, contratto `0.4.0`: `paths.ts` (`allowedPath`, `councilMayWrite`), `files.ts`

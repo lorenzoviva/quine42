@@ -35,7 +35,7 @@ describe('the parts the ink follows', () => {
   });
 
   it('the crown of a pine is one part, however many greens are scattered on it, and the trunk another', () => {
-    const part = lettersOf(bundledFiles['models/albero.xml']);
+    const part = lettersOf(bundledFiles['models/tree.xml']);
     expect(part('L')).toBe(part('F'));
     expect(part('N')).toBe(part('F'));
     expect(part('T')).not.toBe(part('F'));

@@ -80,7 +80,7 @@ describe('MarkovJunior XML (lab/mjx)', () => {
     const s = mjxSystem('persona');
     expect(s).toContain('IL PRIMO STRATO È QUELLO IN ALTO');
     expect(s).toContain('N ab5236');
-    expect(s).toContain('persona (persona): 20×15×30');
+    expect(s).toContain('person (persona): 20×15×30');
     expect(s).not.toMatch(/@@/);
     expect(s).toContain('Fabbro robusto');
     expect(extractXml('Ecco:\n```xml\n<one values="BW" in="B" out="W"/>\n```\nfine')).toBe('<one values="BW" in="B" out="W"/>');

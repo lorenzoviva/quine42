@@ -20,6 +20,7 @@ import { compileMjx, type MjxModel } from '../mj/model';
 import { FORM_LIMITS, MAX_FORM_TIME, MAX_FORM_XML, runMjx } from '../mj/run';
 import { analyzeSound } from '../mj/soundanalysis';
 import { reservedName } from './paths';
+import { internalEffect, internalManifest, internalName } from './internalNames';
 
 const KINDS: ModuleKind[] = ['system', 'entity', 'item', 'player', 'generator', 'data'];
 const LAYERS = ['ground', 'floor', 'wall', 'door', 'liquid', 'vegetation', 'rock'];
@@ -66,7 +67,7 @@ export function modelErrors(path: string, xml: string, time = 8_000): string[] {
   if (xml.length > MAX_FORM_XML) return [`${path}: programma troppo lungo (max ${MAX_FORM_XML} caratteri)`];
   time = Math.min(time, MAX_FORM_TIME);
   try {
-    const size = /<(?!!)[a-z]+\b[^>]*\ssize="/i.test(xml) ? undefined : boxOf(classOf('oggetto')!);
+    const size = /<(?!!)[a-z]+\b[^>]*\ssize="/i.test(xml) ? undefined : boxOf(classOf('object')!);
     const m = compileMjx(xml, size ? { size } : {});
     if (m.sound) {
       const errors = soundErrors(path, m, time);
@@ -138,7 +139,8 @@ export class Validator {
   parseManifest(path: string, src: string): { manifest?: Manifest; errors: string[] } {
     let m: any;
     try {
-      m = JSON.parse(src);
+      // The values of the contract 0.2 the Council still writes in Italian (T307a): internal before anything reads them.
+      m = internalManifest(JSON.parse(src));
     } catch (e) {
       return { errors: [`${path}: JSON non valido (${(e as Error).message})`] };
     }
@@ -314,6 +316,9 @@ export class Validator {
   validatePlan(plan: ChunkPlan, layouts: Set<string>, placeable: Set<string>): PlanVerdict {
     const errors: string[] = [];
     const dropped: string[] = [];
+    // An environment of the seed by its Italian id of the contract 0.1 (T307a): the one it became.
+    const named = internalName('ambienti', plan.layout ?? '');
+    if (!layouts.has(plan.layout) && layouts.has(named)) plan = { ...plan, layout: named };
     if (!plan.place?.name || plan.place.name.length > 60) errors.push('luogo.nome mancante o troppo lungo');
     if (typeof plan.place?.description !== 'string' || plan.place.description.length > 300) errors.push('luogo.descrizione non valida');
     if (!layouts.has(plan.layout)) errors.push(`ambiente sconosciuto "${plan.layout}" (scegli tra: ${[...layouts].join(', ')})`);
@@ -342,6 +347,8 @@ export class Validator {
     }).map((s) => {
       // A size that is not one of D&D's (ADR-0092) is dropped: the structure keeps its lot's.
       if (s.taglia === undefined || sizeOf(s.taglia)) return s;
+      const size = sizeOf(internalName('taglie', s.taglia));
+      if (size) return { ...s, taglia: size.id };
       dropped.push(`struttura «${s.concetto}»: taglia «${s.taglia}» sconosciuta`);
       const { taglia: _, ...rest } = s;
       return rest;
@@ -373,116 +380,124 @@ const num = (v: unknown, lo: number, hi: number, def: number) => {
 
 /**
  * Effects chosen by the Council, from the closed set: unknown types are dropped, numbers clamped,
- * names resolved to ids (items, modules, terrains). What remains is safe to apply.
+ * names resolved to ids (items, modules, terrains). What remains is safe to apply. The Italian of the contract 0.1, which the
+ * Council still writes until its prompts change (T310), is made internal first (`{tipo: 'luce'}` → `{type: 'light'}`, T307a).
  */
 export function validateEffects(raw: unknown, ctx: EffectContext): EffectVerdict {
   const out: EffectVerdict = { effects: [], dropped: [], unknownItems: [] };
   const list = Array.isArray(raw) ? raw.slice(0, 8) : [];
+  // A terrain by its code, its id or its name (in the language of the world), then by a name that holds the word.
   const tileCode = (v: unknown): string | undefined => {
     const s = String(v ?? '').trim();
     if (!s) return undefined;
     if (ctx.palette[s] && s !== '?') return s;
     const n = s.toLowerCase();
-    return Object.keys(ctx.palette).find((c) => c !== '?' && ctx.palette[c].name.toLowerCase() === n) ?? Object.keys(ctx.palette).find((c) => c !== '?' && (ctx.palette[c].name.toLowerCase().includes(n) || n.includes(ctx.palette[c].name.toLowerCase())));
+    const codes = Object.keys(ctx.palette).filter((c) => c !== '?');
+    const id = internalName('terreni', n);
+    return (
+      codes.find((c) => ctx.palette[c].id === n || ctx.palette[c].id === id) ??
+      codes.find((c) => ctx.palette[c].name.toLowerCase() === n) ??
+      codes.find((c) => ctx.palette[c].name.toLowerCase().includes(n) || n.includes(ctx.palette[c].name.toLowerCase()))
+    );
   };
   for (const r of list) {
     if (!r || typeof r !== 'object') continue;
-    const e = r as Record<string, unknown>;
-    const tipo = String(e.tipo ?? '');
-    switch (tipo) {
-      case 'messaggio':
-        if (typeof e.testo === 'string' && e.testo.trim()) out.effects.push({ tipo, testo: e.testo.trim().slice(0, 300) });
+    const e = internalEffect(r) as Record<string, unknown>;
+    const type = String(e.type ?? '');
+    switch (type) {
+      case 'message':
+        if (typeof e.text === 'string' && e.text.trim()) out.effects.push({ type, text: e.text.trim().slice(0, 300) });
         break;
-      case 'bisogni': {
-        const b: Effect & { tipo: 'bisogni' } = { tipo };
-        for (const k of ['fame', 'sete', 'energia', 'salute'] as const) if (e[k] !== undefined && e[k] !== null) b[k] = Math.round(num(e[k], -40, 40, 0));
+      case 'needs': {
+        const b: Effect & { type: 'needs' } = { type };
+        for (const k of ['hunger', 'thirst', 'energy', 'health'] as const) if (e[k] !== undefined && e[k] !== null) b[k] = Math.round(num(e[k], -40, 40, 0));
         if (Object.keys(b).length > 1) out.effects.push(b);
         else out.dropped.push('bisogni senza variazioni');
         break;
       }
-      case 'crea_oggetto':
-      case 'consuma': {
-        const name = String(e.oggetto ?? '').trim();
+      case 'create_item':
+      case 'consume': {
+        const name = String(e.item ?? '').trim();
         const id = name ? ctx.item(name) : undefined;
-        const quantita = Math.round(num(e.quantita, 1, tipo === 'crea_oggetto' ? 5 : 10, 1));
-        if (id) out.effects.push({ tipo, oggetto: id, quantita });
-        else if (tipo === 'crea_oggetto' && name.length >= 2) out.unknownItems.push(name);
-        else out.dropped.push(`${tipo}: «${name}» non esiste`);
+        const quantity = Math.round(num(e.quantity, 1, type === 'create_item' ? 5 : 10, 1));
+        if (id) out.effects.push({ type, item: id, quantity });
+        else if (type === 'create_item' && name.length >= 2) out.unknownItems.push(name);
+        else out.dropped.push(`${type}: «${name}» non esiste`);
         break;
       }
-      case 'distruggi':
-      case 'apri':
-        out.effects.push({ tipo });
+      case 'destroy':
+      case 'open':
+        out.effects.push({ type });
         break;
-      case 'contenitore': {
-        const bottino = typeof e.bottino === 'string' && ctx.loot.has(e.bottino) ? e.bottino : ctx.loot.has('cassa') ? 'cassa' : [...ctx.loot][0];
-        if (bottino) out.effects.push({ tipo, capienza: Math.round(num(e.capienza, 2, 12, 6)), bottino });
+      case 'container': {
+        const loot = typeof e.loot === 'string' && ctx.loot.has(e.loot) ? e.loot : ctx.loot.has('cassa') ? 'cassa' : [...ctx.loot][0];
+        if (loot) out.effects.push({ type, capacity: Math.round(num(e.capacity, 2, 12, 6)), loot });
         else out.dropped.push('contenitore: nessuna tabella di bottino');
         break;
       }
-      case 'terreno': {
-        const a = tileCode(e.a);
-        if (!a) {
-          out.dropped.push(`terreno: «${String(e.a ?? '')}» non è un terreno`);
+      case 'terrain': {
+        const to = tileCode(e.to);
+        if (!to) {
+          out.dropped.push(`terreno: «${String(e.to ?? '')}» non è un terreno`);
           break;
         }
-        const da = e.da !== undefined && e.da !== null && e.da !== '' ? tileCode(e.da) : undefined;
-        out.effects.push({ tipo, a, ...(da ? { da } : {}), raggio: Math.round(num(e.raggio, 0, 3, 1)) });
+        const from = e.from !== undefined && e.from !== null && e.from !== '' ? tileCode(e.from) : undefined;
+        out.effects.push({ type, to, ...(from ? { from } : {}), radius: Math.round(num(e.radius, 0, 3, 1)) });
         break;
       }
-      case 'rilievo': {
+      case 'relief': {
         const delta = Math.round(num(e.delta, -8, 8, 1));
         if (!delta) {
           out.dropped.push('rilievo senza variazione');
           break;
         }
-        out.effects.push({ tipo, delta, raggio: Math.round(num(e.raggio, 0, 3, 1)) });
+        out.effects.push({ type, delta, radius: Math.round(num(e.radius, 0, 3, 1)) });
         break;
       }
-      case 'fuoco':
-      case 'luce':
-        out.effects.push({ tipo, raggio: num(e.raggio, 0.5, tipo === 'fuoco' ? 3 : 8, tipo === 'fuoco' ? 1 : 4), durata: num(e.durata, 2, tipo === 'fuoco' ? 30 : 300, tipo === 'fuoco' ? 10 : 60) });
+      case 'fire':
+      case 'light':
+        out.effects.push({ type, radius: num(e.radius, 0.5, type === 'fire' ? 3 : 8, type === 'fire' ? 1 : 4), duration: num(e.duration, 2, type === 'fire' ? 30 : 300, type === 'fire' ? 10 : 60) });
         break;
-      case 'scudo':
-        out.effects.push({ tipo, durata: num(e.durata, 2, 120, 20) });
+      case 'shield':
+        out.effects.push({ type, duration: num(e.duration, 2, 120, 20) });
         break;
-      case 'spingi':
-        out.effects.push({ tipo, forza: num(e.forza, 0.5, 10, 3) });
+      case 'push':
+        out.effects.push({ type, force: num(e.force, 0.5, 10, 3) });
         break;
-      case 'evoca': {
-        const id = ctx.module(String(e.modulo ?? ''));
-        if (id) out.effects.push({ tipo, modulo: id });
-        else out.dropped.push(`evoca: «${String(e.modulo ?? '')}» non esiste`);
+      case 'summon': {
+        const id = ctx.module(String(e.module ?? ''));
+        if (id) out.effects.push({ type, module: id });
+        else out.dropped.push(`evoca: «${String(e.module ?? '')}» non esiste`);
         break;
       }
-      case 'legame':
-        if (typeof e.legame === 'string' && e.legame.trim()) out.effects.push({ tipo, legame: e.legame.trim().toLowerCase().slice(0, 30) });
+      case 'bond':
+        if (typeof e.bond === 'string' && e.bond.trim()) out.effects.push({ type, bond: e.bond.trim().toLowerCase().slice(0, 30) });
         else out.dropped.push('legame senza legame');
         break;
-      case 'ricordo':
-        if (typeof e.testo === 'string' && e.testo.trim()) out.effects.push({ tipo, testo: e.testo.trim().slice(0, 200), peso: Math.round(num(e.peso, 1, 3, 2)) });
+      case 'memory':
+        if (typeof e.text === 'string' && e.text.trim()) out.effects.push({ type, text: e.text.trim().slice(0, 200), weight: Math.round(num(e.weight, 1, 3, 2)) });
         break;
-      case 'stato': {
-        const nome = typeof e.nome === 'string' ? e.nome.trim().toLowerCase().slice(0, 30) : '';
-        if (!nome) {
+      case 'state': {
+        const name = typeof e.name === 'string' ? e.name.trim().toLowerCase().slice(0, 30) : '';
+        if (!name) {
           out.dropped.push('stato senza nome');
           break;
         }
-        const st: Effect & { tipo: 'stato' } = { tipo, nome, durata: Math.round(num(e.durata, 0, 3600, 0)) };
-        if (e.velocita !== undefined) st.velocita = num(e.velocita, 0.3, 3, 1);
-        if (e.peso !== undefined) st.peso = num(e.peso, -20, 60, 0);
-        if (e.luce !== undefined) st.luce = num(e.luce, 0, 8, 0);
+        const st: Effect & { type: 'state' } = { type, name, duration: Math.round(num(e.duration, 0, 3600, 0)) };
+        if (e.speed !== undefined) st.speed = num(e.speed, 0.3, 3, 1);
+        if (e.weight !== undefined) st.weight = num(e.weight, -20, 60, 0);
+        if (e.light !== undefined) st.light = num(e.light, 0, 8, 0);
         out.effects.push(st);
         break;
       }
-      case 'togli_stato':
-        if (typeof e.nome === 'string' && e.nome.trim()) out.effects.push({ tipo, nome: e.nome.trim().toLowerCase().slice(0, 30) });
+      case 'remove_state':
+        if (typeof e.name === 'string' && e.name.trim()) out.effects.push({ type, name: e.name.trim().toLowerCase().slice(0, 30) });
         break;
-      case 'nascita':
-        out.effects.push({ tipo, ...(typeof e.nome === 'string' && e.nome.trim() ? { nome: e.nome.trim().slice(0, 30) } : {}) });
+      case 'birth':
+        out.effects.push({ type, ...(typeof e.name === 'string' && e.name.trim() ? { name: e.name.trim().slice(0, 30) } : {}) });
         break;
       default:
-        out.dropped.push(`effetto sconosciuto «${tipo}»`);
+        out.dropped.push(`effetto sconosciuto «${type}»`);
     }
   }
   return out;
@@ -500,46 +515,46 @@ export function describeEffect(e: Effect, names: EffectNames): string {
   const signed = (n: number) => (n > 0 ? `+${n}` : `${n}`);
   const radius = (r?: number) => (r ? `, raggio ${r}` : '');
   const lasting = (d?: number) => (d ? ` per ${d} s` : '');
-  switch (e.tipo) {
-    case 'messaggio':
-      return `un messaggio: «${e.testo}»`;
-    case 'bisogni':
-      return (['salute', 'energia', 'fame', 'sete'] as const).filter((k) => e[k]).map((k) => `${k} ${signed(e[k]!)}`).join(', ');
-    case 'crea_oggetto':
-      return `crea ${e.quantita ?? 1} × ${names.item(e.oggetto) ?? e.oggetto}`;
-    case 'consuma':
-      return `consuma ${e.quantita ?? 1} × ${names.item(e.oggetto) ?? e.oggetto}`;
-    case 'distruggi':
+  switch (e.type) {
+    case 'message':
+      return `un messaggio: «${e.text}»`;
+    case 'needs':
+      return ([['health', 'salute'], ['energy', 'energia'], ['hunger', 'fame'], ['thirst', 'sete']] as const).filter(([k]) => e[k]).map(([k, word]) => `${word} ${signed(e[k]!)}`).join(', ');
+    case 'create_item':
+      return `crea ${e.quantity ?? 1} × ${names.item(e.item) ?? e.item}`;
+    case 'consume':
+      return `consuma ${e.quantity ?? 1} × ${names.item(e.item) ?? e.item}`;
+    case 'destroy':
       return 'distrugge ciò che ha davanti';
-    case 'apri':
+    case 'open':
       return 'apre ciò che ha davanti';
-    case 'contenitore':
-      return `ne fa un contenitore${e.capienza ? ` da ${e.capienza} posti` : ''}`;
-    case 'terreno':
-      return `${e.da ? (names.tile(e.da) ?? e.da) : 'il terreno'} diventa ${names.tile(e.a) ?? e.a}${radius(e.raggio)}`;
-    case 'rilievo':
-      return `${e.delta > 0 ? 'alza' : 'abbassa'} il terreno di ${Math.abs(e.delta)} ${Math.abs(e.delta) === 1 ? 'livello' : 'livelli'}${radius(e.raggio)}`;
-    case 'fuoco':
-      return `fuoco${lasting(e.durata)}${radius(e.raggio)}`;
-    case 'luce':
-      return `luce${lasting(e.durata)}${radius(e.raggio)}`;
-    case 'scudo':
-      return `scudo${lasting(e.durata)}`;
-    case 'spingi':
-      return `spinge via${e.forza ? ` (forza ${e.forza})` : ''}`;
-    case 'evoca':
-      return `evoca ${names.module(e.modulo) ?? e.modulo}`;
-    case 'legame':
-      return `diventa ${e.legame} di chi la pronuncia`;
-    case 'ricordo':
-      return `lascia un ricordo: «${e.testo}»`;
-    case 'nascita':
-      return `fa nascere ${e.nome ?? 'qualcuno'}`;
-    case 'stato': {
-      const what = [e.velocita !== undefined && `velocità × ${e.velocita}`, e.peso && `peso ${signed(e.peso)}`, e.luce && `luce ${e.luce}`].filter(Boolean).join(', ');
-      return `stato «${e.nome}»${what ? ` (${what})` : ''}${e.durata ? lasting(e.durata) : ' finché non si toglie'}`;
+    case 'container':
+      return `ne fa un contenitore${e.capacity ? ` da ${e.capacity} posti` : ''}`;
+    case 'terrain':
+      return `${e.from ? (names.tile(e.from) ?? e.from) : 'il terreno'} diventa ${names.tile(e.to) ?? e.to}${radius(e.radius)}`;
+    case 'relief':
+      return `${e.delta > 0 ? 'alza' : 'abbassa'} il terreno di ${Math.abs(e.delta)} ${Math.abs(e.delta) === 1 ? 'livello' : 'livelli'}${radius(e.radius)}`;
+    case 'fire':
+      return `fuoco${lasting(e.duration)}${radius(e.radius)}`;
+    case 'light':
+      return `luce${lasting(e.duration)}${radius(e.radius)}`;
+    case 'shield':
+      return `scudo${lasting(e.duration)}`;
+    case 'push':
+      return `spinge via${e.force ? ` (forza ${e.force})` : ''}`;
+    case 'summon':
+      return `evoca ${names.module(e.module) ?? e.module}`;
+    case 'bond':
+      return `diventa ${e.bond} di chi la pronuncia`;
+    case 'memory':
+      return `lascia un ricordo: «${e.text}»`;
+    case 'birth':
+      return `fa nascere ${e.name ?? 'qualcuno'}`;
+    case 'state': {
+      const what = [e.speed !== undefined && `velocità × ${e.speed}`, e.weight && `peso ${signed(e.weight)}`, e.light && `luce ${e.light}`].filter(Boolean).join(', ');
+      return `stato «${e.name}»${what ? ` (${what})` : ''}${e.duration ? lasting(e.duration) : ' finché non si toglie'}`;
     }
-    case 'togli_stato':
-      return `toglie lo stato «${e.nome}»`;
+    case 'remove_state':
+      return `toglie lo stato «${e.name}»`;
   }
 }

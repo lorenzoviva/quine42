@@ -94,7 +94,7 @@ describe('runes and bindings by role (T37)', () => {
     const k = await many();
     expect(runes(k)).not.toContain('speed');
     expect(runes(k)).not.toContain('carpet');
-    expect(runes(k)).toContain('luce');
+    expect(runes(k)).toContain('lux');
     for (const l of lines(k)) expect(carpetLine(l), l).toBe(false);
   });
 

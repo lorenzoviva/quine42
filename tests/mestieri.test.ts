@@ -122,9 +122,9 @@ describe('world.act: an individual uses a thing', () => {
     const p = k.ecs.get(who, 'pos');
     const well = k.spawnModuleEntity(k.modules.get('object.well')!, p.x + 1, p.y)!;
     spawned.push(well);
-    expect(k.actAs(who, well, 'ascolta')).toMatch(/./);
+    expect(k.actAs(who, well, 'listen')).toMatch(/./);
     expect(k.actAs(who, well, 'nessuna')).toBeUndefined();
-    expect(k.actAs(k.wandererEntity, well, 'ascolta')).toBeUndefined();
+    expect(k.actAs(k.wandererEntity, well, 'listen')).toBeUndefined();
     k.ecs.get(well, 'pos').x += 10;
     expect(k.actAs(who, well, 'ascolta')).toBeUndefined();
   });

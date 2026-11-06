@@ -108,12 +108,12 @@ describe('la galleria delle carte', () => {
   });
 
   it('con ciò che dà publicFiles una carta con un corpo ha la foto; un luogo no, e resta la gemma (T168)', () => {
-    const whole: FileMap = { ...universe(), 'modules/cosa/manifest.json': JSON.stringify({ id: 'cosa', name: 'Cosa', kind: 'entity', appearance: { classe: 'oggetto' }, carta: carta('io') }) };
+    const whole: FileMap = { ...universe(), 'modules/cosa/manifest.json': JSON.stringify({ id: 'cosa', name: 'Cosa', kind: 'entity', appearance: { classe: 'object' }, carta: carta('io') }) };
     const files = publicFiles(whole);
     const forms = new Forms(new InlineRunner());
     forms.load(files);
     const by = (id: string) => allCards(whole, true).find((c) => c.id === id)!;
-    expect(artOf(by('oggetto:spada'), files, forms)?.model).toBe('oggetto');
+    expect(artOf(by('oggetto:spada'), files, forms)?.model).toBe('object');
     expect(artOf(by('tipo:cosa'), files, forms)?.xml).toBeTruthy();
     // A universe played offline has only cards of places: no picture, so no worker starts. It is what they are, not a fault.
     expect(artOf(by('luogo:0_0'), files, forms)).toBeUndefined();
@@ -125,7 +125,7 @@ describe('la galleria delle carte', () => {
     forms.load(files);
     const by = (id: string) => allCards(files, true).find((c) => c.id === id)!;
     const req = artOf(by('oggetto:spada'), files, forms);
-    expect(req?.model).toBe('oggetto');
+    expect(req?.model).toBe('object');
     expect(artOf(by('regola:canto'), files, forms)).toBeUndefined();
     expect(artOf(by('trama:furto'), files, forms)).toBeUndefined();
     const pic = cardPicture(req!);

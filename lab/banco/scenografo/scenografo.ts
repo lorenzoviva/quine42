@@ -345,9 +345,9 @@ export interface Mobile {
 
 /** The catalogue the Scenografo chooses from: what a room of each kind may hold (data, the whole of what an agent writes). */
 export const CATALOGO = {
-  sala: ['banco', 'credenza', 'barile', 'mobile'],
-  stanza: ['letto', 'credenza', 'mobile'],
-  piccola: ['barile', 'mobile'],
+  sala: ['banco', 'credenza', 'barile', 'furniture'],
+  stanza: ['letto', 'credenza', 'furniture'],
+  piccola: ['barile', 'furniture'],
 };
 
 const ROOT = path.resolve(__dirname, '../../..');

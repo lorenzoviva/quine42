@@ -125,7 +125,7 @@ describe('structure stamps', () => {
   it('a castle has its moat, walls, a drawbridge at the gate and a keep, in the world codes', () => {
     const rows = Array.from({ length: 18 }, () => 'g'.repeat(18));
     const pal = { ...palette, b: { name: 'muro di pietra', color: '#888888', solid: true, layer: 'wall' as const }, z: { name: 'ponte levatoio', color: '#8b6a42', solid: false, layer: 'floor' as const }, l: { name: 'pavimento di pietra', color: '#999999', solid: false, layer: 'floor' as const, indoor: true } };
-    const r = layout(rows, pal, { cx: 3, cy: 2, seed: 9, pathCode: 'p', program: { type: 'stamp', shape: 'castello', codes: { muro: 'b', pavimento: 'l', ponte: 'z' } } as MjNode });
+    const r = layout(rows, pal, { cx: 3, cy: 2, seed: 9, pathCode: 'p', program: { type: 'stamp', shape: 'castle', codes: { muro: 'b', pavimento: 'l', ponte: 'z' } } as MjNode });
     const all = r.grid.join('');
     expect(all).toMatch(/w/);
     expect(all).toMatch(/z/);

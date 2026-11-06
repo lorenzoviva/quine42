@@ -225,7 +225,7 @@ export function giudicaVarianza(v: Varianza, b: Pick<Bersaglio, 'classe'>): stri
   if (v.statico) out.push(`statico: voxel ${n2(v.voxel)} (serve ≥ ${S.voxel}; colore ${n2(v.colore)}, che non conta)`);
   else if (v.voxel < S.voxel) out.push(`voxel: ${n2(v.voxel)} (serve ≥ ${S.voxel})`);
   if (v.pianta < S.pianta) out.push(`pianta: ${n2(v.pianta)} (serve ≥ ${S.pianta})`);
-  if (b.classe === 'grande' && v.perimetro < S.perimetro) out.push(`perimetro: ${n2(v.perimetro)} (serve ≥ ${S.perimetro})`);
+  if (b.classe === 'structure' && v.perimetro < S.perimetro) out.push(`perimetro: ${n2(v.perimetro)} (serve ≥ ${S.perimetro})`);
   if (v.interno < S.interno) out.push(`interno: ${n2(v.interno)} (serve ≥ ${S.interno})`);
   if (Math.max(v.firmePiani, v.firmeStanze) < S.firme) out.push(`piani e stanze: ${v.firmePiani} liste di piani, ${v.firmeStanze} di stanze (serve almeno una con ≥ ${S.firme})`);
   if (v.architetture < S.architetture) out.push(`architetture: ${v.architetture} su ${v.semi} semi (serve ≥ ${S.architetture})`);
@@ -299,7 +299,7 @@ export function prova(xml: string, b: Bersaglio, o: OpzioniProva = {}): Prova {
         ({ vpt, gradino } = e.scatola);
         const difetti = giudica(m, e.scatola).difetti;
         // A program with a `size` of its own (`map`) stays that large whatever the size says.
-        if (box.join() !== voluta.join()) difetti.push(`scatola: ${box.join(' × ')} (la taglia ${taglia} dà ${voluta.join(' × ')})`);
+        if (box.join() !== voluta.join()) difetti.push(`scatola: ${box.join(' × ')} (la taglia ${sizeOf(taglia)?.name.toLowerCase() ?? taglia} dà ${voluta.join(' × ')})`);
         return { seme, difetti, ms: Date.now() - t };
       } catch (err) {
         if (!(err instanceof Mj3Error)) throw err;

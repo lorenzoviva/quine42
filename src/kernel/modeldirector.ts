@@ -10,6 +10,7 @@ import type { ModelInfo } from './forms';
 import { BudgetError } from './ai/models';
 import { modelGap, sculptPlan } from './coefficients';
 import { hashStr, hex } from './rng';
+import { italianName } from './internalNames';
 
 /**
  * What a model's index entry says of its size (ADR-0092): the size, if not its class's own, and the coarser density
@@ -23,12 +24,14 @@ export function modelSize(req: Pick<SculptRequest, 'classe' | 'taglia'>): Pick<M
 }
 
 /** Common shapes of items: one program each, tinted with each item's colour. */
-export const ITEM_SHAPES = ['sacco', 'bottiglia', 'vaso', 'cesto', 'frutto', 'pane', 'formaggio', 'attrezzo', 'lama', 'arco', 'gemma', 'cristallo', 'libro', 'pergamena', 'abito', 'cappello', 'scarpe', 'anello', 'moneta', 'erba', 'fiore', 'fungo', 'pietra', 'legna', 'carne', 'pesce', 'chiave', 'candela', 'lanterna', 'corda'] as const;
+export const ITEM_SHAPES = ['sack', 'bottle', 'jar', 'basket', 'fruit', 'bread', 'cheese', 'tool', 'blade', 'bow', 'gem', 'crystal', 'book', 'scroll', 'garment', 'hat', 'shoes', 'ring', 'coin', 'herb', 'flower', 'mushroom', 'stone', 'firewood', 'meat', 'fish', 'key', 'candle', 'lantern', 'rope'] as const;
 export type ItemShape = (typeof ITEM_SHAPES)[number];
-export const itemShapeModel = (f: string) => `forma-${f}`;
+/** The prefix of the model of a common shape (`shape-sack`): the kernel knows these ids, the Sculptor writes them when they are missing. */
+export const SHAPE_PREFIX = 'shape-';
+export const itemShapeModel = (f: string) => `${SHAPE_PREFIX}${f}`;
 
 /** The generic programs of the classes: shared by every kind of entity without a model of its own. */
-export const GENERIC = new Set(['persona', 'animale', 'bestia', 'albero', 'cespuglio', 'roccia', 'sasso', 'oggetto', 'mobile', 'edificio', 'monumento', 'grande']);
+export const GENERIC = new Set(['person', 'animal', 'beast', 'tree', 'bush', 'rock', 'pebble', 'object', 'furniture', 'building', 'monument', 'structure']);
 
 /** A model id for a module or an item of its own ("npc.mugnaio" → "npc-mugnaio"). */
 const COMMON_HOUSE = 'casa-comune-';
@@ -71,8 +74,9 @@ export class ModelDirector {
     }
     for (const d of k.content.items.values()) {
       if (!lacks(d.model)) continue;
-      const forma = d.model!.startsWith('forma-') ? d.model!.slice('forma-'.length) : undefined;
-      out.push(forma ? { id: d.model!, nome: `${forma} (forma comune degli oggetti)`, aspetto: `un ${forma} semplice e riconoscibile, come tanti oggetti del mondo (per esempio: ${d.name})`, classe: 'oggetto', tinta: true } : { id: d.model!, nome: d.name, aspetto: d.aspetto ?? d.description, classe: 'oggetto' });
+      // A common shape is asked for by its word in the language of the world (T307a: the id is internal, `shape-sack`; the word is «sacco»).
+      const forma = d.model!.startsWith(SHAPE_PREFIX) ? italianName('impronte', d.model!.slice(SHAPE_PREFIX.length)) : undefined;
+      out.push(forma ? { id: d.model!, nome: `${forma} (forma comune degli oggetti)`, aspetto: `un ${forma} semplice e riconoscibile, come tanti oggetti del mondo (per esempio: ${d.name})`, classe: 'object', tinta: true } : { id: d.model!, nome: d.name, aspetto: d.aspetto ?? d.description, classe: 'object' });
     }
     // Structures the Cartographer asked for (ADR-0043), at their size (ADR-0092): the rare ones (Huge per zone,
     // Gargantuan per realm, the kernel sees to it) by the best model.
@@ -84,7 +88,7 @@ export class ModelDirector {
     }
     for (const [code, t] of Object.entries(k.palette)) {
       if (code === '?' || !lacks(t.model)) continue;
-      out.push({ id: t.model!, nome: t.name, aspetto: t.description ?? t.name, classe: t.layer === 'vegetation' ? 'albero' : t.layer === 'rock' ? 'roccia' : 'cespuglio', contesto: `sulle caselle di ${t.name}` });
+      out.push({ id: t.model!, nome: t.name, aspetto: t.description ?? t.name, classe: t.layer === 'vegetation' ? 'tree' : t.layer === 'rock' ? 'rock' : 'bush', contesto: `sulle caselle di ${t.name}` });
     }
     // Every common lot shows them: before anything else, or the budget may end on the seed's cottages.
     return [...out.filter((r) => r.id.startsWith(COMMON_HOUSE)), ...out.filter((r) => !r.id.startsWith(COMMON_HOUSE))];

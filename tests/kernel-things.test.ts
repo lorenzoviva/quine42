@@ -51,15 +51,15 @@ describe('items, containers, actions, needs', () => {
   it('objects offer their own actions, with requirements', async () => {
     const bed = spawnInFront(k, 'obj.letto');
     k.needs()!.energy = 10;
-    await k.perform(bed, 'act:dormi');
+    await k.perform(bed, 'act:sleep');
     expect(k.needs()!.energy).toBe(100);
     const well = spawnInFront(k, 'object.well', 2.5);
-    const attingi = () => k.actionsFor(well).find((a) => a.id === 'act:attingi')!;
+    const attingi = () => k.actionsFor(well).find((a) => a.id === 'act:draw')!;
     expect(attingi().enabled).toBe(false);
     expect(attingi().reason).toMatch(/Secchio/);
     k.inventory().slots[5] = { item: 'item.secchio', count: 1 };
     expect(attingi().enabled).toBe(true);
-    await k.perform(well, 'act:attingi');
+    await k.perform(well, 'act:draw');
     expect(countItem(k.inventory(), 'item.otre-acqua')).toBe(1);
   });
 

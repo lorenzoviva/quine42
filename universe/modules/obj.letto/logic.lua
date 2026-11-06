@@ -3,12 +3,12 @@
 local M = {}
 
 function M.on_act(id, user, action)
-  if action == "dormi" then
+  if action == "sleep" then
     local n = ecs.get(user, "needs")
     if n then n.energy = 100 end
     return "Dormi un sonno senza sogni. Al risveglio il mondo è identico, fin troppo."
   end
-  if action == "fruga" then
+  if action == "search" then
     if ecs.get(id, "frugato") then return "Solo polvere." end
     ecs.set(id, "frugato", { si = true })
     if hash(id, 9) < 0.5 then

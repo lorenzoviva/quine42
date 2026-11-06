@@ -11,7 +11,7 @@ import { news } from './notizie-file';
 import { renderNewsCard } from './notizie-testo';
 import { fetchVideos, renderVideos } from './video-testo';
 import { guidePresent } from 'virtual:quine-istruzioni-presenti';
-import pino from '../universe/models/albero.xml?raw';
+import pino from '../universe/models/tree.xml?raw';
 import { SKIN_EVENT, skinColor } from './skin-core';
 
 /** A program of the hero: its MarkovJunior source and the line under the stage. */

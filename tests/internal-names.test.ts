@@ -27,6 +27,9 @@ const domain = (id: string): NameDomain => {
   return found;
 };
 const keys = (id: string) => Object.keys(domain(id).names);
+/** The names a domain has in the code: the internal ones when its step is done (T307a), the Italian ones of today otherwise. */
+const DONE = new Set(['T307a']);
+const inCode = (id: string) => (DONE.has(domain(id).step) ? Object.values(domain(id).names) : keys(id));
 /** The words of the code that read as Italian: the internal language has none (or the same in English: `lava`, `dungeon`, `studio`). */
 const italianOf = (list: readonly string[], d: string) => list.filter((v) => !Object.values(domain(d).names).includes(v) || keys(d).includes(v));
 
@@ -81,14 +84,15 @@ describe('la tabella della lingua interna', () => {
     // A component keeps its name on disk and in Lua: the new ones must not be one the kernel has already.
     const parts = ENTITY_PARTS.filter((p) => !keys('componenti').includes(p));
     for (const en of Object.values(domain('componenti').names)) if (parts.includes(en as never)) hits.push(`componenti: ${en}`);
-    // The generic model of a class has the class's id: a class must not take the id of another model of the seed.
+    // The generic model of a class has the class's id: a class must not take the id of another model of the seed (once renamed, the
+    // model of the class is the only one with that id: the Italian one is gone).
     const models = Object.keys(json('universe/models/index.json').models ?? json('universe/models/index.json'));
-    for (const [it, en] of Object.entries(domain('classi').names)) if (models.includes(en) && en !== it) hits.push(`classi: ${en} è già un modello`);
+    for (const [it, en] of Object.entries(domain('classi').names)) if (models.includes(en) && en !== it && models.includes(it)) hits.push(`classi: ${en} è già un modello`);
     // A terrain's id and a layout's id must not be the name of another one of the seed.
     const tiles = Object.values(json('universe/modules/world.terrain/manifest.json').tiles as Record<string, { name: string }>).map((t) => t.name);
     for (const [it, en] of Object.entries(domain('terreni').names)) if (tiles.includes(en) && en !== it) hits.push(`terreni: ${en} è già un terreno`);
     const layouts = Object.keys(json('universe/modules/world.layouts/manifest.json').layouts);
-    for (const [it, en] of Object.entries(domain('ambienti').names)) if (layouts.includes(en) && en !== it) hits.push(`ambienti: ${en} è già un ambiente`);
+    for (const [it, en] of Object.entries(domain('ambienti').names)) if (layouts.includes(en) && en !== it && layouts.includes(it)) hits.push(`ambienti: ${en} è già un ambiente`);
     expect(hits).toEqual([]);
   });
 
@@ -116,12 +120,12 @@ describe('la tabella della lingua interna', () => {
   });
 
   it('copre i valori che il codice confronta', () => {
-    const cover = (d: string, list: readonly string[]) => expect(list.filter((v) => !keys(d).includes(v)), d).toEqual([]);
+    const cover = (d: string, list: readonly string[]) => expect(list.filter((v) => !inCode(d).includes(v)), d).toEqual([]);
     cover('classi', CLASSES.map((c) => c.id));
     cover('taglie', SIZE_TIERS.map((s) => s.id));
     cover('effetti', EFFECT_TYPES);
     cover('categorie', ITEM_CATEGORIES);
-    cover('impronte', ['forma', ...ITEM_SHAPES]);
+    cover('impronte', ['shape', ...ITEM_SHAPES]);
     cover('timbri', STAMP_SHAPES);
     cover('momenti', DAY_PHASES);
     cover('dove', WHERES);
@@ -139,7 +143,9 @@ describe('la tabella della lingua interna', () => {
   it('copre il seme: terreni, ambienti, azioni, rune, elementi, mestieri', () => {
     const terrain = json('universe/modules/world.terrain/manifest.json').tiles as Record<string, { name: string }>;
     expect(Object.values(terrain).map((t) => t.name).filter((n) => !keys('terreni').includes(n))).toEqual([]);
-    expect(Object.keys(json('universe/modules/world.layouts/manifest.json').layouts).filter((n) => !keys('ambienti').includes(n))).toEqual([]);
+    expect(Object.keys(json('universe/modules/world.layouts/manifest.json').layouts).filter((n) => !inCode('ambienti').includes(n))).toEqual([]);
+    // A terrain of the seed has the internal id of its name (T307a).
+    expect(Object.values(terrain).filter((t) => internalName('terreni', t.name) !== (t as { id?: string }).id).map((t) => t.name)).toEqual([]);
     const actions = new Set<string>();
     const jobs = new Set<string>();
     const walk = (v: unknown, key?: string): void => {
@@ -154,13 +160,13 @@ describe('la tabella della lingua interna', () => {
     for (const m of seedManifests()) walk(m);
     for (const f of fs.readdirSync(path.join(ROOT, 'universe/models')).filter((f) => f.endsWith('.xml')))
       for (const m of read(`universe/models/${f}`).matchAll(/<action\b[^>]*\bname="([^"]+)"/g)) actions.add(m[1]);
-    expect([...actions].filter((a) => !keys('azioni-seme').includes(a))).toEqual([]);
+    expect([...actions].filter((a) => !inCode('azioni-seme').includes(a))).toEqual([]);
     expect([...jobs].filter((a) => !keys('mestieri').includes(a))).toEqual([]);
     const magic = json('universe/modules/magic.runes/manifest.json') as { runes: Record<string, { element: string }>; spells: Record<string, unknown> };
-    expect(Object.keys(magic.runes).filter((r) => !keys('rune').includes(r))).toEqual([]);
-    expect(Object.values(magic.runes).map((r) => r.element).filter((e) => !keys('elementi').includes(e))).toEqual([]);
+    expect(Object.keys(magic.runes).filter((r) => !inCode('rune').includes(r))).toEqual([]);
+    expect(Object.values(magic.runes).map((r) => r.element).filter((e) => !inCode('elementi').includes(e))).toEqual([]);
     // Every formula of the seed is made of rune tokens.
-    for (const f of Object.keys(magic.spells)) for (const t of f.split(/\s+/)) expect(keys('rune'), f).toContain(t);
+    for (const f of Object.keys(magic.spells)) for (const t of f.split(/\s+/)) expect(inCode('rune'), f).toContain(t);
     const modules = fs.readdirSync(path.join(ROOT, 'universe/modules')).filter((m) => /^(sys\.lavoro|lavoro\.|obj\.|item\.)/.test(m));
     expect(modules.filter((m) => !keys('moduli-seme').includes(m))).toEqual([]);
   });

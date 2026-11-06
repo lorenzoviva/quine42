@@ -26,8 +26,8 @@ const out = path.resolve('lab/out/sculpt-game');
 fs.mkdirSync(out, { recursive: true });
 
 const requests: SculptRequest[] = [
-  { id: 'forma-bottiglia', nome: 'bottiglia (forma comune degli oggetti)', aspetto: 'una bottiglia di vetro o di coccio con il tappo, come tante nel mondo (vino, olio, acqua)', classe: 'oggetto', tinta: true },
-  { id: 'npc-mugnaio', nome: 'Mugnaio', aspetto: 'un mugnaio robusto con il grembiule infarinato, un berretto di lana e le maniche rimboccate', classe: 'persona' },
+  { id: 'shape-bottle', nome: 'bottiglia (forma comune degli oggetti)', aspetto: 'una bottiglia di vetro o di coccio con il tappo, come tante nel mondo (vino, olio, acqua)', classe: 'object', tinta: true },
+  { id: 'npc-mugnaio', nome: 'Mugnaio', aspetto: 'un mugnaio robusto con il grembiule infarinato, un berretto di lana e le maniche rimboccate', classe: 'person' },
 ];
 
 for (const req of requests) {

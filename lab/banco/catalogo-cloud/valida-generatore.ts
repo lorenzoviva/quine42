@@ -49,7 +49,7 @@ function valuta(file: string): { esito: Esito; p: Prova; xml: string; b: Bersagl
   const xml = fs.readFileSync(file, 'utf8');
   const cantina = /\bground="Z"/.test(xml);
   const nome = path.basename(file, '.xml');
-  const b: Bersaglio = { id: nome, nome, stile: '', descrizione: '', classe: 'grande', ...(cantina ? { sotto: 1 } : {}) };
+  const b: Bersaglio = { id: nome, nome, stile: '', descrizione: '', classe: 'structure', ...(cantina ? { sotto: 1 } : {}) };
   const p = prova(xml, b, { semi, taglie });
   const difetti: string[] = [];
   const out: Esito['taglie'] = p.taglie.map((t) => {

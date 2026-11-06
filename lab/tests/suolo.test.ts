@@ -56,10 +56,10 @@ describe('la libreria', () => {
   const PROG = '<sequence values="BNE" suolo="E" origin="bottom"><prl in="N" out="N"/></sequence>';
 
   it.each([
-    ['grande', 20, [100, 100, 100]],
-    ['enorme', 16, [120, 120, 112]],
+    ['large', 20, [100, 100, 100]],
+    ['huge', 16, [120, 120, 112]],
   ] as const)('lo stesso XML a %s: il suolo è a z=%i, dove il modello è posato', async (taglia, base, box) => {
-    const forms = forme(PROG, { classe: 'grande', ...modelSize({ classe: 'grande', taglia }), sotto: 1 });
+    const forms = forme(PROG, { classe: 'structure', ...modelSize({ classe: 'structure', taglia }), sotto: 1 });
     expect(forms.request('prova', 1)!.base).toBe(base);
     const f = (await forms.wait('prova', 1))!;
     expect(f.status).toBe('ready');
@@ -74,12 +74,12 @@ describe('la libreria', () => {
   });
 
   it('due profondità sono due risultati: la chiave lo dice', () => {
-    const q = forme(PROG, { classe: 'grande', sotto: 1, vpt: 20 }).request('prova', 1)!;
+    const q = forme(PROG, { classe: 'structure', sotto: 1, vpt: 20 }).request('prova', 1)!;
     expect(formKey(q)).not.toBe(formKey({ ...q, base: 16 }));
   });
 
   it('senza cantina il programma non porta nulla di più', () => {
-    expect('base' in forme(PROG, { classe: 'grande' }).request('prova', 1)!).toBe(false);
+    expect('base' in forme(PROG, { classe: 'structure' }).request('prova', 1)!).toBe(false);
   });
 });
 
@@ -87,7 +87,7 @@ describe('un modello già scolpito', () => {
   // Measured before the letter existed (T258), on a cellar written with `<box>`: the same key means that what is kept stays good, without regenerating anything.
   it('ha la stessa richiesta, la stessa chiave e gli stessi voxel', async () => {
     const xml = fs.readFileSync('lab/banco/conferma/locanda/1/modello.xml', 'utf8');
-    const q = forme(xml, { classe: 'grande', sotto: 1 }).request('prova', 1)!;
+    const q = forme(xml, { classe: 'structure', sotto: 1 }).request('prova', 1)!;
     expect(Object.keys(q).sort()).toEqual(['model', 'rig', 'seed', 'size', 'sway', 'tint', 'vpt', 'xml']);
     expect(sha(formKey(q))).toBe('e351acf1d064f270');
     const r = await new InlineRunner(new FormCache()).run(q);
@@ -97,7 +97,7 @@ describe('un modello già scolpito', () => {
 
 describe('la cantina a mano (riferimento/cantina.xml)', () => {
   const xml = fs.readFileSync('lab/banco/riferimento/cantina.xml', 'utf8');
-  it.each(['grande', 'enorme'] as const)('regge a %s, con la cantina raggiunta', (taglia) => {
+  it.each(['large', 'huge'] as const)('regge a %s, con la cantina raggiunta', (taglia) => {
     const b = { ...bersaglio('locanda')!, taglia };
     // Under the suite's load 8 s may not be enough, and a program cut in half fails everything: here the limit does not count, the bench measures it alone.
     const e = esegui(xml, b, 1, MAX_FORM_TIME);

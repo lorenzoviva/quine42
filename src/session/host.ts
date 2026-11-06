@@ -12,7 +12,7 @@ import { GeminiAiModels } from '../kernel/ai/gemini';
 import type { AiModels } from '../kernel/ai/models';
 import type { Ledger } from '../kernel/credits';
 import { readConfig } from '../kernel/universe';
-import { INTERNAL_HEADER, UniverseChunks, UniverseClient, upgradeFromSeed } from '../kernel/universes';
+import { INTERNAL_HEADER, prepareUniverse, UniverseChunks, UniverseClient } from '../kernel/universes';
 import { BRANCH, SessionServer } from './server';
 import type { Verifier } from './account';
 
@@ -70,8 +70,9 @@ export async function openUniverse(opts: { name: string; base: string; offline?:
   const snap = await client.load();
   if (!snap.exists || !snap.files) return { error: `l'universo «${opts.name}» non esiste` };
   if (readConfig(snap.files).config.partita?.modalita !== 'multigiocatore') return { error: `«${opts.name}» è una partita in singola` };
-  const up = upgradeFromSeed(snap.files, bundledFiles);
-  if (Object.keys(up.changes).length) await client.commit(up.changes, `aggiornamento dal kernel: ${up.updated.slice(0, 6).join(', ') || 'seme'}${up.updated.length > 6 ? '…' : ''}`, 'kernel');
+  // A universe of an older contract is ported first (T307a), then takes the seed: one commit says both.
+  const up = prepareUniverse(snap.files, bundledFiles);
+  if (Object.keys(up.changes).length) await client.commit(up.changes, `${up.applied.length ? `migrazione ${up.applied.map((a) => a.split(':')[0]).join(', ')}; ` : ''}aggiornamento dal kernel: ${up.updated.slice(0, 6).join(', ') || 'seme'}${up.updated.length > 6 ? '…' : ''}`, 'kernel');
   const ai = readConfig(up.files).config.ai;
   const models: AiModels = !opts.offline && opts.gemini
     ? new GeminiAiModels({ fetchImpl: opts.gemini, textModel: ai.textModel, limits: { text: ai.maxText }, thinking: ai.thinking, timeout: (ai.timeout ?? 120) * 1000 })

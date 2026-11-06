@@ -6,6 +6,7 @@ import { MockAiModels } from '../src/kernel/ai/mock';
 import { collectionOf } from '../src/kernel/cards';
 import { addBudgetFromCap } from '../src/kernel/credits';
 import { repairMinimums } from '../src/kernel/universe';
+import { KERNEL_VERSION } from '../src/kernel/version';
 import { fakeLink } from '../src/session/protocol';
 import { SessionServer } from '../src/session/server';
 import { SessionClient } from '../src/session/client';
@@ -385,6 +386,7 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
         ...bundledFiles,
         'universe.json': JSON.stringify({
           name: 'mondo-multi',
+          kernel: KERNEL_VERSION,
           partita: { modalita: 'multigiocatore', master: 'io' },
           ai: {
             textModel: 'gemini-3.1-flash-lite',

@@ -10,6 +10,7 @@ import { allowedPath } from './paths';
 import type { Author } from './repo';
 import { hashStr, hex } from './rng';
 import { checkKernelVersion } from './version';
+import { migrateUniverse } from './migrations';
 import type { ChunkRecord, ChunkStore } from './chunks';
 
 export interface PastCommit {
@@ -122,6 +123,19 @@ export function upgradeFromSeed(files: FileMap, seed: FileMap): { files: FileMap
   const hashes = JSON.stringify(seedHashes(seed), null, 1) + '\n';
   if (out[SEED_FILE] !== hashes) out[SEED_FILE] = changes[SEED_FILE] = hashes;
   return { files: out, changes, updated };
+}
+
+/**
+ * A universe as it is loaded (T307a, ADR-0155): ported to this kernel's contract (migrations.ts), then given the seed's new files
+ * (`upgradeFromSeed`), in this order, so that a universe of an older contract takes in the same load the seed of the new one.
+ * `changes` are what differs from the files given (a file gone is null): what the caller commits.
+ */
+export function prepareUniverse(files: FileMap, seed: FileMap): { files: FileMap; changes: Record<string, string | null>; updated: string[]; applied: string[] } {
+  const ported = migrateUniverse(files);
+  const up = upgradeFromSeed(ported.files, seed);
+  const changes: Record<string, string | null> = {};
+  for (const p of new Set([...Object.keys(files), ...Object.keys(up.files)])) if (files[p] !== up.files[p]) changes[p] = up.files[p] ?? null;
+  return { files: up.files, changes, updated: up.updated, applied: ported.applied };
 }
 
 const KEYED = ['tiles', 'layouts', 'runes', 'spells'] as const;
