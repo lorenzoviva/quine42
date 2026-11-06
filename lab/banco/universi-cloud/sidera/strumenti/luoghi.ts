@@ -32,9 +32,9 @@ export async function luoghi(scrivi = true): Promise<{ errori: string[]; righe: 
   const files = fileDi();
   const voci: Voce[] = JSON.parse(fs.readFileSync(path.join(SIDERA, 'strumenti/luoghi.json'), 'utf8'));
   const k = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
-  const words = lexiconWords(files['world/lessico.md']);
+  const words = lexiconWords(files['world/lexicon.md']);
   const atlas = readAtlas(files);
-  const regional = new Set(atlas.regioni.map((r) => r.ambiente));
+  const regional = new Set(atlas.regions.map((r) => r.environment));
   const free = Object.keys(k.content.layouts).filter((l) => !regional.has(l));
   const placeable = new Set(k.catalog().map((c) => c.id));
   const S = k.config.chunkSize;
@@ -44,12 +44,12 @@ export async function luoghi(scrivi = true): Promise<{ errori: string[]; righe: 
   for (const v of voci) {
     const key = `${v.cx},${v.cy}`;
     const region = v.cx === 0 && v.cy === 0 ? undefined : regionAt(atlas, v.cx, v.cy);
-    const allowed = new Set(region ? [region.ambiente] : free);
+    const allowed = new Set(region ? [region.environment] : free);
     const verdict = k.validator.validatePlan(v.plan, allowed, placeable);
     const err = (s: string) => errori.push(`${key} ${v.plan.place.name}: ${s}`);
     verdict.errors.forEach(err);
     verdict.dropped.forEach((d) => err(`scartato: ${d}`));
-    for (const t of [v.plan.place.name, v.plan.place.description, ...v.plan.ground, ...(v.plan.strutture ?? []).map((s) => s.concetto)]) {
+    for (const t of [v.plan.place.name, v.plan.place.description, ...v.plan.ground, ...(v.plan.structures ?? []).map((s) => s.concept)]) {
       const m = metaBreak(t, words);
       if (m) err(`quarta parete «${m}»`);
     }
@@ -61,7 +61,7 @@ export async function luoghi(scrivi = true): Promise<{ errori: string[]; righe: 
     const r = layout(rows, k.palette, { cx: v.cx, cy: v.cy, seed: k.config.seed, program, pathCode: 'p' });
     const open = r.grid.join('').split('').filter((c) => k.palette[c]?.solid === false).length;
     if (open < S * S * 0.25) err(`poco spazio calpestabile (${open})`);
-    righe.push(`| ${key} | ${v.plan.place.name} | ${v.plan.layout} | ${region?.nome ?? '(libero)'} | ${v.plan.objects.length} | ${v.plan.runes.join(', ')} | ${r.lots.length} | ${open} |`);
+    righe.push(`| ${key} | ${v.plan.place.name} | ${v.plan.layout} | ${region?.name ?? '(libero)'} | ${v.plan.objects.length} | ${v.plan.runes.join(', ')} | ${r.lots.length} | ${open} |`);
     if (scrivi) {
       const file = `maps/${chiaveMappa(files, v.cx, v.cy).replace(/[:,]/g, '_')}.json`;
       fs.mkdirSync(path.join(SIDERA, 'maps'), { recursive: true });

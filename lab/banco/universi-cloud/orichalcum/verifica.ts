@@ -47,7 +47,7 @@ sezione(`piani dei luoghi (${Object.keys(maps).length}, validatePlan)`, piani(k,
 {
   const seed: Record<string, MagicRune> = JSON.parse(files['modules/magic.runes/manifest.json']).runes;
   const mine: Record<string, MagicRune> = JSON.parse(files['modules/magic.vapore/manifest.json']).runes;
-  const words = lexiconWords(files['world/lessico.md']);
+  const words = lexiconWords(files['world/lexicon.md']);
   const out: string[] = [];
   for (const [token, r] of Object.entries(mine)) {
     const others = Object.entries({ ...seed, ...mine }).filter(([t]) => t !== token);
@@ -58,7 +58,7 @@ sezione(`piani dei luoghi (${Object.keys(maps).length}, validatePlan)`, piani(k,
       if (v.rune && v.rune.rune.glyph !== r.glyph) out.push(`${token}: il segno ${r.glyph} non è libero`);
       if (i === 0 && v.rune && !canonWithRune('', v.rune).includes(`- ${r.glyph} ${r.name} («${token}», ${r.element}):`)) out.push(`${token}: la riga del canone non è quella di canonWithRune`);
     }
-    if (!files['world/canone.md'].includes(`- ${r.glyph} ${r.name} («${token}», ${r.element}):`)) out.push(`${token}: manca nel canone`);
+    if (!files['world/canon.md'].includes(`- ${r.glyph} ${r.name} («${token}», ${r.element}):`)) out.push(`${token}: manca nel canone`);
     if (!k.content.spells[token]) out.push(`${token}: nessun incantesimo`);
   }
   if (Object.keys(mine).length !== 12) out.push(`rune nuove: ${Object.keys(mine).length}, non 12`);

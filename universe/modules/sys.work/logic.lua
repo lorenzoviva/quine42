@@ -57,11 +57,11 @@ local function cammina(id, p, tx, ty, solido)
   return false
 end
 
--- Dove: home, work, square (dal kernel), venture (il cantiere), casella:<codice> (la più vicina).
+-- Dove: home, work, square (dal kernel), venture (il cantiere), tile:<codice> (la più vicina).
 local function posto(m, p, dove)
   if dove == "home" or dove == "work" or dove == "square" then return m[dove] end
   if dove == "venture" then return m.impresa_posto end
-  local codice = type(dove) == "string" and dove:match("^casella:(.+)$")
+  local codice = type(dove) == "string" and dove:match("^tile:(.+)$")
   if codice then
     local c = m.work or p
     return world.find_tile(codice, c.x, c.y, 12)
@@ -76,8 +76,8 @@ local function carica(id, oggetto, n)
 end
 
 local function dice(id, compito, s)
-  if compito.dice and not s.detto then
-    world.speak(id, compito.dice)
+  if compito.says and not s.detto then
+    world.speak(id, compito.says)
     s.detto = true
   end
 end
@@ -85,8 +85,8 @@ end
 local B = {}
 
 function B.go(id, compito, s, m, p)
-  local t = posto(m, p, compito.dove)
-  if not t then return "failed:no_place:" .. tostring(compito.dove) end
+  local t = posto(m, p, compito.where)
+  if not t then return "failed:no_place:" .. tostring(compito.where) end
   if cammina(id, p, t.x, t.y) then return "done" end
   return "ongoing"
 end
@@ -109,34 +109,34 @@ local function cambia(id, compito, s, m, p, da, a, raccolto)
   local solido = world.free(s.x, s.y, 0.3) == false
   if not s.fino then
     if not cammina(id, p, s.x, s.y, solido) then return "ongoing" end
-    s.fino = time + (compito.durata or 10)
+    s.fino = time + (compito.duration or 10)
     dice(id, compito, s)
   end
-  ferma(id, compito.posa)
+  ferma(id, compito.pose)
   if time < s.fino then return "ongoing" end
   world.set_tile(s.x, s.y, a)
   if raccolto then carica(id, raccolto, 1) end
   s.fatti = (s.fatti or 0) + 1
   s.x, s.y, s.fino = nil, nil, nil
-  if s.fatti >= (compito.quante or 1) then return "done" end
+  if s.fatti >= (compito.count or 1) then return "done" end
   return "ongoing"
 end
 
 function B.transform(id, compito, s, m, p)
-  return cambia(id, compito, s, m, p, compito.da, compito.a)
+  return cambia(id, compito, s, m, p, compito.from, compito.to)
 end
 
 function B.gather(id, compito, s, m, p)
-  return cambia(id, compito, s, m, p, compito.casella, compito.lascia or compito.casella, compito.oggetto)
+  return cambia(id, compito, s, m, p, compito.tile, compito.drop or compito.tile, compito.item)
 end
 
 -- Fermi, nella posa: senza durata fino alla fine della fase.
 local function resta(posa)
   return function(id, compito, s)
-    ferma(id, compito.posa or posa)
+    ferma(id, compito.pose or posa)
     dice(id, compito, s)
-    if not compito.durata then return "ongoing" end
-    s.fino = s.fino or (time + compito.durata)
+    if not compito.duration then return "ongoing" end
+    s.fino = s.fino or (time + compito.duration)
     if time < s.fino then return "ongoing" end
     return "done"
   end
@@ -148,7 +148,7 @@ B.chat = resta("chat")
 B.wait = resta("work")
 
 function B.patrol(id, compito, s, m, p)
-  local giro = compito.percorso or {}
+  local giro = compito.route or {}
   if #giro == 0 then return "done" end
   s.tappa = s.tappa or 1
   local t = posto(m, p, giro[s.tappa])
@@ -196,9 +196,9 @@ end
 -- Prima di ogni cosa da fare, il posto: per default il lavoro.
 local function al_posto(id, compito, s, m, p)
   if s.arrivato then return true end
-  local dove = compito.dove or "work"
+  local dove = compito.where or "work"
   local t
-  local tag = type(dove) == "string" and dove:match("^entita:(.+)$")
+  local tag = type(dove) == "string" and dove:match("^entity:(.+)$")
   if tag then
     local e = world.nearest(p.x, p.y, 12, tag)
     if e then
@@ -219,19 +219,19 @@ end
 -- Porta ciò che ha al deposito del luogo (o dentro la cosa, se ha una tasca): tutto in una volta.
 function B.carry(id, compito, s, m, p)
   local c = ecs.get(id, "carico") or {}
-  if (c[compito.oggetto] or 0) <= 0 then return "done" end
+  if (c[compito.item] or 0) <= 0 then return "done" end
   local qui = al_posto(id, compito, s, m, p)
   if qui == nil then return "failed:no_place" end
   if not qui then return "ongoing" end
-  local n = c[compito.oggetto]
-  if s.cosa and inventory.add(s.cosa, compito.oggetto, n) > 0 then
-    scarica(id, compito.oggetto, n)
-  elseif deposita(id, compito.oggetto, n) then
-    scarica(id, compito.oggetto, n)
+  local n = c[compito.item]
+  if s.cosa and inventory.add(s.cosa, compito.item, n) > 0 then
+    scarica(id, compito.item, n)
+  elseif deposita(id, compito.item, n) then
+    scarica(id, compito.item, n)
   else
     return "failed:deposit_full"
   end
-  ferma(id, compito.posa or "work")
+  ferma(id, compito.pose or "work")
   dice(id, compito, s)
   return "done"
 end
@@ -241,9 +241,9 @@ function B.take(id, compito, s, m, p)
   local qui = al_posto(id, compito, s, m, p)
   if qui == nil then return "failed:no_place" end
   if not qui then return "ongoing" end
-  local n = preleva(id, compito.oggetto, compito.quante or 1)
-  if n <= 0 then return "failed:missing:" .. compito.oggetto end
-  carica(id, compito.oggetto, n)
+  local n = preleva(id, compito.item, compito.count or 1)
+  if n <= 0 then return "failed:missing:" .. compito.item end
+  carica(id, compito.item, n)
   dice(id, compito, s)
   return "done"
 end
@@ -254,19 +254,19 @@ function B.produce(id, compito, s, m, p)
   if qui == nil then return "failed:no_place" end
   if not qui then return "ongoing" end
   if not s.fino then
-    if compito.con and scarica(id, compito.con, 1) < 1 and preleva(id, compito.con, 1) < 1 then
+    if compito.with and scarica(id, compito.with, 1) < 1 and preleva(id, compito.with, 1) < 1 then
       if (s.fatti or 0) > 0 then return "done" end
-      return "failed:missing:" .. compito.con
+      return "failed:missing:" .. compito.with
     end
-    s.fino = time + (compito.durata or 10)
+    s.fino = time + (compito.duration or 10)
     dice(id, compito, s)
   end
-  ferma(id, compito.posa or "work")
+  ferma(id, compito.pose or "work")
   if time < s.fino then return "ongoing" end
-  carica(id, compito.oggetto, 1)
+  carica(id, compito.item, 1)
   s.fatti = (s.fatti or 0) + 1
   s.fino = nil
-  if s.fatti >= (compito.quante or 1) then return "done" end
+  if s.fatti >= (compito.count or 1) then return "done" end
   return "ongoing"
 end
 
@@ -276,11 +276,11 @@ function B.use(id, compito, s, m, p)
   if qui == nil then return "failed:nothing_to_use" end
   if not qui then return "ongoing" end
   if not s.fino then
-    s.fino = time + (compito.durata or 5)
-    s.usato = world.act(id, s.cosa, compito.azione) ~= nil
+    s.fino = time + (compito.duration or 5)
+    s.usato = world.act(id, s.cosa, compito.action) ~= nil
     dice(id, compito, s)
   end
-  ferma(id, compito.posa or "work")
+  ferma(id, compito.pose or "work")
   if time < s.fino then return "ongoing" end
   return "done"
 end
@@ -291,27 +291,27 @@ end
 function B.build(id, compito, s, m, p, dt)
   local passo = world.impresa(id)
   if not passo then return "done" end
-  if s.passo_fa ~= passo.fa or s.oggetto ~= passo.oggetto then
-    s.passo_fa, s.oggetto, s.x, s.y, s.fino, s.fatti, s.preso = passo.fa, passo.oggetto, nil, nil, nil, nil, nil
+  if s.passo_fa ~= passo.does or s.oggetto ~= passo.item then
+    s.passo_fa, s.oggetto, s.x, s.y, s.fino, s.fatti, s.preso = passo.does, passo.item, nil, nil, nil, nil, nil
   end
-  if passo.fa == "carry" then
+  if passo.does == "carry" then
     local c = ecs.get(id, "carico") or {}
-    if (c[passo.oggetto] or 0) <= 0 then
+    if (c[passo.item] or 0) <= 0 then
       -- Al deposito del luogo, in piazza.
       local t = m.square or p
       if not cammina(id, p, t.x, t.y) then return "ongoing" end
-      local n = preleva(id, passo.oggetto, 2)
+      local n = preleva(id, passo.item, 2)
       if n <= 0 then return "done" end
-      carica(id, passo.oggetto, n)
+      carica(id, passo.item, n)
       return "ongoing"
     end
     if not cammina(id, p, passo.x, passo.y, true) then return "ongoing" end
-    if world.impresa_porta(id, passo.oggetto) <= 0 then return "done" end
+    if world.impresa_porta(id, passo.item) <= 0 then return "done" end
     dice(id, compito, s)
     return "ongoing"
   end
-  if passo.fa == "gather" then
-    local esito = cambia(id, passo, s, { work = { x = passo.x, y = passo.y } }, p, passo.casella, passo.lascia, passo.oggetto)
+  if passo.does == "gather" then
+    local esito = cambia(id, passo, s, { work = { x = passo.x, y = passo.y } }, p, passo.tile, passo.drop, passo.item)
     if esito == "done" and (s.fatti or 0) == 0 then return "done" end
     if esito == "done" then s.fatti = 0 end
     return "ongoing"
@@ -321,7 +321,7 @@ function B.build(id, compito, s, m, p, dt)
     if not cammina(id, p, passo.x, passo.y) then return "ongoing" end
     s.fino = true
   end
-  ferma(id, passo.posa or "work")
+  ferma(id, passo.pose or "work")
   dice(id, compito, s)
   return "ongoing"
 end
@@ -351,7 +351,7 @@ function M.update(dt)
       ferma(id, "chat")
       return
     end
-    local f = B[compito.fa]
+    local f = B[compito.does]
     local esito = f and f(id, compito, s, m, p, dt) or "failed:unknown_behaviour"
     if esito == "ongoing" and s.no_way then esito = "failed:no_way" end
     if esito == "ongoing" and s.bloccato then esito = "failed:unreachable" end

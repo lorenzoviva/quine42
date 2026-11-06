@@ -43,7 +43,7 @@ const hashOf = (cells: Uint8Array, alphabet: string[], dims: number[]) => create
 function compiled(xml: string, b: Bersaglio, seme: number) {
   const scatola = scatolaDi(b);
   const scritto = withSize(xml, scatola.box);
-  const info = { classe: b.classe, ...modelSize(b), ...(b.sotto ? { sotto: b.sotto } : {}) };
+  const info = { class: b.classe, ...modelSize(b), ...(b.sotto ? { cellar: b.sotto } : {}) };
   const forms = new Forms(new InlineRunner(new FormCache()));
   forms.load({ 'models/prova.xml': scritto, 'models/index.json': JSON.stringify({ prova: info }) });
   const q = forms.request('prova', seme)!;

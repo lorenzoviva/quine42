@@ -18,7 +18,7 @@ const PANEL = {
 
 async function world() {
   const cfg = JSON.parse(bundledFiles['universe.json']);
-  const files = { ...bundledFiles, ...PANEL, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3, master: 'io' } }) };
+  const files = { ...bundledFiles, ...PANEL, 'universe.json': JSON.stringify({ ...cfg, game: { mode: 'multiplayer', death: 3, master: 'me' } }) };
   const k = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
   const server = new SessionServer(k);
   const { server: s, client } = fakeLink();
@@ -67,6 +67,6 @@ describe('the keys a client says', () => {
     expect(k.heldBy('bea', 'jump')).toBe(false);
     expect(k.heldBy('bea', 'rollback')).toBe(false);
     // One wanderer's keys are never another's.
-    expect(k.heldBy('io', 'right')).toBe(false);
+    expect(k.heldBy('me', 'right')).toBe(false);
   });
 });

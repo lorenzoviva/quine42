@@ -91,14 +91,14 @@ describe('V-003 i percorsi ammessi', () => {
       ...Object.keys(bundledFiles),
       'universe.json',
       'seed.json',
-      'world/stato.json',
-      'world/consumi.json',
-      'world/mancanze.json',
-      'world/carte.json',
-      'world/grafo.json',
+      'world/state.json',
+      'world/usage.json',
+      'world/shortfalls.json',
+      'world/cards.json',
+      'world/graph.json',
       'world/pagamenti.json',
-      'world/giocatori/io.json',
-      'world/giocatori/viandante-2_a.json',
+      'world/players/me.json',
+      'world/players/viandante-2_a.json',
       'maps/-1_0.json',
       'maps/12_-3.json',
       'models/corona-nucleo.xml',
@@ -115,7 +115,7 @@ describe('V-003 i percorsi ammessi', () => {
       expect(validWandererId(n)).toBe(false);
     }
     for (const n of ['aurora', 'valmora-new', 'console', 'nulla', 'com10']) expect(UNIVERSE_NAME_RE.test(n)).toBe(true);
-    for (const n of ['io', 'console', 'nulla']) expect(validWandererId(n)).toBe(true);
+    for (const n of ['me', 'console', 'nulla']) expect(validWandererId(n)).toBe(true);
   });
 
   it.each(REFUSED)('V-003 il ramo dal WebSocket rifiuta %j: %s', (rel) => {
@@ -135,7 +135,7 @@ describe('V-003 il magazzino degli universi', () => {
   let base: string;
   const git = (cwd: string, ...args: string[]) => execFileSync('git', ['-c', 'user.name=Prova', '-c', 'user.email=prova@rune.local', '-c', 'core.autocrlf=false', ...args], { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
   /** Who sits at this machine, in a game alone: the universe is theirs, so only the paths stop them. */
-  const post = (name: string, op: string, body: unknown) => fetch(`${base}/api/universe/${name}/${op}`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Quine-Viandante': 'io' }, body: JSON.stringify(body) });
+  const post = (name: string, op: string, body: unknown) => fetch(`${base}/api/universe/${name}/${op}`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Quine-Viandante': 'me' }, body: JSON.stringify(body) });
   const commit = (changes: Record<string, string | null>) => post('sonda', 'commit', { changes, message: 'sonda', author: 'player' });
 
   beforeAll(async () => {
@@ -189,7 +189,7 @@ describe('V-003 il magazzino degli universi', () => {
   });
 
   it('V-003 una mappa con un nome riservato non si scrive', async () => {
-    const put = (key: string) => fetch(`${base}/api/universe/sonda/map/${key}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-Quine-Viandante': 'io' }, body: '{}' });
+    const put = (key: string) => fetch(`${base}/api/universe/sonda/map/${key}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-Quine-Viandante': 'me' }, body: '{}' });
     expect((await put('con')).status).toBe(400);
     expect((await put('0,0')).status).toBe(200);
     expect(existsSync(path.join(root, 'maps', '0_0.json'))).toBe(true);

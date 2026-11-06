@@ -13,18 +13,18 @@ import type { Rule } from '../src/kernel/types';
 
 function createSampleRules(count: number): Rule[] {
   return Array.from({ length: count }, (_, i) => ({
-    chiave: `azione.test_${i + 1}`,
-    testo: `Azione di prova ${i + 1}`,
-    possibile: i % 2 === 0,
-    racconto: `Il Concilio giudica l'azione ${i + 1}: ${i % 2 === 0 ? 'è possibile e consentita.' : 'non è consentita dalle leggi del mondo.'}`,
-    effetti: i % 2 === 0 ? ['luce'] : undefined,
+    key: `azione.test_${i + 1}`,
+    text: `Azione di prova ${i + 1}`,
+    possible: i % 2 === 0,
+    story: `Il Concilio giudica l'azione ${i + 1}: ${i % 2 === 0 ? 'è possibile e consentita.' : 'non è consentita dalle leggi del mondo.'}`,
+    effects: i % 2 === 0 ? ['luce'] : undefined,
   }));
 }
 
 const bootWithRules = (rules: Rule[]) => {
   const files = {
     ...bundledFiles,
-    'world/rules.json': JSON.stringify({ regole: rules }, null, 2),
+    'world/rules.json': JSON.stringify({ rules }, null, 2),
   };
   return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 };
@@ -52,7 +52,7 @@ describe('ruleTablets function', () => {
 
     // Check properties and coordinates
     tablets.forEach((t, i) => {
-      expect(t.target).toBe(rules[i].chiave);
+      expect(t.target).toBe(rules[i].key);
       expect(t.rule).toBe(rules[i]);
       expect(t.y).toBe(TABLETS_WALL.y);
     });

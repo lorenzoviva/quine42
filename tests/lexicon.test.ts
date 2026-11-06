@@ -7,6 +7,7 @@ import { reviewPlot, type Plot } from '../src/kernel/plots';
 import { MockAiModels } from '../src/kernel/ai/mock';
 import type { AiModels, TextCall } from '../src/kernel/ai/models';
 import type { FileMap } from '../src/kernel/types';
+import { internalFields } from '../src/kernel/internalNames';
 
 /** A Council whose model only records what it is asked. */
 function council(files: FileMap) {
@@ -15,10 +16,10 @@ function council(files: FileMap) {
   return { c: new Council(models, () => ({ files, palette: {}, catalog: [] })), asked };
 }
 
-const bible = (extra: Partial<Bible> = {}): Bible => ({ titolo: 'Valmora', tono: 'caldo', sintesi: 'Un regno quieto.', luoghi: [], personaggi: [], fatti: [], misteri: [], ...extra });
+const bible = (extra: Partial<Bible> = {}): Bible => ({ title: 'Valmora', tone: 'caldo', summary: 'Un regno quieto.', places: [], characters: [], facts: [], mysteries: [], ...extra });
 
 describe('the lexicon (T65)', () => {
-  const lexicon = bundledFiles['world/lessico.md'];
+  const lexicon = bundledFiles['world/lexicon.md'];
   const words = wordsOf(bundledFiles);
 
   it('is in the seed: 15-20 entries, at most 6 substituted words, nothing of the Council’s table', () => {
@@ -34,7 +35,7 @@ describe('the lexicon (T65)', () => {
   });
 
   it('goes with every narrative task (Narrator and Arbiter), with the customs the universe added', async () => {
-    const files: FileMap = { ...bundledFiles, 'world/bible.json': JSON.stringify(bible({ usanze: ['Chi vende il primo pane lo lascia sulla soglia.'] })) };
+    const files: FileMap = { ...bundledFiles, 'world/bible.json': JSON.stringify(bible({ customs: ['Chi vende il primo pane lo lascia sulla soglia.'] })) };
     const { c, asked } = council(files);
     for (const agent of ['narrator', 'arbiter'] as const) {
       const ctx = c.context(agent);
@@ -50,10 +51,10 @@ describe('the lexicon (T65)', () => {
 
   it('an old universe receives it from the seed; without it, nothing', () => {
     const old: FileMap = { ...bundledFiles };
-    delete old['world/lessico.md'];
+    delete old['world/lexicon.md'];
     expect(lexiconSummary(old)).toBe('');
     expect(wordsOf(old)).toEqual([]);
-    expect(upgradeFromSeed(old, bundledFiles).files['world/lessico.md']).toBe(lexicon);
+    expect(upgradeFromSeed(old, bundledFiles).files['world/lexicon.md']).toBe(lexicon);
   });
 
   it('is never explained like a glossary inside the world, but it can be spoken', () => {
@@ -67,20 +68,20 @@ describe('the lexicon (T65)', () => {
 
   it('a bible keeps few customs of its own, none that explains or redefines a word', () => {
     const b = bible({
-      fatti: ['Al forno si dice «bonombo» a ogni cliente.', 'Lerpio vuol dire bello, dicono al porto.'],
-      usanze: ['Bonombo: si dice solo di sera.', 'Si brinda battendo i bicchieri sul tavolo.', 'Chi perde una scommessa canta.', 'Le vedove portano un nastro verde.', 'I bambini scelgono il nome del cane.'],
+      facts: ['Al forno si dice «bonombo» a ogni cliente.', 'Lerpio vuol dire bello, dicono al porto.'],
+      customs: ['Bonombo: si dice solo di sera.', 'Si brinda battendo i bicchieri sul tavolo.', 'Chi perde una scommessa canta.', 'Le vedove portano un nastro verde.', 'I bambini scelgono il nome del cane.'],
     });
     expect(bibleBreaks(b, words).join(' ')).toContain('Lerpio vuol dire');
     const clean = cleanBible(b, words);
-    expect(clean.fatti).toEqual(['Al forno si dice «bonombo» a ogni cliente.']);
-    expect(clean.usanze).toHaveLength(OWN_CUSTOMS);
-    expect(clean.usanze).not.toContain('Bonombo: si dice solo di sera.');
-    expect(cleanBible(bible({ usanze: [] }), words).usanze).toBeUndefined();
+    expect(clean.facts).toEqual(['Al forno si dice «bonombo» a ogni cliente.']);
+    expect(clean.customs).toHaveLength(OWN_CUSTOMS);
+    expect(clean.customs).not.toContain('Bonombo: si dice solo di sera.');
+    expect(cleanBible(bible({ customs: [] }), words).customs).toBeUndefined();
   });
 
   it('a plot that translates the lexicon goes back to the Narrator', () => {
-    const people = { persone: [{ nome: 'Anselmo', specie: 'person', genere: 'maschile', legami: [] }], attesi: [] } as never;
-    const plot = { id: 't1', titolo: 'Il saluto', stato: 'aperta', mistero: 'Anselmo insegna che «bonombo» significa ciao.', tappe: [{ chi: 'Anselmo', cosa: 'saluta i forestieri' }] } as unknown as Plot;
+    const people = { people: [{ name: 'Anselmo', species: 'person', gender: 'male', family: [] }], expected: [] } as never;
+    const plot = { id: 't1', title: 'Il saluto', state: 'active', mystery: 'Anselmo insegna che «bonombo» significa ciao.', involved: [], beats: [{ who: 'Anselmo', what: 'saluta i forestieri' }] } as unknown as Plot;
     expect(reviewPlot(plot, people, words).problems.join(' ')).toMatch(/spiega il lessico/);
     expect(reviewPlot(plot, people).problems.join(' ')).not.toMatch(/spiega il lessico/);
   });
@@ -88,7 +89,8 @@ describe('the lexicon (T65)', () => {
   it('the offline Narrator writes a bible with a custom of its own', async () => {
     const models = new MockAiModels();
     const text = await models.text({ agent: 'narrator', task: 'genesis.bible', system: '', prompt: '', data: { theme: 'x' } } as TextCall);
-    const b = JSON.parse(text) as Bible;
-    expect(cleanBible(b, words).usanze?.length).toBe(1);
+    // The Narrator answers with the Italian fields of its schema (until T310): the kernel reads them with those of 0.4.
+    const b = internalFields('bible', JSON.parse(text)) as Bible;
+    expect(cleanBible(b, words).customs?.length).toBe(1);
   });
 });

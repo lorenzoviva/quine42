@@ -40,19 +40,19 @@ export function biblePages(bible: Bible): BiblePage[] {
   const pages: BiblePage[] = [];
 
   // Prologue page with title, summary, story
-  if (bible.titolo || bible.sintesi || bible.storia) {
+  if (bible.title || bible.summary || bible.history) {
     pages.push({
       index: pages.length,
       sezione: 'prologue',
-      titolo: bible.titolo || 'Prologo',
-      testo: [bible.sintesi, bible.storia].filter(Boolean).join('\n\n'),
+      titolo: bible.title || 'Prologo',
+      testo: [bible.summary, bible.history].filter(Boolean).join('\n\n'),
       voceIndex: 0,
     });
   }
 
   // Places: one page per place
-  for (let i = 0; i < (bible.luoghi ?? []).length; i++) {
-    const item = bible.luoghi[i];
+  for (let i = 0; i < (bible.places ?? []).length; i++) {
+    const item = bible.places[i];
     const parts = item.split(' — ');
     pages.push({
       index: pages.length,
@@ -64,8 +64,8 @@ export function biblePages(bible: Bible): BiblePage[] {
   }
 
   // Characters: one page per character
-  for (let i = 0; i < (bible.personaggi ?? []).length; i++) {
-    const item = bible.personaggi[i];
+  for (let i = 0; i < (bible.characters ?? []).length; i++) {
+    const item = bible.characters[i];
     const parts = item.split(' — ');
     pages.push({
       index: pages.length,
@@ -77,8 +77,8 @@ export function biblePages(bible: Bible): BiblePage[] {
   }
 
   // Facts: one page per fact
-  for (let i = 0; i < (bible.fatti ?? []).length; i++) {
-    const item = bible.fatti[i];
+  for (let i = 0; i < (bible.facts ?? []).length; i++) {
+    const item = bible.facts[i];
     const parts = item.split(' — ');
     pages.push({
       index: pages.length,
@@ -90,8 +90,8 @@ export function biblePages(bible: Bible): BiblePage[] {
   }
 
   // Mysteries: one page per mystery
-  for (let i = 0; i < (bible.misteri ?? []).length; i++) {
-    const item = bible.misteri![i];
+  for (let i = 0; i < (bible.mysteries ?? []).length; i++) {
+    const item = bible.mysteries![i];
     const parts = item.split(' — ');
     pages.push({
       index: pages.length,
@@ -132,7 +132,7 @@ export function touchingNodes(page: BiblePage, g: WorldGraph, bible?: Bible | nu
 
   // 2. Fact/mystery graph node and its cited neighbors
   if (page.sezione === 'facts' || page.sezione === 'mysteries') {
-    const fattiLen = bible?.fatti?.length ?? 0;
+    const fattiLen = bible?.facts?.length ?? 0;
     const factIdx = page.sezione === 'facts' ? page.voceIndex + 1 : fattiLen + page.voceIndex + 1;
     const factNode = g.node(`fact:${factIdx}`);
     if (factNode) {

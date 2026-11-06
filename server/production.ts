@@ -20,6 +20,7 @@ import { universeHandler, universesPerAccount } from './universeStore';
 import { videoFolder, videoHandler } from './video';
 import { walletHandler } from './wallet';
 import { wandererHandler } from './wanderer';
+import { serverPath } from './folders';
 
 type Next = () => void;
 type Route = (req: IncomingMessage, res: ServerResponse, next: Next) => unknown;
@@ -227,7 +228,7 @@ export function createProductionServer(o: ProductionOptions): ProductionServer {
     const address = addressOf(req);
     return !apiRate.take(address) || (HEAVY.test(req.url ?? '') && !heavyRate.take(address)) || (VIDEO_PIECE.test(req.url ?? '') && !videoRate.take(address));
   };
-  const gemini = new GeminiGate({ apiKey: o.env.GEMINI_API_KEY, dailyCap: o.env.GEMINI_TETTO_GIORNALIERO, universesDir, ledgerFile: path.join(universesDir, '.spesa-gemini.json') });
+  const gemini = new GeminiGate({ apiKey: o.env.GEMINI_API_KEY, dailyCap: o.env.GEMINI_TETTO_GIORNALIERO, universesDir, ledgerFile: serverPath(universesDir, 'geminiSpend') });
   if (!gemini.available) console.warn('GEMINI_API_KEY assente: i mondi usano i modelli locali');
   const answerAccount = accountHandler(accounts);
   const videos = videoFolder(o.env);

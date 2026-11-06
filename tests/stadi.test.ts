@@ -107,7 +107,7 @@ describe('a building that rises in a world', () => {
     const { origin, key } = fallen(k);
     const sid = structureOf(k, origin)!;
     expect(k.ecs.get(sid, 'struttura').stadio).toBe(0);
-    expect(k.chunks.get(key)!.plan!.stadi).toEqual({ [origin]: 0 });
+    expect(k.chunks.get(key)!.plan!.stages).toEqual({ [origin]: 0 });
     // What a body meets follows the stage: nothing at 0, the walls when they are up.
     const fc: FormComp = k.ecs.get(sid, 'form');
     const f = (await k.forms.wait(fc.model, fc.seed, fc.tint)) as Form;
@@ -131,7 +131,7 @@ describe('a building that rises in a world', () => {
     expect(blocked()).toBeLessThanOrEqual(whole);
     // No rooms before the roof: the individuals of the house live elsewhere until then.
     expect((k as unknown as { interiorPoints(id: number): unknown[] }).interiorPoints(sid)).toEqual([]);
-    expect(k.chunks.get(key)!.plan!.stadi).toEqual({ [origin]: 0.7 });
+    expect(k.chunks.get(key)!.plan!.stages).toEqual({ [origin]: 0.7 });
 
     // On the wire: a client sees the stage of the structure, and nothing else of it.
     const many = await Kernel.boot({ files: manyPlayers(bundledFiles), store: memoryStore(), ai: new MockAiModels() });
@@ -156,9 +156,9 @@ describe('a building that rises in a world', () => {
     addWork(w, 1e6);
     k.tick(1 / 60);
     for (let i = 0; i < 70; i++) k.tick(1 / 60);
-    expect(k.ventures()[0].stato).toBe('finished');
+    expect(k.ventures()[0].state).toBe('finished');
     expect(k.ecs.get(structureOf(k, origin)!, 'struttura').stadio).toBeUndefined();
-    expect(k.chunks.get(key)!.plan!.stadi).toBeUndefined();
+    expect(k.chunks.get(key)!.plan!.stages).toBeUndefined();
   }, 120000);
 
   it('a plan saved ahead of the file of the ventures (a tab closed in between): without a venture no scaffolding stays for ever', async () => {
@@ -169,8 +169,8 @@ describe('a building that rises in a world', () => {
     bring(v, 'item.ciocco', 4);
     (k as unknown as { phasesClosed(v: Venture, c: number[]): void }).phasesClosed(v, addWork(v, 200));
     const plan = k.chunks.get(key)!.plan!;
-    expect(plan.stadi).toEqual({ [origin]: 0.2 });
-    plan.case = [{ origine: `${key}#v1`, x: 2, y: 2, modello: 'grande', seme: 1, yaw: 0, classe: 'building', concetto: 'una casetta', stadio: 0.2 }];
+    expect(plan.stages).toEqual({ [origin]: 0.2 });
+    plan.houses = [{ origin: `${key}#v1`, x: 2, y: 2, model: 'grande', seed: 1, yaw: 0, class: 'building', concept: 'una casetta', stage: 0.2 }];
     (k as unknown as { saveChunkSoon(c: unknown): void }).saveChunkSoon(k.chunks.get(key));
     await pause(700);
     // The world files are those of before the fall: no venture.
@@ -178,8 +178,8 @@ describe('a building that rises in a world', () => {
     await developAll(again);
     expect(again.ventures()).toEqual([]);
     expect(again.ecs.get(structureOf(again, origin)!, 'struttura').stadio).toBeUndefined();
-    expect(again.chunks.get(key)!.plan!.stadi).toBeUndefined();
-    expect(again.chunks.get(key)!.plan!.case ?? []).toEqual([]);
+    expect(again.chunks.get(key)!.plan!.stages).toBeUndefined();
+    expect(again.chunks.get(key)!.plan!.houses ?? []).toEqual([]);
     expect(structureOf(again, `${key}#v1`)).toBeUndefined();
   }, 120000);
 });

@@ -226,7 +226,7 @@ describe('due mondi veri', () => {
   const universe = (name: string) => {
     const root = path.join(dir, name);
     const cfg = JSON.parse(bundledFiles['universe.json']);
-    const files: Record<string, string> = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, name, partita: { modalita: 'multiplayer', morte: 3, master: 'io' } }) };
+    const files: Record<string, string> = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, name, game: { mode: 'multiplayer', death: 3, master: 'me' } }) };
     for (const [rel, text] of Object.entries(files)) {
       mkdirSync(path.dirname(path.join(root, rel)), { recursive: true });
       writeFileSync(path.join(root, rel), text);
@@ -349,7 +349,7 @@ describe('due mondi veri', () => {
       if (m?.t !== 'ingresso') throw new Error('nessun ingresso');
       expect(m.master).toBeFalsy();
       const paths = Object.keys(m.files);
-      expect(paths.some((p) => p.startsWith('prompts/') || p === 'world/bible.json' || p === 'world/people.json' || p.startsWith('world/giocatori/'))).toBe(false);
+      expect(paths.some((p) => p.startsWith('prompts/') || p === 'world/bible.json' || p === 'world/people.json' || p.startsWith('world/players/'))).toBe(false);
       expect(JSON.parse(m.files['universe.json'])).not.toHaveProperty('ai');
     };
     try {

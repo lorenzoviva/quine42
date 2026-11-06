@@ -26,7 +26,7 @@ export class DeferredStop extends Error {}
  * The table of the deferred generation: every agent on a subscription (`provider`, the first one by default), except those the
  * universe's table sends to the API on purpose: their tasks stop the command instead of spending.
  */
-export function deferredTable(ai: { provider?: unknown; agenti?: unknown } | undefined, provider: Subscription = SUBSCRIPTIONS[0]): Subscriptions {
+export function deferredTable(ai: { provider?: unknown; agents?: unknown; agenti?: unknown } | undefined, provider: Subscription = SUBSCRIPTIONS[0]): Subscriptions {
   return { provider, agenti: subscriptionsOf(ai).agenti };
 }
 
@@ -203,7 +203,7 @@ export interface WeeklyUsage {
   reset?: string;
 }
 
-/** What a generation has done, outside the universe (`universes/.generazione/<nome>.json`): it is the machine's, not the world's. */
+/** What a generation has done, outside the universe (`universes/.generation/<nome>.json`): it is the machine's, not the world's. */
 export interface DeferredProgress {
   /** The steps ended valid. */
   passi: string[];
@@ -231,7 +231,7 @@ export interface DeferredRun {
   partita: 'single' | 'multiplayer';
   /** How many places from the centre. */
   luoghi: number;
-  /** Models and pieces at most in this run (default the universe's `ai.maxModels`, `ai.maxBrani`). */
+  /** Models and pieces at most in this run (default the universe's `ai.maxModels`, `ai.maxPieces`). */
   modelli?: number;
   brani?: number;
   /** True once whoever started it asked to stop (Ctrl+C): the step under way is not written. */
@@ -251,7 +251,7 @@ async function* stepsOf(k: Kernel, r: DeferredRun, done: Set<string>): AsyncGene
   if (k.needsGenesis())
     yield {
       id: 'genesi',
-      run: async () => ((await k.runGenesis(r.theme, (s) => r.log?.(`  ${s}`), { modalita: r.partita })) ? true : 'la Genesi non è riuscita'),
+      run: async () => ((await k.runGenesis(r.theme, (s) => r.log?.(`  ${s}`), { mode: r.partita })) ? true : 'la Genesi non è riuscita'),
     };
   for (const [cx, cy] of spiral(r.luoghi)) {
     const id = `luogo:${cx},${cy}`;
@@ -275,7 +275,7 @@ async function* stepsOf(k: Kernel, r: DeferredRun, done: Set<string>): AsyncGene
     yield { id: `modello:${req.id}`, run: async () => (await k.sculpting.make(req), true) };
   }
   const composed = new Set<string>();
-  for (let made = 0; made < (r.brani ?? k.config.ai.maxBrani ?? 8); made++) {
+  for (let made = 0; made < (r.brani ?? k.config.ai.maxPieces ?? 8); made++) {
     const what = (q: { ambienti?: string[]; nome?: string; richiesta: string }) => q.ambienti?.[0] ?? q.nome ?? q.richiesta;
     const req = k.composing.missing().find((q) => !composed.has(what(q)));
     if (!req) break;
@@ -303,7 +303,7 @@ export async function runDeferred(r: DeferredRun): Promise<DeferredOutcome> {
   // ledger. Without this, in a universe of many with nobody connected every common call would go to the local models instead of the queue.
   k.council.hasCredits = undefined;
   let p = r.progress.load();
-  if (!k.needsGenesis() && k.gameSetup().modalita !== r.partita) return out('errore', `l'universo è già una partita ${k.gameSetup().modalita === 'multiplayer' ? 'multigiocatore' : 'in singola'}`);
+  if (!k.needsGenesis() && k.gameSetup().mode !== r.partita) return out('errore', `l'universo è già una partita ${k.gameSetup().mode === 'multiplayer' ? 'multigiocatore' : 'in singola'}`);
   if (p.partita && p.partita !== r.partita && !k.needsGenesis()) return out('errore', `la generazione era cominciata per una partita ${p.partita}`);
   p.partita = r.partita;
   const why = await measure(r, p, true);

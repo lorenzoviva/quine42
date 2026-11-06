@@ -34,7 +34,7 @@ export const CLOAKS = ['#ff2a85', '#00f0ff', '#ffe600', '#05ffa1', '#9d00ff', '#
 export const DEFAULT_CLOAK = '#c06030';
 /** The colour the world will really paint: a too dark, light or dull one is moved within the limits (`repairProfile`). */
 export function worldCloak(hex: string): string {
-  return repairProfile({ tinta: hex }, 'sito', [], 1).profilo.tinta ?? DEFAULT_CLOAK;
+  return repairProfile({ tinta: hex }, 'sito', [], 1).profilo.tint ?? DEFAULT_CLOAK;
 }
 
 /** The seed of a profile within the program's seeds (1 … n). */
@@ -272,7 +272,7 @@ class ProfilePage {
     badge.textContent = v.account === 'google' ? 'ACCOUNT GOOGLE' : v.account === 'anonimo' ? 'ANONIMO' : 'SENZA ACCOUNT';
     $('account-kind').textContent =
       v.account === 'google' ? 'Google: il viandante ti segue ovunque' : v.account === 'anonimo' ? 'Anonimo: legalo a Google per non perderlo' : 'Identificativo diretto (server senza account)';
-    $('wanderer-name').textContent = p?.nome ?? 'non ancora scelto';
+    $('wanderer-name').textContent = p?.name ?? 'non ancora scelto';
     $('wanderer-where').textContent = v.nelMondo ? 'sì, in cammino adesso' : v.noto ? 'no, il viandante riposa' : 'non è mai entrato in questo universo';
     $('wallet-amount').textContent = formatCredits(v.crediti);
     $('wallet-note').textContent = v.anonimo ? 'Un viandante anonimo non ha crediti: gioca con i modelli locali.' : 'Si ricarica dalla pagina dei crediti.';
@@ -285,10 +285,10 @@ class ProfilePage {
     const semi = v.modello?.semi ?? 1;
     this.range.max = String(semi);
     this.range.disabled = semi <= 1;
-    this.name.value = p?.nome && p.nome !== 'Viandante' ? p.nome : '';
-    this.intro.value = p?.presentazione ?? '';
-    this.seed = clampSeed(p?.seme ?? 1, semi);
-    this.setCloak(p?.tinta ?? DEFAULT_CLOAK, false);
+    this.name.value = p?.name && p.name !== 'Viandante' ? p.name : '';
+    this.intro.value = p?.introduction ?? '';
+    this.seed = clampSeed(p?.seed ?? 1, semi);
+    this.setCloak(p?.tint ?? DEFAULT_CLOAK, false);
     this.setSeed(this.seed);
   }
 
@@ -326,7 +326,7 @@ class ProfilePage {
     const btn = $<HTMLButtonElement>('btn-save');
     btn.classList.add('is-loading');
     btn.disabled = true;
-    const r = await askServer(this.who, v.universo, { nome: this.name.value, seme: this.seed, tinta: this.cloak, presentazione: this.intro.value });
+    const r = await askServer(this.who, v.universo, { name: this.name.value, seed: this.seed, tint: this.cloak, introduction: this.intro.value });
     btn.classList.remove('is-loading');
     btn.disabled = false;
     if (!r.ok || !r.profilo) {

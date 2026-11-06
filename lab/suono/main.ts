@@ -718,7 +718,7 @@ function bindRoll(): void {
 
 function bindAll(): void {
   const presetSel = $<HTMLSelectElement>('preset');
-  for (const p of presets) presetSel.add(new Option(p.nome ?? p.id, p.id));
+  for (const p of presets) presetSel.add(new Option(p.name ?? p.id, p.id));
   presetSel.add(new Option('— da file o bozza —', ''));
   presetSel.addEventListener('change', () => {
     const p = presets.find((x) => x.id === presetSel.value);

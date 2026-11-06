@@ -375,25 +375,25 @@ export class StudioPanel {
       this.close();
       this.onEdit?.(entry.path);
     };
-    const STEP: Record<BenchStep['tipo'], (p: any) => string> = {
-      slot: (p) => `mette «${p.oggetto}» nello slot «${p.slot}»`,
+    const STEP: Record<BenchStep['type'], (p: any) => string> = {
+      slot: (p) => `mette «${p.item}» nello slot «${p.slot}»`,
       remove: (p) => `toglie ciò che è nello slot «${p.slot}»`,
-      button: (p) => `preme «${p.azione}»`,
-      wait: (p) => `aspetta ${valueText(p.secondi)} s`,
-      walk: (p) => `cammina verso ${WAY_WORDS[p.verso as BenchWay] ?? p.verso} per ${valueText(p.secondi)} s`,
+      button: (p) => `preme «${p.action}»`,
+      wait: (p) => `aspetta ${valueText(p.seconds)} s`,
+      walk: (p) => `cammina verso ${WAY_WORDS[p.toward as BenchWay] ?? p.toward} per ${valueText(p.seconds)} s`,
     };
-    const lines = new Set(c.righe ?? []);
+    const lines = new Set(c.lines ?? []);
     const code = el('pre', { class: 'program' }, ...b.code.map((l, i) => el('div', lines.has(i + 1) ? { style: 'background:rgba(255,207,92,0.18);color:#ffcf5c' } : {}, `${String(i + 1).padStart(3, ' ')}  ${l}`)));
     this.show(
-      el('div', { class: 'title' }, `${entry.name}: «${c.titolo}» — Sala Sistemi`),
+      el('div', { class: 'title' }, `${entry.name}: «${c.title}» — Sala Sistemi`),
       el('div', { class: 'note' }, `Il banco di prova, caso ${b.index + 1} di ${b.count}: un mondo in miniatura (5 × 5 caselle, il viandante al centro) dove gira il codice vero del sistema, quello che ha adesso. Se lo riscrivi, il caso cambia.`),
       ...(entry.description ? [item('Che cosa fa', entry.description)] : []),
-      item('Il caso', c.racconto || c.titolo),
-      ...(c.passi?.length ? [item('Che cosa succede', `${c.passi.map((p) => STEP[p.tipo](p)).join(', poi ')}; poi ${valueText(c.durata)} s.`)] : [item('Quanto dura', `${valueText(c.durata)} s`)]),
+      item('Il caso', c.story || c.title),
+      ...(c.steps?.length ? [item('Che cosa succede', `${c.steps.map((p) => STEP[p.type](p)).join(', poi ')}; poi ${valueText(c.duration)} s.`)] : [item('Quanto dura', `${valueText(c.duration)} s`)]),
       el('div', { class: 'section' }, 'Prima e dopo'),
       ...(run
         ? [
-            ...c.guarda.map((g) => item(fieldLabel(g, scene), `${valueText(run.prima[g])} → ${valueText(run.dopo[g])}`, run.cambiati.includes(g) ? '#7dff9a' : undefined)),
+            ...c.watch.map((g) => item(fieldLabel(g, scene), `${valueText(run.prima[g])} → ${valueText(run.dopo[g])}`, run.cambiati.includes(g) ? '#7dff9a' : undefined)),
             ...run.messaggi.slice(0, 4).map((m) => item('Il viandante legge', `«${m}»`)),
             ...run.errori.map((e) => item('Non va', e, '#ff3b3b')),
           ]
@@ -405,7 +405,7 @@ export class StudioPanel {
     );
     this.benchOpen = true;
     // The code opens on the first lit line.
-    const first = code.children[Math.min(...(c.righe?.length ? c.righe : [1])) - 1] as HTMLElement | undefined;
+    const first = code.children[Math.min(...(c.lines?.length ? c.lines : [1])) - 1] as HTMLElement | undefined;
     if (first) code.scrollTop = Math.max(0, first.offsetTop - code.offsetTop - 40);
   }
 
@@ -602,7 +602,7 @@ export class StudioPanel {
       this.onEdit?.('world/rules.json');
     };
 
-    const outcomeTag = rule.possibile
+    const outcomeTag = rule.possible
       ? el('span', { class: 'tag', style: 'background: #153820; color: #7ee08a; border: 1px solid #2a7a40; font-weight: bold; padding: 2px 8px; border-radius: 4px;' }, '✓ SI PUÒ')
       : el('span', { class: 'tag', style: 'background: #381515; color: #ff8a8a; border: 1px solid #7a2a2a; font-weight: bold; padding: 2px 8px; border-radius: 4px;' }, '✗ NON SI PUÒ');
 
@@ -617,29 +617,29 @@ export class StudioPanel {
         'div',
         { class: 'row', style: 'align-items: center; justify-content: space-between; margin-top: 8px;' },
         el('div', { class: 'row', style: 'align-items: center;' }, outcomeTag, ...(recentBadge ? [recentBadge] : [])),
-        el('small', { style: 'color: var(--dim);' }, rule.chiave),
+        el('small', { style: 'color: var(--dim);' }, rule.key),
       ),
       el(
         'div',
         { class: 'item', style: 'margin-top: 8px;' },
-        el('strong', { style: 'font-size: 15px; color: var(--fg);' }, rule.testo),
+        el('strong', { style: 'font-size: 15px; color: var(--fg);' }, rule.text),
       ),
       el('div', { class: 'section' }, 'Il giudizio del Concilio'),
-      el('div', { class: 'note', style: 'white-space: pre-wrap; font-size: 13px; line-height: 1.5; color: var(--fg); background: #0c0f14; border: 1px solid var(--line); padding: 10px 12px; margin: 4px 0;' }, rule.racconto),
-      ...(rule.effetti?.length
+      el('div', { class: 'note', style: 'white-space: pre-wrap; font-size: 13px; line-height: 1.5; color: var(--fg); background: #0c0f14; border: 1px solid var(--line); padding: 10px 12px; margin: 4px 0;' }, rule.story),
+      ...(rule.effects?.length
         ? [
-            el('div', { class: 'section' }, `Effetti applicati (${rule.effetti.length})`),
+            el('div', { class: 'section' }, `Effetti applicati (${rule.effects.length})`),
             el(
               'div',
               { class: 'row', style: 'flex-wrap: wrap; gap: 4px; margin: 4px 0;' },
-              ...rule.effetti.map((eff: string) => el('span', { class: 'tag', style: 'background: #182230; color: #6fc3ff; border: 1px solid #284460; padding: 2px 6px;' }, eff)),
+              ...rule.effects.map((eff: string) => el('span', { class: 'tag', style: 'background: #182230; color: #6fc3ff; border: 1px solid #284460; padding: 2px 6px;' }, eff)),
             ),
           ]
         : []),
-      ...(rule.carta
+      ...(rule.card
         ? [
             el('div', { class: 'section' }, 'Carta del giocatore'),
-            el('div', { class: 'note', style: 'font-size: 12px; color: var(--dim);' }, `Autore: ${rule.carta.autore ?? 'Concilio'} · Titolare: ${rule.carta.titolare ?? rule.carta.pagante}`),
+            el('div', { class: 'note', style: 'font-size: 12px; color: var(--dim);' }, `Autore: ${rule.card.author ?? 'Concilio'} · Titolare: ${rule.card.holder ?? rule.card.payer}`),
           ]
         : []),
       el(

@@ -70,8 +70,8 @@ async function scene(model: string) {
 
 describe('the model that goes down (T52b)', () => {
   it('reads `sotto` from the index entry, from 1 to 3', () => {
-    expect(cellarOf({ classe: 'structure', sotto: 2 })).toBe(2);
-    for (const sotto of [0, 4, 1.5, -1, '1' as unknown as number, undefined]) expect(cellarOf({ classe: 'structure', sotto })).toBe(0);
+    expect(cellarOf({ class: 'structure', cellar: 2 })).toBe(2);
+    for (const sotto of [0, 4, 1.5, -1, '1' as unknown as number, undefined]) expect(cellarOf({ class: 'structure', cellar: sotto })).toBe(0);
   });
 
   it('grows the box down and lays the model lower; models without `sotto` stand on the ground as before', async () => {

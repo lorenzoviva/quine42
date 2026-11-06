@@ -61,15 +61,15 @@ describe('the Musician writes what is asked', () => {
     const head = k.repo.head();
     expect(head.id).not.toBe(before);
     expect(head.message).toMatch(/^musicista: /);
-    const added = soundPrograms(head.files).find((p) => p.nome?.startsWith('Aria'));
+    const added = soundPrograms(head.files).find((p) => p.name?.startsWith('Aria'));
     expect(added?.id).toMatch(/^sound-music-/);
     expect(councilMayWrite(`models/${added!.id}.xml`)).toBe(true);
     // It is a card: who wrote it, who paid.
     const info = JSON.parse(head.files['models/index.json']!)[added!.id];
-    expect(info.carta).toMatchObject({ autore: 'musician', pagante: k.wanderer().id });
-    expect(info.classe).toBe('suono');
+    expect(info.card).toMatchObject({ author: 'musician', payer: k.wanderer().id });
+    expect(info.class).toBe('suono');
     // The environment it names: the game plays it there, over the piece of the seed, by day and by night.
-    const env = added!.suono!.ambienti![0];
+    const env = added!.sound!.environments![0];
     expect(env).toBe('castle');
     const choice = chooseMusic({ beyond: false, environment: env, phase: 'day', seed: 7 }, readPrograms(head.files));
     expect(choice?.id).toBe(added!.id);
@@ -89,15 +89,15 @@ describe('the Musician writes what is asked', () => {
     expect(asked[0]).toMatchObject({ nome: 'Forra Nera', uso: 'music', momenti: ['morning', 'day'] });
     expect(await k.composing.make(asked[0])).toMatchObject({ ok: true });
     const info = JSON.parse(k.repo.head().files['models/index.json']!)['sound-music-forra-nera'];
-    expect(info.suono).toEqual({ uso: 'music', ambienti: ['forra_nera'], momenti: ['morning', 'day'] });
-    expect(info.carta.pagante).toBe(COMUNE);
+    expect(info.sound).toEqual({ use: 'music', environments: ['forra_nera'], moments: ['morning', 'day'] });
+    expect(info.card.payer).toBe(COMUNE);
     expect(k.composing.missing()).toEqual([]);
   }, 60_000);
 
   it('the pump respects the budget, the coefficient and being offline', async () => {
     const offline = await bootWith(new Scripted(false));
     expect(offline.composing.active).toBe(false);
-    const k = await bootWith(new Scripted(), { maxBrani: 0 });
+    const k = await bootWith(new Scripted(), { maxPieces: 0 });
     k.content.layouts['forra_nera'] = { ...k.content.layouts['bosco'], name: 'Forra Nera' };
     walkIn(k, 'forra_nera');
     k.composing.pump();
@@ -121,7 +121,7 @@ describe('the Musician writes what is asked', () => {
     expect(r.forged).toMatch(/effetto: item/);
     const head = k.repo.head().files;
     expect(head['models/sound-effect-item.xml']).toContain('bpm="280"');
-    expect(soundPrograms(head).filter((p) => p.suono?.effetti?.includes('item')).map((p) => p.id)).toEqual(['sound-effect-item']);
+    expect(soundPrograms(head).filter((p) => p.sound?.effects?.includes('item')).map((p) => p.id)).toEqual(['sound-effect-item']);
   }, 60_000);
 
   it('talking to the Musician in the house of the Artist works like the Referente', async () => {
@@ -184,24 +184,24 @@ describe('what does not pass goes back to the Musician, with the reason', () => 
   });
 
   it('what the world cannot name is dropped: environments out of the list, an effect nobody plays goes back', () => {
-    expect(purposeOf({ uso: 'music', ambienti: ['bosco', 'marte'], momenti: ['notte', 'mai'] }, { richiesta: 'x' }, world).suono).toEqual({ uso: 'music', ambienti: ['bosco'], momenti: ['night'] });
-    expect(purposeOf({ uso: 'music', ambienti: ['marte'] }, { richiesta: 'x' }, world).suono?.ambienti).toEqual(['bosco']);
+    expect(purposeOf({ uso: 'music', ambienti: ['bosco', 'marte'], momenti: ['notte', 'mai'] }, { richiesta: 'x' }, world).suono).toEqual({ use: 'music', environments: ['bosco'], moments: ['night'] });
+    expect(purposeOf({ uso: 'music', ambienti: ['marte'] }, { richiesta: 'x' }, world).suono?.environments).toEqual(['bosco']);
     expect(purposeOf({ uso: 'music' }, { richiesta: 'x' }, { ...world, qui: undefined }).error).toMatch(/ambienti/);
     expect(purposeOf({ uso: 'effect', effetto: 'starnuto' }, { richiesta: 'x' }, world).error).toMatch(/item/);
     // What the kernel decided, the answer does not move.
-    expect(purposeOf({ uso: 'effect', ambienti: ['castello'] }, { richiesta: 'x', uso: 'music', ambienti: ['bosco'], momenti: ['giorno'] }, world).suono).toEqual({ uso: 'music', ambienti: ['bosco'], momenti: ['giorno'] });
+    expect(purposeOf({ uso: 'effect', ambienti: ['castello'] }, { richiesta: 'x', uso: 'music', ambienti: ['bosco'], momenti: ['giorno'] }, world).suono).toEqual({ use: 'music', environments: ['bosco'], moments: ['giorno'] });
   });
 
   it('an id is free, or the effect it replaces', () => {
-    const programs: SoundProgram[] = [{ id: 'sound-effect-rune', xml: '', suono: { uso: 'effect', effetti: ['rune'] } }];
-    expect(soundId('Tocco', { uso: 'effect', effetti: ['rune'] }, programs, () => true)).toBe('sound-effect-rune');
+    const programs: SoundProgram[] = [{ id: 'sound-effect-rune', xml: '', sound: { use: 'effect', effects: ['rune'] } }];
+    expect(soundId('Tocco', { use: 'effect', effects: ['rune'] }, programs, () => true)).toBe('sound-effect-rune');
     const taken = new Set(['sound-music-la-forra']);
-    expect(soundId('La Forra!', { uso: 'music' }, programs, (id) => taken.has(id))).toBe('sound-music-la-forra-2');
+    expect(soundId('La Forra!', { use: 'music' }, programs, (id) => taken.has(id))).toBe('sound-music-la-forra-2');
   });
 });
 
 describe('the choice of the music with the Musician in the house', () => {
-  const p = (id: string, ambienti: string[]): SoundProgram => ({ id, xml: `<x id="${id}"/>`, suono: { uso: 'music', ambienti } });
+  const p = (id: string, ambienti: string[]): SoundProgram => ({ id, xml: `<x id="${id}"/>`, sound: { use: 'music', environments: ambienti } });
   const state = { beyond: false, phase: 'day' as const, seed: 3 };
 
   it('who names the environment exactly beats who names part of its id, and the last written plays', () => {
@@ -217,11 +217,11 @@ describe('the rules of a content of the Council', () => {
   it('a task of the census, with its coefficient, common when the world asks; «Low Detail» thins it and takes the cheap model', () => {
     expect(CENSUS.find((c) => c.compito === 'sound.compose')).toMatchObject({ agente: 'musician', coefficiente: 'pieces' });
     expect(isCommonTask('sound.compose')).toBe(true);
-    expect(LOW_DETAIL.coefficienti.pieces).toBeLessThan(FULL_DETAIL.pieces);
+    expect(LOW_DETAIL.coefficients.pieces).toBeLessThan(FULL_DETAIL.pieces);
     expect(pieceGap(1)).toBe(120);
-    expect(pieceGap(LOW_DETAIL.coefficienti.pieces)).toBeGreaterThan(pieceGap(1));
+    expect(pieceGap(LOW_DETAIL.coefficients.pieces)).toBeGreaterThan(pieceGap(1));
     expect(pieceGap(0)).toBe(Infinity);
-    expect(LOW_DETAIL.scultori.musician).toBe('gemini-3.1-flash-lite');
+    expect(LOW_DETAIL.sculptors.musician).toBe('gemini-3.1-flash-lite');
   });
 
   it('the role carries the scales, the instruments and the limits; no placeholder stays', () => {

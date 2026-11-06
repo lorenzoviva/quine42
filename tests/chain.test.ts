@@ -136,7 +136,7 @@ describe('the meter and the stations, pure', () => {
 
   it('the kinds, the panels of the mechanics, the faults by module', () => {
     const m = new ChainMeter();
-    const c = chainOf([entry('core.movement'), entry('sys.fire'), entry('mech.armi', { ui: { titolo: 'Armi', elementi: [] } })], m, [{ key: 'module:sys.fire:update', message: 'brucia', since: 0, count: 2 }]);
+    const c = chainOf([entry('core.movement'), entry('sys.fire'), entry('mech.armi', { ui: { title: 'Armi', elements: [] } })], m, [{ key: 'module:sys.fire:update', message: 'brucia', since: 0, count: 2 }]);
     expect(c.stations.map((s) => [s.step, s.kind, s.panel, s.fault?.message])).toEqual([
       [1, 'core', undefined, undefined],
       [2, 'system', undefined, 'brucia'],

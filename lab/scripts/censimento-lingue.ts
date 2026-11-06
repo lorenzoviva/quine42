@@ -221,8 +221,8 @@ function walk(dir: string, acc: string[] = []): string[] {
 /** What a file is, for the tables. */
 export function categoryOf(rel: string): string {
   if (rel.startsWith('universe/prompts/')) return 'prompt degli agenti (seme)';
-  if (rel === 'universe/world/canone.md') return 'canone delle rune';
-  if (rel === 'universe/world/lessico.md') return 'lessico';
+  if (rel === 'universe/world/canon.md') return 'canone delle rune';
+  if (rel === 'universe/world/lexicon.md') return 'lessico';
   if (rel.startsWith('universe/world/')) return 'mondo del seme';
   if (rel.startsWith('universe/models/suono-')) return 'suoni (programmi)';
   if (rel.startsWith('universe/models/')) return 'modelli (programmi)';

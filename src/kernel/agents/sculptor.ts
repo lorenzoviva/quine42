@@ -17,6 +17,7 @@ import { cartoonRender, render, sheet, type RenderOptions } from '../../mj/photo
 import { pngDataUrl } from '../../mj/png';
 import { act, runMjx } from '../../mj/run';
 import type { FileMap } from '../types';
+import { internalFields } from '../internalNames';
 import type { Council } from './council';
 
 export type ModelCategory = 'simple' | 'figure' | 'structure';
@@ -106,9 +107,10 @@ export function sculptorRole(files: FileMap): string {
 
 /** Up to two programs of the library of the same class (or family) to learn from: the hand-written first. */
 export function examplesFor(files: FileMap, classe: string): string[] {
-  let index: Record<string, { classe?: string; autore?: string }> = {};
+  let index: Record<string, { class?: string; author?: string }> = {};
   try {
-    index = JSON.parse(files['models/index.json'] ?? '{}');
+    // The fields of 0.3 (`classe`, `autore`) read internal (T308a).
+    index = internalFields('modelIndex', JSON.parse(files['models/index.json'] ?? '{}'));
   } catch {
     index = {};
   }
@@ -116,7 +118,7 @@ export function examplesFor(files: FileMap, classe: string): string[] {
   const ids = Object.keys(index).filter((id) => files[`models/${id}.xml`]);
   const picked: string[] = [];
   for (const cls of family[classe] ?? [classe, 'furniture']) {
-    const of = ids.filter((id) => index[id].classe === cls).sort((a, b) => Number(/mano/.test(index[b].autore ?? '')) - Number(/mano/.test(index[a].autore ?? '')));
+    const of = ids.filter((id) => index[id].class === cls).sort((a, b) => Number(/mano/.test(index[b].author ?? '')) - Number(/mano/.test(index[a].author ?? '')));
     for (const id of of) if (picked.length < 2 && !picked.includes(id)) picked.push(id);
   }
   return picked.map((id) => files[`models/${id}.xml`].trim());

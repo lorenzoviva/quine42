@@ -16,7 +16,7 @@ import { anonymousToken } from '../server/account';
 
 async function bootMany(): Promise<Kernel> {
   const cfg = JSON.parse(bundledFiles['universe.json']);
-  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2) };
+  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, game: { mode: 'multiplayer', death: 3 } }, null, 2) };
   return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 }
 
@@ -61,7 +61,7 @@ describe('accounts (T44b)', () => {
     expect(ok.id).toBe(GOOGLE.toLowerCase());
     expect(ok.anonimo).toBe(false);
     expect(server.connected()).toEqual([GOOGLE.toLowerCase()]);
-    expect(k.wanderers().find((w) => w.id === ok.id)?.nome).toBe('Ilaria');
+    expect(k.wanderers().find((w) => w.id === ok.id)?.name).toBe('Ilaria');
 
     const old = await enter(server, 'chiunque', 'scaduto');
     expect(old.refused).toMatch(/scaduto/);
@@ -86,7 +86,7 @@ describe('accounts (T44b)', () => {
     }
     const online = new TrackingOnlineAiModels();
     const cfg = JSON.parse(bundledFiles['universe.json']);
-    const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2) };
+    const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, game: { mode: 'multiplayer', death: 3 } }, null, 2) };
     const k = await Kernel.boot({ files, store: memoryStore(), ai: online });
     const server = new SessionServer(k, { verify });
     const anon = await enter(server, '', 'anonimo');
@@ -114,7 +114,7 @@ describe('accounts (T44b)', () => {
     expect(linked.anonimo).toBe(false);
     expect(server.isAnonymous(id)).toBe(false);
     expect(k.isAnonymous(id)).toBe(false);
-    expect(linked.profilo?.nome).toBe('Nebbia');
+    expect(linked.profilo?.name).toBe('Nebbia');
     expect(JSON.stringify(k.as(id, () => k.inventory()))).toBe(carried);
 
     // Linked to Google: can receive credits and use online models

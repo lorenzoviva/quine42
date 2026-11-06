@@ -183,7 +183,7 @@ export class Console {
         };
         const reset = el('button', { class: 'danger' }, 'Riparti dal seme del kernel (nuovo universo)');
         reset.onclick = async () => {
-          if (!confirm(`L'universo «${k.config.name}» verrà messo da parte (universes/.cestino) e ne nascerà uno nuovo dal seme del kernel. Procedere?`)) return;
+          if (!confirm(`L'universo «${k.config.name}» verrà messo da parte (universes/.trash) e ne nascerà uno nuovo dal seme del kernel. Procedere?`)) return;
           await k.repo.backend?.reset().catch(() => undefined);
           try {
             localStorage.removeItem(`rune:repo:${k.config.name}`);
@@ -193,7 +193,7 @@ export class Console {
           void k.chunkStore.clear().then(() => location.reload());
         };
         const clone: HTMLElement[] = [];
-        if (this.onClone && k.gameSetup().modalita === 'multiplayer') {
+        if (this.onClone && k.gameSetup().mode === 'multiplayer') {
           const nome = el('input', { type: 'text', placeholder: 'nome del clone' }) as HTMLInputElement;
           const master = el('input', { type: 'text', placeholder: 'id del nuovo master' }) as HTMLInputElement;
           const pass = el('input', { type: 'checkbox' }) as HTMLInputElement;
@@ -219,10 +219,10 @@ export class Console {
           );
         }
         const creditiRows: HTMLElement[] = [];
-        if (k.gameSetup().modalita === 'multiplayer') {
+        if (k.gameSetup().mode === 'multiplayer') {
           // Others' balances do not reach this client (ADR-0104): only their names, and its own balance.
           const me = k.wanderer().id;
-          const wanderers = new Map(k.wanderers().map((w) => [w.id, w.nome]));
+          const wanderers = new Map(k.wanderers().map((w) => [w.id, w.name]));
           for (const p of k.players()) wanderers.set(p.id, p.nome);
           const target = el('select', {}) as HTMLSelectElement;
           for (const [id, nome] of wanderers) {

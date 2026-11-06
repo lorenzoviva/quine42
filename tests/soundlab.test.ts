@@ -32,7 +32,7 @@ import {
   withSeedNote,
 } from '../lab/suono/logic';
 
-const presets = soundPrograms(bundledFiles).filter((p) => !p.suono);
+const presets = soundPrograms(bundledFiles).filter((p) => !p.sound);
 const SEED = 421337;
 
 /** Writes in cells that are empty and in cells that are not, on the first plane and on the last. */

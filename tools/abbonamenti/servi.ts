@@ -15,6 +15,7 @@ import { parseJson } from '../../src/kernel/ai/models';
 import type { Provider, QueuedAnswer } from '../../src/kernel/ai/subscription';
 // @ts-expect-error pipeline.mjs is untyped plain JS
 import { usageLimit } from '../pipeline/pipeline.mjs';
+import { serverPath } from '../../server/folders';
 
 export type SubscriptionProvider = Exclude<Provider, 'api'>;
 
@@ -375,7 +376,7 @@ function providerArg(p: string): SubscriptionProvider {
 
 /** Parses CLI arguments for running the serving daemon. */
 export function parseArgs(argv: string[]): ServeOptions {
-  const defaultDir = path.resolve(process.cwd(), 'universes', '.coda');
+  const defaultDir = serverPath(path.resolve(process.cwd(), 'universes'), 'queue');
   let provider: SubscriptionProvider = 'claude';
   let dir = defaultDir;
   let cmd: string | undefined;

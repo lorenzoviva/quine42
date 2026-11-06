@@ -19,7 +19,7 @@ describe('the bench of the Sala sistemi', () => {
     const k = await boot();
     const before = JSON.stringify(k.files);
     const { manifest, logic } = seed(k, 'sys.needs');
-    const c: BenchCase = { titolo: 'La fame', racconto: 'Senza mangiare la salute cala.', viandante: { componenti: { needs: { hunger: 0, health: 50 } } }, durata: 5, guarda: ['needs.health', 'needs.thirst'] };
+    const c: BenchCase = { title: 'La fame', story: 'Senza mangiare la salute cala.', wanderer: { components: { needs: { hunger: 0, health: 50 } } }, duration: 5, watch: ['needs.health', 'needs.thirst'] };
     const run = await k.runBenchCase(manifest, logic, c);
     expect(run.errori).toEqual([]);
     expect(run.prima['needs.health']).toBe(50);
@@ -36,15 +36,15 @@ describe('the bench of the Sala sistemi', () => {
     const k = await boot();
     const { manifest, logic } = seed(k, 'sys.fire');
     const c: BenchCase = {
-      titolo: 'Il fuoco',
-      racconto: 'Una fiamma accanto al rovo e al viandante.',
-      terreno: ['ggggg', 'ggggg', 'ggggg', 'ggggg', 'ggggg'],
-      cose: [
-        { modulo: 'object.bush', x: 1, y: 1 },
-        { modulo: 'object.sign', x: 1, y: 0, componenti: { effimero: { fino: 99 }, fuoco: { raggio: 1 } } },
+      title: 'Il fuoco',
+      story: 'Una fiamma accanto al rovo e al viandante.',
+      terrain: ['ggggg', 'ggggg', 'ggggg', 'ggggg', 'ggggg'],
+      entities: [
+        { module: 'object.bush', x: 1, y: 1 },
+        { module: 'object.sign', x: 1, y: 0, components: { effimero: { fino: 99 }, fuoco: { raggio: 1 } } },
       ],
-      durata: 2,
-      guarda: ['0:body.solid', 'needs.health'],
+      duration: 2,
+      watch: ['0:body.solid', 'needs.health'],
     };
     const run = await k.runBenchCase(manifest, logic, c);
     expect(run.errori).toEqual([]);
@@ -57,16 +57,16 @@ describe('the bench of the Sala sistemi', () => {
   it('says why a case shows nothing: no change, a fault, a step that fails', async () => {
     const k = await boot();
     const { manifest } = seed(k, 'sys.needs');
-    const idle = await k.runBenchCase(manifest, 'local M = {}\nfunction M.update(dt) end\nreturn M\n', { titolo: 'Niente', racconto: '', durata: 1, guarda: ['needs.health'] });
+    const idle = await k.runBenchCase(manifest, 'local M = {}\nfunction M.update(dt) end\nreturn M\n', { title: 'Niente', story: '', duration: 1, watch: ['needs.health'] });
     expect(idle.errori.join()).toMatch(/non cambia nulla/);
-    const broken = await k.runBenchCase(manifest, 'local M = {}\nfunction M.update(dt) error("rotto") end\nreturn M\n', { titolo: 'Rotto', racconto: '', durata: 1, guarda: ['needs.health'] });
+    const broken = await k.runBenchCase(manifest, 'local M = {}\nfunction M.update(dt) error("rotto") end\nreturn M\n', { title: 'Rotto', story: '', duration: 1, watch: ['needs.health'] });
     expect(broken.errori.join()).toMatch(/update: .*rotto/);
   });
 
   it('keeps only what the scene needs: core, content, the system; objects the universe lacks are trial objects', async () => {
     const k = await boot();
     const { manifest, logic } = seed(k, 'sys.fire');
-    const c: BenchCase = { titolo: 'x', racconto: '', viandante: { oggetti: [{ nome: 'Elmo di prova', posto: 'testa', bonus: { difesa: 2 } }, { nome: 'Ciocco di legna' }] }, durata: 1, guarda: ['needs.health'] };
+    const c: BenchCase = { title: 'x', story: '', wanderer: { items: [{ name: 'Elmo di prova', slot: 'testa', bonus: { difesa: 2 } }, { name: 'Ciocco di legna' }] }, duration: 1, watch: ['needs.health'] };
     const known = (n: string) => k.content.byName(n)?.id;
     const files = benchFiles(k.files, manifest, logic, c, known);
     const modules = [...new Set(Object.keys(files).filter((p) => p.startsWith('modules/')).map((p) => p.split('/')[1]))];
@@ -82,7 +82,7 @@ describe('the bench of the Sala sistemi', () => {
   });
 
   it('cleans the cases the Engineer writes: slots and buttons of the panel, paths to watch, at most 30 seconds', () => {
-    const panel = { id: 'equip', titolo: 'Equip', elementi: [{ tipo: 'slot' as const, id: 'testa', etichetta: 'Testa' }, { tipo: 'button' as const, id: 'riposa', etichetta: 'Riposa' }] };
+    const panel = { id: 'equip', title: 'Equip', elements: [{ type: 'slot' as const, id: 'testa', label: 'Testa' }, { type: 'button' as const, id: 'riposa', label: 'Riposa' }] };
     const { cases, errors } = cleanCases(
       [
         { titolo: 'A', racconto: 'a', viandante_json: '{"needs":{"health":10}}', oggetti: [{ nome: 'Elmo', posto: 'Testa', bonus_json: '{"difesa":1}' }], passi: [{ tipo: 'slot', slot: 'Testa', oggetto: 'Elmo' }, { tipo: 'slot', slot: 'piedi', oggetto: 'Elmo' }, { tipo: 'pulsante', azione: 'riposa' }, { tipo: 'vola' }], durata: 99, guarda: ['difesa.valore', 'non un campo'], righe: [2, 400] },
@@ -92,8 +92,8 @@ describe('the bench of the Sala sistemi', () => {
       10,
     );
     expect(cases.length).toBe(1);
-    expect(cases[0]).toMatchObject({ durata: 30, guarda: ['difesa.valore'], righe: [2], viandante: { componenti: { needs: { health: 10 } }, oggetti: [{ nome: 'Elmo', posto: 'testa', bonus: { difesa: 1 } }] } });
-    expect(cases[0].passi).toEqual([{ tipo: 'slot', slot: 'testa', oggetto: 'Elmo' }, { tipo: 'button', azione: 'riposa' }]);
+    expect(cases[0]).toMatchObject({ duration: 30, watch: ['difesa.valore'], lines: [2], wanderer: { components: { needs: { health: 10 } }, items: [{ name: 'Elmo', slot: 'testa', bonus: { difesa: 1 } }] } });
+    expect(cases[0].steps).toEqual([{ type: 'slot', slot: 'testa', item: 'Elmo' }, { type: 'button', action: 'riposa' }]);
     expect(errors.join()).toMatch(/piedi/);
     expect(errors.join()).toMatch(/«B»/);
   });
@@ -103,12 +103,12 @@ describe('the bench of the Sala sistemi', () => {
     const r = await k.forgeMechanic('equipaggiamento: slot per indossare e impugnare');
     expect(r.ok).toBe(true);
     const { manifest, logic } = seed(k, r.id!);
-    expect(manifest.casi?.map((c) => c.titolo)).toEqual(["Si indossa l'elmo"]);
-    expect(manifest.casi![0].righe).toEqual([4, 9, 14, 17]);
+    expect(manifest.cases?.map((c) => c.title)).toEqual(["Si indossa l'elmo"]);
+    expect(manifest.cases![0].lines).toEqual([4, 9, 14, 17]);
     expect(logic.split('\n')[13]).toMatch(/ecs\.set\(user, "difesa"/);
     // The trial helmet stays on the bench.
     expect(k.content.get(trialId('Elmo di prova'))).toBeUndefined();
-    const run = await k.runBenchCase(manifest, logic, manifest.casi![0]);
+    const run = await k.runBenchCase(manifest, logic, manifest.cases![0]);
     expect(run.errori).toEqual([]);
     expect(run.prima['difesa.valore']).toBeNull();
     expect(run.dopo['difesa.valore']).toBe(3);
@@ -116,7 +116,7 @@ describe('the bench of the Sala sistemi', () => {
     expect(run.messaggi).toContain('Ti senti più protetto.');
     // The player rewrites the mechanic: the case shows what the new code does.
     const doubled = logic.replace('difesa = difesa + items.bonus(it, "difesa")', 'difesa = difesa + 2 * items.bonus(it, "difesa")');
-    expect((await k.runBenchCase(manifest, doubled, manifest.casi![0])).dopo['difesa.valore']).toBe(6);
+    expect((await k.runBenchCase(manifest, doubled, manifest.cases![0])).dopo['difesa.valore']).toBe(6);
     // T27d: the mechanic lives in the Sala sistemi, with the systems; the studio has no Archive for it.
     const ids = k.corona.buildings.map((b) => b.id);
     expect(ids).not.toContain('altro');
@@ -140,7 +140,7 @@ describe('the bench of the Sala sistemi', () => {
     expect(r.ok).toBe(true);
     expect(asked.length).toBe(2);
     expect(asked[1]).toMatch(/non mostrano la meccanica: .*non cambia nulla/);
-    expect(seed(k, r.id!).manifest.casi?.length).toBe(1);
+    expect(seed(k, r.id!).manifest.cases?.length).toBe(1);
   });
 });
 
@@ -153,13 +153,13 @@ describe('the bench with the cases of the seed', () => {
     expect(systems).toEqual(['sys.physics', 'sys.work', 'sys.wander', 'sys.follow', 'sys.needs', 'sys.fire']);
     for (const id of systems) {
       const { manifest, logic } = seed(k, id);
-      expect(manifest.casi?.length, id).toBeGreaterThanOrEqual(2);
+      expect(manifest.cases?.length, id).toBeGreaterThanOrEqual(2);
       // The cases are already clean: the kernel would not change them.
-      expect(cleanCases(manifest.casi, manifest.ui, logic.split('\n').length).cases, id).toEqual(manifest.casi);
-      for (const c of manifest.casi!) {
+      expect(cleanCases(manifest.cases, manifest.ui, logic.split('\n').length).cases, id).toEqual(manifest.cases);
+      for (const c of manifest.cases!) {
         const run = await k.runBenchCase(manifest, logic, c);
-        expect(run.errori, `${id}: ${c.titolo}`).toEqual([]);
-        expect(run.cambiati.length, `${id}: ${c.titolo}`).toBeGreaterThan(0);
+        expect(run.errori, `${id}: ${c.title}`).toEqual([]);
+        expect(run.cambiati.length, `${id}: ${c.title}`).toBeGreaterThan(0);
       }
     }
   }, 30000);
@@ -167,26 +167,26 @@ describe('the bench with the cases of the seed', () => {
   it('the cases say what the code does: the bramble burns and the crate not, the shield protects, the follower stops a step away', async () => {
     const k = await boot();
     const fire = seed(k, 'sys.fire');
-    const [burn, shield] = fire.manifest.casi!;
+    const [burn, shield] = fire.manifest.cases!;
     const a = await k.runBenchCase(fire.manifest, fire.logic, burn);
     expect(a.dopo).toMatchObject({ '0:body.solid': 'assente', '1:body.solid': true, '2:effimero.fino': 'assente' });
     expect(a.dopo['needs.health'] as number).toBeLessThan(100);
     expect((await k.runBenchCase(fire.manifest, fire.logic, shield)).dopo['needs.health']).toBe(100);
     const follow = seed(k, 'sys.follow');
-    const f = await k.runBenchCase(follow.manifest, follow.logic, follow.manifest.casi![0]);
+    const f = await k.runBenchCase(follow.manifest, follow.logic, follow.manifest.cases![0]);
     const [px, py] = f.frames.at(-1)!.pos[0]!, [x, y] = f.frames.at(-1)!.pos[1]!;
     expect(Math.hypot(x - px, y - py)).toBeGreaterThan(1.3);
     expect(Math.hypot(x - px, y - py)).toBeLessThan(1.6);
     // A walk of the wanderer pushes the crate.
     const physics = seed(k, 'sys.physics');
-    const push = await k.runBenchCase(physics.manifest, physics.logic, physics.manifest.casi![0]);
+    const push = await k.runBenchCase(physics.manifest, physics.logic, physics.manifest.cases![0]);
     expect(push.dopo['0:pos.x'] as number).toBeGreaterThan((push.prima['0:pos.x'] as number) + 1);
   });
 
   it('cleans the walks of the cases: the four directions, a time', () => {
     const { cases, errors } = cleanCases([{ titolo: 'A', racconto: '', passi: [{ tipo: 'cammina', verso: 'Giù', secondi: 0.5 }, { tipo: 'cammina', verso: 'sopra' }, { tipo: 'cammina', verso: 'in diagonale' }], durata: 1, guarda: ['needs.thirst'] }], undefined, 5);
     // The Engineer still writes the Italian steps (T310): the bench takes them as the internal ones.
-    expect(cases[0].passi).toEqual([{ tipo: 'walk', verso: 'down', secondi: 0.5 }, { tipo: 'walk', verso: 'up', secondi: 1 }]);
+    expect(cases[0].steps).toEqual([{ type: 'walk', toward: 'down', seconds: 0.5 }, { type: 'walk', toward: 'up', seconds: 1 }]);
     expect(errors.join()).toMatch(/in diagonale/);
   });
 

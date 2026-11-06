@@ -12,7 +12,7 @@ import { MAX_SECONDS, renderScore, renderSoundProgram, scoreOfProgram } from '..
 import { parseXml } from '../src/mj/xml';
 
 const SEEDS = [1, 2, 3, 7, 42, 1234, 421337, 987654];
-const presets = soundPrograms(bundledFiles).filter((p) => !p.suono);
+const presets = soundPrograms(bundledFiles).filter((p) => !p.sound);
 const SOUND = '<sound bpm="120" scale="dorian" root="50"/>';
 
 /** Every node the XML knows, each with something to do, in a program that is a score. */
@@ -181,7 +181,7 @@ describe('the score', () => {
 
 describe('the presets, all of them, in XML on the real engine', () => {
   it('are the four of the SoundLab, in models/ with their own class, which is no class of the world', () => {
-    expect(presets.map((p) => p.nome)).toEqual(['Sentiero Melodico', 'Fuga Cellular Automata', 'Architettura Frattale', 'Boss Fight Cyber-Dungeon']);
+    expect(presets.map((p) => p.name)).toEqual(['Sentiero Melodico', 'Fuga Cellular Automata', 'Architettura Frattale', 'Boss Fight Cyber-Dungeon']);
     expect(CLASSES.map((c) => c.id)).not.toContain(SOUND_CLASS);
     // Parameters as in the SoundLab.
     const params = presets.map((p) => compileMjx(p.xml).sound!).map((s) => [s.scale, s.root, s.bpm]);

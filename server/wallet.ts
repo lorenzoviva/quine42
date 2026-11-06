@@ -1,5 +1,5 @@
 // Dev server: the wallet as the site sees it (T105, ADR-0095). GET /api/crediti?universo=<nome> says a wanderer's balance,
-// the top-ups credited to them (the ledger, ADR-0104) and what they spent day by day (`world/consumi.json → paganti`).
+// the top-ups credited to them (the ledger, ADR-0104) and what they spent day by day (`world/usage.json → paganti`).
 // Only their own lines: those records hold everybody's, so they never go to the page as they are. Who asks comes from the
 // account's token, as in /api/viandante (`whoAsks`). The running world is asked first, then the files on disk.
 
@@ -9,6 +9,8 @@ import { promises as fs } from 'node:fs';
 import type { Kernel } from '../src/kernel/kernel';
 import type { FileMap } from '../src/kernel/types';
 import { isMultiplayer } from '../src/kernel/gameSetup';
+import { internalFields } from '../src/kernel/internalNames';
+import { pathsBefore, portedFiles } from '../src/kernel/migrations';
 import { costWithFee, DEFAULT_PLATFORM_FEE, type Ledger, type PaymentRecord } from '../src/kernel/credits';
 import { USAGE_FILE } from '../src/kernel/ai/usage';
 import { playerFile, readWandererState } from '../src/kernel/wanderers';
@@ -89,7 +91,7 @@ export function linesOf(payments: PaymentRecord[], usageText: string | undefined
 
 function manyIn(files: FileMap): boolean {
   try {
-    return isMultiplayer(JSON.parse(files['universe.json'] ?? '{}')?.partita?.modalita);
+    return isMultiplayer(internalFields('config', JSON.parse(files['universe.json'] ?? '{}') ?? {})?.game?.mode);
   } catch {
     return false;
   }
@@ -98,7 +100,7 @@ function manyIn(files: FileMap): boolean {
 /** The wallet as the universe's files on disk say. */
 export function walletFromFiles(files: FileMap, ledger: Ledger, universo: string, id: string, account: WandererView['account'], fee: number): Wallet {
   const saved = readWandererState(files, id);
-  const anonimo = account === 'anonimo' || !!saved?.anonimo;
+  const anonimo = account === 'anonimo' || !!saved?.anonymous;
   const many = manyIn(files);
   return { id, universo, account, anonimo, crediti: anonimo ? 0 : ledger.balance(id), multigiocatore: many, commissione: fee, ...linesOf(ledger.paymentsOf(id), files[USAGE_FILE], id, many, fee) };
 }
@@ -110,11 +112,11 @@ export function walletFromKernel(k: Kernel, universo: string, id: string, accoun
   return { id, universo, account, anonimo, crediti: anonimo ? 0 : k.creditsOf(id), multigiocatore: many, commissione: k.platformFee, ...linesOf(k.ledger.paymentsOf(id), k.usage.toJson(), id, many, k.platformFee) };
 }
 
-/** The few files a wallet needs. */
+/** The few files a wallet needs, as this kernel reads them (a universe not opened since the contract 0.4 is ported in memory, T308a). */
 async function walletFiles(root: string, id: string): Promise<FileMap> {
   const files: FileMap = {};
   await Promise.all(
-    ['universe.json', 'world/stato.json', USAGE_FILE, playerFile(id)].map(async (rel) => {
+    pathsBefore(['universe.json', 'world/state.json', USAGE_FILE, playerFile(id)]).map(async (rel) => {
       try {
         files[rel] = await fs.readFile(path.join(root, rel), 'utf8');
       } catch {
@@ -122,7 +124,7 @@ async function walletFiles(root: string, id: string): Promise<FileMap> {
       }
     }),
   );
-  return files;
+  return portedFiles(files);
 }
 
 /** The wallet's route says the fee when no world is running: the server's. */

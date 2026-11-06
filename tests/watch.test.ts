@@ -15,7 +15,7 @@ const DT = 1 / 60;
 
 async function bootMany(): Promise<Kernel> {
   const cfg = JSON.parse(bundledFiles['universe.json']);
-  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2) };
+  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, game: { mode: 'multiplayer', death: 3 } }, null, 2) };
   return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 }
 
@@ -45,7 +45,7 @@ describe('the players from the corona (T42c)', () => {
   it('the master’s situation lists the players connected, each on their chunk; a player hears of none', async () => {
     const k = await bootMany();
     const server = new SessionServer(k);
-    const master = join(server, 'io');
+    const master = join(server, 'me');
     const anna = join(server, 'anna', 'Anna');
     const ben = join(server, 'ben', 'Ben');
     await Promise.all([master.client.ready, anna.client.ready, ben.client.ready]);
@@ -78,7 +78,7 @@ describe('the players from the corona (T42c)', () => {
   it('the master follows a player: the world around them comes, the master stays where they are', async () => {
     const k = await bootMany();
     const server = new SessionServer(k);
-    const master = join(server, 'io');
+    const master = join(server, 'me');
     const anna = join(server, 'anna', 'Anna');
     await Promise.all([master.client.ready, anna.client.ready]);
     const mirror = await Kernel.boot({ files: master.client.files, store: memoryStore(), ai: new MockAiModels(), mirror: true });
@@ -117,7 +117,7 @@ describe('the players from the corona (T42c)', () => {
   it('only the master follows, and only a player connected', async () => {
     const k = await bootMany();
     const server = new SessionServer(k);
-    const master = join(server, 'io');
+    const master = join(server, 'me');
     const anna = join(server, 'anna');
     await Promise.all([master.client.ready, anna.client.ready]);
     // An answer comes at the server's next tick.
@@ -125,9 +125,9 @@ describe('the players from the corona (T42c)', () => {
       await run(server, 1);
       return p;
     };
-    expect(await ask(anna.client.act({ t: 'segui', id: 'io' }))).toMatchObject({ ok: false });
+    expect(await ask(anna.client.act({ t: 'segui', id: 'me' }))).toMatchObject({ ok: false });
     expect(await ask(master.client.act({ t: 'segui', id: 'nessuno' }))).toMatchObject({ ok: false });
-    expect(await ask(master.client.act({ t: 'segui', id: 'io' }))).toMatchObject({ ok: false });
+    expect(await ask(master.client.act({ t: 'segui', id: 'me' }))).toMatchObject({ ok: false });
     expect(await ask(master.client.act({ t: 'segui', id: 'anna' }))).toMatchObject({ ok: true });
     // Alone, nobody: no list, no follow.
     const alone = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });

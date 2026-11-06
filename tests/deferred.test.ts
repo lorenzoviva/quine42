@@ -61,7 +61,7 @@ const noApi = () => expect(fetched.filter((u) => /gemini|googleapis|\/api\/coda/
 
 describe('la generazione differita (T207)', () => {
   it('una Genesi e quattro luoghi dalla coda su disco servita da una CLI finta, senza alcuna chiamata alle API', async () => {
-    const coda = path.join(dir, '.coda');
+    const coda = path.join(dir, '.queue');
     await beat(coda, 'claude');
     const served: string[] = [];
     let serving = true;
@@ -102,7 +102,7 @@ describe('la generazione differita (T207)', () => {
     expect(git('valle', 'status', '--porcelain').trim()).toBe('');
     const maps = mapsOf('valle');
     for (const k of ['0_0', '1_0', '1_1', '0_1']) expect(maps.filter((f) => f.endsWith(`_${k}.json`))).toHaveLength(1);
-    expect(universeJson('valle').partita.modalita).toBe('multiplayer');
+    expect(universeJson('valle').game.mode).toBe('multiplayer');
     expect(progressFile(dir, 'valle', { tetto: 10 }).load().passi).toEqual(out.fatti);
     expect(isGenerating(dir, 'valle')).toBe(false);
   }, 120_000);
@@ -113,10 +113,10 @@ describe('la generazione differita (T207)', () => {
     const first = await generateUniverse({ name: 'ferma', dir, queue: q, weekly: still, luoghi: 0, modelli: 0, brani: 0 });
     expect(first.esito).toBe('finito');
     const cfg = universeJson('ferma');
-    cfg.ai = { ...cfg.ai, agenti: { narratore: 'api' } };
+    cfg.ai = { ...cfg.ai, agents: { narrator: 'api' } };
     writeFileSync(path.join(dir, 'ferma', 'universe.json'), JSON.stringify(cfg, null, 2) + '\n');
     git('ferma', '-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-qam', 'il narratore alle API');
-    rmSync(path.join(dir, '.generazione', 'ferma.json'));
+    rmSync(path.join(dir, '.generation', 'ferma.json'));
     const commits = git('ferma', 'rev-list', '--count', 'HEAD');
     const before = q.calls.length;
 
@@ -190,7 +190,7 @@ describe('la generazione differita (T207)', () => {
     expect(isWorldLit(dir, 'acceso')).toBe(false);
 
     // A marker left by a server that is gone does not count.
-    writeFileSync(path.join(dir, '.accesi', 'morto.json'), JSON.stringify({ pid: 2 ** 22 + 12345 }));
+    writeFileSync(path.join(dir, '.running', 'morto.json'), JSON.stringify({ pid: 2 ** 22 + 12345 }));
     expect(isWorldLit(dir, 'morto')).toBe(false);
 
     // The other way round: while it generates, the server does not light its world; two generations do not run together.
@@ -223,7 +223,7 @@ describe('la generazione differita (T207)', () => {
   it('la partita si sceglie all’avvio e non cambia dopo la Genesi', async () => {
     const q = new FakeQueue();
     expect((await generateUniverse({ name: 'sola', dir, queue: q, weekly: still, luoghi: 0, modelli: 0, brani: 0, partita: 'single' })).esito).toBe('finito');
-    expect(universeJson('sola').partita?.modalita ?? 'single').toBe('single');
+    expect(universeJson('sola').game?.mode ?? 'single').toBe('single');
     const other = await generateUniverse({ name: 'sola', dir, queue: q, weekly: still, luoghi: 1, modelli: 0, brani: 0, partita: 'multiplayer' });
     expect(other).toEqual({ esito: 'errore', motivo: expect.stringMatching(/già una partita in singola/), fatti: [] });
   }, 120_000);

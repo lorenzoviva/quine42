@@ -39,7 +39,9 @@ export function leggiUniverso(dir: string): { files: FileMap; maps: Record<strin
 /** The prefix of the name of a map file of this universe (`maps/<prefisso>_<cx>_<cy>.json`), as `UniverseChunks` writes it. */
 export function prefissoMappe(files: FileMap): string {
   const u = JSON.parse(files['universe.json']);
-  const titolo = JSON.parse(files['world/bible.json']).titolo ?? '';
+  // The bible's title, as the kernel signs the places (`title` since the contract 0.4, `titolo` before: the files may be either).
+  const bible = JSON.parse(files['world/bible.json']);
+  const titolo = bible.title ?? bible.titolo ?? '';
   return `${u.name}_${u.seed}_${hex(hashStr(titolo))}`;
 }
 

@@ -262,11 +262,11 @@ export function erroriModello(files: FileMap, id: string): string[] {
   if (xml === undefined) return [`${path}: manca`];
   const info = (JSON.parse(files['models/index.json']) as Record<string, ModelInfo>)[id];
   if (!info) return [`${path}: manca in models/index.json`];
-  if (info.classe === 'suono' || /\ssize="/.test(rootTag(xml))) return modelErrors(path, xml, info.tempo ?? 8000);
-  const cls = classOf(info.classe);
-  if (!cls) return [`${path}: classe sconosciuta ${info.classe}`];
-  const [X, Y, Z] = boxOf(cls, info.taglia);
-  return modelErrors(path, withSize(xml, [X, Y, Z + cellarOf(info) * vptOf(info)]), info.tempo ?? 8000);
+  if (info.class === 'suono' || /\ssize="/.test(rootTag(xml))) return modelErrors(path, xml, info.time ?? 8000);
+  const cls = classOf(info.class);
+  if (!cls) return [`${path}: classe sconosciuta ${info.class}`];
+  const [X, Y, Z] = boxOf(cls, info.size);
+  return modelErrors(path, withSize(xml, [X, Y, Z + cellarOf(info) * vptOf(info)]), info.time ?? 8000);
 }
 
 // --- Sidera's common houses ----------------------------------------------------------------------------------------------------------------
@@ -340,22 +340,22 @@ export async function collocate(files: FileMap, maps: Record<string, ChunkRecord
     const at = luogoDi(files, name);
     if (!at) continue;
     const plan: ChunkPlan = JSON.parse(JSON.stringify(rec.plan));
-    const before = JSON.stringify(plan.strutture ?? []);
+    const before = JSON.stringify(plan.structures ?? []);
     // claimSizes on a chunk with the lots of the plan: nothing it would change (a size that does not fit, a second Enorme).
     const ls = lotti(k, at[0], at[1], plan);
-    const sizes = (plan.strutture ?? []).map((s) => s.taglia);
+    const sizes = (plan.structures ?? []).map((s) => s.size);
     kk.claimSizes({ cx: at[0], cy: at[1], key: `${at[0]},${at[1]}`, lots: ls.map((l) => ({ x0: 0, y0: 0, x1: l.w - 1, y1: l.h - 1 })) }, plan);
-    if (JSON.stringify(plan.strutture ?? []) !== before) problemi.push(`${name}: claimSizes cambia le taglie (${JSON.stringify(sizes)} → ${JSON.stringify(plan.strutture?.map((s) => s.taglia))})`);
-    for (const [i, s] of (plan.strutture ?? []).entries()) {
+    if (JSON.stringify(plan.structures ?? []) !== before) problemi.push(`${name}: claimSizes cambia le taglie (${JSON.stringify(sizes)} → ${JSON.stringify(plan.structures?.map((s) => s.size))})`);
+    for (const [i, s] of (plan.structures ?? []).entries()) {
       const l = ls[i];
       if (!l) {
-        problemi.push(`${name}: «${s.concetto}» non ha un lotto`);
+        problemi.push(`${name}: «${s.concept}» non ha un lotto`);
         continue;
       }
-      if (s.taglia && RARE_SIZES.includes(s.taglia)) rare++;
-      if (l.wanted) problemi.push(`${name}: «${s.concetto}» manca dalla libreria (${l.wanted})`);
-      if (l.modello !== l.struttura.model) problemi.push(`${name}: «${s.concetto}» diventa ${l.modello}, non ${l.struttura.model}`);
-      out.push({ cx: at[0], cy: at[1], luogo: plan.place.name, ambiente: plan.layout, concetto: s.concetto, modello: l.modello, ...(s.taglia ? { taglia: s.taglia } : {}), lotto: `${l.w}×${l.h}`, x: l.x, y: l.y, ...(l.wanted ? { wanted: l.wanted } : {}) });
+      if (s.size && RARE_SIZES.includes(s.size)) rare++;
+      if (l.wanted) problemi.push(`${name}: «${s.concept}» manca dalla libreria (${l.wanted})`);
+      if (l.modello !== l.struttura.model) problemi.push(`${name}: «${s.concept}» diventa ${l.modello}, non ${l.struttura.model}`);
+      out.push({ cx: at[0], cy: at[1], luogo: plan.place.name, ambiente: plan.layout, concetto: s.concept, modello: l.modello, ...(s.size ? { taglia: s.size } : {}), lotto: `${l.w}×${l.h}`, x: l.x, y: l.y, ...(l.wanted ? { wanted: l.wanted } : {}) });
     }
     for (const l of ls) if (l.wanted) problemi.push(`${name}: il lotto ${l.index} (${l.struttura.concetto}) vuole ${l.wanted}`);
   }

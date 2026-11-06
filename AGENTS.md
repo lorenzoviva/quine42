@@ -47,14 +47,14 @@ Design doc originale: [`docs/design.md`](docs/design.md). Decisioni: [`docs/adr/
 6. **Due repository** (ADR-0021): il kernel (questo progetto; `universe/` è il seme, immutabile) e
    l'universo (repository git su disco, `universes/<nome>/`). Si committano solo stati validi, e un guasto invalida il codice, non i dati (ADR-0137): il codice
    scritto senza commit è trattenuto da ogni commit (`Repo.withheld`), stato, viandanti e piani si salvano anche con un guasto aperto (non un universo
-   di un altro kernel o con `universe.json` illeggibile); `R` torna all'ultimo valido, che ha i dati dell'ultimo salvataggio; ripartire dal seme mette l'universo in `universes/.cestino/`. Ogni scrittura (commit, piano, ramo, pubblicazione) che la rete non porta resta in fila, in ordine, anche dopo una ricarica e fino a un tetto oltre il quale si unisce; un 401 rinnova il token; un rifiuto del server non si ritenta (ADR-0122, ADR-0144).
+   di un altro kernel o con `universe.json` illeggibile); `R` torna all'ultimo valido, che ha i dati dell'ultimo salvataggio; ripartire dal seme mette l'universo in `universes/.trash/`. Ogni scrittura (commit, piano, ramo, pubblicazione) che la rete non porta resta in fila, in ordine, anche dopo una ricarica e fino a un tetto oltre il quale si unisce; un 401 rinnova il token; un rifiuto del server non si ritenta (ADR-0122, ADR-0144).
 7. **Il kernel è il pavimento**: sopravvive a NaN, nil, cicli infiniti, binding recisi. Le API del
    `Host` validano gli input e restituiscono `undefined` (mai `null`).
 8. **Dal cerchio nessuno vede la corona** (ADR-0009, ADR-0124): si disegna solo per chi è fuori dal tappeto (a `circleRadius` o più dal centro) o in un interno dello studio; lo decide solo `kernel.coronaRevealed()`, che non guarda ruolo né camera. Dentro il cerchio niente anello, luci, etichette, hover né sfondo, per il giocatore, per chi è tornato, per il master e in god mode; la camera di base è la 3/4 e l'orbita libera non accende nulla.
 8b. **Chi non è il master non riscrive il mondo** (ADR-0102): identità verificata sul server (`server/access.ts`), un'altra origine mai; senza account l'id detto vale solo da questa macchina; una partita di molti è del suo master e del suo mondo, gli altri leggono `publicFiles` e non scrivono; i saldi li scrive solo il mondo; `anonimo`, `offline` e `tetto` non li decide il client. Una route nuova passa da `gate`.
 8b-bis. **A partita in corso nessuno cambia `ai`, nemmeno il master** (ADR-0133): le regolazioni entrano con il master (`entra`, `applySettings`), si fissano quando entra il primo viandante e si sbloccano quando esce l'ultimo; da soli dalla lobby alla ricarica della pagina. Un compito nuovo in `CENSUS` ha una manopola. Il tetto di ogni viandante resta suo.
 8c. **Un universo contiene solo percorsi ammessi** (ADR-0103): un elenco in `src/kernel/paths.ts` (`modules/ models/ world/ maps/ prompts/ universe.json seed.json`, nomi semplici), mai un divieto su `.git`; il server lancia git solo da `server/git.ts`.
-8d. **I saldi stanno fuori dall'universo** (ADR-0104): saldi e pagamenti solo in `universes/.saldi/<nome>.json` (`server/ledger.ts`, `Ledger` in `credits.ts`), mai in un file dell'universo; niente Lua, Concilio, ramo o rollback ci arriva; ogni accredito è un passo atomico; a mano solo il master, entro `QUINE_TETTO_RICARICHE` al giorno. La commissione la decide solo il server (`QUINE_COMMISSIONE`, ADR-0132).
+8d. **I saldi stanno fuori dall'universo** (ADR-0104): saldi e pagamenti solo in `universes/.balances/<nome>.json` (`server/ledger.ts`, `Ledger` in `credits.ts`), mai in un file dell'universo; niente Lua, Concilio, ramo o rollback ci arriva; ogni accredito è un passo atomico; a mano solo il master, entro `QUINE_TETTO_RICARICHE` al giorno. La commissione la decide solo il server (`QUINE_COMMISSIONE`, ADR-0132).
 8e. **Un giocatore solo non consuma il mondo** (ADR-0107): ritmo per viandante all'arrivo di ogni messaggio (`LIMITS` in `src/session/server.ts`), ciò che può chiamare i modelli (`heavy`) ne ha uno più stretto e una coda per pagante, il testo verso il Concilio è tagliato (`words`). Un messaggio nuovo che chiama i modelli passa da lì.
 8f. **Ciò che esce e ciò che il Concilio scrive sono elenchi** (ADR-0109): a un client solo i campi nominati in `src/session/files.ts` (`playerFiles`, `publicFiles`), un campo nuovo resta a casa finché non lo si nomina; `universes/` non si serve mai (`server/hidden.ts`); un commit del Concilio cambia solo `councilMayWrite` (`paths.ts`), `universe.json → ai` si muove solo dal kernel su comando del master, prima di entrare (`setAi`, la lobby, ADR-0133).
 8g. **Ogni mondo di molti è un processo senza segreti** (ADR-0110): `server/worldHost.ts` lo avvia con il solo programma leggibile, il token del suo universo e un limite di memoria, e lo uccide se tace; Gemini e la verifica dei token passano dal canale, le rotte da `WorldCalls`. Mai permettere al mondo una cartella sopra il programma: apre anche il `.env`. `healthy` si conta da `pronto` e `stop()` aspetta i git del suo universo (ADR-0121). I programmi MarkovJunior vi girano uno per turno del ciclo (`TurnRunner` in `host.ts`), così tra due passa il battito.
@@ -72,7 +72,7 @@ Design doc originale: [`docs/design.md`](docs/design.md). Decisioni: [`docs/adr/
 - **Vite 7 + TypeScript 5** (strict), **Vitest 4** in Node con modelli offline (`MockAiModels`), **three.js** per il mondo e per le pagine out-game, DOM per HUD e pannelli; il sito in `site/`, senza framework, con `src/theme.css` (→ `#sito`).
 - **Lua 5.4 via wasmoon**, sandbox del kernel: il confine è `Crossing` (`sandbox.ts`, ADR-0101), con limiti di istruzioni, memoria, stringhe e rete (ADR-0105; → `#lua-sandbox`).
 - **Google Gemini**: modelli, budget e opzioni in `universe/universe.json → ai`, prezzi in `src/kernel/ai/prices.ts`; l'Attore e i coefficienti di generazione (→ `#gemini`), la lobby (→ `#lobby`), la coda degli abbonamenti, solo in locale (→ `#abbonamenti`).
-- **Persistenza**: repository git dell'universo su disco tramite il server; saldi e pagamenti fuori, in `universes/.saldi/`; senza server `localStorage` + IndexedDB (→ `#stack`).
+- **Persistenza**: repository git dell'universo su disco tramite il server; saldi e pagamenti fuori, in `universes/.balances/`; senza server `localStorage` + IndexedDB (→ `#stack`).
 
 ## Comandi
 
@@ -95,7 +95,7 @@ npm run abbonamento  # serve la coda /api/coda con la CLI di Claude (con QUINE_C
 npm run genera -- <universo> [--partita singola|multigiocatore] [--luoghi 25] [--tetto 10]  # genera un universo prima di giocarlo, solo dalla coda degli abbonamenti (servita da npm run abbonamento), mai con un mondo acceso (ADR-0143)
 ```
 
-`.env`: `GEMINI_API_KEY=...` (ignorato da git), per il server di produzione `QUINE_ORIGINI` (i siti per cui risponde, separati da virgole: `https://…`, `http://` solo per questa macchina), `QUINE_PORTA` o `PORT` (8080), `QUINE_HOST` (127.0.0.1 se non detto; `0.0.0.0` per uscire), `QUINE_UNIVERSI` (ADR-0112), `QUINE_MONDO_MEMORIA` (MB di heap di ogni mondo di molti, predefinito 1024, ADR-0110), `QUINE_MONDI_MASSIMI` (mondi accesi insieme, predefinito 16, ADR-0113), `QUINE_UNIVERSI_PER_ACCOUNT` (universi di cui un account è master, predefinito 3, ADR-0114), `QUINE_PROXY_FIDATI` (quanti proxy nostri stanno davanti al server, predefinito 0: si misura al deploy, ADR-0114), `QUINE_VIDEO` (la cartella dei video del sito, con il loro `video.json`, fuori dal progetto; anche per `npm run dev`, ADR-0131), `GEMINI_TETTO_GIORNALIERO` (dollari al giorno per la chiave, predefinito 10; la spesa in `universes/.spesa-gemini.json`, ADR-0099), `QUINE_COMMISSIONE` (la commissione sui consumi come frazione, predefinita 0.01, 0 in beta; un valore non valido dà il predefinito, ADR-0132); `QUINE_CODA=1` accende la coda degli abbonamenti (ADR-0106); `TYPESAFE_KEY` (Jev di TypeSafe) la legge solo `lab/scripts/jev-banco.ts`, mai il gioco né il server (ADR-0157 è una proposta); per gli account in multigiocatore `FIREBASE_PROJECT_ID` (e `FIREBASE_API_KEY`,
+`.env`: `GEMINI_API_KEY=...` (ignorato da git), per il server di produzione `QUINE_ORIGINI` (i siti per cui risponde, separati da virgole: `https://…`, `http://` solo per questa macchina), `QUINE_PORTA` o `PORT` (8080), `QUINE_HOST` (127.0.0.1 se non detto; `0.0.0.0` per uscire), `QUINE_UNIVERSI` (ADR-0112), `QUINE_MONDO_MEMORIA` (MB di heap di ogni mondo di molti, predefinito 1024, ADR-0110), `QUINE_MONDI_MASSIMI` (mondi accesi insieme, predefinito 16, ADR-0113), `QUINE_UNIVERSI_PER_ACCOUNT` (universi di cui un account è master, predefinito 3, ADR-0114), `QUINE_PROXY_FIDATI` (quanti proxy nostri stanno davanti al server, predefinito 0: si misura al deploy, ADR-0114), `QUINE_VIDEO` (la cartella dei video del sito, con il loro `video.json`, fuori dal progetto; anche per `npm run dev`, ADR-0131), `GEMINI_TETTO_GIORNALIERO` (dollari al giorno per la chiave, predefinito 10; la spesa in `universes/.gemini-spend.json`, ADR-0099), `QUINE_COMMISSIONE` (la commissione sui consumi come frazione, predefinita 0.01, 0 in beta; un valore non valido dà il predefinito, ADR-0132); `QUINE_CODA=1` accende la coda degli abbonamenti (ADR-0106); `TYPESAFE_KEY` (Jev di TypeSafe) la legge solo `lab/scripts/jev-banco.ts`, mai il gioco né il server (ADR-0157 è una proposta); per gli account in multigiocatore `FIREBASE_PROJECT_ID` (e `FIREBASE_API_KEY`,
 `FIREBASE_AUTH_DOMAIN`, `QUINE_MASTER`, `QUINE_TETTO_RICARICHE`, dollari al giorno per universo che il master può dare a mano, ADR-0104: 0 con gli account, 20 senza; con l'emulatore `FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099` e un progetto `demo-…`, ADR-0082); per i pagamenti Stripe in prova `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` (e `STRIPE_TAX_CODE` per i Managed Payments, ADR-0083). Senza chiave o con `?offline`: modelli locali, texture e
 ostacoli procedurali. URL: `?skip` salta intro e Genesi; `?classica` mostra il vecchio aspetto al posto del cartone (ADR-0093); `?dev&teleport=46,0` porta oltre il tappeto (o `teleport=X,Y` dovunque: anche dentro una stanza, vedi `docs/architettura-dettagli.md#convalida-browser`); `?universo=<nome>` apre un altro
 universo di `universes/` (quello che può leggere e scrivere lo decide il server); in sviluppo `?viandante=<id>` sceglie il viandante della scheda in multigiocatore (due schede, due viandanti).
@@ -113,7 +113,7 @@ server/ledger.ts        l'archivio di saldi e pagamenti fuori dall'universo (ADR
 server/git.ts           l'unico modo in cui il server lancia git (ADR-0103): `runGit`, senza hook né monitor, senza risalire al repository di sopra; `settleGit`, chi si ferma aspetta i git di una cartella e non lascia lock (ADR-0121)
 server/geminiProxy.ts   l'unico varco della chiave (ADR-0099): GeminiGate, la route /api/gemini (solo loopback) e direct() per i mondi di molti
 server/universeStore.ts /api/universe: ogni universo è un repository git in universes/<nome>/ (e il ramo del master, `rami/master`; il clone)
-server/subscriptionQueue.ts /api/coda: la coda su disco degli abbonamenti (`universes/.coda/`), servita da un processo che usa la CLI (ADR-0077); solo su richiesta, da loopback, con un segreto (ADR-0106)
+server/subscriptionQueue.ts /api/coda: la coda su disco degli abbonamenti (`universes/.queue/`), servita da un processo che usa la CLI (ADR-0077); solo su richiesta, da loopback, con un segreto (ADR-0106)
 server/session.ts       /api/session (WebSocket; `npm run dev` e produzione, `attachSessions`): i client delle partite in multigiocatore (ADR-0058)
 server/production.ts    il server di produzione senza Vite (ADR-0112): `createProductionServer`, `productionProblems`, `frontDoorRefusal`, `buildFile`; serve.ts è il suo avvio, buildServer.ts lo costruisce in `dist-server/`
 server/account.ts       /api/account e la verifica dei token di Firebase Auth (ADR-0082)
@@ -126,7 +126,8 @@ server/betaGuide.ts     le istruzioni della beta (ADR-0131): `docs/beta/` nella 
 server/rates.ts         quanto spesso si può chiedere e chi chiede (ADR-0114): `Rates`, `clientAddress`, `proxyHops`
 server/worldCalls.ts    ciò che le rotte chiedono al mondo acceso (ADR-0110): `WorldCalls`, `worldOf`
 server/skins.ts         le vesti del sito (ADR-0145): trova le cartelle di `site/skins/`, genera `/skins/boot.js`, le porta in `dist/skins/` (`siteSkins`, `readSkins`, `bootScript`)
-server/generation.ts    chi ha un universo ora (ADR-0143): il segno di un mondo acceso (`universes/.accesi/`), il lucchetto e il progresso della generazione differita (`universes/.generazione/`)
+server/folders.ts       le cartelle del server accanto agli universi (ADR-0159): `serverPath`, `serverName`; `.balances`, `.trash`, `.queue`, `.running`, `.generation`, `.gemini-spend.json`, la cartella di prima spostata la prima volta che serve
+server/generation.ts    chi ha un universo ora (ADR-0143): il segno di un mondo acceso (`universes/.running/`), il lucchetto e il progresso della generazione differita (`universes/.generation/`)
 src/
   main.ts               bootstrap: modelli, kernel, renderer, UI, loop a 60 Hz
   master.ts             gli strumenti del master (editor, console, registro, Genesi, studio, atlante, grafo, corona), caricati con import() (ADR-0061)
@@ -148,29 +149,29 @@ src/
     content.ts          registro di oggetti, ricette, bottino, ambienti
     forms.ts            libreria dei modelli, forme (programma + seme → griglia, impronta, pavimenti, azioni); la cache delle forme del processo (`sharedForms`, ADR-0108)
     modeldirector.ts    i modelli che mancano, uno alla volta, entro `ai.maxModels`
-    scoredirector.ts    i brani che mancano e quelli chiesti, uno alla volta, entro `ai.maxBrani` e il coefficiente `brani` (ADR-0127)
+    scoredirector.ts    i brani che mancano e quelli chiesti, uno alla volta, entro `ai.maxPieces` e il coefficiente `brani` (ADR-0127)
     chunks.ts           archivio dei piani dei luoghi
     bench.ts            il banco della Sala sistemi: i casi dei sistemi in un kernel in miniatura (ADR-0052)
     paths.ts            i percorsi che un universo può contenere (`allowedPath`), `UNIVERSE_NAME_RE` (ADR-0103), ciò che il Concilio può scrivere (`councilMayWrite`, ADR-0109)
     magic.ts            le rune nuove dal Concilio: validatore, riga del canone (ADR-0097)
-    cards.ts            chi paga ogni chiamata, le carte dei contenuti, i loro utilizzi (`world/carte.json`), la collezione (ADR-0056; con `shares` anche quote e impronta)
+    cards.ts            chi paga ogni chiamata, le carte dei contenuti, i loro utilizzi (`world/cards.json`), la collezione (ADR-0056; con `shares` anche quote e impronta)
     heritage.ts         l'eredità dei cloni: catena dei titolari, impronte, quote (ADR-0084)
     themes.ts           le quattro ambientazioni della Genesi, testo modificabile (`WORLD_THEMES`, ADR-0134; il censimento in `docs/temi-censimento.md`)
     gameSetup.ts        la partita scelta alla Genesi: livelli della morte, principio per il Concilio (ADR-0053)
     coefficients.ts     i coefficienti di generazione: quanto spesso ogni agente chiama l'IA, «Low Detail», censimento, stima oraria (ADR-0085)
-    wanderers.ts        i viandanti con un id (`io` in singola), il loro stato in `world/giocatori/`, legami e ricordi per id (ADR-0054)
+    wanderers.ts        i viandanti con un id (`me` in singola), il loro stato in `world/players/`, legami e ricordi per id (ADR-0054)
     situation.ts, screens.ts  la Direzione: il tavolo della situazione e la parete di schermi (T46), funzioni pure
     clone.ts            il clone con un altro master: `universe.json` e le carte che passano (ADR-0068)
     chain.ts            la catena della Sala sistemi (T27a): misure di ogni sistema nel tick, stazioni
                         (bench.ts: anche il banco di prova, T27b: casi, scena, nomi dei campi)
-    shortfalls.ts       le mancanze (ADR-0130): ciò che il Concilio non è riuscito a fare (`world/mancanze.json`, mai ai client), il rapporto
+    shortfalls.ts       le mancanze (ADR-0130): ciò che il Concilio non è riuscito a fare (`world/shortfalls.json`, mai ai client), il rapporto
     jobs.ts             i programmi dei mestieri (`validateJobProgram`, `matchJob`, `JOB_BEHAVIOURS`, ADR-0140); route.ts, la via tra due caselle (`findRoute`, `RouteCache`)
-    ventures.ts         le imprese (ADR-0147): `world/imprese.json`, il progresso derivato (`ventureProgress`), la squadra (`fillTeam`), il passo (`nextStep`)
-    store.ts            il magazzino dei moduli (`ModuleStores`, `world/magazzino/<modulo>.json`, tetti in byte, ADR-0138)
+    ventures.ts         le imprese (ADR-0147): `world/ventures.json`, il progresso derivato (`ventureProgress`), la squadra (`fillTeam`), il passo (`nextStep`)
+    store.ts            il magazzino dei moduli (`ModuleStores`, `world/stores/<modulo>.json`, tetti in byte, ADR-0138)
     placing.ts          posare sui mobili (ADR-0150): i ripiani di una forma (`shelvesOf`), l'impronta di un oggetto (`itemShape`), dove sta (`findSpot`)
     version.ts          la versione del kernel `X.Y.Z` (`KERNEL_VERSION`, `checkKernelVersion`, `stampKernel`, ADR-0136) e l'intervallo dei kernel di un universo (`universeKernels`, `rangeLabel`, `runsOnThisKernel`, ADR-0152; fuori intervallo sola lettura, ADR-0156)
-    migrations.ts       le migrazioni da un contratto al successivo (`MIGRATIONS`: 0.1 → 0.2, T307a; 0.2 → 0.3, T307b, ADR-0158; `migrateUniverse` all'avvio, ADR-0152; `migratePlanRecord` su ogni piano letto, ADR-0155; `opensOnThisKernel`, chi si apre qui una volta portato, ADR-0156)
-    internalNames.ts    la lingua interna come dato (ADR-0153): `INTERNAL_NAMES`, ogni nome italiano di oggi → inglese (o latino per le rune), dominio per dominio, con il task che lo applica
+    migrations.ts       le migrazioni da un contratto al successivo (`MIGRATIONS`: 0.1 → 0.2, T307a; 0.2 → 0.3, T307b, ADR-0158; 0.3 → 0.4, T308a, ADR-0159, con `portedFiles` e `pathsBefore` per chi legge il disco; `migrateUniverse` all'avvio, ADR-0152; `migratePlanRecord` su ogni piano letto, ADR-0155; `opensOnThisKernel`, chi si apre qui una volta portato, ADR-0156)
+    internalNames.ts    la lingua interna come dato (ADR-0153): `INTERNAL_NAMES`, ogni nome italiano di oggi → inglese (o latino per le rune), dominio per dominio, con il task che lo applica; i campi per forma di file (`FIELD_SHAPES`, `internalFields`, ADR-0159)
     deferred.ts         la generazione differita (ADR-0143): `DeferredModels` (tutto alla coda, il resto ferma), `StepGate` (si scrive solo un passo valido), `runDeferred`, `spiral`
     credits.ts          la commissione di piattaforma (`costWithFee`, la decide il server, ADR-0132) e la divisione delle spese comuni (ADR-0081)
     ai/                 models.ts, gemini.ts, mock.ts, prices.ts (prezzi, con la data), usage.ts (registro dei consumi),
@@ -186,18 +187,19 @@ src/
   ui/                   hud.ts (anche il diario delle missioni), profile.ts (il profilo del viandante), inventory.ts, actions.ts, chat.ts, feed.ts, genesis.ts, editor.ts, console.ts, studio.ts, atlas.ts,
                         graph.ts + graphlayout.ts (il grafo del mondo nel Nucleo), dom.ts, lobby.ts (la lobby: le regolazioni del master, minimi, tetto e carte; anche da soli, ADR-0086, ADR-0133), creditdialog.ts (la modale crediti esauriti, ADR-0086)
 universe/
-  universe.json         nome, seme, raggio, lato del luogo (18), modelli e budget, `partita` (scelta alla Genesi, ADR-0053), `ai.minimi` (ADR-0086), `rilievo.mare` (facoltativo), `eredita` (le quote dei cloni, ADR-0084)
-  world/                bible.json (memoria del Narratore), imprese.json (le imprese, le scrive solo il kernel), style.md (guida di stile dei modelli), canone.md (le rune), lessico.md (come parla la gente), consumi.json, mancanze.json (ciò che il Concilio non è riuscito a fare),
+  universe.json         nome, seme, raggio, lato del luogo (18), modelli e budget, `game` (scelta alla Genesi, ADR-0053), `ai.minimums` (ADR-0086), `relief.sea` (facoltativo), `heritage` (le quote dei cloni, ADR-0084)
+  world/                bible.json (memoria del Narratore), ventures.json (le imprese, le scrive solo il kernel), style.md (guida di stile dei modelli), canon.md (le rune), lexicon.md (come parla la gente), usage.json, shortfalls.json (ciò che il Concilio non è riuscito a fare),
                         rules.json (regole), people.json (la società, con i ricordi), plots.json (trame),
-                        atlas.json (geografia), stato.json (lo stato del mondo), grafo.json (il grafo del mondo, derivato),
-                        giocatori/<id>.json (lo stato di ogni viandante: inventario, bisogni, stati, slot, frase),
-                        carte.json (gli utilizzi delle carte e le carte dei luoghi),
-                        magazzino/<modulo>.json (il magazzino di ogni modulo, `world.store_get/set`, mai ai client, ADR-0138)
+                        atlas.json (geografia), state.json (lo stato del mondo), graph.json (il grafo del mondo, derivato),
+                        players/<id>.json (lo stato di ogni viandante: inventario, bisogni, stati, slot, frase),
+                        cards.json (gli utilizzi delle carte e le carte dei luoghi),
+                        stores/<modulo>.json (il magazzino di ogni modulo, `world.store_get/set`, mai ai client, ADR-0138)
+                        (nomi di file e di campo in inglese dal contratto 0.4, ADR-0159)
   prompts/              theme.md, agents/<agente>.md
   models/               index.json + <id>.xml: i programmi MarkovJunior di ogni cosa (ADR-0041), uno per tipo
   modules/<id>/         manifest.json (+ logic.lua): sistemi, terreni, ambienti, pacchetti di oggetti, mobili, individui,
                         effetti (core.effects), fuoco (sys.fire), rune magiche e incantesimi (magic.runes, magic.spells),
-                        il lavoro (sys.work) e i programmi dei mestieri (job.<trade>, `kind: data` con `mestieri`, ADR-0140)
+                        il lavoro (sys.work) e i programmi dei mestieri (job.<trade>, `kind: data` con `jobs`, ADR-0140)
 tests/  docs/
 src/mj/                 MarkovJunior del gioco (ADR-0036, 0038): engine.ts (motore 3D), xml.ts e model.ts (XML alla lettera), palette.ts,
                         run.ts (esecuzione, animazioni, azioni), rig.ts (arti), mesh.ts (voxel → triangoli, impronte, pavimenti),
@@ -209,7 +211,7 @@ tools/pipeline/          la pipeline agentica (ADR-0072, 0079): pipeline.mjs (co
                         orchestra.mjs (il processo dell'orchestratore: chat, eventi, epoche), web.mjs (l'interfaccia web locale, T69), config.json
 tools/sicurezza/        il kit delle prove dell'autore (T137): prove.mjs (esecuzione, esito), catalogo.mjs (le prove), ambiente.mjs (i limiti: loopback, cartella temporanea, segreti finti), server.mjs, sandbox.mjs (processi a parte)
 tools/glossario/        glossario.mjs: legge docs/glossario.md e riscrive il censimento dei sinonimi, docs/glossario-censimento.md (ADR-0117)
-tools/mancanze/         rapporto.ts (il comando), leggi.ts (legge `world/mancanze.json` degli universi sul disco, ADR-0130)
+tools/mancanze/         rapporto.ts (il comando), leggi.ts (legge `world/shortfalls.json` degli universi sul disco, ADR-0130)
 tools/generazione/      genera.ts (il comando della generazione differita, `npm run genera`, ADR-0143)
 tools/abbonamenti/      servi.ts (il processo che serve la coda degli abbonamenti con la CLI isolata, ADR-0077, ADR-0106)
 tools/vesti/            scritta.ts ed estrai.ts (la scritta della veste futuristica estratta dalla proposta, verificata cella per cella), logo.ts (logo e icona della sobria, gli elementi SVG della proposta così come sono), misura.mjs e cattura.mjs (quanto costano gli effetti di una veste, le catture): un Chrome headless proprio, solo loopback (cdp.mjs, ADR-0151)
@@ -231,7 +233,7 @@ site/                   il sito web (ADR-0095, T97): landing, carte 3D, sessioni
 | Arbitro | coerenza tra narrativa, aspetto, fisica e codice; rimanda all'agente responsabile; tiene le sessioni del Concilio |
 | Referente | nella corona accoglie il viandante trasceso e porta le sue richieste alla squadra giusta (Fucina, Cartografo, Scultore, regole, pacchetti; in multigiocatore dà al master le rune che chiede) |
 | Musicista | nella casa dell'Artista (ADR-0127): scrive i programmi sonori di ciò che il mondo chiede (un ambiente che non ha un brano) e di ciò che il viandante chiede al Referente; il validatore applica le soglie dell'analisi e l'invalido torna a lui col motivo |
-| Attore | solo se il master lo accende (`ai.attore`, ADR-0116): interpreta gli individui (`npc.reply`, `npc.dialogue`) dalle **schede** che il Narratore scrive una volta per individuo; non inventa fatti del mondo; nello studio ha il suo gerboa, il posto al tavolo accanto al Narratore e la console, e a opzione spenta resta a riposo (T158) |
+| Attore | solo se il master lo accende (`ai.actor`, ADR-0116): interpreta gli individui (`npc.reply`, `npc.dialogue`) dalle **schede** che il Narratore scrive una volta per individuo; non inventa fatti del mondo; nello studio ha il suo gerboa, il posto al tavolo accanto al Narratore e la console, e a opzione spenta resta a riposo (T158) |
 
 Registro, Luogo, Fucina e Genesi → `docs/architettura-dettagli.md#concilio`.
 
@@ -241,8 +243,8 @@ Registro, Luogo, Fucina e Genesi → `docs/architettura-dettagli.md#concilio`.
 
 - **Spazi, tappeto, rune, magia, borse**: cerchio di raggio 42 col tappeto, rune come token Lua eseguiti, canone, frase, `T` e mana → `#spazi-rune-magia`
 - **Lessico**: le parole e le usanze del mondo, mai spiegate come un glossario → `#lessico`
-- **Regole, effetti, stati, morte, menu, salto, contenuti**: i giudizi diventano regole, gli effetti sono un insieme chiuso; ciò che si impugna si posa sul ripiano di un mobile, dove la sua impronta sta (`placing.ts`, `posato`, `stato.json → posati`, ADR-0150) → `#regole-effetti`
-- **Società, vita degli NPC, personaggi**: individui, legami, routine, trame, missioni; i mestieri come programmi (`sys.work`, esiti `done`/`ongoing`/`failed:<motivo>`, `matura` nei terreni, il giorno in `plan.giorni`, ADR-0140); la via va dove va il passo, e chi non ha via rinuncia al compito (`world.path` col raggio di chi cammina, ADR-0154); le imprese (`world/imprese.json`, scritto solo dal kernel, progresso derivato da ciò che è portato e lavorato, regole senza chiamate, `costruisci`, il pannello del cantiere, ADR-0147); l'edificio per stadi (la griglia finita filtrata, `stageGrid`, picchetti e impalcature, `plan.stadi` e `plan.case`, ADR-0148); fuori vista (la contabilità una volta al giorno, il ritorno, `on_return`, ADR-0149) → `#societa`
+- **Regole, effetti, stati, morte, menu, salto, contenuti**: i giudizi diventano regole, gli effetti sono un insieme chiuso; ciò che si impugna si posa sul ripiano di un mobile, dove la sua impronta sta (`placing.ts`, `posato`, `state.json → placed`, ADR-0150) → `#regole-effetti`
+- **Società, vita degli NPC, personaggi**: individui, legami, routine, trame, missioni; i mestieri come programmi (`sys.work`, esiti `done`/`ongoing`/`failed:<motivo>`, `ripens` nei terreni, il giorno in `plan.days`, ADR-0140); la via va dove va il passo, e chi non ha via rinuncia al compito (`world.path` col raggio di chi cammina, ADR-0154); le imprese (`world/ventures.json`, scritto solo dal kernel, progresso derivato da ciò che è portato e lavorato, regole senza chiamate, `costruisci`, il pannello del cantiere, ADR-0147); l'edificio per stadi (la griglia finita filtrata, `stageGrid`, picchetti e impalcature, `plan.stages` e `plan.houses`, ADR-0148); fuori vista (la contabilità una volta al giorno, il ritorno, `on_return`, ADR-0149) → `#societa`
 - **Corona e interni dello studio**: campus, edifici, vetrine, plastico, Nucleo, Biblioteca, Direzione, Galleria, Sala del Concilio → `#corona`
 - **Meccaniche, casi dei sistemi, catena, banco di prova** (Sala sistemi) → `#sala-sistemi`
 - **Geografia**: biomi, ambienti, timbri, atlante → `#geografia`
@@ -256,7 +258,7 @@ Registro, Luogo, Fucina e Genesi → `docs/architettura-dettagli.md#concilio`.
 - **Mondo in 3D, bozze di prova, mappa, voxel luminosi**: un'unità = una casella, kernel (x, y) = three.js (x, z) → `#mondo3d`
 - **MarkovJunior, modelli, cache delle forme**: ogni aspetto è un programma, un'istanza è un seme ; il motore si ottimizza solo voxel per voxel identico (`tests/mj-engine-determinism.test.ts`, ADR-0142) → `#markovjunior-modelli`
 - **Il suono**: programmi MarkovJunior con `<sound>` in `models/sound-*.xml` (classe `suono`; `suono-*` prima di T307b), griglia → partitura → campioni con una funzione pura; il browser suona quei campioni (ADR-0123); nel gioco il suono è del client, senza messaggi: il direttore sceglie il brano con una funzione pura, il rendering sta in un worker con la cache, ciò che fallisce tace (ADR-0126); il SoundLab e i ritocchi del piano roll; un agente lo legge con `lab/scripts/mjx-sound.ts` (ADR-0125); li scrive il Musicista, che abita nella casa dell'Artista perché una stanza ha un elenco di squadre (`Building.teams`, ADR-0127) → `#suono`
-- **Lotti e strutture, scale, piani** → `#lotti`; **taglie di D&D** → `#taglie`; **sotterranei** → `#sotterranei`, con la lettera del suolo: `suolo="E"` sulla radice, il kernel la scrive sullo strato `base`, lo stesso programma serve ogni taglia (ADR-0135)
+- **Lotti e strutture, scale, piani** → `#lotti`; **taglie di D&D** → `#taglie`; **sotterranei** → `#sotterranei`, con la lettera del suolo: `soil="E"` sulla radice, il kernel la scrive sullo strato `base`, lo stesso programma serve ogni taglia (ADR-0135)
 - **Rilievo** (`Relief`, altezze, mare) → `#rilievo`; **acqua che scorre** (automa del kernel, `kernel.dig`) → `#acqua`; **grafica a cartone** (il predefinito, ADR-0093; `?classica` per confronto) → `#cartone`
 - **Grafo del mondo**: nodi e archi dai file, `focus` come contesto del Narratore → `#grafo`
 - **Ambientazioni**: quattro testi tra cui scegliere nella Genesi, un seme solo; ciò che sopravvive alla Genesi parla di epoca, le case comuni dipendono dal mondo (`commonHouse`, ADR-0134) → `#concilio`
@@ -269,12 +271,12 @@ Registro, Luogo, Fucina e Genesi → `docs/architettura-dettagli.md#concilio`.
 
 ### Manifest (`src/kernel/types.ts`)
 `id`, `name`, `kind` (`system | entity | item | player | generator | data`), `logic`, `order`,
-`appearance` (`glyph`, `color`, `aspetto`, `model`, `classe`, `taglia`), `physics`
+`appearance` (`glyph`, `color`, `look`, `model`, `class`, `size`), `physics`
 (`solid`, `radius`, `pushable`, `mass`, `friction`, `speed`), `components`, `singleton`, `persist`,
 `interaction` (`talk | read | lua`), `actions` (`id`, `label`, `requires`, `effects`), `container` (`size`, `loot`),
-`ui` (pannello: `titolo`, `elementi`), `spawn`, `persona`, `unique`, `inventory` (id di oggetti), `item`, `context`, `lore`, `tags`, `drops`,
-`origin`; generatori: `tiles` (`id` interno dal contratto 0.2, `name` nella lingua del mondo, `color`, `solid`, `layer`, `indoor`, `speed`, `model`, `actions`, `matura`),
-`roof`, `commonHouse`; dati: `items` (anche `model`, `aspetto`, `container`, `actions`, `slot`, `bonus`, effetti `mana`), `recipes`, `loot`, `layouts`, `fragments`, `runes`, `spells`, `mestieri` (ADR-0140).
+`ui` (pannello: `title`, `elements`), `spawn`, `persona`, `unique`, `inventory` (id di oggetti), `item`, `context`, `lore`, `tags`, `drops`,
+`origin`; generatori: `tiles` (`id` interno dal contratto 0.2, `name` nella lingua del mondo, `color`, `solid`, `layer`, `indoor`, `speed`, `model`, `actions`, `ripens`),
+`roof`, `commonHouse`; dati: `items` (anche `model`, `look`, `container`, `actions`, `slot`, `bonus`, effetti `mana`), `recipes`, `loot`, `layouts`, `fragments`, `runes`, `spells`, `jobs` (ADR-0140).
 
 ### API Lua — l'unica disponibile, il validatore rifiuta il resto
 `ecs.each/get/set/spawn/destroy/first`; `world.free/free_real/tile/speed_at/spawn/player/player_pos/wanderers/path/find_tile/act/
@@ -337,12 +339,12 @@ La procedura, con gli snippet per spostarsi nelle stanze, è in [`docs/architett
 
 - **L'inglese è la lingua interna** (ADR-0153, step 42): identificatori, commenti TypeScript, valori che il codice confronta, campi su disco e sul filo,
   percorsi dell'universo, nomi visibili a Lua, commenti di Lua e XML e prompt in **inglese**; i token delle rune magiche in **latino**; documentazione, UI e
-  testi del mondo (la lingua del suo universo, oggi l'italiano) in **italiano**. Il passaggio lo fanno T307a-T310 con una migrazione per contratto (fatti T307a, contratto `0.2`: la simulazione e le rune latine, ADR-0155; e T307b, contratto `0.3`: la società e il Concilio, ADR-0158): la tabella
+  testi del mondo (la lingua del suo universo, oggi l'italiano) in **italiano**. Il passaggio lo fanno T307a-T310 con una migrazione per contratto (fatti T307a, contratto `0.2`: la simulazione e le rune latine, ADR-0155; T307b, contratto `0.3`: la società e il Concilio, ADR-0158; e T308a, contratto `0.4`: i campi e i percorsi dei file dell'universo, le cartelle del server, `io` → `me`, ADR-0159): la tabella
   è `src/kernel/internalNames.ts` (`INTERNAL_NAMES`), raccontata in [`docs/lingua-interna.md`](docs/lingua-interna.md); un nome nuovo su disco, sul filo o in Lua nasce inglese.
 - **Un nome per ogni concetto** (ADR-0117): [`docs/glossario.md`](docs/glossario.md) dice per ogni concetto il nome italiano, quello inglese del codice, i sinonimi da non usare e ciò che è fermo. Un identificatore italiano non è un'eccezione: si rinomina (le righe R del glossario; le eccezioni dette da ADR-0117 sono tolte). Un concetto nuovo ha una voce lì nello stesso commit. Ciò che è su disco, sul filo o visibile a Lua (campi JSON, messaggi del protocollo, API Lua, effetti) non si rinomina senza una migrazione; gli ADR non si riscrivono.
 - File in LF (`.gitattributes`). Su Windows niente `Get-Content`/`Set-Content` di PowerShell 5.1 sui sorgenti.
 - Nuova API per Lua: `Host` + `prelude.lua` + `LUA_API` nel validatore + prompt dell'Ingegnere + questo file.
 - Nuovo compito per un agente: schema Gemini + risposta in `MockAiModels` + voce nel registro.
-- **La versione del kernel** (ADR-0136): `X.Y.Z` = era, contratto, incremento, in `src/kernel/version.ts` (`KERNEL_VERSION`) e in `package.json`, uguali. Chi cambia `src/kernel/` sale di `Z` se gli universi della stessa `X.Y` restano buoni, di `Y` (e `Z` a 0) se cambia il contratto (formati, senso di una primitiva, regole del terreno, caso): un contratto nuovo vuole un universo nuovo. `universe.json → kernel` lo scrive il kernel, con `kernels`, l'intervallo dei contratti su cui l'universo gira (`from`, aperto finché il contratto non cambia; ricavato da `kernel` se manca, ADR-0152); `checkKernelVersion` al caricamento, un universo fuori intervallo resta in piedi con il guasto `universe:kernel` e **si legge soltanto** (ADR-0156): niente arriva al suo repository (`Repo.readOnly`: commit, rami, pubblicazioni, ritorni; i piani restano in memoria, `SealedChunks`) e il Concilio usa i modelli locali (`Kernel.readOnly()`, `Council.write`); un universo che le migrazioni portano nell'intervallo non lo è; si vede con l'etichetta («kernel 0.1–0.1») dove si scelgono gli universi, non si cancella e non prende niente dal seme. Le migrazioni da un `X.Y` al successivo stanno solo in `src/kernel/migrations.ts` (oggi `0.1 → 0.2`, ADR-0155, e `0.2 → 0.3`, ADR-0158): pure, deterministiche, i piani dei luoghi idempotenti; un caricamento migra e poi prende il seme (`prepareUniverse`); il validatore ripara i valori italiani del contratto prima finché T310 non cambia i prompt.
+- **La versione del kernel** (ADR-0136): `X.Y.Z` = era, contratto, incremento, in `src/kernel/version.ts` (`KERNEL_VERSION`) e in `package.json`, uguali. Chi cambia `src/kernel/` sale di `Z` se gli universi della stessa `X.Y` restano buoni, di `Y` (e `Z` a 0) se cambia il contratto (formati, senso di una primitiva, regole del terreno, caso): un contratto nuovo vuole un universo nuovo. `universe.json → kernel` lo scrive il kernel, con `kernels`, l'intervallo dei contratti su cui l'universo gira (`from`, aperto finché il contratto non cambia; ricavato da `kernel` se manca, ADR-0152); `checkKernelVersion` al caricamento, un universo fuori intervallo resta in piedi con il guasto `universe:kernel` e **si legge soltanto** (ADR-0156): niente arriva al suo repository (`Repo.readOnly`: commit, rami, pubblicazioni, ritorni; i piani restano in memoria, `SealedChunks`) e il Concilio usa i modelli locali (`Kernel.readOnly()`, `Council.write`); un universo che le migrazioni portano nell'intervallo non lo è; si vede con l'etichetta («kernel 0.1–0.1») dove si scelgono gli universi, non si cancella e non prende niente dal seme. Le migrazioni da un `X.Y` al successivo stanno solo in `src/kernel/migrations.ts` (oggi `0.1 → 0.2`, ADR-0155, `0.2 → 0.3`, ADR-0158, e `0.3 → 0.4`, ADR-0159): pure, deterministiche, i piani dei luoghi idempotenti; un caricamento migra e poi prende il seme (`prepareUniverse`); il validatore ripara i valori italiani del contratto prima finché T310 non cambia i prompt, e ogni lettura accetta anche i campi di prima (`internalFields`, per forma di file); ciò che legge un universo dal disco senza aprirlo lo porta in memoria (`portedFiles`).
 - Prima di consegnare: `npm test` e `npm run typecheck` verdi.
 - Un sottosistema nuovo o cambiato si descrive in `docs/architettura-dettagli.md`; qui una riga nell'indice (ADR-0120).

@@ -86,7 +86,7 @@ describe('world.store_get and world.store_set', () => {
     const giri = first.stores.get('sys.contatore', 'giri') as number;
     expect(giri).toBeGreaterThan(10);
     await closeWorld(first, w);
-    expect(JSON.parse(w.files['world/magazzino/sys.contatore.json'])).toMatchObject({ giri, ultimo: { chi: 'contatore' } });
+    expect(JSON.parse(w.files['world/stores/sys.contatore.json'])).toMatchObject({ giri, ultimo: { chi: 'contatore' } });
     // Opening ticks while the places are drawn: the count goes on from where it was, never from zero.
     const second = await open(w);
     const after = second.stores.get('sys.contatore', 'giri') as number;
@@ -136,28 +136,28 @@ describe('world.store_get and world.store_set', () => {
     const k = await open(w);
     k.tick(DT);
     await closeWorld(k, w);
-    const path = 'world/magazzino/sys.contatore.json';
+    const path = 'world/stores/sys.contatore.json';
     expect(w.files[path]).toBeDefined();
     expect(playerFiles(w.files)[path]).toBeUndefined();
     expect(publicFiles(w.files)[path]).toBeUndefined();
-    expect(Object.keys(playerFiles(w.files)).some((p) => p.startsWith('world/magazzino/'))).toBe(false);
+    expect(Object.keys(playerFiles(w.files)).some((p) => p.startsWith('world/stores/'))).toBe(false);
     // A path of the world like any other: what fences the Council in is that it never writes it, and what it did not change goes back.
     expect(councilMayWrite(path)).toBe(true);
   });
 });
 
 describe('the save keeps what it does not know', () => {
-  it('in world/stato.json and in a wanderer’s file, but never credits', async () => {
+  it('in world/state.json and in a wanderer’s file, but never credits', async () => {
     const w = newLasting({
       ...bundledFiles,
-      'world/stato.json': JSON.stringify({ consumati: [], ora: 5, di_domani: { x: 1 } }),
-      'world/giocatori/io.json': JSON.stringify({ needs: { hunger: 50, thirst: 50, energy: 50, health: 50, mana: 50 }, di_domani: [1, 2], crediti: 40 }),
+      'world/state.json': JSON.stringify({ consumati: [], ora: 5, di_domani: { x: 1 } }),
+      'world/players/me.json': JSON.stringify({ needs: { hunger: 50, thirst: 50, energy: 50, health: 50, mana: 50 }, di_domani: [1, 2], crediti: 40 }),
     });
     const k = await open(w);
     k.give('item.pane', 1);
     await closeWorld(k, w);
-    expect(JSON.parse(w.files['world/stato.json'])).toMatchObject({ di_domani: { x: 1 } });
-    const me = JSON.parse(w.files['world/giocatori/io.json']);
+    expect(JSON.parse(w.files['world/state.json'])).toMatchObject({ di_domani: { x: 1 } });
+    const me = JSON.parse(w.files['world/players/me.json']);
     expect(me.di_domani).toEqual([1, 2]);
     expect(me.crediti).toBeUndefined();
   });

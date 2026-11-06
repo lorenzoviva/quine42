@@ -14,6 +14,7 @@ import { runGit } from '../../../../server/git';
 import { sealLedger } from '../../../../server/ledger';
 import { leggiUniverso, negozioMappe } from './carica';
 import { collocate, leggi, PROGETTO, UNIVERSI, type Universo } from './cloud';
+import { serverPath } from '../../../../server/folders';
 
 const GENESI: [string, string] = ['Genesi', 'genesi@rune.local'];
 
@@ -83,7 +84,7 @@ export async function installa(opts: { dir: string; nomi?: string[]; log?: (s: s
     const root = path.join(opts.dir, u.nome);
     let cestino: string | undefined;
     if (existsSync(root)) {
-      cestino = path.join(opts.dir, '.cestino', `${u.nome}-${Date.now()}`);
+      cestino = path.join(serverPath(opts.dir, 'trash'), `${u.nome}-${Date.now()}`);
       mkdirSync(path.dirname(cestino), { recursive: true });
       renameSync(root, cestino);
       log(`  ${u.nome}: quello che c'era è in ${path.relative(opts.dir, cestino)}`);
@@ -98,7 +99,7 @@ export async function installa(opts: { dir: string; nomi?: string[]; log?: (s: s
     writeFileSync(path.join(root, '.gitattributes'), '* text=auto eol=lf\n', 'utf8');
     sealLedger(opts.dir, u.nome);
     await runGit(root, ['add', '-A'], { author: GENESI });
-    const titolo = readBible(files)?.titolo ?? u.nome;
+    const titolo = readBible(files)?.title ?? u.nome;
     await runGit(root, ['commit', '-q', '-m', `genesi: ${titolo} (dai cantieri di Claude Cloud, T273)`], { author: GENESI });
     const head = (await runGit(root, ['rev-parse', '--short=7', 'HEAD'], { author: GENESI })).trim();
     const r: Installato = { nome: u.nome, cartella: root, head, file: Object.keys(all).length, luoghi: Object.keys(maps).length, strutture, dalSeme, ...(cestino ? { cestino } : {}) };

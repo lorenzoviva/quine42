@@ -4,10 +4,10 @@
   "kind": "data",
   "version": "0.1.0",
   "description": "La giornata di chi scrive per gli altri: lettere e conti al tavolo, portati in piazza la sera.",
-  "mestieri": [
+  "jobs": [
     {
       "id": "scribe",
-      "nomi": [
+      "names": [
         "scrivano",
         "scrivana",
         "copista",
@@ -25,44 +25,44 @@
         "cancelliere",
         "cancelliera"
       ],
-      "giornata": {
+      "day": {
         "morning": [
           {
-            "fa": "go",
-            "dove": "work"
+            "does": "go",
+            "where": "work"
           },
           {
-            "fa": "wait",
-            "durata": 30,
-            "posa": "read"
+            "does": "wait",
+            "duration": 30,
+            "pose": "read"
           }
         ],
         "day": [
           {
-            "fa": "produce",
-            "oggetto": "item.lettera",
-            "quante": 2,
-            "durata": 30,
-            "posa": "read"
+            "does": "produce",
+            "item": "item.lettera",
+            "count": 2,
+            "duration": 30,
+            "pose": "read"
           }
         ],
         "evening": [
           {
-            "fa": "carry",
-            "oggetto": "item.lettera",
-            "dove": "square"
+            "does": "carry",
+            "item": "item.lettera",
+            "where": "square"
           },
           {
-            "fa": "chat"
+            "does": "chat"
           }
         ],
         "night": [
           {
-            "fa": "go",
-            "dove": "home"
+            "does": "go",
+            "where": "home"
           },
           {
-            "fa": "rest"
+            "does": "rest"
           }
         ]
       }

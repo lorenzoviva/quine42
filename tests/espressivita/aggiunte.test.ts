@@ -85,14 +85,14 @@ describe('a new field', () => {
   it('in the saved state, what the kernel does not know stays at the next save (T245a: once a TRAP, it was thrown away)', async () => {
     const w = newLasting({
       ...bundledFiles,
-      'world/stato.json': JSON.stringify({ consumati: [], ora: 5, di_domani: { x: 1 } }),
-      'world/giocatori/io.json': JSON.stringify({ needs: { hunger: 50, thirst: 50, energy: 50, health: 50, mana: 50 }, di_domani: 1 }),
+      'world/state.json': JSON.stringify({ consumati: [], ora: 5, di_domani: { x: 1 } }),
+      'world/players/me.json': JSON.stringify({ needs: { hunger: 50, thirst: 50, energy: 50, health: 50, mana: 50 }, di_domani: 1 }),
     });
     const k = await open(w);
     k.give('item.pane', 1);
     await closeWorld(k, w);
-    expect(JSON.parse(w.files['world/stato.json']).di_domani).toEqual({ x: 1 });
-    expect(JSON.parse(w.files['world/giocatori/io.json']).di_domani).toBe(1);
+    expect(JSON.parse(w.files['world/state.json']).di_domani).toEqual({ x: 1 });
+    expect(JSON.parse(w.files['world/players/me.json']).di_domani).toBe(1);
   });
 });
 
@@ -194,7 +194,7 @@ describe('a universe really played', () => {
     await developAll(k);
     play(k, 1);
     console.log(`[T183] universo giocato: ${Object.keys(files).length} file, ${maps.length} piani, ${updated.length} file dal seme, ${updated.filter((p) => !(p in files)).length} nuovi; luoghi caricati ${k.chunks.size}, dai piani salvati ${loaded.length}; guasti: ${k.faults.list().map((x) => `${x.key}: ${x.message.slice(0, 80)}`).join(' | ') || 'nessuno'}; tempo ${Math.round(k.time)} s`);
-    expect(k.wanderer().id).toBe('io');
+    expect(k.wanderer().id).toBe('me');
     expect(loaded.length).toBeGreaterThan(0);
     expect(k.faults.list().filter((x) => x.key.startsWith('universe:') || x.key.startsWith('kernel:'))).toEqual([]);
   });

@@ -189,7 +189,7 @@ describe('free actions and effects', () => {
     expect(k.needs()!.thirst).toBe(35);
     const learned = k.content.get('item.secchio')!.actions!.find((a) => a.effects?.length)!;
     expect(learned.label).toMatch(/Bevo dal secchio/);
-    expect(k.rules().some((r) => r.possibile && /bevo dal secchio/.test(r.testo))).toBe(true);
+    expect(k.rules().some((r) => r.possible && /bevo dal secchio/.test(r.text))).toBe(true);
     const calls = k.ai.usage.text;
     k.itemAct(8, learned.id);
     expect(k.needs()!.thirst).toBe(50);

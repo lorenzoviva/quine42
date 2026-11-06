@@ -123,10 +123,10 @@ describe('kernel', () => {
     expect(env.forged).toMatch(/Bosco degli Elfi/);
     const rule = await k.talkToAgent('liaison', 'stabilisci una regola: di notte i lupi cantano');
     expect(rule.forged).toMatch(/regola/i);
-    expect(k.rules().some((r) => /lupi/.test(r.testo))).toBe(true);
+    expect(k.rules().some((r) => /lupi/.test(r.text))).toBe(true);
     const art = await k.talkToAgent('liaison', 'riscolpisci il gatto più arancione');
     expect(art.forged).toMatch(/riscolpirà/i);
-    expect(JSON.parse(k.repo.head().files['modules/npc.cat/manifest.json']!).appearance.aspetto).toMatch(/arancione/);
+    expect(JSON.parse(k.repo.head().files['modules/npc.cat/manifest.json']!).appearance.look).toMatch(/arancione/);
   });
 
   it('a broken phrase breaks the world; rollback repairs it and returns the runes', () => {

@@ -1,15 +1,17 @@
 // Who has a universe now (T207, ADR-0143): a world of many that the server keeps lit, or a deferred generation. Never both:
 // the world would write over what the generation commits, and the other way round. Markers on disk, beside the universes
-// (`universes/.accesi/<nome>.json` for a world, `universes/.generazione/<nome>.lock` for a generation), with the pid of who holds them:
+// (`universes/.running/<nome>.json` for a world, `universes/.generation/<nome>.lock` for a generation; `.accesi/` and `.generazione/`
+// until the contract 0.4, moved by `serverPath`), with the pid of who holds them:
 // one whose process is gone does not count (a server or a command that was killed).
 
 import fs from 'node:fs';
 import path from 'node:path';
 import type { DeferredProgress, DeferredStorage } from '../src/kernel/deferred';
 import { internalName } from '../src/kernel/internalNames';
+import { serverName, serverPath } from './folders';
 
-export const LIT_DIR = '.accesi';
-export const GENERATION_DIR = '.generazione';
+export const LIT_DIR = serverName('running');
+export const GENERATION_DIR = serverName('generation');
 
 function alive(pid: unknown): boolean {
   if (!Number.isInteger(pid) || (pid as number) <= 0) return false;
@@ -29,12 +31,12 @@ function holder(file: string): boolean {
   }
 }
 
-const litFile = (dir: string, name: string) => path.join(dir, LIT_DIR, `${name}.json`);
-const lockFile = (dir: string, name: string) => path.join(dir, GENERATION_DIR, `${name}.lock`);
+const litFile = (dir: string, name: string) => path.join(serverPath(dir, 'running'), `${name}.json`);
+const lockFile = (dir: string, name: string) => path.join(serverPath(dir, 'generation'), `${name}.lock`);
 
 /** The server lights a world: until `worldOut`, no generation starts on its universe. */
 export function worldLit(dir: string, name: string, pid = process.pid): void {
-  fs.mkdirSync(path.join(dir, LIT_DIR), { recursive: true });
+  fs.mkdirSync(serverPath(dir, 'running'), { recursive: true });
   fs.writeFileSync(litFile(dir, name), JSON.stringify({ pid, dal: new Date().toISOString() }));
 }
 
@@ -55,7 +57,7 @@ export function isGenerating(dir: string, name: string): boolean {
 /** The universe for this process's generation, or why not: a world lit, another generation. Release it at the end. */
 export function takeGeneration(dir: string, name: string, pid = process.pid): { release: () => void } | { error: string } {
   if (isWorldLit(dir, name)) return { error: `«${name}» ha un mondo acceso: si genera solo un universo che nessuno sta giocando` };
-  fs.mkdirSync(path.join(dir, GENERATION_DIR), { recursive: true });
+  fs.mkdirSync(serverPath(dir, 'generation'), { recursive: true });
   const file = lockFile(dir, name);
   for (let tries = 0; tries < 2; tries++) {
     try {
@@ -76,7 +78,7 @@ export function takeGeneration(dir: string, name: string, pid = process.pid): { 
 
 /** The progress of a generation, a file beside the universes: what it did and the ceiling the author may change while it runs. */
 export function progressFile(dir: string, name: string, defaults: { tetto: number }): DeferredStorage {
-  const file = path.join(dir, GENERATION_DIR, `${name}.json`);
+  const file = path.join(serverPath(dir, 'generation'), `${name}.json`);
   return {
     load(): DeferredProgress {
       try {

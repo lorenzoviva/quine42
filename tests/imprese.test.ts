@@ -19,19 +19,19 @@ const at = (n: number, phase: 'morning' | 'day' | 'evening' | 'night') => (n + {
 
 const house = (over: Partial<Venture> = {}): Venture => ({
   id: 'i-prova',
-  titolo: 'Si ricostruisce una casa',
-  tipo: 'construction',
-  stato: 'active',
-  luogo: '0,0',
-  posto: { x: 9, y: 9 },
-  fasi: housePhases('structure'),
-  ruoli: structuredClone(HOUSE_ROLES),
-  portati: {},
-  lavorato: 0,
-  squadra: [],
-  inizio: 0,
-  ultimo: 0,
-  nato_da: 'regola:ricostruzione',
+  title: 'Si ricostruisce una casa',
+  type: 'construction',
+  state: 'active',
+  chunk: '0,0',
+  spot: { x: 9, y: 9 },
+  phases: housePhases('structure'),
+  roles: structuredClone(HOUSE_ROLES),
+  brought: {},
+  worked: 0,
+  team: [],
+  start: 0,
+  last: 0,
+  born_from: 'regola:ricostruzione',
   ...over,
 });
 
@@ -41,27 +41,27 @@ describe('a venture, as data', () => {
     expect(ventureProgress(v)).toMatchObject({ fase: 0, stadio: 0, manca: { 'item.ciocco': 4 }, finita: false });
     // Work without the materials does not count.
     expect(addWork(v, 500)).toEqual([]);
-    expect(v.lavorato).toBe(0);
+    expect(v.worked).toBe(0);
     expect(bring(v, 'item.ciocco', 100).taken).toBe(16);
     expect(bring(v, 'item.pietra', 5).taken).toBe(0);
     expect(workAllowed(v)).toBe(200);
     expect(addWork(v, 500)).toEqual([0]);
-    expect(v.lavorato).toBe(200);
+    expect(v.worked).toBe(200);
     expect(ventureProgress(v)).toMatchObject({ fase: 1, stadio: 0.2, manca: { 'item.chiodi': 4 } });
     bring(v, 'item.chiodi', 6);
     expect(addWork(v, 1e6)).toEqual([1, 2, 3]);
     expect(ventureProgress(v)).toMatchObject({ fase: 4, stadio: 1, finita: true });
     // Never backwards, never more than the work of all the phases.
     expect(addWork(v, -50)).toEqual([]);
-    expect(v.lavorato).toBe(1500);
+    expect(v.worked).toBe(1500);
   });
 
   it('the state: going on, waiting for a material nobody has, stopped with no team, finished; a harvest whose season passed is over', () => {
-    const v = house({ squadra: [{ nome: 'Ada', ruolo: 'manovale' }] });
+    const v = house({ team: [{ name: 'Ada', role: 'manovale' }] });
     expect(ventureState(v, 0, () => 1)).toBe('active');
     expect(ventureState(v, 0, () => 0)).toBe('waiting');
-    expect(ventureState({ ...v, squadra: [] }, 0, () => 1)).toBe('stopped');
-    expect(ventureState({ ...v, scade: 3 }, 4, () => 1)).toBe('finished');
+    expect(ventureState({ ...v, team: [] }, 0, () => 1)).toBe('stopped');
+    expect(ventureState({ ...v, expires: 3 }, 4, () => 1)).toBe('finished');
   });
 
   it('the team: by trade, then by nearness, then by a draw of the seed for the name; who is gone leaves and is replaced; never one in two', () => {
@@ -74,28 +74,28 @@ describe('a venture, as data', () => {
       { nome: 'Teo', mestiere: 'oste', luogo: '0,1' },
     ];
     fillTeam(v, people, new Set(), 42);
-    expect(v.squadra.find((m) => m.ruolo === 'capomastro')?.nome).toBe('Baldo');
-    expect(v.squadra.filter((m) => m.ruolo === 'manovale').map((m) => m.nome).sort()).toEqual(['Ivo', 'Nives']);
+    expect(v.team.find((m) => m.role === 'capomastro')?.name).toBe('Baldo');
+    expect(v.team.filter((m) => m.role === 'manovale').map((m) => m.name).sort()).toEqual(['Ivo', 'Nives']);
     // The same seed, the same team.
     const again = house();
     fillTeam(again, people, new Set(), 42);
-    expect(again.squadra).toEqual(v.squadra);
+    expect(again.team).toEqual(v.team);
     // Nives is gone: Teo (one place away) takes her place; Remo is too far.
     const { left, joined } = fillTeam(v, people.filter((p) => p.nome !== 'Nives'), new Set(), 42);
     expect(left).toEqual(['Nives']);
-    expect(joined.map((m) => m.nome)).toEqual(['Teo']);
+    expect(joined.map((m) => m.name)).toEqual(['Teo']);
     // Who works at another venture is not free.
     const other = house({ id: 'i-altra' });
-    fillTeam(other, people, new Set(v.squadra.map((m) => m.nome)), 42);
-    expect(other.squadra.map((m) => m.nome)).toEqual(['Nives']);
+    fillTeam(other, people, new Set(v.team.map((m) => m.name)), 42);
+    expect(other.team.map((m) => m.name)).toEqual(['Nives']);
   });
 
   it('the file: what is wrong drops, what is out of range is clamped, what the kernel does not know stays', () => {
-    const v = { ...house(), domani: { x: 1 }, lavorato: -5, portati: { 'item.ciocco': 3.7, x: -2 } };
+    const v = { ...house(), domani: { x: 1 }, worked: -5, brought: { 'item.ciocco': 3.7, x: -2 } };
     const list = readVentures(writeVentures([v as Venture, { id: 'rotta' } as unknown as Venture]));
     expect(list).toHaveLength(1);
-    expect(list[0].lavorato).toBe(0);
-    expect(list[0].portati).toEqual({ 'item.ciocco': 3 });
+    expect(list[0].worked).toBe(0);
+    expect(list[0].brought).toEqual({ 'item.ciocco': 3 });
     expect((list[0] as unknown as { domani: unknown }).domani).toEqual({ x: 1 });
     expect(readVentures('{ non è json')).toEqual([]);
   });
@@ -177,24 +177,24 @@ describe('the ventures in a world', () => {
     k.stores.set('sys.work', `deposito:${key.replace(',', ':')}`, { 'item.ciocco': 40, 'item.chiodi': 20 });
     (k as unknown as { breakEntity(id: number): void }).breakEntity(id);
     const [v] = k.ventures();
-    expect(v).toMatchObject({ tipo: 'construction', luogo: key, origine: origin, nato_da: 'regola:ricostruzione', stato: 'active' });
-    expect(v.squadra.map((m) => `${m.nome}:${m.ruolo}`).sort()).toEqual(['Baldo:capomastro', 'Ivo:manovale', 'Nives:manovale']);
+    expect(v).toMatchObject({ type: 'construction', chunk: key, origin: origin, born_from: 'regola:ricostruzione', state: 'active' });
+    expect(v.team.map((m) => `${m.name}:${m.role}`).sort()).toEqual(['Baldo:capomastro', 'Ivo:manovale', 'Nives:manovale']);
     // The lot shows its building at stage 0 while it is rebuilt (T245e): stakes and a rope.
     expect(stageOf(k, origin)).toBe(0);
 
     k.time = at(2, 'day');
     play(k, 170);
     const now = k.ventures()[0];
-    expect(Object.values(now.portati).reduce((a, b) => a + b, 0)).toBeGreaterThan(0);
-    expect(now.lavorato).toBeGreaterThan(0);
+    expect(Object.values(now.brought).reduce((a, b) => a + b, 0)).toBeGreaterThan(0);
+    expect(now.worked).toBeGreaterThan(0);
     // The deposit gave what was brought.
     const dep = k.placeDeposit(key);
-    expect((dep['item.ciocco'] ?? 0) + (now.portati['item.ciocco'] ?? 0)).toBeLessThanOrEqual(40);
+    expect((dep['item.ciocco'] ?? 0) + (now.brought['item.ciocco'] ?? 0)).toBeLessThanOrEqual(40);
     expect((dep['item.ciocco'] ?? 0)).toBeLessThan(40);
 
     // The panel of the site: the fields its manifest names travel with W (rule 8f), nothing else of the file.
     const fields = k.panelFields();
-    expect(fields['cantiere.titolo']).toBe(now.titolo);
+    expect(fields['cantiere.titolo']).toBe(now.title);
     expect(String(fields['cantiere.squadra'])).toMatch(/Baldo \(capomastro\)/);
     expect(Object.keys(fields).filter((f) => f.startsWith('cantiere.')).sort()).toEqual(['cantiere.fase', 'cantiere.manca', 'cantiere.squadra', 'cantiere.stato', 'cantiere.titolo']);
   }, 60000);
@@ -208,7 +208,7 @@ describe('the ventures in a world', () => {
       { nome: 'Ivo', mestiere: 'boscaiolo', origine: `${key}#t1` },
     ]);
     (k as unknown as { breakEntity(id: number): void }).breakEntity(id);
-    expect(k.ventures()[0].squadra.map((m) => m.nome).sort()).toEqual(['Baldo', 'Ivo']);
+    expect(k.ventures()[0].team.map((m) => m.name).sort()).toEqual(['Baldo', 'Ivo']);
     // Ivo dies (his entity is taken away for good): at the new day he leaves, and Teo, come to the place, takes his place.
     consumed(k).add(`${key}#t1`);
     setPeople(k, [
@@ -218,17 +218,17 @@ describe('the ventures in a world', () => {
     ]);
     k.time = at(3, 'morning');
     play(k, 3.5);
-    expect(k.ventures()[0].squadra.map((m) => m.nome).sort()).toEqual(['Baldo', 'Teo']);
+    expect(k.ventures()[0].team.map((m) => m.name).sort()).toEqual(['Baldo', 'Teo']);
     // Nobody left: stopped, visible, still there.
     setPeople(k, []);
     k.time = at(4, 'morning');
     play(k, 3.5);
-    expect(k.ventures()[0]).toMatchObject({ stato: 'stopped', squadra: [] });
+    expect(k.ventures()[0]).toMatchObject({ state: 'stopped', team: [] });
     setPeople(k, [{ nome: 'Remo', mestiere: 'pescatore', origine: `${key}#t3` }]);
     k.time = at(5, 'morning');
     play(k, 3.5);
-    expect(k.ventures()[0].squadra.map((m) => m.nome)).toEqual(['Remo']);
-    expect(k.ventures()[0].stato).not.toBe('stopped');
+    expect(k.ventures()[0].team.map((m) => m.name)).toEqual(['Remo']);
+    expect(k.ventures()[0].state).not.toBe('stopped');
   }, 60000);
 
   it('months of clock and two reopenings: what was brought and worked stays; the house stands again when it is done', async () => {
@@ -242,24 +242,24 @@ describe('the ventures in a world', () => {
     bring(v, 'item.ciocco', 10);
     addWork(v, 150);
     // Months of clock, a day at a time: nobody works (Baldo has no body here), nothing goes backwards, nothing becomes NaN.
-    let last = { ...v.portati, lavorato: v.lavorato };
+    let last = { ...v.brought, lavorato: v.worked };
     for (let d = 3; d < 3 + 60; d++) {
       k.time = at(d, 'day');
       play(k, 3.5);
       const now = k.ventures().find((x) => x.id === v.id)!;
-      expect(Number.isFinite(now.lavorato)).toBe(true);
-      expect(now.lavorato).toBeGreaterThanOrEqual(last.lavorato);
-      last = { ...now.portati, lavorato: now.lavorato };
+      expect(Number.isFinite(now.worked)).toBe(true);
+      expect(now.worked).toBeGreaterThanOrEqual(last.lavorato);
+      last = { ...now.brought, lavorato: now.worked };
     }
     expect(k.saveState()).toBe(true);
     await pause(700);
     const saved = readVentures(k.files[VENTURES_FILE]).find((x) => x.id === v.id)!;
-    expect(saved).toMatchObject({ portati: { 'item.ciocco': 10 }, lavorato: 150 });
+    expect(saved).toMatchObject({ brought: { 'item.ciocco': 10 }, worked: 150 });
 
     // Reopened: the same venture, the lot at the same stage, the clock where it was.
     k = await Kernel.boot({ files: { ...k.files }, store: memoryStore(), ai: new MockAiModels(), chunks });
     await developAll(k);
-    expect(k.ventures().find((x) => x.id === v.id)).toMatchObject({ portati: { 'item.ciocco': 10 }, lavorato: 150, origine: origin });
+    expect(k.ventures().find((x) => x.id === v.id)).toMatchObject({ brought: { 'item.ciocco': 10 }, worked: 150, origin: origin });
     expect(stageOf(k, origin)).toBe(0);
 
     // The rest is brought and worked: the venture ends, the house stands again, the team remembers it.
@@ -267,17 +267,17 @@ describe('the ventures in a world', () => {
     for (const it of ['item.ciocco', 'item.chiodi']) bring(w, it, 100);
     addWork(w, 1e6);
     play(k, 3.5);
-    expect(k.ventures().find((x) => x.id === v.id)!.stato).toBe('finished');
+    expect(k.ventures().find((x) => x.id === v.id)!.state).toBe('finished');
     expect(stageOf(k, origin)).toBeUndefined();
     expect(consumed(k).has(origin)).toBe(false);
-    expect(k.individualOf('Baldo')?.ricordi?.some((r) => r.peso === 3 && /finito/.test(r.testo))).toBe(true);
+    expect(k.individualOf('Baldo')?.memories?.some((r) => r.weight === 3 && /finito/.test(r.text))).toBe(true);
 
     // And a second reopening: finished it stays finished, the house stands.
     expect(k.saveState()).toBe(true);
     await pause(700);
     k = await Kernel.boot({ files: { ...k.files }, store: memoryStore(), ai: new MockAiModels(), chunks });
     await developAll(k);
-    expect(k.ventures().find((x) => x.id === v.id)!.stato).toBe('finished');
+    expect(k.ventures().find((x) => x.id === v.id)!.state).toBe('finished');
     expect(stageOf(k, origin)).toBeUndefined();
   }, 120000);
 
@@ -294,16 +294,16 @@ describe('the ventures in a world', () => {
     expect(n).toBeGreaterThanOrEqual(4);
     k.time = at(YEAR_DAYS + HARVEST_DAY, 'morning');
     play(k, 3.5);
-    const h = k.ventures().find((v) => v.tipo === 'harvest' && v.luogo === key);
-    expect(h).toMatchObject({ luogo: key, nato_da: 'regola:raccolto', compito: { casella: 'u', oggetto: 'item.grano' } });
-    expect(h!.squadra.map((m) => m.nome)).toEqual(['Nives']);
+    const h = k.ventures().find((v) => v.type === 'harvest' && v.chunk === key);
+    expect(h).toMatchObject({ chunk: key, born_from: 'regola:raccolto', task: { tile: 'u', item: 'item.grano' } });
+    expect(h!.team.map((m) => m.name)).toEqual(['Nives']);
     // Once a year: not again the day after, and after its days it is over.
     k.time = at(YEAR_DAYS + HARVEST_DAY + 1, 'morning');
     play(k, 3.5);
-    expect(k.ventures().filter((v) => v.tipo === 'harvest' && v.luogo === key)).toHaveLength(1);
+    expect(k.ventures().filter((v) => v.type === 'harvest' && v.chunk === key)).toHaveLength(1);
     k.time = at(YEAR_DAYS + HARVEST_DAY + 5, 'morning');
     play(k, 3.5);
-    expect(k.ventures().find((v) => v.tipo === 'harvest' && v.luogo === key)!.stato).toBe('finished');
+    expect(k.ventures().find((v) => v.type === 'harvest' && v.chunk === key)!.state).toBe('finished');
   }, 60000);
 
   it('three families more than the houses of a place, and free ground that keeps the place joined: a common house; built, it stands', async () => {
@@ -313,22 +313,22 @@ describe('the ventures in a world', () => {
     setPeople(k, Array.from({ length: lots + 3 }, (_, i) => ({ nome: `Abitante ${i}`, mestiere: i === 0 ? 'fabbro' : 'contadino', origine: `${key}#t${i}` })));
     k.time = at(2, 'morning');
     play(k, 3.5);
-    const v = k.ventures().find((x) => x.nato_da === 'regola:casa');
+    const v = k.ventures().find((x) => x.born_from === 'regola:casa');
     expect(v, 'a common house').toBeDefined();
     expect(v!.area).toBeDefined();
     const ch = k.chunks.get(key)!;
     for (let r = v!.area!.y0; r <= v!.area!.y1; r++) for (let c = v!.area!.x0; c <= v!.area!.x1; c++) expect(k.palette[ch.tiles[r * S + c]]?.solid ?? false).toBe(false);
-    expect(v!.squadra.length).toBe(3);
+    expect(v!.team.length).toBe(3);
     // Built: it stands as the others do.
     const w = liveVentures(k).find((x) => x.id === v!.id)!;
     for (const it of ['item.ciocco', 'item.chiodi']) bring(w, it, 100);
     addWork(w, 1e6);
     play(k, 3.5);
-    expect(stageOf(k, v!.origine!)).toBeUndefined();
+    expect(stageOf(k, v!.origin!)).toBeUndefined();
     // Families of one: no more common houses than the families need.
     k.time = at(3, 'morning');
     play(k, 3.5);
-    expect(k.ventures().filter((x) => x.nato_da === 'regola:casa')).toHaveLength(1);
+    expect(k.ventures().filter((x) => x.born_from === 'regola:casa')).toHaveLength(1);
   }, 60000);
 
   it('the wanderer brings what the site needs with the button of the panel: from the bag, only what it needs, the team remembers it', async () => {
@@ -342,13 +342,13 @@ describe('the ventures in a world', () => {
     addItem(k.inventory(), 'item.ciocco', 30, { weight: 0, stack: 99 } as never);
     // Far: nothing is taken.
     k.uiAction('cantiere', 'porta');
-    expect(k.ventures()[0].portati).toEqual({});
+    expect(k.ventures()[0].brought).toEqual({});
     const p = k.ecs.get(k.wandererEntity, 'pos');
     p.x = site.x + 1;
     p.y = site.y + 1;
     k.uiAction('cantiere', 'porta');
-    expect(k.ventures()[0].portati).toEqual({ 'item.ciocco': 16 });
-    expect(k.individualOf('Baldo')?.ricordi?.some((r) => r.peso === 2 && /materiale/.test(r.testo))).toBe(true);
+    expect(k.ventures()[0].brought).toEqual({ 'item.ciocco': 16 });
+    expect(k.individualOf('Baldo')?.memories?.some((r) => r.weight === 2 && /materiale/.test(r.text))).toBe(true);
   }, 60000);
 
   it('where a wanderer is, for the site, is where the carpet took them: not their position on the carpet', async () => {
@@ -367,7 +367,7 @@ describe('the ventures in a world', () => {
     carpet.ox = 100;
     carpet.oy = 100;
     k.uiAction('cantiere', 'porta');
-    expect(k.ventures()[0].portati).toEqual({});
+    expect(k.ventures()[0].brought).toEqual({});
     play(k, 1.5);
     expect(k.ecs.get(k.wandererEntity, 'cantiere')).toBeUndefined();
     // Carried next to it, at the centre of the carpet: what the game is, the panel says the site and the button brings.
@@ -376,8 +376,8 @@ describe('the ventures in a world', () => {
     carpet.ox = site.x + 1;
     carpet.oy = site.y + 1;
     play(k, 1.5);
-    expect(k.ecs.get(k.wandererEntity, 'cantiere')?.titolo).toBe(k.ventures()[0].titolo);
+    expect(k.ecs.get(k.wandererEntity, 'cantiere')?.titolo).toBe(k.ventures()[0].title);
     k.uiAction('cantiere', 'porta');
-    expect(k.ventures()[0].portati).toEqual({ 'item.ciocco': 16 });
+    expect(k.ventures()[0].brought).toEqual({ 'item.ciocco': 16 });
   }, 60000);
 });

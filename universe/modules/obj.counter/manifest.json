@@ -14,7 +14,7 @@
     "model": "banco",
     "glyph": "╤",
     "color": "#9a7a52",
-    "aspetto": "un banco da lavoro di legno con attrezzi sparsi sopra"
+    "look": "un banco da lavoro di legno con attrezzi sparsi sopra"
   },
   "physics": {
     "solid": true,

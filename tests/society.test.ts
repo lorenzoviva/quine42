@@ -13,15 +13,15 @@ import type { FileMap } from '../src/kernel/types';
 const cats = (t: string) => (t === 'npc.cat' ? 'animal' : 'person') as 'animal' | 'person';
 
 function individual(nome: string, tipo: string, famiglia: Array<[string, string]>, mestiere = 'contadino'): Individual {
-  return { nome, tipo, mestiere, famiglia: famiglia.map(([n, legame]) => ({ nome: n, legame })), routine: [] };
+  return { name: nome, kind: tipo, job: mestiere, family: famiglia.map(([n, legame]) => ({ name: n, bond: legame })), routine: [] };
 }
 
 /** What an individual is to another, after the repair. */
-const rel = (p: People, a: string, b: string) => p.persone.find((x) => x.nome === a)?.famiglia.find((r) => r.nome === b)?.legame;
+const rel = (p: People, a: string, b: string) => p.people.find((x) => x.name === a)?.family.find((r) => r.name === b)?.bond;
 
 // The cases of valmora (the analysis of 22/10/2026 and the measures of T07).
 const valmora = (): People => ({
-  persone: [
+  people: [
     individual('Micetto', 'npc.cat', [['Ombra', 'padrone'], ['Fiocco', 'figlio'], ['Elara', 'padrone'], ['Bruna', 'apprendista']], 'Cacciatore di topi'),
     individual('Ombra', 'npc.cat', [['Micetto', 'apprendista']], 'Cacciatore di topi'),
     individual('Fiocco', 'npc.cat', [['Bastiano', 'fratello'], ['Micetto', 'madre']], 'Cacciatore di topi'),
@@ -34,29 +34,29 @@ const valmora = (): People => ({
     individual('Elias la Rossa', 'npc.villager', [['Pino', 'fratello']], 'cartografo'),
     individual('Ottone', 'npc.cat', [], 'tessitrice'),
   ],
-  attesi: [],
+  expected: [],
 });
 
 describe('a coherent society', () => {
   it('a cat has no human brother, no cat owner, no human apprentice, and one owner only', () => {
     const { people } = repairSociety(valmora(), cats);
-    expect(people.persone.find((p) => p.nome === 'Micetto')!.specie).toBe('animal');
+    expect(people.people.find((p) => p.name === 'Micetto')!.species).toBe('animal');
     // "Fiocco is Bastiano's brother": across species, family becomes ownership.
     expect(rel(people, 'Fiocco', 'Bastiano')).toBe('animale');
     expect(rel(people, 'Bastiano', 'Fiocco')).toBe('padrone');
     // A cat is no cat's owner, and nobody is a cat's apprentice.
     expect(rel(people, 'Micetto', 'Ombra')).toBe('amico');
     expect(rel(people, 'Ombra', 'Micetto')).toBe('amica');
-    expect(people.persone.flatMap((p) => p.famiglia).some((r) => /apprendista|maestr/.test(r.legame))).toBe(false);
+    expect(people.people.flatMap((p) => p.family).some((r) => /apprendista|maestr/.test(r.bond))).toBe(false);
     // Micetto has a single owner: Elara (the first said); Bruna is a friend.
-    const owners = people.persone.filter((p) => rel(people, p.nome, 'Micetto') === 'padrona' || rel(people, p.nome, 'Micetto') === 'padrone');
-    expect(owners.map((p) => p.nome)).toEqual(['Elara']);
+    const owners = people.people.filter((p) => rel(people, p.name, 'Micetto') === 'padrona' || rel(people, p.name, 'Micetto') === 'padrone');
+    expect(owners.map((p) => p.name)).toEqual(['Elara']);
     expect(rel(people, 'Bruna', 'Micetto')).toBe('amica');
     // Animals among themselves are family: Micetto is Fiocco's son, Fiocco (male) his father.
     expect(rel(people, 'Micetto', 'Fiocco')).toBe('figlio');
     expect(rel(people, 'Fiocco', 'Micetto')).toBe('padre');
     // A cat does what cats do.
-    expect(people.persone.find((p) => p.nome === 'Ottone')!.mestiere).toBe('Cacciatore di topi');
+    expect(people.people.find((p) => p.name === 'Ottone')!.job).toBe('Cacciatore di topi');
   });
 
   it('relations agree with the gender and exist on both sides; nobody named is lost', () => {
@@ -68,25 +68,25 @@ describe('a coherent society', () => {
     expect(rel(people, 'Aldo', 'Marta')).toBe('marito');
     expect(rel(people, 'Marta', 'Aldo')).toBe('moglie');
     // Every relation between two people met has its other side.
-    for (const p of people.persone) for (const r of p.famiglia) {
-      const q = people.persone.find((x) => x.nome === r.nome);
-      if (q) expect(q.famiglia.some((x) => x.nome === p.nome)).toBe(true);
+    for (const p of people.people) for (const r of p.family) {
+      const q = people.people.find((x) => x.name === r.name);
+      if (q) expect(q.family.some((x) => x.name === p.name)).toBe(true);
     }
     // Someone named and never met is awaited, as what they are to who named them.
-    expect(people.attesi).toContainEqual({ nome: 'Nessuno Mai', legame: 'fratello', di: 'Aldo' });
+    expect(people.expected).toContainEqual({ name: 'Nessuno Mai', bond: 'fratello', of: 'Aldo' });
     expect(reverseRelation('madre', 'female')).toBe('figlia');
     expect(reverseRelation('padrone', 'male', 'person', 'animal')).toBe('animale');
   });
 
   it('one father, one mother, one spouse; spouses are not children of the same parent', () => {
     const { people, fixes } = repairSociety({
-      persone: [
+      people: [
         individual('Aldo', 'npc.villager', [['Marta', 'marito'], ['Pino', 'figlio'], ['Cosimo', 'figlio']]),
         individual('Marta', 'npc.villager', [['Pino', 'figlia']]),
         individual('Pino', 'npc.villager', []),
         individual('Cosimo', 'npc.villager', []),
       ],
-      attesi: [],
+      expected: [],
     });
     expect(rel(people, 'Aldo', 'Pino')).toBe('figlio');
     expect(rel(people, 'Aldo', 'Cosimo')).toBe('conoscente');
@@ -104,10 +104,10 @@ describe('a coherent society', () => {
     const { people, renames } = repairSociety(valmora(), cats);
     expect(renames.map(([a]) => a)).toEqual(['Elias la Rossa']);
     const nuovo = renames[0][1];
-    expect(people.persone.map((p) => p.nome)).toContain(nuovo);
-    expect(people.persone.every((p, i) => people.persone.every((q, j) => i === j || !similarNames(p.nome, q.nome)))).toBe(true);
+    expect(people.people.map((p) => p.name)).toContain(nuovo);
+    expect(people.people.every((p, i) => people.people.every((q, j) => i === j || !similarNames(p.name, q.name)))).toBe(true);
     // Pino (awaited) knows the new name; a plot follows it too, but leaves "Elias il Cercatore" alone.
-    expect(people.attesi.some((a) => a.nome === 'Pino' && a.di === 'Elias il Cercatore')).toBe(true);
+    expect(people.expected.some((a) => a.name === 'Pino' && a.of === 'Elias il Cercatore')).toBe(true);
     const plot = { titolo: 'Due cartografi', mistero: 'Elias la Rossa e Elias il Cercatore litigano', coinvolti: ['Elias la Rossa'], tappe: [{ chi: 'Elias la Rossa', cosa: 'parla con Elias il Cercatore' }] };
     const renamed = applyRenames(plot, renames);
     expect(renamed.coinvolti).toEqual([nuovo]);
@@ -119,7 +119,7 @@ describe('a coherent society', () => {
     expect(first.fixes.length).toBeGreaterThan(10);
     expect(checkSociety(first.people, cats)).toEqual([]);
     // Adding someone keeps it coherent: the other side is written, in the right gender.
-    const next = addIndividual(first.people, { ...individual('Gemma', 'npc.villager', [['Marta', 'sorella']]), genere: 'female' }, cats);
+    const next = addIndividual(first.people, { ...individual('Gemma', 'npc.villager', [['Marta', 'sorella']]), gender: 'female' }, cats);
     expect(rel(next, 'Marta', 'Gemma')).toBe('sorella');
     expect(checkSociety(next, cats)).toEqual([]);
   });
@@ -139,14 +139,14 @@ describe('a coherent society', () => {
 
   it('at boot the kernel repairs an old registry and commits it; new people are unlike the others', async () => {
     const files: FileMap = { ...bundledFiles, 'world/people.json': JSON.stringify(valmora()) };
-    const plots: Plot[] = [{ id: 'trama-x', titolo: 'Cartografi', mistero: 'Elias la Rossa nasconde una mappa', coinvolti: ['Elias la Rossa'], tappe: [{ giorno: 0, momento: 'day', chi: 'Elias la Rossa', dove: 'square', cosa: 'disegna' }], inizio: 0, stato: 'active' }];
+    const plots: Plot[] = [{ id: 'trama-x', title: 'Cartografi', mystery: 'Elias la Rossa nasconde una mappa', involved: ['Elias la Rossa'], beats: [{ day: 0, moment: 'day', who: 'Elias la Rossa', where: 'square', what: 'disegna' }], start: 0, state: 'active' }];
     files[PLOTS_FILE] = writePlots(plots);
     const k = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
     expect(k.repo.log().some((c) => c.message.startsWith('società:'))).toBe(true);
     const people = readPeople(k.files);
     expect(rel(people, 'Fiocco', 'Bastiano')).toBe('animale');
-    expect(people.persone.some((p) => p.nome === 'Elias la Rossa')).toBe(false);
-    expect(readPlots(k.files)[0].tappe[0].chi).not.toBe('Elias la Rossa');
+    expect(people.people.some((p) => p.name === 'Elias la Rossa')).toBe(false);
+    expect(readPlots(k.files)[0].beats[0].who).not.toBe('Elias la Rossa');
     expect(k.speciesOf('npc.cat')).toBe('animal');
     expect(k.speciesOf('npc.villager')).toBe('person');
     // Nothing more to repair at the next boot.
@@ -158,8 +158,8 @@ describe('a coherent society', () => {
       await k.ensureIdentity(e);
     }
     const after = readPeople(k.files);
-    expect(after.persone.every((p, i) => after.persone.every((q, j) => i === j || !similarNames(p.nome, q.nome)))).toBe(true);
-    expect(after.persone.every((p) => p.genere && p.specie)).toBe(true);
+    expect(after.people.every((p, i) => after.people.every((q, j) => i === j || !similarNames(p.name, q.name)))).toBe(true);
+    expect(after.people.every((p) => p.gender && p.species)).toBe(true);
     expect(checkSociety(after, (t) => k.speciesOf(t))).toEqual([]);
   });
 });

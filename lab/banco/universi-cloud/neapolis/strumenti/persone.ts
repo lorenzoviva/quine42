@@ -262,7 +262,7 @@ export function registry(originOf: (p: Person) => string, placeName: (p: Person)
   }
   const persone = PEOPLE.map((p): Individual & Record<string, unknown> => internalIndividual({
     nome: p.nome,
-    specie: (p.specie ?? 'persona') as Individual['specie'],
+    specie: (p.specie ?? 'persona') as Individual['species'],
     genere: p.genere,
     tipo: p.tipo,
     mestiere: p.mestiere,
@@ -275,7 +275,7 @@ export function registry(originOf: (p: Person) => string, placeName: (p: Person)
     persona: p.persona,
     aspetto: p.aspetto,
     porta: p.porta,
-    ricordi: p.ricordi.map(([quando, testo, peso, con]): Memory => ({ quando, testo, peso, ...(con ? { con } : {}) })),
+    ricordi: p.ricordi.map(([quando, testo, peso, con]): Memory => ({ when: quando, text: testo, weight: peso, ...(con ? { with: con } : {}) })),
     tratti: p.tratti,
     opinioni: p.opinioni.map(([su, testo, forza]) => ({ su, testo, forza })),
   } as unknown as Individual & Record<string, unknown>));

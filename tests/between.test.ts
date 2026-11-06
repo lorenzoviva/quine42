@@ -15,7 +15,7 @@ const DT = 1 / 60;
 
 async function bootMany(game: Record<string, unknown> = {}): Promise<Kernel> {
   const cfg = JSON.parse(bundledFiles['universe.json']);
-  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3, ...game } }, null, 2) };
+  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, game: { mode: 'multiplayer', death: 3, ...game } }, null, 2) };
   return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 }
 
@@ -214,7 +214,7 @@ describe('«Altro…» and PvP between wanderers (T43b)', () => {
     const after = k.wandererAt('bruno')!;
     expect(after.x - before.x).toBeGreaterThan(0.5);
     // The master: nothing but words reach them, PvP or not.
-    const master = k.gameSetup().master ?? 'io';
+    const master = k.gameSetup().master ?? 'me';
     const at = k.wandererAt('anna')!;
     put(k, master, { x: at.x, y: at.y + 1 });
     const m = k.wandererAt(master)!;
@@ -227,7 +227,7 @@ describe('«Altro…» and PvP between wanderers (T43b)', () => {
   });
 
   it('without «Altro…» between players: not in the menu, refused by the server, no call to the Council', async () => {
-    const { k, server, anna, all } = await three({ pvp: true, altroTraGiocatori: false });
+    const { k, server, anna, all } = await three({ pvp: true, freeActionsBetweenPlayers: false });
     const b = avatarOf(anna, 'bruno')!;
     expect(anna.k.actionsFor(b).map((o) => o.id)).not.toContain('altro');
     hurt(k, 'bruno', 50);
@@ -251,7 +251,7 @@ describe('death and reconnection among many (T43c)', () => {
   }
 
   it('a player dies of thirst with the punishment of the game while the others go on; the master never dies', async () => {
-    const { k, server, anna, bruno, all } = await three({ morte: 3 });
+    const { k, server, anna, bruno, all } = await three({ death: 3 });
     const item = stackable(k);
     put(k, 'anna', { x: 5.5, y: 0.5 });
     k.as('anna', () => {
@@ -274,11 +274,11 @@ describe('death and reconnection among many (T43c)', () => {
     };
     const brunoBefore = k.time;
     // Both the master and Anna run out of water and health: only the player dies, the world does not stop.
-    thirst(k, 'io');
+    thirst(k, 'me');
     thirst(k, 'anna');
     await tickUntil(server, all, () => anna.session.notices.some((n) => n.tipo === 'morte'));
     expect(k.dead).toBe(false);
-    expect(k.as('io', () => k.needs())).toMatchObject({ hunger: 100, thirst: 100, health: 100, morto: false });
+    expect(k.as('me', () => k.needs())).toMatchObject({ hunger: 100, thirst: 100, health: 100, morto: false });
     expect(k.time).toBeGreaterThan(brunoBefore);
     expect(countItem(bruno.k.inventory(), item)).toBe(1);
     expect(calls.find((c) => c.task === 'player.death')).toMatchObject({ chi: 'anna' });
@@ -297,7 +297,7 @@ describe('death and reconnection among many (T43c)', () => {
     expect(death.perso?.some((p) => p.startsWith(k.itemInfo(item).name))).toBe(true);
 
     // Punishment 0 (nessuna): she wakes up where she fell, with what she carried.
-    const mild = await three({ morte: 0 });
+    const mild = await three({ death: 0 });
     put(mild.k, 'anna', { x: 6.5, y: -3.5 });
     mild.k.as('anna', () => mild.k.give(item, 2));
     run(mild.server, mild.all, 8);
@@ -321,7 +321,7 @@ describe('death and reconnection among many (T43c)', () => {
       Object.assign(k.phrase(), { tokens: ['luce'], sel: 0 });
       k.applyEffects([{ type: 'state', name: 'benedizione', speed: 1.2 }]);
       k.setBond(vName, 'amica');
-      k.recordRule({ chiave: 'azione|canto', testo: 'cantare', possibile: true, racconto: 'canti' }, true, { task: 'action.judge', autore: 'narrator' });
+      k.recordRule({ key: 'azione|canto', text: 'cantare', possible: true, story: 'canti' }, true, { task: 'action.judge', author: 'narrator' });
     });
     run(server, all, 8);
     expect(k.cardsOf('anna').some((c) => c.id === 'rule:azione-canto')).toBe(true);
@@ -330,7 +330,7 @@ describe('death and reconnection among many (T43c)', () => {
     anna.session.leave();
     run(server, [bruno, carlo], 8);
     expect(server.connected()).toEqual(['bruno', 'carlo']);
-    expect(JSON.parse(k.files['world/giocatori/anna.json']).pos).toEqual({ x: 6.5, y: -2.5 });
+    expect(JSON.parse(k.files['world/players/anna.json']).pos).toEqual({ x: 6.5, y: -2.5 });
 
     // Anna reconnects: her state, card and bond are all there.
     const back = await thin(server, 'anna', 'Anna');

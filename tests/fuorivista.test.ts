@@ -20,7 +20,7 @@ const STEP = 1 / 20;
 const play = (k: Kernel, s: number) => {
   for (let t = 0; t < s; t += STEP) k.tick(STEP);
 };
-const program = (id: string): JobProgram => JSON.parse(bundledFiles[`modules/job.${id}/manifest.json`]).mestieri[0];
+const program = (id: string): JobProgram => JSON.parse(bundledFiles[`modules/job.${id}/manifest.json`]).jobs[0];
 
 /** A module that hears the returns: it keeps the last one in its store. */
 const RETURNS: FileMap = {
@@ -86,7 +86,7 @@ describe('a place nobody sees', () => {
     const origin = k.ecs.get(sid, 'origin').key;
     (k as unknown as { breakEntity(id: number): void }).breakEntity(sid);
     const v = live(k)[0];
-    expect(v.squadra.map((m) => m.nome).sort()).toEqual(['Baldo', 'Ivo']);
+    expect(v.team.map((m) => m.name).sort()).toEqual(['Baldo', 'Ivo']);
     let field: [number, number] | undefined;
     for (let i = 0; i < S * S && !field; i++) {
       const c = cx * S + (i % S), r = cy * S + Math.floor(i / S);
@@ -104,29 +104,29 @@ describe('a place nobody sees', () => {
       play(k, 3.5);
     }
     const now = k.ventures().find((x) => x.id === v.id)!;
-    expect(now.portati).toEqual({ 'item.ciocco': 16, 'item.chiodi': 3 });
+    expect(now.brought).toEqual({ 'item.ciocco': 16, 'item.chiodi': 3 });
     // Two of them, three days of work, as far as the materials let it: the ground floor and the walls are done, not the roof's nails.
-    expect(now.lavorato).toBeGreaterThan(0);
-    expect(now.lavorato).toBeLessThanOrEqual(2 * 3 * Kernel.AWAY_WORK);
+    expect(now.worked).toBeGreaterThan(0);
+    expect(now.worked).toBeLessThanOrEqual(2 * 3 * Kernel.AWAY_WORK);
     // The deposit gave what was needed; the trades of the place (the farmer, not in the team) filled it again.
     const dep = k.placeDeposit(key);
     expect(dep['item.ciocco'] ?? 0).toBe(0);
     expect(k.placeDeposit(`${cx - 5},${cy}`)['item.grano']).toBeGreaterThan(0);
     // A clock moved forward counts once: the same evening again adds nothing.
-    const worked = now.lavorato;
+    const worked = now.worked;
     play(k, 3.5);
-    expect(k.ventures().find((x) => x.id === v.id)!.lavorato).toBe(worked);
+    expect(k.ventures().find((x) => x.id === v.id)!.worked).toBe(worked);
 
     // Back: the field sown three days ago is ripe, the house is at the stage its venture reached, on_return heard it.
     await goAway(k, -gone, () => loaded(k, key));
     expect(k.tileAt(field![0], field![1])).toBe('u');
     const stage = k.ecs.get(k.ecs.query('struttura', 'origin').find((e) => k.ecs.get(e, 'origin').key === origin)!, 'struttura').stadio;
     expect(stage).toBeGreaterThan(0);
-    expect(k.chunks.get(key)!.plan!.stadi?.[origin]).toBe(stage);
+    expect(k.chunks.get(key)!.plan!.stages?.[origin]).toBe(stage);
     const heard = k.stores.get('prova.ritorno', 'ultimo') as { luogo: string; trascorso: number } | undefined;
     expect(heard?.luogo).toBe(key);
     expect(heard!.trascorso).toBeGreaterThanOrEqual(2 * DAY);
-    expect(k.chunks.get(key)!.plan!.visto).toBeUndefined();
+    expect(k.chunks.get(key)!.plan!.seen).toBeUndefined();
   }, 120000);
 
   it('in a world of many: two wanderers far from the place and from each other, the server keeps its accounts; who comes back sees the result', async () => {
@@ -151,9 +151,9 @@ describe('a place nobody sees', () => {
       k.time = at(day0 + d, 'evening');
       play(k, 3.5);
     }
-    const v = k.ventures().find((x) => x.origine === origin)!;
-    expect(v.portati).toEqual({ 'item.ciocco': 4 });
-    expect(v.lavorato).toBeGreaterThanOrEqual(200);
+    const v = k.ventures().find((x) => x.origin === origin)!;
+    expect(v.brought).toEqual({ 'item.ciocco': 4 });
+    expect(v.worked).toBeGreaterThanOrEqual(200);
     // Ugo comes back: the house is past its ground floor, for whoever looks.
     k.as('ugo', () => (k.carpet()!.oy += 12 * S));
     for (let i = 0; i < 600 && !loaded(k, key); i++) {

@@ -14,7 +14,7 @@ import { soundPrograms, type SoundProgram } from '../src/mj/sound';
 import { expectedModelErrors } from './helpers';
 
 const programs = readPrograms(bundledFiles);
-const music = programs.filter((p) => p.suono?.uso === 'music');
+const music = programs.filter((p) => p.sound?.use === 'music');
 const state = (s: Partial<SoundState> = {}): SoundState => ({ beyond: false, environment: 'village', phase: 'day', seed: 42, ...s });
 const environments = Object.keys(JSON.parse(bundledFiles['modules/world.layouts/manifest.json']).layouts as object);
 
@@ -67,7 +67,7 @@ describe('the choice of the music', () => {
     expect(chooseMusic(state(), [])).toBeUndefined();
     expect(readPrograms({ 'models/index.json': '{nope' })).toEqual([]);
     const odd = { 'models/index.json': JSON.stringify({ a: { classe: 'suono', suono: 'musica' }, b: { classe: 'suono', suono: { uso: 'music', ambienti: 3, momenti: [1, 'notte'] } } }), 'models/a.xml': '', 'models/b.xml': '' };
-    expect(readPrograms(odd).map((p) => [p.id, p.suono])).toEqual([['b', { uso: 'music', momenti: ['night'] }]]);
+    expect(readPrograms(odd).map((p) => [p.id, p.sound])).toEqual([['b', { use: 'music', moments: ['night'] }]]);
   });
 });
 
@@ -75,7 +75,7 @@ describe('the programs of the seed', () => {
   it('are few, one for a type, and the presets of the SoundLab stay for the SoundLab', () => {
     // The seven of T224 and the six of the fantasy theme of Claude Cloud (T273): each its own type, in environments of their own.
     expect(music).toHaveLength(13);
-    expect(soundPrograms(bundledFiles).filter((p) => !p.suono)).toHaveLength(4);
+    expect(soundPrograms(bundledFiles).filter((p) => !p.sound)).toHaveLength(4);
   });
 
   it('every moment of the game has its program', () => {
@@ -88,7 +88,7 @@ describe('the programs of the seed', () => {
     const expected = expectedModelErrors(p.id);
     expect(errors).toHaveLength(expected.length);
     expected.forEach((e, i) => expect(errors[i]).toMatch(e));
-    const use = p.suono!.uso;
+    const use = p.sound!.use;
     const seeds = use === 'music' ? [1, 987654321] : [1, 2, 3, 4, 5];
     for (const seed of seeds) {
       const s = prepareSound({ xml: p.xml, seed, use });

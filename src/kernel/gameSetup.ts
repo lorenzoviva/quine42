@@ -16,9 +16,9 @@ export const DEATH_LEVELS: ReadonlyArray<{ nome: string; testo: string }> = [
 ];
 
 /** The game of today: one player, death as hard as it was before the choice existed. */
-export const DEFAULT_GAME_SETUP: GameSetup = { modalita: 'single', morte: 3, pvp: false, altroTraGiocatori: true };
+export const DEFAULT_GAME_SETUP: GameSetup = { mode: 'single', death: 3, pvp: false, freeActionsBetweenPlayers: true };
 
-export const deathLevel = (p: GameSetup) => DEATH_LEVELS[p.morte] ?? DEATH_LEVELS[DEFAULT_GAME_SETUP.morte];
+export const deathLevel = (p: GameSetup) => DEATH_LEVELS[p.death] ?? DEATH_LEVELS[DEFAULT_GAME_SETUP.death];
 
 /**
  * Whether a universe's `partita.modalita`, as read, is a game of many (T307b): `multiplayer`, or `multigiocatore` of a universe of the
@@ -31,9 +31,9 @@ export function gameSetupSummary(p: GameSetup): string {
   const d = deathLevel(p);
   return [
     '## La partita (scelta prima della Genesi, non cambia più)',
-    `- La morte è ${d.nome} (${p.morte} su 4): ${d.testo}. Ciò che introduci (abilità, tesori, legami, meccaniche) deve restare coerente con questa punizione.`,
-    p.modalita === 'multiplayer'
-      ? `- Si gioca in più viandanti. Tra loro: ${p.pvp ? 'possono ferirsi' : 'non possono ferirsi'}; ${p.altroTraGiocatori ? '«Altro…» si può fare anche su un altro viandante' : '«Altro…» non si fa su un altro viandante'}.`
+    `- La morte è ${d.nome} (${p.death} su 4): ${d.testo}. Ciò che introduci (abilità, tesori, legami, meccaniche) deve restare coerente con questa punizione.`,
+    p.mode === 'multiplayer'
+      ? `- Si gioca in più viandanti. Tra loro: ${p.pvp ? 'possono ferirsi' : 'non possono ferirsi'}; ${p.freeActionsBetweenPlayers ? '«Altro…» si può fare anche su un altro viandante' : '«Altro…» non si fa su un altro viandante'}.`
       : '- Si gioca da soli: un solo viandante.',
   ].join('\n');
 }

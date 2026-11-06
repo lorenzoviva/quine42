@@ -28,12 +28,14 @@ import { cloneChanges, type CloneOptions } from '../src/kernel/clone';
 import { allCards } from '../src/kernel/cards';
 import { allowedPath, UNIVERSE_NAME_RE } from '../src/kernel/paths';
 import { publicFiles } from '../src/session/files';
+import { portedFiles } from '../src/kernel/migrations';
 import type { AccountSettings } from './account';
 import { sealLedger, sweepBalances } from './ledger';
 import { callerOf, creditFile, failureText, gameIn, isJson, newSecret, newUniverse, owns, type Access } from './access';
 import { holdGit, runGit } from './git';
 import { Rates, type Pace } from './rates';
 import { accountWanderer } from '../src/session/account';
+import { serverPath } from './folders';
 
 const MAX_BODY = 32 * 1024 * 1024;
 /** Universes of which an account is the master, unless the `.env` says otherwise (`QUINE_UNIVERSI_PER_ACCOUNT`, V-026). */
@@ -305,7 +307,8 @@ export function universeHandler(baseDir: string, opts: { accounts?: AccountSetti
       const r = await serial(name, async () => {
         if (!(await exists(path.join(root, '.git')))) return { exists: false };
         const files = await readTree(root);
-        return mine ? { exists: true, head: await head(root), log: await log(root), files } : { exists: true, head: await head(root), files: publicFiles(files) };
+        // What is not the master's is read as this kernel reads it: a universe not opened since its contract changed, ported in memory (T308a).
+        return mine ? { exists: true, head: await head(root), log: await log(root), files } : { exists: true, head: await head(root), files: publicFiles(portedFiles(files)) };
       });
       return send(res, 200, r);
     }
@@ -313,7 +316,7 @@ export function universeHandler(baseDir: string, opts: { accounts?: AccountSetti
       // The gallery of the cards: measured here on the whole universe, since what measures a card (its code) does not leave it.
       const r = await serial(name, async () => {
         if (!(await exists(path.join(root, '.git')))) return { exists: false };
-        const files = await readTree(root);
+        const files = portedFiles(await readTree(root));
         return { exists: true, carte: allCards(files, true), files: publicFiles(files) };
       });
       return send(res, 200, r);
@@ -418,7 +421,7 @@ export function universeHandler(baseDir: string, opts: { accounts?: AccountSetti
         case 'reset': {
           if (!(await exists(root))) return { trashed: null };
           // Never deleted: moved aside, so a universe can always be recovered by hand.
-          const trash = path.join(baseDir, '.cestino', `${name}-${Date.now()}`);
+          const trash = path.join(serverPath(baseDir, 'trash'), `${name}-${Date.now()}`);
           await fs.mkdir(path.dirname(trash), { recursive: true });
           await fs.rename(root, trash);
           return { trashed: path.relative(baseDir, trash) };

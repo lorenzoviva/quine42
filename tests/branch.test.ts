@@ -17,7 +17,7 @@ const DT = 1 / 60;
 
 async function bootMany(): Promise<Kernel> {
   const cfg = JSON.parse(bundledFiles['universe.json']);
-  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2) };
+  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, game: { mode: 'multiplayer', death: 3 } }, null, 2) };
   return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 }
 
@@ -59,7 +59,7 @@ describe('the master’s branch and the publication (T42b)', () => {
   it('a change on the master’s branch reaches the players only once it is published', async () => {
     const k = await bootMany();
     const server = new SessionServer(k);
-    const master = await thin(server, 'io');
+    const master = await thin(server, 'me');
     const anna = await thin(server, 'anna');
     run(server, [master, anna], 6);
     const { path, edited } = entityManifest(k);
@@ -96,7 +96,7 @@ describe('the master’s branch and the publication (T42b)', () => {
   it('what the Council commits meanwhile reaches everyone; on the same file the master wins, and the feed says so', async () => {
     const k = await bootMany();
     const server = new SessionServer(k);
-    const master = await thin(server, 'io');
+    const master = await thin(server, 'me');
     const anna = await thin(server, 'anna');
     run(server, [master, anna], 6);
     const one = entityManifest(k, 0);
@@ -127,7 +127,7 @@ describe('the master’s branch and the publication (T42b)', () => {
   it('only the master has a branch; their R goes back to its last valid state, and it waits for them when they come back', async () => {
     const k = await bootMany();
     const server = new SessionServer(k);
-    const master = await thin(server, 'io');
+    const master = await thin(server, 'me');
     const anna = await thin(server, 'anna');
     run(server, [master, anna], 6);
     const { path, edited } = entityManifest(k);
@@ -154,7 +154,7 @@ describe('the master’s branch and the publication (T42b)', () => {
     // The master leaves and comes back: their branch is in their mirror again, the world still has not got it.
     master.session.leave();
     run(server, [anna], 6);
-    const again = await thin(server, 'io');
+    const again = await thin(server, 'me');
     run(server, [again, anna], 6);
     expect(JSON.parse(again.k.files[path]).name).toBe('Valido');
     expect(again.k.publisher!.branch()).toEqual([path]);

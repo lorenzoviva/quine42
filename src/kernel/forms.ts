@@ -14,7 +14,7 @@ import { colorTable, floors, footprint, surfaces, type Levels, type VoxelGrid } 
 import { compileMjx } from '../mj/model';
 import { act, FORM_LIMITS, MAX_FORM_TIME, MAX_FORM_XML, runMjx } from '../mj/run';
 import { hashStr } from './rng';
-import { internalModelInfo } from './internalNames';
+import { internalFields, internalModelInfo } from './internalNames';
 import type { FileMap } from './types';
 
 export const MODELS_DIR = 'models/';
@@ -33,33 +33,33 @@ export function vptOf(info: ModelInfo | undefined): number {
  * (a cellar, a crypt); 0 for anything else.
  */
 export function cellarOf(info: ModelInfo | undefined): number {
-  const n = info?.sotto;
+  const n = info?.cellar;
   return typeof n === 'number' && Number.isInteger(n) && n >= 1 && n <= 3 ? n : 0;
 }
 
 export interface ModelInfo {
   /** Asset class (src/mj/classes.ts): its box and how it moves. */
-  classe: string;
+  class: string;
   /** Its size (ADR-0092), if not the class's own: the box grows or shrinks with it (and `vpt` with it). */
-  taglia?: string;
-  nome?: string;
+  size?: string;
+  name?: string;
   /** Who wrote it: "a mano", "sculptor", the Gemini model… */
-  autore?: string;
+  author?: string;
   /** The Artist's vote (0-10), if it was judged. */
-  voto?: number;
+  score?: number;
   /** A letter of the program that takes the colour of the entity (generic models: one program, many colours). */
-  tinta?: string;
+  tint?: string;
   /** Voxels per tile, if not the usual 20 (ADR-0049): big models are written coarser. */
   vpt?: number;
   /** Milliseconds the program may run, if not `MODEL_TIME`: slow programs drawn by hand (circuito-3D). */
-  tempo?: number;
+  time?: number;
   /** Tiles under the ground (ADR-0091): the box of the class grows down by them, the lowest voxels are the cellar. */
-  sotto?: number;
+  cellar?: number;
   /** Artist's critique advice and problems (T48a). */
-  consigli?: string[];
-  problemi?: string[];
+  advice?: string[];
+  problems?: string[];
   /** What a sound program is for in the game (ADR-0126). */
-  suono?: SoundPurpose;
+  sound?: SoundPurpose;
 }
 
 /** What an entity's look is: which program, which seed, which way it faces, what has been done to it. */
@@ -94,7 +94,7 @@ export interface FormRequest {
   tempo?: number;
   /** Model id for diagnostics and cache key (T64). */
   model?: string;
-  /** Voxels under the ground, for a program that marks it (`suolo`, ADR-0135) and only then: the others run and are kept as ever. */
+  /** Voxels under the ground, for a program that marks it (`soil`, ADR-0135) and only then: the others run and are kept as ever. */
   base?: number;
 }
 
@@ -506,8 +506,9 @@ export class Forms {
     this.files = files;
     this.hashes.clear();
     try {
-      // The class and size of a model as the contract 0.1 wrote them are read as the internal ones (T307a).
-      this.library = Object.fromEntries(Object.entries(JSON.parse(files[MODELS_INDEX] ?? '{}') as Record<string, ModelInfo>).map(([id, info]) => [id, internalModelInfo(info)]));
+      // The class and size of a model as the contract 0.1 wrote them are read as the internal ones (T307a), and so are the fields of 0.3
+      // (`classe`, `taglia`, T308a): the values first, their repair reads the fields of before.
+      this.library = Object.fromEntries(Object.entries(JSON.parse(files[MODELS_INDEX] ?? '{}') as Record<string, ModelInfo>).map(([id, info]) => [id, internalFields('modelInfo', internalModelInfo(info))]));
     } catch {
       this.library = {};
     }
@@ -518,13 +519,13 @@ export class Forms {
     const out: Record<string, ModelInfo> = {};
     for (const p of Object.keys(this.files)) {
       const m = /^models\/([a-z0-9-]+)\.xml$/i.exec(p);
-      if (m) out[m[1]] = this.library[m[1]] ?? { classe: 'object' };
+      if (m) out[m[1]] = this.library[m[1]] ?? { class: 'object' };
     }
     return out;
   }
 
   info(id: string): ModelInfo | undefined {
-    return this.files[`${MODELS_DIR}${id}.xml`] ? (this.library[id] ?? { classe: 'object' }) : undefined;
+    return this.files[`${MODELS_DIR}${id}.xml`] ? (this.library[id] ?? { class: 'object' }) : undefined;
   }
 
   /**
@@ -538,7 +539,7 @@ export class Forms {
   }
 
   classOf(model: string): AssetClass {
-    return classOf(this.info(model)?.classe) ?? classOf(model) ?? CLASSES.find((c) => c.id === 'object')!;
+    return classOf(this.info(model)?.class) ?? classOf(model) ?? CLASSES.find((c) => c.id === 'object')!;
   }
 
   /** How many seeds a program has in the world: the few of its class (T64: 4 for shelf file models). */
@@ -573,14 +574,14 @@ export class Forms {
     return {
       xml,
       seed,
-      size: sizeFor(xml, cls, info?.taglia, under),
-      tint: info?.tinta && tint ? { symbol: info.tinta, color: tint } : undefined,
+      size: sizeFor(xml, cls, info?.size, under),
+      tint: info?.tint && tint ? { symbol: info.tint, color: tint } : undefined,
       rig: cls.animation === 'walk',
       sway: cls.animation === 'wind',
       vpt,
       model,
-      ...(info?.tempo ? { tempo: info.tempo } : {}),
-      ...(under && /\ssuolo="/.test(rootTag(xml)) ? { base: under } : {}),
+      ...(info?.time ? { tempo: info.time } : {}),
+      ...(under && /\s(?:soil|suolo)="/.test(rootTag(xml)) ? { base: under } : {}),
     };
   }
 
@@ -591,7 +592,7 @@ export class Forms {
     const info = this.library[model];
     let h = this.hashes.get(model);
     if (h === undefined) this.hashes.set(model, (h = hashStr(xml)));
-    const key = `${model}#${seed}#${info?.tinta && tint ? tint : ''}#${h}`;
+    const key = `${model}#${seed}#${info?.tint && tint ? tint : ''}#${h}`;
     let f = this.forms.get(key);
     if (f) return f;
     // Asked at every frame: only what is not there yet costs a request.
@@ -662,7 +663,7 @@ export class Forms {
     const xml = this.files[`${MODELS_DIR}${model}.xml`];
     if (!xml) return undefined;
     const info = this.library[model];
-    const size = sizeFor(xml, this.classOf(model), info?.taglia, cellarOf(info) * vptOf(info));
+    const size = sizeFor(xml, this.classOf(model), info?.size, cellarOf(info) * vptOf(info));
     return compileMjx(xml, size ? { size } : {});
   }
 }

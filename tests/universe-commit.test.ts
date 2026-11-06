@@ -217,7 +217,7 @@ describe('la coda dei commit (T211)', () => {
     });
     void client.commit({ 'world/a.json': '1' }, 'a', 'agent');
     await vi.advanceTimersByTimeAsync(5200);
-    await expect(client.clone('copia', 'io')).rejects.toThrow('1 scritture in attesa');
+    await expect(client.clone('copia', 'me')).rejects.toThrow('1 scritture in attesa');
     await expect(client.checkout('abcd')).rejects.toThrow('1 scritture in attesa');
     await expect(client.merge('master', 'pubblica')).resolves.toBeUndefined();
     await expect(client.branch('master', { 'world/x.json': '1' }, 'ramo', 'player')).resolves.toBeNull();

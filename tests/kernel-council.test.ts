@@ -131,17 +131,17 @@ describe('the life of people', () => {
     clearArea(k);
     const a = await individual(k, 'vita#a', 1);
     await k.talk(a.id, 'Ti prometto che tornerò con una lanterna');
-    expect(k.individualOf(a.name)!.ricordi!.some((m) => m.peso === 3 && /promesso/.test(m.testo))).toBe(true);
+    expect(k.individualOf(a.name)!.memories!.some((m) => m.weight === 3 && /promesso/.test(m.text))).toBe(true);
     const r = await k.talk(a.id, 'Ti ricordi cosa ti ho detto?');
     expect(r.say).toMatch(/lanterna/);
     await k.talk(a.id, 'Ti amo. Sposami!');
     expect(k.bondOf(a.name)).toBe('moglie');
-    expect(k.rules().some((x) => x.chiave === `legame|${a.name}`)).toBe(true);
+    expect(k.rules().some((x) => x.key === `legame|${a.name}`)).toBe(true);
     // "Altro…" on an individual: judged by the Council, with social effects.
     await k.freeAction(a.id, 'vorrei avere un figlio con te');
-    const child = readPeople(k.files).persone.find((p) => /^figli[oa]$/.test(bondWith(p, 'io') ?? ''))!;
-    expect(child.famiglia.map((f) => f.nome)).toEqual(expect.arrayContaining([a.name, 'Viandante']));
-    expect(k.ecs.query('identity').some((id) => k.ecs.get(id, 'identity').name === child.nome)).toBe(true);
+    const child = readPeople(k.files).people.find((p) => /^figli[oa]$/.test(bondWith(p, 'me') ?? ''))!;
+    expect(child.family.map((f) => f.name)).toEqual(expect.arrayContaining([a.name, 'Viandante']));
+    expect(k.ecs.query('identity').some((id) => k.ecs.get(id, 'identity').name === child.name)).toBe(true);
   });
 
   it('they live their routine visibly: at night they go to bed and sleep there', async () => {
@@ -171,7 +171,7 @@ describe('the life of people', () => {
     await settle(100);
     for (let i = 0; i < 60 * 6; i++) k.tick(1 / 60);
     expect(k.feed().some((e) => e.task === 'npc.dialogue')).toBe(true);
-    expect(k.individualOf(a.name)!.ricordi?.length).toBeGreaterThan(0);
+    expect(k.individualOf(a.name)!.memories?.length).toBeGreaterThan(0);
   });
 
   it('the Narrator weaves a plot among them; beats happen; a quest is given, done and rewarded', async () => {
@@ -182,19 +182,19 @@ describe('the life of people', () => {
     const z = await individual(k, 'trama#z', 3);
     void y;
     const plot = (await k.weaveStory(true))!;
-    expect(plot.coinvolti.length).toBeGreaterThan(1);
-    expect(plot.missione?.stato).toBe('offered');
-    const giver = plot.missione!.da;
+    expect(plot.involved.length).toBeGreaterThan(1);
+    expect(plot.quest?.state).toBe('offered');
+    const giver = plot.quest!.from;
     const giverId = [x, y, z].find((p) => p.name === giver)!.id;
     await k.talk(giverId, 'Posso aiutarti in qualche modo?');
     expect(k.quests().length).toBe(1);
     // The night comes: the first beat happens, and its individual remembers it.
     k.time = Kernel.DAY_SECONDS * (k.day() + 0.7);
     for (let i = 0; i < 61; i++) k.tick(1 / 60);
-    const first = readPlots(k.files)[0].tappe[0];
-    expect(first.fatto).toBe(true);
+    const first = readPlots(k.files)[0].beats[0];
+    expect(first.done).toBe(true);
     // Talking to whom the quest names completes it, with a reward.
-    const target = plot.missione!.obiettivo.a!;
+    const target = plot.quest!.goal.to!;
     await k.talk([x, y, z].find((p) => p.name === target)!.id, 'Ciao, mi manda qualcuno.');
     await settle(100);
     expect(k.quests().length).toBe(0);

@@ -15,7 +15,7 @@ export interface PlacedComp {
   z: number;
 }
 
-/** A thing lying on furniture as the save keeps it (`posati` of `world/stato.json`): where, how high, turned how, and a bag's content. */
+/** A thing lying on furniture as the save keeps it (`placed` of `world/state.json`): where, how high, turned how, and a bag's content. */
 export interface PlacedRecord {
   item: string;
   count: number;

@@ -142,7 +142,7 @@ export function xmlDi(p: Programma): string {
   for (const k of Object.keys(unions)) usate.delete(k);
   let values = p.values;
   for (const c of usate) if (!values.includes(c)) values += c;
-  const radice = `<sequence values="${values}" symmetry="(xy)" suolo="E"${p.cantina ? ' ground="Z"' : ''} origin="bottom">`;
+  const radice = `<sequence values="${values}" symmetry="(xy)" soil="E"${p.cantina ? ' ground="Z"' : ''} origin="bottom">`;
   const righe = [radice];
   for (const [k, v] of Object.entries(unions)) righe.push(`  <union symbol="${k}" values="${v}"/>`);
   righe.push(

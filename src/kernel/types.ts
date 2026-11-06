@@ -3,13 +3,13 @@ import type { CardStamp } from './cards';
 export type FileMap = Record<string, string>;
 
 export interface Rule {
-  chiave: string;
-  testo: string;
-  possibile: boolean;
-  racconto: string;
-  effetti?: string[];
+  key: string;
+  text: string;
+  possible: boolean;
+  story: string;
+  effects?: string[];
   /** Who judged it and who paid (T36): only the Council's judgements are cards. */
-  carta?: CardStamp;
+  card?: CardStamp;
 }
 
 /** entity = NPCs and objects in the world; item = things that go in the inventory. */
@@ -20,13 +20,13 @@ export interface Appearance {
   glyph: string;
   color: string;
   /** How it looks, in words: what the Sculptor sculpts. */
-  aspetto?: string;
+  look?: string;
   /** Its look: a program of the library (`models/<id>.xml`); without one, the generic model of its class. */
   model?: string;
   /** Asset class (src/mj/classes.ts): person, animal, tree, furniture, building… */
-  classe?: string;
+  class?: string;
   /** Its size of D&D (ADR-0092: minuscola … gargantuesca), if not its class's own: the model's box scales with it. */
-  taglia?: string;
+  size?: string;
 }
 
 export interface Physics {
@@ -89,7 +89,7 @@ export interface TerrainDef {
   /** Actions learned on this kind of terrain ("Altro…" on a tile): effects at that place. */
   actions?: ActionDef[];
   /** What it becomes by itself (T245b, ADR-0140): after `dopo` days of the world from when the tile was written, the tile `in`. */
-  matura?: { dopo: number; in: string };
+  ripens?: { after: number; in: string };
 }
 
 export const ITEM_CATEGORIES = ['food', 'drink', 'medicine', 'tool', 'weapon', 'material', 'light', 'clothing', 'container', 'magic', 'misc'] as const;
@@ -108,7 +108,7 @@ export interface ItemDef {
   glyph: string;
   color: string;
   /** How it looks, in words: what the Sculptor sculpts. */
-  aspetto?: string;
+  look?: string;
   /** Its look (a program of `models/`); items of a kind can share one, tinted with `color`. */
   model?: string;
   equippable?: boolean;
@@ -132,23 +132,23 @@ export interface ItemDef {
  * a quiver, a horse's saddlebags, a reputation sheet.
  */
 export interface UiElement {
-  tipo: 'slot' | 'bar' | 'text' | 'button';
+  type: 'slot' | 'bar' | 'text' | 'button';
   /** Slot id, or the action a button sends to on_ui. */
   id?: string;
-  etichetta?: string;
+  label?: string;
   /** Slot: what fits (item slot names, categories or tags: "testa", "clothing", "weapon"). */
-  accetta?: string[];
+  accepts?: string[];
   /** Bar/text: a field of a player component, "componente.campo" (e.g. "needs.health"). */
-  campo?: string;
+  field?: string;
   max?: number;
-  colore?: string;
+  color?: string;
 }
 
 export interface UiPanel {
   id: string;
-  titolo: string;
-  descrizione?: string;
-  elementi: UiElement[];
+  title: string;
+  description?: string;
+  elements: UiElement[];
 }
 
 export interface Recipe {
@@ -304,7 +304,7 @@ export interface Manifest {
   container?: { size: number; loot: string };
   actions?: ActionDef[];
   /** Cases of a system (T27): small scenes the bench of the Sala sistemi runs with the real code. */
-  casi?: BenchCase[];
+  cases?: BenchCase[];
 }
 
 /**
@@ -312,34 +312,34 @@ export interface Manifest {
  * The bench runs it in a kernel in miniature (only `core.*`, the content and this system): before, the rule, after.
  */
 export interface BenchCase {
-  titolo: string;
+  title: string;
   /** The case in words: what the visitor sees happen. */
-  racconto: string;
+  story: string;
   /** Five rows of five terrain codes, the wanderer in the middle (default: the first walkable terrain). */
-  terreno?: string[];
+  terrain?: string[];
   /** The wanderer: components set before the case (e.g. {"needs": {"health": 50}}), what they carry. */
-  viandante?: { componenti?: Record<string, Record<string, unknown>>; oggetti?: BenchItem[] };
+  wanderer?: { components?: Record<string, Record<string, unknown>>; items?: BenchItem[] };
   /** Entities of the scene, by module, in tiles from the wanderer. */
-  cose?: Array<{ modulo: string; x: number; y: number; componenti?: Record<string, Record<string, unknown>> }>;
+  entities?: Array<{ module: string; x: number; y: number; components?: Record<string, Record<string, unknown>> }>;
   /** What happens, in order: an object into a slot of the panel, out of it, a button, some time, a walk. */
-  passi?: BenchStep[];
+  steps?: BenchStep[];
   /** Seconds the case lasts after its steps (at most 30). */
-  durata: number;
+  duration: number;
   /** What changes: "component.field" of the wanderer, or "<n>:component.field" of the n-th entity (from 0). */
-  guarda: string[];
+  watch: string[];
   /** The lines of logic.lua that matter (from 1), lit on the screen above the bench. */
-  righe?: number[];
+  lines?: number[];
 }
 
 /** An object of a case: one of the universe (by name or id) or a trial one, only for the bench. */
 export interface BenchItem {
-  nome: string;
-  posto?: string;
-  categoria?: string;
+  name: string;
+  slot?: string;
+  category?: string;
   bonus?: Record<string, number>;
 }
 
-export type BenchStep = { tipo: 'slot'; slot: string; oggetto: string } | { tipo: 'remove'; slot: string } | { tipo: 'button'; azione: string } | { tipo: 'wait'; secondi: number } | { tipo: 'walk'; verso: BenchWay; secondi: number };
+export type BenchStep = { type: 'slot'; slot: string; item: string } | { type: 'remove'; slot: string } | { type: 'button'; action: string } | { type: 'wait'; seconds: number } | { type: 'walk'; toward: BenchWay; seconds: number };
 
 /** Where the wanderer walks in a case (T27b): the world's directions, held like the keys. */
 export type BenchWay = 'up' | 'down' | 'left' | 'right';
@@ -362,11 +362,11 @@ export interface AiConfig {
   /** New kinds of inhabitants the world forges by itself per session, so the same face is not everywhere. */
   maxCast?: number;
   /** The Sculptor's model per class and the Artist's (agents/sculptor.ts → DEFAULT_SCULPTORS). */
-  scultori?: Partial<import('./agents/sculptor').SculptorAiModels>;
+  sculptors?: Partial<import('./agents/sculptor').SculptorAiModels>;
   /** New models the Sculptor writes by itself per session. */
   maxModels?: number;
   /** Pieces the Musician writes by themselves in a session (T225; default 8). */
-  maxBrani?: number;
+  maxPieces?: number;
   /** Reasoning effort of every call (default `low`: see docs/reports/costi-step8.2B.md). */
   thinking?: 'low' | 'medium' | 'high' | 'off';
   /** Seconds before a request is given up (and not repeated). */
@@ -376,28 +376,28 @@ export interface AiConfig {
   /** Where the slow tasks of every agent run (T68, ADR-0077): `api` (default) or a subscription's CLI, `claude` (ADR-0106). */
   provider?: import('./ai/subscription').Provider;
   /** Agent id → provider, the exceptions to `provider`. Only in single play and development, never on the server of many. */
-  agenti?: Record<string, import('./ai/subscription').Provider>;
+  agents?: Record<string, import('./ai/subscription').Provider>;
   /** How often every agent asks the model, 0-1 (T45b, ADR-0085): an object or a preset's name (`low detail`); repaired by the validator. */
-  coefficienti?: Partial<import('./coefficients').Coefficients> | string;
+  coefficients?: Partial<import('./coefficients').Coefficients> | string;
   /** Quality and spending minimums set by the master for multiplayer (T45d). */
-  minimi?: AiMinimums;
+  minimums?: AiMinimums;
   /** The Actor (T157, ADR-0116): who plays the people with the Narrator's sheets; off by default. A boolean, a model's name or an object; repaired by the validator. */
-  attore?: Partial<import('./coefficients').ActorConfig> | boolean | string;
+  actor?: Partial<import('./coefficients').ActorConfig> | boolean | string;
 }
 
 /** What the master sets before entering (T247, ADR-0133): every knob of the consumption, none of the providers'. */
-export type AiSettings = Partial<Pick<AiConfig, 'textModel' | 'scultori' | 'coefficienti' | 'attore' | 'minimi' | 'maxText' | 'maxForges' | 'maxPacks' | 'maxCast' | 'maxModels' | 'maxBrani' | 'placesPerMinute' | 'thinking'>>;
+export type AiSettings = Partial<Pick<AiConfig, 'textModel' | 'sculptors' | 'coefficients' | 'actor' | 'minimums' | 'maxText' | 'maxForges' | 'maxPacks' | 'maxCast' | 'maxModels' | 'maxPieces' | 'placesPerMinute' | 'thinking'>>;
 
 /** Quality and spending minimums of an universe (T45d). */
 export interface AiMinimums {
   /** Minimum text model (e.g. 'gemini-3.1-flash-lite'). */
   textModel?: string;
   /** Minimum sculptor models per class (e.g. { struttura: 'gemini-3.8-flash' }). */
-  scultori?: Partial<import('./agents/sculptor').SculptorAiModels>;
+  sculptors?: Partial<import('./agents/sculptor').SculptorAiModels>;
   /** Minimum credit spending ceiling (USD) to enter the world. */
-  tetto?: number;
+  cap?: number;
   /** Minimum coefficient values. */
-  coefficienti?: Partial<import('./coefficients').Coefficients>;
+  coefficients?: Partial<import('./coefficients').Coefficients>;
 }
 
 export interface UniverseConfig {
@@ -408,11 +408,11 @@ export interface UniverseConfig {
   chunkSize: number;
   ai: AiConfig;
   /** Chosen before the Genesis, never changed after (ADR-0053). */
-  partita: GameSetup;
+  game: GameSetup;
   /** The relief (ADR-0048): `mare` is the sea's level (T51a); without it, the one the relief gives. */
-  rilievo?: { mare?: number };
+  relief?: { sea?: number };
   /** The heritage of clones (T45c, ADR-0084): what of every use of a cloned card goes back to who held it before. */
-  eredita?: import('./heritage').HeritageConfig;
+  heritage?: import('./heritage').HeritageConfig;
   /** The kernel that wrote it (T260, ADR-0136): `X.Y.Z`; a universe of another `X.Y` does not open here. */
   kernel?: string;
   /** The range of the kernels it runs on (T302, ADR-0152): `{ from: "X.Y", to?: "X.Y" }`, written by the kernel; without it, from `kernel`. */
@@ -421,13 +421,13 @@ export interface UniverseConfig {
 
 /** How the game is played in this universe: chosen before the Genesis, then fixed (ADR-0053). */
 export interface GameSetup {
-  modalita: 'single' | 'multiplayer';
+  mode: 'single' | 'multiplayer';
   /** How punishing death is: 0 (nothing is lost) to 4 (merciless). */
-  morte: number;
+  death: number;
   /** Players may hurt each other (multiplayer). */
   pvp: boolean;
   /** «Altro…» on another player (multiplayer). */
-  altroTraGiocatori: boolean;
+  freeActionsBetweenPlayers: boolean;
   /** The master of a multiplayer game (T37): the wanderer who created it, `io` until accounts exist (T44). Never changes. */
   master?: string;
 }

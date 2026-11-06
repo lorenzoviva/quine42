@@ -54,7 +54,7 @@ describe('actions as rules on the model', () => {
     expect(k.repo.head().message).toMatch(/regola|azione imparata/);
     expect(k.repo.log().some((c) => /azione imparata: Scheggio la credenza \(credenza\)/.test(c.message))).toBe(true);
     expect((k.ecs.get(a, 'form') as FormComp).done).toEqual(['scheggio-la-credenza']);
-    expect(k.rules().find((r) => /scheggio la credenza/.test(r.testo))?.effetti).toContain('forma');
+    expect(k.rules().find((r) => /scheggio la credenza/.test(r.text))?.effects).toContain('forma');
     // No action with effects is learned besides: the rule of the model is the menu entry.
     expect(k.modules.get('obj.cupboard')!.manifest.actions?.some((x) => x.effects?.length) ?? false).toBe(false);
 

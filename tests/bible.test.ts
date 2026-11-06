@@ -20,14 +20,14 @@ function stand(k: Kernel, x: number, y: number): void {
 }
 
 const sampleBible: Bible = {
-  titolo: 'Regno di Valmora',
-  tono: 'quieto e vivo',
-  sintesi: 'Un regno di boschi e colline.',
-  storia: 'Nato attorno alla piazza dei carrettieri.',
-  luoghi: ['Piazza di Valmora', 'Bosco dei Sussurri', 'Lago del Re Muto'],
-  personaggi: ['Mastro Elio — fabbro laborioso', 'Selva — pastorella dei colli'],
-  fatti: ['Il mercato si tiene ogni settimana in piazza.', 'Mastro Elio forgia attrezzi per i contadini.'],
-  misteri: ['Le rune mandano una luce tenue nella notte.'],
+  title: 'Regno di Valmora',
+  tone: 'quieto e vivo',
+  summary: 'Un regno di boschi e colline.',
+  history: 'Nato attorno alla piazza dei carrettieri.',
+  places: ['Piazza di Valmora', 'Bosco dei Sussurri', 'Lago del Re Muto'],
+  characters: ['Mastro Elio — fabbro laborioso', 'Selva — pastorella dei colli'],
+  facts: ['Il mercato si tiene ogni settimana in piazza.', 'Mastro Elio forgia attrezzi per i contadini.'],
+  mysteries: ['Le rune mandano una luce tenue nella notte.'],
 };
 
 describe('the bible pages', () => {

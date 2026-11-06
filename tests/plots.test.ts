@@ -11,7 +11,7 @@ import type { FileMap } from '../src/kernel/types';
 const cats = (t: string) => (t === 'npc.cat' ? 'animal' : 'person') as 'animal' | 'person';
 
 function individual(nome: string, tipo: string, genere: 'male' | 'female', famiglia: Array<[string, string]>, mestiere = 'contadino'): Individual {
-  return { nome, tipo, genere, mestiere, famiglia: famiglia.map(([n, legame]) => ({ nome: n, legame })), routine: [] };
+  return { name: nome, kind: tipo, gender: genere, job: mestiere, family: famiglia.map(([n, legame]) => ({ name: n, bond: legame })), routine: [] };
 }
 
 // The people of the plots of valmora (22/10/2026): Fiocco is a cat, Bastiano his owner, Tazio a miller
@@ -19,48 +19,48 @@ function individual(nome: string, tipo: string, genere: 'male' | 'female', famig
 const society = (): People =>
   repairSociety(
     {
-      persone: [
+      people: [
         individual('Fiocco', 'npc.cat', 'male', [['Bastiano', 'animale']], 'Cacciatore di topi'),
         individual('Bastiano', 'npc.villager', 'male', [], 'fornaio'),
         individual('Tazio il Mugnaio', 'npc.villager', 'male', [], 'mugnaio'),
         individual('Ada', 'npc.villager', 'female', [['Berta', 'sorella']], 'tessitrice'),
         individual('Berta', 'npc.villager', 'female', [], 'ortolana'),
       ],
-      attesi: [],
+      expected: [],
     },
     cats,
   ).people;
 
-const plot = (p: Partial<Plot>): Plot => ({ id: 'trama-t', titolo: 'Una storia', mistero: '', coinvolti: [], tappe: [], inizio: 0, stato: 'active', ...p });
-const beat = (chi: string, cosa: string, battuta?: string) => ({ giorno: 0, momento: 'day' as const, chi, dove: 'square', cosa, ...(battuta ? { battuta } : {}) });
+const plot = (p: Partial<Plot>): Plot => ({ id: 'trama-t', title: 'Una storia', mystery: '', involved: [], beats: [], start: 0, state: 'active', ...p });
+const beat = (chi: string, cosa: string, battuta?: string) => ({ day: 0, moment: 'day' as const, who: chi, where: 'square', what: cosa, ...(battuta ? { line: battuta } : {}) });
 
 describe('plots coherent with the people', () => {
   it('a coherent plot passes untouched: real relations, animals as animals', () => {
     const p = plot({
-      mistero: 'Ada, sorella di Berta, nasconde un debito. Fiocco lo sa.',
-      tappe: [beat('Ada', 'conta le monete sotto il letto', 'Mia sorella Berta non deve saperlo.'), beat('Fiocco', 'si struscia sulle gambe di Bastiano'), beat('Berta', 'osserva sua sorella Ada')],
-      missione: { da: 'Bastiano', testo: 'Porta questa mela a Berta.', obiettivo: { tipo: 'bring', oggetto: 'mela', a: 'Berta' }, stato: 'offered' },
+      mystery: 'Ada, sorella di Berta, nasconde un debito. Fiocco lo sa.',
+      beats: [beat('Ada', 'conta le monete sotto il letto', 'Mia sorella Berta non deve saperlo.'), beat('Fiocco', 'si struscia sulle gambe di Bastiano'), beat('Berta', 'osserva sua sorella Ada')],
+      quest: { from: 'Bastiano', text: 'Porta questa mela a Berta.', goal: { type: 'bring', item: 'mela', to: 'Berta' }, state: 'offered' },
     });
     const r = reviewPlot(p, society());
     expect(r.problems).toEqual([]);
-    expect(r.plot!.coinvolti).toEqual(['Ada', 'Fiocco', 'Berta']);
-    expect(r.plot!.missione?.da).toBe('Bastiano');
+    expect(r.plot!.involved).toEqual(['Ada', 'Fiocco', 'Berta']);
+    expect(r.plot!.quest?.from).toBe('Bastiano');
   });
 
   it('repairs what it can: unknown people go, animals stay silent and ask nothing', () => {
     // «Il Ciclo delle Lettere Dimenticate», without its fourth-wall lines: a cat that talks and gives a quest.
     const p = plot({
-      tappe: [beat('Fiocco', 'scava vicino al pozzo', 'Non è terra, è una lingua.'), beat('Ottone', 'osserva il lago'), beat('Fiocco', 'scrive un biglietto'), beat('Bastiano', 'osserva il lago')],
-      missione: { da: 'Fiocco', testo: 'Porta questo sigillo a Bastiano.', obiettivo: { tipo: 'bring', oggetto: 'sigillo', a: 'Bastiano' }, stato: 'offered' },
+      beats: [beat('Fiocco', 'scava vicino al pozzo', 'Non è terra, è una lingua.'), beat('Ottone', 'osserva il lago'), beat('Fiocco', 'scrive un biglietto'), beat('Bastiano', 'osserva il lago')],
+      quest: { from: 'Fiocco', text: 'Porta questo sigillo a Bastiano.', goal: { type: 'bring', item: 'sigillo', to: 'Bastiano' }, state: 'offered' },
     });
     const r = reviewPlot(p, society());
     expect(r.problems.join('\n')).toMatch(/Fiocco è un animale e non parla/);
     expect(r.problems.join('\n')).toMatch(/Ottone non esiste/);
     expect(r.problems.join('\n')).toMatch(/Fiocco è un animale e non «scrive»/);
     expect(r.problems.join('\n')).toMatch(/non chiede nulla al viandante/);
-    expect(r.plot!.tappe.map((b) => b.chi)).toEqual(['Fiocco', 'Bastiano']);
-    expect(r.plot!.tappe[0].battuta).toBeUndefined();
-    expect(r.plot!.missione).toBeUndefined();
+    expect(r.plot!.beats.map((b) => b.who)).toEqual(['Fiocco', 'Bastiano']);
+    expect(r.plot!.beats[0].line).toBeUndefined();
+    expect(r.plot!.quest).toBeUndefined();
     // Repaired, it has nothing left to repair.
     expect(reviewPlot(r.plot!, society()).problems).toEqual([]);
   });
@@ -68,14 +68,14 @@ describe('plots coherent with the people', () => {
   it('a plot that contradicts the registry cannot be repaired', () => {
     const people = society();
     // «Il Ritmo del Lago Muto»: Tazio calls Bastiano his brother; they are nothing to each other.
-    const lake = reviewPlot(plot({ tappe: [beat('Tazio il Mugnaio', 'macina grano', 'Mio fratello Bastiano ha paura.'), beat('Bastiano', 'conta le onde')] }), people);
+    const lake = reviewPlot(plot({ beats: [beat('Tazio il Mugnaio', 'macina grano', 'Mio fratello Bastiano ha paura.'), beat('Bastiano', 'conta le onde')] }), people);
     expect(lake.plot).toBeUndefined();
     expect(lake.problems[0]).toMatch(/per il registro Bastiano non è parente di Tazio il Mugnaio/);
     // «Fiocco, fratello di Bastiano»: Bastiano is the cat's owner.
-    const cat = reviewPlot(plot({ mistero: 'Bastiano, fratello di Fiocco, tace.', tappe: [beat('Bastiano', 'tace'), beat('Ada', 'cuce')] }), people);
+    const cat = reviewPlot(plot({ mystery: 'Bastiano, fratello di Fiocco, tace.', beats: [beat('Bastiano', 'tace'), beat('Ada', 'cuce')] }), people);
     expect(cat.problems[0]).toMatch(/Bastiano è padrone di Fiocco/);
     // Sisters are sisters, not mothers.
-    expect(reviewPlot(plot({ tappe: [beat('Ada', 'cuce', 'Mia madre Berta è severa.')] }), people).problems[0]).toMatch(/Berta è sorella di Ada/);
+    expect(reviewPlot(plot({ beats: [beat('Ada', 'cuce', 'Mia madre Berta è severa.')] }), people).problems[0]).toMatch(/Berta è sorella di Ada/);
   });
 
   it('the runes do only what the canon says', () => {
@@ -85,11 +85,11 @@ describe('plots coherent with the people', () => {
     expect(canonBreak('Le rune non si spostano: restano dove sono.')).toBeUndefined();
     expect(canonBreak('Ada nasconde una runa nella cassa e la vende a un mercante.')).toBeUndefined();
     expect(canonBreak('La runa chiamata Sowilo è stata rubata.')).toBeUndefined();
-    const r = reviewPlot(plot({ mistero: 'La runa del pozzo canta di notte.', tappe: [beat('Ada', 'ascolta'), beat('Berta', 'dorme')] }), society());
+    const r = reviewPlot(plot({ mystery: 'La runa del pozzo canta di notte.', beats: [beat('Ada', 'ascolta'), beat('Berta', 'dorme')] }), society());
     expect(r.plot).toBeUndefined();
     expect(r.problems[0]).toMatch(/le rune non fanno ciò che il canone non dice/);
     // Nor other glowing signs, nor hints at the game.
-    const doubles = reviewPlot(plot({ tappe: [beat('Ada', 'scava vicino a un simbolo luminoso'), beat('Berta', 'dorme')] }), society());
+    const doubles = reviewPlot(plot({ beats: [beat('Ada', 'scava vicino a un simbolo luminoso'), beat('Berta', 'dorme')] }), society());
     expect(doubles.plot).toBeUndefined();
     expect(doubles.problems[0]).toMatch(/quarta parete o duplica le rune/);
   });
@@ -113,8 +113,10 @@ async function bootWith(models: MockAiModels, extra: FileMap = {}) {
   return Kernel.boot({ files, store: memoryStore(), ai: models });
 }
 
-const incoherent = { titolo: 'Il gatto che parla', mistero: 'Bastiano, fratello di Fiocco, mente.', coinvolti: ['Fiocco'], tappe: [beat('Fiocco', 'guarda il pozzo', 'Miao.'), beat('Ada', 'cuce')] };
-const coherent = { titolo: 'Il debito di Ada', mistero: 'Ada nasconde un debito a sua sorella.', coinvolti: ['Ada', 'Berta'], tappe: [beat('Ada', 'conta le monete', 'Mia sorella Berta non deve saperlo.'), beat('Berta', 'cerca qualcosa in casa')] };
+/** A beat as the Narrator writes it, with the Italian fields of its schema (until T310). */
+const beatIt = (chi: string, cosa: string, battuta?: string) => ({ giorno: 0, momento: 'day' as const, chi, dove: 'square', cosa, ...(battuta ? { battuta } : {}) });
+const incoherent = { titolo: 'Il gatto che parla', mistero: 'Bastiano, fratello di Fiocco, mente.', coinvolti: ['Fiocco'], tappe: [beatIt('Fiocco', 'guarda il pozzo', 'Miao.'), beatIt('Ada', 'cuce')] };
+const coherent = { titolo: 'Il debito di Ada', mistero: 'Ada nasconde un debito a sua sorella.', coinvolti: ['Ada', 'Berta'], tappe: [beatIt('Ada', 'conta le monete', 'Mia sorella Berta non deve saperlo.'), beatIt('Berta', 'cerca qualcosa in casa')] };
 
 describe('the Narrator weaves coherent plots', () => {
   it('what does not hold goes back to the Narrator with the reasons; the second answer is kept', async () => {
@@ -124,8 +126,8 @@ describe('the Narrator weaves coherent plots', () => {
     expect(asked.length).toBe(2);
     expect(asked[0].prompt).toMatch(/COERENZA/);
     expect(asked[1].prompt).toMatch(/DA CORREGGERE[\s\S]*Fiocco è un animale e non parla[\s\S]*Bastiano è padrone di Fiocco/);
-    expect(p.titolo).toBe('Il debito di Ada');
-    expect(readPlots(k.files).map((x) => x.titolo)).toEqual(['Il debito di Ada']);
+    expect(p.title).toBe('Il debito di Ada');
+    expect(readPlots(k.files).map((x) => x.title)).toEqual(['Il debito di Ada']);
     expect(k.feed().some((e) => e.kind === 'scarta' && e.task === 'plot.weave')).toBe(true);
   });
 
@@ -139,15 +141,15 @@ describe('the Narrator weaves coherent plots', () => {
 
   it('at boot the open plots are repaired or retired, once, and committed', async () => {
     const plots: Plot[] = [
-      plot({ id: 'a', titolo: 'Il gatto che parla', tappe: [beat('Fiocco', 'guarda il pozzo', 'Miao, ascoltami.'), beat('Ada', 'cuce')] }),
-      plot({ id: 'b', titolo: 'Il fratello finto', tappe: [beat('Tazio il Mugnaio', 'macina', 'Mio fratello Bastiano ha paura.'), beat('Ada', 'cuce')] }),
-      plot({ id: 'c', titolo: 'Il debito di Ada', tappe: coherent.tappe }),
-      plot({ id: 'd', titolo: 'Chiusa', stato: 'closed', tappe: [beat('Nessuno', 'niente')] }),
+      plot({ id: 'a', title: 'Il gatto che parla', beats: [beat('Fiocco', 'guarda il pozzo', 'Miao, ascoltami.'), beat('Ada', 'cuce')] }),
+      plot({ id: 'b', title: 'Il fratello finto', beats: [beat('Tazio il Mugnaio', 'macina', 'Mio fratello Bastiano ha paura.'), beat('Ada', 'cuce')] }),
+      plot({ id: 'c', title: 'Il debito di Ada', beats: coherent.tappe.map((b) => ({ day: b.giorno, moment: b.momento, who: b.chi, where: b.dove, what: b.cosa, ...(b.battuta ? { line: b.battuta } : {}) })) }),
+      plot({ id: 'd', title: 'Chiusa', state: 'closed', beats: [beat('Nessuno', 'niente')] }),
     ];
     const k = await bootWith(new MockAiModels(), { [PLOTS_FILE]: writePlots(plots) });
     const after = readPlots(k.files);
     expect(after.map((p) => p.id)).toEqual(['a', 'c', 'd']);
-    expect(after[0].tappe[0].battuta).toBeUndefined();
+    expect(after[0].beats[0].line).toBeUndefined();
     expect(k.repo.log().some((c) => c.message.startsWith('trame:'))).toBe(true);
     expect(k.reviewPlots()).toEqual([]);
   });

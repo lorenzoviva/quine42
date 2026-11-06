@@ -11,7 +11,7 @@
     "model": "contadina",
     "glyph": "&",
     "color": "#e8c07a",
-    "aspetto": "un contadino medievale con tunica ocra e cappello di paglia"
+    "look": "un contadino medievale con tunica ocra e cappello di paglia"
   },
   "physics": {
     "solid": false,

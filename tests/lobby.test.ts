@@ -24,7 +24,7 @@ async function bootMany(extraCfg: Record<string, unknown> = {}): Promise<Kernel>
     'universe.json': JSON.stringify(
       {
         ...cfg,
-        partita: { modalita: 'multiplayer', morte: 3 },
+        game: { mode: 'multiplayer', death: 3 },
         ...extraCfg,
       },
       null,
@@ -70,9 +70,9 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
     });
     expect(clean).toBeDefined();
     expect(clean!.textModel).toBe('gemini-3.8-flash');
-    expect(clean!.scultori?.structure).toBe('gemini-3.8-flash');
-    expect(clean!.tetto).toBe(1.5);
-    expect(clean!.coefficienti?.sessions).toBe(0.5);
+    expect(clean!.sculptors?.structure).toBe('gemini-3.8-flash');
+    expect(clean!.cap).toBe(1.5);
+    expect(clean!.coefficients?.sessions).toBe(0.5);
   });
 
   it('addBudgetFromCap expands the session AI limits proportionally', () => {
@@ -108,7 +108,7 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
     const initialMaxText = k.config.ai.maxText;
 
     const server = new SessionServer(k);
-    const master = await thin(server, 'io');
+    const master = await thin(server, 'me');
     // The ceiling stays within the balance (T120).
     k.giveCredits('carlo', 5);
     const player = await thin(server, 'carlo', { tetto: 1.0 });
@@ -135,13 +135,13 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
     const cfg = JSON.parse(bundledFiles['universe.json']);
     const files = {
       ...bundledFiles,
-      'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2),
+      'universe.json': JSON.stringify({ ...cfg, game: { mode: 'multiplayer', death: 3 } }, null, 2),
     };
     const k = await Kernel.boot({ files, store: memoryStore(), ai: online });
     k.giveCredits('carlo', 10.0); // Has plenty of credits
 
     const server = new SessionServer(k);
-    const master = await thin(server, 'io');
+    const master = await thin(server, 'me');
     // Carlo enters with tetto of 0.05 USD
     const carlo = await thin(server, 'carlo', { tetto: 0.05 });
     run(server, [master, carlo], 6);
@@ -157,7 +157,7 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
       cached: 0,
       output: 0,
       thoughts: 0,
-      chi: 'carlo',
+      who: 'carlo',
     });
 
     expect(k.sessionSpentOf('carlo')).toBeCloseTo(0.02525, 5);
@@ -172,7 +172,7 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
       cached: 0,
       output: 0,
       thoughts: 0,
-      chi: 'carlo',
+      who: 'carlo',
     });
 
     expect(k.sessionSpentOf('carlo')).toBeGreaterThan(0.05);
@@ -202,16 +202,16 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
   it('cards collection outside of the match with usages (T45d)', () => {
     const files = {
       ...bundledFiles,
-      'world/carte.json': JSON.stringify({
+      'world/cards.json': JSON.stringify({
         utilizzi: {
           'kind:custom_forge': { luoghi: 5, trame: 2, prompt: 10 },
           'item:spada_runica': { luoghi: 3, trame: 1, prompt: 4 },
         },
         luoghi: {
           '0_0': {
-            autore: 'cartographer',
-            pagante: 'carlo',
-            titolare: 'carlo',
+            author: 'cartographer',
+            payer: 'carlo',
+            holder: 'carlo',
           },
         },
       }),
@@ -219,10 +219,10 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
         id: 'custom_forge',
         name: 'Forgia Antica',
         kind: 'sistema',
-        carta: {
-          autore: 'engineer',
-          pagante: 'carlo',
-          titolare: 'carlo',
+        card: {
+          author: 'engineer',
+          payer: 'carlo',
+          holder: 'carlo',
         },
       }),
       'modules/core.items/manifest.json': JSON.stringify({
@@ -240,10 +240,10 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
             tags: ['arma'],
             glyph: '⚔',
             color: '#c0c0c0',
-            carta: {
-              autore: 'narrator',
-              pagante: 'carlo',
-              titolare: 'carlo',
+            card: {
+              author: 'narrator',
+              payer: 'carlo',
+              holder: 'carlo',
             },
           },
         ],
@@ -257,21 +257,21 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
     expect(forgeCard).toBeDefined();
     expect(forgeCard?.tipo).toBe('module');
     expect(forgeCard?.nome).toBe('Forgia Antica');
-    expect(forgeCard?.autore).toBe('engineer');
-    expect(forgeCard?.pagante).toBe('carlo');
-    expect(forgeCard?.titolare).toBe('carlo');
-    expect(forgeCard?.utilizzi).toEqual({ luoghi: 5, trame: 2, prompt: 10 });
+    expect(forgeCard?.author).toBe('engineer');
+    expect(forgeCard?.payer).toBe('carlo');
+    expect(forgeCard?.holder).toBe('carlo');
+    expect(forgeCard?.uses).toEqual({ chunks: 5, plots: 2, prompt: 10 });
 
     const swordCard = cards.find((c) => c.id === 'item:spada_runica');
     expect(swordCard).toBeDefined();
     expect(swordCard?.tipo).toBe('item');
     expect(swordCard?.nome).toBe('Spada Runica');
-    expect(swordCard?.utilizzi).toEqual({ luoghi: 3, trame: 1, prompt: 4 });
+    expect(swordCard?.uses).toEqual({ chunks: 3, plots: 1, prompt: 4 });
 
     const chunkCard = cards.find((c) => c.id === 'chunk:0_0');
     expect(chunkCard).toBeDefined();
     expect(chunkCard?.tipo).toBe('chunk');
-    expect(chunkCard?.titolare).toBe('carlo');
+    expect(chunkCard?.holder).toBe('carlo');
 
     // Wanderer with no cards gets an empty list
     expect(collectionOf(files, 'unknown_wanderer')).toEqual([]);
@@ -387,7 +387,7 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
         'universe.json': JSON.stringify({
           name: 'mondo-multi',
           kernel: KERNEL_VERSION,
-          partita: { modalita: 'multiplayer', master: 'io' },
+          game: { mode: 'multiplayer', master: 'me' },
           ai: {
             textModel: 'gemini-3.1-flash-lite',
             maxText: 800,
@@ -434,7 +434,7 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
       expect(lobby.isOpen).toBe(false);
       // A universe of this kernel says nothing of its kernels; one out of its range shows the label, and is entered all the same (T302).
       expect(root.textContent).not.toContain('gira su altri kernel');
-      const old = new LobbyScreen({ name: 'vecchio', files: { ...files, 'universe.json': JSON.stringify({ ...JSON.parse(files['universe.json']), kernel: '0.0.2', kernels: { from: '0.0' } }) }, wandererId: 'io', credits: 5.0, alone: true });
+      const old = new LobbyScreen({ name: 'vecchio', files: { ...files, 'universe.json': JSON.stringify({ ...JSON.parse(files['universe.json']), kernel: '0.0.2', kernels: { from: '0.0' } }) }, wandererId: 'me', credits: 5.0, alone: true });
       const oldOpen = old.open();
       const oldRoot = (old as any).root as FakeElement;
       expect(oldRoot.textContent).toContain('kernel 0.0–0.0: questo universo gira su altri kernel');

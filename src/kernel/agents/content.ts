@@ -78,7 +78,7 @@ export function toItemDef(r: RawItem, taken: Set<string>): ItemDef | null {
     tags: [...new Set((r.tag ?? []).map((t) => String(t).toLowerCase().trim()).filter(Boolean).slice(0, 8))],
     glyph: CATEGORY_GLYPHS[category] ?? '•',
     color: `hsl(${hashStr(id) % 360} 60% 66%)`,
-    aspetto: String(r.aspetto ?? r.nome).slice(0, 200),
+    look: String(r.aspetto ?? r.nome).slice(0, 200),
     ...((ITEM_SHAPES as readonly string[]).includes(internalName('impronte', r.forma ?? '')) ? { model: itemShapeModel(internalName('impronte', r.forma!)) } : {}),
     equippable: !!r.impugnabile,
     ...(hasEffects ? { effects } : {}),
@@ -299,7 +299,7 @@ function relationRules(specie: Species): string {
  */
 export async function individuate(c: Council, archetype: { name: string; description: string; persona: string; specie?: Species }, ctx: { place: string; common: string[]; society?: string; avoid?: string[]; focus?: string[] }): Promise<Identity> {
   const specie = archetype.specie ?? 'person';
-  const r = await c.ask<{ nome: string; persona: string; aspetto: string; porta: string[]; mestiere?: string; genere?: string; eta?: string; storia?: string; famiglia?: Relation[]; routine?: Array<{ quando: string; fa: string; dove: string; azione?: string }> }>(
+  const r = await c.ask<{ nome: string; persona: string; aspetto: string; porta: string[]; mestiere?: string; genere?: string; eta?: string; storia?: string; famiglia?: Array<{ nome: string; legame: string }>; routine?: Array<{ quando: string; fa: string; dove: string; azione?: string }> }>(
     'narrator',
     'npc.individuate',
     [
@@ -327,7 +327,7 @@ export async function individuate(c: Council, archetype: { name: string; descrip
     .map((s) => {
       const dove = ((WHERES as string[]).includes(s.dove) ? s.dove : 'about') as Where;
       const fa = String(s.fa).slice(0, 60);
-      return { quando: s.quando as DayPhase, fa, dove, azione: (ACTIVITIES as readonly string[]).includes(s.azione ?? '') ? (s.azione as Activity) : inferActivity(fa, dove) };
+      return { when: s.quando as DayPhase, does: fa, where: dove, activity: (ACTIVITIES as readonly string[]).includes(s.azione ?? '') ? (s.azione as Activity) : inferActivity(fa, dove) };
     });
   const genere = typeof r.genere === 'string' ? internalName('specie', r.genere) : undefined;
   return {
@@ -339,7 +339,8 @@ export async function individuate(c: Council, archetype: { name: string; descrip
     gender: genere === 'male' || genere === 'female' ? genere : undefined,
     age: r.eta ? String(r.eta).slice(0, 20) : undefined,
     story: r.storia ? String(r.storia).slice(0, 300) : undefined,
-    family: (r.famiglia ?? []).filter((f) => f?.nome && f?.legame).slice(0, 4).map((f) => ({ nome: String(f.nome).slice(0, 40), legame: String(f.legame).toLowerCase().slice(0, 20) })),
-    routine: DAY_PHASES.map((q) => routine.find((s) => s.quando === q) ?? defaultRoutine(job).find((s) => s.quando === q)!),
+    // The Narrator writes with the Italian fields of its schema (until T310): the individual has those of 0.4 (T308a).
+    family: (r.famiglia ?? []).filter((f) => f?.nome && f?.legame).slice(0, 4).map((f) => ({ name: String(f.nome).slice(0, 40), bond: String(f.legame).toLowerCase().slice(0, 20) })),
+    routine: DAY_PHASES.map((q) => routine.find((s) => s.when === q) ?? defaultRoutine(job).find((s) => s.when === q)!),
   };
 }

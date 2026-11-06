@@ -88,9 +88,9 @@ export function parseUniverseSnapshot(name: string, files: FileMap, active?: Act
   const { config } = readConfig(files);
   const ai = config.ai;
   const kernels = rangeLabel(config);
-  const master = config.partita?.master ?? 'io';
-  const coef = repairCoefficients(ai.coefficienti);
-  const sculpt: SculptorAiModels = { ...DEFAULT_SCULPTORS, ...internalSculptors(ai.scultori ?? {}) };
+  const master = config.game?.master ?? 'me';
+  const coef = repairCoefficients(ai.coefficients);
+  const sculpt: SculptorAiModels = { ...DEFAULT_SCULPTORS, ...internalSculptors(ai.sculptors ?? {}) };
   const estimate = hourlyEstimate(ai);
 
   const presetLabel = isLowDetail(coef)
@@ -104,16 +104,16 @@ export function parseUniverseSnapshot(name: string, files: FileMap, active?: Act
       ? `${ai.textModel} (Low Detail)`
       : `${ai.textModel} + ${sculpt.figure}`;
 
-  const minCap = toNumber(ai.minimi?.tetto ?? 1.0);
+  const minCap = toNumber(ai.minimums?.cap ?? 1.0);
 
   let description = 'Universo multigiocatore vivo generato con algoritmi MarkovJunior e intelligenza artificiale.';
   try {
     if (files['world/bible.json']) {
       const bible = JSON.parse(files['world/bible.json']);
-      if (typeof bible.concetto === 'string' && bible.concetto.trim()) {
-        description = bible.concetto.trim();
-      } else if (typeof bible.tema === 'string' && bible.tema.trim()) {
-        description = bible.tema.trim();
+      if (typeof bible.concept === 'string' && bible.concept.trim()) {
+        description = bible.concept.trim();
+      } else if (typeof bible.theme === 'string' && bible.theme.trim()) {
+        description = bible.theme.trim();
       }
     }
   } catch {
@@ -124,7 +124,7 @@ export function parseUniverseSnapshot(name: string, files: FileMap, active?: Act
     name,
     seed: toNumber(config.seed),
     master,
-    isMine: master === 'io' || master === 'Master',
+    isMine: master === 'me' || master === 'Master',
     live: !!active?.active,
     clients: toNumber(active?.clients),
     textModel: ai.textModel,
@@ -182,12 +182,12 @@ export function buildNewUniverseFiles(options: {
     pvp = false;
   }
 
-  cfg.partita = {
-    modalita: 'multiplayer',
-    morte,
+  cfg.game = {
+    mode: 'multiplayer',
+    death: morte,
     pvp,
-    altroTraGiocatori: true,
-    master: options.master ?? 'io',
+    freeActionsBetweenPlayers: true,
+    master: options.master ?? 'me',
   };
 
   // AI profile configuration
@@ -195,35 +195,35 @@ export function buildNewUniverseFiles(options: {
     cfg.ai = {
       ...cfg.ai,
       textModel: 'gemini-3.1-flash-lite',
-      scultori: { ...LOW_DETAIL.scultori },
-      coefficienti: { ...LOW_DETAIL.coefficienti },
-      minimi: { tetto: 0.5, textModel: 'gemini-3.1-flash-lite' },
+      sculptors: { ...LOW_DETAIL.sculptors },
+      coefficients: { ...LOW_DETAIL.coefficients },
+      minimums: { cap: 0.5, textModel: 'gemini-3.1-flash-lite' },
     };
   } else if (options.aiProfile === 'high') {
     cfg.ai = {
       ...cfg.ai,
       textModel: 'gemini-3.8-flash',
-      scultori: {
+      sculptors: {
         simple: 'gemini-3.8-flash',
         figure: 'gemini-3.8-flash',
         important: 'gemini-4-argon',
         artist: 'gemini-3.8-flash',
       },
-      coefficienti: { ...FULL_DETAIL },
-      minimi: { tetto: 2.0, textModel: 'gemini-3.8-flash' },
+      coefficients: { ...FULL_DETAIL },
+      minimums: { cap: 2.0, textModel: 'gemini-3.8-flash' },
     };
   } else {
     // standard
     cfg.ai = {
       ...cfg.ai,
       textModel: 'gemini-3.1-flash-lite',
-      scultori: {
+      sculptors: {
         simple: 'gemini-3.1-flash-lite',
         figure: 'gemini-3.8-flash',
         important: 'gemini-4-argon',
         artist: 'gemini-3.1-flash-lite',
       },
-      coefficienti: {
+      coefficients: {
         sessions: 0.8,
         dialogues: 0.8,
         plots: 0.8,
@@ -234,7 +234,7 @@ export function buildNewUniverseFiles(options: {
         packs: 0.8,
         entities: 0.8,
       },
-      minimi: { tetto: 1.0, textModel: 'gemini-3.1-flash-lite' },
+      minimums: { cap: 1.0, textModel: 'gemini-3.1-flash-lite' },
     };
   }
 

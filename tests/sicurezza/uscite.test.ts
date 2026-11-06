@@ -22,11 +22,11 @@ const CONFIG = JSON.stringify({
   theme: `prompts/${SECRET}.md`,
   circleRadius: 42,
   chunkSize: 18,
-  rilievo: { mare: 2 },
-  eredita: { base: 0.1, copia: 0.4 },
+  relief: { sea: 2 },
+  heritage: { base: 0.1, copy: 0.4 },
   campoNuovo: SECRET,
-  partita: { modalita: 'multiplayer', morte: 3, pvp: false, altroTraGiocatori: true, master: 'io', campoNuovo: SECRET },
-  ai: { textModel: 'gemini-3.1-flash-lite', maxText: 800, provider: 'claude', agenti: { narratore: 'claude' }, thinking: 'low', timeout: 120, placesPerMinute: 20, chiave: SECRET, coefficienti: { dialoghi: 0.5 } },
+  game: { mode: 'multiplayer', death: 3, pvp: false, freeActionsBetweenPlayers: true, master: 'me', campoNuovo: SECRET },
+  ai: { textModel: 'gemini-3.1-flash-lite', maxText: 800, provider: 'claude', agents: { narrator: 'claude' }, thinking: 'low', timeout: 120, placesPerMinute: 20, chiave: SECRET, coefficients: { dialogues: 0.5 } },
 });
 const MANIFEST = JSON.stringify({
   id: 'npc.sonda',
@@ -34,7 +34,7 @@ const MANIFEST = JSON.stringify({
   kind: 'entity',
   description: 'Una che passa.',
   logic: 'logic.lua',
-  appearance: { glyph: 's', color: '#ffffff', model: 'pino', aspetto: SECRET },
+  appearance: { glyph: 's', color: '#ffffff', model: 'pino', look: SECRET },
   persona: SECRET,
   lore: SECRET,
   context: SECRET,
@@ -48,12 +48,12 @@ const MANIFEST = JSON.stringify({
   components: { segreto: { v: SECRET } },
   container: { size: 4, loot: SECRET },
   actions: [{ id: 'bussa', label: 'Bussa', effects: [{ type: 'message', text: SECRET }] }],
-  items: [{ id: 'cosa', name: 'Cosa', description: 'Una cosa.', category: 'varie', weight: 1, stack: 1, tags: [], glyph: 'c', color: '#000000', aspetto: SECRET, actions: [{ id: 'gira', label: 'Gira', effects: [{ type: 'message', text: SECRET }] }] }],
+  items: [{ id: 'cosa', name: 'Cosa', description: 'Una cosa.', category: 'varie', weight: 1, stack: 1, tags: [], glyph: 'c', color: '#000000', look: SECRET, actions: [{ id: 'gira', label: 'Gira', effects: [{ type: 'message', text: SECRET }] }] }],
   tiles: { g: { name: 'Prato', color: '#00ff00', solid: false, segreto: SECRET, actions: [{ id: 'scava', label: 'Scava', effects: [{ type: 'message', text: SECRET }] }] } },
   spells: { 'luce fuoco': { name: 'Lampo', description: 'Un lampo.', cost: 2, effects: [{ type: 'message', text: SECRET }] } },
   loot: { comune: { segreto: SECRET } },
-  layouts: { bosco: { name: 'Bosco', description: 'Alberi.', program: SECRET, carta: { autore: 'a', pagante: 'b', titolare: 'c' } } },
-  casi: [{ titolo: SECRET }],
+  layouts: { bosco: { name: 'Bosco', description: 'Alberi.', program: SECRET, card: { author: 'a', payer: 'b', holder: 'c' } } },
+  cases: [{ title: SECRET }],
   campoNuovo: SECRET,
 });
 const FILES = { 'universe.json': CONFIG, 'modules/npc.sonda/manifest.json': MANIFEST, 'modules/npc.sonda/logic.lua': `-- ${SECRET}\nreturn {}\n` };
@@ -62,7 +62,7 @@ describe('ciò che esce verso il giocatore', () => {
   it('V-012 di universe.json e dei manifest esce solo ciò che è sull\'elenco, anche un campo mai visto', () => {
     expect(JSON.stringify(playerFiles(FILES))).not.toContain(SECRET);
     const config = JSON.parse(playerFiles(FILES)['universe.json']);
-    expect(config).toEqual({ name: 'sonda', seed: 7, circleRadius: 42, chunkSize: 18, rilievo: { mare: 2 }, partita: { modalita: 'multiplayer', morte: 3, pvp: false, altroTraGiocatori: true, master: 'io' } });
+    expect(config).toEqual({ name: 'sonda', seed: 7, circleRadius: 42, chunkSize: 18, relief: { sea: 2 }, game: { mode: 'multiplayer', death: 3, pvp: false, freeActionsBetweenPlayers: true, master: 'me' } });
   });
 
   it('V-012 restano ciò che il client disegna e il menu, gli effetti solo come tipo', () => {
@@ -88,7 +88,7 @@ describe('ciò che esce verso il giocatore', () => {
 
   it('V-012 il seme, nello specchio di un giocatore: nessuna storia, nessun guasto', async () => {
     const cfg = JSON.parse(bundledFiles['universe.json']);
-    const files = playerFiles({ ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3 } }) });
+    const files = playerFiles({ ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, game: { mode: 'multiplayer', death: 3 } }) });
     const mirror = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels(), mirror: true });
     expect(mirror.faults.size).toBe(0);
     expect(Object.keys(mirror.palette).length).toBeGreaterThan(0);
@@ -97,7 +97,7 @@ describe('ciò che esce verso il giocatore', () => {
   });
 
   it('V-012 il registro delle mancanze (T238) non esce: né al giocatore, né in pubblico, né come file cambiato', () => {
-    const files = { ...FILES, [SHORTFALLS_FILE]: JSON.stringify({ voci: [{ richiesta: SECRET, esito: 'rifiuto' }] }) };
+    const files = { ...FILES, [SHORTFALLS_FILE]: JSON.stringify({ entries: [{ request: SECRET, outcome: 'refusal' }] }) };
     expect(JSON.stringify(playerFiles(files))).not.toContain(SECRET);
     expect(JSON.stringify(publicFiles(files))).not.toContain(SECRET);
     expect(playerChanges(files, [SHORTFALLS_FILE])).toEqual({});
@@ -108,10 +108,10 @@ describe('ciò che esce verso il giocatore', () => {
     const files = publicFiles(FILES);
     expect(JSON.stringify(files)).not.toContain(SECRET);
     const { ai } = JSON.parse(files['universe.json']);
-    expect(Object.keys(ai).sort()).toEqual(['coefficienti', 'maxText', 'placesPerMinute', 'textModel', 'thinking']);
+    expect(Object.keys(ai).sort()).toEqual(['coefficients', 'maxText', 'placesPerMinute', 'textModel', 'thinking']);
     expect(hourlyEstimate(readConfig(files).config.ai).dollari).toBeGreaterThan(0);
     // The lobby's collection counts an environment's card; its program stays home.
-    expect(JSON.parse(files['modules/npc.sonda/manifest.json']).layouts.bosco).toEqual({ name: 'Bosco', description: 'Alberi.', carta: { autore: 'a', pagante: 'b', titolare: 'c' } });
+    expect(JSON.parse(files['modules/npc.sonda/manifest.json']).layouts.bosco).toEqual({ name: 'Bosco', description: 'Alberi.', card: { author: 'a', payer: 'b', holder: 'c' } });
   });
 });
 
@@ -123,7 +123,7 @@ describe('universes/ sul server di sviluppo', () => {
     dir = path.join(root, 'universes');
     mkdirSync(path.join(dir, 'sonda', 'world'), { recursive: true });
     mkdirSync(path.join(root, 'src', 'kernel'), { recursive: true });
-    writeFileSync(path.join(dir, 'sonda', 'world', 'stato.json'), '{}');
+    writeFileSync(path.join(dir, 'sonda', 'world', 'state.json'), '{}');
     writeFileSync(path.join(root, 'src', 'kernel', 'universes.ts'), '');
   });
   afterAll(() => rmSync(root, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 }));
@@ -131,17 +131,17 @@ describe('universes/ sul server di sviluppo', () => {
   it('V-012 non si arriva a universes/ per nessuna via', () => {
     const abs = dir.replace(/\\/g, '/').replace(/^\//, '');
     for (const url of [
-      '/universes/sonda/world/stato.json',
-      '/universes/sonda/world/stato.json?raw',
-      '/UNIVERSES/sonda/world/stato.json',
-      '/%75niverses/sonda/world/stato.json',
-      '/src/..%2funiverses/sonda/world/stato.json',
-      '/universes./sonda/world/stato.json',
-      '/universes::$INDEX_ALLOCATION/sonda/world/stato.json',
-      '//universes/.saldi/sonda.json',
+      '/universes/sonda/world/state.json',
+      '/universes/sonda/world/state.json?raw',
+      '/UNIVERSES/sonda/world/state.json',
+      '/%75niverses/sonda/world/state.json',
+      '/src/..%2funiverses/sonda/world/state.json',
+      '/universes./sonda/world/state.json',
+      '/universes::$INDEX_ALLOCATION/sonda/world/state.json',
+      '//universes/.balances/sonda.json',
       '\\universes\\sonda\\world\\stato.json',
-      `/@fs/${abs}/sonda/world/stato.json`,
-      `/@fs/${abs}/sonda/world/stato.json?import&raw`,
+      `/@fs/${abs}/sonda/world/state.json`,
+      `/@fs/${abs}/sonda/world/state.json?import&raw`,
       '/%E0%A4%A', // not even a URL
     ])
       expect(leadsToUniverses(url, root, dir), url).toBe(true);
@@ -211,7 +211,7 @@ describe('ciò che il Concilio scrive', () => {
 
   it('V-013 su comando le impostazioni cambiano: setAi, l\'editor; e il commit dopo del Concilio non le annulla', async () => {
     const k = await boot();
-    k.setAi({ textModel: 'gemini-3.1-flash-lite', coefficienti: { dialogues: 0.5 } as never });
+    k.setAi({ textModel: 'gemini-3.1-flash-lite', coefficients: { dialogues: 0.5 } as never });
     expect(k.repo.commit('il Concilio dopo setAi', 'agent').files['universe.json']).toContain('"dialogues": 0.5');
     const raw = JSON.parse(k.repo.working['universe.json']);
     expect(k.saveFile('universe.json', JSON.stringify({ ...raw, ai: { ...raw.ai, maxText: 123 } }, null, 2)).committed).toBe(true);
@@ -223,7 +223,7 @@ describe('ciò che il Concilio scrive', () => {
 
   it('V-013 sul ramo del master il Concilio ha lo stesso recinto', async () => {
     const k = await boot();
-    const branch = await k.branchKernel({ ...k.files }, 'io');
+    const branch = await k.branchKernel({ ...k.files }, 'me');
     const raw = JSON.parse(branch.repo.working['universe.json']);
     const before = raw.ai.maxText;
     branch.repo.write('universe.json', JSON.stringify({ ...raw, ai: { ...raw.ai, maxText: before + 1 } }));

@@ -6,23 +6,23 @@
   "description": "Fa girovagare ogni entità con il componente wander.",
   "logic": "logic.lua",
   "order": 30,
-  "casi": [
+  "cases": [
     {
-      "titolo": "Verso la meta",
-      "racconto": "Un’abitante ha una meta (la casa, il lavoro, la piazza: la sceglie la sua giornata): ci cammina, e arrivata gironzola lì vicino.",
-      "terreno": [
+      "title": "Verso la meta",
+      "story": "Un’abitante ha una meta (la casa, il lavoro, la piazza: la sceglie la sua giornata): ci cammina, e arrivata gironzola lì vicino.",
+      "terrain": [
         "ggggg",
         "ggggg",
         "ggggg",
         "ggggg",
         "ggggg"
       ],
-      "cose": [
+      "entities": [
         {
-          "modulo": "npc.villager",
+          "module": "npc.villager",
           "x": -2,
           "y": -2,
-          "componenti": {
+          "components": {
             "meta": {
               "x": 2.5,
               "y": 2.5
@@ -30,12 +30,12 @@
           }
         }
       ],
-      "durata": 6,
-      "guarda": [
+      "duration": 6,
+      "watch": [
         "0:pos.x",
         "0:pos.y"
       ],
-      "righe": [
+      "lines": [
         9,
         11,
         12,
@@ -47,29 +47,29 @@
       ]
     },
     {
-      "titolo": "A zonzo",
-      "racconto": "Un gatto senza meta, in un recinto: ogni tanto sceglie una direzione nuova, ogni tanto si ferma a guardare; contro la staccionata ne sceglie un’altra.",
-      "terreno": [
+      "title": "A zonzo",
+      "story": "Un gatto senza meta, in un recinto: ogni tanto sceglie una direzione nuova, ogni tanto si ferma a guardare; contro la staccionata ne sceglie un’altra.",
+      "terrain": [
         "ccccc",
         "cgggc",
         "cgggc",
         "cgggc",
         "ccccc"
       ],
-      "cose": [
+      "entities": [
         {
-          "modulo": "npc.cat",
+          "module": "npc.cat",
           "x": 1,
           "y": -1
         }
       ],
-      "durata": 8,
-      "guarda": [
+      "duration": 8,
+      "watch": [
         "0:pos.x",
         "0:pos.y",
         "0:wander.dx"
       ],
-      "righe": [
+      "lines": [
         43,
         44,
         45,

@@ -185,7 +185,7 @@ export class SessionClient {
         const done = this.waiting.get(m.seq);
         this.waiting.delete(m.seq);
         const { t: _t, seq: _seq, ...outcome } = m;
-        if (m.profilo) Object.assign(this, { profilo: m.profilo, nome: m.profilo.nome });
+        if (m.profilo) Object.assign(this, { profilo: m.profilo, nome: m.profilo.name });
         if (m.forma) this.forma = m.forma;
         done?.(outcome);
         break;

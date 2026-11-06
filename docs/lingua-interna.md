@@ -1,6 +1,6 @@
 # La lingua interna: l'inglese, e le rune in latino (T306, step 42)
 
-> Stato: **decisa** dall'autore (D34, 05/11 sera), ADR-0153; **T307a fatto** (contratto `0.2.0`, ADR-0155: la simulazione e le rune latine, la migrazione `0.1 → 0.2`); **T307b fatto** (contratto `0.3.0`, ADR-0158: la società e il Concilio, la migrazione `0.2 → 0.3`). Questo documento è il piano: la tabella completa di ciò che cambia nome,
+> Stato: **decisa** dall'autore (D34, 05/11 sera), ADR-0153; **T307a fatto** (contratto `0.2.0`, ADR-0155: la simulazione e le rune latine, la migrazione `0.1 → 0.2`); **T307b fatto** (contratto `0.3.0`, ADR-0158: la società e il Concilio, la migrazione `0.2 → 0.3`); **T308a fatto** (contratto `0.4.0`, ADR-0159: i campi e i percorsi dei file dell’universo, la migrazione `0.3 → 0.4`). Questo documento è il piano: la tabella completa di ciò che cambia nome,
 > dominio per dominio, e i task che la applicano. La stessa tabella, come dato, è `src/kernel/internalNames.ts` (`INTERNAL_NAMES`);
 > `tests/internal-names.test.ts` controlla che non abbia doppioni né collisioni e che copra i valori del codice; le tabelle qui sotto
 > le riscrive `npx vite-node lab/scripts/lingua-interna.ts` (con `-- --misura` conta anche i file che ogni passo tocca).
@@ -114,6 +114,15 @@ T307 come era scritto (tutti i valori insieme) toccava ≈ 400 file, T308 ≈ 38
 3. **T308a** — i campi e i percorsi dei file dell'universo, contratto `0.4.0`: `paths.ts` (`allowedPath`, `councilMayWrite`), `files.ts`
    (`playerFiles`, `publicFiles`, `UNIVERSE_FIELDS`), le letture di sito e server; la suite di sicurezza (`paths.ts`, `files.ts`); le cartelle
    del server fuori dagli universi (`.saldi` → `.balances`…) con la lettura del nome vecchio finché c'è; `quine:fila:` letta anche col nome vecchio.
+   **Fatto** (ADR-0159): `MIGRATIONS[2]` con i campi **per forma di file** (`FIELD_SHAPES`, `internalFields`: quali chiavi italiane di
+   quale oggetto, così `posto` è `slot`, `workplace` o `spot` e i componenti restano a T308b), i timbri `carta` → `card` ovunque
+   (`internalCardsIn`), `io` → `me` (`internalSoloIn`, anche il file `world/players/me.json`), i percorsi (`internalPath`), `suolo` → `soil`
+   negli XML; lo stato di prima di T245a portato (`importanti` → `rares.huge`, `viandante` → il file di `me`). Ogni lettura accetta anche i
+   campi di prima, e il server porta in memoria ciò che legge dal disco (`portedFiles`, `pathsBefore`); le cartelle del server in
+   `server/folders.ts`, spostate la prima volta che servono; la fila del browser in `quine:owed:`, quella di prima presa e portata. Voci
+   aggiunte alla tabella: `regole`, `trame`, `nome`, `voci`, `volte`, `primo`, `ultimo` (i contenitori dei file e le mancanze), `entita` (il
+   posto di lavoro e la cosa da usare); l'`azione` di un compito di mestiere è `action` (l'id di un'azione), non `activity`. Restano: gli
+   schemi del Concilio con i campi italiani (T310), i campi del grafo, dei componenti e dei messaggi (T308b), il contenuto dei saldi.
 4. **T308b** — il filo e Lua, contratto `0.5.0`: protocollo (client e server insieme, nessun dato da migrare), componenti, API Lua
    (`Host`, `prelude.lua`, `LUA_API`, prompt dell'Ingegnere, `AGENTS.md`), eventi del bus. Browser: singola e due schede in multigiocatore.
 5. **T309** — i commenti di Lua e XML, invariato: non cambia contratto (sale `Z`); il controllo di identità (token Lua uguali, albero XML
@@ -186,17 +195,17 @@ posto di un pannello sul filo).
 | [Id dei programmi sonori del seme](#suoni-seme) | valori | 46 | disco | T307b (0.3) |
 | [L’id del viandante della partita singola](#viandante-solo) | valori | 1 | disco, filo | T308a (0.4) |
 | [Campi di `universe.json`](#campi-universe) | campi | 17 | disco, filo | T308a (0.4) |
-| [Campi dei manifest (aspetto, terreni, pannelli, casi, mestieri)](#campi-manifest) | campi | 47 | disco, Lua, prompt | T308a (0.4) |
-| [Campi dei programmi di mestiere che cambiano senso](#campi-mestieri) | campi | 2 | disco, Lua | T308a (0.4) |
-| [Campi di `world/rules.json`](#campi-regole) | campi | 6 | disco, filo | T308a (0.4) |
+| [Campi dei manifest (aspetto, terreni, pannelli, casi, mestieri)](#campi-manifest) | campi | 48 | disco, Lua, prompt | T308a (0.4) |
+| [Campi dei programmi di mestiere che cambiano senso](#campi-mestieri) | campi | 1 | disco, Lua | T308a (0.4) |
+| [Campi di `world/rules.json`](#campi-regole) | campi | 7 | disco, filo | T308a (0.4) |
 | [Campi di `world/people.json`](#campi-persone) | campi | 29 | disco, filo, prompt | T308a (0.4) |
-| [Campi di `world/plots.json`](#campi-trame) | campi | 24 | disco, filo, prompt | T308a (0.4) |
+| [Campi di `world/plots.json`](#campi-trame) | campi | 25 | disco, filo, prompt | T308a (0.4) |
 | [Campi di `world/bible.json`](#campi-bibbia) | campi | 10 | disco, filo, prompt | T308a (0.4) |
 | [Campi di `world/atlas.json`](#campi-atlante) | campi | 6 | disco, filo, prompt | T308a (0.4) |
 | [Campi di `world/stato.json`](#campi-stato) | campi | 8 | disco | T308a (0.4) |
 | [Campi di `world/giocatori/<id>.json`](#campi-viandante) | campi | 9 | disco, filo | T308a (0.4) |
 | [Campi di `world/imprese.json`](#campi-imprese) | campi | 37 | disco, Lua, filo | T308a (0.4) |
-| [Campi delle carte, dei consumi e delle mancanze](#campi-carte) | campi | 22 | disco, filo | T308a (0.4) |
+| [Campi delle carte, dei consumi e delle mancanze](#campi-carte) | campi | 27 | disco, filo | T308a (0.4) |
 | [Campi dei piani dei luoghi (`maps/*.json`)](#campi-piani) | campi | 15 | disco, filo | T308a (0.4) |
 | [Campi di `models/index.json` e attributi dei programmi](#campi-modelli) | campi | 17 | disco, prompt | T308a (0.4) |
 | [Percorsi dell’universo e del server](#percorsi) | percorsi | 17 | disco, filo | T308a (0.4) |
@@ -206,7 +215,7 @@ posto di un pannello sul filo).
 | [Componenti visibili a Lua](#componenti) | valori | 16 | disco, filo, Lua, prompt | T308b (0.5) |
 | [Campi dei componenti](#campi-componenti) | campi | 16 | filo, Lua, prompt | T308b (0.5) |
 | [Nomi dell’API Lua, eventi del bus, chiavi del magazzino](#api-lua) | valori | 6 | Lua, prompt | T308b (0.5) |
-| **totale** | | **905** | | T307a: 192 · T307b: 301 · T308a: 267 · T308b: 145 |
+| **totale** | | **912** | | T307a: 192 · T307b: 301 · T308a: 274 · T308b: 145 |
 
 <a id="classi"></a>
 ### Classi dei modelli (`classi`)
@@ -1127,17 +1136,18 @@ posto di un pannello sul filo).
 | `dice` | `says` |
 | `percorso` | `route` |
 | `persona` | `persona` |
+| `entita` | `entity` |
 
 <a id="campi-mestieri"></a>
 ### Campi dei programmi di mestiere che cambiano senso (`campi-mestieri`)
 
-- **Dove si legge**: `src/kernel/jobs.ts (JobProgram.posto, JobTask.azione)`
+- **Dove si legge**: `src/kernel/jobs.ts (JobProgram.posto)`
 - **Tocca**: disco, Lua · **lingua**: inglese · **task**: T308a, contratto 0.4
+- **Nota**: l’`azione` di un compito è l’id di un’azione della cosa, `action` come nei casi (`campi-manifest`); la `posa` è l’attività
 
 | italiano | interno |
 |---|---|
 | `posto` | `workplace` |
-| `azione` | `activity` |
 
 <a id="campi-regole"></a>
 ### Campi di `world/rules.json` (`campi-regole`)
@@ -1147,6 +1157,7 @@ posto di un pannello sul filo).
 
 | italiano | interno |
 |---|---|
+| `regole` | `rules` |
 | `chiave` | `key` |
 | `testo` | `text` |
 | `possibile` | `possible` |
@@ -1224,6 +1235,7 @@ posto di un pannello sul filo).
 | `oggetto` | `item` |
 | `a` | `to` |
 | `luogo` | `place` |
+| `trame` | `plots` |
 
 <a id="campi-bibbia"></a>
 ### Campi di `world/bible.json` (`campi-bibbia`)
@@ -1348,7 +1360,7 @@ posto di un pannello sul filo).
 
 - **Dove si legge**: `src/kernel/cards.ts (CardStamp, CardsFile, Received)`, `src/kernel/heritage.ts (CardOrigin)`, `src/kernel/ai/usage.ts (UsageFile, CallRecord)`, `src/kernel/shortfalls.ts (ShortfallNote)`
 - **Tocca**: disco, filo · **lingua**: inglese · **task**: T308a, contratto 0.4
-- **Nota**: `carta` sta in quasi ogni file del Concilio (piani, regole, trame, imprese): la migrazione lo cambia ovunque
+- **Nota**: `carta` sta in quasi ogni file del Concilio (piani, regole, trame, imprese): la migrazione lo cambia ovunque. `nome` è delle carte dei luoghi, `voci`, `volte`, `primo` e `ultimo` di `world/shortfalls.json`
 
 | italiano | interno |
 |---|---|
@@ -1374,6 +1386,11 @@ posto di un pannello sul filo).
 | `compito` | `task` |
 | `esito` | `outcome` |
 | `motivo` | `reason` |
+| `nome` | `name` |
+| `voci` | `entries` |
+| `volte` | `times` |
+| `primo` | `first` |
+| `ultimo` | `last` |
 
 <a id="campi-piani"></a>
 ### Campi dei piani dei luoghi (`maps/*.json`) (`campi-piani`)

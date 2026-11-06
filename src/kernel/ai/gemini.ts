@@ -97,7 +97,7 @@ export class GeminiAiModels implements AiModels {
         cached: u?.cachedContentTokenCount ?? 0,
         output: u?.candidatesTokenCount ?? 0,
         thoughts: u?.thoughtsTokenCount ?? 0,
-        ...(call.chi ? { chi: call.chi } : {}),
+        ...(call.chi ? { who: call.chi } : {}),
         ...extra,
       };
       this.usage.inputTokens += r.prompt;

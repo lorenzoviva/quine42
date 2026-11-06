@@ -323,13 +323,13 @@ describe('V-026 sul disco', () => {
   let base: string;
   const author = accountWanderer('uid-autore');
 
-  const universe = (name: string, partita?: { modalita: string; master: string }, players: string[] = []) => {
+  const universe = (name: string, partita?: { mode: string; master: string }, players: string[] = []) => {
     const root = path.join(dir, name);
-    mkdirSync(path.join(root, 'world', 'giocatori'), { recursive: true });
+    mkdirSync(path.join(root, 'world', 'players'), { recursive: true });
     mkdirSync(path.join(root, 'models'), { recursive: true });
     for (const f of ['models/index.json', 'models/viandante.xml']) writeFileSync(path.join(root, f), bundledFiles[f]);
     writeFileSync(path.join(root, 'universe.json'), JSON.stringify({ name, ...(partita ? { partita } : {}) }));
-    for (const p of players) writeFileSync(path.join(root, 'world', 'giocatori', `${p}.json`), JSON.stringify({ nome: 'Noto' }));
+    for (const p of players) writeFileSync(path.join(root, 'world', 'players', `${p}.json`), JSON.stringify({ nome: 'Noto' }));
     const git = (...a: string[]) => execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...a], { cwd: root, stdio: 'ignore', windowsHide: true });
     git('init', '-q');
     git('add', '-A');
@@ -343,7 +343,7 @@ describe('V-026 sul disco', () => {
       ...(body ? { body: JSON.stringify(body) } : {}),
     }).then(async (r) => ({ status: r.status, body: (await r.json().catch(() => ({}))) as Record<string, unknown> }));
 
-  const many = { 'universe.json': JSON.stringify({ partita: { modalita: 'multiplayer' } }) };
+  const many = { 'universe.json': JSON.stringify({ game: { mode: 'multiplayer' } }) };
 
   beforeAll(async () => {
     dir = mkdtempSync(path.join(os.tmpdir(), 'quine-risorse-'));
@@ -406,7 +406,7 @@ describe('V-026 sul disco', () => {
     }
     expect(codes.at(-1)).toBe(429);
     expect(codes.filter((c) => c === 200)).toHaveLength(UNIVERSES_MADE.burst);
-    expect(readdirSync(path.join(dir, '.cestino')).filter((f) => f.startsWith('giro-')).length).toBeLessThanOrEqual(UNIVERSES_MADE.burst);
+    expect(readdirSync(path.join(dir, '.trash')).filter((f) => f.startsWith('giro-')).length).toBeLessThanOrEqual(UNIVERSES_MADE.burst);
   }, 60000);
 
   it('V-026 la quota si legge dal .env', () => {
@@ -419,17 +419,17 @@ describe('V-026 sul disco', () => {
   const commits = (name: string) => execFileSync('git', ['rev-list', '--count', 'HEAD'], { cwd: path.join(dir, name), encoding: 'utf8', windowsHide: true }).trim();
 
   it('V-026 un anonimo non scrive un profilo in un universo che non lo conosce', async () => {
-    universe('reame', { modalita: 'multiplayer', master: 'io' });
+    universe('reame', { mode: 'multiplayer', master: 'me' });
     const before = commits('reame');
     const r = await call('/api/viandante', 'anon-sconosciuto', { universo: 'reame', profilo: { nome: 'Ospite' } });
     expect(r.status).toBe(403);
     expect(commits('reame')).toBe(before);
-    expect(existsSync(path.join(dir, 'reame', 'world', 'giocatori', `${accountWanderer('sconosciuto')}.json`))).toBe(false);
+    expect(existsSync(path.join(dir, 'reame', 'world', 'players', `${accountWanderer('sconosciuto')}.json`))).toBe(false);
   });
 
   it('V-026 un anonimo che l’universo conosce sì; un account anche se nuovo, col suo ritmo', async () => {
     const known = accountWanderer('conosciuto');
-    universe('reame2', { modalita: 'multiplayer', master: 'io' }, [known]);
+    universe('reame2', { mode: 'multiplayer', master: 'me' }, [known]);
     expect((await call('/api/viandante', 'anon-conosciuto', { universo: 'reame2', profilo: { nome: 'Ospite' } })).status).toBe(200);
     const statuses: number[] = [];
     for (let i = 0; i < PROFILE_SAVES.burst + 2; i++) statuses.push((await call('/api/viandante', 'vero-uid-profili', { universo: 'reame2', profilo: { nome: `Nome${'abcdefghij'[i]}` } })).status);
@@ -539,7 +539,7 @@ describe('V-026 il server di produzione', () => {
     // A universe that exists keeps the sockets open while they say nothing.
     const root = path.join(work, 'universes', 'aperto');
     mkdirSync(root, { recursive: true });
-    writeFileSync(path.join(root, 'universe.json'), JSON.stringify({ partita: { modalita: 'multiplayer', master: 'io' } }));
+    writeFileSync(path.join(root, 'universe.json'), JSON.stringify({ game: { mode: 'multiplayer', master: 'me' } }));
     execFileSync('git', ['init', '-q'], { cwd: root, stdio: 'ignore', windowsHide: true });
     const held = () => socketOf(`ws://127.0.0.1:${port}/api/session?universo=aperto`, { Host: 'gioco.example' }, SITE);
     const [a, b] = [held(), held()];

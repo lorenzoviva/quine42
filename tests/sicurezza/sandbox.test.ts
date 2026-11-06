@@ -19,7 +19,7 @@ async function runUpdate(body: string) {
 
 describe('la sandbox (ciò che T117 ha provato)', () => {
   it('V-019 i globali pericolosi non si vedono dall\'ambiente di un modulo', async () => {
-    const names = ['os', 'io', 'debug', 'load', 'require', 'package', 'getmetatable', 'setmetatable', 'rawset', 'coroutine', '_G', '__host'];
+    const names = ['os', 'me', 'debug', 'load', 'require', 'package', 'getmetatable', 'setmetatable', 'rawset', 'coroutine', '_G', '__host'];
     const { fault, result } = await runUpdate(
       `local seen = {} for _, n in ipairs({ ${names.map((n) => `'${n}'`).join(', ')} }) do if _ENV[n] ~= nil then seen[#seen + 1] = n end end return table.concat(seen, ' ')`,
     );

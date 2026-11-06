@@ -21,10 +21,10 @@
       }
     }
   ],
-  "mestieri": [
+  "jobs": [
     {
       "id": "fisher",
-      "nomi": [
+      "names": [
         "pescatore",
         "pescatrice",
         "barcaiolo",
@@ -32,59 +32,59 @@
         "traghettatore",
         "traghettatrice"
       ],
-      "posto": {
-        "casella": "w"
+      "workplace": {
+        "tile": "w"
       },
-      "giornata": {
+      "day": {
         "morning": [
           {
-            "fa": "go",
-            "dove": "work"
+            "does": "go",
+            "where": "work"
           },
           {
-            "fa": "gather",
-            "casella": "w",
-            "oggetto": "item.pesce",
-            "lascia": "w",
-            "quante": 2,
-            "durata": 20,
-            "posa": "fish",
-            "dice": "L'acqua è ferma: buon segno."
+            "does": "gather",
+            "tile": "w",
+            "item": "item.pesce",
+            "drop": "w",
+            "count": 2,
+            "duration": 20,
+            "pose": "fish",
+            "says": "L'acqua è ferma: buon segno."
           }
         ],
         "day": [
           {
-            "fa": "gather",
-            "casella": "w",
-            "oggetto": "item.pesce",
-            "lascia": "w",
-            "quante": 3,
-            "durata": 20,
-            "posa": "fish"
+            "does": "gather",
+            "tile": "w",
+            "item": "item.pesce",
+            "drop": "w",
+            "count": 3,
+            "duration": 20,
+            "pose": "fish"
           }
         ],
         "evening": [
           {
-            "fa": "go",
-            "dove": "square"
+            "does": "go",
+            "where": "square"
           },
           {
-            "fa": "carry",
-            "oggetto": "item.pesce",
-            "dove": "square",
-            "dice": "Chi vuole pesce fresco?"
+            "does": "carry",
+            "item": "item.pesce",
+            "where": "square",
+            "says": "Chi vuole pesce fresco?"
           },
           {
-            "fa": "chat"
+            "does": "chat"
           }
         ],
         "night": [
           {
-            "fa": "go",
-            "dove": "home"
+            "does": "go",
+            "where": "home"
           },
           {
-            "fa": "rest"
+            "does": "rest"
           }
         ]
       }

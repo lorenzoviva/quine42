@@ -1,5 +1,5 @@
 <!-- Torre di guardia del passo, con la segreta -->
-<sequence values="BNExzaPpQbOHtsgcdvefwXiIJhjMSFCWRVDLUuTYGKAknryqlmoZ" symmetry="(xy)" suolo="E" ground="Z" origin="bottom">
+<sequence values="BNExzaPpQbOHtsgcdvefwXiIJhjMSFCWRVDLUuTYGKAknryqlmoZ" symmetry="(xy)" soil="E" ground="Z" origin="bottom">
   <union symbol="9" values="NExzaPpQbOHtsgcdvefwXiIJhjMSFCWRVDLUuTYGKAknryqlmoZ"/>
   <union symbol="8" values="XJMjw"/>
   <union symbol="7" values="CUWSuXJMjwDV"/>

@@ -273,7 +273,7 @@ export class InventoryPanel {
     };
 
     const tabs = el('div', { class: 'tabs' });
-    for (const [id, label] of [['oggetti', 'Oggetti'], ['crea', `Crea (${k.recipes().available.size})`], ...k.uiPanels().map((p) => [`ui:${p.panel.id}`, p.panel.titolo])] as Array<[string, string]>) {
+    for (const [id, label] of [['oggetti', 'Oggetti'], ['crea', `Crea (${k.recipes().available.size})`], ...k.uiPanels().map((p) => [`ui:${p.panel.id}`, p.panel.title])] as Array<[string, string]>) {
       const b = el('button', { class: this.tab === id && !box ? 'on' : '' }, label);
       b.onclick = () => {
         this.tab = id;
@@ -317,10 +317,10 @@ export class InventoryPanel {
     const slots = k.slots()[panelId] ?? {};
     const inv = k.inventory();
     const body = el('div', { class: 'panel-ui' });
-    for (const e of p.panel.elementi) {
-      if (e.tipo === 'slot') {
+    for (const e of p.panel.elements) {
+      if (e.type === 'slot') {
         const cur = slots[e.id!];
-        const cell = el('div', { class: `uislot${cur ? ' full' : ''}`, title: e.accetta?.length ? `ci va: ${e.accetta.join(', ')}` : '' });
+        const cell = el('div', { class: `uislot${cur ? ' full' : ''}`, title: e.accepts?.length ? `ci va: ${e.accepts.join(', ')}` : '' });
         cell.append(cur ? itemIcon(k, cur.item, 38) : el('span', { class: 'hint' }, '+'));
         cell.onclick = () => {
           if (cur) k.unequip(panelId, e.id!);
@@ -336,16 +336,16 @@ export class InventoryPanel {
           if (raw) k.equip(panelId, e.id!, Number(raw));
           this.render();
         };
-        body.append(el('div', { class: 'uirow' }, el('span', { class: 'l' }, e.etichetta ?? e.id ?? ''), cell, el('span', { class: 'v' }, cur ? k.itemInfo(cur.item).name : '—')));
-      } else if (e.tipo === 'bar') {
-        const v = Number(k.uiValue(e.campo)) || 0;
+        body.append(el('div', { class: 'uirow' }, el('span', { class: 'l' }, e.label ?? e.id ?? ''), cell, el('span', { class: 'v' }, cur ? k.itemInfo(cur.item).name : '—')));
+      } else if (e.type === 'bar') {
+        const v = Number(k.uiValue(e.field)) || 0;
         const max = e.max ?? 100;
-        body.append(el('div', { class: 'uirow' }, el('span', { class: 'l' }, e.etichetta ?? ''), el('span', { class: 'bar' }, el('span', { class: 'fill', style: `width:${Math.max(0, Math.min(100, (v / max) * 100))}%` })), el('span', { class: 'v' }, `${Math.round(v)}/${max}`)));
-      } else if (e.tipo === 'text') {
-        const v = k.uiValue(e.campo);
-        body.append(el('div', { class: 'uirow' }, el('span', { class: 'l' }, e.etichetta ?? ''), el('span', { class: 'v' }, v === undefined ? '' : String(typeof v === 'number' ? Math.round(v * 100) / 100 : v))));
-      } else if (e.tipo === 'button') {
-        const b = el('button', { class: 'primary' }, e.etichetta ?? e.id ?? '');
+        body.append(el('div', { class: 'uirow' }, el('span', { class: 'l' }, e.label ?? ''), el('span', { class: 'bar' }, el('span', { class: 'fill', style: `width:${Math.max(0, Math.min(100, (v / max) * 100))}%` })), el('span', { class: 'v' }, `${Math.round(v)}/${max}`)));
+      } else if (e.type === 'text') {
+        const v = k.uiValue(e.field);
+        body.append(el('div', { class: 'uirow' }, el('span', { class: 'l' }, e.label ?? ''), el('span', { class: 'v' }, v === undefined ? '' : String(typeof v === 'number' ? Math.round(v * 100) / 100 : v))));
+      } else if (e.type === 'button') {
+        const b = el('button', { class: 'primary' }, e.label ?? e.id ?? '');
         b.onclick = () => {
           k.uiAction(panelId, e.id!);
           this.render();
@@ -353,7 +353,7 @@ export class InventoryPanel {
         body.append(b);
       }
     }
-    side.append(el('div', { class: 'name' }, p.panel.titolo), p.panel.descrizione ? el('div', { class: 'descr' }, p.panel.descrizione) : '', body);
+    side.append(el('div', { class: 'name' }, p.panel.title), p.panel.description ? el('div', { class: 'descr' }, p.panel.description) : '', body);
   }
 
   /** A line where the player writes something for the Council to judge; the answer stays below it. */

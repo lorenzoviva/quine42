@@ -130,7 +130,7 @@ const SCENES = {
 
 async function run(query, look) {
   const universes = path.resolve('universes');
-  for (const name of fs.readdirSync(universes)) fs.rmSync(path.join(universes, name, 'world/giocatori/io.json'), { force: true });
+  for (const name of fs.readdirSync(universes)) fs.rmSync(path.join(universes, name, 'world/players/me.json'), { force: true });
   const target = await json(`http://127.0.0.1:${debugPort}/json/new?about:blank`, 'PUT');
   const ws = new WebSocket(target.webSocketDebuggerUrl, { perMessageDeflate: false });
   await new Promise((r, x) => (ws.once('open', r), ws.once('error', x)));

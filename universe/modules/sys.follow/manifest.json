@@ -6,23 +6,23 @@
   "description": "Chi ha deciso di seguire il viandante lo segue, restando a un passo di distanza.",
   "logic": "logic.lua",
   "order": 31,
-  "casi": [
+  "cases": [
     {
-      "titolo": "Ti segue",
-      "racconto": "Un’abitante a cui il viandante ha chiesto di seguirlo gli va incontro e si ferma a un passo.",
-      "terreno": [
+      "title": "Ti segue",
+      "story": "Un’abitante a cui il viandante ha chiesto di seguirlo gli va incontro e si ferma a un passo.",
+      "terrain": [
         "ggggg",
         "ggggg",
         "ggggg",
         "ggggg",
         "ggggg"
       ],
-      "cose": [
+      "entities": [
         {
-          "modulo": "npc.villager",
+          "module": "npc.villager",
           "x": 2,
           "y": 2,
-          "componenti": {
+          "components": {
             "mind": {
               "mode": "segui",
               "mood": "tranquillo",
@@ -31,12 +31,12 @@
           }
         }
       ],
-      "durata": 3,
-      "guarda": [
+      "duration": 3,
+      "watch": [
         "0:pos.x",
         "0:pos.y"
       ],
-      "righe": [
+      "lines": [
         7,
         8,
         9,
@@ -48,21 +48,21 @@
       ]
     },
     {
-      "titolo": "Ti va dietro",
-      "racconto": "Il viandante si allontana: chi lo segue gli va dietro, un po’ più svelto di come vaga.",
-      "terreno": [
+      "title": "Ti va dietro",
+      "story": "Il viandante si allontana: chi lo segue gli va dietro, un po’ più svelto di come vaga.",
+      "terrain": [
         "ggggg",
         "ggggg",
         "ggggg",
         "ggggg",
         "ggggg"
       ],
-      "cose": [
+      "entities": [
         {
-          "modulo": "npc.villager",
+          "module": "npc.villager",
           "x": 1,
           "y": 0,
-          "componenti": {
+          "components": {
             "mind": {
               "mode": "segui",
               "mood": "tranquillo",
@@ -71,19 +71,19 @@
           }
         }
       ],
-      "passi": [
+      "steps": [
         {
-          "tipo": "walk",
-          "verso": "left",
-          "secondi": 0.35
+          "type": "walk",
+          "toward": "left",
+          "seconds": 0.35
         }
       ],
-      "durata": 2,
-      "guarda": [
+      "duration": 2,
+      "watch": [
         "0:pos.x",
         "0:pos.y"
       ],
-      "righe": [
+      "lines": [
         5,
         8,
         9,

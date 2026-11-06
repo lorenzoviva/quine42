@@ -20,7 +20,7 @@ import { compileMjx, type MjxModel } from '../mj/model';
 import { FORM_LIMITS, MAX_FORM_TIME, MAX_FORM_XML, runMjx } from '../mj/run';
 import { analyzeSound } from '../mj/soundanalysis';
 import { reservedName } from './paths';
-import { internalEffect, internalManifest, internalName, italianName } from './internalNames';
+import { internalCardsIn, internalEffect, internalFields, internalManifest, internalName, italianName, SOLO_BEFORE_0_4 } from './internalNames';
 
 const KINDS: ModuleKind[] = ['system', 'entity', 'item', 'player', 'generator', 'data'];
 const LAYERS = ['ground', 'floor', 'wall', 'door', 'liquid', 'vegetation', 'rock'];
@@ -31,26 +31,29 @@ const ID_RE = /^[a-z][a-z0-9-]*(\.[a-z0-9-]+)+$/;
  * booleans; what is missing is the game of today.
  */
 export function repairGameSetup(raw: unknown): GameSetup {
-  const r = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
+  // The fields of the contract 0.3 (`modalita`, `morte`) read internal (T308a).
+  const r = internalFields('game', (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>);
   const flag = (v: unknown, d: boolean) => (typeof v === 'boolean' ? v : v === 'sì' || v === 'si' || v === 'true' ? true : v === 'no' || v === 'false' ? false : d);
-  let morte = DEFAULT_GAME_SETUP.morte;
-  if (typeof r.morte === 'number' && Number.isFinite(r.morte)) morte = Math.max(0, Math.min(DEATH_LEVELS.length - 1, Math.round(r.morte)));
-  else if (typeof r.morte === 'string') {
-    const t = r.morte.trim().toLowerCase();
+  let morte = DEFAULT_GAME_SETUP.death;
+  if (typeof r.death === 'number' && Number.isFinite(r.death)) morte = Math.max(0, Math.min(DEATH_LEVELS.length - 1, Math.round(r.death)));
+  else if (typeof r.death === 'string') {
+    const t = r.death.trim().toLowerCase();
     const named = DEATH_LEVELS.findIndex((l) => l.nome === t);
     if (named >= 0) morte = named;
     else if (/^\d$/.test(t)) morte = Math.min(DEATH_LEVELS.length - 1, Number(t));
     else if (/\bmolto\b/.test(t)) morte = 4;
     else if (/\bpoco\b/.test(t)) morte = 1;
   }
-  const modalita = isMultiplayer(r.modalita) ? 'multiplayer' : 'single';
+  const modalita = isMultiplayer(r.mode) ? 'multiplayer' : 'single';
+  // The master of before the contract 0.4 who played alone (`io`) is `me`.
+  const master = r.master === SOLO_BEFORE_0_4 ? SOLO : r.master;
   return {
-    modalita,
-    morte,
+    mode: modalita,
+    death: morte,
     pvp: flag(r.pvp, DEFAULT_GAME_SETUP.pvp),
-    altroTraGiocatori: flag(r.altroTraGiocatori, DEFAULT_GAME_SETUP.altroTraGiocatori),
+    freeActionsBetweenPlayers: flag(r.freeActionsBetweenPlayers, DEFAULT_GAME_SETUP.freeActionsBetweenPlayers),
     // Alone, the one who plays is the master of everything; in a multiplayer game, who created it (T37).
-    ...(modalita === 'multiplayer' ? { master: validWandererId(r.master) ? r.master : SOLO } : {}),
+    ...(modalita === 'multiplayer' ? { master: validWandererId(master) ? master : SOLO } : {}),
   };
 }
 
@@ -139,8 +142,9 @@ export class Validator {
   parseManifest(path: string, src: string): { manifest?: Manifest; errors: string[] } {
     let m: any;
     try {
-      // The values of the contract 0.2 the Council still writes in Italian (T307a): internal before anything reads them.
-      m = internalManifest(JSON.parse(src));
+      // The values of the contract 0.2 the Council still writes in Italian (T307a), then the fields of 0.3 (`aspetto`, `casi`, T308a):
+      // internal before anything reads them. The values first: their repair reads the fields of before.
+      m = internalCardsIn(internalFields('manifest', internalManifest(JSON.parse(src))));
     } catch (e) {
       return { errors: [`${path}: JSON non valido (${(e as Error).message})`] };
     }
@@ -155,8 +159,8 @@ export class Validator {
       if (typeof m.appearance.glyph !== 'string' || [...m.appearance.glyph].length !== 1) err('appearance.glyph deve essere un singolo carattere');
       if (typeof m.appearance.color !== 'string') err('appearance.color mancante');
       if (m.appearance.model !== undefined && (typeof m.appearance.model !== 'string' || !MODEL_RE.test(m.appearance.model))) err(`appearance.model deve essere l'id di un modello di models/ (es. "pino"): "${m.appearance.model}"`);
-      if (m.appearance.classe !== undefined && !classOf(m.appearance.classe)) err(`appearance.classe sconosciuta "${m.appearance.classe}" (note: ${CLASSES.map((c) => c.id).join(', ')})`);
-      if (m.appearance.taglia !== undefined && !sizeOf(m.appearance.taglia)) err(`appearance.taglia sconosciuta "${m.appearance.taglia}" (taglie: ${SIZE_TIERS.map((t) => t.id).join(', ')})`);
+      if (m.appearance.class !== undefined && !classOf(m.appearance.class)) err(`appearance.class sconosciuta "${m.appearance.class}" (note: ${CLASSES.map((c) => c.id).join(', ')})`);
+      if (m.appearance.size !== undefined && !sizeOf(m.appearance.size)) err(`appearance.size sconosciuta "${m.appearance.size}" (taglie: ${SIZE_TIERS.map((t) => t.id).join(', ')})`);
     }
     if (['entity', 'item', 'player'].includes(m.kind) && !m.appearance) err(`un modulo ${m.kind} richiede appearance`);
     if (m.physics) {
@@ -193,7 +197,7 @@ export class Validator {
     if (m.actions && (!Array.isArray(m.actions) || m.actions.some((a: any) => typeof a?.id !== 'string' || typeof a?.label !== 'string'))) err('actions: lista di {id, label}');
     if (m.items) errors.push(...this.validateItems(m.items).map((e) => `${path}: ${e}`));
     if (m.fragments && !Array.isArray(m.fragments)) err('fragments deve essere una lista');
-    if (m.casi && (!Array.isArray(m.casi) || m.casi.some((c: any) => typeof c?.titolo !== 'string' || !Array.isArray(c?.guarda)))) err('casi: lista di {titolo, guarda, …}');
+    if (m.cases && (!Array.isArray(m.cases) || m.cases.some((c: any) => typeof c?.title !== 'string' || !Array.isArray(c?.watch)))) err('cases: lista di {title, watch, …}');
     return errors.length ? { errors } : { manifest: m as Manifest, errors };
   }
 
@@ -340,20 +344,20 @@ export class Validator {
       if (!ok) dropped.push(`nuovo «${f.concept}»: non valido`);
       return ok;
     });
-    const strutture = (plan.strutture ?? []).filter((s) => {
-      const ok = s.concetto.length >= 3 && s.concetto.length <= 120;
-      if (!ok) dropped.push(`struttura «${s.concetto}»: non valida`);
+    const strutture = (plan.structures ?? []).filter((s) => {
+      const ok = s.concept.length >= 3 && s.concept.length <= 120;
+      if (!ok) dropped.push(`struttura «${s.concept}»: non valida`);
       return ok;
     }).map((s) => {
       // A size that is not one of D&D's (ADR-0092) is dropped: the structure keeps its lot's.
-      if (s.taglia === undefined || sizeOf(s.taglia)) return s;
-      const size = sizeOf(internalName('taglie', s.taglia));
-      if (size) return { ...s, taglia: size.id };
-      dropped.push(`struttura «${s.concetto}»: taglia «${s.taglia}» sconosciuta`);
-      const { taglia: _, ...rest } = s;
+      if (s.size === undefined || sizeOf(s.size)) return s;
+      const size = sizeOf(internalName('taglie', s.size));
+      if (size) return { ...s, size: size.id };
+      dropped.push(`struttura «${s.concept}»: taglia «${s.size}» sconosciuta`);
+      const { size: _, ...rest } = s;
       return rest;
     });
-    return { errors, dropped, plan: { ...plan, objects, runes, fresh, strutture, ground: plan.ground.filter((g) => g.trim().length >= 2 && g.length <= 60) } };
+    return { errors, dropped, plan: { ...plan, objects, runes, fresh, structures: strutture, ground: plan.ground.filter((g) => g.trim().length >= 2 && g.length <= 60) } };
   }
 }
 

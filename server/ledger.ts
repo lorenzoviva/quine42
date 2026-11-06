@@ -1,4 +1,5 @@
-// The archive of balances and payments (T125, ADR-0104): `universes/.saldi/<nome>.json`, outside every universe's repository, so
+// The archive of balances and payments (T125, ADR-0104): `universes/.balances/<nome>.json` (`.saldi/` until the contract 0.4, moved by
+// `serverPath`, T308a), outside every universe's repository, so
 // no checkout, rollback, published branch, clone or generated code can reach it. Written whole and atomically (a temporary
 // file, fsync, rename) under a lock file that holds across processes and threads: checking an event and crediting it are one step.
 // Node only: the kernel knows `Ledger`, the server gives it this one.
@@ -8,11 +9,13 @@ import path from 'node:path';
 import { threadId } from 'node:worker_threads';
 import { DEFAULT_GRANT_CAP, DEFAULT_PLATFORM_FEE, emptyBook, Ledger, PAYMENTS_FILE, type LedgerBook, type PaymentRecord } from '../src/kernel/credits';
 import { UNIVERSE_NAME_RE } from '../src/kernel/paths';
-import { PLAYERS_DIR, validWandererId } from '../src/kernel/wanderers';
+import { SOLO_BEFORE_0_4 } from '../src/kernel/internalNames';
+import { PLAYERS_DIR, PLAYERS_DIR_BEFORE_0_4, SOLO, validWandererId } from '../src/kernel/wanderers';
+import { serverName, serverPath } from './folders';
 import { runGit } from './git';
 
 /** The archive's folder under the universes': a dot, so no universe can be called that and no list shows it. */
-export const LEDGER_DIR = '.saldi';
+export const LEDGER_DIR = serverName('balances');
 /** How long to wait for the lock, and when a lock is taken for one a dead process left behind. */
 const LOCK_WAIT_MS = 5000;
 const LOCK_STALE_MS = 15000;
@@ -45,7 +48,14 @@ export function platformFeeOf(env: Record<string, string | undefined>): number {
 function readBook(text: string): LedgerBook {
   const data = JSON.parse(text);
   if (!data || typeof data !== 'object' || !data.saldi || !data.eventi) throw new Error('archivio dei saldi illeggibile');
-  return { saldi: data.saldi, eventi: data.eventi, ricariche: Array.isArray(data.ricariche) ? data.ricariche : [] };
+  // The wanderer of a game alone was `io` until the contract 0.4 (T308a): their balance and their payments are `me`'s.
+  const saldi: Record<string, number> = { ...data.saldi };
+  if (Object.hasOwn(saldi, SOLO_BEFORE_0_4) && !Object.hasOwn(saldi, SOLO)) {
+    saldi[SOLO] = saldi[SOLO_BEFORE_0_4];
+    delete saldi[SOLO_BEFORE_0_4];
+  }
+  const eventi = Object.fromEntries(Object.entries(data.eventi as Record<string, PaymentRecord>).map(([k, p]) => [k, p && p.wandererId === SOLO_BEFORE_0_4 ? { ...p, wandererId: SOLO } : p]));
+  return { saldi, eventi, ricariche: Array.isArray(data.ricariche) ? data.ricariche : [] };
 }
 
 export class FileLedger extends Ledger {
@@ -171,21 +181,24 @@ const parse = (text: string): unknown => {
   }
 };
 
-/** The player files in a universe's folder, by file name. */
+/** The player files in a universe's folder, by file name: also where they were until the contract 0.4 (a universe not ported yet, T308a). */
 function playerFilesIn(root: string): Array<{ rel: string; id: string; data: Record<string, unknown> | undefined }> {
-  const dir = path.join(root, PLAYERS_DIR);
-  let names: string[];
-  try {
-    names = readdirSync(dir);
-  } catch {
-    return [];
-  }
-  return names
-    .filter((f) => f.endsWith('.json'))
-    .map((f) => {
-      const data = parse(readFileSync(path.join(dir, f), 'utf8'));
-      return { rel: `${PLAYERS_DIR}${f}`, id: f.slice(0, -5), data: data && typeof data === 'object' ? (data as Record<string, unknown>) : undefined };
-    });
+  return [PLAYERS_DIR, PLAYERS_DIR_BEFORE_0_4].flatMap((rel) => {
+    const dir = path.join(root, rel);
+    let names: string[];
+    try {
+      names = readdirSync(dir);
+    } catch {
+      return [];
+    }
+    return names
+      .filter((f) => f.endsWith('.json'))
+      .map((f) => {
+        const data = parse(readFileSync(path.join(dir, f), 'utf8'));
+        const id = f.slice(0, -5);
+        return { rel: `${rel}${f}`, id: rel === PLAYERS_DIR_BEFORE_0_4 && id === SOLO_BEFORE_0_4 ? SOLO : id, data: data && typeof data === 'object' ? (data as Record<string, unknown>) : undefined };
+      });
+  });
 }
 
 /** What a universe of before this archive says of balances and payments, once, the first time it is seen. */
@@ -209,7 +222,7 @@ const swept = new Map<string, Promise<void>>();
 
 function instanceOf(universesDir: string, name: string): FileLedger {
   if (!UNIVERSE_NAME_RE.test(name)) throw new Error(`nome di universo non valido: ${name}`);
-  const file = path.join(universesDir, LEDGER_DIR, `${name}.json`);
+  const file = path.join(serverPath(universesDir, 'balances'), `${name}.json`);
   let ledger = instances.get(file);
   if (!ledger) instances.set(file, (ledger = new FileLedger(file)));
   return ledger;

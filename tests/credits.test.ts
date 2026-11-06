@@ -19,7 +19,7 @@ async function bootMany(platformFee?: number, more: Record<string, unknown> = {}
   const cfg = JSON.parse(bundledFiles['universe.json']);
   const files = {
     ...bundledFiles,
-    'universe.json': JSON.stringify({ ...cfg, ...more, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2),
+    'universe.json': JSON.stringify({ ...cfg, ...more, game: { mode: 'multiplayer', death: 3 } }, null, 2),
   };
   return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels(), platformFee });
 }
@@ -84,24 +84,24 @@ describe('credits and common costs (T45a)', () => {
     for (const fee of [0, 0.01]) for (const base of [0.01, 1, 10, 100, 1000]) expect(costWithFee(base * 2, fee)).toBeCloseTo(costWithFee(base, fee) * 2, 5);
   });
 
-  const COMMON_CALL = { model: 'gemini-3.1-flash-lite', agent: 'narrator', task: 'council.session', prompt: 1_000_000, cached: 0, output: 0, thoughts: 0, chi: COMUNE };
+  const COMMON_CALL = { model: 'gemini-3.1-flash-lite', agent: 'narrator', task: 'council.session', prompt: 1_000_000, cached: 0, output: 0, thoughts: 0, who: COMUNE };
 
   it('with fee 0 a balance goes down by the base cost exactly: a personal call and a common one (ADR-0132)', async () => {
     const k = await bootMany(0);
     const server = new SessionServer(k);
-    const a = await thin(server, 'io');
+    const a = await thin(server, 'me');
     const b = await thin(server, 'anna');
     run(server, [a, b], 6);
-    k.giveCredits('io', 10);
+    k.giveCredits('me', 10);
     k.giveCredits('anna', 10);
     // $0.25 of cost, split in two.
     k.ai.onCall!(COMMON_CALL);
-    expect(k.creditsOf('io')).toBe(9.875);
+    expect(k.creditsOf('me')).toBe(9.875);
     expect(k.creditsOf('anna')).toBe(9.875);
     // $0.025, all Anna's.
-    k.ai.onCall!({ ...COMMON_CALL, task: 'npc.reply', prompt: 100_000, chi: 'anna' });
+    k.ai.onCall!({ ...COMMON_CALL, task: 'npc.reply', prompt: 100_000, who: 'anna' });
     expect(k.creditsOf('anna')).toBe(9.85);
-    expect(k.creditsOf('io')).toBe(9.875);
+    expect(k.creditsOf('me')).toBe(9.875);
   });
 
   it('without a word from the server the fee stays 1%, and only the server can say otherwise (ADR-0132)', async () => {
@@ -110,7 +110,7 @@ describe('credits and common costs (T45a)', () => {
     expect(k.platformFee).toBe(0.01);
     k.addWanderer('anna', 'Anna');
     k.giveCredits('anna', 10);
-    k.ai.onCall!({ ...COMMON_CALL, prompt: 100_000, chi: 'anna' });
+    k.ai.onCall!({ ...COMMON_CALL, prompt: 100_000, who: 'anna' });
     expect(k.creditsOf('anna')).toBe(9.97475);
     // A kernel that is not a mirror takes it from nobody.
     k.showPlatformFee(0);
@@ -120,13 +120,13 @@ describe('credits and common costs (T45a)', () => {
   it('the master\'s mirror shows the fee the server decided, and a player\'s is not told (ADR-0132)', async () => {
     const k = await bootMany(0.02);
     const server = new SessionServer(k);
-    const master = await thin(server, 'io');
+    const master = await thin(server, 'me');
     const anna = await thin(server, 'anna');
     expect(master.k.platformFee).toBe(0.02);
     expect(anna.session.commissione).toBeUndefined();
   });
 
-  it('the balance is in the ledger, not in world/giocatori/<id>.json (ADR-0104)', async () => {
+  it('the balance is in the ledger, not in world/players/<id>.json (ADR-0104)', async () => {
     const k = await bootMany();
     k.addWanderer('anna', 'Anna');
     expect(k.creditsOf('anna')).toBe(0);
@@ -134,7 +134,7 @@ describe('credits and common costs (T45a)', () => {
     k.giveCredits('anna', 15.5);
     expect(k.creditsOf('anna')).toBe(15.5);
 
-    const file = JSON.parse(k.files['world/giocatori/anna.json'] ?? '{}');
+    const file = JSON.parse(k.files['world/players/anna.json'] ?? '{}');
     expect(file.crediti).toBeUndefined();
     expect(k.ledger.balance('anna')).toBe(15.5);
   });
@@ -142,7 +142,7 @@ describe('credits and common costs (T45a)', () => {
   it('the master gives credits by hand within the cap; the Referente never; players neither (ADR-0104)', async () => {
     const k = await bootMany();
     const server = new SessionServer(k);
-    const master = await thin(server, 'io');
+    const master = await thin(server, 'me');
     const anna = await thin(server, 'anna');
     run(server, [master, anna], 6);
 
@@ -158,10 +158,10 @@ describe('credits and common costs (T45a)', () => {
     expect(k.creditsOf('anna')).toBe(2.5);
 
     // The day's cap holds, for every wanderer together, and says what is left
-    const over = await until(server, [master, anna], master.k.grantCredits('io', 18));
+    const over = await until(server, [master, anna], master.k.grantCredits('me', 18));
     expect(over.ok).toBe(false);
     expect(over.motivo).toContain('17.5');
-    expect(k.creditsOf('io')).toBe(0);
+    expect(k.creditsOf('me')).toBe(0);
 
     // Not an unknown wanderer, not a strange amount
     for (const [id, n] of [['nessuno', 1], ['anna', -1], ['anna', Number.NaN], ['anna', Number.POSITIVE_INFINITY]] as const) {
@@ -179,17 +179,17 @@ describe('credits and common costs (T45a)', () => {
   it('two players and master connected: common expense split in three (+1% fee)', async () => {
     const k = await bootMany();
     const server = new SessionServer(k);
-    const master = await thin(server, 'io');
+    const master = await thin(server, 'me');
     const anna = await thin(server, 'anna');
     const bruno = await thin(server, 'bruno');
     run(server, [master, anna, bruno], 6);
 
     // Initial balances
-    k.giveCredits('io', 10);
+    k.giveCredits('me', 10);
     k.giveCredits('anna', 10);
     k.giveCredits('bruno', 10);
 
-    expect(server.connected().sort()).toEqual(['anna', 'bruno', 'io']);
+    expect(server.connected().sort()).toEqual(['anna', 'bruno', 'me']);
 
     // Trigger a common model call: gemini-3.1-flash-lite prompt: 1_000_000 tokens
     // Base cost: $0.25. Total cost (+1%): 0.25 * 1.01 = 0.2525.
@@ -202,21 +202,21 @@ describe('credits and common costs (T45a)', () => {
       cached: 0,
       output: 0,
       thoughts: 0,
-      chi: COMUNE,
+      who: COMUNE,
     });
 
     const expectedShare = 0.2525 / 3;
-    expect(k.creditsOf('io')).toBeCloseTo(10 - expectedShare, 4);
+    expect(k.creditsOf('me')).toBeCloseTo(10 - expectedShare, 4);
     expect(k.creditsOf('anna')).toBeCloseTo(10 - expectedShare, 4);
     expect(k.creditsOf('bruno')).toBeCloseTo(10 - expectedShare, 4);
 
-    const totalDeducted = (10 - k.creditsOf('io')) + (10 - k.creditsOf('anna')) + (10 - k.creditsOf('bruno'));
+    const totalDeducted = (10 - k.creditsOf('me')) + (10 - k.creditsOf('anna')) + (10 - k.creditsOf('bruno'));
     expect(totalDeducted).toBeCloseTo(0.2525, 5);
 
     // Personal expense for anna:
     // prompt 100_000 tokens of gemini-3.1-flash-lite ($0.025) + 1% = $0.02525
     const annaBefore = k.creditsOf('anna');
-    const ioBefore = k.creditsOf('io');
+    const ioBefore = k.creditsOf('me');
     const brunoBefore = k.creditsOf('bruno');
 
     k.ai.onCall!({
@@ -227,11 +227,11 @@ describe('credits and common costs (T45a)', () => {
       cached: 0,
       output: 0,
       thoughts: 0,
-      chi: 'anna',
+      who: 'anna',
     });
 
     expect(k.creditsOf('anna')).toBeCloseTo(annaBefore - 0.02525, 5);
-    expect(k.creditsOf('io')).toBe(ioBefore);
+    expect(k.creditsOf('me')).toBe(ioBefore);
     expect(k.creditsOf('bruno')).toBe(brunoBefore);
   });
 
@@ -248,11 +248,11 @@ describe('credits and common costs (T45a)', () => {
     const cfg = JSON.parse(bundledFiles['universe.json']);
     const files = {
       ...bundledFiles,
-      'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2),
+      'universe.json': JSON.stringify({ ...cfg, game: { mode: 'multiplayer', death: 3 } }, null, 2),
     };
     const k = await Kernel.boot({ files, store: memoryStore(), ai: online });
     const server = new SessionServer(k);
-    const master = await thin(server, 'io');
+    const master = await thin(server, 'me');
     const anna = await thin(server, 'anna');
     run(server, [master, anna], 6);
 
@@ -287,7 +287,7 @@ describe('credits and common costs (T45a)', () => {
   it('anonymous wanderer (T44b) has 0 credits, cannot receive credits, always uses local models', async () => {
     const k = await bootMany();
     const server = new SessionServer(k);
-    const master = await thin(server, 'io');
+    const master = await thin(server, 'me');
     // Being anonymous is the token's to say (T120): here the account's answer is taken as already heard.
     k.addWanderer('anon1', undefined, true);
     const anon = await thin(server, 'anon1');
@@ -302,7 +302,7 @@ describe('credits and common costs (T45a)', () => {
     expect(k.creditsOf('anon1')).toBe(0);
 
     // Common expenses are split among eligible non-anonymous wanderers only
-    k.giveCredits('io', 10);
+    k.giveCredits('me', 10);
     k.ai.onCall!({
       model: 'gemini-3.1-flash-lite',
       agent: 'narrator',
@@ -311,11 +311,11 @@ describe('credits and common costs (T45a)', () => {
       cached: 0,
       output: 0,
       thoughts: 0,
-      chi: COMUNE,
+      who: COMUNE,
     });
 
-    // Entire common expense is paid by 'io' (the only non-anonymous connected wanderer)
-    expect(k.creditsOf('io')).toBeCloseTo(10 - 0.2525, 4);
+    // Entire common expense is paid by 'me' (the only non-anonymous connected wanderer)
+    expect(k.creditsOf('me')).toBeCloseTo(10 - 0.2525, 4);
     expect(k.creditsOf('anon1')).toBe(0);
   });
 });

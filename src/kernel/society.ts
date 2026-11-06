@@ -4,7 +4,7 @@
 // the miller, the blacksmith's rival). The kernel turns routines into places to go (sys.wander walks
 // there) and lets related people greet each other when they meet. No model calls here.
 
-import { internalIndividual, italianName } from './internalNames';
+import { internalFields, internalIndividual, italianName } from './internalNames';
 import { hashStr } from './rng';
 import type { FileMap } from './types';
 import { SOLO, WANDERER_NAME, wandererOf } from './wanderers';
@@ -37,67 +37,67 @@ export function inferActivity(fa: string, dove: string): Activity {
 }
 
 export interface RoutineStep {
-  quando: DayPhase;
-  fa: string;
-  dove: Where;
-  azione?: Activity;
+  when: DayPhase;
+  does: string;
+  where: Where;
+  activity?: Activity;
 }
 
 /** Something an individual remembers: what happened, with whom, how much it mattered (1-3). */
 export interface Memory {
-  quando: string;
-  testo: string;
-  con?: string;
+  when: string;
+  text: string;
+  with?: string;
   /** The wanderer it is about (their id, T34): only they hear of it. */
-  viandante?: string;
-  peso: number;
+  wanderer?: string;
+  weight: number;
 }
 
 export interface Relation {
-  nome: string;
-  legame: string;
+  name: string;
+  bond: string;
   /** A relation with a wanderer: their id (`nome` is how they are called). */
-  viandante?: string;
+  wanderer?: string;
 }
 
 export type Species = 'person' | 'animal';
 export type Gender = 'male' | 'female';
 
 export interface Individual {
-  nome: string;
+  name: string;
   /** A person or an animal (from the archetype): it decides which relations are possible. */
-  specie?: Species;
-  genere?: Gender;
+  species?: Species;
+  gender?: Gender;
   /** Archetype module. */
-  tipo: string;
-  mestiere: string;
-  eta?: string;
-  famiglia: Relation[];
+  kind: string;
+  job: string;
+  age?: string;
+  family: Relation[];
   routine: RoutineStep[];
-  storia?: string;
+  story?: string;
   /** Where they were met (place name) and the stable origin of their entity, to meet them again. */
-  luogo?: string;
-  origine?: string;
+  place?: string;
+  origin?: string;
   persona?: string;
-  aspetto?: string;
-  porta?: string[];
-  ricordi?: Memory[];
+  look?: string;
+  carries?: string[];
+  memories?: Memory[];
   /** Before T34: what they were to the only wanderer (read into `famiglia` with the id `io`). */
-  legameViandante?: string;
+  wandererBond?: string;
   /** The sheet the Narrator wrote for the Actor (T157): the text, and the fingerprint of what it was written from. */
-  scheda?: IndividualSheet;
+  sheet?: IndividualSheet;
 }
 
 /** The sheet of an individual (T157): written once, rewritten when their bonds or story change (`sheetFingerprint`). */
 export interface IndividualSheet {
-  testo: string;
-  impronta: string;
+  text: string;
+  fingerprint: string;
 }
 
 /** What a sheet depends on: who they are, their trade, their story, their bonds. Memories are not here: they go with every line. */
-export function sheetFingerprint(p: Pick<Individual, 'nome' | 'persona' | 'mestiere' | 'storia' | 'famiglia' | 'eta' | 'genere'>): string {
-  const bonds = [...(p.famiglia ?? [])].map((f) => `${f.nome}=${f.legame}`).sort().join(',');
-  return String(hashStr(`${p.nome}|${p.persona ?? ''}|${p.mestiere}|${p.storia ?? ''}|${p.eta ?? ''}|${p.genere ?? ''}|${bonds}`));
+export function sheetFingerprint(p: Pick<Individual, 'name' | 'persona' | 'job' | 'story' | 'family' | 'age' | 'gender'>): string {
+  const bonds = [...(p.family ?? [])].map((f) => `${f.name}=${f.bond}`).sort().join(',');
+  return String(hashStr(`${p.name}|${p.persona ?? ''}|${p.job}|${p.story ?? ''}|${p.age ?? ''}|${p.gender ?? ''}|${bonds}`));
 }
 
 /** Keeps memories that matter: the heavy ones and the recent ones (at most 30). */
@@ -106,40 +106,42 @@ export function remember(list: Memory[] | undefined, m: Memory): Memory[] {
   if (all.length <= 30) return all;
   // Forget the lightest of the oldest.
   const old = all.slice(0, all.length - 10);
-  const drop = old.reduce((best, x, i) => (x.peso < old[best].peso ? i : best), 0);
+  const drop = old.reduce((best, x, i) => (x.weight < old[best].weight ? i : best), 0);
   return all.filter((_, i) => i !== drop);
 }
 
 export function memorySummary(list: Memory[] | undefined, n = 12): string {
   return (list ?? [])
     .slice(-n)
-    .map((m) => `- (${m.quando}${m.con ? `, con ${m.con}` : ''}${m.peso >= 3 ? ', importante' : ''}) ${m.testo}`)
+    .map((m) => `- (${m.when}${m.with ? `, con ${m.with}` : ''}${m.weight >= 3 ? ', importante' : ''}) ${m.text}`)
     .join('\n');
 }
 
 export interface People {
-  persone: Individual[];
+  people: Individual[];
   /** Named by someone, not met yet: a later individual of a fitting kind may turn out to be them. */
-  attesi: Array<{ nome: string; legame: string; di: string }>;
+  expected: Array<{ name: string; bond: string; of: string }>;
 }
 
 export function readPeople(files: FileMap): People {
   try {
     const p = JSON.parse(files['world/people.json'] ?? '{}');
-    // Values of the contract 0.2 (`femmina`, `mattina`) read internal (T307b): the migration ports the file, this a stray one.
-    return { persone: (p.persone ?? []).map((x: Individual) => withWandererIds(internalIndividual(x))), attesi: p.attesi ?? [] };
+    // Values of the contract 0.2 (`femmina`, `mattina`, T307b) and fields of 0.3 (`nome`, `famiglia`, T308a) read internal: the
+    // migration ports the file, this a stray one. The values first: their repair reads the fields of before.
+    const people = (p.people ?? p.persone ?? []).map((x: Individual) => withWandererIds(internalFields('individual', internalIndividual(x))));
+    return { people, expected: (internalFields('people', { attesi: p.expected ?? p.attesi ?? [] }) as unknown as { expected?: People['expected'] }).expected ?? [] };
   } catch {
-    return { persone: [], attesi: [] };
+    return { people: [], expected: [] };
   }
 }
 
 /** A registry written before T34 speaks of «Viandante»: that is the wanderer `io`. */
 function withWandererIds(p: Individual): Individual {
-  const famiglia = (p.famiglia ?? []).map((r) => (r.viandante || wandererOf(r) !== SOLO ? r : { ...r, viandante: SOLO }));
-  if (p.legameViandante && !famiglia.some((r) => wandererOf(r) === SOLO)) famiglia.push({ nome: WANDERER_NAME, legame: p.legameViandante, viandante: SOLO });
-  const ricordi = p.ricordi?.map((m) => (m.viandante || wandererOf(m) !== SOLO ? m : { ...m, viandante: SOLO }));
-  const { legameViandante: _, ...rest } = p;
-  return { ...rest, famiglia, ...(ricordi ? { ricordi } : {}) };
+  const famiglia = (p.family ?? []).map((r) => (r.wanderer || wandererOf(r) !== SOLO ? r : { ...r, wanderer: SOLO }));
+  if (p.wandererBond && !famiglia.some((r) => wandererOf(r) === SOLO)) famiglia.push({ name: WANDERER_NAME, bond: p.wandererBond, wanderer: SOLO });
+  const ricordi = p.memories?.map((m) => (m.wanderer || wandererOf(m) !== SOLO ? m : { ...m, wanderer: SOLO }));
+  const { wandererBond: _, ...rest } = p;
+  return { ...rest, family: famiglia, ...(ricordi ? { memories: ricordi } : {}) };
 }
 
 // --- A coherent society: species, gender, relations both ways, names that do not repeat ----------
@@ -230,12 +232,12 @@ export function reverseRelation(legame: string, gender?: Gender, a: Species = 'p
 }
 
 /** What is wrong with a relation between these two (species, the word's gender), or undefined when it can be. */
-export function relationProblem(legame: string, a: { specie?: Species; genere?: Gender }, b: { specie?: Species }): string | undefined {
+export function relationProblem(legame: string, a: { species?: Species; gender?: Gender }, b: { species?: Species }): string | undefined {
   const k = kindOf(legame);
-  const sa = a.specie ?? 'person';
-  if (!allowed(k, sa, b.specie)) return `«${legame}» non si dà tra ${sa === 'animal' ? 'un animale' : 'una persona'} e ${b.specie === 'animal' ? 'un animale' : 'una persona'}`;
+  const sa = a.species ?? 'person';
+  if (!allowed(k, sa, b.species)) return `«${legame}» non si dà tra ${sa === 'animal' ? 'un animale' : 'una persona'} e ${b.species === 'animal' ? 'un animale' : 'una persona'}`;
   const word = legame.toLowerCase().split(/[^\p{L}]+/u).find((w) => k.words.test(w));
-  if (word && k.m !== k.f && a.genere && word === (a.genere === 'female' ? k.m : k.f)) return `«${legame}» non si dice di ${a.genere === 'female' ? 'una femmina' : 'un maschio'}`;
+  if (word && k.m !== k.f && a.gender && word === (a.gender === 'female' ? k.m : k.f)) return `«${legame}» non si dice di ${a.gender === 'female' ? 'una femmina' : 'un maschio'}`;
   return undefined;
 }
 
@@ -323,18 +325,18 @@ export function freshName(specie: Species, genere: Gender, taken: string[], seed
 const MALE_IN_A = /^(luca|andrea|elia|barnaba|nicola|mattia|tobia|enea|battista|geremia|isaia|giona|zaccaria|evangelista)$/;
 
 /** A gender for someone who has none written: the name, the job, the words they are called by. */
-export function guessGender(p: Pick<Individual, 'nome' | 'mestiere' | 'famiglia'>): Gender {
-  const first = nameWords(p.nome)[0] ?? '';
+export function guessGender(p: Pick<Individual, 'name' | 'job' | 'family'>): Gender {
+  const first = nameWords(p.name)[0] ?? '';
   if (MALE_IN_A.test(first)) return 'male';
   if (/a$/.test(first)) return 'female';
   if (/o$/.test(first)) return 'male';
-  const job = (p.mestiere ?? '').toLowerCase().split(/\s+/)[0] ?? '';
+  const job = (p.job ?? '').toLowerCase().split(/\s+/)[0] ?? '';
   if (/(trice|essa|iera|aia|ina)$/.test(job)) return 'female';
   if (/(tore|iere|aio|ino|o)$/.test(job)) return 'male';
   let f = 0;
   let m = 0;
-  for (const r of p.famiglia ?? []) {
-    const w = r.legame.toLowerCase().split(/\s+/)[0];
+  for (const r of p.family ?? []) {
+    const w = r.bond.toLowerCase().split(/\s+/)[0];
     const k = kindOf(w);
     if (k.m === k.f) continue;
     if (w === k.f) f++;
@@ -379,94 +381,94 @@ export function applyRenames<T>(value: T, renames: Array<[string, string]>): T {
 export function repairSociety(people: People, speciesOf: (tipo: string) => Species | undefined = () => undefined): SocietyRepair {
   const fixes: string[] = [];
   const renames: Array<[string, string]> = [];
-  let persone: Individual[] = people.persone.map((p) => ({ ...p, famiglia: (p.famiglia ?? []).map((r) => ({ ...r })) }));
+  let persone: Individual[] = people.people.map((p) => ({ ...p, family: (p.family ?? []).map((r) => ({ ...r })) }));
   // Species and gender.
   for (const p of persone) {
-    const sp = speciesOf(p.tipo) ?? p.specie ?? 'person';
-    if (p.specie !== sp) fixes.push(`${p.nome}: specie ${italianName('specie', sp)}`);
-    p.specie = sp;
-    if (p.genere !== 'male' && p.genere !== 'female') {
-      p.genere = guessGender(p);
-      fixes.push(`${p.nome}: genere ${italianName('specie', p.genere)}`);
+    const sp = speciesOf(p.kind) ?? p.species ?? 'person';
+    if (p.species !== sp) fixes.push(`${p.name}: specie ${italianName('specie', sp)}`);
+    p.species = sp;
+    if (p.gender !== 'male' && p.gender !== 'female') {
+      p.gender = guessGender(p);
+      fixes.push(`${p.name}: genere ${italianName('specie', p.gender)}`);
     }
   }
   // Names: the first one keeps it.
   const taken: string[] = ['Viandante'];
   for (let i = 0; i < persone.length; i++) {
     const p = persone[i];
-    if (taken.some((t) => similarNames(t, p.nome))) {
-      const old = p.nome;
-      const nuovo = freshName(p.specie!, p.genere!, [...taken, ...persone.map((x) => x.nome)], p.origine ?? old);
+    if (taken.some((t) => similarNames(t, p.name))) {
+      const old = p.name;
+      const nuovo = freshName(p.species!, p.gender!, [...taken, ...persone.map((x) => x.name)], p.origin ?? old);
       renames.push([old, nuovo]);
       fixes.push(`${old} → ${nuovo}: nome troppo simile a un altro`);
       // An exact namesake: only their own record speaks of them (the others mean the first one).
-      if (persone.some((x) => x !== p && x.nome === old)) persone[i] = renameDeep(p, old, nuovo);
+      if (persone.some((x) => x !== p && x.name === old)) persone[i] = renameDeep(p, old, nuovo);
       else persone = persone.map((x) => renameDeep(x, old, nuovo));
-      persone[i].nome = nuovo;
+      persone[i].name = nuovo;
     }
-    taken.push(persone[i].nome);
+    taken.push(persone[i].name);
   }
   const byName = new Map<string, Individual>();
-  for (const p of persone) if (!byName.has(p.nome.toLowerCase())) byName.set(p.nome.toLowerCase(), p);
+  for (const p of persone) if (!byName.has(p.name.toLowerCase())) byName.set(p.name.toLowerCase(), p);
   // Relations, as pairs: the first said is the truth, the other side follows.
   interface Edge { a: Individual; b: Individual; ab: Kind; ba?: Kind }
   const edges = new Map<string, Edge>();
   const own = new Map<Individual, Array<Edge | Relation>>(persone.map((p) => [p, []]));
   const said = (p: Individual, r: Relation, k: Kind, to: string) => {
-    if (wordOf(k, p.genere) !== r.legame) fixes.push(`${p.nome}: ${r.legame} di ${to} → ${wordOf(k, p.genere)}`);
+    if (wordOf(k, p.gender) !== r.bond) fixes.push(`${p.name}: ${r.bond} di ${to} → ${wordOf(k, p.gender)}`);
   };
   for (const p of persone) {
-    for (const r of p.famiglia) {
+    for (const r of p.family) {
       if (wandererOf(r)) {
         own.get(p)!.push(r);
         continue;
       }
-      const q = byName.get(r.nome.toLowerCase());
+      const q = byName.get(r.name.toLowerCase());
       if (q === p) {
-        fixes.push(`${p.nome}: legame con se stesso`);
+        fixes.push(`${p.name}: legame con se stesso`);
         continue;
       }
-      const k = fitKind(kindOf(r.legame), p.specie!, q?.specie);
+      const k = fitKind(kindOf(r.bond), p.species!, q?.species);
       if (!q) {
         // Someone named, not met yet.
-        if (own.get(p)!.some((x) => !('a' in x) && x.nome.toLowerCase() === r.nome.toLowerCase())) continue;
-        said(p, r, k, r.nome);
-        own.get(p)!.push({ nome: r.nome, legame: wordOf(k, p.genere) });
+        if (own.get(p)!.some((x) => !('a' in x) && x.name.toLowerCase() === r.name.toLowerCase())) continue;
+        said(p, r, k, r.name);
+        own.get(p)!.push({ name: r.name, bond: wordOf(k, p.gender) });
         continue;
       }
-      const key = [p.nome, q.nome].sort().join('\u0000');
+      const key = [p.name, q.name].sort().join('\u0000');
       const e = edges.get(key);
       if (!e) {
         const edge: Edge = { a: p, b: q, ab: k };
         edges.set(key, edge);
         own.get(p)!.push(edge);
         own.get(q)!.push(edge);
-        said(p, r, k, q.nome);
+        said(p, r, k, q.name);
       } else if (e.a === p || e.ba) {
-        fixes.push(`${p.nome}: un secondo legame con ${q.nome}`);
-      } else if (e.ab.back.includes(k.id) && allowed(k, p.specie!, q.specie)) {
+        fixes.push(`${p.name}: un secondo legame con ${q.name}`);
+      } else if (e.ab.back.includes(k.id) && allowed(k, p.species!, q.species)) {
         // The other side, said by the second one: kept if it agrees.
         e.ba = k;
-        said(p, r, k, q.nome);
+        said(p, r, k, q.name);
       } else {
-        e.ba = backOf(e.ab, q.specie!, p.specie!);
-        fixes.push(`${p.nome}: ${r.legame} di ${q.nome} non torna con ${wordOf(e.ab, q.genere)} di ${p.nome} → ${wordOf(e.ba, p.genere)}`);
+        e.ba = backOf(e.ab, q.species!, p.species!);
+        fixes.push(`${p.name}: ${r.bond} di ${q.name} non torna con ${wordOf(e.ab, q.gender)} di ${p.name} → ${wordOf(e.ba, p.gender)}`);
       }
     }
   }
   for (const e of edges.values()) {
     if (e.ba) continue;
-    e.ba = backOf(e.ab, e.a.specie!, e.b.specie!);
-    fixes.push(`${e.b.nome}: manca ${wordOf(e.ba, e.b.genere)} di ${e.a.nome}`);
+    e.ba = backOf(e.ab, e.a.species!, e.b.species!);
+    fixes.push(`${e.b.name}: manca ${wordOf(e.ba, e.b.gender)} di ${e.a.name}`);
   }
   // An animal has one owner: the first.
   const owned = new Set<Individual>();
   for (const e of edges.values()) {
-    const animal = e.ab.id === 'owner' && e.b.specie === 'animal' ? e.b : e.ba!.id === 'owner' && e.a.specie === 'animal' ? e.a : undefined;
+    const animal = e.ab.id === 'owner' && e.b.species === 'animal' ? e.b : e.ba!.id === 'owner' && e.a.species === 'animal' ? e.a : undefined;
     if (!animal) continue;
     if (owned.has(animal)) {
       e.ab = e.ba = KIND.get('friend')!;
-      fixes.push(`${animal.nome}: un solo padrone (${e.a === animal ? e.b.nome : e.a.nome} diventa amico)`);
+      fixes.push(`${animal.name}: un solo padrone (${e.a === animal ? e.b.name : e.a.name} diventa amico)`);
     } else owned.add(animal);
   }
   // One father and one mother, one spouse, and spouses are not children of the same parent.
@@ -478,12 +480,12 @@ export function repairSociety(people: People, speciesOf: (tipo: string) => Speci
     let wrong = '';
     if (parent && child) {
       const s = spouse.get(child);
-      if (parentsOf(child).some((x) => x.genere === parent.genere)) wrong = `${child.nome}: ha già ${parent.genere === 'female' ? 'una madre' : 'un padre'} (non ${parent.nome})`;
-      else if (s && (s === parent || parentsOf(s).includes(parent))) wrong = `${child.nome}: ${parent.nome} è già genitore del suo coniuge`;
+      if (parentsOf(child).some((x) => x.gender === parent.gender)) wrong = `${child.name}: ha già ${parent.gender === 'female' ? 'una madre' : 'un padre'} (non ${parent.name})`;
+      else if (s && (s === parent || parentsOf(s).includes(parent))) wrong = `${child.name}: ${parent.name} è già genitore del suo coniuge`;
       else parents.set(child, [...parentsOf(child), parent]);
     } else if (e.ab.id === 'spouse') {
-      if (spouse.has(e.a) || spouse.has(e.b)) wrong = `${e.a.nome} e ${e.b.nome}: uno dei due è già sposato`;
-      else if (parentsOf(e.a).some((x) => parentsOf(e.b).includes(x))) wrong = `${e.a.nome} e ${e.b.nome}: hanno un genitore in comune`;
+      if (spouse.has(e.a) || spouse.has(e.b)) wrong = `${e.a.name} e ${e.b.name}: uno dei due è già sposato`;
+      else if (parentsOf(e.a).some((x) => parentsOf(e.b).includes(x))) wrong = `${e.a.name} e ${e.b.name}: hanno un genitore in comune`;
       else spouse.set(e.a, e.b).set(e.b, e.a);
     }
     if (!wrong) continue;
@@ -491,30 +493,30 @@ export function repairSociety(people: People, speciesOf: (tipo: string) => Speci
     fixes.push(`${wrong} → conoscenti`);
   }
   for (const p of persone) {
-    p.famiglia = own.get(p)!.map((x) => ('a' in x ? { nome: x.a === p ? x.b.nome : x.a.nome, legame: wordOf(x.a === p ? x.ab : x.ba!, p.genere) } : x));
+    p.family = own.get(p)!.map((x) => ('a' in x ? { name: x.a === p ? x.b.name : x.a.name, bond: wordOf(x.a === p ? x.ab : x.ba!, p.gender) } : x));
   }
   // An animal does what animals of its kind do, not a person's job.
   const words = (s: string) => s.toLowerCase().split(/[^\p{L}]+/u).filter((w) => w.length >= 4);
   for (const p of persone) {
-    if (p.specie !== 'animal') continue;
-    const kin = persone.filter((x) => x !== p && x.tipo === p.tipo && x.specie === 'animal');
-    const mine = words(p.mestiere ?? '');
-    if (!kin.length || kin.some((x) => words(x.mestiere ?? '').some((w) => mine.includes(w)))) continue;
+    if (p.species !== 'animal') continue;
+    const kin = persone.filter((x) => x !== p && x.kind === p.kind && x.species === 'animal');
+    const mine = words(p.job ?? '');
+    if (!kin.length || kin.some((x) => words(x.job ?? '').some((w) => mine.includes(w)))) continue;
     const counts = new Map<string, number>();
-    for (const x of kin) counts.set(x.mestiere, (counts.get(x.mestiere) ?? 0) + 1);
+    for (const x of kin) counts.set(x.job, (counts.get(x.job) ?? 0) + 1);
     const best = [...counts].sort((x, y) => y[1] - x[1])[0][0];
-    fixes.push(`${p.nome}: ${p.mestiere} → ${best}`);
-    p.mestiere = best;
+    fixes.push(`${p.name}: ${p.job} → ${best}`);
+    p.job = best;
   }
   // Named, not met: what they are to whoever named them.
-  const attesi: People['attesi'] = [];
+  const attesi: People['expected'] = [];
   for (const p of persone) {
-    for (const r of p.famiglia) {
-      if (wandererOf(r) || byName.has(r.nome.toLowerCase()) || attesi.some((a) => a.nome.toLowerCase() === r.nome.toLowerCase())) continue;
-      attesi.push({ nome: r.nome, legame: reverseRelation(r.legame, undefined, p.specie, p.specie), di: p.nome });
+    for (const r of p.family) {
+      if (wandererOf(r) || byName.has(r.name.toLowerCase()) || attesi.some((a) => a.name.toLowerCase() === r.name.toLowerCase())) continue;
+      attesi.push({ name: r.name, bond: reverseRelation(r.bond, undefined, p.species, p.species), of: p.name });
     }
   }
-  return { people: { persone, attesi: attesi.slice(-60) }, fixes, renames };
+  return { people: { people: persone, expected: attesi.slice(-60) }, fixes, renames };
 }
 
 /** The validator of the society: what is wrong in it (nothing, when it is coherent). */
@@ -524,15 +526,15 @@ export function checkSociety(people: People, speciesOf?: (tipo: string) => Speci
 
 /** Adds an individual; the society is then made coherent (the other side of each relation, the awaited ones). */
 export function addIndividual(people: People, p: Individual, speciesOf?: (tipo: string) => Species | undefined): People {
-  const persone = [...people.persone.filter((x) => x.nome !== p.nome), p].slice(-200);
-  return repairSociety({ persone, attesi: people.attesi }, speciesOf).people;
+  const persone = [...people.people.filter((x) => x.name !== p.name), p].slice(-200);
+  return repairSociety({ people: persone, expected: people.expected }, speciesOf).people;
 }
 
 /** What the society looks like, for the Narrator creating someone new. */
 export function societySummary(people: People, n = 16): string {
-  const who = (p: Individual) => (p.specie === 'animal' ? `animale${p.genere ? `, ${italianName('specie', p.genere)}` : ''}` : p.genere === 'female' ? 'donna' : p.genere === 'male' ? 'uomo' : '');
-  const lines = people.persone.slice(-n).map((p) => `- ${p.nome}, ${p.mestiere}${who(p) ? ` — ${who(p)}` : ''}${p.luogo ? ` (${p.luogo})` : ''}${p.famiglia.length ? `; ${p.famiglia.map((r) => `${r.legame} di ${r.nome}`).join(', ')}` : ''}`);
-  const waiting = people.attesi.slice(-10).map((a) => `- ${a.nome} (${a.legame} di ${a.di})`);
+  const who = (p: Individual) => (p.species === 'animal' ? `animale${p.gender ? `, ${italianName('specie', p.gender)}` : ''}` : p.gender === 'female' ? 'donna' : p.gender === 'male' ? 'uomo' : '');
+  const lines = people.people.slice(-n).map((p) => `- ${p.name}, ${p.job}${who(p) ? ` — ${who(p)}` : ''}${p.place ? ` (${p.place})` : ''}${p.family.length ? `; ${p.family.map((r) => `${r.bond} di ${r.name}`).join(', ')}` : ''}`);
+  const waiting = people.expected.slice(-10).map((a) => `- ${a.name} (${a.bond} di ${a.of})`);
   return [lines.length ? `Persone già conosciute:\n${lines.join('\n')}` : 'Nessuno è stato ancora conosciuto.', waiting.length ? `Nominate ma mai incontrate (potresti essere una di loro, se il tipo è adatto):\n${waiting.join('\n')}` : ''].filter(Boolean).join('\n\n');
 }
 
@@ -549,10 +551,10 @@ export function dayPhase(time: number, daySeconds: number): DayPhase {
 /** A sensible routine when the Narrator gave none. */
 export function defaultRoutine(job: string): RoutineStep[] {
   return [
-    { quando: 'morning', fa: 'si prepara per la giornata', dove: 'home', azione: 'eat' },
-    { quando: 'day', fa: job ? `lavora come ${job}` : 'lavora', dove: 'work', azione: inferActivity(job || 'lavora', 'work') },
-    { quando: 'evening', fa: 'chiacchiera in piazza', dove: 'square', azione: 'chat' },
-    { quando: 'night', fa: 'dorme', dove: 'home', azione: 'sleep' },
+    { when: 'morning', does: 'si prepara per la giornata', where: 'home', activity: 'eat' },
+    { when: 'day', does: job ? `lavora come ${job}` : 'lavora', where: 'work', activity: inferActivity(job || 'lavora', 'work') },
+    { when: 'evening', does: 'chiacchiera in piazza', where: 'square', activity: 'chat' },
+    { when: 'night', does: 'dorme', where: 'home', activity: 'sleep' },
   ];
 }
 

@@ -29,7 +29,7 @@ function jsonStrings(v: unknown, out: string[] = []): string[] {
 }
 
 export function checkFourthWall(dir = DIR): WallReport {
-  const words = lexiconWords(readFileSync(join(dir, 'world/lessico.md'), 'utf8'));
+  const words = lexiconWords(readFileSync(join(dir, 'world/lexicon.md'), 'utf8'));
   const breaks: string[] = [];
   let files = 0;
   let texts = 0;
@@ -57,7 +57,7 @@ export function checkFourthWall(dir = DIR): WallReport {
       if (p.endsWith('.json')) jsonStrings(JSON.parse(src)).forEach((t) => check(rel, t));
       else if (p.endsWith('.lua')) luaStrings(src).forEach((t) => check(rel, t));
       // Il lessico spiega le sue parole a chi scrive (non al mondo): lì vale solo il filtro delle parole.
-      else if (p.endsWith('.md')) src.split(/\n(?=- |#)/).forEach((t) => check(rel, t, rel !== 'world/lessico.md'));
+      else if (p.endsWith('.md')) src.split(/\n(?=- |#)/).forEach((t) => check(rel, t, rel !== 'world/lexicon.md'));
     }
   };
   walk(dir);
@@ -67,7 +67,7 @@ export function checkFourthWall(dir = DIR): WallReport {
   const people = readPeople(files_);
   for (const plot of readPlots(files_)) {
     const r = reviewPlot(plot, people, words);
-    for (const p of r.problems) breaks.push(`world/plots.json «${plot.titolo}»: ${p}`);
+    for (const p of r.problems) breaks.push(`world/plots.json «${plot.title}»: ${p}`);
   }
   return { files, texts, breaks };
 }

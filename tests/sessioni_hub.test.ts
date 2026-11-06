@@ -24,7 +24,7 @@ describe('Hub Sessioni & Creazione Nuovo Universo (T103)', () => {
     const cfg = JSON.parse(bundledFiles['universe.json']);
     const files = {
       ...bundledFiles,
-      'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2),
+      'universe.json': JSON.stringify({ ...cfg, game: { mode: 'multiplayer', death: 3 } }, null, 2),
     };
     const kernel = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
     const server = new SessionServer(kernel);
@@ -96,7 +96,7 @@ describe('Hub Sessioni & Creazione Nuovo Universo (T103)', () => {
         {
           name: 'valmora',
           seed: 42,
-          partita: { modalita: 'multiplayer', master: 'lorenzo', morte: 1 },
+          game: { mode: 'multiplayer', master: 'lorenzo', death: 1 },
           ai: {
             textModel: 'gemini-3.1-flash-lite',
             scultori: { figura: 'gemini-3.8-flash' },
@@ -108,7 +108,7 @@ describe('Hub Sessioni & Creazione Nuovo Universo (T103)', () => {
         2,
       ),
       'world/bible.json': JSON.stringify({
-        concetto: 'Un antico borgo tra le colline con cripte runiche.',
+        concept: 'Un antico borgo tra le colline con cripte runiche.',
       }),
     };
 
@@ -152,12 +152,12 @@ describe('Hub Sessioni & Creazione Nuovo Universo (T103)', () => {
     const cfgLow = JSON.parse(filesLow['universe.json']!);
     expect(cfgLow.name).toBe('reame-low');
     expect(cfgLow.seed).toBe(1234);
-    expect(cfgLow.partita.morte).toBe(1);
-    expect(cfgLow.partita.modalita).toBe('multiplayer');
-    expect(cfgLow.partita.master).toBe('TestMaster');
+    expect(cfgLow.game.death).toBe(1);
+    expect(cfgLow.game.mode).toBe('multiplayer');
+    expect(cfgLow.game.master).toBe('TestMaster');
     expect(cfgLow.ai.textModel).toBe('gemini-3.1-flash-lite');
-    expect(cfgLow.ai.scultori.figure).toBe('gemini-3.1-flash-lite');
-    expect(cfgLow.ai.minimi.tetto).toBe(0.5);
+    expect(cfgLow.ai.sculptors.figure).toBe('gemini-3.1-flash-lite');
+    expect(cfgLow.ai.minimums.cap).toBe(0.5);
     expect(filesLow['seed.json']).toBeDefined();
 
     // 2. Profilo High Detail & Sfida del Labirinto (PvP)
@@ -171,11 +171,11 @@ describe('Hub Sessioni & Creazione Nuovo Universo (T103)', () => {
     const cfgHigh = JSON.parse(filesHigh['universe.json']!);
     expect(cfgHigh.name).toBe('reame-high');
     expect(cfgHigh.seed).toBe(9999);
-    expect(cfgHigh.partita.morte).toBe(4);
-    expect(cfgHigh.partita.pvp).toBe(true);
+    expect(cfgHigh.game.death).toBe(4);
+    expect(cfgHigh.game.pvp).toBe(true);
     expect(cfgHigh.ai.textModel).toBe('gemini-3.8-flash');
-    expect(cfgHigh.ai.scultori.important).toBe('gemini-4-argon');
-    expect(cfgHigh.ai.minimi.tetto).toBe(2.0);
+    expect(cfgHigh.ai.sculptors.important).toBe('gemini-4-argon');
+    expect(cfgHigh.ai.minimums.cap).toBe(2.0);
   });
 
   it('createUniverse rifiuta slug non validi', async () => {

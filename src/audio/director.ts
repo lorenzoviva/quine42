@@ -25,7 +25,7 @@ export interface MusicChoice {
 }
 
 /** How a universe's program says what it is for, in `models/index.json → suono`. */
-const eligible = (p: SoundProgram, s: SoundState) => p.suono?.uso === 'music' && !!p.suono.oltre === s.beyond && (!p.suono.momenti || s.beyond || p.suono.momenti.includes(s.phase));
+const eligible = (p: SoundProgram, s: SoundState) => p.sound?.use === 'music' && !!p.sound.beyond === s.beyond && (!p.sound.moments || s.beyond || p.sound.moments.includes(s.phase));
 
 /**
  * The piece for a state, or nothing if the universe has none. The program is one per type: the one that names this environment, then one that names no environment
@@ -38,8 +38,8 @@ export function chooseMusic(state: SoundState, programs: readonly SoundProgram[]
   const where = state.beyond ? '' : (state.environment ?? '');
   const when = state.beyond ? '' : state.phase;
   const named = open.filter((p) => namesEnvironment(p, where));
-  const exact = named.filter((p) => p.suono?.ambienti?.includes(where));
-  const general = open.filter((p) => !p.suono?.ambienti?.length);
+  const exact = named.filter((p) => p.sound?.environments?.includes(where));
+  const general = open.filter((p) => !p.sound?.environments?.length);
   const pool = exact.length ? exact.slice(-1) : named.length ? named : general.length ? general : open;
   const pick = pool[hashStr(where) % pool.length];
   return { id: pick.id, xml: pick.xml, seed: hash32(state.seed | 0, hashStr(where), hashStr(when), variant) };
@@ -69,7 +69,7 @@ export type SoundCue = keyof typeof SOUND_CUES;
 
 /** The program of an effect, or nothing. */
 export function effectProgram(effect: string, programs: readonly SoundProgram[]): SoundProgram | undefined {
-  return programs.find((p) => p.suono?.uso === 'effect' && p.suono.effetti?.includes(effect));
+  return programs.find((p) => p.sound?.use === 'effect' && p.sound.effects?.includes(effect));
 }
 
 /** A change of place must last this long before the music follows: walking along a border does not make it flicker. */
@@ -87,7 +87,7 @@ const EFFECT_PATIENCE_MS = 250;
 
 /** Index → programs, kept until the text changes. */
 export function readPrograms(files: Record<string, string>): SoundProgram[] {
-  return soundPrograms(files).filter((p) => p.suono);
+  return soundPrograms(files).filter((p) => p.sound);
 }
 
 export class SoundDirector {

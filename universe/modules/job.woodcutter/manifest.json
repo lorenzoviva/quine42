@@ -4,10 +4,10 @@
   "kind": "data",
   "version": "0.1.0",
   "description": "La giornata di chi vive del bosco: abbatte un albero alla volta e porta via i ciocchi; dove ha tagliato il bosco ricresce in qualche giorno.",
-  "mestieri": [
+  "jobs": [
     {
       "id": "woodcutter",
-      "nomi": [
+      "names": [
         "boscaiolo",
         "boscaiola",
         "taglialegna",
@@ -17,63 +17,63 @@
         "carbonaia",
         "guardaboschi"
       ],
-      "posto": {
-        "casella": "t"
+      "workplace": {
+        "tile": "t"
       },
-      "giornata": {
+      "day": {
         "morning": [
           {
-            "fa": "go",
-            "dove": "work"
+            "does": "go",
+            "where": "work"
           },
           {
-            "fa": "gather",
-            "casella": "t",
-            "oggetto": "item.ciocco",
-            "lascia": "x",
-            "quante": 1,
-            "durata": 15,
-            "posa": "chop_wood",
-            "dice": "Attenti, cade!"
+            "does": "gather",
+            "tile": "t",
+            "item": "item.ciocco",
+            "drop": "x",
+            "count": 1,
+            "duration": 15,
+            "pose": "chop_wood",
+            "says": "Attenti, cade!"
           }
         ],
         "day": [
           {
-            "fa": "gather",
-            "casella": "t",
-            "oggetto": "item.ciocco",
-            "lascia": "x",
-            "quante": 2,
-            "durata": 15,
-            "posa": "chop_wood"
+            "does": "gather",
+            "tile": "t",
+            "item": "item.ciocco",
+            "drop": "x",
+            "count": 2,
+            "duration": 15,
+            "pose": "chop_wood"
           },
           {
-            "fa": "wait",
-            "durata": 20,
-            "posa": "eat"
+            "does": "wait",
+            "duration": 20,
+            "pose": "eat"
           }
         ],
         "evening": [
           {
-            "fa": "go",
-            "dove": "square"
+            "does": "go",
+            "where": "square"
           },
           {
-            "fa": "carry",
-            "oggetto": "item.ciocco",
-            "dove": "square"
+            "does": "carry",
+            "item": "item.ciocco",
+            "where": "square"
           },
           {
-            "fa": "chat"
+            "does": "chat"
           }
         ],
         "night": [
           {
-            "fa": "go",
-            "dove": "home"
+            "does": "go",
+            "where": "home"
           },
           {
-            "fa": "rest"
+            "does": "rest"
           }
         ]
       }

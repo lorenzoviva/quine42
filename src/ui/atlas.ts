@@ -184,18 +184,18 @@ export class AtlasPanel {
   }
 
   private drawRegion(ctx: CanvasRenderingContext2D, r: Region): void {
-    const [x0, y0] = this.toScreen(r.centro[0] - r.raggio, r.centro[1] - r.raggio);
-    const size = (r.raggio * 2 + 1) * this.zoom;
+    const [x0, y0] = this.toScreen(r.center[0] - r.radius, r.center[1] - r.radius);
+    const size = (r.radius * 2 + 1) * this.zoom;
     ctx.save();
-    ctx.strokeStyle = `hsl(${hue(r.ambiente)} 80% 60%)`;
+    ctx.strokeStyle = `hsl(${hue(r.environment)} 80% 60%)`;
     ctx.shadowColor = ctx.strokeStyle;
     ctx.shadowBlur = 8;
     ctx.setLineDash([5, 4]);
     ctx.strokeRect(x0, y0, size, size);
     ctx.restore();
-    ctx.fillStyle = `hsl(${hue(r.ambiente)} 80% 70%)`;
+    ctx.fillStyle = `hsl(${hue(r.environment)} 80% 70%)`;
     ctx.font = '11px sans-serif';
-    ctx.fillText(r.nome, x0 + 3, y0 - 4);
+    ctx.fillText(r.name, x0 + 3, y0 - 4);
   }
 
   private hover(x: number, y: number): void {
@@ -204,9 +204,9 @@ export class AtlasPanel {
     const cx = Math.floor((x - this.canvas.width / 2) / this.zoom + this.cx);
     const cy = Math.floor((y - this.canvas.height / 2) / this.zoom + this.cy);
     const p = v.planned.find((q) => q.cx === cx && q.cy === cy);
-    const r = v.regions.find((q) => Math.max(Math.abs(q.centro[0] - cx), Math.abs(q.centro[1] - cy)) <= q.raggio);
+    const r = v.regions.find((q) => Math.max(Math.abs(q.center[0] - cx), Math.abs(q.center[1] - cy)) <= q.radius);
     const d = v.drafts.some((q) => q.cx === cx && q.cy === cy);
     const who = v.players.filter((q) => q.cx === cx && q.cy === cy).map((q) => q.nome);
-    this.info.textContent = `(${cx}, ${cy}) — ${p ? `«${p.name}» [${p.layout}]` : d ? 'abbozzato, non ancora progettato' : 'mai visto'}${r ? ` — regione «${r.nome}»` : ''}${who.length ? ` — qui: ${who.join(', ')}` : ''}`;
+    this.info.textContent = `(${cx}, ${cy}) — ${p ? `«${p.name}» [${p.layout}]` : d ? 'abbozzato, non ancora progettato' : 'mai visto'}${r ? ` — regione «${r.name}»` : ''}${who.length ? ` — qui: ${who.join(', ')}` : ''}`;
   }
 }

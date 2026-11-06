@@ -7,40 +7,40 @@ import type { FileMap } from './types';
 import { metaBreak } from './fourthwall';
 import { SOLO } from './wanderers';
 import { BINDING_WORDS, DAY_PHASES, relationKind, type DayPhase, type People } from './society';
-import { internalName, internalPlot, italianName } from './internalNames';
+import { internalFields, internalName, internalPlot, italianName } from './internalNames';
 
 export interface Beat {
   /** Day relative to the plot's start. */
-  giorno: number;
-  momento: DayPhase;
-  chi: string;
-  dove: string;
-  cosa: string;
-  battuta?: string;
-  indizio?: string;
-  fatto?: boolean;
+  day: number;
+  moment: DayPhase;
+  who: string;
+  where: string;
+  what: string;
+  line?: string;
+  clue?: string;
+  done?: boolean;
 }
 
 export interface Quest {
-  da: string;
-  testo: string;
-  obiettivo: { tipo: QuestGoal; oggetto?: string; a?: string; luogo?: string };
-  ricompensa?: string;
-  stato: 'offered' | 'accepted' | 'completed';
+  from: string;
+  text: string;
+  goal: { type: QuestGoal; item?: string; to?: string; place?: string };
+  reward?: string;
+  state: 'offered' | 'accepted' | 'completed';
   /** Who accepted it (the wanderer's id, T34; `me` when missing). */
-  viandante?: string;
+  wanderer?: string;
 }
 
 export interface Plot {
   id: string;
-  titolo: string;
-  mistero: string;
-  coinvolti: string[];
-  tappe: Beat[];
-  missione?: Quest;
+  title: string;
+  mystery: string;
+  involved: string[];
+  beats: Beat[];
+  quest?: Quest;
   /** Absolute day it started. */
-  inizio: number;
-  stato: 'active' | 'closed';
+  start: number;
+  state: 'active' | 'closed';
 }
 
 /** The kinds of a quest's goal (T307b: internal; the Narrator still says them in Italian, `plotFromRaw` takes them in). */
@@ -52,24 +52,26 @@ export const PLOTS_FILE = 'world/plots.json';
 export function readPlots(files: FileMap): Plot[] {
   try {
     const p = JSON.parse(files[PLOTS_FILE] ?? '{}');
-    return Array.isArray(p.trame) ? p.trame.map((t: Plot) => internalPlot(t)) : [];
+    // Values of the contract 0.2 (T307b), then fields of 0.3 (`titolo`, `tappe`, T308a): the migration ports the file, this a stray one.
+    const list = p.plots ?? p.trame;
+    return Array.isArray(list) ? list.map((t: Plot) => internalFields('plot', internalPlot(t))) : [];
   } catch {
     return [];
   }
 }
 
 export function writePlots(plots: Plot[]): string {
-  return JSON.stringify({ trame: plots.slice(-30) }, null, 2) + '\n';
+  return JSON.stringify({ plots: plots.slice(-30) }, null, 2) + '\n';
 }
 
 /** What an individual knows of the plots they are in: for their chat (hints, never confessions). */
 export function secretsOf(plots: Plot[], name: string, day: number): string {
   const out: string[] = [];
   for (const p of plots) {
-    if (p.stato !== 'active' || !p.coinvolti.includes(name)) continue;
-    out.push(`- Trama «${p.titolo}»: ${p.mistero}`);
-    for (const b of p.tappe) if (b.chi === name) out.push(`  · ${b.fatto ? 'hai già' : p.inizio + b.giorno > day ? 'dovrai' : 'devi'} ${b.cosa} (${italianName('dove', b.dove)}, ${italianName('momenti', b.momento)})${b.indizio ? ` — indizio: ${b.indizio}` : ''}`);
-    if (p.missione?.da === name && p.missione.stato === 'offered') out.push(`  · Hai una richiesta per il viandante: ${p.missione.testo} (se te la chiede o se ti fidi, affidagliela con l'azione "missione")`);
+    if (p.state !== 'active' || !p.involved.includes(name)) continue;
+    out.push(`- Trama «${p.title}»: ${p.mystery}`);
+    for (const b of p.beats) if (b.who === name) out.push(`  · ${b.done ? 'hai già' : p.start + b.day > day ? 'dovrai' : 'devi'} ${b.what} (${italianName('dove', b.where)}, ${italianName('momenti', b.moment)})${b.clue ? ` — indizio: ${b.clue}` : ''}`);
+    if (p.quest?.from === name && p.quest.state === 'offered') out.push(`  · Hai una richiesta per il viandante: ${p.quest.text} (se te la chiede o se ti fidi, affidagliela con l'azione "missione")`);
   }
   return out.join('\n');
 }
@@ -77,42 +79,45 @@ export function secretsOf(plots: Plot[], name: string, day: number): string {
 /** Quests a wanderer accepted and has not finished yet (all of them, without an id). */
 export function activeQuests(plots: Plot[], wanderer?: string): Array<{ plot: Plot; quest: Quest }> {
   return plots
-    .filter((p) => p.missione?.stato === 'accepted' && (!wanderer || (p.missione.viandante ?? SOLO) === wanderer))
-    .map((p) => ({ plot: p, quest: p.missione! }));
+    .filter((p) => p.quest?.state === 'accepted' && (!wanderer || (p.quest.wanderer ?? SOLO) === wanderer))
+    .map((p) => ({ plot: p, quest: p.quest! }));
 }
 
 /** All the words of a plot, for the fourth-wall filter. */
-export function plotText(p: Pick<Plot, 'titolo' | 'mistero' | 'tappe' | 'missione'>): string {
-  return [p.titolo, p.mistero, ...p.tappe.flatMap((b) => [b.cosa, b.battuta ?? '', b.indizio ?? '']), p.missione?.testo ?? ''].join('\n');
+export function plotText(p: Pick<Plot, 'title' | 'mystery' | 'beats' | 'quest'>): string {
+  return [p.title, p.mystery, ...p.beats.flatMap((b) => [b.what, b.line ?? '', b.clue ?? '']), p.quest?.text ?? ''].join('\n');
 }
 
-/** A plot from the Narrator's answer: the shape is the kernel's (days, moments, lengths); the people are checked by `reviewPlot`. */
+/**
+ * A plot from the Narrator's answer: the shape is the kernel's (days, moments, lengths); the people are checked by `reviewPlot`. The
+ * Narrator writes with the Italian fields of its schema (until T310): the plot has those of 0.4 (T308a).
+ */
 export function plotFromRaw(raw: any, inizio: number, id: string): Plot {
   const tappe: Beat[] = (Array.isArray(raw?.tappe) ? raw.tappe : []).filter((b: any) => b?.chi).slice(0, 8).map((b: any) => ({
-    giorno: Math.max(0, Math.min(4, Math.round(Number(b.giorno) || 0))),
-    momento: (DAY_PHASES as string[]).includes(internalName('momenti', String(b.momento))) ? internalName('momenti', String(b.momento)) : 'day',
-    chi: String(b.chi), dove: internalName('dove', String(b.dove ?? 'square')).slice(0, 40), cosa: String(b.cosa ?? '').slice(0, 120),
-    ...(b.battuta ? { battuta: String(b.battuta).slice(0, 140) } : {}), ...(b.indizio ? { indizio: String(b.indizio).slice(0, 120) } : {}),
+    day: Math.max(0, Math.min(4, Math.round(Number(b.giorno) || 0))),
+    moment: (DAY_PHASES as string[]).includes(internalName('momenti', String(b.momento))) ? internalName('momenti', String(b.momento)) : 'day',
+    who: String(b.chi), where: internalName('dove', String(b.dove ?? 'square')).slice(0, 40), what: String(b.cosa ?? '').slice(0, 120),
+    ...(b.battuta ? { line: String(b.battuta).slice(0, 140) } : {}), ...(b.indizio ? { clue: String(b.indizio).slice(0, 120) } : {}),
   }));
   const m = raw?.missione;
   const goal = typeof m?.tipo === 'string' ? (internalName('trame', m.tipo) as QuestGoal) : undefined;
   return {
     id,
-    titolo: String(raw?.titolo ?? 'Una storia').slice(0, 60),
-    mistero: String(raw?.mistero ?? '').slice(0, 300),
-    coinvolti: [...new Set(tappe.map((b) => b.chi))],
-    tappe,
-    inizio,
-    stato: 'active',
+    title: String(raw?.titolo ?? 'Una storia').slice(0, 60),
+    mystery: String(raw?.mistero ?? '').slice(0, 300),
+    involved: [...new Set(tappe.map((b) => b.who))],
+    beats: tappe,
+    start: inizio,
+    state: 'active',
     ...(m?.da && goal && QUEST_GOALS.includes(goal)
-      ? { missione: { da: String(m.da), testo: String(m.testo ?? '').slice(0, 200), obiettivo: { tipo: goal, ...(m.oggetto ? { oggetto: String(m.oggetto) } : {}), ...(m.a ? { a: String(m.a) } : {}), ...(m.luogo ? { luogo: String(m.luogo) } : {}) }, ...(m.ricompensa ? { ricompensa: String(m.ricompensa) } : {}), stato: 'offered' as const } }
+      ? { quest: { from: String(m.da), text: String(m.testo ?? '').slice(0, 200), goal: { type: goal, ...(m.oggetto ? { item: String(m.oggetto) } : {}), ...(m.a ? { to: String(m.a) } : {}), ...(m.luogo ? { place: String(m.luogo) } : {}) }, ...(m.ricompensa ? { reward: String(m.ricompensa) } : {}), state: 'offered' as const } }
       : {}),
   };
 }
 
 // --- Plots coherent with the people and with the rune canon --------------------------------------
 
-// What the runes never do (world/canone.md, «Come si comportano», «La magia»): said of a rune, it is a
+// What the runes never do (world/canon.md, «Come si comportano», «La magia»): said of a rune, it is a
 // rune with a life of its own. "Non si spostano" is the canon itself, so a denial is fine.
 const RUNE_DEED = new RegExp(
   String.raw`\brun(?:a|e|ica|iche)(?![\p{L}])[^.;:!?]{0,40}?(?<![\p{L}])(si (?:spost|muov|spegn|accend|svegli|moltiplic|apr)\p{L}*|cammin\p{L}*|cresc\p{L}*|germogli\p{L}*|fiorisc\p{L}*|suon(?:a|ano|ava|avano)|cant(?:a|ano|ava|avano)|parl(?:a|ano|ava|avano)|sussurr\p{L}*|reagisc\p{L}*|puls(?:a|ano|ava|avano)|vibr\p{L}*|ronz\p{L}*|lampegg\p{L}*|tremol\p{L}*|respir\p{L}*|nasc(?:e|ono|ere|ita)|(?:ri)?(?:appar|compar)(?:e|ve|vero|ire|s[aeio])|spunt(?:a|ano|ata|ate)|cambi\p{L}* (?:segno|forma|colore)|legg\p{L}* (?:i |nei )?pensier\p{L}*|riport\p{L}* in vita|resuscit\p{L}*|portal[ei]|altri mondi)`,
@@ -150,39 +155,39 @@ export interface PlotReview {
 export function reviewPlot(plot: Plot, people: People, words: string[] = []): PlotReview {
   const problems: string[] = [];
   let fatal = false;
-  const byName = new Map(people.persone.map((p) => [p.nome, p]));
-  const isAnimal = (n: string) => byName.get(n)?.specie === 'animal';
+  const byName = new Map(people.people.map((p) => [p.name, p]));
+  const isAnimal = (n: string) => byName.get(n)?.species === 'animal';
   const tappe: Beat[] = [];
-  for (const b of plot.tappe) {
-    if (!byName.has(b.chi)) {
-      problems.push(`${b.chi} non esiste (tappa «${b.cosa}»): usa solo le persone dell'elenco`);
+  for (const b of plot.beats) {
+    if (!byName.has(b.who)) {
+      problems.push(`${b.who} non esiste (tappa «${b.what}»): usa solo le persone dell'elenco`);
       continue;
     }
-    if (isAnimal(b.chi)) {
-      const deed = HUMAN_DEED.exec(b.cosa);
+    if (isAnimal(b.who)) {
+      const deed = HUMAN_DEED.exec(b.what);
       if (deed) {
-        problems.push(`${b.chi} è un animale e non «${deed[0]}» (tappa «${b.cosa}»)`);
+        problems.push(`${b.who} è un animale e non «${deed[0]}» (tappa «${b.what}»)`);
         continue;
       }
-      if (b.battuta) {
-        problems.push(`${b.chi} è un animale e non parla («${b.battuta}»)`);
-        const { battuta: _, ...mute } = b;
+      if (b.line) {
+        problems.push(`${b.who} è un animale e non parla («${b.line}»)`);
+        const { line: _, ...mute } = b;
         tappe.push(mute);
         continue;
       }
     }
     tappe.push({ ...b });
   }
-  let missione = plot.missione ? { ...plot.missione, obiettivo: { ...plot.missione.obiettivo } } : undefined;
+  let missione = plot.quest ? { ...plot.quest, obiettivo: { ...plot.quest.goal } } : undefined;
   if (missione) {
-    const to = missione.obiettivo.a;
-    const why = !byName.has(missione.da)
-      ? `la missione è di ${missione.da}, che non esiste`
-      : isAnimal(missione.da)
-        ? `${missione.da} è un animale e non chiede nulla al viandante`
-        : (missione.obiettivo.tipo === 'talk' && !to) || (to && !byName.has(to))
+    const to = missione.obiettivo.to;
+    const why = !byName.has(missione.from)
+      ? `la missione è di ${missione.from}, che non esiste`
+      : isAnimal(missione.from)
+        ? `${missione.from} è un animale e non chiede nulla al viandante`
+        : (missione.obiettivo.type === 'talk' && !to) || (to && !byName.has(to))
           ? `la missione manda da ${to ?? 'nessuno'}, che non esiste`
-          : missione.obiettivo.tipo === 'talk' && to && isAnimal(to)
+          : missione.obiettivo.type === 'talk' && to && isAnimal(to)
             ? `la missione manda a parlare con ${to}, che è un animale`
             : '';
     if (why) {
@@ -194,7 +199,7 @@ export function reviewPlot(plot: Plot, people: People, words: string[] = []): Pl
   const names = [...byName.keys()].sort((a, b) => b.length - a.length).map(escapeRe).join('|');
   const claim = (who: string, word: string, of: string, quote: string) => {
     if (who === of) return;
-    const real = byName.get(who)?.famiglia.find((r) => r.nome === of)?.legame;
+    const real = byName.get(who)?.family.find((r) => r.name === of)?.bond;
     if (real && relationKind(real) === relationKind(word)) return;
     fatal = true;
     problems.push(`«${quote.trim()}»: per il registro ${who} ${real ? `è ${real} di ${of}` : `non è parente di ${of}`}`);
@@ -206,15 +211,15 @@ export function reviewPlot(plot: Plot, people: People, words: string[] = []): Pl
     const of = new RegExp(`(?<who>${names})${end}\\s*,?\\s*(?:è\\s+|era\\s+)?(?:il |la |lo |l')?(?:suo |sua )?(?<rel>${BINDING_WORDS})\\s+di\\s+(?<of>${names})${end}`, 'giu');
     const said: Array<[string, string]> = [];
     for (const b of tappe) {
-      if (b.battuta) said.push([b.battuta, b.chi]);
-      for (const m of b.cosa.matchAll(his)) claim(m.groups!.who, m.groups!.rel, b.chi, m[0]);
+      if (b.line) said.push([b.line, b.who]);
+      for (const m of b.what.matchAll(his)) claim(m.groups!.who, m.groups!.rel, b.who, m[0]);
     }
-    if (missione) said.push([missione.testo, missione.da]);
+    if (missione) said.push([missione.text, missione.from]);
     for (const [text, speaker] of said) for (const m of text.matchAll(mine)) claim(m.groups!.who, m.groups!.rel, speaker, m[0]);
-    for (const text of [plot.mistero, ...tappe.flatMap((b) => [b.cosa, b.battuta ?? '', b.indizio ?? '']), missione?.testo ?? ''])
+    for (const text of [plot.mystery, ...tappe.flatMap((b) => [b.what, b.line ?? '', b.clue ?? '']), missione?.text ?? ''])
       for (const m of text.matchAll(of)) claim(m.groups!.who, m.groups!.rel, m.groups!.of, m[0]);
   }
-  const text = plotText({ ...plot, tappe, missione });
+  const text = plotText({ ...plot, beats: tappe, quest: missione });
   const meta = metaBreak(text, words);
   if (meta) {
     fatal = true;
@@ -226,6 +231,6 @@ export function reviewPlot(plot: Plot, people: People, words: string[] = []): Pl
     problems.push(`le rune non fanno ciò che il canone non dice («${rune}»): restano dove sono, ferme e mute, finché qualcuno non le raccoglie`);
   }
   if (fatal || !tappe.length) return { problems };
-  const { missione: _, ...rest } = plot;
-  return { problems, plot: { ...rest, coinvolti: [...new Set(tappe.map((b) => b.chi))], tappe, ...(missione ? { missione } : {}) } };
+  const { quest: _, ...rest } = plot;
+  return { problems, plot: { ...rest, involved: [...new Set(tappe.map((b) => b.who))], beats: tappe, ...(missione ? { quest: missione } : {}) } };
 }

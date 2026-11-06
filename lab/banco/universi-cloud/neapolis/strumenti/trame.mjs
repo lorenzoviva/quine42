@@ -1,4 +1,4 @@
-// Le 8 trame di Neapolis (world/plots.json), le regole (world/rules.json) e lo stato iniziale (world/stato.json).
+// Le 8 trame di Neapolis (world/plots.json), le regole (world/rules.json) e lo stato iniziale (world/state.json).
 // node lab/banco/universi-cloud/neapolis/strumenti/trame.mjs
 import { writeFileSync } from 'node:fs';
 const D = 'lab/banco/universi-cloud/neapolis/world';

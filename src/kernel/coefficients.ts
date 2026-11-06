@@ -8,7 +8,7 @@
 import { priceOf, costOf } from './ai/prices';
 import { DEFAULT_SCULPTORS, type SculptorAiModels } from './agents/sculptor';
 import type { AiConfig } from './types';
-import { internalCoefficients, internalSculptors } from './internalNames';
+import { internalCoefficients, internalFields, internalSculptors } from './internalNames';
 
 export const COEFFICIENT_KEYS = ['sessions', 'dialogues', 'plots', 'reviews', 'models', 'people', 'inhabitants', 'packs', 'entities', 'pieces', 'chunks', 'words', 'looks', 'actions', 'magic', 'death', 'repairs', 'studio', 'lives'] as const;
 export type CoefficientKey = (typeof COEFFICIENT_KEYS)[number];
@@ -17,9 +17,9 @@ export type Coefficients = Record<CoefficientKey, number>;
 export const FULL_DETAIL: Coefficients = { sessions: 1, dialogues: 1, plots: 1, reviews: 1, models: 1, people: 1, inhabitants: 1, packs: 1, entities: 1, pieces: 1, chunks: 1, words: 1, looks: 1, actions: 1, magic: 1, death: 1, repairs: 1, studio: 1, lives: 1 };
 
 /** «Low Detail»: about a fifth of the calls the world makes by itself, and the cheap model for every figure; what the wanderer asks stays answered. */
-export const LOW_DETAIL: { coefficienti: Coefficients; scultori: Partial<SculptorAiModels> } = {
-  coefficienti: { sessions: 0.25, dialogues: 0.2, plots: 0.34, reviews: 0.25, models: 0.34, people: 0.5, inhabitants: 0.25, packs: 0.25, entities: 0.34, pieces: 0.34, chunks: 1, words: 1, looks: 1, actions: 1, magic: 1, death: 1, repairs: 1, studio: 1, lives: 0.2 },
-  scultori: { figure: 'gemini-3.1-flash-lite', structure: 'gemini-3.1-flash-lite', important: 'gemini-3.8-flash', artist: 'gemini-3.1-flash-lite', musician: 'gemini-3.1-flash-lite' },
+export const LOW_DETAIL: { coefficients: Coefficients; sculptors: Partial<SculptorAiModels> } = {
+  coefficients: { sessions: 0.25, dialogues: 0.2, plots: 0.34, reviews: 0.25, models: 0.34, people: 0.5, inhabitants: 0.25, packs: 0.25, entities: 0.34, pieces: 0.34, chunks: 1, words: 1, looks: 1, actions: 1, magic: 1, death: 1, repairs: 1, studio: 1, lives: 0.2 },
+  sculptors: { figure: 'gemini-3.1-flash-lite', structure: 'gemini-3.1-flash-lite', important: 'gemini-3.8-flash', artist: 'gemini-3.1-flash-lite', musician: 'gemini-3.1-flash-lite' },
 };
 
 /**
@@ -28,9 +28,9 @@ export const LOW_DETAIL: { coefficienti: Coefficients; scultori: Partial<Sculpto
  * (`npc.reply`, `npc.dialogue`) with its own model.
  */
 export interface ActorConfig {
-  acceso: boolean;
+  on: boolean;
   /** The Actor's model; `ACTOR_MODEL` when it says nothing. */
-  modello: string;
+  model: string;
 }
 
 /**
@@ -42,17 +42,18 @@ export const ACTOR_MODEL = 'gemini-3.8-flash';
 
 /** The Actor's option from what universe.json says: a boolean, a model's name (on, with that model), or an object. */
 export function repairActor(raw: unknown): ActorConfig {
-  if (typeof raw === 'boolean') return { acceso: raw, modello: ACTOR_MODEL };
+  if (typeof raw === 'boolean') return { on: raw, model: ACTOR_MODEL };
   if (typeof raw === 'string') {
     const m = raw.trim();
-    if (!m || /^(no|off|spento|false|0)$/i.test(m)) return { acceso: false, modello: ACTOR_MODEL };
-    if (/^(s[iì]|on|acceso|true|1)$/i.test(m)) return { acceso: true, modello: ACTOR_MODEL };
-    return { acceso: true, modello: m };
+    if (!m || /^(no|off|spento|false|0)$/i.test(m)) return { on: false, model: ACTOR_MODEL };
+    if (/^(s[iì]|on|acceso|true|1)$/i.test(m)) return { on: true, model: ACTOR_MODEL };
+    return { on: true, model: m };
   }
-  const r = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
-  const modello = typeof r.modello === 'string' && r.modello.trim() ? r.modello.trim() : ACTOR_MODEL;
-  const acceso = typeof r.acceso === 'boolean' ? r.acceso : typeof r.acceso === 'string' ? /^(s[iì]|on|acceso|true|1)$/i.test(r.acceso.trim()) : r.acceso === 1;
-  return { acceso, modello };
+  // The fields of the contract 0.3 (`acceso`, `modello`) read internal (T308a).
+  const r = internalFields('actor', (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>);
+  const model = typeof r.model === 'string' && r.model.trim() ? r.model.trim() : ACTOR_MODEL;
+  const on = typeof r.on === 'boolean' ? r.on : typeof r.on === 'string' ? /^(s[iì]|on|acceso|true|1)$/i.test(r.on.trim()) : r.on === 1;
+  return { on, model };
 }
 
 /** What every coefficient regulates, in the words of the Genesis screen and of the lobby; `minimo` is what the game does at 0. */
@@ -169,7 +170,7 @@ export class Rationing {
   }
 }
 
-const PRESETS: Record<string, Coefficients> = { 'low detail': LOW_DETAIL.coefficienti, low: LOW_DETAIL.coefficienti, pieno: FULL_DETAIL, full: FULL_DETAIL };
+const PRESETS: Record<string, Coefficients> = { 'low detail': LOW_DETAIL.coefficients, low: LOW_DETAIL.coefficients, pieno: FULL_DETAIL, full: FULL_DETAIL };
 
 /** A coefficient from what universe.json says: a number, «0,5», «50%»; clamped to 0-1, `absent` (1) when it says nothing. */
 function one(v: unknown, absent = 1): number {
@@ -188,7 +189,7 @@ export function repairCoefficients(raw: unknown): Coefficients {
 }
 
 /** Whether the coefficients are «Low Detail»'s. */
-export const isLowDetail = (c: Coefficients) => COEFFICIENT_KEYS.every((k) => c[k] === LOW_DETAIL.coefficienti[k]);
+export const isLowDetail = (c: Coefficients) => COEFFICIENT_KEYS.every((k) => c[k] === LOW_DETAIL.coefficients[k]);
 
 /** A rhythm of `base` stretched by a coefficient: every `base / c` (Infinity at 0). */
 export const stretch = (base: number, c: number): number => (c <= 0 ? Infinity : Math.max(base, Math.round(base / c)));
@@ -250,12 +251,12 @@ export interface HourLine {
  * prices of today. The budgets of `ai` (per session) cap what the world does by itself.
  */
 export function hourlyEstimate(ai: AiConfig, date?: string): { righe: HourLine[]; chiamate: number; dollari: number } {
-  const c = repairCoefficients(ai.coefficienti);
-  const sc: SculptorAiModels = { ...DEFAULT_SCULPTORS, ...internalSculptors(ai.scultori ?? {}) };
-  const actor = repairActor(ai.attore);
+  const c = repairCoefficients(ai.coefficients);
+  const sc: SculptorAiModels = { ...DEFAULT_SCULPTORS, ...internalSculptors(ai.sculptors ?? {}) };
+  const actor = repairActor(ai.actor);
   const text = (n: number) => n * (costOf(ai.textModel, WEIGHT.testo, date) ?? 0);
   // Who plays the people: the Actor's model when the option is on (T157), else the text model.
-  const played = (n: number) => n * (costOf(actor.acceso ? actor.modello : ai.textModel, WEIGHT.testo, date) ?? 0);
+  const played = (n: number) => n * (costOf(actor.on ? actor.model : ai.textModel, WEIGHT.testo, date) ?? 0);
   const H = HOUR;
   const rows: HourLine[] = [];
   const add = (voce: string, modo: HourLine['modo'], chiamate: number, dollari: number) => rows.push({ voce, modo, chiamate: Math.round(chiamate * 10) / 10, dollari });
@@ -276,7 +277,7 @@ export function hourlyEstimate(ai: AiConfig, date?: string): { righe: HourLine[]
   const talks = c.dialogues <= 0 ? 0 : (H.vicini / (40 / c.dialogues)) * Math.min(1, c.people * 1.5);
   add(COEFFICIENT_INFO.dialogues.nome, 'diretta', talks, played(talks));
   // The Actor's sheets: one per individual heard for the first time (a conversation, a dialogue), never more than the people met.
-  if (actor.acceso) {
+  if (actor.on) {
     const sheets = Math.min(people, (H.parole * c.words) / 2 + talks);
     add("Schede dei personaggi (l'Attore acceso)", 'indiretta', sheets, text(sheets));
   }
@@ -295,7 +296,7 @@ export function hourlyEstimate(ai: AiConfig, date?: string): { righe: HourLine[]
   add(COEFFICIENT_INFO.reviews.nome, 'diretta', judges, judges * (costOf(sc.artist, WEIGHT.giudizio, date) ?? 0));
   // The Musician: a program for each environment that has none, a third of them sent back once.
   const pause = pieceGap(c.pieces);
-  const pieces = Number.isFinite(pause) ? Math.min(H.ambientiSenzaBrano, 3600 / pause, ai.maxBrani ?? 8) * 1.34 : 0;
+  const pieces = Number.isFinite(pause) ? Math.min(H.ambientiSenzaBrano, 3600 / pause, ai.maxPieces ?? 8) * 1.34 : 0;
   add(COEFFICIENT_INFO.pieces.nome, 'diretta', pieces, pieces * (costOf(sc.musician, WEIGHT.scultura, date) ?? 0));
   // What the wanderer asks: the share of it the knobs let through to the models.
   add(COEFFICIENT_INFO.words.nome, 'diretta', H.parole * c.words, played(H.parole * c.words));

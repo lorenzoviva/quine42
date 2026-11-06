@@ -16,11 +16,11 @@ import { italianName } from './internalNames';
  * What a model's index entry says of its size (ADR-0092): the size, if not its class's own, and the coarser density
  * the large boxes run at (ADR-0049), so that the library runs it in the box it was sculpted in.
  */
-export function modelSize(req: Pick<SculptRequest, 'classe' | 'taglia'>): Pick<ModelInfo, 'taglia' | 'vpt'> {
+export function modelSize(req: Pick<SculptRequest, 'classe' | 'taglia'>): Pick<ModelInfo, 'size' | 'vpt'> {
   const cls = classOf(req.classe), t = sizeOf(req.taglia);
   if (!cls || !t || t.id === cls.taglia) return {};
   const vpt = densityOf(tilesOf(cls, t.id));
-  return { taglia: t.id, ...(vpt !== TILE ? { vpt } : {}) };
+  return { size: t.id, ...(vpt !== TILE ? { vpt } : {}) };
 }
 
 /** Common shapes of items: one program each, tinted with each item's colour. */
@@ -68,15 +68,15 @@ export class ModelDirector {
       const man = m.manifest;
       const app = man.appearance;
       if (!app || !lacks(app.model)) continue;
-      const classe = app.classe ?? guessClass(`${man.name} ${man.description ?? ''} ${app.aspetto ?? ''}`, man.persona ? 'figure' : undefined).id;
-      const taglia = sizeOf(app.taglia)?.id;
-      out.push({ id: app.model!, nome: man.name, aspetto: app.aspetto ?? man.description ?? man.name, classe, ...(taglia ? { taglia } : {}), contesto: man.context });
+      const classe = app.class ?? guessClass(`${man.name} ${man.description ?? ''} ${app.look ?? ''}`, man.persona ? 'figure' : undefined).id;
+      const taglia = sizeOf(app.size)?.id;
+      out.push({ id: app.model!, nome: man.name, aspetto: app.look ?? man.description ?? man.name, classe, ...(taglia ? { taglia } : {}), contesto: man.context });
     }
     for (const d of k.content.items.values()) {
       if (!lacks(d.model)) continue;
       // A common shape is asked for by its word in the language of the world (T307a: the id is internal, `shape-sack`; the word is «sacco»).
       const forma = d.model!.startsWith(SHAPE_PREFIX) ? italianName('impronte', d.model!.slice(SHAPE_PREFIX.length)) : undefined;
-      out.push(forma ? { id: d.model!, nome: `${forma} (forma comune degli oggetti)`, aspetto: `un ${forma} semplice e riconoscibile, come tanti oggetti del mondo (per esempio: ${d.name})`, classe: 'object', tinta: true } : { id: d.model!, nome: d.name, aspetto: d.aspetto ?? d.description, classe: 'object' });
+      out.push(forma ? { id: d.model!, nome: `${forma} (forma comune degli oggetti)`, aspetto: `un ${forma} semplice e riconoscibile, come tanti oggetti del mondo (per esempio: ${d.name})`, classe: 'object', tinta: true } : { id: d.model!, nome: d.name, aspetto: d.look ?? d.description, classe: 'object' });
     }
     // Structures the Cartographer asked for (ADR-0043), at their size (ADR-0092): the rare ones (Huge per zone,
     // Gargantuan per realm, the kernel sees to it) by the best model.
@@ -114,7 +114,7 @@ export class ModelDirector {
         this.lacking(req, 'invalid', this.k.lastDiscard('sculptor', 'model.sculpt'));
         return false;
       }
-      const added = this.k.addModel(req.id, r.xml, { classe: req.classe, ...modelSize(req), nome: req.nome, autore: r.model, ...(r.voto !== undefined ? { voto: r.voto } : {}), ...(req.tinta ? { tinta: 'C' } : {}) }, `scultore: ${req.nome}`);
+      const added = this.k.addModel(req.id, r.xml, { class: req.classe, ...modelSize(req), name: req.nome, author: r.model, ...(r.voto !== undefined ? { score: r.voto } : {}), ...(req.tinta ? { tint: 'C' } : {}) }, `scultore: ${req.nome}`);
       if (!added) this.lacking(req, 'invalid', this.k.lastDiscard('sculptor', 'model.sculpt'));
       return added;
     } catch (e) {
@@ -129,7 +129,7 @@ export class ModelDirector {
   }
 
   private lacking(req: SculptRequest, esito: 'invalid' | 'error', motivo: string): void {
-    this.k.noteShortfall({ richiesta: `il modello di «${req.nome}»`, agente: 'sculptor', compito: 'model.sculpt', esito, motivo });
+    this.k.noteShortfall({ request: `il modello di «${req.nome}»`, agent: 'sculptor', task: 'model.sculpt', outcome: esito, reason: motivo });
   }
 
   /** A model of its own for an entity that showed a generic one, or a new version of its own. */

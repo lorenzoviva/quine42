@@ -101,11 +101,11 @@ describe('new magic runes (T57b)', () => {
     expect(FUTHARK).not.toContain(rune.glyph);
     expect(Object.values(k.content.runes).filter((r) => r.glyph === rune.glyph)).toHaveLength(1);
     expect(k.repo.head().message).toMatch(/runa nuova: sangue/);
-    expect(k.files['world/canone.md']).toContain('Wunjo («sangue»');
+    expect(k.files['world/canon.md']).toContain('Wunjo («sangue»');
     expect(canonSummary(k.files)).toContain('Wunjo («sangue», sangue)');
     expect(k.content.loot.magia.entries.some((e) => e.item === 'rune:sangue')).toBe(true);
     expect(k.content.get('rune:sangue')).toMatchObject({ category: 'magic', tags: ['runa', 'magica'] });
-    expect(allCards(k.files).some((c) => c.id === 'rune:sangue' && c.tipo === 'rune' && c.autore === 'narrator')).toBe(true);
+    expect(allCards(k.files).some((c) => c.id === 'rune:sangue' && c.tipo === 'rune' && c.author === 'narrator')).toBe(true);
     expect(k.feed().some((e) => e.task === 'rune.invent' && /runa nuova/.test(e.text))).toBe(true);
 
     // On the ground like any rune: picked up, it goes to the phrase.

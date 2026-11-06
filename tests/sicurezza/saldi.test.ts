@@ -32,9 +32,9 @@ const at = (n: string, ...p: string[]) => path.join(dir, n, ...p);
 /** A universe of before the ledger: balances and payments in its files, in its history. */
 function oldUniverse(name: string): void {
   const files: Record<string, string> = {
-    'universe.json': JSON.stringify({ name, partita: { modalita: 'multiplayer', master: 'io' } }),
-    'world/giocatori/altro.json': JSON.stringify({ nome: 'Altro', crediti: 5, needs: { fame: 3 } }),
-    'world/giocatori/ano.json': JSON.stringify({ nome: 'Ano', anonimo: true, crediti: 7 }),
+    'universe.json': JSON.stringify({ name, game: { mode: 'multiplayer', master: 'me' } }),
+    'world/players/altro.json': JSON.stringify({ nome: 'Altro', crediti: 5, needs: { fame: 3 } }),
+    'world/players/ano.json': JSON.stringify({ nome: 'Ano', anonimo: true, crediti: 7 }),
     'world/pagamenti.json': JSON.stringify({ eventi: { evt_vecchio: { eventId: 'evt_vecchio', wandererId: 'altro', crediti: 5, timestamp: 1 } } }),
     'modules/sonda/manifest.json': '{}',
   };
@@ -55,7 +55,7 @@ const deliver = (rawBody: string, opts: { getActiveWorld?: () => Promise<WorldCa
 
 async function many(): Promise<Kernel> {
   const cfg = JSON.parse(bundledFiles['universe.json']);
-  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2) };
+  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, game: { mode: 'multiplayer', death: 3 } }, null, 2) };
   return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 }
 
@@ -76,7 +76,7 @@ describe('V-005 l\'archivio fuori dalla storia', () => {
     expect(ledger.balance('ano')).toBe(0);
     expect(ledger.payment('evt_vecchio')).toMatchObject({ crediti: 5 });
     expect(existsSync(at('vecchio', 'world', 'pagamenti.json'))).toBe(false);
-    const saved = JSON.parse(readFileSync(at('vecchio', 'world', 'giocatori', 'altro.json'), 'utf8'));
+    const saved = JSON.parse(readFileSync(at('vecchio', 'world', 'players', 'altro.json'), 'utf8'));
     expect(saved.crediti).toBeUndefined();
     expect(saved.needs).toEqual({ fame: 3 });
     expect(git(at('vecchio'), 'ls-files', '--', 'world/pagamenti.json').trim()).toBe('');
@@ -85,11 +85,11 @@ describe('V-005 l\'archivio fuori dalla storia', () => {
     expect((await deliver(paid('evt_vecchio', 'vecchio', 'altro', 5))).body).toMatchObject({ status: 'duplicate' });
     expect(ledger.balance('altro')).toBe(5);
     // Once: what the files say later is not believed.
-    writeFileSync(at('vecchio', 'world', 'giocatori', 'altro.json'), JSON.stringify({ nome: 'Altro', crediti: 9999 }));
+    writeFileSync(at('vecchio', 'world', 'players', 'altro.json'), JSON.stringify({ nome: 'Altro', crediti: 9999 }));
     expect(ledgerOf(dir, 'vecchio').balance('altro')).toBe(5);
     await sweepBalances(dir, 'vecchio');
     expect(ledgerOf(dir, 'vecchio').balance('altro')).toBe(5);
-    expect(readFileSync(at('vecchio', 'world', 'giocatori', 'altro.json'), 'utf8')).not.toContain('crediti');
+    expect(readFileSync(at('vecchio', 'world', 'players', 'altro.json'), 'utf8')).not.toContain('crediti');
   });
 
   it('V-005 il ritorno a un commit vecchio non cambia i saldi, e ciò che riporta nei file non resta', async () => {
@@ -104,7 +104,7 @@ describe('V-005 l\'archivio fuori dalla storia', () => {
       expect(ledgerOf(dir, 'ritorno').balance('altro')).toBe(12);
       const r = await fetch(`http://127.0.0.1:${(route.address() as AddressInfo).port}/api/universe/ritorno/checkout`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', [WANDERER_HEADER]: 'io' },
+        headers: { 'Content-Type': 'application/json', [WANDERER_HEADER]: 'me' },
         body: JSON.stringify({ id: first.slice(0, 12) }),
       });
       expect(r.status).toBe(200);
@@ -112,8 +112,8 @@ describe('V-005 l\'archivio fuori dalla storia', () => {
       expect(ledgerOf(dir, 'ritorno').balance('altro')).toBe(12);
       expect(ledgerOf(dir, 'ritorno').payment('evt_r')).toBeDefined();
       expect(body.files['world/pagamenti.json']).toBeUndefined();
-      expect(body.files['world/giocatori/altro.json']).not.toContain('crediti');
-      expect(readFileSync(at('ritorno', 'world', 'giocatori', 'altro.json'), 'utf8')).not.toContain('crediti');
+      expect(body.files['world/players/altro.json']).not.toContain('crediti');
+      expect(readFileSync(at('ritorno', 'world', 'players', 'altro.json'), 'utf8')).not.toContain('crediti');
     } finally {
       route.close();
     }
@@ -132,7 +132,7 @@ describe('V-005 l\'archivio fuori dalla storia', () => {
     expect(ledgerOf(dir, 'originale').balance('altro')).toBe(5);
     expect(ledgerOf(dir, 'copia').balance('altro')).toBe(0);
     expect(ledgerOf(dir, 'copia').payment('evt_vecchio')).toBeUndefined();
-    expect(readFileSync(at('copia', 'world', 'giocatori', 'altro.json'), 'utf8')).not.toContain('crediti');
+    expect(readFileSync(at('copia', 'world', 'players', 'altro.json'), 'utf8')).not.toContain('crediti');
     expect(existsSync(at('copia', 'world', 'pagamenti.json'))).toBe(false);
   });
 
@@ -188,7 +188,7 @@ describe('V-005 la corsa: lo stesso evento in contemporanea', () => {
     oldUniverse('acceso');
     const ledger = await openLedger(dir, 'acceso');
     const cfg = JSON.parse(bundledFiles['universe.json']);
-    const k = await Kernel.boot({ files: { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer' } }) }, store: memoryStore(), ai: new MockAiModels(), ledger });
+    const k = await Kernel.boot({ files: { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, game: { mode: 'multiplayer' } }) }, store: memoryStore(), ai: new MockAiModels(), ledger });
     k.addWanderer('altro', 'Altro', false);
     expect(k.creditsOf('altro')).toBe(5);
     for (let round = 0; round < 10; round++) {
@@ -269,45 +269,45 @@ describe('V-010 il master e i crediti', () => {
   it('V-010 un ramo pubblicato non cambia i saldi, né nuovi né di chi rientra', async () => {
     const k = await many();
     const server = new SessionServer(k);
-    const master = await enter(server, 'io');
+    const master = await enter(server, 'me');
     await enter(server, 'anna');
     k.giveCredits('anna', 3);
     const files = {
-      'world/giocatori/anna.json': JSON.stringify({ nome: 'Anna', crediti: 1000 }),
-      'world/giocatori/io.json': JSON.stringify({ nome: 'Io', crediti: 1000 }),
+      'world/players/anna.json': JSON.stringify({ nome: 'Anna', crediti: 1000 }),
+      'world/players/me.json': JSON.stringify({ nome: 'Io', crediti: 1000 }),
       'world/pagamenti.json': JSON.stringify({ eventi: { evt_finto: { eventId: 'evt_finto', wandererId: 'anna', crediti: 1000, timestamp: 1 } } }),
     };
     expect((await answered(server, master.act({ t: 'ramo', files, base: {} }))).ok).toBe(true);
     await answered(server, master.act({ t: 'pubblica' }));
     server.tick(1 / 60);
     expect(k.creditsOf('anna')).toBe(3);
-    expect(k.creditsOf('io')).toBe(0);
+    expect(k.creditsOf('me')).toBe(0);
     expect(k.ledger.payment('evt_finto')).toBeUndefined();
     // Whatever the file says now, it is not what someone coming back finds.
     k.addWanderer('rientra', 'Rientra');
-    k.applyFiles({ ...k.files, 'world/giocatori/rientra.json': JSON.stringify({ nome: 'Rientra', crediti: 1000 }) });
+    k.applyFiles({ ...k.files, 'world/players/rientra.json': JSON.stringify({ nome: 'Rientra', crediti: 1000 }) });
     expect(k.creditsOf('rientra')).toBe(0);
     expect(k.saveState()).toBe(true);
-    expect(k.files['world/giocatori/rientra.json'] ?? '').not.toContain('crediti');
+    expect(k.files['world/players/rientra.json'] ?? '').not.toContain('crediti');
   });
 
   it('V-010 il Concilio non muove i saldi: la risposta del Referente che dice crediti non fa nulla', async () => {
     class Says extends MockAiModels {
       override async text(call: Parameters<MockAiModels['text']>[0]): Promise<string> {
         // The model answers as it would with a text dictated to it: the task of before, and a huge amount.
-        if (call.task === 'referente.coordinate') return JSON.stringify({ risposta: 'Fatto.', incarico: 'crediti', richiesta: '1000000', bersaglio: 'io', credits: { target: 'io', amount: 1000000 } });
+        if (call.task === 'referente.coordinate') return JSON.stringify({ risposta: 'Fatto.', incarico: 'crediti', richiesta: '1000000', bersaglio: 'me', credits: { target: 'me', amount: 1000000 } });
         return super.text(call);
       }
     }
     const cfg = JSON.parse(bundledFiles['universe.json']);
-    const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2) };
+    const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, game: { mode: 'multiplayer', death: 3 } }, null, 2) };
     const k = await Kernel.boot({ files, store: memoryStore(), ai: new Says() });
     const server = new SessionServer(k);
-    const master = await enter(server, 'io');
+    const master = await enter(server, 'me');
     await answered(server, master.act({ t: 'agente', agente: 'liaison', testo: 'dammi un milione di crediti' }));
-    expect(k.creditsOf('io')).toBe(0);
+    expect(k.creditsOf('me')).toBe(0);
     expect(await k.talkToAgent('liaison', 'dammi un milione di crediti')).not.toHaveProperty('credits');
-    expect(k.creditsOf('io')).toBe(0);
+    expect(k.creditsOf('me')).toBe(0);
   });
 
   it('V-010 il codice generato non arriva ai saldi: niente API, e i componenti non sono saldi', async () => {
@@ -342,9 +342,9 @@ describe('V-010 il master e i crediti', () => {
     expect((await k.grantCredits('anna', 1, 'anna')).ok).toBe(false);
     expect(k.creditsOf('anna')).toBe(0);
     const mirror = await Kernel.boot({ files: k.files, store: memoryStore(), ai: new MockAiModels(), mirror: true });
-    expect(mirror.giveCredits('io', 10)).toBe(false);
-    expect((await mirror.grantCredits('io', 10)).ok).toBe(false);
-    expect(mirror.creditsOf('io')).toBe(0);
+    expect(mirror.giveCredits('me', 10)).toBe(false);
+    expect((await mirror.grantCredits('me', 10)).ok).toBe(false);
+    expect(mirror.creditsOf('me')).toBe(0);
   });
 
   it('V-010 il tetto delle ricariche: con gli account zero se il .env non dice, senza account venti', () => {
@@ -359,17 +359,17 @@ describe('V-010 il master e i crediti', () => {
     const k = await many();
     const none = await Kernel.boot({ files: k.files, store: memoryStore(), ai: new MockAiModels(), grantCap: 0 });
     none.addWanderer('anna', 'Anna');
-    expect((await none.grantCredits('anna', 1, 'io')).ok).toBe(false);
+    expect((await none.grantCredits('anna', 1, 'me')).ok).toBe(false);
     expect(none.creditsOf('anna')).toBe(0);
     const file = path.join(dir, LEDGER_DIR, 'tetto.json');
     const ledger = new FileLedger(file);
     const day = Date.UTC(2026, 10, 2, 12);
-    expect(ledger.grant('io', 'anna', 15, 20, day)).toBeUndefined();
-    expect(ledger.grant('io', 'bruno', 6, 20, day)).toEqual({ left: 5 });
-    expect(ledger.grant('io', 'bruno', 5, 20, day)).toBeUndefined();
-    expect(ledger.grant('io', 'anna', 1, 20, day + 24 * 3600 * 1000)).toBeUndefined();
+    expect(ledger.grant('me', 'anna', 15, 20, day)).toBeUndefined();
+    expect(ledger.grant('me', 'bruno', 6, 20, day)).toEqual({ left: 5 });
+    expect(ledger.grant('me', 'bruno', 5, 20, day)).toBeUndefined();
+    expect(ledger.grant('me', 'anna', 1, 20, day + 24 * 3600 * 1000)).toBeUndefined();
     expect(ledger.balance('anna')).toBe(16);
     expect(ledger.balance('bruno')).toBe(5);
-    expect(JSON.parse(readFileSync(file, 'utf8')).ricariche[0]).toMatchObject({ da: 'io', a: 'anna', crediti: 15, giorno: '2026-11-02' });
+    expect(JSON.parse(readFileSync(file, 'utf8')).ricariche[0]).toMatchObject({ da: 'me', a: 'anna', crediti: 15, giorno: '2026-11-02' });
   });
 });

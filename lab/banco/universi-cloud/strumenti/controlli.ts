@@ -45,14 +45,14 @@ export function testiDi(path: string, text: string): Array<[string, string]> {
 
 /** The fourth wall (metaBreak, with the lexicon's words: no glossary either) on every text of the world, and the bible's own check. */
 export function quartaParete(files: FileMap, maps: Record<string, ChunkRecord>): string[] {
-  const words = lexiconWords(files['world/lessico.md'] ?? '');
+  const words = lexiconWords(files['world/lexicon.md'] ?? '');
   const out: string[] = [];
   const texts: Array<[string, string]> = [];
   for (const p of fileDelMondo(files)) texts.push(...testiDi(p, files[p]));
   for (const [name, rec] of Object.entries(maps)) strings(rec, `maps/${name}.json`, texts);
   for (const [where, t] of texts) {
     // The lexicon itself names its words: only the meta-game is looked for there.
-    const m = metaBreak(t, where === 'world/lessico.md' ? [] : words);
+    const m = metaBreak(t, where === 'world/lexicon.md' ? [] : words);
     if (m) out.push(`${where}: «${m}» in «${t.slice(0, 90)}»`);
   }
   const bible = JSON.parse(files['world/bible.json']);
@@ -76,16 +76,16 @@ export function piani(k: Kernel, maps: Record<string, ChunkRecord>): string[] {
 /** The people: names unlike each other, relations that go both ways; the plots through reviewPlot. */
 export function societa(files: FileMap): string[] {
   const people = readPeople(files);
-  const words = lexiconWords(files['world/lessico.md'] ?? '');
+  const words = lexiconWords(files['world/lexicon.md'] ?? '');
   const out: string[] = [];
-  const names = people.persone.map((p) => p.nome);
+  const names = people.people.map((p) => p.name);
   names.forEach((a, i) => names.slice(i + 1).forEach((b) => similarNames(a, b) && out.push(`persone: «${a}» e «${b}» sono troppo simili`)));
-  for (const p of people.persone) {
-    if (p.routine?.length !== 4) out.push(`${p.nome}: la routine non ha quattro momenti`);
-    for (const f of p.famiglia) {
-      const other = people.persone.find((x) => x.nome === f.nome);
-      if (!other) out.push(`${p.nome}: legame con ${f.nome}, che non c'è`);
-      else if (!other.famiglia.some((g) => g.nome === p.nome)) out.push(`${p.nome}: ${f.nome} non sa di essere ${f.legame}`);
+  for (const p of people.people) {
+    if (p.routine?.length !== 4) out.push(`${p.name}: la routine non ha quattro momenti`);
+    for (const f of p.family) {
+      const other = people.people.find((x) => x.name === f.name);
+      if (!other) out.push(`${p.name}: legame con ${f.name}, che non c'è`);
+      else if (!other.family.some((g) => g.name === p.name)) out.push(`${p.name}: ${f.name} non sa di essere ${f.bond}`);
     }
   }
   for (const f of repairSociety(people, (t) => (/gatto/.test(t) ? 'animal' : 'person')).fixes) out.push(`persone: il kernel correggerebbe «${f}»`);

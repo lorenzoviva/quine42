@@ -550,6 +550,7 @@ export const INTERNAL_NAMES: readonly NameDomain[] = [
       durata: 'duration', guarda: 'watch', righe: 'lines', nome: 'name', posto: 'slot', categoria: 'category', secondi: 'seconds', verso: 'toward',
       oggetto: 'item', azione: 'action', mestieri: 'jobs', nomi: 'names', giornata: 'day', fa: 'does', dove: 'where', da: 'from', a: 'to',
       casella: 'tile', lascia: 'drop', con: 'with', quante: 'count', posa: 'pose', dice: 'says', percorso: 'route', persona: 'persona',
+      entita: 'entity',
     },
     note: '`posto` è la tasca di un oggetto di prova nei casi e il posto di lavoro nei mestieri (`workplace`): i due stanno in oggetti diversi; qui la tasca',
   }),
@@ -557,11 +558,12 @@ export const INTERNAL_NAMES: readonly NameDomain[] = [
     id: 'campi-mestieri',
     title: 'Campi dei programmi di mestiere che cambiano senso',
     kind: 'fields',
-    where: ['src/kernel/jobs.ts (JobProgram.posto, JobTask.azione)'],
+    where: ['src/kernel/jobs.ts (JobProgram.posto)'],
     reach: ['disco', 'lua'],
     lang: 'en',
     step: 'T308a',
-    names: { posto: 'workplace', azione: 'activity' },
+    names: { posto: 'workplace' },
+    note: 'l’`azione` di un compito è l’id di un’azione della cosa, `action` come nei casi (`campi-manifest`); la `posa` è l’attività',
   }),
   d({
     id: 'campi-regole',
@@ -571,7 +573,7 @@ export const INTERNAL_NAMES: readonly NameDomain[] = [
     reach: ['disco', 'filo'],
     lang: 'en',
     step: 'T308a',
-    names: { chiave: 'key', testo: 'text', possibile: 'possible', racconto: 'story', effetti: 'effects', carta: 'card' },
+    names: { regole: 'rules', chiave: 'key', testo: 'text', possibile: 'possible', racconto: 'story', effetti: 'effects', carta: 'card' },
   }),
   d({
     id: 'campi-persone',
@@ -599,7 +601,7 @@ export const INTERNAL_NAMES: readonly NameDomain[] = [
     names: {
       titolo: 'title', mistero: 'mystery', coinvolti: 'involved', tappe: 'beats', missione: 'quest', inizio: 'start', stato: 'state', giorno: 'day',
       momento: 'moment', chi: 'who', dove: 'where', cosa: 'what', battuta: 'line', indizio: 'clue', fatto: 'done', da: 'from', testo: 'text',
-      obiettivo: 'goal', ricompensa: 'reward', viandante: 'wanderer', tipo: 'type', oggetto: 'item', a: 'to', luogo: 'place',
+      obiettivo: 'goal', ricompensa: 'reward', viandante: 'wanderer', tipo: 'type', oggetto: 'item', a: 'to', luogo: 'place', trame: 'plots',
     },
   }),
   d({
@@ -676,8 +678,9 @@ export const INTERNAL_NAMES: readonly NameDomain[] = [
       carta: 'card', autore: 'author', pagante: 'payer', titolare: 'holder', origini: 'origins', universo: 'universe', impronta: 'fingerprint',
       utilizzi: 'uses', luoghi: 'chunks', trame: 'plots', allaNascita: 'atBirth', quota: 'share', ricevuto: 'received', prezzi: 'prices',
       giorni: 'days', paganti: 'payers', chi: 'who', richiesta: 'request', agente: 'agent', compito: 'task', esito: 'outcome', motivo: 'reason',
+      nome: 'name', voci: 'entries', volte: 'times', primo: 'first', ultimo: 'last',
     },
-    note: '`carta` sta in quasi ogni file del Concilio (piani, regole, trame, imprese): la migrazione lo cambia ovunque',
+    note: '`carta` sta in quasi ogni file del Concilio (piani, regole, trame, imprese): la migrazione lo cambia ovunque. `nome` è delle carte dei luoghi, `voci`, `volte`, `primo` e `ultimo` di `world/shortfalls.json`',
   }),
   d({
     id: 'campi-piani',
@@ -1091,4 +1094,273 @@ export function internalGraph<T>(raw: T): T {
   if (Array.isArray(o.links))
     o.links = o.links.map((l) => (isRecord(l) ? { ...l, ...(typeof l.source === 'string' ? { source: internalCardId(l.source) } : {}), ...(typeof l.target === 'string' ? { target: internalCardId(l.target) } : {}) } : l));
   return o as T;
+}
+
+// --- The contract 0.4 (T308a): the fields and the files of a universe ------------------------------------------------------------------
+// A file's fields are renamed by its shape: which Italian keys of which of its objects a field domain renames (`only`). An object's other
+// keys are content (the ids of a dictionary, the components of a thing) or another contract's (the wire's and Lua's, T308b). Like the
+// functions of 0.2 and 0.3: idempotent (an internal key stays), and a key whose internal name is there already gives way to it. The
+// migration of a universe (migrations.ts) uses them, and so does every reader of a file, for what the Council still writes with the
+// Italian fields of its schemas (until T310 changes its prompts) and for a universe on disk not ported yet (the tools read the disk).
+// The values first, then the fields: the repairs of 0.2 and 0.3 read the Italian keys, so a reader calls them before these.
+
+/** The id of the wanderer of a game alone: `io` until the contract 0.3, `me` from 0.4. */
+export const SOLO_BEFORE_0_4 = 'io';
+
+interface FieldShape {
+  /** The field domains that rename the keys, the first that names a key wins. */
+  d: readonly string[];
+  /** The Italian keys renamed here. */
+  only: readonly string[];
+  /** The shapes of what the internal keys hold: an object, a list of objects (the shape of each), or a dictionary (`values`). */
+  sub?: Readonly<Record<string, FieldShape | { values: FieldShape }>>;
+  /** What else changes once the keys are internal (a value of the contract 0.4). */
+  then?: (o: Record<string, unknown>) => Record<string, unknown>;
+}
+
+const fieldName = (domains: readonly string[], k: string): string => {
+  for (const id of domains) {
+    const names = INTERNAL_NAMES.find((x) => x.id === id)?.names;
+    if (names && Object.hasOwn(names, k)) return names[k];
+  }
+  return k;
+};
+
+function shaped(v: unknown, s: FieldShape | { values: FieldShape }): unknown {
+  if ('values' in s) return isRecord(v) ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, shaped(x, s.values)])) : v;
+  if (Array.isArray(v)) return v.map((x) => shaped(x, s));
+  if (!isRecord(v)) return v;
+  let out: Record<string, unknown> = {};
+  for (const [k, x] of Object.entries(v)) {
+    const key = s.only.includes(k) ? fieldName(s.d, k) : k;
+    if (key !== k && Object.hasOwn(v, key)) continue;
+    out[key] = x;
+  }
+  for (const [k, sub] of Object.entries(s.sub ?? {})) if (Object.hasOwn(out, k)) out[k] = shaped(out[k], sub);
+  if (s.then) out = s.then(out);
+  return out;
+}
+
+/** A place of a job's task of the contract 0.3 (`casella:m`, `entita:forno`) internal (`tile:m`, `entity:forno`). */
+export const internalJobPlace = (v: unknown): unknown => (typeof v === 'string' ? v.replace(/^casella:/, 'tile:').replace(/^entita:/, 'entity:') : v);
+
+const ORIGIN: FieldShape = { d: ['campi-carte'], only: ['titolare', 'universo', 'impronta'] };
+const CARD: FieldShape = { d: ['campi-carte'], only: ['autore', 'pagante', 'titolare', 'origini'], sub: { origins: ORIGIN } };
+const WITH_CARD: FieldShape = { d: ['campi-carte'], only: ['carta'], sub: { card: CARD } };
+const BENCH: FieldShape = {
+  d: ['campi-manifest'],
+  only: ['titolo', 'racconto', 'terreno', 'viandante', 'cose', 'passi', 'durata', 'guarda', 'righe'],
+  sub: {
+    wanderer: { d: ['campi-manifest'], only: ['componenti', 'oggetti'], sub: { items: { d: ['campi-manifest'], only: ['nome', 'posto', 'categoria'] } } },
+    entities: { d: ['campi-manifest'], only: ['modulo', 'componenti'] },
+    steps: { d: ['campi-manifest'], only: ['tipo', 'oggetto', 'azione', 'secondi', 'verso'] },
+  },
+};
+const JOB_TASK: FieldShape = {
+  d: ['campi-mestieri', 'campi-manifest'],
+  only: ['fa', 'dove', 'da', 'a', 'casella', 'lascia', 'oggetto', 'con', 'quante', 'durata', 'posa', 'dice', 'percorso', 'azione', 'entita'],
+  then: (o) => ({
+    ...o,
+    ...('where' in o ? { where: internalJobPlace(o.where) } : {}),
+    ...('to' in o && (o.does === 'carry' || o.does === 'take') ? { to: internalJobPlace(o.to) } : {}),
+    ...(Array.isArray(o.route) ? { route: o.route.map(internalJobPlace) } : {}),
+  }),
+};
+const JOB: FieldShape = {
+  d: ['campi-mestieri', 'campi-manifest'],
+  only: ['nomi', 'posto', 'giornata', 'modulo'],
+  sub: { workplace: { d: ['campi-manifest'], only: ['casella', 'entita'] }, day: { values: JOB_TASK } },
+};
+const PANEL_ELEMENT: FieldShape = { d: ['campi-manifest'], only: ['tipo', 'etichetta', 'accetta', 'campo', 'colore'] };
+const PANEL: FieldShape = { d: ['campi-manifest'], only: ['titolo', 'descrizione', 'elementi'], sub: { elements: PANEL_ELEMENT } };
+const MANIFEST: FieldShape = {
+  d: ['campi-manifest', 'campi-carte'],
+  only: ['casi', 'mestieri', 'carta'],
+  sub: {
+    appearance: { d: ['campi-manifest'], only: ['aspetto', 'classe', 'taglia'] },
+    items: { d: ['campi-manifest', 'campi-carte'], only: ['aspetto', 'carta'], sub: { card: CARD } },
+    tiles: { values: { d: ['campi-manifest', 'campi-carte'], only: ['matura', 'carta'], sub: { ripens: { d: ['campi-manifest'], only: ['dopo'] }, card: CARD } } },
+    ui: PANEL,
+    cases: BENCH,
+    jobs: JOB,
+    card: CARD,
+    recipes: WITH_CARD,
+    runes: { values: WITH_CARD },
+    spells: { values: WITH_CARD },
+    layouts: { values: WITH_CARD },
+  },
+};
+const P = ['campi-persone', 'campi-carte'];
+const INDIVIDUAL: FieldShape = {
+  d: P,
+  only: ['nome', 'specie', 'genere', 'tipo', 'mestiere', 'eta', 'famiglia', 'storia', 'luogo', 'origine', 'aspetto', 'porta', 'ricordi', 'legameViandante', 'scheda', 'carta'],
+  sub: {
+    family: { d: P, only: ['nome', 'legame', 'viandante'] },
+    routine: { d: P, only: ['quando', 'fa', 'dove', 'azione'] },
+    memories: { d: P, only: ['quando', 'testo', 'con', 'viandante', 'peso'] },
+    sheet: { d: P, only: ['testo', 'impronta'] },
+    card: CARD,
+  },
+};
+const PEOPLE: FieldShape = { d: P, only: ['persone', 'attesi'], sub: { people: INDIVIDUAL, expected: { d: P, only: ['nome', 'legame', 'di'] } } };
+const T = ['campi-trame', 'campi-carte'];
+const PLOT: FieldShape = {
+  d: T,
+  only: ['titolo', 'mistero', 'coinvolti', 'tappe', 'missione', 'inizio', 'stato', 'carta'],
+  sub: {
+    beats: { d: T, only: ['giorno', 'momento', 'chi', 'dove', 'cosa', 'battuta', 'indizio', 'fatto'] },
+    quest: { d: T, only: ['da', 'testo', 'obiettivo', 'ricompensa', 'stato', 'viandante'], sub: { goal: { d: T, only: ['tipo', 'oggetto', 'a', 'luogo'] } } },
+    card: CARD,
+  },
+};
+const PLOTS: FieldShape = { d: T, only: ['trame'], sub: { plots: PLOT } };
+const BIBLE: FieldShape = {
+  d: ['campi-bibbia'],
+  only: ['titolo', 'tono', 'sintesi', 'storia', 'luoghi', 'personaggi', 'fatti', 'misteri', 'usanze', 'crepe'],
+  // The old bibles' cracks (ADR-0025) are gone: nothing reads them.
+  then: ({ cracks: _, ...o }) => o,
+};
+const REGION: FieldShape = { d: ['campi-atlante'], only: ['nome', 'descrizione', 'ambiente', 'centro', 'raggio'] };
+const ATLAS: FieldShape = { d: ['campi-atlante'], only: ['regioni'], sub: { regions: REGION } };
+const RULE: FieldShape = { d: ['campi-regole'], only: ['chiave', 'testo', 'possibile', 'racconto', 'effetti', 'carta'], sub: { card: CARD } };
+const RULES: FieldShape = { d: ['campi-regole'], only: ['regole'], sub: { rules: RULE } };
+const PROFILE: FieldShape = { d: ['campi-viandante'], only: ['nome', 'seme', 'tinta', 'presentazione'] };
+const WANDERER: FieldShape = {
+  d: ['campi-viandante'],
+  only: ['nome', 'profilo', 'stati', 'trasceso', 'anonimo', 'crediti'],
+  sub: { profile: PROFILE },
+  // The credits are not the wanderer's to keep (ADR-0104): they live outside the universe.
+  then: ({ credits: _, ...o }) => o,
+};
+const STATE: FieldShape = { d: ['campi-stato'], only: ['consumati', 'contenitori', 'forme', 'rari', 'ora', 'importanti', 'viandante', 'posati'], sub: { wanderer: WANDERER } };
+const V = ['campi-imprese'];
+const VENTURE: FieldShape = {
+  d: V,
+  only: ['titolo', 'tipo', 'stato', 'luogo', 'posto', 'lotto', 'origine', 'modello', 'concetto', 'classe', 'taglia', 'seme', 'fasi', 'ruoli', 'portati', 'lavorato', 'squadra', 'inizio', 'ultimo', 'fine', 'scade', 'compito', 'nato_da', 'carta'],
+  sub: {
+    phases: { d: V, only: ['nome', 'materiali', 'lavoro', 'stadio'] },
+    roles: { d: V, only: ['ruolo', 'mestiere', 'quanti'] },
+    team: { d: V, only: ['nome', 'ruolo'] },
+    task: { d: V, only: ['casella', 'oggetto', 'lascia', 'durata', 'posa'] },
+    card: CARD,
+  },
+};
+const VENTURES: FieldShape = { d: V, only: ['imprese'], sub: { ventures: VENTURE } };
+const USES: FieldShape = { d: ['campi-carte'], only: ['luoghi', 'trame'] };
+const CARDS: FieldShape = {
+  d: ['campi-carte'],
+  only: ['utilizzi', 'luoghi', 'allaNascita'],
+  sub: { uses: { values: USES }, atBirth: { values: USES }, chunks: { values: { d: ['campi-carte'], only: ['nome', 'autore', 'pagante', 'titolare', 'origini'], sub: { origins: ORIGIN } } } },
+};
+const USAGE: FieldShape = { d: ['campi-carte'], only: ['prezzi', 'giorni', 'paganti'] };
+const SHORTFALL: FieldShape = { d: ['campi-carte'], only: ['richiesta', 'chi', 'agente', 'compito', 'esito', 'motivo', 'volte', 'primo', 'ultimo'] };
+const SHORTFALLS: FieldShape = { d: ['campi-carte'], only: ['voci'], sub: { entries: SHORTFALL } };
+const HOUSE: FieldShape = { d: ['campi-piani'], only: ['origine', 'modello', 'seme', 'classe', 'concetto', 'stadio'] };
+const PLAN: FieldShape = {
+  d: ['campi-piani', 'campi-carte'],
+  only: ['strutture', 'giorni', 'stadi', 'case', 'visto', 'scavi', 'acqua', 'carta'],
+  sub: { structures: { d: ['campi-piani'], only: ['concetto', 'taglia'] }, houses: HOUSE, card: CARD },
+};
+const SOUND_PURPOSE: FieldShape = { d: ['campi-modelli'], only: ['uso', 'ambienti', 'momenti', 'oltre', 'effetti'] };
+const MODEL_INFO: FieldShape = {
+  d: ['campi-modelli', 'campi-carte'],
+  only: ['classe', 'taglia', 'nome', 'autore', 'voto', 'tinta', 'tempo', 'sotto', 'consigli', 'problemi', 'suono', 'carta'],
+  sub: { sound: SOUND_PURPOSE, card: CARD },
+};
+const MODEL_INDEX: FieldShape = { d: [], only: [], then: (o) => Object.fromEntries(Object.entries(o).map(([k, x]) => [k, shaped(x, MODEL_INFO)])) };
+const U = ['campi-universe'];
+const GAME: FieldShape = { d: U, only: ['modalita', 'morte', 'altroTraGiocatori'] };
+const MINIMUMS: FieldShape = { d: U, only: ['scultori', 'tetto', 'coefficienti'] };
+const ACTOR: FieldShape = { d: U, only: ['acceso', 'modello'] };
+const AI: FieldShape = { d: U, only: ['scultori', 'agenti', 'coefficienti', 'minimi', 'attore', 'maxBrani'], sub: { minimums: MINIMUMS, actor: ACTOR } };
+const HERITAGE: FieldShape = { d: U, only: ['copia'] };
+const CONFIG: FieldShape = { d: U, only: ['partita', 'rilievo', 'eredita'], sub: { game: GAME, relief: { d: U, only: ['mare'] }, heritage: HERITAGE, ai: AI } };
+
+/** The shapes of the files of a universe and of the objects in them that are read one at a time. */
+const FIELD_SHAPES = {
+  config: CONFIG,
+  game: GAME,
+  ai: AI,
+  minimums: MINIMUMS,
+  actor: ACTOR,
+  heritage: HERITAGE,
+  manifest: MANIFEST,
+  panel: PANEL,
+  panelElement: PANEL_ELEMENT,
+  bench: BENCH,
+  job: JOB,
+  jobTask: JOB_TASK,
+  people: PEOPLE,
+  individual: INDIVIDUAL,
+  plots: PLOTS,
+  plot: PLOT,
+  bible: BIBLE,
+  atlas: ATLAS,
+  region: REGION,
+  rules: RULES,
+  rule: RULE,
+  state: STATE,
+  wanderer: WANDERER,
+  profile: PROFILE,
+  ventures: VENTURES,
+  venture: VENTURE,
+  cards: CARDS,
+  card: CARD,
+  usage: USAGE,
+  shortfalls: SHORTFALLS,
+  shortfall: SHORTFALL,
+  plan: PLAN,
+  house: HOUSE,
+  modelInfo: MODEL_INFO,
+  modelIndex: MODEL_INDEX,
+  soundPurpose: SOUND_PURPOSE,
+} satisfies Record<string, FieldShape>;
+
+export type FieldShapeId = keyof typeof FIELD_SHAPES;
+
+/** A file of a universe, or an object of one, with the fields of the contract 0.4 (`nome` → `name`, `carta` → `card`…); the rest as it is. */
+export function internalFields<T>(shape: FieldShapeId, raw: T): T {
+  return shaped(raw, FIELD_SHAPES[shape]) as T;
+}
+
+/** Every `carta` of a JSON value, at any depth, as a `card` stamp of 0.4 (`autore` → `author`…): it is in almost every file of the Council. */
+export function internalCardsIn(v: unknown): unknown {
+  if (Array.isArray(v)) return v.map(internalCardsIn);
+  if (!isRecord(v)) return v;
+  const out: Record<string, unknown> = {};
+  for (const [k, x] of Object.entries(v)) {
+    if (k === 'carta' && isRecord(x) && !Object.hasOwn(v, 'card')) out.card = shaped(x, CARD);
+    else out[k] = internalCardsIn(x);
+  }
+  return out;
+}
+
+/** The wanderer of a game alone in a JSON value of 0.3 (`io`) as of 0.4 (`me`), where a field of 0.4 holds a wanderer's id. */
+export function internalSoloIn(v: unknown): unknown {
+  const solo = (x: unknown) => (x === SOLO_BEFORE_0_4 ? 'me' : x);
+  if (Array.isArray(v)) return v.map(internalSoloIn);
+  if (!isRecord(v)) return v;
+  const out: Record<string, unknown> = {};
+  for (const [k, x] of Object.entries(v)) {
+    if (['author', 'payer', 'holder', 'wanderer', 'master'].includes(k)) out[k] = solo(x);
+    else if (k === 'who') out[k] = Array.isArray(x) ? x.map(solo) : solo(x);
+    // usage.json: day → payer → tally.
+    else if (k === 'payers' && isRecord(x))
+      out[k] = Object.fromEntries(Object.entries(x).map(([day, per]) => [day, isRecord(per) ? Object.fromEntries(Object.entries(per).map(([p, t]) => [p === SOLO_BEFORE_0_4 ? 'me' : p, t])) : per]));
+    else out[k] = internalSoloIn(x);
+  }
+  return out;
+}
+
+/** A path of a universe of 0.3 where it is in 0.4 (`world/giocatori/io.json` → `world/players/me.json`, `world/stato.json` → `world/state.json`…). */
+export function internalPath(p: string): string {
+  const names = INTERNAL_NAMES.find((x) => x.id === 'percorsi')?.names ?? {};
+  for (const [it, en] of Object.entries(names)) {
+    if (!it.startsWith('world/')) continue;
+    if (it.endsWith('/') ? p.startsWith(it) : p === it) {
+      const rest = p.slice(it.length);
+      return en + (it === 'world/giocatori/' && rest === `${SOLO_BEFORE_0_4}.json` ? 'me.json' : rest);
+    }
+  }
+  return p;
 }

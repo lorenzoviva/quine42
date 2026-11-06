@@ -4,10 +4,10 @@
   "kind": "data",
   "version": "0.1.0",
   "description": "La giornata di chi officia: la preghiera della mattina, la gente in piazza, il raccoglimento della sera.",
-  "mestieri": [
+  "jobs": [
     {
       "id": "priest",
-      "nomi": [
+      "names": [
         "sacerdote",
         "sacerdotessa",
         "prete",
@@ -22,43 +22,43 @@
         "officiante",
         "eremita"
       ],
-      "giornata": {
+      "day": {
         "morning": [
           {
-            "fa": "go",
-            "dove": "work"
+            "does": "go",
+            "where": "work"
           },
           {
-            "fa": "pray",
-            "durata": 40
+            "does": "pray",
+            "duration": 40
           }
         ],
         "day": [
           {
-            "fa": "go",
-            "dove": "square"
+            "does": "go",
+            "where": "square"
           },
           {
-            "fa": "chat",
-            "durata": 60
+            "does": "chat",
+            "duration": 60
           },
           {
-            "fa": "go",
-            "dove": "work"
+            "does": "go",
+            "where": "work"
           }
         ],
         "evening": [
           {
-            "fa": "pray"
+            "does": "pray"
           }
         ],
         "night": [
           {
-            "fa": "go",
-            "dove": "home"
+            "does": "go",
+            "where": "home"
           },
           {
-            "fa": "rest"
+            "does": "rest"
           }
         ]
       }

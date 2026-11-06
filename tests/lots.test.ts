@@ -108,41 +108,41 @@ describe('lots and structures', () => {
     expect(realmOf(0, 0)).toBe(realmOf(IMPORTANT_ZONE * (REALM / 2) - IMPORTANT_ZONE / 2 - 1, 0));
     expect(realmOf(0, 0)).not.toBe(realmOf(IMPORTANT_ZONE * (REALM / 2) + IMPORTANT_ZONE / 2, 0));
     // The plans before ADR-0092 said «importante»: that castle is Huge.
-    const a: Partial<ChunkPlan> = { strutture: [{ concetto: 'il castello', importante: true } as any, { concetto: 'la torre', taglia: 'huge' }] };
+    const a: Partial<ChunkPlan> = { structures: [{ concetto: 'il castello', importante: true } as any, { concept: 'la torre', size: 'huge' }] };
     claim('5,5', 5, 5, a);
     // One rare per place: the second goes down to Large (and fits its lot of 6).
-    expect(a.strutture!.map((s) => s.taglia)).toEqual(['huge', 'large']);
+    expect(a.structures!.map((s) => s.size)).toEqual(['huge', 'large']);
     // Another place of the same zone may not have a Huge one, but may have the Gargantuan one of the realm.
-    const b: Partial<ChunkPlan> = { strutture: [{ concetto: 'il tempio', taglia: 'huge' }] };
+    const b: Partial<ChunkPlan> = { structures: [{ concept: 'il tempio', size: 'huge' }] };
     claim('6,5', 6, 5, b);
-    expect(b.strutture![0].taglia).toBe('large');
+    expect(b.structures![0].size).toBe('large');
     expect(k.rareAllowed({ key: '6,5', cx: 6, cy: 5 })).toEqual(['gargantuan']);
     expect(k.rareAllowed({ key: '5,5', cx: 5, cy: 5 })).toEqual(['huge', 'gargantuan']);
-    const g: Partial<ChunkPlan> = { strutture: [{ concetto: 'la cittadella', taglia: 'gargantuan' }] };
+    const g: Partial<ChunkPlan> = { structures: [{ concept: 'la cittadella', size: 'gargantuan' }] };
     claim('7,5', 7, 5, g);
-    expect(g.strutture![0].taglia).toBe('gargantuan');
+    expect(g.structures![0].size).toBe('gargantuan');
     // In another zone of the same realm: a Huge one yes, the Gargantuan one no (it goes down to Huge).
-    const c: Partial<ChunkPlan> = { strutture: [{ concetto: 'la piramide', taglia: 'gargantuan' }] };
+    const c: Partial<ChunkPlan> = { structures: [{ concept: 'la piramide', size: 'gargantuan' }] };
     claim(`${IMPORTANT_ZONE},0`, IMPORTANT_ZONE, 0, c);
-    expect(c.strutture![0].taglia).toBe('huge');
+    expect(c.structures![0].size).toBe('huge');
     // A size that does not fit its lot goes down to the largest that does: Huge (7.5 tiles) on a lot of 6 is Large.
-    const d: Partial<ChunkPlan> = { strutture: [{ concetto: 'la rocca', taglia: 'huge' }] };
+    const d: Partial<ChunkPlan> = { structures: [{ concept: 'la rocca', size: 'huge' }] };
     claim(`${2 * IMPORTANT_ZONE},0`, 2 * IMPORTANT_ZONE, 0, d, [6]);
-    expect(d.strutture![0].taglia).toBe('large');
+    expect(d.structures![0].size).toBe('large');
     expect(k.rareAllowed({ key: '0,0', cx: 2 * IMPORTANT_ZONE, cy: 0 })).toContain('huge');
     // The structure carries its size.
     const ch = { ...k.chunks.get('0,0')!, lots: [lot(12)] };
-    const lots = (k as any).lotsOf(ch, { ...k.chunks.get('0,0')!.plan!, strutture: [{ concetto: 'la cittadella', taglia: 'gargantuan' }] }, '.').lots;
+    const lots = (k as any).lotsOf(ch, { ...k.chunks.get('0,0')!.plan!, structures: [{ concept: 'la cittadella', size: 'gargantuan' }] }, '.').lots;
     expect(lots[0].struttura).toMatchObject({ concetto: 'la cittadella', classe: 'structure', taglia: 'gargantuan' });
     // Saved with the game, and read back; the important ones of an old state are the Huge ones.
     expect(k.saveState()).toBe(true);
-    const saved = JSON.parse(k.repo.head().files['world/stato.json']!).rari;
+    const saved = JSON.parse(k.repo.head().files['world/state.json']!).rares;
     expect(saved).toEqual({ huge: { [zoneOf(5, 5)]: '5,5', [zoneOf(IMPORTANT_ZONE, 0)]: `${IMPORTANT_ZONE},0` }, gargantuan: { [realmOf(7, 5)]: '7,5' } });
     for (const m of (k as any).rari.values()) m.clear();
     k.loadState();
     expect(k.rareAllowed({ key: '6,5', cx: 6, cy: 5 })).toEqual([]);
     for (const m of (k as any).rari.values()) m.clear();
-    (k as any).files = { ...(k as any).files, 'world/stato.json': JSON.stringify({ importanti: { [zoneOf(5, 5)]: '5,5' } }) };
+    (k as any).files = { ...(k as any).files, 'world/state.json': JSON.stringify({ importanti: { [zoneOf(5, 5)]: '5,5' } }) };
     k.loadState();
     expect(k.rareAllowed({ key: '6,5', cx: 6, cy: 5 })).toEqual(['gargantuan']);
   });
@@ -156,7 +156,7 @@ describe('lots and structures', () => {
     const own = fc.wanted!;
     const generic = fc.model;
     // The Sculptor's program (here the generic one of its class, under its own name) enters the library.
-    expect(k.addModel(own, bundledFiles[`models/${generic}.xml`], { classe: generic, nome: 'il forno del borgo' }, `scultore: ${own}`)).toBe(true);
+    expect(k.addModel(own, bundledFiles[`models/${generic}.xml`], { class: generic, name: 'il forno del borgo' }, `scultore: ${own}`)).toBe(true);
     expect(fc.model).toBe(own);
     expect(fc.wanted).toBeUndefined();
     expect(fc.seed).toBe(k.forms.seedFor(own, k.ecs.get(sid, 'origin').key));

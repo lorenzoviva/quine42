@@ -764,7 +764,7 @@ export class ThinClient {
       if (action === 'chi') return void k.bus.emit('ui:dialog', { speaker: k.nameOf(id), text: k.introOf(id) ?? '' });
       // What is given leaves the slot when the update says so: the inventory is the server's.
       if (action.startsWith('dai:')) await this.show(this.session.act({ t: 'dai', viandante: other, slot: Number(action.slice(4)) }));
-      if (action === 'altro' && k.gameSetup()?.altroTraGiocatori !== false) k.bus.emit('ui:freeaction', { id, name: k.nameOf(id) });
+      if (action === 'altro' && k.gameSetup()?.freeActionsBetweenPlayers !== false) k.bus.emit('ui:freeaction', { id, name: k.nameOf(id) });
       return;
     }
     const sid = this.server.get(id);

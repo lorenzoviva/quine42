@@ -25,11 +25,11 @@ class Recording extends MockAiModels {
 
 async function bootMany(ai: Record<string, unknown> = {}): Promise<{ k: Kernel; models: Recording }> {
   const cfg = JSON.parse(bundledFiles['universe.json']);
-  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, ai: { ...cfg.ai, ...ai }, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2) };
+  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, ai: { ...cfg.ai, ...ai }, game: { mode: 'multiplayer', death: 3 } }, null, 2) };
   const models = new Recording();
   const k = await Kernel.boot({ files, store: memoryStore(), ai: models });
   // Who plans pays (ADR-0081): without credits the requests would go to the kernel's own local models.
-  k.giveCredits('io', 100);
+  k.giveCredits('me', 100);
   return { k, models };
 }
 
@@ -88,7 +88,7 @@ describe('new places with the lock, at the expense of who explores (T40)', () =>
     expect(target).toEqual([{ key: '12,9', chi: 'anna' }]);
     const ch = k.chunks.get('12,9')!;
     expect(ch.stage).toBe('planned');
-    expect(ch.plan!.carta!.pagante).toBe('anna');
+    expect(ch.plan!.card!.payer).toBe('anna');
     // Bruno has it, planned, with its name: he did not ask for it again.
     const seen = bruno.places.get(ch.key)!;
     expect(seen.stage).toBe('planned');
@@ -123,9 +123,9 @@ describe('new places with the lock, at the expense of who explores (T40)', () =>
     await anna.ready;
     await settle(server);
     // The master (`io`, no client) goes to the Council's hall with their rune: inside the studio, nothing to load.
-    expect(k.as('io', () => k.councilRune())).toBe(true);
+    expect(k.as('me', () => k.councilRune())).toBe(true);
     await run(server, 5);
-    expect(k.as('io', () => k.wandererPos().x)).toBeGreaterThanOrEqual(INTERIOR_X - 10);
+    expect(k.as('me', () => k.wandererPos().x)).toBeGreaterThanOrEqual(INTERIOR_X - 10);
     const before = models.plans.length;
     put(k, 'anna', middleOf(-8, -10));
     await settle(server);

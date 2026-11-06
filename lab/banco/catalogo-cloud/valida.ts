@@ -68,7 +68,7 @@ const opt = (k: string) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`
 
 /** What the XML says of itself: the name in the first comment, the cellar from the root. */
 export function bersaglioDi(xml: string, file: string): Bersaglio {
-  const cantina = /<sequence[^>]*\bsuolo="/.test(xml) && /<sequence[^>]*\bground="/.test(xml);
+  const cantina = /<sequence[^>]*\b(?:soil|suolo)="/.test(xml) && /<sequence[^>]*\bground="/.test(xml);
   const nome = /<!--\s*([^\n]*?)\s*-->/.exec(xml)?.[1] ?? path.basename(file, '.xml');
   return { id: path.basename(file, '.xml'), nome, stile: '', descrizione: '', classe: 'structure', ...(cantina ? { sotto: 1 } : {}) };
 }

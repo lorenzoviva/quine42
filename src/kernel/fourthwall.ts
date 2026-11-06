@@ -60,7 +60,7 @@ export function metaBreak(text: string, words: string[] = []): string | undefine
 
 /** The bible's lines that break the fourth wall (as «line» → what breaks it). */
 export function bibleBreaks(b: Bible, words: string[] = []): string[] {
-  return [b.tono, b.sintesi, b.storia ?? '', ...(b.personaggi ?? []), ...(b.fatti ?? []), ...(b.misteri ?? []), ...(b.usanze ?? [])]
+  return [b.tone, b.summary, b.history ?? '', ...(b.characters ?? []), ...(b.facts ?? []), ...(b.mysteries ?? []), ...(b.customs ?? [])]
     .flatMap((l) => {
       const m = metaBreak(l, words);
       return m ? [`«${l.slice(0, 120)}» («${m}»)`] : [];
@@ -76,9 +76,9 @@ export const OWN_CUSTOMS = 3;
  */
 export function cleanBible(b: Bible, words: string[] = []): Bible {
   const keep = (ls?: string[]) => (ls ?? []).filter((l) => typeof l === 'string' && !metaBreak(l, words));
-  const { crepe: _, usanze, ...rest } = b;
+  const { cracks: _, customs: usanze, ...rest } = b;
   const own = keep(usanze).filter((l) => !redefines(l, words)).slice(0, OWN_CUSTOMS);
-  return { ...rest, personaggi: keep(b.personaggi), fatti: keep(b.fatti), misteri: keep(b.misteri), ...(own.length ? { usanze: own } : {}) };
+  return { ...rest, characters: keep(b.characters), facts: keep(b.facts), mysteries: keep(b.mysteries), ...(own.length ? { customs: own } : {}) };
 }
 
 /** A custom that starts from a word of the lexicon («bonombo: …») gives it a meaning again: it contradicts the lexicon. */
@@ -87,7 +87,7 @@ function redefines(line: string, words: string[]): boolean {
   return words.some((w) => new RegExp(`^${escape(w.toLowerCase())}(?![\p{L}])[»"”\s]*[:=—–-]`, 'u').test(head));
 }
 
-/** The lexicon's words (world/lessico.md, «Parole che si dicono così»), every form: what no one in the world explains. */
+/** The lexicon's words (world/lexicon.md, «Parole che si dicono così»), every form: what no one in the world explains. */
 export function lexiconWords(lexicon: string): string[] {
   const section = /^## Parole[^\n]*\n([\s\S]*?)(?=^## |$(?![\s\S]))/m.exec(lexicon)?.[1] ?? '';
   return [...section.matchAll(/^- \*\*([^*]+)\*\*/gm)].flatMap((m) => m[1].split('/').map((w) => w.trim()).filter(Boolean));

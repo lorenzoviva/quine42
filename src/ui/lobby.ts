@@ -41,10 +41,10 @@ const BUDGET_NAMES: Record<BudgetKey, string> = {
   maxPacks: 'Pacchetti di oggetti per sessione',
   maxCast: 'Tipi di abitanti per sessione',
   maxModels: 'Modelli per sessione',
-  maxBrani: 'Brani per sessione',
+  maxPieces: 'Brani per sessione',
   placesPerMinute: 'Luoghi nuovi al minuto',
 };
-const BUDGET_DEFAULTS: Partial<Record<BudgetKey, number>> = { maxPacks: 4, maxCast: 3, maxModels: 40, maxBrani: 8, placesPerMinute: 20 };
+const BUDGET_DEFAULTS: Partial<Record<BudgetKey, number>> = { maxPacks: 4, maxCast: 3, maxModels: 40, maxPieces: 8, placesPerMinute: 20 };
 const CLASS_NAMES: Record<(typeof SCULPTOR_CLASSES)[number], string> = { simple: 'Scultore, cose semplici', figure: 'Scultore, figure', structure: 'Scultore, strutture', important: 'Scultore, strutture importanti', artist: 'Artista (giudizio)', musician: 'Musicista' };
 const THINKING: Array<[string, string]> = [['off', 'predefinito del modello'], ['low', 'basso'], ['medium', 'medio'], ['high', 'alto']];
 
@@ -85,11 +85,11 @@ export class LobbyScreen {
     const ai = config.ai;
     // The kernels it runs on (T302, ADR-0152): out of the range it is shown with its label, and still opens.
     const kernels = checkKernelVersion(config.kernel, KERNEL_VERSION, config.kernels);
-    const master = config.partita?.master ?? 'io';
-    const minimi = ai.minimi;
-    const coef = repairCoefficients(ai.coefficienti);
-    const sculpt: SculptorAiModels = { ...DEFAULT_SCULPTORS, ...internalSculptors(ai.scultori ?? {}) };
-    const actor = repairActor(ai.attore);
+    const master = config.game?.master ?? 'me';
+    const minimi = ai.minimums;
+    const coef = repairCoefficients(ai.coefficients);
+    const sculpt: SculptorAiModels = { ...DEFAULT_SCULPTORS, ...internalSculptors(ai.sculptors ?? {}) };
+    const actor = repairActor(ai.actor);
     // Everyone sees the settings; the master, and only the master, sets them, while no match is under way (the server refuses the rest).
     const isMaster = !!alone || wandererId === master;
     const editable = isMaster && !inCorso;
@@ -116,20 +116,20 @@ export class LobbyScreen {
 
     // The Actor (T157).
     const actorOn = lockIf(el('input', { type: 'checkbox', id: 'lobby-attore' }) as HTMLInputElement);
-    actorOn.checked = actor.acceso;
+    actorOn.checked = actor.on;
     actorOn.onchange = showEstimate;
-    const actorModel = pick(actor.modello, 'lobby-attore-modello');
+    const actorModel = pick(actor.model, 'lobby-attore-modello');
     const actorRow = el(
       'div',
       { class: 'actor-row' },
-      el('label', { for: 'lobby-attore' }, actorOn, el('strong', {}, ' Attore: '), isMaster ? 'interpreta gli individui con le schede del Narratore' : actor.acceso ? `acceso (${actor.modello})` : 'spento: il Narratore interpreta le persone'),
+      el('label', { for: 'lobby-attore' }, actorOn, el('strong', {}, ' Attore: '), isMaster ? 'interpreta gli individui con le schede del Narratore' : actor.on ? `acceso (${actor.model})` : 'spento: il Narratore interpreta le persone'),
       isMaster ? el('label', { for: 'lobby-attore-modello' }, ' modello ', actorModel) : '',
       el('div', { class: 'note' }, isMaster ? "Spento, nulla cambia e nessuna chiamata in più. Acceso, il Narratore scrive una scheda per individuo alla sua prima battuta e l'Attore la interpreta con il suo modello." : 'Lo stabilisce il master.'),
     );
 
     // Cards collection outside of the match (T45d)
     const cards = collectionOf(files, wandererId);
-    const totalUses = cards.reduce((s, c) => s + c.utilizzi.luoghi + c.utilizzi.trame + c.utilizzi.prompt, 0);
+    const totalUses = cards.reduce((s, c) => s + c.uses.chunks + c.uses.plots + c.uses.prompt, 0);
 
     // The coefficients: what each does, and what the game does at the minimum, for everyone to read.
     const sliders = new Map<CoefficientKey, HTMLInputElement>();
@@ -170,11 +170,11 @@ export class LobbyScreen {
 
     // The minimums: the master's to set; for everyone else, what is asked of them (below).
     const minText = pick(minimi?.textModel ?? '', 'lobby-minimo-testo', ['']);
-    const minSculptors = new Map(SCULPTOR_CLASSES.map((k) => [k, pick(String(internalSculptors(minimi?.scultori ?? {})[k] ?? ''), `lobby-minimo-${k}`, [''])]));
-    const minCapField = lockIf(el('input', { type: 'number', id: 'lobby-minimo-tetto', min: '0', step: '0.5', value: String(minimi?.tetto ?? 0) }) as HTMLInputElement);
+    const minSculptors = new Map(SCULPTOR_CLASSES.map((k) => [k, pick(String(internalSculptors(minimi?.sculptors ?? {})[k] ?? ''), `lobby-minimo-${k}`, [''])]));
+    const minCapField = lockIf(el('input', { type: 'number', id: 'lobby-minimo-tetto', min: '0', step: '0.5', value: String(minimi?.cap ?? 0) }) as HTMLInputElement);
     const minKnobs = new Map(
       COEFFICIENT_KEYS.map((k) => {
-        const input = lockIf(el('input', { type: 'number', id: `lobby-minimo-${k}`, min: '0', max: '1', step: '0.05', value: minimi?.coefficienti?.[k] !== undefined ? String(minimi.coefficienti[k]) : '' }) as HTMLInputElement);
+        const input = lockIf(el('input', { type: 'number', id: `lobby-minimo-${k}`, min: '0', max: '1', step: '0.05', value: minimi?.coefficients?.[k] !== undefined ? String(minimi.coefficients[k]) : '' }) as HTMLInputElement);
         input.oninput = showEstimate;
         return [k, input];
       }),
@@ -188,15 +188,15 @@ export class LobbyScreen {
       return {
         textModel: text.value,
         thinking: thinking.value as AiSettings['thinking'],
-        attore: { acceso: actorOn.checked, modello: actorModel.value },
-        scultori: { ...Object.fromEntries([...sculptors].map(([k, s]) => [k, s.value])), importanteFino: sculpt.importanteFino } as Partial<SculptorAiModels>,
-        coefficienti: Object.fromEntries([...sliders].map(([k, s]) => [k, Number(s.value)])) as AiSettings['coefficienti'],
+        actor: { on: actorOn.checked, model: actorModel.value },
+        sculptors: { ...Object.fromEntries([...sculptors].map(([k, s]) => [k, s.value])), importanteFino: sculpt.importanteFino } as Partial<SculptorAiModels>,
+        coefficients: Object.fromEntries([...sliders].map(([k, s]) => [k, Number(s.value)])) as AiSettings['coefficients'],
         ...Object.fromEntries([...budgets].map(([k, i]) => [k, Number(i.value)])),
-        minimi: {
+        minimums: {
           ...(minText.value ? { textModel: minText.value } : {}),
-          ...(Object.keys(minScult).length ? { scultori: minScult } : {}),
-          ...(Number(minCapField.value) > 0 ? { tetto: Number(minCapField.value) } : {}),
-          ...(Object.keys(minCoef).length ? { coefficienti: minCoef } : {}),
+          ...(Object.keys(minScult).length ? { sculptors: minScult } : {}),
+          ...(Number(minCapField.value) > 0 ? { cap: Number(minCapField.value) } : {}),
+          ...(Object.keys(minCoef).length ? { coefficients: minCoef } : {}),
         },
       };
     };
@@ -206,13 +206,13 @@ export class LobbyScreen {
       preset.value = isLowDetail(c) ? 'low' : COEFFICIENT_KEYS.every((k) => c[k] === 1) ? 'pieno' : 'misura';
     };
     preset.onchange = () => {
-      const chosen = preset.value === 'low' ? LOW_DETAIL : preset.value === 'pieno' ? { coefficienti: FULL_DETAIL, scultori: DEFAULT_SCULPTORS as Partial<SculptorAiModels> } : undefined;
+      const chosen = preset.value === 'low' ? LOW_DETAIL : preset.value === 'pieno' ? { coefficients: FULL_DETAIL, sculptors: DEFAULT_SCULPTORS as Partial<SculptorAiModels> } : undefined;
       if (!chosen) return;
       for (const [k, s] of sliders) {
-        s.value = String(chosen.coefficienti[k]);
-        values.get(k)!.textContent = chosen.coefficienti[k].toFixed(2);
+        s.value = String(chosen.coefficients[k]);
+        values.get(k)!.textContent = chosen.coefficients[k].toFixed(2);
       }
-      for (const [k, s] of sculptors) if (chosen.scultori[k]) s.value = String(chosen.scultori[k]);
+      for (const [k, s] of sculptors) if (chosen.sculptors[k]) s.value = String(chosen.sculptors[k]);
       showEstimate();
     };
     showPreset();
@@ -253,9 +253,9 @@ export class LobbyScreen {
     if (minimi && !isMaster) {
       const items: HTMLElement[] = [];
       if (minimi.textModel) items.push(el('div', {}, `Modello testo minimo: ${minimi.textModel}`));
-      if (internalSculptors(minimi.scultori ?? {}).structure) items.push(el('div', {}, `Strutture minime: ${internalSculptors(minimi.scultori ?? {}).structure}`));
-      if (minimi.tetto !== undefined) items.push(el('div', {}, `Tetto minimo d’ingresso: ${usd(minimi.tetto)}`));
-      if (minimi.coefficienti) {
+      if (internalSculptors(minimi.sculptors ?? {}).structure) items.push(el('div', {}, `Strutture minime: ${internalSculptors(minimi.sculptors ?? {}).structure}`));
+      if (minimi.cap !== undefined) items.push(el('div', {}, `Tetto minimo d’ingresso: ${usd(minimi.cap)}`));
+      if (minimi.coefficients) {
         items.push(el('div', {}, 'Coefficienti minimi imposti dal master'));
       }
       if (items.length) {
@@ -269,7 +269,7 @@ export class LobbyScreen {
     }
 
     // Wanderer & Tetto block
-    const minCap = editable ? Math.max(0, Number(minCapField.value) || 0) : (minimi?.tetto ?? 0);
+    const minCap = editable ? Math.max(0, Number(minCapField.value) || 0) : (minimi?.cap ?? 0);
     const defaultCap = isAnonymous ? 0 : Math.max(minCap, Math.min(1.0, credits > 0 ? credits : 1.0));
     const capInput = el('input', {
       type: 'number',
@@ -337,13 +337,13 @@ export class LobbyScreen {
       );
     } else {
       for (const c of cards) {
-        const u = c.utilizzi;
-        const usesStr = `Utilizzi: ${u.luoghi} luoghi, ${u.trame} trame, ${u.prompt} prompt (totale: ${u.luoghi + u.trame + u.prompt})`;
+        const u = c.uses;
+        const usesStr = `Utilizzi: ${u.chunks} luoghi, ${u.plots} trame, ${u.prompt} prompt (totale: ${u.chunks + u.plots + u.prompt})`;
         const item = el(
           'div',
           { class: 'card-entry' },
           el('div', { class: 'card-header' }, el('span', { class: 'card-kind' }, `[${c.tipo}]`), el('span', { class: 'card-id' }, c.nome ? `${c.nome} (${c.id})` : c.id)),
-          el('div', { class: 'card-meta' }, `Autore: ${c.autore} · Pagante: ${c.pagante}`),
+          el('div', { class: 'card-meta' }, `Autore: ${c.author} · Pagante: ${c.payer}`),
           el('div', { class: 'card-uses' }, usesStr),
         );
         cardsList.appendChild(item);

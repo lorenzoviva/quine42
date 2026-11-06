@@ -310,10 +310,10 @@ export class CoronaView {
     const read = near?.kind === 'lectern' ? k.bibleOf() : undefined;
     const sculpted = near?.kind === 'lathe' ? k.latheOf() : undefined;
     if (shown) o.caption(`E: guarda «${shown.entry.label}» (${shown.index + 1}/${shown.count})`);
-    else if (tried) o.caption(`E: il banco di prova, ${tried.entry.name}: «${tried.entry.case.titolo}» (${tried.index + 1}/${tried.count})`);
+    else if (tried) o.caption(`E: il banco di prova, ${tried.entry.name}: «${tried.entry.case.title}» (${tried.index + 1}/${tried.count})`);
     else if (read) o.caption(`E: sfoglia la bibbia, «${read.page.titolo}» (${read.index + 1}/${read.count})`);
     else if (sculpted) o.caption(`E: il tornio dello Scultore, «${sculpted.entry.name}» (${sculpted.index + 1}/${sculpted.count})`);
-    else if (near?.kind === 'slab') o.caption(near.rule ? `E: la tavola della regola «${near.rule.testo}» (${near.rule.possibile ? 'si può' : 'non si può'}${near.marked ? ' · recente' : ''})` : `E: ${near.label}`);
+    else if (near?.kind === 'slab') o.caption(near.rule ? `E: la tavola della regola «${near.rule.text}» (${near.rule.possible ? 'si può' : 'non si può'}${near.marked ? ' · recente' : ''})` : `E: ${near.label}`);
     else if (near && near.kind !== 'desk') o.caption(`E: ${near.kind === 'file' ? `apri ${near.label}` : near.kind === 'sprite' || near.kind === 'tile' || near.kind === 'layout' ? `guarda «${near.label}»` : near.label}`);
   }
 }

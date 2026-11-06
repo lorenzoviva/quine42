@@ -17,6 +17,8 @@ import { UNIVERSE_NAME_RE } from '../src/kernel/paths';
 import { accountWanderer } from '../src/session/account';
 import type { PaymentRecord } from '../src/kernel/credits';
 import { playerFile, readWandererState, validWandererId, type WandererState } from '../src/kernel/wanderers';
+import { pathsBefore, portedFiles } from '../src/kernel/migrations';
+import type { FileMap } from '../src/kernel/types';
 
 export interface StripeSettings {
   secretKey?: string;
@@ -263,13 +265,16 @@ export async function applyPaymentToUniverse(opts: {
   try {
     const ledger = await openLedger(opts.universesDir, opts.universo);
     let saved: WandererState | undefined;
-    try {
-      const rel = playerFile(opts.payment.wandererId);
-      saved = readWandererState({ [rel]: await fs.readFile(path.join(root, rel), 'utf8') }, opts.payment.wandererId);
-    } catch {
-      /* not in the world yet: they find their credits when they come */
-    }
-    if (saved?.anonimo) return { ok: false, status: 'anonymous', motivo: 'un anonimo non compra crediti' };
+    // Their file, or where it was until the contract 0.4 (a universe not opened since, ported in memory, T308a).
+    const read: FileMap = {};
+    for (const rel of pathsBefore(['universe.json', playerFile(opts.payment.wandererId)]))
+      try {
+        read[rel] = await fs.readFile(path.join(root, rel), 'utf8');
+      } catch {
+        /* not in the world yet: they find their credits when they come */
+      }
+    saved = readWandererState(portedFiles(read), opts.payment.wandererId);
+    if (saved?.anonymous) return { ok: false, status: 'anonymous', motivo: 'un anonimo non compra crediti' };
     return ledger.pay(opts.payment) ? { ok: true, status: 'credited' } : { ok: true, status: 'duplicate' };
   } catch (e) {
     // Not recorded: Stripe delivers again.

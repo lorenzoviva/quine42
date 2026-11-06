@@ -4,10 +4,10 @@
   "kind": "data",
   "version": "0.1.0",
   "description": "La giornata di chi cucina: il grano del deposito diventa pane, il pesce zuppa, e il pane va in piazza.",
-  "mestieri": [
+  "jobs": [
     {
       "id": "cook",
-      "nomi": [
+      "names": [
         "cuoco",
         "cuoca",
         "panettiere",
@@ -22,70 +22,70 @@
         "mugnaio",
         "mugnaia"
       ],
-      "giornata": {
+      "day": {
         "morning": [
           {
-            "fa": "take",
-            "oggetto": "item.grano",
-            "quante": 2,
-            "dove": "square"
+            "does": "take",
+            "item": "item.grano",
+            "count": 2,
+            "where": "square"
           },
           {
-            "fa": "go",
-            "dove": "work"
+            "does": "go",
+            "where": "work"
           },
           {
-            "fa": "produce",
-            "oggetto": "item.pane",
-            "con": "item.grano",
-            "quante": 2,
-            "durata": 15,
-            "posa": "cook",
-            "dice": "Il forno è caldo."
+            "does": "produce",
+            "item": "item.pane",
+            "with": "item.grano",
+            "count": 2,
+            "duration": 15,
+            "pose": "cook",
+            "says": "Il forno è caldo."
           }
         ],
         "day": [
           {
-            "fa": "take",
-            "oggetto": "item.pesce",
-            "quante": 1,
-            "dove": "square"
+            "does": "take",
+            "item": "item.pesce",
+            "count": 1,
+            "where": "square"
           },
           {
-            "fa": "go",
-            "dove": "work"
+            "does": "go",
+            "where": "work"
           },
           {
-            "fa": "produce",
-            "oggetto": "item.zuppa",
-            "con": "item.pesce",
-            "quante": 1,
-            "durata": 20,
-            "posa": "cook"
+            "does": "produce",
+            "item": "item.zuppa",
+            "with": "item.pesce",
+            "count": 1,
+            "duration": 20,
+            "pose": "cook"
           }
         ],
         "evening": [
           {
-            "fa": "carry",
-            "oggetto": "item.pane",
-            "dove": "square"
+            "does": "carry",
+            "item": "item.pane",
+            "where": "square"
           },
           {
-            "fa": "carry",
-            "oggetto": "item.zuppa",
-            "dove": "square"
+            "does": "carry",
+            "item": "item.zuppa",
+            "where": "square"
           },
           {
-            "fa": "chat"
+            "does": "chat"
           }
         ],
         "night": [
           {
-            "fa": "go",
-            "dove": "home"
+            "does": "go",
+            "where": "home"
           },
           {
-            "fa": "rest"
+            "does": "rest"
           }
         ]
       }

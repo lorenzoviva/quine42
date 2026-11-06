@@ -58,8 +58,8 @@ describe('the themes of the Genesis', () => {
     expect(k.modules.has('npc.villager')).toBe(false);
     // What holds in every theme is still there.
     for (const m of ['core.carpet', 'magic.runes']) expect(k.modules.has(m), m).toBe(true);
-    expect(k.repo.working['world/lessico.md']).toBe(bundledFiles['world/lessico.md']);
-    expect(k.repo.working['world/canone.md']).toBe(bundledFiles['world/canone.md']);
+    expect(k.repo.working['world/lexicon.md']).toBe(bundledFiles['world/lexicon.md']);
+    expect(k.repo.working['world/canon.md']).toBe(bundledFiles['world/canon.md']);
     // The theme reaches who writes the look and the land, not only the bible.
     for (const task of ['genesis.bible', 'genesis.style', 'genesis.terrain']) expect(models.asked.get(task), task).toContain(text);
     await develop(k);

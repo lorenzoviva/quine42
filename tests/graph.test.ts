@@ -37,15 +37,15 @@ function universe(): { files: FileMap; chunks: GraphChunk[] } {
   const plots: Plot[] = [
     {
       id: 'trama-lago',
-      titolo: 'Il Ritmo del Lago',
-      mistero: 'Qualcuno ruba le reti di Nereo.',
-      coinvolti: ['Nereo', 'Bastiano', 'Gaspare'],
-      tappe: [
-        { giorno: 0, momento: 'morning', chi: 'Nereo', dove: 'Sulle rive del Lago Muto', cosa: 'conta le reti' },
-        { giorno: 1, momento: 'evening', chi: 'Bastiano', dove: "Prato dell'Eco", cosa: 'aspetta' },
+      title: 'Il Ritmo del Lago',
+      mystery: 'Qualcuno ruba le reti di Nereo.',
+      involved: ['Nereo', 'Bastiano', 'Gaspare'],
+      beats: [
+        { day: 0, moment: 'morning', who: 'Nereo', where: 'Sulle rive del Lago Muto', what: 'conta le reti' },
+        { day: 1, moment: 'evening', who: 'Bastiano', where: "Prato dell'Eco", what: 'aspetta' },
       ],
-      inizio: 0,
-      stato: 'active',
+      start: 0,
+      state: 'active',
     },
   ];
   const files: FileMap = {
@@ -85,7 +85,7 @@ function universe(): { files: FileMap; chunks: GraphChunk[] } {
     [PLOTS_FILE]: writePlots(plots),
     'world/rules.json': JSON.stringify({ regole: [{ chiave: 'obj.counter|apri', testo: '«apri» su Banco', possibile: true }, { chiave: 'craft|fionda', testo: 'fabbricare una fionda', possibile: false }, { chiave: 'obj.forno|accendi', testo: '«accendi» su Forno', possibile: true }] }),
     'world/bible.json': JSON.stringify({ titolo: 'Prova', luoghi: ['Piazza del Borgo', 'Collina dei Venti'], fatti: ['Nereo pesca nel Lago Muto da quando era bambina.', 'Il pane di Piazza del Borgo è il più buono.'], misteri: ['Nessuno sa chi abbia costruito la Collina dei Venti.'] }),
-    'world/stato.json': JSON.stringify({ viandante: { inventory: { slots: [{ item: 'item.pane', count: 2 }, null, { item: 'item.scissors', count: 1, inv: { slots: [{ item: 'item.farina', count: 1 }] } }] } } }),
+    'world/state.json': JSON.stringify({ viandante: { inventory: { slots: [{ item: 'item.pane', count: 2 }, null, { item: 'item.scissors', count: 1, inv: { slots: [{ item: 'item.farina', count: 1 }] } }] } } }),
   };
   const chunks: GraphChunk[] = [
     { cx: 0, cy: 0, nome: 'Piazza del Borgo', ambiente: 'village', cose: ['npc.villager', 'obj.counter', 'obj.forno'], a_terra: ['Pane'], strutture: ['mulino'] },
@@ -224,7 +224,7 @@ describe('the graph of the world (ADR-0045)', () => {
     expect(readGraph({ [GRAPH_FILE]: text })?.nodes.length).toBe(data.nodes.length);
   });
 
-  it('the kernel keeps world/grafo.json with every commit, with the chunks planned', async () => {
+  it('the kernel keeps world/graph.json with every commit, with the chunks planned', async () => {
     const files: FileMap = { ...bundledFiles, [PLOTS_FILE]: writePlots([]) };
     const k = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
     await develop(k);

@@ -14,7 +14,7 @@ function council(files: FileMap) {
 
 describe('the rune canon', () => {
   it('is in the seed and says what runes are, where they are, that they stay put, what magic does', () => {
-    const canon = bundledFiles['world/canone.md'];
+    const canon = bundledFiles['world/canon.md'];
     expect(canon).toBeTruthy();
     for (const s of ['Aspetto', 'Dove si trovano', 'Restano dove sono finché qualcuno non le raccoglie', 'La magia', 'Ciò che nessuno sa']) expect(canon).toContain(s);
   });
@@ -39,8 +39,8 @@ describe('the rune canon', () => {
     files['modules/magic.stelle/manifest.json'] = JSON.stringify({ id: 'magic.stelle', kind: 'data', runes: { stella: { name: 'Stella', glyph: '✶', color: '#ffffff', element: 'cielo', description: 'la stella: guida' } } });
     expect(canonSummary(files)).toMatch(/✶ Stella \(«stella», cielo\): la stella: guida/);
     const old: FileMap = { ...bundledFiles };
-    delete old['world/canone.md'];
+    delete old['world/canon.md'];
     expect(canonSummary(old)).toBe('');
-    expect(upgradeFromSeed(old, bundledFiles).files['world/canone.md']).toBe(bundledFiles['world/canone.md']);
+    expect(upgradeFromSeed(old, bundledFiles).files['world/canon.md']).toBe(bundledFiles['world/canon.md']);
   });
 });

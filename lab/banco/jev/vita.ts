@@ -77,7 +77,7 @@ const VALMORA_TRADES: Array<[string, string[]]> = [
 
 function tradeCases(): CaseSpec[] {
   const programs = programsOf();
-  const options = programs.map((p) => ({ id: p.id, nomi: p.nomi }));
+  const options = programs.map((p) => ({ id: p.id, nomi: p.names }));
   return VALMORA_TRADES.map(([trade, right], i) => ({
     id: `mestiere/${trade.toLowerCase().replace(/[^a-zàèéìòù]+/g, '-')}`,
     group: 'vita',

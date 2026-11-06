@@ -3,6 +3,8 @@
 // seed's sound programs and the gerboas change name with what they name; people, plots, ventures, programs of the trades, sounds,
 // parts, cards, graph, shortfalls and universe.json change value field by field; the plans are ported as they are read; what the
 // Council still writes in Italian is repaired; the seed runs 400 ticks offline without faults, and its people do their trades.
+// The chain goes on to 0.4 (T308a, the fields and the paths): what is checked here is the step to 0.3, so the chain stops there
+// (`TO_0_3`); the readers of today read the fields of 0.4.
 
 import { describe, expect, it } from 'vitest';
 import { bundledFiles } from '../src/kernel/bundle';
@@ -31,6 +33,9 @@ const h = (s: string) => hex(hashStr(s));
 const json = (s: string | undefined) => JSON.parse(s ?? 'null');
 const ITALIAN = (id: string) => Object.entries(INTERNAL_NAMES.find((d) => d.id === id)!.names).filter(([it, en]) => it !== en).map(([it]) => it);
 const write = (v: unknown) => JSON.stringify(v, null, 2) + '\n';
+/** The kernel of the contract 0.3: the chain of these tests stops there. */
+const TO_0_3 = '0.3.0';
+const PLANS_0_3 = MIGRATIONS.slice(0, 2);
 
 /** The seed's sys.lavoro of 0.2, as a universe kept it: the seed's own (its hash is in seed.json). */
 const OLD_WORK_MANIFEST = write({ id: 'sys.lavoro', name: 'Il lavoro', kind: 'system', logic: 'logic.lua', order: 28 });
@@ -88,19 +93,20 @@ function universe02(): FileMap {
 
 describe('the migration 0.2 → 0.3: a universe of 0.2, file by file', () => {
   const before = universe02();
-  const { files, applied } = migrateUniverse(before);
+  const { files, applied } = migrateUniverse(before, TO_0_3);
 
   it('is the second migration of the chain, and it says what it does', () => {
-    expect(MIGRATIONS.map((m) => `${m.from}→${m.to}`)).toEqual(['0.1→0.2', '0.2→0.3']);
+    expect(MIGRATIONS.map((m) => `${m.from}→${m.to}`)).toEqual(['0.1→0.2', '0.2→0.3', '0.3→0.4']);
     expect(applied).toHaveLength(1);
     expect(applied[0]).toMatch(/^0\.2→0\.3: /);
-    expect(json(files['universe.json'])).toMatchObject({ kernel: KERNEL_VERSION, kernels: { from: '0.3' } });
-    expect(checkKernelVersion(json(files['universe.json']).kernel, KERNEL_VERSION, json(files['universe.json']).kernels).ok).toBe(true);
+    expect(json(files['universe.json'])).toMatchObject({ kernel: TO_0_3, kernels: { from: '0.3' } });
+    expect(checkKernelVersion(json(files['universe.json']).kernel, TO_0_3, json(files['universe.json']).kernels).ok).toBe(true);
+    expect(migrateUniverse(before).applied.map((a) => a.slice(0, 8))).toEqual(['0.2→0.3:', '0.3→0.4:']);
   });
 
   it('is deterministic: the same files give the same files, and a ported universe stays as it is', () => {
-    expect(migrateUniverse(universe02()).files).toEqual(files);
-    expect(migrateUniverse(files).applied).toEqual([]);
+    expect(migrateUniverse(universe02(), TO_0_3).files).toEqual(files);
+    expect(migrateUniverse(files, TO_0_3).applied).toEqual([]);
   });
 
   it('moves the seed\'s modules, their store, the prompts of the agents and the models the kernel names', () => {
@@ -184,7 +190,7 @@ describe('the migration 0.2 → 0.3: a universe of 0.2, file by file', () => {
   it('a universe that has the new path already keeps the new one', () => {
     const u = universe02();
     u['prompts/agents/narrator.md'] = 'il mio narratore\n';
-    const out = migrateUniverse(u).files;
+    const out = migrateUniverse(u, TO_0_3).files;
     expect(out['prompts/agents/narrator.md']).toBe('il mio narratore\n');
     expect(out['prompts/agents/narratore.md']).toBeUndefined();
   });
@@ -192,7 +198,7 @@ describe('the migration 0.2 → 0.3: a universe of 0.2, file by file', () => {
   it('a universe of 0.1 makes the whole chain', () => {
     const u = universe02();
     u['universe.json'] = write({ ...json(u['universe.json']), kernel: '0.1.9', kernels: { from: '0.1' } });
-    const out = migrateUniverse(u);
+    const out = migrateUniverse(u, TO_0_3);
     expect(out.applied.map((a) => a.slice(0, 8))).toEqual(['0.1→0.2:', '0.2→0.3:']);
     expect(json(out.files['universe.json']).kernels).toEqual({ from: '0.3' });
   });
@@ -202,48 +208,48 @@ describe('the plans of the places, as the kernel reads them', () => {
   const plan = { place: { name: 'Qui', description: 'qui' }, layout: 'village', objects: [{ module: 'obj.letto', x: 1, y: 1 }, { module: 'obj.banco-officina', x: 2, y: 2 }, { module: 'npc.villager', x: 3, y: 3 }], ground: [], fresh: [], runes: [] } as unknown as ChunkPlan;
 
   it('the seed\'s modules of their things by their internal ids, idempotently; a module of the Council stays', () => {
-    const rec = migratePlanRecord({ plan });
+    const rec = migratePlanRecord({ plan }, PLANS_0_3);
     expect(rec.plan.objects.map((o) => o.module)).toEqual(['obj.bed', 'obj.banco-officina', 'npc.villager']);
-    expect(migratePlanRecord(rec)).toBe(rec);
+    expect(migratePlanRecord(rec, PLANS_0_3)).toBe(rec);
   });
 });
 
 describe('what the Council still writes in Italian, until its prompts change (T310)', () => {
-  it('people and plots read internal; a plot of the Narrator too', () => {
+  it('people and plots read internal (and with the fields of 0.4, T308a); a plot of the Narrator too', () => {
     const files = universe02();
-    expect(readPeople(files).persone[0]).toMatchObject({ specie: 'person', genere: 'female', routine: [{ quando: 'morning', dove: 'work', azione: 'hoe' }, { quando: 'night', dove: 'home', azione: 'sleep' }] });
-    expect(readPlots(files)[0]).toMatchObject({ stato: 'active', missione: { stato: 'accepted', obiettivo: { tipo: 'bring' } } });
+    expect(readPeople(files).people[0]).toMatchObject({ species: 'person', gender: 'female', routine: [{ when: 'morning', where: 'work', activity: 'hoe' }, { when: 'night', where: 'home', activity: 'sleep' }] });
+    expect(readPlots(files)[0]).toMatchObject({ state: 'active', quest: { state: 'accepted', goal: { type: 'bring' } } });
     const p = plotFromRaw({ titolo: 'T', tappe: [{ chi: 'Ada', giorno: 1, momento: 'notte', dove: 'piazza', cosa: 'x' }], missione: { da: 'Ada', tipo: 'parla', a: 'Bruno' } }, 0, 't');
-    expect(p).toMatchObject({ stato: 'active', tappe: [{ momento: 'night', dove: 'square' }], missione: { stato: 'offered', obiettivo: { tipo: 'talk' } } });
+    expect(p).toMatchObject({ state: 'active', beats: [{ moment: 'night', where: 'square' }], quest: { state: 'offered', goal: { type: 'talk' } } });
   });
 
   it('a venture, a shortfall, a sound, a program of a trade, a part of a program', () => {
-    expect(readVenture(json(universe02()['world/imprese.json']).imprese[0])).toMatchObject({ tipo: 'harvest', stato: 'active', ruoli: [{ mestiere: 'farmer' }, { mestiere: 'any' }] });
-    expect(readShortfalls(universe02()['world/mancanze.json'])[0]).toMatchObject({ esito: 'refusal' });
-    expect(soundPrograms(universe02()).map((p) => p.suono?.uso)).toEqual(['music', 'effect', 'music']);
+    expect(readVenture(json(universe02()['world/imprese.json']).imprese[0])).toMatchObject({ type: 'harvest', state: 'active', roles: [{ job: 'farmer' }, { job: 'any' }] });
+    expect(readShortfalls(universe02()['world/mancanze.json'])[0]).toMatchObject({ outcome: 'refusal' });
+    expect(soundPrograms(universe02()).map((p) => p.sound?.use)).toEqual(['music', 'effect', 'music']);
     const world = { codes: new Set(['g', 'm']), items: new Set(['item.grano']) };
     const raw = json(universe02()['modules/lavoro.contadino/manifest.json']).mestieri[0];
     // Read with the moments of 0.2 the day is empty: no task of it runs.
-    expect(Object.values(validateJobProgram(raw, world).program!.giornata).flat()).toEqual([]);
+    expect(Object.values(validateJobProgram(raw, world).program!.day).flat()).toEqual([]);
     expect(validateJobProgram(internalJobProgram(raw), world).errors).toEqual([]);
     const model = compileMjx('<sequence values="BG" size="3 3 3"><color symbol="G" value="88cc88" part="gamba"/><one in="B" out="G" steps="1"/></sequence>');
     expect(model.program.palette.G?.part).toBe('leg');
   });
 
   it('the mode, the coefficients, the minimums; the server reads a game of many not ported yet as a game of many', () => {
-    expect(repairGameSetup({ modalita: 'multigiocatore', master: 'io' })).toMatchObject({ modalita: 'multiplayer', master: 'io' });
-    expect(repairGameSetup({ modalita: 'singola' }).modalita).toBe('single');
+    expect(repairGameSetup({ modalita: 'multigiocatore', master: 'io' })).toMatchObject({ mode: 'multiplayer', master: 'me' });
+    expect(repairGameSetup({ modalita: 'singola' }).mode).toBe('single');
     expect(isMultiplayer('multigiocatore')).toBe(true);
     expect(isMultiplayer('multiplayer')).toBe(true);
     expect(isMultiplayer('singola')).toBe(false);
     expect(repairCoefficients({ trame: 0.5, vite: 1 })).toMatchObject({ plots: 0.5, lives: 1 });
-    expect(repairMinimums({ scultori: { struttura: 'gemini-3.8-flash' }, coefficienti: { dialoghi: 0.5 } })).toEqual({ scultori: { structure: 'gemini-3.8-flash' }, coefficienti: { dialogues: 0.5 } });
+    expect(repairMinimums({ scultori: { struttura: 'gemini-3.8-flash' }, coefficienti: { dialoghi: 0.5 } })).toEqual({ sculptors: { structure: 'gemini-3.8-flash' }, coefficients: { dialogues: 0.5 } });
   });
 
   it('the Musician\'s answer: its use and its moments', () => {
     const r = purposeOf({ uso: 'musica', ambienti: ['castle'], momenti: ['sera', 'notte'] }, { richiesta: 'x' }, { ambienti: ['castle'], effetti: ['rune'] });
-    expect(r.suono).toEqual({ uso: 'music', ambienti: ['castle'], momenti: ['evening', 'night'] });
-    expect(purposeOf({ uso: 'effetto', effetto: 'rune' }, { richiesta: 'x' }, { ambienti: ['castle'], effetti: ['rune'] }).suono).toEqual({ uso: 'effect', effetti: ['rune'] });
+    expect(r.suono).toEqual({ use: 'music', environments: ['castle'], moments: ['evening', 'night'] });
+    expect(purposeOf({ uso: 'effetto', effetto: 'rune' }, { richiesta: 'x' }, { ambienti: ['castle'], effetti: ['rune'] }).suono).toEqual({ use: 'effect', effects: ['rune'] });
   });
 
   it('the ids of the cards and of the models', () => {
@@ -257,7 +263,7 @@ describe('what the Council still writes in Italian, until its prompts change (T3
   });
 });
 
-describe('the seed of 0.3', () => {
+describe('the seed of today (0.4: the values of 0.3 under the fields of 0.4)', () => {
   it('speaks the internal language in every domain of the step where the kernel reads a value', () => {
     const bad: string[] = [];
     for (const [p, text] of Object.entries(bundledFiles)) {
@@ -267,24 +273,24 @@ describe('the seed of 0.3', () => {
       const walk = (v: unknown, key?: string): void => {
         if (Array.isArray(v)) return v.forEach((x) => walk(x, key));
         if (typeof v === 'string') {
-          if (key === 'fa' && ITALIAN('comportamenti').includes(v)) bad.push(`${p}: fa ${v}`);
-          if (key === 'posa' && ITALIAN('attivita').includes(v)) bad.push(`${p}: posa ${v}`);
-          if ((key === 'dove' || key === 'percorso') && ITALIAN('dove').includes(v)) bad.push(`${p}: dove ${v}`);
-          if (key === 'uso' && ITALIAN('suoni').includes(v)) bad.push(`${p}: uso ${v}`);
-          if (key === 'momenti' && ITALIAN('momenti').includes(v)) bad.push(`${p}: momento ${v}`);
-          if (key === 'modalita' && ITALIAN('partita').includes(v)) bad.push(`${p}: modalita ${v}`);
+          if (key === 'does' && ITALIAN('comportamenti').includes(v)) bad.push(`${p}: does ${v}`);
+          if (key === 'pose' && ITALIAN('attivita').includes(v)) bad.push(`${p}: pose ${v}`);
+          if ((key === 'where' || key === 'route') && ITALIAN('dove').includes(v)) bad.push(`${p}: where ${v}`);
+          if (key === 'use' && ITALIAN('suoni').includes(v)) bad.push(`${p}: use ${v}`);
+          if (key === 'moments' && ITALIAN('momenti').includes(v)) bad.push(`${p}: moment ${v}`);
+          if (key === 'mode' && ITALIAN('partita').includes(v)) bad.push(`${p}: mode ${v}`);
           return;
         }
         if (!v || typeof v !== 'object') return;
         for (const [k, x] of Object.entries(v)) {
-          if (key === 'giornata' && ITALIAN('momenti').includes(k)) bad.push(`${p}: giornata ${k}`);
+          if (key === 'day' && ITALIAN('momenti').includes(k)) bad.push(`${p}: day ${k}`);
           walk(x, k);
         }
       };
       walk(JSON.parse(text));
     }
     expect(bad).toEqual([]);
-    expect(json(bundledFiles['universe.json'])).toMatchObject({ kernel: KERNEL_VERSION, kernels: { from: '0.3' } });
+    expect(json(bundledFiles['universe.json'])).toMatchObject({ kernel: KERNEL_VERSION, kernels: { from: '0.4' } });
   });
 
   it('sys.work says its outcomes in English, and the cases of the bench still point at its lines', () => {
@@ -292,7 +298,7 @@ describe('the seed of 0.3', () => {
     expect(lua).not.toMatch(/"(finito|continua)"|fallito:/);
     expect(lua).toContain('"failed:no_way"');
     const lines = lua.split('\n');
-    for (const c of json(bundledFiles['modules/sys.work/manifest.json']).casi) for (const n of c.righe as number[]) expect(n, `${c.titolo}: riga ${n}`).toBeLessThanOrEqual(lines.length);
+    for (const c of json(bundledFiles['modules/sys.work/manifest.json']).cases) for (const n of c.lines as number[]) expect(n, `${c.title}: riga ${n}`).toBeLessThanOrEqual(lines.length);
     // The same lines as before the rename: the cases of the bench cite them by number.
     expect(lines.length).toBe(366);
   });
