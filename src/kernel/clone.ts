@@ -106,7 +106,7 @@ export function cloneChanges(files: FileMap, opts: CloneOptions): { changes: Fil
   if (!validWandererId(opts.master)) throw new Error(`viandante non valido: ${opts.master}`);
   const raw = parse(files['universe.json']) ?? {};
   const game = raw.partita && typeof raw.partita === 'object' ? raw.partita : {};
-  if (game.modalita !== 'multigiocatore') throw new Error('solo un universo in multigiocatore ha un master da cambiare');
+  if (game.modalita !== 'multiplayer') throw new Error('solo un universo in multigiocatore ha un master da cambiare');
   // As repairGameSetup reads it: a master that is not a wanderer id is the one who plays alone.
   const from: string = validWandererId(game.master) ? game.master : SOLO;
   if (from === opts.master) throw new Error(`«${opts.master}» è già il master di questo universo`);

@@ -106,7 +106,7 @@ for (const p of PLACES) {
 const people = registry((x: Person) => origins.get(x.nome)!, (x: Person) => placeNames.get(key(x.at))!);
 const missing = PEOPLE.filter((x) => !origins.get(x.nome));
 if (missing.length) throw new Error(`senza luogo: ${missing.map((x) => x.nome).join(', ')}`);
-const society = checkSociety(people as never, (tipo) => (tipo === 'npc.gatto' ? 'animale' : 'persona'));
+const society = checkSociety(people as never, (tipo) => (tipo === 'npc.gatto' ? 'animal' : 'person'));
 if (society.length) {
   problems++;
   console.log(`✗ società: ${society.join('; ')}`);

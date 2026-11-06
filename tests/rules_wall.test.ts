@@ -45,7 +45,7 @@ describe('ruleTablets function', () => {
 
     // Exactly 5 tablets, no arrows
     expect(tablets.length).toBe(5);
-    expect(tablets.every((t) => t.kind === 'lastra')).toBe(true);
+    expect(tablets.every((t) => t.kind === 'slab')).toBe(true);
 
     // All 5 rules are among the newest 12 -> all marked
     expect(tablets.every((t) => t.marked === true)).toBe(true);
@@ -81,7 +81,7 @@ describe('ruleTablets function', () => {
 
     const prevArrow = items.find((it) => it.kind === 'prev');
     const nextArrow = items.find((it) => it.kind === 'next');
-    const tablets = items.filter((it) => it.kind === 'lastra');
+    const tablets = items.filter((it) => it.kind === 'slab');
 
     expect(prevArrow).toBeDefined();
     expect(prevArrow?.target).toBe('regole');
@@ -110,7 +110,7 @@ describe('the Library of the World (T47b): rules wall in Kernel', () => {
     const b = k.corona.building('mondo')!;
     const f = b.storeys[0];
 
-    const tablets = f.items.filter((it) => it.kind === 'lastra');
+    const tablets = f.items.filter((it) => it.kind === 'slab');
     expect(tablets.length).toBe(6);
     expect(tablets.every((t) => t.marked === true)).toBe(true);
 
@@ -149,7 +149,7 @@ describe('the Library of the World (T47b): rules wall in Kernel', () => {
     const k = await bootWithRules(rules);
     const b = k.corona.building('mondo')!;
     const f = b.storeys[0];
-    const firstTablet = f.items.find((it) => it.kind === 'lastra')!;
+    const firstTablet = f.items.find((it) => it.kind === 'slab')!;
 
     const opened: unknown[] = [];
     k.bus.on('ui:rule', (e) => opened.push(e));

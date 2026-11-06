@@ -15,7 +15,7 @@ const DT = 1 / 60;
 
 async function bootMany(): Promise<Kernel> {
   const cfg = JSON.parse(bundledFiles['universe.json']);
-  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2) };
+  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2) };
   return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 }
 
@@ -55,7 +55,7 @@ describe('the players from the corona (T42c)', () => {
     carry(k, 'anna', 5 * S + 3, -2 * S + 4);
     carry(k, 'ben', -S + 1, 7);
     await run(server);
-    const players = mirror.situation().ops.filter((o) => o.kind === 'giocatore');
+    const players = mirror.situation().ops.filter((o) => o.kind === 'player');
     expect(players.map((o) => [o.who, o.label, o.cx, o.cy]).sort()).toEqual([
       ['anna', 'Anna', 5, -2],
       ['ben', 'Ben', -1, 0],
@@ -72,7 +72,7 @@ describe('the players from the corona (T42c)', () => {
     // One leaves: the master's table loses them.
     ben.client.leave();
     await run(server);
-    expect(mirror.situation().ops.filter((o) => o.kind === 'giocatore').map((o) => o.who)).toEqual(['anna']);
+    expect(mirror.situation().ops.filter((o) => o.kind === 'player').map((o) => o.who)).toEqual(['anna']);
   });
 
   it('the master follows a player: the world around them comes, the master stays where they are', async () => {
@@ -133,6 +133,6 @@ describe('the players from the corona (T42c)', () => {
     const alone = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
     expect(alone.players()).toEqual([]);
     expect(alone.follow).toBeUndefined();
-    expect(alone.situation().ops.some((o) => o.kind === 'giocatore')).toBe(false);
+    expect(alone.situation().ops.some((o) => o.kind === 'player')).toBe(false);
   });
 });

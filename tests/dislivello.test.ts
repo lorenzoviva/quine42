@@ -18,7 +18,7 @@ import { developAll } from './espressivita/banco';
 
 const STEP = 1 / 20;
 const DAY = Kernel.DAY_SECONDS;
-const at = (n: number, phase: 'mattina' | 'giorno' | 'sera' | 'notte') => (n + { mattina: 0, giorno: 0.12, sera: 0.42, notte: 0.58 }[phase] - 0.12) * DAY + 1;
+const at = (n: number, phase: 'morning' | 'day' | 'evening' | 'night') => (n + { morning: 0, day: 0.12, evening: 0.42, night: 0.58 }[phase] - 0.12) * DAY + 1;
 
 describe('the way, tile by tile and step by step', () => {
   const open = (c: number, r: number) => c >= 0 && c < 10 && r >= 0 && r < 10;
@@ -151,13 +151,13 @@ describe('a rise of a model, in the kernel', () => {
       const id = k.spawnModuleEntity(k.modules.get('npc.villager')!, c - 2.5, r + 0.5)!;
       k.ecs.set(id, 'identity', { name: 'Prova', persona: '', look: '', carrying: [], job: 'fabbro' });
       k.ecs.set(id, 'mind', { mode: 'vaga', mood: '', history: [] });
-      k.time = at(3, 'mattina');
+      k.time = at(3, 'morning');
       for (let t = 0; t < 4 && !k.ecs.get(id, 'mestiere'); t += STEP) k.tick(STEP);
       const m = k.ecs.get(id, 'mestiere');
       expect(m).toBeDefined();
       // Her work this morning: up on the platform (with no stair, in its middle: 3 tiles from any she can stand on), then a while at the bench.
       const work = model === 'platea-scala' ? { x: c + 2.5, y: r + 0.5 } : { x: c + 0.5, y: r + 0.5 };
-      Object.assign(m, { lavoro: work, compiti: [{ fa: 'vai', dove: 'lavoro' }, { fa: 'aspetta', durata: 30 }] });
+      Object.assign(m, { work, compiti: [{ fa: 'go', dove: 'work' }, { fa: 'wait', durata: 30 }] });
       k.ecs.set(id, 'lavoro', { fase: m.fase, giorno: m.giorno, passo: 1 });
       const p = k.ecs.get(id, 'pos');
       let took = 0;
@@ -171,13 +171,13 @@ describe('a rise of a model, in the kernel', () => {
       } else {
         // No way and nothing near it: the task fails with its reason within a second, she does not push at the edge for long.
         expect(s.passo).toBe(2);
-        expect(s.motivo).toBe('fallito:nessuna via');
+        expect(s.motivo).toBe('failed:no_way');
         expect(took).toBeLessThan(1.5);
         expect(k.floorAt(p.x, p.y) - ground).toBeCloseTo(0);
         // The day goes on: the next task, a while at work where she is.
         for (let t = 0; t < 1; t += STEP) k.tick(STEP);
         expect(k.ecs.get(id, 'lavoro').passo).toBe(2);
-        expect(k.ecs.get(id, 'attivita')).toMatchObject({ tipo: 'lavora', ferma: true });
+        expect(k.ecs.get(id, 'attivita')).toMatchObject({ tipo: 'work', ferma: true });
       }
     }
   }, 120_000);
@@ -262,7 +262,7 @@ describe('back on foot (what T280 could not try)', () => {
     const sid = k.ecs.query('struttura', 'origin').find((e) => k.ecs.get(e, 'origin').key.startsWith(`${key}#s`))!;
     const origin = k.ecs.get(sid, 'origin').key;
     (k as unknown as { breakEntity(id: number): void }).breakEntity(sid);
-    k.stores.set('sys.lavoro', `deposito:${key.replace(',', ':')}`, { 'item.ciocco': 4 });
+    k.stores.set('sys.work', `deposito:${key.replace(',', ':')}`, { 'item.ciocco': 4 });
     // Away, in one go (the carpet jumps), until the place is let go.
     for (let jump = 0; jump < 3 && loaded(k, key); jump++) {
       k.carpet()!.ox += 12 * S;
@@ -274,7 +274,7 @@ describe('back on foot (what T280 could not try)', () => {
     expect(loaded(k, key)).toBe(false);
     const day0 = k.day();
     for (let d = 1; d <= 2; d++) {
-      k.time = at(day0 + d, 'sera');
+      k.time = at(day0 + d, 'evening');
       for (let t = 0; t < 3.5; t += STEP) k.tick(STEP);
     }
     expect(k.ventures().find((x) => x.origine === origin)!.lavorato).toBeGreaterThanOrEqual(200);

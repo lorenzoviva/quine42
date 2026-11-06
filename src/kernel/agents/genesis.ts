@@ -114,7 +114,7 @@ const REVIEW_SCHEMA: Schema = {
     approvato: { type: 'BOOLEAN' },
     problemi: {
       type: 'ARRAY',
-      items: { type: 'OBJECT', properties: { agente: { type: 'STRING', enum: ['narratore', 'artista', 'cartografo'] }, problema: { type: 'STRING' } }, required: ['agente', 'problema'] },
+      items: { type: 'OBJECT', properties: { agente: { type: 'STRING', enum: ['narrator', 'artist', 'cartographer'] }, problema: { type: 'STRING' } }, required: ['agente', 'problema'] },
     },
   },
   required: ['approvato', 'problemi'],
@@ -196,7 +196,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
   const data = { theme };
   const askBible = (feedback = '') =>
     c.ask<Bible>(
-      'narratore',
+      'narrator',
       'genesis.bible',
       `Crea la bibbia di un nuovo universo a partire da questo tema:\n${theme}\n\nPer chi ci vive il mondo è reale (vedi i principi). Scrivi un mondo semplice e concreto, fatto di persone e mestieri, nell'epoca che il tema dice: tono e sintesi la dicono chiaramente (la tecnologia, com'è una città), perché gli altri lavoreranno da lì. Le rune sono come le dice il canone: non aggiungere nulla. Elenca 6-10 luoghi, 4-6 personaggi con mestieri concreti, 6-10 fatti, 2-4 leggende raccontate dalla gente (storie di persone, bestie, dei, potenti del passato: mai sul mondo stesso, né sulle rune oltre il canone). La gente parla e si comporta come dice il lessico: usalo dove viene da sé, senza spiegarlo; in «usanze» al più 3 usanze o modi di dire propri di questo mondo, che non contraddicono il lessico e non aggiungono parole che ne sostituiscono altre.${feedback ? `\nL'Arbitro ha obiettato: ${feedback}` : ''}`,
       BIBLE_SCHEMA,
@@ -204,7 +204,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
     );
   const askStyle = (bible: Bible, feedback = '') =>
     c.ask<RawStyle>(
-      'artista',
+      'artist',
       'genesis.style',
       `Scrivi la guida di stile per tutti i modelli di questo universo: è un gioco 3D in cui ogni cosa (persone, animali, alberi, rocce, oggetti, edifici) è un modello a voxel (20 voxel per casella) costruito da un programma di regole, visto dall'alto in 3/4. Il mondo si disegna come un cartone: fasce di luce piatte e un contorno scuro dove cambia la parte. Dì lo stile (semplice e leggibile da lontano), le forme e le proporzioni (tozze e semplificate), la palette (ambiente smorzato e chiaro, pochi accenti saturi sulle cose che contano), la luce, 3-6 regole (tra cui: un colore pieno per parte, parti vicine ben staccate di chiaro e scuro, dettagli come segni scuri) e l'aspetto del protagonista, tutto nell'epoca del tema. In «case_comuni», solo se le case comuni di quest'epoca non sono casette di pietra, legno e paglia, dì in una frase come sono (un condominio con i balconi, una baracca di lamiera con un'insegna); altrimenti lascialo vuoto.\nTema: ${theme}\nTitolo: ${bible.titolo}\nTono: ${bible.tono}\nSintesi: ${bible.sintesi}${feedback ? `\nL'Arbitro ha obiettato: ${feedback}` : ''}`,
       STYLE_SCHEMA,
@@ -212,7 +212,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
     );
   const askTerrain = (bible: Bible, style: RawStyle, feedback = '') =>
     c.ask<{ terreni: RawTerrain[]; tetto: string }>(
-      'cartografo',
+      'cartographer',
       'genesis.terrain',
       `Definisci 14-20 tipi di terreno per le mappe di questo universo, esterni e interni, della sua epoca.\nTema: ${theme}\nTono: ${bible.tono}\nLuoghi: ${bible.luoghi.join('; ')}\nStile: ${style.stile}; palette ${style.palette.join(', ')}\nCodici obbligatori (un carattere ciascuno), adattati al tema:\n${Object.entries(BASE_CODES).map(([k, v]) => `- ${k}: ${v.meaning} [strato ${v.layer}]`).join('\n')}\nAggiungine altri (un carattere), ciò che nel tema esiste: in un borgo campi coltivati, fango, muro di pietra, paglia, staccionata, ponte levatoio; in una città asfalto, binari, cemento, vetro, lamiera, rete metallica; ovunque lava, tappeto. Colori ben distinti tra loro.${feedback ? `\nDa correggere: ${feedback}` : ''}`,
       TERRAIN_SCHEMA,
@@ -226,28 +226,28 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
     const breaks = bibleBreaks(b, words);
     if (breaks.length) {
       const why = `rompe la quarta parete, duplica le rune o spiega il lessico come un glossario: ${breaks.slice(0, 4).join('; ')}. Dentro il mondo nessuno sa di essere in un gioco.`;
-      c.say('kernel', 'scarta', why, 'narratore');
+      c.say('kernel', 'scarta', why, 'narrator');
       b = await askBible([feedback, why].filter(Boolean).join('; '));
     }
     return cleanBible(b, words);
   };
   let bible = await worldBible();
-  c.say('narratore', 'propone', `«${bible.titolo}» — ${bible.sintesi}`);
+  c.say('narrator', 'propone', `«${bible.titolo}» — ${bible.sintesi}`);
   let style = await askStyle(bible);
-  c.say('artista', 'propone', `${style.stile}; ${style.forme}; luce ${style.luce}`);
+  c.say('artist', 'propone', `${style.stile}; ${style.forme}; luce ${style.luce}`);
   let terrain = await askTerrain(bible, style);
   let errs = terrainErrors(terrain.terreni);
   if (errs.length) {
-    c.say('kernel', 'scarta', errs.join('; '), 'cartografo');
+    c.say('kernel', 'scarta', errs.join('; '), 'cartographer');
     terrain = await askTerrain(bible, style, errs.join('; '));
     errs = terrainErrors(terrain.terreni);
   }
-  if (!errs.length) c.say('cartografo', 'propone', terrain.terreni.map((t) => `${t.codice}=${t.nome}`).join(', '));
+  if (!errs.length) c.say('cartographer', 'propone', terrain.terreni.map((t) => `${t.codice}=${t.nome}`).join(', '));
 
   // The Physicist decides what can be walked on, and how fast.
   if (!errs.length) {
     const phys = await c.ask<{ terreni: Array<{ codice: string; solido: boolean; velocita: number; nota?: string }> }>(
-      'fisico',
+      'physicist',
       'genesis.physics',
       `Rivedi la fisica di questi terreni: cosa si può attraversare e a che velocità (moltiplicatore 0.3-1.5).\n${terrain.terreni.map((t) => `${t.codice} ${t.nome} [${t.strato}]: ${t.descrizione} (solido=${t.solido}, velocita=${t.velocita})`).join('\n')}\nRegole fisse: g, p, f, d calpestabili; w, t, r, h invalicabili.`,
       PHYS_SCHEMA,
@@ -256,7 +256,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
     for (const p of phys.terreni ?? []) {
       const t = terrain.terreni.find((x) => x.codice === p.codice);
       if (!t || BASE_CODES[t.codice]) continue;
-      if (t.solido !== p.solido || t.velocita !== p.velocita) c.say('fisico', 'corregge', `${t.nome}: ${p.solido ? 'invalicabile' : 'calpestabile'}, velocità ×${p.velocita}${p.nota ? ` — ${p.nota}` : ''}`, 'cartografo');
+      if (t.solido !== p.solido || t.velocita !== p.velocita) c.say('physicist', 'corregge', `${t.nome}: ${p.solido ? 'invalicabile' : 'calpestabile'}, velocità ×${p.velocita}${p.nota ? ` — ${p.nota}` : ''}`, 'cartographer');
       t.solido = p.solido;
       t.velocita = p.velocita;
     }
@@ -265,23 +265,23 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
 
   // The Arbiter checks that the story, the look and the land agree.
   const review = await c.ask<{ approvato: boolean; problemi: Array<{ agente: AgentId; problema: string }> }>(
-    'arbitro',
+    'arbiter',
     'genesis.review',
     `Verifica la coerenza tra bibbia, guida di stile e terreni di questo universo nascente. Segnala solo contraddizioni concrete.\nBibbia: ${JSON.stringify(bible)}\nStile: ${JSON.stringify(style)}\nTerreni: ${JSON.stringify(terrain.terreni)}`,
     REVIEW_SCHEMA,
     { data: { bible, style, terreni: terrain.terreni }, temperature: 0.2 },
   );
-  if (review.approvato || !review.problemi?.length) c.say('arbitro', 'approva', 'Storia, aspetto e terreni sono coerenti.');
+  if (review.approvato || !review.problemi?.length) c.say('arbiter', 'approva', 'Storia, aspetto e terreni sono coerenti.');
   else {
-    for (const p of review.problemi.slice(0, 4)) c.say('arbitro', 'obietta', p.problema, p.agente);
+    for (const p of review.problemi.slice(0, 4)) c.say('arbiter', 'obietta', p.problema, p.agente);
     const issues = (a: AgentId) => review.problemi.filter((p) => p.agente === a).map((p) => p.problema).join('; ');
-    if (issues('narratore')) {
-      bible = await worldBible(issues('narratore'));
-      c.say('narratore', 'corregge', bible.sintesi);
+    if (issues('narrator')) {
+      bible = await worldBible(issues('narrator'));
+      c.say('narrator', 'corregge', bible.sintesi);
     }
-    if (issues('artista')) {
-      style = await askStyle(bible, issues('artista'));
-      c.say('artista', 'corregge', style.stile);
+    if (issues('artist')) {
+      style = await askStyle(bible, issues('artist'));
+      c.say('artist', 'corregge', style.stile);
     }
   }
 
@@ -302,25 +302,25 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
         problems.push(`${d.id}: nessuna regola comprensibile`);
         continue;
       }
-      if (notes.length) c.say('kernel', 'corregge', `${d.id}: ${notes.slice(0, 3).join('; ')}`, 'cartografo');
+      if (notes.length) c.say('kernel', 'corregge', `${d.id}: ${notes.slice(0, 3).join('; ')}`, 'cartographer');
       d.def.program = repaired;
       const e = checkLayout(d.id, d.def, palette);
       if (e.length) problems.push(...e);
       else layouts[d.id] = d.def;
     }
     feedback = problems.join('; ');
-    c.say('cartografo', 'propone', `ambienti: ${Object.values(layouts).map((l) => l.name).join(', ') || 'nessuno valido'}`);
-    if (problems.length) c.say('kernel', 'scarta', problems.slice(0, 3).join('; '), 'cartografo');
+    c.say('cartographer', 'propone', `ambienti: ${Object.values(layouts).map((l) => l.name).join(', ') || 'nessuno valido'}`);
+    if (problems.length) c.say('kernel', 'scarta', problems.slice(0, 3).join('; '), 'cartographer');
   }
 
   const { moduli } = await c.ask<{ moduli: CastEntry[] }>(
-    'narratore',
+    'narrator',
     'genesis.cast',
     `Scegli i primi abitanti e le prime cose di «${bible.titolo}»: 5 npc molto diversi tra loro (almeno 3 persone di mestieri, età e generi diversi, e 1 animale; nessuno uguale a un altro), 5 oggetti che stanno nel mondo (almeno 3 mobili o contenitori, come li ha la sua epoca: letto, credenza, cassa, banco da lavoro…, e 1-2 cose all'aperto con cui fare qualcosa: pozzo, altare, falò, cabina, distributore…), 2 strumenti speciali. Per ognuno una richiesta di una frase per la Fucina, coerente con la bibbia.`,
     CAST_SCHEMA,
     { data: { bible } },
   );
-  c.say('narratore', 'propone', `Primi abitanti e cose: ${moduli.map((m) => m.richiesta).join(' · ')}`);
+  c.say('narrator', 'propone', `Primi abitanti e cose: ${moduli.map((m) => m.richiesta).join(' · ')}`);
 
   const files: FileMap = {
     'world/bible.json': JSON.stringify(bible, null, 2) + '\n',

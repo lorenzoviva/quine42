@@ -18,9 +18,9 @@ function prima(): FileMap {
   const carpet = JSON.parse(bundledFiles[CARPET]);
   return {
     ...bundledFiles,
-    'universe.json': JSON.stringify({ ...cfg, name: 'prima', partita: { modalita: 'multigiocatore', morte: 2, pvp: false, altroTraGiocatori: true, master: 'io' } }, null, 2) + '\n',
-    [CARPET]: JSON.stringify({ ...carpet, carta: { autore: 'ingegnere', pagante: 'io', titolare: 'io' } }, null, 2) + '\n',
-    [CARDS_FILE]: JSON.stringify({ utilizzi: { 'luogo:0_0': { luoghi: 1, trame: 0, prompt: 3 } }, luoghi: { '0_0': { autore: 'cartografo', pagante: 'comune', titolare: 'io', nome: 'La piazza' } } }, null, 1) + '\n',
+    'universe.json': JSON.stringify({ ...cfg, name: 'prima', partita: { modalita: 'multiplayer', morte: 2, pvp: false, altroTraGiocatori: true, master: 'io' } }, null, 2) + '\n',
+    [CARPET]: JSON.stringify({ ...carpet, carta: { autore: 'engineer', pagante: 'io', titolare: 'io' } }, null, 2) + '\n',
+    [CARDS_FILE]: JSON.stringify({ utilizzi: { 'chunk:0_0': { luoghi: 1, trame: 0, prompt: 3 } }, luoghi: { '0_0': { autore: 'cartographer', pagante: 'comune', titolare: 'io', nome: 'La piazza' } } }, null, 1) + '\n',
   };
 }
 
@@ -39,12 +39,12 @@ const editCarpet = (files: FileMap, edit: (m: any) => any): FileMap => ({ ...fil
 describe('the heritage of clones (T45c)', () => {
   it('a clone of a clone carries the chain of the holders before', () => {
     const c = card(terza(), CARPET_ID);
-    expect(c).toMatchObject({ autore: 'ingegnere', pagante: 'io', titolare: 'bruno' });
+    expect(c).toMatchObject({ autore: 'engineer', pagante: 'io', titolare: 'bruno' });
     expect(c.origini!.map((o) => `${o.titolare}@${o.universo}`)).toEqual(['io@prima', 'anna@seconda']);
-    const chunk = card(terza(), 'luogo:0_0');
+    const chunk = card(terza(), 'chunk:0_0');
     expect(chunk.origini!.map((o) => `${o.titolare}@${o.universo}`)).toEqual(['io@prima', 'anna@seconda']);
     // The uses so far are kept apart: the clone owes only what comes after.
-    expect(readCards(terza()).allaNascita).toEqual({ 'luogo:0_0': { luoghi: 1, trame: 0, prompt: 3 } });
+    expect(readCards(terza()).allaNascita).toEqual({ 'chunk:0_0': { luoghi: 1, trame: 0, prompt: 3 } });
   });
 
   it('content never changed: half of every use goes back along the chain, at every link', () => {
@@ -84,14 +84,14 @@ describe('the heritage of clones (T45c)', () => {
   it('who held a card before receives their share of the uses since the clone', () => {
     const files = terza();
     const ledger = JSON.parse(files[CARDS_FILE]);
-    ledger.utilizzi['luogo:0_0'] = { luoghi: 3, trame: 1, prompt: 10 };
+    ledger.utilizzi['chunk:0_0'] = { luoghi: 3, trame: 1, prompt: 10 };
     const used = { ...files, [CARDS_FILE]: JSON.stringify(ledger) };
     const io = receivedBy(used, 'io');
-    const square = io.find((r) => r.card.id === 'luogo:0_0')!;
+    const square = io.find((r) => r.card.id === 'chunk:0_0')!;
     expect(square).toMatchObject({ universo: 'prima', utilizzi: 10 });
     expect(square.ricevuto).toBeCloseTo(2.5);
     expect(io.find((r) => r.card.id === CARPET_ID)).toMatchObject({ universo: 'prima', utilizzi: 0, ricevuto: 0 });
-    expect(receivedBy(used, 'anna').find((r) => r.card.id === 'luogo:0_0')!.universo).toBe('seconda');
+    expect(receivedBy(used, 'anna').find((r) => r.card.id === 'chunk:0_0')!.universo).toBe('seconda');
     // Who holds it now does not receive it as heritage.
     expect(receivedBy(used, 'bruno')).toEqual([]);
   });
@@ -118,8 +118,8 @@ describe('the heritage of clones (T45c)', () => {
     const files = terza();
     const k = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
     const ledger = JSON.parse(k.cards.toJson());
-    expect(ledger.allaNascita['luogo:0_0']).toEqual({ luoghi: 1, trame: 0, prompt: 3 });
+    expect(ledger.allaNascita['chunk:0_0']).toEqual({ luoghi: 1, trame: 0, prompt: 3 });
     expect(ledger.luoghi['0_0'].origini).toHaveLength(2);
-    expect(k.received('io').map((r) => r.card.id)).toEqual(expect.arrayContaining([CARPET_ID, 'luogo:0_0']));
+    expect(k.received('io').map((r) => r.card.id)).toEqual(expect.arrayContaining([CARPET_ID, 'chunk:0_0']));
   });
 });

@@ -37,23 +37,23 @@ describe('the cards (T36)', () => {
     await develop(k);
     const cards = k.cardsOf();
     // What the Genesis made is common; with one wanderer, every common card is theirs.
-    const forged = cards.filter((c) => c.tipo === 'modulo' || (c.tipo === 'oggetto' && c.file.startsWith('modules/items.pacco')));
+    const forged = cards.filter((c) => c.tipo === 'module' || (c.tipo === 'item' && c.file.startsWith('modules/items.pacco')));
     expect(forged.length).toBeGreaterThan(3);
     expect(forged.every((c) => c.pagante === COMUNE && c.titolare === 'io')).toBe(true);
-    expect(cards.filter((c) => c.tipo === 'modulo').every((c) => c.autore === 'narratore')).toBe(true);
-    const envs = cards.filter((c) => c.tipo === 'ambiente');
+    expect(cards.filter((c) => c.tipo === 'module').every((c) => c.autore === 'narrator')).toBe(true);
+    const envs = cards.filter((c) => c.tipo === 'environment');
     expect(envs.length).toBeGreaterThan(0);
-    expect(envs.every((c) => c.autore === 'cartografo' && c.pagante === COMUNE)).toBe(true);
+    expect(envs.every((c) => c.autore === 'cartographer' && c.pagante === COMUNE)).toBe(true);
     // The places are the explorer's.
-    const chunks = cards.filter((c) => c.tipo === 'luogo');
+    const chunks = cards.filter((c) => c.tipo === 'chunk');
     expect(chunks.length).toBeGreaterThanOrEqual(2);
-    expect(chunks.every((c) => c.autore === 'cartografo' && c.pagante === 'io' && c.titolare === 'io' && c.nome)).toBe(true);
+    expect(chunks.every((c) => c.autore === 'cartographer' && c.pagante === 'io' && c.titolare === 'io' && c.nome)).toBe(true);
     // The content of the seed is nobody's card.
-    expect(cards.some((c) => c.id === 'tipo:core.carpet')).toBe(false);
+    expect(cards.some((c) => c.id === 'kind:core.carpet')).toBe(false);
     // Uses: the environments of the places, what stands in them.
-    expect(cards.some((c) => c.tipo === 'ambiente' && c.utilizzi.luoghi > 0)).toBe(true);
+    expect(cards.some((c) => c.tipo === 'environment' && c.utilizzi.luoghi > 0)).toBe(true);
     // A prompt that is about a card counts it.
-    const item = forged.find((c) => c.tipo === 'oggetto')!;
+    const item = forged.find((c) => c.tipo === 'item')!;
     k.council.focusContext([item.id]);
     expect(k.cards.uses(item.id).prompt).toBe(1);
     // The collection of the wanderer: all of it here.
@@ -72,26 +72,26 @@ describe('the cards (T36)', () => {
   }, 60000);
 
   it('common cards go to one of the wanderers, drawn with the seed; the same in every kernel', async () => {
-    const ids = Array.from({ length: 40 }, (_, i) => `oggetto:cosa-${i}`);
+    const ids = Array.from({ length: 40 }, (_, i) => `item:cosa-${i}`);
     const draw = (seed: number) => ids.map((id) => cardHolderOf(id, COMUNE, ['io', 'anna'], seed));
     expect(draw(7)).toEqual(draw(7));
     expect(new Set(draw(7))).toEqual(new Set(['io', 'anna']));
     expect(draw(7)).not.toEqual(draw(8));
-    expect(cardHolderOf('luogo:1_0', 'anna', ['io', 'anna'], 7)).toBe('anna');
+    expect(cardHolderOf('chunk:1_0', 'anna', ['io', 'anna'], 7)).toBe('anna');
     // In the kernel: the wanderers it has (the order they joined in does not matter).
     const a = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
     const b = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
     a.addWanderer('anna');
     b.addWanderer('anna');
-    const signs = (k: Kernel) => ids.map((id) => k.sign(id, 'plot.weave', 'narratore').titolare);
+    const signs = (k: Kernel) => ids.map((id) => k.sign(id, 'plot.weave', 'narrator').titolare);
     expect(signs(a)).toEqual(signs(b));
     expect(new Set(signs(a))).toEqual(new Set(['io', 'anna']));
     // What a wanderer pays for is theirs, whoever else is there.
-    expect(a.as('anna', () => a.sign('luogo:3_3', 'chunk.plan', 'cartografo'))).toEqual({ autore: 'cartografo', pagante: 'anna', titolare: 'anna' });
+    expect(a.as('anna', () => a.sign('chunk:3_3', 'chunk.plan', 'cartographer'))).toEqual({ autore: 'cartographer', pagante: 'anna', titolare: 'anna' });
   });
 
   it('only what a change brings is stamped; a card lost in a rewrite comes back', () => {
-    const carta = { autore: 'scultore', pagante: COMUNE, titolare: 'io' };
+    const carta = { autore: 'sculptor', pagante: COMUNE, titolare: 'io' };
     const head = {
       'models/index.json': JSON.stringify({ seme: { classe: 'object' }, vecchio: { classe: 'object', carta } }, null, 1),
       'modules/items.base/manifest.json': JSON.stringify({ id: 'items.base', kind: 'data', items: [{ id: 'pane', name: 'Pane' }] }, null, 2),
@@ -103,15 +103,15 @@ describe('the cards (T36)', () => {
       'modules/npc.oste/manifest.json': JSON.stringify({ id: 'npc.oste', name: 'Oste', kind: 'entity' }, null, 2),
     };
     const signed: string[] = [];
-    const out = stampFiles(working, head, (id) => (signed.push(id), { autore: 'narratore', pagante: 'io', titolare: 'io' }));
-    expect(signed.sort()).toEqual(['modello:nuovo', 'oggetto:vino', 'tipo:npc.oste']);
+    const out = stampFiles(working, head, (id) => (signed.push(id), { autore: 'narrator', pagante: 'io', titolare: 'io' }));
+    expect(signed.sort()).toEqual(['item:vino', 'kind:npc.oste', 'model:nuovo']);
     const index = JSON.parse(out['models/index.json']);
     expect(index.seme.carta).toBeUndefined();
     expect(index.vecchio.carta).toEqual(carta);
     expect(index.nuovo.carta.pagante).toBe('io');
     expect(out['models/index.json']).toMatch(/^\{\n "seme"/);
     expect(JSON.parse(out['modules/items.base/manifest.json']).items[0].carta).toBeUndefined();
-    expect(JSON.parse(out['modules/npc.oste/manifest.json']).carta.autore).toBe('narratore');
+    expect(JSON.parse(out['modules/npc.oste/manifest.json']).carta.autore).toBe('narrator');
     // Nothing new, nothing rewritten.
     expect(stampFiles(head, head, () => carta)).toEqual({});
   });

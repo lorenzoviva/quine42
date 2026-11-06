@@ -83,7 +83,7 @@ if (Object.keys(maps).length !== 19) fail(`i piani sono ${Object.keys(maps).leng
 
 log('— Società, trame, atlante');
 const people = readPeople(files);
-const society = checkSociety(people, (tipo) => (tipo === 'npc.gatto' ? 'animale' : 'persona'));
+const society = checkSociety(people, (tipo) => (tipo === 'npc.gatto' ? 'animal' : 'person'));
 society.forEach((s) => fail(`società: ${s}`));
 const plots = readPlots(files);
 const atlas = JSON.parse(files['world/atlas.json']).regioni as Array<{ ambiente: string; nome: string }>;
@@ -359,7 +359,7 @@ if (visited.size !== Object.keys(maps).length) fail(`visitati ${visited.size} lu
 if (TICKS - ticks < 70) fail(`restano solo ${TICKS - ticks} tick per la Torre C`);
 await tick(TICKS - ticks);
 await settle(50);
-const done = readPlots(k.files).filter((p) => p.missione?.stato === 'compiuta').map((p) => p.titolo);
+const done = readPlots(k.files).filter((p) => p.missione?.stato === 'completed').map((p) => p.titolo);
 counts.missioni = done.length;
 log(`  missioni compiute: ${done.length} (${done.join('; ')})`);
 if (done.length < 3) fail(`compiute ${done.length} missioni su 3`);

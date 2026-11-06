@@ -4,6 +4,7 @@
 // principle; on death the Narrator turns the level into what is lost and where one wakes up.
 
 import type { GameSetup } from './types';
+import { internalName } from './internalNames';
 
 /** The levels of the death, from 0 to 4: what the Council reads, what the Genesis screen shows. */
 export const DEATH_LEVELS: ReadonlyArray<{ nome: string; testo: string }> = [
@@ -15,9 +16,15 @@ export const DEATH_LEVELS: ReadonlyArray<{ nome: string; testo: string }> = [
 ];
 
 /** The game of today: one player, death as hard as it was before the choice existed. */
-export const DEFAULT_GAME_SETUP: GameSetup = { modalita: 'singola', morte: 3, pvp: false, altroTraGiocatori: true };
+export const DEFAULT_GAME_SETUP: GameSetup = { modalita: 'single', morte: 3, pvp: false, altroTraGiocatori: true };
 
 export const deathLevel = (p: GameSetup) => DEATH_LEVELS[p.morte] ?? DEATH_LEVELS[DEFAULT_GAME_SETUP.morte];
+
+/**
+ * Whether a universe's `partita.modalita`, as read, is a game of many (T307b): `multiplayer`, or `multigiocatore` of a universe of the
+ * contract 0.2 not ported yet (a server reads universe.json before any kernel boots it: such a game must not look like a game alone).
+ */
+export const isMultiplayer = (modalita: unknown): boolean => typeof modalita === 'string' && internalName('partita', modalita) === 'multiplayer';
 
 /** The game as a principle of the Council: with every task of who builds on it. */
 export function gameSetupSummary(p: GameSetup): string {
@@ -25,7 +32,7 @@ export function gameSetupSummary(p: GameSetup): string {
   return [
     '## La partita (scelta prima della Genesi, non cambia più)',
     `- La morte è ${d.nome} (${p.morte} su 4): ${d.testo}. Ciò che introduci (abilità, tesori, legami, meccaniche) deve restare coerente con questa punizione.`,
-    p.modalita === 'multigiocatore'
+    p.modalita === 'multiplayer'
       ? `- Si gioca in più viandanti. Tra loro: ${p.pvp ? 'possono ferirsi' : 'non possono ferirsi'}; ${p.altroTraGiocatori ? '«Altro…» si può fare anche su un altro viandante' : '«Altro…» non si fa su un altro viandante'}.`
       : '- Si gioca da soli: un solo viandante.',
   ].join('\n');

@@ -86,7 +86,7 @@ async function askGame(k: Kernel, c: Case): Promise<Call> {
     return { answers: { possible: { type: 'noul', value: r.possible, p: r.possible ? 1 : 0 }, result: { type: 'choice', value: known(r.result, s.known_items) ?? 'nuovo' } }, calls: 1 };
   }
   if (c.kind === 'referente') {
-    const history = (s.history ?? []).map((t: any) => ({ who: t.chi === 'viandante' ? 'giocatore' : 'agente', text: t.dice }));
+    const history = (s.history ?? []).map((t: any) => ({ who: t.chi === 'viandante' ? 'player' : 'npc', text: t.dice }));
     const r = await liaisonReply(k.council, history, s.request);
     return { answers: { team: { type: 'choice', value: r.task }, refuse: { type: 'noul', value: !!r.refusal, p: r.refusal ? 1 : 0 } }, calls: 1 };
   }
@@ -97,7 +97,7 @@ async function askGame(k: Kernel, c: Case): Promise<Call> {
 async function reviewGame(k: Kernel, cases: Case[]): Promise<Record<string, boolean>> {
   const lines = cases.map((c, i) => `- m${i + 1} «${(c.state as any).text.split('.')[0].slice(0, 40)}»: ${(c.state as any).text.slice(0, 300)}`);
   const r = await k.council.ask<{ ritira?: string[] }>(
-    'arbitro',
+    'arbiter',
     'review.fourthwall',
     `Rivedi questi moduli creati dal Concilio. Ritira quelli che rompono la quarta parete (riferimenti a codice, simulazione, realtà instabile o finta, mondi che si ripetono, ruoli astratti come custodi della realtà, censori, archivisti del mondo, misuratori di anomalie; anche travestiti da leggenda: chi torna sempre in piazza, chi osserva ogni viandante, confini che nessuno supera), quelli che duplicano le rune (altri simboli luminosi nel terreno) e i doppioni. Tieni tutto ciò che è una persona o una cosa vera del mondo.\n${lines.join('\n')}`,
     { type: 'OBJECT', properties: { ritira: { type: 'ARRAY', items: { type: 'STRING' } }, motivo: { type: 'STRING' } }, required: ['ritira'] },

@@ -30,10 +30,10 @@ describe('the Nucleus', () => {
     const k = await boot();
     const b = k.corona.building('nucleo')!;
     const f = b.storeys[0];
-    const g = f.items.find((i) => i.kind === 'grafo')!;
+    const g = f.items.find((i) => i.kind === 'graph')!;
     expect(g.label).toBe('il grafo del mondo');
     // Only in the Nucleus.
-    expect(k.corona.buildings.filter((x) => x.storeys.some((fl) => fl.items.some((i) => i.kind === 'grafo'))).map((x) => x.id)).toEqual(['nucleo']);
+    expect(k.corona.buildings.filter((x) => x.storeys.some((fl) => fl.items.some((i) => i.kind === 'graph'))).map((x) => x.id)).toEqual(['nucleo']);
     const [w, h] = [g.w!, g.h!];
     for (let x = g.x - 1; x <= g.x + w; x++)
       for (let y = g.y - 1; y <= g.y + h; y++) {
@@ -49,7 +49,7 @@ describe('the Nucleus', () => {
 
   it('opens with E in front of it or a click within reach', async () => {
     const k = await boot();
-    const g = k.corona.building('nucleo')!.storeys[0].items.find((i) => i.kind === 'grafo')!;
+    const g = k.corona.building('nucleo')!.storeys[0].items.find((i) => i.kind === 'graph')!;
     const opened: unknown[] = [];
     k.bus.on('ui:graph', (e) => opened.push(e));
     stand(k, g.x + 1.5, g.y + g.h! + 0.5);

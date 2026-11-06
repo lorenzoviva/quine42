@@ -174,7 +174,7 @@ function drawCosts(g: CanvasRenderingContext2D, c: CostBoard, color: string, W: 
   });
 }
 
-const DRAW: Record<ScreenField, (g: CanvasRenderingContext2D, s: any, color: string, W: number, H: number) => void> = { tempo: drawTimeline, registro: drawLive, costi: drawCosts };
+const DRAW: Record<ScreenField, (g: CanvasRenderingContext2D, s: any, color: string, W: number, H: number) => void> = { time: drawTimeline, feed: drawLive, costs: drawCosts };
 
 export class ScreenWall {
   readonly group = new THREE.Group();
@@ -207,7 +207,7 @@ export class ScreenWall {
       this.group.add(panel);
       this.fields.push({ field: it.target as ScreenField, cv, tex, key: '' });
       // The film's arrows, on their pillars in front of it.
-      if (it.target === 'tempo') {
+      if (it.target === 'time') {
         const a = arrowSign(it.x, it.y + 1, '<', color), b = arrowSign(it.x + w - 1, it.y + 1, '>', color);
         a.position.y = b.position.y = 1.1;
         this.group.add(a, b);
@@ -234,7 +234,7 @@ export class ScreenWall {
 
   /** Red blinks. */
   blink(t: number): void {
-    if (this.band) this.band.mesh.visible = this.band.level !== 'rossa' || Math.sin(t * 5) > -0.4;
+    if (this.band) this.band.mesh.visible = this.band.level !== 'red' || Math.sin(t * 5) > -0.4;
   }
 
   /** Draws the fields whose content changed; returns how many. */

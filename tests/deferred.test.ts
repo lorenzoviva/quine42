@@ -89,20 +89,20 @@ describe('la generazione differita (T207)', () => {
       limits: disk.limits,
       text: (call) => (dataOf.set(call.prompt, call.data), disk.text(call)),
     };
-    const out = await generateUniverse({ name: 'valle', dir, queue, weekly: still, luoghi: 4, modelli: 0, brani: 0, partita: 'multigiocatore' });
+    const out = await generateUniverse({ name: 'valle', dir, queue, weekly: still, luoghi: 4, modelli: 0, brani: 0, partita: 'multiplayer' });
     serving = false;
     await cli;
 
     expect(out).toEqual({ esito: 'finito', fatti: ['genesi', 'luogo:0,0', 'luogo:1,0', 'luogo:1,1', 'luogo:0,1'] });
     noApi();
-    expect(served).toContain('narratore:genesis.bible');
+    expect(served).toContain('narrator:genesis.bible');
     expect(served.some((s) => s.endsWith(':chunk.plan'))).toBe(true);
     // On disk: the Genesis committed, the plans of the four places, the game chosen at the start.
     expect(git('valle', 'log', '--format=%s')).toMatch(/genesi: /);
     expect(git('valle', 'status', '--porcelain').trim()).toBe('');
     const maps = mapsOf('valle');
     for (const k of ['0_0', '1_0', '1_1', '0_1']) expect(maps.filter((f) => f.endsWith(`_${k}.json`))).toHaveLength(1);
-    expect(universeJson('valle').partita.modalita).toBe('multigiocatore');
+    expect(universeJson('valle').partita.modalita).toBe('multiplayer');
     expect(progressFile(dir, 'valle', { tetto: 10 }).load().passi).toEqual(out.fatti);
     expect(isGenerating(dir, 'valle')).toBe(false);
   }, 120_000);
@@ -122,8 +122,8 @@ describe('la generazione differita (T207)', () => {
 
     const out = await generateUniverse({ name: 'ferma', dir, queue: q, weekly: still, luoghi: 4, modelli: 0, brani: 0 });
     expect(out.esito).toBe('errore');
-    expect(out.motivo).toMatch(/narratore: .*andrebbe alle API/);
-    expect(q.calls.slice(before).filter((c) => c.agent === 'narratore')).toEqual([]);
+    expect(out.motivo).toMatch(/narrator: .*andrebbe alle API/);
+    expect(q.calls.slice(before).filter((c) => c.agent === 'narrator')).toEqual([]);
     // The steps before it that did not need the Narrator are valid and kept; the one that stopped wrote nothing, not even its place's plan.
     const stopped = /^(luogo:-?\d+,-?\d+):/.exec(out.motivo!)![1];
     expect(out.fatti).not.toContain(stopped);
@@ -194,7 +194,7 @@ describe('la generazione differita (T207)', () => {
     expect(isWorldLit(dir, 'morto')).toBe(false);
 
     // The other way round: while it generates, the server does not light its world; two generations do not run together.
-    await generateUniverse({ name: 'molti', dir, queue: q, weekly: still, luoghi: 0, modelli: 0, brani: 0, partita: 'multigiocatore' });
+    await generateUniverse({ name: 'molti', dir, queue: q, weekly: still, luoghi: 0, modelli: 0, brani: 0, partita: 'multiplayer' });
     const held = takeGeneration(dir, 'molti');
     expect('release' in held).toBe(true);
     expect(worldRefusal(dir, 'molti', 0)).toMatch(/si sta generando/);
@@ -222,9 +222,9 @@ describe('la generazione differita (T207)', () => {
 
   it('la partita si sceglie all’avvio e non cambia dopo la Genesi', async () => {
     const q = new FakeQueue();
-    expect((await generateUniverse({ name: 'sola', dir, queue: q, weekly: still, luoghi: 0, modelli: 0, brani: 0, partita: 'singola' })).esito).toBe('finito');
-    expect(universeJson('sola').partita?.modalita ?? 'singola').toBe('singola');
-    const other = await generateUniverse({ name: 'sola', dir, queue: q, weekly: still, luoghi: 1, modelli: 0, brani: 0, partita: 'multigiocatore' });
+    expect((await generateUniverse({ name: 'sola', dir, queue: q, weekly: still, luoghi: 0, modelli: 0, brani: 0, partita: 'single' })).esito).toBe('finito');
+    expect(universeJson('sola').partita?.modalita ?? 'single').toBe('single');
+    const other = await generateUniverse({ name: 'sola', dir, queue: q, weekly: still, luoghi: 1, modelli: 0, brani: 0, partita: 'multiplayer' });
     expect(other).toEqual({ esito: 'errore', motivo: expect.stringMatching(/già una partita in singola/), fatti: [] });
   }, 120_000);
 });
@@ -240,13 +240,13 @@ describe('i pezzi della generazione differita (T207)', () => {
 
   it('la tabella: ogni agente all’abbonamento, salvo chi l’universo manda alle API', async () => {
     const t = deferredTable({ provider: 'api', agenti: { artista: 'api', narratore: 'claude' } });
-    expect(t).toEqual({ provider: 'claude', agenti: { artista: 'api', narratore: 'claude' } });
+    expect(t).toEqual({ provider: 'claude', agenti: { artist: 'api', narrator: 'claude' } });
     const q = new FakeQueue();
     const m = new DeferredModels(t, { claude: q });
     // Fast tasks too: npc.reply would go to the API in play.
-    await m.text({ agent: 'narratore', task: 'npc.reply', system: '', prompt: 'ciao' });
-    await expect(m.text({ agent: 'artista', task: 'model.judge', system: '', prompt: '' })).rejects.toThrow(/andrebbe alle API/);
-    await expect(m.text({ agent: 'narratore', task: 'npc.reply', system: '', prompt: 'ancora' })).rejects.toThrow(/andrebbe alle API/);
+    await m.text({ agent: 'narrator', task: 'npc.reply', system: '', prompt: 'ciao' });
+    await expect(m.text({ agent: 'artist', task: 'model.judge', system: '', prompt: '' })).rejects.toThrow(/andrebbe alle API/);
+    await expect(m.text({ agent: 'narrator', task: 'npc.reply', system: '', prompt: 'ancora' })).rejects.toThrow(/andrebbe alle API/);
     expect(q.calls.map((c) => c.prompt)).toEqual(['ciao']);
   });
 

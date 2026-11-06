@@ -43,7 +43,7 @@ export interface ModelInfo {
   /** Its size (ADR-0092), if not the class's own: the box grows or shrinks with it (and `vpt` with it). */
   taglia?: string;
   nome?: string;
-  /** Who wrote it: "a mano", "scultore", the Gemini model… */
+  /** Who wrote it: "a mano", "sculptor", the Gemini model… */
   autore?: string;
   /** The Artist's vote (0-10), if it was judged. */
   voto?: number;

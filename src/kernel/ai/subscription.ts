@@ -10,6 +10,7 @@
 
 import { emptyUsage, Semaphore, type Limits, type AiModels, type TextCall } from './models';
 import type { CallRecord } from './usage';
+import { internalAgent } from '../internalNames';
 
 /** `api`: Gemini, paid per call. The others: a subscription's CLI, through the queue. */
 export type Provider = 'api' | 'claude';
@@ -40,7 +41,8 @@ const isProvider = (v: unknown): v is Provider => typeof v === 'string' && (PROV
 export function subscriptionsOf(ai: { provider?: unknown; agenti?: unknown } | undefined): Subscriptions {
   const agenti: Record<string, Provider> = {};
   if (ai?.agenti && typeof ai.agenti === 'object' && !Array.isArray(ai.agenti))
-    for (const [agent, p] of Object.entries(ai.agenti as Record<string, unknown>)) if (isProvider(p)) agenti[agent] = p;
+    // An agent of the contract 0.2 (`narratore`) reads internal (T307b).
+    for (const [agent, p] of Object.entries(ai.agenti as Record<string, unknown>)) if (isProvider(p)) agenti[internalAgent(agent)] = p;
   return { provider: isProvider(ai?.provider) ? ai.provider : 'api', agenti };
 }
 

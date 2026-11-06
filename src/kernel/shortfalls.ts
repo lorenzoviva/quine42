@@ -4,13 +4,14 @@
 // models, so it is cut down and flattened here. Pure and light: the report command imports it, without the kernel.
 
 export const SHORTFALLS_FILE = 'world/mancanze.json';
+import { internalName } from './internalNames';
 
 /**
- * How it ended: the Council said no (`rifiuto`); it said yes, but the validator refused its last attempt or dropped what it
- * proposed (`invalido`); the model gave no usable answer (`errore`); generated code that fails and the Engineer did not repair (`guasto`).
+ * How it ended: the Council said no (`refusal`); it said yes, but the validator refused its last attempt or dropped what it
+ * proposed (`invalid`); the model gave no usable answer (`error`); generated code that fails and the Engineer did not repair (`fault`).
  */
-export type ShortfallOutcome = 'rifiuto' | 'invalido' | 'errore' | 'guasto';
-const OUTCOMES: readonly string[] = ['rifiuto', 'invalido', 'errore', 'guasto'] satisfies ShortfallOutcome[];
+export type ShortfallOutcome = 'refusal' | 'invalid' | 'error' | 'fault';
+const OUTCOMES: readonly string[] = ['refusal', 'invalid', 'error', 'fault'] satisfies ShortfallOutcome[];
 
 export interface ShortfallNote {
   richiesta: string;
@@ -53,11 +54,13 @@ function readEntry(raw: unknown): Shortfall | undefined {
   if (!raw || typeof raw !== 'object') return undefined;
   const e = raw as Record<string, unknown>;
   const richiesta = flat(e.richiesta, MAX_REQUEST);
-  if (!richiesta || !OUTCOMES.includes(e.esito as string)) return undefined;
+  // An outcome of the contract 0.2 (`rifiuto`) reads internal (T307b).
+  const esito = typeof e.esito === 'string' ? internalName('partita', e.esito) : e.esito;
+  if (!richiesta || !OUTCOMES.includes(esito as string)) return undefined;
   const volte = Number.isSafeInteger(e.volte) && (e.volte as number) > 0 ? (e.volte as number) : 1;
   const chi = (Array.isArray(e.chi) ? e.chi : []).filter((c) => typeof c === 'string').map((c) => flat(c, MAX_WORD)).slice(-MAX_ASKERS);
   const primo = flat(e.primo, 10);
-  return { richiesta, chi, agente: flat(e.agente, MAX_WORD), compito: flat(e.compito, MAX_WORD), esito: e.esito as ShortfallOutcome, motivo: flat(e.motivo, MAX_REASON), volte, primo, ultimo: flat(e.ultimo, 10) || primo };
+  return { richiesta, chi, agente: flat(e.agente, MAX_WORD), compito: flat(e.compito, MAX_WORD), esito: esito as ShortfallOutcome, motivo: flat(e.motivo, MAX_REASON), volte, primo, ultimo: flat(e.ultimo, 10) || primo };
 }
 
 /** The entries of the file's text; what cannot be read is nothing. */

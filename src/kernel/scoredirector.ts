@@ -9,14 +9,14 @@ import { ownModelId } from './modeldirector';
 import { namesEnvironment, soundPrograms, SOUND_CLASS, type SoundProgram, type SoundPurpose } from '../mj/sound';
 
 /** How a piece of an environment plays by itself: at evening and at night the music of the moment goes on, as with the pieces of the seed. */
-const BY_DAY = ['mattina', 'giorno'];
+const BY_DAY = ['morning', 'day'];
 
 /** The id of a program: the one it replaces if it takes over an effect, or a free one from its name. */
 export function soundId(nome: string, suono: SoundPurpose, programs: readonly SoundProgram[], taken: (id: string) => boolean): string {
   const effect = suono.effetti?.[0];
-  const replaced = effect ? programs.find((p) => p.suono?.uso === 'effetto' && p.suono.effetti?.includes(effect)) : undefined;
+  const replaced = effect ? programs.find((p) => p.suono?.uso === 'effect' && p.suono.effetti?.includes(effect)) : undefined;
   if (replaced) return replaced.id;
-  const base = `suono-${suono.uso}-${ownModelId(nome)}`;
+  const base = `sound-${suono.uso}-${ownModelId(nome)}`;
   let id = base;
   for (let n = 2; taken(id); n++) id = `${base}-${n}`;
   return id;
@@ -42,20 +42,20 @@ export class ScoreDirector {
 
   /** The environments of the places loaded that no program names, the first met first. */
   missing(): ComposeRequest[] {
-    const programs = soundPrograms(this.k.files).filter((p) => p.suono?.uso === 'musica' && !p.suono.oltre);
+    const programs = soundPrograms(this.k.files).filter((p) => p.suono?.uso === 'music' && !p.suono.oltre);
     const out: ComposeRequest[] = [];
     for (const ch of this.k.chunks.values()) {
       const env = ch.plan?.layout;
       const def = env ? this.k.content.layouts[env] : undefined;
       if (!env || !def || this.skip.has(env) || out.some((r) => r.ambienti?.[0] === env) || programs.some((p) => namesEnvironment(p, env))) continue;
-      out.push({ richiesta: `il brano di ${def.name}, che suona di giorno a chi cammina in questo ambiente`, nome: def.name, uso: 'musica', ambienti: [env], momenti: BY_DAY, contesto: def.description });
+      out.push({ richiesta: `il brano di ${def.name}, che suona di giorno a chi cammina in questo ambiente`, nome: def.name, uso: 'music', ambienti: [env], momenti: BY_DAY, contesto: def.description });
     }
     return out;
   }
 
   /** Called every few seconds: starts the next piece if idle. */
   pump(): void {
-    if (!this.active || this.busy || this.k.generationHeld || this.used >= (this.k.config.ai.maxBrani ?? 8) || this.k.time < this.nextAt || this.k.coefficients().brani <= 0) return;
+    if (!this.active || this.busy || this.k.generationHeld || this.used >= (this.k.config.ai.maxBrani ?? 8) || this.k.time < this.nextAt || this.k.coefficients().pieces <= 0) return;
     const req = this.missing()[0];
     if (req) void this.make(req);
   }
@@ -66,31 +66,31 @@ export class ScoreDirector {
     this.used++;
     const k = this.k;
     const skip = () => req.ambienti?.forEach((e) => this.skip.add(e));
-    const lacking = (esito: 'invalido' | 'errore', motivo: string) => k.noteShortfall({ richiesta: req.richiesta, chi, agente: 'musicista', compito: COMPOSE_TASK, esito, motivo });
+    const lacking = (esito: 'invalid' | 'error', motivo: string) => k.noteShortfall({ richiesta: req.richiesta, chi, agente: 'musician', compito: COMPOSE_TASK, esito, motivo });
     try {
-      const effetti = [...new Set(soundPrograms(k.files).flatMap((p) => (p.suono?.uso === 'effetto' ? (p.suono.effetti ?? []) : [])))];
-      k.council.say('musicista', 'propone', req.richiesta.slice(0, 80), undefined, COMPOSE_TASK);
-      const r = await compose(k.council, req, { ambienti: Object.keys(k.content.layouts), effetti, ...(qui ? { qui } : {}) }, k.sculptors().musicista, chi ? { chi } : {});
-      this.nextAt = k.time + pieceGap(k.coefficients().brani);
+      const effetti = [...new Set(soundPrograms(k.files).flatMap((p) => (p.suono?.uso === 'effect' ? (p.suono.effetti ?? []) : [])))];
+      k.council.say('musician', 'propone', req.richiesta.slice(0, 80), undefined, COMPOSE_TASK);
+      const r = await compose(k.council, req, { ambienti: Object.keys(k.content.layouts), effetti, ...(qui ? { qui } : {}) }, k.sculptors().musician, chi ? { chi } : {});
+      this.nextAt = k.time + pieceGap(k.coefficients().pieces);
       if (!r) {
         skip();
-        lacking('invalido', k.lastDiscard('musicista', COMPOSE_TASK));
+        lacking('invalid', k.lastDiscard('musician', COMPOSE_TASK));
         return { ok: false, summary: 'Il Musicista non è riuscito a scrivere un programma valido.' };
       }
       const id = soundId(r.nome, r.suono, soundPrograms(k.files), (x) => k.files[`models/${x}.xml`] !== undefined);
       const xml = `<!-- ${r.nome.replace(/--/g, '-')}: scritto da ${r.model} -->\n${r.xml.replace(/^\s*<!--[\s\S]*?-->\s*/, '')}\n`;
-      const card = { task: COMPOSE_TASK, autore: 'musicista', ...(chi ? { chi } : {}) };
+      const card = { task: COMPOSE_TASK, autore: 'musician', ...(chi ? { chi } : {}) };
       if (!k.addModel(id, xml, { classe: SOUND_CLASS, nome: r.nome, autore: r.model, suono: r.suono }, `musicista: ${r.nome}`, card)) {
         skip();
-        lacking('invalido', k.lastDiscard('musicista', COMPOSE_TASK));
+        lacking('invalid', k.lastDiscard('musician', COMPOSE_TASK));
         return { ok: false, summary: `Il programma «${r.nome}» non è passato dal validatore.` };
       }
-      return { ok: true, summary: `Il Musicista ha scritto «${r.nome}» (${r.suono.uso === 'effetto' ? `effetto: ${r.suono.effetti?.join(', ')}` : `musica: ${r.suono.ambienti?.join(', ')}`}).` };
+      return { ok: true, summary: `Il Musicista ha scritto «${r.nome}» (${r.suono.uso === 'effect' ? `effetto: ${r.suono.effetti?.join(', ')}` : `musica: ${r.suono.ambienti?.join(', ')}`}).` };
     } catch (e) {
       if (e instanceof BudgetError) this.stopped = true;
-      k.council.say('musicista', 'errore', (e as Error).message, undefined, COMPOSE_TASK);
+      k.council.say('musician', 'errore', (e as Error).message, undefined, COMPOSE_TASK);
       skip();
-      lacking('errore', (e as Error).message);
+      lacking('error', (e as Error).message);
       return { ok: false, summary: `Il Musicista non ha potuto scrivere: ${(e as Error).message}` };
     } finally {
       this.busy = false;

@@ -130,7 +130,7 @@ function rapporto(file: string, xml: string, b: Bersaglio, p: Prova, riga: Riga)
   }
   out.push('Misure: `lab/banco/misure.ts` (il corpo del gioco cammina dal davanti: piani raggiunti, murato = pavimento coperto non raggiunto, porta libera, salti; `valido` sono i controlli di `src/mj/check.ts`, fra cui i voxel staccati da terra) e `lab/banco/varianza.ts` (soglie di T180).', '');
   const m1 = compileMjx(withSize(xml, scatolaDi({ ...b, taglia: 'large' }).box), { ...(b.sotto ? { base: scatolaDi({ ...b, taglia: 'large' }).base } : {}) });
-  out.push('## Traccia del seme 1 (Grande, `src/mj/trace.ts`, forma «differenze»)', '', '```text', traceText(m1, 1, { forma: 'differenze', tetto: 3500 }), '```', '');
+  out.push('## Traccia del seme 1 (Grande, `src/mj/trace.ts`, forma «differenze»)', '', '```text', traceText(m1, 1, { forma: 'diffs', tetto: 3500 }), '```', '');
   return out.join('\n');
 }
 

@@ -131,7 +131,7 @@ export async function judgeAction(c: Council, ctx: ActionContext, focus?: string
   ]
     .filter(Boolean)
     .join('\n\n');
-  const r = await c.ask<{ possibile: boolean; racconto: string; effetti?: unknown[]; ripetibile?: boolean; etichetta?: string; serve?: string; forma?: string }>('narratore', 'action.judge', prompt, JUDGE_SCHEMA, {
+  const r = await c.ask<{ possibile: boolean; racconto: string; effetti?: unknown[]; ripetibile?: boolean; etichetta?: string; serve?: string; forma?: string }>('narrator', 'action.judge', prompt, JUDGE_SCHEMA, {
     data: ctx,
     temperature: 0.5,
     focus,
@@ -204,7 +204,7 @@ export async function nameSpell(
   ]
     .filter(Boolean)
     .join('\n\n');
-  const r = await c.ask<{ nome: string; descrizione: string; costo: number; effetti?: unknown[]; runa_nuova?: string }>('narratore', 'spell.name', prompt, SPELL_SCHEMA, {
+  const r = await c.ask<{ nome: string; descrizione: string; costo: number; effetti?: unknown[]; runa_nuova?: string }>('narrator', 'spell.name', prompt, SPELL_SCHEMA, {
     data: { runes, known, terrains },
     temperature: 0.7,
     focus,
@@ -251,7 +251,7 @@ export async function inventRune(
   ]
     .filter(Boolean)
     .join('\n\n');
-  return c.ask<Record<string, unknown>>('narratore', 'rune.invent', prompt, RUNE_SCHEMA, { data: { known, reason, errors }, temperature: 0.8, focus });
+  return c.ask<Record<string, unknown>>('narrator', 'rune.invent', prompt, RUNE_SCHEMA, { data: { known, reason, errors }, temperature: 0.8, focus });
 }
 
 const CRAFT_SCHEMA: Schema = {
@@ -290,7 +290,7 @@ export async function judgeCraft(c: Council, text: string, carrying: string[], k
     `Oggetti che esistono già nel mondo (usa questi nomi se il risultato è uno di loro): ${known.slice(0, 80).join(', ')}.`,
     `Si può fare con ciò che porta, a mano, in modo credibile? Se sì: "risultato" (nome), "quantita", "ingredienti" consumati e "attrezzi" usati, SOLO tra le cose che porta e con nomi esatti; se il risultato non esiste ancora, descrivilo. Se no, "possibile" falso e spiega cosa manca. Sii severo come un artigiano vero.`,
   ].join('\n\n');
-  const r = await c.ask<{ possibile: boolean; racconto: string; risultato?: string; descrizione?: string; quantita?: number; ingredienti?: Array<{ oggetto: string; quantita: number }>; attrezzi?: string[] }>('narratore', 'craft.free', prompt, CRAFT_SCHEMA, {
+  const r = await c.ask<{ possibile: boolean; racconto: string; risultato?: string; descrizione?: string; quantita?: number; ingredienti?: Array<{ oggetto: string; quantita: number }>; attrezzi?: string[] }>('narrator', 'craft.free', prompt, CRAFT_SCHEMA, {
     data: { text, carrying, known },
     temperature: 0.4,
     focus,
@@ -323,7 +323,7 @@ const SESSION_SCHEMA: Schema = {
  */
 export async function councilSession(c: Council, summary: string): Promise<{ assessment: string; action: 'nessuno' | 'oggetti' | 'abitante' | 'cosa' | 'meccanica' | 'runa'; request?: string }> {
   const r = await c.ask<{ valutazione: string; intervento: string; richiesta?: string }>(
-    'arbitro',
+    'arbiter',
     'council.session',
     `Sessione del Concilio. Ecco come il viandante sta vivendo il mondo:\n${summary}\n\nIl mondo deve evolvere restando coerente. Serve un intervento? Al massimo uno: "oggetti" (un pacchetto di oggetti che manca, dì quali), "abitante" (un nuovo tipo di persona che renda più viva la società), "cosa" (un oggetto o mobile del mondo che le azioni del viandante fanno pensare), "meccanica" (una meccanica con la sua interfaccia: slot per l'equipaggiamento, una faretra, una scheda di reputazione… — soprattutto se il riepilogo dice MANCA), "runa" (una runa magica nuova, di un elemento che nessuna runa ha e che il mondo vissuto fa pensare: dì quale; solo di rado), oppure "nessuno". Interveni solo se serve davvero.`,
     SESSION_SCHEMA,
@@ -368,7 +368,7 @@ export async function judgeDeath(c: Council, ctx: DeathContext): Promise<{ story
     `Porta: ${ctx.carried.map((x) => `${x.name} ×${x.count}`).join(', ') || 'niente'}. Condizioni: ${ctx.states.join(', ') || 'nessuna'}.`,
     `"perde_tutto" toglie tutto ciò che porta e ogni condizione. Altrimenti scegli gli effetti (al massimo 6) SOLO tra: consuma {oggetto, quantita} (perde ciò che porta), togli_stato {nome}, stato {nome, velocita, durata} (una debolezza passeggera), bisogni {…} (negativi), messaggio {testo}. I bisogni tornano comunque pieni prima degli effetti.`,
   ].join('\n\n');
-  const r = await c.ask<{ racconto?: string; perde_tutto?: boolean; ripartenza?: string; effetti?: unknown[] }>('narratore', 'player.death', prompt, DEATH_SCHEMA, { data: ctx, temperature: 0.4 });
+  const r = await c.ask<{ racconto?: string; perde_tutto?: boolean; ripartenza?: string; effetti?: unknown[] }>('narrator', 'player.death', prompt, DEATH_SCHEMA, { data: ctx, temperature: 0.4 });
   return {
     story: String(r.racconto ?? '').slice(0, 300),
     loseAll: !!r.perde_tutto,

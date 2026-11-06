@@ -227,7 +227,7 @@ export class Hud {
       case 'door':
         return [el('div', { class: 'h' }, info.building), el('div', { class: 'doc' }, `ci ${info.teams.length > 1 ? 'lavorano le squadre' : 'lavora la squadra'} ${info.teams.map(ofThe).join(' e ')}`), el('div', { class: 'src' }, 'E alla porta per entrare')];
       case 'agent':
-        return [el('div', { class: 'h' }, info.agent === 'referente' ? 'Il Referente del Concilio' : `${info.name} del Concilio`), ...(info.doing ? [el('div', { class: 'doc' }, info.doing)] : []), el('div', { class: 'src' }, 'E per parlarci')];
+        return [el('div', { class: 'h' }, info.agent === 'liaison' ? 'Il Referente del Concilio' : `${info.name} del Concilio`), ...(info.doing ? [el('div', { class: 'doc' }, info.doing)] : []), el('div', { class: 'src' }, 'E per parlarci')];
     }
     return null;
   }

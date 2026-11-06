@@ -3,7 +3,7 @@
 
 import { renderSoundProgram } from '../mj/synth';
 
-export type SoundUse = 'musica' | 'effetto';
+export type SoundUse = 'music' | 'effect';
 
 export interface SoundRequest {
   xml: string;
@@ -30,7 +30,7 @@ export const soundKey = (q: SoundRequest): string => JSON.stringify([SOUND_CACHE
 
 /** Throws what the program throws. */
 export function prepareSound(q: SoundRequest): PreparedSound {
-  if (q.use === 'musica') {
+  if (q.use === 'music') {
     // Two passes: the second holds the tails of the first, and its end runs into its start without a seam.
     const r = renderSoundProgram(q.xml, q.seed, { loops: 2 });
     return { samples: r.samples.slice(r.loopStart, r.loopEnd), sampleRate: r.sampleRate };

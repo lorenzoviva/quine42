@@ -456,7 +456,9 @@ export class MockAiModels implements AiModels {
           ? 'woods'
           : rng.pick(ids);
     const oggetti: Array<{ modulo: string; dove: string }> = [];
-    for (const m of ctx.catalog) {
+    // In the order of the ids of before T307b (`obj.letto`, not `obj.bed`): the offline worlds of the seed stay the ones they were.
+    const legacy = (id: string) => italianName('moduli-seme', id);
+    for (const m of [...ctx.catalog].sort((a, b) => (legacy(a.id) < legacy(b.id) ? -1 : legacy(a.id) > legacy(b.id) ? 1 : 0))) {
       if (oggetti.length >= 6) break;
       const p = m.kind === 'mobile' ? 0.45 : m.kind === 'npc' ? 0.35 : 0.25;
       if (rng.chance(p)) oggetti.push({ modulo: m.id, dove: m.kind === 'mobile' ? 'dentro' : 'fuori' });

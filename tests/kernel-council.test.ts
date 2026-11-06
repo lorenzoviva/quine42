@@ -17,7 +17,7 @@ describe('the Council', () => {
     expect(m.inventory?.length).toBeGreaterThan(0);
     expect(k.repo.head().author).toBe('agent');
     const kinds = k.feed().map((e) => `${e.from}:${e.kind}`);
-    for (const step of ['narratore:propone', 'fisico:propone', 'ingegnere:propone', 'arbitro:approva']) expect(kinds).toContain(step);
+    for (const step of ['narrator:propone', 'physicist:propone', 'engineer:propone', 'arbiter:approva']) expect(kinds).toContain(step);
   });
 
   it('forged objects get actions and containers', async () => {
@@ -33,7 +33,7 @@ describe('the Council', () => {
       reviews = 0;
       physicsCalls = 0;
       async text(call: Parameters<MockAiModels['text']>[0]) {
-        if (call.task === 'forge.review' && this.reviews++ === 0) return JSON.stringify({ approvato: false, problemi: [{ agente: 'fisico', problema: 'una mela non pesa 40 kg' }] });
+        if (call.task === 'forge.review' && this.reviews++ === 0) return JSON.stringify({ approvato: false, problemi: [{ agente: 'physicist', problema: 'una mela non pesa 40 kg' }] });
         if (call.task === 'forge.physics') this.physicsCalls++;
         return super.text(call);
       }
@@ -42,7 +42,7 @@ describe('the Council', () => {
     const k = await boot(models);
     expect((await k.askAgent('una mela dorata')).ok).toBe(true);
     expect(models.physicsCalls).toBe(2);
-    expect(k.feed().some((e) => e.from === 'arbitro' && e.kind === 'obietta' && e.to === 'fisico')).toBe(true);
+    expect(k.feed().some((e) => e.from === 'arbiter' && e.kind === 'obietta' && e.to === 'physicist')).toBe(true);
   });
 
   it('code that does not load, or calls functions that do not exist, goes back to the Engineer', async () => {
@@ -55,7 +55,7 @@ describe('the Council', () => {
     }
     const k = await boot(new Sloppy());
     expect((await k.askAgent('una pagnotta di pane')).ok).toBe(true);
-    const rejected = k.feed().filter((e) => e.from === 'kernel' && e.kind === 'scarta' && e.to === 'ingegnere');
+    const rejected = k.feed().filter((e) => e.from === 'kernel' && e.kind === 'scarta' && e.to === 'engineer');
     expect(rejected.length).toBe(2);
     expect(rejected[1].text).toMatch(/world\.teleport non esiste/);
   });
@@ -150,13 +150,14 @@ describe('the life of people', () => {
     const a = await individual(k, 'vita#b', 1);
     const pc = k.wandererCarpet();
     // Only the bed next to them: the places' own beds may be anywhere around.
-    for (const id of k.ecs.query('module')) if (k.ecs.get(id, 'module').id === 'obj.letto') k.ecs.destroy(id);
-    k.spawnModuleEntity(k.modules.get('obj.letto')!, pc.x + 2.5, pc.y);
+    for (const id of k.ecs.query('module')) if (k.ecs.get(id, 'module').id === 'obj.bed') k.ecs.destroy(id);
+    // Off the straight line from them to the side of the bed they lie on: who walks there does not have to go round it (T307b).
+    k.spawnModuleEntity(k.modules.get('obj.bed')!, pc.x + 1.5, pc.y + 2);
     // Deep night.
     k.time = Kernel.DAY_SECONDS * 0.7;
     for (let i = 0; i < 60 * 8; i++) k.tick(1 / 60);
     const att = k.ecs.get(a.id, 'attivita');
-    expect(att.tipo).toBe('dorme');
+    expect(att.tipo).toBe('sleep');
     expect(att.ferma).toBe(true);
   });
 
@@ -182,7 +183,7 @@ describe('the life of people', () => {
     void y;
     const plot = (await k.weaveStory(true))!;
     expect(plot.coinvolti.length).toBeGreaterThan(1);
-    expect(plot.missione?.stato).toBe('offerta');
+    expect(plot.missione?.stato).toBe('offered');
     const giver = plot.missione!.da;
     const giverId = [x, y, z].find((p) => p.name === giver)!.id;
     await k.talk(giverId, 'Posso aiutarti in qualche modo?');
@@ -216,6 +217,6 @@ describe('two tables', () => {
     expect(k.modules.has('npc.censore')).toBe(false);
     expect(await k.reviewFourthWall()).toEqual([]);
     // The principles go with every request to the Council.
-    expect(k.council.context('narratore')).not.toMatch(/Crepe/);
+    expect(k.council.context('narrator')).not.toMatch(/Crepe/);
   });
 });

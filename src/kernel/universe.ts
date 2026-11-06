@@ -7,6 +7,7 @@ import { DEFAULT_GAME_SETUP } from './gameSetup';
 import { COEFFICIENT_KEYS, pricedAiModels, type Coefficients } from './coefficients';
 import { DEFAULT_SCULPTORS, type SculptorAiModels } from './agents/sculptor';
 import { priceOf } from './ai/prices';
+import { internalCoefficients, internalSculptors } from './internalNames';
 
 export const DEFAULT_CONFIG: UniverseConfig = {
   name: 'universo',
@@ -27,7 +28,7 @@ export function repairMinimums(raw: unknown): AiMinimums | undefined {
   if (r.scultori && typeof r.scultori === 'object') {
     // Only a class's model: a minimum on anything else means nothing.
     const named = SCULPTOR_CLASSES.flatMap((k) => {
-      const m = (r.scultori as Record<string, unknown>)[k];
+      const m = internalSculptors(r.scultori as Record<string, unknown>)[k];
       return typeof m === 'string' && m.trim() ? [[k, m.trim()]] : [];
     });
     if (named.length) out.scultori = Object.fromEntries(named);
@@ -36,7 +37,7 @@ export function repairMinimums(raw: unknown): AiMinimums | undefined {
   if (r.coefficienti && typeof r.coefficienti === 'object') {
     // Only the knobs it names: a minimum not said is not a minimum of 1.
     const repaired = repairCoefficients(r.coefficienti);
-    const named = COEFFICIENT_KEYS.filter((k) => (r.coefficienti as Record<string, unknown>)[k] !== undefined);
+    const named = COEFFICIENT_KEYS.filter((k) => internalCoefficients(r.coefficienti as Record<string, unknown>)[k] !== undefined);
     if (named.length) out.coefficienti = Object.fromEntries(named.map((k) => [k, repaired[k]])) as Partial<Coefficients>;
   }
   return Object.keys(out).length > 0 ? out : undefined;
@@ -63,7 +64,7 @@ export function withinMinimums(ai: AiConfig): AiConfig {
     out.coefficienti = c;
   }
   if (m.scultori) {
-    const sculptors: Partial<SculptorAiModels> = { ...(ai.scultori ?? {}) };
+    const sculptors: Partial<SculptorAiModels> = { ...internalSculptors(ai.scultori ?? {}) };
     for (const k of SCULPTOR_CLASSES) if (m.scultori[k]) sculptors[k] = atLeast(String(sculptors[k] ?? DEFAULT_SCULPTORS[k]), String(m.scultori[k]));
     out.scultori = sculptors;
   }
@@ -71,7 +72,7 @@ export function withinMinimums(ai: AiConfig): AiConfig {
 }
 
 /** The Sculptor's classes that have a model of their own (the rest of `SculptorAiModels` is not a model). */
-export const SCULPTOR_CLASSES = ['semplice', 'figura', 'struttura', 'importante', 'artista', 'musicista'] as const;
+export const SCULPTOR_CLASSES = ['simple', 'figure', 'structure', 'important', 'artist', 'musician'] as const;
 
 /** What every budget of `ai` may be, [least, most]: `placesPerMinute` at 0 would stop the world from having places at all. */
 export const BUDGET_SCALE = { maxText: [0, 20000], maxForges: [0, 50], maxPacks: [0, 50], maxCast: [0, 50], maxModels: [0, 400], maxBrani: [0, 100], placesPerMinute: [1, 120] } as const;
@@ -97,7 +98,7 @@ export function repairAiSettings(raw: unknown): { settings: AiSettings; riparati
   if (text) settings.textModel = text;
   if (r.coefficienti !== undefined) settings.coefficienti = repairCoefficients(r.coefficienti);
   if (r.scultori && typeof r.scultori === 'object') {
-    const s = r.scultori as Record<string, unknown>;
+    const s = internalSculptors(r.scultori as Record<string, unknown>);
     const sculptors: Record<string, string | number> = {};
     for (const k of SCULPTOR_CLASSES) {
       const m = model(s[k], `Scultore, ${k}`);

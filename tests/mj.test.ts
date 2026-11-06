@@ -176,8 +176,8 @@ describe('photographs, classes, skeleton', () => {
     expect(boxOf(classOf('tree')!)).toEqual([2 * TILE, 2 * TILE, 3 * TILE]);
     expect(boxOf(classOf('structure')!)).toEqual([5 * TILE, 5 * TILE, 4 * TILE]);
     expect(guessClass('Una quercia frondosa').id).toBe('tree');
-    expect(guessClass('Il fabbro', 'figura').id).toBe('person');
-    expect(guessClass('un lupo grigio', 'figura').id).toBe('beast');
+    expect(guessClass('Il fabbro', 'figure').id).toBe('person');
+    expect(guessClass('un lupo grigio', 'figure').id).toBe('beast');
     expect(new Set(CLASSES.map((c) => c.id)).size).toBe(CLASSES.length);
   });
 
@@ -185,8 +185,8 @@ describe('photographs, classes, skeleton', () => {
     const m = compileMjx(FIGURE);
     const r = rig(runMjx(m, 1).grid, m.program.palette);
     expect(r.guessed).toBe(false);
-    expect(r.limbs.filter((l) => l.part === 'gamba')).toHaveLength(2);
-    expect(r.limbs.filter((l) => l.part === 'braccio')).toHaveLength(2);
-    expect(new Set(r.limbs.filter((l) => l.part === 'gamba').map((l) => l.phase)).size).toBe(2);
+    expect(r.limbs.filter((l) => l.part === 'leg')).toHaveLength(2);
+    expect(r.limbs.filter((l) => l.part === 'arm')).toHaveLength(2);
+    expect(new Set(r.limbs.filter((l) => l.part === 'leg').map((l) => l.phase)).size).toBe(2);
   });
 });

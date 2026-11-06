@@ -123,7 +123,7 @@ describe('the wanderer route of the site (T102)', () => {
 
   it('with the world running, asks the kernel: the wanderer in the world wears it, the one away finds it saved', async () => {
     const cfg = JSON.parse(bundledFiles['universe.json']);
-    const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3 } }) };
+    const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3 } }) };
     const k = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
     k.addWanderer('alice', 'Alice', false);
     k.giveCredits('alice', 7);

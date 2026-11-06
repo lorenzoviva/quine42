@@ -54,7 +54,7 @@ describe('the Sculptor', () => {
     // The Artist sees one image (four views) per program; its model is its own.
     const judges = m.calls.filter((x) => x.task === 'model.judge');
     expect(judges).toHaveLength(2);
-    expect(judges.every((x) => x.model === DEFAULT_SCULPTORS.artista && x.images?.[0].startsWith('data:image/png;base64,'))).toBe(true);
+    expect(judges.every((x) => x.model === DEFAULT_SCULPTORS.artist && x.images?.[0].startsWith('data:image/png;base64,'))).toBe(true);
     expect(r!.voto).toBe(8);
     expect(r!.xml).toContain('size="16 16 14"');
     expect(r!.xml).toMatch(/^<!-- Masso rosso: scolpito da gemini-3\.1-flash-lite .* 8\/10 -->/);

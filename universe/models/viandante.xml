@@ -2,15 +2,15 @@
      quanto è ampio il mantello (stretto, normale, a ruota fino a terra), se porta il cappello a tesa larga, se il cappuccio finisce a punta, se il bastone c'è e quanto è lungo, se il braccio libero è alzato, e se sulla
      schiena porta una bisaccia. Il viso, gli occhi e la fibbia restano dove sono: lo si riconosce sempre. -->
 <sequence values="BGMNOCSEAQHPWLKpqmabcdgzrs0" size="20 15 30" symmetry="(xy)" name="Viandante">
-  <color symbol="G" value="4a3424" name="stivali" part="gamba"/>
+  <color symbol="G" value="4a3424" name="stivali" part="leg"/>
   <color symbol="M" value="3f6470" name="mantello"/>
   <color symbol="N" value="5a8592" name="mantello al sole"/>
   <color symbol="O" value="2c4952" name="piega del mantello"/>
   <color symbol="C" value="46707d" name="cappuccio"/>
   <color symbol="S" value="e0b48c" name="viso"/>
   <color symbol="E" value="1e1a22" name="occhi"/>
-  <color symbol="A" value="3f6470" name="braccio libero" part="braccio"/>
-  <color symbol="Q" value="e0b48c" name="mano libera" part="braccio"/>
+  <color symbol="A" value="3f6470" name="braccio libero" part="arm"/>
+  <color symbol="Q" value="e0b48c" name="mano libera" part="arm"/>
   <color symbol="H" value="3f6470" name="braccio col bastone"/>
   <color symbol="P" value="e0b48c" name="mano"/>
   <color symbol="W" value="7a5532" name="bastone"/>

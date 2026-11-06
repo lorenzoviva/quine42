@@ -53,7 +53,7 @@ describe('forms in the kernel', () => {
     const k = await boot();
     const cat = k.spawnModuleEntity(k.modules.get('npc.cat')!, 0.5, 0.5, undefined, 'test#gatto');
     const well = k.spawnModuleEntity(k.modules.get('object.well')!, 3.5, 3.5, undefined, 'test#pozzo');
-    const item = k.spawnItem('item.forbici', 1.5, 1.5);
+    const item = k.spawnItem('item.scissors', 1.5, 1.5);
     const bread = k.spawnItem([...k.content.items.keys()].find((id) => !k.content.get(id)!.model)!, 2.5, 1.5);
     expect((k.ecs.get(cat, 'form') as FormComp).model).toBe('animal');
     expect((k.ecs.get(well, 'form') as FormComp).model).toBe('pozzo');

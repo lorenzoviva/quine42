@@ -1,4 +1,5 @@
 // What a sound program plays and what is wrong with it, without ears (T223, ADR-0125): the presets pass, a program built for each defect is told.
+import { italianName } from '../src/kernel/internalNames';
 import { describe, expect, it, vi } from 'vitest';
 import { wavOf } from '../lab/scripts/wav';
 import { bundledFiles } from '../src/kernel/bundle';
@@ -17,17 +18,17 @@ const hits = (at: number[], y: number, z: number, color: string) => at.map((x) =
 
 /** One program per defect: each is what its name says, and some of them nothing else. */
 const DEFECTS: Array<[string, SoundDefect, RegExp, string]> = [
-  ['un colpo solo in tutta la battuta', 'vuoto', /eventi a battuta/, `<one values="BK" ${BOX} in="B" out="K" steps="1"><sound bpm="120"><track y="0" instrument="lead"/><track y="1" instrument="pad"/><track y="2" instrument="bass"/></sound></one>`],
-  ['niente che suoni', 'vuoto', /partitura è vuota/, `<one values="BR" ${BOX} in="B" out="R" steps="3"><sound/></one>`],
-  ['una traccia dichiarata e muta', 'vuoto', /y=1 \(pad\).*muta/, `<sequence values="BN" size="16 2 8" symmetry="()"><sound><track y="0" instrument="lead"/><track y="1" instrument="pad"/></sound><box at="0 1 0" size="16 1 8" color="B"/><prl in="B" out="B" steps="1"/>${hits([0, 3, 6, 9, 12], 0, 0, 'N')}${hits([1, 5, 10, 14], 0, 3, 'N')}${hits([2, 7, 11], 0, 5, 'N')}</sequence>`],
-  ['note sotto i 20 Hz', 'vuoto', /sotto i 20 Hz/, `<one values="BN" size="16 1 3" symmetry="()" in="B" out="N" steps="20"><sound root="0"><track y="0" instrument="bass"/></sound></one>`],
-  ['una nota sola, a caso nel tempo', 'piatto', /1 note diverse/, `<one values="BN" size="16 1 1" symmetry="()" in="B" out="N" steps="7"><sound><track y="0" instrument="lead"/></sound></one>`],
-  ['la battuta ridice ogni quattro passi lo stesso', 'ripetitivo', /si ripete ogni 4 passi/, `<sequence values="BKHC" ${BOX}><sound><track y="2" instrument="bass"/></sound>${hits([0, 4, 8, 12], 2, 0, 'K')}${hits([2, 6, 10, 14], 2, 0, 'H')}</sequence>`],
-  ['i semi non cambiano niente', 'ripetitivo', /i semi danno quasi la stessa partitura/, `<sequence values="BN" ${BOX}><sound><track y="0" instrument="lead"/></sound>${hits([0], 0, 0, 'N')}${hits([3], 0, 2, 'N')}${hits([6], 0, 4, 'N')}${hits([9], 0, 3, 'N')}${hits([13], 0, 1, 'N')}</sequence>`],
-  ['due tracce a un semitono', 'stonato', /semitono o un tritono/, `<sequence values="BN" ${BOX}><sound scale="phrygian"><track y="0" instrument="pad"/><track y="1" instrument="pad"/></sound><box at="0 0 0" size="16 1 1" color="N"/><box at="0 1 1" size="16 1 1" color="N"/></sequence>`],
-  ['altezze che sbattono sul tetto MIDI, fuori scala', 'stonato', /sulla scala dichiarata/, `<one values="BN" size="16 1 32" symmetry="()" in="B" out="N" steps="40"><sound root="90"><track y="0" instrument="lead"/></sound></one>`],
-  ['tracce a volume 0,02', 'fuori volume', /troppo piano/, `<one values="BN" ${BOX} in="B" out="N" steps="30"><sound bpm="120"><track y="0" instrument="lead" volume="0.02"/><track y="1" instrument="pad" volume="0.02"/></sound></one>`],
-  ['una scatola piena di accenti', 'fuori volume', /troppe note/, `<all values="BA" size="64 3 64" in="B" out="A" symmetry="()"><sound bpm="400" swing="0.45" cutoff="18000" space="0.85"/></all>`],
+  ['un colpo solo in tutta la battuta', 'empty', /eventi a battuta/, `<one values="BK" ${BOX} in="B" out="K" steps="1"><sound bpm="120"><track y="0" instrument="lead"/><track y="1" instrument="pad"/><track y="2" instrument="bass"/></sound></one>`],
+  ['niente che suoni', 'empty', /partitura è vuota/, `<one values="BR" ${BOX} in="B" out="R" steps="3"><sound/></one>`],
+  ['una traccia dichiarata e muta', 'empty', /y=1 \(pad\).*muta/, `<sequence values="BN" size="16 2 8" symmetry="()"><sound><track y="0" instrument="lead"/><track y="1" instrument="pad"/></sound><box at="0 1 0" size="16 1 8" color="B"/><prl in="B" out="B" steps="1"/>${hits([0, 3, 6, 9, 12], 0, 0, 'N')}${hits([1, 5, 10, 14], 0, 3, 'N')}${hits([2, 7, 11], 0, 5, 'N')}</sequence>`],
+  ['note sotto i 20 Hz', 'empty', /sotto i 20 Hz/, `<one values="BN" size="16 1 3" symmetry="()" in="B" out="N" steps="20"><sound root="0"><track y="0" instrument="bass"/></sound></one>`],
+  ['una nota sola, a caso nel tempo', 'flat', /1 note diverse/, `<one values="BN" size="16 1 1" symmetry="()" in="B" out="N" steps="7"><sound><track y="0" instrument="lead"/></sound></one>`],
+  ['la battuta ridice ogni quattro passi lo stesso', 'repetitive', /si ripete ogni 4 passi/, `<sequence values="BKHC" ${BOX}><sound><track y="2" instrument="bass"/></sound>${hits([0, 4, 8, 12], 2, 0, 'K')}${hits([2, 6, 10, 14], 2, 0, 'H')}</sequence>`],
+  ['i semi non cambiano niente', 'repetitive', /i semi danno quasi la stessa partitura/, `<sequence values="BN" ${BOX}><sound><track y="0" instrument="lead"/></sound>${hits([0], 0, 0, 'N')}${hits([3], 0, 2, 'N')}${hits([6], 0, 4, 'N')}${hits([9], 0, 3, 'N')}${hits([13], 0, 1, 'N')}</sequence>`],
+  ['due tracce a un semitono', 'off_key', /semitono o un tritono/, `<sequence values="BN" ${BOX}><sound scale="phrygian"><track y="0" instrument="pad"/><track y="1" instrument="pad"/></sound><box at="0 0 0" size="16 1 1" color="N"/><box at="0 1 1" size="16 1 1" color="N"/></sequence>`],
+  ['altezze che sbattono sul tetto MIDI, fuori scala', 'off_key', /sulla scala dichiarata/, `<one values="BN" size="16 1 32" symmetry="()" in="B" out="N" steps="40"><sound root="90"><track y="0" instrument="lead"/></sound></one>`],
+  ['tracce a volume 0,02', 'off_volume', /troppo piano/, `<one values="BN" ${BOX} in="B" out="N" steps="30"><sound bpm="120"><track y="0" instrument="lead" volume="0.02"/><track y="1" instrument="pad" volume="0.02"/></sound></one>`],
+  ['una scatola piena di accenti', 'off_volume', /troppe note/, `<all values="BA" size="64 3 64" in="B" out="A" symmetry="()"><sound bpm="400" swing="0.45" cutoff="18000" space="0.85"/></all>`],
 ];
 
 const analyzed = (xml: string, seeds?: number[]) => analyzeSound(compileMjx(xml), { ...(seeds ? { seeds } : {}), frugal: xml.includes('size="64') });
@@ -45,7 +46,7 @@ describe('the thresholds, on the presets', () => {
 
 describe('the thresholds, on the programs of the game (T228)', () => {
   it('are the pieces and the effects of the seed: seven and nine of T224, six, nineteen and the Death made again of Claude Cloud (T273)', () => {
-    expect(inGame.map((p) => p.suono!.uso).sort()).toEqual([...new Array(9 + 19 + 1).fill('effetto'), ...new Array(7 + 6).fill('musica')]);
+    expect(inGame.map((p) => p.suono!.uso).sort()).toEqual([...new Array(9 + 19 + 1).fill('effect'), ...new Array(7 + 6).fill('music')]);
   });
 
   it.each(inGame.map((p) => [p.id, p.xml] as const))('%s passes, on the default seeds and on others, unless the author keeps it as it is', (id, xml) => {
@@ -61,7 +62,7 @@ describe('a program built for each defect', () => {
     const issue = analyzed(xml).issues.find((i) => i.defect === defect);
     expect(issue?.message).toMatch(reason);
     // The validator is told the same, and it goes back to who wrote it.
-    expect(modelErrors('models/x.xml', xml).join('\n')).toMatch(new RegExp(`models/x\\.xml: suono ${defect}`));
+    expect(modelErrors('models/x.xml', xml).join('\n')).toMatch(new RegExp(`models/x\\.xml: suono ${italianName('solo-codice', defect)}`));
   });
 
   it('the defects that are measures of the signal only: built on the samples', () => {
@@ -71,17 +72,17 @@ describe('a program built for each defect', () => {
     const judge = (samples: Float32Array) => soundIssues({ seeds: [{ ...base, signal: measureSignal({ samples, sampleRate: rate, loopStart: 0, loopEnd: samples.length }, rate / 8) }], settings: soundSettings(parseXml('<sound><track y="0" instrument="lead"/></sound>')[0]), effect: false }).map((i) => i.defect);
     // A steady tone: no step louder than another, and all the energy in one band.
     const steady = tone(rate * 2, (i) => 0.2 * Math.sin((2 * Math.PI * 1000 * i) / rate));
-    expect(judge(steady)).toContain('piatto');
+    expect(judge(steady)).toContain('flat');
     // The same tone cut half a period off: a click at every turn. The synthesizer's passes are aligned to the sample, so no program gets here today.
     const cut = tone(rate * 2 + 2, (i) => 0.2 * Math.sin((2 * Math.PI * 1000 * i) / rate) * Math.min(1, (i + 1) / rate) * (1 + (i % rate) / rate));
     cut[cut.length - 1] = 1;
     cut[0] = -1;
-    expect(judge(cut)).toContain('giuntura');
+    expect(judge(cut)).toContain('seam');
     // Hard clipping: a square at full scale.
     const square = tone(rate * 2, (i) => (Math.floor(i / 20) % 2 ? 1 : -1));
-    expect(judge(square)).toContain('fuori volume');
+    expect(judge(square)).toContain('off_volume');
     // Nothing at all.
-    expect(judge(new Float32Array(rate * 2))).toContain('vuoto');
+    expect(judge(new Float32Array(rate * 2))).toContain('empty');
   });
 
   it('a rare seed does not condemn a program: the limits speak when most seeds pass them', () => {

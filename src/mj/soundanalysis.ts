@@ -7,11 +7,12 @@ import { run } from './engine';
 import type { MjxModel } from './model';
 import { SCALES, type Instrument, type Score, type ScoreEvent, type SoundSettings, type SoundTrack, scoreOf } from './sound';
 import { renderScore, SOUND_LIMITS, SOUND_MAX_STEPS, type RenderedSound } from './synth';
+import { italianName } from '../kernel/internalNames';
 
 /** Sixteenths in a bar. Below one bar a program is an effect, not a piece: `piatto` and `ripetitivo` do not apply. */
 export const BAR_STEPS = 16;
 
-export const SOUND_DEFECTS = ['vuoto', 'piatto', 'ripetitivo', 'stonato', 'fuori volume', 'giuntura'] as const;
+export const SOUND_DEFECTS = ['empty', 'flat', 'repetitive', 'off_key', 'off_volume', 'seam'] as const;
 export type SoundDefect = (typeof SOUND_DEFECTS)[number];
 
 /**
@@ -474,40 +475,40 @@ export function soundIssues(report: Pick<SoundReport, 'seeds' | 'settings' | 'se
   // These are not matters of chance: one seed is enough.
   const unfinished = seeds.filter((m) => !m.score.finished);
   const silent = seeds.filter((m) => m.score.finished && !m.score.events);
-  if (unfinished.length) say('vuoto', unfinished, () => 'il programma non finisce: ogni crescita deve avere steps');
-  if (silent.length) say('vuoto', silent, () => 'la partitura è vuota: nessuna lettera che suona (N S A G K H C) su una traccia di <sound>');
+  if (unfinished.length) say('empty', unfinished, () => 'il programma non finisce: ogni crescita deve avere steps');
+  if (silent.length) say('empty', silent, () => 'la partitura è vuota: nessuna lettera che suona (N S A G K H C) su una traccia di <sound>');
 
-  if (!report.effect) flag('vuoto', (m) => m.score.events / m.score.bars < T.minEventsPerBar, (m) => `${num(m.score.events / m.score.bars, 1)} eventi a battuta: ne servono almeno ${T.minEventsPerBar}`);
+  if (!report.effect) flag('empty', (m) => m.score.events / m.score.bars < T.minEventsPerBar, (m) => `${num(m.score.events / m.score.bars, 1)} eventi a battuta: ne servono almeno ${T.minEventsPerBar}`);
   for (const t of report.settings.tracks) {
     if (t.volume <= 0.01) continue;
-    flag('vuoto', (m) => m.score.tracks.some((x) => x.y === t.y && !x.notes && !x.hits), () => `la traccia y=${t.y} (${t.instrument}) è dichiarata e resta muta`);
+    flag('empty', (m) => m.score.tracks.some((x) => x.y === t.y && !x.notes && !x.hits), () => `la traccia y=${t.y} (${t.instrument}) è dichiarata e resta muta`);
   }
-  flag('vuoto', (m) => m.score.inaudible > T.maxInaudible, (m) => `${pct(m.score.inaudible)} delle note sta sotto i 20 Hz: alza root`);
-  flagHeard('vuoto', (g) => g.silence > T.maxSilence, (g) => `${pct(g.silence)} del ciclo è silenzio (al più ${pct(T.maxSilence)})`);
+  flag('empty', (m) => m.score.inaudible > T.maxInaudible, (m) => `${pct(m.score.inaudible)} delle note sta sotto i 20 Hz: alza root`);
+  flagHeard('empty', (g) => g.silence > T.maxSilence, (g) => `${pct(g.silence)} del ciclo è silenzio (al più ${pct(T.maxSilence)})`);
 
   if (!report.effect) {
-    flag('piatto', (m) => m.score.tracks.some((t) => t.notes > 0) && m.score.pitches < T.minPitches, (m) => `${m.score.pitches} note diverse in tutto: ne servono almeno ${T.minPitches}`);
-    flagHeard('piatto', (g) => g.dynamics < T.minDynamics, (g) => `${num(g.dynamics, 1)} dB tra i passi deboli e quelli forti: ne servono almeno ${T.minDynamics}`);
-    flagHeard('piatto', (g) => Math.max(...g.bands) > T.maxBandShare, (g) => {
+    flag('flat', (m) => m.score.tracks.some((t) => t.notes > 0) && m.score.pitches < T.minPitches, (m) => `${m.score.pitches} note diverse in tutto: ne servono almeno ${T.minPitches}`);
+    flagHeard('flat', (g) => g.dynamics < T.minDynamics, (g) => `${num(g.dynamics, 1)} dB tra i passi deboli e quelli forti: ne servono almeno ${T.minDynamics}`);
+    flagHeard('flat', (g) => Math.max(...g.bands) > T.maxBandShare, (g) => {
       const i = g.bands.indexOf(Math.max(...g.bands));
       return `${pct(g.bands[i])} dell'energia nella banda «${SPECTRUM_BANDS[i].name}» (al più ${pct(T.maxBandShare)}): guarda cutoff e root`;
     });
-    flag('ripetitivo', (m) => m.score.events > 1 && m.score.period * 2 <= m.score.steps, (m) => `la partitura si ripete ogni ${m.score.period} passi su ${m.score.steps}: il ciclo dice una volta sola ciò che ripete`);
+    flag('repetitive', (m) => m.score.events > 1 && m.score.period * 2 <= m.score.steps, (m) => `la partitura si ripete ogni ${m.score.period} passi su ${m.score.steps}: il ciclo dice una volta sola ciò che ripete`);
     if (report.seedDistance !== undefined && report.seedDistance < T.minSeedDistance && some.length > 1)
-      out.push({ defect: 'ripetitivo', seeds: [], message: `i semi danno quasi la stessa partitura (distanza ${num(report.seedDistance)}, almeno ${num(T.minSeedDistance)}): il programma non estrae niente` });
+      out.push({ defect: 'repetitive', seeds: [], message: `i semi danno quasi la stessa partitura (distanza ${num(report.seedDistance)}, almeno ${num(T.minSeedDistance)}): il programma non estrae niente` });
   }
 
-  flag('stonato', (m) => m.score.inScale < T.minInScale, (m) => `${pct(m.score.inScale)} delle note sulla scala dichiarata (almeno ${pct(T.minInScale)}): le altezze sbattono sul tetto MIDI, abbassa root`);
-  flag('stonato', (m) => m.score.harsh > T.maxHarsh, (m) => `${pct(m.score.harsh)} delle coppie di note insieme a un semitono o un tritono (al più ${pct(T.maxHarsh)})`);
+  flag('off_key', (m) => m.score.inScale < T.minInScale, (m) => `${pct(m.score.inScale)} delle note sulla scala dichiarata (almeno ${pct(T.minInScale)}): le altezze sbattono sul tetto MIDI, abbassa root`);
+  flag('off_key', (m) => m.score.harsh > T.maxHarsh, (m) => `${pct(m.score.harsh)} delle coppie di note insieme a un semitono o un tritono (al più ${pct(T.maxHarsh)})`);
 
-  flag('fuori volume', (m) => m.score.truncated || m.score.events > m.score.steps * T.maxEventsPerStep, (m) => `troppe note: ${num(m.score.events / m.score.steps, 1)} eventi a passo (al più ${T.maxEventsPerStep})${m.score.truncated ? ', e la coda è tagliata' : ''}`);
-  flagHeard('fuori volume', (g) => g.rmsDb < T.minRmsDb, (g) => `RMS ${num(g.rmsDb, 1)} dBFS: troppo piano (almeno ${T.minRmsDb})`);
-  flagHeard('fuori volume', (g) => g.rmsDb > T.maxRmsDb, (g) => `RMS ${num(g.rmsDb, 1)} dBFS: troppo forte (al più ${T.maxRmsDb})`);
-  flagHeard('fuori volume', (g) => g.peakDb < T.minPeakDb, (g) => `picco ${num(g.peakDb, 1)} dBFS: troppo piano (almeno ${T.minPeakDb})`);
-  flagHeard('fuori volume', (g) => g.rawPeak > T.maxRawPeak, (g) => `picco grezzo ${num(g.rawPeak)} prima della scalatura (al più ${T.maxRawPeak}): tutto il resto è stato abbassato`);
-  flagHeard('fuori volume', (g) => g.clipped > T.maxClipped, (g) => `${num(g.clipped * 100, 2)} % dei campioni al limite (al più ${num(T.maxClipped * 100, 2)} %)`);
+  flag('off_volume', (m) => m.score.truncated || m.score.events > m.score.steps * T.maxEventsPerStep, (m) => `troppe note: ${num(m.score.events / m.score.steps, 1)} eventi a passo (al più ${T.maxEventsPerStep})${m.score.truncated ? ', e la coda è tagliata' : ''}`);
+  flagHeard('off_volume', (g) => g.rmsDb < T.minRmsDb, (g) => `RMS ${num(g.rmsDb, 1)} dBFS: troppo piano (almeno ${T.minRmsDb})`);
+  flagHeard('off_volume', (g) => g.rmsDb > T.maxRmsDb, (g) => `RMS ${num(g.rmsDb, 1)} dBFS: troppo forte (al più ${T.maxRmsDb})`);
+  flagHeard('off_volume', (g) => g.peakDb < T.minPeakDb, (g) => `picco ${num(g.peakDb, 1)} dBFS: troppo piano (almeno ${T.minPeakDb})`);
+  flagHeard('off_volume', (g) => g.rawPeak > T.maxRawPeak, (g) => `picco grezzo ${num(g.rawPeak)} prima della scalatura (al più ${T.maxRawPeak}): tutto il resto è stato abbassato`);
+  flagHeard('off_volume', (g) => g.clipped > T.maxClipped, (g) => `${num(g.clipped * 100, 2)} % dei campioni al limite (al più ${num(T.maxClipped * 100, 2)} %)`);
 
-  flagHeard('giuntura', (g) => g.seam > T.maxSeam, (g) => `il salto alla giuntura è ${num(g.seam, 1)} volte i salti più grandi del ciclo (al più ${T.maxSeam}): si sente un clic a ogni giro`);
+  flagHeard('seam', (g) => g.seam > T.maxSeam, (g) => `il salto alla giuntura è ${num(g.seam, 1)} volte i salti più grandi del ciclo (al più ${T.maxSeam}): si sente un clic a ogni giro`);
 
   // Every defect once, its first reason speaking and all the seeds together.
   const merged = new Map<SoundDefect, SoundIssue>();
@@ -601,7 +602,7 @@ export function soundReportText(r: SoundReport): string {
     `Tracce: ${s.tracks.map((t) => `y${t.y} ${t.instrument} ${num(t.volume)}`).join(', ')}.`,
     '',
     '## Verdetto',
-    ...(r.issues.length ? r.issues.map((i) => `- ${i.defect.toUpperCase()}${i.seeds.length ? ` (semi ${i.seeds.join(', ')})` : ''}: ${i.message}`) : ['Nessun difetto tra quelli che le soglie vedono. Il resto si ascolta: lab/banco/suono.md dice cosa le misure non possono dire.']),
+    ...(r.issues.length ? r.issues.map((i) => `- ${italianName('solo-codice', i.defect).toUpperCase()}${i.seeds.length ? ` (semi ${i.seeds.join(', ')})` : ''}: ${i.message}`) : ['Nessun difetto tra quelli che le soglie vedono. Il resto si ascolta: lab/banco/suono.md dice cosa le misure non possono dire.']),
     '',
     `## La partitura, seme ${head.seed}`,
     'Una parola per passo: D4 nota, D4! accento, d4 ghost, ~3 durata in passi, K cassa, H hi-hat, O aperto, C rullante, «.» niente, + insieme.',

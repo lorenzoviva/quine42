@@ -421,7 +421,7 @@ export interface UniverseConfig {
 
 /** How the game is played in this universe: chosen before the Genesis, then fixed (ADR-0053). */
 export interface GameSetup {
-  modalita: 'singola' | 'multigiocatore';
+  modalita: 'single' | 'multiplayer';
   /** How punishing death is: 0 (nothing is lost) to 4 (merciless). */
   morte: number;
   /** Players may hurt each other (multiplayer). */

@@ -25,7 +25,7 @@ class Recording extends MockAiModels {
 
 async function bootMany(ai: Record<string, unknown> = {}): Promise<{ k: Kernel; models: Recording }> {
   const cfg = JSON.parse(bundledFiles['universe.json']);
-  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, ai: { ...cfg.ai, ...ai }, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2) };
+  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, ai: { ...cfg.ai, ...ai }, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2) };
   const models = new Recording();
   const k = await Kernel.boot({ files, store: memoryStore(), ai: models });
   // Who plans pays (ADR-0081): without credits the requests would go to the kernel's own local models.

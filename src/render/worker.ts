@@ -8,7 +8,7 @@ import { clipFrames } from '../mj/run';
 import { runForm, type FormRequest, type FormResult } from '../kernel/forms';
 
 export interface LimbMesh {
-  part: 'gamba' | 'braccio' | 'testa' | 'coda';
+  part: 'leg' | 'arm' | 'head' | 'tail';
   /** The joint, in the model's three.js frame (tiles, origin at the centre of the floor). */
   joint: [number, number, number];
   phase: number;

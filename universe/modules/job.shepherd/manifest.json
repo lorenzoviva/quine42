@@ -1,0 +1,76 @@
+{
+  "id": "job.shepherd",
+  "name": "Il pastore",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "La giornata di chi tiene le bestie: al pascolo dalla mattina, il formaggio fatto sul posto, portato al deposito la sera.",
+  "mestieri": [
+    {
+      "id": "shepherd",
+      "nomi": [
+        "pastore",
+        "pastora",
+        "mandriano",
+        "mandriana",
+        "allevatore",
+        "allevatrice",
+        "capraio",
+        "capraia",
+        "vaccaro",
+        "vaccara",
+        "pecoraio",
+        "pecoraia"
+      ],
+      "posto": {
+        "casella": "g"
+      },
+      "giornata": {
+        "morning": [
+          {
+            "fa": "go",
+            "dove": "work"
+          },
+          {
+            "fa": "wait",
+            "durata": 30,
+            "posa": "graze"
+          }
+        ],
+        "day": [
+          {
+            "fa": "produce",
+            "oggetto": "item.formaggio",
+            "quante": 1,
+            "durata": 40,
+            "posa": "graze",
+            "dice": "Latte buono, oggi."
+          },
+          {
+            "fa": "wait",
+            "durata": 30,
+            "posa": "graze"
+          }
+        ],
+        "evening": [
+          {
+            "fa": "carry",
+            "oggetto": "item.formaggio",
+            "dove": "square"
+          },
+          {
+            "fa": "chat"
+          }
+        ],
+        "night": [
+          {
+            "fa": "go",
+            "dove": "home"
+          },
+          {
+            "fa": "rest"
+          }
+        ]
+      }
+    }
+  ]
+}

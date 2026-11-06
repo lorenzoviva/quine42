@@ -86,7 +86,7 @@ export interface Spot {
  * shelf too small), only shelves out of reach above or below, only spots too far from the wanderer, every spot taken by
  * what lies there, or free of things but someone stands there.
  */
-export type SpotFailure = 'nessun-piano' | 'alto' | 'lontano' | 'pieno' | 'occupato';
+export type SpotFailure = 'no-shelf' | 'high' | 'far' | 'full' | 'taken';
 
 export interface SpotQuery {
   /** Columns taken by the rectangles of what already lies there, per shelf (its height in voxels). */
@@ -221,7 +221,7 @@ export function findSpot(s: Support, item: ItemShape, q: SpotQuery): { spot: Spo
     // A shape that turns into one already there (a round pot) is tried once.
     if (p && !patterns.some((o) => o.W === p.W && o.H === p.H && o.px === p.px && o.py === p.py && o.solid.join() === p.solid.join())) patterns.push(p);
   }
-  if (!patterns.length) return { fail: 'nessun-piano' };
+  if (!patterns.length) return { fail: 'no-shelf' };
   const need = patterns[0].h;
   const shelves = [...shelvesOf(s)]
     .map(([h, room]) => ({ h, room, area: room.reduce((n, r) => n + (r >= need ? 1 : 0), 0) }))
@@ -294,5 +294,5 @@ export function findSpot(s: Support, item: ItemShape, q: SpotQuery): { spot: Spo
       return { spot: { x: (ax + p.px - s.X / 2) / s.vpt, y: (ay + p.py - s.Y / 2) / s.vpt, h, turns: p.turns, cells } };
     }
   }
-  return { fail: (['nessun-piano', 'alto', 'lontano', 'pieno', 'occupato'] as const)[stage] ?? 'nessun-piano' };
+  return { fail: (['no-shelf', 'high', 'far', 'full', 'taken'] as const)[stage] ?? 'no-shelf' };
 }

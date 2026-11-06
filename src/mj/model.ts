@@ -24,6 +24,7 @@
 // Not supported (they need files, search or tiles): wfc, convchain, observe and field (inference),
 // rule files (fin, fout, file).
 
+import { internalName } from '../kernel/internalNames';
 import { Mj3Error, PARTS, SHAPES, type ConvRule, type Node3, type PaletteEntry, type Part, type Program3, type Rule3, type ShapeKind, type Sym, type Vec3 } from './engine';
 import { MJ_PALETTE } from './palette';
 import { soundSettings, type SoundSettings } from './sound';
@@ -180,7 +181,8 @@ class Compiler {
       if (!sym || sym.length !== 1) this.fail(el, '"symbol" è una sola lettera');
       const value = el.attrs.value?.replace(/^#/, '');
       if (value !== undefined && !/^[0-9a-fA-F]{6}$/.test(value)) this.fail(el, `"value" è un colore esadecimale (rrggbb), non "${el.attrs.value}"`);
-      let part: string | undefined = el.attrs.part;
+      // A part of the contract 0.2 (`gamba`) reads internal (T307b): the Sculptor still writes it in Italian until its prompt changes (T310).
+      let part: string | undefined = el.attrs.part === undefined ? undefined : internalName('parti', el.attrs.part);
       if (part !== undefined && !(PARTS as readonly string[]).includes(part)) {
         this.mend(el, `part "${part}" sconosciuta (${PARTS.join(', ')}): tolta`);
         part = undefined;

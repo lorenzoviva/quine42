@@ -1,7 +1,7 @@
 // The skeleton of a figure: the kernel moves its parts (legs and arms swing round their joints) to walk,
 // turns the head, wags the tail; the renderer does it on the meshes of each limb.
 //
-// Parts come from the palette (`part`: gamba, braccio, testa, coda). Each connected piece of a part is
+// Parts come from the palette (`part`: leg, arm, head, tail). Each connected piece of a part is
 // a limb; its joint is where it meets the body (top for legs and arms, bottom for the head, the end
 // nearest the body for a tail). Without parts, the lowest quarter of a figure is taken as its legs.
 
@@ -74,7 +74,7 @@ export function rig(g: Grid3, palette: Record<string, PaletteEntry>): Rig {
     const top = Math.max(...zs);
     const hip = Math.max(1, Math.round(top * 0.27));
     const legs = new Set(all.filter((c) => coords(g, c)[2] < hip));
-    byPart.set('gamba', legs);
+    byPart.set('leg', legs);
     body.length = 0;
     body.push(...all.filter((c) => !legs.has(c)));
     guessed = true;
@@ -90,24 +90,24 @@ export function rig(g: Grid3, palette: Record<string, PaletteEntry>): Rig {
   for (const [part, set] of byPart) {
     let pieces = components(g, set);
     // A skirt or two legs touching: split the piece down the middle.
-    if (part === 'gamba' && pieces.length === 1) {
+    if (part === 'leg' && pieces.length === 1) {
       const left = pieces[0].filter((c) => coords(g, c)[0] < cx);
       const right = pieces[0].filter((c) => coords(g, c)[0] >= cx);
       if (left.length && right.length) pieces = [left, right];
     }
-    const quadruped = part === 'gamba' && pieces.length >= 3;
+    const quadruped = part === 'leg' && pieces.length >= 3;
     for (const cells of pieces) {
       const pts = cells.map((c) => coords(g, c));
       const [mx, my] = centre(cells);
       let joint: Vec3;
-      if (part === 'testa') joint = [mx, my, Math.min(...pts.map((p) => p[2])) - 0.5];
-      else if (part === 'coda') {
+      if (part === 'head') joint = [mx, my, Math.min(...pts.map((p) => p[2])) - 0.5];
+      else if (part === 'tail') {
         const b = centre(body);
         const near = pts.reduce((a, p) => ((p[0] - b[0]) ** 2 + (p[1] - b[1]) ** 2 + (p[2] - b[2]) ** 2 < (a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2 + (a[2] - b[2]) ** 2 ? p : a));
         joint = near;
       } else joint = [mx, my, Math.max(...pts.map((p) => p[2])) + 0.5];
       const side = mx < cx ? 1 : -1;
-      const phase = part === 'braccio' ? -side : quadruped ? side * (my < cy ? 1 : -1) : side;
+      const phase = part === 'arm' ? -side : quadruped ? side * (my < cy ? 1 : -1) : side;
       limbs.push({ part, cells, joint, phase });
     }
   }

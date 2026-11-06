@@ -3,18 +3,18 @@
   <color symbol="I" value="cf7832" name="pelo fulvo"/>
   <color symbol="S" value="783b18" name="striatura scura"/>
   <color symbol="C" value="f2dbbe" name="petto chiaro"/>
-  <color symbol="T" value="cf7832" name="testa fulva" part="testa"/>
-  <color symbol="U" value="f2dbbe" name="musetto chiaro" part="testa"/>
-  <color symbol="N" value="d96868" name="naso" part="testa"/>
-  <color symbol="E" value="4e8c34" name="occhi verdi" part="testa"/>
-  <color symbol="R" value="e09088" name="interno orecchie" part="testa"/>
-  <color symbol="K" value="783b18" name="striatura testa" part="testa"/>
-  <color symbol="J" value="f2dbbe" name="zampa ant sx" part="gamba"/>
-  <color symbol="L" value="f2dbbe" name="zampa ant dx" part="gamba"/>
-  <color symbol="P" value="cf7832" name="zampa post sx" part="gamba"/>
-  <color symbol="Q" value="cf7832" name="zampa post dx" part="gamba"/>
-  <color symbol="A" value="cf7832" name="coda fulva" part="coda"/>
-  <color symbol="Z" value="783b18" name="striatura coda" part="coda"/>
+  <color symbol="T" value="cf7832" name="testa fulva" part="head"/>
+  <color symbol="U" value="f2dbbe" name="musetto chiaro" part="head"/>
+  <color symbol="N" value="d96868" name="naso" part="head"/>
+  <color symbol="E" value="4e8c34" name="occhi verdi" part="head"/>
+  <color symbol="R" value="e09088" name="interno orecchie" part="head"/>
+  <color symbol="K" value="783b18" name="striatura testa" part="head"/>
+  <color symbol="J" value="f2dbbe" name="zampa ant sx" part="leg"/>
+  <color symbol="L" value="f2dbbe" name="zampa ant dx" part="leg"/>
+  <color symbol="P" value="cf7832" name="zampa post sx" part="leg"/>
+  <color symbol="Q" value="cf7832" name="zampa post dx" part="leg"/>
+  <color symbol="A" value="cf7832" name="coda fulva" part="tail"/>
+  <color symbol="Z" value="783b18" name="striatura coda" part="tail"/>
   <box at="4 13 0" size="2 2 5" color="J"/>
   <box at="10 13 0" size="2 2 5" color="L"/>
   <box at="4 4 0" size="2 3 5" color="P"/>

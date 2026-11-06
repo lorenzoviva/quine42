@@ -8,8 +8,9 @@ import { normName } from './content';
 import { regionAt, type Atlas } from './atlas';
 import type { Plot } from './plots';
 import type { Fault } from './faults';
+import { italianName } from './internalNames';
 
-export type OperationKind = 'viandante' | 'giocatore' | 'luogo' | 'trama' | 'missione' | 'guasto';
+export type OperationKind = 'wanderer' | 'player' | 'chunk' | 'plot' | 'quest' | 'fault';
 
 /** Another wanderer connected now (T42c): who, and where in the world (carpet space). */
 export interface PlayerSpot {
@@ -56,22 +57,22 @@ export interface SituationInput {
 }
 
 export const OPERATION_NAME: Record<OperationKind, string> = {
-  viandante: 'il viandante',
-  giocatore: 'giocatori collegati',
-  luogo: 'luoghi in generazione',
-  trama: 'trame aperte',
-  missione: 'missioni',
-  guasto: 'guasti',
+  wanderer: 'il viandante',
+  player: 'giocatori collegati',
+  chunk: 'luoghi in generazione',
+  plot: 'trame aperte',
+  quest: 'missioni',
+  fault: 'guasti',
 };
 
 /** The colours of the marks, on the table and in the panel: faults in red. */
 export const OPERATION_COLOR: Record<OperationKind, string> = {
-  viandante: '#ffffff',
-  giocatore: '#c77dff',
-  luogo: '#05d9e8',
-  trama: '#ffcf5c',
-  missione: '#7dd87d',
-  guasto: '#ff3b3b',
+  wanderer: '#ffffff',
+  player: '#c77dff',
+  chunk: '#05d9e8',
+  plot: '#ffcf5c',
+  quest: '#7dd87d',
+  fault: '#ff3b3b',
 };
 
 export function situation(s: SituationInput): Situation {
@@ -93,30 +94,30 @@ export function situation(s: SituationInput): Situation {
     return r ? { cx: r.centro[0], cy: r.centro[1] } : undefined;
   };
 
-  ops.push(at({ kind: 'viandante', label: 'il viandante', detail: 'è qui' }, s.wanderer));
+  ops.push(at({ kind: 'wanderer', label: 'il viandante', detail: 'è qui' }, s.wanderer));
   for (const p of s.players ?? [])
-    ops.push(at({ kind: 'giocatore', label: p.nome, detail: `collegato, a ${Math.floor(p.x)},${Math.floor(p.y)}`, who: p.id }, { cx: Math.floor(p.x / s.chunkSize), cy: Math.floor(p.y / s.chunkSize) }));
+    ops.push(at({ kind: 'player', label: p.nome, detail: `collegato, a ${Math.floor(p.x)},${Math.floor(p.y)}`, who: p.id }, { cx: Math.floor(p.x / s.chunkSize), cy: Math.floor(p.y / s.chunkSize) }));
   for (const c of s.chunks) {
     if (c.stage !== 'draft') continue;
-    ops.push(at({ kind: 'luogo', label: `luogo ${c.cx},${c.cy}`, detail: c.developing ? 'il Cartografo lo sta pianificando' : 'in coda', ...(c.developing ? { live: true } : {}) }, c));
+    ops.push(at({ kind: 'chunk', label: `luogo ${c.cx},${c.cy}`, detail: c.developing ? 'il Cartografo lo sta pianificando' : 'in coda', ...(c.developing ? { live: true } : {}) }, c));
   }
   for (const p of s.plots) {
-    if (p.stato !== 'attiva') continue;
+    if (p.stato !== 'active') continue;
     const i = p.tappe.findIndex((b) => !b.fatto);
     const beat = p.tappe[i < 0 ? p.tappe.length - 1 : i];
     const where = (beat && s.locate(beat.chi)) ?? p.coinvolti.map(s.locate).find(Boolean);
-    const tappa = beat ? `tappa ${(i < 0 ? p.tappe.length - 1 : i) + 1}/${p.tappe.length}${i < 0 ? ' (fatte tutte)' : ''}: ${beat.chi} ${beat.cosa} (${beat.dove}, ${beat.momento}, giorno ${p.inizio + beat.giorno})` : 'nessuna tappa';
-    ops.push(at({ kind: 'trama', label: p.titolo, detail: tappa }, where));
+    const tappa = beat ? `tappa ${(i < 0 ? p.tappe.length - 1 : i) + 1}/${p.tappe.length}${i < 0 ? ' (fatte tutte)' : ''}: ${beat.chi} ${beat.cosa} (${italianName('dove', beat.dove)}, ${italianName('momenti', beat.momento)}, giorno ${p.inizio + beat.giorno})` : 'nessuna tappa';
+    ops.push(at({ kind: 'plot', label: p.titolo, detail: tappa }, where));
     const q = p.missione;
-    if (q?.stato === 'accettata') {
+    if (q?.stato === 'accepted') {
       const o = q.obiettivo;
-      const goal = o.tipo === 'porta' ? `porta ${o.oggetto ?? 'ciò che serve'} a ${o.a ?? q.da}` : o.tipo === 'vai' ? `vai a ${o.luogo ?? '?'}` : `parla con ${o.a ?? '?'}`;
-      ops.push(at({ kind: 'missione', label: p.titolo, detail: `${q.da}: ${goal}` }, (o.tipo === 'vai' ? named(o.luogo) : undefined) ?? s.locate(o.a ?? q.da)));
+      const goal = o.tipo === 'bring' ? `porta ${o.oggetto ?? 'ciò che serve'} a ${o.a ?? q.da}` : o.tipo === 'go' ? `vai a ${o.luogo ?? '?'}` : `parla con ${o.a ?? '?'}`;
+      ops.push(at({ kind: 'quest', label: p.titolo, detail: `${q.da}: ${goal}` }, (o.tipo === 'go' ? named(o.luogo) : undefined) ?? s.locate(o.a ?? q.da)));
     }
   }
   for (const f of s.faults) {
     const c = f.at ? { cx: Math.floor(f.at.x / s.chunkSize), cy: Math.floor(f.at.y / s.chunkSize) } : undefined;
-    ops.push(at({ kind: 'guasto', label: f.key, detail: f.count > 1 ? `${f.message} (×${f.count})` : f.message }, c));
+    ops.push(at({ kind: 'fault', label: f.key, detail: f.count > 1 ? `${f.message} (×${f.count})` : f.message }, c));
   }
 
   const regions = s.atlas.regioni.map((r) => ({ nome: r.nome, centro: r.centro, raggio: r.raggio }));

@@ -57,8 +57,8 @@ describe("the Actor's option", () => {
     expect(repairActor({ acceso: true, modello: 42 })).toEqual({ acceso: true, modello: ACTOR_MODEL });
     expect(repairActor({ modello: 'x' })).toEqual({ acceso: false, modello: 'x' });
     expect(readConfig(bundledFiles).config.ai.attore).toEqual({ acceso: false, modello: ACTOR_MODEL });
-    expect(AGENTS.attore.name).toBe('Attore');
-    expect(CENSUS.some((c) => c.compito === 'npc.sheet' && c.agente === 'narratore')).toBe(true);
+    expect(AGENTS.actor.name).toBe('Attore');
+    expect(CENSUS.some((c) => c.compito === 'npc.sheet' && c.agente === 'narrator')).toBe(true);
   });
 
   it('the hourly estimate grows only when it is on: the lines move to its model, the sheets are added', () => {
@@ -86,11 +86,11 @@ describe("the Actor's option", () => {
     await k.talk(a.id, 'Buongiorno, chi sei?');
     expect(models.calls.length - before).toBe(1);
     const reply = models.of('npc.reply').at(-1)!;
-    expect(reply.agent).toBe('narratore');
+    expect(reply.agent).toBe('narrator');
     expect(reply.model).toBeUndefined();
     expect(models.of('npc.sheet')).toHaveLength(0);
     expect(k.individualOf(a.name)?.scheda).toBeUndefined();
-    expect(k.feed().some((e) => e.from === 'narratore' && e.task === 'npc.reply' && e.text.startsWith(a.name))).toBe(true);
+    expect(k.feed().some((e) => e.from === 'narrator' && e.task === 'npc.reply' && e.text.startsWith(a.name))).toBe(true);
   });
 
   it('on, the Narrator writes the sheet once and the Actor plays from it, with its model and the same payer', async () => {
@@ -100,12 +100,12 @@ describe("the Actor's option", () => {
     const before = models.calls.length;
     await k.talk(a.id, 'Buongiorno, chi sei?');
     // Two calls: the sheet (the Narrator) and the line (the Actor).
-    expect(models.calls.slice(before).map((c) => `${c.agent}:${c.task}`)).toEqual(['narratore:npc.sheet', 'attore:npc.reply']);
+    expect(models.calls.slice(before).map((c) => `${c.agent}:${c.task}`)).toEqual(['narrator:npc.sheet', 'actor:npc.reply']);
     const sheet = models.of('npc.sheet')[0];
     expect(sheet.chi).toBe('io');
     expect(sheet.prompt).toContain(a.name);
     const reply = models.of('npc.reply')[0];
-    expect(reply.agent).toBe('attore');
+    expect(reply.agent).toBe('actor');
     expect(reply.model).toBe(ACTOR_MODEL);
     expect(reply.chi).toBe(payerOf('npc.reply', 'io'));
     // The Actor gets the sheet, the fourth wall, the canon, the lexicon and the neighbourhood of the graph, like the Narrator.
@@ -124,8 +124,8 @@ describe("the Actor's option", () => {
     expect(models.of('npc.sheet')).toHaveLength(1);
     expect(models.of('npc.reply')).toHaveLength(2);
     // The registry says who spoke.
-    expect(k.feed().some((e) => e.from === 'attore' && e.task === 'npc.reply' && e.text.startsWith(a.name))).toBe(true);
-    expect(k.feed().some((e) => e.from === 'narratore' && e.task === 'npc.sheet')).toBe(true);
+    expect(k.feed().some((e) => e.from === 'actor' && e.task === 'npc.reply' && e.text.startsWith(a.name))).toBe(true);
+    expect(k.feed().some((e) => e.from === 'narrator' && e.task === 'npc.sheet')).toBe(true);
     // What is born in the dialogue goes on as today: the memory, the bond.
     await k.talk(a.id, 'Ti amo. Sposami!');
     expect(k.bondOf(a.name)).toBe('moglie');
@@ -150,12 +150,12 @@ describe("the Actor's option", () => {
     expect(JSON.parse(k.repo.working['universe.json']).ai.attore).toEqual({ acceso: true, modello: 'gemini-3.1-flash-lite' });
     await k.talk(a.id, 'Salve di nuovo.');
     expect(models.of('npc.sheet')).toHaveLength(1);
-    expect(models.of('npc.reply').at(-1)!.agent).toBe('attore');
+    expect(models.of('npc.reply').at(-1)!.agent).toBe('actor');
     expect(models.of('npc.reply').at(-1)!.model).toBe('gemini-3.1-flash-lite');
     k.setAi({ attore: false });
     await k.talk(a.id, 'Addio.');
     expect(models.of('npc.sheet')).toHaveLength(1);
-    expect(models.of('npc.reply').at(-1)!.agent).toBe('narratore');
+    expect(models.of('npc.reply').at(-1)!.agent).toBe('narrator');
   });
 
   it('a dialogue between two people goes to the Actor with both sheets, paid as it was (common)', async () => {
@@ -172,14 +172,14 @@ describe("the Actor's option", () => {
     for (let i = 0; i < 40 && !k.feed().some((e) => e.task === 'npc.dialogue'); i++) await new Promise((r) => setTimeout(r, 10));
     const talk = models.of('npc.dialogue')[0];
     expect(talk).toBeDefined();
-    expect(talk.agent).toBe('attore');
+    expect(talk.agent).toBe('actor');
     expect(talk.model).toBe(ACTOR_MODEL);
     expect(talk.chi).toBe(payerOf('npc.dialogue', 'io'));
     expect(talk.prompt).toContain('scheda:');
     expect(models.of('npc.sheet').map((c) => c.chi)).toEqual(['comune', 'comune']);
     expect(k.individualOf(a.name)?.scheda?.testo).toBeTruthy();
     expect(k.individualOf(b.name)?.scheda?.testo).toBeTruthy();
-    expect(k.feed().some((e) => e.from === 'attore' && e.task === 'npc.dialogue')).toBe(true);
+    expect(k.feed().some((e) => e.from === 'actor' && e.task === 'npc.dialogue')).toBe(true);
   });
 
   it('a sheet that breaks the fourth wall is discarded: the Actor plays from the persona', async () => {
@@ -196,7 +196,7 @@ describe("the Actor's option", () => {
     await k.talk(a.id, 'Chi sei?');
     expect(k.individualOf(a.name)?.scheda).toBeUndefined();
     const reply = models.of('npc.reply')[0];
-    expect(reply.agent).toBe('attore');
+    expect(reply.agent).toBe('actor');
     expect(reply.prompt).not.toContain('scritta dal Narratore');
     expect(k.feed().some((e) => e.kind === 'scarta' && e.task === 'npc.sheet')).toBe(true);
   });
@@ -217,7 +217,7 @@ describe("the Actor's option", () => {
 describe('the Actor in a multiplayer game', () => {
   async function bootMany(ai: Record<string, unknown> = {}): Promise<Kernel> {
     const cfg = JSON.parse(bundledFiles['universe.json']);
-    const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, ai: { ...cfg.ai, ...ai }, partita: { modalita: 'multigiocatore', morte: 3 } }, null, 2) };
+    const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, ai: { ...cfg.ai, ...ai }, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2) };
     return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
   }
   async function thin(server: SessionServer, id: string): Promise<ThinClient> {

@@ -1,15 +1,15 @@
 <!-- Fabbro robusto: step 8B, gemini-3.8-flash, rivisto (b-figure-flash38/fabbro.v2.json, voto dell'Artista 6/10). Convertito dal JSON (lab/mjx/convert.ts): stessi voxel. -->
 <sequence values="BNPCDAULFMSVHEWIJ" size="20 15 30" symmetry="(xy)" name="Fabbro robusto">
-  <color symbol="N" value="382315" name="stivali di cuoio" part="gamba"/>
-  <color symbol="P" value="4a3c32" name="brache robuste" part="gamba"/>
+  <color symbol="N" value="382315" name="stivali di cuoio" part="leg"/>
+  <color symbol="P" value="4a3c32" name="brache robuste" part="leg"/>
   <color symbol="C" value="8c382b" name="camicia pesante"/>
   <color symbol="D" value="63241b" name="camicia in ombra"/>
   <color symbol="A" value="9e5c2b" name="grembiule di cuoio"/>
   <color symbol="U" value="2c1c14" name="cuoio bruciacchiato"/>
   <color symbol="L" value="23150d" name="cinturone"/>
   <color symbol="F" value="b0b2ba" name="fibbia di ferro"/>
-  <color symbol="M" value="8c382b" name="manica arrotolata" part="braccio"/>
-  <color symbol="S" value="dfa57e" name="braccio possente" part="braccio"/>
+  <color symbol="M" value="8c382b" name="manica arrotolata" part="arm"/>
+  <color symbol="S" value="dfa57e" name="braccio possente" part="arm"/>
   <color symbol="V" value="dfa57e" name="pelle viso"/>
   <color symbol="H" value="3e2415" name="capelli e barba"/>
   <color symbol="E" value="1c140e" name="occhi"/>

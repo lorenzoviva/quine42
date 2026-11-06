@@ -2,15 +2,15 @@
      posa della testa (alta in ascolto o bassa a fiutare la traccia), la coda (bassa, dritta o alzata), quanto è massiccio il corpo se ha
      la gorgiera di pelo chiaro sul petto e dove il pelo è arruffato. -->
 <sequence values="BAIUVFDWHCKEhjenfoxyzspqmab0" size="25 40 30" symmetry="(xy)" name="Lupo">
-  <color symbol="A" value="5b606d" name="zampa anteriore sx" part="gamba"/>
-  <color symbol="I" value="5b606d" name="zampa anteriore dx" part="gamba"/>
-  <color symbol="U" value="4f535f" name="zampa posteriore sx" part="gamba"/>
-  <color symbol="V" value="4f535f" name="zampa posteriore dx" part="gamba"/>
+  <color symbol="A" value="5b606d" name="zampa anteriore sx" part="leg"/>
+  <color symbol="I" value="5b606d" name="zampa anteriore dx" part="leg"/>
+  <color symbol="U" value="4f535f" name="zampa posteriore sx" part="leg"/>
+  <color symbol="V" value="4f535f" name="zampa posteriore dx" part="leg"/>
   <color symbol="F" value="6e7484" name="pelliccia grigia"/>
   <color symbol="D" value="393c47" name="dorso scuro"/>
   <color symbol="W" value="c8cbda" name="folto pelo chiaro"/>
   <color symbol="H" value="8e95a8" name="luce pelliccia"/>
-  <color symbol="C" value="5e6372" name="coda folta" part="coda"/>
+  <color symbol="C" value="5e6372" name="coda folta" part="tail"/>
   <color symbol="K" value="1b1c22" name="tartufo e dettagli"/>
   <color symbol="E" value="e29c22" name="occhi ambrati"/>
   <color symbol="h" hidden="True" name="la testa alta"/>

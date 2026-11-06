@@ -3,7 +3,7 @@
 Per chi scrive programmi sonori (`docs/architettura-dettagli.md#suono`) e non può ascoltarli. Niente browser e niente modelli:
 
 ```bash
-npx vite-node lab/scripts/mjx-sound.ts -- suono-fuga-cellulare                # un id di universe/models o un file .xml
+npx vite-node lab/scripts/mjx-sound.ts -- sound-cellular-fugue                 # un id di universe/models o un file .xml
 npx vite-node lab/scripts/mjx-sound.ts -- mio.xml --semi 1,2,3 --out lab/out/suono/prova --tetto 4000
 ```
 
@@ -46,7 +46,7 @@ Il validatore (`soundErrors`) rimanda indietro gli stessi difetti: tre semi per 
 
 ## I programmi del gioco (T228)
 
-I 7 brani e i 9 effetti del seme (`suono-musica-*`, `suono-effetto-*`) non hanno calibrato niente: sono la prima prova delle soglie su programmi scritti dopo. Sui semi 1-5, sui semi 100-139 e su altri cinque sparsi passano tutti, tranne `suono-effetto-morte`: distanza 0 tra i semi, `ripetitivo`, tenuto così dall'autore (lo preferisce all'ascolto). Stanno ben dentro i limiti: RMS da -27,4 a -19,1 dBFS, picco grezzo da 0,29 a 1,06, silenzio fino al 48 %, giuntura al più 0,04, coppie aspre al più il 27 %.
+I 7 brani e i 9 effetti del seme (`sound-music-*`, `sound-effect-*`; `suono-*` prima di T307b) non hanno calibrato niente: sono la prima prova delle soglie su programmi scritti dopo. Sui semi 1-5, sui semi 100-139 e su altri cinque sparsi passano tutti, tranne `suono-effetto-morte`: distanza 0 tra i semi, `ripetitivo`, tenuto così dall'autore (lo preferisce all'ascolto). Stanno ben dentro i limiti: RMS da -27,4 a -19,1 dBFS, picco grezzo da 0,29 a 1,06, silenzio fino al 48 %, giuntura al più 0,04, coppie aspre al più il 27 %.
 
 **L'analisi non sa che un programma è un effetto**: lo deduce dalla lunghezza, e sotto i 16 passi è un effetto. Un effetto di una battuta o più si misura come un brano: chiede 4 eventi a battuta e semi diversi. `suono-effetto-soglia` (24 passi) è stata corretta per questo: la nota d'arrivo la sceglie il seme tra due, e l'ottava in più nel pad porta 8 eventi; il seme 1, quello del gioco, resta com'era con quell'ottava in più.
 

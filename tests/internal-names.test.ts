@@ -27,8 +27,8 @@ const domain = (id: string): NameDomain => {
   return found;
 };
 const keys = (id: string) => Object.keys(domain(id).names);
-/** The names a domain has in the code: the internal ones when its step is done (T307a), the Italian ones of today otherwise. */
-const DONE = new Set(['T307a']);
+/** The names a domain has in the code: the internal ones when its step is done (T307a, T307b), the Italian ones of today otherwise. */
+const DONE = new Set(['T307a', 'T307b']);
 const inCode = (id: string) => (DONE.has(domain(id).step) ? Object.values(domain(id).names) : keys(id));
 /** The words of the code that read as Italian: the internal language has none (or the same in English: `lava`, `dungeon`, `studio`). */
 const italianOf = (list: readonly string[], d: string) => list.filter((v) => !Object.values(domain(d).names).includes(v) || keys(d).includes(v));
@@ -161,14 +161,18 @@ describe('la tabella della lingua interna', () => {
     for (const f of fs.readdirSync(path.join(ROOT, 'universe/models')).filter((f) => f.endsWith('.xml')))
       for (const m of read(`universe/models/${f}`).matchAll(/<action\b[^>]*\bname="([^"]+)"/g)) actions.add(m[1]);
     expect([...actions].filter((a) => !inCode('azioni-seme').includes(a))).toEqual([]);
-    expect([...jobs].filter((a) => !keys('mestieri').includes(a))).toEqual([]);
+    expect([...jobs].filter((a) => !inCode('mestieri').includes(a))).toEqual([]);
     const magic = json('universe/modules/magic.runes/manifest.json') as { runes: Record<string, { element: string }>; spells: Record<string, unknown> };
     expect(Object.keys(magic.runes).filter((r) => !inCode('rune').includes(r))).toEqual([]);
     expect(Object.values(magic.runes).map((r) => r.element).filter((e) => !inCode('elementi').includes(e))).toEqual([]);
     // Every formula of the seed is made of rune tokens.
     for (const f of Object.keys(magic.spells)) for (const t of f.split(/\s+/)) expect(inCode('rune'), f).toContain(t);
-    const modules = fs.readdirSync(path.join(ROOT, 'universe/modules')).filter((m) => /^(sys\.lavoro|lavoro\.|obj\.|item\.)/.test(m));
-    expect(modules.filter((m) => !keys('moduli-seme').includes(m))).toEqual([]);
+    const modules = fs.readdirSync(path.join(ROOT, 'universe/modules')).filter((m) => /^(sys\.work|job\.|obj\.|item\.)/.test(m));
+    expect(modules.filter((m) => !inCode('moduli-seme').includes(m))).toEqual([]);
+    // The seed's sound programs and the gerboas of the teams have their internal ids (T307b).
+    const models = fs.readdirSync(path.join(ROOT, 'universe/models')).map((f) => f.replace(/\.xml$/, ''));
+    expect(models.filter((m) => /^suono-/.test(m) || (/^corona-gerboa-/.test(m) && keys('agenti').includes(m.slice('corona-gerboa-'.length))))).toEqual([]);
+    expect(Object.values(domain('suoni-seme').names).filter((m) => !models.includes(m))).toEqual([]);
   });
 
   it('copre i messaggi del protocollo e i campi di stato del kernel', () => {

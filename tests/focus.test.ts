@@ -12,6 +12,7 @@ import { npcReply, weavePlot } from '../src/kernel/agents/minds';
 import { buildGraph, type GraphChunk } from '../src/kernel/graph';
 import { readPeople } from '../src/kernel/society';
 import { readPlots } from '../src/kernel/plots';
+import { internalAgent } from '../src/kernel/internalNames';
 import type { FileMap, Manifest } from '../src/kernel/types';
 
 /** Offline models that keep every call, to look at what the agents were sent. */
@@ -23,14 +24,14 @@ class Recording extends MockAiModels {
   }
 }
 
-const cats = (t: string) => (t === 'npc.cat' ? 'animale' : t ? 'persona' : undefined) as 'animale' | 'persona' | undefined;
+const cats = (t: string) => (t === 'npc.cat' ? 'animal' : t ? 'person' : undefined) as 'animal' | 'person' | undefined;
 const manifest = (m: Record<string, unknown>) => JSON.stringify({ version: '0.1.0', ...m });
 const individual = (nome: string, tipo: string, famiglia: Array<[string, string]>, extra: Record<string, unknown> = {}) => ({
   nome,
   tipo,
   mestiere: 'contadino',
   famiglia: famiglia.map(([n, legame]) => ({ nome: n, legame })),
-  routine: [{ quando: 'giorno', fa: 'lavora', dove: 'lavoro' }, { quando: 'notte', fa: 'dorme', dove: 'casa' }],
+  routine: [{ quando: 'day', fa: 'lavora', dove: 'work' }, { quando: 'night', fa: 'dorme', dove: 'home' }],
   ...extra,
 });
 
@@ -42,14 +43,14 @@ function universe(): { files: FileMap; chunks: GraphChunk[] } {
     'world/canone.md': '# Canone\n\nLe rune restano ferme dove sono finché qualcuno non le raccoglie.',
     'world/people.json': JSON.stringify({
       persone: [
-        individual('Fiocco', 'npc.cat', [['Bastiano', 'animale']], { luogo: 'Piazza del Borgo', genere: 'femmina', specie: 'animale' }),
-        individual('Bastiano', 'npc.villager', [['Fiocco', 'padrone'], ['Nereo', 'fratello']], { luogo: 'Piazza del Borgo', genere: 'maschio' }),
-        individual('Nereo', 'npc.villager', [['Bastiano', 'fratello']], { luogo: 'Riva del Lago', genere: 'maschio' }),
-        individual('Ottavia', 'npc.villager', [], { luogo: 'Riva del Lago', genere: 'femmina' }),
+        individual('Fiocco', 'npc.cat', [['Bastiano', 'animale']], { luogo: 'Piazza del Borgo', genere: 'female', specie: 'animal' }),
+        individual('Bastiano', 'npc.villager', [['Fiocco', 'padrone'], ['Nereo', 'fratello']], { luogo: 'Piazza del Borgo', genere: 'male' }),
+        individual('Nereo', 'npc.villager', [['Bastiano', 'fratello']], { luogo: 'Riva del Lago', genere: 'male' }),
+        individual('Ottavia', 'npc.villager', [], { luogo: 'Riva del Lago', genere: 'female' }),
       ],
       attesi: [],
     }),
-    'world/plots.json': JSON.stringify({ trame: [{ id: 'trama-reti', titolo: 'Le reti tagliate', mistero: 'Nereo taglia di notte le reti del fratello.', coinvolti: ['Nereo', 'Bastiano'], tappe: [{ giorno: 0, momento: 'notte', chi: 'Nereo', dove: 'Riva del Lago', cosa: 'si aggira tra le barche' }], inizio: 0, stato: 'attiva' }] }),
+    'world/plots.json': JSON.stringify({ trame: [{ id: 'trama-reti', titolo: 'Le reti tagliate', mistero: 'Nereo taglia di notte le reti del fratello.', coinvolti: ['Nereo', 'Bastiano'], tappe: [{ giorno: 0, momento: 'night', chi: 'Nereo', dove: 'Riva del Lago', cosa: 'si aggira tra le barche' }], inizio: 0, stato: 'active' }] }),
     'world/bible.json': JSON.stringify({
       titolo: 'Prova',
       tono: 'quieto',
@@ -86,7 +87,7 @@ describe('the context of the agents from the graph (T13)', () => {
     const { files, chunks } = universe();
     const { c, models } = council(files, chunks);
     await npcReply(c, npc('Bastiano'), 'ciao');
-    await npcReply(c, npc('Bastiano'), 'ciao', ['Bastiano', 'luogo:0_0']);
+    await npcReply(c, npc('Bastiano'), 'ciao', ['Bastiano', 'chunk:0_0']);
     const [plain, focused] = models.calls.map((x) => x.system);
     expect(plain).toMatch(/## Bibbia del mondo/);
     expect(plain).toMatch(/Un fatto lontano numero 28/);
@@ -112,7 +113,7 @@ describe('the context of the agents from the graph (T13)', () => {
   it('a focus the graph does not know, or no graph at all, falls back to the summaries', async () => {
     const { files, chunks } = universe();
     const { c, models } = council(files, chunks);
-    await npcReply(c, npc('Nessuno'), 'ciao', ['Qualcuno che non esiste', 'luogo:9_9']);
+    await npcReply(c, npc('Nessuno'), 'ciao', ['Qualcuno che non esiste', 'chunk:9_9']);
     const bare = new Council(models, () => ({ files, palette: {}, catalog: [] }));
     await npcReply(bare, npc('Bastiano'), 'ciao', ['Bastiano']);
     for (const call of models.calls) {
@@ -158,6 +159,14 @@ describe('the context of the agents from the graph (T13)', () => {
     };
     walk(resolve(__dirname, '../universe'), '');
     walk(valmora!, '');
+    // A universe of 0.1 has the prompts of its agents by their Italian ids: as the migration does (T307b), they take the internal ones.
+    for (const p of Object.keys(files)) {
+      const m = /^prompts\/agents\/([^/]+)\.md$/.exec(p);
+      if (m && internalAgent(m[1]) !== m[1]) {
+        files[`prompts/agents/${internalAgent(m[1])}.md`] = files[p];
+        delete files[p];
+      }
+    }
     const chunks: GraphChunk[] = readdirSync(join(valmora!, 'maps')).map((f) => {
       const [, cx, cy] = /_(-?\d+)_(-?\d+)\.json$/.exec(f)!;
       const { plan } = JSON.parse(readFileSync(join(valmora!, 'maps', f), 'utf8'));
@@ -168,7 +177,7 @@ describe('the context of the agents from the graph (T13)', () => {
     const plot = readPlots(files)[0];
     const who = people.find((p) => p.nome === plot.coinvolti[0]) ?? people[0];
     const home = chunks.find((p) => p.nome === who.luogo) ?? chunks[0];
-    const focus = [who.nome, `luogo:${home.cx}_${home.cy}`];
+    const focus = [who.nome, `chunk:${home.cx}_${home.cy}`];
     const society = people.slice(-20).map((p) => `- ${p.nome}, ${p.mestiere}`).join('\n');
     for (const f of [undefined, focus]) {
       await npcReply(c, { ...npc(who.nome), place: home.nome }, 'Cosa succede al lago?', f);

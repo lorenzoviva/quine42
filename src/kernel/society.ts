@@ -4,34 +4,36 @@
 // the miller, the blacksmith's rival). The kernel turns routines into places to go (sys.wander walks
 // there) and lets related people greet each other when they meet. No model calls here.
 
+import { internalIndividual, italianName } from './internalNames';
 import { hashStr } from './rng';
 import type { FileMap } from './types';
 import { SOLO, WANDERER_NAME, wandererOf } from './wanderers';
 
-export type DayPhase = 'mattina' | 'giorno' | 'sera' | 'notte';
-export const DAY_PHASES: DayPhase[] = ['mattina', 'giorno', 'sera', 'notte'];
-export type Where = 'casa' | 'lavoro' | 'piazza' | 'in giro';
-export const WHERES: Where[] = ['casa', 'lavoro', 'piazza', 'in giro'];
+// The values are internal (T307b, ADR-0153): English; the world says them in its language (italianName).
+export type DayPhase = 'morning' | 'day' | 'evening' | 'night';
+export const DAY_PHASES: DayPhase[] = ['morning', 'day', 'evening', 'night'];
+export type Where = 'home' | 'work' | 'square' | 'about';
+export const WHERES: Where[] = ['home', 'work', 'square', 'about'];
 
 /** What an individual is physically doing: the renderer shows it (lying in bed, hoeing, fishing…). */
-export const ACTIVITIES = ['dorme', 'zappa', 'lavora', 'cucina', 'mangia', 'prega', 'commercia', 'pattuglia', 'chiacchiera', 'legge', 'pesca', 'taglia_legna', 'pascola', 'passeggia'] as const;
+export const ACTIVITIES = ['sleep', 'hoe', 'work', 'cook', 'eat', 'pray', 'trade', 'patrol', 'chat', 'read', 'fish', 'chop_wood', 'graze', 'stroll'] as const;
 export type Activity = (typeof ACTIVITIES)[number];
 
 /** A sign over the head while doing it. */
 export const ACTIVITY_ICON: Record<Activity, string> = {
-  dorme: 'z', zappa: '⚒', lavora: '⚒', cucina: '♨', mangia: 'ò', prega: '✦', commercia: '⚖', pattuglia: '⚔', chiacchiera: '…', legge: '▤', pesca: '≈', taglia_legna: '⚒', pascola: '♣', passeggia: '',
+  sleep: 'z', hoe: '⚒', work: '⚒', cook: '♨', eat: 'ò', pray: '✦', trade: '⚖', patrol: '⚔', chat: '…', read: '▤', fish: '≈', chop_wood: '⚒', graze: '♣', stroll: '',
 };
 
 /** The activity a routine step describes, when the Narrator did not say. */
 export function inferActivity(fa: string, dove: string): Activity {
   const t = fa.toLowerCase();
   const rules: Array<[RegExp, Activity]> = [
-    [/dorm|riposa|letto|sonn/, 'dorme'], [/zapp|semin|ar[ao]|campo|orto|raccol|mietere|mieti/, 'zappa'], [/cucin|impast|forno|pane|zuppa/, 'cucina'], [/mangi|cena|pranz|colazion/, 'mangia'],
-    [/preg|tempio|altare|medita/, 'prega'], [/vend|commerc|merc|banco|baratt/, 'commercia'], [/guard|pattugl|ronda|sorveglia/, 'pattuglia'], [/legg|studi|scriv|libr/, 'legge'],
-    [/pesc/, 'pesca'], [/legna|ascia|taglia|tronc/, 'taglia_legna'], [/pecor|greg|pascol|capre|mucche/, 'pascola'], [/chiacchier|parla|racconta|piazza/, 'chiacchiera'],
-    [/lavor|forgia|martell|cuc[ie]|tess|ripara|intaglia|bottega/, 'lavora'],
+    [/dorm|riposa|letto|sonn/, 'sleep'], [/zapp|semin|ar[ao]|campo|orto|raccol|mietere|mieti/, 'hoe'], [/cucin|impast|forno|pane|zuppa/, 'cook'], [/mangi|cena|pranz|colazion/, 'eat'],
+    [/preg|tempio|altare|medita/, 'pray'], [/vend|commerc|merc|banco|baratt/, 'trade'], [/guard|pattugl|ronda|sorveglia/, 'patrol'], [/legg|studi|scriv|libr/, 'read'],
+    [/pesc/, 'fish'], [/legna|ascia|taglia|tronc/, 'chop_wood'], [/pecor|greg|pascol|capre|mucche/, 'graze'], [/chiacchier|parla|racconta|piazza/, 'chat'],
+    [/lavor|forgia|martell|cuc[ie]|tess|ripara|intaglia|bottega/, 'work'],
   ];
-  return rules.find(([re]) => re.test(t))?.[1] ?? (dove === 'casa' ? 'mangia' : dove === 'piazza' ? 'chiacchiera' : 'passeggia');
+  return rules.find(([re]) => re.test(t))?.[1] ?? (dove === 'home' ? 'eat' : dove === 'square' ? 'chat' : 'stroll');
 }
 
 export interface RoutineStep {
@@ -58,8 +60,8 @@ export interface Relation {
   viandante?: string;
 }
 
-export type Species = 'persona' | 'animale';
-export type Gender = 'maschio' | 'femmina';
+export type Species = 'person' | 'animal';
+export type Gender = 'male' | 'female';
 
 export interface Individual {
   nome: string;
@@ -124,7 +126,8 @@ export interface People {
 export function readPeople(files: FileMap): People {
   try {
     const p = JSON.parse(files['world/people.json'] ?? '{}');
-    return { persone: (p.persone ?? []).map(withWandererIds), attesi: p.attesi ?? [] };
+    // Values of the contract 0.2 (`femmina`, `mattina`) read internal (T307b): the migration ports the file, this a stray one.
+    return { persone: (p.persone ?? []).map((x: Individual) => withWandererIds(internalIndividual(x))), attesi: p.attesi ?? [] };
   } catch {
     return { persone: [], attesi: [] };
   }
@@ -147,7 +150,7 @@ function withWandererIds(p: Individual): Individual {
 // has at most one owner). The kernel writes the other side itself.
 
 /** Who can be what to whom: same species, people only, anyone, a person to an animal (or a servant), an animal to its owner. */
-type Between = 'stessa' | 'persone' | 'tutti' | 'padrone' | 'animale';
+type Between = 'same' | 'people' | 'all' | 'owner' | 'pet';
 
 interface Kind {
   id: string;
@@ -162,28 +165,28 @@ interface Kind {
 }
 
 const KINDS: Kind[] = [
-  { id: 'genitore', m: 'padre', f: 'madre', n: 'genitore', words: /^(padre|madre|mamma|papà|babbo|genitore)$/, back: ['figlio'], between: 'stessa' },
-  { id: 'figlio', m: 'figlio', f: 'figlia', words: /^(figli[oa]|figliastr[oa]|bambin[oa])$/, back: ['genitore'], between: 'stessa' },
-  { id: 'fratello', m: 'fratello', f: 'sorella', words: /^(fratell(o|astro)|sorell(a|astra)|gemell[oa])$/, back: ['fratello'], between: 'stessa' },
-  { id: 'coniuge', m: 'marito', f: 'moglie', n: 'coniuge', words: /^(marito|moglie|spos[oa]|coniuge|consorte)$/, back: ['coniuge'], between: 'persone' },
-  { id: 'fidanzato', m: 'fidanzato', f: 'fidanzata', words: /^fidanzat[oa]$/, back: ['fidanzato'], between: 'persone' },
-  { id: 'nonno', m: 'nonno', f: 'nonna', words: /^nonn[oa]$/, back: ['nipote'], between: 'persone' },
-  { id: 'zio', m: 'zio', f: 'zia', words: /^zi[oa]$/, back: ['nipote'], between: 'persone' },
-  { id: 'nipote', m: 'nipote', f: 'nipote', words: /^nipot(e|in[oa])$/, back: ['nonno', 'zio'], between: 'persone' },
-  { id: 'cugino', m: 'cugino', f: 'cugina', words: /^cugin[oa]$/, back: ['cugino'], between: 'persone' },
-  { id: 'cognato', m: 'cognato', f: 'cognata', words: /^cognat[oa]$/, back: ['cognato'], between: 'persone' },
-  { id: 'suocero', m: 'suocero', f: 'suocera', words: /^suocer[oa]$/, back: ['genero'], between: 'persone' },
-  { id: 'genero', m: 'genero', f: 'nuora', words: /^(genero|nuora)$/, back: ['suocero'], between: 'persone' },
-  { id: 'maestro', m: 'maestro', f: 'maestra', words: /^(maestr[oa]|mentore)$/, back: ['apprendista'], between: 'persone' },
-  { id: 'apprendista', m: 'apprendista', f: 'apprendista', words: /^(apprendista|garzone|allievo|allieva|discepol[oa])$/, back: ['maestro'], between: 'persone' },
-  { id: 'padrone', m: 'padrone', f: 'padrona', words: /^padron[ea]$/, back: ['animale', 'servo'], between: 'padrone' },
-  { id: 'servo', m: 'servo', f: 'serva', words: /^serv[oa]$/, back: ['padrone'], between: 'persone' },
-  { id: 'animale', m: 'animale', f: 'animale', words: /^(animale|gatt[oa]|can[ei]|cagnolin[oa]|mici[oa])$/, back: ['padrone'], between: 'animale' },
-  { id: 'amico', m: 'amico', f: 'amica', words: /^(amic[oa]|compagn[oa])$/, back: ['amico'], between: 'tutti' },
-  { id: 'rivale', m: 'rivale', f: 'rivale', words: /^(rivale|nemic[oa])$/, back: ['rivale'], between: 'tutti' },
-  { id: 'vicino', m: 'vicino', f: 'vicina', words: /^vicin[oa]$/, back: ['vicino'], between: 'tutti' },
-  { id: 'collega', m: 'collega', f: 'collega', words: /^(collega|soci[oa])$/, back: ['collega'], between: 'persone' },
-  { id: 'conoscente', m: 'conoscente', f: 'conoscente', words: /^conoscente$/, back: ['conoscente'], between: 'tutti' },
+  { id: 'parent', m: 'padre', f: 'madre', n: 'genitore', words: /^(padre|madre|mamma|papà|babbo|genitore)$/, back: ['child'], between: 'same' },
+  { id: 'child', m: 'figlio', f: 'figlia', words: /^(figli[oa]|figliastr[oa]|bambin[oa])$/, back: ['parent'], between: 'same' },
+  { id: 'sibling', m: 'fratello', f: 'sorella', words: /^(fratell(o|astro)|sorell(a|astra)|gemell[oa])$/, back: ['sibling'], between: 'same' },
+  { id: 'spouse', m: 'marito', f: 'moglie', n: 'coniuge', words: /^(marito|moglie|spos[oa]|coniuge|consorte)$/, back: ['spouse'], between: 'people' },
+  { id: 'betrothed', m: 'fidanzato', f: 'fidanzata', words: /^fidanzat[oa]$/, back: ['betrothed'], between: 'people' },
+  { id: 'grandparent', m: 'nonno', f: 'nonna', words: /^nonn[oa]$/, back: ['grandchild_or_nephew'], between: 'people' },
+  { id: 'uncle_or_aunt', m: 'zio', f: 'zia', words: /^zi[oa]$/, back: ['grandchild_or_nephew'], between: 'people' },
+  { id: 'grandchild_or_nephew', m: 'nipote', f: 'nipote', words: /^nipot(e|in[oa])$/, back: ['grandparent', 'uncle_or_aunt'], between: 'people' },
+  { id: 'cousin', m: 'cugino', f: 'cugina', words: /^cugin[oa]$/, back: ['cousin'], between: 'people' },
+  { id: 'sibling_in_law', m: 'cognato', f: 'cognata', words: /^cognat[oa]$/, back: ['sibling_in_law'], between: 'people' },
+  { id: 'parent_in_law', m: 'suocero', f: 'suocera', words: /^suocer[oa]$/, back: ['child_in_law'], between: 'people' },
+  { id: 'child_in_law', m: 'genero', f: 'nuora', words: /^(genero|nuora)$/, back: ['parent_in_law'], between: 'people' },
+  { id: 'mentor', m: 'maestro', f: 'maestra', words: /^(maestr[oa]|mentore)$/, back: ['apprentice'], between: 'people' },
+  { id: 'apprentice', m: 'apprendista', f: 'apprendista', words: /^(apprendista|garzone|allievo|allieva|discepol[oa])$/, back: ['mentor'], between: 'people' },
+  { id: 'owner', m: 'padrone', f: 'padrona', words: /^padron[ea]$/, back: ['pet', 'servant'], between: 'owner' },
+  { id: 'servant', m: 'servo', f: 'serva', words: /^serv[oa]$/, back: ['owner'], between: 'people' },
+  { id: 'pet', m: 'animale', f: 'animale', words: /^(animale|gatt[oa]|can[ei]|cagnolin[oa]|mici[oa])$/, back: ['owner'], between: 'pet' },
+  { id: 'friend', m: 'amico', f: 'amica', words: /^(amic[oa]|compagn[oa])$/, back: ['friend'], between: 'all' },
+  { id: 'rival', m: 'rivale', f: 'rivale', words: /^(rivale|nemic[oa])$/, back: ['rival'], between: 'all' },
+  { id: 'neighbor', m: 'vicino', f: 'vicina', words: /^vicin[oa]$/, back: ['neighbor'], between: 'all' },
+  { id: 'colleague', m: 'collega', f: 'collega', words: /^(collega|soci[oa])$/, back: ['colleague'], between: 'people' },
+  { id: 'acquaintance', m: 'conoscente', f: 'conoscente', words: /^conoscente$/, back: ['acquaintance'], between: 'all' },
 ];
 const KIND = new Map(KINDS.map((k) => [k.id, k]));
 
@@ -196,43 +199,43 @@ function kindOf(legame: string): Kind {
     const k = KINDS.find((x) => x.words.test(w));
     if (k) return k;
   }
-  return KIND.get('conoscente')!;
+  return KIND.get('acquaintance')!;
 }
 
 function allowed(k: Kind, a: Species, b: Species | undefined): boolean {
   switch (k.between) {
-    case 'stessa': return !b || a === b;
-    case 'persone': return a === 'persona' && (!b || b === 'persona');
-    case 'tutti': return true;
-    case 'padrone': return a === 'persona';
-    case 'animale': return a === 'animale' && (!b || b === 'persona');
+    case 'same': return !b || a === b;
+    case 'people': return a === 'person' && (!b || b === 'person');
+    case 'all': return true;
+    case 'owner': return a === 'person';
+    case 'pet': return a === 'animal' && (!b || b === 'person');
   }
 }
 
 /** What a relation can be between these two: family across species becomes ownership, the rest friendship. */
 function fitKind(k: Kind, a: Species, b: Species | undefined): Kind {
   if (allowed(k, a, b)) return k;
-  if (a === 'persona' && b === 'animale') return KIND.get('padrone')!;
-  if (a === 'animale' && b === 'persona') return KIND.get('animale')!;
-  return KIND.get('amico')!;
+  if (a === 'person' && b === 'animal') return KIND.get('owner')!;
+  if (a === 'animal' && b === 'person') return KIND.get('pet')!;
+  return KIND.get('friend')!;
 }
 
-const wordOf = (k: Kind, g: Gender | undefined) => (g === 'femmina' ? k.f : g === 'maschio' ? k.m : k.n ?? k.m);
+const wordOf = (k: Kind, g: Gender | undefined) => (g === 'female' ? k.f : g === 'male' ? k.m : k.n ?? k.m);
 
-const backOf = (k: Kind, a: Species, b: Species) => KIND.get(k.back.find((id) => allowed(KIND.get(id)!, b, a)) ?? 'conoscente')!;
+const backOf = (k: Kind, a: Species, b: Species) => KIND.get(k.back.find((id) => allowed(KIND.get(id)!, b, a)) ?? 'acquaintance')!;
 
 /** The other side of a relation: if Ada is Berta's mother, Berta is Ada's child (in Berta's gender). */
-export function reverseRelation(legame: string, gender?: Gender, a: Species = 'persona', b: Species = a): string {
+export function reverseRelation(legame: string, gender?: Gender, a: Species = 'person', b: Species = a): string {
   return wordOf(backOf(fitKind(kindOf(legame), a, b), a, b), gender);
 }
 
 /** What is wrong with a relation between these two (species, the word's gender), or undefined when it can be. */
 export function relationProblem(legame: string, a: { specie?: Species; genere?: Gender }, b: { specie?: Species }): string | undefined {
   const k = kindOf(legame);
-  const sa = a.specie ?? 'persona';
-  if (!allowed(k, sa, b.specie)) return `«${legame}» non si dà tra ${sa === 'animale' ? 'un animale' : 'una persona'} e ${b.specie === 'animale' ? 'un animale' : 'una persona'}`;
+  const sa = a.specie ?? 'person';
+  if (!allowed(k, sa, b.specie)) return `«${legame}» non si dà tra ${sa === 'animal' ? 'un animale' : 'una persona'} e ${b.specie === 'animal' ? 'un animale' : 'una persona'}`;
   const word = legame.toLowerCase().split(/[^\p{L}]+/u).find((w) => k.words.test(w));
-  if (word && k.m !== k.f && a.genere && word === (a.genere === 'femmina' ? k.m : k.f)) return `«${legame}» non si dice di ${a.genere === 'femmina' ? 'una femmina' : 'un maschio'}`;
+  if (word && k.m !== k.f && a.genere && word === (a.genere === 'female' ? k.m : k.f)) return `«${legame}» non si dice di ${a.genere === 'female' ? 'una femmina' : 'un maschio'}`;
   return undefined;
 }
 
@@ -244,7 +247,7 @@ export function relationsAgree(ab: string, ba: string): boolean {
 }
 
 /** Relations anyone may claim loosely (a friend, a rival, a neighbour): the others bind and are checked. */
-const LOOSE = new Set(['amico', 'rivale', 'vicino', 'collega', 'conoscente']);
+const LOOSE = new Set(['friend', 'rival', 'neighbor', 'colleague', 'acquaintance']);
 
 /** The words of the binding relations (family, master and apprentice, owner and animal), as a regex alternation. */
 export const BINDING_WORDS = KINDS.filter((k) => !LOOSE.has(k.id)).map((k) => k.words.source.slice(1, -1)).join('|');
@@ -291,13 +294,13 @@ export function similarNames(a: string, b: string): boolean {
 }
 
 const NAME_POOL: Record<Species, Record<Gender, string[]>> = {
-  persona: {
-    femmina: ['Adelina', 'Brunella', 'Clelia', 'Dorotea', 'Elvira', 'Filomena', 'Giuditta', 'Irene', 'Lucrezia', 'Nives', 'Ornella', 'Petronilla', 'Quirina', 'Rosalba', 'Serafina', 'Teodora', 'Ursula', 'Violante', 'Zelinda', 'Albina', 'Benedetta', 'Costanza', 'Dafne', 'Ersilia', 'Fosca', 'Gisella', 'Ippolita', 'Letizia', 'Marianna', 'Noemi'],
-    maschio: ['Adelmo', 'Baldo', 'Cosimo', 'Damiano', 'Ermanno', 'Fulvio', 'Gerardo', 'Ivo', 'Leandro', 'Manfredi', 'Nestore', 'Oreste', 'Pasquale', 'Quinto', 'Raniero', 'Settimio', 'Teobaldo', 'Umberto', 'Vitale', 'Zeno', 'Amedeo', 'Bonifacio', 'Clemente', 'Donato', 'Egidio', 'Folco', 'Gaspare', 'Lazzaro', 'Matteo', 'Ottavio'],
+  person: {
+    female: ['Adelina', 'Brunella', 'Clelia', 'Dorotea', 'Elvira', 'Filomena', 'Giuditta', 'Irene', 'Lucrezia', 'Nives', 'Ornella', 'Petronilla', 'Quirina', 'Rosalba', 'Serafina', 'Teodora', 'Ursula', 'Violante', 'Zelinda', 'Albina', 'Benedetta', 'Costanza', 'Dafne', 'Ersilia', 'Fosca', 'Gisella', 'Ippolita', 'Letizia', 'Marianna', 'Noemi'],
+    male: ['Adelmo', 'Baldo', 'Cosimo', 'Damiano', 'Ermanno', 'Fulvio', 'Gerardo', 'Ivo', 'Leandro', 'Manfredi', 'Nestore', 'Oreste', 'Pasquale', 'Quinto', 'Raniero', 'Settimio', 'Teobaldo', 'Umberto', 'Vitale', 'Zeno', 'Amedeo', 'Bonifacio', 'Clemente', 'Donato', 'Egidio', 'Folco', 'Gaspare', 'Lazzaro', 'Matteo', 'Ottavio'],
   },
-  animale: {
-    femmina: ['Briciola', 'Cannella', 'Fuliggine', 'Lucciola', 'Mora', 'Nocciola', 'Pepita', 'Stella', 'Zucca', 'Perla', 'Ruggine', 'Viola'],
-    maschio: ['Baffo', 'Carbone', 'Fumo', 'Gomitolo', 'Lampo', 'Pepe', 'Tizzone', 'Bricco', 'Ciuffo', 'Pallino', 'Tobia', 'Zenzero'],
+  animal: {
+    female: ['Briciola', 'Cannella', 'Fuliggine', 'Lucciola', 'Mora', 'Nocciola', 'Pepita', 'Stella', 'Zucca', 'Perla', 'Ruggine', 'Viola'],
+    male: ['Baffo', 'Carbone', 'Fumo', 'Gomitolo', 'Lampo', 'Pepe', 'Tizzone', 'Bricco', 'Ciuffo', 'Pallino', 'Tobia', 'Zenzero'],
   },
 };
 
@@ -311,7 +314,7 @@ export function freshName(specie: Species, genere: Gender, taken: string[], seed
   const V = ['a', 'e', 'i', 'o', 'u'];
   for (let i = 0; i < 2000; i++) {
     const x = hashStr(`${seed}#${i}`);
-    const n = `${C[x % 14].toUpperCase()}${V[(x >> 4) % 5]}${C[(x >> 7) % 14]}${V[(x >> 11) % 5]}${['', 'l', 'n', 'r'][(x >> 14) % 4]}${genere === 'femmina' ? 'a' : 'o'}`;
+    const n = `${C[x % 14].toUpperCase()}${V[(x >> 4) % 5]}${C[(x >> 7) % 14]}${V[(x >> 11) % 5]}${['', 'l', 'n', 'r'][(x >> 14) % 4]}${genere === 'female' ? 'a' : 'o'}`;
     if (free(n)) return n;
   }
   return `${pool[h % pool.length]} ${taken.length}`;
@@ -322,12 +325,12 @@ const MALE_IN_A = /^(luca|andrea|elia|barnaba|nicola|mattia|tobia|enea|battista|
 /** A gender for someone who has none written: the name, the job, the words they are called by. */
 export function guessGender(p: Pick<Individual, 'nome' | 'mestiere' | 'famiglia'>): Gender {
   const first = nameWords(p.nome)[0] ?? '';
-  if (MALE_IN_A.test(first)) return 'maschio';
-  if (/a$/.test(first)) return 'femmina';
-  if (/o$/.test(first)) return 'maschio';
+  if (MALE_IN_A.test(first)) return 'male';
+  if (/a$/.test(first)) return 'female';
+  if (/o$/.test(first)) return 'male';
   const job = (p.mestiere ?? '').toLowerCase().split(/\s+/)[0] ?? '';
-  if (/(trice|essa|iera|aia|ina)$/.test(job)) return 'femmina';
-  if (/(tore|iere|aio|ino|o)$/.test(job)) return 'maschio';
+  if (/(trice|essa|iera|aia|ina)$/.test(job)) return 'female';
+  if (/(tore|iere|aio|ino|o)$/.test(job)) return 'male';
   let f = 0;
   let m = 0;
   for (const r of p.famiglia ?? []) {
@@ -337,7 +340,7 @@ export function guessGender(p: Pick<Individual, 'nome' | 'mestiere' | 'famiglia'
     if (w === k.f) f++;
     else if (w === k.m) m++;
   }
-  return f > m ? 'femmina' : 'maschio';
+  return f > m ? 'female' : 'male';
 }
 
 export interface SocietyRepair {
@@ -379,12 +382,12 @@ export function repairSociety(people: People, speciesOf: (tipo: string) => Speci
   let persone: Individual[] = people.persone.map((p) => ({ ...p, famiglia: (p.famiglia ?? []).map((r) => ({ ...r })) }));
   // Species and gender.
   for (const p of persone) {
-    const sp = speciesOf(p.tipo) ?? p.specie ?? 'persona';
-    if (p.specie !== sp) fixes.push(`${p.nome}: specie ${sp}`);
+    const sp = speciesOf(p.tipo) ?? p.specie ?? 'person';
+    if (p.specie !== sp) fixes.push(`${p.nome}: specie ${italianName('specie', sp)}`);
     p.specie = sp;
-    if (p.genere !== 'maschio' && p.genere !== 'femmina') {
+    if (p.genere !== 'male' && p.genere !== 'female') {
       p.genere = guessGender(p);
-      fixes.push(`${p.nome}: genere ${p.genere}`);
+      fixes.push(`${p.nome}: genere ${italianName('specie', p.genere)}`);
     }
   }
   // Names: the first one keeps it.
@@ -459,10 +462,10 @@ export function repairSociety(people: People, speciesOf: (tipo: string) => Speci
   // An animal has one owner: the first.
   const owned = new Set<Individual>();
   for (const e of edges.values()) {
-    const animal = e.ab.id === 'padrone' && e.b.specie === 'animale' ? e.b : e.ba!.id === 'padrone' && e.a.specie === 'animale' ? e.a : undefined;
+    const animal = e.ab.id === 'owner' && e.b.specie === 'animal' ? e.b : e.ba!.id === 'owner' && e.a.specie === 'animal' ? e.a : undefined;
     if (!animal) continue;
     if (owned.has(animal)) {
-      e.ab = e.ba = KIND.get('amico')!;
+      e.ab = e.ba = KIND.get('friend')!;
       fixes.push(`${animal.nome}: un solo padrone (${e.a === animal ? e.b.nome : e.a.nome} diventa amico)`);
     } else owned.add(animal);
   }
@@ -471,20 +474,20 @@ export function repairSociety(people: People, speciesOf: (tipo: string) => Speci
   const spouse = new Map<Individual, Individual>();
   const parentsOf = (p: Individual) => parents.get(p) ?? [];
   for (const e of edges.values()) {
-    const [parent, child] = e.ab.id === 'genitore' ? [e.a, e.b] : e.ba!.id === 'genitore' ? [e.b, e.a] : [];
+    const [parent, child] = e.ab.id === 'parent' ? [e.a, e.b] : e.ba!.id === 'parent' ? [e.b, e.a] : [];
     let wrong = '';
     if (parent && child) {
       const s = spouse.get(child);
-      if (parentsOf(child).some((x) => x.genere === parent.genere)) wrong = `${child.nome}: ha già ${parent.genere === 'femmina' ? 'una madre' : 'un padre'} (non ${parent.nome})`;
+      if (parentsOf(child).some((x) => x.genere === parent.genere)) wrong = `${child.nome}: ha già ${parent.genere === 'female' ? 'una madre' : 'un padre'} (non ${parent.nome})`;
       else if (s && (s === parent || parentsOf(s).includes(parent))) wrong = `${child.nome}: ${parent.nome} è già genitore del suo coniuge`;
       else parents.set(child, [...parentsOf(child), parent]);
-    } else if (e.ab.id === 'coniuge') {
+    } else if (e.ab.id === 'spouse') {
       if (spouse.has(e.a) || spouse.has(e.b)) wrong = `${e.a.nome} e ${e.b.nome}: uno dei due è già sposato`;
       else if (parentsOf(e.a).some((x) => parentsOf(e.b).includes(x))) wrong = `${e.a.nome} e ${e.b.nome}: hanno un genitore in comune`;
       else spouse.set(e.a, e.b).set(e.b, e.a);
     }
     if (!wrong) continue;
-    e.ab = e.ba = KIND.get('conoscente')!;
+    e.ab = e.ba = KIND.get('acquaintance')!;
     fixes.push(`${wrong} → conoscenti`);
   }
   for (const p of persone) {
@@ -493,8 +496,8 @@ export function repairSociety(people: People, speciesOf: (tipo: string) => Speci
   // An animal does what animals of its kind do, not a person's job.
   const words = (s: string) => s.toLowerCase().split(/[^\p{L}]+/u).filter((w) => w.length >= 4);
   for (const p of persone) {
-    if (p.specie !== 'animale') continue;
-    const kin = persone.filter((x) => x !== p && x.tipo === p.tipo && x.specie === 'animale');
+    if (p.specie !== 'animal') continue;
+    const kin = persone.filter((x) => x !== p && x.tipo === p.tipo && x.specie === 'animal');
     const mine = words(p.mestiere ?? '');
     if (!kin.length || kin.some((x) => words(x.mestiere ?? '').some((w) => mine.includes(w)))) continue;
     const counts = new Map<string, number>();
@@ -527,7 +530,7 @@ export function addIndividual(people: People, p: Individual, speciesOf?: (tipo: 
 
 /** What the society looks like, for the Narrator creating someone new. */
 export function societySummary(people: People, n = 16): string {
-  const who = (p: Individual) => (p.specie === 'animale' ? `animale${p.genere ? `, ${p.genere}` : ''}` : p.genere === 'femmina' ? 'donna' : p.genere === 'maschio' ? 'uomo' : '');
+  const who = (p: Individual) => (p.specie === 'animal' ? `animale${p.genere ? `, ${italianName('specie', p.genere)}` : ''}` : p.genere === 'female' ? 'donna' : p.genere === 'male' ? 'uomo' : '');
   const lines = people.persone.slice(-n).map((p) => `- ${p.nome}, ${p.mestiere}${who(p) ? ` — ${who(p)}` : ''}${p.luogo ? ` (${p.luogo})` : ''}${p.famiglia.length ? `; ${p.famiglia.map((r) => `${r.legame} di ${r.nome}`).join(', ')}` : ''}`);
   const waiting = people.attesi.slice(-10).map((a) => `- ${a.nome} (${a.legame} di ${a.di})`);
   return [lines.length ? `Persone già conosciute:\n${lines.join('\n')}` : 'Nessuno è stato ancora conosciuto.', waiting.length ? `Nominate ma mai incontrate (potresti essere una di loro, se il tipo è adatto):\n${waiting.join('\n')}` : ''].filter(Boolean).join('\n\n');
@@ -537,19 +540,19 @@ export function societySummary(people: People, n = 16): string {
 export function dayPhase(time: number, daySeconds: number): DayPhase {
   const phase = (time / daySeconds + 0.12) % 1;
   // daylight peaks at 0.25; night is centred on 0.75.
-  if (phase < 0.12 || phase >= 0.96) return 'mattina';
-  if (phase < 0.42) return 'giorno';
-  if (phase < 0.58) return 'sera';
-  return 'notte';
+  if (phase < 0.12 || phase >= 0.96) return 'morning';
+  if (phase < 0.42) return 'day';
+  if (phase < 0.58) return 'evening';
+  return 'night';
 }
 
 /** A sensible routine when the Narrator gave none. */
 export function defaultRoutine(job: string): RoutineStep[] {
   return [
-    { quando: 'mattina', fa: 'si prepara per la giornata', dove: 'casa', azione: 'mangia' },
-    { quando: 'giorno', fa: job ? `lavora come ${job}` : 'lavora', dove: 'lavoro', azione: inferActivity(job || 'lavora', 'lavoro') },
-    { quando: 'sera', fa: 'chiacchiera in piazza', dove: 'piazza', azione: 'chiacchiera' },
-    { quando: 'notte', fa: 'dorme', dove: 'casa', azione: 'dorme' },
+    { quando: 'morning', fa: 'si prepara per la giornata', dove: 'home', azione: 'eat' },
+    { quando: 'day', fa: job ? `lavora come ${job}` : 'lavora', dove: 'work', azione: inferActivity(job || 'lavora', 'work') },
+    { quando: 'evening', fa: 'chiacchiera in piazza', dove: 'square', azione: 'chat' },
+    { quando: 'night', fa: 'dorme', dove: 'home', azione: 'sleep' },
   ];
 }
 

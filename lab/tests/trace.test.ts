@@ -52,7 +52,7 @@ describe('la traccia dice cosa ha fatto ogni nodo', () => {
   it('una regola che non si applica mai ha conto 0', () => {
     const n = leaf(traceProgram(model('<all><rule in="B" out="R"/><rule in="Y" out="W"/></all>'), 1).nodes, 'all');
     expect(n.fired).toEqual([75, 0]);
-    expect(traceText(model('<all><rule in="B" out="R"/><rule in="Y" out="W"/></all>'), 1, { forma: 'nodi' })).toContain('r2 Y → W ×0');
+    expect(traceText(model('<all><rule in="B" out="R"/><rule in="Y" out="W"/></all>'), 1, { forma: 'nodes' })).toContain('r2 Y → W ×0');
   });
 
   it('convolution: i passi e le celle dell’automa', () => {
@@ -93,12 +93,12 @@ describe('la traccia dice cosa ha fatto ogni nodo', () => {
   });
 
   it('un nodo che non fa nulla sta in fondo, con il perché', () => {
-    const text = traceText(model('<one in="Y" out="W"/><box at="2 2 0" size="1 1 1" color="B"/><all in="B" out="R"/>'), 1, { forma: 'nodi' });
+    const text = traceText(model('<one in="Y" out="W"/><box at="2 2 0" size="1 1 1" color="B"/><all in="B" out="R"/>'), 1, { forma: 'nodes' });
     expect(text).toMatch(/Senza effetto[^\n]*\n#2 one Y → W: in quel momento nella griglia non c'erano celle "Y"\n#3 box/);
   });
 
   it('i pattern si leggono come li scrive l’XML: lo strato più alto per primo', () => {
-    expect(traceText(model('<one in="R B" out="R B"/><one in="B" out="R" steps="1"/><one in="R B" out="G B" steps="1"/>'), 1, { forma: 'nodi' })).toContain('R . → G .');
+    expect(traceText(model('<one in="R B" out="R B"/><one in="B" out="R" steps="1"/><one in="R B" out="G B" steps="1"/>'), 1, { forma: 'nodes' })).toContain('R . → G .');
   });
 
   it('un passo che scrive più di quanto il registro tiene si conta lo stesso', () => {
@@ -157,7 +157,7 @@ describe('le forme', () => {
   it('(b) le differenze: per coppia di lettere, le celle e le scatole', () => {
     const frames = framesAt(house, 1, [1, 2]);
     expect(diffLines(frames.get(1)!, frames.get(2)!, 4)).toEqual(['  R→G 2: x2 y2 z0-1']);
-    expect(traceText(house, 1, { forma: 'differenze' })).toContain('  R→G 2: x2 y2 z0-1');
+    expect(traceText(house, 1, { forma: 'diffs' })).toContain('  R→G 2: x2 y2 z0-1');
   });
 
   it('(c) le scatole coprono ogni cella una volta sola', () => {
@@ -177,8 +177,8 @@ describe('le forme', () => {
   });
 
   it('(c) nel testo: ogni lettera con le sue scatole', () => {
-    expect(traceText(house, 1, { forma: 'scatole' })).toMatch(/R 16: /);
-    expect(traceText(house, 1, { forma: 'scatole', passo: 1 })).toMatch(/R 18: x1-3 y1-3 z0-1/);
+    expect(traceText(house, 1, { forma: 'boxes' })).toMatch(/R 16: /);
+    expect(traceText(house, 1, { forma: 'boxes', passo: 1 })).toMatch(/R 18: x1-3 y1-3 z0-1/);
   });
 });
 
@@ -203,14 +203,14 @@ describe('il tetto', () => {
   it('ciò che si fonde sono prima i box: i nodi di regole restano leggibili', () => {
     const boxes = Array.from({ length: 60 }, (_, i) => `<box at="${i % 10} ${(i / 10) | 0} 0" size="1 1 1" color="R"/>`).join('');
     const m = compileMjx(`<sequence values="BRG" size="10 10 2">${boxes}<one in="R" out="G" steps="3"/></sequence>`);
-    const text = traceText(m, 1, { forma: 'nodi', tetto: 400 });
+    const text = traceText(m, 1, { forma: 'nodes', tetto: 400 });
     expect(text).toMatch(/one R → G passi=3: ×3, 3 celle/);
     expect(text).toMatch(/#\d+-\d+ box×\d+/);
   });
 
   it('ciò che si taglia si dice', () => {
     const m = compileMjx(`<sequence values="BRG" size="10 10 2"><one in="B" out="R" steps="40"/><one in="R" out="G" steps="3"/></sequence>`);
-    expect(traceText(m, 1, { forma: 'differenze', tetto: 120 })).toMatch(/tagliato/);
+    expect(traceText(m, 1, { forma: 'diffs', tetto: 120 })).toMatch(/tagliato/);
   });
 });
 

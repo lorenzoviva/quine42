@@ -142,7 +142,7 @@ export async function planChunk(c: Council, ctx: PlanContext): Promise<ChunkPlan
     .join('\n\n');
   // The environment can only be one of the existing ids: the schema says so.
   const schema: Schema = { ...PLAN_SCHEMA, properties: { ...PLAN_SCHEMA.properties!, ambiente: { type: 'STRING', enum: ctx.layouts.map((l) => l.id) } } };
-  const raw = await c.ask<any>('cartografo', 'chunk.plan', prompt, schema, { data: ctx, temperature: 0.9, chi: ctx.chi });
+  const raw = await c.ask<any>('cartographer', 'chunk.plan', prompt, schema, { data: ctx, temperature: 0.9, chi: ctx.chi });
   const where = (w: unknown): Where => (WHERE.includes(w as Where) ? (w as Where) : 'ovunque');
   return {
     place: { name: String(raw?.luogo?.nome ?? '').trim(), description: String(raw?.luogo?.descrizione ?? '').trim() },
@@ -179,7 +179,7 @@ const LAYOUTS_SCHEMA: Schema = {
 /** Genesis: the Cartographer writes the environments of this world as rewrite programs. */
 export async function designLayouts(c: Council, palette: Record<string, TerrainDef>, feedback = ''): Promise<Array<{ id: string; def: EnvironmentDef } | { id: string; error: string }>> {
   const raw = await c.ask<{ ambienti: Array<{ id: string; nome: string; descrizione: string; tipo: EnvironmentDef['environment']; programma_json: string }> }>(
-    'cartografo',
+    'cartographer',
     'genesis.layouts',
     [
       'Scrivi 10-14 ambienti per i luoghi di questo mondo, ognuno come programma di riscrittura MarkovJunior (vedi il tuo ruolo per la sintassi) che trasforma la bozza procedurale.',
@@ -230,7 +230,7 @@ export interface RegionDraft {
 export async function drawAtlas(c: Council, layouts: Array<{ id: string; name: string; description: string }>): Promise<RegionDraft[]> {
   const ids = layouts.map((l) => l.id);
   const raw = await c.ask<{ regioni: RegionDraft[] }>(
-    'cartografo',
+    'cartographer',
     'genesis.atlas',
     [
       "Disegna la geografia del mondo: 8-14 regioni attorno al punto di partenza (che è al centro). Ognuna ha un nome proprio, una frase, un ambiente tra quelli disponibili, una direzione e una distanza (in luoghi) dal centro, e un raggio.",
@@ -291,7 +291,7 @@ export async function designEnvironment(
   ctx: { palette: Record<string, TerrainDef>; layouts: Array<{ id: string; name: string; description: string }>; here: string; stamps: readonly string[]; feedback?: string },
 ): Promise<EnvironmentDraft> {
   const raw = await c.ask<any>(
-    'cartografo',
+    'cartographer',
     'cartographer.environment',
     [
       `Ti chiedono: «${request}». Il viandante si trova a «${ctx.here}».`,

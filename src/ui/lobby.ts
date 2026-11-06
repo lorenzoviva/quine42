@@ -7,6 +7,7 @@
 import { collectionOf } from '../kernel/cards';
 import { COEFFICIENT_INFO, COEFFICIENT_KEYS, FULL_DETAIL, hourlyEstimate, isLowDetail, LOW_DETAIL, pricedAiModels, repairActor, repairCoefficients, type CoefficientKey } from '../kernel/coefficients';
 import { DEFAULT_SCULPTORS, type SculptorAiModels } from '../kernel/agents/sculptor';
+import { internalSculptors } from '../kernel/internalNames';
 import { BUDGET_KEYS, BUDGET_SCALE, readConfig, SCULPTOR_CLASSES, withinMinimums, type BudgetKey } from '../kernel/universe';
 import type { AiSettings, FileMap } from '../kernel/types';
 import { usd } from '../kernel/ai/prices';
@@ -44,7 +45,7 @@ const BUDGET_NAMES: Record<BudgetKey, string> = {
   placesPerMinute: 'Luoghi nuovi al minuto',
 };
 const BUDGET_DEFAULTS: Partial<Record<BudgetKey, number>> = { maxPacks: 4, maxCast: 3, maxModels: 40, maxBrani: 8, placesPerMinute: 20 };
-const CLASS_NAMES: Record<(typeof SCULPTOR_CLASSES)[number], string> = { semplice: 'Scultore, cose semplici', figura: 'Scultore, figure', struttura: 'Scultore, strutture', importante: 'Scultore, strutture importanti', artista: 'Artista (giudizio)', musicista: 'Musicista' };
+const CLASS_NAMES: Record<(typeof SCULPTOR_CLASSES)[number], string> = { simple: 'Scultore, cose semplici', figure: 'Scultore, figure', structure: 'Scultore, strutture', important: 'Scultore, strutture importanti', artist: 'Artista (giudizio)', musician: 'Musicista' };
 const THINKING: Array<[string, string]> = [['off', 'predefinito del modello'], ['low', 'basso'], ['medium', 'medio'], ['high', 'alto']];
 
 export class LobbyScreen {
@@ -87,7 +88,7 @@ export class LobbyScreen {
     const master = config.partita?.master ?? 'io';
     const minimi = ai.minimi;
     const coef = repairCoefficients(ai.coefficienti);
-    const sculpt: SculptorAiModels = { ...DEFAULT_SCULPTORS, ...(ai.scultori ?? {}) };
+    const sculpt: SculptorAiModels = { ...DEFAULT_SCULPTORS, ...internalSculptors(ai.scultori ?? {}) };
     const actor = repairActor(ai.attore);
     // Everyone sees the settings; the master, and only the master, sets them, while no match is under way (the server refuses the rest).
     const isMaster = !!alone || wandererId === master;
@@ -169,7 +170,7 @@ export class LobbyScreen {
 
     // The minimums: the master's to set; for everyone else, what is asked of them (below).
     const minText = pick(minimi?.textModel ?? '', 'lobby-minimo-testo', ['']);
-    const minSculptors = new Map(SCULPTOR_CLASSES.map((k) => [k, pick(String(minimi?.scultori?.[k] ?? ''), `lobby-minimo-${k}`, [''])]));
+    const minSculptors = new Map(SCULPTOR_CLASSES.map((k) => [k, pick(String(internalSculptors(minimi?.scultori ?? {})[k] ?? ''), `lobby-minimo-${k}`, [''])]));
     const minCapField = lockIf(el('input', { type: 'number', id: 'lobby-minimo-tetto', min: '0', step: '0.5', value: String(minimi?.tetto ?? 0) }) as HTMLInputElement);
     const minKnobs = new Map(
       COEFFICIENT_KEYS.map((k) => {
@@ -252,7 +253,7 @@ export class LobbyScreen {
     if (minimi && !isMaster) {
       const items: HTMLElement[] = [];
       if (minimi.textModel) items.push(el('div', {}, `Modello testo minimo: ${minimi.textModel}`));
-      if (minimi.scultori?.struttura) items.push(el('div', {}, `Strutture minime: ${minimi.scultori.struttura}`));
+      if (internalSculptors(minimi.scultori ?? {}).structure) items.push(el('div', {}, `Strutture minime: ${internalSculptors(minimi.scultori ?? {}).structure}`));
       if (minimi.tetto !== undefined) items.push(el('div', {}, `Tetto minimo d’ingresso: ${usd(minimi.tetto)}`));
       if (minimi.coefficienti) {
         items.push(el('div', {}, 'Coefficienti minimi imposti dal master'));
