@@ -1,0 +1,3890 @@
+{
+ "group": "battute",
+ "description": "Le battute riusate (T325, idea (b)): l’archivio di ciò che una persona ha risposto, una domanda nuova, la circostanza di allora e di adesso. Le battute e le risposte giuste le ha scritte chi ha scritto il banco: vanno rilette.",
+ "cases": [
+  {
+   "id": "battuta/assunta/uguale",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Assunta Cimmino",
+     "job": "barista del Bar Gambrinus",
+     "place": "Piazza delle Erbe"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Buongiorno! Chi sei?",
+      "answered": "Assunta, bello mio, e questo è il Gambrinus: il caffè più buono della piazza. Tu chi sei, che non ti ho mai visto?",
+      "when": {
+       "day": 3,
+       "moment": "mattina",
+       "place": "Bar Gambrinus",
+       "doing": "apre il bar",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Quanto costa un caffè?",
+      "answered": "Mille lire al banco. E se ne lasci pagato uno per chi viene dopo, il quaderno dei sospesi ti ringrazia.",
+      "when": {
+       "day": 3,
+       "moment": "mattina",
+       "place": "Bar Gambrinus",
+       "doing": "apre il bar",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Che fai stamattina?",
+      "answered": "Apro il bar e preparo i caffè della prima ora: tra mezz’ora arriva tutto il porto.",
+      "when": {
+       "day": 3,
+       "moment": "mattina",
+       "place": "Bar Gambrinus",
+       "doing": "apre il bar",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b4",
+      "asked": "Cosa pensi del cantiere della Linea 2?",
+      "answered": "Una mangiatoia, bello mio! Scavano da tre anni e la piazza è ancora un buco.",
+      "when": {
+       "day": 3,
+       "moment": "giorno",
+       "place": "Piazza delle Erbe",
+       "doing": "serve ai tavolini",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b5",
+      "asked": "Conosci un buon pizzaiolo qui vicino?",
+      "answered": "Gaetano, dice lui. Io dico che la sua pizza è come lui: gonfia e vuota.",
+      "when": {
+       "day": 3,
+       "moment": "giorno",
+       "place": "Piazza delle Erbe",
+       "doing": "serve ai tavolini",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Buongiorno! Chi sei?",
+     "when": {
+      "day": 3,
+      "moment": "mattina",
+      "place": "Bar Gambrinus",
+      "doing": "apre il bar",
+      "bond": "sconosciuto",
+      "who": "un altro viandante, appena arrivato"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b1"
+    ],
+    "fits_b1": true,
+    "fits_b2": false,
+    "fits_b3": false,
+    "fits_b4": false,
+    "fits_b5": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "b1",
+   "source": "scritto per il banco (T325), neapolis: persona da world/people.json",
+   "note": "la stessa domanda da un altro sconosciuto"
+  },
+  {
+   "id": "battuta/assunta/parafrasi",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Assunta Cimmino",
+     "job": "barista del Bar Gambrinus",
+     "place": "Piazza delle Erbe"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Buongiorno! Chi sei?",
+      "answered": "Assunta, bello mio, e questo è il Gambrinus: il caffè più buono della piazza. Tu chi sei, che non ti ho mai visto?",
+      "when": {
+       "day": 3,
+       "moment": "mattina",
+       "place": "Bar Gambrinus",
+       "doing": "apre il bar",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Quanto costa un caffè?",
+      "answered": "Mille lire al banco. E se ne lasci pagato uno per chi viene dopo, il quaderno dei sospesi ti ringrazia.",
+      "when": {
+       "day": 3,
+       "moment": "mattina",
+       "place": "Bar Gambrinus",
+       "doing": "apre il bar",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Che fai stamattina?",
+      "answered": "Apro il bar e preparo i caffè della prima ora: tra mezz’ora arriva tutto il porto.",
+      "when": {
+       "day": 3,
+       "moment": "mattina",
+       "place": "Bar Gambrinus",
+       "doing": "apre il bar",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b4",
+      "asked": "Cosa pensi del cantiere della Linea 2?",
+      "answered": "Una mangiatoia, bello mio! Scavano da tre anni e la piazza è ancora un buco.",
+      "when": {
+       "day": 3,
+       "moment": "giorno",
+       "place": "Piazza delle Erbe",
+       "doing": "serve ai tavolini",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b5",
+      "asked": "Conosci un buon pizzaiolo qui vicino?",
+      "answered": "Gaetano, dice lui. Io dico che la sua pizza è come lui: gonfia e vuota.",
+      "when": {
+       "day": 3,
+       "moment": "giorno",
+       "place": "Piazza delle Erbe",
+       "doing": "serve ai tavolini",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Salve, come ti chiami?",
+     "when": {
+      "day": 3,
+      "moment": "mattina",
+      "place": "Bar Gambrinus",
+      "doing": "apre il bar",
+      "bond": "sconosciuto"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b1"
+    ],
+    "fits_b1": true,
+    "fits_b2": false,
+    "fits_b3": false,
+    "fits_b4": false,
+    "fits_b5": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "b1",
+   "source": "scritto per il banco (T325), neapolis: persona da world/people.json"
+  },
+  {
+   "id": "battuta/assunta/legame-cambiato",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Assunta Cimmino",
+     "job": "barista del Bar Gambrinus",
+     "place": "Piazza delle Erbe"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Buongiorno! Chi sei?",
+      "answered": "Assunta, bello mio, e questo è il Gambrinus: il caffè più buono della piazza. Tu chi sei, che non ti ho mai visto?",
+      "when": {
+       "day": 3,
+       "moment": "mattina",
+       "place": "Bar Gambrinus",
+       "doing": "apre il bar",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Quanto costa un caffè?",
+      "answered": "Mille lire al banco. E se ne lasci pagato uno per chi viene dopo, il quaderno dei sospesi ti ringrazia.",
+      "when": {
+       "day": 3,
+       "moment": "mattina",
+       "place": "Bar Gambrinus",
+       "doing": "apre il bar",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Che fai stamattina?",
+      "answered": "Apro il bar e preparo i caffè della prima ora: tra mezz’ora arriva tutto il porto.",
+      "when": {
+       "day": 3,
+       "moment": "mattina",
+       "place": "Bar Gambrinus",
+       "doing": "apre il bar",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b4",
+      "asked": "Cosa pensi del cantiere della Linea 2?",
+      "answered": "Una mangiatoia, bello mio! Scavano da tre anni e la piazza è ancora un buco.",
+      "when": {
+       "day": 3,
+       "moment": "giorno",
+       "place": "Piazza delle Erbe",
+       "doing": "serve ai tavolini",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b5",
+      "asked": "Conosci un buon pizzaiolo qui vicino?",
+      "answered": "Gaetano, dice lui. Io dico che la sua pizza è come lui: gonfia e vuota.",
+      "when": {
+       "day": 3,
+       "moment": "giorno",
+       "place": "Piazza delle Erbe",
+       "doing": "serve ai tavolini",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Buongiorno! Chi sei?",
+     "when": {
+      "day": 9,
+      "moment": "mattina",
+      "place": "Bar Gambrinus",
+      "doing": "apre il bar",
+      "bond": "amica: si parlano ogni giorno da una settimana"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b1"
+    ],
+    "fits_b1": false,
+    "fits_b2": false,
+    "fits_b3": false,
+    "fits_b4": false,
+    "fits_b5": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "none",
+   "source": "scritto per il banco (T325), neapolis: persona da world/people.json",
+   "note": "«non ti ho mai visto» sarebbe falso"
+  },
+  {
+   "id": "battuta/assunta/parafrasi-prezzo",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Assunta Cimmino",
+     "job": "barista del Bar Gambrinus",
+     "place": "Piazza delle Erbe"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Buongiorno! Chi sei?",
+      "answered": "Assunta, bello mio, e questo è il Gambrinus: il caffè più buono della piazza. Tu chi sei, che non ti ho mai visto?",
+      "when": {
+       "day": 3,
+       "moment": "mattina",
+       "place": "Bar Gambrinus",
+       "doing": "apre il bar",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Quanto costa un caffè?",
+      "answered": "Mille lire al banco. E se ne lasci pagato uno per chi viene dopo, il quaderno dei sospesi ti ringrazia.",
+      "when": {
+       "day": 3,
+       "moment": "mattina",
+       "place": "Bar Gambrinus",
+       "doing": "apre il bar",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Che fai stamattina?",
+      "answered": "Apro il bar e preparo i caffè della prima ora: tra mezz’ora arriva tutto il porto.",
+      "when": {
+       "day": 3,
+       "moment": "mattina",
+       "place": "Bar Gambrinus",
+       "doing": "apre il bar",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b4",
+      "asked": "Cosa pensi del cantiere della Linea 2?",
+      "answered": "Una mangiatoia, bello mio! Scavano da tre anni e la piazza è ancora un buco.",
+      "when": {
+       "day": 3,
+       "moment": "giorno",
+       "place": "Piazza delle Erbe",
+       "doing": "serve ai tavolini",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b5",
+      "asked": "Conosci un buon pizzaiolo qui vicino?",
+      "answered": "Gaetano, dice lui. Io dico che la sua pizza è come lui: gonfia e vuota.",
+      "when": {
+       "day": 3,
+       "moment": "giorno",
+       "place": "Piazza delle Erbe",
+       "doing": "serve ai tavolini",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Quanto si paga un caffè al banco?",
+     "when": {
+      "day": 3,
+      "moment": "mattina",
+      "place": "Bar Gambrinus",
+      "doing": "apre il bar",
+      "bond": "sconosciuto"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b2"
+    ],
+    "fits_b1": false,
+    "fits_b2": true,
+    "fits_b3": false,
+    "fits_b4": false,
+    "fits_b5": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "b2",
+   "source": "scritto per il banco (T325), neapolis: persona da world/people.json"
+  },
+  {
+   "id": "battuta/assunta/ora-cambiata",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Assunta Cimmino",
+     "job": "barista del Bar Gambrinus",
+     "place": "Piazza delle Erbe"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Buongiorno! Chi sei?",
+      "answered": "Assunta, bello mio, e questo è il Gambrinus: il caffè più buono della piazza. Tu chi sei, che non ti ho mai visto?",
+      "when": {
+       "day": 3,
+       "moment": "mattina",
+       "place": "Bar Gambrinus",
+       "doing": "apre il bar",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Quanto costa un caffè?",
+      "answered": "Mille lire al banco. E se ne lasci pagato uno per chi viene dopo, il quaderno dei sospesi ti ringrazia.",
+      "when": {
+       "day": 3,
+       "moment": "mattina",
+       "place": "Bar Gambrinus",
+       "doing": "apre il bar",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Che fai stamattina?",
+      "answered": "Apro il bar e preparo i caffè della prima ora: tra mezz’ora arriva tutto il porto.",
+      "when": {
+       "day": 3,
+       "moment": "mattina",
+       "place": "Bar Gambrinus",
+       "doing": "apre il bar",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b4",
+      "asked": "Cosa pensi del cantiere della Linea 2?",
+      "answered": "Una mangiatoia, bello mio! Scavano da tre anni e la piazza è ancora un buco.",
+      "when": {
+       "day": 3,
+       "moment": "giorno",
+       "place": "Piazza delle Erbe",
+       "doing": "serve ai tavolini",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b5",
+      "asked": "Conosci un buon pizzaiolo qui vicino?",
+      "answered": "Gaetano, dice lui. Io dico che la sua pizza è come lui: gonfia e vuota.",
+      "when": {
+       "day": 3,
+       "moment": "giorno",
+       "place": "Piazza delle Erbe",
+       "doing": "serve ai tavolini",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Che fai stamattina?",
+     "when": {
+      "day": 3,
+      "moment": "sera",
+      "place": "Piazza delle Erbe",
+      "doing": "chiacchiera con le vicine",
+      "bond": "sconosciuto"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b3"
+    ],
+    "fits_b1": false,
+    "fits_b2": false,
+    "fits_b3": false,
+    "fits_b4": false,
+    "fits_b5": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "none",
+   "source": "scritto per il banco (T325), neapolis: persona da world/people.json",
+   "note": "di sera «tra mezz’ora arriva il porto» è sbagliato"
+  },
+  {
+   "id": "battuta/assunta/altra-ora",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Assunta Cimmino",
+     "job": "barista del Bar Gambrinus",
+     "place": "Piazza delle Erbe"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Buongiorno! Chi sei?",
+      "answered": "Assunta, bello mio, e questo è il Gambrinus: il caffè più buono della piazza. Tu chi sei, che non ti ho mai visto?",
+      "when": {
+       "day": 3,
+       "moment": "mattina",
+       "place": "Bar Gambrinus",
+       "doing": "apre il bar",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Quanto costa un caffè?",
+      "answered": "Mille lire al banco. E se ne lasci pagato uno per chi viene dopo, il quaderno dei sospesi ti ringrazia.",
+      "when": {
+       "day": 3,
+       "moment": "mattina",
+       "place": "Bar Gambrinus",
+       "doing": "apre il bar",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Che fai stamattina?",
+      "answered": "Apro il bar e preparo i caffè della prima ora: tra mezz’ora arriva tutto il porto.",
+      "when": {
+       "day": 3,
+       "moment": "mattina",
+       "place": "Bar Gambrinus",
+       "doing": "apre il bar",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b4",
+      "asked": "Cosa pensi del cantiere della Linea 2?",
+      "answered": "Una mangiatoia, bello mio! Scavano da tre anni e la piazza è ancora un buco.",
+      "when": {
+       "day": 3,
+       "moment": "giorno",
+       "place": "Piazza delle Erbe",
+       "doing": "serve ai tavolini",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b5",
+      "asked": "Conosci un buon pizzaiolo qui vicino?",
+      "answered": "Gaetano, dice lui. Io dico che la sua pizza è come lui: gonfia e vuota.",
+      "when": {
+       "day": 3,
+       "moment": "giorno",
+       "place": "Piazza delle Erbe",
+       "doing": "serve ai tavolini",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Che fai stasera?",
+     "when": {
+      "day": 3,
+      "moment": "sera",
+      "place": "Piazza delle Erbe",
+      "doing": "chiacchiera con le vicine",
+      "bond": "sconosciuto"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "none"
+    ],
+    "fits_b1": false,
+    "fits_b2": false,
+    "fits_b3": false,
+    "fits_b4": false,
+    "fits_b5": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "none",
+   "source": "scritto per il banco (T325), neapolis: persona da world/people.json",
+   "note": "un’altra domanda"
+  },
+  {
+   "id": "battuta/assunta/parafrasi-cantiere",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Assunta Cimmino",
+     "job": "barista del Bar Gambrinus",
+     "place": "Piazza delle Erbe"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Buongiorno! Chi sei?",
+      "answered": "Assunta, bello mio, e questo è il Gambrinus: il caffè più buono della piazza. Tu chi sei, che non ti ho mai visto?",
+      "when": {
+       "day": 3,
+       "moment": "mattina",
+       "place": "Bar Gambrinus",
+       "doing": "apre il bar",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Quanto costa un caffè?",
+      "answered": "Mille lire al banco. E se ne lasci pagato uno per chi viene dopo, il quaderno dei sospesi ti ringrazia.",
+      "when": {
+       "day": 3,
+       "moment": "mattina",
+       "place": "Bar Gambrinus",
+       "doing": "apre il bar",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Che fai stamattina?",
+      "answered": "Apro il bar e preparo i caffè della prima ora: tra mezz’ora arriva tutto il porto.",
+      "when": {
+       "day": 3,
+       "moment": "mattina",
+       "place": "Bar Gambrinus",
+       "doing": "apre il bar",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b4",
+      "asked": "Cosa pensi del cantiere della Linea 2?",
+      "answered": "Una mangiatoia, bello mio! Scavano da tre anni e la piazza è ancora un buco.",
+      "when": {
+       "day": 3,
+       "moment": "giorno",
+       "place": "Piazza delle Erbe",
+       "doing": "serve ai tavolini",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b5",
+      "asked": "Conosci un buon pizzaiolo qui vicino?",
+      "answered": "Gaetano, dice lui. Io dico che la sua pizza è come lui: gonfia e vuota.",
+      "when": {
+       "day": 3,
+       "moment": "giorno",
+       "place": "Piazza delle Erbe",
+       "doing": "serve ai tavolini",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Che ne pensi dei lavori della metropolitana in piazza?",
+     "when": {
+      "day": 4,
+      "moment": "giorno",
+      "place": "Piazza delle Erbe",
+      "doing": "serve ai tavolini",
+      "bond": "sconosciuto"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b4"
+    ],
+    "fits_b1": false,
+    "fits_b2": false,
+    "fits_b3": false,
+    "fits_b4": true,
+    "fits_b5": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "b4",
+   "source": "scritto per il banco (T325), neapolis: persona da world/people.json"
+  },
+  {
+   "id": "battuta/assunta/fatto-cantiere",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Assunta Cimmino",
+     "job": "barista del Bar Gambrinus",
+     "place": "Piazza delle Erbe"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Buongiorno! Chi sei?",
+      "answered": "Assunta, bello mio, e questo è il Gambrinus: il caffè più buono della piazza. Tu chi sei, che non ti ho mai visto?",
+      "when": {
+       "day": 3,
+       "moment": "mattina",
+       "place": "Bar Gambrinus",
+       "doing": "apre il bar",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Quanto costa un caffè?",
+      "answered": "Mille lire al banco. E se ne lasci pagato uno per chi viene dopo, il quaderno dei sospesi ti ringrazia.",
+      "when": {
+       "day": 3,
+       "moment": "mattina",
+       "place": "Bar Gambrinus",
+       "doing": "apre il bar",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Che fai stamattina?",
+      "answered": "Apro il bar e preparo i caffè della prima ora: tra mezz’ora arriva tutto il porto.",
+      "when": {
+       "day": 3,
+       "moment": "mattina",
+       "place": "Bar Gambrinus",
+       "doing": "apre il bar",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b4",
+      "asked": "Cosa pensi del cantiere della Linea 2?",
+      "answered": "Una mangiatoia, bello mio! Scavano da tre anni e la piazza è ancora un buco.",
+      "when": {
+       "day": 3,
+       "moment": "giorno",
+       "place": "Piazza delle Erbe",
+       "doing": "serve ai tavolini",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b5",
+      "asked": "Conosci un buon pizzaiolo qui vicino?",
+      "answered": "Gaetano, dice lui. Io dico che la sua pizza è come lui: gonfia e vuota.",
+      "when": {
+       "day": 3,
+       "moment": "giorno",
+       "place": "Piazza delle Erbe",
+       "doing": "serve ai tavolini",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Cosa pensi del cantiere della Linea 2?",
+     "when": {
+      "day": 6,
+      "moment": "giorno",
+      "place": "Piazza delle Erbe",
+      "doing": "serve ai tavolini",
+      "bond": "sconosciuto",
+      "happened": "ieri il cantiere è stato chiuso e la piazza riaperta"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b4"
+    ],
+    "fits_b1": false,
+    "fits_b2": false,
+    "fits_b3": false,
+    "fits_b4": false,
+    "fits_b5": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "none",
+   "source": "scritto per il banco (T325), neapolis: persona da world/people.json",
+   "note": "la piazza non è più un buco"
+  },
+  {
+   "id": "battuta/assunta/nuova",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Assunta Cimmino",
+     "job": "barista del Bar Gambrinus",
+     "place": "Piazza delle Erbe"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Buongiorno! Chi sei?",
+      "answered": "Assunta, bello mio, e questo è il Gambrinus: il caffè più buono della piazza. Tu chi sei, che non ti ho mai visto?",
+      "when": {
+       "day": 3,
+       "moment": "mattina",
+       "place": "Bar Gambrinus",
+       "doing": "apre il bar",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Quanto costa un caffè?",
+      "answered": "Mille lire al banco. E se ne lasci pagato uno per chi viene dopo, il quaderno dei sospesi ti ringrazia.",
+      "when": {
+       "day": 3,
+       "moment": "mattina",
+       "place": "Bar Gambrinus",
+       "doing": "apre il bar",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Che fai stamattina?",
+      "answered": "Apro il bar e preparo i caffè della prima ora: tra mezz’ora arriva tutto il porto.",
+      "when": {
+       "day": 3,
+       "moment": "mattina",
+       "place": "Bar Gambrinus",
+       "doing": "apre il bar",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b4",
+      "asked": "Cosa pensi del cantiere della Linea 2?",
+      "answered": "Una mangiatoia, bello mio! Scavano da tre anni e la piazza è ancora un buco.",
+      "when": {
+       "day": 3,
+       "moment": "giorno",
+       "place": "Piazza delle Erbe",
+       "doing": "serve ai tavolini",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b5",
+      "asked": "Conosci un buon pizzaiolo qui vicino?",
+      "answered": "Gaetano, dice lui. Io dico che la sua pizza è come lui: gonfia e vuota.",
+      "when": {
+       "day": 3,
+       "moment": "giorno",
+       "place": "Piazza delle Erbe",
+       "doing": "serve ai tavolini",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Dove posso comprare il giornale?",
+     "when": {
+      "day": 3,
+      "moment": "giorno",
+      "place": "Piazza delle Erbe",
+      "doing": "serve ai tavolini",
+      "bond": "sconosciuto"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "none"
+    ],
+    "fits_b1": false,
+    "fits_b2": false,
+    "fits_b3": false,
+    "fits_b4": false,
+    "fits_b5": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "none",
+   "source": "scritto per il banco (T325), neapolis: persona da world/people.json"
+  },
+  {
+   "id": "battuta/assunta/fatto-pace",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Assunta Cimmino",
+     "job": "barista del Bar Gambrinus",
+     "place": "Piazza delle Erbe"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Buongiorno! Chi sei?",
+      "answered": "Assunta, bello mio, e questo è il Gambrinus: il caffè più buono della piazza. Tu chi sei, che non ti ho mai visto?",
+      "when": {
+       "day": 3,
+       "moment": "mattina",
+       "place": "Bar Gambrinus",
+       "doing": "apre il bar",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Quanto costa un caffè?",
+      "answered": "Mille lire al banco. E se ne lasci pagato uno per chi viene dopo, il quaderno dei sospesi ti ringrazia.",
+      "when": {
+       "day": 3,
+       "moment": "mattina",
+       "place": "Bar Gambrinus",
+       "doing": "apre il bar",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Che fai stamattina?",
+      "answered": "Apro il bar e preparo i caffè della prima ora: tra mezz’ora arriva tutto il porto.",
+      "when": {
+       "day": 3,
+       "moment": "mattina",
+       "place": "Bar Gambrinus",
+       "doing": "apre il bar",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b4",
+      "asked": "Cosa pensi del cantiere della Linea 2?",
+      "answered": "Una mangiatoia, bello mio! Scavano da tre anni e la piazza è ancora un buco.",
+      "when": {
+       "day": 3,
+       "moment": "giorno",
+       "place": "Piazza delle Erbe",
+       "doing": "serve ai tavolini",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b5",
+      "asked": "Conosci un buon pizzaiolo qui vicino?",
+      "answered": "Gaetano, dice lui. Io dico che la sua pizza è come lui: gonfia e vuota.",
+      "when": {
+       "day": 3,
+       "moment": "giorno",
+       "place": "Piazza delle Erbe",
+       "doing": "serve ai tavolini",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Conosci un buon pizzaiolo qui vicino?",
+     "when": {
+      "day": 5,
+      "moment": "giorno",
+      "place": "Piazza delle Erbe",
+      "doing": "serve ai tavolini",
+      "bond": "sconosciuto",
+      "happened": "alla festa di ieri Assunta e Gaetano hanno fatto pace"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b5"
+    ],
+    "fits_b1": false,
+    "fits_b2": false,
+    "fits_b3": false,
+    "fits_b4": false,
+    "fits_b5": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "none",
+   "source": "scritto per il banco (T325), neapolis: persona da world/people.json",
+   "note": "dopo la pace la battuta sarebbe stonata"
+  },
+  {
+   "id": "battuta/gennaro/altro-motorino",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Gennaro Esposito",
+     "job": "meccanico",
+     "place": "Officina di Gennaro"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Mi ripari il motorino?",
+      "answered": "Lascialo qua, domani è pronto: è la candela, si sente dal rumore.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "officina",
+       "doing": "ripara un taxi",
+       "bond": "sconosciuto",
+       "wanderer_has": "un motorino che tossisce"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Dove si compra la benzina?",
+      "answered": "Al distributore sul lungomare, dopo la curva del porto. Di notte è chiuso.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "officina",
+       "doing": "ripara un taxi",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Da quanto fai il meccanico?",
+      "answered": "Da quando avevo dodici anni: mio padre mi metteva in mano la chiave inglese prima della cartella.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "officina",
+       "doing": "ripara un taxi",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b4",
+      "asked": "Chi è il miglior tassista della città?",
+      "answered": "Mia figlia Nunzia, chi se no? I taxi li ripara e li guida meglio di tutti.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "officina",
+       "doing": "ripara un taxi",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Puoi aggiustarmi il motorino?",
+     "when": {
+      "day": 4,
+      "moment": "giorno",
+      "place": "officina",
+      "doing": "ripara un taxi",
+      "bond": "sconosciuto",
+      "wanderer_has": "un motorino diverso, che fuma nero dallo scarico"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b1"
+    ],
+    "fits_b1": false,
+    "fits_b2": false,
+    "fits_b3": false,
+    "fits_b4": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "none",
+   "source": "scritto per il banco (T325), neapolis: persona da world/people.json",
+   "note": "la diagnosi era di un altro motorino"
+  },
+  {
+   "id": "battuta/gennaro/parafrasi-benzina",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Gennaro Esposito",
+     "job": "meccanico",
+     "place": "Officina di Gennaro"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Mi ripari il motorino?",
+      "answered": "Lascialo qua, domani è pronto: è la candela, si sente dal rumore.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "officina",
+       "doing": "ripara un taxi",
+       "bond": "sconosciuto",
+       "wanderer_has": "un motorino che tossisce"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Dove si compra la benzina?",
+      "answered": "Al distributore sul lungomare, dopo la curva del porto. Di notte è chiuso.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "officina",
+       "doing": "ripara un taxi",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Da quanto fai il meccanico?",
+      "answered": "Da quando avevo dodici anni: mio padre mi metteva in mano la chiave inglese prima della cartella.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "officina",
+       "doing": "ripara un taxi",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b4",
+      "asked": "Chi è il miglior tassista della città?",
+      "answered": "Mia figlia Nunzia, chi se no? I taxi li ripara e li guida meglio di tutti.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "officina",
+       "doing": "ripara un taxi",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Dove posso fare benzina?",
+     "when": {
+      "day": 4,
+      "moment": "giorno",
+      "place": "officina",
+      "doing": "ripara un taxi",
+      "bond": "sconosciuto"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b2"
+    ],
+    "fits_b1": false,
+    "fits_b2": true,
+    "fits_b3": false,
+    "fits_b4": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "b2",
+   "source": "scritto per il banco (T325), neapolis: persona da world/people.json"
+  },
+  {
+   "id": "battuta/gennaro/benzina-notte",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Gennaro Esposito",
+     "job": "meccanico",
+     "place": "Officina di Gennaro"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Mi ripari il motorino?",
+      "answered": "Lascialo qua, domani è pronto: è la candela, si sente dal rumore.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "officina",
+       "doing": "ripara un taxi",
+       "bond": "sconosciuto",
+       "wanderer_has": "un motorino che tossisce"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Dove si compra la benzina?",
+      "answered": "Al distributore sul lungomare, dopo la curva del porto. Di notte è chiuso.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "officina",
+       "doing": "ripara un taxi",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Da quanto fai il meccanico?",
+      "answered": "Da quando avevo dodici anni: mio padre mi metteva in mano la chiave inglese prima della cartella.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "officina",
+       "doing": "ripara un taxi",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b4",
+      "asked": "Chi è il miglior tassista della città?",
+      "answered": "Mia figlia Nunzia, chi se no? I taxi li ripara e li guida meglio di tutti.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "officina",
+       "doing": "ripara un taxi",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Dove si compra la benzina?",
+     "when": {
+      "day": 4,
+      "moment": "notte",
+      "place": "officina",
+      "doing": "chiude la serranda",
+      "bond": "sconosciuto"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b2"
+    ],
+    "fits_b1": false,
+    "fits_b2": true,
+    "fits_b3": false,
+    "fits_b4": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "b2",
+   "source": "scritto per il banco (T325), neapolis: persona da world/people.json",
+   "note": "la risposta dice già che di notte è chiuso"
+  },
+  {
+   "id": "battuta/gennaro/parafrasi-mestiere",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Gennaro Esposito",
+     "job": "meccanico",
+     "place": "Officina di Gennaro"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Mi ripari il motorino?",
+      "answered": "Lascialo qua, domani è pronto: è la candela, si sente dal rumore.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "officina",
+       "doing": "ripara un taxi",
+       "bond": "sconosciuto",
+       "wanderer_has": "un motorino che tossisce"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Dove si compra la benzina?",
+      "answered": "Al distributore sul lungomare, dopo la curva del porto. Di notte è chiuso.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "officina",
+       "doing": "ripara un taxi",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Da quanto fai il meccanico?",
+      "answered": "Da quando avevo dodici anni: mio padre mi metteva in mano la chiave inglese prima della cartella.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "officina",
+       "doing": "ripara un taxi",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b4",
+      "asked": "Chi è il miglior tassista della città?",
+      "answered": "Mia figlia Nunzia, chi se no? I taxi li ripara e li guida meglio di tutti.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "officina",
+       "doing": "ripara un taxi",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Da quanto tempo fai questo lavoro?",
+     "when": {
+      "day": 5,
+      "moment": "giorno",
+      "place": "officina",
+      "doing": "ripara un taxi",
+      "bond": "sconosciuto"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b3"
+    ],
+    "fits_b1": false,
+    "fits_b2": false,
+    "fits_b3": true,
+    "fits_b4": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "b3",
+   "source": "scritto per il banco (T325), neapolis: persona da world/people.json"
+  },
+  {
+   "id": "battuta/gennaro/parafrasi-tassista",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Gennaro Esposito",
+     "job": "meccanico",
+     "place": "Officina di Gennaro"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Mi ripari il motorino?",
+      "answered": "Lascialo qua, domani è pronto: è la candela, si sente dal rumore.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "officina",
+       "doing": "ripara un taxi",
+       "bond": "sconosciuto",
+       "wanderer_has": "un motorino che tossisce"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Dove si compra la benzina?",
+      "answered": "Al distributore sul lungomare, dopo la curva del porto. Di notte è chiuso.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "officina",
+       "doing": "ripara un taxi",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Da quanto fai il meccanico?",
+      "answered": "Da quando avevo dodici anni: mio padre mi metteva in mano la chiave inglese prima della cartella.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "officina",
+       "doing": "ripara un taxi",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b4",
+      "asked": "Chi è il miglior tassista della città?",
+      "answered": "Mia figlia Nunzia, chi se no? I taxi li ripara e li guida meglio di tutti.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "officina",
+       "doing": "ripara un taxi",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Chi guida meglio il taxi in città?",
+     "when": {
+      "day": 3,
+      "moment": "giorno",
+      "place": "officina",
+      "doing": "ripara un taxi",
+      "bond": "sconosciuto"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b4"
+    ],
+    "fits_b1": false,
+    "fits_b2": false,
+    "fits_b3": false,
+    "fits_b4": true
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "b4",
+   "source": "scritto per il banco (T325), neapolis: persona da world/people.json"
+  },
+  {
+   "id": "battuta/gennaro/fatto-tassista",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Gennaro Esposito",
+     "job": "meccanico",
+     "place": "Officina di Gennaro"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Mi ripari il motorino?",
+      "answered": "Lascialo qua, domani è pronto: è la candela, si sente dal rumore.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "officina",
+       "doing": "ripara un taxi",
+       "bond": "sconosciuto",
+       "wanderer_has": "un motorino che tossisce"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Dove si compra la benzina?",
+      "answered": "Al distributore sul lungomare, dopo la curva del porto. Di notte è chiuso.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "officina",
+       "doing": "ripara un taxi",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Da quanto fai il meccanico?",
+      "answered": "Da quando avevo dodici anni: mio padre mi metteva in mano la chiave inglese prima della cartella.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "officina",
+       "doing": "ripara un taxi",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b4",
+      "asked": "Chi è il miglior tassista della città?",
+      "answered": "Mia figlia Nunzia, chi se no? I taxi li ripara e li guida meglio di tutti.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "officina",
+       "doing": "ripara un taxi",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Chi è il miglior tassista della città?",
+     "when": {
+      "day": 6,
+      "moment": "giorno",
+      "place": "officina",
+      "doing": "ripara un taxi",
+      "bond": "sconosciuto",
+      "happened": "Nunzia è in ospedale dopo un incidente col taxi"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b4"
+    ],
+    "fits_b1": false,
+    "fits_b2": false,
+    "fits_b3": false,
+    "fits_b4": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "none",
+   "source": "scritto per il banco (T325), neapolis: persona da world/people.json",
+   "note": "il padre non scherzerebbe così"
+  },
+  {
+   "id": "battuta/gennaro/nuova",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Gennaro Esposito",
+     "job": "meccanico",
+     "place": "Officina di Gennaro"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Mi ripari il motorino?",
+      "answered": "Lascialo qua, domani è pronto: è la candela, si sente dal rumore.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "officina",
+       "doing": "ripara un taxi",
+       "bond": "sconosciuto",
+       "wanderer_has": "un motorino che tossisce"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Dove si compra la benzina?",
+      "answered": "Al distributore sul lungomare, dopo la curva del porto. Di notte è chiuso.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "officina",
+       "doing": "ripara un taxi",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Da quanto fai il meccanico?",
+      "answered": "Da quando avevo dodici anni: mio padre mi metteva in mano la chiave inglese prima della cartella.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "officina",
+       "doing": "ripara un taxi",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b4",
+      "asked": "Chi è il miglior tassista della città?",
+      "answered": "Mia figlia Nunzia, chi se no? I taxi li ripara e li guida meglio di tutti.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "officina",
+       "doing": "ripara un taxi",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Mi presti la chiave inglese?",
+     "when": {
+      "day": 4,
+      "moment": "giorno",
+      "place": "officina",
+      "doing": "ripara un taxi",
+      "bond": "sconosciuto"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "none"
+    ],
+    "fits_b1": false,
+    "fits_b2": false,
+    "fits_b3": false,
+    "fits_b4": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "none",
+   "source": "scritto per il banco (T325), neapolis: persona da world/people.json"
+  },
+  {
+   "id": "battuta/selene/parafrasi-lavoro",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Selene Vitti",
+     "job": "orologiaia e taratrice di manometri",
+     "place": "Bottega degli orologi, Via delle Lancette"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Che lavoro fai?",
+      "answered": "Taro i manometri delle caldaie e aggiusto orologi: se una lancetta mente, qualcuno salta in aria.",
+      "when": {
+       "day": 1,
+       "moment": "giorno",
+       "place": "bottega",
+       "doing": "tara un manometro",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Che ore sono?",
+      "answered": "Le sette e un quarto, e il mio orologio non sbaglia mai di un secondo.",
+      "when": {
+       "day": 1,
+       "moment": "sera",
+       "time": "19:15",
+       "place": "bottega",
+       "doing": "chiude la bottega",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Dove si trova la Gilda dei Caldaisti?",
+      "answered": "In fondo al Canale delle Officine, dove il fumo è più nero: non puoi sbagliare.",
+      "when": {
+       "day": 1,
+       "moment": "giorno",
+       "place": "bottega",
+       "doing": "tara un manometro",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b4",
+      "asked": "Hai visto l’inventore stamattina?",
+      "answered": "Corrado? È passato all’alba col suo carretto di ingranaggi, diretto alla torre.",
+      "when": {
+       "day": 1,
+       "moment": "mattina",
+       "place": "bottega",
+       "doing": "apre la bottega",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Di cosa ti occupi?",
+     "when": {
+      "day": 2,
+      "moment": "giorno",
+      "place": "bottega",
+      "doing": "aggiusta un orologio",
+      "bond": "sconosciuto"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b1"
+    ],
+    "fits_b1": true,
+    "fits_b2": false,
+    "fits_b3": false,
+    "fits_b4": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "b1",
+   "source": "scritto per il banco (T325), orichalcum: persona da world/people.json"
+  },
+  {
+   "id": "battuta/selene/ora-dopo",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Selene Vitti",
+     "job": "orologiaia e taratrice di manometri",
+     "place": "Bottega degli orologi, Via delle Lancette"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Che lavoro fai?",
+      "answered": "Taro i manometri delle caldaie e aggiusto orologi: se una lancetta mente, qualcuno salta in aria.",
+      "when": {
+       "day": 1,
+       "moment": "giorno",
+       "place": "bottega",
+       "doing": "tara un manometro",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Che ore sono?",
+      "answered": "Le sette e un quarto, e il mio orologio non sbaglia mai di un secondo.",
+      "when": {
+       "day": 1,
+       "moment": "sera",
+       "time": "19:15",
+       "place": "bottega",
+       "doing": "chiude la bottega",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Dove si trova la Gilda dei Caldaisti?",
+      "answered": "In fondo al Canale delle Officine, dove il fumo è più nero: non puoi sbagliare.",
+      "when": {
+       "day": 1,
+       "moment": "giorno",
+       "place": "bottega",
+       "doing": "tara un manometro",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b4",
+      "asked": "Hai visto l’inventore stamattina?",
+      "answered": "Corrado? È passato all’alba col suo carretto di ingranaggi, diretto alla torre.",
+      "when": {
+       "day": 1,
+       "moment": "mattina",
+       "place": "bottega",
+       "doing": "apre la bottega",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Che ore sono?",
+     "when": {
+      "day": 1,
+      "moment": "notte",
+      "time": "23:05",
+      "place": "bottega",
+      "doing": "lavora a lume di candela",
+      "bond": "sconosciuto"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b2"
+    ],
+    "fits_b1": false,
+    "fits_b2": false,
+    "fits_b3": false,
+    "fits_b4": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "none",
+   "source": "scritto per il banco (T325), orichalcum: persona da world/people.json",
+   "note": "l’ora è cambiata"
+  },
+  {
+   "id": "battuta/selene/ora-stessa",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Selene Vitti",
+     "job": "orologiaia e taratrice di manometri",
+     "place": "Bottega degli orologi, Via delle Lancette"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Che lavoro fai?",
+      "answered": "Taro i manometri delle caldaie e aggiusto orologi: se una lancetta mente, qualcuno salta in aria.",
+      "when": {
+       "day": 1,
+       "moment": "giorno",
+       "place": "bottega",
+       "doing": "tara un manometro",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Che ore sono?",
+      "answered": "Le sette e un quarto, e il mio orologio non sbaglia mai di un secondo.",
+      "when": {
+       "day": 1,
+       "moment": "sera",
+       "time": "19:15",
+       "place": "bottega",
+       "doing": "chiude la bottega",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Dove si trova la Gilda dei Caldaisti?",
+      "answered": "In fondo al Canale delle Officine, dove il fumo è più nero: non puoi sbagliare.",
+      "when": {
+       "day": 1,
+       "moment": "giorno",
+       "place": "bottega",
+       "doing": "tara un manometro",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b4",
+      "asked": "Hai visto l’inventore stamattina?",
+      "answered": "Corrado? È passato all’alba col suo carretto di ingranaggi, diretto alla torre.",
+      "when": {
+       "day": 1,
+       "moment": "mattina",
+       "place": "bottega",
+       "doing": "apre la bottega",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Sai dirmi l’ora?",
+     "when": {
+      "day": 1,
+      "moment": "sera",
+      "time": "19:15",
+      "place": "bottega",
+      "doing": "chiude la bottega",
+      "bond": "sconosciuto"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b2"
+    ],
+    "fits_b1": false,
+    "fits_b2": true,
+    "fits_b3": false,
+    "fits_b4": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "b2",
+   "source": "scritto per il banco (T325), orichalcum: persona da world/people.json",
+   "note": "stesso minuto"
+  },
+  {
+   "id": "battuta/selene/parafrasi-gilda",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Selene Vitti",
+     "job": "orologiaia e taratrice di manometri",
+     "place": "Bottega degli orologi, Via delle Lancette"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Che lavoro fai?",
+      "answered": "Taro i manometri delle caldaie e aggiusto orologi: se una lancetta mente, qualcuno salta in aria.",
+      "when": {
+       "day": 1,
+       "moment": "giorno",
+       "place": "bottega",
+       "doing": "tara un manometro",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Che ore sono?",
+      "answered": "Le sette e un quarto, e il mio orologio non sbaglia mai di un secondo.",
+      "when": {
+       "day": 1,
+       "moment": "sera",
+       "time": "19:15",
+       "place": "bottega",
+       "doing": "chiude la bottega",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Dove si trova la Gilda dei Caldaisti?",
+      "answered": "In fondo al Canale delle Officine, dove il fumo è più nero: non puoi sbagliare.",
+      "when": {
+       "day": 1,
+       "moment": "giorno",
+       "place": "bottega",
+       "doing": "tara un manometro",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b4",
+      "asked": "Hai visto l’inventore stamattina?",
+      "answered": "Corrado? È passato all’alba col suo carretto di ingranaggi, diretto alla torre.",
+      "when": {
+       "day": 1,
+       "moment": "mattina",
+       "place": "bottega",
+       "doing": "apre la bottega",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Come arrivo alla sede della Gilda dei Caldaisti?",
+     "when": {
+      "day": 3,
+      "moment": "giorno",
+      "place": "bottega",
+      "doing": "tara un manometro",
+      "bond": "sconosciuto"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b3"
+    ],
+    "fits_b1": false,
+    "fits_b2": false,
+    "fits_b3": true,
+    "fits_b4": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "b3",
+   "source": "scritto per il banco (T325), orichalcum: persona da world/people.json"
+  },
+  {
+   "id": "battuta/selene/altro-giorno",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Selene Vitti",
+     "job": "orologiaia e taratrice di manometri",
+     "place": "Bottega degli orologi, Via delle Lancette"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Che lavoro fai?",
+      "answered": "Taro i manometri delle caldaie e aggiusto orologi: se una lancetta mente, qualcuno salta in aria.",
+      "when": {
+       "day": 1,
+       "moment": "giorno",
+       "place": "bottega",
+       "doing": "tara un manometro",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Che ore sono?",
+      "answered": "Le sette e un quarto, e il mio orologio non sbaglia mai di un secondo.",
+      "when": {
+       "day": 1,
+       "moment": "sera",
+       "time": "19:15",
+       "place": "bottega",
+       "doing": "chiude la bottega",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Dove si trova la Gilda dei Caldaisti?",
+      "answered": "In fondo al Canale delle Officine, dove il fumo è più nero: non puoi sbagliare.",
+      "when": {
+       "day": 1,
+       "moment": "giorno",
+       "place": "bottega",
+       "doing": "tara un manometro",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b4",
+      "asked": "Hai visto l’inventore stamattina?",
+      "answered": "Corrado? È passato all’alba col suo carretto di ingranaggi, diretto alla torre.",
+      "when": {
+       "day": 1,
+       "moment": "mattina",
+       "place": "bottega",
+       "doing": "apre la bottega",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Hai visto l’inventore stamattina?",
+     "when": {
+      "day": 2,
+      "moment": "mattina",
+      "place": "bottega",
+      "doing": "apre la bottega",
+      "bond": "sconosciuto"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b4"
+    ],
+    "fits_b1": false,
+    "fits_b2": false,
+    "fits_b3": false,
+    "fits_b4": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "none",
+   "source": "scritto per il banco (T325), orichalcum: persona da world/people.json",
+   "note": "un’altra mattina"
+  },
+  {
+   "id": "battuta/selene/nuova",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Selene Vitti",
+     "job": "orologiaia e taratrice di manometri",
+     "place": "Bottega degli orologi, Via delle Lancette"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Che lavoro fai?",
+      "answered": "Taro i manometri delle caldaie e aggiusto orologi: se una lancetta mente, qualcuno salta in aria.",
+      "when": {
+       "day": 1,
+       "moment": "giorno",
+       "place": "bottega",
+       "doing": "tara un manometro",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Che ore sono?",
+      "answered": "Le sette e un quarto, e il mio orologio non sbaglia mai di un secondo.",
+      "when": {
+       "day": 1,
+       "moment": "sera",
+       "time": "19:15",
+       "place": "bottega",
+       "doing": "chiude la bottega",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Dove si trova la Gilda dei Caldaisti?",
+      "answered": "In fondo al Canale delle Officine, dove il fumo è più nero: non puoi sbagliare.",
+      "when": {
+       "day": 1,
+       "moment": "giorno",
+       "place": "bottega",
+       "doing": "tara un manometro",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b4",
+      "asked": "Hai visto l’inventore stamattina?",
+      "answered": "Corrado? È passato all’alba col suo carretto di ingranaggi, diretto alla torre.",
+      "when": {
+       "day": 1,
+       "moment": "mattina",
+       "place": "bottega",
+       "doing": "apre la bottega",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Mi ripari questo orologio da taschino?",
+     "when": {
+      "day": 2,
+      "moment": "giorno",
+      "place": "bottega",
+      "doing": "aggiusta un orologio",
+      "bond": "sconosciuto"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "none"
+    ],
+    "fits_b1": false,
+    "fits_b2": false,
+    "fits_b3": false,
+    "fits_b4": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "none",
+   "source": "scritto per il banco (T325), orichalcum: persona da world/people.json"
+  },
+  {
+   "id": "battuta/ruben/parafrasi-viaggio",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Ruben Kessler",
+     "job": "pilota di navette",
+     "place": "Hangar sette del porto spaziale"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Mi porti alla stazione orbitale?",
+      "answered": "Duecento crediti e partiamo al prossimo turno, se la tempesta ionica ci lascia passare.",
+      "when": {
+       "day": 4,
+       "moment": "giorno",
+       "place": "hangar",
+       "doing": "controlla i motori",
+       "bond": "sconosciuto",
+       "weather": "tempesta ionica"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Che tempo fa lassù?",
+      "answered": "Tempesta ionica sull’Anello da tre giorni: si vola bassi e si prega.",
+      "when": {
+       "day": 4,
+       "moment": "giorno",
+       "place": "hangar",
+       "doing": "controlla i motori",
+       "bond": "sconosciuto",
+       "weather": "tempesta ionica"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Come si diventa pilota?",
+      "answered": "Sei anni alla scuola della Gilda e mille ore di simulatore, poi ti danno una navetta vecchia come me.",
+      "when": {
+       "day": 4,
+       "moment": "giorno",
+       "place": "hangar",
+       "doing": "controlla i motori",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b4",
+      "asked": "Chi è il tuo capo?",
+      "answered": "Rispondo alla Gilda della Navigazione Profonda, cioè a Selene Moro quando è di cattivo umore.",
+      "when": {
+       "day": 4,
+       "moment": "giorno",
+       "place": "hangar",
+       "doing": "controlla i motori",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Quanto vuoi per portarmi alla stazione orbitale?",
+     "when": {
+      "day": 4,
+      "moment": "giorno",
+      "place": "hangar",
+      "doing": "controlla i motori",
+      "bond": "sconosciuto",
+      "weather": "tempesta ionica"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b1"
+    ],
+    "fits_b1": true,
+    "fits_b2": false,
+    "fits_b3": false,
+    "fits_b4": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "b1",
+   "source": "scritto per il banco (T325), sidera: persona da world/people.json"
+  },
+  {
+   "id": "battuta/ruben/tempo-cambiato",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Ruben Kessler",
+     "job": "pilota di navette",
+     "place": "Hangar sette del porto spaziale"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Mi porti alla stazione orbitale?",
+      "answered": "Duecento crediti e partiamo al prossimo turno, se la tempesta ionica ci lascia passare.",
+      "when": {
+       "day": 4,
+       "moment": "giorno",
+       "place": "hangar",
+       "doing": "controlla i motori",
+       "bond": "sconosciuto",
+       "weather": "tempesta ionica"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Che tempo fa lassù?",
+      "answered": "Tempesta ionica sull’Anello da tre giorni: si vola bassi e si prega.",
+      "when": {
+       "day": 4,
+       "moment": "giorno",
+       "place": "hangar",
+       "doing": "controlla i motori",
+       "bond": "sconosciuto",
+       "weather": "tempesta ionica"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Come si diventa pilota?",
+      "answered": "Sei anni alla scuola della Gilda e mille ore di simulatore, poi ti danno una navetta vecchia come me.",
+      "when": {
+       "day": 4,
+       "moment": "giorno",
+       "place": "hangar",
+       "doing": "controlla i motori",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b4",
+      "asked": "Chi è il tuo capo?",
+      "answered": "Rispondo alla Gilda della Navigazione Profonda, cioè a Selene Moro quando è di cattivo umore.",
+      "when": {
+       "day": 4,
+       "moment": "giorno",
+       "place": "hangar",
+       "doing": "controlla i motori",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Che tempo fa lassù?",
+     "when": {
+      "day": 6,
+      "moment": "giorno",
+      "place": "hangar",
+      "doing": "controlla i motori",
+      "bond": "sconosciuto",
+      "weather": "sereno",
+      "happened": "la tempesta ionica è finita stamattina"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b2"
+    ],
+    "fits_b1": false,
+    "fits_b2": false,
+    "fits_b3": false,
+    "fits_b4": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "none",
+   "source": "scritto per il banco (T325), sidera: persona da world/people.json"
+  },
+  {
+   "id": "battuta/ruben/parafrasi-pilota",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Ruben Kessler",
+     "job": "pilota di navette",
+     "place": "Hangar sette del porto spaziale"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Mi porti alla stazione orbitale?",
+      "answered": "Duecento crediti e partiamo al prossimo turno, se la tempesta ionica ci lascia passare.",
+      "when": {
+       "day": 4,
+       "moment": "giorno",
+       "place": "hangar",
+       "doing": "controlla i motori",
+       "bond": "sconosciuto",
+       "weather": "tempesta ionica"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Che tempo fa lassù?",
+      "answered": "Tempesta ionica sull’Anello da tre giorni: si vola bassi e si prega.",
+      "when": {
+       "day": 4,
+       "moment": "giorno",
+       "place": "hangar",
+       "doing": "controlla i motori",
+       "bond": "sconosciuto",
+       "weather": "tempesta ionica"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Come si diventa pilota?",
+      "answered": "Sei anni alla scuola della Gilda e mille ore di simulatore, poi ti danno una navetta vecchia come me.",
+      "when": {
+       "day": 4,
+       "moment": "giorno",
+       "place": "hangar",
+       "doing": "controlla i motori",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b4",
+      "asked": "Chi è il tuo capo?",
+      "answered": "Rispondo alla Gilda della Navigazione Profonda, cioè a Selene Moro quando è di cattivo umore.",
+      "when": {
+       "day": 4,
+       "moment": "giorno",
+       "place": "hangar",
+       "doing": "controlla i motori",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Cosa serve per diventare pilota?",
+     "when": {
+      "day": 5,
+      "moment": "giorno",
+      "place": "hangar",
+      "doing": "controlla i motori",
+      "bond": "sconosciuto"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b3"
+    ],
+    "fits_b1": false,
+    "fits_b2": false,
+    "fits_b3": true,
+    "fits_b4": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "b3",
+   "source": "scritto per il banco (T325), sidera: persona da world/people.json"
+  },
+  {
+   "id": "battuta/ruben/parafrasi-capo",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Ruben Kessler",
+     "job": "pilota di navette",
+     "place": "Hangar sette del porto spaziale"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Mi porti alla stazione orbitale?",
+      "answered": "Duecento crediti e partiamo al prossimo turno, se la tempesta ionica ci lascia passare.",
+      "when": {
+       "day": 4,
+       "moment": "giorno",
+       "place": "hangar",
+       "doing": "controlla i motori",
+       "bond": "sconosciuto",
+       "weather": "tempesta ionica"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Che tempo fa lassù?",
+      "answered": "Tempesta ionica sull’Anello da tre giorni: si vola bassi e si prega.",
+      "when": {
+       "day": 4,
+       "moment": "giorno",
+       "place": "hangar",
+       "doing": "controlla i motori",
+       "bond": "sconosciuto",
+       "weather": "tempesta ionica"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Come si diventa pilota?",
+      "answered": "Sei anni alla scuola della Gilda e mille ore di simulatore, poi ti danno una navetta vecchia come me.",
+      "when": {
+       "day": 4,
+       "moment": "giorno",
+       "place": "hangar",
+       "doing": "controlla i motori",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b4",
+      "asked": "Chi è il tuo capo?",
+      "answered": "Rispondo alla Gilda della Navigazione Profonda, cioè a Selene Moro quando è di cattivo umore.",
+      "when": {
+       "day": 4,
+       "moment": "giorno",
+       "place": "hangar",
+       "doing": "controlla i motori",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Per chi lavori?",
+     "when": {
+      "day": 5,
+      "moment": "sera",
+      "place": "hangar",
+      "doing": "pulisce la cabina",
+      "bond": "sconosciuto"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b4"
+    ],
+    "fits_b1": false,
+    "fits_b2": false,
+    "fits_b3": false,
+    "fits_b4": true
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "b4",
+   "source": "scritto per il banco (T325), sidera: persona da world/people.json",
+   "note": "la sera non cambia il capo"
+  },
+  {
+   "id": "battuta/ruben/amico",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Ruben Kessler",
+     "job": "pilota di navette",
+     "place": "Hangar sette del porto spaziale"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Mi porti alla stazione orbitale?",
+      "answered": "Duecento crediti e partiamo al prossimo turno, se la tempesta ionica ci lascia passare.",
+      "when": {
+       "day": 4,
+       "moment": "giorno",
+       "place": "hangar",
+       "doing": "controlla i motori",
+       "bond": "sconosciuto",
+       "weather": "tempesta ionica"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Che tempo fa lassù?",
+      "answered": "Tempesta ionica sull’Anello da tre giorni: si vola bassi e si prega.",
+      "when": {
+       "day": 4,
+       "moment": "giorno",
+       "place": "hangar",
+       "doing": "controlla i motori",
+       "bond": "sconosciuto",
+       "weather": "tempesta ionica"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Come si diventa pilota?",
+      "answered": "Sei anni alla scuola della Gilda e mille ore di simulatore, poi ti danno una navetta vecchia come me.",
+      "when": {
+       "day": 4,
+       "moment": "giorno",
+       "place": "hangar",
+       "doing": "controlla i motori",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b4",
+      "asked": "Chi è il tuo capo?",
+      "answered": "Rispondo alla Gilda della Navigazione Profonda, cioè a Selene Moro quando è di cattivo umore.",
+      "when": {
+       "day": 4,
+       "moment": "giorno",
+       "place": "hangar",
+       "doing": "controlla i motori",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Mi porti alla stazione orbitale?",
+     "when": {
+      "day": 8,
+      "moment": "giorno",
+      "place": "hangar",
+      "doing": "controlla i motori",
+      "bond": "amico: il viandante gli ha salvato la navetta",
+      "weather": "sereno"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b1"
+    ],
+    "fits_b1": false,
+    "fits_b2": false,
+    "fits_b3": false,
+    "fits_b4": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "none",
+   "source": "scritto per il banco (T325), sidera: persona da world/people.json",
+   "note": "a chi ti ha salvato non chiedi il prezzo di prima"
+  },
+  {
+   "id": "battuta/ruben/simile-diversa",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Ruben Kessler",
+     "job": "pilota di navette",
+     "place": "Hangar sette del porto spaziale"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Mi porti alla stazione orbitale?",
+      "answered": "Duecento crediti e partiamo al prossimo turno, se la tempesta ionica ci lascia passare.",
+      "when": {
+       "day": 4,
+       "moment": "giorno",
+       "place": "hangar",
+       "doing": "controlla i motori",
+       "bond": "sconosciuto",
+       "weather": "tempesta ionica"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Che tempo fa lassù?",
+      "answered": "Tempesta ionica sull’Anello da tre giorni: si vola bassi e si prega.",
+      "when": {
+       "day": 4,
+       "moment": "giorno",
+       "place": "hangar",
+       "doing": "controlla i motori",
+       "bond": "sconosciuto",
+       "weather": "tempesta ionica"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Come si diventa pilota?",
+      "answered": "Sei anni alla scuola della Gilda e mille ore di simulatore, poi ti danno una navetta vecchia come me.",
+      "when": {
+       "day": 4,
+       "moment": "giorno",
+       "place": "hangar",
+       "doing": "controlla i motori",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b4",
+      "asked": "Chi è il tuo capo?",
+      "answered": "Rispondo alla Gilda della Navigazione Profonda, cioè a Selene Moro quando è di cattivo umore.",
+      "when": {
+       "day": 4,
+       "moment": "giorno",
+       "place": "hangar",
+       "doing": "controlla i motori",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Mi insegni a pilotare?",
+     "when": {
+      "day": 5,
+      "moment": "giorno",
+      "place": "hangar",
+      "doing": "controlla i motori",
+      "bond": "sconosciuto"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "none"
+    ],
+    "fits_b1": false,
+    "fits_b2": false,
+    "fits_b3": false,
+    "fits_b4": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "none",
+   "source": "scritto per il banco (T325), sidera: persona da world/people.json",
+   "note": "una richiesta, non come si diventa pilota"
+  },
+  {
+   "id": "battuta/carmela/stesso-giorno",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Carmela Esposito",
+     "job": "cuoca della trattoria",
+     "place": "Trattoria da Carmela"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Cosa c’è da mangiare oggi?",
+      "answered": "Oggi pasta e patate con la provola e polpette al sugo: il ragù lo faccio la domenica.",
+      "when": {
+       "day": 4,
+       "weekday": "giovedì",
+       "moment": "giorno",
+       "place": "trattoria",
+       "doing": "cucina",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Come si fa il ragù?",
+      "answered": "Ci vuole la domenica intera: carne buona, pomodoro e sei ore sul fuoco piano, che pippia.",
+      "when": {
+       "day": 4,
+       "moment": "giorno",
+       "place": "trattoria",
+       "doing": "cucina",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Da quanto hai la trattoria?",
+      "answered": "Da quarant’anni, e mio figlio Gennaro ci mangiava sotto il tavolo da piccolo.",
+      "when": {
+       "day": 4,
+       "moment": "giorno",
+       "place": "trattoria",
+       "doing": "cucina",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Che si mangia oggi?",
+     "when": {
+      "day": 4,
+      "weekday": "giovedì",
+      "moment": "giorno",
+      "place": "trattoria",
+      "doing": "cucina",
+      "bond": "sconosciuto"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b1"
+    ],
+    "fits_b1": true,
+    "fits_b2": false,
+    "fits_b3": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "b1",
+   "source": "scritto per il banco (T325), neapolis: persona da world/people.json"
+  },
+  {
+   "id": "battuta/carmela/domenica",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Carmela Esposito",
+     "job": "cuoca della trattoria",
+     "place": "Trattoria da Carmela"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Cosa c’è da mangiare oggi?",
+      "answered": "Oggi pasta e patate con la provola e polpette al sugo: il ragù lo faccio la domenica.",
+      "when": {
+       "day": 4,
+       "weekday": "giovedì",
+       "moment": "giorno",
+       "place": "trattoria",
+       "doing": "cucina",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Come si fa il ragù?",
+      "answered": "Ci vuole la domenica intera: carne buona, pomodoro e sei ore sul fuoco piano, che pippia.",
+      "when": {
+       "day": 4,
+       "moment": "giorno",
+       "place": "trattoria",
+       "doing": "cucina",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Da quanto hai la trattoria?",
+      "answered": "Da quarant’anni, e mio figlio Gennaro ci mangiava sotto il tavolo da piccolo.",
+      "when": {
+       "day": 4,
+       "moment": "giorno",
+       "place": "trattoria",
+       "doing": "cucina",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Che si mangia oggi?",
+     "when": {
+      "day": 7,
+      "weekday": "domenica",
+      "moment": "giorno",
+      "place": "trattoria",
+      "doing": "cucina il ragù",
+      "bond": "sconosciuto"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b1"
+    ],
+    "fits_b1": false,
+    "fits_b2": false,
+    "fits_b3": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "none",
+   "source": "scritto per il banco (T325), neapolis: persona da world/people.json",
+   "note": "di domenica c’è il ragù"
+  },
+  {
+   "id": "battuta/carmela/parafrasi-ragu",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Carmela Esposito",
+     "job": "cuoca della trattoria",
+     "place": "Trattoria da Carmela"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Cosa c’è da mangiare oggi?",
+      "answered": "Oggi pasta e patate con la provola e polpette al sugo: il ragù lo faccio la domenica.",
+      "when": {
+       "day": 4,
+       "weekday": "giovedì",
+       "moment": "giorno",
+       "place": "trattoria",
+       "doing": "cucina",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Come si fa il ragù?",
+      "answered": "Ci vuole la domenica intera: carne buona, pomodoro e sei ore sul fuoco piano, che pippia.",
+      "when": {
+       "day": 4,
+       "moment": "giorno",
+       "place": "trattoria",
+       "doing": "cucina",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Da quanto hai la trattoria?",
+      "answered": "Da quarant’anni, e mio figlio Gennaro ci mangiava sotto il tavolo da piccolo.",
+      "when": {
+       "day": 4,
+       "moment": "giorno",
+       "place": "trattoria",
+       "doing": "cucina",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Qual è la ricetta del ragù?",
+     "when": {
+      "day": 5,
+      "moment": "giorno",
+      "place": "trattoria",
+      "doing": "cucina",
+      "bond": "sconosciuto"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b2"
+    ],
+    "fits_b1": false,
+    "fits_b2": true,
+    "fits_b3": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "b2",
+   "source": "scritto per il banco (T325), neapolis: persona da world/people.json"
+  },
+  {
+   "id": "battuta/carmela/parafrasi-trattoria",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Carmela Esposito",
+     "job": "cuoca della trattoria",
+     "place": "Trattoria da Carmela"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Cosa c’è da mangiare oggi?",
+      "answered": "Oggi pasta e patate con la provola e polpette al sugo: il ragù lo faccio la domenica.",
+      "when": {
+       "day": 4,
+       "weekday": "giovedì",
+       "moment": "giorno",
+       "place": "trattoria",
+       "doing": "cucina",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Come si fa il ragù?",
+      "answered": "Ci vuole la domenica intera: carne buona, pomodoro e sei ore sul fuoco piano, che pippia.",
+      "when": {
+       "day": 4,
+       "moment": "giorno",
+       "place": "trattoria",
+       "doing": "cucina",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Da quanto hai la trattoria?",
+      "answered": "Da quarant’anni, e mio figlio Gennaro ci mangiava sotto il tavolo da piccolo.",
+      "when": {
+       "day": 4,
+       "moment": "giorno",
+       "place": "trattoria",
+       "doing": "cucina",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Da quanto tempo cucini qui?",
+     "when": {
+      "day": 5,
+      "moment": "sera",
+      "place": "trattoria",
+      "doing": "lava i piatti",
+      "bond": "sconosciuto"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b3"
+    ],
+    "fits_b1": false,
+    "fits_b2": false,
+    "fits_b3": true
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "b3",
+   "source": "scritto per il banco (T325), neapolis: persona da world/people.json"
+  },
+  {
+   "id": "battuta/carmela/nuova",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Carmela Esposito",
+     "job": "cuoca della trattoria",
+     "place": "Trattoria da Carmela"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Cosa c’è da mangiare oggi?",
+      "answered": "Oggi pasta e patate con la provola e polpette al sugo: il ragù lo faccio la domenica.",
+      "when": {
+       "day": 4,
+       "weekday": "giovedì",
+       "moment": "giorno",
+       "place": "trattoria",
+       "doing": "cucina",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Come si fa il ragù?",
+      "answered": "Ci vuole la domenica intera: carne buona, pomodoro e sei ore sul fuoco piano, che pippia.",
+      "when": {
+       "day": 4,
+       "moment": "giorno",
+       "place": "trattoria",
+       "doing": "cucina",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Da quanto hai la trattoria?",
+      "answered": "Da quarant’anni, e mio figlio Gennaro ci mangiava sotto il tavolo da piccolo.",
+      "when": {
+       "day": 4,
+       "moment": "giorno",
+       "place": "trattoria",
+       "doing": "cucina",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Mi dai la ricetta delle polpette?",
+     "when": {
+      "day": 5,
+      "moment": "giorno",
+      "place": "trattoria",
+      "doing": "cucina",
+      "bond": "sconosciuto"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "none"
+    ],
+    "fits_b1": false,
+    "fits_b2": false,
+    "fits_b3": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "none",
+   "source": "scritto per il banco (T325), neapolis: persona da world/people.json"
+  },
+  {
+   "id": "battuta/iris/parafrasi-piante",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Iris Calandra",
+     "job": "xenobotanica capo delle Cupole",
+     "place": "Cupole di coltura"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Cosa coltivate nelle cupole?",
+      "answered": "Felci di Titano, alghe rosse e un melo che non ha mai visto il sole: tutto sotto luce artificiale.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "cupola uno",
+       "doing": "misura le felci",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Posso entrare nella cupola tre?",
+      "answered": "No: la tre è in quarantena per una muffa. Torna quando la spia è verde.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "cupola uno",
+       "doing": "misura le felci",
+       "bond": "sconosciuto",
+       "dome_three": "in quarantena"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Chi è il ragazzo che ti aiuta?",
+      "answered": "Tobia, mio figlio: apprendista, testardo come una radice.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "cupola uno",
+       "doing": "misura le felci",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Che piante crescono qui sotto le cupole?",
+     "when": {
+      "day": 3,
+      "moment": "giorno",
+      "place": "cupola uno",
+      "doing": "misura le felci",
+      "bond": "sconosciuto"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b1"
+    ],
+    "fits_b1": true,
+    "fits_b2": false,
+    "fits_b3": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "b1",
+   "source": "scritto per il banco (T325), sidera: persona da world/people.json"
+  },
+  {
+   "id": "battuta/iris/quarantena-finita",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Iris Calandra",
+     "job": "xenobotanica capo delle Cupole",
+     "place": "Cupole di coltura"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Cosa coltivate nelle cupole?",
+      "answered": "Felci di Titano, alghe rosse e un melo che non ha mai visto il sole: tutto sotto luce artificiale.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "cupola uno",
+       "doing": "misura le felci",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Posso entrare nella cupola tre?",
+      "answered": "No: la tre è in quarantena per una muffa. Torna quando la spia è verde.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "cupola uno",
+       "doing": "misura le felci",
+       "bond": "sconosciuto",
+       "dome_three": "in quarantena"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Chi è il ragazzo che ti aiuta?",
+      "answered": "Tobia, mio figlio: apprendista, testardo come una radice.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "cupola uno",
+       "doing": "misura le felci",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Posso entrare nella cupola tre?",
+     "when": {
+      "day": 5,
+      "moment": "giorno",
+      "place": "cupola uno",
+      "doing": "misura le felci",
+      "bond": "sconosciuto",
+      "dome_three": "aperta",
+      "happened": "ieri la quarantena della cupola tre è finita"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b2"
+    ],
+    "fits_b1": false,
+    "fits_b2": false,
+    "fits_b3": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "none",
+   "source": "scritto per il banco (T325), sidera: persona da world/people.json"
+  },
+  {
+   "id": "battuta/iris/quarantena-ancora",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Iris Calandra",
+     "job": "xenobotanica capo delle Cupole",
+     "place": "Cupole di coltura"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Cosa coltivate nelle cupole?",
+      "answered": "Felci di Titano, alghe rosse e un melo che non ha mai visto il sole: tutto sotto luce artificiale.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "cupola uno",
+       "doing": "misura le felci",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Posso entrare nella cupola tre?",
+      "answered": "No: la tre è in quarantena per una muffa. Torna quando la spia è verde.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "cupola uno",
+       "doing": "misura le felci",
+       "bond": "sconosciuto",
+       "dome_three": "in quarantena"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Chi è il ragazzo che ti aiuta?",
+      "answered": "Tobia, mio figlio: apprendista, testardo come una radice.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "cupola uno",
+       "doing": "misura le felci",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Posso visitare la cupola tre?",
+     "when": {
+      "day": 3,
+      "moment": "giorno",
+      "place": "cupola uno",
+      "doing": "misura le felci",
+      "bond": "sconosciuto",
+      "dome_three": "in quarantena"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b2"
+    ],
+    "fits_b1": false,
+    "fits_b2": true,
+    "fits_b3": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "b2",
+   "source": "scritto per il banco (T325), sidera: persona da world/people.json"
+  },
+  {
+   "id": "battuta/iris/parafrasi-figlio",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Iris Calandra",
+     "job": "xenobotanica capo delle Cupole",
+     "place": "Cupole di coltura"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Cosa coltivate nelle cupole?",
+      "answered": "Felci di Titano, alghe rosse e un melo che non ha mai visto il sole: tutto sotto luce artificiale.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "cupola uno",
+       "doing": "misura le felci",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Posso entrare nella cupola tre?",
+      "answered": "No: la tre è in quarantena per una muffa. Torna quando la spia è verde.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "cupola uno",
+       "doing": "misura le felci",
+       "bond": "sconosciuto",
+       "dome_three": "in quarantena"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Chi è il ragazzo che ti aiuta?",
+      "answered": "Tobia, mio figlio: apprendista, testardo come una radice.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "cupola uno",
+       "doing": "misura le felci",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Chi è quel giovane che lavora con te?",
+     "when": {
+      "day": 3,
+      "moment": "giorno",
+      "place": "cupola uno",
+      "doing": "misura le felci",
+      "bond": "sconosciuto"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b3"
+    ],
+    "fits_b1": false,
+    "fits_b2": false,
+    "fits_b3": true
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "b3",
+   "source": "scritto per il banco (T325), sidera: persona da world/people.json"
+  },
+  {
+   "id": "battuta/iris/nuova",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Iris Calandra",
+     "job": "xenobotanica capo delle Cupole",
+     "place": "Cupole di coltura"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Cosa coltivate nelle cupole?",
+      "answered": "Felci di Titano, alghe rosse e un melo che non ha mai visto il sole: tutto sotto luce artificiale.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "cupola uno",
+       "doing": "misura le felci",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Posso entrare nella cupola tre?",
+      "answered": "No: la tre è in quarantena per una muffa. Torna quando la spia è verde.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "cupola uno",
+       "doing": "misura le felci",
+       "bond": "sconosciuto",
+       "dome_three": "in quarantena"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Chi è il ragazzo che ti aiuta?",
+      "answered": "Tobia, mio figlio: apprendista, testardo come una radice.",
+      "when": {
+       "day": 2,
+       "moment": "giorno",
+       "place": "cupola uno",
+       "doing": "misura le felci",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Quando apre la cupola uno ai visitatori?",
+     "when": {
+      "day": 3,
+      "moment": "giorno",
+      "place": "cupola uno",
+      "doing": "misura le felci",
+      "bond": "sconosciuto"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "none"
+    ],
+    "fits_b1": false,
+    "fits_b2": false,
+    "fits_b3": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "none",
+   "source": "scritto per il banco (T325), sidera: persona da world/people.json"
+  },
+  {
+   "id": "battuta/bruno/parafrasi-gilda",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Bruno Caldera",
+     "job": "capo della Gilda dei Caldaisti",
+     "place": "Sede della Gilda, Canale delle Officine"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Come entro nella Gilda?",
+      "answered": "Porta tre caldaie riparate e la firma di un maestro: allora ne parliamo.",
+      "when": {
+       "day": 1,
+       "moment": "giorno",
+       "place": "sede della Gilda",
+       "doing": "controlla i registri",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Perché il carbone costa così tanto?",
+      "answered": "Perché le miniere del nord sono allagate e chi ha carbone fa il prezzo che vuole.",
+      "when": {
+       "day": 1,
+       "moment": "giorno",
+       "place": "sede della Gilda",
+       "doing": "controlla i registri",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Chi comanda in città?",
+      "answered": "Il Consiglio delle Torri, sulla carta. In pratica chi tiene accese le caldaie: cioè noi.",
+      "when": {
+       "day": 1,
+       "moment": "giorno",
+       "place": "sede della Gilda",
+       "doing": "controlla i registri",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Cosa serve per entrare nella Gilda?",
+     "when": {
+      "day": 2,
+      "moment": "giorno",
+      "place": "sede della Gilda",
+      "doing": "controlla i registri",
+      "bond": "sconosciuto"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b1"
+    ],
+    "fits_b1": true,
+    "fits_b2": false,
+    "fits_b3": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "b1",
+   "source": "scritto per il banco (T325), orichalcum: persona da world/people.json"
+  },
+  {
+   "id": "battuta/bruno/caldaie-portate",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Bruno Caldera",
+     "job": "capo della Gilda dei Caldaisti",
+     "place": "Sede della Gilda, Canale delle Officine"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Come entro nella Gilda?",
+      "answered": "Porta tre caldaie riparate e la firma di un maestro: allora ne parliamo.",
+      "when": {
+       "day": 1,
+       "moment": "giorno",
+       "place": "sede della Gilda",
+       "doing": "controlla i registri",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Perché il carbone costa così tanto?",
+      "answered": "Perché le miniere del nord sono allagate e chi ha carbone fa il prezzo che vuole.",
+      "when": {
+       "day": 1,
+       "moment": "giorno",
+       "place": "sede della Gilda",
+       "doing": "controlla i registri",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Chi comanda in città?",
+      "answered": "Il Consiglio delle Torri, sulla carta. In pratica chi tiene accese le caldaie: cioè noi.",
+      "when": {
+       "day": 1,
+       "moment": "giorno",
+       "place": "sede della Gilda",
+       "doing": "controlla i registri",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Come entro nella Gilda?",
+     "when": {
+      "day": 4,
+      "moment": "giorno",
+      "place": "sede della Gilda",
+      "doing": "controlla i registri",
+      "bond": "sconosciuto",
+      "happened": "il viandante ha portato tre caldaie riparate e la firma della maestra Gelsomina"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b1"
+    ],
+    "fits_b1": false,
+    "fits_b2": false,
+    "fits_b3": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "none",
+   "source": "scritto per il banco (T325), orichalcum: persona da world/people.json",
+   "note": "ha già fatto ciò che chiedeva"
+  },
+  {
+   "id": "battuta/bruno/parafrasi-carbone",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Bruno Caldera",
+     "job": "capo della Gilda dei Caldaisti",
+     "place": "Sede della Gilda, Canale delle Officine"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Come entro nella Gilda?",
+      "answered": "Porta tre caldaie riparate e la firma di un maestro: allora ne parliamo.",
+      "when": {
+       "day": 1,
+       "moment": "giorno",
+       "place": "sede della Gilda",
+       "doing": "controlla i registri",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Perché il carbone costa così tanto?",
+      "answered": "Perché le miniere del nord sono allagate e chi ha carbone fa il prezzo che vuole.",
+      "when": {
+       "day": 1,
+       "moment": "giorno",
+       "place": "sede della Gilda",
+       "doing": "controlla i registri",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Chi comanda in città?",
+      "answered": "Il Consiglio delle Torri, sulla carta. In pratica chi tiene accese le caldaie: cioè noi.",
+      "when": {
+       "day": 1,
+       "moment": "giorno",
+       "place": "sede della Gilda",
+       "doing": "controlla i registri",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Come mai il carbone è così caro?",
+     "when": {
+      "day": 2,
+      "moment": "giorno",
+      "place": "sede della Gilda",
+      "doing": "controlla i registri",
+      "bond": "sconosciuto"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b2"
+    ],
+    "fits_b1": false,
+    "fits_b2": true,
+    "fits_b3": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "b2",
+   "source": "scritto per il banco (T325), orichalcum: persona da world/people.json"
+  },
+  {
+   "id": "battuta/bruno/parafrasi-comando",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Bruno Caldera",
+     "job": "capo della Gilda dei Caldaisti",
+     "place": "Sede della Gilda, Canale delle Officine"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Come entro nella Gilda?",
+      "answered": "Porta tre caldaie riparate e la firma di un maestro: allora ne parliamo.",
+      "when": {
+       "day": 1,
+       "moment": "giorno",
+       "place": "sede della Gilda",
+       "doing": "controlla i registri",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Perché il carbone costa così tanto?",
+      "answered": "Perché le miniere del nord sono allagate e chi ha carbone fa il prezzo che vuole.",
+      "when": {
+       "day": 1,
+       "moment": "giorno",
+       "place": "sede della Gilda",
+       "doing": "controlla i registri",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Chi comanda in città?",
+      "answered": "Il Consiglio delle Torri, sulla carta. In pratica chi tiene accese le caldaie: cioè noi.",
+      "when": {
+       "day": 1,
+       "moment": "giorno",
+       "place": "sede della Gilda",
+       "doing": "controlla i registri",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Chi governa la città?",
+     "when": {
+      "day": 2,
+      "moment": "giorno",
+      "place": "sede della Gilda",
+      "doing": "controlla i registri",
+      "bond": "sconosciuto"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b3"
+    ],
+    "fits_b1": false,
+    "fits_b2": false,
+    "fits_b3": true
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "b3",
+   "source": "scritto per il banco (T325), orichalcum: persona da world/people.json"
+  },
+  {
+   "id": "battuta/bruno/consiglio-sciolto",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Bruno Caldera",
+     "job": "capo della Gilda dei Caldaisti",
+     "place": "Sede della Gilda, Canale delle Officine"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Come entro nella Gilda?",
+      "answered": "Porta tre caldaie riparate e la firma di un maestro: allora ne parliamo.",
+      "when": {
+       "day": 1,
+       "moment": "giorno",
+       "place": "sede della Gilda",
+       "doing": "controlla i registri",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b2",
+      "asked": "Perché il carbone costa così tanto?",
+      "answered": "Perché le miniere del nord sono allagate e chi ha carbone fa il prezzo che vuole.",
+      "when": {
+       "day": 1,
+       "moment": "giorno",
+       "place": "sede della Gilda",
+       "doing": "controlla i registri",
+       "bond": "sconosciuto"
+      }
+     },
+     {
+      "id": "b3",
+      "asked": "Chi comanda in città?",
+      "answered": "Il Consiglio delle Torri, sulla carta. In pratica chi tiene accese le caldaie: cioè noi.",
+      "when": {
+       "day": 1,
+       "moment": "giorno",
+       "place": "sede della Gilda",
+       "doing": "controlla i registri",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Chi comanda in città?",
+     "when": {
+      "day": 5,
+      "moment": "giorno",
+      "place": "sede della Gilda",
+      "doing": "controlla i registri",
+      "bond": "sconosciuto",
+      "happened": "ieri la rivolta dei fuochisti ha sciolto il Consiglio delle Torri"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b3"
+    ],
+    "fits_b1": false,
+    "fits_b2": false,
+    "fits_b3": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "none",
+   "source": "scritto per il banco (T325), orichalcum: persona da world/people.json"
+  },
+  {
+   "id": "battuta/fumo/parafrasi",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Fumo",
+     "job": "gatto di quartiere del bar",
+     "place": "Bar Gambrinus"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Ciao micio, come stai?",
+      "answered": "(Fumo ti guarda, sbadiglia e si rimette a dormire sulla sedia del bar.)",
+      "when": {
+       "day": 3,
+       "moment": "giorno",
+       "place": "Bar Gambrinus",
+       "doing": "dorme su una sedia",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Ehi gatto, tutto bene?",
+     "when": {
+      "day": 4,
+      "moment": "giorno",
+      "place": "Bar Gambrinus",
+      "doing": "dorme su una sedia",
+      "bond": "sconosciuto"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "b1"
+    ],
+    "fits_b1": true
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "b1",
+   "source": "scritto per il banco (T325), neapolis: persona da world/people.json"
+  },
+  {
+   "id": "battuta/fumo/pesce",
+   "group": "battute",
+   "kind": "battuta",
+   "state": {
+    "person": {
+     "name": "Fumo",
+     "job": "gatto di quartiere del bar",
+     "place": "Bar Gambrinus"
+    },
+    "archive": [
+     {
+      "id": "b1",
+      "asked": "Ciao micio, come stai?",
+      "answered": "(Fumo ti guarda, sbadiglia e si rimette a dormire sulla sedia del bar.)",
+      "when": {
+       "day": 3,
+       "moment": "giorno",
+       "place": "Bar Gambrinus",
+       "doing": "dorme su una sedia",
+       "bond": "sconosciuto"
+      }
+     }
+    ],
+    "now": {
+     "asked": "Vuoi un po’ di pesce?",
+     "when": {
+      "day": 4,
+      "moment": "giorno",
+      "place": "Bar Gambrinus",
+      "doing": "dorme su una sedia",
+      "bond": "sconosciuto",
+      "wanderer_has": "una cassetta di alici"
+     }
+    }
+   },
+   "expected": {
+    "same": [
+     "none"
+    ],
+    "fits_b1": false
+   },
+   "rule": {
+    "reuse": "none"
+   },
+   "reuse": "none",
+   "source": "scritto per il banco (T325), neapolis: persona da world/people.json"
+  }
+ ]
+}

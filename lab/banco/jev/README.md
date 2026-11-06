@@ -8,7 +8,8 @@ Zone» e qui non si usano. Questo banco misura se le decisioni chiuse del gioco 
 invece che a Gemini 3.1 Flash-Lite, con le **stesse domande**, e dove conviene.
 
 Niente cambia in `src/`: il banco è solo `lab/`. La proposta di portarlo nel gioco è
-[ADR-0157](../../../docs/adr/0157-jev-per-le-decisioni-chiuse.md) (proposta, non decisa).
+[ADR-0157](../../../docs/adr/0157-jev-per-le-decisioni-chiuse.md) (proposta, non decisa). Gli altri casi d'uso di TypeSafe — quanto delle
+richieste è contesto, le guardie, le battute riusate, il contesto scelto da Jev — sono in [`casi-d-uso.md`](casi-d-uso.md) (T325).
 
 ## Come si usa
 

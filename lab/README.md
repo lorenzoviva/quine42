@@ -23,6 +23,7 @@ nel [report dei costi](../docs/reports/costi-step8.2B.md) e nella storia di git 
 | `prompts/` | i prompt dello Scultore e dell'Artista delle prove |
 | `banco/` | il banco del prompt delle strutture (T154, [`banco/README.md`](banco/README.md)): prompt, bersagli, misure con il corpo del gioco, soglia e criteri, la prima prova; `banco/pattern.md` e `banco/riferimento/` (T181): i pattern con cui crescono le strutture e tre programmi scritti a mano con il metodo del cantiere, che variano e reggono due taglie |
 | `banco/jev/` | il banco di Jev (T313, [`banco/jev/README.md`](banco/jev/README.md)): decisioni chiuse del gioco, giudizi sulla scultura e scelte della vita degli individui chieste a Jev di TypeSafe e a Gemini 3.1 Flash-Lite con le stesse domande; casi registrati, il registro delle chiamate `consumi.jsonl`, `riepilogo.md` |
+| `banco/jev/casi-d-uso/` | dove Jev ci fa risparmiare ancora (T325, [`banco/jev/casi-d-uso.md`](banco/jev/casi-d-uso.md)): quanto delle richieste del Concilio è contesto (un registratore delle chiamate, il taglio delle richieste in parti, `countTokens`, un'ora di gioco), le guardie sui testi del viandante, le battute riusate, il contesto scelto da Jev; casi, misure, il registro `consumi.jsonl`, `riepilogo.md` |
 | `scripts/` | strumenti da riga di comando (sotto) |
 | `tests/` | conformità ai modelli ufficiali (`mjx.test.ts`), mesh (`mesh3d.test.ts`) |
 | `out/` | ciò che scrivono gli script (ignorata da git) |
@@ -54,6 +55,7 @@ Il motore, il front-end XML, la palette, le mesh, lo scheletro, le classi e le f
 - `mjx-official.ts [-- Growth River]`: i modelli ufficiali eseguiti e fotografati.
 - `mjx-trace.ts -- modello.xml [--bersaglio moderna | --size "X Y Z"] [--forma differenze] [--tetto 4000] [--passo N]`: cosa ha fatto un programma, nodo per nodo, in testo (`banco/traccia.md`).
 - `jev-banco.ts -- --offline | --gruppi decisioni,scultura,vita [--modelli …] [--varianti base,rovescio,domande-2] [--oggi] | --prepara scultura|vita | --rapporto`: il banco di Jev (`banco/jev/README.md`); senza `--offline` costa, con i tetti sul registro intero.
+- `jev-casi-d-uso.ts -- --offline | --contesto [--conta] [--universi …] | --gruppi guardia,battute [--modelli …] | --scelta [--taglio largo] [--riusa-intero] | --prepara guardia,battute,scelta | --rapporto`: i casi d'uso di TypeSafe (`banco/jev/casi-d-uso.md`); `--conta` usa `countTokens` di Gemini (gratis), le prove costano con i tetti sul registro di T325 (0,50 $ e 0,80 $).
 - `game-requests.ts`: quanto sono grandi le richieste del gioco (offline, conta i token con `countTokens`).
 
 ## Che cosa ho imparato scrivendo modelli (vale per chi corregge)
