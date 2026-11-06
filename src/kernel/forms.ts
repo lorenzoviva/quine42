@@ -9,9 +9,9 @@
 
 import type { SoundPurpose } from '../mj/sound';
 import { boxOf, classOf, CLASSES, type AssetClass } from '../mj/classes';
-import { Mj3Error, type PaletteEntry, type Vec3 } from '../mj/engine';
+import { Mj3Error, type Grid3, type PaletteEntry, type Vec3 } from '../mj/engine';
 import { colorTable, floors, footprint, surfaces, type Levels, type VoxelGrid } from '../mj/mesh';
-import { compileMjx } from '../mj/model';
+import { compileMjx, type MjxClip } from '../mj/model';
 import { act, FORM_LIMITS, MAX_FORM_TIME, MAX_FORM_XML, runMjx } from '../mj/run';
 import { hashStr } from './rng';
 import { internalFields, internalModelInfo } from './internalNames';
@@ -21,6 +21,12 @@ export const MODELS_DIR = 'models/';
 export const MODELS_INDEX = 'models/index.json';
 /** Voxels per tile (ADR-0032): a person is 30 voxels tall, a tile 20. A model may say its own (ADR-0049). */
 export const VPT = 20;
+/** The half-side of the wanderer's body (`core.player`, physics.radius), in tiles. */
+export const BODY_R = 0.22;
+/** How high a jump clears obstacles and lands (tiles). */
+export const JUMP_UP = 1.05;
+/** How far a jump reaches (tiles). */
+export const JUMP_FAR = 2.6;
 
 /** The density a model's index entry asks for, if it is a sane one (the corona's buildings: 8). */
 export function vptOf(info: ModelInfo | undefined): number {
@@ -366,6 +372,115 @@ export function topUnder(f: Form, levels: Levels, x0: number, z0: number, x1: nu
       for (let l = start[i]; l < start[i + 1]; l++) if (base[l] < at + up) h = Math.max(h, z[l]);
     }
   return h > f.base ? (h - f.base) / f.vpt : undefined;
+}
+
+/** How far up the first solid above a floor starts, in voxels; undefined under the open sky. */
+function testaSopra(levels: Levels, i: number, z: number): number | undefined {
+  for (let l = levels.start[i]; l < levels.start[i + 1]; l++) if (levels.base[l] > z && levels.z[l] > z) return levels.base[l] - z;
+  return undefined;
+}
+
+/** The heights with a floor large enough, the largest first, never closer than a body's height. */
+function picchi(perZ: Map<number, number>, minimo: number, lontano: number): number[] {
+  const out: number[] = [];
+  for (const [z] of [...perZ].sort((a, b) => b[1] - a[1])) {
+    const area = (perZ.get(z - 1) ?? 0) + perZ.get(z)! + (perZ.get(z + 1) ?? 0);
+    if (area < minimo || out.some((o) => Math.abs(o - z) < lontano)) continue;
+    out.push(z);
+  }
+  return out.sort((a, b) => a - b);
+}
+
+/**
+ * The covered floors reached on foot from the outside ground through the door (ramps/stairs and jumps as the game allows):
+ * their heights (voxels from the base), lowest first. A storey needs at least (1.1 tiles)² of covered floor where a body
+ * can stand, separated from other storeys by at least 0.7 tiles.
+ */
+export function reachableStoreys(grid: VoxelGrid, palette: Record<string, PaletteEntry>, vpt: number, base = 0, actions: readonly MjxClip[] = [], seed = 1): number[] {
+  let g = grid;
+  const clip = actions.find((a) => /^apr/i.test(a.name));
+  if (clip) {
+    const copy: Grid3 = { ...grid, cells: new Uint8Array(grid.cells), alphabet: [...grid.alphabet], log: [], epoch: 0 };
+    act(copy, clip, seed);
+    g = copy;
+  }
+
+  const ground = groundOfForm(g, palette, vpt, base);
+  const f = { result: { grid: g }, vpt, base } as unknown as Form;
+  const { levels } = ground;
+  const step = stepOf(vpt);
+  const m = Math.ceil(BODY_R * vpt) + 2;
+  const W = g.X + 2 * m;
+  const key = (x: number, y: number, at: number) => (x + m + (y + m) * W) * 8192 + (at + 256);
+  const blocks = (x: number, y: number, at: number) => {
+    const lx = (x + 0.5 - g.X / 2) / vpt, ly = (y + 0.5 - g.Y / 2) / vpt;
+    return rampBlocks(f, ground, lx - BODY_R, ly - BODY_R, lx + BODY_R, ly + BODY_R, at);
+  };
+  const piatto = (x: number, y: number, at: number) => {
+    const r = Math.ceil(BODY_R * vpt);
+    for (let dy = -r; dy <= r; dy++)
+      for (let dx = -r; dx <= r; dx++) {
+        const nx = x + dx, ny = y + dy;
+        const z = nx >= 0 && ny >= 0 && nx < g.X && ny < g.Y ? levels.z[levelAt(levels, nx + ny * g.X, at)] : base;
+        if (Math.abs(z - at) > 1) return false;
+      }
+    return true;
+  };
+
+  const seen = new Set<number>();
+  const celle: Array<{ x: number; y: number; z: number }> = [];
+  const queue: number[] = [Math.floor(g.X / 2), g.Y + m - 1, base];
+  seen.add(key(queue[0], queue[1], base));
+  let head = 0;
+  while (head < queue.length) {
+    const x = queue[head++];
+    const y = queue[head++];
+    const at = queue[head++];
+    if (x >= 0 && y >= 0 && x < g.X && y < g.Y) celle.push({ x, y, z: at });
+
+    for (const [nx, ny] of [[x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]]) {
+      if (nx < -m || ny < -m || nx >= g.X + m || ny >= g.Y + m) continue;
+      const inside = nx >= 0 && ny >= 0 && nx < g.X && ny < g.Y;
+      const to = inside ? levels.z[levelAt(levels, nx + ny * g.X, at)] : base;
+      if (Math.abs(to - at) > step || seen.has(key(nx, ny, to))) continue;
+      if (blocks(nx, ny, at) || (to !== at && blocks(nx, ny, to))) continue;
+      seen.add(key(nx, ny, to));
+      queue.push(nx, ny, to);
+    }
+
+    if (x >= 0 && y >= 0 && x < g.X && y < g.Y && (x % 2 === 0 && y % 2 === 0) && piatto(x, y, at)) {
+      const lx0 = (x + 0.5 - g.X / 2) / vpt, ly0 = (y + 0.5 - g.Y / 2) / vpt;
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        for (let k = 10; k * 0.1 <= JUMP_FAR + 1e-6; k++) {
+          const d = k * 0.1, lx = lx0 + dx * d, ly = ly0 + dy * d;
+          const t = topUnder(f, levels, lx - BODY_R, ly - BODY_R, lx + BODY_R, ly + BODY_R, at, JUMP_UP * vpt);
+          const h0 = (at - base) / vpt;
+          if (t !== undefined && t - h0 > JUMP_UP) break;
+          const vx = Math.floor(lx * vpt + g.X / 2), vy = Math.floor(ly * vpt + g.Y / 2);
+          if (vx < 0 || vy < 0 || vx >= g.X || vy >= g.Y) break;
+          const i = vx + vy * g.X;
+          const lim = at + JUMP_UP * vpt;
+          let h = base;
+          for (let l = levels.start[i]; l < levels.start[i + 1]; l++) if (levels.z[l] <= lim) h = Math.max(h, levels.z[l]);
+          if (blocks(vx, vy, h)) continue;
+          if (!seen.has(key(vx, vy, h)) && piatto(vx, vy, h)) {
+            seen.add(key(vx, vy, h));
+            queue.push(vx, vy, h);
+          }
+          break;
+        }
+      }
+    }
+  }
+
+  const coperte = new Map<number, number>();
+  for (const c of celle) {
+    const i = c.x + c.y * g.X;
+    if (testaSopra(levels, i, c.z) !== undefined) coperte.set(c.z, (coperte.get(c.z) ?? 0) + 1);
+  }
+  const minArea = (1.1 * vpt) ** 2;
+  const lontano = Math.ceil(0.7 * vpt);
+  return picchi(coperte, minArea, lontano);
 }
 
 /** The most forms the process keeps, and the most memory they may take (ADR-0108): a server lives long, and many universes share it. */

@@ -17,6 +17,7 @@ import { cartoonRender, render, sheet, type RenderOptions } from '../../mj/photo
 import { pngDataUrl } from '../../mj/png';
 import { act, runMjx } from '../../mj/run';
 import { traceText } from '../../mj/trace';
+import { reachableStoreys } from '../forms';
 import type { FileMap } from '../types';
 import { internalFields } from '../internalNames';
 import type { Council } from './council';
@@ -223,6 +224,11 @@ function checkOnce(xml: string, cls: AssetClass, taglia: string | undefined, see
     const notes = [...a.errors];
     const cells = result.grid.X * result.grid.Y * result.grid.Z;
     if (a.voxels > cells * 0.85) notes.push(`riempie il ${Math.round((a.voxels / cells) * 100)}% della scatola: qualcosa cresce senza limite (manca steps?) o la prima lettera di values non è la cella vuota`);
+    if (procedural(cls, taglia) && !notes.length) {
+      const vpt = densityOf(tilesOf(cls, taglia));
+      const storeys = reachableStoreys(result.grid, model.program.palette, vpt, 0, model.actions, seed);
+      if (storeys.length < 2) notes.push(`piani: ${storeys.length} (serve ≥ 2)`);
+    }
     return { xml, model, result, ...(notes.length ? { error: notes.join('; ') } : {}) };
   } catch (e) {
     return { xml, error: e instanceof Mj3Error ? e.message : `errore: ${(e as Error).message}` };

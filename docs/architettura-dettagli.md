@@ -713,7 +713,7 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   la parte di `prompts/agents/sculptor.md` dopo `<!-- strutture -->` (`sculptorRole(files, true)`, `procedural`), senza esempi della libreria:
   lo scheletro è nel prompt, e offline è la risposta dei modelli locali (`skeletonOf`). Il programma non ha una `size` sua (`withoutSize`):
   gira nella scatola della taglia di ogni voce. `checkProgram` lo prova a `STRUCTURE_SEEDS` semi alla sua taglia e al primo seme della
-  successiva (`triedSizes`), e dice dove cade (`failedAt`); la seconda richiesta (il difetto o la revisione dell'Artista) porta la traccia di
+  successiva (`triedSizes`), verificando che vi siano almeno due piani raggiungibili a piedi dalla porta (`reachableStoreys`, ADR-0162), e dice dove cade (`failedAt`); la seconda richiesta (il difetto o la revisione dell'Artista) porta la traccia di
   quel seme (`traceOf`, T179). L'id ha la taglia se non è Grande (`structureModel`: `struttura-<concetto>`, `struttura-<concetto>-huge`); un lotto indossa la voce
   di prima senza suffisso finché la libreria non ha quella della sua taglia, salvo che sia un programma che scala a un'altra taglia
   (`Kernel.structureModelFor`): nulla di già scolpito cambia. Il

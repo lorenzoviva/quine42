@@ -61,6 +61,16 @@ describe('the procedural prompt of the structures (T156)', () => {
     expect(low.failedAt).toEqual({ taglia: 'large', seed: 1 });
   });
 
+  it('rejects a structure program when the stair does not reach the upper floor (T320)', () => {
+    // The skeleton without the stair rules: ground floor holds, second floor cannot be reached
+    const broken = skeleton
+      .replace('<all in="*BB *B* TY*" out="*TY *K* KK*" steps="16"/>', '')
+      .replace('<all in="K B" out="* K" symmetry="()"/>', '');
+    const c = checkProgram(broken, structure);
+    expect(c.error).toBe('taglia Grande, seme 1: piani: 1 (serve ≥ 2)');
+    expect(c.failedAt).toEqual({ taglia: 'large', seed: 1 });
+  });
+
   it('writes no box into the program, sends no box programs as examples, and puts the trace in the second request', async () => {
     const m = new Scripted((c, n) => {
       if (c.task === 'model.sculpt') return n === 1 ? '<sequence values="BW" size="100 100 80" origin="True"><one in="W B" out="B W"/><all in="B W" out="W *" steps="4"/></sequence>' : skeleton;

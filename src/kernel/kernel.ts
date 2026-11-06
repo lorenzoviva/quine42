@@ -37,7 +37,7 @@ import { USAGE_FILE, UsageLog, type CallRecord } from './ai/usage';
 import { SHORTFALLS_FILE, ShortfallLog, type ShortfallNote } from './shortfalls';
 import { addBudgetFromCap, costWithFee, DEFAULT_GRANT_CAP, DEFAULT_PLATFORM_FEE, MemoryLedger, splitCost, type Ledger, type PaymentRecord } from './credits';
 import { MemoryChunks, SealedChunks, type ChunkStore } from './chunks';
-import { bodyFoot, bodyGround, Forms, holesOf, InlineRunner, instanceGrid, levelAt, rampBlocks, stepOf, toLocal, topUnder, type Form, type FormComp, type FormRunner, type Ground } from './forms';
+import { BODY_R, bodyFoot, bodyGround, Forms, holesOf, InlineRunner, instanceGrid, JUMP_FAR, JUMP_UP, levelAt, rampBlocks, stepOf, toLocal, topUnder, type Form, type FormComp, type FormRunner, type Ground } from './forms';
 import { boxOf, classOf, guessClass, RARE_SIZES, sizeOf, sizeRank, SIZE_TIERS, tilesOf, type SizeTier } from '../mj/classes';
 import { stageGrid } from '../mj/mesh';
 import { commonHouseModel, GENERIC, ModelDirector, ownModelId, structureModel } from './modeldirector';
@@ -93,13 +93,12 @@ export interface JumpComp {
 }
 
 /** How high a jump clears (tiles above where it starts) and how far it can land (tiles). */
-export const JUMP_UP = 1.05;
+export { JUMP_UP, JUMP_FAR, BODY_R };
 /** The half-size of a body a way is for when who asks does not say (a villager's, T299), and how far ahead of it the next point is. */
 export const ROUTE_BODY = 0.35;
 export const ROUTE_AHEAD = 1.6;
 /** How near a goal no way reaches one goes, at most this far from it (tiles): a bench in a wall, the middle of a workshop (T299). */
 export const ROUTE_NEAR = 2.5;
-export const JUMP_FAR = 2.6;
 /** The water (T51b): steps of the automaton every so many ticks (100 steps a second at 60 Hz); a dig moves at most so many levels. */
 const WATER_EVERY = 6;
 const WATER_STEPS = 10;
