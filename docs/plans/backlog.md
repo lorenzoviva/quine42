@@ -4798,3 +4798,33 @@ Nasce da T307b: `dossier T307b`. `integra T307b` si è fermato su un conflitto i
 
 **Quando è fatto:** merge committato, `npm test`, `npm run typecheck` e `npm run build` verdi con i loro turni, un solo ADR per numero; esito con le scelte fatte nel conflitto. Non serve il browser (T307b l'ha provato). Sicurezza: nessuna superficie nuova.
 - Esito: merge di T307b (contratto 0.3.0) nel base con T313; conflitto in AGENTS.md risolto tenendo il comando di jev-banco.ts/TYPESAFE_KEY (T313) e `sound-cellular-fugue` (T307b); ADR-0157 resta Jev, la seconda migrazione è ADR-0158 (rinumerata sul ramo T307b con tutti i rimandi), un ADR per numero; banco di Jev portato al contratto 0.3 (vita.ts: moduli `job.*` più i `lavoro.*` di neapolis tradotti, risposte giuste dei mestieri con gli id inglesi, casi/vita.json rigenerato offline; oggi.ts: agente `arbiter`, turni `player`/`npc`); squadre del Referente e classe `suono` invariate perché ancora italiane nel kernel; storico del banco non toccato; banco non rilanciato su Jev/Gemini. Typecheck, suite (2504 passati, 1 saltato) e build verdi nei loro turni. Sicurezza: nessuna superficie nuova.
+
+### T319 · Integrare T156 nel base, che ha il contratto 0.3 (T307b) — `da fare` (dipende da T308a)
+- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 1
+- Step: 32
+
+Nasce da T156: `dossier T156`. `integra T156` si è fermato su conflitti in `AGENTS.md`, `docs/glossario-censimento.md`, `package-lock.json`, `package.json`, `src/kernel/agents/sculptor.ts`, `src/kernel/kernel.ts`, `src/kernel/modeldirector.ts`, `src/kernel/version.ts`, `universe/universe.json`: T156 è nato a 0.2.1, intanto sono entrati T307b e T318 (contratto 0.3.0, nomi inglesi della società e del Concilio, ADR-0158 la migrazione 0.2→0.3).
+
+**Cosa fare:** nel worktree, `git merge task/T156` sul base di adesso. Il kernel sale di `Z` sul contratto del base (0.4.x se T308a è entrato; `version.ts`, `package.json`, `package-lock.json`, `universe.json` uguali). L'ADR di T156 (anche lui 0158) prende il primo numero libero, con i rimandi in `AGENTS.md`, `docs/architettura-dettagli.md`, `docs/adr/README.md` e nel codice. In `sculptor.ts`, `kernel.ts`, `modeldirector.ts` tieni il prompt procedurale, le voci per taglia e `ModelInfo.seeds` di T156 con i nomi inglesi di T307b (classe, campi, agenti): un nome che T156 ha aggiunto in italiano e che T307b ha rinominato prende il nome inglese. Due aggiunte nello stesso punto restano entrambe. Rigenera `docs/glossario-censimento.md` con `tools/glossario/glossario.mjs`.
+
+**Quando è fatto:** merge committato, `npm test`, `npm run typecheck` e `npm run build` verdi con i loro turni, un solo ADR per numero; esito con le scelte fatte nei conflitti. Non serve il browser (T156 l'ha provato). Sicurezza: nessuna superficie nuova.
+
+### T320 · Lo Scultore: «almeno due piani raggiungibili a piedi» nei controlli del kernel — `da fare` (dipende da T319)
+- Pipeline: claude · sforzo high · stima 4% · approvato · priorità 3
+- Step: 32
+
+Nasce da T156 (`dossier T156`, `docs/pipeline/domande/T156.md`, risposta C scelta dall'orchestratore nell'autonomia del 06/11): i controlli del kernel garantiscono che un programma di struttura finisca e stia in piedi a ogni seme, non che la scala porti al piano di sopra; su Gemini 3.8 Flash è il difetto tipico (4 su 7). Le misure ci sono già in `lab/` (il banco di T182/T156, `lab/banco/gemini/giudizio.md`).
+
+**Cosa fare:** portare nel kernel (in `src/`, non importando da `lab/`) la misura dei piani raggiungibili a piedi da una porta (scale e salti come il gioco li permette) e aggiungerla ai controlli di `checkProgram` per la classe `structure` da Grande in su, su ognuno dei semi provati: sotto i due piani il programma torna allo Scultore col motivo, in testo che il prompt della seconda richiesta già sa leggere. Tenere il costo per seme (misurarlo, l'atteso è qualche decimo di secondo) e non cambiare l'esito delle classi semplici. Kernel `+Z`. Test: un programma con la scala che non porta in alto è rifiutato col motivo, uno buono passa, lo scheletro offline passa.
+
+**Quando è fatto:** test nuovi, `npm test` e `npm run typecheck` verdi nei loro turni; esito con il tempo misurato per seme. Non serve il browser. Sicurezza: nessuna superficie nuova.
+
+### T321 · Lo Scultore su Gemini 3.8 Flash: il prompt adattato e un giro sul banco — `da fare` (dipende da T320)
+- Pipeline: claude · sforzo high · stima 4% · approvato · priorità 4
+- Step: 32
+
+Nasce da T156 (`dossier T156`, `docs/pipeline/domande/T156.md`, risposta B scelta dall'orchestratore nell'autonomia del 06/11): col prompt procedurale Gemini 3.8 Flash passa 1 su 7 alla prima e 2 su 7 entro due richieste, contro 7 e 10 su 12 di Claude; tre seconde richieste su sei tornano vuote perché ragiona fino al tetto di output.
+
+**Cosa fare:** nel prompt dello Scultore per `structure` da Grande in su, dire di non toccare reticolo e scala (sezioni 1-2 del riferimento) e di cambiare solo colori, tetto e facciate; provare lo sforzo `medium` di Gemini perché la risposta non finisca vuota. Un giro sugli stessi sette bersagli di T156 con `gemini-3.8-flash` via `agy` (circa 5 $), con il controllo di T320 acceso, e il confronto in `lab/banco/gemini/giudizio.md`. Se regge la soglia del banco, resta il modello delle strutture grandi; se no, l'esito lo dice e propone Argon (risposta A) senza lanciarlo.
+
+**Quando è fatto:** prompt cambiato nel gioco con i test verdi (`npm test`, `npm run typecheck`), il giro misurato e scritto; esito con passati alla prima e entro due richieste e il costo. Non serve il browser. Sicurezza: nessuna superficie nuova.
