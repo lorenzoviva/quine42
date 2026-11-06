@@ -91,8 +91,11 @@ let lastCleanSound: string | undefined;
 /** Three seeds: a program whose seeds do not differ goes back too. */
 const SOUND_CHECK_SEEDS = [1, 2, 3];
 
-/** A sound program stands in no world: it must finish and pass the thresholds of the analysis (ADR-0123, ADR-0125). */
-function soundErrors(path: string, m: MjxModel, time: number): string[] {
+/**
+ * A sound program stands in no world: it must finish and pass the thresholds of the analysis (ADR-0123, ADR-0125). The Musician's and a
+ * handmade card's alike (ADR-0161): `time` is for the three seeds together.
+ */
+export function soundErrors(path: string, m: Pick<MjxModel, 'program' | 'sound'>, time: number): string[] {
   const { issues } = analyzeSound(m, { seeds: SOUND_CHECK_SEEDS, frugal: true, deadline: time / SOUND_CHECK_SEEDS.length });
   return issues.map((i) => `${path}: suono ${italianName('solo-codice', i.defect)}: ${i.message}`);
 }

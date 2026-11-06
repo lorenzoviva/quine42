@@ -1,6 +1,6 @@
 // T134: the production server of `server/production.ts`, built and started as `server/serve.ts` starts it, in its own process. One thing differs: a token says
-// its account (`vero-<uid>`, `anon-<uid>`), because a token of a real Firebase project cannot be made here. Arguments: the build, the world's program, the universes.
-// It stops when its stdin closes, saving its worlds.
+// its account (`vero-<uid>`, `anon-<uid>`), because a token of a real Firebase project cannot be made here. Arguments: the build, the world's program, the universes,
+// and `--laboratori` for the labs' switch on (ADR-0161). It stops when its stdin closes, saving its worlds.
 
 import { createProductionServer } from '../../../server/production';
 
@@ -11,6 +11,7 @@ const running = createProductionServer({
   dist,
   worldProgram,
   universesDir,
+  labs: process.argv.includes('--laboratori'),
   accounts: {
     config: { projectId: 'prova', apiKey: 'pubblica', authDomain: 'prova.firebaseapp.com' },
     verify: async (t) => (t.startsWith('vero-') ? { uid: t.slice(5), anonimo: false } : t.startsWith('anon-') ? { uid: t.slice(5), anonimo: true } : undefined),

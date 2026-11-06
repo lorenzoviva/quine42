@@ -21,6 +21,8 @@ import { videoFolder, videoHandler } from './video';
 import { walletHandler } from './wallet';
 import { wandererHandler } from './wanderer';
 import { serverPath } from './folders';
+import { handmadeHandler } from './handmade';
+import { processChecker } from './programCheck';
 
 type Next = () => void;
 type Route = (req: IncomingMessage, res: ServerResponse, next: Next) => unknown;
@@ -93,7 +95,7 @@ const TYPES: Record<string, string> = {
   '.wav': 'audio/wav',
 };
 
-/** The tools of the author: in the build, not for strangers. */
+/** The tools of the author: in the build, not for strangers. So with `laboratori` off; serving them when it is on is T294's (ADR-0161). */
 const NOT_SERVED = /^\/lab(\/|$)/i;
 
 /** The file of the build a path asks for, or undefined. Only what is really under the build's folder, with a type on the list, and never a name beginning with a dot. */
@@ -175,7 +177,8 @@ export const FRONT_RATES: FrontRates = {
   videosInAll: 200,
 };
 
-const HEAVY = /^\/api\/universe\/[^/?]/;
+/** What reads or writes a universe whole; and the handmade cards: a write may run a program for seconds, a list reads every account's file (ADR-0161). */
+const HEAVY = /^\/api\/(universe\/[^/?]|handmade(\/|\?|$))/;
 const VIDEO_PIECE = /^\/api\/video\/[^/?]/;
 
 export interface ProductionOptions {
@@ -187,6 +190,8 @@ export interface ProductionOptions {
   universesDir: string;
   /** For the tests and the checks in the browser: only by code, never from the environment. */
   accounts?: AccountSettings;
+  /** The labs for the players (`site/beta.json → laboratori`, which serve.ts reads when it starts): off, the routes of the handmade cards refuse everyone (ADR-0161). */
+  labs?: boolean;
   /** For the tests: only by code. */
   rates?: Partial<FrontRates>;
   /** For the tests: only by code. */
@@ -231,6 +236,8 @@ export function createProductionServer(o: ProductionOptions): ProductionServer {
   const gemini = new GeminiGate({ apiKey: o.env.GEMINI_API_KEY, dailyCap: o.env.GEMINI_TETTO_GIORNALIERO, universesDir, ledgerFile: serverPath(universesDir, 'geminiSpend') });
   if (!gemini.available) console.warn('GEMINI_API_KEY assente: i mondi usano i modelli locali');
   const answerAccount = accountHandler(accounts);
+  // The programs of the handmade cards: each checked by the program of the worlds, in a process of its own (programCheck.ts).
+  const checker = processChecker({ program: async () => o.worldProgram });
   const videos = videoFolder(o.env);
   // Not a reason not to start: the site without videos is the site. The name, never the value.
   if (videos && !existsSync(videos)) console.warn('QUINE_VIDEO: la cartella non c’è, il sito resta senza video');
@@ -242,6 +249,7 @@ export function createProductionServer(o: ProductionOptions): ProductionServer {
     walletHandler({ accounts, universesDir, getActiveWorld, platformFee: platformFeeOf(o.env) }),
     sessionList(accounts),
     videoHandler({ folder: videos, accounts, addressOf, atOnce: limits.videosAtOnce, inAll: limits.videosInAll }),
+    handmadeHandler({ accounts, universesDir, labs: () => o.labs === true, checker }),
   ] as Route[];
   const policy = contentSecurityPolicy(accounts.config);
 
@@ -303,6 +311,7 @@ export function createProductionServer(o: ProductionOptions): ProductionServer {
     stop: () =>
       (stopped ??= (async () => {
         await sessions.stop();
+        checker.stop();
         await new Promise<void>((done) => {
           server.close(() => done());
           server.closeAllConnections();

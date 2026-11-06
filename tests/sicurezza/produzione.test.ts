@@ -2,7 +2,7 @@
 // only the routes on its list, every answer has the policy, and a game of two is played over real WebSockets, each world in its process.
 
 import { execFileSync, spawn, type ChildProcess } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import http from 'node:http';
 import type { AddressInfo } from 'node:net';
 import os from 'node:os';
@@ -17,6 +17,7 @@ import { activeHosts } from '../../server/session';
 import { buildFile, createProductionServer, frontDoorRefusal, originsOf, productionProblems, type ProductionServer } from '../../server/production';
 import type { AccountSettings } from '../../server/account';
 import { bundledFiles } from '../../src/kernel/bundle';
+import { HANDMADE_CONTRACT } from '../../src/kernel/handmade';
 import { accountWanderer } from '../../src/session/account';
 import type { ServerMsg } from '../../src/session/protocol';
 
@@ -290,6 +291,38 @@ describe('il server vero', () => {
     const read = await ask('/api/universe/prova');
     expect(Object.keys(JSON.parse(read.text).files).filter((p) => p.startsWith('prompts/'))).toEqual([]);
   });
+
+  it('V-030 le carte fatte a mano: spente rifiutano; accese, il programma lo controlla il programma dei mondi in un processo suo, al ritmo delle rotte pesanti', async () => {
+    const json = { Authorization: 'Bearer vero-alice', 'Content-Type': 'application/json' };
+    // Off, as `labs` is unless said: refused, nothing written, and `/lab` is not served.
+    for (const [method, target] of [['GET', '/api/handmade'], ['POST', '/api/handmade'], ['DELETE', '/api/handmade/handmade-aaaaaaaaaa']] as const) {
+      expect((await ask(target, { method, headers: json, ...(method === 'POST' ? { body: '{}' } : {}) })).status, `${method} ${target}`).toBe(403);
+    }
+    expect(existsSync(path.join(universes(), '.handmade'))).toBe(false);
+    const own = path.join(work, 'universes-laboratori');
+    mkdirSync(own, { recursive: true });
+    const labs = createProductionServer({ env: ENV, dist, worldProgram: built.world, universesDir: own, accounts, labs: true, rates: { heavy: { burst: 4, perSecond: 0.001 } } });
+    await new Promise<void>((r) => labs.server.listen(0, '127.0.0.1', r));
+    const to = (labs.server.address() as AddressInfo).port;
+    try {
+      expect((await ask('/lab/3d/index.html', { to })).status).toBe(404);
+      const small = readFileSync('universe/models/object.xml', 'utf8');
+      const card = { kernel: HANDMADE_CONTRACT, kind: 'model', name: 'Fagotto', class: 'object', xml: small };
+      const ok = await ask('/api/handmade', { to, method: 'POST', headers: json, body: JSON.stringify(card) });
+      expect(ok.status).toBe(201);
+      expect(JSON.parse(ok.text).card).toMatchObject({ name: 'Fagotto', mine: true });
+      const endless = await ask('/api/handmade', { to, method: 'POST', headers: json, body: JSON.stringify({ ...card, xml: '<markov values="BW" size="4 4 4"><one><rule in="B" out="W"/></one><one><rule in="W" out="B"/></one></markov>' }) });
+      expect(endless.status).toBe(422);
+      expect(JSON.parse(endless.text).errors.join()).toMatch(/non finisce/);
+      // Every route of the cards is heavy: the fourth of this address passes, the fifth waits.
+      expect((await ask('/api/handmade', { to, headers: json })).status).toBe(200);
+      expect((await ask('/api/handmade?mine=1', { to, headers: json })).status).toBe(200);
+      expect((await ask('/api/handmade', { to, headers: json })).status).toBe(429);
+      expect(readdirSync(path.join(own, '.handmade'))).toEqual(['alice.json']);
+    } finally {
+      await labs.stop();
+    }
+  }, 120000);
 
   describe('sul WebSocket', () => {
     const open = (query: string, o: { origin?: string; host?: string; target?: string } = {}) => new WebSocket(`ws://127.0.0.1:${port}${o.target ?? '/api/session'}${query}`, { origin: o.origin ?? SITE, headers: { Host: o.host ?? 'gioco.example' } });

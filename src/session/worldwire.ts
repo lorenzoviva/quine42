@@ -2,6 +2,7 @@
 // messages already written, so that the server does not read them twice and never needs to understand them.
 
 import type { ClientMsg } from './protocol';
+import type { HandmadeProgram } from '../kernel/handmade';
 
 /** What a world needs in order to open, sent over the channel: never in its environment nor on its command line. */
 export interface WorldOpen {
@@ -33,7 +34,9 @@ export type ToWorld =
   | { t: 'chiuso'; cid: number }
   | { t: 'chiedi'; id: number; op: WorldCallName; args: unknown[] }
   | { t: 'risposta'; id: number; ok: boolean; value?: unknown; error?: string }
-  | { t: 'ferma' };
+  | { t: 'ferma' }
+  /** The program of a handmade card to check (ADR-0161): a process started only for this (`server/programCheck.ts`) opens no universe. New on the wire, so in English (ADR-0153). */
+  | { t: 'check'; id: number; program: HandmadeProgram };
 
 export type FromWorld =
   | { t: 'pronto' }
@@ -43,7 +46,9 @@ export type FromWorld =
   | { t: 'invia'; cid: number; json: string }
   | { t: 'chiudi'; cid: number }
   | { t: 'chiedi'; id: number; op: 'gemini' | 'verify'; args: unknown[] }
-  | { t: 'risposta'; id: number; ok: boolean; value?: unknown; error?: string };
+  | { t: 'risposta'; id: number; ok: boolean; value?: unknown; error?: string }
+  /** Why the program cannot be a card; empty: it can. */
+  | { t: 'checked'; id: number; errors: string[] };
 
 /** A call to Gemini as it crosses the channel. */
 export interface GeminiCall {

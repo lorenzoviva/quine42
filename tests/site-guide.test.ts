@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { build, createServer } from 'vite';
-import { betaGuide, guidePage, guideParts, secondPartOn } from '../server/betaGuide';
+import { betaGuide, guidePage, guideParts, labsOn, secondPartOn } from '../server/betaGuide';
 
 const ROOT = path.resolve(__dirname, '..');
 const FIRST = 'SENTINELLA-PRIMA-PARTE-t244';
@@ -74,6 +74,24 @@ describe('le istruzioni della beta', () => {
 
   it('il repository nasce con la seconda parte spenta', () => {
     expect(secondPartOn(ROOT)).toBe(false);
+  });
+
+  it.each([
+    ['{ "laCorona": true }', false, true],
+    ['{ "laboratori": "true", "laCorona": true }', false, true],
+    ['{ "laboratori": 1 }', false, false],
+    ['non è json', false, false],
+    ['{ "laboratori": true }', true, false],
+    ['{ "laboratori": true, "laCorona": false }', true, false],
+  ])('i laboratori hanno un interruttore loro (ADR-0161): %s', (text, labs, corona) => {
+    write('site/beta.json', text);
+    expect(labsOn(work)).toBe(labs);
+    expect(secondPartOn(work)).toBe(corona);
+  });
+
+  it('il repository nasce con i laboratori spenti', () => {
+    expect(labsOn(ROOT)).toBe(false);
+    expect(JSON.parse(readFileSync(path.join(ROOT, 'site/beta.json'), 'utf8'))).toHaveProperty('laboratori', false);
   });
 
   it('in sviluppo, senza i file la pagina non si rompe, e un file nuovo si vede senza riavviare', async () => {

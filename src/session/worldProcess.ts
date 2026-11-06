@@ -1,9 +1,11 @@
 // The process of a world of many (T127, ADR-0110): started by server/worldHost.ts, built into one file with Vite. It has no secret in its
 // environment and only reads what the server lets it (the permission model of Node); what needs a secret (Gemini, verifying a
-// token) it asks over the channel. If the server goes away, so does it.
+// token) it asks over the channel. If the server goes away, so does it. The same program, started for one check and nothing else, tries the program
+// of a handmade card (`check`, server/programCheck.ts, ADR-0161): it opens no universe then, and is killed past its time.
 
 import { fileURLToPath } from 'node:url';
 import { FileLedger, platformFeeOf } from '../../server/ledger';
+import { handmadeProgramErrors } from '../kernel/handmade';
 import { worldOf, type WorldCalls } from '../../server/worldCalls';
 import { openUniverse, type UniverseHost } from './host';
 import type { Account, Verifier } from './account';
@@ -140,6 +142,16 @@ process.on('message', (m: ToWorld) => {
     }
     case 'ferma':
       return void stop();
+    case 'check': {
+      // The program of a handmade card (ADR-0161): the whole check here, in a process that has nothing else and is killed past its time.
+      let errors: string[];
+      try {
+        errors = handmadeProgramErrors(m.program);
+      } catch (e) {
+        errors = [`il programma non si può controllare: ${(e as Error)?.message ?? e}`];
+      }
+      return void send({ t: 'checked', id: m.id, errors });
+    }
   }
 });
 process.on('disconnect', () => process.exit(0));

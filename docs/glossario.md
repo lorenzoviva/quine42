@@ -1000,6 +1000,20 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: `Carta`, `isCarta` (nel codice), `CardLedger`
 - **Fermo**: `carta`, `autore`, `utilizzi`, `world/cards.json`.
 
+### Carta fatta a mano
+- **Inglese**: `handmade`, `HandmadeCard`, `HandmadeRecord`, `HandmadeArchive`, `handmadeHandler`, `handmadeSummary`, `handmadeView`, `HANDMADE_CAPS`, `newHandmadeId`
+- **Definizione**: un programma (modello o suono) che un giocatore ha forkato nei laboratori e cambiato, con un id suo, il nome, la classe e la taglia, il contratto `X.Y` con cui è stato controllato, l'autore e da dove nasce (`from`, `origins`); sta nella collezione del suo account, fuori dagli universi, e entra in un mondo solo all'inizio di un universo (T295). La **firma** (`signature`) è come l'autore si fa vedere dagli altri, mai il suo id.
+- **Dove vive**: `src/kernel/handmade.ts`, `server/handmade.ts`, `universes/.handmade/`
+- **Da non usare**: «carta-mano», `.carte-mano` (la cartella è inglese, ADR-0153), «copia» (per la carta: un fork ha un id suo e non sostituisce l'originale)
+- **Fermo**: `/api/handmade`, `universes/.handmade/<viandante>.json`, i campi `kind`, `name`, `class`, `size`, `xml`, `kernel`, `author`, `from`, `origins`, `made`, `changed`, `signature`.
+
+### Controllo del programma
+- **Inglese**: `handmadeProgramErrors`, `HANDMADE_LIMITS`, `ProgramChecker`, `processChecker`, `inlineChecker`
+- **Definizione**: la prova del programma di una carta fatta a mano sul motore vero, entro tetti misurati sui programmi del seme (griglia, passi, tempo, azioni, animazioni, soglie del suono); nel server di produzione la fa il programma dei mondi, un processo per controllo senza segreti.
+- **Dove vive**: `src/kernel/handmade.ts`, `server/programCheck.ts`, `src/session/worldProcess.ts`
+- **Da non usare**: «validazione» (per questo controllo: il validatore è quello del Concilio, `validator.ts`, che qui presta le soglie del suono)
+- **Fermo**: i messaggi `check` e `checked` del canale dei mondi.
+
 ### Titolare
 - **Inglese**: `holder`, `cardHolderOf`
 - **Definizione**: di chi è una carta: chi l'ha pagata o, per le comuni, un viandante estratto col seme.
@@ -1064,6 +1078,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Definizione**: la pagina per i tester, dal Markdown di `docs/beta/`: la prima parte se c'è, la seconda solo se `site/beta.json` la accende; spenta non entra nella build.
 - **Dove vive**: `server/betaGuide.ts`, `site/istruzioni.ts`
 - **Da non usare**: nessuno
+
+### Laboratori per i giocatori
+- **Inglese**: `labsOn`, `labs`
+- **Definizione**: l'interruttore `laboratori` di `site/beta.json`, separato da `laCorona`: spento (il predefinito) le rotte delle carte fatte a mano rifiutano chiunque e il server di produzione non serve `/lab`; acceso, i giocatori forkano modelli e suoni nei tre laboratori (T294).
+- **Dove vive**: `server/betaGuide.ts`, `server/production.ts`, `server/serve.ts`
+- **Da non usare**: «lab» (nei documenti e nella UI)
+- **Fermo**: `laboratori` in `site/beta.json`.
 
 ## Il kernel
 

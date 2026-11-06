@@ -157,6 +157,9 @@ export interface Form {
 /** How many different seeds a kind of entity has in the world (instances share them: fewer meshes). */
 const SEEDS: Record<string, number> = { tree: 3, bush: 3, rock: 3, pebble: 3, person: 8, animal: 4, beast: 4, building: 1, structure: 1, monument: 2 };
 
+/** The seeds a model of a class has in the world, unless its entry says otherwise (`seedsOf`): a handmade card is tried on each (ADR-0161). */
+export const classSeeds = (classId: string): number => SEEDS[classId] ?? 2;
+
 /** A step one walks up without noticing (a doorstep, a floor): 0.2 tiles, in voxels of a density. */
 export const stepOf = (vpt: number) => Math.round(0.2 * vpt);
 
@@ -549,7 +552,7 @@ export class Forms {
     if (model === 'circuito-3D' || model === 'schermo-struttura' || model === 'schermo-scritte') return 4;
     const own = this.info(model)?.seeds;
     if (typeof own === 'number' && Number.isInteger(own) && own >= 1 && own <= 8) return own;
-    return SEEDS[this.classOf(model).id] ?? 2;
+    return classSeeds(this.classOf(model).id);
   }
 
   /** Preloads forms for a model for the given number of seeds (default: seedsOf(model)). */

@@ -16,7 +16,9 @@ import { testWorkers } from './server/testWorkers';
 import { walletRoute } from './server/wallet';
 import { grantCapOf, platformFeeOf } from './server/ledger';
 import { videoFolder, videoRoute } from './server/video';
-import { betaGuide, guidePage } from './server/betaGuide';
+import { betaGuide, guidePage, labsOn } from './server/betaGuide';
+import { handmadeRoute } from './server/handmade';
+import { inlineChecker } from './server/programCheck';
 import { siteSkins } from './server/skins';
 import { serverPath } from './server/folders';
 
@@ -52,6 +54,8 @@ export default defineConfig(({ mode }) => {
       wandererRoute({ accounts, universesDir, getActiveWorld }),
       // The site's credits page (T105): the account's balance and their lines of the two ledgers.
       walletRoute({ accounts, universesDir, getActiveWorld, platformFee: platformFeeOf(env) }),
+      // The handmade cards (T293, ADR-0161): only with `laboratori` in site/beta.json, read at every request; the programs checked here (only this machine listens).
+      handmadeRoute({ accounts, universesDir, labs: () => labsOn(process.cwd()), checker: inlineChecker() }),
       sessionServer(accounts, gemini.direct(), internal, { universesDir, grantCap: grantCapOf(env, !!accounts?.verify), platformFee: platformFeeOf(env) }, Number(env.QUINE_MONDO_MEMORIA) || undefined, Number(env.QUINE_MONDI_MASSIMI) || undefined),
       subscriptionQueue(serverPath(path.resolve(process.cwd(), 'universes'), 'queue'), { enabled: queueWanted(env) }),
       // The site's videos, from the same folder as in production (T244, ADR-0131), and the instructions of the beta: what is off never reaches the build.

@@ -340,6 +340,39 @@ Modello di una voce:
 - Test: `tests/sicurezza/secondo-audit.test.ts`, `tests/sicurezza/produzione.test.ts`
 - Esito: chiusa da T167 (ADR-0113), 02/11/2026, branch `task/T167`.
 
+### V-030 · Il programma di una carta fatta a mano negli altri browser e nei mondi
+- Gravità: alta (oggi: nessuna, l'interruttore `laboratori` è spento)
+- Stato: `chiusa`
+- Superficie: `POST /api/handmade` e `POST /api/handmade/<id>` (`server/handmade.ts`), `handmadeProgramErrors` (`src/kernel/handmade.ts`), `server/programCheck.ts`, il messaggio `check` del programma dei mondi (`src/session/worldProcess.ts`)
+- Proprietà violata: ciò che un giocatore scrive come programma MarkovJunior arriva nei browser e nei mondi degli altri solo dentro tetti misurati sul motore vero (griglia, passi, tempo, azioni, animazioni, soglie del suono), e controllarlo non ferma il server: un passo solo di un programma può durare quanto vuole
+- Prova: test (T293): programmi che non finiscono, griglie enormi anche per `map`, troppe azioni, azioni e animazioni che non finiscono, XML ostile (commenti e tag mai chiusi, annidamento, entità, regole da file, script) che torna indietro in meno di 3 s; un processo del controllo muto, morto o senza memoria; la coda; l'ambiente del processo; sul server di produzione vero, con il programma dei mondi costruito, un programma che non finisce torna 422
+- Contromisura: `handmadeProgramErrors` con `HANDMADE_LIMITS`, misurati sui programmi del seme (`lab/scripts/carte-mano.ts`): ogni seme della classe, poi ogni azione e ogni fotogramma, entro 15 s; nel server di produzione il controllo gira nel programma dei mondi, un processo per controllo senza segreti, con 512 MB e la sola lettura della sua cartella, ucciso a 25 s, uno alla volta e una coda di 8, poi 503; ogni rotta delle carte è pesante per il ritmo per indirizzo e le scritture hanno un ritmo per account (ADR-0161). In `npm run dev` e nell'anteprima il controllo gira nel processo del server, che ascolta solo questa macchina (regola 8h).
+- Task: T293
+- Test: `tests/sicurezza/carte-mano.test.ts`, `tests/sicurezza/produzione.test.ts`, `tests/sicurezza/serververo.test.ts`
+- Esito: chiusa da T293 (ADR-0161), 06/11/2026, branch `task/T293`. Non coperti: chi ha molti account e molti indirizzi tiene occupata la coda del controllo (non la macchina: un processo alla volta).
+
+### V-031 · L'archivio delle carte fatte a mano: chi scrive, quanto, dove
+- Gravità: media (oggi: nessuna, l'interruttore `laboratori` è spento)
+- Stato: `chiusa`
+- Superficie: `/api/handmade` (`server/handmade.ts`), `universes/.handmade/`
+- Proprietà violata: solo l'autore scrive le sue carte, e chi lo è lo dice il token, mai il corpo né un id detto; nessuno senza account, un anonimo legge e non scrive; con l'interruttore spento ogni rotta rifiuta chiunque; un account ha un tetto di carte, di byte e di scritture; nessun universo (Lua, Concilio, ramo, ritorno) raggiunge l'archivio; ciò che esce agli altri è a elenco, senza l'id dell'autore né la catena; un archivio illeggibile non si riscrive
+- Prova: test (T293), e sul server di produzione vero con la build e il verificatore dei token di prova
+- Contromisura: il file da scrivere viene solo dall'identità verificata (`callerOf`), `gate` prima di tutto, l'interruttore `site/beta.json → laboratori` (ADR-0161), `HANDMADE_CAPS` (50 carte, 2 MiB) e `HANDMADE_WRITES`, l'archivio fuori dagli universi come i saldi (regola 8d), `handmadeSummary` e `handmadeView` come elenco (regola 8f).
+- Task: T293
+- Test: `tests/sicurezza/carte-mano.test.ts`, `tests/sicurezza/produzione.test.ts`, `tests/sicurezza/serververo.test.ts`
+- Esito: chiusa da T293 (ADR-0161), 06/11/2026, branch `task/T293`. Una firma non è un'identità: due autori possono firmarsi uguali.
+
+### V-032 · Il nome e la firma di una carta fatta a mano
+- Gravità: bassa
+- Stato: `chiusa`
+- Superficie: `cleanText`, `cleanCardName` (`src/kernel/handmade.ts`), i campi `name` e `signature` di `/api/handmade`
+- Proprietà violata: il testo di un giocatore che il sito mostra agli altri (e che un giorno può essere il nome di una cosa nel mondo, T295) non porta markup, caratteri di controllo o invisibili (nemmeno un rovesciamento bidirezionale), e il nome non rompe la quarta parete
+- Prova: test (T293), anche sul server di produzione vero
+- Contromisura: una riga, al più 60 caratteri (40 la firma), almeno una lettera o una cifra, niente `<` `>`, niente caratteri `Cc`, `Cf`, `Co`, `Cn`, `Cs`, il nome passa da `metaBreak` (ADR-0161). Chi lo mostra lo mostra come testo (T294).
+- Task: T293
+- Test: `tests/sicurezza/carte-mano.test.ts`, `tests/sicurezza/serververo.test.ts`
+- Esito: chiusa da T293 (ADR-0161), 06/11/2026, branch `task/T293`.
+
 ## Le prove dell'autore
 
 Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm run sicurezza:prove`, `tools/sicurezza/catalogo.mjs`) e di [`prove-f12.md`](prove-f12.md); i test stanno in `tests/sicurezza/`. Le misure in [`esiti/`](esiti/). `tests/sicurezza-kit.test.ts` controlla che la tabella e il catalogo dicano le stesse prove: una voce nuova ha qui la sua riga.
@@ -375,6 +408,9 @@ Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm ru
 | V-027 | — | — | `secondo-audit.test.ts`, `uscita.test.ts` | ciò che Lua scrive si vede solo dentro la sandbox: lo prova tests/sicurezza/secondo-audit.test.ts |
 | V-028 | a | — | `secondo-audit.test.ts`, `produzione.test.ts` | — |
 | V-029 | a | — | `secondo-audit.test.ts`, `produzione.test.ts` | — |
+| V-030 | — | — | `carte-mano.test.ts`, `produzione.test.ts`, `serververo.test.ts` | le carte fatte a mano hanno l’interruttore spento nel progetto del kit: le prova il server di produzione vero, tests/sicurezza/serververo.test.ts |
+| V-031 | — | — | `carte-mano.test.ts`, `produzione.test.ts`, `serververo.test.ts` | le carte fatte a mano hanno l’interruttore spento nel progetto del kit: le prova il server di produzione vero, tests/sicurezza/serververo.test.ts |
+| V-032 | — | — | `carte-mano.test.ts`, `serververo.test.ts` | il nome di una carta si prova sulle sue funzioni: tests/sicurezza/carte-mano.test.ts |
 
 ## Ciò che nessuna voce copre ancora
 

@@ -14,6 +14,7 @@ import { buildServer } from '../../server/buildServer';
 import { createFakeStripeSignature } from '../../server/stripe';
 import { PROGRAM_HEAD } from '../../server/worldHost';
 import { bundledFiles } from '../../src/kernel/bundle';
+import { HANDMADE_CONTRACT } from '../../src/kernel/handmade';
 import { accountWanderer } from '../../src/session/account';
 import type { ServerMsg } from '../../src/session/protocol';
 // @ts-expect-error a plain .mjs of the kit, without types
@@ -321,6 +322,8 @@ describe('con gli account', () => {
         ['GET', '/api/account'],
         ['POST', '/api/stripe/checkout'],
         ['POST', '/api/stripe/webhook'],
+        ['GET', '/api/handmade'],
+        ['POST', '/api/handmade'],
       ];
       const before = head();
       for (const [method, target] of routes) {
@@ -515,6 +518,19 @@ describe('con gli account', () => {
     });
   });
 
+  describe('le carte fatte a mano, con l’interruttore spento', () => {
+    it('V-031 ogni rotta rifiuta chiunque, il master compreso, e nulla si scrive', async () => {
+      const body = JSON.stringify({ kernel: HANDMADE_CONTRACT, kind: 'model', name: 'Fagotto', class: 'object', xml: '<sequence values="BW" size="4 4 4"/>' });
+      for (const token of [undefined, 'vero-uid-master', 'vero-uid-alice', 'anon-uid-alice', 'falso']) {
+        for (const [method, target] of [['GET', '/api/handmade'], ['GET', '/api/handmade?mine=1'], ['POST', '/api/handmade'], ['POST', '/api/handmade/signature'], ['DELETE', '/api/handmade/handmade-aaaaaaaaaa']] as const) {
+          const r = method === 'POST' ? await post(target, token, JSON.parse(body)) : await ask(target, { method, headers: token ? bearer(token) : {} });
+          expect(r.status, `${method} ${target} ${token}`).toBe(403);
+        }
+      }
+      expect(existsSync(path.join(universes, '.handmade'))).toBe(false);
+    });
+  });
+
   describe('sul WebSocket, in una partita vera', () => {
     const player = (query = '?universo=prova') => {
       const ws = new WebSocket(`ws://127.0.0.1:${port}/api/session${query}`, { origin: SITE, headers: { Host: HOST } });
@@ -613,6 +629,80 @@ describe('con gli account', () => {
   }, 60000);
 });
 
+describe('con i laboratori accesi (le carte fatte a mano)', () => {
+  let port: number;
+  let server: ReturnType<typeof startServer>;
+  let universes: string;
+  const network = () => path.join(work, 'rete-laboratori.jsonl');
+  const ask = (target: string, o: { method?: string; headers?: Record<string, string>; body?: string } = {}) => askAt(port, target, o);
+  const post = (target: string, token: string | undefined, body: unknown, headers: Record<string, string> = {}) => ask(target, { method: 'POST', headers: { ...json, ...(token ? bearer(token) : {}), ...headers }, body: JSON.stringify(body) });
+  const small = readFileSync(path.join(REPO, 'universe', 'models', 'object.xml'), 'utf8');
+  const card = (more: Record<string, unknown> = {}) => ({ kernel: HANDMADE_CONTRACT, kind: 'model', name: 'Fagotto', class: 'object', xml: small, ...more });
+
+  beforeAll(async () => {
+    universes = path.join(work, 'universes-laboratori');
+    makeUniverse(universes, 'prova', MASTER);
+    server = startServer([launcher, path.join(work, 'dist'), worldProgram, universes, '--laboratori'], { QUINE_UNIVERSI: universes }, network());
+    port = await server.ready();
+  }, 180000);
+
+  afterAll(async () => {
+    server?.child.stdin?.end();
+    await Promise.race([server?.ended, new Promise((r) => setTimeout(r, 30000))]);
+    if (server?.child.exitCode === null) server.child.kill();
+    await server?.ended;
+  }, 60000);
+
+  it('V-030 il programma lo controlla il programma dei mondi: uno buono entra, uno che non finisce torna col motivo', async () => {
+    const ok = await post('/api/handmade', 'vero-uid-alice', card({ from: { universe: 'prova', model: 'object' } }));
+    expect(ok.status).toBe(201);
+    expect(JSON.parse(ok.text).card).toMatchObject({ name: 'Fagotto', mine: true, from: { universe: 'prova', model: 'object' } });
+    const endless = await post('/api/handmade', 'vero-uid-alice', card({ xml: '<markov values="BW" size="4 4 4"><one><rule in="B" out="W"/></one><one><rule in="W" out="B"/></one></markov>' }));
+    expect(endless.status).toBe(422);
+    expect(JSON.parse(endless.text).errors.join()).toMatch(/non finisce/);
+    expect(server.child.exitCode).toBeNull();
+  }, 120000);
+
+  it('V-031 solo l’autore scrive le sue carte; un anonimo e nessuno no; agli altri niente id', async () => {
+    const mine = JSON.parse((await ask('/api/handmade?mine=1', { headers: bearer('vero-uid-alice') })).text).cards;
+    expect(mine).toHaveLength(1);
+    const id = mine[0].id;
+    const file = path.join(universes, '.handmade', `${ALICE}.json`);
+    const before = readFileSync(file, 'utf8');
+    expect((await post(`/api/handmade/${id}`, 'vero-uid-bruno', { name: 'Di Bruno' })).status).toBe(404);
+    expect((await ask(`/api/handmade/${id}`, { method: 'DELETE', headers: bearer('vero-uid-bruno') })).status).toBe(404);
+    expect((await post(`/api/handmade/${id}`, 'vero-uid-master', { name: 'Del master' })).status).toBe(404);
+    expect((await post('/api/handmade', 'anon-uid-bruno', card())).status).toBe(403);
+    expect((await post('/api/handmade', undefined, card())).status).toBe(401);
+    expect((await post('/api/handmade', undefined, card(), { 'X-Quine-Viandante': ALICE })).status).toBe(401);
+    expect((await post('/api/handmade', 'falso', card())).status).toBe(401);
+    expect((await post('/api/handmade', 'vero-uid-alice', card(), { Origin: 'https://altro.example' })).status).toBe(403);
+    expect(readFileSync(file, 'utf8')).toBe(before);
+    expect(readdirSync(path.join(universes, '.handmade'))).toEqual([`${ALICE}.json`]);
+    for (const token of ['vero-uid-bruno', 'anon-uid-bruno']) {
+      for (const target of ['/api/handmade', `/api/handmade/${id}`]) {
+        const r = await ask(target, { headers: bearer(token) });
+        expect(r.status, target).toBe(200);
+        expect(r.text, target).not.toContain(ALICE);
+        expect(r.text, target).not.toContain('origins');
+      }
+    }
+    expect((await ask('/api/handmade')).status).toBe(401);
+  });
+
+  it('V-032 un nome con markup o che rompe la quarta parete non entra', async () => {
+    for (const name of ['<img src=x onerror=alert(1)>', 'La simulazione', 'Torre‮enoz']) expect((await post('/api/handmade', 'vero-uid-alice', card({ name }))).status, name).toBe(400);
+  });
+
+  it('V-016 nessun valore finto in ciò che è uscito da questo server', async () => {
+    for (const [name, v] of Object.entries(secrets)) {
+      expect(heardByClients.some((t) => t.includes(v)), `${name} a un client`).toBe(false);
+      expect(server.out.text.includes(v), `${name} nel log`).toBe(false);
+    }
+    expect(networkOf(network()).filter((n) => n.bloccato)).toEqual([]);
+  });
+});
+
 describe('il file che `npm run serve` avvia, con il verificatore vero', () => {
   let port: number;
   let server: ReturnType<typeof startServer>;
@@ -690,6 +780,12 @@ describe('il file che `npm run serve` avvia, con il verificatore vero', () => {
       expect((await ask(target, { headers: { Host: `localhost:${port}` } })).status, target).toBe(404);
     }
     expect(existsSync(path.join(universes, '.queue'))).toBe(false);
+  });
+
+  it('V-031 legge l’interruttore di site/beta.json quando parte: spento, le carte fatte a mano rifiutano', async () => {
+    expect(JSON.parse(readFileSync(path.join(work, 'site', 'beta.json'), 'utf8')).laboratori).toBe(false);
+    expect((await ask('/api/handmade', { headers: bearer('falso') })).status).toBe(403);
+    expect(existsSync(path.join(universes, '.handmade'))).toBe(false);
   });
 
   it('V-014 la configurazione non si legge: né dal disco né dalla rotta', async () => {
