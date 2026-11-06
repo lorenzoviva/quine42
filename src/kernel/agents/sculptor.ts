@@ -9,13 +9,14 @@
 
 import type { Schema } from '../ai/models';
 import { analyse } from '../../mj/check';
-import { boxOf, classOf, CLASSES, densityOf, RARE_SIZES, sizeOf, SIZE_TIERS, TILE, tilesOf, type AssetClass, type SizeTier } from '../../mj/classes';
+import { boxOf, classOf, CLASSES, densityOf, RARE_SIZES, sizeOf, sizeRank, SIZE_TIERS, TILE, tilesOf, type AssetClass, type SizeTier } from '../../mj/classes';
 import { Mj3Error, type RunResult, type Vec3 } from '../../mj/engine';
 import { compileMjx, type MjxModel } from '../../mj/model';
 import { MJ_PALETTE } from '../../mj/palette';
 import { cartoonRender, render, sheet, type RenderOptions } from '../../mj/photo';
 import { pngDataUrl } from '../../mj/png';
 import { act, runMjx } from '../../mj/run';
+import { traceText } from '../../mj/trace';
 import type { FileMap } from '../types';
 import { internalFields } from '../internalNames';
 import type { Council } from './council';
@@ -61,6 +62,8 @@ export interface SculptRequest {
   /** The program it had (a request to sculpt it again) and what is wished. */
   previous?: string;
   desiderio?: string;
+  /** A structure's entries of the same concept at the other sizes (ADR-0160): a program that scales is shared, not sculpted again. */
+  shareWith?: string[];
 }
 
 export interface Critique {
@@ -96,10 +99,41 @@ const classLine = (c: AssetClass) => {
 /** The sizes of D&D (ADR-0092): how a class's box scales when an entity is of another size than its class's. */
 const sizesLine = () => `  Taglie (D&D): ${SIZE_TIERS.map((t) => `${t.name} ×${t.scala}`).join(' · ')} — il lato rispetto a Media; una cosa di un'altra taglia ha la scatola della sua classe scalata (la richiesta la dice)`;
 
-/** The Sculptor's instructions (prompts/agents/sculptor.md) with the scale, the classes, the sizes and the palette. */
-export function sculptorRole(files: FileMap): string {
+/**
+ * The structures that grow by rules (T156, ADR-0160): the class `structure` from Large up, a box of 100 voxels a side or more.
+ * Their prompt is the procedural one (the skeleton of the bench, T182), the program has no box of its own (`size`), so one
+ * program serves every size (`shareableProgram`), and it is tried at more seeds and at the next size.
+ */
+export const procedural = (cls: AssetClass, taglia?: string): boolean => cls.id === 'structure' && sizeRank(sizeOf(taglia)?.id ?? cls.taglia) >= sizeRank('large');
+
+/** The sizes a procedural program is tried at: its own and the next (the last one, Gargantuan, with the one before). */
+export function triedSizes(cls: AssetClass, taglia?: string): SizeTier[] {
+  const own = sizeOf(taglia)?.id ?? cls.taglia;
+  const r = sizeRank(own);
+  return [own, (SIZE_TIERS[r + 1] ?? SIZE_TIERS[r - 1]).id];
+}
+
+/** Seeds a procedural structure has in the world (`ModelInfo.seeds`): each is another building of the same kind. */
+export const STRUCTURE_SEEDS = 4;
+
+/** Where the structures' prompt begins in `prompts/agents/sculptor.md`: what comes before is for every other class. */
+export const STRUCTURES_MARK = '<!-- strutture -->';
+
+/** The skeleton of the structures' prompt (its first ```xml block): offline it is the Sculptor's answer. */
+export function skeletonOf(role: string): string | undefined {
+  return /```xml\s*([\s\S]*?)```/.exec(role)?.[1]?.trim();
+}
+
+/**
+ * The Sculptor's instructions (prompts/agents/sculptor.md) with the scale, the classes, the sizes and the palette; for the
+ * procedural structures the part after `STRUCTURES_MARK`, which says its own numbers.
+ */
+export function sculptorRole(files: FileMap, structures = false): string {
   const palette = Object.entries(MJ_PALETTE).map(([k, v]) => `${k} ${v.color.slice(1)}`).join(' · ');
-  return (files['prompts/agents/sculptor.md'] ?? 'Sei lo Scultore: scrivi programmi MarkovJunior in XML.')
+  const text = files['prompts/agents/sculptor.md'] ?? 'Sei lo Scultore: scrivi programmi MarkovJunior in XML.';
+  const at = text.indexOf(STRUCTURES_MARK);
+  if (structures && at >= 0) return text.slice(at + STRUCTURES_MARK.length).trim();
+  return (at >= 0 ? text.slice(0, at).trimEnd() : text)
     .replaceAll('@@TILE@@', String(TILE))
     .replace('@@CLASSES@@', [...CLASSES.map(classLine), sizesLine()].join('\n'))
     .replace('@@PALETTE@@', palette);
@@ -144,8 +178,19 @@ export function withSize(xml: string, box: Vec3): string {
   return xml.slice(0, m.index) + `<${m[1]}${attrs}>` + xml.slice(m.index + m[0].length);
 }
 
+/** A program without a box of its own and without `map`: the library runs it in the box of each entry's size (ADR-0160). */
+export const shareableProgram = (xml: string): boolean => !scales(xml) && !/\ssize="/.test(/<(?!!)[a-z]+\b[^>]*>/i.exec(xml.replace(/<!--[\s\S]*?-->/g, ''))?.[0] ?? '');
+
+/** The root without its `size`: a procedural program takes the box it is given. */
+export function withoutSize(xml: string): string {
+  const m = /<(?!!)([a-z]+)\b([^>]*)>/i.exec(xml);
+  return m && /\ssize="/.test(m[2]) ? xml.slice(0, m.index) + `<${m[1]}${m[2].replace(/\ssize="[^"]*"/, '')}>` + xml.slice(m.index + m[0].length) : xml;
+}
+
 interface Checked {
   xml: string;
+  /** Where a procedural program fell (the size and the seed): the trace looks there. */
+  failedAt?: { taglia: SizeTier; seed: number };
   model?: MjxModel;
   result?: RunResult;
   error?: string;
@@ -153,11 +198,26 @@ interface Checked {
 
 /** The kernel's checks on a program: what makes it unusable goes back to the Sculptor with the reason. */
 export function checkProgram(xml: string, cls: AssetClass, taglia?: string): Checked {
+  if (!procedural(cls, taglia)) return checkOnce(xml, cls, taglia, 1);
+  // A procedural structure (ADR-0160): every seed the world shows at its size, and the first at the next size, which shares it.
+  xml = withoutSize(xml);
+  const [own, next] = triedSizes(cls, taglia);
+  const tries: Array<[SizeTier, number]> = [...Array.from({ length: STRUCTURE_SEEDS }, (_, i): [SizeTier, number] => [own, i + 1]), [next, 1]];
+  let first: Checked | undefined;
+  for (const [t, seed] of tries) {
+    const c = checkOnce(xml, cls, t, seed);
+    first ??= c;
+    if (c.error) return { ...c, xml, failedAt: { taglia: t, seed }, error: `taglia ${sizeOf(t)!.name}, seme ${seed}: ${c.error}` };
+  }
+  return first!;
+}
+
+function checkOnce(xml: string, cls: AssetClass, taglia: string | undefined, seed: number): Checked {
   const box = boxOf(cls, taglia);
   try {
     // A program that decides on a coarse grid and maps up keeps its own size; the others get the class's box.
     const model = compileMjx(xml, scales(xml) ? {} : { size: box });
-    const result = runMjx(model, 1, { deadline: 8_000 });
+    const result = runMjx(model, seed, { deadline: 8_000 });
     if (!result.finished) return { xml, model, error: 'il programma non finisce in 8 secondi: ogni crescita deve avere steps' };
     const a = analyse(result, model.program.palette, { grounded: true, minHeight: Math.round((cls.minHeight ?? 0) * box[2]) });
     const notes = [...a.errors];
@@ -188,9 +248,29 @@ export function describe(req: SculptRequest, cls: AssetClass): string {
     req.contesto && `Dove si trova: ${req.contesto}`,
     `Classe: ${cls.id}${size && size.id !== cls.taglia ? ` · taglia ${size.name} (${tiles.join(' × ')} caselle, ${densityOf(tiles)} voxel per casella)` : ''} · scatola ${box.join(' × ')} voxel${cls.minHeight ? ` · alto almeno ${Math.round(cls.minHeight * box[2])}` : ''}`,
     req.tinta && 'Vale per molte cose di questo genere: il colore principale è la lettera C (il gioco la ricolora per ciascuna).',
+    procedural(cls, req.taglia) && bodyLine(cls, req.taglia),
   ]
     .filter(Boolean)
     .join('\n');
+}
+
+/** What a procedural structure's message says of the body at its size, and of the size that shares the program (as the bench says it, T154). */
+function bodyLine(cls: AssetClass, taglia?: string): string {
+  const [own, next] = triedSizes(cls, taglia);
+  const body = (t: SizeTier) => {
+    const vpt = densityOf(tilesOf(cls, t));
+    return `una casella è ${vpt} voxel, gradino ${Math.round(0.2 * vpt)}, persona alta ${Math.ceil(1.5 * vpt)}`;
+  };
+  return `Corpo: ${body(own)}. Lo stesso programma serve anche la taglia ${sizeOf(next)!.name} (scatola ${boxOf(cls, next).join(' × ')}, ${body(next)}) e gira con ${STRUCTURE_SEEDS} semi: ognuno è un altro edificio dello stesso genere.`;
+}
+
+/** What a procedural program did, node by node (T179), where it fell or at its first seed: the second request carries it. */
+export function traceOf(c: Pick<Checked, 'xml' | 'failedAt'>, cls: AssetClass, taglia?: string): string | undefined {
+  try {
+    return traceText(compileMjx(c.xml, { size: boxOf(cls, c.failedAt?.taglia ?? taglia) }), c.failedAt?.seed ?? 1, { deadline: 8_000 });
+  } catch {
+    return undefined;
+  }
 }
 
 export function modelFor(req: SculptRequest, cls: AssetClass, m: SculptorAiModels, today = new Date().toISOString().slice(0, 10)): string {
@@ -224,22 +304,28 @@ export async function judge(c: Council, req: SculptRequest, cls: AssetClass, che
  * revision (the program, the photographs, the Artist's words).
  */
 async function write(c: Council, req: SculptRequest, cls: AssetClass, model: string, previous?: { checked: Checked; critique: Critique }, retries = 2): Promise<{ checked?: Checked; calls: number; error?: string }> {
-  const role = sculptorRole(c.files);
-  const examples = examplesFor(c.files, cls.id);
+  const proc = procedural(cls, req.taglia);
+  const role = sculptorRole(c.files, proc);
+  // The procedural prompt has its skeleton: the library's programs of sole boxes would teach the opposite (T156).
+  const examples = proc ? [] : examplesFor(c.files, cls.id);
+  const traced = (k: Checked) => {
+    const t = proc ? traceOf(k, cls, req.taglia) : undefined;
+    return t ? `\nEcco cosa ha fatto il programma quando il gioco lo ha eseguito, nodo per nodo:\n${t}` : '';
+  };
   const system = examples.length ? `## Esempi (programmi della libreria)\n${examples.join('\n\n')}` : undefined;
   let prompt = describe(req, cls);
   const images: string[] = [];
   if (req.previous) prompt += `\n\nIl suo programma attuale:\n${req.previous}\n${req.desiderio ? `Si desidera: ${req.desiderio}\n` : ''}Rifallo: rispondi con il programma completo.`;
   if (previous) {
-    prompt += `\n\nIl tuo programma:\n${previous.checked.xml}\nL'immagine allegata lo mostra da quattro lati. L'Artista gli ha dato ${previous.critique.voto}/10.\nProblemi: ${previous.critique.problemi.join('; ') || '—'}\nConsigli: ${previous.critique.consigli.join('; ') || '—'}\nMiglioralo: rispondi con il programma completo.`;
+    prompt += `\n\nIl tuo programma:\n${previous.checked.xml}\nL'immagine allegata lo mostra da quattro lati. L'Artista gli ha dato ${previous.critique.voto}/10.\nProblemi: ${previous.critique.problemi.join('; ') || '—'}\nConsigli: ${previous.critique.consigli.join('; ') || '—'}${traced(previous.checked)}\nMiglioralo: rispondi con il programma completo.`;
     images.push(views(previous.checked));
   }
   let last: Checked | undefined;
   let calls = 0;
   for (let i = 0; i <= retries; i++) {
-    const p = i === 0 ? prompt : `${prompt}\n\nIl programma che hai scritto:\n${last!.xml.slice(0, 6000)}\nNon va: ${last!.error}\nCorreggilo e rispondi con il programma completo.`;
+    const p = i === 0 ? prompt : `${prompt}\n\nIl programma che hai scritto:\n${last!.xml.slice(0, proc ? 24_000 : 6000)}\nNon va: ${last!.error}${traced(last!)}\nCorreggilo e rispondi con il programma completo.`;
     calls++;
-    const raw = await c.write('sculptor', 'model.sculpt', p, { role, system, images, model, temperature: 0.7, data: { request: req, classe: cls.id, example: examples[0] } });
+    const raw = await c.write('sculptor', 'model.sculpt', p, { role, system, images, model, temperature: 0.7, data: { request: req, classe: cls.id, example: proc ? skeletonOf(role) : examples[0] } });
     last = checkProgram(extractXml(raw), cls, req.taglia);
     if (!last.error) return { checked: last, calls };
     c.say('kernel', 'scarta', `«${req.nome}»: ${last.error.slice(0, 160)}`, 'sculptor', 'model.sculpt');
@@ -279,8 +365,10 @@ export async function sculpt(c: Council, req: SculptRequest, m: SculptorAiModels
   }
   const best = candidates.reduce((a, b) => ((b.critique?.voto ?? -1) > (a.critique?.voto ?? -1) ? b : a));
   const voto = best.critique?.voto;
+  // A procedural structure keeps no box of its own: every size that shares it runs it in its own (ADR-0160).
+  const place = (x: string) => (procedural(cls, req.taglia) ? withoutSize(x) : withSize(x, boxOf(cls, req.taglia)));
   if (best.critique) c.say('artist', voto !== undefined && voto >= 7 ? 'approva' : 'obietta', `«${req.nome}»: ${voto}/10${best.critique.problemi.length ? ` — ${best.critique.problemi[0]}` : ''}`, 'sculptor', 'model.judge');
-  const xml = `<!-- ${req.nome}: scolpito da ${model} (step 9)${voto !== undefined ? `, voto dell'Artista ${voto}/10` : ''} -->\n${withSize(best.checked.xml.replace(/^\s*<!--[\s\S]*?-->\s*/, ''), boxOf(cls, req.taglia))}\n`;
+  const xml = `<!-- ${req.nome}: scolpito da ${model} (step 9)${voto !== undefined ? `, voto dell'Artista ${voto}/10` : ''} -->\n${place(best.checked.xml.replace(/^\s*<!--[\s\S]*?-->\s*/, ''))}\n`;
   return { xml, model, voto, calls };
 }
 

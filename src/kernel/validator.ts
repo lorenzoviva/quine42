@@ -64,13 +64,13 @@ export const MODEL_RE = /^[a-z0-9][a-z0-9-]{0,40}$/i;
  * A model of the library must compile, finish and build something that stands: what the front-end can
  * mend it mends (ADR-0036), the rest goes back with the line of the error.
  */
-export function modelErrors(path: string, xml: string, time = 8_000): string[] {
+export function modelErrors(path: string, xml: string, time = 8_000, box?: [number, number, number]): string[] {
   // The Musician's program was measured a moment ago: a piece costs up to two seconds on the page, and the answer would be the same.
   if (xml === lastCleanSound) return [];
   if (xml.length > MAX_FORM_XML) return [`${path}: programma troppo lungo (max ${MAX_FORM_XML} caratteri)`];
   time = Math.min(time, MAX_FORM_TIME);
   try {
-    const size = /<(?!!)[a-z]+\b[^>]*\ssize="/i.test(xml) ? undefined : boxOf(classOf('object')!);
+    const size = /<(?!!)[a-z]+\b[^>]*\ssize="/i.test(xml) ? undefined : (box ?? boxOf(classOf('object')!));
     const m = compileMjx(xml, size ? { size } : {});
     if (m.sound) {
       const errors = soundErrors(path, m, time);
@@ -136,6 +136,8 @@ export interface PlanVerdict {
 export class Validator {
   /** The time a model of the library may run (its `tempo` in the index), set by the kernel. */
   modelTime: (id: string) => number | undefined = () => undefined;
+  /** The box a model without a `size` of its own runs in (its class at its size, ADR-0160), set by the kernel; else an object's. */
+  modelBox: (id: string) => [number, number, number] | undefined = () => undefined;
 
   constructor(private sandbox: Sandbox) {}
 
@@ -224,9 +226,12 @@ export class Validator {
     return e ? [e] : [];
   }
 
-  validateFile(path: string, content: string): string[] {
+  validateFile(path: string, content: string, box?: [number, number, number]): string[] {
     if (path.endsWith('.lua')) return this.checkLua(path, content);
-    if (/^models\/[^/]+\.xml$/.test(path)) return modelErrors(path, content, this.modelTime(path.slice('models/'.length, -'.xml'.length)));
+    if (/^models\/[^/]+\.xml$/.test(path)) {
+      const id = path.slice('models/'.length, -'.xml'.length);
+      return modelErrors(path, content, this.modelTime(id), box ?? this.modelBox(id));
+    }
     if (path.endsWith('manifest.json')) return this.parseManifest(path, content).errors;
     if (path.endsWith('.json')) {
       try {

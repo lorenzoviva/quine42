@@ -1,0 +1,214 @@
+Edificio: Officina a vapore
+Stile: steampunk: mattoni, rame, ottone, ghisa, vapore
+Com'è: Capannone di mattoni con grandi tubi di rame lungo i muri, una caldaia e due ciminiere, ingranaggi di ottone in facciata, finestre ad arco con grate; dentro la sala macchine, un deposito, un ballatoio di ferro al piano sopra con l’ufficio del capofficina.
+Scatola: 100 × 100 × 80 voxel; una casella è 20 voxel.
+Corpo: gradino 4 voxel, passaggio largo almeno 11, persona alta 30; salto: sale al più 21, va da 20 a 52 voxel di distanza.
+Il suolo è in fondo alla scatola.
+
+Hai già scritto questo programma:
+```xml
+<sequence values="BNExzaPpQbOHtsgcdvefwXiIJhjMSFCWRVDLUuTYGKAknryql" symmetry="(xy)" suolo="E" origin="bottom">
+  <union symbol="1" values="bef"/>
+  <union symbol="2" values="tsdcfv"/>
+  <union symbol="3" values="tbf"/>
+  <color symbol="k" value="4a2a18" name="porta in legno e ferro"/>
+  <color symbol="S" value="615d57" name="pietra e basamento"/>
+  <color symbol="F" value="6e472a" name="pavimento in legno"/>
+  <color symbol="C" value="823824" name="mattoni industriali"/>
+  <color symbol="W" value="9e4732" name="mattoni rossi"/>
+  <color symbol="R" value="c86a3d" name="tubi e tetto in rame"/>
+  <color symbol="V" value="86b8c8" alpha="0.5" name="vetro finestre"/>
+  <color symbol="D" value="232529" name="ferro e grate"/>
+  <color symbol="L" value="453020" name="banco del capofficina"/>
+  <color symbol="T" value="2e3035" name="gradino in ghisa"/>
+  <color symbol="K" value="26282c" name="ghisa e caldaia"/>
+  <color symbol="A" value="6e6961" name="strada lastricata"/>
+  <color symbol="O" value="d4af37" name="ingranaggi in ottone"/>
+  <!-- 1. reticolo: bracci dal centro, poi le linee -->
+  <prl in="***/*E*/***" out="***/*z*/***"/>
+  <all in="Nz" out="*a" steps="1"/>
+  <all in="[Nx]az" out="*xa" steps="14"/>
+  <prl in="a" out="Q"/>
+  <all in="xQz" out="*Qa" steps="1"/>
+  <all in="[Qx]az" out="*xa" steps="29"/>
+  <prl in="a" out="Q"/>
+  <all in="z/Q/z" out="a/Q/a" symmetry="()"/>
+  <all in="[Qp]/a/z" out="*/p/a" symmetry="(y)" steps="44"/>
+  <prl in="a" out="p"/>
+  <all in="zQz" out="aQa" symmetry="()"/>
+  <all in="[Ql]a[zp]" out="*la" symmetry="(x)" steps="44"/>
+  <prl><rule in="a" out="p"/><rule in="l" out="p"/></prl>
+  <all in="x/Q/z" out="t/O/*" symmetry="()"/>
+  <prl in="Q" out="p"/>
+  <prl><rule in="x" out="z"/><rule in="N" out="z"/></prl>
+  <all in="Ez" out="*E"/>
+  <all><rule in="*p*/ppp/*p*" out="***/*P*/***"/><rule in="ppp/*p*" out="*P*/***"/><rule in="pp/p*" out="P*/**"/></all>
+  <all in="Op" out="*O" steps="5"/>
+  <all in="tz" out="*t"/>
+  <!-- 2. progetto: scala verso una vicina, campate dell'officina e caldaia -->
+  <all in="Ot" out="*v"/>
+  <all in="vt" out="*v" steps="6"/>
+  <one in="*zzzzzzzzzzz/Pppppppppppp/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt" out="************/*yyyyyyyyyyy/*ggggggggggg/************/************/************/************/************/************/************/************/************/************/************/************/************/************/************/************" steps="1"/>
+  <all in="[ys]/g/t" out="*/s/g" steps="16"/>
+  <all in="s/g" out="c/d"/>
+  <all in="z/y" out="t/*"/>
+  <all in="tz" out="*t"/>
+  <one in="*tttttttttttt/Ppppppppppppp/*tttttttttttt" out="*************/******H******/*************" steps="1"/>
+  <!-- attorno alla scala niente porte; le altre campate crescono attraverso un muro -->
+  <all in="[gsdc]t" out="*v"/>
+  <all in="vt" out="*v" steps="9"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <all in="bz" out="*b"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <all in="bz" out="*b"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <all in="bz" out="*b"/>
+  <all in="Hp" out="*H" steps="5"/>
+  <prl><rule in="tHb" out="*Ht" p="0.07"/></prl>
+  <all in="tb" out="*t"/>
+  <!-- la sala macchine a due campate unite con il varco aperto e la caldaia -->
+  <one in="bHb" out="*n*" steps="1"/>
+  <all><rule in="nH" out="*n"/><rule in="np" out="*n"/></all>
+  <one in="nnnnnnnnn" out="*eeeeeee*" steps="1"/>
+  <one in="bbbbb/bbbbb/ppppp" out="fffff/fffff/*****" steps="1"/>
+  <prl in="v" out="t"/>
+  <!-- 3. i muri, contrafforti e tubi montanti di rame -->
+  <all><rule in="[zE]p[zE]" out="*q*"/><rule in="[zE]p1" out="*w*"/><rule in="[zE]p2" out="*X*"/><rule in="1p1" out="*i*"/><rule in="2p2" out="*I*"/><rule in="1p2" out="*J*"/><rule in="1H1" out="*h*"/><rule in="1H2" out="*j*"/><rule in="EO2" out="*M*"/></all>
+  <prl in="n" out="h"/>
+  <all in="P[XIJjHMy]" out="I*"/>
+  <all in="P[wihO]" out="i*"/>
+  <prl in="P" out="E"/>
+  <one steps="6"><rule in="EEEEEEE/EEEEEEE/wwwwwww" out="*iiiii*/*iiiii*/*******"/><rule in="EEEEEEE/EEEEEEE/XXXXXXX" out="*IIIII*/*IIIII*/*******"/></one>
+  <one steps="6"><rule in="EEEE/wwww" out="*rr*/****"/><rule in="EEEE/XXXX" out="*rr*/****"/></one>
+  <one steps="6"><rule in="qqqqqqqqq" out="GGGGGGGGG"/><rule in="zzzzzzzzz" out="GGGGGGGGG"/></one>
+  <prl in="q" out="E"/>
+  <all in="M/E" out="*/A" symmetry="()"/>
+  <all in="A/E" out="*/A" symmetry="()"/>
+  <!-- 4. le colonne: basamento, sala macchine, caldaia, fasce di rame e piani -->
+  <all steps="1" symmetry="()"><rule in="B b" out="b S"/><rule in="B t" out="t S"/><rule in="B s" out="s S"/><rule in="B d" out="d S"/><rule in="B c" out="c S"/><rule in="B e" out="e S"/><rule in="B f" out="f S"/><rule in="B r" out="r S"/><rule in="B w" out="w S"/><rule in="B X" out="X S"/><rule in="B i" out="i S"/><rule in="B I" out="I S"/><rule in="B J" out="J S"/><rule in="B h" out="h S"/><rule in="B H" out="H S"/><rule in="B j" out="j S"/><rule in="B M" out="M S"/><rule in="B y" out="y S"/></all>
+  <all steps="1" symmetry="()"><rule in="B y" out="y K"/><rule in="B b" out="b F"/><rule in="B t" out="t F"/><rule in="B s" out="s F"/><rule in="B d" out="s T"/><rule in="B c" out="s Y"/><rule in="B e" out="b G"/><rule in="B f" out="f K"/><rule in="B r" out="r R"/><rule in="B h" out="h F"/><rule in="B H" out="H F"/><rule in="B j" out="j F"/><rule in="B M" out="M F"/><rule in="B w" out="w C"/><rule in="B X" out="X C"/><rule in="B i" out="i C"/><rule in="B I" out="I C"/><rule in="B J" out="J C"/></all>
+  <all steps="12" symmetry="()"><rule in="B f" out="f K"/></all>
+  <all steps="2" symmetry="()"><rule in="B f" out="R R"/></all>
+  <all steps="30" symmetry="()"><rule in="B y" out="y K"/><rule in="B b" out="b B"/><rule in="B t" out="t B"/><rule in="B s" out="s B"/><rule in="B h" out="h B"/><rule in="B H" out="H B"/><rule in="B j" out="j B"/><rule in="B M" out="M k"/><rule in="B i" out="i C"/><rule in="B I" out="I C"/><rule in="B J" out="J C"/><rule in="B r" out="r R"/></all>
+  <all steps="6" symmetry="()"><rule in="B w" out="w C"/><rule in="B X" out="X C"/></all>
+  <all steps="2" symmetry="()"><rule in="B w" out="w R"/><rule in="B X" out="X R"/></all>
+  <all steps="14" symmetry="()"><rule in="B w" out="w U"/><rule in="B X" out="X U"/></all>
+  <all steps="2" symmetry="()"><rule in="B w" out="w R"/><rule in="B X" out="X R"/></all>
+  <all steps="6" symmetry="()"><rule in="B w" out="w C"/><rule in="B X" out="X C"/></all>
+  <all steps="2" symmetry="()"><rule in="B s" out="s B"/><rule in="B w" out="w S"/><rule in="B X" out="X S"/><rule in="B J" out="J S"/><rule in="B I" out="I S"/><rule in="B j" out="j S"/><rule in="B M" out="M S"/><rule in="B i" out="i S"/><rule in="B h" out="h S"/><rule in="B r" out="r R"/></all>
+  <all steps="1" symmetry="()"><rule in="B y" out="y K"/><rule in="B b" out="R S"/><rule in="B t" out="t S"/><rule in="B H" out="H S"/><rule in="B r" out="R S"/></all>
+  <all steps="1" symmetry="()"><rule in="B y" out="y B"/><rule in="B t" out="t F"/><rule in="B H" out="H F"/></all>
+  <all steps="4" symmetry="()"><rule in="B w" out="w W"/></all>
+  <all steps="4" symmetry="()"><rule in="B s" out="s K"/></all>
+  <all steps="30" symmetry="()"><rule in="B y" out="y B"/><rule in="B t" out="t B"/><rule in="B s" out="s B"/><rule in="B H" out="H B"/><rule in="B I" out="I W"/><rule in="B M" out="M W"/><rule in="B r" out="r R"/></all>
+  <all steps="6" symmetry="()"><rule in="B X" out="X W"/><rule in="B J" out="J W"/><rule in="B j" out="j W"/></all>
+  <all steps="2" symmetry="()"><rule in="B X" out="X R"/><rule in="B J" out="J R"/><rule in="B j" out="j R"/></all>
+  <all steps="14" symmetry="()"><rule in="B X" out="X u"/><rule in="B J" out="J u"/><rule in="B j" out="j u"/></all>
+  <all steps="2" symmetry="()"><rule in="B X" out="X R"/><rule in="B J" out="J R"/><rule in="B j" out="j R"/></all>
+  <all steps="6" symmetry="()"><rule in="B X" out="X W"/><rule in="B J" out="J W"/><rule in="B j" out="j W"/></all>
+  <all steps="1" symmetry="()"><rule in="B y" out="R S"/><rule in="B t" out="R S"/><rule in="B s" out="R S"/><rule in="B H" out="R S"/><rule in="B I" out="R S"/><rule in="B r" out="R S"/></all>
+  <all steps="4" symmetry="()"><rule in="B X" out="X S"/><rule in="B J" out="J S"/><rule in="B j" out="j S"/><rule in="B M" out="M S"/></all>
+  <!-- 5. la scala in ghisa e gli ostacoli per il salto -->
+  <all in="*BB *B* TY*" out="*TY *K* KK*" steps="16"/>
+  <all in="K B" out="* K" symmetry="()"/>
+  <all steps="8" symmetry="()" in="B G" out="G L"/>
+  <!-- 6. finestre ad arco con grate, ingranaggi di ottone e ciminiere -->
+  <all in="UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU" out="*********** ***DDDDD*** *DDDVVVDDD* *DDVVVVVDD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DDDDDDDDD* ***********"/>
+  <all in="uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu" out="*********** ***DDDDD*** *DDDVVVDDD* *DDVVVVVDD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DDDDDDDDD* ***********"/>
+  <one steps="4"><rule in="WWWWW WWWWW WWWWW WWWWW WWWWW" out="**O** *OOO* OOKOO *OOO* **O**"/></one>
+  <one steps="4"><rule in="CCCCC CCCCC CCCCC CCCCC CCCCC" out="**O** *OOO* OOKOO *OOO* **O**"/></one>
+  <one in="B B R" out="* D *" steps="2" symmetry="()"/>
+  <all in="DB *R" out="*D **" symmetry="(x)" steps="1"/>
+  <all in="D/B */R" out="*/D */*" symmetry="(y)" steps="1"/>
+  <all in="B D" out="D *" steps="7" symmetry="()"/>
+  <all in="B D" out="R *" steps="2" symmetry="()"/>
+  <!-- 7. pulizia finale -->
+  <prl><rule in="U" out="C"/><rule in="u" out="W"/><rule in="Y" out="T"/><rule in="G" out="L"/><rule in="E" out="B"/><rule in="z" out="B"/><rule in="w" out="C"/><rule in="X" out="C"/><rule in="J" out="C"/><rule in="j" out="C"/><rule in="M" out="C"/><rule in="i" out="C"/><rule in="I" out="C"/><rule in="h" out="C"/><rule in="r" out="R"/><rule in="f" out="S"/></prl>
+</sequence>
+<action name="apri" label="Apri la porta"><prl in="k" out="B"/></action>
+```
+
+Il gioco lo ha provato, e non va:
+- large (20 voxel per casella, gradino 4), seme 1 e altri 4: piani: 1 (serve ≥ 2) — i piani coperti a cui il corpo arriva a piedi, solo camminando sulle scale
+- large (20 voxel per casella, gradino 4), seme 1 e altri 4: murato: 0.62 (serve ≤ 0.25) — il pavimento coperto dove il corpo starebbe e non arriva, a pezzi grandi come un piano, in rapporto a quello che raggiunge
+- huge (16 voxel per casella, gradino 3), seme 1 e altri 4: piani: 1 (serve ≥ 2) — i piani coperti a cui il corpo arriva a piedi, solo camminando sulle scale
+- huge (16 voxel per casella, gradino 3), seme 1 e altri 4: murato: 0.78 (serve ≤ 0.25) — il pavimento coperto dove il corpo starebbe e non arriva, a pezzi grandi come un piano, in rapporto a quello che raggiunge
+- varianza a large: piani e stanze: 1 liste di piani, 1 di stanze (serve almeno una con ≥ 2) — quante liste diverse di quote dei piani e di stanze per piano danno i semi
+- varianza a huge: piani e stanze: 1 liste di piani, 1 di stanze (serve almeno una con ≥ 2) — quante liste diverse di quote dei piani e di stanze per piano danno i semi
+
+Piani raggiunti: z=2 (5.3 caselle², 3 stanze).
+Pavimento non raggiunto: z=34, x 40-90, y 40-90, 3.3 caselle².
+Porta trovata a x=49, y=95.
+
+Ecco cosa ha fatto il programma quando il gioco lo ha eseguito, nodo per nodo:
+```
+Traccia, seme 1: griglia 100×100×80, 92 nodi, 750 passi, finito in 986 ms.
+x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
+Lettere: N=browN, E=Emerald, x=x, z=z, a=alive, gray, P=Purple, p=purple, Q=aQua, b=black, O=ingranaggi in ottone, H=Honey, t=teal, s=slate, g=green, c=cyan, d=dead, dark, v=olive, f=fawn, w=white, X=X, i=indigo, I=Indigo, J=Jungle, j=jungle, M=Magenta, S=pietra e basamento, F=pavimento in legno, C=mattoni industriali, W=mattoni rossi, R=tubi e tetto in rame, V=vetro finestre, D=ferro e grate, L=banco del capofficina, U=blUe, u=blue, T=gradino in ghisa, Y=Yellow, G=Green, K=ghisa e caldaia, A=strada lastricata, k=porta in legno e ferro, r=red, y=yellow, q=aqua, l=light.
+Alla fine: S 13274, C 10906, K 7233, W 7126, R 6754, F 6586, V 2112, D 1472, L 486, k 330, O 96, A 44, T 22.
+#2-61 prl×11, all×36, one×9: 306252 celle x1-98 y1-99 z0-32, passi 1-564
+  .→C 5270: x36-65 y65 z1-31; +26 scatole, 4340 celle
+  E→S 4722: x79-95 y5-95 z0; +18 scatole, 3175 celle
+  .→F 4228: x66-94 y6-34 z1; +14 scatole, 3387 celle
+  E→z 3310: x6-34 y36-64 z0; +19 scatole, 2469 celle
+  .→t 2336: x66-94 y36-64 z32; +3 scatole, 1495 celle
+  .→b 1672: x66-94 y6-34 z32; +3 scatole, 831 celle
+  .→K 471: x65 y66-76 z1-31; +1 scatole, 130 celle
+  .→R 392: x68-69 y4 z1-31; +6 scatole, 330 celle
+  .→k 330: x45-55 y95 z2-31
+  .→s 187: x48-64 y66-76 z32
+  .→w 141: x66-94 y5 z2; +5 scatole, 112 celle
+  .→X 138: x95 y36-64 z2; +6 scatole, 109 celle
+  .→J 65: x36-64 y65 z32; +2 scatole, 36 celle
+  .→I 63: x77-95 y65 z32; +11 scatole, 44 celle
+  E→G 54: x14-22 y19 z0; +5 scatole, 45 celle
+  E→A 44: x45-55 y96-99 z0
+  .→i 33: x96-97 y9-13 z32; +5 scatole, 23 celle
+  .→j 22: x84-94 y35 z32; +1 scatole, 11 celle
+  .→H 22: x66-76 y65 z32; +1 scatole, 11 celle
+  .→r 12: x68-69 y4 z32; +5 scatole, 10 celle
+  .→T 11: x48 y66-76 z1
+  .→Y 11: x49 y66-76 z1
+  .→y 11: x65 y66-76 z32
+  .→M 11: x45-55 y95 z32
+  N→S 1: x50 y50 z0
+#62-92 all×27, one×3, prl×1: 233518 celle x0-99 y0-99 z0-78, passi 565-750
+  .→W 7126: x36-94 y95 z34-39; +149 scatole, 6772 celle
+  .→K 6539: x48-64 y66-76 z2-31; +7 scatole, 929 celle
+  .→R 6350: x66-94 y36-94 z65; +74 scatole, 4639 celle
+  .→C 5396: x66-94 y5 z26-31; +139 scatole, 5222 celle
+  .→S 4327: x65-95 y35-95 z64; +51 scatole, 2436 celle
+  z→. 3310: x6-34 y36-64 z0; +19 scatole, 2469 celle
+  .→F 2358: x66-94 y36-64 z33; +5 scatole, 1517 celle
+  t→S 2336: x66-94 y36-64 z32; +3 scatole, 1495 celle
+  .→V 2112: x75-81 y5 z12-19; +98 scatole, 2056 celle
+  E→. 1869: x0-5 y6-99 z0; +28 scatole, 1305 celle
+  b→S 1672: x66-94 y6-34 z32; +3 scatole, 831 celle
+  .→D 1472: x75-77 y28-30 z34-41; +256 scatole, 1400 celle
+  .→L 432: x14-22 y19 z1-8; +5 scatole, 360 celle
+  s→K 187: x48-64 y66-76 z32
+  w→C 141: x66-94 y5 z2; +5 scatole, 112 celle
+  X→C 138: x95 y36-64 z2; +6 scatole, 109 celle
+  J→S 65: x36-64 y65 z32; +2 scatole, 36 celle
+  I→S 63: x77-95 y65 z32; +11 scatole, 44 celle
+  .→O 60: x35 y50 z4-6; +29 scatole, 57 celle
+  G→L 54: x14-22 y19 z0; +5 scatole, 45 celle
+  C→O 36: x57 y65 z15-17; +17 scatole, 33 celle
+  i→S 33: x96-97 y9-13 z32; +5 scatole, 23 celle
+  .→T 22: x64-65 y66-76 z33
+  j→S 22: x84-94 y35 z32; +1 scatole, 11 celle
+  H→S 22: x66-76 y65 z32; +1 scatole, 11 celle
+  r→R 12: x68-69 y4 z32; +5 scatole, 10 celle
+  T→K 11: x48 y66-76 z1
+  Y→K 11: x49 y66-76 z1
+  y→K 11: x65 y66-76 z32
+  M→S 11: x45-55 y95 z32
+  C→K 3: x58 y65 z16; +2 scatole, 2 celle
+Senza effetto (non hanno mai cambiato una cella):
+#41 one bHb → *n* passi=1: le celle cercate c'erano, ma mai disposte come nel pattern
+#42 all nH → *n (+1): in quel momento nella griglia non c'erano celle "n"
+#43 one nnnnnnnnn → *eeeeeee* passi=1: in quel momento nella griglia non c'erano celle "n"
+#47 prl n → h: in quel momento nella griglia non c'erano celle "n"
+```
+
+Correggi questi difetti e lascia com’è tutto ciò che funziona. Rispondi con il programma intero, corretto.

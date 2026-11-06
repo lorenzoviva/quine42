@@ -1,0 +1,220 @@
+{
+  "bersaglio": "rocca",
+  "token": {
+    "input": 18838,
+    "cacheScritta": 0,
+    "cacheLetta": 0,
+    "output": 78199,
+    "inputTotale": 18838,
+    "pensiero": 37107
+  },
+  "modello": "gemini-3.8-flash-high",
+  "dollari": 0.30737475,
+  "ms": 320891,
+  "caratteriXml": 9446,
+  "passa": false,
+  "difetti": [
+    "huge (16 voxel per casella, gradino 3), seme 1 e altri 4: piani: 1 (serve ≥ 2)",
+    "huge (16 voxel per casella, gradino 3), seme 1 e altri 4: murato: 0.75 (serve ≤ 0.25)",
+    "huge (16 voxel per casella, gradino 3), seme 2 e altri 1: porta: x 59, scarto 0, alta 1.56, ostruita (serve sul davanti, scarto ≤ 0.33, alta ≥ 1.5)",
+    "huge (16 voxel per casella, gradino 3), seme 4: testa: — (serve ≥ 1.5 caselle per piano)",
+    "huge (16 voxel per casella, gradino 3), seme 4: stanze: 0 (serve ≥ 3)",
+    "gargantuan (12 voxel per casella, gradino 2), seme 1 e altri 4: piani: 1 (serve ≥ 2)",
+    "gargantuan (12 voxel per casella, gradino 2), seme 1 e altri 4: murato: 0.75 (serve ≤ 0.25)",
+    "gargantuan (12 voxel per casella, gradino 2), seme 2: porta: x 59, scarto 0, alta 2.08, ostruita (serve sul davanti, scarto ≤ 0.33, alta ≥ 1.5)"
+  ],
+  "caduta": {
+    "taglia": "huge",
+    "seme": 1
+  },
+  "voci": [
+    {
+      "id": "finisce",
+      "ok": true,
+      "valore": "862 ms",
+      "richiesto": "entro 8000 ms"
+    },
+    {
+      "id": "valido",
+      "ok": true,
+      "valore": "sì",
+      "richiesto": "i controlli di check.ts"
+    },
+    {
+      "id": "piani",
+      "ok": false,
+      "valore": "1",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "testa",
+      "ok": true,
+      "valore": "1.56",
+      "richiesto": "≥ 1.5 caselle per piano"
+    },
+    {
+      "id": "stanze",
+      "ok": true,
+      "valore": "4",
+      "richiesto": "≥ 3"
+    },
+    {
+      "id": "murato",
+      "ok": false,
+      "valore": "0.75",
+      "richiesto": "≤ 0.25"
+    },
+    {
+      "id": "porta",
+      "ok": true,
+      "valore": "x 59, scarto 0, alta 1.56, libera",
+      "richiesto": "sul davanti, scarto ≤ 0.33, alta ≥ 1.5"
+    },
+    {
+      "id": "salti",
+      "ok": true,
+      "valore": "5",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "materiali",
+      "ok": true,
+      "valore": "11",
+      "richiesto": "≥ 6"
+    },
+    {
+      "id": "dominante",
+      "ok": true,
+      "valore": "0.42",
+      "richiesto": "≤ 0.6"
+    },
+    {
+      "id": "finestre",
+      "ok": true,
+      "valore": "31 su 4 lati",
+      "richiesto": "≥ 6 su ≥ 3 lati"
+    },
+    {
+      "id": "dettagli",
+      "ok": true,
+      "valore": "190, 0 lati vuoti",
+      "richiesto": "≥ 24, ≤ 1 lati vuoti"
+    },
+    {
+      "id": "rumore",
+      "ok": true,
+      "valore": "0.06",
+      "richiesto": "≤ 0.7"
+    },
+    {
+      "id": "sagoma",
+      "ok": true,
+      "valore": "6",
+      "richiesto": "≥ 4"
+    },
+    {
+      "id": "rilievo",
+      "ok": true,
+      "valore": "0.38",
+      "richiesto": "≥ 0.12"
+    },
+    {
+      "id": "ingombro",
+      "ok": true,
+      "valore": "0.4",
+      "richiesto": "≥ 0.3"
+    }
+  ],
+  "misure": {
+    "voxel": 84894,
+    "ms": 862,
+    "finito": true,
+    "piani": [
+      {
+        "z": 2,
+        "quota": 0.125,
+        "area": 8.484375,
+        "testa": 1.5625,
+        "stanze": 4
+      }
+    ],
+    "cantina": 0,
+    "terrazze": 0,
+    "stanze": 4,
+    "murato": 0.7509057971014492,
+    "persi": [
+      {
+        "z": 29,
+        "x0": 20,
+        "x1": 70,
+        "y0": 20,
+        "y1": 100,
+        "area": 6.4765625
+      }
+    ],
+    "porta": {
+      "x": 59,
+      "y": 105,
+      "scarto": 0.03125,
+      "alta": 1.5625,
+      "libera": true
+    },
+    "salti": [
+      {
+        "x": 87,
+        "y": 86,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 87,
+        "y": 21,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 81,
+        "y": 97,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 36,
+        "y": 81,
+        "z": 1,
+        "sale": false
+      },
+      {
+        "x": 23,
+        "y": 81,
+        "z": 1,
+        "sale": false
+      }
+    ],
+    "materiali": 11,
+    "dominante": 0.41941715551157915,
+    "finestre": 31,
+    "latiConFinestre": 4,
+    "dettagli": 190,
+    "latiVuoti": 0,
+    "rumore": 0.0594059405940594,
+    "rilievo": 0.37571369466280513,
+    "sagoma": 6,
+    "ingombro": 0.4,
+    "luci": 0,
+    "inutili": [
+      "one \"bHb\" → \"*n*\" — le celle cercate c'erano, ma mai disposte come nel pattern",
+      "all \"nH\" → \"*n\" (e altre 1 regole) — in quel momento nella griglia non c'erano celle \"n\"",
+      "one \"nnnnnnnnn\" → \"*eeeeeee*\" — in quel momento nella griglia non c'erano celle \"n\"",
+      "prl \"n\" → \"h\" — in quel momento nella griglia non c'erano celle \"n\"",
+      "all \"w/z\" → \"*/A\" — le celle cercate c'erano, ma mai disposte come nel pattern",
+      "all \"L .\" → \"D L\" — le celle cercate c'erano, ma mai disposte come nel pattern"
+    ],
+    "avvisi": [
+      "6 frammenti staccati (1% dei voxel)",
+      "tocca i bordi laterali della griglia: forse è tagliato",
+      "colori mai usati: N E x z a P p Q b O H t s g c d v e f w X i I J h j M U u Y G n r y q l"
+    ],
+    "errori": []
+  }
+}
