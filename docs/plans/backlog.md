@@ -4671,6 +4671,7 @@ Nasce da T307a e T299: `dossier T307a`, `dossier T299`. `integra T307a` si è fe
 - Step: 42
 - Contesto: il secondo passo di T306 (`dossier T306`, `dossier T307a`, `docs/lingua-interna.md`, punto 2). **Va lanciato da solo**, come T307a.
 - Cosa fare: i domini marcati T307b (0.3): momenti, «dove», attività, specie, legami, mestieri e moduli del seme, comportamenti, imprese, trame, suoni, parti, agenti (e i file dei loro prompt, `prompts/agents/<agente>.md`), classi dello Scultore, coefficienti, carte e grafo, modalità, valori del solo TypeScript; i moduli `lavoro.*` → `job.*`, `sys.lavoro` → `sys.work` (anche gli esiti del suo Lua), i modelli `corona-gerboa-<agente>` e `suono-*` del seme. Contratto `0.3.0`, migrazione `0.2 → 0.3` che estende quella di T307a; stessa riparazione nel validatore e stesse prove sugli universi salvati.
+- Da T314 (`traccia T314`): gli esiti `fallito:nessuna via`, `fallito:non ci arriva`, `fallito:comportamento sconosciuto` e `continua` di `sys.lavoro` (T299, ADR-0154) non hanno voce in nessun dominio di `internalNames.ts`: aggiungili qui, con la migrazione. Il kernel ora è 0.2.0 (T307a integrato).
 - Test: unitari della migrazione, suite intera e typecheck con i loro turni; 400 tick offline sul seme senza fault.
 - Browser: `?skip&offline`, un universo salvato prima si apre migrato; gli individui fanno le loro routine e i mestieri; nello studio i gerboa delle squadre ci sono.
 - Quando è fatto: commit su `task/T307b`. Sicurezza: nessuna superficie nuova, o le voci.
