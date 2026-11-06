@@ -169,6 +169,7 @@ src/
     placing.ts          posare sui mobili (ADR-0150): i ripiani di una forma (`shelvesOf`), l'impronta di un oggetto (`itemShape`), dove sta (`findSpot`)
     version.ts          la versione del kernel `X.Y.Z` (`KERNEL_VERSION`, `checkKernelVersion`, `stampKernel`, ADR-0136) e l'intervallo dei kernel di un universo (`universeKernels`, `rangeLabel`, ADR-0152)
     migrations.ts       le migrazioni da un contratto al successivo (`MIGRATIONS`, vuoto; `migrateUniverse` all'avvio, ADR-0152)
+    internalNames.ts    la lingua interna come dato (ADR-0153): `INTERNAL_NAMES`, ogni nome italiano di oggi → inglese (o latino per le rune), dominio per dominio, con il task che lo applica
     deferred.ts         la generazione differita (ADR-0143): `DeferredModels` (tutto alla coda, il resto ferma), `StepGate` (si scrive solo un passo valido), `runDeferred`, `spiral`
     credits.ts          la commissione di piattaforma (`costWithFee`, la decide il server, ADR-0132) e la divisione delle spese comuni (ADR-0081)
     ai/                 models.ts, gemini.ts, mock.ts, prices.ts (prezzi, con la data), usage.ts (registro dei consumi),
@@ -262,6 +263,7 @@ Registro, Luogo, Fucina e Genesi → `docs/architettura-dettagli.md#concilio`.
 - **Il sito e il tema, le vesti** (una cartella di `site/skins/`, `data-skin` sulla radice; la base legge solo token `--skin-*`, misure dalla scala aurea, ADR-0145; la futuristica: la scritta della proposta estratta così com'è, effetti a tick, le luci scelte coi numeri, ADR-0151) → `#sito`; **confine e limiti di Lua** → `#lua-sandbox`; **Gemini, Attore, coefficienti** → `#gemini`
 - **Convalida nel browser**: build, preview, spostarsi fermando il tappeto, `interact()` → `#convalida-browser`
 - **Costi e prestazioni** → `#costi`; **stato del progetto e prossimi passi** → `#stato`; il lavoro da fare è in [`docs/plans/backlog.md`](docs/plans/backlog.md)
+- **La lingua interna** (ADR-0153): inglese per ciò che il codice legge, latino per i token delle rune magiche, la lingua dell'universo per il mondo; la tabella, i contratti `0.2`-`0.5` e il piano dei task in [`docs/lingua-interna.md`](docs/lingua-interna.md)
 - **Fasi e step** (ADR-0128): le quattro fasi dello sviluppo e gli step, obiettivi condivisi tra task, in [`docs/fasi.md`](docs/fasi.md): ogni task sta in una sola riga della tabella, il numero di uno step non cambia; `pipeline.mjs step` ne copia il numero nella riga `- Step:` del backlog e priorizza uno step (T231)
 
 ### Manifest (`src/kernel/types.ts`)
@@ -332,8 +334,10 @@ La procedura, con gli snippet per spostarsi nelle stanze, è in [`docs/architett
 
 ## Convenzioni
 
-- Documentazione, UI, prompt degli agenti e testi di gioco in **italiano**; identificatori e commenti
-  TypeScript in **inglese**; commenti Lua dell'universo in **italiano**.
+- **L'inglese è la lingua interna** (ADR-0153, step 42): identificatori, commenti TypeScript, valori che il codice confronta, campi su disco e sul filo,
+  percorsi dell'universo, nomi visibili a Lua, commenti di Lua e XML e prompt in **inglese**; i token delle rune magiche in **latino**; documentazione, UI e
+  testi del mondo (la lingua del suo universo, oggi l'italiano) in **italiano**. Il passaggio lo fanno T307a-T310 con una migrazione per contratto: la tabella
+  è `src/kernel/internalNames.ts` (`INTERNAL_NAMES`), raccontata in [`docs/lingua-interna.md`](docs/lingua-interna.md); un nome nuovo su disco, sul filo o in Lua nasce inglese.
 - **Un nome per ogni concetto** (ADR-0117): [`docs/glossario.md`](docs/glossario.md) dice per ogni concetto il nome italiano, quello inglese del codice, i sinonimi da non usare e ciò che è fermo. Un identificatore italiano non è un'eccezione: si rinomina (le righe R del glossario; le eccezioni dette da ADR-0117 sono tolte). Un concetto nuovo ha una voce lì nello stesso commit. Ciò che è su disco, sul filo o visibile a Lua (campi JSON, messaggi del protocollo, API Lua, effetti) non si rinomina senza una migrazione; gli ADR non si riscrivono.
 - File in LF (`.gitattributes`). Su Windows niente `Get-Content`/`Set-Content` di PowerShell 5.1 sui sorgenti.
 - Nuova API per Lua: `Host` + `prelude.lua` + `LUA_API` nel validatore + prompt dell'Ingegnere + questo file.

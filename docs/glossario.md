@@ -13,11 +13,13 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 
 - **Un concetto nuovo ha una voce qui nello stesso commit**; prima di coniare un nome si cerca se la voce c'è.
 - **Codice**: identificatori e commenti TypeScript in inglese, con il nome di questo file. Pochi nomi propri restano uguali nelle due lingue (`corona`, `master`, `lobby`, `kernel`). **Nessun'altra eccezione**: quelle che ADR-0117 dice (`Taglia`, `Partita`) l'autore le ha tolte (scelta 6).
-- **Dati**: ciò che finisce su disco, sul filo o nei prompt resta com'è (spesso in italiano): è un formato, non uno stile.
+- **Dati**: ciò che finisce su disco, sul filo o nei prompt resta com'è (spesso in italiano) finché non lo porta in inglese il suo passo di ADR-0153, con la migrazione del suo contratto: è un formato, non uno stile. **Un nome nuovo** su disco, sul filo o visibile a Lua **nasce inglese** (la lingua interna); i token delle rune magiche sono latini; il testo del mondo è nella lingua del suo universo.
 - **Italiano**: nei documenti, nella UI e nei prompt il nome ufficiale; dentro il mondo (bibbia, dialoghi) i termini tecnici non esistono comunque (ADR-0025).
 - **Gli ADR sono storia**: non si riscrivono per cambiare un nome.
 
 ## Ciò che non si rinomina senza una migrazione
+
+Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un contratto ciascuno; il nome d'arrivo di ogni voce è nella tabella di [`lingua-interna.md`](lingua-interna.md) (`src/kernel/internalNames.ts`). Finché un passo non è fatto, il «Fermo» delle voci qui sotto vale com'è.
 
 | Che cosa | Dove | Perché | Che cosa costa |
 |---|---|---|---|
@@ -712,7 +714,7 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 
 ### Runa magica
 - **Inglese**: `MagicRune`, `magic.runes`, `validateNewRune`
-- **Definizione**: una runa che si pronuncia e si consuma: `luce fuoco acqua terra vita scudo vento` e quelle nuove del Concilio.
+- **Definizione**: una runa che si pronuncia e si consuma: `luce fuoco acqua terra vita scudo vento` e quelle nuove del Concilio. I token diventano latini, uguali in ogni lingua (ADR-0153, T307a): `lux ignis aqua terra vita scutum ventus`; il nome della runa (Sowilo) resta testo del mondo.
 - **Dove vive**: `src/kernel/magic.ts`, `universe/modules/`
 - **Da non usare**: nessuno
 
@@ -1095,6 +1097,13 @@ Finché una rinomina non è fatta, **Inglese** dice il nome di oggi e, fra paren
 - **Dove vive**: `src/kernel/version.ts`, `src/kernel/migrations.ts`
 - **Da non usare**: `compatibilità` (per l'intervallo), `range` (in italiano)
 - **Fermo**: `kernels`, `from`, `to` in `universe.json`
+
+### Lingua interna
+- **Inglese**: `INTERNAL_NAMES`, `internalName`, `NameDomain`
+- **Definizione**: la lingua di ciò che il codice legge per nome: valori dei domini, campi su disco e sul filo, percorsi, nomi visibili a Lua, commenti di Lua e XML, prompt. È l'inglese (ADR-0153), e il latino per i token delle rune magiche; il testo del mondo è nella lingua del suo universo (la lingua del mondo), l'interfaccia in quella del viandante. La tabella dei nomi italiani di oggi e di quelli d'arrivo è un dato, dominio per dominio, con il task che la applica.
+- **Dove vive**: `src/kernel/internalNames.ts`, `docs/lingua-interna.md`
+- **Da non usare**: `lingua di sistema`, `i18n` (per la lingua interna: sono le lingue del viandante e del mondo, T239)
+- **Fermo**: nessuno.
 
 ## Lo sviluppo
 

@@ -4633,7 +4633,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: nella pagina web (porta libera) scegliere Pro lascia Argon acceso.
 - Quando è fatto: commit su `task/T305`. Nell'esito che il processo dell'orchestratore legge `config.json` solo all'avvio.
 
-### T306 · L'inglese come lingua interna: la tabella delle corrispondenze, le rune in latino e l'ADR — `da fare` (dipende da T302)
+### T306 · L'inglese come lingua interna: la tabella delle corrispondenze, le rune in latino e l'ADR — `fatto` (`83b5ba3`) (dipende da T302)
 - Pipeline: claude · sforzo high · stima 3% · approvato · priorità 3
 - Step: 42
 - Contesto: risposte dell'autore a D34 (05/11 sera): **C** per le lingue (una lingua del mondo per universo, scelta alla Genesi; l'interfaccia nella lingua del viandante, T239 in Fase III), e **subito, prima della beta, l'inglese come lingua interna** perché la comunità dello sviluppo agentico possa leggere il repository: valori confrontati dal codice, nomi di campo su disco, commenti di Lua e XML, prompt. La documentazione resta italiana (a parte il sottoinsieme in inglese del punto 6, in Fase III). I **token delle rune magiche in latino** (`terra`, `ignis`, `ventus`, `aqua`, `lux`…), uguali in ogni lingua; i token di codice (`x`, `speed`, `=`) restano Lua. Le cifre sono in `docs/lingue-censimento.md` (≈ 130 valori distinti nei domini, 212 nomi di campo; le 3.849 sono occorrenze) e `docs/lingue.md` §3, §5. Contratto nuovo (D32, ADR-0136): `0.2.0`; la migrazione degli universi salvati è la prima che si registra nell'impalcatura di T302 (`dossier T302`).
@@ -4641,6 +4641,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Test: quello della tabella; typecheck con il suo turno.
 - Browser: non serve.
 - Quando è fatto: commit su `task/T306`. Nell'esito il numero di voci per dominio e cosa resta fuori.
+- Esito: `docs/lingua-interna.md` e `src/kernel/internalNames.ts` (54 domini, 847 voci: T307a 192, T307b 244, T308a 266, T308b 145) con il test (niente doppioni, catene, collisioni; copertura del codice e del seme); ADR-0153, `AGENTS.md`, glossario, `docs/lingue.md` §2-§4 allineati a D34; kernel 0.1.12. T307 e T308 spezzati in T307a (0.2), T307b (0.3), T308a (0.4), T308b (0.5), ognuno da solo con la sua migrazione; T310 toglie anche la riparazione dei valori italiani e aggiunge il tipo di legame come id. Fuori: testo del mondo, UI, indirizzi, le 83 regex (T310), contenuti del Concilio salvati, esiti del Lua di `sys.lavoro` (T307b). Il conteggio dei file per passo è un tetto, non la cifra esatta. Suite intera e typecheck verdi.
 
 ### T307 · L'inglese come lingua interna: i valori dei domini e le rune in latino, con la migrazione — `da fare` (dipende da T306)
 - Pipeline: claude · sforzo extra · stima 8% · approvato · priorità 3
