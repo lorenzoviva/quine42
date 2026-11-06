@@ -78,7 +78,7 @@ export class Repo {
    */
   withheld?: () => Iterable<string>;
   /**
-   * Why nothing reaches this repository now (T312, ADR-0155), or undefined: a universe out of the range of the kernels it runs on. While it says so
+   * Why nothing reaches this repository now (T312, ADR-0156), or undefined: a universe out of the range of the kernels it runs on. While it says so
    * a commit is not made (`commit` answers HEAD as it is) and the backend writes nothing: no commit, branch, merge nor rollback on the disk.
    */
   readOnly?: () => string | undefined;

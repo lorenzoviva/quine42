@@ -257,7 +257,7 @@ export function wandererHandler(opts: WandererRouteOptions): Connect.NextHandleF
           if (!r) return send(res, 500, { ok: false, motivo: 'non è stato possibile salvarlo' });
           return send(res, 200, { ok: true, profilo: r.profilo, riparato: r.riparato, viandante: r.viandante });
         }
-        // A universe out of the range of the kernels is read-only (T312, ADR-0155): nothing is committed on it, a profile neither.
+        // A universe out of the range of the kernels is read-only (T312, ADR-0156): nothing is committed on it, a profile neither.
         if (!runsOnThisKernel(await fs.readFile(path.join(root, 'universe.json'), 'utf8').catch(() => undefined))) return send(res, 409, { ok: false, motivo: 'questo universo non è di questo kernel: si legge soltanto' });
         await openLedger(opts.universesDir, universo);
         const files = await wandererFiles(root);

@@ -1,4 +1,4 @@
-// T312 (ADR-0155): a universe out of the range of the kernels it runs on is read-only. Nothing reaches its repository (commits, plans,
+// T312 (ADR-0156): a universe out of the range of the kernels it runs on is read-only. Nothing reaches its repository (commits, plans,
 // branches, merges, rollbacks on the disk) and the Council does not call the models; a universe of this kernel writes as before.
 
 import { describe, expect, it } from 'vitest';

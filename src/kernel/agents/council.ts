@@ -222,7 +222,7 @@ export class Council {
   /** Whether a knob of the master keeps this call from the models (T247, ADR-0133): it goes to the local ones, as without credits. */
   rationed?: (task: string) => boolean;
   /**
-   * Why the universe is read-only now (T312, ADR-0155), or undefined: nothing the Council makes would be saved, so no call reaches the models,
+   * Why the universe is read-only now (T312, ADR-0156), or undefined: nothing the Council makes would be saved, so no call reaches the models,
    * every one goes to the local ones and the world stays playable.
    */
   readOnly?: () => string | undefined;

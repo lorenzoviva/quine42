@@ -8571,7 +8571,7 @@ export class Kernel {
   }
 
   /**
-   * Why nothing reaches the universe's repository now (T312, ADR-0155), or undefined: the fault `universe:kernel` is open. Commits, plans,
+   * Why nothing reaches the universe's repository now (T312, ADR-0156), or undefined: the fault `universe:kernel` is open. Commits, plans,
    * branches, merges and rollbacks on the disk wait for it to close (`Repo.readOnly`, `SealedChunks`), and the Council calls only the local
    * models. A mirror is never read-only: its repository is in memory, and the one it mirrors decides.
    */

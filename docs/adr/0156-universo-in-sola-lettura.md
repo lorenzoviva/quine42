@@ -1,4 +1,4 @@
-# ADR-0155 — Un universo fuori dall'intervallo dei kernel si legge soltanto: niente arriva al suo repository, il Concilio non chiama i modelli
+# ADR-0156 — Un universo fuori dall'intervallo dei kernel si legge soltanto: niente arriva al suo repository, il Concilio non chiama i modelli
 
 Data: 2026-11-06 · Stato: accettato (task T312 del backlog) · Riferimenti: ADR-0136 (la versione del kernel), ADR-0137 (un guasto invalida il codice, non i dati), ADR-0152 (l'intervallo dei kernel), T302
 
