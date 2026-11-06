@@ -4654,7 +4654,17 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: `?skip&offline`, un universo salvato prima si apre migrato senza guasti; una runa latina pronunciata funziona.
 - Quando è fatto: commit su `task/T307a`. Sicurezza: nessuna superficie nuova, o le voci.
 
-### T307b · L'inglese come lingua interna: i valori della società e del Concilio (contratto 0.3) — `da fare` (dipende da T307a)
+### T314 · Integrare T307a nel base, che ha T299 — `da fare`
+- Step: 42
+
+Nasce da T307a e T299: `dossier T307a`, `dossier T299`. `integra T307a` si è fermato su conflitti in `package-lock.json`, `package.json`, `src/kernel/version.ts`, `universe/universe.json`: T307a è partito prima che T299 (kernel 0.1.13, ADR-0154, la via col raggio) entrasse nel base.
+
+**Cosa fare:** nel worktree, `git merge task/T307a` sul base di adesso. La versione è `0.2.0` (contratto nuovo di T307a), uguale in `version.ts`, `package.json` e `package-lock.json`; in `universe.json` tieni il contratto 0.2 e ciò che T299 ha aggiunto. Entrambi gli ADR si chiamano 0154: quello di T307a prende il primo numero libero, con i rimandi in AGENTS.md, `docs/architettura-dettagli.md`, `docs/lingua-interna.md` e nel codice. Poi applica ai nomi che T299 ha portato (`world.path` col raggio, `fallito:nessuna via`, `no_way`, `tests/dislivello.test.ts`, il prompt dell'Ingegnere) le voci dei domini di T307a in `src/kernel/internalNames.ts`, così che nessun valore italiano di quei domini resti nel codice nuovo; se un nome di T299 appartiene a quei domini e non ha una voce, aggiungila.
+
+**Quando è fatto:** merge committato, `npm test` e `npm run typecheck` verdi, `tests/dislivello.test.ts` verde sul contratto 0.2, un solo ADR per numero; esito con le voci aggiunte a `internalNames.ts`.
+- Pipeline: claude · sforzo high · stima 2% · approvato · priorità 1
+
+### T307b · L'inglese come lingua interna: i valori della società e del Concilio (contratto 0.3) — `da fare` (dipende da T314)
 - Pipeline: claude · sforzo extra · stima 4% · approvato · priorità 3
 - Step: 42
 - Contesto: il secondo passo di T306 (`dossier T306`, `dossier T307a`, `docs/lingua-interna.md`, punto 2). **Va lanciato da solo**, come T307a.
