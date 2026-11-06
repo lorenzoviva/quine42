@@ -13,7 +13,7 @@ type Pipeline = {
   parsePipelineLine(line: string): { provider?: string; estimate?: number; approved: boolean; priority: number; needsBrowser: boolean };
   taskNeedsBrowser(block: string): boolean;
   parseUsage(provider: string, text: string): Counter[] | undefined;
-  canOrchestrate(provider: string): boolean;
+  canOrchestrate(provider: string, config?: unknown): boolean;
   usageLimit(output: string, from?: Date): Date | undefined;
   readOutput(text: string): { session?: string; cost?: number; error: boolean; result: string; outcome?: string; browser?: string };
   capOf(o: { left: number; session?: number; provider: string; orchestrator?: string; slot?: number; tetto?: number; threshold: number; urgent?: boolean; resuming?: boolean }): number;
@@ -372,11 +372,19 @@ describe('piani e finestra delle 5 ore (ADR-0119)', () => {
     expect(P.scaledEstimate('gemini', 2, withPlans('max5x', 'pro'))).toBe(5);
     expect(P.providerEnabled('fable', withPlans('pro'))).toBe(false);
     expect(P.providerEnabled('fable', withPlans('max20x'))).toBe(true);
-    expect(P.providerEnabled('argon', withPlans('max5x', 'pro'))).toBe(false);
     expect(P.providerEnabled('gemini', withPlans('max5x', 'pro'))).toBe(true);
+    expect(P.providerEnabled('argon', withPlans('max5x', 'nessuno'))).toBe(false);
     // Una configurazione senza piani non scala e non disabilita nulla.
     expect(P.scaledEstimate('claude', 2, { providers: { claude: {} } })).toBe(2);
     expect(P.providerEnabled('claude', { providers: { claude: {} } })).toBe(true);
+  });
+
+  it('Argon sta anche nel piano Google Pro, ed è quello attivo (T305)', () => {
+    expect(real().abbonamenti.google).toBe('pro');
+    expect(P.providerEnabled('argon', real())).toBe(true);
+    expect(P.canOrchestrate('argon', real())).toBe(true);
+    expect(P.ceilingOf('argon', real())).toBe(1);
+    for (const google of ['pro', 'ultra']) expect(P.providerEnabled('argon', withPlans('max5x', google))).toBe(true);
   });
 
   it('il piano «nessuno» dà tetto 0 ai suoi provider e nessuno orchestra da lì', () => {
@@ -1432,22 +1440,28 @@ describe('interfaccia web della pipeline (T69)', () => {
     const opts = { ...sandbox, config, configFile };
 
     const start = W.handleApi('GET', '/api/stato', {}, opts).data;
-    expect(start.config.abbonamenti).toEqual({ claude: 'max5x', google: 'ultra' });
+    expect(start.config.abbonamenti).toEqual({ claude: 'max5x', google: 'pro' });
     expect(start.config.piani.claude).toEqual(['pro', 'max5x', 'max20x', 'nessuno']);
     expect(start.config.orchestrabili).toEqual(['claude', 'gemini', 'argon']);
     expect(start.config.alternative).toBeUndefined();
 
+    // Da Ultra a Pro Argon resta acceso (T305).
+    expect(W.handleApi('POST', '/api/config', { abbonamenti: { google: 'ultra' } }, opts).status).toBe(200);
     const plan = W.handleApi('POST', '/api/config', { abbonamenti: { google: 'pro' } }, opts);
     expect(plan.status).toBe(200);
     expect(JSON.parse(fsMod.readFileSync(configFile, 'utf8')).abbonamenti).toEqual({ claude: 'max5x', google: 'pro' });
-    // Argon esce dal piano: non è più disponibile, né per orchestrare.
+    const pro = W.handleApi('GET', '/api/stato', {}, opts).data;
+    expect(pro.config.abilitati).toContain('argon');
+    expect(pro.config.orchestrabili).toEqual(['claude', 'gemini', 'argon']);
+    // Senza abbonamento Google Argon esce dal piano: non è più disponibile, né per orchestrare.
+    expect(W.handleApi('POST', '/api/config', { abbonamenti: { google: 'nessuno' } }, opts).status).toBe(200);
     const after = W.handleApi('GET', '/api/stato', {}, opts).data;
     expect(after.config.abilitati).not.toContain('argon');
-    expect(after.config.orchestrabili).toEqual(['claude', 'gemini']);
+    expect(after.config.orchestrabili).toEqual(['claude']);
     expect(W.handleApi('POST', '/api/orchestratore', { provider: 'argon' }, opts).status).toBe(400);
 
     const off = W.handleApi('POST', '/api/config', { orchestrabile: { gemini: false, fable: true } }, opts);
-    expect(off.data.orchestrabili).toEqual(['claude', 'fable']);
+    expect(off.data.orchestrabili).toEqual(['claude', 'fable']); // Google è a «nessuno»: gemini è comunque fuori
     const saved = JSON.parse(fsMod.readFileSync(configFile, 'utf8'));
     expect(saved.providers.gemini.orchestrabile).toBe(false);
     expect(saved.providers.fable.orchestrabile).toBe(true);

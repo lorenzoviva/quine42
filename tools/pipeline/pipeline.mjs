@@ -341,10 +341,14 @@ export function updateConfig({ abbonamenti, orchestrabile } = {}, opts) {
   return { abbonamenti: p.config.abbonamenti, orchestrabili: Object.keys(p.config.providers).filter((k) => canOrchestrate(k, p.config)) };
 }
 
-/** Rereads from config.json what `updateConfig` changes: the page of the web interface may be another process. */
+/**
+ * Rereads from config.json what `updateConfig` changes (the page of the web interface may be another process), and the
+ * plans with it (T305): a plan read without its `disponibili` would switch off a provider the file now includes.
+ */
 export function refreshConfig() {
   const disk = readJson(CONFIG_FILE, undefined);
   if (!disk) return;
+  if (disk.piani) CONFIG.piani = disk.piani;
   if (disk.abbonamenti) CONFIG.abbonamenti = disk.abbonamenti;
   for (const [prov, conf] of Object.entries(CONFIG.providers)) {
     const value = disk.providers?.[prov]?.orchestrabile;

@@ -25,7 +25,7 @@
     - `claude-sonnet-5-5-low`, `claude-sonnet-5-5-medium`, `claude-sonnet-5-5-high` (`Claude Sonnet 5.5 (Low/Medium/High)` — provato sul campo in **T268** su `-high`: calo `-2 pt` settimana e `-4 pt` 5h)
     - `gpt-oss-120b-medium` (`GPT-OSS 120B (Medium)` — provato sul campo in **T268**: calo `0 pt` settimana e `0 pt` 5h)
     - *Nota*: `agy` **non** offre né `claude-haiku-5-5`, né `claude-fable-5-1`, né modelli GPT proprietari (GPT-5/GPT-6); l'unico modello GPT presente in `agy models` è l'open-weight `gpt-oss-120b-medium`. Inoltre in `agy` il flag `-p` richiede il prompt come argomento immediatamente successivo (`agy --output-format json --dangerously-skip-permissions --model <modello> -p "<prompt>"`, come in `tools/pipeline/config.json`; passare `-p --output-format json …` termina subito con codice 2).
-  - Contatori letti da `agy -p /usage` (abbonamento Google Ultra):
+  - Contatori letti da `agy -p /usage` (abbonamento **Google Pro**: fino al 06/11/2026 `config.json` diceva `ultra`, ma l'abbonamento è sempre stato Pro e comprende Argon, T305; le righe di `consumi.jsonl` con `"piano": "ultra"` sono misure su Pro):
     1. `Gemini Models` — `Weekly Limit Remaining` + `Five Hour Limit Remaining` (`finestra5h: true`, `ratioSessioneSettimana: 3.3`); vi pesa `gemini-3.8-flash-{low,medium,high}`.
     2. `Gemini 4 Argon` — `Gemini 4 Argon Weekly Limit` (`finestra5h: false`, `ratioSessioneSettimana: 1`, nessun limite a 5 ore); vi pesa `gemini-4-argon-{low,medium,high}`.
     3. `Claude and GPT models` — `Weekly Limit Remaining` (partito da 97 % e sceso a 91 % dopo le 3 prove di **T268** del 04/11/2026) + `Five Hour Limit Remaining` (partito da 100 % e sceso a 88 %); vi pesano `claude-opus-5-5-{low,medium,high}`, `claude-sonnet-5-5-{low,medium,high}` e `gpt-oss-120b-medium` quando invocati tramite `agy`, con rapporto fisso **5h / settimana = `2,00`** misurato in T268 sia su Opus (`8 / 4`) sia su Sonnet (`4 / 2`).
@@ -183,3 +183,9 @@ Decisione dell'autore del 05/11: **la qualità conta più del tempo: tanti task 
 - `sonnet`, `haiku` sulla CLI `claude`, sullo stesso conto: `ratioSessioneSettimana` **12, provvisorio, copiato da `claude`: `non misurato`**.
 - `agy-opus`, `agy-sonnet` su `agy`, contatore `Claude and GPT models`: `ratioSessioneSettimana` **2, misurato in T268** su una prova breve per modello.
 - Tutti a tetto 1, nessuno orchestrabile, in prova; Opus resta il predefinito. `gpt-oss-120b-medium` non entra.
+
+### 4.6 Argon sul piano Pro (T305)
+
+- `argon` è tra i `disponibili` di `piani.google.pro` e `abbonamenti.google` è `pro`, come l'abbonamento vero dell'autore; restano i limiti di D31 (solo task piccoli, uno alla volta, `limiti.modello.argon = 1`).
+- **Le misure sono già su Pro.** Ogni misura di `gemini`, `argon` e dei modelli Claude su `agy` (compresa T268) è stata fatta con l'abbonamento Pro, anche se `consumi.jsonl` scrive `ultra`: i fattori di 4.3 (Argon 1,1–10,5×, Gemini 1,11×) e i `ratioSessioneSettimana` (3,3 e 2) sono quindi del piano Pro.
+- **Proposta, non applicata:** `piani.google.pro.moltiplicatoreStima` a **1** (oggi 2,5): con 2,5 le stime dei provider Google, già tarate su Pro, contano due volte e i task aspettano una finestra che non serve. Se un giorno l'abbonamento passa a Ultra, il suo moltiplicatore andrebbe misurato (circa 0,4 se Ultra vale 2,5 volte Pro).
