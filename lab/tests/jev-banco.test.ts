@@ -7,6 +7,7 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { Budget, GeminiJudge, JevJudge, jevBody, loadCases, OfflineJudge, readLedger, reversed, runBench, spent, typedAnswers, typedPrompt, type Case, type Judge, type Reply } from '../banco/jev/banco';
 import { second, SECOND } from '../banco/jev/domande';
+import { toItalian, toEnglish, toFreeTextEnglish, isFreeTextCase } from '../banco/jev/lingua';
 import { reportText } from '../banco/jev/rapporto';
 import type { AiModels, TextCall } from '../../src/kernel/ai/models';
 import { emptyUsage } from '../../src/kernel/ai/models';
@@ -158,7 +159,8 @@ describe('la spesa del banco riconciliata con la dashboard (T322)', () => {
     expect(lines.length).toBeGreaterThan(0);
 
     const ts = lines.filter((l) => l.provider === 'typesafe');
-    expect(ts).toHaveLength(2176);
+    const tsHist = ts.filter((l) => ['giro-1', 'giro-1-ripeti', 'prova-1'].includes(l.run));
+    expect(tsHist).toHaveLength(2176);
 
     const g1 = ts.filter((l) => l.run === 'giro-1');
     expect(g1).toHaveLength(1568);
@@ -182,24 +184,83 @@ describe('la spesa del banco riconciliata con la dashboard (T322)', () => {
     const proveTs = ts.filter((l) => l.run === 'prova-1');
     expect(proveTs).toHaveLength(12);
 
-    // Total TypeSafe in ledger.
-    expect(ts.reduce((s, l) => s + l.input_tokens, 0)).toBe(4_662_430);
-    expect(ts.reduce((s, l) => s + l.usd, 0)).toBeCloseTo(0.1958, 3);
+    // Total TypeSafe in historical runs.
+    expect(tsHist.reduce((s, l) => s + l.input_tokens, 0)).toBe(4_662_430);
+    expect(tsHist.reduce((s, l) => s + l.usd, 0)).toBeCloseTo(0.1958, 3);
 
     // Gemini calls match prices.ts exactly.
     const gem = lines.filter((l) => l.provider === 'gemini');
-    expect(gem).toHaveLength(611);
+    const gemHist = gem.filter((l) => ['giro-1', 'giro-1-ripeti', 'prova-1'].includes(l.run));
+    expect(gemHist).toHaveLength(611);
     const gemG1 = gem.filter((l) => l.run === 'giro-1');
     expect(gemG1).toHaveLength(598);
     expect(gemG1.reduce((s, l) => s + l.usd, 0)).toBeCloseTo(0.6621, 3);
-    expect(gem.reduce((s, l) => s + l.usd, 0)).toBeCloseTo(0.6797, 3);
+    expect(gemHist.reduce((s, l) => s + l.usd, 0)).toBeCloseTo(0.6797, 3);
 
-    // reportText explains the reconciliation.
+    // T323 linguistic run (giro-lingua)
+    const tsLingua = ts.filter((l) => l.run === 'giro-lingua');
+    expect(tsLingua).toHaveLength(615);
+    const gemLingua = gem.filter((l) => l.run === 'giro-lingua');
+    expect(gemLingua).toHaveLength(615);
+
+    // reportText explains the reconciliation and the new run.
     const rep = reportText(lines);
     expect(rep).toContain('$0.1613');
     expect(rep).toContain('$0.1958');
     expect(rep).toContain('$0.6621');
     expect(rep).toContain('$0.6797');
     expect(rep).toContain('0,042 $ al milione di token in ingresso');
+    expect(rep).toContain("L'italiano contro l'inglese (T323)");
+  });
+});
+
+describe('le varianti linguistiche (T323)', () => {
+  it('toItalian converte domande e opzioni in italiano mantenendo lo stato', () => {
+    const c = cases.find((x) => x.id === 'azione/forza-cassa')!;
+    const itCase = toItalian(c);
+    expect(itCase.questions[0].instructions).toContain('Può davvero accadere');
+    const effQ = itCase.questions.find((q) => q.id === 'effect') as { criteria: Record<string, string> };
+    expect(effQ.criteria.open).toContain('Il bersaglio si apre');
+  });
+
+  it('toEnglish converte lo stato e le aspettative in inglese', () => {
+    const c = cases.find((x) => x.id === 'azione/forza-cassa')!;
+    const enCase = toEnglish(c);
+    expect((enCase.state as any).player_writes).toContain('force the lock');
+    expect((enCase.state as any).carrying).toContain('Knife');
+    expect(enCase.expected.requires).toContain('Knife');
+    expect(enCase.questions[0].instructions).toContain('Can what');
+  });
+
+  it('toFreeTextEnglish converte solo il testo libero del viandante lasciando il resto in italiano', () => {
+    const c = cases.find((x) => x.id === 'azione/forza-cassa')!;
+    expect(isFreeTextCase(c)).toBe(true);
+    const freeEn = toFreeTextEnglish(c);
+    expect((freeEn.state as any).player_writes).toContain('force the lock');
+    // carrying items stay Italian
+    expect((freeEn.state as any).carrying).toContain('Coltello');
+  });
+
+  it('la modalità offline supporta tutte le varianti linguistiche a costo zero', async () => {
+    const sample = cases.slice(0, 10);
+    const dir = tmp();
+    const ledger = path.join(dir, 'consumi-lingua-offline.jsonl');
+    const budget = new Budget({ typesafe: 3, gemini: 1 }, []);
+
+    for (const variant of ['tutto-italiano', 'tutto-inglese', 'testo-libero-en']) {
+      const transform = variant === 'tutto-italiano' ? toItalian : variant === 'tutto-inglese' ? toEnglish : toFreeTextEnglish;
+      const lines = await runBench({
+        run: 'prova-lingua',
+        judges: [new OfflineJudge('jev-1.13.0')],
+        cases: sample,
+        variant,
+        transform,
+        ledger,
+        budget,
+      });
+      expect(lines).toHaveLength(10);
+      expect(lines.every((l) => l.ok && l.usd === 0 && l.provider === 'offline')).toBe(true);
+      expect(lines.every((l) => l.variant === variant)).toBe(true);
+    }
   });
 });

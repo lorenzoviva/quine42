@@ -63,7 +63,11 @@ export function loadCases(dir = CASES_DIR): Case[] {
     .readdirSync(dir)
     .filter((f) => f.endsWith('.json'))
     .sort()
-    .flatMap((f) => (JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')) as CaseFile).cases.map(withQuestions));
+    .flatMap((f) => {
+      const parsed = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')) as CaseFile;
+      if (!parsed || !Array.isArray(parsed.cases)) return [];
+      return parsed.cases.map(withQuestions);
+    });
 }
 
 /** The same questions with the options in reverse order (Jev leans to the first option, jaggedness #8). */
