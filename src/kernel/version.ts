@@ -5,7 +5,7 @@
 // The same string is in package.json (a test says so) and in every universe.json the kernel writes (`kernel`).
 // Every universe says the range of the kernels it runs on (T302, ADR-0152): `kernels`, from the contract it was born or ported with.
 
-export const KERNEL_VERSION = '0.1.13';
+export const KERNEL_VERSION = '0.1.14';
 
 export interface KernelVersion {
   major: number;
@@ -168,4 +168,16 @@ export function stampKernel(src: string | undefined, kernelVersion: string = KER
   }
   if (!('kernel' in parsed)) Object.assign(out, { kernel: kernelVersion, kernels: range });
   return JSON.stringify(out, null, 2) + '\n';
+}
+
+/** Whether the text of a universe.json runs on this kernel (T302, T312); one that is not readable is left to the fault of the configuration. */
+export function runsOnThisKernel(src: string | undefined): boolean {
+  let parsed: { kernel?: unknown; kernels?: unknown } | null;
+  try {
+    parsed = JSON.parse(src ?? '');
+  } catch {
+    return true;
+  }
+  if (!parsed || typeof parsed !== 'object') return true;
+  return checkKernelVersion(parsed.kernel, undefined, parsed.kernels).ok;
 }

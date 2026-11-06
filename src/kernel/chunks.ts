@@ -26,6 +26,32 @@ export class MemoryChunks implements ChunkStore {
   }
 }
 
+/**
+ * The plans of a universe that may be read-only (T312): while `sealed` says so, a new plan stays in memory, for this session,
+ * and never reaches the store; what the store has is read as always.
+ */
+export class SealedChunks implements ChunkStore {
+  // A map, not a store: no await more than the store's own, so the planning of the places keeps its rhythm.
+  private kept = new Map<string, ChunkRecord>();
+  constructor(
+    private store: ChunkStore,
+    private sealed: () => boolean,
+  ) {}
+  load(key: string): Promise<ChunkRecord | undefined> {
+    const r = this.kept.get(key);
+    return r ? Promise.resolve(r) : this.store.load(key);
+  }
+  save(key: string, record: ChunkRecord): Promise<void> {
+    if (!this.sealed()) return this.store.save(key, record);
+    this.kept.set(key, record);
+    return Promise.resolve();
+  }
+  clear(): Promise<void> {
+    this.kept.clear();
+    return this.store.clear();
+  }
+}
+
 // --- IndexedDB (browser, without the universe server) ---------------------------------------------
 
 function openDb(): Promise<IDBDatabase> {
