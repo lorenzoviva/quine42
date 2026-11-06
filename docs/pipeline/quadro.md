@@ -61,9 +61,10 @@ Aggiornato il 06/11/2026, epoca 307. Crediti: vedi `stato`.
 - **La finestra delle 5 ore la protegge lo script.** Mai più togliere `· approvato` per dosare i lanci. Nessun ripiego: un task aspetta il suo provider, si sposta solo con `assegna`.
 - **Argon (autore, 04/11): pochi crediti, tienilo sotto controllo.** Solo task piccoli, anche complessi; mai grandi esecuzioni. **Fable:** solo i task più difficili; può orchestrare solo se l'autore spunta la casella (T255 cambia ADR-0115); una misura: T157, 7 % sul suo contatore, ~55 punti di sessione. **Claude e GPT su `agy`:** in prova in T268 prima di attivare i provider in T255 (limiti da misurare sul campo, autore 04/11). **Gemini:** valutare anche i modelli inferiori dalla scheda.
 - **Ogni domanda per l'autore va in chat per intero, numerata, con la raccomandazione** (sua richiesta, 04/11), e in `domande/aperte.md`; mai solo «vedi il file». Sui modelli fatti, non impressioni: T254 scrive `docs/pipeline/modelli.md`, T255 distingue Sonnet e Haiku.
+- **Prevedi la finestra delle 5 ore** (autore, 06/11): se un task che l'autore aspetta non entra (`stima × moltiplicatore × ratio` contro ciò che resta), dillo subito con l'ora del reset.
 - Al più una verifica nel browser alla volta, solo su Claude. Risposte brevi all'autore.
 - Obiettivi: nessun parallelismo che aumenta il lavoro; finire i crediti entro il reset settimanale, non prima; margine per le urgenze.
-- **Autonomia piena dell'autore fino al 06/11 alle 18:00 locali** (data da confermare, vedi diario): approvo da me le mie proposte. Priorità 0 solo per urgenze. **Prima del reset di Claude (16:00 UTC, 17:00 locali) l'orchestratore consuma al più 1 % della settimana:** poche operazioni.
+- **Autonomia piena dell'autore fino al 06/11 alle 18:00 locali** (confermata alle 05:55 locali del 06/11): approvo da me le mie proposte. Priorità 0 solo per urgenze. **Prima del reset di Claude (16:00 UTC, 17:00 locali) l'orchestratore consuma al più 1 % della settimana:** poche operazioni.
 - **Sforzo (autore, 05/11, vale anche in futuro):** la qualità conta più del tempo: tanti task `high`, media `extra`, `max` qua e là; `medium` e `low` non sono più il predefinito. Lo sforzo arriva alla CLI solo dalla riga `- Pipeline:` (`assegna --sforzo`).
 - **Mai `git commit -a` nel base:** l'autore ha file suoi (`lab/mjx/models/handmade/lampione copy*.xml`, `docs/design/logo/proposte/`).
 - **Il parser delle dipendenze legge «dopo» e «dipende da» in tutto il blocco**, anche in un nome di file: niente «dopo» vicino a un Txx che non è una dipendenza. Dopo un blocco nuovo controlla `stato`.
@@ -71,5 +72,5 @@ Aggiornato il 06/11/2026, epoca 307. Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **307 (claude):** T316 integrato.
+- **307 (claude):** T316 integrato; T313: tetti fino a 5 $ + 5 $ e «sii intraprendente» nel blocco. L'autore ha aspettato un'ora T313 che non entrava nella finestra: **prevedere `windowAdmits` e dirlo subito**.
 - **306 (claude):** riavvio; T317 partito prima di T313, abbassato a p2; T316 partito al suo posto (T313 non entra nella finestra).
