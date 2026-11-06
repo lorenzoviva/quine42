@@ -2,6 +2,7 @@
 
 L'elenco unico (richiesta dell'autore, 04/11): l'orchestratore lo tiene aggiornato e lo riporta in chat. I numeri non cambiano; una risposta toglie la riga.
 
+- **D45 (T313, ADR-0157 proposto — Jev per le decisioni chiuse; banco in `lab/banco/jev/`):** 1) portarlo nel gioco nell'ordine dell'ADR (varco `TypeSafeGate`, strato `decide`, poi `model.reuse`, `job.match`, `npc.decide`, quarta parete, `action.judge`/Referente/`craft.free`, nodi dello Scultore)? Consiglio sì, dopo la serie della lingua interna (T307b-T310). 2) Il riuso dei modelli anche per le persone? Consiglio no: solo mobili, piante, rocce, strutture. 3) I dati del mondo a un fornitore nuovo senza ritenzione zero? Consiglio sì per stato e domande del mondo, no per il testo libero del viandante finché non c'è ritenzione zero. Anche: rileggere le risposte giuste scritte a mano del banco.
 - **D35 (T240 — Il piano di lancio, `docs/lancio/piano.md`; il testo di ogni voce è lì, col consiglio):**
   - **Da decidere ora:** D3.1 account personali su Hacker News e Reddit da subito, per usarli mesi prima del lancio (consiglio: sì, la voce più importante del piano).
   - **Senza consiglio, tuoi:** D5.1 10 ore a settimana di promozione?; D6.2 tetto della chiave il giorno del lancio (proposta 75 $, poi 15 $; i 10 $ al giorno non reggono il picco); D6.4 macchine e RAM il giorno del lancio (dopo la beta; 16 mondi ≈ 16 GB); D7.3 repository pubblico o in parte (cambia la licenza, segreti da ricontrollare).
