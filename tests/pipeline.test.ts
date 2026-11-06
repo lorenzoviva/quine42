@@ -1486,7 +1486,8 @@ describe('interfaccia web della pipeline (T69)', () => {
     const html = W.renderHtml();
     expect(html).toContain('<th>Step</th>');
     expect(html).toContain("<td>${t.step ?? '—'}</td>");
-    expect(html).toContain('step ${full.step}');
+    expect(html).toContain('stepStyle(t.step)'); // the tile's step label, with its colour (T304)
+    expect(html).toContain('step ${esc(t.step)}');
   });
 
   it('assignTask impedisce l\'assegnazione a gemini o argon di un task con verifica nel browser (T87)', () => {

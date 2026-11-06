@@ -380,7 +380,8 @@ export function parseBacklog(text) {
     } else {
       // Without a status in backticks the tail says what the task is («spezzato in T43a-T43c»): not runnable by itself.
       const status = /`([^`]+)`/.exec(tail)?.[1] ?? (tail.trim() || 'da fare');
-      tasks.push({ id, title, status, deps: [...deps], ...info, needsBrowser });
+      const commit = /`([0-9a-f]{7,40})`/.exec(tail)?.[1]; // «`fatto` (`0e14809`)»: the task's commit, for the web page
+      tasks.push({ id, title, status, deps: [...deps], ...info, needsBrowser, ...(commit ? { commit } : {}) });
     }
   }
   return tasks;
