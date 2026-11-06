@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 06/11/2026, epoca 315 (claude). Crediti: vedi `stato`.
+Aggiornato il 06/11/2026, epoca 316 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -13,7 +13,7 @@ Aggiornato il 06/11/2026, epoca 315 (claude). Crediti: vedi `stato`.
 - **T308a integrato** (`130810f`, contratto 0.4.0, ADR-0159 migrazione 0.3→0.4): campi e percorsi file universo in inglese, `server/folders.ts`.
 - **T307b integrato via T318** (contratto 0.3.0, ADR-0158 migrazione 0.2→0.3; T313 ADR-0157 Jev).
 - **T302 integrato** (`93a6442`, ADR-0152, kernel 0.1.11): `universe.json → kernels`, etichetta «kernel X.Y–X.Y». T312 integrato via T317. Installare i 4 universi (`npm run universi:cloud`) lo fa l'autore.
-- **Inglese lingua interna (autore, 05/11 sera, D34 chiusa, step 42):** T306 (0.1.12) → T307a (0.2) → T307b (0.3) → T308a (0.4) integrati. **T308b (0.5) in corso**, poi T309 → T310. Ognuno da solo.
+- **Inglese lingua interna (autore, 05/11 sera, D34 chiusa, step 42):** T306 (0.1.12) → T307a (0.2) → T307b (0.3) → T308a (0.4) integrati. **T308b (0.5) fatto** (ADR-0161, verificato nel browser), conflitti con T319/T156 → **T328 integrare** (claude, p1), poi T309 → T310. Ognuno da solo.
 - **Carte fatte a mano (autore, 05/11, step 41, Fase I, p7):** T293 archivio e rotte (D40 A, aspetta T255) → T294 i tre laboratori ai giocatori; T295 carte prima della Genesi (D39 A) → T296 eliminare la carta problematica. Scelte mie: interruttore `laboratori`, quote come ADR-0084, import gratis.
 - **Oggetti e mobili (autore, 05/11, tutto `max`, step 40):** T288 in mano → T289 banco vestiti → T290 in attesa foto; T291 integrato via T301 (ADR-0150, 0.1.10); T292 `takeable`.
 - **Tre vesti del sito per la beta (autore, 05/11):** T283 integrato (ADR-0145); D41 A: T284, T285, T286 rifatti da Claude v2 → T287. T233 dipende da T287. Aperta D38.
@@ -38,7 +38,7 @@ Aggiornato il 06/11/2026, epoca 315 (claude). Crediti: vedi `stato`.
 ## Pronti e priorità
 
 0. **Decisioni autore 04/11:** D32 SemVer `X.Y.Z`. Step 32: T260, T262 → T245a → T263/T245b → T245c-f. T265 prima della beta.
-1. **In corso:** T308b (contratto 0.5 filo e Lua). **Pronti:** T320 (controllo due piani, p3) → T321 (prompt Scultore Gemini, p4); T315, T281, T288, T293.
+1. **In corso:** T322 (gemini), T293; T328 integrare T308b (p1). **Pronti:** T320 (controllo due piani, p3) → T321 (prompt Scultore Gemini, p4); T315, T281, T288, T293.
    **Jev (autore 06/11 sera, approvati, solo `lab/`):** T322 conti (gemini, p2), T323 italiano (gemini, p2), T325 casi d'uso e spesa del contesto (p2, max), T324 immagini (p3). D45 resta aperta, T325 la informa.
 2. **Crediti (17:12 UTC):** Claude 5h 97 % libero (reset 22:00 UTC), settimana 66 % (reset 12/11); Gemini 5h 100 %, settimana 95 %; agy 100 %; Argon fermo fino all'11/11.
 
@@ -54,5 +54,5 @@ Aggiornato il 06/11/2026, epoca 315 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **316 (claude):** T308b fatto, integra in conflitto → T328; T309 e T327 dipendono da T328.
 - **315 (claude):** T326/T327 (NPC coeso); T322, T323 spostati su gemini.
-- **314 (claude):** T319 e T156 integrati (kernel 0.4.1); T308b in corso.

@@ -4699,7 +4699,7 @@ Nasce da T307a e T299: `dossier T307a`, `dossier T299`. `integra T307a` si è fe
 - Browser: singola e due schede in multigiocatore (`?viandante=`), un universo salvato prima si apre e gira.
 - Quando è fatto: commit su `task/T308b`. Sicurezza: le voci o «nessuna superficie nuova» (tocca `src/session/`, la sandbox).
 
-### T309 · L'inglese come lingua interna: i commenti di Lua e degli XML — `da fare` (dipende da T308b)
+### T309 · L'inglese come lingua interna: i commenti di Lua e degli XML — `da fare` (dipende da T308b, T328)
 - Pipeline: claude · sforzo high · stima 4% · approvato · priorità 4
 - Step: 42
 - Contesto: T306 (`dossier T306`). ≈ 27.000 parole di commenti in `universe/modules/*/logic.lua` e `universe/models/*.xml`, più i programmi ufficiali di `lab/`. Oggi la convenzione li vuole italiani; l'ADR di T306 la cambia.
@@ -4871,7 +4871,7 @@ Nasce da T156 (`dossier T156`, `docs/pipeline/domande/T156.md`, risposta B scelt
 - Test: nessuno (solo documentazione); typecheck col suo turno.
 - Quando è fatto: commit su `task/T326`; nell'esito le misure e la proposta in cinque righe. Sicurezza: nessuna superficie nuova.
 
-### T327 · L'NPC come oggetto coeso: il comportamento in un modulo solo, dietro una facciata — `da fare` (dipende da T326, T308b)
+### T327 · L'NPC come oggetto coeso: il comportamento in un modulo solo, dietro una facciata — `da fare` (dipende da T326, T308b, T328)
 - Pipeline: claude · sforzo extra · stima 6% · approvato · priorità 5
 - Step: 39
 - Contesto: richiesta dell'autore del 06/11 (vedi T326): basso accoppiamento, alta coesione dell'oggetto NPC. Segue la sezione 10 di `docs/design/comportamento-npc.md` scritta da T326 (`dossier T326`); se la proposta ha un difetto lo correggi nel documento e lo dici nell'esito. Dopo T308b perché il contratto 0.5 tocca il filo e Lua.
@@ -4879,3 +4879,13 @@ Nasce da T156 (`dossier T156`, `docs/pipeline/domande/T156.md`, risposta B scelt
 - Test: i test di società, mestieri, imprese, fuori vista invariati e verdi; il test di architettura; suite intera e typecheck con i loro turni.
 - Browser: una passeggiata in un luogo con individui al lavoro (`#convalida-browser`): camminano, lavorano, il cantiere cresce come prima.
 - Quando è fatto: commit su `task/T327`; nell'esito i moduli prima e ora e le righe tolte da `kernel.ts`. Sicurezza: scrivi l'esito.
+
+### T328 · Integrare T308b nel base, che ha T319 e T156 — `da fare`
+- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 1
+- Step: 42
+
+Nasce da T308b: `dossier T308b`. `integra T308b` si è fermato su conflitti in `docs/glossario-censimento.md`, `package-lock.json`, `package.json`, `src/kernel/modeldirector.ts`, `src/kernel/version.ts`, `universe/universe.json`: intanto nel base sono entrati T319 e T156 (`7d9ee13`, kernel 0.4.1, ADR-0160, prompt procedurale dello Scultore, `ModelInfo.seeds`, voci per taglia).
+
+**Cosa fare:** nel worktree, `git merge task/T308b` sul base di adesso. Versione: T308b porta il contratto a `0.5.0` (vince, in `version.ts`, `package.json`, `package-lock.json`, `universe/universe.json → kernel`/`kernels`). In `modeldirector.ts` tieni entrambe le modifiche (il prompt procedurale e i semi di T156/T319; i nomi inglesi di T308b), e porta al contratto 0.5 ciò che T319/T156 hanno scritto con i nomi di prima se la tabella di T308b li rinomina. `glossario-censimento.md`: rigeneralo con `node tools/glossario/glossario.mjs`. ADR di T308b: se il numero è preso, il primo libero, con i rimandi. Due aggiunte nello stesso punto restano entrambe.
+
+**Quando è fatto:** merge committato, `npm test`, `npm run typecheck` e `npm run build` verdi con i loro turni; esito con le scelte fatte nel conflitto. Non serve il browser (T308b l'ha provato), salvo che la risoluzione cambi codice oltre l'unione. Sicurezza: nessuna superficie nuova.
