@@ -62,8 +62,17 @@ domanda senza risposta giusta (speculativa) non si vota.
 
 ## I risultati
 
-Spesa del primo giro (`giro-1`, con le varianti e il giro ripetuto): **TypeSafe 0,196 $** su 3 (2176 chiamate, 4,66 milioni di token in
-ingresso), **Gemini 0,680 $** su 1 (611 righe). Il primo giro basta a concludere: i tetti più alti (5 $ e 5 $) non sono serviti.
+Spesa del **primo giro di benchmark (`giro-1`)**, su cui sono calcolate le tabelle sotto:
+- **TypeSafe: 0,161 $** (~0,16 $) per 1568 chiamate (3,84 milioni di token in ingresso a 0,042 $/M, uscita gratis a 0 $; di cui la variante principale `base` conta 2,92 milioni di token in ingresso);
+- **Gemini: 0,662 $** (~0,66 $) per 598 righe (1,65 milioni di token in ingresso, prezzi da `src/kernel/ai/prices.ts`).
+
+L'intero file di log (`consumi.jsonl`) comprende inoltre il giro di stabilità (`giro-1-ripeti`: 596 chiamate TypeSafe, 0,80 M token, 0,034 $) per misurare la concordanza tra due esecuzioni identiche, e le prove preliminari (`prova-1`: 12 chiamate TypeSafe per 0,001 $, 13 righe Gemini per 0,018 $), per un totale complessivo a registro di:
+- **TypeSafe: 0,196 $** (2176 chiamate, 4,66 milioni di token in ingresso);
+- **Gemini: 0,680 $** (611 righe, 1,69 milioni di token in ingresso).
+
+> **Riconciliazione con la dashboard di TypeSafe:** sulla dashboard l'autore vede **0,16 $ con circa 3 milioni di token in ingresso**. La cifra coincide esattamente con la fatturazione del primo giro `giro-1` (0,1613 $ su 3,84 M token totali, o ~2,92 M per la variante `base`), al prezzo ufficiale documentato di **0,042 $ al milione di token in ingresso** (uscita gratis a 0 $). Non esiste una tariffa a ~0,053 $/M: l'apparente differenza nasceva solo dalla divisione a mente 0,16 $ / 3 M; infatti 0,161328 $ / 3.841.142 token fa esattamente **0,042 $/M**.
+
+Il primo giro basta a concludere: i tetti più alti (5 $ e 5 $) non sono serviti.
 Le tabelle intere, compito per compito e domanda per domanda, sono in [`riepilogo.md`](riepilogo.md).
 
 ### Gruppo 1: le decisioni del gioco

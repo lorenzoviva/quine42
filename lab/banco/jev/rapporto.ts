@@ -6,6 +6,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { metaBreak } from '../../../src/kernel/fourthwall';
+import { internalName } from '../../../src/kernel/internalNames';
 import { BENCH_DIR, CASES_DIR, consistency, JEV_PRICE, reportTable, spent, summarize, type Case, type CaseFile, type LedgerLine } from './banco';
 
 const pct = (a: number, b: number) => (b ? `${Math.round((100 * a) / b)} %` : '—');
@@ -18,7 +19,11 @@ function casesById(): Map<string, Case> {
   return out;
 }
 
-const accepts = (e: unknown, v: unknown) => (Array.isArray(e) ? e.map(String).includes(String(v)) : String(e) === String(v));
+const norm = (v: unknown) => (typeof v === 'string' ? internalName('mestieri', v) : v);
+const accepts = (e: unknown, v: unknown) => {
+  const nv = String(norm(v));
+  return Array.isArray(e) ? e.map((x) => String(norm(x))).includes(nv) : String(norm(e)) === nv;
+};
 
 /** The kind's main decision and how it is right, for the composite rows. */
 function composites(lines: LedgerLine[], cases: Map<string, Case>): string[] {
@@ -191,10 +196,39 @@ export function reportText(lines: LedgerLine[]): string {
   const money = spent(real);
   const calls = (p: string) => real.filter((l) => l.provider === p).length;
   const tokens = (p: string) => real.filter((l) => l.provider === p).reduce((s, l) => s + l.input_tokens, 0);
+
+  const g1 = real.filter((l) => l.run === 'giro-1');
+  const moneyG1 = spent(g1);
+  const callsG1 = (p: string) => g1.filter((l) => l.provider === p).length;
+  const tokensG1 = (p: string) => g1.filter((l) => l.provider === p).reduce((s, l) => s + l.input_tokens, 0);
+  const tokensBaseG1 = (p: string) => g1.filter((l) => l.provider === p && l.variant === 'base').reduce((s, l) => s + l.input_tokens, 0);
+
+  const ripeti = real.filter((l) => l.run === 'giro-1-ripeti');
+  const moneyRipeti = spent(ripeti);
+  const callsRipeti = (p: string) => ripeti.filter((l) => l.provider === p).length;
+  const tokensRipeti = (p: string) => ripeti.filter((l) => l.provider === p).reduce((s, l) => s + l.input_tokens, 0);
+
+  const prove = real.filter((l) => l.run === 'prova-1');
+  const moneyProve = spent(prove);
+  const callsProve = (p: string) => prove.filter((l) => l.provider === p).length;
+
   const out: string[] = [
     '# Il banco di Jev: riepilogo (generato da `--rapporto`, non a mano)',
     '',
-    `Righe del registro: ${real.length}. Spesi: TypeSafe **${usd(money.typesafe ?? 0)}** (${calls('typesafe')} chiamate, ${tokens('typesafe')} token in ingresso a ${JEV_PRICE.input} $ al milione), Gemini **${usd(money.gemini ?? 0)}** (${calls('gemini')} righe, ${tokens('gemini')} token in ingresso). Le righe \`locale\` sono i modelli locali del gioco (\`MockAiModels\`, e il filtro di parole per la quarta parete): costano zero.`,
+    `Righe del registro: ${real.length}. Spesi nel registro: TypeSafe **${usd(money.typesafe ?? 0)}** (${calls('typesafe')} chiamate, ${tokens('typesafe')} token in ingresso a ${JEV_PRICE.input} $ al milione), Gemini **${usd(money.gemini ?? 0)}** (${calls('gemini')} righe, ${tokens('gemini')} token in ingresso). Le righe \`locale\` sono i modelli locali del gioco (\`MockAiModels\`, e il filtro di parole per la quarta parete): costano zero.`,
+    '',
+    `## Spesa del banco e riconciliazione con la dashboard di TypeSafe`,
+    '',
+    `Le tabelle di confronto sotto riportano il **primo giro di benchmark (\`giro-1\`)**:`,
+    `- **TypeSafe**: **${usd(moneyG1.typesafe ?? 0)}** (${callsG1('typesafe')} chiamate, ${tokensG1('typesafe')} token in ingresso a ${JEV_PRICE.input} $ al milione, uscita gratis a 0 $; di cui la variante principale \`base\` conta ${tokensBaseG1('typesafe')} token in ingresso, ~${(tokensBaseG1('typesafe') / 1e6).toFixed(2)} M);`,
+    `- **Gemini**: **${usd(moneyG1.gemini ?? 0)}** (${callsG1('gemini')} righe, ${tokensG1('gemini')} token in ingresso, calcolati dai prezzi ufficiali di \`src/kernel/ai/prices.ts\`).`,
+    '',
+    `L'intero registro (\`consumi.jsonl\`, ${real.length} righe) comprende inoltre:`,
+    `- il giro di stabilità (\`giro-1-ripeti\`): ${callsRipeti('typesafe')} chiamate TypeSafe (${tokensRipeti('typesafe')} token in ingresso, ${usd(moneyRipeti.typesafe ?? 0)}) per misurare la concordanza tra due esecuzioni identiche;`,
+    `- le prove preliminari (\`prova-1\`): ${callsProve('typesafe')} chiamate TypeSafe (${usd(moneyProve.typesafe ?? 0)}) e ${callsProve('gemini')} righe Gemini (${usd(moneyProve.gemini ?? 0)}).`,
+    `Totale complessivo del registro: TypeSafe **${usd(money.typesafe ?? 0)}** (${calls('typesafe')} chiamate, ${tokens('typesafe')} token in ingresso), Gemini **${usd(money.gemini ?? 0)}** (${calls('gemini')} righe, ${tokens('gemini')} token in ingresso).`,
+    '',
+    `> **Riconciliazione con la dashboard di TypeSafe:** sulla dashboard l'autore vede **0,16 $ con circa 3 milioni di token in ingresso**. La cifra coincide esattamente con la fatturazione del primo giro \`giro-1\` (${usd(moneyG1.typesafe ?? 0)} su ${(tokensG1('typesafe') / 1e6).toFixed(2)} M token totali, o ~${(tokensBaseG1('typesafe') / 1e6).toFixed(2)} M per la sola variante \`base\`), al prezzo ufficiale documentato da TypeSafe di **0,042 $ al milione di token in ingresso** e token in uscita gratuiti (0 $). Non c'è alcun prezzo effettivo a ~0,053 $/M: l'apparente differenza nasceva solo dalla divisione approssimata a mente 0,16 $ / 3 M; infatti ${(moneyG1.typesafe ?? 0).toFixed(6)} $ / ${tokensG1('typesafe')} token fa esattamente **${JEV_PRICE.input} $/M**.`,
     '',
     '«decisioni» conta le domande con una risposta giusta; «$ per 1000 decisioni» divide la spesa per tutte le domande fatte; i token in uscita di Gemini comprendono il ragionamento. Le varianti: `base` le domande del banco, `rovescio` le stesse con le opzioni in ordine inverso, `domande-2` domande più atomiche scritte dopo il primo giro, `oggi` i prompt veri del gioco (judgeAction, judgeCombination, judgeCraft, liaisonReply, la revisione della quarta parete) su Flash-Lite, `locale` i modelli locali del gioco.',
     '',

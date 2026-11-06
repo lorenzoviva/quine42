@@ -145,3 +145,61 @@ describe('la modalità offline', () => {
     expect(judge.cost(r.usage)).toBeCloseTo((800 * 0.25 + 130 * 1.5) / 1e6, 10);
   });
 });
+
+describe('la spesa del banco riconciliata con la dashboard (T322)', () => {
+  it('il calcolo della spesa di TypeSafe usa solo i token di input a 0,042 $/M con output gratuito', () => {
+    const judge = new JevJudge({ key: 'test', model: 'jev-1.13.0' });
+    expect(judge.cost({ input: 1_000_000, output: 50_000 })).toBeCloseTo(0.042, 6);
+    expect(judge.cost({ input: 3_841_142, output: 440_789 })).toBeCloseTo(0.161327964, 6);
+  });
+
+  it('il registro reale riconcilia giro-1 ($0.1613) con la dashboard e l’intero registro ($0.1958)', () => {
+    const lines = readLedger();
+    expect(lines.length).toBeGreaterThan(0);
+
+    const ts = lines.filter((l) => l.provider === 'typesafe');
+    expect(ts).toHaveLength(2176);
+
+    const g1 = ts.filter((l) => l.run === 'giro-1');
+    expect(g1).toHaveLength(1568);
+    const inG1 = g1.reduce((s, l) => s + l.input_tokens, 0);
+    expect(inG1).toBe(3_841_142);
+    const usdG1 = g1.reduce((s, l) => s + l.usd, 0);
+    expect(usdG1).toBeCloseTo(0.1613, 3);
+
+    // The base variant alone in giro-1 accounts for ~2.92 million input tokens (~3 M).
+    const baseG1 = g1.filter((l) => l.variant === 'base');
+    expect(baseG1).toHaveLength(822);
+    expect(baseG1.reduce((s, l) => s + l.input_tokens, 0)).toBe(2_919_758);
+
+    // Stability repeated run: 596 calls.
+    const ripeti = ts.filter((l) => l.run === 'giro-1-ripeti');
+    expect(ripeti).toHaveLength(596);
+    expect(ripeti.reduce((s, l) => s + l.input_tokens, 0)).toBe(802_866);
+    expect(ripeti.reduce((s, l) => s + l.usd, 0)).toBeCloseTo(0.0337, 3);
+
+    // Preliminary trial runs.
+    const proveTs = ts.filter((l) => l.run === 'prova-1');
+    expect(proveTs).toHaveLength(12);
+
+    // Total TypeSafe in ledger.
+    expect(ts.reduce((s, l) => s + l.input_tokens, 0)).toBe(4_662_430);
+    expect(ts.reduce((s, l) => s + l.usd, 0)).toBeCloseTo(0.1958, 3);
+
+    // Gemini calls match prices.ts exactly.
+    const gem = lines.filter((l) => l.provider === 'gemini');
+    expect(gem).toHaveLength(611);
+    const gemG1 = gem.filter((l) => l.run === 'giro-1');
+    expect(gemG1).toHaveLength(598);
+    expect(gemG1.reduce((s, l) => s + l.usd, 0)).toBeCloseTo(0.6621, 3);
+    expect(gem.reduce((s, l) => s + l.usd, 0)).toBeCloseTo(0.6797, 3);
+
+    // reportText explains the reconciliation.
+    const rep = reportText(lines);
+    expect(rep).toContain('$0.1613');
+    expect(rep).toContain('$0.1958');
+    expect(rep).toContain('$0.6621');
+    expect(rep).toContain('$0.6797');
+    expect(rep).toContain('0,042 $ al milione di token in ingresso');
+  });
+});
