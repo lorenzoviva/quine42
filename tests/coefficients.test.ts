@@ -104,7 +104,7 @@ describe('the coefficients of generation (T45b)', () => {
     const { k, models } = await bootWith({});
     const run = async (c: number) => {
       models.calls.clear();
-      await sculpt(k.council, { id: 'prova-sasso', nome: 'sasso', aspetto: 'un sasso grigio', classe: 'roccia' }, k.sculptors(), sculptPlan(c));
+      await sculpt(k.council, { id: 'prova-sasso', nome: 'sasso', aspetto: 'un sasso grigio', classe: 'rock' }, k.sculptors(), sculptPlan(c));
       return models.count('model.sculpt', 'model.judge');
     };
     const full = await run(1);

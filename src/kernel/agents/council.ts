@@ -11,6 +11,7 @@ import type { FileMap, MagicRune, Spell, TerrainDef } from '../types';
 import type { WorldGraph } from '../graph';
 import { gameSetupSummary } from '../gameSetup';
 import { repairGameSetup } from '../validator';
+import { italianName } from '../internalNames';
 
 export type AgentId = 'narratore' | 'cartografo' | 'artista' | 'scultore' | 'fisico' | 'ingegnere' | 'arbitro' | 'referente' | 'attore' | 'musicista';
 
@@ -162,7 +163,7 @@ export function canonSummary(files: FileMap): string {
     } catch {
       continue;
     }
-    for (const [token, r] of Object.entries(m.runes ?? {})) runes.push(`- ${r.glyph} ${r.name} («${token}», ${r.element}): ${r.description}`);
+    for (const [token, r] of Object.entries(m.runes ?? {})) runes.push(`- ${r.glyph} ${r.name} («${token}», ${italianName('elementi', r.element)}): ${r.description}`);
     for (const [seq, sp] of Object.entries(m.spells ?? {})) spells.push(`- ${seq.split(' ').join(' + ')} → ${sp.name}: ${sp.description}`);
   }
   return [

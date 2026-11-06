@@ -20,6 +20,7 @@ import { bibleBreaks, lexiconWords, metaBreak } from '../../../src/kernel/fourth
 import { Kernel } from '../../../src/kernel/kernel';
 import { validateNewRune } from '../../../src/kernel/magic';
 import { validateEffects } from '../../../src/kernel/validator';
+import { MIGRATIONS } from '../../../src/kernel/migrations';
 import { readPlots, reviewPlot, plotText, canonBreak } from '../../../src/kernel/plots';
 import { memoryStore } from '../../../src/kernel/repo';
 import { checkSociety, readPeople } from '../../../src/kernel/society';
@@ -60,7 +61,8 @@ function readTree(dir: string, base = dir, out: FileMap = {}): FileMap {
 export function realmFiles(reame: Reame): FileMap {
   const files = readTree(path.join(HERE, reame));
   delete files['README.md'];
-  return files;
+  // The realms are written for the contract 0.1 (Step 37): read as the kernel of today reads them, ported (T307a).
+  return MIGRATIONS.reduce((out, m) => m.migrate(out), files);
 }
 
 /** The seed with the realm over it: the models' index merged, the rest replaced path by path. */

@@ -4,7 +4,7 @@
       "id": "castello",
       "nome": "Castello",
       "descrizione": "un castello di pietra con fossato, ponte levatoio, mura e torri; un mastio nel cortile",
-      "ambiente": "castello",
+      "ambiente": "castle",
       "centro": [
         -5,
         0
@@ -15,7 +15,7 @@
       "id": "fortezza",
       "nome": "Fortezza",
       "descrizione": "una fortezza a doppia cinta di mura, con caserma interna",
-      "ambiente": "fortezza",
+      "ambiente": "fortress",
       "centro": [
         -8,
         0
@@ -26,7 +26,7 @@
       "id": "capanne",
       "nome": "Villaggio di capanne",
       "descrizione": "capanne di paglia sparse attorno a un pozzo",
-      "ambiente": "capanne",
+      "ambiente": "huts",
       "centro": [
         9,
         -9
@@ -37,7 +37,7 @@
       "id": "maneggio",
       "nome": "Maneggio",
       "descrizione": "recinti di staccionata per cavalli, una stalla",
-      "ambiente": "maneggio",
+      "ambiente": "stables",
       "centro": [
         0,
         9
@@ -48,7 +48,7 @@
       "id": "caserma",
       "nome": "Caserma",
       "descrizione": "la caserma delle guardie, lunga e bassa, con il cortile per le esercitazioni",
-      "ambiente": "caserma",
+      "ambiente": "barracks",
       "centro": [
         -11,
         0
@@ -70,7 +70,7 @@
       "id": "torre_mago",
       "nome": "Torre del mago",
       "descrizione": "una torre rotonda di pietra in una radura silenziosa",
-      "ambiente": "torre_mago",
+      "ambiente": "wizard_tower",
       "centro": [
         8,
         8
@@ -81,7 +81,7 @@
       "id": "tana_drago",
       "nome": "Tana del drago",
       "descrizione": "una caverna nella montagna, con pozze di lava e ossa sparse",
-      "ambiente": "tana_drago",
+      "ambiente": "dragon_lair",
       "centro": [
         -11,
         -11
@@ -92,7 +92,7 @@
       "id": "tempio",
       "nome": "Tempio",
       "descrizione": "un tempio di pietra con colonne, in cima a una scalinata",
-      "ambiente": "tempio",
+      "ambiente": "temple",
       "centro": [
         -14,
         0
@@ -103,7 +103,7 @@
       "id": "piramide",
       "nome": "Piramide",
       "descrizione": "una piramide di pietra nel deserto, con una camera segreta",
-      "ambiente": "piramide",
+      "ambiente": "pyramid",
       "centro": [
         -17,
         0
@@ -114,7 +114,7 @@
       "id": "deserto",
       "nome": "Deserto",
       "descrizione": "dune di sabbia, rocce bruciate dal sole, rare oasi",
-      "ambiente": "deserto",
+      "ambiente": "desert",
       "centro": [
         0,
         13
@@ -125,7 +125,7 @@
       "id": "giungla",
       "nome": "Giungla",
       "descrizione": "una giungla fitta, umida, con radure e sentieri di animali",
-      "ambiente": "giungla",
+      "ambiente": "jungle",
       "centro": [
         -21,
         0
@@ -136,7 +136,7 @@
       "id": "montagne",
       "nome": "Montagne",
       "descrizione": "pareti di roccia, passi stretti e neve sulle cime",
-      "ambiente": "montagne",
+      "ambiente": "mountains",
       "centro": [
         0,
         5
@@ -147,7 +147,7 @@
       "id": "lago",
       "nome": "Lago",
       "descrizione": "un lago tranquillo tra i canneti",
-      "ambiente": "lago",
+      "ambiente": "lake",
       "centro": [
         5,
         0
@@ -158,7 +158,7 @@
       "id": "borgo_mattoni",
       "nome": "Borgo di mattoni",
       "descrizione": "case di mattoni rossi strette attorno a una piazza",
-      "ambiente": "borgo_mattoni",
+      "ambiente": "brick_village",
       "centro": [
         11,
         11

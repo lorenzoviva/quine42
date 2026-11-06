@@ -24,7 +24,7 @@ const house = (over: Partial<Venture> = {}): Venture => ({
   stato: 'in corso',
   luogo: '0,0',
   posto: { x: 9, y: 9 },
-  fasi: housePhases('grande'),
+  fasi: housePhases('structure'),
   ruoli: structuredClone(HOUSE_ROLES),
   portati: {},
   lavorato: 0,

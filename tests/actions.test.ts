@@ -11,7 +11,7 @@ import { classOf } from '../src/mj/classes';
 import type { FormComp } from '../src/kernel/forms';
 
 const BARREL = bundledFiles['models/barile.xml'];
-const mobile = classOf('mobile')!;
+const mobile = classOf('furniture')!;
 
 async function boot() {
   const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
@@ -71,9 +71,9 @@ describe('actions as rules on the model', () => {
     const k = await boot();
     const crate = await spawn(k, 'object.crate', 'test#cassa');
     expect(k.shapeModel(crate)).toBeUndefined();
-    const before = k.files['models/mobile.xml'];
+    const before = k.files['models/furniture.xml'];
     await k.freeAction(crate, 'scheggio la cassa');
-    expect(k.files['models/mobile.xml']).toBe(before);
+    expect(k.files['models/furniture.xml']).toBe(before);
     expect(k.ecs.alive.has(crate)).toBe(true);
   });
 });

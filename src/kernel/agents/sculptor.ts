@@ -22,7 +22,7 @@ import type { Council } from './council';
 export type ModelCategory = 'semplice' | 'figura' | 'struttura';
 
 export const categoryOf = (cls: AssetClass): ModelCategory =>
-  ['persona', 'animale', 'bestia'].includes(cls.id) ? 'figura' : ['edificio', 'monumento', 'grande'].includes(cls.id) ? 'struttura' : 'semplice';
+  ['person', 'animal', 'beast'].includes(cls.id) ? 'figura' : ['building', 'monument', 'structure'].includes(cls.id) ? 'struttura' : 'semplice';
 
 export interface SculptorAiModels {
   semplice: string;
@@ -112,10 +112,10 @@ export function examplesFor(files: FileMap, classe: string): string[] {
   } catch {
     index = {};
   }
-  const family: Record<string, string[]> = { persona: ['persona', 'animale'], animale: ['animale', 'persona'], bestia: ['bestia', 'animale'], albero: ['albero', 'cespuglio'], cespuglio: ['cespuglio', 'albero'], roccia: ['roccia', 'sasso'], sasso: ['sasso', 'roccia'], oggetto: ['oggetto', 'mobile'], mobile: ['mobile', 'oggetto'], edificio: ['edificio', 'grande'], grande: ['grande', 'edificio'], monumento: ['monumento', 'edificio'] };
+  const family: Record<string, string[]> = { person: ['person', 'animal'], animal: ['animal', 'person'], beast: ['beast', 'animal'], tree: ['tree', 'bush'], bush: ['bush', 'tree'], rock: ['rock', 'pebble'], pebble: ['pebble', 'rock'], object: ['object', 'furniture'], furniture: ['furniture', 'object'], building: ['building', 'structure'], structure: ['structure', 'building'], monument: ['monument', 'building'] };
   const ids = Object.keys(index).filter((id) => files[`models/${id}.xml`]);
   const picked: string[] = [];
-  for (const cls of family[classe] ?? [classe, 'mobile']) {
+  for (const cls of family[classe] ?? [classe, 'furniture']) {
     const of = ids.filter((id) => index[id].classe === cls).sort((a, b) => Number(/mano/.test(index[b].autore ?? '')) - Number(/mano/.test(index[a].autore ?? '')));
     for (const id of of) if (picked.length < 2 && !picked.includes(id)) picked.push(id);
   }
@@ -254,7 +254,7 @@ async function write(c: Council, req: SculptRequest, cls: AssetClass, model: str
  * figure is revised, whether the Artist judges at all (without, the first program that passes is the model).
  */
 export async function sculpt(c: Council, req: SculptRequest, m: SculptorAiModels = DEFAULT_SCULPTORS, plan = { semplici: 2, revisione: true, giudizio: true }): Promise<SculptResult | undefined> {
-  const cls = classOf(req.classe) ?? classOf('oggetto')!;
+  const cls = classOf(req.classe) ?? classOf('object')!;
   const model = modelFor(req, cls, m);
   const cat = categoryOf(cls);
   c.say('scultore', 'propone', `«${req.nome}» (${cls.name}, ${model})`, undefined, 'model.sculpt');
@@ -368,7 +368,7 @@ export function checkAction(xml: string, clip: string, name: string, cls: AssetC
 
 /** The Sculptor writes an action for a model; undefined if none passes the kernel's checks. */
 export async function sculptAction(c: Council, req: ActionRequest, model: string, retries = 2): Promise<{ xml: string; calls: number } | undefined> {
-  const cls = classOf(req.classe) ?? classOf('oggetto')!;
+  const cls = classOf(req.classe) ?? classOf('object')!;
   let info: ReturnType<typeof actionLetters>;
   try {
     info = actionLetters(req.xml, cls);

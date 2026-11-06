@@ -337,7 +337,7 @@ export function nextStep(v: Venture, nome: string, has: (item: string) => number
 
 /** The phases of a house rebuilt or built new: the materials of the seed's trades (logs, nails), the stages of T245e. */
 export function housePhases(classe: string | undefined): VenturePhase[] {
-  const k = classe === 'grande' ? 1 : 0.6;
+  const k = classe === 'structure' ? 1 : 0.6;
   const n = (x: number) => Math.max(1, Math.round(x * k));
   return [
     { nome: 'platea', materiali: { 'item.ciocco': n(4) }, lavoro: n(200), stadio: 0.2 },

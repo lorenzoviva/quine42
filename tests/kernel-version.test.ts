@@ -91,11 +91,11 @@ describe('a universe at boot', () => {
   });
 
   it('of another contract opens standing, with a fault that says why, and is never committed as ours', async () => {
-    const k = await boot(withKernel('0.2.0'));
-    expect(k.faults.get('universe:kernel')?.message).toContain(`del kernel 0.2.0, il kernel è il ${KERNEL_VERSION}`);
+    const k = await boot(withKernel('0.3.0'));
+    expect(k.faults.get('universe:kernel')?.message).toContain(`del kernel 0.3.0, il kernel è il ${KERNEL_VERSION}`);
     const saved = k.saveFile('world/prova.txt', 'x\n');
     expect(saved.committed).toBe(false);
-    expect(JSON.parse(k.repo.working['universe.json']).kernel).toBe('0.2.0');
+    expect(JSON.parse(k.repo.working['universe.json']).kernel).toBe('0.3.0');
   });
 
   it('that does not say it gets the field at its next commit', async () => {
@@ -181,25 +181,31 @@ describe('the range of the kernels a universe runs on (T302)', () => {
     const seed = { ...bundledFiles, 'modules/nuovo/manifest.json': '{"id":"nuovo","kind":"data"}' };
     const out = withKernel('0.0.4', { from: '0.0' });
     expect(upgradeFromSeed(out, seed)).toEqual({ files: out, changes: {}, updated: [] });
-    expect(upgradeFromSeed(withKernel('0.1.2'), seed).updated).toContain('modules/nuovo/manifest.json');
+    expect(upgradeFromSeed(withKernel('0.2.0'), seed).updated).toContain('modules/nuovo/manifest.json');
+    // One of the contract before takes nothing either, until it is ported (prepareUniverse, T307a).
+    expect(upgradeFromSeed(withKernel('0.1.2'), seed).updated).toEqual([]);
   });
 
-  it('an old universe without the field opens as before, and gets it at its next commit', async () => {
-    const k = await boot(withKernel('0.1.2'));
+  it('a universe without the field opens as before, and gets it at its next commit; one of 0.1 is ported, born again with 0.2', async () => {
+    const k = await boot(withKernel('0.2.0'));
     expect(k.faults.has('universe:kernel')).toBe(false);
     k.repo.write('world/prova.txt', 'x\n');
     k.repo.commit('prova', 'player');
-    expect(JSON.parse(k.repo.head().files['universe.json'])).toMatchObject({ kernel: KERNEL_VERSION, kernels: { from: '0.1' } });
+    expect(JSON.parse(k.repo.head().files['universe.json'])).toMatchObject({ kernel: KERNEL_VERSION, kernels: { from: '0.2' } });
+    const old = await boot(withKernel('0.1.2'));
+    expect(old.faults.has('universe:kernel')).toBe(false);
+    expect(JSON.parse(old.repo.working['universe.json'])).toMatchObject({ kernel: KERNEL_VERSION, kernels: { from: '0.2' } });
   });
 });
 
-describe('the migrations (T302): one place, empty today', () => {
+describe('the migrations (T302): one place, one migration today (T307a)', () => {
   const at = (kernel: string, kernels?: unknown): FileMap => ({ 'universe.json': JSON.stringify({ name: 'x', kernel, ...(kernels ? { kernels } : {}) }), 'world/a.txt': 'a' });
   const step = (from: string, to: string): Migration => ({ from, to, descrizione: `da ${from} a ${to}`, migrate: (f) => ({ ...f, 'world/a.txt': `${f['world/a.txt']}>${to}` }) });
 
-  it('there is none, and without one a universe stays as it is', () => {
-    expect(MIGRATIONS).toEqual([]);
-    for (const files of [at('0.0.3'), at('0.1.1', { from: '0.1' }), at('9.9.9'), { 'universe.json': '{ rotto' }, {}]) {
+  it('there is one, 0.1 → 0.2; a universe it does not reach, of this contract or unreadable stays as it is', () => {
+    expect(MIGRATIONS.map((m) => `${m.from}→${m.to}`)).toEqual(['0.1→0.2']);
+    expect(migrateUniverse(at('0.1.1', { from: '0.1' })).applied).toHaveLength(1);
+    for (const files of [at('0.0.3'), at(KERNEL_VERSION, { from: '0.2' }), at('9.9.9'), { 'universe.json': '{ rotto' }, {}]) {
       const r = migrateUniverse(files);
       expect(r.applied).toEqual([]);
       expect(r.files).toBe(files);
@@ -229,30 +235,29 @@ describe('the migrations (T302): one place, empty today', () => {
 describe('an effect that nobody applies', () => {
   it('is a fault that names it, not a silence', async () => {
     const k = await boot(bundledFiles);
-    k.applyEffects([{ tipo: 'vento' } as any], k.wandererEntity);
+    k.applyEffects([{ type: 'vento' } as any], k.wandererEntity);
     expect(k.faults.get('effect:vento')?.message).toMatch(/vento.*non ha chi lo applica/);
   });
 
   it('the effects of the seed are all applied by someone, and none is a fault', async () => {
     const k = await boot(bundledFiles);
-    k.applyEffects([{ tipo: 'messaggio', testo: 'ciao' } as any, { tipo: 'legame', legame: 'amico' } as any, { tipo: 'stato', nome: 'bagnato', durata: 5 } as any], k.wandererEntity);
+    k.applyEffects([{ type: 'message', text: 'ciao' } as any, { type: 'bond', bond: 'amico' } as any, { type: 'state', name: 'bagnato', duration: 5 } as any], k.wandererEntity);
     expect(k.faults.list().filter((f) => f.key.startsWith('effect:'))).toEqual([]);
   });
 
-  it('a core.effects written before `handles` is trusted with the effects of the first contract only', async () => {
+  it('a core.effects written before `handles` knew only the Italian effects of 0.1: since 0.2 it is trusted with none (T307a)', async () => {
     const old = bundledFiles['modules/core.effects/logic.lua'].replace(/-- Se un effetto ha chi lo applica[\s\S]*?\nend\n\n/, '');
     expect(old).not.toContain('M.handles');
     const k = await boot({ ...bundledFiles, 'modules/core.effects/logic.lua': old });
-    expect(k.applyEffects([{ tipo: 'messaggio', testo: 'ciao' } as any], k.wandererEntity)).toEqual(['ciao']);
-    k.applyEffects([{ tipo: 'vento' } as any], k.wandererEntity);
-    expect(k.faults.has('effect:vento')).toBe(true);
+    expect(k.applyEffects([{ type: 'message', text: 'ciao' } as any], k.wandererEntity)).toEqual([]);
+    expect(k.faults.has('effect:message')).toBe(true);
   });
 
   it('without core.effects, every effect that is not the kernel’s is a fault', async () => {
     const files = Object.fromEntries(Object.entries(bundledFiles).filter(([p]) => !p.startsWith('modules/core.effects/')));
     const k = await boot(files);
-    k.applyEffects([{ tipo: 'messaggio', testo: 'ciao' } as any, { tipo: 'legame', legame: 'amico' } as any]);
-    expect(k.faults.has('effect:messaggio')).toBe(true);
-    expect(k.faults.has('effect:legame')).toBe(false);
+    k.applyEffects([{ type: 'message', text: 'ciao' } as any, { type: 'bond', bond: 'amico' } as any]);
+    expect(k.faults.has('effect:message')).toBe(true);
+    expect(k.faults.has('effect:bond')).toBe(false);
   });
 });

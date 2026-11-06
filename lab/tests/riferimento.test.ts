@@ -31,7 +31,7 @@ describe('i programmi di riferimento del cantiere', () => {
     }, 60_000);
 
     it(`${r.file}: tre semi alla taglia del bersaglio non sono lo stesso edificio`, () => {
-      const p = prova(xml, b, { semi: 3, taglie: [b.taglia ?? 'grande'] });
+      const p = prova(xml, b, { semi: 3, taglie: [b.taglia ?? 'large'] });
       const t = p.taglie[0];
       expect(t.regge, t.semi.map((s) => `${s.seme}: ${s.difetti.join(', ')}`).join(' | ')).toBe(true);
       expect(t.varianza?.statico).toBe(false);

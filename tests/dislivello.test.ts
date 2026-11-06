@@ -48,7 +48,7 @@ describe('the way, tile by tile and step by step', () => {
   });
 });
 
-// A model of the class `grande` (5 × 5 × 4 tiles, 20 voxels a tile) that is all a rise: a platform 10 voxels high (half a tile, a step
+// A model of the class `structure` (5 × 5 × 4 tiles, 20 voxels a tile) that is all a rise: a platform 10 voxels high (half a tile, a step
 // is 4) over the tiles east of the middle one, its edge on the edge of two tiles. With `scala`, along its northern row, steps 2 voxels
 // apart that go up to it from the west: good steps. With `chiusa`, the platform is the whole model, with no stair.
 const box = (x0: number, x1: number, y0: number, y1: number, z0: number, z1: number) =>
@@ -60,8 +60,8 @@ ${kind === 'chiusa' ? box(0, 99, 0, 99, 0, 9) : [box(60, 99, 0, 99, 0, 9), ...[1
 
 const files = () => {
   const index = JSON.parse(bundledFiles['models/index.json']!);
-  index['platea-scala'] = { classe: 'grande', nome: 'platea con la scala' };
-  index['platea-chiusa'] = { classe: 'grande', nome: 'platea senza scala' };
+  index['platea-scala'] = { classe: 'structure', nome: 'platea con la scala' };
+  index['platea-chiusa'] = { classe: 'structure', nome: 'platea senza scala' };
   return { ...bundledFiles, 'models/platea-scala.xml': platform('scala'), 'models/platea-chiusa.xml': platform('chiusa'), 'models/index.json': JSON.stringify(index) };
 };
 

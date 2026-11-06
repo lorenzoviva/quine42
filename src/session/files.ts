@@ -7,6 +7,7 @@ import { CARDS_FILE } from '../kernel/cards';
 import { RELIEF_PATH } from '../kernel/relief';
 import type { FileMap } from '../kernel/types';
 import { PER_WANDERER } from '../kernel/wanderers';
+import { internalEffect } from '../kernel/internalNames';
 import type { FileChanges } from './protocol';
 
 /** What a client reads of `universe.json`. Not `ai` (budgets, models, providers), not the theme's path, not the heritage. */
@@ -55,7 +56,7 @@ const eachValue = (o: unknown, fn: (e: Fields) => unknown) => (o && typeof o ===
 
 /** An action of a menu: its label, and which effects it has (the inventory shows its button then), never what they say. */
 function actionShown(a: Fields): Fields {
-  return { ...only(a, ['id', 'label', 'requires']), ...(Array.isArray(a.effects) ? { effects: a.effects.map((e) => only(e, ['tipo'])) } : {}) };
+  return { ...only(a, ['id', 'label', 'requires']), ...(Array.isArray(a.effects) ? { effects: a.effects.map((e) => only(internalEffect(e) as Fields, ['type'])) } : {}) };
 }
 
 function withActions(o: Fields, fields: string[]): Fields {

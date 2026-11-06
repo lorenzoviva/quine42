@@ -2,7 +2,7 @@
 local M = {}
 
 function M.on_act(id, user, action)
-  if action ~= "raccogli" then return nil end
+  if action ~= "gather" then return nil end
   local state = ecs.get(id, "raccolto")
   if state then return "Le more sono finite. Ricresceranno quando il mondo si ripete." end
   ecs.set(id, "raccolto", { si = true })

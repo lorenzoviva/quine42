@@ -1,4 +1,4 @@
-// Le rune di Sidera: le quattro del seme che restano (luce, fuoco, acqua, scudo: `luce` è tra le rune con cui si parte)
+// Le rune di Sidera: le quattro del seme che restano (lux, ignis, aqua, scutum: `lux` è tra le rune con cui si parte; dal contratto 0.2, T307a)
 // e le dodici quantistiche e gravitazionali, ognuna validata con `validateNewRune` contro quelle già entrate.
 // Scrive modules/magic.runes/manifest.json e world/canone.md. Esegui: npx vite-node lab/banco/universi-cloud/sidera/strumenti/rune.ts
 import fs from 'node:fs';
@@ -10,7 +10,7 @@ import type { MagicRune, Spell } from '../../../../../src/kernel/types';
 import { SIDERA } from './carica';
 
 const seed = JSON.parse(fs.readFileSync(path.join(SIDERA, '../../../../universe/modules/magic.runes/manifest.json'), 'utf8'));
-const KEEP = ['luce', 'fuoco', 'acqua', 'scudo'];
+const KEEP = ['lux', 'ignis', 'aqua', 'scutum'];
 
 export const NUOVE: RuneDraft[] = [
   { token: 'grava', nome: 'Gravis', glifo: '⊛', colore: '#7a5af0', elemento: 'gravità', descrizione: "il peso: ancora a terra, rende pesante ciò che tocca", canone: "Gravis è la runa del peso: pronunciata, fa sentire la terra più vicina, i passi lenti e sicuri, ciò che si porta più leggero da reggere." },
@@ -29,23 +29,23 @@ export const NUOVE: RuneDraft[] = [
 
 /** Gli incantesimi di ogni runa da sola e qualche formula; effetti dall'insieme chiuso, passano da validateEffects. */
 export const INCANTESIMI: Record<string, Spell> = {
-  grava: { name: 'Ancora', description: 'La terra ti tira giù: passi lenti, ma reggi più peso.', cost: 6, effects: [{ tipo: 'stato', nome: 'zavorrato', durata: 45, velocita: 0.7, peso: 20 }] },
-  lieve: { name: 'Piuma', description: 'Il corpo si fa leggero e il passo si allunga.', cost: 8, effects: [{ tipo: 'stato', nome: 'alleggerito', durata: 40, velocita: 1.5 }] },
-  tunnel: { name: 'Traforo', description: 'Davanti a te il terreno si apre in un sentiero, anche attraverso le paratie.', cost: 14, effects: [{ tipo: 'terreno', a: 'p', raggio: 1 }] },
-  intreccio: { name: 'Nodo gemello', description: 'Tra te e chi hai davanti si stringe un nodo che non si scioglie.', cost: 12, effects: [{ tipo: 'legame', legame: 'amico' }, { tipo: 'ricordo', testo: 'ha sentito un nodo gemello stringersi con il viandante', peso: 2 }] },
-  onda: { name: 'Risacca', description: "Un'onda parte da te e spinge via ciò che hai davanti.", cost: 6, effects: [{ tipo: 'spingi', forza: 6 }] },
-  vuoto: { name: 'Gelo del vuoto', description: 'Il suolo davanti si copre di brina; il freddo ti morde le dita.', cost: 10, effects: [{ tipo: 'terreno', a: 'n', raggio: 1 }, { tipo: 'stato', nome: 'intirizzito', durata: 20, velocita: 0.85 }] },
-  marea: { name: 'Bassa marea', description: 'Il terreno attorno si abbassa, come sabbia quando l’acqua si ritira.', cost: 12, effects: [{ tipo: 'rilievo', delta: -2, raggio: 2 }] },
-  massa: { name: 'Accumulo', description: 'Il terreno davanti si gonfia e si alza.', cost: 12, effects: [{ tipo: 'rilievo', delta: 2, raggio: 1 }] },
-  spin: { name: 'Trottola', description: 'Giri su te stesso e riparti più svelto.', cost: 5, effects: [{ tipo: 'stato', nome: 'in rotazione', durata: 20, velocita: 1.3 }, { tipo: 'spingi', forza: 2 }] },
-  quanto: { name: 'Scintilla', description: 'Una scarica ti ridà forze e ti lascia in mano una cella carica.', cost: 15, effects: [{ tipo: 'bisogni', energia: 15 }, { tipo: 'crea_oggetto', oggetto: 'item.cella-energetica', quantita: 1 }] },
-  orbita: { name: 'Perielio', description: 'Un anello di polvere luminosa ti gira attorno e ti ripara.', cost: 10, effects: [{ tipo: 'scudo', durata: 25 }, { tipo: 'luce', raggio: 3, durata: 25 }] },
-  stasi: { name: 'Sospensione', description: 'Il corpo rallenta quasi fino a fermarsi, e intanto si ristora.', cost: 12, effects: [{ tipo: 'stato', nome: 'sospeso', durata: 8, velocita: 0.3 }, { tipo: 'bisogni', salute: 20 }] },
-  'grava grava': { name: 'Collasso', description: 'Il peso si raddoppia: il terreno davanti sprofonda.', cost: 18, effects: [{ tipo: 'rilievo', delta: -3, raggio: 1 }, { tipo: 'stato', nome: 'zavorrato', durata: 30, velocita: 0.6, peso: 30 }] },
-  'lieve onda': { name: 'Planata', description: "Leggero, l'onda ti porta avanti come una foglia.", cost: 14, effects: [{ tipo: 'stato', nome: 'alleggerito', durata: 30, velocita: 1.8 }, { tipo: 'spingi', forza: 4 }] },
-  'orbita grava': { name: 'Satellite', description: 'Ciò che hai davanti ti gira attorno e poi viene scagliato via.', cost: 16, effects: [{ tipo: 'spingi', forza: 9 }, { tipo: 'scudo', durata: 15 }] },
-  'quanto stasi': { name: 'Riposo del dormiente', description: 'Ti fermi un istante e ti rialzi come dopo una notte intera.', cost: 20, effects: [{ tipo: 'bisogni', energia: 35, salute: 25 }] },
-  'tunnel massa tunnel': { name: 'Galleria', description: 'Il terreno si apre e si richiude in archi sopra di te: una galleria breve.', cost: 26, effects: [{ tipo: 'terreno', a: 'p', raggio: 2 }, { tipo: 'rilievo', delta: 1, raggio: 1 }] },
+  grava: { name: 'Ancora', description: 'La terra ti tira giù: passi lenti, ma reggi più peso.', cost: 6, effects: [{ type: 'state', name: 'zavorrato', duration: 45, speed: 0.7, weight: 20 }] },
+  lieve: { name: 'Piuma', description: 'Il corpo si fa leggero e il passo si allunga.', cost: 8, effects: [{ type: 'state', name: 'alleggerito', duration: 40, speed: 1.5 }] },
+  tunnel: { name: 'Traforo', description: 'Davanti a te il terreno si apre in un sentiero, anche attraverso le paratie.', cost: 14, effects: [{ type: 'terrain', to: 'p', radius: 1 }] },
+  intreccio: { name: 'Nodo gemello', description: 'Tra te e chi hai davanti si stringe un nodo che non si scioglie.', cost: 12, effects: [{ type: 'bond', bond: 'amico' }, { type: 'memory', text: 'ha sentito un nodo gemello stringersi con il viandante', weight: 2 }] },
+  onda: { name: 'Risacca', description: "Un'onda parte da te e spinge via ciò che hai davanti.", cost: 6, effects: [{ type: 'push', force: 6 }] },
+  vuoto: { name: 'Gelo del vuoto', description: 'Il suolo davanti si copre di brina; il freddo ti morde le dita.', cost: 10, effects: [{ type: 'terrain', to: 'n', radius: 1 }, { type: 'state', name: 'intirizzito', duration: 20, speed: 0.85 }] },
+  marea: { name: 'Bassa marea', description: 'Il terreno attorno si abbassa, come sabbia quando l’acqua si ritira.', cost: 12, effects: [{ type: 'relief', delta: -2, radius: 2 }] },
+  massa: { name: 'Accumulo', description: 'Il terreno davanti si gonfia e si alza.', cost: 12, effects: [{ type: 'relief', delta: 2, radius: 1 }] },
+  spin: { name: 'Trottola', description: 'Giri su te stesso e riparti più svelto.', cost: 5, effects: [{ type: 'state', name: 'in rotazione', duration: 20, speed: 1.3 }, { type: 'push', force: 2 }] },
+  quanto: { name: 'Scintilla', description: 'Una scarica ti ridà forze e ti lascia in mano una cella carica.', cost: 15, effects: [{ type: 'needs', energy: 15 }, { type: 'create_item', item: 'item.cella-energetica', quantity: 1 }] },
+  orbita: { name: 'Perielio', description: 'Un anello di polvere luminosa ti gira attorno e ti ripara.', cost: 10, effects: [{ type: 'shield', duration: 25 }, { type: 'light', radius: 3, duration: 25 }] },
+  stasi: { name: 'Sospensione', description: 'Il corpo rallenta quasi fino a fermarsi, e intanto si ristora.', cost: 12, effects: [{ type: 'state', name: 'sospeso', duration: 8, speed: 0.3 }, { type: 'needs', health: 20 }] },
+  'grava grava': { name: 'Collasso', description: 'Il peso si raddoppia: il terreno davanti sprofonda.', cost: 18, effects: [{ type: 'relief', delta: -3, radius: 1 }, { type: 'state', name: 'zavorrato', duration: 30, speed: 0.6, weight: 30 }] },
+  'lieve onda': { name: 'Planata', description: "Leggero, l'onda ti porta avanti come una foglia.", cost: 14, effects: [{ type: 'state', name: 'alleggerito', duration: 30, speed: 1.8 }, { type: 'push', force: 4 }] },
+  'orbita grava': { name: 'Satellite', description: 'Ciò che hai davanti ti gira attorno e poi viene scagliato via.', cost: 16, effects: [{ type: 'push', force: 9 }, { type: 'shield', duration: 15 }] },
+  'quanto stasi': { name: 'Riposo del dormiente', description: 'Ti fermi un istante e ti rialzi come dopo una notte intera.', cost: 20, effects: [{ type: 'needs', energy: 35, health: 25 }] },
+  'tunnel massa tunnel': { name: 'Galleria', description: 'Il terreno si apre e si richiude in archi sopra di te: una galleria breve.', cost: 26, effects: [{ type: 'terrain', to: 'p', radius: 2 }, { type: 'relief', delta: 1, radius: 1 }] },
 };
 
 export function scrivi(): void {

@@ -70,7 +70,7 @@ describe('the Musician writes what is asked', () => {
     expect(info.classe).toBe('suono');
     // The environment it names: the game plays it there, over the piece of the seed, by day and by night.
     const env = added!.suono!.ambienti![0];
-    expect(env).toBe('castello');
+    expect(env).toBe('castle');
     const choice = chooseMusic({ beyond: false, environment: env, phase: 'giorno', seed: 7 }, readPrograms(head.files));
     expect(choice?.id).toBe(added!.id);
     expect(chooseMusic({ beyond: false, environment: env, phase: 'notte', seed: 7 }, readPrograms(head.files))?.id).toBe(added!.id);
@@ -179,7 +179,7 @@ describe('what does not pass goes back to the Musician, with the reason', () => 
   });
 
   it('a model is no piece, and a loop of a bar is not a piece of music', () => {
-    expect(scoreErrors('models/x.xml', bundledFiles['models/sasso.xml'] ?? '<sequence values="BC" size="8 8 8"/>', 'Sasso', 'musica').join()).toMatch(/manca <sound>/);
+    expect(scoreErrors('models/x.xml', bundledFiles['models/pebble.xml'] ?? '<sequence values="BC" size="8 8 8"/>', 'Sasso', 'musica').join()).toMatch(/manca <sound>/);
     expect(scoreErrors('models/x.xml', FLAT.replace('size="32', 'size="8'), 'Corto', 'musica').join()).toMatch(/almeno 32 passi/);
   });
 

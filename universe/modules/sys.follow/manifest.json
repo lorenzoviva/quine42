@@ -73,8 +73,8 @@
       ],
       "passi": [
         {
-          "tipo": "cammina",
-          "verso": "sinistra",
+          "tipo": "walk",
+          "verso": "left",
           "secondi": 0.35
         }
       ],

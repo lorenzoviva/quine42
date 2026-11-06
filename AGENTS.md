@@ -168,7 +168,7 @@ src/
     store.ts            il magazzino dei moduli (`ModuleStores`, `world/magazzino/<modulo>.json`, tetti in byte, ADR-0138)
     placing.ts          posare sui mobili (ADR-0150): i ripiani di una forma (`shelvesOf`), l'impronta di un oggetto (`itemShape`), dove sta (`findSpot`)
     version.ts          la versione del kernel `X.Y.Z` (`KERNEL_VERSION`, `checkKernelVersion`, `stampKernel`, ADR-0136) e l'intervallo dei kernel di un universo (`universeKernels`, `rangeLabel`, ADR-0152)
-    migrations.ts       le migrazioni da un contratto al successivo (`MIGRATIONS`, vuoto; `migrateUniverse` all'avvio, ADR-0152)
+    migrations.ts       le migrazioni da un contratto al successivo (`MIGRATIONS`: 0.1 → 0.2, T307a; `migrateUniverse` all'avvio, ADR-0152; `migratePlanRecord` su ogni piano letto, ADR-0155)
     internalNames.ts    la lingua interna come dato (ADR-0153): `INTERNAL_NAMES`, ogni nome italiano di oggi → inglese (o latino per le rune), dominio per dominio, con il task che lo applica
     deferred.ts         la generazione differita (ADR-0143): `DeferredModels` (tutto alla coda, il resto ferma), `StepGate` (si scrive solo un passo valido), `runDeferred`, `spiral`
     credits.ts          la commissione di piattaforma (`costWithFee`, la decide il server, ADR-0132) e la divisione delle spese comuni (ADR-0081)
@@ -272,7 +272,7 @@ Registro, Luogo, Fucina e Genesi → `docs/architettura-dettagli.md#concilio`.
 (`solid`, `radius`, `pushable`, `mass`, `friction`, `speed`), `components`, `singleton`, `persist`,
 `interaction` (`talk | read | lua`), `actions` (`id`, `label`, `requires`, `effects`), `container` (`size`, `loot`),
 `ui` (pannello: `titolo`, `elementi`), `spawn`, `persona`, `unique`, `inventory` (id di oggetti), `item`, `context`, `lore`, `tags`, `drops`,
-`origin`; generatori: `tiles` (`name`, `color`, `solid`, `layer`, `indoor`, `speed`, `model`, `actions`, `matura`),
+`origin`; generatori: `tiles` (`id` interno dal contratto 0.2, `name` nella lingua del mondo, `color`, `solid`, `layer`, `indoor`, `speed`, `model`, `actions`, `matura`),
 `roof`, `commonHouse`; dati: `items` (anche `model`, `aspetto`, `container`, `actions`, `slot`, `bonus`, effetti `mana`), `recipes`, `loot`, `layouts`, `fragments`, `runes`, `spells`, `mestieri` (ADR-0140).
 
 ### API Lua — l'unica disponibile, il validatore rifiuta il resto
@@ -336,12 +336,12 @@ La procedura, con gli snippet per spostarsi nelle stanze, è in [`docs/architett
 
 - **L'inglese è la lingua interna** (ADR-0153, step 42): identificatori, commenti TypeScript, valori che il codice confronta, campi su disco e sul filo,
   percorsi dell'universo, nomi visibili a Lua, commenti di Lua e XML e prompt in **inglese**; i token delle rune magiche in **latino**; documentazione, UI e
-  testi del mondo (la lingua del suo universo, oggi l'italiano) in **italiano**. Il passaggio lo fanno T307a-T310 con una migrazione per contratto: la tabella
+  testi del mondo (la lingua del suo universo, oggi l'italiano) in **italiano**. Il passaggio lo fanno T307a-T310 con una migrazione per contratto (fatto T307a, contratto `0.2`: la simulazione e le rune latine, ADR-0155): la tabella
   è `src/kernel/internalNames.ts` (`INTERNAL_NAMES`), raccontata in [`docs/lingua-interna.md`](docs/lingua-interna.md); un nome nuovo su disco, sul filo o in Lua nasce inglese.
 - **Un nome per ogni concetto** (ADR-0117): [`docs/glossario.md`](docs/glossario.md) dice per ogni concetto il nome italiano, quello inglese del codice, i sinonimi da non usare e ciò che è fermo. Un identificatore italiano non è un'eccezione: si rinomina (le righe R del glossario; le eccezioni dette da ADR-0117 sono tolte). Un concetto nuovo ha una voce lì nello stesso commit. Ciò che è su disco, sul filo o visibile a Lua (campi JSON, messaggi del protocollo, API Lua, effetti) non si rinomina senza una migrazione; gli ADR non si riscrivono.
 - File in LF (`.gitattributes`). Su Windows niente `Get-Content`/`Set-Content` di PowerShell 5.1 sui sorgenti.
 - Nuova API per Lua: `Host` + `prelude.lua` + `LUA_API` nel validatore + prompt dell'Ingegnere + questo file.
 - Nuovo compito per un agente: schema Gemini + risposta in `MockAiModels` + voce nel registro.
-- **La versione del kernel** (ADR-0136): `X.Y.Z` = era, contratto, incremento, in `src/kernel/version.ts` (`KERNEL_VERSION`) e in `package.json`, uguali. Chi cambia `src/kernel/` sale di `Z` se gli universi della stessa `X.Y` restano buoni, di `Y` (e `Z` a 0) se cambia il contratto (formati, senso di una primitiva, regole del terreno, caso): un contratto nuovo vuole un universo nuovo. `universe.json → kernel` lo scrive il kernel, con `kernels`, l'intervallo dei contratti su cui l'universo gira (`from`, aperto finché il contratto non cambia; ricavato da `kernel` se manca, ADR-0152); `checkKernelVersion` al caricamento, un universo fuori intervallo resta in piedi con il guasto `universe:kernel`, si vede con l'etichetta («kernel 0.1–0.1») dove si scelgono gli universi, non si cancella e non prende niente dal seme. Le migrazioni da un `X.Y` al successivo stanno solo in `src/kernel/migrations.ts` (vuoto).
+- **La versione del kernel** (ADR-0136): `X.Y.Z` = era, contratto, incremento, in `src/kernel/version.ts` (`KERNEL_VERSION`) e in `package.json`, uguali. Chi cambia `src/kernel/` sale di `Z` se gli universi della stessa `X.Y` restano buoni, di `Y` (e `Z` a 0) se cambia il contratto (formati, senso di una primitiva, regole del terreno, caso): un contratto nuovo vuole un universo nuovo. `universe.json → kernel` lo scrive il kernel, con `kernels`, l'intervallo dei contratti su cui l'universo gira (`from`, aperto finché il contratto non cambia; ricavato da `kernel` se manca, ADR-0152); `checkKernelVersion` al caricamento, un universo fuori intervallo resta in piedi con il guasto `universe:kernel`, si vede con l'etichetta («kernel 0.1–0.1») dove si scelgono gli universi, non si cancella e non prende niente dal seme. Le migrazioni da un `X.Y` al successivo stanno solo in `src/kernel/migrations.ts` (oggi `0.1 → 0.2`, ADR-0155): pure, deterministiche, i piani dei luoghi idempotenti; un caricamento migra e poi prende il seme (`prepareUniverse`); il validatore ripara i valori italiani del contratto prima finché T310 non cambia i prompt.
 - Prima di consegnare: `npm test` e `npm run typecheck` verdi.
 - Un sottosistema nuovo o cambiato si descrive in `docs/architettura-dettagli.md`; qui una riga nell'indice (ADR-0120).

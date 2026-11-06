@@ -5,7 +5,7 @@
   "version": "0.1.0",
   "description": "Gli ambienti del mondo come programmi di riscrittura (stile MarkovJunior) applicati alla bozza del terreno. Li scrive il Cartografo; il kernel li prova prima di accettarli.",
   "layouts": {
-    "borgo": {
+    "village": {
       "name": "Borgo",
       "description": "case di pietra con porte sulla strada, orti e cortili",
       "environment": "misto",
@@ -58,7 +58,7 @@
         ]
       }
     },
-    "bosco": {
+    "woods": {
       "name": "Bosco",
       "description": "alberi fitti con radure e sentieri di animali",
       "environment": "esterno",
@@ -88,7 +88,7 @@
         ]
       }
     },
-    "campi": {
+    "fields": {
       "name": "Campi",
       "description": "appezzamenti coltivati divisi da viottoli, un capanno",
       "environment": "esterno",
@@ -128,7 +128,7 @@
         ]
       }
     },
-    "rovine": {
+    "ruins": {
       "name": "Rovine",
       "description": "colonne spezzate e muri crollati di un edificio dimenticato",
       "environment": "esterno",
@@ -168,7 +168,7 @@
         ]
       }
     },
-    "locanda": {
+    "inn": {
       "name": "Locanda",
       "description": "un grande edificio con sala comune e stanze, cortile intorno",
       "environment": "interno",
@@ -207,7 +207,7 @@
         ]
       }
     },
-    "castello": {
+    "castle": {
       "name": "Castello",
       "description": "un castello di pietra con fossato, ponte levatoio, mura e torri; un mastio nel cortile",
       "environment": "misto",
@@ -226,7 +226,7 @@
           },
           {
             "type": "stamp",
-            "shape": "castello",
+            "shape": "castle",
             "codes": {
               "muro": "b",
               "pavimento": "l",
@@ -236,7 +236,7 @@
         ]
       }
     },
-    "fortezza": {
+    "fortress": {
       "name": "Fortezza",
       "description": "una fortezza a doppia cinta di mura, con caserma interna",
       "environment": "misto",
@@ -255,7 +255,7 @@
           },
           {
             "type": "stamp",
-            "shape": "fortezza",
+            "shape": "fortress",
             "codes": {
               "muro": "b",
               "pavimento": "l"
@@ -264,7 +264,7 @@
         ]
       }
     },
-    "capanne": {
+    "huts": {
       "name": "Villaggio di capanne",
       "description": "capanne di paglia sparse attorno a un pozzo",
       "environment": "misto",
@@ -283,11 +283,11 @@
           },
           {
             "type": "stamp",
-            "shape": "pozzo"
+            "shape": "well"
           },
           {
             "type": "stamp",
-            "shape": "capanne",
+            "shape": "huts",
             "codes": {
               "muro": "a",
               "pavimento": "f"
@@ -297,7 +297,7 @@
         ]
       }
     },
-    "maneggio": {
+    "stables": {
       "name": "Maneggio",
       "description": "recinti di staccionata per cavalli, una stalla",
       "environment": "esterno",
@@ -316,7 +316,7 @@
           },
           {
             "type": "stamp",
-            "shape": "recinto",
+            "shape": "pen",
             "codes": {
               "recinto": "c"
             },
@@ -325,7 +325,7 @@
         ]
       }
     },
-    "caserma": {
+    "barracks": {
       "name": "Caserma",
       "description": "la caserma delle guardie, lunga e bassa, con il cortile per le esercitazioni",
       "environment": "misto",
@@ -344,7 +344,7 @@
           },
           {
             "type": "stamp",
-            "shape": "caserma",
+            "shape": "barracks",
             "codes": {
               "muro": "b",
               "pavimento": "l"
@@ -352,7 +352,7 @@
           },
           {
             "type": "stamp",
-            "shape": "recinto",
+            "shape": "pen",
             "codes": {
               "recinto": "c"
             }
@@ -373,7 +373,7 @@
         }
       }
     },
-    "torre_mago": {
+    "wizard_tower": {
       "name": "Torre del mago",
       "description": "una torre rotonda di pietra in una radura silenziosa",
       "environment": "misto",
@@ -392,7 +392,7 @@
           },
           {
             "type": "stamp",
-            "shape": "torre",
+            "shape": "tower",
             "codes": {
               "muro": "b",
               "pavimento": "l"
@@ -401,7 +401,7 @@
         ]
       }
     },
-    "tana_drago": {
+    "dragon_lair": {
       "name": "Tana del drago",
       "description": "una caverna nella montagna, con pozze di lava e ossa sparse",
       "environment": "misto",
@@ -420,7 +420,7 @@
           },
           {
             "type": "stamp",
-            "shape": "tana",
+            "shape": "lair",
             "codes": {
               "roccia": "k",
               "terreno": "s"
@@ -439,7 +439,7 @@
         ]
       }
     },
-    "tempio": {
+    "temple": {
       "name": "Tempio",
       "description": "un tempio di pietra con colonne, in cima a una scalinata",
       "environment": "misto",
@@ -458,7 +458,7 @@
           },
           {
             "type": "stamp",
-            "shape": "tempio",
+            "shape": "temple",
             "codes": {
               "muro": "b",
               "pavimento": "l"
@@ -467,7 +467,7 @@
         ]
       }
     },
-    "piramide": {
+    "pyramid": {
       "name": "Piramide",
       "description": "una piramide di pietra nel deserto, con una camera segreta",
       "environment": "esterno",
@@ -486,7 +486,7 @@
           },
           {
             "type": "stamp",
-            "shape": "piramide",
+            "shape": "pyramid",
             "codes": {
               "muro": "b",
               "pavimento": "l"
@@ -505,7 +505,7 @@
         ]
       }
     },
-    "deserto": {
+    "desert": {
       "name": "Deserto",
       "description": "dune di sabbia, rocce bruciate dal sole, rare oasi",
       "environment": "esterno",
@@ -535,7 +535,7 @@
         ]
       }
     },
-    "giungla": {
+    "jungle": {
       "name": "Giungla",
       "description": "una giungla fitta, umida, con radure e sentieri di animali",
       "environment": "esterno",
@@ -565,7 +565,7 @@
         ]
       }
     },
-    "montagne": {
+    "mountains": {
       "name": "Montagne",
       "description": "pareti di roccia, passi stretti e neve sulle cime",
       "environment": "esterno",
@@ -605,7 +605,7 @@
         ]
       }
     },
-    "lago": {
+    "lake": {
       "name": "Lago",
       "description": "un lago tranquillo tra i canneti",
       "environment": "esterno",
@@ -635,7 +635,7 @@
         ]
       }
     },
-    "borgo_mattoni": {
+    "brick_village": {
       "name": "Borgo di mattoni",
       "description": "case di mattoni rossi strette attorno a una piazza",
       "environment": "misto",
@@ -654,7 +654,7 @@
           },
           {
             "type": "stamp",
-            "shape": "casa",
+            "shape": "house",
             "codes": {
               "muro": "q",
               "pavimento": "f"
@@ -663,7 +663,7 @@
           },
           {
             "type": "stamp",
-            "shape": "pozzo"
+            "shape": "well"
           }
         ]
       }

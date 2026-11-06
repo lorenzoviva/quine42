@@ -9,7 +9,7 @@
       "id": "item.grano",
       "name": "grano",
       "description": "Un fascio di spighe mietute, ancora odorose di campo.",
-      "category": "materiale",
+      "category": "material",
       "weight": 0.5,
       "stack": 20,
       "tags": [

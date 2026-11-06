@@ -44,7 +44,7 @@ import { commonHouseModel, GENERIC, ModelDirector, ownModelId } from './modeldir
 import { ScoreDirector } from './scoredirector';
 import { categoryOf, DEFAULT_SCULPTORS, sculptAction, type SculptorAiModels } from './agents/sculptor';
 import { MODELS_INDEX, type ModelInfo } from './forms';
-import { Content, normName, specOf } from './content';
+import { Content, isCategory, normName, specOf } from './content';
 import { layout, type Lot, type LayoutResult, articulationPoints } from './layout';
 import { AGENTS, Council, readBible, wordsOf, type AgentId, type CatalogEntry, type FeedEntry } from './agents/council';
 import { designEnvironment, drawAtlas, planChunk, readStructure, type ChunkPlan, type PlannedHouse, type WaterRecord, type Where } from './agents/cartography';
@@ -63,7 +63,8 @@ import { CardUses, CARDS_FILE, COMUNE, allCards, collectionOf, moduleCardId, rec
 import { bondWith, memoriesFor, playerFile, PLAYERS_DIR, readWandererState, repairProfile, SOLO, validWandererId, WANDERER_NAME, wandererColor, wandererOf, wanderersIn, type Profile, type ProfileRepair, type Wanderer, type WandererState, PER_WANDERER } from './wanderers';
 import type { ActionDef, AiSettings, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, GameSetup, ChunkInfo, Recipe, RuneFragment, TerrainDef, UniverseConfig } from './types';
 import { checkKernelVersion, KERNEL_VERSION, stampKernel } from './version';
-import { migrateUniverse } from './migrations';
+import { migratePlanRecord, migrateUniverse } from './migrations';
+import { internalName, italianName } from './internalNames';
 import { ModuleStores } from './store';
 import { dailyProduce, matchJob, validateJobProgram, WORKERS_PER_PLACE, type JobProgram, type JobTask } from './jobs';
 import { addWork, bring, fillTeam, HARVEST_DAY, HARVEST_DAYS, HARVEST_ROLES, HOUSE_ROLES, housePhases, missingWords, nextStep, openVentures, pruneVentures, readVentures, SITE_REACH, stillNeeded, ventureId, ventureProgress, ventureState, VENTURES_FILE, writeVentures, YEAR_DAYS, type Venture, type VentureCandidate, type VentureStep } from './ventures';
@@ -353,7 +354,7 @@ const FALLBACK_PLAYER = {
   hand: { tokens: [] as string[], sel: 0 },
   needs: { hunger: 85, thirst: 85, energy: 90, health: 100, mana: 60 },
 };
-const STARTER_RUNES = ['x', 'speed = speed', 'luce'];
+const STARTER_RUNES = ['x', 'speed = speed', 'lux'];
 /** Chunks from the origin (in carpet space) before runes that touch the carpet can appear. */
 const CARPET_RUNE_DISTANCE = 3;
 /**
@@ -373,7 +374,7 @@ export const realmOf = (cx: number, cy: number) => {
   return `${Math.floor((zx + REALM / 2) / REALM)},${Math.floor((zy + REALM / 2) / REALM)}`;
 };
 /** The area of the world where a rare size is unique (ADR-0092): Huge per zone, Gargantuan per realm. */
-export const rareAreaOf = (t: SizeTier, cx: number, cy: number) => (t === 'gargantuesca' ? realmOf(cx, cy) : zoneOf(cx, cy));
+export const rareAreaOf = (t: SizeTier, cx: number, cy: number) => (t === 'gargantuan' ? realmOf(cx, cy) : zoneOf(cx, cy));
 
 const clone = <T>(v: T): T => (v === undefined ? v : JSON.parse(JSON.stringify(v)));
 
@@ -434,9 +435,12 @@ const KERNEL_COMPONENTS = new Set(['pos', 'player', 'carpet', 'hand', 'inventory
 /** What a client may say it holds (T263): the four directions, in the world's terms. */
 const HELD_ACTIONS = new Set(['up', 'down', 'left', 'right']);
 
-const KERNEL_EFFECTS = new Set(['rilievo', 'legame', 'ricordo', 'nascita']);
-/** The effects every core.effects of the contract 0.1 applies: what a core.effects without `handles` is trusted with (T260). */
-const CORE_EFFECTS_0_1 = new Set(['messaggio', 'bisogni', 'crea_oggetto', 'consuma', 'distruggi', 'apri', 'contenitore', 'terreno', 'fuoco', 'luce', 'scudo', 'spingi', 'evoca', 'stato', 'togli_stato']);
+const KERNEL_EFFECTS = new Set(['relief', 'bond', 'memory', 'birth']);
+/**
+ * The effects a core.effects without `handles` is trusted with (T260): none since the contract 0.2 (T307a), whose effects have English
+ * names that only a core.effects with `handles` knows; one of 0.1 applied the Italian ones, and would miss them all.
+ */
+const CORE_EFFECTS_WITHOUT_HANDLES = new Set<string>();
 
 /** A plot that still does not hold after the Narrator's second answer. */
 class PlotRejected extends Error {}
@@ -669,7 +673,9 @@ export class Kernel {
     this.grantCap = opts.grantCap ?? DEFAULT_GRANT_CAP;
     this.fee = opts.platformFee ?? DEFAULT_PLATFORM_FEE;
     this.wasmUri = opts.wasmUri;
-    this.chunkStore = opts.chunks ?? new MemoryChunks();
+    // Every plan read is ported to this contract (T307a): the plans of a universe of before stay on disk as they were until written again.
+    const chunks = opts.chunks ?? new MemoryChunks();
+    this.chunkStore = { load: async (key) => { const rec = await chunks.load(key); return rec && migratePlanRecord(rec); }, save: (key, rec) => chunks.save(key, rec), clear: () => chunks.clear() };
     this.forms = new Forms(opts.forms ?? new InlineRunner());
   }
 
@@ -687,10 +693,12 @@ export class Kernel {
     const { repo, synced } = Repo.open(name, opts.files, opts.store);
     k.repo = repo;
     if (opts.backend) repo.attach(opts.backend, opts.past ?? []);
-    // The one place where a universe of an older contract would be ported (T302, ADR-0152): empty today, it leaves every universe as it is.
+    // The one place where a universe of an older contract is ported, if nobody did before (T302, ADR-0152; prepareUniverse, T307a).
     const ported = migrateUniverse(repo.working);
     if (ported.applied.length) {
       for (const p of new Set([...Object.keys(repo.working), ...Object.keys(ported.files)])) if (repo.working[p] !== ported.files[p]) repo.write(p, ported.files[p] ?? null);
+      // Committed at once, by the kernel: left in the working files, the first commit of the Council would fence most of it back to HEAD.
+      repo.commit(`migrazione ${ported.applied.map((a) => a.split(':')[0]).join(', ')}`, 'kernel');
       k.log('kernel', `universo portato a questo kernel: ${ported.applied.join('; ')}`);
     }
     k.bus.on('lua:morte', (d: { fame?: boolean; sete?: boolean }) => k.mortalDies(d?.sete ? 'sete' : d?.fame ? 'fame' : 'ferite'));
@@ -1346,7 +1354,7 @@ export class Kernel {
       description: d?.description ?? 'Qualcosa che non esiste più nel codice del mondo.',
       glyph: d?.glyph ?? '?',
       color: d?.color ?? '#888',
-      category: d?.category ?? 'varie',
+      category: d?.category ?? 'misc',
       spec: specOf(d) ?? DEFAULT_ITEM,
       effects: d?.effects,
       tags: d?.tags ?? [],
@@ -1484,7 +1492,7 @@ export class Kernel {
    */
   private formFor(man: Manifest | undefined, who: string): FormComp {
     const app = man?.appearance;
-    const classe = app?.classe ?? (man?.kind === 'player' ? 'persona' : man ? guessClass(`${man.name} ${man.description ?? ''} ${app?.aspetto ?? ''}`, man.persona ? 'figura' : undefined).id : 'oggetto');
+    const classe = app?.classe ?? (man?.kind === 'player' ? 'person' : man ? guessClass(`${man.name} ${man.description ?? ''} ${app?.aspetto ?? ''}`, man.persona ? 'figura' : undefined).id : 'object');
     const model = this.forms.resolve(app?.model, classe);
     return { model, seed: this.forms.seedFor(model, who), yaw: man?.persona || man?.kind === 'player' ? 0 : (hashStr(who) % 628) / 100, ...(app?.model && app.model !== model ? { wanted: app.model, classe } : {}) };
   }
@@ -1492,8 +1500,8 @@ export class Kernel {
   /** The look of an item: its own model, or the generic entity in its colour. */
   itemLook(item: string): FormComp {
     const d = this.content.get(item);
-    const model = this.forms.resolve(d?.model, 'oggetto');
-    return { model, seed: 1, yaw: 0, tint: d?.color, ...(d?.model && d.model !== model ? { wanted: d.model, classe: 'oggetto' } : {}) };
+    const model = this.forms.resolve(d?.model, 'object');
+    return { model, seed: 1, yaw: 0, tint: d?.color, ...(d?.model && d.model !== model ? { wanted: d.model, classe: 'object' } : {}) };
   }
 
   /** The actions of an entity's model that would change it now (open when closed, close when open). */
@@ -2011,7 +2019,7 @@ export class Kernel {
     for (const m of (await this.repo.backend?.listMaps?.().catch(() => [])) ?? []) {
       if (!m.file.startsWith(prefix)) continue;
       const parts = m.file.slice(prefix.length).split('_').map(Number);
-      if (parts.length >= 2 && parts.every(Number.isFinite)) planned.set(`${parts[0]},${parts[1]}`, { cx: parts[0], cy: parts[1], name: m.name, layout: m.layout });
+      if (parts.length >= 2 && parts.every(Number.isFinite)) planned.set(`${parts[0]},${parts[1]}`, { cx: parts[0], cy: parts[1], name: m.name, layout: internalName('ambienti', m.layout) });
     }
     for (const ch of this.chunks.values()) if (ch.stage === 'planned' && ch.place) planned.set(ch.key, { cx: ch.cx, cy: ch.cy, name: ch.place.name, layout: ch.plan?.layout ?? '' });
     const drafts = [...this.chunks.values()].filter((c) => c.stage === 'draft' && !planned.has(c.key)).map((c) => ({ cx: c.cx, cy: c.cy }));
@@ -2034,7 +2042,7 @@ export class Kernel {
   private fallbackPlan(ch: Chunk, layouts: string[], start: boolean): ChunkPlan {
     const rng = new Rng(hash32(this.config.seed, ch.cx, ch.cy, 404));
     const trees = [...ch.draft].filter((c) => c === 't').length / ch.draft.length;
-    const layoutId = start ? (layouts.find((l) => /borgo|villag|paese|citt|quartier/.test(l)) ?? layouts[0]) : trees > 0.3 && layouts.includes('bosco') ? 'bosco' : layouts[rng.int(Math.max(1, layouts.length))];
+    const layoutId = start ? (layouts.find((l) => /borgo|villag|paese|citt|quartier/.test(l)) ?? layouts[0]) : trees > 0.3 && layouts.includes('woods') ? 'woods' : layouts[rng.int(Math.max(1, layouts.length))];
     const plan: ChunkPlan = { place: { name: 'Terra senza nome', description: 'Qui il mondo non ha ancora trovato le parole.' }, layout: layoutId ?? '', objects: [], ground: [], fresh: [], runes: [] };
     for (const m of this.modules.values()) {
       const rule = m.manifest.spawn;
@@ -2319,7 +2327,7 @@ export class Kernel {
     plan.strutture.forEach((s, n) => {
       if (!s.taglia) return;
       const side = sides[n];
-      const cls = classOf(side !== undefined && side >= 5 ? 'grande' : 'edificio')!;
+      const cls = classOf(side !== undefined && side >= 5 ? 'structure' : 'building')!;
       const fits = (t: SizeTier) => side !== undefined && Math.max(...tilesOf(cls, t).slice(0, 2)) <= side;
       const allowed = this.rareAllowed(ch);
       const ok = (t: SizeTier) => fits(t) && (!RARE_SIZES.includes(t) || (!rare && allowed.includes(t)));
@@ -2348,7 +2356,7 @@ export class Kernel {
     const order = ch.lots.map((b, i) => ({ b, i, area: (b.x1 - b.x0 + 1) * (b.y1 - b.y0 + 1) })).sort((a, b) => b.area - a.area || a.i - b.i);
     for (const { b, i } of order) {
       const w = b.x1 - b.x0 + 1, h = b.y1 - b.y0 + 1;
-      const classe = Math.max(w, h) >= 5 ? 'grande' : 'edificio';
+      const classe = Math.max(w, h) >= 5 ? 'structure' : 'building';
       const req = wanted.shift();
       // A world whose common houses are not the seed's cottages has its own (ADR-0134), one per class of lot, however many lots.
       const house = req ? undefined : this.terrain?.manifest.commonHouse;
@@ -2377,7 +2385,7 @@ export class Kernel {
         x: ch.cx * S + (b.x0 + b.x1 + 1) / 2,
         y: ch.cy * S + (b.y0 + b.y1 + 1) / 2,
         form,
-        struttura: { concetto: req?.concetto ?? house ?? (classe === 'grande' ? 'una casa' : 'una casetta'), classe, ...(req?.taglia ? { taglia: req.taglia } : {}), ...(own ? { model: own } : {}) },
+        struttura: { concetto: req?.concetto ?? house ?? (classe === 'structure' ? 'una casa' : 'una casetta'), classe, ...(req?.taglia ? { taglia: req.taglia } : {}), ...(own ? { model: own } : {}) },
       });
     }
     return { tiles: tiles.join(''), lots };
@@ -2818,7 +2826,7 @@ export class Kernel {
     const rules = this.rules().slice(-12).map((r) => `- ${r.testo}: ${r.possibile ? 'si può' : 'non si può'}`).join('\n');
     const people = readPeople(this.files).persone.slice(-10).map((p) => `- ${p.nome}, ${p.mestiere}`).join('\n');
     const chunks = [...this.chunks.values()].filter((c) => c.place).slice(-8).map((c) => `- ${c.place!.name}`).join('\n');
-    const wearable = [...this.content.items.values()].filter((d) => d.equippable || d.slot || ['arma', 'vestiario'].includes(d.category)).length;
+    const wearable = [...this.content.items.values()].filter((d) => d.equippable || d.slot || ['weapon', 'clothing'].includes(d.category)).length;
     const panels = this.uiPanels().map((p) => p.panel.titolo);
     const mech = `Meccaniche con interfaccia: ${panels.join(', ') || 'nessuna'}.${wearable && !this.uiPanels().some((p) => p.panel.elementi.some((e) => e.tipo === 'slot')) ? ` MANCA: ci sono ${wearable} oggetti da indossare o impugnare ma nessuno slot per farlo.` : ''}`;
     const summary = `${mech}\nRegole nate dal gioco:\n${rules || '(nessuna)'}\nPersone incontrate:\n${people || '(nessuna)'}\nLuoghi visti:\n${chunks || '(nessuno)'}\nOggetti esistenti: ${this.content.items.size}; tipi di abitanti: ${[...this.modules.values()].filter((m) => m.manifest.persona).length}.`;
@@ -3556,7 +3564,7 @@ export class Kernel {
     if (def?.container) return void this.bus.emit('ui:bag', { slot: index });
     if (slot.item.startsWith('rune:')) return void this.composeRune(slot.item.slice(5));
     const custom = def?.module && this.sandbox.has(def.module, 'on_use') ? def.module : null;
-    if (!custom && def?.equippable && !def.effects && !['luce', 'vestiario'].includes(def.category)) return this.equipSlot(index);
+    if (!custom && def?.equippable && !def.effects && !['light', 'clothing'].includes(def.category)) return this.equipSlot(index);
     const { value, failed } = this.runModule(custom ?? 'core.items', custom ? 'on_use' : 'use', this.wandererEntity, slot.item);
     if (!failed && typeof value === 'string' && value) this.message(value);
     this.bus.emit('item:used', { item: slot.item });
@@ -3625,7 +3633,7 @@ export class Kernel {
   private isFurniture(id: Id): boolean {
     const fc: FormComp | undefined = this.ecs.get(id, 'form');
     const m = this.modules.get(this.ecs.get(id, 'module')?.id)?.manifest;
-    return !!fc && !!m && !m.persona && !this.ecs.has(id, 'struttura') && this.forms.classOf(fc.model).id === 'mobile';
+    return !!fc && !!m && !m.persona && !this.ecs.has(id, 'struttura') && this.forms.classOf(fc.model).id === 'furniture';
   }
 
   /** Whether the menu of a thing offers to put down on it what is held (T291): something with a body that is not someone nor a building, or what lies on furniture. */
@@ -3825,7 +3833,7 @@ export class Kernel {
     const def = s ? this.content.get(s.item) : undefined;
     const it = this.content.get(item);
     if (!def?.container || !it || it.container) return false;
-    return !def.container.accepts || it.tags.includes(def.container.accepts) || it.category === def.container.accepts;
+    return !def.container.accepts || it.tags.includes(def.container.accepts) || isCategory(it, def.container.accepts);
   }
 
   takeFromBag(bagSlot: number, i: number): void {
@@ -4385,27 +4393,27 @@ export class Kernel {
     const b = this.wandererAt(to);
     const me = this.wandererAt(this.wanderer().id);
     if (!b || !me || to === this.wanderer().id) return [];
-    let effects = all.filter((e) => !['legame', 'ricordo', 'nascita', 'distruggi', 'apri', 'contenitore'].includes(e.tipo));
+    let effects = all.filter((e) => !['bond', 'memory', 'birth', 'destroy', 'open', 'container'].includes(e.type));
     const dropped: string[] = [];
     if (this.godMode(to)) {
-      dropped.push(...effects.filter((e) => e.tipo !== 'messaggio').map((e) => e.tipo));
-      effects = effects.filter((e) => e.tipo === 'messaggio');
+      dropped.push(...effects.filter((e) => e.type !== 'message').map((e) => e.type));
+      effects = effects.filter((e) => e.type === 'message');
     } else if (!this.gameSetup()?.pvp) {
       effects = effects.flatMap((e) => {
         const kept = unharmed(e);
-        if (!kept) dropped.push(e.tipo);
+        if (!kept) dropped.push(e.type);
         return kept ? [kept] : [];
       });
     }
     if (dropped.length) this.council.say('kernel', 'scarta', `azione «${text}» su ${this.wanderersById.get(to)?.nome ?? to}: ${dropped.join(', ')} (${this.godMode(to) ? 'nessuno tocca il master' : 'tra viandanti non ci si ferisce'})`, 'narratore', 'action.judge');
-    const body: Effect[] = effects.filter((e) => e.tipo === 'bisogni' || e.tipo === 'scudo' || e.tipo === 'stato' || e.tipo === 'togli_stato');
+    const body: Effect[] = effects.filter((e) => e.type === 'needs' || e.type === 'shield' || e.type === 'state' || e.type === 'remove_state');
     const out: string[] = [];
     for (const e of effects) {
-      if (e.tipo === 'spingi') {
+      if (e.type === 'push') {
         const dx = b.x - me.x;
         const dy = b.y - me.y;
         const d = Math.hypot(dx, dy) || 1;
-        const force = Math.max(0, Math.min(6, Number(e.forza ?? 3) || 0));
+        const force = Math.max(0, Math.min(6, Number(e.force ?? 3) || 0));
         this.stepWanderer(to, { x: b.x + (dx / d) * force, y: b.y + (dy / d) * force }, force);
         this.bus.emit('wanderer:pushed', { id: to });
       } else if (!body.includes(e)) out.push(...this.applyEffects([e], undefined, { x: b.x, y: b.y }));
@@ -4417,28 +4425,28 @@ export class Kernel {
 
   /** Applies effects to the subject of an action: an entity in the world, or something carried. */
   private applyOn(sub: { entity?: Id; slot?: number; tile?: { col: number; row: number }; key: string }, all: Effect[]): string[] {
-    // Acting on something never spends it by accident: only "distruggi" breaks or uses it up.
-    let effects = all.filter((e) => !(e.tipo === 'consuma' && e.oggetto === sub.key));
+    // Acting on something never spends it by accident: only "destroy" breaks or uses it up.
+    let effects = all.filter((e) => !(e.type === 'consume' && e.item === sub.key));
     // Between people: bonds, memories, births are the society's, not the Lua effects'.
-    const social = effects.filter((e) => e.tipo === 'legame' || e.tipo === 'ricordo' || e.tipo === 'nascita');
+    const social = effects.filter((e) => e.type === 'bond' || e.type === 'memory' || e.type === 'birth');
     effects = effects.filter((e) => !(social as Effect[]).includes(e));
     const who: Identity | undefined = sub.entity !== undefined ? this.ecs.get(sub.entity, 'identity') : undefined;
     if (who) {
       for (const e of social) {
-        if (e.tipo === 'legame') this.setBond(who.name, e.legame);
-        else if (e.tipo === 'ricordo') this.rememberWanderer(who.name, e.testo, e.peso ?? 2);
-        else if (e.tipo === 'nascita') void this.birth(sub.entity!, e.nome);
+        if (e.type === 'bond') this.setBond(who.name, e.bond);
+        else if (e.type === 'memory') this.rememberWanderer(who.name, e.text, e.weight ?? 2);
+        else if (e.type === 'birth') void this.birth(sub.entity!, e.name);
       }
     }
     if (sub.entity !== undefined) return this.applyEffects(effects, sub.entity);
     // On a tile: everything happens there (destroying a tile turns it into the ground around).
-    if (sub.tile) return this.applyEffects(effects.filter((e) => e.tipo !== 'distruggi' && e.tipo !== 'apri' && e.tipo !== 'contenitore'), undefined, { x: sub.tile.col + 0.5, y: sub.tile.row + 0.5 });
+    if (sub.tile) return this.applyEffects(effects.filter((e) => e.type !== 'destroy' && e.type !== 'open' && e.type !== 'container'), undefined, { x: sub.tile.col + 0.5, y: sub.tile.row + 0.5 });
     const out: string[] = [];
     const rest: Effect[] = [];
     for (const e of effects) {
-      if (e.tipo === 'distruggi' && sub.slot !== undefined) removeItem(this.inventory(), sub.key, 1);
-      else if (e.tipo === 'apri' && sub.slot !== undefined && this.content.get(sub.key)?.container) this.bus.emit('ui:bag', { slot: sub.slot });
-      else if (e.tipo !== 'contenitore' && e.tipo !== 'spingi') rest.push(e);
+      if (e.type === 'destroy' && sub.slot !== undefined) removeItem(this.inventory(), sub.key, 1);
+      else if (e.type === 'open' && sub.slot !== undefined && this.content.get(sub.key)?.container) this.bus.emit('ui:bag', { slot: sub.slot });
+      else if (e.type !== 'container' && e.type !== 'push') rest.push(e);
     }
     const pc = this.wandererCarpet();
     const [dx, dy] = this.facingDelta();
@@ -4525,25 +4533,25 @@ export class Kernel {
       await this.introduceItems(v.unknownItems, `nati dall'azione «${text}» su ${sub.name}`, me);
       v = validateEffects(j.possible ? j.effects : [], ectx);
     }
-    v.effects = v.effects.filter((e) => !(e.tipo === 'consuma' && e.oggetto === sub.key));
+    v.effects = v.effects.filter((e) => !(e.type === 'consume' && e.item === sub.key));
     // What changes the entity's look becomes a rule of its model (ADR-0044): the entity stays, changed.
     const shaped = j.possible && j.shape && sub.entity !== undefined ? await this.learnShape(sub.entity, j.label || text, text, j.shape) : undefined;
     if (j.possible && j.shape && sub.entity !== undefined && !shaped) lacking('invalido', this.lastDiscard('scultore', 'model.action'), 'scultore', 'model.action');
     if (!j.possible) lacking('rifiuto', j.story);
     else if (v.dropped.length) lacking('invalido', v.dropped.join('; '));
-    if (shaped) v.effects = v.effects.filter((e) => e.tipo !== 'distruggi');
+    if (shaped) v.effects = v.effects.filter((e) => e.type !== 'destroy');
     if (v.dropped.length) this.council.say('kernel', 'scarta', `azione «${text}»: ${v.dropped.join('; ')}`, 'narratore', 'action.judge');
-    this.council.say('narratore', j.possible ? 'approva' : 'obietta', `«${text}» su ${sub.name}: ${j.story}${v.effects.length ? ` [${v.effects.map((e) => e.tipo).join(', ')}]` : ''}`, undefined, 'action.judge');
+    this.council.say('narratore', j.possible ? 'approva' : 'obietta', `«${text}» su ${sub.name}: ${j.story}${v.effects.length ? ` [${v.effects.map((e) => e.type).join(', ')}]` : ''}`, undefined, 'action.judge');
     const out = j.possible ? this.as(me, () => (sub.wanderer ? this.touchWanderer(sub.wanderer, v.effects, text) : this.applyOn(sub, v.effects))) : [];
     if (sub.wanderer && j.possible) this.bus.emit('wanderer:acted', { da: me, a: sub.wanderer, testo: [j.story, ...out].filter(Boolean).join(' ') });
     say([j.story, ...out].filter(Boolean).join(' ') || 'Non succede niente.');
     // The decision becomes a rule of the world; a possible action stays in the entity's menu.
-    const lasting = v.effects.some((e) => e.tipo !== 'messaggio');
-    const creates = v.effects.some((e) => e.tipo === 'crea_oggetto' || e.tipo === 'evoca');
-    const pays = v.effects.some((e) => e.tipo === 'consuma') || !!need;
+    const lasting = v.effects.some((e) => e.type !== 'message');
+    const creates = v.effects.some((e) => e.type === 'create_item' || e.type === 'summon');
+    const pays = v.effects.some((e) => e.type === 'consume') || !!need;
     // A rule of the model is already in every menu of the kind: the rest happened this once.
     const learn = j.possible && !shaped && lasting && (!creates || pays);
-    this.recordRule({ chiave: ruleKey, testo: `«${text}» su ${sub.name}`, possibile: j.possible && (v.effects.length > 0 || !!shaped), racconto: j.story, effetti: [...(shaped ? ['forma'] : []), ...v.effects.map((e) => e.tipo)] }, !learn, { task: 'action.judge', autore: 'narratore' });
+    this.recordRule({ chiave: ruleKey, testo: `«${text}» su ${sub.name}`, possibile: j.possible && (v.effects.length > 0 || !!shaped), racconto: j.story, effetti: [...(shaped ? ['forma'] : []), ...v.effects.map((e) => e.type)] }, !learn, { task: 'action.judge', autore: 'narratore' });
     if (learn) this.learnAction(sub, { id: '', label: j.label || text, requires: need?.id, effects: v.effects });
     return j.story;
   }
@@ -4597,7 +4605,7 @@ export class Kernel {
         continue;
       }
       if (man.appearance) out.push({ label: man.name, color: man.appearance.color, path, target: `module:${man.id}`, model: this.formFor(man, man.id).model });
-      for (const it of man.items ?? []) out.push({ label: it.name, color: it.color, path, target: `item:${it.id}`, model: this.forms.resolve(it.model, 'oggetto'), tint: it.color });
+      for (const it of man.items ?? []) out.push({ label: it.name, color: it.color, path, target: `item:${it.id}`, model: this.forms.resolve(it.model, 'object'), tint: it.color });
     }
     return out;
   }
@@ -4877,7 +4885,7 @@ export class Kernel {
         const tokens = seq.split(' ');
         const sp = this.content.spells[seq];
         const one = tokens.length === 1 ? runes[seq] : undefined;
-        const facts: Array<[string, string]> = [['Rune', tokens.map((t) => `${runes[t].glyph} ${runes[t].name} («${t}», ${runes[t].element})`).join(' · ')]];
+        const facts: Array<[string, string]> = [['Rune', tokens.map((t) => `${runes[t].glyph} ${runes[t].name} («${t}», ${italianName('elementi', runes[t].element)})`).join(' · ')]];
         if (one) facts.push(['Significato', one.description]);
         if (sp) {
           // What casting it really does: the effects as the kernel would apply them.
@@ -4903,7 +4911,7 @@ export class Kernel {
     if (source === 'oggetti') {
       for (const d of [...this.content.items.values()].sort((a, b) => a.id.localeCompare(b.id))) {
         const path = `modules/${this.content.itemSource.get(d.id) ?? d.module ?? ''}/manifest.json`;
-        out.push({ id: `item:${d.id}`, label: d.name, model: this.forms.resolve(d.model, 'oggetto'), tint: d.color, color: d.color, path: this.files[path] ? path : undefined, facts: [['Oggetto', d.id], ['Categoria', d.category], ['Descrizione', d.description], ...(d.aspetto ? [['Aspetto', d.aspetto] as [string, string]] : []), ['Peso', String(d.weight)]] });
+        out.push({ id: `item:${d.id}`, label: d.name, model: this.forms.resolve(d.model, 'object'), tint: d.color, color: d.color, path: this.files[path] ? path : undefined, facts: [['Oggetto', d.id], ['Categoria', d.category], ['Descrizione', d.description], ...(d.aspetto ? [['Aspetto', d.aspetto] as [string, string]] : []), ['Peso', String(d.weight)]] });
       }
       return out;
     }
@@ -5054,13 +5062,13 @@ export class Kernel {
       const o = it ?? man.appearance;
       if (!o) return false;
       const r = own(o, it?.name ?? man.name, id);
-      req = { ...r, nome: it?.name ?? man.name, aspetto: o.aspetto ?? it?.description ?? man.name, classe: 'oggetto' };
+      req = { ...r, nome: it?.name ?? man.name, aspetto: o.aspetto ?? it?.description ?? man.name, classe: 'object' };
     } else if (kind === 'model') {
       const info = this.forms.info(id);
       const previous = this.repo.working[`models/${id}.xml`];
       if (!previous) return false;
       this.council.say('artista', 'propone', `da riscolpire: ${target}${why ? ` (${why})` : ''}`, 'scultore', 'model.resculpt');
-      void this.sculpting.make({ id, nome: info?.nome ?? id, aspetto: `${info?.nome ?? id}${why ? `; ${why}` : ''}`, classe: info?.classe ?? 'oggetto', previous, ...(why ? { desiderio: why } : {}) });
+      void this.sculpting.make({ id, nome: info?.nome ?? id, aspetto: `${info?.nome ?? id}${why ? `; ${why}` : ''}`, classe: info?.classe ?? 'object', previous, ...(why ? { desiderio: why } : {}) });
       return true;
     } else return false;
     this.repo.write(path!, JSON.stringify(man, null, 2) + '\n');
@@ -5698,14 +5706,14 @@ export class Kernel {
       }
       const ectx = { palette: this.palette, item: (n: string) => this.content.byName(n)?.id ?? (this.content.get(n) ? n : undefined), module: () => undefined, loot: new Set<string>() };
       const effects = v.loseAll ? [] : validateEffects(v.effects, ectx).effects;
-      const said = effects.flatMap((e) => (e.tipo === 'messaggio' ? [e.testo] : []));
-      const out = this.applyEffects(effects.filter((e) => e.tipo !== 'messaggio'));
+      const said = effects.flatMap((e) => (e.type === 'message' ? [e.text] : []));
+      const out = this.applyEffects(effects.filter((e) => e.type !== 'message'));
       this.syncPhrase();
       // Death takes, it never heals; but nobody wakes up dying.
       const n = this.needs();
       if (n && !(n.health > 10)) n.health = 10;
       if (!this.remote.has(id)) this.dead = false;
-      this.council.say('narratore', 'approva', `il viandante torna alla vita: ${v.story}${effects.length ? ` [${effects.map((e) => e.tipo).join(', ')}]` : ''}${v.loseAll ? ' (perde tutto)' : ''}`, undefined, 'player.death');
+      this.council.say('narratore', 'approva', `il viandante torna alla vita: ${v.story}${effects.length ? ` [${effects.map((e) => e.type).join(', ')}]` : ''}${v.loseAll ? ' (perde tutto)' : ''}`, undefined, 'player.death');
       this.rememberDeath();
       this.saveState();
       const words = [v.story || 'Riapri gli occhi. È un nuovo giorno, e una nuova vita.', ...said, ...out].join(' ');
@@ -5775,7 +5783,7 @@ export class Kernel {
     const d = this.content.get(item);
     if (!d) return false;
     if (!accetta?.length) return true;
-    return accetta.some((a) => a === d.slot || a === d.category || d.tags.includes(a));
+    return accetta.some((a) => a === d.slot || isCategory(d, a) || d.tags.includes(a));
   }
 
   /** Puts something from the inventory into a slot of a panel; the module reacts (on_slot). */
@@ -5838,7 +5846,7 @@ export class Kernel {
    */
   async forgeMechanic(request: string, chi?: string): Promise<{ ok: boolean; id?: string; summary: string }> {
     const asker = chi ?? this.payerNow();
-    const items = [...this.content.items.values()].filter((d) => d.equippable || d.slot || ['arma', 'vestiario'].includes(d.category)).map((d) => `${d.name}${d.slot ? ` [${d.slot}]` : ` (${d.category})`}${d.bonus ? ` ${JSON.stringify(d.bonus)}` : ''}`);
+    const items = [...this.content.items.values()].filter((d) => d.equippable || d.slot || ['weapon', 'clothing'].includes(d.category)).map((d) => `${d.name}${d.slot ? ` [${d.slot}]` : ` (${d.category})`}${d.bonus ? ` ${JSON.stringify(d.bonus)}` : ''}`);
     const mechanics = this.uiPanels().map((p) => p.panel.titolo);
     let feedback = '';
     for (let attempt = 0; attempt < 2; attempt++) {
@@ -6227,7 +6235,7 @@ export class Kernel {
   static CRYSTAL_RUNES = 3;
 
   private crystalId(): string | undefined {
-    return [...this.content.items.values()].find((d) => d.tags.includes('cristallo') && d.category === 'magia')?.id;
+    return [...this.content.items.values()].find((d) => d.tags.includes('cristallo') && d.category === 'magic')?.id;
   }
 
   private castingNow = false;
@@ -6327,7 +6335,7 @@ export class Kernel {
     this.repo.write(path, JSON.stringify(man, null, 2) + '\n');
     this.applyFiles({ ...this.repo.working });
     const c = this.commitContent(`incantesimo: ${seq.join(' ')} → ${spell.name}`, 'spell.name', 'narratore');
-    this.council.say('narratore', 'propone', `${seq.join(' ')} → «${spell.name}»: ${spell.description} [${spell.effects.map((e) => e.tipo).join(', ')}] (commit ${c.id})`, undefined, 'spell.name');
+    this.council.say('narratore', 'propone', `${seq.join(' ')} → «${spell.name}»: ${spell.description} [${spell.effects.map((e) => e.type).join(', ')}] (commit ${c.id})`, undefined, 'spell.name');
     // The formula called for an element no rune has (T57b): the world gets one more rune to find.
     if (draft.newRune) void this.inventRune(`la formula ${seq.join(' ')} («${spell.name}») chiama un elemento che nessuna runa ha: ${draft.newRune}`);
     return spell;
@@ -6345,7 +6353,7 @@ export class Kernel {
     if (this.inventingRune || this.mirror || Object.keys(this.content.runes).length >= MAX_MAGIC_RUNES) return undefined;
     this.inventingRune = true;
     try {
-      const known = Object.entries(this.content.runes).map(([token, r]) => ({ token, name: r.name, glyph: r.glyph, element: r.element, description: r.description }));
+      const known = Object.entries(this.content.runes).map(([token, r]) => ({ token, name: r.name, glyph: r.glyph, element: italianName('elementi', r.element), description: r.description }));
       let errors: string[] = [];
       for (let attempt = 0; attempt < 2; attempt++) {
         let draft;
@@ -6379,7 +6387,7 @@ export class Kernel {
         if (canon !== undefined) this.repo.write('world/canone.md', canonWithRune(canon, r));
         this.applyFiles({ ...this.repo.working });
         const c = this.commitContent(`runa nuova: ${r.token} (${r.rune.name})`, 'rune.invent', 'narratore', chi);
-        this.council.say('narratore', 'propone', `runa nuova ${r.rune.glyph} ${r.rune.name} («${r.token}», ${r.rune.element}): ${r.rune.description} (commit ${c.id})`, undefined, 'rune.invent');
+        this.council.say('narratore', 'propone', `runa nuova ${r.rune.glyph} ${r.rune.name} («${r.token}», ${italianName('elementi', r.rune.element)}): ${r.rune.description} (commit ${c.id})`, undefined, 'rune.invent');
         return r.token;
       }
       this.noteShortfall({ richiesta: `una runa nuova: ${reason}`, chi, agente: 'narratore', compito: 'rune.invent', esito: 'invalido', motivo: errors.join('; ') });
@@ -6402,24 +6410,24 @@ export class Kernel {
   applyEffects(effects: Effect[], target?: Id, at?: { x: number; y: number }): string[] {
     const out: string[] = [];
     if (!this.modules.has('core.effects')) {
-      for (const e of effects) if (!KERNEL_EFFECTS.has(e.tipo)) this.unhandledEffect(e.tipo);
+      for (const e of effects) if (!KERNEL_EFFECTS.has(e.type)) this.unhandledEffect(e.type);
       return out;
     }
     // Nobody touches a god but the god (T42a): on their body only words arrive.
     const god = target !== undefined && this.wandererOf(target);
-    if (god && god !== this.wanderer().id && this.godMode(god)) effects = effects.filter((e) => e.tipo === 'messaggio');
+    if (god && god !== this.wanderer().id && this.godMode(god)) effects = effects.filter((e) => e.type === 'message');
     for (const e of effects) {
       // The social effects are the kernel's, applied where an action is judged: here they do nothing, as before.
-      if (e.tipo === 'legame' || e.tipo === 'ricordo' || e.tipo === 'nascita') continue;
-      if (e.tipo !== 'rilievo' && !this.effectHandled(e.tipo)) {
-        this.unhandledEffect(e.tipo);
+      if (e.type === 'bond' || e.type === 'memory' || e.type === 'birth') continue;
+      if (e.type !== 'relief' && !this.effectHandled(e.type)) {
+        this.unhandledEffect(e.type);
         continue;
       }
-      if (e.tipo === 'rilievo') {
+      if (e.type === 'relief') {
         const p = target !== undefined ? this.ecs.get(target, 'pos') : undefined;
         const cx = Math.floor(p?.x ?? at?.x ?? this.wandererCarpet().x);
         const cy = Math.floor(p?.y ?? at?.y ?? this.wandererCarpet().y);
-        const r = e.raggio ?? 1;
+        const r = e.radius ?? 1;
         const delta = e.delta ?? 0;
         if (delta) {
           for (let dy = -r; dy <= r; dy++) {
@@ -6442,15 +6450,15 @@ export class Kernel {
   }
 
   /**
-   * Whether core.effects applies an effect (T260): its `handles` says so; a core.effects written before it had one applies the effects
-   * of the first contract, and no other (a new effect arrives with the seed, not in a core.effects the universe rewrote).
+   * Whether core.effects applies an effect (T260): its `handles` says so; one written before it had `handles` knew only the Italian names
+   * of the contract 0.1, and applies none of today (T307a): the effect is a fault, and the seed brings the core.effects that knows it.
    */
   private effectHandled(tipo: string): boolean {
     if (this.sandbox.has('core.effects', 'handles')) {
       const { value, failed } = this.runModule('core.effects', 'handles', tipo);
       return !failed && value === true;
     }
-    return CORE_EFFECTS_0_1.has(tipo);
+    return CORE_EFFECTS_WITHOUT_HANDLES.has(tipo);
   }
 
   /** An effect that nobody applies is a fault, not a silence (T260): who reads the faults sees which one. */
@@ -6644,8 +6652,8 @@ export class Kernel {
     const man = this.modules.get(tipo)?.manifest;
     if (!man) return undefined;
     const app = man.appearance;
-    const classe = app?.classe ?? (app?.model === 'animale' || app?.model === 'bestia' ? app.model : guessClass(`${man.name} ${man.description ?? ''} ${app?.aspetto ?? ''}`, man.persona ? 'figura' : undefined).id);
-    return classe === 'animale' || classe === 'bestia' ? 'animale' : 'persona';
+    const classe = app?.classe ?? (app?.model === 'animal' || app?.model === 'beast' ? app.model : guessClass(`${man.name} ${man.description ?? ''} ${app?.aspetto ?? ''}`, man.persona ? 'figura' : undefined).id);
+    return classe === 'animal' || classe === 'beast' ? 'animale' : 'persona';
   }
 
   /**
@@ -6737,7 +6745,7 @@ export class Kernel {
       p.famiglia = [...p.famiglia.filter((f) => wandererOf(f) !== w.id), { nome: w.nome, legame, viandante: w.id }];
     });
     const who = this.wandererWord(w);
-    this.recordRule({ chiave: `legame|${name}${w.id === SOLO ? '' : `|${w.id}`}`, testo: `${name} e ${who}`, possibile: true, racconto: `${name} ora è ${legame} ${who === 'il viandante' ? 'del viandante' : `di ${who}`}.`, effetti: ['legame'] }, false);
+    this.recordRule({ chiave: `legame|${name}${w.id === SOLO ? '' : `|${w.id}`}`, testo: `${name} e ${who}`, possibile: true, racconto: `${name} ora è ${legame} ${who === 'il viandante' ? 'del viandante' : `di ${who}`}.`, effetti: ['bond'] }, false);
     this.message(`${name} ora è: ${legame}.`, 'good');
   }
 
@@ -7069,8 +7077,8 @@ export class Kernel {
         const area = this.freeArea(ch, 4);
         if (area) {
           const house = this.terrain?.manifest.commonHouse;
-          const own = house ? commonHouseModel(house, 'edificio') : undefined;
-          const model = own ?? this.forms.resolve(undefined, 'edificio');
+          const own = house ? commonHouseModel(house, 'building') : undefined;
+          const model = own ?? this.forms.resolve(undefined, 'building');
           const origin = `${ch.key}#v${today}`;
           this.startVenture({
             id: ventureId(`casa|${origin}`),
@@ -7082,11 +7090,11 @@ export class Kernel {
             area,
             origine: origin,
             concetto: house ?? 'una casetta',
-            classe: 'edificio',
+            classe: 'building',
             modello: model,
             seme: this.forms.seedFor(model, origin),
             yaw: 0,
-            fasi: housePhases('edificio'),
+            fasi: housePhases('building'),
             ruoli: structuredClone(HOUSE_ROLES),
             portati: {},
             lavorato: 0,
@@ -7236,7 +7244,7 @@ export class Kernel {
     if (v.area) {
       const list = (plan.case ??= []);
       const at = list.findIndex((h) => h.origine === v.origine);
-      const classe = v.classe ?? 'edificio';
+      const classe = v.classe ?? 'building';
       const model = v.modello ?? this.forms.resolve(undefined, classe);
       const house: PlannedHouse = { origine: v.origine, x: v.posto.x, y: v.posto.y, modello: model, seme: v.seme ?? this.forms.seedFor(model, v.origine), yaw: v.yaw ?? 0, classe, concetto: v.concetto ?? 'una casetta', stadio: stage };
       if (at < 0 || list[at].stadio !== stage) {
@@ -7259,7 +7267,7 @@ export class Kernel {
   /** A house of the plan built on free ground (T245d, T245e): a structure like those of the lots, with its model, seed, turn and stage. */
   private spawnPlannedHouse(ch: Chunk, h: PlannedHouse | undefined): void {
     if (!h || typeof h.origine !== 'string' || ![h.x, h.y].every(Number.isFinite) || this.ecs.query('struttura', 'origin').some((e) => this.ecs.get(e, 'origin').key === h.origine)) return;
-    const classe = typeof h.classe === 'string' ? h.classe : 'edificio';
+    const classe = typeof h.classe === 'string' ? h.classe : 'building';
     const model = this.forms.resolve(typeof h.modello === 'string' ? h.modello : undefined, classe);
     const form: FormComp = { model, seed: Number.isFinite(h.seme) ? h.seme : this.forms.seedFor(model, h.origine), yaw: Number.isFinite(h.yaw) ? h.yaw : 0, ...(h.modello && h.modello !== model ? { wanted: h.modello, classe } : {}) };
     const done = this.savedForms.get(h.origine);
@@ -7567,9 +7575,22 @@ export class Kernel {
     return true;
   }
 
-  /** The centre of the nearest tile with a code within r (at most 24) of a point: the nearest, then the first row, then the first column. */
-  findTile(code: string, x: number, y: number, r: number): { x: number; y: number } | undefined {
-    if (typeof code !== 'string' || !this.palette[code] || ![x, y].every(Number.isFinite)) return undefined;
+  /**
+   * The code of a terrain of the palette by its code, its internal id (T307a: «meadow») or its name in the language of the world
+   * («prato»), in this order; undefined when none is.
+   */
+  tileCodeOf(word: unknown): string | undefined {
+    if (typeof word !== 'string' || !word || word === '?') return undefined;
+    if (this.palette[word]) return word;
+    const codes = Object.keys(this.palette).filter((c) => c !== '?');
+    const low = word.trim().toLowerCase();
+    return codes.find((c) => this.palette[c].id === word) ?? codes.find((c) => this.palette[c].name.toLowerCase() === low);
+  }
+
+  /** The centre of the nearest tile of a terrain (code, id or name) within r (at most 24) of a point: the nearest, then the first row, then the first column. */
+  findTile(word: string, x: number, y: number, r: number): { x: number; y: number } | undefined {
+    const code = this.tileCodeOf(word);
+    if (!code || ![x, y].every(Number.isFinite)) return undefined;
     const R = Math.max(0, Math.min(24, Math.floor(Number.isFinite(r) ? r : 8)));
     const c0 = Math.floor(x);
     const r0 = Math.floor(y);
@@ -7604,12 +7625,13 @@ export class Kernel {
     const S = this.config.chunkSize;
     for (const [idx, code] of Object.entries(edits)) {
       const m = this.palette[code]?.matura;
-      if (!m || !this.palette[m.in]) continue;
+      const into = m && this.tileCodeOf(m.in);
+      if (!m || !into) continue;
       const days = (ch.plan!.giorni ??= {});
       const since = days[idx] ??= today;
       if (today - since < m.dopo) continue;
       const i = Number(idx);
-      this.setTile(ch.cx * S + (i % S), ch.cy * S + Math.floor(i / S), m.in);
+      this.setTile(ch.cx * S + (i % S), ch.cy * S + Math.floor(i / S), into);
     }
   }
 
@@ -8206,7 +8228,7 @@ export class Kernel {
       const rune: RuneComp = this.ecs.get(id, 'rune');
       const symbol = /^[A-Za-z_]\w*$/.test(rune.token) && !['true', 'false', 'nil', 'not', 'and', 'or'].includes(rune.token) ? this.sandbox.eval(rune.token) : null;
       const mr = this.content.runes[rune.token];
-      const doc = mr ? `${mr.glyph} ${mr.name} — runa magica (${mr.element}): ${mr.description}. Tienila in mano e premi T.` : SYMBOL_DOCS[rune.token];
+      const doc = mr ? `${mr.glyph} ${mr.name} — runa magica (${italianName('elementi', mr.element)}): ${mr.description}. Tienila in mano e premi T.` : SYMBOL_DOCS[rune.token];
       return { kind: 'rune', token: rune.token, doc, symbol, line: this.lineOfRune(id), source: rune.source };
     }
     for (const eid of this.ecs.query('pos', 'glyph')) {
@@ -8638,7 +8660,7 @@ export class Kernel {
       const [cx, cy] = m.file.slice(prefix.length).split('_').map(Number);
       const key = `${cx},${cy}`;
       if (!Number.isFinite(cx) || !Number.isFinite(cy) || known.has(key) || this.graphChunks.has(key)) continue;
-      this.graphChunks.set(key, { cx, cy, nome: m.name, ambiente: m.layout || undefined });
+      this.graphChunks.set(key, { cx, cy, nome: m.name, ambiente: m.layout ? internalName('ambienti', m.layout) : undefined });
       this.graphChunksVersion++;
     }
   }
@@ -8858,7 +8880,7 @@ export class Kernel {
     for (const [k, d] of Object.entries(st.forme ?? {})) if (Array.isArray(d)) this.savedForms.set(k, d.map(String));
     this.restorePlaced(st.posati);
     // The important structures of before ADR-0092 are the Huge ones.
-    for (const [z, c] of Object.entries(st.importanti ?? {})) if (typeof c === 'string') this.rari.get('enorme')!.set(z, c);
+    for (const [z, c] of Object.entries(st.importanti ?? {})) if (typeof c === 'string') this.rari.get('huge')!.set(z, c);
     for (const t of RARE_SIZES) for (const [z, c] of Object.entries(st.rari?.[t] ?? {})) if (typeof c === 'string') this.rari.get(t)!.set(z, c);
     if (Number.isFinite(st.ora)) this.time = st.ora;
     this.lastState = JSON.stringify(st);
@@ -9247,17 +9269,17 @@ function individualFacts(p: Individual, type: string): Array<[string, string]> {
  * no state that slows them, none of theirs taken away; undefined when nothing is left.
  */
 export function unharmed(e: Effect): Effect | undefined {
-  switch (e.tipo) {
-    case 'bisogni': {
-      const kept = Object.fromEntries((['fame', 'sete', 'energia', 'salute'] as const).filter((k) => Number(e[k]) > 0).map((k) => [k, e[k]]));
-      return Object.keys(kept).length ? { tipo: 'bisogni', ...kept } : undefined;
+  switch (e.type) {
+    case 'needs': {
+      const kept = Object.fromEntries((['hunger', 'thirst', 'energy', 'health'] as const).filter((k) => Number(e[k]) > 0).map((k) => [k, e[k]]));
+      return Object.keys(kept).length ? { type: 'needs', ...kept } : undefined;
     }
-    case 'spingi':
-    case 'fuoco':
-    case 'togli_stato':
+    case 'push':
+    case 'fire':
+    case 'remove_state':
       return undefined;
-    case 'stato':
-      return e.velocita !== undefined && Number(e.velocita) < 1 ? undefined : e;
+    case 'state':
+      return e.speed !== undefined && Number(e.speed) < 1 ? undefined : e;
     default:
       return e;
   }

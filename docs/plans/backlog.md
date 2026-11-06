@@ -4654,7 +4654,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Browser: `?skip&offline`, un universo salvato prima si apre migrato senza guasti; una runa latina pronunciata funziona.
 - Quando è fatto: commit su `task/T307a`. Sicurezza: nessuna superficie nuova, o le voci.
 
-### T314 · Integrare T307a nel base, che ha T299 — `da fare`
+### T314 · Integrare T307a nel base, che ha T299 — `fatto` (`734aaa7d`)
 - Step: 42
 
 Nasce da T307a e T299: `dossier T307a`, `dossier T299`. `integra T307a` si è fermato su conflitti in `package-lock.json`, `package.json`, `src/kernel/version.ts`, `universe/universe.json`: T307a è partito prima che T299 (kernel 0.1.13, ADR-0154, la via col raggio) entrasse nel base.
@@ -4663,6 +4663,7 @@ Nasce da T307a e T299: `dossier T307a`, `dossier T299`. `integra T307a` si è fe
 
 **Quando è fatto:** merge committato, `npm test` e `npm run typecheck` verdi, `tests/dislivello.test.ts` verde sul contratto 0.2, un solo ADR per numero; esito con le voci aggiunte a `internalNames.ts`.
 - Pipeline: claude · sforzo high · stima 2% · approvato · priorità 1
+- Esito: merge di T307a sul base con T299 committato (`734aaa7d`), kernel 0.2.0 uguale in `version.ts`, `package.json`, `package-lock.json` e `universe.json` (`kernels.from 0.2`); ADR-0154 resta la via di T299 e ADR-0155 la migrazione di T307a, con i rimandi già allineati; nessuna voce aggiunta a `internalNames.ts`, perché l'unico valore di un dominio T307a nel codice di T299 era la classe `grande` → `structure` in `tests/dislivello.test.ts`; gli esiti `fallito:…` di `sys.lavoro` (`nessuna via`, `non ci arriva`, `comportamento sconosciuto`) e `continua` non hanno voce in nessun dominio, da dare a T307b; typecheck verde, suite 2455 passati e 1 saltato, `tests/dislivello.test.ts` verde sul contratto 0.2; non provato: browser e build (il task non li chiede); sicurezza: nessuna superficie nuova.
 
 ### T307b · L'inglese come lingua interna: i valori della società e del Concilio (contratto 0.3) — `da fare` (dipende da T314)
 - Pipeline: claude · sforzo extra · stima 4% · approvato · priorità 3

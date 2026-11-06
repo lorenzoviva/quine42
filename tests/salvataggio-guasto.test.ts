@@ -96,7 +96,7 @@ describe('a fault open', () => {
   });
 
   it('a universe that is not this world’s saves nothing: of another kernel, or with universe.json unreadable', async () => {
-    const other = (u: FileMap): FileMap => ({ ...u, 'universe.json': JSON.stringify({ ...JSON.parse(u['universe.json']), kernel: '0.2.0' }) });
+    const other = (u: FileMap): FileMap => ({ ...u, 'universe.json': JSON.stringify({ ...JSON.parse(u['universe.json']), kernel: '0.3.0' }) });
     const k = await Kernel.boot({ files: other(bundledFiles), store: memoryStore(), ai: new MockAiModels() });
     k.give('item.pane', 1);
     expect(k.saveState()).toBe(false);

@@ -20,23 +20,23 @@ export interface AssetClass {
   /** The size a member of the class has if nobody says (ADR-0092): the class's box is the box of this size. */
   taglia: SizeTier;
   /** Animation the kernel makes from the model. */
-  animation?: 'camminata' | 'vento';
+  animation?: 'walk' | 'wind';
   hint: string;
 }
 
 export const CLASSES: AssetClass[] = [
-  { id: 'sasso', taglia: 'minuscola', name: 'sasso', tiles: [0.5, 0.5, 0.4], hint: 'un oggetto che sta in una mano o poco più' },
-  { id: 'roccia', taglia: 'piccola', name: 'roccia o masso', tiles: [1, 1, 0.8], minHeight: 0.5, hint: 'occupa una casella; più largo che alto' },
-  { id: 'cespuglio', taglia: 'piccola', name: 'cespuglio o pianta bassa', tiles: [1, 1, 0.8], minHeight: 0.5, animation: 'vento', hint: 'occupa una casella' },
-  { id: 'albero', taglia: 'grande', name: 'albero', tiles: [2, 2, 3], minHeight: 0.8, animation: 'vento', hint: 'il tronco occupa la casella centrale, la chioma sporge sulle vicine' },
-  { id: 'oggetto', taglia: 'minuscola', name: 'oggetto piccolo', tiles: [0.6, 0.6, 0.6], hint: 'vaso, secchio, lanterna, sacco' },
-  { id: 'mobile', taglia: 'media', name: 'mobile o contenitore', tiles: [1, 1, 1], hint: 'cassa, barile, letto, banco: una casella' },
-  { id: 'persona', taglia: 'media', name: 'persona', tiles: [1, 0.75, 1.5], minHeight: 0.8, animation: 'camminata', hint: 'in piedi, di fronte; testa grande (stile chibi)' },
-  { id: 'animale', taglia: 'piccola', name: 'animale piccolo', tiles: [0.75, 1, 0.75], minHeight: 0.6, animation: 'camminata', hint: 'gatto, cane, volpe, gallina; il muso verso il davanti' },
-  { id: 'bestia', taglia: 'grande', name: 'animale grande o mostro', tiles: [1.25, 2, 1.5], minHeight: 0.6, animation: 'camminata', hint: 'lupo, cavallo, orso, troll' },
-  { id: 'monumento', taglia: 'media', name: 'colonna, statua, portale', tiles: [1, 1, 3], minHeight: 0.6, hint: 'una casella di base, alto' },
-  { id: 'edificio', taglia: 'media', name: 'edificio piccolo', tiles: [2.5, 2.5, 2.5], minHeight: 0.6, hint: 'pozzo, fontana, capanna' },
-  { id: 'grande', taglia: 'grande', name: 'struttura grande', tiles: [5, 5, 4], minHeight: 0.5, hint: 'casa con cortile, mulino, torre, tempio: un solo modello su più caselle, in cui si entra' },
+  { id: 'pebble', taglia: 'tiny', name: 'sasso', tiles: [0.5, 0.5, 0.4], hint: 'un oggetto che sta in una mano o poco più' },
+  { id: 'rock', taglia: 'small', name: 'roccia o masso', tiles: [1, 1, 0.8], minHeight: 0.5, hint: 'occupa una casella; più largo che alto' },
+  { id: 'bush', taglia: 'small', name: 'cespuglio o pianta bassa', tiles: [1, 1, 0.8], minHeight: 0.5, animation: 'wind', hint: 'occupa una casella' },
+  { id: 'tree', taglia: 'large', name: 'albero', tiles: [2, 2, 3], minHeight: 0.8, animation: 'wind', hint: 'il tronco occupa la casella centrale, la chioma sporge sulle vicine' },
+  { id: 'object', taglia: 'tiny', name: 'oggetto piccolo', tiles: [0.6, 0.6, 0.6], hint: 'vaso, secchio, lanterna, sacco' },
+  { id: 'furniture', taglia: 'medium', name: 'mobile o contenitore', tiles: [1, 1, 1], hint: 'cassa, barile, letto, banco: una casella' },
+  { id: 'person', taglia: 'medium', name: 'persona', tiles: [1, 0.75, 1.5], minHeight: 0.8, animation: 'walk', hint: 'in piedi, di fronte; testa grande (stile chibi)' },
+  { id: 'animal', taglia: 'small', name: 'animale piccolo', tiles: [0.75, 1, 0.75], minHeight: 0.6, animation: 'walk', hint: 'gatto, cane, volpe, gallina; il muso verso il davanti' },
+  { id: 'beast', taglia: 'large', name: 'animale grande o mostro', tiles: [1.25, 2, 1.5], minHeight: 0.6, animation: 'walk', hint: 'lupo, cavallo, orso, troll' },
+  { id: 'monument', taglia: 'medium', name: 'colonna, statua, portale', tiles: [1, 1, 3], minHeight: 0.6, hint: 'una casella di base, alto' },
+  { id: 'building', taglia: 'medium', name: 'edificio piccolo', tiles: [2.5, 2.5, 2.5], minHeight: 0.6, hint: 'pozzo, fontana, capanna' },
+  { id: 'structure', taglia: 'large', name: 'struttura grande', tiles: [5, 5, 4], minHeight: 0.5, hint: 'casa con cortile, mulino, torre, tempio: un solo modello su più caselle, in cui si entra' },
 ];
 
 // The sizes of D&D (ADR-0092), one scale for creatures and structures: the class gives the shape and the box
@@ -44,7 +44,7 @@ export const CLASSES: AssetClass[] = [
 // Gargantuan one 4 × 4: the box of a class grows by the ratio of those spaces (a Medium structure is a house, larger
 // than a Medium person, because its class is). Gargantuan is the largest; the two largest are rare in the world.
 
-export type SizeTier = 'minuscola' | 'piccola' | 'media' | 'grande' | 'enorme' | 'gargantuesca';
+export type SizeTier = 'tiny' | 'small' | 'medium' | 'large' | 'huge' | 'gargantuan';
 
 export interface SizeDef {
   id: SizeTier;
@@ -54,18 +54,18 @@ export interface SizeDef {
 }
 
 export const SIZE_TIERS: SizeDef[] = [
-  { id: 'minuscola', name: 'Minuscola', scala: 0.5 },
-  { id: 'piccola', name: 'Piccola', scala: 0.75 },
-  { id: 'media', name: 'Media', scala: 1 },
-  { id: 'grande', name: 'Grande', scala: 2 },
-  { id: 'enorme', name: 'Enorme', scala: 3 },
-  { id: 'gargantuesca', name: 'Gargantuesca', scala: 4 },
+  { id: 'tiny', name: 'Minuscola', scala: 0.5 },
+  { id: 'small', name: 'Piccola', scala: 0.75 },
+  { id: 'medium', name: 'Media', scala: 1 },
+  { id: 'large', name: 'Grande', scala: 2 },
+  { id: 'huge', name: 'Enorme', scala: 3 },
+  { id: 'gargantuan', name: 'Gargantuesca', scala: 4 },
 ];
 
 export const sizeOf = (id: string | undefined): SizeDef | undefined => SIZE_TIERS.find((t) => t.id === id);
 
 /** The rare sizes (ADR-0092): one Huge thing per zone of the world, one Gargantuan per realm (4 × 4 zones). */
-export const RARE_SIZES: SizeTier[] = ['enorme', 'gargantuesca'];
+export const RARE_SIZES: SizeTier[] = ['huge', 'gargantuan'];
 
 /** A size's place in the scale (0 Tiny … 5 Gargantuan). */
 export const sizeRank = (t: SizeTier) => SIZE_TIERS.findIndex((x) => x.id === t);
@@ -98,16 +98,16 @@ export function guessClass(text: string, category?: string): AssetClass {
   const t = text.toLowerCase();
   const by = (re: RegExp, id: string) => (re.test(t) ? classOf(id) : undefined);
   return (
-    by(/\b(gatto|cane|volpe|gallina|coniglio|topo|corvo|gufo|anatra|slime)\b/, 'animale') ??
-    by(/\b(lupo|cavallo|orso|cervo|troll|drago|bue|mucca|cinghiale|mostro)\b/, 'bestia') ??
-    (category === 'figura' ? classOf('persona') : undefined) ??
-    by(/\b(sasso|ciottolo)\b/, 'sasso') ??
-    by(/(roccia|masso|pietr|rocce|macigno|sperone|scoglio)/, 'roccia') ??
-    by(/(albero|pino|quercia|betulla|salice|palma|abete|faggio|bosco|giungla)/, 'albero') ??
-    by(/(cespuglio|felce|siepe|arbusto|fungo|fiore|ceppo|canneto)/, 'cespuglio') ??
-    by(/(colonna|statua|portale|porta|obelisco|totem|menhir)/, 'monumento') ??
-    by(/(pozzo|fontana|capanna|casetta|torre|edicola|forno)/, 'edificio') ??
-    by(/(vaso|secchio|lanterna|sacco|brocca|candela|libro)/, 'oggetto') ??
-    classOf('mobile')!
+    by(/\b(gatto|cane|volpe|gallina|coniglio|topo|corvo|gufo|anatra|slime)\b/, 'animal') ??
+    by(/\b(lupo|cavallo|orso|cervo|troll|drago|bue|mucca|cinghiale|mostro)\b/, 'beast') ??
+    (category === 'figura' ? classOf('person') : undefined) ??
+    by(/\b(sasso|ciottolo)\b/, 'pebble') ??
+    by(/(roccia|masso|pietr|rocce|macigno|sperone|scoglio)/, 'rock') ??
+    by(/(albero|pino|quercia|betulla|salice|palma|abete|faggio|bosco|giungla)/, 'tree') ??
+    by(/(cespuglio|felce|siepe|arbusto|fungo|fiore|ceppo|canneto)/, 'bush') ??
+    by(/(colonna|statua|portale|porta|obelisco|totem|menhir)/, 'monument') ??
+    by(/(pozzo|fontana|capanna|casetta|torre|edicola|forno)/, 'building') ??
+    by(/(vaso|secchio|lanterna|sacco|brocca|candela|libro)/, 'object') ??
+    classOf('furniture')!
   );
 }

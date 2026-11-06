@@ -50,7 +50,7 @@ describe('the showcases of the studio', () => {
   it('has something to show from every source, with a model where things have one', async () => {
     const k = await boot();
     const runes = k.showcaseEntries('rune');
-    expect(runes.some((e) => e.id === 'rune:luce' && e.runes?.[0] === 'luce')).toBe(true);
+    expect(runes.some((e) => e.id === 'rune:lux' && e.runes?.[0] === 'lux')).toBe(true);
     expect(runes.every((e) => e.facts.some(([w]) => w === 'Effetto'))).toBe(true);
     const people = k.showcaseEntries('persone');
     expect(people.map((e) => e.id)).toContain('module:npc.villager');
@@ -104,25 +104,25 @@ describe('the screen of the Tower of Magic (T22)', () => {
   it('shows every magic rune, then every known combination, with what speaking it does', async () => {
     const k = await boot();
     // A combination of three (it burns a crystal) and a rune nobody has spoken yet.
-    k.content.spells['luce fuoco vento'] = { name: 'Cometa', description: 'Una scia di fuoco e luce.', cost: 20, effects: [{ tipo: 'fuoco', raggio: 1, durata: 5 }, { tipo: 'luce', raggio: 4, durata: 30 }] };
+    k.content.spells['lux ignis ventus'] = { name: 'Cometa', description: 'Una scia di fuoco e luce.', cost: 20, effects: [{ type: 'fire', radius: 1, duration: 5 }, { type: 'light', radius: 4, duration: 30 }] };
     delete k.content.spells.vita;
     const all = k.showcaseEntries('rune');
     const tokens = Object.keys(k.content.runes);
     expect(all.slice(0, tokens.length).map((e) => e.id)).toEqual(tokens.map((t) => `rune:${t}`));
-    expect(all.slice(tokens.length).map((e) => e.id)).toEqual(['spell:terra fuoco', 'spell:luce fuoco vento']);
+    expect(all.slice(tokens.length).map((e) => e.id)).toEqual(['spell:terra ignis', 'spell:lux ignis ventus']);
     const fact = (id: string, what: string) => all.find((e) => e.id === id)!.facts.find(([w]) => w === what)?.[1];
     // A single rune with its spell: what it means, the spell, what it really does, its cost.
-    expect(all.find((e) => e.id === 'rune:acqua')!.label).toBe('Laguz · Polla');
-    expect(fact('rune:acqua', 'Significato')).toBe(k.content.runes.acqua.description);
-    expect(fact('rune:acqua', 'Cosa fa')).toContain(`diventa ${k.palette.w.name}`);
-    expect(fact('rune:acqua', 'Mana')).toBe('10');
-    expect(fact('rune:acqua', 'Cristallo')).toBeUndefined();
+    expect(all.find((e) => e.id === 'rune:aqua')!.label).toBe('Laguz · Polla');
+    expect(fact('rune:aqua', 'Significato')).toBe(k.content.runes.aqua.description);
+    expect(fact('rune:aqua', 'Cosa fa')).toContain(`diventa ${k.palette.w.name}`);
+    expect(fact('rune:aqua', 'Mana')).toBe('10');
+    expect(fact('rune:aqua', 'Cristallo')).toBeUndefined();
     // Not spoken yet: no effect, the Narrator will name it.
     expect(fact('rune:vita', 'Effetto')).toMatch(/Nessuno ancora/);
     expect(fact('rune:vita', 'Incantesimo')).toBeUndefined();
     // A combination: its runes in order, each with its name, all the effects, the crystal from three runes up.
-    const comet = all.find((e) => e.id === 'spell:luce fuoco vento')!;
-    expect(comet.runes).toEqual(['luce', 'fuoco', 'vento']);
+    const comet = all.find((e) => e.id === 'spell:lux ignis ventus')!;
+    expect(comet.runes).toEqual(['lux', 'ignis', 'ventus']);
     expect(fact(comet.id, 'Rune')).toMatch(/Sowilo.*Kenaz.*Ansuz/);
     expect(fact(comet.id, 'Cosa fa')).toBe('fuoco per 5 s, raggio 1; luce per 30 s, raggio 4');
     expect(fact(comet.id, 'Cristallo')).toBe('ne consuma uno');

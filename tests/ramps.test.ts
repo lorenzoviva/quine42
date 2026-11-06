@@ -18,7 +18,7 @@ ${Array.from({ length: 10 }, (_, i) => `  <box at="${(20 + 10 * i + 139) / 2} 29
 
 const files = () => {
   const index = JSON.parse(bundledFiles['models/index.json']!);
-  index.scala = { classe: 'grande', nome: 'scala di prova' };
+  index.scala = { classe: 'structure', nome: 'scala di prova' };
   return { ...bundledFiles, 'models/scala.xml': STAIR, 'models/index.json': JSON.stringify(index) };
 };
 
@@ -81,7 +81,7 @@ describe('stairs as ramps', () => {
     const forms = new Forms(new InlineRunner());
     const wall = `<sequence values="BS" size="60 20 40"><color symbol="S" value="777777"/>
       <box at="14.5 9.5 0" size="10 20 3" color="S"/><box at="44.5 9.5 0" size="10 20 12" color="S"/></sequence>`;
-    forms.load({ 'models/index.json': JSON.stringify({ muro: { classe: 'grande' } }), 'models/muro.xml': wall });
+    forms.load({ 'models/index.json': JSON.stringify({ muro: { classe: 'structure' } }), 'models/muro.xml': wall });
     const f = (await forms.wait('muro', 1))!;
     const step = stepOf(f.vpt);
     const g = f.result!.grid;
@@ -97,7 +97,7 @@ describe('stairs as ramps', () => {
   it('keeps the seed structures walkable where they were', async () => {
     const forms = new Forms(new InlineRunner());
     forms.load(bundledFiles);
-    for (const model of ['grande', 'edificio'])
+    for (const model of ['structure', 'building'])
       for (const seed of [1, 2, 3]) {
         const f = (await forms.wait(model, seed))!;
         expect(f.status, `${model}#${seed}`).toBe('ready');

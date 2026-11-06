@@ -29,7 +29,7 @@ import { checkKernelVersion } from '../../src/kernel/version';
 import { QueueAiModels } from '../../src/kernel/ai/subscription';
 import type { AiModels } from '../../src/kernel/ai/models';
 import { WORLD_THEMES } from '../../src/kernel/themes';
-import { INTERNAL_HEADER, SEED_FILE, seedHashes, UniverseChunks, UniverseClient, upgradeFromSeed } from '../../src/kernel/universes';
+import { INTERNAL_HEADER, prepareUniverse, SEED_FILE, seedHashes, UniverseChunks, UniverseClient } from '../../src/kernel/universes';
 import { DeferredModels, deferredTable, runDeferred, StepChunks, StepGate, type DeferredOutcome, type WeeklyUsage } from '../../src/kernel/deferred';
 
 export const DEFAULT_PLACES = 25;
@@ -86,12 +86,13 @@ export async function generateUniverse(o: GenerateOptions): Promise<DeferredOutc
       await client.create({ ...bundledFiles, [SEED_FILE]: JSON.stringify(seedHashes(bundledFiles), null, 1) + '\n' }, 'nasce dal seme del kernel');
       snap = await client.load();
     }
-    // A universe of another contract does not open as if it were this kernel's (ADR-0136): nothing is spent and nothing is written on it.
-    const read = readConfig(snap.files ?? {});
+    // A universe of an older contract is ported first (T307a); one of another contract that no migration reaches does not open as if it
+    // were this kernel's (ADR-0136): nothing is spent and nothing is written on it.
+    const up = prepareUniverse(snap.files ?? {}, bundledFiles);
+    const read = readConfig(up.files);
     if (read.error) return fail(`«${o.name}»: universe.json non si legge: ${read.error}`);
     const version = checkKernelVersion(read.config.kernel, undefined, read.config.kernels);
     if (!version.ok) return fail(`«${o.name}» non è di questo kernel: ${version.motivo}`);
-    const up = upgradeFromSeed(snap.files ?? {}, bundledFiles);
     if (Object.keys(up.changes).length) await client.commit(up.changes, `aggiornamento dal kernel: ${up.updated.slice(0, 6).join(', ') || 'seme'}`, 'kernel');
     const progress = progressFile(o.dir, o.name, { tetto: DEFAULT_CEILING });
     if (o.tetto !== undefined) progress.save({ ...progress.load(), tetto: o.tetto });

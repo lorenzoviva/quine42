@@ -14,6 +14,7 @@ import { colorTable, floors, footprint, surfaces, type Levels, type VoxelGrid } 
 import { compileMjx } from '../mj/model';
 import { act, FORM_LIMITS, MAX_FORM_TIME, MAX_FORM_XML, runMjx } from '../mj/run';
 import { hashStr } from './rng';
+import { internalModelInfo } from './internalNames';
 import type { FileMap } from './types';
 
 export const MODELS_DIR = 'models/';
@@ -152,7 +153,7 @@ export interface Form {
 }
 
 /** How many different seeds a kind of entity has in the world (instances share them: fewer meshes). */
-const SEEDS: Record<string, number> = { albero: 3, cespuglio: 3, roccia: 3, sasso: 3, persona: 8, animale: 4, bestia: 4, edificio: 1, grande: 1, monumento: 2 };
+const SEEDS: Record<string, number> = { tree: 3, bush: 3, rock: 3, pebble: 3, person: 8, animal: 4, beast: 4, building: 1, structure: 1, monument: 2 };
 
 /** A step one walks up without noticing (a doorstep, a floor): 0.2 tiles, in voxels of a density. */
 export const stepOf = (vpt: number) => Math.round(0.2 * vpt);
@@ -505,7 +506,8 @@ export class Forms {
     this.files = files;
     this.hashes.clear();
     try {
-      this.library = JSON.parse(files[MODELS_INDEX] ?? '{}');
+      // The class and size of a model as the contract 0.1 wrote them are read as the internal ones (T307a).
+      this.library = Object.fromEntries(Object.entries(JSON.parse(files[MODELS_INDEX] ?? '{}') as Record<string, ModelInfo>).map(([id, info]) => [id, internalModelInfo(info)]));
     } catch {
       this.library = {};
     }
@@ -516,13 +518,13 @@ export class Forms {
     const out: Record<string, ModelInfo> = {};
     for (const p of Object.keys(this.files)) {
       const m = /^models\/([a-z0-9-]+)\.xml$/i.exec(p);
-      if (m) out[m[1]] = this.library[m[1]] ?? { classe: 'oggetto' };
+      if (m) out[m[1]] = this.library[m[1]] ?? { classe: 'object' };
     }
     return out;
   }
 
   info(id: string): ModelInfo | undefined {
-    return this.files[`${MODELS_DIR}${id}.xml`] ? (this.library[id] ?? { classe: 'oggetto' }) : undefined;
+    return this.files[`${MODELS_DIR}${id}.xml`] ? (this.library[id] ?? { classe: 'object' }) : undefined;
   }
 
   /**
@@ -531,12 +533,12 @@ export class Forms {
    */
   resolve(model: string | undefined, classe?: string): string {
     if (model && this.info(model)) return model;
-    const cls = classe && classOf(classe) ? classe : model && classOf(model) ? model : 'oggetto';
-    return this.info(cls) ? cls : 'oggetto';
+    const cls = classe && classOf(classe) ? classe : model && classOf(model) ? model : 'object';
+    return this.info(cls) ? cls : 'object';
   }
 
   classOf(model: string): AssetClass {
-    return classOf(this.info(model)?.classe) ?? classOf(model) ?? CLASSES.find((c) => c.id === 'oggetto')!;
+    return classOf(this.info(model)?.classe) ?? classOf(model) ?? CLASSES.find((c) => c.id === 'object')!;
   }
 
   /** How many seeds a program has in the world: the few of its class (T64: 4 for shelf file models). */
@@ -573,8 +575,8 @@ export class Forms {
       seed,
       size: sizeFor(xml, cls, info?.taglia, under),
       tint: info?.tinta && tint ? { symbol: info.tinta, color: tint } : undefined,
-      rig: cls.animation === 'camminata',
-      sway: cls.animation === 'vento',
+      rig: cls.animation === 'walk',
+      sway: cls.animation === 'wind',
       vpt,
       model,
       ...(info?.tempo ? { tempo: info.tempo } : {}),

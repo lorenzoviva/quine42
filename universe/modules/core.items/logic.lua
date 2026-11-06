@@ -1,7 +1,7 @@
 -- Uso generico degli oggetti, secondo categoria ed effetti (scritti dal Concilio nei pacchetti).
 local M = {}
 
-local VERBI = { cibo = "Mangi", bevanda = "Bevi", medicina = "Usi", magia = "Assorbi" }
+local VERBI = { food = "Mangi", drink = "Bevi", medicine = "Usi", magic = "Assorbi" }
 
 local function clamp(v) return math.max(0, math.min(100, v)) end
 
@@ -22,13 +22,13 @@ function M.use(user, item)
     inventory.remove(user, item, 1)
     return verbo .. ": " .. d.name .. "."
   end
-  if d.category == "luce" then
+  if d.category == "light" then
     local l = ecs.get(user, "luce") or { accesa = false }
     l.accesa = not l.accesa
     ecs.set(user, "luce", l)
     return l.accesa and ("Accendi: " .. d.name .. ".") or ("Spegni: " .. d.name .. ".")
   end
-  if d.category == "vestiario" then return "Indossi " .. d.name .. ". Ti sta come se fosse stato fatto per te." end
+  if d.category == "clothing" then return "Indossi " .. d.name .. ". Ti sta come se fosse stato fatto per te." end
   return d.name .. ": non si usa così. Prova a impugnarlo (F) o a combinarlo."
 end
 

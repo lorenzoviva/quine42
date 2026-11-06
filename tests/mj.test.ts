@@ -173,11 +173,11 @@ describe('photographs, classes, skeleton', () => {
   });
 
   it('gives every class one box, so similar things share proportions', () => {
-    expect(boxOf(classOf('albero')!)).toEqual([2 * TILE, 2 * TILE, 3 * TILE]);
-    expect(boxOf(classOf('grande')!)).toEqual([5 * TILE, 5 * TILE, 4 * TILE]);
-    expect(guessClass('Una quercia frondosa').id).toBe('albero');
-    expect(guessClass('Il fabbro', 'figura').id).toBe('persona');
-    expect(guessClass('un lupo grigio', 'figura').id).toBe('bestia');
+    expect(boxOf(classOf('tree')!)).toEqual([2 * TILE, 2 * TILE, 3 * TILE]);
+    expect(boxOf(classOf('structure')!)).toEqual([5 * TILE, 5 * TILE, 4 * TILE]);
+    expect(guessClass('Una quercia frondosa').id).toBe('tree');
+    expect(guessClass('Il fabbro', 'figura').id).toBe('person');
+    expect(guessClass('un lupo grigio', 'figura').id).toBe('beast');
     expect(new Set(CLASSES.map((c) => c.id)).size).toBe(CLASSES.length);
   });
 

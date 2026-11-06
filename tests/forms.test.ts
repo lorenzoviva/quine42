@@ -36,7 +36,7 @@ describe('the library of models', () => {
       expected.forEach((e, i) => expect(errors[i]).toMatch(e));
     }
     // Every class has its generic model, used when an entity has none of its own.
-    for (const c of ['persona', 'animale', 'bestia', 'albero', 'cespuglio', 'roccia', 'sasso', 'oggetto', 'mobile', 'edificio', 'monumento', 'grande']) expect(bundledFiles[`models/${c}.xml`], c).toBeDefined();
+    for (const c of ['person', 'animal', 'beast', 'tree', 'bush', 'rock', 'pebble', 'object', 'furniture', 'building', 'monument', 'structure']) expect(bundledFiles[`models/${c}.xml`], c).toBeDefined();
     // The structures of the catalogue run in the box of their class (1-3 s each): the library of the seed takes longer than it did.
   }, 240_000);
 
@@ -55,21 +55,21 @@ describe('forms in the kernel', () => {
     const well = k.spawnModuleEntity(k.modules.get('object.well')!, 3.5, 3.5, undefined, 'test#pozzo');
     const item = k.spawnItem('item.forbici', 1.5, 1.5);
     const bread = k.spawnItem([...k.content.items.keys()].find((id) => !k.content.get(id)!.model)!, 2.5, 1.5);
-    expect((k.ecs.get(cat, 'form') as FormComp).model).toBe('animale');
+    expect((k.ecs.get(cat, 'form') as FormComp).model).toBe('animal');
     expect((k.ecs.get(well, 'form') as FormComp).model).toBe('pozzo');
     // An item defined by a module has the module's model; the others the generic entity.
     expect((k.ecs.get(item, 'form') as FormComp).model).toBe('forbici');
     const f = k.ecs.get(bread, 'form') as FormComp;
-    expect(f.model).toBe('oggetto');
+    expect(f.model).toBe('object');
     expect(f.tint).toBe(k.itemInfo(k.ecs.get(bread, 'pickup').item).color);
     expect((k.ecs.get(k.wandererEntity, 'form') as FormComp).model).toBe('viandante');
     // The same person in another place is another seed of the same program; a few seeds per kind.
-    const seeds = new Set(Array.from({ length: 30 }, (_, i) => k.forms.seedFor('persona', `p${i}`)));
+    const seeds = new Set(Array.from({ length: 30 }, (_, i) => k.forms.seedFor('person', `p${i}`)));
     expect(seeds.size).toBeGreaterThan(1);
     expect(Math.max(...seeds)).toBeLessThanOrEqual(8);
     // An entity whose model is missing falls back to its class's.
-    expect(k.forms.resolve('non-esiste', 'albero')).toBe('albero');
-    expect(k.forms.resolve(undefined, undefined)).toBe('oggetto');
+    expect(k.forms.resolve('non-esiste', 'tree')).toBe('tree');
+    expect(k.forms.resolve(undefined, undefined)).toBe('object');
   });
 
   it('a solid thing blocks with its voxels, not with its whole cell', async () => {
@@ -114,19 +114,19 @@ describe('forms in the kernel', () => {
     const k = await boot();
     const house = k.spawnModuleEntity(k.modules.get('object.well')!, 5.5, 5.5, undefined, 'test#casa');
     const fc = k.ecs.get(house, 'form') as FormComp;
-    fc.model = 'grande';
+    fc.model = 'structure';
     fc.seed = 1;
     expect(k.modelActions(house)).toEqual([]);
-    await k.forms.wait('grande', 1);
-    expect(k.modelActions(house).map((a) => a.name)).toEqual(['apri']);
-    expect(k.actionsFor(house).some((o) => o.id === 'modello:apri' && o.label === 'Apri la porta')).toBe(true);
-    await k.perform(house, 'modello:apri');
-    expect(fc.done).toEqual(['apri']);
-    expect(k.modelActions(house).map((a) => a.name)).toEqual(['chiudi']);
+    await k.forms.wait('structure', 1);
+    expect(k.modelActions(house).map((a) => a.name)).toEqual(['open']);
+    expect(k.actionsFor(house).some((o) => o.id === 'modello:open' && o.label === 'Apri la porta')).toBe(true);
+    await k.perform(house, 'modello:open');
+    expect(fc.done).toEqual(['open']);
+    expect(k.modelActions(house).map((a) => a.name)).toEqual(['close']);
     expect(k.saveState()).toBe(true);
-    expect(JSON.parse(k.repo.head().files['world/stato.json']!).forme['test#casa']).toEqual(['apri']);
+    expect(JSON.parse(k.repo.head().files['world/stato.json']!).forme['test#casa']).toEqual(['open']);
     // Closing it again: back to how it was made, nothing left to remember.
-    await k.perform(house, 'modello:chiudi');
+    await k.perform(house, 'modello:close');
     expect(fc.done).toEqual([]);
   }, 30_000);
 });
@@ -262,7 +262,7 @@ describe('precalculated variants and form cache (T64)', () => {
     expect(k.forms.seedsOf('circuito-3D')).toBe(4);
     expect(k.forms.seedsOf('schermo-struttura')).toBe(4);
     expect(k.forms.seedsOf('schermo-scritte')).toBe(4);
-    expect(k.forms.seedsOf('albero')).toBe(3);
+    expect(k.forms.seedsOf('tree')).toBe(3);
 
     const forms = k.forms.preload('circuito-3D');
     expect(forms.length).toBe(4);

@@ -159,11 +159,11 @@ describe('a shared result', () => {
     expect(f.status).toBe('ready');
     const shared = f.result!;
     const before = new Uint8Array(shared.grid.cells);
-    expect(k.modelActions(id).map((a) => a.name)).toContain('apri');
-    expect(k.doModelAction(id, 'apri')).toBe(true);
-    expect(fc.done).toEqual(['apri']);
+    expect(k.modelActions(id).map((a) => a.name)).toContain('open');
+    expect(k.doModelAction(id, 'open')).toBe(true);
+    expect(fc.done).toEqual(['open']);
     (k as any).groundOf(id, fc, f);
-    const opened = instanceGrid(k.forms, f, ['apri']);
+    const opened = instanceGrid(k.forms, f, ['open']);
     expect(opened.cells.some((c, i) => c !== before[i]), 'the action changes the instance').toBe(true);
     expect(opened.cells.buffer === shared.grid.cells.buffer).toBe(false);
     expect(sameCells(shared.grid.cells, before)).toBe(true);

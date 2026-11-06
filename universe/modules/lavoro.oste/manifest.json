@@ -25,7 +25,7 @@
           {
             "fa": "usa",
             "dove": "entita:pozzo",
-            "azione": "ascolta",
+            "azione": "listen",
             "durata": 8,
             "posa": "lavora"
           },

@@ -77,12 +77,12 @@ describe('the bench of the Sala sistemi', () => {
     expect(Object.keys(files).some((p) => p.startsWith('models/') || p.startsWith('world/'))).toBe(false);
     const trial = JSON.parse(files['modules/bench.prova/manifest.json']).items;
     expect(trial.map((i: { id: string }) => i.id)).toEqual([trialId('Elmo di prova')]);
-    expect(trial[0]).toMatchObject({ slot: 'testa', bonus: { difesa: 2 }, category: 'vestiario' });
+    expect(trial[0]).toMatchObject({ slot: 'testa', bonus: { difesa: 2 }, category: 'clothing' });
     expect(BENCH).toBe(5);
   });
 
   it('cleans the cases the Engineer writes: slots and buttons of the panel, paths to watch, at most 30 seconds', () => {
-    const panel = { id: 'equip', titolo: 'Equip', elementi: [{ tipo: 'slot' as const, id: 'testa', etichetta: 'Testa' }, { tipo: 'pulsante' as const, id: 'riposa', etichetta: 'Riposa' }] };
+    const panel = { id: 'equip', titolo: 'Equip', elementi: [{ tipo: 'slot' as const, id: 'testa', etichetta: 'Testa' }, { tipo: 'button' as const, id: 'riposa', etichetta: 'Riposa' }] };
     const { cases, errors } = cleanCases(
       [
         { titolo: 'A', racconto: 'a', viandante_json: '{"needs":{"health":10}}', oggetti: [{ nome: 'Elmo', posto: 'Testa', bonus_json: '{"difesa":1}' }], passi: [{ tipo: 'slot', slot: 'Testa', oggetto: 'Elmo' }, { tipo: 'slot', slot: 'piedi', oggetto: 'Elmo' }, { tipo: 'pulsante', azione: 'riposa' }, { tipo: 'vola' }], durata: 99, guarda: ['difesa.valore', 'non un campo'], righe: [2, 400] },
@@ -93,7 +93,7 @@ describe('the bench of the Sala sistemi', () => {
     );
     expect(cases.length).toBe(1);
     expect(cases[0]).toMatchObject({ durata: 30, guarda: ['difesa.valore'], righe: [2], viandante: { componenti: { needs: { health: 10 } }, oggetti: [{ nome: 'Elmo', posto: 'testa', bonus: { difesa: 1 } }] } });
-    expect(cases[0].passi).toEqual([{ tipo: 'slot', slot: 'testa', oggetto: 'Elmo' }, { tipo: 'pulsante', azione: 'riposa' }]);
+    expect(cases[0].passi).toEqual([{ tipo: 'slot', slot: 'testa', oggetto: 'Elmo' }, { tipo: 'button', azione: 'riposa' }]);
     expect(errors.join()).toMatch(/piedi/);
     expect(errors.join()).toMatch(/«B»/);
   });
@@ -185,7 +185,8 @@ describe('the bench with the cases of the seed', () => {
 
   it('cleans the walks of the cases: the four directions, a time', () => {
     const { cases, errors } = cleanCases([{ titolo: 'A', racconto: '', passi: [{ tipo: 'cammina', verso: 'Giù', secondi: 0.5 }, { tipo: 'cammina', verso: 'sopra' }, { tipo: 'cammina', verso: 'in diagonale' }], durata: 1, guarda: ['needs.thirst'] }], undefined, 5);
-    expect(cases[0].passi).toEqual([{ tipo: 'cammina', verso: 'giu', secondi: 0.5 }, { tipo: 'cammina', verso: 'su', secondi: 1 }]);
+    // The Engineer still writes the Italian steps (T310): the bench takes them as the internal ones.
+    expect(cases[0].passi).toEqual([{ tipo: 'walk', verso: 'down', secondi: 0.5 }, { tipo: 'walk', verso: 'up', secondi: 1 }]);
     expect(errors.join()).toMatch(/in diagonale/);
   });
 

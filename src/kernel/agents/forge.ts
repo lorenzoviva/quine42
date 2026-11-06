@@ -12,7 +12,8 @@ import { hashStr } from '../rng';
 import { metaBreak } from '../fourthwall';
 import { normName } from '../content';
 import type { Manifest } from '../types';
-import { classOf, CLASSES, guessClass, RARE_SIZES, sizeOf, SIZE_TIERS } from '../../mj/classes';
+import { classOf, guessClass, RARE_SIZES, sizeOf, SIZE_TIERS } from '../../mj/classes';
+import { internalName, italianName, italianValues } from '../internalNames';
 import { ownModelId } from '../modeldirector';
 import { AGENTS, wordsOf, type AgentId, type Council } from './council';
 
@@ -38,7 +39,7 @@ export interface ForgeRequest {
  * per realm) and only for structures.
  */
 export const forgedSize = (t: string | undefined): { taglia?: string } => {
-  const s = sizeOf(t?.trim().toLowerCase());
+  const s = sizeOf(internalName('taglie', t?.trim().toLowerCase() ?? ''));
   return s && !RARE_SIZES.includes(s.id) ? { taglia: s.id } : {};
 };
 
@@ -100,8 +101,9 @@ const CONCEPT_SCHEMA: Schema = {
     descrizione: { type: 'STRING' },
     lore: { type: 'STRING' },
     aspetto: { type: 'STRING', description: "com'è fatto: forma, proporzioni, materiali, colori (lo Scultore ne fa un modello 3D)" },
-    classe: { type: 'STRING', enum: CLASSES.map((c) => c.id), description: 'la sua classe di grandezza (persona, animale, mobile, oggetto, edificio…)' },
-    taglia: { type: 'STRING', enum: SIZE_TIERS.filter((t) => !RARE_SIZES.includes(t.id)).map((t) => t.id), description: 'la taglia di D&D, solo se diversa da quella solita della sua classe (un gigante: grande)' },
+    // The prompts still speak Italian (T310): the Council writes the classes and sizes of the contract 0.1, the Forge makes them internal.
+    classe: { type: 'STRING', enum: italianValues('classi'), description: 'la sua classe di grandezza (persona, animale, mobile, oggetto, edificio…)' },
+    taglia: { type: 'STRING', enum: SIZE_TIERS.filter((t) => !RARE_SIZES.includes(t.id)).map((t) => italianName('taglie', t.id)), description: 'la taglia di D&D, solo se diversa da quella solita della sua classe (un gigante: grande)' },
     contesto: {
       type: 'OBJECT',
       properties: { terreni: { type: 'ARRAY', items: { type: 'STRING' } }, luoghi: { type: 'STRING' }, rarita: { type: 'NUMBER' } },
@@ -228,7 +230,7 @@ export function assembleManifest(id: string, concept: Concept, physics: PhysicsS
     tags: concept.tags ?? [],
     origin,
     logic: 'logic.lua',
-    appearance: { glyph, color: `hsl(${hue} 65% 68%)`, aspetto: concept.aspetto, model: ownModelId(id), classe: classOf(concept.classe)?.id ?? guessClass(`${concept.nome} ${concept.aspetto}`, npc ? 'figura' : undefined).id, ...forgedSize(concept.taglia) },
+    appearance: { glyph, color: `hsl(${hue} 65% 68%)`, aspetto: concept.aspetto, model: ownModelId(id), classe: classOf(internalName('classi', concept.classe ?? ''))?.id ?? guessClass(`${concept.nome} ${concept.aspetto}`, npc ? 'figura' : undefined).id, ...forgedSize(concept.taglia) },
     physics: {
       solid: item ? false : !!physics.solido,
       radius: clamp(physics.raggio, 0.2, 0.5, 0.35),

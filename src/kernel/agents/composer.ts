@@ -2,6 +2,7 @@
 // goes through the kernel's checks and goes back with the reason while it does not pass; here the checks are the validator's own, with the thresholds of the analysis
 // (ADR-0125), and the names are the world's (rule 0). Nobody hears it first: what the measures cannot say stays for whoever listens (lab/banco/suono.md).
 
+import { internalName } from '../internalNames';
 import type { Schema } from '../ai/models';
 import { BudgetError } from '../ai/models';
 import { metaBreak } from '../fourthwall';
@@ -106,7 +107,8 @@ export function purposeOf(a: Answer, req: ComposeRequest, world: ComposeWorld): 
     if (!world.effetti.includes(effect)) return { error: `un effetto risponde a un momento del gioco: "effetto" è uno tra ${world.effetti.join(', ')}` };
     return { suono: { uso, effetti: [effect] } };
   }
-  const named = req.ambienti ?? stringsIn(a.ambienti, world.ambienti);
+  // An environment of the seed by its Italian id of the contract 0.1 is the one it became (T307a, until the prompts change, T310).
+  const named = req.ambienti ?? stringsIn(Array.isArray(a.ambienti) ? a.ambienti.map((x) => (typeof x === 'string' && !world.ambienti.includes(x) ? internalName('ambienti', x) : x)) : a.ambienti, world.ambienti);
   const ambienti = !named.length && world.qui ? [world.qui] : named;
   if (!ambienti.length) return { error: `"ambienti" nomina almeno uno tra ${world.ambienti.join(', ')}` };
   const momenti = req.momenti ?? stringsIn(a.momenti, DAY_MOMENTS);

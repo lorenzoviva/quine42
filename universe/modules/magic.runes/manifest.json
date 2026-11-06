@@ -3,92 +3,92 @@
   "name": "Rune magiche",
   "kind": "data",
   "version": "0.1.0",
-  "description": "Le rune della magia: ognuna è anche una parola del codice (una variabile che non vale niente, finché qualcuno non le dà un valore), ma tenute in mano e pronunciate (T) diventano incantesimi. Più rune in fila sono una formula: l’ordine conta (terra fuoco non è fuoco terra) e ripetere una runa la rafforza; il Concilio dà nome e effetti a una formula la prima volta che qualcuno la pronuncia. I cristalli magici, nascosti nelle case e nelle casse, ridanno mana; le rune si consumano quando le pronunci.",
+  "description": "Le rune della magia: ognuna è anche una parola del codice (una variabile che non vale niente, finché qualcuno non le dà un valore), ma tenute in mano e pronunciate (T) diventano incantesimi. Più rune in fila sono una formula: l’ordine conta (terra ignis non è ignis terra) e ripetere una runa la rafforza; il Concilio dà nome e effetti a una formula la prima volta che qualcuno la pronuncia. I cristalli magici, nascosti nelle case e nelle casse, ridanno mana; le rune si consumano quando le pronunci.",
   "runes": {
-    "luce": {
+    "lux": {
       "name": "Sowilo",
       "glyph": "ᛊ",
       "color": "#ffe27a",
-      "element": "luce",
+      "element": "light",
       "description": "il sole: illumina, rivela"
     },
-    "fuoco": {
+    "ignis": {
       "name": "Kenaz",
       "glyph": "ᚲ",
       "color": "#ff7a3a",
-      "element": "fuoco",
+      "element": "fire",
       "description": "la fiaccola: brucia, scalda"
     },
-    "acqua": {
+    "aqua": {
       "name": "Laguz",
       "glyph": "ᛚ",
       "color": "#5ab8ff",
-      "element": "acqua",
+      "element": "water",
       "description": "il lago: scorre, spegne, allaga"
     },
     "terra": {
       "name": "Othala",
       "glyph": "ᛟ",
       "color": "#c49a5a",
-      "element": "terra",
+      "element": "earth",
       "description": "il suolo: apre sentieri, smuove"
     },
     "vita": {
       "name": "Berkano",
       "glyph": "ᛒ",
       "color": "#7ee08a",
-      "element": "vita",
+      "element": "life",
       "description": "la betulla: cura, fa crescere"
     },
-    "scudo": {
+    "scutum": {
       "name": "Algiz",
       "glyph": "ᛉ",
       "color": "#b9a6ff",
-      "element": "protezione",
+      "element": "protection",
       "description": "il corno d'alce: protegge"
     },
-    "vento": {
+    "ventus": {
       "name": "Ansuz",
       "glyph": "ᚨ",
       "color": "#d8f4ff",
-      "element": "aria",
+      "element": "air",
       "description": "il soffio: spinge, porta voci"
     }
   },
   "spells": {
-    "luce": {
+    "lux": {
       "name": "Lume",
       "description": "Una piccola luce resta sospesa davanti a te.",
       "cost": 4,
       "effects": [
         {
-          "tipo": "luce",
-          "raggio": 5,
-          "durata": 90
+          "type": "light",
+          "radius": 5,
+          "duration": 90
         }
       ]
     },
-    "fuoco": {
+    "ignis": {
       "name": "Favilla",
       "description": "Una fiammata davanti a te: brucia ciò che è secco.",
       "cost": 10,
       "effects": [
         {
-          "tipo": "fuoco",
-          "raggio": 1,
-          "durata": 8
+          "type": "fire",
+          "radius": 1,
+          "duration": 8
         }
       ]
     },
-    "acqua": {
+    "aqua": {
       "name": "Polla",
       "description": "Dal suolo davanti a te sgorga acqua.",
       "cost": 10,
       "effects": [
         {
-          "tipo": "terreno",
-          "a": "w",
-          "raggio": 0
+          "type": "terrain",
+          "to": "w",
+          "radius": 0
         }
       ]
     },
@@ -98,9 +98,9 @@
       "cost": 14,
       "effects": [
         {
-          "tipo": "terreno",
-          "a": "p",
-          "raggio": 1
+          "type": "terrain",
+          "to": "p",
+          "radius": 1
         }
       ]
     },
@@ -110,42 +110,42 @@
       "cost": 12,
       "effects": [
         {
-          "tipo": "bisogni",
-          "salute": 25
+          "type": "needs",
+          "health": 25
         }
       ]
     },
-    "scudo": {
+    "scutum": {
       "name": "Corno",
       "description": "Un guscio d'aria ti avvolge.",
       "cost": 8,
       "effects": [
         {
-          "tipo": "scudo",
-          "durata": 30
+          "type": "shield",
+          "duration": 30
         }
       ]
     },
-    "vento": {
+    "ventus": {
       "name": "Soffio",
       "description": "Una folata spinge via ciò che hai davanti.",
       "cost": 6,
       "effects": [
         {
-          "tipo": "spingi",
-          "forza": 5
+          "type": "push",
+          "force": 5
         }
       ]
     },
-    "terra fuoco": {
+    "terra ignis": {
       "name": "Palla di fuoco",
       "description": "La terra dà corpo alla fiamma: una palla di fuoco scoppia davanti a te e brucia tutto attorno.",
       "cost": 16,
       "effects": [
         {
-          "tipo": "fuoco",
-          "raggio": 2,
-          "durata": 10
+          "type": "fire",
+          "radius": 2,
+          "duration": 10
         }
       ]
     }
@@ -155,7 +155,7 @@
       "id": "item.cristallo-magico",
       "name": "Cristallo magico",
       "description": "Un cristallo che pulsa di luce fredda. Assorbito, ridà forza magica (mana); gli incantesimi di tre o più rune ne consumano uno.",
-      "category": "magia",
+      "category": "magic",
       "weight": 0.1,
       "stack": 10,
       "tags": [
@@ -173,7 +173,7 @@
       "id": "item.borsa-rune",
       "name": "Borsa delle rune",
       "description": "Una borsetta di pelle con tante taschine: tiene ordinate centinaia di rune.",
-      "category": "contenitore",
+      "category": "container",
       "weight": 0.2,
       "stack": 1,
       "tags": [
@@ -192,7 +192,7 @@
       "id": "item.sacca",
       "name": "Sacca di tela",
       "description": "Una sacca da spalla: dentro ci sta di tutto, un po' di tutto.",
-      "category": "contenitore",
+      "category": "container",
       "weight": 0.4,
       "stack": 1,
       "tags": [

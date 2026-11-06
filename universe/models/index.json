@@ -1,328 +1,328 @@
 {
  "viandante": {
-  "classe": "persona",
+  "classe": "person",
   "nome": "Viandante",
   "autore": "procedurale, a mano (Claude Cloud, T270)",
   "tinta": "N"
  },
  "contadina": {
-  "classe": "persona",
+  "classe": "person",
   "nome": "Contadina",
   "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
- "persona": {
-  "classe": "persona",
+ "person": {
+  "classe": "person",
   "nome": "Fabbro",
   "autore": "a mano, step 8B (Claude Code)"
  },
- "animale": {
-  "classe": "animale",
+ "animal": {
+  "classe": "animal",
   "nome": "Gatto",
   "autore": "a mano, step 8B (Claude Code)"
  },
- "bestia": {
-  "classe": "bestia",
+ "beast": {
+  "classe": "beast",
   "nome": "Lupo",
   "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
- "albero": {
-  "classe": "albero",
+ "tree": {
+  "classe": "tree",
   "nome": "Pino",
   "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
  "quercia": {
-  "classe": "albero",
+  "classe": "tree",
   "nome": "Quercia",
   "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
  "betulla": {
-  "classe": "albero",
+  "classe": "tree",
   "nome": "Betulla",
   "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
  "palma": {
-  "classe": "albero",
+  "classe": "tree",
   "nome": "Palma",
   "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
- "cespuglio": {
-  "classe": "cespuglio",
+ "bush": {
+  "classe": "bush",
   "nome": "Cespuglio",
   "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
  "cespuglio-con-bacche": {
-  "classe": "cespuglio",
+  "classe": "bush",
   "nome": "Cespuglio con bacche",
   "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
- "roccia": {
-  "classe": "roccia",
+ "rock": {
+  "classe": "rock",
   "nome": "Masso",
   "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
  "masso-muschioso": {
-  "classe": "roccia",
+  "classe": "rock",
   "nome": "Masso muschioso",
   "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
- "sasso": {
-  "classe": "sasso",
+ "pebble": {
+  "classe": "pebble",
   "nome": "Sasso",
   "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
  "barile": {
-  "classe": "mobile",
+  "classe": "furniture",
   "nome": "Barile",
   "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
  "falo": {
-  "classe": "mobile",
+  "classe": "furniture",
   "nome": "Falò",
   "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
- "mobile": {
-  "classe": "mobile",
+ "furniture": {
+  "classe": "furniture",
   "nome": "Cassa",
   "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
  "letto": {
-  "classe": "mobile",
+  "classe": "furniture",
   "nome": "Letto",
   "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
  "banco": {
-  "classe": "mobile",
+  "classe": "furniture",
   "nome": "Banco da lavoro",
   "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
  "credenza": {
-  "classe": "mobile",
+  "classe": "furniture",
   "nome": "Credenza",
   "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
  "cartello": {
-  "classe": "mobile",
+  "classe": "furniture",
   "nome": "Cartello",
   "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
- "oggetto": {
-  "classe": "oggetto",
+ "object": {
+  "classe": "object",
   "nome": "Cosa",
   "autore": "a mano (Claude Code)",
   "tinta": "C"
  },
  "forbici": {
-  "classe": "oggetto",
+  "classe": "object",
   "nome": "Forbici",
   "autore": "a mano (Claude Code)"
  },
  "pozzo": {
-  "classe": "edificio",
+  "classe": "building",
   "nome": "Pozzo",
   "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
- "edificio": {
-  "classe": "edificio",
+ "building": {
+  "classe": "building",
   "nome": "Casetta",
   "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
- "monumento": {
-  "classe": "monumento",
+ "monument": {
+  "classe": "monument",
   "nome": "Colonna",
   "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
- "grande": {
-  "classe": "grande",
+ "structure": {
+  "classe": "structure",
   "nome": "Casa a graticcio",
   "autore": "a mano (Claude Code)"
  },
  "fattoria": {
-  "classe": "grande",
+  "classe": "structure",
   "nome": "Fattoria",
   "autore": "procedurale, a mano (Claude Cloud, T270)"
  },
  "corona-magia": {
-  "classe": "edificio",
+  "classe": "building",
   "nome": "Torre della Magia",
   "autore": "gemini-3.8-flash (Gemini CLI, T19)",
   "vpt": 8
  },
  "corona-concilio": {
-  "classe": "edificio",
+  "classe": "building",
   "nome": "Sala del Concilio",
   "autore": "gemini-3.8-flash (Gemini CLI, T19)",
   "vpt": 8
  },
  "corona-cose": {
-  "classe": "edificio",
+  "classe": "building",
   "nome": "Laboratorio delle cose",
   "autore": "gemini-3.8-flash (Gemini CLI, T19)",
   "vpt": 8
  },
  "corona-galleria": {
-  "classe": "edificio",
+  "classe": "building",
   "nome": "Galleria dell'Artista",
   "autore": "gemini-3.8-flash (Gemini CLI, T19)",
   "vpt": 8
  },
  "corona-luoghi": {
-  "classe": "edificio",
+  "classe": "building",
   "nome": "Ufficio dei luoghi",
   "autore": "gemini-3.8-flash (Gemini CLI, T19)",
   "vpt": 8
  },
  "corona-mondo": {
-  "classe": "edificio",
+  "classe": "building",
   "nome": "Biblioteca del Mondo",
   "autore": "gemini-3.8-flash (Gemini CLI, T19)",
   "vpt": 8
  },
  "corona-nucleo": {
-  "classe": "edificio",
+  "classe": "building",
   "nome": "Il Nucleo",
   "autore": "gemini-3.8-flash (Gemini CLI, T19)",
   "vpt": 8
  },
  "corona-oggetti": {
-  "classe": "edificio",
+  "classe": "building",
   "nome": "Magazzino degli oggetti",
   "autore": "gemini-3.8-flash (Gemini CLI, T19)",
   "vpt": 8
  },
  "corona-persone": {
-  "classe": "edificio",
+  "classe": "building",
   "nome": "Studio dei personaggi",
   "autore": "gemini-3.8-flash (Gemini CLI, T19)",
   "vpt": 8
  },
  "corona-sistemi": {
-  "classe": "edificio",
+  "classe": "building",
   "nome": "Sala sistemi",
   "autore": "gemini-3.8-flash (Gemini CLI, T19)",
   "vpt": 8
  },
  "corona-universo": {
-  "classe": "edificio",
+  "classe": "building",
   "nome": "La Direzione",
   "autore": "gemini-3.8-flash (Gemini CLI, T19)",
   "vpt": 8
  },
  "corona-albero-luce": {
-  "classe": "albero",
+  "classe": "tree",
   "nome": "Albero di luce (corona)",
   "autore": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 8
  },
  "corona-lampione": {
-  "classe": "mobile",
+  "classe": "furniture",
   "nome": "Lampione (corona)",
   "autore": "l'autore, a mano (T113)",
   "vpt": 8
  },
  "corona-panchina": {
-  "classe": "mobile",
+  "classe": "furniture",
   "nome": "Panchina (corona)",
   "autore": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 8
  },
  "corona-totem": {
-  "classe": "monumento",
+  "classe": "monument",
   "nome": "Totem (corona)",
   "autore": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 8
  },
  "corona-drone": {
-  "classe": "oggetto",
+  "classe": "object",
   "nome": "Drone (corona)",
   "autore": "l'autore, a mano; ridotto in scala 1:2 (T113)",
   "vpt": 8
  },
  "corona-treno": {
-  "classe": "mobile",
+  "classe": "furniture",
   "nome": "Treno pod (corona)",
   "autore": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 8
  },
  "corona-gerboa": {
-  "classe": "persona",
+  "classe": "person",
   "nome": "Gerboa base (corona)",
   "autore": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 20
  },
  "corona-gerboa-narratore": {
-  "classe": "persona",
+  "classe": "person",
   "nome": "Gerboa Narratore (corona)",
   "autore": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 20
  },
  "corona-gerboa-cartografo": {
-  "classe": "persona",
+  "classe": "person",
   "nome": "Gerboa Cartografo (corona)",
   "autore": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 20
  },
  "corona-gerboa-artista": {
-  "classe": "persona",
+  "classe": "person",
   "nome": "Gerboa Artista (corona)",
   "autore": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 20
  },
  "corona-gerboa-musicista": {
-  "classe": "persona",
+  "classe": "person",
   "nome": "Gerboa Musicista (corona)",
   "autore": "dal Gerboa Artista, a mano (T225)",
   "vpt": 20
  },
  "corona-gerboa-scultore": {
-  "classe": "persona",
+  "classe": "person",
   "nome": "Gerboa Scultore (corona)",
   "autore": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 20
  },
  "corona-gerboa-fisico": {
-  "classe": "persona",
+  "classe": "person",
   "nome": "Gerboa Fisico (corona)",
   "autore": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 20
  },
  "corona-gerboa-ingegnere": {
-  "classe": "persona",
+  "classe": "person",
   "nome": "Gerboa Ingegnere (corona)",
   "autore": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 20
  },
  "corona-gerboa-arbitro": {
-  "classe": "persona",
+  "classe": "person",
   "nome": "Gerboa Arbitro (corona)",
   "autore": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 20
  },
  "corona-gerboa-referente": {
-  "classe": "persona",
+  "classe": "person",
   "nome": "Gerboa Referente (corona)",
   "autore": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 20
  },
  "corona-gerboa-attore": {
-  "classe": "persona",
+  "classe": "person",
   "nome": "Gerboa Attore (corona)",
   "autore": "claude-opus-5-5 (Claude Code, T158)",
   "vpt": 20
  },
  "schermo-scritte": {
-  "classe": "oggetto",
+  "classe": "object",
   "nome": "Schermo scritte",
   "autore": "a mano (editor MJ, T59)",
   "vpt": 20
  },
  "schermo-struttura": {
-  "classe": "oggetto",
+  "classe": "object",
   "nome": "Schermo struttura",
   "autore": "a mano (editor MJ, T59)",
   "vpt": 20
  },
  "circuito-3D": {
-  "classe": "oggetto",
+  "classe": "object",
   "nome": "Circuito 3D",
   "autore": "a mano (editor MJ, T59)",
   "vpt": 20,
@@ -355,12 +355,12 @@
   "suono": {
    "uso": "musica",
    "ambienti": [
-    "borgo",
-    "campi",
-    "capanne",
-    "maneggio",
-    "locanda",
-    "lago"
+    "village",
+    "fields",
+    "huts",
+    "stables",
+    "inn",
+    "lake"
    ],
    "momenti": [
     "mattina",
@@ -375,11 +375,11 @@
   "suono": {
    "uso": "musica",
    "ambienti": [
-    "bosco",
-    "giungla",
-    "montagne",
-    "deserto",
-    "torre_mago"
+    "woods",
+    "jungle",
+    "mountains",
+    "desert",
+    "wizard_tower"
    ],
    "momenti": [
     "mattina",
@@ -394,11 +394,11 @@
   "suono": {
    "uso": "musica",
    "ambienti": [
-    "castello",
-    "fortezza",
-    "caserma",
-    "tempio",
-    "piramide"
+    "castle",
+    "fortress",
+    "barracks",
+    "temple",
+    "pyramid"
    ],
    "momenti": [
     "mattina",
@@ -414,8 +414,8 @@
    "uso": "musica",
    "ambienti": [
     "dungeon",
-    "tana_drago",
-    "rovine"
+    "dragon_lair",
+    "ruins"
    ]
   }
  },
@@ -550,52 +550,52 @@
   }
  },
  "fantasy-altare-runico": {
-  "classe": "mobile",
+  "classe": "furniture",
   "nome": "Altare runico",
   "autore": "Claude Cloud, props tematici (T270)"
  },
  "fantasy-libreria-alchemica": {
-  "classe": "mobile",
+  "classe": "furniture",
   "nome": "Libreria alchemica",
   "autore": "Claude Cloud, props tematici (T270)"
  },
  "fantasy-calderone-bollente": {
-  "classe": "mobile",
+  "classe": "furniture",
   "nome": "Calderone bollente",
   "autore": "Claude Cloud, props tematici (T270)"
  },
  "fantasy-statua-guardiano": {
-  "classe": "monumento",
+  "classe": "monument",
   "nome": "Statua del guardiano",
   "autore": "Claude Cloud, props tematici (T270)"
  },
  "fantasy-cristallo-arcano": {
-  "classe": "mobile",
+  "classe": "furniture",
   "nome": "Cristallo arcano",
   "autore": "Claude Cloud, props tematici (T270)"
  },
  "fantasy-bancarella-mercato": {
-  "classe": "mobile",
+  "classe": "furniture",
   "nome": "Bancarella del mercato",
   "autore": "Claude Cloud, props tematici (T270)"
  },
  "fantasy-gabbia-sospesa": {
-  "classe": "monumento",
+  "classe": "monument",
   "nome": "Gabbia sospesa",
   "autore": "Claude Cloud, props tematici (T270)"
  },
  "fantasy-trono-di-pietra": {
-  "classe": "mobile",
+  "classe": "furniture",
   "nome": "Trono di pietra",
   "autore": "Claude Cloud, props tematici (T270)"
  },
  "fantasy-fontana-antica": {
-  "classe": "edificio",
+  "classe": "building",
   "nome": "Fontana antica",
   "autore": "Claude Cloud, props tematici (T270)"
  },
  "fantasy-obelisco-inciso": {
-  "classe": "monumento",
+  "classe": "monument",
   "nome": "Obelisco inciso",
   "autore": "Claude Cloud, props tematici (T270)"
  },
@@ -606,8 +606,8 @@
   "suono": {
    "uso": "musica",
    "ambienti": [
-    "montagne",
-    "deserto"
+    "mountains",
+    "desert"
    ],
    "momenti": [
     "mattina",
@@ -622,10 +622,10 @@
   "suono": {
    "uso": "musica",
    "ambienti": [
-    "bosco",
-    "giungla",
-    "montagne",
-    "deserto"
+    "woods",
+    "jungle",
+    "mountains",
+    "desert"
    ],
    "momenti": [
     "notte"
@@ -639,8 +639,8 @@
   "suono": {
    "uso": "musica",
    "ambienti": [
-    "fortezza",
-    "caserma"
+    "fortress",
+    "barracks"
    ],
    "momenti": [
     "mattina",
@@ -655,8 +655,8 @@
   "suono": {
    "uso": "musica",
    "ambienti": [
-    "tempio",
-    "piramide"
+    "temple",
+    "pyramid"
    ],
    "momenti": [
     "mattina",
@@ -671,8 +671,8 @@
   "suono": {
    "uso": "musica",
    "ambienti": [
-    "locanda",
-    "borgo_mattoni"
+    "inn",
+    "brick_village"
    ],
    "momenti": [
     "mattina",
@@ -688,8 +688,8 @@
   "suono": {
    "uso": "musica",
    "ambienti": [
-    "tana_drago",
-    "rovine"
+    "dragon_lair",
+    "ruins"
    ]
   }
  },
@@ -914,69 +914,69 @@
   }
  },
  "struttura-casa-del-borgomastro": {
-  "classe": "grande",
+  "classe": "structure",
   "nome": "Casa del borgomastro, a due piani",
   "autore": "procedurale, a mano (Claude Cloud, catalogo delle strutture, T269)"
  },
  "struttura-forte-di-frontiera": {
-  "classe": "grande",
+  "classe": "structure",
   "nome": "Forte di frontiera (forte con le torri)",
   "autore": "procedurale, a mano (Claude Cloud, catalogo gemello, T273)"
  },
  "struttura-fortino": {
-  "classe": "grande",
+  "classe": "structure",
   "nome": "Fortino di confine",
   "autore": "procedurale, a mano (Claude Cloud, catalogo delle strutture, T269)"
  },
  "struttura-fucina-nanica": {
-  "classe": "grande",
+  "classe": "structure",
   "nome": "Fucina nanica (fucina con la cantina)",
   "autore": "procedurale, a mano (Claude Cloud, catalogo gemello, T273)",
   "sotto": 1
  },
  "struttura-fucina": {
-  "classe": "grande",
+  "classe": "structure",
   "nome": "Fucina del fabbro, con la carbonaia sotto terra",
   "autore": "procedurale, a mano (Claude Cloud, catalogo delle strutture, T269)",
   "sotto": 1
  },
  "struttura-locanda-del-cinghiale": {
-  "classe": "grande",
+  "classe": "structure",
   "nome": "Locanda del cinghiale (locanda con la cantina)",
   "autore": "procedurale, a mano (Claude Cloud, catalogo gemello, T273)",
   "sotto": 1,
-  "taglia": "enorme",
+  "taglia": "huge",
   "vpt": 16
  },
  "struttura-locanda": {
-  "classe": "grande",
+  "classe": "structure",
   "nome": "Locanda del Cinghiale, con la cantina delle botti",
   "autore": "procedurale, a mano (Claude Cloud, catalogo delle strutture, T269)",
   "sotto": 1
  },
  "struttura-residenza-del-borgomastro": {
-  "classe": "grande",
+  "classe": "structure",
   "nome": "Residenza del borgomastro (residenza a due piani)",
   "autore": "procedurale, a mano (Claude Cloud, catalogo gemello, T273)"
  },
  "struttura-santuario": {
-  "classe": "grande",
+  "classe": "structure",
   "nome": "Santuario della Luna d'Argento",
   "autore": "procedurale, a mano (Claude Cloud, catalogo delle strutture, T269)"
  },
  "struttura-tempio-della-luna": {
-  "classe": "grande",
+  "classe": "structure",
   "nome": "Tempio della luna (tempio a gradoni)",
   "autore": "procedurale, a mano (Claude Cloud, catalogo gemello, T273)"
  },
  "struttura-torre-del-mago": {
-  "classe": "grande",
+  "classe": "structure",
   "nome": "Torre del mago (torre con il sotterraneo)",
   "autore": "procedurale, a mano (Claude Cloud, catalogo gemello, T273)",
   "sotto": 1
  },
  "struttura-torre-di-guardia": {
-  "classe": "grande",
+  "classe": "structure",
   "nome": "Torre di guardia del passo, con la segreta",
   "autore": "procedurale, a mano (Claude Cloud, catalogo delle strutture, T269)",
   "sotto": 1

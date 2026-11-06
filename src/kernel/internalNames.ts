@@ -2,8 +2,10 @@
 // tokens of the magic runes, the same in every language. The world's own text (bible, people, dialogues, names of things) stays in the
 // language of its universe. This is the table of every Italian name of today and the name it takes, domain by domain, with where it is
 // read and whether it touches the disk, the wire or Lua. docs/lingua-interna.md tells it in words; the tasks that apply it are T307-T308
-// (split in four, one contract each: `step`). Nothing reads this file at run time yet: it is the plan as data, checked by
-// tests/internal-names.test.ts (no doubles, no collisions with the English already used, every value of the code covered).
+// (split in four, one contract each: `step`). The table is checked by tests/internal-names.test.ts (no doubles, no collisions with the
+// English already used, every value of the code covered); the domains of a step that is done are read at run time too (T307a): the
+// migration of a universe (migrations.ts) and the repair of what the Council still writes in Italian until its prompts change (T310) both
+// read it, through the functions at the end of this file.
 
 /** What a name touches: a file of the universe, a message between client and server, the Lua of the modules, a prompt, only TypeScript. */
 export type NameReach = 'disco' | 'filo' | 'lua' | 'prompt' | 'codice';
@@ -760,4 +762,130 @@ export const INTERNAL_NAMES: readonly NameDomain[] = [
 export function internalName(domain: string, value: string): string {
   const names = INTERNAL_NAMES.find((x) => x.id === domain)?.names;
   return names && Object.hasOwn(names, value) ? names[value] : value;
+}
+
+/** The Italian word of today of an internal value: the reverse of the table, for what the world still shows in its language (T239 has the dictionaries). */
+export function italianName(domain: string, value: string): string {
+  const names = INTERNAL_NAMES.find((x) => x.id === domain)?.names ?? {};
+  return Object.keys(names).find((k) => names[k] === value) ?? value;
+}
+
+/** The Italian values of a domain, in the table's order: what the Council's prompts still list until they change (T310). */
+export function italianValues(domain: string): string[] {
+  return Object.keys(INTERNAL_NAMES.find((x) => x.id === domain)?.names ?? {});
+}
+
+// --- The contract 0.2 (T307a): the repair of the values of the world's simulation ------------------------------------------------------
+// Every function here is idempotent (an internal value stays as it is: the table has no chains) and leaves what it does not know alone.
+
+/** Any string of a value domain, internal; anything else as it is. */
+const named = (domain: string, v: unknown): unknown => (typeof v === 'string' ? internalName(domain, v) : v);
+
+const isRecord = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v);
+
+/** An object with its keys renamed by a field domain, in their order; a key whose internal name is there already gives way to it. */
+function renameFields(o: Record<string, unknown>, domain: string): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(o)) {
+    const key = internalName(domain, k);
+    if (key !== k && Object.hasOwn(o, key)) continue;
+    out[key] = v;
+  }
+  return out;
+}
+
+/** An effect as the Council or a universe of the contract 0.1 wrote it (`{tipo: 'luce', raggio: 4}`), internal (`{type: 'light', radius: 4}`). */
+export function internalEffect(raw: unknown): unknown {
+  if (!isRecord(raw)) return raw;
+  const out = renameFields(raw, 'campi-effetti');
+  if (typeof out.type === 'string') out.type = internalName('effetti', out.type);
+  return out;
+}
+
+/** A list of effects, each internal; what is not a list as it is. */
+export const internalEffects = (raw: unknown): unknown => (Array.isArray(raw) ? raw.map(internalEffect) : raw);
+
+/**
+ * The id of a model the kernel names, internal: the generic model of a class (`albero` → `tree`) and a common shape of the items
+ * (`forma-sacco` → `shape-sack`). Any other id is content (the Sculptor's, the Forge's) and stays.
+ */
+export function internalModelId(id: string): string {
+  const cls = internalName('classi', id);
+  if (cls !== id) return cls;
+  // The common houses of a world (ADR-0134) say their class in their id: `casa-comune-edificio-<hash>` → `casa-comune-building-<hash>`.
+  const house = /^(casa-comune-)([a-z]+)(-[0-9a-f]+)$/.exec(id);
+  if (house) return `${house[1]}${internalName('classi', house[2])}${house[3]}`;
+  const m = /^forma-(.+)$/.exec(id);
+  if (!m) return id;
+  const shape = internalName('impronte', m[1]);
+  return shape === m[1] ? id : `${internalName('impronte', 'forma')}-${shape}`;
+}
+
+const modelOf = (v: unknown): unknown => (typeof v === 'string' ? internalModelId(v) : v);
+
+/** A list of learned actions, with their effects internal. */
+function internalActions(raw: unknown): unknown {
+  if (!Array.isArray(raw)) return raw;
+  return raw.map((a) => (isRecord(a) && Array.isArray(a.effects) ? { ...a, effects: internalEffects(a.effects) } : a));
+}
+
+/** A step of a case of the bench, its kind and its way internal. */
+function internalStep(p: unknown): unknown {
+  if (!isRecord(p)) return p;
+  const o = { ...p };
+  if ('tipo' in o) o.tipo = named('passi-banco', o.tipo);
+  if ('verso' in o) o.verso = named('passi-banco', o.verso);
+  return o;
+}
+
+/**
+ * A manifest (parsed) with the values of the contract 0.2 internal: class and size of the look, the model ids the kernel names, the
+ * categories, models and effects of the items, the effects of the actions and of the incantations, the elements of the magic runes, the
+ * elements of a panel, the steps of the cases of the bench. Ids of terrains, runes, environments and actions are not touched here: they
+ * are keys others point at, and only the migration of a whole universe renames them (migrations.ts).
+ */
+export function internalManifest<T>(raw: T): T {
+  if (!isRecord(raw)) return raw;
+  const m: Record<string, unknown> = { ...raw };
+  if (isRecord(m.appearance)) {
+    const a = { ...m.appearance };
+    if ('classe' in a) a.classe = named('classi', a.classe);
+    if ('taglia' in a) a.taglia = named('taglie', a.taglia);
+    if ('model' in a) a.model = modelOf(a.model);
+    m.appearance = a;
+  }
+  if (Array.isArray(m.items))
+    m.items = m.items.map((it) => {
+      if (!isRecord(it)) return it;
+      const o = { ...it };
+      if ('category' in o) o.category = named('categorie', o.category);
+      if ('model' in o) o.model = modelOf(o.model);
+      if ('actions' in o) o.actions = internalActions(o.actions);
+      return o;
+    });
+  if ('actions' in m) m.actions = internalActions(m.actions);
+  if (isRecord(m.tiles))
+    m.tiles = Object.fromEntries(
+      Object.entries(m.tiles).map(([code, t]) => {
+        if (!isRecord(t)) return [code, t];
+        const o = { ...t };
+        if ('model' in o) o.model = modelOf(o.model);
+        if ('actions' in o) o.actions = internalActions(o.actions);
+        return [code, o];
+      }),
+    );
+  if (isRecord(m.spells)) m.spells = Object.fromEntries(Object.entries(m.spells).map(([k, sp]) => [k, isRecord(sp) && Array.isArray(sp.effects) ? { ...sp, effects: internalEffects(sp.effects) } : sp]));
+  if (isRecord(m.runes)) m.runes = Object.fromEntries(Object.entries(m.runes).map(([k, r]) => [k, isRecord(r) && 'element' in r ? { ...r, element: named('elementi', r.element) } : r]));
+  if (isRecord(m.ui) && Array.isArray(m.ui.elementi)) m.ui = { ...m.ui, elementi: m.ui.elementi.map((e) => (isRecord(e) && 'tipo' in e ? { ...e, tipo: named('pannelli', e.tipo) } : e)) };
+  if (Array.isArray(m.casi)) m.casi = m.casi.map((c) => (isRecord(c) && Array.isArray(c.passi) ? { ...c, passi: c.passi.map(internalStep) } : c));
+  return m as T;
+}
+
+/** An entry of models/index.json with its class and size internal. */
+export function internalModelInfo<T>(raw: T): T {
+  if (!isRecord(raw)) return raw;
+  const o: Record<string, unknown> = { ...raw };
+  if ('classe' in o) o.classe = named('classi', o.classe);
+  if ('taglia' in o) o.taglia = named('taglie', o.taglia);
+  return o as T;
 }

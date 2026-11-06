@@ -77,8 +77,8 @@ describe('the themes of the Genesis', () => {
     expect(await k.runGenesis(WORLD_THEMES[3].text)).toBe(true);
     const ids = Object.keys(k.content.layouts);
     expect(ids).toContain('darsena');
-    expect(ids).toContain('bosco');
-    for (const old of ['castello', 'torre_mago', 'tana_drago', 'capanne', 'locanda', 'borgo']) expect(ids).not.toContain(old);
+    expect(ids).toContain('woods');
+    for (const old of ['castle', 'wizard_tower', 'dragon_lair', 'huts', 'inn', 'village']) expect(ids).not.toContain(old);
   });
 });
 
@@ -137,6 +137,6 @@ describe('a universe that exists', () => {
     expect(before.repo.working['prompts/theme.md']).toBe(bundledFiles['prompts/theme.md']);
     expect(before.repo.working['modules/world.layouts/manifest.json']).toBe(bundledFiles['modules/world.layouts/manifest.json']);
     expect(before.needsGenesis()).toBe(true);
-    expect(Object.keys(before.content.layouts)).toContain('castello');
+    expect(Object.keys(before.content.layouts)).toContain('castle');
   });
 });

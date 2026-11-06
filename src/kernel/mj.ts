@@ -18,6 +18,10 @@
 
 import { Rng } from './rng';
 import { stamp, STAMP_ROLES, STAMP_SHAPES, type StampCodes, type StampShape } from './stamps';
+import { internalName } from './internalNames';
+
+/** A stamp's shape, internal: the Cartographer still writes the Italian of the contract 0.1 until its prompts change (T307a, T310). */
+const stampShape = (v: unknown): string => (typeof v === 'string' ? internalName('timbri', v) : '');
 
 export interface MjRule {
   in: string;
@@ -297,7 +301,8 @@ class SequenceRunner extends Runner {
 class StampRunner extends Runner {
   constructor(private node: { shape: StampShape; codes?: Partial<StampCodes>; on?: string; count?: number }) {
     super(Math.max(1, Math.min(6, node.count ?? 1)));
-    if (!(STAMP_SHAPES as readonly string[]).includes(node.shape)) throw new MjError(`stamp: forma sconosciuta "${node.shape}" (note: ${STAMP_SHAPES.join(', ')})`);
+    this.node = { ...node, shape: stampShape(node.shape) as StampShape };
+    if (!(STAMP_SHAPES as readonly string[]).includes(this.node.shape)) throw new MjError(`stamp: forma sconosciuta "${node.shape}" (note: ${STAMP_SHAPES.join(', ')})`);
   }
   go(g: MjGrid, rng: Rng): boolean {
     if (this.count >= (this.limit ?? 1)) return false;
@@ -378,9 +383,10 @@ export function repairProgram(node: unknown, notes: string[] = [], depth = 0): M
     return children.length ? { type: n.type, children } : null;
   }
   if (n.type === 'stamp') {
-    if (!(STAMP_SHAPES as readonly string[]).includes(n.shape)) return notes.push(`forma sconosciuta "${n.shape}" rimossa`), null;
+    const shape = stampShape(n.shape) as StampShape;
+    if (!(STAMP_SHAPES as readonly string[]).includes(shape)) return notes.push(`forma sconosciuta "${n.shape}" rimossa`), null;
     const codes = Object.fromEntries(Object.entries(n.codes ?? {}).filter(([k, v]) => (STAMP_ROLES as string[]).includes(k) && typeof v === 'string' && v.length === 1));
-    return { type: 'stamp', shape: n.shape, ...(Object.keys(codes).length ? { codes } : {}), ...(typeof n.on === 'string' ? { on: n.on } : {}), ...(Number.isInteger(n.count) ? { count: Math.max(1, Math.min(6, n.count)) } : {}) };
+    return { type: 'stamp', shape, ...(Object.keys(codes).length ? { codes } : {}), ...(typeof n.on === 'string' ? { on: n.on } : {}), ...(Number.isInteger(n.count) ? { count: Math.max(1, Math.min(6, n.count)) } : {}) };
   }
   if (n.type === 'path') return typeof n.from === 'string' && typeof n.to === 'string' && typeof n.on === 'string' && typeof n.color === 'string' && n.color.length === 1 ? { ...n } : (notes.push('path incompleto rimosso'), null);
   if (n.type === 'one' || n.type === 'all' || n.type === 'prl') {

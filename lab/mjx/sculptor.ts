@@ -11,6 +11,7 @@ import { compileMjx, type MjxModel } from '../../src/mj/model';
 import { MJ_PALETTE } from '../../src/mj/palette';
 import { runMjx } from '../../src/mj/run';
 import SCULPTOR from '../prompts/scultore-mj.md?raw';
+import { italianName } from '../../src/kernel/internalNames';
 
 const examples = import.meta.glob('./models/*.xml', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
 const example = (id: string) => examples[`./models/${id}.xml`]?.trim();
@@ -44,7 +45,7 @@ export function mjxSystem(kind: string, withExamples = true): string {
     .replace('@@CLASSES@@', CLASSES.map(classLine).join('\n'))
     .replace('@@PALETTE@@', palette);
   if (withExamples) {
-    const ids = EXAMPLES_FOR[kind] ?? ['masso', 'casa'];
+    const ids = EXAMPLES_FOR[kind] ?? EXAMPLES_FOR[italianName('classi', kind)] ?? ['masso', 'casa'];
     s += `\n## Esempi (programmi del laboratorio)\n${ids.map((id) => example(id)).filter(Boolean).join('\n\n')}\n`;
   }
   return s.trim();

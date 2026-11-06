@@ -13,6 +13,7 @@ import { MemoryChunks, type ChunkStore } from '../../src/kernel/chunks';
 import { Kernel } from '../../src/kernel/kernel';
 import { memoryStore } from '../../src/kernel/repo';
 import type { FileMap, Manifest } from '../../src/kernel/types';
+import { internalManifest } from '../../src/kernel/internalNames';
 
 const HERE = path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1'));
 const MODULES = path.join(HERE, 'moduli');
@@ -28,7 +29,8 @@ export function universeWith(...ids: string[]): FileMap {
   return { ...bundledFiles, ...Object.assign({}, ...ids.map(moduleFiles)) };
 }
 
-export const manifestOf = (id: string): Manifest => JSON.parse(moduleFiles(id)[`modules/${id}/manifest.json`]);
+// Read as the kernel reads a manifest (parseManifest): the values of the contract 0.1 these modules were written with made internal (T307a).
+export const manifestOf = (id: string): Manifest => internalManifest(JSON.parse(moduleFiles(id)[`modules/${id}/manifest.json`]));
 export const logicOf = (id: string): string => moduleFiles(id)[`modules/${id}/logic.lua`] ?? '';
 
 /**

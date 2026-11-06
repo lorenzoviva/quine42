@@ -27,7 +27,7 @@ export const MONUMENTI_ROVINE: Definizione[] = [
     ambientazione: 'fantasy',
     nome: 'ponte-pietra-antico',
     titolo: 'Ponte di pietra antico',
-    classe: 'edificio',
+    classe: 'building',
     descrizione: 'Un ponte di pietra che scavalca un torrente di Aurora da prima che qualcuno ricordi: archi, parapetti sbrecciati, edera.',
     procedura: 'due scelte a caso (il ponte: un arco grande, due archi, tre archi bassi, crollato a metà sul suo cumulo di pietre; le teste: due statue, due lanterne, una torretta) e poi il tempo: pietre del parapetto che mancano a caso, muschio sopra, edera che pende da sotto gli archi.',
     xml: () =>
@@ -70,7 +70,7 @@ export const MONUMENTI_ROVINE: Definizione[] = [
     ambientazione: 'fantasy',
     nome: 'circolo-megalitico',
     titolo: 'Circolo megalitico',
-    classe: 'edificio',
+    classe: 'building',
     descrizione: 'Un cerchio di pietre ritte su un poggio di Aurora: nessuno sa chi le abbia alzate, ognuna ha la sua altezza.',
     procedura: 'otto pietre nascono in punti a caso dell\'anello, salgono e si fermano a un\'altezza propria; il centro a caso (altare, pietra madre, dolmen, cerchio del fuoco); licheni e muschio a caso.',
     xml: () =>
@@ -114,7 +114,7 @@ export const MONUMENTI_ROVINE: Definizione[] = [
     ambientazione: 'fantasy',
     nome: 'rovine-tempio-sommerso',
     titolo: 'Rovine del tempio sommerso',
-    classe: 'edificio',
+    classe: 'building',
     descrizione: 'Un tempio di Aurora che la palude si è ripresa: lo stilobate sott\'acqua, colonne spezzate a ogni altezza, alghe e liane.',
     procedura: 'la pianta a caso (peristilio, due file, cella con le colonne davanti, colonnato a ferro di cavallo), ogni colonna che si spezza a un\'altezza sua, il resto del frontone a caso, liane che pendono e alghe sull\'acqua.',
     xml: () => {
@@ -162,7 +162,7 @@ export const MONUMENTI_ROVINE: Definizione[] = [
     ambientazione: 'fantasy',
     nome: 'statua-colosso',
     titolo: 'Statua colosso',
-    classe: 'monumento',
+    classe: 'monument',
     descrizione: 'Il guardiano di pietra che veglia su un passo di Aurora: ogni seme è un altro eroe, con la sua posa e il suo copricapo.',
     procedura: 'tre scelte a caso (la posa: con la lancia, a braccia alzate, con la spada piantata, con lo scudo; il copricapo: elmo crestato, corona, cappuccio; il piedistallo: a gradoni, a tamburo, di roccia) e muschio, licheni e crepe a caso.',
     xml: () =>
@@ -211,7 +211,7 @@ export const MONUMENTI_ROVINE: Definizione[] = [
     ambientazione: 'fantasy',
     nome: 'portale-arcano',
     titolo: 'Portale arcano',
-    classe: 'edificio',
+    classe: 'building',
     descrizione: 'Una soglia di pietra runica in una radura di Aurora, con una pellicola di luce tesa nel vano: di là non si vede la radura.',
     procedura: 'la cornice a caso (arco tondo, arco a punta, anello ritto, due obelischi con l\'architrave) con la sua pellicola di luce, il basamento a caso (gradini, cerchio, rocce), rune che si accendono a caso sulla pietra e cristalli che spuntano a caso dal basamento.',
     xml: () =>
@@ -249,7 +249,7 @@ export const MONUMENTI_ROVINE: Definizione[] = [
     ambientazione: 'steampunk',
     nome: 'orologio-astrario-piazza',
     titolo: 'Orologio astrario',
-    classe: 'edificio',
+    classe: 'building',
     descrizione: 'L\'orologio astronomico in mezzo a una piazza di Orichalcum: torre di ghisa, quattro quadranti, e in cima i cieli in ottone.',
     procedura: 'tre scelte a caso (l\'ora: le lancette del quadrante davanti in una di quattro posizioni; la cima: sfera armillare, planetario a bracci, cupola con la campana, guglia con la banderuola; il basamento: a gradini, a fontana, a panchine) e ingranaggi di rame in posti a caso.',
     xml: () =>
@@ -302,7 +302,7 @@ export const MONUMENTI_ROVINE: Definizione[] = [
     ambientazione: 'steampunk',
     nome: 'ponte-levatoio-ingranaggi',
     titolo: 'Ponte levatoio a ingranaggi',
-    classe: 'edificio',
+    classe: 'building',
     descrizione: 'La porta di un quartiere di Orichalcum: due torri di mattoni con le ruote dentate, e un ponte che si alza a vapore.',
     procedura: 'tre scelte a caso (il ponte: abbassato, alzato, a metà; le torri: tonde, quadre, a traliccio; le ruote dentate: una grande per torre, due piccole, un treno di tre) e denti delle ruote, rivetti e ruggine a caso.',
     xml: () =>
@@ -346,7 +346,7 @@ export const MONUMENTI_ROVINE: Definizione[] = [
     ambientazione: 'steampunk',
     nome: 'cisterna-pressione',
     titolo: 'Cisterna a pressione',
-    classe: 'edificio',
+    classe: 'building',
     descrizione: 'Una cisterna del vapore cittadino di Orichalcum: lamiera rivettata, manometri accesi, tubi che partono in tutte le direzioni.',
     procedura: 'il serbatoio a caso (sfera su gambe, cilindro alto con la cupola, due botti coricate, botte a cerchi), tubi che nascono in punti a caso della lamiera e corrono dritti salendo a gomiti, valvole sulle punte, manometri e ruggine a caso.',
     xml: () =>
@@ -385,7 +385,7 @@ export const MONUMENTI_ROVINE: Definizione[] = [
     ambientazione: 'steampunk',
     nome: 'stazione-teleferica',
     titolo: 'Stazione della teleferica',
-    classe: 'edificio',
+    classe: 'building',
     descrizione: 'La stazione a monte della teleferica di Orichalcum: la grande ruota delle funi, le funi che partono verso il pilone, una cabina appesa.',
     procedura: 'tre scelte a caso (il tetto: a falde, a cupola d\'ottone, piatto con l\'insegna; dove sta la cabina: in partenza, a metà, al pilone, in arrivo; il pilone: a traliccio, di pietra, a cavalletto) e fumo che sale a caso dal comignolo.',
     xml: () => {
@@ -439,7 +439,7 @@ export const MONUMENTI_ROVINE: Definizione[] = [
     ambientazione: 'steampunk',
     nome: 'faro-aeronautico',
     titolo: 'Faro aeronautico',
-    classe: 'edificio',
+    classe: 'building',
     descrizione: 'Il faro che guida i dirigibili sopra Orichalcum: torre alta, lanterna a gas, fasci di luce e un braccio d\'ormeggio.',
     procedura: 'tre scelte a caso (la torre: traliccio, mattoni rastremati, tubo con i contrafforti; i fasci: due opposti, quattro a croce, uno lungo, tre; il braccio d\'ormeggio da uno dei quattro lati) e rivetti e fuliggine a caso.',
     xml: () => {
@@ -492,7 +492,7 @@ export const MONUMENTI_ROVINE: Definizione[] = [
     ambientazione: 'moderno',
     nome: 'monumento-piazza',
     titolo: 'Monumento di piazza',
-    classe: 'edificio',
+    classe: 'building',
     descrizione: 'Il monumento in mezzo a una piazza di Neapolis: un basamento, qualcosa in cima, una vasca, e i piccioni.',
     procedura: 'tre scelte a caso (il monumento: figura col braccio alzato, obelisco, colonna col capitello, scultura di cubi; la vasca: tonda, quadra, nessuna ma panchine; i lampioni: ai quattro angoli, due, nessuno) e piccioni che si posano in posti a caso.',
     xml: () =>
@@ -541,7 +541,7 @@ export const MONUMENTI_ROVINE: Definizione[] = [
     ambientazione: 'moderno',
     nome: 'fermata-metropolitana',
     titolo: 'Fermata della metropolitana',
-    classe: 'edificio',
+    classe: 'building',
     descrizione: 'L\'ingresso di una fermata della metropolitana di Neapolis: la scala che scende, la pensilina, il palo con la lettera accesa.',
     procedura: 'tre scelte a caso (la pensilina: arcuata di vetro, tettoia piatta, ferri liberty, nessuna; il lato della scala: davanti, dietro, a destra, a sinistra; l\'arredo: panchina, distributore, cestini, biciclette) e cartacce e chewing-gum a caso sul marciapiede.',
     xml: () => {
@@ -608,7 +608,7 @@ export const MONUMENTI_ROVINE: Definizione[] = [
     ambientazione: 'moderno',
     nome: 'chiosco-mercato-coperto',
     titolo: 'Mercato coperto',
-    classe: 'edificio',
+    classe: 'building',
     descrizione: 'Un piccolo mercato coperto di Neapolis: un tetto d\'acciaio sopra i banchi, la frutta, le cassette impilate.',
     procedura: 'tre scelte a caso (il tetto: a capanna, a volta, a ombrello, a dente di sega; i banchi: due file, a U, uno lungo; le tende: a strisce rosse, verdi, nessuna) e la frutta che si posa a caso sui banchi in tre colori, cassette impilate a caso.',
     xml: () =>
@@ -665,7 +665,7 @@ export const MONUMENTI_ROVINE: Definizione[] = [
     ambientazione: 'moderno',
     nome: 'passerella-pedonale',
     titolo: 'Passerella pedonale',
-    classe: 'edificio',
+    classe: 'building',
     descrizione: 'La passerella che scavalca un viale di Neapolis: impalcato d\'acciaio, parapetti, scale o rampe alle teste, i lampioni sopra.',
     procedura: 'tre scelte a caso (la struttura: archi reticolari sopra, due pile, strallata a un pilone; le teste: scale, rampe, torri degli ascensori; i parapetti: a sbarre, pieni, di vetro) e lampioni che nascono in punti a caso con altezze proprie, graffiti che si allargano a caso.',
     xml: () =>
@@ -721,7 +721,7 @@ export const MONUMENTI_ROVINE: Definizione[] = [
     ambientazione: 'moderno',
     nome: 'faro-portuale',
     titolo: 'Faro portuale',
-    classe: 'edificio',
+    classe: 'building',
     descrizione: 'Il faro in testa al molo di Neapolis: la torre, la lanterna, gli scogli attorno.',
     procedura: 'tre scelte a caso (la torre: a strisce bianche e rosse, ottagonale bianca, a traliccio, quadra di pietra; la lanterna: tonda, a cupola, a gabbia; la base: molo di cemento, rocce, piattaforma con la casetta) e scogli che crescono accanto alla base, alghe a caso.',
     xml: () =>
@@ -768,7 +768,7 @@ export const MONUMENTI_ROVINE: Definizione[] = [
     ambientazione: 'futuristico',
     nome: 'anello-teletrasporto',
     titolo: 'Anello del teletrasporto',
-    classe: 'edificio',
+    classe: 'building',
     descrizione: 'Un anello di Sidera che apre la strada verso un altro anello: la piattaforma, la corona d\'acciaio, il campo che vibra nel vano.',
     procedura: 'tre scelte a caso (l\'anello: ritto di fronte, ritto di fianco, orizzontale sui piloni, a ferro di cavallo; la piattaforma: tonda a gradini, quadra, a stella; i condotti) e cavi che partono dalla piattaforma in punti a caso e corrono dritti sul terreno, luci a caso.',
     xml: () =>
@@ -808,7 +808,7 @@ export const MONUMENTI_ROVINE: Definizione[] = [
     ambientazione: 'futuristico',
     nome: 'cupola-geodetica',
     titolo: 'Cupola geodetica',
-    classe: 'edificio',
+    classe: 'building',
     descrizione: 'Una serra-habitat di Sidera: la cupola a pannelli, l\'ingresso a tunnel, le antenne e i pannelli solari attorno.',
     procedura: 'tre scelte a caso (il tunnel d\'ingresso su uno dei quattro lati; la cupola: emisfera, a cipolla, doppia, schiacciata con la torre; gli impianti in un angolo: pannelli solari, serbatoi, antenna a traliccio) e pannelli di vetro che si alternano a caso a quelli pieni, antenne che crescono a rami.',
     xml: () => {
@@ -858,7 +858,7 @@ export const MONUMENTI_ROVINE: Definizione[] = [
     ambientazione: 'futuristico',
     nome: 'torre-schermatura',
     titolo: 'Torre di schermatura',
-    classe: 'monumento',
+    classe: 'monument',
     descrizione: 'Una delle torri che reggono lo scudo sopra le colonie di Sidera: un fusto, gli anelli emettitori, gli archi di energia che ne escono.',
     procedura: 'tre scelte a caso (gli anelli: tre uguali, a spirale, crescenti verso l\'alto, due dischi grandi; la cima: cupola, punta, forcella; la base: a tripode, a gradoni, a cassone) e archi di energia che nascono in punti a caso degli anelli e salgono storti.',
     xml: () =>
@@ -901,7 +901,7 @@ export const MONUMENTI_ROVINE: Definizione[] = [
     ambientazione: 'futuristico',
     nome: 'relitto-astronave',
     titolo: 'Relitto d\'astronave',
-    classe: 'edificio',
+    classe: 'building',
     descrizione: 'Una nave caduta nelle piane di Sidera tanto tempo fa: lo scafo mezzo sepolto, una pinna che punta il cielo, squarci e rottami.',
     procedura: 'tre scelte a caso (lo scafo: fusoliera lunga, disco, cuneo, spezzato in due; la pinna: alta, doppia, ala spezzata; il cratere: rottami sparsi, sabbia ammucchiata, terra bruciata) e squarci che si aprono a caso nello scafo, rottami che crescono accanto, fumo che sale da punti a caso.',
     xml: () =>
@@ -954,7 +954,7 @@ export const MONUMENTI_ROVINE: Definizione[] = [
     ambientazione: 'futuristico',
     nome: 'faro-iperspaziale',
     titolo: 'Faro iperspaziale',
-    classe: 'edificio',
+    classe: 'building',
     descrizione: 'Il faro che indica la rotta alle navi di Sidera: una guglia su tre gambe, anelli che le girano attorno e il fuoco freddo in cima.',
     procedura: 'tre scelte a caso (la guglia: ago, a gradoni, cristallo; gli anelli: uno grande, due inclinati per lato, tre impilati; la cima: sfera, prisma, corona di punte) e raggi che partono dalla cima e si piegano a caso.',
     xml: () =>

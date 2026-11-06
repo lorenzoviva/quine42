@@ -58,7 +58,7 @@ class TimedRunner extends Runner {
 }
 const { run, PROF } = await motoreCronometrato();
 export const AMBIENTAZIONI = ['fantasy', 'steampunk', 'moderno', 'futuristico'] as const;
-export const TAGLIE: SizeTier[] = ['grande', 'enorme'];
+export const TAGLIE: SizeTier[] = ['large', 'huge'];
 export const SEMI = 5;
 /** The ceiling of this workshop at Huge, every seed (the game's is `MODEL_TIME`, 8 s). */
 export const TETTO_MS = 4500;
@@ -70,7 +70,7 @@ const opt = (k: string) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`
 export function bersaglioDi(xml: string, file: string): Bersaglio {
   const cantina = /<sequence[^>]*\bsuolo="/.test(xml) && /<sequence[^>]*\bground="/.test(xml);
   const nome = /<!--\s*([^\n]*?)\s*-->/.exec(xml)?.[1] ?? path.basename(file, '.xml');
-  return { id: path.basename(file, '.xml'), nome, stile: '', descrizione: '', classe: 'grande', ...(cantina ? { sotto: 1 } : {}) };
+  return { id: path.basename(file, '.xml'), nome, stile: '', descrizione: '', classe: 'structure', ...(cantina ? { sotto: 1 } : {}) };
 }
 
 const n2 = (v: number | undefined) => (v === undefined ? '—' : v.toFixed(2));
@@ -129,7 +129,7 @@ function rapporto(file: string, xml: string, b: Bersaglio, p: Prova, riga: Riga)
     if (v) out.push(`Varianza su ${v.semi} semi (mediane delle coppie): voxel ${n2(v.voxel)} (≥ 0.2), pianta ${n2(v.pianta)} (≥ 0.15), perimetro ${n2(v.perimetro)} (≥ 0.15), interno ${n2(v.interno)} (≥ 0.35), colore ${n2(v.colore)} (non conta), liste di piani ${v.firmePiani} e di stanze ${v.firmeStanze} (≥ 2), architetture ${v.architetture}/${v.semi} (≥ 3). ${t.difettiVarianza.length ? 'Difetti: ' + t.difettiVarianza.join('; ') : 'Sopra ogni soglia.'}`, '');
   }
   out.push('Misure: `lab/banco/misure.ts` (il corpo del gioco cammina dal davanti: piani raggiunti, murato = pavimento coperto non raggiunto, porta libera, salti; `valido` sono i controlli di `src/mj/check.ts`, fra cui i voxel staccati da terra) e `lab/banco/varianza.ts` (soglie di T180).', '');
-  const m1 = compileMjx(withSize(xml, scatolaDi({ ...b, taglia: 'grande' }).box), { ...(b.sotto ? { base: scatolaDi({ ...b, taglia: 'grande' }).base } : {}) });
+  const m1 = compileMjx(withSize(xml, scatolaDi({ ...b, taglia: 'large' }).box), { ...(b.sotto ? { base: scatolaDi({ ...b, taglia: 'large' }).base } : {}) });
   out.push('## Traccia del seme 1 (Grande, `src/mj/trace.ts`, forma «differenze»)', '', '```text', traceText(m1, 1, { forma: 'differenze', tetto: 3500 }), '```', '');
   return out.join('\n');
 }

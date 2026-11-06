@@ -40,7 +40,7 @@ describe('the Sculptor', () => {
       return JSON.stringify({ voto: /scatola/.test(c.prompt) && c.images?.length === 1 ? (sculpts === 2 ? 5 : 8) : 0, riconoscibile: true, problemi: [], consigli: [] });
     });
     const c = new Council(m, () => ({ files: bundledFiles, palette: {}, catalog: [] }));
-    const r = await sculpt(c, { id: 'masso-rosso', nome: 'Masso rosso', aspetto: 'un masso rossiccio', classe: 'roccia' });
+    const r = await sculpt(c, { id: 'masso-rosso', nome: 'Masso rosso', aspetto: 'un masso rossiccio', classe: 'rock' });
     expect(r).toBeDefined();
     const sculptCalls = m.calls.filter((x) => x.task === 'model.sculpt');
     // The first program floats: it goes back with the reason; then two valid programs.
@@ -48,7 +48,7 @@ describe('the Sculptor', () => {
     expect(sculptCalls).toHaveLength(3);
     expect(sculptCalls.every((x) => x.model === 'gemini-3.1-flash-lite')).toBe(true);
     // The instructions are the universe's, with the classes and the palette; the examples of the class follow.
-    expect(sculptCalls[0].system).toContain('roccia (roccia o masso): 20×20×16');
+    expect(sculptCalls[0].system).toContain('rock (roccia o masso): 20×20×16');
     expect(sculptCalls[0].system).not.toContain('@@');
     expect(sculptCalls[0].system).toContain('## Esempi');
     // The Artist sees one image (four views) per program; its model is its own.
@@ -62,20 +62,20 @@ describe('the Sculptor', () => {
   });
 
   it('sends figures and structures to the better model, and the rare sizes (Huge, Gargantuan) to the best one while its price lasts', () => {
-    const req = { id: 'x', nome: 'x', aspetto: 'x', classe: 'grande', taglia: 'enorme' as const };
-    expect(modelFor({ ...req, classe: 'persona' }, classOf('persona')!, DEFAULT_SCULPTORS)).toBe('gemini-3.8-flash');
-    expect(modelFor(req, classOf('grande')!, DEFAULT_SCULPTORS, '2026-11-01')).toBe('gemini-4-argon');
-    expect(modelFor(req, classOf('grande')!, DEFAULT_SCULPTORS, '2026-12-02')).toBe('gemini-3.8-flash');
-    expect(modelFor({ ...req, taglia: 'gargantuesca' }, classOf('grande')!, DEFAULT_SCULPTORS, '2026-11-01')).toBe('gemini-4-argon');
-    expect(modelFor({ ...req, taglia: 'grande' }, classOf('grande')!, DEFAULT_SCULPTORS, '2026-11-01')).toBe('gemini-3.8-flash');
-    expect(modelFor({ ...req, taglia: undefined }, classOf('grande')!, DEFAULT_SCULPTORS, '2026-11-01')).toBe('gemini-3.8-flash');
-    expect(modelFor({ ...req, classe: 'albero' }, classOf('albero')!, DEFAULT_SCULPTORS)).toBe('gemini-3.1-flash-lite');
+    const req = { id: 'x', nome: 'x', aspetto: 'x', classe: 'structure', taglia: 'huge' as const };
+    expect(modelFor({ ...req, classe: 'person' }, classOf('person')!, DEFAULT_SCULPTORS)).toBe('gemini-3.8-flash');
+    expect(modelFor(req, classOf('structure')!, DEFAULT_SCULPTORS, '2026-11-01')).toBe('gemini-4-argon');
+    expect(modelFor(req, classOf('structure')!, DEFAULT_SCULPTORS, '2026-12-02')).toBe('gemini-3.8-flash');
+    expect(modelFor({ ...req, taglia: 'gargantuan' }, classOf('structure')!, DEFAULT_SCULPTORS, '2026-11-01')).toBe('gemini-4-argon');
+    expect(modelFor({ ...req, taglia: 'large' }, classOf('structure')!, DEFAULT_SCULPTORS, '2026-11-01')).toBe('gemini-3.8-flash');
+    expect(modelFor({ ...req, taglia: undefined }, classOf('structure')!, DEFAULT_SCULPTORS, '2026-11-01')).toBe('gemini-3.8-flash');
+    expect(modelFor({ ...req, classe: 'tree' }, classOf('tree')!, DEFAULT_SCULPTORS)).toBe('gemini-3.1-flash-lite');
   });
 
   it('checks programs as the kernel will run them, in the class box', () => {
-    expect(checkProgram(ROCK(14), classOf('roccia')!).error).toBeUndefined();
-    expect(checkProgram('<sequence values="BW" size="4 4 4"><all in="B" out="W"/></sequence>', classOf('roccia')!).error).toMatch(/riempie/);
-    expect(checkProgram('<sequence values="BW"><one in="BW" out="WW"/>', classOf('roccia')!).error).toMatch(/riga/);
+    expect(checkProgram(ROCK(14), classOf('rock')!).error).toBeUndefined();
+    expect(checkProgram('<sequence values="BW" size="4 4 4"><all in="B" out="W"/></sequence>', classOf('rock')!).error).toMatch(/riempie/);
+    expect(checkProgram('<sequence values="BW"><one in="BW" out="WW"/>', classOf('rock')!).error).toMatch(/riga/);
     expect(withSize('<sequence values="BW" size="4 4 4"><x/></sequence>', [20, 20, 16])).toContain('size="20 20 16"');
     expect(withSize('<sequence values="BW"><x/></sequence>', [20, 20, 16])).toContain('values="BW" size="20 20 16"');
     // A program that maps up keeps its own coarse size.
@@ -96,16 +96,16 @@ describe('the models the world lacks', () => {
     expect(r.ok).toBe(true);
     const man = k.modules.get(r.id!)!.manifest;
     expect(man.appearance!.model).toBe(r.id!.replace(/\./g, '-'));
-    expect(man.appearance!.classe).toBe('persona');
+    expect(man.appearance!.classe).toBe('person');
     const missing = k.sculpting.missing();
     const req = missing.find((m) => m.id === man.appearance!.model)!;
-    expect(req.classe).toBe('persona');
+    expect(req.classe).toBe('person');
     // Until it is sculpted the entity shows the generic model of its class.
     const id = k.spawnModuleEntity(k.modules.get(r.id!)!, 2.5, 2.5, undefined, 'test#mugnaio');
-    expect((k.ecs.get(id, 'form') as FormComp).model).toBe('persona');
+    expect((k.ecs.get(id, 'form') as FormComp).model).toBe('person');
     expect(await k.sculpting.make(req)).toBe(true);
     expect(k.repo.head().files[`models/${req.id}.xml`]).toContain('scolpito da');
-    expect(JSON.parse(k.repo.head().files['models/index.json']!)[req.id]).toMatchObject({ classe: 'persona' });
+    expect(JSON.parse(k.repo.head().files['models/index.json']!)[req.id]).toMatchObject({ classe: 'person' });
     expect(k.sculpting.missing().some((m) => m.id === req.id)).toBe(false);
     const again = k.spawnModuleEntity(k.modules.get(r.id!)!, 4.5, 2.5, undefined, 'test#mugnaio2');
     expect((k.ecs.get(again, 'form') as FormComp).model).toBe(req.id);
@@ -114,10 +114,10 @@ describe('the models the world lacks', () => {
   it('items get a common shape: one program per shape, tinted for each item', async () => {
     const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
     expect(await k.growContent('prova', 8, true)).toBe(true);
-    const shaped = [...k.content.items.values()].filter((d) => d.model?.startsWith('forma-'));
+    const shaped = [...k.content.items.values()].filter((d) => d.model?.startsWith('shape-'));
     expect(shaped.length).toBeGreaterThan(0);
     const req = k.sculpting.missing().find((m) => m.id === shaped[0].model)!;
-    expect(req).toMatchObject({ classe: 'oggetto', tinta: true });
+    expect(req).toMatchObject({ classe: 'object', tinta: true });
     expect(await k.sculpting.make(req)).toBe(true);
     expect(JSON.parse(k.repo.head().files['models/index.json']!)[req.id].tinta).toBe('C');
   }, 30_000);
@@ -125,31 +125,33 @@ describe('the models the world lacks', () => {
 
 describe('the sizes of D&D (ADR-0092)', () => {
   it('scales a class box by the ratio of the spaces, and writes the large ones coarser', () => {
-    const grande = classOf('grande')!, persona = classOf('persona')!;
+    const grande = classOf('structure')!, persona = classOf('person')!;
     // The class's box is the box of its usual size.
-    expect(boxOf(grande, 'grande')).toEqual(boxOf(grande));
-    expect(tilesOf(persona, 'media')).toEqual(persona.tiles);
+    expect(boxOf(grande, 'large')).toEqual(boxOf(grande));
+    expect(tilesOf(persona, 'medium')).toEqual(persona.tiles);
     // A Large person takes 2 × 2 of a Medium one; a Huge structure 3/2 of a Large one, a Gargantuan one twice.
-    expect(tilesOf(persona, 'grande')).toEqual([2, 1.5, 3]);
-    expect(tilesOf(grande, 'enorme')).toEqual([7.5, 7.5, 6]);
-    expect(tilesOf(grande, 'gargantuesca')).toEqual([10, 10, 8]);
+    expect(tilesOf(persona, 'large')).toEqual([2, 1.5, 3]);
+    expect(tilesOf(grande, 'huge')).toEqual([7.5, 7.5, 6]);
+    expect(tilesOf(grande, 'gargantuan')).toEqual([10, 10, 8]);
     // A box past MAX_SIDE voxels runs at a coarser density: a request «Enorme» gives the right box.
-    expect(densityOf(tilesOf(grande, 'enorme'))).toBe(16);
-    expect(boxOf(grande, 'enorme')).toEqual([120, 120, 96]);
-    expect(boxOf(grande, 'gargantuesca')).toEqual([120, 120, 96]);
-    expect(Math.max(...boxOf(grande, 'gargantuesca'))).toBeLessThanOrEqual(MAX_SIDE);
+    expect(densityOf(tilesOf(grande, 'huge'))).toBe(16);
+    expect(boxOf(grande, 'huge')).toEqual([120, 120, 96]);
+    expect(boxOf(grande, 'gargantuan')).toEqual([120, 120, 96]);
+    expect(Math.max(...boxOf(grande, 'gargantuan'))).toBeLessThanOrEqual(MAX_SIDE);
     // The index entry says it, so the library runs the model in the box it was sculpted in.
-    expect(modelSize({ classe: 'grande', taglia: 'enorme' })).toEqual({ taglia: 'enorme', vpt: 16 });
-    expect(modelSize({ classe: 'grande', taglia: 'grande' })).toEqual({});
-    expect(modelSize({ classe: 'persona', taglia: 'piccola' })).toEqual({ taglia: 'piccola' });
+    expect(modelSize({ classe: 'structure', taglia: 'huge' })).toEqual({ taglia: 'huge', vpt: 16 });
+    expect(modelSize({ classe: 'structure', taglia: 'large' })).toEqual({});
+    expect(modelSize({ classe: 'person', taglia: 'small' })).toEqual({ taglia: 'small' });
     // The Sculptor reads the size and the box.
-    const text = describeRequest({ id: 'x', nome: 'la cittadella', aspetto: 'mura', classe: 'grande', taglia: 'enorme' }, grande);
+    const text = describeRequest({ id: 'x', nome: 'la cittadella', aspetto: 'mura', classe: 'structure', taglia: 'huge' }, grande);
     expect(text).toContain('taglia Enorme (7.5 × 7.5 × 6 caselle, 16 voxel per casella)');
     expect(text).toContain('scatola 120 × 120 × 96 voxel');
     // Six sizes, Gargantuan the largest; a forged entity never takes the two rare ones.
-    expect(SIZE_TIERS.map((t) => t.id)).toEqual(['minuscola', 'piccola', 'media', 'grande', 'enorme', 'gargantuesca']);
-    expect(forgedSize('Grande')).toEqual({ taglia: 'grande' });
+    expect(SIZE_TIERS.map((t) => t.id)).toEqual(['tiny', 'small', 'medium', 'large', 'huge', 'gargantuan']);
+    // The Forge still hears the Italian sizes (T310): the one meant.
+    expect(forgedSize('Grande')).toEqual({ taglia: 'large' });
     expect(forgedSize('enorme')).toEqual({});
+    expect(forgedSize('small')).toEqual({ taglia: 'small' });
     expect(forgedSize('colossale')).toEqual({});
   });
 });

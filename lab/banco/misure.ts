@@ -22,7 +22,7 @@ export interface Bersaglio {
   nome: string;
   stile: string;
   descrizione: string;
-  classe: 'grande' | 'edificio';
+  classe: 'structure' | 'edificio';
   taglia?: SizeTier;
   /** Tiles under the ground (ADR-0091). */
   sotto?: number;

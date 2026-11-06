@@ -23,7 +23,7 @@ export interface Appearance {
   aspetto?: string;
   /** Its look: a program of the library (`models/<id>.xml`); without one, the generic model of its class. */
   model?: string;
-  /** Asset class (src/mj/classes.ts): persona, animale, albero, mobile, edificio… */
+  /** Asset class (src/mj/classes.ts): person, animal, tree, furniture, building… */
   classe?: string;
   /** Its size of D&D (ADR-0092: minuscola … gargantuesca), if not its class's own: the model's box scales with it. */
   taglia?: string;
@@ -68,6 +68,11 @@ export interface ItemSpec {
 export type TerrainLayer = 'ground' | 'floor' | 'wall' | 'door' | 'liquid' | 'vegetation' | 'rock';
 
 export interface TerrainDef {
+  /**
+   * The terrain's internal id (T307a, ADR-0153): what the code and Lua name it by (`world.find_tile`, `matura.in`, effects), the same in
+   * every language; `name` is its word in the language of the world. A terrain of the Genesis may have none: the name then stands for it.
+   */
+  id?: string;
   name: string;
   /** Colour of the ground. */
   color: string;
@@ -87,7 +92,7 @@ export interface TerrainDef {
   matura?: { dopo: number; in: string };
 }
 
-export const ITEM_CATEGORIES = ['cibo', 'bevanda', 'medicina', 'attrezzo', 'arma', 'materiale', 'luce', 'vestiario', 'contenitore', 'magia', 'varie'] as const;
+export const ITEM_CATEGORIES = ['food', 'drink', 'medicine', 'tool', 'weapon', 'material', 'light', 'clothing', 'container', 'magic', 'misc'] as const;
 export type ItemCategory = (typeof ITEM_CATEGORIES)[number];
 
 /** A thing that can be carried. Mostly data (cheap text), generated in packs; custom logic is optional. */
@@ -127,11 +132,11 @@ export interface ItemDef {
  * a quiver, a horse's saddlebags, a reputation sheet.
  */
 export interface UiElement {
-  tipo: 'slot' | 'barra' | 'testo' | 'pulsante';
+  tipo: 'slot' | 'bar' | 'text' | 'button';
   /** Slot id, or the action a button sends to on_ui. */
   id?: string;
   etichetta?: string;
-  /** Slot: what fits (item slot names, categories or tags: "testa", "vestiario", "arma"). */
+  /** Slot: what fits (item slot names, categories or tags: "testa", "clothing", "weapon"). */
   accetta?: string[];
   /** Bar/text: a field of a player component, "componente.campo" (e.g. "needs.health"). */
   campo?: string;
@@ -182,30 +187,32 @@ export interface EnvironmentDef {
  * core.effects (Lua) applies. Used by free actions ("Altro…"), learned actions and spells.
  */
 export type Effect =
-  | { tipo: 'messaggio'; testo: string }
-  | { tipo: 'bisogni'; fame?: number; sete?: number; energia?: number; salute?: number }
-  | { tipo: 'crea_oggetto'; oggetto: string; quantita?: number }
-  | { tipo: 'consuma'; oggetto: string; quantita?: number }
-  | { tipo: 'distruggi' }
-  | { tipo: 'apri' }
-  | { tipo: 'contenitore'; capienza?: number; bottino?: string }
-  | { tipo: 'terreno'; a: string; da?: string; raggio?: number }
-  | { tipo: 'rilievo'; delta: number; raggio?: number }
-  | { tipo: 'fuoco'; raggio?: number; durata?: number }
-  | { tipo: 'luce'; raggio?: number; durata?: number }
-  | { tipo: 'scudo'; durata?: number }
-  | { tipo: 'spingi'; forza?: number }
-  | { tipo: 'evoca'; modulo: string }
-  // Between people (only on someone): what they become to the wanderer, what they will remember, a birth.
-  | { tipo: 'legame'; legame: string }
-  | { tipo: 'ricordo'; testo: string; peso?: number }
-  | { tipo: 'nascita'; nome?: string }
+  | { type: 'message'; text: string }
+  | { type: 'needs'; hunger?: number; thirst?: number; energy?: number; health?: number }
+  | { type: 'create_item'; item: string; quantity?: number }
+  | { type: 'consume'; item: string; quantity?: number }
+  | { type: 'destroy' }
+  | { type: 'open' }
+  | { type: 'container'; capacity?: number; loot?: string }
+  // A terrain: `to` and `from` are tile codes of the palette (the validator resolves ids and names to them).
+  | { type: 'terrain'; to: string; from?: string; radius?: number }
+  | { type: 'relief'; delta: number; radius?: number }
+  | { type: 'fire'; radius?: number; duration?: number }
+  | { type: 'light'; radius?: number; duration?: number }
+  | { type: 'shield'; duration?: number }
+  | { type: 'push'; force?: number }
+  | { type: 'summon'; module: string }
+  // Between people (only on someone): what they become to the wanderer (`bond`, a word of the world), what they will remember, a birth.
+  | { type: 'bond'; bond: string }
+  | { type: 'memory'; text: string; weight?: number }
+  | { type: 'birth'; name?: string }
   // New mechanics: a state of the wanderer (on horseback, rowing, wearing a backpack…) that changes how
-  // fast they go, how much they carry, how far they see; durata 0 = until taken off.
-  | { tipo: 'stato'; nome: string; velocita?: number; peso?: number; luce?: number; durata?: number }
-  | { tipo: 'togli_stato'; nome: string };
+  // fast they go, how much they carry, how far they see; duration 0 = until taken off.
+  | { type: 'state'; name: string; speed?: number; weight?: number; light?: number; duration?: number }
+  | { type: 'remove_state'; name: string };
 
-export const EFFECT_TYPES = ['messaggio', 'bisogni', 'crea_oggetto', 'consuma', 'distruggi', 'apri', 'contenitore', 'terreno', 'rilievo', 'fuoco', 'luce', 'scudo', 'spingi', 'evoca', 'legame', 'ricordo', 'nascita', 'stato', 'togli_stato'] as const;
+export const EFFECT_TYPES = ['message', 'needs', 'create_item', 'consume', 'destroy', 'open', 'container', 'terrain', 'relief', 'fire', 'light', 'shield', 'push', 'summon', 'bond', 'memory', 'birth', 'state', 'remove_state'] as const;
+export type EffectType = (typeof EFFECT_TYPES)[number];
 
 /**
  * Something you can do to an object (E opens the menu). Either handled by the module's
@@ -332,10 +339,10 @@ export interface BenchItem {
   bonus?: Record<string, number>;
 }
 
-export type BenchStep = { tipo: 'slot'; slot: string; oggetto: string } | { tipo: 'togli'; slot: string } | { tipo: 'pulsante'; azione: string } | { tipo: 'attendi'; secondi: number } | { tipo: 'cammina'; verso: BenchWay; secondi: number };
+export type BenchStep = { tipo: 'slot'; slot: string; oggetto: string } | { tipo: 'remove'; slot: string } | { tipo: 'button'; azione: string } | { tipo: 'wait'; secondi: number } | { tipo: 'walk'; verso: BenchWay; secondi: number };
 
 /** Where the wanderer walks in a case (T27b): the world's directions, held like the keys. */
-export type BenchWay = 'su' | 'giu' | 'sinistra' | 'destra';
+export type BenchWay = 'up' | 'down' | 'left' | 'right';
 
 export interface ModuleEntry {
   manifest: Manifest;

@@ -18,7 +18,7 @@ const hidden = (...s) => s.map((c) => `<color symbol="${c}" hidden="True"/>`).jo
 const col = (s, v, name, extra = '') => `<color symbol="${s}" value="${v}" name="${name}"${extra}/>`;
 
 const MODELS = {
-  distributore: { classe: 'mobile', nome: 'Distributore automatico', xml: `<!-- Distributore automatico: carrozzeria rossa di altezza diversa a ogni seme, vetrina, feritoia, insegna luminosa. -->
+  distributore: { classe: 'furniture', nome: 'Distributore automatico', xml: `<!-- Distributore automatico: carrozzeria rossa di altezza diversa a ogni seme, vetrina, feritoia, insegna luminosa. -->
 <sequence values="BZHTSRVKL" size="20 20 24" symmetry="(xy)" name="Distributore">
   ${hidden('Z', 'H')}
   ${col('T', 'c8302a', 'carrozzeria rossa')}${col('S', '8a1a18', 'sportello')}${col('R', '3a3a40', 'tetto')}
@@ -33,7 +33,7 @@ const MODELS = {
   <box at="10 13 9" size="10 1 1" color="L" on="T"/>
 </sequence>
 ` },
-  'macchina-espresso': { classe: 'mobile', nome: 'Macchina del caffè espresso', xml: `<!-- Bancone del bar con la macchina dell'espresso: la caldaia cromata cresce a caso, le tazzine cadono dove capita. -->
+  'macchina-espresso': { classe: 'furniture', nome: 'Macchina del caffè espresso', xml: `<!-- Bancone del bar con la macchina dell'espresso: la caldaia cromata cresce a caso, le tazzine cadono dove capita. -->
 <sequence values="BZHWMTRGCK" size="20 20 24" symmetry="(xy)" name="Macchina espresso">
   ${hidden('Z', 'H')}
   ${col('W', '7a4a2a', 'legno del bancone')}${col('M', 'e8e4dc', 'marmo')}${col('T', 'c8ccd0', 'cromo')}
@@ -50,7 +50,7 @@ const MODELS = {
   <one in="BB MM" out="CC MM" steps="4"/>
 </sequence>
 ` },
-  'scrivania-ufficio': { classe: 'mobile', nome: 'Scrivania e archivio', xml: `<!-- Scrivania d'ufficio con la macchina da scrivere e l'archivio a cassetti accanto: l'archivio ha un numero di cassetti diverso a ogni seme. -->
+  'scrivania-ufficio': { classe: 'furniture', nome: 'Scrivania e archivio', xml: `<!-- Scrivania d'ufficio con la macchina da scrivere e l'archivio a cassetti accanto: l'archivio ha un numero di cassetti diverso a ogni seme. -->
 <sequence values="BZHKWDTSRP" size="20 20 24" symmetry="(xy)" name="Scrivania">
   ${hidden('Z', 'H')}
   ${col('K', '4a4e54', 'gambe di metallo')}${col('W', '9a8a70', 'piano di formica')}${col('D', '2a2a30', 'macchina da scrivere')}
@@ -75,7 +75,7 @@ const MODELS = {
   <one in="B W" out="P W" steps="5"/>
 </sequence>
 ` },
-  'banco-officina': { classe: 'mobile', nome: 'Banco da officina', xml: `<!-- Banco da meccanico con la morsa e il pannello forato degli attrezzi, alto quanto capita. -->
+  'banco-officina': { classe: 'furniture', nome: 'Banco da officina', xml: `<!-- Banco da meccanico con la morsa e il pannello forato degli attrezzi, alto quanto capita. -->
 <sequence values="BZHKMTVRAC" size="20 20 26" symmetry="(xy)" name="Banco officina">
   ${hidden('Z', 'H')}
   ${col('K', '3a4048', 'gambe di ferro')}${col('M', '6a7480', 'piano di lamiera')}${col('T', 'b89868', 'pannello forato')}
@@ -96,7 +96,7 @@ const MODELS = {
   <box at="15 5 11" size="1 1 2" color="A" on="T"/>
 </sequence>
 ` },
-  'quadro-elettrico': { classe: 'mobile', nome: 'Cabina elettrica', xml: `<!-- Cabina elettrica di quartiere: cemento grigio, sportello di metallo, il cartello giallo del fulmine; alta quanto capita. -->
+  'quadro-elettrico': { classe: 'furniture', nome: 'Cabina elettrica', xml: `<!-- Cabina elettrica di quartiere: cemento grigio, sportello di metallo, il cartello giallo del fulmine; alta quanto capita. -->
 <sequence values="BZHTRSYK" size="20 20 26" symmetry="(xy)" name="Cabina elettrica">
   ${hidden('Z', 'H')}
   ${col('T', 'a8a49c', 'cemento')}${col('R', '6a6864', 'tetto di cemento')}${col('S', '5a6a7a', 'sportello di metallo')}
@@ -111,7 +111,7 @@ const MODELS = {
   <box at="4 10 5" size="1 4 2" color="K" on="T"/>
 </sequence>
 ` },
-  edicola: { classe: 'edificio', nome: 'Edicola', xml: `<!-- Edicola: il chiosco verde di lamiera con la tettoia che sporge e le riviste esposte; la tettoia sta più in alto o più in basso a ogni seme. -->
+  edicola: { classe: 'building', nome: 'Edicola', xml: `<!-- Edicola: il chiosco verde di lamiera con la tettoia che sporge e le riviste esposte; la tettoia sta più in alto o più in basso a ogni seme. -->
 <sequence values="BZHTRVMNP" size="25 25 24" symmetry="(xy)" name="Edicola">
   ${hidden('Z', 'H')}
   ${col('T', '3a8a4a', 'lamiera verde')}${col('R', '2a6a3a', 'tettoia')}${col('V', 'b8d8e0', 'vetro', ' alpha="0.6"')}
@@ -127,7 +127,7 @@ const MODELS = {
   <box at="12 18 0" size="9 2 2" color="P"/>
 </sequence>
 ` },
-  transenna: { classe: 'mobile', nome: 'Transenna del cantiere', xml: `<!-- Transenna da cantiere a strisce rosse e bianche sui sacchi di sabbia, con la lampada gialla in cima; il pannello è alto quanto capita. -->
+  transenna: { classe: 'furniture', nome: 'Transenna del cantiere', xml: `<!-- Transenna da cantiere a strisce rosse e bianche sui sacchi di sabbia, con la lampada gialla in cima; il pannello è alto quanto capita. -->
 <sequence values="BZHTWFRL" size="20 20 20" symmetry="(xy)" name="Transenna">
   ${hidden('Z', 'H')}
   ${col('T', 'd83a2a', 'strisce rosse')}${col('W', 'f4f0e8', 'strisce bianche')}${col('F', 'b89a6a', 'sacchi di sabbia')}
@@ -144,7 +144,7 @@ const MODELS = {
   <box at="13 10 2" size="2 2 16" color="W" on="T"/>
 </sequence>
 ` },
-  'cucina-trattoria': { classe: 'mobile', nome: 'Cucina della trattoria', xml: `<!-- Cucina a gas di trattoria: quattro fuochi, il forno, la cappa di rame che sale fino a dove capita, le pentole sul fuoco. -->
+  'cucina-trattoria': { classe: 'furniture', nome: 'Cucina della trattoria', xml: `<!-- Cucina a gas di trattoria: quattro fuochi, il forno, la cappa di rame che sale fino a dove capita, le pentole sul fuoco. -->
 <sequence values="BZHTKDCPRF" size="20 20 26" symmetry="(xy)" name="Cucina">
   ${hidden('Z', 'H')}
   ${col('T', 'e8e0d0', 'smalto bianco')}${col('K', '2a2a2e', 'griglia dei fuochi')}${col('D', '3a3e44', 'sportello del forno')}
@@ -160,7 +160,7 @@ const MODELS = {
   <box at="5 13 6" size="1 1 1" color="F" on="T"/>
 </sequence>
 ` },
-  lampione: { classe: 'monumento', nome: 'Lampione di ghisa', xml: `<!-- Lampione di ghisa verde: il palo sale fino a un'altezza diversa a ogni seme, in cima la lanterna gialla e il cappello. -->
+  lampione: { classe: 'monument', nome: 'Lampione di ghisa', xml: `<!-- Lampione di ghisa verde: il palo sale fino a un'altezza diversa a ogni seme, in cima la lanterna gialla e il cappello. -->
 <sequence values="BZHKPLR" size="20 20 60" symmetry="(xy)" name="Lampione">
   ${hidden('Z', 'H')}
   ${col('K', '2a3a2e', 'basamento')}${col('P', '2e5a3a', 'ghisa verde')}${col('L', 'ffd88a', 'lanterna', ' glow="True"')}${col('R', '1e2a22', 'cappello')}
@@ -173,7 +173,7 @@ const MODELS = {
   <all in="B L" out="R L"/>
 </sequence>
 ` },
-  motorino: { classe: 'mobile', nome: 'Motorino', xml: `<!-- Motorino rosso con lo scudo, la sella e il portapacchi: sopra, una pila di cassette delle consegne alta quanto capita. -->
+  motorino: { classe: 'furniture', nome: 'Motorino', xml: `<!-- Motorino rosso con lo scudo, la sella e il portapacchi: sopra, una pila di cassette delle consegne alta quanto capita. -->
 <sequence values="BZHDTKSCcR" size="20 20 22" symmetry="(x)" name="Motorino">
   ${hidden('Z', 'H')}
   ${col('D', '1e1e22', 'gomme')}${col('T', 'd83a2a', 'carrozzeria rossa')}${col('K', 'b8bcc4', 'manubrio cromato')}
@@ -194,7 +194,7 @@ const MODELS = {
   <box at="10 4 16" size="6 5 1" color="c" on="C"/>
 </sequence>
 ` },
-  'cabina-telefonica': { classe: 'monumento', nome: 'Cabina telefonica', xml: `<!-- Cabina telefonica: telaio grigio, vetri su quattro lati, tetto arancione, il telefono a gettoni dentro; alta quanto capita. -->
+  'cabina-telefonica': { classe: 'monument', nome: 'Cabina telefonica', xml: `<!-- Cabina telefonica: telaio grigio, vetri su quattro lati, tetto arancione, il telefono a gettoni dentro; alta quanto capita. -->
 <sequence values="BZHTVRK" size="20 20 36" symmetry="(xy)" name="Cabina telefonica">
   ${hidden('Z', 'H')}
   ${col('T', '9a9ca4', 'telaio grigio')}${col('V', 'a8d0e0', 'vetro', ' alpha="0.5"')}${col('R', 'e8742a', 'tetto arancione')}${col('K', '2a2a30', 'telefono')}
@@ -211,7 +211,7 @@ const MODELS = {
   <box at="10 7 9" size="2 1 3" color="K"/>
 </sequence>
 ` },
-  cassonetto: { classe: 'mobile', nome: 'Cassonetto', xml: `<!-- Cassonetto verde con il coperchio: i sacchi neri traboccano in un mucchio diverso a ogni seme. -->
+  cassonetto: { classe: 'furniture', nome: 'Cassonetto', xml: `<!-- Cassonetto verde con il coperchio: i sacchi neri traboccano in un mucchio diverso a ogni seme. -->
 <sequence values="BYGTDgw" size="20 20 20" symmetry="(xy)" name="Cassonetto">
   ${hidden('Y')}
   ${col('T', '3a6a3a', 'plastica verde')}${col('D', '2a3a2a', 'coperchio')}${col('G', '1e1e22', 'sacchi neri')}${col('g', '3a3a40', 'sacchi lucidi')}${col('w', '2a2a2a', 'ruote')}
@@ -227,9 +227,9 @@ const MODELS = {
   <prl in="G" out="g" p="0.25"/>
 </sequence>
 ` },
-  'casa-comune-edificio-f2e1f8de': { classe: 'edificio', nome: 'Palazzina di tufo (piccola)', xml: house(25, 24, 19, 17, 10, 22, [3, 13], 6) },
-  'casa-comune-grande-f2e1f8de': { classe: 'grande', nome: 'Palazzina di tufo (grande)', xml: house(40, 40, 32, 28, 14, 36, [3, 15, 26], 6) },
-  'struttura-torre-di-vetro': { classe: 'grande', nome: 'Torre di vetro', xml: `<!-- Torre di vetro del Centro Direzionale: cemento e fasce di vetro azzurro, piani in più o in meno a ogni seme, la piazza di marmo attorno. -->
+  'casa-comune-edificio-f2e1f8de': { classe: 'building', nome: 'Palazzina di tufo (piccola)', xml: house(25, 24, 19, 17, 10, 22, [3, 13], 6) },
+  'casa-comune-grande-f2e1f8de': { classe: 'structure', nome: 'Palazzina di tufo (grande)', xml: house(40, 40, 32, 28, 14, 36, [3, 15, 26], 6) },
+  'struttura-torre-di-vetro': { classe: 'structure', nome: 'Torre di vetro', xml: `<!-- Torre di vetro del Centro Direzionale: cemento e fasce di vetro azzurro, piani in più o in meno a ogni seme, la piazza di marmo attorno. -->
 <sequence values="BZHMTVRDA" size="40 40 48" symmetry="(xy)" name="Torre di vetro">
   ${hidden('Z', 'H')}
   ${col('M', 'd8d4cc', 'marmo della piazza')}${col('T', 'b8b4ac', 'cemento')}${col('V', '7ab8d8', 'vetro azzurro', ' alpha="0.6"')}
@@ -249,7 +249,7 @@ const MODELS = {
   <all in="B A" out="A A" steps="4"/>
 </sequence>
 ` },
-  'struttura-mercato-coperto': { classe: 'grande', nome: 'Mercato coperto', xml: `<!-- Mercato coperto di mattoni rossi: grandi archi sul davanti, tende a righe sopra i banchi, il tetto più o meno alto a ogni seme. -->
+  'struttura-mercato-coperto': { classe: 'structure', nome: 'Mercato coperto', xml: `<!-- Mercato coperto di mattoni rossi: grandi archi sul davanti, tende a righe sopra i banchi, il tetto più o meno alto a ogni seme. -->
 <sequence values="BZHTRWAVF" size="40 40 32" symmetry="(xy)" name="Mercato coperto">
   ${hidden('Z', 'H')}
   ${col('T', 'a84a32', 'mattoni rossi')}${col('R', '6a6e74', 'tetto di lamiera')}${col('W', 'e8dcc0', 'cornici di pietra')}

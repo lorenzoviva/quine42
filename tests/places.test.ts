@@ -45,7 +45,7 @@ describe('the model of places (T26)', () => {
     expect(facts.Dove).toMatch(/^luogo 0, 0/);
     expect(facts.Ambiente).toContain(k.chunks.get('0,0')!.plan!.layout);
     expect(facts.Piano).toMatch(/^maps\/.*0_0\.json$/);
-    expect(facts.Rune).toContain('«luce»');
+    expect(facts.Rune).toContain('«lux»');
     // «Apri il file» opens the module of its environment.
     expect(first.path && k.files[first.path]).toBeTruthy();
     expect(JSON.parse(k.files[first.path!]).layouts[k.chunks.get('0,0')!.plan!.layout]).toBeDefined();
