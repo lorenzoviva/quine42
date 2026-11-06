@@ -4666,7 +4666,7 @@ Nasce da T307a e T299: `dossier T307a`, `dossier T299`. `integra T307a` si è fe
 - Pipeline: claude · sforzo high · stima 2% · approvato · priorità 1
 - Esito: merge di T307a sul base con T299 committato (`734aaa7d`), kernel 0.2.0 uguale in `version.ts`, `package.json`, `package-lock.json` e `universe.json` (`kernels.from 0.2`); ADR-0154 resta la via di T299 e ADR-0155 la migrazione di T307a, con i rimandi già allineati; nessuna voce aggiunta a `internalNames.ts`, perché l'unico valore di un dominio T307a nel codice di T299 era la classe `grande` → `structure` in `tests/dislivello.test.ts`; gli esiti `fallito:…` di `sys.lavoro` (`nessuna via`, `non ci arriva`, `comportamento sconosciuto`) e `continua` non hanno voce in nessun dominio, da dare a T307b; typecheck verde, suite 2455 passati e 1 saltato, `tests/dislivello.test.ts` verde sul contratto 0.2; non provato: browser e build (il task non li chiede); sicurezza: nessuna superficie nuova.
 
-### T307b · L'inglese come lingua interna: i valori della società e del Concilio (contratto 0.3) — `da fare` (dipende da T314)
+### T307b · L'inglese come lingua interna: i valori della società e del Concilio (contratto 0.3) — `da fare` (dipende da T314, T317)
 - Pipeline: claude · sforzo extra · stima 4% · approvato · priorità 3
 - Step: 42
 - Contesto: il secondo passo di T306 (`dossier T306`, `dossier T307a`, `docs/lingua-interna.md`, punto 2). **Va lanciato da solo**, come T307a.
@@ -4770,3 +4770,13 @@ Nasce da T307a e T299: `dossier T307a`, `dossier T299`. `integra T307a` si è fe
 - Test: un test sulle frequenze (es. con un orologio finto: nessun riempimento bianco a pieno schermo, glifi stabili per almeno N ms); typecheck e suite intera con i loro turni.
 - Browser: sì, un mondo con un guasto aperto (anche provocato dalla console), cattura e due righe su come appare.
 - Quando è fatto: commit su `task/T316`; nessun flash bianco, glifi e scossa rallentati. Non tocca `src/kernel/` (niente salto di versione). Sicurezza: nessuna superficie nuova.
+
+### T317 · Integrare T312 nel base, che ha il contratto 0.2 — `da fare`
+- Step: 32
+
+Nasce da T312: `dossier T312`. `integra T312` si è fermato su conflitti in `AGENTS.md`, `docs/architettura-dettagli.md`, `package-lock.json`, `package.json`, `src/kernel/kernel.ts`, `src/kernel/universes.ts`, `src/kernel/version.ts`, `universe/universe.json`: T312 è partito a 0.1 (kernel 0.1.14) e intanto nel base è entrato T307a (contratto 0.2.0, ADR-0155 la migrazione 0.1→0.2).
+
+**Cosa fare:** nel worktree, `git merge task/T312` sul base di adesso. La versione è `0.2.1` (T312 resta compatibile col contratto 0.2), uguale in `version.ts`, `package.json`, `package-lock.json` e `universe.json`, che tiene `kernels.from 0.2`. Entrambi gli ADR si chiamano 0155: quello di T312 (sola lettura fuori intervallo) prende il primo numero libero, con i rimandi in AGENTS.md, `docs/architettura-dettagli.md` e nel codice. In `kernel.ts` e `universes.ts` tieni sia `Kernel.readOnly()` / `runsOnThisKernel` sia la migrazione all'avvio (`prepareUniverse`, `migrateUniverse`): un universo che si migra a 0.2 **non** è in sola lettura; solo uno fuori intervallo anche dopo le migrazioni lo è. Un test lo dice.
+
+**Quando è fatto:** merge committato, `npm test`, `npm run typecheck` e `npm run build` verdi con i loro turni, un solo ADR per numero; esito con le scelte fatte nei conflitti di `kernel.ts` e `universes.ts`. Non serve il browser (T312 l'ha provato). Sicurezza: nessuna superficie nuova.
+- Pipeline: claude · sforzo high · stima 2% · approvato · priorità 1
