@@ -55,6 +55,8 @@ export interface ModelInfo {
   tempo?: number;
   /** Tiles under the ground (ADR-0091): the box of the class grows down by them, the lowest voxels are the cellar. */
   sotto?: number;
+  /** Seeds it has in the world, if not its class's few (ADR-0158: a procedural structure, each seed another building); 1 to 8. */
+  seeds?: number;
   /** Artist's critique advice and problems (T48a). */
   consigli?: string[];
   problemi?: string[];
@@ -544,6 +546,8 @@ export class Forms {
   /** How many seeds a program has in the world: the few of its class (T64: 4 for shelf file models). */
   seedsOf(model: string): number {
     if (model === 'circuito-3D' || model === 'schermo-struttura' || model === 'schermo-scritte') return 4;
+    const own = this.info(model)?.seeds;
+    if (typeof own === 'number' && Number.isInteger(own) && own >= 1 && own <= 8) return own;
     return SEEDS[this.classOf(model).id] ?? 2;
   }
 
@@ -655,6 +659,13 @@ export class Forms {
       await new Promise((r) => setTimeout(r, 5));
     }
     return this.get(model, seed, tint);
+  }
+
+  /** The box a large structure's entry runs a program without `size` in (ADR-0158), as the validator must try it; undefined for the other classes. */
+  structureBox(model: string): Vec3 | undefined {
+    const info = this.library[model];
+    if (!info || info.classe !== 'structure') return undefined;
+    return [...boxOf(this.classOf(model), info.taglia)] as Vec3;
   }
 
   /** The program of a model, compiled (for actions). */

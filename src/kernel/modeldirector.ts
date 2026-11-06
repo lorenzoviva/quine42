@@ -4,8 +4,8 @@
 // Sculptor writes it, the entity shows the generic model of its class. Within a budget per session.
 
 import type { Kernel } from './kernel';
-import { sculpt, type SculptRequest } from './agents/sculptor';
-import { classOf, densityOf, guessClass, sizeOf, TILE, tilesOf, type SizeTier } from '../mj/classes';
+import { procedural, sculpt, shareableProgram, STRUCTURE_SEEDS, type SculptRequest } from './agents/sculptor';
+import { classOf, densityOf, guessClass, sizeOf, SIZE_TIERS, TILE, tilesOf, type SizeTier } from '../mj/classes';
 import type { ModelInfo } from './forms';
 import { BudgetError } from './ai/models';
 import { modelGap, sculptPlan } from './coefficients';
@@ -39,6 +39,18 @@ const COMMON_HOUSE = 'casa-comune-';
 export const commonHouseModel = (house: string, classe: string) => `${COMMON_HOUSE}${classe}-${hex(hashStr(house))}`;
 
 export const ownModelId = (id: string) => id.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'cosa';
+
+/**
+ * The model of a structure the Cartographer asks for (ADR-0043): one per concept and size (ADR-0158). The class's own size has no
+ * suffix, as ever; the others say theirs, so a Huge fort and a Gargantuan one are two entries, which share one program when it scales.
+ */
+export function structureModel(concetto: string, taglia?: SizeTier): string {
+  const suffix = taglia && taglia !== 'large' ? `-${taglia}` : '';
+  return `struttura-${ownModelId(concetto).slice(0, 30 - suffix.length)}${suffix}`;
+}
+
+/** The entries of the same concept at every size: where a program to share is looked for. */
+export const structureSiblings = (concetto: string): string[] => [...new Set([structureModel(concetto), ...SIZE_TIERS.map((t) => structureModel(concetto, t.id))])];
 
 export class ModelDirector {
   private busy = false;
@@ -84,7 +96,7 @@ export class ModelDirector {
       const s = k.ecs.get(id, 'struttura') as { model?: string; concetto: string; classe: string; taglia?: SizeTier };
       if (!lacks(s.model)) continue;
       const place = k.chunkAt(k.ecs.get(id, 'pos').x, k.ecs.get(id, 'pos').y)?.place;
-      out.push({ id: s.model!, nome: s.concetto, aspetto: `${s.concetto}: un edificio in cui si entra, con la porta sul davanti${place ? `, a «${place.name}» (${place.description})` : ''}`, classe: s.classe, ...(s.taglia ? { taglia: s.taglia } : {}), contesto: place?.name });
+      out.push({ id: s.model!, nome: s.concetto, shareWith: structureSiblings(s.concetto).filter((x) => x !== s.model), aspetto: `${s.concetto}: un edificio in cui si entra, con la porta sul davanti${place ? `, a «${place.name}» (${place.description})` : ''}`, classe: s.classe, ...(s.taglia ? { taglia: s.taglia } : {}), contesto: place?.name });
     }
     for (const [code, t] of Object.entries(k.palette)) {
       if (code === '?' || !lacks(t.model)) continue;
@@ -94,9 +106,36 @@ export class ModelDirector {
     return [...out.filter((r) => r.id.startsWith(COMMON_HOUSE)), ...out.filter((r) => !r.id.startsWith(COMMON_HOUSE))];
   }
 
+  /**
+   * A structure at a size the library has another entry of, for the same concept (ADR-0158): the same program, if it is the same
+   * size (an entry of before, without the suffix) or if it scales (no box of its own); no call. Undefined if it has to be sculpted.
+   */
+  shared(req: SculptRequest): { xml: string; info: ModelInfo } | undefined {
+    const k = this.k;
+    const cls = classOf(req.classe);
+    if (!cls) return undefined;
+    const own = (t?: string) => sizeOf(t)?.id ?? cls.taglia;
+    for (const id of req.shareWith ?? []) {
+      const info = k.forms.info(id), xml = k.files[`models/${id}.xml`];
+      if (!info || !xml || info.classe !== req.classe) continue;
+      const { taglia: _t, vpt: _v, ...rest } = info;
+      if (own(info.taglia) === own(req.taglia)) return { xml, info };
+      if (procedural(cls, req.taglia) && procedural(cls, info.taglia) && shareableProgram(xml)) return { xml, info: { ...rest, ...modelSize(req), nome: req.nome } };
+    }
+    return undefined;
+  }
+
   /** Called every few seconds: starts the next model if idle. */
   pump(): void {
-    if (!this.active || this.busy || this.k.generationHeld || this.used >= (this.k.config.ai.maxModels ?? 40) || this.k.time < this.nextAt || this.k.coefficients().modelli <= 0) return;
+    if (!this.active || this.busy || this.k.generationHeld) return;
+    // What another size already has costs nothing, and does not wait for the budget.
+    for (const r of this.missing()) {
+      const s = r.shareWith?.length ? this.shared(r) : undefined;
+      if (!s) continue;
+      if (!this.k.addModel(r.id, s.xml, s.info, `scultore: ${r.nome}, lo stesso programma di un'altra taglia`)) this.skip.add(r.id);
+      return;
+    }
+    if (this.used >= (this.k.config.ai.maxModels ?? 40) || this.k.time < this.nextAt || this.k.coefficients().modelli <= 0) return;
     const req = this.missing()[0];
     if (req) void this.make(req);
   }
@@ -105,6 +144,7 @@ export class ModelDirector {
   async make(req: SculptRequest): Promise<boolean> {
     this.busy = true;
     this.used++;
+    const cls = classOf(req.classe);
     try {
       const coef = this.k.coefficients();
       const r = await sculpt(this.k.council, req, this.k.sculptors(), sculptPlan(coef.revisioni));
@@ -114,7 +154,7 @@ export class ModelDirector {
         this.lacking(req, 'invalido', this.k.lastDiscard('scultore', 'model.sculpt'));
         return false;
       }
-      const added = this.k.addModel(req.id, r.xml, { classe: req.classe, ...modelSize(req), nome: req.nome, autore: r.model, ...(r.voto !== undefined ? { voto: r.voto } : {}), ...(req.tinta ? { tinta: 'C' } : {}) }, `scultore: ${req.nome}`);
+      const added = this.k.addModel(req.id, r.xml, { classe: req.classe, ...modelSize(req), nome: req.nome, autore: r.model, ...(cls && procedural(cls, req.taglia) ? { seeds: STRUCTURE_SEEDS } : {}), ...(r.voto !== undefined ? { voto: r.voto } : {}), ...(req.tinta ? { tinta: 'C' } : {}) }, `scultore: ${req.nome}`);
       if (!added) this.lacking(req, 'invalido', this.k.lastDiscard('scultore', 'model.sculpt'));
       return added;
     } catch (e) {

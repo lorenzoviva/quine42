@@ -705,6 +705,17 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   pavimento per ogni tratto di pieno (`surfaces`, `Form.levels`), il corpo sta su quello più vicino all'altezza dei suoi piedi,
   `pos.z`, che il kernel tiene dopo ogni tick (`settleHeights`) e che `free`/`free_real`/`floorAt` prendono (senza: il piano terra);
   il renderer taglia sopra il piano in cui si è.
+- **Le strutture che crescono** (ADR-0158, T156): la classe `structure` da Grande in su ha il prompt procedurale del banco (T182),
+  la parte di `prompts/agents/scultore.md` dopo `<!-- strutture -->` (`sculptorRole(files, true)`, `procedural`), senza esempi della libreria:
+  lo scheletro è nel prompt, e offline è la risposta dei modelli locali (`skeletonOf`). Il programma non ha una `size` sua (`withoutSize`):
+  gira nella scatola della taglia di ogni voce. `checkProgram` lo prova a `STRUCTURE_SEEDS` semi alla sua taglia e al primo seme della
+  successiva (`triedSizes`), e dice dove cade (`failedAt`); la seconda richiesta (il difetto o la revisione dell'Artista) porta la traccia di
+  quel seme (`traceOf`, T179). L'id ha la taglia se non è Grande (`structureModel`: `struttura-<concetto>`, `struttura-<concetto>-huge`); un lotto indossa la voce
+  di prima senza suffisso finché la libreria non ha quella della sua taglia, salvo che sia un programma che scala a un'altra taglia
+  (`Kernel.structureModelFor`): nulla di già scolpito cambia. Il
+  `ModelDirector` dà a una taglia nuova il programma di un'altra (`shared`, senza chiamate) se è la stessa taglia (una voce di prima, senza
+  suffisso) o se il programma scala (`shareableProgram`); la voce dice i suoi semi (`ModelInfo.seeds`, `seedsOf`). Il validatore prova un
+  programma senza `size` della classe `structure` nella scatola della sua voce (`Validator.modelBox`, `Forms.structureBox`).
 
 <a id="taglie"></a>
 ## Le taglie

@@ -38,11 +38,11 @@ import { SHORTFALLS_FILE, ShortfallLog, type ShortfallNote } from './shortfalls'
 import { addBudgetFromCap, costWithFee, DEFAULT_GRANT_CAP, DEFAULT_PLATFORM_FEE, MemoryLedger, splitCost, type Ledger, type PaymentRecord } from './credits';
 import { MemoryChunks, SealedChunks, type ChunkStore } from './chunks';
 import { bodyFoot, bodyGround, Forms, holesOf, InlineRunner, instanceGrid, levelAt, rampBlocks, stepOf, toLocal, topUnder, type Form, type FormComp, type FormRunner, type Ground } from './forms';
-import { classOf, guessClass, RARE_SIZES, sizeRank, SIZE_TIERS, tilesOf, type SizeTier } from '../mj/classes';
+import { boxOf, classOf, guessClass, RARE_SIZES, sizeOf, sizeRank, SIZE_TIERS, tilesOf, type SizeTier } from '../mj/classes';
 import { stageGrid } from '../mj/mesh';
-import { commonHouseModel, GENERIC, ModelDirector, ownModelId } from './modeldirector';
+import { commonHouseModel, GENERIC, ModelDirector, ownModelId, structureModel } from './modeldirector';
 import { ScoreDirector } from './scoredirector';
-import { categoryOf, DEFAULT_SCULPTORS, sculptAction, type SculptorAiModels } from './agents/sculptor';
+import { categoryOf, DEFAULT_SCULPTORS, sculptAction, shareableProgram, type SculptorAiModels } from './agents/sculptor';
 import { MODELS_INDEX, type ModelInfo } from './forms';
 import { Content, isCategory, normName, specOf } from './content';
 import { layout, type Lot, type LayoutResult, articulationPoints } from './layout';
@@ -688,6 +688,7 @@ export class Kernel {
     k.sandbox = await Sandbox.create(k.makeHost(), opts.wasmUri);
     k.validator = new Validator(k.sandbox);
     k.validator.modelTime = (id) => k.forms.info(id)?.tempo;
+    k.validator.modelBox = (id) => k.forms.structureBox(id);
     k.council = new Council(opts.ai, () => ({ files: k.files, palette: k.palette, catalog: k.catalog(), graph: () => k.graph() }));
     k.council.onFeed = (e) => {
       k.archive.onFeed(e, (x) => k.pathForFeed(x));
@@ -2355,6 +2356,20 @@ export class Kernel {
    * writes the ones that do not exist yet); the others are common houses. The lot's tiles become ground,
    * the path goes on from its door towards the house. Pure: the world and the model of places (T26) build the same.
    */
+  /**
+   * The entry a structure the Cartographer asked for wears (ADR-0158): the one of its size if the library has it; else an entry of before,
+   * named without the size, as it was worn before the suffix (nothing already sculpted changes or waits for a copy), unless it is a
+   * program that scales and is of another size: then its size has an entry of its own, which the `ModelDirector` gives the same program.
+   */
+  private structureModelFor(concetto: string, taglia?: SizeTier): string {
+    const sized = structureModel(concetto, taglia), plain = structureModel(concetto);
+    if (sized === plain || this.forms.info(sized)) return sized;
+    const old = this.forms.info(plain), xml = this.files[`models/${plain}.xml`];
+    if (!old || !xml) return sized;
+    const same = (sizeOf(old.taglia)?.id ?? classOf(old.classe)?.taglia) === taglia;
+    return !same && old.classe === 'structure' && shareableProgram(xml) ? sized : plain;
+  }
+
   private lotsOf(ch: Pick<Chunk, 'cx' | 'cy' | 'key' | 'draft' | 'tiles' | 'lots'>, plan: ChunkPlan, pathCode: string): { tiles: string; lots: ChunkLot[] } {
     const S = this.config.chunkSize;
     const tiles = [...ch.tiles];
@@ -2367,7 +2382,7 @@ export class Kernel {
       const req = wanted.shift();
       // A world whose common houses are not the seed's cottages has its own (ADR-0134), one per class of lot, however many lots.
       const house = req ? undefined : this.terrain?.manifest.commonHouse;
-      const own = req ? `struttura-${ownModelId(req.concetto).slice(0, 30)}` : house ? commonHouseModel(house, classe) : undefined;
+      const own = req ? this.structureModelFor(req.concetto, req.taglia) : house ? commonHouseModel(house, classe) : undefined;
       for (const c of [...b.walls, ...b.floor, ...b.doors]) {
         const d = this.palette[ch.draft[c]];
         tiles[c] = d && !d.solid && (d.layer ?? 'ground') === 'ground' ? ch.draft[c] : pathCode;
@@ -5095,7 +5110,8 @@ export class Kernel {
   /** A program enters the library (or replaces one): validated, written with its index entry, committed. */
   addModel(id: string, xml: string, info: ModelInfo, message: string, card?: { task: string; autore: string; chi?: string }): boolean {
     const path = `models/${id}.xml`;
-    const errors = this.validator.validateFile(path, xml);
+    // A large structure's program without a box of its own runs in its class's at its size (ADR-0158): it is tried there.
+    const errors = this.validator.validateFile(path, xml, info.classe === 'structure' ? boxOf(classOf('structure')!, info.taglia) : undefined);
     if (errors.length) {
       this.council.say('kernel', 'scarta', errors.join('; '), card?.autore === 'musicista' ? 'musicista' : 'scultore', card?.task ?? 'model.sculpt');
       return false;
@@ -8783,7 +8799,7 @@ export class Kernel {
       const d = this.content.byName(n);
       if (d) ids.push(...this.entityCards(d.id));
     }
-    for (const s of plan.strutture ?? []) ids.push(`modello:${nodeSlug(`struttura-${ownModelId(s.concetto).slice(0, 30)}`)}`);
+    for (const s of (plan.strutture ?? []).map(readStructure)) ids.push(`modello:${nodeSlug(this.structureModelFor(s.concetto, s.taglia))}`);
     this.cards.use(ids, 'luoghi', (id) => this.isCard(id));
   }
 

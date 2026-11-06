@@ -257,6 +257,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: nessuno
 - **Fermo**: l'attributo `suolo` nei programmi.
 
+### Struttura procedurale
+- **Inglese**: `procedural`, `shareableProgram`, `structureModel`, `STRUCTURE_SEEDS`, `ModelInfo.seeds`
+- **Definizione**: una struttura grande (classe `structure`, da Grande in su) il cui programma cresce a regole, senza una scatola sua: un seme è un altro edificio dello stesso genere, e lo stesso programma serve più taglie, una voce della libreria per taglia.
+- **Dove vive**: `src/kernel/agents/sculptor.ts`, `src/kernel/modeldirector.ts`, `src/kernel/forms.ts`
+- **Da non usare**: «struttura parametrica»
+- **Fermo**: il campo `seeds` in `models/index.json`; il suffisso della taglia negli id `struttura-<concetto>-<taglia>`.
+
 ### Cantina
 - **Inglese**: `cellar`, `cellarOf`, `sunk`
 - **Definizione**: la parte di una struttura sotto il suolo, con il buco nel terreno (`Form.hole`).
