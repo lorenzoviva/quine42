@@ -4,10 +4,10 @@
   "kind": "data",
   "version": "0.1.0",
   "description": "La giornata di chi compra e vende: prende dal deposito ciò che altri hanno portato e lo tiene al banco per chi passa.",
-  "mestieri": [
+  "jobs": [
     {
       "id": "merchant",
-      "nomi": [
+      "names": [
         "mercante",
         "mercantessa",
         "bottegaio",
@@ -22,55 +22,55 @@
         "droghiere",
         "droghiera"
       ],
-      "giornata": {
+      "day": {
         "morning": [
           {
-            "fa": "take",
-            "oggetto": "item.grano",
-            "quante": 2,
-            "dove": "square"
+            "does": "take",
+            "item": "item.grano",
+            "count": 2,
+            "where": "square"
           },
           {
-            "fa": "take",
-            "oggetto": "item.pesce",
-            "quante": 2,
-            "dove": "square"
+            "does": "take",
+            "item": "item.pesce",
+            "count": 2,
+            "where": "square"
           }
         ],
         "day": [
           {
-            "fa": "go",
-            "dove": "square"
+            "does": "go",
+            "where": "square"
           },
           {
-            "fa": "wait",
-            "durata": 90,
-            "posa": "trade",
-            "dice": "Merce buona, prezzi giusti!"
+            "does": "wait",
+            "duration": 90,
+            "pose": "trade",
+            "says": "Merce buona, prezzi giusti!"
           }
         ],
         "evening": [
           {
-            "fa": "carry",
-            "oggetto": "item.grano",
-            "dove": "square"
+            "does": "carry",
+            "item": "item.grano",
+            "where": "square"
           },
           {
-            "fa": "carry",
-            "oggetto": "item.pesce",
-            "dove": "square"
+            "does": "carry",
+            "item": "item.pesce",
+            "where": "square"
           },
           {
-            "fa": "chat"
+            "does": "chat"
           }
         ],
         "night": [
           {
-            "fa": "go",
-            "dove": "home"
+            "does": "go",
+            "where": "home"
           },
           {
-            "fa": "rest"
+            "does": "rest"
           }
         ]
       }

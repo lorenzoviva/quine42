@@ -2,7 +2,7 @@
 // item, an environment, a model, a place, an individual, a plot, a rule, a spell, a recipe — carries who wrote it
 // and who paid for it (`carta`), and is a card of one wanderer. What every wanderer pays for is theirs; what
 // the world pays for (the Genesis, the sessions of the Council, the horizontal plots, the reviews) is common,
-// and goes to one wanderer drawn with the seed of the universe. `world/carte.json` keeps how often each card is
+// and goes to one wanderer drawn with the seed of the universe. `world/cards.json` keeps how often each card is
 // used (in a place, in a plot, in a prompt) and the cards of the places, whose plans live outside the text of
 // the universe (maps/). Pure functions and a small ledger: the kernel stamps and counts.
 
@@ -13,20 +13,20 @@ import { contentText, fingerprint, readOrigins, repairHeritage, sharesOf, type C
 import { readPlots } from './plots';
 import { readPeople } from './society';
 import type { FileMap, Manifest } from './types';
-import { internalCardId } from './internalNames';
+import { internalCardId, internalCardsIn, internalFields, internalSoloIn } from './internalNames';
 
 /** The payer of what the whole world asks for. */
 export const COMUNE = 'comune';
-export const CARDS_FILE = 'world/carte.json';
+export const CARDS_FILE = 'world/cards.json';
 
 /** Who wrote a piece of content (an agent, or a wanderer's id) and who paid for it (a wanderer's id or `comune`). */
 export interface CardStamp {
-  autore: string;
-  pagante: string;
+  author: string;
+  payer: string;
   /** Whose card it is: the payer, or for common content the wanderer drawn with the seed. */
-  titolare: string;
+  holder: string;
   /** Who held it before, in the universes it was cloned from, the first one first (T45c, ADR-0084). */
-  origini?: CardOrigin[];
+  origins?: CardOrigin[];
 }
 
 /**
@@ -59,14 +59,14 @@ export type CardKind = 'module' | 'item' | 'environment' | 'spell' | 'rune' | 'r
 
 export interface Uses {
   /** Places it entered (an entity, an environment, a structure). */
-  luoghi: number;
+  chunks: number;
   /** Plots it is part of. */
-  trame: number;
+  plots: number;
   /** Prompts it went into, as context of a task (the focus of the graph). */
   prompt: number;
 }
 
-export const emptyUses = (): Uses => ({ luoghi: 0, trame: 0, prompt: 0 });
+export const emptyUses = (): Uses => ({ chunks: 0, plots: 0, prompt: 0 });
 
 /** A card in a collection: an id like the graph's (`kind:`, `item:`, `chunk:cx_cy`…, `model:<id>`). */
 export interface Card extends CardStamp {
@@ -75,20 +75,20 @@ export interface Card extends CardStamp {
   nome: string;
   /** The file it lives in (`maps/` for places). */
   file: string;
-  utilizzi: Uses;
+  uses: Uses;
   /** With `shares`, for a card that came with a clone: who gets what of each of its uses (T45c). */
   quote?: Record<string, number>;
   /** With `shares`: the fingerprint of the content as it is now (the site's cards show it, T104). */
-  impronta?: number[];
+  fingerprint?: number[];
 }
 
-/** world/carte.json */
+/** world/cards.json */
 export interface CardsFile {
-  utilizzi: Record<string, Uses>;
+  uses: Record<string, Uses>;
   /** The places' cards (their plans are in maps/, outside the text of the universe). */
-  luoghi: Record<string, CardStamp & { nome: string }>;
+  chunks: Record<string, CardStamp & { name: string }>;
   /** The uses every card had when this universe was cloned (T45c): what the clone owes is counted from there. */
-  allaNascita?: Record<string, Uses>;
+  atBirth?: Record<string, Uses>;
 }
 
 const parse = (src: string | undefined): any => {
@@ -99,7 +99,10 @@ const parse = (src: string | undefined): any => {
   }
 };
 
-const isCardStamp = (c: any): c is CardStamp => !!c && typeof c === 'object' && typeof c.autore === 'string' && typeof c.pagante === 'string' && typeof c.titolare === 'string';
+const isCardStamp = (c: any): c is CardStamp => !!c && typeof c === 'object' && typeof c.author === 'string' && typeof c.payer === 'string' && typeof c.holder === 'string';
+
+/** A JSON file of the universe with its stamps of the contract 0.4 (`carta` → `card`, T308a), whatever contract it was written in. */
+const stamped = (text: string | undefined): any => internalCardsIn(parse(text));
 
 /** The card id of a module: an item module is an `oggetto`, any other one a `tipo` (as in the graph). */
 export function moduleCardId(m: Pick<Manifest, 'id' | 'kind'>): string {
@@ -109,13 +112,13 @@ export function moduleCardId(m: Pick<Manifest, 'id' | 'kind'>): string {
 export const chunkCardId = (cx: number, cy: number) => `chunk:${cx}_${cy}`;
 
 /**
- * Every card the universe has: the stamped content of its files and the places of world/carte.json. With `shares`,
+ * Every card the universe has: the stamped content of its files and the places of world/cards.json. With `shares`,
  * the cards that came with a clone say who gets what of their uses (T45c): the content measured is what holds the
  * card, as the clone measured it (`inheritCards` in clone.ts: a module with its code, a place by its name).
  */
 export function allCards(files: FileMap, shares = false): Card[] {
   const ledger = readCards(files);
-  const cfg = shares ? repairHeritage(parse(files['universe.json'])?.eredita) : undefined;
+  const cfg = shares ? repairHeritage(internalFields('config', parse(files['universe.json']) ?? {})?.heritage) : undefined;
   const out: Card[] = [];
   // What a data module holds is often measured as the whole module: one fingerprint per text.
   const prints = new Map<string, number[]>();
@@ -124,48 +127,48 @@ export function allCards(files: FileMap, shares = false): Card[] {
     if (!p) prints.set(text, (p = fingerprint(text)));
     return p;
   };
-  // `holder` carries the card (`holder.carta`); a place's card is the ledger's entry itself.
+  // `holder` carries the card (`holder.card`); a place's card is the ledger's entry itself.
   const push = (id: string, tipo: CardKind, nome: string, file: string, holder: any, content: () => string = () => contentText(holder)) => {
-    const c = tipo === 'chunk' ? holder : holder?.carta;
+    const c = tipo === 'chunk' ? holder : holder?.card;
     if (!isCardStamp(c)) return;
-    const card: Card = { id, tipo, nome, file, autore: c.autore, pagante: c.pagante, titolare: c.titolare, utilizzi: { ...emptyUses(), ...ledger.utilizzi[id] } };
-    const origini = readOrigins(c.origini);
-    if (origini.length) card.origini = origini;
+    const card: Card = { id, tipo, nome, file, author: c.author, payer: c.payer, holder: c.holder, uses: { ...emptyUses(), ...ledger.uses[id] } };
+    const origini = readOrigins(c.origins);
+    if (origini.length) card.origins = origini;
     if (cfg) {
-      card.impronta = printOf(content());
-      if (origini.length) card.quote = sharesOf(c.titolare, origini, card.impronta, cfg);
+      card.fingerprint = printOf(content());
+      if (origini.length) card.quote = sharesOf(c.holder, origini, card.fingerprint, cfg);
     }
     out.push(card);
   };
-  const raw = (path: string, key: string): any[] => {
-    const v = parse(files[path])?.[key];
+  const raw = (path: string, key: string, shape: 'people' | 'plots' | 'rules'): any[] => {
+    const v = internalFields(shape, stamped(files[path]) ?? {})?.[key];
     return Array.isArray(v) ? v : [];
   };
   for (const file of Object.keys(files).sort()) {
     if (!/^modules\/[^/]+\/manifest\.json$/.test(file)) continue;
-    const m = parse(files[file]) as Manifest & { carta?: CardStamp } | null;
+    const m = stamped(files[file]) as Manifest & { card?: CardStamp } | null;
     if (!m?.id) continue;
     let text: string | undefined;
     const whole = () => (text ??= contentText(m) + (typeof m.logic === 'string' ? files[file.replace(/manifest\.json$/, m.logic)] ?? '' : ''));
     if (m.kind !== 'data') push(moduleCardId(m), m.kind === 'item' ? 'item' : 'module', m.name ?? m.id, file, m, whole);
     // What a data module holds is a card each, of whoever made the module unless it says otherwise.
     const part = (id: string, tipo: CardKind, nome: string, o: unknown) =>
-      isCardStamp((o as { carta?: unknown })?.carta) ? push(id, tipo, nome, file, o) : push(id, tipo, nome, file, m, whole);
+      isCardStamp((o as { card?: unknown })?.card) ? push(id, tipo, nome, file, o) : push(id, tipo, nome, file, m, whole);
     for (const it of m.items ?? []) part(`item:${slug(it.id)}`, 'item', it.name ?? it.id, it);
     for (const [lid, l] of Object.entries(m.layouts ?? {})) part(`environment:${slug(lid)}`, 'environment', l.name ?? lid, l);
     for (const [seq, s] of Object.entries(m.spells ?? {})) part(`spell:${slug(s.name ?? seq)}`, 'spell', s.name ?? seq, s);
     for (const [token, r] of Object.entries(m.runes ?? {})) part(`rune:${slug(token)}`, 'rune', r.name ?? token, r);
     for (const r of m.recipes ?? []) part(`recipe:${slug(r.id)}`, 'recipe', r.name ?? r.id, r);
   }
-  for (const [id, info] of Object.entries((parse(files[MODELS_INDEX]) ?? {}) as Record<string, { nome?: string; carta?: CardStamp }>)) push(`model:${slug(id)}`, 'model', info?.nome ?? id, MODELS_INDEX, info);
-  for (const [key, c] of Object.entries(ledger.luoghi)) push(`chunk:${key}`, 'chunk', c.nome || key, 'maps/', c, () => String(c.nome ?? ''));
+  for (const [id, info] of Object.entries(internalFields('modelIndex', stamped(files[MODELS_INDEX]) ?? {}) as Record<string, { name?: string; card?: CardStamp }>)) push(`model:${slug(id)}`, 'model', info?.name ?? id, MODELS_INDEX, info);
+  for (const [key, c] of Object.entries(ledger.chunks)) push(`chunk:${key}`, 'chunk', c.name || key, 'maps/', c, () => String(c.name ?? ''));
   // People and plots measured as the file has them, as the clone did (the repaired ones give the names).
-  const people = raw('world/people.json', 'persone');
-  for (const p of readPeople(files).persone) push(`individual:${slug(p.nome)}`, 'individual', p.nome, 'world/people.json', people.find((q) => q?.nome === p.nome) ?? p);
-  const plots = raw('world/plots.json', 'trame');
-  for (const t of readPlots(files)) push(`plot:${slug(t.id)}`, 'plot', t.titolo, 'world/plots.json', plots.find((q) => q?.id === t.id) ?? t);
-  for (const r of raw('world/rules.json', 'regole') as Array<{ chiave?: string; testo?: string; carta?: CardStamp }>)
-    if (r?.chiave) push(`rule:${slug(r.chiave)}`, 'rule', r.testo ?? r.chiave, 'world/rules.json', r);
+  const people = raw('world/people.json', 'people', 'people');
+  for (const p of readPeople(files).people) push(`individual:${slug(p.name)}`, 'individual', p.name, 'world/people.json', people.find((q) => q?.name === p.name) ?? p);
+  const plots = raw('world/plots.json', 'plots', 'plots');
+  for (const t of readPlots(files)) push(`plot:${slug(t.id)}`, 'plot', t.title, 'world/plots.json', plots.find((q) => q?.id === t.id) ?? t);
+  for (const r of raw('world/rules.json', 'rules', 'rules') as Array<{ key?: string; text?: string; card?: CardStamp }>)
+    if (r?.key) push(`rule:${slug(r.key)}`, 'rule', r.text ?? r.key, 'world/rules.json', r);
   return out;
 }
 
@@ -173,63 +176,64 @@ export function allCards(files: FileMap, shares = false): Card[] {
 export interface Received {
   card: Card;
   /** Their share of every use. */
-  quota: number;
+  share: number;
   /** The universe where they held it (their first link in the chain). */
-  universo: string;
+  universe: string;
   /** Uses since this universe was cloned. */
-  utilizzi: number;
+  uses: number;
   /** quota × utilizzi */
-  ricevuto: number;
+  received: number;
 }
 
-const totalUses = (u: Partial<Uses> | undefined) => (u?.luoghi ?? 0) + (u?.trame ?? 0) + (u?.prompt ?? 0);
+const totalUses = (u: Partial<Uses> | undefined) => (u?.chunks ?? 0) + (u?.plots ?? 0) + (u?.prompt ?? 0);
 
 /** What a wanderer receives from this universe as an earlier holder of its cards, the most received first. */
 export function receivedBy(files: FileMap, wanderer: string, cards: Card[] = allCards(files, true)): Received[] {
-  const born = readCards(files).allaNascita ?? {};
+  const born = readCards(files).atBirth ?? {};
   const out: Received[] = [];
   for (const card of cards) {
     const quota = card.quote?.[wanderer] ?? 0;
-    if (!quota || card.titolare === wanderer) continue;
-    const utilizzi = Math.max(0, totalUses(card.utilizzi) - totalUses(born[card.id]));
-    out.push({ card, quota, universo: card.origini!.find((o) => o.titolare === wanderer)?.universo ?? '', utilizzi, ricevuto: quota * utilizzi });
+    if (!quota || card.holder === wanderer) continue;
+    const utilizzi = Math.max(0, totalUses(card.uses) - totalUses(born[card.id]));
+    out.push({ card, share: quota, universe: card.origins!.find((o) => o.holder === wanderer)?.universe ?? '', uses: utilizzi, received: quota * utilizzi });
   }
-  return out.sort((a, b) => b.ricevuto - a.ricevuto || b.quota - a.quota || a.card.id.localeCompare(b.card.id));
+  return out.sort((a, b) => b.received - a.received || b.share - a.share || a.card.id.localeCompare(b.card.id));
 }
 
 /** A wanderer's collection: the cards that are theirs, the most used first. */
 export function collectionOf(files: FileMap, wanderer: string): Card[] {
-  const used = (c: Card) => c.utilizzi.luoghi + c.utilizzi.trame + c.utilizzi.prompt;
+  const used = (c: Card) => c.uses.chunks + c.uses.plots + c.uses.prompt;
   return allCards(files)
-    .filter((c) => c.titolare === wanderer)
+    .filter((c) => c.holder === wanderer)
     .sort((a, b) => used(b) - used(a) || a.id.localeCompare(b.id));
 }
 
 export function readCards(files: FileMap): CardsFile {
-  const f = parse(files[CARDS_FILE]);
+  // The fields of the contract 0.3 (`utilizzi`, `luoghi`, `autore`) read internal (T308a).
+  const f = internalSoloIn(internalFields('cards', parse(files[CARDS_FILE]) ?? {})) as Record<string, any>;
   const uses = (raw: unknown) => {
     const out: Record<string, Uses> = {};
     // A card id of the contract 0.2 (`modello:albero`) reads internal (T307b): the migration ports the file, this a stray key.
     for (const [rawId, u] of Object.entries((raw && typeof raw === 'object' ? raw : {}) as Record<string, Partial<Uses>>)) {
       const id = internalCardId(rawId);
       const n = (v: unknown) => (Number.isFinite(Number(v)) && Number(v) > 0 ? Math.floor(Number(v)) : 0);
-      out[id] = { luoghi: n(u?.luoghi), trame: n(u?.trame), prompt: n(u?.prompt) };
+      out[id] = { chunks: n(u?.chunks), plots: n(u?.plots), prompt: n(u?.prompt) };
     }
     return out;
   };
-  const luoghi: CardsFile['luoghi'] = {};
-  for (const [key, c] of Object.entries((f?.luoghi ?? {}) as Record<string, any>)) {
+  const luoghi: CardsFile['chunks'] = {};
+  for (const [key, c] of Object.entries((f?.chunks ?? {}) as Record<string, any>)) {
     if (!isCardStamp(c)) continue;
-    const origini = readOrigins(c.origini);
-    luoghi[key] = { autore: c.autore, pagante: c.pagante, titolare: c.titolare, ...(origini.length ? { origini } : {}), nome: String((c as { nome?: unknown }).nome ?? '') };
+    const origini = readOrigins(c.origins);
+    luoghi[key] = { author: c.author, payer: c.payer, holder: c.holder, ...(origini.length ? { origins: origini } : {}), name: String((c as { name?: unknown }).name ?? '') };
   }
-  const allaNascita = uses(f?.allaNascita);
-  return { utilizzi: uses(f?.utilizzi), luoghi, ...(Object.keys(allaNascita).length ? { allaNascita } : {}) };
+  const allaNascita = uses(f?.atBirth);
+  return { uses: uses(f?.uses), chunks: luoghi, ...(Object.keys(allaNascita).length ? { atBirth: allaNascita } : {}) };
 }
 
 /** The kernel's ledger of the cards' uses: counted as the world is played, written before every commit. */
 export class CardUses {
-  private file: CardsFile = { utilizzi: {}, luoghi: {} };
+  private file: CardsFile = { uses: {}, chunks: {} };
   /** Bumped at every change: the kernel writes the file when it changed. */
   version = 0;
 
@@ -242,7 +246,7 @@ export class CardUses {
     let changed = false;
     for (const id of new Set(ids)) {
       if (!isCard(id)) continue;
-      (this.file.utilizzi[id] ??= emptyUses())[kind]++;
+      (this.file.uses[id] ??= emptyUses())[kind]++;
       changed = true;
     }
     if (changed) this.version++;
@@ -250,27 +254,27 @@ export class CardUses {
 
   /** A place planned for the first time becomes a card. */
   addChunk(key: string, nome: string, carta: CardStamp): void {
-    if (this.file.luoghi[key]) return;
-    this.file.luoghi[key] = { ...carta, nome };
+    if (this.file.chunks[key]) return;
+    this.file.chunks[key] = { ...carta, name: nome };
     this.version++;
   }
 
   hasChunk(key: string): boolean {
-    return !!this.file.luoghi[key];
+    return !!this.file.chunks[key];
   }
 
   uses(id: string): Uses {
-    return { ...emptyUses(), ...this.file.utilizzi[id] };
+    return { ...emptyUses(), ...this.file.uses[id] };
   }
 
   toJson(): string {
     const sorted = <T>(o: Record<string, T>) => Object.fromEntries(Object.keys(o).sort().map((k) => [k, o[k]]));
-    const born = this.file.allaNascita;
-    return JSON.stringify({ utilizzi: sorted(this.file.utilizzi), luoghi: sorted(this.file.luoghi), ...(born ? { allaNascita: sorted(born) } : {}) } satisfies CardsFile, null, 1) + '\n';
+    const born = this.file.atBirth;
+    return JSON.stringify({ uses: sorted(this.file.uses), chunks: sorted(this.file.chunks), ...(born ? { atBirth: sorted(born) } : {}) } satisfies CardsFile, null, 1) + '\n';
   }
 }
 
-type Stampable = { carta?: CardStamp };
+type Stampable = { card?: CardStamp };
 
 /**
  * The entries of a file that can be cards, by card id (the module itself, what a data module holds, people…).
@@ -294,9 +298,9 @@ function entriesOf(path: string, data: any): Map<string, Stampable> {
   } else if (path === MODELS_INDEX) {
     for (const [id, info] of Object.entries(data)) add(`model:${slug(id)}`, info);
   } else if (path === 'world/people.json') {
-    for (const p of Array.isArray(data.persone) ? data.persone : []) if (p?.nome) add(`individual:${slug(p.nome)}`, p);
+    for (const p of Array.isArray(data.people) ? data.people : []) if (p?.name) add(`individual:${slug(p.name)}`, p);
   } else if (path === 'world/plots.json') {
-    for (const t of Array.isArray(data.trame) ? data.trame : []) if (t?.id) add(`plot:${slug(t.id)}`, t);
+    for (const t of Array.isArray(data.plots) ? data.plots : []) if (t?.id) add(`plot:${slug(t.id)}`, t);
   }
   return out;
 }
@@ -320,10 +324,10 @@ export function stampFiles(working: FileMap, head: FileMap, sign: (cardId: strin
     const before = entriesOf(path, parse(head[path]));
     let changed = false;
     for (const [id, o] of entries) {
-      if (isCardStamp(o.carta)) continue;
+      if (isCardStamp(o.card)) continue;
       const old = before.get(id);
-      if (old && !isCardStamp(old.carta)) continue;
-      o.carta = old ? { ...old.carta! } : sign(id);
+      if (old && !isCardStamp(old.card)) continue;
+      o.card = old ? { ...old.card! } : sign(id);
       changed = true;
     }
     if (changed) out[path] = JSON.stringify(now, null, indentOf(src)) + '\n';

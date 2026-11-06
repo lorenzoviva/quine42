@@ -5,7 +5,7 @@
 import type { Schema } from '../ai/models';
 import type { UiElement, UiPanel } from '../types';
 import type { Council } from './council';
-import { internalName, italianValues } from '../internalNames';
+import { internalFields, internalName, italianValues } from '../internalNames';
 
 const ELEMENT: Schema = {
   type: 'OBJECT',
@@ -97,7 +97,7 @@ export async function designMechanic(c: Council, request: string, ctx: { items: 
   return {
     name: String(r.nome ?? request).slice(0, 40),
     description: String(r.descrizione ?? '').slice(0, 300),
-    panel: { titolo: String(r.pannello?.titolo ?? r.nome ?? 'Meccanica').slice(0, 30), elementi: Array.isArray(r.pannello?.elementi) ? r.pannello.elementi : [] },
+    panel: { title: String(r.pannello?.titolo ?? r.nome ?? 'Meccanica').slice(0, 30), elements: Array.isArray(r.pannello?.elementi) ? r.pannello.elementi : [] },
     components,
     logic: String(r.logica ?? ''),
     cases: Array.isArray(r.casi) ? r.casi : [],
@@ -105,29 +105,30 @@ export async function designMechanic(c: Council, request: string, ctx: { items: 
 }
 
 /** A panel the kernel can draw: known element kinds, ids and labels cleaned, at most 16 elements. */
-export function cleanPanel(panel: { titolo?: string; elementi?: unknown[] }, id: string): { panel?: UiPanel; errors: string[] } {
+export function cleanPanel(panel: { title?: string; elements?: unknown[]; titolo?: string; elementi?: unknown[] }, id: string): { panel?: UiPanel; errors: string[] } {
   const errors: string[] = [];
   const elementi: UiElement[] = [];
   const seen = new Set<string>();
-  for (const raw of (panel.elementi ?? []).slice(0, 16) as Array<Record<string, unknown>>) {
-    // The Council still writes the Italian of the contract 0.1 (T307a, until T310): `barra` is a `bar`.
-    const tipo = typeof raw?.tipo === 'string' ? internalName('pannelli', raw.tipo) : undefined;
+  for (const el0 of (panel.elements ?? panel.elementi ?? []).slice(0, 16) as Array<Record<string, unknown>>) {
+    // The Council still writes the Italian of the contracts 0.1 and 0.3 (T307a, T308a, until T310): `barra` is a `bar`, `etichetta` a `label`.
+    const raw = (el0 && typeof el0 === 'object' ? internalFields('panelElement', el0) : {}) as Record<string, unknown>;
+    const tipo = typeof raw?.type === 'string' ? internalName('pannelli', raw.type) : undefined;
     if (tipo !== 'slot' && tipo !== 'bar' && tipo !== 'text' && tipo !== 'button') continue;
-    const el: UiElement = { tipo, etichetta: String(raw.etichetta ?? raw.id ?? '').slice(0, 40) };
+    const el: UiElement = { type: tipo, label: String(raw.label ?? raw.id ?? '').slice(0, 40) };
     const sid = String(raw.id ?? '').toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 24);
     if (tipo === 'slot' || tipo === 'button') {
       if (!sid || seen.has(sid)) {
-        errors.push(`${tipo} senza id unico («${el.etichetta}»)`);
+        errors.push(`${tipo} senza id unico («${el.label}»)`);
         continue;
       }
       seen.add(sid);
       el.id = sid;
     }
-    if (tipo === 'slot') el.accetta = (Array.isArray(raw.accetta) ? raw.accetta : []).map((a) => String(a).toLowerCase().trim()).filter(Boolean).slice(0, 8);
-    if ((tipo === 'bar' || tipo === 'text') && typeof raw.campo === 'string' && /^[a-z_][a-z0-9_]*\.[a-z_][a-z0-9_]*$/i.test(raw.campo)) el.campo = raw.campo;
+    if (tipo === 'slot') el.accepts = (Array.isArray(raw.accepts) ? raw.accepts : []).map((a) => String(a).toLowerCase().trim()).filter(Boolean).slice(0, 8);
+    if ((tipo === 'bar' || tipo === 'text') && typeof raw.field === 'string' && /^[a-z_][a-z0-9_]*\.[a-z_][a-z0-9_]*$/i.test(raw.field)) el.field = raw.field;
     if (tipo === 'bar') el.max = typeof raw.max === 'number' && raw.max > 0 ? raw.max : 100;
     elementi.push(el);
   }
   if (!elementi.length) errors.push('il pannello non ha elementi validi');
-  return errors.length && !elementi.length ? { errors } : { panel: { id, titolo: String(panel.titolo ?? 'Meccanica').slice(0, 30), elementi }, errors };
+  return errors.length && !elementi.length ? { errors } : { panel: { id, title: String(panel.title ?? panel.titolo ?? 'Meccanica').slice(0, 30), elements: elementi }, errors };
 }

@@ -122,10 +122,10 @@ export class ProfilePanel {
   open(): void {
     const p = this.current();
     const form = this.k.ecs.get(this.k.wandererEntity, 'form');
-    this.nome.value = p?.nome && p.nome !== 'Viandante' ? p.nome : '';
-    this.seme = p?.seme ?? (Number(form?.seed) || 1);
-    this.tinta.value = p?.tinta ?? form?.tint ?? '#c06030';
-    this.presentazione.value = p?.presentazione ?? '';
+    this.nome.value = p?.name && p.name !== 'Viandante' ? p.name : '';
+    this.seme = p?.seed ?? (Number(form?.seed) || 1);
+    this.tinta.value = p?.tint ?? form?.tint ?? '#c06030';
+    this.presentazione.value = p?.introduction ?? '';
     this.status.textContent = '';
     this.root.hidden = false;
     this.paint();
@@ -160,15 +160,15 @@ export class ProfilePanel {
 
   private async save(): Promise<void> {
     this.status.textContent = '…';
-    const r = await this.keep({ nome: this.nome.value, seme: this.seme, tinta: this.tinta.value, presentazione: this.presentazione.value });
+    const r = await this.keep({ name: this.nome.value, seed: this.seme, tint: this.tinta.value, introduction: this.presentazione.value });
     if (!r.ok || !r.profilo) {
       this.status.textContent = r.motivo ?? 'Non è stato possibile.';
       return;
     }
-    this.nome.value = r.profilo.nome === 'Viandante' ? '' : r.profilo.nome;
-    if (r.profilo.tinta) this.tinta.value = r.profilo.tinta;
-    if (r.profilo.seme) this.seme = r.profilo.seme;
-    this.presentazione.value = r.profilo.presentazione ?? '';
+    this.nome.value = r.profilo.name === 'Viandante' ? '' : r.profilo.name;
+    if (r.profilo.tint) this.tinta.value = r.profilo.tint;
+    if (r.profilo.seed) this.seme = r.profilo.seed;
+    this.presentazione.value = r.profilo.introduction ?? '';
     this.status.textContent = r.testo ? `Fatto, ma: ${r.testo}.` : 'Fatto.';
     this.paint();
   }

@@ -238,9 +238,9 @@ describe('la fila nel browser (T265)', () => {
     const mine = browserOwedStorage('sonda', () => now)!;
     expect(mine.save([{ kind: 'commit', changes: { 'world/a.json': '1' }, message: 'a', author: 'agent' }])).toBe(true);
 
-    local.setItem('quine:fila:sonda:altrascheda', JSON.stringify({ at: now, line: [{ kind: 'merge', branch: 'master', message: 'viva' }] }));
-    local.setItem('quine:fila:sonda:chiusa', JSON.stringify({ at: now - ORPHAN_LINE_MS - 1, line: [{ kind: 'map', key: '0,0', data: 1 }, { kind: 'commit', changes: 'no' }, null] }));
-    local.setItem('quine:fila:altro:chiusa', JSON.stringify({ at: 0, line: [{ kind: 'merge', branch: 'x', message: 'di un altro universo' }] }));
+    local.setItem('quine:owed:sonda:altrascheda', JSON.stringify({ at: now, line: [{ kind: 'merge', branch: 'master', message: 'viva' }] }));
+    local.setItem('quine:owed:sonda:chiusa', JSON.stringify({ at: now - ORPHAN_LINE_MS - 1, line: [{ kind: 'map', key: '0,0', data: 1 }, { kind: 'commit', changes: 'no' }, null] }));
+    local.setItem('quine:owed:altro:chiusa', JSON.stringify({ at: 0, line: [{ kind: 'merge', branch: 'x', message: 'di un altro universo' }] }));
 
     now += 1000;
     const reloaded = browserOwedStorage('sonda', () => now)!; // same tab: same sessionStorage
@@ -248,11 +248,32 @@ describe('la fila nel browser (T265)', () => {
       { kind: 'map', key: '0,0', data: 1 },
       { kind: 'commit', changes: { 'world/a.json': '1' }, message: 'a', author: 'agent' },
     ]);
-    expect(local.getItem('quine:fila:sonda:chiusa')).toBeNull();
-    expect(local.getItem('quine:fila:sonda:altrascheda')).not.toBeNull();
-    expect(local.getItem('quine:fila:altro:chiusa')).not.toBeNull();
+    expect(local.getItem('quine:owed:sonda:chiusa')).toBeNull();
+    expect(local.getItem('quine:owed:sonda:altrascheda')).not.toBeNull();
+    expect(local.getItem('quine:owed:altro:chiusa')).not.toBeNull();
     reloaded.save([]);
-    expect([...Array(local.length).keys()].map((i) => local.key(i))).not.toContain(expect.stringMatching(/^quine:fila:sonda:(?!altrascheda)/));
+    expect([...Array(local.length).keys()].map((i) => local.key(i))).not.toContain(expect.stringMatching(/^quine:owed:sonda:(?!altrascheda)/));
+  });
+
+  it('una fila di prima del contratto 0.4 (`quine:fila:`) si prende comunque, portata ai percorsi e ai campi di oggi, e la sua chiave va (T308a)', () => {
+    let now = 1_000_000;
+    const local = webStorage();
+    vi.stubGlobal('document', {});
+    vi.stubGlobal('localStorage', local);
+    vi.stubGlobal('sessionStorage', webStorage());
+    const state = JSON.stringify({ consumati: ['a'], ora: 7 });
+    local.setItem('quine:fila:sonda:viva', JSON.stringify({ at: now, line: [{ kind: 'commit', changes: { 'world/stato.json': state, 'world/giocatori/io.json': JSON.stringify({ nome: 'Io', crediti: 3 }), 'world/vecchio.json': null }, message: 'prima', author: 'player' }] }));
+    local.setItem('quine:fila:altro:viva', JSON.stringify({ at: now, line: [{ kind: 'merge', branch: 'x', message: 'di un altro universo' }] }));
+    const line = browserOwedStorage('sonda', () => now)!.load();
+    expect(line).toHaveLength(1);
+    const w = line[0] as { kind: 'commit'; changes: Record<string, string | null> };
+    expect(Object.keys(w.changes).sort()).toEqual(['world/players/me.json', 'world/state.json', 'world/vecchio.json']);
+    expect(JSON.parse(w.changes['world/state.json']!)).toEqual({ consumed: ['a'], time: 7 });
+    expect(JSON.parse(w.changes['world/players/me.json']!)).toEqual({ name: 'Io' });
+    expect(w.changes['world/vecchio.json']).toBeNull();
+    expect(local.getItem('quine:fila:sonda:viva')).toBeNull();
+    expect(local.getItem('quine:fila:altro:viva')).not.toBeNull();
+    now += 1;
   });
 
   it('senza pagina (un processo Node) non c’è fila salvata', () => {

@@ -157,7 +157,7 @@ describe('a rise of a model, in the kernel', () => {
       expect(m).toBeDefined();
       // Her work this morning: up on the platform (with no stair, in its middle: 3 tiles from any she can stand on), then a while at the bench.
       const work = model === 'platea-scala' ? { x: c + 2.5, y: r + 0.5 } : { x: c + 0.5, y: r + 0.5 };
-      Object.assign(m, { work, compiti: [{ fa: 'go', dove: 'work' }, { fa: 'wait', durata: 30 }] });
+      Object.assign(m, { work, compiti: [{ does: 'go', where: 'work' }, { does: 'wait', duration: 30 }] });
       k.ecs.set(id, 'lavoro', { fase: m.fase, giorno: m.giorno, passo: 1 });
       const p = k.ecs.get(id, 'pos');
       let took = 0;
@@ -277,7 +277,7 @@ describe('back on foot (what T280 could not try)', () => {
       k.time = at(day0 + d, 'evening');
       for (let t = 0; t < 3.5; t += STEP) k.tick(STEP);
     }
-    expect(k.ventures().find((x) => x.origine === origin)!.lavorato).toBeGreaterThanOrEqual(200);
+    expect(k.ventures().find((x) => x.origin === origin)!.worked).toBeGreaterThanOrEqual(200);
     // Back on foot: a step of the walk at every tick (`stepWanderer`, what the server does with a client's steps), toward the next
     // point of the way to a goal at most 40 tiles ahead on the road home; the places load as they are reached.
     const r = Number(k.ecs.get(k.wandererEntity, 'body')?.r) || 0.22;

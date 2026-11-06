@@ -5,7 +5,7 @@
 import type { Kernel, KernelOptions } from './kernel';
 import type { BenchCase, BenchItem, BenchStep, BenchWay, FileMap, ItemDef, Manifest, UiPanel } from './types';
 import { ITEM_CATEGORIES } from './types';
-import { internalName } from './internalNames';
+import { internalFields, internalName } from './internalNames';
 import { memoryStore } from './repo';
 import { MockAiModels } from './ai/mock';
 
@@ -114,67 +114,70 @@ function parseJson(v: unknown): Record<string, Record<string, unknown>> | undefi
 export function cleanCases(raw: unknown, panel: UiPanel | undefined, lines: number): { cases: BenchCase[]; errors: string[] } {
   const errors: string[] = [];
   const cases: BenchCase[] = [];
-  const slots = new Set(panel?.elementi.filter((e) => e.tipo === 'slot').map((e) => e.id!) ?? []);
-  const buttons = new Set(panel?.elementi.filter((e) => e.tipo === 'button').map((e) => e.id!) ?? []);
+  const slots = new Set(panel?.elements.filter((e) => e.type === 'slot').map((e) => e.id!) ?? []);
+  const buttons = new Set(panel?.elements.filter((e) => e.type === 'button').map((e) => e.id!) ?? []);
   const id = (s: unknown) => String(s ?? '').toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 24);
-  for (const r of (Array.isArray(raw) ? raw : []).slice(0, MAX_CASES) as Array<Record<string, any>>) {
-    if (!r || typeof r !== 'object') continue;
-    const titolo = String(r.titolo ?? '').trim().slice(0, 60) || 'Caso';
-    const v = r.viandante && typeof r.viandante === 'object' ? r.viandante : {};
-    const oggetti: BenchItem[] = (Array.isArray(r.oggetti ?? v.oggetti) ? (r.oggetti ?? v.oggetti) : [])
+  for (const r0 of (Array.isArray(raw) ? raw : []).slice(0, MAX_CASES) as Array<Record<string, any>>) {
+    if (!r0 || typeof r0 !== 'object') continue;
+    // The Engineer still writes the Italian fields of its schema (until T310): read with those of 0.4 (T308a), as a case of a manifest is.
+    const r = internalFields('bench', r0) as Record<string, any>;
+    const titolo = String(r.title ?? '').trim().slice(0, 60) || 'Caso';
+    const v = r.wanderer && typeof r.wanderer === 'object' ? r.wanderer : {};
+    // The items of the wanderer, also as the Engineer may list them beside the case (`oggetti`): with the fields of 0.4.
+    const listed = (Array.isArray(r.oggetti) ? r.oggetti : Array.isArray(v.items) ? v.items : []).map((o: any) => (typeof o === 'string' ? { name: o } : o));
+    const oggetti: BenchItem[] = ((internalFields('bench', { viandante: { oggetti: listed } }) as { wanderer?: { items?: any[] } }).wanderer?.items ?? [])
       .slice(0, 6)
-      .map((o: any) => (typeof o === 'string' ? { nome: o } : o))
-      .filter((o: any) => o && typeof o.nome === 'string' && o.nome.trim())
+      .filter((o: any) => o && typeof o.name === 'string' && o.name.trim())
       .map((o: any) => {
         const bonus = typeof o.bonus_json === 'string' ? parseFlat(o.bonus_json) : o.bonus && typeof o.bonus === 'object' ? parseFlat(JSON.stringify(o.bonus)) : undefined;
-        return { nome: o.nome.trim().slice(0, 40), ...(o.posto ? { posto: String(o.posto).toLowerCase().trim() } : {}), ...(o.categoria ? { categoria: internalName('categorie', String(o.categoria).toLowerCase().trim()) } : {}), ...(bonus ? { bonus } : {}) };
+        return { name: o.name.trim().slice(0, 40), ...(o.slot ? { slot: String(o.slot).toLowerCase().trim() } : {}), ...(o.category ? { category: internalName('categorie', String(o.category).toLowerCase().trim()) } : {}), ...(bonus ? { bonus } : {}) };
       });
     const passi: BenchStep[] = [];
-    for (const p of (Array.isArray(r.passi) ? r.passi : []).slice(0, 8) as Array<Record<string, any>>) {
+    for (const p of (Array.isArray(r.steps) ? r.steps : []).slice(0, 8) as Array<Record<string, any>>) {
       // The Engineer still writes the Italian steps of the contract 0.1 (T307a, until T310): `togli` is `remove`.
-      const tipo = typeof p?.tipo === 'string' ? internalName('passi-banco', p.tipo) : undefined;
+      const tipo = typeof p?.type === 'string' ? internalName('passi-banco', p.type) : undefined;
       if (tipo === 'slot' || tipo === 'remove') {
         const slot = id(p.slot);
         if (!slots.has(slot)) {
           errors.push(`«${titolo}»: lo slot «${p.slot}» non è nel pannello`);
           continue;
         }
-        if (tipo === 'remove') passi.push({ tipo, slot });
-        else if (typeof p.oggetto === 'string' && p.oggetto.trim()) passi.push({ tipo, slot, oggetto: p.oggetto.trim() });
+        if (tipo === 'remove') passi.push({ type: tipo, slot });
+        else if (typeof p.item === 'string' && p.item.trim()) passi.push({ type: tipo, slot, item: p.item.trim() });
         else errors.push(`«${titolo}»: il passo slot non dice quale oggetto`);
       } else if (tipo === 'button') {
-        const azione = id(p.azione ?? p.id);
-        if (buttons.has(azione)) passi.push({ tipo, azione });
-        else errors.push(`«${titolo}»: il pulsante «${p.azione}» non è nel pannello`);
-      } else if (tipo === 'wait') passi.push({ tipo, secondi: num(p.secondi, 0.1, MAX_SECONDS, 1) });
+        const azione = id(p.action ?? p.id);
+        if (buttons.has(azione)) passi.push({ type: tipo, action: azione });
+        else errors.push(`«${titolo}»: il pulsante «${p.action}» non è nel pannello`);
+      } else if (tipo === 'wait') passi.push({ type: tipo, seconds: num(p.seconds, 0.1, MAX_SECONDS, 1) });
       else if (tipo === 'walk') {
-        const verso = internalName('passi-banco', id(p.verso).replace(/^sotto$/, 'giu').replace(/^sopra$/, 'su'));
-        if (verso in WAYS) passi.push({ tipo, verso: verso as BenchWay, secondi: num(p.secondi, 0.1, MAX_SECONDS, 1) });
-        else errors.push(`«${titolo}»: «${p.verso}» non è una direzione (su, giu, sinistra, destra)`);
+        const verso = internalName('passi-banco', id(p.toward).replace(/^sotto$/, 'giu').replace(/^sopra$/, 'su'));
+        if (verso in WAYS) passi.push({ type: tipo, toward: verso as BenchWay, seconds: num(p.seconds, 0.1, MAX_SECONDS, 1) });
+        else errors.push(`«${titolo}»: «${p.toward}» non è una direzione (su, giu, sinistra, destra)`);
       }
     }
-    const guarda = [...new Set((Array.isArray(r.guarda) ? r.guarda : []).map((g: unknown) => String(g).trim()).filter((g: string) => PATH_RE.test(g)))].slice(0, 6) as string[];
+    const guarda = [...new Set((Array.isArray(r.watch) ? r.watch : []).map((g: unknown) => String(g).trim()).filter((g: string) => PATH_RE.test(g)))].slice(0, 6) as string[];
     if (!guarda.length) {
       errors.push(`«${titolo}»: "guarda" non ha campi del tipo componente.campo`);
       continue;
     }
-    const terreno = Array.isArray(r.terreno) && r.terreno.length === BENCH && r.terreno.every((row: unknown) => typeof row === 'string' && [...row].length === BENCH) ? (r.terreno as string[]) : undefined;
-    const cose = (Array.isArray(r.cose) ? r.cose : [])
+    const terreno = Array.isArray(r.terrain) && r.terrain.length === BENCH && r.terrain.every((row: unknown) => typeof row === 'string' && [...row].length === BENCH) ? (r.terrain as string[]) : undefined;
+    const cose = (Array.isArray(r.entities) ? r.entities : [])
       .slice(0, 6)
-      .filter((c: any) => c && typeof c.modulo === 'string')
-      .map((c: any) => ({ modulo: c.modulo, x: Math.round(num(c.x, -2, 2, 1)), y: Math.round(num(c.y, -2, 2, 0)), ...(parseJson(c.componenti ?? c.componenti_json) ? { componenti: parseJson(c.componenti ?? c.componenti_json) } : {}) }));
-    const componenti = parseJson(v.componenti ?? r.viandante_json);
-    const righe = [...new Set((Array.isArray(r.righe) ? r.righe : []).filter((n: unknown) => Number.isInteger(n) && (n as number) >= 1 && (n as number) <= lines))].slice(0, 12) as number[];
+      .filter((c: any) => c && typeof c.module === 'string')
+      .map((c: any) => ({ module: c.module, x: Math.round(num(c.x, -2, 2, 1)), y: Math.round(num(c.y, -2, 2, 0)), ...(parseJson(c.components ?? c.componenti_json) ? { components: parseJson(c.components ?? c.componenti_json) } : {}) }));
+    const componenti = parseJson(v.components ?? r.viandante_json);
+    const righe = [...new Set((Array.isArray(r.lines) ? r.lines : []).filter((n: unknown) => Number.isInteger(n) && (n as number) >= 1 && (n as number) <= lines))].slice(0, 12) as number[];
     cases.push({
-      titolo,
-      racconto: String(r.racconto ?? '').trim().slice(0, 300),
-      ...(terreno ? { terreno } : {}),
-      ...(componenti || oggetti.length ? { viandante: { ...(componenti ? { componenti } : {}), ...(oggetti.length ? { oggetti } : {}) } } : {}),
-      ...(cose.length ? { cose } : {}),
-      ...(passi.length ? { passi } : {}),
-      durata: num(r.durata, 0, MAX_SECONDS, 3),
-      guarda,
-      ...(righe.length ? { righe } : {}),
+      title: titolo,
+      story: String(r.story ?? '').trim().slice(0, 300),
+      ...(terreno ? { terrain: terreno } : {}),
+      ...(componenti || oggetti.length ? { wanderer: { ...(componenti ? { components: componenti } : {}), ...(oggetti.length ? { items: oggetti } : {}) } } : {}),
+      ...(cose.length ? { entities: cose } : {}),
+      ...(passi.length ? { steps: passi } : {}),
+      duration: num(r.duration, 0, MAX_SECONDS, 3),
+      watch: guarda,
+      ...(righe.length ? { lines: righe } : {}),
     });
   }
   return { cases, errors };
@@ -220,19 +223,19 @@ export function benchFiles(files: FileMap, manifest: Manifest, logic: string, c:
   }
   out[`modules/${manifest.id}/manifest.json`] = JSON.stringify(manifest);
   out[`modules/${manifest.id}/logic.lua`] = logic;
-  const trial: ItemDef[] = (c.viandante?.oggetti ?? [])
-    .filter((o) => !known(o.nome))
+  const trial: ItemDef[] = (c.wanderer?.items ?? [])
+    .filter((o) => !known(o.name))
     .map((o) => ({
-      id: trialId(o.nome),
-      name: o.nome,
-      description: `oggetto di prova: ${o.nome}`,
-      category: (ITEM_CATEGORIES as readonly string[]).includes(internalName('categorie', o.categoria ?? '')) ? (internalName('categorie', o.categoria!) as ItemDef['category']) : o.posto ? 'clothing' : 'misc',
+      id: trialId(o.name),
+      name: o.name,
+      description: `oggetto di prova: ${o.name}`,
+      category: (ITEM_CATEGORIES as readonly string[]).includes(internalName('categorie', o.category ?? '')) ? (internalName('categorie', o.category!) as ItemDef['category']) : o.slot ? 'clothing' : 'misc',
       weight: 1,
       stack: 1,
       tags: [],
-      glyph: [...o.nome][0].toUpperCase(),
+      glyph: [...o.name][0].toUpperCase(),
       color: '#cccccc',
-      ...(o.posto ? { slot: o.posto, equippable: true } : {}),
+      ...(o.slot ? { slot: o.slot, equippable: true } : {}),
       ...(o.bonus ? { bonus: o.bonus } : {}),
     }));
   if (trial.length) out['modules/bench.prova/manifest.json'] = JSON.stringify({ id: 'bench.prova', name: 'Oggetti di prova', kind: 'data', items: trial });
@@ -247,7 +250,7 @@ export async function runCase(
   c: BenchCase,
   opts: { wasmUri?: string; boot: (o: KernelOptions) => Promise<Kernel>; known: (name: string) => string | undefined },
 ): Promise<BenchRun> {
-  const k = await opts.boot({ files: benchFiles(files, manifest, logic, c, opts.known), store: memoryStore(), ai: new MockAiModels(), wasmUri: opts.wasmUri, bench: { terreno: c.terreno } });
+  const k = await opts.boot({ files: benchFiles(files, manifest, logic, c, opts.known), store: memoryStore(), ai: new MockAiModels(), wasmUri: opts.wasmUri, bench: { terreno: c.terrain } });
   const errori: string[] = [];
   const messaggi: string[] = [];
   const faults = new Map<string, string>();
@@ -263,25 +266,25 @@ export async function runCase(
 
   const player = k.wandererEntity;
   Object.assign(k.wandererPos(), { x: 0.5, y: 0.5 });
-  for (const [name, data] of Object.entries(c.viandante?.componenti ?? {})) {
+  for (const [name, data] of Object.entries(c.wanderer?.components ?? {})) {
     if (['pos', 'module', 'player', 'inventory', 'hand', 'slots'].includes(name)) continue;
     const cur = k.ecs.get(player, name);
     if (cur && typeof cur === 'object') Object.assign(cur, structuredClone(data));
     else k.ecs.set(player, name, structuredClone(data));
   }
   const item = (nome: string) => opts.known(nome) ?? (k.content.get(trialId(nome)) ? trialId(nome) : undefined);
-  for (const o of c.viandante?.oggetti ?? []) {
-    const it = item(o.nome);
-    if (!it || !k.give(it, 1)) errori.push(`il viandante non riesce a portare «${o.nome}»`);
+  for (const o of c.wanderer?.items ?? []) {
+    const it = item(o.name);
+    if (!it || !k.give(it, 1)) errori.push(`il viandante non riesce a portare «${o.name}»`);
   }
-  const things = (c.cose ?? []).map((t) => {
-    const m = k.modules.get(t.modulo);
+  const things = (c.entities ?? []).map((t) => {
+    const m = k.modules.get(t.module);
     if (!m || (m.manifest.kind !== 'entity' && m.manifest.kind !== 'item')) {
-      errori.push(`«${t.modulo}» non è una cosa che si possa mettere nella scena`);
+      errori.push(`«${t.module}» non è una cosa che si possa mettere nella scena`);
       return 0;
     }
     const id = k.spawnModuleEntity(m, t.x + 0.5, t.y + 0.5);
-    for (const [name, data] of Object.entries(t.componenti ?? {})) k.ecs.set(id, name, structuredClone(data));
+    for (const [name, data] of Object.entries(t.components ?? {})) k.ecs.set(id, name, structuredClone(data));
     return id;
   });
 
@@ -300,7 +303,7 @@ export async function runCase(
   const frames: BenchFrame[] = [];
   let t = 0;
   const snap = (passo?: number) => {
-    const valori = Object.fromEntries(c.guarda.map((g) => [g, read(g)]));
+    const valori = Object.fromEntries(c.watch.map((g) => [g, read(g)]));
     frames.push({ t: Math.round(t * 100) / 100, ...(passo === undefined ? {} : { passo }), valori, pos: [where(player), ...things.map(where)] });
     return valori;
   };
@@ -315,23 +318,23 @@ export async function runCase(
 
   const prima = snap();
   const panel = manifest.ui?.id;
-  (c.passi ?? []).forEach((p, i) => {
+  (c.steps ?? []).forEach((p, i) => {
     let ok = true;
-    if (p.tipo === 'slot') {
-      const it = item(p.oggetto);
+    if (p.type === 'slot') {
+      const it = item(p.item);
       const at = it ? k.inventory().slots.findIndex((s) => s?.item === it) : -1;
       ok = !!panel && at >= 0 && k.equip(panel, p.slot, at);
-      if (!ok) errori.push(`passo ${i + 1}: «${p.oggetto}» non va nello slot «${p.slot}»${at < 0 ? ' (il viandante non lo porta)' : ''}`);
-    } else if (p.tipo === 'remove') {
+      if (!ok) errori.push(`passo ${i + 1}: «${p.item}» non va nello slot «${p.slot}»${at < 0 ? ' (il viandante non lo porta)' : ''}`);
+    } else if (p.type === 'remove') {
       ok = !!panel && k.unequip(panel, p.slot);
       if (!ok) errori.push(`passo ${i + 1}: lo slot «${p.slot}» è vuoto`);
-    } else if (p.tipo === 'button') {
-      if (panel) k.uiAction(panel, p.azione);
+    } else if (p.type === 'button') {
+      if (panel) k.uiAction(panel, p.action);
     }
-    if (p.tipo === 'wait') run(p.secondi);
-    else if (p.tipo === 'walk') {
-      k.input.setHeld(WAYS[p.verso], true);
-      run(p.secondi);
+    if (p.type === 'wait') run(p.seconds);
+    else if (p.type === 'walk') {
+      k.input.setHeld(WAYS[p.toward], true);
+      run(p.seconds);
       k.input.releaseAll();
     }
     else {
@@ -340,11 +343,11 @@ export async function runCase(
       snap(i);
     }
   });
-  run(c.durata);
+  run(c.duration);
   const dopo = frames[frames.length - 1].valori;
-  const cambiati = c.guarda.filter((g) => JSON.stringify(prima[g]) !== JSON.stringify(dopo[g]));
+  const cambiati = c.watch.filter((g) => JSON.stringify(prima[g]) !== JSON.stringify(dopo[g]));
   for (const [key, message] of faults) errori.push(`${key.slice(prefix.length)}: ${message}`);
-  if (!cambiati.length && !faults.size) errori.push(`non cambia nulla di ciò che guarda (${c.guarda.join(', ')})`);
+  if (!cambiati.length && !faults.size) errori.push(`non cambia nulla di ciò che guarda (${c.watch.join(', ')})`);
   k.sandbox.close();
   return { prima, dopo, cambiati, frames, messaggi, errori };
 }

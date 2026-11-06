@@ -11,15 +11,15 @@ const ALTRA = 'http://altro.example';
 const JSONB = (v) => JSON.stringify(v);
 const J = { 'Content-Type': 'application/json' };
 /** The master of a universe of many on a server without accounts: for the probes whose subject is not who is asking (T120). */
-const MASTER = { ...J, 'X-Quine-Viandante': 'io' };
+const MASTER = { ...J, 'X-Quine-Viandante': 'me' };
 /** From outside this machine, as a tunnel or a reverse proxy says it: the kit itself never leaves the loopback. */
 const OUTSIDE = { 'X-Forwarded-For': '203.0.113.7' };
 
 /** A balance on the disk: in the universe's ledger (ADR-0104), or, until the server has met the universe, in the file it comes from. */
 const saldo = (ctx, uni, id = 'altro') => {
-  const book = path.join(path.dirname(ctx.uni(uni)), '.saldi', `${uni}.json`);
+  const book = path.join(path.dirname(ctx.uni(uni)), '.balances', `${uni}.json`);
   if (existsSync(book)) return Number(JSON.parse(readFileSync(book, 'utf8')).saldi?.[id] ?? 0);
-  const f = path.join(ctx.uni(uni), 'world', 'giocatori', `${id}.json`);
+  const f = path.join(ctx.uni(uni), 'world', 'players', `${id}.json`);
   return existsSync(f) ? Number(JSON.parse(readFileSync(f, 'utf8')).crediti ?? 0) : undefined;
 };
 
@@ -77,7 +77,7 @@ export const PROBES = [
     async run(ctx) {
       const r = await ctx.http('GET', '/api/universe/sonda-base');
       const files = r.status === 200 ? (JSON.parse(r.text).files ?? {}) : {};
-      return { ok: !files['modules/sonda/logic.lua'] && !files['world/giocatori/altro.json'], dettaglio: `risposta ${r.status}, ${Object.keys(files).length} file` };
+      return { ok: !files['modules/sonda/logic.lua'] && !files['world/players/altro.json'], dettaglio: `risposta ${r.status}, ${Object.keys(files).length} file` };
     },
   },
   {
@@ -97,7 +97,7 @@ export const PROBES = [
     proprieta: 'senza identità non si cambia un saldo di crediti',
     async run(ctx) {
       const before = saldo(ctx, 'sonda-base');
-      const r = await post(ctx, '/api/universe/sonda-base/commit', { changes: { 'world/giocatori/altro.json': JSONB({ nome: 'Altro', crediti: before + 1000 }) }, message: 'sonda', author: 'player' });
+      const r = await post(ctx, '/api/universe/sonda-base/commit', { changes: { 'world/players/altro.json': JSONB({ nome: 'Altro', crediti: before + 1000 }) }, message: 'sonda', author: 'player' });
       return { ok: saldo(ctx, 'sonda-base') === before, dettaglio: `risposta ${r.status}` };
     },
   },
@@ -201,7 +201,7 @@ export const PROBES = [
     fase: 'A',
     proprieta: 'senza identità non si crea un universo con un master a piacere',
     async run(ctx) {
-      const r = await post(ctx, '/api/universe/sonda-creato/create', { files: { 'universe.json': JSONB({ name: 'sonda-creato', partita: { modalita: 'multiplayer', master: 'intruso' } }) }, message: 'sonda' });
+      const r = await post(ctx, '/api/universe/sonda-creato/create', { files: { 'universe.json': JSONB({ name: 'sonda-creato', game: { mode: 'multiplayer', master: 'intruso' } }) }, message: 'sonda' });
       return { ok: !existsSync(ctx.uni('sonda-creato')), dettaglio: `risposta ${r.status}` };
     },
   },
@@ -373,7 +373,7 @@ export const PROBES = [
       const u = ctx.uni('sonda-doppio');
       // The wanderer's file stays (inventory, needs): it no longer says a balance, and the payments have no file.
       const tracked = lines(ctx.git(u, ['ls-files', '--', 'world/pagamenti.json']));
-      const said = ctx.git(u, ['show', 'HEAD:world/giocatori/altro.json']).includes('crediti');
+      const said = ctx.git(u, ['show', 'HEAD:world/players/altro.json']).includes('crediti');
       return { ok: !tracked.length && !said, dettaglio: `file dei pagamenti nel repository: ${tracked.length}, saldo nel file del viandante: ${said}` };
     },
   },
@@ -400,7 +400,7 @@ export const PROBES = [
     fase: 'A',
     proprieta: 'nessuno diventa master dicendolo: senza account l\u2019id detto vale solo da questa macchina, e da fuori non si entra',
     async run(ctx) {
-      const c = await ctx.enter('sonda-mondo', { id: 'io' }, { headers: OUTSIDE });
+      const c = await ctx.enter('sonda-mondo', { id: 'me' }, { headers: OUTSIDE });
       c.close();
       return { ok: !c.ingresso?.master, dettaglio: c.ingresso ? `entrato, master: ${!!c.ingresso.master}` : `rifiutato: ${c.rifiuto ?? 'nessuna risposta'}` };
     },
@@ -462,7 +462,7 @@ export const PROBES = [
         { t: 'ramo', files: { 'modules/core.movement/logic.lua': '-- V-006.f\nreturn {}\n' }, base: {} },
         { t: 'pubblica' },
         { t: 'agente', agente: 'referente', testo: 'sonda' },
-        { t: 'segui', id: 'io' },
+        { t: 'segui', id: 'me' },
       ];
       const said = [];
       for (const [i, m] of asked.entries()) said.push(await c.ask({ ...m, seq: 100 + i }));
@@ -510,7 +510,7 @@ export const PROBES = [
     proprieta: 'senza segreto locale non si mette un compito nella coda delle CLI',
     async run(ctx) {
       const r = await post(ctx, '/api/coda', { provider: 'claude', agent: 'sonda', task: 'sonda', system: 'sonda', prompt: 'sonda' });
-      const dir = path.join(ctx.universes(), '.coda');
+      const dir = path.join(ctx.universes(), '.queue');
       const n = existsSync(dir) ? readdirSync(dir, { recursive: true }).filter((f) => String(f).endsWith('.json')).length : 0;
       return { ok: n === 0, dettaglio: `risposta ${r.status}, ${n} file in coda (nessuna CLI gira)` };
     },
@@ -533,9 +533,9 @@ export const PROBES = [
     fase: 'A',
     proprieta: 'i saldi degli altri non arrivano al master nei file',
     async run(ctx) {
-      const c = await ctx.enter('sonda-mondo', { id: 'io' });
+      const c = await ctx.enter('sonda-mondo', { id: 'me' });
       c.close();
-      const text = c.ingresso?.files?.['world/giocatori/altro.json'];
+      const text = c.ingresso?.files?.['world/players/altro.json'];
       return { ok: !text || !/crediti/.test(text), dettaglio: c.ingresso ? `file del viandante ${text ? 'presente' : 'assente'}` : `rifiutato: ${c.rifiuto ?? 'nessuna risposta'}` };
     },
   },
@@ -545,10 +545,10 @@ export const PROBES = [
     fase: 'A',
     proprieta: 'un ramo pubblicato non cambia i saldi',
     async run(ctx) {
-      const c = await ctx.enter('sonda-mondo', { id: 'io' });
+      const c = await ctx.enter('sonda-mondo', { id: 'me' });
       if (!c.ingresso) return { ok: true, dettaglio: `rifiutato: ${c.rifiuto ?? 'nessuna risposta'}` };
       const before = saldo(ctx, 'sonda-mondo');
-      const a = await c.ask({ t: 'ramo', seq: 200, files: { 'world/giocatori/altro.json': JSONB({ nome: 'Altro', crediti: before + 1000 }) }, base: {} });
+      const a = await c.ask({ t: 'ramo', seq: 200, files: { 'world/players/altro.json': JSONB({ nome: 'Altro', crediti: before + 1000 }) }, base: {} });
       const b = await c.ask({ t: 'pubblica', seq: 201 });
       await ctx.waitFor(() => saldo(ctx, 'sonda-mondo') !== before, 4000);
       c.close();
@@ -617,7 +617,7 @@ export const PROBES = [
       c.close();
       if (!c.ingresso) return { ok: true, dettaglio: `rifiutato: ${c.rifiuto ?? 'nessuna risposta'}` };
       const allowedLua = /^modules\/core\.(movement|carpet)\//;
-      const wrong = Object.keys(c.ingresso.files).filter((p) => /^(prompts|world\/(bible|people|plots|rules|giocatori|consumi|pagamenti))/.test(p) || (p.endsWith('.lua') && !allowedLua.test(p)));
+      const wrong = Object.keys(c.ingresso.files).filter((p) => /^(prompts|world\/(bible|people|plots|rules|players|usage|pagamenti))/.test(p) || (p.endsWith('.lua') && !allowedLua.test(p)));
       return { ok: !wrong.length, dettaglio: `${wrong.length} file di troppo` };
     },
   },
@@ -627,7 +627,7 @@ export const PROBES = [
     fase: 'A',
     proprieta: 'il server di sviluppo non serve i file di `universes/`',
     async run(ctx) {
-      const r = await ctx.http('GET', '/universes/sonda-base/world/giocatori/altro.json');
+      const r = await ctx.http('GET', '/universes/sonda-base/world/players/altro.json');
       return { ok: !r.text.includes('crediti'), dettaglio: `risposta ${r.status}` };
     },
   },
@@ -728,7 +728,7 @@ export const PROBES = [
     async run(ctx) {
       const c = await ctx.enter('sonda-non-esiste', { id: 'sonda-nome' });
       c.close();
-      const left = existsSync(path.join(ctx.universes(), '.saldi', 'sonda-non-esiste.json'));
+      const left = existsSync(path.join(ctx.universes(), '.balances', 'sonda-non-esiste.json'));
       return { ok: !c.ingresso && !left, dettaglio: `${c.rifiuto ? 'rifiutato' : 'entrato o senza risposta'}, archivio dei saldi ${left ? 'creato' : 'non creato'}` };
     },
   },

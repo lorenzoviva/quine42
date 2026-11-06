@@ -4,10 +4,10 @@
   "kind": "data",
   "version": "0.1.0",
   "description": "La giornata di chi tiene le bestie: al pascolo dalla mattina, il formaggio fatto sul posto, portato al deposito la sera.",
-  "mestieri": [
+  "jobs": [
     {
       "id": "shepherd",
-      "nomi": [
+      "names": [
         "pastore",
         "pastora",
         "mandriano",
@@ -21,53 +21,53 @@
         "pecoraio",
         "pecoraia"
       ],
-      "posto": {
-        "casella": "g"
+      "workplace": {
+        "tile": "g"
       },
-      "giornata": {
+      "day": {
         "morning": [
           {
-            "fa": "go",
-            "dove": "work"
+            "does": "go",
+            "where": "work"
           },
           {
-            "fa": "wait",
-            "durata": 30,
-            "posa": "graze"
+            "does": "wait",
+            "duration": 30,
+            "pose": "graze"
           }
         ],
         "day": [
           {
-            "fa": "produce",
-            "oggetto": "item.formaggio",
-            "quante": 1,
-            "durata": 40,
-            "posa": "graze",
-            "dice": "Latte buono, oggi."
+            "does": "produce",
+            "item": "item.formaggio",
+            "count": 1,
+            "duration": 40,
+            "pose": "graze",
+            "says": "Latte buono, oggi."
           },
           {
-            "fa": "wait",
-            "durata": 30,
-            "posa": "graze"
+            "does": "wait",
+            "duration": 30,
+            "pose": "graze"
           }
         ],
         "evening": [
           {
-            "fa": "carry",
-            "oggetto": "item.formaggio",
-            "dove": "square"
+            "does": "carry",
+            "item": "item.formaggio",
+            "where": "square"
           },
           {
-            "fa": "chat"
+            "does": "chat"
           }
         ],
         "night": [
           {
-            "fa": "go",
-            "dove": "home"
+            "does": "go",
+            "where": "home"
           },
           {
-            "fa": "rest"
+            "does": "rest"
           }
         ]
       }

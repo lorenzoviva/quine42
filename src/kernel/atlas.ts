@@ -5,30 +5,32 @@
 
 import type { FileMap } from './types';
 import { Rng } from './rng';
+import { internalFields } from './internalNames';
 
 export interface Region {
   id: string;
-  nome: string;
-  descrizione: string;
+  name: string;
+  description: string;
   /** Layout (environment) id. */
-  ambiente: string;
-  centro: [number, number];
+  environment: string;
+  center: [number, number];
   /** In chunks (Chebyshev distance). */
-  raggio: number;
+  radius: number;
 }
 
 export interface Atlas {
-  regioni: Region[];
+  regions: Region[];
 }
 
 export const ATLAS_FILE = 'world/atlas.json';
 
 export function readAtlas(files: FileMap): Atlas {
   try {
-    const a = JSON.parse(files[ATLAS_FILE] ?? '{}');
-    return { regioni: Array.isArray(a.regioni) ? a.regioni : [] };
+    // An atlas of the contract 0.3 (`regioni`, `centro`) reads internal (T308a): the migration ports the file, this a stray one.
+    const a = internalFields('atlas', JSON.parse(files[ATLAS_FILE] ?? '{}'));
+    return { regions: Array.isArray(a.regions) ? a.regions : [] };
   } catch {
-    return { regioni: [] };
+    return { regions: [] };
   }
 }
 
@@ -40,9 +42,9 @@ export function writeAtlas(a: Atlas): string {
 export function regionAt(atlas: Atlas, cx: number, cy: number): Region | undefined {
   let best: Region | undefined;
   let bd = Infinity;
-  for (const r of atlas.regioni) {
-    const d = Math.max(Math.abs(cx - r.centro[0]), Math.abs(cy - r.centro[1]));
-    if (d <= r.raggio && d < bd) [best, bd] = [r, d];
+  for (const r of atlas.regions) {
+    const d = Math.max(Math.abs(cx - r.center[0]), Math.abs(cy - r.center[1]));
+    if (d <= r.radius && d < bd) [best, bd] = [r, d];
   }
   return best;
 }
@@ -74,7 +76,7 @@ export function placeRegion(atlas: Atlas, from: [number, number], dir: string, d
     const c: [number, number] = [from[0] + vx * d, from[1] + vy * d];
     let free = true;
     for (let y = c[1] - radius; y <= c[1] + radius && free; y++) for (let x = c[0] - radius; x <= c[0] + radius && free; x++) if (explored.has(`${x},${y}`)) free = false;
-    for (const r of atlas.regioni) if (Math.max(Math.abs(r.centro[0] - c[0]), Math.abs(r.centro[1] - c[1])) <= r.raggio + radius) free = false;
+    for (const r of atlas.regions) if (Math.max(Math.abs(r.center[0] - c[0]), Math.abs(r.center[1] - c[1])) <= r.radius + radius) free = false;
     if (Math.max(Math.abs(c[0]), Math.abs(c[1])) <= radius + 1) free = false;
     if (free) return c;
   }
@@ -89,13 +91,13 @@ export function defaultAtlas(layouts: Record<string, { name: string; description
   const ordinary = /^(borgo|bosco|campi|rovine|locanda)$/;
   const ids = Object.keys(layouts).filter((id) => !ordinary.test(id));
   const rng = new Rng(seed ^ 0x51a7);
-  const atlas: Atlas = { regioni: [] };
+  const atlas: Atlas = { regions: [] };
   ids.forEach((id, i) => {
     const dir = COMPASS[(i * 3 + rng.int(8)) % 8];
     const dist = 3 + (i % 4) * 2 + rng.int(3);
     const radius = /deserto|giungla|montagne|lago|mare|oceano/.test(id) ? 2 : 1;
     const centro = placeRegion(atlas, [0, 0], dir, dist, radius, explored);
-    atlas.regioni.push({ id, nome: layouts[id].name, descrizione: layouts[id].description, ambiente: id, centro, raggio: radius });
+    atlas.regions.push({ id, name: layouts[id].name, description: layouts[id].description, environment: id, center: centro, radius: radius });
   });
   return atlas;
 }
@@ -110,11 +112,11 @@ export function directionsFrom(atlas: Atlas, chunks: Array<{ name: string; cx: n
     seen.add(p.name);
     out.push({ d, text: `«${p.name}»: ${direction(p.cx - cx, p.cy - cy)}, ${d === 1 ? 'appena oltre' : `a ${d} luoghi da qui`}` });
   }
-  for (const r of atlas.regioni) {
-    const d = Math.max(Math.abs(r.centro[0] - cx), Math.abs(r.centro[1] - cy));
-    if (seen.has(r.nome)) continue;
-    seen.add(r.nome);
-    out.push({ d: d + 0.5, text: d <= r.raggio ? `qui siamo nella regione «${r.nome}»` : `regione «${r.nome}» (${r.descrizione}): ${direction(r.centro[0] - cx, r.centro[1] - cy)}, a circa ${d} luoghi` });
+  for (const r of atlas.regions) {
+    const d = Math.max(Math.abs(r.center[0] - cx), Math.abs(r.center[1] - cy));
+    if (seen.has(r.name)) continue;
+    seen.add(r.name);
+    out.push({ d: d + 0.5, text: d <= r.radius ? `qui siamo nella regione «${r.name}»` : `regione «${r.name}» (${r.description}): ${direction(r.center[0] - cx, r.center[1] - cy)}, a circa ${d} luoghi` });
   }
   return out.sort((a, b) => a.d - b.d).slice(0, max).map((o) => o.text);
 }

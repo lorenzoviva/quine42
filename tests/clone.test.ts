@@ -20,33 +20,33 @@ function many(): FileMap {
   const carpet = JSON.parse(bundledFiles[CARPET]);
   return {
     ...bundledFiles,
-    'universe.json': JSON.stringify({ ...cfg, name: 'prima', partita: { modalita: 'multiplayer', morte: 2, pvp: true, altroTraGiocatori: false, master: 'io' } }, null, 2) + '\n',
-    [CARPET]: JSON.stringify({ ...carpet, carta: { autore: 'engineer', pagante: 'io', titolare: 'io' } }, null, 2) + '\n',
+    'universe.json': JSON.stringify({ ...cfg, name: 'prima', game: { mode: 'multiplayer', death: 2, pvp: true, freeActionsBetweenPlayers: false, master: 'me' } }, null, 2) + '\n',
+    [CARPET]: JSON.stringify({ ...carpet, card: { author: 'engineer', payer: 'me', holder: 'me' } }, null, 2) + '\n',
     [CARDS_FILE]:
       JSON.stringify({
-        utilizzi: { 'chunk:0_0': { luoghi: 1, trame: 0, prompt: 3 } },
-        luoghi: {
-          '0_0': { autore: 'cartographer', pagante: 'comune', titolare: 'io', nome: 'La piazza' },
-          '1_0': { autore: 'cartographer', pagante: 'anna', titolare: 'anna', nome: 'Il guado' },
+        uses: { 'chunk:0_0': { chunks: 1, plots: 0, prompt: 3 } },
+        chunks: {
+          '0_0': { author: 'cartographer', payer: 'comune', holder: 'me', name: 'La piazza' },
+          '1_0': { author: 'cartographer', payer: 'anna', holder: 'anna', name: 'Il guado' },
         },
       }, null, 1) + '\n',
   };
 }
 
-const owners = (files: FileMap) => allCards(files).map((c) => `${c.id} ${c.autore} ${c.pagante} ${c.titolare}`).sort();
+const owners = (files: FileMap) => allCards(files).map((c) => `${c.id} ${c.author} ${c.payer} ${c.holder}`).sort();
 
 describe('cloning a universe with another master (T42d)', () => {
   it('the clone has the same world and the same cards, another name and another master', () => {
     const files = many();
     const { changes, from } = cloneChanges(files, { nome: 'seconda', master: 'anna' });
-    expect(from).toBe('io');
+    expect(from).toBe('me');
     // One more origin on every card (T45c): the files with cards change, nothing else.
     expect(Object.keys(changes).sort()).toEqual([CARPET, 'universe.json', CARDS_FILE].sort());
     const clone = { ...files, ...changes };
     const cfg = JSON.parse(clone['universe.json']);
     expect(cfg.name).toBe('seconda');
     expect(cfg.seed).toBe(JSON.parse(files['universe.json']).seed);
-    expect(cfg.partita).toEqual({ modalita: 'multiplayer', morte: 2, pvp: true, altroTraGiocatori: false, master: 'anna' });
+    expect(cfg.game).toEqual({ mode: 'multiplayer', death: 2, pvp: true, freeActionsBetweenPlayers: false, master: 'anna' });
     expect(owners(clone)).toEqual(owners(files));
     expect(owners(clone).length).toBeGreaterThanOrEqual(3);
   });
@@ -55,15 +55,15 @@ describe('cloning a universe with another master (T42d)', () => {
     const files = many();
     const { changes } = cloneChanges(files, { nome: 'seconda', master: 'bruno', titolari: 'master' });
     const cards = new Map(allCards({ ...files, ...changes }).map((c) => [c.id, c]));
-    expect(cards.get(moduleCardId({ id: 'core.carpet', kind: 'system' }))).toMatchObject({ autore: 'engineer', pagante: 'io', titolare: 'bruno' });
-    expect(cards.get('chunk:0_0')).toMatchObject({ autore: 'cartographer', pagante: 'comune', titolare: 'bruno' });
-    expect(cards.get('chunk:1_0')).toMatchObject({ pagante: 'anna', titolare: 'anna' });
-    expect(cards.get('chunk:0_0')!.utilizzi.prompt).toBe(3);
+    expect(cards.get(moduleCardId({ id: 'core.carpet', kind: 'system' }))).toMatchObject({ author: 'engineer', payer: 'me', holder: 'bruno' });
+    expect(cards.get('chunk:0_0')).toMatchObject({ author: 'cartographer', payer: 'comune', holder: 'bruno' });
+    expect(cards.get('chunk:1_0')).toMatchObject({ payer: 'anna', holder: 'anna' });
+    expect(cards.get('chunk:0_0')!.uses.prompt).toBe(3);
   });
 
   it('refuses what is not a change of master', () => {
     const files = many();
-    expect(() => cloneChanges(files, { nome: 'seconda', master: 'io' })).toThrow(/già il master/);
+    expect(() => cloneChanges(files, { nome: 'seconda', master: 'me' })).toThrow(/già il master/);
     expect(() => cloneChanges(files, { nome: 'Seconda!', master: 'anna' })).toThrow(/nome/);
     expect(() => cloneChanges(files, { nome: 'seconda', master: 'Anna B' })).toThrow(/viandante/);
     expect(() => cloneChanges(bundledFiles, { nome: 'seconda', master: 'anna' })).toThrow(/multigiocatore/);
@@ -74,8 +74,8 @@ describe('cloning a universe with another master (T42d)', () => {
     const k = await Kernel.boot({ files: { ...files, ...cloneChanges(files, { nome: 'seconda', master: 'anna' }).changes }, store: memoryStore(), ai: new MockAiModels() });
     expect(k.gameSetup().master).toBe('anna');
     expect(k.isMaster('anna')).toBe(true);
-    expect(k.isMaster('io')).toBe(false);
-    expect(k.godMode('io')).toBe(false);
+    expect(k.isMaster('me')).toBe(false);
+    expect(k.godMode('me')).toBe(false);
   });
 });
 
@@ -91,8 +91,8 @@ describe('the clone on disk (T42d)', () => {
         mkdirSync(path.dirname(path.join(src, rel)), { recursive: true });
         writeFileSync(path.join(src, rel), files[rel]);
       }
-      mkdirSync(path.join(src, 'world/giocatori'), { recursive: true });
-      writeFileSync(path.join(src, 'world/giocatori/anna.json'), '{"x":3}\n');
+      mkdirSync(path.join(src, 'world/players'), { recursive: true });
+      writeFileSync(path.join(src, 'world/players/anna.json'), '{"x":3}\n');
       git(base, 'init', '-q', src);
       git(src, 'add', '-A');
       git(src, 'commit', '-q', '-m', 'genesi');
@@ -104,21 +104,21 @@ describe('the clone on disk (T42d)', () => {
 
       const r = await cloneUniverse(base, src, { nome: 'seconda', master: 'anna' });
       const dst = path.join(base, 'seconda');
-      expect(r).toMatchObject({ nome: 'seconda', from: 'io' });
-      expect(git(dst, 'log', '--format=%s').trim().split('\n')).toEqual(['clone di «prima»: il master è anna (prima io)', 'genesi']);
+      expect(r).toMatchObject({ nome: 'seconda', from: 'me' });
+      expect(git(dst, 'log', '--format=%s').trim().split('\n')).toEqual(['clone di «prima»: il master è anna (prima me)', 'genesi']);
       expect(git(dst, 'for-each-ref', 'refs/heads/rami/').trim()).toBe('');
       expect(git(dst, 'status', '--porcelain').trim()).toBe('');
       expect(readFileSync(path.join(dst, 'maps/0_0.json'), 'utf8')).toBe('{"plan":{}}\n');
-      expect(readFileSync(path.join(dst, 'world/giocatori/anna.json'), 'utf8')).toBe('{"x":3}\n');
-      expect(JSON.parse(readFileSync(path.join(dst, 'universe.json'), 'utf8')).partita.master).toBe('anna');
+      expect(readFileSync(path.join(dst, 'world/players/anna.json'), 'utf8')).toBe('{"x":3}\n');
+      expect(JSON.parse(readFileSync(path.join(dst, 'universe.json'), 'utf8')).game.master).toBe('anna');
       const read = (root: string) => Object.fromEntries(keep.map((rel) => [rel, readFileSync(path.join(root, rel), 'utf8')]));
       expect(owners(read(dst))).toEqual(owners(read(src)));
 
       expect(git(src, 'rev-parse', 'HEAD')).toBe(before);
       expect(git(src, 'for-each-ref', '--format=%(refname)', 'refs/heads/rami/').trim()).toBe('refs/heads/rami/master');
-      expect(JSON.parse(readFileSync(path.join(src, 'universe.json'), 'utf8')).partita.master).toBe('io');
+      expect(JSON.parse(readFileSync(path.join(src, 'universe.json'), 'utf8')).game.master).toBe('me');
       await expect(cloneUniverse(base, src, { nome: 'seconda', master: 'bruno' })).rejects.toThrow(/esiste già/);
-      await expect(cloneUniverse(base, src, { nome: 'terza', master: 'io' })).rejects.toThrow(/già il master/);
+      await expect(cloneUniverse(base, src, { nome: 'terza', master: 'me' })).rejects.toThrow(/già il master/);
       expect(existsSync(path.join(base, 'terza'))).toBe(false);
     } finally {
       rmSync(base, { recursive: true, force: true });

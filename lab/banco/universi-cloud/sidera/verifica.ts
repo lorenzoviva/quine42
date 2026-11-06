@@ -35,7 +35,7 @@ const sezione = (t: string) => rapporto.push('', `## ${t}`, '');
 // ---------------------------------------------------------------- 1. la quarta parete
 
 const files = fileDi(SIDERA, { mappe: true });
-const words = lexiconWords(files['world/lessico.md']);
+const words = lexiconWords(files['world/lexicon.md']);
 const testi = (v: unknown): string[] => (typeof v === 'string' ? [v] : Array.isArray(v) ? v.flatMap(testi) : v && typeof v === 'object' ? Object.values(v).flatMap(testi) : []);
 const nostri = Object.keys(files).filter((p) => {
   if (p.startsWith('world/') || p.startsWith('maps/') || p === 'prompts/theme.md' || p === 'universe.json') return true;
@@ -55,7 +55,7 @@ for (const p of nostri) {
   for (const s of list) {
     frasi++;
     // Il lessico definisce le sue parole: lì soltanto non si cercano i glossari.
-    const m = metaBreak(s, p === 'world/lessico.md' ? [] : words);
+    const m = metaBreak(s, p === 'world/lexicon.md' ? [] : words);
     if (m) violazioni.push(`${p}: «${m}» in «${s.slice(0, 90)}»`);
   }
 }
@@ -91,13 +91,13 @@ for (const t of NUOVE) {
   if (!rune) runeErr.push(`${t}: ${errors.join('; ')}`);
   else if (rune.rune.glyph !== r.glyph || rune.rune.color !== r.color) runeErr.push(`${t}: il validatore ripara il segno o il colore`);
   else viste[t] = r;
-  if (!files['world/canone.md'].includes(`(«${t}»`)) runeErr.push(`${t}: assente dal canone`);
+  if (!files['world/canon.md'].includes(`(«${t}»`)) runeErr.push(`${t}: assente dal canone`);
 }
 if (NUOVE.length !== 12) runeErr.push(`le rune nuove sono ${NUOVE.length}, non 12`);
 problemi.push(...runeErr);
 const soc = repairSociety(readPeople(files), (t) => (JSON.parse(files[`modules/${t}/manifest.json`] ?? '{}').tags?.includes('animale') ? 'animal' : 'person'));
 problemi.push(...soc.fixes.map((f) => `società: ${f}`));
-const persone = readPeople(files).persone;
+const persone = readPeople(files).people;
 const trame = readPlots(files);
 const regioni = JSON.parse(files['world/atlas.json']).regioni;
 if (persone.length !== 24) problemi.push(`persone: ${persone.length}, non 24`);
@@ -107,7 +107,7 @@ sezione('4. Rune, società, trame, atlante');
 rapporto.push(
   `- ${NUOVE.length} rune nuove rivalidate in fila con \`validateNewRune\` contro le 4 di sempre: ${runeErr.length ? runeErr.join('; ') : 'tutte valide, segno e colore invariati, tutte nel canone'}.`,
   `- ${persone.length} persone: \`repairSociety\` ${soc.fixes.length ? `corregge ${soc.fixes.length} cose` : 'non corregge niente'} (legami reciproci, generi, specie, nomi).`,
-  `- ${trame.length} trame, ${trame.filter((p) => p.missione).length} con una missione; ${regioni.length} regioni nell'atlante.`,
+  `- ${trame.length} trame, ${trame.filter((p) => p.quest).length} con una missione; ${regioni.length} regioni nell'atlante.`,
 );
 
 // ---------------------------------------------------------------- 3. il kernel vero
@@ -205,8 +205,8 @@ async function vivi(cx: number, cy: number): Promise<void> {
     if (man.persona) {
       const who = await k.ensureIdentity(id);
       if (who) {
-        const p = persone.find((x) => x.nome === who.name);
-        if (p && p.origine === k.ecs.get(id, 'origin')?.key) conosciuti.add(p.nome);
+        const p = persone.find((x) => x.name === who.name);
+        if (p && p.origin === k.ecs.get(id, 'origin')?.key) conosciuti.add(p.name);
       }
     }
     for (const a of man.actions ?? []) {

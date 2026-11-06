@@ -77,8 +77,8 @@ describe('a fault open', () => {
     k.give('item.pane', 1);
     expect(k.saveState()).toBe(true);
     const files = k.repo.head().files;
-    expect(files['world/giocatori/bea.json']).toContain('item.pane');
-    expect(files['world/giocatori/io.json']).toContain('item.pane');
+    expect(files['world/players/bea.json']).toContain('item.pane');
+    expect(files['world/players/me.json']).toContain('item.pane');
   });
 
   it('R goes back as before: to the last commit, which now has the data saved with the fault open', async () => {
@@ -87,16 +87,16 @@ describe('a fault open', () => {
     k.saveFile('modules/mech.posa/manifest.json', '{ rotto', true);
     k.give('item.pane', 4);
     k.saveState();
-    const saved = k.repo.head().files['world/giocatori/io.json'];
+    const saved = k.repo.head().files['world/players/me.json'];
     k.rollback();
     expect(k.faults.list().filter((f) => f.key.startsWith('manifest:'))).toEqual([]);
     expect(k.repo.working['modules/mech.posa/manifest.json']).toBe(valid);
-    expect(k.repo.working['world/giocatori/io.json']).toBe(saved);
+    expect(k.repo.working['world/players/me.json']).toBe(saved);
     expect(k.repo.isDirty()).toBe(false);
   });
 
   it('a universe that is not this world’s saves nothing: of another kernel, or with universe.json unreadable', async () => {
-    const other = (u: FileMap): FileMap => ({ ...u, 'universe.json': JSON.stringify({ ...JSON.parse(u['universe.json']), kernel: '0.4.0' }) });
+    const other = (u: FileMap): FileMap => ({ ...u, 'universe.json': JSON.stringify({ ...JSON.parse(u['universe.json']), kernel: '0.9.0' }) });
     const k = await Kernel.boot({ files: other(bundledFiles), store: memoryStore(), ai: new MockAiModels() });
     k.give('item.pane', 1);
     expect(k.saveState()).toBe(false);

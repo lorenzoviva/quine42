@@ -48,7 +48,7 @@ describe('the wanderer with an id (T34)', () => {
     first.give('item.pane', 3);
     const files: FileMap = {
       ...bundledFiles,
-      'world/stato.json': JSON.stringify({ viandante: { inventory: first.inventory(), trasceso: false }, consumati: [], ora: 120 }),
+      'world/state.json': JSON.stringify({ viandante: { inventory: first.inventory(), trasceso: false }, consumati: [], ora: 120 }),
       'world/people.json': JSON.stringify({
         persone: [
           {
@@ -61,23 +61,23 @@ describe('the wanderer with an id (T34)', () => {
       }),
     };
     const { k } = await boot(files);
-    expect(k.wanderer()).toEqual({ id: 'io', nome: 'Viandante' });
+    expect(k.wanderer()).toEqual({ id: 'me', name: 'Viandante' });
     expect(countItem(k.inventory(), 'item.pane')).toBe(countItem(first.inventory(), 'item.pane'));
     expect(k.bondOf('Berta')).toBe('amica');
-    const berta = readPeople(k.files).persone.find((p) => p.nome === 'Berta')!;
-    expect(berta.famiglia).toEqual([{ nome: 'Viandante', legame: 'amica', viandante: 'io' }]);
-    expect(berta.ricordi![0].viandante).toBe('io');
-    expect(berta.legameViandante).toBeUndefined();
+    const berta = readPeople(k.files).people.find((p) => p.name === 'Berta')!;
+    expect(berta.family).toEqual([{ name: 'Viandante', bond: 'amica', wanderer: 'me' }]);
+    expect(berta.memories![0].wanderer).toBe('me');
+    expect(berta.wandererBond).toBeUndefined();
     const g = k.graph();
-    expect(g.node('individual:viandante')?.giocatore).toBe('io');
+    expect(g.node('individual:viandante')?.giocatore).toBe('me');
     expect(g.links.some((l) => l.source === 'individual:berta' && l.target === 'individual:viandante' && l.legame === 'amica')).toBe(true);
 
     // The next save moves the wanderer into their own file; it loads back the same.
     expect(k.saveState()).toBe(true);
     const saved = k.repo.head().files;
-    expect(JSON.parse(saved['world/stato.json']!).viandante).toBeUndefined();
-    expect(JSON.parse(saved['world/stato.json']!).ora).toBeGreaterThanOrEqual(120);
-    expect(countItem(readWandererState(saved, 'io')!.inventory, 'item.pane')).toBe(countItem(first.inventory(), 'item.pane'));
+    expect(JSON.parse(saved['world/state.json']!).viandante).toBeUndefined();
+    expect(JSON.parse(saved['world/state.json']!).time).toBeGreaterThanOrEqual(120);
+    expect(countItem(readWandererState(saved, 'me')!.inventory, 'item.pane')).toBe(countItem(first.inventory(), 'item.pane'));
     const { k: again } = await boot(saved);
     expect(countItem(again.inventory(), 'item.pane')).toBe(countItem(first.inventory(), 'item.pane'));
   }, 60_000);
@@ -86,7 +86,7 @@ describe('the wanderer with an id (T34)', () => {
     const { k, models } = await boot();
     expect(k.addWanderer('lia', 'Lia')).toBeDefined();
     expect(k.addWanderer('../fuori', 'X')).toBeUndefined();
-    expect(k.wanderers()).toEqual([{ id: 'io', nome: 'Viandante' }, { id: 'lia', nome: 'Lia' }]);
+    expect(k.wanderers()).toEqual([{ id: 'me', name: 'Viandante' }, { id: 'lia', name: 'Lia' }]);
     const { id, name } = await villager(k, 'due#a');
 
     await k.talk(id, 'Ti prometto che tornerò con una lanterna');
@@ -101,10 +101,10 @@ describe('the wanderer with an id (T34)', () => {
     const toMe = await k.talk(id, 'Ti ricordi cosa ti ho detto?');
     expect(toMe.say).toMatch(/lanterna/);
     expect(models.calls.filter((c) => c.task === 'npc.reply').pop()!.prompt).not.toMatch(/spada|Lia/);
-    const memories = readPeople(k.files).persone.find((p) => p.nome === name)!.ricordi!;
-    expect(memories.filter((m) => /lanterna/.test(m.testo)).map((m) => m.viandante)).toEqual(['io']);
-    expect(memories.filter((m) => /spada/.test(m.testo)).map((m) => m.viandante)).toEqual(['lia']);
-    expect(memoriesFor(memories, 'lia').some((m) => /lanterna/.test(m.testo))).toBe(false);
+    const memories = readPeople(k.files).people.find((p) => p.name === name)!.memories!;
+    expect(memories.filter((m) => /lanterna/.test(m.text)).map((m) => m.wanderer)).toEqual(['me']);
+    expect(memories.filter((m) => /spada/.test(m.text)).map((m) => m.wanderer)).toEqual(['lia']);
+    expect(memoriesFor(memories, 'lia').some((m) => /lanterna/.test(m.text))).toBe(false);
 
     // A bond is with one wanderer.
     await k.talk(id, 'Ti amo. Sposami!', 'lia');
@@ -120,23 +120,23 @@ describe('the wanderer with an id (T34)', () => {
     expect(countItem(k.inventory(), 'item.formaggio')).toBe(mine);
     expect(k.saveState()).toBe(true);
     const saved = k.repo.head().files;
-    expect(wanderersIn(saved).map((w) => w.id)).toEqual(['io', 'lia']);
-    expect(JSON.parse(saved['world/giocatori/lia.json']!).nome).toBe('Lia');
+    expect(wanderersIn(saved).map((w) => w.id)).toEqual(['lia', 'me']);
+    expect(JSON.parse(saved['world/players/lia.json']!).name).toBe('Lia');
     const { k: again } = await boot(saved);
-    expect(again.wanderers().map((w) => w.id)).toEqual(['io']);
+    expect(again.wanderers().map((w) => w.id)).toEqual(['me']);
     again.addWanderer('lia');
-    expect(again.wanderers()[1]).toEqual({ id: 'lia', nome: 'Lia' });
+    expect(again.wanderers()[1]).toEqual({ id: 'lia', name: 'Lia' });
     expect(again.as('lia', () => countItem(again.inventory(), 'item.formaggio'))).toBe(countItem(k.as('lia', () => k.inventory()), 'item.formaggio'));
     expect(again.graph().node('individual:viandante-lia')).toBeDefined();
   }, 60_000);
 
   it('a quest belongs to who accepted it (io when the plot is older)', () => {
     const quest = (viandante?: string): Plot => ({
-      id: `t-${viandante ?? 'vecchia'}`, titolo: 't', mistero: '', coinvolti: [], tappe: [], inizio: 0, stato: 'active',
-      missione: { da: 'Berta', testo: 'porta il pane', obiettivo: { tipo: 'bring', oggetto: 'pane' }, stato: 'accepted', ...(viandante ? { viandante } : {}) },
+      id: `t-${viandante ?? 'vecchia'}`, title: 't', mystery: '', involved: [], beats: [], start: 0, state: 'active',
+      quest: { from: 'Berta', text: 'porta il pane', goal: { type: 'bring', item: 'pane' }, state: 'accepted', ...(viandante ? { wanderer: viandante } : {}) },
     });
-    const plots = [quest(), quest('lia'), quest('io')];
-    expect(activeQuests(plots, 'io').map((q) => q.plot.id)).toEqual(['t-vecchia', 't-io']);
+    const plots = [quest(), quest('lia'), quest('me')];
+    expect(activeQuests(plots, 'me').map((q) => q.plot.id)).toEqual(['t-vecchia', 't-me']);
     expect(activeQuests(plots, 'lia').map((q) => q.plot.id)).toEqual(['t-lia']);
     expect(activeQuests(plots)).toHaveLength(3);
   });

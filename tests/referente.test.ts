@@ -16,7 +16,7 @@ const RULES = 'world/rules.json';
 
 async function bootMany(): Promise<Kernel> {
   const cfg = JSON.parse(bundledFiles['universe.json']);
-  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2) };
+  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, game: { mode: 'multiplayer', death: 3 } }, null, 2) };
   return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 }
 
@@ -58,7 +58,7 @@ describe('the Referente and the teams of the corona on the master’s branch (T4
   it('a request of the master to the Referente changes their branch, not the players’ world, until they publish', async () => {
     const k = await bootMany();
     const server = new SessionServer(k);
-    const master = await thin(server, 'io');
+    const master = await thin(server, 'me');
     const anna = await thin(server, 'anna');
     run(server, [master, anna], 6);
     const atlas = k.files[ATLAS_FILE];
@@ -75,18 +75,18 @@ describe('the Referente and the teams of the corona on the master’s branch (T4
     expect(rulesOf(master.k.files)).toMatch(/lupi/);
     expect(master.k.publisher!.branch()).toEqual(expect.arrayContaining([RULES, ATLAS_FILE]));
     // The calls are the server's Council's: the shared models still report to the world's ledger (the mock reports none).
-    k.ai.onCall!({ model: 'prova', agent: 'liaison', task: 'referente.coordinate', prompt: 1, cached: 0, output: 1, thoughts: 0, chi: 'io' });
+    k.ai.onCall!({ model: 'prova', agent: 'liaison', task: 'referente.coordinate', prompt: 1, cached: 0, output: 1, thoughts: 0, who: 'me' });
     expect(k.usage.session.calls).toBe(calls + 1);
     expect(k.feed().some((e) => e.task === 'referente.coordinate')).toBe(true);
     // The world and the players do not have it.
     expect(rulesOf(k.files)).not.toMatch(/lupi/);
-    expect(k.rules().some((r) => /lupi/.test(r.testo))).toBe(false);
+    expect(k.rules().some((r) => /lupi/.test(r.text))).toBe(false);
     expect(k.files[ATLAS_FILE]).toBe(atlas);
     expect(anna.k.files[ATLAS_FILE]).toBe(atlas);
     // Published: the world has it, and the players get what their client draws.
     const out = await until(server, [master, anna], master.k.publisher!.publish());
     expect(out.ok).toBe(true);
-    expect(k.rules().some((r) => /lupi/.test(r.testo))).toBe(true);
+    expect(k.rules().some((r) => /lupi/.test(r.text))).toBe(true);
     expect(k.files[ATLAS_FILE]).toMatch(/Elfi/);
     run(server, [master, anna], 12);
     expect(anna.k.files[ATLAS_FILE]).toMatch(/Elfi/);
@@ -96,7 +96,7 @@ describe('the Referente and the teams of the corona on the master’s branch (T4
   it('the branch keeps the master’s edits beside what the Council made, and a player cannot ask', async () => {
     const k = await bootMany();
     const server = new SessionServer(k);
-    const master = await thin(server, 'io');
+    const master = await thin(server, 'me');
     const anna = await thin(server, 'anna');
     run(server, [master, anna], 6);
     const path = Object.keys(k.files).filter((p) => p.endsWith('manifest.json') && JSON.parse(k.files[p]).kind === 'entity').sort()[0];
@@ -131,15 +131,15 @@ describe('the runes the master asks the Referente for (T42f)', () => {
   it('the master asks «dammi la runa speed» and finds it in their pouch on the server; a player cannot ask', async () => {
     const k = await bootMany();
     const server = new SessionServer(k);
-    const master = await thin(server, 'io');
+    const master = await thin(server, 'me');
     const anna = await thin(server, 'anna');
     run(server, [master, anna], 6);
     const has = (id: string, token: string) => k.as(id, () => countItem(k.inventory(), `rune:${token}`));
-    expect(has('io', 'speed')).toBe(0);
+    expect(has('me', 'speed')).toBe(0);
     const r = await until(server, [master, anna], master.k.talkToAgent('liaison', 'dammi la runa speed'));
     expect(r.forged).toMatch(/speed/);
-    expect(has('io', 'speed')).toBe(1);
-    expect(k.as('io', () => k.phrase().tokens)).toContain('speed');
+    expect(has('me', 'speed')).toBe(1);
+    expect(k.as('me', () => k.phrase().tokens)).toContain('speed');
     // Not a file: the branch has nothing, and the master's client hears of it in the next update.
     expect(server.branchFiles()).toEqual({});
     run(server, [master, anna], 12);

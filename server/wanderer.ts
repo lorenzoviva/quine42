@@ -16,7 +16,8 @@ import { runGit } from './git';
 import { openLedger } from './ledger';
 import { Rates, type Pace } from './rates';
 import { UNIVERSE_NAME_RE } from '../src/kernel/paths';
-import { opensOnThisKernel } from '../src/kernel/migrations';
+import { opensOnThisKernel, pathsBefore, portedFiles } from '../src/kernel/migrations';
+import { internalFields } from '../src/kernel/internalNames';
 import { accountWanderer } from '../src/session/account';
 import type { Kernel } from '../src/kernel/kernel';
 import type { WorldCalls } from './worldCalls';
@@ -25,6 +26,7 @@ import { Forms, InlineRunner, MODELS_DIR, MODELS_INDEX } from '../src/kernel/for
 import { readPeople } from '../src/kernel/society';
 import {
   PLAYERS_DIR,
+  PLAYERS_DIR_BEFORE_0_4,
   playerFile,
   readWandererState,
   repairProfile,
@@ -71,10 +73,13 @@ export async function wandererFiles(root: string): Promise<FileMap> {
       /* missing: not there */
     }
   };
-  await Promise.all(['world/people.json', 'world/stato.json', MODELS_INDEX, `${MODELS_DIR}${WANDERER_MODEL}.xml`].map(read));
-  const players = await fs.readdir(path.join(root, PLAYERS_DIR)).catch(() => [] as string[]);
-  await Promise.all(players.filter((f) => f.endsWith('.json')).map((f) => read(`${PLAYERS_DIR}${f}`)));
-  return files;
+  await Promise.all(['universe.json', 'world/people.json', ...pathsBefore(['world/state.json']), MODELS_INDEX, `${MODELS_DIR}${WANDERER_MODEL}.xml`].map(read));
+  // Where they are, and where they were until the contract 0.4 (T308a): a universe not opened since is ported in memory.
+  for (const dir of [PLAYERS_DIR, PLAYERS_DIR_BEFORE_0_4]) {
+    const players = await fs.readdir(path.join(root, dir)).catch(() => [] as string[]);
+    await Promise.all(players.filter((f) => f.endsWith('.json')).map((f) => read(`${dir}${f}`)));
+  }
+  return portedFiles(files);
 }
 
 /** The look's program of a universe: from its files, or undefined. */
@@ -85,7 +90,7 @@ function lookOf(files: FileMap): WandererView['modello'] {
   forms.load(files);
   let tinta: string | undefined;
   try {
-    const t = JSON.parse(files[MODELS_INDEX] ?? '{}')?.[WANDERER_MODEL]?.tinta;
+    const t = internalFields('modelIndex', JSON.parse(files[MODELS_INDEX] ?? '{}'))?.[WANDERER_MODEL]?.tint;
     if (typeof t === 'string' && t.length === 1) tinta = t;
   } catch {
     /* no index: no cloak to paint */
@@ -96,13 +101,13 @@ function lookOf(files: FileMap): WandererView['modello'] {
 /** A wanderer as the universe's files on disk say. */
 export function viewFromFiles(files: FileMap, universo: string, id: string, account: WandererView['account'], crediti = 0): WandererView {
   const saved = readWandererState(files, id);
-  const anonimo = account === 'anonimo' || !!saved?.anonimo;
+  const anonimo = account === 'anonimo' || !!saved?.anonymous;
   return {
     id,
     universo,
     account,
     anonimo,
-    ...(saved?.profilo ? { profilo: saved.profilo } : {}),
+    ...(saved?.profile ? { profilo: saved.profile } : {}),
     crediti: anonimo ? 0 : crediti,
     nelMondo: false,
     noto: !!saved,
@@ -115,14 +120,14 @@ export function viewFromFiles(files: FileMap, universo: string, id: string, acco
  * the people's and the other wanderers', seed and colour within the limits) and written in the player's file.
  */
 export function keepProfileInFiles(files: FileMap, id: string, raw: unknown): { repair: ProfileRepair; file: string; text: string } {
-  const taken = readPeople(files).persone.map((p) => p.nome);
-  for (const w of wanderersIn(files)) if (w.id !== id) taken.push(w.nome);
+  const taken = readPeople(files).people.map((p) => p.name);
+  for (const w of wanderersIn(files)) if (w.id !== id) taken.push(w.name);
   const forms = new Forms(new InlineRunner());
   forms.load(files);
   const repair = repairProfile(raw, id, taken, forms.seedsOf(WANDERER_MODEL));
   const saved: WandererState = readWandererState(files, id) ?? {};
-  saved.profilo = repair.profilo;
-  saved.nome = repair.profilo.nome;
+  saved.profile = repair.profilo;
+  saved.name = repair.profilo.name;
   const file = playerFile(id);
   const text = JSON.stringify(saved, null, 1) + '\n';
   files[file] = text;
@@ -182,7 +187,7 @@ export function viewFromKernel(k: Kernel, universo: string, id: string, account:
   const inWorld = k.wanderers().some((w) => w.id === id);
   const saved = readWandererState(k.files, id);
   const anonimo = account === 'anonimo' || k.isAnonymous(id);
-  const profilo = k.profileOf(id) ?? saved?.profilo;
+  const profilo = k.profileOf(id) ?? saved?.profile;
   return {
     id,
     universo,
@@ -245,10 +250,8 @@ export function wandererHandler(opts: WandererRouteOptions): Connect.NextHandleF
           if (who.account === 'anonimo') {
             const known = active
               ? (await active.view(universo, who.id, who.account)).noto
-              : await fs.stat(path.join(root, playerFile(who.id))).then(
-                  () => true,
-                  () => false,
-                );
+              : // Their file, or where it was until the contract 0.4 (a universe not opened since, T308a).
+                (await Promise.all(pathsBefore([playerFile(who.id)]).map((rel) => fs.stat(path.join(root, rel)).then(() => true, () => false)))).some(Boolean);
             if (!known) return send(res, 403, { ok: false, motivo: 'entra prima in questo universo' });
           }
         }

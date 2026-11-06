@@ -23,15 +23,15 @@ export type WaterRecord = [number, number] | [number, number, string];
 
 /** A house a venture builds on free ground (T245e): in the plan of its place, so whoever draws the place (a client too) has it. */
 export interface PlannedHouse {
-  origine: string;
+  origin: string;
   x: number;
   y: number;
-  modello: string;
-  seme: number;
+  model: string;
+  seed: number;
   yaw: number;
-  classe: string;
-  concetto: string;
-  stadio: number;
+  class: string;
+  concept: string;
+  stage: number;
 }
 
 export interface ChunkPlan {
@@ -50,23 +50,23 @@ export interface ChunkPlan {
    * environment (the largest first); the Sculptor writes the ones that do not exist yet. Their size (ADR-0092)
    * is a size of D&D, fitted by the kernel to the lot and to the rarity of the two largest.
    */
-  strutture?: Array<{ concetto: string; taglia?: SizeTier }>;
+  structures?: Array<{ concept: string; size?: SizeTier }>;
   /** Tiles changed after the layout (by effects, spells, Lua): cell index → tile code. */
   edits?: Record<string, string>;
   /** The day of the world each edit was written (T245b, ADR-0140): what ripens counts from there. An edit without one is of today. */
-  giorni?: Record<string, number>;
+  days?: Record<string, number>;
   /** The stage of the building of a lot that a venture is putting up again (T245e, ADR-0148): lot origin → 0..1. Absent: standing. */
-  stadi?: Record<string, number>;
+  stages?: Record<string, number>;
   /** The houses the ventures build on free ground (T245e): where, which model and seed, and their stage. */
-  case?: PlannedHouse[];
+  houses?: PlannedHouse[];
   /** When it was last left (T245f, ADR-0149): seconds of the world, only while nobody sees it; at the return the kernel says how long. */
-  visto?: number;
+  seen?: number;
   /** The ground dug (negative) or raised after the layout (T51b): cell index → levels. */
-  scavi?: Record<string, number>;
+  digs?: Record<string, number>;
   /** The water that has flowed (T51b, `water.ts`): cell index → its bed and its water (levels), and the tile it was before it became water. */
-  acqua?: Record<string, WaterRecord>;
+  water?: Record<string, WaterRecord>;
   /** Who planned the place and who paid for it (T36). */
-  carta?: CardStamp;
+  card?: CardStamp;
 }
 
 export interface PlanContext {
@@ -114,10 +114,10 @@ const PLAN_SCHEMA: Schema = {
  * A structure of a plan, as the Cartographer wrote it or as a saved plan has it: a size of D&D, or `importante`
  * of the plans before ADR-0092 (the castle of then is Huge).
  */
-export function readStructure(s: any): { concetto: string; taglia?: SizeTier } {
-  // The Cartographer still writes the Italian sizes of the contract 0.1 (T307a, until T310): the one it means.
-  const taglia = sizeOf(internalName('taglie', String(s?.taglia ?? '').trim().toLowerCase()))?.id ?? (s?.importante === true ? 'huge' : undefined);
-  return { concetto: String(s?.concetto ?? '').trim(), ...(taglia ? { taglia } : {}) };
+export function readStructure(s: any): { concept: string; size?: SizeTier } {
+  // The Cartographer still writes the Italian fields and sizes (T307a, T308a, until T310): the one it means.
+  const size = sizeOf(internalName('taglie', String(s?.size ?? s?.taglia ?? '').trim().toLowerCase()))?.id ?? (s?.importante === true ? 'huge' : undefined);
+  return { concept: String(s?.concept ?? s?.concetto ?? '').trim(), ...(size ? { size } : {}) };
 }
 
 export async function planChunk(c: Council, ctx: PlanContext): Promise<ChunkPlan> {
@@ -151,7 +151,7 @@ export async function planChunk(c: Council, ctx: PlanContext): Promise<ChunkPlan
     ground: (raw?.a_terra ?? []).slice(0, 4).map(String),
     fresh: (raw?.nuovi ?? []).slice(0, 1).map((o: any) => ({ concept: String(o?.concetto ?? ''), where: where(o?.dove) })),
     runes: (raw?.rune ?? []).slice(0, 3).map(String),
-    strutture: (raw?.strutture ?? []).slice(0, 3).map(readStructure),
+    structures: (raw?.strutture ?? []).slice(0, 3).map(readStructure),
   };
 }
 

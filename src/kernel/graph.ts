@@ -2,20 +2,20 @@
 // and their relations, kinds, places, regions, environments, structures, plots, items, recipes, runes,
 // spells, rules, facts of the bible — built from the universe's files, deterministic, no model calls.
 // The Council asks it what exists instead of inventing (T13); the kernel asks it what does not hold
-// (`check`). It is written to world/grafo.json with every commit, in Graphify's node-link format, and
+// (`check`). It is written to world/graph.json with every commit, in Graphify's node-link format, and
 // is always derived: it can be rebuilt from the files (the places come from the chunk plans, which
 // live outside the text snapshot, so a rebuild keeps the places of the previous graph).
 
-import { internalName, italianName } from './internalNames';
+import { internalFields, internalName, italianName } from './internalNames';
 import type { FileMap, Manifest } from './types';
 import { readPeople, relationProblem, relationsAgree, similarNames, type Individual, type Species } from './society';
 import { readPlots } from './plots';
 import { readAtlas, regionAt } from './atlas';
 import { normName } from './content';
 import { hashStr, hex } from './rng';
-import { bondWith, playerFile, readWandererState, SOLO, wandererOf, wanderersIn } from './wanderers';
+import { bondWith, playerFile, readWandererState, SOLO, STATE_FILE, wandererOf, wanderersIn } from './wanderers';
 
-export const GRAPH_FILE = 'world/grafo.json';
+export const GRAPH_FILE = 'world/graph.json';
 export const GRAPH_SCHEMA = 1;
 /** The version of the builder: raise it when the graph is built differently, so the files are rewritten. */
 export const GRAPH_BUILD = 4;
@@ -105,7 +105,7 @@ export interface GraphLink {
   [attr: string]: unknown;
 }
 
-/** NetworkX node-link data, as Graphify reads it (`graphify explain|path|query --graph world/grafo.json`). */
+/** NetworkX node-link data, as Graphify reads it (`graphify explain|path|query --graph world/graph.json`). */
 export interface GraphData {
   directed: true;
   multigraph: true;
@@ -201,12 +201,12 @@ export function carriedOf(files: FileMap, wanderer: string = SOLO): string[] {
 
 /** What the graph is made of, as a hash: the same hash, the same graph (the file is not rewritten). */
 export function graphHash(files: FileMap, chunks: GraphChunk[]): string {
-  return hex(hashStr(`${GRAPH_BUILD}|` + graphSources(files).map((p) => `${p}\0${files[p]}`).join('\u0001') + JSON.stringify(chunks) + wanderersOf(files).map((w) => `${w.id}:${w.nome}:${carriedOf(files, w.id).join(',')}`).join(';')));
+  return hex(hashStr(`${GRAPH_BUILD}|` + graphSources(files).map((p) => `${p}\0${files[p]}`).join('\u0001') + JSON.stringify(chunks) + wanderersOf(files).map((w) => `${w.id}:${w.name}:${carriedOf(files, w.id).join(',')}`).join(';')));
 }
 
 /** The wanderers of the graph: `io` always, then one per player file. */
-function wanderersOf(files: FileMap): Array<{ id: string; nome: string }> {
-  return [{ id: SOLO, nome: 'il viandante' }, ...wanderersIn(files).filter((w) => w.id !== SOLO)];
+function wanderersOf(files: FileMap): Array<{ id: string; name: string }> {
+  return [{ id: SOLO, name: 'il viandante' }, ...wanderersIn(files).filter((w) => w.id !== SOLO)];
 }
 
 export function readGraph(files: FileMap): GraphData | null {
@@ -411,7 +411,8 @@ export class WorldGraph {
       const a = this.nodes.get(l.source)!;
       const b = this.nodes.get(l.target)!;
       if (a.viandante || b.viandante) continue;
-      const why = relationProblem(String(l.legame), a as Pick<Individual, 'specie' | 'genere'>, b as Pick<Individual, 'specie'>);
+      // The graph's nodes keep their attributes in the graph's own words (`specie`, `genere`).
+      const why = relationProblem(String(l.legame), { species: a.specie as Individual['species'], gender: a.genere as Individual['gender'] }, { species: b.specie as Individual['species'] });
       if (why) issues.push({ tipo: 'impossibile', testo: `${a.label} è ${l.legame} di ${b.label}: ${why}`, nodi: [a.id, b.id] });
       if (a.atteso || b.atteso) continue;
       const back = rel(b.id, a.id);
@@ -497,7 +498,7 @@ export function buildGraph(files: FileMap, chunks: GraphChunk[] = [], speciesOf:
   const pending: Array<() => void> = [];
   for (const [file, m] of manifests) {
     if (m.kind === 'item') itemByName.set(normName(m.name ?? ''), g.add('item', m.id, m.name ?? m.id, file, { categoria: m.tags?.[0] }, true));
-    else if (m.kind !== 'data' && m.kind !== 'generator') g.add('kind', m.id, m.name ?? m.id, file, { kind: m.kind, classe: m.appearance?.classe, modello: m.appearance?.model, unico: m.unique || undefined }, true);
+    else if (m.kind !== 'data' && m.kind !== 'generator') g.add('kind', m.id, m.name ?? m.id, file, { kind: m.kind, classe: m.appearance?.class, modello: m.appearance?.model, unico: m.unique || undefined }, true);
     for (const it of m.items ?? []) {
       const id = g.add('item', it.id, it.name ?? it.id, file, { categoria: it.category }, true);
       itemByName.set(normName(it.name ?? ''), id);
@@ -543,9 +544,9 @@ export function buildGraph(files: FileMap, chunks: GraphChunk[] = [], speciesOf:
 
   // The atlas.
   const atlas = readAtlas(files);
-  for (const r of atlas.regioni) {
-    const id = g.add('region', r.id, r.nome, 'world/atlas.json', { descrizione: r.descrizione, centro: r.centro, raggio: r.raggio }, true);
-    if (g.node(`environment:${slug(r.ambiente)}`)) g.link(id, `environment:${slug(r.ambiente)}`, 'ambiente', 'world/atlas.json');
+  for (const r of atlas.regions) {
+    const id = g.add('region', r.id, r.name, 'world/atlas.json', { descrizione: r.description, centro: r.center, raggio: r.radius }, true);
+    if (g.node(`environment:${slug(r.environment)}`)) g.link(id, `environment:${slug(r.environment)}`, 'ambiente', 'world/atlas.json');
   }
 
   // Places: the planned chunks, then the places the bible names that no chunk has.
@@ -568,12 +569,12 @@ export function buildGraph(files: FileMap, chunks: GraphChunk[] = [], speciesOf:
     }
     for (const s of new Set(p.strutture ?? [])) g.link(id, g.add('structure', s, s, 'maps/', {}, true), 'contiene', 'maps/');
   }
-  const bible = json(files, 'world/bible.json');
-  for (const nome of (Array.isArray(bible?.luoghi) ? bible.luoghi : []) as string[]) {
+  const bible = internalFields('bible', json(files, 'world/bible.json') ?? {}) as { places?: string[]; facts?: string[]; mysteries?: string[] };
+  for (const nome of (Array.isArray(bible?.places) ? bible.places : []) as string[]) {
     if (typeof nome !== 'string' || chunkByName.has(normName(nome))) continue;
     chunkByName.set(normName(nome), g.add('chunk', nome, nome, 'world/bible.json', { dalla_bibbia: true }, true));
   }
-  for (const r of atlas.regioni) if (!chunkByName.has(normName(r.nome))) chunkByName.set(normName(r.nome), `region:${slug(r.id)}`);
+  for (const r of atlas.regions) if (!chunkByName.has(normName(r.name))) chunkByName.set(normName(r.name), `region:${slug(r.id)}`);
   /** A place a text names: the same name, or a known name inside it («sulle rive del Lago del Re Muto»). */
   const chunkIn = (text: string): string | undefined => {
     const k = normName(text);
@@ -587,42 +588,42 @@ export function buildGraph(files: FileMap, chunks: GraphChunk[] = [], speciesOf:
   const people = readPeople(files);
   const individualByName = new Map<string, string>();
   const PF = 'world/people.json';
-  for (const p of people.persone) {
-    const id = g.add('individual', p.nome, p.nome, PF, { specie: p.specie ?? speciesOf(p.tipo), genere: p.genere, tipo_modulo: p.tipo, mestiere: p.mestiere, eta: p.eta, luogo: p.luogo, legame_viandante: bondWith(p, SOLO) });
-    individualByName.set(p.nome, id);
+  for (const p of people.people) {
+    const id = g.add('individual', p.name, p.name, PF, { specie: p.species ?? speciesOf(p.kind), genere: p.gender, tipo_modulo: p.kind, mestiere: p.job, eta: p.age, luogo: p.place, legame_viandante: bondWith(p, SOLO) });
+    individualByName.set(p.name, id);
   }
   // Someone named and not met is of the species of who named them (as the repair of the society assumes).
-  for (const a of people.attesi) if (!individualByName.has(a.nome)) individualByName.set(a.nome, g.add('individual', a.nome, a.nome, PF, { atteso: true, specie: individualByName.has(a.di) ? g.node(individualByName.get(a.di)!)!.specie : undefined }));
+  for (const a of people.expected) if (!individualByName.has(a.name)) individualByName.set(a.name, g.add('individual', a.name, a.name, PF, { atteso: true, specie: individualByName.has(a.of) ? g.node(individualByName.get(a.of)!)!.specie : undefined }));
   // One node per wanderer, by id; a relation with a wanderer the files do not know yet makes theirs.
   const wandererAt = (id: string, nome?: string) =>
-    g.node(wandererNode(id)) ? wandererNode(id) : g.add('individual', wandererKey(id), id === SOLO ? 'il viandante' : nome ?? id, files[playerFile(id)] !== undefined || id !== SOLO ? playerFile(id) : 'world/stato.json', { viandante: true, giocatore: id, specie: 'persona' }, true);
-  for (const w of wanderersOf(files)) wandererAt(w.id, w.nome);
-  for (const p of people.persone) {
-    const id = individualByName.get(p.nome)!;
-    if (p.tipo) {
-      if (g.node(`kind:${slug(p.tipo)}`)) g.link(id, `kind:${slug(p.tipo)}`, 'e_un', PF);
-      else g.missing(`${p.nome} è un ${p.tipo}, che non esiste`, [id]);
+    g.node(wandererNode(id)) ? wandererNode(id) : g.add('individual', wandererKey(id), id === SOLO ? 'il viandante' : nome ?? id, files[playerFile(id)] !== undefined || id !== SOLO ? playerFile(id) : 'world/state.json', { viandante: true, giocatore: id, specie: 'persona' }, true);
+  for (const w of wanderersOf(files)) wandererAt(w.id, w.name);
+  for (const p of people.people) {
+    const id = individualByName.get(p.name)!;
+    if (p.kind) {
+      if (g.node(`kind:${slug(p.kind)}`)) g.link(id, `kind:${slug(p.kind)}`, 'e_un', PF);
+      else g.missing(`${p.name} è un ${p.kind}, che non esiste`, [id]);
     }
-    for (const r of p.famiglia ?? []) {
+    for (const r of p.family ?? []) {
       const w = wandererOf(r);
-      const t = w ? wandererAt(w, r.nome) : individualByName.get(r.nome);
-      if (t) g.link(id, t, 'legame', PF, { legame: r.legame });
-      else g.missing(`${p.nome} è ${r.legame} di ${r.nome}, che non esiste`, [id]);
+      const t = w ? wandererAt(w, r.name) : individualByName.get(r.name);
+      if (t) g.link(id, t, 'legame', PF, { legame: r.bond });
+      else g.missing(`${p.name} è ${r.bond} di ${r.name}, che non esiste`, [id]);
     }
-    const home = p.luogo ? chunkIn(p.luogo) : undefined;
+    const home = p.place ? chunkIn(p.place) : undefined;
     if (home?.startsWith('chunk:')) {
-      const where = new Set((p.routine ?? []).map((s) => s.dove));
+      const where = new Set((p.routine ?? []).map((s) => s.where));
       if (where.has('home') || !where.size) g.link(id, home, 'abita', PF);
       if (where.has('work')) g.link(id, home, 'lavora', PF);
     }
   }
-  for (const a of people.attesi) {
-    const id = individualByName.get(a.nome)!;
-    const t = individualByName.get(a.di);
-    if (t) g.link(id, t, 'legame', PF, { legame: a.legame });
+  for (const a of people.expected) {
+    const id = individualByName.get(a.name)!;
+    const t = individualByName.get(a.of);
+    if (t) g.link(id, t, 'legame', PF, { legame: a.bond });
   }
   for (const w of wanderersOf(files)) {
-    const file = files[playerFile(w.id)] !== undefined ? playerFile(w.id) : 'world/stato.json';
+    const file = files[playerFile(w.id)] !== undefined ? playerFile(w.id) : STATE_FILE;
     for (const it of carriedOf(files, w.id)) if (g.node(`item:${slug(it)}`)) g.link(wandererNode(w.id), `item:${slug(it)}`, 'porta', file);
   }
 
@@ -630,16 +631,16 @@ export function buildGraph(files: FileMap, chunks: GraphChunk[] = [], speciesOf:
   for (const t of readPlots(files)) {
     const noIndividual = new Set<string>();
     const noChunk = new Set<string>();
-    const id = g.add('plot', t.id, t.titolo, 'world/plots.json', { mistero: t.mistero, stato: t.stato, inizio: t.inizio });
-    for (const n of new Set([...(t.coinvolti ?? []), ...(t.tappe ?? []).map((b) => b.chi), ...(t.missione ? [t.missione.da] : [])])) {
+    const id = g.add('plot', t.id, t.title, 'world/plots.json', { mistero: t.mystery, stato: t.state, inizio: t.start });
+    for (const n of new Set([...(t.involved ?? []), ...(t.beats ?? []).map((b) => b.who), ...(t.quest ? [t.quest.from] : [])])) {
       const p = individualByName.get(n);
       if (p) g.link(id, p, 'coinvolge', 'world/plots.json');
       else noIndividual.add(n);
     }
-    for (const b of t.tappe ?? []) {
-      const where = b.dove ? chunkIn(b.dove) : undefined;
-      if (where) g.link(id, where, 'tappa', 'world/plots.json', { giorno: b.giorno, momento: b.momento, chi: individualByName.get(b.chi) ?? b.chi, dove: b.dove });
-      else if (b.dove) noChunk.add(b.dove);
+    for (const b of t.beats ?? []) {
+      const where = b.where ? chunkIn(b.where) : undefined;
+      if (where) g.link(id, where, 'tappa', 'world/plots.json', { giorno: b.day, momento: b.moment, chi: individualByName.get(b.who) ?? b.who, dove: b.where });
+      else if (b.where) noChunk.add(b.where);
     }
     const node = g.node(id)!;
     if (noIndividual.size) node.senza_persona = [...noIndividual];
@@ -647,22 +648,22 @@ export function buildGraph(files: FileMap, chunks: GraphChunk[] = [], speciesOf:
   }
 
   // Rules: what they are about («item.secchio|…», «object.crate|apri»).
-  for (const r of (json(files, 'world/rules.json')?.regole ?? []) as Array<{ chiave?: string; testo?: string; possibile?: boolean }>) {
-    if (!r?.chiave) continue;
-    const id = g.add('rule', r.chiave, r.testo ?? r.chiave, 'world/rules.json', { possibile: r.possibile });
-    const about = r.chiave.split('|')[0];
+  for (const r of (internalFields('rules', json(files, 'world/rules.json') ?? {})?.rules ?? []) as Array<{ key?: string; text?: string; possible?: boolean }>) {
+    if (!r?.key) continue;
+    const id = g.add('rule', r.key, r.text ?? r.key, 'world/rules.json', { possibile: r.possible });
+    const about = r.key.split('|')[0];
     if (!/^[a-z]+\.[\w.-]+$/.test(about)) continue;
     const t = thing(about);
     if (t) g.link(id, t, 'riguarda', 'world/rules.json');
-    else g.missing(`la regola «${r.testo ?? r.chiave}» riguarda ${about}, che non esiste`, [id]);
+    else g.missing(`la regola «${r.text ?? r.key}» riguarda ${about}, che non esiste`, [id]);
   }
 
   // Facts of the bible, and whom or what they name.
   const named = [...g.nodes.values()].filter((n) => (n.tipo === 'individual' && !n.viandante) || n.tipo === 'chunk' || n.tipo === 'region').filter((n) => normName(n.label).length >= 4);
-  const facts = [...((Array.isArray(bible?.fatti) ? bible.fatti : []) as string[]), ...((Array.isArray(bible?.misteri) ? bible.misteri : []) as string[])];
+  const facts = [...((Array.isArray(bible?.facts) ? bible.facts : []) as string[]), ...((Array.isArray(bible?.mysteries) ? bible.mysteries : []) as string[])];
   facts.forEach((f, i) => {
     if (typeof f !== 'string') return;
-    const id = g.add('fact', String(i + 1), f, 'world/bible.json', i >= (bible?.fatti?.length ?? 0) ? { mistero: true } : {});
+    const id = g.add('fact', String(i + 1), f, 'world/bible.json', i >= (bible?.facts?.length ?? 0) ? { mistero: true } : {});
     const k = normName(f);
     for (const n of named) if (hasWords(k, normName(n.label))) g.link(id, n.id, 'cita', 'world/bible.json');
   });

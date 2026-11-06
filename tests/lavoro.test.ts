@@ -19,7 +19,7 @@ const at = (n: number, phase: 'morning' | 'day' | 'evening' | 'night') => (n + {
 const seedPrograms = (): JobProgram[] =>
   Object.entries(bundledFiles)
     .filter(([p]) => /^modules\/job\.[^/]+\/manifest\.json$/.test(p))
-    .flatMap(([, src]) => JSON.parse(src).mestieri ?? []);
+    .flatMap(([, src]) => JSON.parse(src).jobs ?? []);
 
 async function world(): Promise<Kernel> {
   const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
@@ -191,10 +191,10 @@ describe('a day of work, in a planned place', () => {
     const id = worker(k, 'contadino');
     play(k, 4);
     expect(k.ecs.get(id, 'mestiere')).toMatchObject({ fase: 'evening' });
-    expect(k.ecs.get(id, 'mestiere').compiti.map((t: { fa: string }) => t.fa)).toEqual(['go', 'carry', 'chat']);
+    expect(k.ecs.get(id, 'mestiere').compiti.map((t: { does: string }) => t.does)).toEqual(['go', 'carry', 'chat']);
     k.time = at(2, 'night');
     play(k, 4);
-    expect(k.ecs.get(id, 'mestiere').compiti.map((t: { fa: string }) => t.fa)).toEqual(['go', 'rest']);
+    expect(k.ecs.get(id, 'mestiere').compiti.map((t: { does: string }) => t.does)).toEqual(['go', 'rest']);
     k.ecs.get(id, 'mind').mode = 'segui';
     play(k, 4);
     expect(k.ecs.get(id, 'mestiere')).toBeUndefined();
@@ -206,15 +206,15 @@ describe('a day of work, in a planned place', () => {
     const pc = k.wandererCarpet();
     const [c, r] = [Math.floor(pc.x) + 3, Math.floor(pc.y) - 3];
     expect(k.setTile(c, r, 'e')).toBe(true);
-    const ch = [...k.chunks.values()].find((x) => x.plan?.giorni && Object.values(x.plan.edits ?? {}).includes('e'))!;
+    const ch = [...k.chunks.values()].find((x) => x.plan?.days && Object.values(x.plan.edits ?? {}).includes('e'))!;
     const idx = Object.entries(ch.plan!.edits!).find(([, code]) => code === 'e')![0];
-    expect(ch.plan!.giorni![idx]).toBe(2);
+    expect(ch.plan!.days![idx]).toBe(2);
     // A plan of before: the edit without its day. It counts from the first look.
-    delete ch.plan!.giorni![idx];
+    delete ch.plan!.days![idx];
     k.time = at(3, 'morning');
     play(k, 4);
     expect(k.tileAt(c, r)).toBe('e');
-    expect(ch.plan!.giorni![idx]).toBe(3);
+    expect(ch.plan!.days![idx]).toBe(3);
     k.time = at(4, 'morning');
     play(k, 4);
     expect(k.tileAt(c, r)).toBe('u');

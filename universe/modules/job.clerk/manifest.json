@@ -4,10 +4,10 @@
   "kind": "data",
   "version": "0.1.0",
   "description": "La giornata di chi lavora a un ufficio, a uno sportello, a un registro: sempre allo stesso posto, con gli stessi colleghi.",
-  "mestieri": [
+  "jobs": [
     {
       "id": "clerk",
-      "nomi": [
+      "names": [
         "impiegato",
         "impiegata",
         "funzionario",
@@ -25,57 +25,57 @@
         "esattore",
         "esattrice"
       ],
-      "giornata": {
+      "day": {
         "morning": [
           {
-            "fa": "go",
-            "dove": "work"
+            "does": "go",
+            "where": "work"
           },
           {
-            "fa": "wait",
-            "durata": 60,
-            "posa": "read"
+            "does": "wait",
+            "duration": 60,
+            "pose": "read"
           }
         ],
         "day": [
           {
-            "fa": "wait",
-            "durata": 90,
-            "posa": "work"
+            "does": "wait",
+            "duration": 90,
+            "pose": "work"
           },
           {
-            "fa": "go",
-            "dove": "square"
+            "does": "go",
+            "where": "square"
           },
           {
-            "fa": "eat",
-            "durata": 20
+            "does": "eat",
+            "duration": 20
           },
           {
-            "fa": "go",
-            "dove": "work"
+            "does": "go",
+            "where": "work"
           },
           {
-            "fa": "wait",
-            "posa": "read"
+            "does": "wait",
+            "pose": "read"
           }
         ],
         "evening": [
           {
-            "fa": "go",
-            "dove": "square"
+            "does": "go",
+            "where": "square"
           },
           {
-            "fa": "chat"
+            "does": "chat"
           }
         ],
         "night": [
           {
-            "fa": "go",
-            "dove": "home"
+            "does": "go",
+            "where": "home"
           },
           {
-            "fa": "rest"
+            "does": "rest"
           }
         ]
       }

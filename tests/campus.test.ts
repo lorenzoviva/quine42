@@ -24,7 +24,7 @@ const BUILDING = `<sequence values="BMO" size="48 40 32" name="Prova">
 function withModel(id: string, vpt?: number) {
   const files = Object.fromEntries(Object.entries(bundledFiles).filter(([p]) => !/^models\/corona-/.test(p)));
   const index = Object.fromEntries(Object.entries(JSON.parse(bundledFiles['models/index.json'])).filter(([m]) => !m.startsWith('corona-')));
-  index[id] = { classe: 'building', nome: 'Prova', autore: 'test', ...(vpt ? { vpt } : {}) };
+  index[id] = { classe: 'building', nome: 'Prova', author: 'test', ...(vpt ? { vpt } : {}) };
   return { ...files, 'models/index.json': JSON.stringify(index), [`models/${id}.xml`]: BUILDING };
 }
 
@@ -100,7 +100,7 @@ describe('the buildings of the seed', () => {
   it('are in the library at 8 voxels per tile', () => {
     expect(written).toContain('magia');
     const index = JSON.parse(bundledFiles['models/index.json']);
-    for (const id of written) expect(index[`corona-${id}`]).toMatchObject({ classe: 'building', vpt: 8 });
+    for (const id of written) expect(index[`corona-${id}`]).toMatchObject({ class: 'building', vpt: 8 });
   });
 
   for (const id of ['magia', 'persone', 'cose', 'oggetti', 'luoghi', 'sistemi', 'nucleo', 'concilio', 'universo', 'galleria', 'mondo']) {
@@ -142,11 +142,11 @@ describe('the buildings of the seed', () => {
     const old = Object.fromEntries(Object.entries(index).filter(([id]) => !id.startsWith('corona-')));
     const oldSeed: Record<string, string> = { ...bundledFiles, 'models/index.json': JSON.stringify(old) };
     for (const p of Object.keys(oldSeed)) if (/^models\/corona-/.test(p)) delete oldSeed[p];
-    const mine = { ...old, mulino: { classe: 'building', nome: 'Mulino', autore: 'sculptor' } };
+    const mine = { ...old, mulino: { classe: 'building', nome: 'Mulino', author: 'sculptor' } };
     const files = { ...oldSeed, 'models/index.json': JSON.stringify(mine), 'seed.json': JSON.stringify(seedHashes(oldSeed)) };
     const up = upgradeFromSeed(files, bundledFiles).files;
     const now = JSON.parse(up['models/index.json']);
-    expect(now.mulino.autore).toBe('sculptor');
+    expect(now.mulino.author).toBe('sculptor');
     expect(now['corona-magia']).toMatchObject({ vpt: 8 });
     expect(up['models/corona-magia.xml']).toBe(bundledFiles['models/corona-magia.xml']);
   });

@@ -18,6 +18,7 @@ import { grantCapOf, platformFeeOf } from './server/ledger';
 import { videoFolder, videoRoute } from './server/video';
 import { betaGuide, guidePage } from './server/betaGuide';
 import { siteSkins } from './server/skins';
+import { serverPath } from './server/folders';
 
 export default defineConfig(({ mode }) => {
   // '' prefix: read every variable, but only server-side. Nothing without VITE_ reaches the client.
@@ -26,7 +27,7 @@ export default defineConfig(({ mode }) => {
   const accounts = accountSettings(env);
   const universesDir = path.resolve(process.cwd(), 'universes');
   // The only holder of the key (T123): models on a list, a daily cap; the route for the browser, `direct()` for the worlds of many.
-  const gemini = new GeminiGate({ apiKey: env.GEMINI_API_KEY, dailyCap: env.GEMINI_TETTO_GIORNALIERO, universesDir, ledgerFile: path.join(universesDir, '.spesa-gemini.json') });
+  const gemini = new GeminiGate({ apiKey: env.GEMINI_API_KEY, dailyCap: env.GEMINI_TETTO_GIORNALIERO, universesDir, ledgerFile: serverPath(universesDir, 'geminiSpend') });
   // How the worlds of this process prove themselves to the store (T120, ADR-0102): only in memory, a new one at every start.
   const internal = newSecret();
   return {
@@ -52,7 +53,7 @@ export default defineConfig(({ mode }) => {
       // The site's credits page (T105): the account's balance and their lines of the two ledgers.
       walletRoute({ accounts, universesDir, getActiveWorld, platformFee: platformFeeOf(env) }),
       sessionServer(accounts, gemini.direct(), internal, { universesDir, grantCap: grantCapOf(env, !!accounts?.verify), platformFee: platformFeeOf(env) }, Number(env.QUINE_MONDO_MEMORIA) || undefined, Number(env.QUINE_MONDI_MASSIMI) || undefined),
-      subscriptionQueue(path.resolve(process.cwd(), 'universes', '.coda'), { enabled: queueWanted(env) }),
+      subscriptionQueue(serverPath(path.resolve(process.cwd(), 'universes'), 'queue'), { enabled: queueWanted(env) }),
       // The site's videos, from the same folder as in production (T244, ADR-0131), and the instructions of the beta: what is off never reaches the build.
       videoRoute({ folder: videoFolder(env), accounts }),
       betaGuide(process.cwd()),

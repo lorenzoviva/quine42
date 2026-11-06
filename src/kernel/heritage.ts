@@ -6,15 +6,16 @@
 // after. Pure and light: the store on the dev server imports it through clone.ts.
 
 import { hash32, hashStr } from './rng';
+import { internalFields } from './internalNames';
 
 /** A holder a card had before a clone. */
 export interface CardOrigin {
   /** Whose card it was in the universe it came from. */
-  titolare: string;
+  holder: string;
   /** That universe's name. */
-  universo: string;
+  universe: string;
   /** The content's fingerprint when it was cloned (`fingerprint`). */
-  impronta: number[];
+  fingerprint: number[];
 }
 
 /** universe.json → eredita: the share that goes back along the chain at every use. */
@@ -22,26 +23,26 @@ export interface HeritageConfig {
   /** Always, however much the content was changed (0-1). */
   base: number;
   /** On top, for content cloned and never changed; less the more it was (0-1). */
-  copia: number;
+  copy: number;
 }
 
-export const DEFAULT_HERITAGE: HeritageConfig = { base: 0.1, copia: 0.4 };
+export const DEFAULT_HERITAGE: HeritageConfig = { base: 0.1, copy: 0.4 };
 
 /** Repairs universe.json → eredita: two numbers between 0 and 1 whose sum is at most 1. */
 export function repairHeritage(raw: unknown): HeritageConfig {
-  const r = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
+  const r = internalFields('heritage', (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>);
   const num = (v: unknown, d: number) => (typeof v === 'number' && Number.isFinite(v) ? Math.min(1, Math.max(0, v)) : d);
   const base = num(r.base, DEFAULT_HERITAGE.base);
-  return { base, copia: Math.min(num(r.copia, DEFAULT_HERITAGE.copia), 1 - base) };
+  return { base, copy: Math.min(num(r.copy, DEFAULT_HERITAGE.copy), 1 - base) };
 }
 
-/** The content of what holds a card, as text: keys sorted, every `carta` left out (who holds it is not what it is). */
+/** The content of what holds a card, as text: keys sorted, every `card` left out (who holds it is not what it is). */
 export function contentText(o: unknown): string {
   const canon = (v: unknown): unknown => {
     if (Array.isArray(v)) return v.map(canon);
     if (!v || typeof v !== 'object') return v;
     const out: Record<string, unknown> = {};
-    for (const k of Object.keys(v).sort()) if (k !== 'carta') out[k] = canon((v as Record<string, unknown>)[k]);
+    for (const k of Object.keys(v).sort()) if (k !== 'card' && k !== 'carta') out[k] = canon((v as Record<string, unknown>)[k]);
     return out;
   };
   return JSON.stringify(canon(o)) ?? '';
@@ -79,9 +80,10 @@ export function changeOf(before: number[], after: number[]): number {
 /** A valid chain of origins (what is not one is left out). */
 export function readOrigins(raw: unknown): CardOrigin[] {
   if (!Array.isArray(raw)) return [];
-  return raw
-    .filter((o) => o && typeof o.titolare === 'string' && typeof o.universo === 'string' && Array.isArray(o.impronta))
-    .map((o) => ({ titolare: o.titolare, universo: o.universo, impronta: o.impronta.filter((n: unknown) => Number.isInteger(n)) }));
+  // An origin of the contract 0.3 (`titolare`, `universo`, `impronta`) reads internal (T308a).
+  return (internalFields('card', { origins: raw }).origins as any[])
+    .filter((o) => o && typeof o.holder === 'string' && typeof o.universe === 'string' && Array.isArray(o.fingerprint))
+    .map((o) => ({ holder: o.holder, universe: o.universe, fingerprint: o.fingerprint.filter((n: unknown) => Number.isInteger(n)) }));
 }
 
 /**
@@ -97,11 +99,11 @@ export function sharesOf(titolare: string, origini: CardOrigin[], now: number[],
   let rest = 1;
   let later = now;
   for (let i = origini.length - 1; i >= 0; i--) {
-    const past = cfg.base + cfg.copia * (1 - changeOf(origini[i].impronta, later));
-    add(i === origini.length - 1 ? titolare : origini[i + 1].titolare, rest * (1 - past));
+    const past = cfg.base + cfg.copy * (1 - changeOf(origini[i].fingerprint, later));
+    add(i === origini.length - 1 ? titolare : origini[i + 1].holder, rest * (1 - past));
     rest *= past;
-    later = origini[i].impronta;
+    later = origini[i].fingerprint;
   }
-  add(origini.length ? origini[0].titolare : titolare, rest);
+  add(origini.length ? origini[0].holder : titolare, rest);
   return out;
 }

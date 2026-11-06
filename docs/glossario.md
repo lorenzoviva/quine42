@@ -23,10 +23,10 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 | Che cosa | Dove | Perché | Che cosa costa |
 |---|---|---|---|
-| Campi JSON degli universi | manifest (`tiles`, `layouts`, `items`), `universe.json` (`chunkSize`, `placesPerMinute`, `maxCast`, `partita`), `world/*.json` (`legami`, `ricordi`, `scheda`), `maps/` (`place`, `layout`, `strutture`, `scavi`), carte (`carta`, `titolare`, `pagante`) | ogni universo su disco li ha nella sua storia git | lettura che accetta i due nomi (come `readPeople`), più un aggiornamento dal seme |
+| Campi JSON degli universi | manifest (`tiles`, `layouts`, `items`), `universe.json` (`chunkSize`, `placesPerMinute`, `maxCast`, `game`), `world/*.json` (`legami`, `ricordi`, `scheda`), `maps/` (`place`, `layout`, `strutture`, `scavi`), carte (`carta`, `titolare`, `pagante`) | ogni universo su disco li ha nella sua storia git | lettura che accetta i due nomi (come `readPeople`), più un aggiornamento dal seme |
 | Componenti delle entità | `src/session/protocol.ts` (`ENTITY_PARTS`), `stato.json`, codice Lua (`hand`, `luce`, `fuoco`, `attivita`, `stati`, `meta`) | salvati nello stato e letti dai moduli generati | migrazione dello stato e del Lua generato |
 | API Lua e hook | `LUA_API` in `src/kernel/validator.ts`, `prelude.lua`, prompt dell'Ingegnere (`world.player`, `world.player_pos`, `generate_chunk`, `on_act`) | il Lua generato negli universi li chiama, il validatore rifiuta il resto | un alias per sempre: **sconsigliato** |
-| Nomi nel validatore e negli schemi | effetti (`crea_oggetto`, `togli_stato`), categorie, `AgentId`, compiti (`npc.reply`, `npc.sheet`), risposte dei modelli (`usa_ambiente`, `richiesta_fucina`) | stanno nei file generati, nei prompt, in `world/consumi.json` | prompt, schemi e validatore insieme, più i file vecchi |
+| Nomi nel validatore e negli schemi | effetti (`crea_oggetto`, `togli_stato`), categorie, `AgentId`, compiti (`npc.reply`, `npc.sheet`), risposte dei modelli (`usa_ambiente`, `richiesta_fucina`) | stanno nei file generati, nei prompt, in `world/usage.json` | prompt, schemi e validatore insieme, più i file vecchi |
 | Messaggi del protocollo | `src/session/protocol.ts` (`entra`, `passo`, `incidi`, `viandanti`, `cose`, `luoghi`) | client e server parlano così | nessun dato; client e server vanno rilasciati insieme |
 | Indirizzi | `/api/viandante`, `/api/crediti`, `?viandante=`, `?universo=`, chiavi di `localStorage` (`rune:profilo:`), `window.rune` | link, profili dei browser, abitudini | redirect o doppia lettura |
 
@@ -48,9 +48,9 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 ### Fila delle scritture
 - **Inglese**: `OwedWrite`, `OwedStorage`, `browserOwedStorage`, `renewAuth`
 - **Definizione**: le scritture sull'universo che il server non ha ancora preso (commit, piani, rami, pubblicazioni), in ordine; nel browser sopravvive a una ricarica, ha un tetto (ADR-0122, ADR-0144).
-- **Dove vive**: `src/kernel/universes.ts` (`UniverseClient`), `localStorage` `quine:fila:<universo>:<scheda>`
+- **Dove vive**: `src/kernel/universes.ts` (`UniverseClient`), `localStorage` `quine:owed:<universo>:<scheda>`
 - **Da non usare**: `coda dei commit` (non ha solo commit; «coda» è quella degli abbonamenti)
-- **Fermo**: la chiave `quine:fila:` e la forma delle scritture salvate.
+- **Fermo**: la chiave `quine:owed:` e la forma delle scritture salvate.
 
 ### Seme
 - **Inglese**: `seed`, `seedLua`, `rngFor`
@@ -68,14 +68,14 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 ### Partita
 - **Inglese**: `GameSetup`, `repairGameSetup`, `game`
 - **Definizione**: come si gioca in un universo, scelto alla Genesi e fisso: modalità, morte, PvP, master.
-- **Dove vive**: `src/kernel/gameSetup.ts`, `universe.json → partita`
+- **Dove vive**: `src/kernel/gameSetup.ts`, `universe.json → game`
 - **Da non usare**: `game of many` (si dice «multigiocatore»), `Partita`, `repairPartita`, `partitaSummary`, `DEFAULT_PARTITA`
-- **Fermo**: `partita`, `modalita`, `altroTraGiocatori`.
+- **Fermo**: `game`, `modalita`, `altroTraGiocatori`.
 
 ### Multigiocatore
 - **Inglese**: `multiplayer`, `manyPlayers`
 - **Definizione**: la modalità in cui il mondo gira sul server e ogni viandante è su un client; il contrario di «singola».
-- **Dove vive**: `src/session/server.ts`, `universe.json → partita.modalita`
+- **Dove vive**: `src/session/server.ts`, `universe.json → game.mode`
 - **Da non usare**: `partita di molti`, `game of many`
 - **Fermo**: il valore `multigiocatore` di `modalita`.
 
@@ -302,9 +302,9 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 ### Magazzino
 - **Inglese**: `ModuleStores`, `stores`, `store_get`, `store_set`, `STORE_DIR`
 - **Definizione**: ciò che un modulo tiene da un'apertura del mondo all'altra e che non è una casella (un prezzo, un contatore, un tabellone), sotto chiavi semplici, in un file per modulo, con un tetto in byte per modulo e per universo (T245a, ADR-0138). Ogni modulo vede solo il suo; non va mai ai client.
-- **Dove vive**: `src/kernel/store.ts`, `world/magazzino/<modulo>.json`
+- **Dove vive**: `src/kernel/store.ts`, `world/stores/<modulo>.json`
 - **Da non usare**: `store` (nei documenti e nella UI), `deposito` (per il magazzino di un modulo), `memoria del modulo`
-- **Fermo**: `world.store_get`, `world.store_set`, la cartella `world/magazzino/`.
+- **Fermo**: `world.store_get`, `world.store_set`, la cartella `world/stores/`.
 
 ### Sistema
 - **Inglese**: `system`
@@ -437,10 +437,10 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Viandante
 - **Inglese**: `wanderer`, `Wanderer`, `wanderers`, `wandererId`, `wandererEntity`, `wandererPos`, `wandererCarpet`, `wandererComp`, `wandererModule`, `wandererTile`, `wandererText`, `wandererPrompt`
-- **Definizione**: il personaggio di chi gioca nel mondo, con un id stabile (`io` in singola).
-- **Dove vive**: `src/kernel/wanderers.ts`, `world/giocatori/<id>.json`
+- **Definizione**: il personaggio di chi gioca nel mondo, con un id stabile (`me` in singola).
+- **Dove vive**: `src/kernel/wanderers.ts`, `world/players/<id>.json`
 - **Da non usare**: `player` (per il personaggio), `giocatore` (idem), `hero`, `playerPos`, `playerCarpet`, `playerId`, `playerComp`, `playerMod`, `playerCell`, `playerText`, `playerPrompt`
-- **Fermo**: `world.player`, `world.player_pos`, `kind: player`, `core.player`, `world/giocatori/`, `viandante` nei file e nel protocollo.
+- **Fermo**: `world.player`, `world.player_pos`, `kind: player`, `core.player`, `world/players/` (`world/giocatori/` fino al contratto 0.3), `viandante` nel protocollo (T308b).
 
 ### Giocatore
 - **Inglese**: `player`, `players`, `PlayerSpot`, `playerFiles`
@@ -452,7 +452,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 ### Master
 - **Inglese**: `master`, `isMaster`
 - **Definizione**: chi ha creato un universo multigiocatore: lo guida, fisso; in singola chi gioca.
-- **Dove vive**: `src/kernel/gameSetup.ts`, `src/master.ts`, `universe.json → partita.master`
+- **Dove vive**: `src/kernel/gameSetup.ts`, `src/master.ts`, `universe.json → game.master`
 - **Da non usare**: `dio`, `admin`, `DM` (salvo il paragone con D&D)
 
 ### God mode
@@ -480,7 +480,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Definizione**: com'è fatta la giornata di un mestiere, scritta una volta per mestiere e usata da ogni individuo che lo ha: i compiti di ogni fase, ognuno un comportamento con i suoi parametri (T245b, ADR-0140). Dati, mai codice.
 - **Dove vive**: `src/kernel/jobs.ts`, `universe/modules/job.farmer/manifest.json`
 - **Da non usare**: `routine` (per il programma: la routine è il testo di oggi), `script`, `job`
-- **Fermo**: `mestieri` nei manifest, `giornata`, `nomi`, `posto`, i componenti `mestiere`, `lavoro`, `carico`.
+- **Fermo**: `jobs` nei manifest, `giornata`, `nomi`, `posto`, i componenti `mestiere`, `lavoro`, `carico`.
 
 ### Comportamento
 - **Inglese**: `JOB_BEHAVIOURS`, `JobBehaviour`
@@ -499,23 +499,23 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 ### Impresa
 - **Inglese**: `Venture`, `ventures`, `ventureProgress`, `ventureState`
 - **Definizione**: un lavoro di molti verso un risultato che si vede, lungo giorni o mesi: una costruzione, un raccolto (e, con i task che le portano, una festa, una ricerca…). Ha fasi con materiali e lavoro, una squadra e uno stato; il progresso si ricava da ciò che è stato portato e lavorato, mai da un contatore (T245d, ADR-0147).
-- **Dove vive**: `src/kernel/ventures.ts`, `src/kernel/kernel.ts`, `world/imprese.json`
+- **Dove vive**: `src/kernel/ventures.ts`, `src/kernel/kernel.ts`, `world/ventures.json`
 - **Da non usare**: `progetto` (per l'impresa: il progetto è un documento), `cantiere` (è il posto dell'impresa e il suo pannello), `quest`, `obiettivo`, `job`
-- **Fermo**: `world/imprese.json`, `imprese`, `fasi`, `materiali`, `lavoro`, `stadio`, `portati`, `lavorato`, `squadra`, `ruoli`, `nato_da`, i valori di `tipo` e di `stato`; l'API Lua `world.impresa`, `world.impresa_porta`; il comportamento `costruisci`.
+- **Fermo**: `world/ventures.json`, `imprese`, `fasi`, `materiali`, `lavoro`, `stadio`, `portati`, `lavorato`, `squadra`, `ruoli`, `nato_da`, i valori di `tipo` e di `stato`; l'API Lua `world.impresa`, `world.impresa_porta`; il comportamento `costruisci`.
 
 ### Squadra di un'impresa
 - **Inglese**: `fillTeam`, `VentureMember`, `staffVentures`
 - **Definizione**: chi lavora a un'impresa, con il suo ruolo (capomastro, manovale, mietitore): la fa il kernel per mestiere, vicinanza e un'estrazione del seme, e la rifà a ogni giorno nuovo (chi non c'è più se ne va, un altro prende il posto) (T245d, ADR-0147).
 - **Dove vive**: `src/kernel/ventures.ts`
 - **Da non usare**: `squadra` da sola dove si confonde con quella del Concilio nello studio, `team` (nei documenti), `gruppo`, `ciurma`
-- **Fermo**: `squadra`, `ruolo`, `ruoli` in `world/imprese.json`.
+- **Fermo**: `squadra`, `ruolo`, `ruoli` in `world/ventures.json`.
 
 ### Stadio di un edificio
 - **Inglese**: `stageGrid`, `stageHeights`, `stagedBody`, `stadio`
 - **Definizione**: a che punto è un edificio che un'impresa costruisce, da 0 (il lotto segnato) a 1 (finito): la griglia del suo modello, finita, mostrata fino a una quota (il piano terra, i muri, il tetto), con il cantiere attorno (picchetti, impalcature) (T245e, ADR-0148).
 - **Dove vive**: `src/mj/mesh.ts`, `src/render/models.ts`, `src/kernel/kernel.ts`
 - **Da non usare**: `fase` (per lo stadio: la fase è dell'impresa), `livello` (è del rilievo), `step`, `stage` (nei documenti)
-- **Fermo**: `stadio` nelle fasi di `world/imprese.json` e in `struttura`, `stadi` e `case` nel piano del luogo, `c.struttura.stadio` sul filo.
+- **Fermo**: `stadio` nelle fasi di `world/ventures.json` e in `struttura`, `stadi` e `case` nel piano del luogo, `c.struttura.stadio` sul filo.
 
 ### Impalcatura
 - **Inglese**: `SCAFFOLD_LETTER`, `STAKE_LETTER`, `site` (di `stageGrid`)
@@ -546,8 +546,8 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Fermo**: il pannello `cantiere`, i campi `cantiere.titolo`, `cantiere.fase`, `cantiere.stato`, `cantiere.manca`, `cantiere.squadra`, il pulsante `porta`.
 
 ### Maturazione
-- **Inglese**: `matura`, `matureTick`
-- **Definizione**: ciò che una casella diventa da sola dopo qualche giorno del mondo (il seminato in grano, la ceppaia in bosco), contato dal giorno in cui la casella è stata scritta (`plan.giorni`). La fa il kernel, non Lua (T245b, ADR-0140).
+- **Inglese**: `ripens`, `matureTick`
+- **Definizione**: ciò che una casella diventa da sola dopo qualche giorno del mondo (il seminato in grano, la ceppaia in bosco), contato dal giorno in cui la casella è stata scritta (`plan.days`). La fa il kernel, non Lua (T245b, ADR-0140).
 - **Dove vive**: `src/kernel/kernel.ts`, `universe/modules/world.terrain/manifest.json`
 - **Da non usare**: `crescita` (per la maturazione), `ripen`
 - **Fermo**: `matura {dopo, in}` nei `tiles`, `giorni` nel piano del luogo.
@@ -653,7 +653,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Definizione**: un oggetto che un viandante ha posato sul ripiano di un mobile: sta alla sua altezza, si raccoglie come da terra, resta nel salvataggio e per tutti.
 - **Dove vive**: `src/kernel/placing.ts`, `src/kernel/kernel.ts`
 - **Da non usare**: `appoggiato`
-- **Fermo**: il componente `posato`, il campo `posati` di `world/stato.json`, l'azione `posa`.
+- **Fermo**: il componente `posato`, il campo `placed` di `world/state.json`, l'azione `posa`.
 
 ### Bottino
 - **Inglese**: `loot`, `LootTable`, `LootEntry`
@@ -755,13 +755,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 ### Canone
 - **Inglese**: `canon`, `canonSummary`
 - **Definizione**: ciò che è vero delle rune, che ogni storia deve rispettare.
-- **Dove vive**: `world/canone.md`
+- **Dove vive**: `world/canon.md`
 - **Da non usare**: nessuno
 
 ### Lessico
 - **Inglese**: `lexicon`, `lexiconSummary`, `glossaryBreak`
 - **Definizione**: come parla la gente del mondo: parole sostituite, saluti, usanze.
-- **Dove vive**: `world/lessico.md`, `src/kernel/fourthwall.ts`
+- **Dove vive**: `world/lexicon.md`, `src/kernel/fourthwall.ts`
 - **Da non usare**: `glossario` (è questo file)
 
 ## Il Concilio
@@ -834,7 +834,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Definizione**: l'agente che scrive i programmi sonori di ciò che il mondo e il viandante chiedono; abita nella casa dell'Artista.
 - **Dove vive**: `src/kernel/agents/composer.ts`, `src/kernel/scoredirector.ts`
 - **Da non usare**: `Compositore`, `MusicDirector`
-- **Fermo**: il valore `musicista` di `AgentId`, `scultori.musicista`, il coefficiente `brani`, `ai.maxBrani`.
+- **Fermo**: il valore `musicista` di `AgentId`, `scultori.musicista`, il coefficiente `brani`, `ai.maxPieces`.
 
 ### Attore
 - **Inglese**: `Actor`, `ActorConfig`, `repairActor`, `attore`, `ACTOR_MODEL`
@@ -883,9 +883,9 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 ### Generazione differita
 - **Inglese**: `runDeferred`, `DeferredModels`, `StepGate`, `planAhead`
 - **Definizione**: un universo generato prima che qualcuno lo giochi, senza browser, passo dopo passo e solo dalla coda degli abbonamenti (ADR-0143).
-- **Dove vive**: `src/kernel/deferred.ts`, `tools/generazione/genera.ts`, `server/generation.ts`, `universes/.generazione/`
+- **Dove vive**: `src/kernel/deferred.ts`, `tools/generazione/genera.ts`, `server/generation.ts`, `universes/.generation/`
 - **Da non usare**: `pregenerazione`, `generazione offline` («offline» sono i modelli locali)
-- **Fermo**: il file `universes/.generazione/<nome>.json` (passi, tetto, partita, consumo) e il segno `universes/.accesi/<nome>.json`.
+- **Fermo**: il file `universes/.generation/<nome>.json` (passi, tetto, partita, consumo) e il segno `universes/.running/<nome>.json`.
 
 ### Ambientazione
 - **Inglese**: `WorldTheme`, `WORLD_THEMES`, `themeOfText`
@@ -908,7 +908,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 ### Grafo del mondo
 - **Inglese**: `WorldGraph`, `graph`
 - **Definizione**: nodi e archi ricavati dai file dell'universo: il contesto degli agenti e i controlli.
-- **Dove vive**: `src/kernel/graph.ts`, `world/grafo.json`
+- **Dove vive**: `src/kernel/graph.ts`, `world/graph.json`
 - **Da non usare**: nessuno
 
 ### Modello di IA
@@ -930,27 +930,27 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Definizione**: quanto spesso ogni agente chiama l'IA, da 0 a 1.
 - **Dove vive**: `src/kernel/coefficients.ts`
 - **Da non usare**: nessuno
-- **Fermo**: `ai.coefficienti`.
+- **Fermo**: `ai.coefficients`.
 
 ### Vite degli individui
 - **Inglese**: `lives` (la chiave; `vite` prima di T307b), `ABSENT`
 - **Definizione**: la manopola del realismo degli individui (T245a, ADR-0138): Cronaca a 0, Vita a 0,5, Teatro a 1. Assente vale 0, a differenza delle altre manopole, così un universo di prima non spende per ciò che non ha scelto; si fissa entrando come tutte (ADR-0133).
 - **Dove vive**: `src/kernel/coefficients.ts`
 - **Da non usare**: `realismo` (per la manopola), `grado di vita`
-- **Fermo**: `ai.coefficienti.lives`, i nomi `Cronaca`, `Vita`, `Teatro`.
+- **Fermo**: `ai.coefficients.lives`, i nomi `Cronaca`, `Vita`, `Teatro`.
 
 ### Consumi
 - **Inglese**: `usage`, `UsageLog`
 - **Definizione**: quanto si è speso per giorno, modello e compito, in token e dollari.
-- **Dove vive**: `src/kernel/ai/usage.ts`, `world/consumi.json`
+- **Dove vive**: `src/kernel/ai/usage.ts`, `world/usage.json`
 - **Da non usare**: `UsageLedger`
 
 ### Mancanze
 - **Inglese**: `shortfalls`, `ShortfallLog`, `noteShortfall`, `shortfallReport`
 - **Definizione**: le richieste che il Concilio non è riuscito a soddisfare, con chi, agente, motivo e quante volte; da qui parte la Fase III. Non va ai client.
-- **Dove vive**: `src/kernel/shortfalls.ts`, `world/mancanze.json`, `tools/mancanze/rapporto.ts`
+- **Dove vive**: `src/kernel/shortfalls.ts`, `world/shortfalls.json`, `tools/mancanze/rapporto.ts`
 - **Da non usare**: «registro dei fallimenti»
-- **Fermo**: `world/mancanze.json` e i suoi campi (`voci`, `richiesta`, `chi`, `agente`, `compito`, `esito`, `motivo`, `volte`, `primo`, `ultimo`).
+- **Fermo**: `world/shortfalls.json` e i suoi campi (`voci`, `richiesta`, `chi`, `agente`, `compito`, `esito`, `motivo`, `volte`, `primo`, `ultimo`).
 
 ## Client, soldi e carte
 
@@ -984,14 +984,14 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Definizione**: ciò che di ogni utilizzo di una carta clonata torna a chi la teneva prima.
 - **Dove vive**: `src/kernel/heritage.ts`, `src/kernel/clone.ts`
 - **Da non usare**: `Eredita`, `EREDITA`, `repairEredita`, `Origine` (nel codice)
-- **Fermo**: `eredita`, `origini`, `quote`, `allaNascita`.
+- **Fermo**: `heritage`, `origini`, `quote`, `allaNascita`.
 
 ### Carta
 - **Inglese**: `Card`, `CardStamp`, `isCardStamp`, `cards`, `CardUses`
 - **Definizione**: il timbro su un contenuto generato: autore, pagante, titolare, utilizzi.
-- **Dove vive**: `src/kernel/cards.ts`, `world/carte.json`
+- **Dove vive**: `src/kernel/cards.ts`, `world/cards.json`
 - **Da non usare**: `Carta`, `isCarta` (nel codice), `CardLedger`
-- **Fermo**: `carta`, `autore`, `utilizzi`, `world/carte.json`.
+- **Fermo**: `carta`, `autore`, `utilizzi`, `world/cards.json`.
 
 ### Titolare
 - **Inglese**: `holder`, `cardHolderOf`
@@ -1017,7 +1017,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 ### Saldo
 - **Inglese**: `balance`, `Ledger`, `FileLedger`
 - **Definizione**: i crediti di un viandante in un universo, tenuti fuori dal repository.
-- **Dove vive**: `src/kernel/credits.ts`, `server/ledger.ts`, `universes/.saldi/`
+- **Dove vive**: `src/kernel/credits.ts`, `server/ledger.ts`, `universes/.balances/`
 - **Da non usare**: nessuno
 
 ### Commissione
@@ -1032,7 +1032,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Definizione**: quanto si può spendere al più, per sessione, per giorno o per universo.
 - **Dove vive**: `src/kernel/credits.ts`, `src/session/server.ts`, `server/geminiProxy.ts`
 - **Da non usare**: `cap` (nei documenti e nella UI), `sessionTetto`, `addBudgetFromTetto`
-- **Fermo**: `tetto` del protocollo e di `ai.minimi`, `GEMINI_TETTO_GIORNALIERO`, `QUINE_TETTO_RICARICHE`.
+- **Fermo**: `tetto` del protocollo e di `ai.minimums`, `GEMINI_TETTO_GIORNALIERO`, `QUINE_TETTO_RICARICHE`.
 
 ### Lobby
 - **Inglese**: `lobby`, `AiMinimums`, `repairMinimums`
@@ -1205,8 +1205,8 @@ Le fanno i task T188-T204, una per task e nell'ordine: vanno in conflitto con tu
 | R4 | Prima `ChunkView` di `terrain.ts` → `TerrainView`; poi `Place` → `ChunkInfo`, `PlaceView` → `ChunkView`, `PlaceLot` → `ChunkLot`, `PlaceMiniature` → `ChunkMiniature`, `GraphPlace` → `GraphChunk`, `placeHere` → `chunkHere`, `placeByName` → `chunkByName`, `placesOf` → `chunksOf`, `placeList` → `chunkList`, `mergePlaces` → `mergeChunks`, `graphPlaces` → `graphChunks`, `graphPlacesVersion` → `graphChunksVersion`, `seedGraphPlaces` → `seedGraphChunks`, `addPlace` → `addChunk`, `hasPlace` → `hasChunk`, `cardPlace` → `cardChunk`, `placeCard` → `chunkCard`, `placeCardId` → `chunkCardId`, `placeIn` → `chunkIn`, `placeQuota` → `chunkQuota`, `placesMade` → `chunksMade`, `noPlace` → `noChunk`, `lastPlace` → `lastChunk`, `listPlaces` → `listChunks` | «place» verbo: `placeStructure`, `placeCampus`, `placeRegion`, `placeInside`, `placeProp`, `placeFor`, `placed`, `Placement`, `placementsOf`, `Placeable`, `PlacedObject`; i locali `place` e `places` che non sono il luogo (i locali che lo sono, passati a mano: `chunk`, `chunks`); i campi `SessionClient.places`, `Client.places`, `ShowcaseEntry.place`, i contesti degli agenti (`ctx.place`, `npc.place`, i `data` di `npcDialogue` e `weavePlot`), il metodo `ThinClient.places`, `Hud.place` (`#place`), `PLACE_PHASES`, `PLACES_PER_MINUTE`, i commenti; **fermi** `plan.place` in `maps/`, `Chunk.place`, `placesPerMinute`, `luoghi` del protocollo, `senza_luogo` | 20 (di cui 5 test) | no | fatto |
 | R5 | Di `Kernel`: `hand()` → `phrase()`, `syncHand` → `syncPhrase`, `inscribeHand` → `inscribePhrase`; `lastHand` di `hud.ts` → `lastPhrase`, `handKey` → `phraseKey` | `ThinClient.phrase` e `ThinClient.syncPhrase`, su un'altra classe; i locali `hand` che tengono il componente, `Hud.hand` (`#hand`), i commenti; **fermi** il componente `hand`, `hand.tokens`, il campo `hand` dello stato sul filo (`hand: k.hand()` diventa `hand: k.phrase()`), i locali `hand` che ne fanno la chiave | 15 | no se resta il componente: con il componente, dallo stato di ogni viandante e dal Lua, ed è **sconsigliato** | fatto |
 | R6 | `ThingView` → `EntityView`, `THING_PARTS` → `ENTITY_PARTS`, `Things` → `Entities`, `Thing` del laboratorio → `Entity`, `thingStandIn` → `entityStandIn`, `thingCards` → `entityCards`; i campi `things` di `Renderer`, `SessionClient`, `BenchScene` e della miniatura → `entities`; `src/render/things.ts` → `src/render/entities.ts`; nei commenti `thing` → `entity` dove è il termine tecnico | `something`, `anything` e la parola comune nei commenti (anche «things» accanto a «people» o per ciò che si porta, che non sono termini tecnici); la riga non li nomina: il campo `things` di `Client` in `server.ts`, il metodo privato `ThinClient.things`, i locali `things` e `thing` (`kernel`, `bench`, `graph`, `coefficients`, test), `things` e `userData.thing` del laboratorio, `things` di `lab/3d/world.ts`, il valore `'thing'` di `EntityView.kind`, i titoli dei test, `tests/kernel-things.test.ts`; `class Thing` di `tests/sicurezza/uscita.test.ts` non è un'entità; **fermi** `cose` ed `entita` del protocollo, `cose` dei casi del banco e dei prompt | 54 | no | fatto |
-| R7 | `AttoreConfig` → `ActorConfig`, `repairAttore` → `repairActor`; `AiMinimi` → `AiMinimums`, `repairMinimi` → `repairMinimums`, `minimiBlock` → `minimumsBlock`; `Eredita` → `HeritageConfig`, `EREDITA` → `DEFAULT_HERITAGE`, `repairEredita` → `repairHeritage`, `Origine` → `CardOrigin`; `Carta` → `CardStamp` (il timbro; `Card` è la carta in una collezione e lo estende), `isCarta` → `isCardStamp`; `titolareOf` → `cardHolderOf` (`holderOf` è occupato in `tools/pipeline/`); `sottoOf` → `cellarOf`; `sessionTetto` → `sessionCap`, `setSessionTetto` → `setSessionCap`, `sessionTettoOf` → `sessionCapOf`, `tettoBudgeted` → `capBudgeted`, `addBudgetFromTetto` → `addBudgetFromCap`, in `lobby.ts` `tettoMin` → `minCap`, `defaultTetto` → `defaultCap`, `tettoInput` → `capInput`, `setTetto` → `setCap`, in `creditdialog.ts` `isTetto` → `isCap`, in `site/sessioni.ts` `tettoMinimo` → `minCap`; `Scheda` di `society.ts` → `IndividualSheet`; `Forma` → `ItemShape`, `FORME` → `ITEM_SHAPES`, `formaModel` → `itemShapeModel`; `PlintoSculpture` → `PlinthSculpture`, `plintoSculpture` → `plinthSculpture`, `plintoSymbols` → `plinthSymbols`; `TornioModelEntry` → `LatheModelEntry`, `TornioShown` → `LatheShown`, `TornioView` → `LatheView`, `tornioCache` → `latheCache`, `tornioExecute` → `latheExecute`, `tornioIndex` → `latheIndex`, `tornioModels` → `latheModels`, `tornioOf` → `latheOf`, `tornioOpen` → `latheOpen`, con i file `src/kernel/tornio.ts`, `src/render/tornio.ts` e `tests/tornio.test.ts` → `lathe` | l'italiano del laboratorio, che non è il TypeScript del gioco (`Scheda` di `lab/banco/seconda.ts`, `Piano`, `daCorreggere`); il locale `tetto`, che è la chiave del messaggio; la riga non li nomina: `stepTornio`, `openTornio`, `TORNIO_AT`, il campo `tornio` di `CoronaView`, il metodo `tornio` di `Studio`, i locali `tornio`, `Kernel.plinto()`, `updatePlinto`, il campo `plinto` della struttura; **fermi** i campi omonimi nei file (`attore`, `minimi`, `eredita`, `origini`, `carta`, `titolare`, `sotto`, `tetto`, `scheda`), gli id `forma-…`, i valori `tornio` e `plinto` di `ItemKind` e simili | 32 | no | fatto |
-| R8 | `CardLedger` → `CardUses`, `UsageLedger` → `UsageLog` | `Ledger`, `FileLedger`, `MemoryLedger`, `LedgerBook`, `openLedger`: sono dei saldi; la riga non li nomina: i locali e parametri `ledger` che tengono un `UsageLog` (`lab/scripts/`, `tests/subscription.test.ts`), `ledger` di `allCards` in `cards.ts`, «ledger» nei commenti e nei titoli dei test; `docs/conversazioni.md`, che è storia; **fermi** `world/consumi.json`, `world/carte.json` | 12 | no | fatto |
+| R7 | `AttoreConfig` → `ActorConfig`, `repairAttore` → `repairActor`; `AiMinimi` → `AiMinimums`, `repairMinimi` → `repairMinimums`, `minimiBlock` → `minimumsBlock`; `Eredita` → `HeritageConfig`, `EREDITA` → `DEFAULT_HERITAGE`, `repairEredita` → `repairHeritage`, `Origine` → `CardOrigin`; `Carta` → `CardStamp` (il timbro; `Card` è la carta in una collezione e lo estende), `isCarta` → `isCardStamp`; `titolareOf` → `cardHolderOf` (`holderOf` è occupato in `tools/pipeline/`); `sottoOf` → `cellarOf`; `sessionTetto` → `sessionCap`, `setSessionTetto` → `setSessionCap`, `sessionTettoOf` → `sessionCapOf`, `tettoBudgeted` → `capBudgeted`, `addBudgetFromTetto` → `addBudgetFromCap`, in `lobby.ts` `tettoMin` → `minCap`, `defaultTetto` → `defaultCap`, `tettoInput` → `capInput`, `setTetto` → `setCap`, in `creditdialog.ts` `isTetto` → `isCap`, in `site/sessioni.ts` `tettoMinimo` → `minCap`; `Scheda` di `society.ts` → `IndividualSheet`; `Forma` → `ItemShape`, `FORME` → `ITEM_SHAPES`, `formaModel` → `itemShapeModel`; `PlintoSculpture` → `PlinthSculpture`, `plintoSculpture` → `plinthSculpture`, `plintoSymbols` → `plinthSymbols`; `TornioModelEntry` → `LatheModelEntry`, `TornioShown` → `LatheShown`, `TornioView` → `LatheView`, `tornioCache` → `latheCache`, `tornioExecute` → `latheExecute`, `tornioIndex` → `latheIndex`, `tornioModels` → `latheModels`, `tornioOf` → `latheOf`, `tornioOpen` → `latheOpen`, con i file `src/kernel/tornio.ts`, `src/render/tornio.ts` e `tests/tornio.test.ts` → `lathe` | l'italiano del laboratorio, che non è il TypeScript del gioco (`Scheda` di `lab/banco/seconda.ts`, `Piano`, `daCorreggere`); il locale `tetto`, che è la chiave del messaggio; la riga non li nomina: `stepTornio`, `openTornio`, `TORNIO_AT`, il campo `tornio` di `CoronaView`, il metodo `tornio` di `Studio`, i locali `tornio`, `Kernel.plinto()`, `updatePlinto`, il campo `plinto` della struttura; **fermi** i campi omonimi nei file (`attore`, `minimi`, `heritage`, `origini`, `carta`, `titolare`, `sotto`, `tetto`, `scheda`), gli id `forma-…`, i valori `tornio` e `plinto` di `ItemKind` e simili | 32 | no | fatto |
+| R8 | `CardLedger` → `CardUses`, `UsageLedger` → `UsageLog` | `Ledger`, `FileLedger`, `MemoryLedger`, `LedgerBook`, `openLedger`: sono dei saldi; la riga non li nomina: i locali e parametri `ledger` che tengono un `UsageLog` (`lab/scripts/`, `tests/subscription.test.ts`), `ledger` di `allCards` in `cards.ts`, «ledger» nei commenti e nei titoli dei test; `docs/conversazioni.md`, che è storia; **fermi** `world/usage.json`, `world/cards.json` | 12 | no | fatto |
 | R9 | Di `corona.ts`: `Floor` → `Storey`, `Building.floors` → `storeys`, `perFloor` → `perStorey`, `nFloors` → `nStoreys`, `FLOOR_STRIDE` → `STOREY_STRIDE`; il campo `floor` di `roomAt`, il parametro `floor: Floor` e l'indice `floor` di `entrance` → `storey`; nei test `sampleFloor` → `sampleStorey`, `floorOf` → `storeyOf` (è il piano di un oggetto) | i pavimenti: `floors` di `src/mj/mesh.ts`, `floorAt`, `floorBelow`, `Math.floor`; le misure di `lab/banco/misure.ts`; `Lot.floor`, `Form.floor`; il genere `'floor'` di `CoronaTile` e la parola inglese «ground floor» nei commenti; **fermo** lo strato `floor` di `TerrainLayer` | 21 | no | fatto |
 | R10 | Le caselle: `gateCells` → `gateTiles`, `freeCell` → `freeTile`, `freeCells` → `freeTiles`, `runeCells` → `runeTiles`, `solidCells` → `solidTiles`, `cellNear` → `tileNear`, `propCells` → `propTiles`, `pickCell` → `pickTile`, `doorCells` → `doorTiles`, `nicheCell` → `nicheTile`, `cellOf` → `tileOf`, `cellIndex` → `tileIndex`, `polarCell` → `polarTile`, `CoronaCell` → `CoronaTile`; i locali `cell` dove indicano una casella (anche il campo del risultato di `tileOf`, che non esce da `kernel.ts`) | le celle: `turnCells`, `cellAt` e `nCell` di `mesh.ts`, `sameCells`, i `cell` di griglie, tabelle e tele; `visibleCells` del sito e `sleepCell` di `ledger.ts`, che non sono né l'una né l'altra. `playerCell` sta in R3; la riga non li nomina: i campi `cell` di `Placements` e di `HoverInfo`, `Building.cells`, `Cell`, `cells` e `cell()` di `water.ts`, `Overlay.cell`, i locali `cells` al plurale, i commenti | 9 | no | fatto |
 | R11 | `LayoutDef` → `EnvironmentDef`, `layoutsFor` → `environmentsFor` | **fermi** `layouts` nei manifest (25 file la leggono), `layout` nei piani; il campo `layouts` del risultato di `environmentsFor` e i locali `layouts`; la riga non li nomina: `designLayouts`, `validateLayout`, `checkLayout`, `LayoutCheck` | 8 | no | fatto |
@@ -1215,6 +1215,6 @@ Le fanno i task T188-T204, una per task e nell'ordine: vanno in conflitto con tu
 | R14 | `AGENTS.md`: `chunk` → «luogo» (righe di `relief.ts`, `terrain.ts`, `universe.json`), `layout` → «ambiente» dove è l'ambiente | gli ADR, che non si toccano | 1 | no | fatto |
 | R15 | Sito: «reame», «reami», `Reame`, `REAME` → «universo», «universi» e maiuscole, anche il messaggio di `server/wanderer.ts`; `realm`, `realms` → `universe`, `universes`; `RealmView` → `UniverseView`, `REALM_KEY` → `UNIVERSE_KEY`, `pickRealm` → `pickUniverse`, `parseRealmSnapshot` → `parseUniverseSnapshot`, `fetchRealmDetails` → `fetchUniverseDetails`, `renderRealmCard` → `renderUniverseCard`, `loadRealms` → `loadUniverses`, `allRealms` → `allUniverses`, `realmPromises` → `universePromises`, `realmsGrid` → `universesGrid`; le classi e gli id: `realm-card`, `realm-card-header`, `realm-card-body`, `realm-card-footer`, `realm-spec-table`, `realm-loading`, `realm-empty`, `realm-filter-tabs`, `realm-select`, `realms-grid`, `card-realm`, `btn-play-realm`, `status-realms` → con `universe` e `universes` | il reame del kernel: `REALM`, `realmOf`, i commenti di `src/`, `tests/lots.test.ts`; le prove di `reame-low`, `reame-high`, `reame2`, che sono nomi d'universo qualunque; `universes` dei dati della risposta, già così; **fermi** il valore `quine:sito:reame` della chiave di `localStorage` e l'ancora `#reami` (`id="reami"`, i suoi `href`), che sta negli indirizzi | 22 (13 del sito, 7 test) | no | fatto |
 | R16 | `Person` → `Individual`, `DialoguePerson` → `DialogueIndividual`, `addPerson` → `addIndividual`, `updatePerson` → `updateIndividual`, `personOf` → `individualOf`, `personFacts` → `individualFacts`, `personByName` → `individualByName`, `personNode` → `individualNode`, `noPerson` → `noIndividual`; il campo `person` di `BenchScene` e di `figure` → `individual`, il locale `person` → `individual`, gli id `person:<nome>` delle vetrine → `individual:<nome>`; nei commenti `person` → `individual` dove è il concetto. Nei documenti, nella UI e in `AGENTS.md`, «persona» → «individuo» dove è il concetto | `Identity`, il componente; `People` e `readPeople`, che dicono il file; `Species`; `nPersone`, `personaggi` e i testi in italiano comune, nel mondo e nei prompt; **fermi** `world/people.json` e il suo `persone`, `persona` nel manifest e nel prompt, il valore `persona` di `specie` e il tipo `persona` dei nodi del grafo (con `senza_persona`), `npc.*` | 9 per i nomi, ~20 con `person` nel codice, 90 con i commenti | no | fatto |
-| R17 | `Taglia` → `SizeTier`, `TAGLIE` → `SIZE_TIERS`; `Partita` → `GameSetup`, `repairPartita` → `repairGameSetup`, `partitaSummary` → `gameSetupSummary`, `DEFAULT_PARTITA` → `DEFAULT_GAME_SETUP`, il metodo `Kernel.partita()` → `gameSetup()`, `src/kernel/gameSetup.ts` → `src/kernel/gameSetup.ts`; `referenteReply` → `liaisonReply`, `askReferente` → `askLiaison` | `SizeDef`, `RARE_SIZES`, `sizeOf`, `sizeRank`; `game`, `chooseGame`, il `Game` di `server/access.ts`; **fermi** `taglia` e i suoi valori, `partita`, `modalita`, `altroTraGiocatori` nei file, il valore `referente` di `AgentId` | 27 | no | fatto |
+| R17 | `Taglia` → `SizeTier`, `TAGLIE` → `SIZE_TIERS`; `Partita` → `GameSetup`, `repairPartita` → `repairGameSetup`, `partitaSummary` → `gameSetupSummary`, `DEFAULT_PARTITA` → `DEFAULT_GAME_SETUP`, il metodo `Kernel.partita()` → `gameSetup()`, `src/kernel/gameSetup.ts` → `src/kernel/gameSetup.ts`; `referenteReply` → `liaisonReply`, `askReferente` → `askLiaison` | `SizeDef`, `RARE_SIZES`, `sizeOf`, `sizeRank`; `game`, `chooseGame`, il `Game` di `server/access.ts`; **fermi** `taglia` e i suoi valori, `game`, `modalita`, `altroTraGiocatori` nei file, il valore `referente` di `AgentId` | 27 | no | fatto |
 | — | API Lua: `world.player` → `world.wanderer` | 6 moduli del seme, ogni universo generato, prompt, validatore | — | **sì, e un alias per sempre: non lo propongo** | — |
 | — | Valori di `AgentId`, nomi degli effetti, componenti in italiano | ovunque, compresi i dati | — | **sì: non lo propongo**, sono dati | — |

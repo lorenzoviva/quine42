@@ -36,14 +36,14 @@ const PEOPLE = JSON.stringify({ persone: [{ nome: 'Mirella', tipo: 'npc.contadin
 function diskUniverse(): { dir: string; root: string; git: (...a: string[]) => string } {
   const dir = mkdtempSync(path.join(tmpdir(), 'viandante-'));
   const root = path.join(dir, 'prova');
-  mkdirSync(path.join(root, 'world', 'giocatori'), { recursive: true });
+  mkdirSync(path.join(root, 'world', 'players'), { recursive: true });
   mkdirSync(path.join(root, 'models'), { recursive: true });
   const git = (...args: string[]) => execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...args], { cwd: root, encoding: 'utf8' });
   git('init', '-q');
   for (const f of ['models/index.json', 'models/viandante.xml']) writeFileSync(path.join(root, f), bundledFiles[f]);
   writeFileSync(path.join(root, 'world/people.json'), PEOPLE);
-  writeFileSync(path.join(root, 'world/giocatori/ugo.json'), JSON.stringify({ nome: 'Ugo', crediti: 3.5 }));
-  writeFileSync(path.join(root, 'world/giocatori/zed.json'), JSON.stringify({ nome: 'Zed', anonimo: true }));
+  writeFileSync(path.join(root, 'world/players/ugo.json'), JSON.stringify({ nome: 'Ugo', crediti: 3.5 }));
+  writeFileSync(path.join(root, 'world/players/zed.json'), JSON.stringify({ nome: 'Zed', anonimo: true }));
   git('add', '-A');
   git('commit', '-q', '-m', 'inizio');
   return { dir, root, git };
@@ -63,7 +63,7 @@ describe('the wanderer route of the site (T102)', () => {
       const anon = (await call({ universesDir: dir }, 'GET', '/api/viandante?universo=prova&viandante=zed')).body.viandante;
       expect(anon).toMatchObject({ anonimo: true, crediti: 0 });
       const fresh = (await call({ universesDir: dir }, 'GET', '/api/viandante?universo=prova')).body.viandante;
-      expect(fresh).toMatchObject({ id: 'io', noto: false });
+      expect(fresh).toMatchObject({ id: 'me', noto: false });
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -88,16 +88,16 @@ describe('the wanderer route of the site (T102)', () => {
       const r = await call({ universesDir: dir }, 'POST', '/api/viandante', { universo: 'prova', viandante: 'ugo', profilo: { nome: 'Zed', seme: 99, tinta: '#000000', presentazione: 'Vengo dal mare.' } });
       expect(r.status).toBe(200);
       // «Zed» is another wanderer's name, the seed is past the program's, black is too dark.
-      expect(r.body.profilo.nome).not.toBe('Zed');
-      expect(r.body.profilo.seme).toBe(3); // 99 folded into the 8 seeds
-      expect(r.body.profilo.tinta).not.toBe('#000000');
+      expect(r.body.profilo.name).not.toBe('Zed');
+      expect(r.body.profilo.seed).toBe(3); // 99 folded into the 8 seeds
+      expect(r.body.profilo.tint).not.toBe('#000000');
       expect(r.body.riparato.length).toBeGreaterThan(0);
-      const saved = JSON.parse(readFileSync(path.join(root, 'world/giocatori/ugo.json'), 'utf8'));
+      const saved = JSON.parse(readFileSync(path.join(root, 'world/players/ugo.json'), 'utf8'));
       // The balance left the file for the ledger the first time the universe was met (ADR-0104), and is still theirs.
       expect(saved.crediti).toBeUndefined();
       expect(r.body.viandante.crediti).toBe(3.5);
-      expect(saved.profilo).toEqual(r.body.profilo);
-      expect(git('show', '--name-only', '--format=', 'HEAD').trim()).toBe('world/giocatori/ugo.json');
+      expect(saved.profile).toEqual(r.body.profilo);
+      expect(git('show', '--name-only', '--format=', 'HEAD').trim()).toBe('world/players/ugo.json');
       expect(git('status', '--short').trim()).toBe('?? non-mio.txt');
       expect(r.body.viandante.profilo).toEqual(r.body.profilo);
     } finally {
@@ -123,7 +123,7 @@ describe('the wanderer route of the site (T102)', () => {
 
   it('with the world running, asks the kernel: the wanderer in the world wears it, the one away finds it saved', async () => {
     const cfg = JSON.parse(bundledFiles['universe.json']);
-    const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3 } }) };
+    const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, game: { mode: 'multiplayer', death: 3 } }) };
     const k = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
     k.addWanderer('alice', 'Alice', false);
     k.giveCredits('alice', 7);
@@ -131,21 +131,21 @@ describe('the wanderer route of the site (T102)', () => {
     const got = (await call(opts, 'GET', '/api/viandante?universo=vivo&viandante=alice')).body.viandante;
     expect(got).toMatchObject({ id: 'alice', nelMondo: true, crediti: 7 });
     const kept = await call(opts, 'POST', '/api/viandante', { universo: 'vivo', viandante: 'alice', profilo: { nome: 'Alda', seme: 3, tinta: '#ff2a85' } });
-    expect(kept.body.profilo).toMatchObject({ nome: 'Alda', seme: 3, tinta: '#ff2a85' });
-    expect(k.profileOf('alice')).toMatchObject({ nome: 'Alda', seme: 3 });
+    expect(kept.body.profilo).toMatchObject({ name: 'Alda', seed: 3, tint: '#ff2a85' });
+    expect(k.profileOf('alice')).toMatchObject({ name: 'Alda', seed: 3 });
     // Away from the world: written in their saved state, which they wear when they come in.
     const away = await call(opts, 'POST', '/api/viandante', { universo: 'vivo', viandante: 'bruno', profilo: { nome: 'Bruno', seme: 2 } });
     expect(away.body.viandante).toMatchObject({ nelMondo: false, noto: true });
-    expect(readWandererState(k.files, 'bruno')?.profilo).toMatchObject({ nome: 'Bruno', seme: 2 });
+    expect(readWandererState(k.files, 'bruno')?.profile).toMatchObject({ name: 'Bruno', seed: 2 });
     k.addWanderer('bruno');
-    expect(k.profileOf('bruno')).toMatchObject({ nome: 'Bruno', seme: 2 });
+    expect(k.profileOf('bruno')).toMatchObject({ name: 'Bruno', seed: 2 });
   });
 
   it('a profile repaired in the files is unlike the people of the world', () => {
     const someone = 'Mirella';
     const files = { ...bundledFiles, 'world/people.json': PEOPLE };
     const { repair } = keepProfileInFiles(files, 'ugo', { nome: someone });
-    expect(repair.profilo.nome).not.toBe(someone);
+    expect(repair.profilo.name).not.toBe(someone);
     expect(viewFromFiles(files, 'x', 'ugo', 'locale').profilo).toEqual(repair.profilo);
   });
 });

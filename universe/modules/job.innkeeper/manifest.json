@@ -4,10 +4,10 @@
   "kind": "data",
   "version": "0.1.0",
   "description": "La giornata di chi tiene la locanda: l'acqua dal pozzo, il sidro, e la sera la gente da servire.",
-  "mestieri": [
+  "jobs": [
     {
       "id": "innkeeper",
-      "nomi": [
+      "names": [
         "oste",
         "ostessa",
         "locandiere",
@@ -20,46 +20,46 @@
         "albergatore",
         "albergatrice"
       ],
-      "giornata": {
+      "day": {
         "morning": [
           {
-            "fa": "use",
-            "dove": "entita:pozzo",
-            "azione": "listen",
-            "durata": 8,
-            "posa": "work"
+            "does": "use",
+            "where": "entity:pozzo",
+            "action": "listen",
+            "duration": 8,
+            "pose": "work"
           },
           {
-            "fa": "go",
-            "dove": "work"
+            "does": "go",
+            "where": "work"
           }
         ],
         "day": [
           {
-            "fa": "produce",
-            "oggetto": "item.sidro",
-            "quante": 2,
-            "durata": 25,
-            "posa": "cook"
+            "does": "produce",
+            "item": "item.sidro",
+            "count": 2,
+            "duration": 25,
+            "pose": "cook"
           }
         ],
         "evening": [
           {
-            "fa": "go",
-            "dove": "work"
+            "does": "go",
+            "where": "work"
           },
           {
-            "fa": "wait",
-            "posa": "trade"
+            "does": "wait",
+            "pose": "trade"
           }
         ],
         "night": [
           {
-            "fa": "go",
-            "dove": "home"
+            "does": "go",
+            "where": "home"
           },
           {
-            "fa": "rest"
+            "does": "rest"
           }
         ]
       }

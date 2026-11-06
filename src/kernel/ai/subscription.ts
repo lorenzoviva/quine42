@@ -38,11 +38,13 @@ export interface Subscriptions {
 const isProvider = (v: unknown): v is Provider => typeof v === 'string' && (PROVIDERS as readonly string[]).includes(v);
 
 /** The table of `universe.json → ai`, repaired: unknown providers fall back to the API, nothing else is guessed. */
-export function subscriptionsOf(ai: { provider?: unknown; agenti?: unknown } | undefined): Subscriptions {
+export function subscriptionsOf(ai: { provider?: unknown; agents?: unknown; agenti?: unknown } | undefined): Subscriptions {
   const agenti: Record<string, Provider> = {};
-  if (ai?.agenti && typeof ai.agenti === 'object' && !Array.isArray(ai.agenti))
+  // `ai.agents` since the contract 0.4, `ai.agenti` before (T308a).
+  const table = ai?.agents ?? ai?.agenti;
+  if (table && typeof table === 'object' && !Array.isArray(table))
     // An agent of the contract 0.2 (`narratore`) reads internal (T307b).
-    for (const [agent, p] of Object.entries(ai.agenti as Record<string, unknown>)) if (isProvider(p)) agenti[internalAgent(agent)] = p;
+    for (const [agent, p] of Object.entries(table as Record<string, unknown>)) if (isProvider(p)) agenti[internalAgent(agent)] = p;
   return { provider: isProvider(ai?.provider) ? ai.provider : 'api', agenti };
 }
 
@@ -231,7 +233,7 @@ export class QueueAiModels implements AiModels {
           cached: u?.cached ?? 0,
           output: u?.output ?? 0,
           thoughts: u?.thoughts ?? 0,
-          ...(call.chi ? { chi: call.chi } : {}),
+          ...(call.chi ? { who: call.chi } : {}),
           ...extra,
         };
         this.usage.inputTokens += r.prompt;

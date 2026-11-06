@@ -28,7 +28,7 @@ const domain = (id: string): NameDomain => {
 };
 const keys = (id: string) => Object.keys(domain(id).names);
 /** The names a domain has in the code: the internal ones when its step is done (T307a, T307b), the Italian ones of today otherwise. */
-const DONE = new Set(['T307a', 'T307b']);
+const DONE = new Set(['T307a', 'T307b', 'T308a']);
 const inCode = (id: string) => (DONE.has(domain(id).step) ? Object.values(domain(id).names) : keys(id));
 /** The words of the code that read as Italian: the internal language has none (or the same in English: `lava`, `dungeon`, `studio`). */
 const italianOf = (list: readonly string[], d: string) => list.filter((v) => !Object.values(domain(d).names).includes(v) || keys(d).includes(v));
@@ -182,17 +182,27 @@ describe('la tabella della lingua interna', () => {
     const kernel = read('src/kernel/kernel.ts');
     const fieldsOf = (name: string): string[] => [...(new RegExp(`const ${name}: ReadonlySet<string> = new Set\(\[([^\]]*)\]`).exec(kernel)?.[1] ?? '').matchAll(/'([^']+)'/g)].map((m) => m[1]);
     const english = new Set(['pos', 'inventory', 'needs', 'hand', 'slots']);
-    expect(fieldsOf('STATE_FIELDS').filter((f) => !keys('campi-stato').includes(f))).toEqual([]);
-    expect(fieldsOf('WANDERER_FIELDS').filter((f) => !english.has(f) && !keys('campi-viandante').includes(f))).toEqual([]);
+    // The kernel names the fields of 0.4 (T308a); the Italian ones of before it knows from the table, never to keep them.
+    expect(fieldsOf('STATE_FIELDS').filter((f) => !inCode('campi-stato').includes(f))).toEqual([]);
+    expect(fieldsOf('WANDERER_FIELDS').filter((f) => !english.has(f) && !inCode('campi-viandante').includes(f))).toEqual([]);
+    const stateLine = kernel.split(/\r?\n/).find((l) => l.startsWith('const STATE_FIELDS')) ?? '';
+    expect(inCode('campi-stato').filter((f) => !stateLine.includes(`'${f}'`))).toEqual([]);
+    expect(kernel).toContain("...italianFieldsOf('campi-stato')");
+    expect(kernel).toContain("...italianFieldsOf('campi-viandante')");
   });
 
-  it('i percorsi italiani esistono nel codice', () => {
-    const code = ['src/kernel/paths.ts', 'src/kernel/kernel.ts', 'src/kernel/wanderers.ts', 'src/kernel/ventures.ts', 'src/kernel/store.ts', 'src/kernel/ai/usage.ts', 'src/kernel/shortfalls.ts', 'src/kernel/cards.ts', 'src/kernel/graph.ts', 'src/kernel/universes.ts', 'server/universeStore.ts', 'server/ledger.ts', 'server/subscriptionQueue.ts', 'server/generation.ts', 'server/geminiProxy.ts', 'server/production.ts', 'src/kernel/agents/council.ts', 'src/kernel/magic.ts']
+  it('i percorsi del contratto 0.4 esistono nel codice, quelli di prima solo dove si leggono ancora (T308a)', () => {
+    const code = ['src/kernel/paths.ts', 'src/kernel/kernel.ts', 'src/kernel/wanderers.ts', 'src/kernel/ventures.ts', 'src/kernel/store.ts', 'src/kernel/ai/usage.ts', 'src/kernel/shortfalls.ts', 'src/kernel/cards.ts', 'src/kernel/graph.ts', 'src/kernel/universes.ts', 'server/universeStore.ts', 'server/ledger.ts', 'server/subscriptionQueue.ts', 'server/generation.ts', 'server/geminiProxy.ts', 'server/production.ts', 'server/folders.ts', 'src/kernel/agents/council.ts', 'src/kernel/magic.ts']
       .filter((f) => fs.existsSync(path.join(ROOT, f)))
       .map(read)
       .join('\n');
-    const missing = keys('percorsi').filter((p) => !code.includes(p.replace(/^universes\//, '').replace(/\/$/, '')));
+    const missing = inCode('percorsi').filter((p) => !code.includes(p.replace(/^universes\//, '').replace(/\/$/, '')));
     expect(missing).toEqual([]);
+    // The server's folders of before are named only where they are moved from (server/folders.ts), and the line of the browser where it is read.
+    const before = (f: string) => read(f);
+    for (const p of keys('percorsi').filter((x) => x.startsWith('universes/')).map((x) => x.replace(/^universes\//, '').replace(/\/$/, '')))
+      expect(before('server/folders.ts'), p).toContain(`'${p}'`);
+    expect(before('src/kernel/universes.ts')).toContain("'quine:fila:'");
   });
 
   it('le rune magiche diventano latine, uguali in ogni lingua', () => {

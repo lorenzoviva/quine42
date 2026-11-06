@@ -12,7 +12,7 @@ const DT = 1 / 60;
 
 async function bootMany(): Promise<Kernel> {
   const cfg = JSON.parse(bundledFiles['universe.json']);
-  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2) };
+  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, game: { mode: 'multiplayer', death: 3 } }, null, 2) };
   return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 }
 
@@ -52,7 +52,7 @@ describe('the player’s client, without corona nor Council (T41)', () => {
     const k = await bootMany();
     const server = new SessionServer(k);
     k.council.say('narrator', 'info', 'prima della partita: la bibbia è pronta');
-    const master = join(server, 'io');
+    const master = join(server, 'me');
     const anna = join(server, 'anna');
     await Promise.all([master.client.ready, anna.client.ready]);
     expect(master.client.master).toBe(true);
@@ -77,7 +77,7 @@ describe('the player’s client, without corona nor Council (T41)', () => {
   it('the master’s mirror hears the Council: its feed, as alone', async () => {
     const k = await bootMany();
     const server = new SessionServer(k);
-    const { client } = join(server, 'io');
+    const { client } = join(server, 'me');
     await client.ready;
     const mirror = await Kernel.boot({ files: client.files, store: memoryStore(), ai: new MockAiModels(), mirror: true });
     const thin = new ThinClient(mirror, client);

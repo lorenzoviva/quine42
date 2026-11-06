@@ -73,7 +73,7 @@ function planOf(p: Place): { plan: ChunkPlan; npc: Map<string, number> } {
   }
   for (const [module, where] of p.cose) objects.push({ module, where });
   return {
-    plan: { place: { name: p.nome, description: p.descrizione }, layout: p.ambiente, objects, ground: p.terra, fresh: [], runes: p.rune, ...(p.strutture ? { strutture: p.strutture.map((concetto) => ({ concetto })) } : {}) },
+    plan: { place: { name: p.nome, description: p.descrizione }, layout: p.ambiente, objects, ground: p.terra, fresh: [], runes: p.rune, ...(p.strutture ? { structures: p.strutture.map((concetto) => ({ concept: concetto })) } : {}) },
     npc,
   };
 }

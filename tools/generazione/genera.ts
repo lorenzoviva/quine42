@@ -4,7 +4,7 @@
 //   --partita singola|multigiocatore   the game, chosen for a universe that has not had its Genesis (default singola)
 //   --tema <id>                        one of the Genesis's settings (themes.ts), default the first; --testo "<testo>" for one of yours
 //   --luoghi <n>                       places from the centre, in a spiral (default 25: the 5 × 5 around (0, 0))
-//   --modelli <n>, --brani <n>          at most in this run (default the universe's ai.maxModels, ai.maxBrani)
+//   --modelli <n>, --brani <n>          at most in this run (default the universe's ai.maxModels, ai.maxPieces)
 //   --tetto <%>                        this universe may use at most this much of the subscription's week (default 10); kept in
 //                                      universes/.generazione/<universo>.json, which is read again before every step
 //   --universi <cartella>              where the universes are (default universes/)
@@ -32,6 +32,7 @@ import { internalName } from '../../src/kernel/internalNames';
 import { WORLD_THEMES } from '../../src/kernel/themes';
 import { INTERNAL_HEADER, prepareUniverse, SEED_FILE, seedHashes, UniverseChunks, UniverseClient } from '../../src/kernel/universes';
 import { DeferredModels, deferredTable, runDeferred, StepChunks, StepGate, type DeferredOutcome, type WeeklyUsage } from '../../src/kernel/deferred';
+import { serverPath } from '../../server/folders';
 
 export const DEFAULT_PLACES = 25;
 export const DEFAULT_CEILING = 10;
@@ -47,7 +48,7 @@ export interface GenerateOptions {
   brani?: number;
   /** Written into the progress file when given; otherwise what the file says, or `DEFAULT_CEILING`. */
   tetto?: number;
-  /** The subscription's queue as models (tests: a queue served by a fake CLI). Default: the queue on disk, `universes/.coda/`. */
+  /** The subscription's queue as models (tests: a queue served by a fake CLI). Default: the queue on disk, `universes/.queue/`. */
   queue?: AiModels;
   weekly?: () => Promise<WeeklyUsage | undefined>;
   interrupted?: () => boolean;
@@ -98,7 +99,7 @@ export async function generateUniverse(o: GenerateOptions): Promise<DeferredOutc
     const progress = progressFile(o.dir, o.name, { tetto: DEFAULT_CEILING });
     if (o.tetto !== undefined) progress.save({ ...progress.load(), tetto: o.tetto });
     const ai = readConfig(up.files).config.ai;
-    const queue = o.queue ?? new QueueAiModels({ provider: 'claude', fetchImpl: diskQueueFetch(path.join(o.dir, '.coda')), poll: 1000, timeout: 60 * 60_000, parallel: 2 });
+    const queue = o.queue ?? new QueueAiModels({ provider: 'claude', fetchImpl: diskQueueFetch(serverPath(o.dir, 'queue')), poll: 1000, timeout: 60 * 60_000, parallel: 2 });
     const models = new DeferredModels(deferredTable(ai, 'claude'), { claude: queue });
     const gate = new StepGate(client);
     const kernel = await Kernel.boot({ files: up.files, store: memoryStore(), ai: models, chunks: new StepChunks(gate, new UniverseChunks(client)), backend: gate, past: snap.log ?? [] });

@@ -106,7 +106,7 @@ describe('il server vero', () => {
   const makeUniverse = (name: string, modalita = 'multigiocatore') => {
     const root = path.join(universes(), name);
     const cfg = JSON.parse(bundledFiles['universe.json']);
-    const files: Record<string, string> = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, name, partita: { modalita, morte: 3, master: 'io' } }) };
+    const files: Record<string, string> = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, name, game: { modalita, death: 3, master: 'me' } }) };
     for (const [rel, text] of Object.entries(files)) {
       mkdirSync(path.dirname(path.join(root, rel)), { recursive: true });
       writeFileSync(path.join(root, rel), text);

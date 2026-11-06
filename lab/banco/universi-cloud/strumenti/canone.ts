@@ -1,4 +1,4 @@
-// Writes world/canone.md of orichalcum: the seed's canon plus one line per rune of magic.vapore (canonWithRune), each rune validated
+// Writes world/canon.md of orichalcum: the seed's canon plus one line per rune of magic.vapore (canonWithRune), each rune validated
 // with validateNewRune against all the other eighteen (in groups under MAX_MAGIC_RUNES: the cap is for what the Council adds, ADR-0097).
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -11,8 +11,8 @@ const read = (p: string) => readFileSync(U + p, 'utf8');
 const seed: Record<string, MagicRune> = JSON.parse(read('modules/magic.runes/manifest.json')).runes;
 const mine: Record<string, MagicRune> = JSON.parse(read('modules/magic.vapore/manifest.json')).runes;
 const lines: Record<string, string> = JSON.parse(readFileSync(process.argv[2] ?? '/dev/null', 'utf8') || '{}');
-const words = lexiconWords(read('world/lessico.md'));
-let canon = readFileSync(new URL('../../../../universe/world/canone.md', import.meta.url), 'utf8');
+const words = lexiconWords(read('world/lexicon.md'));
+let canon = readFileSync(new URL('../../../../universe/world/canon.md', import.meta.url), 'utf8');
 canon = canon.replace("né inventare altri segni luminosi nel terreno", "né inventare altre incisioni che brillano nel terreno");
 let bad = 0;
 for (const [token, r] of Object.entries(mine)) {
@@ -27,5 +27,5 @@ for (const [token, r] of Object.entries(mine)) {
   console.log(errors.size ? `✗ ${token}: ${[...errors].join('; ')}` : `✓ ${token} (${r.name} ${r.glyph})`);
   bad += errors.size;
 }
-if (process.argv[2]) writeFileSync(U + 'world/canone.md', canon);
+if (process.argv[2]) writeFileSync(U + 'world/canon.md', canon);
 process.exit(bad ? 1 : 0);

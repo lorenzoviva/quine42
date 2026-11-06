@@ -34,7 +34,7 @@ class Recording extends MockAiModels {
 
 async function bootWith(ai: Record<string, unknown>, game: Record<string, unknown> = {}, models = new Recording()): Promise<{ k: Kernel; models: Recording }> {
   const cfg = JSON.parse(bundledFiles['universe.json']);
-  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, ai: { ...cfg.ai, ...ai }, partita: { ...cfg.partita, ...game } }, null, 2) };
+  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, ai: { ...cfg.ai, ...ai }, game: { ...cfg.game, ...game } }, null, 2) };
   const k = await Kernel.boot({ files, store: memoryStore(), ai: models });
   await develop(k);
   return { k, models };
@@ -49,14 +49,14 @@ async function individual(k: Kernel, origin: string, dx: number) {
 
 describe("the Actor's option", () => {
   it('is repaired from whatever universe.json says, and is off unless said', () => {
-    expect(repairActor(undefined)).toEqual({ acceso: false, modello: ACTOR_MODEL });
-    expect(repairActor(true)).toEqual({ acceso: true, modello: ACTOR_MODEL });
-    expect(repairActor('gemini-3.1-flash-lite')).toEqual({ acceso: true, modello: 'gemini-3.1-flash-lite' });
-    expect(repairActor('spento')).toEqual({ acceso: false, modello: ACTOR_MODEL });
-    expect(repairActor({ acceso: 'sì', modello: ' gemini-3.8-flash ' })).toEqual({ acceso: true, modello: 'gemini-3.8-flash' });
-    expect(repairActor({ acceso: true, modello: 42 })).toEqual({ acceso: true, modello: ACTOR_MODEL });
-    expect(repairActor({ modello: 'x' })).toEqual({ acceso: false, modello: 'x' });
-    expect(readConfig(bundledFiles).config.ai.attore).toEqual({ acceso: false, modello: ACTOR_MODEL });
+    expect(repairActor(undefined)).toEqual({ on: false, model: ACTOR_MODEL });
+    expect(repairActor(true)).toEqual({ on: true, model: ACTOR_MODEL });
+    expect(repairActor('gemini-3.1-flash-lite')).toEqual({ on: true, model: 'gemini-3.1-flash-lite' });
+    expect(repairActor('spento')).toEqual({ on: false, model: ACTOR_MODEL });
+    expect(repairActor({ acceso: 'sì', modello: ' gemini-3.8-flash ' })).toEqual({ on: true, model: 'gemini-3.8-flash' });
+    expect(repairActor({ acceso: true, modello: 42 })).toEqual({ on: true, model: ACTOR_MODEL });
+    expect(repairActor({ modello: 'x' })).toEqual({ on: false, model: 'x' });
+    expect(readConfig(bundledFiles).config.ai.actor).toEqual({ on: false, model: ACTOR_MODEL });
     expect(AGENTS.actor.name).toBe('Attore');
     expect(CENSUS.some((c) => c.compito === 'npc.sheet' && c.agente === 'narrator')).toBe(true);
   });
@@ -64,8 +64,8 @@ describe("the Actor's option", () => {
   it('the hourly estimate grows only when it is on: the lines move to its model, the sheets are added', () => {
     const ai = readConfig(bundledFiles).config.ai;
     const off = hourlyEstimate(ai);
-    const on = hourlyEstimate({ ...ai, attore: true });
-    const same = hourlyEstimate({ ...ai, attore: { acceso: false, modello: 'gemini-4-argon' } });
+    const on = hourlyEstimate({ ...ai, actor: true });
+    const same = hourlyEstimate({ ...ai, actor: { on: false, model: 'gemini-4-argon' } });
     expect(same.dollari).toBe(off.dollari);
     expect(same.chiamate).toBe(off.chiamate);
     expect(on.dollari).toBeGreaterThan(off.dollari);
@@ -73,7 +73,7 @@ describe("the Actor's option", () => {
     expect(on.righe.some((r) => /Schede dei personaggi/.test(r.voce))).toBe(true);
     expect(off.righe.some((r) => /Schede dei personaggi/.test(r.voce))).toBe(false);
     // The same model for the Actor: only the sheets are added.
-    const lite = hourlyEstimate({ ...ai, attore: { acceso: true, modello: ai.textModel } });
+    const lite = hourlyEstimate({ ...ai, actor: { on: true, model: ai.textModel } });
     const sheets = lite.righe.find((r) => /Schede dei personaggi/.test(r.voce))!;
     expect(lite.dollari - off.dollari).toBeCloseTo(sheets.dollari, 10);
   });
@@ -89,12 +89,12 @@ describe("the Actor's option", () => {
     expect(reply.agent).toBe('narrator');
     expect(reply.model).toBeUndefined();
     expect(models.of('npc.sheet')).toHaveLength(0);
-    expect(k.individualOf(a.name)?.scheda).toBeUndefined();
+    expect(k.individualOf(a.name)?.sheet).toBeUndefined();
     expect(k.feed().some((e) => e.from === 'narrator' && e.task === 'npc.reply' && e.text.startsWith(a.name))).toBe(true);
   });
 
   it('on, the Narrator writes the sheet once and the Actor plays from it, with its model and the same payer', async () => {
-    const { k, models } = await bootWith({ attore: true });
+    const { k, models } = await bootWith({ actor: true });
     clearArea(k);
     const a = await individual(k, 'attore#on', 1);
     const before = models.calls.length;
@@ -102,18 +102,18 @@ describe("the Actor's option", () => {
     // Two calls: the sheet (the Narrator) and the line (the Actor).
     expect(models.calls.slice(before).map((c) => `${c.agent}:${c.task}`)).toEqual(['narrator:npc.sheet', 'actor:npc.reply']);
     const sheet = models.of('npc.sheet')[0];
-    expect(sheet.chi).toBe('io');
+    expect(sheet.chi).toBe('me');
     expect(sheet.prompt).toContain(a.name);
     const reply = models.of('npc.reply')[0];
     expect(reply.agent).toBe('actor');
     expect(reply.model).toBe(ACTOR_MODEL);
-    expect(reply.chi).toBe(payerOf('npc.reply', 'io'));
+    expect(reply.chi).toBe(payerOf('npc.reply', 'me'));
     // The Actor gets the sheet, the fourth wall, the canon, the lexicon and the neighbourhood of the graph, like the Narrator.
-    const saved = k.individualOf(a.name)!.scheda!;
-    expect(saved.testo).toContain(`Sei ${a.name}`);
-    expect(saved.impronta).toBe(sheetFingerprint(k.individualOf(a.name)!));
+    const saved = k.individualOf(a.name)!.sheet!;
+    expect(saved.text).toContain(`Sei ${a.name}`);
+    expect(saved.fingerprint).toBe(sheetFingerprint(k.individualOf(a.name)!));
     expect(reply.prompt).toContain('scritta dal Narratore');
-    expect(reply.prompt).toContain(saved.testo);
+    expect(reply.prompt).toContain(saved.text);
     expect(reply.system).toContain(COUNCIL_PRINCIPLES);
     expect(reply.system).toContain("L'Attore");
     expect(reply.system).toContain('Canone delle rune');
@@ -132,11 +132,11 @@ describe("the Actor's option", () => {
     // The bond changed: the sheet is written again at the next line, once.
     await k.talk(a.id, 'Come stai, amore mio?');
     expect(models.of('npc.sheet')).toHaveLength(2);
-    expect(k.individualOf(a.name)!.scheda!.impronta).toBe(sheetFingerprint(k.individualOf(a.name)!));
+    expect(k.individualOf(a.name)!.sheet!.fingerprint).toBe(sheetFingerprint(k.individualOf(a.name)!));
     await k.talk(a.id, 'Andiamo a casa?');
     expect(models.of('npc.sheet')).toHaveLength(2);
     // The sheet is saved with the individual, in the universe's history.
-    expect(readPeople(k.repo.head().files).persone.find((p) => p.nome === a.name)?.scheda?.testo).toBe(k.individualOf(a.name)!.scheda!.testo);
+    expect(readPeople(k.repo.head().files).people.find((p) => p.name === a.name)?.sheet?.text).toBe(k.individualOf(a.name)!.sheet!.text);
   });
 
   it('turned on later, an old individual gets their sheet at their first line', async () => {
@@ -145,21 +145,21 @@ describe("the Actor's option", () => {
     const a = await individual(k, 'attore#later', 1);
     await k.talk(a.id, 'Salve.');
     expect(models.of('npc.sheet')).toHaveLength(0);
-    k.setAi({ attore: 'gemini-3.1-flash-lite' });
-    expect(k.actor()).toEqual({ acceso: true, modello: 'gemini-3.1-flash-lite' });
-    expect(JSON.parse(k.repo.working['universe.json']).ai.attore).toEqual({ acceso: true, modello: 'gemini-3.1-flash-lite' });
+    k.setAi({ actor: 'gemini-3.1-flash-lite' });
+    expect(k.actor()).toEqual({ on: true, model: 'gemini-3.1-flash-lite' });
+    expect(JSON.parse(k.repo.working['universe.json']).ai.actor).toEqual({ on: true, model: 'gemini-3.1-flash-lite' });
     await k.talk(a.id, 'Salve di nuovo.');
     expect(models.of('npc.sheet')).toHaveLength(1);
     expect(models.of('npc.reply').at(-1)!.agent).toBe('actor');
     expect(models.of('npc.reply').at(-1)!.model).toBe('gemini-3.1-flash-lite');
-    k.setAi({ attore: false });
+    k.setAi({ actor: false });
     await k.talk(a.id, 'Addio.');
     expect(models.of('npc.sheet')).toHaveLength(1);
     expect(models.of('npc.reply').at(-1)!.agent).toBe('narrator');
   });
 
   it('a dialogue between two people goes to the Actor with both sheets, paid as it was (common)', async () => {
-    const { k, models } = await bootWith({ attore: true });
+    const { k, models } = await bootWith({ actor: true });
     clearArea(k);
     const a = await individual(k, 'attore#da', 1);
     const b = await individual(k, 'attore#db', 2);
@@ -174,11 +174,11 @@ describe("the Actor's option", () => {
     expect(talk).toBeDefined();
     expect(talk.agent).toBe('actor');
     expect(talk.model).toBe(ACTOR_MODEL);
-    expect(talk.chi).toBe(payerOf('npc.dialogue', 'io'));
+    expect(talk.chi).toBe(payerOf('npc.dialogue', 'me'));
     expect(talk.prompt).toContain('scheda:');
     expect(models.of('npc.sheet').map((c) => c.chi)).toEqual(['comune', 'comune']);
-    expect(k.individualOf(a.name)?.scheda?.testo).toBeTruthy();
-    expect(k.individualOf(b.name)?.scheda?.testo).toBeTruthy();
+    expect(k.individualOf(a.name)?.sheet?.text).toBeTruthy();
+    expect(k.individualOf(b.name)?.sheet?.text).toBeTruthy();
     expect(k.feed().some((e) => e.from === 'actor' && e.task === 'npc.dialogue')).toBe(true);
   });
 
@@ -190,11 +190,11 @@ describe("the Actor's option", () => {
         return super.text(call);
       }
     }
-    const { k, models } = await bootWith({ attore: true }, {}, new Leaky());
+    const { k, models } = await bootWith({ actor: true }, {}, new Leaky());
     clearArea(k);
     const a = await individual(k, 'attore#leak', 1);
     await k.talk(a.id, 'Chi sei?');
-    expect(k.individualOf(a.name)?.scheda).toBeUndefined();
+    expect(k.individualOf(a.name)?.sheet).toBeUndefined();
     const reply = models.of('npc.reply')[0];
     expect(reply.agent).toBe('actor');
     expect(reply.prompt).not.toContain('scritta dal Narratore');
@@ -202,7 +202,7 @@ describe("the Actor's option", () => {
   });
 
   it('with the credits gone the local models answer, the sheet too, as for every call', async () => {
-    const { k, models } = await bootWith({ attore: true });
+    const { k, models } = await bootWith({ actor: true });
     clearArea(k);
     const a = await individual(k, 'attore#broke', 1);
     const before = models.calls.length;
@@ -217,7 +217,7 @@ describe("the Actor's option", () => {
 describe('the Actor in a multiplayer game', () => {
   async function bootMany(ai: Record<string, unknown> = {}): Promise<Kernel> {
     const cfg = JSON.parse(bundledFiles['universe.json']);
-    const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, ai: { ...cfg.ai, ...ai }, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2) };
+    const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, ai: { ...cfg.ai, ...ai }, game: { mode: 'multiplayer', death: 3 } }, null, 2) };
     return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
   }
   async function thin(server: SessionServer, id: string): Promise<ThinClient> {
@@ -248,9 +248,9 @@ describe('the Actor in a multiplayer game', () => {
   }
 
   it('the lobby reads it from the public files; a player never reads ai', async () => {
-    const k = await bootMany({ attore: 'gemini-3.1-flash-lite' });
+    const k = await bootMany({ actor: 'gemini-3.1-flash-lite' });
     const pub = JSON.parse(publicFiles(k.files)['universe.json']);
-    expect(repairActor(pub.ai.attore)).toEqual({ acceso: true, modello: 'gemini-3.1-flash-lite' });
+    expect(repairActor(pub.ai.actor)).toEqual({ on: true, model: 'gemini-3.1-flash-lite' });
     const player = JSON.parse(playerFiles(k.files)['universe.json']);
     expect(player.ai).toBeUndefined();
   });
@@ -258,7 +258,7 @@ describe('the Actor in a multiplayer game', () => {
   it('only the master changes it: a player is refused and the world stays as it was', async () => {
     const k = await bootMany();
     const server = new SessionServer(k);
-    const master = await thin(server, 'io');
+    const master = await thin(server, 'me');
     const anna = await thin(server, 'anna');
     expect(master.session.master).toBe(true);
     expect(anna.session.master).toBe(false);
@@ -266,7 +266,7 @@ describe('the Actor in a multiplayer game', () => {
     for (const who of [anna, master]) {
       const refused = await ask(server, [master, anna], who.session.act({ t: 'attore', acceso: true, modello: 'gemini-4-argon' } as never));
       expect(refused.ok).toBe(false);
-      expect(k.actor().acceso).toBe(false);
+      expect(k.actor().on).toBe(false);
     }
   });
 
@@ -275,18 +275,18 @@ describe('the Actor in a multiplayer game', () => {
     const server = new SessionServer(k);
     const { server: s, client: c } = fakeLink();
     server.connect(s);
-    const session = new SessionClient(c, { id: 'io', regolazioni: { attore: { acceso: true, modello: 'gemini-3.8-flash' } } });
+    const session = new SessionClient(c, { id: 'me', regolazioni: { actor: { on: true, model: 'gemini-3.8-flash' } } });
     await session.ready;
     expect(session.settingsAnswer?.ok).toBe(true);
-    expect(k.actor()).toEqual({ acceso: true, modello: 'gemini-3.8-flash' });
+    expect(k.actor()).toEqual({ on: true, model: 'gemini-3.8-flash' });
     // A model's name that is not one stays the default.
     const odd = await bootMany();
     const other = new SessionServer(odd);
     const link = fakeLink();
     other.connect(link.server);
-    const oddSession = new SessionClient(link.client, { id: 'io', regolazioni: { attore: { acceso: true, modello: '../../etc' } } });
+    const oddSession = new SessionClient(link.client, { id: 'me', regolazioni: { actor: { on: true, model: '../../etc' } } });
     await oddSession.ready;
     expect(oddSession.settingsAnswer?.riparati?.join(' ')).toMatch(/Attore/);
-    expect(odd.actor()).toEqual({ acceso: true, modello: ACTOR_MODEL });
+    expect(odd.actor()).toEqual({ on: true, model: ACTOR_MODEL });
   });
 });

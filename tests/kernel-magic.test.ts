@@ -15,17 +15,17 @@ describe('a society', () => {
     const a = k.spawnModuleEntity(k.modules.get('npc.villager')!, pc.x + 1, pc.y, undefined, 'test#a');
     const ia = (await k.ensureIdentity(a))!;
     expect(ia.job).toBeTruthy();
-    expect(ia.routine?.map((r) => r.quando)).toEqual(['morning', 'day', 'evening', 'night']);
+    expect(ia.routine?.map((r) => r.when)).toEqual(['morning', 'day', 'evening', 'night']);
     const b = k.spawnModuleEntity(k.modules.get('npc.villager')!, pc.x + 1.5, pc.y, undefined, 'test#b');
     const ib = (await k.ensureIdentity(b))!;
     // The second is related to someone already known, and that individual knows it too.
     const people = JSON.parse(k.files['world/people.json']);
-    const relName = ib.family?.[0].nome;
-    const relative = people.persone.find((p: { nome: string }) => p.nome === relName);
+    const relName = ib.family?.[0].name;
+    const relative = people.people.find((p: { name: string }) => p.name === relName);
     // Either someone already met (who now knows it too) or a relative not met yet (awaited).
-    if (relative) expect(relative.famiglia.some((f: { nome: string }) => f.nome === ib.name)).toBe(true);
-    else expect(people.attesi.some((x: { nome: string }) => x.nome === relName)).toBe(true);
-    expect(people.persone.map((p: { nome: string }) => p.nome)).toEqual(expect.arrayContaining([ia.name, ib.name]));
+    if (relative) expect(relative.family.some((f: { name: string }) => f.name === ib.name)).toBe(true);
+    else expect(people.expected.some((x: { name: string }) => x.name === relName)).toBe(true);
+    expect(people.people.map((p: { name: string }) => p.name)).toEqual(expect.arrayContaining([ia.name, ib.name]));
     expect(k.council.context('narrator')).toBeTruthy();
     // Met again (same origin), no new call: the same individual.
     k.ecs.destroy(a);
@@ -215,9 +215,9 @@ describe('the atlas', () => {
     const k = await boot();
     for (const [id, def] of Object.entries(k.content.layouts)) expect(k.validator.validateLayout(id, def, k.palette, k.sampleDrafts()), id).toEqual([]);
     const atlas = JSON.parse(k.files['world/atlas.json']);
-    expect(atlas.regioni.length).toBeGreaterThan(8);
-    const r = atlas.regioni.find((x: { ambiente: string }) => x.ambiente === 'castle');
-    expect((k as any).environmentsFor({ cx: r.centro[0], cy: r.centro[1] }).layouts.map((l: { id: string }) => l.id)).toEqual(['castle']);
+    expect(atlas.regions.length).toBeGreaterThan(8);
+    const r = atlas.regions.find((x: { environment: string }) => x.environment === 'castle');
+    expect((k as any).environmentsFor({ cx: r.center[0], cy: r.center[1] }).layouts.map((l: { id: string }) => l.id)).toEqual(['castle']);
     // Elsewhere, regional environments are not used at random.
     expect((k as any).environmentsFor({ cx: 0, cy: 1 }).layouts.some((l: { id: string }) => l.id === 'castle')).toBe(false);
   });
@@ -229,8 +229,8 @@ describe('the atlas', () => {
     expect(r.summary).toMatch(/Bosco degli Elfi[\s\S]*nord-est/);
     expect(k.content.layouts.bosco_elfi).toBeTruthy();
     expect(Object.values(k.palette).some((t) => t.name === 'albero argenteo')).toBe(true);
-    const region = JSON.parse(k.files['world/atlas.json']).regioni.find((x: { nome: string }) => x.nome === 'Bosco degli Elfi');
-    expect(region.ambiente).toBe('bosco_elfi');
+    const region = JSON.parse(k.files['world/atlas.json']).regions.find((x: { name: string }) => x.name === 'Bosco degli Elfi');
+    expect(region.environment).toBe('bosco_elfi');
     const pc = k.wandererCarpet();
     expect(k.directionsAt(pc.x, pc.y).join(' ')).toMatch(/Bosco degli Elfi.*nord-est/);
     // The cartographer in the corona routes requests to environments, not objects.

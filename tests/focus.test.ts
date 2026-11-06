@@ -40,7 +40,7 @@ function universe(): { files: FileMap; chunks: GraphChunk[] } {
     'universe.json': JSON.stringify({ name: 'prova' }),
     'modules/npc.cat/manifest.json': manifest({ id: 'npc.cat', name: 'Gatto', kind: 'entity', persona: 'Sei un gatto.' }),
     'modules/npc.villager/manifest.json': manifest({ id: 'npc.villager', name: 'Abitante', kind: 'entity', persona: 'Sei un abitante.' }),
-    'world/canone.md': '# Canone\n\nLe rune restano ferme dove sono finché qualcuno non le raccoglie.',
+    'world/canon.md': '# Canone\n\nLe rune restano ferme dove sono finché qualcuno non le raccoglie.',
     'world/people.json': JSON.stringify({
       persone: [
         individual('Fiocco', 'npc.cat', [['Bastiano', 'animale']], { luogo: 'Piazza del Borgo', genere: 'female', specie: 'animal' }),
@@ -173,15 +173,15 @@ describe('the context of the agents from the graph (T13)', () => {
       return { cx: +cx, cy: +cy, nome: plan.place.name, ambiente: plan.layout, cose: plan.objects.map((o: { module: string }) => o.module), a_terra: plan.ground };
     });
     const { c, models } = council(files, chunks);
-    const people = readPeople(files).persone;
+    const people = readPeople(files).people;
     const plot = readPlots(files)[0];
-    const who = people.find((p) => p.nome === plot.coinvolti[0]) ?? people[0];
-    const home = chunks.find((p) => p.nome === who.luogo) ?? chunks[0];
-    const focus = [who.nome, `chunk:${home.cx}_${home.cy}`];
-    const society = people.slice(-20).map((p) => `- ${p.nome}, ${p.mestiere}`).join('\n');
+    const who = people.find((p) => p.name === plot.involved[0]) ?? people[0];
+    const home = chunks.find((p) => p.nome === who.place) ?? chunks[0];
+    const focus = [who.name, `chunk:${home.cx}_${home.cy}`];
+    const society = people.slice(-20).map((p) => `- ${p.name}, ${p.job}`).join('\n');
     for (const f of [undefined, focus]) {
-      await npcReply(c, { ...npc(who.nome), place: home.nome }, 'Cosa succede al lago?', f);
-      await weavePlot(c, society, home.nome, '', '', f && [...people.slice(-20).map((p) => p.nome), ...f.slice(1)]);
+      await npcReply(c, { ...npc(who.name), place: home.nome }, 'Cosa succede al lago?', f);
+      await weavePlot(c, society, home.nome, '', '', f && [...people.slice(-20).map((p) => p.name), ...f.slice(1)]);
     }
     // The lexicon (T65) is the same with and without the graph, and the cache serves it: not what the graph saves.
     const lexicon = lexiconSummary(files);
@@ -197,7 +197,7 @@ describe('the context of the agents from the graph (T13)', () => {
     if (process.env.T13_DUMP)
       for (const x of [r0, r1]) console.log(x.system.split(/\n(?=## )/).map((s) => `${Math.ceil(s.length / 4)}\t${s.slice(0, 60).replace(/\n/g, ' ')}`).join('\n'), `\nPROMPT ${Math.ceil(x.prompt.length / 4)}\n${x === r1 ? x.system.split('## Ciò che il mondo sa')[1] : ''}`);
     console.log(`T13 su valmora — npc.reply: ${Math.ceil((r0.system.length + r0.prompt.length) / 4)} → ${Math.ceil((r1.system.length + r1.prompt.length) / 4)} token; plot.weave: ${Math.ceil((p0.system.length + p0.prompt.length) / 4)} → ${Math.ceil((p1.system.length + p1.prompt.length) / 4)}; dollari ${before.usd.toFixed(5)} → ${after.usd.toFixed(5)}`);
-    expect(r1.system).toContain(`- ${who.nome}`);
+    expect(r1.system).toContain(`- ${who.name}`);
     expect(after.prompt).toBeLessThan(before.prompt * 0.6);
     expect(after.usd).toBeLessThan(before.usd);
   });

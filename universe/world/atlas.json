@@ -1,169 +1,169 @@
 {
-  "regioni": [
+  "regions": [
     {
       "id": "castello",
-      "nome": "Castello",
-      "descrizione": "un castello di pietra con fossato, ponte levatoio, mura e torri; un mastio nel cortile",
-      "ambiente": "castle",
-      "centro": [
+      "name": "Castello",
+      "description": "un castello di pietra con fossato, ponte levatoio, mura e torri; un mastio nel cortile",
+      "environment": "castle",
+      "center": [
         -5,
         0
       ],
-      "raggio": 1
+      "radius": 1
     },
     {
       "id": "fortezza",
-      "nome": "Fortezza",
-      "descrizione": "una fortezza a doppia cinta di mura, con caserma interna",
-      "ambiente": "fortress",
-      "centro": [
+      "name": "Fortezza",
+      "description": "una fortezza a doppia cinta di mura, con caserma interna",
+      "environment": "fortress",
+      "center": [
         -8,
         0
       ],
-      "raggio": 1
+      "radius": 1
     },
     {
       "id": "capanne",
-      "nome": "Villaggio di capanne",
-      "descrizione": "capanne di paglia sparse attorno a un pozzo",
-      "ambiente": "huts",
-      "centro": [
+      "name": "Villaggio di capanne",
+      "description": "capanne di paglia sparse attorno a un pozzo",
+      "environment": "huts",
+      "center": [
         9,
         -9
       ],
-      "raggio": 1
+      "radius": 1
     },
     {
       "id": "maneggio",
-      "nome": "Maneggio",
-      "descrizione": "recinti di staccionata per cavalli, una stalla",
-      "ambiente": "stables",
-      "centro": [
+      "name": "Maneggio",
+      "description": "recinti di staccionata per cavalli, una stalla",
+      "environment": "stables",
+      "center": [
         0,
         9
       ],
-      "raggio": 1
+      "radius": 1
     },
     {
       "id": "caserma",
-      "nome": "Caserma",
-      "descrizione": "la caserma delle guardie, lunga e bassa, con il cortile per le esercitazioni",
-      "ambiente": "barracks",
-      "centro": [
+      "name": "Caserma",
+      "description": "la caserma delle guardie, lunga e bassa, con il cortile per le esercitazioni",
+      "environment": "barracks",
+      "center": [
         -11,
         0
       ],
-      "raggio": 1
+      "radius": 1
     },
     {
       "id": "dungeon",
-      "nome": "Sotterraneo",
-      "descrizione": "cunicoli e stanze scavati nella roccia, umidi e bui",
-      "ambiente": "dungeon",
-      "centro": [
+      "name": "Sotterraneo",
+      "description": "cunicoli e stanze scavati nella roccia, umidi e bui",
+      "environment": "dungeon",
+      "center": [
         0,
         -6
       ],
-      "raggio": 1
+      "radius": 1
     },
     {
       "id": "torre_mago",
-      "nome": "Torre del mago",
-      "descrizione": "una torre rotonda di pietra in una radura silenziosa",
-      "ambiente": "wizard_tower",
-      "centro": [
+      "name": "Torre del mago",
+      "description": "una torre rotonda di pietra in una radura silenziosa",
+      "environment": "wizard_tower",
+      "center": [
         8,
         8
       ],
-      "raggio": 1
+      "radius": 1
     },
     {
       "id": "tana_drago",
-      "nome": "Tana del drago",
-      "descrizione": "una caverna nella montagna, con pozze di lava e ossa sparse",
-      "ambiente": "dragon_lair",
-      "centro": [
+      "name": "Tana del drago",
+      "description": "una caverna nella montagna, con pozze di lava e ossa sparse",
+      "environment": "dragon_lair",
+      "center": [
         -11,
         -11
       ],
-      "raggio": 1
+      "radius": 1
     },
     {
       "id": "tempio",
-      "nome": "Tempio",
-      "descrizione": "un tempio di pietra con colonne, in cima a una scalinata",
-      "ambiente": "temple",
-      "centro": [
+      "name": "Tempio",
+      "description": "un tempio di pietra con colonne, in cima a una scalinata",
+      "environment": "temple",
+      "center": [
         -14,
         0
       ],
-      "raggio": 1
+      "radius": 1
     },
     {
       "id": "piramide",
-      "nome": "Piramide",
-      "descrizione": "una piramide di pietra nel deserto, con una camera segreta",
-      "ambiente": "pyramid",
-      "centro": [
+      "name": "Piramide",
+      "description": "una piramide di pietra nel deserto, con una camera segreta",
+      "environment": "pyramid",
+      "center": [
         -17,
         0
       ],
-      "raggio": 1
+      "radius": 1
     },
     {
       "id": "deserto",
-      "nome": "Deserto",
-      "descrizione": "dune di sabbia, rocce bruciate dal sole, rare oasi",
-      "ambiente": "desert",
-      "centro": [
+      "name": "Deserto",
+      "description": "dune di sabbia, rocce bruciate dal sole, rare oasi",
+      "environment": "desert",
+      "center": [
         0,
         13
       ],
-      "raggio": 2
+      "radius": 2
     },
     {
       "id": "giungla",
-      "nome": "Giungla",
-      "descrizione": "una giungla fitta, umida, con radure e sentieri di animali",
-      "ambiente": "jungle",
-      "centro": [
+      "name": "Giungla",
+      "description": "una giungla fitta, umida, con radure e sentieri di animali",
+      "environment": "jungle",
+      "center": [
         -21,
         0
       ],
-      "raggio": 2
+      "radius": 2
     },
     {
       "id": "montagne",
-      "nome": "Montagne",
-      "descrizione": "pareti di roccia, passi stretti e neve sulle cime",
-      "ambiente": "mountains",
-      "centro": [
+      "name": "Montagne",
+      "description": "pareti di roccia, passi stretti e neve sulle cime",
+      "environment": "mountains",
+      "center": [
         0,
         5
       ],
-      "raggio": 2
+      "radius": 2
     },
     {
       "id": "lago",
-      "nome": "Lago",
-      "descrizione": "un lago tranquillo tra i canneti",
-      "ambiente": "lake",
-      "centro": [
+      "name": "Lago",
+      "description": "un lago tranquillo tra i canneti",
+      "environment": "lake",
+      "center": [
         5,
         0
       ],
-      "raggio": 2
+      "radius": 2
     },
     {
       "id": "borgo_mattoni",
-      "nome": "Borgo di mattoni",
-      "descrizione": "case di mattoni rossi strette attorno a una piazza",
-      "ambiente": "brick_village",
-      "centro": [
+      "name": "Borgo di mattoni",
+      "description": "case di mattoni rossi strette attorno a una piazza",
+      "environment": "brick_village",
+      "center": [
         11,
         11
       ],
-      "raggio": 1
+      "radius": 1
     }
   ]
 }

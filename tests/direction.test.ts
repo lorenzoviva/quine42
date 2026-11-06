@@ -26,16 +26,16 @@ function files(): FileMap {
   const plots: Plot[] = [
     {
       id: 'trama-reti',
-      titolo: 'Le reti sparite',
-      mistero: 'Qualcuno taglia le reti di Nereo.',
-      coinvolti: ['Nereo', 'Ilde'],
-      tappe: [
-        { giorno: 0, momento: 'morning', chi: 'Nereo', dove: 'work', cosa: 'conta le reti', fatto: true },
-        { giorno: 1, momento: 'evening', chi: 'Ilde', dove: 'square', cosa: 'aspetta qualcuno' },
+      title: 'Le reti sparite',
+      mystery: 'Qualcuno taglia le reti di Nereo.',
+      involved: ['Nereo', 'Ilde'],
+      beats: [
+        { day: 0, moment: 'morning', who: 'Nereo', where: 'work', what: 'conta le reti', done: true },
+        { day: 1, moment: 'evening', who: 'Ilde', where: 'square', what: 'aspetta qualcuno' },
       ],
-      missione: { da: 'Nereo', testo: 'Trova chi taglia le reti.', obiettivo: { tipo: 'go', luogo: 'Paludi del Nord' }, stato: 'accepted' },
-      inizio: 0,
-      stato: 'active',
+      quest: { from: 'Nereo', text: 'Trova chi taglia le reti.', goal: { type: 'go', place: 'Paludi del Nord' }, state: 'accepted' },
+      start: 0,
+      state: 'active',
     },
   ];
   return {

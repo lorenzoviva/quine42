@@ -134,7 +134,7 @@ async function main() {
   if (client) loading.textContent = `apertura dell'universo «${name}»…`;
   const snap = client ? await client.load() : undefined;
   const snapFiles = snap?.files;
-  const many = !!snapFiles && readConfig(snapFiles).config.partita?.modalita === 'multiplayer';
+  const many = !!snapFiles && readConfig(snapFiles).config.game?.mode === 'multiplayer';
   let lobbyChoice: LobbyResult | undefined;
   if (many && snapFiles && !params.has('skip')) {
     loading.hidden = true;

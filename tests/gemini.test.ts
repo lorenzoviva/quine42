@@ -107,12 +107,12 @@ describe('usage ledger', () => {
     const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
     k.ai.onCall!({ model: 'gemini-3.1-flash-lite', agent: 'narrator', task: 'npc.reply', prompt: 100, cached: 0, output: 50, thoughts: 0 });
     expect(k.saveUsage()).toBe(true);
-    expect(JSON.parse(k.repo.head().files['world/consumi.json']!).prezzi).toBe('2026-10-22');
+    expect(JSON.parse(k.repo.head().files['world/usage.json']!).prices).toBe('2026-10-22');
     k.ai.onCall!({ model: 'gemini-3.1-flash-lite', agent: 'narrator', task: 'npc.reply', prompt: 100, cached: 0, output: 50, thoughts: 0 });
     k.rollback();
     expect(k.usage.session.calls).toBe(2);
     expect(k.saveUsage()).toBe(true);
-    const day = Object.values(JSON.parse(k.repo.head().files['world/consumi.json']!).giorni)[0] as any;
+    const day = Object.values(JSON.parse(k.repo.head().files['world/usage.json']!).days)[0] as any;
     expect(day['gemini-3.1-flash-lite']['npc.reply'].calls).toBe(2);
   });
 });

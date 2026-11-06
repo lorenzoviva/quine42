@@ -25,7 +25,7 @@ export async function moduli(): Promise<{ righe: string[]; errori: string[]; avv
   const files = fileDi();
   const sandbox = await Sandbox.create(fakeHost().host);
   const v = new Validator(sandbox);
-  const words = lexiconWords(files['world/lessico.md']);
+  const words = lexiconWords(files['world/lexicon.md']);
   const items = new Map<string, string>();
   const runes = new Set<string>();
   const models = new Set(Object.keys(files).filter((p) => /^models\/[^/]+\.xml$/.test(p)).map((p) => p.slice(7, -4)));

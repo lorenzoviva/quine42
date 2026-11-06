@@ -81,7 +81,7 @@ export function situation(s: SituationInput): Situation {
   const at = (op: Operation, c: { cx: number; cy: number } | undefined): Operation => {
     if (!c) return op;
     // The first place is nobody's region (as for the Cartographer).
-    const region = c.cx === 0 && c.cy === 0 ? undefined : regionAt(s.atlas, c.cx, c.cy)?.nome;
+    const region = c.cx === 0 && c.cy === 0 ? undefined : regionAt(s.atlas, c.cx, c.cy)?.name;
     return { ...op, cx: c.cx, cy: c.cy, ...(region ? { region } : {}), ...(names.has(`${c.cx},${c.cy}`) ? { place: names.get(`${c.cx},${c.cy}`) } : {}) };
   };
   // A place or a region by its name (a quest to «go to»).
@@ -90,8 +90,8 @@ export function situation(s: SituationInput): Situation {
     if (!n) return undefined;
     const ch = s.chunks.find((c) => c.name && normName(c.name) === n);
     if (ch) return ch;
-    const r = s.atlas.regioni.find((x) => normName(x.nome) === n || n.includes(normName(x.nome)));
-    return r ? { cx: r.centro[0], cy: r.centro[1] } : undefined;
+    const r = s.atlas.regions.find((x) => normName(x.name) === n || n.includes(normName(x.name)));
+    return r ? { cx: r.center[0], cy: r.center[1] } : undefined;
   };
 
   ops.push(at({ kind: 'wanderer', label: 'il viandante', detail: 'è qui' }, s.wanderer));
@@ -102,17 +102,17 @@ export function situation(s: SituationInput): Situation {
     ops.push(at({ kind: 'chunk', label: `luogo ${c.cx},${c.cy}`, detail: c.developing ? 'il Cartografo lo sta pianificando' : 'in coda', ...(c.developing ? { live: true } : {}) }, c));
   }
   for (const p of s.plots) {
-    if (p.stato !== 'active') continue;
-    const i = p.tappe.findIndex((b) => !b.fatto);
-    const beat = p.tappe[i < 0 ? p.tappe.length - 1 : i];
-    const where = (beat && s.locate(beat.chi)) ?? p.coinvolti.map(s.locate).find(Boolean);
-    const tappa = beat ? `tappa ${(i < 0 ? p.tappe.length - 1 : i) + 1}/${p.tappe.length}${i < 0 ? ' (fatte tutte)' : ''}: ${beat.chi} ${beat.cosa} (${italianName('dove', beat.dove)}, ${italianName('momenti', beat.momento)}, giorno ${p.inizio + beat.giorno})` : 'nessuna tappa';
-    ops.push(at({ kind: 'plot', label: p.titolo, detail: tappa }, where));
-    const q = p.missione;
-    if (q?.stato === 'accepted') {
-      const o = q.obiettivo;
-      const goal = o.tipo === 'bring' ? `porta ${o.oggetto ?? 'ciò che serve'} a ${o.a ?? q.da}` : o.tipo === 'go' ? `vai a ${o.luogo ?? '?'}` : `parla con ${o.a ?? '?'}`;
-      ops.push(at({ kind: 'quest', label: p.titolo, detail: `${q.da}: ${goal}` }, (o.tipo === 'go' ? named(o.luogo) : undefined) ?? s.locate(o.a ?? q.da)));
+    if (p.state !== 'active') continue;
+    const i = p.beats.findIndex((b) => !b.done);
+    const beat = p.beats[i < 0 ? p.beats.length - 1 : i];
+    const where = (beat && s.locate(beat.who)) ?? p.involved.map(s.locate).find(Boolean);
+    const tappa = beat ? `tappa ${(i < 0 ? p.beats.length - 1 : i) + 1}/${p.beats.length}${i < 0 ? ' (fatte tutte)' : ''}: ${beat.who} ${beat.what} (${italianName('dove', beat.where)}, ${italianName('momenti', beat.moment)}, giorno ${p.start + beat.day})` : 'nessuna tappa';
+    ops.push(at({ kind: 'plot', label: p.title, detail: tappa }, where));
+    const q = p.quest;
+    if (q?.state === 'accepted') {
+      const o = q.goal;
+      const goal = o.type === 'bring' ? `porta ${o.item ?? 'ciò che serve'} a ${o.to ?? q.from}` : o.type === 'go' ? `vai a ${o.place ?? '?'}` : `parla con ${o.to ?? '?'}`;
+      ops.push(at({ kind: 'quest', label: p.title, detail: `${q.from}: ${goal}` }, (o.type === 'go' ? named(o.place) : undefined) ?? s.locate(o.to ?? q.from)));
     }
   }
   for (const f of s.faults) {
@@ -120,7 +120,7 @@ export function situation(s: SituationInput): Situation {
     ops.push(at({ kind: 'fault', label: f.key, detail: f.count > 1 ? `${f.message} (×${f.count})` : f.message }, c));
   }
 
-  const regions = s.atlas.regioni.map((r) => ({ nome: r.nome, centro: r.centro, raggio: r.raggio }));
+  const regions = s.atlas.regions.map((r) => ({ nome: r.name, centro: r.center, raggio: r.radius }));
   const xs = [...ops.flatMap((o) => (o.cx === undefined ? [] : [o.cx])), ...regions.flatMap((r) => [r.centro[0] - r.raggio, r.centro[0] + r.raggio])];
   const ys = [...ops.flatMap((o) => (o.cy === undefined ? [] : [o.cy])), ...regions.flatMap((r) => [r.centro[1] - r.raggio, r.centro[1] + r.raggio])];
   const bounds = { x0: Math.min(...xs) - 1, y0: Math.min(...ys) - 1, x1: Math.max(...xs) + 1, y1: Math.max(...ys) + 1 };

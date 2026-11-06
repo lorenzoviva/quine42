@@ -31,7 +31,7 @@ export class GenesisScreen {
     const now = this.k.gameSetup();
     const free = this.k.needsGenesis();
     const death = el('input', { type: 'range', min: '0', max: String(DEATH_LEVELS.length - 1), step: '1' }) as HTMLInputElement;
-    death.value = String(now.morte);
+    death.value = String(now.death);
     const deathText = el('div', { class: 'note' });
     const showDeath = () => {
       const d = DEATH_LEVELS[Number(death.value)];
@@ -40,14 +40,14 @@ export class GenesisScreen {
     death.oninput = showDeath;
     showDeath();
     const mode = el('select', {}, el('option', { value: 'single' }, 'singola'), el('option', { value: 'multiplayer' }, 'multigiocatore')) as HTMLSelectElement;
-    mode.value = now.modalita;
+    mode.value = now.mode;
     const check = (on: boolean) => {
       const c = el('input', { type: 'checkbox' }) as HTMLInputElement;
       c.checked = on;
       return c;
     };
     const pvp = check(now.pvp);
-    const other = check(now.altroTraGiocatori);
+    const other = check(now.freeActionsBetweenPlayers);
     const lock = (on: boolean) => {
       for (const c of [death, mode]) c.disabled = on || !free;
       // PvP and «Altro…» between players only mean something with more than one player.
@@ -66,14 +66,14 @@ export class GenesisScreen {
       el('div', { class: 'row' }, el('label', {}, pvp, 'PvP: i viandanti possono ferirsi'), el('label', {}, other, '«Altro…» anche su un altro viandante')),
       el('div', { class: 'note' }, 'Il multigiocatore arriverà: per ora ogni universo si gioca da soli, ma la scelta resta.'),
     );
-    return { form, read: () => ({ modalita: mode.value === 'multiplayer' ? 'multiplayer' : 'single', morte: Number(death.value), pvp: pvp.checked, altroTraGiocatori: other.checked }), lock };
+    return { form, read: () => ({ mode: mode.value === 'multiplayer' ? 'multiplayer' : 'single', death: Number(death.value), pvp: pvp.checked, freeActionsBetweenPlayers: other.checked }), lock };
   }
 
   /**
    * The detail of generation (T45b): a preset, a coefficient per rhythm of the Council, the agents' models, and what an
    * hour of play costs with them. Unlike the game it can change, but only before a match (T247): the lobby. `read` gives what goes into universe.json → ai.
    */
-  private aiForm(): { form: HTMLElement; read: () => Pick<AiConfig, 'textModel' | 'scultori' | 'coefficienti' | 'attore'>; lock: (on: boolean) => void } {
+  private aiForm(): { form: HTMLElement; read: () => Pick<AiConfig, 'textModel' | 'sculptors' | 'coefficients' | 'actor'>; lock: (on: boolean) => void } {
     const ai = this.k.config.ai;
     const coef: Coefficients = this.k.coefficients();
     const sculptors: SculptorAiModels = this.k.sculptors();
@@ -87,23 +87,23 @@ export class GenesisScreen {
     const text = pick(ai.textModel);
     // The Actor (T157): off by default (nothing changes, no call is added); on, with its own model.
     const actorOn = el('input', { type: 'checkbox', id: 'genesi-attore' }) as HTMLInputElement;
-    actorOn.checked = actor.acceso;
-    const actorModel = pick(actor.modello);
+    actorOn.checked = actor.on;
+    const actorModel = pick(actor.model);
     actorModel.id = 'genesi-attore-modello';
     const classes: Array<[keyof SculptorAiModels, string]> = [['simple', 'cose semplici'], ['figure', 'figure'], ['structure', 'strutture'], ['important', 'strutture importanti'], ['artist', 'Artista (giudizio)'], ['musician', 'Musicista']];
     const sculpt = new Map(classes.map(([k]) => [k, pick(String(sculptors[k]))]));
     const sliders = new Map<keyof Coefficients, HTMLInputElement>();
     const preset = el('select', {}, el('option', { value: 'pieno' }, 'Pieno dettaglio'), el('option', { value: 'low' }, 'Low Detail (a risparmio)'), el('option', { value: 'misura' }, 'Su misura')) as HTMLSelectElement;
     const estimate = el('div', { class: 'note' });
-    const read = (): Pick<AiConfig, 'textModel' | 'scultori' | 'coefficienti' | 'attore'> => ({
+    const read = (): Pick<AiConfig, 'textModel' | 'sculptors' | 'coefficients' | 'actor'> => ({
       textModel: text.value,
-      attore: { acceso: actorOn.checked, modello: actorModel.value },
-      scultori: { ...Object.fromEntries([...sculpt].map(([k, s]) => [k, s.value])), importanteFino: sculptors.importanteFino } as Partial<SculptorAiModels>,
-      coefficienti: Object.fromEntries([...sliders].map(([k, s]) => [k, Number(s.value)])) as Coefficients,
+      actor: { on: actorOn.checked, model: actorModel.value },
+      sculptors: { ...Object.fromEntries([...sculpt].map(([k, s]) => [k, s.value])), importanteFino: sculptors.importanteFino } as Partial<SculptorAiModels>,
+      coefficients: Object.fromEntries([...sliders].map(([k, s]) => [k, Number(s.value)])) as Coefficients,
     });
     const show = () => {
       const r = read();
-      const c = r.coefficienti as Coefficients;
+      const c = r.coefficients as Coefficients;
       preset.value = isLowDetail(c) ? 'low' : COEFFICIENT_KEYS.every((k) => c[k] === 1) ? 'pieno' : 'misura';
       for (const s of sliders.values()) (s.nextElementSibling as HTMLElement).textContent = Number(s.value).toFixed(2);
       const h = hourlyEstimate({ ...ai, ...r });
@@ -122,10 +122,10 @@ export class GenesisScreen {
       return el('label', { title: `${info.agente}, regolazione ${info.modo}: ${info.testo}` }, `${info.nome}`, s, el('span', {}, ''));
     });
     preset.onchange = () => {
-      const c = preset.value === 'low' ? LOW_DETAIL.coefficienti : preset.value === 'pieno' ? FULL_DETAIL : undefined;
+      const c = preset.value === 'low' ? LOW_DETAIL.coefficients : preset.value === 'pieno' ? FULL_DETAIL : undefined;
       if (!c) return;
       for (const [k, s] of sliders) s.value = String(c[k]);
-      const models: Partial<SculptorAiModels> = preset.value === 'low' ? LOW_DETAIL.scultori : DEFAULT_SCULPTORS;
+      const models: Partial<SculptorAiModels> = preset.value === 'low' ? LOW_DETAIL.sculptors : DEFAULT_SCULPTORS;
       for (const [k, s] of sculpt) if (models[k]) s.value = String(models[k]);
       show();
     };

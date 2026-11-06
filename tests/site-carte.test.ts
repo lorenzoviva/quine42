@@ -9,7 +9,7 @@ import { publicFiles } from '../src/session/files';
 import { cardPicture } from '../site/carte-art';
 import { artOf, chainOf, collectionView, describeCard, inCategory, mhCode, PAGE, rarityOf, wandererFrom } from '../site/carte';
 
-const carta = (titolare: string, origini?: unknown) => ({ autore: 'narrator', pagante: titolare, titolare, ...(origini ? { origini } : {}) });
+const carta = (titolare: string, origini?: unknown) => ({ author: 'narrator', payer: titolare, holder: titolare, ...(origini ? { origins: origini } : {}) });
 const print = (t: string) => fingerprint(t);
 
 /** A small universe of cards: an item pack, an individual, a plot, a place that came with a clone, a rule. */
@@ -22,35 +22,35 @@ function universe(): FileMap {
       id: 'pack',
       name: 'Pacchetto',
       kind: 'data',
-      carta: carta('anna'),
+      card: carta('anna'),
       items: [
-        { id: 'spada', name: 'Spada di fuliggine', description: 'Lama forgiata nella cenere. <b>Brucia</b>.', color: '#aa4422', carta: carta('io', [{ titolare: 'anna', universo: 'prima', impronta: print('altro testo, molto diverso') }]) },
-        { id: 'pane', name: 'Pane', description: 'x'.repeat(300), color: '#ccaa66', carta: carta('io') },
+        { id: 'spada', name: 'Spada di fuliggine', description: 'Lama forgiata nella cenere. <b>Brucia</b>.', color: '#aa4422', card: carta('me', [{ holder: 'anna', universe: 'prima', fingerprint: print('altro testo, molto diverso') }]) },
+        { id: 'pane', name: 'Pane', description: 'x'.repeat(300), color: '#ccaa66', card: carta('me') },
       ],
     }),
     'models/index.json': JSON.stringify(models),
-    'world/people.json': JSON.stringify({ persone: [{ nome: 'Mira', tipo: 'assente', mestiere: 'fornaia', famiglia: [], routine: [], carta: carta('io') }] }),
-    'world/plots.json': JSON.stringify({ trame: [{ id: 'furto', titolo: 'Il furto', mistero: 'Chi ha preso il pane?', coinvolti: ['Mira'], tappe: [], inizio: 0, stato: 'active', carta: carta('bruno') }] }),
-    'world/rules.json': JSON.stringify({ regole: [{ chiave: 'canto', testo: 'Il canto calma i lupi', carta: carta('io') }] }),
+    'world/people.json': JSON.stringify({ people: [{ name: 'Mira', kind: 'assente', job: 'fornaia', family: [], routine: [], card: carta('me') }] }),
+    'world/plots.json': JSON.stringify({ plots: [{ id: 'furto', title: 'Il furto', mystery: 'Chi ha preso il pane?', involved: ['Mira'], beats: [], start: 0, state: 'active', card: carta('bruno') }] }),
+    'world/rules.json': JSON.stringify({ rules: [{ key: 'canto', text: 'Il canto calma i lupi', card: carta('me') }] }),
     [CARDS_FILE]: JSON.stringify({
-      utilizzi: { 'item:spada': { luoghi: 14, trame: 6, prompt: 31 }, 'item:pane': { luoghi: 1, trame: 0, prompt: 0 }, 'rule:canto': { luoghi: 60, trame: 20, prompt: 20 }, 'chunk:0_0': { luoghi: 9, trame: 0, prompt: 1 } },
-      luoghi: { '0_0': { ...carta('bruno', [{ titolare: 'io', universo: 'prima', impronta: print('La piazza') }]), nome: 'La piazza' } },
+      uses: { 'item:spada': { chunks: 14, plots: 6, prompt: 31 }, 'item:pane': { chunks: 1, plots: 0, prompt: 0 }, 'rule:canto': { chunks: 60, plots: 20, prompt: 20 }, 'chunk:0_0': { chunks: 9, plots: 0, prompt: 1 } },
+      chunks: { '0_0': { ...carta('bruno', [{ holder: 'me', universe: 'prima', fingerprint: print('La piazza') }]), name: 'La piazza' } },
     }),
   };
 }
 
 describe('la galleria delle carte', () => {
   it('la rarità cresce con gli utilizzi', () => {
-    expect(rarityOf({ luoghi: 0, trame: 0, prompt: 4 })).toBe('comune');
-    expect(rarityOf({ luoghi: 2, trame: 2, prompt: 1 })).toBe('rara');
-    expect(rarityOf({ luoghi: 14, trame: 6, prompt: 31 })).toBe('epica');
-    expect(rarityOf({ luoghi: 60, trame: 20, prompt: 20 })).toBe('leggendaria');
+    expect(rarityOf({ chunks: 0, plots: 0, prompt: 4 })).toBe('comune');
+    expect(rarityOf({ chunks: 2, plots: 2, prompt: 1 })).toBe('rara');
+    expect(rarityOf({ chunks: 14, plots: 6, prompt: 31 })).toBe('epica');
+    expect(rarityOf({ chunks: 60, plots: 20, prompt: 20 })).toBe('leggendaria');
   });
 
   it('la collezione: le carte del viandante, le più usate prima, e ciò che riceve', () => {
-    const c = collectionView(universe(), 'io', 'seconda');
+    const c = collectionView(universe(), 'me', 'seconda');
     expect(c.mine.map((v) => v.card.id).slice(0, 2)).toEqual(['rule:canto', 'item:spada']);
-    expect(c.mine.every((v) => v.card.titolare === 'io')).toBe(true);
+    expect(c.mine.every((v) => v.card.holder === 'me')).toBe(true);
     expect(c.stats).toMatchObject({ totale: 4, rare: 1, leggendarie: 1 });
     // The square is now of Bruno, but it was of whoever looks: 50% of its 10 uses (content never changed).
     expect(c.received.map((v) => v.card.id)).toEqual(['chunk:0_0']);
@@ -65,19 +65,19 @@ describe('la galleria delle carte', () => {
     const files = universe();
     const spada = allCards(files, true).find((c) => c.id === 'item:spada')!;
     const chain = chainOf(spada, 'seconda');
-    expect(chain.map((l) => [l.titolare, l.universo])).toEqual([['anna', 'prima'], ['io', 'seconda']]);
+    expect(chain.map((l) => [l.holder, l.universe])).toEqual([['anna', 'prima'], ['me', 'seconda']]);
     expect(chain[0].cambio).toBeGreaterThan(0.5);
     expect(chain[1].cambio).toBeUndefined();
     expect(chain[0].quota! + chain[1].quota!).toBeCloseTo(1);
     expect(chain[0].mh).toMatch(/^mh:[0-9a-f]{8}$/);
-    expect(chain[1].mh).toBe(mhCode(spada.impronta));
+    expect(chain[1].mh).toBe(mhCode(spada.fingerprint));
     expect(chain[1].mh).not.toBe(chain[0].mh);
   });
 
   it('una carta senza eredità è tutta del titolare; chi torna nella catena ha una quota sola', () => {
-    const base: Card = { id: 'item:x', tipo: 'item', nome: 'X', file: 'f', autore: 'a', pagante: 'io', titolare: 'io', utilizzi: { luoghi: 0, trame: 0, prompt: 0 }, impronta: [1] };
-    expect(chainOf(base, 'u')).toEqual([{ titolare: 'io', universo: 'u', mh: 'mh:00000001', quota: 1 }]);
-    const back = chainOf({ ...base, origini: [{ titolare: 'io', universo: 'p', impronta: [2] }], quote: { io: 1 } }, 'u');
+    const base: Card = { id: 'item:x', tipo: 'item', nome: 'X', file: 'f', author: 'a', payer: 'me', holder: 'me', uses: { chunks: 0, plots: 0, prompt: 0 }, fingerprint: [1] };
+    expect(chainOf(base, 'u')).toEqual([{ holder: 'me', universe: 'u', mh: 'mh:00000001', quota: 1 }]);
+    const back = chainOf({ ...base, origins: [{ holder: 'me', universe: 'p', fingerprint: [2] }], quote: { me: 1 } }, 'u');
     expect(back.map((l) => l.quota)).toEqual([1, undefined]);
   });
 
@@ -93,8 +93,8 @@ describe('la galleria delle carte', () => {
   it('la frase del fronte da ciò che dà publicFiles: description e mestiere; senza, la riga generica (T168)', () => {
     const whole: FileMap = {
       ...universe(),
-      'modules/cosa/manifest.json': JSON.stringify({ id: 'cosa', name: 'Cosa', kind: 'entity', lore: 'Segreto del Concilio', appearance: { aspetto: 'Segreto anche lui' }, carta: carta('io') }),
-      'modules/detta/manifest.json': JSON.stringify({ id: 'detta', name: 'Detta', kind: 'entity', description: 'Una cosa che si dice.', lore: 'Segreto', carta: carta('io') }),
+      'modules/cosa/manifest.json': JSON.stringify({ id: 'cosa', name: 'Cosa', kind: 'entity', lore: 'Segreto del Concilio', appearance: { look: 'Segreto anche lui' }, card: carta('me') }),
+      'modules/detta/manifest.json': JSON.stringify({ id: 'detta', name: 'Detta', kind: 'entity', description: 'Una cosa che si dice.', lore: 'Segreto', card: carta('me') }),
     };
     const files = publicFiles(whole);
     const by = (id: string) => allCards(whole, true).find((c) => c.id === id)!;
@@ -108,7 +108,7 @@ describe('la galleria delle carte', () => {
   });
 
   it('con ciò che dà publicFiles una carta con un corpo ha la foto; un luogo no, e resta la gemma (T168)', () => {
-    const whole: FileMap = { ...universe(), 'modules/cosa/manifest.json': JSON.stringify({ id: 'cosa', name: 'Cosa', kind: 'entity', appearance: { classe: 'object' }, carta: carta('io') }) };
+    const whole: FileMap = { ...universe(), 'modules/cosa/manifest.json': JSON.stringify({ id: 'cosa', name: 'Cosa', kind: 'entity', appearance: { class: 'object' }, card: carta('me') }) };
     const files = publicFiles(whole);
     const forms = new Forms(new InlineRunner());
     forms.load(files);
@@ -138,7 +138,7 @@ describe('la galleria delle carte', () => {
   it('di chi è la collezione: l’indirizzo, poi l’account, poi chi gioca da solo', () => {
     expect(wandererFrom('?viandante=anna', 'UID1')).toBe('anna');
     expect(wandererFrom('', 'UID1')).toBe('uid1');
-    expect(wandererFrom('')).toBe('io');
+    expect(wandererFrom('')).toBe('me');
   });
 
   it('un universo senza carte dà una collezione vuota, senza errori', () => {

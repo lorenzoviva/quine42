@@ -30,6 +30,7 @@ import { Mj3Error } from '../../../src/mj/engine';
 import { compileMjx } from '../../../src/mj/model';
 import { FORM_LIMITS, runMjx } from '../../../src/mj/run';
 import { analyzeSound } from '../../../src/mj/soundanalysis';
+import { internalFields } from '../../../src/kernel/internalNames';
 import { SOGLIA_VARIANZA } from '../varianza';
 
 const HERE = path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1'));
@@ -96,7 +97,7 @@ export function checkRunes(files: FileMap, words: string[]): { errori: string[];
   const errori: string[] = [];
   const m = json<Manifest & { runes?: Record<string, MagicRune>; spells?: Record<string, { name: string; description: string; effects: unknown[] }> }>(files, 'modules/magic.runes/manifest.json');
   const runes = m?.runes ?? {};
-  const canon = files['world/canone.md'] ?? '';
+  const canon = files['world/canon.md'] ?? '';
   const accepted: Record<string, MagicRune> = {};
   for (const [token, r] of Object.entries(runes)) {
     const canonLine = canon.split('\n').find((l) => l.includes(`«${token}»`));
@@ -106,7 +107,7 @@ export function checkRunes(files: FileMap, words: string[]): { errori: string[];
       if (v.rune!.rune.glyph !== r.glyph) errori.push(`runa «${token}»: il segno «${r.glyph}» non è libero, il validatore darebbe «${v.rune!.rune.glyph}»`);
       accepted[token] = r;
     }
-    if (!canonLine) errori.push(`runa «${token}»: manca la sua riga nel canone (world/canone.md, «${token}» tra caporali)`);
+    if (!canonLine) errori.push(`runa «${token}»: manca la sua riga nel canone (world/canon.md, «${token}» tra caporali)`);
     if (!m?.spells?.[token]) errori.push(`runa «${token}»: manca il suo incantesimo (spells)`);
   }
   const palette = json<{ tiles?: Record<string, never> }>(files, 'modules/world.terrain/manifest.json')?.tiles ?? json<{ tiles?: Record<string, never> }>(bundledFiles, 'modules/world.terrain/manifest.json')?.tiles ?? {};
@@ -214,7 +215,7 @@ function realmTexts(files: FileMap): Array<[string, string]> {
 /** The world's files as the kernel's validators read them. */
 export function checkWorld(files: FileMap, own: FileMap, seedWords: string[]): { errori: string[]; conteggi: Record<string, number> } {
   const errori: string[] = [];
-  const words = lexiconWords(files['world/lessico.md'] ?? '');
+  const words = lexiconWords(files['world/lexicon.md'] ?? '');
   // The lexicon is the common thread of every world (T65): the same words; a few customs of its own.
   for (const w of seedWords) if (!words.includes(w)) errori.push(`lessico: manca la parola comune «${w}»`);
   const people = readPeople(files);
@@ -227,17 +228,17 @@ export function checkWorld(files: FileMap, own: FileMap, seedWords: string[]): {
     const c = canonBreak(plotText(p));
     if (c) errori.push(`trama «${p.id}»: le rune fanno ciò che il canone non dice («${c}»)`);
   }
-  const bible = json<Parameters<typeof bibleBreaks>[0]>(files, 'world/bible.json');
+  const bible = internalFields('bible', json<Parameters<typeof bibleBreaks>[0]>(files, 'world/bible.json'));
   errori.push(...bibleBreaks(bible, words).map((b) => `bibbia: ${b}`));
   const atlas = readAtlas(files);
   const layouts = Object.keys(json<{ layouts?: Record<string, unknown> }>(files, 'modules/world.layouts/manifest.json')?.layouts ?? {});
-  for (const r of atlas.regioni) if (!layouts.includes(r.ambiente)) errori.push(`atlante: la regione «${r.id}» vuole l'ambiente «${r.ambiente}», che non c'è`);
-  const rules = json<{ regole?: Array<{ chiave: string; testo: string; racconto: string }> }>(files, 'world/rules.json')?.regole ?? [];
+  for (const r of atlas.regions) if (!layouts.includes(r.environment)) errori.push(`atlante: la regione «${r.id}» vuole l'ambiente «${r.environment}», che non c'è`);
+  const rules = internalFields('rules', json<{ rules?: Array<{ key: string; text: string; story: string }> }>(files, 'world/rules.json') ?? {}).rules ?? [];
   for (const [where, t] of realmTexts(own)) {
     const b = metaBreak(t, where.startsWith('world/lessico') ? [] : words);
     if (b) errori.push(`quarta parete in ${where}: «${b}»`);
   }
-  return { errori, conteggi: { persone: people.persone.length, trame: plots.length, regioni: atlas.regioni.length, regole: rules.length } };
+  return { errori, conteggi: { persone: people.people.length, trame: plots.length, regioni: atlas.regions.length, regole: rules.length } };
 }
 
 const DT = 1 / 60;
@@ -247,7 +248,7 @@ const settle = (ms = 20) => new Promise((r) => setTimeout(r, ms));
 export async function runRealm(files: FileMap, own: string[], log: (s: string) => void): Promise<{ errori: string[]; faults: number; quarta: number; tick: number; detti: number }> {
   const errori: string[] = [];
   const k = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
-  const words = lexiconWords(files['world/lessico.md'] ?? '');
+  const words = lexiconWords(files['world/lexicon.md'] ?? '');
   const said: string[] = [];
   const listen = (e: unknown) => {
     const t = (e as { text?: unknown })?.text;
@@ -316,8 +317,8 @@ export async function verifica(reame: Reame, opts: { suoni?: boolean; log?: (s: 
   const files = realmUniverse(reame);
   const errori: string[] = [];
   const note: string[] = [];
-  const seedWords = lexiconWords(bundledFiles['world/lessico.md']);
-  const words = lexiconWords(files['world/lessico.md'] ?? '');
+  const seedWords = lexiconWords(bundledFiles['world/lexicon.md']);
+  const words = lexiconWords(files['world/lexicon.md'] ?? '');
 
   const r = checkRunes(own, words);
   errori.push(...r.errori);
@@ -339,21 +340,22 @@ export async function verifica(reame: Reame, opts: { suoni?: boolean; log?: (s: 
   for (const id of moduleIds(own).filter((x) => DATA_MODULE.test(x))) errori.push(...bootK.validator.parseManifest(`modules/${id}/manifest.json`, own[`modules/${id}/manifest.json`]).errors);
   log(`  moduli: ${ownModules.length} con Lua`);
 
-  const index = json<Record<string, { classe?: string; suono?: { uso?: string } }>>(own, 'models/index.json') ?? {};
+  // The index as the kernel reads it (the fields of 0.4, T308a; the values of 0.3, T307b).
+  const index = internalFields('modelIndex', json<Record<string, { class?: string; sound?: { use?: string } }>>(own, 'models/index.json') ?? {});
   const models = Object.keys(own).filter((p) => /^models\/[^/]+\.xml$/.test(p));
   let nModels = 0, nMusic = 0, nEffects = 0;
   for (const p of models) {
     const id = p.slice(7, -4);
     if (!index[id]) errori.push(`modello ${id}: manca in models/index.json`);
-    if (index[id]?.classe === 'suono') {
-      if (index[id].suono?.uso === 'musica') nMusic++;
+    if (index[id]?.class === 'suono') {
+      if (index[id].sound?.use === 'music') nMusic++;
       else nEffects++;
       if (opts.suoni === false) continue;
       const t = Date.now();
       const s = checkSound(id, own[p]);
       errori.push(...s.errori);
       log(`  suono ${id}: ${s.errori.length ? `${s.errori.length} difetti` : 'regge'} sulle 10 terne (${Date.now() - t} ms)`);
-      if (s.effetto !== (index[id].suono?.uso === 'effetto')) errori.push(`suono ${id}: l'indice dice ${index[id].suono?.uso}, l'analisi ${s.effetto ? 'un effetto' : 'una musica'}`);
+      if (s.effetto !== (index[id].sound?.use === 'effect')) errori.push(`suono ${id}: l'indice dice ${index[id].sound?.use}, l'analisi ${s.effetto ? 'un effetto' : 'una musica'}`);
     } else {
       nModels++;
       const m = checkModel(id, own[p]);

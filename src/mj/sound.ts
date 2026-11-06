@@ -13,7 +13,7 @@
 
 import { at, Mj3Error, type Grid3 } from './engine';
 import type { XmlElement } from './xml';
-import { internalSoundPurpose, italianName } from '../kernel/internalNames';
+import { internalFields, internalSoundPurpose, italianName } from '../kernel/internalNames';
 
 /** The class of a sound program in `models/index.json`. Not one of `CLASSES`: it has no box, nothing in the world wears it. */
 export const SOUND_CLASS = 'suono';
@@ -180,35 +180,36 @@ export function scoreOf(grid: Grid3, settings: SoundSettings): Score {
 
 /** What a program is for in the game (ADR-0126), in `models/index.json → suono`. Without it the program is for the SoundLab only. */
 export interface SoundPurpose {
-  uso: 'music' | 'effect';
+  use: 'music' | 'effect';
   /** Music: the environments it belongs to (whose id contains one of these); none: any. */
-  ambienti?: string[];
+  environments?: string[];
   /** Music: the moments of the day it plays in; none: any. */
-  momenti?: string[];
+  moments?: string[];
   /** Music: it plays beyond the carpet, and only there. */
-  oltre?: boolean;
+  beyond?: boolean;
   /** Effect: the names it answers to. */
-  effetti?: string[];
+  effects?: string[];
 }
 
 export interface SoundProgram {
   id: string;
-  nome?: string;
+  name?: string;
   xml: string;
-  suono?: SoundPurpose;
+  sound?: SoundPurpose;
 }
 
 const strings = (v: unknown): string[] | undefined => (Array.isArray(v) ? v.filter((s): s is string => typeof s === 'string') : undefined);
 
 /** The index is a file of the universe: what does not read as a purpose is no purpose. */
 function soundPurpose(raw: unknown): SoundPurpose | undefined {
-  // A purpose of the contract 0.2 (`musica`, `mattina`, `runa`) reads internal (T307b): the migration ports the index, this a stray entry.
-  const r = internalSoundPurpose(raw) as Record<string, unknown> | null | undefined;
-  if (!r || typeof r !== 'object' || (r.uso !== 'music' && r.uso !== 'effect')) return undefined;
-  const ambienti = strings(r.ambienti);
-  const momenti = strings(r.momenti);
-  const effetti = strings(r.effetti);
-  return { uso: r.uso, ...(ambienti ? { ambienti } : {}), ...(momenti ? { momenti } : {}), ...(r.oltre === true ? { oltre: true } : {}), ...(effetti ? { effetti } : {}) };
+  // A purpose of the contract 0.2 (`musica`, `mattina`, `runa`, T307b) and its fields of 0.3 (`uso`, `ambienti`, T308a) read internal: the
+  // migration ports the index, this a stray entry. The values first: their repair reads the fields of before.
+  const r = internalFields('soundPurpose', internalSoundPurpose(raw)) as Record<string, unknown> | null | undefined;
+  if (!r || typeof r !== 'object' || (r.use !== 'music' && r.use !== 'effect')) return undefined;
+  const ambienti = strings(r.environments);
+  const momenti = strings(r.moments);
+  const effetti = strings(r.effects);
+  return { use: r.use, ...(ambienti ? { environments: ambienti } : {}), ...(momenti ? { moments: momenti } : {}), ...(r.beyond === true ? { beyond: true } : {}), ...(effetti ? { effects: effetti } : {}) };
 }
 
 /** Whether a program names an environment: its id, or one of the Cartographer's whose id contains it («castello_nero» is a castle). */
@@ -217,20 +218,22 @@ function soundPurpose(raw: unknown): SoundPurpose | undefined {
  * the Cartographer's ids still carry (T307a: `castle` plays in `castello_nero`).
  */
 export const namesEnvironment = (p: SoundProgram, environment: string | undefined): boolean =>
-  !!environment && !!p.suono?.ambienti?.some((a) => environment === a || environment.includes(a) || environment.includes(italianName('ambienti', a)));
+  !!environment && !!p.sound?.environments?.some((a) => environment === a || environment.includes(a) || environment.includes(italianName('ambienti', a)));
 
 /** The sound programs among a universe's files: their ids and index entries, in the index's order. */
 export function soundPrograms(files: Record<string, string>): SoundProgram[] {
-  let index: Record<string, { classe?: string; nome?: string; suono?: unknown }>;
+  let index: Record<string, { class?: string; name?: string; sound?: unknown; suono?: unknown }>;
   try {
     index = JSON.parse(files['models/index.json'] ?? '{}');
   } catch {
     return [];
   }
-  return Object.entries(index).flatMap(([id, info]) => {
+  return Object.entries(index).flatMap(([id, raw]): SoundProgram[] => {
     const xml = files[`models/${id}.xml`];
-    if (info?.classe !== SOUND_CLASS || xml === undefined) return [];
-    const suono = soundPurpose(info.suono);
-    return [{ id, nome: info.nome, xml, ...(suono ? { suono } : {}) }];
+    // The entry's fields of 0.3 (`classe`, `suono`) read internal (T308a); its purpose reads its own.
+    const info = internalFields('modelInfo', { ...raw, ...(raw?.suono !== undefined ? { suono: undefined } : {}) }) as typeof raw;
+    if (info?.class !== SOUND_CLASS || xml === undefined) return [];
+    const sound = soundPurpose(raw?.sound ?? raw?.suono);
+    return [{ id, ...(info.name !== undefined ? { name: info.name } : {}), xml, ...(sound ? { sound } : {}) }];
   });
 }

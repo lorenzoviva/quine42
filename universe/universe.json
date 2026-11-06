@@ -1,22 +1,22 @@
 {
   "name": "aurora",
-  "kernel": "0.3.0",
+  "kernel": "0.4.0",
   "kernels": {
-    "from": "0.3"
+    "from": "0.4"
   },
   "seed": 1337,
   "theme": "prompts/theme.md",
   "circleRadius": 42,
   "chunkSize": 18,
-  "partita": {
-    "modalita": "single",
-    "morte": 3,
+  "game": {
+    "mode": "single",
+    "death": 3,
     "pvp": false,
-    "altroTraGiocatori": true
+    "freeActionsBetweenPlayers": true
   },
-  "eredita": {
+  "heritage": {
     "base": 0.1,
-    "copia": 0.4
+    "copy": 0.4
   },
   "ai": {
     "textModel": "gemini-3.1-flash-lite",

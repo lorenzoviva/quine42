@@ -27,9 +27,9 @@ const CASI = [
 ];
 
 interface Persona {
-  nome: string;
-  specie?: string;
-  mestiere: string;
+  name: string;
+  species?: string;
+  job: string;
   origine: string;
 }
 
@@ -122,20 +122,20 @@ describe('the trades of the three universes of Claude Cloud (T298)', () => {
         expect(programs.length).toBe(caso.programmi);
         expect(files['modules/sys.work/manifest.json']).toBeTruthy();
         const world = { codes: new Set(Object.keys(k.palette)), items: new Set(k.content.items.keys()) };
-        for (const p of modules) for (const raw of JSON.parse(files[p]).mestieri) expect(validateJobProgram(raw, world).errors, p).toEqual([]);
+        for (const p of modules) for (const raw of JSON.parse(files[p]).jobs) expect(validateJobProgram(raw, world).errors, p).toEqual([]);
         // What rebuilds a house is in the registry, with a name of the world.
         for (const it of ['item.ciocco', 'item.chiodi']) expect(k.content.items.get(it)?.name, it).toBeTruthy();
-        const persone = JSON.parse(files['world/people.json']).persone as Persona[];
+        const persone = JSON.parse(files['world/people.json']).people as Persona[];
         for (const p of persone) {
-          const job = matchJob(p.mestiere, programs);
-          if (p.specie === 'person') expect(job?.id, `${p.nome}, ${p.mestiere}`).toBeDefined();
-          else expect(job, `${p.nome}, ${p.mestiere}`).toBeUndefined();
+          const job = matchJob(p.job, programs);
+          if (p.species === 'person') expect(job?.id, `${p.name}, ${p.job}`).toBeDefined();
+          else expect(job, `${p.name}, ${p.job}`).toBeUndefined();
         }
         // A name is in one program only.
-        const names = programs.flatMap((p) => p.nomi);
+        const names = programs.flatMap((p) => p.names);
         expect(new Set(names).size).toBe(names.length);
         // Their texts are of the world (rule 0): names, descriptions, what the items are, what people say at work.
-        const words = lexiconWords(files['world/lessico.md'] ?? '');
+        const words = lexiconWords(files['world/lexicon.md'] ?? '');
         const texts = (o: unknown): string[] => (typeof o === 'string' ? [o] : Array.isArray(o) ? o.flatMap(texts) : o && typeof o === 'object' ? Object.values(o).flatMap(texts) : []);
         for (const p of modules) for (const t of texts(JSON.parse(files[p]))) expect(metaBreak(t, words), `${p}: ${t}`).toBeUndefined();
         expect(k.faults.list()).toEqual([]);
@@ -185,31 +185,31 @@ describe('the trades of the three universes of Claude Cloud (T298)', () => {
         expect(sid, `${key} has a building`).toBeDefined();
         const origin = k.ecs.get(sid!, 'origin').key as string;
         (k as unknown as { breakEntity(id: number): void }).breakEntity(sid!);
-        const v = liveVentures(k).find((x) => x.origine === origin)!;
-        expect(v).toMatchObject({ tipo: 'construction', luogo: key, nato_da: 'regola:ricostruzione' });
-        expect(v.squadra.length).toBeGreaterThan(0);
+        const v = liveVentures(k).find((x) => x.origin === origin)!;
+        expect(v).toMatchObject({ type: 'construction', chunk: key, born_from: 'regola:ricostruzione' });
+        expect(v.team.length).toBeGreaterThan(0);
         // Who is in it has a program (the people the offline Narrator adds in the places around count too).
-        const ora = JSON.parse(k.files['world/people.json']).persone as Persona[];
-        for (const m of v.squadra) expect(matchJob(ora.find((p) => p.nome === m.nome)?.mestiere, k.jobPrograms()), m.nome).toBeDefined();
+        const ora = JSON.parse(k.files['world/people.json']).people as Persona[];
+        for (const m of v.team) expect(matchJob(ora.find((p) => p.name === m.name)?.job, k.jobPrograms()), m.name).toBeDefined();
         expect(stageOf(k, origin)).toBe(0);
 
         // In sight, in the day: the team brings from the deposit and works at the site.
         k.time = at(10, 'day');
         const cur = () => liveVentures(k).find((x) => x.id === v.id)!;
-        const going = () => Object.values(cur().portati).some((n) => n > 0) && cur().lavorato > 0;
+        const going = () => Object.values(cur().brought).some((n) => n > 0) && cur().worked > 0;
         play(k, 150, going);
-        expect(Object.values(cur().portati).reduce((a, b) => a + b, 0)).toBeGreaterThan(0);
+        expect(Object.values(cur().brought).reduce((a, b) => a + b, 0)).toBeGreaterThan(0);
 
         // Out of sight, by accounts: a day at a time it rises, never back, until it is done.
         await lontano(k, key);
         const stages: number[] = [];
-        for (let d = 11; d <= 30 && liveVentures(k).find((x) => x.id === v.id)!.stato !== 'finished'; d++) {
+        for (let d = 11; d <= 30 && liveVentures(k).find((x) => x.id === v.id)!.state !== 'finished'; d++) {
           k.time = at(d, 'evening');
           play(k, 3.5);
           const now = liveVentures(k).find((x) => x.id === v.id)!;
           stages.push(ventureProgress(now).stadio);
         }
-        expect(liveVentures(k).find((x) => x.id === v.id)!.stato).toBe('finished');
+        expect(liveVentures(k).find((x) => x.id === v.id)!.state).toBe('finished');
         for (let i = 1; i < stages.length; i++) expect(stages[i]).toBeGreaterThanOrEqual(stages[i - 1]);
         // At least one stage between the stakes and the whole was seen.
         expect(stages.some((s) => s > 0 && s < 1)).toBe(true);

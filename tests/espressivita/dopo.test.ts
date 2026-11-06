@@ -13,7 +13,7 @@ import { memoryStore } from '../../src/kernel/repo';
 import { LUA_API } from '../../src/kernel/validator';
 import { closeWorld, developAll, DT, newLasting, open, universeWith } from './banco';
 
-const STORE = 'world/magazzino/mech.mercato.json';
+const STORE = 'world/stores/mech.mercato.json';
 
 const LASTING_MARKET = `-- Il mercato che ricorda: il prezzo sta nel magazzino del mondo.
 local M = {}

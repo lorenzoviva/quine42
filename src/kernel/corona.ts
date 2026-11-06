@@ -11,6 +11,7 @@ import type { FileMap, Rule } from './types';
 import { SCREEN_NAME, type ScreenField } from './screens';
 import { AGENTS } from './agents/council';
 import { hashStr } from './rng';
+import { internalFields } from './internalNames';
 
 export type FileLook = 'book' | 'crystal' | 'scroll' | 'tablet';
 export type ItemKind = 'file' | 'sprite' | 'tile' | 'layout' | 'screen' | 'up' | 'down' | 'exit' | 'desk' | 'portal' | 'table' | 'atlas' | 'showcase' | 'prev' | 'next' | 'less' | 'more' | 'graph' | 'situation' | 'wall' | 'console' | 'station' | 'bench' | 'lectern' | 'slab' | 'lathe';
@@ -133,8 +134,8 @@ export function ruleTablets(ox: number, oy: number, allRules: Rule[], offset = 0
       const marked = i >= count - FOCUSED_RULES;
       items.push({
         kind: 'slab',
-        label: `la tavola della regola: «${r.testo}»`,
-        target: r.chiave,
+        label: `la tavola della regola: «${r.text}»`,
+        target: r.key,
         rule: r,
         marked,
         color: marked ? '#ffcf5c' : '#7dd87d',
@@ -160,8 +161,8 @@ export function ruleTablets(ox: number, oy: number, allRules: Rule[], offset = 0
       const marked = globalIndex >= count - FOCUSED_RULES;
       items.push({
         kind: 'slab',
-        label: `la tavola della regola: «${r.testo}»`,
-        target: r.chiave,
+        label: `la tavola della regola: «${r.text}»`,
+        target: r.key,
         rule: r,
         marked,
         color: marked ? '#ffcf5c' : '#7dd87d',
@@ -557,7 +558,7 @@ export class Corona {
             // The Library of the World (T47b): tablets of the rules (world/rules.json) along the back wall
             let allRules: Rule[] = [];
             try {
-              allRules = (JSON.parse(this.files['world/rules.json'] ?? '{}').regole ?? []) as Rule[];
+              allRules = (internalFields('rules', JSON.parse(this.files['world/rules.json'] ?? '{}')).rules ?? []) as Rule[];
             } catch { }
             this.rulesOffset = Math.max(0, allRules.length - TABLETS_MAX);
             placed.push(...ruleTablets(ox, oy, allRules, this.rulesOffset));
@@ -885,7 +886,7 @@ export class Corona {
     const f = b.storeys[0];
     let allRules: Rule[] = [];
     try {
-      allRules = (JSON.parse(this.files['world/rules.json'] ?? '{}').regole ?? []) as Rule[];
+      allRules = (internalFields('rules', JSON.parse(this.files['world/rules.json'] ?? '{}')).rules ?? []) as Rule[];
     } catch { }
     // Remove existing rule tablets and rule arrows
     f.items = f.items.filter((it) => it.kind !== 'slab' && !(it.target === 'regole' && (it.kind === 'prev' || it.kind === 'next')));

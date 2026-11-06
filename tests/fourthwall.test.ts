@@ -20,12 +20,12 @@ const ANALYSIS = [
 
 const plot = (titolo: string, cosa: string): Plot => ({
   id: `trama-${titolo}`,
-  titolo,
-  mistero: 'un segreto di famiglia',
-  coinvolti: ['Fiocco'],
-  tappe: [{ giorno: 0, momento: 'morning', chi: 'Fiocco', dove: 'square', cosa }],
-  inizio: 0,
-  stato: 'active',
+  title: titolo,
+  mystery: 'un segreto di famiglia',
+  involved: ['Fiocco'],
+  beats: [{ day: 0, moment: 'morning', who: 'Fiocco', where: 'square', what: cosa }],
+  start: 0,
+  state: 'active',
 });
 
 describe('the fourth wall', () => {
@@ -70,28 +70,28 @@ describe('the fourth wall', () => {
   });
 
   it('a bible is cleaned of what breaks the wall, line by line', () => {
-    const b: Bible = { titolo: 'Valmora', tono: 'quieto', sintesi: 'un regno', luoghi: ['Piazza'], personaggi: ['Bastiano — fornaio'], fatti: [ANALYSIS[2], 'Il mercato è il martedì.'], misteri: [ANALYSIS[0], ANALYSIS[1], 'Il lago canta.'], crepe: ['il mondo si riavvia'] };
+    const b: Bible = { title: 'Valmora', tone: 'quieto', summary: 'un regno', places: ['Piazza'], characters: ['Bastiano — fornaio'], facts: [ANALYSIS[2], 'Il mercato è il martedì.'], mysteries: [ANALYSIS[0], ANALYSIS[1], 'Il lago canta.'], cracks: ['il mondo si riavvia'] };
     expect(bibleBreaks(b)).toHaveLength(3);
     const clean = cleanBible(b);
-    expect(clean.fatti).toEqual(['Il mercato è il martedì.']);
-    expect(clean.misteri).toEqual(['Il lago canta.']);
-    expect(clean.crepe).toBeUndefined();
+    expect(clean.facts).toEqual(['Il mercato è il martedì.']);
+    expect(clean.mysteries).toEqual(['Il lago canta.']);
+    expect(clean.cracks).toBeUndefined();
     expect(bibleBreaks(clean)).toEqual([]);
   });
 
   it('the review cleans the bible and drops the plots that break it, also in universes reviewed before', async () => {
     const k = await boot();
     const bible = readBible(k.repo.working)!;
-    k.repo.write('world/bible.json', JSON.stringify({ ...bible, fatti: [...bible.fatti, ANALYSIS[2]], misteri: [...(bible.misteri ?? []), ANALYSIS[0], ANALYSIS[1]] }, null, 2) + '\n');
+    k.repo.write('world/bible.json', JSON.stringify({ ...bible, fatti: [...bible.facts, ANALYSIS[2]], misteri: [...(bible.mysteries ?? []), ANALYSIS[0], ANALYSIS[1]] }, null, 2) + '\n');
     k.repo.write(PLOTS_FILE, writePlots([plot('Il Ciclo delle Lettere Dimenticate', ANALYSIS[3]), plot('Il pane rubato', 'Cerca chi ha rubato il pane del forno.')]));
     // Reviewed under the old principles: reviewed again.
     k.repo.write('world/rules.json', JSON.stringify({ regole: [{ chiave: 'revisione|quarta-parete', testo: 'revisione della quarta parete', possibile: true }] }) + '\n');
     k.applyFiles({ ...k.repo.working });
     const gone = await k.reviewFourthWall();
     expect(gone).toEqual(['trama «Il Ciclo delle Lettere Dimenticate»']);
-    expect(readPlots(k.files).map((p) => p.titolo)).toEqual(['Il pane rubato']);
+    expect(readPlots(k.files).map((p) => p.title)).toEqual(['Il pane rubato']);
     expect(bibleBreaks(readBible(k.files)!)).toEqual([]);
-    expect(readBible(k.files)!.misteri).toEqual(bible.misteri);
+    expect(readBible(k.files)!.mysteries).toEqual(bible.mysteries);
     expect(await k.reviewFourthWall()).toEqual([]);
   });
 });

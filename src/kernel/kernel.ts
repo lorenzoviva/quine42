@@ -64,7 +64,7 @@ import { bondWith, memoriesFor, playerFile, PLAYERS_DIR, readWandererState, repa
 import type { ActionDef, AiSettings, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, GameSetup, ChunkInfo, Recipe, RuneFragment, TerrainDef, UniverseConfig } from './types';
 import { checkKernelVersion, KERNEL_VERSION, stampKernel } from './version';
 import { migratePlanRecord, migrateUniverse } from './migrations';
-import { internalJobProgram, internalName, internalSculptors, italianName } from './internalNames';
+import { internalFields, internalJobProgram, internalName, internalSculptors, italianName, italianValues as italianFieldsOf } from './internalNames';
 import { ModuleStores } from './store';
 import { dailyProduce, matchJob, validateJobProgram, WORK_MODULE, WORKERS_PER_PLACE, type JobProgram, type JobTask } from './jobs';
 import { addWork, bring, fillTeam, HARVEST_DAY, HARVEST_DAYS, HARVEST_ROLES, HOUSE_ROLES, housePhases, missingWords, nextStep, openVentures, pruneVentures, readVentures, SITE_REACH, stillNeeded, ventureId, ventureProgress, ventureState, VENTURES_FILE, writeVentures, YEAR_DAYS, type Venture, type VentureCandidate, type VentureStep } from './ventures';
@@ -412,11 +412,13 @@ export function placeRefusal(why: SpotFailure, name: string, what: string): stri
 
 /** The effects the kernel applies itself (T260): the relief, and the social ones of a judgement. */
 /**
- * The fields of world/stato.json and of a wanderer's file that this kernel reads and writes, those of before it migrates included (T245a):
+ * The fields of world/state.json and of a wanderer's file that this kernel reads and writes, those of before it migrates included (T245a):
  * any other field is a kernel of tomorrow's, and the save keeps it as it was. Credits are not data of the universe (ADR-0104): never kept.
  */
-const STATE_FIELDS: ReadonlySet<string> = new Set(['consumati', 'contenitori', 'forme', 'rari', 'ora', 'importanti', 'viandante', 'posati']);
-const WANDERER_FIELDS: ReadonlySet<string> = new Set(['nome', 'profilo', 'pos', 'inventory', 'needs', 'hand', 'stati', 'slots', 'trasceso', 'anonimo', 'crediti']);
+// Also known, so never kept as a field of tomorrow: the names they had until the contract 0.3 (T308a), and the balance of before the
+// ledger (`crediti`, ADR-0104).
+const STATE_FIELDS: ReadonlySet<string> = new Set(['consumed', 'containers', 'forms', 'rares', 'time', 'important', 'wanderer', 'placed', ...italianFieldsOf('campi-stato')]);
+const WANDERER_FIELDS: ReadonlySet<string> = new Set(['name', 'profile', 'pos', 'inventory', 'needs', 'hand', 'states', 'slots', 'transcended', 'anonymous', 'credits', ...italianFieldsOf('campi-viandante')]);
 
 /** The fields of a saved JSON object that are not in `known`. */
 function unknownFields(src: string | undefined, known: ReadonlySet<string>): Record<string, unknown> {
@@ -454,14 +456,14 @@ export class Kernel {
   readonly input = new Input();
   readonly content = new Content();
   readonly ai: AiModels;
-  /** What the models cost, per day, model and task (world/consumi.json). */
+  /** What the models cost, per day, model and task (world/usage.json). */
   readonly usage = new UsageLog();
   private usageWritten = -1;
-  /** What the Council could not do (T238): world/mancanze.json, written before every commit; it survives rollbacks. */
+  /** What the Council could not do (T238): world/shortfalls.json, written before every commit; it survives rollbacks. */
   readonly shortfalls = new ShortfallLog();
   /** A kernel on the master's branch keeps nothing of its own: what it could not do goes to the world's. */
   private onShortfall?: (n: ShortfallNote) => void;
-  /** The cards' uses and the places' cards (T36): world/carte.json, written before every commit. */
+  /** The cards' uses and the places' cards (T36): world/cards.json, written before every commit. */
   readonly cards = new CardUses();
   private cardsWritten = -1;
   private cardIdsOf?: { files: FileMap; ids: Set<string> };
@@ -687,7 +689,7 @@ export class Kernel {
     const k = new Kernel(opts);
     k.sandbox = await Sandbox.create(k.makeHost(), opts.wasmUri);
     k.validator = new Validator(k.sandbox);
-    k.validator.modelTime = (id) => k.forms.info(id)?.tempo;
+    k.validator.modelTime = (id) => k.forms.info(id)?.time;
     k.council = new Council(opts.ai, () => ({ files: k.files, palette: k.palette, catalog: k.catalog(), graph: () => k.graph() }));
     k.council.onFeed = (e) => {
       k.archive.onFeed(e, (x) => k.pathForFeed(x));
@@ -990,8 +992,8 @@ export class Kernel {
 
   /** The wanderer acting now: the one whose entity is `wandererEntity`. */
   wanderer(): Wanderer {
-    for (const w of this.wanderersById.values()) if (w.entity === this.wandererEntity) return { id: w.id, nome: w.nome };
-    return { id: SOLO, nome: WANDERER_NAME };
+    for (const w of this.wanderersById.values()) if (w.entity === this.wandererEntity) return { id: w.id, name: w.name };
+    return { id: SOLO, name: WANDERER_NAME };
   }
 
   /** The keys a wanderer's client holds (T263): world directions, set by the server from what the client says. */
@@ -1024,7 +1026,7 @@ export class Kernel {
   }
 
   wanderers(): Wanderer[] {
-    return [...this.wanderersById.values()].map((w) => ({ id: w.id, nome: w.nome, ...(w.anonimo ? { anonimo: true } : {}) }));
+    return [...this.wanderersById.values()].map((w) => ({ id: w.id, name: w.name, ...(w.anonymous ? { anonymous: true } : {}) }));
   }
 
   /**
@@ -1037,7 +1039,7 @@ export class Kernel {
     const out: PlayerSpot[] = [];
     for (const w of this.wanderers()) {
       const at = w.id !== me && this.inWorld(w.id) ? this.wandererAt(w.id) : undefined;
-      if (at) out.push({ id: w.id, nome: w.nome, x: at.x, y: at.y });
+      if (at) out.push({ id: w.id, nome: w.name, x: at.x, y: at.y });
     }
     return out;
   }
@@ -1082,7 +1084,7 @@ export class Kernel {
     if (!this.ecs.alive.has(w.entity)) {
       // Never someone else in their place: they come back with what was saved of them.
       this.wanderersById.delete(id);
-      this.addWanderer(id, w.nome);
+      this.addWanderer(id, w.name);
       return this.asWanderer(id, fn);
     }
     const was = this.wandererEntity;
@@ -1119,15 +1121,15 @@ export class Kernel {
     const p = this.wandererPos() ?? { x: 0, y: 0 };
     const entity = this.spawnWanderer(p.x + 1, p.y);
     const saved = readWandererState(this.files, id);
-    const isAnon = anonimo !== undefined ? !!anonimo : !!saved?.anonimo;
+    const isAnon = anonimo !== undefined ? !!anonimo : !!saved?.anonymous;
     // Their carpet starts where the carpet of the one acting is: they appear beside them.
-    this.wanderersById.set(id, { id, nome: String(nome ?? saved?.nome ?? '').trim().slice(0, 40) || WANDERER_NAME, entity, tappeto: { ...this.offset() }, anonimo: isAnon });
-    if (saved?.anonimo && anonimo === false) {
-      delete saved.anonimo;
+    this.wanderersById.set(id, { id, name: String(nome ?? saved?.name ?? '').trim().slice(0, 40) || WANDERER_NAME, entity, tappeto: { ...this.offset() }, anonymous: isAnon });
+    if (saved?.anonymous && anonimo === false) {
+      delete saved.anonymous;
       this.setAnonymous(id, false);
     }
     // The profile they had (T44a), checked again: the world may have someone of that name by now.
-    if (saved?.profilo) this.setProfile(id, nome ? { ...saved.profilo, nome } : saved.profilo);
+    if (saved?.profile) this.setProfile(id, nome ? { ...saved.profile, nome } : saved.profile);
     else this.dressWanderer(id);
     if (saved) this.as(id, () => this.applyWandererState(saved));
     return entity;
@@ -1142,16 +1144,16 @@ export class Kernel {
     const form: FormComp | undefined = w && this.ecs.get(w.entity, 'form');
     if (!w || !form) return;
     const pr = w.profilo;
-    const seed = pr?.seme ?? (id !== SOLO ? this.forms.seedFor(form.model, `viandante:${id}`) : form.seed);
-    const tint = pr?.tinta ?? wandererColor(id) ?? form.tint;
+    const seed = pr?.seed ?? (id !== SOLO ? this.forms.seedFor(form.model, `viandante:${id}`) : form.seed);
+    const tint = pr?.tint ?? wandererColor(id) ?? form.tint;
     Object.assign(form, { seed, tint });
     if (!tint) delete form.tint;
   }
 
   /** The names a wanderer's must not be like (T44a): the people of the world, and every other wanderer, here or saved. */
   private namesTaken(id: string): string[] {
-    const out = readPeople(this.files).persone.map((p) => p.nome);
-    for (const w of [...wanderersIn(this.files), ...this.wanderersById.values()]) if (w.id !== id) out.push(w.nome);
+    const out = readPeople(this.files).people.map((p) => p.name);
+    for (const w of [...wanderersIn(this.files), ...this.wanderersById.values()]) if (w.id !== id) out.push(w.name);
     return out;
   }
 
@@ -1171,7 +1173,7 @@ export class Kernel {
     const model: string = this.ecs.get(w.entity, 'form')?.model ?? 'viandante';
     const r = repairProfile(raw, id, this.namesTaken(id), this.forms.seedsOf(model));
     w.profilo = r.profilo;
-    w.nome = r.profilo.nome;
+    w.name = r.profilo.name;
     this.dressWanderer(id);
     return r;
   }
@@ -1187,8 +1189,8 @@ export class Kernel {
     const r = repairProfile(raw, id, this.namesTaken(id), this.forms.seedsOf('viandante'));
     const file = playerFile(id);
     const saved: WandererState = readWandererState(this.files, id) ?? {};
-    saved.profilo = r.profilo;
-    saved.nome = r.profilo.nome;
+    saved.profile = r.profilo;
+    saved.name = r.profilo.name;
     const text = JSON.stringify(saved, null, 1) + '\n';
     this.files[file] = text;
     this.repo.write(file, text);
@@ -1387,7 +1389,7 @@ export class Kernel {
    * new environments, tiles or regions must not regenerate what was already explored.
    */
   private worldSignature(): string {
-    return hex(hashStr(readBible(this.files)?.titolo ?? ''));
+    return hex(hashStr(readBible(this.files)?.title ?? ''));
   }
 
   /**
@@ -1499,7 +1501,7 @@ export class Kernel {
    */
   private formFor(man: Manifest | undefined, who: string): FormComp {
     const app = man?.appearance;
-    const classe = app?.classe ?? (man?.kind === 'player' ? 'person' : man ? guessClass(`${man.name} ${man.description ?? ''} ${app?.aspetto ?? ''}`, man.persona ? 'figure' : undefined).id : 'object');
+    const classe = app?.class ?? (man?.kind === 'player' ? 'person' : man ? guessClass(`${man.name} ${man.description ?? ''} ${app?.look ?? ''}`, man.persona ? 'figure' : undefined).id : 'object');
     const model = this.forms.resolve(app?.model, classe);
     return { model, seed: this.forms.seedFor(model, who), yaw: man?.persona || man?.kind === 'player' ? 0 : (hashStr(who) % 628) / 100, ...(app?.model && app.model !== model ? { wanted: app.model, classe } : {}) };
   }
@@ -1567,7 +1569,7 @@ export class Kernel {
     const taken = new Set(this.forms.compiled(model)?.actions.map((a) => a.name) ?? []);
     let name = slug(label);
     for (let i = 2; taken.has(name); i++) name = `${slug(label)}-${i}`;
-    const nome = this.forms.info(model)?.nome ?? this.nameOf(id);
+    const nome = this.forms.info(model)?.name ?? this.nameOf(id);
     this.council.say('narrator', 'propone', `«${text}» cambia ${nome}: ${change}`, 'sculptor', 'model.action');
     let r;
     try {
@@ -1576,7 +1578,7 @@ export class Kernel {
       this.council.say('sculptor', 'errore', `azione «${label}»: ${(e as Error).message}`, undefined, 'model.action');
       return undefined;
     }
-    if (!r || !this.addModel(model, r.xml, this.forms.info(model) ?? { classe: cls.id }, `azione imparata: ${label} (${model})`)) return undefined;
+    if (!r || !this.addModel(model, r.xml, this.forms.info(model) ?? { class: cls.id }, `azione imparata: ${label} (${model})`)) return undefined;
     // The program changed (a new form is on its way): this instance remembers what was done to it.
     const fc: FormComp | undefined = this.ecs.get(id, 'form');
     if (fc) {
@@ -1638,7 +1640,7 @@ export class Kernel {
 
     if (!this.wandererEntity || !this.ecs.alive.has(this.wandererEntity)) {
       this.wandererEntity = this.spawnWanderer(0, 0);
-      this.wanderersById.set(SOLO, { id: SOLO, nome: this.wanderersById.get(SOLO)?.nome ?? WANDERER_NAME, entity: this.wandererEntity });
+      this.wanderersById.set(SOLO, { id: SOLO, name: this.wanderersById.get(SOLO)?.name ?? WANDERER_NAME, entity: this.wandererEntity });
     } else {
       this.ecs.set(this.wandererEntity, 'glyph', glyph);
       this.ecs.set(this.wandererEntity, 'form', this.formFor(wandererModule?.manifest, 'viandante'));
@@ -1860,8 +1862,8 @@ export class Kernel {
     const all = Object.entries(this.content.layouts).map(([id, l]) => ({ id, name: l.name, description: l.description, environment: l.environment }));
     const atlas = readAtlas(this.files);
     const region = ch.cx === 0 && ch.cy === 0 ? undefined : regionAt(atlas, ch.cx, ch.cy);
-    if (region && this.content.layouts[region.ambiente]) return { layouts: all.filter((l) => l.id === region.ambiente), region };
-    const regional = new Set(atlas.regioni.map((r) => r.ambiente));
+    if (region && this.content.layouts[region.environment]) return { layouts: all.filter((l) => l.id === region.environment), region };
+    const regional = new Set(atlas.regions.map((r) => r.environment));
     const free = all.filter((l) => !regional.has(l.id));
     return { layouts: free.length ? free : all };
   }
@@ -1880,7 +1882,7 @@ export class Kernel {
         const raw = await planChunk(this.council, {
           cx: ch.cx, cy: ch.cy, terrain: this.terrainSummary(ch.draft), neighbors, layouts, catalog: this.catalog(),
           fragments: this.fragments.map((f) => f.line), wanted: [...this.wanted].map((id) => this.itemInfo(id).name).slice(0, 8), start, attempt, feedback,
-          region: region ? { nome: region.nome, descrizione: region.descrizione } : undefined,
+          region: region ? { nome: region.name, descrizione: region.description } : undefined,
           rari: this.rareAllowed(ch),
           chi: ch.chi,
         });
@@ -1899,9 +1901,9 @@ export class Kernel {
         if (e instanceof BudgetError) break;
       }
     }
-    if (feedback) this.noteShortfall({ richiesta: 'il piano di un luogo', chi: ch.chi, agente: 'cartographer', compito: 'chunk.plan', esito: 'invalid', motivo: feedback });
+    if (feedback) this.noteShortfall({ request: 'il piano di un luogo', who: ch.chi, agent: 'cartographer', task: 'chunk.plan', outcome: 'invalid', reason: feedback });
     const plan = this.fallbackPlan(ch, layouts.map((l) => l.id), start);
-    if (region) plan.place = { name: region.nome, description: region.descrizione };
+    if (region) plan.place = { name: region.name, description: region.description };
     return plan;
   }
 
@@ -1912,8 +1914,8 @@ export class Kernel {
     const atlas = defaultAtlas(this.content.layouts, explored, this.config.seed);
     this.repo.write(ATLAS_FILE, writeAtlas(atlas));
     this.applyFiles({ ...this.repo.working });
-    this.repo.commit(`atlante: ${atlas.regioni.length} regioni`, 'agent');
-    this.council.say('cartographer', 'propone', `atlante del mondo: ${atlas.regioni.map((r) => `${r.nome} (${r.centro.join(',')})`).join(', ')}`, undefined, 'atlas');
+    this.repo.commit(`atlante: ${atlas.regions.length} regioni`, 'agent');
+    this.council.say('cartographer', 'propone', `atlante del mondo: ${atlas.regions.map((r) => `${r.name} (${r.center.join(',')})`).join(', ')}`, undefined, 'atlas');
   }
 
   private explored(): Set<string> {
@@ -1930,16 +1932,16 @@ export class Kernel {
       this.council.say('cartographer', 'errore', `atlante: ${(e as Error).message}`, undefined, 'genesis.atlas');
       drafts = [];
     }
-    const atlas = { regioni: [] as Region[] };
+    const atlas = { regions: [] as Region[] };
     for (const d of drafts) {
       const raggio = Math.max(1, Math.min(3, Math.round(d.raggio) || 1));
       const centro = placeRegion(atlas, [0, 0], d.direzione, Math.max(2, Math.min(14, Math.round(d.distanza) || 4)), raggio, new Set());
-      atlas.regioni.push({ id: `${d.ambiente}-${atlas.regioni.length}`, nome: String(d.nome).slice(0, 40), descrizione: String(d.descrizione).slice(0, 200), ambiente: d.ambiente, centro, raggio });
+      atlas.regions.push({ id: `${d.ambiente}-${atlas.regions.length}`, name: String(d.nome).slice(0, 40), description: String(d.descrizione).slice(0, 200), environment: d.ambiente, center: centro, radius: raggio });
     }
-    const final = atlas.regioni.length >= 3 ? atlas : defaultAtlas(this.content.layouts, new Set(), this.config.seed);
+    const final = atlas.regions.length >= 3 ? atlas : defaultAtlas(this.content.layouts, new Set(), this.config.seed);
     this.repo.write(ATLAS_FILE, writeAtlas(final));
     this.applyFiles({ ...this.repo.working });
-    this.council.say('cartographer', 'propone', `geografia: ${final.regioni.map((r) => `${r.nome} (${direction(r.centro[0], r.centro[1])})`).join(', ')}`, undefined, 'genesis.atlas');
+    this.council.say('cartographer', 'propone', `geografia: ${final.regions.map((r) => `${r.name} (${direction(r.center[0], r.center[1])})`).join(', ')}`, undefined, 'genesis.atlas');
   }
 
   /**
@@ -1958,7 +1960,7 @@ export class Kernel {
       try {
         d = await designEnvironment(this.council, request, { palette: this.palette, layouts, here: this.chunkHere()?.name ?? 'qui', stamps: STAMP_SHAPES, feedback });
       } catch (e) {
-        this.noteShortfall({ richiesta: request, chi, agente: 'cartographer', compito: 'cartographer.environment', esito: 'error', motivo: (e as Error).message });
+        this.noteShortfall({ request: request, who: chi, agent: 'cartographer', task: 'cartographer.environment', outcome: 'error', reason: (e as Error).message });
         return { ok: false, summary: `Il Cartografo non riesce: ${(e as Error).message}` };
       }
       // New terrains: one free character each, a known layer.
@@ -2000,18 +2002,18 @@ export class Kernel {
       }
       const atlas = readAtlas(this.repo.working);
       const centro = placeRegion(atlas, here, d.region.direzione, d.region.distanza, d.region.raggio, this.explored());
-      const region: Region = { id: `${layoutId}-${atlas.regioni.length}`, nome: d.region.nome, descrizione: d.region.descrizione || d.description, ambiente: layoutId, centro, raggio: d.region.raggio };
-      atlas.regioni.push(region);
+      const region: Region = { id: `${layoutId}-${atlas.regions.length}`, name: d.region.nome, description: d.region.descrizione || d.description, environment: layoutId, center: centro, radius: d.region.raggio };
+      atlas.regions.push(region);
       this.repo.write(ATLAS_FILE, writeAtlas(atlas));
       this.applyFiles({ ...this.repo.working });
       const dist = Math.max(Math.abs(centro[0] - here[0]), Math.abs(centro[1] - here[1]));
       const where = `${direction(centro[0] - here[0], centro[1] - here[1])}, a ${dist} luoghi da qui`;
-      const c = this.commitContent(`cartografo: ${region.nome} (${where})`, 'cartographer.environment', 'cartographer');
-      const summary = `«${region.nome}» — ${region.descrizione.replace(/\.$/, '')}. Si trova a ${where}.${Object.keys(added).length ? ` Terreni nuovi: ${Object.values(added).map((t) => t.name).join(', ')}.` : ''}`;
+      const c = this.commitContent(`cartografo: ${region.name} (${where})`, 'cartographer.environment', 'cartographer');
+      const summary = `«${region.name}» — ${region.description.replace(/\.$/, '')}. Si trova a ${where}.${Object.keys(added).length ? ` Terreni nuovi: ${Object.values(added).map((t) => t.name).join(', ')}.` : ''}`;
       this.council.say('cartographer', 'approva', `${summary} (commit ${c.id})`, undefined, 'cartographer.environment');
       return { ok: true, summary };
     }
-    this.noteShortfall({ richiesta: request, chi, agente: 'cartographer', compito: 'cartographer.environment', esito: 'invalid', motivo: feedback });
+    this.noteShortfall({ request: request, who: chi, agent: 'cartographer', task: 'cartographer.environment', outcome: 'invalid', reason: feedback });
     return { ok: false, summary: `Il Cartografo non è riuscito a scrivere un ambiente valido: ${feedback}` };
   }
 
@@ -2034,7 +2036,7 @@ export class Kernel {
     const pc = this.corona.isInterior(this.wandererPos().x) ? this.lastWorld : this.wandererCarpet();
     // The players connected (T42c), each on their chunk.
     const players = this.players().map((p) => ({ ...p, cx: Math.floor(p.x / S), cy: Math.floor(p.y / S) }));
-    return { planned: [...planned.values()], drafts, regions: readAtlas(this.files).regioni, here: { cx: Math.floor(pc.x / S), cy: Math.floor(pc.y / S) }, players };
+    return { planned: [...planned.values()], drafts, regions: readAtlas(this.files).regions, here: { cx: Math.floor(pc.x / S), cy: Math.floor(pc.y / S) }, players };
   }
 
   /** Where things are, seen from a carpet point: places nearby and regions of the atlas. */
@@ -2167,7 +2169,7 @@ export class Kernel {
     const { result, tiles } = this.layoutOf(ch, plan, pathCode);
     ch.plan = plan;
     ch.place = plan.place;
-    this.graphChunks.set(ch.key, { cx: ch.cx, cy: ch.cy, nome: plan.place.name, descrizione: plan.place.description, ambiente: plan.layout, cose: plan.objects.map((o) => o.module), a_terra: plan.ground, strutture: plan.strutture?.map((x) => x.concetto) });
+    this.graphChunks.set(ch.key, { cx: ch.cx, cy: ch.cy, nome: plan.place.name, descrizione: plan.place.description, ambiente: plan.layout, cose: plan.objects.map((o) => o.module), a_terra: plan.ground, strutture: plan.structures?.map((x) => x.concept) });
     this.graphChunksVersion++;
     ch.tiles = tiles;
     ch.lots = result.lots;
@@ -2238,18 +2240,18 @@ export class Kernel {
 
   /** How often every agent asks the model (T45b): universe.json → ai.coefficienti, repaired. */
   coefficients(): Coefficients {
-    return repairCoefficients(this.config.ai.coefficienti);
+    return repairCoefficients(this.config.ai.coefficients);
   }
 
   /** The Actor's option (T157, ADR-0116): universe.json → ai.attore, repaired; off unless the master turned it on. */
   actor(): ActorConfig {
-    return repairActor(this.config.ai.attore);
+    return repairActor(this.config.ai.actor);
   }
 
   /** Who plays the people now: the Actor with its model when the option is on, else the Narrator as always. */
   interpreter(): Interpreter {
     const a = this.actor();
-    return a.acceso ? { agent: 'actor', model: a.modello } : NARRATOR_PLAYS;
+    return a.on ? { agent: 'actor', model: a.model } : NARRATOR_PLAYS;
   }
 
   private sheeting = new Map<string, Promise<string | undefined>>();
@@ -2260,11 +2262,11 @@ export class Kernel {
    * world/people.json. Paid by whoever pays the line (`chi`). Nothing is written when the Actor is off.
    */
   async ensureSheet(name: string, chi?: string): Promise<string | undefined> {
-    if (!this.actor().acceso) return undefined;
+    if (!this.actor().on) return undefined;
     const p = this.individualOf(name);
     if (!p) return undefined;
     const stamp = sheetFingerprint(p);
-    if (p.scheda?.testo && p.scheda.impronta === stamp) return p.scheda.testo;
+    if (p.sheet?.text && p.sheet.fingerprint === stamp) return p.sheet.text;
     const pending = this.sheeting.get(name);
     if (pending) return pending;
     const job = (async () => {
@@ -2272,16 +2274,16 @@ export class Kernel {
         const text = await npcSheet(
           this.council,
           {
-            nome: p.nome,
+            nome: p.name,
             persona: p.persona ?? '',
-            mestiere: p.mestiere,
-            genere: p.genere,
-            eta: p.eta,
-            aspetto: p.aspetto,
-            storia: p.storia,
-            legami: (p.famiglia ?? []).map((f) => `${f.legame} ${f.nome}`),
-            routine: (p.routine ?? []).map((r) => `${italianName('momenti', r.quando)}: ${r.fa} (${italianName('dove', r.dove)})`).join('; '),
-            porta: p.porta ?? [],
+            mestiere: p.job,
+            genere: p.gender,
+            eta: p.age,
+            aspetto: p.look,
+            storia: p.story,
+            legami: (p.family ?? []).map((f) => `${f.bond} ${f.name}`),
+            routine: (p.routine ?? []).map((r) => `${italianName('momenti', r.when)}: ${r.does} (${italianName('dove', r.where)})`).join('; '),
+            porta: p.carries ?? [],
           },
           this.focusOn([name]),
           chi,
@@ -2290,7 +2292,7 @@ export class Kernel {
           this.council.say('kernel', 'scarta', `la scheda di ${name} ${text ? 'rompe la quarta parete' : 'è vuota'}: l'Attore recita dalla persona`, 'narrator', 'npc.sheet');
           return undefined;
         }
-        this.updateIndividual(name, (x) => (x.scheda = { testo: text, impronta: stamp }));
+        this.updateIndividual(name, (x) => (x.sheet = { text: text, fingerprint: stamp }));
         this.commitContent(`scheda: ${name}`, 'npc.sheet', 'narrator', chi);
         this.council.say('narrator', 'info', `la scheda di ${name} è scritta, per l'Attore`, 'actor', 'npc.sheet');
         return text;
@@ -2327,21 +2329,21 @@ export class Kernel {
    * next size allowed. The plan is changed, so it is saved as it is applied.
    */
   private claimSizes(ch: Chunk, plan: ChunkPlan): void {
-    if (!plan.strutture?.length) return;
-    plan.strutture = plan.strutture.map(readStructure);
+    if (!plan.structures?.length) return;
+    plan.structures = plan.structures.map(readStructure);
     const sides = ch.lots.map((b, i) => ({ i, area: (b.x1 - b.x0 + 1) * (b.y1 - b.y0 + 1), side: Math.max(b.x1 - b.x0 + 1, b.y1 - b.y0 + 1) })).sort((a, b) => b.area - a.area || a.i - b.i).map((b) => b.side);
     let rare = false;
-    plan.strutture.forEach((s, n) => {
-      if (!s.taglia) return;
+    plan.structures.forEach((s, n) => {
+      if (!s.size) return;
       const side = sides[n];
       const cls = classOf(side !== undefined && side >= 5 ? 'structure' : 'building')!;
       const fits = (t: SizeTier) => side !== undefined && Math.max(...tilesOf(cls, t).slice(0, 2)) <= side;
       const allowed = this.rareAllowed(ch);
       const ok = (t: SizeTier) => fits(t) && (!RARE_SIZES.includes(t) || (!rare && allowed.includes(t)));
-      let t: SizeTier | undefined = s.taglia;
+      let t: SizeTier | undefined = s.size;
       while (t && !ok(t)) t = sizeRank(t) > 0 ? SIZE_TIERS[sizeRank(t) - 1].id : undefined;
-      if (!t) delete s.taglia;
-      else s.taglia = t;
+      if (!t) delete s.size;
+      else s.size = t;
       if (t && RARE_SIZES.includes(t)) {
         this.rari.get(t)!.set(rareAreaOf(t, ch.cx, ch.cy), ch.key);
         rare = true;
@@ -2358,7 +2360,7 @@ export class Kernel {
   private lotsOf(ch: Pick<Chunk, 'cx' | 'cy' | 'key' | 'draft' | 'tiles' | 'lots'>, plan: ChunkPlan, pathCode: string): { tiles: string; lots: ChunkLot[] } {
     const S = this.config.chunkSize;
     const tiles = [...ch.tiles];
-    const wanted = (plan.strutture ?? []).map(readStructure);
+    const wanted = (plan.structures ?? []).map(readStructure);
     const lots: ChunkLot[] = [];
     const order = ch.lots.map((b, i) => ({ b, i, area: (b.x1 - b.x0 + 1) * (b.y1 - b.y0 + 1) })).sort((a, b) => b.area - a.area || a.i - b.i);
     for (const { b, i } of order) {
@@ -2367,7 +2369,7 @@ export class Kernel {
       const req = wanted.shift();
       // A world whose common houses are not the seed's cottages has its own (ADR-0134), one per class of lot, however many lots.
       const house = req ? undefined : this.terrain?.manifest.commonHouse;
-      const own = req ? `struttura-${ownModelId(req.concetto).slice(0, 30)}` : house ? commonHouseModel(house, classe) : undefined;
+      const own = req ? `struttura-${ownModelId(req.concept).slice(0, 30)}` : house ? commonHouseModel(house, classe) : undefined;
       for (const c of [...b.walls, ...b.floor, ...b.doors]) {
         const d = this.palette[ch.draft[c]];
         tiles[c] = d && !d.solid && (d.layer ?? 'ground') === 'ground' ? ch.draft[c] : pathCode;
@@ -2392,7 +2394,7 @@ export class Kernel {
         x: ch.cx * S + (b.x0 + b.x1 + 1) / 2,
         y: ch.cy * S + (b.y0 + b.y1 + 1) / 2,
         form,
-        struttura: { concetto: req?.concetto ?? house ?? (classe === 'structure' ? 'una casa' : 'una casetta'), classe, ...(req?.taglia ? { taglia: req.taglia } : {}), ...(own ? { model: own } : {}) },
+        struttura: { concetto: req?.concept ?? house ?? (classe === 'structure' ? 'una casa' : 'una casetta'), classe, ...(req?.size ? { taglia: req.size } : {}), ...(own ? { model: own } : {}) },
       });
     }
     return { tiles: tiles.join(''), lots };
@@ -2403,7 +2405,7 @@ export class Kernel {
     const { tiles, lots } = this.lotsOf(ch, plan, pathCode);
     const out: Id[] = [];
     // A lot being built again shows its building at the stage of its venture (T245e): the plan says it, for every kernel that draws it.
-    const stadi = plan.stadi ?? {};
+    const stadi = plan.stages ?? {};
     for (const l of lots) {
       const st = stadi[l.origin];
       if (st !== undefined && Number.isFinite(st) && st < 1) l.struttura = { ...l.struttura, stadio: Math.max(0, st) };
@@ -2419,7 +2421,7 @@ export class Kernel {
     }
     ch.tiles = tiles;
     // The houses the ventures build on free ground stand like the others, at their stage (T245d, T245e).
-    for (const h of plan.case ?? []) this.spawnPlannedHouse(ch, h);
+    for (const h of plan.houses ?? []) this.spawnPlannedHouse(ch, h);
     return out;
   }
 
@@ -2570,7 +2572,7 @@ export class Kernel {
 
   /** The sea's level (T51a): `universe.json → rilievo.mare`, or the one the relief gives. */
   get seaLevel(): number {
-    const m = this.config.rilievo?.mare;
+    const m = this.config.relief?.sea;
     return typeof m === 'number' && Number.isFinite(m) ? Math.round(m) : this.relief.sea;
   }
 
@@ -2603,10 +2605,10 @@ export class Kernel {
 
   /** The ground dug or raised and the water that has flowed of a place (T51b): its plan's, or what the server said. */
   private digsOf(ch: Chunk): Record<string, number> | undefined {
-    return ch.plan?.scavi ?? ch.scavi;
+    return ch.plan?.digs ?? ch.scavi;
   }
   private waterOf(ch: Chunk): Record<string, WaterRecord> | undefined {
-    return ch.plan?.acqua ?? ch.acqua;
+    return ch.plan?.water ?? ch.acqua;
   }
   private tileOf(col: number, row: number): { ch: Chunk; tile: number } | undefined {
     const ch = this.chunkAt(col, row);
@@ -2647,12 +2649,12 @@ export class Kernel {
     // The flow takes the tile as it is before the dig: its bed moves by what the ground moves.
     this.water.wake(c, r);
     const before = this.relief.level(c, r) + this.digAt(c, r);
-    const scavi = (plan.scavi ??= {});
+    const scavi = (plan.digs ??= {});
     const next = Math.max(-2 * MAX_DIG, Math.min(2 * MAX_DIG, (scavi[tile] ?? 0) + d));
     if (next) scavi[tile] = next;
     else delete scavi[tile];
     const moved = this.relief.level(c, r) + next - before;
-    const rec = plan.acqua?.[tile];
+    const rec = plan.water?.[tile];
     if (rec) rec[0] += moved;
     // Under water the bed moves as it is dug; land never goes below the sea.
     const wet = !!rec || this.palette[ch.tiles[tile]]?.layer === 'liquid';
@@ -2680,7 +2682,7 @@ export class Kernel {
       const at = this.tileOf(x.col, x.row);
       if (!at?.ch.plan || at.ch.stage !== 'planned') continue;
       const { ch, tile } = at;
-      const acqua = (at.ch.plan.acqua ??= {});
+      const acqua = (at.ch.plan.water ??= {});
       const old = acqua[tile];
       const code = ch.tiles[tile];
       const round = (v: number) => Math.round(v * 1000) / 1000;
@@ -2830,12 +2832,12 @@ export class Kernel {
   async holdSession(force = false): Promise<string> {
     if (!force && (this.sessions >= 4 || this.generationHeld || this.ai.name === 'offline')) return 'nessuno';
     this.sessions++;
-    const rules = this.rules().slice(-12).map((r) => `- ${r.testo}: ${r.possibile ? 'si può' : 'non si può'}`).join('\n');
-    const people = readPeople(this.files).persone.slice(-10).map((p) => `- ${p.nome}, ${p.mestiere}`).join('\n');
+    const rules = this.rules().slice(-12).map((r) => `- ${r.text}: ${r.possible ? 'si può' : 'non si può'}`).join('\n');
+    const people = readPeople(this.files).people.slice(-10).map((p) => `- ${p.name}, ${p.job}`).join('\n');
     const chunks = [...this.chunks.values()].filter((c) => c.place).slice(-8).map((c) => `- ${c.place!.name}`).join('\n');
     const wearable = [...this.content.items.values()].filter((d) => d.equippable || d.slot || ['weapon', 'clothing'].includes(d.category)).length;
-    const panels = this.uiPanels().map((p) => p.panel.titolo);
-    const mech = `Meccaniche con interfaccia: ${panels.join(', ') || 'nessuna'}.${wearable && !this.uiPanels().some((p) => p.panel.elementi.some((e) => e.tipo === 'slot')) ? ` MANCA: ci sono ${wearable} oggetti da indossare o impugnare ma nessuno slot per farlo.` : ''}`;
+    const panels = this.uiPanels().map((p) => p.panel.title);
+    const mech = `Meccaniche con interfaccia: ${panels.join(', ') || 'nessuna'}.${wearable && !this.uiPanels().some((p) => p.panel.elements.some((e) => e.type === 'slot')) ? ` MANCA: ci sono ${wearable} oggetti da indossare o impugnare ma nessuno slot per farlo.` : ''}`;
     const summary = `${mech}\nRegole nate dal gioco:\n${rules || '(nessuna)'}\nPersone incontrate:\n${people || '(nessuna)'}\nLuoghi visti:\n${chunks || '(nessuno)'}\nOggetti esistenti: ${this.content.items.size}; tipi di abitanti: ${[...this.modules.values()].filter((m) => m.manifest.persona).length}.`;
     let s;
     try {
@@ -2885,7 +2887,7 @@ export class Kernel {
   private unloadChunk(ch: Chunk): void {
     // When it was left (T245f): at the return the kernel says how long it was away.
     if (ch.stage === 'planned' && ch.plan && !this.mirror) {
-      ch.plan.visto = Math.round(this.time);
+      ch.plan.seen = Math.round(this.time);
       this.saveChunkSoon(ch);
     }
     for (const id of this.ecs.query('chunk')) {
@@ -3080,7 +3082,7 @@ export class Kernel {
     ch.version++;
     (ch.plan.edits ??= {})[String(tile)] = code;
     // The day it was written (T245b): what ripens counts from here.
-    (ch.plan.giorni ??= {})[String(tile)] = this.day();
+    (ch.plan.days ??= {})[String(tile)] = this.day();
     this.routes.clear();
     this.saveChunkSoon(ch);
     return true;
@@ -3923,12 +3925,12 @@ export class Kernel {
     if (!text) return { ok: false, story: '' };
     // Who asks: `as` never spans an await.
     const me = this.payerNow();
-    const lacking = (esito: 'refusal' | 'error', motivo: string) => this.noteShortfall({ richiesta: `fabbricare «${text}»`, chi: me, agente: 'narrator', compito: 'craft.free', esito, motivo });
+    const lacking = (esito: 'refusal' | 'error', motivo: string) => this.noteShortfall({ request: `fabbricare «${text}»`, who: me, agent: 'narrator', task: 'craft.free', outcome: esito, reason: motivo });
     const key = `craft|${normName(text)}`;
-    const ruled = this.rules().find((r) => r.chiave === key && !r.possibile);
+    const ruled = this.rules().find((r) => r.key === key && !r.possible);
     if (ruled) {
-      lacking('refusal', ruled.racconto);
-      return { ok: false, story: ruled.racconto };
+      lacking('refusal', ruled.story);
+      return { ok: false, story: ruled.story };
     }
     let j;
     try {
@@ -3940,7 +3942,7 @@ export class Kernel {
     const refuse = (why: string) => {
       lacking('refusal', why);
       this.council.say('narrator', 'obietta', `fabbricare «${text}»: ${why}`, undefined, 'craft.free');
-      this.recordRule({ chiave: key, testo: `fabbricare «${text}»`, possibile: false, racconto: why }, true, { task: 'craft.free', autore: 'narrator' });
+      this.recordRule({ key: key, text: `fabbricare «${text}»`, possible: false, story: why }, true, { task: 'craft.free', author: 'narrator' });
       return { ok: false, story: why };
     };
     if (!j.possible) return refuse(j.story || 'Non si può fare.');
@@ -3963,7 +3965,7 @@ export class Kernel {
     let id = `ricetta.${slug(result.name)}`;
     while (this.content.recipes.some((r) => r.id === id)) id += '-2';
     const recipe: Recipe = { id, name: result.name, inputs, ...(tools.length ? { tools } : {}), output: { item: result.id, count: j.count } };
-    this.recordRule({ chiave: key, testo: `fabbricare «${result.name}»`, possibile: true, racconto: j.story, effetti: [`ricetta: ${inputs.map((i) => `${this.itemInfo(i.item).name} ×${i.count}`).join(' + ')}`] }, false, { task: 'craft.free', autore: 'narrator' });
+    this.recordRule({ key: key, text: `fabbricare «${result.name}»`, possible: true, story: j.story, effects: [`ricetta: ${inputs.map((i) => `${this.itemInfo(i.item).name} ×${i.count}`).join(' + ')}`] }, false, { task: 'craft.free', author: 'narrator' });
     this.writePack('modules/items.scoperte/manifest.json', { id: 'items.scoperte', name: 'Ricette scoperte', description: 'Ricette che il viandante ha inventato e che il Concilio ha giudicato possibili: ora sono regole del mondo.' }, { items: [], recipes: [recipe], loot: {} });
     this.applyFiles({ ...this.repo.working });
     const c = this.commitContent(`ricetta scoperta: ${result.name}`, 'craft.free', 'narrator');
@@ -3986,7 +3988,7 @@ export class Kernel {
     try {
       verdict = await judgeCombination(this.council, ia, ib, known.map((d) => d.name).slice(-150), this.focusOn([ia.name, ib.name]));
     } catch (e) {
-      this.noteShortfall({ richiesta: `combinare «${ia.name}» e «${ib.name}»`, chi: me, agente: 'narrator', compito: 'craft.judge', esito: 'error', motivo: (e as Error).message });
+      this.noteShortfall({ request: `combinare «${ia.name}» e «${ib.name}»`, who: me, agent: 'narrator', task: 'craft.judge', outcome: 'error', reason: (e as Error).message });
       return `Il Concilio non risponde: ${(e as Error).message}`;
     }
     if (!verdict.possible || !verdict.result) return verdict.reason;
@@ -4014,7 +4016,7 @@ export class Kernel {
       out.push({ id: 'parla', label: 'Parla', enabled: true });
       if (this.introOf(id)) out.push({ id: 'chi', label: 'Chi è', enabled: true });
       this.inventory().slots.slice(0, HOTBAR).forEach((s, i) => s && out.push({ id: `dai:${i}`, label: `Dai ${this.itemInfo(s.item).name}${s.count > 1 ? ` ×${s.count}` : ''}`, enabled: true }));
-      if (this.gameSetup()?.altroTraGiocatori !== false) out.push({ id: 'altro', label: 'Altro…', enabled: true });
+      if (this.gameSetup()?.freeActionsBetweenPlayers !== false) out.push({ id: 'altro', label: 'Altro…', enabled: true });
       return out;
     }
     const m = this.modules.get(this.ecs.get(id, 'module')?.id)?.manifest;
@@ -4049,7 +4051,7 @@ export class Kernel {
     const b = a && this.inWorld(to) ? this.wandererAt(to) : undefined;
     if (!a || !b) return void this.message('Non c’è nessuno qui con questo nome.', 'warn');
     if (Math.hypot(a.x - b.x, a.y - b.y) > reach) return void this.message(far, 'warn');
-    return { nome: this.wanderersById.get(to)!.nome };
+    return { nome: this.wanderersById.get(to)!.name };
   }
 
   /**
@@ -4193,7 +4195,7 @@ export class Kernel {
       if (action === 'parla') this.bus.emit('ui:chat', { id, name: this.nameOf(id) });
       if (action === 'chi') this.bus.emit('ui:dialog', { speaker: this.nameOf(id), text: this.introOf(id) ?? '' });
       if (action.startsWith('dai:')) this.giveTo(other, Number(action.slice(4)));
-      if (action === 'altro' && this.gameSetup()?.altroTraGiocatori !== false) this.bus.emit('ui:freeaction', { id, name: this.nameOf(id) });
+      if (action === 'altro' && this.gameSetup()?.freeActionsBetweenPlayers !== false) this.bus.emit('ui:freeaction', { id, name: this.nameOf(id) });
       return;
     }
     const modId: string | undefined = this.ecs.get(id, 'module')?.id;
@@ -4307,7 +4309,7 @@ export class Kernel {
    * an individual; the server applies the effects to the other's body (`touchWanderer`). Nothing is learned: they are not a thing.
    */
   async freeOnWanderer(to: string, text: string): Promise<string> {
-    if (this.gameSetup()?.altroTraGiocatori === false) {
+    if (this.gameSetup()?.freeActionsBetweenPlayers === false) {
       this.message('In questo mondo non si fa «Altro…» su un altro viandante.', 'warn');
       return '';
     }
@@ -4344,9 +4346,9 @@ export class Kernel {
     if (!parent || !entry || !p) return undefined;
     const origin = `${this.ecs.get(parentId, 'origin')?.key ?? parent.name}#figlio${this.worldStamp()}`;
     const child = this.spawnModuleEntity(entry, p.x + 0.7, p.y + 0.4, this.ecs.get(parentId, 'chunk')?.key, origin);
-    const gender = name ? guessGender({ nome: name, mestiere: '', famiglia: [] }) : hashStr(origin) % 2 ? 'female' : 'male';
+    const gender = name ? guessGender({ name: name, job: '', family: [] }) : hashStr(origin) % 2 ? 'female' : 'male';
     // A name of their own, unlike anyone else's (not "Piccola Berta" beside Berta).
-    const taken = readPeople(this.files).persone.map((x) => x.nome);
+    const taken = readPeople(this.files).people.map((x) => x.name);
     const nome = name && !taken.some((t) => similarNames(t, name)) ? name : freshName(this.speciesOf(entry.manifest.id) ?? 'person', gender, taken, origin);
     const child_ = gender === 'female' ? 'figlia' : 'figlio';
     const w = this.wanderer();
@@ -4360,18 +4362,18 @@ export class Kernel {
       job: 'bambino',
       age: 'neonato',
       gender,
-      family: [{ nome: parent.name, legame: child_ }, { nome: w.nome, legame: child_, viandante: w.id }],
+      family: [{ name: parent.name, bond: child_ }, { name: w.name, bond: child_, wanderer: w.id }],
       routine: [
-        { quando: 'morning', fa: 'gioca vicino a casa', dove: 'home', azione: 'stroll' },
-        { quando: 'day', fa: 'segue il genitore al lavoro', dove: 'work', azione: 'stroll' },
-        { quando: 'evening', fa: 'ascolta storie in piazza', dove: 'square', azione: 'chat' },
-        { quando: 'night', fa: 'dorme', dove: 'home', azione: 'sleep' },
+        { when: 'morning', does: 'gioca vicino a casa', where: 'home', activity: 'stroll' },
+        { when: 'day', does: 'segue il genitore al lavoro', where: 'work', activity: 'stroll' },
+        { when: 'evening', does: 'ascolta storie in piazza', where: 'square', activity: 'chat' },
+        { when: 'night', does: 'dorme', where: 'home', activity: 'sleep' },
       ],
     };
     this.ecs.set(child, 'identity', identity);
     const glyph = this.ecs.get(child, 'glyph');
     if (glyph) glyph.scale = (glyph.scale ?? 1.1) * 0.6;
-    const next = addIndividual(readPeople(this.files), { nome, tipo: entry.manifest.id, specie: this.speciesOf(entry.manifest.id) ?? 'person', genere: gender, mestiere: 'bambino', eta: 'neonato', famiglia: identity.family!, routine: identity.routine!, origine: origin, persona: identity.persona, aspetto: identity.look }, (t) => this.speciesOf(t));
+    const next = addIndividual(readPeople(this.files), { name: nome, kind: entry.manifest.id, species: this.speciesOf(entry.manifest.id) ?? 'person', gender: gender, job: 'bambino', age: 'neonato', family: identity.family!, routine: identity.routine!, origin: origin, persona: identity.persona, look: identity.look }, (t) => this.speciesOf(t));
     this.repo.write('world/people.json', JSON.stringify(next, null, 2) + '\n');
     this.applyFiles({ ...this.repo.working });
     this.commitContent(`nascita: ${nome}, ${child_} di ${parent.name} e ${ofOther}`, 'npc.birth', 'narrator');
@@ -4412,7 +4414,7 @@ export class Kernel {
         return kept ? [kept] : [];
       });
     }
-    if (dropped.length) this.council.say('kernel', 'scarta', `azione «${text}» su ${this.wanderersById.get(to)?.nome ?? to}: ${dropped.join(', ')} (${this.godMode(to) ? 'nessuno tocca il master' : 'tra viandanti non ci si ferisce'})`, 'narrator', 'action.judge');
+    if (dropped.length) this.council.say('kernel', 'scarta', `azione «${text}» su ${this.wanderersById.get(to)?.name ?? to}: ${dropped.join(', ')} (${this.godMode(to) ? 'nessuno tocca il master' : 'tra viandanti non ci si ferisce'})`, 'narrator', 'action.judge');
     const body: Effect[] = effects.filter((e) => e.type === 'needs' || e.type === 'shield' || e.type === 'state' || e.type === 'remove_state');
     const out: string[] = [];
     for (const e of effects) {
@@ -4471,7 +4473,7 @@ export class Kernel {
     // Who asks: after the await what happens is theirs (`as` never spans an await).
     const me = this.wanderer().id;
     const say = (t: string) => this.bus.emit('ui:dialog', { speaker: sub.name, text: t });
-    const lacking = (esito: 'refusal' | 'invalid' | 'error', motivo: string, agente: AgentId = 'narrator', compito = 'action.judge') => this.noteShortfall({ richiesta: `«${text}» su ${sub.name}`, chi: me, agente, compito, esito, motivo });
+    const lacking = (esito: 'refusal' | 'invalid' | 'error', motivo: string, agente: AgentId = 'narrator', compito = 'action.judge') => this.noteShortfall({ request: `«${text}» su ${sub.name}`, who: me, agent: agente, task: compito, outcome: esito, reason: motivo });
     // What its model already knows how to do (an action of the program) happens without asking.
     const own = sub.entity !== undefined && !sub.wanderer ? this.modelActions(sub.entity).find((a) => normName(a.label) === normName(text) || normName(a.name) === normName(text)) : undefined;
     if (own && this.doModelAction(sub.entity!, own.name)) {
@@ -4489,11 +4491,11 @@ export class Kernel {
     }
     // What the Council already ruled impossible stays impossible: no need to ask again.
     const ruleKey = `${sub.key}|${normName(text)}`;
-    const ruled = this.rules().find((r) => r.chiave === ruleKey && !r.possibile);
+    const ruled = this.rules().find((r) => r.key === ruleKey && !r.possible);
     if (ruled) {
-      lacking('refusal', ruled.racconto);
-      say(ruled.racconto);
-      return ruled.racconto;
+      lacking('refusal', ruled.story);
+      say(ruled.story);
+      return ruled.story;
     }
     const p = sub.wanderer ? this.wandererAt(sub.wanderer) : sub.entity !== undefined ? this.ecs.get(sub.entity, 'pos') : sub.tile ? { x: sub.tile.col + 0.5, y: sub.tile.row + 0.5 } : this.wandererCarpet();
     const tile = p ? (this.palette[this.tileAt(Math.floor(p.x), Math.floor(p.y)) ?? '']?.name ?? '?') : '?';
@@ -4558,7 +4560,7 @@ export class Kernel {
     const pays = v.effects.some((e) => e.type === 'consume') || !!need;
     // A rule of the model is already in every menu of the kind: the rest happened this once.
     const learn = j.possible && !shaped && lasting && (!creates || pays);
-    this.recordRule({ chiave: ruleKey, testo: `«${text}» su ${sub.name}`, possibile: j.possible && (v.effects.length > 0 || !!shaped), racconto: j.story, effetti: [...(shaped ? ['forma'] : []), ...v.effects.map((e) => e.type)] }, !learn, { task: 'action.judge', autore: 'narrator' });
+    this.recordRule({ key: ruleKey, text: `«${text}» su ${sub.name}`, possible: j.possible && (v.effects.length > 0 || !!shaped), story: j.story, effects: [...(shaped ? ['forma'] : []), ...v.effects.map((e) => e.type)] }, !learn, { task: 'action.judge', author: 'narrator' });
     if (learn) this.learnAction(sub, { id: '', label: j.label || text, requires: need?.id, effects: v.effects });
     return j.story;
   }
@@ -4580,23 +4582,23 @@ export class Kernel {
   /** The rules the Council established while the world was played (world/rules.json). */
   rules(): Rule[] {
     try {
-      return (JSON.parse(this.files['world/rules.json'] ?? '{}').regole ?? []) as Rule[];
+      return (internalFields('rules', JSON.parse(this.files['world/rules.json'] ?? '{}')).rules ?? []) as Rule[];
     } catch {
       return [];
     }
   }
 
   /** A judgement becomes a rule: written in the universe, shown to the Council in every later judgement. */
-  recordRule(r: Rule, commit = true, card?: { task: string; autore: string }): void {
+  recordRule(r: Rule, commit = true, card?: { task: string; author: string }): void {
     // A judgement of the Council is a card (T36); the facts the kernel notes (a death, a bond, a quest) are not.
-    if (card) r.carta = this.sign(`rule:${nodeSlug(r.chiave)}`, card.task, card.autore);
-    const all = this.rules().filter((x) => x.chiave !== r.chiave);
+    if (card) r.card = this.sign(`rule:${nodeSlug(r.key)}`, card.task, card.author);
+    const all = this.rules().filter((x) => x.key !== r.key);
     all.push(r);
-    this.repo.write('world/rules.json', JSON.stringify({ regole: all.slice(-300) }, null, 2) + '\n');
+    this.repo.write('world/rules.json', JSON.stringify({ rules: all.slice(-300) }, null, 2) + '\n');
     this.files = { ...this.files, 'world/rules.json': this.repo.working['world/rules.json']! };
     if (commit) {
       this.applyFiles({ ...this.repo.working });
-      this.repo.commit(`regola: ${r.testo} → ${r.possibile ? 'si può' : 'non si può'}`, 'agent');
+      this.repo.commit(`regola: ${r.text} → ${r.possible ? 'si può' : 'non si può'}`, 'agent');
     }
   }
 
@@ -4918,12 +4920,12 @@ export class Kernel {
     if (source === 'items') {
       for (const d of [...this.content.items.values()].sort((a, b) => a.id.localeCompare(b.id))) {
         const path = `modules/${this.content.itemSource.get(d.id) ?? d.module ?? ''}/manifest.json`;
-        out.push({ id: `item:${d.id}`, label: d.name, model: this.forms.resolve(d.model, 'object'), tint: d.color, color: d.color, path: this.files[path] ? path : undefined, facts: [['Oggetto', d.id], ['Categoria', d.category], ['Descrizione', d.description], ...(d.aspetto ? [['Aspetto', d.aspetto] as [string, string]] : []), ['Peso', String(d.weight)]] });
+        out.push({ id: `item:${d.id}`, label: d.name, model: this.forms.resolve(d.model, 'object'), tint: d.color, color: d.color, path: this.files[path] ? path : undefined, facts: [['Oggetto', d.id], ['Categoria', d.category], ['Descrizione', d.description], ...(d.look ? [['Aspetto', d.look] as [string, string]] : []), ['Peso', String(d.weight)]] });
       }
       return out;
     }
     // People and things: the modules of their building that have a look.
-    const people = readPeople(this.files).persone;
+    const people = readPeople(this.files).people;
     for (const path of Object.keys(this.files).sort()) {
       // The building of the source: the studio's room, `persone` or `cose` (T307b: the sources are internal, the rooms are not).
       if (!/^modules\/[^/]+\/manifest\.json$/.test(path) || folderOf(path) !== (source === 'people' ? 'persone' : 'cose')) continue;
@@ -4936,17 +4938,17 @@ export class Kernel {
       if (!man.appearance) continue;
       const facts: Array<[string, string]> = [['Modulo', man.id]];
       if (man.description) facts.push(['Descrizione', man.description]);
-      if (man.appearance.aspetto) facts.push(['Aspetto', man.appearance.aspetto]);
+      if (man.appearance.look) facts.push(['Aspetto', man.appearance.look]);
       if (man.context) facts.push(['Contesto', man.context]);
       if (man.lore) facts.push(['Storia', man.lore]);
       if (man.persona) facts.push(['Carattere', man.persona]);
       const model = this.formFor(man, man.id).model;
-      const who = source === 'people' ? people.filter((x) => x.tipo === man.id) : [];
-      if (who.length) facts.push(['Individui', who.map((x) => `${x.nome} (${x.mestiere})`).join(', ')]);
+      const who = source === 'people' ? people.filter((x) => x.kind === man.id) : [];
+      if (who.length) facts.push(['Individui', who.map((x) => `${x.name} (${x.job})`).join(', ')]);
       out.push({ id: `module:${man.id}`, label: man.name, model, color: man.appearance.color, path, facts });
       // T23: after its type, each individual, with the look it has in the world (its seed) and the module under it.
       for (const p of who)
-        out.push({ id: `individual:${p.nome}`, label: `${p.nome} · ${p.mestiere}`, model, seed: this.forms.seedFor(model, p.origine ?? p.nome), color: man.appearance.color, path, facts: [...individualFacts(p, man.name), ...facts.filter(([w]) => w !== 'Individui').map(([w, t]): [string, string] => [w === 'Aspetto' || w === 'Carattere' ? `${w} del tipo` : w, t])] });
+        out.push({ id: `individual:${p.name}`, label: `${p.name} · ${p.job}`, model, seed: this.forms.seedFor(model, p.origin ?? p.name), color: man.appearance.color, path, facts: [...individualFacts(p, man.name), ...facts.filter(([w]) => w !== 'Individui').map(([w, t]): [string, string] => [w === 'Aspetto' || w === 'Carattere' ? `${w} del tipo` : w, t])] });
     }
     return out;
   }
@@ -4971,7 +4973,7 @@ export class Kernel {
       const envModule = p.ambiente ? [...this.modules.values()].find((m) => m.manifest.layouts?.[p.ambiente!]) : undefined;
       const path = envModule ? `modules/${envModule.manifest.id}/manifest.json` : undefined;
       const facts: Array<[string, string]> = [['Dove', `luogo ${p.cx}, ${p.cy}${p.cx === here.cx && p.cy === here.cy ? ' (qui sei stato per ultimo)' : ''}`]];
-      if (region) facts.push(['Regione', `${region.nome}: ${region.descrizione}`]);
+      if (region) facts.push(['Regione', `${region.name}: ${region.description}`]);
       if (p.descrizione) facts.push(['Descrizione', p.descrizione]);
       if (p.ambiente) facts.push(['Ambiente', env ? `${env.name} (${p.ambiente}): ${env.description}` : p.ambiente]);
       if (plan) {
@@ -5054,8 +5056,8 @@ export class Kernel {
     };
     // The wish is added to how it looks ({ aspetto } of a module's appearance or of an item), and the thing
     // gets a model of its own if it showed a generic one.
-    const own = (o: { aspetto?: string; model?: string }, name: string, fallback: string) => {
-      if (why) o.aspetto = `${o.aspetto ?? name}; ${why}`;
+    const own = (o: { look?: string; model?: string }, name: string, fallback: string) => {
+      if (why) o.look = `${o.look ?? name}; ${why}`;
       const current = o.model && this.forms.info(o.model) ? o.model : undefined;
       if (!current || this.sculpting.isGeneric(current)) o.model = ownModelId(fallback);
       return { id: o.model!, previous: current };
@@ -5064,19 +5066,19 @@ export class Kernel {
     if (kind === 'module' && load(this.modules.get(id)?.manifestPath)) {
       if (!man.appearance) return false;
       const r = own(man.appearance, man.name, man.id);
-      req = { ...r, nome: man.name, aspetto: man.appearance.aspetto ?? man.description ?? man.name, classe: man.appearance.classe ?? this.forms.classOf(this.forms.resolve(r.previous ?? r.id, undefined)).id };
+      req = { ...r, nome: man.name, aspetto: man.appearance.look ?? man.description ?? man.name, classe: man.appearance.class ?? this.forms.classOf(this.forms.resolve(r.previous ?? r.id, undefined)).id };
     } else if (kind === 'item' && load(this.modules.get(this.content.itemSource.get(id) ?? '')?.manifestPath)) {
       const it = (man.items ?? []).find((x: ItemDef) => x.id === id);
       const o = it ?? man.appearance;
       if (!o) return false;
       const r = own(o, it?.name ?? man.name, id);
-      req = { ...r, nome: it?.name ?? man.name, aspetto: o.aspetto ?? it?.description ?? man.name, classe: 'object' };
+      req = { ...r, nome: it?.name ?? man.name, aspetto: o.look ?? it?.description ?? man.name, classe: 'object' };
     } else if (kind === 'model') {
       const info = this.forms.info(id);
       const previous = this.repo.working[`models/${id}.xml`];
       if (!previous) return false;
       this.council.say('artist', 'propone', `da riscolpire: ${target}${why ? ` (${why})` : ''}`, 'sculptor', 'model.resculpt');
-      void this.sculpting.make({ id, nome: info?.nome ?? id, aspetto: `${info?.nome ?? id}${why ? `; ${why}` : ''}`, classe: info?.classe ?? 'object', previous, ...(why ? { desiderio: why } : {}) });
+      void this.sculpting.make({ id, nome: info?.name ?? id, aspetto: `${info?.name ?? id}${why ? `; ${why}` : ''}`, classe: info?.class ?? 'object', previous, ...(why ? { desiderio: why } : {}) });
       return true;
     } else return false;
     this.repo.write(path!, JSON.stringify(man, null, 2) + '\n');
@@ -5090,15 +5092,15 @@ export class Kernel {
 
   /** The Sculptor's models per class (universe.json → ai.scultori over the defaults). */
   sculptors(): SculptorAiModels {
-    return { ...DEFAULT_SCULPTORS, ...internalSculptors(this.config.ai.scultori ?? {}) };
+    return { ...DEFAULT_SCULPTORS, ...internalSculptors(this.config.ai.sculptors ?? {}) };
   }
 
   /** A program enters the library (or replaces one): validated, written with its index entry, committed. */
-  addModel(id: string, xml: string, info: ModelInfo, message: string, card?: { task: string; autore: string; chi?: string }): boolean {
+  addModel(id: string, xml: string, info: ModelInfo, message: string, card?: { task: string; author: string; chi?: string }): boolean {
     const path = `models/${id}.xml`;
     const errors = this.validator.validateFile(path, xml);
     if (errors.length) {
-      this.council.say('kernel', 'scarta', errors.join('; '), card?.autore === 'musician' ? 'musician' : 'sculptor', card?.task ?? 'model.sculpt');
+      this.council.say('kernel', 'scarta', errors.join('; '), card?.author === 'musician' ? 'musician' : 'sculptor', card?.task ?? 'model.sculpt');
       return false;
     }
     let index: Record<string, ModelInfo> = {};
@@ -5111,8 +5113,8 @@ export class Kernel {
     this.repo.write(path, xml);
     this.repo.write(MODELS_INDEX, JSON.stringify(index, null, 1) + '\n');
     this.applyFiles({ ...this.repo.working });
-    const c = card ? this.commitContent(message, card.task, card.autore, card.chi) : this.repo.commit(message, 'agent');
-    this.council.say('kernel', 'approva', `modello «${info.nome ?? id}» (${id}) → validato, commit ${c.id}`, undefined, card?.task ?? 'model.sculpt');
+    const c = card ? this.commitContent(message, card.task, card.author, card.chi) : this.repo.commit(message, 'agent');
+    this.council.say('kernel', 'approva', `modello «${info.name ?? id}» (${id}) → validato, commit ${c.id}`, undefined, card?.task ?? 'model.sculpt');
     this.bus.emit('model:added', { id });
     return true;
   }
@@ -5145,7 +5147,7 @@ export class Kernel {
     try {
       r = await agentReply(this.council, agent, history, text);
     } catch (e) {
-      this.noteShortfall({ richiesta: text, chi, agente: agent, compito: 'agent.chat', esito: 'error', motivo: (e as Error).message });
+      this.noteShortfall({ request: text, who: chi, agent: agent, task: 'agent.chat', outcome: 'error', reason: (e as Error).message });
       return { say: `(${AGENTS[agent].name} non risponde: ${(e as Error).message})` };
     }
     history.push({ who: 'player', text }, { who: 'npc', text: r.say });
@@ -5165,7 +5167,7 @@ export class Kernel {
    * Cartographer, the Artist, the rules, the Narrator's packs. The Council says yes to almost anything.
    */
   private async askLiaison(text: string, history: Turn[], chi: string, here: string | undefined): Promise<{ say: string; forged?: string; runes?: string[]; credits?: { target: string; amount: number } }> {
-    const lacking = (esito: 'refusal' | 'invalid' | 'error', motivo: string, agente: AgentId = 'liaison') => this.noteShortfall({ richiesta: text, chi, agente, compito: 'referente.coordinate', esito, motivo });
+    const lacking = (esito: 'refusal' | 'invalid' | 'error', motivo: string, agente: AgentId = 'liaison') => this.noteShortfall({ request: text, who: chi, agent: agente, task: 'referente.coordinate', outcome: esito, reason: motivo });
     let r;
     try {
       r = await liaisonReply(this.council, history, text);
@@ -5195,7 +5197,7 @@ export class Kernel {
       case 'meccanica':
         return { say: r.say, forged: (await this.forgeMechanic(req)).summary };
       case 'regola': {
-        this.recordRule({ chiave: `regola|${normName(req).slice(0, 60)}`, testo: req, possibile: true, racconto: 'stabilito dal viandante trasceso, accolto dal Concilio', effetti: ['regola'] }, true, { task: 'referente.coordinate', autore: this.wanderer().id });
+        this.recordRule({ key: `regola|${normName(req).slice(0, 60)}`, text: req, possible: true, story: 'stabilito dal viandante trasceso, accolto dal Concilio', effects: ['regola'] }, true, { task: 'referente.coordinate', author: this.wanderer().id });
         return { say: r.say, forged: `Nuova regola del mondo: ${req}` };
       }
       case 'runa': {
@@ -5235,12 +5237,12 @@ export class Kernel {
 
   /** The game of this universe (universe.json → partita), chosen at the Genesis. */
   gameSetup(): GameSetup {
-    return this.config.partita;
+    return this.config.game;
   }
 
   /** A multiplayer game (ADR-0050): the carpet, the rollback and the Council are the master's. */
   manyPlayers(): boolean {
-    return this.gameSetup()?.modalita === 'multiplayer';
+    return this.gameSetup()?.mode === 'multiplayer';
   }
 
   /** Whether a wanderer (the one acting, by default) is the master (T37): alone, always. */
@@ -5311,19 +5313,19 @@ export class Kernel {
   /** Whether a wanderer is anonymous (T44b, T45a): no account, no credits, plays with local models. */
   isAnonymous(id: string = this.wanderer().id): boolean {
     const entry = this.wanderersById.get(id);
-    if (entry?.anonimo !== undefined) return entry.anonimo;
-    return !!readWandererState(this.files, id)?.anonimo;
+    if (entry?.anonymous !== undefined) return entry.anonymous;
+    return !!readWandererState(this.files, id)?.anonymous;
   }
 
   /** Sets whether a wanderer is anonymous (T44b, T45a). An anonymous wanderer has 0 credits. */
   setAnonymous(id: string, anonimo: boolean): void {
     const entry = this.wanderersById.get(id);
-    if (entry) entry.anonimo = anonimo;
+    if (entry) entry.anonymous = anonimo;
     const file = playerFile(id);
     const saved = readWandererState(this.files, id);
     if (!saved && !anonimo) return;
-    const updated = saved ?? { nome: entry?.nome ?? id };
-    updated.anonimo = anonimo ? true : undefined;
+    const updated = saved ?? { name: entry?.name ?? id };
+    updated.anonymous = anonimo ? true : undefined;
     const text = JSON.stringify(updated, null, 1) + '\n';
     this.files[file] = text;
     this.repo.write(file, text);
@@ -5446,7 +5448,7 @@ export class Kernel {
     const usd = costOf(billedModel(r.model), { prompt: r.prompt, cached: r.cached, output: r.output, thoughts: r.thoughts }, r.day) ?? 0;
     if (usd <= 0) return;
     const total = costWithFee(usd, this.fee);
-    const payer = r.chi || COMUNE;
+    const payer = r.who || COMUNE;
     if (payer !== COMUNE) {
       this.deductCredits(payer, total);
     } else {
@@ -5479,7 +5481,7 @@ export class Kernel {
     const remote = this.ecs.get(entity, 'remote');
     if (typeof remote?.presentazione === 'string') return remote.presentazione || undefined;
     const id = this.otherWanderer(entity);
-    return id ? this.profileOf(id)?.presentazione : undefined;
+    return id ? this.profileOf(id)?.introduction : undefined;
   }
 
   /** The gods' needs stay full, whatever the world's code did to them this tick. */
@@ -5527,18 +5529,18 @@ export class Kernel {
    */
   private keepGame(config: UniverseConfig, files: FileMap): void {
     if (!this.game) {
-      this.game = config.partita;
+      this.game = config.game;
       return;
     }
-    if (JSON.stringify(config.partita) === JSON.stringify(this.game)) return;
-    config.partita = this.game;
+    if (JSON.stringify(config.game) === JSON.stringify(this.game)) return;
+    config.game = this.game;
     let raw: Record<string, unknown>;
     try {
-      raw = JSON.parse(files['universe.json'] ?? '{}');
+      raw = internalFields('config', JSON.parse(files['universe.json'] ?? '{}'));
     } catch {
       return;
     }
-    if (this.repo.working['universe.json'] !== undefined) this.repo.write('universe.json', JSON.stringify({ ...raw, partita: this.game }, null, 2) + '\n');
+    if (this.repo.working['universe.json'] !== undefined) this.repo.write('universe.json', JSON.stringify({ ...raw, game: this.game }, null, 2) + '\n');
     this.council?.say('kernel', 'scarta', "la partita (morte, modalità, PvP, «Altro…» tra giocatori) si sceglie solo alla Genesi: universe.json la tiene com'era");
   }
 
@@ -5620,7 +5622,7 @@ export class Kernel {
     } catch {
       raw = {};
     }
-    const ai = { ...(raw.ai ?? {}), ...patch, ...(patch.coefficienti !== undefined ? { coefficienti: repairCoefficients(patch.coefficienti) } : {}), ...(patch.attore !== undefined ? { attore: repairActor(patch.attore) } : {}) };
+    const ai = { ...(raw.ai ?? {}), ...patch, ...(patch.coefficients !== undefined ? { coefficients: repairCoefficients(patch.coefficients) } : {}), ...(patch.actor !== undefined ? { actor: repairActor(patch.actor) } : {}) };
     const text = JSON.stringify({ ...raw, ai }, null, 2) + '\n';
     this.writeCommanded('universe.json', text);
     const before = this.config.ai.maxText;
@@ -5637,12 +5639,12 @@ export class Kernel {
     const game = repairGameSetup({ ...this.gameSetup(), ...choice });
     let raw: Record<string, unknown>;
     try {
-      raw = JSON.parse(this.repo.working['universe.json'] ?? '{}');
+      raw = internalFields('config', JSON.parse(this.repo.working['universe.json'] ?? '{}'));
     } catch {
       raw = {};
     }
     this.game = game;
-    this.writeCommanded('universe.json', JSON.stringify({ ...raw, partita: game }, null, 2) + '\n');
+    this.writeCommanded('universe.json', JSON.stringify({ ...raw, game }, null, 2) + '\n');
   }
 
   /**
@@ -5675,7 +5677,7 @@ export class Kernel {
   }
 
   private async judgeDeath(cause: string): Promise<DeathVerdict> {
-    const level = this.gameSetup().morte;
+    const level = this.gameSetup().death;
     const carried = this.carriedCounts();
     const d = deathLevel(this.gameSetup());
     try {
@@ -5694,7 +5696,7 @@ export class Kernel {
     if (cause === undefined && this.dying.has(id)) return this.dying.get(id)!;
     const carried = this.as(id, () => this.carriedCounts());
     const verdict = this.deathVerdicts.get(id);
-    const v = (await verdict) ?? fallbackDeath(this.gameSetup().morte, carried);
+    const v = (await verdict) ?? fallbackDeath(this.gameSetup().death, carried);
     this.deathVerdicts.delete(id);
     if (!this.wanderersById.has(id)) return;
     this.as(id, () => {
@@ -5738,7 +5740,7 @@ export class Kernel {
   }
 
   private rememberDeath(): void {
-    this.recordRule({ chiave: `morte|${this.worldStamp()}`, testo: 'un viandante è morto', possibile: true, racconto: 'la gente ne parla ancora, in piazza' }, false);
+    this.recordRule({ key: `morte|${this.worldStamp()}`, text: 'un viandante è morto', possible: true, story: 'la gente ne parla ancora, in piazza' }, false);
   }
 
   // --- Interfaces of modules (ADR-0028) -------------------------------------------------------
@@ -5751,11 +5753,11 @@ export class Kernel {
   panelFields(): Record<string, string | number | boolean> {
     const out: Record<string, string | number | boolean> = {};
     for (const { panel } of this.uiPanels()) {
-      for (const e of panel.elementi) {
-        if (!e.campo || !PANEL_FIELD_RE.test(e.campo) || e.campo in out) continue;
-        const v = this.uiValue(e.campo);
-        if (typeof v === 'string') out[e.campo] = v.slice(0, 200);
-        else if (typeof v === 'boolean' || (typeof v === 'number' && Number.isFinite(v))) out[e.campo] = v;
+      for (const e of panel.elements) {
+        if (!e.field || !PANEL_FIELD_RE.test(e.field) || e.field in out) continue;
+        const v = this.uiValue(e.field);
+        if (typeof v === 'string') out[e.field] = v.slice(0, 200);
+        else if (typeof v === 'boolean' || (typeof v === 'number' && Number.isFinite(v))) out[e.field] = v;
       }
     }
     return out;
@@ -5764,7 +5766,7 @@ export class Kernel {
   /** The fields a server sent (T263): on a mirror they become the components the panels read. The kernel's own are never touched. */
   takePanelFields(fields: unknown): void {
     if (!fields || typeof fields !== 'object') return;
-    const named = new Set(this.uiPanels().flatMap(({ panel }) => panel.elementi.map((e) => e.campo).filter((c): c is string => !!c)));
+    const named = new Set(this.uiPanels().flatMap(({ panel }) => panel.elements.map((e) => e.field).filter((c): c is string => !!c)));
     for (const [campo, v] of Object.entries(fields as Record<string, unknown>)) {
       if (!named.has(campo) || !PANEL_FIELD_RE.test(campo) || !['string', 'number', 'boolean'].includes(typeof v)) continue;
       const [c, f] = campo.split('.');
@@ -5776,7 +5778,7 @@ export class Kernel {
   }
 
   uiPanels(): Array<{ module: string; panel: UiPanel }> {
-    return [...this.modules.values()].filter((m) => m.manifest.ui?.elementi?.length).map((m) => ({ module: m.manifest.id, panel: m.manifest.ui! }));
+    return [...this.modules.values()].filter((m) => m.manifest.ui?.elements?.length).map((m) => ({ module: m.manifest.id, panel: m.manifest.ui! }));
   }
 
   /** What sits in the slots of every panel: player component `slots` (kernel-owned). */
@@ -5797,11 +5799,11 @@ export class Kernel {
   /** Puts something from the inventory into a slot of a panel; the module reacts (on_slot). */
   equip(panelId: string, slotId: string, invSlot: number): boolean {
     const p = this.uiPanels().find((x) => x.panel.id === panelId);
-    const el = p?.panel.elementi.find((e) => e.tipo === 'slot' && e.id === slotId);
+    const el = p?.panel.elements.find((e) => e.type === 'slot' && e.id === slotId);
     const s = this.inventory().slots[invSlot];
     if (!p || !el || !s) return false;
-    if (!this.fits(s.item, el.accetta)) {
-      this.message(`${this.itemInfo(s.item).name} non va lì (${el.etichetta}).`, 'warn');
+    if (!this.fits(s.item, el.accepts)) {
+      this.message(`${this.itemInfo(s.item).name} non va lì (${el.label}).`, 'warn');
       return false;
     }
     const slots = this.slots();
@@ -5855,14 +5857,14 @@ export class Kernel {
   async forgeMechanic(request: string, chi?: string): Promise<{ ok: boolean; id?: string; summary: string }> {
     const asker = chi ?? this.payerNow();
     const items = [...this.content.items.values()].filter((d) => d.equippable || d.slot || ['weapon', 'clothing'].includes(d.category)).map((d) => `${d.name}${d.slot ? ` [${d.slot}]` : ` (${d.category})`}${d.bonus ? ` ${JSON.stringify(d.bonus)}` : ''}`);
-    const mechanics = this.uiPanels().map((p) => p.panel.titolo);
+    const mechanics = this.uiPanels().map((p) => p.panel.title);
     let feedback = '';
     for (let attempt = 0; attempt < 2; attempt++) {
       let d;
       try {
         d = await designMechanic(this.council, request, { items, mechanics, feedback, chi });
       } catch (e) {
-        this.noteShortfall({ richiesta: request, chi: asker, agente: 'engineer', compito: 'mechanic.design', esito: 'error', motivo: (e as Error).message });
+        this.noteShortfall({ request: request, who: asker, agent: 'engineer', task: 'mechanic.design', outcome: 'error', reason: (e as Error).message });
         return { ok: false, summary: `L'Ingegnere non riesce: ${(e as Error).message}` };
       }
       let id = `mech.${slug(d.name)}`;
@@ -5882,7 +5884,7 @@ export class Kernel {
       const kept: BenchCase[] = [];
       for (const c of cases) {
         const run = await this.runBenchCase(manifest, logic, c);
-        if (run.errori.length) failed.push(`«${c.titolo}»: ${run.errori.join('; ')}`);
+        if (run.errori.length) failed.push(`«${c.title}»: ${run.errori.join('; ')}`);
         else kept.push(c);
       }
       if (!cases.length) failed.push('nessun caso d’uso da mettere in scena');
@@ -5891,7 +5893,7 @@ export class Kernel {
         feedback = `i casi d'uso non mostrano la meccanica: ${failed.join('; ')}`;
         continue;
       }
-      if (kept.length) manifest.casi = kept;
+      if (kept.length) manifest.cases = kept;
       const dir = `modules/${id}/`;
       this.repo.write(`${dir}manifest.json`, JSON.stringify(manifest, null, 2) + '\n');
       this.repo.write(`${dir}logic.lua`, logic);
@@ -5899,10 +5901,10 @@ export class Kernel {
       for (const [name, data] of Object.entries(d.components ?? {})) if (data && typeof data === 'object' && !this.ecs.has(this.wandererEntity, name) && !['player', 'hand', 'inventory', 'needs', 'pos', 'slots'].includes(name)) this.ecs.set(this.wandererEntity, name, clone(data));
       this.applyFiles({ ...this.repo.working });
       const c = this.commitContent(`meccanica: ${d.name}`, 'mechanic.design', 'engineer', chi);
-      this.council.say('engineer', 'approva', `nuova meccanica «${d.name}»: ${d.description} (pannello «${panel!.titolo}», commit ${c.id})`, undefined, 'mechanic.design');
-      return { ok: true, id, summary: `Nuova meccanica: ${d.name} — ${d.description} (la trovi nell'inventario, scheda «${panel!.titolo}»).` };
+      this.council.say('engineer', 'approva', `nuova meccanica «${d.name}»: ${d.description} (pannello «${panel!.title}», commit ${c.id})`, undefined, 'mechanic.design');
+      return { ok: true, id, summary: `Nuova meccanica: ${d.name} — ${d.description} (la trovi nell'inventario, scheda «${panel!.title}»).` };
     }
-    this.noteShortfall({ richiesta: request, chi: asker, agente: 'engineer', compito: 'mechanic.design', esito: 'invalid', motivo: feedback });
+    this.noteShortfall({ request: request, who: asker, agent: 'engineer', task: 'mechanic.design', outcome: 'invalid', reason: feedback });
     return { ok: false, summary: `L'Ingegnere non è riuscito a scrivere una meccanica valida: ${feedback}` };
   }
 
@@ -5918,7 +5920,7 @@ export class Kernel {
   /** The cases of the bench (T27b): those of every system, in the order of the tick. */
   benchCases(): BenchEntry[] {
     return this.systems.flatMap((m) =>
-      (m.manifest.casi ?? []).map((c, i, all) => ({
+      (m.manifest.cases ?? []).map((c, i, all) => ({
         id: `${m.manifest.id}#${i}`,
         system: m.manifest.id,
         name: m.manifest.name || m.manifest.id,
@@ -5935,14 +5937,14 @@ export class Kernel {
   benchScene(c: BenchCase): BenchScene {
     const base = this.benchBase();
     const tiles = Array.from({ length: BENCH * BENCH }, (_, i) => {
-      const code = [...(c.terreno?.[Math.floor(i / BENCH)] ?? '')][i % BENCH];
+      const code = [...(c.terrain?.[Math.floor(i / BENCH)] ?? '')][i % BENCH];
       const t = this.palette[code && this.palette[code] ? code : base];
       return { color: t?.color ?? '#555555', ...(t?.layer ? { layer: t.layer } : {}), solid: !!t?.solid };
     });
-    const entities = (c.cose ?? []).map((t) => {
-      const m = this.modules.get(t.modulo)?.manifest;
-      const fire = !!t.componenti?.fuoco;
-      return { name: fire ? 'Fiamma' : (m?.name ?? t.modulo), color: fire ? '#ff8a2a' : (m?.appearance?.color ?? '#cccccc'), radius: m?.physics?.radius ?? 0.4, individual: !!(m?.components?.wander || m?.persona || m?.interaction?.type === 'talk'), fire };
+    const entities = (c.entities ?? []).map((t) => {
+      const m = this.modules.get(t.module)?.manifest;
+      const fire = !!t.components?.fuoco;
+      return { name: fire ? 'Fiamma' : (m?.name ?? t.module), color: fire ? '#ff8a2a' : (m?.appearance?.color ?? '#cccccc'), radius: m?.physics?.radius ?? 0.4, individual: !!(m?.components?.wander || m?.persona || m?.interaction?.type === 'talk'), fire };
     });
     return { tiles, entities };
   }
@@ -5980,7 +5982,7 @@ export class Kernel {
     if (!n) return this.message('Il banco è vuoto: nessun sistema ha casi.');
     this.benchIndex = (((this.benchIndex + d) % n) + n) % n;
     const now = this.benchOf()!;
-    this.message(`${now.entry.name}: «${now.entry.case.titolo}» (${now.index + 1}/${now.count})`);
+    this.message(`${now.entry.name}: «${now.entry.case.title}» (${now.index + 1}/${now.count})`);
     this.bus.emit('studio:bench', now);
   }
 
@@ -6076,7 +6078,7 @@ export class Kernel {
     if (typeof chiaveOrIndex === 'number') {
       idx = chiaveOrIndex;
     } else {
-      idx = rules.findIndex((r) => r.chiave === chiaveOrIndex);
+      idx = rules.findIndex((r) => r.key === chiaveOrIndex);
     }
     if (idx < 0 || idx >= rules.length) return undefined;
     const rule = rules[idx];
@@ -6106,7 +6108,7 @@ export class Kernel {
     if (!list.length) return undefined;
     this.latheIndex = (((this.latheIndex % list.length) + list.length) % list.length);
     const entry = list[this.latheIndex];
-    const key = `${entry.id}@${entry.xml.length}@${entry.info.voto ?? ''}`;
+    const key = `${entry.id}@${entry.xml.length}@${entry.info.score ?? ''}`;
     const hit = this.latheCache.get(key);
     if (hit) {
       return { ...hit, index: this.latheIndex, count: list.length };
@@ -6369,7 +6371,7 @@ export class Kernel {
           draft = await inventRune(this.council, known, reason, errors, this.focusOn(known.map((r) => `rune:${nodeSlug(r.token)}`)));
         } catch (e) {
           this.council.say('narrator', 'errore', `runa nuova: ${(e as Error).message}`, undefined, 'rune.invent');
-          this.noteShortfall({ richiesta: `una runa nuova: ${reason}`, chi, agente: 'narrator', compito: 'rune.invent', esito: 'error', motivo: (e as Error).message });
+          this.noteShortfall({ request: `una runa nuova: ${reason}`, who: chi, agent: 'narrator', task: 'rune.invent', outcome: 'error', reason: (e as Error).message });
           return undefined;
         }
         const v = validateNewRune(draft, this.content.runes, wordsOf(this.files));
@@ -6391,14 +6393,14 @@ export class Kernel {
         const magia = man.loot?.magia;
         if (magia && !magia.entries.some((e) => e.item === `rune:${r.token}`)) magia.entries.push({ item: `rune:${r.token}`, weight: 1 });
         this.repo.write(path, JSON.stringify(man, null, 2) + '\n');
-        const canon = this.repo.working['world/canone.md'];
-        if (canon !== undefined) this.repo.write('world/canone.md', canonWithRune(canon, r));
+        const canon = this.repo.working['world/canon.md'];
+        if (canon !== undefined) this.repo.write('world/canon.md', canonWithRune(canon, r));
         this.applyFiles({ ...this.repo.working });
         const c = this.commitContent(`runa nuova: ${r.token} (${r.rune.name})`, 'rune.invent', 'narrator', chi);
         this.council.say('narrator', 'propone', `runa nuova ${r.rune.glyph} ${r.rune.name} («${r.token}», ${italianName('elementi', r.rune.element)}): ${r.rune.description} (commit ${c.id})`, undefined, 'rune.invent');
         return r.token;
       }
-      this.noteShortfall({ richiesta: `una runa nuova: ${reason}`, chi, agente: 'narrator', compito: 'rune.invent', esito: 'invalid', motivo: errors.join('; ') });
+      this.noteShortfall({ request: `una runa nuova: ${reason}`, who: chi, agent: 'narrator', task: 'rune.invent', outcome: 'invalid', reason: errors.join('; ') });
       return undefined;
     } finally {
       this.inventingRune = false;
@@ -6567,16 +6569,16 @@ export class Kernel {
     if (!m?.persona) return undefined;
     const origin: string | undefined = this.ecs.get(id, 'origin')?.key;
     const people = readPeople(this.files);
-    const known = origin ? people.persone.find((p) => p.origine === origin && p.tipo === modId) : undefined;
+    const known = origin ? people.people.find((p) => p.origin === origin && p.kind === modId) : undefined;
     let identity: Identity;
     if (known) {
-      identity = { name: known.nome, persona: known.persona ?? m.persona, look: known.aspetto ?? '', carrying: known.porta ?? [], job: known.mestiere, gender: known.genere, age: known.eta, family: known.famiglia, routine: known.routine, story: known.storia };
+      identity = { name: known.name, persona: known.persona ?? m.persona, look: known.look ?? '', carrying: known.carries ?? [], job: known.job, gender: known.gender, age: known.age, family: known.family, routine: known.routine, story: known.story };
     } else {
       const specie = this.speciesOf(modId!) ?? 'person';
       // Names already taken (people met, people around): a newcomer's name is unlike all of them,
       // unless they are someone named and awaited.
-      const taken = () => [...readPeople(this.files).persone.map((p) => p.nome), ...this.ecs.query('identity').map((e) => this.ecs.get(e, 'identity').name as string)];
-      const awaited = (n: string) => readPeople(this.files).attesi.some((a) => a.nome.toLowerCase() === n.toLowerCase());
+      const taken = () => [...readPeople(this.files).people.map((p) => p.name), ...this.ecs.query('identity').map((e) => this.ecs.get(e, 'identity').name as string)];
+      const awaited = (n: string) => readPeople(this.files).expected.some((a) => a.name.toLowerCase() === n.toLowerCase());
       const alike = (n: string) => (awaited(n) && !taken().includes(n) ? [] : taken().filter((t) => similarNames(t, n)));
       try {
         const ask = (avoid?: string[]) => individuate(this.council, { name: m.name, description: m.description ?? '', persona: m.persona!, specie }, { place: this.chunkHere()?.name ?? '', common: [...this.content.items.values()].map((d) => d.name), society: societySummary(readPeople(this.files)), avoid, focus: this.focusOn([`kind:${nodeSlug(modId!)}`], this.ecs.get(id, 'pos')) });
@@ -6591,7 +6593,7 @@ export class Kernel {
       } catch {
         identity = { name: m.name, persona: m.persona, look: '', carrying: [], routine: defaultRoutine('') };
       }
-      identity.gender ??= guessGender({ nome: identity.name, mestiere: identity.job ?? '', famiglia: identity.family ?? [] });
+      identity.gender ??= guessGender({ name: identity.name, job: identity.job ?? '', family: identity.family ?? [] });
       // Still alike: a name the kernel picks (and the persona says it).
       if (identity.name !== m.name && alike(identity.name).length) {
         const old = identity.name;
@@ -6609,31 +6611,31 @@ export class Kernel {
     if (!inv.slots.some(Boolean)) for (const d of defs) addItem(inv, d.id, 1, this.itemSpec(d.id));
     if (!known && identity.name !== m.name) {
       const individual: Individual = {
-        nome: identity.name, tipo: modId!, specie: this.speciesOf(modId!) ?? 'person', genere: identity.gender, mestiere: identity.job || m.name, eta: identity.age, famiglia: identity.family ?? [], routine: identity.routine ?? defaultRoutine(identity.job ?? ''),
-        storia: identity.story, luogo: this.chunkAt(this.ecs.get(id, 'pos')?.x ?? 0, this.ecs.get(id, 'pos')?.y ?? 0)?.place?.name, origine: origin, persona: identity.persona, aspetto: identity.look, porta: identity.carrying,
+        name: identity.name, kind: modId!, species: this.speciesOf(modId!) ?? 'person', gender: identity.gender, job: identity.job || m.name, age: identity.age, family: identity.family ?? [], routine: identity.routine ?? defaultRoutine(identity.job ?? ''),
+        story: identity.story, place: this.chunkAt(this.ecs.get(id, 'pos')?.x ?? 0, this.ecs.get(id, 'pos')?.y ?? 0)?.place?.name, origin: origin, persona: identity.persona, look: identity.look, carries: identity.carrying,
       };
       // The kernel makes the society coherent: the other side of each relation, what this species can be.
       const next = addIndividual(readPeople(this.files), individual, (t) => this.speciesOf(t));
       this.repo.write('world/people.json', JSON.stringify(next, null, 2) + '\n');
       this.applyFiles({ ...this.repo.working });
-      this.commitContent(`persone: ${identity.name}, ${individual.mestiere}`, 'npc.individuate', 'narrator');
+      this.commitContent(`persone: ${identity.name}, ${individual.job}`, 'npc.individuate', 'narrator');
       // Relatives already met learn about the newcomer too (and the newcomer's relations may be corrected).
       for (const other of this.ecs.query('identity')) {
         const oi: Identity = this.ecs.get(other, 'identity');
-        const back = next.persone.find((p) => p.nome === oi.name);
-        if (back) oi.family = back.famiglia;
+        const back = next.people.find((p) => p.name === oi.name);
+        if (back) oi.family = back.family;
       }
-      const fam = (identity.family ?? []).map((f) => `${f.legame} di ${f.nome}`).join(', ');
-      this.council.say('narrator', 'propone', `${m.name} → ${identity.name}, ${individual.mestiere}${fam ? `; ${fam}` : ''}: ${identity.look} (porta ${defs.map((d) => d.name).join(', ') || 'niente'})`, undefined, 'npc.individuate');
+      const fam = (identity.family ?? []).map((f) => `${f.bond} di ${f.name}`).join(', ');
+      this.council.say('narrator', 'propone', `${m.name} → ${identity.name}, ${individual.job}${fam ? `; ${fam}` : ''}: ${identity.look} (porta ${defs.map((d) => d.name).join(', ') || 'niente'})`, undefined, 'npc.individuate');
     }
     return identity;
   }
 
   /** What the routine says this individual does now. */
-  routineNow(identity: Identity | undefined): { quando: DayPhase; fa: string; dove: string } | undefined {
+  routineNow(identity: Identity | undefined): { when: DayPhase; does: string; where: string } | undefined {
     if (!identity?.routine?.length) return undefined;
     const q = dayPhase(this.time, Kernel.DAY_SECONDS);
-    return identity.routine.find((r) => r.quando === q);
+    return identity.routine.find((r) => r.when === q);
   }
 
   private greeted = new Map<string, number>();
@@ -6660,7 +6662,7 @@ export class Kernel {
     const man = this.modules.get(tipo)?.manifest;
     if (!man) return undefined;
     const app = man.appearance;
-    const classe = app?.classe ?? (app?.model === 'animal' || app?.model === 'beast' ? app.model : guessClass(`${man.name} ${man.description ?? ''} ${app?.aspetto ?? ''}`, man.persona ? 'figure' : undefined).id);
+    const classe = app?.class ?? (app?.model === 'animal' || app?.model === 'beast' ? app.model : guessClass(`${man.name} ${man.description ?? ''} ${app?.look ?? ''}`, man.persona ? 'figure' : undefined).id);
     return classe === 'animal' || classe === 'beast' ? 'animal' : 'person';
   }
 
@@ -6671,7 +6673,7 @@ export class Kernel {
    */
   reviewSociety(): string[] {
     const people = readPeople(this.repo.working);
-    if (!people.persone.length) return [];
+    if (!people.people.length) return [];
     const { people: fixed, fixes, renames } = repairSociety(people, (t) => this.speciesOf(t));
     if (!fixes.length) return [];
     this.repo.write('world/people.json', JSON.stringify(fixed, null, 2) + '\n');
@@ -6694,14 +6696,14 @@ export class Kernel {
     const fixes: string[] = [];
     const kept: Plot[] = [];
     for (const p of plots) {
-      if (p.stato !== 'active') {
+      if (p.state !== 'active') {
         kept.push(p);
         continue;
       }
       const r = reviewPlot(p, people, wordsOf(this.files));
       if (!r.problems.length) kept.push(p);
-      else if (r.plot) kept.push(r.plot), fixes.push(`«${p.titolo}»: ${r.problems.join('; ')}`);
-      else fixes.push(`«${p.titolo}» ritirata: ${r.problems.join('; ')}`);
+      else if (r.plot) kept.push(r.plot), fixes.push(`«${p.title}»: ${r.problems.join('; ')}`);
+      else fixes.push(`«${p.title}» ritirata: ${r.problems.join('; ')}`);
     }
     if (!fixes.length) return [];
     this.repo.write(PLOTS_FILE, writePlots(kept));
@@ -6713,12 +6715,12 @@ export class Kernel {
 
   /** The registry entry of an individual, by name. */
   individualOf(name: string): Individual | undefined {
-    return readPeople(this.files).persone.find((p) => p.nome === name);
+    return readPeople(this.files).people.find((p) => p.name === name);
   }
 
   private updateIndividual(name: string, fn: (p: Individual) => void): void {
     const people = readPeople(this.files);
-    const p = people.persone.find((x) => x.nome === name);
+    const p = people.people.find((x) => x.name === name);
     if (!p) return;
     fn(p);
     this.repo.write('world/people.json', JSON.stringify(people, null, 2) + '\n');
@@ -6731,18 +6733,18 @@ export class Kernel {
    */
   rememberAbout(name: string, testo: string, con?: string, peso = 1, viandante?: string): void {
     if (!testo.trim()) return;
-    this.updateIndividual(name, (p) => (p.ricordi = remember(p.ricordi, { quando: this.when(), testo: testo.slice(0, 200), ...(con ? { con } : {}), ...(viandante ? { viandante } : {}), peso: Math.max(1, Math.min(3, peso)) })));
+    this.updateIndividual(name, (p) => (p.memories = remember(p.memories, { when: this.when(), text: testo.slice(0, 200), ...(con ? { with: con } : {}), ...(viandante ? { wanderer: viandante } : {}), weight: Math.max(1, Math.min(3, peso)) })));
   }
 
   /** A memory of the wanderer acting now: only they hear of it again (T34). */
   private rememberWanderer(name: string, testo: string, peso: number): void {
     const w = this.wanderer();
-    this.rememberAbout(name, testo, w.nome, peso, w.id);
+    this.rememberAbout(name, testo, w.name, peso, w.id);
   }
 
   /** How the world speaks of a wanderer: «il viandante» when alone, their name otherwise. */
   private wandererWord(w: Wanderer): string {
-    return w.id === SOLO && w.nome === WANDERER_NAME ? 'il viandante' : w.nome;
+    return w.id === SOLO && w.name === WANDERER_NAME ? 'il viandante' : w.name;
   }
 
   /** What someone becomes to the wanderer acting now (friend, sweetheart, spouse, child…): a fact of the world. */
@@ -6750,10 +6752,10 @@ export class Kernel {
     const w = this.wanderer();
     this.updateIndividual(name, (p) => {
       // As everywhere in the registry: what this individual is to the other one.
-      p.famiglia = [...p.famiglia.filter((f) => wandererOf(f) !== w.id), { nome: w.nome, legame, viandante: w.id }];
+      p.family = [...p.family.filter((f) => wandererOf(f) !== w.id), { name: w.name, bond: legame, wanderer: w.id }];
     });
     const who = this.wandererWord(w);
-    this.recordRule({ chiave: `legame|${name}${w.id === SOLO ? '' : `|${w.id}`}`, testo: `${name} e ${who}`, possibile: true, racconto: `${name} ora è ${legame} ${who === 'il viandante' ? 'del viandante' : `di ${who}`}.`, effetti: ['bond'] }, false);
+    this.recordRule({ key: `legame|${name}${w.id === SOLO ? '' : `|${w.id}`}`, text: `${name} e ${who}`, possible: true, story: `${name} ora è ${legame} ${who === 'il viandante' ? 'del viandante' : `di ${who}`}.`, effects: ['bond'] }, false);
     this.message(`${name} ora è: ${legame}.`, 'good');
   }
 
@@ -6797,13 +6799,13 @@ export class Kernel {
       if (this.workTick(id, identity, mind, workers)) continue;
       const now = this.routineNow(identity);
       if (!now) continue;
-      const activity: Activity = (now as { azione?: Activity }).azione ?? inferActivity(now.fa, now.dove);
-      const phaseKey = `${now.quando}`;
+      const activity: Activity = (now as { activity?: Activity }).activity ?? inferActivity(now.does, now.where);
+      const phaseKey = `${now.when}`;
       if (this.lastPhase.get(id) !== phaseKey) {
         this.lastPhase.set(id, phaseKey);
         this.ecs.set(id, 'attivita', { tipo: activity, ferma: false });
-        if (mind.mode === 'vaga') this.ecs.set(id, 'meta', this.placeFor(id, identity, now.dove, activity) ?? { none: true });
-        if (Math.hypot(p.x - pc.x, p.y - pc.y) < 10) this.speak(id, `(${now.fa})`);
+        if (mind.mode === 'vaga') this.ecs.set(id, 'meta', this.placeFor(id, identity, now.where, activity) ?? { none: true });
+        if (Math.hypot(p.x - pc.x, p.y - pc.y) < 10) this.speak(id, `(${now.does})`);
       }
       // Arrived: they do it, there, visibly (lying in bed, hoeing the field, fishing on the bank).
       const meta = this.ecs.get(id, 'meta');
@@ -6832,7 +6834,8 @@ export class Kernel {
     const programs: JobProgram[] = [];
     const seen = new Set<string>();
     for (const m of this.modules.values()) {
-      const list = (m.manifest as { mestieri?: unknown }).mestieri;
+      // The programs of the trades (`jobs`, `mestieri` until the contract 0.4: a module the validator let through as it was).
+      const list = (m.manifest as { jobs?: unknown; mestieri?: unknown }).jobs ?? (m.manifest as { mestieri?: unknown }).mestieri;
       if (m.manifest.kind !== 'data' || !Array.isArray(list)) continue;
       for (const raw of list) {
         // A program of the contract 0.2 (Italian values) reads internal (T307b): the migration ports the seed's, this a stray one.
@@ -6843,7 +6846,7 @@ export class Kernel {
         }
         if (seen.has(program.id)) continue;
         seen.add(program.id);
-        programs.push({ ...program, modulo: m.manifest.id });
+        programs.push({ ...program, module: m.manifest.id });
       }
     }
     this.jobCache = { files: this.files, programs };
@@ -6871,14 +6874,14 @@ export class Kernel {
     const venture = fase === 'day' ? this.ventureWorkable(identity.name) : undefined;
     if (had?.id === program.id && had.fase === fase && had.impresa === venture?.id) return true;
     if (!had && place) workers.set(place, (workers.get(place) ?? 0) + 1);
-    const first = program.giornata.morning.concat(program.giornata.day).find((t) => t.posa)?.posa;
+    const first = program.day.morning.concat(program.day.day).find((t) => t.pose)?.pose;
     const home = this.placeFor(id, identity, 'home', 'sleep') ?? this.placeFor(id, identity, 'home');
     const square = this.placeFor(id, identity, 'square');
     const anchor = home ?? this.ecs.get(id, 'pos');
     // The work: the nearest tile of its kind, or the nearest thing with its tag (the bench of the smith), or the place the routine would give.
-    const bench = program.posto?.entita && anchor ? this.nearest(anchor.x, anchor.y, 18, program.posto.entita) : undefined;
+    const bench = program.workplace?.entity && anchor ? this.nearest(anchor.x, anchor.y, 18, program.workplace.entity) : undefined;
     const benchAt = bench !== undefined ? this.ecs.get(bench, 'pos') : undefined;
-    const work = (program.posto?.casella && anchor ? this.findTile(program.posto.casella, anchor.x, anchor.y, 18) : undefined) ?? (benchAt ? { x: benchAt.x, y: benchAt.y } : undefined) ?? this.placeFor(id, identity, 'work', first);
+    const work = (program.workplace?.tile && anchor ? this.findTile(program.workplace.tile, anchor.x, anchor.y, 18) : undefined) ?? (benchAt ? { x: benchAt.x, y: benchAt.y } : undefined) ?? this.placeFor(id, identity, 'work', first);
     const p = this.ecs.get(id, 'pos');
     // The place they belong to: its deposit is where what they make goes (T245c).
     const luogo = place ?? (p ? this.chunkAt(p.x, p.y)?.key : undefined);
@@ -6887,8 +6890,8 @@ export class Kernel {
       fase,
       giorno: this.day(),
       ...(luogo ? { luogo } : {}),
-      compiti: venture ? [{ fa: 'build' } as JobTask, ...structuredClone(program.giornata[fase])] : structuredClone(program.giornata[fase]),
-      ...(venture ? { impresa: venture.id, impresa_posto: { x: venture.posto.x, y: venture.posto.y } } : {}),
+      compiti: venture ? [{ does: 'build' } as JobTask, ...structuredClone(program.day[fase])] : structuredClone(program.day[fase]),
+      ...(venture ? { impresa: venture.id, impresa_posto: { x: venture.spot.x, y: venture.spot.y } } : {}),
       // The places by the values of `dove` (T307b): sys.work reads `m[dove]`.
       ...(home ? { home } : {}),
       ...(square ? { square } : {}),
@@ -6926,13 +6929,13 @@ export class Kernel {
 
   /** The open venture whose team has this name, if any. */
   private ventureOfMember(name: string | undefined): Venture | undefined {
-    return name ? this.ventureList.find((v) => v.stato !== 'finished' && v.squadra.some((m) => m.nome === name)) : undefined;
+    return name ? this.ventureList.find((v) => v.state !== 'finished' && v.team.some((m) => m.name === name)) : undefined;
   }
 
   /** The venture an individual works at in the day: going on, with something they can do now. */
   private ventureWorkable(name: string | undefined): Venture | undefined {
     const v = this.ventureOfMember(name);
-    return v && v.stato === 'active' ? v : undefined;
+    return v && v.state === 'active' ? v : undefined;
   }
 
   /** How many of an item an individual can bring: what they carry and what the deposit of their place holds. */
@@ -6950,10 +6953,10 @@ export class Kernel {
   /** Who could work at a venture: the individuals with a trade that has a program, grown up, alive. */
   private ventureCandidates(): VentureCandidate[] {
     const programs = this.jobPrograms();
-    return readPeople(this.files).persone.flatMap((p): VentureCandidate[] => {
-      if (/bambin|neonat|infan|piccol/i.test(`${p.eta ?? ''} ${p.mestiere}`) || (p.origine && this.consumed.has(p.origine))) return [];
-      const job = matchJob(p.mestiere, programs);
-      return job ? [{ nome: p.nome, mestiere: job.id, luogo: p.origine?.split('#')[0] }] : [];
+    return readPeople(this.files).people.flatMap((p): VentureCandidate[] => {
+      if (/bambin|neonat|infan|piccol/i.test(`${p.age ?? ''} ${p.job}`) || (p.origin && this.consumed.has(p.origin))) return [];
+      const job = matchJob(p.job, programs);
+      return job ? [{ nome: p.name, mestiere: job.id, luogo: p.origin?.split('#')[0] }] : [];
     });
   }
 
@@ -6961,12 +6964,12 @@ export class Kernel {
   private staffVentures(only?: Venture): void {
     const candidates = this.ventureCandidates();
     for (const v of only ? [only] : openVentures(this.ventureList)) {
-      const busy = new Set(openVentures(this.ventureList).filter((o) => o !== v).flatMap((o) => o.squadra.map((m) => m.nome)));
+      const busy = new Set(openVentures(this.ventureList).filter((o) => o !== v).flatMap((o) => o.team.map((m) => m.name)));
       const { joined, left } = fillTeam(v, candidates, busy, this.config.seed);
       if (!joined.length && !left.length) continue;
       this.touchVentures();
-      for (const m of joined) this.rememberAbout(m.nome, `Lavoro a «${v.titolo}», come ${m.ruolo}.`, undefined, 1);
-      if (left.length) this.council.say('kernel', 'info', `«${v.titolo}»: ${left.join(', ')} non ci sono più; la squadra è di ${v.squadra.length}.`, undefined, 'impresa.squadra');
+      for (const m of joined) this.rememberAbout(m.name, `Lavoro a «${v.title}», come ${m.role}.`, undefined, 1);
+      if (left.length) this.council.say('kernel', 'info', `«${v.title}»: ${left.join(', ')} non ci sono più; la squadra è di ${v.team.length}.`, undefined, 'impresa.squadra');
     }
   }
 
@@ -6977,7 +6980,7 @@ export class Kernel {
     this.touchVentures();
     this.staffVentures(v);
     this.syncVenturePlan(v);
-    this.council.say('kernel', 'info', `nasce un'impresa: «${v.titolo}» (${v.tipo}, ${v.fasi.map((f) => f.nome).join(' → ')}), squadra di ${v.squadra.length}`, undefined, 'impresa.nasce');
+    this.council.say('kernel', 'info', `nasce un'impresa: «${v.title}» (${v.type}, ${v.phases.map((f) => f.name).join(' → ')}), squadra di ${v.team.length}`, undefined, 'impresa.nasce');
   }
 
   /** A building fell (T245d): its rebuilding, on its lot, with the same model and seed. */
@@ -6989,37 +6992,37 @@ export class Kernel {
     const concetto = ruin.concetto ?? 'una casa';
     this.startVenture({
       id,
-      titolo: `Si ricostruisce ${concetto}`,
-      tipo: 'construction',
-      stato: 'active',
-      luogo,
-      posto: { x: p.x, y: p.y },
-      lotto: Number(lot),
-      origine: origin,
-      concetto,
-      ...(ruin.classe ? { classe: ruin.classe } : {}),
-      ...(ruin.taglia ? { taglia: ruin.taglia } : {}),
-      ...(form ? { modello: form.wanted ?? form.model, seme: form.seed, yaw: form.yaw } : {}),
-      fasi: housePhases(ruin.classe),
-      ruoli: structuredClone(HOUSE_ROLES),
-      portati: {},
-      lavorato: 0,
-      squadra: [],
-      inizio: this.day(),
-      ultimo: this.day(),
-      nato_da: 'regola:ricostruzione',
-      carta: { autore: 'kernel' },
+      title: `Si ricostruisce ${concetto}`,
+      type: 'construction',
+      state: 'active',
+      chunk: luogo,
+      spot: { x: p.x, y: p.y },
+      lot: Number(lot),
+      origin: origin,
+      concept: concetto,
+      ...(ruin.classe ? { class: ruin.classe } : {}),
+      ...(ruin.taglia ? { size: ruin.taglia } : {}),
+      ...(form ? { model: form.wanted ?? form.model, seed: form.seed, yaw: form.yaw } : {}),
+      phases: housePhases(ruin.classe),
+      roles: structuredClone(HOUSE_ROLES),
+      brought: {},
+      worked: 0,
+      team: [],
+      start: this.day(),
+      last: this.day(),
+      born_from: 'regola:ricostruzione',
+      card: { author: 'kernel' },
     });
   }
 
   /** The households of a place: the individuals who belong to it, grouped by the family bonds among them. */
   private householdsOf(key: string): number {
-    const here = readPeople(this.files).persone.filter((p) => p.origine?.startsWith(`${key}#`) && !(p.origine && this.consumed.has(p.origine)));
-    const names = new Set(here.map((p) => p.nome));
-    const parent = new Map(here.map((p) => [p.nome, p.nome]));
+    const here = readPeople(this.files).people.filter((p) => p.origin?.startsWith(`${key}#`) && !(p.origin && this.consumed.has(p.origin)));
+    const names = new Set(here.map((p) => p.name));
+    const parent = new Map(here.map((p) => [p.name, p.name]));
     const find = (n: string): string => (parent.get(n) === n ? n : find(parent.get(n)!));
-    for (const p of here) for (const f of p.famiglia) if (names.has(f.nome)) parent.set(find(p.nome), find(f.nome));
-    return new Set(here.map((p) => find(p.nome))).size;
+    for (const p of here) for (const f of p.family) if (names.has(f.name)) parent.set(find(p.name), find(f.name));
+    return new Set(here.map((p) => find(p.name))).size;
   }
 
   /**
@@ -7030,7 +7033,7 @@ export class Kernel {
     const S = this.config.chunkSize;
     const path = this.pathCode();
     const lotBox = (c: number, r: number) => ch.lots.some((b) => c >= b.x0 - 1 && c <= b.x1 + 1 && r >= b.y0 - 1 && r <= b.y1 + 1);
-    const built = this.ventureList.filter((v) => v.luogo === ch.key && v.area).map((v) => v.area!);
+    const built = this.ventureList.filter((v) => v.chunk === ch.key && v.area).map((v) => v.area!);
     const inBuilt = (c: number, r: number) => built.some((b) => c >= b.x0 - 1 && c <= b.x1 + 1 && r >= b.y0 - 1 && r <= b.y1 + 1);
     const ground = (i: number) => {
       const t = this.palette[ch.tiles[i]];
@@ -7082,7 +7085,7 @@ export class Kernel {
       const name = ch.plan.place?.name ?? 'il paese';
       const open = openVentures(this.ventureList, ch.key);
       // Three families or more without a house, and free ground: a common house (ADR-0134: the house of the world).
-      const houses = ch.lots.length + this.ventureList.filter((v) => v.luogo === ch.key && v.area).length;
+      const houses = ch.lots.length + this.ventureList.filter((v) => v.chunk === ch.key && v.area).length;
       if (!open.some((v) => v.area) && this.householdsOf(ch.key) - houses >= 3) {
         const area = this.freeArea(ch, 4);
         if (area) {
@@ -7092,59 +7095,59 @@ export class Kernel {
           const origin = `${ch.key}#v${today}`;
           this.startVenture({
             id: ventureId(`casa|${origin}`),
-            titolo: `La casa comune di ${name}`,
-            tipo: 'construction',
-            stato: 'active',
-            luogo: ch.key,
-            posto: { x: ch.cx * S + (area.x0 + area.x1 + 1) / 2, y: ch.cy * S + (area.y0 + area.y1 + 1) / 2 },
+            title: `La casa comune di ${name}`,
+            type: 'construction',
+            state: 'active',
+            chunk: ch.key,
+            spot: { x: ch.cx * S + (area.x0 + area.x1 + 1) / 2, y: ch.cy * S + (area.y0 + area.y1 + 1) / 2 },
             area,
-            origine: origin,
-            concetto: house ?? 'una casetta',
-            classe: 'building',
-            modello: model,
-            seme: this.forms.seedFor(model, origin),
+            origin: origin,
+            concept: house ?? 'una casetta',
+            class: 'building',
+            model: model,
+            seed: this.forms.seedFor(model, origin),
             yaw: 0,
-            fasi: housePhases('building'),
-            ruoli: structuredClone(HOUSE_ROLES),
-            portati: {},
-            lavorato: 0,
-            squadra: [],
-            inizio: today,
-            ultimo: today,
-            nato_da: 'regola:casa',
-            carta: { autore: 'kernel' },
+            phases: housePhases('building'),
+            roles: structuredClone(HOUSE_ROLES),
+            brought: {},
+            worked: 0,
+            team: [],
+            start: today,
+            last: today,
+            born_from: 'regola:casa',
+            card: { author: 'kernel' },
           });
         }
       }
       // The harvest, once a year by the calendar of the kernel: where something ripens into what a trade gathers.
-      if (today % YEAR_DAYS !== HARVEST_DAY || this.ventureList.some((v) => v.luogo === ch.key && v.tipo === 'harvest' && v.inizio > today - YEAR_DAYS)) continue;
+      if (today % YEAR_DAYS !== HARVEST_DAY || this.ventureList.some((v) => v.chunk === ch.key && v.type === 'harvest' && v.start > today - YEAR_DAYS)) continue;
       // A crop: gathered by a trade, ripened from a tile some trade sows (`transform` into it). A wood that grows back is not a harvest.
-      const tasks = this.jobPrograms().flatMap((p) => [...p.giornata.morning, ...p.giornata.day, ...p.giornata.evening]);
-      const sown = new Set(tasks.flatMap((t) => (t.fa === 'transform' && t.a ? [t.a] : [])));
-      const gather = tasks.find((t) => t.fa === 'gather' && t.casella && Object.entries(this.palette).some(([c, d]) => d.matura?.in === t.casella && sown.has(c)));
-      if (!gather?.casella || !gather.oggetto) continue;
-      const crops = Object.entries(this.palette).filter(([c, d]) => c === gather.casella || d.matura?.in === gather.casella).map(([c]) => c);
+      const tasks = this.jobPrograms().flatMap((p) => [...p.day.morning, ...p.day.day, ...p.day.evening]);
+      const sown = new Set(tasks.flatMap((t) => (t.does === 'transform' && t.to ? [t.to] : [])));
+      const gather = tasks.find((t) => t.does === 'gather' && t.tile && Object.entries(this.palette).some(([c, d]) => d.ripens?.in === t.tile && sown.has(c)));
+      if (!gather?.tile || !gather.item) continue;
+      const crops = Object.entries(this.palette).filter(([c, d]) => c === gather.tile || d.ripens?.in === gather.tile).map(([c]) => c);
       const cells = [...ch.tiles].flatMap((t, i) => (crops.includes(t) ? [i] : []));
       if (cells.length < 4) continue;
       const mid = cells.reduce((a, i) => ({ c: a.c + (i % S) / cells.length, r: a.r + Math.floor(i / S) / cells.length }), { c: 0, r: 0 });
       this.startVenture({
         id: ventureId(`raccolto|${ch.key}|${today}`),
-        titolo: `Il raccolto di ${name}`,
-        tipo: 'harvest',
-        stato: 'active',
-        luogo: ch.key,
-        posto: { x: ch.cx * S + mid.c + 0.5, y: ch.cy * S + mid.r + 0.5 },
-        fasi: [{ nome: 'mietitura', materiali: {}, lavoro: Math.min(900, 30 * cells.length), stadio: 1 }],
-        ruoli: structuredClone(HARVEST_ROLES),
-        compito: { casella: gather.casella, oggetto: gather.oggetto, lascia: gather.lascia ?? gather.casella, durata: gather.durata ?? 10, ...(gather.posa ? { posa: gather.posa } : {}) },
-        portati: {},
-        lavorato: 0,
-        squadra: [],
-        inizio: today,
-        ultimo: today,
-        scade: today + HARVEST_DAYS - 1,
-        nato_da: 'regola:raccolto',
-        carta: { autore: 'kernel' },
+        title: `Il raccolto di ${name}`,
+        type: 'harvest',
+        state: 'active',
+        chunk: ch.key,
+        spot: { x: ch.cx * S + mid.c + 0.5, y: ch.cy * S + mid.r + 0.5 },
+        phases: [{ name: 'mietitura', materials: {}, work: Math.min(900, 30 * cells.length), stage: 1 }],
+        roles: structuredClone(HARVEST_ROLES),
+        task: { tile: gather.tile, item: gather.item, drop: gather.drop ?? gather.tile, duration: gather.duration ?? 10, ...(gather.pose ? { pose: gather.pose } : {}) },
+        brought: {},
+        worked: 0,
+        team: [],
+        start: today,
+        last: today,
+        expires: today + HARVEST_DAYS - 1,
+        born_from: 'regola:raccolto',
+        card: { author: 'kernel' },
       });
     }
   }
@@ -7167,31 +7170,31 @@ export class Kernel {
     this.ventureTime = this.time;
     const bodies = this.bodyOfName();
     for (const v of this.ventureList) {
-      if (v.stato === 'finished') continue;
-      const ch = this.chunks.get(v.luogo);
+      if (v.state === 'finished') continue;
+      const ch = this.chunks.get(v.chunk);
       let worked = 0;
       if (ch?.stage === 'planned') {
-        for (const m of v.squadra) {
-          const id = bodies.get(m.nome);
+        for (const m of v.team) {
+          const id = bodies.get(m.name);
           if (id === undefined) continue;
           const job = this.ecs.get(id, 'mestiere');
           const s = this.ecs.get(id, 'lavoro');
           const task = job?.impresa === v.id && s ? job.compiti?.[(Number(s.passo) || 1) - 1] : undefined;
-          if (task?.fa !== 'build' || !this.ecs.get(id, 'attivita')?.ferma) continue;
+          if (task?.does !== 'build' || !this.ecs.get(id, 'attivita')?.ferma) continue;
           const p = this.ecs.get(id, 'pos');
-          if (v.compito ? this.ecs.get(id, 'chunk')?.key === v.luogo || this.chunkAt(p.x, p.y)?.key === v.luogo : Math.hypot(p.x - v.posto.x, p.y - v.posto.y) <= SITE_REACH + 1) worked++;
+          if (v.task ? this.ecs.get(id, 'chunk')?.key === v.chunk || this.chunkAt(p.x, p.y)?.key === v.chunk : Math.hypot(p.x - v.spot.x, p.y - v.spot.y) <= SITE_REACH + 1) worked++;
         }
       }
       if (worked && dt > 0) {
         const closed = addWork(v, worked * dt);
-        v.ultimo = today;
+        v.last = today;
         this.touchVentures();
         this.phasesClosed(v, closed);
       }
-      const available = (item: string) => v.squadra.reduce((n, m) => n + this.canBring(bodies.get(m.nome), this.placeOfPerson(bodies.get(m.nome), readPeople(this.files).persone.find((p) => p.nome === m.nome)?.origine), item), 0) + (Number(this.placeDeposit(v.luogo)[item]) || 0);
+      const available = (item: string) => v.team.reduce((n, m) => n + this.canBring(bodies.get(m.name), this.placeOfPerson(bodies.get(m.name), readPeople(this.files).people.find((p) => p.name === m.name)?.origin), item), 0) + (Number(this.placeDeposit(v.chunk)[item]) || 0);
       const state = ventureState(v, today, available);
-      if (state !== v.stato) {
-        v.stato = state;
+      if (state !== v.state) {
+        v.state = state;
         this.touchVentures();
         if (state === 'finished') this.ventureDone(v);
       }
@@ -7201,24 +7204,24 @@ export class Kernel {
 
   /** A phase that closes is a line of the registry, with no call (`impresa.fase`). */
   private phasesClosed(v: Venture, closed: number[]): void {
-    for (const k of closed) this.council.say('kernel', 'info', `«${v.titolo}»: finita la fase «${v.fasi[k]?.nome}» (${k + 1} di ${v.fasi.length})`, undefined, 'impresa.fase');
+    for (const k of closed) this.council.say('kernel', 'info', `«${v.title}»: finita la fase «${v.phases[k]?.name}» (${k + 1} di ${v.phases.length})`, undefined, 'impresa.fase');
     // The building rises a stage (T245e).
     if (closed.length) this.syncVenturePlan(v);
   }
 
   /** A venture ends: the team remembers it, a rebuilt or a new building stands whole. */
   private ventureDone(v: Venture): void {
-    v.fine = this.day();
-    for (const m of v.squadra) this.rememberAbout(m.nome, `Abbiamo finito «${v.titolo}».`, undefined, 3);
-    this.council.say('kernel', 'info', `«${v.titolo}» è finita.`, undefined, 'impresa.fine');
-    if (v.origine && !v.area) this.consumed.delete(v.origine);
+    v.end = this.day();
+    for (const m of v.team) this.rememberAbout(m.name, `Abbiamo finito «${v.title}».`, undefined, 3);
+    this.council.say('kernel', 'info', `«${v.title}» è finita.`, undefined, 'impresa.fine');
+    if (v.origin && !v.area) this.consumed.delete(v.origin);
     this.syncVenturePlan(v);
     this.ventureList = pruneVentures(this.ventureList);
   }
 
   /** The stage a venture shows (T245e): that of its last phase done; 1 once it is finished (a harvest has none). */
   private ventureStage(v: Venture): number {
-    return v.stato === 'finished' ? 1 : ventureProgress(v).stadio;
+    return v.state === 'finished' ? 1 : ventureProgress(v).stadio;
   }
 
   /**
@@ -7227,20 +7230,20 @@ export class Kernel {
    * at once (and a client gets it with the entity). Only a loaded place: an unloaded one is brought up to date when it loads (T245f).
    */
   private syncVenturePlan(v: Venture): void {
-    if (v.tipo !== 'construction' || !v.origine || this.mirror) return;
-    const ch = this.chunks.get(v.luogo);
+    if (v.type !== 'construction' || !v.origin || this.mirror) return;
+    const ch = this.chunks.get(v.chunk);
     if (ch?.stage !== 'planned' || !ch.plan) return;
     const stage = this.ventureStage(v);
     const changed = this.ventureIntoPlan(v, ch.plan);
-    const sid = this.ecs.query('struttura', 'origin').find((e) => this.ecs.get(e, 'origin').key === v.origine);
+    const sid = this.ecs.query('struttura', 'origin').find((e) => this.ecs.get(e, 'origin').key === v.origin);
     if (sid !== undefined) {
       const st = this.ecs.get(sid, 'struttura');
       if (stage >= 1) delete st.stadio;
       else st.stadio = stage;
-    } else if (v.area) this.spawnPlannedHouse(ch, ch.plan.case!.find((h) => h.origine === v.origine)!);
+    } else if (v.area) this.spawnPlannedHouse(ch, ch.plan.houses!.find((h) => h.origin === v.origin)!);
     else {
       const { lots } = this.lotsOf(ch, ch.plan, this.pathCode());
-      const l = lots.find((x) => x.origin === v.origine);
+      const l = lots.find((x) => x.origin === v.origin);
       if (l) this.ecs.spawn({ pos: { x: l.x, y: l.y }, glyph: { ch: '⌂', color: this.terrain?.manifest.roof?.color ?? '#9a4632' }, body: { r: 0.5, solid: true }, form: l.form, struttura: { ...l.struttura, ...(stage < 1 ? { stadio: stage } : {}) }, chunk: { key: ch.key }, origin: { key: l.origin } });
     }
     if (changed) this.saveChunkSoon(ch);
@@ -7248,42 +7251,42 @@ export class Kernel {
 
   /** A venture's building and stage written into the plan of its place (T245e, T245f): whether it changed. */
   private ventureIntoPlan(v: Venture, plan: ChunkPlan): boolean {
-    if (v.tipo !== 'construction' || !v.origine) return false;
+    if (v.type !== 'construction' || !v.origin) return false;
     const stage = this.ventureStage(v);
     let changed = false;
     if (v.area) {
-      const list = (plan.case ??= []);
-      const at = list.findIndex((h) => h.origine === v.origine);
-      const classe = v.classe ?? 'building';
-      const model = v.modello ?? this.forms.resolve(undefined, classe);
-      const house: PlannedHouse = { origine: v.origine, x: v.posto.x, y: v.posto.y, modello: model, seme: v.seme ?? this.forms.seedFor(model, v.origine), yaw: v.yaw ?? 0, classe, concetto: v.concetto ?? 'una casetta', stadio: stage };
-      if (at < 0 || list[at].stadio !== stage) {
+      const list = (plan.houses ??= []);
+      const at = list.findIndex((h) => h.origin === v.origin);
+      const classe = v.class ?? 'building';
+      const model = v.model ?? this.forms.resolve(undefined, classe);
+      const house: PlannedHouse = { origin: v.origin, x: v.spot.x, y: v.spot.y, model: model, seed: v.seed ?? this.forms.seedFor(model, v.origin), yaw: v.yaw ?? 0, class: classe, concept: v.concept ?? 'una casetta', stage: stage };
+      if (at < 0 || list[at].stage !== stage) {
         if (at < 0) list.push(house);
         else list[at] = house;
         changed = true;
       }
     } else {
-      const stadi = (plan.stadi ??= {});
-      if (stage >= 1 ? v.origine in stadi : stadi[v.origine] !== stage) {
-        if (stage >= 1) delete stadi[v.origine];
-        else stadi[v.origine] = stage;
+      const stadi = (plan.stages ??= {});
+      if (stage >= 1 ? v.origin in stadi : stadi[v.origin] !== stage) {
+        if (stage >= 1) delete stadi[v.origin];
+        else stadi[v.origin] = stage;
         changed = true;
       }
-      if (!Object.keys(stadi).length) delete plan.stadi;
+      if (!Object.keys(stadi).length) delete plan.stages;
     }
     return changed;
   }
 
   /** A house of the plan built on free ground (T245d, T245e): a structure like those of the lots, with its model, seed, turn and stage. */
   private spawnPlannedHouse(ch: Chunk, h: PlannedHouse | undefined): void {
-    if (!h || typeof h.origine !== 'string' || ![h.x, h.y].every(Number.isFinite) || this.ecs.query('struttura', 'origin').some((e) => this.ecs.get(e, 'origin').key === h.origine)) return;
-    const classe = typeof h.classe === 'string' ? h.classe : 'building';
-    const model = this.forms.resolve(typeof h.modello === 'string' ? h.modello : undefined, classe);
-    const form: FormComp = { model, seed: Number.isFinite(h.seme) ? h.seme : this.forms.seedFor(model, h.origine), yaw: Number.isFinite(h.yaw) ? h.yaw : 0, ...(h.modello && h.modello !== model ? { wanted: h.modello, classe } : {}) };
-    const done = this.savedForms.get(h.origine);
+    if (!h || typeof h.origin !== 'string' || ![h.x, h.y].every(Number.isFinite) || this.ecs.query('struttura', 'origin').some((e) => this.ecs.get(e, 'origin').key === h.origin)) return;
+    const classe = typeof h.class === 'string' ? h.class : 'building';
+    const model = this.forms.resolve(typeof h.model === 'string' ? h.model : undefined, classe);
+    const form: FormComp = { model, seed: Number.isFinite(h.seed) ? h.seed : this.forms.seedFor(model, h.origin), yaw: Number.isFinite(h.yaw) ? h.yaw : 0, ...(h.model && h.model !== model ? { wanted: h.model, classe } : {}) };
+    const done = this.savedForms.get(h.origin);
     if (done?.length) form.done = [...done];
-    const stadio = Number.isFinite(h.stadio) ? Math.max(0, Math.min(1, h.stadio)) : 1;
-    this.ecs.spawn({ pos: { x: h.x, y: h.y }, glyph: { ch: '⌂', color: this.terrain?.manifest.roof?.color ?? '#9a4632' }, body: { r: 0.5, solid: true }, form, struttura: { concetto: String(h.concetto ?? 'una casetta').slice(0, 80), classe, ...(h.modello ? { model: h.modello } : {}), ...(stadio < 1 ? { stadio } : {}) }, chunk: { key: ch.key }, origin: { key: h.origine } });
+    const stadio = Number.isFinite(h.stage) ? Math.max(0, Math.min(1, h.stage)) : 1;
+    this.ecs.spawn({ pos: { x: h.x, y: h.y }, glyph: { ch: '⌂', color: this.terrain?.manifest.roof?.color ?? '#9a4632' }, body: { r: 0.5, solid: true }, form, struttura: { concetto: String(h.concept ?? 'una casetta').slice(0, 80), classe, ...(h.model ? { model: h.model } : {}), ...(stadio < 1 ? { stadio } : {}) }, chunk: { key: ch.key }, origin: { key: h.origin } });
   }
 
   /** What `costruisci` asks the kernel (`world.impresa(id)`): the next step of the venture this individual works at, or nothing. */
@@ -7310,9 +7313,9 @@ export class Kernel {
     if (!p) return 0;
     const name = this.ecs.get(id, 'identity')?.name;
     const v = wanderer !== undefined
-      ? openVentures(this.ventureList).filter((o) => Math.hypot(o.posto.x - p.x, o.posto.y - p.y) <= 6).sort((a, b) => Math.hypot(a.posto.x - p.x, a.posto.y - p.y) - Math.hypot(b.posto.x - p.x, b.posto.y - p.y))[0]
+      ? openVentures(this.ventureList).filter((o) => Math.hypot(o.spot.x - p.x, o.spot.y - p.y) <= 6).sort((a, b) => Math.hypot(a.spot.x - p.x, a.spot.y - p.y) - Math.hypot(b.spot.x - p.x, b.spot.y - p.y))[0]
       : this.ventureOfMember(name);
-    if (!v || Math.hypot(v.posto.x - p.x, v.posto.y - p.y) > (wanderer !== undefined ? 6 : SITE_REACH + 1.5)) return 0;
+    if (!v || Math.hypot(v.spot.x - p.x, v.spot.y - p.y) > (wanderer !== undefined ? 6 : SITE_REACH + 1.5)) return 0;
     let total = 0;
     const before = ventureProgress(v).fase;
     for (const it of Object.keys(stillNeeded(v)).filter((x) => item === undefined || x === item)) {
@@ -7333,17 +7336,17 @@ export class Kernel {
       }
     }
     if (!total) return 0;
-    v.ultimo = this.day();
+    v.last = this.day();
     this.touchVentures();
     this.phasesClosed(v, Array.from({ length: ventureProgress(v).fase - before }, (_, i) => before + i));
     if (wanderer !== undefined) {
       const who = this.wanderersById.get(wanderer);
       const bodies = this.bodyOfName();
       // Who is there remembers it (section 3.5): weight 2, about this wanderer.
-      for (const m of v.squadra) {
-        const b = bodies.get(m.nome);
+      for (const m of v.team) {
+        const b = bodies.get(m.name);
         const q = b !== undefined ? this.ecs.get(b, 'pos') : undefined;
-        if (q && Math.hypot(q.x - p.x, q.y - p.y) < 12) this.rememberAbout(m.nome, `${who && who.id !== SOLO ? who.nome : 'Il viandante'} ha portato del materiale per «${v.titolo}».`, who?.nome, 2, wanderer);
+        if (q && Math.hypot(q.x - p.x, q.y - p.y) < 12) this.rememberAbout(m.name, `${who && who.id !== SOLO ? who.name : 'Il viandante'} ha portato del materiale per «${v.title}».`, who?.name, 2, wanderer);
       }
     }
     return total;
@@ -7357,8 +7360,8 @@ export class Kernel {
     for (const w of this.wanderersInWorld()) {
       const p = { x: w.x, y: w.y };
       const near = this.ventureList
-        .filter((v) => v.stato !== 'finished' || (v.fine ?? 0) >= this.day() - 1)
-        .map((v) => ({ v, d: Math.hypot(v.posto.x - p.x, v.posto.y - p.y) }))
+        .filter((v) => v.state !== 'finished' || (v.end ?? 0) >= this.day() - 1)
+        .map((v) => ({ v, d: Math.hypot(v.spot.x - p.x, v.spot.y - p.y) }))
         .filter((x) => x.d <= 30)
         .sort((a, b) => a.d - b.d)[0]?.v;
       // No site near: no fields, nothing travels (the panel shows nothing).
@@ -7369,11 +7372,11 @@ export class Kernel {
       const name = (it: string) => this.itemInfo(it).name;
       const pr = ventureProgress(near);
       const fields = {
-            titolo: near.titolo,
-            fase: pr.finita ? 'finita' : `${near.fasi[pr.fase].nome} (${pr.fase + 1} di ${near.fasi.length})`,
-            stato: near.stato === 'waiting' ? 'aspetta il materiale' : near.stato === 'stopped' ? 'ferma: nessuno ci lavora' : italianName('imprese', near.stato),
+            titolo: near.title,
+            fase: pr.finita ? 'finita' : `${near.phases[pr.fase].name} (${pr.fase + 1} di ${near.phases.length})`,
+            stato: near.state === 'waiting' ? 'aspetta il materiale' : near.state === 'stopped' ? 'ferma: nessuno ci lavora' : italianName('imprese', near.state),
             manca: missingWords(near, name),
-            squadra: near.squadra.map((m) => `${m.nome} (${m.ruolo})`).join(', ') || 'nessuno',
+            squadra: near.team.map((m) => `${m.name} (${m.role})`).join(', ') || 'nessuno',
           };
       const cur = this.ecs.get(w.id, 'cantiere');
       if (!cur || Object.entries(fields).some(([k, x]) => cur[k] !== x)) this.ecs.set(w.id, 'cantiere', fields);
@@ -7406,28 +7409,28 @@ export class Kernel {
     const setDeposit = (luogo: string, d: Record<string, number>) => this.stores.set(WORK_MODULE, depKey(luogo), Object.keys(d).length ? d : undefined);
     const busy = new Set<string>();
     for (const v of openVentures(this.ventureList)) {
-      for (const m of v.squadra) busy.add(m.nome);
-      if (loaded(v.luogo) || !v.squadra.length) continue;
-      const d = deposit(v.luogo);
+      for (const m of v.team) busy.add(m.name);
+      if (loaded(v.chunk) || !v.team.length) continue;
+      const d = deposit(v.chunk);
       const before = ventureProgress(v).fase;
       for (const [it, n] of Object.entries(stillNeeded(v))) {
         const { taken } = bring(v, it, Math.min(n, d[it] ?? 0));
         if (taken) d[it] -= taken;
         if (d[it] !== undefined && d[it] <= 0) delete d[it];
       }
-      setDeposit(v.luogo, d);
-      addWork(v, v.squadra.length * Kernel.AWAY_WORK);
-      v.ultimo = this.day();
+      setDeposit(v.chunk, d);
+      addWork(v, v.team.length * Kernel.AWAY_WORK);
+      v.last = this.day();
       this.touchVentures();
       this.phasesClosed(v, Array.from({ length: ventureProgress(v).fase - before }, (_, i) => before + i));
     }
     // The trades of the places nobody sees fill their deposits.
     const programs = this.jobPrograms();
     const byPlace = new Map<string, Record<string, number>>();
-    for (const p of readPeople(this.files).persone) {
-      const luogo = p.origine?.split('#')[0];
-      if (!luogo || loaded(luogo) || busy.has(p.nome) || (p.origine && this.consumed.has(p.origine))) continue;
-      const job = matchJob(p.mestiere, programs);
+    for (const p of readPeople(this.files).people) {
+      const luogo = p.origin?.split('#')[0];
+      if (!luogo || loaded(luogo) || busy.has(p.name) || (p.origin && this.consumed.has(p.origin))) continue;
+      const job = matchJob(p.job, programs);
       if (!job) continue;
       const d = byPlace.get(luogo) ?? deposit(luogo);
       byPlace.set(luogo, d);
@@ -7454,25 +7457,25 @@ export class Kernel {
   private returnToPlace(ch: Chunk, plan: ChunkPlan): number | undefined {
     if (this.mirror) return undefined;
     let changed = false;
-    for (const v of this.ventureList) if (v.luogo === ch.key && this.ventureIntoPlan(v, plan)) changed = true;
+    for (const v of this.ventureList) if (v.chunk === ch.key && this.ventureIntoPlan(v, plan)) changed = true;
     // A plan goes to disk on its own, ahead of the file of the ventures: after a tab closed in between, or `R`, a stage no venture backs
     // would keep its scaffolding for ever. The ventures say what is being built; without one the building is whole, the new house was never begun.
-    const building = new Set(this.ventureList.filter((v) => v.luogo === ch.key && v.stato !== 'finished').map((v) => v.origine));
-    for (const origin of Object.keys(plan.stadi ?? {})) {
+    const building = new Set(this.ventureList.filter((v) => v.chunk === ch.key && v.state !== 'finished').map((v) => v.origin));
+    for (const origin of Object.keys(plan.stages ?? {})) {
       if (building.has(origin)) continue;
-      delete plan.stadi![origin];
+      delete plan.stages![origin];
       changed = true;
     }
-    if (plan.stadi && !Object.keys(plan.stadi).length) delete plan.stadi;
-    const houses = plan.case?.filter((h) => !(Number.isFinite(h.stadio) && h.stadio < 1) || building.has(h.origine));
-    if (houses && houses.length !== plan.case!.length) {
-      plan.case = houses;
+    if (plan.stages && !Object.keys(plan.stages).length) delete plan.stages;
+    const houses = plan.houses?.filter((h) => !(Number.isFinite(h.stage) && h.stage < 1) || building.has(h.origin));
+    if (houses && houses.length !== plan.houses!.length) {
+      plan.houses = houses;
       changed = true;
     }
     this.matureChunk(ch);
-    const away = Number.isFinite(plan.visto) ? Math.max(0, this.time - plan.visto!) : undefined;
-    if (plan.visto !== undefined) {
-      delete plan.visto;
+    const away = Number.isFinite(plan.seen) ? Math.max(0, this.time - plan.seen!) : undefined;
+    if (plan.seen !== undefined) {
+      delete plan.seen;
       changed = true;
     }
     if (changed) this.saveChunkSoon(ch);
@@ -7634,12 +7637,12 @@ export class Kernel {
     const today = this.day();
     const S = this.config.chunkSize;
     for (const [idx, code] of Object.entries(edits)) {
-      const m = this.palette[code]?.matura;
+      const m = this.palette[code]?.ripens;
       const into = m && this.tileCodeOf(m.in);
       if (!m || !into) continue;
-      const days = (ch.plan!.giorni ??= {});
+      const days = (ch.plan!.days ??= {});
       const since = days[idx] ??= today;
-      if (today - since < m.dopo) continue;
+      if (today - since < m.after) continue;
       const i = Number(idx);
       this.setTile(ch.cx * S + (i % S), ch.cy * S + Math.floor(i / S), into);
     }
@@ -7658,19 +7661,19 @@ export class Kernel {
         const ia: Identity = this.ecs.get(a, 'identity');
         const ib: Identity = this.ecs.get(b, 'identity');
         if (this.ecs.get(a, 'attivita')?.tipo === 'sleep' || this.ecs.get(b, 'attivita')?.tipo === 'sleep') continue;
-        const rel = ia.family?.find((f) => f.nome === ib.name);
+        const rel = ia.family?.find((f) => f.name === ib.name);
         const key = [ia.name, ib.name].sort().join('|');
         if ((this.greeted.get(key) ?? -1e9) > this.time - (rel ? 90 : 240)) continue;
         const near = Math.hypot(pa.x - pc.x, pa.y - pc.y) < 10;
         // A real conversation (the Narrator) when the wanderer can hear it, at most one at a time.
         if (near && !this.talking && this.time - this.lastTalk > stretch(40, this.coefficients().dialogues) && !this.generationHeld) {
           this.greeted.set(key, this.time);
-          void this.converse(a, b, ia, ib, rel?.legame);
+          void this.converse(a, b, ia, ib, rel?.bond);
           return;
         }
         if (!rel) continue;
         this.greeted.set(key, this.time);
-        const [la, lb] = greeting({ nome: ia.name, mestiere: ia.job ?? '' }, { nome: ib.name }, rel.legame, this.routineNow(ia)?.fa ?? '');
+        const [la, lb] = greeting({ nome: ia.name, mestiere: ia.job ?? '' }, { nome: ib.name }, rel.bond, this.routineNow(ia)?.does ?? '');
         this.speak(a, la);
         this.queuedSpeech.push({ id: b, text: lb, at: this.time + 2.2 });
       }
@@ -7685,9 +7688,9 @@ export class Kernel {
       nome: who.name,
       mestiere: who.job ?? '',
       scheda,
-      legame: l ?? who.family?.find((f) => f.nome === other.name)?.legame,
-      fa: this.routineNow(who)?.fa ?? '',
-      ricordi: memorySummary(this.individualOf(who.name)?.ricordi?.filter((m) => !m.con || m.con === other.name || m.peso >= 3), 6),
+      legame: l ?? who.family?.find((f) => f.name === other.name)?.bond,
+      fa: this.routineNow(who)?.does ?? '',
+      ricordi: memorySummary(this.individualOf(who.name)?.memories?.filter((m) => !m.with || m.with === other.name || m.weight >= 3), 6),
       segreti: secretsOf(plots, who.name, day),
     });
     try {
@@ -7701,7 +7704,7 @@ export class Kernel {
       this.council.say(by.agent, 'info', `${ia.name} e ${ib.name}: ${r.lines.map((l) => `«${l.say}»`).join(' ')}`, undefined, 'npc.dialogue');
     } catch {
       if (legame) {
-        const [la, lb] = greeting({ nome: ia.name, mestiere: ia.job ?? '' }, { nome: ib.name }, legame, this.routineNow(ia)?.fa ?? '');
+        const [la, lb] = greeting({ nome: ia.name, mestiere: ia.job ?? '' }, { nome: ib.name }, legame, this.routineNow(ia)?.does ?? '');
         this.speak(a, la);
         this.queuedSpeech.push({ id: b, text: lb, at: this.time + 2.2 });
       }
@@ -7730,25 +7733,25 @@ export class Kernel {
     let changed = false;
     const pc = this.wandererCarpet();
     for (const plot of plots) {
-      if (plot.stato !== 'active') continue;
-      for (const beat of plot.tappe) {
-        if (beat.fatto || plot.inizio + beat.giorno > day || (plot.inizio + beat.giorno === day && beat.momento !== q)) continue;
-        beat.fatto = true;
+      if (plot.state !== 'active') continue;
+      for (const beat of plot.beats) {
+        if (beat.done || plot.start + beat.day > day || (plot.start + beat.day === day && beat.moment !== q)) continue;
+        beat.done = true;
         changed = true;
-        this.rememberAbout(beat.chi, `${beat.cosa}${beat.battuta ? ` («${beat.battuta}»)` : ''}`, undefined, 2);
-        const id = this.entityOf(beat.chi);
+        this.rememberAbout(beat.who, `${beat.what}${beat.line ? ` («${beat.line}»)` : ''}`, undefined, 2);
+        const id = this.entityOf(beat.who);
         if (id !== undefined) {
           const identity: Identity = this.ecs.get(id, 'identity');
-          const place = ['home', 'work', 'square'].includes(beat.dove) ? this.placeFor(id, identity, beat.dove, inferActivity(beat.cosa, beat.dove)) : undefined;
+          const place = ['home', 'work', 'square'].includes(beat.where) ? this.placeFor(id, identity, beat.where, inferActivity(beat.what, beat.where)) : undefined;
           if (place) this.ecs.set(id, 'meta', place);
-          this.queuedSpeech.push({ id, text: beat.battuta ? beat.battuta : `(${beat.cosa})`, at: this.time + 1 });
+          this.queuedSpeech.push({ id, text: beat.line ? beat.line : `(${beat.what})`, at: this.time + 1 });
           const p = this.ecs.get(id, 'pos');
-          if (p && Math.hypot(p.x - pc.x, p.y - pc.y) < 12) this.message(`${beat.chi} ${beat.cosa}${beat.indizio ? ` — ${beat.indizio}` : ''}`);
+          if (p && Math.hypot(p.x - pc.x, p.y - pc.y) < 12) this.message(`${beat.who} ${beat.what}${beat.clue ? ` — ${beat.clue}` : ''}`);
         }
-        this.council.say('narrator', 'info', `trama «${plot.titolo}»: ${beat.chi} ${beat.cosa} (${italianName('dove', beat.dove)}, ${italianName('momenti', beat.momento)})`, undefined, 'plot.beat');
+        this.council.say('narrator', 'info', `trama «${plot.title}»: ${beat.who} ${beat.what} (${italianName('dove', beat.where)}, ${italianName('momenti', beat.moment)})`, undefined, 'plot.beat');
       }
-      if (plot.tappe.every((b) => b.fatto) && (!plot.missione || plot.missione.stato !== 'accepted') && day > plot.inizio + 3) {
-        plot.stato = 'closed';
+      if (plot.beats.every((b) => b.done) && (!plot.quest || plot.quest.state !== 'accepted') && day > plot.start + 3) {
+        plot.state = 'closed';
         changed = true;
       }
     }
@@ -7758,22 +7761,22 @@ export class Kernel {
     }
     // A new day without a story: the Narrator weaves one among the people already met (every few days with fewer plots).
     const every = stretch(1, this.coefficients().plots);
-    if (!first && !plots.some((p) => p.stato === 'active') && Number.isFinite(every) && day % every === 0) void this.weaveStory();
+    if (!first && !plots.some((p) => p.state === 'active') && Number.isFinite(every) && day % every === 0) void this.weaveStory();
   }
 
   /** The Narrator weaves a horizontal plot among existing people and places (westworld-like). */
   async weaveStory(force = false): Promise<Plot | undefined> {
     const society = readPeople(this.files);
-    if (!force && (this.plotsWoven >= 3 || society.persone.length < 3 || this.ai.name === 'offline' || this.generationHeld)) return undefined;
+    if (!force && (this.plotsWoven >= 3 || society.people.length < 3 || this.ai.name === 'offline' || this.generationHeld)) return undefined;
     this.plotsWoven++;
     const pc = this.wandererCarpet();
     const places = this.directionsAt(pc.x, pc.y).join('\n');
-    const recent = society.persone.flatMap((p) => (p.ricordi ?? []).filter((m) => m.peso >= 2).slice(-2).map((m) => `${p.nome}: ${m.testo}`)).slice(-10).join('\n');
+    const recent = society.people.flatMap((p) => (p.memories ?? []).filter((m) => m.weight >= 2).slice(-2).map((m) => `${p.name}: ${m.text}`)).slice(-10).join('\n');
     // The plot is checked against the people and the canon; what does not hold goes back to the
     // Narrator once, with the reasons; the second answer is repaired, or dropped if it cannot be.
     const attempt = async (feedback?: string) => {
-      const raw = plotFromRaw(await weavePlot(this.council, societySummary(society, 20), places, recent, feedback, this.focusOn(society.persone.slice(-20).map((p) => p.nome))), this.day(), `trama-${this.worldStamp()}`);
-      return { titolo: raw.titolo, ...reviewPlot(raw, society, wordsOf(this.files)) };
+      const raw = plotFromRaw(await weavePlot(this.council, societySummary(society, 20), places, recent, feedback, this.focusOn(society.people.slice(-20).map((p) => p.name))), this.day(), `trama-${this.worldStamp()}`);
+      return { titolo: raw.title, ...reviewPlot(raw, society, wordsOf(this.files)) };
     };
     let plot: Plot | undefined;
     try {
@@ -7788,16 +7791,16 @@ export class Kernel {
       plot = a.plot;
     } catch (e) {
       this.council.say('narrator', 'errore', `trama: ${(e as Error).message}`, undefined, 'plot.weave');
-      this.noteShortfall({ richiesta: 'una trama nuova', agente: 'narrator', compito: 'plot.weave', esito: e instanceof PlotRejected ? 'invalid' : 'error', motivo: (e as Error).message });
+      this.noteShortfall({ request: 'una trama nuova', agent: 'narrator', task: 'plot.weave', outcome: e instanceof PlotRejected ? 'invalid' : 'error', reason: (e as Error).message });
       return undefined;
     }
-    if (!plot || plot.tappe.length < 2) return undefined;
+    if (!plot || plot.beats.length < 2) return undefined;
     const plots = [...readPlots(this.files), plot];
     this.repo.write(PLOTS_FILE, writePlots(plots));
     this.applyFiles({ ...this.repo.working });
-    this.commitContent(`trama: ${plot.titolo}`, 'plot.weave', 'narrator');
-    this.cards.use([...plot.coinvolti.map((n) => `individual:${nodeSlug(n)}`), ...this.graph().resolve(plot.tappe.map((t) => t.dove))], 'trame', (id) => this.isCard(id));
-    this.council.say('narrator', 'propone', `nuova trama «${plot.titolo}» tra ${plot.coinvolti.join(', ')}${plot.missione ? `; ${plot.missione.da} avrà una richiesta per il viandante` : ''}`, undefined, 'plot.weave');
+    this.commitContent(`trama: ${plot.title}`, 'plot.weave', 'narrator');
+    this.cards.use([...plot.involved.map((n) => `individual:${nodeSlug(n)}`), ...this.graph().resolve(plot.beats.map((t) => t.where))], 'plots', (id) => this.isCard(id));
+    this.council.say('narrator', 'propone', `nuova trama «${plot.title}» tra ${plot.involved.join(', ')}${plot.quest ? `; ${plot.quest.from} avrà una richiesta per il viandante` : ''}`, undefined, 'plot.weave');
     return plot;
   }
 
@@ -7811,10 +7814,10 @@ export class Kernel {
   /** Quests the wanderer acting now is on (for the HUD). */
   quests(): Array<{ titolo: string; da: string; testo: string; obiettivo: string }> {
     return activeQuests(readPlots(this.files), this.wanderer().id).map(({ plot, quest }) => ({
-      titolo: plot.titolo,
-      da: quest.da,
-      testo: quest.testo,
-      obiettivo: quest.obiettivo.tipo === 'bring' ? `porta ${quest.obiettivo.oggetto ?? 'ciò che serve'} a ${quest.obiettivo.a ?? quest.da}` : quest.obiettivo.tipo === 'go' ? `vai a ${quest.obiettivo.luogo ?? '?'}` : `parla con ${quest.obiettivo.a ?? '?'}`,
+      titolo: plot.title,
+      da: quest.from,
+      testo: quest.text,
+      obiettivo: quest.goal.type === 'bring' ? `porta ${quest.goal.item ?? 'ciò che serve'} a ${quest.goal.to ?? quest.from}` : quest.goal.type === 'go' ? `vai a ${quest.goal.place ?? '?'}` : `parla con ${quest.goal.to ?? '?'}`,
     }));
   }
 
@@ -7824,16 +7827,16 @@ export class Kernel {
    */
   situation(): Situation {
     const S = this.config.chunkSize;
-    const people = readPeople(this.files).persone;
+    const people = readPeople(this.files).people;
     const chunkOf = (x: number, y: number) => ({ cx: Math.floor(x / S), cy: Math.floor(y / S) });
     const locate = (name: string) => {
       const id = this.entityOf(name);
       const pos = id === undefined ? undefined : this.ecs.get(id, 'pos');
       if (pos) return chunkOf(pos.x, pos.y);
-      const p = people.find((x) => x.nome === name);
-      const m = /^(-?\d+),(-?\d+)#/.exec(p?.origine ?? '');
+      const p = people.find((x) => x.name === name);
+      const m = /^(-?\d+),(-?\d+)#/.exec(p?.origin ?? '');
       if (m) return { cx: Number(m[1]), cy: Number(m[2]) };
-      const ch = p?.luogo ? [...this.chunks.values()].find((c) => c.place?.name === p.luogo) : undefined;
+      const ch = p?.place ? [...this.chunks.values()].find((c) => c.place?.name === p.place) : undefined;
       return ch ? { cx: ch.cx, cy: ch.cy } : undefined;
     };
     // Seen from the studio, the wanderer is where they last stood in the world.
@@ -7865,7 +7868,7 @@ export class Kernel {
       { nome: 'pacchetti', usati: this.packsUsed, max: ai.maxPacks ?? 4 },
       { nome: 'tipi nuovi', usati: this.castUsed, max: ai.maxCast ?? 3 },
       { nome: 'modelli', usati: this.sculpting.count, max: ai.maxModels ?? 40 },
-      { nome: 'brani', usati: this.composing.count, max: ai.maxBrani ?? 8 },
+      { nome: 'brani', usati: this.composing.count, max: ai.maxPieces ?? 8 },
     ];
     return {
       time: timeline(log, Math.max(0, i), (c) => (c.parent ? this.repo.find(c.parent) : undefined)),
@@ -7922,7 +7925,7 @@ export class Kernel {
   private questTick(): void {
     const here = [this.chunkHere()?.name ?? '', ...this.directionsAt(this.wandererCarpet().x, this.wandererCarpet().y).filter((d) => d.startsWith('qui siamo'))].join(' ').toLowerCase();
     for (const { plot, quest } of activeQuests(readPlots(this.files), this.wanderer().id)) {
-      if (quest.obiettivo.tipo === 'go' && quest.obiettivo.luogo && here.includes(normName(quest.obiettivo.luogo).split(' ')[0] ?? '~')) void this.completeQuest(plot.id);
+      if (quest.goal.type === 'go' && quest.goal.place && here.includes(normName(quest.goal.place).split(' ')[0] ?? '~')) void this.completeQuest(plot.id);
     }
   }
 
@@ -7930,32 +7933,32 @@ export class Kernel {
     let done: Plot | undefined;
     this.updatePlots((plots) => {
       const p = plots.find((x) => x.id === plotId);
-      if (!p?.missione || p.missione.stato !== 'accepted') return false;
-      p.missione.stato = 'completed';
+      if (!p?.quest || p.quest.state !== 'accepted') return false;
+      p.quest.state = 'completed';
       done = p;
       return true;
     });
-    if (!done?.missione) return;
-    const q = done.missione;
+    if (!done?.quest) return;
+    const q = done.quest;
     // Whoever accepted it is remembered and rewarded, wherever the others are.
-    const by = q.viandante ?? SOLO;
+    const by = q.wanderer ?? SOLO;
     const who = this.as(by, () => this.wandererWord(this.wanderer()));
-    this.as(by, () => this.rememberWanderer(q.da, `${who} ha mantenuto la promessa: ${q.testo}`, 3));
-    this.recordRule({ chiave: `missione|${plotId}`, testo: `missione di ${q.da}: ${q.testo}`, possibile: true, racconto: `compiuta da${who === 'il viandante' ? 'l viandante' : ` ${who}`}`, effetti: ['missione'] }, false);
-    this.message(`Missione compiuta: ${q.testo}`, 'good');
-    if (q.ricompensa) {
-      const d = this.content.byName(q.ricompensa) ?? (await this.introduceItems([q.ricompensa], `ricompensa di ${q.da}`))[0];
-      if (d && this.as(by, () => this.give(d.id, 1))) this.message(`${q.da} ti ricompensa: ${d.name}`, 'good');
+    this.as(by, () => this.rememberWanderer(q.from, `${who} ha mantenuto la promessa: ${q.text}`, 3));
+    this.recordRule({ key: `missione|${plotId}`, text: `missione di ${q.from}: ${q.text}`, possible: true, story: `compiuta da${who === 'il viandante' ? 'l viandante' : ` ${who}`}`, effects: ['missione'] }, false);
+    this.message(`Missione compiuta: ${q.text}`, 'good');
+    if (q.reward) {
+      const d = this.content.byName(q.reward) ?? (await this.introduceItems([q.reward], `ricompensa di ${q.from}`))[0];
+      if (d && this.as(by, () => this.give(d.id, 1))) this.message(`${q.from} ti ricompensa: ${d.name}`, 'good');
     }
   }
 
   /** Talking to someone may complete a quest: the one to talk to, or the one waiting for something. */
   private questsOnTalk(name: string): void {
     for (const { plot, quest } of activeQuests(readPlots(this.files), this.wanderer().id)) {
-      const o = quest.obiettivo;
-      if (o.tipo === 'talk' && o.a === name) void this.completeQuest(plot.id);
-      if (o.tipo === 'bring' && (o.a ?? quest.da) === name && o.oggetto) {
-        const id = this.carriedByName(o.oggetto);
+      const o = quest.goal;
+      if (o.type === 'talk' && o.to === name) void this.completeQuest(plot.id);
+      if (o.type === 'bring' && (o.to ?? quest.from) === name && o.item) {
+        const id = this.carriedByName(o.item);
         if (id) {
           removeItem(this.inventory(), id, 1);
           this.message(`Consegni ${this.itemInfo(id).name} a ${name}.`);
@@ -8056,7 +8059,7 @@ export class Kernel {
     try {
       const now = this.routineNow(identity);
       const social = identity
-        ? `\nIl tuo mestiere: ${identity.job ?? '—'}. La tua famiglia: ${(identity.family ?? []).map((f) => `${f.legame} ${f.nome}`).join(', ') || 'nessuno'}.${identity.story ? ` La tua storia: ${identity.story}` : ''}${now ? ` Adesso (${now.quando}) stai: ${now.fa}.` : ''}`
+        ? `\nIl tuo mestiere: ${identity.job ?? '—'}. La tua famiglia: ${(identity.family ?? []).map((f) => `${f.bond} ${f.name}`).join(', ') || 'nessuno'}.${identity.story ? ` La tua storia: ${identity.story}` : ''}${now ? ` Adesso (${now.when}) stai: ${now.does}.` : ''}`
         : '';
       // The Actor plays from the Narrator's sheet (T157): written at the first line, paid by who talks.
       const by = this.interpreter();
@@ -8065,14 +8068,14 @@ export class Kernel {
       reply = await npcReply(this.council, {
         chi: me.id,
         name,
-        wanderer: me.nome,
-        presentazione: this.profileOf(me.id)?.presentazione,
-        memories: memorySummary(memoriesFor(individual?.ricordi, me.id), 12),
+        wanderer: me.name,
+        presentazione: this.profileOf(me.id)?.introduction,
+        memories: memorySummary(memoriesFor(individual?.memories, me.id), 12),
         bond: individual ? bondWith(individual, me.id) : undefined,
         secrets: secretsOf(readPlots(this.files), name, this.day()),
         scheda,
         persona: (identity?.persona ?? m.persona) + social, mood: mind.mood, mode: mind.mode, carrying, place: this.chunkHere()?.name ?? '', history: mind.history.filter((t) => (t.con ?? SOLO) === me.id), facts: this.worldFacts() }, text, this.focusOn([name], this.ecs.get(id, 'pos')), by);
-      this.council.say(by.agent, 'info', `${name} a ${me.nome}: «${reply.say}»`, undefined, 'npc.reply');
+      this.council.say(by.agent, 'info', `${name} a ${me.name}: «${reply.say}»`, undefined, 'npc.reply');
     } catch (e) {
       return { say: `(${name} ti guarda in silenzio — ${(e as Error).message})`, action: 'nessuna', mood: mind.mood };
     }
@@ -8097,12 +8100,12 @@ export class Kernel {
       let carry: string | undefined;
       if (reply.action === 'missione') {
         this.updatePlots((plots) => {
-          const p = plots.find((x) => x.stato === 'active' && x.missione?.da === name && x.missione.stato === 'offered');
-          if (!p?.missione) return false;
-          p.missione.stato = 'accepted';
-          p.missione.viandante = me.id;
-          given = p.missione.testo;
-          if (p.missione.obiettivo.tipo === 'bring') carry = p.missione.obiettivo.oggetto;
+          const p = plots.find((x) => x.state === 'active' && x.quest?.from === name && x.quest.state === 'offered');
+          if (!p?.quest) return false;
+          p.quest.state = 'accepted';
+          p.quest.wanderer = me.id;
+          given = p.quest.text;
+          if (p.quest.goal.type === 'bring') carry = p.quest.goal.item;
           return true;
         });
         if (given) this.message(`Nuova missione da ${name}: ${given}`, 'good');
@@ -8140,13 +8143,13 @@ export class Kernel {
       raw = await defineItems(this.council, fresh, context);
     } catch (e) {
       this.council.say('narrator', 'errore', (e as Error).message);
-      this.noteShortfall({ richiesta: `definire ${fresh.join(', ')}: ${context}`, chi, agente: 'narrator', compito: 'content.define', esito: 'error', motivo: (e as Error).message });
+      this.noteShortfall({ request: `definire ${fresh.join(', ')}: ${context}`, who: chi, agent: 'narrator', task: 'content.define', outcome: 'error', reason: (e as Error).message });
       return [];
     }
     const taken = new Set(this.content.items.keys());
     const defs = raw.map((r) => toItemDef(r, taken)).filter((d): d is ItemDef => !!d);
     if (!defs.length) {
-      this.noteShortfall({ richiesta: `definire ${fresh.join(', ')}: ${context}`, chi, agente: 'narrator', compito: 'content.define', esito: 'invalid', motivo: 'nessuna definizione valida' });
+      this.noteShortfall({ request: `definire ${fresh.join(', ')}: ${context}`, who: chi, agent: 'narrator', task: 'content.define', outcome: 'invalid', reason: 'nessuna definizione valida' });
       return [];
     }
     this.writePack('modules/items.citati/manifest.json', { id: 'items.citati', name: 'Oggetti di cui si è parlato', description: 'Oggetti entrati nel mondo perché qualcuno ne ha parlato.' }, { items: defs, recipes: [], loot: {} });
@@ -8176,7 +8179,7 @@ export class Kernel {
       const errors = this.validator.validateItems(pack.items);
       if (errors.length || !pack.items.length) {
         this.council.say('kernel', 'scarta', `pacchetto: ${errors.join('; ') || 'vuoto'}`, 'narrator');
-        this.noteShortfall({ richiesta: `un pacchetto di oggetti: ${reason}`, chi, agente: 'narrator', compito: 'content.items', esito: 'invalid', motivo: errors.join('; ') || 'vuoto' });
+        this.noteShortfall({ request: `un pacchetto di oggetti: ${reason}`, who: chi, agent: 'narrator', task: 'content.items', outcome: 'invalid', reason: errors.join('; ') || 'vuoto' });
         return false;
       }
       let n = 1;
@@ -8188,7 +8191,7 @@ export class Kernel {
       return true;
     } catch (e) {
       this.council.say('narrator', 'errore', `pacchetto: ${(e as Error).message}`);
-      this.noteShortfall({ richiesta: `un pacchetto di oggetti: ${reason}`, chi, agente: 'narrator', compito: 'content.items', esito: 'error', motivo: (e as Error).message });
+      this.noteShortfall({ request: `un pacchetto di oggetti: ${reason}`, who: chi, agent: 'narrator', task: 'content.items', outcome: 'error', reason: (e as Error).message });
       return false;
     } finally {
       this.growing = false;
@@ -8255,9 +8258,9 @@ export class Kernel {
       const m = this.modules.get(this.ecs.get(eid, 'module')?.id)?.manifest;
       const mind: Mind | undefined = this.ecs.get(eid, 'mind');
       const identity: Identity | undefined = this.ecs.get(eid, 'identity');
-      const doing = this.routineNow(identity)?.fa;
+      const doing = this.routineNow(identity)?.does;
       const extra = mind ? `${doing ? `${doing} · ` : ''}umore: ${mind.mood}` : this.ecs.has(eid, 'container') ? 'E per aprire' : m?.actions?.length ? `E: ${m.actions.map((a) => a.label).join(', ')}` : undefined;
-      const fam = identity?.family?.length ? ` ${identity.family.map((f) => `${f.legame[0].toUpperCase()}${f.legame.slice(1)} di ${f.nome}`).join(', ')}.` : '';
+      const fam = identity?.family?.length ? ` ${identity.family.map((f) => `${f.bond[0].toUpperCase()}${f.bond.slice(1)} di ${f.name}`).join(', ')}.` : '';
       return { kind: 'entity', name: identity?.name ?? m?.name ?? '???', description: identity ? `${identity.job ? identity.job[0].toUpperCase() + identity.job.slice(1) : m?.name}.${fam} ${identity.look}` : (m?.description ?? ''), extra };
     }
     const t = this.tileAt(Math.floor(cx), Math.floor(cy));
@@ -8299,7 +8302,7 @@ export class Kernel {
     } catch (e) {
       const msg = (e as Error).message;
       this.council.say('kernel', 'errore', `Fucina: ${msg}`);
-      this.noteShortfall({ richiesta: prompt, chi: asker, agente: (e as { agent?: string }).agent ?? 'kernel', compito: 'forge.concept', esito: e instanceof ForgeRejected ? 'invalid' : 'error', motivo: msg });
+      this.noteShortfall({ request: prompt, who: asker, agent: (e as { agent?: string }).agent ?? 'kernel', task: 'forge.concept', outcome: e instanceof ForgeRejected ? 'invalid' : 'error', reason: msg });
       return { ok: false, summary: `Il Concilio non è riuscito a creare un modulo valido: ${msg}` };
     }
   }
@@ -8319,7 +8322,7 @@ export class Kernel {
     if (this.repo.lastAuthorOf(entry.logicPath) !== 'agent') return false;
     this.repaired.add(m[1]);
     this.council.say('kernel', 'obietta', `${m[1]}.${m[2]} fallisce durante il gioco: ${message}`, 'engineer', 'forge.fix');
-    const unrepaired = (motivo: string) => this.noteShortfall({ richiesta: `riparare ${m[1]}.${m[2]}: ${message}`, agente: 'engineer', compito: 'forge.fix', esito: 'fault', motivo });
+    const unrepaired = (motivo: string) => this.noteShortfall({ request: `riparare ${m[1]}.${m[2]}: ${message}`, agent: 'engineer', task: 'forge.fix', outcome: 'fault', reason: motivo });
     // The knob of the repairs (T247): a local repair would empty the module, so without a call it stays as it is, isolated by its fault.
     if (!this.rationing.allows('repairs', this.coefficients().repairs)) {
       unrepaired('le riparazioni sono regolate dal master');
@@ -8356,8 +8359,8 @@ export class Kernel {
     const bible = readBible(this.repo.working);
     if (!bible) return;
     const line = `${m.name} — ${m.description ?? ''}`.slice(0, 200);
-    if (m.persona) bible.personaggi = [...(bible.personaggi ?? []), line].slice(-30);
-    else bible.fatti = [...(bible.fatti ?? []), line].slice(-40);
+    if (m.persona) bible.characters = [...(bible.characters ?? []), line].slice(-30);
+    else bible.facts = [...(bible.facts ?? []), line].slice(-40);
     this.repo.write('world/bible.json', JSON.stringify(bible, null, 2) + '\n');
   }
 
@@ -8370,7 +8373,7 @@ export class Kernel {
    */
   async reviewFourthWall(): Promise<string[]> {
     const marker = 'revisione|quarta-parete-2';
-    if (this.rules().some((r) => r.chiave === marker)) return [];
+    if (this.rules().some((r) => r.key === marker)) return [];
     const generated = [...this.modules.values()].filter((m) => m.manifest.origin && m.manifest.origin !== 'esempio' && (m.manifest.kind === 'entity' || m.manifest.kind === 'item'));
     const oldBible = readBible(this.repo.working);
     const plots = readPlots(this.repo.working);
@@ -8414,16 +8417,16 @@ export class Kernel {
     if (oldBible) {
       const gone = new Set(names.map(normName));
       const bible = cleanBible(oldBible, words);
-      bible.personaggi = bible.personaggi.filter((l) => !gone.has(normName(l.split(' — ')[0])));
-      bible.fatti = bible.fatti.filter((l) => !gone.has(normName(l.split(' — ')[0])));
+      bible.characters = bible.characters.filter((l) => !gone.has(normName(l.split(' — ')[0])));
+      bible.facts = bible.facts.filter((l) => !gone.has(normName(l.split(' — ')[0])));
       this.repo.write('world/bible.json', JSON.stringify(bible, null, 2) + '\n');
     }
     // Plots that hint at the game, or give the runes a life of their own, are dropped.
     if (brokenPlots.length) {
       this.repo.write(PLOTS_FILE, writePlots(plots.filter((p) => !brokenPlots.includes(p))));
-      names.push(...brokenPlots.map((p) => `trama «${p.titolo}»`));
+      names.push(...brokenPlots.map((p) => `trama «${p.title}»`));
     }
-    this.recordRule({ chiave: marker, testo: 'revisione della quarta parete', possibile: true, racconto: names.length ? `ritirati: ${names.join(', ')}` : 'niente da ritirare' }, false);
+    this.recordRule({ key: marker, text: 'revisione della quarta parete', possible: true, story: names.length ? `ritirati: ${names.join(', ')}` : 'niente da ritirare' }, false);
     this.applyFiles({ ...this.repo.working });
     this.repo.commit(names.length ? `l'Arbitro ritira ${names.length} moduli fuori dal mondo: ${[...new Set(names)].join(', ')}` : 'revisione della quarta parete', 'agent');
     if (names.length) this.council.say('arbiter', 'approva', `quarta parete: ritirati ${names.length} moduli (${[...new Set(names)].join(', ')})`, undefined, 'review.fourthwall');
@@ -8490,7 +8493,7 @@ export class Kernel {
       for (const m of this.rari.values()) m.clear();
       // What lay on the furniture of the world of before goes with it (T291).
       for (const id of this.ecs.query('posato')) this.ecs.destroy(id);
-      this.repo.write('world/stato.json', null);
+      this.repo.write('world/state.json', null);
       for (const p of Object.keys(this.repo.working)) if (p.startsWith(PLAYERS_DIR)) this.repo.write(p, null);
       this.wanted.clear();
       onProgress?.('Il Narratore scrive gli oggetti comuni del mondo');
@@ -8514,18 +8517,18 @@ export class Kernel {
       await Promise.all([worker(), worker()]);
       const path = 'modules/core.player/manifest.json';
       const man = JSON.parse(this.repo.working[path]);
-      man.appearance = { glyph: '@', color: '#ffffff', aspetto: plan.wandererPrompt };
+      man.appearance = { glyph: '@', color: '#ffffff', look: plan.wandererPrompt };
       this.repo.write(path, JSON.stringify(man, null, 2) + '\n');
       this.applyFiles({ ...this.repo.working });
       this.clearChunks();
-      const title = readBible(this.repo.working)?.titolo ?? 'nuovo universo';
+      const title = readBible(this.repo.working)?.title ?? 'nuovo universo';
       const c = this.commitContent(`genesi: ${title}`, 'genesis.cast', 'narrator', COMUNE);
       this.council.say('kernel', 'approva', `Genesi completata: «${title}», ${done} moduli, ${this.content.items.size} oggetti, ${Object.keys(this.content.layouts).length} ambienti, commit ${c.id}.`);
       this.bus.emit('genesis:done', { title });
       return true;
     } catch (e) {
       this.council.say('kernel', 'errore', `Genesi fallita: ${(e as Error).message}`);
-      this.noteShortfall({ richiesta: 'la Genesi', agente: (e as { agent?: string }).agent ?? 'kernel', compito: 'genesis', esito: 'error', motivo: (e as Error).message });
+      this.noteShortfall({ request: 'la Genesi', agent: (e as { agent?: string }).agent ?? 'kernel', task: 'genesis', outcome: 'error', reason: (e as Error).message });
       this.game = keptGame;
       this.repo.restore();
       this.applyFiles({ ...this.repo.working });
@@ -8541,7 +8544,7 @@ export class Kernel {
   /** Containers opened in earlier sessions, by stable origin: they keep what was left in them. */
   private savedContainers = new Map<string, { inv: Inventory; filled: boolean }>();
   private lastState = '';
-  /** The lasting stores of the modules (T245a, ADR-0138): `world/magazzino/`, saved with the game. */
+  /** The lasting stores of the modules (T245a, ADR-0138): `world/stores/`, saved with the game. */
   readonly stores = new ModuleStores();
   /** The module whose Lua runs now: whose store `world.store_get/set` reach. */
   private luaModule: string | undefined;
@@ -8549,7 +8552,7 @@ export class Kernel {
   private unsaved = new Set<string>();
 
   /**
-   * The state of play is part of the universe too (`world/stato.json`): what the wanderer carries,
+   * The state of play is part of the universe too (`world/state.json`): what the wanderer carries,
    * what was taken from the world, what is left in chests. Saved only while the universe is valid.
    */
   saveState(): boolean {
@@ -8563,12 +8566,12 @@ export class Kernel {
     }
     const placed = this.placedToSave();
     const state = {
-      consumati: [...this.consumed].slice(-5000),
-      contenitori: containers,
-      forme: this.formsToSave(),
-      rari: Object.fromEntries([...this.rari].map(([t, m]) => [t, Object.fromEntries(m)])),
-      ora: Math.round(this.time),
-      ...(placed.length ? { posati: placed } : {}),
+      consumed: [...this.consumed].slice(-5000),
+      containers,
+      forms: this.formsToSave(),
+      rares: Object.fromEntries([...this.rari].map(([t, m]) => [t, Object.fromEntries(m)])),
+      time: Math.round(this.time),
+      ...(placed.length ? { placed } : {}),
     };
     // Each wanderer in their own file (T34); the world's state no longer carries one.
     const players = Object.fromEntries([...this.wanderersById.values()].map((w) => [playerFile(w.id), this.as(w.id, () => this.wandererState(w))]));
@@ -8587,7 +8590,7 @@ export class Kernel {
     for (const [p, v] of Object.entries(stores)) this.repo.write(p, v);
     // What this kernel does not know of a file it saves stays in it (T245a): a kernel of tomorrow wrote it, a kernel of today keeps it.
     const kept = (p: string, v: object, known: ReadonlySet<string>) => ({ ...unknownFields(this.repo.working[p], known), ...v });
-    for (const [p, v] of Object.entries({ 'world/stato.json': kept('world/stato.json', state, STATE_FIELDS), ...Object.fromEntries(Object.entries(players).map(([q, w]) => [q, kept(q, w, WANDERER_FIELDS)])) })) {
+    for (const [p, v] of Object.entries({ 'world/state.json': kept('world/state.json', state, STATE_FIELDS), ...Object.fromEntries(Object.entries(players).map(([q, w]) => [q, kept(q, w, WANDERER_FIELDS)])) })) {
       this.repo.write(p, JSON.stringify(v, null, 1) + '\n');
       written[p] = this.repo.working[p]!;
     }
@@ -8616,16 +8619,16 @@ export class Kernel {
     const at = this.corona.isInterior(this.wandererPos().x) ? this.lastWorld : this.wandererCarpet();
     const entry = this.wanderersById.get(w.id);
     return {
-      ...(w.nome !== WANDERER_NAME ? { nome: w.nome } : {}),
-      ...(entry?.profilo ? { profilo: entry.profilo } : {}),
+      ...(w.name !== WANDERER_NAME ? { name: w.name } : {}),
+      ...(entry?.profilo ? { profile: entry.profilo } : {}),
       pos: { x: Math.round(at.x * 1000) / 1000, y: Math.round(at.y * 1000) / 1000 },
       inventory: this.inventory(),
       needs: this.needs() as unknown as Record<string, number>,
       hand: this.phrase(),
-      stati: this.states(),
+      states: this.states(),
       slots: this.slots(),
-      ...(w.id === SOLO ? { trasceso: this.exitedOnce } : {}),
-      ...(entry?.anonimo ? { anonimo: true } : {}),
+      ...(w.id === SOLO ? { transcended: this.exitedOnce } : {}),
+      ...(entry?.anonymous ? { anonymous: true } : {}),
     };
   }
 
@@ -8639,7 +8642,7 @@ export class Kernel {
     if (v.inventory?.slots) this.ecs.set(this.wandererEntity, 'inventory', v.inventory);
     if (v.needs) Object.assign(this.needs() ?? {}, v.needs, { morto: false });
     if (v.hand?.tokens) Object.assign(this.phrase(), v.hand);
-    if (v.stati) this.ecs.set(this.wandererEntity, 'stati', Object.fromEntries(Object.entries(v.stati).filter(([, x]) => x && typeof x === 'object')));
+    if (v.states) this.ecs.set(this.wandererEntity, 'stati', Object.fromEntries(Object.entries(v.states).filter(([, x]) => x && typeof x === 'object')));
     if (v.slots && typeof v.slots === 'object') this.ecs.set(this.wandererEntity, 'slots', v.slots);
     // What the mechanics derive from the slots (defence, states) is rebuilt by their own on_slot.
     for (const p of this.uiPanels()) {
@@ -8719,9 +8722,9 @@ export class Kernel {
    * One request of a wanderer or of the world that the Council could not satisfy (T238): nothing shows it, in the world or on a
    * client. `chi` is who asked: `as` never spans an await, so what comes after one passes it; without one, the world asked.
    */
-  noteShortfall(n: Omit<ShortfallNote, 'chi'> & { chi?: string }): void {
+  noteShortfall(n: Omit<ShortfallNote, 'who'> & { who?: string }): void {
     if (this.bench) return;
-    const note = { ...n, chi: n.chi || COMUNE };
+    const note = { ...n, who: n.who || COMUNE };
     if (this.mirror) this.onShortfall?.(note);
     else this.shortfalls.note(note);
   }
@@ -8778,16 +8781,16 @@ export class Kernel {
 
   /** A place planned for the first time: its card, and one use of every card it holds (T36). */
   private cardChunk(ch: Chunk, plan: ChunkPlan, chi?: string): void {
-    plan.carta ??= this.sign(chunkCardId(ch.cx, ch.cy), 'chunk.plan', 'cartographer', chi);
-    this.cards.addChunk(`${ch.cx}_${ch.cy}`, plan.place.name, plan.carta);
+    plan.card ??= this.sign(chunkCardId(ch.cx, ch.cy), 'chunk.plan', 'cartographer', chi);
+    this.cards.addChunk(`${ch.cx}_${ch.cy}`, plan.place.name, plan.card);
     const ids = [`environment:${nodeSlug(plan.layout)}`];
     for (const o of plan.objects) ids.push(...this.entityCards(o.module));
     for (const n of plan.ground) {
       const d = this.content.byName(n);
       if (d) ids.push(...this.entityCards(d.id));
     }
-    for (const s of plan.strutture ?? []) ids.push(`model:${nodeSlug(`struttura-${ownModelId(s.concetto).slice(0, 30)}`)}`);
-    this.cards.use(ids, 'luoghi', (id) => this.isCard(id));
+    for (const s of plan.structures ?? []) ids.push(`model:${nodeSlug(`struttura-${ownModelId(s.concept).slice(0, 30)}`)}`);
+    this.cards.use(ids, 'chunks', (id) => this.isCard(id));
   }
 
   /** The cards an entity in a place stands for: its module or item, and its model. */
@@ -8805,7 +8808,7 @@ export class Kernel {
   sign(cardId: string, task: string, autore: string, chi?: string): CardStamp {
     const pagante = chi ?? payerOf(task, this.payerNow());
     const all = [...new Set([...this.wanderers().map((w) => w.id), ...wanderersIn(this.files).map((w) => w.id)])];
-    return { autore, pagante, titolare: cardHolderOf(cardId, pagante, all.length ? all : [SOLO], this.config?.seed ?? 0) };
+    return { author: autore, payer: pagante, holder: cardHolderOf(cardId, pagante, all.length ? all : [SOLO], this.config?.seed ?? 0) };
   }
 
   /** Whether an id (of the graph's kind) is a card of this universe. */
@@ -8856,7 +8859,7 @@ export class Kernel {
   }
 
   /**
-   * Puts back what lay on furniture when the game was saved (T291). `world/stato.json` is a file of the universe, which a master may
+   * Puts back what lay on furniture when the game was saved (T291). `world/state.json` is a file of the universe, which a master may
    * write by hand: whatever is not a known item at a finite place is left out, never thrown at the world.
    */
   private restorePlaced(list: unknown): void {
@@ -8881,28 +8884,29 @@ export class Kernel {
   loadState(): void {
     let st: any;
     try {
-      st = JSON.parse(this.files['world/stato.json'] ?? 'null');
+      // A state of the contract 0.3 (`consumati`, `rari`, `ora`) reads internal (T308a): the kernel ports it at boot anyway.
+      st = internalFields('state', JSON.parse(this.files['world/state.json'] ?? 'null'));
     } catch {
       st = null;
     }
-    // Each wanderer from their own file, `io` also from the wanderer of an older stato.json.
+    // Each wanderer from their own file, `me` also from the wanderer of an older state of the world.
     for (const w of this.wanderersById.values()) {
       const v = readWandererState(this.files, w.id);
       if (!v) continue;
-      if (v.nome && w.id !== SOLO) w.nome = String(v.nome).slice(0, 40);
-      if (v.profilo && !this.mirror) this.setProfile(w.id, v.profilo);
+      if (v.name && w.id !== SOLO) w.name = String(v.name).slice(0, 40);
+      if (v.profile && !this.mirror) this.setProfile(w.id, v.profile);
       this.as(w.id, () => this.applyWandererState(v));
-      if (w.id === SOLO && v.trasceso) this.exitedOnce = true;
+      if (w.id === SOLO && v.transcended) this.exitedOnce = true;
     }
     if (!st) return;
-    for (const k of st.consumati ?? []) this.consumed.add(String(k));
-    for (const [k, c] of Object.entries(st.contenitori ?? {})) this.savedContainers.set(k, c as { inv: Inventory; filled: boolean });
-    for (const [k, d] of Object.entries(st.forme ?? {})) if (Array.isArray(d)) this.savedForms.set(k, d.map(String));
-    this.restorePlaced(st.posati);
+    for (const k of st.consumed ?? []) this.consumed.add(String(k));
+    for (const [k, c] of Object.entries(st.containers ?? {})) this.savedContainers.set(k, c as { inv: Inventory; filled: boolean });
+    for (const [k, d] of Object.entries(st.forms ?? {})) if (Array.isArray(d)) this.savedForms.set(k, d.map(String));
+    this.restorePlaced(st.placed);
     // The important structures of before ADR-0092 are the Huge ones.
-    for (const [z, c] of Object.entries(st.importanti ?? {})) if (typeof c === 'string') this.rari.get('huge')!.set(z, c);
-    for (const t of RARE_SIZES) for (const [z, c] of Object.entries(st.rari?.[t] ?? {})) if (typeof c === 'string') this.rari.get(t)!.set(z, c);
-    if (Number.isFinite(st.ora)) this.time = st.ora;
+    for (const [z, c] of Object.entries(st.important ?? {})) if (typeof c === 'string') this.rari.get('huge')!.set(z, c);
+    for (const t of RARE_SIZES) for (const [z, c] of Object.entries(st.rares?.[t] ?? {})) if (typeof c === 'string') this.rari.get(t)!.set(z, c);
+    if (Number.isFinite(st.time)) this.time = st.time;
     this.lastState = JSON.stringify(st);
   }
 
@@ -9273,18 +9277,18 @@ export class Kernel {
 
 /** What the Studio of characters says of an individual (T23), in the order a visitor reads it. */
 function individualFacts(p: Individual, type: string): Array<[string, string]> {
-  const out: Array<[string, string]> = [['Individuo', p.nome]];
-  const who = [p.specie === 'animal' ? 'animale' : 'persona', p.genere ? italianName('specie', p.genere) : undefined, p.eta].filter(Boolean).join(', ');
-  out.push(['Chi è', `${type} (${who})`], ['Mestiere', p.mestiere]);
-  if (p.aspetto) out.push(['Aspetto', p.aspetto]);
+  const out: Array<[string, string]> = [['Individuo', p.name]];
+  const who = [p.species === 'animal' ? 'animale' : 'persona', p.gender ? italianName('specie', p.gender) : undefined, p.age].filter(Boolean).join(', ');
+  out.push(['Chi è', `${type} (${who})`], ['Mestiere', p.job]);
+  if (p.look) out.push(['Aspetto', p.look]);
   if (p.persona) out.push(['Carattere', p.persona]);
-  if (p.storia) out.push(['Storia', p.storia]);
-  if (p.famiglia?.length) out.push(['Famiglia', p.famiglia.map((r) => `${r.legame} di ${r.nome}`).join(', ')]);
-  for (const r of p.famiglia ?? []) if (wandererOf(r)) out.push([wandererOf(r) === SOLO && r.nome === WANDERER_NAME ? 'Per il viandante' : `Per ${r.nome}`, r.legame]);
-  if (p.routine?.length) out.push(['Giornata', p.routine.map((r) => `${italianName('momenti', r.quando)}: ${r.fa}`).join('; ')]);
-  if (p.luogo) out.push(['Incontrato a', p.luogo]);
-  if (p.porta?.length) out.push(['Porta con sé', p.porta.join(', ')]);
-  if (p.ricordi?.length) out.push(['Ricorda', p.ricordi.slice(-3).map((m) => m.testo).join(' · ')]);
+  if (p.story) out.push(['Storia', p.story]);
+  if (p.family?.length) out.push(['Famiglia', p.family.map((r) => `${r.bond} di ${r.name}`).join(', ')]);
+  for (const r of p.family ?? []) if (wandererOf(r)) out.push([wandererOf(r) === SOLO && r.name === WANDERER_NAME ? 'Per il viandante' : `Per ${r.name}`, r.bond]);
+  if (p.routine?.length) out.push(['Giornata', p.routine.map((r) => `${italianName('momenti', r.when)}: ${r.does}`).join('; ')]);
+  if (p.place) out.push(['Incontrato a', p.place]);
+  if (p.carries?.length) out.push(['Porta con sé', p.carries.join(', ')]);
+  if (p.memories?.length) out.push(['Ricorda', p.memories.slice(-3).map((m) => m.text).join(' · ')]);
   return out;
 }
 

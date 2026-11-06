@@ -17,7 +17,8 @@ import { UNIVERSE_NAME_RE } from '../src/kernel/paths';
 import { failureText, gameIn, gate, refuse } from './access';
 import { PROGRAMS_DIR } from './hidden';
 import { runGit, settleGit } from './git';
-import { LEDGER_DIR, sweepBalances } from './ledger';
+import { serverPath } from './folders';
+import { sweepBalances } from './ledger';
 import { Rates, type Pace } from './rates';
 import { buildWorld, sweepPrograms, WorldHost, type HostLink, type WorldTimes } from './worldHost';
 import type { WorldCalls } from './worldCalls';
@@ -226,7 +227,7 @@ export function attachSessions(httpServer: HttpServer, o: SessionOptions): { sto
     // The balances come out of the universe's files before the world reads them, and go to its ledger (ADR-0104).
     if (universes) {
       await sweepBalances(universes, name);
-      fs.mkdirSync(path.join(universes, LEDGER_DIR), { recursive: true });
+      fs.mkdirSync(serverPath(universes, 'balances'), { recursive: true });
     }
     const world = new WorldHost({
       name,
@@ -236,7 +237,7 @@ export function attachSessions(httpServer: HttpServer, o: SessionOptions): { sto
       gemini,
       verify: accounts?.verify,
       masterUid: accounts?.masterUid,
-      ...(universes && credits ? { ledgerFile: path.join(universes, LEDGER_DIR, `${name}.json`), grantCap: credits.grantCap, platformFee: credits.platformFee } : {}),
+      ...(universes && credits ? { ledgerFile: path.join(serverPath(universes, 'balances'), `${name}.json`), grantCap: credits.grantCap, platformFee: credits.platformFee } : {}),
       entry: await program(),
       memoryMb,
       headOf: universes ? () => runGit(path.join(universes, name), ['rev-parse', 'HEAD'], { author: ['kernel', 'kernel@quine'] }).then((out) => out.trim()) : undefined,

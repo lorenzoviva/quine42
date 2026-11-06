@@ -3,8 +3,8 @@
 // server: nothing in the world reads it and `src/session/files.ts` does not name it. The text comes from players and from the
 // models, so it is cut down and flattened here. Pure and light: the report command imports it, without the kernel.
 
-export const SHORTFALLS_FILE = 'world/mancanze.json';
-import { internalName } from './internalNames';
+export const SHORTFALLS_FILE = 'world/shortfalls.json';
+import { internalFields, internalName, internalSoloIn } from './internalNames';
 
 /**
  * How it ended: the Council said no (`refusal`); it said yes, but the validator refused its last attempt or dropped what it
@@ -14,24 +14,24 @@ export type ShortfallOutcome = 'refusal' | 'invalid' | 'error' | 'fault';
 const OUTCOMES: readonly string[] = ['refusal', 'invalid', 'error', 'fault'] satisfies ShortfallOutcome[];
 
 export interface ShortfallNote {
-  richiesta: string;
+  request: string;
   /** Who asked: a wanderer's id, or `comune` when it was the world's own need. */
-  chi: string;
-  agente: string;
+  who: string;
+  agent: string;
   /** The task of the model (`forge.concept`, `action.judge`). */
-  compito: string;
-  esito: ShortfallOutcome;
-  motivo: string;
+  task: string;
+  outcome: ShortfallOutcome;
+  reason: string;
 }
 
-/** One entry of world/mancanze.json. */
-export interface Shortfall extends Omit<ShortfallNote, 'chi'> {
+/** One entry of world/shortfalls.json. */
+export interface Shortfall extends Omit<ShortfallNote, 'who'> {
   /** Everyone who asked, each once. */
-  chi: string[];
-  volte: number;
+  who: string[];
+  times: number;
   /** ISO days. */
-  primo: string;
-  ultimo: string;
+  first: string;
+  last: string;
 }
 
 const MAX_ENTRIES = 500;
@@ -45,29 +45,31 @@ function flat(text: unknown, max: number): string {
   return String(text ?? '').replace(/[\s\u0000-\u001f\u007f]+/g, ' ').trim().slice(0, max);
 }
 
-const keyOf = (s: Pick<ShortfallNote, 'agente' | 'compito' | 'richiesta'>) => `${s.agente}|${s.compito}|${s.richiesta.toLowerCase()}`;
+const keyOf = (s: Pick<ShortfallNote, 'agent' | 'task' | 'request'>) => `${s.agent}|${s.task}|${s.request.toLowerCase()}`;
 
 const today = () => new Date().toISOString().slice(0, 10);
 
 /** An entry as read from the file, or undefined if it is not one: the file may have been edited by hand. */
 function readEntry(raw: unknown): Shortfall | undefined {
   if (!raw || typeof raw !== 'object') return undefined;
-  const e = raw as Record<string, unknown>;
-  const richiesta = flat(e.richiesta, MAX_REQUEST);
+  // The fields of the contract 0.3 (`richiesta`, `volte`) and its wanderer alone (`io`) read internal (T308a): the tools read the disk.
+  const e = internalSoloIn(internalFields('shortfall', raw as Record<string, unknown>)) as Record<string, unknown>;
+  const richiesta = flat(e.request, MAX_REQUEST);
   // An outcome of the contract 0.2 (`rifiuto`) reads internal (T307b).
-  const esito = typeof e.esito === 'string' ? internalName('partita', e.esito) : e.esito;
+  const esito = typeof e.outcome === 'string' ? internalName('partita', e.outcome) : e.outcome;
   if (!richiesta || !OUTCOMES.includes(esito as string)) return undefined;
-  const volte = Number.isSafeInteger(e.volte) && (e.volte as number) > 0 ? (e.volte as number) : 1;
-  const chi = (Array.isArray(e.chi) ? e.chi : []).filter((c) => typeof c === 'string').map((c) => flat(c, MAX_WORD)).slice(-MAX_ASKERS);
-  const primo = flat(e.primo, 10);
-  return { richiesta, chi, agente: flat(e.agente, MAX_WORD), compito: flat(e.compito, MAX_WORD), esito: esito as ShortfallOutcome, motivo: flat(e.motivo, MAX_REASON), volte, primo, ultimo: flat(e.ultimo, 10) || primo };
+  const volte = Number.isSafeInteger(e.times) && (e.times as number) > 0 ? (e.times as number) : 1;
+  const chi = (Array.isArray(e.who) ? e.who : []).filter((c) => typeof c === 'string').map((c) => flat(c, MAX_WORD)).slice(-MAX_ASKERS);
+  const primo = flat(e.first, 10);
+  return { request: richiesta, who: chi, agent: flat(e.agent, MAX_WORD), task: flat(e.task, MAX_WORD), outcome: esito as ShortfallOutcome, reason: flat(e.reason, MAX_REASON), times: volte, first: primo, last: flat(e.last, 10) || primo };
 }
 
 /** The entries of the file's text; what cannot be read is nothing. */
 export function readShortfalls(json: string | undefined): Shortfall[] {
   if (!json) return [];
   try {
-    const voci = JSON.parse(json)?.voci;
+    const parsed = JSON.parse(json);
+    const voci = parsed?.entries ?? parsed?.voci;
     return Array.isArray(voci) ? voci.map(readEntry).filter((e): e is Shortfall => !!e) : [];
   } catch {
     return [];
@@ -85,18 +87,18 @@ export class ShortfallLog {
 
   /** One more time this request ended badly: the last reason stays. A request that is empty is no request. */
   note(n: ShortfallNote, day = today()): void {
-    const richiesta = flat(n.richiesta, MAX_REQUEST);
+    const richiesta = flat(n.request, MAX_REQUEST);
     if (!richiesta) return;
-    const agente = flat(n.agente, MAX_WORD);
-    const compito = flat(n.compito, MAX_WORD);
-    const key = keyOf({ agente, compito, richiesta });
-    const e = this.entries.get(key) ?? { richiesta, chi: [], agente, compito, esito: n.esito, motivo: '', volte: 0, primo: day, ultimo: day };
-    const chi = flat(n.chi, MAX_WORD);
-    e.chi = [...e.chi.filter((c) => c !== chi), chi].slice(-MAX_ASKERS);
-    e.esito = n.esito;
-    e.motivo = flat(n.motivo, MAX_REASON);
-    e.volte++;
-    e.ultimo = day;
+    const agente = flat(n.agent, MAX_WORD);
+    const compito = flat(n.task, MAX_WORD);
+    const key = keyOf({ agent: agente, task: compito, request: richiesta });
+    const e = this.entries.get(key) ?? { request: richiesta, who: [], agent: agente, task: compito, outcome: n.outcome, reason: '', times: 0, first: day, last: day };
+    const chi = flat(n.who, MAX_WORD);
+    e.who = [...e.who.filter((c) => c !== chi), chi].slice(-MAX_ASKERS);
+    e.outcome = n.outcome;
+    e.reason = flat(n.reason, MAX_REASON);
+    e.times++;
+    e.last = day;
     // Reinserted last: the map stays in the order of what happened most recently.
     this.entries.delete(key);
     this.entries.set(key, e);
@@ -107,7 +109,7 @@ export class ShortfallLog {
   /** Over the cap (a player can make up new requests for as long as they like): out goes the oldest of those counted least. */
   private forgetOne(): void {
     let worst: [string, number] | undefined;
-    for (const [k, e] of this.entries) if (!worst || e.volte < worst[1]) worst = [k, e.volte];
+    for (const [k, e] of this.entries) if (!worst || e.times < worst[1]) worst = [k, e.times];
     if (worst) this.entries.delete(worst[0]);
   }
 
@@ -116,7 +118,7 @@ export class ShortfallLog {
   }
 
   toJson(): string {
-    return JSON.stringify({ voci: this.list() }, null, 1) + '\n';
+    return JSON.stringify({ entries: this.list() }, null, 1) + '\n';
   }
 }
 
@@ -125,22 +127,22 @@ const cell = (s: string) => s.replace(/\\/g, '\\\\').replace(/\|/g, '\\|');
 
 /** The report for the kernel 1.0.0: what happened most first, as Markdown. Each universe's entries stay apart. */
 export function shortfallReport(universes: Array<{ universo: string; voci: Shortfall[] }>): string {
-  const rows = universes.flatMap(({ universo, voci }) => voci.map((v) => ({ universo, ...v }))).sort((a, b) => b.volte - a.volte || b.ultimo.localeCompare(a.ultimo));
+  const rows = universes.flatMap(({ universo, voci }) => voci.map((v) => ({ universo, ...v }))).sort((a, b) => b.times - a.times || b.last.localeCompare(a.last));
   const out = ['# Ciò che il Concilio non è riuscito a fare', ''];
   if (!rows.length) return [...out, universes.length === 1 ? `Nessuna voce in «${universes[0].universo}».` : `Nessuna voce negli universi letti: ${universes.length}.`, ''].join('\n');
-  const times = rows.reduce((n, r) => n + r.volte, 0);
+  const times = rows.reduce((n, r) => n + r.times, 0);
   out.push(`Richieste: ${rows.length}. Volte: ${times}. Universi con voci: ${universes.filter((u) => u.voci.length).length}.`, '');
   const byAgent = new Map<string, { rows: number; times: number }>();
   for (const r of rows) {
-    const a = byAgent.get(r.agente) ?? { rows: 0, times: 0 };
+    const a = byAgent.get(r.agent) ?? { rows: 0, times: 0 };
     a.rows++;
-    a.times += r.volte;
-    byAgent.set(r.agente, a);
+    a.times += r.times;
+    byAgent.set(r.agent, a);
   }
   out.push('| agente | richieste | volte |', '|---|---:|---:|');
   for (const [agente, a] of [...byAgent].sort((x, y) => y[1].times - x[1].times)) out.push(`| ${cell(agente)} | ${a.rows} | ${a.times} |`);
   out.push('', '| volte | richiesta | chi | agente | compito | esito | motivo | universo | ultima volta |', '|---:|---|---|---|---|---|---|---|---|');
-  for (const r of rows) out.push(`| ${r.volte} | ${cell(r.richiesta)} | ${cell(r.chi.join(', '))} | ${cell(r.agente)} | ${cell(r.compito)} | ${r.esito} | ${cell(r.motivo)} | ${cell(r.universo)} | ${cell(r.ultimo)} |`);
+  for (const r of rows) out.push(`| ${r.times} | ${cell(r.request)} | ${cell(r.who.join(', '))} | ${cell(r.agent)} | ${cell(r.task)} | ${r.outcome} | ${cell(r.reason)} | ${cell(r.universo)} | ${cell(r.last)} |`);
   out.push('');
   return out.join('\n');
 }

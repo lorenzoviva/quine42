@@ -9,6 +9,7 @@ import { wordsOf } from './council';
 import { designLayouts } from './cartography';
 import { repairProgram } from '../mj';
 import { bibleBreaks, cleanBible, metaBreak } from '../fourthwall';
+import { internalFields } from '../internalNames';
 
 /** Codes the procedural draft and the kernel rely on: every palette must define them. */
 export const BASE_CODES: Record<string, { meaning: string; layer: TerrainLayer; solid: boolean; indoor?: boolean }> = {
@@ -194,19 +195,20 @@ export type LayoutCheck = (id: string, def: EnvironmentDef, palette: Record<stri
 
 export async function planGenesis(c: Council, theme: string, base: FileMap, checkLayout: LayoutCheck): Promise<GenesisPlan> {
   const data = { theme };
-  const askBible = (feedback = '') =>
-    c.ask<Bible>(
+  // The Narrator still writes the bible with the Italian fields of its schema (until T310): it is read with those of 0.4 (T308a).
+  const askBible = async (feedback = ''): Promise<Bible> =>
+    internalFields('bible', await c.ask<Bible>(
       'narrator',
       'genesis.bible',
       `Crea la bibbia di un nuovo universo a partire da questo tema:\n${theme}\n\nPer chi ci vive il mondo è reale (vedi i principi). Scrivi un mondo semplice e concreto, fatto di persone e mestieri, nell'epoca che il tema dice: tono e sintesi la dicono chiaramente (la tecnologia, com'è una città), perché gli altri lavoreranno da lì. Le rune sono come le dice il canone: non aggiungere nulla. Elenca 6-10 luoghi, 4-6 personaggi con mestieri concreti, 6-10 fatti, 2-4 leggende raccontate dalla gente (storie di persone, bestie, dei, potenti del passato: mai sul mondo stesso, né sulle rune oltre il canone). La gente parla e si comporta come dice il lessico: usalo dove viene da sé, senza spiegarlo; in «usanze» al più 3 usanze o modi di dire propri di questo mondo, che non contraddicono il lessico e non aggiungono parole che ne sostituiscono altre.${feedback ? `\nL'Arbitro ha obiettato: ${feedback}` : ''}`,
       BIBLE_SCHEMA,
       { data },
-    );
+    ));
   const askStyle = (bible: Bible, feedback = '') =>
     c.ask<RawStyle>(
       'artist',
       'genesis.style',
-      `Scrivi la guida di stile per tutti i modelli di questo universo: è un gioco 3D in cui ogni cosa (persone, animali, alberi, rocce, oggetti, edifici) è un modello a voxel (20 voxel per casella) costruito da un programma di regole, visto dall'alto in 3/4. Il mondo si disegna come un cartone: fasce di luce piatte e un contorno scuro dove cambia la parte. Dì lo stile (semplice e leggibile da lontano), le forme e le proporzioni (tozze e semplificate), la palette (ambiente smorzato e chiaro, pochi accenti saturi sulle cose che contano), la luce, 3-6 regole (tra cui: un colore pieno per parte, parti vicine ben staccate di chiaro e scuro, dettagli come segni scuri) e l'aspetto del protagonista, tutto nell'epoca del tema. In «case_comuni», solo se le case comuni di quest'epoca non sono casette di pietra, legno e paglia, dì in una frase come sono (un condominio con i balconi, una baracca di lamiera con un'insegna); altrimenti lascialo vuoto.\nTema: ${theme}\nTitolo: ${bible.titolo}\nTono: ${bible.tono}\nSintesi: ${bible.sintesi}${feedback ? `\nL'Arbitro ha obiettato: ${feedback}` : ''}`,
+      `Scrivi la guida di stile per tutti i modelli di questo universo: è un gioco 3D in cui ogni cosa (persone, animali, alberi, rocce, oggetti, edifici) è un modello a voxel (20 voxel per casella) costruito da un programma di regole, visto dall'alto in 3/4. Il mondo si disegna come un cartone: fasce di luce piatte e un contorno scuro dove cambia la parte. Dì lo stile (semplice e leggibile da lontano), le forme e le proporzioni (tozze e semplificate), la palette (ambiente smorzato e chiaro, pochi accenti saturi sulle cose che contano), la luce, 3-6 regole (tra cui: un colore pieno per parte, parti vicine ben staccate di chiaro e scuro, dettagli come segni scuri) e l'aspetto del protagonista, tutto nell'epoca del tema. In «case_comuni», solo se le case comuni di quest'epoca non sono casette di pietra, legno e paglia, dì in una frase come sono (un condominio con i balconi, una baracca di lamiera con un'insegna); altrimenti lascialo vuoto.\nTema: ${theme}\nTitolo: ${bible.title}\nTono: ${bible.tone}\nSintesi: ${bible.summary}${feedback ? `\nL'Arbitro ha obiettato: ${feedback}` : ''}`,
       STYLE_SCHEMA,
       { data: { ...data, bible } },
     );
@@ -214,7 +216,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
     c.ask<{ terreni: RawTerrain[]; tetto: string }>(
       'cartographer',
       'genesis.terrain',
-      `Definisci 14-20 tipi di terreno per le mappe di questo universo, esterni e interni, della sua epoca.\nTema: ${theme}\nTono: ${bible.tono}\nLuoghi: ${bible.luoghi.join('; ')}\nStile: ${style.stile}; palette ${style.palette.join(', ')}\nCodici obbligatori (un carattere ciascuno), adattati al tema:\n${Object.entries(BASE_CODES).map(([k, v]) => `- ${k}: ${v.meaning} [strato ${v.layer}]`).join('\n')}\nAggiungine altri (un carattere), ciò che nel tema esiste: in un borgo campi coltivati, fango, muro di pietra, paglia, staccionata, ponte levatoio; in una città asfalto, binari, cemento, vetro, lamiera, rete metallica; ovunque lava, tappeto. Colori ben distinti tra loro.${feedback ? `\nDa correggere: ${feedback}` : ''}`,
+      `Definisci 14-20 tipi di terreno per le mappe di questo universo, esterni e interni, della sua epoca.\nTema: ${theme}\nTono: ${bible.tone}\nLuoghi: ${bible.places.join('; ')}\nStile: ${style.stile}; palette ${style.palette.join(', ')}\nCodici obbligatori (un carattere ciascuno), adattati al tema:\n${Object.entries(BASE_CODES).map(([k, v]) => `- ${k}: ${v.meaning} [strato ${v.layer}]`).join('\n')}\nAggiungine altri (un carattere), ciò che nel tema esiste: in un borgo campi coltivati, fango, muro di pietra, paglia, staccionata, ponte levatoio; in una città asfalto, binari, cemento, vetro, lamiera, rete metallica; ovunque lava, tappeto. Colori ben distinti tra loro.${feedback ? `\nDa correggere: ${feedback}` : ''}`,
       TERRAIN_SCHEMA,
       { data: { ...data, bible } },
     );
@@ -232,7 +234,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
     return cleanBible(b, words);
   };
   let bible = await worldBible();
-  c.say('narrator', 'propone', `«${bible.titolo}» — ${bible.sintesi}`);
+  c.say('narrator', 'propone', `«${bible.title}» — ${bible.summary}`);
   let style = await askStyle(bible);
   c.say('artist', 'propone', `${style.stile}; ${style.forme}; luce ${style.luce}`);
   let terrain = await askTerrain(bible, style);
@@ -277,7 +279,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
     const issues = (a: AgentId) => review.problemi.filter((p) => p.agente === a).map((p) => p.problema).join('; ');
     if (issues('narrator')) {
       bible = await worldBible(issues('narrator'));
-      c.say('narrator', 'corregge', bible.sintesi);
+      c.say('narrator', 'corregge', bible.summary);
     }
     if (issues('artist')) {
       style = await askStyle(bible, issues('artist'));
@@ -316,7 +318,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
   const { moduli } = await c.ask<{ moduli: CastEntry[] }>(
     'narrator',
     'genesis.cast',
-    `Scegli i primi abitanti e le prime cose di «${bible.titolo}»: 5 npc molto diversi tra loro (almeno 3 persone di mestieri, età e generi diversi, e 1 animale; nessuno uguale a un altro), 5 oggetti che stanno nel mondo (almeno 3 mobili o contenitori, come li ha la sua epoca: letto, credenza, cassa, banco da lavoro…, e 1-2 cose all'aperto con cui fare qualcosa: pozzo, altare, falò, cabina, distributore…), 2 strumenti speciali. Per ognuno una richiesta di una frase per la Fucina, coerente con la bibbia.`,
+    `Scegli i primi abitanti e le prime cose di «${bible.title}»: 5 npc molto diversi tra loro (almeno 3 persone di mestieri, età e generi diversi, e 1 animale; nessuno uguale a un altro), 5 oggetti che stanno nel mondo (almeno 3 mobili o contenitori, come li ha la sua epoca: letto, credenza, cassa, banco da lavoro…, e 1-2 cose all'aperto con cui fare qualcosa: pozzo, altare, falò, cabina, distributore…), 2 strumenti speciali. Per ognuno una richiesta di una frase per la Fucina, coerente con la bibbia.`,
     CAST_SCHEMA,
     { data: { bible } },
   );

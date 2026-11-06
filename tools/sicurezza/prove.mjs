@@ -103,7 +103,7 @@ function seedFiles() {
 }
 
 const seedConfig = () => readFileSync(path.join(REPO, 'universe', 'universe.json'), 'utf8');
-const many = (name) => JSON.stringify({ ...JSON.parse(seedConfig()), name, partita: { modalita: 'multiplayer', morte: 3, master: 'io' } }, null, 2);
+const many = (name) => JSON.stringify({ ...JSON.parse(seedConfig()), name, game: { mode: 'multiplayer', death: 3, master: 'me' } }, null, 2);
 
 async function writeUniverse(root, files) {
   for (const [rel, text] of Object.entries(files)) {
@@ -122,11 +122,11 @@ const small = (name) => ({
   'universe.json': many(name),
   'modules/sonda/manifest.json': JSON.stringify({ id: 'sonda', name: 'Sonda', kind: 'data' }),
   'modules/sonda/logic.lua': 'return {}\n',
-  'world/giocatori/altro.json': JSON.stringify({ nome: 'Altro', crediti: 5 }),
+  'world/players/altro.json': JSON.stringify({ nome: 'Altro', crediti: 5 }),
 });
 
 /** The whole seed as a universe of many, with a wanderer who has a balance. */
-const world = (name, seed, extra = {}) => ({ ...seed, 'universe.json': many(name), 'world/giocatori/altro.json': JSON.stringify({ nome: 'Altro', crediti: 5 }), ...extra });
+const world = (name, seed, extra = {}) => ({ ...seed, 'universe.json': many(name), 'world/players/altro.json': JSON.stringify({ nome: 'Altro', crediti: 5 }), ...extra });
 
 async function makeUniverses(work) {
   const at = (n) => path.join(work, 'universes', n);

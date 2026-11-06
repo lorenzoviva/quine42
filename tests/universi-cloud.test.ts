@@ -14,7 +14,7 @@ import { leggiUniverso } from '../lab/banco/universi-cloud/strumenti/carica';
 import { installa } from '../lab/banco/universi-cloud/strumenti/installa';
 import { MockAiModels } from '../src/kernel/ai/mock';
 import { Kernel } from '../src/kernel/kernel';
-import { internalModelId0_3, internalSoundPurpose } from '../src/kernel/internalNames';
+import { internalFields, internalModelId0_3, internalSoundPurpose } from '../src/kernel/internalNames';
 import { memoryStore } from '../src/kernel/repo';
 import { checkKernelVersion, KERNEL_VERSION, parseVersion } from '../src/kernel/version';
 import { soundPrograms } from '../src/mj/sound';
@@ -37,21 +37,21 @@ describe('what Claude Cloud made, in the four universes', () => {
   for (const u of UNIVERSI) {
     describe(u.nome, () => {
       const { files, maps } = leggi(u);
-      const index = JSON.parse(files['models/index.json']) as Record<string, { classe?: string; sotto?: number; taglia?: string; suono?: unknown }>;
+      const index = JSON.parse(files['models/index.json']) as Record<string, { class?: string; cellar?: number; size?: string; sound?: unknown }>;
       const catalogo = strutture(u.tema);
 
       it(`has the ${catalogo.length} structures of its theme (${u.tema}), the props and the sounds in its library`, () => {
         expect(catalogo.length).toBe(12);
         for (const s of catalogo) {
-          expect(index[s.id], s.id).toMatchObject({ classe: 'structure' });
+          expect(index[s.id], s.id).toMatchObject({ class: 'structure' });
           expect(files[`models/${s.id}.xml`], s.id).toBeTruthy();
           // A cellar is a tile under the ground (ADR-0135): without `sotto` the library would cut it off.
-          expect(index[s.id].sotto, s.id).toBe(s.cantina ? 1 : undefined);
+          expect(index[s.id].cellar, s.id).toBe(s.cantina ? 1 : undefined);
         }
-        for (const p of props(u.tema)) expect(index[p.id]?.classe, p.id).toBe(p.voce.classe);
+        for (const p of props(u.tema)) expect(index[p.id]?.class, p.id).toBe(p.voce.classe);
         const programs = new Map(soundPrograms(files).map((p) => [p.id, p]));
         // The universes are of 0.1 on the disk and read ported: the seed's sound programs by their new ids, their purposes internal (T307b).
-        for (const m of suoni(u)) expect(programs.get(internalModelId0_3(m.id))?.suono, m.id).toEqual(internalSoundPurpose(m.voce.suono));
+        for (const m of suoni(u)) expect(programs.get(internalModelId0_3(m.id))?.sound, m.id).toEqual(internalFields('soundPurpose', internalSoundPurpose(m.voce.suono)));
         for (const f of Object.keys(files).filter((p) => /^models\/[^/]+\.xml$/.test(p))) expect(index[f.slice(7, -4)], f).toBeDefined();
       });
 
@@ -63,7 +63,7 @@ describe('what Claude Cloud made, in the four universes', () => {
           expect(luogoDi(files, name), name).toBeDefined();
           const v = k.validator.validatePlan(rec.plan, layouts, placeable);
           expect([...v.errors, ...v.dropped], name).toEqual([]);
-          for (const s of rec.plan.strutture ?? []) expect(k.forms.resolve(modelloDi(s.concetto), 'grande'), `${name}: ${s.concetto}`).toBe(modelloDi(s.concetto));
+          for (const s of rec.plan.structures ?? []) expect(k.forms.resolve(modelloDi(s.concept), 'grande'), `${name}: ${s.concept}`).toBe(modelloDi(s.concept));
         }
         const { strutture: placed, problemi } = await collocate(files, maps);
         expect(problemi).toEqual([]);
@@ -71,7 +71,7 @@ describe('what Claude Cloud made, in the four universes', () => {
         // Every structure of the catalogue stands somewhere, and the one Enorme of the zone is its model's size.
         const ids = new Set(placed.map((p) => p.modello));
         for (const s of catalogo) expect(ids.has(s.id), s.id).toBe(true);
-        for (const p of placed) if (p.taglia === 'huge') expect(index[p.modello]?.taglia, p.modello).toBe('huge');
+        for (const p of placed) if (p.taglia === 'huge') expect(index[p.modello]?.size, p.modello).toBe('huge');
         expect(placed.filter((p) => p.taglia === 'huge').length).toBeLessThanOrEqual(1);
       });
     });
@@ -91,7 +91,7 @@ describe('the installation in universes/ (lab/scripts/installa-universi-cloud.ts
         // `needsGenesis` looks for a commit that starts with «genesi:»: the world is not asked for again.
         expect(log.trim().split('\n')).toEqual([expect.stringMatching(/^Genesi genesi: /)]);
         expect((await runGit(root, ['status', '--porcelain'], { author: ['Prova', 'prova@rune.local'] })).trim()).toBe('');
-        expect(existsSync(path.join(dir, '.saldi', `${d.nome}.json`))).toBe(true);
+        expect(existsSync(path.join(dir, '.balances', `${d.nome}.json`))).toBe(true);
         // What the browser reads (the snapshot leaves maps/ out) and upgrades from the seed at every load: nothing left to change.
         const { files } = leggiUniverso(root + '/');
         expect(Object.keys(upgradeFromSeed(files, seed).changes)).toEqual([]);

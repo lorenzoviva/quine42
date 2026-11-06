@@ -380,7 +380,7 @@ describe('the devices of the rooms', () => {
     expect(fileModelOf('world/rules.json')).toBe('schermo-struttura');
     expect(fileModelOf('models/tree.xml')).toBe('schermo-struttura');
     expect(fileModelOf('prompts/theme.md')).toBe('schermo-scritte');
-    expect(fileModelOf('world/canone.md')).toBe('schermo-scritte');
+    expect(fileModelOf('world/canon.md')).toBe('schermo-scritte');
     expect(fileModelOf('world/notes.txt')).toBe('schermo-scritte');
 
     // 2. fileSeedOf returns deterministic 1..4
@@ -392,7 +392,7 @@ describe('the devices of the rooms', () => {
     for (const id of ['schermo-scritte', 'schermo-struttura', 'circuito-3D']) {
       expect(bundledFiles[`models/${id}.xml`], id).toBeDefined();
       expect(index[id], id).toBeDefined();
-      expect(index[id].classe, id).toBe('object');
+      expect(index[id].class, id).toBe('object');
       expect(index[id].vpt, id).toBe(20);
     }
 

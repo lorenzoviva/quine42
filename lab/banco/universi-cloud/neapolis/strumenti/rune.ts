@@ -8,7 +8,7 @@ import type { MagicRune } from '../../../../../src/kernel/types';
 
 const DIR = 'lab/banco/universi-cloud/neapolis';
 const seed = JSON.parse(readFileSync('universe/modules/magic.runes/manifest.json', 'utf8'));
-const words = lexiconWords(readFileSync(`${DIR}/world/lessico.md`, 'utf8'));
+const words = lexiconWords(readFileSync(`${DIR}/world/lexicon.md`, 'utf8'));
 
 /** Le rune del seme che restano: quattro, così con le dodici nuove sono 16, il massimo (MAX_MAGIC_RUNES). */
 const KEPT = ['luce', 'fuoco', 'terra', 'vento'];
@@ -47,7 +47,7 @@ const URBAN: Urban[] = [
 function build() {
   const runes: Record<string, MagicRune> = Object.fromEntries(KEPT.map((t) => [t, seed.runes[t]]));
   const spells: Record<string, unknown> = Object.fromEntries(Object.entries(seed.spells).filter(([k]) => k.split(' ').every((t) => KEPT.includes(t))));
-  let canon = readFileSync('universe/world/canone.md', 'utf8')
+  let canon = readFileSync('universe/world/canon.md', 'utf8')
     // Due frasi del seme che il filtro della quarta parete prende alla lettera: dette con altre parole, uguali nel senso.
     .replace('Nessuno ha mai visto una runa nascere: chi passa le trova già lì.', 'Nessuno ha mai assistito alla nascita di una lastra: chi passa le trova già lì.')
     .replace(/né inventare altri segni luminosi nel terreno\s+che facciano le veci delle rune\./, 'né inventare altri segni che brillino nel terreno al posto delle rune.');
@@ -86,7 +86,7 @@ function build() {
   writeFileSync(`${DIR}/modules/magic.runes/manifest.json`, JSON.stringify(man, null, 2) + '\n');
   // Il canone: un paragrafo sulla città prima delle rune trovate dopo.
   canon = canon.replace('## Le rune trovate dopo', '## A Neapolis\n- In città le rune si trovano come altrove: sul basolato dei rioni, nei giardini del Colle, tra i binari morti dello scalo. Alla radio ci ridono sopra; i ragazzi le vendono al mercatino della domenica.\n- Chi pronuncia una runa in città lo racconta sottovoce, al bar, a chi offre il caffè.\n\n## Le rune trovate dopo');
-  writeFileSync(`${DIR}/world/canone.md`, canon);
+  writeFileSync(`${DIR}/world/canon.md`, canon);
   return report;
 }
 

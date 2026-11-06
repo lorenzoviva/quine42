@@ -1,6 +1,6 @@
 // Le rune di Sidera: le quattro del seme che restano (lux, ignis, aqua, scutum: `lux` è tra le rune con cui si parte; dal contratto 0.2, T307a)
 // e le dodici quantistiche e gravitazionali, ognuna validata con `validateNewRune` contro quelle già entrate.
-// Scrive modules/magic.runes/manifest.json e world/canone.md. Esegui: npx vite-node lab/banco/universi-cloud/sidera/strumenti/rune.ts
+// Scrive modules/magic.runes/manifest.json e world/canon.md. Esegui: npx vite-node lab/banco/universi-cloud/sidera/strumenti/rune.ts
 import fs from 'node:fs';
 import path from 'node:path';
 import { canonWithRune, MAX_MAGIC_RUNES, validateNewRune, type RuneDraft } from '../../../../../src/kernel/magic';
@@ -49,7 +49,7 @@ export const INCANTESIMI: Record<string, Spell> = {
 };
 
 export function scrivi(): void {
-  const lessico = fs.readFileSync(path.join(SIDERA, 'world/lessico.md'), 'utf8');
+  const lessico = fs.readFileSync(path.join(SIDERA, 'world/lexicon.md'), 'utf8');
   const words = lexiconWords(lessico);
   const runes: Record<string, MagicRune> = Object.fromEntries(KEEP.map((t) => [t, seed.runes[t]]));
   let canone = fs.readFileSync(path.join(SIDERA, 'strumenti/canone-base.md'), 'utf8');
@@ -98,7 +98,7 @@ export function scrivi(): void {
     },
   };
   fs.writeFileSync(path.join(SIDERA, 'modules/magic.runes/manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
-  fs.writeFileSync(path.join(SIDERA, 'world/canone.md'), canone);
+  fs.writeFileSync(path.join(SIDERA, 'world/canon.md'), canone);
   console.log(`${tot} rune magiche, ${Object.keys(spells).length} incantesimi; ${errori.length ? 'ERRORI:\n' + errori.join('\n') : 'nessun errore'}`);
   if (errori.length) process.exit(1);
 }

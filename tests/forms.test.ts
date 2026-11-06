@@ -25,12 +25,12 @@ describe('the library of models', () => {
       const id = p.slice('models/'.length, -'.xml'.length);
       expect(index[id], id).toBeDefined();
       // A sound program has no box (ADR-0123): the validator judges it all the same.
-      if (index[id].classe !== SOUND_CLASS) expect(classOf(index[id].classe), id).toBeDefined();
+      if (index[id].class !== SOUND_CLASS) expect(classOf(index[id].class), id).toBeDefined();
       // In the box the library runs it in (`sizeFor`): its own `size`, or its class's box at its size and as much deeper as its cellar (ADR-0135).
       const xml = bundledFiles[p];
-      const cls = classOf(index[id].classe);
-      const boxed = index[id].classe === SOUND_CLASS || !cls || /\ssize="/.test(rootTag(xml)) ? xml : withSize(xml, boxOf(cls, index[id].taglia).map((n, i) => (i === 2 ? n + cellarOf(index[id]) * vptOf(index[id]) : n)) as [number, number, number]);
-      const errors = modelErrors(p, boxed, index[id].tempo);
+      const cls = classOf(index[id].class);
+      const boxed = index[id].class === SOUND_CLASS || !cls || /\ssize="/.test(rootTag(xml)) ? xml : withSize(xml, boxOf(cls, index[id].size).map((n, i) => (i === 2 ? n + cellarOf(index[id]) * vptOf(index[id]) : n)) as [number, number, number]);
+      const errors = modelErrors(p, boxed, index[id].time);
       const expected = expectedModelErrors(id);
       expect(errors, id).toHaveLength(expected.length);
       expected.forEach((e, i) => expect(errors[i]).toMatch(e));
@@ -124,7 +124,7 @@ describe('forms in the kernel', () => {
     expect(fc.done).toEqual(['open']);
     expect(k.modelActions(house).map((a) => a.name)).toEqual(['close']);
     expect(k.saveState()).toBe(true);
-    expect(JSON.parse(k.repo.head().files['world/stato.json']!).forme['test#casa']).toEqual(['open']);
+    expect(JSON.parse(k.repo.head().files['world/state.json']!).forms['test#casa']).toEqual(['open']);
     // Closing it again: back to how it was made, nothing left to remember.
     await k.perform(house, 'modello:close');
     expect(fc.done).toEqual([]);

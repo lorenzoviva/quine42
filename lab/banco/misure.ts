@@ -44,7 +44,7 @@ export interface Scatola {
 /** The library's own idea of a model of this class, size and cellar: how it would run in the game. */
 function voce(b: Bersaglio, xml = '<sequence values="B"/>'): { forms: Forms; id: string; vpt: number; size?: Vec3 } {
   const id = 'prova';
-  const info = { classe: b.classe, ...modelSize(b), ...(b.sotto ? { sotto: b.sotto } : {}) };
+  const info = { class: b.classe, ...modelSize(b), ...(b.sotto ? { cellar: b.sotto } : {}) };
   const forms = new Forms(new InlineRunner(new FormCache()));
   forms.load({ [`models/${id}.xml`]: xml, 'models/index.json': JSON.stringify({ [id]: info }) });
   const q = forms.request(id, 1)!;

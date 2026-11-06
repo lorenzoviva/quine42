@@ -156,7 +156,7 @@ export class BenchView {
     const half = Math.floor(BENCH / 2);
     this.actors.forEach((m, i) => {
       const c = this.shown.entry.case;
-      const start: [number, number] | null = i === 0 ? [0.5, 0.5] : c.cose?.[i - 1] ? [c.cose[i - 1].x + 0.5, c.cose[i - 1].y + 0.5] : null;
+      const start: [number, number] | null = i === 0 ? [0.5, 0.5] : c.entities?.[i - 1] ? [c.entities[i - 1].x + 0.5, c.entities[i - 1].y + 0.5] : null;
       const p = at ? at(i) : start;
       const inside = !!p && p[0] >= -half && p[0] <= half + 1 && p[1] >= -half && p[1] <= half + 1;
       m.visible = inside;
@@ -194,13 +194,13 @@ export class BenchView {
     g.fillText(label, 25, 17);
     g.fillStyle = '#ffffff';
     g.font = 'bold 26px system-ui, sans-serif';
-    g.fillText(fit(g, c.titolo, W - lw - 46), lw + 28, 14);
+    g.fillText(fit(g, c.title, W - lw - 46), lw + 28, 14);
     g.font = '17px system-ui, sans-serif';
     g.fillStyle = DIM;
     g.fillText(fit(g, `${entry.name} · caso ${entry.of + 1} di ${entry.cases} · ${this.shown.index + 1}/${this.shown.count} sul banco`, W - 36), 16, 52);
     const errors = run?.errori ?? [];
     // The lines that make the case: lit while the rule runs.
-    const lines = (c.righe?.length ? c.righe : []).slice(0, LINES);
+    const lines = (c.lines?.length ? c.lines : []).slice(0, LINES);
     const lit = moment === 'regola';
     g.font = '19px monospace';
     lines.forEach((ln, i) => {
@@ -221,7 +221,7 @@ export class BenchView {
     // What it watches: the value now, lit when it changed from before.
     const x0 = W * 0.62;
     g.font = '19px system-ui, sans-serif';
-    c.guarda.slice(0, VALUES).forEach((path, i) => {
+    c.watch.slice(0, VALUES).forEach((path, i) => {
       const y = 82 + i * 40;
       const v = frame?.valori[path];
       const changed = run && frame && JSON.stringify(v) !== JSON.stringify(run.prima[path]);

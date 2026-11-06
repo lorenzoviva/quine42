@@ -12,7 +12,7 @@ import { LIMITS, SessionServer } from '../../src/session/server';
 let kernel: Kernel;
 beforeAll(async () => {
   const cfg = JSON.parse(bundledFiles['universe.json']);
-  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2) };
+  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, game: { mode: 'multiplayer', death: 3 } }, null, 2) };
   kernel = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 }, 120_000);
 afterEach(() => void vi.restoreAllMocks());
@@ -102,7 +102,7 @@ describe('V-011 i limiti ai messaggi', () => {
     expect(spy.mock.calls.length).toBe(asked + 1);
   });
 
-  it('V-011 le code sono per pagante: chi aspetta non fa aspettare un altro', async () => {
+  it('V-011 le code sono per payer: chi aspetta non fa aspettare un altro', async () => {
     const server = await world();
     const { spy, open } = holdCrafts(server);
     const a = enter(server, 'inonda');

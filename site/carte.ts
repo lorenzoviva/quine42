@@ -22,7 +22,7 @@ export const RARITIES: Array<{ id: Rarity; da: number; nome: string; badge: stri
   { id: 'comune', da: 0, nome: 'COMUNE', badge: 'dark' },
 ];
 
-export const totalUses = (u: Uses) => u.luoghi + u.trame + u.prompt;
+export const totalUses = (u: Uses) => u.chunks + u.plots + u.prompt;
 
 /** Cards carry no rarity: it is how much the world uses them, so a card grows as it is played. */
 export function rarityOf(u: Uses): Rarity {
@@ -87,8 +87,8 @@ export function mhCode(impronta: number[] | undefined): string {
 
 /** A link of the chain: who held the card, where, what the content was then, how much of every use they get. */
 export interface ChainLink {
-  titolare: string;
-  universo: string;
+  holder: string;
+  universe: string;
   mh: string;
   /** Share of every use, 0-1; undefined on a later link of someone who is in the chain twice (their share is one). */
   quota?: number;
@@ -98,7 +98,7 @@ export interface ChainLink {
 
 /** The chain of a card, the first holder first and the holder of now last. */
 export function chainOf(card: Card, universo: string): ChainLink[] {
-  const past = card.origini ?? [];
+  const past = card.origins ?? [];
   const seen = new Set<string>();
   const quota = (who: string) => {
     if (seen.has(who)) return undefined;
@@ -106,13 +106,13 @@ export function chainOf(card: Card, universo: string): ChainLink[] {
     return card.quote?.[who] ?? (past.length ? 0 : 1);
   };
   const links: ChainLink[] = past.map((o, i) => ({
-    titolare: o.titolare,
-    universo: o.universo,
-    mh: mhCode(o.impronta),
-    quota: quota(o.titolare),
-    cambio: changeOf(o.impronta, past[i + 1]?.impronta ?? card.impronta ?? o.impronta),
+    holder: o.holder,
+    universe: o.universe,
+    mh: mhCode(o.fingerprint),
+    quota: quota(o.holder),
+    cambio: changeOf(o.fingerprint, past[i + 1]?.fingerprint ?? card.fingerprint ?? o.fingerprint),
   }));
-  links.push({ titolare: card.titolare, universo, mh: mhCode(card.impronta), quota: quota(card.titolare) });
+  links.push({ holder: card.holder, universe: universo, mh: mhCode(card.fingerprint), quota: quota(card.holder) });
   return links;
 }
 
@@ -144,9 +144,9 @@ function entryOf(card: Card, files: FileMap): any {
     case 'model':
       return byKey(data, (k) => k);
     case 'individual':
-      return (data.persone as any[] | undefined)?.find((p) => slug(p?.nome ?? '') === key);
+      return (data.people as any[] | undefined)?.find((p) => slug(p?.name ?? '') === key);
     case 'plot':
-      return (data.trame as any[] | undefined)?.find((t) => slug(t?.id ?? '') === key);
+      return (data.plots as any[] | undefined)?.find((t) => slug(t?.id ?? '') === key);
     case 'rule':
       return undefined;
     case 'chunk':
@@ -157,7 +157,7 @@ function entryOf(card: Card, files: FileMap): any {
 }
 
 /** What the content says of itself among what `publicFiles` gives (T168): the rest stays on the server, and the card says what it is. */
-const SAYS = ['description', 'mestiere'];
+const SAYS = ['description', 'job'];
 const MAX_TEXT = 120;
 
 /** A line for the front of the card, from what the content says of itself. */
@@ -173,7 +173,7 @@ export function artOf(card: Card, files: FileMap, forms: Forms): FormRequest | u
   const entry = entryOf(card, files);
   const modulePic = (m: Manifest | undefined, who: string) => {
     if (!m?.appearance || m.kind === 'system' || m.kind === 'generator' || m.kind === 'data') return undefined;
-    const model = forms.resolve(m.appearance.model, m.appearance.classe);
+    const model = forms.resolve(m.appearance.model, m.appearance.class);
     return forms.request(model, forms.seedFor(model, who), m.appearance.color);
   };
   switch (card.tipo) {
@@ -216,19 +216,19 @@ export function collectionView(files: FileMap, wanderer: string, universo: strin
   forms.load(files);
   const view = (card: Card): CardView => ({
     card,
-    rarita: rarityOf(card.utilizzi),
+    rarita: rarityOf(card.uses),
     categoria: CATEGORY[card.tipo],
     descrizione: describeCard(card, files),
     catena: chainOf(card, universo),
     art: artOf(card, files, forms),
   });
-  const used = (c: Card) => totalUses(c.utilizzi);
+  const used = (c: Card) => totalUses(c.uses);
   const mine = cards
-    .filter((c) => c.titolare === wanderer)
+    .filter((c) => c.holder === wanderer)
     .sort((a, b) => used(b) - used(a) || a.id.localeCompare(b.id))
     .map(view);
   const paid = receivedBy(files, wanderer, cards);
-  const received = paid.map((r) => ({ ...view(r.card), quota: r.quota, ricevuto: r.ricevuto }));
+  const received = paid.map((r) => ({ ...view(r.card), quota: r.share, ricevuto: r.received }));
   return {
     mine,
     received,
@@ -236,7 +236,7 @@ export function collectionView(files: FileMap, wanderer: string, universo: strin
       totale: mine.length,
       rare: mine.filter((v) => v.rarita === 'rara' || v.rarita === 'epica').length,
       leggendarie: mine.filter((v) => v.rarita === 'leggendaria').length,
-      rendita: paid.reduce((s, r) => s + r.ricevuto, 0),
+      rendita: paid.reduce((s, r) => s + r.received, 0),
     },
   };
 }
@@ -250,7 +250,7 @@ export function inCategory(c: Collection, cat: Category): CardView[] {
 /** Whose collection: the id in the address (it only reads what is public anyway), then the account, then the one who plays alone. */
 export function wandererFrom(search: string, uid?: string): string {
   const asked = new URLSearchParams(search).get('viandante')?.trim();
-  return asked || (uid ? accountWanderer(uid) : 'io');
+  return asked || (uid ? accountWanderer(uid) : 'me');
 }
 
 const percent = (q: number) => `${Math.round(q * 100)}%`;
@@ -270,7 +270,7 @@ function renderCard(v: CardView, me: string, index: number): HTMLElement {
   const [from, to] = GEM[v.categoria];
   const gem = el('div', { class: 'card-art-gem', style: `background: linear-gradient(45deg, var(${from}), var(${to}));` });
   const art = el('div', { class: 'card-art-box' }, gem, el('span', { class: 'card-kind arcade-text' }, KIND_NAME[v.card.tipo].toUpperCase()));
-  const u = v.card.utilizzi;
+  const u = v.card.uses;
   const stat = (label: string, n: number, cls = '') => el('div', { class: 'card-stat' }, `${label}: `, el('b', cls ? { class: cls } : {}, String(n)));
   const front = el(
     'div',
@@ -282,7 +282,7 @@ function renderCard(v: CardView, me: string, index: number): HTMLElement {
       faceHead(v),
       art,
       el('p', { class: 'card-text' }, v.descrizione),
-      el('div', { class: 'card-stats-box' }, stat('Luoghi', u.luoghi), stat('Trame', u.trame), stat('Prompt', u.prompt), stat('Totale', totalUses(u), 'text-green')),
+      el('div', { class: 'card-stats-box' }, stat('Luoghi', u.chunks), stat('Trame', u.plots), stat('Prompt', u.prompt), stat('Totale', totalUses(u), 'text-green')),
     ),
   );
 
@@ -291,8 +291,8 @@ function renderCard(v: CardView, me: string, index: number): HTMLElement {
     return el(
       'li',
       { class: `card-genealogy-node${now ? ' is-now' : ''}` },
-      el('div', { class: 'link-head' }, el('span', { class: `comic-badge ${now ? 'green' : 'dark'}` }, now ? 'ORA' : i === 0 ? 'ORIGINE' : `#${i + 1}`), el('b', {}, who(l.titolare, me)), l.quota === undefined ? '' : el('span', { class: 'text-green link-share' }, percent(l.quota))),
-      el('div', { class: 'link-where text-dim' }, l.universo, ' · ', l.mh, l.cambio === undefined ? '' : ` · cambiata ${percent(l.cambio)}`),
+      el('div', { class: 'link-head' }, el('span', { class: `comic-badge ${now ? 'green' : 'dark'}` }, now ? 'ORA' : i === 0 ? 'ORIGINE' : `#${i + 1}`), el('b', {}, who(l.holder, me)), l.quota === undefined ? '' : el('span', { class: 'text-green link-share' }, percent(l.quota))),
+      el('div', { class: 'link-where text-dim' }, l.universe, ' · ', l.mh, l.cambio === undefined ? '' : ` · cambiata ${percent(l.cambio)}`),
     );
   });
   const back = el(
@@ -307,7 +307,7 @@ function renderCard(v: CardView, me: string, index: number): HTMLElement {
         { class: 'card-back-frame' },
         el('div', { class: 'card-back-brand' }, 'QUINE42'),
         el('div', { class: 'arcade-text text-cyan card-back-label' }, 'IMPRONTA MINHASH'),
-        el('code', { class: 'mono-text text-yellow card-back-code' }, mhCode(v.card.impronta)),
+        el('code', { class: 'mono-text text-yellow card-back-code' }, mhCode(v.card.fingerprint)),
         el('div', { class: 'arcade-text text-cyan card-back-label' }, 'CATENA DEI TITOLARI'),
         el('ol', { class: 'card-genealogy-box' }, ...links),
         v.quota === undefined ? '' : el('div', { class: 'card-paid text-green' }, `Ti spetta ${percent(v.quota)} di ogni utilizzo: ${formatUses(v.ricevuto ?? 0)} finora`),
@@ -496,7 +496,7 @@ async function start(): Promise<void> {
   const config = await accountConfig();
   const signed = config && !new URLSearchParams(location.search).get('viandante') ? await signIn(config).catch(() => undefined) : undefined;
   const me = wandererFrom(location.search, signed?.uid);
-  stat('card-owner', me === 'io' ? 'IL TUO VIANDANTE' : `VIANDANTE ${me}`);
+  stat('card-owner', me === 'me' ? 'IL TUO VIANDANTE' : `VIANDANTE ${me}`);
 
   let collection: Collection = { mine: [], received: [], stats: { totale: 0, rare: 0, leggendarie: 0, rendita: 0 } };
   let category: Category = 'tutte';
@@ -570,7 +570,7 @@ async function start(): Promise<void> {
     const snap = await snapshot(name);
     if (!snap) continue;
     first ??= { name, snap };
-    if (snap.carte.some((c) => c.titolare === me)) {
+    if (snap.carte.some((c) => c.holder === me)) {
       first = { name, snap };
       break;
     }

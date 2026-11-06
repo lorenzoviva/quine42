@@ -4,10 +4,10 @@
   "kind": "data",
   "version": "0.1.0",
   "description": "La giornata di chi lavora il ferro: al banco con la legna del deposito per il fuoco, chiodi per chi costruisce.",
-  "mestieri": [
+  "jobs": [
     {
       "id": "smith",
-      "nomi": [
+      "names": [
         "fabbro",
         "fabbra",
         "maniscalco",
@@ -23,51 +23,51 @@
         "operaio",
         "operaia"
       ],
-      "posto": {
-        "entita": "banco"
+      "workplace": {
+        "entity": "banco"
       },
-      "giornata": {
+      "day": {
         "morning": [
           {
-            "fa": "take",
-            "oggetto": "item.ciocco",
-            "quante": 2,
-            "dove": "square"
+            "does": "take",
+            "item": "item.ciocco",
+            "count": 2,
+            "where": "square"
           },
           {
-            "fa": "go",
-            "dove": "work"
+            "does": "go",
+            "where": "work"
           }
         ],
         "day": [
           {
-            "fa": "produce",
-            "oggetto": "item.chiodi",
-            "con": "item.ciocco",
-            "quante": 2,
-            "durata": 25,
-            "posa": "work",
-            "dove": "entita:banco",
-            "dice": "Il fuoco è pronto."
+            "does": "produce",
+            "item": "item.chiodi",
+            "with": "item.ciocco",
+            "count": 2,
+            "duration": 25,
+            "pose": "work",
+            "where": "entity:banco",
+            "says": "Il fuoco è pronto."
           }
         ],
         "evening": [
           {
-            "fa": "carry",
-            "oggetto": "item.chiodi",
-            "dove": "square"
+            "does": "carry",
+            "item": "item.chiodi",
+            "where": "square"
           },
           {
-            "fa": "chat"
+            "does": "chat"
           }
         ],
         "night": [
           {
-            "fa": "go",
-            "dove": "home"
+            "does": "go",
+            "where": "home"
           },
           {
-            "fa": "rest"
+            "does": "rest"
           }
         ]
       }

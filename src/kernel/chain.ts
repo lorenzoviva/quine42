@@ -95,7 +95,7 @@ export function chainOf(systems: ModuleEntry[], meter: ChainMeter, faults: Fault
       kind: stationKind(id),
       ...(m.manifest.description ? { description: m.manifest.description } : {}),
       path: m.logicPath ?? m.manifestPath,
-      ...(m.manifest.ui?.titolo ? { panel: m.manifest.ui.titolo } : {}),
+      ...(m.manifest.ui?.title ? { panel: m.manifest.ui.title } : {}),
       ...(measure ? { measure } : {}),
       ...(f ? { fault: { message: f.message, count: f.count } } : {}),
     };

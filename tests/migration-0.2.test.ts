@@ -2,6 +2,8 @@
 // the same files giving the same files; the Lua of the Council's modules is ported only where the kernel reads a value; the seed's files a
 // universe kept as they were take the seed of 0.2 in the same load; the plans of the places are ported as they are read; what the Council
 // still writes in Italian is repaired; a Latin rune pronounced works; and the seed runs 400 ticks offline without faults.
+// The chain goes on (0.3, T307b; 0.4, T308a): what is checked here of the files is the chain up to 0.3 (`TO_0_3`), whose fields are still
+// the Italian ones; the readers of today read the fields of 0.4.
 
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
@@ -31,6 +33,8 @@ import { boot, clearArea, develop, giveRunes } from './world';
 const h = (s: string) => hex(hashStr(s));
 const json = (s: string | undefined) => JSON.parse(s ?? 'null');
 const ITALIAN = (id: string) => Object.entries(INTERNAL_NAMES.find((d) => d.id === id)!.names).filter(([it, en]) => it !== en).map(([it]) => it);
+/** The kernel of the contract 0.3: the chain of the files checked here stops there. */
+const TO_0_3 = '0.3.0';
 
 /** A small universe of the contract 0.1, as the Council and the seed of then wrote it. */
 function universe01(): FileMap {
@@ -78,14 +82,15 @@ function universe01(): FileMap {
 
 describe('the migration 0.1 → 0.2: a universe of 0.1, file by file', () => {
   const before = universe01();
-  const { files, applied } = migrateUniverse(before);
+  const { files, applied } = migrateUniverse(before, TO_0_3);
 
-  it('is the first migration of the chain (then 0.2 → 0.3, T307b), and it says what it does', () => {
-    expect(MIGRATIONS.map((m) => `${m.from}→${m.to}`)).toEqual(['0.1→0.2', '0.2→0.3']);
+  it('is the first migration of the chain (then 0.2 → 0.3, T307b, and 0.3 → 0.4, T308a), and it says what it does', () => {
+    expect(MIGRATIONS.map((m) => `${m.from}→${m.to}`)).toEqual(['0.1→0.2', '0.2→0.3', '0.3→0.4']);
     expect(applied).toHaveLength(2);
     expect(applied[0]).toMatch(/^0.1→0.2: /);
-    expect(json(files['universe.json'])).toMatchObject({ kernel: KERNEL_VERSION, kernels: { from: '0.3' } });
-    expect(checkKernelVersion(json(files['universe.json']).kernel, KERNEL_VERSION, json(files['universe.json']).kernels).ok).toBe(true);
+    expect(json(files['universe.json'])).toMatchObject({ kernel: TO_0_3, kernels: { from: '0.3' } });
+    expect(checkKernelVersion(json(files['universe.json']).kernel, TO_0_3, json(files['universe.json']).kernels).ok).toBe(true);
+    expect(migrateUniverse(before).applied).toHaveLength(3);
   });
 
   it('ports the runes to Latin, the incantations, the effects and their fields; a rune of the Council keeps its token', () => {
@@ -153,7 +158,7 @@ describe('the migration 0.1 → 0.2: a universe of 0.1, file by file', () => {
   });
 
   it('is deterministic, and what is ported stays as it is', () => {
-    expect(migrateUniverse(universe01()).files).toEqual(files);
+    expect(migrateUniverse(universe01(), TO_0_3).files).toEqual(files);
     const again = MIGRATIONS[0].migrate(files);
     for (const p of Object.keys(files)) expect(again[p], p).toBe(files[p]);
   });
@@ -183,7 +188,7 @@ describe('seed.json after the migration', () => {
     };
     files[SEED_FILE] = JSON.stringify({ 'modules/core.effects/logic.lua': h(pristineEffects), 'modules/core.items/logic.lua': h('return {}\n'), 'models/albero.xml': h(old['models/albero.xml']), 'models/persona.xml': 'cancellato' }, null, 1) + '\n';
     const out = prepareUniverse(files, bundledFiles);
-    expect(out.applied).toHaveLength(2);
+    expect(out.applied).toHaveLength(3);
     expect(out.files['modules/core.effects/logic.lua']).toBe(bundledFiles['modules/core.effects/logic.lua']);
     expect(out.files['modules/core.items/logic.lua']).toBe('return {} -- mio\n');
     expect(out.files['models/tree.xml']).toBe(bundledFiles['models/tree.xml']);
@@ -199,8 +204,8 @@ describe('the plans of the places, as the kernel reads them', () => {
 
   it('are ported, idempotently, and a plan of today is the same object', () => {
     const rec = migratePlanRecord({ plan });
-    expect(rec.plan).toMatchObject({ layout: 'village', runes: ['x', 'ignis', 'terra ventus'], strutture: [{ concetto: 'il mulino', taglia: 'huge' }, { concetto: 'casa' }] });
-    expect(rec.plan.case?.[0]).toMatchObject({ classe: 'structure', modello: 'casa-comune-structure-0a1b2c3d' });
+    expect(rec.plan).toMatchObject({ layout: 'village', runes: ['x', 'ignis', 'terra ventus'], structures: [{ concept: 'il mulino', size: 'huge' }, { concept: 'casa' }] });
+    expect(rec.plan.houses?.[0]).toMatchObject({ class: 'structure', model: 'casa-comune-structure-0a1b2c3d', origin: '1,1', seed: 1, stage: 0.5 });
     expect(migratePlanRecord(rec)).toBe(rec);
     expect(migratePlanRecord({ plan: { ...plan, layout: 'mio_ambiente', runes: [], strutture: undefined, case: undefined } as unknown as ChunkPlan }).plan.layout).toBe('mio_ambiente');
   });
@@ -230,10 +235,10 @@ describe('what the Council still writes in Italian, until its prompts change (T3
   it('a manifest, a panel, the cases, a structure of a plan, a stamp', () => {
     const m = internalManifest({ id: 'x.y', appearance: { classe: 'animale', taglia: 'piccola', model: 'mobile' }, items: [{ category: 'vestiario', model: 'forma-cappello' }] });
     expect(m).toMatchObject({ appearance: { classe: 'animal', taglia: 'small', model: 'furniture' }, items: [{ category: 'clothing', model: 'shape-hat' }] });
-    expect(cleanPanel({ titolo: 'P', elementi: [{ tipo: 'barra', campo: 'needs.health' }, { tipo: 'pulsante', id: 'Via' }] }, 'p').panel?.elementi.map((e) => e.tipo)).toEqual(['bar', 'button']);
+    expect(cleanPanel({ titolo: 'P', elementi: [{ tipo: 'barra', campo: 'needs.health' }, { tipo: 'pulsante', id: 'Via' }] }, 'p').panel?.elements.map((e) => e.type)).toEqual(['bar', 'button']);
     const { cases } = cleanCases([{ titolo: 'c', racconto: 'r', passi: [{ tipo: 'attendi', secondi: 1 }, { tipo: 'cammina', verso: 'sinistra', secondi: 1 }], guarda: ['a.b'] }], undefined, 10);
-    expect(cases[0].passi).toEqual([{ tipo: 'wait', secondi: 1 }, { tipo: 'walk', verso: 'left', secondi: 1 }]);
-    expect(readStructure({ concetto: 'il castello', taglia: 'Enorme' })).toEqual({ concetto: 'il castello', taglia: 'huge' });
+    expect(cases[0].steps).toEqual([{ type: 'wait', seconds: 1 }, { type: 'walk', toward: 'left', seconds: 1 }]);
+    expect(readStructure({ concetto: 'il castello', taglia: 'Enorme' })).toEqual({ concept: 'il castello', size: 'huge' });
     expect(repairProgram({ type: 'stamp', shape: 'castello' })).toEqual({ type: 'stamp', shape: 'castle' });
   });
 });
@@ -257,15 +262,15 @@ describe('a Latin rune, pronounced', () => {
   });
 });
 
-describe('the seed of 0.2', () => {
+describe('the seed of today (the values of 0.2 under the fields of 0.4)', () => {
   it('speaks the internal language in every domain of the step: no Italian value is left where the kernel reads one', () => {
     const bad: string[] = [];
     const walk = (v: unknown, file: string, key?: string): void => {
       if (Array.isArray(v)) return v.forEach((x) => walk(x, file, key));
       if (!v || typeof v !== 'object') {
         if (typeof v !== 'string') return;
-        if (key === 'classe' && ITALIAN('classi').includes(v)) bad.push(`${file}: classe ${v}`);
-        if (key === 'taglia' && ITALIAN('taglie').includes(v)) bad.push(`${file}: taglia ${v}`);
+        if (key === 'class' && ITALIAN('classi').includes(v)) bad.push(`${file}: class ${v}`);
+        if (key === 'size' && ITALIAN('taglie').includes(v)) bad.push(`${file}: size ${v}`);
         if (key === 'category' && ITALIAN('categorie').includes(v)) bad.push(`${file}: category ${v}`);
         if (key === 'type' && ITALIAN('effetti').includes(v)) bad.push(`${file}: type ${v}`);
         if (key === 'shape' && ITALIAN('timbri').includes(v)) bad.push(`${file}: shape ${v}`);
@@ -281,7 +286,7 @@ describe('the seed of 0.2', () => {
     expect(bad).toEqual([]);
     const magic = JSON.parse(bundledFiles['modules/magic.runes/manifest.json']);
     expect(Object.keys(magic.runes)).toEqual(['lux', 'ignis', 'aqua', 'terra', 'vita', 'scutum', 'ventus']);
-    expect(json(bundledFiles['universe.json'])).toMatchObject({ kernel: KERNEL_VERSION, kernels: { from: '0.3' } });
+    expect(json(bundledFiles['universe.json'])).toMatchObject({ kernel: KERNEL_VERSION, kernels: { from: '0.4' } });
   });
 
   it('runs 400 ticks offline without faults', async () => {
@@ -337,7 +342,7 @@ describe('valmora, a universe really played of the contract 0.1', () => {
     const a = prepareUniverse(files, bundledFiles);
     const b = prepareUniverse(files, bundledFiles);
     expect(a.files).toEqual(b.files);
-    expect(a.applied).toHaveLength(2);
+    expect(a.applied).toHaveLength(3);
     const runes = Object.keys(json(a.files['modules/magic.runes/manifest.json']).runes ?? {});
     expect(runes.filter((t) => ITALIAN('rune').includes(t))).toEqual([]);
     const chunks = new MemoryChunks();

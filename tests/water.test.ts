@@ -117,9 +117,9 @@ describe('the kernel’s water (T51b)', () => {
     expect(k.groundAt(S + 3, 8) / LEVEL).toBe(after);
     expect(k.groundAt(S, 7) / LEVEL).toBe(after);
     // The plans keep the ground dug and the water.
-    expect(Object.keys(east.plan!.scavi ?? {}).length).toBe(hollow.length);
-    expect(Object.keys(east.plan!.acqua ?? {}).length).toBeGreaterThanOrEqual(hollow.length);
-    expect(Object.keys(west.plan!.acqua ?? {}).length).toBeGreaterThan(0);
+    expect(Object.keys(east.plan!.digs ?? {}).length).toBe(hollow.length);
+    expect(Object.keys(east.plan!.water ?? {}).length).toBeGreaterThanOrEqual(hollow.length);
+    expect(Object.keys(west.plan!.water ?? {}).length).toBeGreaterThan(0);
     // Nothing moves where nothing changed; a dig outside the planned world is refused.
     expect(k.dig(10_000, 10_000, -2)).toBe(false);
   }, 60_000);

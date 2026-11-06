@@ -72,7 +72,7 @@ describe('the neon studio', () => {
 
   it('the Actor has its place in the studio, on or off (T158): gerboa, seat, console and a post in the Studio of the Characters', async () => {
     const k = await boot();
-    expect(k.actor().acceso).toBe(false);
+    expect(k.actor().on).toBe(false);
     const hall = k.corona.building('concilio')!.storeys[0].items;
     const seats = hall.filter((i) => i.kind === 'desk').map((s) => s.target);
     expect(seats.indexOf('actor')).toBe(seats.indexOf('narrator') + 1);
@@ -93,7 +93,7 @@ describe('the neon studio', () => {
     const before = JSON.stringify(hall);
     k.archive.consoles(k.working());
     expect(k.archive.avatars.has('actor@universo#console')).toBe(false);
-    k.setAi({ attore: true });
+    k.setAi({ actor: true });
     expect(JSON.stringify(k.corona.building('concilio')!.storeys[0].items)).toBe(before);
 
     // On, it works: speaks from its post when no file is at stake, and sits at its console.
@@ -237,7 +237,7 @@ describe('mechanics with interfaces', () => {
     const r = await k.forgeMechanic('equipaggiamento: slot per indossare e impugnare');
     expect(r.ok).toBe(true);
     const p = k.uiPanels().find((x) => x.module !== 'sys.work')!;
-    expect(p.panel.elementi.filter((e) => e.tipo === 'slot').map((e) => e.id)).toEqual(['testa', 'corpo', 'piedi', 'arma']);
+    expect(p.panel.elements.filter((e) => e.type === 'slot').map((e) => e.id)).toEqual(['testa', 'corpo', 'piedi', 'arma']);
     // A helmet from a pack of the Narrator (with its place and bonus).
     const items = JSON.parse(k.files['modules/items.base/manifest.json']);
     items.items.push({ id: 'item.elmo', name: 'Elmo di ferro', description: 'un elmo', category: 'vestiario', weight: 2, stack: 1, tags: ['metallo'], glyph: 'Ʌ', color: '#999999', slot: 'testa', bonus: { difesa: 3, velocita: 0.95 } });

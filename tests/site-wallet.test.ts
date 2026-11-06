@@ -49,13 +49,13 @@ const USAGE = {
 function diskUniverse(modalita = 'multigiocatore'): string {
   const dir = mkdtempSync(path.join(tmpdir(), 'crediti-'));
   const root = path.join(dir, 'prova');
-  mkdirSync(path.join(root, 'world', 'giocatori'), { recursive: true });
-  writeFileSync(path.join(root, 'universe.json'), JSON.stringify({ partita: { modalita } }));
+  mkdirSync(path.join(root, 'world', 'players'), { recursive: true });
+  writeFileSync(path.join(root, 'universe.json'), JSON.stringify({ game: { modalita } }));
   writeFileSync(path.join(root, 'world/pagamenti.json'), JSON.stringify(PAYMENTS));
-  writeFileSync(path.join(root, 'world/consumi.json'), JSON.stringify(USAGE));
-  writeFileSync(path.join(root, 'world/giocatori/ugo.json'), JSON.stringify({ nome: 'Ugo', crediti: 3.5 }));
-  writeFileSync(path.join(root, 'world/giocatori/zed.json'), JSON.stringify({ nome: 'Zed', crediti: 40 }));
-  writeFileSync(path.join(root, 'world/giocatori/ano.json'), JSON.stringify({ nome: 'Ano', anonimo: true, crediti: 7 }));
+  writeFileSync(path.join(root, 'world/usage.json'), JSON.stringify(USAGE));
+  writeFileSync(path.join(root, 'world/players/ugo.json'), JSON.stringify({ nome: 'Ugo', crediti: 3.5 }));
+  writeFileSync(path.join(root, 'world/players/zed.json'), JSON.stringify({ nome: 'Zed', crediti: 40 }));
+  writeFileSync(path.join(root, 'world/players/ano.json'), JSON.stringify({ nome: 'Ano', anonimo: true, crediti: 7 }));
   execFileSync('git', ['init', '-q'], { cwd: root });
   return dir;
 }

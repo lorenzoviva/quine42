@@ -6,33 +6,33 @@
   "description": "Il fuoco brucia ciò che è infiammabile e scotta chi non è protetto; le cose effimere (fiamme, luci evocate) svaniscono a tempo; gli scudi si spengono.",
   "logic": "logic.lua",
   "order": 45,
-  "casi": [
+  "cases": [
     {
-      "titolo": "Il rovo brucia, la cassa no",
-      "racconto": "Una fiamma tra un rovo, una cassa e il viandante: il rovo brucia, la cassa no; il viandante, troppo vicino, si scotta. Dopo tre secondi la fiamma svanisce.",
-      "terreno": [
+      "title": "Il rovo brucia, la cassa no",
+      "story": "Una fiamma tra un rovo, una cassa e il viandante: il rovo brucia, la cassa no; il viandante, troppo vicino, si scotta. Dopo tre secondi la fiamma svanisce.",
+      "terrain": [
         "ggggg",
         "ggggg",
         "ggggg",
         "ggggg",
         "ggggg"
       ],
-      "cose": [
+      "entities": [
         {
-          "modulo": "object.bush",
+          "module": "object.bush",
           "x": 1,
           "y": 1
         },
         {
-          "modulo": "obj.chest",
+          "module": "obj.chest",
           "x": -1,
           "y": 1
         },
         {
-          "modulo": "object.sign",
+          "module": "object.sign",
           "x": 0,
           "y": 1,
-          "componenti": {
+          "components": {
             "effimero": {
               "fino": 3
             },
@@ -42,14 +42,14 @@
           }
         }
       ],
-      "durata": 5,
-      "guarda": [
+      "duration": 5,
+      "watch": [
         "0:body.solid",
         "1:body.solid",
         "needs.health",
         "2:effimero.fino"
       ],
-      "righe": [
+      "lines": [
         15,
         16,
         17,
@@ -62,33 +62,33 @@
       ]
     },
     {
-      "titolo": "Lo scudo protegge",
-      "racconto": "La stessa fiamma, ma il viandante ha uno scudo acceso: il rovo brucia, la sua salute non cala.",
-      "terreno": [
+      "title": "Lo scudo protegge",
+      "story": "La stessa fiamma, ma il viandante ha uno scudo acceso: il rovo brucia, la sua salute non cala.",
+      "terrain": [
         "ggggg",
         "ggggg",
         "ggggg",
         "ggggg",
         "ggggg"
       ],
-      "viandante": {
-        "componenti": {
+      "wanderer": {
+        "components": {
           "scudo": {
             "fino": 99
           }
         }
       },
-      "cose": [
+      "entities": [
         {
-          "modulo": "object.bush",
+          "module": "object.bush",
           "x": 1,
           "y": 1
         },
         {
-          "modulo": "object.sign",
+          "module": "object.sign",
           "x": 0,
           "y": 1,
-          "componenti": {
+          "components": {
             "effimero": {
               "fino": 99
             },
@@ -98,13 +98,13 @@
           }
         }
       ],
-      "durata": 3,
-      "guarda": [
+      "duration": 3,
+      "watch": [
         "0:body.solid",
         "needs.health",
         "scudo.fino"
       ],
-      "righe": [
+      "lines": [
         9,
         10,
         14,

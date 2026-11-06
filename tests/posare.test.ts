@@ -398,7 +398,7 @@ describe('saved, and opened again', () => {
     const [knife] = placed(k);
     const was = { ...k.ecs.get(knife, 'pos'), yaw: k.ecs.get(knife, 'form').yaw };
     await closeWorld(k, w);
-    expect(JSON.parse(w.files['world/stato.json']).posati).toHaveLength(1);
+    expect(JSON.parse(w.files['world/state.json']).placed).toHaveLength(1);
 
     const again = await open(w);
     const [back] = placed(again);
@@ -415,7 +415,7 @@ describe('saved, and opened again', () => {
     // Taken, it is no longer saved.
     await again.perform(back, 'raccogli');
     expect(again.saveState()).toBe(true);
-    expect(JSON.parse(again.repo.working['world/stato.json']).posati).toBeUndefined();
+    expect(JSON.parse(again.repo.working['world/state.json']).posati).toBeUndefined();
   });
 
   it('a place left out of sight (ADR-0149) comes back with what lay on its furniture, on the same shelf, and the save keeps it meanwhile', async () => {
@@ -452,7 +452,7 @@ describe('saved, and opened again', () => {
     expect(k.ecs.alive.has(chest)).toBe(false);
     expect(k.ecs.alive.has(knife)).toBe(true);
     k.saveState();
-    expect(JSON.parse(k.repo.working['world/stato.json']).posati).toEqual([expect.objectContaining({ item: 'item.coltello' })]);
+    expect(JSON.parse(k.repo.working['world/state.json']).placed).toEqual([expect.objectContaining({ item: 'item.coltello' })]);
     // A day goes by out of sight, then back: the chest is there again and the knife on its shelf.
     k.time += Kernel.DAY_SECONDS;
     run(k, 0.5);
@@ -475,7 +475,7 @@ describe('saved, and opened again', () => {
 
   it('a save written by hand with nonsense in it opens anyway, keeping only what makes sense', async () => {
     const st = { posati: [null, 7, { item: 'item.coltello', x: 'qui', y: 0, z: 0 }, { item: 'nessuno', x: 1, y: 1, z: 1 }, { item: 'item.ascia', x: 1e9, y: 0, z: 0 }, { item: 'item.martello', count: -3, x: 2.5, y: 3.5, z: 0.6, yaw: 'su', inv: { slots: 'no' } }, { item: 'item.sacco', x: 4.5, y: 4.5, z: 0.5, inv: { slots: [{ item: 'item.mela-rossa', count: 2 }, { item: 5 }, null] } }] };
-    const k = await Kernel.boot({ files: { ...bundledFiles, 'world/stato.json': JSON.stringify(st) }, store: memoryStore(), ai: new MockAiModels() });
+    const k = await Kernel.boot({ files: { ...bundledFiles, 'world/state.json': JSON.stringify(st) }, store: memoryStore(), ai: new MockAiModels() });
     const items = placed(k).map((id) => k.ecs.get(id, 'pickup'));
     expect(items.map((pk) => pk.item).sort()).toEqual(['item.martello', 'item.sacco']);
     expect(items.find((pk) => pk.item === 'item.martello')!.count).toBe(1);
@@ -487,7 +487,7 @@ describe('saved, and opened again', () => {
 
 async function bootMany(): Promise<Kernel> {
   const cfg = JSON.parse(bundledFiles['universe.json']);
-  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2) };
+  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, game: { mode: 'multiplayer', death: 3 } }, null, 2) };
   return Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 }
 

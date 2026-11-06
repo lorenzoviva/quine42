@@ -16,7 +16,7 @@
 | [La coda della CLI degli abbonamenti](#abbonamenti) | `src/kernel/ai/subscription.ts`, `server/subscriptionQueue.ts`, `tools/abbonamenti/servi.ts`, `src/kernel/deferred.ts`, `tools/generazione/genera.ts` |
 | [Il Concilio al lavoro: registro, Luogo, Fucina, Genesi](#concilio) | `src/kernel/agents/`, `src/kernel/layout.ts` |
 | [Spazi, rune, magia, borse](#spazi-rune-magia) | `src/kernel/kernel.ts`, `src/kernel/runes.ts`, `src/kernel/magic.ts`, `src/kernel/inventory.ts` |
-| [Il lessico](#lessico) | `world/lessico.md`, `src/kernel/fourthwall.ts` |
+| [Il lessico](#lessico) | `world/lexicon.md`, `src/kernel/fourthwall.ts` |
 | [Regole, effetti, stati, morte, menu, salto, contenuti](#regole-effetti) | `src/kernel/kernel.ts`, `src/kernel/content.ts`, `src/kernel/validator.ts`, `src/kernel/placing.ts`, `universe/modules/` |
 | [Società, NPC, personaggi](#societa) | `src/kernel/society.ts`, `src/kernel/plots.ts`, `src/kernel/agents/minds.ts` |
 | [La corona e gli interni dello studio](#corona) | `src/kernel/corona.ts`, `src/kernel/archive.ts`, `src/kernel/bible.ts`, `src/kernel/situation.ts`, `src/kernel/screens.ts`, `src/render/corona3d.ts`, `src/render/screens.ts`, `src/ui/studio.ts`, `src/ui/graph.ts` |
@@ -38,7 +38,7 @@
 | [L'acqua che scorre](#acqua) | `src/kernel/water.ts` |
 | [Lotti e strutture, scale e piani](#lotti) | `src/kernel/layout.ts`, `src/kernel/forms.ts` |
 | [Le taglie](#taglie) | `src/mj/classes.ts` |
-| [Il grafo del mondo](#grafo) | `src/kernel/graph.ts`, `world/grafo.json` |
+| [Il grafo del mondo](#grafo) | `src/kernel/graph.ts`, `world/graph.json` |
 | [Convalida nel browser (senza tentativi)](#convalida-browser) | `src/main.ts`, `src/kernel/corona.ts` |
 | [Costi e prestazioni](#costi) | `src/kernel/ai/usage.ts`, `src/kernel/ai/prices.ts` |
 | [Stato e prossimi passi](#stato) | `docs/plans/backlog.md` |
@@ -49,11 +49,12 @@
 - **Vite 7 + TypeScript 5** (strict; Vitest 4, ADR-0100), **three.js** per il mondo (ADR-0040) e per le pagine out-game (ADR-0095), DOM per HUD/pannelli, uno strato 2D sopra per i testi.
 - **Vitest** in Node con modelli offline (`MockAiModels`): kernel, Concilio e layout testabili headless.
 - Persistenza: repository git dell'universo su disco tramite il server di Vite (`server/universeStore.ts`):
-  testi, `maps/` (piani dei luoghi), `world/stato.json` (lo stato del mondo), `world/giocatori/` (i viandanti), `world/consumi.json` (i consumi); saldi e pagamenti fuori dal repository, in `universes/.saldi/` (ADR-0104). Senza server:
+  testi, `maps/` (piani dei luoghi), `world/state.json` (lo stato del mondo), `world/players/` (i viandanti), `world/usage.json` (i consumi); saldi e pagamenti fuori dal repository, in `universes/.balances/` (ADR-0104). Senza server:
   `localStorage` + IndexedDB. I commit vanno al disco in fila (`UniverseClient`, ADR-0122): senza risposta dal server il commit resta primo in fila e ritenta (tre volte subito, poi a ogni commit nuovo e ogni 30 s), un 5xx ritenta tre volte e cede il passo, un rifiuto (4xx) si scarta con un avviso; `checkout` e `clone` non passano sopra un commit in attesa. Nella stessa fila stanno anche i piani (`putMap`), i rami e le pubblicazioni, che ritentano come i commit (ADR-0144); nel browser la fila si salva per scheda in `localStorage` (`browserOwedStorage`, mai il token) e la pagina dopo la scrive prima di leggere l'universo; al tetto (256 scritture o 2 milioni di caratteri) una scrittura nuova si unisce a una in fila; un 401 chiede un token nuovo (`renewAuth`) e riprova.
 - **La versione del kernel e l'intervallo dei kernel** (ADR-0136, ADR-0152): `universe.json → kernel` è l'ultimo kernel che ha scritto l'universo, `kernels` (`{ "from": "0.1" }`, `to` facoltativo) i contratti su cui gira: aperto, arriva al contratto di `kernel`. Li scrive il kernel prima di ogni commit (`stampKernel`) e solo se l'universo è nell'intervallo; un universo senza `kernels` lo ricava da `kernel`. Fuori intervallo: il guasto `universe:kernel` con l'intervallo nel motivo e l'universo **in sola lettura** (ADR-0156, T312): `Kernel.readOnly()` è il predicato, `Repo.readOnly` non fa nessun commit (Concilio, viandante, stato, magazzini, editor, pubblicazione) e il backend avvolto da `Repo.attach` non scrive commit, rami, `merge` né ritorni (`checkout`); i piani nuovi restano in memoria (`SealedChunks`); `Council.write` manda ogni compito ai modelli locali; il motivo del guasto lo dice (`READ_ONLY_WORDS`); `/api/viandante` a mondo spento risponde 409 se nemmeno le migrazioni portano l'universo qui (`opensOnThisKernel`, T317); restano il cestino, il clone e i saldi; un universo che le migrazioni portano nell'intervallo non è in sola lettura (la migrazione si committa in `Kernel.boot` prima che `Repo.readOnly` si colleghi, e il guasto si decide su `universe.json` già portato). Niente dal seme (`upgradeFromSeed`), l'etichetta «kernel 0.1–0.1» sulla scheda della pagina delle sessioni e nella lobby; l'universo resta sul disco. Le migrazioni da un contratto al successivo si registrano solo in `src/kernel/migrations.ts` (`MIGRATIONS`): `migrateUniverse` porta un universo lungo la catena se c'è tutta e scrive `kernels.from` del kernel; la chiamano `prepareUniverse` (`universes.ts`: migra, poi `upgradeFromSeed`, un commit solo) nella pagina, nei mondi di molti, nella generazione differita e per i quattro universi del laboratorio, e `Kernel.boot` per chi non passa di lì, con un commit subito (il primo commit del Concilio la recinterebbe); il server di un'altra versione è solo descritto in ADR-0152 (una build per `X.Y`, il front che sceglie dall'intervallo).
 - **La prima migrazione, 0.1 → 0.2** (T307a, ADR-0153, ADR-0155): la lingua interna della simulazione (i domini T307a di `internalNames.ts`). I dati campo per campo (un JSON si riscrive con la sua indentazione, solo se cambia); le chiavi che altri puntano con ogni riferimento: i token delle rune e le formule in latino (`terra fuoco` → `terra ignis`, anche nel canone e nelle rune portate e nella mano), gli ambienti del seme e i timbri dei programmi, i modelli che il kernel nomina (i generici delle classi `persona.xml` → `person.xml`, `forma-*` → `shape-*`, `casa-comune-<classe>-*`), con l'indice, le imprese, le carte e le azioni fatte sulle forme; i terreni del seme prendono un `id` (`meadow`) e tengono il `name` del mondo (`world.find_tile`, `matura.in` e gli effetti cercano codice, id, nome: `Kernel.tileCodeOf`). Il Lua solo nei moduli del Concilio (`origin`), solo dove il kernel legge un valore: una categoria confrontata, un effetto costruito come tabella (`luaFor0_2`, un lessico che lascia commenti e stringhe lunghe); quello del giocatore resta (regola 3), quello del seme lo porta il seme. `seed.json` segue la migrazione: un file tenuto come il seme resta del seme e il seme della 0.2 lo sostituisce (così `core.effects` legge gli effetti inglesi). I piani dei luoghi non dicono il loro contratto: `migratePlan` è idempotente e il `chunkStore` del kernel la applica a ogni piano che legge (`migratePlanRecord`). Finché T310 non cambia i prompt, il validatore ripara l'italiano del contratto 0.1 (`internalManifest` in `parseManifest`, `internalEffect` in `validateEffects`, `validatePlan`, Fucina, pacchetti, pannelli, casi, timbri, rune nuove, indice dei modelli) e gli schemi del Concilio elencano i valori in italiano (`italianValues`); ciò che il mondo mostra usa la parola italiana (`italianName`: «Runa magica (luce)»).
-- **La seconda migrazione, 0.2 → 0.3** (T307b, ADR-0153, ADR-0158): la lingua interna della società e del Concilio. I file cambiano nome con ciò che nominano: i moduli del seme che il kernel nomina (`sys.lavoro` → `sys.work`, `lavoro.<mestiere>` → `job.<trade>`, `obj.letto|cassa|banco|credenza` → `obj.bed|chest|counter|cupboard`, `item.forbici` → `item.scissors`) con il loro magazzino, `prompts/agents/<agente>.md` → `prompts/agents/<agent>.md`, i programmi sonori del seme (`suono-*` → `sound-*`, il dominio `suoni-seme`) e i gerboa (`corona-gerboa-<agent>`); ogni stringa JSON che è l'id di uno di quei moduli e ogni `carta.autore` che è un agente cambiano ovunque. Campo per campo: persone (specie, genere, routine), trame e missioni, imprese, programmi dei mestieri (`internalJobProgram`) e i casi del banco, l'indice dei suoni, le parti dei programmi, `universe.json` (chiavi di `ai.scultori`, `ai.coefficienti`, `ai.agenti`, `ai.minimi`; la modalità), le carte e il grafo (`modello:` → `model:`, `persona:` → `individual:`…), le mancanze. Il Lua del Concilio dove il kernel legge un valore (un id di modulo del seme, l'attività di `attivita`); `migratePlan` porta le cose dei piani (`obj.letto` → `obj.bed`) e l'autore della carta del luogo. Le stesse funzioni riparano ciò che il Concilio scrive ancora in italiano in ogni lettura (`readPeople`, `readPlots`, `readVenture`, `readShortfalls`, `readCards`, l'indice dei suoni, `jobPrograms`, `model.ts`); il server legge `multigiocatore` come `multiplayer` (`isMultiplayer`). L'id `io` del viandante solo resta: lo porta T308a con i percorsi dei viandanti e i saldi.
+- **La seconda migrazione, 0.2 → 0.3** (T307b, ADR-0153, ADR-0158): la lingua interna della società e del Concilio. I file cambiano nome con ciò che nominano: i moduli del seme che il kernel nomina (`sys.lavoro` → `sys.work`, `lavoro.<mestiere>` → `job.<trade>`, `obj.letto|cassa|banco|credenza` → `obj.bed|chest|counter|cupboard`, `item.forbici` → `item.scissors`) con il loro magazzino, `prompts/agents/<agente>.md` → `prompts/agents/<agent>.md`, i programmi sonori del seme (`suono-*` → `sound-*`, il dominio `suoni-seme`) e i gerboa (`corona-gerboa-<agent>`); ogni stringa JSON che è l'id di uno di quei moduli e ogni `carta.autore` che è un agente cambiano ovunque. Campo per campo: persone (specie, genere, routine), trame e missioni, imprese, programmi dei mestieri (`internalJobProgram`) e i casi del banco, l'indice dei suoni, le parti dei programmi, `universe.json` (chiavi di `ai.sculptors`, `ai.coefficients`, `ai.agents`, `ai.minimums`; la modalità), le carte e il grafo (`modello:` → `model:`, `persona:` → `individual:`…), le mancanze. Il Lua del Concilio dove il kernel legge un valore (un id di modulo del seme, l'attività di `attivita`); `migratePlan` porta le cose dei piani (`obj.letto` → `obj.bed`) e l'autore della carta del luogo. Le stesse funzioni riparano ciò che il Concilio scrive ancora in italiano in ogni lettura (`readPeople`, `readPlots`, `readVenture`, `readShortfalls`, `readCards`, l'indice dei suoni, `jobPrograms`, `model.ts`); il server legge `multigiocatore` come `multiplayer` (`isMultiplayer`). L'id del viandante solo (`io`) restava: lo porta T308a con i percorsi dei viandanti e i saldi.
+- **La terza migrazione, 0.3 → 0.4** (T308a, ADR-0153, ADR-0159): i campi e i percorsi dei file dell’universo. I campi per **forma di file** (`FIELD_SHAPES` in `internalNames.ts`, `internalFields(forma, json)`): ogni forma dice quali chiavi italiane di quale oggetto un dominio rinomina (`only`), le altre sono contenuto o di un altro contratto e restano (`posto` è `slot`, `workplace` o `spot` secondo l’oggetto; i componenti di una cosa restano a T308b). `universe.json` (`game`, `relief.sea`, `heritage`, `ai.sculptors|agents|coefficients|minimums|actor|maxPieces`), i manifest (`appearance.look|class|size`, `ui.title|elements`, `cases`, `jobs` con `names`, `workplace`, `day` e i compiti `does|where|from|to|tile|drop|item|with|count|duration|pose|says|route|action`, `tiles.*.ripens`), persone, trame, bibbia (via le «crepe»), atlante, regole, stato (`consumed`, `containers`, `forms`, `rares`, `time`, `placed`), viandanti (`name`, `profile`, `states`, `transcended`, `anonymous`; mai `crediti`), imprese, carte, consumi, mancanze (`entries`), piani (`structures`, `houses`, `days`, `stages`, `seen`, `digs`, `water`), indice dei modelli (`class`, `size`, `cellar`, `score`, `sound.use|environments|moments|beyond|effects`); i timbri `carta` → `card` (`author`, `payer`, `holder`, `origins`) a ogni profondità (`internalCardsIn`); il viandante solo `io` → `me` dove un campo tiene un viandante e nel nome del suo file (`internalSoloIn`); i percorsi `world/players/`, `world/state.json`, `world/ventures.json`, `world/stores/`, `world/usage.json`, `world/shortfalls.json`, `world/cards.json`, `world/graph.json`, `world/canon.md`, `world/lexicon.md` (`internalPath`); l’attributo `soil="E"` dei programmi (il parser legge anche `suolo`). Lo stato di prima di T245a: le `importanti` sono le Enormi di `rares`, il `viandante` è `world/players/me.json`. **Ogni lettura** accetta anche i campi di prima (i valori di 0.2 e 0.3 si riparano prima, sulle chiavi italiane): così si legge ciò che il Concilio scrive ancora con i campi italiani dei suoi schemi (T310) e un universo del disco non ancora aperto; il server porta in memoria ciò che legge dal disco (`portedFiles`, `pathsBefore`: portafoglio, viandante, carte, ciò che è pubblico, Stripe, il rapporto delle mancanze). Le **cartelle del server** sono in `server/folders.ts` (`serverPath`): `.trash`, `.balances`, `.queue`, `.running`, `.generation`, `.gemini-spend.json`, e la cartella di prima si sposta al nome nuovo la prima volta che serve (un archivio dei saldi di prima legge `io` come `me`). La **fila del browser** è in `quine:owed:`; una sotto `quine:fila:` si prende comunque, portata (`owedTo0_4`). Lua: `sys.work` legge i compiti e il passo dell’impresa (`world.impresa`: `does`, `item`, `pose`) con i campi di 0.4; i posti sono `tile:<codice>` ed `entity:<tag>`.
 
 <a id="sito"></a>
 ## Il sito e il tema
@@ -117,11 +118,11 @@
 - **Google Gemini**: `gemini-3.1-flash-lite` (testo), in
   `universe/universe.json → ai` con i budget (`maxText`, `maxForges`, `maxPacks`, `maxCast`; in multigiocatore `placesPerMinute`),
   il ragionamento (`thinking`, `low`) e il tempo massimo (`timeout`). Prezzi in `src/kernel/ai/prices.ts` (con la data).
-  **L'Attore** (`ai.attore`, ADR-0116, T157): spento se non detto, e allora nulla cambia; acceso (un booleano, il nome di un modello o `{acceso, modello}`,
+  **L'Attore** (`ai.actor`, ADR-0116, T157): spento se non detto, e allora nulla cambia; acceso (un booleano, il nome di un modello o `{acceso, modello}`,
   `repairActor`), il Narratore scrive la scheda di ogni individuo alla sua prima battuta (`npc.sheet`, `Individual.scheda`, riscritta solo se cambiano legami o
   storia, `sheetFingerprint`) e l'agente `attore` recita `npc.reply` e `npc.dialogue` con il suo modello (`ACTOR_MODEL`, `gemini-3.8-flash`): stessi compiti,
   paganti, limiti e modelli locali; si sceglie nella Genesi o nella lobby (solo il master, entrando: → #lobby); `kernel.interpreter()` dice chi recita.
-  I **coefficienti di generazione** (`ai.coefficienti`, ADR-0085, T45b, `src/kernel/coefficients.ts`): quanto spesso ogni agente chiama l'IA,
+  I **coefficienti di generazione** (`ai.coefficients`, ADR-0085, T45b, `src/kernel/coefficients.ts`): quanto spesso ogni agente chiama l'IA,
   da 0 a 1, riparati dal validatore; diretti (`sessioni dialoghi trame revisioni modelli brani`: ritmi allungati; `luoghi parole sguardi azioni magia morte riparazioni studio`: la quota che va ai modelli, ADR-0133) e indiretti (`persone abitanti
   pacchetti cose`: meno di ciò che causa le chiamate); a 0 nessuna chiamata, per nessuna riga; il censimento delle chiamate in `CENSUS`, dove solo la Genesi non ha una manopola, il preset «Low Detail» (`LOW_DETAIL`, anche
   lo Scultore su Flash-Lite), la stima di un'ora di gioco (`hourlyEstimate`); nella Genesi si scelgono con i modelli (`kernel.setAi`).
@@ -138,15 +139,15 @@
 <a id="abbonamenti"></a>
 ## La coda della CLI degli abbonamenti
 
-  Gli abbonamenti (ADR-0077, T68; blindati da ADR-0106): `ai.provider` (`api` predefinito, `claude`; Antigravity non può escludere gli strumenti e non sta sulla coda) e `ai.agenti` (agente → provider)
+  Gli abbonamenti (ADR-0077, T68; blindati da ADR-0106): `ai.provider` (`api` predefinito, `claude`; Antigravity non può escludere gli strumenti e non sta sulla coda) e `ai.agents` (agente → provider)
   mandano i compiti lenti (Genesi, Fucina, modelli dello Scultore, sessioni del Concilio, meccaniche) alla coda `/api/coda`, servita
   da un processo che usa la CLI dell'abbonamento di chi gioca; il resto resta sulle API. Solo in locale, mai sul server del multigiocatore. La route c'è solo con `QUINE_CODA=1` nel `.env`, da loopback, con un segreto che vive nel server; la CLI gira in una cartella vuota, con l'ambiente ridotto, senza strumenti, MCP, hook e impostazioni, il testo su stdin, e ogni esecuzione deve confermarlo dal suo `init` (`IsolationCheck` in `tools/abbonamenti/servi.ts`) o viene uccisa.
 
   **La generazione differita** (ADR-0137, T207): `npm run genera -- <universo>` genera un universo prima che qualcuno lo giochi, senza browser e solo
   dalla coda: ogni compito, anche i veloci, va all'abbonamento (`DeferredModels`), uno che andrebbe alle API ferma il comando. I passi (Genesi, luoghi a
   spirale da `(0, 0)` con i loro individui, modelli, brani) si scrivono solo se finiscono validi (`StepGate`); il progresso e il tetto in percentuale
-  della settimana (riletto a ogni passo, misurato da `/usage`) stanno in `universes/.generazione/<nome>.json`; il comando non parte su un universo con
-  un mondo acceso (`universes/.accesi/`, `server/generation.ts`) e un mondo non si accende su un universo che si genera. Un universo di un'altra `X.Y` del kernel non si genera.
+  della settimana (riletto a ogni passo, misurato da `/usage`) stanno in `universes/.generation/<nome>.json`; il comando non parte su un universo con
+  un mondo acceso (`universes/.running/`, `server/generation.ts`) e un mondo non si accende su un universo che si genera. Un universo di un'altra `X.Y` del kernel non si genera.
 
 <a id="concilio"></a>
 ## Il Concilio al lavoro: registro, Luogo, Fucina, Genesi
@@ -165,7 +166,7 @@ unicità) → fisica → codice → Arbitro → validatore → commit → bibbia
 hanno una forma comune (`forma-…`, un programma per forma, ricolorato), i terreni con cose sopra un modello loro. **Genesi**: bibbia → stile → terreni (Fisico) → Arbitro → ambienti (provati) →
 pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) → commit.
 **Ambientazioni** (ADR-0134, censimento in `docs/temi-censimento.md`): la schermata offre quattro testi (`WORLD_THEMES`: medievale, steampunk, moderno, futuristico), che si possono riscrivere; il kernel non sa quale, resta `prompts/theme.md` e l'epoca la portano bibbia e stile. I prompt e il canone parlano di epoca; i nomi dei timbri sono forme e non escono dal programma. `case_comuni` dell'Artista diventa `commonHouse` nel manifest dei terreni: i lotti senza struttura chiesta hanno allora un modello del mondo (`commonHouseModel`, per classe, primo nella coda del `ModelDirector`), altrimenti quelli generici del seme. Con meno di 3 ambienti generati restano solo quelli senza epoca (`TIMELESS_LAYOUTS`). `?offline` può fare una Genesi con i modelli locali, solo per le prove: scrivono sempre Valmora.
-**Mancanze** (ADR-0130): una richiesta che finisce male, di un viandante o del mondo, è una voce di `world/mancanze.json` (`noteShortfall`, `ShortfallLog` in `src/kernel/shortfalls.ts`): richiesta, chi (`comune` se è il mondo), agente, compito, esito, motivo, volte. Gli esiti: `rifiuto` (Referente, azione o fabbricazione libera giudicata impossibile, anche quando è già una regola), `invalido` (il validatore ha rifiutato l'ultimo tentativo o scartato ciò che il Concilio proponeva: Fucina, ambienti, meccaniche, rune, pacchetti, piani dei luoghi, trame, modelli, brani), `errore` (il modello non ha dato una risposta usabile), `guasto` (l'Ingegnere non ripara). Non si conta ciò che manca al viandante (non ha gli ingredienti, non può chiedere rune) né la combinazione di due oggetti giudicata impossibile: il Narratore lì è severo di proposito. La stessa richiesta allo stesso agente per lo stesso compito è una voce sola; tetto di 500 voci. Il file si scrive prima di ogni commit e il salvataggio lo porta anche se non è cambiato altro; come i consumi sopravvive ai rollback. Il kernel del ramo del master non tiene niente: passa la voce al mondo. Nessun file di `playerFiles`/`publicFiles`, niente nel gioco; il master lo vede solo come ogni file del suo universo. `npm run mancanze [-- <universo>] [--cartella <dir>]` stampa il rapporto per il kernel 1.0.0.
+**Mancanze** (ADR-0130): una richiesta che finisce male, di un viandante o del mondo, è una voce di `world/shortfalls.json` (`noteShortfall`, `ShortfallLog` in `src/kernel/shortfalls.ts`): richiesta, chi (`comune` se è il mondo), agente, compito, esito, motivo, volte. Gli esiti: `rifiuto` (Referente, azione o fabbricazione libera giudicata impossibile, anche quando è già una regola), `invalido` (il validatore ha rifiutato l'ultimo tentativo o scartato ciò che il Concilio proponeva: Fucina, ambienti, meccaniche, rune, pacchetti, piani dei luoghi, trame, modelli, brani), `errore` (il modello non ha dato una risposta usabile), `guasto` (l'Ingegnere non ripara). Non si conta ciò che manca al viandante (non ha gli ingredienti, non può chiedere rune) né la combinazione di due oggetti giudicata impossibile: il Narratore lì è severo di proposito. La stessa richiesta allo stesso agente per lo stesso compito è una voce sola; tetto di 500 voci. Il file si scrive prima di ogni commit e il salvataggio lo porta anche se non è cambiato altro; come i consumi sopravvive ai rollback. Il kernel del ramo del master non tiene niente: passa la voce al mondo. Nessun file di `playerFiles`/`publicFiles`, niente nel gioco; il master lo vede solo come ogni file del suo universo. `npm run mancanze [-- <universo>] [--cartella <dir>]` stampa il rapporto per il kernel 1.0.0.
 
 <a id="spazi-rune-magia"></a>
 ## Spazi, rune, magia, borse
@@ -173,7 +174,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 - **Spazi, tappeto, corona** (ADR-0004, 0009, 0063): cerchio di simulazione di raggio 42 fermo in (0,0) (42 passi per uscire fermando il tappeto), tappeto con offset; `coronaRevealed()`.
 - **Rune** (ADR-0002, 0015): un token per runa, una casella per runa (una lastra luminosa a terra), righe orizzontali eseguite ogni
   tick; binding `x y speed carpet time`. Rare; quelle del tappeto solo a ≥ 3 chunk dall'origine. Il **canone delle rune**
-  (`world/canone.md`: aspetto, dove stanno, restano finché qualcuno non le raccoglie, magia, ciò che nessuno sa), con le rune
+  (`world/canon.md`: aspetto, dove stanno, restano finché qualcuno non le raccoglie, magia, ciò che nessuno sa), con le rune
   magiche e gli incantesimi dell'universo, va con ogni compito del Narratore e dell'Arbitro (`canonSummary`): nessuna storia
   dà alle rune comportamenti che lì non ci sono.
 - **Magia** (ADR-0015, 0018): rune magiche `luce fuoco acqua terra vita scudo vento`; ogni runa è un oggetto
@@ -193,7 +194,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 <a id="lessico"></a>
 ## Il lessico
 
-- **Il lessico** (ADR-0075, T65): `world/lessico.md` (seme, uguale in ogni universo e ambientazione): poche parole sostituite
+- **Il lessico** (ADR-0075, T65): `world/lexicon.md` (seme, uguale in ogni universo e ambientazione): poche parole sostituite
   (`bonombo` il saluto, `macico`, `lerpio`, `pagosso`, `Ciok Ciok`), saluti, buone maniere, usanze, modi di dire. Va con ogni compito del
   Narratore e dell'Arbitro (`lexiconSummary`, con le al più 3 `usanze` che la bibbia aggiunge, `cleanBible`); nessun testo del mondo lo
   spiega come un glossario (`glossaryBreak` in `fourthwall.ts`, dentro `metaBreak(text, wordsOf(files))`).
@@ -235,7 +236,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   (`placeRefusal`: non è un mobile, si muove, non ha un piano, non arrivi, avvicinati, non c'è più posto, c'è già qualcuno). L'oggetto
   è un `pickup` senza luogo con il componente `posato {z}` (l'altezza del ripiano): `settleHeights` lo posa sul pavimento più alto
   non sopra `z` (`floorBelow`), quindi sul ripiano o, se il mobile non c'è più o non è ancora pronto, su ciò che sta sotto, e non si
-  perde; non è solido e non cambia pavimenti (regola 10); si raccoglie come da terra. Il salvataggio lo tiene in `world/stato.json →
+  perde; non è solido e non cambia pavimenti (regola 10); si raccoglie come da terra. Il salvataggio lo tiene in `world/state.json →
   posati` (oggetto, quanti, x, y, z, yaw, la borsa; al più `MAX_PLACED`), letto con validazione; la Genesi lo toglie. In
   multigiocatore `posato` è in `ENTITY_PARTS` e il kernel specchio lo posa sulla sua copia del mobile; l'azione viaggia in `azione`
   (nessun messaggio nuovo). Il renderer lo disegna fermo, all'altezza del ripiano, girato come lo si è posato.
@@ -253,7 +254,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   (`world/plots.json`, diario nell'HUD). Ogni trama passa dal validatore (`reviewPlot` in `plots.ts`): individui che
   esistono, animali da animali, legami del registro, rune del canone, niente quarta parete; ciò che non torna va al
   Narratore con il motivo, all'avvio `reviewPlots` ripara o ritira le trame aperte.
-- **Il lavoro** (ADR-0140, T245b; progetto in `docs/design/comportamento-npc.md`): un mestiere con un **programma** (`mestieri` di un
+- **Il lavoro** (ADR-0140, T245b; progetto in `docs/design/comportamento-npc.md`): un mestiere con un **programma** (`jobs` di un
   modulo `data`, `job.<trade>/manifest.json`: nomi, posto, i compiti di ogni fase) si abbina per nome, poi per parola
   (`matchJob` in `jobs.ts`); il programma passa dal validatore per riferimento (`validateJobProgram`: comportamenti di un elenco chiuso,
   caselle del terreno, oggetti del registro, durate 5-300 s, al più 6 compiti per fase). A ogni fase del giorno il kernel mette
@@ -271,7 +272,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   Senza via `sys.work` fa fallire il compito subito (`failed:no_way`; gli esiti sono `done`, `ongoing`, `failed:<motivo>`, il dominio `esiti-lavoro`) e passa al prossimo: nessuno resta a spingere contro un
   dislivello. `transform` e `gather` cambiano davvero le caselle (`world.set_tile`, quindi `plan.edits`), senza chiamare i
   modelli; al più 12 al lavoro per luogo, chi segue il viandante smette. **Ciò che matura** è del kernel: un terreno con
-  `matura {dopo, in}` diventa `in` dopo `dopo` giorni da quando la casella è stata scritta (`plan.giorni`, il giorno di ogni modifica;
+  `matura {dopo, in}` diventa `in` dopo `dopo` giorni da quando la casella è stata scritta (`plan.days`, il giorno di ogni modifica;
   una modifica senza giorno vale da oggi), a ogni fase del giorno nei luoghi caricati (`matureTick`). Il seme ha il contadino (ara
   `g→m`, semina `m→e`, il seminato matura in grano `u` in un giorno, miete `u→m` con `item.grano`), il boscaiolo (`t→x` con
   `item.ciocco`, la ceppaia ricresce in bosco in tre giorni) e il pescatore (`item.pesce` dalla riva di `w`). Con T245c (ADR-0141) i
@@ -280,7 +281,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   `sys.work`, il luogo è `mestiere.luogo`, `placeDeposit`), `produce` consuma `con` e fa un pezzo al banco, `use` chiama l'`on_act`
   di una cosa con l'individuo come chi la usa (`world.act`, solo azioni senza effetti, entro 2,5 caselle). La via vede le forme dei
   modelli (`free`); chi è fermo a meno di tre caselle dalla meta è arrivato, chi è fermo lontano per otto secondi lascia il compito.
-- **Le imprese** (T245d, ADR-0147, `src/kernel/ventures.ts`): il lavoro di molti verso un risultato che si vede, in `world/imprese.json`,
+- **Le imprese** (T245d, ADR-0147, `src/kernel/ventures.ts`): il lavoro di molti verso un risultato che si vede, in `world/ventures.json`,
   scritto solo dal kernel (in memoria, nel file con il salvataggio come il magazzino; mai ai client; torna indietro con `R`). Il
   **progresso è derivato** da `portati` e `lavorato` (`ventureProgress`: la fase di adesso è la prima con materiali o lavoro che
   mancano; il lavoro conta solo fin dove i materiali lo permettono, `workAllowed`); lo stato si legge (`ventureState`: `active`,
@@ -304,14 +305,14 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   stadio dell'impresa (`stageGrid` in `src/mj/mesh.ts`, pura: le quote del primo pavimento e della base del tetto dagli strati pieni
   della griglia; 0 niente, 0,2 il piano terra, fino a 0,7 i muri, da 0,9 tutto a luci spente, 1 com'è), con il cantiere attorno (un
   voxel in più per lato: picchetti e corda a 0, impalcature mentre sale). Impronta, pavimenti e piani seguono lo stadio senza il
-  cantiere (`groundOf`); le stanze valgono dal tetto. Lo stadio sta nel piano del luogo (`plan.stadi` per i lotti, `plan.case` per
+  cantiere (`groundOf`); le stanze valgono dal tetto. Lo stadio sta nel piano del luogo (`plan.stages` per i lotti, `plan.houses` per
   le case nuove), che il kernel aggiorna quando una fase si chiude (`syncVenturePlan`) e che `settleLots` legge; sul filo va solo
   `struttura.stadio`, e il renderer rifà la mesh dell'istanza (`stagedBody`).
 - **Fuori vista** (T245f, ADR-0149): un luogo non caricato non ha Lua; una volta al giorno, quando comincia la sera, il kernel tiene i
   conti (`awayTick`): un'impresa di un luogo non caricato prende dal deposito ciò che le serve e aggiunge un giorno di lavoro per
   ognuno della squadra (`AWAY_WORK`), i mestieri dei luoghi non caricati e in nessuna impresa portano al deposito del loro luogo ciò
   che portano in un giorno (`dailyProduce`, fino a 60 per oggetto); un orologio spostato in avanti conta una volta. Al **ritorno**
-  (`returnToPlace`, prima di posare i lotti) ciò che matura matura per data e il piano prende lo stadio delle imprese, e perde quello che nessuna impresa regge (il piano va su disco prima di `world/imprese.json`: una scheda chiusa in mezzo o `R` non lasciano impalcature per sempre); `plan.visto`
+  (`returnToPlace`, prima di posare i lotti) ciò che matura matura per data e il piano prende lo stadio delle imprese, e perde quello che nessuna impresa regge (il piano va su disco prima di `world/ventures.json`: una scheda chiusa in mezzo o `R` non lasciano impalcature per sempre); `plan.visto`
   (quando il luogo è stato lasciato, solo mentre nessuno lo vede) dà a `on_return(luogo, trascorso)` dei moduli quanto è durata
   l'assenza. A mondo fermo il tempo resta fermo (ADR-0114).
 - **Personaggi** (ADR-0010, 0013, 0017, 0020): tipo + individuo (`identity`: anche `job family routine story`), `mind` (memoria, umore, modo), azioni
@@ -331,7 +332,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   il bordo luminoso; sopra ogni porta un'insegna al neon con il nome. Lungo il campus arredi futuristici (`CampusProp` in `corona.ts`, T50: lampioni
   neon lungo il viale, alberi di luce sui prati, panchine e totem olografici nei vicoli, porte e viali sempre liberi) e logistica operosa
   animata (droni volanti tra gli edifici e trenini magnetici di file sul binario ad anello, `corona3d.ts`). Negli interni e nella Direzione
-  gli avatar del Concilio sono gerboa giganti pacioccosi (`corona-gerboa-<agent>.xml`, T50), ciascuno con cappello distintivo per ruolo; l'Attore (T158) ha il cappello da moschettiere piumato, la mezza maschera e la gorgiera, siede al tavolo accanto al Narratore e il suo posto di lavoro è lo Studio dei Personaggi (seconda squadra di `persone`, un passo oltre il Narratore). Con l'opzione spenta (`ai.attore`) resta a riposo come chi non lavora: posto, console e avatar non dipendono dalla configurazione, così la sala non cambia quando il master la cambia; alla console siede solo se lavora, e da spento non lavora.
+  gli avatar del Concilio sono gerboa giganti pacioccosi (`corona-gerboa-<agent>.xml`, T50), ciascuno con cappello distintivo per ruolo; l'Attore (T158) ha il cappello da moschettiere piumato, la mezza maschera e la gorgiera, siede al tavolo accanto al Narratore e il suo posto di lavoro è lo Studio dei Personaggi (seconda squadra di `persone`, un passo oltre il Narratore). Con l'opzione spenta (`ai.actor`) resta a riposo come chi non lavora: posto, console e avatar non dipendono dalla configurazione, così la sala non cambia quando il master la cambia; alla console siede solo se lavora, e da spento non lavora.
   Un edificio con un programma suo (`models/corona-<id>.xml`, 8 voxel per casella, ADR-0049) è quel modello: davanti al viale, la porta
   sulla lettera `porta`, collisione dai voxel (`placeStructure`, `kernel.placeCampus`); senza, il blocco. Davanti alla Galleria dell'Artista, sulla lettera `plinto` (T48b), il kernel posa un'istanza di un modello della libreria scelto a ogni visita della corona (seme dal tick d'arrivo), ridotto a stare sul plinto, senza collisione nuova oltre al plinto. Dentro, le **vetrine** (T21, `SHOWCASES` in
   `corona.ts`): uno schermo (Torre della Magia: ogni runa magica e ogni combinazione nota, nei loro colori; il pannello dice l'effetto in parole, `describeEffect` in `validator.ts`), un silos (Studio dei personaggi: ogni tipo e dopo di lui i suoi individui, ciascuno col seme che ha nel mondo, che fluttuano in un liquido viscoso; il pannello dice l'individuo e il modulo), una stampante
@@ -408,19 +409,19 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 <a id="partita-viandanti"></a>
 ## La partita, i viandanti, le rune per ruolo
 
-- **La partita** (ADR-0053, T33): `universe.json → partita` (`modalita`, `morte` 0-4, `pvp`, `altroTraGiocatori`; predefiniti:
+- **La partita** (ADR-0053, T33): `universe.json → game` (`modalita`, `morte` 0-4, `pvp`, `altroTraGiocatori`; predefiniti:
   singola, 3, no, sì) si sceglie nella schermata della Genesi di un universo mai generato e poi non cambia: `repairGameSetup` (validatore)
   la ripara, `keepGame` riscrive un `universe.json` che dice altro. Va come principio (`gameSummary`) a Narratore, Arbitro, Ingegnere
   e Referente. Alla morte il Narratore (`player.death`) traduce il livello (`DEATH_LEVELS`) in cosa si perde (`perde_tutto` o effetti
   che tolgono) e dove si riparte (`qui | piazza`); `continueAfterDeath` è asincrona; senza risposta vale `fallbackDeath`.
-- **I viandanti** (ADR-0054, T34): ogni viandante ha un id stabile (`io` in singola, `src/kernel/wanderers.ts`) e il suo stato
-  in `world/giocatori/<id>.json` (da uno `stato.json` vecchio per `io`); `world/stato.json` è lo stato del mondo. Il kernel ha un
+- **I viandanti** (ADR-0054, T34): ogni viandante ha un id stabile (`me` in singola, `src/kernel/wanderers.ts`) e il suo stato
+  in `world/players/<id>.json` (da uno `stato.json` vecchio per `me`); `world/state.json` è lo stato del mondo. Il kernel ha un
   registro (`wanderers()`, `addWanderer`); ciò che agisce su «il giocatore» agisce sul viandante che agisce (`wanderer()`), e
   `as(id, fn)`, sincrono (mai attraverso un `await`), fa agire un altro. Legami e ricordi portano `viandante: <id>` (`readPeople`
-  migra «Viandante» e `legameViandante` a `io`; `bondWith`, `bondOf`, `memoriesFor`: un individuo non racconta a un viandante ciò che ha
+  migra «Viandante» e `legameViandante` a `me`; `bondWith`, `bondOf`, `memoriesFor`: un individuo non racconta a un viandante ciò che ha
   vissuto con un altro), le missioni `Quest.viandante`; `talk(id, testo, viandante?)` dà al Narratore il nome di chi parla; nel grafo
-  `persona:viandante` è `io`, `persona:viandante-<id>` gli altri.
-- **Rune per ruolo** (ADR-0057, T37): `partita.master` è chi ha creato l'universo multigiocatore (`io` per ora); in singola chi gioca
+  `persona:viandante` è `me`, `persona:viandante-<id>` gli altri.
+- **Rune per ruolo** (ADR-0057, T37): `game.master` è chi ha creato l'universo multigiocatore (`me` per ora); in singola chi gioca
   è il master di tutto (`isMaster()`) e nulla cambia. In multigiocatore nessuna riga del tappeto (`carpetLine` in `runes.ts`: token del
   tappeto, la runa `concilio`, un binding scritto) nei luoghi; ogni riga gira come chi l'ha incisa (`RuneComp.by`, `as`) e, se non è il
   master (o è generata), le scritture dei binding non arrivano (`K.run_line(key, lock)`, il `Host` dà copie di tappeto e posizioni).
@@ -442,19 +443,19 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 
 - **Chi paga e le carte** (ADR-0056, T36): ogni chiamata ha un `chi` (un viandante o `comune`): lo mette il Concilio con la
   politica di `payerOf` (`src/kernel/cards.ts`: comuni Genesi, sessioni, trame, revisioni, dialoghi tra individui, modelli che mancano,
-  pacchetti; il resto è del viandante che agisce), un `chi` esplicito vince; `world/consumi.json → paganti`. Ogni contenuto generato
+  pacchetti; il resto è del viandante che agisce), un `chi` esplicito vince; `world/usage.json → paganti`. Ogni contenuto generato
   porta `carta {autore, pagante, titolare}` (moduli, oggetti, ambienti, incantesimi, ricette, modelli, individui, trame, regole giudicate,
   piani dei luoghi): i punti che creano contenuti committano con `commitContent`, che timbra ciò che il cambio porta (`stampFiles`); il
   titolare delle comuni è un viandante estratto col seme (`cardHolderOf`). Gli utilizzi (`luoghi trame prompt`) e le carte dei luoghi in
-  `world/carte.json` (`CardUses`, scritto prima di ogni commit); la collezione: `kernel.cardsOf(id)`, `collectionOf`.
-- **Crediti e spese comuni** (ADR-0081, T45a, ADR-0104, T125): saldo crediti per viandante nel `Ledger` del kernel (`kernel.ledger`; sul server `universes/.saldi/<nome>.json`, fuori dalla storia; `kernel.creditsOf`, `deductCredits`); ricaricato a mano solo dal master, dalla console (`grantCredits`, messaggio `ricarica`), entro il tetto al giorno per universo (`QUINE_TETTO_RICARICHE`); il Referente non dà crediti. Ogni chiamata scala dal pagante (`payerOf`) costo modello + commissione di piattaforma (`costWithFee`): la decide solo il server (`QUINE_COMMISSIONE`, `platformFeeOf` in `server/ledger.ts`, predefinita 0,01; 0 è ammesso, un valore che non sia una frazione da 0 a meno di 1 dà il predefinito, ADR-0132), arriva al mondo per valore (`worldEnv`, `KernelOptions.platformFee`, `kernel.platformFee`) e si mostra da lì: `Wallet.commissione` sul sito (`feeText`), `ingresso.commissione` nella console del master (`showPlatformFee`, solo uno specchio); mai da `universe.json`, Lua, Concilio o client. Ricariche e consumi sono lineari, senza fasce né interessi: un credito è un dollaro; i consumi su disco tengono il costo senza commissione, quindi il portafoglio mostra anche i giorni passati alla commissione di oggi; le spese comuni (`comune`) sono divise in parti uguali tra tutti i giocatori collegati in quel momento (`splitCost`), master compreso, escludendo gli anonimi. A crediti esauriti (`crediti <= 0`) o per viandanti anonimi (`anonimo: true`, 0 crediti non ricaricabili): le richieste personali sono risposte dai modelli locali (`MockAiModels`) e il giocatore lo sa (`stato.crediti` nell'aggiornamento, avviso nel feed).
+  `world/cards.json` (`CardUses`, scritto prima di ogni commit); la collezione: `kernel.cardsOf(id)`, `collectionOf`.
+- **Crediti e spese comuni** (ADR-0081, T45a, ADR-0104, T125): saldo crediti per viandante nel `Ledger` del kernel (`kernel.ledger`; sul server `universes/.balances/<nome>.json`, fuori dalla storia; `kernel.creditsOf`, `deductCredits`); ricaricato a mano solo dal master, dalla console (`grantCredits`, messaggio `ricarica`), entro il tetto al giorno per universo (`QUINE_TETTO_RICARICHE`); il Referente non dà crediti. Ogni chiamata scala dal pagante (`payerOf`) costo modello + commissione di piattaforma (`costWithFee`): la decide solo il server (`QUINE_COMMISSIONE`, `platformFeeOf` in `server/ledger.ts`, predefinita 0,01; 0 è ammesso, un valore che non sia una frazione da 0 a meno di 1 dà il predefinito, ADR-0132), arriva al mondo per valore (`worldEnv`, `KernelOptions.platformFee`, `kernel.platformFee`) e si mostra da lì: `Wallet.commissione` sul sito (`feeText`), `ingresso.commissione` nella console del master (`showPlatformFee`, solo uno specchio); mai da `universe.json`, Lua, Concilio o client. Ricariche e consumi sono lineari, senza fasce né interessi: un credito è un dollaro; i consumi su disco tengono il costo senza commissione, quindi il portafoglio mostra anche i giorni passati alla commissione di oggi; le spese comuni (`comune`) sono divise in parti uguali tra tutti i giocatori collegati in quel momento (`splitCost`), master compreso, escludendo gli anonimi. A crediti esauriti (`crediti <= 0`) o per viandanti anonimi (`anonimo: true`, 0 crediti non ricaricabili): le richieste personali sono risposte dai modelli locali (`MockAiModels`) e il giocatore lo sa (`stato.crediti` nell'aggiornamento, avviso nel feed).
 
 <a id="multigiocatore"></a>
 ## Il multigiocatore: server, client, ramo del master, tra viandanti
 
 - **Il kernel sul server** (ADR-0058, T38): ogni viandante ha il suo tappeto (`as` scambia anche lo scorrimento, `holdCarpet`);
   `core.movement` e `core.carpet` (`PER_WANDERER`) girano una volta per viandante mosso dal kernel e vedono solo lui; la tastiera
-  muove `inputFor` (`io`); chunk, ritmo, frase e stati di ogni viandante. Un viandante di un client (`setRemote`) non lo muove il
+  muove `inputFor` (`me`); chunk, ritmo, frase e stati di ogni viandante. Un viandante di un client (`setRemote`) non lo muove il
   kernel: il client manda dove è nel mondo e `stepWanderer` lo porta lì al più per il ritmo (`paceOf`), con la collisione del
   cammino. `src/session/`: protocollo JSON (`entra passo frase incidi pronuncia azione altro chat oggetto contenitore fabbrica pannello
   casella dici dai` → `ingresso aggiorna correzione esito rifiuto`), `SessionServer` (messaggi a ogni tick, aggiornamenti a 10 Hz di ciò che è cambiato vicino, credito di passo di
@@ -471,7 +472,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   se il prossimo aggiornamento dice altro. Ciò che si porta (T39b): tasche, borse, contenitori (il contenuto arriva nell'`esito`),
   fabbricazione, pannelli delle meccaniche, azioni e «Altro…» sulle caselle vanno al server, che li fa con `as`; gli spostamenti di
   slot si vedono subito e, finché sono in viaggio, l'inventario del server non li sovrascrive (`pending`). Ogni
-  viandante oltre `io` è un seme suo del `viandante` col mantello del suo colore (`wandererColor`, `tinta: N`).
+  viandante oltre `me` è un seme suo del `viandante` col mantello del suo colore (`wandererColor`, `tinta: N`).
 - **I pannelli e i tasti di ogni viandante** (ADR-0139, T263): `MyState.campi` porta, per ogni viandante, il valore di ogni `campo` che
   un `manifest.ui` nomina (`panelFields`: solo testi, numeri e booleani, testi a 200 caratteri); un campo che nessun pannello nomina
   resta sul server (regola 8f). Sul client `takePanelFields` scrive quei campi nei componenti del suo viandante, mai in quelli del
@@ -515,7 +516,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   sul suo corpo (`touchWanderer`: bisogni, scudo, stati come lui; `spingi` sul suo tappeto, `wanderer:pushed` azzera il suo credito di passo); ciò che
   ferisce (`unharmed`: bisogni che scendono, `spingi`, `fuoco`, `togli_stato`, stati che rallentano) solo con `partita.pvp`; sul master solo `messaggio`.
   Chi lo subisce lo sa (`wanderer:acted` → avviso `altro`).
-- **Il profilo del viandante** (ADR-0074, T44a): `Profile {nome, seme, tinta, presentazione}` in `world/giocatori/<id>.json`; `repairProfile`
+- **Il profilo del viandante** (ADR-0074, T44a): `Profile {nome, seme, tinta, presentazione}` in `world/players/<id>.json`; `repairProfile`
   (`wanderers.ts`) lo ripara (nome di 2-24 caratteri e non simile a individui o viandanti, altrimenti `freshName`; seme tra quelli della classe;
   mantello né scuro né chiaro né grigio; 4 righe) e `kernel.setProfile` lo fa nome e aspetto (`dressWanderer`). `entra {profilo}` e `profilo`
   nel protocollo, l'`ingresso`/`esito` dicono il profilo riparato e `riparato`; agli altri con `OtherView` (+ `presentazione`, «Chi è» nel
@@ -524,9 +525,9 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   (`src/ui/profile.ts`, una foto del modello per seme).
 - **Morte e ricollegamento in multigiocatore** (ADR-0076, T43c): a salute zero un giocatore (mai il master: `mortalDies`) muore sul server con la
   punizione della partita (`continueAfterDeath(id, cause)` concatenata da `die` come lui, senza alzare `dead` né fermare gli altri; `wanderer:died` →
-  avviso `morte` con `perso` e `dove`, il client mostra la schermata della morte, `ui:died`, e riparte dove il verdetto dice). `world/giocatori/<id>.json` salva anche `pos {x, y}`: chi esce e rientra ritrova
+  avviso `morte` con `perso` e `dove`, il client mostra la schermata della morte, `ui:died`, e riparte dove il verdetto dice). `world/players/<id>.json` salva anche `pos {x, y}`: chi esce e rientra ritrova
   posizione, inventario, frase, stati, carte e legami.
-- **Il master in god mode** (ADR-0065, T42a): in multigiocatore il master (`partita.master`, fisso come la partita) è un dio
+- **Il master in god mode** (ADR-0065, T42a): in multigiocatore il master (`game.master`, fisso come la partita) è un dio
   (`godMode`): dopo i sistemi di ogni tick `keepGods` gli rimette i bisogni pieni (non il mana), la morte annunciata da Lua passa da
   `spareGods` (muore solo un giocatore), `applyEffects` sul suo corpo da parte di un altro lascia passare solo `messaggio`. Gli altri
   lo vedono solo nel mondo (`inWorld`: sul suo tappeto, dentro il cerchio, non in un interno); uscito con la runa del Concilio è `partiti`.
@@ -546,7 +547,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   `SessionServer.isAnonymous`, `kernel.isAnonymous`) usa il meccanismo unico dei crediti di ADR-0081: 0 crediti non ricaricabili,
   escluso dalle spese comuni, richieste personali gestite con i modelli locali (`MockAiModels` a crediti esauriti); legandosi a Google
   (pannello `P`, «Lega a Google») smette di essere anonimo (`setAnonymous`), tiene lo stesso uid e viandante e può ricevere crediti.
-  `QUINE_MASTER` (uid) è il master `io` degli universi fatti prima degli account. Senza `FIREBASE_PROJECT_ID` (sviluppo, test) vale l'id di
+  `QUINE_MASTER` (uid) è il master `me` degli universi fatti prima degli account. Senza `FIREBASE_PROJECT_ID` (sviluppo, test) vale l'id di
   oggi; in singola nessun account.
 
 <a id="stripe"></a>
@@ -560,10 +561,10 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 - **Il clone con un altro master** (ADR-0068, T42d): il master non cambia; un altro master è un altro universo. `cloneUniverse`
   (`server/universeStore.ts`, `POST /api/universe/<nome>/clone {nome, master, titolari}`) copia la cartella intera (storia, `maps/`,
   viandanti, carte, consumi; non i rami `rami/*` né i saldi, ADR-0104) e committa ciò che dà `cloneChanges` (`src/kernel/clone.ts`): `name` e
-  `partita.master` in `universe.json`; autore e pagante delle carte restano, il titolare resta o, con `titolari: 'master'`, le carte
+  `game.master` in `universe.json`; autore e pagante delle carte restano, il titolare resta o, con `titolari: 'master'`, le carte
   del vecchio master passano al nuovo (`passCards`). Nella console del master in multigiocatore, scheda «Universo» (`Console.onClone`).
 - **L'eredità dei cloni** (ADR-0084, T45c): a ogni clone `inheritCards` (`clone.ts`) allunga la catena di ogni carta (`carta.origini`:
-  titolare, universo, impronta MinHash del contenuto, `src/kernel/heritage.ts`) e mette gli utilizzi di allora in `world/carte.json →
+  titolare, universo, impronta MinHash del contenuto, `src/kernel/heritage.ts`) e mette gli utilizzi di allora in `world/cards.json →
   allaNascita`. A ogni utilizzo dopo, risalendo la catena ogni anello passa indietro `base + copia × (1 − cambio)` (`universe.json →
   eredita`, 0,1 e 0,4; `sharesOf`), il resto al titolare; `allCards(files, true)` dà le `quote`, `receivedBy` / `kernel.received(id)`
   ciò che un viandante riceve come titolare di prima.
@@ -571,7 +572,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 <a id="sotterranei"></a>
 ## I sotterranei
 
-- **I sotterranei** (ADR-0091, progetto di T52a; T52b fatto, da attuare T52c-f): parti delle strutture sotto il suolo, mai un mondo a parte. La voce del modello dice `sotto: N` (1-3, `cellarOf`; la scatola della classe si allunga in basso, `Form.base` = `N · vpt` voxel sotto il suolo): pavimenti, collisione e taglio contano da lì (`levelIn` aggiunge `base`; fuori dal modello e dove non ha voxel sotto il suolo la terra è piena fino a `base`, `surfaces(…, fill)`), dalla cantina si esce solo per la scala, e ogni pavimento sotto il suolo si raggiunge dal piano terra (`groundOfForm`; altrimenti il modello entra senza cantina: `Form.hole` assente, posato comunque più in basso). Sulle colonne della cantina (`Form.hole`) `floorAt` ignora il terreno, sopra la tromba delle scale è aria (`rampBlocks`) e il salto non ci atterra (`floorBelow`, `topUnder`); il renderer posa il modello `kernel.sunk(id)` più in basso e abbassa il terreno delle caselle della cantina al suo fondo (`kernel.holesIn(chunk)`, il buco). Il Cartografo la chiede (`strutture[].sotto`, cose `sotto`); la profondità del terreno si genera come su X e Y (terreni `strato`, bozza per colonna, programma `sottosuolo` dell’ambiente, `strati` nel piano e in `ChunkView`, fino a 2 caselle sotto la cantina più profonda, al più 6). Si vede con il buco del terreno sotto il modello e, per chi sta sotto, un taglio a caselle in un disco attorno a lui con le bande degli strati e la luce attenuata. Nella corona scende solo l’esterno dell’edificio (T52c). **La lettera del suolo** (ADR-0135, T258): un programma con `suolo="E"` sulla radice trova quella lettera sullo strato `base`, con `origin="bottom"` al centro, così lo stesso XML serve ogni taglia e scava fino al fondo (`ground="Z"`) con regole senza `steps`; vale per chi la dice, e non con `map`.
+- **I sotterranei** (ADR-0091, progetto di T52a; T52b fatto, da attuare T52c-f): parti delle strutture sotto il suolo, mai un mondo a parte. La voce del modello dice `sotto: N` (1-3, `cellarOf`; la scatola della classe si allunga in basso, `Form.base` = `N · vpt` voxel sotto il suolo): pavimenti, collisione e taglio contano da lì (`levelIn` aggiunge `base`; fuori dal modello e dove non ha voxel sotto il suolo la terra è piena fino a `base`, `surfaces(…, fill)`), dalla cantina si esce solo per la scala, e ogni pavimento sotto il suolo si raggiunge dal piano terra (`groundOfForm`; altrimenti il modello entra senza cantina: `Form.hole` assente, posato comunque più in basso). Sulle colonne della cantina (`Form.hole`) `floorAt` ignora il terreno, sopra la tromba delle scale è aria (`rampBlocks`) e il salto non ci atterra (`floorBelow`, `topUnder`); il renderer posa il modello `kernel.sunk(id)` più in basso e abbassa il terreno delle caselle della cantina al suo fondo (`kernel.holesIn(chunk)`, il buco). Il Cartografo la chiede (`strutture[].sotto`, cose `sotto`); la profondità del terreno si genera come su X e Y (terreni `strato`, bozza per colonna, programma `sottosuolo` dell’ambiente, `strati` nel piano e in `ChunkView`, fino a 2 caselle sotto la cantina più profonda, al più 6). Si vede con il buco del terreno sotto il modello e, per chi sta sotto, un taglio a caselle in un disco attorno a lui con le bande degli strati e la luce attenuata. Nella corona scende solo l’esterno dell’edificio (T52c). **La lettera del suolo** (ADR-0135, T258): un programma con `soil="E"` sulla radice trova quella lettera sullo strato `base`, con `origin="bottom"` al centro, così lo stesso XML serve ogni taglia e scava fino al fondo (`ground="Z"`) con regole senza `steps`; vale per chi la dice, e non con `map`.
 
 <a id="cartone"></a>
 ## La grafica a cartone
@@ -658,7 +659,7 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
 - **`<sound bpm scale root swing cutoff space>`** con i `<track y instrument volume>`: i parametri stanno nell'XML, ciò che manca è il predefinito del SoundLab, ciò che è fuori range torna con la riga. Scale in `SCALES`.
 - **Una sola fonte** (`renderScore`, `src/mj/synth.ts`): partitura + seme → campioni mono, senza Web Audio, orologio né `Math.random`. `renderSoundProgram` fa tutta la strada dal testo; il browser suona quei campioni e basta. Non si scrive un secondo sintetizzatore: un suono nuovo passa da qui.
 - **Tetti**: `MAX_EVENTS`, `MAX_SECONDS`, `SOUND_LIMITS`, `SOUND_MAX_STEPS` e i secondi di voci di una resa; ciò che resta fuori lo dice `truncated`. Il segnale non supera mai 1: oltre 0,98 si scala tutto.
-- **Dove stanno**: `models/suono-<id>.xml` con `classe: "suono"` in `index.json`; `soundPrograms(files)` li elenca. `suono` non è tra le `CLASSES`. Il validatore (`modelErrors`) chiede che finiscano e che la partitura non sia vuota. I quattro preset del SoundLab sono nel seme.
+- **Dove stanno**: `models/suono-<id>.xml` con `class: "suono"` in `index.json`; `soundPrograms(files)` li elenca. `suono` non è tra le `CLASSES`. Il validatore (`modelErrors`) chiede che finiscano e che la partitura non sia vuota. I quattro preset del SoundLab sono nel seme.
 - **Il SoundLab** (`/lab/suono/`, T222): la pagina per scrivere, ascoltare, correggere e salvare un programma sonoro a mano. Non ha voci: programma e sintetizzatore girano in due worker (`lab/suono/worker.ts`; chi esegue i programmi si uccide dopo 8 s senza risposta, senza scadenze dentro la corsa, perché l'orologio non sceglie le note), e `LoopPlayer` (`player.ts`) suona i campioni; una resa nuova parte allo stesso punto del ciclo e si dissolve sulla vecchia in 60 ms, ed è così che una manopola non scatta. Tutto ciò che si salva sta nel testo, toccato sul posto e mai riscritto da un albero (`logic.ts`): le manopole scrivono in `<sound>`, il volume in `<track>`, il seme in un commento sulla prima riga. Il muto è solo ascolto.
 - **I ritocchi** (`retouch`, `lab/suono/logic.ts`): ciò che il piano roll cambia rispetto alle regole diventa una serie di `<box>` in fondo alla `<sequence>` radice, tra due commenti, così il file dice tutto e il gioco suona la stessa griglia; stanno sopra a ciò che le regole scrivono con ogni seme. `retouch` riesegue il risultato e confronta: se la griglia non torna (una radice che non è una `sequence`, un programma che non arriva in fondo) non scrive nulla e la pagina lo dice. Si dipinge solo sull'ultimo passo.
 - **L'analisi** (ADR-0125, `src/mj/soundanalysis.ts`, comando `lab/scripts/mjx-sound.ts`, guida `lab/banco/suono.md`): dalla partitura e dai campioni veri un rapporto in testo, identico a ogni giro, con la partitura parola per parola, le misure per seme e per traccia, il segnale e lo spettro. `SOUND_THRESHOLDS` dice i difetti `empty`, `flat`, `repetitive`, `off_key`, `off_volume`, `seam` (nei messaggi con le parole di prima): un limite parla quando lo passa più di metà dei semi (solo «non finisce» e «partitura vuota» bastano su un seme), e sotto una battuta il programma è un effetto, senza `piatto` né `ripetitivo`. Il validatore usa le stesse soglie su tre semi con un solo rendering, e nessuno se la partitura basta già a rifiutare.
@@ -667,7 +668,7 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
 - **I tempi**: un cambio di luogo aspetta 4 s stabili e si dissolve in 3 s, così un confine non fa sfarfallare; oltre il bordo si cambia subito. Ogni 75 s il brano diventa un'altra delle sue 4 varianti (un altro seme, allo stesso punto del ciclo).
 - **Il percorso**: `SoundRenders` (`renders.ts`, un worker, musica davanti agli effetti, 64 MB in memoria, cane da guardia a 20 s) → `worker.ts` (IndexedDB `quine-suoni`, 256 MB, sulle origini di `keepsFormsOnDisk`; alza `SOUND_CACHE_VERSION` se cambi ciò che esce dal sintetizzatore, un test te lo ricorda) → `prepareSound` (`prepare.ts`: il passaggio che gira, o l'effetto senza silenzio finale) → `Sfx` (`sfx.ts`: solo guadagni e dissolvenze). Ciò che fallisce tace. Volume e muto nel pannello d'aiuto (`H`), in `localStorage`. Dalla console: `window.suono` (`sfx.outputRms()`, `director.now`, `renders.measures`, `renders.failures`).
 - **Le misure** (T224): Chrome headless, RTX 2070, ?skip&offline, turni da 15 s: 59,2 e 60,0 fps senza suono; 60,0 durante il primo rendering e 60,0 e 60,0 con la musica; p99 16,9 ms, il frame peggiore 17 ms contro i 183,6 di un caricamento senza suono. Un brano si calcola in 0,6-1,1 s nel worker (in Node 0,8-1,7 s), un effetto in 3-48 ms, tutti e 22 in circa 0,3 s; dal disco i 22 effetti in 80 ms in tutto. Un brano pesa 3,1-6,0 MB, gli effetti insieme 5,8 MB; dopo aver sentito sette brani la memoria della pagina tiene 36 MB (tetto 64), e ciò che suona ne ha una copia in più nell'AudioBuffer. Livelli all'uscita, volume 70 %, RMS massimo su 46 ms: musica 0,02-0,11; effetti 0,03-0,14; muto 0.
-- **Il Musicista** (T225, ADR-0127): `sound.compose` (`src/kernel/agents/composer.ts`), prompt `prompts/agents/musician.md`, modello `ai.scultori.musician`. Risponde con nome, programma e scopo; il kernel prende ciò che il mondo sa nominare, e un programma che non passa il validatore, i nomi del mondo (regola 0) o i 32 passi di un brano torna indietro col motivo, due volte al più. `ScoreDirector` (`src/kernel/scoredirector.ts`, `kernel.composing`): un ambiente di un luogo caricato che nessun programma nomina riceve il suo brano di giorno, entro `ai.maxBrani` (8) e il coefficiente `brani`, spese comuni; con il seme non chiede nulla, perché il seme li nomina tutti. Il viandante chiede al Referente (incarico `musica`) o al Musicista con `E`, e paga: senza un ambiente nominato il brano è di dove sta; un effetto prende l'id del programma di quell'effetto e lo sostituisce. In `chooseMusic` chi nomina l'ambiente per intero batte chi ne nomina una parte, e tra pari suona l'ultimo dell'indice. Provare il prompt: `npx vite-node lab/scripts/musicista-prova.ts -- <cartella con il .env> --max 10`.
+- **Il Musicista** (T225, ADR-0127): `sound.compose` (`src/kernel/agents/composer.ts`), prompt `prompts/agents/musician.md`, modello `ai.sculptors.musician`. Risponde con nome, programma e scopo; il kernel prende ciò che il mondo sa nominare, e un programma che non passa il validatore, i nomi del mondo (regola 0) o i 32 passi di un brano torna indietro col motivo, due volte al più. `ScoreDirector` (`src/kernel/scoredirector.ts`, `kernel.composing`): un ambiente di un luogo caricato che nessun programma nomina riceve il suo brano di giorno, entro `ai.maxPieces` (8) e il coefficiente `brani`, spese comuni; con il seme non chiede nulla, perché il seme li nomina tutti. Il viandante chiede al Referente (incarico `musica`) o al Musicista con `E`, e paga: senza un ambiente nominato il brano è di dove sta; un effetto prende l'id del programma di quell'effetto e lo sostituisce. In `chooseMusic` chi nomina l'ambiente per intero batte chi ne nomina una parte, e tra pari suona l'ultimo dell'indice. Provare il prompt: `npx vite-node lab/scripts/musicista-prova.ts -- <cartella con il .env> --max 10`.
 - **In multigiocatore** suona ciò che il client sa: musica e raccolte, iscrizioni, incantesimi, ritorni, morte. Il client non riceve `item:crafted` né `forge:done` e non salta da sé, quindi quei suoni restano del gioco in singola.
 
 <a id="rilievo"></a>
@@ -676,7 +677,7 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
 - **Rilievo** (ADR-0048): il terreno ha le altezze. `Relief` (`src/kernel/relief.ts`) fa girare `Hills` di MarkovJunior
   (o `world/rilievo.xml`) su due scatole di lati 64 e 45, lette come piastrelle che si ripetono e rammendate; il livello
   di una casella è la somma (un livello = un quarto di casella, fra vicini al più due: si sale sempre, non è mai un
-  ostacolo). Il mare sta al suo livello (`universe.json → rilievo.mare`, o `Relief.sea`), la terra mai sotto; ogni specchio
+  ostacolo). Il mare sta al suo livello (`universe.json → relief.sea`, o `Relief.sea`), la terra mai sotto; ogni specchio
   d'acqua è piano per intero attraverso i chunk caricati, al suo livello più basso e mai sopra la riva, con sponde che
   scendono di due livelli a casella (T51a, `worldLevels`: un campo per il mondo caricato, uguale in qualunque ordine arrivino
   i chunk; `Chunk.levels` ridisegna chi cambia livelli); ogni lotto è piano, con un anello
@@ -712,8 +713,8 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
 
 - **Le taglie** (ADR-0092, T54): le taglie di D&D (`SIZE_TIERS` in `src/mj/classes.ts`: minuscola, piccola, media, grande, enorme,
   gargantuesca, la massima), la stessa scala per creature e strutture: la classe dà la forma e la scatola della sua taglia solita
-  (`AssetClass.taglia`), la taglia la scala (`tilesOf`, `boxOf(cls, taglia)`, più rada oltre 120 voxel, `densityOf`). `appearance.taglia`,
-  `strutture[].taglia` del Cartografo, `struttura.taglia`, `SculptRequest.taglia`, `ModelInfo.taglia`/`vpt` (`modelSize`). Rare: una
+  (`AssetClass.taglia`), la taglia la scala (`tilesOf`, `boxOf(cls, taglia)`, più rada oltre 120 voxel, `densityOf`). `appearance.size`,
+  `structures[].size` del Cartografo, `struttura.taglia`, `SculptRequest.taglia`, `ModelInfo.size`/`vpt` (`modelSize`). Rare: una
   **Enorme** (il castello «importante» di prima) per zona di 56 × 56 luoghi (`zoneOf`), una **Gargantuesca** per **reame** di 4 × 4 zone
   (`realmOf`), una per luogo, con il modello migliore dello Scultore; `claimSizes` le adatta al lotto e alla rarità (`rareAllowed`),
   `stato.json → rari` (un `importanti` vecchio è `rari.enorme`).
@@ -725,7 +726,7 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   di nodi tipizzati (`<tipo>:<slug>`: individui col viandante e gli attesi, tipi, luoghi `luogo:<cx>_<cy>`, regioni, ambienti,
   strutture, trame, oggetti, ricette, rune, incantesimi, regole, fatti) e archi (legami, routine, tappe, contenuti, ingredienti,
   ciò che il viandante porta); `kernel.graph()` (in cache) con `find`, `neighbors`, `context`, `check()` (riferimenti verso
-  nulla, legami da un lato solo o impossibili, nomi simili, trame senza individui o luoghi). Va in `world/grafo.json` prima di
+  nulla, legami da un lato solo o impossibili, nomi simili, trame senza individui o luoghi). Va in `world/graph.json` prima di
   ogni commit se è cambiato ciò di cui è fatto (formato di Graphify, una riga per nodo e arco; tiene i luoghi del file
   precedente; `GRAPH_BUILD` da alzare quando si costruisce in modo diverso). I compiti narrativi (risposte e dialoghi degli NPC, «Esamina», «Leggi», azioni libere, fabbricazione, combinazioni,
   incantesimi nuovi, individui, trame) passano un `focus` (`kernel.focusOn`: le cose nominate e il luogo, id o nomi): il
@@ -755,10 +756,10 @@ Il kernel è in console come `window.quine` (o `window.rune`) in singola e per i
   dispositivi sono le costanti di `corona.ts` (`SHOWCASE_AT`, `GRAPH_AT`, `SITUATION_AT`, `WALL_AT`, `CONSOLES_AT`, `BENCH_AT`…,
   relative a `f.ox`, `f.oy`); il dispositivo sta sulla colonna 12, l'uscita in basso (y 14): stare a y 10.5 lo inquadra con la
   parete di fondo, ma `E` lo raggiunge da y 7.5. Per gli esterni: `k.corona.building(id).door` (il viale davanti alla porta) o `?dev&teleport=46,0`.
-- **Il teleport non si somma più a quella salvata** (T264, prima T214): `pagehide` scrive la posizione in `universes/<nome>/world/giocatori/io.json` e il caricamento dopo la rende scostamento del tappeto; con `?dev&teleport=X,Y` `applyTeleport` (`src/kernel/teleport.ts`) ferma il tappeto e ne azzera lo scostamento, quindi due caricamenti dello stesso URL arrivano allo stesso punto (prima davano 0, 46, 92, 138). Senza `teleport` vale lo scostamento salvato: chi chiude nella corona riparte dov'era.
+- **Il teleport non si somma più a quella salvata** (T264, prima T214): `pagehide` scrive la posizione in `universes/<nome>/world/players/me.json` e il caricamento dopo la rende scostamento del tappeto; con `?dev&teleport=X,Y` `applyTeleport` (`src/kernel/teleport.ts`) ferma il tappeto e ne azzera lo scostamento, quindi due caricamenti dello stesso URL arrivano allo stesso punto (prima davano 0, 46, 92, 138). Senza `teleport` vale lo scostamento salvato: chi chiude nella corona riparte dov'era.
 - **Multigiocatore**: `vite preview` non aggancia il WebSocket di `/api/session` (il client dà «il mondo non risponde»): serve il server
-  di sviluppo, `npx vite --port <n> --strictPort`, sempre nel turno `browser`. Un universo con `partita.modalita: 'multigiocatore'`, due
-  schede con `?skip&offline&universo=<nome>&viandante=io` (il master, se `partita.master` non dice altro) e `&viandante=<altro>`; la prima
+  di sviluppo, `npx vite --port <n> --strictPort`, sempre nel turno `browser`. Un universo con `game.mode: 'multigiocatore'`, due
+  schede con `?skip&offline&universo=<nome>&viandante=me` (il master, se `game.master` non dice altro) e `&viandante=<altro>`; la prima
   partenza del mondo richiede una ventina di secondi. Nel master `window.quine` è il kernel specchio e `window.session` il `ThinClient`; nel
   giocatore `window.rune` è il `ThinClient`. Un dono: `await session.session.act({ t: 'dai', viandante: '<altro>', slot, quanti })`.
 - **Agire**: `await k.interact()` è `E` (sul dispositivo o sullo scaffale più vicino), `k.clickStudio(x, y)` il clic sinistro su un punto;
@@ -772,7 +773,7 @@ Il kernel è in console come `window.quine` (o `window.rune`) in singola e per i
 ## Costi e prestazioni
 
 - **Registro dei consumi** (ADR-0039): ogni chiamata passa da `kernel.usage` (per giorno, modello e compito, in token e
-  dollari, cache e ragionamento compresi) e va in `world/consumi.json` con ogni commit; il costo è nel pannello del
+  dollari, cache e ragionamento compresi) e va in `world/usage.json` con ogni commit; il costo è nel pannello del
   Concilio (`G`). `GeminiAiModels` non ripete mai una richiesta scaduta (può essere stata pagata); ripete solo 429/5xx.
 
 - Testo per mondo: Genesi ~60 chiamate; poi 1 per luogo, 1-2 per individuo, ~4 per pacchetto di oggetti.

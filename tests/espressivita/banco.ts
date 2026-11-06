@@ -13,7 +13,7 @@ import { MemoryChunks, type ChunkStore } from '../../src/kernel/chunks';
 import { Kernel } from '../../src/kernel/kernel';
 import { memoryStore } from '../../src/kernel/repo';
 import type { FileMap, Manifest } from '../../src/kernel/types';
-import { internalManifest } from '../../src/kernel/internalNames';
+import { internalFields, internalManifest } from '../../src/kernel/internalNames';
 
 const HERE = path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1'));
 const MODULES = path.join(HERE, 'moduli');
@@ -29,8 +29,9 @@ export function universeWith(...ids: string[]): FileMap {
   return { ...bundledFiles, ...Object.assign({}, ...ids.map(moduleFiles)) };
 }
 
-// Read as the kernel reads a manifest (parseManifest): the values of the contract 0.1 these modules were written with made internal (T307a).
-export const manifestOf = (id: string): Manifest => internalManifest(JSON.parse(moduleFiles(id)[`modules/${id}/manifest.json`]));
+// Read as the kernel reads a manifest (parseManifest): the values of the contract 0.1 these modules were written with made internal (T307a),
+// then their fields (T308a).
+export const manifestOf = (id: string): Manifest => internalFields('manifest', internalManifest(JSON.parse(moduleFiles(id)[`modules/${id}/manifest.json`])));
 export const logicOf = (id: string): string => moduleFiles(id)[`modules/${id}/logic.lua`] ?? '';
 
 /**
@@ -43,7 +44,7 @@ export async function expectForgeable(id: string, extras: string[] = []): Promis
   if (manifest.kind === 'system') {
     const { panel, errors } = cleanPanel(manifest.ui ?? {}, manifest.ui?.id ?? 'x');
     expect(errors).toEqual([]);
-    expect(panel?.elementi.length).toBe(manifest.ui?.elementi.length);
+    expect(panel?.elements.length).toBe(manifest.ui?.elements.length);
   }
   expect(k.validator.validateForged(manifest, logicOf(id), new Set(k.modules.keys()), { system: true })).toEqual([]);
   return k;
@@ -106,5 +107,5 @@ export function play(k: Kernel, seconds: number): void {
 /** With another wanderer in the same world: what a multiplayer game is, in the kernel on the server. */
 export function manyPlayers(files: FileMap): FileMap {
   const cfg = JSON.parse(files['universe.json']);
-  return { ...files, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multigiocatore', morte: 3, master: 'io' } }, null, 2) };
+  return { ...files, 'universe.json': JSON.stringify({ ...cfg, game: { mode: 'multigiocatore', death: 3, master: 'me' } }, null, 2) };
 }

@@ -11,27 +11,27 @@ import { internalEffect } from '../kernel/internalNames';
 import type { FileChanges } from './protocol';
 
 /** What a client reads of `universe.json`. Not `ai` (budgets, models, providers), not the theme's path, not the heritage. */
-const UNIVERSE_FIELDS = ['name', 'kernel', 'kernels', 'seed', 'circleRadius', 'chunkSize', 'rilievo'];
-const GAME_FIELDS = ['modalita', 'morte', 'pvp', 'altroTraGiocatori', 'master'];
-/** What the lobby and the site's pages show of `ai`, and what the hourly estimate reads (`publicFiles` only). Not `provider`, `agenti`, `thinking`, `timeout`. */
-const LOBBY_AI_FIELDS = ['textModel', 'scultori', 'coefficienti', 'minimi', 'maxText', 'maxForges', 'maxPacks', 'maxCast', 'maxModels', 'maxBrani', 'placesPerMinute', 'thinking', 'attore'];
+const UNIVERSE_FIELDS = ['name', 'kernel', 'kernels', 'seed', 'circleRadius', 'chunkSize', 'relief'];
+const GAME_FIELDS = ['mode', 'death', 'pvp', 'freeActionsBetweenPlayers', 'master'];
+/** What the lobby and the site's pages show of `ai`, and what the hourly estimate reads (`publicFiles` only). Not `provider`, `agents`, `thinking`, `timeout`. */
+const LOBBY_AI_FIELDS = ['textModel', 'sculptors', 'coefficients', 'minimums', 'maxText', 'maxForges', 'maxPacks', 'maxCast', 'maxModels', 'maxPieces', 'placesPerMinute', 'thinking', 'actor'];
 
 /**
  * What a client reads of a manifest. An entity in the world reaches it from the server (form, body, menu: `ENTITY_PARTS`), so
  * what spawns it is not here: `spawn`, `interaction`, `container`, `inventory`, `loot`, `layouts`, `fragments`, `drops`; nor what only the
- * Council reads: `persona`, `lore`, `context`, `prompts`, `origin`; nor `casi`. A field added to `Manifest` stays home until it is
- * named here. `carta` is on the list because anyone may read it (`publicFiles`, ADR-0102). `ui` is whole: it is the panel drawn.
+ * Council reads: `persona`, `lore`, `context`, `prompts`, `origin`; nor `cases`. A field added to `Manifest` stays home until it is
+ * named here. `card` is on the list because anyone may read it (`publicFiles`, ADR-0102). `ui` is whole: it is the panel drawn.
  */
-const MANIFEST_FIELDS = ['id', 'name', 'kind', 'version', 'description', 'order', 'physics', 'tags', 'item', 'roof', 'ui', 'carta'];
+const MANIFEST_FIELDS = ['id', 'name', 'kind', 'version', 'description', 'order', 'physics', 'tags', 'item', 'roof', 'ui', 'card'];
 /** Only for the modules that make up the client's own wanderer and carpet: the others' entities come from the server. */
 const OWN_FIELDS = ['components', 'singleton', 'persist'];
-const APPEARANCE_FIELDS = ['glyph', 'color', 'model', 'classe', 'taglia'];
-const ITEM_FIELDS = ['id', 'name', 'description', 'category', 'weight', 'stack', 'tags', 'glyph', 'color', 'model', 'equippable', 'effects', 'container', 'module', 'bonus', 'slot', 'carta'];
+const APPEARANCE_FIELDS = ['glyph', 'color', 'model', 'class', 'size'];
+const ITEM_FIELDS = ['id', 'name', 'description', 'category', 'weight', 'stack', 'tags', 'glyph', 'color', 'model', 'equippable', 'effects', 'container', 'module', 'bonus', 'slot', 'card'];
 const TILE_FIELDS = ['name', 'color', 'solid', 'speed', 'description', 'layer', 'indoor', 'model'];
-const RECIPE_FIELDS = ['id', 'name', 'inputs', 'tools', 'output', 'carta'];
-const RUNE_FIELDS = ['name', 'glyph', 'color', 'element', 'description', 'carta'];
-const SPELL_FIELDS = ['name', 'description', 'cost', 'carta'];
-const LAYOUT_FIELDS = ['name', 'description', 'carta'];
+const RECIPE_FIELDS = ['id', 'name', 'inputs', 'tools', 'output', 'card'];
+const RUNE_FIELDS = ['name', 'glyph', 'color', 'element', 'description', 'card'];
+const SPELL_FIELDS = ['name', 'description', 'cost', 'card'];
+const LAYOUT_FIELDS = ['name', 'description', 'card'];
 
 /** The fields of an object that are named here. */
 function only(o: unknown, keys: string[]): Record<string, unknown> {
@@ -84,7 +84,7 @@ function configShown(text: string | undefined, fields: string[], aiFields: strin
   const raw = parsed(text);
   if (!raw) return undefined;
   const ai = only(raw.ai, aiFields);
-  return JSON.stringify({ ...only(raw, fields), ...(raw.partita !== undefined ? { partita: only(raw.partita, GAME_FIELDS) } : {}), ...(Object.keys(ai).length ? { ai } : {}) }, null, 2) + '\n';
+  return JSON.stringify({ ...only(raw, fields), ...(raw.game !== undefined ? { game: only(raw.game, GAME_FIELDS) } : {}), ...(Object.keys(ai).length ? { ai } : {}) }, null, 2) + '\n';
 }
 
 /** Whether a file outside the modules and the settings is one a player's client has, as it is. */
@@ -154,7 +154,7 @@ function cutDown(text: string | undefined, list: string, keys: string[]): string
  */
 export function publicFiles(files: FileMap): FileMap {
   const out = playerFiles(files);
-  const config = configShown(files['universe.json'], [...UNIVERSE_FIELDS, 'eredita'], LOBBY_AI_FIELDS);
+  const config = configShown(files['universe.json'], [...UNIVERSE_FIELDS, 'heritage'], LOBBY_AI_FIELDS);
   if (config !== undefined) out['universe.json'] = config;
   for (const path of Object.keys(out)) {
     if (!path.endsWith('/manifest.json')) continue;
@@ -163,14 +163,14 @@ export function publicFiles(files: FileMap): FileMap {
   }
   if (files[CARDS_FILE] !== undefined) out[CARDS_FILE] = files[CARDS_FILE];
   const cut: Array<[string, string | undefined]> = [
-    ['world/people.json', cutDown(files['world/people.json'], 'persone', ['nome', 'tipo', 'origine', 'mestiere', 'carta'])],
-    ['world/plots.json', cutDown(files['world/plots.json'], 'trame', ['id', 'titolo', 'carta'])],
-    ['world/rules.json', cutDown(files['world/rules.json'], 'regole', ['chiave', 'testo', 'carta'])],
+    ['world/people.json', cutDown(files['world/people.json'], 'people', ['name', 'kind', 'origin', 'job', 'card'])],
+    ['world/plots.json', cutDown(files['world/plots.json'], 'plots', ['id', 'title', 'card'])],
+    ['world/rules.json', cutDown(files['world/rules.json'], 'rules', ['key', 'text', 'card'])],
   ];
   for (const [path, text] of cut) if (text !== undefined) out[path] = text;
   if (files['world/bible.json'] !== undefined) {
     try {
-      out['world/bible.json'] = JSON.stringify(only(JSON.parse(files['world/bible.json']), ['concetto', 'tema']));
+      out['world/bible.json'] = JSON.stringify(only(JSON.parse(files['world/bible.json']), ['concept', 'theme']));
     } catch {
       /* unreadable: nothing to say of the world */
     }

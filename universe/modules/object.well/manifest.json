@@ -15,7 +15,7 @@
     "model": "pozzo",
     "glyph": "Ö",
     "color": "#9aa6b8",
-    "aspetto": "un pozzo di pietra rotondo, acqua scura"
+    "look": "un pozzo di pietra rotondo, acqua scura"
   },
   "physics": {
     "solid": true,

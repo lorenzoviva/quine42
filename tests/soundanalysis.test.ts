@@ -11,8 +11,8 @@ import { renderSoundProgram, SAMPLE_RATE } from '../src/mj/synth';
 import { keptByTheAuthor } from './helpers';
 import { parseXml } from '../src/mj/xml';
 
-const presets = soundPrograms(bundledFiles).filter((p) => !p.suono);
-const inGame = soundPrograms(bundledFiles).filter((p) => p.suono);
+const presets = soundPrograms(bundledFiles).filter((p) => !p.sound);
+const inGame = soundPrograms(bundledFiles).filter((p) => p.sound);
 const BOX = 'size="16 3 8" symmetry="()"';
 const hits = (at: number[], y: number, z: number, color: string) => at.map((x) => `<box at="${x} ${y} ${z}" size="1 1 1" color="${color}"/>`).join('');
 
@@ -46,7 +46,7 @@ describe('the thresholds, on the presets', () => {
 
 describe('the thresholds, on the programs of the game (T228)', () => {
   it('are the pieces and the effects of the seed: seven and nine of T224, six, nineteen and the Death made again of Claude Cloud (T273)', () => {
-    expect(inGame.map((p) => p.suono!.uso).sort()).toEqual([...new Array(9 + 19 + 1).fill('effect'), ...new Array(7 + 6).fill('music')]);
+    expect(inGame.map((p) => p.sound!.use).sort()).toEqual([...new Array(9 + 19 + 1).fill('effect'), ...new Array(7 + 6).fill('music')]);
   });
 
   it.each(inGame.map((p) => [p.id, p.xml] as const))('%s passes, on the default seeds and on others, unless the author keeps it as it is', (id, xml) => {

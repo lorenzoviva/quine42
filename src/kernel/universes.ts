@@ -10,7 +10,8 @@ import { allowedPath } from './paths';
 import type { Author } from './repo';
 import { hashStr, hex } from './rng';
 import { runsOnThisKernel } from './version';
-import { migrateUniverse } from './migrations';
+import { migrateUniverse, MIGRATIONS } from './migrations';
+import { internalPath } from './internalNames';
 import type { ChunkRecord, ChunkStore } from './chunks';
 
 export interface PastCommit {
@@ -236,10 +237,32 @@ export function owedWrite(v: unknown): OwedWrite | undefined {
 /** A line left by a tab that closed is taken by the next page after this long without news of it (ms). */
 export const ORPHAN_LINE_MS = 2 * 60_000;
 
+/** The keys of the browser's line: `quine:owed:` since the contract 0.4 (T308a), `quine:fila:` before. */
+export const OWED_PREFIX = 'quine:owed:';
+export const OWED_PREFIX_BEFORE_0_4 = 'quine:fila:';
+
+const PORT_0_4 = MIGRATIONS.find((m) => m.from === '0.3' && m.to === '0.4');
+
+/** The files of a write left in line by a page of the contract 0.3: with the paths and the fields of 0.4 (a file gone keeps going). */
+function changesTo0_4(changes: Record<string, string | null>): Record<string, string | null> {
+  const texts: FileMap = Object.fromEntries(Object.entries(changes).filter((e): e is [string, string] => e[1] !== null));
+  const out: Record<string, string | null> = PORT_0_4 ? { ...PORT_0_4.migrate(texts) } : { ...texts };
+  for (const [p, v] of Object.entries(changes)) if (v === null) out[internalPath(p)] = null;
+  return out;
+}
+
+/** A write a page of before the contract 0.4 left in line, as this kernel writes it; a place's plan is ported when it is read. */
+export function owedTo0_4(w: OwedWrite): OwedWrite {
+  if (w.kind === 'commit') return { ...w, changes: changesTo0_4(w.changes) };
+  if (w.kind === 'branch') return { ...w, files: changesTo0_4(w.files) };
+  return w;
+}
+
 /**
- * The browser's line (T265): one key per tab and universe in localStorage, `quine:fila:<universo>:<scheda>`, the tab's id in its
+ * The browser's line (T265): one key per tab and universe in localStorage, `quine:owed:<universo>:<scheda>`, the tab's id in its
  * sessionStorage, so a reload finds its own line and two tabs never write each other's. A line whose tab gave no news for
- * `ORPHAN_LINE_MS` (closed, crashed) is taken by the next page of that universe. Undefined without storage.
+ * `ORPHAN_LINE_MS` (closed, crashed) is taken by the next page of that universe. A line under the key of before the contract 0.4
+ * (`quine:fila:`, T308a) is taken whatever its age, ported to 0.4, and its key goes. Undefined without storage.
  */
 export function browserOwedStorage(name: string, now: () => number = () => Date.now()): OwedStorage | undefined {
   const g = globalThis as { localStorage?: Storage; sessionStorage?: Storage; document?: unknown };
@@ -257,7 +280,8 @@ export function browserOwedStorage(name: string, now: () => number = () => Date.
   } catch {
     return undefined;
   }
-  const prefix = `quine:fila:${name}:`;
+  const prefix = `${OWED_PREFIX}${name}:`;
+  const before = `${OWED_PREFIX_BEFORE_0_4}${name}:`;
   const own = prefix + tab;
   const read = (key: string): { at: number; line: OwedWrite[] } | undefined => {
     try {
@@ -274,6 +298,13 @@ export function browserOwedStorage(name: string, now: () => number = () => Date.
       try {
         for (let i = 0; i < local.length; i++) {
           const key = local.key(i);
+          if (key?.startsWith(before)) {
+            const l = read(key);
+            if (l) lines.push({ at: l.at, line: l.line.map(owedTo0_4) });
+            local.removeItem(key);
+            i--;
+            continue;
+          }
           if (!key?.startsWith(prefix)) continue;
           const l = read(key);
           if (key === own) {

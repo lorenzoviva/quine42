@@ -230,7 +230,7 @@ export function assembleManifest(id: string, concept: Concept, physics: PhysicsS
     tags: concept.tags ?? [],
     origin,
     logic: 'logic.lua',
-    appearance: { glyph, color: `hsl(${hue} 65% 68%)`, aspetto: concept.aspetto, model: ownModelId(id), classe: classOf(internalName('classi', concept.classe ?? ''))?.id ?? guessClass(`${concept.nome} ${concept.aspetto}`, npc ? 'figure' : undefined).id, ...forgedSize(concept.taglia) },
+    appearance: { glyph, color: `hsl(${hue} 65% 68%)`, look: concept.aspetto, model: ownModelId(id), class: classOf(internalName('classi', concept.classe ?? ''))?.id ?? guessClass(`${concept.nome} ${concept.aspetto}`, npc ? 'figure' : undefined).id, ...forgedSize(concept.taglia) },
     physics: {
       solid: item ? false : !!physics.solido,
       radius: clamp(physics.raggio, 0.2, 0.5, 0.35),

@@ -8,58 +8,58 @@
   "order": 28,
   "ui": {
     "id": "cantiere",
-    "titolo": "Il cantiere",
-    "descrizione": "Il lavoro di molti più vicino: a che punto è, cosa manca, chi ci lavora.",
-    "elementi": [
+    "title": "Il cantiere",
+    "description": "Il lavoro di molti più vicino: a che punto è, cosa manca, chi ci lavora.",
+    "elements": [
       {
-        "tipo": "text",
-        "etichetta": "Che cosa",
-        "campo": "cantiere.titolo"
+        "type": "text",
+        "label": "Che cosa",
+        "field": "cantiere.titolo"
       },
       {
-        "tipo": "text",
-        "etichetta": "A che punto è",
-        "campo": "cantiere.fase"
+        "type": "text",
+        "label": "A che punto è",
+        "field": "cantiere.fase"
       },
       {
-        "tipo": "text",
-        "etichetta": "Come va",
-        "campo": "cantiere.stato"
+        "type": "text",
+        "label": "Come va",
+        "field": "cantiere.stato"
       },
       {
-        "tipo": "text",
-        "etichetta": "Cosa manca",
-        "campo": "cantiere.manca"
+        "type": "text",
+        "label": "Cosa manca",
+        "field": "cantiere.manca"
       },
       {
-        "tipo": "text",
-        "etichetta": "Chi ci lavora",
-        "campo": "cantiere.squadra"
+        "type": "text",
+        "label": "Chi ci lavora",
+        "field": "cantiere.squadra"
       },
       {
-        "tipo": "button",
+        "type": "button",
         "id": "porta",
-        "etichetta": "Porta ciò che serve"
+        "label": "Porta ciò che serve"
       }
     ]
   },
-  "casi": [
+  "cases": [
     {
-      "titolo": "Verso il lavoro",
-      "racconto": "Un contadino comincia la mattina: il primo compito è andare al lavoro, e ci cammina un punto della via alla volta (la meta la segue il vagabondaggio).",
-      "terreno": [
+      "title": "Verso il lavoro",
+      "story": "Un contadino comincia la mattina: il primo compito è andare al lavoro, e ci cammina un punto della via alla volta (la meta la segue il vagabondaggio).",
+      "terrain": [
         "ggggg",
         "ggggg",
         "ggggg",
         "ggggg",
         "ggggg"
       ],
-      "cose": [
+      "entities": [
         {
-          "modulo": "npc.villager",
+          "module": "npc.villager",
           "x": -2,
           "y": -2,
-          "componenti": {
+          "components": {
             "mestiere": {
               "id": "farmer",
               "fase": "morning",
@@ -78,13 +78,13 @@
           }
         }
       ],
-      "durata": 6,
-      "guarda": [
+      "duration": 6,
+      "watch": [
         "0:meta.x",
         "0:meta.y",
         "0:attivita.tipo"
       ],
-      "righe": [
+      "lines": [
         37,
         40,
         41,
@@ -98,21 +98,21 @@
       ]
     },
     {
-      "titolo": "A riposo",
-      "racconto": "Di notte, a casa, il compito è riposare: senza durata, resta fermo nella posa fino alla fine della fase.",
-      "terreno": [
+      "title": "A riposo",
+      "story": "Di notte, a casa, il compito è riposare: senza durata, resta fermo nella posa fino alla fine della fase.",
+      "terrain": [
         "ggggg",
         "ggggg",
         "ggggg",
         "ggggg",
         "ggggg"
       ],
-      "cose": [
+      "entities": [
         {
-          "modulo": "npc.villager",
+          "module": "npc.villager",
           "x": 0,
           "y": 0,
-          "componenti": {
+          "components": {
             "mestiere": {
               "id": "farmer",
               "fase": "night",
@@ -126,12 +126,12 @@
           }
         }
       ],
-      "durata": 2,
-      "guarda": [
+      "duration": 2,
+      "watch": [
         "0:attivita.tipo",
         "0:attivita.ferma"
       ],
-      "righe": [
+      "lines": [
         12,
         13,
         120,

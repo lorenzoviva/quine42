@@ -45,13 +45,13 @@ function clearArea(k: Kernel, width = 24) {
 
 async function bootWith(partita: Record<string, unknown>) {
   const cfg = JSON.parse(bundledFiles['universe.json']);
-  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita }, null, 2) };
+  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, game: partita }, null, 2) };
   const k = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
   await develop(k);
   return k;
 }
 
-const many = () => bootWith({ modalita: 'multiplayer', morte: 3 });
+const many = () => bootWith({ mode: 'multiplayer', death: 3 });
 
 /** How far a wanderer is from the centre of their circle. */
 const away = (k: Kernel, id: string) => k.as(id, () => Math.hypot(k.wandererPos().x, k.wandererPos().y));
@@ -75,20 +75,20 @@ describe('runes and bindings by role (T37)', () => {
   });
 
   it('the master is who created the multiplayer game; alone, everyone is', async () => {
-    expect(repairGameSetup({ modalita: 'multiplayer' }).master).toBe('io');
-    expect(repairGameSetup({ modalita: 'multiplayer', master: 'Bea!' }).master).toBe('io');
-    expect(repairGameSetup({ modalita: 'multiplayer', master: 'bea' }).master).toBe('bea');
+    expect(repairGameSetup({ mode: 'multiplayer' }).master).toBe('me');
+    expect(repairGameSetup({ mode: 'multiplayer', master: 'Bea!' }).master).toBe('me');
+    expect(repairGameSetup({ mode: 'multiplayer', master: 'bea' }).master).toBe('bea');
     expect(repairGameSetup({ master: 'bea' }).master).toBeUndefined();
     const k = await many();
     k.addWanderer('bea', 'Bea');
-    expect(k.isMaster('io')).toBe(true);
+    expect(k.isMaster('me')).toBe(true);
     expect(k.isMaster('bea')).toBe(false);
     expect(k.as('bea', () => k.isMaster())).toBe(false);
   });
 
   it('in a multiplayer game no place has runes of the carpet; alone the start still has speed = speed', async () => {
     const lines = (k: Kernel) => extractLines(k.ecs.query('rune').map((id) => ({ id, rune: k.ecs.get(id, 'rune') }))).map((l) => l.src);
-    const solo = await bootWith({ modalita: 'single' });
+    const solo = await bootWith({ mode: 'single' });
     const runes = (k: Kernel) => k.ecs.query('rune').map((id) => k.ecs.get(id, 'rune').token as string);
     expect(runes(solo)).toContain('speed');
     const k = await many();
@@ -113,12 +113,12 @@ describe('runes and bindings by role (T37)', () => {
     expect(k.faults.has('module:core.carpet:update')).toBe(false);
     expect(k.coronaRevealed()).toBe(false);
     // The same phrase written by the master moves the master.
-    write(k, 'io', ['x', '=', '9999']);
+    write(k, 'me', ['x', '=', '9999']);
     run(k, 0.5);
-    expect(away(k, 'io')).toBeGreaterThan(R);
+    expect(away(k, 'me')).toBeGreaterThan(R);
     // The master has the god mode and, out of the circle, the corona; back inside, not even they see it (T226).
-    expect(k.as('io', () => k.coronaRevealed())).toBe(true);
-    k.as('io', () => {
+    expect(k.as('me', () => k.coronaRevealed())).toBe(true);
+    k.as('me', () => {
       Object.assign(k.wandererPos(), { x: R - 1, y: 0 });
       expect(k.godMode()).toBe(true);
       expect(k.coronaRevealed()).toBe(false);
@@ -153,7 +153,7 @@ describe('runes and bindings by role (T37)', () => {
     let rolled = 0;
     k.bus.on('rollback', () => rolled++);
     write(k, 'bea', ['x', '=', '1']);
-    write(k, 'io', ['speed', '=', 'speed']);
+    write(k, 'me', ['speed', '=', 'speed']);
     const head = k.repo.head().id;
     k.as('bea', () => k.rollback());
     run(k, 2 / 60);
@@ -161,7 +161,7 @@ describe('runes and bindings by role (T37)', () => {
     expect(k.repo.head().id).toBe(head);
     expect(k.as('bea', () => k.phrase().tokens)).toEqual(['x', '=', '1']);
     const mine = k.ecs.query('rune').map((id) => k.ecs.get(id, 'rune')).filter((r) => r.source === 'player');
-    expect(mine.map((r) => r.by)).toEqual(['io', 'io', 'io']);
+    expect(mine.map((r) => r.by)).toEqual(['me', 'me', 'me']);
     // The master's rollback brings the world back, and every rune to whoever wrote it.
     write(k, 'bea', ['y', '=', '2']);
     k.rollback();
@@ -171,10 +171,10 @@ describe('runes and bindings by role (T37)', () => {
   });
 
   it('alone nothing changes: the wanderer’s x = 9999 still breaks out', async () => {
-    const k = await bootWith({ modalita: 'single' });
+    const k = await bootWith({ mode: 'single' });
     expect(k.isMaster()).toBe(true);
-    write(k, 'io', ['x', '=', '9999']);
+    write(k, 'me', ['x', '=', '9999']);
     run(k, 0.5);
-    expect(away(k, 'io')).toBeGreaterThan(k.config.circleRadius);
+    expect(away(k, 'me')).toBeGreaterThan(k.config.circleRadius);
   });
 });

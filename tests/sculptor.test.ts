@@ -96,7 +96,7 @@ describe('the models the world lacks', () => {
     expect(r.ok).toBe(true);
     const man = k.modules.get(r.id!)!.manifest;
     expect(man.appearance!.model).toBe(r.id!.replace(/\./g, '-'));
-    expect(man.appearance!.classe).toBe('person');
+    expect(man.appearance!.class).toBe('person');
     const missing = k.sculpting.missing();
     const req = missing.find((m) => m.id === man.appearance!.model)!;
     expect(req.classe).toBe('person');
@@ -105,7 +105,7 @@ describe('the models the world lacks', () => {
     expect((k.ecs.get(id, 'form') as FormComp).model).toBe('person');
     expect(await k.sculpting.make(req)).toBe(true);
     expect(k.repo.head().files[`models/${req.id}.xml`]).toContain('scolpito da');
-    expect(JSON.parse(k.repo.head().files['models/index.json']!)[req.id]).toMatchObject({ classe: 'person' });
+    expect(JSON.parse(k.repo.head().files['models/index.json']!)[req.id]).toMatchObject({ class: 'person' });
     expect(k.sculpting.missing().some((m) => m.id === req.id)).toBe(false);
     const again = k.spawnModuleEntity(k.modules.get(r.id!)!, 4.5, 2.5, undefined, 'test#mugnaio2');
     expect((k.ecs.get(again, 'form') as FormComp).model).toBe(req.id);
@@ -119,7 +119,7 @@ describe('the models the world lacks', () => {
     const req = k.sculpting.missing().find((m) => m.id === shaped[0].model)!;
     expect(req).toMatchObject({ classe: 'object', tinta: true });
     expect(await k.sculpting.make(req)).toBe(true);
-    expect(JSON.parse(k.repo.head().files['models/index.json']!)[req.id].tinta).toBe('C');
+    expect(JSON.parse(k.repo.head().files['models/index.json']!)[req.id].tint).toBe('C');
   }, 30_000);
 });
 
@@ -139,9 +139,9 @@ describe('the sizes of D&D (ADR-0092)', () => {
     expect(boxOf(grande, 'gargantuan')).toEqual([120, 120, 96]);
     expect(Math.max(...boxOf(grande, 'gargantuan'))).toBeLessThanOrEqual(MAX_SIDE);
     // The index entry says it, so the library runs the model in the box it was sculpted in.
-    expect(modelSize({ classe: 'structure', taglia: 'huge' })).toEqual({ taglia: 'huge', vpt: 16 });
+    expect(modelSize({ classe: 'structure', taglia: 'huge' })).toEqual({ size: 'huge', vpt: 16 });
     expect(modelSize({ classe: 'structure', taglia: 'large' })).toEqual({});
-    expect(modelSize({ classe: 'person', taglia: 'small' })).toEqual({ taglia: 'small' });
+    expect(modelSize({ classe: 'person', taglia: 'small' })).toEqual({ size: 'small' });
     // The Sculptor reads the size and the box.
     const text = describeRequest({ id: 'x', nome: 'la cittadella', aspetto: 'mura', classe: 'structure', taglia: 'huge' }, grande);
     expect(text).toContain('taglia Enorme (7.5 × 7.5 × 6 caselle, 16 voxel per casella)');

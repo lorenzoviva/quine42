@@ -17,7 +17,7 @@ const at = (n: number, phase: 'morning' | 'day' | 'evening' | 'night') => (n + {
 
 const PROGRAMS: JobProgram[] = Object.entries(bundledFiles)
   .filter(([p]) => /^modules\/job\.[^/]+\/manifest\.json$/.test(p))
-  .flatMap(([, src]) => JSON.parse(src).mestieri ?? []);
+  .flatMap(([, src]) => JSON.parse(src).jobs ?? []);
 
 let k: Kernel;
 const spawned: number[] = [];
@@ -86,7 +86,7 @@ const placeOf = (id: number): string => {
   const S = k.config.chunkSize;
   return `${Math.floor(p.x / S)},${Math.floor(p.y / S)}`;
 };
-const tasks = (id: number) => (k.ecs.get(id, 'mestiere')?.compiti ?? []).map((t: { fa: string }) => t.fa);
+const tasks = (id: number) => (k.ecs.get(id, 'mestiere')?.compiti ?? []).map((t: { does: string }) => t.does);
 
 /** What the deposit of the place of `id` holds of an item; `set` fills it as a day of other trades would. */
 function deposit(id: number, item: string, set?: number): number {
@@ -104,7 +104,7 @@ describe('the programs of the seed', () => {
     for (const [trade, id] of [['fornaia', 'cook'], ['chef', 'cook'], ['maniscalco', 'smith'], ['meccanica', 'smith'], ['locandiera', 'innkeeper'], ['barista', 'innkeeper'], ['gendarme', 'guard'], ['poliziotta', 'guard'], ['copista', 'scribe'], ['giornalista', 'scribe'], ['monaca', 'priest'], ['sciamano', 'priest'], ['rigattiere', 'merchant'], ['commessa', 'clerk'], ['funzionario del catasto', 'clerk'], ['capraio', 'shepherd']])
       expect(matchJob(trade, PROGRAMS)?.id, trade).toBe(id);
     // No name in two programs: who has it would not know which day is theirs.
-    const names = PROGRAMS.flatMap((p) => p.nomi);
+    const names = PROGRAMS.flatMap((p) => p.names);
     expect(new Set(names).size).toBe(names.length);
   });
 

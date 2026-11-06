@@ -24,7 +24,7 @@ export interface ComposeRequest {
   richiesta: string;
   /** What the kernel has already decided: the Musician's answer does not move it. */
   nome?: string;
-  uso?: SoundPurpose['uso'];
+  uso?: SoundPurpose['use'];
   ambienti?: string[];
   momenti?: string[];
   /** What it is for: the environment's description, the place. */
@@ -70,15 +70,15 @@ const COMPOSE_SCHEMA: Schema = {
 };
 
 /** Hand-written programs to learn from, by use: the first the universe still has. */
-const LEARN_FROM: Record<SoundPurpose['uso'], string[]> = {
+const LEARN_FROM: Record<SoundPurpose['use'], string[]> = {
   music: ['sound-music-stone', 'sound-music-sunset', 'sound-music-woods'],
   effect: ['sound-effect-item', 'sound-effect-rune', 'sound-effect-spell'],
 };
 
 /** One program of the library to learn from. */
-export function soundExample(files: FileMap, uso: SoundPurpose['uso']): string | undefined {
+export function soundExample(files: FileMap, uso: SoundPurpose['use']): string | undefined {
   const known = LEARN_FROM[uso].map((id) => files[`models/${id}.xml`]).find(Boolean);
-  return (known ?? soundPrograms(files).find((p) => p.suono?.uso === uso)?.xml)?.trim();
+  return (known ?? soundPrograms(files).find((p) => p.sound?.use === uso)?.xml)?.trim();
 }
 
 /** The Musician's instructions (prompts/agents/musician.md) with the scales, the instruments and the thresholds of today. */
@@ -107,18 +107,18 @@ export function purposeOf(a: Answer, req: ComposeRequest, world: ComposeWorld): 
   if (uso === 'effect') {
     const effect = typeof a.effetto === 'string' ? a.effetto.trim() : '';
     if (!world.effetti.includes(effect)) return { error: `un effetto risponde a un momento del gioco: "effetto" è uno tra ${world.effetti.join(', ')}` };
-    return { suono: { uso, effetti: [effect] } };
+    return { suono: { use: uso, effects: [effect] } };
   }
   // An environment of the seed by its Italian id of the contract 0.1 is the one it became (T307a, until the prompts change, T310).
   const named = req.ambienti ?? stringsIn(Array.isArray(a.ambienti) ? a.ambienti.map((x) => (typeof x === 'string' && !world.ambienti.includes(x) ? internalName('ambienti', x) : x)) : a.ambienti, world.ambienti);
   const ambienti = !named.length && world.qui ? [world.qui] : named;
   if (!ambienti.length) return { error: `"ambienti" nomina almeno uno tra ${world.ambienti.join(', ')}` };
   const momenti = req.momenti ?? stringsIn(Array.isArray(a.momenti) ? a.momenti.map((x) => (typeof x === 'string' ? internalName('momenti', x) : x)) : a.momenti, DAY_PHASES);
-  return { suono: { uso, ambienti, ...(momenti.length ? { momenti } : {}) } };
+  return { suono: { use: uso, environments: ambienti, ...(momenti.length ? { moments: momenti } : {}) } };
 }
 
 /** What sends a program back, or nothing: the validator of every model, and what only a program of the Council must respect. */
-export function scoreErrors(path: string, xml: string, nome: string, uso: SoundPurpose['uso'], words: string[] = []): string[] {
+export function scoreErrors(path: string, xml: string, nome: string, uso: SoundPurpose['use'], words: string[] = []): string[] {
   if (!/<sound\b/.test(xml)) return ['manca <sound> nella radice: senza, il programma è un modello e non suona'];
   const broken = [nome, ...namesIn(xml)].flatMap((n) => {
     const m = metaBreak(n, words);
@@ -170,7 +170,7 @@ export async function compose(c: Council, req: ComposeRequest, world: ComposeWor
     const xml = typeof a.programma === 'string' ? a.programma.trim() : '';
     const nome = req.nome ?? (typeof a.nome === 'string' ? a.nome.trim() : '');
     const { suono, error } = purposeOf(a, req, world);
-    const errors = error ? [error] : !nome ? ['manca "nome"'] : scoreErrors('models/sound-test.xml', xml, nome, suono!.uso, words);
+    const errors = error ? [error] : !nome ? ['manca "nome"'] : scoreErrors('models/sound-test.xml', xml, nome, suono!.use, words);
     if (!errors.length) return { nome, xml, suono: suono!, model, calls };
     last = { xml, error: errors.join('; ') };
     c.say('kernel', 'scarta', `«${nome || 'brano'}»: ${last.error.slice(0, 160)}`, 'musician', COMPOSE_TASK);

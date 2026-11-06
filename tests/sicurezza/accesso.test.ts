@@ -51,13 +51,13 @@ const at = (n: string, ...p: string[]) => path.join(dir, n, ...p);
 function universe(name: string, partita: object | undefined, more: Record<string, string> = {}): void {
   const files: Record<string, string> = {
     'universe.json': JSON.stringify({ name, ...(partita ? { partita } : {}) }),
-    'modules/sonda/manifest.json': JSON.stringify({ id: 'sonda', name: 'Sonda', kind: 'entity', logic: 'logic.lua', carta: { autore: 'a', pagante: 'b', titolare: 'altro' } }),
+    'modules/sonda/manifest.json': JSON.stringify({ id: 'sonda', name: 'Sonda', kind: 'entity', logic: 'logic.lua', card: { author: 'a', payer: 'b', holder: 'altro' } }),
     'modules/sonda/logic.lua': 'return {}\n',
     'prompts/theme.md': 'segreto del tema\n',
-    'world/giocatori/altro.json': JSON.stringify({ nome: 'Altro', crediti: 5 }),
-    'world/consumi.json': '{}',
-    'world/bible.json': JSON.stringify({ concetto: 'Un borgo.', misteri: ['segreto della bibbia'] }),
-    'world/people.json': JSON.stringify({ persone: [{ nome: 'Mirella', tipo: 'npc.contadina', mestiere: 'contadina', storia: 'segreto di Mirella', ricordi: [{ testo: 'segreto' }], carta: { autore: 'a', pagante: 'b', titolare: 'altro' } }] }),
+    'world/players/altro.json': JSON.stringify({ nome: 'Altro', crediti: 5 }),
+    'world/usage.json': '{}',
+    'world/bible.json': JSON.stringify({ concept: 'Un borgo.', mysteries: ['segreto della bibbia'] }),
+    'world/people.json': JSON.stringify({ persone: [{ nome: 'Mirella', tipo: 'npc.contadina', mestiere: 'contadina', storia: 'segreto di Mirella', ricordi: [{ testo: 'segreto' }], card: { author: 'a', payer: 'b', holder: 'altro' } }] }),
     ...more,
   };
   for (const [rel, text] of Object.entries(files)) {
@@ -84,7 +84,7 @@ let withAccounts: Awaited<ReturnType<typeof serve>>;
 
 beforeAll(async () => {
   dir = mkdtempSync(path.join(os.tmpdir(), 'quine-accesso-'));
-  for (const n of ['molti', 'fatto', 'molti-account', 'mondo']) universe(n, { modalita: 'multiplayer', master: 'io' });
+  for (const n of ['molti', 'fatto', 'molti-account', 'mondo']) universe(n, { mode: 'multiplayer', master: 'me' });
   universe('solo', undefined);
   local = await serve(universeStore(dir, { internal: INTERNAL }));
   withAccounts = await serve(universeStore(dir, { accounts, internal: INTERNAL }));
@@ -118,24 +118,24 @@ describe('V-001 chi scrive su un universo in multigiocatore', () => {
     });
 
     it(`V-001 ${op}: rifiutato con un account che non è il master, con un anonimo e senza account`, async () => {
-      for (const headers of [{}, { Authorization: 'Bearer altro' }, { Authorization: 'Bearer anon' }, { [WANDERER_HEADER]: 'io' }] as Array<Record<string, string>>) expect((await asked(withAccounts.base, method, url('molti-account'), body, headers)).status).toBe(403);
+      for (const headers of [{}, { Authorization: 'Bearer altro' }, { Authorization: 'Bearer anon' }, { [WANDERER_HEADER]: 'me' }] as Array<Record<string, string>>) expect((await asked(withAccounts.base, method, url('molti-account'), body, headers)).status).toBe(403);
       expect((await asked(withAccounts.base, method, url('molti-account'), body, { Authorization: 'Bearer falso' })).status).toBe(401);
       expect(untouched('molti-account')).toBe(true);
     });
 
     it(`V-001 ${op}: da fuori, senza account, non passa nemmeno chi dice di essere il master`, async () => {
-      expect((await asked(local.base, method, url('molti'), body, { ...OUTSIDE, [WANDERER_HEADER]: 'io' })).status).toBe(403);
+      expect((await asked(local.base, method, url('molti'), body, { ...OUTSIDE, [WANDERER_HEADER]: 'me' })).status).toBe(403);
       expect(untouched('molti')).toBe(true);
     });
   }
 
   it('V-001 il master scrive il Lua e il mondo del server anche, ma i saldi solo il mondo', async () => {
-    expect((await asked(local.base, 'POST', 'fatto/commit', commitLua('master'), { [WANDERER_HEADER]: 'io' })).status).toBe(200);
+    expect((await asked(local.base, 'POST', 'fatto/commit', commitLua('master'), { [WANDERER_HEADER]: 'me' })).status).toBe(200);
     expect(logicOf('fatto')).toContain('master');
     expect((await asked(local.base, 'POST', 'fatto/commit', commitLua('mondo'), { [INTERNAL_HEADER]: worldToken(INTERNAL, 'fatto') })).status).toBe(200);
     expect(logicOf('fatto')).toContain('mondo');
-    const saldo = { changes: { 'world/giocatori/altro.json': JSON.stringify({ nome: 'Altro', crediti: 999 }) }, message: 'x' };
-    expect((await asked(local.base, 'POST', 'fatto/commit', saldo, { [WANDERER_HEADER]: 'io' })).status).toBe(403);
+    const saldo = { changes: { 'world/players/altro.json': JSON.stringify({ nome: 'Altro', crediti: 999 }) }, message: 'x' };
+    expect((await asked(local.base, 'POST', 'fatto/commit', saldo, { [WANDERER_HEADER]: 'me' })).status).toBe(403);
     expect(saldoOf('fatto')).toBe(5);
     // Not even the world's commit makes a balance: a file is not where they are (ADR-0104).
     expect((await asked(local.base, 'POST', 'fatto/commit', saldo, { [INTERNAL_HEADER]: worldToken(INTERNAL, 'fatto') })).status).toBe(200);
@@ -144,7 +144,7 @@ describe('V-001 chi scrive su un universo in multigiocatore', () => {
     // A world's token opens its universe, not another's; the secret it is made from is not a token; and a world does not clone (ADR-0110).
     expect((await asked(local.base, 'POST', 'fatto/commit', commitLua('altrui'), { [INTERNAL_HEADER]: worldToken(INTERNAL, 'molti') })).status).toBe(403);
     expect((await asked(local.base, 'POST', 'fatto/commit', commitLua('segreto'), { [INTERNAL_HEADER]: INTERNAL })).status).toBe(403);
-    expect((await asked(local.base, 'POST', 'fatto/clone', { nome: 'clone-del-mondo', master: 'io' }, { [INTERNAL_HEADER]: worldToken(INTERNAL, 'fatto') })).status).toBe(403);
+    expect((await asked(local.base, 'POST', 'fatto/clone', { nome: 'clone-del-mondo', master: 'me' }, { [INTERNAL_HEADER]: worldToken(INTERNAL, 'fatto') })).status).toBe(403);
     expect(existsSync(at('clone-del-mondo'))).toBe(false);
   });
 
@@ -154,13 +154,13 @@ describe('V-001 chi scrive su un universo in multigiocatore', () => {
   });
 
   it('V-001 un clone lo fa solo il master, e il nuovo master non è chi lo fa', async () => {
-    const r = await asked(local.base, 'POST', 'fatto/clone', { nome: 'clone-buono', master: 'anna' }, { [WANDERER_HEADER]: 'io' });
+    const r = await asked(local.base, 'POST', 'fatto/clone', { nome: 'clone-buono', master: 'anna' }, { [WANDERER_HEADER]: 'me' });
     expect(r.status).toBe(200);
-    expect(JSON.parse(readFileSync(at('clone-buono', 'universe.json'), 'utf8')).partita.master).toBe('anna');
+    expect(JSON.parse(readFileSync(at('clone-buono', 'universe.json'), 'utf8')).game.master).toBe('anna');
   });
 
   it('V-001 un\'altra origine e un corpo che non è JSON non scrivono, nemmeno per il master', async () => {
-    const master = { [WANDERER_HEADER]: 'io' };
+    const master = { [WANDERER_HEADER]: 'me' };
     expect((await asked(local.base, 'POST', 'fatto/commit', commitLua('altra-origine'), { ...master, Origin: 'http://altro.example' })).status).toBe(403);
     expect((await asked(local.base, 'POST', 'fatto/commit', commitLua('testo'), { ...master, 'Content-Type': 'text/plain' })).status).toBe(415);
     const put = await fetch(`${local.base}/api/universe/fatto/map/8_8`, { method: 'PUT', headers: { ...master, 'Content-Type': 'text/plain' }, body: '{}' });
@@ -174,32 +174,32 @@ describe('V-001 chi scrive su un universo in multigiocatore', () => {
 });
 
 describe('V-001 fare un universo', () => {
-  const many = (master: string) => ({ files: { 'universe.json': JSON.stringify({ name: 'x', partita: { modalita: 'multiplayer', master } }), 'world/giocatori/io.json': JSON.stringify({ crediti: 1000 }) }, message: 'x' });
+  const many = (master: string) => ({ files: { 'universe.json': JSON.stringify({ name: 'x', game: { mode: 'multiplayer', master } }), 'world/players/me.json': JSON.stringify({ crediti: 1000 }) }, message: 'x' });
 
   it('V-001 in multigiocatore non si fa senza identità, né da anonimi, né da fuori senza account', async () => {
     expect((await asked(local.base, 'POST', 'nuovo-a/create', many('intruso'), {})).status).toBe(403);
     expect((await asked(withAccounts.base, 'POST', 'nuovo-a/create', many('intruso'), { Authorization: 'Bearer anon' })).status).toBe(403);
-    expect((await asked(local.base, 'POST', 'nuovo-a/create', many('intruso'), { ...OUTSIDE, [WANDERER_HEADER]: 'io' })).status).toBe(403);
+    expect((await asked(local.base, 'POST', 'nuovo-a/create', many('intruso'), { ...OUTSIDE, [WANDERER_HEADER]: 'me' })).status).toBe(403);
     expect(existsSync(at('nuovo-a'))).toBe(false);
   });
 
   it('V-001 il master è chi lo fa, non ciò che dicono i file, e non porta saldi', async () => {
     expect((await asked(withAccounts.base, 'POST', 'nuovo-b/create', many('intruso'), { Authorization: 'Bearer altro', ...OUTSIDE })).status).toBe(200);
-    expect(JSON.parse(readFileSync(at('nuovo-b', 'universe.json'), 'utf8')).partita.master).toBe(accountWanderer(GOOGLE_OTHER));
-    expect(existsSync(at('nuovo-b', 'world', 'giocatori', 'io.json'))).toBe(false);
-    expect((await asked(local.base, 'POST', 'nuovo-c/create', many('intruso'), { [WANDERER_HEADER]: 'io' })).status).toBe(200);
-    expect(JSON.parse(readFileSync(at('nuovo-c', 'universe.json'), 'utf8')).partita.master).toBe('io');
+    expect(JSON.parse(readFileSync(at('nuovo-b', 'universe.json'), 'utf8')).game.master).toBe(accountWanderer(GOOGLE_OTHER));
+    expect(existsSync(at('nuovo-b', 'world', 'players', 'me.json'))).toBe(false);
+    expect((await asked(local.base, 'POST', 'nuovo-c/create', many('intruso'), { [WANDERER_HEADER]: 'me' })).status).toBe(200);
+    expect(JSON.parse(readFileSync(at('nuovo-c', 'universe.json'), 'utf8')).game.master).toBe('me');
   });
 
   it('V-001 da fuori con un account un universo è sempre in multigiocatore', async () => {
     const alone = { files: { 'universe.json': JSON.stringify({ name: 'x' }) }, message: 'x' };
     expect((await asked(withAccounts.base, 'POST', 'nuovo-d/create', alone, { Authorization: 'Bearer altro', ...OUTSIDE })).status).toBe(200);
-    expect(JSON.parse(readFileSync(at('nuovo-d', 'universe.json'), 'utf8')).partita).toMatchObject({ modalita: 'multiplayer', master: accountWanderer(GOOGLE_OTHER) });
+    expect(JSON.parse(readFileSync(at('nuovo-d', 'universe.json'), 'utf8')).game).toMatchObject({ mode: 'multiplayer', master: accountWanderer(GOOGLE_OTHER) });
   });
 });
 
 describe('V-001 chi legge', () => {
-  const SECRETS = ['modules/sonda/logic.lua', 'prompts/theme.md', 'world/giocatori/altro.json', 'world/consumi.json'];
+  const SECRETS = ['modules/sonda/logic.lua', 'prompts/theme.md', 'world/players/altro.json', 'world/usage.json'];
 
   it('V-001 un non master legge solo ciò che è pubblico, e niente storia', async () => {
     for (const [base, headers] of [[local.base, {}], [local.base, { [WANDERER_HEADER]: 'altro' }], [withAccounts.base, { Authorization: 'Bearer altro' }]] as Array<[string, Record<string, string>]>) {
@@ -209,14 +209,14 @@ describe('V-001 chi legge', () => {
       expect(JSON.stringify(snap.files)).not.toContain('segreto');
       expect(snap.log).toBeUndefined();
       // What the hub and the lobby show.
-      expect(JSON.parse(snap.files['universe.json']).partita.modalita).toBe('multiplayer');
-      expect(JSON.parse(snap.files['world/bible.json']).concetto).toBe('Un borgo.');
-      expect(JSON.parse(snap.files['world/people.json']).persone[0].mestiere).toBe('contadina');
+      expect(JSON.parse(snap.files['universe.json']).game.mode).toBe('multiplayer');
+      expect(JSON.parse(snap.files['world/bible.json']).concept).toBe('Un borgo.');
+      expect(JSON.parse(snap.files['world/people.json']).people[0].job).toBe('contadina');
     }
   });
 
   it('V-001 il master e il mondo leggono tutto', async () => {
-    for (const headers of [{ [WANDERER_HEADER]: 'io' }, { [INTERNAL_HEADER]: worldToken(INTERNAL, 'molti') }] as Array<Record<string, string>>) {
+    for (const headers of [{ [WANDERER_HEADER]: 'me' }, { [INTERNAL_HEADER]: worldToken(INTERNAL, 'molti') }] as Array<Record<string, string>>) {
       const snap = (await (await asked(local.base, 'GET', 'molti', undefined, headers)).json()) as { files: Record<string, string>; log?: unknown[] };
       for (const p of SECRETS) expect(snap.files[p], p).toBeDefined();
       expect(snap.log?.length).toBeGreaterThan(0);
@@ -226,14 +226,14 @@ describe('V-001 chi legge', () => {
   it('V-001 i piani, l\'elenco dei luoghi e il ramo sono del master', async () => {
     for (const p of ['molti/maps', 'molti/map/0_0', 'molti/branch/master']) {
       expect((await asked(local.base, 'GET', p, undefined, {})).status, p).toBe(403);
-      expect((await asked(local.base, 'GET', p, undefined, { [WANDERER_HEADER]: 'io' })).status, p).not.toBe(403);
+      expect((await asked(local.base, 'GET', p, undefined, { [WANDERER_HEADER]: 'me' })).status, p).not.toBe(403);
     }
   });
 
   it('V-001 le carte si misurano sul server: stesse impronte, senza il codice', async () => {
-    const r = (await (await asked(local.base, 'GET', 'molti/carte', undefined, {})).json()) as { carte: Array<{ id: string; impronta?: number[]; titolare: string }>; files: Record<string, string> };
+    const r = (await (await asked(local.base, 'GET', 'molti/carte', undefined, {})).json()) as { carte: Array<{ id: string; fingerprint?: number[]; holder: string }>; files: Record<string, string> };
     expect(r.carte.map((c) => c.id)).toEqual(expect.arrayContaining(['kind:sonda', 'individual:mirella']));
-    expect(r.carte.find((c) => c.id === 'kind:sonda')?.impronta?.length).toBeGreaterThan(0);
+    expect(r.carte.find((c) => c.id === 'kind:sonda')?.fingerprint?.length).toBeGreaterThan(0);
     for (const p of SECRETS) expect(r.files[p], p).toBeUndefined();
     expect(JSON.stringify(r)).not.toContain('segreto');
   });
@@ -352,7 +352,7 @@ describe('V-006 la sessione', () => {
 
   async function world(opts: ConstructorParameters<typeof SessionServer>[1] = {}) {
     const cfg = JSON.parse(bundledFiles['universe.json']);
-    const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2) };
+    const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, game: { mode: 'multiplayer', death: 3 } }, null, 2) };
     const kernel = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
     return { kernel, server: new SessionServer(kernel, opts) };
   }
@@ -369,7 +369,7 @@ describe('V-006 la sessione', () => {
 
   it('V-006 con un verificatore l\'id detto non conta: il master non lo diventa nessuno dicendolo', async () => {
     const { server } = await world({ verify: accounts.verify });
-    const { got } = client(server, { id: 'io', token: 'altro' });
+    const { got } = client(server, { id: 'me', token: 'altro' });
     await new Promise((r) => setTimeout(r, 10));
     const ingresso = got.find((m) => m.t === 'ingresso');
     expect(ingresso?.id).toBe(accountWanderer(GOOGLE_OTHER));
@@ -378,7 +378,7 @@ describe('V-006 la sessione', () => {
 
   it('V-006 senza token, con un verificatore, non si entra', async () => {
     const { server } = await world({ verify: accounts.verify });
-    const { got } = client(server, { id: 'io' });
+    const { got } = client(server, { id: 'me' });
     await new Promise((r) => setTimeout(r, 10));
     expect(got.find((m) => m.t === 'ingresso')).toBeUndefined();
     expect(got.find((m) => m.t === 'rifiuto')).toBeTruthy();
@@ -416,13 +416,13 @@ describe('V-006 la sessione', () => {
       { t: 'ramo', files: { 'modules/core.movement/logic.lua': lua }, base: {} },
       { t: 'pubblica' },
       { t: 'agente', agente: 'engineer', testo: lua },
-      { t: 'segui', id: 'io' },
+      { t: 'segui', id: 'me' },
       { t: 'frase', tokens: [MARK, 'x', '=', '1'] },
       { t: 'incidi' },
       { t: 'pronuncia' },
       { t: 'profilo', profilo: { nome: MARK, presentazione: lua, logic: lua } },
-      { t: 'dici', viandante: 'io', testo: lua },
-      { t: 'dai', viandante: 'io', slot: 0 },
+      { t: 'dici', viandante: 'me', testo: lua },
+      { t: 'dai', viandante: 'me', slot: 0 },
       { t: 'oggetto', op: 'azione', slot: 0, azione: lua },
       { t: 'contenitore', op: 'apri', entita: 1, slot: 0 },
       { t: 'pannello', op: 'pulsante', pannello: 'core.movement', posto: lua, azione: lua, slot: 0 },

@@ -6,12 +6,12 @@
   "description": "Fame, sete ed energia calano col tempo; se fame o sete arrivano a zero cala la salute. Il mana torna piano da solo. A zero salute il viandante muore e la simulazione lo rimette in piedi.",
   "logic": "logic.lua",
   "order": 40,
-  "casi": [
+  "cases": [
     {
-      "titolo": "Senza mangiare",
-      "racconto": "Al viandante resta un boccone di fame: finita quella, la salute comincia a calare. La sete scende più in fretta della fame.",
-      "viandante": {
-        "componenti": {
+      "title": "Senza mangiare",
+      "story": "Al viandante resta un boccone di fame: finita quella, la salute comincia a calare. La sete scende più in fretta della fame.",
+      "wanderer": {
+        "components": {
           "needs": {
             "hunger": 1,
             "thirst": 40,
@@ -20,13 +20,13 @@
           }
         }
       },
-      "durata": 12,
-      "guarda": [
+      "duration": 12,
+      "watch": [
         "needs.hunger",
         "needs.thirst",
         "needs.health"
       ],
-      "righe": [
+      "lines": [
         4,
         10,
         11,
@@ -35,10 +35,10 @@
       ]
     },
     {
-      "titolo": "Sazio e dissetato",
-      "racconto": "Con fame e sete sopra la metà la salute torna, piano; il mana torna da solo.",
-      "viandante": {
-        "componenti": {
+      "title": "Sazio e dissetato",
+      "story": "Con fame e sete sopra la metà la salute torna, piano; il mana torna da solo.",
+      "wanderer": {
+        "components": {
           "needs": {
             "hunger": 90,
             "thirst": 90,
@@ -48,23 +48,23 @@
           }
         }
       },
-      "durata": 10,
-      "guarda": [
+      "duration": 10,
+      "watch": [
         "needs.health",
         "needs.mana",
         "needs.thirst"
       ],
-      "righe": [
+      "lines": [
         15,
         16,
         19
       ]
     },
     {
-      "titolo": "Camminare stanca",
-      "racconto": "Il viandante cammina avanti e indietro: sete ed energia calano più in fretta (la fatica), la fame no.",
-      "viandante": {
-        "componenti": {
+      "title": "Camminare stanca",
+      "story": "Il viandante cammina avanti e indietro: sete ed energia calano più in fretta (la fatica), la fame no.",
+      "wanderer": {
+        "components": {
           "needs": {
             "hunger": 80,
             "thirst": 80,
@@ -73,55 +73,55 @@
           }
         }
       },
-      "passi": [
+      "steps": [
         {
-          "tipo": "walk",
-          "verso": "right",
-          "secondi": 0.35
+          "type": "walk",
+          "toward": "right",
+          "seconds": 0.35
         },
         {
-          "tipo": "walk",
-          "verso": "left",
-          "secondi": 0.35
+          "type": "walk",
+          "toward": "left",
+          "seconds": 0.35
         },
         {
-          "tipo": "walk",
-          "verso": "right",
-          "secondi": 0.35
+          "type": "walk",
+          "toward": "right",
+          "seconds": 0.35
         },
         {
-          "tipo": "walk",
-          "verso": "left",
-          "secondi": 0.35
+          "type": "walk",
+          "toward": "left",
+          "seconds": 0.35
         },
         {
-          "tipo": "walk",
-          "verso": "right",
-          "secondi": 0.35
+          "type": "walk",
+          "toward": "right",
+          "seconds": 0.35
         },
         {
-          "tipo": "walk",
-          "verso": "left",
-          "secondi": 0.35
+          "type": "walk",
+          "toward": "left",
+          "seconds": 0.35
         },
         {
-          "tipo": "walk",
-          "verso": "right",
-          "secondi": 0.35
+          "type": "walk",
+          "toward": "right",
+          "seconds": 0.35
         },
         {
-          "tipo": "walk",
-          "verso": "left",
-          "secondi": 0.35
+          "type": "walk",
+          "toward": "left",
+          "seconds": 0.35
         }
       ],
-      "durata": 0.5,
-      "guarda": [
+      "duration": 0.5,
+      "watch": [
         "needs.thirst",
         "needs.energy",
         "needs.hunger"
       ],
-      "righe": [
+      "lines": [
         8,
         9,
         11,

@@ -4,10 +4,10 @@
   "kind": "data",
   "version": "0.1.0",
   "description": "La giornata di chi tiene d’occhio il luogo: un giro fra la piazza e le case, di giorno e di sera.",
-  "mestieri": [
+  "jobs": [
     {
       "id": "guard",
-      "nomi": [
+      "names": [
         "guardia",
         "sentinella",
         "poliziotto",
@@ -22,47 +22,47 @@
         "sceriffo",
         "ronda"
       ],
-      "giornata": {
+      "day": {
         "morning": [
           {
-            "fa": "go",
-            "dove": "square"
+            "does": "go",
+            "where": "square"
           },
           {
-            "fa": "wait",
-            "durata": 30,
-            "posa": "patrol"
+            "does": "wait",
+            "duration": 30,
+            "pose": "patrol"
           }
         ],
         "day": [
           {
-            "fa": "patrol",
-            "percorso": [
+            "does": "patrol",
+            "route": [
               "square",
               "work",
               "home"
             ],
-            "posa": "patrol"
+            "pose": "patrol"
           }
         ],
         "evening": [
           {
-            "fa": "patrol",
-            "percorso": [
+            "does": "patrol",
+            "route": [
               "square",
               "home"
             ],
-            "posa": "patrol",
-            "dice": "Tutto tranquillo."
+            "pose": "patrol",
+            "says": "Tutto tranquillo."
           }
         ],
         "night": [
           {
-            "fa": "go",
-            "dove": "home"
+            "does": "go",
+            "where": "home"
           },
           {
-            "fa": "rest"
+            "does": "rest"
           }
         ]
       }

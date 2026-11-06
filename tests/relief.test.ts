@@ -267,7 +267,7 @@ describe('the kernel on the relief', () => {
     expect(crossings).toBeGreaterThan(0);
     // The pond grows over the whole east place, down to its lowest tile: the west half, its tiles the same,
     // goes down with it and is drawn again.
-    k.config.rilievo = { mare: 0 };
+    k.config.relief = { sea: 0 };
     const pond = k.groundAt(S - 1, 6);
     const low = Math.min(pond / LEVEL, ...Array.from({ length: S * S }, (_, i) => k.relief.level(S + (i % S), Math.floor(i / S))));
     east.tiles = water.repeat(S * S);

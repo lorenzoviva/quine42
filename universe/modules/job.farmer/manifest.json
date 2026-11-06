@@ -18,10 +18,10 @@
       ]
     }
   ],
-  "mestieri": [
+  "jobs": [
     {
       "id": "farmer",
-      "nomi": [
+      "names": [
         "contadino",
         "contadina",
         "bracciante",
@@ -36,67 +36,67 @@
         "coltivatore",
         "coltivatrice"
       ],
-      "posto": {
-        "casella": "m"
+      "workplace": {
+        "tile": "m"
       },
-      "giornata": {
+      "day": {
         "morning": [
           {
-            "fa": "go",
-            "dove": "work"
+            "does": "go",
+            "where": "work"
           },
           {
-            "fa": "transform",
-            "da": "g",
-            "a": "m",
-            "quante": 2,
-            "durata": 10,
-            "posa": "hoe",
-            "dice": "Terra dura, stamattina."
+            "does": "transform",
+            "from": "g",
+            "to": "m",
+            "count": 2,
+            "duration": 10,
+            "pose": "hoe",
+            "says": "Terra dura, stamattina."
           }
         ],
         "day": [
           {
-            "fa": "transform",
-            "da": "m",
-            "a": "e",
-            "quante": 3,
-            "durata": 8,
-            "posa": "hoe"
+            "does": "transform",
+            "from": "m",
+            "to": "e",
+            "count": 3,
+            "duration": 8,
+            "pose": "hoe"
           },
           {
-            "fa": "gather",
-            "casella": "u",
-            "oggetto": "item.grano",
-            "lascia": "m",
-            "quante": 3,
-            "durata": 8,
-            "posa": "hoe",
-            "dice": "Questo è pronto."
+            "does": "gather",
+            "tile": "u",
+            "item": "item.grano",
+            "drop": "m",
+            "count": 3,
+            "duration": 8,
+            "pose": "hoe",
+            "says": "Questo è pronto."
           }
         ],
         "evening": [
           {
-            "fa": "go",
-            "dove": "square"
+            "does": "go",
+            "where": "square"
           },
           {
-            "fa": "carry",
-            "oggetto": "item.grano",
-            "dove": "square",
-            "dice": "Il grano di oggi, al deposito."
+            "does": "carry",
+            "item": "item.grano",
+            "where": "square",
+            "says": "Il grano di oggi, al deposito."
           },
           {
-            "fa": "chat"
+            "does": "chat"
           }
         ],
         "night": [
           {
-            "fa": "go",
-            "dove": "home"
+            "does": "go",
+            "where": "home"
           },
           {
-            "fa": "rest"
+            "does": "rest"
           }
         ]
       }

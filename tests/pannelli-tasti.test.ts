@@ -28,7 +28,7 @@ function join(server: SessionServer, id: string): { client: SessionClient; sent:
 }
 
 /** The mechanics of T183 whose panels show a field of the wanderer. */
-const WITH_FIELDS = readdirSync('tests/espressivita/moduli').filter((id) => id.startsWith('mech.') && (manifestOf(id).ui?.elementi ?? []).some((e) => e.campo));
+const WITH_FIELDS = readdirSync('tests/espressivita/moduli').filter((id) => id.startsWith('mech.') && (manifestOf(id).ui?.elements ?? []).some((e) => e.field));
 
 describe('W: what a panel shows, in a game of many', () => {
   it('every mechanic of T183 with a panel field has it reach the client of the wanderer it belongs to', async () => {
@@ -38,7 +38,7 @@ describe('W: what a panel shows, in a game of many', () => {
       const server = new SessionServer(k);
       const { client } = join(server, 'bea');
       await client.ready;
-      const fields = manifestOf(id).ui!.elementi.flatMap((e) => (e.campo ? [e.campo] : []));
+      const fields = manifestOf(id).ui!.elements.flatMap((e) => (e.field ? [e.field] : []));
       k.as('bea', () => {
         for (const [i, campo] of fields.entries()) {
           const [c, f] = campo.split('.');
@@ -112,7 +112,7 @@ describe('K: the keys and the places of every wanderer', () => {
     await bea.client.ready;
     const seen = () => k.ecs.get(k.ecs.query('visto')[0], 'visto');
     server.tick(DT);
-    expect(seen().chi).toBe('bea,io');
+    expect(seen().chi).toBe('bea,me');
     expect(seen().destra).toBe('');
     bea.client.keys(['right']);
     server.tick(DT);
@@ -129,7 +129,7 @@ describe('K: the keys and the places of every wanderer', () => {
     const k = await Kernel.boot({ files: { ...bundledFiles, ...seer }, store: memoryStore(), ai: new MockAiModels() });
     k.input.setHeld('right', true);
     k.tick(DT);
-    expect(k.ecs.get(k.ecs.query('visto')[0], 'visto')).toEqual({ chi: 'io', destra: 'io' });
+    expect(k.ecs.get(k.ecs.query('visto')[0], 'visto')).toEqual({ chi: 'me', destra: 'me' });
   });
 
   it('who leaves takes their keys with them', async () => {

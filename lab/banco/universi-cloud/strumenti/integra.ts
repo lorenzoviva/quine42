@@ -135,8 +135,8 @@ async function mappeAurora(u: Universo, files: FileMap): Promise<Record<string, 
     // Nothing that would call a model once the place is loaded: no new things for the Forge, only things on the ground the world knows.
     plan.fresh = [];
     plan.ground = plan.ground.filter((g) => !!k.content.byName(g));
-    delete plan.carta;
-    plan.strutture = [];
+    delete plan.card;
+    plan.structures = [];
     Object.assign(plan, AURORA_A_MANO[`${cx},${cy}`] ?? {});
     out[`${prefix}_${cx}_${cy}`] = { plan };
   }
@@ -172,7 +172,7 @@ interface Posto {
   plan: ChunkPlan;
   lots: Lotto[];
   /** The structures the plan keeps (the universe's own), then the Cloud's. */
-  tiene: NonNullable<ChunkPlan['strutture']>;
+  tiene: NonNullable<ChunkPlan['structures']>;
   nuove: Array<{ s: Struttura; taglia: 'large' | 'huge' }>;
 }
 
@@ -195,7 +195,7 @@ function colloca(u: Universo, files: FileMap, k: Kernel, maps: Record<string, Ch
     if (!at) continue;
     const plan: ChunkPlan = JSON.parse(JSON.stringify(rec.plan));
     // What the universe had and has a model (neapolis's tower and market, sidera's dome and wreck) stays, first; the rest goes.
-    const tiene = (plan.strutture ?? []).filter((s) => known.has(modelloDi(s.concetto)) && !catalogo.some((c) => c.id === modelloDi(s.concetto)));
+    const tiene = (plan.structures ?? []).filter((s) => known.has(modelloDi(s.concept)) && !catalogo.some((c) => c.id === modelloDi(s.concept)));
     const bare = { ...plan, strutture: tiene };
     posti.push({ name, cx: at[0], cy: at[1], plan: bare, lots: lotti(k, at[0], at[1], bare), tiene, nuove: [] });
   }
@@ -235,9 +235,9 @@ function colloca(u: Universo, files: FileMap, k: Kernel, maps: Record<string, Ch
   const kk = k as any;
   const out: Record<string, ChunkRecord> = {};
   for (const p of posti) {
-    const plan: ChunkPlan = { ...p.plan, strutture: [...p.tiene, ...p.nuove.map((n) => ({ concetto: n.s.concetto, taglia: n.taglia }))] };
+    const plan: ChunkPlan = { ...p.plan, structures: [...p.tiene, ...p.nuove.map((n) => ({ concept: n.s.concetto, size: n.taglia }))] };
     kk.claimSizes({ cx: p.cx, cy: p.cy, key: `${p.cx},${p.cy}`, lots: lotti(k, p.cx, p.cy, plan).map((l) => ({ x0: 0, y0: 0, x1: l.w - 1, y1: l.h - 1 })) }, plan);
-    if (!plan.strutture?.length && !('strutture' in maps[p.name].plan)) delete plan.strutture;
+    if (!plan.structures?.length && !('strutture' in maps[p.name].plan) && !('structures' in maps[p.name].plan)) delete plan.structures;
     out[p.name] = { ...maps[p.name], plan };
   }
   return { maps: out, righe };
@@ -253,9 +253,9 @@ function segnaTaglie(u: Universo, maps: Record<string, ChunkRecord>) {
   const index = JSON.parse(text) as Record<string, Record<string, unknown>>;
   const ids = new Set(strutture(u.tema).map((s) => s.id));
   for (const rec of Object.values(maps))
-    for (const s of rec.plan.strutture ?? []) {
-      const id = modelloDi(s.concetto);
-      if (ids.has(id) && s.taglia && s.taglia !== 'large') Object.assign(index[id], modelSize({ classe: 'structure', taglia: s.taglia }));
+    for (const s of rec.plan.structures ?? []) {
+      const id = modelloDi(s.concept);
+      if (ids.has(id) && s.size && s.size !== 'large') Object.assign(index[id], modelSize({ classe: 'structure', taglia: s.size }));
     }
   scriviIndice(indexPath, index, indentDi(text));
 }

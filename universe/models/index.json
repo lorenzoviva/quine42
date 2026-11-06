@@ -1,360 +1,360 @@
 {
  "viandante": {
-  "classe": "person",
-  "nome": "Viandante",
-  "autore": "procedurale, a mano (Claude Cloud, T270)",
-  "tinta": "N"
+  "class": "person",
+  "name": "Viandante",
+  "author": "procedurale, a mano (Claude Cloud, T270)",
+  "tint": "N"
  },
  "contadina": {
-  "classe": "person",
-  "nome": "Contadina",
-  "autore": "procedurale, a mano (Claude Cloud, T270)"
+  "class": "person",
+  "name": "Contadina",
+  "author": "procedurale, a mano (Claude Cloud, T270)"
  },
  "person": {
-  "classe": "person",
-  "nome": "Fabbro",
-  "autore": "a mano, step 8B (Claude Code)"
+  "class": "person",
+  "name": "Fabbro",
+  "author": "a mano, step 8B (Claude Code)"
  },
  "animal": {
-  "classe": "animal",
-  "nome": "Gatto",
-  "autore": "a mano, step 8B (Claude Code)"
+  "class": "animal",
+  "name": "Gatto",
+  "author": "a mano, step 8B (Claude Code)"
  },
  "beast": {
-  "classe": "beast",
-  "nome": "Lupo",
-  "autore": "procedurale, a mano (Claude Cloud, T270)"
+  "class": "beast",
+  "name": "Lupo",
+  "author": "procedurale, a mano (Claude Cloud, T270)"
  },
  "tree": {
-  "classe": "tree",
-  "nome": "Pino",
-  "autore": "procedurale, a mano (Claude Cloud, T270)"
+  "class": "tree",
+  "name": "Pino",
+  "author": "procedurale, a mano (Claude Cloud, T270)"
  },
  "quercia": {
-  "classe": "tree",
-  "nome": "Quercia",
-  "autore": "procedurale, a mano (Claude Cloud, T270)"
+  "class": "tree",
+  "name": "Quercia",
+  "author": "procedurale, a mano (Claude Cloud, T270)"
  },
  "betulla": {
-  "classe": "tree",
-  "nome": "Betulla",
-  "autore": "procedurale, a mano (Claude Cloud, T270)"
+  "class": "tree",
+  "name": "Betulla",
+  "author": "procedurale, a mano (Claude Cloud, T270)"
  },
  "palma": {
-  "classe": "tree",
-  "nome": "Palma",
-  "autore": "procedurale, a mano (Claude Cloud, T270)"
+  "class": "tree",
+  "name": "Palma",
+  "author": "procedurale, a mano (Claude Cloud, T270)"
  },
  "bush": {
-  "classe": "bush",
-  "nome": "Cespuglio",
-  "autore": "procedurale, a mano (Claude Cloud, T270)"
+  "class": "bush",
+  "name": "Cespuglio",
+  "author": "procedurale, a mano (Claude Cloud, T270)"
  },
  "cespuglio-con-bacche": {
-  "classe": "bush",
-  "nome": "Cespuglio con bacche",
-  "autore": "procedurale, a mano (Claude Cloud, T270)"
+  "class": "bush",
+  "name": "Cespuglio con bacche",
+  "author": "procedurale, a mano (Claude Cloud, T270)"
  },
  "rock": {
-  "classe": "rock",
-  "nome": "Masso",
-  "autore": "procedurale, a mano (Claude Cloud, T270)"
+  "class": "rock",
+  "name": "Masso",
+  "author": "procedurale, a mano (Claude Cloud, T270)"
  },
  "masso-muschioso": {
-  "classe": "rock",
-  "nome": "Masso muschioso",
-  "autore": "procedurale, a mano (Claude Cloud, T270)"
+  "class": "rock",
+  "name": "Masso muschioso",
+  "author": "procedurale, a mano (Claude Cloud, T270)"
  },
  "pebble": {
-  "classe": "pebble",
-  "nome": "Sasso",
-  "autore": "procedurale, a mano (Claude Cloud, T270)"
+  "class": "pebble",
+  "name": "Sasso",
+  "author": "procedurale, a mano (Claude Cloud, T270)"
  },
  "barile": {
-  "classe": "furniture",
-  "nome": "Barile",
-  "autore": "procedurale, a mano (Claude Cloud, T270)"
+  "class": "furniture",
+  "name": "Barile",
+  "author": "procedurale, a mano (Claude Cloud, T270)"
  },
  "falo": {
-  "classe": "furniture",
-  "nome": "Falò",
-  "autore": "procedurale, a mano (Claude Cloud, T270)"
+  "class": "furniture",
+  "name": "Falò",
+  "author": "procedurale, a mano (Claude Cloud, T270)"
  },
  "furniture": {
-  "classe": "furniture",
-  "nome": "Cassa",
-  "autore": "procedurale, a mano (Claude Cloud, T270)"
+  "class": "furniture",
+  "name": "Cassa",
+  "author": "procedurale, a mano (Claude Cloud, T270)"
  },
  "letto": {
-  "classe": "furniture",
-  "nome": "Letto",
-  "autore": "procedurale, a mano (Claude Cloud, T270)"
+  "class": "furniture",
+  "name": "Letto",
+  "author": "procedurale, a mano (Claude Cloud, T270)"
  },
  "banco": {
-  "classe": "furniture",
-  "nome": "Banco da lavoro",
-  "autore": "procedurale, a mano (Claude Cloud, T270)"
+  "class": "furniture",
+  "name": "Banco da lavoro",
+  "author": "procedurale, a mano (Claude Cloud, T270)"
  },
  "credenza": {
-  "classe": "furniture",
-  "nome": "Credenza",
-  "autore": "procedurale, a mano (Claude Cloud, T270)"
+  "class": "furniture",
+  "name": "Credenza",
+  "author": "procedurale, a mano (Claude Cloud, T270)"
  },
  "cartello": {
-  "classe": "furniture",
-  "nome": "Cartello",
-  "autore": "procedurale, a mano (Claude Cloud, T270)"
+  "class": "furniture",
+  "name": "Cartello",
+  "author": "procedurale, a mano (Claude Cloud, T270)"
  },
  "object": {
-  "classe": "object",
-  "nome": "Cosa",
-  "autore": "a mano (Claude Code)",
-  "tinta": "C"
+  "class": "object",
+  "name": "Cosa",
+  "author": "a mano (Claude Code)",
+  "tint": "C"
  },
  "forbici": {
-  "classe": "object",
-  "nome": "Forbici",
-  "autore": "a mano (Claude Code)"
+  "class": "object",
+  "name": "Forbici",
+  "author": "a mano (Claude Code)"
  },
  "pozzo": {
-  "classe": "building",
-  "nome": "Pozzo",
-  "autore": "procedurale, a mano (Claude Cloud, T270)"
+  "class": "building",
+  "name": "Pozzo",
+  "author": "procedurale, a mano (Claude Cloud, T270)"
  },
  "building": {
-  "classe": "building",
-  "nome": "Casetta",
-  "autore": "procedurale, a mano (Claude Cloud, T270)"
+  "class": "building",
+  "name": "Casetta",
+  "author": "procedurale, a mano (Claude Cloud, T270)"
  },
  "monument": {
-  "classe": "monument",
-  "nome": "Colonna",
-  "autore": "procedurale, a mano (Claude Cloud, T270)"
+  "class": "monument",
+  "name": "Colonna",
+  "author": "procedurale, a mano (Claude Cloud, T270)"
  },
  "structure": {
-  "classe": "structure",
-  "nome": "Casa a graticcio",
-  "autore": "a mano (Claude Code)"
+  "class": "structure",
+  "name": "Casa a graticcio",
+  "author": "a mano (Claude Code)"
  },
  "fattoria": {
-  "classe": "structure",
-  "nome": "Fattoria",
-  "autore": "procedurale, a mano (Claude Cloud, T270)"
+  "class": "structure",
+  "name": "Fattoria",
+  "author": "procedurale, a mano (Claude Cloud, T270)"
  },
  "corona-magia": {
-  "classe": "building",
-  "nome": "Torre della Magia",
-  "autore": "gemini-3.8-flash (Gemini CLI, T19)",
+  "class": "building",
+  "name": "Torre della Magia",
+  "author": "gemini-3.8-flash (Gemini CLI, T19)",
   "vpt": 8
  },
  "corona-concilio": {
-  "classe": "building",
-  "nome": "Sala del Concilio",
-  "autore": "gemini-3.8-flash (Gemini CLI, T19)",
+  "class": "building",
+  "name": "Sala del Concilio",
+  "author": "gemini-3.8-flash (Gemini CLI, T19)",
   "vpt": 8
  },
  "corona-cose": {
-  "classe": "building",
-  "nome": "Laboratorio delle cose",
-  "autore": "gemini-3.8-flash (Gemini CLI, T19)",
+  "class": "building",
+  "name": "Laboratorio delle cose",
+  "author": "gemini-3.8-flash (Gemini CLI, T19)",
   "vpt": 8
  },
  "corona-galleria": {
-  "classe": "building",
-  "nome": "Galleria dell'Artista",
-  "autore": "gemini-3.8-flash (Gemini CLI, T19)",
+  "class": "building",
+  "name": "Galleria dell'Artista",
+  "author": "gemini-3.8-flash (Gemini CLI, T19)",
   "vpt": 8
  },
  "corona-luoghi": {
-  "classe": "building",
-  "nome": "Ufficio dei luoghi",
-  "autore": "gemini-3.8-flash (Gemini CLI, T19)",
+  "class": "building",
+  "name": "Ufficio dei luoghi",
+  "author": "gemini-3.8-flash (Gemini CLI, T19)",
   "vpt": 8
  },
  "corona-mondo": {
-  "classe": "building",
-  "nome": "Biblioteca del Mondo",
-  "autore": "gemini-3.8-flash (Gemini CLI, T19)",
+  "class": "building",
+  "name": "Biblioteca del Mondo",
+  "author": "gemini-3.8-flash (Gemini CLI, T19)",
   "vpt": 8
  },
  "corona-nucleo": {
-  "classe": "building",
-  "nome": "Il Nucleo",
-  "autore": "gemini-3.8-flash (Gemini CLI, T19)",
+  "class": "building",
+  "name": "Il Nucleo",
+  "author": "gemini-3.8-flash (Gemini CLI, T19)",
   "vpt": 8
  },
  "corona-oggetti": {
-  "classe": "building",
-  "nome": "Magazzino degli oggetti",
-  "autore": "gemini-3.8-flash (Gemini CLI, T19)",
+  "class": "building",
+  "name": "Magazzino degli oggetti",
+  "author": "gemini-3.8-flash (Gemini CLI, T19)",
   "vpt": 8
  },
  "corona-persone": {
-  "classe": "building",
-  "nome": "Studio dei personaggi",
-  "autore": "gemini-3.8-flash (Gemini CLI, T19)",
+  "class": "building",
+  "name": "Studio dei personaggi",
+  "author": "gemini-3.8-flash (Gemini CLI, T19)",
   "vpt": 8
  },
  "corona-sistemi": {
-  "classe": "building",
-  "nome": "Sala sistemi",
-  "autore": "gemini-3.8-flash (Gemini CLI, T19)",
+  "class": "building",
+  "name": "Sala sistemi",
+  "author": "gemini-3.8-flash (Gemini CLI, T19)",
   "vpt": 8
  },
  "corona-universo": {
-  "classe": "building",
-  "nome": "La Direzione",
-  "autore": "gemini-3.8-flash (Gemini CLI, T19)",
+  "class": "building",
+  "name": "La Direzione",
+  "author": "gemini-3.8-flash (Gemini CLI, T19)",
   "vpt": 8
  },
  "corona-albero-luce": {
-  "classe": "tree",
-  "nome": "Albero di luce (corona)",
-  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+  "class": "tree",
+  "name": "Albero di luce (corona)",
+  "author": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 8
  },
  "corona-lampione": {
-  "classe": "furniture",
-  "nome": "Lampione (corona)",
-  "autore": "l'autore, a mano (T113)",
+  "class": "furniture",
+  "name": "Lampione (corona)",
+  "author": "l'autore, a mano (T113)",
   "vpt": 8
  },
  "corona-panchina": {
-  "classe": "furniture",
-  "nome": "Panchina (corona)",
-  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+  "class": "furniture",
+  "name": "Panchina (corona)",
+  "author": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 8
  },
  "corona-totem": {
-  "classe": "monument",
-  "nome": "Totem (corona)",
-  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+  "class": "monument",
+  "name": "Totem (corona)",
+  "author": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 8
  },
  "corona-drone": {
-  "classe": "object",
-  "nome": "Drone (corona)",
-  "autore": "l'autore, a mano; ridotto in scala 1:2 (T113)",
+  "class": "object",
+  "name": "Drone (corona)",
+  "author": "l'autore, a mano; ridotto in scala 1:2 (T113)",
   "vpt": 8
  },
  "corona-treno": {
-  "classe": "furniture",
-  "nome": "Treno pod (corona)",
-  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+  "class": "furniture",
+  "name": "Treno pod (corona)",
+  "author": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 8
  },
  "corona-gerboa": {
-  "classe": "person",
-  "nome": "Gerboa base (corona)",
-  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+  "class": "person",
+  "name": "Gerboa base (corona)",
+  "author": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 20
  },
  "corona-gerboa-narrator": {
-  "classe": "person",
-  "nome": "Gerboa Narratore (corona)",
-  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+  "class": "person",
+  "name": "Gerboa Narratore (corona)",
+  "author": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 20
  },
  "corona-gerboa-cartographer": {
-  "classe": "person",
-  "nome": "Gerboa Cartografo (corona)",
-  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+  "class": "person",
+  "name": "Gerboa Cartografo (corona)",
+  "author": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 20
  },
  "corona-gerboa-artist": {
-  "classe": "person",
-  "nome": "Gerboa Artista (corona)",
-  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+  "class": "person",
+  "name": "Gerboa Artista (corona)",
+  "author": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 20
  },
  "corona-gerboa-musician": {
-  "classe": "person",
-  "nome": "Gerboa Musicista (corona)",
-  "autore": "dal Gerboa Artista, a mano (T225)",
+  "class": "person",
+  "name": "Gerboa Musicista (corona)",
+  "author": "dal Gerboa Artista, a mano (T225)",
   "vpt": 20
  },
  "corona-gerboa-sculptor": {
-  "classe": "person",
-  "nome": "Gerboa Scultore (corona)",
-  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+  "class": "person",
+  "name": "Gerboa Scultore (corona)",
+  "author": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 20
  },
  "corona-gerboa-physicist": {
-  "classe": "person",
-  "nome": "Gerboa Fisico (corona)",
-  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+  "class": "person",
+  "name": "Gerboa Fisico (corona)",
+  "author": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 20
  },
  "corona-gerboa-engineer": {
-  "classe": "person",
-  "nome": "Gerboa Ingegnere (corona)",
-  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+  "class": "person",
+  "name": "Gerboa Ingegnere (corona)",
+  "author": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 20
  },
  "corona-gerboa-arbiter": {
-  "classe": "person",
-  "nome": "Gerboa Arbitro (corona)",
-  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+  "class": "person",
+  "name": "Gerboa Arbitro (corona)",
+  "author": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 20
  },
  "corona-gerboa-liaison": {
-  "classe": "person",
-  "nome": "Gerboa Referente (corona)",
-  "autore": "gemini-3.8-flash (Gemini CLI, T50)",
+  "class": "person",
+  "name": "Gerboa Referente (corona)",
+  "author": "gemini-3.8-flash (Gemini CLI, T50)",
   "vpt": 20
  },
  "corona-gerboa-actor": {
-  "classe": "person",
-  "nome": "Gerboa Attore (corona)",
-  "autore": "claude-opus-5-5 (Claude Code, T158)",
+  "class": "person",
+  "name": "Gerboa Attore (corona)",
+  "author": "claude-opus-5-5 (Claude Code, T158)",
   "vpt": 20
  },
  "schermo-scritte": {
-  "classe": "object",
-  "nome": "Schermo scritte",
-  "autore": "a mano (editor MJ, T59)",
+  "class": "object",
+  "name": "Schermo scritte",
+  "author": "a mano (editor MJ, T59)",
   "vpt": 20
  },
  "schermo-struttura": {
-  "classe": "object",
-  "nome": "Schermo struttura",
-  "autore": "a mano (editor MJ, T59)",
+  "class": "object",
+  "name": "Schermo struttura",
+  "author": "a mano (editor MJ, T59)",
   "vpt": 20
  },
  "circuito-3D": {
-  "classe": "object",
-  "nome": "Circuito 3D",
-  "autore": "a mano (editor MJ, T59)",
+  "class": "object",
+  "name": "Circuito 3D",
+  "author": "a mano (editor MJ, T59)",
   "vpt": 20,
-  "tempo": 30000
+  "time": 30000
  },
  "sound-melodic-path": {
-  "classe": "suono",
-  "nome": "Sentiero Melodico",
-  "autore": "Argon (SoundLab), in XML a mano (T221)"
+  "class": "suono",
+  "name": "Sentiero Melodico",
+  "author": "Argon (SoundLab), in XML a mano (T221)"
  },
  "sound-cellular-fugue": {
-  "classe": "suono",
-  "nome": "Fuga Cellular Automata",
-  "autore": "Argon (SoundLab), in XML a mano (T221)"
+  "class": "suono",
+  "name": "Fuga Cellular Automata",
+  "author": "Argon (SoundLab), in XML a mano (T221)"
  },
  "sound-fractal-architecture": {
-  "classe": "suono",
-  "nome": "Architettura Frattale",
-  "autore": "Argon (SoundLab), in XML a mano (T221)"
+  "class": "suono",
+  "name": "Architettura Frattale",
+  "author": "Argon (SoundLab), in XML a mano (T221)"
  },
  "sound-final-battle": {
-  "classe": "suono",
-  "nome": "Boss Fight Cyber-Dungeon",
-  "autore": "Argon (SoundLab), in XML a mano (T221)"
+  "class": "suono",
+  "name": "Boss Fight Cyber-Dungeon",
+  "author": "Argon (SoundLab), in XML a mano (T221)"
  },
  "sound-music-pastoral": {
-  "classe": "suono",
-  "nome": "Prati",
-  "autore": "a mano (T224)",
-  "suono": {
-   "uso": "music",
-   "ambienti": [
+  "class": "suono",
+  "name": "Prati",
+  "author": "a mano (T224)",
+  "sound": {
+   "use": "music",
+   "environments": [
     "village",
     "fields",
     "huts",
@@ -362,57 +362,57 @@
     "inn",
     "lake"
    ],
-   "momenti": [
+   "moments": [
     "morning",
     "day"
    ]
   }
  },
  "sound-music-woods": {
-  "classe": "suono",
-  "nome": "Selva",
-  "autore": "a mano (T224)",
-  "suono": {
-   "uso": "music",
-   "ambienti": [
+  "class": "suono",
+  "name": "Selva",
+  "author": "a mano (T224)",
+  "sound": {
+   "use": "music",
+   "environments": [
     "woods",
     "jungle",
     "mountains",
     "desert",
     "wizard_tower"
    ],
-   "momenti": [
+   "moments": [
     "morning",
     "day"
    ]
   }
  },
  "sound-music-stone": {
-  "classe": "suono",
-  "nome": "Pietra",
-  "autore": "a mano (T224)",
-  "suono": {
-   "uso": "music",
-   "ambienti": [
+  "class": "suono",
+  "name": "Pietra",
+  "author": "a mano (T224)",
+  "sound": {
+   "use": "music",
+   "environments": [
     "castle",
     "fortress",
     "barracks",
     "temple",
     "pyramid"
    ],
-   "momenti": [
+   "moments": [
     "morning",
     "day"
    ]
   }
  },
  "sound-music-deep": {
-  "classe": "suono",
-  "nome": "Profondo",
-  "autore": "a mano (T224)",
-  "suono": {
-   "uso": "music",
-   "ambienti": [
+  "class": "suono",
+  "name": "Profondo",
+  "author": "a mano (T224)",
+  "sound": {
+   "use": "music",
+   "environments": [
     "dungeon",
     "dragon_lair",
     "ruins"
@@ -420,261 +420,261 @@
   }
  },
  "sound-music-sunset": {
-  "classe": "suono",
-  "nome": "Tramonto",
-  "autore": "a mano (T224)",
-  "suono": {
-   "uso": "music",
-   "momenti": [
+  "class": "suono",
+  "name": "Tramonto",
+  "author": "a mano (T224)",
+  "sound": {
+   "use": "music",
+   "moments": [
     "evening"
    ]
   }
  },
  "sound-music-night": {
-  "classe": "suono",
-  "nome": "Notte",
-  "autore": "a mano (T224)",
-  "suono": {
-   "uso": "music",
-   "momenti": [
+  "class": "suono",
+  "name": "Notte",
+  "author": "a mano (T224)",
+  "sound": {
+   "use": "music",
+   "moments": [
     "night"
    ]
   }
  },
  "sound-music-beyond": {
-  "classe": "suono",
-  "nome": "Oltre",
-  "autore": "a mano (T224)",
-  "suono": {
-   "uso": "music",
-   "oltre": true
+  "class": "suono",
+  "name": "Oltre",
+  "author": "a mano (T224)",
+  "sound": {
+   "use": "music",
+   "beyond": true
   }
  },
  "sound-effect-rune": {
-  "classe": "suono",
-  "nome": "Runa",
-  "autore": "a mano (T224)",
-  "suono": {
-   "uso": "effect",
-   "effetti": [
+  "class": "suono",
+  "name": "Runa",
+  "author": "a mano (T224)",
+  "sound": {
+   "use": "effect",
+   "effects": [
     "rune"
    ]
   }
  },
  "sound-effect-item": {
-  "classe": "suono",
-  "nome": "Oggetto",
-  "autore": "a mano (T224)",
-  "suono": {
-   "uso": "effect",
-   "effetti": [
+  "class": "suono",
+  "name": "Oggetto",
+  "author": "a mano (T224)",
+  "sound": {
+   "use": "effect",
+   "effects": [
     "item"
    ]
   }
  },
  "sound-effect-arpeggio": {
-  "classe": "suono",
-  "nome": "Arpeggio",
-  "autore": "a mano (T224)",
-  "suono": {
-   "uso": "effect",
-   "effetti": [
+  "class": "suono",
+  "name": "Arpeggio",
+  "author": "a mano (T224)",
+  "sound": {
+   "use": "effect",
+   "effects": [
     "arpeggio"
    ]
   }
  },
  "sound-effect-spell": {
-  "classe": "suono",
-  "nome": "Incantesimo",
-  "autore": "a mano (T224)",
-  "suono": {
-   "uso": "effect",
-   "effetti": [
+  "class": "suono",
+  "name": "Incantesimo",
+  "author": "a mano (T224)",
+  "sound": {
+   "use": "effect",
+   "effects": [
     "spell"
    ]
   }
  },
  "sound-effect-fault": {
-  "classe": "suono",
-  "nome": "Guasto",
-  "autore": "a mano (T224)",
-  "suono": {
-   "uso": "effect",
-   "effetti": [
+  "class": "suono",
+  "name": "Guasto",
+  "author": "a mano (T224)",
+  "sound": {
+   "use": "effect",
+   "effects": [
     "fault"
    ]
   }
  },
  "sound-effect-rollback": {
-  "classe": "suono",
-  "nome": "Ritorno",
-  "autore": "a mano (T224)",
-  "suono": {
-   "uso": "effect",
-   "effetti": [
+  "class": "suono",
+  "name": "Ritorno",
+  "author": "a mano (T224)",
+  "sound": {
+   "use": "effect",
+   "effects": [
     "rollback"
    ]
   }
  },
  "sound-effect-threshold": {
-  "classe": "suono",
-  "nome": "Soglia",
-  "autore": "a mano (T224)",
-  "suono": {
-   "uso": "effect",
-   "effetti": [
+  "class": "suono",
+  "name": "Soglia",
+  "author": "a mano (T224)",
+  "sound": {
+   "use": "effect",
+   "effects": [
     "threshold"
    ]
   }
  },
  "sound-effect-jump": {
-  "classe": "suono",
-  "nome": "Salto",
-  "autore": "a mano (T224)",
-  "suono": {
-   "uso": "effect",
-   "effetti": [
+  "class": "suono",
+  "name": "Salto",
+  "author": "a mano (T224)",
+  "sound": {
+   "use": "effect",
+   "effects": [
     "jump"
    ]
   }
  },
  "sound-effect-death": {
-  "classe": "suono",
-  "nome": "Morte",
-  "autore": "a mano (T224)",
-  "suono": {
-   "uso": "effect",
-   "effetti": [
+  "class": "suono",
+  "name": "Morte",
+  "author": "a mano (T224)",
+  "sound": {
+   "use": "effect",
+   "effects": [
     "death"
    ]
   }
  },
  "fantasy-altare-runico": {
-  "classe": "furniture",
-  "nome": "Altare runico",
-  "autore": "Claude Cloud, props tematici (T270)"
+  "class": "furniture",
+  "name": "Altare runico",
+  "author": "Claude Cloud, props tematici (T270)"
  },
  "fantasy-libreria-alchemica": {
-  "classe": "furniture",
-  "nome": "Libreria alchemica",
-  "autore": "Claude Cloud, props tematici (T270)"
+  "class": "furniture",
+  "name": "Libreria alchemica",
+  "author": "Claude Cloud, props tematici (T270)"
  },
  "fantasy-calderone-bollente": {
-  "classe": "furniture",
-  "nome": "Calderone bollente",
-  "autore": "Claude Cloud, props tematici (T270)"
+  "class": "furniture",
+  "name": "Calderone bollente",
+  "author": "Claude Cloud, props tematici (T270)"
  },
  "fantasy-statua-guardiano": {
-  "classe": "monument",
-  "nome": "Statua del guardiano",
-  "autore": "Claude Cloud, props tematici (T270)"
+  "class": "monument",
+  "name": "Statua del guardiano",
+  "author": "Claude Cloud, props tematici (T270)"
  },
  "fantasy-cristallo-arcano": {
-  "classe": "furniture",
-  "nome": "Cristallo arcano",
-  "autore": "Claude Cloud, props tematici (T270)"
+  "class": "furniture",
+  "name": "Cristallo arcano",
+  "author": "Claude Cloud, props tematici (T270)"
  },
  "fantasy-bancarella-mercato": {
-  "classe": "furniture",
-  "nome": "Bancarella del mercato",
-  "autore": "Claude Cloud, props tematici (T270)"
+  "class": "furniture",
+  "name": "Bancarella del mercato",
+  "author": "Claude Cloud, props tematici (T270)"
  },
  "fantasy-gabbia-sospesa": {
-  "classe": "monument",
-  "nome": "Gabbia sospesa",
-  "autore": "Claude Cloud, props tematici (T270)"
+  "class": "monument",
+  "name": "Gabbia sospesa",
+  "author": "Claude Cloud, props tematici (T270)"
  },
  "fantasy-trono-di-pietra": {
-  "classe": "furniture",
-  "nome": "Trono di pietra",
-  "autore": "Claude Cloud, props tematici (T270)"
+  "class": "furniture",
+  "name": "Trono di pietra",
+  "author": "Claude Cloud, props tematici (T270)"
  },
  "fantasy-fontana-antica": {
-  "classe": "building",
-  "nome": "Fontana antica",
-  "autore": "Claude Cloud, props tematici (T270)"
+  "class": "building",
+  "name": "Fontana antica",
+  "author": "Claude Cloud, props tematici (T270)"
  },
  "fantasy-obelisco-inciso": {
-  "classe": "monument",
-  "nome": "Obelisco inciso",
-  "autore": "Claude Cloud, props tematici (T270)"
+  "class": "monument",
+  "name": "Obelisco inciso",
+  "author": "Claude Cloud, props tematici (T270)"
  },
  "sound-fantasy-exploration-day": {
-  "classe": "suono",
-  "nome": "Fantasy: esplorazione di giorno",
-  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
-  "suono": {
-   "uso": "music",
-   "ambienti": [
+  "class": "suono",
+  "name": "Fantasy: esplorazione di giorno",
+  "author": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "sound": {
+   "use": "music",
+   "environments": [
     "mountains",
     "desert"
    ],
-   "momenti": [
+   "moments": [
     "morning",
     "day"
    ]
   }
  },
  "sound-fantasy-exploration-night": {
-  "classe": "suono",
-  "nome": "Fantasy: esplorazione di notte",
-  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
-  "suono": {
-   "uso": "music",
-   "ambienti": [
+  "class": "suono",
+  "name": "Fantasy: esplorazione di notte",
+  "author": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "sound": {
+   "use": "music",
+   "environments": [
     "woods",
     "jungle",
     "mountains",
     "desert"
    ],
-   "momenti": [
+   "moments": [
     "night"
    ]
   }
  },
  "sound-fantasy-danger-tension": {
-  "classe": "suono",
-  "nome": "Fantasy: pericolo",
-  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
-  "suono": {
-   "uso": "music",
-   "ambienti": [
+  "class": "suono",
+  "name": "Fantasy: pericolo",
+  "author": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "sound": {
+   "use": "music",
+   "environments": [
     "fortress",
     "barracks"
    ],
-   "momenti": [
+   "moments": [
     "morning",
     "day"
    ]
   }
  },
  "sound-fantasy-sacred-place": {
-  "classe": "suono",
-  "nome": "Fantasy: luogo sacro",
-  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
-  "suono": {
-   "uso": "music",
-   "ambienti": [
+  "class": "suono",
+  "name": "Fantasy: luogo sacro",
+  "author": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "sound": {
+   "use": "music",
+   "environments": [
     "temple",
     "pyramid"
    ],
-   "momenti": [
+   "moments": [
     "morning",
     "day"
    ]
   }
  },
  "sound-fantasy-town-inn": {
-  "classe": "suono",
-  "nome": "Fantasy: città e locanda",
-  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
-  "suono": {
-   "uso": "music",
-   "ambienti": [
+  "class": "suono",
+  "name": "Fantasy: città e locanda",
+  "author": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "sound": {
+   "use": "music",
+   "environments": [
     "inn",
     "brick_village"
    ],
-   "momenti": [
+   "moments": [
     "morning",
     "day",
     "evening"
@@ -682,303 +682,303 @@
   }
  },
  "sound-fantasy-abyss-dungeon": {
-  "classe": "suono",
-  "nome": "Fantasy: sotterraneo",
-  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
-  "suono": {
-   "uso": "music",
-   "ambienti": [
+  "class": "suono",
+  "name": "Fantasy: sotterraneo",
+  "author": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "sound": {
+   "use": "music",
+   "environments": [
     "dragon_lair",
     "ruins"
    ]
   }
  },
  "sound-effect-siren-alarm": {
-  "classe": "suono",
-  "nome": "Allarme sirena",
-  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
-  "suono": {
-   "uso": "effect",
-   "effetti": [
+  "class": "suono",
+  "name": "Allarme sirena",
+  "author": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "sound": {
+   "use": "effect",
+   "effects": [
     "allarme-sirena"
    ]
   }
  },
  "sound-effect-resonant-crystal": {
-  "classe": "suono",
-  "nome": "Cristallo risonante",
-  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
-  "suono": {
-   "uso": "effect",
-   "effetti": [
+  "class": "suono",
+  "name": "Cristallo risonante",
+  "author": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "sound": {
+   "use": "effect",
+   "effects": [
     "cristallo-risonante"
    ]
   }
  },
  "sound-effect-healing-blessing": {
-  "classe": "suono",
-  "nome": "Cura benedizione",
-  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
-  "suono": {
-   "uso": "effect",
-   "effetti": [
+  "class": "suono",
+  "name": "Cura benedizione",
+  "author": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "sound": {
+   "use": "effect",
+   "effects": [
     "cura-benedizione"
    ]
   }
  },
  "sound-effect-greeting": {
-  "classe": "suono",
-  "nome": "Dialogo saluto",
-  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
-  "suono": {
-   "uso": "effect",
-   "effetti": [
+  "class": "suono",
+  "name": "Dialogo saluto",
+  "author": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "sound": {
+   "use": "effect",
+   "effects": [
     "dialogo-saluto"
    ]
   }
  },
  "sound-effect-explosion-collapse": {
-  "classe": "suono",
-  "nome": "Esplosione crollo",
-  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
-  "suono": {
-   "uso": "effect",
-   "effetti": [
+  "class": "suono",
+  "name": "Esplosione crollo",
+  "author": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "sound": {
+   "use": "effect",
+   "effects": [
     "esplosione-crollo"
    ]
   }
  },
  "sound-effect-forge-hammer": {
-  "classe": "suono",
-  "nome": "Forgia martello",
-  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
-  "suono": {
-   "uso": "effect",
-   "effetti": [
+  "class": "suono",
+  "name": "Forgia martello",
+  "author": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "sound": {
+   "use": "effect",
+   "effects": [
     "forgia-martello"
    ]
   }
  },
  "sound-effect-crackling-fire": {
-  "classe": "suono",
-  "nome": "Fuoco scoppiettante",
-  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
-  "suono": {
-   "uso": "effect",
-   "effetti": [
+  "class": "suono",
+  "name": "Fuoco scoppiettante",
+  "author": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "sound": {
+   "use": "effect",
+   "effects": [
     "fuoco-scoppiettante"
    ]
   }
  },
  "sound-effect-lever-mechanism": {
-  "classe": "suono",
-  "nome": "Meccanismo leva",
-  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
-  "suono": {
-   "uso": "effect",
-   "effetti": [
+  "class": "suono",
+  "name": "Meccanismo leva",
+  "author": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "sound": {
+   "use": "effect",
+   "effects": [
     "meccanismo-leva"
    ]
   }
  },
  "sound-effect-coin-trade": {
-  "classe": "suono",
-  "nome": "Moneta scambio",
-  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
-  "suono": {
-   "uso": "effect",
-   "effetti": [
+  "class": "suono",
+  "name": "Moneta scambio",
+  "author": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "sound": {
+   "use": "effect",
+   "effects": [
     "moneta-scambio"
    ]
   }
  },
  "sound-effect-water-step": {
-  "classe": "suono",
-  "nome": "Passo acqua",
-  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
-  "suono": {
-   "uso": "effect",
-   "effetti": [
+  "class": "suono",
+  "name": "Passo acqua",
+  "author": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "sound": {
+   "use": "effect",
+   "effects": [
     "passo-acqua"
    ]
   }
  },
  "sound-effect-metal-step": {
-  "classe": "suono",
-  "nome": "Passo metallo",
-  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
-  "suono": {
-   "uso": "effect",
-   "effetti": [
+  "class": "suono",
+  "name": "Passo metallo",
+  "author": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "sound": {
+   "use": "effect",
+   "effects": [
     "passo-metallo"
    ]
   }
  },
  "sound-effect-heavy-door": {
-  "classe": "suono",
-  "nome": "Porta pesante",
-  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
-  "suono": {
-   "uso": "effect",
-   "effetti": [
+  "class": "suono",
+  "name": "Porta pesante",
+  "author": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "sound": {
+   "use": "effect",
+   "effects": [
     "porta-pesante"
    ]
   }
  },
  "sound-effect-level-up": {
-  "classe": "suono",
-  "nome": "Salita livello",
-  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
-  "suono": {
-   "uso": "effect",
-   "effetti": [
+  "class": "suono",
+  "name": "Salita livello",
+  "author": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "sound": {
+   "use": "effect",
+   "effects": [
     "salita-livello"
    ]
   }
  },
  "sound-effect-electric-discharge": {
-  "classe": "suono",
-  "nome": "Scarica elettrica",
-  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
-  "suono": {
-   "uso": "effect",
-   "effetti": [
+  "class": "suono",
+  "name": "Scarica elettrica",
+  "author": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "sound": {
+   "use": "effect",
+   "effects": [
     "scarica-elettrica"
    ]
   }
  },
  "sound-effect-secret-found": {
-  "classe": "suono",
-  "nome": "Scoperta segreto",
-  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
-  "suono": {
-   "uso": "effect",
-   "effetti": [
+  "class": "suono",
+  "name": "Scoperta segreto",
+  "author": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "sound": {
+   "use": "effect",
+   "effects": [
     "scoperta-segreto"
    ]
   }
  },
  "sound-effect-teleport": {
-  "classe": "suono",
-  "nome": "Teletrasporto",
-  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
-  "suono": {
-   "uso": "effect",
-   "effetti": [
+  "class": "suono",
+  "name": "Teletrasporto",
+  "author": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "sound": {
+   "use": "effect",
+   "effects": [
     "teletrasporto"
    ]
   }
  },
  "sound-effect-steam-pressure": {
-  "classe": "suono",
-  "nome": "Vapore pressione",
-  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
-  "suono": {
-   "uso": "effect",
-   "effetti": [
+  "class": "suono",
+  "name": "Vapore pressione",
+  "author": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "sound": {
+   "use": "effect",
+   "effects": [
     "vapore-pressione"
    ]
   }
  },
  "sound-effect-poison-damage": {
-  "classe": "suono",
-  "nome": "Veleno danno",
-  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
-  "suono": {
-   "uso": "effect",
-   "effetti": [
+  "class": "suono",
+  "name": "Veleno danno",
+  "author": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "sound": {
+   "use": "effect",
+   "effects": [
     "veleno-danno"
    ]
   }
  },
  "sound-effect-high-wind": {
-  "classe": "suono",
-  "nome": "Vento alta quota",
-  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
-  "suono": {
-   "uso": "effect",
-   "effetti": [
+  "class": "suono",
+  "name": "Vento alta quota",
+  "author": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "sound": {
+   "use": "effect",
+   "effects": [
     "vento-alta-quota"
    ]
   }
  },
  "sound-effect-death-v2": {
-  "classe": "suono",
-  "nome": "Morte (rifatta, da ascoltare)",
-  "autore": "Claude Cloud, colonna sonora ed effetti (T271)",
-  "suono": {
-   "uso": "effect",
-   "effetti": [
+  "class": "suono",
+  "name": "Morte (rifatta, da ascoltare)",
+  "author": "Claude Cloud, colonna sonora ed effetti (T271)",
+  "sound": {
+   "use": "effect",
+   "effects": [
     "death"
    ]
   }
  },
  "struttura-casa-del-borgomastro": {
-  "classe": "structure",
-  "nome": "Casa del borgomastro, a due piani",
-  "autore": "procedurale, a mano (Claude Cloud, catalogo delle strutture, T269)"
+  "class": "structure",
+  "name": "Casa del borgomastro, a due piani",
+  "author": "procedurale, a mano (Claude Cloud, catalogo delle strutture, T269)"
  },
  "struttura-forte-di-frontiera": {
-  "classe": "structure",
-  "nome": "Forte di frontiera (forte con le torri)",
-  "autore": "procedurale, a mano (Claude Cloud, catalogo gemello, T273)"
+  "class": "structure",
+  "name": "Forte di frontiera (forte con le torri)",
+  "author": "procedurale, a mano (Claude Cloud, catalogo gemello, T273)"
  },
  "struttura-fortino": {
-  "classe": "structure",
-  "nome": "Fortino di confine",
-  "autore": "procedurale, a mano (Claude Cloud, catalogo delle strutture, T269)"
+  "class": "structure",
+  "name": "Fortino di confine",
+  "author": "procedurale, a mano (Claude Cloud, catalogo delle strutture, T269)"
  },
  "struttura-fucina-nanica": {
-  "classe": "structure",
-  "nome": "Fucina nanica (fucina con la cantina)",
-  "autore": "procedurale, a mano (Claude Cloud, catalogo gemello, T273)",
-  "sotto": 1
+  "class": "structure",
+  "name": "Fucina nanica (fucina con la cantina)",
+  "author": "procedurale, a mano (Claude Cloud, catalogo gemello, T273)",
+  "cellar": 1
  },
  "struttura-fucina": {
-  "classe": "structure",
-  "nome": "Fucina del fabbro, con la carbonaia sotto terra",
-  "autore": "procedurale, a mano (Claude Cloud, catalogo delle strutture, T269)",
-  "sotto": 1
+  "class": "structure",
+  "name": "Fucina del fabbro, con la carbonaia sotto terra",
+  "author": "procedurale, a mano (Claude Cloud, catalogo delle strutture, T269)",
+  "cellar": 1
  },
  "struttura-locanda-del-cinghiale": {
-  "classe": "structure",
-  "nome": "Locanda del cinghiale (locanda con la cantina)",
-  "autore": "procedurale, a mano (Claude Cloud, catalogo gemello, T273)",
-  "sotto": 1,
-  "taglia": "huge",
+  "class": "structure",
+  "name": "Locanda del cinghiale (locanda con la cantina)",
+  "author": "procedurale, a mano (Claude Cloud, catalogo gemello, T273)",
+  "cellar": 1,
+  "size": "huge",
   "vpt": 16
  },
  "struttura-locanda": {
-  "classe": "structure",
-  "nome": "Locanda del Cinghiale, con la cantina delle botti",
-  "autore": "procedurale, a mano (Claude Cloud, catalogo delle strutture, T269)",
-  "sotto": 1
+  "class": "structure",
+  "name": "Locanda del Cinghiale, con la cantina delle botti",
+  "author": "procedurale, a mano (Claude Cloud, catalogo delle strutture, T269)",
+  "cellar": 1
  },
  "struttura-residenza-del-borgomastro": {
-  "classe": "structure",
-  "nome": "Residenza del borgomastro (residenza a due piani)",
-  "autore": "procedurale, a mano (Claude Cloud, catalogo gemello, T273)"
+  "class": "structure",
+  "name": "Residenza del borgomastro (residenza a due piani)",
+  "author": "procedurale, a mano (Claude Cloud, catalogo gemello, T273)"
  },
  "struttura-santuario": {
-  "classe": "structure",
-  "nome": "Santuario della Luna d'Argento",
-  "autore": "procedurale, a mano (Claude Cloud, catalogo delle strutture, T269)"
+  "class": "structure",
+  "name": "Santuario della Luna d'Argento",
+  "author": "procedurale, a mano (Claude Cloud, catalogo delle strutture, T269)"
  },
  "struttura-tempio-della-luna": {
-  "classe": "structure",
-  "nome": "Tempio della luna (tempio a gradoni)",
-  "autore": "procedurale, a mano (Claude Cloud, catalogo gemello, T273)"
+  "class": "structure",
+  "name": "Tempio della luna (tempio a gradoni)",
+  "author": "procedurale, a mano (Claude Cloud, catalogo gemello, T273)"
  },
  "struttura-torre-del-mago": {
-  "classe": "structure",
-  "nome": "Torre del mago (torre con il sotterraneo)",
-  "autore": "procedurale, a mano (Claude Cloud, catalogo gemello, T273)",
-  "sotto": 1
+  "class": "structure",
+  "name": "Torre del mago (torre con il sotterraneo)",
+  "author": "procedurale, a mano (Claude Cloud, catalogo gemello, T273)",
+  "cellar": 1
  },
  "struttura-torre-di-guardia": {
-  "classe": "structure",
-  "nome": "Torre di guardia del passo, con la segreta",
-  "autore": "procedurale, a mano (Claude Cloud, catalogo delle strutture, T269)",
-  "sotto": 1
+  "class": "structure",
+  "name": "Torre di guardia del passo, con la segreta",
+  "author": "procedurale, a mano (Claude Cloud, catalogo delle strutture, T269)",
+  "cellar": 1
  }
 }

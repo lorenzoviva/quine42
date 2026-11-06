@@ -265,7 +265,7 @@ export class SessionServer {
     const notify = (tipo: Notice['tipo']) => (e: { da?: unknown; a?: unknown; testo?: unknown }) => {
       const to = typeof e?.a === 'string' ? this.clients.get(e.a) : undefined;
       const da = String(e?.da ?? '');
-      if (to && to.notices.length < 50) to.notices.push({ tipo, da, nome: kernel.wanderers().find((w) => w.id === da)?.nome ?? da, testo: String(e?.testo ?? '') });
+      if (to && to.notices.length < 50) to.notices.push({ tipo, da, nome: kernel.wanderers().find((w) => w.id === da)?.name ?? da, testo: String(e?.testo ?? '') });
     };
     kernel.bus.on('wanderer:said', notify('dici'));
     kernel.bus.on('wanderer:gave', notify('dai'));
@@ -409,7 +409,7 @@ export class SessionServer {
     // The settings come in with the master, before anything else of the match (T247, ADR-0133): this is sync, so nobody slips in between.
     const settled = settings === undefined ? undefined : this.kernel.isMaster(id) ? this.kernel.applySettings(settings) : { ok: false, motivo: 'solo il master regola il mondo' };
     // The master's minimum: what is asked below it does not enter; asking nothing, or 0 (the local models), spends nothing of the world's.
-    const least = this.kernel.config.ai.minimi?.tetto;
+    const least = this.kernel.config.ai.minimums?.cap;
     if (typeof tetto === 'number' && tetto > 0 && least !== undefined && tetto < least && !this.isAnonymous(id)) {
       link.send({ t: 'rifiuto', motivo: `il master chiede un tetto di almeno ${least}: alzalo, o gioca con i modelli locali` });
       return undefined;
@@ -436,7 +436,7 @@ export class SessionServer {
     link.send({
       t: 'ingresso',
       id,
-      nome: w.nome,
+      nome: w.name,
       ...(this.kernel.profileOf(id) ? { profilo: this.kernel.profileOf(id) } : {}),
       ...(fixed?.riparato.length ? { riparato: fixed.riparato } : {}),
       ...(settled ? { regolazioni: settled } : {}),
@@ -913,7 +913,7 @@ export class SessionServer {
     if (k.isMaster(c.id)) {
       const players = [...this.clients.keys()].flatMap((id) => {
         const o = id !== c.id && k.inWorld(id) ? k.wandererAt(id) : undefined;
-        return o ? [{ id, nome: k.wanderers().find((w) => w.id === id)?.nome ?? id, x: round(o.x), y: round(o.y) }] : [];
+        return o ? [{ id, nome: k.wanderers().find((w) => w.id === id)?.name ?? id, x: round(o.x), y: round(o.y) }] : [];
       });
       const key = JSON.stringify(players);
       if (key !== c.players) out.giocatori = players;
@@ -947,8 +947,8 @@ export class SessionServer {
         ...(ch.place?.name ? { nome: ch.place.name, descrizione: ch.place.description } : {}),
         ...(ch.lots.length ? { lotti: ch.lots.map((b) => [b.x0, b.y0, b.x1, b.y1]) } : {}),
         ...(ch.draft.includes(SEA_DRAFT) ? { mare: [...ch.draft].flatMap((c, i) => (c === SEA_DRAFT ? [i] : [])) } : {}),
-        ...(ch.plan?.scavi && Object.keys(ch.plan.scavi).length ? { scavi: { ...ch.plan.scavi } } : {}),
-        ...(ch.plan?.acqua && Object.keys(ch.plan.acqua).length ? { acqua: { ...ch.plan.acqua } } : {}),
+        ...(ch.plan?.digs && Object.keys(ch.plan.digs).length ? { scavi: { ...ch.plan.digs } } : {}),
+        ...(ch.plan?.water && Object.keys(ch.plan.water).length ? { acqua: { ...ch.plan.water } } : {}),
       });
     }
     if (chunks.length) out.luoghi = chunks;
@@ -981,8 +981,8 @@ export class SessionServer {
       near.add(w.id);
       const form = this.formOf(o.entity);
       const b = k.bubbles.get(o.entity);
-      const intro = k.profileOf(w.id)?.presentazione;
-      const v: OtherView = { id: w.id, nome: w.nome, x: round(o.x), y: round(o.y), facing: o.facing, ...(form ? { form } : {}), ...(b ? { testo: b.text } : {}), ...(intro ? { presentazione: intro } : {}) };
+      const intro = k.profileOf(w.id)?.introduction;
+      const v: OtherView = { id: w.id, nome: w.name, x: round(o.x), y: round(o.y), facing: o.facing, ...(form ? { form } : {}), ...(b ? { testo: b.text } : {}), ...(intro ? { presentazione: intro } : {}) };
       const key = JSON.stringify(v);
       if (c.others.get(w.id) !== key) others.push(v);
       c.others.set(w.id, key);

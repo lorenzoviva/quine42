@@ -46,10 +46,10 @@ const commit = (changes: Record<string, string>, headers: Record<string, string>
 beforeAll(async () => {
   dir = mkdtempSync(path.join(os.tmpdir(), 'quine-rotte-'));
   mkdirSync(path.dirname(logic()), { recursive: true });
-  mkdirSync(path.join(root(), 'world', 'giocatori'), { recursive: true });
-  writeFileSync(path.join(root(), 'universe.json'), JSON.stringify({ name: 'sonda', partita: { modalita: 'multiplayer', master: 'io' } }));
+  mkdirSync(path.join(root(), 'world', 'players'), { recursive: true });
+  writeFileSync(path.join(root(), 'universe.json'), JSON.stringify({ name: 'sonda', game: { mode: 'multiplayer', master: 'me' } }));
   writeFileSync(logic(), 'return {}\n');
-  writeFileSync(path.join(root(), 'world', 'giocatori', 'altro.json'), JSON.stringify({ nome: 'Altro', crediti: 5 }));
+  writeFileSync(path.join(root(), 'world', 'players', 'altro.json'), JSON.stringify({ nome: 'Altro', crediti: 5 }));
   git(root(), ['init', '-q']);
   git(root(), ['add', '-A']);
   git(root(), ['commit', '-q', '-m', 'nasce']);
@@ -70,7 +70,7 @@ describe('/api/universe', () => {
   });
 
   it('V-001 senza identità non si cambia un saldo', async () => {
-    await commit({ 'world/giocatori/altro.json': JSON.stringify({ nome: 'Altro', crediti: 1000 }) });
+    await commit({ 'world/players/altro.json': JSON.stringify({ nome: 'Altro', crediti: 1000 }) });
     expect(saldo()).toBe(5);
   });
 
@@ -86,7 +86,7 @@ describe('/api/universe', () => {
 
   it('V-003 il nome esatto della cartella di git è rifiutato, come ciò che esce dall\'universo', async () => {
     // As the master: a stranger stops before the paths are even looked at.
-    for (const p of ['.git/sonda-v003', '../sonda-v003', 'world/../../sonda-v003']) await commit({ [p]: 'sonda\n' }, { 'Content-Type': 'application/json', 'X-Quine-Viandante': 'io' });
+    for (const p of ['.git/sonda-v003', '../sonda-v003', 'world/../../sonda-v003']) await commit({ [p]: 'sonda\n' }, { 'Content-Type': 'application/json', 'X-Quine-Viandante': 'me' });
     expect(existsSync(path.join(root(), '.git', 'sonda-v003'))).toBe(false);
     expect(existsSync(path.join(dir, 'sonda-v003'))).toBe(false);
   });
@@ -169,7 +169,7 @@ describe('il webhook di Stripe', () => {
     try {
       const r = await signed(paid('evt_v004b', `../${path.basename(outside)}`, 'altro', 1));
       expect(r.status).toBe(400);
-      expect(existsSync(path.join(outside, 'world', 'giocatori', 'altro.json'))).toBe(false);
+      expect(existsSync(path.join(outside, 'world', 'players', 'altro.json'))).toBe(false);
     } finally {
       rmSync(outside, { recursive: true, force: true });
     }
@@ -398,7 +398,7 @@ describe('la coda delle CLI', () => {
 describe('la sessione', () => {
   async function world() {
     const cfg = JSON.parse(bundledFiles['universe.json']);
-    const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3 } }, null, 2) };
+    const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, game: { mode: 'multiplayer', death: 3 } }, null, 2) };
     return new SessionServer(await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() }));
   }
 

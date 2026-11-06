@@ -3,14 +3,15 @@
 // range of the kernels it runs on (`kernels`, version.ts) and left standing with the fault `universe:kernel`. When a contract changes and
 // a migration is worth writing, it goes in MIGRATIONS: a pure function from the files of `from` to the files of `to`, with its test.
 // The first is 0.1 → 0.2 (T307a, ADR-0153, ADR-0155): the internal language of the world's simulation; then 0.2 → 0.3 (T307b,
-// ADR-0158): the internal language of society, work and the Council.
+// ADR-0158): the internal language of society, work and the Council; then 0.3 → 0.4 (T308a, ADR-0159): the fields and the paths of the
+// universe's files.
 // The universe's places live apart (`maps/`, a chunk store): a migration says how a place's plan is ported too (`migratePlan`), and the
 // kernel ports every plan it reads (`migratePlanRecord`). The kernel runs the chain at boot (`Kernel.boot`), before the files are read; the
 // pages, the worlds of many and the tools run it before they take the seed (`prepareUniverse`, universes.ts), so the seed's new files
 // reach a universe in the same load. A ported universe says it in `kernels.from`.
 
 import type { ChunkPlan } from './agents/cartography';
-import { INTERNAL_NAMES, internalAgent, internalCardId, internalCoefficients, internalGraph, internalJobProgram, internalManifest, internalModelId, internalModelId0_3, internalModelInfo, internalModuleId, internalName, internalPeople, internalPlots, internalSculptors, internalSoundPurpose, internalVenture } from './internalNames';
+import { INTERNAL_NAMES, internalAgent, internalCardId, internalCardsIn, internalCoefficients, internalFields, internalGraph, internalJobProgram, internalManifest, internalModelId, internalModelId0_3, internalModelInfo, internalModuleId, internalName, internalPath, internalPeople, internalPlots, internalSculptors, internalSoloIn, internalSoundPurpose, internalVenture, type FieldShapeId } from './internalNames';
 import { hashStr, hex } from './rng';
 import type { FileMap } from './types';
 import { checkKernelVersion, compareContracts, contractOf, KERNEL_VERSION, parseContract, parseVersion, runsOnThisKernel, showContract, universeKernels, type Contract } from './version';
@@ -48,6 +49,14 @@ export const MIGRATIONS: readonly Migration[] = [
       'la lingua interna della società e del Concilio (T307b): momenti, «dove», attività, specie e genere, mestieri e i loro programmi, comportamenti ed esiti del lavoro, id dei moduli del seme (sys.work, job.*, obj.*), imprese, trame e missioni, suoni (usi, effetti, programmi del seme), parti dei modelli, agenti e i loro prompt, classi dello Scultore, coefficienti, carte e grafo, modalità della partita, esiti delle mancanze',
     migrate: (files) => migrate0_3(files),
     migratePlan: (plan) => plan0_3(plan),
+  },
+  {
+    from: '0.3',
+    to: '0.4',
+    descrizione:
+      'la lingua interna dei file dell’universo (T308a): i nomi di campo di ogni file (universe.json, manifest, persone, trame, bibbia, atlante, regole, stato, viandanti, imprese, carte, consumi, mancanze, piani, indice dei modelli), i timbri delle carte, il viandante della partita singola (io → me), i percorsi del mondo (world/players/, world/state.json, world/ventures.json, world/stores/…) e l’attributo suolo dei programmi',
+    migrate: (files) => migrate0_4(files),
+    migratePlan: (plan) => plan0_4(plan),
   },
 ];
 
@@ -105,6 +114,26 @@ export function migrateUniverse(files: FileMap, kernelVersion: string = KERNEL_V
   }
   const ported = { ...config, kernel: kernelVersion, kernels: { from: showContract(contractOf(kernel)) } };
   return { files: { ...out, 'universe.json': JSON.stringify(ported, null, 2) + '\n' }, applied: chain.map((m) => `${m.from}→${m.to}: ${m.descrizione}`) };
+}
+
+/**
+ * A universe's files (all of them, or the few a page needs, with universe.json among them) as this kernel reads them: ported in memory
+ * when they are of an older contract, nothing written (T308a). What reads a universe on the disk without opening it (the site's routes,
+ * the tools) reads these: a universe not opened since its contract changed has the paths and the fields of before.
+ */
+export function portedFiles(files: FileMap): FileMap {
+  return migrateUniverse(files).files;
+}
+
+/** The paths a page reads of a universe, with where they were before the contract 0.4 (T308a): those of 0.3 are ported by `portedFiles`. */
+export function pathsBefore(paths: readonly string[]): string[] {
+  const before = INTERNAL_NAMES.find((d) => d.id === 'percorsi')?.names ?? {};
+  const back = (p: string): string | undefined => {
+    if (p === 'world/players/me.json') return 'world/giocatori/io.json';
+    for (const [it, en] of Object.entries(before)) if (en.startsWith('world/') && (en.endsWith('/') ? p.startsWith(en) : p === en)) return it + p.slice(en.length);
+    return undefined;
+  };
+  return [...new Set(paths.flatMap((p) => [p, back(p) ?? p]))];
 }
 
 /**
@@ -703,4 +732,88 @@ function plan0_3(plan: ChunkPlan): ChunkPlan {
     return { ...o, module: internalModuleId(o.module) };
   });
   return changed ? ({ ...p, objects } as ChunkPlan) : plan;
+}
+
+// --- 0.3 → 0.4 (T308a, ADR-0153, ADR-0159): the fields and the files of a universe ------------------------------------------------------
+// Every field the table names, file by file and object by object (`internalFields`, the shapes of internalNames.ts), the cards' stamps
+// wherever they are (`carta` → `card`), the wanderer of a game alone (`io` → `me`, also the name of their file), and the paths of the
+// world (`world/giocatori/` → `world/players/`, `world/stato.json` → `world/state.json`…). The state of before T245a is ported too: its
+// important structures are the Huge ones, its wanderer is `me`'s own file. The plans are ported as they are read. The Lua is not touched:
+// what it reads of these files comes through the kernel (a job's tasks, a venture's step), which hands it the fields of 0.4.
+
+/** A universe's JSON of 0.3 in 0.4 by its shape, with the stamps and the wanderer alone of 0.4. */
+const fields0_4 = (shape: FieldShapeId) => (v: unknown): unknown => internalSoloIn(internalCardsIn(internalFields(shape, v)));
+
+/** The shape of every JSON file of the universe that has one (by its path of 0.3). */
+function shape0_4(p: string): FieldShapeId | undefined {
+  if (/^modules\/[^/]+\/manifest\.json$/.test(p)) return 'manifest';
+  if (/^world\/giocatori\/[^/]+\.json$/.test(p)) return 'wanderer';
+  return (
+    {
+      'universe.json': 'config',
+      'models/index.json': 'modelIndex',
+      'world/people.json': 'people',
+      'world/plots.json': 'plots',
+      'world/bible.json': 'bible',
+      'world/atlas.json': 'atlas',
+      'world/rules.json': 'rules',
+      'world/stato.json': 'state',
+      'world/imprese.json': 'ventures',
+      'world/carte.json': 'cards',
+      'world/consumi.json': 'usage',
+      'world/mancanze.json': 'shortfalls',
+    } as Record<string, FieldShapeId>
+  )[p];
+}
+
+/** The attribute of the programs that marks the world's ground (`suolo="E"` → `soil="E"`, ADR-0135). */
+const xml0_4 = (xml: string): string => xml.replace(/(<[A-Za-z]+\b[^>]*?\s)suolo=(")/g, '$1soil=$2');
+
+/** Where a file of 0.3 goes in 0.4: the world's paths (`world/giocatori/io.json` → `world/players/me.json`). */
+const path0_4 = (p: string): string => internalPath(p);
+
+function migrate0_4(files: FileMap): FileMap {
+  const out: FileMap = {};
+  for (const [p, text] of Object.entries(files)) {
+    if (p === SEED) continue;
+    const to = path0_4(p);
+    // A universe that has both the old path and the new one keeps the new one.
+    if (to !== p && files[to] !== undefined) continue;
+    const shape = shape0_4(p);
+    let next = text;
+    if (shape) next = rewriteJson(text, fields0_4(shape));
+    else if (/^models\/[^/]+\.xml$/.test(p)) next = xml0_4(text);
+    else if (/\.json$/.test(p)) next = rewriteJson(text, (v) => internalSoloIn(internalCardsIn(v)));
+    out[to] = next;
+  }
+  // The state of before T245a: its important structures are the Huge ones, its wanderer is `me`'s own file (if `me` has none).
+  const state = parseJson(out['world/state.json'] ?? '');
+  if (isRecord(state) && (state.important !== undefined || state.wanderer !== undefined)) {
+    const { important, wanderer, ...rest } = state;
+    const rares = isRecord(rest.rares) ? { ...rest.rares } : {};
+    if (isRecord(important)) rares.huge = { ...important, ...(isRecord(rares.huge) ? rares.huge : {}) };
+    if (Object.keys(rares).length) rest.rares = rares;
+    if (isRecord(wanderer) && out['world/players/me.json'] === undefined) out['world/players/me.json'] = JSON.stringify(internalFields('wanderer', wanderer), null, 1) + '\n';
+    out['world/state.json'] = JSON.stringify(rest, null, 1) + '\n';
+  }
+  // seed.json follows, as in 0.2 and 0.3: a file of the seed the migration changed or moved, untouched by the universe, stays the seed's.
+  if (files[SEED] !== undefined) {
+    const base = parseJson(files[SEED]);
+    if (isRecord(base)) {
+      const next: Record<string, unknown> = {};
+      for (const [p, hash] of Object.entries(base)) {
+        const to = path0_4(p);
+        const pristine = files[p] !== undefined && hashOf(files[p]) === hash;
+        next[to] = pristine && out[to] !== undefined ? hashOf(out[to]) : hash;
+      }
+      out[SEED] = JSON.stringify(next, null, 1) + '\n';
+    } else out[SEED] = files[SEED];
+  }
+  return out;
+}
+
+/** A plan of 0.3 in 0.4 (idempotent): its fields (`strutture` → `structures`, `case` → `houses`…), its card and who signed it. */
+function plan0_4(plan: ChunkPlan): ChunkPlan {
+  const next = fields0_4('plan')(plan) as ChunkPlan;
+  return JSON.stringify(next) === JSON.stringify(plan) ? plan : next;
 }

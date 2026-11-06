@@ -61,7 +61,7 @@ function diskFetch(d: string): typeof fetch {
   }) as typeof fetch;
 }
 
-const call = (task: string, agent = 'sculptor'): TextCall => ({ agent, task, system: 'sys', prompt: 'p', schema: { type: 'OBJECT' }, data: { x: 1 }, chi: 'io' });
+const call = (task: string, agent = 'sculptor'): TextCall => ({ agent, task, system: 'sys', prompt: 'p', schema: { type: 'OBJECT' }, data: { x: 1 }, chi: 'me' });
 
 describe('la tabella dei provider (T68)', () => {
   it('solo i compiti lenti vanno agli abbonamenti', () => {
@@ -153,7 +153,7 @@ describe('QueueAiModels e RoutedAiModels (T68)', () => {
       for (;;) {
         const r = await take(d, 'claude');
         if (r) {
-          expect(r).toMatchObject({ agent: 'sculptor', task: 'model.sculpt', system: 'sys', prompt: 'p', schema: { type: 'OBJECT' }, chi: 'io' });
+          expect(r).toMatchObject({ agent: 'sculptor', task: 'model.sculpt', system: 'sys', prompt: 'p', schema: { type: 'OBJECT' }, chi: 'me' });
           expect(r).not.toHaveProperty('data');
           return answer(d, r.id, { text: '{"ok":true}', usage: { prompt: 100, output: 20 } });
         }
@@ -162,7 +162,7 @@ describe('QueueAiModels e RoutedAiModels (T68)', () => {
     })();
     expect(await q.text(call('model.sculpt'))).toBe('{"ok":true}');
     await serve;
-    expect(records).toEqual([{ model: 'abbonamento-claude', agent: 'sculptor', task: 'model.sculpt', prompt: 100, cached: 0, output: 20, thoughts: 0, chi: 'io' }]);
+    expect(records).toEqual([{ model: 'abbonamento-claude', agent: 'sculptor', task: 'model.sculpt', prompt: 100, cached: 0, output: 20, thoughts: 0, who: 'me' }]);
     const ledger = new UsageLog();
     ledger.record(records[0]);
     expect(ledger.session.usd).toBe(0);

@@ -11,7 +11,7 @@ import type { FileMap, MagicRune, Spell, TerrainDef } from '../types';
 import type { WorldGraph } from '../graph';
 import { gameSetupSummary } from '../gameSetup';
 import { repairGameSetup } from '../validator';
-import { italianName } from '../internalNames';
+import { internalFields, italianName } from '../internalNames';
 
 export type AgentId = 'narrator' | 'cartographer' | 'artist' | 'sculptor' | 'physicist' | 'engineer' | 'arbiter' | 'liaison' | 'actor' | 'musician';
 
@@ -75,24 +75,25 @@ export interface WorldView {
 }
 
 export interface Bible {
-  titolo: string;
-  tono: string;
-  sintesi: string;
-  storia?: string;
-  luoghi: string[];
-  personaggi: string[];
-  fatti: string[];
+  title: string;
+  tone: string;
+  summary: string;
+  history?: string;
+  places: string[];
+  characters: string[];
+  facts: string[];
   /** Legends and mysteries of the world, told from inside it. */
-  misteri?: string[];
-  /** Customs and sayings of this universe that enrich the lexicon (world/lessico.md) without contradicting it (T65). */
-  usanze?: string[];
+  mysteries?: string[];
+  /** Customs and sayings of this universe that enrich the lexicon (world/lexicon.md) without contradicting it (T65). */
+  customs?: string[];
   /** Old bibles: hints that the world was a simulation. No longer used (no meta-game, ADR-0025). */
-  crepe?: string[];
+  cracks?: string[];
 }
 
 export function readBible(files: FileMap): Bible | null {
   try {
-    return JSON.parse(files['world/bible.json'] ?? 'null');
+    // A bible of the contract 0.3 (`titolo`, `luoghi`) reads internal (T308a), as one the Narrator writes with its schema's fields.
+    return internalFields('bible', JSON.parse(files['world/bible.json'] ?? 'null'));
   } catch {
     return null;
   }
@@ -102,14 +103,14 @@ export function bibleSummary(b: Bible | null, full = false): string {
   if (!b) return '(nessuna bibbia del mondo)';
   const list = (xs: string[] | undefined, n: number) => (xs ?? []).slice(-n).map((x) => `- ${x}`).join('\n');
   return [
-    `Titolo: ${b.titolo}`,
-    `Tono: ${b.tono}`,
-    `Sintesi: ${b.sintesi}`,
-    full && b.storia ? `Storia: ${b.storia}` : '',
-    `Luoghi noti:\n${list(b.luoghi, full ? 30 : 12)}`,
-    `Personaggi noti:\n${list(b.personaggi, full ? 20 : 8)}`,
-    `Fatti stabiliti:\n${list(b.fatti, full ? 30 : 12)}`,
-    b.misteri?.length ? `Misteri e leggende del mondo:\n${list(b.misteri, 8)}` : '',
+    `Titolo: ${b.title}`,
+    `Tono: ${b.tone}`,
+    `Sintesi: ${b.summary}`,
+    full && b.history ? `Storia: ${b.history}` : '',
+    `Luoghi noti:\n${list(b.places, full ? 30 : 12)}`,
+    `Personaggi noti:\n${list(b.characters, full ? 20 : 8)}`,
+    `Fatti stabiliti:\n${list(b.facts, full ? 30 : 12)}`,
+    b.mysteries?.length ? `Misteri e leggende del mondo:\n${list(b.mysteries, 8)}` : '',
   ]
     .filter(Boolean)
     .join('\n');
@@ -118,7 +119,7 @@ export function bibleSummary(b: Bible | null, full = false): string {
 /** The head of the bible, for the tasks that bring their own context from the graph. */
 export function bibleHead(b: Bible | null): string {
   if (!b) return '(nessuna bibbia del mondo)';
-  return [`Titolo: ${b.titolo}`, `Tono: ${b.tono}`, `Sintesi: ${b.sintesi}`].join('\n');
+  return [`Titolo: ${b.title}`, `Tono: ${b.tone}`, `Sintesi: ${b.summary}`].join('\n');
 }
 
 /** Characters of graph context a focused task gets (about 700 tokens), and how many recent rules. */
@@ -134,24 +135,24 @@ export function paletteSummary(palette: Record<string, TerrainDef>): string {
 
 /** Rules established while the world was played (world/rules.json): later judgements must respect them. */
 export function rulesSummary(files: FileMap, n = 30): string {
-  let list: Array<{ testo: string; possibile: boolean; racconto: string; effetti?: string[] }> = [];
+  let list: Array<{ text: string; possible: boolean; story: string; effects?: string[] }> = [];
   try {
-    list = JSON.parse(files['world/rules.json'] ?? '{}').regole ?? [];
+    list = internalFields('rules', JSON.parse(files['world/rules.json'] ?? '{}')).rules ?? [];
   } catch {
     return '';
   }
   if (!list.length) return '';
-  const lines = list.slice(-n).map((r) => `- ${r.testo}: ${r.possibile ? `si può${r.effetti?.length ? ` (${r.effetti.join(', ')})` : ''}` : 'non si può'} — ${r.racconto}`);
+  const lines = list.slice(-n).map((r) => `- ${r.text}: ${r.possible ? `si può${r.effects?.length ? ` (${r.effects.join(', ')})` : ''}` : 'non si può'} — ${r.story}`);
   return `## Regole già stabilite dal Concilio (rispettale, sii coerente)\n${lines.join('\n')}`;
 }
 
 /**
- * The rune canon (world/canone.md): what the people of the world know about runes, plus the magic runes
+ * The rune canon (world/canon.md): what the people of the world know about runes, plus the magic runes
  * and incantations the universe actually has. Every narrative task gets it, so no story invents new rune
  * behaviours.
  */
 export function canonSummary(files: FileMap): string {
-  const canon = (files['world/canone.md'] ?? '').replace(/^# .*\n+/, '').trim();
+  const canon = (files['world/canon.md'] ?? '').replace(/^# .*\n+/, '').trim();
   if (!canon) return '';
   const runes: string[] = [];
   const spells: string[] = [];
@@ -176,19 +177,19 @@ export function canonSummary(files: FileMap): string {
     .join('\n\n');
 }
 
-/** The words of the lexicon (world/lessico.md) no text of the world explains (T65). */
+/** The words of the lexicon (world/lexicon.md) no text of the world explains (T65). */
 export function wordsOf(files: FileMap): string[] {
-  return lexiconWords(files['world/lessico.md'] ?? '');
+  return lexiconWords(files['world/lexicon.md'] ?? '');
 }
 
 /**
- * The lexicon (world/lessico.md): how people speak and behave in every universe, whatever the setting, plus
+ * The lexicon (world/lexicon.md): how people speak and behave in every universe, whatever the setting, plus
  * the few customs this universe added (bible → usanze). Every narrative task gets it, like the rune canon.
  */
 export function lexiconSummary(files: FileMap): string {
-  const lexicon = (files['world/lessico.md'] ?? '').replace(/^# .*\n+/, '').trim();
+  const lexicon = (files['world/lexicon.md'] ?? '').replace(/^# .*\n+/, '').trim();
   if (!lexicon) return '';
-  const own = readBible(files)?.usanze ?? [];
+  const own = readBible(files)?.customs ?? [];
   return [
     "## Lessico del mondo (vale sempre: le persone parlano e si comportano così, in ogni epoca; usalo nei dialoghi, nelle cose e nella bibbia, senza mai spiegarlo)",
     lexicon,
@@ -198,11 +199,11 @@ export function lexiconSummary(files: FileMap): string {
     .join('\n\n');
 }
 
-/** The game chosen before the Genesis (universe.json → partita), as a principle of the Council (ADR-0053). */
+/** The game chosen before the Genesis (universe.json → game), as a principle of the Council (ADR-0053). */
 export function gameSummary(files: FileMap): string {
   let raw: unknown;
   try {
-    raw = JSON.parse(files['universe.json'] ?? '{}').partita;
+    raw = internalFields('config', JSON.parse(files['universe.json'] ?? '{}')).game;
   } catch {
     raw = undefined;
   }
@@ -282,30 +283,30 @@ export class Council {
         break;
       case 'cartographer': {
         parts.push(`## Bibbia del mondo\n${bibleSummary(bible)}`, `## Terreni\n${paletteSummary(v.palette)}`, `## Moduli posizionabili\n${catalogSummary(v.catalog)}`);
-        let regions: Array<{ nome: string; ambiente: string; centro: [number, number]; raggio: number }> = [];
+        let regions: Array<{ name: string; environment: string; center: [number, number]; radius: number }> = [];
         try {
-          regions = JSON.parse(v.files['world/atlas.json'] ?? '{}').regioni ?? [];
+          regions = internalFields('atlas', JSON.parse(v.files['world/atlas.json'] ?? '{}')).regions ?? [];
         } catch {
           regions = [];
         }
-        if (regions.length) parts.push(`## Atlante (centro in luoghi; nord = y negativa)\n${regions.map((r) => `- ${r.nome} [${r.ambiente}] centro ${r.centro.join(',')} raggio ${r.raggio}`).join('\n')}`);
+        if (regions.length) parts.push(`## Atlante (centro in luoghi; nord = y negativa)\n${regions.map((r) => `- ${r.name} [${r.environment}] centro ${r.center.join(',')} raggio ${r.radius}`).join('\n')}`);
         break;
       }
       case 'sculptor':
         parts.push(`## Guida di stile\n${style}`);
         break;
       case 'artist':
-        parts.push(`## Guida di stile\n${style}`, `## Tono\n${bible?.tono ?? ''}`);
+        parts.push(`## Guida di stile\n${style}`, `## Tono\n${bible?.tone ?? ''}`);
         break;
       case 'musician':
         parts.push(`## Il mondo\n${bibleHead(bible)}`);
         break;
       case 'physicist':
-        parts.push(`## Terreni\n${paletteSummary(v.palette)}`, `## Tono\n${bible?.tono ?? ''}`);
+        parts.push(`## Terreni\n${paletteSummary(v.palette)}`, `## Tono\n${bible?.tone ?? ''}`);
         if (rules) parts.push(rules);
         break;
       case 'engineer':
-        parts.push(`## Bibbia (sintesi)\n${bible?.sintesi ?? ''}`, `## Terreni\n${paletteSummary(v.palette)}`);
+        parts.push(`## Bibbia (sintesi)\n${bible?.summary ?? ''}`, `## Terreni\n${paletteSummary(v.palette)}`);
         break;
       case 'arbiter':
         parts.push(`## Bibbia del mondo\n${bibleSummary(bible)}`, `## Guida di stile\n${style}`, `## Terreni\n${paletteSummary(v.palette)}`);

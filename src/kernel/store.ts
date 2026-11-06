@@ -1,12 +1,12 @@
 // The lasting store of the modules (T245a, ADR-0138; primitive D of T183): what a module keeps across the openings of the world that is
 // not a tile, as plain data under a key: a market's price, a site's counter, a tournament's board. One file per module in the world,
-// `world/magazzino/<module>.json`, saved with the game; never sent to a client (it is in no list of `src/session/files.ts`), never
+// `world/stores/<module>.json`, saved with the game; never sent to a client (it is in no list of `src/session/files.ts`), never
 // written by the Council (no agent produces it: the kernel writes it in the save, which commits it at once). A cap in bytes per module
 // and per universe: a full store says no.
 
 import type { FileMap } from './types';
 
-export const STORE_DIR = 'world/magazzino/';
+export const STORE_DIR = 'world/stores/';
 /** Bytes of the JSON of one module's store, and of all of them. */
 export const STORE_MODULE_BYTES = 64 * 1024;
 export const STORE_UNIVERSE_BYTES = 1024 * 1024;

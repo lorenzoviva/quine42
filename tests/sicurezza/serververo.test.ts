@@ -69,7 +69,7 @@ const until = async (what: () => unknown, ms: number, label: string) => {
 function makeUniverse(universes: string, name: string, master: string): string {
   const root = path.join(universes, name);
   const cfg = JSON.parse(bundledFiles['universe.json']);
-  const files: Record<string, string> = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, name, partita: { modalita: 'multiplayer', morte: 3, master } }) };
+  const files: Record<string, string> = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, name, game: { mode: 'multiplayer', death: 3, master } }) };
   for (const [rel, text] of Object.entries(files)) {
     mkdirSync(path.dirname(path.join(root, rel)), { recursive: true });
     writeFileSync(path.join(root, rel), text);
@@ -80,7 +80,7 @@ function makeUniverse(universes: string, name: string, master: string): string {
   return root;
 }
 
-const ledgerOf = (universes: string, name: string) => path.join(universes, '.saldi', `${name}.json`);
+const ledgerOf = (universes: string, name: string) => path.join(universes, '.balances', `${name}.json`);
 
 /** A server in a process of its own, with only the environment it is given and nothing out of the machine. What it and its worlds write is kept. */
 function startServer(args: string[], env: Record<string, string>, network: string) {
@@ -215,7 +215,7 @@ describe('con gli account', () => {
 
     it('V-014 oltre la build nulla: né i segreti, né il server, né gli universi', async () => {
       expect(existsSync(path.join(work, '.env'))).toBe(true);
-      for (const target of ['/.env', '/%2eenv', '/..%2f.env', '/%2e%2e/.env', '/assets/..%2f..%2f.env', '/..%5c.env', '/dist-server/server.mjs', '/lanciatore/lanciatore.mjs', '/universes/prova/universe.json', '/%2e%2e/universes/prova/universe.json', '/universes/.saldi/prova.json', '/rete-account.jsonl', '/package.json', '/lab/3d/index.html', '/@fs/etc/hosts', '/src/main.ts']) {
+      for (const target of ['/.env', '/%2eenv', '/..%2f.env', '/%2e%2e/.env', '/assets/..%2f..%2f.env', '/..%5c.env', '/dist-server/server.mjs', '/lanciatore/lanciatore.mjs', '/universes/prova/universe.json', '/%2e%2e/universes/prova/universe.json', '/universes/.balances/prova.json', '/rete-account.jsonl', '/package.json', '/lab/3d/index.html', '/@fs/etc/hosts', '/src/main.ts']) {
         expect((await ask(target)).status, target).toBe(404);
       }
     });
@@ -266,7 +266,7 @@ describe('con gli account', () => {
     });
 
     it('V-001 nemmeno il master scrive i crediti da fuori', async () => {
-      const r = await post('/api/universe/prova/commit', 'vero-uid-master', { changes: { [`world/giocatori/${ALICE}.json`]: '{"crediti":1000}' }, message: 'x' });
+      const r = await post('/api/universe/prova/commit', 'vero-uid-master', { changes: { [`world/players/${ALICE}.json`]: '{"crediti":1000}' }, message: 'x' });
       expect(r.status).toBe(403);
     });
 
@@ -299,13 +299,13 @@ describe('con gli account', () => {
     });
 
     it('V-001 chi fa un universo ne è il master, qualunque cosa dicano i file; un anonimo e nessuno no', async () => {
-      const files = { 'universe.json': JSON.stringify({ name: 'fatto', partita: { modalita: 'multiplayer', master: MASTER } }), [`world/giocatori/${ALICE}.json`]: '{"crediti":1000}' };
+      const files = { 'universe.json': JSON.stringify({ name: 'fatto', game: { mode: 'multiplayer', master: MASTER } }), [`world/players/${ALICE}.json`]: '{"crediti":1000}' };
       expect((await post('/api/universe/fatto/create', undefined, { files })).status).toBe(403);
       expect((await post('/api/universe/fatto/create', 'anon-uid-alice', { files })).status).toBe(403);
       expect(existsSync(path.join(universes, 'fatto'))).toBe(false);
       expect((await post('/api/universe/fatto/create', 'vero-uid-alice', { files })).status).toBe(200);
-      expect(JSON.parse(readFileSync(path.join(universes, 'fatto', 'universe.json'), 'utf8')).partita.master).toBe(ALICE);
-      expect(existsSync(path.join(universes, 'fatto', 'world', 'giocatori', `${ALICE}.json`))).toBe(false);
+      expect(JSON.parse(readFileSync(path.join(universes, 'fatto', 'universe.json'), 'utf8')).game.master).toBe(ALICE);
+      expect(existsSync(path.join(universes, 'fatto', 'world', 'players', `${ALICE}.json`))).toBe(false);
     });
   });
 
@@ -383,7 +383,7 @@ describe('con gli account', () => {
     });
 
     it('V-003 il nome di un universo e di un luogo non escono dalla loro cartella', async () => {
-      for (const name of ['..', '.git', '.saldi', '.cestino', '%2e%2e', '..%2f..', '%2e%2e%2f.saldi', 'prova%2f..', 'PROVA%00', 'con']) {
+      for (const name of ['..', '.git', '.balances', '.trash', '.saldi', '.cestino', '%2e%2e', '..%2f..', '%2e%2e%2f.saldi', 'prova%2f..', 'PROVA%00', 'con']) {
         const r = await ask(`/api/universe/${name}`, { headers: bearer('vero-uid-master') });
         expect(r.text, name).not.toContain('"exists":true');
         const w = await post(`/api/universe/${name}/commit`, 'vero-uid-master', { changes: { 'world/x.md': 'x' }, message: 'x' });
@@ -511,7 +511,7 @@ describe('con gli account', () => {
           expect((await ask(target, { method: 'POST', headers: { ...json, ...headers }, body: '{}' })).status, target).toBe(404);
         }
       }
-      expect(existsSync(path.join(universes, '.coda'))).toBe(false);
+      expect(existsSync(path.join(universes, '.queue'))).toBe(false);
     });
   });
 
@@ -608,7 +608,7 @@ describe('con gli account', () => {
     const history = git(root, ['log', '--all', '-p', '--format=%H %s']);
     for (const v of values) expect(history.includes(v)).toBe(false);
     // The spending is counted, and it is only a number.
-    expect(Object.keys(JSON.parse(readFileSync(path.join(universes, '.spesa-gemini.json'), 'utf8'))).sort()).toEqual(['giorno', 'spesi']);
+    expect(Object.keys(JSON.parse(readFileSync(path.join(universes, '.gemini-spend.json'), 'utf8'))).sort()).toEqual(['giorno', 'spesi']);
     expect(networkOf(network()).filter((n) => n.bloccato)).toEqual([]);
   }, 60000);
 });
@@ -689,7 +689,7 @@ describe('il file che `npm run serve` avvia, con il verificatore vero', () => {
     for (const target of ['/api/gemini/status', '/api/coda', '/api/coda/prendi']) {
       expect((await ask(target, { headers: { Host: `localhost:${port}` } })).status, target).toBe(404);
     }
-    expect(existsSync(path.join(universes, '.coda'))).toBe(false);
+    expect(existsSync(path.join(universes, '.queue'))).toBe(false);
   });
 
   it('V-014 la configurazione non si legge: né dal disco né dalla rotta', async () => {

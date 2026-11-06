@@ -8,6 +8,7 @@ import { accountWanderer } from '../src/session/account';
 import { INTERNAL_HEADER, WANDERER_HEADER } from '../src/kernel/universes';
 import { SOLO, validWandererId } from '../src/kernel/wanderers';
 import { isMultiplayer } from '../src/kernel/gameSetup';
+import { internalFields, SOLO_BEFORE_0_4 } from '../src/kernel/internalNames';
 import type { AccountSettings } from './account';
 import { accessRefusal, originRefusal } from './geminiProxy';
 
@@ -98,15 +99,17 @@ export interface Game {
 
 export function gameIn(universeJson: string | undefined): Game {
   try {
-    const partita = JSON.parse(universeJson ?? '{}')?.partita;
+    // A universe.json of the contract 0.3 (`partita.modalita`, the master `io`) reads internal (T308a).
+    const game = internalFields('config', JSON.parse(universeJson ?? '{}') ?? {})?.game;
+    const master = game?.master === SOLO_BEFORE_0_4 ? SOLO : game?.master;
     // As repairGameSetup reads it: a master that is not a wanderer's id is the one who plays alone.
-    return { many: isMultiplayer(partita?.modalita), master: validWandererId(partita?.master) ? partita.master : SOLO };
+    return { many: isMultiplayer(game?.mode), master: validWandererId(master) ? master : SOLO };
   } catch {
     return { many: false, master: SOLO };
   }
 }
 
-/** The master of this game: never an anonymous account; `QUINE_MASTER` is the master `io` of the universes made before accounts. */
+/** The master of this game: never an anonymous account; `QUINE_MASTER` is the master `me` (`io` until the contract 0.4) of the universes made before accounts. */
 export function isMasterOf(who: Caller, game: Game, masterUid?: string): boolean {
   if (!who.id || who.anonimo) return false;
   return who.id === game.master || (!!masterUid && who.uid === masterUid && game.master === SOLO);
@@ -118,8 +121,8 @@ export function owns(who: Caller, game: Game, masterUid?: string): boolean {
   return game.many ? isMasterOf(who, game, masterUid) : who.local;
 }
 
-/** A wanderer's state (and where balances and payments were, before their ledger, ADR-0104): over HTTP only the world writes it in a multiplayer game, and it never travels with a universe that is made. */
-export const creditFile = (p: string) => /^world\/(giocatori\/|pagamenti\.json$)/i.test(p.replace(/\\/g, '/'));
+/** A wanderer's state (and where balances and payments were, before their ledger, ADR-0104), also by the path of before the contract 0.4 (`world/giocatori/`, T308a): over HTTP only the world writes it in a multiplayer game, and it never travels with a universe that is made. */
+export const creditFile = (p: string) => /^world\/(players\/|giocatori\/|pagamenti\.json$)/i.test(p.replace(/\\/g, '/'));
 
 /**
  * The files of a universe being made, or why not. A game alone only from this machine, as ever. A multiplayer game has a master,
@@ -132,14 +135,15 @@ export function newUniverse(who: Caller, files: Record<string, string | null>): 
   if (!who.id) return { status: 403, refused: 'per fare un universo serve un account' };
   let cfg: Record<string, unknown> = {};
   try {
-    const parsed = JSON.parse(files['universe.json'] ?? '{}');
+    // The fields of the contract 0.3 (`partita`) read internal (T308a): the game is said once, with the names of 0.4.
+    const parsed = internalFields('config', JSON.parse(files['universe.json'] ?? '{}'));
     if (parsed && typeof parsed === 'object') cfg = parsed;
   } catch {
     /* not a config: the kernel repairs what it reads */
   }
   const kept = Object.fromEntries(Object.entries(files).filter(([p]) => !creditFile(p)));
-  const partita = { ...(cfg.partita as object | undefined), modalita: 'multiplayer', master: who.id };
-  return { files: { ...kept, 'universe.json': JSON.stringify({ ...cfg, partita }, null, 2) + '\n' } };
+  const made = { ...(cfg.game as object | undefined), mode: 'multiplayer', master: who.id };
+  return { files: { ...kept, 'universe.json': JSON.stringify({ ...cfg, game: made }, null, 2) + '\n' } };
 }
 
 /** The words of a failure a client may read: those the server wrote for it. Everything else (git's, the file system's, a parser's) names what is inside this machine. */

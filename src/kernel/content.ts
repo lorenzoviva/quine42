@@ -65,7 +65,7 @@ export class Content {
           tags: man.tags ?? [],
           glyph: app?.glyph ?? '?',
           color: app?.color ?? '#aaa',
-          ...(app?.aspetto ? { aspetto: app.aspetto } : {}),
+          ...(app?.look ? { look: app.look } : {}),
           ...(app?.model ? { model: app.model } : {}),
           equippable: man.item?.equippable,
           module: man.id,

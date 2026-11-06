@@ -88,22 +88,22 @@ society.forEach((s) => fail(`società: ${s}`));
 const plots = readPlots(files);
 const atlas = JSON.parse(files['world/atlas.json']).regioni as Array<{ ambiente: string; nome: string }>;
 for (const r of atlas) if (!layouts[r.ambiente]) fail(`atlante: la regione ${r.nome} ha l'ambiente ${r.ambiente}, che non c'è`);
-out.societa = { individui: people.persone.length, legami: people.persone.reduce((n, p) => n + p.famiglia.length, 0) / 2, problemi: society.length, trame: plots.length, regioni: atlas.length };
-log(`  ${people.persone.length} individui, ${(out.societa as { legami: number }).legami} legami, ${plots.length} trame, ${atlas.length} regioni: ${society.length} problemi`);
-if (people.persone.length !== 24 || plots.length !== 8 || atlas.length !== 10) fail('i numeri della società, delle trame o dell\'atlante non tornano');
+out.societa = { individui: people.people.length, legami: people.people.reduce((n, p) => n + p.family.length, 0) / 2, problemi: society.length, trame: plots.length, regioni: atlas.length };
+log(`  ${people.people.length} individui, ${(out.societa as { legami: number }).legami} legami, ${plots.length} trame, ${atlas.length} regioni: ${society.length} problemi`);
+if (people.people.length !== 24 || plots.length !== 8 || atlas.length !== 10) fail('i numeri della società, delle trame o dell\'atlante non tornano');
 
 log('— Rune');
 const magic = JSON.parse(files['modules/magic.runes/manifest.json']);
 const seedRunes = JSON.parse(readFileSync('universe/modules/magic.runes/manifest.json', 'utf8')).runes;
 const urban = Object.keys(magic.runes).filter((t) => !(t in seedRunes));
-const words = lexiconWords(files['world/lessico.md']);
+const words = lexiconWords(files['world/lexicon.md']);
 for (const t of urban) {
   const others = Object.fromEntries(Object.entries(magic.runes).filter(([x]) => x !== t)) as never;
   const r = magic.runes[t];
   const { errors } = validateNewRune({ token: t, nome: r.name, glifo: r.glyph, colore: r.color, elemento: r.element, descrizione: r.description }, others, words);
   errors.forEach((e) => fail(`runa ${t}: ${e}`));
   if (!magic.spells[t]) fail(`la runa ${t} non ha un incantesimo`);
-  if (!files['world/canone.md'].includes(`(«${t}»`)) fail(`la runa ${t} non è nel canone`);
+  if (!files['world/canon.md'].includes(`(«${t}»`)) fail(`la runa ${t} non è nel canone`);
 }
 out.rune = { urbane: urban.length, totali: Object.keys(magic.runes).length, incantesimi: Object.keys(magic.spells).length };
 log(`  ${urban.length} rune urbane (${Object.keys(magic.runes).length} in tutto), ${Object.keys(magic.spells).length} incantesimi`);
@@ -174,7 +174,7 @@ log(`  dopo ${ticks} tick: ${planned().length} luoghi pianificati`);
 
 // Gli individui: il registro li riconosce per origine, senza chiedere al Narratore.
 // Chi sta in un luogo dei piani è del registro; nei luoghi oltre i piani il Cartografo (qui i modelli locali) ne mette di nuovi.
-const registry = new Set(people.persone.map((p) => p.nome));
+const registry = new Set(people.people.map((p) => p.name));
 const mapped = new Set(Object.keys(maps).map((f) => f.replace(/\.json$/, '').split('_').slice(-2).join(',')));
 const npcs = k.ecs.query('module').filter((id) => mod(id)?.startsWith('npc.'));
 const strangers: string[] = [];
@@ -313,7 +313,7 @@ for (const id of ['trama-luce-torre', 'trama-busta-gialla', 'trama-ragu-domenica
 // Si ritrova ciascuno per origine (sono nei luoghi attorno alla piazza) e gli si parla.
 for (const [item, name] of [['item.busta-gialla', 'Rosaria Vitale'], ['item.pomodori', 'Carmela Esposito']] as const) {
   if (!countItem(inv(), item)) give(item, 1);
-  const origine = people.persone.find((x) => x.nome === name)!.origine!;
+  const origine = people.people.find((x) => x.name === name)!.origin!;
   const id = k.ecs.query('origin').find((e) => k.ecs.get(e, 'origin').key === origine);
   if (id === undefined) fail(`${name} non è nel suo luogo`);
   else {
@@ -359,7 +359,7 @@ if (visited.size !== Object.keys(maps).length) fail(`visitati ${visited.size} lu
 if (TICKS - ticks < 70) fail(`restano solo ${TICKS - ticks} tick per la Torre C`);
 await tick(TICKS - ticks);
 await settle(50);
-const done = readPlots(k.files).filter((p) => p.missione?.stato === 'completed').map((p) => p.titolo);
+const done = readPlots(k.files).filter((p) => p.quest?.state === 'completed').map((p) => p.title);
 counts.missioni = done.length;
 log(`  missioni compiute: ${done.length} (${done.join('; ')})`);
 if (done.length < 3) fail(`compiute ${done.length} missioni su 3`);

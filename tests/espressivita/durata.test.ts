@@ -142,7 +142,7 @@ describe('what Lua can leave behind for the next opening of the world', () => {
     first.ecs.get(id, 'form').done = ['alza-i-muri'];
     first.tick(DT);
     await closeWorld(first, w);
-    expect(JSON.parse(w.files['world/stato.json']).forme ?? {}).toEqual({});
+    expect(JSON.parse(w.files['world/state.json']).forme ?? {}).toEqual({});
   });
 
   it('a fault anywhere does not stop the saves (T262, once a LIMIT): it invalidates code, not the data of the game', async () => {
@@ -184,7 +184,7 @@ describe('many wanderers in the same world', () => {
     expect(board().tabellone).toBe('in gioco');
     k.tick(DT);
     const seen = (id: string) => k.as(id, () => k.uiValue('torneo_visto.tocca'));
-    expect(seen('io')).toBe('a te');
+    expect(seen('me')).toBe('a te');
     expect(seen('bea')).toBe('aspetti');
     // Out of turn: no effect.
     k.as('bea', () => k.uiAction('torneo', 'tira'));
@@ -203,14 +203,14 @@ describe('many wanderers in the same world', () => {
     k.as('bea', () => k.uiAction('carro', 'sali'));
     k.uiAction('carro', 'sali');
     k.as('bea', () => k.uiAction('carro', 'guida'));
-    const before = { io: k.wandererAt('io')!.x, bea: k.wandererAt('bea')!.x };
+    const before = { io: k.wandererAt('me')!.x, bea: k.wandererAt('bea')!.x };
     for (const c of [k.carpet()]) if (c) c.active = false;
     play(k, 1);
     expect(cart().visti).toBe(2);
     expect(k.wandererAt('bea')!.x - before.bea).toBeGreaterThan(1);
-    expect(k.wandererAt('io')!.x - before.io).toBeGreaterThan(1);
+    expect(k.wandererAt('me')!.x - before.io).toBeGreaterThan(1);
     // The system runs once, as whoever holds the default body; the keys it reads are bea’s, who drives, as her client says them.
-    const io = k.wandererAt('io')!.entity;
+    const io = k.wandererAt('me')!.entity;
     expect(cart().chi).toBe(io);
     expect(cart().guidatore).toBe(k.wandererAt('bea')!.entity);
     const keys = cart().tasti;
@@ -219,7 +219,7 @@ describe('many wanderers in the same world', () => {
     expect(cart().tasti).toBeGreaterThan(keys);
     // The keys of who does not drive move nothing.
     k.setHeldOf('bea', []);
-    k.setHeldOf('io', ['right']);
+    k.setHeldOf('me', ['right']);
     const still = cart().tasti;
     play(k, 0.2);
     expect(cart().tasti).toBe(still);
@@ -272,7 +272,7 @@ describe('what the Forge of mechanics can write', () => {
 describe('what a panel and the API cannot say', () => {
   it('LIMIT (panels): a board is not possible, sixteen elements at most; a text field is not an element', () => {
     const board = Array.from({ length: 64 }, (_, i) => ({ tipo: 'pulsante', id: `c${i}`, etichetta: '' }));
-    expect(cleanPanel({ titolo: 'Scacchi', elementi: board }, 'scacchi').panel!.elementi.length).toBe(16);
+    expect(cleanPanel({ titolo: 'Scacchi', elementi: board }, 'scacchi').panel!.elements.length).toBe(16);
     expect(cleanPanel({ titolo: 'x', elementi: [{ tipo: 'campo', id: 'riga', etichetta: 'Comando' }, { tipo: 'griglia', id: 'g', etichetta: '' }] }, 'x').errors).toEqual(['il pannello non ha elementi validi']);
   });
 

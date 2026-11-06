@@ -1,5 +1,5 @@
 <!-- Fortino di confine -->
-<sequence values="BNExzaPpQbOHtsgcdvefwXiIJhjMSFCWRVDLUuTYGKAknryql" symmetry="(xy)" suolo="E" origin="bottom">
+<sequence values="BNExzaPpQbOHtsgcdvefwXiIJhjMSFCWRVDLUuTYGKAknryql" symmetry="(xy)" soil="E" origin="bottom">
   <union symbol="9" values="NExzaPpQbOHtsgcdvefwXiIJhjMSFCWRVDLUuTYGKAknryql"/>
   <union symbol="8" values="XJMjw"/>
   <union symbol="7" values="CUWSuXJMjwDV"/>

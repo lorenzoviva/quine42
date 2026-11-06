@@ -193,8 +193,8 @@
       "layer": "ground",
       "speed": 0.8,
       "description": "Solchi appena chiusi sul seme: tra un giorno spunta il grano.",
-      "matura": {
-        "dopo": 1,
+      "ripens": {
+        "after": 1,
         "in": "u"
       }
     },
@@ -215,8 +215,8 @@
       "layer": "ground",
       "speed": 0.9,
       "description": "Il ceppo di un albero tagliato: in qualche giorno il bosco si richiude.",
-      "matura": {
-        "dopo": 3,
+      "ripens": {
+        "after": 3,
         "in": "t"
       }
     }

@@ -48,14 +48,14 @@ export function latheModels(files: FileMap, forms: Forms): LatheModelEntry[] {
   return ids.map((id) => {
     const path = `models/${id}.xml`;
     const xml = files[path] ?? '';
-    const info = forms.info(id) ?? { classe: 'object' };
-    const name = info.nome ?? id;
-    const classe = info.classe ?? forms.classOf(id).id;
-    const autore = info.autore ?? 'autore sconosciuto';
-    const voto = info.voto;
+    const info = forms.info(id) ?? { class: 'object' };
+    const name = info.name ?? id;
+    const classe = info.class ?? forms.classOf(id).id;
+    const autore = info.author ?? 'autore sconosciuto';
+    const voto = info.score;
 
-    let consigli = info.consigli ? [...info.consigli] : [];
-    let problemi = info.problemi ? [...info.problemi] : [];
+    let consigli = info.advice ? [...info.advice] : [];
+    let problemi = info.problems ? [...info.problems] : [];
 
     if (!consigli.length) {
       if (voto !== undefined && voto >= 8) {

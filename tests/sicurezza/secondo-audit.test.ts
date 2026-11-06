@@ -30,7 +30,7 @@ const TICK = 1 / 60;
 
 async function bootMany() {
   const cfg = JSON.parse(bundledFiles['universe.json']);
-  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, partita: { modalita: 'multiplayer', morte: 3, master: 'io' } }, null, 2) };
+  const files = { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, game: { mode: 'multiplayer', death: 3, master: 'me' } }, null, 2) };
   const models = new MockAiModels();
   const kernel = await Kernel.boot({ files, store: memoryStore(), ai: models });
   return { kernel, models };
@@ -154,17 +154,17 @@ describe('V-022 chi paga dopo un await', () => {
     }
     const reply = asked.find((c) => c.task === 'npc.reply');
     expect(reply?.chi).toBe('parla');
-    expect(asked.filter((c) => c.chi === 'io')).toEqual([]);
+    expect(asked.filter((c) => c.chi === 'me')).toEqual([]);
   });
 
   it('V-022 senza crediti di chi parla risponde il modello locale, anche se il master ne ha', async () => {
-    kernel.ledger.credit('io', 5);
+    kernel.ledger.credit('me', 5);
     const server = new SessionServer(kernel, { reach: 1e6 });
     const a = enter(server, 'senza');
     const individual = [...kernel.modules.values()].find((m) => m.manifest.persona)!;
     const at = kernel.wandererAt('senza')!;
     const npc = kernel.spawnModuleEntity(individual, at.x + 1, at.y);
-    const master = kernel.creditsOf('io');
+    const master = kernel.creditsOf('me');
     asked.length = 0;
     a.send({ t: 'chat', seq: 1, entita: npc, testo: 'ciao' });
     for (let i = 0; i < 200 && !a.got.some((m) => m.t === 'esito' && m.seq === 1); i++) {
@@ -172,13 +172,13 @@ describe('V-022 chi paga dopo un await', () => {
       await settle();
     }
     expect(asked.filter((c) => c.task === 'npc.reply')).toEqual([]);
-    expect(kernel.creditsOf('io')).toBe(master);
+    expect(kernel.creditsOf('me')).toBe(master);
   });
 
   it('V-022 ciò che il mondo chiede da solo, fuori da un viandante che agisce, non è del master', () => {
     expect(kernel.payerNow()).toBe(COMUNE);
     expect(kernel.as('parla', () => kernel.payerNow())).toBe('parla');
-    expect(kernel.as('io', () => kernel.payerNow())).toBe('io');
+    expect(kernel.as('me', () => kernel.payerNow())).toBe('me');
   });
 });
 
@@ -232,7 +232,7 @@ describe('V-024 un modello fuori listino', () => {
     expect(billedModel('mock')).toBe('mock');
     const { kernel } = await bootMany();
     kernel.ledger.credit('paga', 5);
-    const call = (model: string) => ({ day: '2026-11-02', model, agent: 'narrator', task: 'text.examine', prompt: 100000, cached: 0, output: 100000, thoughts: 0, chi: 'paga' });
+    const call = (model: string) => ({ day: '2026-11-02', model, agent: 'narrator', task: 'text.examine', prompt: 100000, cached: 0, output: 100000, thoughts: 0, who: 'paga' });
     kernel.billCall(call('mock') as never);
     expect(kernel.ledger.balance('paga')).toBe(5);
     kernel.billCall(call('gemini-mai-sentito') as never);
@@ -246,7 +246,7 @@ describe('V-025 quali mondi apre un socket', () => {
     dir = mkdtempSync(path.join(os.tmpdir(), 'quine-mondi-'));
     for (const [name, modalita] of [['molti', 'multigiocatore'], ['solo', 'singola']]) {
       mkdirSync(path.join(dir, name, '.git'), { recursive: true });
-      writeFileSync(path.join(dir, name, 'universe.json'), JSON.stringify({ partita: { modalita } }));
+      writeFileSync(path.join(dir, name, 'universe.json'), JSON.stringify({ game: { mode: modalita } }));
     }
   });
   afterAll(() => rmSync(dir, { recursive: true, force: true }));
