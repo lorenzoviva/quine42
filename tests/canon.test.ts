@@ -25,8 +25,9 @@ describe('the rune canon', () => {
       const ctx = c.context(agent);
       expect(ctx).toMatch(/## Canone delle rune[\s\S]*nessuna trama/);
       expect(ctx).toContain('Non si spostano');
-      expect(ctx).toMatch(/ᛊ Sowilo \(«luce», luce\)/);
-      expect(ctx).toMatch(/terra \+ fuoco → Palla di fuoco/);
+      // The token is Latin (T307a), the element in the language of the world.
+      expect(ctx).toMatch(/ᛊ Sowilo \(«lux», luce\)/);
+      expect(ctx).toMatch(/terra \+ ignis → Palla di fuoco/);
     }
     for (const agent of ['scultore', 'artista', 'fisico', 'ingegnere', 'cartografo', 'referente'] as const) expect(c.context(agent)).not.toContain('Canone delle rune');
     await c.ask('narratore', 'plot.weave', 'una trama', { type: 'OBJECT' });

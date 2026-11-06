@@ -12,7 +12,7 @@ export const FLORA_GEOLOGIA: Definizione[] = [
     ambientazione: 'fantasy',
     nome: 'quercia-secolare',
     titolo: 'Quercia secolare',
-    classe: 'albero',
+    classe: 'tree',
     descrizione: 'La quercia dei boschi antichi di Aurora: tronco nodoso e muschioso, rami larghi, chioma a nuvole.',
     procedura: 'le radici a caso (larghe, a ceppo, ad arco), il tronco che sale storto a caso, sette rami nati in punti a caso del tronco alto che vanno dalla loro parte e a volte salgono, la chioma che si gonfia a caso dalle punte; muschio a caso sul tronco.',
     xml: () =>
@@ -52,7 +52,7 @@ export const FLORA_GEOLOGIA: Definizione[] = [
     ambientazione: 'fantasy',
     nome: 'salice-piangente',
     titolo: 'Salice piangente',
-    classe: 'albero',
+    classe: 'tree',
     descrizione: 'Il salice degli stagni di Aurora: tronco corto e storto, rami che si aprono e fronde che ricadono fino all\'acqua.',
     procedura: 'il tronco storto a caso, rami nati in punti a caso che si aprono, poi le fronde: ogni foglia lascia cadere sotto di sé una foglia nuova con una probabilità, così le tende verdi hanno lunghezze diverse a ogni seme; la base a caso (sul prato, sulla riva con le pietre, sulle radici).',
     xml: () =>
@@ -90,7 +90,7 @@ export const FLORA_GEOLOGIA: Definizione[] = [
     ambientazione: 'fantasy',
     nome: 'fungo-gigante-luminoso',
     titolo: 'Fungo gigante luminoso',
-    classe: 'albero',
+    classe: 'tree',
     descrizione: 'Il fungo alto come un albero che illumina le radure notturne di Aurora: gambo pallido, cappello maculato, lamelle che brillano.',
     procedura: 'il gambo che sale storto a caso, il cappello a caso (piatto, a cupola, a cono, a due piani), le lamelle luminose che si accendono a caso sotto il cappello, macchie sul cappello e funghetti che nascono in punti a caso della base.',
     xml: () =>
@@ -137,7 +137,7 @@ export const FLORA_GEOLOGIA: Definizione[] = [
     ambientazione: 'fantasy',
     nome: 'arco-roccia-muschioso',
     titolo: 'Arco di roccia muschioso',
-    classe: 'edificio',
+    classe: 'building',
     descrizione: 'Un arco naturale nelle forre di Aurora: roccia grigia rosa, muschio sopra, liane che pendono dall\'arco.',
     procedura: 'la forma dell\'arco a caso (tondo, inclinato, doppio, ponte basso), la roccia che si gonfia a caso in bozze, il muschio sulle facce in alto e liane che nascono in punti a caso sotto l\'arco e scendono di lunghezze diverse.',
     xml: () =>
@@ -175,7 +175,7 @@ export const FLORA_GEOLOGIA: Definizione[] = [
     ambientazione: 'fantasy',
     nome: 'cristallo-caverna',
     titolo: 'Cristalli di caverna',
-    classe: 'edificio',
+    classe: 'building',
     descrizione: 'Un nido di cristalli che spunta dalla roccia delle caverne di Aurora, ognuno con la sua luce.',
     procedura: 'massi che nascono a caso sul terreno e crescono, un cristallo madre a caso (dritto, inclinato, doppio, a ventaglio), poi una ventina di cristalli nati in punti a caso della roccia, ognuno con una direzione e una lunghezza a caso.',
     xml: () =>
@@ -208,7 +208,7 @@ export const FLORA_GEOLOGIA: Definizione[] = [
     ambientazione: 'steampunk',
     nome: 'albero-ferro-fuso',
     titolo: 'Albero di ferro fuso',
-    classe: 'albero',
+    classe: 'tree',
     descrizione: 'Un albero di tubi e lamiera nei giardini meccanici di Orichalcum: tronco a canna, rami che piegano ad angolo retto, foglie di rame.',
     procedura: 'il piede a caso (flangia, treppiede, cassa di ingranaggi), una canna che sale con qualche gomito a caso, rami a tubo nati a caso che vanno dritti e salgono a gradini, foglie di rame piatte che si allargano a caso, rivetti e ruggine a caso.',
     xml: () =>
@@ -249,7 +249,7 @@ export const FLORA_GEOLOGIA: Definizione[] = [
     ambientazione: 'steampunk',
     nome: 'camino-geotermico',
     titolo: 'Camino geotermico',
-    classe: 'edificio',
+    classe: 'building',
     descrizione: 'Una bocca di vapore delle terre calde di Orichalcum, incanalata in camini d\'ottone che sbuffano.',
     procedura: 'la collina di roccia cresce da massi nati a caso; i camini a caso (uno grande, tre in fila, un fascio storto, una cupola con valvole); il vapore sale a rami dalle bocche e si gonfia a caso; zolfo a caso sulla roccia.',
     xml: () =>
@@ -286,7 +286,7 @@ export const FLORA_GEOLOGIA: Definizione[] = [
     ambientazione: 'steampunk',
     nome: 'venatura-oricalco',
     titolo: 'Venatura di oricalco',
-    classe: 'edificio',
+    classe: 'building',
     descrizione: 'Uno sperone di roccia nera rigato da vene di oricalco che i minatori di Orichalcum seguono a colpi di piccone.',
     procedura: 'lo sperone a caso (guglia alta, mensa larga, due denti), massi che crescono da semi a caso attorno, vene di oricalco che nascono in punti a caso della roccia e la attraversano in direzioni a caso, il puntello dei minatori a caso (palo con lanterna, carrello sui binari, piccone piantato).',
     xml: () =>
@@ -327,7 +327,7 @@ export const FLORA_GEOLOGIA: Definizione[] = [
     ambientazione: 'steampunk',
     nome: 'ponte-tubi-vapore',
     titolo: 'Ponte di tubi a vapore',
-    classe: 'edificio',
+    classe: 'building',
     descrizione: 'Un fascio di tubature che scavalca la strada fra due piloni, nel quartiere delle caldaie di Orichalcum: valvole, perdite di vapore.',
     procedura: 'i piloni a caso (traliccio, mattoni, cavalletto), il fascio di tubi a caso (tre tubi in fila, due tubi grandi, quattro a gradini), tiranti che pendono dai tubi per lunghezze a caso, valvole in posti a caso e perdite di vapore che nascono a caso sui tubi e salgono a rami.',
     xml: () =>
@@ -372,7 +372,7 @@ export const FLORA_GEOLOGIA: Definizione[] = [
     ambientazione: 'steampunk',
     nome: 'gru-miniera',
     titolo: 'Gru di miniera',
-    classe: 'edificio',
+    classe: 'building',
     descrizione: 'La gru a vapore sopra un pozzo di Orichalcum: torre a traliccio, braccio, carrucola e secchia che scende.',
     procedura: 'la base a caso (binari, zoccolo di pietra, cavalletto di legno), il braccio in una di quattro direzioni con il suo contrappeso, la fune che scende dalla punta per una lunghezza a caso e finisce in una secchia, cumuli di minerale che crescono da semi a caso.',
     xml: () => {
@@ -428,7 +428,7 @@ export const FLORA_GEOLOGIA: Definizione[] = [
     ambientazione: 'moderno',
     nome: 'platano-viale',
     titolo: 'Platano di viale',
-    classe: 'albero',
+    classe: 'tree',
     descrizione: 'Il platano dei viali di Neapolis: tronco chiazzato che si sfoglia, chioma larga, ai piedi la città.',
     procedura: 'il piede a caso (griglia di ghisa, panchina tonda, fioriera di cemento), il tronco alto che sale storto a caso, rami nati a caso che si aprono larghi, la chioma che si gonfia a caso, le chiazze della corteccia che si allargano a caso.',
     xml: () =>
@@ -470,7 +470,7 @@ export const FLORA_GEOLOGIA: Definizione[] = [
     ambientazione: 'moderno',
     nome: 'aiuola-fiorita-urbana',
     titolo: 'Aiuola fiorita',
-    classe: 'cespuglio',
+    classe: 'bush',
     descrizione: 'Un\'aiuola di quartiere a Neapolis: bordo di cemento, terra scura, fiori di tre colori e qualcosa nel mezzo.',
     procedura: 'il bordo a caso (tondo, quadrato, a ottagono), il centro a caso (un arbusto, un lampioncino, un cartello, una fontanella), poi steli che nascono in punti a caso della terra, salgono di altezze diverse e fioriscono di un colore a caso.',
     xml: () =>
@@ -516,7 +516,7 @@ export const FLORA_GEOLOGIA: Definizione[] = [
     ambientazione: 'moderno',
     nome: 'scogliera-frangiflutti',
     titolo: 'Scogliera frangiflutti',
-    classe: 'edificio',
+    classe: 'building',
     descrizione: 'Il frangiflutti del porto di Neapolis: un muro di cemento, scogli e tetrapodi ammucchiati dove batte il mare.',
     procedura: 'il muro a caso (con la passeggiata e la ringhiera, a gradoni, con la lanterna verde in testa), poi massi che nascono accanto al muro e crescono, e tetrapodi: punte che spuntano a caso dai massi e crescono di sbieco; alghe a caso sui massi.',
     xml: () =>
@@ -554,7 +554,7 @@ export const FLORA_GEOLOGIA: Definizione[] = [
     ambientazione: 'moderno',
     nome: 'traliccio-alta-tensione',
     titolo: 'Traliccio dell\'alta tensione',
-    classe: 'monumento',
+    classe: 'monument',
     descrizione: 'Il traliccio d\'acciaio che porta la corrente attraverso le campagne di Neapolis.',
     procedura: 'la sagoma a caso (a delta, a botte con tre mensole, a Y, a T doppia), gli isolatori che pendono dalle punte con lunghezze a caso, un nido d\'uccelli e cartelli in posti a caso.',
     xml: () => {
@@ -603,7 +603,7 @@ export const FLORA_GEOLOGIA: Definizione[] = [
     ambientazione: 'moderno',
     nome: 'cantiere-gru',
     titolo: 'Cantiere con la gru',
-    classe: 'edificio',
+    classe: 'building',
     descrizione: 'Un palazzo in costruzione a Neapolis: platea, pilastri che salgono, solai gettati a metà e la gru a torre.',
     procedura: 'sedici pilastri che salgono e si fermano a caso (ognuno ha la sua altezza), due solai gettati attorno ai pilastri che li raggiungono e allargati a caso, la gru a torre in un angolo con il braccio in una di quattro direzioni, il ponteggio su uno dei quattro lati, ferri d\'armatura sulle teste dei pilastri e sacchi di materiale a caso.',
     xml: () => {
@@ -678,7 +678,7 @@ export const FLORA_GEOLOGIA: Definizione[] = [
     ambientazione: 'futuristico',
     nome: 'albero-bioluminescente',
     titolo: 'Albero bioluminescente',
-    classe: 'albero',
+    classe: 'tree',
     descrizione: 'Un albero dei giardini di Sidera che brilla di notte: tronco a spirale, baccelli luminosi, viticci che pendono accesi.',
     procedura: 'le radici a caso (aeree, a disco, a tripode), il tronco che sale molto storto, rami nati a caso, baccelli che si gonfiano a caso sulle punte e viticci luminosi che pendono per lunghezze a caso.',
     xml: () =>
@@ -716,7 +716,7 @@ export const FLORA_GEOLOGIA: Definizione[] = [
     ambientazione: 'futuristico',
     nome: 'corallo-silicio',
     titolo: 'Corallo di silicio',
-    classe: 'albero',
+    classe: 'tree',
     descrizione: 'Un corallo che cresce nell\'aria sottile di Sidera, fatto di silicio: rami che si biforcano, punte che si accendono.',
     procedura: 'lo scoglio a caso (masso tondo, disco, tre pietre), punte che nascono in posti a caso dello scoglio e crescono tutte insieme salendo, piegando e biforcandosi a caso; poi i rami si ispessiscono e le punte si accendono.',
     xml: () =>
@@ -751,7 +751,7 @@ export const FLORA_GEOLOGIA: Definizione[] = [
     ambientazione: 'futuristico',
     nome: 'monolite-magnetico',
     titolo: 'Monolite magnetico',
-    classe: 'monumento',
+    classe: 'monument',
     descrizione: 'Una pietra nera dei deserti di Sidera che piega il campo attorno a sé: frammenti trattenuti da linee di luce, limatura che si drizza.',
     procedura: 'il monolite a caso (lastra, obelisco, blocchi sfalsati, anello), i frammenti tenuti da linee di campo a caso (in alto, a spirale, ai lati), aculei di limatura che si drizzano a caso sulla base e segni luminosi a caso sulla pietra.',
     xml: () =>
@@ -789,7 +789,7 @@ export const FLORA_GEOLOGIA: Definizione[] = [
     ambientazione: 'futuristico',
     nome: 'geyser-criogenico',
     titolo: 'Geyser criogenico',
-    classe: 'edificio',
+    classe: 'building',
     descrizione: 'Un geyser delle lune ghiacciate di Sidera: un cono di ghiaccio e un getto che gela mentre sale.',
     procedura: 'il getto a caso (colonna alta, fontana a ombrello che ricade, due getti storti, spruzzo a rami), massi di ghiaccio che crescono accanto al cono, cristalli di brina che nascono a caso con la loro direzione e lunghezza.',
     xml: () =>
@@ -824,7 +824,7 @@ export const FLORA_GEOLOGIA: Definizione[] = [
     ambientazione: 'futuristico',
     nome: 'antenna-array-profondo',
     titolo: 'Antenna dello spazio profondo',
-    classe: 'edificio',
+    classe: 'building',
     descrizione: 'Una stazione d\'ascolto di Sidera che punta lontano: parabole, pannelli e antenne che crescono come rami.',
     procedura: 'lo strumento a caso (una parabola grande, tre parabole sui piloni, pannelli a fase, torre a griglia), poi antenne che nascono in punti a caso della piattaforma e crescono a rami, luci di segnalazione a caso.',
     xml: () =>

@@ -19,7 +19,7 @@ import type { ChunkPlan } from '../../../../src/kernel/agents/cartography';
 import type { FileMap } from '../../../../src/kernel/types';
 import { prefissoMappe } from './carica';
 import { LUOGHI } from './luoghi';
-import { CASA_SIDERA, CASE_SIDERA, collocate, leggi, lotti, luogoDi, modelloDi, PROGETTO, props, semeProcedurale, strutture, suoni, UNIVERSI, xmlDi, xmlLab, xmlStruttura, type Lotto, type Struttura, type Universo } from './cloud';
+import { CASA_SIDERA, CASE_SIDERA, collocate, leggiDisco, lotti, luogoDi, modelloDi, PROGETTO, props, semeProcedurale, strutture, suoni, UNIVERSI, xmlDi, xmlLab, xmlStruttura, type Lotto, type Struttura, type Universo } from './cloud';
 
 const solo = process.argv.slice(2).filter((a) => !a.startsWith('-'));
 const settle = (ms = 10) => new Promise((r) => setTimeout(r, ms));
@@ -64,7 +64,7 @@ function registra(u: Universo): string[] {
   // A structure's entry is written anew (its size comes later, from where it stands): a cellar is one tile under the ground (ADR-0135).
   for (const s of strutture(u.tema)) {
     delete index[s.id];
-    put(s.id, xmlStruttura(s), { classe: 'grande', nome: s.nome, autore: STRUTTURE_AUTORE(s), ...(s.cantina ? { sotto: 1 } : {}) });
+    put(s.id, xmlStruttura(s), { classe: 'structure', nome: s.nome, autore: STRUTTURE_AUTORE(s), ...(s.cantina ? { sotto: 1 } : {}) });
   }
   fatti.push(`${strutture(u.tema).length} strutture`);
   const sounds = suoni(u);
@@ -85,10 +85,10 @@ function sidera(dir: string, index: Record<string, Record<string, unknown>>): st
   const t = JSON.parse(readFileSync(terrain, 'utf8'));
   if (t.commonHouse !== CASA_SIDERA) writeFileSync(terrain, JSON.stringify({ ...t, commonHouse: CASA_SIDERA }, null, 2) + '\n');
   const out: string[] = [];
-  for (const classe of ['edificio', 'grande'] as const) {
+  for (const classe of ['building', 'structure'] as const) {
     const id = commonHouseModel(CASA_SIDERA, classe);
     writeFileSync(join(dir, `${id}.xml`), xmlLab(CASE_SIDERA[classe]));
-    index[id] = { classe, nome: classe === 'edificio' ? 'Modulo abitativo (casa comune)' : 'Residenza modulare (casa comune)', autore: 'Claude Cloud (T272, T273)' };
+    index[id] = { classe, nome: classe === 'building' ? 'Modulo abitativo (casa comune)' : 'Residenza modulare (casa comune)', autore: 'Claude Cloud (T272, T273)' };
     out.push(id);
   }
   const alias: Record<string, [string, string, string]> = {
@@ -173,7 +173,7 @@ interface Posto {
   lots: Lotto[];
   /** The structures the plan keeps (the universe's own), then the Cloud's. */
   tiene: NonNullable<ChunkPlan['strutture']>;
-  nuove: Array<{ s: Struttura; taglia: 'grande' | 'enorme' }>;
+  nuove: Array<{ s: Struttura; taglia: 'large' | 'huge' }>;
 }
 
 /** The lots a structure can still take: they are taken in order, the largest first, and a grande model needs a longest side of 5. */
@@ -212,7 +212,7 @@ function colloca(u: Universo, files: FileMap, k: Kernel, maps: Record<string, Ch
       if (better === true || (typeof better === 'number' && better > 0)) enorme = { p, s };
     }
   if (enorme) {
-    enorme.p.nuove.push({ s: enorme.s, taglia: 'enorme' });
+    enorme.p.nuove.push({ s: enorme.s, taglia: 'huge' });
     restano.splice(restano.indexOf(enorme.s), 1);
   }
   // The others: each where it fits best (the words of the place), then the nearest to the start, at most two to a place.
@@ -225,7 +225,7 @@ function colloca(u: Universo, files: FileMap, k: Kernel, maps: Record<string, Ch
         if (!best || score > best.score) best = { p, s, score };
       }
     if (!best) break;
-    best.p.nuove.push({ s: best.s, taglia: 'grande' });
+    best.p.nuove.push({ s: best.s, taglia: 'large' });
     restano.splice(restano.indexOf(best.s), 1);
   }
   const righe: string[] = [];
@@ -255,7 +255,7 @@ function segnaTaglie(u: Universo, maps: Record<string, ChunkRecord>) {
   for (const rec of Object.values(maps))
     for (const s of rec.plan.strutture ?? []) {
       const id = modelloDi(s.concetto);
-      if (ids.has(id) && s.taglia && s.taglia !== 'grande') Object.assign(index[id], modelSize({ classe: 'grande', taglia: s.taglia }));
+      if (ids.has(id) && s.taglia && s.taglia !== 'large') Object.assign(index[id], modelSize({ classe: 'structure', taglia: s.taglia }));
     }
   scriviIndice(indexPath, index, indentDi(text));
 }
@@ -268,14 +268,14 @@ function segnaTaglie(u: Universo, maps: Record<string, ChunkRecord>) {
     if (solo.length && !solo.includes(u.nome)) continue;
     console.log(`== ${u.nome} (${u.tema})`);
     console.log('  ' + registra(u).join('; '));
-    let { files, maps } = leggi(u);
+    let { files, maps } = leggiDisco(u);
     if (u.nome === 'aurora') {
       const nuove = await mappeAurora(u, files);
       if (Object.keys(nuove).length) {
         mkdirSync(join(PROGETTO, u.mappe), { recursive: true });
         for (const [name, rec] of Object.entries(nuove)) writeFileSync(join(PROGETTO, u.mappe, `${name}.json`), JSON.stringify(rec, null, 1) + '\n');
         console.log(`  ${Object.keys(nuove).length} luoghi pianificati offline in ${u.mappe}`);
-        ({ files, maps } = leggi(u));
+        ({ files, maps } = leggiDisco(u));
       }
     }
     const k = await boot(files);
@@ -283,7 +283,7 @@ function segnaTaglie(u: Universo, maps: Record<string, ChunkRecord>) {
     for (const [name, rec] of Object.entries(placed.maps)) writeFileSync(join(PROGETTO, u.mappe, `${name}.json`), JSON.stringify(rec, null, 1) + '\n');
     placed.righe.forEach((r) => console.log('  ' + r));
     segnaTaglie(u, placed.maps);
-    ({ files } = leggi(u));
+    ({ files } = leggiDisco(u));
     const check = await collocate(files, placed.maps);
     for (const s of check.strutture) console.log(`  (${s.cx}, ${s.cy}) ${s.luogo} [${s.ambiente}]: ${s.concetto} → ${s.modello}${s.taglia ? ` (${s.taglia})` : ''}, lotto ${s.lotto}`);
     check.problemi.forEach((p) => console.log('  ✗ ' + p));

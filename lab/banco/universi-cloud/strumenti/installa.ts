@@ -7,6 +7,7 @@ import { Kernel } from '../../../../src/kernel/kernel';
 import { memoryStore } from '../../../../src/kernel/repo';
 import { allowedPath } from '../../../../src/kernel/paths';
 import { SEED_FILE, seedHashes, upgradeFromSeed } from '../../../../src/kernel/universes';
+import { migratePlanRecord } from '../../../../src/kernel/migrations';
 import type { FileMap } from '../../../../src/kernel/types';
 import { checkKernelVersion, KERNEL_VERSION, stampKernel } from '../../../../src/kernel/version';
 import { runGit } from '../../../../server/git';
@@ -39,7 +40,13 @@ export function componi(u: Universo, seed = seme()): { files: FileMap; maps: Rec
   const files = Object.fromEntries(Object.entries(leggi(u).files).filter(([p]) => !p.startsWith('models/') || p === 'models/index.json' || p.endsWith('.xml')));
   const dir = path.join(PROGETTO, u.mappe);
   const maps: Record<string, string> = {};
-  for (const f of readdirSync(dir).filter((f) => f.endsWith('.json')).sort()) maps[`maps/${f}`] = readFileSync(path.join(dir, f), 'utf8').replace(/\r\n/g, '\n');
+  // The plans as the kernel of today reads them (T307a): installed already ported, so the disk of the universe is of this contract.
+  for (const f of readdirSync(dir).filter((f) => f.endsWith('.json')).sort()) {
+    const text = readFileSync(path.join(dir, f), 'utf8').replace(/\r\n/g, '\n');
+    const rec = JSON.parse(text);
+    const ported = migratePlanRecord(rec);
+    maps[`maps/${f}`] = ported === rec ? text : JSON.stringify(ported, null, 1) + '\n';
+  }
   const born = { ...files, [SEED_FILE]: JSON.stringify(seedHashes(seed), null, 1) + '\n' };
   const up = upgradeFromSeed(born, seed);
   // The range of the kernels it runs on (T302, ADR-0152), as the kernel writes it before its commit: from the contract it was made for.

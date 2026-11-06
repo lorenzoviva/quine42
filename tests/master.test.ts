@@ -54,13 +54,13 @@ describe('the master in god mode (T42a)', () => {
     const pos = { ...k.ecs.get(io, 'pos')! };
     // Anna right under the master (in world coordinates, the same as the master's: their carpets are both at rest).
     k.as('anna', () => Object.assign(k.wandererPos(), { x: pos.x, y: pos.y + 1 }));
-    const said = k.as('anna', () => k.applyEffects([{ tipo: 'spingi', forza: 3 } as any, { tipo: 'distruggi' } as any, { tipo: 'messaggio', testo: 'ehi' } as any], io));
+    const said = k.as('anna', () => k.applyEffects([{ type: 'push', force: 3 } as any, { type: 'destroy' } as any, { type: 'message', text: 'ehi' } as any], io));
     expect(said).toEqual(['ehi']);
     expect(k.ecs.alive.has(io)).toBe(true);
     expect(k.ecs.get(io, 'pos')).toMatchObject({ x: pos.x, y: pos.y });
     // The master pushes a player like anything else.
     const before = { ...k.ecs.get(anna, 'pos')! };
-    k.as('io', () => k.applyEffects([{ tipo: 'spingi', forza: 3 } as any], anna));
+    k.as('io', () => k.applyEffects([{ type: 'push', force: 3 } as any], anna));
     expect(Math.hypot(k.ecs.get(anna, 'pos')!.x - before.x, k.ecs.get(anna, 'pos')!.y - before.y)).toBeGreaterThan(0);
   });
 

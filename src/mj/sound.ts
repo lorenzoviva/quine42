@@ -13,6 +13,7 @@
 
 import { at, Mj3Error, type Grid3 } from './engine';
 import type { XmlElement } from './xml';
+import { italianName } from '../kernel/internalNames';
 
 /** The class of a sound program in `models/index.json`. Not one of `CLASSES`: it has no box, nothing in the world wears it. */
 export const SOUND_CLASS = 'suono';
@@ -210,7 +211,12 @@ function soundPurpose(raw: unknown): SoundPurpose | undefined {
 }
 
 /** Whether a program names an environment: its id, or one of the Cartographer's whose id contains it («castello_nero» is a castle). */
-export const namesEnvironment = (p: SoundProgram, environment: string | undefined): boolean => !!environment && !!p.suono?.ambienti?.some((a) => environment === a || environment.includes(a));
+/**
+ * Whether a program names an environment: exactly, or as part of its id; an environment of the seed also by its word of the world, which
+ * the Cartographer's ids still carry (T307a: `castle` plays in `castello_nero`).
+ */
+export const namesEnvironment = (p: SoundProgram, environment: string | undefined): boolean =>
+  !!environment && !!p.suono?.ambienti?.some((a) => environment === a || environment.includes(a) || environment.includes(italianName('ambienti', a)));
 
 /** The sound programs among a universe's files: their ids and index entries, in the index's order. */
 export function soundPrograms(files: Record<string, string>): SoundProgram[] {

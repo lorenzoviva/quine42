@@ -50,7 +50,7 @@ function universe(): { files: FileMap; chunks: GraphChunk[] } {
   ];
   const files: FileMap = {
     'universe.json': JSON.stringify({ name: 'prova' }),
-    'modules/npc.cat/manifest.json': manifest({ id: 'npc.cat', name: 'Gatto', kind: 'entity', appearance: { classe: 'animale' } }),
+    'modules/npc.cat/manifest.json': manifest({ id: 'npc.cat', name: 'Gatto', kind: 'entity', appearance: { classe: 'animal' } }),
     'modules/npc.villager/manifest.json': manifest({ id: 'npc.villager', name: 'Abitante', kind: 'entity' }),
     'modules/obj.banco/manifest.json': manifest({ id: 'obj.banco', name: 'Banco', kind: 'entity' }),
     'modules/item.forbici/manifest.json': manifest({ id: 'item.forbici', name: 'Forbici', kind: 'item', tags: ['strumento'] }),
@@ -69,8 +69,8 @@ function universe(): { files: FileMap; chunks: GraphChunk[] } {
     }),
     'modules/magic.runes/manifest.json': manifest({ id: 'magic.runes', name: 'Rune magiche', kind: 'data', runes: { luce: { name: 'Luce' }, acqua: { name: 'Acqua' } } }),
     'modules/magic.spells/manifest.json': manifest({ id: 'magic.spells', name: 'Incantesimi', kind: 'data', spells: { 'luce acqua': { name: 'Arcobaleno', cost: 5, effects: [] }, 'luce vento': { name: 'Brezza', cost: 5, effects: [] } } }),
-    'modules/world.layouts/manifest.json': manifest({ id: 'world.layouts', name: 'Ambienti', kind: 'data', layouts: { borgo: { name: 'Borgo', description: '', environment: 'villaggio' }, lago: { name: 'Lago', description: '', environment: 'acqua' } } }),
-    'world/atlas.json': JSON.stringify({ regioni: [{ id: 'lago-muto', nome: 'Lago Muto', descrizione: 'un lago fermo', ambiente: 'lago', centro: [3, 0], raggio: 1 }] }),
+    'modules/world.layouts/manifest.json': manifest({ id: 'world.layouts', name: 'Ambienti', kind: 'data', layouts: { village: { name: 'Borgo', description: '', environment: 'villaggio' }, lake: { name: 'Lago', description: '', environment: 'acqua' } } }),
+    'world/atlas.json': JSON.stringify({ regioni: [{ id: 'lago-muto', nome: 'Lago Muto', descrizione: 'un lago fermo', ambiente: 'lake', centro: [3, 0], raggio: 1 }] }),
     'world/people.json': JSON.stringify({
       persone: [
         individual('Fiocco', 'npc.cat', [['Bastiano', 'fratello'], ['Micetto', 'madre']], { luogo: 'Piazza del Borgo', genere: 'femmina' }),
@@ -88,8 +88,8 @@ function universe(): { files: FileMap; chunks: GraphChunk[] } {
     'world/stato.json': JSON.stringify({ viandante: { inventory: { slots: [{ item: 'item.pane', count: 2 }, null, { item: 'item.forbici', count: 1, inv: { slots: [{ item: 'item.farina', count: 1 }] } }] } } }),
   };
   const chunks: GraphChunk[] = [
-    { cx: 0, cy: 0, nome: 'Piazza del Borgo', ambiente: 'borgo', cose: ['npc.villager', 'obj.banco', 'obj.forno'], a_terra: ['Pane'], strutture: ['mulino'] },
-    { cx: 3, cy: 0, nome: 'Riva del Lago', ambiente: 'lago', cose: ['npc.cat'] },
+    { cx: 0, cy: 0, nome: 'Piazza del Borgo', ambiente: 'village', cose: ['npc.villager', 'obj.banco', 'obj.forno'], a_terra: ['Pane'], strutture: ['mulino'] },
+    { cx: 3, cy: 0, nome: 'Riva del Lago', ambiente: 'lake', cose: ['npc.cat'] },
   ];
   return { files, chunks };
 }
@@ -109,7 +109,7 @@ describe('the graph of the world (ADR-0045)', () => {
     expect(n('ricetta:pane')?.tipo).toBe('ricetta');
     expect(n('runa:luce')?.tipo).toBe('runa');
     expect(n('incantesimo:arcobaleno')?.tipo).toBe('incantesimo');
-    expect(n('ambiente:borgo')?.tipo).toBe('ambiente');
+    expect(n('ambiente:village')?.tipo).toBe('ambiente');
     expect(n('regione:lago-muto')?.tipo).toBe('regione');
     expect(n('luogo:0_0')).toMatchObject({ label: 'Piazza del Borgo', cx: 0, cy: 0 });
     expect(n('luogo:collina-dei-venti')?.dalla_bibbia).toBe(true);
@@ -131,8 +131,8 @@ describe('the graph of the world (ADR-0045)', () => {
     // «Sulle rive del Lago Muto» is in the region of that name.
     expect(has('trama:trama-lago', 'regione:lago-muto', 'tappa', { giorno: 0, momento: 'mattina', chi: 'persona:nereo' })).toBe(true);
     expect(has('luogo:3_0', 'regione:lago-muto', 'in_regione')).toBe(true);
-    expect(has('luogo:0_0', 'ambiente:borgo', 'ambiente')).toBe(true);
-    expect(has('regione:lago-muto', 'ambiente:lago', 'ambiente')).toBe(true);
+    expect(has('luogo:0_0', 'ambiente:village', 'ambiente')).toBe(true);
+    expect(has('regione:lago-muto', 'ambiente:lake', 'ambiente')).toBe(true);
     expect(has('luogo:0_0', 'tipo:obj.banco', 'contiene')).toBe(true);
     expect(has('luogo:0_0', 'oggetto:item.pane', 'contiene')).toBe(true);
     expect(has('luogo:0_0', 'struttura:mulino', 'contiene')).toBe(true);

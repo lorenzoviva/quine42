@@ -31,8 +31,8 @@ ${stair
 
 const files = () => {
   const index = JSON.parse(bundledFiles['models/index.json']!);
-  index['cantina-prova'] = { classe: 'grande', nome: 'casa con cantina', sotto: 1 };
-  index['chiusa-prova'] = { classe: 'grande', nome: 'cantina senza scala', sotto: 1 };
+  index['cantina-prova'] = { classe: 'structure', nome: 'casa con cantina', sotto: 1 };
+  index['chiusa-prova'] = { classe: 'structure', nome: 'cantina senza scala', sotto: 1 };
   return { ...bundledFiles, 'models/cantina-prova.xml': house(true), 'models/chiusa-prova.xml': house(false), 'models/index.json': JSON.stringify(index) };
 };
 
@@ -70,8 +70,8 @@ async function scene(model: string) {
 
 describe('the model that goes down (T52b)', () => {
   it('reads `sotto` from the index entry, from 1 to 3', () => {
-    expect(cellarOf({ classe: 'grande', sotto: 2 })).toBe(2);
-    for (const sotto of [0, 4, 1.5, -1, '1' as unknown as number, undefined]) expect(cellarOf({ classe: 'grande', sotto })).toBe(0);
+    expect(cellarOf({ classe: 'structure', sotto: 2 })).toBe(2);
+    for (const sotto of [0, 4, 1.5, -1, '1' as unknown as number, undefined]) expect(cellarOf({ classe: 'structure', sotto })).toBe(0);
   });
 
   it('grows the box down and lays the model lower; models without `sotto` stand on the ground as before', async () => {
@@ -82,7 +82,7 @@ describe('the model that goes down (T52b)', () => {
     expect(f.result!.grid.Z).toBe(100);
     expect(f.base).toBe(20);
     expect(f.hole).toBeDefined();
-    const plain = (await forms.wait('grande', 1))!;
+    const plain = (await forms.wait('structure', 1))!;
     expect(plain.base).toBe(0);
     expect(plain.hole).toBeUndefined();
   });

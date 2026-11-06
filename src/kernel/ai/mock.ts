@@ -118,7 +118,7 @@ export class MockAiModels implements AiModels {
         const r = d.request ?? {};
         const n = hashStr(String(r.richiesta));
         const programma = String(d.example ?? '').replace(/bpm="(\d+)"/, (_, b) => `bpm="${Number(b) + (n % 13) - 6}"`);
-        return { nome: r.nome ?? `Aria ${SUFFIX[n % SUFFIX.length]}`, programma, uso: r.uso ?? 'musica', ambienti: r.ambienti ?? (d.world?.ambienti ?? []).filter((a: string) => String(r.richiesta).includes(a)), momenti: r.momenti ?? [] };
+        return { nome: r.nome ?? `Aria ${SUFFIX[n % SUFFIX.length]}`, programma, uso: r.uso ?? 'musica', ambienti: r.ambienti ?? (d.world?.ambienti ?? []).filter((a: string) => String(r.richiesta).includes(a) || String(r.richiesta).includes(italianName('ambienti', a))), momenti: r.momenti ?? [] };
       }
       case 'model.action': {
         // Offline the Sculptor recolours part of the most used letter (or chips it away, if it cracks).

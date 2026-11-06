@@ -17,8 +17,8 @@ const box = (h: number, name: string) => `<sequence values="BS" size="20 20 ${h 
 
 const files = () => {
   const index = JSON.parse(bundledFiles['models/index.json']!);
-  index['cassa-prova'] = { classe: 'mobile', nome: 'cassa di prova' };
-  index['muro-prova'] = { classe: 'grande', nome: 'muro di prova' };
+  index['cassa-prova'] = { classe: 'furniture', nome: 'cassa di prova' };
+  index['muro-prova'] = { classe: 'structure', nome: 'muro di prova' };
   return { ...bundledFiles, 'models/cassa-prova.xml': box(16, 'Cassa'), 'models/muro-prova.xml': box(60, 'Muro'), 'models/index.json': JSON.stringify(index) };
 };
 

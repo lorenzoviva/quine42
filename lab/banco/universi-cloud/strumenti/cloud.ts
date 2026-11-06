@@ -17,6 +17,10 @@ import type { ChunkPlan } from '../../../../src/kernel/agents/cartography';
 import type { ChunkRecord } from '../../../../src/kernel/chunks';
 import type { FileMap } from '../../../../src/kernel/types';
 import { leggiUniverso, negozioMappe, prefissoMappe } from './carica';
+import { migratePlanRecord } from '../../../../src/kernel/migrations';
+import { internalName } from '../../../../src/kernel/internalNames';
+import { prepareUniverse, SEED_FILE } from '../../../../src/kernel/universes';
+import { checkKernelVersion, KERNEL_VERSION } from '../../../../src/kernel/version';
 
 /** The project's root, whatever the directory one runs from. */
 export const PROGETTO = fileURLToPath(new URL('../../../../', import.meta.url));
@@ -40,8 +44,28 @@ export const UNIVERSI: Universo[] = [
   { nome: 'sidera', tema: 'futuristico', radice: 'lab/banco/universi-cloud/sidera', mappe: 'lab/banco/universi-cloud/sidera/maps' },
 ];
 
-/** A universe as the kernel reads it: its files (`allowedPath`) and its maps, aurora's from beside it. */
+/**
+ * A universe as the kernel of today reads it: its files (`allowedPath`) and its maps, aurora's from beside it. The three of Claude Cloud
+ * are written for the contract 0.1 (T273): they are ported as a load ports them (`prepareUniverse`, T307a), knowing that they were born from
+ * the seed of 0.1 (`seme-0.1.json`: the files they kept as that seed had them take the seed of today), and their plans as the kernel reads them.
+ */
 export function leggi(u: Universo): { files: FileMap; maps: Record<string, ChunkRecord> } {
+  const disk = leggiDisco(u);
+  return { files: diQuestoKernel(disk.files), maps: Object.fromEntries(Object.entries(disk.maps).map(([k, r]) => [k, migratePlanRecord(r)])) };
+}
+
+/** The files of a universe of an older contract, ported and given the seed of today; one of this kernel as it is. */
+export function diQuestoKernel(files: FileMap): FileMap {
+  const cfg = JSON.parse(files['universe.json'] ?? '{}') as { kernel?: unknown; kernels?: unknown };
+  if (checkKernelVersion(cfg.kernel, KERNEL_VERSION, cfg.kernels).ok) return files;
+  const seed = leggiUniverso(join(PROGETTO, 'universe') + '/').files;
+  const born = { ...files, [SEED_FILE]: readFileSync(join(LAB, 'universi-cloud/seme-0.1.json'), 'utf8') };
+  const { [SEED_FILE]: _, ...ported } = prepareUniverse(born, seed).files;
+  return ported;
+}
+
+/** A universe as it is on disk, of the contract it was written for: what the tools that write it read. */
+export function leggiDisco(u: Universo): { files: FileMap; maps: Record<string, ChunkRecord> } {
   const { files, maps } = leggiUniverso(join(PROGETTO, u.radice) + '/');
   const dir = join(PROGETTO, u.mappe);
   if (existsSync(dir))
@@ -143,7 +167,7 @@ export function semeProcedurale(): Modello[] {
 /** The ten props of a theme (T270). */
 export function props(tema: Tema): Modello[] {
   const index = JSON.parse(readFileSync(join(LAB, `props-tematici/index-${tema}.json`), 'utf8')) as Record<string, { classe: string; nome: string }>;
-  return Object.entries(index).map(([id, v]) => ({ id, file: `props-tematici/${id}.xml`, voce: { classe: v.classe, nome: v.nome, autore: 'Claude Cloud, props tematici (T270)' } }));
+  return Object.entries(index).map(([id, v]) => ({ id, file: `props-tematici/${id}.xml`, voce: { classe: internalName('classi', v.classe), nome: v.nome, autore: 'Claude Cloud, props tematici (T270)' } }));
 }
 
 const BRANI: Record<string, string> = {
@@ -160,6 +184,8 @@ interface Uso {
   momenti?: string[];
 }
 const GIORNO = ['mattina', 'giorno'];
+/** The environments of the seed by their internal ids (T307a): the table below names them as the universes of 0.1 did. */
+const internalUso = (u: Uso): Uso => (u.ambienti ? { ...u, ambienti: u.ambienti.map((a) => internalName('ambienti', a)) } : u);
 const NOTTE = ['notte'];
 
 /**
@@ -213,7 +239,7 @@ export function suoni(u: Universo): Modello[] {
   const out: Modello[] = [];
   for (const [tipo, label] of Object.entries(BRANI)) {
     const id = `suono-${u.tema}-${tipo}`;
-    out.push({ id, file: `suoni-cloud/${u.tema}/${id}.xml`, voce: { classe: 'suono', nome: `${u.tema[0].toUpperCase()}${u.tema.slice(1)}: ${label}`, autore: AUTORE_SUONI, suono: { uso: 'musica', ...MUSICA[u.nome][tipo] } } });
+    out.push({ id, file: `suoni-cloud/${u.tema}/${id}.xml`, voce: { classe: 'suono', nome: `${u.tema[0].toUpperCase()}${u.tema.slice(1)}: ${label}`, autore: AUTORE_SUONI, suono: { uso: 'musica', ...internalUso(MUSICA[u.nome][tipo]) } } });
   }
   for (const f of readdirSync(join(LAB, 'suoni-cloud/effetti')).filter((f) => f.endsWith('.xml')).sort()) {
     const id = f.slice(0, -4);
@@ -250,7 +276,7 @@ export function erroriModello(files: FileMap, id: string): string[] {
  * (T272) for the small lots and the twin catalogue's modular residence for the large ones: two programs already validated.
  */
 export const CASA_SIDERA = 'moduli abitativi di lega bianca, bassi e tondi, con gli oblò accesi e le luci di posizione sul tetto';
-export const CASE_SIDERA = { edificio: 'universi-cloud/sidera/models/sidera-modulo-abitativo.xml', grande: 'catalogo-cloud/futuristico/residenza-modulare.xml' } as const;
+export const CASE_SIDERA = { building: 'universi-cloud/sidera/models/sidera-modulo-abitativo.xml', structure: 'catalogo-cloud/futuristico/residenza-modulare.xml' } as const;
 export const xmlLab = (file: string) => readFileSync(join(LAB, file), 'utf8');
 
 // --- The lots ------------------------------------------------------------------------------------------------------------------------------

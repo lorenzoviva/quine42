@@ -72,7 +72,7 @@ describe('glowing voxels', () => {
   });
 
   it('tells the Sculptor which letters of a model give light (to light or put out)', () => {
-    const { letters } = actionLetters(LAMP, classOf('oggetto')!);
+    const { letters } = actionLetters(LAMP, classOf('object')!);
     expect(letters.find((l) => l.lettera === 'F')?.luce).toBe(true);
     expect(letters.find((l) => l.lettera === 'A')?.luce).toBeUndefined();
   });

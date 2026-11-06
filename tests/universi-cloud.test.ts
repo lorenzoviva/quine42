@@ -42,7 +42,7 @@ describe('what Claude Cloud made, in the four universes', () => {
       it(`has the ${catalogo.length} structures of its theme (${u.tema}), the props and the sounds in its library`, () => {
         expect(catalogo.length).toBe(12);
         for (const s of catalogo) {
-          expect(index[s.id], s.id).toMatchObject({ classe: 'grande' });
+          expect(index[s.id], s.id).toMatchObject({ classe: 'structure' });
           expect(files[`models/${s.id}.xml`], s.id).toBeTruthy();
           // A cellar is a tile under the ground (ADR-0135): without `sotto` the library would cut it off.
           expect(index[s.id].sotto, s.id).toBe(s.cantina ? 1 : undefined);
@@ -69,8 +69,8 @@ describe('what Claude Cloud made, in the four universes', () => {
         // Every structure of the catalogue stands somewhere, and the one Enorme of the zone is its model's size.
         const ids = new Set(placed.map((p) => p.modello));
         for (const s of catalogo) expect(ids.has(s.id), s.id).toBe(true);
-        for (const p of placed) if (p.taglia === 'enorme') expect(index[p.modello]?.taglia, p.modello).toBe('enorme');
-        expect(placed.filter((p) => p.taglia === 'enorme').length).toBeLessThanOrEqual(1);
+        for (const p of placed) if (p.taglia === 'huge') expect(index[p.modello]?.taglia, p.modello).toBe('huge');
+        expect(placed.filter((p) => p.taglia === 'huge').length).toBeLessThanOrEqual(1);
       });
     });
   }

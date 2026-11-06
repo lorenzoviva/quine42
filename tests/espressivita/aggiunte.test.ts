@@ -11,7 +11,7 @@ import { MemoryChunks } from '../../src/kernel/chunks';
 import { Kernel } from '../../src/kernel/kernel';
 import { memoryStore } from '../../src/kernel/repo';
 import type { FileMap } from '../../src/kernel/types';
-import { seedHashes, upgradeFromSeed } from '../../src/kernel/universes';
+import { prepareUniverse, seedHashes, upgradeFromSeed } from '../../src/kernel/universes';
 import { compileMjx } from '../../src/mj/model';
 import { closeWorld, developAll, DT, newLasting, open, play, universeWith } from './banco';
 
@@ -39,8 +39,9 @@ const madeFrom = (seed: FileMap): FileMap => ({ ...seed, 'seed.json': JSON.strin
 describe('a universe made with an older kernel', () => {
   // The last of the 20th of October, before models, lots, sound and water; one of the 26th; the last before the renames.
   it.skipIf(!hasHistory).each(['6f2d8df', '7ced571', '0d773f2'])('%s opens with no fault, as it is and after the update from the seed', async (commit) => {
+    // Of the contract 0.1: ported, then given the seed of today, as a load does (T307a); as it is, the kernel ports it at boot.
     const old = universeAt(commit);
-    const { files, updated } = upgradeFromSeed(old, bundledFiles);
+    const { files, updated } = prepareUniverse(old, bundledFiles);
     expect(updated.length).toBeGreaterThan(0);
     for (const f of [old, files]) {
       const k = await boot(f);
@@ -54,7 +55,7 @@ describe('a universe made with an older kernel', () => {
   it.skipIf(!hasHistory)('what the universe wrote itself stays: the update never touches it, and the module keeps working', async () => {
     const old = universeAt('6f2d8df');
     const mine = '-- Riscritto dal Concilio.\nlocal M = {}\nfunction M.update(dt) end\nreturn M\n';
-    const { files } = upgradeFromSeed({ ...old, 'modules/sys.needs/logic.lua': mine }, bundledFiles);
+    const { files } = prepareUniverse({ ...old, 'modules/sys.needs/logic.lua': mine }, bundledFiles);
     expect(files['modules/sys.needs/logic.lua']).toBe(mine);
     const k = await boot(files);
     k.tick(DT);
@@ -98,11 +99,11 @@ describe('a new field', () => {
 describe('a new effect', () => {
   const next = (files: FileMap) => ({
     ...files,
-    'modules/core.effects/logic.lua': files['modules/core.effects/logic.lua'].replace('function M.apply(', 'function F.vento(_, _, e) return "Tira vento: " .. e.forza end\n\nfunction M.apply('),
+    'modules/core.effects/logic.lua': files['modules/core.effects/logic.lua'].replace('function M.apply(', 'function F.vento(_, _, e) return "Tira vento: " .. e.force end\n\nfunction M.apply('),
   });
   const apply = async (files: FileMap) => {
     const k = await boot(files);
-    const { value, failed } = k.runModule('core.effects', 'apply', k.wandererEntity, k.wandererEntity, { tipo: 'vento', forza: 3 });
+    const { value, failed } = k.runModule('core.effects', 'apply', k.wandererEntity, k.wandererEntity, { type: 'vento', force: 3 });
     return { value, failed };
   };
 
@@ -119,14 +120,14 @@ describe('a new effect', () => {
     expect(r.failed).toBe(false);
     expect(r.value ?? null).toBeNull();
     const k = await boot(files);
-    expect(k.applyEffects([{ tipo: 'vento', forza: 3 } as any], k.wandererEntity)).toEqual([]);
+    expect(k.applyEffects([{ type: 'vento', force: 3 } as any], k.wandererEntity)).toEqual([]);
     expect(k.faults.get('effect:vento')?.message).toMatch(/non ha chi lo applica/);
   });
 
   it('where it arrived, the kernel applies it with no fault', async () => {
     const { files } = upgradeFromSeed(madeFrom(bundledFiles), next(bundledFiles));
     const k = await boot(files);
-    expect(k.applyEffects([{ tipo: 'vento', forza: 3 } as any], k.wandererEntity)).toEqual(['Tira vento: 3']);
+    expect(k.applyEffects([{ type: 'vento', force: 3 } as any], k.wandererEntity)).toEqual(['Tira vento: 3']);
     expect(k.faults.has('effect:vento')).toBe(false);
   });
 });

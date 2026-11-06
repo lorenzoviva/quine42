@@ -66,7 +66,9 @@ describe('validator', async () => {
   it('validates manifests, items and characters', () => {
     expect(v.parseManifest('m', '{"id":"npc.a","name":"A","kind":"entity","appearance":{"glyph":"a","color":"#fff"}}').errors).toEqual([]);
     expect(v.parseManifest('m', '{"id":"npc.a","name":"A","kind":"entity","appearance":{"glyph":"a","color":"#fff"},"interaction":{"type":"talk"}}').errors.join()).toMatch(/persona/);
-    expect(v.validateItems([{ id: 'item.a', name: 'A', category: 'cibo', weight: 1, stack: 5, tags: [] }])).toEqual([]);
+    expect(v.validateItems([{ id: 'item.a', name: 'A', category: 'food', weight: 1, stack: 5, tags: [] }])).toEqual([]);
+    // A manifest the Council wrote with the categories of 0.1 is read with the internal ones (T307a).
+    expect(v.parseManifest('m', '{"id":"items.a","name":"A","kind":"data","items":[{"id":"item.a","name":"A","category":"cibo","weight":1,"stack":5,"tags":[]}]}').manifest?.items?.[0].category).toBe('food');
     expect(v.validateItems([{ id: 'bad', name: '', category: 'boh', weight: 99, stack: 0, tags: [] }]).length).toBeGreaterThan(3);
   });
 
@@ -176,22 +178,22 @@ describe('effects', () => {
   it('keeps only the closed set, clamps numbers and resolves names', () => {
     const v = validateEffects(
       [
-        { tipo: 'bisogni', fame: 500, salute: -3 },
-        { tipo: 'terreno', a: 'Sentiero', raggio: 99 },
-        { tipo: 'crea_oggetto', oggetto: 'una mela rossa', quantita: 40 },
-        { tipo: 'fuoco', durata: 1e9 },
-        { tipo: 'crea_oggetto', oggetto: 'Spada di vetro' },
-        { tipo: 'evoca', modulo: 'Drago' },
+        { type: 'needs', hunger: 500, health: -3 },
+        { type: 'terrain', to: 'Sentiero', radius: 99 },
+        { type: 'create_item', item: 'una mela rossa', quantity: 40 },
+        { type: 'fire', duration: 1e9 },
+        { type: 'create_item', item: 'Spada di vetro' },
+        { type: 'summon', module: 'Drago' },
         { tipo: 'teletrasporto' },
         'rubbish',
       ],
       ctx,
     );
     expect(v.effects).toEqual([
-      { tipo: 'bisogni', fame: 40, salute: -3 },
-      { tipo: 'terreno', a: 'p', raggio: 3 },
-      { tipo: 'crea_oggetto', oggetto: 'item.mela', quantita: 5 },
-      { tipo: 'fuoco', raggio: 1, durata: 30 },
+      { type: 'needs', hunger: 40, health: -3 },
+      { type: 'terrain', to: 'p', radius: 3 },
+      { type: 'create_item', item: 'item.mela', quantity: 5 },
+      { type: 'fire', radius: 1, duration: 30 },
     ]);
     expect(v.unknownItems).toEqual(['Spada di vetro']);
     expect(v.dropped.join(' ')).toMatch(/Drago.*teletrasporto/);

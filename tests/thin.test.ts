@@ -315,7 +315,7 @@ describe('what is carried, among many (T39b)', () => {
     expect(countItem(serverInv(), 'item.pane')).toBe(2);
     expect(countItem(anna.k.inventory(), 'item.pane')).toBe(2);
     // A learned action of something carried: the server does it, its words come back.
-    k.content.get('item.pane')!.actions = [{ id: 'spezza', label: 'Spezza', effects: [{ tipo: 'messaggio', testo: 'Lo spezzi a metà.' }] }];
+    k.content.get('item.pane')!.actions = [{ id: 'spezza', label: 'Spezza', effects: [{ type: 'message', text: 'Lo spezzi a metà.' }] }];
     anna.k.itemAct(slotOf(anna.k, 'item.pane'), 'spezza');
     await flush(server, [anna]);
     expect(said.some((m) => m.includes('Lo spezzi a metà.'))).toBe(true);
@@ -421,7 +421,7 @@ describe('what is carried, among many (T39b)', () => {
     const col = Math.floor(start.x);
     const row = Math.floor(start.y);
     const code = k.tileAt(col, row)!;
-    k.palette[code].actions = [{ id: 'scava', label: 'Scava', effects: [{ tipo: 'messaggio', testo: 'Scavi un poco.' }] }];
+    k.palette[code].actions = [{ id: 'scava', label: 'Scava', effects: [{ type: 'message', text: 'Scavi un poco.' }] }];
     await until(server, [anna], anna.k.performMenu('t:scava', -1, col, row));
     expect(dialogs.some((d) => d.includes('Scavi un poco.'))).toBe(true);
     // Too far from her, it is refused.

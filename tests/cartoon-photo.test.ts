@@ -122,8 +122,8 @@ describe('a photograph as the world draws it', () => {
 
 describe('who looks at the photographs', () => {
   it('the Artist gets a sheet of the four sides, no larger than the classic one', () => {
-    const cls = classOf('albero')!;
-    const checked = checkProgram(bundledFiles['models/albero.xml'], cls);
+    const cls = classOf('tree')!;
+    const checked = checkProgram(bundledFiles['models/tree.xml'], cls);
     expect(checked.error).toBeUndefined();
     const url = views(checked);
     expect(url.startsWith('data:image/png;base64,')).toBe(true);

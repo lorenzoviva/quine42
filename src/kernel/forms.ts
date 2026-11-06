@@ -153,7 +153,7 @@ export interface Form {
 }
 
 /** How many different seeds a kind of entity has in the world (instances share them: fewer meshes). */
-const SEEDS: Record<string, number> = { albero: 3, cespuglio: 3, roccia: 3, sasso: 3, persona: 8, animale: 4, bestia: 4, edificio: 1, grande: 1, monumento: 2 };
+const SEEDS: Record<string, number> = { tree: 3, bush: 3, rock: 3, pebble: 3, person: 8, animal: 4, beast: 4, building: 1, structure: 1, monument: 2 };
 
 /** A step one walks up without noticing (a doorstep, a floor): 0.2 tiles, in voxels of a density. */
 export const stepOf = (vpt: number) => Math.round(0.2 * vpt);

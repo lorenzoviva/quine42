@@ -104,7 +104,7 @@ describe('new magic runes (T57b)', () => {
     expect(k.files['world/canone.md']).toContain('Wunjo («sangue»');
     expect(canonSummary(k.files)).toContain('Wunjo («sangue», sangue)');
     expect(k.content.loot.magia.entries.some((e) => e.item === 'rune:sangue')).toBe(true);
-    expect(k.content.get('rune:sangue')).toMatchObject({ category: 'magia', tags: ['runa', 'magica'] });
+    expect(k.content.get('rune:sangue')).toMatchObject({ category: 'magic', tags: ['runa', 'magica'] });
     expect(allCards(k.files).some((c) => c.id === 'runa:sangue' && c.tipo === 'runa' && c.autore === 'narratore')).toBe(true);
     expect(k.feed().some((e) => e.task === 'rune.invent' && /runa nuova/.test(e.text))).toBe(true);
 
@@ -121,12 +121,12 @@ describe('new magic runes (T57b)', () => {
     expect(k.phrase().tokens).toEqual(['sangue']);
 
     // Composed with the others: a formula the Narrator names once.
-    giveRunes(k, ['fuoco']);
-    k.phrase().tokens = ['sangue', 'fuoco'];
+    giveRunes(k, ['ignis']);
+    k.phrase().tokens = ['sangue', 'ignis'];
     k.needs()!.mana = 100;
-    expect(k.incantation()).toEqual(['sangue', 'fuoco']);
+    expect(k.incantation()).toEqual(['sangue', 'ignis']);
     expect(await k.castSpell()).toBe(true);
-    expect(k.content.spells['sangue fuoco']).toBeTruthy();
+    expect(k.content.spells['sangue ignis']).toBeTruthy();
 
     // A second one is another rune; the same one never twice.
     expect(await k.inventRune('ancora')).toBe('ghiaccio');
@@ -138,7 +138,7 @@ describe('new magic runes (T57b)', () => {
     const text = models.text.bind(models);
     models.text = async (call: TextCall) => {
       if (call.task === 'council.session') return JSON.stringify({ valutazione: 'manca il gelo', intervento: 'runa', richiesta: 'ghiaccio' });
-      if (call.task === 'spell.name') return JSON.stringify({ nome: 'Patto', descrizione: 'un patto', costo: 8, effetti: [{ tipo: 'bisogni', salute: 5 }], runa_nuova: 'ombra' });
+      if (call.task === 'spell.name') return JSON.stringify({ nome: 'Patto', descrizione: 'un patto', costo: 8, effetti: [{ type: 'needs', health: 5 }], runa_nuova: 'ombra' });
       return text(call);
     };
     const k = await boot(models);
@@ -150,12 +150,12 @@ describe('new magic runes (T57b)', () => {
     expect(asked[0]).toMatch(/sessione del Concilio[^\n]*ghiaccio/);
     // The formula that calls for an element no rune has: one more rune, after the spell.
     clearArea(k);
-    giveRunes(k, ['vita', 'acqua']);
-    k.phrase().tokens = ['vita', 'acqua'];
+    giveRunes(k, ['vita', 'aqua']);
+    k.phrase().tokens = ['vita', 'aqua'];
     k.needs()!.mana = 100;
     expect(await k.castSpell()).toBe(true);
     for (let i = 0; i < 40 && !k.content.runes.ghiaccio; i++) await new Promise((r) => setTimeout(r, 25));
     expect(k.content.runes.ghiaccio).toBeTruthy();
-    expect(asked[1]).toMatch(/vita acqua[^\n]*ombra/);
+    expect(asked[1]).toMatch(/vita aqua[^\n]*ombra/);
   });
 });

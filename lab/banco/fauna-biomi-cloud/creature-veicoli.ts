@@ -9,7 +9,7 @@ export const CREATURE_VEICOLI: Definizione[] = [
     ambientazione: 'fantasy',
     nome: 'cervo-reale',
     titolo: 'Cervo reale',
-    classe: 'bestia',
+    classe: 'beast',
     descrizione: 'Il cervo dei boschi di Aurora: mantello fulvo, ventre chiaro, palchi d\'osso che crescono a rami.',
     procedura:
       'tre scelte a caso (postura delle zampe: ferma, al passo, in slancio; corporatura: snella, robusta, lunga; portamento della testa: fiero, al pascolo, voltato, al bramito) e i palchi che crescono da due punte con un camminatore che sale, piega o si biforca.',
@@ -56,7 +56,7 @@ export const CREATURE_VEICOLI: Definizione[] = [
     ambientazione: 'fantasy',
     nome: 'lupo-dei-boschi',
     titolo: 'Lupo dei boschi',
-    classe: 'bestia',
+    classe: 'beast',
     descrizione: 'Il lupo grigio delle selve di Aurora, dorso scuro e petto chiaro.',
     procedura: 'quattro scelte a caso: andatura (fermo, al trotto, acquattato), corporatura (magro, massiccio, lungo), testa (in avanti, all\'ululato, a fiutare il suolo), coda (bassa, alta e arricciata, tesa); il pelo del dorso si scurisce a chiazze.',
     xml: () =>
@@ -106,7 +106,7 @@ export const CREATURE_VEICOLI: Definizione[] = [
     ambientazione: 'fantasy',
     nome: 'cinghiale-corazzato',
     titolo: 'Cinghiale corazzato',
-    classe: 'bestia',
+    classe: 'beast',
     descrizione: 'Un cinghiale enorme con placche d\'osso sul dorso e zanne ricurve: la bestia delle forre di Aurora.',
     procedura: 'tre scelte a caso (zampe ferme o alla carica; corpo massiccio, allungato o tozzo; testa bassa alla carica, alta, voltata) e punte d\'osso che spuntano in posti a caso sulle placche e crescono dritte o di sbieco.',
     xml: () =>
@@ -149,7 +149,7 @@ export const CREATURE_VEICOLI: Definizione[] = [
     ambientazione: 'fantasy',
     nome: 'golem-runico',
     titolo: 'Golem runico',
-    classe: 'persona',
+    classe: 'person',
     descrizione: 'Un guardiano di pietra di Aurora, massi sovrapposti tenuti insieme da rune che brillano; il muschio gli cresce sulle spalle.',
     procedura: 'quattro scelte a caso (gambe divaricate, al passo o in ginocchio; tronco a blocco, a botte o a gradoni; braccia abbassate, alzate o una avanti; testa a masso, a cuneo o affondata) e rune luminose incise in posti a caso sulle facce, muschio sulle facce in alto.',
     xml: () =>
@@ -196,7 +196,7 @@ export const CREATURE_VEICOLI: Definizione[] = [
     ambientazione: 'fantasy',
     nome: 'drago-antico',
     titolo: 'Drago antico',
-    classe: 'edificio',
+    classe: 'building',
     descrizione: 'Il drago delle vette di Aurora, accucciato su quattro zampe: squame color bronzo, ali di membrana, corna che crescono storte.',
     procedura: 'cinque scelte a caso (corpo, zampe piantate o impennate, ali spiegate, alzate o raccolte, collo eretto, basso o voltato, coda arrotolata a destra, a sinistra o alzata), corna che crescono a caso e creste sul dorso in posti a caso.',
     xml: () =>
@@ -250,7 +250,7 @@ export const CREATURE_VEICOLI: Definizione[] = [
     ambientazione: 'steampunk',
     nome: 'automa-sentinella',
     titolo: 'Automa sentinella',
-    classe: 'persona',
+    classe: 'person',
     descrizione: 'La sentinella d\'ottone di Orichalcum: caldaia nel petto, rivetti, una lanterna o un\'alabarda.',
     procedura: 'quattro scelte a caso (gambe dritte, al passo, piegate; tronco a caldaia, a botte, a cassa con griglia; braccia con alabarda, con lanterna avanti, abbassate; testa a cupola, a cilindro con periscopio, a lanterna) e rivetti di rame in posti a caso.',
     xml: () =>
@@ -295,7 +295,7 @@ export const CREATURE_VEICOLI: Definizione[] = [
     ambientazione: 'steampunk',
     nome: 'segugio-ottone',
     titolo: 'Segugio d\'ottone',
-    classe: 'bestia',
+    classe: 'beast',
     descrizione: 'Un cane da caccia meccanico di Orichalcum: corpo a caldaia, giunti di ferro, comignoli che fumano sul dorso.',
     procedura: 'quattro scelte a caso (andatura ferma, in punta o di corsa; corpo a caldaia, snello o corazzato; testa avanti, a fiutare o all\'ululato; coda ad antenna, tesa o a frusta) e comignoli che spuntano a caso sul dorso e salgono storti.',
     xml: () =>
@@ -340,7 +340,7 @@ export const CREATURE_VEICOLI: Definizione[] = [
     ambientazione: 'steampunk',
     nome: 'ragno-meccanico',
     titolo: 'Ragno meccanico',
-    classe: 'bestia',
+    classe: 'beast',
     descrizione: 'Un ragno a vapore delle miniere di Orichalcum: otto zampe a pistone, addome-caldaia, occhi di vetro rosso.',
     procedura: 'due scelte a caso (la postura di tutto il corpo e delle otto zampe: alta, acquattata, in cammino, all\'attacco; l\'addome: caldaia grande, serbatoio stretto, gabbia di tubi) e valvole che spuntano a caso sul dorso.',
     xml: () => {
@@ -386,7 +386,7 @@ export const CREATURE_VEICOLI: Definizione[] = [
     ambientazione: 'steampunk',
     nome: 'locomotiva-vapore',
     titolo: 'Locomotiva a vapore',
-    classe: 'bestia',
+    classe: 'beast',
     descrizione: 'La locomotiva delle linee di Orichalcum: caldaia nera, ruote motrici rosse, cabina e fumo che sale.',
     procedura: 'quattro scelte a caso (ruote: tre grandi motrici o quattro piccole; caldaia lunga, grossa o corta con duomo doppio; cabina chiusa, aperta o con tender di carbone; fumaiolo a imbuto, dritto o a pallone) e il fumo che sale dal fumaiolo con un camminatore e si gonfia a caso.',
     xml: () =>
@@ -435,7 +435,7 @@ export const CREATURE_VEICOLI: Definizione[] = [
     ambientazione: 'steampunk',
     nome: 'dirigibile-esploratore',
     titolo: 'Dirigibile esploratore',
-    classe: 'edificio',
+    classe: 'building',
     descrizione: 'Il dirigibile delle spedizioni di Orichalcum, ormeggiato al suo traliccio: involucro di tela, gondola di legno, eliche d\'ottone.',
     procedura: 'quattro scelte a caso (involucro lungo, panciuto o a sigaro alto; traliccio d\'ormeggio a prua, al centro o a poppa; gondola lunga, piccola o a due ponti; impennaggi a croce, a X o a tre pinne) e toppe di tela più scura in posti a caso.',
     xml: () =>
@@ -483,7 +483,7 @@ export const CREATURE_VEICOLI: Definizione[] = [
     ambientazione: 'moderno',
     nome: 'cane-randagio',
     titolo: 'Cane randagio',
-    classe: 'animale',
+    classe: 'animal',
     descrizione: 'Il randagio dei vicoli di Neapolis: pelo fulvo a chiazze, orecchie che fanno quello che vogliono.',
     procedura: 'la postura a caso (in piedi, seduto, sdraiato, a fiutare), poi orecchie che crescono dritte, di sbieco o cadenti, una coda che cresce in una direzione a caso e chiazze del mantello che si allargano a caso.',
     xml: () =>
@@ -526,7 +526,7 @@ export const CREATURE_VEICOLI: Definizione[] = [
     ambientazione: 'moderno',
     nome: 'gatto-urbano',
     titolo: 'Gatto urbano',
-    classe: 'animale',
+    classe: 'animal',
     descrizione: 'Il gatto dei tetti di Neapolis: tigrato, sornione, la coda che si muove per conto suo.',
     procedura: 'la postura a caso (seduto, in cammino, a pagnotta, ad arco, sdraiato su un fianco), una coda lunga che cresce in direzioni a caso e strisce tigrate che si allungano a caso.',
     xml: () =>
@@ -566,7 +566,7 @@ export const CREATURE_VEICOLI: Definizione[] = [
     ambientazione: 'moderno',
     nome: 'furgone-consegne',
     titolo: 'Furgone delle consegne',
-    classe: 'bestia',
+    classe: 'beast',
     descrizione: 'Il furgone che fa il giro dei quartieri di Neapolis, con i pacchi che non stanno mai dentro.',
     procedura: 'tre scelte a caso (carrozzeria: tetto alto, media, cassonato con le casse; porte: chiuse, laterale aperta, posteriori aperte; carico a terra: solo il paraurti, pila di pacchi, carrello; sul tetto della cabina: lampeggiante, scala, antenna) e pacchi che si impilano a caso sul tetto o sul cassone.',
     xml: () =>
@@ -621,7 +621,7 @@ export const CREATURE_VEICOLI: Definizione[] = [
     ambientazione: 'moderno',
     nome: 'motocicletta-stradale',
     titolo: 'Motocicletta stradale',
-    classe: 'bestia',
+    classe: 'beast',
     descrizione: 'Una moto delle strade di Neapolis: ogni seme è un\'altra moto, dalla sportiva carenata alla custom con la forcella lunga.',
     procedura: 'quattro scelte a caso (stile: sportiva, custom, naked, turismo con le borse; scarico: basso a destra, alto a sinistra, doppio; cavalletto, casco appoggiato o bauletto; faro supplementare, portapacchi alto, paramani o niente) e adesivi che compaiono a caso sulle carene.',
     xml: () =>
@@ -671,7 +671,7 @@ export const CREATURE_VEICOLI: Definizione[] = [
     ambientazione: 'moderno',
     nome: 'elicottero-soccorso',
     titolo: 'Elicottero di soccorso',
-    classe: 'edificio',
+    classe: 'building',
     descrizione: 'L\'elisoccorso di Neapolis, bianco e rosso, posato sui pattini.',
     procedura: 'tre scelte a caso (fusoliera grande, compatta o a goccia con la sua trave di coda; rotore a quattro pale dritte, a X, a tre o a cinque pale; dotazione: scaletta, verricello con la barella a terra, galleggianti, faro di ricerca) e i numeri di bordo che compaiono a caso sulle fiancate.',
     xml: () => {
@@ -726,7 +726,7 @@ export const CREATURE_VEICOLI: Definizione[] = [
     ambientazione: 'futuristico',
     nome: 'drone-esapode',
     titolo: 'Drone esapode',
-    classe: 'bestia',
+    classe: 'beast',
     descrizione: 'Il drone a sei zampe che pattuglia le colonie di Sidera: guscio bianco, giunti grigi, un occhio azzurro.',
     procedura: 'tre scelte a caso (le sei zampe: larghe e basse, alte, in cammino a tripode; il modulo sul dorso: cupola di sensori, rotori spiegati, torretta, antenna; il carico sotto la pancia: capsula, pinza, sfera dei sensori, niente) e un\'antenna che cresce a rami dal guscio, luci di posizione a caso.',
     xml: () => {
@@ -782,7 +782,7 @@ export const CREATURE_VEICOLI: Definizione[] = [
     ambientazione: 'futuristico',
     nome: 'camminatore-pesante',
     titolo: 'Camminatore pesante',
-    classe: 'edificio',
+    classe: 'building',
     descrizione: 'Il camminatore bipede dei cantieri orbitali di Sidera: gambe a pistone, cabina corazzata, bracci da lavoro o da guardia.',
     procedura: 'tre scelte a caso (gambe erette, al passo, accovacciate; cabina larga, a cupola o a torre; bracci con due cannoni, con lanciamissili sulle spalle, con artiglio e cannone) sfiati che spuntano a caso sulla cabina, antenne che crescono a rami dalle spalle e piastre di colore diverso a caso.',
     xml: () =>
@@ -832,7 +832,7 @@ export const CREATURE_VEICOLI: Definizione[] = [
     ambientazione: 'futuristico',
     nome: 'xenofauna-cristallina',
     titolo: 'Xenofauna cristallina',
-    classe: 'bestia',
+    classe: 'beast',
     descrizione: 'Una bestia delle lune di Sidera, a sei zampe, con cristalli vivi che le crescono dal dorso e le danno luce.',
     procedura: 'tre scelte a caso (corpo allungato, gobbo o a segmenti; sei zampe dritte, aperte o arcuate; testa a cuneo, a ventaglio o con mandibole) e cristalli che nascono in posti a caso sul dorso, crescono storti e si ispessiscono a caso.',
     xml: () => {
@@ -878,7 +878,7 @@ export const CREATURE_VEICOLI: Definizione[] = [
     ambientazione: 'futuristico',
     nome: 'navetta-orbitale',
     titolo: 'Navetta orbitale',
-    classe: 'edificio',
+    classe: 'building',
     descrizione: 'La navetta che fa la spola fra le stazioni di Sidera, posata sui suoi carrelli.',
     procedura: 'quattro scelte a caso (fusoliera lunga, tozza o a freccia; ali a delta, a freccia o corte; deriva singola, doppia o a V; motori: due, tre o uno solo grande), antenne dorsali che spuntano a caso con altezze proprie e pannelli termici scuri che si allargano a caso sulla pancia.',
     xml: () =>
@@ -936,7 +936,7 @@ export const CREATURE_VEICOLI: Definizione[] = [
     ambientazione: 'futuristico',
     nome: 'rover-esplorazione',
     titolo: 'Rover da esplorazione',
-    classe: 'bestia',
+    classe: 'beast',
     descrizione: 'Il rover a sei ruote che mappa i deserti di Sidera, con l\'albero delle telecamere e il braccio dei campioni.',
     procedura: 'tre scelte a caso (albero delle telecamere alto, basso o doppio; braccio a riposo, teso a terra o alzato; energia da pannelli piatti, pannelli ad ali o generatore con alette) e polvere che si posa a caso sulle facce in alto.',
     xml: () =>

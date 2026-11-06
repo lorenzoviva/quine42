@@ -36,8 +36,8 @@ const CRATES = TOWER.replace('</sequence>', [box(50, 69, 85, 104, 3, 18, 'S'), b
 
 const files = () => {
   const index = JSON.parse(bundledFiles['models/index.json']!);
-  index.torre = { classe: 'grande', nome: 'torre di prova' };
-  index['torre-casse'] = { classe: 'grande', nome: 'torre con le casse' };
+  index.torre = { classe: 'structure', nome: 'torre di prova' };
+  index['torre-casse'] = { classe: 'structure', nome: 'torre con le casse' };
   return { ...bundledFiles, 'models/torre.xml': TOWER, 'models/torre-casse.xml': CRATES, 'models/index.json': JSON.stringify(index) };
 };
 

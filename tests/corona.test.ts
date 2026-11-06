@@ -378,7 +378,7 @@ describe('the devices of the rooms', () => {
     expect(fileModelOf('modules/core.carpet/logic.lua')).toBe('circuito-3D');
     expect(fileModelOf('modules/sys.physics/manifest.json')).toBe('schermo-struttura');
     expect(fileModelOf('world/rules.json')).toBe('schermo-struttura');
-    expect(fileModelOf('models/albero.xml')).toBe('schermo-struttura');
+    expect(fileModelOf('models/tree.xml')).toBe('schermo-struttura');
     expect(fileModelOf('prompts/theme.md')).toBe('schermo-scritte');
     expect(fileModelOf('world/canone.md')).toBe('schermo-scritte');
     expect(fileModelOf('world/notes.txt')).toBe('schermo-scritte');
@@ -392,7 +392,7 @@ describe('the devices of the rooms', () => {
     for (const id of ['schermo-scritte', 'schermo-struttura', 'circuito-3D']) {
       expect(bundledFiles[`models/${id}.xml`], id).toBeDefined();
       expect(index[id], id).toBeDefined();
-      expect(index[id].classe, id).toBe('oggetto');
+      expect(index[id].classe, id).toBe('object');
       expect(index[id].vpt, id).toBe(20);
     }
 

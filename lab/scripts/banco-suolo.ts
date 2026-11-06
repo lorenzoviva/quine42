@@ -19,7 +19,7 @@ const n2 = (v: number | undefined) => (v === undefined ? '—' : v.toFixed(2).re
 for (const b of STRUTTURE) {
   if (solo && !solo.includes(b.id)) continue;
   const xml = fs.readFileSync(path.join(out, `${b.id}.xml`), 'utf8');
-  const p = prova(xml, b, { taglie: ['grande', 'enorme'] });
+  const p = prova(xml, b, { taglie: ['large', 'huge'] });
   const pic = fotoSemi(p);
   if (pic) fs.writeFileSync(path.join(out, `${b.id}.png`), png(pic));
   const v = p.taglie[0].varianza;

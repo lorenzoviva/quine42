@@ -24,28 +24,28 @@ describe('rilievo effect validation and description', () => {
   };
 
   it('validates delta and radius, clamping within bounds', () => {
-    const v1 = validateEffects([{ tipo: 'rilievo', delta: 2, raggio: 1 }], ctx);
-    expect(v1.effects).toEqual([{ tipo: 'rilievo', delta: 2, raggio: 1 }]);
+    const v1 = validateEffects([{ type: 'relief', delta: 2, radius: 1 }], ctx);
+    expect(v1.effects).toEqual([{ type: 'relief', delta: 2, radius: 1 }]);
     expect(v1.dropped).toEqual([]);
 
-    const v2 = validateEffects([{ tipo: 'rilievo', delta: 15, raggio: 5 }], ctx);
-    expect(v2.effects).toEqual([{ tipo: 'rilievo', delta: 8, raggio: 3 }]);
+    const v2 = validateEffects([{ type: 'relief', delta: 15, radius: 5 }], ctx);
+    expect(v2.effects).toEqual([{ type: 'relief', delta: 8, radius: 3 }]);
 
-    const v3 = validateEffects([{ tipo: 'rilievo', delta: -20, raggio: -2 }], ctx);
-    expect(v3.effects).toEqual([{ tipo: 'rilievo', delta: -8, raggio: 0 }]);
+    const v3 = validateEffects([{ type: 'relief', delta: -20, radius: -2 }], ctx);
+    expect(v3.effects).toEqual([{ type: 'relief', delta: -8, radius: 0 }]);
   });
 
   it('drops rilievo with delta 0', () => {
-    const v = validateEffects([{ tipo: 'rilievo', delta: 0, raggio: 1 }], ctx);
+    const v = validateEffects([{ type: 'relief', delta: 0, radius: 1 }], ctx);
     expect(v.effects).toEqual([]);
     expect(v.dropped).toContain('rilievo senza variazione');
   });
 
   it('describes raising and lowering with levels and radius', () => {
-    expect(describeEffect({ tipo: 'rilievo', delta: 1, raggio: 1 }, dummyNames)).toBe('alza il terreno di 1 livello, raggio 1');
-    expect(describeEffect({ tipo: 'rilievo', delta: 3, raggio: 2 }, dummyNames)).toBe('alza il terreno di 3 livelli, raggio 2');
-    expect(describeEffect({ tipo: 'rilievo', delta: -1, raggio: 0 }, dummyNames)).toBe('abbassa il terreno di 1 livello');
-    expect(describeEffect({ tipo: 'rilievo', delta: -4, raggio: 1 }, dummyNames)).toBe('abbassa il terreno di 4 livelli, raggio 1');
+    expect(describeEffect({ type: 'relief', delta: 1, radius: 1 }, dummyNames)).toBe('alza il terreno di 1 livello, raggio 1');
+    expect(describeEffect({ type: 'relief', delta: 3, radius: 2 }, dummyNames)).toBe('alza il terreno di 3 livelli, raggio 2');
+    expect(describeEffect({ type: 'relief', delta: -1, radius: 0 }, dummyNames)).toBe('abbassa il terreno di 1 livello');
+    expect(describeEffect({ type: 'relief', delta: -4, radius: 1 }, dummyNames)).toBe('abbassa il terreno di 4 livelli, raggio 1');
   });
 });
 
@@ -72,7 +72,7 @@ describe('the kernel’s rilievo effect (T57c)', () => {
     const initial = k.groundAt(col, row) / LEVEL;
 
     // Apply raising effect
-    k.applyEffects([{ tipo: 'rilievo', delta: 2, raggio: 1 }], undefined, { x: col + 0.5, y: row + 0.5 });
+    k.applyEffects([{ type: 'relief', delta: 2, radius: 1 }], undefined, { x: col + 0.5, y: row + 0.5 });
     const raisedCenter = k.groundAt(col, row) / LEVEL;
     expect(raisedCenter).toBe(initial + 2);
     expect(k.groundAt(col + 1, row) / LEVEL).toBe((k.groundAt(col + 1, row) / LEVEL)); // raised too
@@ -83,7 +83,7 @@ describe('the kernel’s rilievo effect (T57c)', () => {
     expect(ch.plan!.scavi![tile]).toBe(2);
 
     // Apply lowering effect
-    k.applyEffects([{ tipo: 'rilievo', delta: -3, raggio: 0 }], undefined, { x: col + 0.5, y: row + 0.5 });
+    k.applyEffects([{ type: 'relief', delta: -3, radius: 0 }], undefined, { x: col + 0.5, y: row + 0.5 });
     const loweredCenter = k.groundAt(col, row) / LEVEL;
     expect(loweredCenter).toBe(initial - 1);
     expect(ch.plan!.scavi![tile]).toBe(-1);
@@ -115,7 +115,7 @@ describe('the kernel’s rilievo effect (T57c)', () => {
     const beforeHollow = k.groundAt(hollowCol, hollowRow) / LEVEL;
     const digDepth = Math.round(beforeHollow - pondLevel + 3);
 
-    k.applyEffects([{ tipo: 'rilievo', delta: -digDepth, raggio: 1 }], undefined, { x: hollowCol + 0.5, y: hollowRow + 0.5 });
+    k.applyEffects([{ type: 'relief', delta: -digDepth, radius: 1 }], undefined, { x: hollowCol + 0.5, y: hollowRow + 0.5 });
     expect(k.water.moving).toBe(true);
 
     // Settle water
@@ -147,19 +147,19 @@ describe('the kernel’s rilievo effect (T57c)', () => {
 
     const before = k.groundAt(targetCol, targetRow) / LEVEL;
 
-    // Cast «terra vento terra» -> raises
-    giveRunes(['terra', 'vento', 'terra']);
-    k.phrase().tokens = ['terra', 'vento', 'terra'];
+    // Cast «terra ventus terra» -> raises
+    giveRunes(['terra', 'ventus', 'terra']);
+    k.phrase().tokens = ['terra', 'ventus', 'terra'];
     expect(await k.castSpell()).toBe(true);
-    expect(k.content.spells['terra vento terra']?.effects[0]).toMatchObject({ tipo: 'rilievo', delta: 2 });
+    expect(k.content.spells['terra ventus terra']?.effects[0]).toMatchObject({ type: 'relief', delta: 2 });
     const afterRaise = k.groundAt(targetCol, targetRow) / LEVEL;
     expect(afterRaise).toBeGreaterThan(before);
 
-    // Cast «vento terra vento» -> lowers
-    giveRunes(['vento', 'terra', 'vento']);
-    k.phrase().tokens = ['vento', 'terra', 'vento'];
+    // Cast «ventus terra ventus» -> lowers
+    giveRunes(['ventus', 'terra', 'ventus']);
+    k.phrase().tokens = ['ventus', 'terra', 'ventus'];
     expect(await k.castSpell()).toBe(true);
-    expect(k.content.spells['vento terra vento']?.effects[0]).toMatchObject({ tipo: 'rilievo', delta: -2 });
+    expect(k.content.spells['ventus terra ventus']?.effects[0]).toMatchObject({ type: 'relief', delta: -2 });
     const afterLower = k.groundAt(targetCol, targetRow) / LEVEL;
     expect(afterLower).toBeLessThan(afterRaise);
   }, 30_000);

@@ -810,7 +810,7 @@ $<HTMLInputElement>('wind').oninput = (e) => (uWind.value = Number((e.target as 
 
 const roleOfClass: Record<string, Entry['role']> = { persona: 'npc', animale: 'animal', bestia: 'animal', albero: 'tree', cespuglio: 'plant', roccia: 'rock', sasso: 'rock', edificio: 'structure', monumento: 'structure' };
 for (const c of CLASSES) $('g-class').append(new Option(`${c.name} (${c.tiles.join('×')})`, c.id));
-$<HTMLSelectElement>('g-class').value = 'edificio';
+$<HTMLSelectElement>('g-class').value = 'building';
 const gMeter = new UsageLog();
 $('g-go').onclick = async () => {
   const out = $('g-out');
@@ -825,7 +825,7 @@ $('g-go').onclick = async () => {
     name,
     description: $<HTMLInputElement>('g-desc').value.trim(),
     kind,
-    category: ['persona', 'animale', 'bestia'].includes(kind) ? 'figura' : ['edificio', 'monumento'].includes(kind) ? 'struttura' : 'semplice',
+    category: ['person', 'animal', 'beast'].includes(kind) ? 'figura' : ['building', 'monument'].includes(kind) ? 'struttura' : 'semplice',
   };
   const models = new GeminiAiModels({ textModel: $<HTMLSelectElement>('g-model').value, limits: { text: 50 }, thinking: 'low', timeout: 240_000 });
   models.onCall = (r) => gMeter.record(r);

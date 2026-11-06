@@ -170,7 +170,7 @@ describe('a building that rises in a world', () => {
     (k as unknown as { phasesClosed(v: Venture, c: number[]): void }).phasesClosed(v, addWork(v, 200));
     const plan = k.chunks.get(key)!.plan!;
     expect(plan.stadi).toEqual({ [origin]: 0.2 });
-    plan.case = [{ origine: `${key}#v1`, x: 2, y: 2, modello: 'grande', seme: 1, yaw: 0, classe: 'edificio', concetto: 'una casetta', stadio: 0.2 }];
+    plan.case = [{ origine: `${key}#v1`, x: 2, y: 2, modello: 'grande', seme: 1, yaw: 0, classe: 'building', concetto: 'una casetta', stadio: 0.2 }];
     (k as unknown as { saveChunkSoon(c: unknown): void }).saveChunkSoon(k.chunks.get(key));
     await pause(700);
     // The world files are those of before the fall: no venture.

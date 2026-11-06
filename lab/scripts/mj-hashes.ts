@@ -77,7 +77,7 @@ export function voci(semi = [1, 2]): Voce[] {
     ['suolo/locanda/1/seconda/modello', 'locanda'], ['suolo/locanda/2/seconda/modello', 'locanda'],
   ];
   for (const [file, id] of refs)
-    for (const taglia of ['grande', 'enorme'] as const)
+    for (const taglia of ['large', 'huge'] as const)
       for (const seme of semi.slice(0, 1))
         out.push({
           nome: `${file}@${taglia}#${seme}`,

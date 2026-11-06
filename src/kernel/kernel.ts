@@ -692,6 +692,8 @@ export class Kernel {
     const ported = migrateUniverse(repo.working);
     if (ported.applied.length) {
       for (const p of new Set([...Object.keys(repo.working), ...Object.keys(ported.files)])) if (repo.working[p] !== ported.files[p]) repo.write(p, ported.files[p] ?? null);
+      // Committed at once, by the kernel: left in the working files, the first commit of the Council would fence most of it back to HEAD.
+      repo.commit(`migrazione ${ported.applied.map((a) => a.split(':')[0]).join(', ')}`, 'kernel');
       k.log('kernel', `universo portato a questo kernel: ${ported.applied.join('; ')}`);
     }
     k.bus.on('lua:morte', (d: { fame?: boolean; sete?: boolean }) => k.mortalDies(d?.sete ? 'sete' : d?.fame ? 'fame' : 'ferite'));

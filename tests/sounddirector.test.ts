@@ -15,24 +15,24 @@ import { expectedModelErrors } from './helpers';
 
 const programs = readPrograms(bundledFiles);
 const music = programs.filter((p) => p.suono?.uso === 'musica');
-const state = (s: Partial<SoundState> = {}): SoundState => ({ beyond: false, environment: 'borgo', phase: 'giorno', seed: 42, ...s });
+const state = (s: Partial<SoundState> = {}): SoundState => ({ beyond: false, environment: 'village', phase: 'giorno', seed: 42, ...s });
 const environments = Object.keys(JSON.parse(bundledFiles['modules/world.layouts/manifest.json']).layouts as object);
 
 describe('the choice of the music', () => {
   it('is pure: the same state gives the same piece, and the order of questions does not matter', () => {
     const a = chooseMusic(state(), programs);
-    chooseMusic(state({ environment: 'bosco' }), programs);
+    chooseMusic(state({ environment: 'woods' }), programs);
     expect(chooseMusic(state(), programs)).toEqual(a);
     expect(a?.id).toBe('suono-musica-pastorale');
   });
 
   it('follows the environment and the moment of the day', () => {
     const id = (s: Partial<SoundState>) => chooseMusic(state(s), programs)?.id;
-    expect(id({ environment: 'bosco' })).toBe('suono-musica-selva');
-    expect(id({ environment: 'castello' })).toBe('suono-musica-pietra');
+    expect(id({ environment: 'woods' })).toBe('suono-musica-selva');
+    expect(id({ environment: 'castle' })).toBe('suono-musica-pietra');
     expect(id({ environment: 'dungeon', phase: 'notte' })).toBe('suono-musica-profondo');
-    expect(id({ environment: 'borgo', phase: 'sera' })).toBe('suono-musica-tramonto');
-    expect(id({ environment: 'borgo', phase: 'notte' })).toBe('suono-musica-notte');
+    expect(id({ environment: 'village', phase: 'sera' })).toBe('suono-musica-tramonto');
+    expect(id({ environment: 'village', phase: 'notte' })).toBe('suono-musica-notte');
   });
 
   it('an environment of the Cartographer goes by what its name contains; an unknown one and a place not known yet still have music', () => {
@@ -197,15 +197,15 @@ describe('the director', () => {
     d.update(state());
     await flush();
     advance(1000);
-    d.update(state({ environment: 'bosco' }));
+    d.update(state({ environment: 'woods' }));
     advance(1000);
     d.update(state());
     advance(1000);
-    d.update(state({ environment: 'bosco' }));
+    d.update(state({ environment: 'woods' }));
     await flush();
     expect(out.music).toHaveLength(1);
     advance(4100);
-    d.update(state({ environment: 'bosco' }));
+    d.update(state({ environment: 'woods' }));
     await flush();
     expect(out.music).toHaveLength(2);
     expect(d.now?.id).toBe('suono-musica-selva');

@@ -451,7 +451,9 @@ function migrate0_2(files: FileMap): FileMap {
     if (isRecord(base)) {
       const next: Record<string, unknown> = {};
       for (const [p, hash] of Object.entries(base)) {
-        const to = renamed.get(p) ?? p;
+        // A model of the seed the universe no longer has keeps its new name, so that the seed does not bring it back as new.
+        const gone = files[p] === undefined && /^models\/([^/]+)\.xml$/.exec(p);
+        const to = renamed.get(p) ?? (gone ? `models/${internalModelId(gone[1])}.xml` : p);
         const pristine = files[p] !== undefined && hashOf(files[p]) === hash;
         next[to] = pristine && out[to] !== undefined ? hashOf(out[to]) : hash;
       }

@@ -132,7 +132,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Terreno
 - **Inglese**: `terrain`, `TerrainDef`, `TerrainLayer`
-- **Definizione**: il tipo di una casella: nome, colore, strato, se blocca, azioni imparate.
+- **Definizione**: il tipo di una casella: nome, colore, strato, se blocca, azioni imparate. Dal contratto 0.2 un terreno del seme ha un `id` interno (`meadow`) e un `name` nella lingua del mondo («prato»); il codice e Lua lo cercano per codice, id o nome (`tileCodeOf`).
 - **Dove vive**: `src/kernel/types.ts`, i moduli `generator` dell'universo
 - **Da non usare**: `tile` (per il tipo), `TileDef`, `TileLayer`
 - **Fermo**: `tiles` nei manifest, `TerrainDef.layer`.
@@ -1097,6 +1097,20 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Dove vive**: `src/kernel/version.ts`, `src/kernel/migrations.ts`
 - **Da non usare**: `compatibilità` (per l'intervallo), `range` (in italiano)
 - **Fermo**: `kernels`, `from`, `to` in `universe.json`
+
+### Migrazione
+- **Inglese**: `Migration`, `MIGRATIONS`, `migrate`, `migratePlan`, `migratePlanRecord`, `prepareUniverse`
+- **Definizione**: il passo che porta un universo da un contratto al successivo (ADR-0152, ADR-0154): una funzione pura sui suoi file e una, idempotente, sui piani dei luoghi, che il kernel applica a ogni piano che legge. Un caricamento migra e poi prende il seme (`prepareUniverse`). La prima è `0.1 → 0.2` (T307a, la lingua interna della simulazione).
+- **Dove vive**: `src/kernel/migrations.ts`, `src/kernel/universes.ts`
+- **Da non usare**: `conversione`, `upgrade` (per la migrazione: l'aggiornamento dal seme è un'altra cosa)
+- **Fermo**: nessuno.
+
+### Riparazione dei valori italiani
+- **Inglese**: `internalManifest`, `internalEffect`, `internalModelId`, `internalModelInfo`, `italianValues`, `italianName`
+- **Definizione**: finché i prompt del Concilio sono italiani (T310), ciò che il Concilio scrive con i valori del contratto prima si riporta ai nomi interni entrando nel kernel (manifest, effetti, piani, pannelli, casi, timbri, rune nuove, indice dei modelli); gli schemi elencano ancora i valori italiani e ciò che il mondo mostra usa la parola italiana.
+- **Dove vive**: `src/kernel/internalNames.ts`, `src/kernel/validator.ts`
+- **Da non usare**: `traduzione` (non è il testo del mondo)
+- **Fermo**: nessuno.
 
 ### Lingua interna
 - **Inglese**: `INTERNAL_NAMES`, `internalName`, `NameDomain`

@@ -93,12 +93,12 @@ describe('the cards (T36)', () => {
   it('only what a change brings is stamped; a card lost in a rewrite comes back', () => {
     const carta = { autore: 'scultore', pagante: COMUNE, titolare: 'io' };
     const head = {
-      'models/index.json': JSON.stringify({ seme: { classe: 'oggetto' }, vecchio: { classe: 'oggetto', carta } }, null, 1),
+      'models/index.json': JSON.stringify({ seme: { classe: 'object' }, vecchio: { classe: 'object', carta } }, null, 1),
       'modules/items.base/manifest.json': JSON.stringify({ id: 'items.base', kind: 'data', items: [{ id: 'pane', name: 'Pane' }] }, null, 2),
     };
     const working = {
       ...head,
-      'models/index.json': JSON.stringify({ seme: { classe: 'oggetto', voto: 5 }, vecchio: { classe: 'oggetto', voto: 7 }, nuovo: { classe: 'figura' } }, null, 1),
+      'models/index.json': JSON.stringify({ seme: { classe: 'object', voto: 5 }, vecchio: { classe: 'object', voto: 7 }, nuovo: { classe: 'figura' } }, null, 1),
       'modules/items.base/manifest.json': JSON.stringify({ id: 'items.base', kind: 'data', items: [{ id: 'pane', name: 'Pane' }, { id: 'vino', name: 'Vino' }] }, null, 2),
       'modules/npc.oste/manifest.json': JSON.stringify({ id: 'npc.oste', name: 'Oste', kind: 'entity' }, null, 2),
     };

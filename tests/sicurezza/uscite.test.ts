@@ -47,10 +47,10 @@ const MANIFEST = JSON.stringify({
   interaction: { type: 'talk' },
   components: { segreto: { v: SECRET } },
   container: { size: 4, loot: SECRET },
-  actions: [{ id: 'bussa', label: 'Bussa', effects: [{ tipo: 'messaggio', testo: SECRET }] }],
-  items: [{ id: 'cosa', name: 'Cosa', description: 'Una cosa.', category: 'varie', weight: 1, stack: 1, tags: [], glyph: 'c', color: '#000000', aspetto: SECRET, actions: [{ id: 'gira', label: 'Gira', effects: [{ tipo: 'messaggio', testo: SECRET }] }] }],
-  tiles: { g: { name: 'Prato', color: '#00ff00', solid: false, segreto: SECRET, actions: [{ id: 'scava', label: 'Scava', effects: [{ tipo: 'messaggio', testo: SECRET }] }] } },
-  spells: { 'luce fuoco': { name: 'Lampo', description: 'Un lampo.', cost: 2, effects: [{ tipo: 'messaggio', testo: SECRET }] } },
+  actions: [{ id: 'bussa', label: 'Bussa', effects: [{ type: 'message', text: SECRET }] }],
+  items: [{ id: 'cosa', name: 'Cosa', description: 'Una cosa.', category: 'varie', weight: 1, stack: 1, tags: [], glyph: 'c', color: '#000000', aspetto: SECRET, actions: [{ id: 'gira', label: 'Gira', effects: [{ type: 'message', text: SECRET }] }] }],
+  tiles: { g: { name: 'Prato', color: '#00ff00', solid: false, segreto: SECRET, actions: [{ id: 'scava', label: 'Scava', effects: [{ type: 'message', text: SECRET }] }] } },
+  spells: { 'luce fuoco': { name: 'Lampo', description: 'Un lampo.', cost: 2, effects: [{ type: 'message', text: SECRET }] } },
   loot: { comune: { segreto: SECRET } },
   layouts: { bosco: { name: 'Bosco', description: 'Alberi.', program: SECRET, carta: { autore: 'a', pagante: 'b', titolare: 'c' } } },
   casi: [{ titolo: SECRET }],
@@ -68,9 +68,9 @@ describe('ciò che esce verso il giocatore', () => {
   it('V-012 restano ciò che il client disegna e il menu, gli effetti solo come tipo', () => {
     const m = JSON.parse(playerFiles(FILES)['modules/npc.sonda/manifest.json']);
     expect(m.appearance).toEqual({ glyph: 's', color: '#ffffff', model: 'pino' });
-    expect(m.actions).toEqual([{ id: 'bussa', label: 'Bussa', effects: [{ tipo: 'messaggio' }] }]);
-    expect(m.items[0].actions[0].effects).toEqual([{ tipo: 'messaggio' }]);
-    expect(m.tiles.g).toEqual({ name: 'Prato', color: '#00ff00', solid: false, actions: [{ id: 'scava', label: 'Scava', effects: [{ tipo: 'messaggio' }] }] });
+    expect(m.actions).toEqual([{ id: 'bussa', label: 'Bussa', effects: [{ type: 'message' }] }]);
+    expect(m.items[0].actions[0].effects).toEqual([{ type: 'message' }]);
+    expect(m.tiles.g).toEqual({ name: 'Prato', color: '#00ff00', solid: false, actions: [{ id: 'scava', label: 'Scava', effects: [{ type: 'message' }] }] });
     expect(m.spells['luce fuoco']).toEqual({ name: 'Lampo', description: 'Un lampo.', cost: 2 });
     for (const field of ['logic', 'persona', 'lore', 'context', 'spawn', 'inventory', 'drops', 'fragments', 'interaction', 'container', 'components', 'loot', 'layouts', 'casi', 'origin', 'prompts', 'campoNuovo']) expect(m[field], field).toBeUndefined();
   });
