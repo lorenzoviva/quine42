@@ -4813,7 +4813,7 @@ Nasce da T156: `dossier T156`. `integra T156` si è fermato su conflitti in `AGE
 **Quando è fatto:** merge committato, `npm test`, `npm run typecheck` e `npm run build` verdi con i loro turni, un solo ADR per numero; esito con le scelte fatte nei conflitti. Non serve il browser (T156 l'ha provato). Sicurezza: nessuna superficie nuova.
 - Esito: merge di task/T156 sul contratto 0.4: kernel 0.4.1, ADR di T156 rinumerato 0160 (un solo ADR per numero); prompt procedurale, voci per taglia e `ModelInfo.seeds` con i nomi inglesi di T307b/T308a (campi `class`/`size`/`name`/`cellar`/`time`, agenti `sculptor`/`artist`, `plan.structures`/`concept`, `prompts/agents/sculptor.md`, `soil="E"` nel prompt, nello scheletro e nel test); `modelTime` e `modelBox` restano entrambi; censimento del glossario rigenerato; typecheck, suite intera (2529 passati, 1 saltato) e build verdi nei loro turni; non portato `lab/banco/prompt.md` (ancora `suolo`, come gli altri strumenti di lab); sicurezza: nessuna superficie nuova.
 
-### T320 · Lo Scultore: «almeno due piani raggiungibili a piedi» nei controlli del kernel — `da fare` (dipende da T319)
+### T320 · Lo Scultore: «almeno due piani raggiungibili a piedi» nei controlli del kernel — `fatto` (`2957f4eb`) (dipende da T319)
 - Pipeline: gemini · sforzo high · stima 4% · approvato · priorità 3
 - Step: 32
 
@@ -4822,6 +4822,7 @@ Nasce da T156 (`dossier T156`, `docs/pipeline/domande/T156.md`, risposta C scelt
 **Cosa fare:** portare nel kernel (in `src/`, non importando da `lab/`) la misura dei piani raggiungibili a piedi da una porta (scale e salti come il gioco li permette) e aggiungerla ai controlli di `checkProgram` per la classe `structure` da Grande in su, su ognuno dei semi provati: sotto i due piani il programma torna allo Scultore col motivo, in testo che il prompt della seconda richiesta già sa leggere. Tenere il costo per seme (misurarlo, l'atteso è qualche decimo di secondo) e non cambiare l'esito delle classi semplici. Kernel `+Z`. Test: un programma con la scala che non porta in alto è rifiutato col motivo, uno buono passa, lo scheletro offline passa.
 
 **Quando è fatto:** test nuovi, `npm test` e `npm run typecheck` verdi nei loro turni; esito con il tempo misurato per seme. Non serve il browser. Sicurezza: nessuna superficie nuova.
+- Esito: portata la misura dei piani raggiungibili a piedi nel kernel (src/kernel/forms.ts: reachableStoreys) e aggiunta a checkProgram per structure da Grande in su con motivo di scarto leggibile 'piani: <n> (serve ≥ 2)'; costo medio ~90 ms per seme; kernel 0.4.3, ADR-0162, typecheck e suite intera di test (170/170 file) verdi nei loro turni.
 
 ### T321 · Lo Scultore su Gemini 3.8 Flash: il prompt adattato e un giro sul banco — `da fare` (dipende da T320)
 - Pipeline: claude · sforzo high · stima 4% · approvato · priorità 4
