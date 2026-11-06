@@ -4645,7 +4645,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Quando è fatto: commit su `task/T306`. Nell'esito il numero di voci per dominio e cosa resta fuori.
 - Esito: `docs/lingua-interna.md` e `src/kernel/internalNames.ts` (54 domini, 847 voci: T307a 192, T307b 244, T308a 266, T308b 145) con il test (niente doppioni, catene, collisioni; copertura del codice e del seme); ADR-0153, `AGENTS.md`, glossario, `docs/lingue.md` §2-§4 allineati a D34; kernel 0.1.12. T307 e T308 spezzati in T307a (0.2), T307b (0.3), T308a (0.4), T308b (0.5), ognuno da solo con la sua migrazione; T310 toglie anche la riparazione dei valori italiani e aggiunge il tipo di legame come id. Fuori: testo del mondo, UI, indirizzi, le 83 regex (T310), contenuti del Concilio salvati, esiti del Lua di `sys.lavoro` (T307b). Il conteggio dei file per passo è un tetto, non la cifra esatta. Suite intera e typecheck verdi.
 
-### T307a · L'inglese come lingua interna: i valori della simulazione e le rune in latino (contratto 0.2) — `da fare` (dipende da T306)
+### T307a · L'inglese come lingua interna: i valori della simulazione e le rune in latino (contratto 0.2) — `fatto` (`66b98324`) (dipende da T306)
 - Pipeline: claude · sforzo extra · stima 4% · approvato · priorità 2
 - Step: 42
 - Contesto: il primo dei quattro passi di codice in cui T306 ha spezzato T307 e T308 (`dossier T306`, `docs/lingua-interna.md`, sezione del piano, punto 1; ADR-0153). **Va lanciato da solo**: nessun altro task su `src/`, `universe/`, `tests/` in corso, perché si scontra con tutti.
@@ -4653,6 +4653,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Test: unitari della migrazione, suite intera e typecheck con i loro turni; 400 tick offline sul seme senza fault.
 - Browser: `?skip&offline`, un universo salvato prima si apre migrato senza guasti; una runa latina pronunciata funziona.
 - Quando è fatto: commit su `task/T307a`. Sicurezza: nessuna superficie nuova, o le voci.
+- Esito: contratto 0.2.0: i 15 domini T307a in inglese (rune in latino) nel codice, nel seme, nei modelli, in MockAiModels, in lab/ e nei test; migrazione 0.1→0.2 (ADR-0154) con piani migrati alla lettura, Lua solo dei moduli del Concilio, seed.json che segue, prepareUniverse in ogni caricamento e Kernel.boot che committa subito; il validatore ripara l'italiano finché T310 non cambia i prompt (schemi del Concilio ancora italiani); i quattro universi del laboratorio restano 0.1 sul disco e si leggono/installano migrati (seme-0.1.json); typecheck e suite verdi (2449). Restano: parole dell'interfaccia ancora dal valore di prima (T239); gli strumenti di lab che generano i quattro universi ora scrivono 0.2. Sicurezza: nessuna superficie nuova (files.ts: gli effetti escono come `type`).
 
 ### T314 · Integrare T307a nel base, che ha T299 — `fatto` (`734aaa7d`)
 - Step: 42
