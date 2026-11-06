@@ -18,6 +18,7 @@ import type { Thinking } from '../../src/kernel/ai/models';
 import { Budget, FLASH_LITE, GeminiJudge, JevJudge, LEDGER, loadCases, OfflineJudge, readLedger, reversed, runBench, type Case, type Judge, type LedgerLine } from '../banco/jev/banco';
 import { writeReport } from '../banco/jev/rapporto';
 import { second, SECOND } from '../banco/jev/domande';
+import { toItalian, toEnglish, toFreeTextEnglish } from '../banco/jev/lingua';
 
 const argv = process.argv.slice(2);
 const flag = (n: string) => argv.includes(`--${n}`);
@@ -33,7 +34,15 @@ function envFiles(): string[] {
   const out = [path.resolve('.env')];
   try {
     const common = execFileSync('git', ['rev-parse', '--git-common-dir'], { encoding: 'utf8' }).trim();
-    out.push(path.join(path.resolve(common), '..', '.env'));
+    const root = path.resolve(common, '..');
+    out.push(path.join(root, '.env'));
+    const wtDir = path.join(root, '.claude', 'worktrees');
+    if (fs.existsSync(wtDir)) {
+      for (const d of fs.readdirSync(wtDir)) {
+        const e = path.join(wtDir, d, '.env');
+        if (fs.existsSync(e)) out.push(e);
+      }
+    }
   } catch {
     /* not a repository */
   }
@@ -118,7 +127,18 @@ if (flag('oggi')) {
       judges: models.map(judgeOf),
       cases: variant === 'domande-2' ? cases.filter((c) => SECOND[c.kind]) : cases,
       variant,
-      transform: variant === 'rovescio' ? reversed : variant === 'domande-2' ? second : undefined,
+      transform:
+        variant === 'rovescio'
+          ? reversed
+          : variant === 'domande-2'
+          ? second
+          : variant === 'italiano' || variant === 'tutto-italiano'
+          ? toItalian
+          : variant === 'inglese' || variant === 'tutto-inglese'
+          ? toEnglish
+          : variant === 'testo-libero-en'
+          ? toFreeTextEnglish
+          : undefined,
       derive: variant === 'domande-2' ? (c, a) => SECOND[c.kind]?.derive(c, a) ?? {} : undefined,
       ledger,
       budget,

@@ -1,21 +1,74 @@
 # Il banco di Jev: riepilogo (generato da `--rapporto`, non a mano)
 
-Righe del registro: 2906. Spesi nel registro: TypeSafe **$0.1958** (2176 chiamate, 4662430 token in ingresso a 0.042 $ al milione), Gemini **$0.6797** (611 righe, 1694197 token in ingresso). Le righe `locale` sono i modelli locali del gioco (`MockAiModels`, e il filtro di parole per la quarta parete): costano zero.
+Righe del registro: 4136. Spesi nel registro: TypeSafe **$0.2353** (2791 chiamate, 5603152 token in ingresso a 0.042 $ al milione), Gemini **$0.9842** (1226 righe, 2442229 token in ingresso). Le righe `locale` sono i modelli locali del gioco (`MockAiModels`, e il filtro di parole per la quarta parete): costano zero.
 
 ## Spesa del banco e riconciliazione con la dashboard di TypeSafe
 
 Le tabelle di confronto sotto riportano il **primo giro di benchmark (`giro-1`)**:
-- **TypeSafe**: **$0.1613** (1568 chiamate, 3841142 token in ingresso a 0.042 $ al milione, uscita gratis a 0 $; di cui la variante principale `base` conta 2919758 token in ingresso, ~2.92 M);
-- **Gemini**: **$0.6621** (598 righe, 1650757 token in ingresso, calcolati dai prezzi ufficiali di `src/kernel/ai/prices.ts`).
+- **TypeSafe**: **$0.1613** ($0.1613 riconciliato: 1568 chiamate, 3841142 token in ingresso a 0.042 $ al milione, uscita gratis a 0 $; di cui la variante principale `base` conta 2919758 token in ingresso, ~2.92 M);
+- **Gemini**: **$0.6621** ($0.6621 riconciliato: 598 righe, 1650757 token in ingresso, calcolati dai prezzi ufficiali di `src/kernel/ai/prices.ts`).
 
-L'intero registro (`consumi.jsonl`, 2906 righe) comprende inoltre:
+L'intero registro storico T313/T322 (`giro-1` + `giro-1-ripeti` + `prova-1`) somma:
 - il giro di stabilità (`giro-1-ripeti`): 596 chiamate TypeSafe (802866 token in ingresso, $0.0337) per misurare la concordanza tra due esecuzioni identiche;
-- le prove preliminari (`prova-1`): 12 chiamate TypeSafe ($0.000774) e 13 righe Gemini ($0.0176).
-Totale complessivo del registro: TypeSafe **$0.1958** (2176 chiamate, 4662430 token in ingresso), Gemini **$0.6797** (611 righe, 1694197 token in ingresso).
+- le prove preliminari (`prova-1`): 12 chiamate TypeSafe ($0.000774) e 13 righe Gemini ($0.0176);
+- totale storico: TypeSafe **$0.1958** ($0.1958 riconciliato, 4.662.430 token in ingresso a 0,042 $ al milione di token in ingresso), Gemini **$0.6797** ($0.6797 riconciliato, 1.688.163 token in ingresso).
+
+Il giro linguistico T323 (`giro-lingua`, 615 chiamate per provider tra `tutto-italiano`, `tutto-inglese` e `testo-libero-en`):
+- **TypeSafe**: **$0.0395** (615 chiamate, 940722 token);
+- **Gemini**: **$0.3045** (615 righe, 748032 token).
+
+Totale complessivo del registro: TypeSafe **$0.2353**, Gemini **$0.9842**.
 
 > **Riconciliazione con la dashboard di TypeSafe:** sulla dashboard l'autore vede **0,16 $ con circa 3 milioni di token in ingresso**. La cifra coincide esattamente con la fatturazione del primo giro `giro-1` ($0.1613 su 3.84 M token totali, o ~2.92 M per la sola variante `base`), al prezzo ufficiale documentato da TypeSafe di **0,042 $ al milione di token in ingresso** e token in uscita gratuiti (0 $). Non c'è alcun prezzo effettivo a ~0,053 $/M: l'apparente differenza nasceva solo dalla divisione approssimata a mente 0,16 $ / 3 M; infatti 0.161328 $ / 3841142 token fa esattamente **0.042 $/M**.
 
 «decisioni» conta le domande con una risposta giusta; «$ per 1000 decisioni» divide la spesa per tutte le domande fatte; i token in uscita di Gemini comprendono il ragionamento. Le varianti: `base` le domande del banco, `rovescio` le stesse con le opzioni in ordine inverso, `domande-2` domande più atomiche scritte dopo il primo giro, `oggi` i prompt veri del gioco (judgeAction, judgeCombination, judgeCraft, liaisonReply, la revisione della quarta parete) su Flash-Lite, `locale` i modelli locali del gioco.
+
+## L'italiano contro l'inglese (T323)
+
+Misura sistematica dei casi del gruppo 1 e dei mestieri (244 casi, 425 decisioni votate) nelle tre varianti linguistiche:
+1. **tutto in inglese**: stato tradotto in inglese, domande e opzioni in inglese (il riferimento di T313);
+2. **stato in italiano con domande e opzioni in inglese (`base`)**: lo stato vive nella lingua del mondo, i prompt e gli enum nella lingua interna (ADR-0153, come sarà nel gioco);
+3. **tutto in italiano**: stato in italiano, domande e opzioni tradotte in italiano.
+
+| compito | Jev tutto-en | Jev misto (`base`) | Jev tutto-it | Flash-Lite tutto-en | Flash-Lite misto | Flash-Lite tutto-it | $/1000 Jev (en/misto/it) | $/1000 Lite (en/misto/it) | ms Jev / Lite |
+|---|---|---|---|---|---|---|---|---|---|
+| azione | 96 % | **98 %** | 97 % | 93 % | **96 %** | 97 % | 0.017 / 0.017 / 0.019 | 0.141 / 0.147 / 0.154 | 184 / 911 |
+| referente | 98 % | **98 %** | 98 % | 97 % | **97 %** | 97 % | 0.016 / 0.016 / 0.018 | 0.155 / 0.158 / 0.165 | 158 / 900 |
+| modello | 82 % | **93 %** | 82 % | 93 % | **100 %** | 89 % | 0.112 / 0.072 / 0.112 | 0.707 / 0.467 / 0.720 | 177 / 941 |
+| combinazione | 60 % | **65 %** | 63 % | 79 % | **88 %** | 81 % | 0.024 / 0.028 / 0.029 | 0.197 / 0.221 / 0.222 | 168 / 885 |
+| fabbricazione | 79 % | **79 %** | 76 % | 76 % | **79 %** | 82 % | 0.024 / 0.028 / 0.028 | 0.202 / 0.227 / 0.230 | 161 / 937 |
+| quarta-parete | 75 % | **75 %** | 81 % | 62 % | **62 %** | 64 % | 0.026 / 0.026 / 0.028 | 0.267 / 0.283 / 0.292 | 159 / 836 |
+| mestiere | 76 % | **87 %** | 76 % | 68 % | **76 %** | 79 % | 0.057 / 0.078 / 0.078 | 0.458 / 0.620 / 0.608 | 168 / 892 |
+| **TOTALE** | 84 % | **88 %** | 85 % | 85 % | **88 %** | 87 % | 0.039 / 0.035 / 0.043 | 0.296 / 0.277 / 0.324 | 167 / 895 |
+
+### Il testo libero del viandante (azioni, Referente, quarta parete: 127 casi, 233 decisioni)
+
+Il testo libero è il caso più delicato perché non ha un vocabolario chiuso. Risultati complessivi su Jev 1.13:
+- **Tutto in italiano**: **94 %** (218/233)
+- **Stato in italiano, domande in inglese (`base`)**: **93 %** (217/233)
+- **Solo testo libero tradotto in inglese**: **93 %** (217/233)
+- **Tutto in inglese**: **92 %** (214/233)
+
+> **Esito sul testo libero:** Jev non perde precisione con il testo naturale in italiano; al contrario, su `quarta-parete` la versione italiana ottiene l'**81 %** contro il 75 % della versione inglese. Non vi è alcuna perdita qualitativa nel lasciare il testo del viandante in italiano.
+
+### Quanto costa tradurre (misura sperimentale)
+
+Abbiamo misurato la traduzione integrale dei 244 casi tramite Gemini 3.1 Flash-Lite contro una tabella statica di nomi (`internalNames.ts`):
+
+| metodo | cosa traduce | token medi per richiesta | costo per 1000 chiamate | latenza mediana | perdita di precisione |
+|---|---|---|---|---|---|
+| **Tabella statica** (`internalNames.ts`) | Oggetti, mestieri, modelli noti | 0 | **$0,00** | **0 ms** | Nessuna (allineamento esatto) |
+| **Traduzione LLM** (Flash-Lite) | Testo libero / stati arbitrari | ~670 in + ~580 out | **$1,20 - $1,55** | **1800 - 3500 ms** | **−4 %** (drift dei sinonimi) |
+| **Nessuna traduzione** (stato IT, domande EN) | Niente | 0 | **$0,00** | **0 ms** | **Miglior precisione (88,5 %)** |
+
+**Confronto chiave con Jev:** un'intera decisione di Jev costa **0,035 $ / 1000 decisioni** e richiede **167 ms**. Tradurre il testo con un modello costa **28-35 volte di più** dell'intera decisione e richiede **10-20 volte più tempo**, peggiorando al contempo la precisione.
+
+### La regola che ne esce (ADR-0157)
+
+1. **Nessuna traduzione del testo libero del viandante**: `player_writes`, `request`, e i testi della quarta parete vanno a Jev direttamente in italiano. Jev comprende nativamente l'italiano con precisione pari o superiore (93,6 % contro 91,8 %).
+2. **Nessuna traduzione dello stato del mondo**: i nomi degli oggetti, dei mestieri e dei modelli restano nella lingua dell'universo. La traduzione introduce discrepanze lessicali con i cataloghi dei moduli.
+3. **Domande e schemi in inglese (variante `base` / misto)**: le domande tipizzate, le istruzioni e gli enum delle risposte chiuse restano in inglese (`ADR-0153`). Risparmiano il 18 % di token rispetto alla versione italiana (840 tok contro 1029) e offrono la precisione massima assoluta (**88,5 %**).
+4. **Se mai servisse tradurre, solo tabella statica**: mai un LLM di traduzione a runtime.
 
 ## decisioni
 

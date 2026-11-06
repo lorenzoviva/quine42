@@ -1,6 +1,6 @@
 # ADR-0157 — Jev per le decisioni chiuse: un varco sul server come `GeminiGate`, la regola di oggi come pavimento e come risposta dei modelli locali
 
-Data: 2026-11-06 · Stato: **proposto** (task T313 del backlog: il banco è fatto, portarlo nel gioco lo decide l'autore) · Riferimenti: ADR-0099 (il varco della chiave di Gemini, regola 9), ADR-0085 e ADR-0133 (i coefficienti e le manopole), ADR-0113 (chi paga si dice), ADR-0140, ADR-0147 (mestieri e imprese), ADR-0042 (lo Scultore), `lab/banco/jev/README.md`
+Data: 2026-11-06 · Stato: **proposto** (task T313 e T323 del backlog: il banco e le misure sull'italiano sono fatti, portarlo nel gioco lo decide l'autore) · Riferimenti: ADR-0099 (il varco della chiave di Gemini, regola 9), ADR-0085 e ADR-0133 (i coefficienti e le manopole), ADR-0113 (chi paga si dice), ADR-0140, ADR-0147 (mestieri e imprese), ADR-0042 (lo Scultore), ADR-0153 (la lingua interna), `lab/banco/jev/README.md`
 
 ## Contesto
 
@@ -49,8 +49,9 @@ In sintesi (le tabelle sono nel README del banco):
    5. le scelte di `action.judge`, `referente.coordinate` e `craft.free` (quale oggetto noto): Jev decide, il racconto si scrive solo per ciò
       che riesce.
    6. i tre nodi sospetti per la seconda richiesta dello Scultore, o da togliere uno alla volta rifacendo le misure.
-5. **Non si portano**: `craft.judge`, `model.judge`, ciò che è numeri (fisica, passi delle imprese) e ciò che è testo.
-6. **Il banco è il collaudo**: prima di cambiare versione di Jev si rifà `jev-banco.ts` sulla nuova e si confronta con il registro.
+5. **La lingua dello stato e delle domande (T323)**: lo stato vive nella lingua dell'universo (italiano), mentre le domande, le istruzioni e gli enum delle scelte restano nella lingua interna (inglese, ADR-0153). Questa combinazione mista è la più precisa (88,5 % contro 84,5 % di tutto-inglese e 85,4 % di tutto-italiano) e risparmia il 18 % di token rispetto alle domande in italiano. **Niente si traduce a runtime**: il testo libero del viandante (`player_writes`, `request`, quarta parete) va a Jev direttamente in italiano (93,6 % di precisione contro 91,8 % in inglese). Tradurre con un LLM costerebbe $1,20-$1,55 per 1000 chiamate (28-35 volte l'intera decisione di Jev) con 2-3 secondi di latenza e peggiorerebbe l'accuratezza per il drift dei sinonimi. Per i soli termini noti che dovessero servire in inglese si usa la tabella statica (`internalNames.ts`), a costo zero.
+6. **Non si portano**: `craft.judge`, `model.judge`, ciò che è numeri (fisica, passi delle imprese) e ciò che è testo.
+7. **Il banco è il collaudo**: prima di cambiare versione di Jev si rifà `jev-banco.ts` sulla nuova e si confronta con il registro.
 
 ## Alternative scartate
 

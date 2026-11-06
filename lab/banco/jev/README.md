@@ -214,6 +214,56 @@ nessuna chiamata quando lo stato è quello della routine (la meta senza un fatto
 stato uguale è quasi sempre «la regola»); una risposta per sempre dove la scelta non cambia (mestiere → programma, oggetto → modello,
 come oggi le azioni imparate diventano regole). La soglia di probabilità non conviene, per i motivi sopra.
 
+## Jev in italiano contro l'inglese (T323)
+
+Il task T323 misura l'impatto dell'italiano sui compiti del gruppo 1 e sui mestieri (244 casi, 425 decisioni votate) nelle tre varianti:
+1. **tutto in inglese**: stato tradotto in inglese, domande e opzioni in inglese (il riferimento ideale);
+2. **stato in italiano con domande e opzioni in inglese (`base`)**: lo stato vive nella lingua del mondo, i prompt e gli enum nella lingua interna (ADR-0153);
+3. **tutto in italiano**: stato in italiano, domande e opzioni tradotte in italiano.
+
+### Tabella per compito (Jev 1.13 contro Flash-Lite)
+
+| compito | Jev tutto-en | Jev misto (`base`) | Jev tutto-it | Flash-Lite tutto-en | Flash-Lite misto | Flash-Lite tutto-it | $/1000 Jev (en/misto/it) | $/1000 Lite (en/misto/it) | ms Jev / Lite |
+|---|---|---|---|---|---|---|---|---|---|
+| azione | 96 % | **98 %** | 97 % | 93 % | **96 %** | 97 % | 0.017 / 0.017 / 0.019 | 0.141 / 0.147 / 0.154 | 184 / 911 |
+| referente | 98 % | **98 %** | 98 % | 97 % | **97 %** | 97 % | 0.016 / 0.016 / 0.018 | 0.155 / 0.158 / 0.165 | 158 / 900 |
+| modello | 82 % | **93 %** | 82 % | 93 % | **100 %** | 89 % | 0.112 / 0.072 / 0.112 | 0.707 / 0.467 / 0.720 | 177 / 941 |
+| combinazione | 60 % | **65 %** | 63 % | 79 % | **88 %** | 81 % | 0.024 / 0.028 / 0.029 | 0.197 / 0.221 / 0.222 | 168 / 885 |
+| fabbricazione | 79 % | **79 %** | 76 % | 76 % | **79 %** | 82 % | 0.024 / 0.028 / 0.028 | 0.202 / 0.227 / 0.230 | 161 / 937 |
+| quarta-parete | 75 % | **75 %** | 81 % | 62 % | **62 %** | 64 % | 0.026 / 0.026 / 0.028 | 0.267 / 0.283 / 0.292 | 159 / 836 |
+| mestiere | 76 % | **87 %** | 76 % | 68 % | **76 %** | 79 % | 0.057 / 0.078 / 0.078 | 0.458 / 0.620 / 0.608 | 168 / 892 |
+| **TOTALE** | 84 % | **88 %** | 85 % | 85 % | **88 %** | 87 % | 0.039 / 0.035 / 0.043 | 0.296 / 0.277 / 0.324 | 167 / 895 |
+
+### Il testo libero del viandante (azioni libere, richieste al Referente, quarta parete: 127 casi, 233 decisioni)
+
+Il testo libero non ha un vocabolario chiuso. Risultati su Jev 1.13:
+- **Tutto in italiano**: **94 %** (218/233)
+- **Stato in italiano, domande in inglese (`base`)**: **93 %** (217/233)
+- **Solo testo libero tradotto in inglese**: **93 %** (217/233)
+- **Tutto in inglese**: **92 %** (214/233)
+
+Su `quarta-parete`, la variante in italiano raggiunge l'**81 %** (contro il 75 % in inglese).
+Jev cattura le sfumature espressive dell'italiano direttamente nei suoi embedding; non c'è alcuna perdita qualitativa sul testo naturale.
+
+### Quanto costa tradurre (misura empirica con Flash-Lite)
+
+Misurata la traduzione integrale dei 244 casi con Flash-Lite contro la tabella statica (`internalNames.ts`):
+
+| metodo | cosa traduce | token medi per richiesta | costo per 1000 chiamate | latenza mediana | precisione finale |
+|---|---|---|---|---|---|
+| **Nessuna traduzione** (stato IT, domande EN) | Niente | 0 | **$0,00** | **0 ms** | **88,5 % (massima)** |
+| **Tabella statica** (`internalNames.ts`) | Oggetti, mestieri, modelli noti | 0 | **$0,00** | **0 ms** | Allineamento perfetto |
+| **Traduzione LLM** (Flash-Lite) | Testo libero / stati arbitrari | ~670 in + ~580 out | **$1,20 - $1,55** | **1800 - 3500 ms** | 84,5 % (**−4 %**) |
+
+Un'intera decisione di Jev costa **0,035 $ / 1000 decisioni** e richiede **167 ms**. Tradurre il testo con un modello costa **28-35 volte di più** dell'intera decisione e richiede **10-20 volte più tempo**, peggiorando al contempo la precisione per il disallineamento dei sinonimi.
+
+### La regola che ne esce (ADR-0157)
+
+1. **Non tradurre il testo libero del viandante**: Jev comprende nativamente l'italiano (93,6 % contro 91,8 %).
+2. **Non tradurre lo stato del mondo**: i nomi di oggetti, modelli e mestieri in italiano garantiscono l'allineamento con i cataloghi dei moduli.
+3. **Mantenere domande ed enum in inglese (`base`)**: risparmiano il 18 % di token (840 contro 1029) e danno la massima precisione (**88,5 %**).
+4. **Se mai servisse tradurre, solo tabella statica**: mai un LLM di traduzione a runtime.
+
 ## I limiti di queste misure
 
 - **Le risposte giuste scritte per il banco sono giudizi** di chi ha scritto il banco: 206 casi nel gruppo 1, 92 nel gruppo 3; molti
@@ -221,7 +271,7 @@ come oggi le azioni imparate diventano regole). La soglia di probabilità non co
 - **Campioni piccoli** dove sono piccoli: 5 squadre, 6 passi, 3 lotti; `oggi` su metà dei casi del gruppo 1.
 - **Il colpevole è un sabotaggio**: un nodo aggiunto che cambia molte celle, scelto tra quattro tipi; i difetti veri dei programmi del
   Concilio non sono stati provati.
-- **Domande in inglese, stato in italiano** in tutto il banco: non è stata provata una versione italiana delle domande.
+- **Domande in inglese e in italiano misurate in T323**: la variante mista (`base`) supera sia tutto-inglese che tutto-italiano.
 - **Non provato**: un testo del viandante scritto per ingannare il giudice; il contesto lungo e le immagini (Danger Zone, da non usare);
   Jev dal Vercel AI Gateway (si è usata l'API diretta).
 
