@@ -1,7 +1,8 @@
 // The Markdown of the pipeline's web page (agents' messages, quadro, dossiers, questions), with no dependencies: the page
 // gets these very functions through `toString()`, so they must use nothing from outside. Agents write the text: everything is
 // escaped, no raw HTML passes, and only http(s) links become links.
-export function markdownToHtml(source, { breaks = false } = {}) {
+// `inline`: one line of text (a task's title), only the inline marks, never a block (a title that starts with `1.` stays text).
+export function markdownToHtml(source, { breaks = false, inline: oneLine = false } = {}) {
   const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   const MAX_DEPTH = 12;
 
@@ -117,24 +118,28 @@ export function markdownToHtml(source, { breaks = false } = {}) {
     return html;
   };
 
+  if (oneLine) return inline(String(source ?? '').replace(/\u0000/g, '').replace(/\s+/g, ' ').trim());
   return blocks(String(source ?? '').replace(/\u0000/g, '').replace(/\r\n?/g, '\n').split('\n'), 0);
 }
 
 /**
  * Marks the references to existing tasks (`T93`, `T89b`) in HTML that is already escaped, with the title of the task as a
  * tooltip. Tags are copied as they are (a `T12` in an attribute stays there) and so is the text of a link; `titles` is a Map
- * from task id to title, and an id it does not know, or one inside a word (`ST12`, `T12x`), stays plain text.
+ * from task id to title, and an id it does not know, or one inside a word (`ST12`, `T12x`), stays plain text. With
+ * `anyCase` a lowercase reference (`t304`, as in `task/t304`) counts too, written as it is and pointing to `T304`.
  */
-export function taskRefsToHtml(html, titles) {
+export function taskRefsToHtml(html, titles, { anyCase = false } = {}) {
   const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   let inLink = 0;
-  return String(html ?? '').replace(/<(?:"[^"]*"|'[^']*'|[^'">])*>|(?<![\p{L}\p{N}_])T\d+[a-z]?(?![\p{L}\p{N}_])/gu, (token) => {
+  return String(html ?? '').replace(/<(?:"[^"]*"|'[^']*'|[^'">])*>|(?<![\p{L}\p{N}_])[Tt]\d+[a-z]?(?![\p{L}\p{N}_])/gu, (token) => {
     if (token[0] === '<') {
       if (/^<a[\s>]/i.test(token)) inLink++;
       else if (/^<\/a\s*>/i.test(token)) inLink = Math.max(0, inLink - 1);
       return token;
     }
-    const title = inLink ? undefined : titles.get(token);
-    return title === undefined ? token : `<span class="task-ref" data-task="${token}" title="${esc(title)}">${token}</span>`;
+    if (token[0] === 't' && !anyCase) return token;
+    const id = `T${token.slice(1)}`;
+    const title = inLink ? undefined : titles.get(id);
+    return title === undefined ? token : `<span class="task-ref" data-task="${id}" title="${esc(title)}">${token}</span>`;
   });
 }

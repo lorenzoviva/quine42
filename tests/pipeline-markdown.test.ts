@@ -4,8 +4,8 @@ import vm from 'node:vm';
 import { pathToFileURL } from 'node:url';
 
 const at = (file: string) => pathToFileURL(path.resolve(__dirname, '../tools/pipeline', file)).href;
-let md: (s: string, o?: { breaks?: boolean }) => string;
-let refs: (html: string, titles: Map<string, string>) => string;
+let md: (s: string, o?: { breaks?: boolean; inline?: boolean }) => string;
+let refs: (html: string, titles: Map<string, string>, o?: { anyCase?: boolean }) => string;
 
 beforeAll(async () => {
   const M = await import(/* @vite-ignore */ at('markdown.mjs'));
@@ -99,5 +99,65 @@ describe('la pagina della pipeline', () => {
     const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)];
     expect(scripts).toHaveLength(1);
     expect(() => new vm.Script(scripts[0][1])).not.toThrow();
+  });
+});
+
+describe('la lavagna (T304)', () => {
+  type Tiles = { stepStyle(s: unknown): string | undefined; priorityStyle(p: unknown): string; effortStyle(e: unknown): string };
+  type Done = { id: string; quando: string; commit?: string; esito?: string };
+  let T: Tiles;
+  let W: { recentlyDone(tasks: object[], runs?: object, commits?: Map<string, { hash: string; date: string }>, limit?: number): Done[] };
+  beforeAll(async () => {
+    T = (await import(/* @vite-ignore */ at('tiles.mjs'))) as Tiles;
+    W = await import(/* @vite-ignore */ at('web.mjs'));
+  });
+  const hueOf = (style: string | undefined) => Number(/^background:hsl\((\d+) /.exec(style ?? '')?.[1]);
+
+  it('il titolo in Markdown in linea: ogni Txx o txx di un task che esiste è un link, nient’altro diventa un blocco', () => {
+    const titles = new Map([['T69', "L'interfaccia web"], ['T304', 'La lavagna']]);
+    const html = refs(md('La lavagna di `T69` e **task/t304**, non T999', { inline: true }), titles, { anyCase: true });
+    expect(html).toBe(
+      'La lavagna di <code><span class="task-ref" data-task="T69" title="L&#39;interfaccia web">T69</span></code> e ' +
+        '<strong>task/<span class="task-ref" data-task="T304" title="La lavagna">t304</span></strong>, non T999',
+    );
+    expect(md('1. # non un titolo', { inline: true })).toBe('1. # non un titolo');
+    expect(md('<b>x</b>', { inline: true })).toBe('&lt;b&gt;x&lt;/b&gt;');
+    expect(refs('t304', titles)).toBe('t304'); // senza anyCase la minuscola resta testo, come prima
+  });
+
+  it('il colore dello step è sempre lo stesso, e step diversi hanno colori diversi', () => {
+    expect(T.stepStyle(19)).toBe(T.stepStyle(19));
+    expect(T.stepStyle('19')).toBe(T.stepStyle(19));
+    expect(T.stepStyle(19)).toMatchInlineSnapshot(`"background:hsl(221 55% 20%);color:hsl(221 75% 80%);border:1px solid hsl(221 55% 38%)"`);
+    const hues = new Set(Array.from({ length: 12 }, (_, i) => hueOf(T.stepStyle(i + 1))));
+    expect(hues.size).toBe(12);
+    for (const s of [undefined, null, '', 'x']) expect(T.stepStyle(s)).toBeUndefined();
+  });
+
+  it('priorità e sforzo in scala: la priorità più alta è la più calda, lo sforzo sale da low a max', () => {
+    const pri = [1, 2, 5, 10, 30, 100].map((p) => hueOf(T.priorityStyle(p)));
+    expect(pri[0]).toBe(0);
+    for (let i = 1; i < pri.length; i++) expect(pri[i]).toBeGreaterThan(pri[i - 1]);
+    expect(hueOf(T.priorityStyle(undefined))).toBe(hueOf(T.priorityStyle(100)));
+    const eff = ['low', 'medium', 'high', 'extra', 'xhigh', 'max'].map((e) => hueOf(T.effortStyle(e)));
+    for (let i = 1; i < eff.length; i++) expect(eff[i]).toBeGreaterThan(eff[i - 1]);
+    expect(T.effortStyle('boh')).toContain('hsl(220 10%');
+  });
+
+  it('gli ultimi finiti: i più recenti in alto, con commit ed esito, senza data fuori', () => {
+    const tasks = [
+      { id: 'T1', title: 'uno', status: 'fatto', commit: 'aaaaaaa' },
+      { id: 'T2', title: 'due', status: 'fatto' },
+      { id: 'T3', title: 'tre', status: 'fatto' },
+      { id: 'T4', title: 'quattro', status: 'da fare' },
+      { id: 'T5', title: 'cinque', status: 'fatto' },
+    ];
+    const runs = { T1: { integrato: '2026-11-05T10:00:00Z', esito: 'ESITO: fatto — bene' }, T2: { fine: '2026-11-06T10:00:00Z' }, T4: { integrato: '2026-11-07T00:00:00Z' } };
+    const commits = new Map([['T3', { hash: 'ccccccc', date: '2026-11-04T10:00:00Z' }], ['T1', { hash: 'bbbbbbb', date: '2026-11-05T09:00:00Z' }]]);
+    const list = W.recentlyDone(tasks, runs, commits);
+    expect(list.map((d) => d.id)).toEqual(['T2', 'T1', 'T3']);
+    expect(list[1]).toMatchObject({ commit: 'aaaaaaa', esito: 'fatto — bene' });
+    expect(list[2].commit).toBe('ccccccc');
+    expect(W.recentlyDone(tasks, runs, commits, 1)).toHaveLength(1);
   });
 });

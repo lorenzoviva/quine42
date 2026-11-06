@@ -1,9 +1,11 @@
 // The web interface of the agentic pipeline (T69, ADR-0072, ADR-0079): a local server with no dependencies that reads
 // and writes the same files and runs the same commands as `pipeline.mjs` and `orchestra.mjs`.
+import { execFileSync } from 'node:child_process';
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { markdownToHtml, taskRefsToHtml } from './markdown.mjs';
+import { badgeStyle, effortStyle, priorityStyle, stepStyle } from './tiles.mjs';
 import {
   approveTasks,
   assignTask,
@@ -144,6 +146,49 @@ export function appendTodoRequest(text, { titolo, testo, provider, priorita, dip
   return `${text.trimEnd()}\n\n# Modifiche da fare\n${entry}`;
 }
 
+const COMMITS_TTL_MS = 20_000;
+const commitsCache = new Map();
+
+/**
+ * The newest commit of each task in the checkout's history, from its subject («T299: …»), read at most every 20 s: the
+ * page asks for the state every few seconds. Outside a git repository it is empty.
+ */
+export function taskCommits(repo) {
+  const hit = commitsCache.get(repo);
+  if (hit && Date.now() - hit.at < COMMITS_TTL_MS) return hit.map;
+  const map = new Map();
+  let out = '';
+  try {
+    out = execFileSync('git', ['log', '--format=%h%x09%cI%x09%s', '-n', '800'], { cwd: repo, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 5000 });
+  } catch { /* not a repository, or git is missing */ }
+  for (const line of out.split('\n')) {
+    const [hash, date, subject = ''] = line.split('\t');
+    const m = /^(T\d+[a-z]?)(?=[:\s,])/.exec(subject);
+    if (m && !map.has(m[1])) map.set(m[1], { hash, date, subject });
+  }
+  commitsCache.set(repo, { at: Date.now(), map });
+  return map;
+}
+
+/**
+ * The last finished tasks (T304), newest first: done in the backlog, with when (integrated, or finished, or the date of its
+ * commit), the commit (the one in the backlog's header, or the newest «Txx: …» of the history) and the run's outcome line.
+ * A done task with no date anywhere is not in the list.
+ */
+export function recentlyDone(tasks, runs = {}, commits = new Map(), limit = 15) {
+  return tasks
+    .filter((t) => String(t.status ?? '').startsWith('fatto'))
+    .map((t) => {
+      const r = runs[t.id];
+      const c = commits.get(t.id);
+      const esito = r?.esito ? String(r.esito).replace(/^ESITO:\s*/i, '') : undefined;
+      return { id: t.id, title: t.title, quando: r?.integrato ?? r?.fine ?? c?.date, commit: t.commit ?? c?.hash, ...(esito ? { esito } : {}), ...(r?.provider ? { provider: r.provider } : {}) };
+    })
+    .filter((d) => d.quando && Number.isFinite(Date.parse(d.quando)))
+    .sort((a, b) => Date.parse(b.quando) - Date.parse(a.quando))
+    .slice(0, limit);
+}
+
 /** Builds the complete live state of the pipeline from the files on disk. */
 export function buildStateSnapshot(opts = {}) {
   const p = pathsOf(opts);
@@ -163,6 +208,8 @@ export function buildStateSnapshot(opts = {}) {
     ...t,
     coda: queueMap.get(t.id) ?? (t.status.startsWith('fatto') ? 'fatto' : 'altro'),
     esecuzione: runs[t.id] ?? undefined,
+    // The effort the run gets: the task's, then the run's, then its provider's (as `effortOf` in pipeline.mjs).
+    sforzoEffettivo: t.sforzo ?? runs[t.id]?.sforzo ?? (t.provider ? p.config.providers[t.provider]?.sforzo : undefined),
     missing: queues.bloccati.find((b) => b.id === t.id)?.missing,
   }));
 
@@ -237,6 +284,7 @@ export function buildStateSnapshot(opts = {}) {
     chat: readJsonl(path.join(p.stateDir, 'orchestra', 'chat.jsonl')).slice(-80),
     eventi: readJsonl(path.join(p.stateDir, 'orchestra', 'eventi.jsonl')).slice(-100),
     diario: reportLines.slice(-80),
+    finiti: recentlyDone(tasks, runs, taskCommits(p.repo)),
     quadro: readText(p.quadro),
     consumi: readJsonl(p.history),
     domande,
@@ -956,6 +1004,18 @@ export function renderHtml() {
     .md table { border-collapse: collapse; display: block; overflow-x: auto; }
     .md th, .md td { border: 1px solid var(--border); padding: 3px 8px; text-align: left; vertical-align: top; }
     .task-ref { text-decoration: underline dotted; text-underline-offset: 2px; cursor: pointer; }
+    .task-title .task-ref, .done-title .task-ref { color: var(--accent); }
+    .md-inline code { font-family: var(--mono); font-size: 0.92em; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 0 3px; }
+    .tile-labels { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px; }
+    .tile-labels .badge { padding: 1px 6px; font-size: 10.5px; white-space: nowrap; }
+    .left-col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+    .done-list { max-height: 520px; overflow-y: auto; padding: 8px 10px; display: flex; flex-direction: column; gap: 8px; }
+    .done-item { border-left: 3px solid var(--green); padding: 4px 8px; background: var(--bg-card); border-radius: 0 6px 6px 0; font-size: 12px; }
+    .done-head { display: flex; justify-content: space-between; gap: 6px; align-items: baseline; }
+    .done-when { color: var(--muted); font-size: 11px; white-space: nowrap; }
+    .done-title { font-weight: 600; margin: 2px 0; }
+    .done-esito { color: var(--muted); font-size: 11px; cursor: pointer; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    .done-esito.open { -webkit-line-clamp: unset; display: block; }
     .md-source { white-space: pre-wrap; word-break: break-word; font-family: var(--mono); font-size: 12px; }
     .md-doc { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 13px; }
     #btn-md-source.active { color: var(--accent); border-color: var(--accent); }
@@ -1022,7 +1082,8 @@ export function renderHtml() {
     <!-- VISTA 1: LAVAGNE & CHAT -->
     <section id="view-lavagne" class="view active">
       <div class="workspace-grid">
-        <!-- Colonna sinistra: Chat con l'Orchestratore, Eventi e Quadro -->
+        <!-- Colonna sinistra: Chat con l'Orchestratore, Eventi e Quadro, poi gli ultimi task finiti -->
+        <div class="left-col">
         <div class="panel">
           <div class="panel-header">
             <span>Orchestratore &amp; Diario</span>
@@ -1055,6 +1116,14 @@ export function renderHtml() {
           <div id="subpanel-quadro" style="display:none; padding:12px;">
             <div class="md-doc" id="quadro-text" style="max-height:520px; overflow-y:auto;"></div>
           </div>
+        </div>
+
+        <div class="panel" id="done-panel">
+          <div class="panel-header">
+            <span>Ultimi finiti (<span id="count-done">0</span>)</span>
+          </div>
+          <div class="done-list" id="done-list"></div>
+        </div>
         </div>
 
         <!-- Colonna destra: Lavagne tipo Trello con le code di PIANO.md -->
@@ -1284,6 +1353,10 @@ export function renderHtml() {
     const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     ${markdownToHtml.toString()}
     ${taskRefsToHtml.toString()}
+    ${badgeStyle.toString()}
+    ${priorityStyle.toString()}
+    ${effortStyle.toString()}
+    ${stepStyle.toString()}
     let MD_SOURCE = localStorage.getItem('pipeline-md-sorgente') === '1';
     const md = (text, breaks = false) => MD_SOURCE
       ? \`<div class="md-source">\${esc(text)}</div>\`
@@ -1300,6 +1373,17 @@ export function renderHtml() {
       preview.style.display = MD_SOURCE ? 'none' : '';
       if (!MD_SOURCE) setMd(preview, editor.value || '(vuoto)');
     }
+    // A task's title: inline Markdown, and every Txx (or txx) of a known task is a link to it; the Source view keeps the text.
+    const titleHtml = (title, titles) => MD_SOURCE
+      ? esc(title)
+      : \`<span class="md-inline">\${taskRefsToHtml(markdownToHtml(title, { inline: true }), titles, { anyCase: true })}</span>\`;
+    const tileLabels = (t) => {
+      const labels = [\`<span class="badge" style="\${priorityStyle(t.priority ?? 100)}" title="priorità \${t.priority ?? 100}">p\${t.priority ?? 100}</span>\`];
+      if (t.sforzoEffettivo) labels.push(\`<span class="badge" style="\${effortStyle(t.sforzoEffettivo)}" title="sforzo \${esc(t.sforzoEffettivo)}\${t.sforzo ? '' : ' (del provider)'}">\${esc(t.sforzoEffettivo)}</span>\`);
+      const st = stepStyle(t.step);
+      if (st) labels.push(\`<span class="badge" style="\${st}" title="step \${esc(t.step)} (docs/fasi.md)">step \${esc(t.step)}</span>\`);
+      return labels.join('');
+    };
     const provBadge = (p) => p ? \`<span class="badge prov-\${esc(p)}">\${esc(p)}</span>\` : '<span class="badge st-dafare">—</span>';
     const statusBadge = (s) => {
       const v = String(s ?? '');
@@ -1454,6 +1538,7 @@ export function renderHtml() {
         { key: 'inAttesa', title: 'In attesa', list: s.code.inAttesa },
       ];
       const byId = new Map(s.tasks.map((t) => [t.id, t]));
+      const titles = new Map(s.tasks.map((t) => [t.id, t.title]));
       document.getElementById('boards-wrap').innerHTML = cols.map((col) => {
         const cards = col.list.map((item) => {
           const full = byId.get(item.id) || item;
@@ -1461,12 +1546,10 @@ export function renderHtml() {
           return \`<div class="task-card" data-task-card="\${esc(full.id)}">
             <div class="task-card-top">
               <a class="task-id" onclick="openTask('\${esc(full.id)}')">\${esc(full.id)}</a>
-              <div>\${provBadge(full.provider)} \${full.estimate !== undefined ? \`<span class="badge st-dafare">\${full.estimate}%</span>\` : ''}</div>
+              <div class="tile-labels">\${provBadge(full.provider)}\${full.estimate !== undefined ? \`<span class="badge st-dafare">\${full.estimate}%</span>\` : ''}\${tileLabels(full)}</div>
             </div>
-            <div class="task-title" onclick="openTask('\${esc(full.id)}')">\${esc(full.title)}</div>
+            <div class="task-title" data-open-task="\${esc(full.id)}">\${titleHtml(full.title, titles)}</div>
             <div class="task-meta">
-              <span>p\${full.priority ?? 100}</span>
-              \${full.step !== undefined ? \`<span>step \${full.step}</span>\` : ''}
               \${full.missing?.length ? \`<span style="color:var(--amber)">aspetta \${esc(full.missing.join(', '))}</span>\` : ''}
               \${r ? \`<span>· \${esc(r.stato)} (\${r.tentativi} tent.)</span>\` : ''}
             </div>
@@ -1485,6 +1568,28 @@ export function renderHtml() {
       }).join('');
     }
 
+    function renderDone(s) {
+      const list = s.finiti || [];
+      document.getElementById('count-done').textContent = list.length;
+      const titles = new Map(s.tasks.map((t) => [t.id, t.title]));
+      const when = (iso) => {
+        const d = new Date(iso);
+        const pad = (n) => String(n).padStart(2, '0');
+        return \`\${pad(d.getDate())}/\${pad(d.getMonth() + 1)} \${pad(d.getHours())}:\${pad(d.getMinutes())}\`;
+      };
+      const opened = new Set([...document.querySelectorAll('#done-list .done-esito.open')].map((e) => e.dataset.task));
+      const html = list.map((d) => \`<div class="done-item">
+          <div class="done-head">
+            <span><a class="task-id" onclick="openTask('\${esc(d.id)}')">\${esc(d.id)}</a>\${d.commit ? \` <code style="font-size:11px; color:var(--muted);">\${esc(d.commit)}</code>\` : ''}\${d.provider ? ' ' + provBadge(d.provider) : ''}</span>
+            <span class="done-when" title="\${esc(d.quando)}">\${esc(when(d.quando))}</span>
+          </div>
+          <div class="done-title">\${titleHtml(d.title, titles)}</div>
+          \${d.esito ? \`<div class="done-esito md-inline\${opened.has(d.id) ? ' open' : ''}" data-task="\${esc(d.id)}" title="Clic per leggerlo tutto">\${MD_SOURCE ? esc(d.esito) : taskRefsToHtml(markdownToHtml(d.esito, { inline: true }), titles)}</div>\` : ''}
+        </div>\`).join('') || '<div style="color:var(--muted); font-size:12px;">Nessun task finito con una data.</div>';
+      const el = document.getElementById('done-list');
+      if (el.dataset.shown !== html) { el.innerHTML = html; el.dataset.shown = html; }
+    }
+
     function renderTasksTable(s) {
       document.getElementById('count-all').textContent = s.tasks.length;
       const q = document.getElementById('filter-search').value.trim().toLowerCase();
@@ -1500,6 +1605,7 @@ export function renderHtml() {
         return true;
       });
 
+      const titles = new Map(s.tasks.map((t) => [t.id, t.title]));
       document.getElementById('tasks-tbody').innerHTML = filtered.map((t) => {
         const r = t.esecuzione;
         const deps = (t.deps || []).map((d) => \`<a class="task-id" style="font-size:11px; margin-right:4px;" onclick="openTask('\${esc(d)}')">\${esc(d)}</a>\`).join('') || '—';
@@ -1508,7 +1614,7 @@ export function renderHtml() {
           : '—';
         return \`<tr data-task-row="\${esc(t.id)}">
           <td><a class="task-id" onclick="openTask('\${esc(t.id)}')">\${esc(t.id)}</a></td>
-          <td><span style="cursor:pointer; font-weight:600;" onclick="openTask('\${esc(t.id)}')">\${esc(t.title)}</span></td>
+          <td><span style="cursor:pointer; font-weight:600;" data-open-task="\${esc(t.id)}">\${titleHtml(t.title, titles)}</span></td>
           <td>\${statusBadge(t.status)}</td>
           <td><span class="badge st-dafare">\${esc(t.coda)}</span></td>
           <td>\${t.step ?? '—'}</td>
@@ -1663,6 +1769,7 @@ export function renderHtml() {
         renderOrchestratorBar(STATE);
         renderChatAndEvents(STATE);
         renderBoards(STATE);
+        renderDone(STATE);
         renderTasksTable(STATE);
         renderDomandeAndTodo(STATE);
         renderConsumiAndBudget(STATE);
@@ -1888,10 +1995,16 @@ export function renderHtml() {
     syncEditor('domande');
     syncEditor('todo');
     document.getElementById('btn-refresh').addEventListener('click', () => loadState());
-    document.getElementById('chat-list').addEventListener('click', (e) => {
+    // A Txx in a message, a title or an outcome opens its task; in capture, so the card's own click does not open the card's task.
+    document.addEventListener('click', (e) => {
+      if (String(getSelection()) !== '') return;
       const ref = e.target.closest('.task-ref');
-      if (ref && String(getSelection()) === '') openTask(ref.dataset.task);
-    });
+      if (ref) { e.stopPropagation(); openTask(ref.dataset.task); return; }
+      const esito = e.target.closest('.done-esito');
+      if (esito) { esito.classList.toggle('open'); return; }
+      const own = e.target.closest('[data-open-task]');
+      if (own) openTask(own.dataset.openTask);
+    }, true);
     document.getElementById('btn-refresh-usage').addEventListener('click', async () => {
       showToast('Lettura /usage dalle CLI in corso…');
       await api('POST', '/api/budget', { uso: true });
