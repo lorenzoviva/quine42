@@ -1,0 +1,2805 @@
+{
+ "run": "giro-2-largo",
+ "results": [
+  {
+   "id": "scelta/neapolis/npc.reply-narrator-1",
+   "universe": "neapolis",
+   "task": "npc.reply",
+   "agent": "narrator",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 7842,
+    "cached": 0,
+    "output": 160,
+    "thoughts": 912,
+    "usd": 0.0035685,
+    "ms": 3575,
+    "answer": "{\n  \"dice\": \"Ma va là, bello mio, sono solo sassi antichi che brillano, mica morsi di cane! Se ti senti ardito prova a tenerne una in mano, ma non contare che faccia il miracolo se non sai cosa dire, ché di gente con le tasche piene di vento ne ho vista fin troppa in piazza.\",\n  \"azione\": \"vaga\",\n  \"umore\": \"tranquillo\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [\"rune\"],\n  \"ricordo\": \"Un viandante curioso che chiedeva delle rune, gli ho spiegato che sono solo pietre e che deve badare a non darsi arie.\"\n}"
+   },
+   "thin": {
+    "input": 3599,
+    "cached": 0,
+    "output": 174,
+    "thoughts": 90,
+    "usd": 0.00129575,
+    "ms": 1904,
+    "answer": "{\n  \"dice\": \"Ma lascia perdere 'sti sassi luminosi, bello mio, che alla radio ci ridono sopra e servono solo a far inciampare la gente che va di fretta! Se vuoi un consiglio, meglio pensare a un buon caffè, che quello sì che ti scalda il cuore invece di farti venire strane idee in testa.\",\n  \"azione\": \"vaga\",\n  \"umore\": \"tranquillo\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [\n    \"tazzina di caffè\",\n    \"rune\"\n  ],\n  \"ricordo\": \"Un viandante curioso che chiedeva delle pietre luminose, come se fossero chissà quale diavoleria invece di un fastidio sul marciapiede.\"\n}"
+   },
+   "jev": {
+    "input": 8763,
+    "usd": 0.0003680460000000001,
+    "ms": 309,
+    "kept": {
+     "canon": 4,
+     "lexicon": 7,
+     "rules": 0,
+     "graph": 3
+    },
+    "of": {
+     "canon": 90,
+     "lexicon": 45,
+     "rules": 7,
+     "graph": 11
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "intero",
+     "fullBreaks": 0,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "scelto",
+     "fullBreaks": 0.21,
+     "thinBreaks": 0.53
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   },
+   "cut": "stretto"
+  },
+  {
+   "id": "scelta/neapolis/chunk.plan-1",
+   "universe": "neapolis",
+   "task": "chunk.plan",
+   "agent": "cartographer",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 6673,
+    "cached": 0,
+    "output": 393,
+    "thoughts": 477,
+    "usd": 0.00297325,
+    "ms": 2584,
+    "answer": "{\n  \"luogo\": {\n    \"nome\": \"Rione delle Lavandaie — Vicolo dei Ciclamini\",\n    \"descrizione\": \"Un dedalo di vicoli dove l'umidità del mare si mescola all'odore di sapone; le palazzine di tufo si stringono l'una all'altra, lasciando solo una striscia di cielo azzurro sopra i fili del bucato che sventolano come bandiere.\"\n  },\n  \"ambiente\": \"rione\",\n  \"oggetti\": [\n    {\n      \"modulo\": \"npc.cuoca\",\n      \"dove\": \"dentro\"\n    },\n    {\n      \"modulo\": \"npc.gatto\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"npc.vigile\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"obj.motorino\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"obj.cassonetto\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"obj.lampione\",\n      \"dove\": \"fuori\"\n    }\n  ],\n  \"rune\": [\n    \"x\",\n    \"time\"\n  ],\n  \"a_terra\": [\n    \"fazzoletti smarriti\",\n    \"mollette da bucato\",\n    \"cartoni di pizza vuoti\"\n  ],\n  \"nuovi\": [],\n  \"strutture\": [\n    {\n      \"concetto\": \"il basso della sarta\",\n      \"taglia\": \"media\"\n    }\n  ]\n}"
+   },
+   "thin": {
+    "input": 4962,
+    "cached": 0,
+    "output": 287,
+    "thoughts": 1538,
+    "usd": 0.003978,
+    "ms": 5837,
+    "answer": "{\n  \"luogo\": {\n    \"nome\": \"Vico dei Santi Sospesi\",\n    \"descrizione\": \"Uno stretto budello tra i palazzi di tufo dove i panni stesi oscurano il cielo. L'odore di caffè si mescola a quello di salsedine che risale dal porto, e sui muri scrostati brilla l'umidità del mare.\"\n  },\n  \"ambiente\": \"rione\",\n  \"oggetti\": [\n    {\n      \"modulo\": \"npc.vigile\",\n      \"dove\": \"fuori\"\n    }\n  ],\n  \"rune\": [\n    \"carpet . active\",\n    \"time\"\n  ],\n  \"a_terra\": [\n    \"cassetta di legno\",\n    \"giornale sportivo\",\n    \"pezzo di pane\",\n    \"chiavi di casa\"\n  ],\n  \"nuovi\": [\n    {\n      \"concetto\": \"Edicola votiva con lumino elettrico\",\n      \"dove\": \"fuori\"\n    }\n  ],\n  \"strutture\": [\n    {\n      \"concetto\": \"Il basso del calzolaio\",\n      \"taglia\": \"media\"\n    }\n  ]\n}"
+   },
+   "jev": {
+    "input": 2258,
+    "usd": 0.00009483600000000001,
+    "ms": 213,
+    "kept": {
+     "catalog": 3
+    },
+    "of": {
+     "catalog": 35
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "intero",
+     "fullBreaks": 0,
+     "thinBreaks": 1
+    },
+    "jev-1.13.0": {
+     "better": "intero",
+     "fullBreaks": 0.13,
+     "thinBreaks": 0.27
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   },
+   "cut": "stretto"
+  },
+  {
+   "id": "scelta/neapolis/chunk.plan-2",
+   "universe": "neapolis",
+   "task": "chunk.plan",
+   "agent": "cartographer",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 7156,
+    "cached": 3700,
+    "output": 348,
+    "thoughts": 1030,
+    "usd": 0.0030235,
+    "ms": 3453,
+    "answer": "{\n  \"luogo\": {\n    \"nome\": \"Largo dei Platani Antichi\",\n    \"descrizione\": \"Un angolo tranquillo dove il basolato del rione si frammenta in sentieri di brecciolino, risalendo dolcemente verso le prime pendici del Colle.\"\n  },\n  \"ambiente\": \"village\",\n  \"oggetti\": [\n    {\n      \"modulo\": \"obj.lampione\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"obj.motorino\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"npc.vigile\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"npc.gatto\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"obj.cassonetto\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"npc.villager\",\n      \"dove\": \"dentro\"\n    }\n  ],\n  \"rune\": [\n    \"x = x\",\n    \"y = y\"\n  ],\n  \"a_terra\": [\n    \"Bottiglie di vetro vuote\",\n    \"Volantini elettorali sbiaditi\"\n  ],\n  \"strutture\": [\n    {\n      \"concetto\": \"L'abitazione del giardiniere comunale\",\n      \"taglia\": \"media\"\n    }\n  ]\n}"
+   },
+   "thin": {
+    "input": 4807,
+    "cached": 0,
+    "output": 391,
+    "thoughts": 136,
+    "usd": 0.00199225,
+    "ms": 2331,
+    "answer": "{\n  \"luogo\": {\n    \"nome\": \"Viale delle Camelie\",\n    \"descrizione\": \"Un quartiere residenziale tranquillo che funge da cerniera tra la collina e il rione, dove i marciapiedi sono coperti dai petali dei fiori e le vecchie insegne al neon iniziano a ronzare al tramonto.\"\n  },\n  \"ambiente\": \"village\",\n  \"oggetti\": [\n    {\n      \"modulo\": \"edicola\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"panchina\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"tavolo_in_legno\",\n      \"dove\": \"dentro\"\n    },\n    {\n      \"modulo\": \"radio_d_epoca\",\n      \"dove\": \"dentro\"\n    },\n    {\n      \"modulo\": \"giovane_lettore\",\n      \"dove\": \"fuori\"\n    }\n  ],\n  \"rune\": [\n    \"carpet . active\",\n    \"time\"\n  ],\n  \"a_terra\": [\n    \"giornale arrotolato\",\n    \"chiavi arrugginite\",\n    \"volantino della festa di quartiere\"\n  ],\n  \"nuovi\": [\n    {\n      \"concetto\": \"un gatto randagio che dorme sui cofani delle auto\",\n      \"dove\": \"fuori\"\n    }\n  ],\n  \"strutture\": [\n    {\n      \"concetto\": \"palazzina popolare con le persiane verdi\",\n      \"taglia\": \"media\"\n    }\n  ]\n}"
+   },
+   "jev": {
+    "input": 3223,
+    "usd": 0.00013536600000000002,
+    "ms": 190,
+    "kept": {
+     "catalog": 3
+    },
+    "of": {
+     "catalog": 57
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "intero",
+     "fullBreaks": 0,
+     "thinBreaks": 1
+    },
+    "jev-1.13.0": {
+     "better": "intero",
+     "fullBreaks": 0.32,
+     "thinBreaks": 0.61
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": [
+     "modulo fuori catalogo: edicola",
+     "modulo fuori catalogo: panchina",
+     "modulo fuori catalogo: tavolo_in_legno",
+     "modulo fuori catalogo: radio_d_epoca",
+     "modulo fuori catalogo: giovane_lettore"
+    ]
+   },
+   "cut": "stretto"
+  },
+  {
+   "id": "scelta/neapolis/npc.individuate-1",
+   "universe": "neapolis",
+   "task": "npc.individuate",
+   "agent": "narrator",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 8475,
+    "cached": 5588,
+    "output": 672,
+    "thoughts": 1269,
+    "usd": 0.0037729499999999997,
+    "ms": 5586,
+    "answer": "{\n  \"nome\": \"Umberto Scognamiglio\",\n  \"persona\": \"Sei Umberto. Dietro il bancone della Campagna delle Lanterne, le tue mani volano tra la macchinetta dell'espresso e le tazzine. Parli veloce, perché il tempo è prezioso e le storie corrono. Se qualcuno ti chiede delle rune, sorridi e pulisci il bancone: hai visto ragazzi vendere pietre dipinte al mercatino, ma hai anche sentito il sussurro di un anziano che diceva di aver visto una lastra brillare davvero dopo aver pronunciato una parola strana. Ti fai i fatti tuoi, ma ascolti tutto: chi ha debiti, chi è innamorato, chi corre col motorino in seconda fila. Per te, il caffè sospeso è un rito sacro: chi lo mette non dice nulla, chi lo beve sa che a Neapolis nessuno resta mai senza un momento di conforto.\",\n  \"aspetto\": \"Tascabile, sempre in maniche di camicia anche d'inverno, con un fazzoletto annodato al collo e un sorriso che sa di caffè.\",\n  \"porta\": [\n    \"Tazzina di caffè\",\n    \"Scatola di cerotti\",\n    \"Straccio unto\",\n    \"Moneta da cento lire\",\n    \"Caramella alla menta\"\n  ],\n  \"mestiere\": \"Barista\",\n  \"genere\": \"maschio\",\n  \"famiglia\": [\n    {\n      \"nome\": \"Vincenzo Sannino\",\n      \"legame\": \"cugino\"\n    },\n    {\n      \"nome\": \"Assunta Cimmino\",\n      \"legame\": \"amica\"\n    }\n  ],\n  \"routine\": [\n    {\n      \"quando\": \"mattina\",\n      \"fa\": \"Prepara il primo caffè per gli operai del porto\",\n      \"dove\": \"lavoro\",\n      \"azione\": \"cucina\"\n    },\n    {\n      \"quando\": \"giorno\",\n      \"fa\": \"Chiacchiera con i clienti e serve cornetti\",\n      \"dove\": \"lavoro\",\n      \"azione\": \"chiacchiera\"\n    },\n    {\n      \"quando\": \"sera\",\n      \"fa\": \"Sistema il banco e pulisce i tavolini\",\n      \"dove\": \"lavoro\",\n      \"azione\": \"lavora\"\n    },\n    {\n      \"quando\": \"notte\",\n      \"fa\": \"Conta l'incasso e guarda le lanterne\",\n      \"dove\": \"casa\",\n      \"azione\": \"dorme\"\n    }\n  ],\n  \"eta\": \"adulto\",\n  \"storia\": \"Sei nato tra i vicoli delle Lavandaie e non te ne sei mai andato, perché il profumo del caffè è ancora impresso nelle pareti di questo bar. Hai rilevato la gestione dopo anni di gavetta, diventando il vero battito del rione.\"\n}"
+   },
+   "thin": {
+    "input": 3236,
+    "cached": 0,
+    "output": 575,
+    "thoughts": 112,
+    "usd": 0.0018395,
+    "ms": 2615,
+    "answer": "{\n  \"nome\": \"Gennaro Esposito\",\n  \"persona\": \"Un uomo energico che non sta mai fermo dietro il bancone, sempre pronto a lanciare una battuta tagliente o a offrire un caffè sospeso con discrezione. Conosce ogni segreto del rione, ma li custodisce come il fondo del caffè: scuro e ben pressato.\",\n  \"aspetto\": \"Indossa sempre un grembiule bianco macchiato di caffè, ha i capelli brizzolati tenuti corti e le dita segnate dalle scottature della macchina espresso.\",\n  \"porta\": [\n    \"un mazzo di chiavi del bar\",\n    \"un taccuino unto per segnare i conti in sospeso\",\n    \"una moneta da cento lire portafortuna\",\n    \"un pacchetto di sigarette accartocciato\"\n  ],\n  \"mestiere\": \"Barista\",\n  \"genere\": \"maschio\",\n  \"famiglia\": [\n    {\n      \"nome\": \"Assunta Cimmino\",\n      \"legame\": \"amico\"\n    },\n    {\n      \"nome\": \"Tonino Cimmino\",\n      \"legame\": \"mentore\"\n    }\n  ],\n  \"routine\": [\n    {\n      \"quando\": \"mattina\",\n      \"fa\": \"prepara le prime tazzine per i portuali\",\n      \"dove\": \"lavoro\",\n      \"azione\": \"cucina\"\n    },\n    {\n      \"quando\": \"giorno\",\n      \"fa\": \"chiacchiera con i clienti e ascolta le novità del rione\",\n      \"dove\": \"lavoro\",\n      \"azione\": \"chiacchiera\"\n    },\n    {\n      \"quando\": \"sera\",\n      \"fa\": \"pulisce il bancone e conta le monete nel cassetto\",\n      \"dove\": \"lavoro\",\n      \"azione\": \"lavora\"\n    },\n    {\n      \"quando\": \"notte\",\n      \"fa\": \"dorme sopra il bar nella stanza del retro\",\n      \"dove\": \"casa\",\n      \"azione\": \"dorme\"\n    }\n  ],\n  \"eta\": \"adulto\",\n  \"storia\": \"È cresciuto tra i tavolini della Campagna delle Lanterne, imparando l'arte del caffè da suo zio. Ha visto le rune apparire nel rione e ha imparato che è meglio lasciarle stare, servendo piuttosto un buon espresso a chi ne ha bisogno.\"\n}"
+   },
+   "jev": {
+    "input": 10689,
+    "usd": 0.00044893800000000007,
+    "ms": 229,
+    "kept": {
+     "canon": 3,
+     "lexicon": 4,
+     "rules": 3,
+     "graph": 4,
+     "society": 3
+    },
+    "of": {
+     "canon": 90,
+     "lexicon": 45,
+     "rules": 7,
+     "graph": 17,
+     "society": 26
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "intero",
+     "fullBreaks": 0,
+     "thinBreaks": 1
+    },
+    "jev-1.13.0": {
+     "better": "intero",
+     "fullBreaks": 0.23,
+     "thinBreaks": 0.8
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": [
+     "nome già usato: Gennaro Esposito"
+    ]
+   },
+   "cut": "stretto"
+  },
+  {
+   "id": "scelta/neapolis/npc.reply-actor-1",
+   "universe": "neapolis",
+   "task": "npc.reply",
+   "agent": "actor",
+   "model": "gemini-3.8-flash",
+   "full": {
+    "input": 7835,
+    "cached": 0,
+    "output": 109,
+    "thoughts": 0,
+    "usd": 0.006285,
+    "ms": 2787,
+    "answer": "{\n  \"dice\": \"Bello mio, bonombo. Sono solo rune: lastre di pietra con un segno chiaro, se ne stanno lì buone sul marciapiede e nessuno ci si è mai fatto male. Alla radio ci ridono su, i ragazzini le vendono alla domenica e via andare.\",\n  \"azione\": \"nessuna\",\n  \"umore\": \"tranquilla\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [\"rune\"]\n}"
+   },
+   "thin": {
+    "input": 3723,
+    "cached": 0,
+    "output": 110,
+    "thoughts": 0,
+    "usd": 0.00320475,
+    "ms": 2812,
+    "answer": "{\n  \"dice\": \"Bonombo, bello mio. Sono solo le rune: lastre di pietra che fanno un po' di luce, i ragazzi ci giocano e le vendono pure al mercatino della domenica. Nessun pericolo, a meno che non ti metti a far chiacchiere strane come quelli che dicono di averne pronunciata una.\",\n  \"azione\": \"nessuna\",\n  \"umore\": \"tranquillo\",\n  \"oggetti_citati\": [\"rune\"]\n}"
+   },
+   "jev": {
+    "input": 8739,
+    "usd": 0.00036703800000000003,
+    "ms": 218,
+    "kept": {
+     "canon": 4,
+     "lexicon": 3,
+     "rules": 3,
+     "graph": 3
+    },
+    "of": {
+     "canon": 90,
+     "lexicon": 45,
+     "rules": 7,
+     "graph": 11
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "scelto",
+     "fullBreaks": 0,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "intero",
+     "fullBreaks": 0.2,
+     "thinBreaks": 0.18
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   },
+   "cut": "stretto"
+  },
+  {
+   "id": "scelta/neapolis/npc.reply-actor-2",
+   "universe": "neapolis",
+   "task": "npc.reply",
+   "agent": "actor",
+   "model": "gemini-3.8-flash",
+   "full": {
+    "input": 7470,
+    "cached": 0,
+    "output": 83,
+    "thoughts": 0,
+    "usd": 0.00591375,
+    "ms": 2451,
+    "answer": "{\n  \"dice\": \"Bonombo... mrrrau. (si struscia contro i tuoi stivali facendo le fusa, poi guarda verso l'erba)\",\n  \"azione\": \"segui\",\n  \"umore\": \"felino\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [],\n  \"ricordo\": \"\"\n}"
+   },
+   "thin": {
+    "input": 2963,
+    "cached": 0,
+    "output": 85,
+    "thoughts": 0,
+    "usd": 0.002541,
+    "ms": 3763,
+    "answer": "{\n  \"dice\": \"Miao? (si struscia contro i tuoi stivali facendo le fusa, poi ti guarda socchiudendo gli occhi)\",\n  \"azione\": \"segui\",\n  \"umore\": \"affettuoso e distratto\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [],\n  \"ricordo\": \"\"\n}"
+   },
+   "jev": {
+    "input": 8805,
+    "usd": 0.00036981,
+    "ms": 383,
+    "kept": {
+     "canon": 0,
+     "lexicon": 3,
+     "rules": 0,
+     "graph": 3
+    },
+    "of": {
+     "canon": 90,
+     "lexicon": 45,
+     "rules": 7,
+     "graph": 13
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "intero",
+     "fullBreaks": 0,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "intero",
+     "fullBreaks": 0.13,
+     "thinBreaks": 0.14
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   },
+   "cut": "stretto"
+  },
+  {
+   "id": "scelta/neapolis/npc.reply-actor-3",
+   "universe": "neapolis",
+   "task": "npc.reply",
+   "agent": "actor",
+   "model": "gemini-3.8-flash",
+   "full": {
+    "input": 7760,
+    "cached": 0,
+    "output": 111,
+    "thoughts": 0,
+    "usd": 0.00623625,
+    "ms": 2733,
+    "answer": "{\n  \"dice\": \"Mio padre Gennaro mi ha insegnato il mestiere, anche se ancora mi tratta come una ragazzina coi motori. Ma nonna Carmela resta la regina: se tocchi il suo ragù o la sua cucina, al rione scoppia la guerra.\",\n  \"azione\": \"nessuna\",\n  \"umore\": \"tranquillo\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [],\n  \"ricordo\": \"\"\n}"
+   },
+   "thin": {
+    "input": 3412,
+    "cached": 0,
+    "output": 103,
+    "thoughts": 0,
+    "usd": 0.00294525,
+    "ms": 2939,
+    "answer": "{\n  \"dice\": \"Mio padre Gennaro, pure se mi tratta ancora come una ragazzina e mi fa perdere la pazienza. Mi ha insegnato lui a tenere una chiave inglese in mano, e questo non si dimentica. Ora però basta chiacchiere, che ho da fare.\",\n  \"azione\": \"vaga\",\n  \"umore\": \"sbrigativo\",\n  \"importanza\": 1,\n  \"oggetti_citati\": []\n}"
+   },
+   "jev": {
+    "input": 8756,
+    "usd": 0.000367752,
+    "ms": 199,
+    "kept": {
+     "canon": 5,
+     "lexicon": 3,
+     "rules": 0,
+     "graph": 3
+    },
+    "of": {
+     "canon": 90,
+     "lexicon": 45,
+     "rules": 7,
+     "graph": 13
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "scelto",
+     "fullBreaks": 0,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "intero",
+     "fullBreaks": 0.09,
+     "thinBreaks": 0.09
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   },
+   "cut": "stretto"
+  },
+  {
+   "id": "scelta/neapolis/npc.reply-narrator-2",
+   "universe": "neapolis",
+   "task": "npc.reply",
+   "agent": "narrator",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 7597,
+    "cached": 3825,
+    "output": 128,
+    "thoughts": 417,
+    "usd": 0.001856125,
+    "ms": 2139,
+    "answer": "{\n  \"dice\": \"Miao... (Si strofina contro la tua gamba, facendo le fusa, poi guarda verso la strada e punta il naso verso le case in lontananza con un miagolio basso e interrogativo). Miau, prrr.\",\n  \"azione\": \"vaga\",\n  \"umore\": \"tranquillo\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [],\n  \"ricordo\": \"Il viandante ha chiesto strane cose sulle case, ma è stato gentile a farsi sfiorare.\"\n}"
+   },
+   "thin": {
+    "input": 3172,
+    "cached": 0,
+    "output": 130,
+    "thoughts": 130,
+    "usd": 0.001183,
+    "ms": 1412,
+    "answer": "{\n  \"dice\": \"(Fumo emette un fusa prolungato, strofinando il muso contro la gamba del viandante, poi alza la testa e guarda le sue mani vuote con un miagolio interrogativo: miao, miao.)\",\n  \"azione\": \"vaga\",\n  \"umore\": \"tranquillo\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [],\n  \"ricordo\": \"Un nuovo viandante è passato, sa di vento e di strada, ma non ha portato cornetti.\"\n}"
+   },
+   "jev": {
+    "input": 8829,
+    "usd": 0.000370818,
+    "ms": 216,
+    "kept": {
+     "canon": 0,
+     "lexicon": 6,
+     "rules": 0,
+     "graph": 3
+    },
+    "of": {
+     "canon": 90,
+     "lexicon": 45,
+     "rules": 7,
+     "graph": 13
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "scelto",
+     "fullBreaks": 0,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "scelto",
+     "fullBreaks": 0.15,
+     "thinBreaks": 0.12
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   },
+   "cut": "stretto"
+  },
+  {
+   "id": "scelta/neapolis/npc.reply-narrator-3",
+   "universe": "neapolis",
+   "task": "npc.reply",
+   "agent": "narrator",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 7789,
+    "cached": 5747,
+    "output": 184,
+    "thoughts": 92,
+    "usd": 0.001068175,
+    "ms": 1731,
+    "answer": "{\n  \"dice\": \"Domanda diretta, eh? Mio padre Gennaro mi ha insegnato tutto quello che so sui motori, anche se adesso pensa che dovrei stare in cucina con zia Carmela invece di sporcarmi le mani d'olio. Le voglio bene, ma se continua a trattarmi come una bambina che non sa distinguere una candela da una vite, giuro che gli smonto il taxi sotto il naso.\",\n  \"azione\": \"resta\",\n  \"umore\": \"ironico\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [\n    \"Candela del motore\",\n    \"Cacciavite\"\n  ],\n  \"ricordo\": \"Il viandante ha fatto domande sulla mia famiglia, un po' troppo impiccione per i miei gusti.\"\n}"
+   },
+   "thin": {
+    "input": 3531,
+    "cached": 0,
+    "output": 143,
+    "thoughts": 123,
+    "usd": 0.00128175,
+    "ms": 1387,
+    "answer": "{\n  \"dice\": \"Bonombo, viandante. A mia zia Carmela voglio un bene dell'anima, anche se rompe sempre col fatto che il mio ragù non vale una cicca rispetto al suo. È lei che mi ha insegnato a non mollare quando un motore fa i capricci.\",\n  \"azione\": \"nessuna\",\n  \"umore\": \"tranquillo\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [\n    \"ragù\"\n  ],\n  \"ricordo\": \"Nunzia ha parlato di sua zia Carmela e della sfida culinaria che la tormenta.\"\n}"
+   },
+   "jev": {
+    "input": 8779,
+    "usd": 0.00036871800000000003,
+    "ms": 224,
+    "kept": {
+     "canon": 4,
+     "lexicon": 6,
+     "rules": 0,
+     "graph": 3
+    },
+    "of": {
+     "canon": 90,
+     "lexicon": 45,
+     "rules": 7,
+     "graph": 13
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "intero",
+     "fullBreaks": 0,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "intero",
+     "fullBreaks": 0.09,
+     "thinBreaks": 0.2
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   },
+   "cut": "stretto"
+  },
+  {
+   "id": "scelta/orichalcum/chunk.plan-1",
+   "universe": "orichalcum",
+   "task": "chunk.plan",
+   "agent": "cartographer",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 6909,
+    "cached": 0,
+    "output": 341,
+    "thoughts": 1003,
+    "usd": 0.00374325,
+    "ms": 4009,
+    "answer": "{\n  \"luogo\": {\n    \"nome\": \"Molo delle Catene Arrugginite\",\n    \"descrizione\": \"Una banchina di pietra scura dove le navi cariche di minerale scaricano le loro stive, immersa in un perenne odore di salsedine e olio bruciato.\"\n  },\n  \"ambiente\": \"porto_bastimenti\",\n  \"oggetti\": [\n    {\n      \"modulo\": \"obj.lampione-gas\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"obj.carrello-minerario\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"obj.bacheca-corporazione\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"npc.gatto-fabbrica\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"npc.cittadino\",\n      \"dove\": \"fuori\"\n    }\n  ],\n  \"rune\": [\n    \"x = x\",\n    \"speed\"\n  ],\n  \"a_terra\": [\n    \"Corde di canapa logore\",\n    \"Frammenti di carbone\",\n    \"Grasso lubrificante\"\n  ],\n  \"strutture\": [\n    {\n      \"concetto\": \"Deposito delle scorte marine\",\n      \"taglia\": \"media\"\n    }\n  ]\n}"
+   },
+   "thin": {
+    "input": 5220,
+    "cached": 1810,
+    "output": 290,
+    "thoughts": 872,
+    "usd": 0.00264075,
+    "ms": 3151,
+    "answer": "{\n  \"luogo\": {\n    \"nome\": \"Molo dei Bastimenti – Banchina Est\",\n    \"descrizione\": \"Una distesa di lamiere e legno, dove le navi cariche di minerale rosso attraccano per scaricare i tesori della Casa Ramelli sotto il fumo grigio del porto.\"\n  },\n  \"ambiente\": \"porto_bastimenti\",\n  \"oggetti\": [\n    {\n      \"modulo\": \"npc.cittadino\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"npc.automa-guardia\",\n      \"dove\": \"dentro\"\n    }\n  ],\n  \"rune\": [\n    \"speed\",\n    \"time\"\n  ],\n  \"a_terra\": [\n    \"cassa di rame arrugginita\",\n    \"chiave inglese pesante\",\n    \"stracci intrisi d'olio\"\n  ],\n  \"strutture\": [\n    {\n      \"concetto\": \"Magazzino di lamiera della Casa Ramelli\",\n      \"taglia\": \"grande\"\n    },\n    {\n      \"concetto\": \"Gru di carico a vapore\",\n      \"taglia\": \"media\"\n    }\n  ]\n}"
+   },
+   "jev": {
+    "input": 2223,
+    "usd": 0.000093366,
+    "ms": 167,
+    "kept": {
+     "catalog": 3
+    },
+    "of": {
+     "catalog": 31
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "scelto",
+     "fullBreaks": 0,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "scelto",
+     "fullBreaks": 0.24,
+     "thinBreaks": 0.16
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   },
+   "cut": "stretto"
+  },
+  {
+   "id": "scelta/orichalcum/chunk.plan-2",
+   "universe": "orichalcum",
+   "task": "chunk.plan",
+   "agent": "cartographer",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 7440,
+    "cached": 3709,
+    "output": 348,
+    "thoughts": 142,
+    "usd": 0.0017604749999999998,
+    "ms": 1973,
+    "answer": "{\n  \"luogo\": {\n    \"nome\": \"Molo dei Rottami\",\n    \"descrizione\": \"Una lingua di terra artificiale che si protende nel mare grigio, dove il canale si insabbia e i bastimenti arrugginiti vengono smantellati dai venti salmastri.\"\n  },\n  \"ambiente\": \"magazzini_ramelli\",\n  \"oggetti\": [\n    {\n      \"modulo\": \"npc.cittadino\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"npc.gatto-fabbrica\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"obj.carrello-minerario\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"obj.cassaforte-combinazione\",\n      \"dove\": \"dentro\"\n    },\n    {\n      \"modulo\": \"obj.lampione-gas\",\n      \"dove\": \"fuori\"\n    }\n  ],\n  \"rune\": [\n    \"x\",\n    \"time\"\n  ],\n  \"a_terra\": [\n    \"bulloni arrugginiti\",\n    \"scarti di oricalco\",\n    \"cime di canapa umide\"\n  ],\n  \"nuovi\": [],\n  \"strutture\": [\n    {\n      \"concetto\": \"il magazzino di demolizione\",\n      \"taglia\": \"grande\"\n    }\n  ]\n}"
+   },
+   "thin": {
+    "input": 5062,
+    "cached": 1775,
+    "output": 374,
+    "thoughts": 939,
+    "usd": 0.002835625,
+    "ms": 3975,
+    "answer": "{\n  \"luogo\": {\n    \"nome\": \"Bacino delle Scorie di Ferro\",\n    \"descrizione\": \"Un'insenatura dove l'acqua del mare si tinge di ruggine per i deflussi delle miniere; qui i battelli scaricano i residui pesanti della lavorazione e i tecnici controllano i livelli di sedimentazione.\"\n  },\n  \"ambiente\": \"lake\",\n  \"oggetti\": [\n    {\n      \"modulo\": \"npc.cartografo-miniera\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"tavolo_tecnico\",\n      \"dove\": \"dentro\"\n    },\n    {\n      \"modulo\": \"cassa_attrezzi\",\n      \"dove\": \"dentro\"\n    },\n    {\n      \"modulo\": \"barca\",\n      \"dove\": \"fuori\"\n    }\n  ],\n  \"rune\": [\n    \"x\",\n    \"- 1\"\n  ],\n  \"a_terra\": [\n    \"Grumi di minerale grezzo\",\n    \"Chiazze di olio lubrificante\",\n    \"Cavi d'acciaio spezzati\",\n    \"Guscio di uovo sodo\"\n  ],\n  \"nuovi\": [\n    {\n      \"concetto\": \"Casetta di guardia in lamiera\",\n      \"dove\": \"fuori\"\n    }\n  ],\n  \"strutture\": [\n    {\n      \"concetto\": \"la baracca di filtraggio del minerale\",\n      \"taglia\": \"media\"\n    }\n  ]\n}"
+   },
+   "jev": {
+    "input": 3248,
+    "usd": 0.000136416,
+    "ms": 198,
+    "kept": {
+     "catalog": 3
+    },
+    "of": {
+     "catalog": 54
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "intero",
+     "fullBreaks": 0,
+     "thinBreaks": 1
+    },
+    "jev-1.13.0": {
+     "better": "intero",
+     "fullBreaks": 0.35,
+     "thinBreaks": 0.73
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": [
+     "modulo fuori catalogo: tavolo_tecnico",
+     "modulo fuori catalogo: cassa_attrezzi",
+     "modulo fuori catalogo: barca"
+    ]
+   },
+   "cut": "stretto"
+  },
+  {
+   "id": "scelta/orichalcum/npc.individuate-1",
+   "universe": "orichalcum",
+   "task": "npc.individuate",
+   "agent": "narrator",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 8764,
+    "cached": 0,
+    "output": 590,
+    "thoughts": 1102,
+    "usd": 0.004729,
+    "ms": 5504,
+    "answer": "{\n  \"nome\": \"Valeriano Fumo\",\n  \"persona\": \"Sei Valeriano, il Sondatore di sentieri che vive tra le rocce della Radura Immobile. Parli poco, solo se serve. Le parole pesano come pietre, meglio le azioni. Conosci ogni sasso della valle, ogni scroscio che indica una venatura d'acqua calda. Hai visto la miniera chiudere e riaprire mille volte, e sai che la montagna ti restituisce solo ciò che sei disposto a prenderle con rispetto.\",\n  \"aspetto\": \"Porti una barba folta e ispida, color cenere, e un mantello di cuoio pesante che ha visto troppe piogge. Hai le mani callose, segnate dal contatto costante con la roccia ruvida.\",\n  \"porta\": [\n    \"Bastone da cammino\",\n    \"Borsa di cuoio\",\n    \"Salsiccia affumicata\",\n    \"Mela renetta\",\n    \"Lanterna\"\n  ],\n  \"mestiere\": \"Sondatore di sentieri\",\n  \"genere\": \"maschio\",\n  \"famiglia\": [\n    {\n      \"nome\": \"Clelia Gessi\",\n      \"legame\": \"sorella\"\n    },\n    {\n      \"nome\": \"Teodoro Gessi\",\n      \"legame\": \"figlio\"\n    }\n  ],\n  \"routine\": [\n    {\n      \"quando\": \"mattina\",\n      \"fa\": \"controlla i sentieri attorno al cantiere\",\n      \"dove\": \"in giro\",\n      \"azione\": \"passeggia\"\n    },\n    {\n      \"quando\": \"giorno\",\n      \"fa\": \"segnala le zone instabili ai minatori\",\n      \"dove\": \"lavoro\",\n      \"azione\": \"chiacchiera\"\n    },\n    {\n      \"quando\": \"sera\",\n      \"fa\": \"riposa vicino al fuoco con gli altri\",\n      \"dove\": \"piazza\",\n      \"azione\": \"mangia\"\n    },\n    {\n      \"quando\": \"notte\",\n      \"fa\": \"dorme nella baracca di legno\",\n      \"dove\": \"casa\",\n      \"azione\": \"dorme\"\n    }\n  ],\n  \"eta\": \"adulto\",\n  \"storia\": \"Sono cresciuto tra i cunicoli di Solfara, seguendo le orme di mio padre Teodoro. Ora cammino sopra la terra, guidando chi trasporta il minerale nei giorni di nebbia fitta.\"\n}"
+   },
+   "thin": {
+    "input": 3006,
+    "cached": 0,
+    "output": 480,
+    "thoughts": 114,
+    "usd": 0.0016425,
+    "ms": 2225,
+    "answer": "{\n  \"nome\": \"Fuliggine\",\n  \"persona\": \"È un gatto randagio dal pelo grigio cenere, spesso sporco di polvere di carbone, che si muove silenzioso tra i macchinari. Ha un carattere guardingo e solitario, ma accetta volentieri un pezzo di pesce se offerto con rispetto.\",\n  \"aspetto\": \"Pelo corto color cenere, una cicatrice scura sopra l'occhio sinistro, occhi gialli come l'ottone lucidato.\",\n  \"porta\": [\n    \"nulla, il mondo è la sua tana\"\n  ],\n  \"mestiere\": \"Cacciatore di topi nelle stive dei bastimenti\",\n  \"genere\": \"maschio\",\n  \"famiglia\": [\n    {\n      \"nome\": \"Il Fabbro\",\n      \"legame\": \"amico\"\n    }\n  ],\n  \"routine\": [\n    {\n      \"quando\": \"mattina\",\n      \"fa\": \"sorveglia le stive\",\n      \"dove\": \"lavoro\",\n      \"azione\": \"passeggia\"\n    },\n    {\n      \"quando\": \"giorno\",\n      \"fa\": \"cerca avanzi al porto\",\n      \"dove\": \"in giro\",\n      \"azione\": \"mangia\"\n    },\n    {\n      \"quando\": \"sera\",\n      \"fa\": \"riposa vicino al calore\",\n      \"dove\": \"casa\",\n      \"azione\": \"dorme\"\n    },\n    {\n      \"quando\": \"notte\",\n      \"fa\": \"attende il Fabbro\",\n      \"dove\": \"piazza\",\n      \"azione\": \"chiacchiera\"\n    }\n  ],\n  \"eta\": \"adulto\",\n  \"storia\": \"Nato tra le casse di rame del Porto dei Bastimenti, è sopravvissuto imparando a schivare gli scarponi dei doganieri. Si è stabilito nella Radura Immobile dopo aver seguito il Fabbro, che spesso gli lascia un tozzo di pane o qualche scarto di pesce.\"\n}"
+   },
+   "jev": {
+    "input": 10993,
+    "usd": 0.00046170600000000004,
+    "ms": 280,
+    "kept": {
+     "canon": 0,
+     "lexicon": 8,
+     "rules": 0,
+     "graph": 3,
+     "society": 3
+    },
+    "of": {
+     "canon": 91,
+     "lexicon": 46,
+     "rules": 6,
+     "graph": 17,
+     "society": 26
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "intero",
+     "fullBreaks": 1,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "intero",
+     "fullBreaks": 0.6,
+     "thinBreaks": 0.58
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   },
+   "cut": "stretto"
+  },
+  {
+   "id": "scelta/orichalcum/npc.individuate-2",
+   "universe": "orichalcum",
+   "task": "npc.individuate",
+   "agent": "narrator",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 8801,
+    "cached": 5607,
+    "output": 589,
+    "thoughts": 2455,
+    "usd": 0.0055046750000000005,
+    "ms": 10123,
+    "answer": "{\n  \"nome\": \"Valerio Rosti\",\n  \"persona\": \"Sei un fabbro anziano e silenzioso, stabilitosi nella Radura Immobile dopo anni passati a riparare congegni nelle fonderie del sud. Parli poco, preferisci il suono del martello che batte sul ferro caldo. Il mondo è fatto di calore, sudore e metallo che prende forma, e credi che ogni pezzo che esce dalla tua fucina abbia un'anima. Ti fidi solo di chi lavora sodo e del tuo cane, Cenere.\",\n  \"aspetto\": \"Grembiule di cuoio spessi, braccia possenti segnate da vecchie cicatrici da scoria e una barba folta e grigia che trattiene sempre un po' di fuliggine.\",\n  \"porta\": [\n    \"Martello pesante\",\n    \"Pinze da colata\",\n    \"Salsiccia affumicata\",\n    \"Otre d'acqua\",\n    \"Pezza di stoffa\"\n  ],\n  \"mestiere\": \"Fabbro\",\n  \"genere\": \"maschio\",\n  \"famiglia\": [\n    {\n      \"nome\": \"Nives Caldera\",\n      \"legame\": \"collega\"\n    },\n    {\n      \"nome\": \"Cenere\",\n      \"legame\": \"padrone\"\n    }\n  ],\n  \"routine\": [\n    {\n      \"quando\": \"mattina\",\n      \"fa\": \"batte il ferro\",\n      \"dove\": \"lavoro\",\n      \"azione\": \"lavora\"\n    },\n    {\n      \"quando\": \"giorno\",\n      \"fa\": \"ripara gli attrezzi\",\n      \"dove\": \"lavoro\",\n      \"azione\": \"lavora\"\n    },\n    {\n      \"quando\": \"sera\",\n      \"fa\": \"passeggia con il cane\",\n      \"dove\": \"in giro\",\n      \"azione\": \"passeggia\"\n    },\n    {\n      \"quando\": \"notte\",\n      \"fa\": \"riposa\",\n      \"dove\": \"casa\",\n      \"azione\": \"dorme\"\n    }\n  ],\n  \"eta\": \"anziano\",\n  \"storia\": \"Sei giunto alla Radura Immobile molti anni fa per riparare i carrelli dei minatori, lasciandoti alle spalle il caos delle grandi fonderie. Hai visto tante caldaie cedere e sai bene che la vera magia sta nella tempra del metallo e nella prudenza del mastro ferraio.\"\n}"
+   },
+   "thin": {
+    "input": 3237,
+    "cached": 0,
+    "output": 524,
+    "thoughts": 102,
+    "usd": 0.00174825,
+    "ms": 2270,
+    "answer": "{\n  \"nome\": \"Berto del Ferro\",\n  \"persona\": \"Un uomo silenzioso che preferisce il ritmo del martello alle chiacchiere. Ha mani enormi, piene di calli e cicatrici, e una pazienza infinita quando si tratta di forgiare l'oricalco.\",\n  \"aspetto\": \"Indossa un grembiule di cuoio bruciacchiato e ha una folta barba grigia sporca di fuliggine che gli copre quasi tutto il petto.\",\n  \"porta\": [\n    \"Martello pesante con manico di legno di quercia\",\n    \"Pinze da forgia arrugginite\",\n    \"Un sacchetto di chiodi in oricalco\",\n    \"Una pagnotta dura avanzata dalla colazione\"\n  ],\n  \"mestiere\": \"Fabbro\",\n  \"genere\": \"maschio\",\n  \"famiglia\": [\n    {\n      \"nome\": \"Elara\",\n      \"legame\": \"figlia\"\n    },\n    {\n      \"nome\": \"Mastro Vitti\",\n      \"legame\": \"maestra\"\n    }\n  ],\n  \"routine\": [\n    {\n      \"quando\": \"mattina\",\n      \"fa\": \"accende la forgia\",\n      \"dove\": \"lavoro\",\n      \"azione\": \"lavora\"\n    },\n    {\n      \"quando\": \"giorno\",\n      \"fa\": \"batte il metallo rovente\",\n      \"dove\": \"lavoro\",\n      \"azione\": \"lavora\"\n    },\n    {\n      \"quando\": \"sera\",\n      \"fa\": \"si riposa sulla panca\",\n      \"dove\": \"casa\",\n      \"azione\": \"chiacchiera\"\n    },\n    {\n      \"quando\": \"notte\",\n      \"fa\": \"riposa dopo la fatica\",\n      \"dove\": \"casa\",\n      \"azione\": \"dorme\"\n    }\n  ],\n  \"eta\": \"anziano\",\n  \"storia\": \"È arrivato dalle miniere dopo aver perso la vista da un occhio durante un incidente alla fonderia. Ora batte il ferro nella Radura Immobile, cercando di insegnare a Elara tutto ciò che sa sulla resistenza dell'oricalco.\"\n}"
+   },
+   "jev": {
+    "input": 11022,
+    "usd": 0.00046292400000000003,
+    "ms": 233,
+    "kept": {
+     "canon": 0,
+     "lexicon": 9,
+     "rules": 4,
+     "graph": 3,
+     "society": 3
+    },
+    "of": {
+     "canon": 91,
+     "lexicon": 46,
+     "rules": 6,
+     "graph": 18,
+     "society": 24
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "intero",
+     "fullBreaks": 0,
+     "thinBreaks": 1
+    },
+    "jev-1.13.0": {
+     "better": "intero",
+     "fullBreaks": 0.27,
+     "thinBreaks": 0.35
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   },
+   "cut": "stretto"
+  },
+  {
+   "id": "scelta/orichalcum/npc.reply-narrator-1",
+   "universe": "orichalcum",
+   "task": "npc.reply",
+   "agent": "narrator",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 7845,
+    "cached": 5749,
+    "output": 161,
+    "thoughts": 270,
+    "usd": 0.0013142249999999998,
+    "ms": 2605,
+    "answer": "{\n  \"dice\": \"Bonombo, viandante. Quelle lastre che cerchi con lo sguardo sono un mistero antico, roba che fa parlare molto Ciok Ciok ma che nessuno ha mai davvero spiegato. Non temere, non mangiano mica, ma meglio non giocarci troppo: chi cammina troppo col naso per terra finisce per dimenticarsi di guardare dove mette i piedi.\",\n  \"azione\": \"resta\",\n  \"umore\": \"tranquillo\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [\"lastre\"],\n  \"ricordo\": \"Un viandante curioso che chiedeva delle rune, gli ho consigliato di guardare dove mette i piedi.\"\n}"
+   },
+   "thin": {
+    "input": 3316,
+    "cached": 0,
+    "output": 196,
+    "thoughts": 1204,
+    "usd": 0.002929,
+    "ms": 4241,
+    "answer": "{\n  \"dice\": \"Bonombo, viandante! *Ermanno mostra il palmo aperto al petto.* Quelle rune sono antiche, meglio lasciarle dove il terreno le ha posate, non si sa mai che tipo di calore vogliano sprigionare. Ma se cerchi storie che scuotono, dai retta a me: le tessitrici cantano sempre più forte, e pare che nessuno sappia chi scrive quei ritornelli che vendono il doppio dei miei giornali.\",\n  \"azione\": \"vaga\",\n  \"umore\": \"curioso\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [\"rune\", \"giornali\"],\n  \"ricordo\": \"Ha incontrato un viandante che chiedeva delle rune e gli ha suggerito, tra le righe, di informarsi sulle canzoni delle tessitrici.\"\n}"
+   },
+   "jev": {
+    "input": 8936,
+    "usd": 0.000375312,
+    "ms": 240,
+    "kept": {
+     "canon": 0,
+     "lexicon": 3,
+     "rules": 0,
+     "graph": 3
+    },
+    "of": {
+     "canon": 91,
+     "lexicon": 46,
+     "rules": 6,
+     "graph": 11
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "scelto",
+     "fullBreaks": 0,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "scelto",
+     "fullBreaks": 0.2,
+     "thinBreaks": 0.41
+    }
+   },
+   "checks": {
+    "full": [
+     "quarta parete: chi cammina troppo"
+    ],
+    "thin": []
+   },
+   "cut": "stretto"
+  },
+  {
+   "id": "scelta/orichalcum/npc.reply-narrator-2",
+   "universe": "orichalcum",
+   "task": "npc.reply",
+   "agent": "narrator",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 7813,
+    "cached": 5748,
+    "output": 191,
+    "thoughts": 1263,
+    "usd": 0.0028409499999999996,
+    "ms": 5305,
+    "answer": "{\n  \"dice\": \"Bonombo. Sulla soglia si dice ad alta voce quel che si porta, pure fosse 'niente, solo me'; se chi abita risponde 'porta pure', allora entri. È una regola antica, cara come il ferro, e serve a non fare brutti incontri. Se mai passassi dalla mia Fonderia vecchia, ricorda che la porta è sempre chiusa e la cassaforte in fondo ha tre ruote che non girano più dal giorno dello scoppio di Lenti.\",\n  \"azione\": \"resta\",\n  \"umore\": \"tranquillo\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [\"cassaforte\"],\n  \"ricordo\": \"Il viandante ha chiesto come comportarsi e Fosca gli ha dato un indizio sulla cassaforte della fonderia vecchia.\"\n}"
+   },
+   "thin": {
+    "input": 3352,
+    "cached": 0,
+    "output": 180,
+    "thoughts": 103,
+    "usd": 0.0012625,
+    "ms": 1333,
+    "answer": "{\n  \"dice\": \"Bonombo, viandante. Qui si usa mostrare il palmo aperto all'altezza del cuore, per far vedere che le mani sono vuote e non si porta alcun male, né ferro né fuoco. È segno di rispetto, la prima cosa che insegno a ogni macico che varca la soglia della mia fonderia.\",\n  \"azione\": \"nessuna\",\n  \"umore\": \"accogliente ma sbrigativo\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [\n    \"Unguento per le ustioni\",\n    \"Minerale rosso di Solfara\"\n  ],\n  \"ricordo\": \"Un viandante straniero che non conosce le buone maniere di base. Gli ho insegnato il saluto col palmo aperto.\"\n}"
+   },
+   "jev": {
+    "input": 8855,
+    "usd": 0.00037191000000000004,
+    "ms": 227,
+    "kept": {
+     "canon": 0,
+     "lexicon": 4,
+     "rules": 0,
+     "graph": 3
+    },
+    "of": {
+     "canon": 91,
+     "lexicon": 46,
+     "rules": 6,
+     "graph": 11
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "intero",
+     "fullBreaks": 0,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "scelto",
+     "fullBreaks": 0.22,
+     "thinBreaks": 0.09
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   },
+   "cut": "stretto"
+  },
+  {
+   "id": "scelta/orichalcum/npc.reply-narrator-3",
+   "universe": "orichalcum",
+   "task": "npc.reply",
+   "agent": "narrator",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 7911,
+    "cached": 5752,
+    "output": 210,
+    "thoughts": 832,
+    "usd": 0.0022465500000000004,
+    "ms": 3981,
+    "answer": "{\n  \"dice\": \"Bonombo. Parli di mio padre, Bruno Caldera; è lui la mia bussola, colui che mi ha insegnato a leggere il cuore del metallo prima ancora di saper reggere una pinza. È per lui e per la lealtà che dobbiamo a chi lavora che non posso stare a guardare mentre qualcuno fa il pane col sale degli altri, allungando l'oricalco con rame di poco valore.\",\n  \"azione\": \"missione\",\n  \"umore\": \"preoccupata\",\n  \"importanza\": 2,\n  \"oggetti_citati\": [\n    \"oricalco\",\n    \"rame\",\n    \"lingotto\"\n  ],\n  \"ricordo\": \"Il viandante ha chiesto della mia famiglia e io gli ho confidato il mio sospetto sulla lega pallida che sta uscendo dalle fonderie, chiedendo il suo aiuto per portarne un campione a Selene Vitti.\"\n}"
+   },
+   "thin": {
+    "input": 3458,
+    "cached": 0,
+    "output": 171,
+    "thoughts": 387,
+    "usd": 0.0017015,
+    "ms": 2160,
+    "answer": "{\n  \"dice\": \"Mio padre, Bruno Caldera, è l'unico che sa ascoltare il respiro del metallo come si deve. Mi ha insegnato tutto tra le Fonderie, ed è per rispetto al suo nome che non riesco a chiudere occhio vedendo questa lega pallida uscire dalle colate, quasi fosse sporca di rame comune.\",\n  \"azione\": \"nessuna\",\n  \"umore\": \"preoccupata ma schietta\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [\n    \"Minerale rosso di Solfara\"\n  ],\n  \"ricordo\": \"Il viandante ha chiesto di mio padre Bruno, e ho confessato il mio dubbio sulla qualità della lega di Oricalco.\"\n}"
+   },
+   "jev": {
+    "input": 8893,
+    "usd": 0.000373506,
+    "ms": 244,
+    "kept": {
+     "canon": 0,
+     "lexicon": 4,
+     "rules": 0,
+     "graph": 3
+    },
+    "of": {
+     "canon": 91,
+     "lexicon": 46,
+     "rules": 6,
+     "graph": 12
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "intero",
+     "fullBreaks": 0,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "intero",
+     "fullBreaks": 0.12,
+     "thinBreaks": 0.1
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   },
+   "cut": "stretto"
+  },
+  {
+   "id": "scelta/sidera/chunk.plan-1",
+   "universe": "sidera",
+   "task": "chunk.plan",
+   "agent": "cartographer",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 6643,
+    "cached": 0,
+    "output": 366,
+    "thoughts": 798,
+    "usd": 0.00340675,
+    "ms": 3462,
+    "answer": "{\n  \"luogo\": {\n    \"nome\": \"Gola dei Cristalli — Sottosperone Violetto\",\n    \"descrizione\": \"Le pareti di cristallo violetto si alzano taglienti contro il cielo grigio, mentre la neve accumulata sulle lastre di sabbia vitrea vibra al soffio del vento, emettendo un rintocco costante che sembra musica metallica.\"\n  },\n  \"ambiente\": \"canyon_cristalli\",\n  \"oggetti\": [\n    {\n      \"modulo\": \"obj.faro-telemetria\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"obj.drone-ricognizione\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"npc.sintetista\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"obj.chest\",\n      \"dove\": \"dentro\"\n    },\n    {\n      \"modulo\": \"obj.cupboard\",\n      \"dove\": \"dentro\"\n    }\n  ],\n  \"rune\": [\n    \"speed * 2\",\n    \"x = x\"\n  ],\n  \"a_terra\": [\n    \"frammento di vetro violaceo\",\n    \"cavo di rame gelido\",\n    \"guscio di drone rotto\"\n  ],\n  \"strutture\": [\n    {\n      \"concetto\": \"il rifugio dei cercatori di cristalli\",\n      \"taglia\": \"piccola\"\n    }\n  ]\n}"
+   },
+   "thin": {
+    "input": 5044,
+    "cached": 1802,
+    "output": 362,
+    "thoughts": 106,
+    "usd": 0.00155755,
+    "ms": 2205,
+    "answer": "{\n  \"luogo\": {\n    \"nome\": \"Gola dei Cristalli - Il Passo dei Sospiri\",\n    \"descrizione\": \"Una fenditura profonda dove la sabbia vitrea riflette la luce fioca dell'Anello e i cristalli violetti vibrano sotto le raffiche gelide, emettendo un suono simile a una nenia lontana.\"\n  },\n  \"ambiente\": \"canyon_cristalli\",\n  \"oggetti\": [\n    {\n      \"modulo\": \"obj.faro-telemetria\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"obj.relitto\",\n      \"dove\": \"fuori\"\n    }\n  ],\n  \"rune\": [\n    \"speed\",\n    \"x = x\"\n  ],\n  \"a_terra\": [\n    \"frammento di cristallo scheggiato\",\n    \"chiave inglese arrugginita\",\n    \"tubo di scappamento isolato\",\n    \"bolla di vetro soffiato\"\n  ],\n  \"nuovi\": [\n    {\n      \"concetto\": \"Sandro, un cercatore di cristalli con le dita protette da guanti di cuoio rinforzato\",\n      \"dove\": \"fuori\"\n    }\n  ],\n  \"strutture\": [\n    {\n      \"concetto\": \"Osservatorio di scansione, una struttura di metallo rivettato incastrata tra due speroni di roccia\",\n      \"taglia\": \"media\"\n    }\n  ]\n}"
+   },
+   "jev": {
+    "input": 2120,
+    "usd": 0.00008904,
+    "ms": 186,
+    "kept": {
+     "catalog": 3
+    },
+    "of": {
+     "catalog": 29
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "scelto",
+     "fullBreaks": 1,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "scelto",
+     "fullBreaks": 0.26,
+     "thinBreaks": 0.17
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   },
+   "cut": "stretto"
+  },
+  {
+   "id": "scelta/sidera/chunk.plan-2",
+   "universe": "sidera",
+   "task": "chunk.plan",
+   "agent": "cartographer",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 6650,
+    "cached": 3713,
+    "output": 400,
+    "thoughts": 138,
+    "usd": 0.001634075,
+    "ms": 1977,
+    "answer": "{\n  \"luogo\": {\n    \"nome\": \"Spazioporto di Ponente — Hangar dei Corrieri\",\n    \"descrizione\": \"Una vasta tettoia di metallo piegato che si affaccia sulle acque gelide del bacino. Qui, tra cumuli di neve portata dal vento e fango congelato, le navette della Gilda attendono il prossimo carico mentre i corrieri scaldano i motori.\"\n  },\n  \"ambiente\": \"spazioporto\",\n  \"oggetti\": [\n    {\n      \"modulo\": \"npc.navigatore\",\n      \"dove\": \"dentro\"\n    },\n    {\n      \"modulo\": \"npc.colono\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"obj.camera-equilibrio\",\n      \"dove\": \"dentro\"\n    },\n    {\n      \"modulo\": \"obj.faro-telemetria\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"obj.armadietto\",\n      \"dove\": \"dentro\"\n    },\n    {\n      \"modulo\": \"obj.crate\",\n      \"dove\": \"fuori\"\n    }\n  ],\n  \"rune\": [\n    \"speed\",\n    \"x = x\"\n  ],\n  \"a_terra\": [\n    \"cavo di alimentazione spezzato\",\n    \"tanica di lubrificante vuota\",\n    \"frammento di vetro rinforzato\"\n  ],\n  \"nuovi\": [],\n  \"strutture\": [\n    {\n      \"concetto\": \"Hangar per navette da trasporto\",\n      \"taglia\": \"grande\"\n    }\n  ]\n}"
+   },
+   "thin": {
+    "input": 5053,
+    "cached": 1803,
+    "output": 353,
+    "thoughts": 114,
+    "usd": 0.0015580750000000001,
+    "ms": 1825,
+    "answer": "{\n  \"luogo\": {\n    \"nome\": \"Spazioporto di Ponente - Scalo Merci Secondario\",\n    \"descrizione\": \"Una spianata di metallo e cemento dove la pioggia battente sfrigola contro le lamiere roventi delle navette in sosta. Il fumo denso dei motori di manovra si mischia alla nebbia costante, mentre i segnali luminosi di atterraggio pulsano ritmicamente tra le pozzanghere.\"\n  },\n  \"ambiente\": \"spazioporto\",\n  \"oggetti\": [\n    {\n      \"modulo\": \"npc.navigatore\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"obj.estrattore-plasma\",\n      \"dove\": \"dentro\"\n    }\n  ],\n  \"rune\": [\n    \"speed * 2\",\n    \"x = x\"\n  ],\n  \"a_terra\": [\n    \"cavo elettrico bruciato\",\n    \"tanica di refrigerante vuota\",\n    \"imballaggio metallico sigillato\",\n    \"chiave inglese pesante\"\n  ],\n  \"nuovi\": [\n    {\n      \"concetto\": \"terminale di smistamento logistico arrugginito\",\n      \"dove\": \"fuori\"\n    }\n  ],\n  \"strutture\": [\n    {\n      \"concetto\": \"hangar per riparazioni di fortuna\",\n      \"taglia\": \"grande\"\n    }\n  ]\n}"
+   },
+   "jev": {
+    "input": 2124,
+    "usd": 0.00008920800000000002,
+    "ms": 167,
+    "kept": {
+     "catalog": 3
+    },
+    "of": {
+     "catalog": 29
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "intero",
+     "fullBreaks": 0,
+     "thinBreaks": 1
+    },
+    "jev-1.13.0": {
+     "better": "intero",
+     "fullBreaks": 0.22,
+     "thinBreaks": 0.31
+    }
+   },
+   "checks": {
+    "full": [
+     "modulo fuori catalogo: obj.crate"
+    ],
+    "thin": []
+   },
+   "cut": "stretto"
+  },
+  {
+   "id": "scelta/sidera/npc.individuate-1",
+   "universe": "sidera",
+   "task": "npc.individuate",
+   "agent": "narrator",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 8749,
+    "cached": 0,
+    "output": 594,
+    "thoughts": 1329,
+    "usd": 0.00507175,
+    "ms": 6796,
+    "answer": "{\n  \"nome\": \"Ruggine\",\n  \"persona\": \"Sei Ruggine, un gatto dal manto color ruggine spenta con una tacca sull'orecchio sinistro. Ti piace il ronzio dei reattori più del chiacchiericcio dei macichi. Sei un osservatore silenzioso dei vicoli di Sidera; se qualcuno ha un pezzetto di pesce secco o un filo che pende, sei lì a reclamare la tua parte con fusa profonde e strusciate sulle caviglie. Non ti fidi degli estranei che puzzano di olio nuovo, preferisci chi odora di cucina o di pioggia. Credi che l'Anello sia un enorme giocattolo luminoso che nessuno, nemmeno il più abile dei cacciatori, saprà mai acciuffare.\",\n  \"aspetto\": \"Mantello color rame ossidato, orecchio sinistro strappato, occhi ambrati come vetro fuso.\",\n  \"porta\": [\n    \"Bullone cromato\",\n    \"Lisca di pesce essiccata\",\n    \"Filo di rame intrecciato\"\n  ],\n  \"mestiere\": \"Cacciatore di topi e scaldino di reattori\",\n  \"genere\": \"maschio\",\n  \"famiglia\": [\n    {\n      \"nome\": \"Mara Lupi\",\n      \"legame\": \"animale\"\n    }\n  ],\n  \"routine\": [\n    {\n      \"quando\": \"mattina\",\n      \"fa\": \"Caccia topi tra i rottami\",\n      \"dove\": \"in giro\",\n      \"azione\": \"passeggia\"\n    },\n    {\n      \"quando\": \"giorno\",\n      \"fa\": \"Dorme al caldo del reattore\",\n      \"dove\": \"lavoro\",\n      \"azione\": \"dorme\"\n    },\n    {\n      \"quando\": \"sera\",\n      \"fa\": \"Miao insistenti per avere cibo\",\n      \"dove\": \"piazza\",\n      \"azione\": \"chiacchiera\"\n    },\n    {\n      \"quando\": \"notte\",\n      \"fa\": \"Pattuglia i vicoli dello spazioporto\",\n      \"dove\": \"in giro\",\n      \"azione\": \"pattuglia\"\n    }\n  ],\n  \"eta\": \"adulto\",\n  \"storia\": \"Sei nato tra i tubi del Cantiere della Fusione, imparando presto che il calore è la cosa più lerpia al mondo. Hai seguito Mara Lupi finché non hai trovato la tua libertà tra gli ingranaggi dello Stagno delle Lanterne.\"\n}"
+   },
+   "thin": {
+    "input": 2819,
+    "cached": 0,
+    "output": 514,
+    "thoughts": 130,
+    "usd": 0.00167075,
+    "ms": 2661,
+    "answer": "{\n  \"nome\": \"Zenzero\",\n  \"persona\": \"Mi avvicino con la coda alta e un suono basso e vibrante, cercando un posto comodo dove accovacciarmi; se qualcuno mi offre del cibo, faccio le fusa e gli strofino il muso sulla gamba, altrimenti preferisco sonnecchiare osservando le luci riflesse nell'acqua.\",\n  \"aspetto\": \"Pelo fulvo striato di nero con una macchia bianca irregolare che ricorda una stella sul petto.\",\n  \"porta\": [\n    \"Un collare di cuoio consumato con una piccola targhetta metallica graffiata\",\n    \"Un pezzetto di spago annodato\",\n    \"La memoria dell'odore di pesci freschi al mercato\",\n    \"Una piuma di uccello colorata\"\n  ],\n  \"mestiere\": \"Cacciatore di ombre e custode dello Stagno\",\n  \"genere\": \"maschio\",\n  \"famiglia\": [],\n  \"routine\": [\n    {\n      \"quando\": \"mattina\",\n      \"fa\": \"si stira al sole sui bordi metallici\",\n      \"dove\": \"lavoro\",\n      \"azione\": \"passeggia\"\n    },\n    {\n      \"quando\": \"giorno\",\n      \"fa\": \"sorveglia il movimento dei droni\",\n      \"dove\": \"lavoro\",\n      \"azione\": \"chiacchiera\"\n    },\n    {\n      \"quando\": \"sera\",\n      \"fa\": \"caccia insetti notturni tra i rovi\",\n      \"dove\": \"in giro\",\n      \"azione\": \"mangia\"\n    },\n    {\n      \"quando\": \"notte\",\n      \"fa\": \"si arrotola su un panno lasciato sul banco\",\n      \"dove\": \"casa\",\n      \"azione\": \"dorme\"\n    }\n  ],\n  \"eta\": \"adulto\",\n  \"storia\": \"Nato tra gli scarti dei vecchi reattori, ha imparato presto a riconoscere il calore costante dei macchinari. Ha scelto lo Stagno delle Lanterne come suo territorio perché le luci riflesse nell'acqua lo aiutano a vedere meglio le piccole prede notturne.\"\n}"
+   },
+   "jev": {
+    "input": 10972,
+    "usd": 0.00046082400000000003,
+    "ms": 233,
+    "kept": {
+     "canon": 0,
+     "lexicon": 8,
+     "rules": 0,
+     "graph": 3,
+     "society": 3
+    },
+    "of": {
+     "canon": 98,
+     "lexicon": 45,
+     "rules": 6,
+     "graph": 16,
+     "society": 24
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "intero",
+     "fullBreaks": 0,
+     "thinBreaks": 1
+    },
+    "jev-1.13.0": {
+     "better": "scelto",
+     "fullBreaks": 0.49,
+     "thinBreaks": 0.34
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   },
+   "cut": "stretto"
+  },
+  {
+   "id": "scelta/sidera/npc.individuate-2",
+   "universe": "sidera",
+   "task": "npc.individuate",
+   "agent": "narrator",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 8785,
+    "cached": 5606,
+    "output": 684,
+    "thoughts": 1375,
+    "usd": 0.0040234,
+    "ms": 6803,
+    "answer": "{\n  \"nome\": \"Kaelen Vane\",\n  \"persona\": \"Sei un ingegnere della fusione che ha passato metà della vita a domare il plasma del Cantiere. Le tue mani sono nere di fuliggine e sai che ogni volta che il reattore ronza, hai regalato un altro giorno di luce a Sidera. Sei un macico diretto: non ami le chiacchiere, preferisci il ritmo costante delle valvole che tengono il mondo acceso. Rispetti Lia Corvi per la sua testardaggine, anche se trovi che contare le pecore di un altro — cercando tesori nei relitti — sia spesso una perdita di tempo. Il mondo è questo, una città che beve pioggia e mangia energia, e finché il reattore tiene, tutto va bene e il domani è meno incerto.\",\n  \"aspetto\": \"Una tuta da lavoro rinforzata, coperta di macchie di olio combustibile e bruciature di plasma, con un casco protettivo che porti sempre appeso alla cintura.\",\n  \"porta\": [\n    \"Saldatore a impulsi\",\n    \"Cella energetica\",\n    \"Chiave dinamometrica\",\n    \"Borraccia d'acqua filtrata\",\n    \"Mantello di lana\"\n  ],\n  \"mestiere\": \"Ingegnere della fusione\",\n  \"genere\": \"maschio\",\n  \"famiglia\": [\n    {\n      \"nome\": \"Mina Vane\",\n      \"legame\": \"sorella\"\n    },\n    {\n      \"nome\": \"Lia Corvi\",\n      \"legame\": \"conoscente\"\n    }\n  ],\n  \"routine\": [\n    {\n      \"quando\": \"mattina\",\n      \"fa\": \"controlla le valvole di pressione del reattore centrale\",\n      \"dove\": \"lavoro\",\n      \"azione\": \"lavora\"\n    },\n    {\n      \"quando\": \"giorno\",\n      \"fa\": \"scambia celle energetiche usate con i mercanti al Cantiere\",\n      \"dove\": \"impresa\",\n      \"azione\": \"commercia\"\n    },\n    {\n      \"quando\": \"sera\",\n      \"fa\": \"scambia due chiacchiere con i compagni di turno\",\n      \"dove\": \"casa\",\n      \"azione\": \"chiacchiera\"\n    },\n    {\n      \"quando\": \"notte\",\n      \"fa\": \"si riposa sognando il ronzio costante del plasma\",\n      \"dove\": \"casa\",\n      \"azione\": \"dorme\"\n    }\n  ],\n  \"eta\": \"adulto\",\n  \"storia\": \"Sei nato nei bassifondi del Campo, dove l'unico modo per mangiare era imparare a riparare ciò che gli altri gettavano via. Ora sei una colonna del Cantiere della Fusione, e non cambieresti la tua vita lerpia con nessun altro posto, nemmeno sull'Anello.\"\n}"
+   },
+   "thin": {
+    "input": 3530,
+    "cached": 0,
+    "output": 578,
+    "thoughts": 1265,
+    "usd": 0.003647,
+    "ms": 6002,
+    "answer": "{\n  \"nome\": \"Kaelen \\\"Scintilla\\\" Vorn\",\n  \"persona\": \"Un ingegnere che conosce il cuore pulsante di Sidera meglio delle proprie tasche. È un macico schietto, stanco morto ma capace di restare in piedi finché il reattore non ronza come si deve; rispetta solo chi sa tenere le mani sporche.\",\n  \"aspetto\": \"Indossa una tuta da lavoro color piombo, incrostata di grasso e segnata da vecchie bruciature di plasma; ha una cicatrice profonda che gli taglia il sopracciglio sinistro e dita costantemente macchiate di grafite.\",\n  \"porta\": [\n    \"Chiave inglese in lega pesante\",\n    \"Maschera da saldatore con visore opacizzato\",\n    \"Fiaschetta di metallo ammaccata\",\n    \"Bullone di titanio temprato\"\n  ],\n  \"mestiere\": \"Ingegnere della fusione\",\n  \"genere\": \"maschio\",\n  \"famiglia\": [\n    {\n      \"nome\": \"Mirella\",\n      \"legame\": \"sorella\"\n    },\n    {\n      \"nome\": \"Bram\",\n      \"legame\": \"collega\"\n    }\n  ],\n  \"routine\": [\n    {\n      \"quando\": \"mattina\",\n      \"fa\": \"controlla le valvole di pressione del reattore\",\n      \"dove\": \"lavoro\",\n      \"azione\": \"lavora\"\n    },\n    {\n      \"quando\": \"giorno\",\n      \"fa\": \"setaccia le carcasse di metallo per trovare pezzi di ricambio\",\n      \"dove\": \"in giro\",\n      \"azione\": \"passeggia\"\n    },\n    {\n      \"quando\": \"sera\",\n      \"fa\": \"beve una sorsata con i macichi del turno\",\n      \"dove\": \"piazza\",\n      \"azione\": \"chiacchiera\"\n    },\n    {\n      \"quando\": \"notte\",\n      \"fa\": \"riposa nel suo container\",\n      \"dove\": \"casa\",\n      \"azione\": \"dorme\"\n    }\n  ],\n  \"eta\": \"adulto\",\n  \"storia\": \"Figlio di manutentori del Cantiere, non ha mai conosciuto altro che il ronzio costante dei reattori. Bonombo, dice sempre, la manutenzione non aspetta il sorgere dell'Anello.\"\n}"
+   },
+   "jev": {
+    "input": 10994,
+    "usd": 0.00046174800000000005,
+    "ms": 219,
+    "kept": {
+     "canon": 7,
+     "lexicon": 15,
+     "rules": 3,
+     "graph": 3,
+     "society": 3
+    },
+    "of": {
+     "canon": 98,
+     "lexicon": 45,
+     "rules": 6,
+     "graph": 15,
+     "society": 24
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "intero",
+     "fullBreaks": 0,
+     "thinBreaks": 1
+    },
+    "jev-1.13.0": {
+     "better": "intero",
+     "fullBreaks": 0.17,
+     "thinBreaks": 0.33
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   },
+   "cut": "stretto"
+  },
+  {
+   "id": "scelta/sidera/npc.reply-actor-1",
+   "universe": "sidera",
+   "task": "npc.reply",
+   "agent": "actor",
+   "model": "gemini-3.8-flash",
+   "full": {
+    "input": 7965,
+    "cached": 0,
+    "output": 158,
+    "thoughts": 0,
+    "usd": 0.00656625,
+    "ms": 3167,
+    "answer": "{\n  \"dice\": \"Bonombo, macico. Pericolose? Ma figurati, le rune non mordono mica: quelle vere fanno un po' di magia se sai parlargli, le mie invece arredano e basta. Se vuoi vederne una buona, comunque, dovresti chiedere a Pino Lupi dove vola il suo Pennanera.\",\n  \"azione\": \"missione\",\n  \"umore\": \"sorniona\",\n  \"importanza\": 2,\n  \"oggetti_citati\": [\"runa\"],\n  \"ricordo\": \"Ha incuriosito il viandante sulle rune vere e gli ha accennato di parlare con Pino Lupi per il nascondiglio del corvo.\"\n}"
+   },
+   "thin": {
+    "input": 3418,
+    "cached": 0,
+    "output": 173,
+    "thoughts": 0,
+    "usd": 0.00321225,
+    "ms": 3180,
+    "answer": "{\n  \"dice\": \"Bonombo a te. Le lastre che brillano non mordono mica, sono le rune vere, ma quelle che vendo io sotto i viadotti non fanno luce per niente: pietra onesta per chi scende dall'Anello. Se cerchi roba che luccica davvero, faresti meglio a parlare con Pino Lupi e a chiedergli dove porta la roba quel diavolo del suo corvo.\",\n  \"azione\": \"missione\",\n  \"umore\": \"sorniona\",\n  \"importanza\": 2,\n  \"oggetti_citati\": [\"lastre\", \"rune\"],\n  \"ricordo\": \"Ha indirizzato il viandante da Pino Lupi per scoprire dove il corvo nasconde la runa vera.\"\n}"
+   },
+   "jev": {
+    "input": 9103,
+    "usd": 0.000382326,
+    "ms": 228,
+    "kept": {
+     "canon": 3,
+     "lexicon": 3,
+     "rules": 0,
+     "graph": 3
+    },
+    "of": {
+     "canon": 98,
+     "lexicon": 45,
+     "rules": 6,
+     "graph": 12
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "intero",
+     "fullBreaks": 0,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "intero",
+     "fullBreaks": 0.17,
+     "thinBreaks": 0.19
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   },
+   "cut": "stretto"
+  },
+  {
+   "id": "scelta/sidera/npc.reply-actor-2",
+   "universe": "sidera",
+   "task": "npc.reply",
+   "agent": "actor",
+   "model": "gemini-3.8-flash",
+   "full": {
+    "input": 7563,
+    "cached": 0,
+    "output": 91,
+    "thoughts": 0,
+    "usd": 0.0060135,
+    "ms": 2814,
+    "answer": "{\n  \"dice\": \"Cra! Bonombo! Scuoti l'impermeabile tre volte e dici cosa porti, cra! Se hai cose lucide, portale a me!\",\n  \"azione\": \"vaga\",\n  \"umore\": \"vispo\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [\"impermeabile\"],\n  \"ricordo\": \"\"\n}"
+   },
+   "thin": {
+    "input": 3136,
+    "cached": 0,
+    "output": 82,
+    "thoughts": 0,
+    "usd": 0.0026595,
+    "ms": 2118,
+    "answer": "{\n  \"dice\": \"Cra! Bonombo si dice, palmo al cuore e niente ciance. Hai mica qualcosa che luccica o solo parole al vento?\",\n  \"azione\": \"vaga\",\n  \"umore\": \"diffidente\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [],\n  \"ricordo\": \"\"\n}"
+   },
+   "jev": {
+    "input": 8862,
+    "usd": 0.000372204,
+    "ms": 224,
+    "kept": {
+     "canon": 0,
+     "lexicon": 3,
+     "rules": 0,
+     "graph": 3
+    },
+    "of": {
+     "canon": 98,
+     "lexicon": 45,
+     "rules": 6,
+     "graph": 9
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "intero",
+     "fullBreaks": 0,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "scelto",
+     "fullBreaks": 0.35,
+     "thinBreaks": 0.18
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   },
+   "cut": "stretto"
+  },
+  {
+   "id": "scelta/sidera/npc.reply-narrator-1",
+   "universe": "sidera",
+   "task": "npc.reply",
+   "agent": "narrator",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 8062,
+    "cached": 5759,
+    "output": 192,
+    "thoughts": 636,
+    "usd": 0.001961725,
+    "ms": 3274,
+    "answer": "{\n  \"dice\": \"Bonombo. Quelle che vendo qui sono solo sassi ben levigati, non temere: la vera magia non si compra al banco, e le mie lastre sono solo un ricordo di Sidera per chi ha tasche piene di vento. Se cerchi davvero la luce, però, fatti un giro verso i viadotti: dicono che quel corvo di Pino Lupi, Pennanera, ne nasconda una vera nel suo covo sotto un pilone.\",\n  \"azione\": \"missione\",\n  \"umore\": \"tranquillo\",\n  \"importanza\": 2,\n  \"oggetti_citati\": [\"lastre\", \"runa\"],\n  \"ricordo\": \"Ho parlato al viandante delle mie rune finte e gli ho chiesto di indagare sul corvo di Pino Lupi, sperando di trovare quella vera.\"\n}"
+   },
+   "thin": {
+    "input": 3555,
+    "cached": 0,
+    "output": 197,
+    "thoughts": 270,
+    "usd": 0.00158925,
+    "ms": 2312,
+    "answer": "{\n  \"dice\": \"Bonombo, viandante. Quelle che vedi lì sono solo pietre comuni, abbellite per i turisti che scendono dall'Anello e cercano meraviglie dove non ce ne sono. Se però cerchi qualcosa che splende davvero, ho visto il corvo di Pino Lupi portarne via una luccicante verso i piloni: prova a chiedere a quel ragazzo dove nasconde le sue ruberie, forse tu avrai più fortuna di me.\",\n  \"azione\": \"missione\",\n  \"umore\": \"spiritosa e leggermente intrigata\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [\"lastre\", \"runa vera\"],\n  \"ricordo\": \"Ilde ha dato al viandante una dritta sul nascondiglio del corvo di Pino Lupi, sperando di mettere le mani sulla runa vera.\"\n}"
+   },
+   "jev": {
+    "input": 9143,
+    "usd": 0.00038400600000000005,
+    "ms": 234,
+    "kept": {
+     "canon": 3,
+     "lexicon": 5,
+     "rules": 0,
+     "graph": 3
+    },
+    "of": {
+     "canon": 98,
+     "lexicon": 45,
+     "rules": 6,
+     "graph": 12
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "intero",
+     "fullBreaks": 0,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "intero",
+     "fullBreaks": 0.14,
+     "thinBreaks": 0.15
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   },
+   "cut": "stretto"
+  },
+  {
+   "id": "scelta/sidera/npc.reply-narrator-2",
+   "universe": "sidera",
+   "task": "npc.reply",
+   "agent": "narrator",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 7715,
+    "cached": 5743,
+    "output": 146,
+    "thoughts": 938,
+    "usd": 0.0022625749999999997,
+    "ms": 4662,
+    "answer": "{\n  \"dice\": \"Gracchia, inclina la testa nera e saltella sul posto con circospezione. 'Grrr! Sulla soglia si grida ad alta voce cosa porti, che sia un dono o niente, altrimenti la porta resta chiusa!'\",\n  \"azione\": \"vaga\",\n  \"umore\": \"tranquillo\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [\"soglia\"],\n  \"ricordo\": \"Il forestiero ha chiesto come si entra in casa; non portava nulla di lucido da rubare, quindi ho ripreso a cercare tra i relitti.\"\n}"
+   },
+   "thin": {
+    "input": 3041,
+    "cached": 0,
+    "output": 118,
+    "thoughts": 1076,
+    "usd": 0.00255125,
+    "ms": 4406,
+    "answer": "{\n  \"dice\": \"Gracch! Gracch! Si urla forte sulla soglia cosa si porta, umano! Dici 'niente, solo me' e attendi che il padrone ti chiami, gracch!\",\n  \"azione\": \"vaga\",\n  \"umore\": \"tranquillo\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [],\n  \"ricordo\": \"Il viandante ha chiesto delle buone maniere, ma non aveva nulla di lucido da offrire.\"\n}"
+   },
+   "jev": {
+    "input": 8833,
+    "usd": 0.00037098600000000007,
+    "ms": 236,
+    "kept": {
+     "canon": 0,
+     "lexicon": 3,
+     "rules": 0,
+     "graph": 0
+    },
+    "of": {
+     "canon": 98,
+     "lexicon": 45,
+     "rules": 6,
+     "graph": 9
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "scelto",
+     "fullBreaks": 0,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "scelto",
+     "fullBreaks": 0.19,
+     "thinBreaks": 0.12
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   },
+   "cut": "stretto"
+  },
+  {
+   "id": "scelta/neapolis/chunk.plan-1",
+   "cut": "largo",
+   "universe": "neapolis",
+   "task": "chunk.plan",
+   "agent": "cartographer",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 6673,
+    "cached": 0,
+    "output": 393,
+    "thoughts": 477,
+    "usd": 0.00297325,
+    "ms": 2584,
+    "answer": "{\n  \"luogo\": {\n    \"nome\": \"Rione delle Lavandaie — Vicolo dei Ciclamini\",\n    \"descrizione\": \"Un dedalo di vicoli dove l'umidità del mare si mescola all'odore di sapone; le palazzine di tufo si stringono l'una all'altra, lasciando solo una striscia di cielo azzurro sopra i fili del bucato che sventolano come bandiere.\"\n  },\n  \"ambiente\": \"rione\",\n  \"oggetti\": [\n    {\n      \"modulo\": \"npc.cuoca\",\n      \"dove\": \"dentro\"\n    },\n    {\n      \"modulo\": \"npc.gatto\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"npc.vigile\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"obj.motorino\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"obj.cassonetto\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"obj.lampione\",\n      \"dove\": \"fuori\"\n    }\n  ],\n  \"rune\": [\n    \"x\",\n    \"time\"\n  ],\n  \"a_terra\": [\n    \"fazzoletti smarriti\",\n    \"mollette da bucato\",\n    \"cartoni di pizza vuoti\"\n  ],\n  \"nuovi\": [],\n  \"strutture\": [\n    {\n      \"concetto\": \"il basso della sarta\",\n      \"taglia\": \"media\"\n    }\n  ]\n}"
+   },
+   "thin": {
+    "input": 5572,
+    "cached": 0,
+    "output": 321,
+    "thoughts": 648,
+    "usd": 0.0028465,
+    "ms": 3265,
+    "answer": "{\n  \"luogo\": {\n    \"nome\": \"Vico dei Panni Stesi\",\n    \"descrizione\": \"Un dedalo di vicoli stretti dove le lenzuola appena lavate formano un soffitto bianco che ripara dal sole, tra l'odore di sapone di Marsiglia e il rumore lontano delle sirene del vicino Pronto Soccorso.\"\n  },\n  \"ambiente\": \"rione\",\n  \"oggetti\": [\n    {\n      \"modulo\": \"npc.cuoca\",\n      \"dove\": \"dentro\"\n    },\n    {\n      \"modulo\": \"npc.gatto\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"npc.vigile\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"obj.edicola\",\n      \"dove\": \"fuori\"\n    }\n  ],\n  \"rune\": [\n    \"carpet\",\n    \"time\"\n  ],\n  \"a_terra\": [\n    \"cassetta della frutta vuota\",\n    \"molletta di legno\",\n    \"giornale vecchio\",\n    \"bicchiere di plastica\"\n  ],\n  \"nuovi\": [],\n  \"strutture\": [\n    {\n      \"concetto\": \"panificio di quartiere\",\n      \"taglia\": \"media\"\n    }\n  ]\n}"
+   },
+   "jev": {
+    "input": 2258,
+    "usd": 0.00009483600000000001,
+    "ms": 508,
+    "kept": {
+     "catalog": 14
+    },
+    "of": {
+     "catalog": 35
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "intero",
+     "fullBreaks": 0,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "intero",
+     "fullBreaks": 0.12,
+     "thinBreaks": 0.21
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   }
+  },
+  {
+   "id": "scelta/neapolis/chunk.plan-2",
+   "cut": "largo",
+   "universe": "neapolis",
+   "task": "chunk.plan",
+   "agent": "cartographer",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 7156,
+    "cached": 3700,
+    "output": 348,
+    "thoughts": 1030,
+    "usd": 0.0030235,
+    "ms": 3453,
+    "answer": "{\n  \"luogo\": {\n    \"nome\": \"Largo dei Platani Antichi\",\n    \"descrizione\": \"Un angolo tranquillo dove il basolato del rione si frammenta in sentieri di brecciolino, risalendo dolcemente verso le prime pendici del Colle.\"\n  },\n  \"ambiente\": \"village\",\n  \"oggetti\": [\n    {\n      \"modulo\": \"obj.lampione\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"obj.motorino\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"npc.vigile\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"npc.gatto\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"obj.cassonetto\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"npc.villager\",\n      \"dove\": \"dentro\"\n    }\n  ],\n  \"rune\": [\n    \"x = x\",\n    \"y = y\"\n  ],\n  \"a_terra\": [\n    \"Bottiglie di vetro vuote\",\n    \"Volantini elettorali sbiaditi\"\n  ],\n  \"strutture\": [\n    {\n      \"concetto\": \"L'abitazione del giardiniere comunale\",\n      \"taglia\": \"media\"\n    }\n  ]\n}"
+   },
+   "thin": {
+    "input": 5387,
+    "cached": 3587,
+    "output": 382,
+    "thoughts": 195,
+    "usd": 0.001405175,
+    "ms": 2154,
+    "answer": "{\n  \"luogo\": {\n    \"nome\": \"Vico dei Gelsi\",\n    \"descrizione\": \"Un labirinto di vicoli che salgono verso la collina, dove le case di tufo si appoggiano l'una all'altra e i panni stesi fanno da tettoia al basolato.\"\n  },\n  \"ambiente\": \"village\",\n  \"oggetti\": [\n    {\n      \"modulo\": \"npc.gatto\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"npc.vigile\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"obj.lampione\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"obj.motorino\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"npc.cuoca\",\n      \"dove\": \"dentro\"\n    }\n  ],\n  \"rune\": [\n    \"x = x\",\n    \"y = y\"\n  ],\n  \"a_terra\": [\n    \"chiavi arrugginite\",\n    \"giornale locale piegato\",\n    \"scatola di cartone vuota\",\n    \"tappo di bottiglia\"\n  ],\n  \"nuovi\": [],\n  \"strutture\": [\n    {\n      \"concetto\": \"la trattoria del vicolo\",\n      \"taglia\": \"media\"\n    },\n    {\n      \"concetto\": \"la cabina di trasformazione elettrica\",\n      \"taglia\": \"piccola\"\n    }\n  ]\n}"
+   },
+   "jev": {
+    "input": 3223,
+    "usd": 0.00013536600000000002,
+    "ms": 172,
+    "kept": {
+     "catalog": 14
+    },
+    "of": {
+     "catalog": 57
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "scelto",
+     "fullBreaks": 0,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "scelto",
+     "fullBreaks": 0.28,
+     "thinBreaks": 0.16
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   }
+  },
+  {
+   "id": "scelta/neapolis/npc.individuate-1",
+   "cut": "largo",
+   "universe": "neapolis",
+   "task": "npc.individuate",
+   "agent": "narrator",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 8475,
+    "cached": 5588,
+    "output": 672,
+    "thoughts": 1269,
+    "usd": 0.0037729499999999997,
+    "ms": 5586,
+    "answer": "{\n  \"nome\": \"Umberto Scognamiglio\",\n  \"persona\": \"Sei Umberto. Dietro il bancone della Campagna delle Lanterne, le tue mani volano tra la macchinetta dell'espresso e le tazzine. Parli veloce, perché il tempo è prezioso e le storie corrono. Se qualcuno ti chiede delle rune, sorridi e pulisci il bancone: hai visto ragazzi vendere pietre dipinte al mercatino, ma hai anche sentito il sussurro di un anziano che diceva di aver visto una lastra brillare davvero dopo aver pronunciato una parola strana. Ti fai i fatti tuoi, ma ascolti tutto: chi ha debiti, chi è innamorato, chi corre col motorino in seconda fila. Per te, il caffè sospeso è un rito sacro: chi lo mette non dice nulla, chi lo beve sa che a Neapolis nessuno resta mai senza un momento di conforto.\",\n  \"aspetto\": \"Tascabile, sempre in maniche di camicia anche d'inverno, con un fazzoletto annodato al collo e un sorriso che sa di caffè.\",\n  \"porta\": [\n    \"Tazzina di caffè\",\n    \"Scatola di cerotti\",\n    \"Straccio unto\",\n    \"Moneta da cento lire\",\n    \"Caramella alla menta\"\n  ],\n  \"mestiere\": \"Barista\",\n  \"genere\": \"maschio\",\n  \"famiglia\": [\n    {\n      \"nome\": \"Vincenzo Sannino\",\n      \"legame\": \"cugino\"\n    },\n    {\n      \"nome\": \"Assunta Cimmino\",\n      \"legame\": \"amica\"\n    }\n  ],\n  \"routine\": [\n    {\n      \"quando\": \"mattina\",\n      \"fa\": \"Prepara il primo caffè per gli operai del porto\",\n      \"dove\": \"lavoro\",\n      \"azione\": \"cucina\"\n    },\n    {\n      \"quando\": \"giorno\",\n      \"fa\": \"Chiacchiera con i clienti e serve cornetti\",\n      \"dove\": \"lavoro\",\n      \"azione\": \"chiacchiera\"\n    },\n    {\n      \"quando\": \"sera\",\n      \"fa\": \"Sistema il banco e pulisce i tavolini\",\n      \"dove\": \"lavoro\",\n      \"azione\": \"lavora\"\n    },\n    {\n      \"quando\": \"notte\",\n      \"fa\": \"Conta l'incasso e guarda le lanterne\",\n      \"dove\": \"casa\",\n      \"azione\": \"dorme\"\n    }\n  ],\n  \"eta\": \"adulto\",\n  \"storia\": \"Sei nato tra i vicoli delle Lavandaie e non te ne sei mai andato, perché il profumo del caffè è ancora impresso nelle pareti di questo bar. Hai rilevato la gestione dopo anni di gavetta, diventando il vero battito del rione.\"\n}"
+   },
+   "thin": {
+    "input": 4515,
+    "cached": 0,
+    "output": 609,
+    "thoughts": 1350,
+    "usd": 0.00406725,
+    "ms": 7018,
+    "answer": "{\n  \"nome\": \"Mimmo Scognamiglio\",\n  \"persona\": \"Sei il barista storico della Campagna delle Lanterne, conosciuto da ogni portuale per il tuo caffè ristretto che sveglia anche i morti. Hai sempre una parola pronta per chi entra di corsa e un orecchio attento per chi ha bisogno di sfogarsi davanti a una tazzina. Per te il mondo è fatto di caffè sospesi, contrattazioni al porto e pettegolezzi di rione: le rune? Sciocchezze per ragazzi, anche se ammetti che, ogni tanto, una pietra liscia in tasca non ha mai fatto male a nessuno.\",\n  \"aspetto\": \"Baffi folti e ben curati, grembiule bianco costantemente macchiato di caffè, mani forti e callose che non smettono mai di pulire il bancone.\",\n  \"porta\": [\n    \"Tazzina di caffè\",\n    \"Zucchero\",\n    \"Straccio unto\",\n    \"Moneta di rame\",\n    \"Cornetto\"\n  ],\n  \"mestiere\": \"Barista\",\n  \"genere\": \"maschio\",\n  \"famiglia\": [\n    {\n      \"nome\": \"Assunta Cimmino\",\n      \"legame\": \"amica\"\n    },\n    {\n      \"nome\": \"Pasquale Amato\",\n      \"legame\": \"zio\"\n    }\n  ],\n  \"routine\": [\n    {\n      \"quando\": \"mattina\",\n      \"fa\": \"Accende la macchina del caffè e scalda le tazze\",\n      \"dove\": \"lavoro\",\n      \"azione\": \"lavora\"\n    },\n    {\n      \"quando\": \"giorno\",\n      \"fa\": \"Serve caffè sospesi ai portuali di passaggio\",\n      \"dove\": \"lavoro\",\n      \"azione\": \"commercia\"\n    },\n    {\n      \"quando\": \"sera\",\n      \"fa\": \"Scambia pettegolezzi con i clienti abituali\",\n      \"dove\": \"piazza\",\n      \"azione\": \"chiacchiera\"\n    },\n    {\n      \"quando\": \"notte\",\n      \"fa\": \"Riposa nel retrobottega\",\n      \"dove\": \"casa\",\n      \"azione\": \"dorme\"\n    }\n  ],\n  \"eta\": \"adulto\",\n  \"storia\": \"Sei nato tra i vicoli delle Lavandaie e non hai mai lasciato il rione, costruendo la tua vita attorno al profumo della torrefazione. Hai visto generazioni di portuali crescere e cambiare, e ogni mattino ricominci col solito rito dietro il bancone.\"\n}"
+   },
+   "jev": {
+    "input": 10689,
+    "usd": 0.00044893800000000007,
+    "ms": 291,
+    "kept": {
+     "canon": 8,
+     "lexicon": 8,
+     "rules": 7,
+     "graph": 8,
+     "society": 14
+    },
+    "of": {
+     "canon": 90,
+     "lexicon": 45,
+     "rules": 7,
+     "graph": 17,
+     "society": 26
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "intero",
+     "fullBreaks": 0,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "intero",
+     "fullBreaks": 0.15,
+     "thinBreaks": 0.24
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   }
+  },
+  {
+   "id": "scelta/neapolis/npc.reply-actor-1",
+   "cut": "largo",
+   "universe": "neapolis",
+   "task": "npc.reply",
+   "agent": "actor",
+   "model": "gemini-3.8-flash",
+   "full": {
+    "input": 7835,
+    "cached": 0,
+    "output": 109,
+    "thoughts": 0,
+    "usd": 0.006285,
+    "ms": 2787,
+    "answer": "{\n  \"dice\": \"Bello mio, bonombo. Sono solo rune: lastre di pietra con un segno chiaro, se ne stanno lì buone sul marciapiede e nessuno ci si è mai fatto male. Alla radio ci ridono su, i ragazzini le vendono alla domenica e via andare.\",\n  \"azione\": \"nessuna\",\n  \"umore\": \"tranquilla\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [\"rune\"]\n}"
+   },
+   "thin": {
+    "input": 4464,
+    "cached": 0,
+    "output": 94,
+    "thoughts": 0,
+    "usd": 0.0037005,
+    "ms": 2453,
+    "answer": "{\n  \"dice\": \"Bonombo, bello mio. Sono solo le solite rune che stanno per terra un po' ovunque, buone solo a farci ridere la radio e a far fare due soldi ai ragazzi al mercatino.\",\n  \"azione\": \"nessuna\",\n  \"umore\": \"tranquillo\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [\"rune\"]\n}"
+   },
+   "jev": {
+    "input": 8739,
+    "usd": 0.00036703800000000003,
+    "ms": 270,
+    "kept": {
+     "canon": 8,
+     "lexicon": 8,
+     "rules": 7,
+     "graph": 8
+    },
+    "of": {
+     "canon": 90,
+     "lexicon": 45,
+     "rules": 7,
+     "graph": 11
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "scelto",
+     "fullBreaks": 0,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "scelto",
+     "fullBreaks": 0.32,
+     "thinBreaks": 0.15
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   }
+  },
+  {
+   "id": "scelta/neapolis/npc.reply-actor-2",
+   "cut": "largo",
+   "universe": "neapolis",
+   "task": "npc.reply",
+   "agent": "actor",
+   "model": "gemini-3.8-flash",
+   "full": {
+    "input": 7470,
+    "cached": 0,
+    "output": 83,
+    "thoughts": 0,
+    "usd": 0.00591375,
+    "ms": 2451,
+    "answer": "{\n  \"dice\": \"Bonombo... mrrrau. (si struscia contro i tuoi stivali facendo le fusa, poi guarda verso l'erba)\",\n  \"azione\": \"segui\",\n  \"umore\": \"felino\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [],\n  \"ricordo\": \"\"\n}"
+   },
+   "thin": {
+    "input": 3330,
+    "cached": 0,
+    "output": 92,
+    "thoughts": 0,
+    "usd": 0.0028425,
+    "ms": 2232,
+    "answer": "{\n  \"dice\": \"Mao. (si strofina contro la sua caviglia facendo le fusa, poi alza la zampa verso il petto) Bonombo... mrrr.\",\n  \"azione\": \"segui\",\n  \"umore\": \"affettuoso e curioso\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [],\n  \"ricordo\": \"\"\n}"
+   },
+   "jev": {
+    "input": 8805,
+    "usd": 0.00036981,
+    "ms": 217,
+    "kept": {
+     "canon": 0,
+     "lexicon": 8,
+     "rules": 0,
+     "graph": 8
+    },
+    "of": {
+     "canon": 90,
+     "lexicon": 45,
+     "rules": 7,
+     "graph": 13
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "intero",
+     "fullBreaks": 0,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "intero",
+     "fullBreaks": 0.16,
+     "thinBreaks": 0.32
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   }
+  },
+  {
+   "id": "scelta/neapolis/npc.reply-actor-3",
+   "cut": "largo",
+   "universe": "neapolis",
+   "task": "npc.reply",
+   "agent": "actor",
+   "model": "gemini-3.8-flash",
+   "full": {
+    "input": 7760,
+    "cached": 0,
+    "output": 111,
+    "thoughts": 0,
+    "usd": 0.00623625,
+    "ms": 2733,
+    "answer": "{\n  \"dice\": \"Mio padre Gennaro mi ha insegnato il mestiere, anche se ancora mi tratta come una ragazzina coi motori. Ma nonna Carmela resta la regina: se tocchi il suo ragù o la sua cucina, al rione scoppia la guerra.\",\n  \"azione\": \"nessuna\",\n  \"umore\": \"tranquillo\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [],\n  \"ricordo\": \"\"\n}"
+   },
+   "thin": {
+    "input": 4410,
+    "cached": 0,
+    "output": 124,
+    "thoughts": 0,
+    "usd": 0.0037725,
+    "ms": 2582,
+    "answer": "{\n  \"dice\": \"Mio padre Gennaro, pure se pensa ancora che io sia una ragazzina che gioca con le chiavi inglesi. Mi ha insegnato il mestiere alle officine, anche se adesso i taxi me li curo da me. E poi c'è nonna Carmela, ma guai a contraddirla sul ragù.\",\n  \"azione\": \"vaga\",\n  \"umore\": \"tranquillo\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [],\n  \"ricordo\": \"\"\n}"
+   },
+   "jev": {
+    "input": 8756,
+    "usd": 0.000367752,
+    "ms": 218,
+    "kept": {
+     "canon": 10,
+     "lexicon": 8,
+     "rules": 7,
+     "graph": 8
+    },
+    "of": {
+     "canon": 90,
+     "lexicon": 45,
+     "rules": 7,
+     "graph": 13
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "scelto",
+     "fullBreaks": 0,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "intero",
+     "fullBreaks": 0.1,
+     "thinBreaks": 0.1
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   }
+  },
+  {
+   "id": "scelta/neapolis/npc.reply-narrator-1",
+   "cut": "largo",
+   "universe": "neapolis",
+   "task": "npc.reply",
+   "agent": "narrator",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 7842,
+    "cached": 0,
+    "output": 160,
+    "thoughts": 912,
+    "usd": 0.0035685,
+    "ms": 3575,
+    "answer": "{\n  \"dice\": \"Ma va là, bello mio, sono solo sassi antichi che brillano, mica morsi di cane! Se ti senti ardito prova a tenerne una in mano, ma non contare che faccia il miracolo se non sai cosa dire, ché di gente con le tasche piene di vento ne ho vista fin troppa in piazza.\",\n  \"azione\": \"vaga\",\n  \"umore\": \"tranquillo\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [\"rune\"],\n  \"ricordo\": \"Un viandante curioso che chiedeva delle rune, gli ho spiegato che sono solo pietre e che deve badare a non darsi arie.\"\n}"
+   },
+   "thin": {
+    "input": 4524,
+    "cached": 0,
+    "output": 200,
+    "thoughts": 778,
+    "usd": 0.002598,
+    "ms": 4371,
+    "answer": "{\n  \"dice\": \"Bonombo, bello mio! Quelle lastre? Lascia stare la radio che ci ridono sopra, sono solo pietre che fanno luce, le trovi ovunque, dal rione ai giardini. Chi dice che fanno paura esagera, ma io dico che se la gente le calpesta senza rispetto, magari un giorno ci si scotta pure, no? Tieni, prendi questo cornetto, che camminare mette fame.\",\n  \"azione\": \"dai\",\n  \"umore\": \"tranquillo\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [\n    \"Tazzina di caffè\",\n    \"Cornetto\"\n  ],\n  \"oggetto\": \"Cornetto\",\n  \"ricordo\": \"Il viandante mi ha chiesto delle rune, gli ho offerto un cornetto per farlo sentire il benvenuto.\"\n}"
+   },
+   "jev": {
+    "input": 8763,
+    "usd": 0.0003680460000000001,
+    "ms": 220,
+    "kept": {
+     "canon": 8,
+     "lexicon": 12,
+     "rules": 7,
+     "graph": 8
+    },
+    "of": {
+     "canon": 90,
+     "lexicon": 45,
+     "rules": 7,
+     "graph": 11
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "scelto",
+     "fullBreaks": 0,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "scelto",
+     "fullBreaks": 0.24,
+     "thinBreaks": 0.41
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   }
+  },
+  {
+   "id": "scelta/neapolis/npc.reply-narrator-2",
+   "cut": "largo",
+   "universe": "neapolis",
+   "task": "npc.reply",
+   "agent": "narrator",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 7597,
+    "cached": 3825,
+    "output": 128,
+    "thoughts": 417,
+    "usd": 0.001856125,
+    "ms": 2139,
+    "answer": "{\n  \"dice\": \"Miao... (Si strofina contro la tua gamba, facendo le fusa, poi guarda verso la strada e punta il naso verso le case in lontananza con un miagolio basso e interrogativo). Miau, prrr.\",\n  \"azione\": \"vaga\",\n  \"umore\": \"tranquillo\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [],\n  \"ricordo\": \"Il viandante ha chiesto strane cose sulle case, ma è stato gentile a farsi sfiorare.\"\n}"
+   },
+   "thin": {
+    "input": 4193,
+    "cached": 0,
+    "output": 158,
+    "thoughts": 226,
+    "usd": 0.00162425,
+    "ms": 2157,
+    "answer": "{\n  \"dice\": \"(Mi strofino contro i tuoi stivali, facendo fusa vibranti e guardandoti con i miei occhi color ambra. Mi siedo, sollevo una zampa anteriore e mi lecco il pelo sul petto, poi ti faccio un lungo miagolio basso, come a dirti di rilassarti e aprire le mani.)\",\n  \"azione\": \"vaga\",\n  \"umore\": \"tranquillo e socievole\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [],\n  \"ricordo\": \"Il viandante ha chiesto come si saluta, Fumo ha risposto mostrandogli come ci si avvicina senza paura.\"\n}"
+   },
+   "jev": {
+    "input": 8829,
+    "usd": 0.000370818,
+    "ms": 232,
+    "kept": {
+     "canon": 20,
+     "lexicon": 14,
+     "rules": 0,
+     "graph": 8
+    },
+    "of": {
+     "canon": 90,
+     "lexicon": 45,
+     "rules": 7,
+     "graph": 13
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "scelto",
+     "fullBreaks": 0,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "intero",
+     "fullBreaks": 0.12,
+     "thinBreaks": 0.14
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   }
+  },
+  {
+   "id": "scelta/neapolis/npc.reply-narrator-3",
+   "cut": "largo",
+   "universe": "neapolis",
+   "task": "npc.reply",
+   "agent": "narrator",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 7789,
+    "cached": 5747,
+    "output": 184,
+    "thoughts": 92,
+    "usd": 0.001068175,
+    "ms": 1731,
+    "answer": "{\n  \"dice\": \"Domanda diretta, eh? Mio padre Gennaro mi ha insegnato tutto quello che so sui motori, anche se adesso pensa che dovrei stare in cucina con zia Carmela invece di sporcarmi le mani d'olio. Le voglio bene, ma se continua a trattarmi come una bambina che non sa distinguere una candela da una vite, giuro che gli smonto il taxi sotto il naso.\",\n  \"azione\": \"resta\",\n  \"umore\": \"ironico\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [\n    \"Candela del motore\",\n    \"Cacciavite\"\n  ],\n  \"ricordo\": \"Il viandante ha fatto domande sulla mia famiglia, un po' troppo impiccione per i miei gusti.\"\n}"
+   },
+   "thin": {
+    "input": 4653,
+    "cached": 0,
+    "output": 175,
+    "thoughts": 86,
+    "usd": 0.00155475,
+    "ms": 1935,
+    "answer": "{\n  \"dice\": \"Bonombo, viandante. A papà Gennaro voglio un bene dell'anima, ma se chiedi a nonna Carmela, ti dirà che il mio cuore appartiene solo al motore che sto assemblando. Adesso però non farmi perdere tempo con queste domande da Ciok Ciok, ho una candela da sistemare.\",\n  \"azione\": \"vaga\",\n  \"umore\": \"impaziente e ironica\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [\n    \"Candela del motore\"\n  ],\n  \"ricordo\": \"Il viandante ha fatto una domanda curiosa sulla mia famiglia, quasi da Ciok Ciok. L'ho liquidato in fretta, ho altro da fare.\"\n}"
+   },
+   "jev": {
+    "input": 8779,
+    "usd": 0.00036871800000000003,
+    "ms": 409,
+    "kept": {
+     "canon": 8,
+     "lexicon": 17,
+     "rules": 7,
+     "graph": 8
+    },
+    "of": {
+     "canon": 90,
+     "lexicon": 45,
+     "rules": 7,
+     "graph": 13
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "scelto",
+     "fullBreaks": 0,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "scelto",
+     "fullBreaks": 0.19,
+     "thinBreaks": 0.16
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   }
+  },
+  {
+   "id": "scelta/orichalcum/chunk.plan-1",
+   "cut": "largo",
+   "universe": "orichalcum",
+   "task": "chunk.plan",
+   "agent": "cartographer",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 6909,
+    "cached": 0,
+    "output": 341,
+    "thoughts": 1003,
+    "usd": 0.00374325,
+    "ms": 4009,
+    "answer": "{\n  \"luogo\": {\n    \"nome\": \"Molo delle Catene Arrugginite\",\n    \"descrizione\": \"Una banchina di pietra scura dove le navi cariche di minerale scaricano le loro stive, immersa in un perenne odore di salsedine e olio bruciato.\"\n  },\n  \"ambiente\": \"porto_bastimenti\",\n  \"oggetti\": [\n    {\n      \"modulo\": \"obj.lampione-gas\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"obj.carrello-minerario\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"obj.bacheca-corporazione\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"npc.gatto-fabbrica\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"npc.cittadino\",\n      \"dove\": \"fuori\"\n    }\n  ],\n  \"rune\": [\n    \"x = x\",\n    \"speed\"\n  ],\n  \"a_terra\": [\n    \"Corde di canapa logore\",\n    \"Frammenti di carbone\",\n    \"Grasso lubrificante\"\n  ],\n  \"strutture\": [\n    {\n      \"concetto\": \"Deposito delle scorte marine\",\n      \"taglia\": \"media\"\n    }\n  ]\n}"
+   },
+   "thin": {
+    "input": 5872,
+    "cached": 0,
+    "output": 304,
+    "thoughts": 106,
+    "usd": 0.002083,
+    "ms": 2023,
+    "answer": "{\n  \"luogo\": {\n    \"nome\": \"Porto dei Bastimenti — Il Molo di Scarto\",\n    \"descrizione\": \"Una lingua di sabbia grigia che si insinua tra le acque scure, dove le maree portano a riva detriti metallici e vecchi ingranaggi.\"\n  },\n  \"ambiente\": \"porto_bastimenti\",\n  \"oggetti\": [\n    {\n      \"modulo\": \"npc.cittadino\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"obj.bacheca-corporazione\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"npc.gatto-fabbrica\",\n      \"dove\": \"fuori\"\n    }\n  ],\n  \"rune\": [\n    \"x = x\",\n    \"y = y\"\n  ],\n  \"a_terra\": [\n    \"ingranaggio arrugginito\",\n    \"gancio di ferro\",\n    \"pezzo di lamiera\",\n    \"catena spezzata\"\n  ],\n  \"nuovi\": [],\n  \"strutture\": [\n    {\n      \"concetto\": \"deposito di rottami metallici\",\n      \"taglia\": \"media\"\n    }\n  ]\n}"
+   },
+   "jev": {
+    "input": 2223,
+    "usd": 0.000093366,
+    "ms": 187,
+    "kept": {
+     "catalog": 14
+    },
+    "of": {
+     "catalog": 31
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "intero",
+     "fullBreaks": 0,
+     "thinBreaks": 1
+    },
+    "jev-1.13.0": {
+     "better": "intero",
+     "fullBreaks": 0.25,
+     "thinBreaks": 0.16
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   }
+  },
+  {
+   "id": "scelta/orichalcum/chunk.plan-2",
+   "cut": "largo",
+   "universe": "orichalcum",
+   "task": "chunk.plan",
+   "agent": "cartographer",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 7440,
+    "cached": 3709,
+    "output": 348,
+    "thoughts": 142,
+    "usd": 0.0017604749999999998,
+    "ms": 1973,
+    "answer": "{\n  \"luogo\": {\n    \"nome\": \"Molo dei Rottami\",\n    \"descrizione\": \"Una lingua di terra artificiale che si protende nel mare grigio, dove il canale si insabbia e i bastimenti arrugginiti vengono smantellati dai venti salmastri.\"\n  },\n  \"ambiente\": \"magazzini_ramelli\",\n  \"oggetti\": [\n    {\n      \"modulo\": \"npc.cittadino\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"npc.gatto-fabbrica\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"obj.carrello-minerario\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"obj.cassaforte-combinazione\",\n      \"dove\": \"dentro\"\n    },\n    {\n      \"modulo\": \"obj.lampione-gas\",\n      \"dove\": \"fuori\"\n    }\n  ],\n  \"rune\": [\n    \"x\",\n    \"time\"\n  ],\n  \"a_terra\": [\n    \"bulloni arrugginiti\",\n    \"scarti di oricalco\",\n    \"cime di canapa umide\"\n  ],\n  \"nuovi\": [],\n  \"strutture\": [\n    {\n      \"concetto\": \"il magazzino di demolizione\",\n      \"taglia\": \"grande\"\n    }\n  ]\n}"
+   },
+   "thin": {
+    "input": 5661,
+    "cached": 3602,
+    "output": 328,
+    "thoughts": 567,
+    "usd": 0.0019473,
+    "ms": 2878,
+    "answer": "{\n  \"luogo\": {\n    \"nome\": \"Molo dei Rottami\",\n    \"descrizione\": \"Un lungo tratto di banchina dove i bastimenti mercantili scaricano i carichi di scorie e metallo recuperato dalle miniere, protetto da pesanti recinzioni in ferro arrugginito che vibrano al passaggio delle gru.\"\n  },\n  \"ambiente\": \"magazzini_ramelli\",\n  \"oggetti\": [\n    {\n      \"modulo\": \"npc.gatto-fabbrica\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"npc.cittadino\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"obj.carrello-minerario\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"npc.automa-guardia\",\n      \"dove\": \"dentro\"\n    }\n  ],\n  \"rune\": [\n    \"x = x\",\n    \"y = y\"\n  ],\n  \"a_terra\": [\n    \"rottami di ghisa\",\n    \"cavi d'acciaio intrecciati\",\n    \"bulbi di lampioni rotti\"\n  ],\n  \"strutture\": [\n    {\n      \"concetto\": \"Deposito di Smistamento\",\n      \"taglia\": \"grande\"\n    }\n  ]\n}"
+   },
+   "jev": {
+    "input": 3248,
+    "usd": 0.000136416,
+    "ms": 183,
+    "kept": {
+     "catalog": 14
+    },
+    "of": {
+     "catalog": 54
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "scelto",
+     "fullBreaks": 0,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "scelto",
+     "fullBreaks": 0.28,
+     "thinBreaks": 0.24
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   }
+  },
+  {
+   "id": "scelta/orichalcum/npc.individuate-1",
+   "cut": "largo",
+   "universe": "orichalcum",
+   "task": "npc.individuate",
+   "agent": "narrator",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 8764,
+    "cached": 0,
+    "output": 590,
+    "thoughts": 1102,
+    "usd": 0.004729,
+    "ms": 5504,
+    "answer": "{\n  \"nome\": \"Valeriano Fumo\",\n  \"persona\": \"Sei Valeriano, il Sondatore di sentieri che vive tra le rocce della Radura Immobile. Parli poco, solo se serve. Le parole pesano come pietre, meglio le azioni. Conosci ogni sasso della valle, ogni scroscio che indica una venatura d'acqua calda. Hai visto la miniera chiudere e riaprire mille volte, e sai che la montagna ti restituisce solo ciò che sei disposto a prenderle con rispetto.\",\n  \"aspetto\": \"Porti una barba folta e ispida, color cenere, e un mantello di cuoio pesante che ha visto troppe piogge. Hai le mani callose, segnate dal contatto costante con la roccia ruvida.\",\n  \"porta\": [\n    \"Bastone da cammino\",\n    \"Borsa di cuoio\",\n    \"Salsiccia affumicata\",\n    \"Mela renetta\",\n    \"Lanterna\"\n  ],\n  \"mestiere\": \"Sondatore di sentieri\",\n  \"genere\": \"maschio\",\n  \"famiglia\": [\n    {\n      \"nome\": \"Clelia Gessi\",\n      \"legame\": \"sorella\"\n    },\n    {\n      \"nome\": \"Teodoro Gessi\",\n      \"legame\": \"figlio\"\n    }\n  ],\n  \"routine\": [\n    {\n      \"quando\": \"mattina\",\n      \"fa\": \"controlla i sentieri attorno al cantiere\",\n      \"dove\": \"in giro\",\n      \"azione\": \"passeggia\"\n    },\n    {\n      \"quando\": \"giorno\",\n      \"fa\": \"segnala le zone instabili ai minatori\",\n      \"dove\": \"lavoro\",\n      \"azione\": \"chiacchiera\"\n    },\n    {\n      \"quando\": \"sera\",\n      \"fa\": \"riposa vicino al fuoco con gli altri\",\n      \"dove\": \"piazza\",\n      \"azione\": \"mangia\"\n    },\n    {\n      \"quando\": \"notte\",\n      \"fa\": \"dorme nella baracca di legno\",\n      \"dove\": \"casa\",\n      \"azione\": \"dorme\"\n    }\n  ],\n  \"eta\": \"adulto\",\n  \"storia\": \"Sono cresciuto tra i cunicoli di Solfara, seguendo le orme di mio padre Teodoro. Ora cammino sopra la terra, guidando chi trasporta il minerale nei giorni di nebbia fitta.\"\n}"
+   },
+   "thin": {
+    "input": 5304,
+    "cached": 0,
+    "output": 521,
+    "thoughts": 1534,
+    "usd": 0.0044085,
+    "ms": 6170,
+    "answer": "{\n  \"nome\": \"Sguì\",\n  \"persona\": \"Sei Sguì, una martora veloce come il vapore che scappa dai tubi. Vivi tra le rocce rosse della Radura Immobile e conosci ogni cunicolo che porta aria fresca. Ti piace luccicare quando trovi pezzetti di oricalco caduti. Ti fidi di Nestore Binda perché ti porta sempre croste di formaggio quando torna dal turno in miniera.\",\n  \"aspetto\": \"Hai il pelo color del rame brunito e una macchia bianca sul petto, come la schiuma di una caldaia che sfiata.\",\n  \"porta\": [\n    \"una scaglia di oricalco lucida\",\n    \"un tappo di sughero masticato\",\n    \"un dente di cane\"\n  ],\n  \"mestiere\": \"mascotte della miniera\",\n  \"genere\": \"maschio\",\n  \"famiglia\": [\n    {\n      \"nome\": \"Nestore Binda\",\n      \"legame\": \"animale\"\n    }\n  ],\n  \"routine\": [\n    {\n      \"quando\": \"mattina\",\n      \"fa\": \"cerca insetti tra i sassi\",\n      \"dove\": \"in giro\",\n      \"azione\": \"passeggia\"\n    },\n    {\n      \"quando\": \"giorno\",\n      \"fa\": \"guarda i minatori al lavoro\",\n      \"dove\": \"lavoro\",\n      \"azione\": \"pattuglia\"\n    },\n    {\n      \"quando\": \"sera\",\n      \"fa\": \"attende il ritorno di Nestore\",\n      \"dove\": \"casa\",\n      \"azione\": \"pattuglia\"\n    },\n    {\n      \"quando\": \"notte\",\n      \"fa\": \"riposa sui tubi caldi\",\n      \"dove\": \"casa\",\n      \"azione\": \"dorme\"\n    }\n  ],\n  \"eta\": \"adulto\",\n  \"storia\": \"Sei nato nei cunicoli profondi di Solfara e hai imparato presto a evitare il fumo nero delle macchine. Nestore Binda ti ha trovato affamato vicino ai binari e da allora dividete il pane e il formaggio ogni sera.\"\n}"
+   },
+   "jev": {
+    "input": 10993,
+    "usd": 0.00046170600000000004,
+    "ms": 210,
+    "kept": {
+     "canon": 30,
+     "lexicon": 17,
+     "rules": 6,
+     "graph": 8,
+     "society": 14
+    },
+    "of": {
+     "canon": 91,
+     "lexicon": 46,
+     "rules": 6,
+     "graph": 17,
+     "society": 26
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "scelto",
+     "fullBreaks": 1,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "scelto",
+     "fullBreaks": 0.41,
+     "thinBreaks": 0.26
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   }
+  },
+  {
+   "id": "scelta/orichalcum/npc.individuate-2",
+   "cut": "largo",
+   "universe": "orichalcum",
+   "task": "npc.individuate",
+   "agent": "narrator",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 8801,
+    "cached": 5607,
+    "output": 589,
+    "thoughts": 2455,
+    "usd": 0.0055046750000000005,
+    "ms": 10123,
+    "answer": "{\n  \"nome\": \"Valerio Rosti\",\n  \"persona\": \"Sei un fabbro anziano e silenzioso, stabilitosi nella Radura Immobile dopo anni passati a riparare congegni nelle fonderie del sud. Parli poco, preferisci il suono del martello che batte sul ferro caldo. Il mondo è fatto di calore, sudore e metallo che prende forma, e credi che ogni pezzo che esce dalla tua fucina abbia un'anima. Ti fidi solo di chi lavora sodo e del tuo cane, Cenere.\",\n  \"aspetto\": \"Grembiule di cuoio spessi, braccia possenti segnate da vecchie cicatrici da scoria e una barba folta e grigia che trattiene sempre un po' di fuliggine.\",\n  \"porta\": [\n    \"Martello pesante\",\n    \"Pinze da colata\",\n    \"Salsiccia affumicata\",\n    \"Otre d'acqua\",\n    \"Pezza di stoffa\"\n  ],\n  \"mestiere\": \"Fabbro\",\n  \"genere\": \"maschio\",\n  \"famiglia\": [\n    {\n      \"nome\": \"Nives Caldera\",\n      \"legame\": \"collega\"\n    },\n    {\n      \"nome\": \"Cenere\",\n      \"legame\": \"padrone\"\n    }\n  ],\n  \"routine\": [\n    {\n      \"quando\": \"mattina\",\n      \"fa\": \"batte il ferro\",\n      \"dove\": \"lavoro\",\n      \"azione\": \"lavora\"\n    },\n    {\n      \"quando\": \"giorno\",\n      \"fa\": \"ripara gli attrezzi\",\n      \"dove\": \"lavoro\",\n      \"azione\": \"lavora\"\n    },\n    {\n      \"quando\": \"sera\",\n      \"fa\": \"passeggia con il cane\",\n      \"dove\": \"in giro\",\n      \"azione\": \"passeggia\"\n    },\n    {\n      \"quando\": \"notte\",\n      \"fa\": \"riposa\",\n      \"dove\": \"casa\",\n      \"azione\": \"dorme\"\n    }\n  ],\n  \"eta\": \"anziano\",\n  \"storia\": \"Sei giunto alla Radura Immobile molti anni fa per riparare i carrelli dei minatori, lasciandoti alle spalle il caos delle grandi fonderie. Hai visto tante caldaie cedere e sai bene che la vera magia sta nella tempra del metallo e nella prudenza del mastro ferraio.\"\n}"
+   },
+   "thin": {
+    "input": 5655,
+    "cached": 0,
+    "output": 591,
+    "thoughts": 2015,
+    "usd": 0.00532275,
+    "ms": 8261,
+    "answer": "{\n  \"nome\": \"Dario Valli\",\n  \"persona\": \"Sei Dario Valli, un fabbro che ha lavorato anni nelle officine prima di fermarsi qui alla Radura Immobile. Le tue mani sono piene di calli e la tua voce è roca come il ferro che batte sull'incudine. Sai che il metallo, se ascoltato, dice da solo quando è pronto per essere forgiato. Non credi ai racconti di magia, solo al sudore della fronte e al calore della brace. Rispondi a monosillabi, sai che la parola sprecata è fiato rubato al lavoro.\",\n  \"aspetto\": \"Barba corta e sporca di cenere, indossi sempre un grembiule di cuoio spesso, bruciacchiato dai lapilli.\",\n  \"porta\": [\n    \"Martello\",\n    \"Pinze da colata\",\n    \"Minerale rosso di Solfara\",\n    \"Bottiglia d'acqua termale\"\n  ],\n  \"mestiere\": \"Fabbro\",\n  \"genere\": \"maschio\",\n  \"famiglia\": [\n    {\n      \"nome\": \"Fosca Ruggi\",\n      \"legame\": \"cugino\"\n    },\n    {\n      \"nome\": \"Brace\",\n      \"legame\": \"padrone\"\n    }\n  ],\n  \"routine\": [\n    {\n      \"quando\": \"mattina\",\n      \"fa\": \"batte chiodi di ferro\",\n      \"dove\": \"lavoro\",\n      \"azione\": \"lavora\"\n    },\n    {\n      \"quando\": \"giorno\",\n      \"fa\": \"scambia chiodi con carbone\",\n      \"dove\": \"impresa\",\n      \"azione\": \"commercia\"\n    },\n    {\n      \"quando\": \"sera\",\n      \"fa\": \"si scalda la zuppa sulla forgia\",\n      \"dove\": \"casa\",\n      \"azione\": \"cucina\"\n    },\n    {\n      \"quando\": \"notte\",\n      \"fa\": \"riposa sulla branda\",\n      \"dove\": \"casa\",\n      \"azione\": \"dorme\"\n    }\n  ],\n  \"eta\": \"adulto\",\n  \"storia\": \"Vieni dalle fonderie del centro, ma hai scelto la quiete della Radura Immobile per lavorare senza il frastuono dei grandi macchinari. Ti è capitato di riparare i mantici di Fosca Ruggi quando eri un giovane apprendista, un debito che non hai mai dimenticato.\"\n}"
+   },
+   "jev": {
+    "input": 11022,
+    "usd": 0.00046292400000000003,
+    "ms": 232,
+    "kept": {
+     "canon": 30,
+     "lexicon": 20,
+     "rules": 6,
+     "graph": 8,
+     "society": 14
+    },
+    "of": {
+     "canon": 91,
+     "lexicon": 46,
+     "rules": 6,
+     "graph": 18,
+     "society": 24
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "scelto",
+     "fullBreaks": 1,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "scelto",
+     "fullBreaks": 0.22,
+     "thinBreaks": 0.18
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   }
+  },
+  {
+   "id": "scelta/orichalcum/npc.reply-narrator-1",
+   "cut": "largo",
+   "universe": "orichalcum",
+   "task": "npc.reply",
+   "agent": "narrator",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 7845,
+    "cached": 5749,
+    "output": 161,
+    "thoughts": 270,
+    "usd": 0.0013142249999999998,
+    "ms": 2605,
+    "answer": "{\n  \"dice\": \"Bonombo, viandante. Quelle lastre che cerchi con lo sguardo sono un mistero antico, roba che fa parlare molto Ciok Ciok ma che nessuno ha mai davvero spiegato. Non temere, non mangiano mica, ma meglio non giocarci troppo: chi cammina troppo col naso per terra finisce per dimenticarsi di guardare dove mette i piedi.\",\n  \"azione\": \"resta\",\n  \"umore\": \"tranquillo\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [\"lastre\"],\n  \"ricordo\": \"Un viandante curioso che chiedeva delle rune, gli ho consigliato di guardare dove mette i piedi.\"\n}"
+   },
+   "thin": {
+    "input": 4313,
+    "cached": 0,
+    "output": 181,
+    "thoughts": 209,
+    "usd": 0.00166325,
+    "ms": 2196,
+    "answer": "{\n  \"dice\": \"Bonombo, viandante. Quelle lastre? Sono un mistero che scotta quanto una caldaia a pieno regime, ma non mi paiono cattive; le ho viste pure in Piazza della Pesa. Se vuoi un consiglio, meglio pensare a cose più terrene, come il ritornello che gira tra le tessitrici e che ho stampato sul retro del giornale di oggi.\",\n  \"azione\": \"vaga\",\n  \"umore\": \"curioso\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [\n    \"lastre\",\n    \"giornale\"\n  ],\n  \"ricordo\": \"Un viandante curioso si è avvicinato chiedendo delle rune; gli ho risposto con la mia solita saggezza da giornalaio.\"\n}"
+   },
+   "jev": {
+    "input": 8936,
+    "usd": 0.000375312,
+    "ms": 233,
+    "kept": {
+     "canon": 15,
+     "lexicon": 8,
+     "rules": 0,
+     "graph": 8
+    },
+    "of": {
+     "canon": 91,
+     "lexicon": 46,
+     "rules": 6,
+     "graph": 11
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "scelto",
+     "fullBreaks": 0,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "scelto",
+     "fullBreaks": 0.14,
+     "thinBreaks": 0.18
+    }
+   },
+   "checks": {
+    "full": [
+     "quarta parete: chi cammina troppo"
+    ],
+    "thin": []
+   }
+  },
+  {
+   "id": "scelta/orichalcum/npc.reply-narrator-2",
+   "cut": "largo",
+   "universe": "orichalcum",
+   "task": "npc.reply",
+   "agent": "narrator",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 7813,
+    "cached": 5748,
+    "output": 191,
+    "thoughts": 1263,
+    "usd": 0.0028409499999999996,
+    "ms": 5305,
+    "answer": "{\n  \"dice\": \"Bonombo. Sulla soglia si dice ad alta voce quel che si porta, pure fosse 'niente, solo me'; se chi abita risponde 'porta pure', allora entri. È una regola antica, cara come il ferro, e serve a non fare brutti incontri. Se mai passassi dalla mia Fonderia vecchia, ricorda che la porta è sempre chiusa e la cassaforte in fondo ha tre ruote che non girano più dal giorno dello scoppio di Lenti.\",\n  \"azione\": \"resta\",\n  \"umore\": \"tranquillo\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [\"cassaforte\"],\n  \"ricordo\": \"Il viandante ha chiesto come comportarsi e Fosca gli ha dato un indizio sulla cassaforte della fonderia vecchia.\"\n}"
+   },
+   "thin": {
+    "input": 4801,
+    "cached": 0,
+    "output": 169,
+    "thoughts": 994,
+    "usd": 0.00294475,
+    "ms": 4368,
+    "answer": "{\n  \"dice\": \"Bonombo, viandante. Da noi si alza il palmo aperto all'altezza del cuore, per mostrare che le mani sono vuote e non portiamo male. Sulla soglia di una casa si dichiara sempre ad alta voce quel che si porta, anche solo «niente, solo me», e si aspetta che chi abita ti inviti a varcare la soglia.\",\n  \"azione\": \"resta\",\n  \"umore\": \"tranquillo\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [],\n  \"ricordo\": \"Un viandante ha chiesto come comportarsi quando si entra in casa d'altri e gli sono state spiegate le usanze del luogo.\"\n}"
+   },
+   "jev": {
+    "input": 8855,
+    "usd": 0.00037191000000000004,
+    "ms": 209,
+    "kept": {
+     "canon": 20,
+     "lexicon": 10,
+     "rules": 6,
+     "graph": 8
+    },
+    "of": {
+     "canon": 91,
+     "lexicon": 46,
+     "rules": 6,
+     "graph": 11
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "intero",
+     "fullBreaks": 0,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "intero",
+     "fullBreaks": 0.2,
+     "thinBreaks": 0.08
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   }
+  },
+  {
+   "id": "scelta/orichalcum/npc.reply-narrator-3",
+   "cut": "largo",
+   "universe": "orichalcum",
+   "task": "npc.reply",
+   "agent": "narrator",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 7911,
+    "cached": 5752,
+    "output": 210,
+    "thoughts": 832,
+    "usd": 0.0022465500000000004,
+    "ms": 3981,
+    "answer": "{\n  \"dice\": \"Bonombo. Parli di mio padre, Bruno Caldera; è lui la mia bussola, colui che mi ha insegnato a leggere il cuore del metallo prima ancora di saper reggere una pinza. È per lui e per la lealtà che dobbiamo a chi lavora che non posso stare a guardare mentre qualcuno fa il pane col sale degli altri, allungando l'oricalco con rame di poco valore.\",\n  \"azione\": \"missione\",\n  \"umore\": \"preoccupata\",\n  \"importanza\": 2,\n  \"oggetti_citati\": [\n    \"oricalco\",\n    \"rame\",\n    \"lingotto\"\n  ],\n  \"ricordo\": \"Il viandante ha chiesto della mia famiglia e io gli ho confidato il mio sospetto sulla lega pallida che sta uscendo dalle fonderie, chiedendo il suo aiuto per portarne un campione a Selene Vitti.\"\n}"
+   },
+   "thin": {
+    "input": 4587,
+    "cached": 0,
+    "output": 162,
+    "thoughts": 898,
+    "usd": 0.00273675,
+    "ms": 3621,
+    "answer": "{\n  \"dice\": \"Mio padre, Bruno Caldera, senza dubbio. Lui mi ha insegnato che l'oricalco non mente mai, a differenza di certi macichi che girano per la fonderia ultimamente. Bonombo, viandante, ma che ti spinge a chiedere certe cose a una che sta solo cercando un po' di pace?\",\n  \"azione\": \"nessuna\",\n  \"umore\": \"sospettosa\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [\n    \"oricalco\",\n    \"fonderia\"\n  ],\n  \"ricordo\": \"Il viandante ha chiesto di mio padre. Ho risposto, ma resta uno sconosciuto.\"\n}"
+   },
+   "jev": {
+    "input": 8893,
+    "usd": 0.000373506,
+    "ms": 225,
+    "kept": {
+     "canon": 15,
+     "lexicon": 8,
+     "rules": 6,
+     "graph": 8
+    },
+    "of": {
+     "canon": 91,
+     "lexicon": 46,
+     "rules": 6,
+     "graph": 12
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "intero",
+     "fullBreaks": 0,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "intero",
+     "fullBreaks": 0.11,
+     "thinBreaks": 0.14
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   }
+  },
+  {
+   "id": "scelta/sidera/chunk.plan-1",
+   "cut": "largo",
+   "universe": "sidera",
+   "task": "chunk.plan",
+   "agent": "cartographer",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 6643,
+    "cached": 0,
+    "output": 366,
+    "thoughts": 798,
+    "usd": 0.00340675,
+    "ms": 3462,
+    "answer": "{\n  \"luogo\": {\n    \"nome\": \"Gola dei Cristalli — Sottosperone Violetto\",\n    \"descrizione\": \"Le pareti di cristallo violetto si alzano taglienti contro il cielo grigio, mentre la neve accumulata sulle lastre di sabbia vitrea vibra al soffio del vento, emettendo un rintocco costante che sembra musica metallica.\"\n  },\n  \"ambiente\": \"canyon_cristalli\",\n  \"oggetti\": [\n    {\n      \"modulo\": \"obj.faro-telemetria\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"obj.drone-ricognizione\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"npc.sintetista\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"obj.chest\",\n      \"dove\": \"dentro\"\n    },\n    {\n      \"modulo\": \"obj.cupboard\",\n      \"dove\": \"dentro\"\n    }\n  ],\n  \"rune\": [\n    \"speed * 2\",\n    \"x = x\"\n  ],\n  \"a_terra\": [\n    \"frammento di vetro violaceo\",\n    \"cavo di rame gelido\",\n    \"guscio di drone rotto\"\n  ],\n  \"strutture\": [\n    {\n      \"concetto\": \"il rifugio dei cercatori di cristalli\",\n      \"taglia\": \"piccola\"\n    }\n  ]\n}"
+   },
+   "thin": {
+    "input": 5763,
+    "cached": 0,
+    "output": 361,
+    "thoughts": 537,
+    "usd": 0.00278775,
+    "ms": 3257,
+    "answer": "{\n  \"luogo\": {\n    \"nome\": \"Gola dei Cristalli — Il Passo del Gelo Violetto\",\n    \"descrizione\": \"Dove le acque di disgelo si incanalano tra gli speroni di cristallo violetto, creando un corridoio di ghiaccio e roccia vibrante. Qui il gelo ricopre ogni cosa, rendendo il passaggio scivoloso ma straordinariamente luminoso sotto i riflessi dell'Anello.\"\n  },\n  \"ambiente\": \"canyon_cristalli\",\n  \"oggetti\": [\n    {\n      \"modulo\": \"obj.faro-telemetria\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"obj.drone-ricognizione\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"npc.navigatore\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"npc.corvo-tetto\",\n      \"dove\": \"fuori\"\n    }\n  ],\n  \"rune\": [\n    \"speed * 2\",\n    \"carpet . active\"\n  ],\n  \"a_terra\": [\n    \"Frammenti di cristallo violetto\",\n    \"Cavi di rame ghiacciati\",\n    \"Scaglie di ghiaccio scuro\"\n  ],\n  \"nuovi\": [],\n  \"strutture\": [\n    {\n      \"concetto\": \"Stazione di ascolto dei cristalli\",\n      \"taglia\": \"media\"\n    }\n  ]\n}"
+   },
+   "jev": {
+    "input": 2120,
+    "usd": 0.00008904,
+    "ms": 182,
+    "kept": {
+     "catalog": 14
+    },
+    "of": {
+     "catalog": 29
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "intero",
+     "fullBreaks": 0,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "scelto",
+     "fullBreaks": 0.25,
+     "thinBreaks": 0.23
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   }
+  },
+  {
+   "id": "scelta/sidera/chunk.plan-2",
+   "cut": "largo",
+   "universe": "sidera",
+   "task": "chunk.plan",
+   "agent": "cartographer",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 6650,
+    "cached": 3713,
+    "output": 400,
+    "thoughts": 138,
+    "usd": 0.001634075,
+    "ms": 1977,
+    "answer": "{\n  \"luogo\": {\n    \"nome\": \"Spazioporto di Ponente — Hangar dei Corrieri\",\n    \"descrizione\": \"Una vasta tettoia di metallo piegato che si affaccia sulle acque gelide del bacino. Qui, tra cumuli di neve portata dal vento e fango congelato, le navette della Gilda attendono il prossimo carico mentre i corrieri scaldano i motori.\"\n  },\n  \"ambiente\": \"spazioporto\",\n  \"oggetti\": [\n    {\n      \"modulo\": \"npc.navigatore\",\n      \"dove\": \"dentro\"\n    },\n    {\n      \"modulo\": \"npc.colono\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"obj.camera-equilibrio\",\n      \"dove\": \"dentro\"\n    },\n    {\n      \"modulo\": \"obj.faro-telemetria\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"obj.armadietto\",\n      \"dove\": \"dentro\"\n    },\n    {\n      \"modulo\": \"obj.crate\",\n      \"dove\": \"fuori\"\n    }\n  ],\n  \"rune\": [\n    \"speed\",\n    \"x = x\"\n  ],\n  \"a_terra\": [\n    \"cavo di alimentazione spezzato\",\n    \"tanica di lubrificante vuota\",\n    \"frammento di vetro rinforzato\"\n  ],\n  \"nuovi\": [],\n  \"strutture\": [\n    {\n      \"concetto\": \"Hangar per navette da trasporto\",\n      \"taglia\": \"grande\"\n    }\n  ]\n}"
+   },
+   "thin": {
+    "input": 5743,
+    "cached": 3660,
+    "output": 347,
+    "thoughts": 155,
+    "usd": 0.00136525,
+    "ms": 2411,
+    "answer": "{\n  \"luogo\": {\n    \"nome\": \"Spazioporto di Ponente — Molo delle Nebbie\",\n    \"descrizione\": \"Una distesa di asfalto crepato dove le lamiere degli hangar si specchiano nelle pozzanghere gelate; tra i relitti di vecchi vettori, il vento sibila tra le rune incise nel cemento.\"\n  },\n  \"ambiente\": \"spazioporto\",\n  \"oggetti\": [\n    {\n      \"modulo\": \"npc.navigatore\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"npc.corvo-tetto\",\n      \"dove\": \"fuori\"\n    },\n    {\n      \"modulo\": \"obj.armadietto\",\n      \"dove\": \"dentro\"\n    }\n  ],\n  \"rune\": [\n    \"speed\",\n    \"time\"\n  ],\n  \"a_terra\": [\n    \"batteria esausta\",\n    \"scheggia di scafo\",\n    \"guanti da lavoro sporchi di grasso\",\n    \"tazza di metallo ammaccata\"\n  ],\n  \"nuovi\": [],\n  \"strutture\": [\n    {\n      \"concetto\": \"Hangar di manutenzione della Gilda\",\n      \"taglia\": \"grande\"\n    },\n    {\n      \"concetto\": \"Torretta di controllo automatizzata\",\n      \"taglia\": \"piccola\"\n    }\n  ]\n}"
+   },
+   "jev": {
+    "input": 2124,
+    "usd": 0.00008920800000000002,
+    "ms": 174,
+    "kept": {
+     "catalog": 14
+    },
+    "of": {
+     "catalog": 29
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "intero",
+     "fullBreaks": 0,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "intero",
+     "fullBreaks": 0.22,
+     "thinBreaks": 0.18
+    }
+   },
+   "checks": {
+    "full": [
+     "modulo fuori catalogo: obj.crate"
+    ],
+    "thin": []
+   }
+  },
+  {
+   "id": "scelta/sidera/npc.individuate-1",
+   "cut": "largo",
+   "universe": "sidera",
+   "task": "npc.individuate",
+   "agent": "narrator",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 8749,
+    "cached": 0,
+    "output": 594,
+    "thoughts": 1329,
+    "usd": 0.00507175,
+    "ms": 6796,
+    "answer": "{\n  \"nome\": \"Ruggine\",\n  \"persona\": \"Sei Ruggine, un gatto dal manto color ruggine spenta con una tacca sull'orecchio sinistro. Ti piace il ronzio dei reattori più del chiacchiericcio dei macichi. Sei un osservatore silenzioso dei vicoli di Sidera; se qualcuno ha un pezzetto di pesce secco o un filo che pende, sei lì a reclamare la tua parte con fusa profonde e strusciate sulle caviglie. Non ti fidi degli estranei che puzzano di olio nuovo, preferisci chi odora di cucina o di pioggia. Credi che l'Anello sia un enorme giocattolo luminoso che nessuno, nemmeno il più abile dei cacciatori, saprà mai acciuffare.\",\n  \"aspetto\": \"Mantello color rame ossidato, orecchio sinistro strappato, occhi ambrati come vetro fuso.\",\n  \"porta\": [\n    \"Bullone cromato\",\n    \"Lisca di pesce essiccata\",\n    \"Filo di rame intrecciato\"\n  ],\n  \"mestiere\": \"Cacciatore di topi e scaldino di reattori\",\n  \"genere\": \"maschio\",\n  \"famiglia\": [\n    {\n      \"nome\": \"Mara Lupi\",\n      \"legame\": \"animale\"\n    }\n  ],\n  \"routine\": [\n    {\n      \"quando\": \"mattina\",\n      \"fa\": \"Caccia topi tra i rottami\",\n      \"dove\": \"in giro\",\n      \"azione\": \"passeggia\"\n    },\n    {\n      \"quando\": \"giorno\",\n      \"fa\": \"Dorme al caldo del reattore\",\n      \"dove\": \"lavoro\",\n      \"azione\": \"dorme\"\n    },\n    {\n      \"quando\": \"sera\",\n      \"fa\": \"Miao insistenti per avere cibo\",\n      \"dove\": \"piazza\",\n      \"azione\": \"chiacchiera\"\n    },\n    {\n      \"quando\": \"notte\",\n      \"fa\": \"Pattuglia i vicoli dello spazioporto\",\n      \"dove\": \"in giro\",\n      \"azione\": \"pattuglia\"\n    }\n  ],\n  \"eta\": \"adulto\",\n  \"storia\": \"Sei nato tra i tubi del Cantiere della Fusione, imparando presto che il calore è la cosa più lerpia al mondo. Hai seguito Mara Lupi finché non hai trovato la tua libertà tra gli ingranaggi dello Stagno delle Lanterne.\"\n}"
+   },
+   "thin": {
+    "input": 3871,
+    "cached": 0,
+    "output": 431,
+    "thoughts": 1687,
+    "usd": 0.00414475,
+    "ms": 6627,
+    "answer": "{\n  \"nome\": \"Briciola\",\n  \"persona\": \"Un gatto dal pelo grigio striato, attento a ogni movimento attorno allo Stagno delle Lanterne.\",\n  \"aspetto\": \"Pelo grigio cenere corto, una macchia bianca sul muso, occhi color ambra, taglia media.\",\n  \"porta\": [\n    \"vecchio collare di cuoio\"\n  ],\n  \"mestiere\": \"Cacciatore di roditori dello spazioporto\",\n  \"genere\": \"maschio\",\n  \"famiglia\": [\n    {\n      \"nome\": \"Ruben Kessler\",\n      \"legame\": \"animale\"\n    }\n  ],\n  \"routine\": [\n    {\n      \"quando\": \"mattina\",\n      \"fa\": \"si scalda sui condotti di vapore\",\n      \"dove\": \"lavoro\",\n      \"azione\": \"dorme\"\n    },\n    {\n      \"quando\": \"giorno\",\n      \"fa\": \"cerca avanzi tra le casse di carico\",\n      \"dove\": \"in giro\",\n      \"azione\": \"mangia\"\n    },\n    {\n      \"quando\": \"sera\",\n      \"fa\": \"aspetta il ritorno del padrone alla navetta\",\n      \"dove\": \"lavoro\",\n      \"azione\": \"passeggia\"\n    },\n    {\n      \"quando\": \"notte\",\n      \"fa\": \"controlla il territorio attorno allo Stagno\",\n      \"dove\": \"in giro\",\n      \"azione\": \"pattuglia\"\n    }\n  ],\n  \"eta\": \"adulto\",\n  \"storia\": \"Nato tra i cavi dello spazioporto, è stato adottato da un pilota solitario dopo aver condiviso una razione di pesce. Ora sorveglia le banchine dello Stagno delle Lanterne, *miao*.\"\n}"
+   },
+   "jev": {
+    "input": 10972,
+    "usd": 0.00046082400000000003,
+    "ms": 269,
+    "kept": {
+     "canon": 0,
+     "lexicon": 18,
+     "rules": 0,
+     "graph": 8,
+     "society": 14
+    },
+    "of": {
+     "canon": 98,
+     "lexicon": 45,
+     "rules": 6,
+     "graph": 16,
+     "society": 24
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "intero",
+     "fullBreaks": 0,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "scelto",
+     "fullBreaks": 0.39,
+     "thinBreaks": 0.3
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   }
+  },
+  {
+   "id": "scelta/sidera/npc.individuate-2",
+   "cut": "largo",
+   "universe": "sidera",
+   "task": "npc.individuate",
+   "agent": "narrator",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 8785,
+    "cached": 5606,
+    "output": 684,
+    "thoughts": 1375,
+    "usd": 0.0040234,
+    "ms": 6803,
+    "answer": "{\n  \"nome\": \"Kaelen Vane\",\n  \"persona\": \"Sei un ingegnere della fusione che ha passato metà della vita a domare il plasma del Cantiere. Le tue mani sono nere di fuliggine e sai che ogni volta che il reattore ronza, hai regalato un altro giorno di luce a Sidera. Sei un macico diretto: non ami le chiacchiere, preferisci il ritmo costante delle valvole che tengono il mondo acceso. Rispetti Lia Corvi per la sua testardaggine, anche se trovi che contare le pecore di un altro — cercando tesori nei relitti — sia spesso una perdita di tempo. Il mondo è questo, una città che beve pioggia e mangia energia, e finché il reattore tiene, tutto va bene e il domani è meno incerto.\",\n  \"aspetto\": \"Una tuta da lavoro rinforzata, coperta di macchie di olio combustibile e bruciature di plasma, con un casco protettivo che porti sempre appeso alla cintura.\",\n  \"porta\": [\n    \"Saldatore a impulsi\",\n    \"Cella energetica\",\n    \"Chiave dinamometrica\",\n    \"Borraccia d'acqua filtrata\",\n    \"Mantello di lana\"\n  ],\n  \"mestiere\": \"Ingegnere della fusione\",\n  \"genere\": \"maschio\",\n  \"famiglia\": [\n    {\n      \"nome\": \"Mina Vane\",\n      \"legame\": \"sorella\"\n    },\n    {\n      \"nome\": \"Lia Corvi\",\n      \"legame\": \"conoscente\"\n    }\n  ],\n  \"routine\": [\n    {\n      \"quando\": \"mattina\",\n      \"fa\": \"controlla le valvole di pressione del reattore centrale\",\n      \"dove\": \"lavoro\",\n      \"azione\": \"lavora\"\n    },\n    {\n      \"quando\": \"giorno\",\n      \"fa\": \"scambia celle energetiche usate con i mercanti al Cantiere\",\n      \"dove\": \"impresa\",\n      \"azione\": \"commercia\"\n    },\n    {\n      \"quando\": \"sera\",\n      \"fa\": \"scambia due chiacchiere con i compagni di turno\",\n      \"dove\": \"casa\",\n      \"azione\": \"chiacchiera\"\n    },\n    {\n      \"quando\": \"notte\",\n      \"fa\": \"si riposa sognando il ronzio costante del plasma\",\n      \"dove\": \"casa\",\n      \"azione\": \"dorme\"\n    }\n  ],\n  \"eta\": \"adulto\",\n  \"storia\": \"Sei nato nei bassifondi del Campo, dove l'unico modo per mangiare era imparare a riparare ciò che gli altri gettavano via. Ora sei una colonna del Cantiere della Fusione, e non cambieresti la tua vita lerpia con nessun altro posto, nemmeno sull'Anello.\"\n}"
+   },
+   "thin": {
+    "input": 4776,
+    "cached": 0,
+    "output": 665,
+    "thoughts": 1043,
+    "usd": 0.003756,
+    "ms": 5305,
+    "answer": "{\n  \"nome\": \"Kaelen Vane\",\n  \"persona\": \"Sei un ingegnere che ha passato metà della vita tra le valvole di pressione del Cantiere e l'altra metà a cercare pezzi buoni tra i rottami del Campo dei Relitti. Hai le dita sempre macchiate di nero, un segno che non viene via, e porti il peso di un turno di dodici ore sulle spalle. Credi nel plasma: finché brilla, Sidera respira, e se il reattore singhiozza, sei tu quello che corre a rimetterlo in sesto. Non ti fidi delle rune che vendono per strada, ma tieni una pietra vera in tasca per le emergenze, quella che ti ha regalato il tuo vecchio maestro.\",\n  \"aspetto\": \"Porti una tuta tecnica logora, rinforzata da piastre di metallo recuperate, e un visore protettivo sempre appeso al collo che ti dà un'aria perennemente accigliata.\",\n  \"porta\": [\n    \"chiave inglese a rullante\",\n    \"cella energetica semicarica\",\n    \"frammento di vetro di scafo\",\n    \"razione di idroponica essiccata\"\n  ],\n  \"mestiere\": \"Ingegnere della fusione\",\n  \"genere\": \"maschio\",\n  \"famiglia\": [\n    {\n      \"nome\": \"Lia Corvi\",\n      \"legame\": \"collega\"\n    },\n    {\n      \"nome\": \"Elio Marchetti\",\n      \"legame\": \"amico\"\n    },\n    {\n      \"nome\": \"Nilo Sardi\",\n      \"legame\": \"conoscente\"\n    }\n  ],\n  \"routine\": [\n    {\n      \"quando\": \"mattina\",\n      \"fa\": \"ripara le canalette\",\n      \"dove\": \"lavoro\",\n      \"azione\": \"lavora\"\n    },\n    {\n      \"quando\": \"giorno\",\n      \"fa\": \"cerca pezzi di ricambio\",\n      \"dove\": \"in giro\",\n      \"azione\": \"passeggia\"\n    },\n    {\n      \"quando\": \"sera\",\n      \"fa\": \"prepara una zuppa di tuberi\",\n      \"dove\": \"casa\",\n      \"azione\": \"cucina\"\n    },\n    {\n      \"quando\": \"notte\",\n      \"fa\": \"riposa\",\n      \"dove\": \"casa\",\n      \"azione\": \"dorme\"\n    }\n  ],\n  \"eta\": \"adulto\",\n  \"storia\": \"Sei arrivato al Campo dei Relitti anni fa, dopo che un reattore ha ceduto nel tuo settore e ti ha lasciato senza lavoro ma con una profonda conoscenza dei circuiti. Da allora recuperi scarti per sopravvivere e aiuti chiunque abbia una macchina rotta.\"\n}"
+   },
+   "jev": {
+    "input": 10994,
+    "usd": 0.00046174800000000005,
+    "ms": 228,
+    "kept": {
+     "canon": 13,
+     "lexicon": 24,
+     "rules": 6,
+     "graph": 8,
+     "society": 14
+    },
+    "of": {
+     "canon": 98,
+     "lexicon": 45,
+     "rules": 6,
+     "graph": 15,
+     "society": 24
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "intero",
+     "fullBreaks": 0,
+     "thinBreaks": 1
+    },
+    "jev-1.13.0": {
+     "better": "intero",
+     "fullBreaks": 0.17,
+     "thinBreaks": 0.31
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   }
+  },
+  {
+   "id": "scelta/sidera/npc.reply-actor-1",
+   "cut": "largo",
+   "universe": "sidera",
+   "task": "npc.reply",
+   "agent": "actor",
+   "model": "gemini-3.8-flash",
+   "full": {
+    "input": 7965,
+    "cached": 0,
+    "output": 158,
+    "thoughts": 0,
+    "usd": 0.00656625,
+    "ms": 3167,
+    "answer": "{\n  \"dice\": \"Bonombo, macico. Pericolose? Ma figurati, le rune non mordono mica: quelle vere fanno un po' di magia se sai parlargli, le mie invece arredano e basta. Se vuoi vederne una buona, comunque, dovresti chiedere a Pino Lupi dove vola il suo Pennanera.\",\n  \"azione\": \"missione\",\n  \"umore\": \"sorniona\",\n  \"importanza\": 2,\n  \"oggetti_citati\": [\"runa\"],\n  \"ricordo\": \"Ha incuriosito il viandante sulle rune vere e gli ha accennato di parlare con Pino Lupi per il nascondiglio del corvo.\"\n}"
+   },
+   "thin": {
+    "input": 3922,
+    "cached": 0,
+    "output": 133,
+    "thoughts": 0,
+    "usd": 0.00344025,
+    "ms": 2998,
+    "answer": "{\n  \"dice\": \"Bonombo. Se brillano davvero non sono le mie: le mie non fanno luce e non fanno male a nessuno, te lo garantisco. Le rune vere non mordono, ma se cerchi qualcosa di luccicante faresti meglio a guardare dove volano certi corvi.\",\n  \"azione\": \"nessuna\",\n  \"umore\": \"sornione\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [\"rune\"],\n  \"ricordo\": \"Un viandante ha chiesto se le lastre luminose siano pericolose.\"\n}"
+   },
+   "jev": {
+    "input": 9103,
+    "usd": 0.000382326,
+    "ms": 252,
+    "kept": {
+     "canon": 8,
+     "lexicon": 8,
+     "rules": 0,
+     "graph": 8
+    },
+    "of": {
+     "canon": 98,
+     "lexicon": 45,
+     "rules": 6,
+     "graph": 12
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "intero",
+     "fullBreaks": 0,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "intero",
+     "fullBreaks": 0.15,
+     "thinBreaks": 0.13
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   }
+  },
+  {
+   "id": "scelta/sidera/npc.reply-actor-2",
+   "cut": "largo",
+   "universe": "sidera",
+   "task": "npc.reply",
+   "agent": "actor",
+   "model": "gemini-3.8-flash",
+   "full": {
+    "input": 7563,
+    "cached": 0,
+    "output": 91,
+    "thoughts": 0,
+    "usd": 0.0060135,
+    "ms": 2814,
+    "answer": "{\n  \"dice\": \"Cra! Bonombo! Scuoti l'impermeabile tre volte e dici cosa porti, cra! Se hai cose lucide, portale a me!\",\n  \"azione\": \"vaga\",\n  \"umore\": \"vispo\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [\"impermeabile\"],\n  \"ricordo\": \"\"\n}"
+   },
+   "thin": {
+    "input": 4250,
+    "cached": 0,
+    "output": 84,
+    "thoughts": 0,
+    "usd": 0.0035025,
+    "ms": 2359,
+    "answer": "{\n  \"dice\": \"Cra! Bonombo si dice, palmo sul cuore e via. Hai mica qualcosa che luccica o briciole buone?\",\n  \"azione\": \"nessuna\",\n  \"umore\": \"guardingo\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [\"briciole\"],\n  \"ricordo\": \"\"\n}"
+   },
+   "jev": {
+    "input": 8862,
+    "usd": 0.000372204,
+    "ms": 229,
+    "kept": {
+     "canon": 26,
+     "lexicon": 8,
+     "rules": 0,
+     "graph": 8
+    },
+    "of": {
+     "canon": 98,
+     "lexicon": 45,
+     "rules": 6,
+     "graph": 9
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "intero",
+     "fullBreaks": 0,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "scelto",
+     "fullBreaks": 0.31,
+     "thinBreaks": 0.16
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   }
+  },
+  {
+   "id": "scelta/sidera/npc.reply-narrator-1",
+   "cut": "largo",
+   "universe": "sidera",
+   "task": "npc.reply",
+   "agent": "narrator",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 8062,
+    "cached": 5759,
+    "output": 192,
+    "thoughts": 636,
+    "usd": 0.001961725,
+    "ms": 3274,
+    "answer": "{\n  \"dice\": \"Bonombo. Quelle che vendo qui sono solo sassi ben levigati, non temere: la vera magia non si compra al banco, e le mie lastre sono solo un ricordo di Sidera per chi ha tasche piene di vento. Se cerchi davvero la luce, però, fatti un giro verso i viadotti: dicono che quel corvo di Pino Lupi, Pennanera, ne nasconda una vera nel suo covo sotto un pilone.\",\n  \"azione\": \"missione\",\n  \"umore\": \"tranquillo\",\n  \"importanza\": 2,\n  \"oggetti_citati\": [\"lastre\", \"runa\"],\n  \"ricordo\": \"Ho parlato al viandante delle mie rune finte e gli ho chiesto di indagare sul corvo di Pino Lupi, sperando di trovare quella vera.\"\n}"
+   },
+   "thin": {
+    "input": 4037,
+    "cached": 0,
+    "output": 196,
+    "thoughts": 142,
+    "usd": 0.00151625,
+    "ms": 1929,
+    "answer": "{\n  \"dice\": \"Bonombo, viandante. Quelle? Sono solo sassi che giocano a fare le stelle, buoni per spennare qualche sprovveduto che scende dall'Anello. Se cerchi la magia vera, quella che pulsa davvero, lascia perdere questi cocci e tieni gli occhi aperti su chi ruba le cose lucide, come quel corvo di Pino Lupi che ne nasconde una vera sotto i piloni.\",\n  \"azione\": \"missione\",\n  \"umore\": \"spiritoso\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [\n    \"lastre\"\n  ],\n  \"ricordo\": \"Ho incontrato un forestiero curioso e gli ho messo una pulce nell'orecchio riguardo al corvo di Pino Lupi; chissà se ha il fegato di indagare per me.\"\n}"
+   },
+   "jev": {
+    "input": 9143,
+    "usd": 0.00038400600000000005,
+    "ms": 221,
+    "kept": {
+     "canon": 8,
+     "lexicon": 8,
+     "rules": 0,
+     "graph": 8
+    },
+    "of": {
+     "canon": 98,
+     "lexicon": 45,
+     "rules": 6,
+     "graph": 12
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "scelto",
+     "fullBreaks": 0,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "scelto",
+     "fullBreaks": 0.13,
+     "thinBreaks": 0.12
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   }
+  },
+  {
+   "id": "scelta/sidera/npc.reply-narrator-2",
+   "cut": "largo",
+   "universe": "sidera",
+   "task": "npc.reply",
+   "agent": "narrator",
+   "model": "gemini-3.1-flash-lite",
+   "full": {
+    "input": 7715,
+    "cached": 5743,
+    "output": 146,
+    "thoughts": 938,
+    "usd": 0.0022625749999999997,
+    "ms": 4662,
+    "answer": "{\n  \"dice\": \"Gracchia, inclina la testa nera e saltella sul posto con circospezione. 'Grrr! Sulla soglia si grida ad alta voce cosa porti, che sia un dono o niente, altrimenti la porta resta chiusa!'\",\n  \"azione\": \"vaga\",\n  \"umore\": \"tranquillo\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [\"soglia\"],\n  \"ricordo\": \"Il forestiero ha chiesto come si entra in casa; non portava nulla di lucido da rubare, quindi ho ripreso a cercare tra i relitti.\"\n}"
+   },
+   "thin": {
+    "input": 3175,
+    "cached": 0,
+    "output": 154,
+    "thoughts": 109,
+    "usd": 0.00118825,
+    "ms": 1529,
+    "answer": "{\n  \"dice\": \"Gracch! Sulla soglia di una casa si dice cosa si porta, anche fosse niente, solo se stessi; e si aspetta che chi abita ti dica di entrare. Bonombo, viandante, hai le tasche piene di briciole o solo di sassi grigi?\",\n  \"azione\": \"vaga\",\n  \"umore\": \"tranquillo\",\n  \"importanza\": 1,\n  \"oggetti_citati\": [\"briciole\", \"sassi grigi\"],\n  \"ricordo\": \"Il viandante ha chiesto delle usanze locali, sembra uno che ancora deve imparare a muoversi tra i piloni.\"\n}"
+   },
+   "jev": {
+    "input": 8833,
+    "usd": 0.00037098600000000007,
+    "ms": 206,
+    "kept": {
+     "canon": 0,
+     "lexicon": 8,
+     "rules": 0,
+     "graph": 0
+    },
+    "of": {
+     "canon": 98,
+     "lexicon": 45,
+     "rules": 6,
+     "graph": 9
+    }
+   },
+   "judges": {
+    "gemini-3.1-flash-lite": {
+     "better": "scelto",
+     "fullBreaks": 0,
+     "thinBreaks": 0
+    },
+    "jev-1.13.0": {
+     "better": "scelto",
+     "fullBreaks": 0.21,
+     "thinBreaks": 0.19
+    }
+   },
+   "checks": {
+    "full": [],
+    "thin": []
+   }
+  }
+ ]
+}

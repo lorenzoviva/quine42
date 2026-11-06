@@ -88,6 +88,7 @@ npm run build:server # il server di produzione: dist-server/server.mjs e il prog
 npm run serve        # lo avvia (dopo build e build:server), legge il .env se c'è; rifiuta di partire senza configurazione
 npx vite-node lab/scripts/mjx-sound.ts -- sound-cellular-fugue  # un programma sonoro: WAV, traccia e rapporto in testo, senza browser né modelli (ADR-0125)
 npx vite-node lab/scripts/jev-banco.ts -- --offline  # il banco di Jev (T313, lab/banco/jev/README.md): le stesse domande tipizzate a Jev di TypeSafe e a Flash-Lite, ogni chiamata in consumi.jsonl, i tetti sul registro intero; senza --offline legge TYPESAFE_KEY e GEMINI_API_KEY dai .env di --env
+npx vite-node lab/scripts/jev-casi-d-uso.ts -- --offline  # i casi d'uso di TypeSafe (T325, lab/banco/jev/casi-d-uso.md): quanto delle richieste del Concilio è contesto (--contesto --conta: countTokens, gratis), le guardie, le battute riusate, il contesto scelto da Jev; senza --offline le prove costano, con i tetti sul loro registro
 npx vite-node lab/scripts/carte-mano.ts  # quanto costano i programmi del seme contro i tetti di una carta fatta a mano (ADR-0161); con -- --tutti anche i modelli fatti a mano del laboratorio
 npm run mancanze -- <universo>  # il rapporto di ciò che il Concilio non è riuscito a fare, per il kernel 1.0.0 (senza nome: tutti gli universi; ADR-0130)
 npm run universi:cloud  # installa in universes/ aurora, orichalcum, neapolis e sidera con le strutture, i modelli e i suoni di Claude Cloud, a costo zero (T273, lab/banco/universi-cloud/INTEGRAZIONE.md)
