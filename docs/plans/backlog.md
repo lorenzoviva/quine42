@@ -4643,25 +4643,43 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Quando è fatto: commit su `task/T306`. Nell'esito il numero di voci per dominio e cosa resta fuori.
 - Esito: `docs/lingua-interna.md` e `src/kernel/internalNames.ts` (54 domini, 847 voci: T307a 192, T307b 244, T308a 266, T308b 145) con il test (niente doppioni, catene, collisioni; copertura del codice e del seme); ADR-0153, `AGENTS.md`, glossario, `docs/lingue.md` §2-§4 allineati a D34; kernel 0.1.12. T307 e T308 spezzati in T307a (0.2), T307b (0.3), T308a (0.4), T308b (0.5), ognuno da solo con la sua migrazione; T310 toglie anche la riparazione dei valori italiani e aggiunge il tipo di legame come id. Fuori: testo del mondo, UI, indirizzi, le 83 regex (T310), contenuti del Concilio salvati, esiti del Lua di `sys.lavoro` (T307b). Il conteggio dei file per passo è un tetto, non la cifra esatta. Suite intera e typecheck verdi.
 
-### T307 · L'inglese come lingua interna: i valori dei domini e le rune in latino, con la migrazione — `da fare` (dipende da T306)
-- Pipeline: claude · sforzo extra · stima 8% · approvato · priorità 3
+### T307a · L'inglese come lingua interna: i valori della simulazione e le rune in latino (contratto 0.2) — `da fare` (dipende da T306)
+- Pipeline: claude · sforzo extra · stima 4% · approvato · priorità 2
 - Step: 42
-- Contesto: il primo passo di codice di T306 (`dossier T306`, `docs/lingua-interna.md`). Tocca kernel, validatore, seme, modelli offline, test: **va lanciato da solo**, senza altri task su `src/` o `universe/` in corso, perché si scontra con tutti.
-- Cosa fare: i valori dei domini della tabella (classi, taglie, effetti, momenti, «dove», attività, specie, usi dei suoni, azioni e layout del seme, terreni come id con l'etichetta italiana, i token delle rune magiche in latino nel canone, in `magic.runes`, in `magic.ts`) nel codice, nel seme `universe/`, nei programmi `models/`, in `MockAiModels` e nei test. La migrazione `0.1 → 0.2` registrata nell'impalcatura di T302: un universo salvato si apre tradotto, deterministico, con un test su `valmora` o sugli universi del 20/10 (come T183/T205) e sui quattro di `lab/banco/universi-cloud/` (`npm run universi:cloud` installa la versione migrata). Kernel `0.2.0` (ADR-0136). Le regex che leggono testo generato restano com'erano (le tocca T310). Il validatore, per una versione, accetta anche il valore italiano e lo riporta all'inglese (riparazione, come `repairGameSetup`), così un Concilio con i prompt di oggi non si rompe.
+- Contesto: il primo dei quattro passi di codice in cui T306 ha spezzato T307 e T308 (`dossier T306`, `docs/lingua-interna.md`, sezione del piano, punto 1; ADR-0153). **Va lanciato da solo**: nessun altro task su `src/`, `universe/`, `tests/` in corso, perché si scontra con tutti.
+- Cosa fare: i domini della tabella marcati T307a (0.2) in `src/kernel/internalNames.ts`: classi, animazioni, taglie, effetti e i loro campi, categorie, forme, terreni (id con l'etichetta italiana), ambienti, timbri, azioni, **rune in latino** (canone, `magic.runes`, `magic.ts`), elementi, pannelli, passi del banco; nel codice, nel seme `universe/`, nei programmi `models/`, in `MockAiModels` e nei test. Contratto `0.2.0` (ADR-0136), migrazione `0.1 → 0.2` in `MIGRATIONS` con la riscrittura del Lua (la scrive questo task, gli altri la estendono); un universo salvato si apre tradotto, deterministico, con un test su `valmora` o sugli universi del 20/10 e sui quattro di `lab/banco/universi-cloud/` (`npm run universi:cloud` installa la versione migrata). Il validatore per una versione accetta il valore italiano e lo riporta all'inglese (riparazione, come `repairGameSetup`). Le regex che leggono testo generato restano (T310).
 - Test: unitari della migrazione, suite intera e typecheck con i loro turni; 400 tick offline sul seme senza fault.
 - Browser: `?skip&offline`, un universo salvato prima si apre migrato senza guasti; una runa latina pronunciata funziona.
-- Quando è fatto: commit su `task/T307`. Sicurezza: nessuna superficie nuova, o le voci.
+- Quando è fatto: commit su `task/T307a`. Sicurezza: nessuna superficie nuova, o le voci.
 
-### T308 · L'inglese come lingua interna: i nomi di campo su disco e sul filo — `da fare` (dipende da T307)
-- Pipeline: claude · sforzo extra · stima 6% · approvato · priorità 3
+### T307b · L'inglese come lingua interna: i valori della società e del Concilio (contratto 0.3) — `da fare` (dipende da T307a)
+- Pipeline: claude · sforzo extra · stima 4% · approvato · priorità 3
 - Step: 42
-- Contesto: il secondo passo di codice di T306 (`dossier T306`, `dossier T307`). ADR-0117: ciò che è su disco, sul filo o visibile a Lua si rinomina solo con una migrazione: è questa. **Va lanciato da solo**, come T307.
-- Cosa fare: i 212 nomi di campo della tabella e i percorsi dell'universo (`world/giocatori/` ecc.) in inglese; `paths.ts` (`allowedPath`, `councilMayWrite`), `files.ts` (`playerFiles`, `publicFiles`, regola 8f), il protocollo, i nomi visibili a Lua che la tabella cambia (`Host`, `prelude.lua`, `LUA_API`, prompt dell'Ingegnere, `AGENTS.md`), il sito e il server che li leggono. La migrazione nella stessa voce di T307 (stesso contratto `0.2`, `Z` sale) o in una nuova, come decide T306. Ciò che resta in fila in `localStorage` (T265) si legge anche col nome vecchio.
-- Test: migrazione di un universo salvato (anche nato in multigiocatore, se c'è una fixture), la suite di sicurezza (`files.ts`, `paths.ts`), suite intera e typecheck con i loro turni.
-- Browser: singola e due schede in multigiocatore (`?viandante=`), un universo salvato prima si apre e si salva coi nomi nuovi.
-- Quando è fatto: commit su `task/T308`. Sicurezza: le voci o «nessuna superficie nuova» (tocca `server/`, `src/session/`, la sandbox).
+- Contesto: il secondo passo di T306 (`dossier T306`, `dossier T307a`, `docs/lingua-interna.md`, punto 2). **Va lanciato da solo**, come T307a.
+- Cosa fare: i domini marcati T307b (0.3): momenti, «dove», attività, specie, legami, mestieri e moduli del seme, comportamenti, imprese, trame, suoni, parti, agenti (e i file dei loro prompt, `prompts/agents/<agente>.md`), classi dello Scultore, coefficienti, carte e grafo, modalità, valori del solo TypeScript; i moduli `lavoro.*` → `job.*`, `sys.lavoro` → `sys.work` (anche gli esiti del suo Lua), i modelli `corona-gerboa-<agente>` e `suono-*` del seme. Contratto `0.3.0`, migrazione `0.2 → 0.3` che estende quella di T307a; stessa riparazione nel validatore e stesse prove sugli universi salvati.
+- Test: unitari della migrazione, suite intera e typecheck con i loro turni; 400 tick offline sul seme senza fault.
+- Browser: `?skip&offline`, un universo salvato prima si apre migrato; gli individui fanno le loro routine e i mestieri; nello studio i gerboa delle squadre ci sono.
+- Quando è fatto: commit su `task/T307b`. Sicurezza: nessuna superficie nuova, o le voci.
 
-### T309 · L'inglese come lingua interna: i commenti di Lua e degli XML — `da fare` (dipende da T308)
+### T308a · L'inglese come lingua interna: i campi e i percorsi dei file dell'universo (contratto 0.4) — `da fare` (dipende da T307b)
+- Pipeline: claude · sforzo extra · stima 3% · approvato · priorità 3
+- Step: 42
+- Contesto: il terzo passo di T306 (`dossier T306`, `docs/lingua-interna.md`, punto 3). ADR-0117: ciò che è su disco si rinomina solo con una migrazione: è questa. **Va lanciato da solo**, come T307a.
+- Cosa fare: i nomi di campo di ogni file dell'universo e i percorsi (`world/giocatori/` → `world/players/`…) della tabella (T308a, 0.4); `paths.ts` (`allowedPath`, `councilMayWrite`), `files.ts` (`playerFiles`, `publicFiles`, `UNIVERSE_FIELDS`, regola 8f), le letture di sito e server; le cartelle del server fuori dagli universi (`.saldi` → `.balances`…) con la lettura del nome vecchio finché c'è; `quine:fila:` in `localStorage` (T265) letta anche col nome vecchio. Contratto `0.4.0`, migrazione `0.3 → 0.4`; `AGENTS.md` e `docs/architettura-dettagli.md` coi nomi nuovi.
+- Test: migrazione di un universo salvato (anche nato in multigiocatore, se c'è una fixture), la suite di sicurezza (`files.ts`, `paths.ts`), suite intera e typecheck con i loro turni.
+- Browser: singola, un universo salvato prima si apre e si salva coi nomi nuovi.
+- Quando è fatto: commit su `task/T308a`. Sicurezza: le voci o «nessuna superficie nuova» (tocca `server/`, `src/session/`).
+
+### T308b · L'inglese come lingua interna: il filo e Lua (contratto 0.5) — `da fare` (dipende da T308a)
+- Pipeline: claude · sforzo extra · stima 3% · approvato · priorità 3
+- Step: 42
+- Contesto: il quarto passo di T306 (`dossier T306`, `docs/lingua-interna.md`, punto 4). **Va lanciato da solo**, come T307a.
+- Cosa fare: i messaggi del protocollo e i loro campi (client e server insieme), i componenti e i loro campi, l'API Lua (`Host`, `prelude.lua`, `LUA_API`, prompt dell'Ingegnere, `AGENTS.md`), gli eventi del bus, come dice la tabella (T308b, 0.5). Contratto `0.5.0`, migrazione `0.4 → 0.5` (il Lua salvato riscritto con la funzione di T307a).
+- Test: protocollo, sandbox e la suite di sicurezza, suite intera e typecheck con i loro turni.
+- Browser: singola e due schede in multigiocatore (`?viandante=`), un universo salvato prima si apre e gira.
+- Quando è fatto: commit su `task/T308b`. Sicurezza: le voci o «nessuna superficie nuova» (tocca `src/session/`, la sandbox).
+
+### T309 · L'inglese come lingua interna: i commenti di Lua e degli XML — `da fare` (dipende da T308b)
 - Pipeline: claude · sforzo high · stima 4% · approvato · priorità 4
 - Step: 42
 - Contesto: T306 (`dossier T306`). ≈ 27.000 parole di commenti in `universe/modules/*/logic.lua` e `universe/models/*.xml`, più i programmi ufficiali di `lab/`. Oggi la convenzione li vuole italiani; l'ADR di T306 la cambia.
