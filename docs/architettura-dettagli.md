@@ -258,7 +258,16 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   all'individuo il componente `mestiere` (i compiti della fase, casa, piazza e lavoro da `placeFor` e `findTile`) e non gli sceglie più
   la meta; `sys.lavoro` (seme, ordine 28) esegue i compiti uno dopo l'altro con lo stato in `lavoro` e ciò che porta in `carico`, e
   cammina mettendo `meta` al prossimo punto di `world.path` (A* sulle caselle dei luoghi caricati, `route.ts`, con la cache), che
-  `sys.wander` segue. `trasforma` e `raccogli` cambiano davvero le caselle (`world.set_tile`, quindi `plan.edits`), senza chiamare i
+  `sys.wander` segue. **La via va dove va il passo** (T299, ADR-0154): una casella è libera se lo è un corpo al suo centro, e un passo
+  fra due caselle libere vale solo se il corpo ci cammina davvero (`stepFree`: senza modelli sulle caselle basta il terreno, altrimenti
+  `free` ogni decimo di casella con i piedi sul pavimento, come `stepWanderer`), così un muro sottile sul bordo o il gradino di un modello
+  più alto di un passo (una platea, un mobile) non si attraversano; il raggio è di chi chiede (`world.path(x, y, tx, ty, r)`, se no
+  quello di un abitante, `ROUTE_BODY`); il punto dato è il più lontano dei due prossimi che si raggiunge dritti da dove si è, ad almeno
+  `ROUTE_AHEAD`; una meta che nessuna via raggiunge (il centro di una bottega, un banco nel muro) si raggiunge il più vicino possibile,
+  entro `ROUTE_NEAR`; chi è già su una via verso la stessa meta ne prende il resto, e i passi provati restano quanto le vie (la cache
+  si svuota quando un luogo si carica o si scarica, quando cambia una casella e quando il primo passo di una via non è più libero).
+  Senza via `sys.lavoro` fa fallire il compito subito (`fallito:nessuna via`) e passa al prossimo: nessuno resta a spingere contro un
+  dislivello. `trasforma` e `raccogli` cambiano davvero le caselle (`world.set_tile`, quindi `plan.edits`), senza chiamare i
   modelli; al più 12 al lavoro per luogo, chi segue il viandante smette. **Ciò che matura** è del kernel: un terreno con
   `matura {dopo, in}` diventa `in` dopo `dopo` giorni da quando la casella è stata scritta (`plan.giorni`, il giorno di ogni modifica;
   una modifica senza giorno vale da oggi), a ogni fase del giorno nei luoghi caricati (`matureTick`). Il seme ha il contadino (ara

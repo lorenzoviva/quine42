@@ -33,12 +33,25 @@ local function fermo(id, p, d)
   return d < VICINO_FERMO and da >= FERMO
 end
 
+-- How far a way is looked for (world.path looks no farther): beyond, one walks straight.
+local MAX_WAY = 60
+
 -- Un passo verso (tx, ty): la meta di sys.wander è il prossimo punto della via. Vero se è arrivato.
+-- T299: the way is for a body as large as this one; with no way (nor one near the goal) nobody pushes at the wall: the task fails at
+-- once, and the day goes on with the next one.
 local function cammina(id, p, tx, ty, solido)
   local dx, dy = tx - p.x, ty - p.y
   local d = math.sqrt(dx * dx + dy * dy)
   if d < (solido and VICINO_SOLIDO or ARRIVATO) or fermo(id, p, d) then return true end
-  local q = world.path(p.x, p.y, tx, ty) or { x = tx, y = ty }
+  local b = ecs.get(id, "body")
+  local q = world.path(p.x, p.y, tx, ty, b and b.r)
+  if not q then
+    if d <= MAX_WAY then
+      local s = ecs.get(id, "lavoro")
+      if s then s.no_way = true end
+    end
+    q = { x = tx, y = ty }
+  end
   ecs.set(id, "meta", { x = q.x, y = q.y })
   ecs.set(id, "attivita", { tipo = "passeggia", ferma = false })
   return false
@@ -340,6 +353,7 @@ function M.update(dt)
     end
     local f = B[compito.fa]
     local esito = f and f(id, compito, s, m, p, dt) or "fallito:comportamento sconosciuto"
+    if esito == "continua" and s.no_way then esito = "fallito:nessuna via" end
     if esito == "continua" and s.bloccato then esito = "fallito:non ci arriva" end
     if esito ~= "continua" then
       -- Il compito dopo comincia da capo: dello stato resta solo dove si è arrivati nella giornata, e l'ultimo motivo.

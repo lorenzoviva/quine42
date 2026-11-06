@@ -20,8 +20,8 @@ export interface Host {
   held(action: string, id?: number): boolean;
   /** Every wanderer in this kernel: their body, who they are, where they are in the world (T263, ADR-0139). */
   wanderers(): unknown;
-  /** The next point of the way from (x, y) to (tx, ty) on the tiles of the places loaded (T245b, ADR-0140), or undefined. */
-  path(x: number, y: number, tx: number, ty: number): { x: number; y: number } | undefined;
+  /** The next point of the way from (x, y) to (tx, ty) on the tiles of the places loaded (T245b, ADR-0140), for a body of half-size r (T299), or undefined. */
+  path(x: number, y: number, tx: number, ty: number, r?: number): { x: number; y: number } | undefined;
   /** An individual uses a thing as the wanderer does with «Usa» (T245c, ADR-0141): its `on_act`, with the individual as user. The text, or undefined. */
   act(user: number, target: number, action?: string): string | undefined;
   /** The next step of the venture an individual works at (T245d, ADR-0147): `{fa, x, y, …}`, or undefined. */

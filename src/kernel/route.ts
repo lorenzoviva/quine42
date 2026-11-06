@@ -1,6 +1,8 @@
 // The way between two tiles (T245b, ADR-0140; primitive N of T183): A* on the tiles of the places loaded, in eight directions without
 // cutting corners, with a cap on the tiles looked at. The kernel asks it for `world.path` and keeps what it found for a while, so a
-// walker asks once per way and not at every tick. Pure: the passable test comes from whoever calls.
+// walker asks once per way and not at every tick. Pure: the passable test comes from whoever calls, and so does the test of a step
+// (T299): two free tiles are not enough when what stops a body stands between their middles (a thin wall on the edge, a rise of
+// a model higher than a step), so a step is taken only where the body really passes.
 
 export type Cell = readonly [number, number];
 
@@ -53,11 +55,16 @@ class Heap {
   }
 }
 
+/** Whether a body goes from the middle of one tile to the middle of the next (both passable already). */
+export type StepTest = (col: number, row: number, toCol: number, toRow: number) => boolean;
+
 /**
  * The tiles from `from` to `to`, both included, or undefined when there is no way within `ROUTE_NODES`. A goal that is not passable
- * (water to fish in, a tree to cut) is reached at a passable tile next to it.
+ * (water to fish in, a tree to cut) is reached at a passable tile next to it. With `step`, a move between two passable tiles is
+ * taken only if it says so. With `near`, a goal no way reaches (the middle of a building, a bench in a wall) is reached as near as
+ * one gets, if that is within `near` tiles of it: the way to the tile looked at nearest to it (T299).
  */
-export function findRoute(from: Cell, to: Cell, passable: (col: number, row: number) => boolean, maxNodes = ROUTE_NODES): Cell[] | undefined {
+export function findRoute(from: Cell, to: Cell, passable: (col: number, row: number) => boolean, step?: StepTest, near = 0, maxNodes = ROUTE_NODES): Cell[] | undefined {
   const [gc, gr] = to;
   const goalOk = passable(gc, gr);
   const isGoal = (c: number, r: number) => (goalOk ? c === gc && r === gr : Math.max(Math.abs(c - gc), Math.abs(r - gr)) === 1);
@@ -73,16 +80,21 @@ export function findRoute(from: Cell, to: Cell, passable: (col: number, row: num
   const cells = new Map<string, Cell>([[start, from]]);
   const open = new Heap();
   open.push(start, h(from[0], from[1]));
+  const wayTo = (k: string): Cell[] => {
+    const path: Cell[] = [];
+    for (let at: string | undefined = k; at; at = came.get(at)) path.unshift(cells.get(at)!);
+    return path;
+  };
   let seen = 0;
+  let best = start;
+  let bestH = h(from[0], from[1]);
   while (open.size && seen < maxNodes) {
     const k = open.pop();
     const [c, r] = cells.get(k)!;
     seen++;
-    if (isGoal(c, r)) {
-      const path: Cell[] = [];
-      for (let at: string | undefined = k; at; at = came.get(at)) path.unshift(cells.get(at)!);
-      return path;
-    }
+    if (isGoal(c, r)) return wayTo(k);
+    const hk = h(c, r);
+    if (hk < bestH) (best = k), (bestH = hk);
     const base = g.get(k)!;
     for (const [dc, dr, w] of DIRS) {
       const nc = c + dc;
@@ -90,6 +102,7 @@ export function findRoute(from: Cell, to: Cell, passable: (col: number, row: num
       if (!passable(nc, nr)) continue;
       // No corner cut: both sides of a diagonal step are free.
       if (dc && dr && (!passable(c + dc, r) || !passable(c, r + dr))) continue;
+      if (step && !step(c, r, nc, nr)) continue;
       const nk = key(nc, nr);
       const cost = base + w;
       if (cost >= (g.get(nk) ?? Infinity)) continue;
@@ -99,28 +112,63 @@ export function findRoute(from: Cell, to: Cell, passable: (col: number, row: num
       open.push(nk, cost + h(nc, nr));
     }
   }
-  return undefined;
+  return bestH <= near ? wayTo(best) : undefined;
 }
 
-/** The ways found, for a while: by start and goal tile, forgotten after `ttl` ticks or when the tiles change (`clear`). */
+/**
+ * The ways found, for a while: by start and goal tile, forgotten after `ttl` ticks or when the tiles change (`clear`). A walker already
+ * on a way it was given to the same goal goes on with the rest of it, with no search (T299: a search for each tile walked costs); the
+ * steps tried are kept as long, since the next search near there tries them again.
+ */
 export class RouteCache {
   private ways = new Map<string, { cells: Cell[] | undefined; at: number }>();
+  /** The ways found to each goal (and body), the newest last: where a walker may already be. */
+  private toGoal = new Map<string, Array<{ cells: Cell[]; at: number }>>();
+  private steps = new Map<string, boolean>();
+  private stepsAt = 0;
   constructor(
     private ttl = 600,
     private max = 512,
   ) {}
 
-  get(from: Cell, to: Cell, now: number, find: () => Cell[] | undefined): Cell[] | undefined {
-    const k = `${from[0]},${from[1]}>${to[0]},${to[1]}`;
+  /** `body` tells apart the ways of bodies of different sizes. */
+  get(from: Cell, to: Cell, now: number, find: () => Cell[] | undefined, body = ''): Cell[] | undefined {
+    const goal = `${to[0]},${to[1]}${body && `@${body}`}`;
+    const k = `${from[0]},${from[1]}>${goal}`;
     const hit = this.ways.get(k);
     if (hit && now - hit.at <= this.ttl) return hit.cells;
-    const cells = find();
+    const known = (this.toGoal.get(goal) ?? []).filter((w) => now - w.at <= this.ttl);
+    let cells: Cell[] | undefined;
+    for (let j = known.length - 1; j >= 0 && !cells; j--) {
+      const i = known[j].cells.findIndex(([c, r]) => c === from[0] && r === from[1]);
+      if (i >= 0) cells = known[j].cells.slice(i);
+    }
+    const found = !cells;
+    cells ??= find();
     if (this.ways.size >= this.max) this.ways.delete(this.ways.keys().next().value!);
     this.ways.set(k, { cells, at: now });
+    if (found && cells) {
+      known.push({ cells, at: now });
+      if (known.length > 8) known.shift();
+      this.toGoal.delete(goal);
+      if (this.toGoal.size >= this.max) this.toGoal.delete(this.toGoal.keys().next().value!);
+      this.toGoal.set(goal, known);
+    }
     return cells;
+  }
+
+  /** Whether a body steps from one tile to the next, as `test` says, kept as long as the ways. */
+  step(c: number, r: number, nc: number, nr: number, body: string, now: number, test: () => boolean): boolean {
+    if (now - this.stepsAt > this.ttl || this.steps.size > 200_000) this.steps.clear(), (this.stepsAt = now);
+    const k = `${c},${r}>${nc},${nr}@${body}`;
+    let ok = this.steps.get(k);
+    if (ok === undefined) this.steps.set(k, (ok = test()));
+    return ok;
   }
 
   clear(): void {
     this.ways.clear();
+    this.toGoal.clear();
+    this.steps.clear();
   }
 }
