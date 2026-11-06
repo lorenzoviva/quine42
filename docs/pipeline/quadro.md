@@ -3,10 +3,12 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 06/11/2026, epoca 314 (claude). Crediti: vedi `stato`.
+Aggiornato il 06/11/2026, epoca 315 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
+- **NPC coeso (autore, 06/11 sera):** basso accoppiamento, alta coesione dell'oggetto NPC. T326 (gemini, solo doc: mappa e confine, sezione 10 di `comportamento-npc.md`) → T327 (claude extra, rifacimento dietro una facciata, dopo T308b) → T245g-i dentro il confine.
+- **Gemini (autore, 06/11 sera):** consumare Gemini finché orchestro, con task del progetto non troppo difficili, spezzando se serve; niente task inventati. Su gemini: T322, T323, T326.
 - **T319 e T156 integrati** (`7d9ee13`, kernel 0.4.1, ADR-0160): prompt procedurale dello Scultore sul contratto 0.4. Resta la cartella `worktrees/t156` (bloccata, branch tolto). `lab/banco/prompt.md` ancora con `suolo`.
 - **T308a integrato** (`130810f`, contratto 0.4.0, ADR-0159 migrazione 0.3→0.4): campi e percorsi file universo in inglese, `server/folders.ts`.
 - **T307b integrato via T318** (contratto 0.3.0, ADR-0158 migrazione 0.2→0.3; T313 ADR-0157 Jev).
@@ -37,7 +39,7 @@ Aggiornato il 06/11/2026, epoca 314 (claude). Crediti: vedi `stato`.
 
 0. **Decisioni autore 04/11:** D32 SemVer `X.Y.Z`. Step 32: T260, T262 → T245a → T263/T245b → T245c-f. T265 prima della beta.
 1. **In corso:** T308b (contratto 0.5 filo e Lua). **Pronti:** T320 (controllo due piani, p3) → T321 (prompt Scultore Gemini, p4); T315, T281, T288, T293.
-   **Jev (autore 06/11 sera, approvati, solo `lab/`):** T322 conti con la dashboard (p2), T323 italiano (p2), T325 casi d'uso e spesa del contesto (p2, max), T324 immagini (p3). D45 resta aperta, T325 la informa.
+   **Jev (autore 06/11 sera, approvati, solo `lab/`):** T322 conti (gemini, p2), T323 italiano (gemini, p2), T325 casi d'uso e spesa del contesto (p2, max), T324 immagini (p3). D45 resta aperta, T325 la informa.
 2. **Crediti (17:12 UTC):** Claude 5h 97 % libero (reset 22:00 UTC), settimana 66 % (reset 12/11); Gemini 5h 100 %, settimana 95 %; agy 100 %; Argon fermo fino all'11/11.
 
 ## Attese dall'autore
@@ -52,5 +54,5 @@ Aggiornato il 06/11/2026, epoca 314 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **315 (claude):** T326/T327 (NPC coeso); T322, T323 spostati su gemini.
 - **314 (claude):** T319 e T156 integrati (kernel 0.4.1); T308b in corso.
-- **312 (gemini):** T308a integrato nel base (contratto 0.4.0).
