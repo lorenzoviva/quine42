@@ -90,6 +90,10 @@ Il contrario dei modelli di `finale/` e `conferma/`: `pattern.md` dice con quali
 
 `prompt.md` contiene lo scheletro `riferimento/cantiere.xml` e chiede di partire da lì. Con `--varianza` un tentativo passa solo se regge a ogni seme e taglia **e** varia (`prova`, `passa` di `misure.json`): i difetti dicono taglia e seme, e `--seconda --traccia --varianza` li riporta con la traccia della prima coppia che cade (`caduta`). Giri in `diario.md`, fogli e modelli in `procedurale/`.
 
+## Su Gemini (T156)
+
+`--provider agy [--modello gemini-3.8-flash-high]` fa la stessa prova su Gemini con `agy -p` (`agy.ts`): da una cartella vuota, nella sua sandbox, prompt e bersaglio in un messaggio solo (agy non ha un prompt di sistema da sostituire; oltre 30 000 caratteri il messaggio va in un file della cartella). Antigravity non esclude i suoi strumenti: per questo non serve mai la coda (ADR-0106), e qui va bene solo perché il prompt è quello fidato del banco. I token sono quelli che agy scrive alla fine: il suo prompt di sistema ne conta circa 10 800 a ogni chiamata, il ragionamento è nell'output (Gemini lo fattura così), i dollari sono a listino (`prices.ts`). Il giro è in `gemini/`, con `gemini/giudizio.md`; il gioco con le stesse idee, `gemini/browser/`. I primi edifici veri che reggono e variano (`gemini/futuristica/1`, `gemini/rocca/1/seconda`) passano la soglia di varianza proposta qui sotto e nel foglio sono edifici diversi dello stesso genere: la proposta resta com'è.
+
 ## Varianza e scala (T180)
 
 Il banco qui sopra prova un seme in una scatola: premia i modelli statici. `varianza.ts` prova lo stesso programma con **almeno 5 semi** in **almeno 2 taglie** (`prova`; se nessuno le dice, `taglieDiProva`: quella del bersaglio e la successiva). Niente modelli, solo il motore. Il giudizio è in due parti, separate:

@@ -2,6 +2,7 @@
 // the game's engine runs it; four photos, a cut per storey, a plan, the measures and the defects, all in one folder per attempt.
 //
 //   npx vite-node lab/scripts/banco-strutture.ts -- --bersagli moderna,steampunk|tutti [--giro v1] [--prompt lab/banco/prompt.md] [--modello sonnet] [--tentativi 1]
+//   npx vite-node lab/scripts/banco-strutture.ts -- --bersagli tutti --provider agy [--modello gemini-4-argon-high]   (T156: su Gemini, il prompt fidato del banco)
 //   npx vite-node lab/scripts/banco-strutture.ts -- --xml modello.xml --bersagli moderna [--giro prove]
 //   npx vite-node lab/scripts/banco-strutture.ts -- --xml modello.xml --bersagli rocca --varianza   (T180: anche varianza.json e semi.png; da sola, lab/scripts/banco-varianza.ts)
 //   npx vite-node lab/scripts/banco-strutture.ts -- --seconda --giro conferma --dir lab/banco [--bersagli …] [--insieme 3] [--traccia] [--tetto 4000]   (T173; la traccia, T179)
@@ -16,6 +17,7 @@ import { extractXml } from '../../src/kernel/agents/sculptor';
 import type { Picture } from '../../src/mj/photo';
 import { DEFAULT_CEILING, traceText } from '../../src/mj/trace';
 import { BERSAGLI, bersaglio, testoBersaglio } from '../banco/bersagli';
+import { chiediAgy } from '../banco/agy';
 import { chiedi, LimiteAbbonamento, type Risposta } from '../banco/claude';
 import { fotoLati, fotoPianta, fotoSezioni } from '../banco/foto';
 import { esegui, giudica, misura, type Bersaglio, type Giudizio, type Misure } from '../banco/misure';
@@ -30,6 +32,10 @@ const giro = opt('giro') ?? 'prove';
 const promptFile = path.resolve(opt('prompt') ?? 'lab/banco/prompt.md');
 const fileXml = opt('xml');
 const modello = opt('modello');
+/** `agy`: the same trial on Gemini (T156), `--modello gemini-3.8-flash-high` if not said. */
+const provider = opt('provider') ?? 'claude';
+if (provider !== 'claude' && provider !== 'agy') throw new Error('--provider claude|agy');
+const domanda = provider === 'agy' ? chiediAgy : chiedi;
 const quanti = Number(opt('tentativi') ?? 1);
 const seconda = args.includes('--seconda');
 /** The second request also says what the program did (T179). */
@@ -181,9 +187,9 @@ else {
       const dir = crea();
       if (!seconda) fs.writeFileSync(path.join(dir, 'prompt.md'), `${system}\n`);
       fs.writeFileSync(path.join(dir, file), `${testo}\n`);
-      console.log(`${b.id}: chiedo a claude…`);
+      console.log(`${b.id}: chiedo a ${provider}…`);
       try {
-        const r = await chiedi(system, testo, { ...(modello ? { modello } : {}) });
+        const r = await domanda(system, testo, { ...(modello ? { modello } : {}) });
         fs.writeFileSync(path.join(dir, 'risposta.txt'), r.testo);
         const riga = valuta(extractXml(r.testo), b, dir, r);
         righe.push(riga);

@@ -1,0 +1,204 @@
+Edificio: Tempio a gradoni
+Stile: antico: pietra chiara, oro, colonne
+Com'è: Piramide a terrazze con una scalinata larga sul davanti, colonne lungo il primo livello, un vestibolo, una sala delle offerte e due celle laterali, una cella più in alto raggiunta da una scala interna, statue e bracieri accesi.
+Scatola: 100 × 100 × 80 voxel; una casella è 20 voxel.
+Corpo: gradino 4 voxel, passaggio largo almeno 11, persona alta 30; salto: sale al più 21, va da 20 a 52 voxel di distanza.
+Il suolo è in fondo alla scatola.
+
+Hai già scritto questo programma:
+```xml
+<sequence values="BNExzaPpQbOHtsgcdvefwXiIJhjMSFCWRVDLUuTYGKAknryqlm" symmetry="(xy)" suolo="E" origin="bottom">
+  <union symbol="1" values="bef"/>
+  <union symbol="2" values="tsdcfv"/>
+  <union symbol="3" values="tb"/>
+  <color symbol="k" value="4a3525" name="portale bronzo"/><color symbol="S" value="ded7c8" name="calcare chiaro"/><color symbol="F" value="8a5229" name="cedro"/><color symbol="C" value="c2b59b" name="arenaria"/><color symbol="W" value="f2ede4" name="marmo bianco"/><color symbol="R" value="9e9587" name="pietra lastricata"/><color symbol="V" value="2c5a75" alpha="0.5" name="lapislazzuli"/><color symbol="D" value="383531" name="basalto scuro"/><color symbol="L" value="734822" name="legno scuro"/><color symbol="T" value="d6cfbe" name="gradino"/><color symbol="K" value="5a554e" name="pietra grigia"/><color symbol="A" value="78726a" name="lastricato"/><color symbol="G" value="e5b83b" name="oro"/><color symbol="r" value="ff7a18" glow="True" name="fuoco"/>
+  <!-- 1. reticolo -->
+  <prl in="***/*E*/***" out="***/*z*/***"/>
+  <all in="Nz" out="*a" steps="1"/>
+  <all in="[Nx]az" out="*xa" steps="14"/>
+  <prl in="a" out="Q"/>
+  <all in="xQz" out="*Qa" steps="1"/>
+  <all in="[Qx]az" out="*xa" steps="29"/>
+  <prl in="a" out="Q"/>
+  <all in="z/Q/z" out="a/Q/a" symmetry="()"/>
+  <all in="[Qp]/a/z" out="*/p/a" symmetry="(y)" steps="44"/>
+  <prl in="a" out="p"/>
+  <all in="zQz" out="aQa" symmetry="()"/>
+  <all in="[Ql]a[zp]" out="*la" symmetry="(x)" steps="44"/>
+  <prl><rule in="a" out="p"/><rule in="l" out="p"/></prl>
+  <all in="x/Q/z" out="t/O/*" symmetry="()"/>
+  <prl in="Q" out="p"/>
+  <prl><rule in="x" out="z"/><rule in="N" out="z"/></prl>
+  <all in="Ez" out="*E"/>
+  <all><rule in="*p*/ppp/*p*" out="***/*P*/***"/><rule in="ppp/*p*" out="*P*/***"/><rule in="pp/p*" out="P*/**"/></all>
+  <all in="Op" out="*O" steps="5"/>
+  <all in="tz" out="*t"/>
+  <!-- 2. progetto: vestibolo, scala interna, celle laterali e sala delle offerte -->
+  <all in="Ot" out="*v"/>
+  <all in="vt" out="*v" steps="6"/>
+  <one in="*zzzzzzzzzzz/Pppppppppppp/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt" out="************/*yyyyyyyyyyy/*ggggggggggg/************/************/************/************/************/************/************/************/************/************/************/************/************/************/************/************" steps="1"/>
+  <all in="[ys]/g/t" out="*/s/g" steps="16"/>
+  <all in="s/g" out="c/d"/>
+  <all in="z/y" out="t/*"/>
+  <all in="tz" out="*t"/>
+  <one in="*tttttttttttt/Ppppppppppppp/*tttttttttttt" out="*************/******H******/*************" steps="1"/>
+  <all in="[gsdc]t" out="*v"/>
+  <all in="vt" out="*v" steps="9"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <all in="bz" out="*b"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <all in="bz" out="*b"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <all in="bz" out="*b"/>
+  <all in="Hp" out="*H" steps="5"/>
+  <prl><rule in="tHb" out="*Ht" p="0.07"/></prl>
+  <all in="tb" out="*t"/>
+  <!-- due ostacoli da salto di altezza 8 nei varchi -->
+  <one in="bHb" out="*n*" steps="1"/>
+  <all><rule in="nH" out="*n"/><rule in="np" out="*n"/></all>
+  <one in="nnnnnnnnn" out="*eeeeeee*" steps="1"/>
+  <one in="tHb" out="*m*" steps="1"/>
+  <all><rule in="mH" out="*m"/><rule in="mp" out="*m"/></all>
+  <one in="mmmmmmmmm" out="*fffffff*" steps="1"/>
+  <prl in="v" out="t"/>
+  <!-- 3. muri, contrafforti e scalinata sul davanti -->
+  <all><rule in="[zE]p[zE]" out="*q*"/><rule in="[zE]p1" out="*w*"/><rule in="[zE]p2" out="*X*"/><rule in="1p1" out="*i*"/><rule in="2p2" out="*I*"/><rule in="1p2" out="*J*"/><rule in="1H1" out="*h*"/><rule in="1H2" out="*j*"/><rule in="EO2" out="*M*"/></all>
+  <prl><rule in="n" out="h"/><rule in="m" out="h"/></prl>
+  <all in="P[XIJjHMy]" out="I*"/>
+  <all in="P[wihO]" out="i*"/>
+  <prl in="P" out="E"/>
+  <one steps="6"><rule in="EEEEEEE/EEEEEEE/wwwwwww" out="*iiiii*/*iiiii*/*******"/><rule in="EEEEEEE/EEEEEEE/XXXXXXX" out="*IIIII*/*IIIII*/*******"/></one>
+  <one steps="6"><rule in="qqqqqqqqq" out="GGGGGGGGG"/><rule in="zzzzzzzzz" out="GGGGGGGGG"/></one>
+  <prl in="q" out="E"/>
+  <all in="M/E" out="*/A" symmetry="()"/>
+  <all in="A/E" out="*/A" symmetry="()"/>
+  <all in="E A E" out="T A T"/>
+  <all in="E T E" out="T T T" steps="2"/>
+  <one in="E A E" out="r * r" steps="1" symmetry="()"/>
+  <!-- 4. colonne e volumi: basamento, fusti in marmo e capitelli in oro -->
+  <all steps="1" symmetry="()"><rule in="B b" out="b S"/><rule in="B t" out="t S"/><rule in="B s" out="s S"/><rule in="B d" out="d S"/><rule in="B c" out="c S"/><rule in="B e" out="e S"/><rule in="B f" out="f S"/><rule in="B w" out="w S"/><rule in="B X" out="X S"/><rule in="B i" out="i S"/><rule in="B I" out="I S"/><rule in="B J" out="J S"/><rule in="B h" out="h S"/><rule in="B H" out="H S"/><rule in="B j" out="j S"/><rule in="B M" out="M S"/><rule in="B y" out="y S"/></all>
+  <all steps="1" symmetry="()"><rule in="B y" out="y K"/><rule in="B b" out="b F"/><rule in="B t" out="t F"/><rule in="B s" out="s F"/><rule in="B d" out="s T"/><rule in="B c" out="s Y"/><rule in="B e" out="b G"/><rule in="B f" out="t G"/><rule in="B h" out="h F"/><rule in="B H" out="H F"/><rule in="B j" out="j F"/><rule in="B M" out="M F"/><rule in="B w" out="w C"/><rule in="B X" out="X C"/><rule in="B i" out="i D"/><rule in="B I" out="I D"/><rule in="B J" out="J C"/></all>
+  <all steps="2" symmetry="()"><rule in="B i" out="i D"/><rule in="B I" out="I D"/></all>
+  <all steps="8" symmetry="()"><rule in="B G" out="G D"/></all>
+  <all steps="24" symmetry="()"><rule in="B i" out="i W"/><rule in="B I" out="I W"/></all>
+  <all steps="4" symmetry="()"><rule in="B i" out="i G"/><rule in="B I" out="I G"/></all>
+  <all steps="30" symmetry="()"><rule in="B y" out="y K"/><rule in="B b" out="b B"/><rule in="B t" out="t B"/><rule in="B s" out="s B"/><rule in="B h" out="h B"/><rule in="B H" out="H B"/><rule in="B j" out="j B"/><rule in="B M" out="M k"/><rule in="B J" out="J C"/></all>
+  <all steps="8" symmetry="()"><rule in="B w" out="w C"/><rule in="B X" out="X C"/></all>
+  <all steps="14" symmetry="()"><rule in="B w" out="w U"/><rule in="B X" out="X U"/></all>
+  <all steps="8" symmetry="()"><rule in="B w" out="w C"/><rule in="B X" out="X C"/></all>
+  <all steps="2" symmetry="()"><rule in="B s" out="s B"/><rule in="B w" out="w S"/><rule in="B X" out="X S"/><rule in="B J" out="J S"/><rule in="B I" out="I S"/><rule in="B j" out="j S"/><rule in="B M" out="M S"/><rule in="B i" out="i S"/><rule in="B h" out="h S"/></all>
+  <!-- prima terrazza: tetti bassi diventano camminamento lastricato -->
+  <all steps="1" symmetry="()"><rule in="B y" out="y K"/><rule in="B b" out="R S"/><rule in="B t" out="t S"/><rule in="B H" out="H S"/></all>
+  <all steps="1" symmetry="()"><rule in="B y" out="y B"/><rule in="B t" out="t F"/><rule in="B H" out="H F"/></all>
+  <all steps="4" symmetry="()"><rule in="B w" out="w W"/></all>
+  <all steps="30" symmetry="()"><rule in="B y" out="y B"/><rule in="B t" out="t B"/><rule in="B s" out="s B"/><rule in="B H" out="H B"/><rule in="B I" out="I W"/><rule in="B M" out="M W"/></all>
+  <all steps="8" symmetry="()"><rule in="B X" out="X W"/><rule in="B J" out="J W"/><rule in="B j" out="j W"/></all>
+  <all steps="14" symmetry="()"><rule in="B X" out="X u"/><rule in="B J" out="J u"/><rule in="B j" out="j u"/></all>
+  <all steps="8" symmetry="()"><rule in="B X" out="X W"/><rule in="B J" out="J W"/><rule in="B j" out="j W"/></all>
+  <all steps="1" symmetry="()"><rule in="B y" out="R S"/><rule in="B t" out="R S"/><rule in="B s" out="R S"/><rule in="B H" out="R S"/><rule in="B I" out="R S"/></all>
+  <all steps="4" symmetry="()"><rule in="B X" out="X S"/><rule in="B J" out="J S"/><rule in="B j" out="j S"/><rule in="B M" out="M S"/></all>
+  <!-- 5. scala interna e bracieri -->
+  <all in="*BB *B* TY*" out="*TY *K* KK*" steps="16"/>
+  <all in="K B" out="* K" symmetry="()"/>
+  <all in="B B B r" out="r r K D" symmetry="()"/>
+  <one in="B B R" out="* r *" steps="2" symmetry="()"/>
+  <!-- statue dorate nelle celle -->
+  <one in="*b* *b* *b* *S*" out="*G* *G* *D* ***" steps="2"/>
+  <one in="B B B R" out="G G D *" steps="2" symmetry="()"/>
+  <!-- 6. finestre e piramide a gradoni -->
+  <all in="UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU" out="*********** *DDDDDDDDD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DDDDDDDDD* ***********"/>
+  <all in="uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu" out="*********** *DDDDDDDDD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DDDDDDDDD* ***********"/>
+  <all in="***/*B*/*** *R*/RRR/*R*" out="***/*R*/*** ***/***/***" steps="8" symmetry="()"/>
+  <all in="***/*B*/*** ***/*R*/***" out="***/*G*/*** ***/***/***" steps="2" symmetry="()"/>
+  <one in="B B R" out="* G *" steps="4" symmetry="()"/>
+  <all in="B G" out="G *" steps="3" symmetry="()"/>
+  <!-- 7. pulizia -->
+  <prl><rule in="U" out="C"/><rule in="u" out="W"/><rule in="Y" out="T"/><rule in="E" out="B"/><rule in="z" out="B"/><rule in="w" out="C"/><rule in="X" out="W"/><rule in="J" out="C"/><rule in="j" out="C"/><rule in="M" out="S"/><rule in="i" out="A"/><rule in="h" out="A"/></prl>
+</sequence>
+<action name="apri" label="Apri la porta"><prl in="k" out="B"/></action>
+```
+
+Il gioco lo ha provato, e non va:
+- large (20 voxel per casella, gradino 4), seme 2: salti: 1 (serve ≥ 2) — i posti distinti dove il corpo atterra saltando, su pavimenti a cui arriva anche a piedi
+
+Piani raggiunti: z=2 (5.8 caselle², 4 stanze); z=34 (3.2 caselle², 2 stanze).
+Porta trovata a x=49, y=95.
+
+Ecco cosa ha fatto il programma quando il gioco lo ha eseguito, nodo per nodo:
+```
+Traccia, seme 2: griglia 100×100×80, 93 nodi, 777 passi, finito in 594 ms.
+x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
+Lettere: N=browN, E=Emerald, x=x, z=z, a=alive, gray, P=Purple, p=purple, Q=aQua, b=black, O=Orange, H=Honey, t=teal, s=slate, g=green, c=cyan, d=dead, dark, v=olive, f=fawn, w=white, X=X, i=indigo, I=Indigo, J=Jungle, h=honey, j=jungle, M=Magenta, S=calcare chiaro, F=cedro, C=arenaria, W=marmo bianco, R=pietra lastricata, V=lapislazzuli, D=basalto scuro, U=blUe, u=blue, T=gradino, Y=Yellow, G=oro, K=pietra grigia, A=lastricato, k=portale bronzo, r=fuoco, y=yellow, q=aqua, l=light, m=magenta.
+Alla fine: R 23607, G 17858, S 13229, W 9871, C 8832, F 6614, K 3355, V 2380, D 2017, k 330, A 100, T 22, r 2.
+#2-67 prl×12, all×39, one×9: 304948 celle x1-98 y1-99 z0-32, passi 1-610
+  E→S 4740: x5-41 y5-35 z0; +14 scatole, 3593 celle
+  .→F 4249: x6-34 y6-34 z1; +12 scatole, 3408 celle
+  E→z 3310: x6-34 y66-94 z0; +21 scatole, 2469 celle
+  .→t 2343: x36-64 y6-34 z32; +4 scatole, 1502 celle
+  .→W 2328: x35-53 y35 z4-27; +18 scatole, 1872 celle
+  .→b 1682: x6-34 y6-34 z32; +1 scatole, 841 celle
+  .→C 895: x35 y6-23 z1-31; +13 scatole, 337 celle
+  .→D 669: x79-87 y22 z1-7; +24 scatole, 606 celle
+  .→G 449: x35-53 y35 z28-31; +25 scatole, 373 celle
+  .→K 341: x36-46 y65 z1-31
+  .→k 330: x45-55 y95 z2-31
+  .→s 187: x36-46 y66-82 z32
+  .→w 174: x6-34 y5 z2; +5 scatole, 145 celle
+  .→X 163: x36-64 y5 z2; +6 scatole, 134 celle
+  .→I 63: x35-53 y35 z32; +11 scatole, 44 celle
+  E→D 54: x79-87 y22 z0; +5 scatole, 45 celle
+  E→A 44: x45-55 y96-99 z0
+  .→i 34: x3-4 y17-21 z32; +6 scatole, 24 celle
+  .→h 22: x65 y66-81 z32; +1 scatole, 6 celle
+  .→H 22: x54-64 y35 z32; +1 scatole, 11 celle
+  .→J 18: x35 y6-23 z32
+  .→Y 11: x36-46 y81 z1
+  .→T 11: x36-46 y82 z1
+  .→j 11: x35 y24-34 z32
+  .→y 11: x36-46 y65 z32
+  .→M 11: x45-55 y95 z32
+  N→S 1: x50 y50 z0
+#68-93 all×20, one×2, prl×1: 266906 celle x0-99 y0-99 z0-77, passi 611-777
+  .→R 23607: x36-64 y6-94 z65; +299 scatole, 21026 celle
+  .→G 17409: x44-52 y15-62 z74-77; +422 scatole, 15681 celle
+  .→C 7600: x36-44 y95 z3-31; +68 scatole, 7339 celle
+  .→W 7543: x35 y6-95 z34-42; +50 scatole, 6733 celle
+  .→S 4282: x35-41 y5-95 z64; +50 scatole, 3645 celle
+  z→. 3310: x6-34 y66-94 z0; +21 scatole, 2469 celle
+  .→K 2970: x36-46 y66-81 z2-3; +14 scatole, 2618 celle
+  .→V 2380: x10-16 y5 z12-21; +33 scatole, 2310 celle
+  .→F 2365: x36-64 y6-34 z33; +5 scatole, 1524 celle
+  t→S 2343: x36-64 y6-34 z32; +4 scatole, 1502 celle
+  E→. 1851: x0-99 y0-2 z0; +20 scatole, 1551 celle
+  b→S 1682: x6-34 y6-34 z32; +1 scatole, 841 celle
+  .→D 1294: x5 y20-21 z12-22; +129 scatole, 1272 celle
+  s→. 176: x36-46 y67-82 z32
+  w→C 174: x6-34 y5 z2; +5 scatole, 145 celle
+  X→C 163: x36-64 y5 z2; +6 scatole, 134 celle
+  I→S 63: x35-53 y35 z32; +11 scatole, 44 celle
+  .→A 56: x65 y66-81 z34; +8 scatole, 40 celle
+  i→S 34: x3-4 y17-21 z32; +6 scatole, 24 celle
+  .→T 22: x36-46 y65-66 z33
+  h→S 22: x65 y66-81 z32; +1 scatole, 6 celle
+  H→S 22: x54-64 y35 z32; +1 scatole, 11 celle
+  J→S 18: x35 y6-23 z32
+  Y→K 11: x36-46 y81 z1
+  T→K 11: x36-46 y82 z1
+  j→S 11: x35 y24-34 z32
+  y→K 11: x36-46 y65 z32
+  s→K 11: x36-46 y66 z32
+  M→S 11: x45-55 y95 z32
+  .→r 2: x77 y76 z34; +1 scatole, 1 celle
+Senza effetto (non hanno mai cambiato una cella):
+#41 one bHb → *n* passi=1: le celle cercate c'erano, ma mai disposte come nel pattern
+#42 all nH → *n (+1): in quel momento nella griglia non c'erano celle "n"
+#43 one nnnnnnnnn → *eeeeeee* passi=1: in quel momento nella griglia non c'erano celle "n"
+#58 all E A E → T A T: le celle cercate c'erano, ma mai disposte come nel pattern
+#59 all E T E → T T T passi=2: in quel momento nella griglia non c'erano celle "T"
+#60 one E A E → r * r passi=1: le celle cercate c'erano, ma mai disposte come nel pattern
+#83 all . . . r → r r K D: in quel momento nella griglia non c'erano celle "r"
+#85 one *b* *b* *b* *S* → *G* *G* *D* *** passi=2: in quel momento nella griglia non c'erano celle "b"
+#91 one . . R → * G * passi=4: le celle cercate c'erano, ma mai disposte come nel pattern
+```
+
+Correggi questi difetti e lascia com’è tutto ciò che funziona. Rispondi con il programma intero, corretto.

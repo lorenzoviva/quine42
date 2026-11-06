@@ -1,0 +1,20 @@
+{
+  "bersaglio": "moderna",
+  "errore": "Cannot read properties of undefined (reading 'vpt')",
+  "token": {
+    "input": 38123,
+    "cacheScritta": 0,
+    "cacheLetta": 0,
+    "output": 126326,
+    "inputTotale": 38123,
+    "pensiero": 63117
+  },
+  "modello": "gemini-3.8-flash-high",
+  "dollari": 0.50231475,
+  "ms": 417522,
+  "caratteriXml": 0,
+  "passa": false,
+  "difetti": [
+    "Cannot read properties of undefined (reading 'vpt')"
+  ]
+}

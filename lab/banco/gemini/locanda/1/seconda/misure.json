@@ -1,0 +1,20 @@
+{
+  "bersaglio": "locanda",
+  "errore": "Cannot read properties of undefined (reading 'vpt')",
+  "token": {
+    "input": 39925,
+    "cacheScritta": 0,
+    "cacheLetta": 0,
+    "output": 126408,
+    "inputTotale": 39925,
+    "pensiero": 63158
+  },
+  "modello": "gemini-3.8-flash-high",
+  "dollari": 0.50397375,
+  "ms": 457314,
+  "caratteriXml": 0,
+  "passa": false,
+  "difetti": [
+    "Cannot read properties of undefined (reading 'vpt')"
+  ]
+}

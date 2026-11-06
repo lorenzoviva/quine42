@@ -1,0 +1,133 @@
+{
+  "taglie": [
+    {
+      "taglia": "large",
+      "box": [
+        100,
+        100,
+        100
+      ],
+      "vpt": 20,
+      "gradino": 4,
+      "semi": [
+        {
+          "seme": 1,
+          "difetti": [
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)"
+          ],
+          "ms": 796
+        },
+        {
+          "seme": 2,
+          "difetti": [
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)"
+          ],
+          "ms": 882
+        },
+        {
+          "seme": 3,
+          "difetti": [
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)"
+          ],
+          "ms": 854
+        },
+        {
+          "seme": 4,
+          "difetti": [
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)"
+          ],
+          "ms": 800
+        },
+        {
+          "seme": 5,
+          "difetti": [
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)"
+          ],
+          "ms": 706
+        }
+      ],
+      "regge": false,
+      "varianza": {
+        "voxel": 0.5516877478657669,
+        "colore": 0.07379768108146835,
+        "pianta": 0.18141956453900218,
+        "perimetro": 0.055540837079854424,
+        "interno": 0.5404022594913699,
+        "semi": 5,
+        "firmePiani": 1,
+        "firmeStanze": 5,
+        "architetture": 3,
+        "statico": false
+      },
+      "difettiVarianza": [
+        "perimetro: 0.06 (serve ≥ 0.15)"
+      ]
+    },
+    {
+      "taglia": "huge",
+      "box": [
+        120,
+        120,
+        112
+      ],
+      "vpt": 16,
+      "gradino": 3,
+      "semi": [
+        {
+          "seme": 1,
+          "difetti": [
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)"
+          ],
+          "ms": 916
+        },
+        {
+          "seme": 2,
+          "difetti": [
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)"
+          ],
+          "ms": 840
+        },
+        {
+          "seme": 3,
+          "difetti": [
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)"
+          ],
+          "ms": 926
+        },
+        {
+          "seme": 4,
+          "difetti": [
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)"
+          ],
+          "ms": 981
+        },
+        {
+          "seme": 5,
+          "difetti": [
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)"
+          ],
+          "ms": 927
+        }
+      ],
+      "regge": false,
+      "varianza": {
+        "voxel": 0.703018632494596,
+        "colore": 0.1257638689031026,
+        "pianta": 0.525796022098225,
+        "perimetro": 0.25217896174863386,
+        "interno": 0.8329923496510725,
+        "semi": 5,
+        "firmePiani": 1,
+        "firmeStanze": 4,
+        "architetture": 4,
+        "statico": false
+      },
+      "difettiVarianza": []
+    }
+  ],
+  "regge": false,
+  "statico": false,
+  "varia": false,
+  "passa": false,
+  "ms": 8789
+}
