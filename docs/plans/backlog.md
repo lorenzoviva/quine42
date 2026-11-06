@@ -4723,7 +4723,7 @@ Nasce da T307a e T299: `dossier T307a`, `dossier T299`. `integra T307a` si è fe
 - Quando è fatto: commit su `task/T311`. Nell'esito: ricorda di dare `integra T311`, poi `integra T285`.
 - Esito: T285 integrato in `task/T311`: nei conflitti di `docs/architettura-dettagli.md` (`#sito`) e `site/skins/LEGGIMI.md` restano tutte le aggiunte, nell'ordine sobria, fumetto, futuristica (la riga delle vesti non chiama più il fumetto «prima stesura»; nel LEGGIMI una frase in più su come si rifanno i disegni del fumetto); `AGENTS.md` senza conflitti e non toccato; nessun ADR da rinumerare. Test delle tre vesti e `site-skins` verdi insieme (70), suite intera (2396, 1 saltato), typecheck e build verdi, e `dist/skins/` ha le tre vesti. Browser non aperto, come chiede il task. Ora `integra T311`, poi `integra T285`.
 
-### T312 · Il Concilio non scrive su un universo fuori dall'intervallo dei kernel — `da fare`
+### T312 · Il Concilio non scrive su un universo fuori dall'intervallo dei kernel — `fatto` (`4104fee2`)
 - Pipeline: claude · sforzo high · stima 3% · approvato · priorità 3
 - Step: 32
 - Contesto: T302 (ADR-0152) apre un universo fuori dall'intervallo `kernels` con il guasto `universe:kernel` e rifiuta il salvataggio dello stato, ma nella verifica nel browser il Concilio ha committato 5 contenuti sulla copia `vecchio` (kernel 0.0.4): un difetto che c'era già prima. Nasce da T302: `dossier T302`, e da ADR-0136.
@@ -4731,6 +4731,7 @@ Nasce da T307a e T299: `dossier T307a`, `dossier T299`. `integra T307a` si è fe
 - Test: unitari (universo fuori intervallo: nessun commit, nessuna chiamata ai modelli; universo buono: come prima); suite intera e typecheck con i loro turni.
 - Browser: la copia `vecchio` di T302 (fatta a mano in una cartella temporanea): entrando e camminando qualche minuto offline, `git log` dell'universo non si muove; `sidera` scrive come prima.
 - Quando è fatto: commit su `task/T312`. Nell'esito: dove sta il blocco e cosa resta scrivibile (se qualcosa).
+- Esito: Il blocco è in un punto solo, `Kernel.readOnly()` (il guasto `universe:kernel`, mai per uno specchio), che regola `Repo.readOnly` (nessun commit; il backend avvolto da `attach` non scrive commit, rami, merge né ritorni), `SealedChunks` (piani nuovi solo in memoria) e `Council.write` (ogni compito ai modelli locali, niente spesa); il pannello dell'anomalia dice «sola lettura» in testa; `/api/viandante` a mondo spento risponde 409; `runsOnThisKernel` in version.ts; ADR-0155, kernel 0.1.14; restano scrivibili il cestino, il clone, i saldi, le scritture in fila da una pagina precedente e i piani legacy da IndexedDB; ciò che si accumula in sessione si perde alla ricarica, o va nel primo commit se il guasto si chiude; suite 2440 passati e 1 saltato, typecheck e build verdi; sicurezza: nessuna superficie nuova (una rotta risponde 409 in un caso in più).
 
 ### T313 · Jev sul banco: decisioni chiuse del gioco e giudizi sulla scultura, contro Flash-Lite — `da fare`
 - Pipeline: claude · sforzo max · stima 6% · approvato · priorità 1
