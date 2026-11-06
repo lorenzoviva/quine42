@@ -1,12 +1,13 @@
 -- Effetti: il Concilio sceglie da un insieme chiuso, il kernel li valida, qui accadono.
 -- apply(bersaglio, chi, effetto, x, y) restituisce una frase (o nil). x, y: dove accade, se non c'è un bersaglio.
+-- Gli effetti hanno nomi e campi inglesi (contratto 0.2): { type = "light", radius = 4, duration = 60 }.
 local M = {}
 
-local BISOGNI = { fame = "hunger", sete = "thirst", energia = "energy", salute = "health" }
+local NEEDS = { "hunger", "thirst", "energy", "health" }
 
 local function clamp(v) return math.max(0, math.min(100, v)) end
 
-local function dove(target, x, y)
+local function where(target, x, y)
   local p = target and ecs.get(target, "pos")
   if p then return p.x, p.y end
   if x and y then return x, y end
@@ -16,90 +17,90 @@ end
 
 local F = {}
 
-function F.messaggio(_, _, e) return e.testo end
+function F.message(_, _, e) return e.text end
 
-function F.bisogni(_, user, e)
+function F.needs(_, user, e)
   local n = ecs.get(user, "needs")
   if not n then return nil end
-  for k, campo in pairs(BISOGNI) do
-    if e[k] then n[campo] = clamp(n[campo] + e[k]) end
+  for _, k in ipairs(NEEDS) do
+    if e[k] then n[k] = clamp(n[k] + e[k]) end
   end
   return nil
 end
 
-function F.crea_oggetto(target, _, e, x, y)
-  local px, py = dove(target, x, y)
-  for i = 1, (e.quantita or 1) do
-    world.spawn(e.oggetto, px + (hash(i, 7) - 0.5) * 0.8, py + 0.4 + (hash(i, 9) - 0.5) * 0.4)
+function F.create_item(target, _, e, x, y)
+  local px, py = where(target, x, y)
+  for i = 1, (e.quantity or 1) do
+    world.spawn(e.item, px + (hash(i, 7) - 0.5) * 0.8, py + 0.4 + (hash(i, 9) - 0.5) * 0.4)
   end
-  local d = items.def(e.oggetto)
+  local d = items.def(e.item)
   return d and ("Compare: " .. d.name .. ".") or nil
 end
 
-function F.consuma(_, user, e)
-  inventory.remove(user, e.oggetto, e.quantita or 1)
+function F.consume(_, user, e)
+  inventory.remove(user, e.item, e.quantity or 1)
   return nil
 end
 
-function F.distruggi(target)
+function F.destroy(target)
   if target then world.break_entity(target) end
   return nil
 end
 
-function F.apri(target)
+function F.open(target)
   if target and world.open(target) then return nil end
   return "Non c'è niente da aprire."
 end
 
-function F.contenitore(target, _, e)
-  if target then world.make_container(target, e.capienza or 6, e.bottino or "cassa") end
+function F.container(target, _, e)
+  if target then world.make_container(target, e.capacity or 6, e.loot or "cassa") end
   return nil
 end
 
-function F.terreno(target, _, e, x, y)
-  local px, py = dove(target, x, y)
+function F.terrain(target, _, e, x, y)
+  local px, py = where(target, x, y)
   local cx, cy = math.floor(px), math.floor(py)
-  local r = e.raggio or 1
+  local r = e.radius or 1
   for dy = -r, r do
     for dx = -r, r do
       if dx * dx + dy * dy <= r * r + r then
-        if not e.da or world.tile(cx + dx, cy + dy) == e.da then world.set_tile(cx + dx, cy + dy, e.a) end
+        if not e.from or world.tile(cx + dx, cy + dy) == e.from then world.set_tile(cx + dx, cy + dy, e.to) end
       end
     end
   end
   return nil
 end
 
-function F.fuoco(target, _, e, x, y)
-  local px, py = dove(target, x, y)
-  local r = e.raggio or 1
+function F.fire(target, _, e, x, y)
+  local px, py = where(target, x, y)
+  local r = e.radius or 1
   ecs.spawn({
     pos = { x = px, y = py },
     glyph = { ch = "✶", color = "#ff8a2a", scale = 0.9 },
     fuoco = { raggio = r },
     luce = { raggio = r * 2 + 2, colore = "#ffb060", accesa = true },
-    effimero = { fino = time + (e.durata or 10) },
+    effimero = { fino = time + (e.duration or 10) },
   })
   return nil
 end
 
-function F.luce(target, _, e, x, y)
-  local px, py = dove(target, x, y)
+function F.light(target, _, e, x, y)
+  local px, py = where(target, x, y)
   ecs.spawn({
     pos = { x = px, y = py },
     glyph = { ch = "✧", color = "#fff3b0", scale = 0.6 },
-    luce = { raggio = e.raggio or 4, colore = "#fff3b0", accesa = true },
-    effimero = { fino = time + (e.durata or 60) },
+    luce = { raggio = e.radius or 4, colore = "#fff3b0", accesa = true },
+    effimero = { fino = time + (e.duration or 60) },
   })
   return nil
 end
 
-function F.scudo(_, user, e)
-  ecs.set(user, "scudo", { fino = time + (e.durata or 20) })
+function F.shield(_, user, e)
+  ecs.set(user, "scudo", { fino = time + (e.duration or 20) })
   return nil
 end
 
-function F.spingi(target, user, e)
+function F.push(target, user, e)
   local p = target and ecs.get(target, "pos")
   local b = target and ecs.get(target, "body")
   if not p then return nil end
@@ -108,8 +109,8 @@ function F.spingi(target, user, e)
   local d = math.sqrt(dx * dx + dy * dy)
   if d < 0.01 then dx, dy, d = 0, 1, 1 end
   local r = (b and b.r) or 0.3
-  local passi = math.floor((e.forza or 3) * 4)
-  for _ = 1, passi do
+  local steps = math.floor((e.force or 3) * 4)
+  for _ = 1, steps do
     local nx, ny = p.x + dx / d * 0.25, p.y + dy / d * 0.25
     if not world.free(nx, ny, r, p.z) then break end
     p.x, p.y = nx, ny
@@ -118,33 +119,34 @@ function F.spingi(target, user, e)
 end
 
 -- Uno stato del viandante: a cavallo, in barca, con lo zaino. Cambia velocità, peso, luce.
-function F.stato(_, user, e)
+-- Il componente "stati" tiene ancora i suoi campi italiani (velocita, peso, luce, fino): li rinomina il contratto 0.5.
+function F.state(_, user, e)
   local st = ecs.get(user, "stati") or {}
-  st[e.nome] = { velocita = e.velocita or 1, peso = e.peso or 0, luce = e.luce or 0, fino = (e.durata or 0) > 0 and (time + e.durata) or 0 }
+  st[e.name] = { velocita = e.speed or 1, peso = e.weight or 0, luce = e.light or 0, fino = (e.duration or 0) > 0 and (time + e.duration) or 0 }
   ecs.set(user, "stati", st)
   return nil
 end
 
-function F.togli_stato(_, user, e)
+function F.remove_state(_, user, e)
   -- Lo stato si spegne (false); il kernel poi lo toglie dalla tabella.
   local st = ecs.get(user, "stati")
-  if st then st[e.nome] = false end
+  if st then st[e.name] = false end
   return nil
 end
 
-function F.evoca(target, _, e, x, y)
-  local px, py = dove(target, x, y)
-  world.spawn(e.modulo, px + 0.8, py + 0.3)
+function F.summon(target, _, e, x, y)
+  local px, py = where(target, x, y)
+  world.spawn(e.module, px + 0.8, py + 0.3)
   return nil
 end
 
 -- Se un effetto ha chi lo applica: il kernel lo chiede prima di applicarlo, e un effetto senza è un guasto (T260).
-function M.handles(tipo)
-  return F[tipo] ~= nil
+function M.handles(type)
+  return F[type] ~= nil
 end
 
 function M.apply(target, user, e, x, y)
-  local f = F[e.tipo]
+  local f = F[e.type]
   if not f then return nil end
   return f(target, user, e, x, y)
 end

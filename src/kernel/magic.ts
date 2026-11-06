@@ -8,6 +8,7 @@ import { metaBreak } from './fourthwall';
 import { hashStr } from './rng';
 import { BINDINGS, CARPET_TOKENS, COUNCIL_RUNE, FUTHARK } from './runes';
 import { similarNames } from './society';
+import { internalName, italianName } from './internalNames';
 import type { MagicRune } from './types';
 
 /** At most this many magic runes in a universe (the seven of the seed and what the Council adds): they stay rare. */
@@ -63,7 +64,8 @@ export function validateNewRune(draft: RuneDraft, existing: Record<string, Magic
   if (tokens.length >= MAX_MAGIC_RUNES) return { errors: [`le rune magiche sono già ${tokens.length}, il massimo: restano rare`] };
   const token = runeToken(draft.token);
   const name = text(draft.nome, 20);
-  const element = text(draft.elemento, 24) || token;
+  // An element of the seed in the Italian the Narrator still writes (T307a, until T310) is the internal one; a new one is its word.
+  const element = internalName('elementi', text(draft.elemento, 24).toLowerCase()) || token;
   const description = text(draft.descrizione, 120);
   const canone = text(draft.canone, 240) || description;
   if (token.length < 3 || token.length > 12) errors.push(`il token «${String(draft.token ?? '')}» deve essere una sola parola di 3-12 lettere`);
@@ -97,7 +99,7 @@ export const NEW_RUNES_HEADING = '## Le rune trovate dopo';
 
 /** The canon with one more line for a new rune (under NEW_RUNES_HEADING, made if missing). */
 export function canonWithRune(canon: string, r: NewRune): string {
-  const line = `- ${r.rune.glyph} ${r.rune.name} («${r.token}», ${r.rune.element}): ${r.canone}`;
+  const line = `- ${r.rune.glyph} ${r.rune.name} («${r.token}», ${italianName('elementi', r.rune.element)}): ${r.canone}`;
   const body = canon.replace(/\s*$/, '');
   if (!body.includes(NEW_RUNES_HEADING))
     return `${body}\n\n${NEW_RUNES_HEADING}\n- Le rune magiche non sono tutte note da sempre: di tanto in tanto qualcuno ne trova una che prima nessuno aveva visto, e da allora si trova come le altre.\n${line}\n`;

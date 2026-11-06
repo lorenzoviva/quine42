@@ -9,6 +9,7 @@ import type { PlanContext } from '../agents/cartography';
 import type { Concept, ForgeRequest, PhysicsSpec } from '../agents/forge';
 import type { NpcContext } from '../agents/minds';
 import { fallbackDeath } from '../gameSetup';
+import { italianName } from '../internalNames';
 
 const PLACES: Record<string, { nouns: string[]; descr: string[] }> = {
   forest: {
@@ -51,14 +52,14 @@ const STOP = new Set(['un', 'una', 'uno', 'il', 'lo', 'la', 'i', 'gli', 'le', 'c
 
 const NAMES = ['Berta', 'Gualtiero', 'Ilde', 'Ottone', 'Mirella', 'Tancredi', 'Gemma', 'Ugolino', 'Fiora', 'Corrado', 'Agnese', 'Bastiano'];
 const STOCK: Array<[string, string, string, number, number, string[], Record<string, number>?]> = [
-  ['Fiasco di vino', 'bevanda', 'un fiasco impagliato', 1.2, 4, ['locanda', 'cucina'], { thirst: 20, energy: -5 }],
-  ['Castagne secche', 'cibo', 'un sacchetto di castagne', 0.3, 10, ['bosco', 'cucina'], { hunger: 15 }],
-  ['Ago e filo', 'attrezzo', 'per rammendare', 0.05, 5, ['stoffa', 'casa']],
-  ['Falcetto', 'attrezzo', "una piccola falce per l'erba", 0.8, 1, ['contadino', 'taglio', 'metallo']],
-  ['Fune di canapa', 'materiale', 'corda robusta', 0.8, 5, ['bottega']],
-  ['Lucerna', 'luce', 'una lampada a olio di terracotta', 0.5, 1, ['luce', 'casa']],
-  ['Ricotta', 'cibo', 'ricotta fresca in un canestro', 0.5, 3, ['cucina', 'contadino'], { hunger: 20 }],
-  ['Erba medica', 'medicina', 'un mazzetto di erbe che curano', 0.05, 10, ['erbe'], { health: 15 }],
+  ['Fiasco di vino', 'drink', 'un fiasco impagliato', 1.2, 4, ['locanda', 'cucina'], { thirst: 20, energy: -5 }],
+  ['Castagne secche', 'food', 'un sacchetto di castagne', 0.3, 10, ['bosco', 'cucina'], { hunger: 15 }],
+  ['Ago e filo', 'tool', 'per rammendare', 0.05, 5, ['stoffa', 'casa']],
+  ['Falcetto', 'tool', "una piccola falce per l'erba", 0.8, 1, ['contadino', 'taglio', 'metallo']],
+  ['Fune di canapa', 'material', 'corda robusta', 0.8, 5, ['bottega']],
+  ['Lucerna', 'light', 'una lampada a olio di terracotta', 0.5, 1, ['luce', 'casa']],
+  ['Ricotta', 'food', 'ricotta fresca in un canestro', 0.5, 3, ['cucina', 'contadino'], { hunger: 20 }],
+  ['Erba medica', 'medicine', 'un mazzetto di erbe che curano', 0.05, 10, ['erbe'], { health: 15 }],
 ];
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const words = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').match(/[a-z]+/g) ?? [];
@@ -91,9 +92,9 @@ export class MockAiModels implements AiModels {
       case 'forge.concept':
         return this.concept((d.request ?? { prompt: call.prompt }) as ForgeRequest);
       case 'forge.physics':
-        return this.physics((d.concept ?? { nome: 'Cosa', tipo: 'oggetto', descrizione: call.prompt, aspetto: call.prompt, classe: 'oggetto' }) as Concept);
+        return this.physics((d.concept ?? { nome: 'Cosa', tipo: 'oggetto', descrizione: call.prompt, aspetto: call.prompt, classe: 'object' }) as Concept);
       case 'forge.code':
-        return { logic: this.code((d.concept ?? { nome: 'Cosa', tipo: 'oggetto', descrizione: call.prompt, aspetto: call.prompt, classe: 'oggetto' }) as Concept), componenti_json: '{}' };
+        return { logic: this.code((d.concept ?? { nome: 'Cosa', tipo: 'oggetto', descrizione: call.prompt, aspetto: call.prompt, classe: 'object' }) as Concept), componenti_json: '{}' };
       case 'forge.fix':
         return { logic: `-- ${d.manifest?.name ?? 'modulo'}: riparato offline.\nlocal M = {}\n\nreturn M\n` };
       case 'forge.review':
@@ -187,7 +188,7 @@ export class MockAiModels implements AiModels {
       case 'content.recipes': {
         const names: string[] = d.names ?? [];
         const ricette = names.length >= 3 ? [{ nome: `${names[names.length - 1]} grezzo`, ingredienti: [{ oggetto: names[names.length - 2], quantita: 1 }], attrezzi: [], risultato: { oggetto: names[names.length - 1], quantita: 1 } }] : [];
-        return { ricette, bottino: [{ tabella: 'comune', voci: [{ tag: 'cibo', peso: 3 }, { tag: 'materiale', peso: 2 }] }] };
+        return { ricette, bottino: [{ tabella: 'comune', voci: [{ tag: 'food', peso: 3 }, { tag: 'material', peso: 2 }] }] };
       }
       case 'npc.individuate': {
         const rng = new Rng(hashStr(`${d.archetype?.name}|${d.ctx?.place}|${this.drawn++}`));
@@ -233,11 +234,11 @@ export class MockAiModels implements AiModels {
             titolo: 'Equipaggiamento',
             elementi: [
               { tipo: 'slot', id: 'testa', etichetta: 'Testa', accetta: ['testa'] },
-              { tipo: 'slot', id: 'corpo', etichetta: 'Corpo', accetta: ['corpo', 'vestiario'] },
+              { tipo: 'slot', id: 'corpo', etichetta: 'Corpo', accetta: ['corpo', 'clothing'] },
               { tipo: 'slot', id: 'piedi', etichetta: 'Piedi', accetta: ['piedi'] },
               { tipo: 'slot', id: 'arma', etichetta: 'Arma', accetta: ['arma'] },
-              { tipo: 'testo', etichetta: 'Difesa', campo: 'difesa.valore' },
-              { tipo: 'barra', etichetta: 'Salute', campo: 'needs.health', max: 100 },
+              { tipo: 'text', etichetta: 'Difesa', campo: 'difesa.valore' },
+              { tipo: 'bar', etichetta: 'Salute', campo: 'needs.health', max: 100 },
             ],
           },
           componenti_json: '{"difesa":{"valore":0}}',
@@ -340,7 +341,7 @@ export class MockAiModels implements AiModels {
           nome: elves ? 'Bosco degli Elfi' : t.slice(0, 30),
           descrizione: elves ? 'alberi altissimi e argentei, case sugli alberi, sentieri di luce' : t,
           tipo: 'esterno',
-          programma_json: JSON.stringify({ type: 'sequence', children: [{ type: 'prl', rules: [{ in: 'g', out: 'E', p: 0.3 }] }, { type: 'stamp', shape: 'torre', codes: { muro: 'E' } }] }),
+          programma_json: JSON.stringify({ type: 'sequence', children: [{ type: 'prl', rules: [{ in: 'g', out: 'E', p: 0.3 }] }, { type: 'stamp', shape: 'tower', codes: { muro: 'E' } }] }),
           nuovi_terreni: [{ codice: 'E', nome: elves ? 'albero argenteo' : 'pietra strana', colore: '#c8d8e8', strato: 'vegetation', solido: true, descrizione: 'alberi dalla corteccia d\'argento' }],
           regione: { nome: elves ? 'Bosco degli Elfi' : t.slice(0, 30), descrizione: 'dove la luce cade a fili', direzione: 'nord-est', distanza: 4, raggio: 1 },
         };
@@ -371,21 +372,22 @@ export class MockAiModels implements AiModels {
       }
       case 'spell.name': {
         // A program (T57a): the first rune gives the main effect, stronger for every time it is repeated;
-        // the others follow, weaker. Order matters: «terra vento» is not «vento terra».
+        // the others follow, weaker. Order matters: «terra ventus» is not «ventus terra».
         const runes: Array<{ token: string; name: string; element: string }> = d.runes ?? [];
         const s = runes.map((r) => r.token).join(' ');
-        if (/^(terra vento terra|terra aria terra)$/.test(s)) {
-          return { nome: 'Innalza', descrizione: 'La terra si solleva in una collina.', costo: 24, effetti: [{ tipo: 'rilievo', delta: 2, raggio: 1 }] };
+        if (/^terra ventus terra$/.test(s)) {
+          return { nome: 'Innalza', descrizione: 'La terra si solleva in una collina.', costo: 24, effetti: [{ type: 'relief', delta: 2, radius: 1 }] };
         }
-        if (/^(vento terra vento|aria terra aria)$/.test(s)) {
-          return { nome: 'Abbassa', descrizione: 'La terra si abbassa in una conca.', costo: 24, effetti: [{ tipo: 'rilievo', delta: -2, raggio: 1 }] };
+        if (/^ventus terra ventus$/.test(s)) {
+          return { nome: 'Abbassa', descrizione: 'La terra si abbassa in una conca.', costo: 24, effetti: [{ type: 'relief', delta: -2, radius: 1 }] };
         }
-        const BASE: Record<string, Record<string, unknown>> = { luce: { tipo: 'luce', raggio: 4, durata: 60 }, fuoco: { tipo: 'fuoco', raggio: 1, durata: 6 }, vita: { tipo: 'bisogni', salute: 15 }, scudo: { tipo: 'scudo', durata: 20 }, vento: { tipo: 'spingi', forza: 4 }, terra: { tipo: 'terreno', a: 'sentiero', raggio: 1 }, acqua: { tipo: 'terreno', a: 'acqua', raggio: 0 } };
+        // The terrains by their internal ids (T307a): the validator finds the tile of this world that has it.
+        const BASE: Record<string, Record<string, unknown>> = { lux: { type: 'light', radius: 4, duration: 60 }, ignis: { type: 'fire', radius: 1, duration: 6 }, vita: { type: 'needs', health: 15 }, scutum: { type: 'shield', duration: 20 }, ventus: { type: 'push', force: 4 }, terra: { type: 'terrain', to: 'path', radius: 1 }, aqua: { type: 'terrain', to: 'water', radius: 0 } };
         const times = (t: string) => runes.filter((r) => r.token === t).length;
-        const scaled = (t: string, k: number) => Object.fromEntries(Object.entries(BASE[t] ?? {}).map(([f, v]) => [f, typeof v === 'number' ? Math.min(f === 'raggio' ? 3 : 40, Math.round(v * k)) : v]));
+        const scaled = (t: string, k: number) => Object.fromEntries(Object.entries(BASE[t] ?? {}).map(([f, v]) => [f, typeof v === 'number' ? Math.min(f === 'radius' ? 3 : 40, Math.round(v * k)) : v]));
         const order = [...new Set(runes.map((r) => r.token))].filter((t) => BASE[t]);
         const effetti = order.map((t, i) => scaled(t, i === 0 ? 1 + times(t) : 0.5 * times(t) + 0.5)).slice(0, 3);
-        return { nome: runes.map((r) => r.name.slice(0, 3)).join('').replace(/^./, (c) => c.toUpperCase()), descrizione: `Le rune ${runes.map((r) => r.element).join(' e ')} insieme.`, costo: 8 * runes.length, effetti };
+        return { nome: runes.map((r) => r.name.slice(0, 3)).join('').replace(/^./, (c) => c.toUpperCase()), descrizione: `Le rune ${runes.map((r) => italianName('elementi', r.element)).join(' e ')} insieme.`, costo: 8 * runes.length, effetti };
       }
       case 'text.examine':
         return { testo: `Osservi ${d.what?.name ?? 'la cosa'} da vicino. ${d.what?.description ?? ''} Per un istante ti sembra di averla già vista, identica, altrove.` };
@@ -401,31 +403,31 @@ export class MockAiModels implements AiModels {
     const name = d.target?.name ?? 'la cosa';
     const label = String(d.text ?? '').trim().replace(/^./, (c: string) => c.toUpperCase()).slice(0, 30);
     // An entity with a shape of its own changes it: the Sculptor will write the rule.
-    if (d.shape && has('scheggi', 'ammacc', 'incid', 'accend', 'spegn', 'dipin')) return { possibile: true, racconto: `${name} cambia sotto le tue mani.`, effetti: [{ tipo: 'bisogni', energia: -2 }], ripetibile: true, etichetta: label, forma: `${name} ${ws.find((w) => /scheggi|ammacc|incid/.test(w)) ? 'si scheggia in parte' : 'cambia colore in parte'}` };
+    if (d.shape && has('scheggi', 'ammacc', 'incid', 'accend', 'spegn', 'dipin')) return { possibile: true, racconto: `${name} cambia sotto le tue mani.`, effetti: [{ type: 'needs', energy: -2 }], ripetibile: true, etichetta: label, forma: `${name} ${ws.find((w) => /scheggi|ammacc|incid/.test(w)) ? 'si scheggia in parte' : 'cambia colore in parte'}` };
     // Another wanderer (T43b): a blow hurts, care heals (the kernel takes away what the game does not allow).
-    if (d.target?.kind === 'altro viandante' && has('colp', 'pugn', 'ferisc', 'picchi')) return { possibile: true, racconto: `Colpisci ${name}.`, effetti: [{ tipo: 'bisogni', salute: -20, energia: -5 }, { tipo: 'messaggio', testo: 'Ahi!' }], ripetibile: true, etichetta: label };
-    if (d.target?.kind === 'altro viandante' && has('cur', 'medic', 'fascia')) return { possibile: true, racconto: `Curi ${name}.`, effetti: [{ tipo: 'bisogni', salute: 15 }], ripetibile: true, etichetta: label };
-    if (has('apr', 'forz', 'scassin')) return { possibile: true, racconto: `Fai leva su ${name} finché cede.`, effetti: [d.target?.container ? { tipo: 'apri' } : { tipo: 'contenitore', capienza: 4, bottino: 'cassa' }, { tipo: 'apri' }], ripetibile: true, etichetta: label };
-    if (has('romp', 'sfond', 'spacc', 'distrugg')) return { possibile: true, racconto: `Colpisci ${name} con tutta la forza: va in pezzi.`, effetti: [{ tipo: 'distruggi' }, { tipo: 'bisogni', energia: -5 }], ripetibile: true, etichetta: label };
-    if (has('bruc', 'incend', 'appicc')) return { possibile: true, racconto: `Le fiamme attecchiscono a ${name}.`, effetti: [{ tipo: 'fuoco', raggio: 1, durata: 8 }], ripetibile: true, etichetta: label };
-    if (has('scav')) return { possibile: true, racconto: 'Scavi attorno, la terra si smuove.', effetti: [{ tipo: 'terreno', a: (d.terrains ?? []).find((t: string) => /sentier|terra|strada/.test(t)) ?? d.terrains?.[0], raggio: 1 }], ripetibile: true, etichetta: label };
-    if (has('innalz', 'sollev')) return { possibile: true, racconto: 'La terra si solleva.', effetti: [{ tipo: 'rilievo', delta: 2, raggio: 1 }], ripetibile: true, etichetta: label };
-    if (has('abbass', 'spian')) return { possibile: true, racconto: 'La terra si abbassa.', effetti: [{ tipo: 'rilievo', delta: -2, raggio: 1 }], ripetibile: true, etichetta: label };
-    if (has('spin', 'calc')) return { possibile: true, racconto: `Dai una spinta a ${name}.`, effetti: [{ tipo: 'spingi', forza: 2 }], ripetibile: true, etichetta: label };
-    if (has('mont', 'cavalc', 'sell')) return { possibile: true, racconto: `Sali in sella: ${name} sbuffa e parte al trotto.`, effetti: [{ tipo: 'stato', nome: 'a cavallo', velocita: 1.8, peso: 30, durata: 0 }], ripetibile: true, etichetta: 'Monta in sella' };
-    if (has('smont', 'scend')) return { possibile: true, racconto: 'Scendi di sella.', effetti: [{ tipo: 'togli_stato', nome: 'a cavallo' }], ripetibile: true, etichetta: 'Scendi di sella' };
-    if (has('riemp')) return { possibile: true, racconto: `Riempi ${name} e bevi; poi è di nuovo vuoto.`, effetti: [{ tipo: 'consuma', oggetto: name }, { tipo: 'bisogni', sete: 10 }], ripetibile: true, etichetta: label };
-    if (has('bev', 'sorsegg')) return { possibile: true, racconto: `Bevi da ${name}: l'acqua è fresca.`, effetti: [{ tipo: 'bisogni', sete: 15 }], ripetibile: true, etichetta: label };
-    if (d.target?.kind === 'persona' && has('figli', 'bambin')) return { possibile: true, racconto: `${name} ti stringe la mano: tra qualche tempo, una nuova vita.`, effetti: [{ tipo: 'nascita' }, { tipo: 'ricordo', testo: 'abbiamo deciso di avere un figlio', peso: 3 }], ripetibile: false, etichetta: label };
-    if (d.target?.kind === 'persona' && has('abbracc', 'regal')) return { possibile: true, racconto: `${name} sorride, sorpreso.`, effetti: [{ tipo: 'ricordo', testo: 'il viandante è stato gentile', peso: 2 }, { tipo: 'legame', legame: 'amico' }], ripetibile: false, etichetta: label };
-    if (has('bussa', 'accarezz', 'ascolt')) return { possibile: true, racconto: `${name} non risponde, ma per un attimo ti sembra di sentire un'eco.`, effetti: [{ tipo: 'messaggio', testo: 'Nulla cambia.' }], ripetibile: false, etichetta: label };
+    if (d.target?.kind === 'altro viandante' && has('colp', 'pugn', 'ferisc', 'picchi')) return { possibile: true, racconto: `Colpisci ${name}.`, effetti: [{ type: 'needs', health: -20, energy: -5 }, { type: 'message', text: 'Ahi!' }], ripetibile: true, etichetta: label };
+    if (d.target?.kind === 'altro viandante' && has('cur', 'medic', 'fascia')) return { possibile: true, racconto: `Curi ${name}.`, effetti: [{ type: 'needs', health: 15 }], ripetibile: true, etichetta: label };
+    if (has('apr', 'forz', 'scassin')) return { possibile: true, racconto: `Fai leva su ${name} finché cede.`, effetti: [d.target?.container ? { type: 'open' } : { type: 'container', capacity: 4, loot: 'cassa' }, { type: 'open' }], ripetibile: true, etichetta: label };
+    if (has('romp', 'sfond', 'spacc', 'distrugg')) return { possibile: true, racconto: `Colpisci ${name} con tutta la forza: va in pezzi.`, effetti: [{ type: 'destroy' }, { type: 'needs', energy: -5 }], ripetibile: true, etichetta: label };
+    if (has('bruc', 'incend', 'appicc')) return { possibile: true, racconto: `Le fiamme attecchiscono a ${name}.`, effetti: [{ type: 'fire', radius: 1, duration: 8 }], ripetibile: true, etichetta: label };
+    if (has('scav')) return { possibile: true, racconto: 'Scavi attorno, la terra si smuove.', effetti: [{ type: 'terrain', to: (d.terrains ?? []).find((t: string) => /sentier|terra|strada/.test(t)) ?? d.terrains?.[0], radius: 1 }], ripetibile: true, etichetta: label };
+    if (has('innalz', 'sollev')) return { possibile: true, racconto: 'La terra si solleva.', effetti: [{ type: 'relief', delta: 2, radius: 1 }], ripetibile: true, etichetta: label };
+    if (has('abbass', 'spian')) return { possibile: true, racconto: 'La terra si abbassa.', effetti: [{ type: 'relief', delta: -2, radius: 1 }], ripetibile: true, etichetta: label };
+    if (has('spin', 'calc')) return { possibile: true, racconto: `Dai una spinta a ${name}.`, effetti: [{ type: 'push', force: 2 }], ripetibile: true, etichetta: label };
+    if (has('mont', 'cavalc', 'sell')) return { possibile: true, racconto: `Sali in sella: ${name} sbuffa e parte al trotto.`, effetti: [{ type: 'state', name: 'a cavallo', speed: 1.8, weight: 30, duration: 0 }], ripetibile: true, etichetta: 'Monta in sella' };
+    if (has('smont', 'scend')) return { possibile: true, racconto: 'Scendi di sella.', effetti: [{ type: 'remove_state', name: 'a cavallo' }], ripetibile: true, etichetta: 'Scendi di sella' };
+    if (has('riemp')) return { possibile: true, racconto: `Riempi ${name} e bevi; poi è di nuovo vuoto.`, effetti: [{ type: 'consume', item: name }, { type: 'needs', thirst: 10 }], ripetibile: true, etichetta: label };
+    if (has('bev', 'sorsegg')) return { possibile: true, racconto: `Bevi da ${name}: l'acqua è fresca.`, effetti: [{ type: 'needs', thirst: 15 }], ripetibile: true, etichetta: label };
+    if (d.target?.kind === 'persona' && has('figli', 'bambin')) return { possibile: true, racconto: `${name} ti stringe la mano: tra qualche tempo, una nuova vita.`, effetti: [{ type: 'birth' }, { type: 'memory', text: 'abbiamo deciso di avere un figlio', weight: 3 }], ripetibile: false, etichetta: label };
+    if (d.target?.kind === 'persona' && has('abbracc', 'regal')) return { possibile: true, racconto: `${name} sorride, sorpreso.`, effetti: [{ type: 'memory', text: 'il viandante è stato gentile', weight: 2 }, { type: 'bond', bond: 'amico' }], ripetibile: false, etichetta: label };
+    if (has('bussa', 'accarezz', 'ascolt')) return { possibile: true, racconto: `${name} non risponde, ma per un attimo ti sembra di sentire un'eco.`, effetti: [{ type: 'message', text: 'Nulla cambia.' }], ripetibile: false, etichetta: label };
     return { possibile: false, racconto: `Provi, ma ${name} non si lascia ${d.text}.`, effetti: [], ripetibile: false, etichetta: label };
   }
 
   private item(name: string): unknown {
     const ws = words(name);
     const food = ws.some((w) => EDIBLE.includes(w));
-    return { nome: name.trim().replace(/^./, (c) => c.toUpperCase()), descrizione: `${name}, come lo si trova nel regno`, categoria: food ? 'cibo' : 'varie', peso: 0.5, pila: food ? 5 : 1, tag: [food ? 'cucina' : 'casa'], effetti: food ? { fame: 15 } : undefined, impugnabile: false, aspetto: name, forma: food ? 'pane' : 'sacco' };
+    return { nome: name.trim().replace(/^./, (c) => c.toUpperCase()), descrizione: `${name}, come lo si trova nel regno`, categoria: food ? 'food' : 'misc', peso: 0.5, pila: food ? 5 : 1, tag: [food ? 'cucina' : 'casa'], effetti: food ? { fame: 15 } : undefined, impugnabile: false, aspetto: name, forma: food ? 'bread' : 'sack' };
   }
 
   private items(count: number, existing: string[], hints: string[]): unknown[] {
@@ -433,7 +435,7 @@ export class MockAiModels implements AiModels {
     for (const [nome, categoria, descrizione, peso, pila, tag, e] of STOCK) {
       if (out.length >= count) break;
       if (existing.includes(nome)) continue;
-      out.push({ nome, categoria, descrizione, peso, pila, tag, effetti: e ? { fame: e.hunger, sete: e.thirst, energia: e.energy, salute: e.health } : undefined, impugnabile: categoria === 'attrezzo', aspetto: descrizione, forma: categoria === 'cibo' ? 'frutto' : categoria === 'bevanda' ? 'bottiglia' : categoria === 'attrezzo' ? 'attrezzo' : 'sacco' });
+      out.push({ nome, categoria, descrizione, peso, pila, tag, effetti: e ? { fame: e.hunger, sete: e.thirst, energia: e.energy, salute: e.health } : undefined, impugnabile: categoria === 'tool', aspetto: descrizione, forma: categoria === 'food' ? 'fruit' : categoria === 'drink' ? 'bottle' : categoria === 'tool' ? 'tool' : 'sack' });
     }
     return out;
   }
@@ -447,11 +449,11 @@ export class MockAiModels implements AiModels {
     const ids = ctx.layouts.map((l) => l.id);
     const neighbour = ctx.neighbors.find((n) => ids.includes(n.layout))?.layout;
     const ambiente = ctx.start
-      ? (ids.find((i) => i === 'borgo') ?? ids[0])
+      ? (ids.find((i) => i === 'village') ?? ids[0])
       : neighbour && rng.chance(0.4)
         ? neighbour
-        : biome === 'forest' && ids.includes('bosco')
-          ? 'bosco'
+        : biome === 'forest' && ids.includes('woods')
+          ? 'woods'
           : rng.pick(ids);
     const oggetti: Array<{ modulo: string; dove: string }> = [];
     for (const m of ctx.catalog) {
@@ -497,7 +499,7 @@ export class MockAiModels implements AiModels {
       descrizione: req.prompt,
       lore: `Nessuno ricorda da quando ${tipo === 'npc' ? 'vive' : 'si trova'} qui.`,
       aspetto: req.prompt,
-      classe: tipo === 'npc' ? (/gatto|cane|pecora|uccello|corvo|volpe/.test(req.prompt.toLowerCase()) ? 'animale' : 'persona') : tipo === 'strumento' ? 'oggetto' : 'mobile',
+      classe: tipo === 'npc' ? (/gatto|cane|pecora|uccello|corvo|volpe/.test(req.prompt.toLowerCase()) ? 'animal' : 'person') : tipo === 'strumento' ? 'object' : 'furniture',
       contesto: { terreni: (req.paletteCodes ?? ['g', 'p']).filter((c) => c === 'g' || c === 'p'), luoghi: 'prati e sentieri', rarita: 0.2 },
       interazione: tipo === 'npc' ? 'parla' : tipo === 'oggetto' ? 'usa' : 'nessuna',
       comandi: tipo === 'strumento' ? [edible ? { azione: 'usa', descrizione: 'mangialo' } : { azione: 'azione', descrizione: 'usalo su ciò che hai davanti' }] : [],

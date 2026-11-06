@@ -4,7 +4,7 @@
 // makes sense and can be repeated is learned by the object: it enters its menu, no further calls.
 
 import type { Schema } from '../ai/models';
-import { EFFECT_TYPES } from '../types';
+import { italianName, italianValues } from '../internalNames';
 import type { Council } from './council';
 
 export interface ActionContext {
@@ -44,7 +44,8 @@ export interface ActionJudgement {
 const EFFECT_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
-    tipo: { type: 'STRING', enum: [...EFFECT_TYPES] },
+    // The prompts still speak Italian (T310): the effects of the contract 0.1, which validateEffects makes internal.
+    tipo: { type: 'STRING', enum: italianValues('effetti') },
     testo: { type: 'STRING' },
     oggetto: { type: 'STRING', description: 'nome di un oggetto (crea_oggetto, consuma)' },
     nome: { type: 'STRING', description: 'stato/togli_stato: il nome della condizione (es. «a cavallo»)' },
@@ -195,7 +196,7 @@ export async function nameSpell(
   const sorted = (s: string) => s.split(' ').sort().join(' ');
   const reordered = known.filter((k) => k.sequence !== seq && sorted(k.sequence) === sorted(seq));
   const prompt = [
-    `Il viandante pronuncia, in quest'ordine, le rune: ${runes.map((r) => `«${r.token}» (${r.name}, ${r.element}: ${r.description})`).join(', ')}.`,
+    `Il viandante pronuncia, in quest'ordine, le rune: ${runes.map((r) => `«${r.token}» (${r.name}, ${italianName('elementi', r.element)}: ${r.description})`).join(', ')}.`,
     `Incantesimi già noti:\n${known.map((k) => `- ${k.sequence} → ${k.name}: ${k.description}`).join('\n') || '(nessuno)'}`,
     reordered.length ? `Le stesse rune in un altro ordine sono già un altro incantesimo (${reordered.map((k) => `${k.sequence} → ${k.name}`).join('; ')}): questa sequenza deve fare altro.` : '',
     `Decidi cosa fa questa sequenza (${seq}), coerente con gli elementi delle rune, con gli incantesimi noti e con il mondo. ${SPELL_GUIDE}\nEffetti (al massimo 4) SOLO da questo elenco:\n${EFFECTS_GUIDE}`,

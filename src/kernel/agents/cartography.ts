@@ -7,8 +7,8 @@ import type { Schema } from '../ai/models';
 import type { CardStamp } from '../cards';
 import type { EnvironmentDef, ChunkInfo, TerrainDef } from '../types';
 import type { MjNode } from '../mj';
-import { sizeOf, SIZE_TIERS, type SizeTier } from '../../mj/classes';
-import { STAMP_SHAPES } from '../stamps';
+import { sizeOf, type SizeTier } from '../../mj/classes';
+import { internalName, italianValues } from '../internalNames';
 import { paletteSummary, type CatalogEntry, type Council } from './council';
 
 export type Where = 'dentro' | 'fuori' | 'ovunque';
@@ -105,7 +105,7 @@ const PLAN_SCHEMA: Schema = {
     a_terra: { type: 'ARRAY', items: { type: 'STRING' } },
     nuovi: { type: 'ARRAY', items: { type: 'OBJECT', properties: { concetto: { type: 'STRING' }, dove: { type: 'STRING', enum: WHERE } }, required: ['concetto', 'dove'] } },
     rune: { type: 'ARRAY', items: { type: 'STRING' } },
-    strutture: { type: 'ARRAY', items: { type: 'OBJECT', properties: { concetto: { type: 'STRING' }, taglia: { type: 'STRING', enum: SIZE_TIERS.map((t) => t.id) } }, required: ['concetto'] } },
+    strutture: { type: 'ARRAY', items: { type: 'OBJECT', properties: { concetto: { type: 'STRING' }, taglia: { type: 'STRING', enum: italianValues('taglie') } }, required: ['concetto'] } },
   },
   required: ['luogo', 'ambiente', 'oggetti', 'rune'],
 };
@@ -115,7 +115,8 @@ const PLAN_SCHEMA: Schema = {
  * of the plans before ADR-0092 (the castle of then is Huge).
  */
 export function readStructure(s: any): { concetto: string; taglia?: SizeTier } {
-  const taglia = sizeOf(String(s?.taglia ?? '').trim().toLowerCase())?.id ?? (s?.importante === true ? 'enorme' : undefined);
+  // The Cartographer still writes the Italian sizes of the contract 0.1 (T307a, until T310): the one it means.
+  const taglia = sizeOf(internalName('taglie', String(s?.taglia ?? '').trim().toLowerCase()))?.id ?? (s?.importante === true ? 'huge' : undefined);
   return { concetto: String(s?.concetto ?? '').trim(), ...(taglia ? { taglia } : {}) };
 }
 
@@ -133,7 +134,7 @@ export async function planChunk(c: Council, ctx: PlanContext): Promise<ChunkPlan
     '"strutture": 0-2 edifici o costruzioni di questo luogo, se l\'ambiente ne ha della sua epoca (es. «il mulino sul fiume», «il deposito dei tram», «l\'officina delle caldaie»): ognuno diventa un modello intero in cui si entra, sui lotti dell\'ambiente (gli altri lotti hanno case comuni).',
     `"taglia" (facoltativa, come le taglie di D&D: minuscola, piccola, media, grande, enorme, gargantuesca): media una casa, grande un mulino, una stazione o una torre; il kernel la adatta al lotto.`,
     ctx.rari?.length
-      ? `Le taglie più grandi sono rare: in questa parte del mondo può esserci ancora ${ctx.rari.map((t) => (t === 'enorme' ? 'una struttura "enorme" (ciò che nella sua epoca è enorme: un castello, una centrale, un grattacielo)' : 'una struttura "gargantuesca" (una cittadella, una cattedrale, una torre-città, una rovina immensa)')).join(' e ')}: al più una per luogo, solo se il luogo lo merita davvero.`
+      ? `Le taglie più grandi sono rare: in questa parte del mondo può esserci ancora ${ctx.rari.map((t) => (t === 'huge' ? 'una struttura "enorme" (ciò che nella sua epoca è enorme: un castello, una centrale, un grattacielo)' : 'una struttura "gargantuesca" (una cittadella, una cattedrale, una torre-città, una rovina immensa)')).join(' e ')}: al più una per luogo, solo se il luogo lo merita davvero.`
       : 'Niente strutture "enorme" né "gargantuesca" qui: questa parte del mondo ha già i suoi luoghi notevoli.',
     ctx.feedback ? `IL TENTATIVO PRECEDENTE È STATO SCARTATO: ${ctx.feedback}. Correggi.` : '',
   ]
@@ -183,7 +184,7 @@ export async function designLayouts(c: Council, palette: Record<string, TerrainD
     [
       'Scrivi 10-14 ambienti per i luoghi di questo mondo, ognuno come programma di riscrittura MarkovJunior (vedi il tuo ruolo per la sintassi) che trasforma la bozza procedurale.',
       'Varietà, nell\'epoca della bibbia! Servono: dove si abita (più di un tipo: dal borgo di pietra al quartiere di condomini, secondo il mondo), dove si lavora e si coltiva, la natura che in questo mondo resta (boschi, giungle, deserti, montagne, laghi e coste, o ciò che ne hanno fatto), e luoghi speciali con i timbri del kernel. Più un interno grande con più stanze. La bozza è natura: un ambiente costruito fitto prima la sgombra.',
-      `Timbri disponibili: {"type":"stamp","shape":…} con shape tra ${STAMP_SHAPES.join(', ')} (vedi il ruolo). Un timbro è una forma, non un'epoca: il suo nome resta nel programma, nome e descrizione dell'ambiente li decidi tu e "codes" gli dà i materiali di questo mondo.`,
+      `Timbri disponibili: {"type":"stamp","shape":…} con shape tra ${italianValues('timbri').join(', ')} (vedi il ruolo). Un timbro è una forma, non un'epoca: il suo nome resta nel programma, nome e descrizione dell'ambiente li decidi tu e "codes" gli dà i materiali di questo mondo.`,
       `Codici dei terreni utilizzabili:\n${paletteSummary(palette)}`,
       feedback && `ALCUNI PROGRAMMI ERANO INVALIDI, correggili: ${feedback}`,
     ]

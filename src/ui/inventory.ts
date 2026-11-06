@@ -214,10 +214,10 @@ export class InventoryPanel {
         };
         const def = k.content.get(s.item);
         const isRune = s.item.startsWith('rune:');
-        const usable = !isRune && !def?.container && (!!info.effects || ['cibo', 'bevanda', 'medicina', 'luce', 'vestiario'].includes(info.category) || k.sandbox.has(def?.module ?? '', 'on_use'));
+        const usable = !isRune && !def?.container && (!!info.effects || ['food', 'drink', 'medicine', 'light', 'clothing'].includes(info.category) || k.sandbox.has(def?.module ?? '', 'on_use'));
         if (def?.container) btn(`Apri (${(s.inv?.slots.filter(Boolean).length ?? 0)}/${def.container.size})`, () => k.useSlot(this.sel), 'primary');
         if (isRune) btn('Aggiungi alla frase', () => k.composeRune(s.item.slice(5)), 'primary');
-        if (usable) btn(info.category === 'cibo' ? 'Mangia' : info.category === 'bevanda' ? 'Bevi' : info.category === 'magia' ? 'Assorbi' : 'Usa', () => k.useSlot(this.sel), 'primary');
+        if (usable) btn(info.category === 'food' ? 'Mangia' : info.category === 'drink' ? 'Bevi' : info.category === 'magic' ? 'Assorbi' : 'Usa', () => k.useSlot(this.sel), 'primary');
         if (info.spec.equippable) btn(inv.equipped === this.sel ? 'Riponi' : 'Impugna', () => k.equipSlot(this.sel), 'primary');
         for (const a of def?.actions ?? []) if (a.effects?.length) btn(a.label, () => k.itemAct(this.sel, a.id), 'primary');
         btn('Getta', () => k.dropSlot(this.sel));
@@ -337,14 +337,14 @@ export class InventoryPanel {
           this.render();
         };
         body.append(el('div', { class: 'uirow' }, el('span', { class: 'l' }, e.etichetta ?? e.id ?? ''), cell, el('span', { class: 'v' }, cur ? k.itemInfo(cur.item).name : '—')));
-      } else if (e.tipo === 'barra') {
+      } else if (e.tipo === 'bar') {
         const v = Number(k.uiValue(e.campo)) || 0;
         const max = e.max ?? 100;
         body.append(el('div', { class: 'uirow' }, el('span', { class: 'l' }, e.etichetta ?? ''), el('span', { class: 'bar' }, el('span', { class: 'fill', style: `width:${Math.max(0, Math.min(100, (v / max) * 100))}%` })), el('span', { class: 'v' }, `${Math.round(v)}/${max}`)));
-      } else if (e.tipo === 'testo') {
+      } else if (e.tipo === 'text') {
         const v = k.uiValue(e.campo);
         body.append(el('div', { class: 'uirow' }, el('span', { class: 'l' }, e.etichetta ?? ''), el('span', { class: 'v' }, v === undefined ? '' : String(typeof v === 'number' ? Math.round(v * 100) / 100 : v))));
-      } else if (e.tipo === 'pulsante') {
+      } else if (e.tipo === 'button') {
         const b = el('button', { class: 'primary' }, e.etichetta ?? e.id ?? '');
         b.onclick = () => {
           k.uiAction(panelId, e.id!);

@@ -75,43 +75,43 @@
       },
       "passi": [
         {
-          "tipo": "cammina",
-          "verso": "destra",
+          "tipo": "walk",
+          "verso": "right",
           "secondi": 0.35
         },
         {
-          "tipo": "cammina",
-          "verso": "sinistra",
+          "tipo": "walk",
+          "verso": "left",
           "secondi": 0.35
         },
         {
-          "tipo": "cammina",
-          "verso": "destra",
+          "tipo": "walk",
+          "verso": "right",
           "secondi": 0.35
         },
         {
-          "tipo": "cammina",
-          "verso": "sinistra",
+          "tipo": "walk",
+          "verso": "left",
           "secondi": 0.35
         },
         {
-          "tipo": "cammina",
-          "verso": "destra",
+          "tipo": "walk",
+          "verso": "right",
           "secondi": 0.35
         },
         {
-          "tipo": "cammina",
-          "verso": "sinistra",
+          "tipo": "walk",
+          "verso": "left",
           "secondi": 0.35
         },
         {
-          "tipo": "cammina",
-          "verso": "destra",
+          "tipo": "walk",
+          "verso": "right",
           "secondi": 0.35
         },
         {
-          "tipo": "cammina",
-          "verso": "sinistra",
+          "tipo": "walk",
+          "verso": "left",
           "secondi": 0.35
         }
       ],

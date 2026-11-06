@@ -1,12 +1,12 @@
 // Structure stamps: castles with moats and drawbridges, fortresses, wizard towers, temples, pyramids,
 // hut villages, stables, barracks, dungeons, dragon lairs. Models cannot draw a castle cell by cell
 // (they cannot count); the Cartographer only says "a castle here" in its layout program
-// ({type: "stamp", shape: "castello"}) and the kernel draws it with the world's own tile codes.
+// ({type: "stamp", shape: "castle"}) and the kernel draws it with the world's own tile codes.
 
 import type { Rng } from './rng';
 import type { TerrainDef } from './types';
 
-export const STAMP_SHAPES = ['casa', 'castello', 'fortezza', 'torre', 'tempio', 'piramide', 'capanne', 'recinto', 'caserma', 'dungeon', 'tana', 'pozzo'] as const;
+export const STAMP_SHAPES = ['house', 'castle', 'fortress', 'tower', 'temple', 'pyramid', 'huts', 'pen', 'barracks', 'dungeon', 'lair', 'well'] as const;
 export type StampShape = (typeof STAMP_SHAPES)[number];
 
 /** Roles a stamp draws with; resolved from the palette when the program does not say. */
@@ -64,12 +64,12 @@ function house(p: Pat, x0: number, y0: number, w: number, h: number, doorX?: num
 /** The pattern of a shape (role per cell; null = leave the ground as it is). */
 export function shapePattern(shape: StampShape, rng: Rng): Pat {
   switch (shape) {
-    case 'casa': {
+    case 'house': {
       const p = grid(5 + rng.int(2), 4 + rng.int(2));
       house(p, 0, 0, p[0].length, p.length);
       return p;
     }
-    case 'castello': {
+    case 'castle': {
       // Moat, curtain wall with corner towers, a drawbridge at the gate, a keep in the courtyard.
       const p = grid(15, 15, 'terreno');
       rect(p, 0, 0, 14, 14, 'acqua');
@@ -81,7 +81,7 @@ export function shapePattern(shape: StampShape, rng: Rng): Pat {
       for (let y = 9; y <= 12; y++) p[y][7] = 'strada';
       return p;
     }
-    case 'fortezza': {
+    case 'fortress': {
       const p = grid(13, 13, 'terreno');
       rect(p, 0, 0, 12, 12, 'muro', 'muro');
       rect(p, 2, 2, 10, 10, 'muro', 'terreno');
@@ -92,7 +92,7 @@ export function shapePattern(shape: StampShape, rng: Rng): Pat {
       house(p, 4, 3, 5, 4);
       return p;
     }
-    case 'torre': {
+    case 'tower': {
       const p = grid(7, 7);
       for (let y = 0; y < 7; y++)
         for (let x = 0; x < 7; x++) {
@@ -102,7 +102,7 @@ export function shapePattern(shape: StampShape, rng: Rng): Pat {
       p[6][3] = 'porta';
       return p;
     }
-    case 'tempio': {
+    case 'temple': {
       const p = grid(9, 8);
       rect(p, 0, 0, 8, 7, 'muro', 'pavimento');
       for (const y of [2, 5]) for (const x of [2, 4, 6]) p[y][x] = 'muro';
@@ -110,20 +110,20 @@ export function shapePattern(shape: StampShape, rng: Rng): Pat {
       p[7][3] = 'porta';
       return p;
     }
-    case 'piramide': {
+    case 'pyramid': {
       const p = grid(11, 11, 'muro');
       for (let y = 4; y <= 6; y++) for (let x = 4; x <= 6; x++) p[y][x] = 'pavimento';
       for (let y = 7; y <= 9; y++) p[y][5] = 'pavimento';
       p[10][5] = 'porta';
       return p;
     }
-    case 'capanne': {
+    case 'huts': {
       const p = grid(3, 3);
       rect(p, 0, 0, 2, 2, 'muro', 'pavimento');
       p[2][1] = 'porta';
       return p;
     }
-    case 'recinto': {
+    case 'pen': {
       // A paddock fenced in, with a small stable in a corner.
       const p = grid(10, 8, 'terreno');
       rect(p, 0, 0, 9, 7, 'recinto', 'terreno');
@@ -132,7 +132,7 @@ export function shapePattern(shape: StampShape, rng: Rng): Pat {
       house(p, 1, 1, 4, 3);
       return p;
     }
-    case 'caserma': {
+    case 'barracks': {
       const p = grid(11, 5);
       rect(p, 0, 0, 10, 4, 'muro', 'pavimento');
       for (let y = 1; y < 4; y++) p[y][5] = 'muro';
@@ -164,7 +164,7 @@ export function shapePattern(shape: StampShape, rng: Rng): Pat {
       p[13][last[0]] = 'porta';
       return p;
     }
-    case 'tana': {
+    case 'lair': {
       // A cave in the rock: an irregular hollow and a mouth.
       const p = grid(12, 10, 'roccia');
       for (let y = 1; y < 9; y++)
@@ -176,7 +176,7 @@ export function shapePattern(shape: StampShape, rng: Rng): Pat {
       p[9][6] = 'terreno';
       return p;
     }
-    case 'pozzo': {
+    case 'well': {
       const p = grid(3, 3, 'strada');
       p[1][1] = 'acqua';
       return p;

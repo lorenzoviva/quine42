@@ -11,6 +11,6 @@
   "physics": { "solid": true, "radius": 0.45 },
   "tags": ["tagliabile"],
   "drops": ["item.ciocco"],
-  "actions": [{ "id": "raccogli", "label": "Raccogli le more" }],
+  "actions": [{ "id": "gather", "label": "Raccogli le more" }],
   "spawn": { "tiles": ["g"], "chance": 0.2, "max": 2 }
 }

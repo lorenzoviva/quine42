@@ -6,6 +6,7 @@
 // is always derived: it can be rebuilt from the files (the places come from the chunk plans, which
 // live outside the text snapshot, so a rebuild keeps the places of the previous graph).
 
+import { internalName } from './internalNames';
 import type { FileMap, Manifest } from './types';
 import { readPeople, relationProblem, relationsAgree, similarNames, type Individual, type Species } from './society';
 import { readPlots } from './plots';
@@ -166,7 +167,7 @@ export function graphSources(files: FileMap): string[] {
 export function chunksOf(data: GraphData | null | undefined): GraphChunk[] {
   return (data?.nodes ?? [])
     .filter((n) => n.tipo === 'luogo' && typeof n.cx === 'number' && typeof n.cy === 'number')
-    .map((n) => ({ cx: n.cx as number, cy: n.cy as number, nome: n.label, descrizione: n.descrizione as string | undefined, ambiente: n.ambiente as string | undefined, cose: n.cose as string[] | undefined, a_terra: n.a_terra as string[] | undefined, strutture: n.strutture as string[] | undefined }));
+    .map((n) => ({ cx: n.cx as number, cy: n.cy as number, nome: n.label, descrizione: n.descrizione as string | undefined, ambiente: typeof n.ambiente === 'string' ? internalName('ambienti', n.ambiente) : undefined, cose: n.cose as string[] | undefined, a_terra: n.a_terra as string[] | undefined, strutture: n.strutture as string[] | undefined }));
 }
 
 /** The places of the previous graph file, then those given (which win), in a stable order. */

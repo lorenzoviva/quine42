@@ -29,7 +29,7 @@ export const BASE_CODES: Record<string, { meaning: string; layer: TerrainLayer; 
 };
 
 /** The seed's environments that belong to no age (ADR-0134): a Genesis that wrote too few keeps these, not a castle in a city of neon. */
-const TIMELESS_LAYOUTS = new Set(['bosco', 'campi', 'rovine', 'dungeon', 'deserto', 'giungla', 'montagne', 'lago']);
+const TIMELESS_LAYOUTS = new Set(['woods', 'fields', 'ruins', 'dungeon', 'desert', 'jungle', 'mountains', 'lake']);
 
 export interface CastEntry {
   tipo: 'npc' | 'oggetto' | 'strumento';

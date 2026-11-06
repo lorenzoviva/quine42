@@ -9,6 +9,7 @@ import { ITEM_CATEGORIES, type ItemDef, type LootTable, type Recipe } from '../t
 import { slug } from './forge';
 import type { AgentId, Council } from './council';
 import { ITEM_SHAPES, itemShapeModel } from '../modeldirector';
+import { internalName, italianValues } from '../internalNames';
 import { ACTIVITIES, DAY_PHASES, defaultRoutine, inferActivity, RELATION_WORDS, WHERES, type Activity, type DayPhase, type Gender, type Relation, type RoutineStep, type Species, type Where } from '../society';
 
 const ITEM_SCHEMA: Schema = {
@@ -16,7 +17,8 @@ const ITEM_SCHEMA: Schema = {
   properties: {
     nome: { type: 'STRING' },
     descrizione: { type: 'STRING' },
-    categoria: { type: 'STRING', enum: [...ITEM_CATEGORIES] },
+    // The prompts still speak Italian (T310): categories and shapes of the contract 0.1, made internal by toItemDef.
+    categoria: { type: 'STRING', enum: italianValues('categorie') },
     peso: { type: 'NUMBER' },
     pila: { type: 'INTEGER' },
     tag: { type: 'ARRAY', items: { type: 'STRING' } },
@@ -26,7 +28,7 @@ const ITEM_SCHEMA: Schema = {
     posto: { type: 'STRING', description: 'solo per ciò che si indossa o si impugna: testa, corpo, gambe, piedi, mani, arma, scudo, anello, collo, schiena' },
     bonus: { type: 'OBJECT', description: 'solo per ciò che si indossa o si impugna: cosa dà', properties: { difesa: { type: 'NUMBER' }, attacco: { type: 'NUMBER' }, velocita: { type: 'NUMBER', description: 'moltiplicatore, es. 0.95 per un\'armatura pesante, 1.1 per stivali leggeri' }, peso: { type: 'NUMBER', description: 'peso trasportabile in più (zaini)' }, luce: { type: 'NUMBER' }, calore: { type: 'NUMBER' } } },
     aspetto: { type: 'STRING' },
-    forma: { type: 'STRING', enum: [...ITEM_SHAPES], description: 'la forma comune a cui somiglia (un modello per forma, colorato come l\'oggetto)' },
+    forma: { type: 'STRING', enum: italianValues('impronte').filter((f) => f !== 'forma'), description: 'la forma comune a cui somiglia (un modello per forma, colorato come l\'oggetto)' },
   },
   required: ['nome', 'descrizione', 'categoria', 'peso', 'pila', 'tag', 'aspetto', 'forma'],
 };
@@ -60,10 +62,11 @@ export function toItemDef(r: RawItem, taken: Set<string>): ItemDef | null {
   let id = `item.${slug(r.nome)}`;
   for (let i = 2; taken.has(id); i++) id = `item.${slug(r.nome)}-${i}`;
   taken.add(id);
-  const category = (ITEM_CATEGORIES as readonly string[]).includes(r.categoria) ? (r.categoria as ItemDef['category']) : 'varie';
+  const named = internalName('categorie', String(r.categoria ?? ''));
+  const category = (ITEM_CATEGORIES as readonly string[]).includes(named) ? (named as ItemDef['category']) : 'misc';
   const e = r.effetti ?? {};
   const effects = { hunger: clamp(e.fame, -50, 60, 0), thirst: clamp(e.sete, -50, 60, 0), energy: clamp(e.energia, -50, 60, 0), health: clamp(e.salute, -50, 60, 0), mana: clamp(e.mana, -50, 60, 0) };
-  const bag = category === 'contenitore' && Number(r.contenitore) >= 2 ? { size: Math.round(clamp(r.contenitore, 2, 12, 4)) } : undefined;
+  const bag = category === 'container' && Number(r.contenitore) >= 2 ? { size: Math.round(clamp(r.contenitore, 2, 12, 4)) } : undefined;
   const hasEffects = Object.values(effects).some((v) => v !== 0);
   return {
     id,
@@ -76,7 +79,7 @@ export function toItemDef(r: RawItem, taken: Set<string>): ItemDef | null {
     glyph: CATEGORY_GLYPHS[category] ?? '•',
     color: `hsl(${hashStr(id) % 360} 60% 66%)`,
     aspetto: String(r.aspetto ?? r.nome).slice(0, 200),
-    ...((ITEM_SHAPES as readonly string[]).includes(r.forma ?? '') ? { model: itemShapeModel(r.forma!) } : {}),
+    ...((ITEM_SHAPES as readonly string[]).includes(internalName('impronte', r.forma ?? '')) ? { model: itemShapeModel(internalName('impronte', r.forma!)) } : {}),
     equippable: !!r.impugnabile,
     ...(hasEffects ? { effects } : {}),
     ...(bag ? { container: bag } : {}),

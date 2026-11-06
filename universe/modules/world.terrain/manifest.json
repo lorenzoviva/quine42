@@ -7,6 +7,7 @@
   "logic": "logic.lua",
   "tiles": {
     "g": {
+      "id": "meadow",
       "name": "prato",
       "description": "erba bassa con trifoglio e piccoli fiori",
       "color": "#5a9e48",
@@ -15,6 +16,7 @@
       "speed": 1
     },
     "p": {
+      "id": "path",
       "name": "sentiero",
       "description": "terra battuta con sassolini",
       "color": "#c7a76a",
@@ -23,7 +25,8 @@
       "speed": 1.15
     },
     "t": {
-      "model": "albero",
+      "id": "forest",
+      "model": "tree",
       "name": "bosco",
       "description": "alberi fitti dalle chiome tonde",
       "color": "#2c6a34",
@@ -31,6 +34,7 @@
       "layer": "vegetation"
     },
     "w": {
+      "id": "water",
       "name": "acqua",
       "description": "acqua di stagno, increspata",
       "color": "#3c7cc8",
@@ -38,7 +42,8 @@
       "layer": "liquid"
     },
     "r": {
-      "model": "roccia",
+      "id": "rock",
+      "model": "rock",
       "name": "roccia",
       "description": "massi grigi e lastre di pietra",
       "color": "#8c8d95",
@@ -46,6 +51,7 @@
       "layer": "rock"
     },
     "h": {
+      "id": "wall",
       "name": "muro",
       "description": "muri di pietra squadrata",
       "color": "#8a6a52",
@@ -53,6 +59,7 @@
       "layer": "wall"
     },
     "f": {
+      "id": "wooden_floor",
       "name": "pavimento di legno",
       "description": "assi di legno chiaro",
       "color": "#b48a5a",
@@ -61,6 +68,7 @@
       "indoor": true
     },
     "d": {
+      "id": "door",
       "name": "porta",
       "description": "soglia e porta di legno",
       "color": "#d8b048",
@@ -68,6 +76,7 @@
       "layer": "door"
     },
     "m": {
+      "id": "plowed_field",
       "name": "campo arato",
       "description": "solchi di terra scura coltivata",
       "color": "#6e5434",
@@ -76,6 +85,7 @@
       "speed": 0.8
     },
     "s": {
+      "id": "sand",
       "name": "sabbia",
       "color": "#d8c27a",
       "solid": false,
@@ -84,6 +94,7 @@
       "description": "sabbia fine e calda, di deserto o di spiaggia"
     },
     "j": {
+      "id": "jungle",
       "model": "palma",
       "name": "giungla",
       "color": "#1f6b34",
@@ -92,6 +103,7 @@
       "description": "vegetazione tropicale fittissima, liane e foglie enormi"
     },
     "o": {
+      "id": "sea",
       "name": "mare",
       "color": "#1d4f8a",
       "solid": true,
@@ -99,6 +111,7 @@
       "description": "acqua profonda del mare aperto"
     },
     "k": {
+      "id": "mountain",
       "model": "masso-muschioso",
       "name": "montagna",
       "color": "#6e6a66",
@@ -107,6 +120,7 @@
       "description": "pareti di montagna, invalicabili"
     },
     "n": {
+      "id": "snow",
       "name": "neve",
       "color": "#e8eef2",
       "solid": false,
@@ -115,6 +129,7 @@
       "description": "neve alta che rallenta il passo"
     },
     "b": {
+      "id": "stone_wall",
       "name": "muro di pietra",
       "color": "#8a8580",
       "solid": true,
@@ -122,6 +137,7 @@
       "description": "muri di grosse pietre squadrate: castelli, torri, templi"
     },
     "q": {
+      "id": "brick_wall",
       "name": "muro di mattoni",
       "color": "#9a4a32",
       "solid": true,
@@ -129,6 +145,7 @@
       "description": "mattoni rossi cotti al forno"
     },
     "a": {
+      "id": "straw_wall",
       "name": "parete di paglia",
       "color": "#c9a85a",
       "solid": true,
@@ -136,6 +153,7 @@
       "description": "pareti di canne e paglia delle capanne"
     },
     "c": {
+      "id": "fence",
       "name": "staccionata",
       "color": "#7a5a34",
       "solid": true,
@@ -143,6 +161,7 @@
       "description": "recinto di pali di legno per cavalli e pecore"
     },
     "z": {
+      "id": "drawbridge",
       "name": "ponte levatoio",
       "color": "#8b6a42",
       "solid": false,
@@ -150,6 +169,7 @@
       "description": "assi di legno robuste sopra il fossato"
     },
     "l": {
+      "id": "stone_floor",
       "name": "pavimento di pietra",
       "color": "#9c958c",
       "solid": false,
@@ -158,6 +178,7 @@
       "description": "lastre di pietra consumate dai passi"
     },
     "v": {
+      "id": "lava",
       "name": "lava",
       "color": "#e2581e",
       "solid": true,
@@ -165,6 +186,7 @@
       "description": "roccia fusa che ribolle: nessuno la attraversa"
     },
     "e": {
+      "id": "sown_field",
       "name": "campo seminato",
       "color": "#6e5232",
       "solid": false,
@@ -177,6 +199,7 @@
       }
     },
     "u": {
+      "id": "ripe_wheat",
       "name": "grano maturo",
       "color": "#d6b445",
       "solid": false,
@@ -185,6 +208,7 @@
       "description": "Spighe alte e gialle, pronte per la falce."
     },
     "x": {
+      "id": "stump",
       "name": "ceppaia",
       "color": "#6f8a3c",
       "solid": false,

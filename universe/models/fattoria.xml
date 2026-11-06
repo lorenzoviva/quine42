@@ -167,8 +167,8 @@ al cancello e due aiuole di ortaggi; dentro un tavolo. La porta si apre (azione)
   <all in="KB" out="*K" steps="1"/>
   <all in="B K" out="K *" steps="7"/>
 
-  <action name="apri" label="Apri la porta"><all><rule in="O" out="h"/><rule in="o" out="j"/></all></action>
-  <action name="chiudi" label="Chiudi la porta"><all><rule in="h" out="O"/><rule in="j" out="o"/></all></action>
+  <action name="open" label="Apri la porta"><all><rule in="O" out="h"/><rule in="o" out="j"/></all></action>
+  <action name="close" label="Chiudi la porta"><all><rule in="h" out="O"/><rule in="j" out="o"/></all></action>
 </sequence>
 <animation name="fumo" frames="8">
   <prl in="B S" out="S B" steps="1"/>

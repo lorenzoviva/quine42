@@ -5,11 +5,12 @@
 import type { Schema } from '../ai/models';
 import type { UiElement, UiPanel } from '../types';
 import type { Council } from './council';
+import { internalName, italianValues } from '../internalNames';
 
 const ELEMENT: Schema = {
   type: 'OBJECT',
   properties: {
-    tipo: { type: 'STRING', enum: ['slot', 'barra', 'testo', 'pulsante'] },
+    tipo: { type: 'STRING', enum: italianValues('pannelli') },
     id: { type: 'STRING', description: 'slot: il suo id (es. testa); pulsante: l\'azione che riceve on_ui' },
     etichetta: { type: 'STRING' },
     accetta: { type: 'ARRAY', items: { type: 'STRING' }, description: 'slot: cosa ci va (posti degli oggetti come testa/corpo/arma, categorie come vestiario/arma, o tag)' },
@@ -109,11 +110,12 @@ export function cleanPanel(panel: { titolo?: string; elementi?: unknown[] }, id:
   const elementi: UiElement[] = [];
   const seen = new Set<string>();
   for (const raw of (panel.elementi ?? []).slice(0, 16) as Array<Record<string, unknown>>) {
-    const tipo = raw?.tipo;
-    if (tipo !== 'slot' && tipo !== 'barra' && tipo !== 'testo' && tipo !== 'pulsante') continue;
+    // The Council still writes the Italian of the contract 0.1 (T307a, until T310): `barra` is a `bar`.
+    const tipo = typeof raw?.tipo === 'string' ? internalName('pannelli', raw.tipo) : undefined;
+    if (tipo !== 'slot' && tipo !== 'bar' && tipo !== 'text' && tipo !== 'button') continue;
     const el: UiElement = { tipo, etichetta: String(raw.etichetta ?? raw.id ?? '').slice(0, 40) };
     const sid = String(raw.id ?? '').toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 24);
-    if (tipo === 'slot' || tipo === 'pulsante') {
+    if (tipo === 'slot' || tipo === 'button') {
       if (!sid || seen.has(sid)) {
         errors.push(`${tipo} senza id unico («${el.etichetta}»)`);
         continue;
@@ -122,8 +124,8 @@ export function cleanPanel(panel: { titolo?: string; elementi?: unknown[] }, id:
       el.id = sid;
     }
     if (tipo === 'slot') el.accetta = (Array.isArray(raw.accetta) ? raw.accetta : []).map((a) => String(a).toLowerCase().trim()).filter(Boolean).slice(0, 8);
-    if ((tipo === 'barra' || tipo === 'testo') && typeof raw.campo === 'string' && /^[a-z_][a-z0-9_]*\.[a-z_][a-z0-9_]*$/i.test(raw.campo)) el.campo = raw.campo;
-    if (tipo === 'barra') el.max = typeof raw.max === 'number' && raw.max > 0 ? raw.max : 100;
+    if ((tipo === 'bar' || tipo === 'text') && typeof raw.campo === 'string' && /^[a-z_][a-z0-9_]*\.[a-z_][a-z0-9_]*$/i.test(raw.campo)) el.campo = raw.campo;
+    if (tipo === 'bar') el.max = typeof raw.max === 'number' && raw.max > 0 ? raw.max : 100;
     elementi.push(el);
   }
   if (!elementi.length) errors.push('il pannello non ha elementi validi');

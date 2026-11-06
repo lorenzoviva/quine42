@@ -96,8 +96,8 @@ per casella; la casa occupa circa 3 × 2 caselle, la porta è alta quanto il via
     <all in="U U U U U U U U U" out="* * * * N * * * *" symmetry="(x)"/>
   </map>
 
-  <action name="apri" label="Apri la porta"><all><rule in="O" out="h"/><rule in="o" out="j"/></all></action>
-  <action name="chiudi" label="Chiudi la porta"><all><rule in="h" out="O"/><rule in="j" out="o"/></all></action>
+  <action name="open" label="Apri la porta"><all><rule in="O" out="h"/><rule in="o" out="j"/></all></action>
+  <action name="close" label="Chiudi la porta"><all><rule in="h" out="O"/><rule in="j" out="o"/></all></action>
 </sequence>
 <animation name="fumo" frames="8">
   <prl in="B S" out="S B" steps="1"/>

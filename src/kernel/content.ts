@@ -4,11 +4,18 @@
 
 import { Rng } from './rng';
 import { runeGlyph } from './runes';
+import { internalName, italianName } from './internalNames';
 import type { ItemDef, ItemSpec, EnvironmentDef, LootTable, MagicRune, ModuleEntry, Recipe, Spell } from './types';
 
 export const CATEGORY_GLYPHS: Record<string, string> = {
-  cibo: 'ò', bevanda: 'Ů', medicina: '+', attrezzo: '⚒', arma: '†', materiale: '▪', luce: '☼', vestiario: 'Ʌ', contenitore: '◘', magia: '✦', varie: '•',
+  food: 'ò', drink: 'Ů', medicine: '+', tool: '⚒', weapon: '†', material: '▪', light: '☼', clothing: 'Ʌ', container: '◘', magic: '✦', misc: '•',
 };
+
+/**
+ * Whether a word names an item's category (T307a): a loot table, a bag or a slot that says a category says it as a tag, often in the
+ * language of the world (`cibo`): the category it names is the internal one (`food`).
+ */
+export const isCategory = (d: Pick<ItemDef, 'category'>, word: string): boolean => d.category === word || d.category === internalName('categorie', word);
 
 export function normName(s: string): string {
   return s
@@ -52,7 +59,7 @@ export class Content {
           id: man.id,
           name: man.name,
           description: man.description ?? '',
-          category: (man.tags?.find((t) => t in CATEGORY_GLYPHS) as ItemDef['category']) ?? 'varie',
+          category: (man.tags?.map((t) => internalName('categorie', t)).find((t) => t in CATEGORY_GLYPHS) as ItemDef['category']) ?? 'misc',
           weight: man.item?.weight ?? 1,
           stack: man.item?.stackable ? man.item.maxStack : 1,
           tags: man.tags ?? [],
@@ -92,8 +99,8 @@ export class Content {
     return {
       id,
       name: magic ? `Runa ${magic.name} («${token}»)` : `Runa «${token}»`,
-      description: magic ? `Runa magica (${magic.element}): ${magic.description}. Come codice è la parola «${token}».` : `Un frammento del codice del mondo: la parola «${token}». Incisa sul tappeto, si esegue.`,
-      category: magic ? 'magia' : 'varie',
+      description: magic ? `Runa magica (${italianName('elementi', magic.element)}): ${magic.description}. Come codice è la parola «${token}».` : `Un frammento del codice del mondo: la parola «${token}». Incisa sul tappeto, si esegue.`,
+      category: magic ? 'magic' : 'misc',
       weight: 0.02,
       stack: 50,
       tags: magic ? ['runa', 'magica'] : ['runa'],
@@ -116,7 +123,7 @@ export class Content {
   }
 
   withTag(tag: string): ItemDef[] {
-    return [...this.items.values()].filter((d) => d.tags.includes(tag) || d.category === tag);
+    return [...this.items.values()].filter((d) => d.tags.includes(tag) || isCategory(d, tag));
   }
 
   /** Rolls a loot table: items found in a chest, a drawer, on the ground. */

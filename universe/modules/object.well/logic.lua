@@ -9,12 +9,12 @@ local ECHI = {
 }
 
 function M.on_act(id, user, action)
-  if action == "attingi" then
+  if action == "draw" then
     local otre = items.find("Otre d'acqua")
     if otre then inventory.add(user, otre, 1) end
     return "Il secchio risale pieno. Riempi un otre d'acqua fresca."
   end
-  if action == "moneta" then
+  if action == "coin" then
     inventory.remove(user, items.find("Moneta di rame"), 1)
     return "La moneta cade a lungo. Non senti il tonfo. Poi, dietro di te, un tintinnio."
   end

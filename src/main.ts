@@ -2,7 +2,7 @@ import wasmUri from 'wasmoon/dist/glue.wasm?url';
 import { Kernel } from './kernel/kernel';
 import { bundledFiles } from './kernel/bundle';
 import { localStore, memoryStore } from './kernel/repo';
-import { SEED_FILE, seedHashes, UniverseChunks, UniverseClient, upgradeFromSeed, WANDERER_HEADER, type PastCommit, type UniverseSnapshot } from './kernel/universes';
+import { prepareUniverse, SEED_FILE, seedHashes, UniverseChunks, UniverseClient, WANDERER_HEADER, type PastCommit, type UniverseSnapshot } from './kernel/universes';
 import type { FileMap } from './kernel/types';
 import { readConfig } from './kernel/universe';
 import { IdbChunks } from './kernel/chunks';
@@ -67,8 +67,9 @@ async function bootAlone(client: UniverseClient | null, snap: UniverseSnapshot |
       }
       snap = await client.load();
     }
-    const up = upgradeFromSeed(snap.files ?? {}, bundledFiles);
-    if (Object.keys(up.changes).length) await client.commit(up.changes, `aggiornamento dal kernel: ${up.updated.slice(0, 6).join(', ') || 'seme'}${up.updated.length > 6 ? '…' : ''}`, 'kernel');
+    // A universe of an older contract is ported first (T307a), then takes the seed: one commit says both.
+    const up = prepareUniverse(snap.files ?? {}, bundledFiles);
+    if (Object.keys(up.changes).length) await client.commit(up.changes, `${up.applied.length ? `migrazione ${up.applied.map((a) => a.split(':')[0]).join(', ')}; ` : ''}aggiornamento dal kernel: ${up.updated.slice(0, 6).join(', ') || 'seme'}${up.updated.length > 6 ? '…' : ''}`, 'kernel');
     files = up.files;
     past = snap.log ?? [];
   }
