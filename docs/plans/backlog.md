@@ -3082,7 +3082,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Quando è fatto: commit su `task/T259`; nell'esito costo misurato di ogni via e la raccomandazione; i task che ne nascono sono una proposta per l'autore.
 - Esito: `docs/design/scenografo.md`, banco `lab/banco/scenografo/` (`lab/scripts/banco-scenografo.ts`, `lab/tests/scenografo.test.ts`). Due vie su 6 edifici × 5 semi, con le stesse classi dello strato dei piedi (`φ ψ π #`) e una guardia del kernel sulla connessione 3D dei centri: il programma MarkovJunior di secondo stadio regge 30/30 al primo arredo (122 ms, varianza interna 0,86, ≈ 1 200 token), i modelli esistenti come dati 28/30 al primo e 30/30 entro 4 (319 ms, 0,77, ≈ 30 token di catalogo). Raccomandazione: i dati come base, il programma solo per cantina e arredi al soffitto. Diverso dal previsto: **nessuna richiesta ai modelli** (niente API in questa sessione), quindi il costo in dollari è una stima e la misura vera è il primo dei task proposti; la misura `stanze` di `giudica` non vale su un edificio arredato (cade quasi sempre, con tutte le stanze ancora percorribili).
 
-### T156 · Il prompt nuovo nello Scultore del gioco — `da fare` (dipende da T155, T173, T182, T258)
+### T156 · Il prompt nuovo nello Scultore del gioco — `in attesa` (dipende da T155, T173, T182, T258)
 - Pipeline: claude · stima 5% · approvato · browser · priorità 4
 - Step: 30
 - Deciso dall'autore il 04/11 (`domande/T182.md`): la ricchezza dei programmi a regole basta; le campate restano sgombre e gli interni arrivano in seguito, da un altro agente: un interno vuoto qui non è un difetto.
@@ -3092,6 +3092,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Test: `MockModels` e i test dello Scultore; typecheck e suite intera con i loro turni.
 - Browser: col turno `browser`: un edificio nuovo nel gioco, si entra, si sale di piano e si salta; screenshot.
 - Quando è fatto: commit su `task/T156`; nell'esito qualità e costo su Gemini contro Claude.
+- Esito: prompt procedurale nello Scultore per `structure` da Grande in su (senza scatola, 4 semi più la taglia successiva, traccia nella seconda richiesta), una voce per taglia che condivide il programma senza chiamate, `ModelInfo.seeds`, ADR-0158, kernel 0.2.2, suite e typecheck verdi; su Gemini 3.8 Flash via agy 1 su 7 alla prima e 2 su 7 entro due richieste contro 7 e 10 su 12 di Claude (alla prima 18 850 di input e 90 mila di output, 0,35 $ a chiamata contro 1,15 $; 13 chiamate, 5,39 $; tre seconde richieste vuote per il tetto di output); Argon non provato per il limite dell'abbonamento; i controlli del kernel non misurano i piani raggiunti; la decisione su modello o prompt è in `docs/pipeline/domande/T156.md`; sicurezza: nessuna superficie nuova.
 
 ### T157 · L'Attore: chi interpreta gli NPC, un'opzione del master — `fatto` (`a63d8e2`)
 - Pipeline: fable · stima 15% · approvato · browser · priorità 20
