@@ -3,6 +3,7 @@
 // whether it should not. Nothing here touches the game or the universe.
 
 import * as THREE from 'three';
+import { makeRenderer } from '../../src/render/gpu';
 import { GeminiAiModels } from '../../src/kernel/ai/gemini';
 import type { Grid3 } from '../../src/mj/engine';
 import { tallyLine, UsageLog } from '../../src/kernel/ai/usage';
@@ -66,7 +67,7 @@ const pool = new Pool(Math.max(1, Math.min(4, (navigator.hardwareConcurrency || 
 // ------------------------------------------------------------------ renderer and materials
 
 const canvas = $<HTMLCanvasElement>('view');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+const renderer = makeRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFShadowMap;

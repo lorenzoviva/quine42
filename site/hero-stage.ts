@@ -4,6 +4,7 @@
 // large one never stops the page. With `prefers-reduced-motion` the model stands finished and still, and turns only when dragged.
 
 import * as THREE from 'three';
+import { makeRenderer } from '../src/render/gpu';
 import type { HeroShow } from './hero-programs';
 import { SKIN_EVENT, skinColor } from './skin-core';
 
@@ -76,7 +77,7 @@ export function startStage(stage: HTMLElement, canvas: HTMLCanvasElement): () =>
 
   let renderer: THREE.WebGLRenderer;
   try {
-    renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    renderer = makeRenderer({ canvas, alpha: true, antialias: true });
   } catch {
     stage.classList.add('no-webgl');
     return () => {};

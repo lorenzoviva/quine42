@@ -1,6 +1,7 @@
 // The grid as voxels, in three.js: X the time, Z the height, Y the tracks set apart so the planes can be told. Drag to turn, wheel to zoom.
 
 import * as THREE from 'three';
+import { makeRenderer } from '../../src/render/gpu';
 import type { GridData } from './logic';
 import { letterAt } from './logic';
 
@@ -32,7 +33,7 @@ export class VoxelView {
   cut = 0;
 
   constructor(private canvas: HTMLCanvasElement) {
-    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    this.renderer = makeRenderer({ canvas, antialias: true });
     this.renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
     this.scene.background = new THREE.Color(0x07090e);
     this.scene.add(new THREE.HemisphereLight(0xdfe9ff, 0x20242e, 1.5));

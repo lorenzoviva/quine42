@@ -1,6 +1,7 @@
 // MarkovJunior Model Editor: split-screen code editor, real-time 3D Three.js viewport & interactive CAD voxel tools (T59b).
 
 import * as THREE from 'three';
+import { makeRenderer } from '../../src/render/gpu';
 import { CATALOG, GROUPS } from '../3d/catalog';
 import {
   highlightXml,
@@ -113,7 +114,7 @@ const workerClient = new WorkerClient();
 // ------------------------------------------------------------------ 3D Three.js Scene
 
 const canvas = $<HTMLCanvasElement>('viewport');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+const renderer = makeRenderer({ canvas, antialias: true, alpha: false });
 renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFShadowMap;

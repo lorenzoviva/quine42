@@ -386,6 +386,9 @@ async function main() {
   if (thin && master) (window as any).session = thin;
   // The 3D view, for the console (camera distance, scene).
   (window as any).view = renderer;
+  // The GPU in use (T330): whether the browser took the dedicated one. It stays in this tab.
+  (window as any).gpu = renderer.gpu;
+  if (renderer.gpu) console.info('[gpu] ' + renderer.gpu);
   Object.defineProperty(kernel, 'godMode', {
     get: () => renderer.godMode,
     set: (v: boolean) => { renderer.godMode = !!v; },

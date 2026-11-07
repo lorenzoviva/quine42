@@ -5,6 +5,7 @@
 // What is chosen goes to the server (/api/viandante, server/wanderer.ts), which repairs it as the world does.
 
 import * as THREE from 'three';
+import { makeRenderer } from '../src/render/gpu';
 import { runForm, VPT } from '../src/kernel/forms';
 import { meshVoxels } from '../src/mj/mesh';
 import { boxOf, classOf } from '../src/mj/classes';
@@ -64,7 +65,7 @@ class AvatarViewer {
   private height = 1.5;
 
   constructor(private canvas: HTMLCanvasElement) {
-    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    this.renderer = makeRenderer({ canvas, antialias: true, alpha: true });
     this.renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
     this.scene.add(new THREE.HemisphereLight(0xbfe8ff, 0x2a1440, 1.4));
     const key = new THREE.DirectionalLight(0xffffff, 2.2);
