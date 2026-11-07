@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 06/11/2026, epoca 322 (claude). Crediti: vedi `stato`.
+Aggiornato il 07/11/2026, epoca 323 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -22,9 +22,9 @@ Aggiornato il 06/11/2026, epoca 322 (claude). Crediti: vedi `stato`.
 ## Pronti e priorità
 
 0. **Decisioni autore 04/11:** D32 SemVer `X.Y.Z`. Step 32: T260, T262 → T245a → T263/T245b → T245c-f. T265 prima della beta.
-1. **In corso:** T324 (immagini Jev, claude).
-2. **Pronti:** T309 (inglese, dopo 0.5); T327 (NPC coeso, claude extra); T324 (immagini Jev, claude p3); T294 (laboratori giocatori, claude p3); T295 (carte prima della Genesi, claude p3); T315 (veste futuristica, p4); T321 (Scultore su Flash, claude p4); T281 (placeInside bloccati, p5, browser); T303 (misura Scenografo, claude p5); T288 (armi/attrezzi in mano, p6, browser); T242 (rapporto aureo, p33); T88 (generazione differita crediti che avanzano, p60).
-3. **Crediti (22:14 UTC):** Claude finestra 5h nuova (reset 02:59 UTC 07/11), settimana 60 % (reset 12/11); Gemini 5h 69 % (reset 23:14 UTC), settimana 86 %; agy 100 %; Argon fermo fino all'11/11.
+1. **In corso:** T309 (inglese, claude). **T324 fatto** (immagini Jev: utile come filtro dei difetti visivi, non per il giudizio dell'Artista) → conflitti in `AGENTS.md`, `lab/README.md` → **T329** (integrarlo, claude medium, p1).
+2. **Pronti:** T327 (NPC coeso, claude extra); T294 (laboratori giocatori, claude p3); T295 (carte prima della Genesi, claude p3); T315 (veste futuristica, p4); T321 (Scultore su Flash, claude p4); T281 (placeInside bloccati, p5, browser); T303 (misura Scenografo, claude p5); T288 (armi/attrezzi in mano, p6, browser); T242 (rapporto aureo, p33); T88 (generazione differita crediti che avanzano, p60).
+3. **Crediti (00:25 UTC 07/11):** Claude 5h 62 % (reset 02:59 UTC), settimana 57 % (reset 12/11); Gemini 100 % (5h reset 05:20 UTC, settimana 14/11); agy 100 %; Argon fermo fino all'11/11.
 
 ## Attese dall'autore
 
@@ -38,5 +38,5 @@ Aggiornato il 06/11/2026, epoca 322 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **323 (claude):** T324 fatto, `integra` in conflitto → T329; T309 in corso.
 - **322 (claude):** T328 e T308b integrati (`4537848`, contratto 0.5.0, ADR-0163); sbloccati T309 e T327; T325 integrato (casi d'uso Jev, domande in D45); T324 in corso.
-- **320 (gemini):** T320 integrato (`86acd5f`, kernel 0.4.3, ADR-0162); sbloccati T321, T88, T242, T303.
