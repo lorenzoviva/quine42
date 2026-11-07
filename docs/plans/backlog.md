@@ -4988,7 +4988,16 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì, i modelli portati nel laboratorio 3D.
 - Quando è fatto: commit su `task/T335`; kernel sale di Z. Sicurezza: i tetti nell'esito.
 
-### T336 · Lo Scultore e i nodi nuovi: validatore, prompt e banco delle strutture — `da fare` (dipende da T333, T334, T335)
+### T342 · MarkovJunior: simboli illimitati con `#<numero>`, le cifre da sole non sono più simboli — `da fare` (dipende da T335)
+- Pipeline: claude · sforzo extra · stima 6% · approvato · priorità 3
+- Step: 30
+- Contesto: l'autore in chat (08/11): i simboli (colori) di un programma MarkovJunior oggi sono un carattere solo, lettere e le dieci cifre: troppo pochi per strutture ricche. Propone un suffisso `#` seguito da un numero (`#12`), così i simboli sono illimitati; ogni programma che oggi usa una cifra come simbolo va convertito, e da qui in poi le cifre stanno solo dopo `#`. Nasce dai nodi di T333-T335: `dossier T333`, `dossier T334`, `dossier T335` (`wfc`, `convchain`, `values`, regole da file e tessere testuali usano gli stessi simboli).
+- Cosa fare: un simbolo è una lettera o `#` seguito da cifre (avido: `#12A` sono due simboli, `#1#2` due); una cifra senza `#` è un errore del compilatore col motivo. Ovunque si leggono simboli: `values`, `in`/`out` (attributi, figli, file di T333), `union`, `origin`/`soil`, palette e colori dei simboli, `field`/`observe` (T334), `wfc`/`convchain` (T335), `<sound>` (ADR-0123), mesh, foto, traccia, editor e SoundLab. Il motore tiene un tetto sul numero di simboli che regge (dirlo nell'ADR). La conversione: ogni programma del seme (`universe/models/`), del laboratorio (`lab/`, anche i modelli originali portati) e di `universes/` con una migrazione in `src/kernel/migrations.ts` (cambia il senso dei programmi: contratto nuovo, la Y dopo quella di T310b se intanto è integrato); le carte fatte a mano e quelle portate passano dalla stessa migrazione. Prompt dello Scultore e del Musicista, `MockAiModels`, validatore, `lab/banco/pattern.md`, glossario, ADR, `docs/architettura-dettagli.md#markovjunior-modelli`.
+- Test: tokenizzazione (`#` avido, cifra sola rifiutata, `#` senza numero rifiutato); più di 36 simboli in un programma; ogni programma del seme convertito dà la stessa griglia voxel per voxel e lo stesso suono campione per campione (`tests/mj-engine-determinism.test.ts`); la migrazione idempotente su un universo del contratto di prima.
+- Browser: sì, il seme nel gioco e un modello convertito nel laboratorio 3D come prima.
+- Quando è fatto: commit su `task/T342`; contratto del kernel nuovo. Sicurezza: il tetto dei simboli nell'esito (carte fatte a mano).
+
+### T336 · Lo Scultore e i nodi nuovi: validatore, prompt e banco delle strutture — `da fare` (dipende da T333, T334, T335, T342)
 - Pipeline: claude · sforzo high · stima 5% · approvato · priorità 4
 - Step: 30
 - Contesto: dopo T333-T335 il motore sa i nodi; lo Scultore deve poterli usare e il validatore deve contenerli.
