@@ -358,7 +358,8 @@ export class ThinClient {
       id = k.ecs.spawn({ pos: { x: o.x, y: o.y }, glyph: { ...(me ?? { glyph: '@', color: '#ffffff' }) }, body: { r: 0.3, solid: false }, wander: {} });
       this.others.set(o.id, id);
     } else this.targets.set(id, { x: o.x, y: o.y });
-    k.ecs.set(id, 'remote', { id: o.id, name: o.name, introduction: o.introduction ?? '' });
+    // What they wield (T288): the renderer puts it in their hand; a string or nothing, whatever came.
+    k.ecs.set(id, 'remote', { id: o.id, name: o.name, introduction: o.introduction ?? '', ...(typeof o.held === 'string' && o.held ? { held: o.held.slice(0, 120) } : {}) });
     k.ecs.set(id, 'identity', { name: o.name });
     if (o.form) k.ecs.set(id, 'form', { ...o.form });
     if (o.text) this.say(id, o.text);

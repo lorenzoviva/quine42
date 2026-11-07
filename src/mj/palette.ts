@@ -60,3 +60,28 @@ export const MJ_PALETTE: Record<string, { color: string; name: string }> = {
 
 /** The letters, in the order of palette.xml. */
 export const MJ_LETTERS = Object.keys(MJ_PALETTE).join('');
+
+/**
+ * A colour as a palette holds it, `#rrggbb`, from what a tint may be (T288): a hex (`#rgb`, `#rrggbb`, with or without `#`) or the
+ * CSS `hsl()` the Narrator's packs and the Forge write (`hsl(120 60% 66%)`, `hsl(120, 60%, 66%)`). Undefined for anything else:
+ * a letter given a colour the meshes cannot read would vanish (it did, for every generated item tinted onto its model).
+ */
+export function hexColor(c: unknown): string | undefined {
+  if (typeof c !== 'string') return undefined;
+  const s = c.trim();
+  const hex = /^#?([0-9a-f]{6}|[0-9a-f]{3})$/i.exec(s);
+  if (hex) {
+    const h = hex[1].length === 3 ? [...hex[1]].map((d) => d + d).join('') : hex[1];
+    return `#${h.toLowerCase()}`;
+  }
+  const hsl = /^hsla?\(\s*(-?[\d.]+)(?:deg)?[\s,]+([\d.]+)%[\s,]+([\d.]+)%/i.exec(s);
+  if (!hsl) return undefined;
+  const [h, sat, l] = [Number(hsl[1]), Number(hsl[2]) / 100, Number(hsl[3]) / 100];
+  if (![h, sat, l].every(Number.isFinite)) return undefined;
+  const hue = (((h % 360) + 360) % 360) / 360;
+  const [S, L] = [Math.min(1, Math.max(0, sat)), Math.min(1, Math.max(0, l))];
+  const k = (n: number) => (n + hue * 12) % 12;
+  const a = S * Math.min(L, 1 - L);
+  const channel = (n: number) => Math.round(255 * (L - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1))));
+  return `#${[channel(0), channel(8), channel(4)].map((v) => v.toString(16).padStart(2, '0')).join('')}`;
+}
