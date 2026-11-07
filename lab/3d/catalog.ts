@@ -127,7 +127,7 @@ for (const [file, xml] of Object.entries(handmade)) {
 
 
 /**
- * Whether the page has the developers' tools (T294, ADR-0168): `npm run dev`. The build is the players' labs (served by the production
+ * Whether the page has the developers' tools (T294, ADR-0169): `npm run dev`. The build is the players' labs (served by the production
  * server only with `laboratori` on): no Gemini, no comparisons with MarkovJunior's own models or the trials, no files from the disk.
  * `MODE`, not `DEV`: every build has the mode `production`, while `DEV` follows NODE_ENV, and a build with NODE_ENV=development has it on.
  */

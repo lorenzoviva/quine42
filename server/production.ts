@@ -97,7 +97,7 @@ const TYPES: Record<string, string> = {
 
 /** The labs: in the build, not for strangers while `laboratori` is off (ADR-0161). */
 const NOT_SERVED = /^\/lab(\/|$)/i;
-/** With `laboratori` on, the three labs of the players and nothing else under `/lab` (T294, ADR-0168): their pages; their scripts are in `/assets`. */
+/** With `laboratori` on, the three labs of the players and nothing else under `/lab` (T294, ADR-0169): their pages; their scripts are in `/assets`. */
 const LAB_FOLDER = /^\/lab\/(3d|editor|suono)$/;
 const PLAYER_LABS = /^\/lab\/(3d|editor|suono)\/(index\.html)?$/;
 

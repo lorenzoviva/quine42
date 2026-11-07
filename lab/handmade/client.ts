@@ -1,4 +1,4 @@
-// What a lab and the site ask the server of the handmade cards (T294, ADR-0168): `/api/handmade` (server/handmade.ts) with the account's
+// What a lab and the site ask the server of the handmade cards (T294, ADR-0169): `/api/handmade` (server/handmade.ts) with the account's
 // token, and what a player may read of a universe (`/api/universe/<name>`, only what `publicFiles` gives to who is not its master).
 // Never Gemini: the labs run every program in the browser, so for a player they cost no credits.
 

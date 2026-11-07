@@ -1,4 +1,4 @@
-# ADR-0168 — I laboratori dei giocatori: serviti con l'interruttore, fork, bozza, salvataggio, carte nel sito
+# ADR-0169 — I laboratori dei giocatori: serviti con l'interruttore, fork, bozza, salvataggio, carte nel sito
 
 Data: 2026-11-07 · Stato: accettato (task T294 del backlog, step 41) · Riferimenti: ADR-0161 (le carte fatte a mano), ADR-0102 (chi chiede e cosa può), ADR-0109 (ciò che esce è un elenco), ADR-0111 (la CSP), ADR-0112 (il server di produzione), ADR-0131 (`site/beta.json`), ADR-0145 (le vesti del sito)
 

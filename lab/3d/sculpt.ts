@@ -1,6 +1,6 @@
 // The sculptor, live, through the Gemini proxy of `npm run dev` (ADR-0099): only for the developers. The sandbox imports this module only
 // outside a build (`import.meta.env.MODE`, not `DEV`: a build with NODE_ENV=development has `DEV` on), so the build the players get has
-// neither it nor Gemini (T294, ADR-0168).
+// neither it nor Gemini (T294, ADR-0169).
 
 import { GeminiAiModels } from '../../src/kernel/ai/gemini';
 import { tallyLine, UsageLog } from '../../src/kernel/ai/usage';

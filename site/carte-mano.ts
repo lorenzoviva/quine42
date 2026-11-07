@@ -1,4 +1,4 @@
-// The handmade cards in the gallery (T294, ADR-0168): every account's, recognisable, with how their author signs and the lab that opens
+// The handmade cards in the gallery (T294, ADR-0169): every account's, recognisable, with how their author signs and the lab that opens
 // them (another's only to look at and try). Only in a build with `site/beta.json → laboratori` on; with accounts, any account reads them
 // (an anonymous one too). Loaded by carte.ts when the page starts: what a player wrote goes on the page as text.
 

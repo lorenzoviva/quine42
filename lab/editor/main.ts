@@ -3554,7 +3554,7 @@ function loadSelectedPreset() {
   });
 }
 
-// ------------------------------------------------------------------ The handmade cards (T294, ADR-0168)
+// ------------------------------------------------------------------ The handmade cards (T294, ADR-0169)
 
 /** The class and size of the card being changed, if any: a program without its own `size` is drawn in the game's box for them. */
 let cardMeta: { class?: string; size?: string } = {};

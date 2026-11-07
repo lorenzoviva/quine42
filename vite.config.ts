@@ -73,7 +73,7 @@ export default defineConfig(({ mode }) => {
     // wasmoon is UMD: pre-bundled, the browser can import it in dev (its glue.wasm comes by URL, `wasmUri`).
     optimizeDeps: { include: ['wasmoon'] },
     // The MarkovJunior lab has its dedicated pages: the sandbox (/lab/3d/), the model editor (/lab/editor/), the SoundLab (/lab/suono/)
-    // and the bench of worn things (/lab/indossati/, T289). Built, the first three are the players' labs (T294, ADR-0168): without the
+    // and the bench of worn things (/lab/indossati/, T289). Built, the first three are the players' labs (T294, ADR-0169): without the
     // developers' tools, served by the production server only with `laboratori` on.
     build: {
       rollupOptions: {

@@ -1,4 +1,4 @@
-// The link to the labs in the site's navigation (T294, ADR-0168): only in a build made with `site/beta.json → laboratori` on. Off, the
+// The link to the labs in the site's navigation (T294, ADR-0169): only in a build made with `site/beta.json → laboratori` on. Off, the
 // labs are not served (`server/production.ts`) and no page points to them.
 
 import { labsOpen } from 'virtual:quine-laboratori';

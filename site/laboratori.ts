@@ -1,4 +1,4 @@
-// The site's entry to the labs (T294, ADR-0168): the three labs, the account's handmade cards (open, sign, take away) and what can be forked
+// The site's entry to the labs (T294, ADR-0169): the three labs, the account's handmade cards (open, sign, take away) and what can be forked
 // of a universe (only what `publicFiles` gives to who is not its master). In the build only with `site/beta.json → laboratori` on.
 // Everything a player wrote (names, signatures) goes on the page as text.
 

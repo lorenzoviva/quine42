@@ -68,7 +68,7 @@ let cursor = 0;
 let morphTimer: ReturnType<typeof setInterval> | undefined;
 const undoStack: string[] = [];
 /**
- * The developers' tools (T294, ADR-0168): opening a file from the disk and saving the XML there. In the build the players get, a program
+ * The developers' tools (T294, ADR-0169): opening a file from the disk and saving the XML there. In the build the players get, a program
  * is saved as a card (the bar of the handmade cards). The page's own draft is of free work only: a card or a fork has the bar's.
  */
 const DEV_TOOLS = import.meta.env.MODE !== 'production';

@@ -1,4 +1,4 @@
-// The labs for the players (T294, ADR-0168): what a lab does with a handmade card, as the pages do it (lab/handmade/logic.ts), against the
+// The labs for the players (T294, ADR-0169): what a lab does with a handmade card, as the pages do it (lab/handmade/logic.ts), against the
 // real routes (server/handmade.ts) with the check in this process. A fork, saved as a card and opened again, gives the same program; a
 // change saved and opened again, the changed one; a draft not saved comes back; a universe gives only what a player may read of it.
 

@@ -1,4 +1,4 @@
-// The production server with the labs of the players on or off, for the check in the browser (T294, ADR-0168): the build in `dist/` as it
+// The production server with the labs of the players on or off, for the check in the browser (T294, ADR-0169): the build in `dist/` as it
 // is, the program of the worlds built here in a temporary folder, an environment of fakes like the tests' (no key, no account: only this
 // machine, the wanderer said by `?viandante=`), and a universe `prova` copied from the seed to fork from. Nothing of this repository's
 // `universes/` is read or written. Ctrl+C stops it and removes the folder.

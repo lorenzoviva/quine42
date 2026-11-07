@@ -1,4 +1,4 @@
-// The handmade cards in the sandbox (T294, ADR-0168): every account's models, to put in front of you in the world; a card of the address
+// The handmade cards in the sandbox (T294, ADR-0169): every account's models, to put in front of you in the world; a card of the address
 // (`?card=<id>`) opens at once. A card is changed in the editor: the link opens it there (another's only to look at and try).
 
 import type { HandmadeSummary } from '../../src/kernel/handmade';

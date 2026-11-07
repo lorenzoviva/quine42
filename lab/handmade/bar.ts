@@ -1,4 +1,4 @@
-// The bar of the handmade cards in a lab (T294, ADR-0168): it opens the copy the address asks for (a model or a sound of a universe, a
+// The bar of the handmade cards in a lab (T294, ADR-0169): it opens the copy the address asks for (a model or a sound of a universe, a
 // card), keeps the work not saved on this machine, and saves it as a card of the account, saying every reason the server gives for a
 // refusal. The lab only gives its program and takes one: `CardsHost`. Everything a player wrote (a name, a signature) is shown as text.
 

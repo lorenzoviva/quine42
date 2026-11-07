@@ -805,7 +805,7 @@ $<HTMLInputElement>('wind').oninput = (e) => (uWind.value = Number((e.target as 
 
 // ------------------------------------------------------------------ the sculptor, live: only for the developers (T294)
 
-// In the build the players get, the sculptor and Gemini are not there at all: the labs never call the models (ADR-0168).
+// In the build the players get, the sculptor and Gemini are not there at all: the labs never call the models (ADR-0169).
 if (import.meta.env.MODE !== 'production') {
   void import('./sculpt').then(({ wireSculptor }) =>
     wireSculptor(async (e) => {
@@ -817,7 +817,7 @@ if (import.meta.env.MODE !== 'production') {
   );
 } else $('g-go').closest('section')?.remove();
 
-// ------------------------------------------------------------------ the handmade cards (T294, ADR-0168)
+// ------------------------------------------------------------------ the handmade cards (T294, ADR-0169)
 
 void startCardsList({
   mount: $('cards'),

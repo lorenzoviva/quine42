@@ -38,7 +38,7 @@ export const secondPartOn = (root: string): boolean => switchOn(root, 'laCorona'
  */
 export const labsOn = (root: string): boolean => switchOn(root, 'laboratori');
 
-/** The site's entry page of the labs (T294, ADR-0168) among the build's inputs: only with `laboratori` on. */
+/** The site's entry page of the labs (T294, ADR-0169) among the build's inputs: only with `laboratori` on. */
 export function labsPage(root: string): Record<string, string> {
   return labsOn(root) ? { laboratori: path.resolve(root, 'site/laboratori.html') } : {};
 }

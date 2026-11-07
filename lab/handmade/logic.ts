@@ -1,4 +1,4 @@
-// The labs for the players (T294, ADR-0168): what a lab does with a handmade card (T293, ADR-0161), without the page. Where the copy comes
+// The labs for the players (T294, ADR-0169): what a lab does with a handmade card (T293, ADR-0161), without the page. Where the copy comes
 // from (the address: `?card=<id>` or `?fork=<universe>/<model>`), what can be forked from a universe (only what `publicFiles` gives: the
 // models and their index), the draft that keeps the work of a page that was not saved, and what is sent to `/api/handmade`. Pure: the
 // tests read it as the pages do (`tests/handmade-labs.test.ts`).
