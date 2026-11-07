@@ -4955,3 +4955,46 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - **Quando è fatto:** test nuovo verde, suite e typecheck verdi; kernel sale di Z.
 - Dipende da T327.
 - Esito: talk.ts:47 legge activity.kind invece di activity.tipo, così chi dorme non saluta più; non ci sono altri accessi a campi di componenti di prima del contratto 0.5 in src/ né nel Lua del seme (i .tipo rimasti sono schemi del Concilio o nodi del grafo, T310b); test nuovo tests/npc-talk.test.ts, rosso prima della correzione e verde dopo; kernel 0.5.4 (version.ts, package.json, package-lock.json, universe/universe.json); suite intera (2691 passati, 1 saltato) e typecheck verdi nei turni; nessuna verifica nel browser (il task non la chiede); sicurezza: nessuna superficie nuova.
+
+### T333 · MarkovJunior: `<in>` e `<out>` come figli delle regole, e un programma che carica un altro file — `da fare`
+- Pipeline: claude · sforzo high · stima 5% · approvato · priorità 2
+- Step: 30
+- Contesto: l'autore in chat (07/11, epoca 327, testo in `docs/userchats/to-do-2026-11-07.md`, punto 2): i pattern lunghi negli attributi sono difficili da scrivere e sostituire; vuole decomporre le strutture complesse in sottoblocchi in file a parte e ricomporli (con MarkovJunior o, dopo T335, con `wfc`). Oggi le regole da file (`file`, `fin`, `fout`) non ci sono (`lab/banco/pattern.md` §12).
+- Cosa fare: (1) in `src/mj/xml.ts`/`model.ts`/`engine.ts` `<in>` e `<out>` come figli facoltativi di `<rule>`, `<one>`, `<all>`, `<prl>` (e di ogni nodo con `in`/`out`), testo multiriga con gli strati separati come oggi, alternativi all'attributo (entrambi = errore chiaro); (2) caricare un file: un nodo (proposta: `<import file="<id>"/>`) che inserisce il programma di un altro modello di `models/` come sottoprogramma, e le regole con `fin`/`fout`/`file` lette da un file di testo del modello (solo testo, regola 11; solo dentro `models/` dell'universo o del laboratorio, nomi semplici, niente percorsi, tetti su profondità e cicli di inclusione); (3) validatore: i file inclusi si validano come il resto, un include mancante è un errore col motivo; la cache delle forme tiene conto dei file inclusi (cambiarne uno invalida chi lo include); (4) editor del laboratorio: evidenziazione e un modello di prova che ne include un altro; (5) il motore resta voxel per voxel identico sui programmi di oggi (`tests/mj-engine-determinism.test.ts`, ADR-0142). ADR, `docs/architettura-dettagli.md#markovjunior-modelli`, glossario.
+- Test: figli e attributi danno lo stesso esito voxel per voxel; include, include mancante, ciclo, profondità; cache invalidata.
+- Browser: sì, l'editor del laboratorio con un modello che ne include un altro.
+- Quando è fatto: commit su `task/T333`; kernel sale di Z (nessun programma esistente cambia). Sicurezza: il caricamento di file è una superficie (percorsi): dillo nell'esito.
+
+### T334 · MarkovJunior: `field`, `temperature` e `observe` nel motore — `da fare`
+- Pipeline: claude · sforzo extra · stima 7% · approvato · priorità 3
+- Step: 30
+- Contesto: l'autore in chat (07/11, punto 1): i casi più belli del repository di MarkovJunior non si riproducono sul banco perché il motore non ha `field`/`temperature` (`Keys`, `SoftPath`, `Division`, `Dwarves`) né `observe` (`StairsPath`, `RegularPath`) (`lab/banco/pattern.md` §12).
+- Cosa fare: implementare come nell'originale (riferimento: il sorgente C# di MarkovJunior, `Field.cs`, `Observation.cs`, `Search.cs`) `<field>` (for, from, to, on, recompute, essential, inversed) con `temperature` sui nodi di regole, e `<observe>` (value, from, to) con la propagazione delle osservazioni e la ricerca (`search`, `limit`, `depthCoefficient`) entro tetti di tempo e memoria; deterministici dal seme (ADR-0142: i programmi di oggi voxel per voxel identici); la traccia (`src/mj/trace.ts`) e l'editor del laboratorio li riconoscono; i modelli del repository che li usano portati nel banco (`lab/`) con le foto. Validatore e prompt dello Scultore li apre T336. ADR, dettagli, glossario.
+- Test: un caso piccolo per ogni attributo, confronto con l'esito dell'originale dove si può; determinismo; tetti.
+- Browser: sì, i modelli portati nel laboratorio 3D.
+- Quando è fatto: commit su `task/T334`; kernel sale di Z. Sicurezza: i tetti di tempo e memoria della ricerca nell'esito.
+
+### T335 · MarkovJunior: `wfc` (a tessere e a sovrapposizione), `convchain` e `map` frazionaria nel motore — `da fare` (dipende da T333)
+- Pipeline: claude · sforzo extra · stima 8% · approvato · priorità 3
+- Step: 30
+- Contesto: l'autore in chat (07/11, punti 1 e 2): `wfc` a tessere è il cuore di `ModernHouse`, `SeaVilla`, `Apartemazements`, `PillarsOfEternity`, `Partitioning`, `Surface`, `Escher*`; `convchain` di `ChainDungeon` (`lab/banco/pattern.md` §12). L'autore vuole ricomporre con `wfc` i sottoblocchi di T333; `ModernHouse` e `SeaVilla` vogliono anche `map` a scala frazionaria (`1/3`, `5/3`).
+- Cosa fare: `<wfc>` come nell'originale (`tileset` a tessere e `sample` a sovrapposizione, `values`, `N`, `periodic`, `shannon`, `tries`, `<rule>` di mappatura, `<tile>`/`<neighbor>`), con le tessere da file di testo del modello grazie al caricamento di T333 (niente immagini né `.vox`: solo testo, regola 11; se serve un formato testuale per le tessere, deciderlo e scriverlo nell'ADR); `<convchain>` (sample, N, temperature, on, black, white); `map` a scala frazionaria; deterministici dal seme, tetti di tempo; traccia ed editor; nel banco i modelli citati sopra, con le foto da quattro lati accanto a quelle dell'originale. ADR, dettagli, glossario.
+- Test: tessere piccole con esito noto, contraddizione e nuovo tentativo, determinismo, tetti.
+- Browser: sì, i modelli portati nel laboratorio 3D.
+- Quando è fatto: commit su `task/T335`; kernel sale di Z. Sicurezza: i tetti nell'esito.
+
+### T336 · Lo Scultore e i nodi nuovi: validatore, prompt e banco delle strutture — `da fare` (dipende da T333, T334, T335)
+- Pipeline: claude · sforzo high · stima 5% · approvato · priorità 4
+- Step: 30
+- Contesto: dopo T333-T335 il motore sa i nodi; lo Scultore deve poterli usare e il validatore deve contenerli.
+- Cosa fare: il validatore accetta i nodi nuovi con tetti (celle, tentativi, profondità di ricerca, file inclusi); il prompt dello Scultore e `lab/banco/pattern.md` §12 aggiornati (cosa fa ogni nodo, quando usarlo per una struttura); `MockAiModels` con un programma che usa i nodi nuovi; un giro sul banco delle strutture confrontato con quello di T156.
+- Browser: sì, le foto del banco.
+- Quando è fatto: commit su `task/T336`; kernel sale di Z.
+
+### T337 · Edifici che non sembrano tutti lo stesso: il metodo dell'autore per lo Scultore, a sottoblocchi — `da fare` (dipende da T333, T335)
+- Pipeline: claude · sforzo max · stima 8% · approvato · priorità 4
+- Step: 30
+- Contesto: l'autore in chat (07/11, punto 2): nelle ultime prove con l'IA solo palazzine e villette futuristiche sono venute bene; il castello/forte sembra una prigione (resta solo il merlo, la forma originale è persa) e gli edifici sembrano tutti lo stesso. Dall'editor l'autore ottiene molta varianza con un metodo: una traccia a terra della base, marcatori messi a caso e in punti specifici (curve, incroci), muri tirati su dalla base, finestre dai marcatori sui muri; per un forte una cinta muraria esterna, una sala, le segrete, espandendo con `map`. L'IA non può fare tentativi guardando il risultato come lui.
+- Cosa fare: (1) capire perché i programmi dello Scultore convergono sullo stesso edificio (prompt procedurale di T319, `lab/banco/pattern.md`, `lab/banco/riferimento/cantiere.xml`): una misura di varianza tra concetti e tra semi (impronta, profilo, rapporto pieni/vuoti) sui programmi del banco di T156 e su quelli fatti a mano dall'autore (`lab/mjx/models/handmade/`); (2) il metodo dell'autore come procedura per lo Scultore: traccia della base → marcatori (casuali e su curve/incroci) → muri → aperture dai marcatori; le strutture composte di sottoblocchi in file a parte (cinta, sala, torri, segrete) ricomposti con `map`, include (T333) o `wfc` (T335); (3) un sostituto del «guardare il risultato»: dopo ogni sottoblocco lo Scultore riceve la traccia in testo (`src/mj/trace.ts`) e le misure (`src/mj/check.ts`) e corregge; (4) un giro sul banco con forte, castello, tempio, palazzina, villetta: foto da quattro lati, misure di varianza prima e dopo, costo per modello. Raccomandazione all'autore su cosa portare nel prompt dello Scultore (domanda in `docs/pipeline/domande/T337.md`).
+- Browser: sì, le foto del banco.
+- Quando è fatto: commit su `task/T337`, rapporto in `lab/banco/` con le foto e i numeri.
