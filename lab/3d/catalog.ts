@@ -97,9 +97,10 @@ export const CATALOG: Entry[] = [
     const xml = files[`../mjx/models/${id}.xml`];
     return { id, name, role, xml, vpt: vpt ?? 20, source: sourceOf(xml), ...(id === 'fiore' ? { grows: true } : {}) };
   }),
-  ...['Growth', 'MazeGrowth', 'NoDeadEnds', 'OpenCave3D', 'StrangeDungeon', 'OddScale3D', 'Hills', 'MazeTrail']
+  // The first eight stand on the plinths of the gallery; the others, which infer (T334), are in the list.
+  ...['Growth', 'MazeGrowth', 'NoDeadEnds', 'OpenCave3D', 'StrangeDungeon', 'OddScale3D', 'Hills', 'MazeTrail', 'Keys', 'SoftPath', 'StairsPath', 'Dwarves', 'Division', 'RegularPath', 'GrowTo', 'CompleteSAW']
     .map((n) => OFFICIAL.find((o) => o.name === n)!)
-    .map((o) => ({ id: `mj:${o.name}`, name: o.name, role: 'official' as const, xml: o.xml, vpt: 20, size: o.size, source: 'MarkovJunior (github.com/mxgmn/MarkovJunior, models/' + o.name + '.xml), invariato', grows: true, ...(o.steps ? { steps: o.steps } : {}) })),
+    .map((o) => ({ id: `mj:${o.name}`, name: o.name, role: 'official' as const, xml: o.xml, vpt: 20, size: o.size, source: `MarkovJunior (github.com/mxgmn/MarkovJunior, models/${o.name}.xml), ${o.note ?? 'invariato'}`, grows: true, ...(o.steps ? { steps: o.steps } : {}) })),
 ];
 
 // The step 8.2A trial: what each Gemini model wrote for the same targets (<target>.<model>.xml).

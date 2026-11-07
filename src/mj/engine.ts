@@ -20,11 +20,15 @@
 //                      after works at the new resolution (MarkovJunior "map": coarse plan → fine detail)
 //   shape            — box, ellipsoid, cylinder, cone resting on `at` (centre of the base), or a line
 //                      from `at` to `to` with radius `r`; `on` limits which codes it may overwrite
+// A rule node may also infer (infer.ts, T334): `fields` (potentials that rank its matches, softly with `temperature`), `observe`
+// (a future the node walks towards) and `search` (a whole trajectory found first, within ceilings); then a match is wherever the
+// input fits, as in MarkovJunior, and the node is a `GuidedRunner`. Every other node runs as it always did (ADR-0142).
 //
 // Programs written in MarkovJunior's own XML (lab/mjx) compile to these nodes with MarkovJunior's
 // semantics: map with `clear` (a new empty grid, rules wrapping round), conv with `sums`, unlimited steps.
 
 import { Rng } from '../kernel/rng';
+import { backwardPotentials, fieldPotential, goalReached, INFERENCE_LIMITS, makeWork, MAX_OBSERVED_CODES, prepare, search, type InferRule, type Prepared, type Work } from './infer';
 
 export type Vec3 = [number, number, number];
 /**
@@ -57,8 +61,43 @@ export interface ConvRule {
 export type ShapeKind = 'box' | 'ellipsoid' | 'cylinder' | 'cone' | 'line';
 export const SHAPES: readonly ShapeKind[] = ['box', 'ellipsoid', 'cylinder', 'cone', 'line'];
 
+/**
+ * MarkovJunior's <field>: the potential of the code `for` is the distance, over `on` cells, from the nearest `to` cell; with `from`
+ * instead of `to` it is inversed (the node moves away). `recompute` computes it again at every step (else once, at the node's first
+ * step); a field `essential` that finds no `to` (or `from`) cell stops the node.
+ */
+export interface FieldSpec {
+  for: string;
+  from?: string;
+  to?: string;
+  on: string;
+  recompute?: boolean;
+  essential?: boolean;
+}
+
+/** MarkovJunior's <observe>: cells of `value` become `from` (the same code if not said) and must end as one of `to`. */
+export interface ObserveSpec {
+  value: string;
+  from?: string;
+  to: string;
+}
+
+/** What a rule node infers (T334): with none of it, it is the node it always was. */
+export interface Inference {
+  fields?: FieldSpec[];
+  /** How softly the potentials choose: 0 (MarkovJunior's default) always the best, larger more at random. */
+  temperature?: number;
+  observe?: ObserveSpec[];
+  /** Search a whole trajectory before the first step, instead of walking down the potentials. */
+  search?: boolean;
+  /** States the search may keep (MarkovJunior: unlimited, 20 tries); never more than `INFERENCE_LIMITS.boards`. */
+  limit?: number;
+  /** Weight of the depth in the search's ranking (0.5); below 0, deepest first. */
+  depthCoefficient?: number;
+}
+
 export type Node3 =
-  | { type: 'one' | 'all' | 'prl'; rules: Rule3[]; steps?: number; symmetry?: Sym; optional?: boolean }
+  | ({ type: 'one' | 'all' | 'prl'; rules: Rule3[]; steps?: number; symmetry?: Sym; optional?: boolean } & Inference)
   | { type: 'sequence' | 'markov'; children: Node3[] }
   | { type: 'conv'; rules: ConvRule[]; neighborhood?: 'moore' | 'vonneumann' | 'nocorners'; steps?: number; periodic?: boolean }
   | { type: 'path'; from: string; to: string; on: string; color: string; steps?: number; inertia?: boolean; longest?: boolean }
@@ -113,6 +152,9 @@ export interface GridLimits {
 export const MODEL_LIMITS: GridLimits = { side: MAX_SIDE, cells: MAX_CELLS };
 
 export class Mj3Error extends Error { }
+
+/** A search that ran out of time (`INFERENCE_LIMITS.searchMs` or the run's deadline): the run stops, not finished. */
+class Mj3Late extends Error { }
 
 export interface Grid3 {
   X: number;
@@ -170,8 +212,8 @@ class Census {
   }
 }
 
-/** The grid of the run in progress and its census (built when a scan first needs it): runs do not nest. */
-let current: { g: Grid3; census?: Census } | undefined;
+/** The grid of the run in progress and its census (built when a scan first needs it), and when the run must end: runs do not nest. */
+let current: { g: Grid3; census?: Census; deadline?: number } | undefined;
 
 function censusOf(g: Grid3): Census {
   if (current?.g !== g) current = { g };
@@ -336,6 +378,8 @@ abstract class Runner {
   why?: string;
   /** Times each rule of the node was applied over the whole run (never reset). */
   fired: number[] = [];
+  /** What the node found out on its own (a search's trajectory), for the trace. */
+  note?: string;
   constructor(protected limit?: number) { }
   reset(): void {
     this.count = 0;
@@ -455,23 +499,28 @@ let stampN = 0;
 let writtenBuf = new Uint8Array(0);
 
 class RuleRunner extends Runner {
-  private patterns: Pattern[];
+  protected patterns: Pattern[];
   private probes: Array<Probe | undefined> = [];
-  private matches = new MatchSet();
+  protected matches = new MatchSet();
   private seen = 0;
   private epoch = -1;
   private uniform: boolean;
-  private sets: Uint8Array[];
+  protected sets: Uint8Array[];
   /** The cells the rules look for (a code, or a set of codes), to explain a node that never matches. */
   private wanted: string[];
-  private alpha: Alphabet;
+  protected alpha: Alphabet;
 
+  /**
+   * `inputOnly`: a match is wherever the input fits, as in MarkovJunior, even if it would change nothing (the guided nodes, where a
+   * rule that keeps a cell competes with the others); otherwise only where it would change something, as the lab has always done.
+   */
   constructor(
-    private kind: 'one' | 'all' | 'prl',
+    protected kind: 'one' | 'all' | 'prl',
     rules: Rule3[],
     limit: number | undefined,
     sym: Sym,
     alpha: Alphabet,
+    private inputOnly = false,
   ) {
     super(limit);
     if (!Array.isArray(rules) || !rules.length) throw new Mj3Error(`nodo ${kind} senza regole`);
@@ -488,7 +537,7 @@ class RuleRunner extends Runner {
     this.epoch = -1;
   }
 
-  private probe(pi: number, g: Grid3): Probe {
+  protected probe(pi: number, g: Grid3): Probe {
     const XY = g.X * g.Y;
     const old = this.probes[pi];
     if (old && old.X === g.X && old.XY === XY) return old;
@@ -527,6 +576,13 @@ class RuleRunner extends Runner {
     return false;
   }
 
+  /** Whether the pattern matches with its first cell at `o`, whatever it writes. */
+  private static fitsAt(pr: Probe, cells: Uint8Array, o: number): boolean {
+    const { inOff, inSets } = pr;
+    for (let t = 0; t < inOff.length; t++) if (!inSets[t][cells[o + inOff[t]]]) return false;
+    return true;
+  }
+
   private scan(g: Grid3): void {
     const N = g.cells.length;
     this.matches.clear();
@@ -545,12 +601,13 @@ class RuleRunner extends Runner {
     const XY = pr.XY;
     const base = pi * N;
     const nIn = pr.inOff.length;
+    const only = this.inputOnly;
     if (nIn === 0) {
       for (let z = 0; z + p.dz <= Z; z++)
         for (let y = 0; y + p.dy <= Y; y++)
           for (let x = 0; x + p.dx <= X; x++) {
             const o = x + y * X + z * XY;
-            if (RuleRunner.checkAt(pr, cells, o)) this.matches.push(base + o);
+            if (only || RuleRunner.checkAt(pr, cells, o)) this.matches.push(base + o);
           }
       return;
     }
@@ -587,12 +644,14 @@ class RuleRunner extends Runner {
         }
         const o0 = oy * X + oz * XY;
         const a0 = (oz + aK) * XY + (oy + aJ) * X + aI;
-        for (let ox = 0; ox + p.dx <= X; ox++) if (aSet[cells[a0 + ox]] && RuleRunner.checkAt(pr, cells, o0 + ox)) this.matches.push(base + o0 + ox);
+        if (only) {
+          for (let ox = 0; ox + p.dx <= X; ox++) if (aSet[cells[a0 + ox]] && RuleRunner.fitsAt(pr, cells, o0 + ox)) this.matches.push(base + o0 + ox);
+        } else for (let ox = 0; ox + p.dx <= X; ox++) if (aSet[cells[a0 + ox]] && RuleRunner.checkAt(pr, cells, o0 + ox)) this.matches.push(base + o0 + ox);
       }
   }
 
   /** Brings the match set up to date with every cell written since the last look. */
-  private sync(g: Grid3): void {
+  protected sync(g: Grid3): void {
     const fresh = g.log.length - this.seen;
     if (this.epoch !== g.epoch || fresh > g.cells.length / 4) {
       this.scan(g);
@@ -606,6 +665,7 @@ class RuleRunner extends Runner {
       }
       const mark = ++stampN;
       const probes = this.patterns.map((_, pi) => this.probe(pi, g));
+      const only = this.inputOnly;
       for (let l = this.seen; l < log.length; l++) {
         const c = log[l];
         if (stamps[c] === mark) continue;
@@ -627,7 +687,7 @@ class RuleRunner extends Runner {
                 const ox = cx - i;
                 if (ox < 0 || ox + p.dx > X) continue;
                 const o = ox + oy * X + oz * XY;
-                if (RuleRunner.checkAt(pr, cells, o)) this.matches.add(base + o);
+                if (only ? RuleRunner.fitsAt(pr, cells, o) : RuleRunner.checkAt(pr, cells, o)) this.matches.add(base + o);
                 else this.matches.remove(base + o);
               }
             }
@@ -639,7 +699,7 @@ class RuleRunner extends Runner {
     this.seen = g.log.length;
   }
 
-  private apply(g: Grid3, key: number, written?: Uint8Array, touched?: number[]): boolean {
+  protected apply(g: Grid3, key: number, written?: Uint8Array, touched?: number[]): boolean {
     const N = g.cells.length;
     const pi = Math.floor(key / N);
     const p = this.patterns[pi];
@@ -698,6 +758,386 @@ class RuleRunner extends Runner {
       const chosen = keys.filter((k) => rng.next() < this.patterns[Math.floor(k / N)].p);
       if (!chosen.length) return false;
       for (const k of chosen) this.apply(g, k);
+    }
+    this.count++;
+    this.total++;
+    return true;
+  }
+}
+
+type RuleNode3 = Extract<Node3, { type: 'one' | 'all' | 'prl' }>;
+interface FieldRun {
+  code: number;
+  zero: Uint8Array;
+  on: Uint8Array;
+  recompute: boolean;
+  essential: boolean;
+  /** The field as the program writes it, for who reads why the node stopped. */
+  name: string;
+}
+interface ObserveRun {
+  value: number;
+  from: number;
+  to: Uint8Array;
+  name: string;
+}
+
+/**
+ * A rule node that infers (T334, ADR-0171): MarkovJunior's RuleNode with fields, observations and search (RuleNode.cs, OneNode.cs,
+ * AllNode.cs, ParallelNode.cs). A match is wherever the input fits. `one` takes the match with the best heuristic (with `temperature`,
+ * a draw weighted by exp(-h/T)); `all` applies its matches best first where they do not overlap; `prl` only waits for its fields.
+ * With observations the node stops when the grid reaches the future; with a trajectory from the search it replays it, a state a step.
+ */
+class GuidedRunner extends RuleRunner {
+  private fields: FieldRun[] = [];
+  /** Per code, 1 if its field grows from `from` (MarkovJunior's `inversed`). */
+  private inversed?: Uint8Array;
+  private observations?: ObserveRun[];
+  /** Per code, its observation. */
+  private observed: Array<ObserveRun | undefined> = [];
+  private temperature: number;
+  private searching: boolean;
+  private searchLimit: number;
+  private depthCoefficient: number;
+  /** Per code its potential; undefined is 0 everywhere (a code without a field, as MarkovJunior allocates them). */
+  private potentials?: Array<Int32Array | undefined>;
+  /** The cells the potentials were computed for: another grid (a map in between) computes them again. */
+  private potentialCells = 0;
+  private future = new Uint32Array(0);
+  private futureComputed = false;
+  private trajectory: Uint8Array[] | null = null;
+  /** Per pattern, the cells it writes with a code its own input does not accept: MarkovJunior's DeltaPointwise reads only those. */
+  private deltas: Array<{ X: number; XY: number; off: Int32Array; val: Int16Array } | undefined> = [];
+  private queue = new Int32Array(0);
+  private prepared?: { X: number; Y: number; Z: number; C: number; rules: Prepared[]; work?: Work };
+
+  constructor(node: RuleNode3, limit: number | undefined, sym: Sym, alpha: Alphabet) {
+    super(node.type, node.rules, limit, sym, alpha, node.type !== 'prl');
+    const set = (s: unknown, what: string): Uint8Array => {
+      if (typeof s !== 'string' || !s) throw new Mj3Error(`${what}: vuole delle lettere`);
+      return alpha.sets[alpha.mask(s)];
+    };
+    const code = (s: unknown, what: string): number => {
+      if (typeof s !== 'string' || s.length !== 1) throw new Mj3Error(`${what}: è una sola lettera`);
+      return alpha.index(s);
+    };
+    const byCode = new Map<number, FieldRun & { inversed: boolean }>();
+    for (const f of node.fields ?? []) {
+      const c = code(f?.for, 'field "for"');
+      const inversed = typeof f.from === 'string' && f.from !== '';
+      if (!inversed && (typeof f.to !== 'string' || !f.to)) throw new Mj3Error(`field per "${f.for}": manca "to" (o "from")`);
+      byCode.set(c, {
+        code: c,
+        zero: set(inversed ? f.from : f.to, `field per "${f.for}"`),
+        on: set(f.on, `field per "${f.for}", "on"`),
+        recompute: f.recompute === true,
+        essential: f.essential === true,
+        inversed,
+        name: `${f.for} ${inversed ? 'da' : 'verso'} ${inversed ? f.from : f.to} su ${f.on}`,
+      });
+    }
+    this.fields = [...byCode.values()];
+    if (this.fields.length) {
+      this.inversed = new Uint8Array(MAX_CODES);
+      for (const f of byCode.values()) if (f.inversed) this.inversed[f.code] = 1;
+    }
+    if (node.observe?.length) {
+      for (const o of node.observe) {
+        const value = code(o?.value, 'observe "value"');
+        this.observed[value] = { value, from: o.from === undefined ? value : code(o.from, 'observe "from"'), to: set(o.to, `observe "${o.value}", "to"`), name: o.value };
+      }
+      this.observations = this.observed.filter((o): o is ObserveRun => o !== undefined);
+    }
+    const t = node.temperature ?? 0;
+    if (typeof t !== 'number' || !Number.isFinite(t) || t < 0) throw new Mj3Error('temperature vuole un numero da 0 in su');
+    this.temperature = t;
+    this.searching = node.search === true && this.observations !== undefined;
+    this.searchLimit = Number.isInteger(node.limit) && node.limit! > 0 ? node.limit! : -1;
+    const dc = node.depthCoefficient ?? 0.5;
+    if (typeof dc !== 'number' || !Number.isFinite(dc)) throw new Mj3Error('depthCoefficient vuole un numero');
+    this.depthCoefficient = dc;
+  }
+
+  reset(): void {
+    super.reset();
+    this.futureComputed = false;
+    this.trajectory = null;
+  }
+
+  rewind(): void {
+    super.rewind();
+    this.futureComputed = false;
+    this.trajectory = null;
+  }
+
+  /** Potentials for the codes with a field, or for every code (`all`); within the ceiling of bytes. */
+  private potentialsFor(N: number, all: boolean): Array<Int32Array | undefined> {
+    const C = this.alpha.codes.length;
+    if (!this.potentials || this.potentials.length !== C) this.potentials = new Array<Int32Array | undefined>(C);
+    const pot = this.potentials;
+    const want = all ? C : this.fields.length;
+    if (want * N * 4 > INFERENCE_LIMITS.potentialBytes) throw new Mj3Error(`i potenziali di ${want} valori su ${N} celle superano ${INFERENCE_LIMITS.potentialBytes >> 20} MB`);
+    for (let c = 0; c < C; c++) {
+      if ((all || this.fields.some((f) => f.code === c)) && pot[c]?.length !== N) pot[c] = new Int32Array(N);
+      else if (pot[c] && pot[c]!.length !== N) pot[c] = undefined;
+    }
+    this.potentialCells = N;
+    return pot;
+  }
+
+  /**
+   * The rules ready for propagation on this grid, within the ceiling of bytes: the potentials of every code, the queue of the propagation
+   * and a bit per rule and cell, once more for a search (its potentials forwards and backwards). The buffers of the node's own propagation
+   * only if it propagates (`work`): a search has its own.
+   */
+  private rulesFor(g: Grid3, searching: boolean): { rules: Prepared[]; work?: Work } {
+    const C = this.alpha.codes.length;
+    const { X, Y, Z } = g;
+    const N = X * Y * Z;
+    let p = this.prepared;
+    if (!p || p.X !== X || p.Y !== Y || p.Z !== Z || p.C !== C) {
+      const rules = prepare(this.patterns.map((pt): InferRule => ({ dx: pt.dx, dy: pt.dy, dz: pt.dz, input: Array.from(pt.input, (id) => (id === -1 ? undefined : this.sets[id])), output: pt.output })), C, X, Y, Z);
+      const bytes = C * N * 4 * (searching ? 3 : 2) + (rules.length * N) / 8;
+      if (bytes > INFERENCE_LIMITS.potentialBytes) throw new Mj3Error(`observe: ${C} valori su ${N} celle con ${rules.length} varianti di regole superano ${INFERENCE_LIMITS.potentialBytes >> 20} MB`);
+      p = this.prepared = { X, Y, Z, C, rules };
+    }
+    if (!searching) p.work ??= makeWork(C, N, p.rules.length);
+    return p;
+  }
+
+  /**
+   * MarkovJunior's ComputeFutureSetPresent: every observed cell becomes its `from` and its future is `to`, every other cell's future is
+   * itself. False if an observed code is not on the grid (the cells are changed anyway, as there).
+   */
+  private observe(g: Grid3): boolean {
+    const C = this.alpha.codes.length;
+    if (C > MAX_OBSERVED_CODES) throw new Mj3Error(`observe: la griglia ha ${C} valori, al più ${MAX_OBSERVED_CODES}`);
+    const N = g.cells.length;
+    if (this.future.length !== N) this.future = new Uint32Array(N);
+    const future = this.future;
+    const toMask = new Uint32Array(C);
+    for (let c = 0; c < C; c++) {
+      const o = this.observed[c];
+      if (!o) continue;
+      let m = 0;
+      for (let k = 0; k < C; k++) if (o.to[k]) m |= 1 << k;
+      toMask[c] = m >>> 0;
+    }
+    const present = new Uint8Array(C);
+    const cells = g.cells;
+    for (let i = 0; i < N; i++) {
+      const v = cells[i];
+      present[v] = 1;
+      const o = this.observed[v];
+      if (o) {
+        future[i] = toMask[v];
+        if (o.from !== v) write(g, i, o.from);
+      } else future[i] = (1 << v) >>> 0;
+    }
+    const missing = this.observations!.filter((o) => !present[o.value]);
+    if (missing.length) {
+      if (!this.total) this.why ??= `i valori osservati ${missing.map((o) => `"${o.name}"`).join(', ')} non erano nella griglia`;
+      return false;
+    }
+    return true;
+  }
+
+  /** The trajectory of the search (MarkovJunior: one try without `limit`, twenty with it), or null. Out of time, the run stops. */
+  private searchFrom(g: Grid3, rng: Rng): Uint8Array[] | null {
+    const C = this.alpha.codes.length;
+    const { X, Y, Z } = g;
+    const { rules } = this.rulesFor(g, true);
+    const until = Math.min(Date.now() + INFERENCE_LIMITS.searchMs, current?.deadline ?? Infinity);
+    const tries = this.searchLimit < 0 ? 1 : 20;
+    let boards = 0;
+    let why = '';
+    for (let k = 0; k < tries; k++) {
+      const seed = rng.int(0x7fffffff);
+      const out = search(new Uint8Array(g.cells), this.future, rules, X, Y, Z, C, this.kind === 'all', {
+        boards: Math.min(this.searchLimit < 0 ? Infinity : this.searchLimit, INFERENCE_LIMITS.boards),
+        bytes: INFERENCE_LIMITS.boardBytes,
+        children: INFERENCE_LIMITS.children,
+        until,
+      }, this.depthCoefficient, seed);
+      boards += out.boards;
+      if (out.late) {
+        this.note = `ricerca interrotta dal tempo dopo ${boards} stati`;
+        throw new Mj3Late();
+      }
+      if (out.trajectory) {
+        this.note = `ricerca: traiettoria di ${out.trajectory.length} passi, ${boards} stati`;
+        return out.trajectory;
+      }
+      why = out.why ?? '';
+    }
+    this.note = `ricerca senza traiettoria: ${why}${tries > 1 ? ` (${tries} tentativi, ${boards} stati)` : ''}`;
+    if (!this.total) this.why ??= this.note;
+    return null;
+  }
+
+  /** MarkovJunior's DeltaPointwise: how much the match lowers (negative) or raises the potentials of what it writes; null where one is -1. */
+  private heuristic(g: Grid3, key: number): number | null {
+    const N = g.cells.length;
+    const pi = Math.floor(key / N);
+    const o = key - pi * N;
+    const XY = g.X * g.Y;
+    let d = this.deltas[pi];
+    if (!d || d.X !== g.X || d.XY !== XY) {
+      const p = this.patterns[pi];
+      const off: number[] = [];
+      const val: number[] = [];
+      for (let k = 0, n = 0; k < p.dz; k++)
+        for (let j = 0; j < p.dy; j++)
+          for (let i = 0; i < p.dx; i++, n++) {
+            const v = p.output[n];
+            if (v === -1 || p.input[n] === -1 || this.sets[p.input[n]][v]) continue;
+            off.push(i + j * g.X + k * XY);
+            val.push(v);
+          }
+      d = this.deltas[pi] = { X: g.X, XY, off: Int32Array.from(off), val: Int16Array.from(val) };
+    }
+    const pot = this.potentials!;
+    const inv = this.inversed;
+    const cells = g.cells;
+    let sum = 0;
+    for (let t = 0; t < d.off.length; t++) {
+      const i = o + d.off[t];
+      const v = d.val[t];
+      const pv = pot[v];
+      const now = pv ? pv[i] : 0;
+      if (now === -1) return null;
+      const old = cells[i];
+      const po = pot[old];
+      const was = po ? po[i] : 0;
+      sum += now - was;
+      if (inv) {
+        if (inv[old]) sum += 2 * was;
+        if (inv[v]) sum -= 2 * now;
+      }
+    }
+    return sum;
+  }
+
+  /**
+   * Every match with a heuristic, and its key: at temperature 0 the lowest heuristic wins (a thousandth of a draw breaks ties); above,
+   * u^exp((h - h₀)/T), whose largest falls on a match with probability ∝ exp(-h/T) (OneNode.RandomMatch, AllNode.Go).
+   */
+  private scored(g: Grid3, rng: Rng): Array<[number, number]> {
+    const out: Array<[number, number]> = [];
+    const T = this.temperature;
+    let first = 0;
+    let have = false;
+    for (const k of this.matches.keys) {
+      const h = this.heuristic(g, k);
+      if (h === null) continue;
+      if (!have) {
+        first = h;
+        have = true;
+      }
+      const u = rng.next();
+      out.push([k, T > 0 ? Math.pow(u, Math.exp((h - first) / T)) : -h + 0.001 * u]);
+    }
+    return out;
+  }
+
+  go(g: Grid3, rng: Rng): boolean {
+    if (this.limit !== undefined && this.count >= this.limit) return false;
+    const N = g.cells.length;
+    if (this.observations && this.futureComputed && this.future.length !== N) this.futureComputed = false;
+    if (this.observations && !this.futureComputed) {
+      if (!this.observe(g)) return false;
+      this.futureComputed = true;
+      // A prl replays no trajectory and reads no potential (ParallelNode): only the cells the observations changed count.
+      if (this.kind !== 'prl') {
+        if (this.searching) this.trajectory = this.searchFrom(g, rng);
+        else {
+          const { rules, work } = this.rulesFor(g, false);
+          backwardPotentials(this.potentialsFor(N, true) as Int32Array[], this.future, g.X, g.Y, g.Z, rules, work!);
+        }
+      }
+    }
+    this.sync(g);
+    if (this.fields.length) {
+      const fresh = this.count === 0 || this.potentialCells !== N;
+      const pot = this.potentialsFor(N, this.observations !== undefined && !this.searching && this.kind !== 'prl');
+      if (this.queue.length < N) this.queue = new Int32Array(N);
+      let computed = false;
+      let any = false;
+      for (const f of this.fields) {
+        if (!fresh && !f.recompute) continue;
+        const ok = fieldPotential(pot[f.code]!, g.cells, g.X, g.Y, g.Z, f.zero, f.on, this.queue);
+        if (!ok && f.essential) {
+          if (!this.total) this.why ??= `il campo essenziale ${f.name} non aveva da dove partire`;
+          return false;
+        }
+        any ||= ok;
+        computed = true;
+      }
+      if (computed && !any) {
+        if (!this.total) this.why ??= `nessun campo aveva da dove partire (${this.fields.map((f) => f.name).join('; ')})`;
+        return false;
+      }
+    }
+    if (this.kind === 'prl') return super.go(g, rng);
+    if (this.trajectory) {
+      if (this.count >= this.trajectory.length) return false;
+      const next = this.trajectory[this.count];
+      for (let i = 0; i < N; i++) if (g.cells[i] !== next[i]) write(g, i, next[i]);
+      this.count++;
+      this.total++;
+      return true;
+    }
+    const keys = this.matches.keys;
+    const guided = this.fields.length > 0 || (this.observations !== undefined && !this.searching);
+    const astray = 'le regole combaciavano, ma ogni applicazione portava dove un potenziale è -1';
+    const absent = 'le celle cercate non c\'erano mai disposte come nel pattern';
+    if (this.kind === 'one') {
+      let pick = -1;
+      if (guided) {
+        if (this.observations && goalReached(g.cells, this.future)) {
+          this.futureComputed = false;
+          return false;
+        }
+        let best = -Infinity;
+        for (const [k, key] of this.scored(g, rng))
+          if (key > best) {
+            best = key;
+            pick = k;
+          }
+      } else if (keys.length) pick = keys[rng.int(keys.length)];
+      if (pick < 0) {
+        if (!this.total) this.why ??= keys.length ? astray : absent;
+        return false;
+      }
+      this.apply(g, pick);
+    } else {
+      if (!keys.length) {
+        if (!this.total) this.why ??= absent;
+        return false;
+      }
+      let order: number[];
+      if (guided) {
+        const list = this.scored(g, rng);
+        // Stable, as LINQ's OrderBy: equal keys keep the order of the matches.
+        list.sort((a, b) => b[1] - a[1]);
+        order = list.map((e) => e[0]);
+      } else {
+        order = [...keys];
+        for (let i = order.length - 1; i > 0; i--) {
+          const j = rng.int(i + 1);
+          [order[i], order[j]] = [order[j], order[i]];
+        }
+      }
+      if (writtenBuf.length !== N) writtenBuf = new Uint8Array(N);
+      const touched: number[] = [];
+      let any = false;
+      for (const k of order) any = this.apply(g, k, writtenBuf, touched) || any;
+      for (const idx of touched) writtenBuf[idx] = 0;
+      // MarkovJunior counts a step that applied nothing and stops at the next; here the matches would be the same: it stops now.
+      if (!any) {
+        if (!this.total) this.why ??= astray;
+        return false;
+      }
     }
     this.count++;
     this.total++;
@@ -1180,7 +1620,7 @@ class WatchedRunner extends Runner {
     const from = g.log.length;
     const epoch = g.epoch;
     if (!this.inner.go(g, rng)) return false;
-    this.watch.step({ node: this.node, grid: g, from, epoch, fired: this.inner.fired });
+    this.watch.step({ node: this.node, grid: g, from, epoch, fired: this.inner.fired, ...(this.inner.note ? { note: this.inner.note } : {}) });
     return true;
   }
 }
@@ -1212,8 +1652,12 @@ function compileNode(node: Node3, alpha: Alphabet, limits: GridLimits, depth: nu
   switch (node.type) {
     case 'one':
     case 'all':
-    case 'prl':
-      return new RuleRunner(node.type, node.rules, node.steps ?? (node.type === 'prl' ? 1 : undefined), node.symmetry ?? 'xy', alpha);
+    case 'prl': {
+      const limit = node.steps ?? (node.type === 'prl' ? 1 : undefined);
+      // Only a node that infers runs another way (T334): every other program is the same run, voxel by voxel (ADR-0142).
+      if (node.fields?.length || node.observe?.length) return new GuidedRunner(node, limit, node.symmetry ?? 'xy', alpha);
+      return new RuleRunner(node.type, node.rules, limit, node.symmetry ?? 'xy', alpha);
+    }
     case 'conv':
       return new ConvRunner(node, alpha);
     case 'path':
@@ -1275,6 +1719,8 @@ export interface NodeStep {
   epoch: number;
   /** Times each rule of the node has been applied so far. */
   fired: readonly number[];
+  /** What the node found out on its own (a search's trajectory). */
+  note?: string;
 }
 
 export interface RunWatch {
@@ -1293,7 +1739,7 @@ export interface Snapshot {
 
 function exec(root: Runner, g: Grid3, seed: number, maxSteps: number, t0: number, trace: Trace = [], opts: RunOptions = {}): RunResult & { snapshots?: Snapshot[] } {
   const outer = current;
-  current = { g };
+  current = { g, ...(opts.deadline ? { deadline: t0 + opts.deadline } : {}) };
   try {
     return execIn(root, g, seed, maxSteps, t0, trace, opts);
   } finally {
@@ -1312,7 +1758,17 @@ function execIn(root: Runner, g: Grid3, seed: number, maxSteps: number, t0: numb
   const shoot = () => shots.push({ X: g.X, Y: g.Y, Z: g.Z, cells: new Uint8Array(g.cells), step: steps });
   if (keep) shoot();
   opts.watch?.start(g);
-  while (steps < maxSteps && root.go(g, rng)) {
+  while (steps < maxSteps) {
+    let went: boolean;
+    try {
+      went = root.go(g, rng);
+    } catch (e) {
+      // A search out of time: the run ends here, not finished (T334).
+      if (!(e instanceof Mj3Late)) throw e;
+      late = true;
+      break;
+    }
+    if (!went) break;
     steps++;
     if (keep && steps % every === 0) {
       shoot();
@@ -1418,6 +1874,8 @@ export class Stepper {
     try {
       if (again) this.root.rewind();
       while (made < maxSteps && this.root.go(this.grid, this.rng)) made++;
+    } catch (e) {
+      if (!(e instanceof Mj3Late)) throw e;
     } finally {
       keeping = was;
       current = outer;
