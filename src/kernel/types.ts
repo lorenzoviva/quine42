@@ -422,7 +422,15 @@ export interface UniverseConfig {
   kernel?: string;
   /** The range of the kernels it runs on (T302, ADR-0152): `{ from: "X.Y", to?: "X.Y" }`, written by the kernel; without it, from `kernel`. */
   kernels?: { from: string; to?: string };
+  /**
+   * The choice of the cards to bring (T295, ADR-0170), open since the universe was born: `seed` (from the seed, until its Genesis) or
+   * `clone` (until the first wanderer enters). Absent: closed, as in every universe made before it. The kernel closes it, the store opens it.
+   */
+  cardChoice?: CardChoice;
 }
+
+/** Where a universe that may still bring cards was born (T295). */
+export type CardChoice = 'seed' | 'clone';
 
 /** How the game is played in this universe: chosen before the Genesis, then fixed (ADR-0053). */
 export interface GameSetup {

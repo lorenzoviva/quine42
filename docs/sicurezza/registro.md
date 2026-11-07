@@ -373,6 +373,17 @@ Modello di una voce:
 - Test: `tests/sicurezza/carte-mano.test.ts`, `tests/sicurezza/serververo.test.ts`
 - Esito: chiusa da T293 (ADR-0161), 06/11/2026, branch `task/T293`.
 
+### V-033 · Le carte portate in un universo da un altro, prima della Genesi
+- Gravità: media
+- Stato: `chiusa`
+- Superficie: `GET /api/universe/<nome>/kin` e `POST /api/universe/<nome>/bring` (`server/bring.ts`, `server/universeStore.ts`), `broughtEntry` (`src/kernel/bring.ts`), il pannello «Le carte da portare» (`src/ui/cardchoice.ts`)
+- Proprietà violata: un modello o un suono che entra in un universo viene dagli universi di altri master e dall'archivio di altri giocatori, e finisce nei browser e nel mondo di chi gioca lì: solo il master di quell'universo lo porta (mai un giocatore, un anonimo, il mondo), ciò che la carta è (programma, voce dell'indice, timbro, catena) lo legge il server dal disco e mai dal client, il programma passa il controllo delle carte fatte a mano, il nome è un testo di un altro (niente markup, la quarta parete), il timbro e la catena si leggono, i campi con cui il gioco correrebbe in un altro modo (il tempo del programma, la densità, i semi) non passano, e portare non muove nessun saldo (regola 8d)
+- Prova: test (T295)
+- Contromisura: `owns` (il master, mai anonimo; il token del mondo è rifiutato), `readBringRefs` (il client dice solo universo e modello, o l'id di una carta fatta a mano: al più 24), `choiceOf` (la scelta aperta in `universe.json`, nessuna Genesi dietro un universo dal seme, nessun mondo acceso né generazione), la stessa radice (`rootsOf`, solo da `server/git.ts`) e lo stesso contratto letto sul disco, `ProgramChecker` (in produzione un processo per controllo, come le carte fatte a mano: V-030), `cleanBroughtName` (al più 120 caratteri, `cleanText` e `metaBreak`), `broughtEntry` (la voce rifatta campo per campo; timbro e catena con nomi semplici, al più 32 anelli), tutto o niente in un commit del kernel dei soli `models/`; le carte fatte a mano solo con i laboratori aperti; con gli account un ritmo per master (`BRINGS`), e nel server di produzione le rotte sotto `HEAVY`
+- Task: T295
+- Test: `tests/sicurezza/carte-portate.test.ts`, `tests/bring.test.ts`
+- Esito: chiusa da T295 (ADR-0170), 07/11/2026, branch `task/T295`.
+
 ## Le prove dell'autore
 
 Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm run sicurezza:prove`, `tools/sicurezza/catalogo.mjs`) e di [`prove-f12.md`](prove-f12.md); i test stanno in `tests/sicurezza/`. Le misure in [`esiti/`](esiti/). `tests/sicurezza-kit.test.ts` controlla che la tabella e il catalogo dicano le stesse prove: una voce nuova ha qui la sua riga.
@@ -411,6 +422,7 @@ Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm ru
 | V-030 | — | — | `carte-mano.test.ts`, `produzione.test.ts`, `serververo.test.ts` | le carte fatte a mano hanno l’interruttore spento nel progetto del kit: le prova il server di produzione vero, tests/sicurezza/serververo.test.ts |
 | V-031 | — | — | `carte-mano.test.ts`, `produzione.test.ts`, `serververo.test.ts` | le carte fatte a mano hanno l’interruttore spento nel progetto del kit: le prova il server di produzione vero, tests/sicurezza/serververo.test.ts |
 | V-032 | — | — | `carte-mano.test.ts`, `serververo.test.ts` | il nome di una carta si prova sulle sue funzioni: tests/sicurezza/carte-mano.test.ts |
+| V-033 | — | — | `carte-portate.test.ts` | le carte portate si provano sullo store con gli account finti: tests/sicurezza/carte-portate.test.ts |
 
 ## Ciò che nessuna voce copre ancora
 

@@ -42,7 +42,8 @@ export default defineConfig(({ mode }) => {
       // Before the routes: what lives in universes/ reaches a browser only through the routes below (T130, ADR-0109).
       hideUniverses(process.cwd(), universesDir),
       geminiProxy(gemini),
-      universeStore(universesDir, { accounts, internal, quota: universesPerAccount(env.QUINE_UNIVERSI_PER_ACCOUNT) }),
+      // The cards a master brings before the start (T295): their programs checked here, as the handmade cards' (only this machine listens).
+      universeStore(universesDir, { accounts, internal, quota: universesPerAccount(env.QUINE_UNIVERSI_PER_ACCOUNT), checker: inlineChecker(), labs: () => labsOn(process.cwd()) }),
       accountRoute(accounts),
       stripeRoute({
         settings: stripeSettings(env),

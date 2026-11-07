@@ -13,6 +13,7 @@ import { runsOnThisKernel } from './version';
 import { migrateUniverse, MIGRATIONS } from './migrations';
 import { internalPath } from './internalNames';
 import type { ChunkRecord, ChunkStore } from './chunks';
+import type { BringAnswer, BringRef, KinView } from './bring';
 
 export interface PastCommit {
   id: string;
@@ -43,6 +44,10 @@ export interface UniverseBackend {
   merge?(name: string, message: string): Promise<void>;
   /** A copy of this universe with another master (T42d), under a new name; returns the clone's head. */
   clone?(nome: string, master: string, titolari: 'restano' | 'master'): Promise<string | null>;
+  /** What the master may bring before the start (T295, ADR-0170): the kin universes and their cards, the handmade cards, whether the choice is open. */
+  kin?(): Promise<KinView>;
+  /** The cards chosen, brought: the store reads them from the disk, checks and commits them; the answer has the files it wrote. */
+  bring?(cards: BringRef[]): Promise<BringAnswer>;
 }
 
 /** Hash of every seed file a universe was made from (or last updated from): `seed.json`. */
@@ -658,6 +663,23 @@ export class UniverseClient implements UniverseBackend {
   async clone(nome: string, master: string, titolari: 'restano' | 'master' = 'restano'): Promise<string | null> {
     await this.afterCommits();
     return (await this.post('clone', { nome, master, titolari })).head ?? null;
+  }
+
+  /** What the master may bring before the start (T295). Throws with the store's reason (not the master, no store). */
+  async kin(): Promise<KinView> {
+    const r = await fetch(this.url('kin'), { headers: this.headers });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new StoreAnswer(j.error ?? `HTTP ${r.status}`, r.status);
+    return { open: !!j.open, ...(j.reason ? { reason: String(j.reason) } : {}), ...(j.choice ? { choice: j.choice } : {}), contract: String(j.contract ?? ''), kin: Array.isArray(j.kin) ? j.kin : [], handmade: Array.isArray(j.handmade) ? j.handmade : [] };
+  }
+
+  /** The cards chosen, after the writes in flight (the store checks against the disk): what came and the files written, or why nothing did. */
+  async bring(cards: BringRef[]): Promise<BringAnswer> {
+    await this.afterCommits();
+    const r = await fetch(this.url('bring'), { method: 'POST', headers: { 'Content-Type': 'application/json', ...this.headers }, body: JSON.stringify({ cards }) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) return { ok: false, reason: String(j.error ?? `HTTP ${r.status}`), ...(Array.isArray(j.cards) ? { cards: j.cards } : {}) };
+    return { ok: true, head: j.head ?? null, brought: Array.isArray(j.brought) ? j.brought : [], changes: j.changes && typeof j.changes === 'object' ? j.changes : {} };
   }
 
   // Maps: files of the universe too, outside the text snapshot.

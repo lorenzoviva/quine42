@@ -272,7 +272,8 @@ async function* stepsOf(k: Kernel, r: DeferredRun, done: Set<string>): AsyncGene
     const req = k.sculpting.missing().find((q) => !tried.has(q.id));
     if (!req) break;
     tried.add(req.id);
-    yield { id: `modello:${req.id}`, run: async () => (await k.sculpting.make(req), true) };
+    // What costs nothing (another size, a card brought before the Genesis, T295) is not sculpted again.
+    yield { id: `modello:${req.id}`, run: async () => (k.sculpting.free(req) || (await k.sculpting.make(req)), true) };
   }
   const composed = new Set<string>();
   for (let made = 0; made < (r.brani ?? k.config.ai.maxPieces ?? 8); made++) {

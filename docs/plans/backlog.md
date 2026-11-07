@@ -4528,7 +4528,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Quando è fatto: commit su `task/T294`. Sicurezza: nell'esito.
 - Esito: laboratori serviti dal server di produzione solo con `laboratori` acceso e solo i tre; build senza strumenti degli sviluppatori (`import.meta.env.MODE`, perché `DEV` segue NODE_ENV e portava Gemini nel dist); barra delle carte in editor e SoundLab (fork da `publicFiles` o da una propria carta, Salva / Salva come nuova coi motivi del server, bozza in localStorage, carta altrui sola lettura); sandbox con i modelli fatti a mano; `site/laboratori.html` e link a build accesa; carte fatte a mano in `carte.html`; senza account viandante per id; preset del SoundLab ripristinati (`sound-*`); ADR-0168; non provato con un account dell'emulatore (non installato), miniature delle carte fatte a mano assenti, il posizionamento automatico della carta nella sandbox non visto nel browser; sicurezza: nessuna rotta nuova, superficie solo le tre pagine statiche con l'interruttore acceso, sotto CSP, nessuna voce nuova.
 
-### T295 · Portare le carte in un universo nuovo, prima della Genesi — `da fare` (dipende da T293)
+### T295 · Portare le carte in un universo nuovo, prima della Genesi — `fatto` (`f3a98545`) (dipende da T293)
 - Pipeline: claude · sforzo max · stima 4% · approvato · browser · priorità 7
 - Sforzo: max, scelto dall'autore.
 - Step: 41
@@ -4543,6 +4543,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Test: radice uguale e diversa, clone, `X.Y` diverso, scelta a Genesi già fatta (rifiutata), a partita iniziata (rifiutata), non master (rifiutata), Genesi offline con carte (meno chiamate, 0 fault), carta ostile da un altro universo; `tests/sicurezza/` se serve. Typecheck e suite intera con i loro turni. Versione del kernel (ADR-0136; una radice nuova per i nuovi universi: motiva nell'ADR se `Y` sale).
 - Browser: sì, con `?offline`: scelgo due modelli e un suono prima della Genesi, li vedo nel mondo, ricarico. Catture nel commit.
 - Quando è fatto: commit su `task/T295`, ADR, sezione in `#clone-eredita`.
+- Esito: radice del contratto per gli universi nuovi (un commit fisso per `X.Y`, parenti per radice); scelta aperta in `universe.json → cardChoice`, chiusa dal kernel alla Genesi e al primo ingresso; rotte `kin` e `bring` solo del master, ogni carta riletta dal disco e controllata, doppioni prima di partire, tutto o niente in un commit del kernel; titolare il master e un anello in più nella catena, nessun saldo si muove; Cartografo, Narratore e Scultore usano le carte portate, l'Artista non le rigiudica; i modelli dello Scultore ora sono carte; risparmio offline 21→0 programmi e 68→26 chiamate; V-033 chiusa; ADR-0169, kernel 0.5.6. Mancano: gli universi di prima (senza radice) e i modelli scolpiti prima di 0.5.6 (senza carta) restano fuori; `npm run genera` non sceglie carte da sé. Non provati nel browser: la lobby di un clone e le carte fatte a mano (coperti solo dai test).
 
 ### T296 · Eliminare la carta problematica — `da fare` (dipende da T295)
 - Pipeline: claude · sforzo max · stima 1.5% · approvato · browser · priorità 7

@@ -193,7 +193,20 @@ export function toPalette(terrains: RawTerrain[]): Record<string, TerrainDef> {
 
 export type LayoutCheck = (id: string, def: EnvironmentDef, palette: Record<string, TerrainDef>) => string[];
 
-export async function planGenesis(c: Council, theme: string, base: FileMap, checkLayout: LayoutCheck): Promise<GenesisPlan> {
+/**
+ * What came with the cards before the Genesis (T295, ADR-0170), as its agents are told: the Artist every model and sound by name and class
+ * (they stay as they are: the guide welcomes them), the Cartographer the music by the environments it plays in, the Narrator the figures
+ * and things it may cast by name. Never the universes they come from: inside the world nothing comes from elsewhere.
+ */
+export interface GenesisBrought {
+  all: Array<{ name: string; class: string }>;
+  music: Array<{ name: string; environments: string[] }>;
+  cast: Array<{ name: string; class: string }>;
+}
+
+const listed = (xs: Array<{ name: string; class: string }>, n = 40) => xs.slice(0, n).map((x) => `«${x.name}» (${x.class})`).join(', ');
+
+export async function planGenesis(c: Council, theme: string, base: FileMap, checkLayout: LayoutCheck, brought?: GenesisBrought): Promise<GenesisPlan> {
   const data = { theme };
   // The Narrator still writes the bible with the Italian fields of its schema (until T310b): it is read with those of 0.4 (T308a).
   const askBible = async (feedback = ''): Promise<Bible> =>
@@ -208,7 +221,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
     c.ask<RawStyle>(
       'artist',
       'genesis.style',
-      `Write the style guide for all the models of this universe: it is a 3D game where everything (people, animals, trees, rocks, things, buildings) is a voxel model (20 voxels per tile) built by a program of rules, seen from above in 3/4. The world is drawn like a cartoon: flat bands of light and a dark outline where the part changes. Say the style (simple and readable from afar), the shapes and proportions (squat and simplified), the palette (a muted, light environment, few saturated accents on the things that matter), the light, 3-6 rules (among them: one solid colour per part, neighbouring parts well apart in light and dark, details as dark marks) and the look of the protagonist, all in the age of the theme. In "case_comuni", only if the common houses of this age are not cottages of stone, wood and straw, say in one sentence what they are like (a block of flats with balconies, a tin shack with a sign); otherwise leave it empty.\nTheme: ${theme}\nTitle: ${bible.title}\nTone: ${bible.tone}\nSummary: ${bible.summary}${feedback ? `\nThe Arbiter objected: ${feedback}` : ''}`,
+      `Write the style guide for all the models of this universe: it is a 3D game where everything (people, animals, trees, rocks, things, buildings) is a voxel model (20 voxels per tile) built by a program of rules, seen from above in 3/4. The world is drawn like a cartoon: flat bands of light and a dark outline where the part changes. Say the style (simple and readable from afar), the shapes and proportions (squat and simplified), the palette (a muted, light environment, few saturated accents on the things that matter), the light, 3-6 rules (among them: one solid colour per part, neighbouring parts well apart in light and dark, details as dark marks) and the look of the protagonist, all in the age of the theme. In "case_comuni", only if the common houses of this age are not cottages of stone, wood and straw, say in one sentence what they are like (a block of flats with balconies, a tin shack with a sign); otherwise leave it empty.${brought?.all.length ? `\nSome models of the library were made before this guide and stay as they are: ${listed(brought.all)}. Let the palette and the shapes welcome them, without naming them in the guide.` : ''}\nTheme: ${theme}\nTitle: ${bible.title}\nTone: ${bible.tone}\nSummary: ${bible.summary}${feedback ? `\nThe Arbiter objected: ${feedback}` : ''}`,
       STYLE_SCHEMA,
       { data: { ...data, bible } },
     );
@@ -291,7 +304,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
   const layouts: Record<string, EnvironmentDef> = {};
   let feedback = '';
   for (let round = 0; round < 2 && Object.keys(layouts).length < 4; round++) {
-    const designed = await designLayouts(c, palette, feedback);
+    const designed = await designLayouts(c, palette, feedback, brought?.music);
     const problems: string[] = [];
     for (const d of designed) {
       if ('error' in d) {
@@ -318,7 +331,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
   const { moduli } = await c.ask<{ moduli: CastEntry[] }>(
     'narrator',
     'genesis.cast',
-    `Choose the first inhabitants and the first things of «${bible.title}»: 5 npcs very different from each other (at least 3 people of different trades, ages and genders, and 1 animal; none the same as another), 5 objects that stand in the world (at least 3 pieces of furniture or containers, as its age has them: bed, cupboard, chest, workbench…, and 1-2 outdoor things to do something with: well, altar, bonfire, booth, vending machine…), 2 special tools. For each one a one-sentence request for the Forge, consistent with the bible.`,
+    `Choose the first inhabitants and the first things of «${bible.title}»: 5 npcs very different from each other (at least 3 people of different trades, ages and genders, and 1 animal; none the same as another), 5 objects that stand in the world (at least 3 pieces of furniture or containers, as its age has them: bed, cupboard, chest, workbench…, and 1-2 outdoor things to do something with: well, altar, bonfire, booth, vending machine…), 2 special tools. For each one a one-sentence request for the Forge, consistent with the bible.${brought?.cast.length ? ` These already have their look: ${listed(brought.cast, 30)}; when one fits this world, ask for it with exactly its name.` : ''}`,
     CAST_SCHEMA,
     { data: { bible } },
   );

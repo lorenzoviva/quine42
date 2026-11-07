@@ -11,7 +11,7 @@ import { compileMjx } from '../mj/model';
 import { parseXml, XmlError } from '../mj/xml';
 import { classSeeds, rootTag } from './forms';
 import { metaBreak } from './fourthwall';
-import { fingerprint, readOrigins, type CardOrigin } from './heritage';
+import { fingerprint, HANDMADE_ID_RE, readOrigins, type CardOrigin } from './heritage';
 import { soundErrors } from './validator';
 import { contractOf, parseContract, parseVersion, showContract, KERNEL_VERSION } from './version';
 import { validWandererId } from './wanderers';
@@ -97,7 +97,8 @@ export type HandmadeLimits = typeof HANDMADE_LIMITS;
 export const HANDMADE_CAPS = { cards: 50, bytes: 2 * 1024 * 1024 };
 export type HandmadeCaps = typeof HANDMADE_CAPS;
 
-export const HANDMADE_ID_RE = /^handmade-[a-z0-9]{10}$/;
+// The id of a card lives with what measures it (heritage.ts): the cards of a universe read it without the engine.
+export { HANDMADE_ID_RE };
 const ID_ALPHABET = 'abcdefghijklmnopqrstuvwxyz0123456789';
 
 /** A new id from ten random bytes (the server's `randomBytes`): `handmade-` and ten letters or digits. */

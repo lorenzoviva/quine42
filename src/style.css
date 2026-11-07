@@ -330,6 +330,11 @@ input[type='checkbox'], input[type='radio'] { accent-color: var(--neon-pink); }
 #genesis .game .row { display: flex; gap: var(--space-21); flex-wrap: wrap; }
 #genesis .feed { display: flex; flex-direction: column; gap: var(--space-3); max-height: 40vh; overflow: auto; }
 #genesis.running textarea { opacity: 0.5; }
+/* The cards to bring (T295): in the Genesis and in the lobby of a clone. */
+.cards-to-bring .section-sub { color: var(--gold); font-size: var(--text-13); margin-top: var(--space-5); }
+.cards-to-bring label.card-to-bring { display: flex; gap: var(--space-8); align-items: baseline; flex-wrap: wrap; font-size: var(--text-13); }
+.cards-to-bring .warn { color: var(--neon-pink); }
+#genesis .cards-to-bring { max-height: 40vh; overflow: auto; }
 #intro .models { margin-top: var(--space-21); color: var(--comic-paper-dim); font: var(--text-18)/var(--leading-tight) var(--font-pixel); }
 @media (max-width: 720px) {
   #inventory .grid { grid-template-columns: repeat(4, var(--measure-47)); }

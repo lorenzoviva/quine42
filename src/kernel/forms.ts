@@ -69,6 +69,11 @@ export interface ModelInfo {
   problems?: string[];
   /** What a sound program is for in the game (ADR-0126). */
   sound?: SoundPurpose;
+  /**
+   * Where it was brought from before the Genesis (T295, ADR-0170): the universe of its card, or `.handmade` for a handmade card. The
+   * Cartographer and the Sculptor are told of these; nothing else of the game reads it.
+   */
+  brought?: string;
 }
 
 /** What an entity's look is: which program, which seed, which way it faces, what has been done to it. */

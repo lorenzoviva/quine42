@@ -16,6 +16,11 @@
 //   GET|PUT /api/universe/<name>/map/<key>    JSON
 //   GET  /api/universe/<name>/maps            → [{ file, name, layout }] every place ever planned
 //   GET  /api/universe/<name>/carte           → { exists, carte, files }      the cards measured here, what shows them (T104, T120)
+//   GET  /api/universe/<name>/kin             → { open, kin, handmade… }      the cards the master may bring before the start (T295, server/bring.ts)
+//   POST /api/universe/<name>/bring           { cards }                       → { head, brought, changes }
+//
+// A universe born here starts from the root of its contract (T295, ADR-0170, `plantRoot`): every universe born from the seed of that
+// contract has it, so they are kin. A return to the root is refused: it holds no file.
 //
 // Who may do what (T120, ADR-0102, server/access.ts): a game alone is of whoever is on this machine, a multiplayer game of its master and
 // its world. Everyone else reads only `publicFiles` and writes nothing. In a multiplayer game balances are written only by the world.
@@ -32,16 +37,23 @@ import { portedFiles } from '../src/kernel/migrations';
 import type { AccountSettings } from './account';
 import { sealLedger, sweepBalances } from './ledger';
 import { callerOf, creditFile, failureText, gameIn, isJson, newSecret, newUniverse, owns, type Access } from './access';
-import { holdGit, runGit } from './git';
+import { EMPTY_TREE, holdGit, plantRoot, runGit } from './git';
 import { Rates, type Pace } from './rates';
 import { accountWanderer } from '../src/session/account';
 import { serverPath } from './folders';
+import { bringCards, kinOf } from './bring';
+import { HandmadeArchive } from './handmade';
+import type { ProgramChecker } from './programCheck';
+import { withCardChoice } from '../src/kernel/bring';
+import { KERNEL_CONTRACT } from '../src/kernel/version';
 
 const MAX_BODY = 32 * 1024 * 1024;
 /** Universes of which an account is the master, unless the `.env` says otherwise (`QUINE_UNIVERSI_PER_ACCOUNT`, V-026). */
 export const DEFAULT_UNIVERSES_PER_ACCOUNT = 3;
 /** Universes an account may make or clone: what goes to the bin stays on the disk, so a quota alone would not hold (V-026). Twelve, then one every two hours. */
 export const UNIVERSES_MADE: Pace = { burst: 12, perSecond: 12 / 86400 };
+/** Choices of cards a master may bring: each one checks its programs for seconds (V-033). Six, then one a minute. */
+export const BRINGS: Pace = { burst: 6, perSecond: 1 / 60 };
 
 /** `QUINE_UNIVERSI_PER_ACCOUNT`: a number, or the default. */
 export function universesPerAccount(text: string | undefined): number {
@@ -223,14 +235,14 @@ async function head(root: string): Promise<string | null> {
 }
 
 async function log(root: string): Promise<Array<{ id: string; author: string; time: number; message: string }>> {
-  const raw = await git(root, ['log', '-n', '300', '--format=%h%x09%an%x09%at%x09%s']).catch(() => '');
+  const raw = await git(root, ['log', '-n', '300', '--format=%h%x09%an%x09%at%x09%T%x09%s']).catch(() => '');
+  // The root of a contract (T295) is no state of the universe: nothing to go back to, so not in its history.
   return raw
     .split('\n')
     .filter(Boolean)
-    .map((l) => {
-      const [id, author, time, ...msg] = l.split('\t');
-      return { id, author, time: Number(time) * 1000, message: msg.join('\t') };
-    });
+    .map((l) => l.split('\t'))
+    .filter(([, , , tree]) => tree !== EMPTY_TREE)
+    .map(([id, author, time, , ...msg]) => ({ id, author, time: Number(time) * 1000, message: msg.join('\t') }));
 }
 
 async function writeFiles(root: string, changes: Record<string, string | null>): Promise<void> {
@@ -263,7 +275,17 @@ const aiOf = (text: string): string => {
   }
 };
 
-export function universeHandler(baseDir: string, opts: { accounts?: AccountSettings; internal?: string; quota?: number } = {}): Connect.NextHandleFunction {
+export interface UniverseStoreOptions {
+  accounts?: AccountSettings;
+  internal?: string;
+  quota?: number;
+  /** What checks the programs of the cards a master brings (T295): in production the world's program, a process each. None: no card comes. */
+  checker?: ProgramChecker;
+  /** The labs (`site/beta.json → laboratori`): closed, no handmade card comes into a universe (ADR-0161). */
+  labs?: () => boolean;
+}
+
+export function universeHandler(baseDir: string, opts: UniverseStoreOptions = {}): Connect.NextHandleFunction {
   const queues = new Map<string, Promise<unknown>>();
   /** One operation at a time per universe (git is not happy with concurrent writers). */
   const serial = <T>(name: string, fn: () => Promise<T>): Promise<T> => {
@@ -278,6 +300,9 @@ export function universeHandler(baseDir: string, opts: { accounts?: AccountSetti
   const masterUid = opts.accounts?.masterUid;
   const quota = opts.quota ?? DEFAULT_UNIVERSES_PER_ACCOUNT;
   const makings = new Rates(UNIVERSES_MADE);
+  const brings = new Rates(BRINGS);
+  const labs = opts.labs ?? (() => false);
+  const archive = HandmadeArchive.of(baseDir);
   /** With accounts, whether this wanderer has no room for one more; the author (`QUINE_MASTER`) is not counted. */
   const noRoom = async (id: string | undefined) => !!opts.accounts?.verify && !!id && !(masterUid && id === accountWanderer(masterUid)) && (await universesOf(baseDir, id)) >= quota;
   const full = () => `al più ${quota} universi per account`;
@@ -286,7 +311,7 @@ export function universeHandler(baseDir: string, opts: { accounts?: AccountSetti
     const url = (req.url ?? '').split('?')[0];
     const who = await callerOf(req, access);
     if ('refused' in who) return send(res, who.status, { error: who.refused });
-    const m = /^\/api\/universe\/([^/]+)(?:\/(create|commit|checkout|reset|map|maps|branch|merge|clone|carte)(?:\/([^/]+))?)?$/.exec(url);
+    const m = /^\/api\/universe\/([^/]+)(?:\/(create|commit|checkout|reset|map|maps|branch|merge|clone|carte|kin|bring)(?:\/([^/]+))?)?$/.exec(url);
     if (url === '/api/universe' || url === '/api/universe/') {
       const es = await fs.readdir(baseDir, { withFileTypes: true }).catch(() => []);
       return send(res, 200, { available: true, universes: es.filter((e) => e.isDirectory() && !e.name.startsWith('.')).map((e) => e.name) });
@@ -299,8 +324,8 @@ export function universeHandler(baseDir: string, opts: { accounts?: AccountSetti
     const game = gameIn(await fs.readFile(path.join(root, 'universe.json'), 'utf8').catch(() => undefined));
     const mine = owns(who, game, masterUid);
     const notYours = () => send(res, 403, { error: game.many ? 'solo il master di questo universo' : 'solo da questa macchina' });
-    // The world's token is for its own universe: making others is not a world's to do (ADR-0110).
-    if (who.server && op === 'clone') return notYours();
+    // The world's token is for its own universe: making others is not a world's to do (ADR-0110), nor bringing them cards from others.
+    if (who.server && (op === 'clone' || op === 'kin' || op === 'bring')) return notYours();
 
     // --- What anyone may read: cut down to what is public, unless the universe is theirs. ---
     if (!op && req.method === 'GET') {
@@ -369,14 +394,30 @@ export function universeHandler(baseDir: string, opts: { accounts?: AccountSetti
       const files = await serial(name, () => readBranch(root, arg));
       return send(res, 200, files ? { exists: true, files } : { exists: false });
     }
+    // The cards the master may bring before the start (T295): what the other universes and the archive have, and whether the choice is open.
+    if (op === 'kin' && !arg && req.method === 'GET') return send(res, 200, await kinOf(name, { baseDir, labs, archive, asker: who.id }));
     if (req.method !== 'POST') return send(res, 405, { error: 'metodo non ammesso' });
     if (!isJson(req)) return send(res, 415, { error: 'solo JSON' });
     // Before reading up to MAX_BODY of who could not make anything anyway (V-028): `newUniverse` says the rest from the files.
     if (op === 'create' && (who.anonimo || (!who.local && !who.id))) return send(res, 403, { error: 'per fare un universo serve un account' });
     if (op === 'create' && (await noRoom(who.id))) return send(res, 403, { error: full() });
     if ((op === 'create' || op === 'clone') && opts.accounts?.verify && who.id && !makings.take(who.id)) return send(res, 429, { error: 'troppi universi fatti di recente: riprova più tardi' });
+    if (op === 'bring' && !opts.checker) return send(res, 503, { error: 'questo server non controlla i programmi: le carte non entrano' });
+    // Each choice checks its programs for seconds: with accounts, at a pace per master (V-033); without, only this machine is here.
+    if (op === 'bring' && opts.accounts?.verify && !brings.take(who.id ?? '')) return send(res, 429, { error: 'troppe scelte di carte di recente: riprova tra poco' });
     const raw = await readBody(req);
     const body = raw ? JSON.parse(raw) : {};
+    if (op === 'bring') {
+      // Read, checked and written in the universe's own line: one commit of the kernel, or nothing (server/bring.ts). Whose the cards become: the master's.
+      const r = await serial(name, async () => {
+        const out = await bringCards(name, body.cards, { baseDir, master: game.master, checker: opts.checker!, labs, archive, asker: who.id });
+        if (!('ok' in out)) return out;
+        await writeFiles(root, out.changes);
+        return { ...out, head: await commitAll(root, out.message, 'kernel') };
+      });
+      if (!('ok' in r)) return send(res, r.status, { error: r.refused, ...(r.cards ? { cards: r.cards } : {}) });
+      return send(res, 200, { ok: true, head: r.head, brought: r.brought, changes: r.changes });
+    }
     // In a multiplayer game the balances are the world's: not even its master writes them from outside (ADR-0081, ADR-0102).
     const touched = op === 'commit' ? body.changes : op === 'branch' ? body.files : undefined;
     if (Object.keys((op === 'create' ? body.files : touched) ?? {}).some((p) => !allowedPath(p))) return send(res, 400, { error: 'percorso non ammesso' });
@@ -392,7 +433,12 @@ export function universeHandler(baseDir: string, opts: { accounts?: AccountSetti
           sealLedger(baseDir, name);
           await fs.mkdir(root, { recursive: true });
           await git(root, ['init', '-q']);
-          await writeFiles(root, made && 'files' in made ? made.files : {});
+          // From the root of this kernel's contract, the same for every universe born here (T295, ADR-0170); the files come in the commit after.
+          await plantRoot(root, KERNEL_CONTRACT, AUTHORS.kernel);
+          const born = made && 'files' in made ? made.files : {};
+          // A universe just born may bring cards, until its Genesis or its first entry: the kernel closes the choice.
+          const config = born['universe.json'];
+          await writeFiles(root, typeof config === 'string' ? { ...born, 'universe.json': withCardChoice(config, 'seed') } : born);
           await fs.writeFile(path.join(root, '.gitattributes'), '* text=auto eol=lf\n', 'utf8');
           return { head: await commitAll(root, body.message ?? 'nasce dal seme del kernel', 'genesis') };
         }
@@ -402,6 +448,9 @@ export function universeHandler(baseDir: string, opts: { accounts?: AccountSetti
           return { head: await commitAll(root, String(body.message ?? 'commit'), String(body.author ?? 'kernel')) };
         case 'checkout': {
           if (!/^[0-9a-f]{4,40}$/.test(String(body.id))) throw new Error('commit non valido');
+          // The root of a contract holds no file (T295): going back there would be a universe of nothing.
+          const tree = await git(root, ['rev-parse', '--verify', '-q', `${body.id}^{tree}`]).then((s) => s.trim(), () => '');
+          if (!tree || tree === EMPTY_TREE) throw new Error('commit non valido');
           await git(root, ['restore', `--source=${body.id}`, '--staged', '--worktree', '--', '.']);
           await commitAll(root, `ritorno a ${body.id}`, 'kernel');
           // An old commit may bring balances back: they count for nothing, and they do not stay (ADR-0104).
@@ -442,7 +491,7 @@ export function universeHandler(baseDir: string, opts: { accounts?: AccountSetti
   };
 }
 
-export function universeStore(baseDir: string, opts: { accounts?: AccountSettings; internal?: string; quota?: number } = {}): Plugin {
+export function universeStore(baseDir: string, opts: UniverseStoreOptions = {}): Plugin {
   const handler = universeHandler(baseDir, opts);
   return {
     name: 'rune-universe-store',
