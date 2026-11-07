@@ -12,7 +12,7 @@ import { parseXml, XmlError } from '../mj/xml';
 import { classSeeds, rootTag } from './forms';
 import { metaBreak } from './fourthwall';
 import { fingerprint, HANDMADE_ID_RE, readOrigins, type CardOrigin } from './heritage';
-import { soundErrors } from './validator';
+import { inferenceRefusal, soundErrors } from './validator';
 import { contractOf, parseContract, parseVersion, showContract, KERNEL_VERSION } from './version';
 import { validWandererId } from './wanderers';
 
@@ -182,6 +182,8 @@ export function handmadeProgramErrors(q: HandmadeProgram, limits: HandmadeLimits
     if (q.kind === 'sound') {
       const m = compileMjx(q.xml, {});
       if (!m.sound) return ['manca <sound>: questo programma è un modello, salvalo come modello'];
+      const infers = inferenceRefusal(m);
+      if (infers) return [infers];
       const errors = soundErrors('programma', m, left(limits.soundMs));
       return now() > end ? [slow] : errors;
     }
@@ -190,6 +192,8 @@ export function handmadeProgramErrors(q: HandmadeProgram, limits: HandmadeLimits
     const box = /\ssize="/.test(rootTag(q.xml)) ? undefined : boxOf(cls, q.size);
     const m = compileMjx(q.xml, box ? { size: box } : {});
     if (m.sound) return ['questo programma è un suono (<sound>): salvalo come suono'];
+    const infers = inferenceRefusal(m);
+    if (infers) return [infers];
     if (m.actions.length > limits.actions) return [`troppe azioni: ${m.actions.length}, al più ${limits.actions}`];
     if (m.animations.length > limits.animations) return [`troppe animazioni: ${m.animations.length}, al più ${limits.animations}`];
     let first: Grid3 | undefined;

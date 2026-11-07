@@ -28,10 +28,12 @@
 //   <import file="x"/>                      the program of models/x.xml run here as a node: its letters, colours and unions come
 //                                           with it; its box, origin, ground, soil, sound, animations and actions do not
 // Files come from `opts.files` (`mjxIncludes` gathers them): plain names, never a path, bounded in depth, number and size.
-// Not supported (they need search or tiles): wfc, convchain, observe and field (inference).
+// Inference, as MarkovJunior (T334, ADR-0173, src/mj/infer.ts): inside one, all and prl, <field for from|to on recompute essential/> and
+// <observe value from to/>, with temperature, search, limit and depthCoefficient on the node.
+// Not supported (they need tiles): wfc, convchain.
 
 import { internalName } from '../kernel/internalNames';
-import { Mj3Error, PARTS, SHAPES, type ConvRule, type Node3, type PaletteEntry, type Part, type Program3, type Rule3, type ShapeKind, type Sym, type Vec3 } from './engine';
+import { Mj3Error, PARTS, SHAPES, type ConvRule, type FieldSpec, type Inference, type Node3, type ObserveSpec, type PaletteEntry, type Part, type Program3, type Rule3, type ShapeKind, type Sym, type Vec3 } from './engine';
 import { MJ_PALETTE } from './palette';
 import { soundSettings, type SoundSettings } from './sound';
 import { parseXml, XmlError, type XmlElement } from './xml';
@@ -127,9 +129,10 @@ export function mjxIncludes(src: string, read: (file: string) => string | undefi
 const UNSUPPORTED: Record<string, string> = {
   wfc: 'il WFC a tessere non serve più: il modello si genera intero',
   convchain: 'convchain non è supportato',
-  observe: "l'inferenza (observe) non è supportata",
-  field: "i campi di potenziale (field) non sono supportati",
 };
+/** What infers inside a rule node (T334): not a node of its own. */
+const INFERENCE_TAGS = new Set(['field', 'observe']);
+const truthy = (s: string | undefined) => /^true$/i.test(s ?? '');
 
 interface Ctx {
   /** The empty letter of the grid in scope (it becomes the engine's air, '.'). */
@@ -483,7 +486,7 @@ class Compiler {
     if (this.ownRule(el)) add(el, true);
     for (const c of el.children) {
       if (c.name === 'rule') add(c, false);
-      else if (c.name === 'in' || c.name === 'out') continue;
+      else if (c.name === 'in' || c.name === 'out' || INFERENCE_TAGS.has(c.name)) continue;
       else if (UNSUPPORTED[c.name]) this.fail(c, UNSUPPORTED[c.name]);
       else if (c.name !== 'union' && c.name !== 'color' && c.name !== 'sound') this.fail(c, `dentro <${el.name}> vanno solo <rule>, <in> e <out>`);
     }
@@ -504,8 +507,10 @@ class Compiler {
         steps: this.steps(el),
         symmetry: sym,
         ...(/^true$/i.test(el.attrs.optional ?? '') ? { optional: true } : {}),
+        ...this.inference(el, ctx),
       };
     }
+    if (INFERENCE_TAGS.has(el.name)) this.fail(el, 'va dentro one, all o prl');
     if (el.name === 'sequence' || el.name === 'markov') {
       const children = this.children(el, { ...ctx, sym });
       if (!children.length) this.fail(el, 'nessun nodo dentro');
@@ -531,6 +536,45 @@ class Compiler {
     if ((SHAPES as readonly string[]).includes(el.name)) return this.shape(el, ctx);
     if (el.name === 'rule') this.fail(el, '<rule> va dentro one, all, prl, convolution o map');
     this.fail(el, `nodo sconosciuto (noti: ${MJX_NODES.join(' ')} import union color sound animation action; in e out dentro le regole)`);
+  }
+
+  /** MarkovJunior's fields and observations of a rule node, and the attributes that go with them (RuleNode.Load). */
+  inference(el: XmlElement, ctx: Ctx): Inference {
+    const fields: FieldSpec[] = el.children
+      .filter((c) => c.name === 'field')
+      .map((f) => {
+        const from = f.attrs.from;
+        if (from === undefined && f.attrs.to === undefined) this.fail(f, 'vuole "to" (verso dove scende il potenziale) o "from" (da dove sale)');
+        return {
+          for: this.one(f, f.attrs.for, ctx, 'for'),
+          ...(from !== undefined ? { from: this.letters(f, from, ctx, 'from') } : { to: this.letters(f, f.attrs.to!, ctx, 'to') }),
+          on: this.letters(f, f.attrs.on ?? this.fail(f, 'manca "on" (le celle su cui si propaga)'), ctx, 'on'),
+          ...(truthy(f.attrs.recompute) ? { recompute: true } : {}),
+          ...(truthy(f.attrs.essential) ? { essential: true } : {}),
+        };
+      });
+    const observe: ObserveSpec[] = el.children
+      .filter((c) => c.name === 'observe')
+      .map((o) => ({
+        value: this.one(o, o.attrs.value, ctx, 'value'),
+        ...(o.attrs.from !== undefined ? { from: this.one(o, o.attrs.from, ctx, 'from') } : {}),
+        to: this.letters(o, o.attrs.to ?? this.fail(o, 'manca "to" (ciò che la cella deve diventare)'), ctx, 'to'),
+      }));
+    const temperature = this.num(el, el.attrs.temperature, 'temperature');
+    if (temperature !== undefined && temperature < 0) this.fail(el, 'temperature vuole un numero da 0 in su');
+    const out: Inference = {
+      ...(fields.length ? { fields } : {}),
+      ...(observe.length ? { observe } : {}),
+      ...(temperature !== undefined ? { temperature } : {}),
+    };
+    if (truthy(el.attrs.search)) {
+      if (!observe.length) this.warnings.push(`riga ${el.line}: search senza observe non cerca niente`);
+      const limit = this.num(el, el.attrs.limit, 'limit');
+      const depthCoefficient = this.num(el, el.attrs.depthCoefficient, 'depthCoefficient');
+      Object.assign(out, { search: true, ...(limit !== undefined && limit > 0 ? { limit: Math.floor(limit) } : {}), ...(depthCoefficient !== undefined ? { depthCoefficient } : {}) });
+    }
+    if (temperature !== undefined && !fields.length && !observe.length) this.warnings.push(`riga ${el.line}: temperature senza field né observe non cambia niente`);
+    return out;
   }
 
   convolution(el: XmlElement, ctx: Ctx): Node3 {
@@ -648,6 +692,24 @@ function pad(a: string, b: string): [string, string] {
 }
 
 const hasMap = (el: XmlElement): boolean => el.name === 'map' || el.children.some(hasMap);
+
+/**
+ * What a program infers: `field` and `observe` in its rule nodes, its animations and its actions (T334). The engine runs them; the
+ * game's validator and the handmade cards take them only when T336 gives them their ceilings.
+ */
+export function inferenceIn(m: Pick<MjxModel, 'program'> & Partial<Pick<MjxModel, 'animations' | 'actions'>>): string[] {
+  const found = new Set<string>();
+  const visit = (n: Node3) => {
+    if (n.type === 'sequence' || n.type === 'markov') n.children.forEach(visit);
+    else if (n.type === 'one' || n.type === 'all' || n.type === 'prl') {
+      if (n.fields?.length) found.add('field');
+      if (n.observe?.length) found.add('observe');
+    }
+  };
+  visit(m.program.program);
+  for (const clip of [...(m.animations ?? []), ...(m.actions ?? [])]) visit(clip.program.program);
+  return [...found];
+}
 
 /**
  * Compiles a program; `size` (the class's box) wins over the program's own, `base` says how many voxels of it are under the ground
