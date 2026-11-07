@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 07/11/2026, epoca 325 (claude). Crediti: vedi `stato`.
+Aggiornato il 07/11/2026, epoca 326 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -23,8 +23,8 @@ Aggiornato il 07/11/2026, epoca 325 (claude). Crediti: vedi `stato`.
 
 0. **Decisioni autore 04/11:** D32 SemVer `X.Y.Z`. Step 32: T260, T262 → T245a → T263/T245b → T245c-f. T265 prima della beta.
 1. T324 (immagini Jev: utile come filtro dei difetti visivi, non per il giudizio dell'Artista) integrato via T329.
-2. **In corso:** T330. **Pronti:** T327 (NPC coeso, claude extra); T294 (laboratori giocatori, claude p3); T295 (carte prima della Genesi, claude p3); T315 (veste futuristica, p4); T321 (Scultore su Flash, claude p4); T303 (misura Scenografo, claude p5); T288 (armi/attrezzi in mano, p6, browser); T242 (rapporto aureo, p33); T88 (generazione differita crediti che avanzano, p60).
-3. **Crediti (00:25 UTC 07/11):** Claude 5h 62 % (reset 02:59 UTC), settimana 57 % (reset 12/11); Gemini 100 % (5h reset 05:20 UTC, settimana 14/11); agy 100 %; Argon fermo fino all'11/11.
+2. **T330 integrato** (WebGL high-performance, `src/render/gpu.ts`). **Pronti:** T331 (misura frame/generazione prima di MJ su GPU, claude p7); T327 (NPC coeso, claude extra); T294 (laboratori giocatori, claude p3); T295 (carte prima della Genesi, claude p3); T315 (veste futuristica, p4); T321 (Scultore su Flash, claude p4); T303 (misura Scenografo, claude p5); T288 (armi/attrezzi in mano, p6, browser); T242 (rapporto aureo, p33); T88 (generazione differita crediti che avanzano, p60).
+3. **Crediti (05:52 UTC 07/11):** Claude 5h 40 % residuo (reset 07:59 UTC), settimana 48 % (reset 12/11); Gemini 100 %; agy 100 %; Argon fermo fino all'11/11.
 
 ## Attese dall'autore
 
@@ -39,4 +39,4 @@ Aggiornato il 07/11/2026, epoca 325 (claude). Crediti: vedi `stato`.
 ## Ultime 2 epoche
 
 - **325 (claude):** T310 integrato (ADR-0164 → 0165); T310b nel backlog, da approvare; T281 integrato (placeInside, casa a graticcio nel seme; anch'esso kernel 0.5.2: due cambi sulla stessa Z).
-- **323 (claude):** T324 integrato via T329; T309 integrato (kernel 0.5.1) → T310 pronto.
+- **326 (claude):** T330 integrato (GPU: RTX 2070 via ANGLE D3D11).
