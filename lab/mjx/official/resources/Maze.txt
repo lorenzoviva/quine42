@@ -1,0 +1,2 @@
+# MarkovJunior (github.com/mxgmn/MarkovJunior, resources/samples/Maze.png, MIT, © 2022 Maxim Gumin), as text by lab/scripts/mjx-risorse.ts: white pixels are A, the others D, as in ChainDungeonMaze
+AAAA/ADDD/ADAD/ADDD

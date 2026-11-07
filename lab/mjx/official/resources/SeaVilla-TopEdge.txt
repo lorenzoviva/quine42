@@ -1,0 +1,7 @@
+# MarkovJunior (github.com/mxgmn/MarkovJunior, resources/rules/SeaVilla/TopEdge.vox, MIT, © 2022 Maxim Gumin), as text by lab/scripts/mjx-risorse.ts, with the legend "Ex*ag" of SeaVilla
+*****/*****/*****/*****/*****
+*****/*****/*****/*****/*****
+*g***/*****/*g***/*****/*g***
+*g***/*****/*g***/*****/*g***
+*g*a*/***a*/*g*a*/***a*/*g*a*
+EEEx*/EEEa*/EEEa*/EEEa*/EEEx*

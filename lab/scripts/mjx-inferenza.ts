@@ -63,7 +63,7 @@ const photo = (g: Grid3, palette: Parameters<typeof render>[1]): Picture => {
 for (const name of INFERENCE_MODELS) {
   if (only.length && !only.includes(name)) continue;
   const o = OFFICIAL.find((m) => m.name === name)!;
-  const m = compileMjx(o.xml, { size: o.size });
+  const m = compileMjx(o.xml, { size: o.size, ...(o.files ? { files: o.files } : {}) });
   const r = runMjx(m, seed, { maxSteps: o.steps ?? 5_000_000, deadline: 120_000 });
   const ours = photo(r.grid, m.program.palette);
   fs.writeFileSync(path.join(dir, `${name}.png`), png(ours));

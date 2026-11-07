@@ -47,6 +47,9 @@ const ALL_NODES = `<sequence values="BNSAGKHCRTMPDE" size="8 3 8" symmetry="()" 
   </map>
 </sequence>`;
 
+/** The nodes a program of the world may use: wfc and convchain the engine runs, the world takes them with T336 (ADR-0174). */
+const WORLD_NODES = MJX_NODES.filter((n) => n !== 'wfc' && n !== 'convchain');
+
 function kindsOf(n: Node3, out = new Set<string>()): Set<string> {
   if (n.type === 'sequence' || n.type === 'markov') {
     out.add(n.type);
@@ -59,7 +62,7 @@ function kindsOf(n: Node3, out = new Set<string>()): Set<string> {
 describe('the language: sound programs are the engine\'s XML', () => {
   it('a sound program uses every node the engine knows, and each of them does something', () => {
     const m = compileMjx(ALL_NODES, { strict: true });
-    expect([...kindsOf(m.program.program)].sort()).toEqual([...MJX_NODES].sort());
+    expect([...kindsOf(m.program.program)].sort()).toEqual([...WORLD_NODES].sort());
     const fired = new Set<string>();
     const r = run(m.program, 5, 200_000, FORM_LIMITS, {
       watch: {
@@ -69,7 +72,7 @@ describe('the language: sound programs are the engine\'s XML', () => {
     });
     expect(r.finished).toBe(true);
     expect(r.unused).toEqual([]);
-    for (const k of MJX_NODES.filter((n) => n !== 'sequence' && n !== 'markov')) expect([...fired], k).toContain(k);
+    for (const k of WORLD_NODES.filter((n) => n !== 'sequence' && n !== 'markov')) expect([...fired], k).toContain(k);
     expect(scoreOf(r.grid, m.sound!).events.length).toBeGreaterThan(0);
   });
 

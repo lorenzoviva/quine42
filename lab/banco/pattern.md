@@ -212,13 +212,16 @@ spariscono: «delete fine scaffold»), `River` (`W`, `R` → `U` → `B`).
   per un bordo di gronda; non per piante di edifici (le smussa).
 - **`map`** (`OddScale3D`, `CarmaTower`, `ModernHouse` 1/3 e 5/3): decidere su una griglia grossa e poi ingrandire. Qui **non si usa**: con
   `map` la scatola la decide il programma (`withSize` lascia la `size` scritta, `scales` in `sculptor.ts`) e un programma non serve più due
-  taglie. Il motore accetta solo scale intere, non `1/3`: `ModernHouse` e `SeaVilla` non girano per questo oltre che per `wfc`.
+  taglie. Dal T335 (ADR-0174) il motore accetta anche le frazioni (`1/3`, `5/3`, solo con la griglia nuova vuota): `ModernHouse` e `SeaVilla`
+  girano interi (`lab/banco/wfc/`).
 
 ### 12. Ciò che il motore non sa fare
 
 - `wfc` a tessere (`ModernHouse`, `SeaVilla`, `Apartemazements`, `PillarsOfEternity`, `Partitioning`, `Surface`, `Escher*`): è il cuore di
-  quei modelli (partizione a tessere `Partition`, scale `Stairs`/`OrientedStairs`). Qui si sostituisce con il reticolo e la crescita (1-3).
-- `convchain` (`ChainDungeon`), `map` frazionaria.
+  quei modelli (partizione a tessere `Partition`, scale `Stairs`/`OrientedStairs`). **Il motore lo sa da T335** (ADR-0174), con `wfc` a
+  sovrapposizione, `convchain` (`ChainDungeon`) e la `map` frazionaria: un tileset è un file di `models/` in testo, una tessera è un pattern (anche
+  un sottoblocco `.txt` di T333, `<tile file>`); i modelli dell'originale e le foto accanto alle sue sono in `lab/banco/wfc/`. Il validatore del gioco
+  non li prende finché T336 non li apre: per lo Scultore, oggi, una partizione si fa ancora con il reticolo e la crescita (1-3).
 - `field` e `temperature` (`Keys`, `SoftPath`, `Division`, `Dwarves`), `observe` e `search` (`StairsPath`, `RegularPath`, `CompleteSAW`):
   **il motore li sa da T334** (ADR-0173; i modelli in `lab/mjx/official/`, le foto accanto all'originale in `inferenza/`), ma il validatore del
   gioco non li prende finché T336 non li apre: per lo Scultore, oggi, un corridoio «verso» un bersaglio si fa ancora con `path`.

@@ -1,0 +1,7 @@
+# MarkovJunior (github.com/mxgmn/MarkovJunior, resources/rules/SeaVilla/StairsBottom.vox, MIT, © 2022 Maxim Gumin), as text by lab/scripts/mjx-risorse.ts, with the legend "EabW*e" of SeaVilla
+aeee*/W****/W****/W****/aeee*
+*aee*/*W***/*W***/*W***/*aee*
+**ae*/**W**/**W**/**W**/**ae*
+**aa*/**WW*/**WW*/**WW*/**aa*
+**aab/**aWW/**aWW/**aWW/**aab
+EEaab/EEaaW/EEaaW/EEaaW/EEaab

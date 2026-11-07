@@ -1,0 +1,7 @@
+# MarkovJunior (github.com/mxgmn/MarkovJunior, resources/rules/SeaVilla/LadderBottom.vox, MIT, © 2022 Maxim Gumin), as text by lab/scripts/mjx-risorse.ts, with the legend "EaW*D" of SeaVilla
+**a**/**a**/**a**/**a**/**a**
+**aD*/**aD*/**aD*/**aD*/**aD*
+**a**/**a**/**a**/**a**/**a**
+**aD*/**aD*/**aD*/**aD*/**aD*
+**a**/**a**/**a**/**a**/**a**
+EEaEE/EEaWW/EEaWW/EEaWW/EEaEE

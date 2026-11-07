@@ -44,7 +44,7 @@ describe('the library of models', () => {
     expect(modelErrors('models/x.xml', '<sequence values="BW" size="4 4 4"><box at="2 2 2" size="2 2 1" color="W"/></sequence>').join()).toMatch(/terra/);
     // What the front-end can mend it mends (an undeclared letter); what is left is judged: here, nothing was built.
     expect(modelErrors('models/x.xml', '<sequence values="BW" size="4 4 4"><one in="BX" out="WW"/></sequence>').join()).toMatch(/vuoto/);
-    expect(modelErrors('models/x.xml', '<sequence values="BW" size="4 4 4"><wfc/></sequence>').join()).toMatch(/WFC/);
+    expect(modelErrors('models/x.xml', '<sequence values="BW" size="4 4 4"><wfc/></sequence>').join()).toMatch(/tileset|sample/);
   });
 });
 

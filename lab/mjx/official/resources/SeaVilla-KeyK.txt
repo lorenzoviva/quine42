@@ -1,0 +1,7 @@
+# MarkovJunior (github.com/mxgmn/MarkovJunior, resources/rules/SeaVilla/KeyK.vox, MIT, © 2022 Maxim Gumin), as text by lab/scripts/mjx-risorse.ts, with the legend "EW*KOM" of SeaVilla
+*****/*****/*****/*****/*****
+*****/*****/*****/*****/*****
+*****/OM***/OO***/OM***/*****
+*****/*****/O****/*****/*****
+*****/*****/K****/*****/*****
+EEEEE/EWWWE/EWWWE/EWWWE/EEEEE

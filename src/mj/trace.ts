@@ -289,7 +289,11 @@ export function nodeName(node: Node3): string {
     case 'path':
       return `path da ${node.from} a ${node.to} su ${node.on} colore ${node.color}${node.inertia ? ' inerzia' : ''}${node.longest ? ' piu-lungo' : ''}`;
     case 'map':
-      return `map scala ${node.scale.join(' ')}`;
+      return `map scala ${node.scale.map((n, a) => (node.divide && node.divide[a] !== 1 ? `${n}/${node.divide[a]}` : `${n}`)).join(' ')}`;
+    case 'wfc':
+      return `wfc ${node.model === 'tile' ? `a tessere ${node.dims.join('×')}` : `a sovrapposizione N=${node.dims[0]}`}, ${node.patterns.length} motivi${node.periodic ? ' periodica' : ''}${node.shannon ? ' shannon' : ''}${node.tries !== undefined ? ` tentativi=${node.tries}` : ''}`;
+    case 'convchain':
+      return `convchain su ${node.on} → ${node.black}/${node.white} N=${node.n}${node.temperature !== undefined ? ` temperatura=${node.temperature}` : ''}${node.steps !== undefined && Number.isFinite(node.steps) ? ` passi=${node.steps}` : ''}`;
     case 'shape':
       return node.shape === 'line' ? `line ${node.at.join(' ')} → ${node.to?.join(' ')} ${node.color}` : `${node.shape} at ${node.at.join(' ')} size ${node.size?.join(' ')} ${node.color}${node.on ? ` su ${node.on}` : ''}`;
     default:

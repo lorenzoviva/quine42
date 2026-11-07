@@ -1,0 +1,7 @@
+# MarkovJunior (github.com/mxgmn/MarkovJunior, resources/rules/SeaVilla/Room.vox, MIT, © 2022 Maxim Gumin), as text by lab/scripts/mjx-risorse.ts, with the legend "T*" of SeaVilla
+*****/*****/*****/*****/*****
+*****/*****/*****/*****/*****
+*****/*****/*****/*****/*****
+*****/*****/*****/*****/*****
+*****/*****/*****/*****/*****
+TTTTT/TTTTT/TTTTT/TTTTT/TTTTT

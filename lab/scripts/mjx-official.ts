@@ -16,7 +16,7 @@ fs.mkdirSync(dir, { recursive: true });
 for (const o of OFFICIAL) {
   if (only.length && !only.includes(o.name)) continue;
   try {
-    const m = compileMjx(o.xml, { size: o.size });
+    const m = compileMjx(o.xml, { size: o.size, ...(o.files ? { files: o.files } : {}) });
     const r = runMjx(m, 1, { maxSteps: o.steps ?? 5_000_000, deadline: 60_000 });
     const counts: Record<string, number> = {};
     for (const c of r.grid.cells) counts[r.grid.alphabet[c]] = (counts[r.grid.alphabet[c]] ?? 0) + 1;

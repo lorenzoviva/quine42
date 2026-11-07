@@ -41,6 +41,8 @@ export const COLOR_ATTRS = new Set([
   'symbol',
   'ground',
   'for',
+  'black',
+  'white',
 ]);
 
 export function getContrastColor(hex: string): string {
@@ -85,6 +87,10 @@ export const MJ_NODES = new Set([
   'tile',
   'tiles',
   'rules',
+  // Tiles and samples (T335): the tileset's neighbours, ConvChain.
+  'neighbors',
+  'neighbor',
+  'convchain',
 ]);
 
 export const MJ_ATTRS = new Set([
@@ -137,6 +143,23 @@ export const MJ_ATTRS = new Set([
   'limit',
   'depthcoefficient',
   'p',
+  // Tiles, samples, folders and fractional maps (T335): <wfc>, <tileset>, <tile>, <neighbor>, <convchain>, <map folder>.
+  'tileset',
+  'tiles',
+  'overlapz',
+  'shannon',
+  'tries',
+  'periodicinput',
+  'fullsymmetry',
+  'left',
+  'right',
+  'top',
+  'bottom',
+  'black',
+  'white',
+  'folder',
+  'legend',
+  'clear',
 ]);
 
 export function escapeHtml(str: string): string {

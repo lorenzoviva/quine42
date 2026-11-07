@@ -16,7 +16,13 @@
     <observe value="B" to="BDA"/>
   </one>
   <one in="ROBB" out="DAAD"/>
-  <!-- lab (T334): the original ends with <map scale="5/3 5/3 5/3"> drawing the stairs with tiles from files (fout), which the engine does not read yet (T333, T335); without it the path stays on the coarse grid: A the corridor, D its corners and the ends of the flights. -->
+  <map scale="5/3 5/3 5/3" values="BWAR" folder="Stairs">
+    <rule in="BBB/BBB/BBB BBB/ADA/BBB BBB/BBB/BBB" fout="Line" legend="BAW"/>
+    <rule in="BBB/BBB/BBB BBB/BDA/BAB BBB/BBB/BBB" fout="Turn" legend="BAW"/>
+    <rule in="BBB/BBB/BBB BBB/ADB/BBB BBB/BAB/BBB" fout="Down" legend="BAW"/>
+    <rule in="BBB/BAB/BBB BBB/BDA/BBB BBB/BBB/BBB" fout="Up" legend="BAW"/>
+    <rule in="BBB/BBB/BBB BBB/ADB/BBB BBB/BBB/BBB" fout="End" legend="BAWR"/>
+  </map>
 </sequence>
 
 <!--
