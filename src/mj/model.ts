@@ -58,8 +58,8 @@ export interface MjxModel {
 
 const SYMMETRY: Record<string, Sym> = { '()': 'none', '(x)': 'x', '(y)': 'y', '(z)': 'z', '(xy)': 'xy', '(xyz+)': 'rot', '(xyz)': 'all' };
 const RULE_NODES = new Set(['one', 'all', 'prl']);
-/** Every node a program can use, as the XML names it. */
-export const MJX_NODES: readonly string[] = ['one', 'all', 'prl', 'sequence', 'markov', 'convolution', 'path', 'map', 'import', ...SHAPES];
+/** Every node the engine runs, as the XML names it (`<import>` is not one: it becomes the nodes of the file it reads). */
+export const MJX_NODES: readonly string[] = ['one', 'all', 'prl', 'sequence', 'markov', 'convolution', 'path', 'map', ...SHAPES];
 /** The nodes a program may start with (its root, or an imported file's). */
 const ROOT_NODES = new Set(['one', 'all', 'prl', 'sequence', 'markov', 'map', 'convolution', 'path']);
 
@@ -530,7 +530,7 @@ class Compiler {
     if (el.name === 'in' || el.name === 'out') this.fail(el, `<${el.name}> va dentro rule, one, all, prl o convolution`);
     if ((SHAPES as readonly string[]).includes(el.name)) return this.shape(el, ctx);
     if (el.name === 'rule') this.fail(el, '<rule> va dentro one, all, prl, convolution o map');
-    this.fail(el, `nodo sconosciuto (noti: ${MJX_NODES.join(' ')} union color sound animation action; in e out dentro le regole)`);
+    this.fail(el, `nodo sconosciuto (noti: ${MJX_NODES.join(' ')} import union color sound animation action; in e out dentro le regole)`);
   }
 
   convolution(el: XmlElement, ctx: Ctx): Node3 {
