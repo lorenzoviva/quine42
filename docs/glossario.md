@@ -351,6 +351,20 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Dove vive**: `src/mj/`, `src/kernel/mj.ts`
 - **Da non usare**: `codice` (è il Lua), `xml` (nei documenti)
 
+### Programma incluso
+- **Inglese**: `import`, `importNode`, `mjxIncludes`, `MjxFiles`, `files`, `includesOf`
+- **Definizione**: il programma di un altro modello di `models/` eseguito dentro un programma come un nodo, con `<import file="<nome>"/>`: ne vengono le lettere, i colori e le unioni, non la scatola né le animazioni (ADR-0171). I file che un programma legge (programmi inclusi e file di regole) si danno al compilatore per nome semplice.
+- **Dove vive**: `src/mj/model.ts`, `src/kernel/forms.ts`, `lab/3d/catalog.ts`
+- **Da non usare**: `include` (nei documenti: è l'azione), `sottoprogramma`, `percorso` (un file si nomina, non si cerca)
+- **Fermo**: il nodo `<import>` e il suo attributo `file`.
+
+### File di regole
+- **Inglese**: `fin`, `fout`, `file`, `ruleFileErrors`, `patternText`
+- **Definizione**: un file di testo di `models/` (`<nome>.txt`) con un lato di una regola (`fin`, `fout`) o i due separati da una riga `->` (`file`), nella stessa sintassi del testo di `<in>` e `<out>` (ADR-0171). Solo lettere, mai immagini.
+- **Dove vive**: `src/mj/model.ts`, `src/kernel/validator.ts`
+- **Da non usare**: `file di pattern`
+- **Fermo**: gli attributi `fin`, `fout`, `file` delle regole, l'estensione `.txt`.
+
 ### Passo persistente
 - **Inglese**: `Stepper`, `advance`, `rewind`
 - **Definizione**: un programma MarkovJunior tenuto compilato sulla sua griglia fra una chiamata e l'altra, per ciò che si muove un poco a ogni tick di una pagina: `advance` prosegue la stessa corsa (a pezzi è quella di `runOn`), `tick` rifà il programma dal primo nodo con le corrispondenze tenute al passo dal registro della griglia invece di cercarle di nuovo (ADR-0164).

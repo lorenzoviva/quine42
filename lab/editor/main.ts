@@ -2,7 +2,7 @@
 
 import * as THREE from 'three';
 import { makeRenderer } from '../../src/render/gpu';
-import { CATALOG, GROUPS } from '../3d/catalog';
+import { CATALOG, GROUPS, labIncludes } from '../3d/catalog';
 import {
   highlightXml,
   validateMjx,
@@ -683,8 +683,9 @@ async function triggerBuild() {
   const vpt = parseInt(vptSelect.value, 10) || 20;
   currentVpt = vpt;
 
-  // Immediate synchronous validation
-  const val = validateMjx(xml);
+  // Immediate synchronous validation; what it imports comes from lab/mjx/models (T333).
+  const files = labIncludes(xml);
+  const val = validateMjx(xml, undefined, files);
 
   const lines = xml.split('\n');
   updateGutter(lines.length, val.ok ? undefined : val.line);
@@ -704,7 +705,7 @@ async function triggerBuild() {
   try {
     // A model of a universe or a card says its class, not its box: the game's box for it (T294).
     const box = boxFor(xml, cardMeta.class, cardMeta.size);
-    const res = await workerClient.build({ xml, seed, vpt, ...(box ? { size: box } : {}) });
+    const res = await workerClient.build({ xml, seed, vpt, ...(box ? { size: box } : {}), ...(Object.keys(files).length ? { files } : {}) });
     loadingOverlay.classList.add('hidden');
 
     if (!res.ok) {
@@ -772,7 +773,7 @@ function onCodeChange() {
   updateCursorPos();
 
   const lines = code.split('\n');
-  const val = validateMjx(code);
+  const val = validateMjx(code, undefined, labIncludes(code));
   updateGutter(lines.length, val.ok ? undefined : val.line);
   renderDiagnostics(val);
 

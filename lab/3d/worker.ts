@@ -14,6 +14,8 @@ export interface BuildRequest {
   size?: Vec3;
   steps?: number;
   vpt: number;
+  /** The files of models/ the program reads (T333). */
+  files?: Record<string, string>;
   /** Vegetation: per-vertex wind weight. */
   sway?: boolean;
   /** Figures: the limbs as separate meshes. */
@@ -50,7 +52,7 @@ const buffers = (m: MeshData) => [m.positions.buffer, m.normals.buffer, m.colors
 self.onmessage = (ev: MessageEvent<BuildRequest>) => {
   const q = ev.data;
   try {
-    const m = compileMjx(q.xml, q.size ? { size: q.size } : {});
+    const m = compileMjx(q.xml, { ...(q.size ? { size: q.size } : {}), ...(q.files ? { files: q.files } : {}) });
     const r = runMjx(m, q.seed, { snapshots: q.growth || undefined, deadline: 20_000, ...(q.steps ? { maxSteps: q.steps } : {}) });
     const g: Grid3 = r.grid;
     const pal = m.program.palette;

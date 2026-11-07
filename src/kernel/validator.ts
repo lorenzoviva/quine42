@@ -16,7 +16,7 @@ export { repairCoefficients, repairActor } from './coefficients';
 export { repairMinimums } from './universe';
 import { boxOf, classOf, CLASSES, sizeOf, SIZE_TIERS } from '../mj/classes';
 import { Mj3Error } from '../mj/engine';
-import { compileMjx, type MjxModel } from '../mj/model';
+import { compileMjx, MJX_FILE_RE, mjxIncludes, patternText, type MjxFiles, type MjxModel } from '../mj/model';
 import { FORM_LIMITS, MAX_FORM_TIME, MAX_FORM_XML, runMjx } from '../mj/run';
 import { analyzeSound } from '../mj/soundanalysis';
 import { reservedName } from './paths';
@@ -64,14 +64,15 @@ export const MODEL_RE = /^[a-z0-9][a-z0-9-]{0,40}$/i;
  * A model of the library must compile, finish and build something that stands: what the front-end can
  * mend it mends (ADR-0036), the rest goes back with the line of the error.
  */
-export function modelErrors(path: string, xml: string, time = 8_000, box?: [number, number, number]): string[] {
+export function modelErrors(path: string, xml: string, time = 8_000, box?: [number, number, number], files?: MjxFiles): string[] {
   // The Musician's program was measured a moment ago: a piece costs up to two seconds on the page, and the answer would be the same.
   if (xml === lastCleanSound) return [];
   if (xml.length > MAX_FORM_XML) return [`${path}: programma troppo lungo (max ${MAX_FORM_XML} caratteri)`];
   time = Math.min(time, MAX_FORM_TIME);
   try {
     const size = /<(?!!)[a-z]+\b[^>]*\ssize="/i.test(xml) ? undefined : (box ?? boxOf(classOf('object')!));
-    const m = compileMjx(xml, size ? { size } : {});
+    const self = /^models\/([^/]+)\.xml$/.exec(path)?.[1];
+    const m = compileMjx(xml, { ...(size ? { size } : {}), ...(files && Object.keys(files).length ? { files, ...(self ? { self } : {}) } : {}) });
     if (m.sound) {
       const errors = soundErrors(path, m, time);
       if (!errors.length) lastCleanSound = xml;
@@ -83,6 +84,30 @@ export function modelErrors(path: string, xml: string, time = 8_000, box?: [numb
   } catch (e) {
     return [`${path}: ${e instanceof Mj3Error ? e.message : (e as Error).message}`];
   }
+}
+
+/** The longest rule file of models/ (T333). */
+export const MAX_RULE_FILE = 100_000;
+
+/**
+ * A rule file of models/ (`<name>.txt`, T333, ADR-0171): a plain name, text of pattern cells only (letters, digits, `* / [ ]`, spaces), notes
+ * after "#", at most one line "->". Whether its patterns fit a program is said when the program that reads it compiles.
+ */
+export function ruleFileErrors(path: string, text: string): string[] {
+  const name = /^models\/([^/]+)\.txt$/.exec(path)?.[1];
+  if (!name || !MJX_FILE_RE.test(name)) return [`${path}: un file di regole è models/<nome>.txt, con lettere, cifre e "-" nel nome`];
+  if (text.length > MAX_RULE_FILE) return [`${path}: troppo lungo (max ${MAX_RULE_FILE} caratteri)`];
+  const errors: string[] = [];
+  let arrows = 0;
+  text.split(/\r?\n/).forEach((line, i) => {
+    if (/^\s*#/.test(line)) return;
+    if (/^[ \t]*->[ \t]*$/.test(line)) return void arrows++;
+    const bad = /[^A-Za-z0-9*/[\] \t]/.exec(line);
+    if (bad) errors.push(`${path}: riga ${i + 1}: "${bad[0]}" non sta in un pattern (lettere, cifre, * / [ ] e spazi; le note dopo #)`);
+  });
+  if (arrows > 1) errors.push(`${path}: al più una riga "->" (fra in e out)`);
+  if (!errors.length && text.split(/^[ \t]*->[ \t]*\r?$/m).some((part) => !patternText(part))) errors.push(`${path}: un pattern vuoto`);
+  return errors.slice(0, 6);
 }
 
 /** The last sound program that passed: the measures are a pure function of the text. */
@@ -141,6 +166,8 @@ export class Validator {
   modelTime: (id: string) => number | undefined = () => undefined;
   /** The box a model without a `size` of its own runs in (its class at its size, ADR-0160), set by the kernel; else an object's. */
   modelBox: (id: string) => [number, number, number] | undefined = () => undefined;
+  /** A file of models/ by its name there (`torre.xml`, `porta.txt`), for the programs that read others (T333), set by the kernel. */
+  modelFile: (name: string) => string | undefined = () => undefined;
 
   constructor(private sandbox: Sandbox) {}
 
@@ -237,8 +264,9 @@ export class Validator {
     if (path.endsWith('.lua')) return this.checkLua(path, content);
     if (/^models\/[^/]+\.xml$/.test(path)) {
       const id = path.slice('models/'.length, -'.xml'.length);
-      return modelErrors(path, content, this.modelTime(id), box ?? this.modelBox(id));
+      return modelErrors(path, content, this.modelTime(id), box ?? this.modelBox(id), mjxIncludes(content, (f) => this.modelFile(f)));
     }
+    if (/^models\/[^/]+\.txt$/.test(path)) return ruleFileErrors(path, content);
     if (path.endsWith('manifest.json')) return this.parseManifest(path, content).errors;
     if (path.endsWith('.json')) {
       try {

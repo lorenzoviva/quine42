@@ -70,6 +70,9 @@ export const MJ_NODES = new Set([
   'convolution',
   'path',
   'map',
+  'import',
+  'in',
+  'out',
   'union',
   'sound',
   'track',
@@ -95,6 +98,8 @@ export const MJ_ATTRS = new Set([
   'name',
   'label',
   'file',
+  'fin',
+  'fout',
   'origin',
   'ground',
   'symmetry',
@@ -137,13 +142,13 @@ export function extractLineFromError(msg: string): number {
  * Validates a MarkovJunior XML model string.
  * Returns { ok: true, model, warnings } or { ok: false, error, line }.
  */
-export function validateMjx(xml: string, sizeOverride?: Vec3): ValidationResult {
+export function validateMjx(xml: string, sizeOverride?: Vec3, files?: Record<string, string>): ValidationResult {
   const trimmed = xml.trim();
   if (!trimmed) {
     return { ok: false, error: 'Il codice XML è vuoto', line: 1 };
   }
   try {
-    const model = compileMjx(xml, sizeOverride ? { size: sizeOverride } : {});
+    const model = compileMjx(xml, { ...(sizeOverride ? { size: sizeOverride } : {}), ...(files && Object.keys(files).length ? { files } : {}) });
     return { ok: true, model, warnings: model.warnings };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
@@ -153,12 +158,54 @@ export function validateMjx(xml: string, sizeOverride?: Vec3): ValidationResult 
 }
 
 /**
+ * The letters of a pattern as colour chips (an attribute's value, or the text of `<in>`/`<out>`, T333): `start` is where it begins in the
+ * source, so a chip can be changed in place. In a text, a line starting with "#" is a note.
+ */
+function patternChips(rawVal: string, attrName: string, start: number, options: HighlightOptions, notes = false): string {
+  const valStartInSrc = start;
+  let chipsHtml = '';
+  let note = false;
+  for (let k = 0; k < rawVal.length; k++) {
+    const ch = rawVal[k];
+    const charPos = valStartInSrc + k;
+
+    if (ch === '\n') note = false;
+    else if (notes && ch === '#' && /^[ \t]*$/.test(rawVal.slice(rawVal.lastIndexOf('\n', k - 1) + 1, k))) note = true;
+    if (note || /\s/.test(ch) || ch === '/' || ch === '[' || ch === ']') {
+      chipsHtml += escapeHtml(ch);
+      continue;
+    }
+
+    const pal = options.palette?.[ch] ?? MJ_PALETTE[ch];
+    if (pal?.color) {
+      const hex = pal.color.startsWith('#') ? pal.color : `#${pal.color}`;
+      const fg = getContrastColor(hex);
+      const isGlowing = 'glow' in pal ? !!(pal as PaletteColorInfo).glow : false;
+      const isGlass = 'alpha' in pal ? (pal as PaletteColorInfo).alpha !== undefined && (pal as PaletteColorInfo).alpha! < 1.0 : false;
+      const glowClass = isGlowing ? ' tok-glow' : '';
+      const glassClass = isGlass ? ' tok-glass' : '';
+      const title = `${escapeHtml(ch)}: ${escapeHtml(pal.name ?? ch)} (${hex}${isGlass ? ' · Vetro' : ''}) · Clicca per cambiare`;
+      chipsHtml += `<span class="tok-color-chip${glowClass}${glassClass}" data-letter="${escapeHtml(ch)}" data-attr="${escapeHtml(attrName)}" data-pos="${charPos}" style="--chip-bg:${hex};--chip-text:${fg};" title="${title}">${escapeHtml(ch)}</span>`;
+    } else if (ch === '*') {
+      chipsHtml += `<span class="tok-color-chip tok-wildcard" data-letter="*" data-attr="${escapeHtml(attrName)}" data-pos="${charPos}" title="Wildcard (*): qualsiasi voxel">*</span>`;
+    } else if (ch === '.') {
+      chipsHtml += `<span class="tok-color-chip tok-air" data-letter="." data-attr="${escapeHtml(attrName)}" data-pos="${charPos}" title="Aria (.)">.</span>`;
+    } else {
+      chipsHtml += `<span class="tok-color-chip tok-unknown" data-letter="${escapeHtml(ch)}" data-attr="${escapeHtml(attrName)}" data-pos="${charPos}">${escapeHtml(ch)}</span>`;
+    }
+  }
+  return chipsHtml;
+}
+
+/**
  * Tokenizes and highlights XML code with HTML markup for syntax highlighting.
  */
 export function highlightXml(src: string, options?: HighlightOptions): string {
   let i = 0;
   const n = src.length;
   let out = '';
+  /** The last tag opened and not closed: the text of `<in>` and `<out>` is a pattern (T333). */
+  let open: string | undefined;
 
   while (i < n) {
     const lt = src.indexOf('<', i);
@@ -168,7 +215,8 @@ export function highlightXml(src: string, options?: HighlightOptions): string {
     }
 
     if (lt > i) {
-      out += escapeHtml(src.slice(i, lt));
+      const text = src.slice(i, lt);
+      out += options?.colorChips && (open === 'in' || open === 'out') ? patternChips(text, open, i, options, true) : escapeHtml(text);
       i = lt;
     }
 
@@ -209,6 +257,7 @@ export function highlightXml(src: string, options?: HighlightOptions): string {
       const isMj = MJ_NODES.has(tagContent.toLowerCase());
       const tagCls = isMj ? 'tok-tag tok-mj-node' : 'tok-tag';
       out += `<span class="tok-punct">&lt;/</span><span class="${tagCls}">${escapeHtml(tagContent)}</span><span class="tok-punct">&gt;</span>`;
+      open = undefined;
       i = gt + 1;
       continue;
     }
@@ -274,34 +323,7 @@ export function highlightXml(src: string, options?: HighlightOptions): string {
 
         const isSymbolDef = tagName.toLowerCase() === 'color' && attrName.toLowerCase() === 'symbol';
         if (options?.colorChips && quote && COLOR_ATTRS.has(attrName.toLowerCase()) && !isSymbolDef) {
-          let chipsHtml = '';
-          for (let k = 0; k < rawVal.length; k++) {
-            const ch = rawVal[k];
-            const charPos = valStartInSrc + k;
-
-            if (/\s/.test(ch) || ch === '/' || ch === '[' || ch === ']') {
-              chipsHtml += escapeHtml(ch);
-              continue;
-            }
-
-            const pal = options.palette?.[ch] ?? MJ_PALETTE[ch];
-            if (pal?.color) {
-              const hex = pal.color.startsWith('#') ? pal.color : `#${pal.color}`;
-              const fg = getContrastColor(hex);
-              const isGlowing = 'glow' in pal ? !!(pal as PaletteColorInfo).glow : false;
-              const isGlass = 'alpha' in pal ? (pal as PaletteColorInfo).alpha !== undefined && (pal as PaletteColorInfo).alpha! < 1.0 : false;
-              const glowClass = isGlowing ? ' tok-glow' : '';
-              const glassClass = isGlass ? ' tok-glass' : '';
-              const title = `${escapeHtml(ch)}: ${escapeHtml(pal.name ?? ch)} (${hex}${isGlass ? ' · Vetro' : ''}) · Clicca per cambiare`;
-              chipsHtml += `<span class="tok-color-chip${glowClass}${glassClass}" data-letter="${escapeHtml(ch)}" data-attr="${escapeHtml(attrName)}" data-pos="${charPos}" style="--chip-bg:${hex};--chip-text:${fg};" title="${title}">${escapeHtml(ch)}</span>`;
-            } else if (ch === '*') {
-              chipsHtml += `<span class="tok-color-chip tok-wildcard" data-letter="*" data-attr="${escapeHtml(attrName)}" data-pos="${charPos}" title="Wildcard (*): qualsiasi voxel">*</span>`;
-            } else if (ch === '.') {
-              chipsHtml += `<span class="tok-color-chip tok-air" data-letter="." data-attr="${escapeHtml(attrName)}" data-pos="${charPos}" title="Aria (.)">.</span>`;
-            } else {
-              chipsHtml += `<span class="tok-color-chip tok-unknown" data-letter="${escapeHtml(ch)}" data-attr="${escapeHtml(attrName)}" data-pos="${charPos}">${escapeHtml(ch)}</span>`;
-            }
-          }
+          const chipsHtml = patternChips(rawVal, attrName, valStartInSrc, options);
           out += `<span class="tok-val">${quote}${chipsHtml}${quote}</span>`;
         } else if (options?.colorChips && quote && (attrName.toLowerCase() === 'value' || tagName.toLowerCase() === 'color')) {
           const cleanHex = rawVal.replace(/^#/, '');
@@ -329,6 +351,7 @@ export function highlightXml(src: string, options?: HighlightOptions): string {
     } else {
       out += '<span class="tok-punct">&gt;</span>';
     }
+    open = selfClosing ? undefined : tagName.toLowerCase();
 
     i = gt + 1;
   }
@@ -407,8 +430,11 @@ export const TAG_SCHEMAS: Record<string, TagAttrDef[]> = {
     { name: 'comment', default: '', description: 'Descrizione opzionale' },
   ],
   rule: [
-    { name: 'in', default: '*', description: 'Pattern di match' },
-    { name: 'out', default: '*', description: 'Pattern di sostituzione' },
+    { name: 'in', default: '*', description: 'Pattern di match (oppure il figlio <in>)' },
+    { name: 'out', default: '*', description: 'Pattern di sostituzione (oppure il figlio <out>)' },
+    { name: 'fin', default: '', description: 'Il pattern di match da models/<nome>.txt' },
+    { name: 'fout', default: '', description: 'Il pattern di sostituzione da models/<nome>.txt' },
+    { name: 'file', default: '', description: 'in, una riga "->", out da models/<nome>.txt' },
     { name: 'p', default: '1.0', description: 'Probabilità individuale' },
     { name: 'comment', default: '', description: 'Descrizione opzionale' },
   ],
@@ -464,6 +490,12 @@ export const TAG_SCHEMAS: Record<string, TagAttrDef[]> = {
     { name: 'periodic', default: 'False', description: 'Wrap periodico' },
     { name: 'symmetry', default: '8', description: 'Simmetrie usate' },
   ],
+  import: [
+    { name: 'file', default: '', description: 'Il programma di models/<nome>.xml, eseguito qui come un nodo' },
+    { name: 'symmetry', default: '', description: 'Simmetria del programma incluso (se non dice la sua)' },
+  ],
+  in: [],
+  out: [],
   animation: [
     { name: 'name', default: '', description: 'Nome traccia animazione' },
     { name: 'frames', default: '16', description: 'Numero di fotogrammi totali' },

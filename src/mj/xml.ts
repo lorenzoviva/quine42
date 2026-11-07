@@ -1,11 +1,13 @@
 // A small XML reader for MarkovJunior programs: elements, attributes, comments, the five entities.
-// No namespaces, no DTDs, no text content (MarkovJunior uses none). Errors carry the line.
+// No namespaces, no DTDs. Text content is kept only where there is some (`<in>` and `<out>` of a rule, T333). Errors carry the line.
 
 export interface XmlElement {
   name: string;
   attrs: Record<string, string>;
   children: XmlElement[];
   line: number;
+  /** The text inside the element, if it has any besides spaces (comments left out, entities decoded). */
+  text?: string;
 }
 
 export class XmlError extends Error {}
@@ -28,6 +30,12 @@ export function parseXml(src: string): XmlElement[] {
     if (lt < 0) {
       advance(src.length);
       break;
+    }
+    if (stack.length && lt > i) {
+      const text = src.slice(i, lt);
+      const top = stack[stack.length - 1];
+      // Spaces count once there is text: around a comment they still separate two layers.
+      if (top.text !== undefined || /\S/.test(text)) top.text = (top.text ?? '') + decode(text);
     }
     advance(lt);
     if (src.startsWith('<!--', i)) {
@@ -87,6 +95,7 @@ export function writeXml(el: XmlElement, indent = ''): string {
   const attrs = Object.entries(el.attrs)
     .map(([k, v]) => ` ${k}="${v.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;')}"`)
     .join('');
-  if (!el.children.length) return `${indent}<${el.name}${attrs}/>`;
+  const text = el.text?.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  if (!el.children.length) return text ? `${indent}<${el.name}${attrs}>${text}</${el.name}>` : `${indent}<${el.name}${attrs}/>`;
   return `${indent}<${el.name}${attrs}>\n${el.children.map((c) => writeXml(c, indent + '  ')).join('\n')}\n${indent}</${el.name}>`;
 }

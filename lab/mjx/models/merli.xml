@@ -1,0 +1,19 @@
+<!-- Merli (T333): un sottoblocco da includere con <import file="merli"/>. Sopra ogni pietra che ha il vuoto sopra di sé mette un
+     merlo, poi apre le feritoie una sì e una no. Da solo lavora sul pavimento (ground, che incluso non vale): lo si prova anche così. -->
+<sequence values="BSM" size="9 9 3" ground="S" symmetry="(xy)">
+  <color symbol="S" value="8f8a7e" name="pietra"/>
+  <color symbol="M" value="a39c8c" name="merlo"/>
+  <!-- Il parapetto: gli strati dall'alto, uno per riga (il vuoto sopra la pietra diventa un merlo). -->
+  <all>
+    <in>
+      B
+      S
+    </in>
+    <out>
+      M
+      S
+    </out>
+  </all>
+  <!-- Le feritoie: in una fila di tre merli, quello in mezzo se ne va. -->
+  <all in="MMM" out="MBM"/>
+</sequence>

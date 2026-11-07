@@ -21,8 +21,14 @@
 //   <action name="apri" label="Apri la porta">…</action>  nodes run on the model when someone acts on it
 //   <sound bpm scale root swing cutoff space><track y instrument volume/></sound>  the grid is a score (src/mj/sound.ts)
 //   <map … clear="False">                   the grid is scaled and kept (every cell a block of itself) before the rules write on it
-// Not supported (they need files, search or tiles): wfc, convchain, observe and field (inference),
-// rule files (fin, fout, file).
+//   <rule><in>…</in><out>…</out></rule>     a pattern as the text of a child, in place of the attribute (T333, ADR-0171): the same
+//                                           syntax, layers apart by spaces or lines, and a "/" may end a line (the row goes on below);
+//                                           on one, all, prl, convolution and every rule; the attribute or the child, never both
+//   <rule fin="a" fout="b"/>, <rule file="c"/>  a pattern read from a text file of models/ (`a.txt`; `file` holds in, a line "->", out)
+//   <import file="x"/>                      the program of models/x.xml run here as a node: its letters, colours and unions come
+//                                           with it; its box, origin, ground, soil, sound, animations and actions do not
+// Files come from `opts.files` (`mjxIncludes` gathers them): plain names, never a path, bounded in depth, number and size.
+// Not supported (they need search or tiles): wfc, convchain, observe and field (inference).
 
 import { internalName } from '../kernel/internalNames';
 import { Mj3Error, PARTS, SHAPES, type ConvRule, type Node3, type PaletteEntry, type Part, type Program3, type Rule3, type ShapeKind, type Sym, type Vec3 } from './engine';
@@ -53,7 +59,71 @@ export interface MjxModel {
 const SYMMETRY: Record<string, Sym> = { '()': 'none', '(x)': 'x', '(y)': 'y', '(z)': 'z', '(xy)': 'xy', '(xyz+)': 'rot', '(xyz)': 'all' };
 const RULE_NODES = new Set(['one', 'all', 'prl']);
 /** Every node a program can use, as the XML names it. */
-export const MJX_NODES: readonly string[] = ['one', 'all', 'prl', 'sequence', 'markov', 'convolution', 'path', 'map', ...SHAPES];
+export const MJX_NODES: readonly string[] = ['one', 'all', 'prl', 'sequence', 'markov', 'convolution', 'path', 'map', 'import', ...SHAPES];
+/** The nodes a program may start with (its root, or an imported file's). */
+const ROOT_NODES = new Set(['one', 'all', 'prl', 'sequence', 'markov', 'map', 'convolution', 'path']);
+
+/**
+ * The files of models/ a program reads (T333, ADR-0171), by name in that folder: `x.xml` for `<import file="x"/>`, `x.txt` for a rule's
+ * `fin`, `fout` or `file`. Only text, only plain names: nothing outside the folder can be named.
+ */
+export type MjxFiles = Readonly<Record<string, string>>;
+/** A file a program may name: the same as a model's id. */
+export const MJX_FILE_RE = /^[a-z0-9][a-z0-9-]{0,40}$/i;
+/** Imports one inside the other. */
+export const MJX_INCLUDE_DEPTH = 6;
+/** Imports in a program, counting each time one is used. */
+export const MJX_INCLUDE_COUNT = 64;
+/** Characters of what a program reads from files, counting each time one is read. */
+export const MJX_INCLUDE_CHARS = 1_000_000;
+/** The nodes that hold a rule, so whose `file` is a rule file. */
+const RULE_HOLDERS = new Set(['one', 'all', 'prl', 'rule', 'convolution']);
+
+/**
+ * The text of a pattern written in a child or a file as the attribute's: lines starting with "#" are notes, a "/" with spaces or
+ * lines around it joins two rows, the rest stays as it is (spaces and lines between layers).
+ */
+export function patternText(s: string): string {
+  return s
+    .split(/\r?\n/)
+    .filter((l) => !/^\s*#/.test(l))
+    .join('\n')
+    .replace(/\s*\/\s*/g, '/')
+    .trim();
+}
+
+/**
+ * Every file a program reads, with its text (imports of imports too), from `read` (a name in models/ → its text). What is missing stays
+ * out: compiling says why. A program that names no file costs no parse.
+ */
+export function mjxIncludes(src: string, read: (file: string) => string | undefined): Record<string, string> {
+  const out: Record<string, string> = {};
+  if (!/\b(?:import|fin|fout|file)\b/.test(src)) return out;
+  const queue = [src];
+  while (queue.length) {
+    let roots: XmlElement[];
+    try {
+      roots = parseXml(queue.shift()!);
+    } catch {
+      continue;
+    }
+    const visit = (el: XmlElement) => {
+      const names: string[] = [];
+      if (el.name === 'import') names.push(`${el.attrs.file}.xml`);
+      else if (RULE_HOLDERS.has(el.name)) for (const a of ['fin', 'fout', 'file']) if (el.attrs[a] !== undefined) names.push(`${el.attrs[a]}.txt`);
+      for (const f of names) {
+        if (f in out || !MJX_FILE_RE.test(f.slice(0, -4))) continue;
+        const text = read(f);
+        if (typeof text !== 'string') continue;
+        out[f] = text;
+        if (f.endsWith('.xml')) queue.push(text);
+      }
+      el.children.forEach(visit);
+    };
+    roots.forEach(visit);
+  }
+  return out;
+}
 const UNSUPPORTED: Record<string, string> = {
   wfc: 'il WFC a tessere non serve più: il modello si genera intero',
   convchain: 'convchain non è supportato',
@@ -83,15 +153,138 @@ class Compiler {
    * are mended, with a warning (spaces or repeats in values, a letter used but not declared, an unknown
    * part): models do not count characters.
    */
-  constructor(private strict: boolean) {}
+  constructor(
+    private strict: boolean,
+    private files: MjxFiles = {},
+    /** The program's own name in models/, if it has one: importing itself is a cycle at once. */
+    self?: string,
+  ) {
+    if (self) this.chain.push(self);
+    this.top = this.chain.length;
+  }
+
+  /** The imports from the program down to the one being compiled now (the program's own name first, if known). */
+  chain: string[] = [];
+  /** Where the imports begin in `chain`. */
+  private top: number;
+  /** The imported file being compiled now; undefined in the program itself. */
+  file?: string;
+  imports = 0;
+  /** Characters read from files. */
+  read = 0;
+  /** Each imported file parsed once. */
+  parsed = new Map<string, XmlElement>();
+  /** Files whose colours and unions were collected. */
+  collected = new Set<string>();
+
+  where(el: XmlElement): string {
+    return `${this.file ? `models/${this.file}.xml, ` : ''}riga ${el.line}`;
+  }
 
   fail(el: XmlElement, msg: string): never {
-    throw new Mj3Error(`riga ${el.line}, <${el.name}>: ${msg}`);
+    throw new Mj3Error(`${this.where(el)}, <${el.name}>: ${msg}`);
   }
 
   mend(el: XmlElement, msg: string): void {
     if (this.strict) this.fail(el, msg);
-    this.warnings.push(`riga ${el.line}: ${msg} (riparato)`);
+    this.warnings.push(`${this.where(el)}: ${msg} (riparato)`);
+  }
+
+  /** A file of models/ by its plain name, counted. */
+  fileText(el: XmlElement, name: string | undefined, ext: 'xml' | 'txt', what: string): string {
+    if (!name || !MJX_FILE_RE.test(name)) this.fail(el, `${what} vuole il nome semplice di un file di models/ (lettere, cifre e "-", niente percorsi né estensione), non "${name ?? ''}"`);
+    const key = `${name}.${ext}`;
+    const text = Object.prototype.hasOwnProperty.call(this.files, key) ? this.files[key] : undefined;
+    if (typeof text !== 'string') this.fail(el, `manca il file models/${key}`);
+    this.read += text.length;
+    if (this.read > MJX_INCLUDE_CHARS) this.fail(el, `i file letti sono troppo lunghi (al più ${MJX_INCLUDE_CHARS} caratteri in tutto)`);
+    return text;
+  }
+
+  /** The program of an imported file: its one root (animations and actions beside it stay in that file). */
+  importRoot(el: XmlElement, name: string | undefined): XmlElement {
+    const text = this.fileText(el, name, 'xml', '<import file>');
+    const known = this.parsed.get(name!);
+    if (known) return known;
+    let roots: XmlElement[];
+    try {
+      roots = parseXml(text);
+    } catch (e) {
+      if (e instanceof XmlError) this.fail(el, `models/${name}.xml: XML: ${e.message}`);
+      throw e;
+    }
+    const mains = roots.filter((r) => !CLIP_TAGS.has(r.name));
+    if (mains.length !== 1) this.fail(el, `models/${name}.xml deve avere un solo nodo radice (trovati ${mains.length})`);
+    if (roots.length > 1) this.warnings.push(`${this.where(el)}: models/${name}.xml: le sue animazioni e azioni restano sue, qui non entrano`);
+    this.parsed.set(name!, mains[0]);
+    return mains[0];
+  }
+
+  /** Compiles inside an imported file: messages say which, the chain finds cycles. */
+  inside<T>(name: string, fn: () => T): T {
+    const outer = this.file;
+    this.chain.push(name);
+    this.file = name;
+    try {
+      return fn();
+    } finally {
+      this.file = outer;
+      this.chain.pop();
+    }
+  }
+
+  /** `<import file="x"/>`: the program of models/x.xml, compiled here as a node, on its own letters. */
+  importNode(el: XmlElement, ctx: Ctx): Node3 {
+    const name = el.attrs.file;
+    if (name !== undefined && this.chain.includes(name)) this.fail(el, `ciclo di inclusione: ${[...this.chain, name].join(' → ')}`);
+    if (this.chain.length - this.top >= MJX_INCLUDE_DEPTH) this.fail(el, `troppe inclusioni una dentro l'altra (al più ${MJX_INCLUDE_DEPTH})`);
+    if (++this.imports > MJX_INCLUDE_COUNT) this.fail(el, `troppe inclusioni (al più ${MJX_INCLUDE_COUNT} per programma)`);
+    const root = this.importRoot(el, name);
+    if (!ROOT_NODES.has(root.name)) this.fail(el, `models/${name}.xml: <${root.name}> non può essere la radice di un programma`);
+    const sym = this.symmetry(el, ctx);
+    return this.inside(name!, () => {
+      for (const a of ['origin', 'ground', 'soil', 'suolo'])
+        if (root.attrs[a] !== undefined) this.warnings.push(`${this.where(root)}: ${a} vale solo quando il programma si apre da sé, non incluso`);
+      const values = this.values(root, root.attrs.values);
+      return this.node(root, { bg: values[0], sym, values: new Set(values) }) ?? this.fail(root, 'nessun nodo da eseguire');
+    });
+  }
+
+  /** The text of a rule file named by `file`: in, a line "->", out. */
+  rulePair(r: XmlElement): [string, string] {
+    const parts = this.fileText(r, r.attrs.file, 'txt', 'file').split(/^[ \t]*->[ \t]*\r?$/m);
+    if (parts.length !== 2) this.fail(r, `models/${r.attrs.file}.txt: in e out vanno separati da una riga con "->" e nient'altro`);
+    return [patternText(parts[0]), patternText(parts[1])];
+  }
+
+  /**
+   * One side of a rule (T333): the attribute as it is, the text of a child `<in>`/`<out>`, or a file (`fin`/`fout`, both in `file`).
+   * Two ways for the same side is an error.
+   */
+  side(r: XmlElement, which: 'in' | 'out'): string | undefined {
+    const own = which === 'in' ? 'fin' : 'fout';
+    const kids = r.children.filter((c) => c.name === which);
+    const ways = [
+      ...(r.attrs[which] !== undefined ? [`l'attributo ${which}`] : []),
+      ...(kids.length ? [`il figlio <${which}>`] : []),
+      ...(r.attrs[own] !== undefined ? [own] : []),
+      ...(r.attrs.file !== undefined ? ['file'] : []),
+    ];
+    if (ways.length > 1) this.fail(r, `"${which}" è scritto in due modi (${ways.join(' e ')}): se ne usa uno solo`);
+    if (kids.length > 1) this.fail(kids[1], `un solo <${which}> per regola`);
+    if (kids.length) {
+      const k = kids[0];
+      if (k.children.length || Object.keys(k.attrs).length) this.fail(k, `<${which}> contiene solo il pattern, come testo`);
+      return patternText(k.text ?? '');
+    }
+    if (r.attrs[own] !== undefined) return patternText(this.fileText(r, r.attrs[own], 'txt', own));
+    if (r.attrs.file !== undefined) return this.rulePair(r)[which === 'in' ? 0 : 1];
+    return r.attrs[which];
+  }
+
+  /** Whether a rule node has a rule of its own (on the node, not in `<rule>` children). */
+  ownRule(el: XmlElement): boolean {
+    return ['in', 'out', 'fin', 'fout', 'file'].some((a) => el.attrs[a] !== undefined) || el.children.some((c) => c.name === 'in' || c.name === 'out');
   }
 
   values(el: XmlElement, s: string | undefined): string {
@@ -171,6 +364,25 @@ class Compiler {
 
   /** First pass: unions and colours, wherever they are (MarkovJunior lets a union appear anywhere). */
   collect(el: XmlElement): void {
+    if (el.name === 'import') {
+      // An imported file's colours and unions come with it; the program's own win (they are written over them, or kept).
+      const name = el.attrs.file;
+      if (name === undefined || this.collected.has(name) || this.chain.includes(name) || this.chain.length - this.top >= MJX_INCLUDE_DEPTH) return;
+      this.collected.add(name);
+      const root = this.importRoot(el, name);
+      this.read -= this.files[`${name}.xml`]?.length ?? 0;
+      const own = { colors: this.colors, unions: this.unions, sound: this.sound };
+      this.colors = {};
+      this.unions = {};
+      try {
+        this.inside(name, () => this.collect(root));
+      } finally {
+        this.colors = { ...this.colors, ...own.colors };
+        this.unions = { ...this.unions, ...own.unions };
+        this.sound = own.sound;
+      }
+      return;
+    }
     if (el.name === 'union') {
       const sym = el.attrs.symbol;
       if (!sym || sym.length !== 1 || '*/ []'.includes(sym)) this.fail(el, '"symbol" è un solo carattere');
@@ -205,6 +417,10 @@ class Compiler {
         ...(alpha !== undefined ? { alpha } : {}),
       };
     } else if (el.name === 'sound') {
+      if (this.file) {
+        this.warnings.push(`${this.where(el)}: il <sound> di un programma incluso resta suo, qui non entra`);
+        return;
+      }
       if (this.sound) this.fail(el, 'un solo <sound> per programma');
       this.sound = soundSettings(el);
       return;
@@ -221,7 +437,8 @@ class Compiler {
   children(el: XmlElement, ctx: Ctx): Node3[] {
     return el.children.flatMap((c) => {
       if (c.name === 'animation' || c.name === 'action') {
-        this.pending.push(c);
+        if (this.file) this.warnings.push(`${this.where(c)}: <${c.name}> di un programma incluso resta suo, qui non entra`);
+        else this.pending.push(c);
         return [];
       }
       const n = this.node(c, ctx);
@@ -243,16 +460,17 @@ class Compiler {
   rules(el: XmlElement, ctx: Ctx, sym: Sym): Rule3[] {
     const out: Rule3[] = [];
     const add = (r: XmlElement, own: boolean) => {
-      if (r.attrs.fin || r.attrs.fout || r.attrs.file) this.fail(r, 'le regole da file (fin, fout, file) non sono supportate: scrivi in e out');
       if (r.attrs.d === '2') return;
+      const input = this.side(r, 'in');
+      const output = this.side(r, 'out');
       const rs = own ? sym : this.symmetry(r, { ...ctx, sym });
       const p = this.num(r, r.attrs.p, 'p');
-      const rule: Rule3 = { in: this.pattern(r, r.attrs.in, ctx, 'in'), out: this.pattern(r, r.attrs.out, ctx, 'out'), ...(p !== undefined ? { p } : {}) };
+      const rule: Rule3 = { in: this.pattern(r, input, ctx, 'in'), out: this.pattern(r, output, ctx, 'out'), ...(p !== undefined ? { p } : {}) };
       const shape = (s: string) => s.split(' ').map((layer) => layer.split('/').map((row) => (row.match(/\[[^\]]*\]|./g) ?? []).length).join('×')).join(' | ');
       if (!this.strict && shape(rule.in) !== shape(rule.out) || !regular(rule.in) || !regular(rule.out)) {
         const [a, b] = pad(rule.in, rule.out);
         if (!this.strict && (a !== rule.in || b !== rule.out)) {
-          this.mend(r, `pattern irregolari completati con "*": in "${r.attrs.in}", out "${r.attrs.out}"`);
+          this.mend(r, `pattern irregolari completati con "*": in "${input}", out "${output}"`);
           rule.in = a;
           rule.out = b;
         }
@@ -262,13 +480,14 @@ class Compiler {
       if (rs !== sym) rule.symmetry = rs;
       out.push(rule);
     };
-    if (el.attrs.in !== undefined || el.attrs.out !== undefined) add(el, true);
+    if (this.ownRule(el)) add(el, true);
     for (const c of el.children) {
       if (c.name === 'rule') add(c, false);
+      else if (c.name === 'in' || c.name === 'out') continue;
       else if (UNSUPPORTED[c.name]) this.fail(c, UNSUPPORTED[c.name]);
-      else if (c.name !== 'union' && c.name !== 'color' && c.name !== 'sound') this.fail(c, `dentro <${el.name}> vanno solo <rule>`);
+      else if (c.name !== 'union' && c.name !== 'color' && c.name !== 'sound') this.fail(c, `dentro <${el.name}> vanno solo <rule>, <in> e <out>`);
     }
-    if (!out.length) this.fail(el, 'nessuna regola (in e out sul nodo, o figli <rule>)');
+    if (!out.length) this.fail(el, 'nessuna regola (in e out sul nodo, come attributi o figli <in> e <out>, o figli <rule>)');
     return out;
   }
 
@@ -307,9 +526,11 @@ class Compiler {
       };
     }
     if (el.name === 'map') return this.map(el, ctx, sym);
+    if (el.name === 'import') return this.importNode(el, ctx);
+    if (el.name === 'in' || el.name === 'out') this.fail(el, `<${el.name}> va dentro rule, one, all, prl o convolution`);
     if ((SHAPES as readonly string[]).includes(el.name)) return this.shape(el, ctx);
     if (el.name === 'rule') this.fail(el, '<rule> va dentro one, all, prl, convolution o map');
-    this.fail(el, `nodo sconosciuto (noti: ${MJX_NODES.join(' ')} union color sound animation action)`);
+    this.fail(el, `nodo sconosciuto (noti: ${MJX_NODES.join(' ')} union color sound animation action; in e out dentro le regole)`);
   }
 
   convolution(el: XmlElement, ctx: Ctx): Node3 {
@@ -318,8 +539,8 @@ class Compiler {
     const xs = el.children.filter((c) => c.name === 'rule');
     const sources = xs.length ? xs : [el];
     const rules: ConvRule[] = sources.map((r) => {
-      const input = this.one(r, r.attrs.in, ctx, 'in');
-      const output = this.one(r, r.attrs.out, ctx, 'out');
+      const input = this.one(r, this.side(r, 'in'), ctx, 'in');
+      const output = this.one(r, this.side(r, 'out'), ctx, 'out');
       const p = this.num(r, r.attrs.p, 'p');
       // A rule may take values or sum from its node (models put them there), spaces between letters go.
       let values = r.attrs.values;
@@ -356,7 +577,7 @@ class Compiler {
       .filter((c) => c.name === 'rule')
       .map((r) => {
         const p = this.num(r, r.attrs.p, 'p');
-        return { in: this.pattern(r, r.attrs.in, ctx, 'in'), out: this.pattern(r, r.attrs.out, inner, 'out'), ...(p !== undefined ? { p } : {}) };
+        return { in: this.pattern(r, this.side(r, 'in'), ctx, 'in'), out: this.pattern(r, this.side(r, 'out'), inner, 'out'), ...(p !== undefined ? { p } : {}) };
       });
     const step: Node3 = { type: 'map', scale: scale.map(Number) as Vec3, rules, symmetry: sym, clear };
     this.final = inner;
@@ -430,9 +651,10 @@ const hasMap = (el: XmlElement): boolean => el.name === 'map' || el.children.som
 
 /**
  * Compiles a program; `size` (the class's box) wins over the program's own, `base` says how many voxels of it are under the ground
- * (`soil` marks that layer). Throws Mj3Error with the line.
+ * (`soil` marks that layer); `files` are the files of models/ it may read (`mjxIncludes`), `self` its own name there. Throws Mj3Error with
+ * the line.
  */
-export function compileMjx(src: string, opts: { size?: Vec3; strict?: boolean; base?: number } = {}): MjxModel {
+export function compileMjx(src: string, opts: { size?: Vec3; strict?: boolean; base?: number; files?: MjxFiles; self?: string } = {}): MjxModel {
   let roots: XmlElement[];
   try {
     roots = parseXml(src);
@@ -444,7 +666,7 @@ export function compileMjx(src: string, opts: { size?: Vec3; strict?: boolean; b
   if (!mains.length) throw new Mj3Error('nessun programma: il primo elemento è il nodo radice (sequence, markov, one…) con values');
   if (mains.length > 1) throw new Mj3Error(`un solo nodo radice (trovati: ${mains.map((m) => `<${m.name}>`).join(', ')}); animazioni e azioni possono stare accanto`);
   const root = mains[0];
-  const c = new Compiler(opts.strict === true);
+  const c = new Compiler(opts.strict === true, opts.files, opts.self);
   for (const r of roots) c.collect(r);
   const values = c.values(root, root.attrs.values);
   const ctx: Ctx = { bg: values[0], sym: 'all', values: new Set(values) };
@@ -452,7 +674,7 @@ export function compileMjx(src: string, opts: { size?: Vec3; strict?: boolean; b
   const rootSym = c.symmetry(root, ctx);
   ctx.sym = rootSym;
   let program: Node3 | null;
-  if (RULE_NODES.has(root.name) || root.name === 'sequence' || root.name === 'markov' || root.name === 'map' || root.name === 'convolution' || root.name === 'path') program = c.node(root, ctx);
+  if (ROOT_NODES.has(root.name)) program = c.node(root, ctx);
   else throw new Mj3Error(`riga ${root.line}: <${root.name}> non può essere la radice`);
   const last = { ...(c.final ?? ctx), sym: rootSym };
   for (const r of [...c.pending, ...roots.filter((r) => CLIP_TAGS.has(r.name))]) c.clip(r, last);
