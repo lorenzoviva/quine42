@@ -4,8 +4,9 @@ Jev di TypeSafe AI ([typesafe.ai/blog/jev-1-14](https://typesafe.ai/blog/jev-1-1
 testo, **sceglie**. Riceve uno stato (testo o JSON) e domande tipizzate — *Choice* (un'opzione di un elenco, con le probabilità), *Score*
 (un livello di una rubrica), *Noul* (la probabilità di un sì) — e risponde solo dentro le opzioni. Costa **0,042 $ al milione di token in
 ingresso** (l'uscita è gratis), il contesto di produzione è 64k per richiesta e 32k per domanda, immagini e contesto lungo sono «Danger
-Zone» e qui non si usano. Questo banco misura se le decisioni chiuse del gioco e alcuni giudizi sulla scultura si possono chiedere a Jev
-invece che a Gemini 3.1 Flash-Lite, con le **stesse domande**, e dove conviene.
+Zone». Questo banco misura se le decisioni chiuse del gioco e alcuni giudizi sulla scultura si possono chiedere a Jev
+invece che a Gemini 3.1 Flash-Lite, con le **stesse domande**, e dove conviene. Le immagini le prova solo T324, sul banco: la sezione
+[«Le immagini (T324)»](#le-immagini-t324) e le tabelle di [`riepilogo-immagini.md`](riepilogo-immagini.md).
 
 Niente cambia in `src/`: il banco è solo `lab/`. La proposta di portarlo nel gioco è
 [ADR-0157](../../../docs/adr/0157-jev-per-le-decisioni-chiuse.md) (proposta, non decisa). Gli altri casi d'uso di TypeSafe — quanto delle
@@ -265,6 +266,161 @@ Un'intera decisione di Jev costa **0,035 $ / 1000 decisioni** e richiede **167 m
 3. **Mantenere domande ed enum in inglese (`base`)**: risparmiano il 18 % di token (840 contro 1029) e danno la massima precisione (**88,5 %**).
 4. **Se mai servisse tradurre, solo tabella statica**: mai un LLM di traduzione a runtime.
 
+## Le immagini (T324)
+
+L'autore (06/11) ha chiesto di provare Jev con le immagini, che T313 non aveva toccato perché TypeSafe le dà come funzione sperimentale.
+Qui le foto dei modelli in 3/4 a cartone — quelle che l'Artista giudica (`views()` in `src/kernel/agents/sculptor.ts`, `model.judge`) — vanno
+a Jev e a Gemini 3.1 Flash-Lite con le **stesse immagini e le stesse domande chiuse**. Solo `lab/`: niente arriva al gioco.
+
+### I limiti della funzione sperimentale
+
+Dalla documentazione ([docs.typesafe.ai/images.md](https://docs.typesafe.ai/images.md), [models.md](https://docs.typesafe.ai/models.md),
+[changelog](https://docs.typesafe.ai/changelog.md), lette il 07/11/2026):
+
+- **«Dreamer-ready»**: per TypeSafe le immagini non sono pronte per la produzione; formato, risposte, limiti e precisione possono cambiare
+  da una versione all'altra. Vanno accese con l'intestazione `TypeSafe-Danger-Zone-Images: true` su ogni richiesta che ne ha (senza: `400`).
+  Le accettano sia `jev-1.13.0` sia `jev-1.14.0` (arrivate con la 1.14, il 14/10, «funziona anche sulla 1.13»); le domande *Box* (dove sta
+  una cosa nell'immagine) solo la 1.14.
+- **Dove**: un'immagine va ovunque va il testo — nello `state`, nelle `instructions` di una domanda, nei `criteria` (un'opzione di una
+  Choice, un livello di uno Score, il `true`/`false` di un Noul) — come un **riferimento** testuale (qui `img-<10 cifre esadecimali>`, stabile
+  per la foto) che il servizio sostituisce con l'immagine elencata in `assets`. **Ogni uso del riferimento aggiunge di nuovo l'immagine**
+  (si paga e conta nei limiti ogni volta): un'immagine che più domande guardano va nello stato, una volta sola. Un asset non citato è un `400`.
+- **Misure**: PNG o JPEG fermi; ogni lato fra **280 e 1568 pixel**, l'area fra 78 400 e 2 458 624 pixel; 16 MiB a file, 32 MiB la richiesta,
+  tutte le immagini e la richiesta espansa. Un'immagine fuori misura è rifiutata, mai ridimensionata; se una è rifiutata, cade la richiesta
+  intera. I metadati (EXIF) si buttano senza applicare l'orientamento.
+- **Prezzo**: le immagini sono token in ingresso al prezzo del testo (0,042 $ al milione), dentro `usage.input_tokens` e dentro i contesti
+  di 64k per richiesta e 32k per domanda; «come stimare i token di un'immagine» TypeSafe non lo dice ancora. Nessun limite di frequenza a parte.
+
+**Misurato qui**: Jev conta circa **due token per riquadro di 28 × 28 pixel e un centinaio a immagine** (≈ 390 pixel a token: la striscia
+dei quattro lati di una struttura, 1100 × 375, ≈ 1230 token; il lato solo, 280 × 390, ≈ 390; la griglia 2×2 quanto la striscia con gli
+stessi pixel); Flash-Lite **~1100 token a foto** qualunque sia la misura. Le foto del gioco sono più basse di 280 pixel: lo script le **allarga con lo sfondo** del foglio, senza
+scalarle (`padded` in `foto.ts`).
+
+### Come si usa
+
+```bash
+npx vite-node lab/scripts/jev-banco.ts -- --prepara immagini            # le foto in lab/out/jev/foto (11 MB, ignorate da git) e casi-immagini/immagini.json, ~9 minuti
+npx vite-node lab/scripts/jev-banco.ts -- --gruppi immagini --offline --varianti lati4    # risposte finte, nessuna spesa
+npx vite-node lab/scripts/jev-banco.ts -- --gruppi immagini --varianti lati4,nomi8 --run img-1 \
+     --tetti-giri img,prova-immagini --tetto-typesafe 0.5 --tetto-gemini 0.5            # i tetti contano solo i giri di T324
+npx vite-node lab/scripts/jev-banco.ts -- --gruppi immagini --oggi-artista --casi … --run img-oggi   # l'Artista del gioco (judge, gemini-3.5-flash)
+npx vite-node lab/scripts/jev-banco.ts -- --rapporto                    # riepilogo.md e riepilogo-immagini.md
+```
+
+Una **variante è una forma** delle foto: `lati4` (i quattro lati in fila, la foto che il gioco manda all'Artista), `lato1` (il davanti),
+`griglia` (i quattro lati 2×2), `separate` (quattro foto nello stato: `front`, `right`, `back`, `left`); per l'oggetto → modello `nomi8`,
+`foto8`, `foto50`. Le foto si rigenerano uguali (MarkovJunior è deterministico, i riferimenti vengono dal nome della foto); se mancano, lo
+script le rifà prima di chiedere. I casi con le immagini stanno in `casi-immagini/`, fuori da `casi/`: il banco di T313 e i suoi test
+restano quelli. File nuovi: `foto.ts` (le foto e i limiti), `immagini.ts` (i casi, i difetti), `artista-oggi.ts` (l'Artista del gioco),
+`rapporto-immagini.ts` (le tabelle), `lab/tests/jev-immagini.test.ts`.
+
+### I casi (936) e le risposte giuste
+
+| compito | casi | domande | da dove vengono le risposte giuste |
+|---|---|---|---|
+| `artista`: la rubrica dell'Artista | 28 giudicati × 4 forme, più 95 difettosi in `lati4` | i sei criteri che si vedono da fuori (riconosce, regge, lati, tetto, colori, dettaglio: Score a tre livelli, come T313), `passa` (Noul), `voto` (Score a quattro livelli: sotto 7 o da 7 in su, la soglia dell'Artista) | `lab/banco/finale/giudizio.md` e `lab/banco/conferma/giudizio.md` (19 passano, 9 no); i difettosi non devono passare |
+| `concetto`: quale dei sette edifici è | 28 × 3 forme | Choice fra i sette bersagli del banco (nome e stile) | il bersaglio del programma |
+| `difetto`: cinque difetti fatti apposta | 19 edifici che passano × (intero + 5 difetti) × 3 forme | cinque Noul: buco nel tetto, puntini sui muri, una parte tagliata, un colore solo, porta murata | il difetto fatto sulla griglia finita (`withDefect`): noto, non giudicato |
+| `confronto`, `migliore` | 38 coppie intero/difetto e 18 giudicato/giudicato (in tutti e due gli ordini), 19 quattro | Choice A/B (A-D) | l'intero; quello che il giudizio fa passare |
+| `riconosci` | 50 modelli del mondo della libreria | Choice fra i 50 nomi | l'id del modello (i doppioni di nome, come le due locande, valgono) |
+| `quarta-parete-foto` | 50 del mondo e 17 dello studio della corona | Noul `modern` (neon, schermi, macchine elettriche) e `belongs` (sta in Valmora) | lo studio della corona non è mai nel mondo; panchina, totem e albero di luce dello studio non si votano; gerboa, schermi e circuito (scatole vuote finché il gioco non ci scrive) fuori |
+| `modello-foto` | i 37 casi di T313 × 3 | Choice + `fits` (il companion Noul) | le risposte di T313; `nomi8`: gli otto candidati che i nomi di T313 mettono prima, con i giusti; `foto8`: gli stessi otto, solo foto e chiavi opache; `foto50`: tutta la libreria, il davanti |
+
+I difetti si fanno sulla griglia finita, non nel programma: cambia ciò che si vede e nient'altro. Il **buco** è un quadrato di un terzo
+dell'impronta dove il tetto è più alto, scavato per un piano; i **puntini** il 12 % delle celle della lettera dei muri, nel colore più lontano;
+la **parte tagliata** il 38 % a destra della larghezza; il **colore unico** tutto nella lettera dei muri; la **porta murata** l'ingresso misurato
+dal banco (`misure.ts → porta`) riempito fino sopra la testa.
+
+### I risultati
+
+Spesa di T324: **TypeSafe 0,280 $** (2846 chiamate, 6,67 milioni di token in ingresso), **Gemini 0,477 $** (576 righe, 1,31 milioni di token,
+di cui 0,028 $ per le 10 chiamate dell'Artista del gioco su gemini-3.5-flash); tetti 0,50 $ e 0,50 $. Le prove prima del giro (`prova-immagini`,
+`img-prova`, con un doppione di casi poi tolto) sono nella spesa e fuori dalle tabelle. Forma `lati4` dove non è detto; giuste sulle
+domande votate; costo per 1000 decisioni; latenza mediana.
+
+| compito | Jev 1.13 | Jev 1.14 | Flash-Lite | da sola, la risposta più frequente | $/1000 Jev | $/1000 Flash-Lite | ms Jev / Flash-Lite |
+|---|---|---|---|---|---|---|---|
+| `artista` (passa, voto, criteri) | 71 % | 69 % | 48 % | — | 0,013 | 0,102 | 217 / 1396 |
+| … `passa` sui giudicati: passano detti sì / non passano detti no | 0/19 / 9/9 | 0/19 / 9/9 | 19/19 / 0/9 | | | | |
+| … `passa` sui difettosi: detti no | 94/95 | 95/95 | 14/95 | | | | |
+| … AUC di p(passa): giudicati / interi contro difettosi | 0,77 / 0,57 | 0,72 / 0,58 | (0 o 1) | | | | |
+| `difetto` (5 Noul) | 74 % | **88 %** | **89 %** | 83 % (sempre «no») | 0,014 | 0,114 | 206 / 1461 |
+| … AUC per difetto: tetto, puntini, tagliato, un colore, porta | 0,89, **1,00**, 0,83, **1,00**, 0,71 | **0,93**, **1,00**, **0,90**, **1,00**, 0,53 | (sì/no) | | | | |
+| … visti a soglia 0,5 / falsi allarmi sugli interi | | | 37 %, 79 %, 11 %, 74 %, 0 % / 1 interi su 19 | | | | |
+| `migliore`: l'intero fra tre suoi difetti | **79 %** | 74 % | 32 % | 25 % | 0,225 | 1,451 | 253 / 1217 |
+| `confronto` intero contro difetto (due ordini) | **82 %** | 79 % | 66 % (sceglie A il 63 %) | 50 % | 0,119 | 0,814 | 220 / 1101 |
+| `confronto` giudicato contro giudicato | 67 % | 67 % | **78 %** | 50 % | | | |
+| `concetto` (quale dei 7) | 86 % | 89 % (griglia **96 %**) | **100 %** | 14 % | 0,073 | 0,528 | 230 / 1274 |
+| `riconosci` (quale dei 50 modelli) | 44 % | 42 % | **66 %** | 2 % | 0,093 | 0,674 | 198 / 1303 |
+| `quarta-parete-foto` | 80 % | **92 %** | **94 %** | 78 % (tutto «del mondo») | 0,024 | 0,269 | 187 / 1058 |
+| `modello-foto` composta: `nomi8` / `foto8` / `foto50` | **97 %** / 65 % / 68 % | **100 %** / 65 % / 68 % | 95 % / — / — | | 0,018 / 0,127 / 0,287 | 0,176 / 1,325 / — | 167 / 986 |
+| … sugli stessi 14 casi: `nomi8` / `foto8` / `foto50` | 14 / 8 / 9 | 14 / 7 / 9 | 12 / 12 / — | | | | |
+
+L'**Artista del gioco** (`judge` di `sculptor.ts` su gemini-3.5-flash, con la sua foto e il suo prompt, 10 casi): 6 su 10 giusti col voto
+≥ 7; boccia il buco nel tetto (3/10) e le due pagode e la torre che il giudizio boccia, **promuove con 8/10** la rocca tutta grigia e il tempio
+tagliato pur scrivendo nei problemi «la palette è quasi interamente monocromatica» e «la struttura appare tagliata sul retro»; 0,0028 $ e
+3,3 s a chiamata (30-40 volte Jev, più del doppio del tempo di Flash-Lite). Il campione è piccolo: dice come lavora, non quanto vale.
+
+Le forme (tutte le tabelle in [`riepilogo-immagini.md`](riepilogo-immagini.md)):
+- **`griglia` vale `lati4`** e costa uguale (1581 token contro 1593 sulle stesse richieste): difetti 89 % e AUC 0,95-0,97 sul
+  tagliato e sul buco con la 1.14, il concetto 96 %.
+- **`lato1`** costa meno della metà (753 token contro 1593) e perde ciò che sta dietro o di lato: i criteri «lati» crollano (0-4 %), la parte tagliata
+  passa da 0,90 a 0,75 di AUC, il concetto da 89 a 64 %. Basta per i puntini e il colore unico (AUC 1,00).
+- **`separate`** (quattro foto) non aggiunge niente alla striscia e costa di più (2446 token contro 2381 sulla rubrica).
+
+**Stabilità** (lo stesso giro rifatto, `img-1-ripeti`): Jev dà le stesse risposte nel 95-100 % dei casi (la 1.14 l'82 % su `riconosci` e
+l'84 % su `migliore`), la probabilità di un sì si muove di 0,01 in mediana e di 0,02-0,07 al 90 %; Flash-Lite, sui 28 giudicati, il 100 %
+(dice sempre sì).
+
+### Cosa ne esce
+
+- **I giudizi d'insieme non passano alle immagini**, per nessuno dei due: come sulle viste in testo di T313, Flash-Lite dice «passa» a tutto
+  (anche all'85 % dei difettosi), Jev «non passa» a tutto, con una probabilità che ordina appena i giudicati (AUC 0,72-0,77 su 19 contro 9)
+  e non i difettosi (0,57). I criteri non fanno meglio della risposta più frequente; «regge» Jev lo dice sempre «no» (il criterio è scritto
+  al negativo: «nessuna parte fluttua…», jaggedness #1 e #7).
+- **Le domande atomiche sui difetti visibili sì, e lì Jev è meglio di Flash-Lite**: le sue probabilità separano i puntini e il colore unico
+  in ogni foto (AUC 1,00), il buco nel tetto e la parte tagliata quasi sempre (0,89-0,97 con la 1.14); Flash-Lite, che risponde sì o no,
+  ne vede il 79 %, 74 %, 37 % e 11 %. Con la soglia 0,5 Jev è mal tarato: al colore unico dà 0,00-0,02 sugli interi e 0,14-0,33 (mediana) sui
+  grigi, al buco 0,10 contro 0,28 (la 1.14): la soglia va scelta per domanda e per versione, su casi nuovi. **La porta murata nessuno la vede** (AUC 0,53-0,71, Flash-Lite 0 %).
+- **Scegliere la versione buona fra quelle rotte**: Jev sceglie l'intero fra quattro il 79 % delle volte, Flash-Lite il 32 %; in coppia 82 %
+  contro 66 % (Flash-Lite preferisce la prima). Fra due tentativi veri che il giudizio separa per gusto Flash-Lite fa meglio (78 % contro 67 %).
+- **Riconoscere** che cosa è: Flash-Lite meglio (concetto 100 %, i 50 modelli 66 %); Jev 86-96 % sui sette edifici, 42-44 % sui modelli
+  piccoli della libreria (un lupo, un sasso, un gatto in poche decine di voxel).
+- **La foto al posto del nome peggiora**: per l'oggetto → modello i nomi danno il 97-100 % con il companion Noul, le foto il 65-68 %, a
+  7-16 volte i token. Il nome di un modello dice già ciò che serve; la foto di un modello piccolo no.
+- **La 1.13 e la 1.14 sono due modelli diversi sulle immagini**: la 1.13 dice «tagliato» a tutti gli interi (19 su 19, p 0,84 in mediana),
+  la 1.14 a 2; la 1.14 vede meno il buco a soglia 0,5 ma lo ordina meglio. Una soglia vale per una versione: la versione va fissata (non `jev-latest`).
+
+### Dove le immagini con Jev valgono la spesa e dove no
+
+| uso | oggi | con Jev e le immagini (misurato) | vale la spesa? |
+|---|---|---|---|
+| filtro dei difetti evidenti sulle foto di un modello scolpito, prima dell'Artista (puntini, colore unico, buco, parte mancante) | l'Artista (3.5 Flash, 0,0028 $, 3 s) li scrive nei problemi ma può dare 8/10 lo stesso | AUC 0,93-1,00 (1.14, `griglia`), 0,00007 $ e 0,2 s a foto, 40 volte meno dell'Artista | **sì, come filtro** a soglie per domanda tarate su casi nuovi, la versione fissata: rimanda allo Scultore ciò che è rotto senza chiamare l'Artista, o abbassa il voto; non sostituisce l'Artista |
+| scegliere la versione migliore fra più semi o fra la prima e la seconda richiesta, quando una è rotta | nessuno (si tiene il voto più alto dell'Artista) | 79 % fra quattro, 82 % in coppia (Flash-Lite 32 % e 66 %), 0,0002 $ | **sì** per scartare la versione rotta; no per scegliere per gusto (67 % contro 78 % di Flash-Lite) |
+| il giudizio dell'Artista (`passa`, voto ≥ 7, i criteri) | Gemini 3.5 Flash con la foto | dice no a tutto; AUC 0,57 contro i difettosi | **no** |
+| riconoscere il concetto («è una pagoda?») | il voto `riconoscibile` dell'Artista | 89-96 % fra sette edifici (Flash-Lite 100 %) | **forse**, come controllo grezzo a 0,00007 $; dove serve la risposta giusta, Flash-Lite |
+| riconoscere un modello piccolo della libreria | — | 42-44 % fra 50 (Flash-Lite 66 %) | **no** |
+| oggetto → modello della libreria con le foto | i nomi (T313: 97 % con il companion Noul) | 65-68 % | **no**: i nomi sono meglio e costano 7-16 volte meno |
+| la quarta parete sulle foto (un modello con neon, schermi, macchine in un mondo medievale) | nessuno: la quarta parete si guarda sui testi | 92 % la 1.14 (Flash-Lite 94 %), 0,00007 $ | **sì, la 1.14**, come guardia economica sui modelli nuovi di un mondo che ha un'epoca; il campione è facile (lo studio al neon contro Valmora) |
+| la porta murata, ciò che è dentro | le misure del kernel (`misure.ts`, `reachableStoreys`) | AUC 0,53-0,71 | **no**: lo dicono le misure, non le foto |
+
+Il guadagno vero, come per T313, non è il prezzo (l'Artista costa poco l'ora) ma **ciò che oggi non si guarda**: ogni seme e ogni taglia di
+una struttura procedurale (ADR-0160) potrebbe passare dal filtro a 0,00007 $ la foto, dove l'Artista ne guarda uno. Restano contro:
+la funzione è sperimentale («Dreamer-ready», può cambiare senza preavviso), le soglie vanno tarate su difetti veri (questi sono fatti
+apposta, grandi), e una chiamata nuova del gioco passerebbe da un varco sul server come quello proposto in ADR-0157.
+
+### I limiti di queste misure (immagini)
+
+- **I difetti sono fatti apposta e grandi** (un terzo del tetto, il 38 % dell'edificio, il 12 % delle celle): i difetti veri dei programmi
+  del Concilio (una finestra fuori posto, un tetto un po' storto) non sono stati provati; le soglie migliori della tabella di
+  `riepilogo-immagini.md` sono scelte sugli stessi dati.
+- **Pochi giudizi negativi veri**: 9 programmi su 28 non passano il giudizio delle foto, e il giudizio guarda anche dentro (`sezioni.png`),
+  che dalla foto non si vede; i giudizi sono di Claude Opus 5.5 e vanno riletti dall'autore.
+- **Flash-Lite con le foto dell'oggetto → modello** solo su 14 casi (7 «nuovo», 7 no), `foto50` su Flash-Lite no (57 mila token, 0,0145 $ a
+  chiamata); l'Artista del gioco su 10 casi; la stabilità di Flash-Lite solo sui 28 giudicati.
+- Le domande della rubrica sono quelle di T313 riscritte per le foto: non sono state provate domande più atomiche sul gusto (il
+  *composite scoring* di TypeSafe) né le domande *Box*.
+
 ## I limiti di queste misure
 
 - **Le risposte giuste scritte per il banco sono giudizi** di chi ha scritto il banco: 206 casi nel gruppo 1, 92 nel gruppo 3; molti
@@ -273,10 +429,12 @@ Un'intera decisione di Jev costa **0,035 $ / 1000 decisioni** e richiede **167 m
 - **Il colpevole è un sabotaggio**: un nodo aggiunto che cambia molte celle, scelto tra quattro tipi; i difetti veri dei programmi del
   Concilio non sono stati provati.
 - **Domande in inglese e in italiano misurate in T323**: la variante mista (`base`) supera sia tutto-inglese che tutto-italiano.
-- **Non provato**: un testo del viandante scritto per ingannare il giudice; il contesto lungo e le immagini (Danger Zone, da non usare);
-  Jev dal Vercel AI Gateway (si è usata l'API diretta).
+- **Non provato**: un testo del viandante scritto per ingannare il giudice; il contesto lungo (Danger Zone); Jev dal Vercel AI Gateway
+  (si è usata l'API diretta). Le immagini le ha provate T324, solo sul banco (sopra, con i loro limiti).
 
 ## Sicurezza
 
 Una chiave nuova, `TYPESAFE_KEY`, nel `.env` del base: la legge solo `lab/scripts/jev-banco.ts`, non va in `src/`, `dist/`, nel registro
-né in un commit (il test lo prova sul registro). Nessuna superficie nuova nel gioco: niente cambia in `src/` né in `server/`.
+né in un commit (il test lo prova sul registro). Nessuna superficie nuova nel gioco: niente cambia in `src/` né in `server/`. T324 (le
+immagini) non aggiunge superfici: le foto restano in `lab/out/` (ignorata da git), nel registro vanno i riferimenti e le risposte, mai i
+pixel né la chiave (il test lo prova).

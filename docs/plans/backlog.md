@@ -4899,7 +4899,7 @@ Nasce da T308b: `dossier T308b`. `integra T308b` si è fermato su conflitti in `
 **Quando è fatto:** merge committato, `npm test`, `npm run typecheck` e `npm run build` verdi con i loro turni; esito con le scelte fatte nel conflitto. Non serve il browser (T308b l'ha provato), salvo che la risoluzione cambi codice oltre l'unione. Sicurezza: nessuna superficie nuova.
 - Esito: T308b fuso nel base (con T319, T156, T320, T293): contratto 0.5.0; `modeldirector.ts` unisce `shareWith`/`structureSiblings` con i campi inglesi di `structure`; nei test delle carte fatte a mano il verificatore usa `anonymous`; `architettura-dettagli.md` tiene entrambe le righe; censimento del glossario rigenerato; l'ADR di T308b diventa ADR-0163 con i rimandi. Suite (2607 passati, 1 saltato), typecheck e build verdi nei turni. Non provati: il browser (non serviva) e `sicurezza:prove`. Sicurezza: nessuna superficie nuova.
 
-### T329 · Integrare T324 nel base — `da fare`
+### T329 · Integrare T324 nel base — `fatto` (`53f819f2`)
 - Pipeline: claude · sforzo medium · stima 2% · approvato · priorità 1
 
 Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGENTS.md` e `lab/README.md` (nel frattempo nel base sono entrati T325, T308b e altri).
@@ -4907,3 +4907,4 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 **Cosa fare:** nel worktree, `git merge task/T324` sul base di adesso. In `AGENTS.md` e `lab/README.md` due aggiunte nello stesso punto restano entrambe (le righe del banco di Jev di T325 e quelle delle immagini di T324). Se T324 ha un ADR il cui numero è preso, il primo libero con i rimandi.
 
 **Quando è fatto:** merge committato, `npm test` e `npm run typecheck` verdi con i loro turni; esito con le scelte fatte nel conflitto. Non serve il browser (solo `lab/` e documenti). Sicurezza: nessuna superficie nuova.
+- Esito: merge di `task/T324` nel base (commit 53f819f2); conflitti in AGENTS.md e lab/README.md risolti tenendo le due aggiunte nello stesso punto: la riga di `jev-banco.ts` di T324 (quella di T313 più `--prepara immagini`, `--gruppi immagini`, `--oggi-artista`, `--tetti-giri`) e sotto la riga di `jev-casi-d-uso.ts` di T325, invariata; il resto (banco di Jev con le immagini, `consumi.jsonl`, test) fuso da solo; T324 non ha ADR, niente da rinumerare; `npm test` (173 file, 2636 passati, 1 saltato) e `npm run typecheck` verdi nei loro turni; browser non necessario (solo `lab/` e documenti); sicurezza: nessuna superficie nuova.

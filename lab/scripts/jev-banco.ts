@@ -8,6 +8,12 @@
 //   npx vite-node lab/scripts/jev-banco.ts -- --oggi --compiti azione,referente ...        # the game's own prompts on Flash-Lite
 //   npx vite-node lab/scripts/jev-banco.ts -- --prepara scultura|vita                     # writes casi/scultura.json, casi/vita.json
 //   npx vite-node lab/scripts/jev-banco.ts -- --rapporto                                  # the tables from the ledger → riepilogo.md
+//
+// With images (T324, lab/banco/jev/README.md «Le immagini»):
+//   npx vite-node lab/scripts/jev-banco.ts -- --prepara immagini                          # the photographs (lab/out/jev/foto) and casi/immagini.json
+//   npx vite-node lab/scripts/jev-banco.ts -- --gruppi immagini --varianti lati4,griglia --run img-1 \
+//        --tetti-giri img,prova-immagini --tetto-typesafe 0.5 --tetto-gemini 0.5      # a form of the photographs is a variant
+//   npx vite-node lab/scripts/jev-banco.ts -- --gruppi immagini --oggi-artista --run img-oggi …  # the game's Artist (gemini-3.5-flash)
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -66,12 +72,14 @@ if (flag('prepara')) {
   const what = opt('prepara');
   if (what === 'scultura') (await import('../banco/jev/scultura')).prepare(log);
   else if (what === 'vita') (await import('../banco/jev/vita')).prepare(log);
-  else throw new Error('--prepara scultura | vita');
+  else if (what === 'immagini') (await import('../banco/jev/immagini')).prepare(log);
+  else throw new Error('--prepara scultura | vita | immagini');
   process.exit(0);
 }
 
 if (flag('rapporto')) {
   log(`scritto ${writeReport(readLedger())}`);
+  log(`scritto ${(await import('../banco/jev/rapporto-immagini')).writeImageReport(readLedger())}`);
   process.exit(0);
 }
 
@@ -86,11 +94,15 @@ const show = (l: LedgerLine) =>
       .join(' ')} · ${l.input_tokens}+${l.output_tokens}${l.thought_tokens ? `+${l.thought_tokens}` : ''} tok · $${l.usd.toFixed(6)} · ${l.ms} ms`,
   );
 const caps = { typesafe: Number(opt('tetto-typesafe') ?? 3), gemini: Number(opt('tetto-gemini') ?? 1) };
-const budget = new Budget(caps, readLedger(ledger));
+// `--tetti-giri img,prova-immagini`: the caps of a task of its own (T324) sum only its runs, not the whole ledger.
+const capRuns = list('tetti-giri');
+const budget = new Budget(caps, readLedger(ledger).filter((l) => !capRuns.length || capRuns.some((r) => l.run.startsWith(r))));
 const groups = list('gruppi');
 const kinds = list('compiti');
 const only = list('casi');
-let cases: Case[] = loadCases().filter((c) => (!groups.length || groups.includes(c.group)) && (!kinds.length || kinds.includes(c.kind)) && (!only.length || only.includes(c.id)));
+// The cases with images (T324) only when asked by their group: they want their photographs on the disk.
+const IMAGE_CASES = path.resolve('lab/banco/jev/casi-immagini');
+let cases: Case[] = [...loadCases(), ...(list('gruppi').includes('immagini') ? loadCases(IMAGE_CASES) : [])].filter((c) => (!groups.length || groups.includes(c.group)) && (!kinds.length || kinds.includes(c.kind)) && (!only.length || only.includes(c.id)));
 const limit = Number(opt('quanti') ?? 0);
 if (limit > 0) cases = cases.slice(0, limit);
 const run = opt('run') ?? `r${new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '')}`;
@@ -115,7 +127,27 @@ function judgeOf(label: string): Judge {
   throw new Error(`modello sconosciuto: ${label}`);
 }
 
-if (flag('oggi')) {
+/** The variants that are a form of the photographs (T324): a run of one asks only the cases cut that way. */
+const IMAGE_VARIANTS = ['lati4', 'lato1', 'griglia', 'separate', 'nomi8', 'foto8', 'foto50'];
+const variantCases = (variant: string) =>
+  IMAGE_VARIANTS.includes(variant) ? cases.filter((c) => c.form === variant) : variant === 'domande-2' ? cases.filter((c) => SECOND[c.kind]) : cases.filter((c) => !c.form);
+
+// The photographs are generated, not committed: a case that needs them and does not find them has them made first (the same pictures).
+if (cases.some((c) => c.images)) {
+  const { photosReady } = await import('../banco/jev/immagini');
+  if (!photosReady(cases)) {
+    log('foto mancanti in lab/out/jev/foto: le preparo (--prepara immagini)');
+    (await import('../banco/jev/immagini')).prepare(log);
+  }
+}
+
+if (flag('oggi-artista')) {
+  // The Artist of the game (sculptor.ts → judge: its prompt, its photograph, its model) on the rubric cases in the game's own photograph.
+  const artist = opt('artista') ?? 'gemini-3.5-flash';
+  if (!offline && !geminiKey) throw new Error("nessuna GEMINI_API_KEY: --oggi-artista chiama l'Artista del gioco");
+  const { runArtistToday } = await import('../banco/jev/artista-oggi');
+  await runArtistToday({ run, cases: cases.filter((c) => c.kind === 'artista' && c.form === 'lati4'), ledger, budget, offline, log, model: artist, models: offline ? undefined : () => direct(artist, geminiKey!, ledgerSink, { thinking: 'low', timeout: 120_000 }), dry: flag('prova') });
+} else if (flag('oggi')) {
   if (!offline && !geminiKey) throw new Error('nessuna GEMINI_API_KEY: --oggi chiama Flash-Lite con i prompt del gioco');
   const { runToday } = await import('../banco/jev/oggi');
   await runToday({ run, cases, ledger, budget, offline, log, models: offline ? undefined : () => direct(FLASH_LITE, geminiKey!, ledgerSink, { thinking: 'low', timeout: 120_000 }), dry: flag('prova') });
@@ -125,7 +157,7 @@ if (flag('oggi')) {
     await runBench({
       run,
       judges: models.map(judgeOf),
-      cases: variant === 'domande-2' ? cases.filter((c) => SECOND[c.kind]) : cases,
+      cases: variantCases(variant),
       variant,
       transform:
         variant === 'rovescio'
@@ -150,4 +182,7 @@ if (flag('oggi')) {
   }
 }
 log(`spesi in tutto: typesafe $${budget.get('typesafe').toFixed(4)}, gemini $${budget.get('gemini').toFixed(4)}`);
-if (!flag('prova') && !offline) log(`scritto ${writeReport(readLedger(ledger))}`);
+if (!flag('prova') && !offline) {
+  log(`scritto ${writeReport(readLedger(ledger))}`);
+  log(`scritto ${(await import('../banco/jev/rapporto-immagini')).writeImageReport(readLedger(ledger))}`);
+}

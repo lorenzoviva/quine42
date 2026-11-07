@@ -1,6 +1,6 @@
 # Il banco di Jev: riepilogo (generato da `--rapporto`, non a mano)
 
-Righe del registro: 4136. Spesi nel registro: TypeSafe **$0.2353** (2791 chiamate, 5603152 token in ingresso a 0.042 $ al milione), Gemini **$0.9842** (1226 righe, 2442229 token in ingresso). Le righe `locale` sono i modelli locali del gioco (`MockAiModels`, e il filtro di parole per la quarta parete): costano zero.
+Righe del registro: 7558. Spesi nel registro: TypeSafe **$0.5154** (5637 chiamate, 12270400 token in ingresso a 0.042 $ al milione), Gemini **$1.46** (1802 righe, 3749833 token in ingresso). Le righe `locale` sono i modelli locali del gioco (`MockAiModels`, e il filtro di parole per la quarta parete): costano zero.
 
 ## Spesa del banco e riconciliazione con la dashboard di TypeSafe
 
@@ -17,7 +17,7 @@ Il giro linguistico T323 (`giro-lingua`, 615 chiamate per provider tra `tutto-it
 - **TypeSafe**: **$0.0395** (615 chiamate, 940722 token);
 - **Gemini**: **$0.3045** (615 righe, 748032 token).
 
-Totale complessivo del registro: TypeSafe **$0.2353**, Gemini **$0.9842**.
+Totale complessivo del registro: TypeSafe **$0.5154**, Gemini **$1.46**.
 
 > **Riconciliazione con la dashboard di TypeSafe:** sulla dashboard l'autore vede **0,16 $ con circa 3 milioni di token in ingresso**. La cifra coincide esattamente con la fatturazione del primo giro `giro-1` ($0.1613 su 3.84 M token totali, o ~2.92 M per la sola variante `base`), al prezzo ufficiale documentato da TypeSafe di **0,042 $ al milione di token in ingresso** e token in uscita gratuiti (0 $). Non c'è alcun prezzo effettivo a ~0,053 $/M: l'apparente differenza nasceva solo dalla divisione approssimata a mente 0,16 $ / 3 M; infatti 0.161328 $ / 3841142 token fa esattamente **0.042 $/M**.
 
