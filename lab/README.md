@@ -24,6 +24,7 @@ nel [report dei costi](../docs/reports/costi-step8.2B.md) e nella storia di git 
 | `banco/` | il banco del prompt delle strutture (T154, [`banco/README.md`](banco/README.md)): prompt, bersagli, misure con il corpo del gioco, soglia e criteri, la prima prova; `banco/pattern.md` e `banco/riferimento/` (T181): i pattern con cui crescono le strutture e tre programmi scritti a mano con il metodo del cantiere, che variano e reggono due taglie |
 | `banco/jev/` | il banco di Jev (T313, [`banco/jev/README.md`](banco/jev/README.md)): decisioni chiuse del gioco, giudizi sulla scultura e scelte della vita degli individui chieste a Jev di TypeSafe e a Gemini 3.1 Flash-Lite con le stesse domande; casi registrati, il registro delle chiamate `consumi.jsonl`, `riepilogo.md` |
 | `banco/jev/casi-d-uso/` | dove Jev ci fa risparmiare ancora (T325, [`banco/jev/casi-d-uso.md`](banco/jev/casi-d-uso.md)): quanto delle richieste del Concilio è contesto (un registratore delle chiamate, il taglio delle richieste in parti, `countTokens`, un'ora di gioco), le guardie sui testi del viandante, le battute riusate, il contesto scelto da Jev; casi, misure, il registro `consumi.jsonl`, `riepilogo.md` |
+| `banco/indossati.md`, `banco/indossati/`, `indossati/` | vestiti e armature addosso (T289): tre vie (due programmi per oggetto; un programma con la sezione `<worn>`, regole che riscrivono il corpo; i colori del kernel) sugli stessi elmo, corazza e mantello, sul viandante, sul lupo e su 27 corpi del seme e del Cantiere 8; foto da quattro lati, tempi, memoria, costo con lo Scultore, la domanda per l'autore; la pagina 3D `/lab/indossati/` le mostra una accanto all'altra, ferme o in cammino |
 | `scripts/` | strumenti da riga di comando (sotto) |
 | `tests/` | conformità ai modelli ufficiali (`mjx.test.ts`), mesh (`mesh3d.test.ts`) |
 | `out/` | ciò che scrivono gli script (ignorata da git) |
@@ -57,6 +58,9 @@ Il motore, il front-end XML, la palette, le mesh, lo scheletro, le classi e le f
 - `jev-banco.ts -- --offline | --gruppi decisioni,scultura,vita [--modelli …] [--varianti base,rovescio,domande-2] [--oggi] | --prepara scultura|vita | --rapporto`: il banco di Jev (`banco/jev/README.md`); senza `--offline` costa, con i tetti sul registro intero. Con le immagini (T324): `--prepara immagini` (le foto in `out/jev/foto`), `--gruppi immagini --varianti lati4,lato1,griglia,separate,nomi8,foto8,foto50`, `--oggi-artista` (l'Artista del gioco), `--tetti-giri img` (i tetti su quei giri soltanto).
 - `jev-casi-d-uso.ts -- --offline | --contesto [--conta] [--universi …] | --gruppi guardia,battute [--modelli …] | --scelta [--taglio largo] [--riusa-intero] | --prepara guardia,battute,scelta | --rapporto`: i casi d'uso di TypeSafe (`banco/jev/casi-d-uso.md`); `--conta` usa `countTokens` di Gemini (gratis), le prove costano con i tetti sul registro di T325 (0,50 $ e 0,80 $).
 - `game-requests.ts`: quanto sono grandi le richieste del gioco (offline, conta i token con `countTokens`).
+- `indossati.ts [-- --rapido]`: il banco degli indossati (`banco/indossati.md`): foto a cartone da quattro lati, `misure.json` e
+  `riepilogo.md` in `banco/indossati/`, senza modelli né browser (≈ 20 s). In 3D: `npm run dev` → <http://localhost:5173/lab/indossati/>
+  (`?corpo=viandante|lupo|gerboa|golem|cervo&seme=2&vista=0..3&passo`, in console `window.indossati`).
 
 ## Che cosa ho imparato scrivendo modelli (vale per chi corregge)
 
