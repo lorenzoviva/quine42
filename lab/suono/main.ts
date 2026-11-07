@@ -10,6 +10,8 @@ import { brushFor, leadComment, letterAt, levels, noteName, paintCell, retouchCo
 import { LoopPlayer } from './player';
 import { VoxelView, type VoxelStyle } from './voxels';
 import type { RunReply, SoundReply, SoundRequest } from './worker';
+import { startCards, type CardsBar } from '../handmade/bar';
+import { sourceFromSearch } from '../handmade/logic';
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const DRAFT_KEY = 'quine.soundlab.bozza';
@@ -32,7 +34,8 @@ const TRACK_COLOR: Record<Instrument, string> = { lead: '#38bdf8', pad: '#e879f9
 const TRACK_TINT: Record<Instrument, { note: string; held: string }> = { lead: { note: '#38bdf8', held: '#0284c7' }, pad: { note: '#e879f9', held: '#a21caf' }, bass: { note: '#fbbf24', held: '#d97706' } };
 const SCALE_NAMES: Record<string, string> = { pentatonic_minor: 'Pentatonica minore', dorian: 'Dorica', harmonic_minor: 'Minore armonica', phrygian: 'Frigia', hirajoshi: 'Hirajoshi' };
 
-const files = import.meta.glob('../../universe/models/suono-*.xml', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
+// The seed's sound programs: `sound-*` since the contract 0.3 (T307b).
+const files = import.meta.glob('../../universe/models/sound-*.xml', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
 const presets = soundPrograms({
   'models/index.json': JSON.stringify(indexJson),
   ...Object.fromEntries(Object.entries(files).map(([k, v]) => [`models/${k.split('/').pop()}`, v])),
@@ -64,6 +67,13 @@ let playWanted = false;
 let cursor = 0;
 let morphTimer: ReturnType<typeof setInterval> | undefined;
 const undoStack: string[] = [];
+/**
+ * The developers' tools (T294, ADR-0168): opening a file from the disk and saving the XML there. In the build the players get, a program
+ * is saved as a card (the bar of the handmade cards). The page's own draft is of free work only: a card or a fork has the bar's.
+ */
+const DEV_TOOLS = import.meta.env.MODE !== 'production';
+let ownDraft = !sourceFromSearch(location.search);
+let cards: CardsBar | undefined;
 
 // ---- the two workers ----
 
@@ -224,11 +234,11 @@ function setText(next: string): void {
     area.scrollLeft = scrollLeft;
   }
   paintCode();
-  $('dirty').hidden = next === savedText;
+  if (DEV_TOOLS) $('dirty').hidden = next === savedText;
   $<HTMLButtonElement>('undo').disabled = !undoStack.length;
   $('desc').textContent = leadComment(next);
   try {
-    localStorage.setItem(DRAFT_KEY, JSON.stringify({ xml: next, seed, fileName, savedText }));
+    if (ownDraft) localStorage.setItem(DRAFT_KEY, JSON.stringify({ xml: next, seed, fileName, savedText }));
   } catch {
     /* no storage: the draft stays in the page */
   }
@@ -840,7 +850,8 @@ function bindAll(): void {
       runProgram();
     } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
       e.preventDefault();
-      saveXml();
+      if (cards) void cards.save();
+      else if (DEV_TOOLS) saveXml();
     } else if (e.key === ' ' && !inText) {
       e.preventDefault();
       togglePlay();
@@ -850,10 +861,11 @@ function bindAll(): void {
 
 function start(): void {
   bindAll();
+  if (!DEV_TOOLS) for (const id of ['open', 'save', 'dirty']) $(id).remove();
   $<HTMLButtonElement>('undo').disabled = true;
   let draft: { xml?: string; seed?: number; fileName?: string; savedText?: string } = {};
   try {
-    draft = JSON.parse(localStorage.getItem(DRAFT_KEY) ?? '{}');
+    if (ownDraft) draft = JSON.parse(localStorage.getItem(DRAFT_KEY) ?? '{}');
   } catch {
     /* a draft that does not read is no draft */
   }
@@ -867,6 +879,27 @@ function start(): void {
     runProgram();
   } else if (presets[0]) loadProgram(presets[0].xml, `${presets[0].id}.xml`);
   requestAnimationFrame(frame);
+  void startCards({
+    lab: 'suono',
+    kind: 'sound',
+    mount: document.body,
+    getXml: () => xml,
+    setXml: (text) => {
+      $<HTMLSelectElement>('preset').value = '';
+      loadProgram(text, 'carta.xml');
+    },
+    freeDraft: false,
+    onSaved: () => {
+      // Free work saved is a card now: the page's draft would make another one of it.
+      if (!ownDraft) return;
+      ownDraft = false;
+      try {
+        localStorage.removeItem(DRAFT_KEY);
+      } catch {
+        /* nothing kept */
+      }
+    },
+  }).then((bar) => (cards = bar));
 }
 
 start();

@@ -103,7 +103,8 @@ export const CATALOG: Entry[] = [
 ];
 
 // The step 8.2A trial: what each Gemini model wrote for the same targets (<target>.<model>.xml).
-const trial = import.meta.glob('../mjx/models/gemini/*.xml', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
+// Only for the developers (T294): in the build the players get, the comparisons are not there at all.
+const trial = (import.meta.env.MODE !== 'production' ? import.meta.glob('../mjx/models/gemini/*.xml', { query: '?raw', import: 'default', eager: true }) : {}) as Record<string, string>;
 const TRIAL_ROLE: Record<string, Role> = { mulino: 'structure', pino: 'tree', quercia: 'tree', betulla: 'tree', 'masso-muschioso': 'rock', 'cespuglio-con-bacche': 'plant', barile: 'prop', pozzo: 'structure', casetta: 'structure', viandante: 'npc', contadina: 'npc', gatto: 'animal', lupo: 'animal' };
 for (const [file, xml] of Object.entries(trial)) {
   const base = file.replace(/^.*\//, '').replace(/\.xml$/, '');
@@ -115,7 +116,7 @@ for (const [file, xml] of Object.entries(trial)) {
 
 
 // Hand drawn models
-const handmade = import.meta.glob('../mjx/models/handmade/*.xml', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
+const handmade = (import.meta.env.MODE !== 'production' ? import.meta.glob('../mjx/models/handmade/*.xml', { query: '?raw', import: 'default', eager: true }) : {}) as Record<string, string>;
 for (const [file, xml] of Object.entries(handmade)) {
   const base = file.replace(/^.*\//, '').replace(/\.xml$/, '');
   const target = base.split('.')[0];
@@ -125,13 +126,23 @@ for (const [file, xml] of Object.entries(handmade)) {
 
 
 
+/**
+ * Whether the page has the developers' tools (T294, ADR-0168): `npm run dev`. The build is the players' labs (served by the production
+ * server only with `laboratori` on): no Gemini, no comparisons with MarkovJunior's own models or the trials, no files from the disk.
+ * `MODE`, not `DEV`: every build has the mode `production`, while `DEV` follows NODE_ENV, and a build with NODE_ENV=development has it on.
+ */
+export const DEV_TOOLS: boolean = import.meta.env.MODE !== 'production';
+
 export const byId = (id: string) => CATALOG.find((e) => e.id === id);
 export const GROUPS: Array<[string, (e: Entry) => boolean]> = [
   ['Persone e animali', (e) => !e.trial && ['player', 'npc', 'animal'].includes(e.role)],
   ['Piante e rocce', (e) => !e.trial && ['tree', 'plant', 'rock'].includes(e.role)],
   ['Oggetti e strutture', (e) => !e.trial && ['prop', 'structure'].includes(e.role)],
-  ['MarkovJunior (originali)', (e) => e.role === 'official'],
-  ['Gemini: prove degli step 8.2A e 8.2B', (e) => !!e.trial],
-  ['Modelli dell\'editor', (e) => !!e.handmade],
-
+  ...(DEV_TOOLS
+    ? ([
+        ['MarkovJunior (originali)', (e) => e.role === 'official'],
+        ['Gemini: prove degli step 8.2A e 8.2B', (e) => !!e.trial],
+        ['Modelli dell\'editor', (e) => !!e.handmade],
+      ] as Array<[string, (e: Entry) => boolean]>)
+    : []),
 ];

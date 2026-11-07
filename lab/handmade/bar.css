@@ -1,0 +1,87 @@
+/* The bar of the handmade cards in the labs (T294): its own colours, so it reads the same over the three labs' themes. */
+.hm-box {
+  font: 13px/1.35 system-ui, sans-serif;
+  color: #e8eefc;
+  background: #121a2c;
+  border-bottom: 1px solid #2c3a5a;
+  position: relative;
+  z-index: 20;
+}
+.hm-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  padding: 6px 12px;
+}
+.hm-badge {
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #f5c542;
+  color: #1b1b1b;
+}
+.hm-state {
+  color: #9fb3d9;
+  min-width: 12em;
+}
+.hm-box input,
+.hm-box select,
+.hm-box button {
+  font: inherit;
+  color: inherit;
+  background: #0b1120;
+  border: 1px solid #3a4b73;
+  border-radius: 4px;
+  padding: 3px 7px;
+}
+.hm-name {
+  width: 16em;
+}
+.hm-model {
+  display: inline-flex;
+  gap: 6px;
+}
+.hm-model[hidden] {
+  display: none;
+}
+.hm-box button {
+  cursor: pointer;
+}
+.hm-box button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.hm-save {
+  background: #1f6f43 !important;
+  border-color: #2fa565 !important;
+  font-weight: 600;
+}
+.hm-dirty {
+  color: #f5c542;
+}
+.hm-login {
+  display: inline-flex;
+  gap: 6px;
+}
+.hm-login[hidden] {
+  display: none;
+}
+.hm-home {
+  margin-left: auto;
+  color: #7fd3ff;
+}
+.hm-errors {
+  margin: 0;
+  padding: 4px 12px 8px 30px;
+  color: #ffb4b4;
+}
+.hm-errors[hidden] {
+  display: none;
+}
+/* Ciò che la barra nasconde resta nascosto anche sotto i fogli dei laboratori, che danno un display ai pulsanti */
+.hm-box [hidden] {
+  display: none !important;
+}
