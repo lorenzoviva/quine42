@@ -7,6 +7,7 @@
 // the circle or in the studio, ADR-0124), nothing of the simulation is drawn beyond the circle.
 
 import * as THREE from 'three';
+import { gpuName, makeRenderer } from './gpu';
 import type { Kernel } from '../kernel/kernel';
 import { Bloom } from './bloom';
 import type { CoronaView, StudioRoom } from './coronaview';
@@ -37,6 +38,8 @@ export class Renderer {
   private drag?: { x: number; y: number; yaw: number; pitch: number };
 
   private gl: THREE.WebGLRenderer;
+  /** The GPU drawing the world, as the browser names it (T330); `undefined` when it does not say. */
+  readonly gpu: string | undefined;
   private bloom: Bloom;
   private scene = new THREE.Scene();
   readonly camera = new THREE.PerspectiveCamera(38, 1, 0.1, 400);
@@ -82,7 +85,8 @@ export class Renderer {
     overlay: HTMLCanvasElement,
     private kernel: Kernel,
   ) {
-    this.gl = new THREE.WebGLRenderer({ canvas, antialias: true });
+    this.gl = makeRenderer({ canvas, antialias: true });
+    this.gpu = gpuName(this.gl);
     this.gl.shadowMap.enabled = true;
     this.gl.localClippingEnabled = true;
     this.gl.shadowMap.type = THREE.PCFShadowMap;

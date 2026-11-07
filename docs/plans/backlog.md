@@ -4925,13 +4925,14 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 **Quando è fatto:** merge committato, `npm test` e `npm run typecheck` verdi con i loro turni; esito con le scelte fatte nel conflitto. Non serve il browser (solo `lab/` e documenti). Sicurezza: nessuna superficie nuova.
 - Esito: merge di `task/T324` nel base (commit 53f819f2); conflitti in AGENTS.md e lab/README.md risolti tenendo le due aggiunte nello stesso punto: la riga di `jev-banco.ts` di T324 (quella di T313 più `--prepara immagini`, `--gruppi immagini`, `--oggi-artista`, `--tetti-giri`) e sotto la riga di `jev-casi-d-uso.ts` di T325, invariata; il resto (banco di Jev con le immagini, `consumi.jsonl`, test) fuso da solo; T324 non ha ADR, niente da rinumerare; `npm test` (173 file, 2636 passati, 1 saltato) e `npm run typecheck` verdi nei loro turni; browser non necessario (solo `lab/` e documenti); sicurezza: nessuna superficie nuova.
 
-### T330 · La GPU dedicata per il renderer — `da fare`
+### T330 · La GPU dedicata per il renderer — `fatto` (`89dcf5e1`)
 - Pipeline: claude · sforzo medium · stima 1% · approvato · priorità 6
 - Contesto: l'autore in chat (07/11, epoca 324): «il gioco gira in GPU? si può far girare sulla GPU?». Il disegno è già su WebGL (three.js), ma nessun `THREE.WebGLRenderer` chiede `powerPreference: 'high-performance'` (`src/render/renderer.ts:85`, `src/render/thumbs.ts:58`, e quelli di `lab/` e `site/` se ce ne sono): su un portatile con due GPU il browser può scegliere l'integrata.
 - Cosa fare: `powerPreference: 'high-performance'` su ogni `WebGLRenderer` del gioco (renderer, foto dei modelli), del laboratorio e del sito, con un solo punto da cui lo si legge (una costante o un aiuto in `src/render/`). Nel HUD di sviluppo o in console (`window.quine`) la GPU in uso (`WEBGL_debug_renderer_info`, se il browser la dà; altrimenti niente), così l'autore vede se è quella dedicata. Una riga in `docs/architettura-dettagli.md#mondo3d`.
 - Test: un test che ogni `new THREE.WebGLRenderer(` di `src/`, `lab/` e `site/` passa dall'aiuto (lettura dei sorgenti); typecheck con il suo turno.
 - Browser: build e preview, in console la GPU riportata e nessun errore; screenshot del mondo uguale a prima.
 - Quando è fatto: commit su `task/T330`. Nell'esito la GPU vista sulla macchina dell'autore, se il browser la dice. Sicurezza: nessuna superficie nuova (il nome della GPU resta nel client, non va al server).
+- Esito: ogni WebGLRenderer di src/, lab/ e site/ passa da `makeRenderer` (`src/render/gpu.ts`, powerPreference 'high-performance'); la GPU in uso è in `window.gpu` e in una riga `[gpu]` in console; test sui sorgenti `tests/gpu.test.ts`, doc in #mondo3d; test, typecheck e build verdi; GPU vista sulla macchina dell'autore: ANGLE (NVIDIA GeForce RTX 2070, D3D11). Sicurezza: nessuna superficie nuova (il nome della GPU resta nel client).
 
 ### T331 · Dove va il tempo: la misura di frame e generazione, prima di portare MarkovJunior sulla GPU — `da fare`
 - Pipeline: claude · sforzo high · stima 4% · approvato · priorità 7

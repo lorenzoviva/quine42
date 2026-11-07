@@ -3,6 +3,7 @@
 // always in daylight: an icon taken at night would stay dark in the cache.
 
 import * as THREE from 'three';
+import { makeRenderer } from './gpu';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import type { Kernel } from '../kernel/kernel';
 import { CARTOON, Ink, PHASES, SHADE, SUN_FROM } from './cartoon';
@@ -55,7 +56,7 @@ export class Thumbs {
 
   private renderer(): THREE.WebGLRenderer {
     if (!this.gl) {
-      this.gl = new THREE.WebGLRenderer({ alpha: true, antialias: true, preserveDrawingBuffer: true });
+      this.gl = makeRenderer({ alpha: true, antialias: true, preserveDrawingBuffer: true });
       this.gl.setSize(PX, PX, false);
       this.gl.setClearColor(0x000000, 0);
     }
