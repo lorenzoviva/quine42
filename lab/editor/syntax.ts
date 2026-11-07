@@ -40,6 +40,7 @@ export const COLOR_ATTRS = new Set([
   'to',
   'symbol',
   'ground',
+  'for',
 ]);
 
 export function getContrastColor(hex: string): string {
@@ -73,6 +74,8 @@ export const MJ_NODES = new Set([
   'import',
   'in',
   'out',
+  'field',
+  'observe',
   'union',
   'sound',
   'track',
@@ -124,6 +127,16 @@ export const MJ_ATTRS = new Set([
   'y',
   'instrument',
   'volume',
+  // Inference in rule nodes (T334): <field>, <observe> and the node's attributes.
+  'for',
+  'from',
+  'recompute',
+  'essential',
+  'temperature',
+  'search',
+  'limit',
+  'depthcoefficient',
+  'p',
 ]);
 
 export function escapeHtml(str: string): string {
@@ -366,6 +379,14 @@ export interface TagAttrDef {
   type?: 'string' | 'number' | 'boolean' | 'color';
 }
 
+/** What a rule node may infer (T334): the attributes that go with <field> and <observe>. */
+const INFERENCE_ATTRS: TagAttrDef[] = [
+  { name: 'temperature', default: '0', description: 'Quanto a caso scelgono i campi: 0 sempre la mossa migliore' },
+  { name: 'search', default: 'False', description: 'Con observe: cerca prima tutta la traiettoria' },
+  { name: 'limit', default: '', description: 'Stati che la ricerca tiene (20 tentativi)' },
+  { name: 'depthCoefficient', default: '0.5', description: 'Peso della profondità nella ricerca; sotto 0, prima in profondità' },
+];
+
 export const TAG_SCHEMAS: Record<string, TagAttrDef[]> = {
   sequence: [
     { name: 'values', default: 'BW', description: 'Simboli colori usati nel modello' },
@@ -387,6 +408,7 @@ export const TAG_SCHEMAS: Record<string, TagAttrDef[]> = {
     { name: 'symmetry', default: '(xy)', description: 'Simmetria pattern' },
     { name: 'p', default: '1.0', description: 'Probabilità' },
     { name: 'comment', default: '', description: 'Descrizione opzionale' },
+    ...INFERENCE_ATTRS,
   ],
   one: [
     { name: 'in', default: '*', description: 'Pattern di ricerca' },
@@ -394,6 +416,7 @@ export const TAG_SCHEMAS: Record<string, TagAttrDef[]> = {
     { name: 'steps', default: '1', description: 'Numero di passi' },
     { name: 'symmetry', default: '(xy)', description: 'Simmetria pattern' },
     { name: 'comment', default: '', description: 'Descrizione opzionale' },
+    ...INFERENCE_ATTRS,
   ],
   prl: [
     { name: 'in', default: '*', description: 'Pattern di ricerca' },
@@ -402,6 +425,7 @@ export const TAG_SCHEMAS: Record<string, TagAttrDef[]> = {
     { name: 'symmetry', default: '(xy)', description: 'Simmetria pattern' },
     { name: 'p', default: '0.5', description: 'Probabilità parallela stocastica' },
     { name: 'comment', default: '', description: 'Descrizione opzionale' },
+    ...INFERENCE_ATTRS,
   ],
   path: [
     { name: 'from', default: 'a', description: 'Simbolo/pattern di partenza' },
@@ -428,6 +452,19 @@ export const TAG_SCHEMAS: Record<string, TagAttrDef[]> = {
     { name: 'scale', default: '2 2 2', description: 'Moltiplicatore risoluzione X Y Z' },
     { name: 'values', default: 'BW', description: 'Simboli considerati' },
     { name: 'comment', default: '', description: 'Descrizione opzionale' },
+  ],
+  field: [
+    { name: 'for', default: 'R', description: 'La lettera il cui potenziale si calcola' },
+    { name: 'to', default: 'G', description: 'Verso dove scende il potenziale' },
+    { name: 'from', default: '', description: 'Al posto di to: da dove sale (il nodo se ne allontana)' },
+    { name: 'on', default: 'B', description: 'Le celle su cui il potenziale si propaga' },
+    { name: 'recompute', default: 'False', description: 'Ricalcolato a ogni passo' },
+    { name: 'essential', default: 'False', description: 'Senza da dove partire, il nodo si ferma' },
+  ],
+  observe: [
+    { name: 'value', default: 'G', description: 'La lettera osservata' },
+    { name: 'from', default: '', description: 'Ciò che la cella diventa subito (se no resta com’è)' },
+    { name: 'to', default: 'R', description: 'Ciò che la cella deve diventare alla fine' },
   ],
   rule: [
     { name: 'in', default: '*', description: 'Pattern di match (oppure il figlio <in>)' },

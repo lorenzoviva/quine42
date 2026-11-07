@@ -5012,7 +5012,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì, le foto del banco.
 - Quando è fatto: commit su `task/T338`, rapporto in `lab/banco/` con le foto; kernel sale di Z se cambiano i controlli.
 
-### T341 · Integrare T340 nel base (ADR e kernel presi da T296) — `da fare`
+### T341 · Integrare T340 nel base (ADR e kernel presi da T296) — `fatto` (`6909ea52`)
 - Pipeline: claude · sforzo high · stima 2% · approvato · priorità 1
 - Step: 30
 - Contesto: `integra T340` ha trovato un conflitto in `docs/glossario-censimento.md`. Inoltre T296, integrato poco prima (`67bf2669`), ha preso ADR-0172 e kernel 0.5.8, gli stessi numeri scritti da T340 (ADR di T334). Nasce da T340: `dossier T340`, `dossier T296`.
@@ -5020,6 +5020,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: suite intera (il fallimento noto di `tests/determinism.test.ts` sotto carico si riprova da solo), typecheck, build.
 - Browser: no (T340 e T296 già verificati).
 - Quando è fatto: commit su `task/T341`; poi l'orchestratore integra T341 e `integra T340` toglie worktree e branch di T340, poi `integra T334`.
+- Esito: merge di task/T340 nel base dopo T296: censimento del glossario rigenerato, l'inferenza di MarkovJunior resta ADR-0173 (rinumerata già in T340), le carte guaste ADR-0172 (kernel 0.5.8), il kernel sale a 0.5.9 (version.ts, package.json, package-lock.json, universe.json, ADR-0173 e la sua riga nel README); suite intera, typecheck e build passati; nessuna verifica nel browser (il task non la chiede); sicurezza: nessuna superficie nuova.
 
 ### T340 · Integrare T334 nel base (conflitti con T333) — `da fare`
 - Pipeline: claude · sforzo high · stima 3% · approvato · priorità 1

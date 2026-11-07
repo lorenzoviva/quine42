@@ -808,6 +808,8 @@ export function extractRuleAtPos(code: string, pos: number): CodeRuleInfo | null
   const nameMatch = /^<([a-zA-Z0-9_-]+)/.exec(rawTag);
   if (!nameMatch) return null;
   const tag = nameMatch[1];
+  // <field> and <observe> (T334) have from and to, but they are sets of letters inside a rule node, not patterns to draw.
+  if (tag === 'field' || tag === 'observe') return null;
 
   const line = code.slice(0, tagStart).split('\n').length;
 
