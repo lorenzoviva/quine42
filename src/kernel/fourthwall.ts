@@ -1,7 +1,7 @@
 // Two tables, as in Dungeons & Dragons (ADR-0025): the Council is the Dungeon Master, outside the
 // world; inside, the wanderer and the people live a world that is real to them. The principles below
 // go with every request to the Council; the filter catches content that breaks the fourth wall anyway,
-// in the language of the world, in Italian and in English (T310, ADR-0164): the models read English
+// in the language of the world, in Italian and in English (T310, ADR-0165): the models read English
 // instructions and may slip into English, and they may repeat the Italian of an old prompt.
 
 import type { Bible } from './agents/council';

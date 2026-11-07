@@ -1,4 +1,4 @@
-// The fourth wall in more languages (T310, ADR-0164): the filter reads the language of the world, Italian and English; every table
+// The fourth wall in more languages (T310, ADR-0165): the filter reads the language of the world, Italian and English; every table
 // catches its test phrases and leaves twenty harmless ones alone. The Language block says in what language the world is written.
 import { describe, expect, it } from 'vitest';
 import { glossaryBreak, metaBreak, metaLanguages } from '../src/kernel/fourthwall';

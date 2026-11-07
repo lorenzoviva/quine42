@@ -1,4 +1,4 @@
-// The language of a world (T310, ADR-0153, ADR-0164): the Council's prompts are English, the text of the world is in the language of its
+// The language of a world (T310, ADR-0153, ADR-0165): the Council's prompts are English, the text of the world is in the language of its
 // universe (`universe.json → language`, Italian when it says none; the choice at the Genesis is T239's). The Language block goes with every
 // request, after the principles; the detector says what language a text is in, with the function words of each language.
 

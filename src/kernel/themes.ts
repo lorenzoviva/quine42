@@ -1,6 +1,6 @@
 // The four themes offered by the Genesis screen (T152, ADR-0134): plain text, the same free text the player can rewrite.
 // A theme is not a seed of its own: what a universe keeps of it is `prompts/theme.md`, like any theme written by hand.
-// A theme is a prompt of the Council, so it is English (T310, ADR-0164); the world it makes speaks the language of its universe.
+// A theme is a prompt of the Council, so it is English (T310, ADR-0165); the world it makes speaks the language of its universe.
 
 export interface WorldTheme {
   id: 'medievale' | 'steampunk' | 'moderno' | 'futuristico';

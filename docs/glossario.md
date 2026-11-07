@@ -1135,7 +1135,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Riparazione dei valori italiani
 - **Inglese**: `internalManifest`, `internalEffect`, `internalModelId`, `internalModelInfo`, `italianValues`, `italianName`
-- **Definizione**: ciò che il Concilio scrive con i valori del contratto prima si riporta ai nomi interni entrando nel kernel (manifest, effetti, piani, pannelli, casi, timbri, rune nuove, indice dei modelli); ciò che il mondo mostra usa la parola italiana. Dal kernel 0.5.2 (T310, ADR-0164) i prompt sono inglesi e gli schemi elencano i valori interni (`internalValues`): la riparazione resta ancora un contratto, per i modelli che scrivono l'italiano di prima, poi si toglie.
+- **Definizione**: ciò che il Concilio scrive con i valori del contratto prima si riporta ai nomi interni entrando nel kernel (manifest, effetti, piani, pannelli, casi, timbri, rune nuove, indice dei modelli); ciò che il mondo mostra usa la parola italiana. Dal kernel 0.5.2 (T310, ADR-0165) i prompt sono inglesi e gli schemi elencano i valori interni (`internalValues`): la riparazione resta ancora un contratto, per i modelli che scrivono l'italiano di prima, poi si toglie.
 - **Dove vive**: `src/kernel/internalNames.ts`, `src/kernel/validator.ts`
 - **Da non usare**: `traduzione` (non è il testo del mondo)
 - **Fermo**: nessuno.
@@ -1149,7 +1149,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Blocco «Lingua»
 - **Inglese**: `languageBlock`
-- **Definizione**: le righe che seguono i principi del Concilio in ogni richiesta (ADR-0164): il testo del mondo nella lingua del mondo, gli id dello schema in inglese, gli esempi solo come forme, il codice in inglese e ciò che mostra nella lingua del mondo, le parole vietate dai principi con le loro alternative nella lingua del mondo. Corto di proposito: va con ogni richiesta.
+- **Definizione**: le righe che seguono i principi del Concilio in ogni richiesta (ADR-0165): il testo del mondo nella lingua del mondo, gli id dello schema in inglese, gli esempi solo come forme, il codice in inglese e ciò che mostra nella lingua del mondo, le parole vietate dai principi con le loro alternative nella lingua del mondo. Corto di proposito: va con ogni richiesta.
 - **Dove vive**: `src/kernel/language.ts`, `src/kernel/agents/council.ts` (`Council.write`)
 - **Da non usare**: `traduzione`, `istruzione di lingua`
 - **Fermo**: nessuno.

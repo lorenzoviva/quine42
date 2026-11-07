@@ -1,4 +1,4 @@
-# ADR-0164 — I prompt del Concilio in inglese, il blocco «Lingua», la quarta parete in tre lingue
+# ADR-0165 — I prompt del Concilio in inglese, il blocco «Lingua», la quarta parete in tre lingue
 
 Data: 2026-11-07 · Stato: accettato (task T310 del backlog, prima parte; il resto è T310b) · Riferimenti: ADR-0153 (l'inglese è la lingua interna), ADR-0025 (due tavoli, la quarta parete), ADR-0134 (le ambientazioni della Genesi), ADR-0136 (la versione del kernel), ADR-0155 (la riparazione dei valori italiani), `docs/lingue.md` §4, `docs/lingua-interna.md`
 
