@@ -8,6 +8,7 @@ import type { Inventory } from '../kernel/inventory';
 import type { FeedEntry } from '../kernel/agents/council';
 import type { PlayerSpot } from '../kernel/situation';
 import type { Profile } from '../kernel/wanderers';
+import type { BrokenCard } from '../kernel/brokencards';
 
 /** A tick of the server's world and its hour. */
 export interface Clock {
@@ -151,7 +152,9 @@ export type ClientMsg =
   /** The master talks to an agent of the Council in the corona (T42e): what it makes goes on their branch. */
   | { t: 'agent'; seq: number; agent: string; text: string }
   /** The master gives credits by hand (ADR-0104), within the day's cap. */
-  | { t: 'recharge'; seq: number; wanderer: string; count: number };
+  | { t: 'recharge'; seq: number; wanderer: string; count: number }
+  /** The master takes a brought card away from the world (T296, ADR-0172): the card and its copies, with a commit of the kernel. */
+  | { t: 'card'; seq: number; op: 'remove'; id: string };
 
 
 /** Files changed: their new text, or null when they are gone. */
@@ -173,8 +176,12 @@ export type ServerMsg =
    * wanderer is the master (T41) and, only for the master, the platform fee their console shows (ADR-0132), the Council's feed so far and their branch (T42b); the
    * master's updates say (`players`) every player connected and where they are, when it changes (T42c).
    */
-  | ({ t: 'welcome'; id: string; name: string; profile?: Profile; repaired?: string[]; settings?: { ok: boolean; reason?: string; repaired?: string[] }; anonymous?: true; master?: true; fee?: number; council?: FeedEntry[]; branch?: FileChanges; files: FileMap; me: Me; form?: FormView; state: MyState; chunks: ChunkView[]; entities: EntityView[]; wanderers: OtherView[]; players?: PlayerSpot[] } & Clock)
-  | ({ t: 'update'; me?: Me; state?: MyState; chunks?: ChunkView[]; entities?: EntityView[]; gone?: number[]; wanderers?: OtherView[]; departed?: string[]; players?: PlayerSpot[]; notices?: Notice[] } & Clock)
+  | ({ t: 'welcome'; id: string; name: string; profile?: Profile; repaired?: string[]; settings?: { ok: boolean; reason?: string; repaired?: string[] }; anonymous?: true; master?: true; fee?: number; council?: FeedEntry[]; branch?: FileChanges; files: FileMap; me: Me; form?: FormView; state: MyState; chunks: ChunkView[]; entities: EntityView[]; wanderers: OtherView[]; players?: PlayerSpot[]; broken?: BrokenCard[] } & Clock)
+  /**
+   * `broken` (T296, ADR-0172): the brought cards that do not work in the world, when the list changes: every client draws the generic of their
+   * class in their place, as the world does, and the master's console shows why.
+   */
+  | ({ t: 'update'; me?: Me; state?: MyState; chunks?: ChunkView[]; entities?: EntityView[]; gone?: number[]; wanderers?: OtherView[]; departed?: string[]; players?: PlayerSpot[]; notices?: Notice[]; broken?: BrokenCard[] } & Clock)
   /** The step was not possible (too fast, through a wall): the wanderer is here. */
   | { t: 'correction'; seq: number; x: number; y: number }
   /**

@@ -78,6 +78,19 @@ export class ModelDirector {
     return this.k.ai.name !== 'offline' && !this.stopped;
   }
 
+  /**
+   * Why the director cannot sculpt now, or undefined if it can (T296: a card taken away waits for it): the local models, the budget that ended,
+   * its cap for the session, the knob the master turned to zero.
+   */
+  blocked(): string | undefined {
+    if (this.k.ai.name === 'offline') return 'i modelli sono locali: lo Scultore non scrive';
+    if (this.stopped) return 'il budget dei modelli è finito';
+    const max = this.k.config.ai.maxModels ?? 40;
+    if (this.used >= max) return `lo Scultore ha già scritto i ${max} modelli di questa sessione`;
+    if (this.k.coefficients().models <= 0) return 'il master ha spento i modelli nuovi';
+    return undefined;
+  }
+
   /** What is missing, in the order it matters: people and things first, then items' shapes, then terrains. */
   missing(): SculptRequest[] {
     const k = this.k;

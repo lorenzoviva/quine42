@@ -163,6 +163,8 @@ export interface Form {
   reach: number;
   /** Voxels per tile of this model (ADR-0049). */
   vpt: number;
+  /** Ready, and nothing of it at body height: a body walks through it (T296: a solid thing that wears it stops nobody). */
+  footless?: boolean;
   /**
    * Asks the runner again for the meshes it let go of (`FormResult.meshesGone`); whoever draws calls it, as often as it likes. `arrived` runs as soon as they
    * are here: the runner may let go of them at the next arrival, before whoever draws comes back.
@@ -195,6 +197,15 @@ function sizeFor(xml: string, cls: AssetClass, taglia?: string, under = 0): Vec3
 
 /** Where a body cannot go: voxel columns solid between a step and a head (above the ground, `base` voxels up the grid). */
 export const bodyFoot = (g: VoxelGrid, palette: Record<string, PaletteEntry>, vpt = VPT, base = 0) => footprint(g, palette, base + stepOf(vpt) + 1, base + Math.ceil(0.7 * vpt));
+
+/** Whether a grid has a voxel one sees: a letter with a colour that is not hidden (the program made something, T296). */
+export function anyVisible(g: VoxelGrid, palette: Record<string, PaletteEntry>): boolean {
+  const colors = colorTable(g.alphabet, palette);
+  if (!colors.some(Boolean)) return false;
+  const cells = g.cells;
+  for (let i = 0; i < cells.length; i++) if (colors[cells[i]]) return true;
+  return false;
+}
 
 /** The voxel columns of a model with something solid under the ground (its lowest `base` voxels, T52b), if any. */
 export function holesOf(g: VoxelGrid, palette: Record<string, PaletteEntry>, base: number): Uint8Array | undefined {
@@ -631,9 +642,16 @@ export class Forms {
   private remaking = new Set<Form>();
   /** The run of each pending form: it ends when the form is ready or has failed (`settled`). */
   private running = new Map<Form, Promise<void>>();
+  /**
+   * The models nobody wears here, by the hash of their program when they were isolated (T296): a brought card that fails in this world. A
+   * program written anew is another program, and may be worn again.
+   */
+  private isolated = new Map<string, number>();
   /** Bumped whenever a form becomes ready (renderers rebuild what used stand-ins). */
   version = 0;
   onReady?: (f: Form) => void;
+  /** A form whose program threw, or whose runner gave up on it (a worker that stopped, T296). */
+  onFail?: (f: Form) => void;
 
   constructor(public runner: FormRunner) {}
 
@@ -678,12 +696,52 @@ export class Forms {
     return this.files[`${MODELS_DIR}${id}.xml`] ? (this.library[id] ?? { class: 'object' }) : undefined;
   }
 
+  /** The hash of a program as it is written now, with the files it reads: what a form of it is a form of. Undefined if there is no such program. */
+  hashOf(model: string): number | undefined {
+    const xml = this.files[`${MODELS_DIR}${model}.xml`];
+    if (!xml) return undefined;
+    let h = this.hashes.get(model);
+    if (h === undefined) {
+      const inc = this.includesOf(model);
+      this.hashes.set(model, (h = hashStr(Object.keys(inc).length ? xml + JSON.stringify(Object.entries(inc).sort(([a], [b]) => (a < b ? -1 : 1))) : xml)));
+    }
+    return h;
+  }
+
+  /** Whether a form is of its program as it is written now (a program written anew has other forms). */
+  current(f: Form): boolean {
+    const h = this.hashOf(f.model);
+    return h !== undefined && f.key.endsWith(`#${h}`);
+  }
+
+  /** Nobody wears this model any more, as it is written now (T296): `resolve` gives the generic of its class instead. */
+  isolate(model: string): void {
+    const h = this.hashOf(model);
+    if (h !== undefined) this.isolated.set(model, h);
+  }
+
   /**
-   * The program an entity uses: its own model if the library has it, otherwise the generic model of its
+   * The model is not isolated any more (taken away, or written anew), and its forms go: if it comes back it is run again, and what fails says so
+   * again (a form that failed, or that showed nothing, stays as it was in this map and nobody would hear of it twice).
+   */
+  release(model: string): void {
+    this.isolated.delete(model);
+    for (const [key, f] of this.forms) if (f.model === model) this.forms.delete(key);
+  }
+
+  /** Whether a model may be worn: the library has it, and it is not isolated as it is written now. */
+  usable(model: string): boolean {
+    if (!this.info(model)) return false;
+    const h = this.isolated.get(model);
+    return h === undefined || h !== this.hashOf(model);
+  }
+
+  /**
+   * The program an entity uses: its own model if the library has it (and it is not isolated, T296), otherwise the generic model of its
    * class (the seed has one per class), otherwise the generic entity.
    */
   resolve(model: string | undefined, classe?: string): string {
-    if (model && this.info(model)) return model;
+    if (model && this.usable(model)) return model;
     const cls = classe && classOf(classe) ? classe : model && classOf(model) ? model : 'object';
     return this.info(cls) ? cls : 'object';
   }
@@ -742,14 +800,9 @@ export class Forms {
 
   /** The form of a program with a seed, if ready; starts running it otherwise. */
   get(model: string, seed: number, tint?: string): Form | undefined {
-    const xml = this.files[`${MODELS_DIR}${model}.xml`];
-    if (!xml) return undefined;
+    const h = this.hashOf(model);
+    if (h === undefined) return undefined;
     const info = this.library[model];
-    let h = this.hashes.get(model);
-    if (h === undefined) {
-      const inc = this.includesOf(model);
-      this.hashes.set(model, (h = hashStr(Object.keys(inc).length ? xml + JSON.stringify(Object.entries(inc).sort(([a], [b]) => (a < b ? -1 : 1))) : xml)));
-    }
     const key = `${model}#${seed}#${info?.tint && tint ? tint : ''}#${h}`;
     let f = this.forms.get(key);
     if (f) return f;
@@ -769,19 +822,30 @@ export class Forms {
         const base = under < result.grid.Z ? under : 0;
         form.base = base;
         form.foot = bodyFoot(result.grid, result.palette, vpt, base);
+        form.footless = !form.foot.includes(1);
         Object.assign(form, groundOfForm(result.grid, result.palette, vpt, base));
         form.reach = Math.hypot(result.grid.X, result.grid.Y) / 2 / vpt;
         form.status = 'ready';
         this.version++;
-        this.onReady?.(form);
+        this.tell(this.onReady, form);
       })
-      .catch((e: Error) => {
+      .catch((e: unknown) => {
         form.status = 'failed';
-        form.error = e.message;
+        form.error = e instanceof Error ? e.message : String(e);
+        this.tell(this.onFail, form);
       });
     this.running.set(form, run);
     void run.finally(() => this.running.delete(form));
     return f;
+  }
+
+  /** A hook of whoever listens: never a reason for a form to fail, nor a rejection nobody waits for (rule 7). */
+  private tell(hook: ((f: Form) => void) | undefined, f: Form): void {
+    try {
+      hook?.(f);
+    } catch {
+      /* the form stays as it is */
+    }
   }
 
   /** One request at a time: the same program and seed give the same grid, so nothing but the drawing changes and the form stays ready. */
@@ -795,9 +859,10 @@ export class Forms {
         arrived?.();
         this.version++;
       })
-      .catch((e: Error) => {
+      .catch((e: unknown) => {
         form.status = 'failed';
-        form.error = e.message;
+        form.error = e instanceof Error ? e.message : String(e);
+        this.tell(this.onFail, form);
       })
       .finally(() => this.remaking.delete(form));
   }

@@ -25,6 +25,18 @@ export const SOUND_CACHE_VERSION = 1;
 
 /** Below this an effect's tail is silence (about -70 dB). */
 const TAIL_FLOOR = 3e-4;
+/** A render whose loudest sample stays below this is mute (T296): about -80 dB, nothing anybody hears. */
+export const MUTE_FLOOR = 1e-4;
+
+/** The loudest sample of a render. */
+export function peakOf(samples: Float32Array): number {
+  let peak = 0;
+  for (let i = 0; i < samples.length; i++) {
+    const v = Math.abs(samples[i]);
+    if (v > peak) peak = v;
+  }
+  return peak;
+}
 
 export const soundKey = (q: SoundRequest): string => JSON.stringify([SOUND_CACHE_VERSION, q.use, q.seed]) + q.xml;
 
@@ -41,11 +53,14 @@ export function prepareSound(q: SoundRequest): PreparedSound {
   return { samples: r.samples.slice(0, end), sampleRate: r.sampleRate };
 }
 
-/** A program that fails stays silent, and says why: whatever comes in, nothing is thrown (rule 7). */
+/**
+ * A program that fails stays silent, and says why: whatever comes in, nothing is thrown (rule 7). A piece whose every sample is below
+ * `MUTE_FLOOR` is a failure too (T296): it would play silence in a loop, and a card that does it is shown to the master.
+ */
 export function tryPrepareSound(q: SoundRequest): { sound: PreparedSound } | { error: string } {
   try {
     const sound = prepareSound(q);
-    return sound.samples.length ? { sound } : { error: 'non suona nulla' };
+    return sound.samples.length && peakOf(sound.samples) >= MUTE_FLOOR ? { sound } : { error: 'non suona nulla' };
   } catch (e) {
     return { error: e instanceof Error ? e.message : String(e) };
   }

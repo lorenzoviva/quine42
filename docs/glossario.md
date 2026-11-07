@@ -1088,6 +1088,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: «carta importata», «importare» (per le carte: si portano), «fork» (un fork è una carta fatta a mano: un'altra carta)
 - **Fermo**: `universe.json → cardChoice` (`seed`, `clone`), il campo `brought` delle voci di `models/index.json` (`.handmade` per una carta fatta a mano), le rotte `/api/universe/<nome>/kin` e `/api/universe/<nome>/bring`.
 
+### Carta guasta
+- **Inglese**: `BrokenCard`, `BreakKind`, `brokenCards`, `cardBroke`, `removeCard`, `cardFamily`, `withoutCards`, `readBrokenCards`, `broughtCardsOf`, `worldBroken`
+- **Definizione**: una carta portata che in questo mondo non funziona: il suo programma getta o ferma il suo worker (`fault`), non produce niente da vedere (`empty`), non ferma un corpo che è solido (`footless`), non suona (`mute`). Si **isola** con le sue copie (chi la indossava veste il modello generico della sua classe, il suono tace), si mostra al master col motivo, e il master la **toglie** dalla console con un commit (ADR-0172).
+- **Dove vive**: `src/kernel/brokencards.ts`, `src/kernel/kernel.ts`, `src/ui/console.ts`
+- **Da non usare**: «carta rotta», «carta problematica» (nei testi nuovi), «eliminare» (una carta si toglie da un universo: resta dove è nata e nella collezione del suo autore), «quarantena»
+- **Fermo**: il messaggio `card` con `op: 'remove'` e il campo `broken` di `welcome` e `update`, i valori `fault`, `empty`, `footless`, `mute`, la chiave del guasto `card:<id>`.
+
 ### Controllo del programma
 - **Inglese**: `handmadeProgramErrors`, `HANDMADE_LIMITS`, `ProgramChecker`, `processChecker`, `inlineChecker`
 - **Definizione**: la prova del programma di una carta fatta a mano sul motore vero, entro tetti misurati sui programmi del seme (griglia, passi, tempo, azioni, animazioni, soglie del suono); nel server di produzione la fa il programma dei mondi, un processo per controllo senza segreti.

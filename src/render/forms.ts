@@ -25,6 +25,14 @@ export const FORM_MEMORY_BYTES = 128 * 1024 * 1024;
 export const FORM_DISK_BYTES = 4 * 1024 * 1024 * 1024;
 export const FORM_ENTRIES = 4096;
 
+/**
+ * How long a worker has to answer a job (T296): a program stops itself at `MAX_FORM_TIME` (30 s) and its meshes take a few seconds more, so a
+ * worker silent this long is stuck (a program that hangs it, a crash that said nothing). What it was doing fails, another worker takes its place.
+ */
+export const FORM_WATCHDOG_MS = 120_000;
+/** Workers that may take the place of one that stopped, in the life of a page: a worker that cannot even start does not loop. */
+export const RESPAWNS = 8;
+
 /** The ports of this machine that stay the same from one day to the next: `npm run dev` and `vite preview` when not told otherwise. */
 const LASTING_PORTS = ['5173', '4173'];
 
@@ -287,6 +295,12 @@ export class WorkerRunner implements FormRunner {
   private reads: Array<{ id: number; read: MeshRead }> = [];
   private reading = new Map<number, (meshes: FormMeshes | undefined) => void>();
   readonly store: FormStore;
+  /** The workers alive, and what each is doing now with its watchdog (T296: a worker that stops fails only what it was doing). */
+  private workers = new Map<Worker, { job?: number; watchdog?: ReturnType<typeof setTimeout> }>();
+  private makeWorker?: () => Worker;
+  /** Workers made so far, the first ones and those that took the place of one that stopped: past `maxWorkers` none is made again. */
+  private made = 0;
+  private maxWorkers = 0;
 
   constructor(
     n = Math.max(1, Math.min(4, (typeof navigator !== 'undefined' ? navigator.hardwareConcurrency || 4 : 4) - 1)),
@@ -294,43 +308,95 @@ export class WorkerRunner implements FormRunner {
     workerFactory?: () => Worker,
     private maxBytes = FORM_MEMORY_BYTES,
     private maxEntries = FORM_ENTRIES,
+    private watchdogMs = FORM_WATCHDOG_MS,
   ) {
     const onDisk = typeof indexedDB !== 'undefined' && (typeof location === 'undefined' || keepsFormsOnDisk(location));
     this.store = store ?? (onDisk ? new IdbFormStore() : new MemoryFormStore());
     if (typeof Worker !== 'undefined' || workerFactory) {
       if (n > 0 && this.store instanceof IdbFormStore) this.store.meshReader = (read) => this.readInWorker(read);
-      const makeWorker = workerFactory ?? (() => new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' }));
-      for (let i = 0; i < n; i++) {
-        const w = makeWorker();
-        w.onmessage = (ev: MessageEvent<WorkerAnswer | MeshAnswer>) => {
-          const a = ev.data;
-          const p = this.waiting.get(a.id);
-          this.waiting.delete(a.id);
-          if ('read' in a) {
-            this.reading.get(a.id)?.(a.meshes);
-            this.reading.delete(a.id);
-          } else if (p) {
-            if (a.ok) {
-              if (a.finished) this.keep(p.key, a.result);
-              p.ok(a.result);
-            } else {
-              p.fail(new Error(a.error));
-            }
-          }
-          this.idle.push(w);
-          this.pump();
-        };
-        w.onerror = (err: ErrorEvent) => {
-          for (const [id, p] of this.waiting.entries()) {
-            p.fail(new Error(`Worker error: ${err.message}`));
-            this.waiting.delete(id);
-          }
-          for (const done of this.reading.values()) done(undefined);
-          this.reading.clear();
-        };
-        this.idle.push(w);
-      }
+      this.makeWorker = workerFactory ?? (() => new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' }));
+      this.maxWorkers = n + RESPAWNS;
+      for (let i = 0; i < n; i++) this.addWorker();
     }
+  }
+
+  /** Workers that took the place of one that stopped, at most (T296): a worker that cannot even start does not loop. */
+  get respawned(): number {
+    return Math.max(0, this.made - (this.maxWorkers - RESPAWNS));
+  }
+
+  /** One worker more in the pool, listening: one of the first, or one in the place of a worker that stopped. */
+  private addWorker(): void {
+    if (!this.makeWorker || this.made >= this.maxWorkers) return;
+    let w: Worker;
+    try {
+      w = this.makeWorker();
+    } catch {
+      this.made = this.maxWorkers;
+      return;
+    }
+    this.made++;
+    this.workers.set(w, {});
+    w.onmessage = (ev: MessageEvent<WorkerAnswer | MeshAnswer>) => {
+      const state = this.workers.get(w);
+      // A worker given up (it did not answer in time) says nothing any more.
+      if (!state) return;
+      clearTimeout(state.watchdog);
+      this.workers.set(w, {});
+      const a = ev.data;
+      const p = this.waiting.get(a.id);
+      this.waiting.delete(a.id);
+      if ('read' in a) {
+        this.reading.get(a.id)?.(a.meshes);
+        this.reading.delete(a.id);
+      } else if (p) {
+        if (a.ok) {
+          if (a.finished) this.keep(p.key, a.result);
+          p.ok(a.result);
+        } else {
+          p.fail(new Error(a.error));
+        }
+      }
+      this.idle.push(w);
+      this.pump();
+    };
+    w.onerror = (err: ErrorEvent) => this.lose(w, `il worker si è fermato${err?.message ? `: ${err.message}` : ''}`);
+    this.idle.push(w);
+  }
+
+  /**
+   * A worker that stopped (an error out of its program: out of memory, a stack) or did not answer in time (T296): only what it was doing fails,
+   * the jobs of the others and those in the queue go on, and another worker takes its place. With none left, what waits fails.
+   */
+  private lose(w: Worker, why: string): void {
+    const state = this.workers.get(w);
+    if (!state) return;
+    clearTimeout(state.watchdog);
+    this.workers.delete(w);
+    this.idle = this.idle.filter((x) => x !== w);
+    try {
+      w.terminate();
+    } catch {
+      /* it is gone anyway */
+    }
+    if (state.job !== undefined) {
+      const p = this.waiting.get(state.job);
+      this.waiting.delete(state.job);
+      p?.fail(new Error(why));
+      const r = this.reading.get(state.job);
+      this.reading.delete(state.job);
+      r?.(undefined);
+    }
+    this.addWorker();
+    if (!this.workers.size) {
+      for (const p of this.waiting.values()) p.fail(new Error(`${why}; nessun worker rimasto`));
+      this.waiting.clear();
+      this.queue = [];
+      for (const r of this.reading.values()) r(undefined);
+      this.reading.clear();
+      this.reads = [];
+    }
+    this.pump();
   }
 
   /** Jobs waiting or running (the HUD may show it). */
@@ -339,6 +405,8 @@ export class WorkerRunner implements FormRunner {
   }
 
   private readInWorker(read: MeshRead): Promise<FormMeshes | undefined> {
+    // No worker left (T296): the store reads them itself.
+    if (this.makeWorker && !this.workers.size) return Promise.resolve(undefined);
     return new Promise((done) => {
       const id = this.next++;
       this.reading.set(id, done);
@@ -397,7 +465,8 @@ export class WorkerRunner implements FormRunner {
         return res;
       }
 
-      // 5. Worker execution
+      // 5. Worker execution; with every worker stopped (T296), nothing would ever answer.
+      if (this.makeWorker && !this.workers.size) throw new Error('nessun worker rimasto');
       return new Promise<FormResult>((ok, fail) => {
         const id = this.next++;
         this.waiting.set(id, { ok, fail, key });
@@ -452,10 +521,18 @@ export class WorkerRunner implements FormRunner {
   }
 
   private pump(): void {
-    while (this.idle.length && this.reads.length) this.idle.pop()!.postMessage(this.reads.shift()!);
+    while (this.idle.length && this.reads.length) this.post(this.idle.pop()!, this.reads.shift()!);
     while (this.idle.length && this.queue.length) {
       const job = this.queue.shift()!;
-      this.idle.pop()!.postMessage({ id: job.id, req: job.req });
+      this.post(this.idle.pop()!, { id: job.id, req: job.req });
     }
+  }
+
+  /** A job (or a read) to a worker, which has `watchdogMs` to answer: a program stops itself well before (`MAX_FORM_TIME`), a worker that hangs does not. */
+  private post(w: Worker, msg: { id: number; req: FormRequest } | { id: number; read: MeshRead }): void {
+    const watchdog = setTimeout(() => this.lose(w, 'il worker non risponde'), this.watchdogMs);
+    (watchdog as { unref?: () => void }).unref?.();
+    this.workers.set(w, { job: msg.id, watchdog });
+    w.postMessage(msg);
   }
 }

@@ -37,7 +37,7 @@ import { USAGE_FILE, UsageLog, type CallRecord } from './ai/usage';
 import { SHORTFALLS_FILE, ShortfallLog, type ShortfallNote } from './shortfalls';
 import { addBudgetFromCap, costWithFee, DEFAULT_GRANT_CAP, DEFAULT_PLATFORM_FEE, MemoryLedger, splitCost, type Ledger, type PaymentRecord } from './credits';
 import { MemoryChunks, SealedChunks, type ChunkStore } from './chunks';
-import { BODY_R, bodyFoot, bodyGround, Forms, holesOf, InlineRunner, instanceGrid, JUMP_FAR, JUMP_UP, levelAt, rampBlocks, stepOf, toLocal, topUnder, type Form, type FormComp, type FormRunner, type Ground } from './forms';
+import { anyVisible, BODY_R, bodyFoot, bodyGround, Forms, holesOf, InlineRunner, instanceGrid, JUMP_FAR, JUMP_UP, levelAt, rampBlocks, stepOf, toLocal, topUnder, type Form, type FormComp, type FormRunner, type Ground } from './forms';
 import { boxOf, classOf, guessClass, RARE_SIZES, sizeOf, sizeRank, SIZE_TIERS, tilesOf, type SizeTier } from '../mj/classes';
 import { stageGrid } from '../mj/mesh';
 import { commonHouseModel, GENERIC, ModelDirector, ownModelId, structureModel } from './modeldirector';
@@ -53,7 +53,9 @@ import { forge, ForgeRejected, judgeCombination, repairLogic, slug, type ForgeOr
 import { agentReply, examine, narrate, NARRATOR_PLAYS, liaisonReply, type Interpreter, type NpcReply, type Turn } from './agents/minds';
 import { planGenesis, type GenesisBrought } from './agents/genesis';
 import { broughtModels, CAST_CLASSES, sameName, withCardChoice, type BringAnswer, type BringRef, type KinView } from './bring';
-import { soundPrograms } from '../mj/sound';
+import { breakReason, brokenFault, broughtCardsOf, cardFamily, CARD_ID_RE, reasonText, withoutCards, type BreakKind, type BrokenCard, type BroughtCardView, type RemoveCardAnswer } from './brokencards';
+import { COMPOSE_TASK } from './agents/composer';
+import { soundPrograms, SOUND_CLASS } from '../mj/sound';
 import { councilSession, inventRune, judgeAction, judgeCraft, judgeDeath, nameSpell } from './agents/effects';
 import { canonWithRune, MAX_MAGIC_RUNES, validateNewRune } from './magic';
 import { cleanPanel, designMechanic } from './agents/mechanics';
@@ -537,6 +539,11 @@ export class Kernel {
   private cellars: SolidForm[] = [];
   /** Footprints of instances whose model was changed by an action (the door is open). */
   private instanceFeet = new Map<Id, Ground & { key: string; foot: Uint8Array }>();
+  /**
+   * The brought cards that do not work in this world (T296, ADR-0172), by id: isolated (`Forms.isolate`), shown to the master until they are
+   * taken away or their program changes. Not saved: a world that opens finds them again as it runs them; a mirror takes the world's too.
+   */
+  private broken = new Map<string, BrokenCard>();
   /** What was done to models of entities, by stable origin (saved with the game). */
   private savedForms = new Map<string, string[]>();
   /** Zones of the world that already have their important structure: zone → the chunk that has it (saved with the game). */
@@ -702,6 +709,9 @@ export class Kernel {
     k.validator.modelTime = (id) => k.forms.info(id)?.time;
     k.validator.modelBox = (id) => k.forms.structureBox(id);
     k.validator.modelFile = (name) => k.forms.file(name);
+    // A brought card that fails here is isolated (T296): a program that throws or stops its worker, a form with nothing to see.
+    k.forms.onReady = (f) => k.formReady(f);
+    k.forms.onFail = (f) => k.formFailed(f);
     k.council = new Council(opts.ai, () => ({ files: k.files, palette: k.palette, catalog: k.catalog(), graph: () => k.graph() }));
     k.council.onFeed = (e) => {
       k.archive.onFeed(e, (x) => k.pathForFeed(x));
@@ -1492,10 +1502,12 @@ export class Kernel {
     this.corona.build(files, this.exhibits(files), this.terrainExhibits(), this.layoutExhibits(), this.systems.map((m) => ({ id: m.manifest.id, name: m.manifest.name || m.manifest.id })));
     this.rulesOffset = this.corona.rulesOffset;
     this.placeCampus();
-    // Entities that wait for a model of their own wear it as soon as the library has it.
+    // A broken card whose program is gone or written anew is not broken any more (T296): taken away, or mended by hand; it is tried again.
+    this.forgetMended();
+    // Entities that wait for a model of their own wear it as soon as the library has it (and it is not a card isolated here, T296).
     for (const id of this.ecs.query('form')) {
       const fc: FormComp = this.ecs.get(id, 'form');
-      if (!fc.wanted || !this.forms.info(fc.wanted)) continue;
+      if (!fc.wanted || !this.forms.usable(fc.wanted)) continue;
       fc.model = fc.wanted;
       fc.seed = this.forms.seedFor(fc.wanted, this.ecs.get(id, 'origin')?.key ?? String(id));
       delete fc.wanted;
@@ -5469,10 +5481,13 @@ export class Kernel {
 
   private broughtCache?: { files: FileMap; list: Array<{ id: string; info: ModelInfo }> };
 
-  /** The models that came with a choice of cards (`brought` in the library's index). */
+  /**
+   * The models that came with a choice of cards (`brought` in the library's index) and work here: one isolated (T296) is not offered to the
+   * Cartographer, to the Narrator or to the `ModelDirector`, which would copy it again under the id of a request.
+   */
   broughtModels(): Array<{ id: string; info: ModelInfo }> {
     if (this.broughtCache?.files !== this.files) this.broughtCache = { files: this.files, list: broughtModels(this.files) };
-    return this.broughtCache.list;
+    return this.broken.size ? this.broughtCache.list.filter(({ id }) => this.forms.usable(id)) : this.broughtCache.list;
   }
 
   /** The structures that came with the cards, by the concept they are named by and their size: the Cartographer may ask for them, and they cost nothing. */
@@ -5567,6 +5582,185 @@ export class Kernel {
     this.council.say('kernel', 'approva', `modello «${info.name ?? id}» (${id}) → validato, commit ${c.id}`, undefined, card?.task ?? 'model.sculpt');
     this.bus.emit('model:added', { id });
     return true;
+  }
+
+  // --- The cards that do not work here (T296, ADR-0172) -----------------------------------------------------------------------
+
+  /** Whether a model of the library is a card that came with a choice (T295): only those are isolated and taken away like this. */
+  private isBrought(model: string): boolean {
+    return typeof this.forms.info(model)?.brought === 'string';
+  }
+
+  /** A form is ready: a brought card's program that made nothing one sees is broken. */
+  private formReady(f: Form): void {
+    if (!f.result || this.broken.has(f.model) || !this.isBrought(f.model) || !this.forms.current(f)) return;
+    if (!anyVisible(f.result.grid, f.result.palette)) this.cardBroke(f.model, 'empty', breakReason('empty', { seed: f.seed }));
+  }
+
+  /** A form failed: a brought card's program that threw, or whose worker stopped or did not answer, is broken. */
+  private formFailed(f: Form): void {
+    if (this.broken.has(f.model) || !this.isBrought(f.model) || !this.forms.current(f)) return;
+    this.cardBroke(f.model, 'fault', breakReason('fault', { seed: f.seed, error: f.error }));
+  }
+
+  /**
+   * A brought card does not work in this world (T296, ADR-0172): it and its copies (the same program under other ids, `cardFamily`) are
+   * isolated, what wore them wears the generic model of its class, and the master is shown why (a fault, `card:<id>`; in the world, a line of
+   * the Council's log, which only the master hears). The forms say it of a model, the sound director of a sound, a mirror of what its world
+   * said. What is not a brought card, or is already broken, changes nothing: false.
+   */
+  cardBroke(id: string, why: BreakKind, reason: string): boolean {
+    if (typeof id !== 'string' || this.broken.has(id) || !this.isBrought(id)) return false;
+    const info = this.forms.info(id)!;
+    const name = reasonText(info.name, 120) || id;
+    const kind = info.class === SOUND_CLASS ? 'sound' : 'model';
+    const text = reasonText(reason) || breakReason(why);
+    const family = cardFamily(this.files, id);
+    for (const f of family) {
+      if (this.broken.has(f)) continue;
+      this.broken.set(f, { id: f, name, kind, why, reason: text, ...(f !== id ? { same: id } : {}) });
+      this.forms.isolate(f);
+    }
+    this.unwear(new Set(family));
+    // Alone the one who plays is the master; in a game of many the master's mirror (the one with a branch to publish), never a player's.
+    if (!this.mirror || this.publisher) this.faults.raise(`card:${id}`, brokenFault(this.broken.get(id)!));
+    const meanwhile = kind === 'sound' ? 'Il suono tace' : 'Chi la usava veste il modello generico';
+    if (!this.mirror) this.council.say('kernel', 'obietta', `la carta «${name}» (${family.join(', ')}) non funziona in questo mondo: ${text}. ${meanwhile}; il master può toglierla dalla console, scheda Universo.`, kind === 'sound' ? 'musician' : 'sculptor', 'card.broken');
+    this.bus.emit('card:broken', { id, ids: family, why, reason: text });
+    return true;
+  }
+
+  /** The brought cards that do not work in this world, and why. */
+  brokenCards(): BrokenCard[] {
+    return [...this.broken.values()];
+  }
+
+  /** The brought cards of this universe as the master's console lists them: one per card (its copies with it), and why one does not work. */
+  broughtCards(): BroughtCardView[] {
+    return broughtCardsOf(this.files, this.broken);
+  }
+
+  /**
+   * On a mirror, what its world says is broken (T296): the same cards isolated here, so that this client draws what the world uses, and the
+   * master's console shows them. What this client found broken by itself stays so.
+   */
+  worldBroken(list: readonly BrokenCard[]): void {
+    if (!this.mirror) return;
+    for (const b of list) if (!this.broken.has(b.id)) this.cardBroke(b.id, b.why, b.reason);
+  }
+
+  /** A form as this kernel wears it (a mirror, of what its world sends): a card isolated here gives way to the generic of its class, which waits for it. */
+  worn<T extends { model: string; seed: number | string }>(fc: T): T | (T & { wanted: string; classe: string }) {
+    if (!this.broken.has(fc.model) || this.forms.usable(fc.model)) return fc;
+    const classe = this.forms.classOf(fc.model).id;
+    const model = this.forms.resolve(fc.model, classe);
+    return { ...fc, model, seed: this.forms.seedFor(model, `${fc.model}#${fc.seed}`), wanted: fc.model, classe };
+  }
+
+  /** What wears these models wears the generic of its class, and waits for its own (`wanted`): the card mended, or what the Sculptor makes of the id. */
+  private unwear(ids: ReadonlySet<string>): void {
+    for (const e of this.ecs.query('form')) {
+      const fc: FormComp | undefined = this.ecs.get(e, 'form');
+      if (!fc || !ids.has(fc.model)) continue;
+      const own = fc.model;
+      const classe = fc.classe ?? this.forms.classOf(own).id;
+      const model = this.forms.resolve(own, classe);
+      if (model === own) continue;
+      Object.assign(fc, { model, seed: this.forms.seedFor(model, this.ecs.get(e, 'origin')?.key ?? String(e)), wanted: own, classe });
+      this.instanceFeet.delete(e);
+    }
+  }
+
+  /**
+   * The broken cards whose program is gone or written anew: not broken any more, their faults closed, their isolation let go. A program written
+   * anew is tried again; one that comes back (a return to a commit of before) too, and if it still fails it is found broken again. One still
+   * broken as it is written stays shown: a rollback clears every fault, and this card is no better for it.
+   */
+  private forgetMended(): void {
+    for (const [id, b] of [...this.broken]) {
+      if (this.forms.info(id) && !this.forms.usable(id)) {
+        if (!b.same && (!this.mirror || this.publisher) && !this.faults.has(`card:${id}`)) this.faults.raise(`card:${id}`, brokenFault(b));
+        continue;
+      }
+      this.broken.delete(id);
+      this.faults.clear(`card:${id}`);
+      this.forms.release(id);
+    }
+  }
+
+  /**
+   * The structures that wore a card taken away (T296) wear what their concept wears now: the kernel's own entry of the concept at its size,
+   * or another card that came with the same name (`structureModelFor`), and the `ModelDirector` sculpts what is missing.
+   */
+  private repoint(ids: ReadonlySet<string>): Set<string> {
+    const now = new Set<string>();
+    for (const e of this.ecs.query('structure', 'form')) {
+      const s = this.ecs.get(e, 'structure') as { model?: string; concept: string; size?: SizeTier };
+      if (!s.model || !ids.has(s.model)) continue;
+      const own = this.structureModelFor(s.concept, s.size);
+      s.model = own;
+      now.add(own);
+      const fc: FormComp = this.ecs.get(e, 'form');
+      if (fc.wanted && ids.has(fc.wanted)) fc.wanted = own;
+    }
+    return now;
+  }
+
+  /**
+   * The master takes a brought card away from this universe (T296, ADR-0172), with a commit of the kernel: its program and its entry, and those
+   * of its copies. What wore it wears the generic of its class and waits for the `ModelDirector`; the music of its environments is the
+   * `ScoreDirector`'s to write again; within their caps. If the Council cannot make it again now, the world notes what it lacks (ADR-0130). The
+   * card stays where it came from (the universe of its card, the archive of its author) and in this universe's history. Only the master; a mirror
+   * asks its world; nothing for a universe that is only read.
+   */
+  async removeCard(id: string, by: string = this.wanderer().id): Promise<RemoveCardAnswer> {
+    const no = (reason: string): RemoveCardAnswer => ({ ok: false, reason });
+    if (this.mirror) return no('le carte le toglie il mondo, non uno specchio');
+    if (!this.isMaster(by)) return no('solo il master toglie una carta dal suo universo');
+    if (this.readOnly() !== undefined) return no('questo universo si legge soltanto');
+    if (typeof id !== 'string' || !CARD_ID_RE.test(id) || !this.forms.info(id)) return no('nessuna carta con questo id in questo universo');
+    if (!this.isBrought(id)) return no('così si tolgono solo le carte portate prima della Genesi');
+    const info = this.forms.info(id)!;
+    const name = reasonText(info.name, 120) || id;
+    const kind = info.class === SOUND_CLASS ? 'sound' : 'model';
+    const family = cardFamily(this.files, id);
+    const ids = new Set(family);
+    const why = family.map((f) => this.broken.get(f)?.reason).find(Boolean);
+    // What wore it lets go first, while the library still says its class; the structures wear what their concept wears without it.
+    for (const f of family) this.forms.isolate(f);
+    this.unwear(ids);
+    const repointed = this.repoint(ids);
+    for (const [p, v] of Object.entries(withoutCards(this.repo.working, family))) this.repo.write(p, v);
+    this.applyFiles({ ...this.repo.working });
+    // Gone from the library: a return to a commit of before brings it back as it was, to be tried again.
+    for (const f of family) this.forms.release(f);
+    const lacking = this.lacksAfterRemoval(kind, name, info, new Set([...ids, ...repointed]), why);
+    const c = this.repo.commit(`il master toglie la carta «${name}» (${family.join(', ')})${why ? `: ${why}` : ''}`, 'kernel');
+    this.council.say('kernel', 'scarta', `carta tolta dal master: «${name}» (${family.join(', ')}) → commit ${c.id}${lacking ? `; ${lacking}` : ''}`, kind === 'sound' ? 'musician' : 'sculptor', 'card.remove');
+    this.bus.emit('card:removed', { id, ids: family });
+    const next = kind === 'sound' ? 'il suono tace finché il Musicista non scrive un brano nuovo' : 'chi la usava veste il modello generico della sua classe finché lo Scultore non ne scrive uno';
+    return { ok: true, removed: family, commit: c.id, text: `«${name}» è tolta (commit ${c.id}): ${lacking ?? next}.` };
+  }
+
+  /**
+   * After a card is taken away: what the Council would have to make again, and cannot now (the local models, a cap, a knob at zero), is a
+   * shortfall (ADR-0130), with the card's reason. What it can make, it will, at its own pace: nothing to note. Says why not, or undefined.
+   */
+  private lacksAfterRemoval(kind: 'model' | 'sound', name: string, info: ModelInfo, ids: ReadonlySet<string>, why: string | undefined): string | undefined {
+    const card = `la carta «${name}» è tolta${why ? ` (${why})` : ''}`;
+    if (kind === 'model') {
+      // What the world still names (a module, an item, a structure of a concept): the director would sculpt it, if it could.
+      const wanted = this.sculpting.missing().filter((r) => ids.has(r.id));
+      const blocked = wanted.length ? this.sculpting.blocked() : undefined;
+      if (!blocked) return undefined;
+      for (const r of wanted) this.noteShortfall({ request: `il modello di «${r.nome}»`, agent: 'sculptor', task: 'model.sculpt', outcome: 'fault', reason: `${card}; ${blocked}` });
+      return `${blocked}; resta il modello generico`;
+    }
+    const environments = info.sound?.use === 'music' ? (info.sound.environments ?? []) : [];
+    const blocked = environments.length ? this.composing.blocked() : undefined;
+    if (!blocked) return undefined;
+    this.noteShortfall({ request: `la musica di ${environments.join(', ')}`, agent: 'musician', task: COMPOSE_TASK, outcome: 'fault', reason: `${card}; ${blocked}` });
+    return `${blocked}; suona la musica del momento`;
   }
 
   /** Which file a piece of the Council's work is about (the avatars walk there). */
@@ -8384,7 +8578,8 @@ export class Kernel {
       const p = this.ecs.get(id, 'pos');
       const fc: FormComp | undefined = this.ecs.get(id, 'form');
       const f = fc && this.forms.ready(fc.model, fc.seed, fc.tint);
-      if (!fc || !f?.foot) {
+      // A solid thing whose brought model stops nobody (T296, rule 10): the card is isolated, the thing blocks its tile until the generic is ready.
+      if (!fc || !f?.foot || (f.footless && this.isBrought(fc.model) && this.cardBroke(fc.model, 'footless', breakReason('footless', { seed: f.seed })))) {
         this.solidTiles.add(`${Math.floor(p.x)},${Math.floor(p.y)}`);
         continue;
       }

@@ -60,6 +60,8 @@ describe('V-021 un messaggio che non si capisce', () => {
     { t: 'panel', panel: POISON, socket: POISON, op: 'put' },
     { t: 'item', op: POISON, slot: 0 },
     { t: 'recharge', wanderer: POISON, count: POISON },
+    // The master takes a brought card away (T296, ADR-0172).
+    { t: 'card', op: POISON, id: POISON },
     { t: 'step', seq: POISON, x: 1e9, y: 0 },
     { t: 'tile', col: POISON, row: POISON },
     { t: 'action', entity: POISON, action: POISON },

@@ -40,6 +40,16 @@ export class ScoreDirector {
     return this.k.ai.name !== 'offline' && !this.stopped;
   }
 
+  /** Why the director cannot write a piece now, or undefined if it can (T296: the music of a card taken away waits for it). */
+  blocked(): string | undefined {
+    if (this.k.ai.name === 'offline') return 'i modelli sono locali: il Musicista non scrive';
+    if (this.stopped) return 'il budget dei brani è finito';
+    const max = this.k.config.ai.maxPieces ?? 8;
+    if (this.used >= max) return `il Musicista ha già scritto i ${max} brani di questa sessione`;
+    if (this.k.coefficients().pieces <= 0) return 'il master ha spento i brani nuovi';
+    return undefined;
+  }
+
   /** The environments of the places loaded that no program names, the first met first. */
   missing(): ComposeRequest[] {
     const programs = soundPrograms(this.k.files).filter((p) => p.sound?.use === 'music' && !p.sound.beyond);
