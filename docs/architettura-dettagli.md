@@ -18,7 +18,7 @@
 | [Spazi, rune, magia, borse](#spazi-rune-magia) | `src/kernel/kernel.ts`, `src/kernel/runes.ts`, `src/kernel/magic.ts`, `src/kernel/inventory.ts` |
 | [Il lessico](#lessico) | `world/lexicon.md`, `src/kernel/fourthwall.ts` |
 | [Regole, effetti, stati, morte, menu, salto, contenuti](#regole-effetti) | `src/kernel/kernel.ts`, `src/kernel/content.ts`, `src/kernel/validator.ts`, `src/kernel/placing.ts`, `universe/modules/` |
-| [Società, NPC, personaggi](#societa) | `src/kernel/society.ts`, `src/kernel/plots.ts`, `src/kernel/agents/minds.ts` |
+| [Società, NPC, personaggi](#societa) | `src/kernel/npc/` (la facciata `index.ts`, la porta `host.ts`, i dati `model.ts`), `src/kernel/agents/minds.ts` |
 | [La corona e gli interni dello studio](#corona) | `src/kernel/corona.ts`, `src/kernel/archive.ts`, `src/kernel/bible.ts`, `src/kernel/situation.ts`, `src/kernel/screens.ts`, `src/render/corona3d.ts`, `src/render/screens.ts`, `src/ui/studio.ts`, `src/ui/graph.ts` |
 | [Meccaniche, casi dei sistemi, catena e banco di prova](#sala-sistemi) | `src/kernel/agents/mechanics.ts`, `src/kernel/bench.ts`, `src/kernel/chain.ts`, `src/render/chain.ts`, `src/render/bench.ts` |
 | [Geografia](#geografia) | `src/kernel/atlas.ts`, `src/kernel/stamps.ts`, `world/atlas.json` |
@@ -266,23 +266,44 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 <a id="societa"></a>
 ## Società, NPC, personaggi
 
+- **L'NPC come oggetto** (T327, ADR-0166; il progetto in `docs/design/comportamento-npc.md` §10): tutto ciò che segue vive in
+  `src/kernel/npc/`, dietro una facciata, la classe `Npc` (`npc/index.ts`), che ne possiede lo stato (le imprese in memoria, la cache
+  dei mestieri e delle vie, le schede che si scrivono, le battute in coda, i saluti, la fase delle trame e della maturazione, la
+  contabilità del giorno) e vede il mondo solo dalla porta `NpcHost` (`npc/host.ts`: l'ECS, i file e i commit, i luoghi e le
+  collisioni, i viandanti, il tavolo del Concilio, a elenco). Il kernel ha un campo, `npc`, e chiama solo la facciata: `npc.tick()`
+  dove era la società, `reset` quando i file si rileggono, `venturesToSave` al salvataggio, `returnToPlace` e `onReturn` quando un
+  luogo si stende, `forgetWays` quando cambia il terreno sotto le vie, `buildingFell`, e le cinque primitive dell'Host (`world.path`,
+  `find_tile`, `act`, `venture`, `venture_bring`); l'API di prima (`talk`, `quests`, `ventures`, `ensureIdentity`…) resta sul kernel,
+  una chiamata ciascuna. Restano del kernel l'orologio (`day`, `DAY_SECONDS`), la stesura delle strutture (`spawnPlannedHouse`,
+  `spawnLot`), ciò che sa un locale (`worldFacts`), lo studio dei personaggi. Dentro, le parti in una direzione sola: la facciata →
+  `talk.ts` (dialoghi, `npc.reply`, `npc.dialogue`) → `stories.ts` (trame e missioni) → `people.ts` (chi sono: `npc.individuate`,
+  `npc.sheet`, ricordi, legami, specie, nascite, le revisioni dell'avvio), `places.ts` (dove vanno, `findTile`, la via con la cache),
+  `speech.ts` (le battute a tempo); `worksites.ts` (le imprese al lavoro, il pannello) → `people.ts`, `trades.ts` (i programmi, il
+  deposito, `world.act`, ciò che matura) → `places.ts`; `away.ts` (fuori vista) → `worksites.ts`, `trades.ts`; tutte → i dati
+  (`society.ts`, `plots.ts`, `jobs.ts`, `ventures.ts`, `route.ts`, puri) e la porta. Da fuori si importano solo due facce: `npc/index.ts`
+  (il comportamento: il kernel) e `npc/model.ts` (i dati e le loro parole: il grafo, le carte, il sito, il rendering, gli agenti che
+  scrivono persone); dentro, niente kernel, viandanti, sessione, rendering, UI, suono, server: l'id di un viandante sta in
+  `wandererIds.ts`, che leggono le persone e i viandanti (il ciclo `society` ⇄ `wanderers` non c'è più). Lo dice
+  `tests/npc-architecture.test.ts`, che legge gli import del prodotto (`src/`, `server/`, `site/`, `tools/`); test e laboratorio
+  possono aprire l'interno per provare un pezzo. Un comportamento nuovo (i mestieri del Narratore, i bivi, le vite lunghe) è una
+  parte nuova di `npc/` con una voce della facciata, non un metodo del kernel.
 - **Società** (ADR-0020): `world/people.json`; individui con specie (`persona | animale`, dal tipo) e genere,
   mestiere, famiglia, routine (mattina/giorno/sera/notte → casa/lavoro/piazza/in giro, componente `meta` seguito
   da `sys.wander`). Un legame dice cosa è l'individuo per l'altro, nel suo genere; il validatore della società
-  (`repairSociety` in `society.ts`) lo rende possibile per le due specie e simmetrico, un padrone per animale,
+  (`repairSociety` in `npc/society.ts`) lo rende possibile per le due specie e simmetrico, un padrone per animale,
   nomi non simili (rinomina anche nelle trame); ripara a ogni aggiunta e all'avvio (`reviewSociety`).
 - **Vita degli NPC** (ADR-0024): attività visibili (`attivita {tipo, ferma}`), dialoghi tra individui,
   ricordi pesati, legami col viandante e figli (effetti `legame ricordo nascita`), trame e missioni
-  (`world/plots.json`, diario nell'HUD). Ogni trama passa dal validatore (`reviewPlot` in `plots.ts`): individui che
+  (`world/plots.json`, diario nell'HUD). Ogni trama passa dal validatore (`reviewPlot` in `npc/plots.ts`): individui che
   esistono, animali da animali, legami del registro, rune del canone, niente quarta parete; ciò che non torna va al
   Narratore con il motivo, all'avvio `reviewPlots` ripara o ritira le trame aperte.
 - **Il lavoro** (ADR-0140, T245b; progetto in `docs/design/comportamento-npc.md`): un mestiere con un **programma** (`jobs` di un
   modulo `data`, `job.<trade>/manifest.json`: nomi, posto, i compiti di ogni fase) si abbina per nome, poi per parola
-  (`matchJob` in `jobs.ts`); il programma passa dal validatore per riferimento (`validateJobProgram`: comportamenti di un elenco chiuso,
+  (`matchJob` in `npc/jobs.ts`); il programma passa dal validatore per riferimento (`validateJobProgram`: comportamenti di un elenco chiuso,
   caselle del terreno, oggetti del registro, durate 5-300 s, al più 6 compiti per fase). A ogni fase del giorno il kernel mette
   all'individuo il componente `job` (`mestiere` fino al contratto 0.4: i compiti della fase in `tasks`, `home`, `square` e `work` da `placeFor` e `findTile`, che non dà mai una casella di un lotto: l'erba sotto una casa non è un pascolo, T281) e non gli sceglie più
   la meta; `sys.work` (seme, ordine 28; `sys.lavoro` prima di T307b) esegue i compiti uno dopo l'altro con lo stato in `work` e ciò che porta in `load`, e
-  cammina mettendo `goal` al prossimo punto di `world.path` (A* sulle caselle dei luoghi caricati, `route.ts`, con la cache), che
+  cammina mettendo `goal` al prossimo punto di `world.path` (A* sulle caselle dei luoghi caricati, `npc/route.ts`, con la cache di `npc/places.ts`), che
   `sys.wander` segue. **La via va dove va il passo** (T299, ADR-0154): una casella è libera se lo è un corpo al suo centro, e un passo
   fra due caselle libere vale solo se il corpo ci cammina davvero (`stepFree`: senza modelli sulle caselle basta il terreno, altrimenti
   `free` ogni decimo di casella con i piedi sul pavimento, come `stepWanderer`), così un muro sottile sul bordo o il gradino di un modello
@@ -303,7 +324,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   `sys.work`, il luogo è `job.chunk`, `placeDeposit`), `produce` consuma `con` e fa un pezzo al banco, `use` chiama l'`on_act`
   di una cosa con l'individuo come chi la usa (`world.act`, solo azioni senza effetti, entro 2,5 caselle). La via vede le forme dei
   modelli (`free`); chi è fermo a meno di tre caselle dalla meta è arrivato, chi è fermo lontano per otto secondi lascia il compito.
-- **Le imprese** (T245d, ADR-0147, `src/kernel/ventures.ts`): il lavoro di molti verso un risultato che si vede, in `world/ventures.json`,
+- **Le imprese** (T245d, ADR-0147, `src/kernel/npc/ventures.ts` i dati, `npc/worksites.ts` il lavoro): il lavoro di molti verso un risultato che si vede, in `world/ventures.json`,
   scritto solo dal kernel (in memoria, nel file con il salvataggio come il magazzino; mai ai client; torna indietro con `R`). Il
   **progresso è derivato** da `portati` e `lavorato` (`ventureProgress`: la fase di adesso è la prima con materiali o lavoro che
   mancano; il lavoro conta solo fin dove i materiali lo permettono, `workAllowed`); lo stato si legge (`ventureState`: `active`,
@@ -331,7 +352,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   le case nuove), che il kernel aggiorna quando una fase si chiude (`syncVenturePlan`) e che `settleLots` legge; sul filo va solo
   `struttura.stadio`, e il renderer rifà la mesh dell'istanza (`stagedBody`).
 - **Fuori vista** (T245f, ADR-0149): un luogo non caricato non ha Lua; una volta al giorno, quando comincia la sera, il kernel tiene i
-  conti (`awayTick`): un'impresa di un luogo non caricato prende dal deposito ciò che le serve e aggiunge un giorno di lavoro per
+  conti (`awayTick`, `npc/away.ts`): un'impresa di un luogo non caricato prende dal deposito ciò che le serve e aggiunge un giorno di lavoro per
   ognuno della squadra (`AWAY_WORK`), i mestieri dei luoghi non caricati e in nessuna impresa portano al deposito del loro luogo ciò
   che portano in un giorno (`dailyProduce`, fino a 60 per oggetto); un orologio spostato in avanti conta una volta. Al **ritorno**
   (`returnToPlace`, prima di posare i lotti) ciò che matura matura per data e il piano prende lo stadio delle imprese, e perde quello che nessuna impresa regge (il piano va su disco prima di `world/ventures.json`: una scheda chiusa in mezzo o `R` non lasciano impalcature per sempre); `plan.visto`

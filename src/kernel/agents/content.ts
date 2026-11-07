@@ -10,7 +10,7 @@ import { slug } from './forge';
 import type { AgentId, Council } from './council';
 import { ITEM_SHAPES, itemShapeModel } from '../modeldirector';
 import { internalName, internalValues } from '../internalNames';
-import { ACTIVITIES, DAY_PHASES, defaultRoutine, inferActivity, RELATION_WORDS, WHERES, type Activity, type DayPhase, type Gender, type Relation, type RoutineStep, type Species, type Where } from '../society';
+import { ACTIVITIES, DAY_PHASES, defaultRoutine, inferActivity, RELATION_WORDS, WHERES, type Activity, type DayPhase, type Gender, type Relation, type RoutineStep, type Species, type Where } from '../npc/model';
 
 const ITEM_SCHEMA: Schema = {
   type: 'OBJECT',

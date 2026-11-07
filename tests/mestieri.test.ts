@@ -4,7 +4,7 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { MockAiModels } from '../src/kernel/ai/mock';
 import { bundledFiles } from '../src/kernel/bundle';
-import { matchJob, validateJobProgram, type JobProgram } from '../src/kernel/jobs';
+import { matchJob, validateJobProgram, type JobProgram } from '../src/kernel/npc/jobs';
 import { Kernel } from '../src/kernel/kernel';
 import { memoryStore } from '../src/kernel/repo';
 import { WORLD_THEMES } from '../src/kernel/themes';

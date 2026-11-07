@@ -484,49 +484,56 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 ### Individuo
 - **Inglese**: `Individual`, `people`, `readPeople` (`people` e `readPeople` restano: dicono il file)
 - **Definizione**: un membro della società: uomo o animale, con mestiere, famiglia, routine, legami.
-- **Dove vive**: `src/kernel/society.ts`, `world/people.json`
+- **Dove vive**: `src/kernel/npc/society.ts`, `src/kernel/npc/people.ts`, `world/people.json`
 - **Da non usare**: `npc` (per l'individuo), `persona` (idem: è il valore di `specie`), `person`, `Person`, `DialoguePerson`, `addPerson`, `updatePerson`, `personOf`, `personFacts`, `personByName`, `personNode`, `noPerson`
 - **Fermo**: `world/people.json`, `persone`, il valore `persona` di `specie`, `npc.reply`, `npc.dialogue`, `npc.sheet`, `persona` nel manifest, `identity` e `mind` dei componenti.
+
+### Facciata delle persone
+- **Inglese**: `Npc`, `NpcHost`, `npcHost`, `NpcPlace`, `NpcWanderer`
+- **Definizione**: l'oggetto che tiene tutto il comportamento degli individui (chi sono, la giornata e il mestiere, le imprese, fuori vista, la via, i dialoghi, le trame) e il suo stato, dietro una classe sola che il kernel chiama; la porta è ciò che quell'oggetto chiede al mondo, a elenco (T327, ADR-0166).
+- **Dove vive**: `src/kernel/npc/index.ts`, `src/kernel/npc/host.ts`, `src/kernel/npc/model.ts`, `src/kernel/kernel.ts`
+- **Da non usare**: `NpcSubsystem` (il nome della proposta di T326), `NpcContext` (idem), `sottosistema NPC`
+- **Fermo**: nessuno.
 
 ### Programma di mestiere
 - **Inglese**: `JobProgram`, `jobPrograms`, `validateJobProgram`, `matchJob`
 - **Definizione**: com'è fatta la giornata di un mestiere, scritta una volta per mestiere e usata da ogni individuo che lo ha: i compiti di ogni fase, ognuno un comportamento con i suoi parametri (T245b, ADR-0140). Dati, mai codice.
-- **Dove vive**: `src/kernel/jobs.ts`, `universe/modules/job.farmer/manifest.json`
+- **Dove vive**: `src/kernel/npc/jobs.ts`, `src/kernel/npc/trades.ts`, `universe/modules/job.farmer/manifest.json`
 - **Da non usare**: `routine` (per il programma: la routine è il testo di oggi), `script`, `job`
 - **Fermo**: `jobs` nei manifest, `giornata`, `nomi`, `posto`, i componenti `job`, `work`, `load` (`mestiere`, `lavoro`, `carico` fino al contratto 0.4).
 
 ### Comportamento
 - **Inglese**: `JOB_BEHAVIOURS`, `JobBehaviour`
 - **Definizione**: uno dei compiti di un elenco chiuso (`go`, `transform`, `gather`, `carry`, `produce`, `use`…; T307b) che `sys.work` sa fare e che cambia il mondo davvero (T245b, ADR-0140).
-- **Dove vive**: `src/kernel/jobs.ts`, `universe/modules/sys.work/logic.lua`
+- **Dove vive**: `src/kernel/npc/jobs.ts`, `universe/modules/sys.work/logic.lua`
 - **Da non usare**: `azione` (per il comportamento: l'azione è del viandante), `task`
 - **Fermo**: i valori di `fa`.
 
 ### Deposito del luogo
 - **Inglese**: `placeDeposit`
 - **Definizione**: ciò che i mestieri di un luogo portano e prendono (il grano, i ciocchi, il pane), una voce `deposit:<cx>:<cy>` del magazzino di `sys.work`; il luogo è quello a cui l'individuo appartiene (`job.chunk`). Dura con la partita, non va ai client (T245c, ADR-0141).
-- **Dove vive**: `universe/modules/sys.work/logic.lua`, `src/kernel/kernel.ts`
+- **Dove vive**: `universe/modules/sys.work/logic.lua`, `src/kernel/npc/trades.ts`
 - **Da non usare**: `magazzino` (per il deposito: il magazzino è di un modulo), `granaio`, `scorta`
 - **Fermo**: la chiave `deposit:<cx>:<cy>`, `chunk` di `job` (`deposito:` e `mestiere.luogo` fino al contratto 0.4).
 
 ### Impresa
 - **Inglese**: `Venture`, `ventures`, `ventureProgress`, `ventureState`
 - **Definizione**: un lavoro di molti verso un risultato che si vede, lungo giorni o mesi: una costruzione, un raccolto (e, con i task che le portano, una festa, una ricerca…). Ha fasi con materiali e lavoro, una squadra e uno stato; il progresso si ricava da ciò che è stato portato e lavorato, mai da un contatore (T245d, ADR-0147).
-- **Dove vive**: `src/kernel/ventures.ts`, `src/kernel/kernel.ts`, `world/ventures.json`
+- **Dove vive**: `src/kernel/npc/ventures.ts`, `src/kernel/npc/worksites.ts`, `world/ventures.json`
 - **Da non usare**: `progetto` (per l'impresa: il progetto è un documento), `cantiere` (è il posto dell'impresa e il suo pannello), `quest`, `obiettivo`, `job`
 - **Fermo**: `world/ventures.json`, `imprese`, `fasi`, `materiali`, `lavoro`, `stadio`, `portati`, `lavorato`, `squadra`, `ruoli`, `nato_da`, i valori di `tipo` e di `stato`; l'API Lua `world.venture`, `world.venture_bring` (`world.impresa`, `world.impresa_porta` fino al contratto 0.4); il comportamento `costruisci`.
 
 ### Squadra di un'impresa
 - **Inglese**: `fillTeam`, `VentureMember`, `staffVentures`
 - **Definizione**: chi lavora a un'impresa, con il suo ruolo (capomastro, manovale, mietitore): la fa il kernel per mestiere, vicinanza e un'estrazione del seme, e la rifà a ogni giorno nuovo (chi non c'è più se ne va, un altro prende il posto) (T245d, ADR-0147).
-- **Dove vive**: `src/kernel/ventures.ts`
+- **Dove vive**: `src/kernel/npc/ventures.ts`, `src/kernel/npc/worksites.ts`
 - **Da non usare**: `squadra` da sola dove si confonde con quella del Concilio nello studio, `team` (nei documenti), `gruppo`, `ciurma`
 - **Fermo**: `squadra`, `ruolo`, `ruoli` in `world/ventures.json`.
 
 ### Stadio di un edificio
 - **Inglese**: `stageGrid`, `stageHeights`, `stagedBody`, `stadio`
 - **Definizione**: a che punto è un edificio che un'impresa costruisce, da 0 (il lotto segnato) a 1 (finito): la griglia del suo modello, finita, mostrata fino a una quota (il piano terra, i muri, il tetto), con il cantiere attorno (picchetti, impalcature) (T245e, ADR-0148).
-- **Dove vive**: `src/mj/mesh.ts`, `src/render/models.ts`, `src/kernel/kernel.ts`
+- **Dove vive**: `src/mj/mesh.ts`, `src/render/models.ts`, `src/kernel/kernel.ts`, `src/kernel/npc/worksites.ts`
 - **Da non usare**: `fase` (per lo stadio: la fase è dell'impresa), `livello` (è del rilievo), `step`, `stage` (nei documenti)
 - **Fermo**: `stadio` nelle fasi di `world/ventures.json`, `stage` nel componente `structure`, `stadi` e `case` nel piano del luogo, `c.structure.stage` sul filo (`struttura.stadio` fino al contratto 0.4).
 
@@ -540,7 +547,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 ### Contabilità fuori vista
 - **Inglese**: `awayTick`, `dailyProduce`, `AWAY_WORK`
 - **Definizione**: ciò che il kernel conta una volta al giorno per i luoghi che nessuno vede, senza Lua e senza chiamate: le imprese prendono dal deposito e vanno avanti del lavoro della squadra, i mestieri riempiono il deposito del loro luogo (T245f, ADR-0149).
-- **Dove vive**: `src/kernel/kernel.ts`, `src/kernel/jobs.ts`
+- **Dove vive**: `src/kernel/npc/away.ts`, `src/kernel/npc/jobs.ts`
 - **Da non usare**: `simulazione` (per la contabilità: nessuno simula), `offline`, `background`
 - **Fermo**: nessuno.
 
@@ -581,34 +588,34 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 ### Scheda
 - **Inglese**: `sheet`, `IndividualSheet`, `ensureSheet`, `sheetFingerprint`
 - **Definizione**: il foglio che il Narratore scrive di un individuo perché l'Attore la reciti.
-- **Dove vive**: `src/kernel/society.ts`
+- **Dove vive**: `src/kernel/npc/society.ts`, `src/kernel/npc/people.ts`
 - **Da non usare**: `Scheda` (nel codice)
 - **Fermo**: `scheda` in `world/people.json`.
 
 ### Legame
 - **Inglese**: `bond`, `bonds`, `bondWith`, `bondOf`
 - **Definizione**: ciò che un individuo è per un altro o per un viandante, simmetrico e possibile per le specie.
-- **Dove vive**: `src/kernel/society.ts`, `src/kernel/wanderers.ts`
+- **Dove vive**: `src/kernel/npc/society.ts`, `src/kernel/wandererIds.ts`
 - **Da non usare**: nessuno
 - **Fermo**: `legami`, l'effetto `legame`.
 
 ### Ricordo
 - **Inglese**: `memory`, `memories`, `memoriesFor`
 - **Definizione**: ciò che un individuo ha vissuto, pesato e legato a un viandante.
-- **Dove vive**: `src/kernel/society.ts`, `src/kernel/wanderers.ts`
+- **Dove vive**: `src/kernel/npc/society.ts`, `src/kernel/wandererIds.ts`
 - **Da non usare**: nessuno
 - **Fermo**: `ricordi`, l'effetto `ricordo`.
 
 ### Trama
 - **Inglese**: `Plot`, `plot`, `reviewPlot`
 - **Definizione**: una storia orizzontale tra individui, a tappe, validata.
-- **Dove vive**: `src/kernel/plots.ts`, `world/plots.json`
+- **Dove vive**: `src/kernel/npc/plots.ts`, `src/kernel/npc/stories.ts`, `world/plots.json`
 - **Da non usare**: `storia` (è di un individuo)
 
 ### Missione
 - **Inglese**: `Quest`, `quest`, `quests`
 - **Definizione**: ciò che una trama chiede a un viandante; sta nel suo diario.
-- **Dove vive**: `src/kernel/plots.ts`, `src/ui/hud.ts`
+- **Dove vive**: `src/kernel/npc/plots.ts`, `src/kernel/npc/stories.ts`, `src/ui/hud.ts`
 - **Da non usare**: `quest` (nei documenti e nella UI)
 - **Fermo**: `missione` nei file e nelle risposte del Narratore.
 

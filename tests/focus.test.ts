@@ -11,8 +11,8 @@ import { UsageLog } from '../src/kernel/ai/usage';
 import { Council, lexiconSummary, type CatalogEntry } from '../src/kernel/agents/council';
 import { npcReply, weavePlot } from '../src/kernel/agents/minds';
 import { buildGraph, type GraphChunk } from '../src/kernel/graph';
-import { readPeople } from '../src/kernel/society';
-import { readPlots } from '../src/kernel/plots';
+import { readPeople } from '../src/kernel/npc/society';
+import { readPlots } from '../src/kernel/npc/plots';
 import { internalAgent } from '../src/kernel/internalNames';
 import type { FileMap, Manifest } from '../src/kernel/types';
 

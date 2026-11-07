@@ -7,7 +7,7 @@ import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockAiModels } from '../src/kernel/ai/mock';
-import { writePlots, PLOTS_FILE, type Plot } from '../src/kernel/plots';
+import { writePlots, PLOTS_FILE, type Plot } from '../src/kernel/npc/plots';
 import type { FileMap } from '../src/kernel/types';
 
 const individual = (nome: string, extra: Record<string, unknown> = {}) => ({

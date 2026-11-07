@@ -6,7 +6,7 @@
 
 import { normName } from './content';
 import { regionAt, type Atlas } from './atlas';
-import type { Plot } from './plots';
+import type { Plot } from './npc/model';
 import type { Fault } from './faults';
 import { italianName } from './internalNames';
 

@@ -3,11 +3,11 @@
 // places, clues, and sometimes a request for the wanderer (a quest). They live in the universe
 // (world/plots.json); the kernel plays the beats (people go there, say their line, remember it).
 
-import type { FileMap } from './types';
-import { metaBreak } from './fourthwall';
-import { SOLO } from './wanderers';
+import type { FileMap } from '../types';
+import { metaBreak } from '../fourthwall';
+import { SOLO } from '../wandererIds';
 import { BINDING_WORDS, DAY_PHASES, relationKind, type DayPhase, type People } from './society';
-import { internalFields, internalName, internalPlot, italianName } from './internalNames';
+import { internalFields, internalName, internalPlot, italianName } from '../internalNames';
 
 export interface Beat {
   /** Day relative to the plot's start. */

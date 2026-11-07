@@ -448,7 +448,7 @@ function read(rel: string): string {
 }
 
 export function domains(): Domain[] {
-  const society = read('src/kernel/society.ts');
+  const society = read('src/kernel/npc/society.ts');
   const types = read('src/kernel/types.ts');
   const validator = read('src/kernel/validator.ts');
   const classes = read('src/mj/classes.ts');
@@ -476,10 +476,10 @@ export function domains(): Domain[] {
     { name: 'classi dei modelli', where: 'src/mj/classes.ts', values: classIds },
     { name: 'taglie', where: 'src/mj/classes.ts', values: sizes },
     { name: 'effetti (`tipo`)', where: 'src/kernel/validator.ts', values: effectTypes },
-    { name: 'momenti del giorno', where: 'src/kernel/society.ts', values: unionOf(society, 'DayPhase') },
-    { name: 'dove (routine)', where: 'src/kernel/society.ts', values: unionOf(society, 'Where') },
-    { name: 'attività', where: 'src/kernel/society.ts', values: [...activities.matchAll(/'([^']+)'/g)].map((m) => m[1]) },
-    { name: 'specie e genere', where: 'src/kernel/society.ts', values: [...unionOf(society, 'Species'), ...unionOf(society, 'Gender')] },
+    { name: 'momenti del giorno', where: 'src/kernel/npc/society.ts', values: unionOf(society, 'DayPhase') },
+    { name: 'dove (routine)', where: 'src/kernel/npc/society.ts', values: unionOf(society, 'Where') },
+    { name: 'attività', where: 'src/kernel/npc/society.ts', values: [...activities.matchAll(/'([^']+)'/g)].map((m) => m[1]) },
+    { name: 'specie e genere', where: 'src/kernel/npc/society.ts', values: [...unionOf(society, 'Species'), ...unionOf(society, 'Gender')] },
     { name: 'uso dei suoni', where: 'src/mj/sound.ts', values: [...new Set([...sound.matchAll(/uso: '([a-z]+)'(?: \| '([a-z]+)')?/g)].flatMap((m) => [m[1], m[2]]).filter(Boolean))] },
     { name: 'tipi di modulo', where: 'src/kernel/types.ts', values: unionOf(types, 'ModuleKind') },
     { name: 'azioni del seme (`id`)', where: 'universe/modules/*/manifest.json', values: [...actionIds].sort() },

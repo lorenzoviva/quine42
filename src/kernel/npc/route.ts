@@ -6,6 +6,12 @@
 
 export type Cell = readonly [number, number];
 
+/** The half-size of a body a way is for when who asks does not say (a villager's, T299), and how far ahead of it the next point is. */
+export const ROUTE_BODY = 0.35;
+export const ROUTE_AHEAD = 1.6;
+/** How near a goal no way reaches one goes, at most this far from it (tiles): a bench in a wall, the middle of a workshop (T299). */
+export const ROUTE_NEAR = 2.5;
+
 /** Tiles looked at, at most, for one way: beyond, there is no way (a place is 18×18, a few of them fit). */
 export const ROUTE_NODES = 4000;
 

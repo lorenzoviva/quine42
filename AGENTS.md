@@ -141,8 +141,14 @@ src/
     kernel.ts           orchestratore: tick, luoghi, oggetti, contenitori, azioni (anche libere), effetti, magia, chat, Fucina, Genesi, rollback
     corona.ts           la corona come studio: edifici, interni su più piani, scaffali, gallerie
     archive.ts          le squadre del Concilio e il Referente nello studio
-    society.ts          la società: individui, legami, routine, attività, ricordi
-    plots.ts            trame orizzontali e missioni
+    npc/                le persone del mondo come un oggetto solo (ADR-0166): tutto il comportamento degli individui dietro la facciata `Npc` (`index.ts`),
+                        che ne possiede lo stato e vede il mondo solo dalla porta `NpcHost` (`host.ts`); dentro: chi sono (`people.ts`), dove vanno e la via
+                        (`places.ts`), i mestieri e ciò che matura (`trades.ts`), le imprese al lavoro (`worksites.ts`), fuori vista (`away.ts`), le battute
+                        (`speech.ts`), le trame (`stories.ts`), i dialoghi (`talk.ts`); i dati, puri, con la loro faccia `model.ts`: la società (`society.ts`:
+                        individui, legami, routine, attività, ricordi), le trame e le missioni (`plots.ts`), i programmi dei mestieri (`jobs.ts`:
+                        `validateJobProgram`, `matchJob`, `JOB_BEHAVIOURS`, ADR-0140), le imprese (`ventures.ts`: `world/ventures.json`, il progresso
+                        derivato, la squadra, il passo, ADR-0147), la via tra due caselle (`route.ts`: `findRoute`, `RouteCache`); da fuori si importano
+                        solo `npc/index.ts` e `npc/model.ts` (`tests/npc-architecture.test.ts`)
     graph.ts            il grafo del mondo: nodi e archi dai file dell'universo, interrogazioni, controlli
     atlas.ts            l'atlante: regioni geolocalizzate, direzioni
     relief.ts           il rilievo: Hills di MarkovJunior → livello di ogni casella, mare, acqua piana tra i luoghi (ADR-0048)
@@ -166,14 +172,13 @@ src/
     themes.ts           le quattro ambientazioni della Genesi, testo modificabile (`WORLD_THEMES`, ADR-0134; il censimento in `docs/temi-censimento.md`)
     gameSetup.ts        la partita scelta alla Genesi: livelli della morte, principio per il Concilio (ADR-0053)
     coefficients.ts     i coefficienti di generazione: quanto spesso ogni agente chiama l'IA, «Low Detail», censimento, stima oraria (ADR-0085)
-    wanderers.ts        i viandanti con un id (`me` in singola), il loro stato in `world/players/`, legami e ricordi per id (ADR-0054)
+    wanderers.ts        i viandanti con un id (`me` in singola), il loro stato in `world/players/`, legami e ricordi per id (ADR-0054); l'id da solo
+                        (`SOLO`, `wandererOf`) in wandererIds.ts, che leggono anche le persone (ADR-0166)
     situation.ts, screens.ts  la Direzione: il tavolo della situazione e la parete di schermi (T46), funzioni pure
     clone.ts            il clone con un altro master: `universe.json` e le carte che passano (ADR-0068)
     chain.ts            la catena della Sala sistemi (T27a): misure di ogni sistema nel tick, stazioni
                         (bench.ts: anche il banco di prova, T27b: casi, scena, nomi dei campi)
     shortfalls.ts       le mancanze (ADR-0130): ciò che il Concilio non è riuscito a fare (`world/shortfalls.json`, mai ai client), il rapporto
-    jobs.ts             i programmi dei mestieri (`validateJobProgram`, `matchJob`, `JOB_BEHAVIOURS`, ADR-0140); route.ts, la via tra due caselle (`findRoute`, `RouteCache`)
-    ventures.ts         le imprese (ADR-0147): `world/ventures.json`, il progresso derivato (`ventureProgress`), la squadra (`fillTeam`), il passo (`nextStep`)
     store.ts            il magazzino dei moduli (`ModuleStores`, `world/stores/<modulo>.json`, tetti in byte, ADR-0138)
     handmade.ts         le carte fatte a mano (ADR-0161): la forma (`HandmadeCard`), i testi di un giocatore (`cleanText`, `cleanCardName`), il programma provato sul motore vero (`handmadeProgramErrors`, `HANDMADE_LIMITS`), i tetti per account (`HANDMADE_CAPS`), ciò che esce agli altri (`handmadeSummary`, `handmadeView`)
     placing.ts          posare sui mobili (ADR-0150): i ripiani di una forma (`shelvesOf`), l'impronta di un oggetto (`itemShape`), dove sta (`findSpot`)
@@ -253,7 +258,7 @@ Registro, Luogo, Fucina e Genesi → `docs/architettura-dettagli.md#concilio`.
 - **Spazi, tappeto, rune, magia, borse**: cerchio di raggio 42 col tappeto, rune come token Lua eseguiti, canone, frase, `T` e mana → `#spazi-rune-magia`
 - **Lessico**: le parole e le usanze del mondo, mai spiegate come un glossario → `#lessico`
 - **Regole, effetti, stati, morte, menu, salto, contenuti**: i giudizi diventano regole, gli effetti sono un insieme chiuso; ciò che si impugna si posa sul ripiano di un mobile, dove la sua impronta sta (`placing.ts`, il componente `placed`, `state.json → placed`, ADR-0150) → `#regole-effetti`
-- **Società, vita degli NPC, personaggi**: individui, legami, routine, trame, missioni; i mestieri come programmi (`sys.work`, esiti `done`/`ongoing`/`failed:<motivo>`, `ripens` nei terreni, il giorno in `plan.days`, ADR-0140); la via va dove va il passo, e chi non ha via rinuncia al compito (`world.path` col raggio di chi cammina, ADR-0154); le imprese (`world/ventures.json`, scritto solo dal kernel, progresso derivato da ciò che è portato e lavorato, regole senza chiamate, `costruisci`, il pannello del cantiere, ADR-0147); l'edificio per stadi (la griglia finita filtrata, `stageGrid`, picchetti e impalcature, `plan.stages` e `plan.houses`, ADR-0148); fuori vista (la contabilità una volta al giorno, il ritorno, `on_return`, ADR-0149) → `#societa`
+- **Società, vita degli NPC, personaggi**: individui, legami, routine, trame, missioni; i mestieri come programmi (`sys.work`, esiti `done`/`ongoing`/`failed:<motivo>`, `ripens` nei terreni, il giorno in `plan.days`, ADR-0140); la via va dove va il passo, e chi non ha via rinuncia al compito (`world.path` col raggio di chi cammina, ADR-0154); le imprese (`world/ventures.json`, scritto solo dal kernel, progresso derivato da ciò che è portato e lavorato, regole senza chiamate, `costruisci`, il pannello del cantiere, ADR-0147); l'edificio per stadi (la griglia finita filtrata, `stageGrid`, picchetti e impalcature, `plan.stages` e `plan.houses`, ADR-0148); fuori vista (la contabilità una volta al giorno, il ritorno, `on_return`, ADR-0149); tutto questo è un oggetto solo, `src/kernel/npc/`: la facciata `Npc` che il kernel chiama (un campo, `npc.tick()`), la porta `NpcHost` da cui l'NPC vede il mondo, due facce per chi sta fuori (`npc/index.ts`, `npc/model.ts`), una direzione sola di import, nessuna di kernel, viandanti, sessione, rendering, UI o server (ADR-0166, `tests/npc-architecture.test.ts`) → `#societa`
 - **Corona e interni dello studio**: campus, edifici, vetrine, plastico, Nucleo, Biblioteca, Direzione, Galleria, Sala del Concilio → `#corona`
 - **Meccaniche, casi dei sistemi, catena, banco di prova** (Sala sistemi) → `#sala-sistemi`
 - **Geografia**: biomi, ambienti, timbri, atlante → `#geografia`

@@ -5,8 +5,8 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { bibleBreaks, lexiconWords, metaBreak } from '../../../../../src/kernel/fourthwall';
-import { canonBreak, readPlots, reviewPlot } from '../../../../../src/kernel/plots';
-import { readPeople } from '../../../../../src/kernel/society';
+import { canonBreak, readPlots, reviewPlot } from '../../../../../src/kernel/npc/plots';
+import { readPeople } from '../../../../../src/kernel/npc/society';
 import { DIR } from './universo';
 
 export interface WallReport {

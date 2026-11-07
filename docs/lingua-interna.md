@@ -583,7 +583,7 @@ posto di un pannello sul filo).
 <a id="momenti"></a>
 ### Momenti del giorno (`momenti`)
 
-- **Dove si legge**: `src/kernel/society.ts (DAY_PHASES)`, `world/people.json → routine[].quando`, `world/plots.json → tappe[].momento`, `models/index.json → suono.momenti`, `manifest → mestieri[].giornata (chiavi)`
+- **Dove si legge**: `src/kernel/npc/society.ts (DAY_PHASES)`, `world/people.json → routine[].quando`, `world/plots.json → tappe[].momento`, `models/index.json → suono.momenti`, `manifest → mestieri[].giornata (chiavi)`
 - **Tocca**: disco, Lua, prompt · **lingua**: inglese · **task**: T307b, contratto 0.3
 
 | italiano | interno |
@@ -596,7 +596,7 @@ posto di un pannello sul filo).
 <a id="dove"></a>
 ### «Dove» della routine (`dove`)
 
-- **Dove si legge**: `src/kernel/society.ts (WHERES)`, `world/people.json → routine[].dove`, `world/plots.json → tappe[].dove`, `manifest → mestieri[].giornata[].dove, percorso`, `componente mestiere (i posti)`
+- **Dove si legge**: `src/kernel/npc/society.ts (WHERES)`, `world/people.json → routine[].dove`, `world/plots.json → tappe[].dove`, `manifest → mestieri[].giornata[].dove, percorso`, `componente mestiere (i posti)`
 - **Tocca**: disco, Lua, prompt · **lingua**: inglese · **task**: T307b, contratto 0.3
 - **Nota**: `impresa` è il posto di un compito di mestiere (il cantiere, T307b); i posti `casella:<codice>` ed `entita:<tag>` restano finché T308a non cambia i campi
 
@@ -611,7 +611,7 @@ posto di un pannello sul filo).
 <a id="attivita"></a>
 ### Attività degli individui (`attivita`)
 
-- **Dove si legge**: `src/kernel/society.ts (ACTIVITIES)`, `world/people.json → routine[].azione`, `componente attivita.tipo`, `src/render/entities.ts`
+- **Dove si legge**: `src/kernel/npc/society.ts (ACTIVITIES)`, `world/people.json → routine[].azione`, `componente attivita.tipo`, `src/render/entities.ts`
 - **Tocca**: disco, filo, Lua, prompt · **lingua**: inglese · **task**: T307b, contratto 0.3
 
 | italiano | interno |
@@ -634,7 +634,7 @@ posto di un pannello sul filo).
 <a id="specie"></a>
 ### Specie e genere (`specie`)
 
-- **Dove si legge**: `src/kernel/society.ts (Species, Gender)`, `world/people.json → specie, genere`, `src/kernel/graph.ts`
+- **Dove si legge**: `src/kernel/npc/society.ts (Species, Gender)`, `world/people.json → specie, genere`, `src/kernel/graph.ts`
 - **Tocca**: disco, prompt · **lingua**: inglese · **task**: T307b, contratto 0.3
 
 | italiano | interno |
@@ -647,7 +647,7 @@ posto di un pannello sul filo).
 <a id="legami"></a>
 ### Tipi di legame (solo codice: la parola del legame è testo del mondo) (`legami`)
 
-- **Dove si legge**: `src/kernel/society.ts (KINDS, Between)`
+- **Dove si legge**: `src/kernel/npc/society.ts (KINDS, Between)`
 - **Tocca**: solo codice · **lingua**: inglese · **task**: T307b, contratto 0.3
 - **Nota**: `legame` resta la parola nella lingua del mondo («madre»); T310 aggiunge il tipo come id nello schema
 
@@ -682,7 +682,7 @@ posto di un pannello sul filo).
 <a id="mestieri"></a>
 ### Mestieri del seme e i loro moduli (`mestieri`)
 
-- **Dove si legge**: `universe/modules/lavoro.* (mestieri[].id)`, `src/kernel/jobs.ts (matchJob)`, `world/people.json → mestiere (via matchJob)`
+- **Dove si legge**: `universe/modules/lavoro.* (mestieri[].id)`, `src/kernel/npc/jobs.ts (matchJob)`, `world/people.json → mestiere (via matchJob)`
 - **Tocca**: disco, Lua, prompt · **lingua**: inglese · **task**: T307b, contratto 0.3
 - **Nota**: il mestiere di un individuo (`mestiere`) è testo del mondo; `matchJob` lo lega all’id
 
@@ -705,7 +705,7 @@ posto di un pannello sul filo).
 <a id="comportamenti"></a>
 ### Comportamenti dei mestieri (`fa`) (`comportamenti`)
 
-- **Dove si legge**: `src/kernel/jobs.ts (JOB_BEHAVIOURS)`, `universe/modules/sys.lavoro/logic.lua`, `manifest → mestieri[].giornata[].fa`
+- **Dove si legge**: `src/kernel/npc/jobs.ts (JOB_BEHAVIOURS)`, `universe/modules/sys.lavoro/logic.lua`, `manifest → mestieri[].giornata[].fa`
 - **Tocca**: disco, Lua, prompt · **lingua**: inglese · **task**: T307b, contratto 0.3
 
 | italiano | interno |
@@ -756,7 +756,7 @@ posto di un pannello sul filo).
 <a id="imprese"></a>
 ### Tipi e stati delle imprese (`imprese`)
 
-- **Dove si legge**: `src/kernel/ventures.ts (VENTURE_TYPES, VentureState)`, `world/imprese.json → tipo, stato`, `il pannello del cantiere`
+- **Dove si legge**: `src/kernel/npc/ventures.ts (VENTURE_TYPES, VentureState)`, `world/imprese.json → tipo, stato`, `il pannello del cantiere`
 - **Tocca**: disco, Lua, prompt · **lingua**: inglese · **task**: T307b, contratto 0.3
 
 | italiano | interno |
@@ -776,7 +776,7 @@ posto di un pannello sul filo).
 <a id="trame"></a>
 ### Stati delle trame e delle missioni, tipi di obiettivo (`trame`)
 
-- **Dove si legge**: `src/kernel/plots.ts (Plot, Quest)`, `world/plots.json`
+- **Dove si legge**: `src/kernel/npc/plots.ts (Plot, Quest)`, `world/plots.json`
 - **Tocca**: disco, prompt · **lingua**: inglese · **task**: T307b, contratto 0.3
 
 | italiano | interno |
@@ -1111,7 +1111,7 @@ posto di un pannello sul filo).
 <a id="campi-manifest"></a>
 ### Campi dei manifest (aspetto, terreni, pannelli, casi, mestieri) (`campi-manifest`)
 
-- **Dove si legge**: `src/kernel/types.ts (Manifest, Appearance, TerrainDef, UiPanel, BenchCase)`, `src/kernel/jobs.ts (JobProgram, JobTask)`, `src/kernel/validator.ts`
+- **Dove si legge**: `src/kernel/types.ts (Manifest, Appearance, TerrainDef, UiPanel, BenchCase)`, `src/kernel/npc/jobs.ts (JobProgram, JobTask)`, `src/kernel/validator.ts`
 - **Tocca**: disco, Lua, prompt · **lingua**: inglese · **task**: T308a, contratto 0.4
 - **Nota**: `posto` è la tasca di un oggetto di prova nei casi e il posto di lavoro nei mestieri (`workplace`): i due stanno in oggetti diversi; qui la tasca
 
@@ -1169,7 +1169,7 @@ posto di un pannello sul filo).
 <a id="campi-mestieri"></a>
 ### Campi dei programmi di mestiere che cambiano senso (`campi-mestieri`)
 
-- **Dove si legge**: `src/kernel/jobs.ts (JobProgram.posto)`
+- **Dove si legge**: `src/kernel/npc/jobs.ts (JobProgram.posto)`
 - **Tocca**: disco, Lua · **lingua**: inglese · **task**: T308a, contratto 0.4
 - **Nota**: l’`azione` di un compito è l’id di un’azione della cosa, `action` come nei casi (`campi-manifest`); la `posa` è l’attività
 
@@ -1196,7 +1196,7 @@ posto di un pannello sul filo).
 <a id="campi-persone"></a>
 ### Campi di `world/people.json` (`campi-persone`)
 
-- **Dove si legge**: `src/kernel/society.ts (People, Individual, Relation, RoutineStep, Memory, IndividualSheet)`, `src/kernel/agents/minds.ts`
+- **Dove si legge**: `src/kernel/npc/society.ts (People, Individual, Relation, RoutineStep, Memory, IndividualSheet)`, `src/kernel/agents/minds.ts`
 - **Tocca**: disco, filo, prompt · **lingua**: inglese · **task**: T308a, contratto 0.4
 
 | italiano | interno |
@@ -1234,7 +1234,7 @@ posto di un pannello sul filo).
 <a id="campi-trame"></a>
 ### Campi di `world/plots.json` (`campi-trame`)
 
-- **Dove si legge**: `src/kernel/plots.ts (Plot, Beat, Quest)`
+- **Dove si legge**: `src/kernel/npc/plots.ts (Plot, Beat, Quest)`
 - **Tocca**: disco, filo, prompt · **lingua**: inglese · **task**: T308a, contratto 0.4
 
 | italiano | interno |
@@ -1340,7 +1340,7 @@ posto di un pannello sul filo).
 <a id="campi-imprese"></a>
 ### Campi di `world/imprese.json` (`campi-imprese`)
 
-- **Dove si legge**: `src/kernel/ventures.ts (Venture, VenturePhase, VentureRole, VentureMember, VentureTask)`
+- **Dove si legge**: `src/kernel/npc/ventures.ts (Venture, VenturePhase, VentureRole, VentureMember, VentureTask)`
 - **Tocca**: disco, Lua, filo · **lingua**: inglese · **task**: T308a, contratto 0.4
 
 | italiano | interno |

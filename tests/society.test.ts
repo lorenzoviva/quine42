@@ -5,8 +5,8 @@ import { individuate } from '../src/kernel/agents/content';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockAiModels } from '../src/kernel/ai/mock';
-import { readPlots, writePlots, PLOTS_FILE, type Plot } from '../src/kernel/plots';
-import { addIndividual, applyRenames, checkSociety, readPeople, repairSociety, reverseRelation, similarNames, type People, type Individual } from '../src/kernel/society';
+import { readPlots, writePlots, PLOTS_FILE, type Plot } from '../src/kernel/npc/plots';
+import { addIndividual, applyRenames, checkSociety, readPeople, repairSociety, reverseRelation, similarNames, type People, type Individual } from '../src/kernel/npc/society';
 import type { AiModels, TextCall } from '../src/kernel/ai/models';
 import type { FileMap } from '../src/kernel/types';
 

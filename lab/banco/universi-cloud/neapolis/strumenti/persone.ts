@@ -1,6 +1,6 @@
 // I 24 individui di Neapolis: due per ognuno dei dodici tipi (npc.*), ognuno in un luogo dei piani (`maps/`).
 // I legami si dicono una volta (a è <legame> di b, b è <ritorno> di a) e si scrivono dalle due parti.
-import type { Individual, Memory } from '../../../../../src/kernel/society';
+import type { Individual, Memory } from '../../../../../src/kernel/npc/society';
 import { internalIndividual } from '../../../../../src/kernel/internalNames';
 
 export interface Person {

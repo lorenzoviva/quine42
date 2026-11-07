@@ -4,9 +4,9 @@
 import { describe, expect, it } from 'vitest';
 import { MockAiModels } from '../src/kernel/ai/mock';
 import { bundledFiles } from '../src/kernel/bundle';
-import { matchJob, normalTrade, validateJobProgram, type JobProgram } from '../src/kernel/jobs';
+import { matchJob, normalTrade, validateJobProgram, type JobProgram } from '../src/kernel/npc/jobs';
 import { Kernel } from '../src/kernel/kernel';
-import { findRoute } from '../src/kernel/route';
+import { findRoute } from '../src/kernel/npc/route';
 import { memoryStore } from '../src/kernel/repo';
 import { apiErrors } from '../src/kernel/validator';
 import { developAll } from './espressivita/banco';

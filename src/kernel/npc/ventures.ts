@@ -4,8 +4,8 @@
 // The progress is derived: the phase now is the first whose materials are not all brought or whose work is not done, so there is no
 // counter to keep true. Pure: the kernel, the tests and the panel read it.
 
-import { internalFields, internalName, internalVenture } from './internalNames';
-import { hash32, hashStr } from './rng';
+import { internalFields, internalName, internalVenture } from '../internalNames';
+import { hash32, hashStr } from '../rng';
 
 export const VENTURES_FILE = 'world/ventures.json';
 export const VENTURE_TYPES = ['construction', 'harvest', 'feast', 'research', 'reclamation', 'journey', 'election'] as const;

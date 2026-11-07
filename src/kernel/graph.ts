@@ -8,8 +8,7 @@
 
 import { internalFields, internalName, italianName } from './internalNames';
 import type { FileMap, Manifest } from './types';
-import { readPeople, relationProblem, relationsAgree, similarNames, type Individual, type Species } from './society';
-import { readPlots } from './plots';
+import { readPeople, readPlots, relationProblem, relationsAgree, similarNames, type Individual, type Species } from './npc/model';
 import { readAtlas, regionAt } from './atlas';
 import { normName } from './content';
 import { hashStr, hex } from './rng';

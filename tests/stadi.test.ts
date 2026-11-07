@@ -9,7 +9,7 @@ import { MemoryChunks } from '../src/kernel/chunks';
 import type { Form, FormComp } from '../src/kernel/forms';
 import { Kernel } from '../src/kernel/kernel';
 import { memoryStore } from '../src/kernel/repo';
-import { addWork, bring, type Venture } from '../src/kernel/ventures';
+import { addWork, bring, type Venture } from '../src/kernel/npc/ventures';
 import type { PaletteEntry } from '../src/mj/engine';
 import { SCAFFOLD_LETTER, STAKE_LETTER, stageGrid, stageHeight, stageHeights, type VoxelGrid } from '../src/mj/mesh';
 import { SessionServer } from '../src/session/server';
@@ -87,7 +87,7 @@ async function world(files = bundledFiles, chunks = new MemoryChunks()): Promise
   return k;
 }
 
-const live = (k: Kernel) => (k as unknown as { ventureList: Venture[] }).ventureList;
+const live = (k: Kernel) => (k.npc as unknown as { worksites: { ventureList: Venture[] } }).worksites.ventureList;
 const structureOf = (k: Kernel, origin: string) => k.ecs.query('structure', 'origin').find((e) => k.ecs.get(e, 'origin').key === origin);
 
 function fallen(k: Kernel): { origin: string; key: string } {
@@ -121,7 +121,7 @@ describe('a building that rises in a world', () => {
     const v = live(k)[0];
     const step = (it: Record<string, number>, work: number) => {
       for (const [i, n] of Object.entries(it)) bring(v, i, n);
-      (k as unknown as { phasesClosed(v: Venture, c: number[]): void }).phasesClosed(v, addWork(v, work));
+      (k.npc as unknown as { worksites: { phasesClosed(v: Venture, c: number[]): void } }).worksites.phasesClosed(v, addWork(v, work));
     };
     step({ 'item.ciocco': 4 }, 200);
     expect(k.ecs.get(sid, 'structure').stage).toBe(0.2);
@@ -167,7 +167,7 @@ describe('a building that rises in a world', () => {
     const { origin, key } = fallen(k);
     const v = live(k)[0];
     bring(v, 'item.ciocco', 4);
-    (k as unknown as { phasesClosed(v: Venture, c: number[]): void }).phasesClosed(v, addWork(v, 200));
+    (k.npc as unknown as { worksites: { phasesClosed(v: Venture, c: number[]): void } }).worksites.phasesClosed(v, addWork(v, 200));
     const plan = k.chunks.get(key)!.plan!;
     expect(plan.stages).toEqual({ [origin]: 0.2 });
     plan.houses = [{ origin: `${key}#v1`, x: 2, y: 2, model: 'grande', seed: 1, yaw: 0, class: 'building', concept: 'una casetta', stage: 0.2 }];

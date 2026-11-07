@@ -4,10 +4,10 @@
 // the miller, the blacksmith's rival). The kernel turns routines into places to go (sys.wander walks
 // there) and lets related people greet each other when they meet. No model calls here.
 
-import { internalFields, internalIndividual, italianName } from './internalNames';
-import { hashStr } from './rng';
-import type { FileMap } from './types';
-import { SOLO, WANDERER_NAME, wandererOf } from './wanderers';
+import { internalFields, internalIndividual, italianName } from '../internalNames';
+import { hashStr } from '../rng';
+import type { FileMap } from '../types';
+import { SOLO, WANDERER_NAME, wandererOf } from '../wandererIds';
 
 // The values are internal (T307b, ADR-0153): English; the world says them in its language (italianName).
 export type DayPhase = 'morning' | 'day' | 'evening' | 'night';
@@ -569,4 +569,18 @@ export function greeting(a: { nome: string; mestiere: string }, b: { nome: strin
   if (/rivale/.test(l)) return [`Hmpf. ${b.nome}.`, `${a.nome}. Sempre in mezzo ai piedi.`];
   if (/apprendista|garzone/.test(l)) return [`Maestro, ho quasi finito!`, `Quasi non basta, ${a.nome}.`];
   return [`Buongiorno, ${b.nome}!`, `Buongiorno a te, ${a.nome}. Come va il lavoro da ${a.mestiere}?`];
+}
+
+/** What an individual is to a wanderer, if anything (T34; here since T327: a fact of the people, the wanderer is only an id). */
+export function bondWith(p: { family?: Array<{ name: string; bond: string; wanderer?: string }>; wandererBond?: string }, id: string): string | undefined {
+  const r = (p.family ?? []).find((f) => wandererOf(f) === id);
+  return r?.bond ?? (id === SOLO ? p.wandererBond : undefined);
+}
+
+/** The memories an individual brings to a talk with a wanderer: theirs together and those of the others in the world, not of other wanderers. */
+export function memoriesFor<T extends { with?: string; wanderer?: string }>(list: T[] | undefined, id: string): T[] {
+  return (list ?? []).filter((m) => {
+    const w = wandererOf(m);
+    return !w || w === id;
+  });
 }

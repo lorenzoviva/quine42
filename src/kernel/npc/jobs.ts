@@ -5,7 +5,7 @@
 
 import { ACTIVITIES, type Activity } from './society';
 import type { DayPhase } from './society';
-import { internalFields } from './internalNames';
+import { internalFields } from '../internalNames';
 
 /** The seed's system that carries out the trades (T307b: `sys.lavoro` before); its store holds the deposits of the places. */
 export const WORK_MODULE = 'sys.work';

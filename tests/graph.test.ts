@@ -6,7 +6,7 @@ import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockAiModels } from '../src/kernel/ai/mock';
 import { buildGraph, GRAPH_FILE, readGraph, type GraphChunk } from '../src/kernel/graph';
-import { writePlots, PLOTS_FILE, type Plot } from '../src/kernel/plots';
+import { writePlots, PLOTS_FILE, type Plot } from '../src/kernel/npc/plots';
 import type { FileMap } from '../src/kernel/types';
 
 /** Ticks until every loaded chunk has been planned (as in world.ts). */

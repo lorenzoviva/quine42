@@ -3,7 +3,7 @@
 // (ADR-0125), and the names are the world's (rule 0). Nobody hears it first: what the measures cannot say stays for whoever listens (lab/banco/suono.md).
 
 import { internalName, internalValues } from '../internalNames';
-import { DAY_PHASES } from '../society';
+import { DAY_PHASES } from '../npc/model';
 import type { Schema } from '../ai/models';
 import { BudgetError } from '../ai/models';
 import { metaBreak } from '../fourthwall';

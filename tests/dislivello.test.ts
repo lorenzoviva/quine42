@@ -10,9 +10,9 @@ import { MockAiModels } from '../src/kernel/ai/mock';
 import { bundledFiles } from '../src/kernel/bundle';
 import { MemoryChunks } from '../src/kernel/chunks';
 import { type FormComp } from '../src/kernel/forms';
-import { Kernel, ROUTE_NEAR } from '../src/kernel/kernel';
+import { Kernel } from '../src/kernel/kernel';
 import { memoryStore } from '../src/kernel/repo';
-import { findRoute, type Cell } from '../src/kernel/route';
+import { findRoute, ROUTE_NEAR, type Cell } from '../src/kernel/npc/route';
 import type { FileMap } from '../src/kernel/types';
 import { developAll } from './espressivita/banco';
 
@@ -94,11 +94,14 @@ async function scene(model: 'platea-scala' | 'platea-chiusa') {
   return { k, c, r, ground: k.groundAt(c + 0.5, r + 0.5) };
 }
 
+// Where the people walk (T327: `npc/places.ts`, behind `k.npc`).
 const kernelOf = (k: Kernel) =>
-  k as unknown as {
-    routeStep(x: number, y: number, tx: number, ty: number, r?: number): { x: number; y: number } | undefined;
-    walkable(x0: number, y0: number, x1: number, y1: number, r: number): boolean;
-  };
+  (k.npc as unknown as {
+    places: {
+      routeStep(x: number, y: number, tx: number, ty: number, r?: number): { x: number; y: number } | undefined;
+      walkable(x0: number, y0: number, x1: number, y1: number, r: number): boolean;
+    };
+  }).places;
 
 /** A body that walks as sys.wander does (axis by axis, `free` at the height of its feet) toward a point, a tick at a time. */
 function stepToward(k: Kernel, p: { x: number; y: number; z?: number }, to: { x: number; y: number }, r = 0.35, v = 0.05): void {
@@ -207,7 +210,8 @@ describe('on a whole world', () => {
   it('every step a way may take between two tiles, a walk takes; the tiles alone let through some no walk takes (furniture, a wall on an edge)', async () => {
     const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels(), chunks: new MemoryChunks() });
     await developAll(k);
-    const step = (k as unknown as { stepFree(c: number, r: number, nc: number, nr: number, body: number): boolean }).stepFree.bind(k);
+    const places = (k.npc as unknown as { places: { stepFree(c: number, r: number, nc: number, nr: number, body: number): boolean } }).places;
+    const step = places.stepFree.bind(places);
     const S = k.config.chunkSize;
     const body = 0.35;
     /** The walk of `stepWanderer`: a tenth of a tile at a time, axis by axis, the feet on the floor under them. */
@@ -281,7 +285,7 @@ describe('back on foot (what T280 could not try)', () => {
     // Back on foot: a step of the walk at every tick (`stepWanderer`, what the server does with a client's steps), toward the next
     // point of the way to a goal at most 40 tiles ahead on the road home; the places load as they are reached.
     const r = Number(k.ecs.get(k.wandererEntity, 'body')?.r) || 0.22;
-    const route = (k as unknown as { routeStep(x: number, y: number, tx: number, ty: number, r?: number): { x: number; y: number } | undefined }).routeStep.bind(k);
+    const route = k.npc.routeStep.bind(k.npc);
     const start = k.wandererCarpet();
     let stuck = 0;
     let last = start;

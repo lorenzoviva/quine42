@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { bibleBreaks, cleanBible, COUNCIL_PRINCIPLES, metaBreak } from '../src/kernel/fourthwall';
 import { Council, readBible, type Bible } from '../src/kernel/agents/council';
 import { bundledFiles } from '../src/kernel/bundle';
-import { readPlots, PLOTS_FILE, writePlots, type Plot } from '../src/kernel/plots';
+import { readPlots, PLOTS_FILE, writePlots, type Plot } from '../src/kernel/npc/plots';
 import type { AiModels, TextCall } from '../src/kernel/ai/models';
 import { Kernel } from '../src/kernel/kernel';
 import { memoryStore } from '../src/kernel/repo';

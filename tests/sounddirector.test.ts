@@ -7,7 +7,7 @@ import { SOUND_MEMORY_BYTES, SoundRenders, type SoundWorker } from '../src/audio
 import { readSoundPrefs, type SoundOut } from '../src/audio/sfx';
 import { bundledFiles } from '../src/kernel/bundle';
 import { hashStr } from '../src/kernel/rng';
-import { DAY_PHASES } from '../src/kernel/society';
+import { DAY_PHASES } from '../src/kernel/npc/society';
 import { modelErrors } from '../src/kernel/validator';
 import { compileMjx } from '../src/mj/model';
 import { soundPrograms, type SoundProgram } from '../src/mj/sound';

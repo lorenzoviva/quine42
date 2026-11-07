@@ -10,8 +10,7 @@ import { slug } from './graph';
 import { hash32, hashStr } from './rng';
 import { MODELS_INDEX } from './forms';
 import { contentText, fingerprint, readOrigins, repairHeritage, sharesOf, type CardOrigin } from './heritage';
-import { readPlots } from './plots';
-import { readPeople } from './society';
+import { readPeople, readPlots } from './npc/model';
 import type { FileMap, Manifest } from './types';
 import { internalCardId, internalCardsIn, internalFields, internalSoloIn } from './internalNames';
 

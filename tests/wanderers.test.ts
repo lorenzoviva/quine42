@@ -5,8 +5,8 @@ import { memoryStore } from '../src/kernel/repo';
 import { MockAiModels } from '../src/kernel/ai/mock';
 import type { TextCall } from '../src/kernel/ai/models';
 import { countItem } from '../src/kernel/inventory';
-import { readPeople } from '../src/kernel/society';
-import { activeQuests, type Plot } from '../src/kernel/plots';
+import { readPeople } from '../src/kernel/npc/society';
+import { activeQuests, type Plot } from '../src/kernel/npc/plots';
 import { memoriesFor, readWandererState, wanderersIn } from '../src/kernel/wanderers';
 import type { FileMap } from '../src/kernel/types';
 
