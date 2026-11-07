@@ -23,7 +23,7 @@ Aggiornato il 07/11/2026, epoca 326 (claude). Crediti: vedi `stato`.
 
 0. **Decisioni autore 04/11:** D32 SemVer `X.Y.Z`. Step 32: T260, T262 → T245a → T263/T245b → T245c-f. T265 prima della beta.
 1. T324 (immagini Jev: utile come filtro dei difetti visivi, non per il giudizio dell'Artista) integrato via T329.
-2. **T330 integrato** (WebGL high-performance, `src/render/gpu.ts`). **Pronti:** T331 (misura frame/generazione prima di MJ su GPU, claude p7); T327 (NPC coeso, claude extra); T294 (laboratori giocatori, claude p3); T295 (carte prima della Genesi, claude p3); T315 (veste futuristica, p4); T321 (Scultore su Flash, claude p4); T303 (misura Scenografo, claude p5); T288 (armi/attrezzi in mano, p6, browser); T242 (rapporto aureo, p33); T88 (generazione differita crediti che avanzano, p60).
+2. **T330 integrato** (WebGL high-performance, `src/render/gpu.ts`). **Pronti:** T331 (misura frame/generazione prima di MJ su GPU, claude p7); T332 (chi dorme saluta, p4); T294 (laboratori giocatori, claude p3); T295 (carte prima della Genesi, claude p3); T315 (veste futuristica, p4); T321 (Scultore su Flash, claude p4); T303 (misura Scenografo, claude p5); T288 (armi/attrezzi in mano, p6, browser); T242 (rapporto aureo, p33); T88 (generazione differita crediti che avanzano, p60).
 3. **Crediti (05:52 UTC 07/11):** Claude 5h 40 % residuo (reset 07:59 UTC), settimana 48 % (reset 12/11); Gemini 100 %; agy 100 %; Argon fermo fino all'11/11.
 
 ## Attese dall'autore
@@ -38,4 +38,4 @@ Aggiornato il 07/11/2026, epoca 326 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **326 (claude):** T330 integrato (GPU: RTX 2070 via ANGLE D3D11).; T327 integrato, T332 creato e approvato.
+- **326 (claude):** T330 integrato (GPU: RTX 2070 via ANGLE D3D11); T327 integrato, T332 creato e approvato.
