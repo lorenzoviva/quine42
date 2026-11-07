@@ -13,7 +13,7 @@ import { metaBreak } from '../fourthwall';
 import { normName } from '../content';
 import type { Manifest } from '../types';
 import { classOf, guessClass, RARE_SIZES, sizeOf, SIZE_TIERS } from '../../mj/classes';
-import { internalComponents, internalName, italianName, italianValues } from '../internalNames';
+import { internalComponents, internalName, internalValues } from '../internalNames';
 import { luaFor0_5 } from '../migrations';
 import { ownModelId } from '../modeldirector';
 import { AGENTS, wordsOf, type AgentId, type Council } from './council';
@@ -101,10 +101,10 @@ const CONCEPT_SCHEMA: Schema = {
     tipo: { type: 'STRING', enum: ['npc', 'oggetto', 'strumento'] },
     descrizione: { type: 'STRING' },
     lore: { type: 'STRING' },
-    aspetto: { type: 'STRING', description: "com'è fatto: forma, proporzioni, materiali, colori (lo Scultore ne fa un modello 3D)" },
-    // The prompts still speak Italian (T310): the Council writes the classes and sizes of the contract 0.1, the Forge makes them internal.
-    classe: { type: 'STRING', enum: italianValues('classi'), description: 'la sua classe di grandezza (persona, animale, mobile, oggetto, edificio…)' },
-    taglia: { type: 'STRING', enum: SIZE_TIERS.filter((t) => !RARE_SIZES.includes(t.id)).map((t) => italianName('taglie', t.id)), description: 'la taglia di D&D, solo se diversa da quella solita della sua classe (un gigante: grande)' },
+    aspetto: { type: 'STRING', description: 'what it is made like: shape, proportions, materials, colours (the Sculptor makes a 3D model of it)' },
+    // Classes and sizes are internal since T310 (the prompts are English); the Forge still makes an Italian one of the contract 0.1 internal.
+    classe: { type: 'STRING', enum: internalValues('classi'), description: 'its class of size (person, animal, furniture, object, building…)' },
+    taglia: { type: 'STRING', enum: SIZE_TIERS.filter((t) => !RARE_SIZES.includes(t.id)).map((t) => t.id), description: 'the size of D&D, only if different from the usual one of its class (a giant: large)' },
     contesto: {
       type: 'OBJECT',
       properties: { terreni: { type: 'ARRAY', items: { type: 'STRING' } }, luoghi: { type: 'STRING' }, rarita: { type: 'NUMBER' } },
@@ -113,19 +113,19 @@ const CONCEPT_SCHEMA: Schema = {
     interazione: { type: 'STRING', enum: ['parla', 'leggi', 'usa', 'nessuna'] },
     comandi: { type: 'ARRAY', items: { type: 'OBJECT', properties: { azione: { type: 'STRING', enum: ['usa', 'azione'] }, descrizione: { type: 'STRING' } }, required: ['azione', 'descrizione'] } },
     persona: { type: 'STRING' },
-    unico: { type: 'BOOLEAN', description: 'true per un individuo con un nome (esiste una sola volta nel mondo), false per animali, oggetti comuni, cose che si ripetono' },
+    unico: { type: 'BOOLEAN', description: 'true for an individual with a name (exists only once in the world), false for animals, common things, things that repeat' },
     azioni: {
       type: 'ARRAY',
-      description: 'per un oggetto: cosa ci si può fare (voci del menu), es. {id:"attingi", etichetta:"Attingi acqua", richiede:"secchio"}',
+      description: 'for an object: what can be done with it (menu entries), the id in English and the label in the language of the world, e.g. {id:"draw_water", etichetta:"Attingi acqua", richiede:"secchio"}',
       items: { type: 'OBJECT', properties: { id: { type: 'STRING' }, etichetta: { type: 'STRING' }, richiede: { type: 'STRING' } }, required: ['id', 'etichetta'] },
     },
     contenitore: {
       type: 'OBJECT',
-      description: 'per mobili e casse: quanti posti e quale tabella di bottino (cucina, cassa, bottega, comune…)',
+      description: 'for furniture and chests: how many places and which loot table (cucina, cassa, bottega, comune…)',
       properties: { capienza: { type: 'INTEGER' }, bottino: { type: 'STRING' } },
       required: ['capienza', 'bottino'],
     },
-    porta: { type: 'ARRAY', items: { type: 'STRING' }, description: 'per un npc: oggetti che porta con sé' },
+    porta: { type: 'ARRAY', items: { type: 'STRING' }, description: 'for an npc: things they carry' },
     tags: { type: 'ARRAY', items: { type: 'STRING' } },
   },
   required: ['nome', 'tipo', 'descrizione', 'lore', 'aspetto', 'contesto', 'interazione', 'comandi', 'tags'],
@@ -285,16 +285,16 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
       'narrator',
       'forge.concept',
       [
-        `Richiesta (${req.origin}): ${req.prompt}`,
-        req.permissive ? 'Il viandante è trasceso: è un membro del Concilio. Accogli la sua richiesta come vuole lui; rifiuta solo ciò che distruggerebbe l’universo, lui stesso o le leggi del gioco. Resta fedele alla sua richiesta, anche se insolita.' : '',
-        req.kind ? `Deve essere di tipo "${req.kind}".` : 'Scegli il tipo: npc (persona simulata), oggetto (sta nel mondo, inerte o interattivo), strumento (si raccoglie e va nell\'inventario).',
-        `Terreni validi per "contesto.terreni": ${codes}. "rarita" tra 0.02 e 0.5.`,
-        'Per un npc: un mestiere o un ruolo concreto del mondo (fornaio, guardia, pastore, guaritrice, brigante, mercante…), mai ruoli astratti; in "persona" la scheda del tipo di personaggio (ogni individuo avrà poi nome e storia propri): come parla, cosa vuole, cosa sa e crede del suo mondo; in "porta" 3-6 oggetti comuni del suo mestiere.',
-        req.existingNames?.length ? `Esistono già (non fare doppioni, né di nome né di ruolo): ${req.existingNames.slice(0, 80).join(', ')}.` : '',
-        'Per un oggetto: in "azioni" 1-4 cose concrete che ci si può fare (aprire, sedersi, attingere, dormire, accendere, pregare…), con "richiede" se serve uno strumento; se è un mobile che contiene cose, "contenitore" con capienza e tabella di bottino (cucina, cassa, bottega, comune, contadino).',
-        'Per uno strumento elenca in "comandi" al massimo due voci: "usa" = effetto su chi lo usa o consumo (mangiare, bere, leggere, accendere); "azione" = effetto su ciò che il viandante ha davanti (tagliare, colpire, aprire, scavare).',
-        'Non creare moduli per elementi del terreno (sentieri, fiumi, ponti, muri, prati): quelli sono la mappa del Cartografo. Crea cose concrete che stanno sul terreno.',
-        feedback && `L'Arbitro ha obiettato: ${feedback}`,
+        `Request (${req.origin}): ${req.prompt}`,
+        req.permissive ? 'The wanderer has transcended: they are a member of the Council. Take their request as they want it; refuse only what would destroy the universe, themselves or the laws of the game. Stay faithful to their request, even if it is unusual.' : '',
+        req.kind ? `It must be of type "${req.kind}".` : 'Choose the type: npc (a simulated person), oggetto (stands in the world, inert or interactive), strumento (it is picked up and goes into the inventory).',
+        `Valid terrains for "contesto.terreni": ${codes}. "rarita" between 0.02 and 0.5.`,
+        'For an npc: a concrete trade or role of the world (baker, guard, shepherd, healer, brigand, merchant…), never abstract roles; in "persona" the sheet of the kind of character (every individual will then have a name and a story of their own), in the language of the world: how they speak, what they want, what they know and believe of their world; in "porta" 3-6 common things of their trade.',
+        req.existingNames?.length ? `They exist already (no doubles, neither of name nor of role): ${req.existingNames.slice(0, 80).join(', ')}.` : '',
+        'For an object: in "azioni" 1-4 concrete things one can do with it (open, sit down, draw water, sleep, light, pray…), with "richiede" if a tool is needed; if it is a piece of furniture that holds things, "contenitore" with capacity and loot table (cucina, cassa, bottega, comune, contadino).',
+        'For a tool list in "comandi" at most two entries: "usa" = effect on whoever uses it, or consumption (eat, drink, read, light); "azione" = effect on what the wanderer has in front of them (cut, hit, open, dig).',
+        'Do not create modules for elements of the terrain (paths, rivers, bridges, walls, meadows): those are the Cartographer\'s map. Create concrete things that stand on the terrain.',
+        feedback && `The Arbiter objected: ${feedback}`,
       ]
         .filter(Boolean)
         .join('\n'),
@@ -306,9 +306,9 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
       'physicist',
       'forge.physics',
       [
-        `Definisci la fisica di questo elemento in modo coerente con ciò che è e con l'aspetto descritto:\n${JSON.stringify(concept, null, 1)}`,
-        'Unità: raggio in caselle (0.2-0.5), velocita in caselle/s (0 se non si muove da solo), massa in kg, attrito 0-1 (quanto in fretta si ferma se spinto), peso in unità di inventario (il giocatore porta 20 senza rallentare).',
-        feedback && `L'Arbitro ha obiettato: ${feedback}`,
+        `Define the physics of this element consistently with what it is and with the look described:\n${JSON.stringify(concept, null, 1)}`,
+        'Units: "raggio" in tiles (0.2-0.5), "velocita" in tiles/s (0 if it does not move by itself), "massa" in kg, "attrito" 0-1 (how fast it stops if pushed), "peso" in inventory units (the wanderer carries 20 without slowing down).',
+        feedback && `The Arbiter objected: ${feedback}`,
       ]
         .filter(Boolean)
         .join('\n'),
@@ -320,10 +320,10 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
       'engineer',
       'forge.code',
       [
-        `Scrivi logic.lua per questo modulo.\nConcetto:\n${JSON.stringify(concept, null, 1)}\nFisica:\n${JSON.stringify(physics)}`,
-        `Funzioni obbligatorie: ${requiredHooks(concept).join(', ') || 'nessuna (restituisci comunque una tabella M)'}.`,
-        'In "componenti_json" eventuali componenti extra come oggetto JSON (stringa), es. {"light":{"lit":false}}. Niente stato nelle variabili Lua.',
-        feedback && `DA CORREGGERE: ${feedback}`,
+        `Write logic.lua for this module.\nConcept:\n${JSON.stringify(concept, null, 1)}\nPhysics:\n${JSON.stringify(physics)}`,
+        `Required functions: ${requiredHooks(concept).join(', ') || 'none (return a table M anyway)'}.`,
+        'In "componenti_json" any extra components as a JSON object (a string), e.g. {"light":{"lit":false}}. No state in Lua variables.',
+        feedback && `TO FIX: ${feedback}`,
       ]
         .filter(Boolean)
         .join('\n'),
@@ -363,7 +363,7 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
   const review = await c.ask<{ approvato: boolean; problemi: Array<{ agente: AgentId; problema: string }> }>(
     'arbiter',
     'forge.review',
-    `${req.permissive ? 'Il viandante è trasceso: è un membro del Concilio. Accogli la sua richiesta come vuole lui; rifiuta solo ciò che distruggerebbe l’universo, lui stesso o le leggi del gioco. Non obiettare sull\'idea in sé: solo su incoerenze tecniche che romperebbero il gioco.\n' : ''}Verifica la coerenza tra narrativa, aspetto, fisica e codice di questo modulo. Segnala solo incoerenze concrete, indicando l'agente responsabile.\nConcetto:\n${JSON.stringify(concept, null, 1)}\nFisica:\n${JSON.stringify(physics)}\nlogic.lua:\n${code.logic}`,
+    `${req.permissive ? 'The wanderer has transcended: they are a member of the Council. Take their request as they want it; refuse only what would destroy the universe, themselves or the laws of the game. Do not object to the idea itself: only to technical inconsistencies that would break the game.\n' : ''}Check that the narrative, the look, the physics and the code of this module agree. Point out only concrete inconsistencies, naming the agent responsible.\nConcept:\n${JSON.stringify(concept, null, 1)}\nPhysics:\n${JSON.stringify(physics)}\nlogic.lua:\n${code.logic}`,
     REVIEW_SCHEMA,
     { chi: req.chi, data: { ...data, concept, physics, code }, temperature: 0.2 },
   );
@@ -409,11 +409,11 @@ export async function repairLogic(c: Council, manifest: Manifest, logic: string,
     'engineer',
     'forge.fix',
     [
-      `Il modulo ${manifest.id} («${manifest.name}», ${manifest.description ?? ''}) è entrato nell'universo ma fallisce durante il gioco.`,
-      `Errore a runtime: ${error}`,
-      `logic.lua attuale:\n${logic}`,
-      'Correggilo mantenendo lo stesso comportamento previsto. Usa solo l\'API documentata.',
-      feedback && `Il validatore ha rifiutato la correzione precedente: ${feedback}`,
+      `The module ${manifest.id} («${manifest.name}», ${manifest.description ?? ''}) entered the universe but fails during play.`,
+      `Runtime error: ${error}`,
+      `Current logic.lua:\n${logic}`,
+      'Fix it keeping the same intended behaviour. Use only the documented API.',
+      feedback && `The validator refused the previous fix: ${feedback}`,
     ]
       .filter(Boolean)
       .join('\n\n'),
@@ -425,7 +425,7 @@ export async function repairLogic(c: Council, manifest: Manifest, logic: string,
 
 /**
  * The Engineer's code with the names of the contract 0.5 (T308b): what it may still write with those of before (`ecs.get(u, "luce")`,
- * `world.impresa`) is ported as a universe of 0.4 is (`luaFor0_5`), until its prompts are all in the internal language (T310).
+ * `world.impresa`) is ported as a universe of 0.4 is (`luaFor0_5`): its prompts are English since T310, the port stays a contract more.
  */
 function internalCode(code: CodeSpec): CodeSpec {
   return { ...code, logic: luaFor0_5(String(code.logic ?? '')) };
@@ -436,7 +436,7 @@ const JUDGE_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
     possibile: { type: 'BOOLEAN' },
-    risultato: { type: 'STRING', description: 'nome dello strumento risultante, se esiste già usa esattamente quel nome' },
+    risultato: { type: 'STRING', description: 'name of the resulting tool; if it exists already, use exactly that name' },
     descrizione: { type: 'STRING' },
     spiegazione: { type: 'STRING' },
   },
@@ -454,7 +454,7 @@ export async function judgeCombination(
   const r = await c.ask<{ possibile: boolean; risultato?: string; descrizione?: string; spiegazione: string }>(
     'narrator',
     'craft.judge',
-    `Il giocatore prova a combinare «${a.name}» (${a.description}) con «${b.name}» (${b.description}). Ha senso nel mondo e fisicamente? Se sì, cosa ne esce (uno strumento)? Strumenti già esistenti: ${knownItems.join(', ') || 'nessuno'}. Sii severo: la maggior parte delle combinazioni non produce nulla.`,
+    `The wanderer tries to combine «${a.name}» (${a.description}) with «${b.name}» (${b.description}). Does it make sense in the world and physically? If so, what comes out of it (a tool)? Tools that already exist: ${knownItems.join(', ') || 'none'}. Be strict: most combinations produce nothing.`,
     JUDGE_SCHEMA,
     { data: { a, b, knownItems }, temperature: 0.4, focus },
   );

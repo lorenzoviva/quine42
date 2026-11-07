@@ -37,27 +37,27 @@ describe('the Sculptor', () => {
     const m = new Scripted((c) => {
       if (c.task === 'model.sculpt') return ++sculpts === 1 ? FLOATING : `Ecco:\n\`\`\`xml\n${ROCK(sculpts === 2 ? 10 : 14)}\n\`\`\``;
       // The Artist prefers the taller rock (it sees it in the photographs).
-      return JSON.stringify({ voto: /scatola/.test(c.prompt) && c.images?.length === 1 ? (sculpts === 2 ? 5 : 8) : 0, riconoscibile: true, problemi: [], consigli: [] });
+      return JSON.stringify({ voto: /box/.test(c.prompt) && c.images?.length === 1 ? (sculpts === 2 ? 5 : 8) : 0, riconoscibile: true, problemi: [], consigli: [] });
     });
     const c = new Council(m, () => ({ files: bundledFiles, palette: {}, catalog: [] }));
     const r = await sculpt(c, { id: 'masso-rosso', nome: 'Masso rosso', aspetto: 'un masso rossiccio', classe: 'rock' });
     expect(r).toBeDefined();
     const sculptCalls = m.calls.filter((x) => x.task === 'model.sculpt');
     // The first program floats: it goes back with the reason; then two valid programs.
-    expect(sculptCalls[1].prompt).toMatch(/Non va: .*galleggia|tocca terra/);
+    expect(sculptCalls[1].prompt).toMatch(/It does not pass: .*galleggia|tocca terra/);
     expect(sculptCalls).toHaveLength(3);
     expect(sculptCalls.every((x) => x.model === 'gemini-3.1-flash-lite')).toBe(true);
     // The instructions are the universe's, with the classes and the palette; the examples of the class follow.
-    expect(sculptCalls[0].system).toContain('rock (roccia o masso): 20×20×16');
+    expect(sculptCalls[0].system).toContain('rock: 20×20×16');
     expect(sculptCalls[0].system).not.toContain('@@');
-    expect(sculptCalls[0].system).toContain('## Esempi');
+    expect(sculptCalls[0].system).toContain('## Examples');
     // The Artist sees one image (four views) per program; its model is its own.
     const judges = m.calls.filter((x) => x.task === 'model.judge');
     expect(judges).toHaveLength(2);
     expect(judges.every((x) => x.model === DEFAULT_SCULPTORS.artist && x.images?.[0].startsWith('data:image/png;base64,'))).toBe(true);
     expect(r!.voto).toBe(8);
     expect(r!.xml).toContain('size="16 16 14"');
-    expect(r!.xml).toMatch(/^<!-- Masso rosso: scolpito da gemini-3\.1-flash-lite .* 8\/10 -->/);
+    expect(r!.xml).toMatch(/^<!-- Masso rosso: sculpted by gemini-3\.1-flash-lite .* 8\/10 -->/);
     expect(r!.xml).toContain('size="20 20 16"');
   });
 
@@ -104,7 +104,7 @@ describe('the models the world lacks', () => {
     const id = k.spawnModuleEntity(k.modules.get(r.id!)!, 2.5, 2.5, undefined, 'test#mugnaio');
     expect((k.ecs.get(id, 'form') as FormComp).model).toBe('person');
     expect(await k.sculpting.make(req)).toBe(true);
-    expect(k.repo.head().files[`models/${req.id}.xml`]).toContain('scolpito da');
+    expect(k.repo.head().files[`models/${req.id}.xml`]).toContain('sculpted by');
     expect(JSON.parse(k.repo.head().files['models/index.json']!)[req.id]).toMatchObject({ class: 'person' });
     expect(k.sculpting.missing().some((m) => m.id === req.id)).toBe(false);
     const again = k.spawnModuleEntity(k.modules.get(r.id!)!, 4.5, 2.5, undefined, 'test#mugnaio2');
@@ -144,8 +144,8 @@ describe('the sizes of D&D (ADR-0092)', () => {
     expect(modelSize({ classe: 'person', taglia: 'small' })).toEqual({ size: 'small' });
     // The Sculptor reads the size and the box.
     const text = describeRequest({ id: 'x', nome: 'la cittadella', aspetto: 'mura', classe: 'structure', taglia: 'huge' }, grande);
-    expect(text).toContain('taglia Enorme (7.5 × 7.5 × 6 caselle, 16 voxel per casella)');
-    expect(text).toContain('scatola 120 × 120 × 96 voxel');
+    expect(text).toContain('size huge (7.5 × 7.5 × 6 tiles, 16 voxels per tile)');
+    expect(text).toContain('box 120 × 120 × 96 voxels');
     // Six sizes, Gargantuan the largest; a forged entity never takes the two rare ones.
     expect(SIZE_TIERS.map((t) => t.id)).toEqual(['tiny', 'small', 'medium', 'large', 'huge', 'gargantuan']);
     // The Forge still hears the Italian sizes (T310): the one meant.

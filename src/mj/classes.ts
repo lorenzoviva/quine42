@@ -25,18 +25,18 @@ export interface AssetClass {
 }
 
 export const CLASSES: AssetClass[] = [
-  { id: 'pebble', taglia: 'tiny', name: 'sasso', tiles: [0.5, 0.5, 0.4], hint: 'un oggetto che sta in una mano o poco più' },
-  { id: 'rock', taglia: 'small', name: 'roccia o masso', tiles: [1, 1, 0.8], minHeight: 0.5, hint: 'occupa una casella; più largo che alto' },
-  { id: 'bush', taglia: 'small', name: 'cespuglio o pianta bassa', tiles: [1, 1, 0.8], minHeight: 0.5, animation: 'wind', hint: 'occupa una casella' },
-  { id: 'tree', taglia: 'large', name: 'albero', tiles: [2, 2, 3], minHeight: 0.8, animation: 'wind', hint: 'il tronco occupa la casella centrale, la chioma sporge sulle vicine' },
-  { id: 'object', taglia: 'tiny', name: 'oggetto piccolo', tiles: [0.6, 0.6, 0.6], hint: 'vaso, secchio, lanterna, sacco' },
-  { id: 'furniture', taglia: 'medium', name: 'mobile o contenitore', tiles: [1, 1, 1], hint: 'cassa, barile, letto, banco: una casella' },
-  { id: 'person', taglia: 'medium', name: 'persona', tiles: [1, 0.75, 1.5], minHeight: 0.8, animation: 'walk', hint: 'in piedi, di fronte; testa grande (stile chibi)' },
-  { id: 'animal', taglia: 'small', name: 'animale piccolo', tiles: [0.75, 1, 0.75], minHeight: 0.6, animation: 'walk', hint: 'gatto, cane, volpe, gallina; il muso verso il davanti' },
-  { id: 'beast', taglia: 'large', name: 'animale grande o mostro', tiles: [1.25, 2, 1.5], minHeight: 0.6, animation: 'walk', hint: 'lupo, cavallo, orso, troll' },
-  { id: 'monument', taglia: 'medium', name: 'colonna, statua, portale', tiles: [1, 1, 3], minHeight: 0.6, hint: 'una casella di base, alto' },
-  { id: 'building', taglia: 'medium', name: 'edificio piccolo', tiles: [2.5, 2.5, 2.5], minHeight: 0.6, hint: 'pozzo, fontana, capanna' },
-  { id: 'structure', taglia: 'large', name: 'struttura grande', tiles: [5, 5, 4], minHeight: 0.5, hint: 'casa con cortile, mulino, torre, tempio: un solo modello su più caselle, in cui si entra' },
+  { id: 'pebble', taglia: 'tiny', name: 'sasso', tiles: [0.5, 0.5, 0.4], hint: 'a thing that fits in a hand or little more' },
+  { id: 'rock', taglia: 'small', name: 'roccia o masso', tiles: [1, 1, 0.8], minHeight: 0.5, hint: 'takes one tile; wider than tall' },
+  { id: 'bush', taglia: 'small', name: 'cespuglio o pianta bassa', tiles: [1, 1, 0.8], minHeight: 0.5, animation: 'wind', hint: 'takes one tile' },
+  { id: 'tree', taglia: 'large', name: 'albero', tiles: [2, 2, 3], minHeight: 0.8, animation: 'wind', hint: 'the trunk takes the central tile, the crown juts over the neighbouring ones' },
+  { id: 'object', taglia: 'tiny', name: 'oggetto piccolo', tiles: [0.6, 0.6, 0.6], hint: 'jar, bucket, lantern, sack' },
+  { id: 'furniture', taglia: 'medium', name: 'mobile o contenitore', tiles: [1, 1, 1], hint: 'chest, barrel, bed, counter: one tile' },
+  { id: 'person', taglia: 'medium', name: 'persona', tiles: [1, 0.75, 1.5], minHeight: 0.8, animation: 'walk', hint: 'standing, facing front; big head (chibi style)' },
+  { id: 'animal', taglia: 'small', name: 'animale piccolo', tiles: [0.75, 1, 0.75], minHeight: 0.6, animation: 'walk', hint: 'cat, dog, fox, hen; the snout toward the front' },
+  { id: 'beast', taglia: 'large', name: 'animale grande o mostro', tiles: [1.25, 2, 1.5], minHeight: 0.6, animation: 'walk', hint: 'wolf, horse, bear, troll' },
+  { id: 'monument', taglia: 'medium', name: 'colonna, statua, portale', tiles: [1, 1, 3], minHeight: 0.6, hint: 'one tile at the base, tall' },
+  { id: 'building', taglia: 'medium', name: 'edificio piccolo', tiles: [2.5, 2.5, 2.5], minHeight: 0.6, hint: 'well, fountain, hut' },
+  { id: 'structure', taglia: 'large', name: 'struttura grande', tiles: [5, 5, 4], minHeight: 0.5, hint: 'house with a courtyard, mill, tower, temple: a single model over several tiles, that one enters' },
 ];
 
 // The sizes of D&D (ADR-0092), one scale for creatures and structures: the class gives the shape and the box

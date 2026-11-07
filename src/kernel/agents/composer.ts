@@ -2,7 +2,7 @@
 // goes through the kernel's checks and goes back with the reason while it does not pass; here the checks are the validator's own, with the thresholds of the analysis
 // (ADR-0125), and the names are the world's (rule 0). Nobody hears it first: what the measures cannot say stays for whoever listens (lab/banco/suono.md).
 
-import { internalName, italianValues } from '../internalNames';
+import { internalName, internalValues } from '../internalNames';
 import { DAY_PHASES } from '../society';
 import type { Schema } from '../ai/models';
 import { BudgetError } from '../ai/models';
@@ -14,8 +14,8 @@ import type { FileMap } from '../types';
 import { wordsOf, type Council } from './council';
 
 export const COMPOSE_TASK = 'sound.compose';
-/** The moments of the day as the Musician's schema says them: in Italian until its prompt changes (T310); the answer reads internal. */
-export const DAY_MOMENTS = italianValues('momenti');
+/** The moments of the day as the Musician's schema says them, internal since T310; an Italian answer still reads internal. */
+export const DAY_MOMENTS = internalValues('momenti');
 /** A loop shorter than this is not a piece: a bar (16 steps) would go round every two seconds. */
 export const MIN_PIECE_STEPS = 32;
 
@@ -59,12 +59,12 @@ interface Answer {
 const COMPOSE_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
-    nome: { type: 'STRING', description: 'come lo chiamerebbe la gente del mondo: due o tre parole' },
-    programma: { type: 'STRING', description: 'il programma completo, in XML, con <sound> nella radice' },
-    uso: { type: 'STRING', enum: ['musica', 'effetto'], description: 'musica o effetto' },
-    ambienti: { type: 'ARRAY', items: { type: 'STRING' }, description: "per la musica: gli ambienti in cui suona, dall'elenco" },
-    momenti: { type: 'ARRAY', items: { type: 'STRING', enum: DAY_MOMENTS }, description: 'per la musica: quando suona; vuoto, sempre' },
-    effetto: { type: 'STRING', description: "per un effetto: quale, dall'elenco" },
+    nome: { type: 'STRING', description: 'what the people of the world would call it, in the language of the world: two or three words' },
+    programma: { type: 'STRING', description: 'the whole program, in XML, with <sound> in the root' },
+    uso: { type: 'STRING', enum: ['music', 'effect'], description: 'music or effect' },
+    ambienti: { type: 'ARRAY', items: { type: 'STRING' }, description: 'for music: the environments it plays in, from the list' },
+    momenti: { type: 'ARRAY', items: { type: 'STRING', enum: DAY_MOMENTS }, description: 'for music: when it plays; empty, always' },
+    effetto: { type: 'STRING', description: 'for an effect: which one, from the list' },
   },
   required: ['nome', 'programma', 'uso'],
 };
@@ -84,13 +84,13 @@ export function soundExample(files: FileMap, uso: SoundPurpose['use']): string |
 /** The Musician's instructions (prompts/agents/musician.md) with the scales, the instruments and the thresholds of today. */
 export function composerRole(files: FileMap): string {
   const limits = [
-    `almeno ${T.minEventsPerBar} eventi a battuta e ${T.minPitches} note diverse`,
-    `il ciclo non si ripete identico ogni metà o meno, e semi diversi danno partiture diverse (distanza tra i semi almeno ${T.minSeedDistance})`,
-    `al più ${Math.round(T.maxSilence * 100)} % di silenzio e ${T.maxEventsPerStep} eventi a passo`,
-    `al più ${Math.round(T.maxHarsh * 100)} % di coppie simultanee a semitono o tritono`,
-    `volume del ciclo tra ${T.minRmsDb} e ${T.maxRmsDb} dBFS (RMS), picco grezzo al più ${T.maxRawPeak}`,
+    `at least ${T.minEventsPerBar} events per bar and ${T.minPitches} different notes`,
+    `the loop does not repeat identically every half or less, and different seeds give different scores (distance between the seeds at least ${T.minSeedDistance})`,
+    `at most ${Math.round(T.maxSilence * 100)} % of silence and ${T.maxEventsPerStep} events per step`,
+    `at most ${Math.round(T.maxHarsh * 100)} % of simultaneous pairs a semitone or a tritone apart`,
+    `loudness of the loop between ${T.minRmsDb} and ${T.maxRmsDb} dBFS (RMS), raw peak at most ${T.maxRawPeak}`,
   ];
-  return (files['prompts/agents/musician.md'] ?? 'Sei il Musicista: scrivi programmi sonori MarkovJunior in XML.')
+  return (files['prompts/agents/musician.md'] ?? 'You are the Musician: you write MarkovJunior sound programs in XML.')
     .replace('@@SCALES@@', Object.keys(SCALES).join(', '))
     .replace('@@INSTRUMENTS@@', INSTRUMENTS.join(', '))
     .replace('@@LIMITS@@', limits.map((l) => `- ${l}`).join('\n'));
@@ -109,7 +109,7 @@ export function purposeOf(a: Answer, req: ComposeRequest, world: ComposeWorld): 
     if (!world.effetti.includes(effect)) return { error: `un effetto risponde a un momento del gioco: "effetto" è uno tra ${world.effetti.join(', ')}` };
     return { suono: { use: uso, effects: [effect] } };
   }
-  // An environment of the seed by its Italian id of the contract 0.1 is the one it became (T307a, until the prompts change, T310).
+  // An environment of the seed by its Italian id of the contract 0.1 is the one it became (T307a; the prompts are English since T310, the repair stays a contract more).
   const named = req.ambienti ?? stringsIn(Array.isArray(a.ambienti) ? a.ambienti.map((x) => (typeof x === 'string' && !world.ambienti.includes(x) ? internalName('ambienti', x) : x)) : a.ambienti, world.ambienti);
   const ambienti = !named.length && world.qui ? [world.qui] : named;
   if (!ambienti.length) return { error: `"ambienti" nomina almeno uno tra ${world.ambienti.join(', ')}` };
@@ -132,12 +132,12 @@ export function scoreErrors(path: string, xml: string, nome: string, uso: SoundP
 
 const describe = (req: ComposeRequest, world: ComposeWorld): string =>
   [
-    `Scrivi: ${req.richiesta}`,
-    req.nome && `Si chiama: ${req.nome}`,
-    req.contesto && `Dove si sente: ${req.contesto}`,
-    req.uso ? `È ${req.uso === 'music' ? 'un brano: musica' : 'un effetto'}.` : 'Decidi se è musica (un ciclo che suona in un ambiente) o un effetto (un momento breve del gioco).',
-    !req.ambienti && `Ambienti del mondo: ${world.ambienti.join(', ')}.`,
-    !req.uso && `Momenti del gioco che hanno un effetto: ${world.effetti.join(', ')}.`,
+    `Write: ${req.richiesta}`,
+    req.nome && `It is called: ${req.nome}`,
+    req.contesto && `Where it is heard: ${req.contesto}`,
+    req.uso ? `It is ${req.uso === 'music' ? 'a piece: music' : 'an effect'}.` : 'Decide whether it is music (a loop that plays in an environment) or an effect (a short moment of the game).',
+    !req.ambienti && `Environments of the world: ${world.ambienti.join(', ')}.`,
+    !req.uso && `Moments of the game that have an effect: ${world.effetti.join(', ')}.`,
   ]
     .filter(Boolean)
     .join('\n');
@@ -150,13 +150,13 @@ export async function compose(c: Council, req: ComposeRequest, world: ComposeWor
   const example = soundExample(c.files, req.uso ?? 'music');
   // Who decides the use sees both: an effect is not a short piece.
   const shown = req.uso ? [example] : [example, soundExample(c.files, 'effect')];
-  const system = shown.some(Boolean) ? `## Esempi della libreria\n${shown.filter(Boolean).join('\n\n')}` : undefined;
+  const system = shown.some(Boolean) ? `## Examples from the library\n${shown.filter(Boolean).join('\n\n')}` : undefined;
   const prompt = describe(req, world);
   const words = wordsOf(c.files);
   let last: { xml?: string; error: string } | undefined;
   let calls = 0;
   for (let i = 0; i <= (opts.retries ?? 2); i++) {
-    const p = last ? `${prompt}\n\nIl programma che hai scritto:\n${(last.xml ?? '(nessuno)').slice(0, 6000)}\nNon va: ${last.error}\nCorreggilo e rispondi con il programma completo.` : prompt;
+    const p = last ? `${prompt}\n\nThe program you wrote:\n${(last.xml ?? '(none)').slice(0, 6000)}\nIt does not pass: ${last.error}\nFix it and answer with the whole program.` : prompt;
     calls++;
     let a: Answer;
     try {

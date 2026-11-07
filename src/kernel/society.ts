@@ -532,10 +532,11 @@ export function addIndividual(people: People, p: Individual, speciesOf?: (tipo: 
 
 /** What the society looks like, for the Narrator creating someone new. */
 export function societySummary(people: People, n = 16): string {
-  const who = (p: Individual) => (p.species === 'animal' ? `animale${p.gender ? `, ${italianName('specie', p.gender)}` : ''}` : p.gender === 'female' ? 'donna' : p.gender === 'male' ? 'uomo' : '');
-  const lines = people.people.slice(-n).map((p) => `- ${p.name}, ${p.job}${who(p) ? ` — ${who(p)}` : ''}${p.place ? ` (${p.place})` : ''}${p.family.length ? `; ${p.family.map((r) => `${r.bond} di ${r.name}`).join(', ')}` : ''}`);
-  const waiting = people.expected.slice(-10).map((a) => `- ${a.name} (${a.bond} di ${a.of})`);
-  return [lines.length ? `Persone già conosciute:\n${lines.join('\n')}` : 'Nessuno è stato ancora conosciuto.', waiting.length ? `Nominate ma mai incontrate (potresti essere una di loro, se il tipo è adatto):\n${waiting.join('\n')}` : ''].filter(Boolean).join('\n\n');
+  // For the Council's prompts (English since T310): the names, trades and bonds are the world's words.
+  const who = (p: Individual) => (p.species === 'animal' ? `animal${p.gender ? `, ${p.gender}` : ''}` : p.gender === 'female' ? 'woman' : p.gender === 'male' ? 'man' : '');
+  const lines = people.people.slice(-n).map((p) => `- ${p.name}, ${p.job}${who(p) ? ` — ${who(p)}` : ''}${p.place ? ` (${p.place})` : ''}${p.family.length ? `; ${p.family.map((r) => `${r.bond} of ${r.name}`).join(', ')}` : ''}`);
+  const waiting = people.expected.slice(-10).map((a) => `- ${a.name} (${a.bond} of ${a.of})`);
+  return [lines.length ? `People already known:\n${lines.join('\n')}` : 'Nobody has been met yet.', waiting.length ? `Named but never met (you could be one of them, if the kind fits):\n${waiting.join('\n')}` : ''].filter(Boolean).join('\n\n');
 }
 
 /** The part of the day, from the kernel's clock (same phase as daylight). */

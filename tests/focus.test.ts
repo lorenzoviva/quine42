@@ -1,4 +1,5 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import { languageBlock, languageOf } from '../src/kernel/language';
 import { join, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
@@ -89,14 +90,14 @@ describe('the context of the agents from the graph (T13)', () => {
     await npcReply(c, npc('Bastiano'), 'ciao');
     await npcReply(c, npc('Bastiano'), 'ciao', ['Bastiano', 'chunk:0_0']);
     const [plain, focused] = models.calls.map((x) => x.system);
-    expect(plain).toMatch(/## Bibbia del mondo/);
+    expect(plain).toMatch(/## Bible of the world/);
     expect(plain).toMatch(/Un fatto lontano numero 28/);
-    expect(plain).toMatch(/## Moduli esistenti/);
-    expect(focused).not.toMatch(/## Bibbia del mondo|## Moduli esistenti|Un fatto lontano|Luogo lontano/);
-    expect(focused).toMatch(/## Il mondo\nTitolo: Prova\nTono: quieto\nSintesi: Un borgo sul lago\./);
+    expect(plain).toMatch(/## Existing modules/);
+    expect(focused).not.toMatch(/## Bible of the world|## Existing modules|Un fatto lontano|Luogo lontano/);
+    expect(focused).toMatch(/## The world\nTitle: Prova\nTone: quieto\nSummary: Un borgo sul lago\./);
     // The canon goes with every narrative task, focused or not.
-    expect(focused).toMatch(/Canone delle rune[\s\S]*restano ferme/);
-    const ctx = focused.split('## Ciò che il mondo sa di questo compito')[1];
+    expect(focused).toMatch(/Canon of the runes[\s\S]*restano ferme/);
+    const ctx = focused.split('## What the world knows about this task')[1];
     expect(ctx).toBeDefined();
     expect(ctx).toMatch(/- Bastiano, uomo, contadino: padrone di Fiocco; fratello di Nereo; abita a Piazza del Borgo; lavora a Piazza del Borgo/);
     expect(ctx).toMatch(/- Fiocco, animale femmina/);
@@ -106,7 +107,7 @@ describe('the context of the agents from the graph (T13)', () => {
     expect(ctx).not.toMatch(/Ottavia/);
     expect(ctx).not.toMatch(/\(tipo\)/);
     // What is the same for every focused task comes first (the cache), the focus last.
-    expect(focused.indexOf('## Il mondo')).toBeLessThan(focused.indexOf('## Ciò che il mondo sa'));
+    expect(focused.indexOf('## The world')).toBeLessThan(focused.indexOf('## What the world knows'));
     expect(focused.length).toBeLessThan(plain.length);
   });
 
@@ -117,8 +118,8 @@ describe('the context of the agents from the graph (T13)', () => {
     const bare = new Council(models, () => ({ files, palette: {}, catalog: [] }));
     await npcReply(bare, npc('Bastiano'), 'ciao', ['Bastiano']);
     for (const call of models.calls) {
-      expect(call.system).toMatch(/## Bibbia del mondo/);
-      expect(call.system).not.toMatch(/## Ciò che il mondo sa/);
+      expect(call.system).toMatch(/## Bible of the world/);
+      expect(call.system).not.toMatch(/## What the world knows/);
     }
   });
 
@@ -135,13 +136,13 @@ describe('the context of the agents from the graph (T13)', () => {
     await k.talk(id, 'Buongiorno!');
     const name = k.ecs.get(id, 'identity')?.name as string;
     const reply = models.calls.filter((x) => x.task === 'npc.reply').at(-1)!;
-    expect(reply.system).toMatch(/## Ciò che il mondo sa di questo compito/);
+    expect(reply.system).toMatch(/## What the world knows about this task/);
     expect(reply.system).toContain(`- ${name}`);
     expect(reply.system).toMatch(/\(luogo 0,0\)/);
-    expect(reply.system).not.toMatch(/## Moduli esistenti/);
+    expect(reply.system).not.toMatch(/## Existing modules/);
     // The individual was created with the context of its kind and place, too.
     const individuate = models.calls.find((x) => x.task === 'npc.individuate')!;
-    expect(individuate.system).toMatch(/## Ciò che il mondo sa di questo compito/);
+    expect(individuate.system).toMatch(/## What the world knows about this task/);
   });
 
   // The measure of T13 on a real universe: tokens of the context before (summaries) and after (graph),
@@ -183,11 +184,12 @@ describe('the context of the agents from the graph (T13)', () => {
       await npcReply(c, { ...npc(who.name), place: home.nome }, 'Cosa succede al lago?', f);
       await weavePlot(c, society, home.nome, '', '', f && [...people.slice(-20).map((p) => p.name), ...f.slice(1)]);
     }
-    // The lexicon (T65) is the same with and without the graph, and the cache serves it: not what the graph saves.
+    // The lexicon (T65) and the Language block (T310) are the same with and without the graph, and the cache serves them: not what the graph saves.
     const lexicon = lexiconSummary(files);
+    const language = languageBlock(languageOf(files));
     const ledger = (calls: TextCall[]) => {
       const l = new UsageLog();
-      for (const x of calls) l.record({ model: 'gemini-3.1-flash-lite', agent: x.agent, task: x.task, prompt: Math.ceil((x.system.replace(lexicon, '').length + x.prompt.length) / 4), cached: 0, output: 0, thoughts: 0 });
+      for (const x of calls) l.record({ model: 'gemini-3.1-flash-lite', agent: x.agent, task: x.task, prompt: Math.ceil((x.system.replace(lexicon, '').replace(language, '').length + x.prompt.length) / 4), cached: 0, output: 0, thoughts: 0 });
       return l.session;
     };
     const [r0, p0, r1, p1] = models.calls;
@@ -195,7 +197,7 @@ describe('the context of the agents from the graph (T13)', () => {
     const after = ledger([r1, p1]);
     // T13_DUMP=1: the size of every section, to see where the tokens go.
     if (process.env.T13_DUMP)
-      for (const x of [r0, r1]) console.log(x.system.split(/\n(?=## )/).map((s) => `${Math.ceil(s.length / 4)}\t${s.slice(0, 60).replace(/\n/g, ' ')}`).join('\n'), `\nPROMPT ${Math.ceil(x.prompt.length / 4)}\n${x === r1 ? x.system.split('## Ciò che il mondo sa')[1] : ''}`);
+      for (const x of [r0, r1]) console.log(x.system.split(/\n(?=## )/).map((s) => `${Math.ceil(s.length / 4)}\t${s.slice(0, 60).replace(/\n/g, ' ')}`).join('\n'), `\nPROMPT ${Math.ceil(x.prompt.length / 4)}\n${x === r1 ? x.system.split('## What the world knows')[1] : ''}`);
     console.log(`T13 su valmora — npc.reply: ${Math.ceil((r0.system.length + r0.prompt.length) / 4)} → ${Math.ceil((r1.system.length + r1.prompt.length) / 4)} token; plot.weave: ${Math.ceil((p0.system.length + p0.prompt.length) / 4)} → ${Math.ceil((p1.system.length + p1.prompt.length) / 4)}; dollari ${before.usd.toFixed(5)} → ${after.usd.toFixed(5)}`);
     expect(r1.system).toContain(`- ${who.name}`);
     expect(after.prompt).toBeLessThan(before.prompt * 0.6);

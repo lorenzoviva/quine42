@@ -48,7 +48,7 @@ export class ScoreDirector {
       const env = ch.plan?.layout;
       const def = env ? this.k.content.layouts[env] : undefined;
       if (!env || !def || this.skip.has(env) || out.some((r) => r.ambienti?.[0] === env) || programs.some((p) => namesEnvironment(p, env))) continue;
-      out.push({ richiesta: `il brano di ${def.name}, che suona di giorno a chi cammina in questo ambiente`, nome: def.name, uso: 'music', ambienti: [env], momenti: BY_DAY, contesto: def.description });
+      out.push({ richiesta: `the piece of ${def.name}, which plays by day for whoever walks in this environment`, nome: def.name, uso: 'music', ambienti: [env], momenti: BY_DAY, contesto: def.description });
     }
     return out;
   }

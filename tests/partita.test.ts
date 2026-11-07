@@ -65,8 +65,8 @@ describe('the game chosen at the Genesis (T33)', () => {
     const asked = [mild, hard].map(({ models }) => models.calls.find((c) => c.task === 'player.death')!);
     expect(asked.every(Boolean)).toBe(true);
     // The punishment is a principle of the Council (system) and the heart of the task (prompt).
-    expect(asked[0].system).toMatch(/La morte è nessuna \(0 su 4\)/);
-    expect(asked[1].system).toMatch(/La morte è dura \(3 su 4\)/);
+    expect(asked[0].system).toMatch(/Death is none \(0 of 4\)/);
+    expect(asked[1].system).toMatch(/Death is hard \(3 of 4\)/);
     expect(asked[0].prompt).not.toBe(asked[1].prompt);
     // Nothing lost, up where they fell; everything lost, back at the square.
     expect(countItem(mild.k.inventory(), 'item.coltello')).toBe(1);
@@ -85,10 +85,10 @@ describe('the game chosen at the Genesis (T33)', () => {
     k.die('fame');
     await k.continueAfterDeath();
     const narr = models.calls.find((c) => c.task === 'player.death')!;
-    expect(narr.system).toMatch(/spietata/);
-    expect(narr.system).toMatch(/possono ferirsi; «Altro…» non si fa su un altro viandante/);
-    for (const a of ['arbiter', 'engineer', 'liaison'] as const) expect(k.council.context(a)).toMatch(/## La partita/);
-    for (const a of ['sculptor', 'artist', 'cartographer', 'physicist'] as const) expect(k.council.context(a)).not.toMatch(/## La partita/);
+    expect(narr.system).toMatch(/ruthless/);
+    expect(narr.system).toMatch(/they can hurt each other; "Altro…" \(a free action\) is not done on another wanderer/);
+    for (const a of ['arbiter', 'engineer', 'liaison'] as const) expect(k.council.context(a)).toMatch(/## The game/);
+    for (const a of ['sculptor', 'artist', 'cartographer', 'physicist'] as const) expect(k.council.context(a)).not.toMatch(/## The game/);
   });
 
   it('after the Genesis the game never changes: a rewritten universe.json is written back', async () => {

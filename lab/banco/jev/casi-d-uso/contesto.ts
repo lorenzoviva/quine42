@@ -12,6 +12,34 @@ import { DEFAULT_SCULPTORS } from '../../../../src/kernel/agents/sculptor';
 import { ACTOR_MODEL, HOUR } from '../../../../src/kernel/coefficients';
 import type { RecordedCall } from './registratore';
 
+/** The principles as the requests recorded before T310 carry them (Italian): the cases of the bank were recorded then. */
+export const PRINCIPLES_BEFORE_T310 = `## Principi del Concilio (il kernel li garantisce)
+Due tavoli, come in Dungeons & Dragons. Il Concilio è il Dungeon Master: sta fuori dal mondo, lo crea e
+lo fa evolvere. Dentro il mondo ci sono il viandante e le persone: per loro il mondo è reale.
+- Niente meta-gioco nei contenuti (persone, oggetti, luoghi, dialoghi, testi, trame, fatti, leggende): mai
+  codice, simulazioni, programmi, computer, giochi, giocatori, agenti, Concilio, «crepe della realtà», bordi
+  del mondo misurati, mondi che si ripetono o si riavviano.
+- Nemmeno allusioni travestite da leggenda. Il mondo non sa di essere un gioco, quindi nessuno racconta che:
+  chi cammina troppo torna sempre in piazza o non si perde mai; qualcuno o qualcosa (un re sotto il lago, la
+  luna, un dio) osserva ogni viandante; un confine (il bosco, la valle, il regno) non si può superare o fa
+  tornare sui propri passi; il mondo finisce, si ripete, ricomincia o esiste solo per chi lo guarda.
+- Niente doppioni degli elementi del gioco. Le rune sono una cosa sola, quella del canone: nessun altro
+  «simbolo luminoso», «glifo», «lettera di luce» o «scritta che brilla» nel terreno, e nessun comportamento
+  delle rune che il canone non dice. Lo stesso per ciò che esiste già (oggetti, persone, incantesimi).
+- Mestieri e ruoli concreti (fornaio, guardia, pastore, guaritrice, mercante, brigante, mago di
+  villaggio), mai custodi della realtà, censori delle identità, archivisti del mondo, misuratori di anomalie.
+- Storie semplici e concrete, fatte di persone: amori, debiti, mestieri, furti, feste, rivalità, viaggi,
+  bestie, magia delle rune come la dice il canone. Il mistero non è un obbligo.
+- Il Concilio fa evolvere il gioco, non lo censura: ciò che ha senso nel mondo (un cavallo sellato, una
+  barca, un'arma, un rituale) va reso possibile con oggetti, azioni, effetti, stati e codice, con
+  conseguenze coerenti.
+- Ogni mondo ha la sua epoca: macchine e mestieri sono cose del mondo. Le parole vietate
+  non si usano nemmeno per altro: di' calcolatore, trasmissione, calciatore.`;
+/** The principles a recorded system carries: the ones of now, or the Italian ones of before T310. */
+export const principlesIn = (system: string): string | undefined => [COUNCIL_PRINCIPLES, PRINCIPLES_BEFORE_T310].find((p) => system.includes(p));
+/** The Language block (T310) that follows the principles: fixed instructions, like them. */
+const LANGUAGE_HEADING = '## Language of the world';
+
 // ---------------------------------------------------------------------------------------------------------- the parts
 
 export const PARTS = {
@@ -59,6 +87,20 @@ export interface Piece {
 
 /** The context the Council gives an agent: every part begins with one of these headings (council.ts → context()). */
 const CONTEXT_HEADINGS: Array<[string, Part]> = [
+  // The headings of now (English since T310), then those the recorded cases carry.
+  ['## The game (chosen before the Genesis', 'partita'],
+  ['## Bible of the world', 'bibbia'],
+  ['## The world\n', 'bibbia'],
+  ['## Bible (summary)', 'bibbia'],
+  ['## Tone\n', 'bibbia'],
+  ['## Existing modules', 'catalogo'],
+  ['## Placeable modules', 'catalogo'],
+  ['## Canon of the runes', 'canone'],
+  ['## Lexicon of the world', 'lessico'],
+  ['## Rules the Council has already established', 'regole'],
+  ['## Terrains\n', 'terreni'],
+  ['## Atlas (centre in places', 'atlante'],
+  ['## Style guide', 'stile'],
   ['## La partita (scelta prima della Genesi', 'partita'],
   ['## Bibbia del mondo', 'bibbia'],
   ['## Il mondo\n', 'bibbia'],
@@ -73,7 +115,9 @@ const CONTEXT_HEADINGS: Array<[string, Part]> = [
   ['## Atlante (centro in luoghi', 'atlante'],
   ['## Guida di stile', 'stile'],
 ];
-export const FOCUS_HEADING = '## Ciò che il mondo sa di questo compito';
+export const FOCUS_HEADING = '## What the world knows about this task';
+/** The focus as the recorded cases of before T310 say it. */
+const FOCUS_HEADING_BEFORE_T310 = '## Ciò che il mondo sa di questo compito';
 
 /**
  * The system instruction: role, principles, the agent's context, the task's own system lines, the graph's focus. With the context as the
@@ -82,13 +126,21 @@ export const FOCUS_HEADING = '## Ciò che il mondo sa di questo compito';
  */
 export function cutSystem(system: string, context?: string): Piece[] {
   const out: Piece[] = [];
-  const at = system.indexOf(COUNCIL_PRINCIPLES);
-  if (at < 0) return [{ part: 'ruolo', text: system, prefix: true }];
+  const principles = principlesIn(system);
+  if (!principles) return [{ part: 'ruolo', text: system, prefix: true }];
+  const at = system.indexOf(principles);
   if (at > 0) out.push({ part: 'ruolo', text: system.slice(0, at).replace(/\n\n$/, ''), prefix: true });
-  out.push({ part: 'principi', text: COUNCIL_PRINCIPLES, prefix: true });
-  let rest = system.slice(at + COUNCIL_PRINCIPLES.length).replace(/^\n\n/, '');
+  out.push({ part: 'principi', text: principles, prefix: true });
+  let rest = system.slice(at + principles.length).replace(/^\n\n/, '');
+  // The Language block (T310) is fixed instructions, as the principles are.
+  if (rest.startsWith(LANGUAGE_HEADING)) {
+    const end = rest.indexOf('\n\n');
+    const block = end < 0 ? rest : rest.slice(0, end);
+    out.push({ part: 'principi', text: block, prefix: true });
+    rest = rest.slice(block.length).replace(/^\n\n/, '');
+  }
   let focus = '';
-  const f = rest.lastIndexOf(FOCUS_HEADING);
+  const f = Math.max(rest.lastIndexOf(FOCUS_HEADING), rest.lastIndexOf(FOCUS_HEADING_BEFORE_T310));
   if (f >= 0) {
     focus = rest.slice(f);
     rest = rest.slice(0, f).replace(/\n\n$/, '');
@@ -123,6 +175,20 @@ export function cutSystem(system: string, context?: string): Piece[] {
  * rule. What no rule names is the task's own instruction. Inline lists of what exists («Esistono già: …») are cut off their line.
  */
 const LINE_RULES: Array<[RegExp, Part, boolean]> = [
+  // The requests of now (English since T310).
+  [/^(The wanderer says: «|The wanderer, in front of «|The wanderer wants to make|The wanderer (looks closely at|reads) «|The wanderer died|The wanderer tries to combine|You are asked: «|The Council introduces a mechanic|Request \(|Write: |Create an individual of this kind|In the world people talked about)/, 'richiesta', false],
+  [/^(Sculpt: |Review these modules|Concept:|logic\.lua:|Physics:|Check the weight, stack|Are these things consistent|Define the physics)/, 'richiesta', true],
+  [/^(They exist already|Tools that already exist|Things that already exist|Existing things( \(|:)|(Available|Existing) environments|Mechanics already there|(Existing|Valid) terrains|Terrains:$|Things and characters: )/, 'catalogo', true],
+  [/^"rune": 0-2 fragments/, 'catalogo', false],
+  [/^(Design the place|Neighbouring places|This place belongs to the region|State: mood|Carries: |Facts you perceive|You are talking with |How the wanderer introduces themselves|To the wanderer you are|A and B meet|Place where they are|The wanderer is at|Conditions:)/, 'stato', false],
+  [/^(Session of the Council\.|Mechanics with an interface|Rules born from play|People met|Places seen|PLACES AND REGIONS)/, 'stato', true],
+  [/^(SHEET OF THE CHARACTER|WHO THEY ARE|Sheet of the kind:)/, 'persona', true],
+  [/^(In short: )/, 'persona', false],
+  [/^(YOUR MEMORIES|Things you know and do not say|memories:|secrets:)/, 'ricordi', true],
+  [/^(Conversation so far|THINGS THAT HAPPENED RECENTLY)/, 'storia', true],
+  [/^The wanderer comes up to you for the first time/, 'storia', false],
+  [/^(PEOPLE|People already known|Named but never met|THE SOCIETY OF THE WORLD)/, 'societa', true],
+  // The requests recorded before T310 (Italian).
   // What is asked this time.
   [/^Il viandante dice: «/, 'richiesta', false],
   [/^Il viandante, davanti a «/, 'richiesta', false],
@@ -163,7 +229,7 @@ const LINE_RULES: Array<[RegExp, Part, boolean]> = [
 ];
 
 /** Phrases inside a line after which a list of what exists begins (to the end of the sentence). */
-const INLINE_LISTS = [/Esistono già[^:]*: /, /Strumenti già esistenti: /, /Oggetti che esistono già[^:]*: /, /questi oggetti \(nomi esatti\): /, /Oggetti noti: /];
+const INLINE_LISTS = [/They exist already[^:]*: /, /Tools that already exist: /, /Things that already exist[^:]*: /, /these things \(exact names\): /, /Esistono già[^:]*: /, /Strumenti già esistenti: /, /Oggetti che esistono già[^:]*: /, /questi oggetti \(nomi esatti\): /, /Oggetti noti: /];
 
 export function cutPrompt(prompt: string): Piece[] {
   const out: Piece[] = [];

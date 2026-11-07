@@ -20,6 +20,22 @@ export const DEFAULT_GAME_SETUP: GameSetup = { mode: 'single', death: 3, pvp: fa
 
 export const deathLevel = (p: GameSetup) => DEATH_LEVELS[p.death] ?? DEATH_LEVELS[DEFAULT_GAME_SETUP.death];
 
+/** The same levels as the Council reads them (T310: the prompts are English; the Genesis screen shows DEATH_LEVELS). */
+const DEATH_RULES: readonly string[] = [
+  'none: one gets up where one fell, with everything one carries: only the memory remains',
+  'light: one opens one\'s eyes again in the square with what one carries; at most one thing is lost, the most fragile',
+  'medium: one opens one\'s eyes again in the square and loses part of what one carries (the valuables, the provisions)',
+  'hard: one opens one\'s eyes again in the square with nothing of what one carried, and without the conditions of before',
+  'ruthless: everything is lost: what one carries, the conditions, the advantages won; no ability or progress of the wanderer may survive death',
+];
+
+/** The punishment of a level of the death as the Council reads it: «hard (3 of 4): …». */
+export function deathRule(level: number): string {
+  const i = DEATH_RULES[level] !== undefined ? level : DEFAULT_GAME_SETUP.death;
+  const [name, text] = DEATH_RULES[i].split(/: (.*)/s);
+  return `${name} (${i} of 4): ${text}`;
+}
+
 /**
  * Whether a universe's `partita.modalita`, as read, is a game of many (T307b): `multiplayer`, or `multigiocatore` of a universe of the
  * contract 0.2 not ported yet (a server reads universe.json before any kernel boots it: such a game must not look like a game alone).
@@ -28,13 +44,12 @@ export const isMultiplayer = (modalita: unknown): boolean => typeof modalita ===
 
 /** The game as a principle of the Council: with every task of who builds on it. */
 export function gameSetupSummary(p: GameSetup): string {
-  const d = deathLevel(p);
   return [
-    '## La partita (scelta prima della Genesi, non cambia più)',
-    `- La morte è ${d.nome} (${p.death} su 4): ${d.testo}. Ciò che introduci (abilità, tesori, legami, meccaniche) deve restare coerente con questa punizione.`,
+    '## The game (chosen before the Genesis, it never changes)',
+    `- Death is ${deathRule(p.death)}. What you introduce (abilities, treasures, bonds, mechanics) must stay consistent with this punishment.`,
     p.mode === 'multiplayer'
-      ? `- Si gioca in più viandanti. Tra loro: ${p.pvp ? 'possono ferirsi' : 'non possono ferirsi'}; ${p.freeActionsBetweenPlayers ? '«Altro…» si può fare anche su un altro viandante' : '«Altro…» non si fa su un altro viandante'}.`
-      : '- Si gioca da soli: un solo viandante.',
+      ? `- Several wanderers play. Between them: ${p.pvp ? 'they can hurt each other' : 'they cannot hurt each other'}; ${p.freeActionsBetweenPlayers ? '"Altro…" (a free action) can be done on another wanderer too' : '"Altro…" (a free action) is not done on another wanderer'}.`
+      : '- One plays alone: a single wanderer.',
   ].join('\n');
 }
 
@@ -60,7 +75,7 @@ export function fallbackDeath(level: number, carried: Array<{ name: string; coun
         story: 'Riapri gli occhi nella piazza. Metà di ciò che portavi è andata perduta.',
         loseAll: false,
         restart: 'piazza',
-        effects: carried.filter((c) => c.count >= 2).map((c) => ({ tipo: 'consuma', oggetto: c.name, quantita: Math.floor(c.count / 2) })),
+        effects: carried.filter((c) => c.count >= 2).map((c) => ({ type: 'consume', item: c.name, quantity: Math.floor(c.count / 2) })),
       };
     case 4:
       return { story: 'Riapri gli occhi nella piazza. Non ti resta niente, nemmeno ciò che avevi imparato a essere.', loseAll: true, restart: 'piazza', effects: [] };

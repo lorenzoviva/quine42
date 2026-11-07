@@ -208,7 +208,7 @@ describe('free actions and effects', () => {
     expect(k.ai.usage.text).toBe(after);
     expect(after).toBe(calls + 2);
     // The Council sees the rules in every later judgement.
-    expect(k.council.context('narrator')).toMatch(/Regole già stabilite[\s\S]*bevo dal secchio/);
+    expect(k.council.context('narrator')).toMatch(/Rules the Council has already established[\s\S]*bevo dal secchio/);
   });
 
   it('free crafting: the Council decides from what you carry; a possible recipe becomes a known recipe', async () => {

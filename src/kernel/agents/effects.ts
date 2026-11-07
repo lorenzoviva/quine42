@@ -4,7 +4,7 @@
 // makes sense and can be repeated is learned by the object: it enters its menu, no further calls.
 
 import type { Schema } from '../ai/models';
-import { italianName, italianValues } from '../internalNames';
+import { internalName, internalValues } from '../internalNames';
 import type { Council } from './council';
 
 export interface ActionContext {
@@ -44,90 +44,90 @@ export interface ActionJudgement {
 const EFFECT_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
-    // The prompts still speak Italian (T310): the effects of the contract 0.1, which validateEffects makes internal.
-    tipo: { type: 'STRING', enum: italianValues('effetti') },
-    testo: { type: 'STRING' },
-    oggetto: { type: 'STRING', description: 'nome di un oggetto (crea_oggetto, consuma)' },
-    nome: { type: 'STRING', description: 'stato/togli_stato: il nome della condizione (es. «a cavallo»)' },
-    velocita: { type: 'NUMBER' },
-    peso: { type: 'NUMBER' },
-    luce: { type: 'NUMBER' },
-    legame: { type: 'STRING' },
-    quantita: { type: 'INTEGER' },
-    a: { type: 'STRING', description: 'terreno: nome del terreno risultante' },
-    da: { type: 'STRING', description: 'terreno: solo le caselle di questo terreno (facoltativo)' },
-    delta: { type: 'INTEGER', description: 'rilievo: livelli di cui scavare o alzare (positivo = alza, negativo = scava)' },
-    raggio: { type: 'NUMBER' },
-    durata: { type: 'NUMBER', description: 'secondi' },
-    forza: { type: 'NUMBER' },
-    modulo: { type: 'STRING', description: 'evoca: nome di ciò che compare' },
-    fame: { type: 'NUMBER' },
-    sete: { type: 'NUMBER' },
-    energia: { type: 'NUMBER' },
-    salute: { type: 'NUMBER' },
-    capienza: { type: 'INTEGER' },
-    bottino: { type: 'STRING' },
+    // The effects and their fields are internal since T310 (the prompts are English); validateEffects still makes an Italian one internal.
+    type: { type: 'STRING', enum: internalValues('effetti') },
+    text: { type: 'STRING' },
+    item: { type: 'STRING', description: 'name of a thing (create_item, consume)' },
+    name: { type: 'STRING', description: 'state/remove_state: the name of the condition, in the language of the world (e.g. «a cavallo»)' },
+    speed: { type: 'NUMBER' },
+    weight: { type: 'NUMBER' },
+    light: { type: 'NUMBER' },
+    bond: { type: 'STRING' },
+    quantity: { type: 'INTEGER' },
+    to: { type: 'STRING', description: 'terrain: name of the resulting terrain' },
+    from: { type: 'STRING', description: 'terrain: only the tiles of this terrain (optional)' },
+    delta: { type: 'INTEGER', description: 'relief: levels to dig or raise (positive = raise, negative = dig)' },
+    radius: { type: 'NUMBER' },
+    duration: { type: 'NUMBER', description: 'seconds' },
+    force: { type: 'NUMBER' },
+    module: { type: 'STRING', description: 'summon: name of what appears' },
+    hunger: { type: 'NUMBER' },
+    thirst: { type: 'NUMBER' },
+    energy: { type: 'NUMBER' },
+    health: { type: 'NUMBER' },
+    capacity: { type: 'INTEGER' },
+    loot: { type: 'STRING' },
   },
-  required: ['tipo'],
+  required: ['type'],
 };
 
 const JUDGE_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
     possibile: { type: 'BOOLEAN' },
-    racconto: { type: 'STRING', description: "cosa succede, 1-2 frasi, seconda persona" },
+    racconto: { type: 'STRING', description: 'what happens, 1-2 sentences, second person' },
     effetti: { type: 'ARRAY', items: EFFECT_SCHEMA },
-    ripetibile: { type: 'BOOLEAN', description: "vero se è un'azione sensata che si può rifare sempre allo stesso modo su cose come questa" },
-    etichetta: { type: 'STRING', description: "l'azione come voce di menu, 1-3 parole (es. «Forza la serratura»)" },
-    serve: { type: 'STRING', description: "oggetto che il viandante deve avere per farlo (facoltativo, tra quelli che porta)" },
-    forma: { type: 'STRING', description: "se cambia l'aspetto della cosa stessa, che resta lì: come cambia, in poche parole (facoltativo)" },
+    ripetibile: { type: 'BOOLEAN', description: 'true if it is a sensible action that can always be done again the same way on things like this one' },
+    etichetta: { type: 'STRING', description: 'the action as a menu entry, 1-3 words (e.g. «Forza la serratura»)' },
+    serve: { type: 'STRING', description: 'thing the wanderer must have to do it (optional, among the ones they carry)' },
+    forma: { type: 'STRING', description: 'if the look of the thing itself changes, and it stays there: how it changes, in a few words (optional)' },
   },
   required: ['possibile', 'racconto', 'effetti', 'ripetibile', 'etichetta'],
 };
 
 export const EFFECTS_GUIDE = [
-  'messaggio {testo}: solo racconto, nessun cambiamento',
-  'bisogni {fame, sete, energia, salute}: variazioni da -40 a +40 (positivo = meglio)',
-  'crea_oggetto {oggetto, quantita}: compare un oggetto a terra (anche nuovo, se ha senso)',
-  'consuma {oggetto, quantita}: il viandante spende un altro oggetto che porta (un ingrediente, del cibo); MAI la cosa su cui agisce: quella resta, a meno di distruggi',
-  "distruggi: la cosa si rompe o finisce (e lascia ciò che conteneva)",
-  'apri: si apre (se è un contenitore)',
-  'contenitore {capienza, bottino}: la cosa diventa apribile (ha uno spazio dentro)',
-  'terreno {a, da, raggio}: il terreno attorno cambia (raggio 0-3)',
-  'rilievo {delta, raggio}: alza (delta positivo) o scava (delta negativo) il suolo di livelli interi attorno (raggio 0-3)',
-  'fuoco {raggio, durata}: fiamme che bruciano ciò che è infiammabile',
-  'luce {raggio, durata}: una luce',
-  'scudo {durata}: il viandante è protetto',
-  'spingi {forza}: la cosa viene spinta via',
-  'evoca {modulo}: compare qualcosa o qualcuno che esiste già nel mondo',
-  'stato {nome, velocita, peso, luce, durata}: una condizione del viandante che rende possibile una meccanica nuova (a cavallo: velocita 1.8; con lo zaino: peso 15; con la torcia: luce 5; durata in secondi, 0 = finché non lo togli)',
-  'togli_stato {nome}: finisce una condizione (scendere da cavallo, posare lo zaino)',
-  'SOLO SU UNA PERSONA — legame {legame}: cosa diventa per il viandante (amico, innamorata, moglie, marito, nemico…); ricordo {testo, peso 1-3}: cosa ricorderà; nascita {nome}: nasce un figlio (solo tra sposi, e solo se la persona lo vuole)',
+  'message {text}: only a story, no change',
+  'needs {hunger, thirst, energy, health}: changes from -40 to +40 (positive = better)',
+  'create_item {item, quantity}: a thing appears on the ground (a new one too, if it makes sense)',
+  'consume {item, quantity}: the wanderer spends another thing they carry (an ingredient, some food); NEVER the thing acted upon: that one stays, unless destroy',
+  'destroy: the thing breaks or ends (and leaves what it held)',
+  'open: it opens (if it is a container)',
+  'container {capacity, loot}: the thing becomes openable (it has a space inside)',
+  'terrain {to, from, radius}: the terrain around changes (radius 0-3)',
+  'relief {delta, radius}: raises (positive delta) or digs (negative delta) the ground by whole levels around (radius 0-3)',
+  'fire {radius, duration}: flames that burn what is flammable',
+  'light {radius, duration}: a light',
+  'shield {duration}: the wanderer is protected',
+  'push {force}: the thing is pushed away',
+  'summon {module}: something or someone that already exists in the world appears',
+  'state {name, speed, weight, light, duration}: a condition of the wanderer that makes a new mechanic possible (on horseback: speed 1.8; with the backpack: weight 15; with the torch: light 5; duration in seconds, 0 = until it is removed)',
+  'remove_state {name}: a condition ends (getting off the horse, putting down the backpack)',
+  'ONLY ON A PERSON — bond {bond}: what they become to the wanderer, a word of the world (amico, innamorata, moglie, marito, nemico…); memory {text, weight 1-3}: what they will remember; birth {name}: a child is born (only between spouses, and only if the person wants it)',
 ].join('\n');
 
 export async function judgeAction(c: Council, ctx: ActionContext, focus?: string[]): Promise<ActionJudgement> {
   const t = ctx.target;
   const prompt = [
-    `Il viandante, davanti a «${t.name}» (${t.kind}: ${t.description}${t.tags.length ? `; tag ${t.tags.join(', ')}` : ''}${t.container ? '; è un contenitore' : ''}), scrive: «${ctx.text}».`,
-    `Porta: ${ctx.carrying.join(', ') || 'niente'}. Impugna: ${ctx.holding}. Sotto la cosa: ${ctx.tile}. Luogo: ${ctx.place || 'sconosciuto'}.`,
+    `The wanderer, in front of «${t.name}» (${t.kind}: ${t.description}${t.tags.length ? `; tags ${t.tags.join(', ')}` : ''}${t.container ? '; it is a container' : ''}), writes: «${ctx.text}».`,
+    `Carries: ${ctx.carrying.join(', ') || 'nothing'}. Holds: ${ctx.holding}. Under the thing: ${ctx.tile}. Place: ${ctx.place || 'unknown'}.`,
     ctx.transcended
-      ? `Il viandante è trasceso: è un membro del Concilio e ha visto il codice del mondo. Asseconda ciò che vuole fare (purché non distrugga l'universo, se stesso o le leggi del gioco), scegliendo gli effetti che lo realizzano meglio.`
-      : `Giudica come il Concilio: è possibile, nel mondo e per la fisica? Se no, "possibile" falso e racconta perché non riesce (effetti vuoti o solo messaggio).`,
-    `Se sì, scegli gli effetti (al massimo 4) SOLO da questo elenco:\n${EFFECTS_GUIDE}`,
-    `Terreni esistenti: ${ctx.terrains.join(', ')}. Cose evocabili: ${ctx.summonable.slice(0, 30).join(', ') || 'nessuna'}. Tabelle di bottino: ${ctx.loot.join(', ')}.`,
-    `Sii fedele alla fisica: niente miracoli senza strumenti o rune; serve il giusto attrezzo per scassinare, tagliare, scavare. Se serve un oggetto che il viandante porta, mettilo in "serve".`,
-    `Fai evolvere il gioco: se l'azione apre una meccanica nuova sensata (montare il cavallo sellato, remare sulla barca, indossare lo zaino), rendila possibile con uno "stato", e diventerà un'azione ripetibile della cosa.`,
+      ? `The wanderer has transcended: they are a member of the Council and have seen the code of the world. Go along with what they want to do (as long as it does not destroy the universe, themselves or the laws of the game), choosing the effects that make it happen best.`
+      : `Judge as the Council: is it possible, in the world and for physics? If not, "possibile" false and tell why it does not work (no effects or only a message).`,
+    `If so, choose the effects (at most 4) ONLY from this list:\n${EFFECTS_GUIDE}`,
+    `Existing terrains: ${ctx.terrains.join(', ')}. Things that can be summoned: ${ctx.summonable.slice(0, 30).join(', ') || 'none'}. Loot tables: ${ctx.loot.join(', ')}.`,
+    `Be faithful to physics: no miracles without tools or runes; it takes the right tool to pick a lock, cut, dig. If a thing the wanderer carries is needed, put it in "serve".`,
+    `Make the game evolve: if the action opens a sensible new mechanic (riding the saddled horse, rowing the boat, wearing the backpack), make it possible with a "state", and it will become a repeatable action of the thing.`,
     ctx.between &&
       [
-        `«${t.name}» è un altro viandante, una persona vera come lui: giudica come su una persona. Gli effetti bisogni, scudo, stato e togli_stato valgono per «${t.name}», non per chi agisce; spingi lo spinge via; niente legame, ricordo, nascita, distruggi, apri, contenitore.`,
+        `«${t.name}» is another wanderer, a real person like them: judge as on a person. The effects needs, shield, state and remove_state apply to «${t.name}», not to whoever acts; push pushes them away; no bond, memory, birth, destroy, open, container.`,
         ctx.between.god
-          ? `Su «${t.name}» non arriva niente: solo un messaggio.`
+          ? `Nothing reaches «${t.name}»: only a message.`
           : ctx.between.pvp
-            ? 'In questo mondo i viandanti possono ferirsi tra loro.'
-            : 'In questo mondo i viandanti non possono ferirsi tra loro: niente bisogni che scendono, spingi, fuoco, stati che rallentano, togli_stato; se l’azione vuole ferire, non riesce (o resta un messaggio).',
+            ? 'In this world the wanderers can hurt each other.'
+            : 'In this world the wanderers cannot hurt each other: no needs that go down, push, fire, states that slow down, remove_state; if the action means to hurt, it fails (or stays a message).',
       ].join(' '),
     ctx.shape &&
-      `Se ciò che il viandante fa cambia l'aspetto della cosa, che resta lì (si apre, si scheggia, si accende, si spegne, si piega, si macchia), scrivi in "forma" come cambia, in poche parole: diventerà una regola della sua forma, per tutte le cose di questo tipo. In quel caso niente "distruggi"; gli effetti servono per ciò che non è aspetto (luce, fuoco, bisogni, oggetti).`,
+      `If what the wanderer does changes the look of the thing, which stays there (it opens, chips, lights up, goes out, bends, gets stained), write in "forma" how it changes, in a few words: it will become a rule of its shape, for all the things of this kind. In that case no "destroy"; the effects are for what is not look (light, fire, needs, things).`,
   ]
     .filter(Boolean)
     .join('\n\n');
@@ -150,11 +150,11 @@ export async function judgeAction(c: Council, ctx: ActionContext, focus?: string
 const SPELL_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
-    nome: { type: 'STRING', description: "nome dell'incantesimo, 1-2 parole" },
-    descrizione: { type: 'STRING', description: 'cosa fa, una frase' },
-    costo: { type: 'INTEGER', description: 'energia del viandante che consuma, da 3 a 40' },
+    nome: { type: 'STRING', description: 'name of the incantation, 1-2 words, in the language of the world' },
+    descrizione: { type: 'STRING', description: 'what it does, one sentence' },
+    costo: { type: 'INTEGER', description: 'energy of the wanderer it consumes, from 3 to 40' },
     effetti: { type: 'ARRAY', items: EFFECT_SCHEMA },
-    runa_nuova: { type: 'STRING', description: "quasi sempre vuoto; solo se questa formula chiama un elemento che nessuna runa ha: quell'elemento in una parola (es. sangue, ghiaccio), una runa nuova da trovare" },
+    runa_nuova: { type: 'STRING', description: 'almost always empty; only if this formula calls for an element no rune has: that element in one word (e.g. blood, ice), a new rune to be found' },
   },
   required: ['nome', 'descrizione', 'costo', 'effetti'],
 };
@@ -164,11 +164,11 @@ const SPELL_SCHEMA: Schema = {
  * The examples guide, they are not a list; the effects stay the closed set the kernel validates.
  */
 export const SPELL_GUIDE = [
-  "Una sequenza di rune è un programma: l'ordine conta (terra fuoco ≠ fuoco terra: due incantesimi diversi) e ripetere una runa la rafforza (raggio, durata, forza più grandi).",
-  'Di solito la prima runa dà la forma (terra: corpo e peso, una palla, un muro; vento: lancia, spinge, sparge; scudo: racchiude, protegge; luce: rivela) e le altre ciò che porta (fuoco, acqua, cura, luce).',
-  'Esempi di come si compone, non un elenco da copiare: terra fuoco → palla di fuoco (fuoco raggio 2); terra fuoco fuoco → palla di fuoco più grande (fuoco raggio 3, più durata); fuoco terra fuoco → dardi infuocati (fuoco raggio 1 e spingi); acqua → crea acqua (terreno acqua); terra vento terra → la terra si solleva (rilievo delta 2 raggio 1); vento terra vento → la terra si abbassa (rilievo delta -2 raggio 1).',
-  'Come un incantesimo di D&D: un effetto vero sul luogo o sulle persone (fuoco, spingi, terreno, rilievo, luce, bisogni, scudo, stato), mai solo un messaggio; più rune = più forte e più costoso.',
-  'Le rune non sono tutte note: se la formula chiama un elemento che nessuna runa ha (sangue, ghiaccio), scrivilo in runa_nuova e il mondo ne avrà una da trovare; di rado, quasi sempre resta vuoto.',
+  'A sequence of runes is a program: the order matters (terra ignis ≠ ignis terra: two different incantations) and repeating a rune strengthens it (bigger radius, duration, force).',
+  'Usually the first rune gives the form (terra: body and weight, a ball, a wall; ventus: throws, pushes, scatters; scutum: encloses, protects; lux: reveals) and the others what it carries (ignis, aqua, vita, lux).',
+  'Examples of how it composes, not a list to copy: terra ignis → fireball (fire radius 2); terra ignis ignis → bigger fireball (fire radius 3, longer duration); ignis terra ignis → fiery darts (fire radius 1 and push); aqua → makes water (terrain to water); terra ventus terra → the ground rises (relief delta 2 radius 1); ventus terra ventus → the ground sinks (relief delta -2 radius 1).',
+  'Like an incantation of D&D: a real effect on the place or on people (fire, push, terrain, relief, light, needs, shield, state), never only a message; more runes = stronger and more costly.',
+  'Not all the runes are known: if the formula calls for an element no rune has (blood, ice), write it in runa_nuova and the world will have one to find; rarely, it almost always stays empty.',
 ].join(' ');
 
 export interface SpellDraft {
@@ -196,11 +196,11 @@ export async function nameSpell(
   const sorted = (s: string) => s.split(' ').sort().join(' ');
   const reordered = known.filter((k) => k.sequence !== seq && sorted(k.sequence) === sorted(seq));
   const prompt = [
-    `Il viandante pronuncia, in quest'ordine, le rune: ${runes.map((r) => `«${r.token}» (${r.name}, ${italianName('elementi', r.element)}: ${r.description})`).join(', ')}.`,
-    `Incantesimi già noti:\n${known.map((k) => `- ${k.sequence} → ${k.name}: ${k.description}`).join('\n') || '(nessuno)'}`,
-    reordered.length ? `Le stesse rune in un altro ordine sono già un altro incantesimo (${reordered.map((k) => `${k.sequence} → ${k.name}`).join('; ')}): questa sequenza deve fare altro.` : '',
-    `Decidi cosa fa questa sequenza (${seq}), coerente con gli elementi delle rune, con gli incantesimi noti e con il mondo. ${SPELL_GUIDE}\nEffetti (al massimo 4) SOLO da questo elenco:\n${EFFECTS_GUIDE}`,
-    `Terreni esistenti: ${terrains.join(', ')}. Gli effetti agiscono su ciò che il viandante ha davanti (o sul viandante stesso per bisogni e scudo).`,
+    `The wanderer speaks, in this order, the runes: ${runes.map((r) => `"${r.token}" (${r.name}, ${r.element}: ${r.description})`).join(', ')}.`,
+    `Incantations already known:\n${known.map((k) => `- ${k.sequence} → ${k.name}: ${k.description}`).join('\n') || '(none)'}`,
+    reordered.length ? `The same runes in another order are already another incantation (${reordered.map((k) => `${k.sequence} → ${k.name}`).join('; ')}): this sequence must do something else.` : '',
+    `Decide what this sequence (${seq}) does, consistent with the elements of the runes, with the known incantations and with the world. ${SPELL_GUIDE}\nEffects (at most 4) ONLY from this list:\n${EFFECTS_GUIDE}`,
+    `Existing terrains: ${terrains.join(', ')}. The effects act on what the wanderer has in front of them (or on the wanderer themselves for needs and shield).`,
   ]
     .filter(Boolean)
     .join('\n\n');
@@ -221,13 +221,13 @@ export async function nameSpell(
 const RUNE_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
-    token: { type: 'STRING', description: 'la parola della runa, in italiano, minuscola, 3-12 lettere senza accenti (es. sangue): è anche la parola del codice' },
-    nome: { type: 'STRING', description: 'il nome antico della runa, una parola (come Kenaz, Laguz), diverso da tutti gli altri' },
-    glifo: { type: 'STRING', description: 'un solo segno runico (un carattere Unicode del blocco runico), diverso da quelli già usati' },
-    colore: { type: 'STRING', description: 'il colore della sua luce, #rrggbb' },
-    elemento: { type: 'STRING', description: "l'elemento, una parola" },
-    descrizione: { type: 'STRING', description: 'cosa significa, come le altre: «la fiaccola: brucia, scalda»' },
-    canone: { type: 'STRING', description: 'una riga del canone: ciò che chi vive nel mondo sa di questa runa, senza dire chi la incise né perché' },
+    token: { type: 'STRING', description: 'the word of the rune, in Latin like the others, lower case, 3-12 letters without accents (e.g. sanguis): it is also the word of the code' },
+    nome: { type: 'STRING', description: 'the ancient name of the rune, one word (like Kenaz, Laguz), different from all the others' },
+    glifo: { type: 'STRING', description: 'a single runic sign (one Unicode character of the runic block), different from the ones already used' },
+    colore: { type: 'STRING', description: 'the colour of its light, #rrggbb' },
+    elemento: { type: 'STRING', description: 'the element, one word, in English (e.g. blood)' },
+    descrizione: { type: 'STRING', description: 'what it means, like the others, in the language of the world: «la fiaccola: brucia, scalda»' },
+    canone: { type: 'STRING', description: 'a line of the canon, in the language of the world: what those who live in the world know of this rune, without saying who carved it or why' },
   },
   required: ['token', 'nome', 'glifo', 'colore', 'elemento', 'descrizione', 'canone'],
 };
@@ -244,10 +244,10 @@ export async function inventRune(
   focus?: string[],
 ): Promise<Record<string, unknown>> {
   const prompt = [
-    `Il mondo ha una runa magica in più da trovare: ${reason}.`,
-    `Le rune magiche che già ci sono:\n${known.map((r) => `- ${r.glyph} ${r.name} («${r.token}», ${r.element}): ${r.description}`).join('\n')}`,
-    "Inventa la runa nuova: un elemento che nessuna di queste ha, una parola (il suo token) che non somiglia alle altre, un nome antico, un segno e un colore suoi, cosa significa. Deve potersi comporre con le altre in formule (l'ordine conta, ripeterla la rafforza), con effetti veri sul luogo e sulle persone; come tutte le rune è una lastra a terra, rara, che resta finché qualcuno non la raccoglie.",
-    errors.length ? `La proposta di prima è stata rifiutata: ${errors.join('; ')}. Correggi.` : '',
+    `The world has one more magic rune to be found: ${reason}.`,
+    `The magic runes there are already:\n${known.map((r) => `- ${r.glyph} ${r.name} ("${r.token}", ${r.element}): ${r.description}`).join('\n')}`,
+    'Invent the new rune: an element none of these has, a word (its token, Latin) that does not look like the others, an ancient name, a sign and a colour of its own, what it means. It must compose with the others in formulas (the order matters, repeating it strengthens it), with real effects on the place and on people; like all the runes it is a slab on the ground, rare, that stays until someone picks it up.',
+    errors.length ? `The previous proposal was refused: ${errors.join('; ')}. Fix it.` : '',
   ]
     .filter(Boolean)
     .join('\n\n');
@@ -258,12 +258,12 @@ const CRAFT_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
     possibile: { type: 'BOOLEAN' },
-    racconto: { type: 'STRING', description: 'come lo fai, o perché non si può: 1-2 frasi, seconda persona' },
-    risultato: { type: 'STRING', description: "nome dell'oggetto che ottieni" },
-    descrizione: { type: 'STRING', description: "com'è l'oggetto ottenuto, se è nuovo" },
+    racconto: { type: 'STRING', description: 'how you do it, or why it cannot be done: 1-2 sentences, second person' },
+    risultato: { type: 'STRING', description: 'name of the thing you get' },
+    descrizione: { type: 'STRING', description: 'what the thing you get is like, if it is new' },
     quantita: { type: 'INTEGER' },
-    ingredienti: { type: 'ARRAY', items: { type: 'OBJECT', properties: { oggetto: { type: 'STRING' }, quantita: { type: 'INTEGER' } }, required: ['oggetto', 'quantita'] }, description: 'cose che porti e che si consumano' },
-    attrezzi: { type: 'ARRAY', items: { type: 'STRING' }, description: 'cose che porti, servono ma non si consumano' },
+    ingredienti: { type: 'ARRAY', items: { type: 'OBJECT', properties: { oggetto: { type: 'STRING' }, quantita: { type: 'INTEGER' } }, required: ['oggetto', 'quantita'] }, description: 'things you carry that are consumed' },
+    attrezzi: { type: 'ARRAY', items: { type: 'STRING' }, description: 'things you carry, needed but not consumed' },
   },
   required: ['possibile', 'racconto'],
 };
@@ -285,10 +285,10 @@ export interface CraftJudgement {
  */
 export async function judgeCraft(c: Council, text: string, carrying: string[], known: string[], focus?: string[]): Promise<CraftJudgement> {
   const prompt = [
-    `Il viandante vuole fabbricare: «${text}».`,
-    `Porta con sé: ${carrying.join(', ') || 'niente'}.`,
-    `Oggetti che esistono già nel mondo (usa questi nomi se il risultato è uno di loro): ${known.slice(0, 80).join(', ')}.`,
-    `Si può fare con ciò che porta, a mano, in modo credibile? Se sì: "risultato" (nome), "quantita", "ingredienti" consumati e "attrezzi" usati, SOLO tra le cose che porta e con nomi esatti; se il risultato non esiste ancora, descrivilo. Se no, "possibile" falso e spiega cosa manca. Sii severo come un artigiano vero.`,
+    `The wanderer wants to make: «${text}».`,
+    `Carries: ${carrying.join(', ') || 'nothing'}.`,
+    `Things that already exist in the world (use these names if the result is one of them): ${known.slice(0, 80).join(', ')}.`,
+    `Can it be made with what they carry, by hand, believably? If so: "risultato" (name), "quantita", the "ingredienti" consumed and the "attrezzi" used, ONLY among the things they carry and with exact names; if the result does not exist yet, describe it. If not, "possibile" false and explain what is missing. Be as strict as a real craftsman.`,
   ].join('\n\n');
   const r = await c.ask<{ possibile: boolean; racconto: string; risultato?: string; descrizione?: string; quantita?: number; ingredienti?: Array<{ oggetto: string; quantita: number }>; attrezzi?: string[] }>('narrator', 'craft.free', prompt, CRAFT_SCHEMA, {
     data: { text, carrying, known },
@@ -309,9 +309,9 @@ export async function judgeCraft(c: Council, text: string, carrying: string[], k
 const SESSION_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
-    valutazione: { type: 'STRING', description: 'in una frase: come sta andando il mondo' },
+    valutazione: { type: 'STRING', description: 'in one sentence: how the world is going' },
     intervento: { type: 'STRING', enum: ['nessuno', 'oggetti', 'abitante', 'cosa', 'meccanica', 'runa'] },
-    richiesta: { type: 'STRING', description: "per abitante o cosa: la richiesta alla Fucina in una frase; per oggetti: che genere di oggetti mancano; per runa: l'elemento della runa magica nuova" },
+    richiesta: { type: 'STRING', description: 'for abitante or cosa: the request to the Forge in one sentence; for oggetti: what kind of things are missing; for runa: the element of the new magic rune' },
   },
   required: ['valutazione', 'intervento'],
 };
@@ -325,7 +325,7 @@ export async function councilSession(c: Council, summary: string): Promise<{ ass
   const r = await c.ask<{ valutazione: string; intervento: string; richiesta?: string }>(
     'arbiter',
     'council.session',
-    `Sessione del Concilio. Ecco come il viandante sta vivendo il mondo:\n${summary}\n\nIl mondo deve evolvere restando coerente. Serve un intervento? Al massimo uno: "oggetti" (un pacchetto di oggetti che manca, dì quali), "abitante" (un nuovo tipo di persona che renda più viva la società), "cosa" (un oggetto o mobile del mondo che le azioni del viandante fanno pensare), "meccanica" (una meccanica con la sua interfaccia: slot per l'equipaggiamento, una faretra, una scheda di reputazione… — soprattutto se il riepilogo dice MANCA), "runa" (una runa magica nuova, di un elemento che nessuna runa ha e che il mondo vissuto fa pensare: dì quale; solo di rado), oppure "nessuno". Interveni solo se serve davvero.`,
+    `Session of the Council. Here is how the wanderer is living the world:\n${summary}\n\nThe world must evolve while staying consistent. Is an intervention needed? At most one: "oggetti" (a pack of things that is missing, say which), "abitante" (a new kind of person that makes the society livelier), "cosa" (a thing or piece of furniture of the world that the wanderer's actions bring to mind), "meccanica" (a mechanic with its interface: slots for the equipment, a quiver, a reputation sheet… — above all if the summary says MANCA), "runa" (a new magic rune, of an element no rune has and that the lived world brings to mind: say which; only rarely), or "nessuno". Intervene only if it is really needed.`,
     SESSION_SCHEMA,
     { data: { summary }, temperature: 0.6 },
   );
@@ -343,15 +343,15 @@ export interface DeathContext {
   place: string;
 }
 
-/** The effects death may use: it takes away, it never gives. */
-export const DEATH_EFFECTS = ['messaggio', 'bisogni', 'consuma', 'togli_stato', 'stato'] as const;
+/** The effects death may use: it takes away, it never gives (internal, T310; an Italian one is read internal). */
+export const DEATH_EFFECTS = ['message', 'needs', 'consume', 'remove_state', 'state'] as const;
 
 const DEATH_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
-    racconto: { type: 'STRING', description: 'come il viandante torna alla vita, 1-2 frasi, seconda persona' },
-    perde_tutto: { type: 'BOOLEAN', description: 'vero se perde tutto ciò che porta e ogni condizione' },
-    ripartenza: { type: 'STRING', enum: ['qui', 'piazza'], description: 'dove riapre gli occhi: dove è caduto o nella piazza' },
+    racconto: { type: 'STRING', description: 'how the wanderer comes back to life, 1-2 sentences, second person' },
+    perde_tutto: { type: 'BOOLEAN', description: 'true if they lose everything they carry and every condition' },
+    ripartenza: { type: 'STRING', enum: ['qui', 'piazza'], description: 'where they open their eyes again: where they fell (qui) or in the square (piazza)' },
     effetti: { type: 'ARRAY', items: EFFECT_SCHEMA },
   },
   required: ['racconto', 'perde_tutto', 'ripartenza', 'effetti'],
@@ -363,16 +363,19 @@ const DEATH_SCHEMA: Schema = {
  */
 export async function judgeDeath(c: Council, ctx: DeathContext): Promise<{ story: string; loseAll: boolean; restart: 'qui' | 'piazza'; effects: unknown[] }> {
   const prompt = [
-    `Il viandante è morto (${ctx.cause}) a ${ctx.place || 'un luogo senza nome'}. Torna alla vita: decidi cosa gli costa.`,
-    `La punizione della morte in questo mondo è scelta per sempre: ${ctx.punishment}. Rispettala alla lettera, né più né meno.`,
-    `Porta: ${ctx.carried.map((x) => `${x.name} ×${x.count}`).join(', ') || 'niente'}. Condizioni: ${ctx.states.join(', ') || 'nessuna'}.`,
-    `"perde_tutto" toglie tutto ciò che porta e ogni condizione. Altrimenti scegli gli effetti (al massimo 6) SOLO tra: consuma {oggetto, quantita} (perde ciò che porta), togli_stato {nome}, stato {nome, velocita, durata} (una debolezza passeggera), bisogni {…} (negativi), messaggio {testo}. I bisogni tornano comunque pieni prima degli effetti.`,
+    `The wanderer died (${ctx.cause}) at ${ctx.place || 'a place without a name'}. They come back to life: decide what it costs them.`,
+    `The punishment of death in this world is chosen forever: ${ctx.punishment}. Respect it to the letter, no more, no less.`,
+    `Carries: ${ctx.carried.map((x) => `${x.name} ×${x.count}`).join(', ') || 'nothing'}. Conditions: ${ctx.states.join(', ') || 'none'}.`,
+    `"perde_tutto" takes away everything they carry and every condition. Otherwise choose the effects (at most 6) ONLY among: consume {item, quantity} (loses what they carry), remove_state {name}, state {name, speed, duration} (a passing weakness), needs {…} (negative), message {text}. The needs come back full anyway before the effects.`,
   ].join('\n\n');
   const r = await c.ask<{ racconto?: string; perde_tutto?: boolean; ripartenza?: string; effetti?: unknown[] }>('narrator', 'player.death', prompt, DEATH_SCHEMA, { data: ctx, temperature: 0.4 });
   return {
     story: String(r.racconto ?? '').slice(0, 300),
     loseAll: !!r.perde_tutto,
     restart: r.ripartenza === 'qui' ? 'qui' : 'piazza',
-    effects: (Array.isArray(r.effetti) ? r.effetti : []).filter((e) => (DEATH_EFFECTS as readonly string[]).includes(String((e as { tipo?: unknown })?.tipo))),
+    effects: (Array.isArray(r.effetti) ? r.effetti : []).filter((e) => {
+      const kind = (e as { type?: unknown; tipo?: unknown })?.type ?? (e as { tipo?: unknown })?.tipo;
+      return (DEATH_EFFECTS as readonly string[]).includes(internalName('effetti', String(kind)));
+    }),
   };
 }

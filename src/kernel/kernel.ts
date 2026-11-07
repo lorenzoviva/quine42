@@ -7,7 +7,7 @@ import { EventBus } from './events';
 import { Faults } from './faults';
 import { Sandbox, type Host } from './sandbox';
 import { apiErrors, describeEffect, repairGameSetup, validateEffects, Validator } from './validator';
-import { deathLevel, fallbackDeath, type DeathVerdict } from './gameSetup';
+import { deathLevel, deathRule, fallbackDeath, type DeathVerdict } from './gameSetup';
 import { Repo, memoryStore, type Commit, type KeyValueStore } from './repo';
 import { councilMayWrite } from './paths';
 import { Corona, campusModel, coronaNearby, coronaShown, tileNear, FOCUSED_RULES, folderOf, TABLETS_MAX, type CoronaTile, type Exhibit, type ShowcaseSource, type StudioItem } from './corona';
@@ -2846,13 +2846,14 @@ export class Kernel {
   async holdSession(force = false): Promise<string> {
     if (!force && (this.sessions >= 4 || this.generationHeld || this.ai.name === 'offline')) return 'nessuno';
     this.sessions++;
-    const rules = this.rules().slice(-12).map((r) => `- ${r.text}: ${r.possible ? 'si può' : 'non si può'}`).join('\n');
+    // The summary goes to the Arbiter's prompt (English since T310); the rules, people and places are the world's words.
+    const rules = this.rules().slice(-12).map((r) => `- ${r.text}: ${r.possible ? 'possible' : 'not possible'}`).join('\n');
     const people = readPeople(this.files).people.slice(-10).map((p) => `- ${p.name}, ${p.job}`).join('\n');
     const chunks = [...this.chunks.values()].filter((c) => c.place).slice(-8).map((c) => `- ${c.place!.name}`).join('\n');
     const wearable = [...this.content.items.values()].filter((d) => d.equippable || d.slot || ['weapon', 'clothing'].includes(d.category)).length;
     const panels = this.uiPanels().map((p) => p.panel.title);
-    const mech = `Meccaniche con interfaccia: ${panels.join(', ') || 'nessuna'}.${wearable && !this.uiPanels().some((p) => p.panel.elements.some((e) => e.type === 'slot')) ? ` MANCA: ci sono ${wearable} oggetti da indossare o impugnare ma nessuno slot per farlo.` : ''}`;
-    const summary = `${mech}\nRegole nate dal gioco:\n${rules || '(nessuna)'}\nPersone incontrate:\n${people || '(nessuna)'}\nLuoghi visti:\n${chunks || '(nessuno)'}\nOggetti esistenti: ${this.content.items.size}; tipi di abitanti: ${[...this.modules.values()].filter((m) => m.manifest.persona).length}.`;
+    const mech = `Mechanics with an interface: ${panels.join(', ') || 'none'}.${wearable && !this.uiPanels().some((p) => p.panel.elements.some((e) => e.type === 'slot')) ? ` MANCA: there are ${wearable} things to wear or hold but no slot to do it.` : ''}`;
+    const summary = `${mech}\nRules born from play:\n${rules || '(none)'}\nPeople met:\n${people || '(none)'}\nPlaces seen:\n${chunks || '(none)'}\nExisting things: ${this.content.items.size}; kinds of inhabitants: ${[...this.modules.values()].filter((m) => m.manifest.persona).length}.`;
     let s;
     try {
       s = await councilSession(this.council, summary);
@@ -2865,7 +2866,7 @@ export class Kernel {
     else if (s.action === 'abitante') await this.forgeModule(s.request ?? 'un nuovo abitante del mondo', 'agente', 'npc', false, COMUNE);
     else if (s.action === 'cosa' && s.request) await this.forgeModule(s.request, 'agente', 'oggetto', false, COMUNE);
     else if (s.action === 'meccanica') await this.forgeMechanic(s.request ?? 'equipaggiamento: slot per indossare e impugnare', COMUNE);
-    else if (s.action === 'runa') await this.inventRune(`la sessione del Concilio la chiede: ${s.request ?? 'un elemento che nessuna runa ha'}`, COMUNE);
+    else if (s.action === 'runa') await this.inventRune(`the session of the Council asks for it: ${s.request ?? 'an element no rune has'}`, COMUNE);
     return s.action;
   }
 
@@ -5694,9 +5695,8 @@ export class Kernel {
   private async judgeDeath(cause: string): Promise<DeathVerdict> {
     const level = this.gameSetup().death;
     const carried = this.carriedCounts();
-    const d = deathLevel(this.gameSetup());
     try {
-      return await judgeDeath(this.council, { cause, level, punishment: `${d.nome} (${level} su 4): ${d.testo}`, carried, states: Object.keys(this.states()), place: this.chunkHere()?.name ?? '' });
+      return await judgeDeath(this.council, { cause, level, punishment: deathRule(level), carried, states: Object.keys(this.states()), place: this.chunkHere()?.name ?? '' });
     } catch (e) {
       this.council.say('kernel', 'errore', `il Narratore tace sulla morte (${(e as Error).message}): vale la punizione alla lettera`, 'narrator', 'player.death');
       return fallbackDeath(level, carried);
@@ -6362,7 +6362,7 @@ export class Kernel {
     const c = this.commitContent(`incantesimo: ${seq.join(' ')} → ${spell.name}`, 'spell.name', 'narrator');
     this.council.say('narrator', 'propone', `${seq.join(' ')} → «${spell.name}»: ${spell.description} [${spell.effects.map((e) => e.type).join(', ')}] (commit ${c.id})`, undefined, 'spell.name');
     // The formula called for an element no rune has (T57b): the world gets one more rune to find.
-    if (draft.newRune) void this.inventRune(`la formula ${seq.join(' ')} («${spell.name}») chiama un elemento che nessuna runa ha: ${draft.newRune}`);
+    if (draft.newRune) void this.inventRune(`the formula ${seq.join(' ')} («${spell.name}») calls for an element no rune has: ${draft.newRune}`);
     return spell;
   }
 
@@ -8413,7 +8413,7 @@ export class Kernel {
         const r = await this.council.ask<{ ritira?: string[]; motivo?: string }>(
           'arbiter',
           'review.fourthwall',
-          `Rivedi questi moduli creati dal Concilio. Ritira quelli che rompono la quarta parete (riferimenti a codice, simulazione, realtà instabile o finta, mondi che si ripetono, ruoli astratti come custodi della realtà, censori, archivisti del mondo, misuratori di anomalie; anche travestiti da leggenda: chi torna sempre in piazza, chi osserva ogni viandante, confini che nessuno supera), quelli che duplicano le rune (altri simboli luminosi nel terreno) e i doppioni. Tieni tutto ciò che è una persona o una cosa vera del mondo.\n${generated.map((m) => `- ${m.manifest.id} «${m.manifest.name}»: ${(m.manifest.description ?? '').slice(0, 140)} ${(m.manifest.persona ?? '').slice(0, 160)}`).join('\n')}`,
+          `Review these modules created by the Council. Retire those that break the fourth wall (references to code, simulation, unstable or fake reality, worlds that repeat, abstract roles like keepers of reality, censors, archivists of the world, measurers of anomalies; also dressed up as legends: whoever always comes back to the square, whoever watches every wanderer, borders nobody crosses), those that duplicate the runes (other glowing symbols in the ground) and the doubles. Keep everything that is a real person or thing of the world.\n${generated.map((m) => `- ${m.manifest.id} «${m.manifest.name}»: ${(m.manifest.description ?? '').slice(0, 140)} ${(m.manifest.persona ?? '').slice(0, 160)}`).join('\n')}`,
           { type: 'OBJECT', properties: { ritira: { type: 'ARRAY', items: { type: 'STRING' } }, motivo: { type: 'STRING' } }, required: ['ritira'] },
           { data: { ids: generated.map((m) => m.manifest.id) }, temperature: 0.2 },
         );
