@@ -4897,3 +4897,12 @@ Nasce da T308b: `dossier T308b`. `integra T308b` si è fermato su conflitti in `
 
 **Quando è fatto:** merge committato, `npm test`, `npm run typecheck` e `npm run build` verdi con i loro turni; esito con le scelte fatte nel conflitto. Non serve il browser (T308b l'ha provato), salvo che la risoluzione cambi codice oltre l'unione. Sicurezza: nessuna superficie nuova.
 - Esito: T308b fuso nel base (con T319, T156, T320, T293): contratto 0.5.0; `modeldirector.ts` unisce `shareWith`/`structureSiblings` con i campi inglesi di `structure`; nei test delle carte fatte a mano il verificatore usa `anonymous`; `architettura-dettagli.md` tiene entrambe le righe; censimento del glossario rigenerato; l'ADR di T308b diventa ADR-0163 con i rimandi. Suite (2607 passati, 1 saltato), typecheck e build verdi nei turni. Non provati: il browser (non serviva) e `sicurezza:prove`. Sicurezza: nessuna superficie nuova.
+
+### T329 · Integrare T324 nel base — `da fare`
+- Pipeline: claude · sforzo medium · stima 2% · approvato · priorità 1
+
+Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGENTS.md` e `lab/README.md` (nel frattempo nel base sono entrati T325, T308b e altri).
+
+**Cosa fare:** nel worktree, `git merge task/T324` sul base di adesso. In `AGENTS.md` e `lab/README.md` due aggiunte nello stesso punto restano entrambe (le righe del banco di Jev di T325 e quelle delle immagini di T324). Se T324 ha un ADR il cui numero è preso, il primo libero con i rimandi.
+
+**Quando è fatto:** merge committato, `npm test` e `npm run typecheck` verdi con i loro turni; esito con le scelte fatte nel conflitto. Non serve il browser (solo `lab/` e documenti). Sicurezza: nessuna superficie nuova.
