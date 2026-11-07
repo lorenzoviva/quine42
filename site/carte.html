@@ -80,6 +80,16 @@
       <div class="cards-more" id="cards-more" hidden>
         <button type="button" class="comic-btn arcade" id="btn-cards-more">MOSTRA ALTRE</button>
       </div>
+
+      <!-- Le carte fatte a mano di tutti gli account (T294): solo con i laboratori aperti, le disegna carte-mano.ts -->
+      <section class="handmade-section" id="handmade-section" hidden aria-labelledby="handmade-title">
+        <div class="section-head">
+          <span class="comic-badge yellow">DAI LABORATORI · <span id="handmade-count">0</span></span>
+          <h2 class="comic-title" id="handmade-title">CARTE FATTE A MANO</h2>
+          <p>// FORKATE, CAMBIATE E FIRMATE DAI VIANDANTI</p>
+        </div>
+        <div class="handmade-grid" id="handmade-grid"></div>
+      </section>
     </main>
 
     <!-- Synthwave Sunset Footer with the Secret of the Jerboa -->
@@ -118,6 +128,7 @@
     </footer>
 
     <script type="module" src="./skin.ts"></script>
+    <script type="module" src="./labs-nav.ts"></script>
     <script type="module" src="./carte.ts"></script>
   </body>
 </html>

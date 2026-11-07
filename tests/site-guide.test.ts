@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { build, createServer } from 'vite';
-import { betaGuide, guidePage, guideParts, labsOn, secondPartOn } from '../server/betaGuide';
+import { betaGuide, guidePage, guideParts, labsOn, labsPage, secondPartOn } from '../server/betaGuide';
 
 const ROOT = path.resolve(__dirname, '..');
 const FIRST = 'SENTINELLA-PRIMA-PARTE-t244';
@@ -88,6 +88,22 @@ describe('le istruzioni della beta', () => {
     expect(labsOn(work)).toBe(labs);
     expect(secondPartOn(work)).toBe(corona);
   });
+
+  it('la pagina d’ingresso dei laboratori e il link nel sito solo con l’interruttore acceso (T294)', async () => {
+    const server = await createServer({ root: ROOT, configFile: false, logLevel: 'silent', appType: 'custom', server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true, include: [] }, plugins: [betaGuide(work)] });
+    const open = async () => (await server.transformRequest('virtual:quine-laboratori'))?.code ?? '';
+    try {
+      write('site/beta.json', '{ "laboratori": false }');
+      expect(labsPage(work)).toEqual({});
+      expect(await open()).toContain('labsOpen = false');
+      write('site/beta.json', '{ "laboratori": true }');
+      expect(labsPage(work)).toEqual({ laboratori: path.resolve(work, 'site/laboratori.html') });
+      server.watcher.emit('change', path.join(work, 'site/beta.json'));
+      expect(await open()).toContain('labsOpen = true');
+    } finally {
+      await server.close();
+    }
+  }, 60_000);
 
   it('il repository nasce con i laboratori spenti', () => {
     expect(labsOn(ROOT)).toBe(false);

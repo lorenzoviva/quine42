@@ -9,6 +9,8 @@ import type { Plugin } from 'vite';
 const PARTS_ID = 'virtual:quine-istruzioni';
 /** Only whether the page exists: for who links to it, without carrying its text. */
 const PRESENT_ID = 'virtual:quine-istruzioni-presenti';
+/** Whether the labs are open in this build (T294): the site's links to them, and their entry page, exist only then. */
+const LABS_ID = 'virtual:quine-laboratori';
 
 export interface GuidePart {
   id: 'guida' | 'la-corona';
@@ -36,6 +38,11 @@ export const secondPartOn = (root: string): boolean => switchOn(root, 'laCorona'
  */
 export const labsOn = (root: string): boolean => switchOn(root, 'laboratori');
 
+/** The site's entry page of the labs (T294, ADR-0169) among the build's inputs: only with `laboratori` on. */
+export function labsPage(root: string): Record<string, string> {
+  return labsOn(root) ? { laboratori: path.resolve(root, 'site/laboratori.html') } : {};
+}
+
 /** The parts to show, in order: a file that does not exist yet, or is empty, is not one. */
 export function guideParts(root: string): GuidePart[] {
   const ids: GuidePart['id'][] = secondPartOn(root) ? ['guida', 'la-corona'] : ['guida'];
@@ -61,9 +68,10 @@ export function betaGuide(root: string): Plugin {
   return {
     name: 'quine-beta-guide',
     resolveId(id) {
-      return id === PARTS_ID || id === PRESENT_ID ? resolved(id) : undefined;
+      return id === PARTS_ID || id === PRESENT_ID || id === LABS_ID ? resolved(id) : undefined;
     },
     load(id) {
+      if (id === resolved(LABS_ID)) return `export const labsOpen = ${labsOn(root)};`;
       if (id !== resolved(PARTS_ID) && id !== resolved(PRESENT_ID)) return undefined;
       const parts = guideParts(root);
       return id === resolved(PARTS_ID) ? `export const parts = ${JSON.stringify(parts)};` : `export const guidePresent = ${parts.length > 0};`;
@@ -74,7 +82,7 @@ export function betaGuide(root: string): Plugin {
       server.watcher.add(files);
       const changed = (file: string) => {
         if (!files.includes(path.resolve(file))) return;
-        for (const id of [PARTS_ID, PRESENT_ID]) {
+        for (const id of [PARTS_ID, PRESENT_ID, LABS_ID]) {
           const module = server.moduleGraph.getModuleById(resolved(id));
           if (module) server.moduleGraph.invalidateModule(module);
         }

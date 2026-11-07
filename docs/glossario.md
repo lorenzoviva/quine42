@@ -1067,6 +1067,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: «validazione» (per questo controllo: il validatore è quello del Concilio, `validator.ts`, che qui presta le soglie del suono)
 - **Fermo**: i messaggi `check` e `checked` del canale dei mondi.
 
+### Laboratori dei giocatori
+- **Inglese**: `PLAYER_LABS`, `startCards`, `CardsBar`, `CardsClient`, `forkables`, `Draft`, `draftKey`, `labsOpen`, `labsPage`
+- **Definizione**: le tre pagine (sandbox 3D, editor dei modelli, SoundLab) come le serve il server di produzione con l'interruttore `laboratori` acceso, senza gli strumenti degli sviluppatori; il **fork** apre la copia di un modello o di un suono di un universo (o di una propria carta) nel laboratorio giusto, la **bozza** è ciò che non è salvato, tenuto su questa macchina (ADR-0169).
+- **Dove vive**: `lab/handmade/`, `lab/3d/cards.ts`, `site/laboratori.html`, `site/carte-mano.ts`, `site/labs-nav.ts`
+- **Da non usare**: «lab» per le pagine dei giocatori nei testi (si dice «laboratori»); «copia» per la carta salvata (è un fork con un id suo)
+- **Fermo**: i parametri `?fork=<universo>/<modello>` e `?card=<id>`, le chiavi `quine:lab:<laboratorio>:<sorgente>` di `localStorage`.
+
 ### Titolare
 - **Inglese**: `holder`, `cardHolderOf`
 - **Definizione**: di chi è una carta: chi l'ha pagata o, per le comuni, un viandante estratto col seme.

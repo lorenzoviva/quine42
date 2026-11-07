@@ -37,8 +37,8 @@ describe('il glossario', () => {
   beforeAll(async () => {
     tool = (await import(/* @vite-ignore */ pathToFileURL(path.join(ROOT, 'tools/glossario/glossario.mjs')).href)) as Tool;
     entries = tool.parseGlossary(fs.readFileSync(path.join(ROOT, 'docs/glossario.md'), 'utf8'));
-    // The SoundLab's retouches are a concept with a voice, and the page is where they live (T222).
-    code = codeOf('src') + codeOf('server') + codeOf('site') + codeOf('lab/suono');
+    // The SoundLab's retouches are a concept with a voice, and the page is where they live (T222); the players' labs live in lab/handmade (T294).
+    code = codeOf('src') + codeOf('server') + codeOf('site') + codeOf('lab/suono') + codeOf('lab/handmade');
   });
 
   it('copre i concetti che confondevano', () => {
@@ -58,7 +58,7 @@ describe('il glossario', () => {
     }
   });
 
-  it('i nomi in inglese esistono in src/, server/, site/ o lab/suono/', () => {
+  it('i nomi in inglese esistono in src/, server/, site/, lab/suono/ o lab/handmade/', () => {
     const missing: string[] = [];
     for (const e of entries) {
       const names = tool.namesIn(e.fields.Inglese);

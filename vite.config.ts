@@ -16,7 +16,7 @@ import { testWorkers } from './server/testWorkers';
 import { walletRoute } from './server/wallet';
 import { grantCapOf, platformFeeOf } from './server/ledger';
 import { videoFolder, videoRoute } from './server/video';
-import { betaGuide, guidePage, labsOn } from './server/betaGuide';
+import { betaGuide, guidePage, labsOn, labsPage } from './server/betaGuide';
 import { handmadeRoute } from './server/handmade';
 import { inlineChecker } from './server/programCheck';
 import { siteSkins } from './server/skins';
@@ -73,7 +73,8 @@ export default defineConfig(({ mode }) => {
     // wasmoon is UMD: pre-bundled, the browser can import it in dev (its glue.wasm comes by URL, `wasmUri`).
     optimizeDeps: { include: ['wasmoon'] },
     // The MarkovJunior lab has its dedicated pages: the sandbox (/lab/3d/), the model editor (/lab/editor/), the SoundLab (/lab/suono/)
-    // and the bench of worn things (/lab/indossati/, T289).
+    // and the bench of worn things (/lab/indossati/, T289). Built, the first three are the players' labs (T294, ADR-0169): without the
+    // developers' tools, served by the production server only with `laboratori` on.
     build: {
       rollupOptions: {
         input: {
@@ -89,6 +90,8 @@ export default defineConfig(({ mode }) => {
           siteProfilo: path.resolve('site/profilo.html'),
           sitePagamenti: path.resolve('site/pagamenti.html'),
           ...guidePage(process.cwd()),
+          // The site's entry page of the labs for the players, only with `laboratori` on (T294).
+          ...labsPage(process.cwd()),
         },
       },
     },

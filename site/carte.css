@@ -328,3 +328,40 @@
     animation: none;
   }
 }
+
+/* Le carte fatte a mano (T294): dai laboratori, riconoscibili, con chi le firma */
+.handmade-section {
+  margin-top: var(--space-55);
+}
+
+.handmade-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--measure-233), 1fr));
+  gap: var(--space-21);
+}
+
+.handmade-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  border-style: dashed;
+}
+
+.handmade-top,
+.handmade-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+}
+
+.handmade-name {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.handmade-by,
+.handmade-from {
+  margin: 0;
+  font-size: var(--text-11);
+  overflow-wrap: anywhere;
+}

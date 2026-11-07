@@ -4512,7 +4512,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Quando è fatto: commit su `task/T293`, ADR, sezione in `#carte-crediti`, riga in `AGENTS.md`. Nell'esito le voci di sicurezza.
 - Esito: carte fatte a mano: forma (ADR-0161, kernel 0.4.2), archivio `universes/.handmade/` con tetti, rotte `/api/handmade` dietro `gate` e l'interruttore `laboratori` (spento), controllo del programma sul motore vero con tetti misurati sul seme, in produzione nel programma dei mondi in un processo a parte; sicurezza: V-030, V-031, V-032 aggiunte e chiuse; nomi inglesi `.handmade` e `check`/`checked` invece di `.carte-mano` (ADR-0153); aggiunta la firma dell'account; il kit dell'autore non prova le rotte (le prova `serververo.test.ts`); conflitti attesi con T308b su numero di ADR, versione del kernel e canale dei mondi; laboratori per i giocatori a T294.
 
-### T294 · I tre laboratori per i giocatori: forkare e modificare — `da fare` (dipende da T293)
+### T294 · I tre laboratori per i giocatori: forkare e modificare — `fatto` (`e59e79f2`) (dipende da T293)
 - Pipeline: claude · sforzo high · stima 4% · approvato · browser · priorità 7
 - Sforzo: high.
 - Step: 41
@@ -4526,6 +4526,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Test: la logica isolabile (fork → carta → riapertura dà lo stesso XML); server di produzione con interruttore acceso e spento. Typecheck, build e suite intera con i loro turni.
 - Browser: sì, sotto `npm run serve` con l'interruttore nei due stati, con un account di prova (emulatore): forko un modello, lo modifico, salvo, ricarico, lo vedo in `carte.html`; stesso giro per un suono (l'agente non sente: misura il segnale e di' cosa deve ascoltare l'autore); da un secondo account lo vedo e non lo scrivo. Catture nel commit.
 - Quando è fatto: commit su `task/T294`. Sicurezza: nell'esito.
+- Esito: laboratori serviti dal server di produzione solo con `laboratori` acceso e solo i tre; build senza strumenti degli sviluppatori (`import.meta.env.MODE`, perché `DEV` segue NODE_ENV e portava Gemini nel dist); barra delle carte in editor e SoundLab (fork da `publicFiles` o da una propria carta, Salva / Salva come nuova coi motivi del server, bozza in localStorage, carta altrui sola lettura); sandbox con i modelli fatti a mano; `site/laboratori.html` e link a build accesa; carte fatte a mano in `carte.html`; senza account viandante per id; preset del SoundLab ripristinati (`sound-*`); ADR-0168; non provato con un account dell'emulatore (non installato), miniature delle carte fatte a mano assenti, il posizionamento automatico della carta nella sandbox non visto nel browser; sicurezza: nessuna rotta nuova, superficie solo le tre pagine statiche con l'interruttore acceso, sotto CSP, nessuna voce nuova.
 
 ### T295 · Portare le carte in un universo nuovo, prima della Genesi — `da fare` (dipende da T293)
 - Pipeline: claude · sforzo max · stima 4% · approvato · browser · priorità 7

@@ -130,10 +130,12 @@ describe('il server vero', () => {
     mkdirSync(path.join(dist, 'assets'), { recursive: true });
     mkdirSync(path.join(dist, 'site'), { recursive: true });
     mkdirSync(path.join(dist, 'lab', '3d'), { recursive: true });
+    mkdirSync(path.join(dist, 'lab', 'indossati'), { recursive: true });
     mkdirSync(universes(), { recursive: true });
     writeFileSync(path.join(dist, 'index.html'), '<title>gioco</title>');
     writeFileSync(path.join(dist, 'site', 'index.html'), '<title>sito</title>');
     writeFileSync(path.join(dist, 'lab', '3d', 'index.html'), '<title>laboratorio</title>');
+    writeFileSync(path.join(dist, 'lab', 'indossati', 'index.html'), '<title>banco</title>');
     writeFileSync(path.join(dist, 'assets', 'a-1.js'), 'export {}');
     writeFileSync(path.join(dist, 'assets', 'glue.wasm'), 'x');
     writeFileSync(path.join(dist, '.env'), `GEMINI_API_KEY=${FAKE.key}`);
@@ -305,7 +307,22 @@ describe('il server vero', () => {
     await new Promise<void>((r) => labs.server.listen(0, '127.0.0.1', r));
     const to = (labs.server.address() as AddressInfo).port;
     try {
-      expect((await ask('/lab/3d/index.html', { to })).status).toBe(404);
+      // On, the three labs of the players are served, under the same policy; nothing else of `/lab` (T294).
+      for (const target of ['/lab/3d/', '/lab/3d/index.html', '/lab/3d/?card=handmade-aaaaaaaaaa']) {
+        const page = await ask(target, { to });
+        expect(page.status, target).toBe(200);
+        expect(page.text).toContain('laboratorio');
+        expect(page.headers['content-security-policy'], target).toMatch(/script-src 'self'/);
+      }
+      const bare = await ask('/lab/3d?fork=prova/barile', { to });
+      expect(bare.status).toBe(301);
+      expect(bare.headers.location).toBe('/lab/3d/?fork=prova%2Fbarile');
+      for (const target of ['/lab/', '/lab', '/lab/indossati/', '/lab/indossati/index.html', '/LAB/3d/', '/lab/3D/', '/lab/3d/../indossati/', '/lab/3d/%2e%2e/indossati/', '/lab/3d/../../.env', '/lab/scripts/gemini.ts']) {
+        expect((await ask(target, { to })).status, target).toBe(404);
+      }
+      expect(buildFile(dist, '/lab/3d/', true)).toBe(path.join(dist, 'lab', '3d', 'index.html'));
+      expect(buildFile(dist, '/lab/3d/', false)).toBeUndefined();
+      expect(buildFile(dist, '/lab/indossati/', true)).toBeUndefined();
       const small = readFileSync('universe/models/object.xml', 'utf8');
       const card = { kernel: HANDMADE_CONTRACT, kind: 'model', name: 'Fagotto', class: 'object', xml: small };
       const ok = await ask('/api/handmade', { to, method: 'POST', headers: json, body: JSON.stringify(card) });

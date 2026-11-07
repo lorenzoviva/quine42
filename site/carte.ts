@@ -496,6 +496,8 @@ async function start(): Promise<void> {
   const config = await accountConfig();
   const signed = config && !new URLSearchParams(location.search).get('viandante') ? await signIn(config).catch(() => undefined) : undefined;
   const me = wandererFrom(location.search, signed?.uid);
+  // The handmade cards of everyone, with the labs open (T294): a module of its own, it knows from the build whether they are.
+  void import('./carte-mano').then((m) => m.showHandmade(signed));
   stat('card-owner', me === 'me' ? 'IL TUO VIANDANTE' : `VIANDANTE ${me}`);
 
   let collection: Collection = { mine: [], received: [], stats: { totale: 0, rare: 0, leggendarie: 0, rendita: 0 } };

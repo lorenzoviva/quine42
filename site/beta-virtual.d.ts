@@ -7,3 +7,8 @@ declare module 'virtual:quine-istruzioni' {
 declare module 'virtual:quine-istruzioni-presenti' {
   export const guidePresent: boolean;
 }
+
+declare module 'virtual:quine-laboratori' {
+  /** Whether `site/beta.json → laboratori` was on when the site was built (T294). */
+  export const labsOpen: boolean;
+}

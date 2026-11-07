@@ -41,6 +41,8 @@ import {
 } from './cad';
 import { MJ_PALETTE } from '../../src/mj/palette';
 import type { PaletteEntry } from '../../src/mj/engine';
+import { startCards, type CardsBar } from '../handmade/bar';
+import { boxFor } from '../handmade/logic';
 import { PlaybackController, getOrComputeFrameMesh } from './playback';
 import {
   type RuleNodeType,
@@ -700,7 +702,9 @@ async function triggerBuild() {
   loadingOverlay.classList.remove('hidden');
 
   try {
-    const res = await workerClient.build({ xml, seed, vpt });
+    // A model of a universe or a card says its class, not its box: the game's box for it (T294).
+    const box = boxFor(xml, cardMeta.class, cardMeta.size);
+    const res = await workerClient.build({ xml, seed, vpt, ...(box ? { size: box } : {}) });
     loadingOverlay.classList.add('hidden');
 
     if (!res.ok) {
@@ -3550,6 +3554,34 @@ function loadSelectedPreset() {
   });
 }
 
+// ------------------------------------------------------------------ The handmade cards (T294, ADR-0169)
+
+/** The class and size of the card being changed, if any: a program without its own `size` is drawn in the game's box for them. */
+let cardMeta: { class?: string; size?: string } = {};
+let cards: CardsBar | undefined;
+
+/** Opens a program from a card or a universe: no preset, its density, its box. */
+function openProgram(xml: string, meta: { class?: string; size?: string; vpt?: number }) {
+  hasCustomColorsPrev = null;
+  cardMeta = { class: meta.class, size: meta.size };
+  const vpt = String(meta.vpt ?? 20);
+  if (![...vptSelect.options].some((o) => o.value === vpt)) vptSelect.append(new Option(`${vpt} vpt`, vpt));
+  vptSelect.value = vpt;
+  presetSelect.value = '';
+  codeInput.value = xml;
+  onCodeChange();
+  void triggerBuild().then(() => {
+    if (currentMesh) fitCameraToMesh(new THREE.Box3().setFromObject(currentMesh));
+  });
+}
+
+window.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's' && cards) {
+    e.preventDefault();
+    void cards.save();
+  }
+});
+
 // ------------------------------------------------------------------ Initial Setup
 
 populatePresets();
@@ -3566,3 +3598,15 @@ if (defaultEntry) {
 }
 
 updateViewportSize();
+
+void startCards({
+  lab: 'editor',
+  kind: 'model',
+  mount: $('app'),
+  getXml: () => codeInput.value,
+  setXml: openProgram,
+  onMeta: (meta) => {
+    cardMeta = meta;
+    void triggerBuild();
+  },
+}).then((bar) => (cards = bar));

@@ -95,18 +95,25 @@ const TYPES: Record<string, string> = {
   '.wav': 'audio/wav',
 };
 
-/** The tools of the author: in the build, not for strangers. So with `laboratori` off; serving them when it is on is T294's (ADR-0161). */
+/** The labs: in the build, not for strangers while `laboratori` is off (ADR-0161). */
 const NOT_SERVED = /^\/lab(\/|$)/i;
+/** With `laboratori` on, the three labs of the players and nothing else under `/lab` (T294, ADR-0169): their pages; their scripts are in `/assets`. */
+const LAB_FOLDER = /^\/lab\/(3d|editor|suono)$/;
+const PLAYER_LABS = /^\/lab\/(3d|editor|suono)\/(index\.html)?$/;
 
-/** The file of the build a path asks for, or undefined. Only what is really under the build's folder, with a type on the list, and never a name beginning with a dot. */
-export function buildFile(dist: string, url: string): string | undefined {
+/**
+ * The file of the build a path asks for, or undefined. Only what is really under the build's folder, with a type on the list, and never a
+ * name beginning with a dot; under `/lab` only the players' three pages, and only with `labs` on.
+ */
+export function buildFile(dist: string, url: string, labs = false): string | undefined {
   let pathname: string;
   try {
     pathname = decodeURIComponent(url.split(/[?#]/)[0]);
   } catch {
     return undefined;
   }
-  if (!pathname.startsWith('/') || /[\\\0:]/.test(pathname) || NOT_SERVED.test(pathname)) return undefined;
+  if (!pathname.startsWith('/') || /[\\\0:]/.test(pathname)) return undefined;
+  if (NOT_SERVED.test(pathname) && !(labs && PLAYER_LABS.test(pathname))) return undefined;
   const segments = pathname.split('/').filter(Boolean);
   if (segments.some((s) => s.startsWith('.'))) return undefined;
   let file = path.join(dist, ...segments);
@@ -121,7 +128,7 @@ export function buildFile(dist: string, url: string): string | undefined {
   }
 }
 
-function sendBuild(dist: string, req: IncomingMessage, res: ServerResponse): void {
+function sendBuild(dist: string, req: IncomingMessage, res: ServerResponse, labs: boolean): void {
   if (req.method !== 'GET' && req.method !== 'HEAD') {
     res.statusCode = 405;
     res.setHeader('Allow', 'GET, HEAD');
@@ -134,7 +141,13 @@ function sendBuild(dist: string, req: IncomingMessage, res: ServerResponse): voi
     res.setHeader('Location', pathname === '/' ? '/site/' : '/site/sessioni.html');
     return void res.end();
   }
-  const file = buildFile(dist, req.url ?? '/');
+  // A lab asked without its last slash is its folder: its scripts are written relative to it.
+  if (labs && LAB_FOLDER.test(pathname)) {
+    res.statusCode = 301;
+    res.setHeader('Location', `${pathname}/${searchParams.size ? `?${searchParams}` : ''}`);
+    return void res.end();
+  }
+  const file = buildFile(dist, req.url ?? '/', labs);
   if (!file) {
     res.statusCode = 404;
     return void res.end();
@@ -270,7 +283,7 @@ export function createProductionServer(o: ProductionOptions): ProductionServer {
       return void res.end(JSON.stringify({ error: refused }));
     }
     try {
-      if (!/^\/api(\/|\?|$)/.test(req.url ?? '')) return sendBuild(o.dist, req, res);
+      if (!/^\/api(\/|\?|$)/.test(req.url ?? '')) return sendBuild(o.dist, req, res, o.labs === true);
       if (overRate(req)) {
         res.statusCode = 429;
         res.setHeader('Retry-After', '30');

@@ -1,0 +1,94 @@
+@import './site.css';
+
+/* ==========================================================================
+   QUINE42 — I laboratori (T294): l'ingresso dei giocatori, le loro carte, ciò che si forka
+   ========================================================================== */
+
+.labs-page {
+  padding-top: var(--space-34);
+  padding-bottom: var(--space-55);
+}
+
+.labs-trio {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--measure-233), 1fr));
+  gap: var(--space-21);
+  margin-top: var(--space-21);
+}
+
+.labs-door {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.labs-door h2 {
+  font-size: var(--text-29);
+  margin: var(--space-8) 0;
+}
+
+.labs-note {
+  margin: var(--space-21) 0;
+  font-size: var(--text-11);
+}
+
+.labs-section {
+  margin-top: var(--space-34);
+}
+
+.labs-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-13);
+  margin-bottom: var(--space-13);
+}
+
+.labs-head h2 {
+  font-size: var(--text-29);
+  margin: 0;
+}
+
+.labs-signature {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-8);
+  margin-bottom: var(--space-21);
+}
+
+.labs-signature .comic-input {
+  max-width: var(--measure-322);
+}
+
+.labs-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-8);
+}
+
+.labs-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-8) var(--space-13);
+  padding: var(--space-8) var(--space-13);
+  border: var(--border-ink);
+  background: var(--skin-panel);
+}
+
+.labs-list .labs-name {
+  font-weight: 700;
+  flex: 1 1 var(--measure-199);
+}
+
+.labs-list .comic-btn {
+  padding: var(--space-5) var(--space-13);
+}
+
+/* Ciò che la pagina nasconde resta nascosto anche dove una classe dà un display (il pannello d'accesso, gli avvisi) */
+.page-labs [hidden] {
+  display: none !important;
+}
