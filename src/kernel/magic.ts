@@ -7,7 +7,7 @@
 import { metaBreak } from './fourthwall';
 import { hashStr } from './rng';
 import { BINDINGS, CARPET_TOKENS, COUNCIL_RUNE, FUTHARK } from './runes';
-import { similarNames } from './society';
+import { similarNames } from './npc/model';
 import { internalName, italianName } from './internalNames';
 import type { MagicRune } from './types';
 

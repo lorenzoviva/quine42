@@ -10,9 +10,9 @@ import { VIEWS } from '../src/mj/photo';
 import { EFFECT_TYPES, ITEM_CATEGORIES } from '../src/kernel/types';
 import { ITEM_SHAPES } from '../src/kernel/modeldirector';
 import { STAMP_SHAPES } from '../src/kernel/stamps';
-import { ACTIVITIES, DAY_PHASES, WHERES } from '../src/kernel/society';
-import { JOB_BEHAVIOURS } from '../src/kernel/jobs';
-import { VENTURE_TYPES } from '../src/kernel/ventures';
+import { ACTIVITIES, DAY_PHASES, WHERES } from '../src/kernel/npc/society';
+import { JOB_BEHAVIOURS } from '../src/kernel/npc/jobs';
+import { VENTURE_TYPES } from '../src/kernel/npc/ventures';
 import { SCULPTOR_CLASSES } from '../src/kernel/universe';
 import { COEFFICIENT_KEYS } from '../src/kernel/coefficients';
 import { ENTITY_PARTS } from '../src/session/protocol';
@@ -193,7 +193,7 @@ describe('la tabella della lingua interna', () => {
   });
 
   it('i percorsi del contratto 0.4 esistono nel codice, quelli di prima solo dove si leggono ancora (T308a)', () => {
-    const code = ['src/kernel/paths.ts', 'src/kernel/kernel.ts', 'src/kernel/wanderers.ts', 'src/kernel/ventures.ts', 'src/kernel/store.ts', 'src/kernel/ai/usage.ts', 'src/kernel/shortfalls.ts', 'src/kernel/cards.ts', 'src/kernel/graph.ts', 'src/kernel/universes.ts', 'server/universeStore.ts', 'server/ledger.ts', 'server/subscriptionQueue.ts', 'server/generation.ts', 'server/geminiProxy.ts', 'server/production.ts', 'server/folders.ts', 'src/kernel/agents/council.ts', 'src/kernel/magic.ts']
+    const code = ['src/kernel/paths.ts', 'src/kernel/kernel.ts', 'src/kernel/wanderers.ts', 'src/kernel/npc/ventures.ts', 'src/kernel/store.ts', 'src/kernel/ai/usage.ts', 'src/kernel/shortfalls.ts', 'src/kernel/cards.ts', 'src/kernel/graph.ts', 'src/kernel/universes.ts', 'server/universeStore.ts', 'server/ledger.ts', 'server/subscriptionQueue.ts', 'server/generation.ts', 'server/geminiProxy.ts', 'server/production.ts', 'server/folders.ts', 'src/kernel/agents/council.ts', 'src/kernel/magic.ts']
       .filter((f) => fs.existsSync(path.join(ROOT, f)))
       .map(read)
       .join('\n');

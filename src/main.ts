@@ -29,7 +29,7 @@ import { Sfx } from './audio/sfx';
 import { readPrograms, SoundDirector, type SoundCue } from './audio/director';
 import { SoundRenders } from './audio/renders';
 import { bindSoundMenu } from './ui/soundmenu';
-import { dayPhase } from './kernel/society';
+import { dayPhase } from './kernel/npc/model';
 import { keepsFormsOnDisk } from './render/forms';
 import { $ } from './ui/dom';
 import { applyTeleport, teleportTarget } from './kernel/teleport';

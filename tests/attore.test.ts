@@ -7,7 +7,7 @@ import { MockAiModels } from '../src/kernel/ai/mock';
 import type { TextCall } from '../src/kernel/ai/models';
 import { ACTOR_MODEL, CENSUS, hourlyEstimate, repairActor } from '../src/kernel/coefficients';
 import { COUNCIL_PRINCIPLES } from '../src/kernel/fourthwall';
-import { readPeople, sheetFingerprint } from '../src/kernel/society';
+import { readPeople, sheetFingerprint } from '../src/kernel/npc/society';
 import { readConfig } from '../src/kernel/universe';
 import { payerOf } from '../src/kernel/cards';
 import { AGENTS } from '../src/kernel/agents/council';
@@ -163,7 +163,7 @@ describe("the Actor's option", () => {
     clearArea(k);
     const a = await individual(k, 'attore#da', 1);
     const b = await individual(k, 'attore#db', 2);
-    (k as unknown as { lastTalk: number }).lastTalk = -1e9;
+    (k.npc as unknown as { talks: { lastTalk: number } }).talks.lastTalk = -1e9;
     for (let i = 0; i < 240 && !models.of('npc.dialogue').length; i++) {
       k.tick(DT);
       await new Promise((r) => setTimeout(r, 5));

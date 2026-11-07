@@ -7,10 +7,10 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { MockAiModels } from '../src/kernel/ai/mock';
 import { lexiconWords, metaBreak } from '../src/kernel/fourthwall';
-import { matchJob, validateJobProgram } from '../src/kernel/jobs';
+import { matchJob, validateJobProgram } from '../src/kernel/npc/jobs';
 import { Kernel } from '../src/kernel/kernel';
 import { memoryStore } from '../src/kernel/repo';
-import { ventureProgress, type Venture } from '../src/kernel/ventures';
+import { ventureProgress, type Venture } from '../src/kernel/npc/ventures';
 import { negozioMappe } from '../lab/banco/universi-cloud/strumenti/carica';
 import { UNIVERSI } from '../lab/banco/universi-cloud/strumenti/cloud';
 import { componi } from '../lab/banco/universi-cloud/strumenti/installa';
@@ -94,7 +94,7 @@ const stageOf = (k: Kernel, origin: string) => {
   const id = k.ecs.query('structure', 'origin').find((e) => k.ecs.get(e, 'origin').key === origin);
   return id === undefined ? null : k.ecs.get(id, 'structure').stage;
 };
-const liveVentures = (k: Kernel) => (k as unknown as { ventureList: Venture[] }).ventureList;
+const liveVentures = (k: Kernel) => (k.npc as unknown as { worksites: { ventureList: Venture[] } }).worksites.ventureList;
 
 describe('the trades of the three universes of Claude Cloud (T298)', () => {
   // The variety of the loaded world (at most `NPC_CAP` individuals of one kind) is not what this test is about: the places the offline

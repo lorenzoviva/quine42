@@ -2,8 +2,8 @@
 // places, the plots against the registry of people. Each returns one line per problem (empty: all good).
 
 import { bibleBreaks, lexiconWords, metaBreak } from '../../../../src/kernel/fourthwall';
-import { readPeople, repairSociety, similarNames } from '../../../../src/kernel/society';
-import { readPlots, reviewPlot } from '../../../../src/kernel/plots';
+import { readPeople, repairSociety, similarNames } from '../../../../src/kernel/npc/society';
+import { readPlots, reviewPlot } from '../../../../src/kernel/npc/plots';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import type { Kernel } from '../../../../src/kernel/kernel';

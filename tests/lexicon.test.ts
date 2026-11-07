@@ -3,7 +3,7 @@ import { Council, lexiconSummary, wordsOf, type Bible } from '../src/kernel/agen
 import { bundledFiles } from '../src/kernel/bundle';
 import { upgradeFromSeed } from '../src/kernel/universes';
 import { OWN_CUSTOMS, bibleBreaks, cleanBible, glossaryBreak, metaBreak } from '../src/kernel/fourthwall';
-import { reviewPlot, type Plot } from '../src/kernel/plots';
+import { reviewPlot, type Plot } from '../src/kernel/npc/plots';
 import { MockAiModels } from '../src/kernel/ai/mock';
 import type { AiModels, TextCall } from '../src/kernel/ai/models';
 import type { FileMap } from '../src/kernel/types';

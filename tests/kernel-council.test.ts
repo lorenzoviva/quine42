@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
-import { readPeople } from '../src/kernel/society';
+import { readPeople } from '../src/kernel/npc/society';
 import { bondWith } from '../src/kernel/wanderers';
-import { readPlots } from '../src/kernel/plots';
+import { readPlots } from '../src/kernel/npc/plots';
 import { MockAiModels } from '../src/kernel/ai/mock';
 import { countItem } from '../src/kernel/inventory';
 import { boot, develop, settle, clearArea } from './world';

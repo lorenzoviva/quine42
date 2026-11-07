@@ -5,7 +5,7 @@
 import { mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { hashStr, hex } from '../../../../../src/kernel/rng';
 import type { ChunkPlan, Where } from '../../../../../src/kernel/agents/cartography';
-import { checkSociety } from '../../../../../src/kernel/society';
+import { checkSociety } from '../../../../../src/kernel/npc/society';
 import { PEOPLE, registry, type Person } from './persone';
 import { bootNeapolis, DIR, universeFiles } from './universo';
 

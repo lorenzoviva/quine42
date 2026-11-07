@@ -3,8 +3,8 @@ import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockAiModels } from '../src/kernel/ai/mock';
-import { canonBreak, readPlots, reviewPlot, writePlots, PLOTS_FILE, type Plot } from '../src/kernel/plots';
-import { repairSociety, type People, type Individual } from '../src/kernel/society';
+import { canonBreak, readPlots, reviewPlot, writePlots, PLOTS_FILE, type Plot } from '../src/kernel/npc/plots';
+import { repairSociety, type People, type Individual } from '../src/kernel/npc/society';
 import type { TextCall } from '../src/kernel/ai/models';
 import type { FileMap } from '../src/kernel/types';
 

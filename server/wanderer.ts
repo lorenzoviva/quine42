@@ -23,7 +23,7 @@ import type { Kernel } from '../src/kernel/kernel';
 import type { WorldCalls } from './worldCalls';
 import type { FileMap } from '../src/kernel/types';
 import { Forms, InlineRunner, MODELS_DIR, MODELS_INDEX } from '../src/kernel/forms';
-import { readPeople } from '../src/kernel/society';
+import { readPeople } from '../src/kernel/npc/model';
 import {
   PLAYERS_DIR,
   PLAYERS_DIR_BEFORE_0_4,

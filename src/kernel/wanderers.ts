@@ -5,12 +5,11 @@
 // keeps the entities.
 
 import type { FileMap } from './types';
-import { reservedName } from './paths';
 import { hashStr } from './rng';
-import { freshName, guessGender, similarNames } from './society';
+import { freshName, guessGender, similarNames } from './npc/model';
+import { SOLO, WANDERER_NAME, validWandererId } from './wandererIds';
 import { internalFields } from './internalNames';
 
-/** The wanderer of a game alone (and of every universe before T34). */
 /**
  * Systems that move one wanderer (T38): they run once for each wanderer the kernel moves itself, as that
  * wanderer, and see no other wanderer. Those a session's client moves (`setRemote`) they skip. The only ones a
@@ -18,9 +17,10 @@ import { internalFields } from './internalNames';
  */
 export const PER_WANDERER = new Set(['core.movement', 'core.carpet']);
 
-export const SOLO = 'me';
-/** The name people use for a wanderer they know nothing more of. */
-export const WANDERER_NAME = 'Viandante';
+// The id of a wanderer is in wandererIds.ts (T327), read by the people of the world too; what an individual is to a wanderer and what they
+// remember of them is the people's (npc/society.ts). Both said here as well, for whoever reads the wanderers.
+export { SOLO, WANDERER_NAME, validWandererId, wandererOf } from './wandererIds';
+export { bondWith, memoriesFor } from './npc/model';
 
 export interface Wanderer {
   id: string;
@@ -176,11 +176,6 @@ export const PLAYERS_DIR_BEFORE_0_4 = 'world/giocatori/';
 /** The state of the world (`world/stato.json` until the contract 0.3). */
 export const STATE_FILE = 'world/state.json';
 
-/** An id is a short slug (it names a file). */
-export function validWandererId(id: unknown): id is string {
-  return typeof id === 'string' && /^[a-z0-9][a-z0-9_-]{0,39}$/.test(id) && !reservedName(id);
-}
-
 export function playerFile(id: string): string {
   return `${PLAYERS_DIR}${id}.json`;
 }
@@ -218,25 +213,4 @@ export function wanderersIn(files: FileMap): Wanderer[] {
     out.set(id, { id, name: typeof nome === 'string' && nome.trim() ? nome.trim().slice(0, 40) : WANDERER_NAME });
   }
   return [...out.values()];
-}
-
-/** The wanderer a relation or a memory is about: its id, or `io` for the old ones that name «Viandante». */
-export function wandererOf(x: { name?: string; with?: string; wanderer?: string }): string | undefined {
-  if (validWandererId(x.wanderer)) return x.wanderer;
-  const name = (x.name ?? x.with ?? '').trim().toLowerCase();
-  return name === 'viandante' ? SOLO : undefined;
-}
-
-/** What an individual is to a wanderer, if anything. */
-export function bondWith(p: { family?: Array<{ name: string; bond: string; wanderer?: string }>; wandererBond?: string }, id: string): string | undefined {
-  const r = (p.family ?? []).find((f) => wandererOf(f) === id);
-  return r?.bond ?? (id === SOLO ? p.wandererBond : undefined);
-}
-
-/** The memories an individual brings to a talk with a wanderer: theirs together and those of the others in the world, not of other wanderers. */
-export function memoriesFor<T extends { with?: string; wanderer?: string }>(list: T[] | undefined, id: string): T[] {
-  return (list ?? []).filter((m) => {
-    const w = wandererOf(m);
-    return !w || w === id;
-  });
 }

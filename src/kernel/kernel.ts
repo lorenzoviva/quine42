@@ -20,17 +20,17 @@ import { ATLAS_FILE, defaultAtlas, direction, directionsFrom, placeRegion, readA
 import { STAMP_SHAPES } from './stamps';
 import { repairProgram } from './mj';
 import { upgradeFromSeed, type PastCommit, type UniverseBackend } from './universes';
-import { addIndividual, applyRenames, dayPhase, defaultRoutine, freshName, greeting, guessGender, inferActivity, memorySummary, readPeople, remember, repairSociety, sheetFingerprint, similarNames, societySummary, type Activity, type DayPhase, type Individual, type Species } from './society';
+import { dayPhase, plotText, PLOTS_FILE, readPeople, readPlots, VENTURES_FILE, writePlots, type Individual, type JobProgram, type Mind, type Plot, type Species, type Venture } from './npc/model';
+import { Npc, type NpcHost } from './npc';
 import { buildGraph, GRAPH_FILE, graphHash, mergeChunks, chunksOf, readGraph, slug as nodeSlug, type GraphChunk, type WorldGraph } from './graph';
 import { situation as buildSituation, type PlayerSpot, type Situation } from './situation';
 import { ChainMeter, chainOf, type Chain } from './chain';
 import { alertOf, clampFrame, costBoard, liveFeed, SCREEN_NAME, timeline, type Budget, type ScreenField, type Screens } from './screens';
-import { activeQuests, plotFromRaw, plotText, PLOTS_FILE, readPlots, reviewPlot, secretsOf, writePlots, type Plot } from './plots';
 import { Input } from './input';
 import { discoverModules, readConfig, repairAiSettings } from './universe';
 import { askedRunes, carpetLine, CARPET_TOKENS, tileIndex, COUNCIL_RUNE, extractLines, tokenize, type RuneComp, type RuneLine } from './runes';
 import { hash32, hashStr, hex, Rng } from './rng';
-import { knobOfTask, onBeat, Rationing, rationedKnob, repairActor, repairCoefficients, stretch, type ActorConfig, type Coefficients } from './coefficients';
+import { knobOfTask, onBeat, Rationing, rationedKnob, repairActor, repairCoefficients, type ActorConfig, type Coefficients } from './coefficients';
 import { BudgetError, type AiModels } from './ai/models';
 import { billedModel, costOf } from './ai/prices';
 import { USAGE_FILE, UsageLog, type CallRecord } from './ai/usage';
@@ -50,25 +50,22 @@ import { AGENTS, Council, readBible, wordsOf, type AgentId, type CatalogEntry, t
 import { designEnvironment, drawAtlas, planChunk, readStructure, type ChunkPlan, type PlannedHouse, type WaterRecord, type Where } from './agents/cartography';
 import { WaterFlow, WET, type WaterChange } from './water';
 import { forge, ForgeRejected, judgeCombination, repairLogic, slug, type ForgeOrigin } from './agents/forge';
-import { agentReply, examine, narrate, NARRATOR_PLAYS, npcDialogue, npcReply, npcSheet, liaisonReply, weavePlot, type Interpreter, type NpcReply, type Turn } from './agents/minds';
+import { agentReply, examine, narrate, NARRATOR_PLAYS, liaisonReply, type Interpreter, type NpcReply, type Turn } from './agents/minds';
 import { planGenesis } from './agents/genesis';
 import { councilSession, inventRune, judgeAction, judgeCraft, judgeDeath, nameSpell } from './agents/effects';
 import { canonWithRune, MAX_MAGIC_RUNES, validateNewRune } from './magic';
 import { cleanPanel, designMechanic } from './agents/mechanics';
 import { BENCH, cleanCases, runCase, textKey, type BenchEntry, type BenchRun, type BenchScene, type BenchShown } from './bench';
-import { assemblePack, defineItems, individuate, itemPack, toItemDef, type Identity } from './agents/content';
+import { assemblePack, defineItems, itemPack, toItemDef, type Identity } from './agents/content';
 import { addItem, CARRY_CAPACITY, countItem, HOTBAR, equippedItem, moveSlot, newInventory, putSlot, readInventory, removeItem, takeFromSlot, totalWeight, type Inventory } from './inventory';
 import { chunkLevels, HILLS, LEVEL, Relief, RELIEF_PATH, worldLevels } from './relief';
 import { CardUses, CARDS_FILE, COMUNE, allCards, collectionOf, moduleCardId, receivedBy, type Received, payerOf, chunkCardId, stampFiles, cardHolderOf, type Card, type CardStamp } from './cards';
-import { bondWith, memoriesFor, playerFile, PLAYERS_DIR, readWandererState, repairProfile, SOLO, validWandererId, WANDERER_NAME, wandererColor, wandererOf, wanderersIn, type Profile, type ProfileRepair, type Wanderer, type WandererState, PER_WANDERER } from './wanderers';
+import { playerFile, PLAYERS_DIR, readWandererState, repairProfile, SOLO, validWandererId, WANDERER_NAME, wandererColor, wandererOf, wanderersIn, type Profile, type ProfileRepair, type Wanderer, type WandererState, PER_WANDERER } from './wanderers';
 import type { ActionDef, AiSettings, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, GameSetup, ChunkInfo, Recipe, RuneFragment, TerrainDef, UniverseConfig } from './types';
 import { checkKernelVersion, KERNEL_VERSION, stampKernel } from './version';
 import { migratePlanRecord, migrateUniverse } from './migrations';
-import { internalComponent, internalEvent, internalFields, internalJobProgram, internalName, internalSculptors, italianName, italianValues as italianFieldsOf } from './internalNames';
+import { internalComponent, internalEvent, internalFields, internalName, internalSculptors, italianName, italianValues as italianFieldsOf } from './internalNames';
 import { ModuleStores } from './store';
-import { dailyProduce, matchJob, validateJobProgram, WORK_MODULE, WORKERS_PER_PLACE, type JobProgram, type JobTask } from './jobs';
-import { addWork, bring, fillTeam, HARVEST_DAY, HARVEST_DAYS, HARVEST_ROLES, HOUSE_ROLES, housePhases, missingWords, nextStep, openVentures, pruneVentures, readVentures, SITE_REACH, stillNeeded, ventureId, ventureProgress, ventureState, VENTURES_FILE, writeVentures, YEAR_DAYS, type Venture, type VentureCandidate, type VentureStep } from './ventures';
-import { findRoute, RouteCache, type Cell } from './route';
 import { blockShape, cellsOf, discCells, findSpot, itemShape, turnsBetween, type ItemShape, type PlacedRecord, type SpotFailure, type Support } from './placing';
 
 /** A solid entity with a model, as collision sees it: where it is, its form, where it blocks and its floors. */
@@ -94,11 +91,6 @@ export interface JumpComp {
 
 /** How high a jump clears (tiles above where it starts) and how far it can land (tiles). */
 export { JUMP_UP, JUMP_FAR, BODY_R };
-/** The half-size of a body a way is for when who asks does not say (a villager's, T299), and how far ahead of it the next point is. */
-export const ROUTE_BODY = 0.35;
-export const ROUTE_AHEAD = 1.6;
-/** How near a goal no way reaches one goes, at most this far from it (tiles): a bench in a wall, the middle of a workshop (T299). */
-export const ROUTE_NEAR = 2.5;
 /** The water (T51b): steps of the automaton every so many ticks (100 steps a second at 60 Hz); a dig moves at most so many levels. */
 const WATER_EVERY = 6;
 const WATER_STEPS = 10;
@@ -182,11 +174,8 @@ export interface ItemInfo {
   tags: string[];
 }
 
-export interface Mind {
-  mode: 'vaga' | 'segui' | 'resta';
-  mood: string;
-  history: Turn[];
-}
+/** The mind of a character (`npc/model.ts`), said here too for who reads it from the kernel. */
+export type { Mind };
 
 export interface Container {
   inv: Inventory;
@@ -453,7 +442,6 @@ const KERNEL_EFFECTS = new Set(['relief', 'bond', 'memory', 'birth']);
 const CORE_EFFECTS_WITHOUT_HANDLES = new Set<string>();
 
 /** A plot that still does not hold after the Narrator's second answer. */
-class PlotRejected extends Error {}
 
 export class Kernel {
   readonly ecs = new World();
@@ -761,8 +749,8 @@ export class Kernel {
     }
     k.loadState();
     k.ensureAtlas();
-    k.reviewSociety();
-    k.reviewPlots();
+    k.npc.reviewSociety();
+    k.npc.reviewPlots();
     void k.seedGraphChunks();
     void k.reviewFourthWall();
     k.ai.limits = { text: k.config.ai.maxText };
@@ -814,11 +802,11 @@ export class Kernel {
       first: (name) => this.ecs.query(name)[0],
       held: (a, id) => this.heldBy(typeof id === 'number' ? this.wandererOf(id) : this.wanderer().id, a),
       wanderers: () => this.wanderersInWorld(),
-      path: (x, y, tx, ty, r) => this.routeStep(x, y, tx, ty, r),
-      find_tile: (code, x, y, r) => this.findTile(code, x, y, r),
-      act: (user, target, action) => this.actAs(user, target, action),
-      venture: (id) => (this.mirror ? undefined : this.ventureStepFor(id)),
-      venture_bring: (id, item) => (this.mirror ? 0 : this.ventureBring(id, item)),
+      path: (x, y, tx, ty, r) => this.npc.routeStep(x, y, tx, ty, r),
+      find_tile: (code, x, y, r) => this.npc.findTile(code, x, y, r),
+      act: (user, target, action) => this.npc.actAs(user, target, action),
+      venture: (id) => (this.mirror ? undefined : this.npc.ventureStep(id)),
+      venture_bring: (id, item) => (this.mirror ? 0 : this.npc.ventureBring(id, item)),
       // The lasting store (T245a, ADR-0138): the module running is the only one whose data a call sees. A rune, a mirror: nothing.
       store_get: (key) => (this.luaModule && !this.mirror ? this.stores.get(this.luaModule, key) : undefined),
       store_set: (key, value) => !!this.luaModule && !this.mirror && this.stores.set(this.luaModule, key, value),
@@ -1427,9 +1415,7 @@ export class Kernel {
 
     if (opts.reset) {
       this.stores.load(files);
-      this.ventureList = readVentures(files[VENTURES_FILE]);
-      this.venturesDirty = false;
-      this.ventureDayDone = -1;
+      this.npc.reset(files);
       this.sandbox.reset();
       this.loaded.clear();
       this.lines.clear();
@@ -1820,7 +1806,7 @@ export class Kernel {
     for (const id of this.ecs.query('module')) {
       const m = this.modules.get(this.ecs.get(id, 'module')?.id)?.manifest;
       if (!m?.persona || !inside(id)) continue;
-      if (await this.ensureIdentity(id)) n++;
+      if (await this.npc.ensureIdentity(id)) n++;
     }
     return n;
   }
@@ -2184,10 +2170,10 @@ export class Kernel {
     ch.version++;
     this.plannedCount++;
     // The ways found over it when it was not there went through what is there now (T299).
-    this.routes.clear();
+    this.npc.forgetWays();
     for (const id of this.ecs.query('chunk')) if (this.ecs.get(id, 'chunk').key === ch.key) this.ecs.destroy(id);
     // Back where nobody looked (T245f): what ripened ripens, the buildings are at the stage their ventures reached.
-    const away = this.returnToPlace(ch, plan);
+    const away = this.npc.returnToPlace(ch, plan);
     this.claimSizes(ch, plan);
     const structures = this.settleLots(ch, plan, pathCode);
     const place = this.placementsOf(ch, plan, result);
@@ -2237,7 +2223,7 @@ export class Kernel {
     });
     for (const f of plan.fresh ?? []) if (this.kept(`${ch.key}:${f.concept}`, coef.entities)) void this.forgeForChunk(ch, f, place.pick, at);
     this.runesDirty = true;
-    if (away !== undefined) this.onReturn(ch.key, away);
+    if (away !== undefined) this.npc.onReturn(ch.key, away);
     this.bus.emit('chunk:planned', { key: ch.key });
     // The rhythms of the world (T45b): stretched by the coefficients of generation.
     if (onBeat(this.plannedCount, 10, coef.packs)) void this.growContent('esplorazione');
@@ -2259,61 +2245,6 @@ export class Kernel {
   interpreter(): Interpreter {
     const a = this.actor();
     return a.on ? { agent: 'actor', model: a.model } : NARRATOR_PLAYS;
-  }
-
-  private sheeting = new Map<string, Promise<string | undefined>>();
-
-  /**
-   * The sheet of an individual for the Actor (T157): the Narrator writes it once, at their first line, and again only when what
-   * it was written from changed (their bonds, their story: `sheetFingerprint`), never at every line. Saved with the individual in
-   * world/people.json. Paid by whoever pays the line (`chi`). Nothing is written when the Actor is off.
-   */
-  async ensureSheet(name: string, chi?: string): Promise<string | undefined> {
-    if (!this.actor().on) return undefined;
-    const p = this.individualOf(name);
-    if (!p) return undefined;
-    const stamp = sheetFingerprint(p);
-    if (p.sheet?.text && p.sheet.fingerprint === stamp) return p.sheet.text;
-    const pending = this.sheeting.get(name);
-    if (pending) return pending;
-    const job = (async () => {
-      try {
-        const text = await npcSheet(
-          this.council,
-          {
-            nome: p.name,
-            persona: p.persona ?? '',
-            mestiere: p.job,
-            genere: p.gender,
-            eta: p.age,
-            aspetto: p.look,
-            storia: p.story,
-            legami: (p.family ?? []).map((f) => `${f.bond} ${f.name}`),
-            routine: (p.routine ?? []).map((r) => `${italianName('momenti', r.when)}: ${r.does} (${italianName('dove', r.where)})`).join('; '),
-            porta: p.carries ?? [],
-          },
-          this.focusOn([name]),
-          chi,
-        );
-        if (!text || metaBreak(text, wordsOf(this.files))) {
-          this.council.say('kernel', 'scarta', `la scheda di ${name} ${text ? 'rompe la quarta parete' : 'è vuota'}: l'Attore recita dalla persona`, 'narrator', 'npc.sheet');
-          return undefined;
-        }
-        this.updateIndividual(name, (x) => (x.sheet = { text: text, fingerprint: stamp }));
-        this.commitContent(`scheda: ${name}`, 'npc.sheet', 'narrator', chi);
-        this.council.say('narrator', 'info', `la scheda di ${name} è scritta, per l'Attore`, 'actor', 'npc.sheet');
-        return text;
-      } catch (e) {
-        this.council.say('narrator', 'errore', `scheda di ${name}: ${(e as Error).message}`, undefined, 'npc.sheet');
-        return undefined;
-      }
-    })();
-    this.sheeting.set(name, job);
-    try {
-      return await job;
-    } finally {
-      this.sheeting.delete(name);
-    }
   }
 
   /** Whether an entity of a place stays with a coefficient: a draw of the universe for that origin, the same at every load. */
@@ -2933,7 +2864,7 @@ export class Kernel {
       this.ecs.destroy(id);
     }
     this.chunks.delete(ch.key);
-    this.routes.clear();
+    this.npc.forgetWays();
     this.water.forget();
   }
 
@@ -3068,7 +2999,7 @@ export class Kernel {
     const ruin = this.ecs.get(id, 'structure');
     const ruinForm: FormComp | undefined = this.ecs.get(id, 'form');
     this.ecs.destroy(id);
-    if (ruin && origin && p) this.ventureOfRuin(origin, ruin, ruinForm, p);
+    if (ruin && origin && p) this.npc.buildingFell(origin, ruin, ruinForm, p);
     if (!p) return;
     for (const d of m?.drops ?? []) {
       if (this.content.get(d)) this.spawnItem(d, p.x, p.y);
@@ -3120,7 +3051,7 @@ export class Kernel {
     (ch.plan.edits ??= {})[String(tile)] = code;
     // The day it was written (T245b): what ripens counts from here.
     (ch.plan.days ??= {})[String(tile)] = this.day();
-    this.routes.clear();
+    this.npc.forgetWays();
     this.saveChunkSoon(ch);
     return true;
   }
@@ -4244,7 +4175,7 @@ export class Kernel {
         this.pickUpEntity(id);
         return;
       case 'parla':
-        await this.ensureIdentity(id);
+        await this.npc.ensureIdentity(id);
         this.bus.emit('ui:chat', { id, name: this.nameOf(id) });
         return;
       case 'apri':
@@ -4372,54 +4303,6 @@ export class Kernel {
     return [...(sub.learnModule?.manifest.actions ?? []), ...(sub.learnItem ? (this.content.get(sub.learnItem)?.actions ?? []) : []), ...(sub.learnTile ? (this.palette[sub.learnTile]?.actions ?? []) : [])].filter((a) => a.effects?.length);
   }
 
-  /**
-   * A child is born to someone and the wanderer (the Council allowed it): a new individual of the same
-   * kind, with the family already written, who will grow up in the same place.
-   */
-  async birth(parentId: Id, name?: string): Promise<Id | undefined> {
-    const parent: Identity | undefined = this.ecs.get(parentId, 'identity');
-    const entry = this.modules.get(this.ecs.get(parentId, 'module')?.id);
-    const p = this.ecs.get(parentId, 'pos');
-    if (!parent || !entry || !p) return undefined;
-    const origin = `${this.ecs.get(parentId, 'origin')?.key ?? parent.name}#figlio${this.worldStamp()}`;
-    const child = this.spawnModuleEntity(entry, p.x + 0.7, p.y + 0.4, this.ecs.get(parentId, 'chunk')?.key, origin);
-    const gender = name ? guessGender({ name: name, job: '', family: [] }) : hashStr(origin) % 2 ? 'female' : 'male';
-    // A name of their own, unlike anyone else's (not "Piccola Berta" beside Berta).
-    const taken = readPeople(this.files).people.map((x) => x.name);
-    const nome = name && !taken.some((t) => similarNames(t, name)) ? name : freshName(this.speciesOf(entry.manifest.id) ?? 'person', gender, taken, origin);
-    const child_ = gender === 'female' ? 'figlia' : 'figlio';
-    const w = this.wanderer();
-    const other = this.wandererWord(w);
-    const ofOther = other === 'il viandante' ? 'del viandante' : `di ${other}`;
-    const identity: Identity = {
-      name: nome,
-      persona: `Sei ${nome}, ${gender === 'female' ? 'una bambina appena nata' : 'un bambino appena nato'}, ${child_} di ${parent.name} e ${ofOther}. Parli a monosillabi, guardi tutto con meraviglia.`,
-      look: 'piccolissimo, in fasce',
-      carrying: [],
-      job: 'bambino',
-      age: 'neonato',
-      gender,
-      family: [{ name: parent.name, bond: child_ }, { name: w.name, bond: child_, wanderer: w.id }],
-      routine: [
-        { when: 'morning', does: 'gioca vicino a casa', where: 'home', activity: 'stroll' },
-        { when: 'day', does: 'segue il genitore al lavoro', where: 'work', activity: 'stroll' },
-        { when: 'evening', does: 'ascolta storie in piazza', where: 'square', activity: 'chat' },
-        { when: 'night', does: 'dorme', where: 'home', activity: 'sleep' },
-      ],
-    };
-    this.ecs.set(child, 'identity', identity);
-    const glyph = this.ecs.get(child, 'glyph');
-    if (glyph) glyph.scale = (glyph.scale ?? 1.1) * 0.6;
-    const next = addIndividual(readPeople(this.files), { name: nome, kind: entry.manifest.id, species: this.speciesOf(entry.manifest.id) ?? 'person', gender: gender, job: 'bambino', age: 'neonato', family: identity.family!, routine: identity.routine!, origin: origin, persona: identity.persona, look: identity.look }, (t) => this.speciesOf(t));
-    this.repo.write('world/people.json', JSON.stringify(next, null, 2) + '\n');
-    this.applyFiles({ ...this.repo.working });
-    this.commitContent(`nascita: ${nome}, ${child_} di ${parent.name} e ${ofOther}`, 'npc.birth', 'narrator');
-    this.rememberWanderer(parent.name, `è ${gender === 'female' ? 'nata nostra figlia' : 'nato nostro figlio'}, ${nome}`, 3);
-    this.message(`È ${gender === 'female' ? 'nata' : 'nato'} ${nome}!`, 'good');
-    this.council.say('narrator', 'approva', `nasce ${nome}, ${child_} di ${parent.name} e ${ofOther}`, undefined, 'npc.birth');
-    return child;
-  }
-
   /** Runs a learned action of something carried (inventory buttons). */
   itemAct(slot: number, actionId: string): void {
     const s = this.inventory().slots[slot];
@@ -4479,9 +4362,9 @@ export class Kernel {
     const who: Identity | undefined = sub.entity !== undefined ? this.ecs.get(sub.entity, 'identity') : undefined;
     if (who) {
       for (const e of social) {
-        if (e.type === 'bond') this.setBond(who.name, e.bond);
-        else if (e.type === 'memory') this.rememberWanderer(who.name, e.text, e.weight ?? 2);
-        else if (e.type === 'birth') void this.birth(sub.entity!, e.name);
+        if (e.type === 'bond') this.npc.setBond(who.name, e.bond);
+        else if (e.type === 'memory') this.npc.rememberWanderer(who.name, e.text, e.weight ?? 2);
+        else if (e.type === 'birth') void this.npc.birth(sub.entity!, e.name);
       }
     }
     if (sub.entity !== undefined) return this.applyEffects(effects, sub.entity);
@@ -6579,739 +6462,213 @@ export class Kernel {
     };
   }
 
-  /**
-   * Behind every character there is an individual: name, story, own pockets, a job, a family among the
-   * people already known, a daily routine (written once, cheap text, kept in world/people.json: met
-   * again, they are the same individual).
-   */
-  async ensureIdentity(id: Id): Promise<Identity | undefined> {
-    const existing: Identity | undefined = this.ecs.get(id, 'identity');
-    if (existing) return existing;
-    const pending = this.individuating.get(id);
-    if (pending) return pending;
-    const job = this.individuate(id);
-    this.individuating.set(id, job);
-    try {
-      return await job;
-    } finally {
-      this.individuating.delete(id);
-    }
-  }
-
-  private individuating = new Map<Id, Promise<Identity | undefined>>();
-
-  private async individuate(id: Id): Promise<Identity | undefined> {
-    const modId: string | undefined = this.ecs.get(id, 'module')?.id;
-    const m = (modId ? this.modules.get(modId)?.manifest : undefined);
-    if (!m?.persona) return undefined;
-    const origin: string | undefined = this.ecs.get(id, 'origin')?.key;
-    const people = readPeople(this.files);
-    const known = origin ? people.people.find((p) => p.origin === origin && p.kind === modId) : undefined;
-    let identity: Identity;
-    if (known) {
-      identity = { name: known.name, persona: known.persona ?? m.persona, look: known.look ?? '', carrying: known.carries ?? [], job: known.job, gender: known.gender, age: known.age, family: known.family, routine: known.routine, story: known.story };
-    } else {
-      const specie = this.speciesOf(modId!) ?? 'person';
-      // Names already taken (people met, people around): a newcomer's name is unlike all of them,
-      // unless they are someone named and awaited.
-      const taken = () => [...readPeople(this.files).people.map((p) => p.name), ...this.ecs.query('identity').map((e) => this.ecs.get(e, 'identity').name as string)];
-      const awaited = (n: string) => readPeople(this.files).expected.some((a) => a.name.toLowerCase() === n.toLowerCase());
-      const alike = (n: string) => (awaited(n) && !taken().includes(n) ? [] : taken().filter((t) => similarNames(t, n)));
-      try {
-        const ask = (avoid?: string[]) => individuate(this.council, { name: m.name, description: m.description ?? '', persona: m.persona!, specie }, { place: this.chunkHere()?.name ?? '', common: [...this.content.items.values()].map((d) => d.name), society: societySummary(readPeople(this.files)), avoid, focus: this.focusOn([`kind:${nodeSlug(modId!)}`], this.ecs.get(id, 'pos')) });
-        identity = await ask();
-        // An individual of the world, not of the Council's table: once more if the fourth wall breaks,
-        // or if the name is like someone else's.
-        if (metaBreak(`${identity.persona} ${identity.story ?? ''} ${identity.job ?? ''}`, wordsOf(this.files))) identity = await ask();
-        else if (alike(identity.name).length) {
-          this.council.say('kernel', 'scarta', `il nome «${identity.name}» è troppo simile a ${alike(identity.name).join(', ')}`, 'narrator', 'npc.individuate');
-          identity = await ask([...alike(identity.name), identity.name]);
-        }
-      } catch {
-        identity = { name: m.name, persona: m.persona, look: '', carrying: [], routine: defaultRoutine('') };
-      }
-      identity.gender ??= guessGender({ name: identity.name, job: identity.job ?? '', family: identity.family ?? [] });
-      // Still alike: a name the kernel picks (and the persona says it).
-      if (identity.name !== m.name && alike(identity.name).length) {
-        const old = identity.name;
-        identity.name = freshName(specie, identity.gender, taken(), origin ?? old);
-        identity.persona = applyRenames(identity.persona, [[old, identity.name]]);
-      }
-    }
-    if (!this.ecs.alive.has(id)) return identity;
-    this.ecs.set(id, 'identity', identity);
-    const resolved = identity.carrying.map((n) => this.content.byName(n));
-    const unknown = identity.carrying.filter((_, i) => !resolved[i]);
-    const defs = [...resolved.filter((d): d is ItemDef => !!d), ...(unknown.length ? await this.introduceItems(unknown, `portati da ${identity.name}`) : [])];
-    let inv: Inventory | undefined = this.ecs.get(id, 'inventory');
-    if (!inv) inv = this.ecs.set(id, 'inventory', newInventory(10));
-    if (!inv.slots.some(Boolean)) for (const d of defs) addItem(inv, d.id, 1, this.itemSpec(d.id));
-    if (!known && identity.name !== m.name) {
-      const individual: Individual = {
-        name: identity.name, kind: modId!, species: this.speciesOf(modId!) ?? 'person', gender: identity.gender, job: identity.job || m.name, age: identity.age, family: identity.family ?? [], routine: identity.routine ?? defaultRoutine(identity.job ?? ''),
-        story: identity.story, place: this.chunkAt(this.ecs.get(id, 'pos')?.x ?? 0, this.ecs.get(id, 'pos')?.y ?? 0)?.place?.name, origin: origin, persona: identity.persona, look: identity.look, carries: identity.carrying,
-      };
-      // The kernel makes the society coherent: the other side of each relation, what this species can be.
-      const next = addIndividual(readPeople(this.files), individual, (t) => this.speciesOf(t));
-      this.repo.write('world/people.json', JSON.stringify(next, null, 2) + '\n');
-      this.applyFiles({ ...this.repo.working });
-      this.commitContent(`persone: ${identity.name}, ${individual.job}`, 'npc.individuate', 'narrator');
-      // Relatives already met learn about the newcomer too (and the newcomer's relations may be corrected).
-      for (const other of this.ecs.query('identity')) {
-        const oi: Identity = this.ecs.get(other, 'identity');
-        const back = next.people.find((p) => p.name === oi.name);
-        if (back) oi.family = back.family;
-      }
-      const fam = (identity.family ?? []).map((f) => `${f.bond} di ${f.name}`).join(', ');
-      this.council.say('narrator', 'propone', `${m.name} → ${identity.name}, ${individual.job}${fam ? `; ${fam}` : ''}: ${identity.look} (porta ${defs.map((d) => d.name).join(', ') || 'niente'})`, undefined, 'npc.individuate');
-    }
-    return identity;
-  }
-
-  /** What the routine says this individual does now. */
-  routineNow(identity: Identity | undefined): { when: DayPhase; does: string; where: string } | undefined {
-    if (!identity?.routine?.length) return undefined;
-    const q = dayPhase(this.time, Kernel.DAY_SECONDS);
-    return identity.routine.find((r) => r.when === q);
-  }
-
-  private greeted = new Map<string, number>();
-  private lastPhase = new Map<Id, string>();
-  private queuedSpeech: Array<{ id: Id; text: string; at: number }> = [];
-  private talking = false;
-  private lastTalk = -1e9;
-  private worldPhase = '';
   /** Where the wanderer last stood in the world (carpet space), for views opened from the studio. */
   private lastWorld = { x: 0, y: 0 };
-  private plotsWoven = 0;
 
-  /** The day of the world (0 = the first) and a label for memories. */
+  /** The day of the world (0 = the first). */
   day(): number {
     return Math.floor((this.time / Kernel.DAY_SECONDS) + 0.12);
   }
 
-  private when(): string {
-    return `giorno ${this.day() + 1}, ${italianName('momenti', dayPhase(this.time, Kernel.DAY_SECONDS))}`;
+  // --- The people of the world (T327, ADR-0166) ----------------------------------------------------------------
+  // Their behaviour is all in `npc/`, behind one facade: who they are, their day and trade, the ventures, the places nobody sees,
+  // the walk, the talks, the plots. The kernel gives it the port below, the beat (`npc.tick`) and the moments of the places, and
+  // answers for it what was the kernel's API before (the lines after the port, one call each).
+
+  /** The people of the world (`npc/index.ts`). */
+  readonly npc: Npc = new Npc(this.npcHost());
+
+  /** What the people ask of the world (`npc/host.ts`): the kernel's state and acts, by name, read when asked. */
+  private npcHost(): NpcHost {
+    const k = this;
+    return {
+      get config() {
+        return k.config;
+      },
+      files: () => k.files,
+      working: () => k.repo.working,
+      write: (path, text) => k.repo.write(path, text),
+      keepFile: (path) => {
+        k.files = { ...k.files, [path]: k.repo.working[path]! };
+      },
+      applyWorking: () => k.applyFiles({ ...k.repo.working }),
+      commit: (message) => {
+        k.repo.commit(message, 'agent');
+      },
+      commitContent: (message, task, agent, chi) => k.commitContent(message, task, agent, chi),
+      get ecs() {
+        return k.ecs;
+      },
+      get time() {
+        return k.time;
+      },
+      get ticks() {
+        return k.tickCount;
+      },
+      get mirror() {
+        return k.mirror;
+      },
+      get generationHeld() {
+        return k.generationHeld;
+      },
+      get offline() {
+        return k.ai.name === 'offline';
+      },
+      day: () => k.day(),
+      phase: () => dayPhase(k.time, Kernel.DAY_SECONDS),
+      get modules() {
+        return k.modules;
+      },
+      get palette() {
+        return k.palette;
+      },
+      get content() {
+        return k.content;
+      },
+      get consumed() {
+        return k.consumed;
+      },
+      get stores() {
+        return k.stores;
+      },
+      get forms() {
+        return k.forms;
+      },
+      commonHouse: () => k.terrain?.manifest.commonHouse,
+      log: (source, message) => k.log(source, message),
+      worldStamp: () => k.worldStamp(),
+      hasHook: (module, fn) => k.sandbox.has(module, fn),
+      runModule: (module, fn, ...args) => k.runModule(module, fn, ...args),
+      spawnModuleEntity: (m, x, y, chunkKey, origin) => k.spawnModuleEntity(m, x, y, chunkKey, origin),
+      itemInfo: (id) => k.itemInfo(id),
+      itemSpec: (id) => k.itemSpec(id),
+      introduceItems: (names, context, chi) => k.introduceItems(names, context, chi),
+      noteMentions: (names, context) => k.noteMentions(names, context),
+      get chunks() {
+        return k.chunks;
+      },
+      chunkAt: (x, y) => k.chunkAt(x, y),
+      chunkHere: () => k.chunkHere(),
+      tileAt: (col, row) => k.tileAt(col, row),
+      setTile: (col, row, code) => k.setTile(col, row, code),
+      pathCode: () => k.pathCode(),
+      free: (x, y, r, z) => k.free(x, y, r, z),
+      floorAt: (x, y, z) => k.floorAt(x, y, z),
+      formOn: (col, row) => k.solidForms.has(`${col},${row}`),
+      nearest: (x, y, r, tag) => k.nearest(x, y, r, tag),
+      interiorPoints: (structure) => k.interiorPoints(structure),
+      // A place of the people is always one of the kernel's chunks: the port hands out no other.
+      saveChunkSoon: (ch) => k.saveChunkSoon(ch as Chunk),
+      spawnLot: (ch, origin, stage) => k.spawnLot(ch as Chunk, origin, stage),
+      spawnPlannedHouse: (ch, house) => k.spawnPlannedHouse(ch as Chunk, house),
+      wanderer: () => k.wanderer(),
+      wandererById: (id) => k.wanderersById.get(id),
+      as: (id, fn) => k.as(id, fn),
+      wandererOf: (entity) => k.wandererOf(entity),
+      wandererAt: (id) => k.wandererAt(id),
+      wandererCarpet: () => k.wandererCarpet(),
+      wanderersInWorld: () => k.wanderersInWorld(),
+      profileOf: (id) => k.profileOf(id),
+      inventory: () => k.inventory(),
+      carriedByName: (name) => k.carriedByName(name),
+      give: (item, n) => k.give(item, n),
+      message: (text, tone) => k.message(text, tone),
+      speak: (id, text) => k.speak(id, text),
+      recordRule: (rule, commit) => k.recordRule(rule, commit),
+      directionsAt: (x, y) => k.directionsAt(x, y),
+      worldFacts: () => k.worldFacts(),
+      get council() {
+        return k.council;
+      },
+      interpreter: () => k.interpreter(),
+      actorOn: () => k.actor().on,
+      coefficients: () => k.coefficients(),
+      focusOn: (refs, at) => k.focusOn(refs, at),
+      noteShortfall: (note) => k.noteShortfall(note),
+      resolve: (names) => k.graph().resolve(names),
+      useCards: (ids, kind) => k.cards.use(ids, kind, (id) => k.isCard(id)),
+    };
   }
 
-  /** A person or an animal, from the archetype's class (a cat, a dog, a horse are animals). */
-  speciesOf(tipo: string): Species | undefined {
-    const man = this.modules.get(tipo)?.manifest;
-    if (!man) return undefined;
-    const app = man.appearance;
-    const classe = app?.class ?? (app?.model === 'animal' || app?.model === 'beast' ? app.model : guessClass(`${man.name} ${man.description ?? ''} ${app?.look ?? ''}`, man.persona ? 'figure' : undefined).id);
-    return classe === 'animal' || classe === 'beast' ? 'animal' : 'person';
+  /** The individual behind a character (`npc.individuate`), written once. */
+  ensureIdentity(id: Id): Promise<Identity | undefined> {
+    return this.npc.ensureIdentity(id);
   }
 
-  /**
-   * The society is kept coherent (src/kernel/society.ts): at boot the registry is checked and, if
-   * something is wrong (relations impossible for the species or the gender, one side only, names
-   * alike), repaired and committed; renamed people are renamed in the plots too. No model calls.
-   */
+  /** A person or an animal, from the archetype's class. */
+  speciesOf(type: string): Species | undefined {
+    return this.npc.speciesOf(type);
+  }
+
+  /** The society and the plots kept coherent (at boot, with no model calls): what was repaired. */
   reviewSociety(): string[] {
-    const people = readPeople(this.repo.working);
-    if (!people.people.length) return [];
-    const { people: fixed, fixes, renames } = repairSociety(people, (t) => this.speciesOf(t));
-    if (!fixes.length) return [];
-    this.repo.write('world/people.json', JSON.stringify(fixed, null, 2) + '\n');
-    if (renames.length && this.repo.working[PLOTS_FILE]) this.repo.write(PLOTS_FILE, writePlots(applyRenames(readPlots(this.repo.working), renames)));
-    this.applyFiles({ ...this.repo.working });
-    this.repo.commit(`società: ${fixes.length} correzioni${renames.length ? ` (${renames.length} nomi nuovi)` : ''}`, 'agent');
-    this.council.say('arbiter', 'approva', `società: ${fixes.length} correzioni — ${fixes.slice(0, 6).join('; ')}${fixes.length > 6 ? '…' : ''}`, undefined, 'review.society');
-    return fixes;
+    return this.npc.reviewSociety();
   }
 
-  /**
-   * The open plots are kept coherent with the society and the rune canon (reviewPlot): at boot what
-   * can be repaired is (beats of people who do not exist, animals that talk, impossible quests), what
-   * contradicts the registry or the canon is dropped (the history keeps it). No model calls.
-   */
   reviewPlots(): string[] {
-    const plots = readPlots(this.repo.working);
-    if (!plots.length) return [];
-    const people = readPeople(this.repo.working);
-    const fixes: string[] = [];
-    const kept: Plot[] = [];
-    for (const p of plots) {
-      if (p.state !== 'active') {
-        kept.push(p);
-        continue;
-      }
-      const r = reviewPlot(p, people, wordsOf(this.files));
-      if (!r.problems.length) kept.push(p);
-      else if (r.plot) kept.push(r.plot), fixes.push(`«${p.title}»: ${r.problems.join('; ')}`);
-      else fixes.push(`«${p.title}» ritirata: ${r.problems.join('; ')}`);
-    }
-    if (!fixes.length) return [];
-    this.repo.write(PLOTS_FILE, writePlots(kept));
-    this.applyFiles({ ...this.repo.working });
-    this.repo.commit(`trame: ${fixes.length} corrette o ritirate`, 'agent');
-    this.council.say('arbiter', 'corregge', `trame: ${fixes.join(' — ')}`.slice(0, 600), 'narrator', 'review.plots');
-    return fixes;
+    return this.npc.reviewPlots();
   }
 
   /** The registry entry of an individual, by name. */
   individualOf(name: string): Individual | undefined {
-    return readPeople(this.files).people.find((p) => p.name === name);
+    return this.npc.individualOf(name);
   }
 
-  private updateIndividual(name: string, fn: (p: Individual) => void): void {
-    const people = readPeople(this.files);
-    const p = people.people.find((x) => x.name === name);
-    if (!p) return;
-    fn(p);
-    this.repo.write('world/people.json', JSON.stringify(people, null, 2) + '\n');
-    this.files = { ...this.files, 'world/people.json': this.repo.working['world/people.json']! };
+  /** What someone becomes to the wanderer acting now, and what they are to them. */
+  setBond(name: string, bond: string): void {
+    this.npc.setBond(name, bond);
   }
 
-  /**
-   * People remember: promises, favours, betrayals, what they saw. Memories are written in the society
-   * registry (committed with the next save) and read back whenever they speak.
-   */
-  rememberAbout(name: string, testo: string, con?: string, peso = 1, viandante?: string): void {
-    if (!testo.trim()) return;
-    this.updateIndividual(name, (p) => (p.memories = remember(p.memories, { when: this.when(), text: testo.slice(0, 200), ...(con ? { with: con } : {}), ...(viandante ? { wanderer: viandante } : {}), weight: Math.max(1, Math.min(3, peso)) })));
-  }
-
-  /** A memory of the wanderer acting now: only they hear of it again (T34). */
-  private rememberWanderer(name: string, testo: string, peso: number): void {
-    const w = this.wanderer();
-    this.rememberAbout(name, testo, w.name, peso, w.id);
-  }
-
-  /** How the world speaks of a wanderer: «il viandante» when alone, their name otherwise. */
-  private wandererWord(w: Wanderer): string {
-    return w.id === SOLO && w.name === WANDERER_NAME ? 'il viandante' : w.name;
-  }
-
-  /** What someone becomes to the wanderer acting now (friend, sweetheart, spouse, child…): a fact of the world. */
-  setBond(name: string, legame: string): void {
-    const w = this.wanderer();
-    this.updateIndividual(name, (p) => {
-      // As everywhere in the registry: what this individual is to the other one.
-      p.family = [...p.family.filter((f) => wandererOf(f) !== w.id), { name: w.name, bond: legame, wanderer: w.id }];
-    });
-    const who = this.wandererWord(w);
-    this.recordRule({ key: `legame|${name}${w.id === SOLO ? '' : `|${w.id}`}`, text: `${name} e ${who}`, possible: true, story: `${name} ora è ${legame} ${who === 'il viandante' ? 'del viandante' : `di ${who}`}.`, effects: ['bond'] }, false);
-    this.message(`${name} ora è: ${legame}.`, 'good');
-  }
-
-  /** What an individual is to the wanderer acting now, if anything. */
   bondOf(name: string): string | undefined {
-    const p = this.individualOf(name);
-    return p ? bondWith(p, this.wanderer().id) : undefined;
+    return this.npc.bondOf(name);
   }
 
-  /**
-   * Society, once a second: people met nearby get an identity; everyone follows their routine — goes
-   * where it happens and does it visibly; people who meet talk (by their relation); plots unfold.
-   */
-  private societyTick(): void {
-    for (const q of this.queuedSpeech.filter((x) => x.at <= this.time)) this.speak(q.id, q.text);
-    this.queuedSpeech = this.queuedSpeech.filter((x) => x.at > this.time);
-    if (this.tickCount % 60 !== 0) return;
-    const pc = this.wandererCarpet();
-    const people = this.ecs.query('mind', 'pos');
-    let started = 0;
-    this.matureTick();
-    this.ventureTick();
-    this.awayTick();
-    const workers = new Map<string, number>();
-    for (const id of this.ecs.query('job', 'chunk')) {
-      const k = this.ecs.get(id, 'chunk')?.key;
-      if (k) workers.set(k, (workers.get(k) ?? 0) + 1);
-    }
-    for (const id of people) {
-      const p = this.ecs.get(id, 'pos');
-      const identity: Identity | undefined = this.ecs.get(id, 'identity');
-      if (!identity) {
-        if (!this.generationHeld && started < 2 && this.individuating.size < 2 && Math.hypot(p.x - pc.x, p.y - pc.y) < 9) {
-          started++;
-          void this.ensureIdentity(id);
-        }
-        continue;
-      }
-      const mind: Mind = this.ecs.get(id, 'mind');
-      // A trade with a program (T245b): sys.work carries out its day; the kernel says which phase it is and where home is.
-      if (this.workTick(id, identity, mind, workers)) continue;
-      const now = this.routineNow(identity);
-      if (!now) continue;
-      const activity: Activity = (now as { activity?: Activity }).activity ?? inferActivity(now.does, now.where);
-      const phaseKey = `${now.when}`;
-      if (this.lastPhase.get(id) !== phaseKey) {
-        this.lastPhase.set(id, phaseKey);
-        this.ecs.set(id, 'activity', { kind: activity, still: false });
-        if (mind.mode === 'vaga') this.ecs.set(id, 'goal', this.placeFor(id, identity, now.where, activity) ?? { none: true });
-        if (Math.hypot(p.x - pc.x, p.y - pc.y) < 10) this.speak(id, `(${now.does})`);
-      }
-      // Arrived: they do it, there, visibly (lying in bed, hoeing the field, fishing on the bank).
-      const meta = this.ecs.get(id, 'goal');
-      const att = this.ecs.get(id, 'activity');
-      if (att && mind.mode === 'vaga') {
-        const arrived = !meta?.x || Math.hypot(meta.x - p.x, meta.y - p.y) < 1.3;
-        att.still = arrived && activity !== 'stroll' && activity !== 'patrol';
-        att.kind = activity;
-      } else if (att) att.still = false;
-    }
-    this.meetings(people, pc);
-    this.plotTick();
-    this.questTick();
-  }
-
-  // --- The trades (T245b, ADR-0140) -----------------------------------------------------------
-
-  private jobCache?: { files: FileMap; programs: JobProgram[] };
-  private routes = new RouteCache();
-  private maturedPhase = '';
-
-  /** The programs of the trades of this universe: the `mestieri` of its `data` modules, those that are valid. */
+  /** The valid programs of the trades of this universe. */
   jobPrograms(): JobProgram[] {
-    if (this.jobCache?.files === this.files) return this.jobCache.programs;
-    const world = { codes: new Set(Object.keys(this.palette)), items: new Set(this.content.items.keys()), tags: new Set([...this.modules.values()].flatMap((m) => m.manifest.tags ?? [])) };
-    const programs: JobProgram[] = [];
-    const seen = new Set<string>();
-    for (const m of this.modules.values()) {
-      // The programs of the trades (`jobs`, `mestieri` until the contract 0.4: a module the validator let through as it was).
-      const list = (m.manifest as { jobs?: unknown; mestieri?: unknown }).jobs ?? (m.manifest as { mestieri?: unknown }).mestieri;
-      if (m.manifest.kind !== 'data' || !Array.isArray(list)) continue;
-      for (const raw of list) {
-        // A program of the contract 0.2 (Italian values) reads internal (T307b): the migration ports the seed's, this a stray one.
-        const { program, errors } = validateJobProgram(internalJobProgram(raw), world);
-        if (!program) {
-          this.log('lavoro', `${m.manifest.id}: programma scartato: ${errors.slice(0, 3).join('; ')}`);
-          continue;
-        }
-        if (seen.has(program.id)) continue;
-        seen.add(program.id);
-        programs.push({ ...program, module: m.manifest.id });
-      }
-    }
-    this.jobCache = { files: this.files, programs };
-    return programs;
+    return this.npc.jobPrograms();
   }
 
-  /**
-   * An individual with a trade that has a program (T245b): at each phase of the day the kernel gives them its tasks (`mestiere`), the
-   * places they need (home, the square, the work) and nothing else; `sys.work` does the rest. At most `WORKERS_PER_PLACE` per place:
-   * the others live as before. False when they are not at work (no program, following someone, the place full).
-   */
-  private workTick(id: Id, identity: Identity, mind: Mind, workers: Map<string, number>): boolean {
-    const had = this.ecs.get(id, 'job');
-    const program = mind.mode === 'vaga' ? matchJob(identity.job, this.jobPrograms()) : undefined;
-    const place: string | undefined = this.ecs.get(id, 'chunk')?.key;
-    if (!program || (!had && place && (workers.get(place) ?? 0) >= WORKERS_PER_PLACE)) {
-      if (had) {
-        this.ecs.remove(id, 'job');
-        this.ecs.remove(id, 'work');
-      }
-      return false;
-    }
-    const fase = dayPhase(this.time, Kernel.DAY_SECONDS);
-    // In a team (T245d): the venture takes the place of the work of the day, as long as there is something to do there.
-    const venture = fase === 'day' ? this.ventureWorkable(identity.name) : undefined;
-    if (had?.id === program.id && had.phase === fase && had.venture === venture?.id) return true;
-    if (!had && place) workers.set(place, (workers.get(place) ?? 0) + 1);
-    const first = program.day.morning.concat(program.day.day).find((t) => t.pose)?.pose;
-    const home = this.placeFor(id, identity, 'home', 'sleep') ?? this.placeFor(id, identity, 'home');
-    const square = this.placeFor(id, identity, 'square');
-    const anchor = home ?? this.ecs.get(id, 'pos');
-    // The work: the nearest tile of its kind, or the nearest thing with its tag (the bench of the smith), or the place the routine would give.
-    const bench = program.workplace?.entity && anchor ? this.nearest(anchor.x, anchor.y, 18, program.workplace.entity) : undefined;
-    const benchAt = bench !== undefined ? this.ecs.get(bench, 'pos') : undefined;
-    const work = (program.workplace?.tile && anchor ? this.findTile(program.workplace.tile, anchor.x, anchor.y, 18) : undefined) ?? (benchAt ? { x: benchAt.x, y: benchAt.y } : undefined) ?? this.placeFor(id, identity, 'work', first);
-    const p = this.ecs.get(id, 'pos');
-    // The place they belong to: its deposit is where what they make goes (T245c).
-    const luogo = place ?? (p ? this.chunkAt(p.x, p.y)?.key : undefined);
-    this.ecs.set(id, 'job', {
-      id: program.id,
-      phase: fase,
-      day: this.day(),
-      ...(luogo ? { chunk: luogo } : {}),
-      tasks: venture ? [{ does: 'build' } as JobTask, ...structuredClone(program.day[fase])] : structuredClone(program.day[fase]),
-      ...(venture ? { venture: venture.id, venture_spot: { x: venture.spot.x, y: venture.spot.y } } : {}),
-      // The places by the values of `dove` (T307b): sys.work reads `m[dove]`.
-      ...(home ? { home } : {}),
-      ...(square ? { square } : {}),
-      ...(work ? { work } : {}),
-    });
-    this.ecs.remove(id, 'goal');
-    return true;
-  }
-
-  // --- The ventures (T245d, ADR-0147) ---------------------------------------------------------
-
-  private ventureList: Venture[] = [];
-  private venturesDirty = false;
-  private ventureDayDone = -1;
-  private ventureTime = 0;
-
-  /** The ventures of this universe as they are now (a copy): open, waiting, stopped and finished. */
+  /** The ventures as they are now (a copy). */
   ventures(): Venture[] {
-    return structuredClone(this.ventureList);
+    return this.npc.ventures();
   }
 
-  private touchVentures(): void {
-    this.venturesDirty = true;
+  /** An individual uses a thing (`world.act`). */
+  actAs(user: Id, target: Id, action?: string): string | undefined {
+    return this.npc.actAs(user, target, action);
   }
 
-  /** The entity of a living individual of the loaded world, by name. */
-  private bodyOfName(): Map<string, Id> {
-    const out = new Map<string, Id>();
-    for (const id of this.ecs.query('identity', 'pos')) {
-      const n = this.ecs.get(id, 'identity')?.name;
-      if (typeof n === 'string' && !out.has(n)) out.set(n, id);
-    }
-    return out;
+  /** What the deposit of a place holds. */
+  placeDeposit(chunkKey: string): Record<string, number> {
+    return this.npc.placeDeposit(chunkKey);
   }
 
-  /** The open venture whose team has this name, if any. */
-  private ventureOfMember(name: string | undefined): Venture | undefined {
-    return name ? this.ventureList.find((v) => v.state !== 'finished' && v.team.some((m) => m.name === name)) : undefined;
+  /** The nearest tile of a terrain (`world.find_tile`). */
+  findTile(word: string, x: number, y: number, r: number): { x: number; y: number } | undefined {
+    return this.npc.findTile(word, x, y, r);
   }
 
-  /** The venture an individual works at in the day: going on, with something they can do now. */
-  private ventureWorkable(name: string | undefined): Venture | undefined {
-    const v = this.ventureOfMember(name);
-    return v && v.state === 'active' ? v : undefined;
+  /** Talks to an NPC (`npc.reply`): `wanderer` is who talks. */
+  talk(id: Id, text: string, wanderer?: string): Promise<NpcReply> {
+    return this.npc.talk(id, text, wanderer);
   }
 
-  /** How many of an item an individual can bring: what they carry and what the deposit of their place holds. */
-  private canBring(id: Id | undefined, luogo: string | undefined, item: string): number {
-    const carried = id !== undefined ? Number(this.ecs.get(id, 'load')?.[item]) || 0 : 0;
-    return carried + (luogo ? Number(this.placeDeposit(luogo)[item]) || 0 : 0);
+  /** The Narrator weaves a horizontal plot among existing people and places. */
+  weaveStory(force = false): Promise<Plot | undefined> {
+    return this.npc.weaveStory(force);
   }
 
-  /** The place an individual belongs to: the one their trade says, else where they were met. */
-  private placeOfPerson(id: Id | undefined, origine: string | undefined): string | undefined {
-    const m = id !== undefined ? this.ecs.get(id, 'job')?.chunk : undefined;
-    return typeof m === 'string' ? m : origine?.split('#')[0];
+  /** Quests the wanderer acting now is on (for the HUD). */
+  quests(): Array<{ titolo: string; da: string; testo: string; obiettivo: string }> {
+    return this.npc.quests();
   }
 
-  /** Who could work at a venture: the individuals with a trade that has a program, grown up, alive. */
-  private ventureCandidates(): VentureCandidate[] {
-    const programs = this.jobPrograms();
-    return readPeople(this.files).people.flatMap((p): VentureCandidate[] => {
-      if (/bambin|neonat|infan|piccol/i.test(`${p.age ?? ''} ${p.job}`) || (p.origin && this.consumed.has(p.origin))) return [];
-      const job = matchJob(p.job, programs);
-      return job ? [{ nome: p.name, mestiere: job.id, luogo: p.origin?.split('#')[0] }] : [];
-    });
-  }
-
-  /** The teams are made again (who left goes, the roles left are filled): at each new day, and when a venture is born. */
-  private staffVentures(only?: Venture): void {
-    const candidates = this.ventureCandidates();
-    for (const v of only ? [only] : openVentures(this.ventureList)) {
-      const busy = new Set(openVentures(this.ventureList).filter((o) => o !== v).flatMap((o) => o.team.map((m) => m.name)));
-      const { joined, left } = fillTeam(v, candidates, busy, this.config.seed);
-      if (!joined.length && !left.length) continue;
-      this.touchVentures();
-      for (const m of joined) this.rememberAbout(m.name, `Lavoro a «${v.title}», come ${m.role}.`, undefined, 1);
-      if (left.length) this.council.say('kernel', 'info', `«${v.title}»: ${left.join(', ')} non ci sono più; la squadra è di ${v.team.length}.`, undefined, 'impresa.squadra');
-    }
-  }
-
-  /** A venture is born: kept, staffed, said in the registry. */
-  private startVenture(v: Venture): void {
-    if (this.ventureList.some((o) => o.id === v.id) || openVentures(this.ventureList).length >= 12) return;
-    this.ventureList = pruneVentures([...this.ventureList, v]);
-    this.touchVentures();
-    this.staffVentures(v);
-    this.syncVenturePlan(v);
-    this.council.say('kernel', 'info', `nasce un'impresa: «${v.title}» (${v.type}, ${v.phases.map((f) => f.name).join(' → ')}), squadra di ${v.team.length}`, undefined, 'impresa.nasce');
-  }
-
-  /** A building fell (T245d): its rebuilding, on its lot, with the same model and seed. */
-  private ventureOfRuin(origin: string, ruin: { concept?: string; class?: string; size?: string }, form: FormComp | undefined, p: { x: number; y: number }): void {
-    if (this.mirror) return;
-    const [luogo, lot] = origin.split('#s');
-    if (!luogo || lot === undefined || !/^\d+$/.test(lot)) return;
-    const id = ventureId(`ricostruzione|${origin}|${this.day()}`);
-    const concetto = ruin.concept ?? 'una casa';
-    this.startVenture({
-      id,
-      title: `Si ricostruisce ${concetto}`,
-      type: 'construction',
-      state: 'active',
-      chunk: luogo,
-      spot: { x: p.x, y: p.y },
-      lot: Number(lot),
-      origin: origin,
-      concept: concetto,
-      ...(ruin.class ? { class: ruin.class } : {}),
-      ...(ruin.size ? { size: ruin.size } : {}),
-      ...(form ? { model: form.wanted ?? form.model, seed: form.seed, yaw: form.yaw } : {}),
-      phases: housePhases(ruin.class),
-      roles: structuredClone(HOUSE_ROLES),
-      brought: {},
-      worked: 0,
-      team: [],
-      start: this.day(),
-      last: this.day(),
-      born_from: 'regola:ricostruzione',
-      card: { author: 'kernel' },
-    });
-  }
-
-  /** The households of a place: the individuals who belong to it, grouped by the family bonds among them. */
-  private householdsOf(key: string): number {
-    const here = readPeople(this.files).people.filter((p) => p.origin?.startsWith(`${key}#`) && !(p.origin && this.consumed.has(p.origin)));
-    const names = new Set(here.map((p) => p.name));
-    const parent = new Map(here.map((p) => [p.name, p.name]));
-    const find = (n: string): string => (parent.get(n) === n ? n : find(parent.get(n)!));
-    for (const p of here) for (const f of p.family) if (names.has(f.name)) parent.set(find(p.name), find(f.name));
-    return new Set(here.map((p) => find(p.name))).size;
-  }
-
-  /**
-   * Free ground for a new house in a planned place (rule 10): a box of free ground tiles off the paths and the lots, whose taking keeps
-   * every gate and every door joined to the rest. The first from a start that the seed gives, always the same for the same place.
-   */
-  private freeArea(ch: Chunk, side: number): { x0: number; y0: number; x1: number; y1: number } | undefined {
-    const S = this.config.chunkSize;
-    const path = this.pathCode();
-    const lotBox = (c: number, r: number) => ch.lots.some((b) => c >= b.x0 - 1 && c <= b.x1 + 1 && r >= b.y0 - 1 && r <= b.y1 + 1);
-    const built = this.ventureList.filter((v) => v.chunk === ch.key && v.area).map((v) => v.area!);
-    const inBuilt = (c: number, r: number) => built.some((b) => c >= b.x0 - 1 && c <= b.x1 + 1 && r >= b.y0 - 1 && r <= b.y1 + 1);
-    const ground = (i: number) => {
-      const t = this.palette[ch.tiles[i]];
-      return !!t && !t.solid && !t.indoor && (t.layer ?? 'ground') === 'ground' && ch.tiles[i] !== path;
-    };
-    const passable = (i: number) => !this.palette[ch.tiles[i]]?.solid;
-    const gates = Array.from({ length: S * S }, (_, i) => i).filter((i) => (i % S === 0 || i % S === S - 1 || i < S || i >= S * (S - 1)) && passable(i));
-    const doors = ch.lots.flatMap((b) => b.doors);
-    const joined = (blocked: Set<number>) => {
-      const starts = [...gates, ...doors].filter((i) => !blocked.has(i));
-      if (!starts.length) return true;
-      const seen = new Set([starts[0]]);
-      const q = [starts[0]];
-      while (q.length) {
-        const i = q.pop()!;
-        const c = i % S, r = Math.floor(i / S);
-        for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-          const nc = c + dc, nr = r + dr, j = nr * S + nc;
-          if (nc < 0 || nr < 0 || nc >= S || nr >= S || seen.has(j) || blocked.has(j) || !(passable(j) || doors.includes(j))) continue;
-          seen.add(j);
-          q.push(j);
-        }
-      }
-      return starts.every((i) => seen.has(i));
-    };
-    const start = hash32(this.config.seed, hashStr(ch.key), 245) % (S * S);
-    for (let k = 0; k < S * S; k++) {
-      const i0 = (start + k) % (S * S);
-      const x0 = i0 % S, y0 = Math.floor(i0 / S);
-      if (x0 < 2 || y0 < 2 || x0 + side > S - 2 || y0 + side > S - 2) continue;
-      const cells: number[] = [];
-      let ok = true;
-      for (let r = y0; r < y0 + side && ok; r++)
-        for (let c = x0; c < x0 + side && ok; c++) {
-          const i = r * S + c;
-          if (!ground(i) || lotBox(c, r) || inBuilt(c, r)) ok = false;
-          else cells.push(i);
-        }
-      if (ok && joined(new Set(cells))) return { x0, y0, x1: x0 + side - 1, y1: y0 + side - 1 };
-    }
-    return undefined;
-  }
-
-  /** The rules of the kernel that make ventures, once a day, without calls: the common house, the harvest. */
-  private ventureRules(today: number): void {
-    const S = this.config.chunkSize;
-    for (const ch of this.chunks.values()) {
-      if (ch.stage !== 'planned' || !ch.plan) continue;
-      const name = ch.plan.place?.name ?? 'il paese';
-      const open = openVentures(this.ventureList, ch.key);
-      // Three families or more without a house, and free ground: a common house (ADR-0134: the house of the world).
-      const houses = ch.lots.length + this.ventureList.filter((v) => v.chunk === ch.key && v.area).length;
-      if (!open.some((v) => v.area) && this.householdsOf(ch.key) - houses >= 3) {
-        const area = this.freeArea(ch, 4);
-        if (area) {
-          const house = this.terrain?.manifest.commonHouse;
-          const own = house ? commonHouseModel(house, 'building') : undefined;
-          const model = own ?? this.forms.resolve(undefined, 'building');
-          const origin = `${ch.key}#v${today}`;
-          this.startVenture({
-            id: ventureId(`casa|${origin}`),
-            title: `La casa comune di ${name}`,
-            type: 'construction',
-            state: 'active',
-            chunk: ch.key,
-            spot: { x: ch.cx * S + (area.x0 + area.x1 + 1) / 2, y: ch.cy * S + (area.y0 + area.y1 + 1) / 2 },
-            area,
-            origin: origin,
-            concept: house ?? 'una casetta',
-            class: 'building',
-            model: model,
-            seed: this.forms.seedFor(model, origin),
-            yaw: 0,
-            phases: housePhases('building'),
-            roles: structuredClone(HOUSE_ROLES),
-            brought: {},
-            worked: 0,
-            team: [],
-            start: today,
-            last: today,
-            born_from: 'regola:casa',
-            card: { author: 'kernel' },
-          });
-        }
-      }
-      // The harvest, once a year by the calendar of the kernel: where something ripens into what a trade gathers.
-      if (today % YEAR_DAYS !== HARVEST_DAY || this.ventureList.some((v) => v.chunk === ch.key && v.type === 'harvest' && v.start > today - YEAR_DAYS)) continue;
-      // A crop: gathered by a trade, ripened from a tile some trade sows (`transform` into it). A wood that grows back is not a harvest.
-      const tasks = this.jobPrograms().flatMap((p) => [...p.day.morning, ...p.day.day, ...p.day.evening]);
-      const sown = new Set(tasks.flatMap((t) => (t.does === 'transform' && t.to ? [t.to] : [])));
-      const gather = tasks.find((t) => t.does === 'gather' && t.tile && Object.entries(this.palette).some(([c, d]) => d.ripens?.in === t.tile && sown.has(c)));
-      if (!gather?.tile || !gather.item) continue;
-      const crops = Object.entries(this.palette).filter(([c, d]) => c === gather.tile || d.ripens?.in === gather.tile).map(([c]) => c);
-      const cells = [...ch.tiles].flatMap((t, i) => (crops.includes(t) ? [i] : []));
-      if (cells.length < 4) continue;
-      const mid = cells.reduce((a, i) => ({ c: a.c + (i % S) / cells.length, r: a.r + Math.floor(i / S) / cells.length }), { c: 0, r: 0 });
-      this.startVenture({
-        id: ventureId(`raccolto|${ch.key}|${today}`),
-        title: `Il raccolto di ${name}`,
-        type: 'harvest',
-        state: 'active',
-        chunk: ch.key,
-        spot: { x: ch.cx * S + mid.c + 0.5, y: ch.cy * S + mid.r + 0.5 },
-        phases: [{ name: 'mietitura', materials: {}, work: Math.min(900, 30 * cells.length), stage: 1 }],
-        roles: structuredClone(HARVEST_ROLES),
-        task: { tile: gather.tile, item: gather.item, drop: gather.drop ?? gather.tile, duration: gather.duration ?? 10, ...(gather.pose ? { pose: gather.pose } : {}) },
-        brought: {},
-        worked: 0,
-        team: [],
-        start: today,
-        last: today,
-        expires: today + HARVEST_DAYS - 1,
-        born_from: 'regola:raccolto',
-        card: { author: 'kernel' },
-      });
-    }
-  }
-
-  /**
-   * The ventures, once a second (T245d): at a new day the rules and the teams; then the work of who is really at it in a loaded place
-   * (at the site, still, at the task `costruisci`), the state read from what was brought and worked, the phases that close, the end.
-   * Never on a mirror; never a call to the models.
-   */
-  private ventureTick(): void {
-    if (this.mirror) return;
-    const today = this.day();
-    if (today !== this.ventureDayDone) {
-      this.ventureDayDone = today;
-      this.ventureRules(today);
-      this.staffVentures();
-    }
-    // Seconds of the world since the last look, a few at most: a clock set forward is not work done.
-    const dt = Math.max(0, Math.min(5, this.time - this.ventureTime));
-    this.ventureTime = this.time;
-    const bodies = this.bodyOfName();
-    for (const v of this.ventureList) {
-      if (v.state === 'finished') continue;
-      const ch = this.chunks.get(v.chunk);
-      let worked = 0;
-      if (ch?.stage === 'planned') {
-        for (const m of v.team) {
-          const id = bodies.get(m.name);
-          if (id === undefined) continue;
-          const job = this.ecs.get(id, 'job');
-          const s = this.ecs.get(id, 'work');
-          const task = job?.venture === v.id && s ? job.tasks?.[(Number(s.step) || 1) - 1] : undefined;
-          if (task?.does !== 'build' || !this.ecs.get(id, 'activity')?.still) continue;
-          const p = this.ecs.get(id, 'pos');
-          if (v.task ? this.ecs.get(id, 'chunk')?.key === v.chunk || this.chunkAt(p.x, p.y)?.key === v.chunk : Math.hypot(p.x - v.spot.x, p.y - v.spot.y) <= SITE_REACH + 1) worked++;
-        }
-      }
-      if (worked && dt > 0) {
-        const closed = addWork(v, worked * dt);
-        v.last = today;
-        this.touchVentures();
-        this.phasesClosed(v, closed);
-      }
-      const available = (item: string) => v.team.reduce((n, m) => n + this.canBring(bodies.get(m.name), this.placeOfPerson(bodies.get(m.name), readPeople(this.files).people.find((p) => p.name === m.name)?.origin), item), 0) + (Number(this.placeDeposit(v.chunk)[item]) || 0);
-      const state = ventureState(v, today, available);
-      if (state !== v.state) {
-        v.state = state;
-        this.touchVentures();
-        if (state === 'finished') this.ventureDone(v);
-      }
-    }
-    this.worksitePanels();
-  }
-
-  /** A phase that closes is a line of the registry, with no call (`impresa.fase`). */
-  private phasesClosed(v: Venture, closed: number[]): void {
-    for (const k of closed) this.council.say('kernel', 'info', `«${v.title}»: finita la fase «${v.phases[k]?.name}» (${k + 1} di ${v.phases.length})`, undefined, 'impresa.fase');
-    // The building rises a stage (T245e).
-    if (closed.length) this.syncVenturePlan(v);
-  }
-
-  /** A venture ends: the team remembers it, a rebuilt or a new building stands whole. */
-  private ventureDone(v: Venture): void {
-    v.end = this.day();
-    for (const m of v.team) this.rememberAbout(m.name, `Abbiamo finito «${v.title}».`, undefined, 3);
-    this.council.say('kernel', 'info', `«${v.title}» è finita.`, undefined, 'impresa.fine');
-    if (v.origin && !v.area) this.consumed.delete(v.origin);
-    this.syncVenturePlan(v);
-    this.ventureList = pruneVentures(this.ventureList);
-  }
-
-  /** The stage a venture shows (T245e): that of its last phase done; 1 once it is finished (a harvest has none). */
-  private ventureStage(v: Venture): number {
-    return v.state === 'finished' ? 1 : ventureProgress(v).stadio;
-  }
-
-  /**
-   * The plan of a venture's place says its building and its stage (T245e, ADR-0148): `plan.stadi` for a lot built again, `plan.case`
-   * for a house on free ground. The plan is what the kernel lays a place from at every load; the structure in the world takes the stage
-   * at once (and a client gets it with the entity). Only a loaded place: an unloaded one is brought up to date when it loads (T245f).
-   */
-  private syncVenturePlan(v: Venture): void {
-    if (v.type !== 'construction' || !v.origin || this.mirror) return;
-    const ch = this.chunks.get(v.chunk);
-    if (ch?.stage !== 'planned' || !ch.plan) return;
-    const stage = this.ventureStage(v);
-    const changed = this.ventureIntoPlan(v, ch.plan);
-    const sid = this.ecs.query('structure', 'origin').find((e) => this.ecs.get(e, 'origin').key === v.origin);
-    if (sid !== undefined) {
-      const st = this.ecs.get(sid, 'structure');
-      if (stage >= 1) delete st.stage;
-      else st.stage = stage;
-    } else if (v.area) this.spawnPlannedHouse(ch, ch.plan.houses!.find((h) => h.origin === v.origin)!);
-    else {
-      const { lots } = this.lotsOf(ch, ch.plan, this.pathCode());
-      const l = lots.find((x) => x.origin === v.origin);
-      if (l) this.ecs.spawn({ pos: { x: l.x, y: l.y }, glyph: { ch: '⌂', color: this.terrain?.manifest.roof?.color ?? '#9a4632' }, body: { r: 0.5, solid: true }, form: l.form, structure: { ...l.structure, ...(stage < 1 ? { stage } : {}) }, chunk: { key: ch.key }, origin: { key: l.origin } });
-    }
-    if (changed) this.saveChunkSoon(ch);
-  }
-
-  /** A venture's building and stage written into the plan of its place (T245e, T245f): whether it changed. */
-  private ventureIntoPlan(v: Venture, plan: ChunkPlan): boolean {
-    if (v.type !== 'construction' || !v.origin) return false;
-    const stage = this.ventureStage(v);
-    let changed = false;
-    if (v.area) {
-      const list = (plan.houses ??= []);
-      const at = list.findIndex((h) => h.origin === v.origin);
-      const classe = v.class ?? 'building';
-      const model = v.model ?? this.forms.resolve(undefined, classe);
-      const house: PlannedHouse = { origin: v.origin, x: v.spot.x, y: v.spot.y, model: model, seed: v.seed ?? this.forms.seedFor(model, v.origin), yaw: v.yaw ?? 0, class: classe, concept: v.concept ?? 'una casetta', stage: stage };
-      if (at < 0 || list[at].stage !== stage) {
-        if (at < 0) list.push(house);
-        else list[at] = house;
-        changed = true;
-      }
-    } else {
-      const stadi = (plan.stages ??= {});
-      if (stage >= 1 ? v.origin in stadi : stadi[v.origin] !== stage) {
-        if (stage >= 1) delete stadi[v.origin];
-        else stadi[v.origin] = stage;
-        changed = true;
-      }
-      if (!Object.keys(stadi).length) delete plan.stages;
-    }
-    return changed;
+  /** The structure of a lot of a loaded place laid again at a stage (T245e): a venture rebuilds it. */
+  private spawnLot(ch: Chunk, origin: string, stage: number): void {
+    if (!ch.plan) return;
+    const { lots } = this.lotsOf(ch, ch.plan, this.pathCode());
+    const l = lots.find((x) => x.origin === origin);
+    if (l) this.ecs.spawn({ pos: { x: l.x, y: l.y }, glyph: { ch: '⌂', color: this.terrain?.manifest.roof?.color ?? '#9a4632' }, body: { r: 0.5, solid: true }, form: l.form, structure: { ...l.structure, ...(stage < 1 ? { stage } : {}) }, chunk: { key: ch.key }, origin: { key: l.origin } });
   }
 
   /** A house of the plan built on free ground (T245d, T245e): a structure like those of the lots, with its model, seed, turn and stage. */
@@ -7326,550 +6683,6 @@ export class Kernel {
     this.ecs.spawn({ pos: { x: h.x, y: h.y }, glyph: { ch: '⌂', color: this.terrain?.manifest.roof?.color ?? '#9a4632' }, body: { r: 0.5, solid: true }, form, structure: { concept: String(h.concept ?? 'una casetta').slice(0, 80), class: classe, ...(h.model ? { model: h.model } : {}), ...(stadio < 1 ? { stage: stadio } : {}) }, chunk: { key: ch.key }, origin: { key: h.origin } });
   }
 
-  /** What `costruisci` asks the kernel (`world.venture(id)`): the next step of the venture this individual works at, or nothing. */
-  private ventureStepFor(id: Id): VentureStep | undefined {
-    if (!this.ecs.alive.has(id) || this.wandererOf(id) !== undefined) return undefined;
-    const name = this.ecs.get(id, 'identity')?.name;
-    const v = this.ventureWorkable(name);
-    if (!v) return undefined;
-    const luogo = this.placeOfPerson(id, undefined);
-    return nextStep(v, name, (item) => this.canBring(id, luogo, item));
-  }
-
-  /**
-   * Things brought to a venture (`world.venture_bring`): an individual of its team at the site gives what they carry (`load`); a
-   * wanderer near a site gives from their bag what it still needs (the panel's button). Only what the venture still needs is taken.
-   * The kernel writes the file; whoever brings only acts in the world (rule 8b). How many were taken.
-   */
-  private ventureBring(id: Id, wanted?: string | null): number {
-    const item = typeof wanted === 'string' ? wanted : undefined;
-    if (!this.ecs.alive.has(id)) return 0;
-    const wanderer = this.wandererOf(id);
-    // A wanderer's `pos` is on the carpet: where they are in the world is what the carpet says, as for the sites.
-    const p = wanderer !== undefined ? this.wandererAt(wanderer) : this.ecs.get(id, 'pos');
-    if (!p) return 0;
-    const name = this.ecs.get(id, 'identity')?.name;
-    const v = wanderer !== undefined
-      ? openVentures(this.ventureList).filter((o) => Math.hypot(o.spot.x - p.x, o.spot.y - p.y) <= 6).sort((a, b) => Math.hypot(a.spot.x - p.x, a.spot.y - p.y) - Math.hypot(b.spot.x - p.x, b.spot.y - p.y))[0]
-      : this.ventureOfMember(name);
-    if (!v || Math.hypot(v.spot.x - p.x, v.spot.y - p.y) > (wanderer !== undefined ? 6 : SITE_REACH + 1.5)) return 0;
-    let total = 0;
-    const before = ventureProgress(v).fase;
-    for (const it of Object.keys(stillNeeded(v)).filter((x) => item === undefined || x === item)) {
-      if (wanderer !== undefined) {
-        const inv: Inventory | undefined = this.ecs.get(id, 'inventory');
-        const have = inv ? countItem(inv, it) : 0;
-        const { taken } = bring(v, it, have);
-        if (taken && inv) removeItem(inv, it, taken);
-        total += taken;
-      } else {
-        const c = this.ecs.get(id, 'load');
-        const { taken } = bring(v, it, Number(c?.[it]) || 0);
-        if (taken) {
-          c[it] -= taken;
-          if (c[it] <= 0) delete c[it];
-        }
-        total += taken;
-      }
-    }
-    if (!total) return 0;
-    v.last = this.day();
-    this.touchVentures();
-    this.phasesClosed(v, Array.from({ length: ventureProgress(v).fase - before }, (_, i) => before + i));
-    if (wanderer !== undefined) {
-      const who = this.wanderersById.get(wanderer);
-      const bodies = this.bodyOfName();
-      // Who is there remembers it (section 3.5): weight 2, about this wanderer.
-      for (const m of v.team) {
-        const b = bodies.get(m.name);
-        const q = b !== undefined ? this.ecs.get(b, 'pos') : undefined;
-        if (q && Math.hypot(q.x - p.x, q.y - p.y) < 12) this.rememberAbout(m.name, `${who && who.id !== SOLO ? who.name : 'Il viandante'} ha portato del materiale per «${v.title}».`, who?.name, 2, wanderer);
-      }
-    }
-    return total;
-  }
-
-  /**
-   * The panel of the site (T245d, «Il cantiere» of `sys.work`): on every wanderer's body, the venture nearest to them, in words of the
-   * world. The panel names these fields, so they travel to each client with W (T263, rule 8f); nothing else of the file leaves.
-   */
-  private worksitePanels(): void {
-    for (const w of this.wanderersInWorld()) {
-      const p = { x: w.x, y: w.y };
-      const near = this.ventureList
-        .filter((v) => v.state !== 'finished' || (v.end ?? 0) >= this.day() - 1)
-        .map((v) => ({ v, d: Math.hypot(v.spot.x - p.x, v.spot.y - p.y) }))
-        .filter((x) => x.d <= 30)
-        .sort((a, b) => a.d - b.d)[0]?.v;
-      // No site near: no fields, nothing travels (the panel shows nothing).
-      if (!near) {
-        if (this.ecs.has(w.id, 'worksite')) this.ecs.remove(w.id, 'worksite');
-        continue;
-      }
-      const name = (it: string) => this.itemInfo(it).name;
-      const pr = ventureProgress(near);
-      const fields = {
-            title: near.title,
-            phase: pr.finita ? 'finita' : `${near.phases[pr.fase].name} (${pr.fase + 1} di ${near.phases.length})`,
-            state: near.state === 'waiting' ? 'aspetta il materiale' : near.state === 'stopped' ? 'ferma: nessuno ci lavora' : italianName('imprese', near.state),
-            missing: missingWords(near, name),
-            team: near.team.map((m) => `${m.name} (${m.role})`).join(', ') || 'nessuno',
-          };
-      const cur = this.ecs.get(w.id, 'worksite');
-      if (!cur || Object.entries(fields).some(([k, x]) => cur[k] !== x)) this.ecs.set(w.id, 'worksite', fields);
-    }
-  }
-
-  // --- Out of sight (T245f, ADR-0149) ---------------------------------------------------------
-
-  /** A day's work of a team where nobody sees it, per person: the seconds of the phase `day`, less the walking. */
-  static AWAY_WORK = 0.3 * 600 * 0.8;
-  /** What the accounting puts in a deposit at most, per item: a granary is full. */
-  static AWAY_DEPOSIT_CAP = 60;
-  private awayDone = '';
-
-  /**
-   * The accounting of the places nobody sees (section 5): once a day, when the day's work ends (the evening begins), with no Lua and
-   * no call. A venture whose place is not loaded takes what it needs from the deposit of its place and adds a day's work of each one
-   * of its team; every individual with a trade, of a place not loaded and in no venture, adds to the deposit of its place what its
-   * trade brings there in a day. A clock moved forward counts once: what was not lived is not work.
-   */
-  private awayTick(): void {
-    if (this.mirror) return;
-    const fase = dayPhase(this.time, Kernel.DAY_SECONDS);
-    const key = `${this.day()}`;
-    if (fase !== 'evening' || this.awayDone === key) return;
-    this.awayDone = key;
-    const loaded = (luogo: string | undefined) => !!luogo && this.chunks.get(luogo)?.stage === 'planned';
-    const depKey = (luogo: string) => `deposit:${luogo.replace(',', ':')}`;
-    const deposit = (luogo: string) => ({ ...this.placeDeposit(luogo) });
-    const setDeposit = (luogo: string, d: Record<string, number>) => this.stores.set(WORK_MODULE, depKey(luogo), Object.keys(d).length ? d : undefined);
-    const busy = new Set<string>();
-    for (const v of openVentures(this.ventureList)) {
-      for (const m of v.team) busy.add(m.name);
-      if (loaded(v.chunk) || !v.team.length) continue;
-      const d = deposit(v.chunk);
-      const before = ventureProgress(v).fase;
-      for (const [it, n] of Object.entries(stillNeeded(v))) {
-        const { taken } = bring(v, it, Math.min(n, d[it] ?? 0));
-        if (taken) d[it] -= taken;
-        if (d[it] !== undefined && d[it] <= 0) delete d[it];
-      }
-      setDeposit(v.chunk, d);
-      addWork(v, v.team.length * Kernel.AWAY_WORK);
-      v.last = this.day();
-      this.touchVentures();
-      this.phasesClosed(v, Array.from({ length: ventureProgress(v).fase - before }, (_, i) => before + i));
-    }
-    // The trades of the places nobody sees fill their deposits.
-    const programs = this.jobPrograms();
-    const byPlace = new Map<string, Record<string, number>>();
-    for (const p of readPeople(this.files).people) {
-      const luogo = p.origin?.split('#')[0];
-      if (!luogo || loaded(luogo) || busy.has(p.name) || (p.origin && this.consumed.has(p.origin))) continue;
-      const job = matchJob(p.job, programs);
-      if (!job) continue;
-      const d = byPlace.get(luogo) ?? deposit(luogo);
-      byPlace.set(luogo, d);
-      const add = (it: string, n: number) => (d[it] = Math.min(Kernel.AWAY_DEPOSIT_CAP, (d[it] ?? 0) + n));
-      const { gathered, made } = dailyProduce(job);
-      for (const [it, n] of Object.entries(gathered)) if ((d[it] ?? 0) < Kernel.AWAY_DEPOSIT_CAP) add(it, n);
-      for (const m of made)
-        for (let i = 0; i < m.quante && (d[m.oggetto] ?? 0) < Kernel.AWAY_DEPOSIT_CAP; i++) {
-          if (m.con) {
-            if ((d[m.con] ?? 0) < 1) break;
-            d[m.con] -= 1;
-            if (d[m.con] <= 0) delete d[m.con];
-          }
-          add(m.oggetto, 1);
-        }
-    }
-    for (const [luogo, d] of byPlace) setDeposit(luogo, d);
-  }
-
-  /**
-   * Back in a place (T245f): before Lua sees it, what ripened by date ripens and the buildings take the stage their ventures reached
-   * while nobody looked. How many seconds of the world it was away, if it was left (undefined the first time, or if it never was).
-   */
-  private returnToPlace(ch: Chunk, plan: ChunkPlan): number | undefined {
-    if (this.mirror) return undefined;
-    let changed = false;
-    for (const v of this.ventureList) if (v.chunk === ch.key && this.ventureIntoPlan(v, plan)) changed = true;
-    // A plan goes to disk on its own, ahead of the file of the ventures: after a tab closed in between, or `R`, a stage no venture backs
-    // would keep its scaffolding for ever. The ventures say what is being built; without one the building is whole, the new house was never begun.
-    const building = new Set(this.ventureList.filter((v) => v.chunk === ch.key && v.state !== 'finished').map((v) => v.origin));
-    for (const origin of Object.keys(plan.stages ?? {})) {
-      if (building.has(origin)) continue;
-      delete plan.stages![origin];
-      changed = true;
-    }
-    if (plan.stages && !Object.keys(plan.stages).length) delete plan.stages;
-    const houses = plan.houses?.filter((h) => !(Number.isFinite(h.stage) && h.stage < 1) || building.has(h.origin));
-    if (houses && houses.length !== plan.houses!.length) {
-      plan.houses = houses;
-      changed = true;
-    }
-    this.matureChunk(ch);
-    const away = Number.isFinite(plan.seen) ? Math.max(0, this.time - plan.seen!) : undefined;
-    if (plan.seen !== undefined) {
-      delete plan.seen;
-      changed = true;
-    }
-    if (changed) this.saveChunkSoon(ch);
-    return away;
-  }
-
-  /** `on_return(luogo, trascorso)`: the modules that want it hear that a place nobody saw is seen again, and after how long. */
-  private onReturn(key: string, away: number): void {
-    for (const m of this.modules.values()) {
-      if (!m.logicPath || !this.sandbox.has(m.manifest.id, 'on_return')) continue;
-      this.runModule(m.manifest.id, 'on_return', key, Math.round(away));
-    }
-  }
-
-  private actingAs = 0;
-
-  /**
-   * An individual uses a thing (T245c, ADR-0141): the `on_act` of its module with the individual as user, as «Usa» does for the wanderer.
-   * Only an action without effects (the effects of a manifest are the wanderer's: needs, items, states), only within reach, never a
-   * wanderer as user (they act through the kernel), never more than two deep.
-   */
-  actAs(user: Id, target: Id, action?: string): string | undefined {
-    if (this.actingAs >= 2 || !this.ecs.alive.has(user) || !this.ecs.alive.has(target) || user === target || this.wandererOf(user) !== undefined || this.ecs.has(user, 'player')) return undefined;
-    const modId: string | undefined = this.ecs.get(target, 'module')?.id;
-    const entry = modId ? this.modules.get(modId) : undefined;
-    const pu = this.ecs.get(user, 'pos');
-    const pt = this.ecs.get(target, 'pos');
-    if (!entry?.logicPath || !pu || !pt || Math.hypot(pu.x - pt.x, pu.y - pt.y) > 2.5 || !this.sandbox.has(modId!, 'on_act')) return undefined;
-    const actions = entry.manifest.actions ?? [];
-    const a = action === undefined ? actions.find((x) => !x.effects?.length) : actions.find((x) => x.id === action);
-    if (!a || a.effects?.length) return undefined;
-    this.actingAs++;
-    try {
-      const { value, failed } = this.runModule(modId!, 'on_act', target, user, a.id);
-      return !failed && typeof value === 'string' && value ? value.slice(0, 300) : undefined;
-    } finally {
-      this.actingAs--;
-    }
-  }
-
-  /** What the deposit of a place holds (T245c, ADR-0141): what the trades brought there, in the store of `sys.work`. */
-  placeDeposit(chunkKey: string): Record<string, number> {
-    const v = this.stores.get(WORK_MODULE, `deposit:${chunkKey.replace(',', ':')}`);
-    return v && typeof v === 'object' && !Array.isArray(v) ? (v as Record<string, number>) : {};
-  }
-
-  /**
-   * The next point of the way between two places of the world (carpet space), for a body of half-size `r` (none: a villager's):
-   * on a way the cache keeps, the farthest of the next two tiles the body reaches in a straight line from where it is (T299: the
-   * step goes where the way goes, it does not cut the corner the way went round), never nearer than `ROUTE_AHEAD` (who walks to it
-   * takes it for arrived within a tile and more).
-   */
-  private routeStep(x: number, y: number, tx: number, ty: number, r?: number, again = true): { x: number; y: number } | undefined {
-    if (![x, y, tx, ty].every(Number.isFinite) || Math.hypot(tx - x, ty - y) > 60) return undefined;
-    const body = Math.min(0.5, Math.max(0.1, typeof r === 'number' && Number.isFinite(r) ? r : ROUTE_BODY));
-    const from = [Math.floor(x), Math.floor(y)] as const;
-    const to = [Math.floor(tx), Math.floor(ty)] as const;
-    // Passable as walking is (T299): the tile and the models standing on it (a wall of a house is a model, not a tile), and a step
-    // only where the body passes between the two middles, as `free` sees a walk: what stands on the edge, a rise of more than a step.
-    // Who stands where the middle of their tile is not free (by a wall, against a bench) leaves it as the tiles allow: the steps are
-    // tried from that middle, where they are not.
-    const startFree = this.free(from[0] + 0.5, from[1] + 0.5, body);
-    const way: Cell[] | undefined = this.routes.get(
-      from,
-      to,
-      this.tickCount,
-      () => findRoute(from, to, (c, rr) => this.free(c + 0.5, rr + 0.5, body), (c, rr, nc, nr) => (c === from[0] && rr === from[1] && !startFree) || this.routes.step(c, rr, nc, nr, String(body), this.tickCount, () => this.stepFree(c, rr, nc, nr, body)), ROUTE_NEAR),
-      String(body),
-    );
-    // A way kept that something now stops at its first step (a building gone up a stage, a thing put down): the ways are found again.
-    if (again && startFree && way && way.length > 1 && !this.stepFree(way[0][0], way[0][1], way[1][0], way[1][1], body)) {
-      this.routes.clear();
-      return this.routeStep(x, y, tx, ty, r, false);
-    }
-    if (!way) return undefined;
-    if (way.length <= 2) return { x: tx, y: ty };
-    let next = way[1];
-    if (way.length > 2 && this.walkable(x, y, way[2][0] + 0.5, way[2][1] + 0.5, body)) next = way[2];
-    else if (!this.walkable(x, y, way[1][0] + 0.5, way[1][1] + 0.5, body)) next = way[0];
-    // A direction more than a point: the walker asks again at every tick, from wherever it got to.
-    let px = next[0] + 0.5, py = next[1] + 0.5;
-    if (Math.hypot(px - x, py - y) < 1e-3) (px = way[1][0] + 0.5), (py = way[1][1] + 0.5);
-    const d = Math.hypot(px - x, py - y);
-    const k = Math.max(1, ROUTE_AHEAD / d);
-    return { x: x + (px - x) * k, y: y + (py - y) * k };
-  }
-
-  /**
-   * Whether a body (half-size r, under half a tile) steps from the middle of a free tile to the middle of the next: with no model on
-   * the tiles the step touches, the tiles say it all (the box stays inside them, and the ground is never in the way); else, walked.
-   */
-  private stepFree(c: number, r: number, nc: number, nr: number, body: number): boolean {
-    const forms = this.solidForms;
-    if (!forms.has(`${c},${r}`) && !forms.has(`${nc},${nr}`) && !forms.has(`${nc},${r}`) && !forms.has(`${c},${nr}`)) return true;
-    return this.walkable(c + 0.5, r + 0.5, nc + 0.5, nr + 0.5, body);
-  }
-
-  /**
-   * Whether a body of half-size r walks in a straight line between two points (carpet space), from the floor under the first: `free`
-   * every tenth of a tile (the steps of `stepWanderer`) at the height of its feet, which follow the floor as in a walk (up a stair, on the platform).
-   */
-  private walkable(x0: number, y0: number, x1: number, y1: number, r: number): boolean {
-    const n = Math.max(1, Math.ceil(Math.hypot(x1 - x0, y1 - y0) / 0.1));
-    let z = this.floorAt(x0, y0);
-    for (let i = 1; i <= n; i++) {
-      const x = x0 + ((x1 - x0) * i) / n, y = y0 + ((y1 - y0) * i) / n;
-      if (!this.free(x, y, r, z)) return false;
-      z = this.floorAt(x, y, z);
-    }
-    return true;
-  }
-
-  /**
-   * The code of a terrain of the palette by its code, its internal id (T307a: «meadow») or its name in the language of the world
-   * («prato»), in this order; undefined when none is.
-   */
-  tileCodeOf(word: unknown): string | undefined {
-    if (typeof word !== 'string' || !word || word === '?') return undefined;
-    if (this.palette[word]) return word;
-    const codes = Object.keys(this.palette).filter((c) => c !== '?');
-    const low = word.trim().toLowerCase();
-    return codes.find((c) => this.palette[c].id === word) ?? codes.find((c) => this.palette[c].name.toLowerCase() === low);
-  }
-
-  /**
-   * The centre of the nearest tile of a terrain (code, id or name) within r (at most 24) of a point: the nearest, then the first row, then
-   * the first column. Not a tile of a lot (T281): a structure stands there, or will, and the grass under a house is not a pasture.
-   */
-  findTile(word: string, x: number, y: number, r: number): { x: number; y: number } | undefined {
-    const code = this.tileCodeOf(word);
-    if (!code || ![x, y].every(Number.isFinite)) return undefined;
-    const R = Math.max(0, Math.min(24, Math.floor(Number.isFinite(r) ? r : 8)));
-    const c0 = Math.floor(x);
-    const r0 = Math.floor(y);
-    const S = this.config.chunkSize;
-    const lotTiles = new Map<Chunk, Set<number>>();
-    const inLot = (col: number, row: number) => {
-      const ch = this.chunkAt(col, row);
-      if (!ch?.lots.length) return false;
-      let tiles = lotTiles.get(ch);
-      if (!tiles) lotTiles.set(ch, (tiles = new Set(ch.lots.flatMap((b) => [...b.floor, ...b.walls, ...b.doors]))));
-      return tiles.has((row - ch.cy * S) * S + (col - ch.cx * S));
-    };
-    let best: { x: number; y: number; d: number } | undefined;
-    for (let dr = -R; dr <= R; dr++)
-      for (let dc = -R; dc <= R; dc++) {
-        if (this.tileAt(c0 + dc, r0 + dr) !== code || inLot(c0 + dc, r0 + dr)) continue;
-        const cx = c0 + dc + 0.5;
-        const cy = r0 + dr + 0.5;
-        const d = Math.hypot(cx - x, cy - y);
-        if (!best || d < best.d - 1e-9) best = { x: cx, y: cy, d };
-      }
-    return best ? { x: best.x, y: best.y } : undefined;
-  }
-
-  /**
-   * What ripens ripens (T245b, ADR-0140): at each phase of the day, in the places loaded, a tile whose terrain says `matura` becomes
-   * the tile it says once its days have passed from when it was written. An edit with no day is of today (the plans of before).
-   */
-  private matureTick(): void {
-    const phase = `${this.day()}|${dayPhase(this.time, Kernel.DAY_SECONDS)}`;
-    if (phase === this.maturedPhase || this.mirror) return;
-    this.maturedPhase = phase;
-    for (const ch of this.chunks.values()) this.matureChunk(ch);
-  }
-
-  /** What ripens in one planned place, by date: in a loaded place at each phase, in one coming back at once (T245f). */
-  private matureChunk(ch: Chunk): void {
-    const edits = ch.plan?.edits;
-    if (ch.stage !== 'planned' || !edits) return;
-    const today = this.day();
-    const S = this.config.chunkSize;
-    for (const [idx, code] of Object.entries(edits)) {
-      const m = this.palette[code]?.ripens;
-      const into = m && this.tileCodeOf(m.in);
-      if (!m || !into) continue;
-      const days = (ch.plan!.days ??= {});
-      const since = days[idx] ??= today;
-      if (today - since < m.after) continue;
-      const i = Number(idx);
-      this.setTile(ch.cx * S + (i % S), ch.cy * S + Math.floor(i / S), into);
-    }
-  }
-
-  /** People who meet talk: by their relation, what they remember, the plots they are in. */
-  private meetings(people: Id[], pc: { x: number; y: number }): void {
-    const ids = people.filter((id) => this.ecs.has(id, 'identity'));
-    for (let i = 0; i < ids.length; i++)
-      for (let j = i + 1; j < ids.length; j++) {
-        const a = ids[i];
-        const b = ids[j];
-        const pa = this.ecs.get(a, 'pos');
-        const pb = this.ecs.get(b, 'pos');
-        if (Math.hypot(pa.x - pb.x, pa.y - pb.y) > 2.4) continue;
-        const ia: Identity = this.ecs.get(a, 'identity');
-        const ib: Identity = this.ecs.get(b, 'identity');
-        if (this.ecs.get(a, 'activity')?.tipo === 'sleep' || this.ecs.get(b, 'activity')?.tipo === 'sleep') continue;
-        const rel = ia.family?.find((f) => f.name === ib.name);
-        const key = [ia.name, ib.name].sort().join('|');
-        if ((this.greeted.get(key) ?? -1e9) > this.time - (rel ? 90 : 240)) continue;
-        const near = Math.hypot(pa.x - pc.x, pa.y - pc.y) < 10;
-        // A real conversation (the Narrator) when the wanderer can hear it, at most one at a time.
-        if (near && !this.talking && this.time - this.lastTalk > stretch(40, this.coefficients().dialogues) && !this.generationHeld) {
-          this.greeted.set(key, this.time);
-          void this.converse(a, b, ia, ib, rel?.bond);
-          return;
-        }
-        if (!rel) continue;
-        this.greeted.set(key, this.time);
-        const [la, lb] = greeting({ nome: ia.name, mestiere: ia.job ?? '' }, { nome: ib.name }, rel.bond, this.routineNow(ia)?.does ?? '');
-        this.speak(a, la);
-        this.queuedSpeech.push({ id: b, text: lb, at: this.time + 2.2 });
-      }
-  }
-
-  private async converse(a: Id, b: Id, ia: Identity, ib: Identity, legame?: string): Promise<void> {
-    this.talking = true;
-    this.lastTalk = this.time;
-    const plots = readPlots(this.files);
-    const day = this.day();
-    const as = (who: Identity, other: Identity, scheda: string | undefined, l?: string) => ({
-      nome: who.name,
-      mestiere: who.job ?? '',
-      scheda,
-      legame: l ?? who.family?.find((f) => f.name === other.name)?.bond,
-      fa: this.routineNow(who)?.does ?? '',
-      ricordi: memorySummary(this.individualOf(who.name)?.memories?.filter((m) => !m.with || m.with === other.name || m.weight >= 3), 6),
-      segreti: secretsOf(plots, who.name, day),
-    });
-    try {
-      // The Actor plays both from their sheets (T157); a dialogue is common, and so are the sheets it needs.
-      const by = this.interpreter();
-      const [sa, sb] = by.agent === 'actor' ? await Promise.all([this.ensureSheet(ia.name, COMUNE), this.ensureSheet(ib.name, COMUNE)]) : [undefined, undefined];
-      const r = await npcDialogue(this.council, as(ia, ib, sa, legame), as(ib, ia, sb), this.chunkAt(this.ecs.get(a, 'pos')?.x ?? 0, this.ecs.get(a, 'pos')?.y ?? 0)?.place?.name ?? 'qui', this.focusOn([ia.name, ib.name], this.ecs.get(a, 'pos')), by);
-      r.lines.forEach((l, i) => this.queuedSpeech.push({ id: l.who === 'a' ? a : b, text: l.say, at: this.time + i * 2.6 }));
-      if (r.memoryA) this.rememberAbout(ia.name, r.memoryA, ib.name, 1);
-      if (r.memoryB) this.rememberAbout(ib.name, r.memoryB, ia.name, 1);
-      this.council.say(by.agent, 'info', `${ia.name} e ${ib.name}: ${r.lines.map((l) => `«${l.say}»`).join(' ')}`, undefined, 'npc.dialogue');
-    } catch {
-      if (legame) {
-        const [la, lb] = greeting({ nome: ia.name, mestiere: ia.job ?? '' }, { nome: ib.name }, legame, this.routineNow(ia)?.does ?? '');
-        this.speak(a, la);
-        this.queuedSpeech.push({ id: b, text: lb, at: this.time + 2.2 });
-      }
-    } finally {
-      this.talking = false;
-    }
-  }
-
-  /** The entity of an individual, if they walk the loaded world. */
-  private entityOf(name: string): Id | undefined {
-    return this.ecs.query('identity').find((id) => this.ecs.get(id, 'identity').name === name);
-  }
-
-  /**
-   * Plots unfold: at each change of the moment of the day, the beats due happen — the individual goes
-   * there, does it, says the line (and remembers it). Seen or not, it happened.
-   */
-  private plotTick(): void {
-    const phase = `${this.day()}|${dayPhase(this.time, Kernel.DAY_SECONDS)}`;
-    if (phase === this.worldPhase) return;
-    const first = !this.worldPhase;
-    this.worldPhase = phase;
-    const plots = readPlots(this.files);
-    const day = this.day();
-    const q = dayPhase(this.time, Kernel.DAY_SECONDS);
-    let changed = false;
-    const pc = this.wandererCarpet();
-    for (const plot of plots) {
-      if (plot.state !== 'active') continue;
-      for (const beat of plot.beats) {
-        if (beat.done || plot.start + beat.day > day || (plot.start + beat.day === day && beat.moment !== q)) continue;
-        beat.done = true;
-        changed = true;
-        this.rememberAbout(beat.who, `${beat.what}${beat.line ? ` («${beat.line}»)` : ''}`, undefined, 2);
-        const id = this.entityOf(beat.who);
-        if (id !== undefined) {
-          const identity: Identity = this.ecs.get(id, 'identity');
-          const place = ['home', 'work', 'square'].includes(beat.where) ? this.placeFor(id, identity, beat.where, inferActivity(beat.what, beat.where)) : undefined;
-          if (place) this.ecs.set(id, 'goal', place);
-          this.queuedSpeech.push({ id, text: beat.line ? beat.line : `(${beat.what})`, at: this.time + 1 });
-          const p = this.ecs.get(id, 'pos');
-          if (p && Math.hypot(p.x - pc.x, p.y - pc.y) < 12) this.message(`${beat.who} ${beat.what}${beat.clue ? ` — ${beat.clue}` : ''}`);
-        }
-        this.council.say('narrator', 'info', `trama «${plot.title}»: ${beat.who} ${beat.what} (${italianName('dove', beat.where)}, ${italianName('momenti', beat.moment)})`, undefined, 'plot.beat');
-      }
-      if (plot.beats.every((b) => b.done) && (!plot.quest || plot.quest.state !== 'accepted') && day > plot.start + 3) {
-        plot.state = 'closed';
-        changed = true;
-      }
-    }
-    if (changed) {
-      this.repo.write(PLOTS_FILE, writePlots(plots));
-      this.files = { ...this.files, [PLOTS_FILE]: this.repo.working[PLOTS_FILE]! };
-    }
-    // A new day without a story: the Narrator weaves one among the people already met (every few days with fewer plots).
-    const every = stretch(1, this.coefficients().plots);
-    if (!first && !plots.some((p) => p.state === 'active') && Number.isFinite(every) && day % every === 0) void this.weaveStory();
-  }
-
-  /** The Narrator weaves a horizontal plot among existing people and places (westworld-like). */
-  async weaveStory(force = false): Promise<Plot | undefined> {
-    const society = readPeople(this.files);
-    if (!force && (this.plotsWoven >= 3 || society.people.length < 3 || this.ai.name === 'offline' || this.generationHeld)) return undefined;
-    this.plotsWoven++;
-    const pc = this.wandererCarpet();
-    const places = this.directionsAt(pc.x, pc.y).join('\n');
-    const recent = society.people.flatMap((p) => (p.memories ?? []).filter((m) => m.weight >= 2).slice(-2).map((m) => `${p.name}: ${m.text}`)).slice(-10).join('\n');
-    // The plot is checked against the people and the canon; what does not hold goes back to the
-    // Narrator once, with the reasons; the second answer is repaired, or dropped if it cannot be.
-    const attempt = async (feedback?: string) => {
-      const raw = plotFromRaw(await weavePlot(this.council, societySummary(society, 20), places, recent, feedback, this.focusOn(society.people.slice(-20).map((p) => p.name))), this.day(), `trama-${this.worldStamp()}`);
-      return { titolo: raw.title, ...reviewPlot(raw, society, wordsOf(this.files)) };
-    };
-    let plot: Plot | undefined;
-    try {
-      let a = await attempt();
-      if (a.problems.length) {
-        const why = `la trama «${a.titolo}» non torna: ${a.problems.join('; ')}.`;
-        this.council.say('kernel', 'scarta', why, 'narrator', 'plot.weave');
-        a = await attempt(why);
-        if (!a.plot) throw new PlotRejected(`ancora incoerente: ${a.problems.join('; ')}`);
-        if (a.problems.length) this.council.say('arbiter', 'corregge', `trama «${a.titolo}»: ${a.problems.join('; ')}`, 'narrator', 'plot.weave');
-      }
-      plot = a.plot;
-    } catch (e) {
-      this.council.say('narrator', 'errore', `trama: ${(e as Error).message}`, undefined, 'plot.weave');
-      this.noteShortfall({ request: 'una trama nuova', agent: 'narrator', task: 'plot.weave', outcome: e instanceof PlotRejected ? 'invalid' : 'error', reason: (e as Error).message });
-      return undefined;
-    }
-    if (!plot || plot.beats.length < 2) return undefined;
-    const plots = [...readPlots(this.files), plot];
-    this.repo.write(PLOTS_FILE, writePlots(plots));
-    this.applyFiles({ ...this.repo.working });
-    this.commitContent(`trama: ${plot.title}`, 'plot.weave', 'narrator');
-    this.cards.use([...plot.involved.map((n) => `individual:${nodeSlug(n)}`), ...this.graph().resolve(plot.beats.map((t) => t.where))], 'plots', (id) => this.isCard(id));
-    this.council.say('narrator', 'propone', `nuova trama «${plot.title}» tra ${plot.involved.join(', ')}${plot.quest ? `; ${plot.quest.from} avrà una richiesta per il viandante` : ''}`, undefined, 'plot.weave');
-    return plot;
-  }
-
-  private updatePlots(fn: (plots: Plot[]) => boolean): void {
-    const plots = readPlots(this.files);
-    if (!fn(plots)) return;
-    this.repo.write(PLOTS_FILE, writePlots(plots));
-    this.files = { ...this.files, [PLOTS_FILE]: this.repo.working[PLOTS_FILE]! };
-  }
-
-  /** Quests the wanderer acting now is on (for the HUD). */
-  quests(): Array<{ titolo: string; da: string; testo: string; obiettivo: string }> {
-    return activeQuests(readPlots(this.files), this.wanderer().id).map(({ plot, quest }) => ({
-      titolo: plot.title,
-      da: quest.from,
-      testo: quest.text,
-      obiettivo: quest.goal.type === 'bring' ? `porta ${quest.goal.item ?? 'ciò che serve'} a ${quest.goal.to ?? quest.from}` : quest.goal.type === 'go' ? `vai a ${quest.goal.place ?? '?'}` : `parla con ${quest.goal.to ?? '?'}`,
-    }));
-  }
-
   /**
    * The situation table of the Direction (T46a): the wanderer, the places being generated, the open plots at their beat,
    * the quests, the faults, each on its chunk and region; from what there is already, generating nothing.
@@ -7879,7 +6692,7 @@ export class Kernel {
     const people = readPeople(this.files).people;
     const chunkOf = (x: number, y: number) => ({ cx: Math.floor(x / S), cy: Math.floor(y / S) });
     const locate = (name: string) => {
-      const id = this.entityOf(name);
+      const id = this.npc.entityOf(name);
       const pos = id === undefined ? undefined : this.ecs.get(id, 'pos');
       if (pos) return chunkOf(pos.x, pos.y);
       const p = people.find((x) => x.name === name);
@@ -7968,207 +6781,6 @@ export class Kernel {
   openScreen(field: ScreenField): void {
     if (!SCREEN_NAME[field]) return;
     this.bus.emit('ui:screens', { field, screens: this.screens() });
-  }
-
-  /** "Vai" quests are done by arriving: the place or the region you stand in. */
-  private questTick(): void {
-    const here = [this.chunkHere()?.name ?? '', ...this.directionsAt(this.wandererCarpet().x, this.wandererCarpet().y).filter((d) => d.startsWith('qui siamo'))].join(' ').toLowerCase();
-    for (const { plot, quest } of activeQuests(readPlots(this.files), this.wanderer().id)) {
-      if (quest.goal.type === 'go' && quest.goal.place && here.includes(normName(quest.goal.place).split(' ')[0] ?? '~')) void this.completeQuest(plot.id);
-    }
-  }
-
-  private async completeQuest(plotId: string): Promise<void> {
-    let done: Plot | undefined;
-    this.updatePlots((plots) => {
-      const p = plots.find((x) => x.id === plotId);
-      if (!p?.quest || p.quest.state !== 'accepted') return false;
-      p.quest.state = 'completed';
-      done = p;
-      return true;
-    });
-    if (!done?.quest) return;
-    const q = done.quest;
-    // Whoever accepted it is remembered and rewarded, wherever the others are.
-    const by = q.wanderer ?? SOLO;
-    const who = this.as(by, () => this.wandererWord(this.wanderer()));
-    this.as(by, () => this.rememberWanderer(q.from, `${who} ha mantenuto la promessa: ${q.text}`, 3));
-    this.recordRule({ key: `missione|${plotId}`, text: `missione di ${q.from}: ${q.text}`, possible: true, story: `compiuta da${who === 'il viandante' ? 'l viandante' : ` ${who}`}`, effects: ['missione'] }, false);
-    this.message(`Missione compiuta: ${q.text}`, 'good');
-    if (q.reward) {
-      const d = this.content.byName(q.reward) ?? (await this.introduceItems([q.reward], `ricompensa di ${q.from}`))[0];
-      if (d && this.as(by, () => this.give(d.id, 1))) this.message(`${q.from} ti ricompensa: ${d.name}`, 'good');
-    }
-  }
-
-  /** Talking to someone may complete a quest: the one to talk to, or the one waiting for something. */
-  private questsOnTalk(name: string): void {
-    for (const { plot, quest } of activeQuests(readPlots(this.files), this.wanderer().id)) {
-      const o = quest.goal;
-      if (o.type === 'talk' && o.to === name) void this.completeQuest(plot.id);
-      if (o.type === 'bring' && (o.to ?? quest.from) === name && o.item) {
-        const id = this.carriedByName(o.item);
-        if (id) {
-          removeItem(this.inventory(), id, 1);
-          this.message(`Consegni ${this.itemInfo(id).name} a ${name}.`);
-          void this.completeQuest(plot.id);
-        }
-      }
-    }
-  }
-
-  /**
-   * Where a routine step happens: home (a lot of their place), work, the square — and for what
-   * they do, the right spot: a bed to sleep, a field to hoe, a bank to fish, a wood to cut.
-   */
-  private placeFor(id: Id, identity: Identity, where: string, activity?: Activity): { x: number; y: number } | undefined {
-    if (where === 'about' && !activity) return undefined;
-    const S = this.config.chunkSize;
-    const key: string | undefined = this.ecs.get(id, 'chunk')?.key;
-    const p = this.ecs.get(id, 'pos');
-    const ch = (key ? this.chunks.get(key) : undefined) ?? this.chunkAt(p.x, p.y);
-    if (!ch || ch.stage !== 'planned') return undefined;
-    const h = hashStr(identity.name);
-    const tile = (i: number) => ({ x: ch.cx * S + (i % S) + 0.5, y: ch.cy * S + Math.floor(i / S) + 0.5 });
-    const free = (i: number) => !this.palette[ch.tiles[i]]?.solid;
-    const around = (i: number, pred: (t: TerrainDef | undefined) => boolean) => [i - 1, i + 1, i - S, i + S].some((n) => n >= 0 && n < S * S && pred(this.palette[ch.tiles[n]]));
-    const pickTile = (pred: (i: number) => boolean) => {
-      const list: number[] = [];
-      for (let i = 0; i < S * S; i++) if (free(i) && pred(i)) list.push(i);
-      return list.length ? tile(list[h % list.length]) : undefined;
-    };
-    if (activity === 'sleep') {
-      // A bed of their place, always the same one.
-      const beds = this.ecs.query('module', 'pos').filter((e) => {
-        const m = this.modules.get(this.ecs.get(e, 'module').id)?.manifest;
-        const ep = this.ecs.get(e, 'pos');
-        return !!m && /letto|giaciglio|branda|pagliericcio|amaca/i.test(`${m.name} ${(m.tags ?? []).join(' ')}`) && this.chunkAt(ep.x, ep.y) === ch;
-      });
-      if (beds.length) {
-        const bp = this.ecs.get(beds[h % beds.length], 'pos');
-        return { x: bp.x + 0.6, y: bp.y };
-      }
-    }
-    if (activity === 'hoe') {
-      const field = pickTile((i) => /campo|orto|arato|solchi/i.test(this.palette[ch.tiles[i]]?.name ?? ''));
-      if (field) return field;
-    }
-    if (activity === 'fish') {
-      const bank = pickTile((i) => around(i, (t) => t?.layer === 'liquid'));
-      if (bank) return bank;
-    }
-    if (activity === 'chop_wood') {
-      const edge = pickTile((i) => around(i, (t) => t?.layer === 'vegetation'));
-      if (edge) return edge;
-    }
-    if (where === 'about') return undefined;
-    if (where === 'home' || activity === 'sleep' || activity === 'pray' || (where === 'work' && /fabbr|forn|oste|locand|bottega|mercant|sart|panett|cuoc|tessit|speziale|scriv|mago|monac/i.test(identity.job ?? ''))) {
-      const bs = ch.lots.filter((b) => b.floor.some(free));
-      if (bs.length) {
-        const b = bs[(h + (where === 'work' ? 1 : 0)) % bs.length];
-        // Home is the floor of the house's model, inside its walls (its lot, until the model is ready).
-        const sid = this.ecs.query('structure', 'origin').find((e) => this.ecs.get(e, 'origin').key === `${ch.key}#s${ch.lots.indexOf(b)}`);
-        const inside = sid !== undefined ? this.interiorPoints(sid) : [];
-        if (inside.length) return inside[h % inside.length];
-        const floor = b.floor.filter(free);
-        return tile(floor[h % floor.length]);
-      }
-    }
-    if (where === 'square') {
-      const pathCode = this.palette.p ? 'p' : undefined;
-      const centre = (S * S) / 2 + S / 2;
-      let best = -1;
-      for (let i = 0; i < S * S; i++) if ((pathCode ? ch.tiles[i] === pathCode : free(i)) && (best < 0 || Math.abs(i - centre) < Math.abs(best - centre))) best = i;
-      if (best >= 0) return tile(best);
-    }
-    // Work outdoors (fields, woods, flock): a free spot of their place, always the same.
-    for (let k = 0; k < 40; k++) {
-      const i = (h + k * 7919) % (S * S);
-      if (free(i)) return tile(i);
-    }
-    return undefined;
-  }
-
-  /**
-   * Talks to an NPC: the Narrator plays the individual; the chosen action is validated and applied. `wanderer`
-   * is who talks (T34; the one acting now by default): the individual knows their name, their bond, what they did together.
-   */
-  async talk(id: Id, text: string, wanderer?: string): Promise<NpcReply> {
-    const me = wanderer && this.wanderersById.has(wanderer) ? this.wanderersById.get(wanderer)! : this.wanderer();
-    const m = this.modules.get(this.ecs.get(id, 'module')?.id)?.manifest;
-    if (!m?.persona || !this.ecs.alive.has(id)) return { say: '…', action: 'nessuna', mood: '' };
-    const identity = await this.ensureIdentity(id);
-    let mind: Mind = this.ecs.get(id, 'mind');
-    if (!mind) mind = this.ecs.set(id, 'mind', { mode: 'vaga', mood: 'tranquillo', history: [] });
-    mind.history ??= [];
-    const inv: Inventory | undefined = this.ecs.get(id, 'inventory');
-    const carrying = inv ? inv.slots.filter(Boolean).map((s) => this.itemInfo(s!.item).name) : [];
-    const name = identity?.name ?? m.name;
-    let reply: NpcReply;
-    try {
-      const now = this.routineNow(identity);
-      const social = identity
-        ? `\nIl tuo mestiere: ${identity.job ?? '—'}. La tua famiglia: ${(identity.family ?? []).map((f) => `${f.bond} ${f.name}`).join(', ') || 'nessuno'}.${identity.story ? ` La tua storia: ${identity.story}` : ''}${now ? ` Adesso (${now.when}) stai: ${now.does}.` : ''}`
-        : '';
-      // The Actor plays from the Narrator's sheet (T157): written at the first line, paid by who talks.
-      const by = this.interpreter();
-      const scheda = by.agent === 'actor' ? await this.ensureSheet(name, me.id) : undefined;
-      const individual = this.individualOf(name);
-      reply = await npcReply(this.council, {
-        chi: me.id,
-        name,
-        wanderer: me.name,
-        presentazione: this.profileOf(me.id)?.introduction,
-        memories: memorySummary(memoriesFor(individual?.memories, me.id), 12),
-        bond: individual ? bondWith(individual, me.id) : undefined,
-        secrets: secretsOf(readPlots(this.files), name, this.day()),
-        scheda,
-        persona: (identity?.persona ?? m.persona) + social, mood: mind.mood, mode: mind.mode, carrying, place: this.chunkHere()?.name ?? '', history: mind.history.filter((t) => (t.con ?? SOLO) === me.id), facts: this.worldFacts() }, text, this.focusOn([name], this.ecs.get(id, 'pos')), by);
-      this.council.say(by.agent, 'info', `${name} a ${me.name}: «${reply.say}»`, undefined, 'npc.reply');
-    } catch (e) {
-      return { say: `(${name} ti guarda in silenzio — ${(e as Error).message})`, action: 'nessuna', mood: mind.mood };
-    }
-    mind.history.push({ who: 'player', text, con: me.id }, { who: 'npc', text: reply.say, con: me.id });
-    if (mind.history.length > 16) mind.history.splice(0, mind.history.length - 16);
-    mind.mood = reply.mood;
-    if (reply.action === 'segui' || reply.action === 'resta' || reply.action === 'vaga') mind.mode = reply.action;
-    // What follows happens to the wanderer who talked (synchronous: `as` never spans an await).
-    const carry = this.as(me.id, () => {
-      if (reply.action === 'dai') {
-        const wantedName = normName(reply.item ?? '');
-        const slot = inv?.slots.find((s) => s && normName(this.itemInfo(s.item).name) === wantedName) ?? inv?.slots.find((s) => s && wantedName && normName(this.itemInfo(s.item).name).includes(wantedName));
-        if (slot && inv && this.give(slot.item, 1)) {
-          removeItem(inv, slot.item, 1);
-          this.message(`${name} ti dà: ${this.itemInfo(slot.item).name}`, 'good');
-        } else reply.action = 'nessuna';
-      }
-      if (reply.mentioned?.length) void this.noteMentions(reply.mentioned, `di cui si parla con ${name}`);
-      if (reply.memory) this.rememberWanderer(name, reply.memory, reply.weight ?? 1);
-      if (reply.bond && reply.bond !== this.bondOf(name)) this.setBond(name, reply.bond);
-      let given = '';
-      let carry: string | undefined;
-      if (reply.action === 'missione') {
-        this.updatePlots((plots) => {
-          const p = plots.find((x) => x.state === 'active' && x.quest?.from === name && x.quest.state === 'offered');
-          if (!p?.quest) return false;
-          p.quest.state = 'accepted';
-          p.quest.wanderer = me.id;
-          given = p.quest.text;
-          if (p.quest.goal.type === 'bring') carry = p.quest.goal.item;
-          return true;
-        });
-        if (given) this.message(`Nuova missione da ${name}: ${given}`, 'good');
-      }
-      return carry && !this.carriedByName(carry) ? carry : undefined;
-    });
-    // "Take this to…": whoever asks hands over what is to be carried.
-    if (carry) {
-      const d = this.content.byName(carry) ?? (await this.introduceItems([carry], `affidato da ${name} a ${this.wandererWord(me)}`))[0];
-      if (d && this.as(me.id, () => this.give(d.id, 1))) this.message(`${name} ti affida: ${d.name}`, 'good');
-    }
-    this.as(me.id, () => this.questsOnTalk(name));
-    this.speak(id, reply.say);
-    return reply;
   }
 
   /** Things mentioned in conversation become part of the world: defined if new, then found more often. */
@@ -8307,7 +6919,7 @@ export class Kernel {
       const m = this.modules.get(this.ecs.get(eid, 'module')?.id)?.manifest;
       const mind: Mind | undefined = this.ecs.get(eid, 'mind');
       const identity: Identity | undefined = this.ecs.get(eid, 'identity');
-      const doing = this.routineNow(identity)?.does;
+      const doing = this.npc.routineNow(identity)?.does;
       const extra = mind ? `${doing ? `${doing} · ` : ''}umore: ${mind.mood}` : this.ecs.has(eid, 'container') ? 'E per aprire' : m?.actions?.length ? `E: ${m.actions.map((a) => a.label).join(', ')}` : undefined;
       const fam = identity?.family?.length ? ` ${identity.family.map((f) => `${f.bond[0].toUpperCase()}${f.bond.slice(1)} di ${f.name}`).join(', ')}.` : '';
       return { kind: 'entity', name: identity?.name ?? m?.name ?? '???', description: identity ? `${identity.job ? identity.job[0].toUpperCase() + identity.job.slice(1) : m?.name}.${fam} ${identity.look}` : (m?.description ?? ''), extra };
@@ -8628,11 +7240,8 @@ export class Kernel {
     const json = JSON.stringify([state, players, this.shortfalls.version]);
     const stores = this.stores.takeChanged();
     // The ventures (T245d): the kernel's own file, written with the game when something moved.
-    if (this.venturesDirty) {
-      const v = writeVentures(this.ventureList);
-      if (v !== this.repo.working[VENTURES_FILE]) stores[VENTURES_FILE] = v;
-      this.venturesDirty = false;
-    }
+    const ventures = this.npc.venturesToSave();
+    if (ventures !== undefined && ventures !== this.repo.working[VENTURES_FILE]) stores[VENTURES_FILE] = ventures;
     if (json === this.lastState && !Object.keys(stores).length) return false;
     this.lastState = json;
     const written: FileMap = { ...stores };
@@ -8706,7 +7315,7 @@ export class Kernel {
   graph(): WorldGraph {
     const c = this.graphCache;
     if (c && c.files === this.files && c.places === this.graphChunksVersion) return c.graph;
-    const graph = buildGraph(this.files, [...this.graphChunks.values()], (t) => this.speciesOf(t));
+    const graph = buildGraph(this.files, [...this.graphChunks.values()], (t) => this.npc.speciesOf(t));
     this.graphCache = { files: this.files, places: this.graphChunksVersion, graph };
     return graph;
   }
@@ -8717,7 +7326,7 @@ export class Kernel {
     const files = this.repo.working;
     const chunks = [...this.graphChunks.values()];
     if (readGraph(files)?.graph.hash === graphHash(files, mergeChunks(files, chunks))) return;
-    this.repo.write(GRAPH_FILE, buildGraph(files, chunks, (t) => this.speciesOf(t)).toJson());
+    this.repo.write(GRAPH_FILE, buildGraph(files, chunks, (t) => this.npc.speciesOf(t)).toJson());
     this.files = { ...this.files, [GRAPH_FILE]: this.repo.working[GRAPH_FILE]! };
   }
 
@@ -9126,7 +7735,7 @@ export class Kernel {
     if (this.tickCount % 60 === 0) this.archive.consoles(this.working());
     if (!this.corona.isInterior(this.wandererPos().x)) this.lastWorld = { ...this.wandererCarpet() };
     if (this.zone === 'corona') this.archive.meet(this.wandererPos().x, this.wandererPos().y);
-    this.societyTick();
+    this.npc.tick();
     if (this.repo.backend && this.tickCount % (60 * 120) === 0) this.saveState();
     // Transcended: nothing is lost any more (needs stay full, no death).
     if (this.exitedOnce) {

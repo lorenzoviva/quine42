@@ -10,7 +10,7 @@ import { addItem } from '../src/kernel/inventory';
 import { Kernel } from '../src/kernel/kernel';
 import { memoryStore } from '../src/kernel/repo';
 import { apiErrors } from '../src/kernel/validator';
-import { addWork, bring, fillTeam, HARVEST_DAY, housePhases, HOUSE_ROLES, readVentures, ventureProgress, ventureState, VENTURES_FILE, workAllowed, writeVentures, YEAR_DAYS, type Venture } from '../src/kernel/ventures';
+import { addWork, bring, fillTeam, HARVEST_DAY, housePhases, HOUSE_ROLES, readVentures, ventureProgress, ventureState, VENTURES_FILE, workAllowed, writeVentures, YEAR_DAYS, type Venture } from '../src/kernel/npc/ventures';
 import { developAll, pause } from './espressivita/banco';
 
 const STEP = 1 / 20;
@@ -156,7 +156,7 @@ const stageOf = (k: Kernel, origin: string) => {
   const id = k.ecs.query('structure', 'origin').find((e) => k.ecs.get(e, 'origin').key === origin);
   return id === undefined ? null : k.ecs.get(id, 'structure').stage;
 };
-const liveVentures = (k: Kernel) => (k as unknown as { ventureList: Venture[] }).ventureList;
+const liveVentures = (k: Kernel) => (k.npc as unknown as { worksites: { ventureList: Venture[] } }).worksites.ventureList;
 const consumed = (k: Kernel) => (k as unknown as { consumed: Set<string> }).consumed;
 
 /** The structure of the first lot of the wanderer's place, and its origin. */

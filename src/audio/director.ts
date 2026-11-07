@@ -2,7 +2,7 @@
 // which touches no simulation: the sound is of the client and asks the server nothing.
 
 import { hash32, hashStr } from '../kernel/rng';
-import type { DayPhase } from '../kernel/society';
+import type { DayPhase } from '../kernel/npc/model';
 import { namesEnvironment, soundPrograms, type SoundProgram } from '../mj/sound';
 import type { SoundRenders } from './renders';
 import type { SoundOut } from './sfx';

@@ -7,10 +7,11 @@ import { describe, expect, it } from 'vitest';
 import { MockAiModels } from '../src/kernel/ai/mock';
 import { bundledFiles } from '../src/kernel/bundle';
 import { MemoryChunks } from '../src/kernel/chunks';
-import { dailyProduce, type JobProgram } from '../src/kernel/jobs';
+import { dailyProduce, type JobProgram } from '../src/kernel/npc/jobs';
 import { Kernel } from '../src/kernel/kernel';
+import { AWAY_WORK } from '../src/kernel/npc/away';
 import { memoryStore } from '../src/kernel/repo';
-import type { Venture } from '../src/kernel/ventures';
+import type { Venture } from '../src/kernel/npc/ventures';
 import type { FileMap } from '../src/kernel/types';
 import { developAll, manyPlayers } from './espressivita/banco';
 
@@ -45,7 +46,7 @@ function setPeople(k: Kernel, list: Array<{ nome: string; mestiere: string; orig
   (k as unknown as { files: FileMap }).files = { ...k.files, 'world/people.json': src };
 }
 
-const live = (k: Kernel) => (k as unknown as { ventureList: Venture[] }).ventureList;
+const live = (k: Kernel) => (k.npc as unknown as { worksites: { ventureList: Venture[] } }).worksites.ventureList;
 const loaded = (k: Kernel, key: string) => k.chunks.get(key)?.stage === 'planned';
 
 /**
@@ -107,7 +108,7 @@ describe('a place nobody sees', () => {
     expect(now.brought).toEqual({ 'item.ciocco': 16, 'item.chiodi': 3 });
     // Two of them, three days of work, as far as the materials let it: the ground floor and the walls are done, not the roof's nails.
     expect(now.worked).toBeGreaterThan(0);
-    expect(now.worked).toBeLessThanOrEqual(2 * 3 * Kernel.AWAY_WORK);
+    expect(now.worked).toBeLessThanOrEqual(2 * 3 * AWAY_WORK);
     // The deposit gave what was needed; the trades of the place (the farmer, not in the team) filled it again.
     const dep = k.placeDeposit(key);
     expect(dep['item.ciocco'] ?? 0).toBe(0);

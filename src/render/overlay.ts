@@ -4,7 +4,7 @@
 
 import * as THREE from 'three';
 import type { Kernel } from '../kernel/kernel';
-import { ACTIVITY_ICON, type Activity } from '../kernel/society';
+import { ACTIVITY_ICON, type Activity } from '../kernel/npc/model';
 import { applyGlitch, drawGlyphs, glitchPlan } from './glitch';
 
 const FONT = '"Cascadia Mono", "JetBrains Mono", Consolas, "DejaVu Sans Mono", monospace';

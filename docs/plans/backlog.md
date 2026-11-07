@@ -4895,7 +4895,7 @@ Nasce da T156 (`dossier T156`, `docs/pipeline/domande/T156.md`, risposta B scelt
 - Quando è fatto: commit su `task/T326`; nell'esito le misure e la proposta in cinque righe. Sicurezza: nessuna superficie nuova.
 - Esito: aggiunta sezione 10 in docs/design/comportamento-npc.md con mappa completa, misure (24 moduli toccano lo stato, 65 funzioni e 1.470 righe in kernel.ts, ciclo society/wanderers) e proposta del confine unico src/kernel/npc/ con facciata NpcSubsystem e tabella di transizione per T327; typecheck verde nel suo turno; sicurezza: nessuna superficie nuova.
 
-### T327 · L'NPC come oggetto coeso: il comportamento in un modulo solo, dietro una facciata — `da fare` (dipende da T326, T308b, T328)
+### T327 · L'NPC come oggetto coeso: il comportamento in un modulo solo, dietro una facciata — `fatto` (`3b9d44ab`) (dipende da T326, T308b, T328)
 - Pipeline: claude · sforzo extra · stima 6% · approvato · priorità 5
 - Step: 39
 - Contesto: richiesta dell'autore del 06/11 (vedi T326): basso accoppiamento, alta coesione dell'oggetto NPC. Segue la sezione 10 di `docs/design/comportamento-npc.md` scritta da T326 (`dossier T326`); se la proposta ha un difetto lo correggi nel documento e lo dici nell'esito. Dopo T308b perché il contratto 0.5 tocca il filo e Lua.
@@ -4903,6 +4903,7 @@ Nasce da T156 (`dossier T156`, `docs/pipeline/domande/T156.md`, risposta B scelt
 - Test: i test di società, mestieri, imprese, fuori vista invariati e verdi; il test di architettura; suite intera e typecheck con i loro turni.
 - Browser: una passeggiata in un luogo con individui al lavoro (`#convalida-browser`): camminano, lavorano, il cantiere cresce come prima.
 - Quando è fatto: commit su `task/T327`; nell'esito i moduli prima e ora e le righe tolte da `kernel.ts`. Sicurezza: scrivi l'esito.
+- Esito: il comportamento degli NPC sta in src/kernel/npc/ dietro la facciata Npc (index.ts) e la porta NpcHost (host.ts), con le parti people/places/trades/worksites/away/speech/stories/talk e i dati society/plots/jobs/ventures/route spostati con la faccia model.ts; prima i 5 moduli in src/kernel/ più 66 metodi e 18 campi in kernel.ts, ora 16 file in npc/ più wandererIds.ts (ciclo society⇄wanderers spezzato); kernel.ts da 9.363 a 7.972 righe (≈1.500 tolte, ≈185 aggiunte: campo npc, porta, 15 deleghe, spawnLot), chiama solo la facciata; tests/npc-architecture.test.ts nuovo; nessun cambio di comportamento, kernel 0.5.3; ADR-0166, AGENTS.md, #societa, §10.5 del documento di T326 con le correzioni alla proposta (due facce, porta larga a elenco, wandererIds al posto di names.ts, orologio e stesura delle strutture restano del kernel), glossario e lingua-interna aggiornati; test esistenti toccati solo in import e accessi allo stato privato; suite intera (2689 passati, 1 saltato), typecheck e build verdi nei turni. Non fatto: corretto il bug trovato (meetings legge activity.tipo invece di kind: chi dorme saluta), rigenerato docs/lingue-censimento.md, sicurezza:prove. Rischio d'integrazione: chi importa src/kernel/society|plots|jobs|ventures|route va portato a npc/. Sicurezza: nessuna superficie nuova.
 
 ### T328 · Integrare T308b nel base, che ha T319 e T156 — `fatto` (`e7b00a26`)
 - Pipeline: claude · sforzo high · stima 3% · approvato · priorità 1

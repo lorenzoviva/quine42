@@ -6,7 +6,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { matchJob, type JobProgram } from '../../../src/kernel/jobs';
+import { matchJob, type JobProgram } from '../../../src/kernel/npc/jobs';
 import { hashStr } from '../../../src/kernel/rng';
 import { internalJobProgram, internalModuleId } from '../../../src/kernel/internalNames';
 import type { CaseSpec, Question } from './banco';
