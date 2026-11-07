@@ -1,5 +1,8 @@
 <!--
-Half-timbered house, written by hand by Claude Code (step 8.2A): a whole structure in a single MarkovJunior
+Half-timbered house, procedural (Cantiere 2) from the house written by hand by Claude Code (step 8.2A). The seed picks the
+length (the two tips of the plan), the depth (a cut at the back), where the door and the eight windows open,
+where the chimney rises and how tall it is, and whether at the back there is a low wing with a lean-to roof.
+The original house: a whole structure in a single MarkovJunior
 program, with no blocks nor architect. As in ModernHouse and CarmaTower, one decides at a large scale and
 refines at a small one: the house is designed on a coarse grid (one cell = 3 voxels), then `map`
 enlarges it and the rules add the details voxel by voxel.
@@ -8,8 +11,11 @@ layer by layer; beams, door and windows are found by the patterns on the facade.
 The door opens and closes with two actions; the chimney smokes (animation). Scale of the game: 20 voxels
 per tile; the house takes about 3 × 2 tiles, the door is as tall as the wanderer.
 -->
-<sequence values="BXQIWNnDOURrK" size="24 24 30" origin="True" symmetry="(xy)">
+<sequence values="BXQIWNnDOURrKhk0" size="24 24 30" origin="True" symmetry="(xy)">
   <color symbol="X" hidden="True" name="volume della casa"/>
+  <color symbol="0" hidden="True" name="mescola"/>
+  <color symbol="h" hidden="True" name="profondità possibili"/>
+  <color symbol="k" hidden="True" name="il taglio"/>
   <color symbol="Q" hidden="True" name="volume del tetto"/>
   <color symbol="I" hidden="True" name="interno"/>
   <color symbol="W" value="e6d8b8" name="intonaco"/>
@@ -24,11 +30,24 @@ per tile; the house takes about 3 × 2 tiles, the door is as tall as the wandere
 
   <!-- The seed falls to the bottom and becomes a rectangular plan: a line along x (the two tips
        lengthen at random: prl decides for every match), then the whole line advances along y. -->
+  <!-- Shuffle: the generator starts again from a different point for every seed (see README) -->
+  <box at="12 0 29" size="24 2 1" color="0"/>
+  <prl in="0" out="B" p="0.5" steps="1"/>
+  <all in="0" out="B"/>
   <one in="X B" out="B X"/>
   <all in="XB" out="*X" steps="6" symmetry="(x)"/>
   <prl in="XB" out="*X" p="0.5" steps="3" symmetry="(x)"/>
   <all in="X/B" out="*/X" steps="5" symmetry="(y)"/>
-
+  <!-- The depth: from the back, everything before the chosen row disappears -->
+  <box at="0 8 0" size="1 4 1" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all symmetry="()">
+    <rule in="k*" out="kk"/>
+    <rule in="*k" out="kk"/>
+    <rule in="*/k" out="k/k"/>
+  </all>
+  <all in="k" out="B"/>
   <!-- The volume: the house 14 high, above it the base of the roof jutting out by one (the eaves) and the prism. -->
   <all in="B X" out="X *" steps="13"/>
   <all in="B X" out="R *"/>

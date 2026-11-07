@@ -108,6 +108,8 @@ export interface FormRequest {
 
 /** How long a model's program may run, unless its entry in the index says otherwise. */
 export const MODEL_TIME = 8_000;
+/** How long `Forms.settled` waits at most (ms): the worker of a browser that has a whole place to make, programs one after another (T281). */
+export const SETTLE_CAP_MS = 180_000;
 
 export interface FormResult {
   grid: VoxelGrid;
@@ -615,6 +617,8 @@ export class Forms {
   private hashes = new Map<string, number>();
   /** Forms whose meshes were asked for again and have not arrived. */
   private remaking = new Set<Form>();
+  /** The run of each pending form: it ends when the form is ready or has failed (`settled`). */
+  private running = new Map<Form, Promise<void>>();
   /** Bumped whenever a form becomes ready (renderers rebuild what used stand-ins). */
   version = 0;
   onReady?: (f: Form) => void;
@@ -726,7 +730,7 @@ export class Forms {
     this.forms.set(key, f);
     const form = f;
     form.remake = (arrived) => this.remake(form, req, arrived);
-    void (this.runner.withoutMeshes?.(req) ?? this.runner.run(req))
+    const run = (this.runner.withoutMeshes?.(req) ?? this.runner.run(req))
       .then((result) => {
         form.result = result;
         // Under the ground (T52b): its lowest voxels, if the grid has room for them and for something above.
@@ -743,6 +747,8 @@ export class Forms {
         form.status = 'failed';
         form.error = e.message;
       });
+    this.running.set(form, run);
+    void run.finally(() => this.running.delete(form));
     return f;
   }
 
@@ -767,6 +773,21 @@ export class Forms {
   ready(model: string, seed: number, tint?: string): Form | undefined {
     const f = this.get(model, seed, tint);
     return f?.status === 'ready' ? f : undefined;
+  }
+
+  /**
+   * A form once its program has run, ready or failed, however long the runner takes (T281: in the browser a structure comes from a
+   * worker in tens of seconds, and `wait` gives up after two to six, as the timers go); at most `cap` ms. Undefined if there is no such program.
+   */
+  async settled(model: string, seed: number, tint?: string, cap = SETTLE_CAP_MS): Promise<Form | undefined> {
+    const f = this.get(model, seed, tint);
+    const run = f && this.running.get(f);
+    if (run) {
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      await Promise.race([run, new Promise<void>((r) => (timer = setTimeout(r, cap)))]);
+      clearTimeout(timer);
+    }
+    return f;
   }
 
   /** Waits for a form (tests, the Sculptor's checks). */
