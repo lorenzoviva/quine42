@@ -3,7 +3,7 @@
 
 import type { Vec3 } from '../../src/mj/engine';
 import { mjxIncludes } from '../../src/mj/model';
-import { OFFICIAL } from '../mjx/official';
+import { OFFICIAL, OFFICIAL_FILES } from '../mjx/official';
 
 export type Role = 'player' | 'npc' | 'animal' | 'tree' | 'plant' | 'rock' | 'prop' | 'structure' | 'official' | 'handmade';
 
@@ -33,8 +33,12 @@ export interface Entry {
 const files = import.meta.glob('../mjx/models/*.xml', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
 const ruleFiles = import.meta.glob('../mjx/models/*.txt', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
 
-/** The lab's models/ (T333, ADR-0171): what `<import file>` and the rule files of a program written in the lab may read, by name there. */
-export const LAB_FILES: Readonly<Record<string, string>> = Object.fromEntries(Object.entries({ ...files, ...ruleFiles }).map(([k, v]) => [k.replace(/^.*\//, ''), v]));
+/**
+ * The lab's models/ (T333, ADR-0171): what `<import file>` and the rule files of a program written in the lab may read, by name there.
+ * For the developers also the original's tilesets, rule files and samples as text (T335, lab/mjx/official/resources/: empty in the
+ * players' build), so a program written in the lab may use them too; the lab's own files win.
+ */
+export const LAB_FILES: Readonly<Record<string, string>> = { ...OFFICIAL_FILES, ...Object.fromEntries(Object.entries({ ...files, ...ruleFiles }).map(([k, v]) => [k.replace(/^.*\//, ''), v])) };
 /** The files of the lab's models/ a program reads, imports of imports too. */
 export const labIncludes = (xml: string): Record<string, string> => mjxIncludes(xml, (f) => LAB_FILES[f]);
 /** `files` for compileMjx, only if the program reads any. */
@@ -113,10 +117,11 @@ export const CATALOG: Entry[] = [
     const xml = files[`../mjx/models/${id}.xml`];
     return { id, name, role, xml, vpt: vpt ?? 20, source: sourceOf(xml), ...(id === 'fiore' ? { grows: true } : {}), ...withIncludes(xml) };
   }),
-  // The first eight stand on the plinths of the gallery; the others, which infer (T334), are in the list.
-  ...['Growth', 'MazeGrowth', 'NoDeadEnds', 'OpenCave3D', 'StrangeDungeon', 'OddScale3D', 'Hills', 'MazeTrail', 'Keys', 'SoftPath', 'StairsPath', 'Dwarves', 'Division', 'RegularPath', 'GrowTo', 'CompleteSAW']
+  // The first eight stand on the plinths of the gallery; the others, which infer (T334) or read tiles and samples (T335), are in the list.
+  ...['Growth', 'MazeGrowth', 'NoDeadEnds', 'OpenCave3D', 'StrangeDungeon', 'OddScale3D', 'Hills', 'MazeTrail', 'Keys', 'SoftPath', 'StairsPath', 'Dwarves', 'Division', 'RegularPath', 'GrowTo', 'CompleteSAW',
+    'ModernHouse', 'SeaVilla', 'Apartemazements', 'PillarsOfEternity', 'Partitioning', 'Surface', 'Escher', 'EscherSurface', 'OrientedEscher', 'PeriodicEscher', 'ChainDungeon', 'ChainDungeonMaze', 'WaveDungeon']
     .map((n) => OFFICIAL.find((o) => o.name === n)!)
-    .map((o) => ({ id: `mj:${o.name}`, name: o.name, role: 'official' as const, xml: o.xml, vpt: 20, size: o.size, source: `MarkovJunior (github.com/mxgmn/MarkovJunior, models/${o.name}.xml), ${o.note ?? 'invariato'}`, grows: true, ...(o.steps ? { steps: o.steps } : {}) })),
+    .map((o) => ({ id: `mj:${o.name}`, name: o.name, role: 'official' as const, xml: o.xml, vpt: 20, size: o.size, source: `MarkovJunior (github.com/mxgmn/MarkovJunior, models/${o.name}.xml), ${o.note ?? 'invariato'}`, grows: true, ...(o.steps ? { steps: o.steps } : {}), ...(o.files ? { files: o.files } : {}) })),
 ];
 
 // The step 8.2A trial: what each Gemini model wrote for the same targets (<target>.<model>.xml).

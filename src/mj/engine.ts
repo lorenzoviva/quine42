@@ -17,7 +17,13 @@
 //                      `inertia` keeps going straight while it can, `longest` starts from the farthest `from`
 //   map              — scales the grid by integer factors: every cell becomes a block of itself, then rules
 //                      whose input is on the old grid write their (scaled) output on the new one; what comes
-//                      after works at the new resolution (MarkovJunior "map": coarse plan → fine detail)
+//                      after works at the new resolution (MarkovJunior "map": coarse plan → fine detail); with
+//                      `clear` the factors may be fractions (`divide`, T335): 1/3 shrinks, 5/3 grows
+//   wfc              — wave function collapse (wfc.ts, T335): one tile per cell of the grid (`tile`), or the grid's
+//                      own cells from the windows of a flat sample (`overlap`); the new grid is what the tiles or
+//                      windows write, and what comes after works on it
+//   convchain        — MarkovJunior's ConvChain on a flat grid: `on` cells become black or white, then sweeps of
+//                      Metropolis steps make every N×N window as likely as in the sample
 //   shape            — box, ellipsoid, cylinder, cone resting on `at` (centre of the base), or a line
 //                      from `at` to `to` with radius `r`; `on` limits which codes it may overwrite
 // A rule node may also infer (infer.ts, T334): `fields` (potentials that rank its matches, softly with `temperature`), `observe`
@@ -29,6 +35,7 @@
 
 import { Rng } from '../kernel/rng';
 import { backwardPotentials, fieldPotential, goalReached, INFERENCE_LIMITS, makeWork, MAX_OBSERVED_CODES, prepare, search, type InferRule, type Prepared, type Work } from './infer';
+import { convchainWeights, squareSubgroup, waveBytes, WFC_LIMITS, WfcError, WfcSolver } from './wfc';
 
 export type Vec3 = [number, number, number];
 /**
@@ -96,12 +103,57 @@ export interface Inference {
   depthCoefficient?: number;
 }
 
+/**
+ * MarkovJunior's <wfc> (T335, ADR-0174), its tileset or sample already turned into patterns (model.ts, wfc.ts): the wave holds one
+ * pattern per cell of the grid, and the grid that follows is what the patterns write.
+ */
+export interface WfcNode {
+  type: 'wfc';
+  /** `tile`: a tile per cell, the tiles side by side; `overlap`: the windows of a flat sample, the grid as large as before. */
+  model: 'tile' | 'overlap';
+  /** Each pattern's letters ('.' the empty one), x fastest, then y, then z from the bottom: `dims` cells each. */
+  patterns: string[];
+  dims: Vec3;
+  weights: number[];
+  /** Per direction (+x, +y, -x, -y, +z, -z; four for `overlap`), per pattern, the patterns that may stand there. */
+  propagator: number[][][];
+  /** A cell of the grid with this letter may hold only these patterns; any other, every pattern. */
+  map: Record<string, number[]>;
+  /** `tile`: how many cells two neighbouring tiles share (x, y, z; negative leaves a gap between them). */
+  overlap?: Vec3;
+  /** `tile`: the wave wraps round the edges (`overlap` always does, as in MarkovJunior). */
+  periodic?: boolean;
+  /** The cell of least Shannon entropy is observed first, not the one with fewest patterns. */
+  shannon?: boolean;
+  /** Tries to find a seed without contradictions (1000, never more than `WFC_LIMITS.tries`). */
+  tries?: number;
+}
+
+/** MarkovJunior's <convchain> (T335): `on` cells become `black` or `white` like the sample, `1` white and `0` black, rows of `sampleSize[0]`. */
+export interface ConvChainNode {
+  type: 'convchain';
+  sample: string;
+  sampleSize: [number, number];
+  n: number;
+  temperature?: number;
+  on: string;
+  black: string;
+  white: string;
+  /** Steps, the first one included (it paints the `on` cells); unlimited if not said. */
+  steps?: number;
+  symmetry?: Sym;
+}
+
 export type Node3 =
   | ({ type: 'one' | 'all' | 'prl'; rules: Rule3[]; steps?: number; symmetry?: Sym; optional?: boolean } & Inference)
-  | { type: 'sequence' | 'markov'; children: Node3[] }
+  /** `gated` (a sequence the compiler makes of a wfc and its nodes, T335): the rest runs only if the first child did something. */
+  | { type: 'sequence' | 'markov'; children: Node3[]; gated?: boolean }
   | { type: 'conv'; rules: ConvRule[]; neighborhood?: 'moore' | 'vonneumann' | 'nocorners'; steps?: number; periodic?: boolean }
   | { type: 'path'; from: string; to: string; on: string; color: string; steps?: number; inertia?: boolean; longest?: boolean }
-  | { type: 'map'; scale: Vec3; rules?: Rule3[]; symmetry?: Sym; clear?: boolean }
+  /** Each factor is `scale / divide` (T335: 1/3, 5/3), fractions only with `clear`. */
+  | { type: 'map'; scale: Vec3; divide?: Vec3; rules?: Rule3[]; symmetry?: Sym; clear?: boolean }
+  | WfcNode
+  | ConvChainNode
   | { type: 'shape'; shape: ShapeKind; at: Vec3; size?: Vec3; to?: Vec3; r?: number; color: string; on?: string };
 
 /** Body parts the kernel can move to animate a figure (legs and arms swing, the head nods, tails wag). */
@@ -1383,16 +1435,22 @@ class PathRunner extends Runner {
 /** Scales the grid (see the header): the program goes on at the new resolution. */
 class MapRunner extends Runner {
   private scale: Vec3;
+  /** The denominators of the factors (T335): 1 unless the scale is a fraction. */
+  private divide: Vec3;
   private rules: Array<{ d: Vec3; D: Vec3; input: Int32Array; output: Int16Array }>;
   private sets: Uint8Array[];
   /** MarkovJunior's map: the new grid starts empty and only the rules write it (wrapping round the edges). */
   private clear: boolean;
-  constructor(node: { scale: Vec3; rules?: Rule3[]; symmetry?: Sym; clear?: boolean }, alpha: Alphabet, private limits: GridLimits) {
+  constructor(node: { scale: Vec3; divide?: Vec3; rules?: Rule3[]; symmetry?: Sym; clear?: boolean }, alpha: Alphabet, private limits: GridLimits) {
     super(1);
     if (!isVec(node.scale) || node.scale.some((v) => !Number.isInteger(v) || v < 1 || v > 32)) throw new Mj3Error('map: "scale" vuole tre interi tra 1 e 32');
+    const divide = node.divide ?? [1, 1, 1];
+    if (!isVec(divide) || divide.some((v) => !Number.isInteger(v) || v < 1 || v > 32)) throw new Mj3Error('map: i denominatori di "scale" sono interi tra 1 e 32');
     this.scale = node.scale;
+    this.divide = divide;
     this.sets = alpha.sets;
     this.clear = node.clear === true;
+    if (!this.clear && divide.some((v) => v !== 1)) throw new Mj3Error('map: una scala frazionaria vale solo con la griglia nuova vuota (clear)');
     this.rules = (node.rules ?? []).flatMap((r) => {
       const li = layersOf(String(r?.in ?? ''));
       const lo = layersOf(String(r?.out ?? ''));
@@ -1424,8 +1482,11 @@ class MapRunner extends Runner {
     this.count++;
     this.total++;
     const [sx, sy, sz] = this.scale;
-    const X = g.X * sx, Y = g.Y * sy, Z = g.Z * sz;
+    const [qx, qy, qz] = this.divide;
+    // MarkovJunior's integer division: M·N/D cells, a cell x of the old grid at x·N/D.
+    const X = Math.floor((g.X * sx) / qx), Y = Math.floor((g.Y * sy) / qy), Z = Math.floor((g.Z * sz) / qz);
     if (Math.max(X, Y, Z) > this.limits.side || X * Y * Z > this.limits.cells) throw new Mj3Error(`map: la griglia scalata (${X}×${Y}×${Z}) supera i limiti`);
+    if (Math.min(X, Y, Z) < 1) throw new Mj3Error(`map: la griglia scalata (${X}×${Y}×${Z}) è vuota`);
     const old = g.cells;
     const cells = new Uint8Array(X * Y * Z);
     if (!this.clear)
@@ -1452,7 +1513,7 @@ class MapRunner extends Runner {
               const put = r.output[n];
               if (put === -1) continue;
               const i = n % DX, j = Math.floor(n / DX) % DY, k = Math.floor(n / (DX * DY));
-              const x = ox * sx + i, y = oy * sy + j, z = oz * sz + k;
+              const x = Math.floor((ox * sx) / qx) + i, y = Math.floor((oy * sy) / qy) + j, z = Math.floor((oz * sz) / qz) + k;
               if (!wrap && (x >= X || y >= Y || z >= Z)) continue;
               cells[(x % X) + (y % Y) * X + (z % Z) * X * Y] = put;
             }
@@ -1464,6 +1525,213 @@ class MapRunner extends Runner {
     g.cells = cells;
     g.log.length = 0;
     g.epoch++;
+    return true;
+  }
+}
+
+/** The grid becomes another one, as a map makes it: nodes that follow scan it again. */
+function replaceGrid(g: Grid3, X: number, Y: number, Z: number, cells: Uint8Array): void {
+  g.X = X;
+  g.Y = Y;
+  g.Z = Z;
+  g.cells = cells;
+  g.log.length = 0;
+  g.epoch++;
+}
+
+const isInt = (v: unknown, min: number, max: number): v is number => typeof v === 'number' && Number.isInteger(v) && v >= min && v <= max;
+
+/**
+ * MarkovJunior's <wfc> (T335, ADR-0174): in one step the wave of the grid is observed (wfc.ts: up to `tries` seeds, the first without a
+ * contradiction) and the grid becomes what its patterns write. A wave without a solution does nothing and the grid stays; out of time
+ * the run stops, not finished. Deterministic: the seeds of the tries come from the run's generator.
+ */
+class WfcRunner extends Runner {
+  private patterns: Uint8Array[];
+  private allowed = new Map<number, Uint8Array>();
+  private P: number;
+  constructor(private node: WfcNode, alpha: Alphabet, private limits: GridLimits) {
+    super(1);
+    const n = node;
+    if (n.model !== 'tile' && n.model !== 'overlap') throw new Mj3Error('wfc: modello sconosciuto');
+    if (!isVec(n.dims) || n.dims.some((v) => !isInt(v, 1, 64))) throw new Mj3Error('wfc: le misure di una tessera sono tre interi tra 1 e 64');
+    const cells = n.dims[0] * n.dims[1] * n.dims[2];
+    const P = (this.P = Array.isArray(n.patterns) ? n.patterns.length : 0);
+    if (!P || P > WFC_LIMITS.patterns) throw new Mj3Error(`wfc: da 1 a ${WFC_LIMITS.patterns} motivi`);
+    if (!Array.isArray(n.weights) || n.weights.length !== P || n.weights.some((w) => typeof w !== 'number' || !Number.isFinite(w) || w <= 0)) throw new Mj3Error('wfc: un peso positivo per motivo');
+    const D = n.model === 'tile' ? 6 : 4;
+    if (!Array.isArray(n.propagator) || n.propagator.length !== D) throw new Mj3Error(`wfc: ${D} direzioni di vicini`);
+    let entries = 0;
+    for (const d of n.propagator) {
+      if (!Array.isArray(d) || d.length !== P) throw new Mj3Error('wfc: i vicini di ogni motivo');
+      for (const list of d) {
+        if (!Array.isArray(list) || list.some((t) => !isInt(t, 0, P - 1))) throw new Mj3Error('wfc: un vicino che non è un motivo');
+        entries += list.length;
+      }
+    }
+    if (entries > WFC_LIMITS.propagator) throw new Mj3Error(`wfc: troppi vicini (al più ${WFC_LIMITS.propagator})`);
+    this.patterns = n.patterns.map((p) => {
+      const cs = typeof p === 'string' ? [...p] : [];
+      if (cs.length !== cells) throw new Mj3Error(`wfc: un motivo non è grande ${n.dims.join('×')}`);
+      return Uint8Array.from(cs, (ch) => (ch === AIR ? 0 : alpha.index(ch)));
+    });
+    for (const [ch, list] of Object.entries(n.map ?? {})) {
+      if (ch.length !== 1 || !Array.isArray(list) || list.some((t) => !isInt(t, 0, P - 1))) throw new Mj3Error('wfc: una regola vuole una lettera e dei motivi');
+      const mask = new Uint8Array(P);
+      for (const t of list) mask[t] = 1;
+      this.allowed.set(ch === AIR ? 0 : alpha.index(ch), mask);
+    }
+    if (n.overlap !== undefined && (!isVec(n.overlap) || n.overlap.some((v, a) => !isInt(v, -64, n.dims[a] - 1)))) throw new Mj3Error('wfc: overlap va da -64 a una cella meno della tessera');
+    if (n.tries !== undefined && !isInt(n.tries, 1, WFC_LIMITS.tries)) throw new Mj3Error(`wfc: tries va da 1 a ${WFC_LIMITS.tries}`);
+  }
+
+  go(g: Grid3, rng: Rng): boolean {
+    if (this.count >= 1) return false;
+    const n = this.node;
+    const tile = n.model === 'tile';
+    if (!tile && g.Z !== 1) throw new Mj3Error('wfc a sovrapposizione (sample): solo su una griglia piana, alta un voxel, come nell\'originale');
+    const [S, SY, SZ] = n.dims;
+    const [ox, oy, oz] = n.overlap ?? [0, 0, 0];
+    const X = tile ? (S - ox) * g.X + ox : g.X, Y = tile ? (SY - oy) * g.Y + oy : g.Y, Z = tile ? (SZ - oz) * g.Z + oz : g.Z;
+    if (Math.min(X, Y, Z) < 1 || Math.max(X, Y, Z) > this.limits.side || X * Y * Z > this.limits.cells) throw new Mj3Error(`wfc: la griglia nuova (${X}×${Y}×${Z}) supera i limiti`);
+    const D = n.propagator.length;
+    const bytes = waveBytes(g.cells.length, this.P, D, n.shannon === true);
+    if (bytes > WFC_LIMITS.waveBytes) throw new Mj3Error(`wfc: l'onda è troppo grande (${Math.round(bytes / 2 ** 20)} MB, al più ${WFC_LIMITS.waveBytes / 2 ** 20}): meno celle o meno motivi`);
+    const solver = new WfcSolver({ MX: g.X, MY: g.Y, MZ: g.Z, weights: n.weights, propagator: n.propagator, periodic: !tile || n.periodic === true, shannon: n.shannon === true });
+    for (let i = 0; i < g.cells.length; i++) {
+      const mask = this.allowed.get(g.cells[i]);
+      if (mask) for (let t = 0; t < this.P; t++) if (!mask[t] && solver.allows(i, t)) solver.ban(i, t);
+    }
+    const until = Math.min(Date.now() + WFC_LIMITS.ms, current?.deadline ?? Infinity);
+    const out = solver.solve(rng, n.tries ?? WFC_LIMITS.tries, until);
+    if (out.late) {
+      this.note = `wfc interrotta dal tempo al tentativo ${out.tries}`;
+      throw new Mj3Late();
+    }
+    if (!out.observed) {
+      this.note = `wfc senza soluzione: ${out.why}`;
+      if (!this.total) this.why ??= this.note;
+      return false;
+    }
+    this.count++;
+    this.total++;
+    this.note = `wfc: ${this.P} motivi, trovata al tentativo ${out.tries + 1} con ${out.observations} osservazioni`;
+    const cells = new Uint8Array(X * Y * Z);
+    const MX = g.X, MY = g.Y;
+    if (tile) {
+      // Every cell writes its tile, in order: where tiles overlap the later one stays (TileModel.UpdateState).
+      for (let z = 0; z < g.Z; z++)
+        for (let y = 0; y < MY; y++)
+          for (let x = 0; x < MX; x++) {
+            const p = this.patterns[out.observed[x + y * MX + z * MX * MY]];
+            for (let dz = 0, di = 0; dz < SZ; dz++)
+              for (let dy = 0; dy < SY; dy++)
+                for (let dx = 0; dx < S; dx++, di++) cells[x * (S - ox) + dx + (y * (SY - oy) + dy) * X + (z * (SZ - oz) + dz) * X * Y] = p[di];
+          }
+    } else for (let i = 0; i < cells.length; i++) cells[i] = this.patterns[out.observed[i]][0];
+    replaceGrid(g, X, Y, Z, cells);
+    return true;
+  }
+}
+
+/** MarkovJunior's <convchain> (T335): see `ConvChainNode`. Only on a flat grid, as the original. */
+class ConvChainRunner extends Runner {
+  private weights: Float64Array;
+  private N: number;
+  private temperature: number;
+  private c0: number;
+  private c1: number;
+  private on: number;
+  private substrate?: Uint8Array;
+  private counter = 0;
+  constructor(node: ConvChainNode, alpha: Alphabet) {
+    super(node.steps);
+    if (!Array.isArray(node.sampleSize) || node.sampleSize.length !== 2 || node.sampleSize.some((v) => !isInt(v, 1, 1024))) throw new Mj3Error('convchain: le misure del campione');
+    const [SX, SY] = node.sampleSize;
+    if (SX * SY > WFC_LIMITS.sampleCells) throw new Mj3Error(`convchain: il campione è troppo grande (al più ${WFC_LIMITS.sampleCells} celle)`);
+    if (typeof node.sample !== 'string' || node.sample.length !== SX * SY || /[^01]/.test(node.sample)) throw new Mj3Error('convchain: il campione è fatto di 0 e 1');
+    if (node.temperature !== undefined && !(typeof node.temperature === 'number' && node.temperature > 0 && Number.isFinite(node.temperature))) throw new Mj3Error('convchain: temperature è un numero positivo');
+    if (node.steps !== undefined && !(node.steps === Infinity || isInt(node.steps, 1, Number.MAX_SAFE_INTEGER))) throw new Mj3Error('convchain: steps è un intero positivo');
+    const one = (ch: unknown, what: string) => {
+      if (typeof ch !== 'string' || ch.length !== 1) throw new Mj3Error(`convchain: ${what} è una lettera`);
+      return ch === AIR ? 0 : alpha.index(ch);
+    };
+    this.c0 = one(node.black, 'black');
+    this.c1 = one(node.white, 'white');
+    this.on = one(node.on, 'on');
+    this.N = node.n;
+    this.temperature = node.temperature ?? 1;
+    try {
+      this.weights = convchainWeights(Uint8Array.from(node.sample, (c) => (c === '1' ? 1 : 0)), SX, SY, node.n, squareSubgroup(node.symmetry ?? 'xy'));
+    } catch (e) {
+      if (e instanceof WfcError) throw new Mj3Error(e.message);
+      throw e;
+    }
+  }
+  reset(): void {
+    super.reset();
+    this.counter = 0;
+    this.substrate = undefined;
+  }
+  rewind(): void {
+    this.reset();
+  }
+  go(g: Grid3, rng: Rng): boolean {
+    if (this.limit !== undefined && this.counter >= this.limit) return false;
+    if (g.Z !== 1) throw new Mj3Error('convchain: solo su una griglia piana, alta un voxel, come nell\'originale');
+    const MX = g.X, MY = g.Y, N = this.N;
+    const total = MX * MY;
+    if (this.counter === 0) {
+      const substrate = new Uint8Array(total);
+      let any = false;
+      for (let i = 0; i < total; i++)
+        if (g.cells[i] === this.on) {
+          write(g, i, rng.int(2) === 0 ? this.c0 : this.c1);
+          substrate[i] = 1;
+          any = true;
+        }
+      // Without `on` cells it does nothing, now or later (the original would count empty sweeps).
+      if (!any) return false;
+      this.substrate = substrate;
+      this.counter++;
+      this.count++;
+      this.total++;
+      return true;
+    }
+    const substrate = this.substrate!;
+    const cells = g.cells;
+    for (let k = 0; k < total; k++) {
+      const r = rng.int(total);
+      if (!substrate[r]) continue;
+      const x = r % MX, y = Math.floor(r / MX);
+      let q = 1;
+      for (let sy = y - N + 1; sy <= y + N - 1; sy++)
+        for (let sx = x - N + 1; sx <= x + N - 1; sx++) {
+          let ind = 0, difference = 0;
+          for (let dy = 0; dy < N; dy++)
+            for (let dx = 0; dx < N; dx++) {
+              let X = sx + dx;
+              if (X < 0) X += MX;
+              else if (X >= MX) X -= MX;
+              let Y = sy + dy;
+              if (Y < 0) Y += MY;
+              else if (Y >= MY) Y -= MY;
+              const value = cells[X + Y * MX] === this.c1;
+              const power = 1 << (dy * N + dx);
+              if (value) ind += power;
+              if (X === x && Y === y) difference = value ? power : -power;
+            }
+          q *= this.weights[ind - difference] / this.weights[ind];
+        }
+      if (q < 1) {
+        if (this.temperature !== 1) q = Math.pow(q, 1 / this.temperature);
+        if (!(q > rng.next())) continue;
+      }
+      write(g, r, cells[r] === this.c0 ? this.c1 : this.c0);
+    }
+    this.counter++;
+    this.count++;
+    this.total++;
     return true;
   }
 }
@@ -1556,22 +1824,34 @@ class ShapeRunner extends Runner {
 
 class SequenceRunner extends Runner {
   private index = 0;
-  constructor(private children: Runner[]) {
+  /** The first child did something since the sequence started (a gated sequence, T335). */
+  private opened = false;
+  /** `gated`: the rest runs only if the first child did something (a wfc without a solution leaves its nodes out, as MarkovJunior's branch). */
+  constructor(private children: Runner[], private gated = false) {
     super();
   }
   reset(): void {
     super.reset();
     this.index = 0;
+    this.opened = false;
     for (const c of this.children) c.reset();
   }
   rewind(): void {
     super.rewind();
     this.index = 0;
+    this.opened = false;
     for (const c of this.children) c.rewind();
   }
   go(g: Grid3, rng: Rng): boolean {
     while (this.index < this.children.length) {
-      if (this.children[this.index].go(g, rng)) return true;
+      if (this.children[this.index].go(g, rng)) {
+        if (this.index === 0) this.opened = true;
+        return true;
+      }
+      if (this.gated && this.index === 0 && !this.opened) {
+        this.index = this.children.length;
+        return false;
+      }
       this.index++;
       if (this.index < this.children.length) restart(this.children[this.index]);
     }
@@ -1634,6 +1914,8 @@ export function describe(node: Node3): string | undefined {
   if (node.type === 'one' || node.type === 'all' || node.type === 'prl') return `${node.type} "${node.rules[0]?.in}" → "${node.rules[0]?.out}"${node.rules.length > 1 ? ` (e altre ${node.rules.length - 1} regole)` : ''}`;
   if (node.type === 'path') return `path da "${node.from}" a "${node.to}" su "${node.on}"`;
   if (node.type === 'conv') return `conv "${node.rules[0]?.in}" → "${node.rules[0]?.out}"`;
+  if (node.type === 'wfc') return `wfc ${node.model === 'tile' ? 'a tessere' : 'a sovrapposizione'} (${node.patterns?.length} motivi)`;
+  if (node.type === 'convchain') return `convchain su "${node.on}"`;
   return undefined;
 }
 
@@ -1666,11 +1948,15 @@ function compileNode(node: Node3, alpha: Alphabet, limits: GridLimits, depth: nu
       return new ShapeRunner(node, alpha);
     case 'map':
       return new MapRunner(node, alpha, limits);
+    case 'wfc':
+      return new WfcRunner(node, alpha, limits);
+    case 'convchain':
+      return new ConvChainRunner(node, alpha);
     case 'sequence':
     case 'markov': {
       if (!Array.isArray(node.children) || !node.children.length) throw new Mj3Error(`nodo ${node.type} senza figli`);
       const children = node.children.map((c) => compile(c, alpha, limits, depth + 1, trace, watch));
-      return node.type === 'sequence' ? new SequenceRunner(children) : new MarkovRunner(children);
+      return node.type === 'sequence' ? new SequenceRunner(children, node.gated === true) : new MarkovRunner(children);
     }
     default:
       throw new Mj3Error(`tipo di nodo sconosciuto: ${(node as { type: string }).type}`);

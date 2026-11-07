@@ -1,0 +1,7 @@
+# MarkovJunior (github.com/mxgmn/MarkovJunior, resources/rules/SeaVilla/TopWall.vox, MIT, © 2022 Maxim Gumin), as text by lab/scripts/mjx-risorse.ts, with the legend "Ea*g" of SeaVilla
+*****/*****/*****/*****/*****
+*****/*****/*****/*****/*****
+*****/*g***/*****/*g***/*****
+*****/*g***/*****/*g***/*****
+***a*/*g*a*/***a*/*g*a*/***a*
+EEEa*/EEEa*/EEEa*/EEEa*/EEEa*

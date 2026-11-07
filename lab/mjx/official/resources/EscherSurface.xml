@@ -1,0 +1,92 @@
+<!-- MarkovJunior (github.com/mxgmn/MarkovJunior, resources/tilesets/EscherSurface.xml and EscherSurface/*.vox, MIT, © 2022 Maxim Gumin), as text by lab/scripts/mjx-risorse.ts; the letters are those of EscherSurface. -->
+<tileset values="BADG" fullSymmetry="True">
+  <tiles>
+    <tile name="Empty">
+      BBBBB/BBBBB/BBBBB/BBBBB/BBBBB
+      BBBBB/BBBBB/BBBBB/BBBBB/BBBBB
+      BBBBB/BBBBB/BBBBB/BBBBB/BBBBB
+      BBBBB/BBBBB/BBBBB/BBBBB/BBBBB
+      BBBBB/BBBBB/BBBBB/BBBBB/BBBBB
+    </tile>
+    <tile name="Line">
+      BBBBB/BBBBB/BBBBB/BBBBB/BBBBB
+      BBBBB/BBBBB/BBBBB/BBBBB/BBBBB
+      AAAAA/DDDDD/GGGGG/DDDDD/AAAAA
+      BBBBB/BBBBB/BBBBB/BBBBB/BBBBB
+      BBBBB/BBBBB/BBBBB/BBBBB/BBBBB
+    </tile>
+    <tile name="Turn">
+      BBBBB/BBBBB/BBBBB/BBBBB/BBBBB
+      BBBBB/BBBBB/BBBBB/BBBBB/BBBBB
+      AAAAA/ADDDD/ADGGG/ADGDD/ADGDA
+      BBBBB/BBBBB/BBBBB/BBBBB/BBBBB
+      BBBBB/BBBBB/BBBBB/BBBBB/BBBBB
+    </tile>
+    <tile name="Stairs">
+      BAABB/AABBB/ABBBB/BBBBB/BBBBB
+      BDDBB/DDBBB/DBBBB/BBBBB/BBBBB
+      BGGBB/GGBBB/GBBBB/BBBBB/BBBBB
+      BDDBB/DDBBB/DBBBB/BBBBB/BBBBB
+      BAABB/AABBB/ABBBB/BBBBB/BBBBB
+    </tile>
+  </tiles>
+  <neighbors>
+    <neighbor left="Empty" right="Empty"/>
+    <neighbor left="Empty" right="z Line"/>
+    <neighbor left="Empty" right="Turn"/>
+    <neighbor left="Empty" right="y Line"/>
+    <neighbor left="Empty" right="y Turn"/>
+    <neighbor left="Empty" right="z Stairs"/>
+    <neighbor left="Empty" right="y Stairs"/>
+    <neighbor left="z Line" right="z Line"/>
+    <neighbor left="y Line" right="y Line"/>
+    <neighbor left="y Line" right="xy Line"/>
+    <neighbor left="z Line" right="y Line" condition="Dense"/>
+    <neighbor left="z Line" right="xy Line" condition="Dense"/>
+    <neighbor left="Line" right="z Turn"/>
+    <neighbor left="z Line" right="Turn"/>
+    <neighbor left="y Line" right="y Turn"/>
+    <neighbor left="z Line" right="y Turn" condition="Dense"/>
+    <neighbor left="y Line" right="Turn" condition="Dense"/>
+    <neighbor left="y Line" right="x Turn" condition="Dense"/>
+    <neighbor left="x Line" right="Stairs"/>
+    <neighbor left="y Line" right="z Stairs"/>
+    <neighbor left="z Line" right="z Stairs" condition="Dense"/>
+    <neighbor left="z Line" right="xz Stairs" condition="Dense"/>
+    <neighbor left="y Line" right="y Stairs" condition="Dense"/>
+    <neighbor left="Turn" right="zz Turn"/>
+    <neighbor left="z Turn" right="Turn"/>
+    <neighbor left="zz Turn" right="Turn"/>
+    <neighbor left="y Turn" right="y Turn"/>
+    <neighbor left="y Turn" right="xy Turn"/>
+    <neighbor left="y Turn" right="xxy Turn"/>
+    <neighbor left="z Turn" right="y Turn" condition="Dense"/>
+    <neighbor left="z Turn" right="xy Turn" condition="Dense"/>
+    <neighbor left="Stairs" right="y Turn"/>
+    <neighbor left="Stairs" right="xy Turn"/>
+    <neighbor left="Stairs" right="Turn" condition="Dense"/>
+    <neighbor left="Stairs" right="x Turn" condition="Dense"/>
+    <neighbor left="Stairs" right="xx Turn" condition="Dense"/>
+    <neighbor left="y Stairs" right="y Turn" condition="Dense"/>
+    <neighbor left="y Stairs" right="xy Turn" condition="Dense"/>
+    <neighbor left="y Stairs" right="xxy Turn" condition="Dense"/>
+    <neighbor left="z Stairs" right="zzz Stairs"/>
+    <neighbor left="y Stairs" right="y Stairs"/>
+    <neighbor left="y Stairs" right="xy Stairs"/>
+    <neighbor left="y Stairs" right="xxy Stairs"/>
+    <neighbor left="Stairs" right="z Stairs"/>
+    <neighbor left="Stairs" right="zz Stairs"/>
+    <neighbor left="y Stairs" right="z Stairs" condition="Dense"/>
+    <neighbor left="y Stairs" right="zz Stairs" condition="Dense"/>
+    <neighbor left="Stairs" right="y Stairs"/>
+    <neighbor left="Stairs" right="xy Stairs"/>
+    <neighbor left="z Line" right="y Stairs"/>
+    <neighbor left="z Line" right="yyy Stairs"/>
+    <neighbor left="z Turn" right="y Stairs"/>
+    <neighbor left="z Turn" right="yyy Stairs"/>
+    <neighbor left="zz Turn" right="y Stairs"/>
+    <neighbor left="zz Turn" right="yyy Stairs"/>
+    <neighbor left="x Line" right="Stairs"/>
+    <neighbor left="x Turn" right="Stairs"/>
+  </neighbors>
+</tileset>

@@ -758,6 +758,22 @@ export interface CodeRuleInfo {
  * Inspects XML code at or around a character position to extract any rule node
  * that defines in/out/from/to patterns.
  */
+/** The element still open at the end of `before` (comments left out): the parent of what comes next, lowercase, or undefined. */
+export function parentTag(before: string): string | undefined {
+  const stack: string[] = [];
+  const text = before.replace(/<!--[\s\S]*?(-->|$)/g, '');
+  const re = /<(\/?)([a-zA-Z][\w:.-]*)((?:"[^"]*"|'[^']*'|[^'">])*)>/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text)) !== null) {
+    const name = m[2].toLowerCase();
+    if (m[1]) {
+      const at = stack.lastIndexOf(name);
+      if (at >= 0) stack.length = at;
+    } else if (!/\/\s*$/.test(m[3])) stack.push(name);
+  }
+  return stack[stack.length - 1];
+}
+
 export function extractRuleAtPos(code: string, pos: number): CodeRuleInfo | null {
   if (!code || code.length === 0) return null;
   const safePos = Math.max(0, Math.min(code.length, pos));
@@ -810,6 +826,8 @@ export function extractRuleAtPos(code: string, pos: number): CodeRuleInfo | null
   const tag = nameMatch[1];
   // <field> and <observe> (T334) have from and to, but they are sets of letters inside a rule node, not patterns to draw.
   if (tag === 'field' || tag === 'observe') return null;
+  // A rule of a <wfc> (T335) says which tiles (or letters) a letter may become: "Empty|Line", not a pattern.
+  if (tag === 'rule' && parentTag(code.slice(0, tagStart)) === 'wfc') return null;
 
   const line = code.slice(0, tagStart).split('\n').length;
 

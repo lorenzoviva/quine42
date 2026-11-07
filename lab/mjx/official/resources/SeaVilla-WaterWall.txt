@@ -1,0 +1,7 @@
+# MarkovJunior (github.com/mxgmn/MarkovJunior, resources/rules/SeaVilla/WaterWall.vox, MIT, © 2022 Maxim Gumin), as text by lab/scripts/mjx-risorse.ts, with the legend "yaU*" of SeaVilla
+*****/*aaa*/*aaa*/*aaa*/*****
+UUUUU/UaaaU/UaaaU/UaaaU/UUUUU
+UUUUU/UaaaU/UaaaU/UaaaU/UUUUU
+UUUUU/UaaaU/UaaaU/UaaaU/UUUUU
+UUUUU/UaaaU/UaaaU/UaaaU/UUUUU
+yyyyy/yaaay/yaaay/yaaay/yyyyy

@@ -399,9 +399,51 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: nessuno
 - **Fermo**: `search`, `limit`, `depthCoefficient`, come nell'XML di MarkovJunior.
 
+### Onda
+- **Inglese**: `wfc`, `WfcNode`, `WfcSolver`, `WfcOutcome`, `WFC_LIMITS`
+- **Definizione**: il nodo `<wfc>` di un programma MarkovJunior (wave function collapse): ogni cella della griglia tiene i motivi che può ancora essere, le regole del nodo ne tolgono alcuni, poi i tentativi osservano la cella più incerta, estraggono un motivo per peso e propagano ai vicini, fino a una cella un motivo; il primo tentativo senza contraddizioni dà la griglia nuova, su cui girano i nodi dentro la `wfc`. A tessere (`tileset`) o a sovrapposizione (`sample`), deterministica dal seme, con tetti di motivi, tentativi, byte e tempo (ADR-0174).
+- **Dove vive**: `src/mj/wfc.ts`, `src/mj/engine.ts`, `src/mj/model.ts`
+- **Da non usare**: `collasso` (per il nodo)
+- **Fermo**: `<wfc tileset sample values periodic overlap overlapz tiles n periodicInput shannon tries>` e le sue `<rule in out>`, come nell'XML di MarkovJunior.
+
+### Tileset
+- **Inglese**: `tileset`, `TileSource`, `NeighborSource`, `tileModel`
+- **Definizione**: il file di `models/` che una `<wfc tileset>` legge: `<tileset values fullSymmetry>` con le tessere (`<tile name weight file>`, i voxel come testo di un pattern) e i vicini (`<neighbor left right>` o `top bottom`, con le rotazioni x, y, z davanti al nome). Una tessera vale con tutte le sue rotazioni attorno a z (o del cubo con `fullSymmetry`); le lettere del tileset vanno su quelle del nodo per posizione (ADR-0174). Solo testo: niente `.vox`.
+- **Dove vive**: `src/mj/wfc.ts`, `src/mj/model.ts`, `lab/mjx/official/resources/`
+- **Da non usare**: `tilemap`, `set di tessere`
+- **Fermo**: `<tileset>`, `<tiles>`, `<tile>`, `<neighbors>`, `<neighbor>`, come i tileset di MarkovJunior.
+
+### Campione
+- **Inglese**: `sample`, `overlapModel`, `convchainWeights`
+- **Definizione**: un pattern piano di `models/<nome>.txt` da cui la `wfc` a sovrapposizione (nelle lettere del nodo) e `convchain` (nelle sue due lettere, black e white) imparano quali finestre N×N possono stare insieme e quanto spesso (ADR-0174). Al posto dell'immagine PNG dell'originale.
+- **Dove vive**: `src/mj/wfc.ts`, `src/mj/model.ts`
+- **Da non usare**: `esempio`, `immagine` (per il campione)
+- **Fermo**: l'attributo `sample` dell'XML di MarkovJunior.
+
+### ConvChain
+- **Inglese**: `convchain`, `ConvChainNode`
+- **Definizione**: il nodo `<convchain>` di MarkovJunior: le celle `on` di una griglia piana diventano black o white, poi a ogni passo una passata di Metropolis le fa somigliare alle finestre N×N del campione (`temperature` le ammorbidisce), per `steps` passi (ADR-0174).
+- **Dove vive**: `src/mj/engine.ts`, `src/mj/wfc.ts`
+- **Da non usare**: nessuno
+- **Fermo**: `<convchain sample n temperature on black white steps>`, come nell'XML di MarkovJunior.
+
+### Scala frazionaria
+- **Inglese**: `divide`
+- **Definizione**: una `map` con `scale="5/3 5/3 6/3"`: la griglia nuova è M·N/D celle per asse e una regola scrive a x·N/D, quindi 1/3 rimpicciolisce e 5/3 ingrandisce senza essere un intero; solo con la griglia nuova vuota (ADR-0174).
+- **Dove vive**: `src/mj/engine.ts`, `src/mj/model.ts`
+- **Da non usare**: nessuno
+- **Fermo**: l'attributo `scale` di `<map>`, come nell'XML di MarkovJunior.
+
+### Cartella delle regole
+- **Inglese**: `folder`
+- **Definizione**: l'attributo `folder` della radice, di una `map` o di una `wfc`: le regole da file della sua griglia si leggono da `models/<cartella>-<nome>.txt`, il posto che nell'originale è `resources/rules/<cartella>/` (ADR-0174).
+- **Dove vive**: `src/mj/model.ts`
+- **Da non usare**: nessuno
+- **Fermo**: l'attributo `folder` dell'XML di MarkovJunior.
+
 ### Nodo guidato
-- **Inglese**: `GuidedRunner`, `inferenceIn`, `inferenceRefusal`
-- **Definizione**: un nodo di regole con almeno un campo di potenziale o un'osservazione: vede una corrispondenza dovunque il suo ingresso combacia, anche se non cambierebbe niente, e sceglie con l'euristica; ogni altro nodo resta quello di sempre. Il validatore del gioco non lo prende finché T336 non lo apre (ADR-0173).
+- **Inglese**: `GuidedRunner`, `inferenceIn`, `newNodesRefusal`
+- **Definizione**: un nodo di regole con almeno un campo di potenziale o un'osservazione: vede una corrispondenza dovunque il suo ingresso combacia, anche se non cambierebbe niente, e sceglie con l'euristica; ogni altro nodo resta quello di sempre. Il validatore del gioco non lo prende finché T336 non lo apre (ADR-0173; dal T335 lo dice `newNodesRefusal`, che rifiuta anche `wfc` e `convchain`).
 - **Dove vive**: `src/mj/engine.ts`, `src/mj/model.ts`, `src/kernel/validator.ts`
 - **Da non usare**: nessuno
 

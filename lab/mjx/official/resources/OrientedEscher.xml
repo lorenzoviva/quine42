@@ -1,0 +1,114 @@
+<!-- MarkovJunior (github.com/mxgmn/MarkovJunior, resources/tilesets/OrientedEscher.xml and OrientedEscher/*.vox, MIT, © 2022 Maxim Gumin), as text by lab/scripts/mjx-risorse.ts; the letters are those of OrientedEscher. -->
+<tileset values="BODAWEU" fullSymmetry="True">
+  <tiles>
+    <tile name="Empty">
+      BBBBB/BBBBB/BBBBB/BBBBB/BBBBB
+      BBBBB/BBBBB/BBBBB/BBBBB/BBBBB
+      BBBBB/BBBBB/BBBBB/BBBBB/BBBBB
+      BBBBB/BBBBB/BBBBB/BBBBB/BBBBB
+      BBBBB/BBBBB/BBBBB/BBBBB/BBBBB
+    </tile>
+    <tile name="Turn">
+      BBBBB/BBBBB/BBBBB/BBBBB/BBBBB
+      BBBBB/BBBBB/BBBBB/BBBBB/BBOBB
+      DDDDD/DAAAA/DAWWW/DAWAA/DAWAD
+      BBBBB/BBBBB/BBBBO/BBBBB/BBBBB
+      BBBBB/BBBBB/BBBBB/BBBBB/BBBBB
+    </tile>
+    <tile name="Stairs">
+      BDDBB/DDBBB/DBBBB/BBBBB/BBBBB
+      BAABB/AABBB/ABBBB/BBBBB/BBBBB
+      BWWBB/WWBBB/WBBBB/BBBBB/BBBBB
+      BAABB/AABBB/ABBBB/BBBBB/BBBBB
+      BDDBB/DDBBB/DBBBB/BBBBB/BBBBB
+    </tile>
+    <tile name="Cube">
+      EEEEE/EUUUE/EUUUE/EUUUE/EEEEE
+      EEEEE/EUUUE/EUUUE/EUUUE/EEEEE
+      EEEEE/EUUUE/EUUUE/EUUUE/EEEEE
+      EEEEE/EUUUE/EUUUE/EUUUE/EEEEE
+      EEEEE/EUUUE/EUUUE/EUUUE/EEEEE
+    </tile>
+    <tile name="T">
+      BBBBB/BBBBB/BBBBB/BBBBB/BBBBB
+      BBBBB/BBBBB/BBBBB/BBBBB/BBOBB
+      DDDDD/AAAAA/WWWWW/AAWAA/DAWAD
+      BBBBB/BBBBB/OBBBO/BBBBB/BBBBB
+      BBBBB/BBBBB/BBBBB/BBBBB/BBBBB
+    </tile>
+  </tiles>
+  <neighbors>
+    <neighbor left="Empty" right="Empty"/>
+    <neighbor left="Stairs" right="Empty"/>
+    <neighbor left="Empty" right="y Stairs"/>
+    <neighbor left="Empty" right="Turn"/>
+    <neighbor left="z Turn" right="Empty"/>
+    <neighbor left="Empty" right="y Turn"/>
+    <neighbor left="z Stairs" right="zzz Stairs"/>
+    <neighbor left="y Stairs" right="y Stairs"/>
+    <neighbor left="y Stairs" right="xxy Stairs"/>
+    <neighbor left="Stairs" right="z Stairs"/>
+    <neighbor left="Stairs" right="zz Stairs"/>
+    <neighbor left="y Stairs" right="z Stairs"/>
+    <neighbor left="y Stairs" right="zz Stairs"/>
+    <neighbor left="Stairs" right="y Stairs"/>
+    <neighbor left="Stairs" right="xy Stairs"/>
+    <neighbor left="xxx Turn" right="Stairs"/>
+    <neighbor left="zz Stairs" right="xxxz Turn"/>
+    <neighbor left="Stairs" right="Turn"/>
+    <neighbor left="Stairs" right="zzz Turn"/>
+    <neighbor left="Stairs" right="x Turn"/>
+    <neighbor left="Stairs" right="xxx Turn"/>
+    <neighbor left="Stairs" right="y Turn"/>
+    <neighbor left="Stairs" right="yyy Turn"/>
+    <neighbor left="y Stairs" right="y Turn"/>
+    <neighbor left="y Turn" right="y Turn"/>
+    <neighbor left="y Turn" right="xxy Turn"/>
+    <neighbor left="y Turn" right="xxxy Turn"/>
+    <neighbor left="y Turn" right="yyy Turn"/>
+    <neighbor left="y Turn" right="xyyy Turn"/>
+    <neighbor left="y Turn" right="xxxyyy Turn"/>
+    <neighbor left="y Turn" right="Turn"/>
+    <neighbor left="xy Turn" right="Turn"/>
+    <neighbor left="xxy Turn" right="Turn"/>
+    <neighbor left="y Turn" right="zzz Turn"/>
+    <neighbor left="xxxy Turn" right="zzz Turn"/>
+    <neighbor left="xxy Turn" right="zzz Turn"/>
+    <neighbor left="Empty" right="Cube"/>
+    <neighbor left="y Cube" right="y Cube"/>
+    <neighbor left="Stairs" right="Cube"/>
+    <neighbor left="y Stairs" right="Cube"/>
+    <neighbor left="Cube" right="y Turn"/>
+    <neighbor left="Cube" right="Turn"/>
+    <neighbor left="z Turn" right="Cube"/>
+    <neighbor left="Empty" right="zzz T"/>
+    <neighbor left="Empty" right="y T"/>
+    <neighbor left="Empty" right="yyy T"/>
+    <neighbor left="z Stairs" right="xxx T"/>
+    <neighbor left="z Stairs" right="yx T"/>
+    <neighbor left="Stairs" right="y T"/>
+    <neighbor left="Stairs" right="xy T"/>
+    <neighbor left="Stairs" right="yyy T"/>
+    <neighbor left="Cube" right="zzz T"/>
+    <neighbor left="Cube" right="y T"/>
+    <neighbor left="Cube" right="xyyy T"/>
+    <neighbor left="y T" right="y T"/>
+    <neighbor left="y T" right="xxy T"/>
+    <neighbor left="y T" right="xyyy T"/>
+    <neighbor left="y Turn" right="xxxy T"/>
+    <neighbor left="yyy Turn" right="xxy T"/>
+    <neighbor left="y Turn" right="xxxyyy T"/>
+    <neighbor left="yyy Turn" right="xxyyy T"/>
+    <neighbor left="y Turn" right="zzz T"/>
+    <neighbor left="y Turn" right="xxzzz T"/>
+    <neighbor left="yyy Turn" right="xzzz T"/>
+    <neighbor left="yyy Turn" right="xxxzzz T"/>
+    <neighbor left="xz Turn" right="y T"/>
+    <neighbor left="yxz Turn" right="y T"/>
+    <neighbor left="z Turn" right="yyy T"/>
+    <neighbor left="zz Turn" right="yyy T"/>
+    <neighbor left="y T" right="zzz T"/>
+    <neighbor left="yyy T" right="xzzz T"/>
+    <neighbor left="yyy T" right="xxxzzz T"/>
+  </neighbors>
+</tileset>

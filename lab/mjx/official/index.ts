@@ -1,12 +1,18 @@
 // 3D models from MarkovJunior's repository (github.com/mxgmn/MarkovJunior/tree/main/models, MIT licence,
-// © 2022 Maxim Gumin), copied unchanged, with the size and steps that models.xml gives them. Only those
-// that need no rule files or tiles (wfc): the lab's front-end must run them as they are. Since T334 also those
-// that infer (field, temperature, observe, search), the 2D ones as slabs one voxel thick; `note` says what differs.
+// © 2022 Maxim Gumin), copied unchanged, with the size and steps that models.xml gives them: the lab's front-end must
+// run them as they are. Since T334 also those that infer (field, temperature, observe, search), the 2D ones as slabs
+// one voxel thick; since T335 those with tiles (wfc), samples (convchain) and rule files, which read the original's
+// resources turned into text (resources/, lab/scripts/mjx-risorse.ts); `note` says what differs.
 
 import type { Vec3 } from '../../../src/mj/engine';
+import { mjxIncludes } from '../../../src/mj/model';
 
 const files = import.meta.glob('./*.xml', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
 const xml = (name: string) => files[`./${name}.xml`];
+// Only for the developers, as the comparisons (catalog.ts, T294): the players' build hides the original's models and has no resources.
+const resources = (import.meta.env.MODE !== 'production' ? import.meta.glob(['./resources/*.xml', './resources/*.txt'], { query: '?raw', import: 'default', eager: true }) : {}) as Record<string, string>;
+/** The original's tilesets, rule files and samples, as text (T335), by name in the folder: what the models read as models/ files. */
+export const OFFICIAL_FILES: Readonly<Record<string, string>> = Object.fromEntries(Object.entries(resources).map(([k, v]) => [k.replace(/^.*\//, ''), v]));
 
 export interface OfficialModel {
   name: string;
@@ -16,6 +22,8 @@ export interface OfficialModel {
   steps?: number;
   /** What is not as in the repository (a smaller box, a node the engine does not have yet). */
   note?: string;
+  /** The files of resources/ it reads (T335), for compileMjx. */
+  files?: Record<string, string>;
 }
 
 const cube = (n: number): Vec3 => [n, n, n];
@@ -40,10 +48,28 @@ export const OFFICIAL: OfficialModel[] = ([
   // They infer (T334): potential fields with temperature, observations, a search.
   { name: 'Keys', size: cube(23) },
   { name: 'SoftPath', size: cube(80) },
-  { name: 'StairsPath', size: cube(33), note: 'senza il map finale, che disegna le scale con tessere da file (fout)' },
+  { name: 'StairsPath', size: cube(33), note: 'le scale del map finale da file di testo (resources/Stairs-*.txt)' },
   { name: 'Dwarves', size: [20, 20, 1], steps: 85 },
   { name: 'Division', size: [75, 75, 1] },
   { name: 'RegularPath', size: [79, 79, 1] },
   { name: 'GrowTo', size: [120, 120, 1], steps: 2000 },
   { name: 'CompleteSAW', size: [19, 19, 1] },
-] as Array<Omit<OfficialModel, 'xml'>>).map((m) => ({ ...m, xml: xml(m.name) }));
+  // Tiles, samples, fractional maps and rule files (T335): the original's .vox and .png resources as text.
+  { name: 'Surface', size: cube(10) },
+  { name: 'Escher', size: cube(8) },
+  { name: 'EscherSurface', size: cube(8) },
+  { name: 'OrientedEscher', size: cube(6) },
+  { name: 'PeriodicEscher', size: cube(8) },
+  { name: 'PillarsOfEternity', size: cube(9) },
+  { name: 'Apartemazements', size: cube(8) },
+  { name: 'Partitioning', size: [11, 11, 3] },
+  { name: 'ModernHouse', size: [9, 9, 4] },
+  { name: 'SeaVilla', size: [10, 10, 4] },
+  { name: 'ChainDungeon', size: [60, 60, 1] },
+  { name: 'ChainDungeonMaze', size: [60, 60, 1] },
+  { name: 'WaveDungeon', size: [50, 50, 1] },
+] as Array<Omit<OfficialModel, 'xml'>>).map((m) => {
+  const text = xml(m.name);
+  const files = mjxIncludes(text, (f) => OFFICIAL_FILES[f]);
+  return { ...m, xml: text, ...(Object.keys(files).length ? { files } : {}) };
+});

@@ -112,7 +112,7 @@ describe('la traccia dice cosa ha fatto ogni nodo', () => {
 
 describe('la traccia non cambia il risultato', () => {
   it.each(OFFICIAL.filter((o) => o.name !== 'MazeTrail'))('$name: griglia e passi identici', (o) => {
-    const m = compileMjx(o.xml, { size: o.size });
+    const m = compileMjx(o.xml, { size: o.size, ...(o.files ? { files: o.files } : {}) });
     const plain = run(m.program, 7, 5_000_000, FORM_LIMITS);
     const t = traceProgram(m, 7);
     expect(t.steps).toBe(plain.steps);

@@ -1,0 +1,6 @@
+# MarkovJunior (github.com/mxgmn/MarkovJunior, resources/rules/Stairs/Turn.vox, MIT, © 2022 Maxim Gumin), as text by lab/scripts/mjx-risorse.ts, with the legend "BAW" of StairsPath
+BBBBB/BBBBB/BBBBB/BBBBB/BBBBB
+BBBBB/BBBBB/BBBBB/BBBBB/BBBBB
+AAAAA/AWWWW/AWWWW/AWWWW/AWWWA
+BBBBB/BBBBB/BBBBB/BBBBB/BBBBB
+BBBBB/BBBBB/BBBBB/BBBBB/BBBBB

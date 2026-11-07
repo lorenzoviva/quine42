@@ -35,8 +35,9 @@ Come si leggono:
 
 Le differenze volute dall'originale sono nell'ADR-0173: il motore guarda corrispondenze sempre aggiornate (l'originale, in un `all` con i
 campi, perde fino a quando il nodo ricomincia le corrispondenze che in un passo non hanno potenziale), un `all` che non applica niente si ferma subito
-invece di contare un passo vuoto, i tetti della ricerca. StairsPath è senza il `map` finale: disegna le scale con tessere da file (`fout`),
-che il motore non legge ancora (T333, T335); il cammino resta sulla griglia grossa, `A` il corridoio, `D` gli angoli e i capi delle rampe.
+invece di contare un passo vuoto, i tetti della ricerca. StairsPath qui è senza il `map` finale: disegna le scale con tessere da file (`fout`),
+che il motore allora non leggeva; il cammino resta sulla griglia grossa, `A` il corridoio, `D` gli angoli e i capi delle rampe. Dal T335 il modello
+è intero, con le scale da file di testo: la sua foto è in `lab/banco/wfc/` (ADR-0174).
 
 ## L'originale (`originale/`)
 

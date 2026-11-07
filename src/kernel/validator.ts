@@ -16,7 +16,7 @@ export { repairCoefficients, repairActor } from './coefficients';
 export { repairMinimums } from './universe';
 import { boxOf, classOf, CLASSES, sizeOf, SIZE_TIERS } from '../mj/classes';
 import { Mj3Error } from '../mj/engine';
-import { compileMjx, inferenceIn, MJX_FILE_RE, mjxIncludes, patternText, type MjxFiles, type MjxModel } from '../mj/model';
+import { compileMjx, MJX_FILE_RE, mjxIncludes, newNodesIn, patternText, type MjxFiles, type MjxModel } from '../mj/model';
 import { FORM_LIMITS, MAX_FORM_TIME, MAX_FORM_XML, runMjx } from '../mj/run';
 import { analyzeSound } from '../mj/soundanalysis';
 import { reservedName } from './paths';
@@ -73,7 +73,7 @@ export function modelErrors(path: string, xml: string, time = 8_000, box?: [numb
     const size = /<(?!!)[a-z]+\b[^>]*\ssize="/i.test(xml) ? undefined : (box ?? boxOf(classOf('object')!));
     const self = /^models\/([^/]+)\.xml$/.exec(path)?.[1];
     const m = compileMjx(xml, { ...(size ? { size } : {}), ...(files && Object.keys(files).length ? { files, ...(self ? { self } : {}) } : {}) });
-    const infers = inferenceRefusal(m);
+    const infers = newNodesRefusal(m);
     if (infers) return [`${path}: ${infers}`];
     if (m.sound) {
       const errors = soundErrors(path, m, time);
@@ -113,11 +113,11 @@ export function ruleFileErrors(path: string, text: string): string[] {
 }
 
 /**
- * The engine infers (T334), the world does not yet: `field` and `observe` wait for their ceilings and the Sculptor's prompt (T336).
- * Why a program that uses them goes back, or undefined.
+ * The engine infers (T334) and collapses waves (T335), the world does not yet: `field`, `observe`, `wfc` and `convchain` wait for their
+ * ceilings and the Sculptor's prompt (T336). Why a program that uses them goes back, or undefined.
  */
-export function inferenceRefusal(m: Parameters<typeof inferenceIn>[0]): string | undefined {
-  const found = inferenceIn(m);
+export function newNodesRefusal(m: Parameters<typeof newNodesIn>[0]): string | undefined {
+  const found = newNodesIn(m);
   return found.length ? `${found.map((n) => `<${n}>`).join(' e ')} non ${found.length > 1 ? 'sono ancora ammessi' : 'è ancora ammesso'} nei programmi del mondo: scrivilo senza` : undefined;
 }
 

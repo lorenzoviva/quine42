@@ -1,0 +1,7 @@
+# MarkovJunior (github.com/mxgmn/MarkovJunior, resources/rules/SeaVilla/LockL.vox, MIT, © 2022 Maxim Gumin), as text by lab/scripts/mjx-risorse.ts, with the legend "EW*GY" of SeaVilla
+**Y**/*****/**Y**/*****/**Y**
+**Y**/*****/**Y**/*****/**Y**
+**Y**/*****/**Y**/*****/**Y**
+**Y**/*****/**Y**/*****/**Y**
+*GYG*/*****/**Y**/*****/*GYG*
+EEEEE/WWWWW/WWWWW/WWWWW/EEEEE

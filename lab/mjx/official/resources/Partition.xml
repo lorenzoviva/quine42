@@ -1,0 +1,37 @@
+<!-- MarkovJunior (github.com/mxgmn/MarkovJunior, resources/tilesets/Partition.xml and Partition/*.vox, MIT, © 2022 Maxim Gumin), as text by lab/scripts/mjx-risorse.ts; the letters are those of Partitioning. -->
+<tileset values="BCA">
+  <tiles>
+    <tile name="Nothing" weight="2.0">
+      BBB/BBB/BBB
+      BBB/BCB/BBB
+      BBB/BBB/BBB
+    </tile>
+    <tile name="I">
+      BBB/BBB/BBB
+      BAB/BCB/BAB
+      BBB/BBB/BBB
+    </tile>
+    <tile name="T">
+      BBB/BBB/BBB
+      BAB/BCA/BAB
+      BBB/BBB/BBB
+    </tile>
+  </tiles>
+  <neighbors>
+    <neighbor left="Nothing" right="Nothing"/>
+    <neighbor left="Nothing" right="I"/>
+    <neighbor left="Nothing" right="T"/>
+    <neighbor left="z I" right="z I"/>
+    <neighbor left="z I" right="z T"/>
+    <neighbor left="T" right="z I"/>
+    <neighbor left="z T" right="zzz T"/>
+    <neighbor top="Nothing" bottom="Nothing"/>
+    <neighbor top="Nothing" bottom="I"/>
+    <neighbor top="Nothing" bottom="T"/>
+    <neighbor top="I" bottom="Nothing"/>
+    <neighbor top="I" bottom="I"/>
+    <neighbor top="I" bottom="z I"/>
+    <neighbor top="T" bottom="Nothing"/>
+    <neighbor top="T" bottom="T"/>
+  </neighbors>
+</tileset>

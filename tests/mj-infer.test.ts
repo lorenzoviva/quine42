@@ -6,11 +6,13 @@ import fs from 'node:fs';
 import { afterEach, describe, expect, it } from 'vitest';
 import { run, runOn, Mj3Error, type Grid3, type RunOptions } from '../src/mj/engine';
 import { INFERENCE_LIMITS } from '../src/mj/infer';
-import { compileMjx, inferenceIn } from '../src/mj/model';
+import { compileMjx, inferenceIn, mjxIncludes } from '../src/mj/model';
 import { traceProgram, traceText } from '../src/mj/trace';
 import { modelErrors } from '../src/kernel/validator';
 
 const official = (name: string) => fs.readFileSync(`lab/mjx/official/${name}.xml`, 'utf8');
+/** The original's resources a model reads, as text (T335: StairsPath draws its stairs from rule files). */
+const resources = (xml: string) => mjxIncludes(xml, (f) => (fs.existsSync(`lab/mjx/official/resources/${f}`) ? fs.readFileSync(`lab/mjx/official/resources/${f}`, 'utf8') : undefined));
 
 /** A program of one grid run on the rows given (`/` between rows, the program's own letters): the rows it ends with. */
 function play(xml: string, rows: string, seed = 1, maxSteps = 10_000, opts: RunOptions = {}, files?: Record<string, string>) {
@@ -236,7 +238,7 @@ describe('con <import> e i figli <in>/<out> (T333, T340)', () => {
 describe('determinismo', () => {
   it('lo stesso seme dà la stessa griglia, semi diversi griglie diverse', () => {
     for (const [name, size] of [['Keys', [11, 11, 11]], ['SoftPath', [16, 16, 16]], ['StairsPath', [21, 21, 21]], ['RegularPath', [31, 31, 1]]] as const) {
-      const m = compileMjx(official(name), { size: [...size] });
+      const m = compileMjx(official(name), { size: [...size], files: resources(official(name)) });
       const a = run(m.program, 3, 200_000);
       const b = run(m.program, 3, 200_000);
       const c = run(m.program, 4, 200_000);

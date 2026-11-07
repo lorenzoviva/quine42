@@ -30,12 +30,22 @@
 // Files come from `opts.files` (`mjxIncludes` gathers them): plain names, never a path, bounded in depth, number and size.
 // Inference, as MarkovJunior (T334, ADR-0173, src/mj/infer.ts): inside one, all and prl, <field for from|to on recompute essential/> and
 // <observe value from to/>, with temperature, search, limit and depthCoefficient on the node.
-// Not supported (they need tiles): wfc, convchain.
+// Tiles and samples, as MarkovJunior (T335, ADR-0174, src/mj/wfc.ts), only text:
+//   <wfc tileset="x" values=".." periodic overlap overlapz tiles shannon tries><rule in="W" out="Empty|Line"/>…nodes…</wfc>
+//                                           the tileset is models/x.xml, root <tileset values fullSymmetry> with <tiles><tile name weight
+//                                           file>pattern</tile></tiles> and <neighbors><neighbor left right | top bottom/></neighbors>; a tile
+//                                           is the text of its <tile>, or models/<file>.txt, or models/<tiles>-<name>.txt
+//   <wfc sample="x" values=".." n symmetry periodicInput shannon tries><rule in="W" out="A|B"/>…</wfc>  a flat sample, models/x.txt
+//   <convchain sample="x" n temperature on black white steps/>  a flat sample of the black and white letters, models/x.txt
+//   <map scale="5/3 5/3 6/3">               a fraction: the new grid is M·N/D cells, the rules write at x·N/D
+//   folder="F" on the root, a map or a wfc  the rule files of that grid are models/F-<name>.txt (MarkovJunior's folders)
+// A union belongs to its grid (the root, a map, a wfc), as in MarkovJunior: the same symbol may mean other letters in another grid.
 
 import { internalName } from '../kernel/internalNames';
 import { Mj3Error, PARTS, SHAPES, type ConvRule, type FieldSpec, type Inference, type Node3, type ObserveSpec, type PaletteEntry, type Part, type Program3, type Rule3, type ShapeKind, type Sym, type Vec3 } from './engine';
 import { MJ_PALETTE } from './palette';
 import { soundSettings, type SoundSettings } from './sound';
+import { overlapModel, squareSubgroup, tileModel, WFC_LIMITS, WfcError, type NeighborSource, type TileSource, type WfcModel } from './wfc';
 import { parseXml, XmlError, type XmlElement } from './xml';
 
 export interface MjxClip {
@@ -61,7 +71,7 @@ export interface MjxModel {
 const SYMMETRY: Record<string, Sym> = { '()': 'none', '(x)': 'x', '(y)': 'y', '(z)': 'z', '(xy)': 'xy', '(xyz+)': 'rot', '(xyz)': 'all' };
 const RULE_NODES = new Set(['one', 'all', 'prl']);
 /** Every node the engine runs, as the XML names it (`<import>` is not one: it becomes the nodes of the file it reads). */
-export const MJX_NODES: readonly string[] = ['one', 'all', 'prl', 'sequence', 'markov', 'convolution', 'path', 'map', ...SHAPES];
+export const MJX_NODES: readonly string[] = ['one', 'all', 'prl', 'sequence', 'markov', 'convolution', 'path', 'map', 'wfc', 'convchain', ...SHAPES];
 /** The nodes a program may start with (its root, or an imported file's). */
 const ROOT_NODES = new Set(['one', 'all', 'prl', 'sequence', 'markov', 'map', 'convolution', 'path']);
 
@@ -100,8 +110,16 @@ export function patternText(s: string): string {
  */
 export function mjxIncludes(src: string, read: (file: string) => string | undefined): Record<string, string> {
   const out: Record<string, string> = {};
-  if (!/\b(?:import|fin|fout|file)\b/.test(src)) return out;
+  if (!/\b(?:import|fin|fout|file|tileset|sample)\b/.test(src)) return out;
   const queue = [src];
+  /** Reads a file once; its text, if it is there. */
+  const take = (f: string): string | undefined => {
+    if (f in out) return out[f];
+    if (!MJX_FILE_RE.test(f.slice(0, -4))) return undefined;
+    const text = read(f);
+    if (typeof text !== 'string') return undefined;
+    return (out[f] = text);
+  };
   while (queue.length) {
     let roots: XmlElement[];
     try {
@@ -109,27 +127,39 @@ export function mjxIncludes(src: string, read: (file: string) => string | undefi
     } catch {
       continue;
     }
-    const visit = (el: XmlElement) => {
-      const names: string[] = [];
-      if (el.name === 'import') names.push(`${el.attrs.file}.xml`);
-      else if (RULE_HOLDERS.has(el.name)) for (const a of ['fin', 'fout', 'file']) if (el.attrs[a] !== undefined) names.push(`${el.attrs[a]}.txt`);
-      for (const f of names) {
-        if (f in out || !MJX_FILE_RE.test(f.slice(0, -4))) continue;
-        const text = read(f);
-        if (typeof text !== 'string') continue;
-        out[f] = text;
-        if (f.endsWith('.xml')) queue.push(text);
+    // `folder` belongs to the grid the rules write: the root's, a map's, a wfc's.
+    const visit = (el: XmlElement, folder: string | undefined) => {
+      if (el.name === 'import') {
+        const f = `${el.attrs.file}.xml`;
+        const known = f in out;
+        const text = take(f);
+        if (text !== undefined && !known) queue.push(text);
+      } else if (RULE_HOLDERS.has(el.name)) for (const a of ['fin', 'fout', 'file']) if (el.attrs[a] !== undefined) take(`${inFolder(folder, el.attrs[a])}.txt`);
+      if ((el.name === 'wfc' || el.name === 'convchain') && el.attrs.sample !== undefined) take(`${el.attrs.sample}.txt`);
+      if (el.name === 'wfc' && el.attrs.tileset !== undefined) {
+        const text = take(`${el.attrs.tileset}.xml`);
+        if (text !== undefined) for (const t of tilesOf(text)) if (!t.text?.trim()) take(`${t.attrs.file ?? `${el.attrs.tiles ?? el.attrs.tileset}-${t.attrs.name}`}.txt`);
       }
-      el.children.forEach(visit);
+      const inner = el.name === 'map' || el.name === 'wfc' ? el.attrs.folder : folder;
+      for (const c of el.children) visit(c, inner);
     };
-    roots.forEach(visit);
+    for (const r of roots) visit(r, r.attrs.folder);
   }
   return out;
 }
-const UNSUPPORTED: Record<string, string> = {
-  wfc: 'il WFC a tessere non serve più: il modello si genera intero',
-  convchain: 'convchain non è supportato',
-};
+
+/** A rule file's name in its grid's folder (MarkovJunior's resources/rules/<folder>/): `F-name`. */
+const inFolder = (folder: string | undefined, name: string) => (folder ? `${folder}-${name}` : name);
+
+/** The <tile> elements of a tileset's text (none if it does not read). */
+function tilesOf(text: string): XmlElement[] {
+  try {
+    const root = parseXml(text).find((r) => r.name === 'tileset');
+    return root?.children.filter((c) => c.name === 'tiles').flatMap((c) => c.children.filter((t) => t.name === 'tile')) ?? [];
+  } catch {
+    return [];
+  }
+}
 /** What infers inside a rule node (T334): not a node of its own. */
 const INFERENCE_TAGS = new Set(['field', 'observe']);
 const truthy = (s: string | undefined) => /^true$/i.test(s ?? '');
@@ -140,7 +170,16 @@ interface Ctx {
   sym: Sym;
   /** Letters the grid in scope may hold. */
   values: Set<string>;
+  /** The grid's folder (MarkovJunior's `folder`): its rule files are models/<folder>-<name>.txt. */
+  folder?: string;
+  /** The elements of the grids in scope, outermost first (the root, then each map and wfc): where a union belongs (T335). */
+  scopes?: readonly XmlElement[];
 }
+
+/** The grids of a program: a union written in one belongs to it (MarkovJunior's Grid.Load). */
+const GRID_TAGS = new Set(['map', 'wfc']);
+/** The symbols a union becomes when it means other letters in another grid: the engine has one table (private use, never typed). */
+const PRIVATE_UNION = 0xe000;
 
 class Compiler {
   unions: Record<string, string> = {};
@@ -179,6 +218,15 @@ class Compiler {
   parsed = new Map<string, XmlElement>();
   /** Files whose colours and unions were collected. */
   collected = new Set<string>();
+  /** The unions the program itself writes (not its imports), each with its grid (T335). */
+  unionDefs: Array<{ sym: string; values: string; scope: XmlElement }> = [];
+  /** Symbols whose unions mean other letters in other grids (and "."): each grid has its own private symbol for them. */
+  conflicted = new Set<string>();
+  scopedUnions = new Map<XmlElement, Map<string, string>>();
+  /** The letters of those private symbols, the grid's empty letter as ".". */
+  privateUnions: Record<string, string> = {};
+  /** `legend` said once: a text file has its letters. */
+  private legendSaid = false;
 
   where(el: XmlElement): string {
     return `${this.file ? `models/${this.file}.xml, ` : ''}riga ${el.line}`;
@@ -249,22 +297,27 @@ class Compiler {
       for (const a of ['origin', 'ground', 'soil', 'suolo'])
         if (root.attrs[a] !== undefined) this.warnings.push(`${this.where(root)}: ${a} vale solo quando il programma si apre da sé, non incluso`);
       const values = this.values(root, root.attrs.values);
-      return this.node(root, { bg: values[0], sym, values: new Set(values) }) ?? this.fail(root, 'nessun nodo da eseguire');
+      return this.node(root, { bg: values[0], sym, values: new Set(values), folder: root.attrs.folder, scopes: [...(ctx.scopes ?? []), root] }) ?? this.fail(root, 'nessun nodo da eseguire');
     });
   }
 
   /** The text of a rule file named by `file`: in, a line "->", out. */
-  rulePair(r: XmlElement): [string, string] {
-    const parts = this.fileText(r, r.attrs.file, 'txt', 'file').split(/^[ \t]*->[ \t]*\r?$/m);
-    if (parts.length !== 2) this.fail(r, `models/${r.attrs.file}.txt: in e out vanno separati da una riga con "->" e nient'altro`);
+  rulePair(r: XmlElement, folder?: string): [string, string] {
+    const name = inFolder(folder, r.attrs.file);
+    const parts = this.fileText(r, name, 'txt', 'file').split(/^[ \t]*->[ \t]*\r?$/m);
+    if (parts.length !== 2) this.fail(r, `models/${name}.txt: in e out vanno separati da una riga con "->" e nient'altro`);
     return [patternText(parts[0]), patternText(parts[1])];
   }
 
   /**
-   * One side of a rule (T333): the attribute as it is, the text of a child `<in>`/`<out>`, or a file (`fin`/`fout`, both in `file`).
-   * Two ways for the same side is an error.
+   * One side of a rule (T333): the attribute as it is, the text of a child `<in>`/`<out>`, or a file (`fin`/`fout`, both in `file`), in
+   * the folder of the grid the rule writes (T335). Two ways for the same side is an error.
    */
-  side(r: XmlElement, which: 'in' | 'out'): string | undefined {
+  side(r: XmlElement, which: 'in' | 'out', folder?: string): string | undefined {
+    if (r.attrs.legend !== undefined && !this.legendSaid && ['fin', 'fout', 'file'].some((a) => r.attrs[a] !== undefined)) {
+      this.legendSaid = true;
+      this.warnings.push(`${this.where(r)}: legend vale per le immagini dell'originale; un file di testo ha già le sue lettere (ignorato)`);
+    }
     const own = which === 'in' ? 'fin' : 'fout';
     const kids = r.children.filter((c) => c.name === which);
     const ways = [
@@ -280,8 +333,8 @@ class Compiler {
       if (k.children.length || Object.keys(k.attrs).length) this.fail(k, `<${which}> contiene solo il pattern, come testo`);
       return patternText(k.text ?? '');
     }
-    if (r.attrs[own] !== undefined) return patternText(this.fileText(r, r.attrs[own], 'txt', own));
-    if (r.attrs.file !== undefined) return this.rulePair(r)[which === 'in' ? 0 : 1];
+    if (r.attrs[own] !== undefined) return patternText(this.fileText(r, inFolder(folder, r.attrs[own]), 'txt', own));
+    if (r.attrs.file !== undefined) return this.rulePair(r, folder)[which === 'in' ? 0 : 1];
     return r.attrs[which];
   }
 
@@ -324,6 +377,7 @@ class Compiler {
     let out = '';
     for (const ch of s) {
       if (ch === ctx.bg) out += '.';
+      else if (this.conflicted.has(ch)) out += this.scopedUnion(ch, ctx);
       else if ('*/ []'.includes(ch) || ch === '.') out += ch;
       else if (ctx.values.has(ch) || ch in this.unions) out += ch;
       else if (!this.strict && /^[A-Za-z0-9]$/.test(ch)) {
@@ -365,8 +419,49 @@ class Compiler {
     return v as Vec3;
   }
 
-  /** First pass: unions and colours, wherever they are (MarkovJunior lets a union appear anywhere). */
-  collect(el: XmlElement): void {
+  /** The private symbol of a union in the grids in scope, the innermost first (else the first grid that writes it). */
+  scopedUnion(ch: string, ctx: Ctx): string {
+    for (let i = (ctx.scopes?.length ?? 0) - 1; i >= 0; i--) {
+      const own = this.scopedUnions.get(ctx.scopes![i])?.get(ch);
+      if (own) return own;
+    }
+    const first = this.unionDefs.find((d) => d.sym === ch)!;
+    return this.scopedUnions.get(first.scope)!.get(ch)!;
+  }
+
+  /**
+   * After the first pass: a symbol whose unions mean other letters in other grids (ModernHouse writes "." three times) gets a private
+   * symbol in each grid (T335); one with one meaning stays in the program-wide table, as before.
+   */
+  resolveUnions(): void {
+    const bySym = new Map<string, Array<{ values: string; scope: XmlElement }>>();
+    for (const d of this.unionDefs) {
+      const list = bySym.get(d.sym) ?? [];
+      list.push(d);
+      bySym.set(d.sym, list);
+    }
+    let next = PRIVATE_UNION;
+    for (const [sym, defs] of bySym) {
+      if (sym !== '.' && defs.every((d) => d.values === defs[0].values)) continue;
+      this.conflicted.add(sym);
+      delete this.unions[sym];
+      for (const d of defs) {
+        const mine = this.scopedUnions.get(d.scope) ?? new Map<string, string>();
+        this.scopedUnions.set(d.scope, mine);
+        if (mine.has(sym)) {
+          if (defs.some((e) => e.scope === d.scope && e.values !== d.values)) throw new Mj3Error(`riga ${d.scope.line}: l'unione "${sym}" è scritta due volte nella stessa griglia, con lettere diverse`);
+          continue;
+        }
+        const bg = [...(d.scope.attrs.values ?? '').replace(/\s+/g, '')][0];
+        const priv = String.fromCharCode(next++);
+        mine.set(sym, priv);
+        this.privateUnions[priv] = [...d.values].map((ch) => (ch === bg ? '.' : ch)).join('');
+      }
+    }
+  }
+
+  /** First pass: unions and colours, wherever they are (MarkovJunior lets a union appear anywhere), each union with its grid. */
+  collect(el: XmlElement, scope: XmlElement = el): void {
     if (el.name === 'import') {
       // An imported file's colours and unions come with it; the program's own win (they are written over them, or kept).
       const name = el.attrs.file;
@@ -391,6 +486,7 @@ class Compiler {
       if (!sym || sym.length !== 1 || '*/ []'.includes(sym)) this.fail(el, '"symbol" è un solo carattere');
       if (!el.attrs.values) this.fail(el, 'manca "values"');
       this.unions[sym] = el.attrs.values;
+      if (!this.file) this.unionDefs.push({ sym, values: el.attrs.values, scope });
     } else if (el.name === 'color') {
       const sym = el.attrs.symbol;
       if (!sym || sym.length !== 1) this.fail(el, '"symbol" è una sola lettera');
@@ -428,7 +524,8 @@ class Compiler {
       this.sound = soundSettings(el);
       return;
     }
-    for (const c of el.children) this.collect(c);
+    const inner = GRID_TAGS.has(el.name) ? el : scope;
+    for (const c of el.children) this.collect(c, inner);
   }
 
   /** Animations and actions wait for the end: they run on the finished model, in its last grid's letters. */
@@ -464,8 +561,8 @@ class Compiler {
     const out: Rule3[] = [];
     const add = (r: XmlElement, own: boolean) => {
       if (r.attrs.d === '2') return;
-      const input = this.side(r, 'in');
-      const output = this.side(r, 'out');
+      const input = this.side(r, 'in', ctx.folder);
+      const output = this.side(r, 'out', ctx.folder);
       const rs = own ? sym : this.symmetry(r, { ...ctx, sym });
       const p = this.num(r, r.attrs.p, 'p');
       const rule: Rule3 = { in: this.pattern(r, input, ctx, 'in'), out: this.pattern(r, output, ctx, 'out'), ...(p !== undefined ? { p } : {}) };
@@ -487,7 +584,6 @@ class Compiler {
     for (const c of el.children) {
       if (c.name === 'rule') add(c, false);
       else if (c.name === 'in' || c.name === 'out' || INFERENCE_TAGS.has(c.name)) continue;
-      else if (UNSUPPORTED[c.name]) this.fail(c, UNSUPPORTED[c.name]);
       else if (c.name !== 'union' && c.name !== 'color' && c.name !== 'sound') this.fail(c, `dentro <${el.name}> vanno solo <rule>, <in> e <out>`);
     }
     if (!out.length) this.fail(el, 'nessuna regola (in e out sul nodo, come attributi o figli <in> e <out>, o figli <rule>)');
@@ -496,7 +592,6 @@ class Compiler {
 
   node(el: XmlElement, ctx: Ctx): Node3 | null {
     if (el.name === 'union' || el.name === 'color' || el.name === 'sound') return null;
-    if (UNSUPPORTED[el.name]) this.fail(el, UNSUPPORTED[el.name]);
     // A node meant only for 2D grids (MarkovJunior's d="2").
     if (el.attrs.d === '2') return null;
     const sym = this.symmetry(el, ctx);
@@ -531,6 +626,8 @@ class Compiler {
       };
     }
     if (el.name === 'map') return this.map(el, ctx, sym);
+    if (el.name === 'wfc') return this.wfc(el, ctx, sym);
+    if (el.name === 'convchain') return this.convchain(el, ctx, sym);
     if (el.name === 'import') return this.importNode(el, ctx);
     if (el.name === 'in' || el.name === 'out') this.fail(el, `<${el.name}> va dentro rule, one, all, prl o convolution`);
     if ((SHAPES as readonly string[]).includes(el.name)) return this.shape(el, ctx);
@@ -583,8 +680,8 @@ class Compiler {
     const xs = el.children.filter((c) => c.name === 'rule');
     const sources = xs.length ? xs : [el];
     const rules: ConvRule[] = sources.map((r) => {
-      const input = this.one(r, this.side(r, 'in'), ctx, 'in');
-      const output = this.one(r, this.side(r, 'out'), ctx, 'out');
+      const input = this.one(r, this.side(r, 'in', ctx.folder), ctx, 'in');
+      const output = this.one(r, this.side(r, 'out', ctx.folder), ctx, 'out');
       const p = this.num(r, r.attrs.p, 'p');
       // A rule may take values or sum from its node (models put them there), spaces between letters go.
       let values = r.attrs.values;
@@ -612,21 +709,217 @@ class Compiler {
 
   map(el: XmlElement, ctx: Ctx, sym: Sym): Node3 {
     const scale = (el.attrs.scale ?? '').trim().split(/\s+/);
-    if (scale.length !== 3 || scale.some((s) => !/^\d+$/.test(s))) this.fail(el, `scale vuole tre interi separati da spazi (le frazioni non sono supportate), non "${el.attrs.scale}"`);
+    if (scale.length !== 3 || scale.some((s) => !/^\d+(\/\d+)?$/.test(s))) this.fail(el, `scale vuole tre interi o frazioni (5/3) separati da spazi, non "${el.attrs.scale}"`);
+    const [num, den] = [0, 1].map((k) => scale.map((s) => Number(s.split('/')[k] ?? 1)) as Vec3);
+    if ([...num, ...den].some((v) => v < 1 || v > 32)) this.fail(el, 'i numeri di scale vanno da 1 a 32');
     const values = this.values(el, el.attrs.values);
     // Kept, the old letters are still in the grid.
     const clear = !/^false$/i.test(el.attrs.clear ?? '');
-    const inner: Ctx = { bg: values[0], sym, values: new Set(clear ? values : [...ctx.values, ...values]) };
+    const fraction = den.some((d) => d !== 1);
+    if (fraction && !clear) this.fail(el, 'una scala frazionaria vale solo con la griglia nuova vuota (senza clear="False")');
+    const inner: Ctx = { bg: values[0], sym, values: new Set(clear ? values : [...ctx.values, ...values]), folder: el.attrs.folder, scopes: [...(ctx.scopes ?? []), el] };
     const rules: Rule3[] = el.children
       .filter((c) => c.name === 'rule')
       .map((r) => {
         const p = this.num(r, r.attrs.p, 'p');
-        return { in: this.pattern(r, this.side(r, 'in'), ctx, 'in'), out: this.pattern(r, this.side(r, 'out'), inner, 'out'), ...(p !== undefined ? { p } : {}) };
+        // MarkovJunior reads both sides of a map's rule files from the new grid's folder.
+        return { in: this.pattern(r, this.side(r, 'in', inner.folder), ctx, 'in'), out: this.pattern(r, this.side(r, 'out', inner.folder), inner, 'out'), ...(p !== undefined ? { p } : {}) };
       });
-    const step: Node3 = { type: 'map', scale: scale.map(Number) as Vec3, rules, symmetry: sym, clear };
+    const step: Node3 = { type: 'map', scale: num, ...(fraction ? { divide: den } : {}), rules, symmetry: sym, clear };
     this.final = inner;
     const rest = this.children({ ...el, children: el.children.filter((c) => c.name !== 'rule') }, inner);
     return rest.length ? { type: 'sequence', children: [step, ...rest] } : step;
+  }
+
+  /** An integer attribute between `min` and `max`, or undefined if it is not there. */
+  int(el: XmlElement, name: string, min: number, max: number): number | undefined {
+    const n = this.num(el, el.attrs[name], name);
+    if (n === undefined) return undefined;
+    if (!Number.isInteger(n) || n < min || n > max) this.fail(el, `"${name}" è un intero da ${min} a ${max}`);
+    return n;
+  }
+
+  /** A pattern's text as cells: layers from the top (as written), rows from the back; every layer and row of one size. */
+  block(el: XmlElement, text: string, what: string): string[][][] {
+    const layers = patternText(text).split(/\s+/).filter(Boolean).map((l) => l.split('/').map((row) => [...row]));
+    if (!layers.length) this.fail(el, `${what} è vuoto`);
+    const dy = layers[0].length, dx = layers[0][0].length;
+    if (!dx || layers.some((l) => l.length !== dy || l.some((r) => r.length !== dx))) this.fail(el, `${what}: ogni strato con le stesse righe, ogni riga con le stesse celle`);
+    return layers;
+  }
+
+  /**
+   * MarkovJunior's <wfc> (T335, ADR-0174): `tileset` (a file of models/ with its tiles) or `sample` (a flat text of letters). The rules
+   * say which patterns a letter of the grid may become; the nodes inside run on the new grid, in the wfc's own `values`.
+   */
+  wfc(el: XmlElement, ctx: Ctx, sym: Sym): Node3 {
+    const { tileset, sample } = el.attrs;
+    if ((tileset === undefined) === (sample === undefined)) this.fail(el, 'vuole tileset="…" (a tessere: un file di models/) o sample="…" (a sovrapposizione: un campione di models/), uno dei due');
+    const values = this.values(el, el.attrs.values);
+    const inner: Ctx = { bg: values[0], sym, values: new Set(values), folder: el.attrs.folder, scopes: [...(ctx.scopes ?? []), el] };
+    const letterOf = (k: number) => (k === 0 ? '.' : values[k]);
+    const tries = this.int(el, 'tries', 1, WFC_LIMITS.tries);
+    const shannon = truthy(el.attrs.shannon);
+    const rules = el.children.filter((c) => c.name === 'rule');
+    const map: Record<string, number[]> = {};
+    const mapLetter = (r: XmlElement) => {
+      const input = this.one(r, r.attrs.in, ctx, 'in');
+      if (input in map) this.fail(r, `una sola regola per la lettera "${r.attrs.in}"`);
+      if (!r.attrs.out) this.fail(r, 'manca "out" (le tessere, o le lettere, separate da "|")');
+      return input;
+    };
+    let built: WfcModel;
+    let node: Node3;
+    try {
+      if (tileset !== undefined) {
+        const tiles = this.tileset(el, tileset, values);
+        built = tiles.model;
+        for (const r of rules) {
+          const input = mapLetter(r);
+          map[input] = [
+            ...new Set(
+              r.attrs.out.split('|').flatMap((name) => tiles.model.positions.get(name.trim()) ?? this.fail(r, `tessera sconosciuta "${name}" (il tileset ha ${[...tiles.model.positions.keys()].join(', ')})`)),
+            ),
+          ].sort((a, b) => a - b);
+        }
+        const overlap: Vec3 = [this.int(el, 'overlap', -64, tiles.S - 1) ?? 0, 0, this.int(el, 'overlapz', -64, tiles.SZ - 1) ?? 0];
+        overlap[1] = overlap[0];
+        node = {
+          type: 'wfc',
+          model: 'tile',
+          patterns: [],
+          dims: [tiles.S, tiles.S, tiles.SZ],
+          weights: built.weights,
+          propagator: built.propagator,
+          map,
+          ...(overlap.some((v) => v !== 0) ? { overlap } : {}),
+          ...(truthy(el.attrs.periodic) ? { periodic: true } : {}),
+        };
+      } else {
+        const N = this.int(el, 'n', 1, 8) ?? 3;
+        const text = this.fileText(el, sample, 'txt', 'sample');
+        const layers = this.block(el, text, `models/${sample}.txt`);
+        if (layers.length !== 1) this.fail(el, `models/${sample}.txt: il campione è piano, uno strato solo (come nell'originale)`);
+        const rows = layers[0];
+        const cells = Uint8Array.from(rows.flat(), (ch) => {
+          const k = values.indexOf(ch);
+          if (k < 0) this.fail(el, `models/${sample}.txt: la lettera "${ch}" non è tra i values del nodo ("${values}")`);
+          return k;
+        });
+        if (cells.length > WFC_LIMITS.sampleCells) this.fail(el, `il campione è troppo grande (al più ${WFC_LIMITS.sampleCells} celle)`);
+        built = overlapModel(cells, rows[0].length, rows.length, N, !/^false$/i.test(el.attrs.periodicInput ?? ''), squareSubgroup(sym));
+        for (const r of rules) {
+          const input = mapLetter(r);
+          const outs = new Set(r.attrs.out.split('|').map((s) => {
+            const k = values.indexOf(s.trim());
+            if (s.trim().length !== 1 || k < 0) this.fail(r, `"${s}" non è una lettera dei values del nodo ("${values}")`);
+            return k;
+          }));
+          map[input] = built.patterns.flatMap((p, t) => (outs.has(p[0]) ? [t] : []));
+        }
+        node = { type: 'wfc', model: 'overlap', patterns: [], dims: [N, N, 1], weights: built.weights, propagator: built.propagator, map };
+      }
+    } catch (e) {
+      if (e instanceof WfcError) this.fail(el, e.message);
+      throw e;
+    }
+    node.patterns = built.patterns.map((p) => Array.from(p, letterOf).join(''));
+    if (shannon) node.shannon = true;
+    if (tries !== undefined) node.tries = tries;
+    this.final = inner;
+    // Its nodes run on the new grid, so only if there is one: a wave without a solution leaves them out (MarkovJunior's WFCNode).
+    const rest = this.children({ ...el, children: el.children.filter((c) => c.name !== 'rule') }, inner);
+    return rest.length ? { type: 'sequence', children: [node, ...rest], gated: true } : node;
+  }
+
+  /**
+   * A tileset of models/ (T335): `<tileset values fullSymmetry>`, its tiles (the text of a `<tile>`, or `file`, or `<tiles>-<name>`),
+   * its neighbours. The tileset's `values` are its letters in order: the k-th becomes the k-th of the node's, as MarkovJunior lays the
+   * colours of its tiles on the node's values; without them its letters are the node's.
+   */
+  tileset(el: XmlElement, name: string, values: string): { model: ReturnType<typeof tileModel>; S: number; SZ: number } {
+    const text = this.fileText(el, name, 'xml', 'tileset');
+    let roots: XmlElement[];
+    try {
+      roots = parseXml(text);
+    } catch (e) {
+      if (e instanceof XmlError) this.fail(el, `models/${name}.xml: XML: ${e.message}`);
+      throw e;
+    }
+    const tilesFolder = el.attrs.tiles ?? name;
+    return this.inside(name, () => {
+      const root = roots.find((r) => r.name === 'tileset') ?? this.fail(el, `models/${name}.xml non è un tileset (la sua radice è <tileset>)`);
+      const own = root.attrs.values?.replace(/\s+/g, '');
+      if (own !== undefined && new Set(own).size !== own.length) this.fail(root, 'una lettera è ripetuta nei values del tileset');
+      const ordinal = (t: XmlElement, ch: string) => {
+        const k = own !== undefined ? own.indexOf(ch) : values.indexOf(ch);
+        if (k < 0) this.fail(t, `la lettera "${ch}" non è tra i values ${own !== undefined ? `del tileset ("${own}")` : `del nodo ("${values}")`}`);
+        if (k >= values.length) this.fail(t, `la lettera "${ch}" è la ${k + 1}ª del tileset, e il nodo ha solo ${values.length} values`);
+        return k;
+      };
+      const full = truthy(root.attrs.fullSymmetry);
+      const list = root.children.filter((c) => c.name === 'tiles').flatMap((c) => c.children.filter((t) => t.name === 'tile'));
+      if (!list.length) this.fail(root, 'nessuna <tile> dentro <tiles>');
+      let dims: Vec3 | undefined;
+      const tiles: TileSource[] = list.map((t) => {
+        const tname = t.attrs.name;
+        if (!tname || /\s|\|/.test(tname)) this.fail(t, 'ogni tessera ha un nome, senza spazi né "|"');
+        const weight = this.num(t, t.attrs.weight, 'weight') ?? 1;
+        if (!(weight > 0)) this.fail(t, 'weight è un numero positivo');
+        const own = t.text?.trim() ? t.text : t.attrs.file !== undefined ? this.fileText(t, t.attrs.file, 'txt', 'file') : this.fileText(t, `${tilesFolder}-${tname}`, 'txt', `la tessera ${tname}`);
+        const layers = this.block(t, own, `la tessera ${tname}`);
+        const d: Vec3 = [layers[0][0].length, layers[0].length, layers.length];
+        if (d[0] !== d[1]) this.fail(t, `la tessera ${tname} è ${d.join('×')}: le tessere sono quadrate (larghe quanto profonde)`);
+        if (dims && dims.join() !== d.join()) this.fail(t, `la tessera ${tname} è ${d.join('×')}, le altre ${dims.join('×')}`);
+        dims = d;
+        const [S, , SZ] = d;
+        const cells = new Uint8Array(S * S * SZ);
+        // The text goes from the top layer, the cells from the bottom one (as a rule's pattern).
+        for (let z = 0; z < SZ; z++) for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) cells[x + y * S + z * S * S] = ordinal(t, layers[SZ - 1 - z][y][x]);
+        return { name: tname, weight, cells };
+      });
+      const neighbors: NeighborSource[] = root.children
+        .filter((c) => c.name === 'neighbors')
+        .flatMap((c) => c.children.filter((n) => n.name === 'neighbor'))
+        .map((n) => ({ ...(n.attrs.left !== undefined ? { left: n.attrs.left } : {}), ...(n.attrs.right !== undefined ? { right: n.attrs.right } : {}), ...(n.attrs.top !== undefined ? { top: n.attrs.top } : {}), ...(n.attrs.bottom !== undefined ? { bottom: n.attrs.bottom } : {}) }));
+      try {
+        return { model: tileModel(tiles, dims![0], dims![2], full, neighbors), S: dims![0], SZ: dims![2] };
+      } catch (e) {
+        if (e instanceof WfcError) this.fail(root, e.message);
+        throw e;
+      }
+    });
+  }
+
+  /**
+   * MarkovJunior's <convchain> (T335): a flat sample of models/ in the node's two letters, `black` and `white`; the `on` cells of the
+   * grid become one or the other and then change as the sample's windows say.
+   */
+  convchain(el: XmlElement, ctx: Ctx, sym: Sym): Node3 {
+    const name = el.attrs.sample;
+    if (name === undefined) this.fail(el, 'manca "sample" (un campione piano di models/, nelle lettere black e white)');
+    const black = this.one(el, el.attrs.black, ctx, 'black');
+    const white = this.one(el, el.attrs.white, ctx, 'white');
+    if (black === white) this.fail(el, 'black e white sono due lettere diverse');
+    const layers = this.block(el, this.fileText(el, name, 'txt', 'sample'), `models/${name}.txt`);
+    if (layers.length !== 1) this.fail(el, `models/${name}.txt: il campione è piano, uno strato solo (come nell'originale)`);
+    const rows = layers[0];
+    const sample = rows.flat().map((ch) => (ch === el.attrs.white ? '1' : ch === el.attrs.black ? '0' : this.fail(el, `models/${name}.txt: la lettera "${ch}" non è né black ("${el.attrs.black}") né white ("${el.attrs.white}")`))).join('');
+    if (sample.length > WFC_LIMITS.sampleCells) this.fail(el, `il campione è troppo grande (al più ${WFC_LIMITS.sampleCells} celle)`);
+    const temperature = this.num(el, el.attrs.temperature, 'temperature');
+    if (temperature !== undefined && !(temperature > 0)) this.fail(el, 'temperature è un numero positivo');
+    return {
+      type: 'convchain',
+      sample,
+      sampleSize: [rows[0].length, rows.length],
+      n: this.int(el, 'n', 1, WFC_LIMITS.convchainN) ?? 3,
+      ...(temperature !== undefined ? { temperature } : {}),
+      on: this.one(el, el.attrs.on, ctx, 'on'),
+      black,
+      white,
+      steps: this.steps(el),
+      symmetry: sym,
+    };
   }
 
   shape(el: XmlElement, ctx: Ctx): Node3 {
@@ -691,7 +984,7 @@ function pad(a: string, b: string): [string, string] {
   return [fit(ga, false), fit(gb, true)];
 }
 
-const hasMap = (el: XmlElement): boolean => el.name === 'map' || el.children.some(hasMap);
+const hasMap = (el: XmlElement): boolean => GRID_TAGS.has(el.name) || el.children.some(hasMap);
 
 /**
  * What a program infers: `field` and `observe` in its rule nodes, its animations and its actions (T334). The engine runs them; the
@@ -712,6 +1005,21 @@ export function inferenceIn(m: Pick<MjxModel, 'program'> & Partial<Pick<MjxModel
 }
 
 /**
+ * What a program uses that the world does not take yet (T335): `field` and `observe` (T334), `wfc` and `convchain`, in its nodes, its
+ * animations and its actions. The engine runs them; the game's validator and the handmade cards take them when T336 opens them.
+ */
+export function newNodesIn(m: Pick<MjxModel, 'program'> & Partial<Pick<MjxModel, 'animations' | 'actions'>>): string[] {
+  const found = new Set<string>(inferenceIn(m));
+  const visit = (n: Node3) => {
+    if (n.type === 'sequence' || n.type === 'markov') n.children.forEach(visit);
+    else if (n.type === 'wfc' || n.type === 'convchain') found.add(n.type);
+  };
+  visit(m.program.program);
+  for (const clip of [...(m.animations ?? []), ...(m.actions ?? [])]) visit(clip.program.program);
+  return ['field', 'observe', 'wfc', 'convchain'].filter((n) => found.has(n));
+}
+
+/**
  * Compiles a program; `size` (the class's box) wins over the program's own, `base` says how many voxels of it are under the ground
  * (`soil` marks that layer); `files` are the files of models/ it may read (`mjxIncludes`), `self` its own name there. Throws Mj3Error with
  * the line.
@@ -729,9 +1037,10 @@ export function compileMjx(src: string, opts: { size?: Vec3; strict?: boolean; b
   if (mains.length > 1) throw new Mj3Error(`un solo nodo radice (trovati: ${mains.map((m) => `<${m.name}>`).join(', ')}); animazioni e azioni possono stare accanto`);
   const root = mains[0];
   const c = new Compiler(opts.strict === true, opts.files, opts.self);
-  for (const r of roots) c.collect(r);
+  for (const r of roots) c.collect(r, r);
+  c.resolveUnions();
   const values = c.values(root, root.attrs.values);
-  const ctx: Ctx = { bg: values[0], sym: 'all', values: new Set(values) };
+  const ctx: Ctx = { bg: values[0], sym: 'all', values: new Set(values), folder: root.attrs.folder, scopes: [root] };
   // The root's symmetry is inherited by everything below, animations and actions included.
   const rootSym = c.symmetry(root, ctx);
   ctx.sym = rootSym;
@@ -755,6 +1064,7 @@ export function compileMjx(src: string, opts: { size?: Vec3; strict?: boolean; b
   for (const ch of Object.keys(c.colors)) if (!c.declared.has(ch)) c.warnings.push(`<color symbol="${ch}">: la lettera non è in nessun values`);
   const unions: Record<string, string> = {};
   for (const [k, v] of Object.entries(c.unions)) unions[k] = [...v].map((ch) => (ch === values[0] ? '.' : ch)).join('');
+  Object.assign(unions, c.privateUnions);
   for (const clip of [...c.animations, ...c.actions]) clip.program = { ...clip.program, palette, unions };
 
   const origin = root.attrs.origin;

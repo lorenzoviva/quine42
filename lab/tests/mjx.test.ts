@@ -39,13 +39,13 @@ describe('MarkovJunior XML (lab/mjx)', () => {
     expect(m.warnings.join(' ')).toMatch(/"X".*aggiunta/);
     expect(m.warnings.join(' ')).toMatch(/busto/);
     expect(() => compileMjx('<sequence values="BW" size="4 4 4">\n  <one in="B" out="W">\n</sequence>')).toThrow(/riga 3/);
-    expect(() => compileMjx('<sequence values="BW" size="4 4 4"><wfc/></sequence>')).toThrow(/WFC/);
+    expect(() => compileMjx('<sequence values="BW" size="4 4 4"><wfc/></sequence>')).toThrow(/tileset|sample/);
     expect(() => compileMjx('<one values="BW" size="4 4 4" in="B" out="W" symmetry="(ab)"/>')).toThrow(/simmetria/);
   });
 
   it('runs the 3D models of MarkovJunior unchanged', () => {
     for (const o of OFFICIAL) {
-      const m = compileMjx(o.xml, { size: o.size });
+      const m = compileMjx(o.xml, { size: o.size, ...(o.files ? { files: o.files } : {}) });
       const r = runMjx(m, 7, { maxSteps: o.steps ?? 5_000_000, deadline: 30_000 });
       const n = count(r.grid);
       if (o.name === 'Growth') expect(n.W).toBe(3001);
