@@ -1,4 +1,4 @@
-// T288 (ADR-0166): what the wanderer wields is seen on its body. The hand comes from the arms of the rig, the grip from the thing's
+// T288 (ADR-0167): what the wanderer wields is seen on its body. The hand comes from the arms of the rig, the grip from the thing's
 // voxels, the mount from its place, the pose from all three: pure functions, tried on the seed's own figures and things and on things
 // built by hand (a sword, an axe, a torch, a bow, a staff, a shield). Then the renderer in Node, with the meshes the worker makes:
 // the mesh in hand is the one of the ground, shared, and nothing is made again when what is held changes, with many holders in the
@@ -624,7 +624,7 @@ describe('the renderer', () => {
       empty = Math.min(empty, frame(100));
     }
     expect(runner.runs).toBe(runs);
-    // What it costs, said (ADR-0166): a frame with 60 holders against the same frame with empty hands, and all 60 changing at once.
+    // What it costs, said (ADR-0167): a frame with 60 holders against the same frame with empty hands, and all 60 changing at once.
     const warm = swaps.slice(1);
     const mean = warm.reduce((x, y) => x + y, 0) / warm.length;
     console.log(`[T288] 60 viandanti: un fotogramma ${holding.toFixed(3)} ms con le mani piene, ${empty.toFixed(3)} ms vuote; cambiano tutti insieme in ${mean.toFixed(2)} ms (il primo ${swaps[0].toFixed(2)} ms)`);

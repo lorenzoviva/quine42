@@ -97,7 +97,7 @@ export interface OtherView {
   text?: string;
   /** What they say of themselves (their profile, T44a). */
   introduction?: string;
-  /** The item they wield (T288, ADR-0166): its id, which the client's files make a look of. Nothing else of what they carry. */
+  /** The item they wield (T288, ADR-0167): its id, which the client's files make a look of. Nothing else of what they carry. */
   held?: string;
 }
 

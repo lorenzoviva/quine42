@@ -1,4 +1,4 @@
-# ADR-0166 — Ciò che si impugna si vede addosso: la mesh di terra, la mano dal rig, la presa dalla forma, un punto di aggancio per posto
+# ADR-0167 — Ciò che si impugna si vede addosso: la mesh di terra, la mano dal rig, la presa dalla forma, un punto di aggancio per posto
 
 Data: 2026-11-07 · Stato: accettato (task T288 del backlog) · Riferimenti: testo dell'autore in `docs/userchats/to-do-2026-11-05.md` («Interazioni grafiche di oggetti»), ADR-0041 (ogni aspetto è un programma), ADR-0108 (la cache delle forme), ADR-0109 (ciò che esce, a elenco), ADR-0150 (posare sui mobili), ADR-0136 (la versione del kernel), regola 11; T289 e T290 per vestiti e armature
 

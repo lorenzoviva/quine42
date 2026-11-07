@@ -1,4 +1,4 @@
-// How a body holds a thing (T288, ADR-0166). What a figure wields is drawn with the mesh the thing has on the ground, hung on an
+// How a body holds a thing (T288, ADR-0167). What a figure wields is drawn with the mesh the thing has on the ground, hung on an
 // arm of the figure's rig. Every number comes from voxels, so a model written tomorrow is held by the same rules, and no table
 // says how to hold this or that thing:
 //

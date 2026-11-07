@@ -1,4 +1,4 @@
-// What a figure wields, on it (T288, ADR-0166): the thing's mesh from the ground, the very geometry every instance shares (on the
+// What a figure wields, on it (T288, ADR-0167): the thing's mesh from the ground, the very geometry every instance shares (on the
 // ground, on a shelf, in every hand), hung on the pivot of the arm its mount takes and posed by `holdPose` (src/mj/hold.ts), so it
 // swings with the arm and turns with the body. A change of what is held makes two objects and nothing else: the grip of a form is
 // read once from its grid, the hands of a figure once from its model's (models.ts), and no program runs again for it.

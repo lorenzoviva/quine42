@@ -1,4 +1,4 @@
-# Catture della verifica nel browser di T288 (ADR-0166)
+# Catture della verifica nel browser di T288 (ADR-0167)
 
 Ciò che si impugna si vede addosso. Build di produzione, `?skip&offline` (e `?classica` per le 12-13), Chrome con la scheda di Claude in Chrome, camera a 3,4 caselle.
 
