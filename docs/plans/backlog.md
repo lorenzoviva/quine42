@@ -4447,7 +4447,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Quando è fatto: impugno, si vede, lo vede anche l'altro viandante; commit su `task/T288`, riga in `#mondo3d`. Sicurezza: scrivi l'esito, tocca ciò che esce dal server.
 - Esito: l'oggetto impugnato si vede in mano con la sua mesh di terra condivisa, mano ricavata dalle braccia e presa dalla forma, senza tabelle per oggetto; un punto di aggancio per posto (mano destra, avambraccio per lo scudo); in multigiocatore `OtherView.held` porta solo l'id dell'oggetto e il cambio arriva all'altro senza ricaricare; costo misurato con 60 viandanti (Node: nessuna differenza entro il rumore; browser: 4,72 contro 4,24 ms, +3 chiamate di disegno per mano, nessuna griglia o geometria rifatta); corretto il colore `hsl()` che svuotava i modelli tinti (kernel 0.5.3); ADR-0166, `#mondo3d`, AGENTS.md, glossario, 22 test nuovi; mancano gli individui con qualcosa in mano (nessuna funzione glielo dà; in multigiocatore manca anche il campo); non provati i modelli dello Scultore reali (usati programmi scritti a mano) né gli fps in headless; sicurezza: nessuna superficie nuova.
 
-### T289 · Vestiti e armature addosso: il banco che decide come — `da fare` (dipende da T288)
+### T289 · Vestiti e armature addosso: il banco che decide come — `fatto` (`90765ba8`) (dipende da T288)
 - Pipeline: claude · sforzo max · stima 3% · approvato · browser · priorità 6
 - Sforzo: max, scelto dall'autore.
 - Step: 40
@@ -4460,6 +4460,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Test: quelli del banco; typecheck col suo turno. Il gioco non cambia.
 - Browser: sì, per le foto nel `lab/`.
 - Quando è fatto: l'autore può decidere guardando le foto; commit su `task/T289`. Sicurezza: nessuna superficie nuova.
+- Esito: banco degli indossati in `lab/banco/indossati.md` e `lab/banco/indossati/` (zone del corpo dai voxel e dal rig; tre vie A due programmi / B sezione `<worn>` / C colori del kernel; elmo, corazza e mantello scritti a mano come lo Scultore; foto a cartone da quattro lati su viandante e lupo, lo stesso abito su 27 corpi del seme e del Cantiere 8; tempi, memoria, chiamate di disegno, costo con lo Scultore in `riepilogo.md` e `misure.json`), pagina 3D `/lab/indossati/` con 12 catture, `lab/scripts/indossati.ts`, 10 test in `lab/tests/indossati.test.ts`, voce della pagina in `vite.config.ts`; raccomandazione C + B, domanda aperta per l'autore in `docs/pipeline/domande/T289.md` (serve a T290); il gioco non cambia; non provato: nessun modello vero ha scritto una sezione `<worn>`, tempi misurati in Node e non nel browser, zone euristiche (sbagliano sul cane randagio e sul ragno meccanico); sicurezza: nessuna superficie nuova.
 
 ### T290 · Vestiti e armature addosso nel gioco — `in attesa` (dipende da T289)
 - Step: 40

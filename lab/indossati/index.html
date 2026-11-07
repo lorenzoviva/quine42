@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QUINE42 · banco degli indossati</title>
+    <style>
+      html, body { margin: 0; height: 100%; overflow: hidden; background: #9cc8e8; font: 14px/1.4 system-ui, sans-serif; color: #10202a; }
+      canvas { display: block; width: 100%; height: 100%; }
+      #hud { position: absolute; top: 8px; left: 8px; right: 8px; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; background: rgba(255, 255, 255, 0.82); padding: 6px 10px; border-radius: 6px; }
+      #hud b { margin-right: 6px; }
+      #hud label { display: inline-flex; gap: 4px; align-items: center; }
+      #hud button.active { background: #2b6cb0; color: white; }
+      #ways { position: absolute; bottom: 10px; left: 0; right: 0; display: flex; justify-content: space-around; pointer-events: none; }
+      #ways div { background: rgba(255, 255, 255, 0.85); padding: 4px 10px; border-radius: 5px; font-weight: 600; }
+      #stats { font-size: 12px; opacity: 0.8; }
+    </style>
+  </head>
+  <body>
+    <canvas id="view"></canvas>
+    <div id="hud">
+      <b>Banco degli indossati (T289)</b>
+      <label>corpo <select id="body"></select></label>
+      <label>seme <input id="seed" type="number" min="1" max="8" value="2" style="width: 3em" /></label>
+      <label><input type="checkbox" id="helmet" checked /> elmo</label>
+      <label><input type="checkbox" id="cuirass" checked /> corazza</label>
+      <label><input type="checkbox" id="cloak" checked /> mantello</label>
+      <button id="walk">Cammina</button>
+      <button id="turn">Gira le figure (, .)</button>
+      <button id="look">Cartone</button>
+      <span id="stats"></span>
+    </div>
+    <div id="ways"><div>A · due programmi</div><div>B · un programma con &lt;worn&gt;</div><div>C · colori del kernel</div></div>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

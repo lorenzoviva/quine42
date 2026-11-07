@@ -72,7 +72,8 @@ export default defineConfig(({ mode }) => {
     server: { cors: false, port: 5173, watch: { ignored: ['**/universes/**'] }, fs: { allow: [searchForWorkspaceRoot(process.cwd()), realModules()], deny: FS_DENY } },
     // wasmoon is UMD: pre-bundled, the browser can import it in dev (its glue.wasm comes by URL, `wasmUri`).
     optimizeDeps: { include: ['wasmoon'] },
-    // The MarkovJunior lab has its dedicated pages: the sandbox (/lab/3d/), the model editor (/lab/editor/) and the SoundLab (/lab/suono/).
+    // The MarkovJunior lab has its dedicated pages: the sandbox (/lab/3d/), the model editor (/lab/editor/), the SoundLab (/lab/suono/)
+    // and the bench of worn things (/lab/indossati/, T289).
     build: {
       rollupOptions: {
         input: {
@@ -80,6 +81,7 @@ export default defineConfig(({ mode }) => {
           lab3d: path.resolve('lab/3d/index.html'),
           labEditor: path.resolve('lab/editor/index.html'),
           labSuono: path.resolve('lab/suono/index.html'),
+          labIndossati: path.resolve('lab/indossati/index.html'),
           site: path.resolve('site/index.html'),
           sessioni: path.resolve('site/sessioni.html'),
           carte: path.resolve('site/carte.html'),

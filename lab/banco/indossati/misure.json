@@ -1,0 +1,4321 @@
+{
+ "items": {
+  "cloak": {
+   "name": "Mantello",
+   "groundChars": 838,
+   "wornSectionChars": 821,
+   "wornProgramChars": 1299,
+   "wornProgramMs": 2.6635999999998603,
+   "wornMeshBytes": 153768,
+   "wornMeshMs": 4.333799999998519,
+   "colors": [
+    "#7a2e3a",
+    "#c9a23a"
+   ]
+  },
+  "cuirass": {
+   "name": "Corazza",
+   "groundChars": 1107,
+   "wornSectionChars": 926,
+   "wornProgramChars": 1060,
+   "wornProgramMs": 1.5802999999996246,
+   "wornMeshBytes": 167872,
+   "wornMeshMs": 4.151300000001356,
+   "colors": [
+    "#8f9aa6",
+    "#7a4a2a"
+   ]
+  },
+  "helmet": {
+   "name": "Elmo",
+   "groundChars": 1133,
+   "wornSectionChars": 1010,
+   "wornProgramChars": 1284,
+   "wornProgramMs": 1.915899999999965,
+   "wornMeshBytes": 164432,
+   "wornMeshMs": 4.135000000000218,
+   "colors": [
+    "#a3acb6",
+    "#c9a23a"
+   ]
+  }
+ },
+ "sculptor": {
+  "simple": "gemini-3.1-flash-lite",
+  "artist": "gemini-3.5-flash",
+  "oneModel": 0.019325000000000002,
+  "perWearable": {
+   "A": 0.019475000000000003,
+   "B": 0.000939,
+   "C": 0
+  },
+  "wornTokens": 263
+ },
+ "measures": [
+  {
+   "body": "viandante",
+   "seed": 2,
+   "way": "A",
+   "outfit": [
+    "helmet"
+   ],
+   "bodyMs": 4.813799999999901,
+   "wearMs": 0.984599999999773,
+   "meshMs": 0,
+   "meshBytes": 0,
+   "bareBytes": 295496,
+   "meshes": 5,
+   "added": 285,
+   "recoloured": 0,
+   "overlapped": 90,
+   "gap": {
+    "mean": 0.9226666666666666,
+    "max": 2,
+    "far": 0
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "helmet",
+     "way": "A",
+     "added": 285,
+     "recoloured": 0,
+     "overlapped": 90,
+     "ms": 1
+    }
+   ]
+  },
+  {
+   "body": "viandante",
+   "seed": 2,
+   "way": "B",
+   "outfit": [
+    "helmet"
+   ],
+   "bodyMs": 3.45679999999993,
+   "wearMs": 9.514299999999821,
+   "meshMs": 9.547300000000178,
+   "meshBytes": 327488,
+   "bareBytes": 295496,
+   "meshes": 4,
+   "added": 289,
+   "recoloured": 0,
+   "overlapped": 0,
+   "gap": {
+    "mean": 1.1038062283737025,
+    "max": 3,
+    "far": 0.03460207612456748
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "helmet",
+     "way": "B",
+     "added": 289,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 7,
+     "steps": 7,
+     "finished": true
+    }
+   ]
+  },
+  {
+   "body": "viandante",
+   "seed": 2,
+   "way": "C",
+   "outfit": [
+    "helmet"
+   ],
+   "bodyMs": 3.316899999999805,
+   "wearMs": 1.3462999999992462,
+   "meshMs": 15.430000000000291,
+   "meshBytes": 295496,
+   "bareBytes": 295496,
+   "meshes": 4,
+   "added": 0,
+   "recoloured": 149,
+   "overlapped": 0,
+   "gap": {
+    "mean": 0,
+    "max": 0,
+    "far": 0
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "helmet",
+     "way": "C",
+     "added": 0,
+     "recoloured": 149,
+     "overlapped": 0,
+     "ms": 0.5
+    }
+   ]
+  },
+  {
+   "body": "viandante",
+   "seed": 2,
+   "way": "A",
+   "outfit": [
+    "cuirass"
+   ],
+   "bodyMs": 3.318000000000211,
+   "wearMs": 0.61200000000008,
+   "meshMs": 0,
+   "meshBytes": 0,
+   "bareBytes": 295496,
+   "meshes": 5,
+   "added": 265,
+   "recoloured": 0,
+   "overlapped": 77,
+   "gap": {
+    "mean": 1.2982456140350878,
+    "max": 4,
+    "far": 0.14327485380116958
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cuirass",
+     "way": "A",
+     "added": 265,
+     "recoloured": 0,
+     "overlapped": 77,
+     "ms": 0.7
+    }
+   ]
+  },
+  {
+   "body": "viandante",
+   "seed": 2,
+   "way": "B",
+   "outfit": [
+    "cuirass"
+   ],
+   "bodyMs": 3.0131000000001222,
+   "wearMs": 5.697000000000116,
+   "meshMs": 5.701000000000022,
+   "meshBytes": 313040,
+   "bareBytes": 295496,
+   "meshes": 4,
+   "added": 314,
+   "recoloured": 0,
+   "overlapped": 0,
+   "gap": {
+    "mean": 1,
+    "max": 1,
+    "far": 0
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cuirass",
+     "way": "B",
+     "added": 314,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 3.5,
+     "steps": 7,
+     "finished": true
+    }
+   ]
+  },
+  {
+   "body": "viandante",
+   "seed": 2,
+   "way": "C",
+   "outfit": [
+    "cuirass"
+   ],
+   "bodyMs": 2.90309999999954,
+   "wearMs": 0.6513000000004467,
+   "meshMs": 4.5583000000005995,
+   "meshBytes": 295496,
+   "bareBytes": 295496,
+   "meshes": 4,
+   "added": 0,
+   "recoloured": 292,
+   "overlapped": 0,
+   "gap": {
+    "mean": 0,
+    "max": 0,
+    "far": 0
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cuirass",
+     "way": "C",
+     "added": 0,
+     "recoloured": 292,
+     "overlapped": 0,
+     "ms": 0.7
+    }
+   ]
+  },
+  {
+   "body": "viandante",
+   "seed": 2,
+   "way": "A",
+   "outfit": [
+    "cloak"
+   ],
+   "bodyMs": 2.944999999999709,
+   "wearMs": 0.5149999999994179,
+   "meshMs": 0,
+   "meshBytes": 0,
+   "bareBytes": 295496,
+   "meshes": 5,
+   "added": 144,
+   "recoloured": 0,
+   "overlapped": 165,
+   "gap": {
+    "mean": 0.9611650485436893,
+    "max": 5,
+    "far": 0.1553398058252427
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "A",
+     "added": 144,
+     "recoloured": 0,
+     "overlapped": 165,
+     "ms": 0.5
+    }
+   ]
+  },
+  {
+   "body": "viandante",
+   "seed": 2,
+   "way": "B",
+   "outfit": [
+    "cloak"
+   ],
+   "bodyMs": 3.7645000000002256,
+   "wearMs": 2.990600000000086,
+   "meshMs": 6.191100000000006,
+   "meshBytes": 318888,
+   "bareBytes": 295496,
+   "meshes": 4,
+   "added": 173,
+   "recoloured": 0,
+   "overlapped": 0,
+   "gap": {
+    "mean": 1.884393063583815,
+    "max": 6,
+    "far": 0.23121387283236994
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "B",
+     "added": 173,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 3.1,
+     "steps": 12,
+     "finished": true
+    }
+   ]
+  },
+  {
+   "body": "viandante",
+   "seed": 2,
+   "way": "C",
+   "outfit": [
+    "cloak"
+   ],
+   "bodyMs": 3.734400000000278,
+   "wearMs": 1.215400000000045,
+   "meshMs": 5.3708000000005995,
+   "meshBytes": 320264,
+   "bareBytes": 295496,
+   "meshes": 4,
+   "added": 74,
+   "recoloured": 96,
+   "overlapped": 0,
+   "gap": {
+    "mean": 1.3352941176470587,
+    "max": 6,
+    "far": 0.23529411764705882
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "C",
+     "added": 74,
+     "recoloured": 96,
+     "overlapped": 0,
+     "ms": 1.1
+    }
+   ]
+  },
+  {
+   "body": "viandante",
+   "seed": 2,
+   "way": "A",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 3.3269000000000233,
+   "wearMs": 2.5429999999996653,
+   "meshMs": 0,
+   "meshBytes": 0,
+   "bareBytes": 295496,
+   "meshes": 7,
+   "added": 670,
+   "recoloured": 0,
+   "overlapped": 291,
+   "gap": {
+    "mean": 1.105098855359001,
+    "max": 5,
+    "far": 0.10093652445369407
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "A",
+     "added": 144,
+     "recoloured": 0,
+     "overlapped": 165,
+     "ms": 0.6
+    },
+    {
+     "item": "cuirass",
+     "way": "A",
+     "added": 245,
+     "recoloured": 0,
+     "overlapped": 43,
+     "ms": 0.6
+    },
+    {
+     "item": "helmet",
+     "way": "A",
+     "added": 281,
+     "recoloured": 0,
+     "overlapped": 83,
+     "ms": 0.6
+    }
+   ]
+  },
+  {
+   "body": "viandante",
+   "seed": 2,
+   "way": "B",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 3.1291000000001077,
+   "wearMs": 8.206700000000637,
+   "meshMs": 6.348800000000665,
+   "meshBytes": 360168,
+   "bareBytes": 295496,
+   "meshes": 4,
+   "added": 677,
+   "recoloured": 0,
+   "overlapped": 0,
+   "gap": {
+    "mean": 1.2703101920236337,
+    "max": 6,
+    "far": 0.07385524372230429
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "B",
+     "added": 173,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 5.2,
+     "steps": 12,
+     "finished": true
+    },
+    {
+     "item": "cuirass",
+     "way": "B",
+     "added": 215,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 4.7,
+     "steps": 6,
+     "finished": true
+    },
+    {
+     "item": "helmet",
+     "way": "B",
+     "added": 289,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 5,
+     "steps": 7,
+     "finished": true
+    }
+   ]
+  },
+  {
+   "body": "viandante",
+   "seed": 2,
+   "way": "C",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 3.152799999999843,
+   "wearMs": 2.976400000000467,
+   "meshMs": 5.604199999999764,
+   "meshBytes": 320264,
+   "bareBytes": 295496,
+   "meshes": 4,
+   "added": 74,
+   "recoloured": 441,
+   "overlapped": 0,
+   "gap": {
+    "mean": 0.4407766990291262,
+    "max": 6,
+    "far": 0.07766990291262135
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "C",
+     "added": 74,
+     "recoloured": 96,
+     "overlapped": 0,
+     "ms": 1
+    },
+    {
+     "item": "cuirass",
+     "way": "C",
+     "added": 0,
+     "recoloured": 196,
+     "overlapped": 0,
+     "ms": 0.5
+    },
+    {
+     "item": "helmet",
+     "way": "C",
+     "added": 0,
+     "recoloured": 149,
+     "overlapped": 0,
+     "ms": 0.4
+    }
+   ]
+  },
+  {
+   "body": "lupo",
+   "seed": 1,
+   "way": "A",
+   "outfit": [
+    "helmet"
+   ],
+   "bodyMs": 9.714699999999539,
+   "wearMs": 1.9877000000005864,
+   "meshMs": 0,
+   "meshBytes": 0,
+   "bareBytes": 796360,
+   "meshes": 7,
+   "added": 976,
+   "recoloured": 0,
+   "overlapped": 340,
+   "gap": {
+    "mean": 3.0319148936170213,
+    "max": 10,
+    "far": 0.5569908814589666
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "helmet",
+     "way": "A",
+     "added": 976,
+     "recoloured": 0,
+     "overlapped": 340,
+     "ms": 1
+    }
+   ]
+  },
+  {
+   "body": "lupo",
+   "seed": 1,
+   "way": "B",
+   "outfit": [
+    "helmet"
+   ],
+   "bodyMs": 7.035600000000159,
+   "wearMs": 4.723500000000058,
+   "meshMs": 13.908899999999448,
+   "meshBytes": 834200,
+   "bareBytes": 796360,
+   "meshes": 6,
+   "added": 445,
+   "recoloured": 0,
+   "overlapped": 0,
+   "gap": {
+    "mean": 1.0876404494382022,
+    "max": 3,
+    "far": 0.02696629213483146
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "helmet",
+     "way": "B",
+     "added": 445,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 3.5,
+     "steps": 8,
+     "finished": true
+    }
+   ]
+  },
+  {
+   "body": "lupo",
+   "seed": 1,
+   "way": "C",
+   "outfit": [
+    "helmet"
+   ],
+   "bodyMs": 6.647799999999734,
+   "wearMs": 0.3596000000006825,
+   "meshMs": 13.621300000000701,
+   "meshBytes": 796360,
+   "bareBytes": 796360,
+   "meshes": 6,
+   "added": 0,
+   "recoloured": 307,
+   "overlapped": 0,
+   "gap": {
+    "mean": 0,
+    "max": 0,
+    "far": 0
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "helmet",
+     "way": "C",
+     "added": 0,
+     "recoloured": 307,
+     "overlapped": 0,
+     "ms": 0.4
+    }
+   ]
+  },
+  {
+   "body": "lupo",
+   "seed": 1,
+   "way": "A",
+   "outfit": [
+    "cuirass"
+   ],
+   "bodyMs": 10.511000000000422,
+   "wearMs": 2.0711999999994077,
+   "meshMs": 0,
+   "meshBytes": 0,
+   "bareBytes": 796360,
+   "meshes": 7,
+   "added": 1131,
+   "recoloured": 0,
+   "overlapped": 165,
+   "gap": {
+    "mean": 2.064043209876543,
+    "max": 8,
+    "far": 0.3055555555555556
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cuirass",
+     "way": "A",
+     "added": 1131,
+     "recoloured": 0,
+     "overlapped": 165,
+     "ms": 1.5
+    }
+   ]
+  },
+  {
+   "body": "lupo",
+   "seed": 1,
+   "way": "B",
+   "outfit": [
+    "cuirass"
+   ],
+   "bodyMs": 7.635599999999613,
+   "wearMs": 4.9452000000001135,
+   "meshMs": 14.599200000000565,
+   "meshBytes": 840048,
+   "bareBytes": 796360,
+   "meshes": 6,
+   "added": 629,
+   "recoloured": 0,
+   "overlapped": 0,
+   "gap": {
+    "mean": 1,
+    "max": 1,
+    "far": 0
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cuirass",
+     "way": "B",
+     "added": 629,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 4.3,
+     "steps": 16,
+     "finished": true
+    }
+   ]
+  },
+  {
+   "body": "lupo",
+   "seed": 1,
+   "way": "C",
+   "outfit": [
+    "cuirass"
+   ],
+   "bodyMs": 8.227700000000368,
+   "wearMs": 3.350100000000566,
+   "meshMs": 16.749700000000303,
+   "meshBytes": 796360,
+   "bareBytes": 796360,
+   "meshes": 6,
+   "added": 0,
+   "recoloured": 577,
+   "overlapped": 0,
+   "gap": {
+    "mean": 0,
+    "max": 0,
+    "far": 0
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cuirass",
+     "way": "C",
+     "added": 0,
+     "recoloured": 577,
+     "overlapped": 0,
+     "ms": 3.4
+    }
+   ]
+  },
+  {
+   "body": "lupo",
+   "seed": 1,
+   "way": "A",
+   "outfit": [
+    "cloak"
+   ],
+   "bodyMs": 6.880699999999706,
+   "wearMs": 1.0018999999992957,
+   "meshMs": 0,
+   "meshBytes": 0,
+   "bareBytes": 796360,
+   "meshes": 7,
+   "added": 483,
+   "recoloured": 0,
+   "overlapped": 188,
+   "gap": {
+    "mean": 1.812220566318927,
+    "max": 8,
+    "far": 0.28017883755588674
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "A",
+     "added": 483,
+     "recoloured": 0,
+     "overlapped": 188,
+     "ms": 0.9
+    }
+   ]
+  },
+  {
+   "body": "lupo",
+   "seed": 1,
+   "way": "B",
+   "outfit": [
+    "cloak"
+   ],
+   "bodyMs": 6.847999999999956,
+   "wearMs": 3.5623999999997977,
+   "meshMs": 15.813700000000608,
+   "meshBytes": 891304,
+   "bareBytes": 796360,
+   "meshes": 6,
+   "added": 908,
+   "recoloured": 0,
+   "overlapped": 0,
+   "gap": {
+    "mean": 2.432819383259912,
+    "max": 8,
+    "far": 0.3843612334801762
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "B",
+     "added": 908,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 3.5,
+     "steps": 24,
+     "finished": true
+    }
+   ]
+  },
+  {
+   "body": "lupo",
+   "seed": 1,
+   "way": "C",
+   "outfit": [
+    "cloak"
+   ],
+   "bodyMs": 6.990600000000086,
+   "wearMs": 1.143500000000131,
+   "meshMs": 14.568899999999303,
+   "meshBytes": 796360,
+   "bareBytes": 796360,
+   "meshes": 6,
+   "added": 0,
+   "recoloured": 264,
+   "overlapped": 0,
+   "gap": {
+    "mean": 0,
+    "max": 0,
+    "far": 0
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "C",
+     "added": 0,
+     "recoloured": 264,
+     "overlapped": 0,
+     "ms": 1.1
+    }
+   ]
+  },
+  {
+   "body": "lupo",
+   "seed": 1,
+   "way": "A",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 7.164499999999862,
+   "wearMs": 3.7731999999996333,
+   "meshMs": 0,
+   "meshBytes": 0,
+   "bareBytes": 796360,
+   "meshes": 9,
+   "added": 2302,
+   "recoloured": 0,
+   "overlapped": 624,
+   "gap": {
+    "mean": 2.4384825700615176,
+    "max": 10,
+    "far": 0.4084073820915926
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "A",
+     "added": 483,
+     "recoloured": 0,
+     "overlapped": 188,
+     "ms": 0.9
+    },
+    {
+     "item": "cuirass",
+     "way": "A",
+     "added": 845,
+     "recoloured": 0,
+     "overlapped": 147,
+     "ms": 1.4
+    },
+    {
+     "item": "helmet",
+     "way": "A",
+     "added": 974,
+     "recoloured": 0,
+     "overlapped": 289,
+     "ms": 1.4
+    }
+   ]
+  },
+  {
+   "body": "lupo",
+   "seed": 1,
+   "way": "B",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 7.029999999999745,
+   "wearMs": 10.924700000000485,
+   "meshMs": 16.59060000000045,
+   "meshBytes": 946344,
+   "bareBytes": 796360,
+   "meshes": 6,
+   "added": 1680,
+   "recoloured": 0,
+   "overlapped": 0,
+   "gap": {
+    "mean": 1.7958333333333334,
+    "max": 8,
+    "far": 0.21428571428571427
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "B",
+     "added": 908,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 3,
+     "steps": 24,
+     "finished": true
+    },
+    {
+     "item": "cuirass",
+     "way": "B",
+     "added": 342,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 4.7,
+     "steps": 11,
+     "finished": true
+    },
+    {
+     "item": "helmet",
+     "way": "B",
+     "added": 430,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 3.2,
+     "steps": 8,
+     "finished": true
+    }
+   ]
+  },
+  {
+   "body": "lupo",
+   "seed": 1,
+   "way": "C",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 7.423700000000281,
+   "wearMs": 1.9248999999999796,
+   "meshMs": 14.078800000000228,
+   "meshBytes": 796360,
+   "bareBytes": 796360,
+   "meshes": 6,
+   "added": 0,
+   "recoloured": 884,
+   "overlapped": 0,
+   "gap": {
+    "mean": 0,
+    "max": 0,
+    "far": 0
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "C",
+     "added": 0,
+     "recoloured": 264,
+     "overlapped": 0,
+     "ms": 0.6
+    },
+    {
+     "item": "cuirass",
+     "way": "C",
+     "added": 0,
+     "recoloured": 313,
+     "overlapped": 0,
+     "ms": 0.9
+    },
+    {
+     "item": "helmet",
+     "way": "C",
+     "added": 0,
+     "recoloured": 307,
+     "overlapped": 0,
+     "ms": 0.4
+    }
+   ]
+  },
+  {
+   "body": "viandante#1",
+   "seed": 1,
+   "way": "A",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 4.373199999999997,
+   "wearMs": 1.86659999999938,
+   "meshMs": 0,
+   "meshBytes": 0,
+   "bareBytes": 332648,
+   "meshes": 7,
+   "added": 1083,
+   "recoloured": 0,
+   "overlapped": 272,
+   "gap": {
+    "mean": 1.670110701107011,
+    "max": 6,
+    "far": 0.25166051660516603
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "A",
+     "added": 144,
+     "recoloured": 0,
+     "overlapped": 165,
+     "ms": 0.5
+    },
+    {
+     "item": "cuirass",
+     "way": "A",
+     "added": 245,
+     "recoloured": 0,
+     "overlapped": 43,
+     "ms": 0.5
+    },
+    {
+     "item": "helmet",
+     "way": "A",
+     "added": 694,
+     "recoloured": 0,
+     "overlapped": 64,
+     "ms": 0.9
+    }
+   ]
+  },
+  {
+   "body": "viandante#1",
+   "seed": 1,
+   "way": "B",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 3.519400000001042,
+   "wearMs": 4.661700000000565,
+   "meshMs": 6.786999999998443,
+   "meshBytes": 408672,
+   "bareBytes": 332648,
+   "meshes": 4,
+   "added": 812,
+   "recoloured": 0,
+   "overlapped": 0,
+   "gap": {
+    "mean": 1.2401477832512315,
+    "max": 6,
+    "far": 0.0665024630541872
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "B",
+     "added": 172,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 1,
+     "steps": 13,
+     "finished": true
+    },
+    {
+     "item": "cuirass",
+     "way": "B",
+     "added": 215,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 1.5,
+     "steps": 6,
+     "finished": true
+    },
+    {
+     "item": "helmet",
+     "way": "B",
+     "added": 425,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 1.7,
+     "steps": 7,
+     "finished": true
+    }
+   ]
+  },
+  {
+   "body": "viandante#1",
+   "seed": 1,
+   "way": "C",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 2.66150000000016,
+   "wearMs": 0.7229999999999563,
+   "meshMs": 5.263500000000931,
+   "meshBytes": 357416,
+   "bareBytes": 332648,
+   "meshes": 4,
+   "added": 74,
+   "recoloured": 554,
+   "overlapped": 0,
+   "gap": {
+    "mean": 0.3614649681528662,
+    "max": 6,
+    "far": 0.06369426751592357
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "C",
+     "added": 74,
+     "recoloured": 95,
+     "overlapped": 0,
+     "ms": 0.3
+    },
+    {
+     "item": "cuirass",
+     "way": "C",
+     "added": 0,
+     "recoloured": 194,
+     "overlapped": 0,
+     "ms": 0.2
+    },
+    {
+     "item": "helmet",
+     "way": "C",
+     "added": 0,
+     "recoloured": 265,
+     "overlapped": 0,
+     "ms": 0.2
+    }
+   ]
+  },
+  {
+   "body": "viandante#2",
+   "seed": 2,
+   "way": "A",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 2.603399999999965,
+   "wearMs": 0.8930000000018481,
+   "meshMs": 0,
+   "meshBytes": 0,
+   "bareBytes": 295496,
+   "meshes": 7,
+   "added": 670,
+   "recoloured": 0,
+   "overlapped": 291,
+   "gap": {
+    "mean": 1.105098855359001,
+    "max": 5,
+    "far": 0.10093652445369407
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "A",
+     "added": 144,
+     "recoloured": 0,
+     "overlapped": 165,
+     "ms": 0.3
+    },
+    {
+     "item": "cuirass",
+     "way": "A",
+     "added": 245,
+     "recoloured": 0,
+     "overlapped": 43,
+     "ms": 0.3
+    },
+    {
+     "item": "helmet",
+     "way": "A",
+     "added": 281,
+     "recoloured": 0,
+     "overlapped": 83,
+     "ms": 0.3
+    }
+   ]
+  },
+  {
+   "body": "viandante#2",
+   "seed": 2,
+   "way": "B",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 2.5363000000015745,
+   "wearMs": 4.914099999999962,
+   "meshMs": 5.470499999999447,
+   "meshBytes": 360168,
+   "bareBytes": 295496,
+   "meshes": 4,
+   "added": 677,
+   "recoloured": 0,
+   "overlapped": 0,
+   "gap": {
+    "mean": 1.2703101920236337,
+    "max": 6,
+    "far": 0.07385524372230429
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "B",
+     "added": 173,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 1.3,
+     "steps": 12,
+     "finished": true
+    },
+    {
+     "item": "cuirass",
+     "way": "B",
+     "added": 215,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 1.8,
+     "steps": 6,
+     "finished": true
+    },
+    {
+     "item": "helmet",
+     "way": "B",
+     "added": 289,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 2.1,
+     "steps": 7,
+     "finished": true
+    }
+   ]
+  },
+  {
+   "body": "viandante#2",
+   "seed": 2,
+   "way": "C",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 2.5459999999984575,
+   "wearMs": 0.6736999999993714,
+   "meshMs": 4.9188000000012835,
+   "meshBytes": 320264,
+   "bareBytes": 295496,
+   "meshes": 4,
+   "added": 74,
+   "recoloured": 441,
+   "overlapped": 0,
+   "gap": {
+    "mean": 0.4407766990291262,
+    "max": 6,
+    "far": 0.07766990291262135
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "C",
+     "added": 74,
+     "recoloured": 96,
+     "overlapped": 0,
+     "ms": 0.3
+    },
+    {
+     "item": "cuirass",
+     "way": "C",
+     "added": 0,
+     "recoloured": 196,
+     "overlapped": 0,
+     "ms": 0.2
+    },
+    {
+     "item": "helmet",
+     "way": "C",
+     "added": 0,
+     "recoloured": 149,
+     "overlapped": 0,
+     "ms": 0.2
+    }
+   ]
+  },
+  {
+   "body": "viandante#3",
+   "seed": 3,
+   "way": "A",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 2.8647000000000844,
+   "wearMs": 1.2203999999983353,
+   "meshMs": 0,
+   "meshBytes": 0,
+   "bareBytes": 412800,
+   "meshes": 7,
+   "added": 1025,
+   "recoloured": 0,
+   "overlapped": 330,
+   "gap": {
+    "mean": 1.4907749077490775,
+    "max": 6,
+    "far": 0.1992619926199262
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "A",
+     "added": 76,
+     "recoloured": 0,
+     "overlapped": 233,
+     "ms": 0.3
+    },
+    {
+     "item": "cuirass",
+     "way": "A",
+     "added": 267,
+     "recoloured": 0,
+     "overlapped": 21,
+     "ms": 0.3
+    },
+    {
+     "item": "helmet",
+     "way": "A",
+     "added": 682,
+     "recoloured": 0,
+     "overlapped": 76,
+     "ms": 0.5
+    }
+   ]
+  },
+  {
+   "body": "viandante#3",
+   "seed": 3,
+   "way": "B",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 2.9325000000008004,
+   "wearMs": 4.293499999999767,
+   "meshMs": 7.035499999999956,
+   "meshBytes": 472656,
+   "bareBytes": 412800,
+   "meshes": 4,
+   "added": 813,
+   "recoloured": 0,
+   "overlapped": 0,
+   "gap": {
+    "mean": 1.071340713407134,
+    "max": 3,
+    "far": 0.017220172201722016
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "B",
+     "added": 164,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 1.1,
+     "steps": 13,
+     "finished": true
+    },
+    {
+     "item": "cuirass",
+     "way": "B",
+     "added": 235,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 1.5,
+     "steps": 10,
+     "finished": true
+    },
+    {
+     "item": "helmet",
+     "way": "B",
+     "added": 414,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 1.7,
+     "steps": 7,
+     "finished": true
+    }
+   ]
+  },
+  {
+   "body": "viandante#3",
+   "seed": 3,
+   "way": "C",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 2.86489999999867,
+   "wearMs": 0.6804999999967549,
+   "meshMs": 6.104600000000573,
+   "meshBytes": 421056,
+   "bareBytes": 412800,
+   "meshes": 4,
+   "added": 64,
+   "recoloured": 564,
+   "overlapped": 0,
+   "gap": {
+    "mean": 0.12738853503184713,
+    "max": 2,
+    "far": 0
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "C",
+     "added": 64,
+     "recoloured": 96,
+     "overlapped": 0,
+     "ms": 0.3
+    },
+    {
+     "item": "cuirass",
+     "way": "C",
+     "added": 0,
+     "recoloured": 205,
+     "overlapped": 0,
+     "ms": 0.2
+    },
+    {
+     "item": "helmet",
+     "way": "C",
+     "added": 0,
+     "recoloured": 263,
+     "overlapped": 0,
+     "ms": 0.2
+    }
+   ]
+  },
+  {
+   "body": "viandante#4",
+   "seed": 4,
+   "way": "A",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 2.847700000000259,
+   "wearMs": 0.8601000000016938,
+   "meshMs": 0,
+   "meshBytes": 0,
+   "bareBytes": 372552,
+   "meshes": 7,
+   "added": 620,
+   "recoloured": 0,
+   "overlapped": 341,
+   "gap": {
+    "mean": 0.9521331945889698,
+    "max": 4,
+    "far": 0.062434963579604576
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "A",
+     "added": 76,
+     "recoloured": 0,
+     "overlapped": 233,
+     "ms": 0.3
+    },
+    {
+     "item": "cuirass",
+     "way": "A",
+     "added": 267,
+     "recoloured": 0,
+     "overlapped": 21,
+     "ms": 0.8
+    },
+    {
+     "item": "helmet",
+     "way": "A",
+     "added": 277,
+     "recoloured": 0,
+     "overlapped": 87,
+     "ms": 0.3
+    }
+   ]
+  },
+  {
+   "body": "viandante#4",
+   "seed": 4,
+   "way": "B",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 2.916299999998955,
+   "wearMs": 4.742099999997663,
+   "meshMs": 7.316100000000006,
+   "meshBytes": 423120,
+   "bareBytes": 372552,
+   "meshes": 4,
+   "added": 676,
+   "recoloured": 0,
+   "overlapped": 0,
+   "gap": {
+    "mean": 1.0680473372781065,
+    "max": 3,
+    "far": 0.014792899408284023
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "B",
+     "added": 163,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 1.3,
+     "steps": 13,
+     "finished": true
+    },
+    {
+     "item": "cuirass",
+     "way": "B",
+     "added": 235,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 1.9,
+     "steps": 10,
+     "finished": true
+    },
+    {
+     "item": "helmet",
+     "way": "B",
+     "added": 278,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 1.9,
+     "steps": 7,
+     "finished": true
+    }
+   ]
+  },
+  {
+   "body": "viandante#4",
+   "seed": 4,
+   "way": "C",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 2.810699999999997,
+   "wearMs": 0.691900000001624,
+   "meshMs": 5.669099999999162,
+   "meshBytes": 380808,
+   "bareBytes": 372552,
+   "meshes": 4,
+   "added": 64,
+   "recoloured": 445,
+   "overlapped": 0,
+   "gap": {
+    "mean": 0.15717092337917485,
+    "max": 2,
+    "far": 0
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "C",
+     "added": 64,
+     "recoloured": 95,
+     "overlapped": 0,
+     "ms": 0.3
+    },
+    {
+     "item": "cuirass",
+     "way": "C",
+     "added": 0,
+     "recoloured": 203,
+     "overlapped": 0,
+     "ms": 0.2
+    },
+    {
+     "item": "helmet",
+     "way": "C",
+     "added": 0,
+     "recoloured": 147,
+     "overlapped": 0,
+     "ms": 0.2
+    }
+   ]
+  },
+  {
+   "body": "viandante#5",
+   "seed": 5,
+   "way": "A",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 2.921200000000681,
+   "wearMs": 1.0948000000007596,
+   "meshMs": 0,
+   "meshBytes": 0,
+   "bareBytes": 411768,
+   "meshes": 7,
+   "added": 1025,
+   "recoloured": 0,
+   "overlapped": 330,
+   "gap": {
+    "mean": 1.4907749077490775,
+    "max": 6,
+    "far": 0.1992619926199262
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "A",
+     "added": 76,
+     "recoloured": 0,
+     "overlapped": 233,
+     "ms": 0.3
+    },
+    {
+     "item": "cuirass",
+     "way": "A",
+     "added": 267,
+     "recoloured": 0,
+     "overlapped": 21,
+     "ms": 0.3
+    },
+    {
+     "item": "helmet",
+     "way": "A",
+     "added": 682,
+     "recoloured": 0,
+     "overlapped": 76,
+     "ms": 0.5
+    }
+   ]
+  },
+  {
+   "body": "viandante#5",
+   "seed": 5,
+   "way": "B",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 2.912800000000061,
+   "wearMs": 4.647500000000946,
+   "meshMs": 7.282499999999345,
+   "meshBytes": 472656,
+   "bareBytes": 411768,
+   "meshes": 4,
+   "added": 812,
+   "recoloured": 0,
+   "overlapped": 0,
+   "gap": {
+    "mean": 1.0714285714285714,
+    "max": 3,
+    "far": 0.017241379310344827
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "B",
+     "added": 163,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 1,
+     "steps": 13,
+     "finished": true
+    },
+    {
+     "item": "cuirass",
+     "way": "B",
+     "added": 235,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 1.6,
+     "steps": 10,
+     "finished": true
+    },
+    {
+     "item": "helmet",
+     "way": "B",
+     "added": 414,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 2,
+     "steps": 7,
+     "finished": true
+    }
+   ]
+  },
+  {
+   "body": "viandante#5",
+   "seed": 5,
+   "way": "C",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 2.8896999999997206,
+   "wearMs": 0.816899999999805,
+   "meshMs": 6.309400000000096,
+   "meshBytes": 420024,
+   "bareBytes": 411768,
+   "meshes": 4,
+   "added": 64,
+   "recoloured": 561,
+   "overlapped": 0,
+   "gap": {
+    "mean": 0.128,
+    "max": 2,
+    "far": 0
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "C",
+     "added": 64,
+     "recoloured": 95,
+     "overlapped": 0,
+     "ms": 0.3
+    },
+    {
+     "item": "cuirass",
+     "way": "C",
+     "added": 0,
+     "recoloured": 203,
+     "overlapped": 0,
+     "ms": 0.3
+    },
+    {
+     "item": "helmet",
+     "way": "C",
+     "added": 0,
+     "recoloured": 263,
+     "overlapped": 0,
+     "ms": 0.2
+    }
+   ]
+  },
+  {
+   "body": "viandante#6",
+   "seed": 6,
+   "way": "A",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 2.5024999999986903,
+   "wearMs": 0.866199999998571,
+   "meshMs": 0,
+   "meshBytes": 0,
+   "bareBytes": 297216,
+   "meshes": 7,
+   "added": 685,
+   "recoloured": 0,
+   "overlapped": 276,
+   "gap": {
+    "mean": 1.1592091571279917,
+    "max": 5,
+    "far": 0.11030176899063475
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "A",
+     "added": 150,
+     "recoloured": 0,
+     "overlapped": 159,
+     "ms": 0.3
+    },
+    {
+     "item": "cuirass",
+     "way": "A",
+     "added": 258,
+     "recoloured": 0,
+     "overlapped": 30,
+     "ms": 0.3
+    },
+    {
+     "item": "helmet",
+     "way": "A",
+     "added": 277,
+     "recoloured": 0,
+     "overlapped": 87,
+     "ms": 0.3
+    }
+   ]
+  },
+  {
+   "body": "viandante#6",
+   "seed": 6,
+   "way": "B",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 2.5432999999993626,
+   "wearMs": 4.893599999999424,
+   "meshMs": 5.554199999998673,
+   "meshBytes": 363608,
+   "bareBytes": 297216,
+   "meshes": 4,
+   "added": 688,
+   "recoloured": 0,
+   "overlapped": 0,
+   "gap": {
+    "mean": 1.2674418604651163,
+    "max": 6,
+    "far": 0.07267441860465117
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "B",
+     "added": 174,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 1.4,
+     "steps": 15,
+     "finished": true
+    },
+    {
+     "item": "cuirass",
+     "way": "B",
+     "added": 236,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 2,
+     "steps": 9,
+     "finished": true
+    },
+    {
+     "item": "helmet",
+     "way": "B",
+     "added": 278,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 1.8,
+     "steps": 7,
+     "finished": true
+    }
+   ]
+  },
+  {
+   "body": "viandante#6",
+   "seed": 6,
+   "way": "C",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 2.5455000000001746,
+   "wearMs": 0.6366000000016356,
+   "meshMs": 4.89220000000023,
+   "meshBytes": 321984,
+   "bareBytes": 297216,
+   "meshes": 4,
+   "added": 66,
+   "recoloured": 446,
+   "overlapped": 0,
+   "gap": {
+    "mean": 0.390625,
+    "max": 6,
+    "far": 0.068359375
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "C",
+     "added": 66,
+     "recoloured": 95,
+     "overlapped": 0,
+     "ms": 0.3
+    },
+    {
+     "item": "cuirass",
+     "way": "C",
+     "added": 0,
+     "recoloured": 204,
+     "overlapped": 0,
+     "ms": 0.2
+    },
+    {
+     "item": "helmet",
+     "way": "C",
+     "added": 0,
+     "recoloured": 147,
+     "overlapped": 0,
+     "ms": 0.2
+    }
+   ]
+  },
+  {
+   "body": "viandante#7",
+   "seed": 7,
+   "way": "A",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 3.1185999999997875,
+   "wearMs": 0.9027999999980238,
+   "meshMs": 0,
+   "meshBytes": 0,
+   "bareBytes": 373584,
+   "meshes": 7,
+   "added": 610,
+   "recoloured": 0,
+   "overlapped": 351,
+   "gap": {
+    "mean": 0.9073881373569199,
+    "max": 4,
+    "far": 0.053069719042663895
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "A",
+     "added": 72,
+     "recoloured": 0,
+     "overlapped": 237,
+     "ms": 0.3
+    },
+    {
+     "item": "cuirass",
+     "way": "A",
+     "added": 254,
+     "recoloured": 0,
+     "overlapped": 34,
+     "ms": 0.3
+    },
+    {
+     "item": "helmet",
+     "way": "A",
+     "added": 284,
+     "recoloured": 0,
+     "overlapped": 80,
+     "ms": 0.3
+    }
+   ]
+  },
+  {
+   "body": "viandante#7",
+   "seed": 7,
+   "way": "B",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 2.8567000000002736,
+   "wearMs": 5.020199999999022,
+   "meshMs": 6.61239999999998,
+   "meshBytes": 423120,
+   "bareBytes": 373584,
+   "meshes": 4,
+   "added": 665,
+   "recoloured": 0,
+   "overlapped": 0,
+   "gap": {
+    "mean": 1.0706766917293233,
+    "max": 3,
+    "far": 0.015037593984962405
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "B",
+     "added": 162,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 1.4,
+     "steps": 14,
+     "finished": true
+    },
+    {
+     "item": "cuirass",
+     "way": "B",
+     "added": 214,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 2.1,
+     "steps": 7,
+     "finished": true
+    },
+    {
+     "item": "helmet",
+     "way": "B",
+     "added": 289,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 2,
+     "steps": 7,
+     "finished": true
+    }
+   ]
+  },
+  {
+   "body": "viandante#7",
+   "seed": 7,
+   "way": "C",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 2.7934000000004744,
+   "wearMs": 0.6242000000002008,
+   "meshMs": 5.761999999998807,
+   "meshBytes": 382184,
+   "bareBytes": 373584,
+   "meshes": 4,
+   "added": 64,
+   "recoloured": 437,
+   "overlapped": 0,
+   "gap": {
+    "mean": 0.16167664670658682,
+    "max": 2,
+    "far": 0
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "C",
+     "added": 64,
+     "recoloured": 95,
+     "overlapped": 0,
+     "ms": 0.3
+    },
+    {
+     "item": "cuirass",
+     "way": "C",
+     "added": 0,
+     "recoloured": 193,
+     "overlapped": 0,
+     "ms": 0.2
+    },
+    {
+     "item": "helmet",
+     "way": "C",
+     "added": 0,
+     "recoloured": 149,
+     "overlapped": 0,
+     "ms": 0.2
+    }
+   ]
+  },
+  {
+   "body": "viandante#8",
+   "seed": 8,
+   "way": "A",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 2.9072999999989406,
+   "wearMs": 0.8633000000008906,
+   "meshMs": 0,
+   "meshBytes": 0,
+   "bareBytes": 373584,
+   "meshes": 7,
+   "added": 609,
+   "recoloured": 0,
+   "overlapped": 352,
+   "gap": {
+    "mean": 0.9063475546305931,
+    "max": 4,
+    "far": 0.053069719042663895
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "A",
+     "added": 71,
+     "recoloured": 0,
+     "overlapped": 238,
+     "ms": 0.3
+    },
+    {
+     "item": "cuirass",
+     "way": "A",
+     "added": 254,
+     "recoloured": 0,
+     "overlapped": 34,
+     "ms": 0.3
+    },
+    {
+     "item": "helmet",
+     "way": "A",
+     "added": 284,
+     "recoloured": 0,
+     "overlapped": 80,
+     "ms": 0.3
+    }
+   ]
+  },
+  {
+   "body": "viandante#8",
+   "seed": 8,
+   "way": "B",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 2.7994999999991705,
+   "wearMs": 4.611399999999776,
+   "meshMs": 6.859599999999773,
+   "meshBytes": 422776,
+   "bareBytes": 373584,
+   "meshes": 4,
+   "added": 665,
+   "recoloured": 0,
+   "overlapped": 0,
+   "gap": {
+    "mean": 1.069172932330827,
+    "max": 3,
+    "far": 0.015037593984962405
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "B",
+     "added": 162,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 1.3,
+     "steps": 14,
+     "finished": true
+    },
+    {
+     "item": "cuirass",
+     "way": "B",
+     "added": 214,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 1.9,
+     "steps": 7,
+     "finished": true
+    },
+    {
+     "item": "helmet",
+     "way": "B",
+     "added": 289,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 1.9,
+     "steps": 7,
+     "finished": true
+    }
+   ]
+  },
+  {
+   "body": "viandante#8",
+   "seed": 8,
+   "way": "C",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 2.830500000000029,
+   "wearMs": 0.6779999999998836,
+   "meshMs": 5.477500000000873,
+   "meshBytes": 381840,
+   "bareBytes": 373584,
+   "meshes": 4,
+   "added": 64,
+   "recoloured": 437,
+   "overlapped": 0,
+   "gap": {
+    "mean": 0.1596806387225549,
+    "max": 2,
+    "far": 0
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "C",
+     "added": 64,
+     "recoloured": 95,
+     "overlapped": 0,
+     "ms": 0.3
+    },
+    {
+     "item": "cuirass",
+     "way": "C",
+     "added": 0,
+     "recoloured": 193,
+     "overlapped": 0,
+     "ms": 0.7
+    },
+    {
+     "item": "helmet",
+     "way": "C",
+     "added": 0,
+     "recoloured": 149,
+     "overlapped": 0,
+     "ms": 0.2
+    }
+   ]
+  },
+  {
+   "body": "lupo#1",
+   "seed": 1,
+   "way": "A",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 6.860500000000684,
+   "wearMs": 3.8325999999997293,
+   "meshMs": 0,
+   "meshBytes": 0,
+   "bareBytes": 796360,
+   "meshes": 9,
+   "added": 2302,
+   "recoloured": 0,
+   "overlapped": 624,
+   "gap": {
+    "mean": 2.4384825700615176,
+    "max": 10,
+    "far": 0.4084073820915926
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "A",
+     "added": 483,
+     "recoloured": 0,
+     "overlapped": 188,
+     "ms": 0.9
+    },
+    {
+     "item": "cuirass",
+     "way": "A",
+     "added": 845,
+     "recoloured": 0,
+     "overlapped": 147,
+     "ms": 1.9
+    },
+    {
+     "item": "helmet",
+     "way": "A",
+     "added": 974,
+     "recoloured": 0,
+     "overlapped": 289,
+     "ms": 0.9
+    }
+   ]
+  },
+  {
+   "body": "lupo#1",
+   "seed": 1,
+   "way": "B",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 6.905000000000655,
+   "wearMs": 9.371500000001106,
+   "meshMs": 16.342899999999645,
+   "meshBytes": 946344,
+   "bareBytes": 796360,
+   "meshes": 6,
+   "added": 1680,
+   "recoloured": 0,
+   "overlapped": 0,
+   "gap": {
+    "mean": 1.7958333333333334,
+    "max": 8,
+    "far": 0.21428571428571427
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "B",
+     "added": 908,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 2.6,
+     "steps": 24,
+     "finished": true
+    },
+    {
+     "item": "cuirass",
+     "way": "B",
+     "added": 342,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 3.7,
+     "steps": 11,
+     "finished": true
+    },
+    {
+     "item": "helmet",
+     "way": "B",
+     "added": 430,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 3.1,
+     "steps": 8,
+     "finished": true
+    }
+   ]
+  },
+  {
+   "body": "lupo#1",
+   "seed": 1,
+   "way": "C",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 6.82470000000103,
+   "wearMs": 1.9623000000010506,
+   "meshMs": 13.258200000000215,
+   "meshBytes": 796360,
+   "bareBytes": 796360,
+   "meshes": 6,
+   "added": 0,
+   "recoloured": 884,
+   "overlapped": 0,
+   "gap": {
+    "mean": 0,
+    "max": 0,
+    "far": 0
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "C",
+     "added": 0,
+     "recoloured": 264,
+     "overlapped": 0,
+     "ms": 0.7
+    },
+    {
+     "item": "cuirass",
+     "way": "C",
+     "added": 0,
+     "recoloured": 313,
+     "overlapped": 0,
+     "ms": 0.9
+    },
+    {
+     "item": "helmet",
+     "way": "C",
+     "added": 0,
+     "recoloured": 307,
+     "overlapped": 0,
+     "ms": 0.4
+    }
+   ]
+  },
+  {
+   "body": "lupo#2",
+   "seed": 2,
+   "way": "A",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 9.095100000000457,
+   "wearMs": 4.653299999999945,
+   "meshMs": 0,
+   "meshBytes": 0,
+   "bareBytes": 809776,
+   "meshes": 9,
+   "added": 3297,
+   "recoloured": 0,
+   "overlapped": 352,
+   "gap": {
+    "mean": 3.101945738558509,
+    "max": 10,
+    "far": 0.558783228281721
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "A",
+     "added": 1226,
+     "recoloured": 0,
+     "overlapped": 117,
+     "ms": 1.4
+    },
+    {
+     "item": "cuirass",
+     "way": "A",
+     "added": 1578,
+     "recoloured": 0,
+     "overlapped": 170,
+     "ms": 2.7
+    },
+    {
+     "item": "helmet",
+     "way": "A",
+     "added": 493,
+     "recoloured": 0,
+     "overlapped": 65,
+     "ms": 0.4
+    }
+   ]
+  },
+  {
+   "body": "lupo#2",
+   "seed": 2,
+   "way": "B",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 7.939699999998993,
+   "wearMs": 9.981999999999971,
+   "meshMs": 17.075300000000425,
+   "meshBytes": 976616,
+   "bareBytes": 809776,
+   "meshes": 6,
+   "added": 2119,
+   "recoloured": 0,
+   "overlapped": 0,
+   "gap": {
+    "mean": 1.9919773478055687,
+    "max": 8,
+    "far": 0.2779613025011798
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "B",
+     "added": 1401,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 3.3,
+     "steps": 29,
+     "finished": true
+    },
+    {
+     "item": "cuirass",
+     "way": "B",
+     "added": 501,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 4.1,
+     "steps": 13,
+     "finished": true
+    },
+    {
+     "item": "helmet",
+     "way": "B",
+     "added": 217,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 2.6,
+     "steps": 6,
+     "finished": true
+    }
+   ]
+  },
+  {
+   "body": "lupo#2",
+   "seed": 2,
+   "way": "C",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 6.935199999999895,
+   "wearMs": 2.145300000001953,
+   "meshMs": 14.295199999998658,
+   "meshBytes": 809776,
+   "bareBytes": 809776,
+   "meshes": 6,
+   "added": 0,
+   "recoloured": 934,
+   "overlapped": 0,
+   "gap": {
+    "mean": 0,
+    "max": 0,
+    "far": 0
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "C",
+     "added": 0,
+     "recoloured": 381,
+     "overlapped": 0,
+     "ms": 0.8
+    },
+    {
+     "item": "cuirass",
+     "way": "C",
+     "added": 0,
+     "recoloured": 479,
+     "overlapped": 0,
+     "ms": 1.8
+    },
+    {
+     "item": "helmet",
+     "way": "C",
+     "added": 0,
+     "recoloured": 74,
+     "overlapped": 0,
+     "ms": 0.1
+    }
+   ]
+  },
+  {
+   "body": "lupo#3",
+   "seed": 3,
+   "way": "A",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 7.27560000000085,
+   "wearMs": 2.669100000000981,
+   "meshMs": 0,
+   "meshBytes": 0,
+   "bareBytes": 731000,
+   "meshes": 9,
+   "added": 1859,
+   "recoloured": 0,
+   "overlapped": 632,
+   "gap": {
+    "mean": 2.4010437575270975,
+    "max": 9,
+    "far": 0.43918105178643113
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "A",
+     "added": 278,
+     "recoloured": 0,
+     "overlapped": 98,
+     "ms": 0.7
+    },
+    {
+     "item": "cuirass",
+     "way": "A",
+     "added": 563,
+     "recoloured": 0,
+     "overlapped": 142,
+     "ms": 1.4
+    },
+    {
+     "item": "helmet",
+     "way": "A",
+     "added": 1018,
+     "recoloured": 0,
+     "overlapped": 392,
+     "ms": 1
+    }
+   ]
+  },
+  {
+   "body": "lupo#3",
+   "seed": 3,
+   "way": "B",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 7.473700000000463,
+   "wearMs": 10.25119999999879,
+   "meshMs": 16.3679000000011,
+   "meshBytes": 888896,
+   "bareBytes": 731000,
+   "meshes": 6,
+   "added": 1456,
+   "recoloured": 0,
+   "overlapped": 0,
+   "gap": {
+    "mean": 1.8070054945054945,
+    "max": 7,
+    "far": 0.2342032967032967
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "B",
+     "added": 734,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 4,
+     "steps": 20,
+     "finished": true
+    },
+    {
+     "item": "cuirass",
+     "way": "B",
+     "added": 267,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 3.2,
+     "steps": 14,
+     "finished": true
+    },
+    {
+     "item": "helmet",
+     "way": "B",
+     "added": 455,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 3.5,
+     "steps": 8,
+     "finished": true
+    }
+   ]
+  },
+  {
+   "body": "lupo#3",
+   "seed": 3,
+   "way": "C",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 6.1437000000005355,
+   "wearMs": 1.5397999999986496,
+   "meshMs": 13.200699999999415,
+   "meshBytes": 731000,
+   "bareBytes": 731000,
+   "meshes": 6,
+   "added": 0,
+   "recoloured": 739,
+   "overlapped": 0,
+   "gap": {
+    "mean": 0,
+    "max": 0,
+    "far": 0
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "C",
+     "added": 0,
+     "recoloured": 173,
+     "overlapped": 0,
+     "ms": 0.5
+    },
+    {
+     "item": "cuirass",
+     "way": "C",
+     "added": 0,
+     "recoloured": 238,
+     "overlapped": 0,
+     "ms": 0.6
+    },
+    {
+     "item": "helmet",
+     "way": "C",
+     "added": 0,
+     "recoloured": 328,
+     "overlapped": 0,
+     "ms": 0.4
+    }
+   ]
+  },
+  {
+   "body": "lupo#4",
+   "seed": 4,
+   "way": "A",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 6.966700000000856,
+   "wearMs": 3.9283999999988737,
+   "meshMs": 0,
+   "meshBytes": 0,
+   "bareBytes": 804616,
+   "meshes": 9,
+   "added": 2643,
+   "recoloured": 0,
+   "overlapped": 715,
+   "gap": {
+    "mean": 2.655151876116736,
+    "max": 10,
+    "far": 0.4389517569982132
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "A",
+     "added": 667,
+     "recoloured": 0,
+     "overlapped": 203,
+     "ms": 0.9
+    },
+    {
+     "item": "cuirass",
+     "way": "A",
+     "added": 884,
+     "recoloured": 0,
+     "overlapped": 140,
+     "ms": 1.4
+    },
+    {
+     "item": "helmet",
+     "way": "A",
+     "added": 1092,
+     "recoloured": 0,
+     "overlapped": 372,
+     "ms": 1.4
+    }
+   ]
+  },
+  {
+   "body": "lupo#4",
+   "seed": 4,
+   "way": "B",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 7.323500000000422,
+   "wearMs": 10.046299999998155,
+   "meshMs": 17.09389999999985,
+   "meshBytes": 980056,
+   "bareBytes": 804616,
+   "meshes": 6,
+   "added": 1672,
+   "recoloured": 0,
+   "overlapped": 0,
+   "gap": {
+    "mean": 1.7834928229665072,
+    "max": 8,
+    "far": 0.2063397129186603
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "B",
+     "added": 891,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 2.6,
+     "steps": 23,
+     "finished": true
+    },
+    {
+     "item": "cuirass",
+     "way": "B",
+     "added": 345,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 3.5,
+     "steps": 14,
+     "finished": true
+    },
+    {
+     "item": "helmet",
+     "way": "B",
+     "added": 436,
+     "recoloured": 0,
+     "overlapped": 0,
+     "ms": 3.4,
+     "steps": 8,
+     "finished": true
+    }
+   ]
+  },
+  {
+   "body": "lupo#4",
+   "seed": 4,
+   "way": "C",
+   "outfit": [
+    "cloak",
+    "cuirass",
+    "helmet"
+   ],
+   "bodyMs": 7.199300000000221,
+   "wearMs": 1.906699999999546,
+   "meshMs": 13.89259999999922,
+   "meshBytes": 804616,
+   "bareBytes": 804616,
+   "meshes": 6,
+   "added": 0,
+   "recoloured": 882,
+   "overlapped": 0,
+   "gap": {
+    "mean": 0,
+    "max": 0,
+    "far": 0
+   },
+   "unfinished": 0,
+   "changes": [
+    {
+     "item": "cloak",
+     "way": "C",
+     "added": 0,
+     "recoloured": 262,
+     "overlapped": 0,
+     "ms": 0.6
+    },
+    {
+     "item": "cuirass",
+     "way": "C",
+     "added": 0,
+     "recoloured": 319,
+     "overlapped": 0,
+     "ms": 0.9
+    },
+    {
+     "item": "helmet",
+     "way": "C",
+     "added": 0,
+     "recoloured": 301,
+     "overlapped": 0,
+     "ms": 0.4
+    }
+   ]
+  }
+ ],
+ "robust": [
+  {
+   "body": "viandante",
+   "from": "seme",
+   "cls": "person",
+   "upright": true,
+   "neck": "narrowing",
+   "zones": {
+    "head": 814,
+    "torso": 754,
+    "back": 397
+   },
+   "ways": {
+    "A": {
+     "added": 1083,
+     "recoloured": 0,
+     "overlapped": 272,
+     "gap": {
+      "mean": 1.670110701107011,
+      "max": 6,
+      "far": 0.25166051660516603
+     },
+     "unfinished": 0,
+     "wearMs": 1.129000000000815,
+     "meshMs": 0
+    },
+    "B": {
+     "added": 812,
+     "recoloured": 0,
+     "overlapped": 0,
+     "gap": {
+      "mean": 1.2401477832512315,
+      "max": 6,
+      "far": 0.0665024630541872
+     },
+     "unfinished": 0,
+     "wearMs": 4.520799999998417,
+     "meshMs": 5.92029999999977
+    },
+    "C": {
+     "added": 74,
+     "recoloured": 554,
+     "overlapped": 0,
+     "gap": {
+      "mean": 0.3614649681528662,
+      "max": 6,
+      "far": 0.06369426751592357
+     },
+     "unfinished": 0,
+     "wearMs": 0.6713999999992666,
+     "meshMs": 5.132899999998699
+    }
+   }
+  },
+  {
+   "body": "contadina",
+   "from": "seme",
+   "cls": "person",
+   "upright": true,
+   "neck": "narrowing",
+   "zones": {
+    "head": 532,
+    "torso": 1181,
+    "back": 635
+   },
+   "ways": {
+    "A": {
+     "added": 1026,
+     "recoloured": 0,
+     "overlapped": 194,
+     "gap": {
+      "mean": 1.848360655737705,
+      "max": 6,
+      "far": 0.2819672131147541
+     },
+     "unfinished": 0,
+     "wearMs": 1.6828999999997905,
+     "meshMs": 0
+    },
+    "B": {
+     "added": 880,
+     "recoloured": 0,
+     "overlapped": 0,
+     "gap": {
+      "mean": 1.0727272727272728,
+      "max": 4,
+      "far": 0.020454545454545454
+     },
+     "unfinished": 0,
+     "wearMs": 4.866700000000492,
+     "meshMs": 4.412099999999555
+    },
+    "C": {
+     "added": 60,
+     "recoloured": 550,
+     "overlapped": 0,
+     "gap": {
+      "mean": 0.10491803278688525,
+      "max": 2,
+      "far": 0
+     },
+     "unfinished": 0,
+     "wearMs": 1.1170000000001892,
+     "meshMs": 4.135200000000623
+    }
+   }
+  },
+  {
+   "body": "person",
+   "from": "seme",
+   "cls": "person",
+   "upright": true,
+   "neck": "narrowing",
+   "zones": {
+    "head": 858,
+    "torso": 1009,
+    "back": 559
+   },
+   "ways": {
+    "A": {
+     "added": 806,
+     "recoloured": 0,
+     "overlapped": 414,
+     "gap": {
+      "mean": 1.0065573770491802,
+      "max": 4,
+      "far": 0.04590163934426229
+     },
+     "unfinished": 0,
+     "wearMs": 1.0761999999976979,
+     "meshMs": 0
+    },
+    "B": {
+     "added": 840,
+     "recoloured": 0,
+     "overlapped": 0,
+     "gap": {
+      "mean": 1.4607142857142856,
+      "max": 6,
+      "far": 0.14642857142857144
+     },
+     "unfinished": 0,
+     "wearMs": 5.068999999999505,
+     "meshMs": 6.121899999998277
+    },
+    "C": {
+     "added": 77,
+     "recoloured": 472,
+     "overlapped": 0,
+     "gap": {
+      "mean": 0.39162112932604737,
+      "max": 5,
+      "far": 0.07650273224043716
+     },
+     "unfinished": 0,
+     "wearMs": 0.8258000000005268,
+     "meshMs": 5.535599999999249
+    }
+   }
+  },
+  {
+   "body": "animal",
+   "from": "seme",
+   "cls": "animal",
+   "upright": false,
+   "neck": "rig",
+   "zones": {
+    "head": 251,
+    "torso": 375,
+    "back": 213
+   },
+   "ways": {
+    "A": {
+     "added": 404,
+     "recoloured": 0,
+     "overlapped": 131,
+     "gap": {
+      "mean": 1.4317757009345795,
+      "max": 5,
+      "far": 0.1925233644859813
+     },
+     "unfinished": 0,
+     "wearMs": 0.6223000000009051,
+     "meshMs": 0
+    },
+    "B": {
+     "added": 426,
+     "recoloured": 0,
+     "overlapped": 0,
+     "gap": {
+      "mean": 1.176056338028169,
+      "max": 4,
+      "far": 0.04225352112676056
+     },
+     "unfinished": 0,
+     "wearMs": 3.5115999999998166,
+     "meshMs": 4.636099999999715
+    },
+    "C": {
+     "added": 0,
+     "recoloured": 284,
+     "overlapped": 0,
+     "gap": {
+      "mean": 0,
+      "max": 0,
+      "far": 0
+     },
+     "unfinished": 0,
+     "wearMs": 0.5442000000002736,
+     "meshMs": 3.5538999999989755
+    }
+   }
+  },
+  {
+   "body": "beast",
+   "from": "seme",
+   "cls": "beast",
+   "upright": false,
+   "neck": "narrowing",
+   "zones": {
+    "head": 1382,
+    "torso": 2539,
+    "back": 1313
+   },
+   "ways": {
+    "A": {
+     "added": 2302,
+     "recoloured": 0,
+     "overlapped": 624,
+     "gap": {
+      "mean": 2.4384825700615176,
+      "max": 10,
+      "far": 0.4084073820915926
+     },
+     "unfinished": 0,
+     "wearMs": 3.9583000000020547,
+     "meshMs": 0
+    },
+    "B": {
+     "added": 1680,
+     "recoloured": 0,
+     "overlapped": 0,
+     "gap": {
+      "mean": 1.7958333333333334,
+      "max": 8,
+      "far": 0.21428571428571427
+     },
+     "unfinished": 0,
+     "wearMs": 12.713799999999537,
+     "meshMs": 16.53139999999985
+    },
+    "C": {
+     "added": 0,
+     "recoloured": 884,
+     "overlapped": 0,
+     "gap": {
+      "mean": 0,
+      "max": 0,
+      "far": 0
+     },
+     "unfinished": 0,
+     "wearMs": 2.008299999999508,
+     "meshMs": 16.842099999999846
+    }
+   }
+  },
+  {
+   "body": "corona-gerboa",
+   "from": "seme",
+   "cls": "person",
+   "upright": true,
+   "neck": "rig",
+   "zones": {
+    "head": 1484,
+    "torso": 1186,
+    "back": 610
+   },
+   "ways": {
+    "A": {
+     "added": 2733,
+     "recoloured": 0,
+     "overlapped": 837,
+     "gap": {
+      "mean": 3.2563025210084033,
+      "max": 14,
+      "far": 0.4826330532212885
+     },
+     "unfinished": 0,
+     "wearMs": 7.859300000001895,
+     "meshMs": 0
+    },
+    "B": {
+     "added": 1414,
+     "recoloured": 0,
+     "overlapped": 0,
+     "gap": {
+      "mean": 1.4292786421499293,
+      "max": 6,
+      "far": 0.12234794908062235
+     },
+     "unfinished": 0,
+     "wearMs": 13.106900000000678,
+     "meshMs": 22.350399999999354
+    },
+    "C": {
+     "added": 48,
+     "recoloured": 696,
+     "overlapped": 0,
+     "gap": {
+      "mean": 0.17204301075268819,
+      "max": 4,
+      "far": 0.03763440860215054
+     },
+     "unfinished": 0,
+     "wearMs": 1.871900000000096,
+     "meshMs": 16.838799999999537
+    }
+   }
+  },
+  {
+   "body": "corona-gerboa-narrator",
+   "from": "seme",
+   "cls": "person",
+   "upright": true,
+   "neck": "rig",
+   "zones": {
+    "head": 2014,
+    "torso": 1144,
+    "back": 546
+   },
+   "ways": {
+    "A": {
+     "added": 2981,
+     "recoloured": 0,
+     "overlapped": 889,
+     "gap": {
+      "mean": 2.8426356589147286,
+      "max": 11,
+      "far": 0.4697674418604651
+     },
+     "unfinished": 0,
+     "wearMs": 3.042600000002494,
+     "meshMs": 0
+    },
+    "B": {
+     "added": 1561,
+     "recoloured": 0,
+     "overlapped": 0,
+     "gap": {
+      "mean": 1.407431133888533,
+      "max": 6,
+      "far": 0.11531069827033953
+     },
+     "unfinished": 0,
+     "wearMs": 13.39010000000053,
+     "meshMs": 28.376000000000204
+    },
+    "C": {
+     "added": 44,
+     "recoloured": 904,
+     "overlapped": 0,
+     "gap": {
+      "mean": 0.13291139240506328,
+      "max": 4,
+      "far": 0.029535864978902954
+     },
+     "unfinished": 0,
+     "wearMs": 2.114400000000387,
+     "meshMs": 20.205200000000332
+    }
+   }
+  },
+  {
+   "body": "corona-gerboa-cartographer",
+   "from": "seme",
+   "cls": "person",
+   "upright": true,
+   "neck": "rig",
+   "zones": {
+    "head": 1922,
+    "torso": 1174,
+    "back": 564
+   },
+   "ways": {
+    "A": {
+     "added": 2834,
+     "recoloured": 0,
+     "overlapped": 885,
+     "gap": {
+      "mean": 2.9747243882764183,
+      "max": 12,
+      "far": 0.48211884915299813
+     },
+     "unfinished": 0,
+     "wearMs": 3.3439999999991414,
+     "meshMs": 0
+    },
+    "B": {
+     "added": 1547,
+     "recoloured": 0,
+     "overlapped": 0,
+     "gap": {
+      "mean": 1.3949579831932772,
+      "max": 6,
+      "far": 0.11053652230122818
+     },
+     "unfinished": 0,
+     "wearMs": 13.16269999999895,
+     "meshMs": 28.609200000000783
+    },
+    "C": {
+     "added": 44,
+     "recoloured": 908,
+     "overlapped": 0,
+     "gap": {
+      "mean": 0.1323529411764706,
+      "max": 4,
+      "far": 0.029411764705882353
+     },
+     "unfinished": 0,
+     "wearMs": 1.2530000000006112,
+     "meshMs": 23.155699999999342
+    }
+   }
+  },
+  {
+   "body": "corona-gerboa-artist",
+   "from": "seme",
+   "cls": "person",
+   "upright": true,
+   "neck": "rig",
+   "zones": {
+    "head": 1825,
+    "torso": 1120,
+    "back": 546
+   },
+   "ways": {
+    "A": {
+     "added": 2889,
+     "recoloured": 0,
+     "overlapped": 903,
+     "gap": {
+      "mean": 3.2365506329113924,
+      "max": 13,
+      "far": 0.504746835443038
+     },
+     "unfinished": 0,
+     "wearMs": 3.0574000000015076,
+     "meshMs": 0
+    },
+    "B": {
+     "added": 1511,
+     "recoloured": 0,
+     "overlapped": 0,
+     "gap": {
+      "mean": 1.4242223692918596,
+      "max": 6,
+      "far": 0.11978821972203839
+     },
+     "unfinished": 0,
+     "wearMs": 14.728300000000672,
+     "meshMs": 26.729600000000573
+    },
+    "C": {
+     "added": 44,
+     "recoloured": 816,
+     "overlapped": 0,
+     "gap": {
+      "mean": 0.14651162790697675,
+      "max": 4,
+      "far": 0.03255813953488372
+     },
+     "unfinished": 0,
+     "wearMs": 1.9301000000014028,
+     "meshMs": 20.64639999999963
+    }
+   }
+  },
+  {
+   "body": "corona-gerboa-musician",
+   "from": "seme",
+   "cls": "person",
+   "upright": true,
+   "neck": "rig",
+   "zones": {
+    "head": 1825,
+    "torso": 1120,
+    "back": 546
+   },
+   "ways": {
+    "A": {
+     "added": 2889,
+     "recoloured": 0,
+     "overlapped": 903,
+     "gap": {
+      "mean": 3.2365506329113924,
+      "max": 13,
+      "far": 0.504746835443038
+     },
+     "unfinished": 0,
+     "wearMs": 3.540399999999863,
+     "meshMs": 0
+    },
+    "B": {
+     "added": 1511,
+     "recoloured": 0,
+     "overlapped": 0,
+     "gap": {
+      "mean": 1.4242223692918596,
+      "max": 6,
+      "far": 0.11978821972203839
+     },
+     "unfinished": 0,
+     "wearMs": 13.35570000000007,
+     "meshMs": 27.258100000000923
+    },
+    "C": {
+     "added": 44,
+     "recoloured": 816,
+     "overlapped": 0,
+     "gap": {
+      "mean": 0.14651162790697675,
+      "max": 4,
+      "far": 0.03255813953488372
+     },
+     "unfinished": 0,
+     "wearMs": 1.268000000001848,
+     "meshMs": 20.467100000001665
+    }
+   }
+  },
+  {
+   "body": "corona-gerboa-sculptor",
+   "from": "seme",
+   "cls": "person",
+   "upright": true,
+   "neck": "rig",
+   "zones": {
+    "head": 1798,
+    "torso": 1200,
+    "back": 580
+   },
+   "ways": {
+    "A": {
+     "added": 2844,
+     "recoloured": 0,
+     "overlapped": 875,
+     "gap": {
+      "mean": 3.0276956171013714,
+      "max": 12,
+      "far": 0.48722774939499863
+     },
+     "unfinished": 0,
+     "wearMs": 3.3377999999993335,
+     "meshMs": 0
+    },
+    "B": {
+     "added": 1635,
+     "recoloured": 0,
+     "overlapped": 0,
+     "gap": {
+      "mean": 1.5051987767584099,
+      "max": 6,
+      "far": 0.145565749235474
+     },
+     "unfinished": 0,
+     "wearMs": 12.514399999998204,
+     "meshMs": 31.04689999999937
+    },
+    "C": {
+     "added": 66,
+     "recoloured": 847,
+     "overlapped": 0,
+     "gap": {
+      "mean": 0.17305585980284777,
+      "max": 4,
+      "far": 0.03285870755750274
+     },
+     "unfinished": 0,
+     "wearMs": 1.6996999999992113,
+     "meshMs": 26.151200000000244
+    }
+   }
+  },
+  {
+   "body": "corona-gerboa-physicist",
+   "from": "seme",
+   "cls": "person",
+   "upright": true,
+   "neck": "rig",
+   "zones": {
+    "head": 1792,
+    "torso": 1188,
+    "back": 628
+   },
+   "ways": {
+    "A": {
+     "added": 3549,
+     "recoloured": 0,
+     "overlapped": 922,
+     "gap": {
+      "mean": 3.065309774099754,
+      "max": 12,
+      "far": 0.5180049205994185
+     },
+     "unfinished": 0,
+     "wearMs": 9.567200000001321,
+     "meshMs": 0
+    },
+    "B": {
+     "added": 1702,
+     "recoloured": 0,
+     "overlapped": 0,
+     "gap": {
+      "mean": 1.435370152761457,
+      "max": 6,
+      "far": 0.12573443008225618
+     },
+     "unfinished": 0,
+     "wearMs": 13.59349999999904,
+     "meshMs": 31.134400000000824
+    },
+    "C": {
+     "added": 40,
+     "recoloured": 876,
+     "overlapped": 0,
+     "gap": {
+      "mean": 0.13755458515283842,
+      "max": 5,
+      "far": 0.03056768558951965
+     },
+     "unfinished": 0,
+     "wearMs": 1.3330000000023574,
+     "meshMs": 25.940599999999904
+    }
+   }
+  },
+  {
+   "body": "corona-gerboa-engineer",
+   "from": "seme",
+   "cls": "person",
+   "upright": true,
+   "neck": "rig",
+   "zones": {
+    "head": 1754,
+    "torso": 1168,
+    "back": 561
+   },
+   "ways": {
+    "A": {
+     "added": 3284,
+     "recoloured": 0,
+     "overlapped": 785,
+     "gap": {
+      "mean": 3.4104202506758416,
+      "max": 13,
+      "far": 0.5509953305480462
+     },
+     "unfinished": 0,
+     "wearMs": 3.5447000000003754,
+     "meshMs": 0
+    },
+    "B": {
+     "added": 1545,
+     "recoloured": 0,
+     "overlapped": 0,
+     "gap": {
+      "mean": 1.4576051779935275,
+      "max": 6,
+      "far": 0.1307443365695793
+     },
+     "unfinished": 0,
+     "wearMs": 12.58889999999883,
+     "meshMs": 40.81739999999991
+    },
+    "C": {
+     "added": 66,
+     "recoloured": 795,
+     "overlapped": 0,
+     "gap": {
+      "mean": 0.1835075493612079,
+      "max": 4,
+      "far": 0.03484320557491289
+     },
+     "unfinished": 0,
+     "wearMs": 1.2395999999989726,
+     "meshMs": 33.89600000000064
+    }
+   }
+  },
+  {
+   "body": "corona-gerboa-arbiter",
+   "from": "seme",
+   "cls": "person",
+   "upright": true,
+   "neck": "rig",
+   "zones": {
+    "head": 1976,
+    "torso": 1071,
+    "back": 549
+   },
+   "ways": {
+    "A": {
+     "added": 3915,
+     "recoloured": 0,
+     "overlapped": 844,
+     "gap": {
+      "mean": 3.270224837150662,
+      "max": 13,
+      "far": 0.5330951880647194
+     },
+     "unfinished": 0,
+     "wearMs": 4.136300000000119,
+     "meshMs": 0
+    },
+    "B": {
+     "added": 1674,
+     "recoloured": 0,
+     "overlapped": 0,
+     "gap": {
+      "mean": 1.3847072879330944,
+      "max": 6,
+      "far": 0.1081242532855436
+     },
+     "unfinished": 0,
+     "wearMs": 14.363400000000183,
+     "meshMs": 28.765800000001036
+    },
+    "C": {
+     "added": 8,
+     "recoloured": 858,
+     "overlapped": 0,
+     "gap": {
+      "mean": 0.021939953810623556,
+      "max": 4,
+      "far": 0.003464203233256351
+     },
+     "unfinished": 0,
+     "wearMs": 1.3626000000003842,
+     "meshMs": 22.262699999999313
+    }
+   }
+  },
+  {
+   "body": "corona-gerboa-liaison",
+   "from": "seme",
+   "cls": "person",
+   "upright": true,
+   "neck": "rig",
+   "zones": {
+    "head": 1664,
+    "torso": 1358,
+    "back": 682
+   },
+   "ways": {
+    "A": {
+     "added": 2826,
+     "recoloured": 0,
+     "overlapped": 888,
+     "gap": {
+      "mean": 3.1031233171782446,
+      "max": 13,
+      "far": 0.47226709746903606
+     },
+     "unfinished": 0,
+     "wearMs": 3.3162000000011176,
+     "meshMs": 0
+    },
+    "B": {
+     "added": 1508,
+     "recoloured": 0,
+     "overlapped": 0,
+     "gap": {
+      "mean": 1.436339522546419,
+      "max": 6,
+      "far": 0.1226790450928382
+     },
+     "unfinished": 0,
+     "wearMs": 14.280700000001161,
+     "meshMs": 26.562700000000405
+    },
+    "C": {
+     "added": 66,
+     "recoloured": 784,
+     "overlapped": 0,
+     "gap": {
+      "mean": 0.18588235294117647,
+      "max": 4,
+      "far": 0.03529411764705882
+     },
+     "unfinished": 0,
+     "wearMs": 1.7771000000011554,
+     "meshMs": 20.098799999999756
+    }
+   }
+  },
+  {
+   "body": "corona-gerboa-actor",
+   "from": "seme",
+   "cls": "person",
+   "upright": true,
+   "neck": "rig",
+   "zones": {
+    "head": 2138,
+    "torso": 1510,
+    "back": 766
+   },
+   "ways": {
+    "A": {
+     "added": 5995,
+     "recoloured": 0,
+     "overlapped": 888,
+     "gap": {
+      "mean": 4.692140055208485,
+      "max": 17,
+      "far": 0.6658433822461136
+     },
+     "unfinished": 0,
+     "wearMs": 5.394000000002052,
+     "meshMs": 0
+    },
+    "B": {
+     "added": 1767,
+     "recoloured": 0,
+     "overlapped": 0,
+     "gap": {
+      "mean": 1.3961516694963214,
+      "max": 6,
+      "far": 0.11262026032823995
+     },
+     "unfinished": 0,
+     "wearMs": 15.0779999999977,
+     "meshMs": 35.124799999999595
+    },
+    "C": {
+     "added": 66,
+     "recoloured": 915,
+     "overlapped": 0,
+     "gap": {
+      "mean": 0.16106014271151886,
+      "max": 4,
+      "far": 0.03058103975535168
+     },
+     "unfinished": 0,
+     "wearMs": 1.4724000000005617,
+     "meshMs": 28.023800000000847
+    }
+   }
+  },
+  {
+   "body": "cervo-reale",
+   "from": "cantiere 8",
+   "cls": "beast",
+   "upright": false,
+   "neck": "narrowing",
+   "zones": {
+    "head": 377,
+    "torso": 1487,
+    "back": 662
+   },
+   "ways": {
+    "A": {
+     "added": 1545,
+     "recoloured": 0,
+     "overlapped": 168,
+     "gap": {
+      "mean": 2.4238178633975482,
+      "max": 9,
+      "far": 0.4068884997081144
+     },
+     "unfinished": 0,
+     "wearMs": 3.069900000000416,
+     "meshMs": 0
+    },
+    "B": {
+     "added": 1205,
+     "recoloured": 0,
+     "overlapped": 0,
+     "gap": {
+      "mean": 1.754356846473029,
+      "max": 8,
+      "far": 0.2016597510373444
+     },
+     "unfinished": 0,
+     "wearMs": 9.855999999999767,
+     "meshMs": 9.496799999998984
+    },
+    "C": {
+     "added": 0,
+     "recoloured": 658,
+     "overlapped": 0,
+     "gap": {
+      "mean": 0,
+      "max": 0,
+      "far": 0
+     },
+     "unfinished": 0,
+     "wearMs": 1.2572000000000116,
+     "meshMs": 7.679400000000896
+    }
+   }
+  },
+  {
+   "body": "lupo-dei-boschi",
+   "from": "cantiere 8",
+   "cls": "beast",
+   "upright": false,
+   "neck": "narrowing",
+   "zones": {
+    "head": 478,
+    "torso": 1378,
+    "back": 596
+   },
+   "ways": {
+    "A": {
+     "added": 2189,
+     "recoloured": 0,
+     "overlapped": 272,
+     "gap": {
+      "mean": 3.7732629012596504,
+      "max": 12,
+      "far": 0.6115400243803332
+     },
+     "unfinished": 0,
+     "wearMs": 3.470900000002075,
+     "meshMs": 0
+    },
+    "B": {
+     "added": 1149,
+     "recoloured": 0,
+     "overlapped": 0,
+     "gap": {
+      "mean": 1.6414273281114011,
+      "max": 11,
+      "far": 0.14012184508268058
+     },
+     "unfinished": 0,
+     "wearMs": 12.652900000002774,
+     "meshMs": 9.765699999999924
+    },
+    "C": {
+     "added": 0,
+     "recoloured": 668,
+     "overlapped": 0,
+     "gap": {
+      "mean": 0,
+      "max": 0,
+      "far": 0
+     },
+     "unfinished": 0,
+     "wearMs": 1.246899999998277,
+     "meshMs": 7.603000000000975
+    }
+   }
+  },
+  {
+   "body": "cinghiale-corazzato",
+   "from": "cantiere 8",
+   "cls": "beast",
+   "upright": false,
+   "neck": "share",
+   "zones": {
+    "head": 780,
+    "torso": 2518,
+    "back": 1276
+   },
+   "ways": {
+    "A": {
+     "added": 2477,
+     "recoloured": 0,
+     "overlapped": 345,
+     "gap": {
+      "mean": 2.806165839829908,
+      "max": 12,
+      "far": 0.4599574769666903
+     },
+     "unfinished": 0,
+     "wearMs": 3.5710999999992055,
+     "meshMs": 0
+    },
+    "B": {
+     "added": 1635,
+     "recoloured": 0,
+     "overlapped": 0,
+     "gap": {
+      "mean": 1.8342507645259938,
+      "max": 10,
+      "far": 0.19327217125382262
+     },
+     "unfinished": 0,
+     "wearMs": 10.652699999998731,
+     "meshMs": 11.032999999999447
+    },
+    "C": {
+     "added": 0,
+     "recoloured": 926,
+     "overlapped": 0,
+     "gap": {
+      "mean": 0,
+      "max": 0,
+      "far": 0
+     },
+     "unfinished": 0,
+     "wearMs": 1.7997999999988679,
+     "meshMs": 8.766499999999724
+    }
+   }
+  },
+  {
+   "body": "golem-runico",
+   "from": "cantiere 8",
+   "cls": "person",
+   "upright": true,
+   "neck": "share",
+   "zones": {
+    "head": 486,
+    "torso": 1333,
+    "back": 752
+   },
+   "ways": {
+    "A": {
+     "added": 859,
+     "recoloured": 0,
+     "overlapped": 388,
+     "gap": {
+      "mean": 1.3400160384923818,
+      "max": 5,
+      "far": 0.16599839615076184
+     },
+     "unfinished": 0,
+     "wearMs": 1.3284999999996217,
+     "meshMs": 0
+    },
+    "B": {
+     "added": 910,
+     "recoloured": 0,
+     "overlapped": 0,
+     "gap": {
+      "mean": 1.1835164835164835,
+      "max": 6,
+      "far": 0.04945054945054945
+     },
+     "unfinished": 0,
+     "wearMs": 4.66820000000007,
+     "meshMs": 7.1534000000010565
+    },
+    "C": {
+     "added": 152,
+     "recoloured": 591,
+     "overlapped": 0,
+     "gap": {
+      "mean": 0.3943472409152086,
+      "max": 6,
+      "far": 0.04979811574697174
+     },
+     "unfinished": 0,
+     "wearMs": 1.1782000000002881,
+     "meshMs": 4.308200000001307
+    }
+   }
+  },
+  {
+   "body": "automa-sentinella",
+   "from": "cantiere 8",
+   "cls": "person",
+   "upright": true,
+   "neck": "narrowing",
+   "zones": {
+    "head": 118,
+    "torso": 1251,
+    "back": 681
+   },
+   "ways": {
+    "A": {
+     "added": 1111,
+     "recoloured": 0,
+     "overlapped": 259,
+     "gap": {
+      "mean": 2.3291970802919706,
+      "max": 8,
+      "far": 0.4576642335766423
+     },
+     "unfinished": 0,
+     "wearMs": 1.2611000000015338,
+     "meshMs": 0
+    },
+    "B": {
+     "added": 979,
+     "recoloured": 0,
+     "overlapped": 0,
+     "gap": {
+      "mean": 2.1583248212461696,
+      "max": 8,
+      "far": 0.30745658835546474
+     },
+     "unfinished": 0,
+     "wearMs": 5.1185999999979686,
+     "meshMs": 7.560900000000402
+    },
+    "C": {
+     "added": 28,
+     "recoloured": 437,
+     "overlapped": 0,
+     "gap": {
+      "mean": 0.18924731182795698,
+      "max": 5,
+      "far": 0.043010752688172046
+     },
+     "unfinished": 0,
+     "wearMs": 1.1546000000016647,
+     "meshMs": 4.759200000000419
+    }
+   }
+  },
+  {
+   "body": "segugio-ottone",
+   "from": "cantiere 8",
+   "cls": "beast",
+   "upright": false,
+   "neck": "share",
+   "zones": {
+    "head": 458,
+    "torso": 2407,
+    "back": 1142
+   },
+   "ways": {
+    "A": {
+     "added": 2706,
+     "recoloured": 0,
+     "overlapped": 357,
+     "gap": {
+      "mean": 3.315703558602677,
+      "max": 11,
+      "far": 0.56513222331048
+     },
+     "unfinished": 0,
+     "wearMs": 3.8449000000000524,
+     "meshMs": 0
+    },
+    "B": {
+     "added": 1575,
+     "recoloured": 0,
+     "overlapped": 0,
+     "gap": {
+      "mean": 2.060952380952381,
+      "max": 11,
+      "far": 0.2342857142857143
+     },
+     "unfinished": 0,
+     "wearMs": 9.443899999998393,
+     "meshMs": 13.508299999999508
+    },
+    "C": {
+     "added": 0,
+     "recoloured": 860,
+     "overlapped": 0,
+     "gap": {
+      "mean": 0,
+      "max": 0,
+      "far": 0
+     },
+     "unfinished": 0,
+     "wearMs": 1.5987000000004628,
+     "meshMs": 10.403700000000754
+    }
+   }
+  },
+  {
+   "body": "ragno-meccanico",
+   "from": "cantiere 8",
+   "cls": "beast",
+   "upright": false,
+   "neck": "narrowing",
+   "zones": {
+    "head": 444,
+    "torso": 2311,
+    "back": 1190
+   },
+   "ways": {
+    "A": {
+     "added": 990,
+     "recoloured": 0,
+     "overlapped": 547,
+     "gap": {
+      "mean": 1.2966818477553677,
+      "max": 5,
+      "far": 0.18607677293428757
+     },
+     "unfinished": 0,
+     "wearMs": 2.8549000000002707,
+     "meshMs": 0
+    },
+    "B": {
+     "added": 874,
+     "recoloured": 0,
+     "overlapped": 0,
+     "gap": {
+      "mean": 1.2860411899313502,
+      "max": 7,
+      "far": 0.07665903890160183
+     },
+     "unfinished": 0,
+     "wearMs": 8.980100000000675,
+     "meshMs": 17.717899999999645
+    },
+    "C": {
+     "added": 0,
+     "recoloured": 772,
+     "overlapped": 0,
+     "gap": {
+      "mean": 0,
+      "max": 0,
+      "far": 0
+     },
+     "unfinished": 0,
+     "wearMs": 1.7445000000006985,
+     "meshMs": 15.64890000000014
+    }
+   }
+  },
+  {
+   "body": "cane-randagio",
+   "from": "cantiere 8",
+   "cls": "animal",
+   "upright": true,
+   "neck": "share",
+   "zones": {
+    "head": 95,
+    "torso": 328,
+    "back": 151
+   },
+   "ways": {
+    "A": {
+     "added": 378,
+     "recoloured": 0,
+     "overlapped": 14,
+     "gap": {
+      "mean": 2.436224489795918,
+      "max": 6,
+      "far": 0.43112244897959184
+     },
+     "unfinished": 0,
+     "wearMs": 0.4359999999996944,
+     "meshMs": 0
+    },
+    "B": {
+     "added": 293,
+     "recoloured": 0,
+     "overlapped": 0,
+     "gap": {
+      "mean": 1.1023890784982935,
+      "max": 3,
+      "far": 0.030716723549488054
+     },
+     "unfinished": 0,
+     "wearMs": 3.1226999999998952,
+     "meshMs": 1.8674000000009983
+    },
+    "C": {
+     "added": 8,
+     "recoloured": 174,
+     "overlapped": 0,
+     "gap": {
+      "mean": 0.04945054945054945,
+      "max": 2,
+      "far": 0
+     },
+     "unfinished": 0,
+     "wearMs": 0.25790000000051805,
+     "meshMs": 1.4224000000012893
+    }
+   }
+  },
+  {
+   "body": "gatto-urbano",
+   "from": "cantiere 8",
+   "cls": "animal",
+   "upright": false,
+   "neck": "share",
+   "zones": {
+    "head": 76,
+    "torso": 190,
+    "back": 76
+   },
+   "ways": {
+    "A": {
+     "added": 205,
+     "recoloured": 0,
+     "overlapped": 52,
+     "gap": {
+      "mean": 1.5875486381322956,
+      "max": 5,
+      "far": 0.21011673151750973
+     },
+     "unfinished": 0,
+     "wearMs": 0.4940999999998894,
+     "meshMs": 0
+    },
+    "B": {
+     "added": 250,
+     "recoloured": 0,
+     "overlapped": 0,
+     "gap": {
+      "mean": 1.568,
+      "max": 5,
+      "far": 0.16
+     },
+     "unfinished": 0,
+     "wearMs": 2.581900000001042,
+     "meshMs": 2.0679999999993015
+    },
+    "C": {
+     "added": 0,
+     "recoloured": 121,
+     "overlapped": 0,
+     "gap": {
+      "mean": 0,
+      "max": 0,
+      "far": 0
+     },
+     "unfinished": 0,
+     "wearMs": 0.4447999999993044,
+     "meshMs": 1.309400000000096
+    }
+   }
+  },
+  {
+   "body": "drone-esapode",
+   "from": "cantiere 8",
+   "cls": "beast",
+   "upright": false,
+   "neck": "narrowing",
+   "zones": {
+    "head": 32,
+    "torso": 1561,
+    "back": 834
+   },
+   "ways": {
+    "A": {
+     "added": 3792,
+     "recoloured": 0,
+     "overlapped": 412,
+     "gap": {
+      "mean": 3.3836822074215034,
+      "max": 13,
+      "far": 0.6194100856327307
+     },
+     "unfinished": 0,
+     "wearMs": 4.6864000000005035,
+     "meshMs": 0
+    },
+    "B": {
+     "added": 1016,
+     "recoloured": 0,
+     "overlapped": 0,
+     "gap": {
+      "mean": 1.6318897637795275,
+      "max": 8,
+      "far": 0.15255905511811024
+     },
+     "unfinished": 0,
+     "wearMs": 8.882200000000012,
+     "meshMs": 13.92069999999876
+    },
+    "C": {
+     "added": 0,
+     "recoloured": 643,
+     "overlapped": 0,
+     "gap": {
+      "mean": 0,
+      "max": 0,
+      "far": 0
+     },
+     "unfinished": 0,
+     "wearMs": 1.804599999999482,
+     "meshMs": 10.985599999999977
+    }
+   }
+  },
+  {
+   "body": "xenofauna-cristallina",
+   "from": "cantiere 8",
+   "cls": "beast",
+   "upright": false,
+   "neck": "narrowing",
+   "zones": {
+    "head": 460,
+    "torso": 1624,
+    "back": 860
+   },
+   "ways": {
+    "A": {
+     "added": 2294,
+     "recoloured": 0,
+     "overlapped": 309,
+     "gap": {
+      "mean": 2.9466000768344216,
+      "max": 10,
+      "far": 0.5213215520553208
+     },
+     "unfinished": 0,
+     "wearMs": 3.48070000000007,
+     "meshMs": 0
+    },
+    "B": {
+     "added": 1385,
+     "recoloured": 0,
+     "overlapped": 0,
+     "gap": {
+      "mean": 1.9631768953068591,
+      "max": 10,
+      "far": 0.2252707581227437
+     },
+     "unfinished": 0,
+     "wearMs": 10.401400000000649,
+     "meshMs": 13.426000000001295
+    },
+    "C": {
+     "added": 0,
+     "recoloured": 758,
+     "overlapped": 0,
+     "gap": {
+      "mean": 0,
+      "max": 0,
+      "far": 0
+     },
+     "unfinished": 0,
+     "wearMs": 1.7537000000011176,
+     "meshMs": 10.788699999999153
+    }
+   }
+  }
+ ]
+}
