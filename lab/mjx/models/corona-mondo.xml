@@ -1,38 +1,38 @@
 <!--
-La Biblioteca del Mondo (corona): la memoria del Narratore, chiostro orizzontale zen-cybernetico con corte aperta, specchio d'acqua scura e le rune del canone.
-Scritto da Gemini CLI (Gemini 3.8 Flash, abbonamento) il 23/10/2026, task T19.
-Scatola: 14 × 14 × 7 caselle, 112 × 112 × 56 voxel, 8 voxel per casella.
-Lettere chiave:
-  O = porta (lettera O, nome "porta", al centro x=56, y=102, z=0..19, atrio interno vuoto e passante verso la corte)
-  F = insegna ("BIBLIOTECA DEL MONDO", neon verde 7dd87d glow fisso su targa sopra la porta)
-  P = targa scura opaca per l'insegna
-  M = metallo nero cybernetico primario (pilastri 1×1, architravi, telaio corte e tetto a lama)
-  m = metallo secondario scuro (pannellature, montanti, cordoli vasca)
-  C = cemento grafite (basamento perimetrale, deambulatorio, sagrato e passerella)
-  S = acciaio chiaro (finiture lama del tetto, collarini e guglia lanterna)
-  s = acciaio scuro (cordoli di transizione e giunti)
-  V = vetro scuro riflettente
-  v = fasce di riflesso azzurrato-cenerino freddo
-  W = acqua scura specchiante della corte (10202a)
-  N = neon verde vivo d'accento (7dd87d glow)
-  n = neon verde tenue per i fili alla base dei pilastri (4a984a glow)
-  x = buffer temporaneo per l'animazione (hidden)
-Fasi pulsanti del canone (1..8):
-  1..8 = gradiente continuo di 8 fasi (da 489848 a 7dd87d con glow) per la respirazione meditativa delle rune e della lanterna.
-Architettura:
-  Edificio basso e orizzontale (12 × 12 caselle, alto ~3 caselle, z=0..25) con tetto piano a lama sottile sporgente.
-  Portico esterno continuo con pilastri neri fittissimi (1 × 1 voxel, passo 5 voxel) con filo di neon verde alla base.
-  Pareti arretrate in vetro scuro riflettente con montanti e fasce di riflesso.
-  Corte interna aperta al cielo (6 × 6 caselle = 48 × 48 voxel, x=32..80, y=32..80) con specchio d'acqua scura a filo (W, z=1).
-  Sul pelo dell'acqua (z=1), a filo, le 8 rune del canone accese in verde geometrico secondo una composizione sacra simmetrica.
-  Unica lanterna zenitale alta e sottile (z=0..48, ~6 caselle) nell'angolo nord-est dello specchio d'acqua, con luce in cima.
-  Porta O centrata a sud a z=0 con ampio varco nel colonnato e atrio interno passante verso la corte.
-  Insegna "BIBLIOTECA DEL MONDO" su due righe centrata sul bordo del tetto sopra la porta.
-Animazione "canone" (8 frame):
-  Respiro fluido e ciclico della luce delle rune immerse nello specchio d'acqua e del nucleo sommitale della lanterna.
+The Library of the World (corona): the memory of the Narrator, a horizontal zen-cybernetic cloister with an open court, a dark water mirror and the runes of the canon.
+Written by Gemini CLI (Gemini 3.8 Flash, subscription) on 23/10/2026, task T19.
+Box: 14 × 14 × 7 tiles, 112 × 112 × 56 voxels, 8 voxels per tile.
+Key letters:
+  O = door (letter O, name "porta", at the centre x=56, y=102, z=0..19, inner hall empty and open through to the court)
+  F = sign ("BIBLIOTECA DEL MONDO", green neon 7dd87d with a steady glow on a plate above the door)
+  P = dark matte plate for the sign
+  M = primary cybernetic black metal (1×1 pillars, lintels, court frame and blade roof)
+  m = dark secondary metal (panelling, posts, pool kerbs)
+  C = graphite concrete (perimeter base, ambulatory, parvis and walkway)
+  S = light steel (finishes of the roof blade, collars and lantern spire)
+  s = dark steel (transition kerbs and joints)
+  V = dark reflecting glass
+  v = bands of cold ash-blue reflection
+  W = dark mirroring water of the court (10202a)
+  N = bright green accent neon (7dd87d glow)
+  n = soft green neon for the threads at the base of the pillars (4a984a glow)
+  x = temporary buffer for the animation (hidden)
+Pulsing phases of the canon (1..8):
+  1..8 = continuous gradient of 8 phases (from 489848 to 7dd87d with glow) for the meditative breathing of the runes and the lantern.
+Architecture:
+  A low, horizontal building (12 × 12 tiles, ~3 tiles high, z=0..25) with a flat, thin, jutting blade roof.
+  A continuous outer portico with very close black pillars (1 × 1 voxel, every 5 voxels) with a green neon thread at the base.
+  Recessed walls in dark reflecting glass with posts and bands of reflection.
+  An inner court open to the sky (6 × 6 tiles = 48 × 48 voxels, x=32..80, y=32..80) with a flush dark water mirror (W, z=1).
+  On the surface of the water (z=1), flush, the 8 runes of the canon lit in geometric green in a sacred symmetric composition.
+  A single tall, thin zenith lantern (z=0..48, ~6 tiles) in the north-east corner of the water mirror, with a light on top.
+  Door O centred to the south at z=0 with a wide gap in the colonnade and an inner hall open through to the court.
+  The sign "BIBLIOTECA DEL MONDO" on two lines centred on the edge of the roof above the door.
+Animation "canone" (8 frames):
+  A fluid, cyclic breathing of the light of the runes immersed in the water mirror and of the top core of the lantern.
 -->
 <sequence values="BMmCSsVvWNnFPOx12345678" size="112 112 56" symmetry="()" name="Biblioteca del Mondo">
-  <!-- Materiali e palette neon punk -->
+  <!-- Materials and neon punk palette -->
   <color symbol="M" value="14141a" name="metallo primario"/>
   <color symbol="m" value="22242e" name="metallo secondario"/>
   <color symbol="C" value="34363e" name="cemento grafite"/>
@@ -48,7 +48,7 @@ Animazione "canone" (8 frame):
   <color symbol="O" value="1a2c1a" name="porta"/>
   <color symbol="x" hidden="True" name="buffer animazione"/>
 
-  <!-- 8 Fasi della respirazione del canone (1..8) -->
+  <!-- 8 phases of the breathing of the canon (1..8) -->
   <color symbol="1" value="7dd87d" glow="True" name="fase verde apice"/>
   <color symbol="2" value="88e288" glow="True" name="fase verde brillante"/>
   <color symbol="3" value="70cc70" glow="True" name="fase verde medio"/>
@@ -59,41 +59,41 @@ Animazione "canone" (8 frame):
   <color symbol="8" value="88e288" glow="True" name="fase verde brillante 2"/>
 
   <!-- ================================================================= -->
-  <!-- 1. BASAMENTO PERIMETRALE, SAGRATO E PAVIMENTAZIONI (z = 0..2)     -->
+  <!-- 1. PERIMETER BASE, PARVIS AND PAVING (z = 0..2)                   -->
   <!-- ================================================================= -->
-  <!-- Basamento generale dell'edificio (x=8..104, y=8..104, z=0) -->
+  <!-- General base of the building (x=8..104, y=8..104, z=0) -->
   <box at="56 56 0" size="97 97 1" color="C"/>
   <box at="56 56 1" size="95 95 1" color="m"/>
 
-  <!-- Sagrato d'ingresso e viale frontale (y=104..111, z=0..1) -->
+  <!-- Entrance parvis and front avenue (y=104..111, z=0..1) -->
   <box at="56 107 0" size="49 7 1" color="C"/>
   <box at="56 107 1" size="41 7 1" color="m"/>
-  <!-- Passerella centrale d'onore in lastre lisce verso la porta -->
+  <!-- Central path of honour in smooth slabs towards the door -->
   <box at="56 107 1" size="21 7 1" color="C"/>
   <box at="45 107 1" size="1 7 1" color="n"/>
   <box at="67 107 1" size="1 7 1" color="n"/>
 
-  <!-- Deambulatorio coperto (galleria tra le vetrate e la corte interna) -->
-  <!-- Pavimentazione interna raffinata in granito grafite a z=1 -->
+  <!-- Covered ambulatory (the gallery between the glass walls and the inner court) -->
+  <!-- Refined inner paving in graphite granite at z=1 -->
   <box at="56 56 1" size="93 93 1" color="C"/>
-  <!-- Fasce perimetrali di camminamento in acciaio scuro -->
+  <!-- Perimeter walkway bands in dark steel -->
   <box at="56 24 1" size="77 13 1" color="s"/>
   <box at="56 88 1" size="77 13 1" color="s"/>
   <box at="24 56 1" size="13 51 1" color="s"/>
   <box at="88 56 1" size="13 51 1" color="s"/>
 
   <!-- ================================================================= -->
-  <!-- 2. CORTE APERTA CENTRALE E SPECCHIO D'ACQUA (x=32..80, y=32..80)  -->
+  <!-- 2. CENTRAL OPEN COURT AND WATER MIRROR (x=32..80, y=32..80)       -->
   <!-- ================================================================= -->
-  <!-- Banchina e cornice perimetrale in pietra grafite liscia e metallo -->
+  <!-- Quay and perimeter frame in smooth graphite stone and metal -->
   <box at="56 56 1" size="49 49 1" color="m"/>
   <box at="56 56 2" size="49 49 1" color="M"/>
-  <!-- Scavo centrale della vasca (x=35..77, y=35..77, z=1..2) -->
+  <!-- Central dig of the pool (x=35..77, y=35..77, z=1..2) -->
   <box at="56 56 1" size="43 43 2" color="B"/>
 
-  <!-- Fondo della vasca a z=0 in pietra scura -->
+  <!-- Bottom of the pool at z=0 in dark stone -->
   <box at="56 56 0" size="43 43 1" color="m"/>
-  <!-- Cordolo interno perimetrale della vasca in metallo nero -->
+  <!-- Inner perimeter kerb of the pool in black metal -->
   <box at="56 35 0" size="43 1 2" color="M"/>
   <box at="56 77 0" size="43 1 2" color="M"/>
   <box at="35 56 0" size="1 43 2" color="M"/>
@@ -103,62 +103,62 @@ Animazione "canone" (8 frame):
   <box at="35 56 1" size="1 41 1" color="s"/>
   <box at="77 56 1" size="1 41 1" color="s"/>
 
-  <!-- Filo di luce neon verde tenue che orla il perimetro interno dello specchio d'acqua -->
+  <!-- A thread of soft green neon light edging the inner perimeter of the water mirror -->
   <box at="56 36 1" size="39 1 1" color="n"/>
   <box at="56 76 1" size="39 1 1" color="n"/>
   <box at="36 56 1" size="1 39 1" color="n"/>
   <box at="76 56 1" size="1 39 1" color="n"/>
 
-  <!-- Specchio d'acqua scura a filo (z=1, x=36..76, y=36..76) -->
+  <!-- Flush dark water mirror (z=1, x=36..76, y=36..76) -->
   <box at="56 56 1" size="41 41 1" color="W"/>
 
-  <!-- Medaglione centrale del canone immerso a z=1 (cx=56, cy=56) -->
+  <!-- Central medallion of the canon immersed at z=1 (cx=56, cy=56) -->
   <box at="56 56 1" size="7 7 1" color="M"/>
   <box at="56 56 1" size="5 5 1" color="s"/>
   <box at="56 56 1" size="3 3 1" color="1"/>
   <box at="56 56 1" size="1 1 1" color="M"/>
 
-  <!-- 8 Rune del Canone sul pelo dell'acqua a filo (z=1) -->
-  <!-- Runa 1 (Nord, Luce / Freccia zen): cx=56, cy=44 -->
+  <!-- 8 Runes of the Canon flush on the surface of the water (z=1) -->
+  <!-- Rune 1 (North, Light / zen arrow): cx=56, cy=44 -->
   <box at="56 44 1" size="1 5 1" color="1"/>
   <box at="55 43 1" size="1 1 1" color="1"/>
   <box at="57 43 1" size="1 1 1" color="1"/>
   <box at="54 44 1" size="1 1 1" color="1"/>
   <box at="58 44 1" size="1 1 1" color="1"/>
 
-  <!-- Runa 2 (Nord-Est, Fuoco / Chevron angolare): cx=65, cy=47 -->
+  <!-- Rune 2 (North-East, Fire / angular chevron): cx=65, cy=47 -->
   <box at="64 47 1" size="1 5 1" color="2"/>
   <box at="65 46 1" size="1 1 1" color="2"/>
   <box at="65 48 1" size="1 1 1" color="2"/>
   <box at="66 47 1" size="1 1 1" color="2"/>
 
-  <!-- Runa 3 (Est, Acqua / Gancio fluido): cx=68, cy=56 -->
+  <!-- Rune 3 (East, Water / fluid hook): cx=68, cy=56 -->
   <box at="68 56 1" size="1 5 1" color="3"/>
   <box at="69 54 1" size="1 2 1" color="3"/>
   <box at="67 58 1" size="1 1 1" color="3"/>
 
-  <!-- Runa 4 (Sud-Est, Terra / Losanga chiusa): cx=65, cy=65 -->
+  <!-- Rune 4 (South-East, Earth / closed lozenge): cx=65, cy=65 -->
   <box at="65 65 1" size="3 3 1" color="4"/>
   <box at="65 65 1" size="1 1 1" color="W"/>
 
-  <!-- Runa 5 (Sud, Vita / Tridente sacro): cx=56, cy=68 -->
+  <!-- Rune 5 (South, Life / sacred trident): cx=56, cy=68 -->
   <box at="56 68 1" size="1 5 1" color="5"/>
   <box at="54 66 1" size="1 3 1" color="5"/>
   <box at="58 66 1" size="1 3 1" color="5"/>
   <box at="56 68 1" size="3 1 1" color="5"/>
 
-  <!-- Runa 6 (Sud-Ovest, Scudo / Triangolo cybernetico): cx=47, cy=65 -->
+  <!-- Rune 6 (South-West, Shield / cybernetic triangle): cx=47, cy=65 -->
   <box at="46 65 1" size="1 5 1" color="6"/>
   <box at="47 64 1" size="1 1 1" color="6"/>
   <box at="47 66 1" size="1 1 1" color="6"/>
   <box at="48 65 1" size="1 1 1" color="6"/>
 
-  <!-- Runa 7 (Ovest, Vento / Saetta spezzata): cx=44, cy=56 -->
+  <!-- Rune 7 (West, Wind / broken bolt): cx=44, cy=56 -->
   <box at="43 54 1" size="1 2 1" color="7"/>
   <box at="44 55 1" size="1 3 1" color="7"/>
   <box at="45 57 1" size="1 2 1" color="7"/>
 
-  <!-- Runa 8 (Nord-Ovest, Canone / Intreccio geometrico): cx=47, cy=47 -->
+  <!-- Rune 8 (North-West, Canon / geometric weave): cx=47, cy=47 -->
   <box at="47 47 1" size="5 1 1" color="8"/>
   <box at="45 46 1" size="1 1 1" color="8"/>
   <box at="49 48 1" size="1 1 1" color="8"/>
@@ -166,51 +166,51 @@ Animazione "canone" (8 frame):
   <box at="47 49 1" size="1 1 1" color="8"/>
 
   <!-- ================================================================= -->
-  <!-- 3. LA LANTERNA ZENITALE NELL'ANGOLO NORD-EST (cx=71, cy=41)       -->
+  <!-- 3. THE ZENITH LANTERN IN THE NORTH-EAST CORNER (cx=71, cy=41)     -->
   <!-- ================================================================= -->
-  <!-- Plinto e basamento immerso nell'acqua (z=0..3) -->
+  <!-- Plinth and base immersed in the water (z=0..3) -->
   <box at="71 41 0" size="3 3 2" color="M"/>
   <box at="71 41 2" size="3 3 1" color="s"/>
   <box at="71 41 3" size="3 3 1" color="M"/>
   <box at="71 41 3" size="1 1 1" color="1"/>
 
-  <!-- Fusto slanciato e sottile in titanio nero (z=4..39) -->
+  <!-- Slender, thin shaft in black titanium (z=4..39) -->
   <box at="71 41 4" size="1 1 36" color="M"/>
-  <!-- Anelli e ghiere strutturali ogni 8 voxel -->
+  <!-- Structural rings and collars every 8 voxels -->
   <box at="71 41 12" size="3 3 1" color="S"/>
   <box at="71 41 20" size="3 3 1" color="S"/>
   <box at="71 41 28" size="3 3 1" color="S"/>
   <box at="71 41 36" size="3 3 1" color="S"/>
 
-  <!-- Gabbia zen della lanterna e nucleo luminoso sommitale (z=40..48) -->
-  <!-- Piattello di base della gabbia a sbalzo -->
+  <!-- Zen cage of the lantern and glowing top core (z=40..48) -->
+  <!-- Overhanging base plate of the cage -->
   <box at="71 41 40" size="5 5 1" color="M"/>
   <box at="71 41 40" size="3 3 1" color="s"/>
-  <!-- 4 Montanti angolari sottili della gabbia -->
+  <!-- 4 thin corner posts of the cage -->
   <box at="69 39 41" size="1 1 4" color="S"/>
   <box at="73 39 41" size="1 1 4" color="S"/>
   <box at="69 43 41" size="1 1 4" color="S"/>
   <box at="73 43 41" size="1 1 4" color="S"/>
-  <!-- Cuore di luce verde pulsante (fasi 1..8) al centro della lanterna -->
+  <!-- Pulsing green heart of light (phases 1..8) at the centre of the lantern -->
   <box at="71 41 41" size="1 1 4" color="1"/>
   <box at="71 41 42" size="3 3 2" color="1"/>
 
-  <!-- Tettuccio a padiglione della lanterna (z=45..47) -->
+  <!-- Pavilion roof of the lantern (z=45..47) -->
   <box at="71 41 45" size="7 7 1" color="M"/>
   <box at="71 41 46" size="5 5 1" color="m"/>
   <box at="71 41 47" size="3 3 1" color="S"/>
-  <!-- Cuspide / ago sottile di chiusura a z=48..49 -->
+  <!-- Thin closing cusp / needle at z=48..49 -->
   <box at="71 41 48" size="1 1 2" color="S"/>
 
   <!-- ================================================================= -->
-  <!-- 4. PARETI INTERNE ED ESTERNE IN VETRO SCURO RIFLETTENTE           -->
+  <!-- 4. INNER AND OUTER WALLS IN DARK REFLECTING GLASS                -->
   <!-- ================================================================= -->
-  <!-- Pareti di vetro arretrate dal portico esterno (z=1..23) -->
-  <!-- Parete Nord (y=16, x=16..96) -->
+  <!-- Glass walls set back from the outer portico (z=1..23) -->
+  <!-- North wall (y=16, x=16..96) -->
   <box at="56 16 1" size="81 1 23" color="V"/>
   <box at="56 16 7" size="81 1 1" color="v"/>
   <box at="56 16 15" size="81 1 1" color="v"/>
-  <!-- Montanti verticali metallo scuro -->
+  <!-- Vertical posts in dark metal -->
   <box at="26 16 1" size="1 1 23" color="m"/>
   <box at="36 16 1" size="1 1 23" color="m"/>
   <box at="46 16 1" size="1 1 23" color="m"/>
@@ -219,11 +219,11 @@ Animazione "canone" (8 frame):
   <box at="76 16 1" size="1 1 23" color="m"/>
   <box at="86 16 1" size="1 1 23" color="m"/>
 
-  <!-- Parete Ovest (x=16, y=16..96) -->
+  <!-- West wall (x=16, y=16..96) -->
   <box at="16 56 1" size="1 81 23" color="V"/>
   <box at="16 56 7" size="1 81 1" color="v"/>
   <box at="16 56 15" size="1 81 1" color="v"/>
-  <!-- Montanti verticali metallo scuro -->
+  <!-- Vertical posts in dark metal -->
   <box at="16 26 1" size="1 1 23" color="m"/>
   <box at="16 36 1" size="1 1 23" color="m"/>
   <box at="16 46 1" size="1 1 23" color="m"/>
@@ -232,11 +232,11 @@ Animazione "canone" (8 frame):
   <box at="16 76 1" size="1 1 23" color="m"/>
   <box at="16 86 1" size="1 1 23" color="m"/>
 
-  <!-- Parete Est (x=96, y=16..96) -->
+  <!-- East wall (x=96, y=16..96) -->
   <box at="96 56 1" size="1 81 23" color="V"/>
   <box at="96 56 7" size="1 81 1" color="v"/>
   <box at="96 56 15" size="1 81 1" color="v"/>
-  <!-- Montanti verticali metallo scuro -->
+  <!-- Vertical posts in dark metal -->
   <box at="96 26 1" size="1 1 23" color="m"/>
   <box at="96 36 1" size="1 1 23" color="m"/>
   <box at="96 46 1" size="1 1 23" color="m"/>
@@ -245,7 +245,7 @@ Animazione "canone" (8 frame):
   <box at="96 76 1" size="1 1 23" color="m"/>
   <box at="96 86 1" size="1 1 23" color="m"/>
 
-  <!-- Parete Sud frontale (y=96, x=16..45 e x=67..96, con apertura centrale atrio) -->
+  <!-- Front south wall (y=96, x=16..45 and x=67..96, with a central opening for the hall) -->
   <box at="31 96 1" size="29 1 23" color="V"/>
   <box at="31 96 7" size="29 1 1" color="v"/>
   <box at="31 96 15" size="29 1 1" color="v"/>
@@ -257,38 +257,38 @@ Animazione "canone" (8 frame):
   <box at="76 96 1" size="1 1 23" color="m"/>
   <box at="86 96 1" size="1 1 23" color="m"/>
 
-  <!-- Pareti laterali dell'atrio d'ingresso (x=46 e x=66, y=96..102, z=1..23) -->
+  <!-- Side walls of the entrance hall (x=46 and x=66, y=96..102, z=1..23) -->
   <box at="46 99 1" size="1 7 23" color="M"/>
   <box at="46 99 3" size="1 5 18" color="V"/>
   <box at="66 99 1" size="1 7 23" color="M"/>
   <box at="66 99 3" size="1 5 18" color="V"/>
 
   <!-- ================================================================= -->
-  <!-- 5. PORTA O, VANO D'INGRESSO E PORTALE FRONTALE (x=56, y=102..104)  -->
+  <!-- 5. DOOR O, ENTRANCE SPACE AND FRONT PORTAL (x=56, y=102..104)      -->
   <!-- ================================================================= -->
-  <!-- Portale d'onore in metallo nero a cornice (x=46..66, y=102, z=0..23) -->
+  <!-- Portal of honour as a black metal frame (x=46..66, y=102, z=0..23) -->
   <box at="46 102 0" size="1 1 24" color="M"/>
   <box at="66 102 0" size="1 1 24" color="M"/>
-  <!-- Architrave d'ingresso a z=20..23 -->
+  <!-- Entrance lintel at z=20..23 -->
   <box at="56 102 20" size="19 1 4" color="M"/>
   <box at="56 102 20" size="17 1 1" color="N"/>
 
-  <!-- Porta O (vano d'ingresso a z=0, larga 16 voxel, alta 20 voxel: x=48..63) -->
+  <!-- Door O (entrance space at z=0, 16 voxels wide, 20 voxels high: x=48..63) -->
   <box at="52 102 0" size="8 1 20" color="O"/>
   <box at="60 102 0" size="8 1 20" color="O"/>
-  <!-- Sguancio e vano interno libero e vuoto per oltre 12 voxel fino alla corte -->
+  <!-- Splay and inner space free and empty for over 12 voxels up to the court -->
   <box at="56 95 0" size="17 13 22" color="B"/>
-  <!-- Pavimento dell'atrio interno a z=0..1 -->
+  <!-- Floor of the inner hall at z=0..1 -->
   <box at="56 95 0" size="19 13 1" color="C"/>
   <box at="56 95 1" size="17 13 1" color="m"/>
-  <!-- Guide luminose interne lungo l'atrio verso la corte -->
+  <!-- Inner light guides along the hall towards the court -->
   <box at="49 95 1" size="1 13 1" color="n"/>
   <box at="63 95 1" size="1 13 1" color="n"/>
 
   <!-- ================================================================= -->
-  <!-- 6. COLONNATO FITTO PERIMETRALE (Pilastri 1×1, passo 5, base neon) -->
+  <!-- 6. CLOSE PERIMETER COLONNADE (1×1 pillars, every 5, neon base)    -->
   <!-- ================================================================= -->
-  <!-- Lato Nord (y=11, x=11..101 a passo 5) -->
+  <!-- North side (y=11, x=11..101 every 5) -->
   <box at="11 11 1" size="1 1 1" color="n"/><box at="11 11 2" size="1 1 22" color="M"/>
   <box at="16 11 1" size="1 1 1" color="n"/><box at="16 11 2" size="1 1 22" color="M"/>
   <box at="21 11 1" size="1 1 1" color="n"/><box at="21 11 2" size="1 1 22" color="M"/>
@@ -309,7 +309,7 @@ Animazione "canone" (8 frame):
   <box at="96 11 1" size="1 1 1" color="n"/><box at="96 11 2" size="1 1 22" color="M"/>
   <box at="101 11 1" size="1 1 1" color="n"/><box at="101 11 2" size="1 1 22" color="M"/>
 
-  <!-- Lato Ovest (x=11, y=16..96 a passo 5) -->
+  <!-- West side (x=11, y=16..96 every 5) -->
   <box at="11 16 1" size="1 1 1" color="n"/><box at="11 16 2" size="1 1 22" color="M"/>
   <box at="11 21 1" size="1 1 1" color="n"/><box at="11 21 2" size="1 1 22" color="M"/>
   <box at="11 26 1" size="1 1 1" color="n"/><box at="11 26 2" size="1 1 22" color="M"/>
@@ -329,7 +329,7 @@ Animazione "canone" (8 frame):
   <box at="11 96 1" size="1 1 1" color="n"/><box at="11 96 2" size="1 1 22" color="M"/>
   <box at="11 101 1" size="1 1 1" color="n"/><box at="11 101 2" size="1 1 22" color="M"/>
 
-  <!-- Lato Est (x=101, y=16..96 a passo 5) -->
+  <!-- East side (x=101, y=16..96 every 5) -->
   <box at="101 16 1" size="1 1 1" color="n"/><box at="101 16 2" size="1 1 22" color="M"/>
   <box at="101 21 1" size="1 1 1" color="n"/><box at="101 21 2" size="1 1 22" color="M"/>
   <box at="101 26 1" size="1 1 1" color="n"/><box at="101 26 2" size="1 1 22" color="M"/>
@@ -349,7 +349,7 @@ Animazione "canone" (8 frame):
   <box at="101 96 1" size="1 1 1" color="n"/><box at="101 96 2" size="1 1 22" color="M"/>
   <box at="101 101 1" size="1 1 1" color="n"/><box at="101 101 2" size="1 1 22" color="M"/>
 
-  <!-- Lato Sud frontale (y=101, x=16..41 e x=71..96 a passo 5, con varco aperto al centro x=46..66 per l'ingresso) -->
+  <!-- Front south side (y=101, x=16..41 and x=71..96 every 5, with an open gap at the centre x=46..66 for the entrance) -->
   <box at="16 101 1" size="1 1 1" color="n"/><box at="16 101 2" size="1 1 22" color="M"/>
   <box at="21 101 1" size="1 1 1" color="n"/><box at="21 101 2" size="1 1 22" color="M"/>
   <box at="26 101 1" size="1 1 1" color="n"/><box at="26 101 2" size="1 1 22" color="M"/>
@@ -364,8 +364,8 @@ Animazione "canone" (8 frame):
   <box at="91 101 1" size="1 1 1" color="n"/><box at="91 101 2" size="1 1 22" color="M"/>
   <box at="96 101 1" size="1 1 1" color="n"/><box at="96 101 2" size="1 1 22" color="M"/>
 
-  <!-- Colonnato interno della corte aperta (affacciato sull'acqua, x=33..79, y=33..79) -->
-  <!-- Lato Nord corte (y=33, x=33..79 a passo 6) -->
+  <!-- Inner colonnade of the open court (facing the water, x=33..79, y=33..79) -->
+  <!-- North side of the court (y=33, x=33..79 every 6) -->
   <box at="33 33 1" size="1 1 1" color="n"/><box at="33 33 2" size="1 1 22" color="M"/>
   <box at="39 33 1" size="1 1 1" color="n"/><box at="39 33 2" size="1 1 22" color="M"/>
   <box at="45 33 1" size="1 1 1" color="n"/><box at="45 33 2" size="1 1 22" color="M"/>
@@ -376,7 +376,7 @@ Animazione "canone" (8 frame):
   <box at="75 33 1" size="1 1 1" color="n"/><box at="75 33 2" size="1 1 22" color="M"/>
   <box at="79 33 1" size="1 1 1" color="n"/><box at="79 33 2" size="1 1 22" color="M"/>
 
-  <!-- Lato Sud corte (y=79, x=33..79 a passo 6) -->
+  <!-- South side of the court (y=79, x=33..79 every 6) -->
   <box at="33 79 1" size="1 1 1" color="n"/><box at="33 79 2" size="1 1 22" color="M"/>
   <box at="39 79 1" size="1 1 1" color="n"/><box at="39 79 2" size="1 1 22" color="M"/>
   <box at="45 79 1" size="1 1 1" color="n"/><box at="45 79 2" size="1 1 22" color="M"/>
@@ -387,7 +387,7 @@ Animazione "canone" (8 frame):
   <box at="75 79 1" size="1 1 1" color="n"/><box at="75 79 2" size="1 1 22" color="M"/>
   <box at="79 79 1" size="1 1 1" color="n"/><box at="79 79 2" size="1 1 22" color="M"/>
 
-  <!-- Lato Ovest corte (x=33, y=39..73 a passo 6) -->
+  <!-- West side of the court (x=33, y=39..73 every 6) -->
   <box at="33 39 1" size="1 1 1" color="n"/><box at="33 39 2" size="1 1 22" color="M"/>
   <box at="33 45 1" size="1 1 1" color="n"/><box at="33 45 2" size="1 1 22" color="M"/>
   <box at="33 51 1" size="1 1 1" color="n"/><box at="33 51 2" size="1 1 22" color="M"/>
@@ -396,7 +396,7 @@ Animazione "canone" (8 frame):
   <box at="33 69 1" size="1 1 1" color="n"/><box at="33 69 2" size="1 1 22" color="M"/>
   <box at="33 73 1" size="1 1 1" color="n"/><box at="33 73 2" size="1 1 22" color="M"/>
 
-  <!-- Lato Est corte (x=79, y=39..73 a passo 6) -->
+  <!-- East side of the court (x=79, y=39..73 every 6) -->
   <box at="79 39 1" size="1 1 1" color="n"/><box at="79 39 2" size="1 1 22" color="M"/>
   <box at="79 45 1" size="1 1 1" color="n"/><box at="79 45 2" size="1 1 22" color="M"/>
   <box at="79 51 1" size="1 1 1" color="n"/><box at="79 51 2" size="1 1 22" color="M"/>
@@ -406,56 +406,56 @@ Animazione "canone" (8 frame):
   <box at="79 73 1" size="1 1 1" color="n"/><box at="79 73 2" size="1 1 22" color="M"/>
 
   <!-- ================================================================= -->
-  <!-- 7. COPERTURA A LAMA SOTTILE (Tetto piano sporgente, z=24..25)     -->
+  <!-- 7. THIN BLADE COVERING (flat jutting roof, z=24..25)              -->
   <!-- ================================================================= -->
-  <!-- Settore Nord (y=7..31, x=7..105, z=24..25) -->
+  <!-- North sector (y=7..31, x=7..105, z=24..25) -->
   <box at="56 19 24" size="99 25 1" color="M"/>
   <box at="56 19 25" size="99 25 1" color="m"/>
 
-  <!-- Settore Sud (y=81..105, x=7..105, z=24..25) -->
+  <!-- South sector (y=81..105, x=7..105, z=24..25) -->
   <box at="56 93 24" size="99 25 1" color="M"/>
   <box at="56 93 25" size="99 25 1" color="m"/>
 
-  <!-- Settore Ovest (x=7..31, y=32..80, z=24..25) -->
+  <!-- West sector (x=7..31, y=32..80, z=24..25) -->
   <box at="19 56 24" size="25 49 1" color="M"/>
   <box at="19 56 25" size="25 49 1" color="m"/>
 
-  <!-- Settore Est (x=81..105, y=32..80, z=24..25) -->
+  <!-- East sector (x=81..105, y=32..80, z=24..25) -->
   <box at="93 56 24" size="25 49 1" color="M"/>
   <box at="93 56 25" size="25 49 1" color="m"/>
 
-  <!-- Bordo a lama perimetrale esterno finitura acciaio scuro s/S (z=25) -->
+  <!-- Outer perimeter blade edge with a dark steel finish s/S (z=25) -->
   <box at="56 7 25" size="99 1 1" color="S"/>
   <box at="56 105 25" size="99 1 1" color="S"/>
   <box at="7 56 25" size="1 99 1" color="S"/>
   <box at="105 56 25" size="1 99 1" color="S"/>
 
-  <!-- Bordo a lama interno della corte aperta (z=25) -->
+  <!-- Inner blade edge of the open court (z=25) -->
   <box at="56 32 25" size="49 1 1" color="s"/>
   <box at="56 80 25" size="49 1 1" color="s"/>
   <box at="32 56 25" size="1 49 1" color="s"/>
   <box at="80 56 25" size="1 49 1" color="s"/>
 
-  <!-- Fascia sottile neon verde d'accento sotto il cornicione del tetto della corte interna -->
+  <!-- Thin green accent neon band under the roof cornice of the inner court -->
   <box at="56 32 24" size="47 1 1" color="n"/>
   <box at="56 80 24" size="47 1 1" color="n"/>
   <box at="32 56 24" size="1 47 1" color="n"/>
   <box at="80 56 24" size="1 47 1" color="n"/>
 
   <!-- ================================================================= -->
-  <!-- 8. TARGA E INSEGNA NEON "BIBLIOTECA DEL MONDO" (x=36..76, y=105) -->
+  <!-- 8. PLATE AND NEON SIGN "BIBLIOTECA DEL MONDO" (x=36..76, y=105) -->
   <!-- ================================================================= -->
-  <!-- Targa di supporto scura opaca montata a filo del tetto sopra la porta (z=20..33) -->
+  <!-- Dark matte support plate mounted flush with the roof above the door (z=20..33) -->
   <box at="56 104 20" size="43 1 14" color="P"/>
   <box at="56 104 20" size="45 1 1" color="M"/>
   <box at="56 104 33" size="45 1 1" color="M"/>
   <box at="34 104 20" size="1 1 14" color="M"/>
   <box at="78 104 20" size="1 1 14" color="M"/>
-  <!-- Filetto luminoso verde alla base e in cima alla targa -->
+  <!-- Green light thread at the bottom and at the top of the plate -->
   <box at="56 105 20" size="41 1 1" color="n"/>
   <box at="56 105 33" size="41 1 1" color="n"/>
 
-  <!-- RIGA 1: "BIBLIOTECA" (x=39..73, z=27..31, y=105) -->
+  <!-- LINE 1: "BIBLIOTECA" (x=39..73, z=27..31, y=105) -->
   <!-- B (x=39..41) -->
   <box at="39 105 27" size="1 1 5" color="F"/>
   <box at="40 105 31" size="1 1 1" color="F"/>
@@ -514,7 +514,7 @@ Animazione "canone" (8 frame):
   <box at="72 105 31" size="1 1 1" color="F"/>
   <box at="72 105 29" size="1 1 1" color="F"/>
 
-  <!-- RIGA 2: "DEL MONDO" (x=40..73, z=21..25, y=105) -->
+  <!-- LINE 2: "DEL MONDO" (x=40..73, z=21..25, y=105) -->
   <!-- D (x=40..42) -->
   <box at="40 105 21" size="1 1 5" color="F"/>
   <box at="41 105 25" size="1 1 1" color="F"/>
@@ -534,9 +534,9 @@ Animazione "canone" (8 frame):
   <box at="49 105 21" size="1 1 1" color="F"/>
   <box at="50 105 21" size="1 1 1" color="F"/>
 
-  <!-- Spazio x=51..52 tra DEL e MONDO -->
+  <!-- Space x=51..52 between DEL and MONDO -->
 
-  <!-- M (x=53..57, larghezza 5 voxel) -->
+  <!-- M (x=53..57, 5 voxels wide) -->
   <box at="53 105 21" size="1 1 5" color="F"/>
   <box at="57 105 21" size="1 1 5" color="F"/>
   <box at="54 105 24" size="1 1 1" color="F"/>
@@ -568,12 +568,12 @@ Animazione "canone" (8 frame):
 </sequence>
 
 <!-- ================================================================= -->
-<!-- ANIMAZIONE CICLICA "CANONE" (8 frame)                             -->
-<!-- Respirazione meditativa delle rune d'acqua e del faro zenitale    -->
+<!-- CYCLIC ANIMATION "CANONE" (8 frames)                              -->
+<!-- Meditative breathing of the water runes and the zenith beacon     -->
 <!-- ================================================================= -->
 <animation name="canone" frames="8">
   <sequence>
-    <!-- Scorrimento ciclico delle 8 fasi di intensità luminosa verde -->
+    <!-- Cyclic run through the 8 phases of green light intensity -->
     <all in="1" out="x"/>
     <all in="2" out="1"/>
     <all in="3" out="2"/>

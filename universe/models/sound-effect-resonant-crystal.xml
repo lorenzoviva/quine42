@@ -1,4 +1,4 @@
-<!-- Un cristallo che risuona: tre rintocchi acuti su una scala antica, ognuno lungo, e un alone di pad sotto. Il seme sceglie le note. -->
+<!-- A resonating crystal: three high chimes on an ancient scale, each long, and a halo of pad underneath. The seed picks the notes. -->
 <sequence name="Cristallo risonante" values="BNSAGKHCTUVPM" size="12 2 14" symmetry="()">
   <sound bpm="100" scale="hirajoshi" root="57" swing="0" cutoff="12000" space="0.75">
     <track y="0" instrument="lead" volume="0.45"/>
@@ -17,7 +17,7 @@
   <color symbol="P" value="64748b" name="Scelta" hidden="True"/>
   <color symbol="M" value="14b8a6" name="Scelta" hidden="True"/>
 
-  <!-- I rintocchi. -->
+  <!-- The chimes. -->
   <line at="0 0 7" to="0 0 7" r="0" color="T"/>
   <line at="0 0 9" to="0 0 9" r="0" color="T"/>
   <line at="0 0 8" to="0 0 8" r="0" color="T"/>
@@ -35,7 +35,7 @@
   <all in="V" out="B"/>
   <all in="ABBB" out="ASSS"/>
   <all in="NBBB" out="NSSS"/>
-  <!-- L'alone. -->
+  <!-- The halo. -->
   <line at="0 1 5" to="0 1 5" r="0" color="N"/>
   <line at="0 1 7" to="0 1 7" r="0" color="P"/>
   <line at="0 1 8" to="0 1 8" r="0" color="P"/>

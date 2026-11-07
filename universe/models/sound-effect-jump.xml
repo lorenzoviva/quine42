@@ -1,4 +1,4 @@
-<!-- Un salto: due tocchi leggeri, perché si salta spesso. -->
+<!-- A jump: two light touches, because one jumps often. -->
 <sequence name="Salto" values="BNMT" size="3 1 5" symmetry="()">
   <sound bpm="400" scale="pentatonic_minor" root="67" swing="0" cutoff="6000" space="0.05">
     <track y="0" instrument="bass" volume="0.8"/>

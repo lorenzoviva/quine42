@@ -1,4 +1,4 @@
-<!-- Dal SoundLab: una griglia di 4×3×4 (quattro battute) scalata per 4×1×2: ogni cella grossa diventa sedicesimi, legature, accenti e colpi. -->
+<!-- From the SoundLab: a 4×3×4 grid (four bars) scaled by 4×1×2: every coarse cell becomes sixteenths, ties, accents and hits. -->
 <sequence name="Architettura Frattale" values="BNSAGKHCRTMP" size="4 3 4" symmetry="()">
   <sound bpm="114" scale="hirajoshi" root="53" swing="0.12" cutoff="4800" space="0.35">
     <track y="0" instrument="lead" volume="0.82"/>
@@ -17,14 +17,14 @@
   <color symbol="M" value="10b981" name="Motivo" hidden="True"/>
   <color symbol="P" value="64748b" name="Passaggio" hidden="True"/>
 
-  <!-- La struttura grossa. La prima colonna è sempre completa, così il pad c'è con ogni seme. -->
+  <!-- The coarse structure. The first column is always complete, so the pad is there with every seed. -->
   <one in="B/B/B" out="R/M/K" steps="1"/>
   <one steps="3">
     <rule in="B/B/B" out="R/M/K"/>
     <rule in="B/B/B" out="T/B/C"/>
   </one>
   <all in="B" out="P"/>
-  <!-- L'espansione: gli strati si scrivono dall'alto, come sempre in MarkovJunior. -->
+  <!-- The expansion: the layers are written from the top, as always in MarkovJunior. -->
   <map scale="4 1 2" values="BNSAGKHCRTMP">
     <rule in="R" out="BBGN ABNB"/>
     <rule in="T" out="BBBG NSSB"/>

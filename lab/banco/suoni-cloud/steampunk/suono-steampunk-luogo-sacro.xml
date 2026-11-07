@@ -23,7 +23,7 @@
   <color symbol="Z" value="e879f9" name="Segno dell'arpeggio" hidden="True"/>
   <color symbol="D" value="475569" name="Battuta" hidden="True"/>
 
-  <!-- Le teste, all'inizio del ciclo; il soffitto tiene gli accordi nel registro grave. -->
+  <!-- The heads, at the start of the cycle; the ceiling keeps the chords in the low register. -->
   <line at="0 0 7" to="0 0 7" r="0" color="M"/>
   <line at="16 3 9" to="16 3 9" r="0" color="Q"/>
   <line at="0 2 0" to="0 2 0" r="0" color="T"/>
@@ -38,7 +38,7 @@
   <line at="0 2 14" to="127 2 14" r="0" color="W"/>
   <line at="0 2 15" to="127 2 15" r="0" color="W"/>
 
-  <!-- L'armonia: la testa cammina di 16 in 16 passi e lascia una radice; il seme sceglie il grado. -->
+  <!-- The harmony: the head walks 16 steps at a time and leaves a root; the seed picks the degree. -->
   <one>
     <rule in="****************B ***************** ***************** T****************" out="****************T ***************** ***************** R****************" p="3"/>
     <rule in="T**************** ***************** ***************** ****************B" out="R**************** ***************** ***************** ****************T" p="3"/>
@@ -51,20 +51,20 @@
   <all in="W" out="B"/>
   <all in="B/R" out="X/Y"/>
 
-  <!-- Il pad: un disegno per battuta. -->
+  <!-- The pad: one pattern per bar. -->
   <one>
     <rule in="BBBBBBBBBBBBBBBB **************** BBBBBBBBBBBBBBBB **************** BBBBBBBBBBBBBBBB **************** XBBBBBBBBBBBBBBB" out="NSSSSSSSSSSSSSSS **************** NSSSSSSSSSSSSSSS **************** NSSSSSSSSSSSSSSS **************** NSSSSSSSSSSSSSSS" p="3"/>
     <rule in="********BBBBBBBB **************** BBBBBBBBBBBBBBBB **************** BBBBBBBBBBBBBBBB **************** XBBBBBBBBBBBBBBB" out="********NSSSSSSS **************** NSSSSSSSNSSSSSSS **************** NSSSSSSSNSSSSSSS **************** NSSSSSSSNSSSSSSS" p="2"/>
     <rule in="BBBBBBBBBBBBBBBB **************** **************** BBBBBBBBBBBBBBBB **************** **************** **************** XBBBBBBBBBBBBBBB" out="NSSSSSSSSSSSSSSS **************** **************** NSSSSSSSSSSSSSSS **************** **************** **************** NSSSSSSSSSSSSSSS"/>
   </one>
-  <!-- Il basso sulla radice. -->
+  <!-- The bass on the root. -->
   <one>
     <rule in="YBBBBBBBBBBBBBBB" out="ASSSSSSSSSSSSSSS" p="3"/>
     <rule in="********BBBBBBBB **************** **************** **************** YBBBBBBB********" out="********NSSSSSSS **************** **************** **************** ASSSSSSS********" p="2"/>
     <rule in="************BBBB **************** YBBBBBBBBBBB****" out="************NSSS **************** ASSSSSSSSSSS****"/>
   </one>
 
-  <!-- La melodia: una testa che va avanti nel tempo e sale o scende. -->
+  <!-- The melody: a head going forward in time and rising or falling. -->
   <one>
     <rule in="****B MBBB*" out="****M NSSS*" p="3"/>
     <rule in="MBBB* ****B" out="NSSS* ****M" p="3"/>

@@ -1,4 +1,4 @@
-<!-- Una porta pesante si apre: i cardini cigolano su un semitono grave, il legno geme, il battente sbatte contro il muro. -->
+<!-- A heavy door opens: the hinges creak on a low semitone, the wood groans, the leaf bangs against the wall. -->
 <sequence name="Porta pesante" values="BNSAGKHCTUVPM" size="12 3 8" symmetry="()">
   <sound bpm="96" scale="phrygian" root="38" swing="0" cutoff="2200" space="0.45">
     <track y="0" instrument="bass" volume="0.8"/>
@@ -18,7 +18,7 @@
   <color symbol="P" value="64748b" name="Scelta" hidden="True"/>
   <color symbol="M" value="14b8a6" name="Scelta" hidden="True"/>
 
-  <!-- Il cigolio: il basso parte e scivola di un semitono, il seme sceglie dove. -->
+  <!-- The creak: the bass starts and slides by a semitone, the seed picks where. -->
   <line at="0 0 2" to="0 0 2" r="0" color="A"/>
   <line at="3 0 1" to="3 0 1" r="0" color="T"/>
   <line at="4 0 3" to="4 0 3" r="0" color="T"/>
@@ -27,11 +27,11 @@
   <all in="T" out="B"/>
   <all in="ABB" out="ASS"/>
   <all in="NBBB" out="NSSS"/>
-  <!-- Il legno che geme sotto, una quinta vuota. -->
+  <!-- The wood groaning underneath, an empty fifth. -->
   <line at="1 1 0" to="1 1 0" r="0" color="N"/>
   <line at="1 1 4" to="1 1 4" r="0" color="N"/>
   <all in="NBBBBB" out="NSSSSS"/>
-  <!-- Il battente: un colpo sordo, un po' prima o un po' dopo. -->
+  <!-- The leaf: a dull blow, a little earlier or a little later. -->
   <line at="8 2 0" to="8 2 0" r="0" color="U"/>
   <line at="9 2 0" to="9 2 0" r="0" color="U"/>
   <line at="10 2 0" to="10 2 0" r="0" color="U"/>

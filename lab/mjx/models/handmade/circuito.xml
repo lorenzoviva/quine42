@@ -1,7 +1,7 @@
 <sequence values="BtEDGANYOWUa" size="37 37 47"  origin="True" name="Circuito a colori neon">
 
   <!-- ======================================================== -->
-  <!-- 1. MATERIALI E COLORI                                    -->
+  <!-- 1. MATERIALS AND COLOURS                                 -->
   <!-- ======================================================== -->
   <color symbol="t" value="7a66b8" alpha="0.5" name="Piazzola chip / via"/>
   <color symbol="E" value="9F97BA" alpha="0.5" name="Pista conduttiva spenta"/>
@@ -19,14 +19,14 @@
   <color symbol="r" value="edf104" name="Segnaposto routing pista raggiungibile"/>  
 
 
-  <!-- Base verticale su piano XZ -->
+  <!-- Vertical base on the XZ plane -->
   <box at="19 2 0" size="35 1 45" color="E"/>
   <box at="19 36 0" size="35 1 45" color="E"/>
   <box at="2 19 0" size="1 35 45" color="E"/>
   <box at="36 19 0" size="1 35 45" color="E"/>
 
   <!-- ======================================================== -->
-  <!-- 2. RETICOLO E PIAZZAMENTO A MANO DEL CHIP (5x7 su XZ)    -->
+  <!-- 2. LATTICE AND PLACING THE CHIP BY HAND (5x7 on XZ)     -->
   <!-- ======================================================== -->
   <one in="BBB BEE BEE" out="BBB BtE BEE"/>
   <all in="tEE" out="tEt"/>
@@ -40,7 +40,7 @@
   -->
 
 
-  <!-- mette i primi due chip -->
+  <!-- places the first two chips -->
   <one in="tEtEtEtEt EEEEEEEEE tEtEtEtEt EEEEEEEEE tEtEtEtEt EEEEEEEEE tEtEtEtEt EEEEEEEEE tEtEtEtEt EEEEEEEEE tEtEtEtEt" 
        out="tEtEtEtEt EEtatatEE ttFDFDFtt EaDFDFDaE ttFDFDFtt EaDFDFDaE ttFDFDFtt EaDFDFDaE ttFDFDFtt EEtatatEE tEtEtEtEt" 
        steps="1" symmetry="(xyz)"/>
@@ -48,7 +48,7 @@
       out="tEtEtEtEt EEtututEE ttFDFDFtt EuDFDFDuE ttFDFDFtt EuDFDFDuE ttFDFDFtt EuDFDFDuE ttFDFDFtt EEtututEE tEtEtEtEt" 
       steps="1" symmetry="(xyz)"/>
 
-  <!-- finche puo collega, poi aggiunge un chip e riparte finche puo -->
+  <!-- connects while it can, then adds a chip and starts again while it can -->
   <markov>
     <markov>
       <!-- <path from="a" to="u" on="E" color="G" inertia="longest" steps="1"/> -->
@@ -61,13 +61,13 @@
           steps="1" symmetry="(xyz)"/>
   </markov>
 
-  <!-- Pulizia -->
+  <!-- Cleanup -->
 
   <all in="aE" out="EE" symmetry="(xyz)"/>
   <all in="EEE EtE EtE" out="EEE EEE EEE" symmetry="(xyz)"/>
   <all in="EtE EEE EEE" out="EtE EEE EtE" symmetry="(xyz)"/>
 
-  <!-- Connessioni -->
+  <!-- Connections -->
   <markov>
     <one in="DaGG" out="DPAG" steps="1" symmetry="(xyz)"/>
     <markov>
@@ -85,7 +85,7 @@
   <all in="DP" out="DU" steps="1" symmetry="(xyz)"/>
   <!-- <all in="DP" out="DA" steps="1" symmetry="(xyz)"/> -->
 
-  <!-- Pulizia -->
+  <!-- Cleanup -->
   <!-- <all in="a" out="U" steps="1"/> -->
   <all in="a" out="E" steps="1"/>
 

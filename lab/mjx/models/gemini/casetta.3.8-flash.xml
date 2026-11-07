@@ -13,51 +13,51 @@
   <color symbol="G" value="4d7332" name="muschio verde"/>
   <color symbol="H" value="2c1a0e" name="ferramenta e ombra profonda"/>
 
-  <!-- Il seme scende al suolo -->
+  <!-- The seed goes down to the ground -->
   <one in="X B" out="B X"/>
 
-  <!-- Pianta rettangolare: 13 lungo x, 11 lungo y -->
+  <!-- Rectangular plan: 13 along x, 11 along y -->
   <all in="XB" out="*X" steps="5" symmetry="(x)"/>
   <all in="X/B" out="*/X" steps="4" symmetry="(y)"/>
 
   <!-- Altezza dei muri (8 voxel base) -->
   <all in="B X" out="X *" steps="7"/>
 
-  <!-- Gronda e falde del tetto a due spioventi lungo x -->
+  <!-- Eaves and slopes of the gable roof along x -->
   <all in="B X" out="R *"/>
   <all in="RB XB" out="*R **" symmetry="(x)"/>
   <all in="B R" out="Q *"/>
   <all in="B Q" out="Q *" steps="6"/>
-  <!-- Erosione a due falde (tetto a capanna) -->
+  <!-- Erosion in two slopes (gable roof) -->
   <all in="*Q B*" out="*B **" symmetry="(x)"/>
 
-  <!-- Timpano frontale e posteriore (nord e sud) in legno -->
+  <!-- Front and back gable (north and south) in wood -->
   <all in="R Q" out="* n" symmetry="(y)"/>
   <all in="n Q" out="* n" symmetry="(y)"/>
 
-  <!-- Pareti di pietra e tetto -->
+  <!-- Stone walls and roof -->
   <all in="X" out="D"/>
   <all in="Q" out="R"/>
 
-  <!-- Travi di legno robuste sui quattro spigoli esterni -->
+  <!-- Sturdy wooden beams on the four outer corners -->
   <all in="BB/BD" out="**/*N"/>
 
-  <!-- Facciata frontale (y grande, verso sud): PORTA chiaramente scavata e sagomata -->
+  <!-- Front facade (large y, towards the south): a DOOR clearly dug and shaped -->
   <one steps="1" symmetry="()"
        in="DDDD/BBBB DDDD/BBBB DDDD/BBBB DDDD/BBBB DDDD/BBBB"
        out="NNNN/**** NOON/**** NOON/**** NOON/**** NOON/****"/>
 
-  <!-- Finestra con infisso in legno e davanzale sulla facciata sud a lato della porta -->
+  <!-- Window with a wooden frame and a sill on the south facade beside the door -->
   <one steps="1" symmetry="(x)"
        in="DDD/BBB DDD/BBB DDD/BBB"
        out="NNN/*** NUN/*** NNN/***"/>
 
-  <!-- Finestre laterali (est e ovest) per illuminare l'interno -->
+  <!-- Side windows (east and west) to light the inside -->
   <one steps="1" symmetry="(y)"
        in="D/B D/B D/B"
        out="N/* U/* N/*"/>
 
-  <!-- Risoluzione fine: scala x2 per raggiungere la scatola 50x50x48 (alto > 30) -->
+  <!-- Fine resolution: scale x2 to reach the 50x50x48 box (tall > 30) -->
   <map scale="2 2 2" values="BDNnOURrGHdFp">
     <rule in="D" out="DD/DD DD/DD"/>
     <rule in="N" out="NN/NN NN/NN"/>
@@ -72,24 +72,24 @@
     <color symbol="F" value="9c968c" name="luce pietra"/>
     <color symbol="p" value="a8daf0" name="riflesso vetro"/>
 
-    <!-- Tetto: gradoni e gronda con sottotetto in ombra netta -->
+    <!-- Roof: steps and eaves with a sharply shaded underside -->
     <prl in="RB" out="r*" steps="1"/>
     <prl in="B R" out="* r" p="0.2" steps="1"/>
 
-    <!-- Blocchi di pietra regolari e puliti (corsi orizzontali e verticali a scacchiera RPG) -->
+    <!-- Regular, clean stone blocks (horizontal and vertical courses in an RPG checkerboard) -->
     <all in="DD DD" out="*d **" steps="1"/>
     <prl in="DD/DD" out="*d/**" p="0.3" steps="1"/>
     <prl in="B D" out="* F" p="0.2" steps="1"/>
 
-    <!-- Dettaglio porta: maniglia in ferro scuro e separazione assi -->
+    <!-- Door detail: dark iron handle and separate planks -->
     <all in="OO" out="*H" symmetry="()" steps="1"/>
     <all in="O O" out="O H" symmetry="()" steps="1"/>
 
-    <!-- Dettaglio finestre: telaio a croce e riflesso chiaro nel vetro -->
+    <!-- Window detail: cross frame and a light reflection in the glass -->
     <all in="UU" out="Up" symmetry="()" steps="1"/>
     <all in="U U" out="N *" symmetry="()" steps="1"/>
 
-    <!-- Muschio e umidità alla base a nord (retro) -->
+    <!-- Moss and damp at the base to the north (back) -->
     <prl in="B/D" out="*/G" p="0.35" steps="1" symmetry="()"/>
     <prl in="G D" out="* G" p="0.25" steps="1" symmetry="()"/>
   </map>

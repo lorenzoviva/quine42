@@ -103,7 +103,7 @@
   <all in="***/*B*/*** ***/*R*/***" out="***/*G*/*** ***/***/***" steps="2" symmetry="()"/>
   <one in="B B R" out="* G *" steps="4" symmetry="()"/>
   <all in="B G" out="G *" steps="3" symmetry="()"/>
-  <!-- 7. pulizia -->
+  <!-- 7. cleanup -->
   <prl><rule in="U" out="C"/><rule in="u" out="W"/><rule in="Y" out="T"/><rule in="E" out="B"/><rule in="z" out="B"/><rule in="w" out="C"/><rule in="X" out="W"/><rule in="J" out="C"/><rule in="j" out="C"/><rule in="M" out="S"/><rule in="i" out="A"/><rule in="h" out="A"/></prl>
 </sequence>
 <action name="apri" label="Apri la porta"><prl in="k" out="B"/></action>

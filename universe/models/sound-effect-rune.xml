@@ -1,4 +1,4 @@
-<!-- Una runa raccolta: tre note che salgono, in fretta. Il seme sceglie da dove. -->
+<!-- A rune picked up: three notes rising, in a hurry. The seed picks where from. -->
 <sequence name="Runa" values="BNAMT" size="6 1 10" symmetry="()">
   <sound bpm="300" scale="pentatonic_minor" root="62" swing="0" cutoff="9000" space="0.2">
     <track y="0" instrument="lead" volume="0.9"/>

@@ -201,7 +201,7 @@ export interface FileCount {
   keys: number;
   /** Regular expressions that read Italian words in texts (of the models, of the players): they break in another language. */
   regex: number;
-  /** Italian words in comments (Lua and XML comments are Italian by convention; TS comments should be English). */
+  /** Italian words in comments (every comment is English since T309, ADR-0153: what is left is to translate). */
   commentWords: number;
 }
 
@@ -358,7 +358,7 @@ function countJson(rel: string, src: string): FileCount {
   return f;
 }
 
-/** Strings shown by Lua (said, written, returned) and Italian comments (they stay Italian: convention). */
+/** Strings shown by Lua (said, written, returned) and Italian comments (English since T309: what is left is to translate). */
 function countLua(rel: string, src: string): FileCount {
   const f = empty(rel);
   for (const m of src.matchAll(/--(?!\[\[)([^\n]*)/g)) f.commentWords += words(m[1]);
@@ -539,7 +539,7 @@ export function report(files: FileCount[]): string {
     '- **id per nome**: parole italiane singole che il codice confronta (`===`, `case`, `includes`, unioni di tipi) o che stanno in un campo identificatore',
     '  (`id`, `tipo`, `classe`, `uso`, `ambiente`, `azione`…): **non si traducono**, si etichettano.',
     '- **chiavi su disco**: nomi di campo italiani distinti nei JSON (`persone`, `famiglia`, `tappe`…): sul disco e sul filo, non si rinominano senza migrazione (ADR-0117).',
-    '- **parole nei commenti**: commenti italiani (in Lua e negli XML sono italiani per convenzione; in TypeScript dovrebbero essere inglesi): non si traducono.',
+    '- **parole nei commenti**: commenti italiani (i commenti sono inglesi, in Lua e negli XML del seme da T309, ADR-0153): ciò che resta è da tradurre.',
     '- Euristica deterministica, non un parser di lingua: sbaglia sui casi di confine (una parola inglese che finisce in vocale, un\'etichetta di una parola sola).',
     '  Le cifre servono a dimensionare, non a fatturare. Controllato a campione su `src/kernel/kernel.ts`, `src/ui/hud.ts` e `server/production.ts`:',
     '  i letterali con segnaposto `${…}` contano solo le parole fisse; percorsi, tipi MIME e variabili d\'ambiente non contano.',

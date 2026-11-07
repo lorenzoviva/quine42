@@ -1,6 +1,6 @@
--- Fisica delle spinte. Quando il viandante si sovrappone a un corpo spingibile, il corpo viene
--- spostato fuori dalla sovrapposizione (di più se è leggero, di meno se è pesante) e conserva un po'
--- di slancio; poi scivola, frenato dall'attrito, e si ferma contro ciò che è solido.
+-- Physics of pushes. When the wanderer overlaps a pushable body, the body is
+-- moved out of the overlap (more if it is light, less if it is heavy) and keeps a little
+-- momentum; then it slides, slowed by friction, and stops against what is solid.
 local M = {}
 
 function M.update(dt)

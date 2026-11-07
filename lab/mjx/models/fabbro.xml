@@ -1,4 +1,4 @@
-<!-- Fabbro robusto: step 8B, gemini-3.8-flash, rivisto (b-figure-flash38/fabbro.v2.json, voto dell'Artista 6/10). Convertito dal JSON (lab/mjx/convert.ts): stessi voxel. -->
+<!-- Sturdy blacksmith: step 8B, gemini-3.8-flash, revised (b-figure-flash38/fabbro.v2.json, the Artist's vote 6/10). Converted from the JSON (lab/mjx/convert.ts): same voxels. -->
 <sequence values="BNPCDAULFMSVHEWIJ" size="20 15 30" symmetry="(xy)" name="Fabbro robusto">
   <color symbol="N" value="382315" name="stivali di cuoio" part="gamba"/>
   <color symbol="P" value="4a3c32" name="brache robuste" part="gamba"/>

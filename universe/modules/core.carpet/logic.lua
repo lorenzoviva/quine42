@@ -1,6 +1,6 @@
--- Il tappeto.
--- Ogni passo del giocatore viene compensato da uno scorrimento opposto:
--- il mondo si muove, lui resta al centro. Per sempre.
+-- The carpet.
+-- Every step of the player is offset by an opposite slide:
+-- the world moves, the player stays at the centre. Forever.
 local M = {}
 
 function M.update(dt)

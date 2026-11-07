@@ -1,4 +1,4 @@
-<!-- Un oggetto preso o usato: due note piene, più tonde di quelle di una runa. -->
+<!-- An item taken or used: two full notes, rounder than those of a rune. -->
 <sequence name="Oggetto" values="BNAMT" size="4 1 6" symmetry="()">
   <sound bpm="300" scale="dorian" root="84" swing="0" cutoff="8000" space="0.1">
     <track y="0" instrument="bass" volume="0.9"/>

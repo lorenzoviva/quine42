@@ -181,7 +181,7 @@ export interface Received {
   universe: string;
   /** Uses since this universe was cloned. */
   uses: number;
-  /** quota × utilizzi */
+  /** share × uses */
   received: number;
 }
 

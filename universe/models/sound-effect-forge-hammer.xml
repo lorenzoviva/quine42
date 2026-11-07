@@ -1,4 +1,4 @@
-<!-- Il martello sull'incudine: due colpi, il primo pieno, il secondo più leggero; il ferro canta acuto e il seme sceglie la sua nota. -->
+<!-- The hammer on the anvil: two blows, the first full, the second lighter; the iron sings high and the seed picks its note. -->
 <sequence name="Forgia e martello" values="BNSAGKHCTUVPM" size="12 3 10" symmetry="()">
   <sound bpm="120" scale="dorian" root="57" swing="0" cutoff="9000" space="0.4">
     <track y="0" instrument="lead" volume="0.55"/>
@@ -18,14 +18,14 @@
   <color symbol="P" value="64748b" name="Scelta" hidden="True"/>
   <color symbol="M" value="14b8a6" name="Scelta" hidden="True"/>
 
-  <!-- I colpi. -->
+  <!-- The blows. -->
   <line at="0 1 0" to="0 1 0" r="0" color="K"/>
   <line at="0 1 2" to="0 1 2" r="0" color="C"/>
   <line at="6 1 2" to="6 1 2" r="0" color="T"/>
   <line at="7 1 2" to="7 1 2" r="0" color="T"/>
   <one in="T" out="C" steps="1"/>
   <all in="T" out="B"/>
-  <!-- Il canto del ferro dopo ogni colpo. -->
+  <!-- The song of the iron after every blow. -->
   <line at="0 0 7" to="0 0 7" r="0" color="U"/>
   <line at="0 0 9" to="0 0 9" r="0" color="U"/>
   <line at="0 0 8" to="0 0 8" r="0" color="U"/>
@@ -38,7 +38,7 @@
   <one in="V" out="N" steps="1"/>
   <all in="V" out="B"/>
   <all in="NBBB" out="NSSS"/>
-  <!-- Il calore della forgia, sotto. -->
+  <!-- The heat of the forge, underneath. -->
   <line at="0 2 0" to="0 2 0" r="0" color="N"/>
   <line at="0 2 4" to="0 2 4" r="0" color="N"/>
   <all in="NBBBBBBBBB" out="NSSSSSSSSS"/>

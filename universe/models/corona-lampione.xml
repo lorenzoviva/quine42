@@ -1,33 +1,33 @@
 <!--
-Lampione futuristico "Cyber-Drago" a gravità con mortaio fotonico (corona):
-Architettura a spirale con testa a becco protesa a sbalzo, mozzi laterali e pinne angolate,
-perfettamente compatibile con le invarianti spaziali del motore logico MarkovJunior:
-- Canale di scorrimento (x=2..5, y=2..5, z=19..62) 100% libero (B);
-- Guida dorsale in vetro (v) a y=1 (x=3..4, z=18..62) intatta per il pattern matching mm/vm;
-- Fasce nere/ardesia (m) a z=31..32 e z=45..46 che si aprono in Bx/xB durante il <markov> di caduta;
-- Canale posteriore (x=3..4, y=0) sgombro con i soli freni di tappa (b) a z=59, 55, 47, 30, 22;
-- Cremagliera dentata spostata sulle colonne laterali del dorso (x=2 e x=5, y=0) per non ostruire *BB*;
-- Innesco sommitale a z=63 conforme al pattern ****/*MM*/****/**** per convertire p -> c;
-- Palette Neon Punk completa (Ciano -> Cobalto -> Viola -> Magenta) sincronizzata sul ciclo a 26 frame.
+Futuristic gravity street lamp "Cyber-Drago" with a photon mortar (corona):
+a spiral architecture with a beaked head jutting out, side hubs and angled fins,
+fully compatible with the spatial invariants of the MarkovJunior logic engine:
+- Sliding channel (x=2..5, y=2..5, z=19..62) 100% free (B);
+- Glass dorsal guide (v) at y=1 (x=3..4, z=18..62) intact for the mm/vm pattern matching;
+- Black/slate bands (m) at z=31..32 and z=45..46 that open into Bx/xB during the falling <markov>;
+- Back channel (x=3..4, y=0) clear, with only the stage brakes (b) at z=59, 55, 47, 30, 22;
+- Toothed rack moved onto the side columns of the back (x=2 and x=5, y=0) so as not to block *BB*;
+- Top trigger at z=63 matching the pattern ****/*MM*/****/**** to turn p -> c;
+- Full Neon Punk palette (Cyan -> Cobalt -> Purple -> Magenta) synchronised on the 26-frame cycle.
 -->
 <sequence values="BMmDSsVTGNWEexXpabcvOPC1234567890ZAFYURQLKJIH" size="10 14 74" symmetry="(x)" name="LampioneDrago">
-  <!-- Materiali strutturali: metallo cybernetico abissale e ardesia -->
+  <!-- Structural materials: abyssal cybernetic metal and slate -->
   <color symbol="D" value="0c0a12" name="piastra base carbonio abissale"/>
   <color symbol="M" value="14141a" name="metallo primario nero-viola"/>
   <color symbol="m" value="242632" name="metallo secondario biselli ardesia"/>
 
-  <!-- Meccanica, gabbia elicoidale, mozzi e finiture cromate -->
+  <!-- Mechanics, helical cage, hubs and chrome finishes -->
   <color symbol="S" value="767092" name="cromo satinato lavanda gabbia"/>
   <color symbol="s" value="d0d2d8" name="argento cromo lucido mozzi e artigli"/>
 
-  <!-- Ottiche, guide interne e riflettori -->
+  <!-- Optics, inner guides and reflectors -->
   <color symbol="V" value="181c28" name="vano ottico muso"/>
   <color symbol="T" value="403858" name="riflettore prisma lavanda scuro"/>
   <color symbol="G" value="05d9e8" name="diffusore prismatico ciano"/>
   <color symbol="x" value="ff0000" hidden="True" name="marker temporaneo per ripristino fascia"/>
 
-  <!-- Fonti luminose attive (glow="True"): Gradiente Neon Punk a 26 fasi -->
-  <!-- Dal picco laser bianco-ciano (1), attraverso cobalto (7-9), fino a viola/magenta (A-I) e spegnimento (J-Y) -->
+  <!-- Active light sources (glow="True"): a 26-phase Neon Punk gradient -->
+  <!-- From the white-cyan laser peak (1), through cobalt (7-9), to purple/magenta (A-I) and going out (J-Y) -->
   <color symbol="1" value="ffffff" glow="True" name="fascio neon 1 picco fotonico"/>
   <color symbol="2" value="d8fcff" glow="True" name="fascio neon 2 ghiaccio"/>
   <color symbol="3" value="9ef6ff" glow="True" name="fascio neon 3 ciano chiaro"/>
@@ -55,29 +55,29 @@ perfettamente compatibile con le invarianti spaziali del motore logico MarkovJun
   <color symbol="U" value="080309" glow="True" name="fascio neon 25 quasi spento"/>
   <color symbol="Y" value="040105" glow="True" name="fascio neon 26 innesco dormiente"/>
 
-  <!-- Spie telemetriche alla base (E verde smeraldo, e cobalto) -->
+  <!-- Telemetry lights at the base (E emerald green, e cobalt) -->
   <color symbol="W" value="ffffff" glow="True" name="nucleo fotonico bianco"/>
   <color symbol="E" value="00ff88" glow="True" name="led alimentazione smeraldo"/>
   <color symbol="e" value="29adff" glow="True" name="led uplink cobalto"/>
 
-  <!-- Componenti in vetro e cubo gravitazionale (p in salita ciano, c in caduta magenta) -->
+  <!-- Glass parts and the gravity cube (p rising cyan, c falling magenta) -->
   <color symbol="v" value="29adff" alpha="0.38" name="vetro protettivo e guida dorsale"/>
   <color symbol="p" value="05d9e8" alpha="0.52" name="peso mortaio in salita ciano"/>
   <color symbol="c" value="ff2a6d" alpha="0.60" name="peso mortaio in caduta magenta"/>
 
-  <!-- Marcatori per cinematica e regole generative -->
+  <!-- Markers for the kinematics and the generative rules -->
   <color symbol="a" value="29adff" alpha="0" name="apice mortaio"/>
   <color symbol="b" hidden="True" alpha="0" name="marker caduta mortaio"/>
   <color symbol="X" hidden="True" name="marker generativo"/>
 
   <!-- ======================================================== -->
-  <!-- 1. PLINTO E FLANGIA DI FONDAZIONE (z = 0..4)             -->
+  <!-- 1. PLINTH AND FOUNDATION FLANGE (z = 0..4)               -->
   <!-- ======================================================== -->
   <box at="3.5 3 0" size="4 7 1" color="D"/>
   <box at="3.5 3 0" size="8 5 1" color="D"/>
   <box at="3.5 3 0" size="6 5 1" color="S"/>
 
-  <!-- Artigli meccanici cromati ai vertici del plinto -->
+  <!-- Chrome mechanical claws at the corners of the plinth -->
   <box at="2 0 0" size="1 1 1" color="s"/>
   <box at="5 0 0" size="1 1 1" color="s"/>
   <box at="7 1 0" size="1 1 1" color="s"/>
@@ -97,7 +97,7 @@ perfettamente compatibile con le invarianti spaziali del motore logico MarkovJun
   <box at="6 1 44" size="1 1 1" color="s"/>
   <box at="6 1 47" size="1 1 1" color="s"/>
 
-  <!-- Zoccolo a gradini sul plinto con cascata neon e spie diagnostiche E/e -->
+  <!-- Stepped base on the plinth with a neon cascade and diagnostic lights E/e -->
   <box at="3.5 3.0 1" size="4 3 1" color="M"/>
   <box at="2 5 1" size="1 1 1" color="E"/>
   <box at="3.5 4 2" size="2 1 1" color="F"/>
@@ -110,7 +110,7 @@ perfettamente compatibile con le invarianti spaziali del motore logico MarkovJun
   <box at="3.5 2.5 2" size="2 2 1" color="S"/>
 
   <!-- ======================================================== -->
-  <!-- 2. PILONE INFERIORE E CAMERA OTTICA (z = 2..18)          -->
+  <!-- 2. LOWER PYLON AND OPTICAL CHAMBER (z = 2..18)           -->
   <!-- ======================================================== -->
   <box at="3.5 2 2" size="2 1 10" color="M"/>
   <box at="3.5 1 3" size="2 1 1" color="m"/>
@@ -158,7 +158,7 @@ perfettamente compatibile con le invarianti spaziali del motore logico MarkovJun
   <box at="3.5 5.0 15" size="2 1 1" color="M"/>
   <box at="3.5 2 13" size="2 1 1" color="X"/>
 
-  <!-- Calotta della camera ottica inferiore (z = 16..18) -->
+  <!-- Cap of the lower optical chamber (z = 16..18) -->
   <box at="3.5 4.5 16" size="4 4 1" color="M"/>
   <box at="6 3.5 17" size="1 6 1" color="M"/>
   <box at="1 3.5 17" size="1 6 1" color="M"/>
@@ -176,9 +176,9 @@ perfettamente compatibile con le invarianti spaziali del motore logico MarkovJun
   <box at="3.5 5.5 18" size="2 1 1" color="s"/>
 
   <!-- ======================================================== -->
-  <!-- 3. GABBIA ELICOIDALE E CORRIDOIO LOGICO (z = 18..62)     -->
+  <!-- 3. HELICAL CAGE AND LOGICAL CORRIDOR (z = 18..62)        -->
   <!-- ======================================================== -->
-  <!-- Doppia elica esterna su x=1 e x=6 (non invade mai x=2..5, y=2..5) -->
+  <!-- Double outer helix on x=1 and x=6 (never enters x=2..5, y=2..5) -->
   <box at="1 1 20" size="1 1 1" color="S"/>
   <box at="1 4 22" size="1 1 1" color="S"/>
   <box at="1 6 21" size="1 1 2" color="S"/>
@@ -243,7 +243,7 @@ perfettamente compatibile con le invarianti spaziali del motore logico MarkovJun
   <box at="6 1 57" size="1 1 1" color="S"/>
   <box at="6 3.5 62" size="1 6 1" color="S"/>
 
-  <!-- Cremagliera dentata laterale sul dorso (x=2 e x=5, y=0): lascia x=3..4 y=0 libero (B)! -->
+  <!-- Toothed side rack on the back (x=2 and x=5, y=0): it leaves x=3..4 y=0 free (B)! -->
   <box at="2 0 20" size="1 1 1" color="m"/>
   <box at="5 0 20" size="1 1 1" color="m"/>
   <box at="2 0 24" size="1 1 1" color="m"/>
@@ -271,8 +271,8 @@ perfettamente compatibile con le invarianti spaziali del motore logico MarkovJun
   <box at="2 0 57" size="1 1 1" color="m"/>
   <box at="5 0 57" size="1 1 1" color="m"/>
 
-  <!-- Fasce orizzontali nere/ardesia (m) a z=31..32 e z=45..46 -->
-  <!-- DEVONO essere in colore 'm' e precedere 'v' per attivare la regola mm/vm -> Bx/vm! -->
+  <!-- Horizontal black/slate bands (m) at z=31..32 and z=45..46 -->
+  <!-- They MUST be in colour 'm' and come before 'v' to trigger the rule mm/vm -> Bx/vm! -->
   <box at="3.5 0 45" size="4 1 2" color="m"/>
   <box at="5.5 1 45" size="2 1 2" color="m"/>
   <box at="1.5 1 45" size="2 1 2" color="m"/>
@@ -285,16 +285,16 @@ perfettamente compatibile con le invarianti spaziali del motore logico MarkovJun
   <box at="5.5 1 31" size="2 1 2" color="m"/>
   <box at="1.5 1 31" size="2 1 2" color="m"/>
 
-  <!-- I 2 nodi luminosi sulla spirale sopra il cubo (collegati al ciclo dinamico) -->
+  <!-- The 2 glowing nodes on the spiral above the cube (tied to the dynamic cycle) -->
   <box at="1 2 35" size="1 1 1" color="A"/>
   <box at="6 3 35" size="1 1 1" color="Z"/>
 
-  <!-- CUBO DI VETRO 4x4x4 E COLONNA DORSALE IN VETRO 'v' (x=3..4, y=1, z=18..62) -->
+  <!-- 4x4x4 GLASS CUBE AND GLASS DORSAL COLUMN 'v' (x=3..4, y=1, z=18..62) -->
   <box at="3.5 3.5 19" size="4 4 4" color="p"/>
   <box at="3.5 6 13" size="4 1 3" color="v"/>
   <box at="3.5 7 58" size="4 1 4" color="v"/>
   <box at="3.5 6 58" size="4 1 4" color="7"/>
-  <!-- CRITICO: questa barra 'v' sovrascrive x=3..4, y=1 a z=31 e z=45 creando il pattern mm/vm! -->
+  <!-- CRITICAL: this 'v' bar overwrites x=3..4, y=1 at z=31 and z=45, creating the mm/vm pattern! -->
   <box at="3.5 1 18" size="2 1 45" color="v"/>
   <box at="6 4 58" size="1 7 4" color="v"/>
   <box at="1 4 58" size="1 7 4" color="v"/>
@@ -316,9 +316,9 @@ perfettamente compatibile con le invarianti spaziali del motore logico MarkovJun
   <box at="5 3 8" size="1 3 5" color="v"/>
 
   <!-- ======================================================== -->
-  <!-- 4. INNESCHI DI APICE E TESTA "CYBER-DRAGO" (z = 58..70)  -->
+  <!-- 4. APEX TRIGGERS AND "CYBER-DRAGO" HEAD (z = 58..70)     -->
   <!-- ======================================================== -->
-  <!-- CRITICO: Struttura a z=63 IDENTICA al file originale per garantire il match ****/*MM*/****/**** -->
+  <!-- CRITICAL: the structure at z=63 is IDENTICAL to the original file to guarantee the match ****/*MM*/****/**** -->
   <box at="2 5 63" size="1 1 1" color="5"/>
   <box at="5 5 63" size="1 1 1" color="5"/>
   <box at="3.5 6 63" size="4 1 1" color="M"/>
@@ -326,7 +326,7 @@ perfettamente compatibile con le invarianti spaziali del motore logico MarkovJun
   <box at="3.5 2.5 63" size="4 4 1" color="M"/>
   <box at="3.5 7 62" size="6 1 1" color="m"/>
 
-  <!-- Marker 'a' e 'b' di controllo caduta nelle coordinate esatte originali -->
+  <!-- Fall-control markers 'a' and 'b' at the exact original coordinates -->
   <box at="3.5 2 63" size="2 1 1" color="a"/>
   <box at="3.5 0 59" size="2 1 1" color="b"/>
   <box at="3.5 0 55" size="2 1 1" color="b"/>
@@ -336,45 +336,45 @@ perfettamente compatibile con le invarianti spaziali del motore logico MarkovJun
   <box at="3.5 6 61" size="2 1 1" color="b"/>
   <box at="3.5 6 62" size="2 1 1" color="b"/>
 
-  <!-- Estensione della Testa "Cyber-Drago" (tutta a z >= 64 o y >= 7 o x = 0,7 per non interferire) -->
-  <!-- Mascella inferiore a sbalzo in avanti (y = 8..12, z = 61..62) -->
+  <!-- Extension of the "Cyber-Drago" head (all at z >= 64 or y >= 7 or x = 0,7 so as not to interfere) -->
+  <!-- Lower jaw jutting forward (y = 8..12, z = 61..62) -->
   <box at="3.5 9.5 62" size="6 5 1" color="S"/>
   <box at="3.5 11.5 62" size="4 2 1" color="s"/>
   <box at="3.5 9.0 61" size="6 4 1" color="M"/>
 
-  <!-- Chele / denti meccanici anteriori sotto la punta del muso (y = 11..12, z = 59..60) -->
+  <!-- Front mechanical pincers / teeth under the tip of the snout (y = 11..12, z = 59..60) -->
   <box at="2 11 60" size="1 1 2" color="S"/>
   <box at="5 11 60" size="1 1 2" color="S"/>
   <box at="2.5 11.5 59" size="2 1 1" color="s"/>
   <box at="4.5 11.5 59" size="2 1 1" color="s"/>
 
-  <!-- FASCIO LUMINOSO DINAMICO DEL MUSO (incassato a y = 8..11, z = 60..61: usa fasi 1, 3, 5, 9, Z) -->
+  <!-- DYNAMIC LIGHT BEAM OF THE SNOUT (recessed at y = 8..11, z = 60..61: uses phases 1, 3, 5, 9, Z) -->
   <box at="3.5 9.5 61" size="4 4 1" color="5"/>
   <box at="3.5 9.5 61" size="2 3 1" color="1"/>
   <box at="3.5 9.5 60" size="2 3 1" color="3"/>
   <box at="2 9.5 60" size="1 3 1" color="9"/>
   <box at="5 9.5 60" size="1 3 1" color="Z"/>
 
-  <!-- Muso aerodinamico superiore a gradini (y = 7..11, z = 63..65) -->
+  <!-- Stepped aerodynamic upper snout (y = 7..11, z = 63..65) -->
   <box at="3.5 9.0 63" size="6 5 1" color="M"/>
   <box at="3.5 8.5 64" size="4 4 1" color="V"/>
   <box at="3.5 7.5 65" size="4 2 1" color="V"/>
 
-  <!-- Cranio / Calotta superiore (z = 64..67, sopra il piano di arresto z=63) -->
+  <!-- Skull / upper cap (z = 64..67, above the stopping level z=63) -->
   <box at="3.5 4.0 64" size="6 5 2" color="M"/>
   <box at="3.5 4.0 66" size="6 5 1" color="m"/>
   <box at="3.5 4.0 67" size="4 4 1" color="D"/>
-  <!-- Striscia LED longitudinale sul tetto della testa -->
+  <!-- Lengthwise LED strip on the top of the head -->
   <box at="3.5 4.5 67" size="2 3 1" color="5"/>
   <box at="3.5 5.5 66" size="2 1 1" color="2"/>
 
-  <!-- Cuscinetti / Mozzi circolari bianchi laterali (all'esterno su x = 0 e x = 7, y = 3..5, z = 62..64) -->
+  <!-- White round side bearings / hubs (outside, on x = 0 and x = 7, y = 3..5, z = 62..64) -->
   <box at="0 4 62" size="1 3 3" color="s"/>
   <box at="7 4 62" size="1 3 3" color="s"/>
   <box at="0 4 63" size="1 1 1" color="D"/>
   <box at="7 4 63" size="1 1 1" color="D"/>
 
-  <!-- Alette / Corna superiori inclinate all'indietro (Swept-Back Upper Fins, z = 66..69) -->
+  <!-- Upper fins / horns swept back (Swept-Back Upper Fins, z = 66..69) -->
   <box at="1 3 66" size="1 2 1" color="S"/>
   <box at="6 3 66" size="1 2 1" color="S"/>
   <box at="1 2 67" size="1 2 1" color="S"/>
@@ -384,14 +384,14 @@ perfettamente compatibile con le invarianti spaziali del motore logico MarkovJun
   <box at="1 0.5 69" size="1 2 1" color="s"/>
   <box at="6 0.5 69" size="1 2 1" color="s"/>
 
-  <!-- Alette inferiori esterne (x = 0 e x = 7, z = 61..62) -->
+  <!-- Outer lower fins (x = 0 and x = 7, z = 61..62) -->
   <box at="0 2 62" size="1 2 1" color="S"/>
   <box at="7 2 62" size="1 2 1" color="S"/>
   <box at="0 1 61" size="1 2 1" color="m"/>
   <box at="7 1 61" size="1 2 1" color="m"/>
 
   <!-- ======================================================== -->
-  <!-- 5. COLONNA ENERGETICA MULTICOLORE (z = 4..15)            -->
+  <!-- 5. MULTICOLOURED ENERGY COLUMN (z = 4..15)               -->
   <!-- ======================================================== -->
   <box at="3.5 4.5 15" size="4 2 1" color="T"/>
   <box at="2 5.0 15" size="1 2 1" color="G"/>
@@ -409,7 +409,7 @@ perfettamente compatibile con le invarianti spaziali del motore logico MarkovJun
   <box at="3.5 3 4" size="2 1 1" color="I"/>
 
   <!-- ======================================================== -->
-  <!-- 6. REGOLE GENERATIVE: VARIANTI NEI SEMI                  -->
+  <!-- 6. GENERATIVE RULES: VARIANTS IN THE SEEDS               -->
   <!-- ======================================================== -->
   <one steps="1">
     <rule in="X" out="s" p="0.40"/>
@@ -430,46 +430,46 @@ perfettamente compatibile con le invarianti spaziali del motore logico MarkovJun
 </sequence>
 
 <!-- ============================================================ -->
-<!-- 7. ANIMAZIONE TELEMETRIA (26 FRAMES): LOGICA GLOBALE MJ      -->
+<!-- 7. TELEMETRY ANIMATION (26 FRAMES): GLOBAL MJ LOGIC          -->
 <!-- ============================================================ -->
 <animation name="telemetria" frames="26">
   <sequence>
-    <!-- 1. Risalita di 2 voxel per step del cubo 'p' nel cilindro B -->
+    <!-- 1. The cube 'p' rises 2 voxels per step in the cylinder B -->
     <one in="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB pppp/pppp/pppp/pppp pppp/pppp/pppp/pppp pppp/pppp/pppp/pppp pppp/pppp/pppp/pppp"
         out="pppp/pppp/pppp/pppp pppp/pppp/pppp/pppp pppp/pppp/pppp/pppp pppp/pppp/pppp/pppp BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB"
         steps="1" symmetry="(xy)"/>
 
-    <!-- 2. Contatto con il pattern *MM* a z=63 e mutazione globale p -> c (magenta) -->
+    <!-- 2. Contact with the pattern *MM* at z=63 and the global change p -> c (magenta) -->
     <all in="****/*MM*/****/**** pppp/pppp/pppp/pppp pppp/pppp/pppp/pppp pppp/pppp/pppp/pppp pppp/pppp/pppp/pppp"
          out="****/*MM*/****/**** cccc/cccc/cccc/cccc cccc/cccc/cccc/cccc cccc/cccc/cccc/cccc cccc/cccc/cccc/cccc"
          steps="1" symmetry="(xy)"/>
     
-    <!-- 3. Rimozione temporanea delle fasce 'm' davanti alla guida 'v' (apre i varchi B a y=0) -->
+    <!-- 3. Temporary removal of the 'm' bands in front of the 'v' guide (opens the B gaps at y=0) -->
     <all in="mm/vm" out="Bx/vm" symmetry="()"/>
     <all in="mm/mv" out="xB/mv" symmetry="()"/>
 
-    <!-- 4. Caduta gravitazionale nel blocco <markov> fino al primo freno 'b' non vuoto -->
+    <!-- 4. Gravity fall in the <markov> block down to the first non-empty brake 'b' -->
     <markov>
       <all in="*BB*/****/cccc/cccc/cccc/cccc ****/****/cccc/cccc/cccc/cccc ****/****/cccc/cccc/cccc/cccc ****/****/cccc/cccc/cccc/cccc ****/****/BBBB/BBBB/BBBB/BBBB"
            out="*BB*/****/BBBB/BBBB/BBBB/BBBB ****/****/cccc/cccc/cccc/cccc ****/****/cccc/cccc/cccc/cccc ****/****/cccc/cccc/cccc/cccc ****/****/cccc/cccc/cccc/cccc"
            steps="1" symmetry="()"/>
     </markov>
     
-    <!-- 5. Ripristino immediato delle fasce orizzontali 'm' e scatto di 1 voxel sul freno 'b' -->
+    <!-- 5. Immediate restoring of the horizontal 'm' bands and a 1-voxel click on the brake 'b' -->
     <all in="Bx/vm" out="mm/vm" symmetry="()"/>
     <all in="xB/mv" out="mm/mv" symmetry="()"/>
     <all in="*bb*/****/cccc/cccc/cccc/cccc ****/****/cccc/cccc/cccc/cccc ****/****/cccc/cccc/cccc/cccc ****/****/cccc/cccc/cccc/cccc ****/****/BBBB/BBBB/BBBB/BBBB"
          out="*bb*/****/BBBB/BBBB/BBBB/BBBB ****/****/cccc/cccc/cccc/cccc ****/****/cccc/cccc/cccc/cccc ****/****/cccc/cccc/cccc/cccc ****/****/cccc/cccc/cccc/cccc"
          steps="1" symmetry="()"/>
 
-    <!-- 6. Pulsazione diagnostica delle spie alla base -->
+    <!-- 6. Diagnostic pulse of the lights at the base -->
     <prl steps="1">
       <rule in="E" out="e" p="0.30"/>
       <rule in="e" out="E" p="0.30"/>
     </prl>
   </sequence>
 
-  <!-- Catena globale di shift cromatico (26 stadi: Ciano -> Cobalto -> Viola -> Magenta -> Spento) -->
+  <!-- Global chain of colour shift (26 stages: Cyan -> Cobalt -> Purple -> Magenta -> Off) -->
   <all in="Y" out="1" steps="1" />
   <all in="U" out="Y" steps="1" />
   <all in="R" out="U" steps="1" />

@@ -1,4 +1,4 @@
-<!-- Una runa pronunciata: una scala che sale in fretta, con un luccichio in cima. -->
+<!-- A rune spoken: a scale rising in a hurry, with a glimmer on top. -->
 <sequence name="Incantesimo" values="BNSAHMT" size="20 2 12" symmetry="()">
   <sound bpm="240" scale="harmonic_minor" root="57" swing="0" cutoff="10000" space="0.5">
     <track y="0" instrument="lead" volume="0.9"/>

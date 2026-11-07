@@ -1,4 +1,4 @@
-<!-- Un teletrasporto: un arpeggio velocissimo che sale e svanisce in un accordo sospeso; il seme sceglie i gradini e la cima. -->
+<!-- A teleport: a very fast arpeggio rising and vanishing into a suspended chord; the seed picks the steps and the top. -->
 <sequence name="Teletrasporto" values="BNSAGKHCTUVPM" size="14 2 14" symmetry="()">
   <sound bpm="176" scale="hirajoshi" root="52" swing="0" cutoff="9000" space="0.7">
     <track y="0" instrument="lead" volume="0.5"/>
@@ -17,7 +17,7 @@
   <color symbol="P" value="64748b" name="Scelta" hidden="True"/>
   <color symbol="M" value="14b8a6" name="Scelta" hidden="True"/>
 
-  <!-- La salita: una testa che sale di uno o due gradi a ogni passo. -->
+  <!-- The climb: a head rising one or two degrees at every step. -->
   <line at="0 0 0" to="0 0 0" r="0" color="M"/>
   <one>
     <rule in="*B MB" out="*M NB" p="2"/>
@@ -26,7 +26,7 @@
   </one>
   <all in="M" out="A"/>
   <all in="ABBBBB" out="ASSSSS"/>
-  <!-- L'accordo sospeso che resta. -->
+  <!-- The suspended chord that remains. -->
   <line at="0 1 0" to="0 1 0" r="0" color="N"/>
   <line at="0 1 3" to="0 1 3" r="0" color="T"/>
   <line at="0 1 2" to="0 1 2" r="0" color="T"/>

@@ -23,7 +23,7 @@
   <color symbol="Z" value="e879f9" name="Segno dell'arpeggio" hidden="True"/>
   <color symbol="D" value="475569" name="Battuta" hidden="True"/>
 
-  <!-- Le teste, all'inizio del ciclo; il soffitto tiene gli accordi nel registro grave. -->
+  <!-- The heads, at the start of the cycle; the ceiling keeps the chords in the low register. -->
   <line at="0 0 7" to="0 0 7" r="0" color="M"/>
   <line at="0 2 0" to="0 2 0" r="0" color="T"/>
   <line at="0 2 4" to="95 2 4" r="0" color="W"/>
@@ -47,7 +47,7 @@
   <line at="72 3 0" to="72 3 0" r="0" color="D"/>
   <line at="84 3 0" to="84 3 0" r="0" color="D"/>
 
-  <!-- L'armonia: la testa cammina di 16 in 16 passi e lascia una radice; il seme sceglie il grado. -->
+  <!-- The harmony: the head walks 16 steps at a time and leaves a root; the seed picks the degree. -->
   <one>
     <rule in="****************B T****************" out="****************T R****************" p="3"/>
     <rule in="T**************** ****************B" out="R**************** ****************T" p="3"/>
@@ -59,24 +59,24 @@
   <all in="W" out="B"/>
   <all in="B/R" out="X/Y"/>
 
-  <!-- Il pad: un disegno per battuta. -->
+  <!-- The pad: one pattern per bar. -->
   <one>
     <rule in="BBBB****BBBB**** **************** **************** BBBB****BBBB**** XBBB****BBBB****" out="NSSS****NSSS**** **************** **************** NSSS****NSSS**** NSSS****NSSS****" p="2"/>
     <rule in="****BBBB****BBBB **************** **************** **************** X***BBBB****BBBB" out="****NSSS****NSSS **************** **************** **************** B***NSSS****NSSS" p="2"/>
   </one>
-  <!-- Il basso sulla radice. -->
+  <!-- The bass on the root. -->
   <one>
     <rule in="***********B***B YB*BBB*BBB**BB**" out="***********N***N AN*NAN*NAN**AN**" p="3"/>
     <rule in="*************BB* **************** **************** **************** Y*BB*BB*B*BB****" out="*************NN* **************** **************** **************** A*NN*NN*A*NN****" p="2"/>
   </one>
-  <!-- La batteria: un disegno per battuta. -->
+  <!-- The drums: one pattern per bar. -->
   <one>
     <rule in="***B*****B** **B**B**B**B D*****B*****" out="***C*****C** **H**H**H**H K*****K*****" p="3"/>
     <rule in="******B**B** **B**B**B**B D**B********" out="******C**C** **H**H**H**H K**K********" p="2"/>
     <rule in="***B*****BBB *BB*BB*BB*** D*****B*****" out="***C*****CCC *HH*HH*HH*** K*****K*****"/>
   </one>
 
-  <!-- La melodia: una testa che va avanti nel tempo e sale o scende. -->
+  <!-- The melody: a head going forward in time and rising or falling. -->
   <one>
     <rule in="*B M*" out="*M N*" p="2"/>
     <rule in="M* *B" out="N* *M" p="2"/>

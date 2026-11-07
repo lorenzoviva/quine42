@@ -1,6 +1,6 @@
-<!-- Cristallo arcano (fantasy, aurora): un grande cristallo viola che brilla, piantato in una base di pietra, con schegge minori che
-     spuntano storte tutt'attorno. Il seme sceglie la base (un cumulo basso, un piedistallo a gradini con le rune o un masso alto), quanto
-     sale il cristallo maggiore e dove nascono le schegge e da che parte si piegano. -->
+<!-- Arcane crystal (fantasy, aurora): a big shining purple crystal, set in a stone base, with smaller shards
+     sprouting crookedly all around. The seed picks the base (a low mound, a stepped pedestal with runes or a tall boulder), how high
+     the main crystal rises and where the shards start and which way they bend. -->
 <sequence values="BSdRCKWxkhsVvabo" size="20 20 20" symmetry="(xy)" name="Cristallo arcano">
   <color symbol="S" value="8a8478" name="pietra"/>
   <color symbol="d" value="5e5a52" name="pietra scura"/>
@@ -17,7 +17,7 @@
   <color symbol="a" hidden="True" name="cumulo basso"/>
   <color symbol="b" hidden="True" name="piedistallo a gradini"/>
   <color symbol="o" hidden="True" name="masso alto"/>
-  <!-- Il dado della base -->
+  <!-- The die of the base -->
   <box at="10 10 0" size="20 20 20" color="v"/>
   <all in="v" out="V"/>
   <one steps="1"><rule in="V" out="a"/><rule in="V" out="b"/><rule in="V" out="o"/></one>
@@ -31,7 +31,7 @@
   <box at="10 10 3" size="9 9 1" color="S" on="R"/>
   <ellipsoid at="10 10 0" size="11 11 15" color="S" on="o"/>
   <ellipsoid at="7 11 0" size="7 7 7" color="d" on="o"/>
-  <!-- Quanto sale il cristallo maggiore -->
+  <!-- How high the main crystal rises -->
   <box at="0 0 11" size="1 1 8" color="h"/>
   <one in="h" out="k" steps="1"/>
   <all in="h" out="B"/>
@@ -43,7 +43,7 @@
   <all steps="1" in="C* C[abo]" out="** CC"/>
   <all steps="1" in="C* C* C* C[abo]" out="** ** ** CC"/>
   <all steps="1" in="C C" out="W *"/>
-  <!-- Le schegge: dove nascono e da che parte piegano -->
+  <!-- The shards: where they start and which way they bend -->
   <prl steps="1" in="[abo] [Sd]" out="s *" p="0.035"/>
   <prl steps="1" in="[abo][Sd]" out="s*" p="0.02"/>
   <one steps="45">

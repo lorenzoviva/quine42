@@ -1,4 +1,4 @@
-<!-- Dal SoundLab: ancore sulla melodia unite da un cammino con inerzia, accordi sul pad, un groove di basso e batteria. -->
+<!-- From the SoundLab: anchors on the melody joined by a walk with inertia, chords on the pad, a groove of bass and drums. -->
 <sequence name="Sentiero Melodico" values="BNSAGKHCRTMP" size="16 3 8" symmetry="()">
   <sound bpm="120" scale="dorian" root="50" swing="0.12" cutoff="4800" space="0.35">
     <track y="0" instrument="lead" volume="0.82"/>
@@ -18,36 +18,36 @@
   <color symbol="P" value="64748b" name="Passaggio" hidden="True"/>
   <union symbol="X" values="NSA"/>
 
-  <!-- La melodia (y=0) si prepara: un piano di passaggi su cui il cammino può andare. -->
+  <!-- The melody (y=0) gets ready: a plane of passages the walk can go along. -->
   <all in="B/B/B" out="P/B/B"/>
-  <!-- Tre ancore di partenza e tre mete. -->
+  <!-- Three starting anchors and three goals. -->
   <one in="P" out="R" steps="3"/>
   <one in="P" out="T" steps="3"/>
-  <!-- Il cammino le unisce, e l'inerzia ne fa scale e arpeggi. -->
+  <!-- The walk joins them, and the inertia makes scales and arpeggios of it. -->
   <path from="R" to="T" on="P" color="N" steps="4" inertia="True" longest="True"/>
-  <!-- Le ancore diventano accenti, le mete note; i passaggi rimasti spariscono. -->
+  <!-- The anchors become accents, the goals notes; the remaining passages disappear. -->
   <all>
     <rule in="R" out="A"/>
     <rule in="T" out="N"/>
     <rule in="P" out="B"/>
   </all>
-  <!-- Code di sustain e note fantasma lungo il tempo. -->
+  <!-- Sustain tails and ghost notes along time. -->
   <one steps="10">
     <rule in="NB" out="NS" p="2"/>
     <rule in="BN" out="GN" p="1"/>
   </one>
-  <!-- Il pad (y=1): dove la melodia suona, fiorisce un accordo. -->
+  <!-- The pad (y=1): where the melody plays, a chord blooms. -->
   <one steps="7">
     <rule in="XBB/BBB" out="*BB/NNS"/>
     <rule in="AB/BB" out="*B/NS"/>
   </one>
-  <!-- Il ritmo (y=2): una riga di motivo sulla quota più bassa diventa cassa e hi-hat. -->
+  <!-- The rhythm (y=2): a row of pattern at the lowest height becomes kick and hi-hat. -->
   <line at="0 2 0" to="15 2 0" r="0" color="M"/>
   <all in="MMMM" out="KBHB"/>
   <one steps="4">
     <rule in="KBHB" out="KBHC"/>
     <rule in="HB" out="HG"/>
   </one>
-  <!-- Sopra la cassa, due quote più in alto, a volte una nota di basso. -->
+  <!-- Above the kick, two heights higher, sometimes a bass note. -->
   <prl in="* * K" out="N * *" p="0.65" steps="1"/>
 </sequence>

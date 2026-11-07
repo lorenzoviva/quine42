@@ -3,41 +3,41 @@ Drone logistico volante porta-dati (corona): corriere aereo autonomo per il tras
 Scatola aggiornata: 10 × 10 × 8 voxel (drone centrato con offset +1 su X e +1 su Y).
 -->
 <sequence values="BWwMmDSPVsIabcd1234GexyXYZfg" size="20 20 16" symmetry="()" name="Drone">
-  <!-- Materiali strutturali: ceramica bianca aerodinamica e titanio cybernetico scuro -->
+  <!-- Structural materials: aerodynamic white ceramic and dark cybernetic titanium -->
   <color symbol="W" value="fff1e8" name="cyber-ceramica bianca scocca"/>
   <color symbol="w" value="d8d0c8" name="sfumatura e biselli scocca chiara"/>
   <color symbol="M" value="20222a" name="titanio grafite scuro telaio"/>
   <color symbol="m" value="2e323f" name="titanio secondario biselli e alette"/>
   <color symbol="D" value="141418" name="carbonio ultra-scuro bracci"/>
 
-  <!-- Meccanica, carrello, bracci e finiture cromate -->
+  <!-- Mechanics, landing gear, arms and chrome finishes -->
   <color symbol="S" value="83769c" name="cromo satinato montanti carrello e bracci"/>
   <color symbol="s" value="c2c3c7" name="argento cromo lucido pinze e antenna"/>
   <color symbol="P" value="3a3a40" name="pattini carrello grafite anti-usura"/>
 
-  <!-- Vano ottico, visore e lenti sensore espressive -->
+  <!-- Optical bay, visor and expressive sensor lenses -->
   <color symbol="V" value="1c2a3a" name="vano ottico vetro scuro visore"/>
   <color symbol="I" value="006666" glow="True" name="lente sensore occhio ciano"/>
 
-  <!-- Quattro fasi plasma ciano per rotazione rotori (glow="True") -->
+  <!-- Four cyan plasma phases for the rotors' rotation (glow="True") -->
   <color symbol="a" value="ffffff" glow="True" name="lama plasma bianco-ciano laser"/>
   <color symbol="b" value="00ffff" glow="True" name="lama neon ciano puro"/>
   <color symbol="c" value="05d9e8" glow="True" name="lama neon ciano elettrico"/>
   <color symbol="d" value="29adff" glow="True" name="lama plasma azzurro cobalto"/>
 
-  <!-- Quattro fasi energetiche per pacchetto dati ambra/oro (glow="True") -->
+  <!-- Four energy phases for the amber/gold data packet (glow="True") -->
   <color symbol="1" value="ffa300" glow="True" name="flusso dati ambra dorata"/>
   <color symbol="2" value="ffec27" glow="True" name="pacchetto dati oro brillante"/>
   <color symbol="3" value="ffe27a" glow="True" name="picco dati bianco-oro"/>
   <color symbol="4" value="ff7700" glow="True" name="plasma dati arancio denso"/>
   <color symbol="G" value="d8a878" name="staffa ambra isolante pacchetto"/>
 
-  <!-- Telemetria e beacon di navigazione sommitale -->
+  <!-- Telemetry and navigation beacon on top -->
   <color symbol="e" value="afe0e4" name="beacon navigazione spento"/>
   <color symbol="f" value="05e684" glow="True" name="beacon navigazione verde"/>
   <color symbol="g" value="ec4670" glow="True" name="beacon navigazione rosso"/>
 
-  <!-- Buffer di animazione e marcatori stocastici per semi diversi -->
+  <!-- Animation buffers and stochastic markers for different seeds -->
   <color symbol="x" hidden="True" name="buffer animazione rotori"/>
   <color symbol="y" hidden="True" name="buffer animazione pacchetto dati"/>
   <color symbol="X" hidden="True" name="marker quantistico pacchetto dati"/>
@@ -45,9 +45,9 @@ Scatola aggiornata: 10 × 10 × 8 voxel (drone centrato con offset +1 su X e +1 
   <color symbol="Z" hidden="True" name="marker carenatura dorsale"/>
 
   <!-- ======================================================== -->
-  <!-- 1. CARRELLI DI ATTERRAGGIO A SLITTA E MONTANTI (z = 0..1) -->
+  <!-- 1. SKID LANDING GEAR AND STRUTS (z = 0..1)               -->
   <!-- ======================================================== -->
-  <!-- Slitta sinistra al suolo -->
+  <!-- Left skid on the ground -->
   <box at="4.5 9.5 0" size="2 8 2" color="P"/>
   <box at="4.5 4.5 2" size="2 2 2" color="M"/>
   <box at="4.5 14.5 2" size="2 2 2" color="M"/>
@@ -58,7 +58,7 @@ Scatola aggiornata: 10 × 10 × 8 voxel (drone centrato con offset +1 su X e +1 
   <box at="12 9.5 6" size="1 4 2" color="S"/>
   <box at="14 9.5 2" size="1 4 1" color="S"/>
 
-  <!-- Slitta destra al suolo -->
+  <!-- Right skid on the ground -->
   <box at="14.5 9.5 0" size="2 8 2" color="P"/>
   <box at="14.5 4.5 2" size="2 2 2" color="M"/>
   <box at="14.5 14.5 2" size="2 2 2" color="M"/>
@@ -66,7 +66,7 @@ Scatola aggiornata: 10 × 10 × 8 voxel (drone centrato con offset +1 su X e +1 
   <box at="14.5 12.5 2" size="2 2 2" color="S"/>
 
   <!-- ======================================================== -->
-  <!-- 2. PINZE DI PRESA CROMATE DEL CARGO (z = 1..2)           -->
+  <!-- 2. CHROME CARGO GRIPPERS (z = 1..2)                      -->
   <!-- ======================================================== -->
   <box at="6.5 9.5 2" size="2 4 2" color="s"/>
   <box at="6.5 9.5 4" size="2 4 2" color="s"/>
@@ -74,15 +74,15 @@ Scatola aggiornata: 10 × 10 × 8 voxel (drone centrato con offset +1 su X e +1 
   <box at="12.5 9.5 4" size="2 4 2" color="s"/>
 
   <!-- ======================================================== -->
-  <!-- 3. PACCHETTO DATI LUMINOSO CENTRALE (z = 0..1, x=4..5)   -->
+  <!-- 3. CENTRAL GLOWING DATA PACKET (z = 0..1, x=4..5)        -->
   <!-- ======================================================== -->
-  <!-- Strato inferiore del pacchetto (z=1) -->
+  <!-- Lower layer of the packet (z=1) -->
   <box at="8.5 8.5 2" size="2 2 2" color="3"/>
   <box at="10.5 8.5 2" size="2 2 2" color="4"/>
   <box at="8.5 10.5 2" size="2 2 2" color="G"/>
   <box at="10.5 10.5 2" size="2 2 2" color="1"/>
 
-  <!-- Strato superiore del pacchetto (z=2) -->
+  <!-- Upper layer of the packet (z=2) -->
   <box at="8.5 8.5 4" size="2 2 2" color="1"/>
   <box at="10.5 8.5 4" size="2 2 2" color="2"/>
   <box at="8.5 10.5 4" size="2 2 2" color="X"/>
@@ -90,79 +90,79 @@ Scatola aggiornata: 10 × 10 × 8 voxel (drone centrato con offset +1 su X e +1 
   <box at="10.5 10.5 4" size="2 2 2" color="Y"/>
 
   <!-- ======================================================== -->
-  <!-- 4. BAIA DI DOCKING VENTRALE E CARENA CENTRALE (z = 2)     -->
+  <!-- 4. VENTRAL DOCKING BAY AND CENTRAL HULL (z = 2)          -->
   <!-- ======================================================== -->
 
   <!-- ======================================================== -->
-  <!-- 5. FUSOLIERA CENTRALE E VISORE OTTICO (z = 3)             -->
+  <!-- 5. CENTRAL FUSELAGE AND OPTICAL VISOR (z = 3)            -->
   <!-- ======================================================== -->
-  <!-- Scocca centrale in ceramica bianca -->
+  <!-- Central body in white ceramic -->
   <box at="9.5 9.5 6" size="4 4 2" color="W"/>
 
-  <!-- Visore ottico frontale (+y, y=6) con occhi sensori ciano -->
+  <!-- Front optical visor (+y, y=6) with cyan sensor eyes -->
   <box at="9.5 12 7" size="4 1 1" color="I"/>
 
   <box at="8.5 10.5 6" size="2 2 2" color="V"/>
   <box at="10.5 10.5 6" size="2 2 2" color="V"/>
 
-  <!-- Sfogo termico e scarico posteriore (-y, y=3) -->
+  <!-- Heat vent and rear exhaust (-y, y=3) -->
   <box at="8.5 6.5 6" size="2 2 2" color="m"/>
   <box at="10.5 6.5 6" size="2 2 2" color="m"/>
 
-  <!-- Braccetti diagonali di supporto gondole a quota z=3 -->
-  <!-- Anteriore-Sinistro -->
+  <!-- Small diagonal arms supporting the nacelles at height z=3 -->
+  <!-- Front-Left -->
   <box at="6.5 12.5 6" size="2 2 2" color="S"/>
   <box at="4.5 14.5 6" size="2 2 2" color="D"/>
   <box at="2.5 14.5 6" size="2 2 2" color="m"/>
   <box at="2.5 16.5 6" size="2 2 2" color="m"/>
 
-  <!-- Anteriore-Destro -->
+  <!-- Front-Right -->
   <box at="12.5 12.5 6" size="2 2 2" color="S"/>
   <box at="14.5 14.5 6" size="2 2 2" color="D"/>
   <box at="16.5 14.5 6" size="2 2 2" color="m"/>
   <box at="16.5 16.5 6" size="2 2 2" color="m"/>
 
-  <!-- Posteriore-Sinistro -->
+  <!-- Rear-Left -->
   <box at="6.5 6.5 6" size="2 2 2" color="S"/>
   <box at="4.5 4.5 6" size="2 2 2" color="D"/>
   <box at="2.5 4.5 6" size="2 2 2" color="m"/>
   <box at="2.5 2.5 6" size="2 2 2" color="m"/>
 
-  <!-- Posteriore-Destro -->
+  <!-- Rear-Right -->
   <box at="12.5 6.5 6" size="2 2 2" color="S"/>
   <box at="14.5 4.5 6" size="2 2 2" color="D"/>
   <box at="16.5 4.5 6" size="2 2 2" color="m"/>
   <box at="16.5 2.5 6" size="2 2 2" color="m"/>
 
   <!-- ======================================================== -->
-  <!-- 6. PIANO DEI 4 ROTORI VTOL E CANOPY (z = 4)               -->
+  <!-- 6. LAYER OF THE 4 VTOL ROTORS AND CANOPY (z = 4)          -->
   <!-- ======================================================== -->
-  <!-- GONDOLA 1: ANTERIORE-SINISTRA (x in 1..2, y in 7..8) -->
+  <!-- NACELLE 1: FRONT-LEFT (x in 1..2, y in 7..8) -->
   <box at="2.5 16.5 8" size="2 2 2" color="a"/>
   <box at="4.5 16.5 8" size="2 2 2" color="b"/>
   <box at="4.5 14.5 8" size="2 2 2" color="c"/>
   <box at="2.5 14.5 8" size="2 2 2" color="d"/>
 
-  <!-- GONDOLA 2: ANTERIORE-DESTRA (x in 7..8, y in 7..8) -->
+  <!-- NACELLE 2: FRONT-RIGHT (x in 7..8, y in 7..8) -->
   <box at="14.5 16.5 8" size="2 2 2" color="a"/>
   <box at="14.5 14.5 8" size="2 2 2" color="b"/>
   <box at="16.5 14.5 8" size="2 2 2" color="c"/>
   <box at="16.5 16.5 8" size="2 2 2" color="d"/>
 
-  <!-- GONDOLA 3: POSTERIORE-SINISTRA (x in 1..2, y in 1..2) -->
+  <!-- NACELLE 3: REAR-LEFT (x in 1..2, y in 1..2) -->
   <box at="2.5 4.5 8" size="2 2 2" color="a"/>
   <box at="2.5 2.5 8" size="2 2 2" color="b"/>
   <box at="4.5 2.5 8" size="2 2 2" color="c"/>
   <box at="4.5 4.5 8" size="2 2 2" color="d"/>
 
-  <!-- GONDOLA 4: POSTERIORE-DESTRA (x in 7..8, y in 1..2) -->
+  <!-- NACELLE 4: REAR-RIGHT (x in 7..8, y in 1..2) -->
   <box at="14.5 4.5 8" size="2 2 2" color="a"/>
   <box at="16.5 4.5 8" size="2 2 2" color="b"/>
   <box at="16.5 2.5 8" size="2 2 2" color="c"/>
   <box at="14.5 2.5 8" size="2 2 2" color="d"/>
 
   <!-- ======================================================== -->
-  <!-- 7. TETTO CANOPY SUPERIORE RASTREMATO (z = 5)              -->
+  <!-- 7. TAPERED UPPER CANOPY ROOF (z = 5)                      -->
   <!-- ======================================================== -->
   <box at="6.5 9.5 8" size="2 9 2" color="m"/>
   <box at="12.5 9.5 8" size="2 9 2" color="m"/>
@@ -219,23 +219,23 @@ Scatola aggiornata: 10 × 10 × 8 voxel (drone centrato con offset +1 su X e +1 
   <box at="9.5 6.5 8" size="20 2 2" color="m"/>    
   <box at="9.5 12.5 8" size="20 2 2" color="m"/>    
   <!-- ======================================================== -->
-  <!-- 8. PINNA STABILIZZATRICE, MAST E BEACON (z = 6)           -->
+  <!-- 8. STABILISER FIN, MAST AND BEACON (z = 6)                -->
   <!-- ======================================================== -->
-  <!-- Pinna stabilizzatrice posteriore -->
+  <!-- Rear stabiliser fin -->
   <box at="8.5 6.5 8" size="2 2 2" color="m"/>
   <box at="10.5 6.5 8" size="2 2 2" color="m"/>
-  <!-- Mast antenna cromato -->
+  <!-- Chrome antenna mast -->
   <box at="8.5 8.5 8" size="2 2 2" color="s"/>
   <box at="9.5 10.5 8" size="4 2 2" color="s"/>
   <box at="8 11 9" size="1 1 4" color="s"/>
-  <!-- Beacon telemetrico di navigazione ciano -->
+  <!-- Cyan navigation telemetry beacon -->
   <box at="9.5 8.5 9.5" size="4 2 1" color="e"/>
   <box at="8 11 13" size="1 1 1" color="e"/>
 
   <!-- ======================================================== -->
-  <!-- 9. REGOLE GENERATIVE: VARIANTI STOCASTICHE NEI SEMI       -->
+  <!-- 9. GENERATIVE RULES: STOCHASTIC VARIANTS IN THE SEEDS     -->
   <!-- ======================================================== -->
-  <!-- A) Risoluzione quantistica del pacchetto dati (X) -->
+  <!-- A) Quantum resolution of the data packet (X) -->
   <one steps="4">
     <rule in="X" out="1" p="0.40"/>
     <rule in="X" out="2" p="0.30"/>
@@ -244,7 +244,7 @@ Scatola aggiornata: 10 × 10 × 8 voxel (drone centrato con offset +1 su X e +1 
   </one>
   <all in="X" out="2" optional="True"/>
 
-  <!-- B) Risoluzione dei circuiti e involucro pacchetto (Y) -->
+  <!-- B) Resolution of the circuits and the packet casing (Y) -->
   <one steps="4">
     <rule in="Y" out="2" p="0.40"/>
     <rule in="Y" out="3" p="0.30"/>
@@ -252,7 +252,7 @@ Scatola aggiornata: 10 × 10 × 8 voxel (drone centrato con offset +1 su X e +1 
   </one>
   <all in="Y" out="2" optional="True"/>
 
-  <!-- C) Dettagli dorsali della canopy (Z) -->
+  <!-- C) Dorsal details of the canopy (Z) -->
   <one steps="2">
     <rule in="Z" out="W" p="0.50"/>
     <rule in="Z" out="w" p="0.30"/>
@@ -262,18 +262,18 @@ Scatola aggiornata: 10 × 10 × 8 voxel (drone centrato con offset +1 su X e +1 
 </sequence>
 
 <!-- ============================================================ -->
-<!-- 10. ANIMAZIONE ELICA (4 FRAMES): ROTAZIONE E PULSAZIONE DATI -->
+<!-- 10. PROPELLER ANIMATION (4 FRAMES): ROTATION AND DATA PULSE -->
 <!-- ============================================================ -->
 <animation name="elica" frames="4" symmetry="()">
   <sequence>
-    <!-- 1. Rotazione continua a 360° dei rotori al plasma ciano -->
+    <!-- 1. Continuous 360° rotation of the cyan plasma rotors -->
     <all in="a" out="x"/>
     <all in="b" out="a"/>
     <all in="c" out="b"/>
     <all in="d" out="c"/>
     <all in="x" out="d"/>
 
-    <!-- 2. Pulsazione ritmica del flusso dati energetico -->
+    <!-- 2. Rhythmic pulse of the energy data flow -->
     <all in="1" out="y"/>
     <all in="2" out="1"/>
     <all in="3" out="2"/>

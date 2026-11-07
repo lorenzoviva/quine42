@@ -1,6 +1,6 @@
-<!-- Cartello, procedurale (Cantiere 2): palo, tavola, bordo e incisioni dell'originale (niente scritte: chi passa la legge). Il seme sceglie
-     quanto è alto il palo, quante tavole porta (una, o una seconda più in basso che indica l'altra strada) e verso dove sporge ciascuna, e se
-     il palo è un poco storto. -->
+<!-- Signpost, procedural (Cantiere 2): post, board, border and carvings of the original (no writing: whoever passes reads it). The seed picks
+     how tall the post is, how many boards it carries (one, or a second one lower down pointing to the other road) and which way each juts out, and whether
+     the post is a little crooked. -->
 <sequence values="BNLndhkrtaS" size="20 20 20" symmetry="(xy)" name="Cartello">
   <color symbol="N" value="6b4a2e" name="palo"/>
   <color symbol="L" value="c09a62" name="tavola"/>
@@ -12,7 +12,7 @@
   <color symbol="t" hidden="True" name="dove nasce una tavola"/>
   <color symbol="a" hidden="True" name="una tavola che si allunga"/>
   <color symbol="S" hidden="True" name="la cima"/>
-  <!-- Il palo sale fino alla quota scelta, forse piegando una volta -->
+  <!-- The post rises to the chosen height, perhaps bending once -->
   <box at="0 0 12" size="1 1 7" color="h"/>
   <one in="h" out="k" steps="1"/>
   <all in="h" out="B"/>
@@ -26,14 +26,14 @@
   <all in="k" out="B"/>
   <all in="NB" out="NN" steps="1" symmetry="()"/>
   <all in="N/B" out="N/N" steps="1" symmetry="()"/>
-  <!-- La tavola alta, sotto la cima, e forse una seconda più in basso -->
+  <!-- The high board, under the top, and perhaps a second one lower down -->
   <all in="S/B" out="N/t" symmetry="()"/>
   <all in="* S" out="* N"/>
   <prl in="N/B" out="*/t" symmetry="()" p="0.04" steps="1"/>
   <all in="t/*/* */*/* */*/* */*/*" out="*/*/* */*/* */*/* */*/*" symmetry="()"/>
   <one steps="2" in="t" out="a"/>
   <all in="t" out="B"/>
-  <!-- Ogni tavola: si allunga a destra o a sinistra o da entrambe le parti, poi prende altezza -->
+  <!-- Every board: it stretches to the right or to the left or both ways, then gains height -->
   <one steps="2">
     <rule in="aB" out="aa"/>
     <rule in="Ba" out="aa"/>

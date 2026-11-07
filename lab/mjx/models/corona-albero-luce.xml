@@ -1,125 +1,125 @@
 <!--
-Albero di luce neon e traslucido (corona): arredo urbano futuristico per il campus della corona.
-Scritto da Gemini CLI (Gemini 3.8 Flash, abbonamento), task T50a.
-Scatola: 2 × 2 × 3.5 caselle, 16 × 16 × 28 voxel, 8 voxel per casella (vpt: 8).
-Ruolo: tree.
-Fusto bionico slanciato ancorato su plinto circolare grafite (M) con radici compatte a sbalzo (z=0..2);
-il tronco sale snello (z=2..12) percorso da quattro canali verticali a fibra ottica ciano (C)
-incastonati in titanio grafite (m) e cinto da un collare zaffiro (Z); a quota z=11..13 si apre
-un'ampia chioma generativa a calice di rami frattali (m, C, Z), rivestita da cristalli ottici
-vitrei altamente traslucidi in aqua e ghiaccio etereo (V, T, G).
-Dalla chioma scendono liane penzolanti luminescenti ciano (H, glow="True").
-Animazione ciclica a 8 fotogrammi:
-- le liane penzolanti si allungano e accorciano organicamente;
-- i cristalli e le gemme della chioma scintillano e pulsano sporadicamente.
+Neon, translucent tree of light (corona): futuristic street furniture for the campus of the corona.
+Written by Gemini CLI (Gemini 3.8 Flash, subscription), task T50a.
+Box: 2 × 2 × 3.5 tiles, 16 × 16 × 28 voxels, 8 voxels per tile (vpt: 8).
+Role: tree.
+A slender bionic trunk anchored on a round graphite plinth (M) with compact overhanging roots (z=0..2);
+the trunk rises slim (z=2..12) run through by four vertical cyan optical-fibre channels (C)
+set in graphite titanium (m) and girded by a sapphire collar (Z); at height z=11..13 opens
+a wide generative chalice crown of fractal branches (m, C, Z), clad in highly translucent
+glassy optical crystals in aqua and ethereal ice (V, T, G).
+Glowing cyan hanging vines come down from the crown (H, glow="True").
+Cyclic animation in 8 frames:
+- the hanging vines lengthen and shorten organically;
+- the crystals and gems of the crown sparkle and pulse sporadically.
 -->
 <sequence values="BXmMZCVTGLWH" size="16 16 28" symmetry="(xy)" name="Albero di luce">
-  <!-- Materiali strutturali di base: metallo grafite scuro e titanio -->
+  <!-- Base structural materials: dark graphite metal and titanium -->
   <color symbol="M" value="141418" name="grafite base"/>
   <color symbol="m" value="222634" name="titanio fusto"/>
   
-  <!-- Segnalatore invisibile per la crescita generativa dei rami -->
+  <!-- Invisible marker for the generative growth of the branches -->
   <color symbol="X" hidden="True" name="nodo di crescita"/>
 
-  <!-- Vene a fibra ottica e nodi di giunzione -->
+  <!-- Optical-fibre veins and junction nodes -->
   <color symbol="C" value="05d9e8" name="fibra ciano"/>
   <color symbol="Z" value="29adff" name="zaffiro nodi"/>
 
-  <!-- Liane pendenti luminescenti al neon: le uniche con emissione attiva glow -->
+  <!-- Glowing neon hanging vines: the only ones with an active glow -->
   <color symbol="H" value="00ffff" glow="True" name="liana neon pendente"/>
 
-  <!-- Cristalli ottici traslucidi: aqua brillante, indaco profondo e ghiaccio etereo -->
+  <!-- Translucent optical crystals: bright aqua, deep indigo and ethereal ice -->
   <color symbol="V" value="162436" name="vetro indaco"/>
   <color symbol="T" value="3ea8c8" name="vetro aqua traslucido"/>
   <color symbol="G" value="b4f0ff" name="cristallo ghiaccio traslucido"/>
 
-  <!-- Punti di diffrazione della chioma: gemme azzurre e scintille bianche traslucide -->
+  <!-- Diffraction points of the crown: light-blue gems and translucent white sparks -->
   <color symbol="L" value="6fc3ff" name="gemma azzurra"/>
   <color symbol="W" value="ffffff" name="scintilla fotonica"/>
 
-  <!-- Unione dei materiali della chioma da cui possono germogliare le liane pendenti -->
+  <!-- Union of the crown materials from which the hanging vines can sprout -->
   <union symbol="K" values="TVmZ"/>
 
   <!-- ======================================================== -->
-  <!-- 1. BASAMENTO TECNOLOGICO E RADICI COMPATTE (z = 0..2)    -->
+  <!-- 1. TECHNOLOGICAL BASE AND COMPACT ROOTS (z = 0..2)       -->
   <!-- ======================================================== -->
-  <!-- Plinto circolare scuro a terra z=0 -->
+  <!-- Dark round plinth on the ground z=0 -->
   <cylinder at="7.5 7.5 0" size="4 4 2" color="M"/>
   <cylinder at="7.5 7.5 0" size="2 2 2" color="m"/>
 
-  <!-- 4 radici tecnologiche che si diramano verso i quadranti -->
+  <!-- 4 technological roots branching out towards the quadrants -->
   <line at="7.5 7.5 1" to="4.5 4.5 0" r="0.7" color="M"/>
   <line at="7.5 7.5 1" to="10.5 4.5 0" r="0.7" color="M"/>
   <line at="7.5 7.5 1" to="4.5 10.5 0" r="0.7" color="M"/>
   <line at="7.5 7.5 1" to="10.5 10.5 0" r="0.7" color="M"/>
 
   <!-- ======================================================== -->
-  <!-- 2. FUSTO SLANCIATO CON FIBRE E TORSIONE (z = 2..12)      -->
+  <!-- 2. SLENDER TRUNK WITH FIBRES AND TWIST (z = 2..12)       -->
   <!-- ======================================================== -->
-  <!-- Fusto centrale in titanio grafite -->
+  <!-- Central trunk in graphite titanium -->
   <cylinder at="7.5 7.5 2" size="3 3 9" color="m"/>
   <cylinder at="7.5 7.5 2" size="3.5 3.5 2" color="M"/>
 
-  <!-- 4 canali verticali di fibra ottica ciano brillante a vista lungo il fusto -->
+  <!-- 4 vertical channels of bright cyan optical fibre in view along the trunk -->
   <box at="5 7 3" size="1 2 7" color="C"/>
   <box at="9 7 3" size="1 2 7" color="C"/>
   <box at="7 5 3" size="2 1 7" color="C"/>
   <box at="7 9 3" size="2 1 7" color="C"/>
 
-  <!-- Collare energetico zaffiro a quota z=9 -->
+  <!-- Sapphire energy collar at height z=9 -->
   <cylinder at="7.5 7.5 9" size="4 4 1" color="Z"/>
-  <!-- Corona di raccordo e alloggiamento rami a quota z=11 -->
+  <!-- Joining crown and branch housing at height z=11 -->
   <cylinder at="7.5 7.5 11" size="4 4 1" color="m"/>
   <cylinder at="7.5 7.5 11" size="2 2 1" color="C"/>
 
   <!-- ======================================================== -->
-  <!-- 3. INNOCULO DEI RAMI GENERATIVI (z = 12)                 -->
+  <!-- 3. SEEDING THE GENERATIVE BRANCHES (z = 12)              -->
   <!-- ======================================================== -->
-  <!-- 4 nodi di diramazione iniziale su coordinate intere solide -->
+  <!-- 4 initial branching nodes on solid integer coordinates -->
   <box at="6 6 12" size="1 1 1" color="X"/>
   <box at="9 6 12" size="1 1 1" color="X"/>
   <box at="6 9 12" size="1 1 1" color="X"/>
   <box at="9 9 12" size="1 1 1" color="X"/>
 
   <!-- ======================================================== -->
-  <!-- 4. CRESCITA GENERATIVA PRIMARIA DEI RAMI (z = 12..20)    -->
+  <!-- 4. PRIMARY GENERATIVE GROWTH OF THE BRANCHES (z = 12..20) -->
   <!-- ======================================================== -->
-  <!-- I rami salgono allargandosi a coppa divergente -->
+  <!-- The branches rise widening into a diverging cup -->
   <one steps="32">
-    <!-- Slancio ascensionale dritto con fibra ciano -->
+    <!-- Straight upward thrust with cyan fibre -->
     <rule in="B X" out="X C" p="1.6"/>
-    <!-- Slancio ascensionale dritto con fusto titanio -->
+    <!-- Straight upward thrust with titanium trunk -->
     <rule in="B X" out="X m" p="1.2"/>
-    <!-- Avanzamento diagonale verso l'esterno (+x o +y, +z) -->
+    <!-- Diagonal advance outwards (+x or +y, +z) -->
     <rule in="*B X*" out="*X *m" p="0.6"/>
-    <!-- Avanzamento diagonale d'angolo (+x, +y, +z) -->
+    <!-- Corner diagonal advance (+x, +y, +z) -->
     <rule in="**/*B X*/**" out="**/*X *m/**" p="0.45"/>
-    <!-- Venatura zaffiro lungo il ramo -->
+    <!-- Sapphire veining along the branch -->
     <rule in="*B X*" out="*X *Z" p="0.35"/>
   </one>
 
   <!-- ======================================================== -->
-  <!-- 5. BIFORCAZIONE FRATTALE E CHIOMA SUPERIORE (z = 19..25) -->
+  <!-- 5. FRACTAL FORKING AND UPPER CROWN (z = 19..25)          -->
   <!-- ======================================================== -->
-  <!-- I rami si biforcano e aprono la chioma in alto -->
+  <!-- The branches fork and open the crown at the top -->
   <one steps="24">
-    <!-- Slancio finale verso l'apice con zaffiro -->
+    <!-- Final thrust towards the apex with sapphire -->
     <rule in="B X" out="X Z" p="1.4"/>
-    <!-- Sdoppiamento a calice del ramo -->
+    <!-- Chalice split of the branch -->
     <rule in="B*B *X*" out="X*X *m*" p="0.25"/>
-    <!-- Ramo secondario divergente con nodo neon zaffiro -->
+    <!-- Diverging secondary branch with a sapphire neon node -->
     <rule in="*B X*" out="*X *Z" p="0.5"/>
-    <!-- Ramo angolare verso la volta con fibra ciano -->
+    <!-- Angled branch towards the vault with cyan fibre -->
     <rule in="**/*B X*/**" out="**/*X *C/**" p="0.4"/>
   </one>
 
-  <!-- Cristallizzazione definitiva dei fronti terminali X in nodi zaffiro -->
+  <!-- Final crystallisation of the X end fronts into sapphire nodes -->
   <all in="X" out="Z"/>
 
   <!-- ======================================================== -->
-  <!-- 6. FORMAZIONE DEI CRISTALLI TRASLUCIDI (V, T, G)         -->
+  <!-- 6. FORMING THE TRANSLUCENT CRYSTALS (V, T, G)            -->
   <!-- ======================================================== -->
-  <!-- Il vetro indaco si addensa attorno a tutti i nodi e rami della chioma -->
+  <!-- The indigo glass thickens around all the nodes and branches of the crown -->
   <prl steps="1">
     <rule in="B Z" out="V *" p="0.85"/>
     <rule in="ZB" out="*V" p="0.75"/>
@@ -128,76 +128,76 @@ Animazione ciclica a 8 fotogrammi:
     <rule in="B C" out="V *" p="0.45"/>
   </prl>
 
-  <!-- Cristallizzazione superficiale in vetro aqua traslucido vivido (T) -->
+  <!-- Surface crystallisation in vivid translucent aqua glass (T) -->
   <prl steps="1">
     <rule in="B V" out="B T" p="0.7"/>
     <rule in="V B" out="T B" p="0.6"/>
   </prl>
 
-  <!-- Fusione organica e saldatura interna dei prismi con NoCorners -->
+  <!-- Organic fusion and inner welding of the prisms with NoCorners -->
   <convolution neighborhood="NoCorners" steps="1" optional="True">
     <rule in="B" out="T" values="V T" sum="8..16"/>
   </convolution>
 
-  <!-- Sfaccettature riflettenti in cristallo ghiaccio etereo (G) sulle facce esposte -->
+  <!-- Reflecting facets in ethereal ice crystal (G) on the exposed faces -->
   <prl steps="1">
     <rule in="B T" out="B G" p="0.65"/>
     <rule in="B V" out="B T" p="0.5"/>
   </prl>
 
   <!-- ======================================================== -->
-  <!-- 7. LIANE NEON LUMINOSE PENDENTI (H)                      -->
+  <!-- 7. GLOWING HANGING NEON VINES (H)                        -->
   <!-- ======================================================== -->
-  <!-- Spunta dei nodi di liana sotto la volta della chioma -->
+  <!-- Vine nodes sprout under the vault of the crown -->
   <prl steps="1">
     <rule in="K B" out="* H" p="0.32"/>
   </prl>
 
-  <!-- Accrescimento verso il basso delle liane pendenti luminescenti -->
+  <!-- Downward growth of the glowing hanging vines -->
   <one steps="44">
-    <!-- La liana scende se ci sono almeno due blocchi di aria sotto -->
+    <!-- The vine goes down if there are at least two blocks of air below -->
     <rule in="H B B" out="* H *" p="1.0"/>
-    <!-- Allungamento semplice -->
+    <!-- Simple lengthening -->
     <rule in="H B" out="* H" p="0.4"/>
   </one>
 
   <!-- ======================================================== -->
-  <!-- 8. GEMME NEON TERMINALI (L) E SCINTILLE FOTONICHE (W)    -->
+  <!-- 8. END NEON GEMS (L) AND PHOTON SPARKS (W)               -->
   <!-- ======================================================== -->
-  <!-- Punti luce neon azzurri distribuiti sui cristalli esterni -->
+  <!-- Light-blue neon points spread over the outer crystals -->
   <prl steps="1">
     <rule in="B G" out="B L" p="0.45"/>
     <rule in="B T" out="B L" p="0.30"/>
   </prl>
 
-  <!-- Fotoni bianchi stellari sulle sommità delle gemme neon -->
+  <!-- Starry white photons on the tops of the neon gems -->
   <prl steps="1">
     <rule in="B L" out="B W" p="0.35"/>
   </prl>
 </sequence>
 
 <!-- ============================================================ -->
-<!-- 9. ANIMAZIONE CICLICA VITA (8 FRAMES): LIANE E SCINTILLIO    -->
+<!-- 9. CYCLIC LIFE ANIMATION (8 FRAMES): VINES AND SPARKLE      -->
 <!-- ============================================================ -->
 <animation name="vita" frames="8">
   <sequence>
-    <!-- Le liane pendenti fluttuano: allungamento o ritrazione stocastica della punta -->
+    <!-- The hanging vines float: stochastic lengthening or retraction of the tip -->
     <prl steps="1">
-      <!-- Si allunga verso il basso di un voxel se c'è spazio d'aria sotto -->
+      <!-- It lengthens downwards by one voxel if there is air below -->
       <rule in="H B B" out="* H *" p="0.30"/>
-      <!-- Si accorcia ritirando la punta di un voxel (mantiene l'ancoraggio alla chioma) -->
+      <!-- It shortens by pulling the tip back one voxel (keeps its anchor to the crown) -->
       <rule in="H H B" out="* B *" p="0.22"/>
     </prl>
 
-    <!-- Scintillio sporadico nella chioma: gemme che si accendono e tornano cristallo -->
+    <!-- Sporadic sparkle in the crown: gems that light up and turn back into crystal -->
     <prl steps="1">
-      <!-- Alcuni cristalli aqua si accendono sporadicamente in gemme neon azzurre -->
+      <!-- Some aqua crystals light up sporadically into light-blue neon gems -->
       <rule in="T" out="L" p="0.08"/>
-      <!-- Alcuni cristalli ghiaccio si accendono in scintille fotoniche bianche -->
+      <!-- Some ice crystals light up into white photon sparks -->
       <rule in="G" out="W" p="0.06"/>
-      <!-- Le gemme accese tornano delicatamente cristallo traslucido -->
+      <!-- The lit gems gently turn back into translucent crystal -->
       <rule in="L" out="T" p="0.32"/>
-      <!-- I fotoni bianchi tornano cristallo ghiaccio -->
+      <!-- The white photons turn back into ice crystal -->
       <rule in="W" out="G" p="0.38"/>
     </prl>
   </sequence>

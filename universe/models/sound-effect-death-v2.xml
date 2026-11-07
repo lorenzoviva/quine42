@@ -1,4 +1,4 @@
-<!-- Il viaggio finisce: un colpo sordo e tre note gravi che scendono; il seme sceglie la strada della discesa, dove cade il basso e l'eco che resta. -->
+<!-- The journey ends: a dull blow and three low notes going down; the seed picks the path of the descent, where the bass falls and the echo that remains. -->
 <sequence name="Morte" values="BNSAGKHCTUVPM" size="16 2 9" symmetry="()">
   <sound bpm="80" scale="phrygian" root="43" swing="0" cutoff="2400" space="0.6">
     <track y="0" instrument="pad" volume="0.9"/>
@@ -17,14 +17,14 @@
   <color symbol="P" value="64748b" name="Scelta" hidden="True"/>
   <color symbol="M" value="14b8a6" name="Scelta" hidden="True"/>
 
-  <!-- Il colpo, sempre; un secondo colpo più lontano, a volte. -->
+  <!-- The blow, always; a second, farther blow, sometimes. -->
   <line at="0 1 0" to="0 1 0" r="0" color="K"/>
   <line at="12 1 0" to="12 1 0" r="0" color="P"/>
   <line at="14 1 0" to="14 1 0" r="0" color="P"/>
   <line at="13 1 0" to="13 1 0" r="0" color="P"/>
   <one in="P" out="K" steps="1"/>
   <all in="P" out="B"/>
-  <!-- La discesa: da dove parte, dove passa, dove si posa (accento). -->
+  <!-- The descent: where it starts, where it passes, where it rests (accent). -->
   <line at="0 0 6" to="0 0 6" r="0" color="T"/>
   <line at="0 0 7" to="0 0 7" r="0" color="T"/>
   <one in="T" out="N" steps="1"/>
@@ -38,16 +38,16 @@
   <line at="8 0 2" to="8 0 2" r="0" color="V"/>
   <one in="V" out="A" steps="1"/>
   <all in="V" out="B"/>
-  <!-- Il basso sotto l'ultima nota, o un'ottava più giù. -->
+  <!-- The bass under the last note, or an octave lower. -->
   <line at="8 1 3" to="8 1 3" r="0" color="M"/>
   <line at="8 1 1" to="8 1 1" r="0" color="M"/>
   <line at="9 1 2" to="9 1 2" r="0" color="M"/>
   <one in="M" out="N" steps="1"/>
   <all in="M" out="B"/>
-  <!-- Le code: ogni nota tiene fino alla successiva, l'ultima a lungo. -->
+  <!-- The tails: every note holds until the next, the last one long. -->
   <all in="NBB" out="NSS"/>
   <all in="ABBBBB" out="ASSSSS"/>
-  <!-- L'eco: un ghost che risale appena, in fondo. -->
+  <!-- The echo: a ghost rising barely, at the end. -->
   <line at="14 0 1" to="14 0 1" r="0" color="T"/>
   <line at="14 0 0" to="14 0 0" r="0" color="T"/>
   <line at="15 0 1" to="15 0 1" r="0" color="T"/>

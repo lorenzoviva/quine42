@@ -17,7 +17,7 @@
   <color symbol="a" value="6e6860" name="fondazione"/>
   <color symbol="x" value="543319" name="botti"/>
   <color symbol="Y" value="ff6600" glow="True" name="fuoco"/>
-  <!-- 1. reticolo: bracci dal centro, poi le linee -->
+  <!-- 1. lattice: arms from the centre, then the lines -->
   <prl in="***/*E*/***" out="***/*z*/***"/>
   <all in="Nz" out="*a" steps="1"/>
   <all in="[Nx]az" out="*xa" steps="14"/>
@@ -72,7 +72,7 @@
   <one in="nnnnnnnnn" out="*eeeeeee*" steps="1"/>
   <prl in="v" out="t"/>
   <prl in="m" out="H"/>
-  <!-- 3. i muri dalle lettere vicine -->
+  <!-- 3. the walls from the neighbouring letters -->
   <all><rule in="[zE]p[zE]" out="*q*"/><rule in="[zE]p1" out="*w*"/><rule in="[zE]p2" out="*X*"/><rule in="1p1" out="*i*"/><rule in="2p2" out="*I*"/><rule in="1p2" out="*J*"/><rule in="1H1" out="*h*"/><rule in="1H2" out="*j*"/><rule in="EO2" out="*M*"/></all>
   <prl in="n" out="h"/>
   <all in="P[XIJjHMy]" out="I*"/>
@@ -135,7 +135,7 @@
   <all in="C/B */R" out="*/C */*" symmetry="(y)" steps="6"/>
   <all in="B C" out="C *" steps="9" symmetry="()"/>
   <all in="B C" out="Y *" steps="1" symmetry="()"/>
-  <!-- 7. pulizia -->
+  <!-- 7. cleanup -->
   <prl><rule in="U" out="C"/><rule in="u" out="W"/><rule in="G" out="L"/><rule in="E" out="B"/><rule in="z" out="B"/><rule in="Z" out="B"/><rule in="w" out="C"/><rule in="X" out="C"/><rule in="J" out="C"/><rule in="j" out="C"/><rule in="M" out="C"/><rule in="i" out="R"/><rule in="h" out="R"/></prl>
 </sequence>
 <action name="apri" label="Apri la porta"><prl in="k" out="B"/></action>

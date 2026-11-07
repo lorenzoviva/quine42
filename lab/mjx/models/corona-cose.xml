@@ -1,37 +1,37 @@
 <!--
-Il Laboratorio delle cose (corona): tensostruttura geodetica semisferica in metallo nero e vetro riflettente.
-Scritto da Gemini CLI (Gemini 3.8 Flash, abbonamento) il 23/10/2026, task T19.
-Scatola: 14 × 14 × 8 caselle, 112 × 112 × 64 voxel, 8 voxel per casella.
-Lettere chiave:
-  O = porta (lettera O, nome "porta", al centro x=56, y=98, z=0..16, atrio interno vuoto per 18 voxel)
-  F = insegna ("IL LABORATORIO DELLE COSE", neon rame d89a6a glow fisso su totem frontale a sinistra)
-  P = targa scura opaca per il totem dell'insegna
-  M = metallo nero primario (tensostruttura e nervature)
-  m = metallo secondario scuro (macchinari interni e pilastri)
-  C = cemento grafite della base e pavimentazione
-  S = acciaio chiaro / raccordi tensili / cavi
-  V = vetro scuro riflettente
-  v = fasce di riflesso azzurrato sul vetro
-  n = neon rame sottile per giunzioni e anelli (glow)
-  N = neon rame vivo per portale e nucleo (glow)
-  x = buffer temporaneo per l'animazione (hidden)
-Fasi pulsanti del rame (1..8):
-  1..8 = gradiente continuo di 8 fasi (da 844422 a f2b07c) con onda morbida e respiro del laboratorio.
-Tensostruttura e Cupola:
-  Cupola semisferica geodetica (diametro 80 voxel, z=0..40) con reticolo a losanghe e triangoli in metallo nero,
-  pannelli di vetro scuro riflettente con riflessi orizzontali e diagonali, pilastri di trazione esterni e cavi d'acciaio.
-Avancorpo a tunnel:
-  Tunnel d'ingresso sporgente verso sud (y=74..98) con portale cybernetico, cornice neon rame e vano d'ingresso libero.
-Totem insegna:
-  Monolite cybernetico sul lato sinistro (x=4..48, y=102..107, z=0..29) con targa scura opaca, tiranti posteriori e scritta neon a pixel
-  "IL LABORATORIO DELLE COSE" su tre righe perfettamente centrate e leggibili dal viale.
-Laboratorio interno:
-  Atrio passante, camera centrale di sintesi della materia con cilindro di contenimento e nucleo di plasma rame pulsante.
-Animazione "sintesi" (8 frame):
-  Onda di energia continua che fluisce attraverso gli anelli geodetici, i cavi tensili e il nucleo centrale.
+The Laboratory of Things (corona): a hemispherical geodesic tensile structure in black metal and reflecting glass.
+Written by Gemini CLI (Gemini 3.8 Flash, subscription) on 23/10/2026, task T19.
+Box: 14 × 14 × 8 tiles, 112 × 112 × 64 voxels, 8 voxels per tile.
+Key letters:
+  O = door (letter O, name "porta", at the centre x=56, y=98, z=0..16, inner hall empty for 18 voxels)
+  F = sign ("IL LABORATORIO DELLE COSE", copper neon d89a6a with a steady glow on the front totem to the left)
+  P = dark matte plate for the totem of the sign
+  M = primary black metal (tensile structure and ribs)
+  m = dark secondary metal (inner machinery and pillars)
+  C = graphite concrete of the base and paving
+  S = light steel / tensile joints / cables
+  V = dark reflecting glass
+  v = bands of bluish reflection on the glass
+  n = thin copper neon for joints and rings (glow)
+  N = bright copper neon for the portal and the core (glow)
+  x = temporary buffer for the animation (hidden)
+Pulsing phases of the copper (1..8):
+  1..8 = continuous gradient of 8 phases (from 844422 to f2b07c) with a soft wave, the breathing of the laboratory.
+Tensile structure and Dome:
+  Geodesic hemispherical dome (diameter 80 voxels, z=0..40) with a lattice of lozenges and triangles in black metal,
+  dark reflecting glass panels with horizontal and diagonal reflections, outer tension pillars and steel cables.
+Tunnel forward block:
+  Entrance tunnel jutting out to the south (y=74..98) with a cybernetic portal, a copper neon frame and a free entrance space.
+Sign totem:
+  Cybernetic monolith on the left side (x=4..48, y=102..107, z=0..29) with a dark matte plate, rear tie rods and pixel neon writing
+  "IL LABORATORIO DELLE COSE" on three lines, perfectly centred and readable from the avenue.
+Inner laboratory:
+  A through hall, the central chamber of matter synthesis with a containment cylinder and a pulsing copper plasma core.
+Animation "sintesi" (8 frames):
+  A continuous energy wave flowing through the geodesic rings, the tensile cables and the central core.
 -->
 <sequence values="BMmCSVvNFPOnx12345678" size="112 112 64" symmetry="()" name="Laboratorio delle cose">
-  <!-- Materiali e palette -->
+  <!-- Materials and palette -->
   <color symbol="M" value="16161e" name="metallo primario"/>
   <color symbol="m" value="242632" name="metallo secondario"/>
   <color symbol="C" value="363842" name="cemento grafite"/>
@@ -45,7 +45,7 @@ Animazione "sintesi" (8 frame):
   <color symbol="O" value="281a14" name="porta"/>
   <color symbol="x" hidden="True" name="buffer animazione"/>
 
-  <!-- 8 Fasi dell'onda neon rame (pulsazione ciclica fluida) -->
+  <!-- 8 phases of the copper neon wave (fluid cyclic pulse) -->
   <color symbol="1" value="844422" glow="True" name="fase rame 1"/>
   <color symbol="2" value="9c542a" glow="True" name="fase rame 2"/>
   <color symbol="3" value="b86a36" glow="True" name="fase rame 3"/>
@@ -56,30 +56,30 @@ Animazione "sintesi" (8 frame):
   <color symbol="8" value="9c542a" glow="True" name="fase rame 8"/>
 
   <!-- ================================================================= -->
-  <!-- 1. BASAMENTO, PIAZZALE E PERIMETRO (z = 0..3)                     -->
+  <!-- 1. BASE, FORECOURT AND PERIMETER (z = 0..3)                       -->
   <!-- ================================================================= -->
-  <!-- Basamento circolare a gradoni sotto la cupola (cx=56, cy=46) -->
+  <!-- Round stepped base under the dome (cx=56, cy=46) -->
   <cylinder at="56 46 0" size="88 88 2" color="C"/>
   <cylinder at="56 46 2" size="84 84 1" color="C"/>
   <cylinder at="56 46 3" size="82 82 1" color="m"/>
 
-  <!-- Piazzale frontale pavimentato verso il viale (y=46..106) -->
+  <!-- Paved front forecourt towards the avenue (y=46..106) -->
   <box at="56 84 0" size="40 44 2" color="C"/>
   <box at="56 84 1" size="36 42 1" color="m"/>
   <box at="56 94 2" size="24 24 1" color="C"/>
 
-  <!-- Guide luminose neon rame lungo il percorso pedonale (fasi 1 e 5) -->
+  <!-- Copper neon light guides along the footpath (phases 1 and 5) -->
   <box at="47 101 2" size="1 10 1" color="1"/>
   <box at="65 101 2" size="1 10 1" color="5"/>
 
-  <!-- Basamento monolitico per il totem dell'insegna (lato sinistro) -->
+  <!-- Monolithic base for the totem of the sign (left side) -->
   <box at="26 104 0" size="46 6 2" color="C"/>
   <box at="26 104 2" size="44 4 1" color="m"/>
 
   <!-- ================================================================= -->
-  <!-- 2. PILASTRI DI TRAZIONE DELLA TENSOSTRUTTURA ESTERNA             -->
+  <!-- 2. TENSION PILLARS OF THE OUTER TENSILE STRUCTURE                 -->
   <!-- ================================================================= -->
-  <!-- 8 piloni angolati di ancoraggio perimetrale (R ~ 44 da cx=56, cy=46) -->
+  <!-- 8 angled perimeter anchoring pylons (R ~ 44 from cx=56, cy=46) -->
   <box at="12 46 0" size="4 6 16" color="M"/>
   <box at="12 46 16" size="4 4 3" color="S"/>
   <box at="12 46 19" size="2 2 2" color="1"/>
@@ -109,55 +109,55 @@ Animazione "sintesi" (8 frame):
   <box at="87 77 19" size="2 2 2" color="7"/>
 
   <!-- ================================================================= -->
-  <!-- 3. GUSCIO DELLA CUPOLA (VETRO RIFLETTENTE E RIFLESSI)             -->
+  <!-- 3. SHELL OF THE DOME (REFLECTING GLASS AND REFLECTIONS)           -->
   <!-- ================================================================= -->
-  <!-- Guscio semisferico perfetto in vetro riflettente (r=40, h=40) -->
+  <!-- Perfect hemispherical shell in reflecting glass (r=40, h=40) -->
   <ellipsoid at="56 46 -39" size="80 80 80" color="V"/>
 
-  <!-- Fasce orizzontali di riflesso del cielo/luce nel vetro -->
+  <!-- Horizontal bands of reflected sky/light in the glass -->
   <cylinder at="56 46 8" size="79 79 3" color="v" on="V"/>
   <cylinder at="56 46 18" size="74 74 3" color="v" on="V"/>
   <cylinder at="56 46 27" size="62 62 3" color="v" on="V"/>
   <cylinder at="56 46 34" size="44 44 2" color="v" on="V"/>
 
-  <!-- Svuotamento dell'interno della cupola (lascia parete spessa 3 voxel) -->
+  <!-- Hollowing out the inside of the dome (leaves a wall 3 voxels thick) -->
   <ellipsoid at="56 46 -36" size="74 74 74" color="B"/>
 
-  <!-- Pavimento interno del laboratorio a z=0..1 -->
+  <!-- Inner floor of the laboratory at z=0..1 -->
   <cylinder at="56 46 0" size="74 74 1" color="C"/>
   <cylinder at="56 46 1" size="72 72 1" color="m"/>
 
   <!-- ================================================================= -->
-  <!-- 4. RETICOLO STRUTTURALE (NERVATURE MERIDIANE, PARALLELE E GEODETICA) -->
+  <!-- 4. STRUCTURAL LATTICE (MERIDIAN RIBS, PARALLELS AND GEODESIC)     -->
   <!-- ================================================================= -->
-  <!-- Cerchiature orizzontali in metallo nero lungo i paralleli -->
-  <!-- Parallelo 1 (z=6..7) -->
+  <!-- Horizontal hoops in black metal along the parallels -->
+  <!-- Parallel 1 (z=6..7) -->
   <cylinder at="56 46 6" size="81 81 2" color="M" on="Vv"/>
   <cylinder at="56 46 6" size="77 77 2" color="V" on="M"/>
 
-  <!-- Parallelo 2 (z=14..15) con filetto neon rame pulsante (fase 2) -->
+  <!-- Parallel 2 (z=14..15) with a pulsing copper neon thread (phase 2) -->
   <cylinder at="56 46 14" size="77 77 2" color="M" on="Vv"/>
   <cylinder at="56 46 14" size="73 73 2" color="V" on="M"/>
   <cylinder at="56 46 14" size="78 78 1" color="2" on="M"/>
 
-  <!-- Parallelo 3 (z=23..24) -->
+  <!-- Parallel 3 (z=23..24) -->
   <cylinder at="56 46 23" size="69 69 2" color="M" on="Vv"/>
   <cylinder at="56 46 23" size="65 65 2" color="V" on="M"/>
 
-  <!-- Parallelo 4 (z=31..32) con filetto neon rame pulsante (fase 6) -->
+  <!-- Parallel 4 (z=31..32) with a pulsing copper neon thread (phase 6) -->
   <cylinder at="56 46 31" size="55 55 2" color="M" on="Vv"/>
   <cylinder at="56 46 31" size="51 51 2" color="V" on="M"/>
   <cylinder at="56 46 31" size="56 56 1" color="6" on="M"/>
 
-  <!-- Parallelo 5 (z=36..37) -->
+  <!-- Parallel 5 (z=36..37) -->
   <cylinder at="56 46 36" size="37 37 2" color="M" on="Vv"/>
   <cylinder at="56 46 36" size="33 33 2" color="V" on="M"/>
 
-  <!-- Nervature verticali dei meridiani principali (archi a tutto sesto) -->
+  <!-- Vertical ribs of the main meridians (round arches) -->
   <box at="56 46 0" size="2 82 42" color="M" on="Vv"/>
   <box at="56 46 0" size="82 2 42" color="M" on="Vv"/>
 
-  <!-- Geodetica tier 1 (z=6..14) -->
+  <!-- Geodesic tier 1 (z=6..14) -->
   <line at="95 46 6" to="90 60 14" r="0" color="M" on="Vv"/>
   <line at="92 61 6" to="93 46 14" r="0" color="M" on="Vv"/>
   <box at="93 46 14" size="1 1 1" color="S" on="VvM"/>
@@ -206,7 +206,7 @@ Animazione "sintesi" (8 frame):
   <line at="92 31 6" to="93 46 14" r="0" color="M" on="Vv"/>
   <line at="95 46 6" to="90 32 14" r="0" color="M" on="Vv"/>
   <box at="90 32 14" size="1 1 1" color="8" on="VvM"/>
-  <!-- Geodetica tier 2 (z=14..23) -->
+  <!-- Geodesic tier 2 (z=14..23) -->
   <line at="93 46 14" to="86 59 23" r="0" color="M" on="Vv"/>
   <line at="90 60 14" to="89 46 23" r="0" color="M" on="Vv"/>
   <box at="89 46 23" size="1 1 1" color="S" on="VvM"/>
@@ -255,7 +255,7 @@ Animazione "sintesi" (8 frame):
   <line at="90 32 14" to="89 46 23" r="0" color="M" on="Vv"/>
   <line at="93 46 14" to="86 33 23" r="0" color="M" on="Vv"/>
   <box at="86 33 23" size="1 1 1" color="8" on="VvM"/>
-  <!-- Geodetica tier 3 (z=23..31) -->
+  <!-- Geodesic tier 3 (z=23..31) -->
   <line at="89 46 23" to="80 56 31" r="0" color="M" on="Vv"/>
   <line at="86 59 23" to="82 46 31" r="0" color="M" on="Vv"/>
   <box at="82 46 31" size="1 1 1" color="S" on="VvM"/>
@@ -304,7 +304,7 @@ Animazione "sintesi" (8 frame):
   <line at="86 33 23" to="82 46 31" r="0" color="M" on="Vv"/>
   <line at="89 46 23" to="80 36 31" r="0" color="M" on="Vv"/>
   <box at="80 36 31" size="1 1 1" color="8" on="VvM"/>
-  <!-- Geodetica tier 4 (z=31..36) -->
+  <!-- Geodesic tier 4 (z=31..36) -->
   <line at="82 46 31" to="72 53 36" r="0" color="M" on="Vv"/>
   <line at="80 56 31" to="73 46 36" r="0" color="M" on="Vv"/>
   <box at="73 46 36" size="1 1 1" color="S" on="VvM"/>
@@ -354,7 +354,7 @@ Animazione "sintesi" (8 frame):
   <line at="82 46 31" to="72 39 36" r="0" color="M" on="Vv"/>
   <box at="72 39 36" size="1 1 1" color="8" on="VvM"/>
 
-  <!-- Cavi di trazione in acciaio dai piloni esterni al parallelo 2 della cupola -->
+  <!-- Steel tension cables from the outer pylons to parallel 2 of the dome -->
   <line at="12 46 17" to="20 46 14" r="0" color="S"/>
   <line at="100 46 17" to="92 46 14" r="0" color="S"/>
   <line at="56 6 17" to="56 14 14" r="0" color="S"/>
@@ -364,35 +364,35 @@ Animazione "sintesi" (8 frame):
   <line at="87 77 17" to="81 71 14" r="0" color="S"/>
 
   <!-- ================================================================= -->
-  <!-- 5. OCULUS E LANTERNA ZENITALE (z = 39..48)                        -->
+  <!-- 5. OCULUS AND ZENITH LANTERN (z = 39..48)                         -->
   <!-- ================================================================= -->
-  <!-- Anello sommitale di giunzione strutturale -->
+  <!-- Top ring of structural junction -->
   <cylinder at="56 46 39" size="18 18 2" color="M"/>
   <cylinder at="56 46 40" size="14 14 2" color="S"/>
   <cylinder at="56 46 41" size="10 10 2" color="4"/>
   <cylinder at="56 46 43" size="6 6 2" color="M"/>
-  <!-- Guglia / antenna di trasmissione dati -->
+  <!-- Spire / data transmission antenna -->
   <cylinder at="56 46 44" size="3 3 5" color="S"/>
   <box at="56 46 49" size="1 1 2" color="5"/>
 
   <!-- ================================================================= -->
-  <!-- 6. NUCLEO TECNOLOGICO INTERNO AL LABORATORIO                     -->
+  <!-- 6. TECHNOLOGICAL CORE INSIDE THE LABORATORY                      -->
   <!-- ================================================================= -->
-  <!-- Pedistallo centrale circolare di sintesi (visibile attraverso il vetro) -->
+  <!-- Central round synthesis pedestal (visible through the glass) -->
   <cylinder at="56 46 1" size="24 24 2" color="m"/>
   <cylinder at="56 46 3" size="20 20 1" color="S"/>
   <cylinder at="56 46 4" size="12 12 1" color="M"/>
 
-  <!-- Cilindro di contenimento del sintetizzatore di particelle -->
+  <!-- Containment cylinder of the particle synthesiser -->
   <cylinder at="56 46 5" size="10 10 12" color="V"/>
   <cylinder at="56 46 5" size="12 12 1" color="S"/>
   <cylinder at="56 46 16" size="12 12 1" color="S"/>
 
-  <!-- Nucleo di plasma di rame incandescente (sintesi delle cose, fasi 4 e 5) -->
+  <!-- Glowing copper plasma core (the synthesis of things, phases 4 and 5) -->
   <ellipsoid at="56 46 8" size="6 6 6" color="5"/>
   <ellipsoid at="56 46 10" size="2 2 2" color="4"/>
 
-  <!-- 4 bracci meccanici robotici attorno al cilindro -->
+  <!-- 4 robotic mechanical arms around the cylinder -->
   <box at="47 46 4" size="2 4 7" color="M"/>
   <box at="49 46 10" size="3 2 2" color="S"/>
   <box at="65 46 4" size="2 4 7" color="M"/>
@@ -403,50 +403,50 @@ Animazione "sintesi" (8 frame):
   <box at="56 53 10" size="2 3 2" color="S"/>
 
   <!-- ================================================================= -->
-  <!-- 7. AVANCORPO A TUNNEL SUL DAVANTI (y = 74..98)                   -->
+  <!-- 7. TUNNEL FORWARD BLOCK AT THE FRONT (y = 74..98)                -->
   <!-- ================================================================= -->
-  <!-- Struttura a tunnel in metallo nero e vetro riflettente -->
+  <!-- Tunnel structure in black metal and reflecting glass -->
   <box at="56 86 0" size="22 24 18" color="M"/>
   <box at="56 87 2" size="20 22 16" color="V"/>
   <box at="56 87 2" size="20 22 2" color="v"/>
   <box at="56 87 9" size="20 22 2" color="v"/>
 
-  <!-- Costolature ad arco del tunnel in metallo e neon -->
+  <!-- Arched ribs of the tunnel in metal and neon -->
   <box at="56 80 0" size="24 2 19" color="M"/>
   <box at="56 86 0" size="24 2 19" color="M"/>
   <box at="56 86 19" size="20 1 1" color="3"/>
   <box at="56 92 0" size="24 2 19" color="M"/>
 
-  <!-- Svuotamento dell'interno del tunnel (corridoio e atrio d'ingresso) -->
+  <!-- Hollowing out the inside of the tunnel (corridor and entrance hall) -->
   <box at="56 86 0" size="14 26 16" color="B"/>
-  <!-- Pavimentazione a terra dell'atrio -->
+  <!-- Ground paving of the hall -->
   <box at="56 86 0" size="14 26 1" color="C"/>
 
-  <!-- Portale monumentale sulla facciata sud del tunnel (y=98) -->
+  <!-- Monumental portal on the south facade of the tunnel (y=98) -->
   <box at="56 97 0" size="24 2 20" color="M"/>
   <box at="56 98 0" size="22 1 19" color="m"/>
 
-  <!-- Piloni laterali di guardia al portale -->
+  <!-- Side pylons guarding the portal -->
   <box at="45 98 0" size="4 3 22" color="M"/>
   <box at="67 98 0" size="4 3 22" color="M"/>
   <box at="45 99 4" size="2 1 16" color="S"/>
   <box at="67 99 4" size="2 1 16" color="S"/>
 
-  <!-- Cornice neon rame vivo del portale d'ingresso -->
+  <!-- Bright copper neon frame of the entrance portal -->
   <box at="48 99 0" size="1 1 18" color="N"/>
   <box at="64 99 0" size="1 1 18" color="N"/>
   <box at="56 99 18" size="17 1 1" color="N"/>
 
-  <!-- I VOXEL DELLA PORTA O (z=0..16, x=50..62, larghezza 13, altezza 17) -->
+  <!-- THE VOXELS OF DOOR O (z=0..16, x=50..62, width 13, height 17) -->
   <box at="56 97 0" size="13 1 17" color="O"/>
-  <!-- Atrio interno completamente vuoto per oltre 18 voxel dietro la porta (y=78..96) -->
+  <!-- Inner hall completely empty for over 18 voxels behind the door (y=78..96) -->
   <box at="56 87 0" size="13 18 17" color="B"/>
   <box at="56 87 0" size="13 18 1" color="C"/>
 
   <!-- ================================================================= -->
-  <!-- 8. IL TOTEM DELL'INSEGNA (LATO SINISTRO, x=4..48, y=102..107)    -->
+  <!-- 8. THE TOTEM OF THE SIGN (LEFT SIDE, x=4..48, y=102..107)        -->
   <!-- ================================================================= -->
-  <!-- Piloni verticali di sostegno del totem -->
+  <!-- Vertical support pylons of the totem -->
   <box at="5 104 0" size="3 4 28" color="M"/>
   <box at="47 104 0" size="3 4 28" color="M"/>
   <box at="5 105 4" size="1 1 24" color="S"/>
@@ -454,31 +454,31 @@ Animazione "sintesi" (8 frame):
   <box at="5 104 28" size="3 4 1" color="N"/>
   <box at="47 104 28" size="3 4 1" color="N"/>
 
-  <!-- Tiranti diagonali anteriori e posteriori di ancoraggio per il totem -->
+  <!-- Front and rear diagonal anchoring tie rods for the totem -->
   <line at="5 104 20" to="2 104 0" r="0" color="M"/>
   <line at="47 104 20" to="50 104 0" r="0" color="M"/>
   <line at="5 103 24" to="5 100 0" r="0" color="S"/>
   <line at="47 103 24" to="47 100 0" r="0" color="S"/>
-  <!-- Rinforzi reticolari sul retro del totem (visibili dal retro) -->
+  <!-- Lattice bracing on the back of the totem (visible from behind) -->
   <box at="26 102 16" size="38 1 2" color="m"/>
   <line at="5 102 5" to="47 102 27" r="0" color="S"/>
   <line at="5 102 27" to="47 102 5" r="0" color="S"/>
 
-  <!-- Targa opaca scura di fondo per l'insegna (x=5..47, y=104, z=5..27) -->
+  <!-- Dark matte backing plate for the sign (x=5..47, y=104, z=5..27) -->
   <box at="26 104 5" size="39 1 23" color="P"/>
   <box at="26 103 5" size="39 1 23" color="M"/>
 
-  <!-- Cornice perimetrale al neon rame della targa -->
+  <!-- Copper neon perimeter frame of the plate -->
   <box at="26 104 4" size="41 1 1" color="n"/>
   <box at="26 104 28" size="41 1 1" color="n"/>
   <box at="6 104 5" size="1 1 23" color="n"/>
   <box at="46 104 5" size="1 1 23" color="n"/>
 
   <!-- ================================================================= -->
-  <!-- 9. L'INSEGNA NEON "IL LABORATORIO DELLE COSE" (y=105, glow=True) -->
+  <!-- 9. THE NEON SIGN "IL LABORATORIO DELLE COSE" (y=105, glow=True) -->
   <!-- ================================================================= -->
 
-  <!-- RIGA 1: "IL" (z=22..26, y=105) -->
+  <!-- LINE 1: "IL" (z=22..26, y=105) -->
   <box at="23 105 26" size="1 1 1" color="F"/>
   <box at="24 105 26" size="1 1 1" color="F"/>
   <box at="25 105 26" size="1 1 1" color="F"/>
@@ -495,7 +495,7 @@ Animazione "sintesi" (8 frame):
   <box at="27 105 22" size="1 1 1" color="F"/>
   <box at="28 105 22" size="1 1 1" color="F"/>
   <box at="29 105 22" size="1 1 1" color="F"/>
-  <!-- RIGA 2: "LABORATORIO" (z=14..18, y=105) -->
+  <!-- LINE 2: "LABORATORIO" (z=14..18, y=105) -->
   <box at="5 105 18" size="1 1 1" color="F"/>
   <box at="5 105 17" size="1 1 1" color="F"/>
   <box at="5 105 16" size="1 1 1" color="F"/>
@@ -593,7 +593,7 @@ Animazione "sintesi" (8 frame):
   <box at="45 105 15" size="1 1 1" color="F"/>
   <box at="47 105 15" size="1 1 1" color="F"/>
   <box at="46 105 14" size="1 1 1" color="F"/>
-  <!-- RIGA 3: "DELLE COSE" (z=6..10, y=105) -->
+  <!-- LINE 3: "DELLE COSE" (z=6..10, y=105) -->
   <box at="8 105 10" size="1 1 1" color="F"/>
   <box at="9 105 10" size="1 1 1" color="F"/>
   <box at="8 105 9" size="1 1 1" color="F"/>
@@ -675,8 +675,8 @@ Animazione "sintesi" (8 frame):
 </sequence>
 
 <!-- ================================================================= -->
-<!-- ANIMAZIONE CICLICA "SINTESI" (8 frame, pulsazione continua fluida) -->
-<!-- Il flusso di sintesi ondula attraverso il reticolo e il nucleo     -->
+<!-- CYCLIC ANIMATION "SINTESI" (8 frames, continuous fluid pulse)     -->
+<!-- The flow of synthesis ripples through the lattice and the core     -->
 <!-- ================================================================= -->
 <animation name="sintesi" frames="8">
   <sequence>

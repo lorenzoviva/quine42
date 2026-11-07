@@ -1,4 +1,4 @@
-<!-- Qualcosa di fatto (una ricetta, una frase incisa, la Fucina, la partenza): un accordo sgranato. Il seme ne cambia la forma. -->
+<!-- Something made (a recipe, a carved sentence, the Forge, the departure): a broken chord. The seed changes its shape. -->
 <sequence name="Arpeggio" values="BNSAMT" size="12 1 12" symmetry="()">
   <sound bpm="200" scale="dorian" root="72" swing="0" cutoff="8000" space="0.3">
     <track y="0" instrument="bass" volume="0.85"/>

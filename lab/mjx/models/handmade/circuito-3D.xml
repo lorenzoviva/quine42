@@ -1,7 +1,7 @@
 <sequence values="BtEDGANYOWUa" size="37 37 47"  origin="True" name="Circuito 3D colori neon">
 
   <!-- ======================================================== -->
-  <!-- 1. MATERIALI E COLORI                                    -->
+  <!-- 1. MATERIALS AND COLOURS                                 -->
   <!-- ======================================================== -->
   <color symbol="t" value="7a66b8" alpha="0.3" name="Piazzola chip / via"/>
   <color symbol="E" value="9F97BA" alpha="0.2" name="Pista conduttiva spenta"/>
@@ -19,20 +19,20 @@
   <color symbol="r" value="edf104" name="Segnaposto routing pista raggiungibile"/>  
 
 
-  <!-- Base verticale su piano XZ -->
+  <!-- Vertical base on the XZ plane -->
   <!-- <box at="15 15 0" size="15 15 30" color="E"/> -->
   <!-- <box at="19 19 0" size="35 35 45" color="E"/> -->
   <box at="11 11 0" size="21 21 35" color="E"/>
 
   <!-- ======================================================== -->
-  <!-- 2. RETICOLO E PIAZZAMENTO A MANO DEL CHIP (5x7 su XZ)    -->
+  <!-- 2. LATTICE AND PLACING THE CHIP BY HAND (5x7 on XZ)     -->
   <!-- ======================================================== -->
   <one in="BBB/BBB/BBB BBB/BEE/BEE BBB/BEE/BEE" out="BBB/BBB/BBB BBB/BtE/BEE BBB/BEE/BEE" steps="1" symmetry="(xy)"/>
   <all in="tEE" out="tEt" simmetry="()"/>
   <all in="t/E/E" out="t/E/t" simmetry="()"/>
   <all in="t E E" out="t E t" simmetry="()"/>
 
-  <!-- mette i primi due chip -->
+  <!-- places the first two chips -->
   <!-- Chip 3D 7x7x5 -->
        <one in="EEEEEEEEE/tEtEtEtEt/EEEEEEEEE/tEtEtEtEt/EEEEEEEEE/tEtEtEtEt/EEEEEEEEE/tEtEtEtEt/EEEEEEEEE/tEtEtEtEt/EEEEEEEEE 
           EEEEEEEEE/EEEEEEEEE/EEEEEEEEE/EEEEEEEEE/EEEEEEEEE/EEEEEEEEE/EEEEEEEEE/EEEEEEEEE/EEEEEEEEE/EEEEEEEEE/EEEEEEEEE 
@@ -83,7 +83,7 @@
           EEEEEEEEE/tEtEtEtEt/EEEEEEEEE/tEtEtEtEt/EEEEEEEEE/tEtEtEtEt/EEEEEEEEE/tEtEtEtEt/EEEEEEEEE/tEtEtEtEt/EEEEEEEEE"
        steps="1" symmetry="(xyz)"/>
 
-  <!-- finche puo collega, poi aggiunge un chip e riparte finche puo -->
+  <!-- connects while it can, then adds a chip and starts again while it can -->
   <markov>
     <markov>
       <path from="a" to="u" on="E" color="G" inertia="True" steps="1"/>
@@ -116,7 +116,7 @@
   </markov>
 
 
-  <!-- Pulizia -->
+  <!-- Cleanup -->
 <!-- 
   <all in="aE" out="EE" symmetry="(xyz)"/>
   <all in="EEE EtE EtE" out="EEE EEE EEE" symmetry="(xyz)"/>
@@ -133,7 +133,7 @@
   <!-- <all in="tEt/tat/FDF" out="tEt/tEt/FDF" steps="1" symmetry="(xyz)"/> -->
   <!-- <all in="BBB/tat/FDF" out="BBB/tEt/FDF" steps="1" symmetry="(xyz)"/> -->
 
-  <!-- Connessioni -->
+  <!-- Connections -->
   <markov>
     <one in="DaGG" out="DPAG" steps="1" symmetry="(xyz)"/>
     <markov>
@@ -151,7 +151,7 @@
    <!-- Pin -->
   <all in="DP" out="DU" steps="1" symmetry="(xyz)"/>
 
-  <!-- Pulizia -->
+  <!-- Cleanup -->
   <all in="a" out="E" steps="1"/>
   <all in="G" out="E" steps="1"/>
 

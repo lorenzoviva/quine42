@@ -1,12 +1,12 @@
 <!--
-Casa a graticcio, scritta a mano da Claude Code (step 8.2A): una struttura intera in un solo programma
-MarkovJunior, senza blocchi né architetto. Come in ModernHouse e CarmaTower, si decide in grande e si
-rifinisce in piccolo: la casa si progetta su una griglia grossa (una cella = 3 voxel), poi `map` la
-ingrandisce e le regole aggiungono i dettagli voxel per voxel.
-Nella griglia grossa il blocco pieno della casa si scava; il tetto a padiglione nasce da un prisma eroso
-strato per strato; travi, porta e finestre le trovano i pattern sulla facciata.
-La porta si apre e si chiude con due azioni; il comignolo fuma (animazione). Scala del gioco: 20 voxel
-per casella; la casa occupa circa 3 × 2 caselle, la porta è alta quanto il viandante.
+Half-timbered house, written by hand by Claude Code (step 8.2A): a whole structure in a single MarkovJunior
+program, with no blocks nor architect. As in ModernHouse and CarmaTower, one decides at a large scale and
+refines at a small one: the house is designed on a coarse grid (one cell = 3 voxels), then `map`
+enlarges it and the rules add the details voxel by voxel.
+In the coarse grid the solid block of the house is dug out; the hip roof is born from a prism eroded
+layer by layer; beams, door and windows are found by the patterns on the facade.
+The door opens and closes with two actions; the chimney smokes (animation). Scale of the game: 20 voxels
+per tile; the house takes about 3 × 2 tiles, the door is as tall as the wanderer.
 -->
 <sequence values="BXQIWNnDOURrK" size="24 24 30" origin="True" symmetry="(xy)">
   <color symbol="X" hidden="True" name="volume della casa"/>
@@ -22,23 +22,23 @@ per casella; la casa occupa circa 3 × 2 caselle, la porta è alta quanto il via
   <color symbol="r" value="80372a" name="coppi in ombra"/>
   <color symbol="K" value="8e8578" name="comignolo"/>
 
-  <!-- Il seme cade sul fondo e diventa una pianta rettangolare: una linea lungo x (le due punte si
-       allungano a caso: prl decide per ogni corrispondenza), poi la linea intera avanza lungo y. -->
+  <!-- The seed falls to the bottom and becomes a rectangular plan: a line along x (the two tips
+       lengthen at random: prl decides for every match), then the whole line advances along y. -->
   <one in="X B" out="B X"/>
   <all in="XB" out="*X" steps="6" symmetry="(x)"/>
   <prl in="XB" out="*X" p="0.5" steps="3" symmetry="(x)"/>
   <all in="X/B" out="*/X" steps="5" symmetry="(y)"/>
 
-  <!-- Il volume: la casa alta 14, sopra la base del tetto che sporge di uno (la gronda) e il prisma. -->
+  <!-- The volume: the house 14 high, above it the base of the roof jutting out by one (the eaves) and the prism. -->
   <all in="B X" out="X *" steps="13"/>
   <all in="B X" out="R *"/>
   <all in="RB XB" out="*R **"/>
   <all in="B R" out="Q *"/>
   <all in="B Q" out="Q *" steps="10"/>
-  <!-- Tetto a padiglione: ogni strato del prisma perde il bordo che non ha nulla sotto in diagonale. -->
+  <!-- Hip roof: every layer of the prism loses the edge that has nothing diagonally below it. -->
   <all in="*Q B*" out="*B **"/>
 
-  <!-- Scavo: l'interno diventa vuoto; restano i muri, il pavimento sul fondo e il soffitto sotto il tetto. -->
+  <!-- Digging: the inside becomes empty; the walls remain, the floor at the bottom and the ceiling under the roof. -->
   <prl in="XXX/XXX/XXX" out="***/*I*/***" steps="1"/>
   <prl in="R I" out="* n" steps="1"/>
   <prl in="I *" out="B *" steps="1"/>
@@ -47,23 +47,23 @@ per casella; la casa occupa circa 3 × 2 caselle, la porta è alta quanto il via
   <prl in="X" out="D" steps="1"/>
   <prl in="Q" out="R" steps="1"/>
 
-  <!-- Graticcio: pali agli spigoli, trave in cima ai muri e sopra lo zoccolo. -->
+  <!-- Half-timbering: posts at the corners, a beam on top of the walls and above the plinth. -->
   <all in="BB/BW" out="**/*N"/>
   <all in="R W" out="* N"/>
   <all in="W D" out="N *"/>
 
-  <!-- La porta sul davanti (verso y grande: symmetry "()"), alta quanto una persona; le finestre sotto la trave. -->
+  <!-- The door at the front (towards large y: symmetry "()"), as tall as a person; the windows under the beam. -->
   <one steps="1" symmetry="()"
        in="WWWWWWWW/BBBBBBBB WWWWWWWW/BBBBBBBB WWWWWWWW/BBBBBBBB WWWWWWWW/BBBBBBBB WWWWWWWW/BBBBBBBB WWWWWWWW/BBBBBBBB WWWWWWWW/BBBBBBBB WWWWWWWW/BBBBBBBB WWWWWWWW/BBBBBBBB WWWWWWWW/BBBBBBBB WWWWWWWW/BBBBBBBB NNNNNNNN/BBBBBBBB DDDDDDDD/BBBBBBBB"
        out="*NNNNNN*/******** *NOOOON*/******** *NOOOON*/******** *NOOOON*/******** *NOOOON*/******** *NOOOON*/******** *NOOOON*/******** *NOOOON*/******** *NOOOON*/******** *NOOOON*/******** *NOOOON*/******** *NOOOON*/******** ********/********"/>
   <one steps="8"
        in="NNNNNN/BBBBBB WWWWWW/BBBBBB WWWWWW/BBBBBB WWWWWW/BBBBBB WWWWWW/BBBBBB WWWWWW/BBBBBB"
        out="******/****** ******/****** *NUUN*/****** *NUUN*/****** *NUUN*/****** *NNNN*/******"/>
-  <!-- Il comignolo, su un punto del tetto con aria sopra. -->
+  <!-- The chimney, on a point of the roof with air above. -->
   <one in="B B R" out="* K *" steps="1"/>
   <all in="B K" out="K *" steps="3"/>
 
-  <!-- In piccolo: ogni cella diventa un cubo di 3 × 3 × 3 voxel. -->
+  <!-- At a small scale: every cell becomes a cube of 3 × 3 × 3 voxels. -->
   <map scale="3 3 3" values="BWNnDOURrKwdoghjS">
     <rule in="W" out="WWW/WWW/WWW WWW/WWW/WWW WWW/WWW/WWW"/>
     <rule in="N" out="NNN/NNN/NNN NNN/NNN/NNN NNN/NNN/NNN"/>
@@ -82,16 +82,16 @@ per casella; la casa occupa circa 3 × 2 caselle, la porta è alta quanto il via
     <color symbol="j" hidden="True" name="porta aperta"/>
     <color symbol="S" value="d8d8d8" name="fumo"/>
 
-    <!-- Il tetto a gradoni: le alzate in ombra, qualche coppo scuro, muschio sul lato a nord. -->
+    <!-- The stepped roof: the risers in shade, a few dark tiles, moss on the north side. -->
     <prl in="RB" out="r*" steps="1"/>
     <prl in="B R" out="* r" p="0.12" steps="1"/>
     <prl in="B/r" out="*/g" p="0.3" steps="1" symmetry="()"/>
-    <!-- Intonaco scrostato, pietre scure nello zoccolo, assi della porta. -->
+    <!-- Flaking plaster, dark stones in the plinth, planks of the door. -->
     <prl in="W" out="w" p="0.02" steps="1"/>
     <one in="Ww" out="w*" steps="400"/>
     <prl in="D" out="d" p="0.3" steps="1"/>
     <all in="OOO" out="*o*" symmetry="()"/>
-    <!-- Le finestre hanno la croce. -->
+    <!-- The windows have the cross. -->
     <all in="UUUUUU" out="**NN**" symmetry="()"/>
     <all in="U U U U U U U U U" out="* * * * N * * * *" symmetry="(x)"/>
   </map>

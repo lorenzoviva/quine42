@@ -1,4 +1,4 @@
-<!-- Oltre il bordo, la prima volta e ogni volta: un accordo largo che sale e resta; il seme sceglie dove arriva. -->
+<!-- Beyond the edge, the first time and every time: a wide chord rising and staying; the seed picks where it arrives. -->
 <sequence name="Soglia" values="BNSAT" size="24 2 12" symmetry="()">
   <sound bpm="96" scale="phrygian" root="43" swing="0" cutoff="6000" space="0.6">
     <track y="0" instrument="lead" volume="0.6"/>

@@ -1,4 +1,4 @@
-<!-- Qualcuno saluta: due sillabe cantate, su e giù, come una voce; il seme sceglie l'intervallo e se c'è una terza sillaba. -->
+<!-- Someone greets: two sung syllables, up and down, like a voice; the seed picks the interval and whether there is a third syllable. -->
 <sequence name="Dialogo e saluto" values="BNSAGKHCTUVPM" size="8 2 10" symmetry="()">
   <sound bpm="140" scale="dorian" root="57" swing="0.1" cutoff="5000" space="0.35">
     <track y="0" instrument="lead" volume="0.6"/>
@@ -34,7 +34,7 @@
   <one in="V" out="G" steps="1"/>
   <all in="V" out="B"/>
   <all in="GB" out="GS"/>
-  <!-- Un appoggio sotto la voce. -->
+  <!-- A support under the voice. -->
   <line at="0 1 0" to="0 1 0" r="0" color="N"/>
   <line at="0 1 2" to="0 1 2" r="0" color="P"/>
   <line at="0 1 4" to="0 1 4" r="0" color="P"/>

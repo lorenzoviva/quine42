@@ -1,5 +1,5 @@
 <sequence values="BSabcg" size="23 23 35" symmetry="()" name="JSON screen">
- <!-- 1 voxel in piu e richiesto per il matching vuoto -->
+ <!-- 1 more voxel is needed for the empty matching -->
   <color symbol="S" value="e8edf7" alpha="0.1" name="Schermo"/>
   
   <color symbol="a" value="e8edf7" alpha="0.1" name="Schermo dopo prima lettera"/>
@@ -14,10 +14,10 @@
 
 
 
-<!-- 
-x consecutiva 1
+<!--
+x consecutive 1
 y slash 2
-z spazio 3
+z space 3
  -->
 
   <box at="11 11 1" size="21 21 34" color="S"/>  

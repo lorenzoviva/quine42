@@ -1,4 +1,4 @@
-<!-- Un colpo subìto, un veleno che entra: un accento acido che scivola giù di semitono, un colpo nel petto, un gorgoglio storto. -->
+<!-- A blow taken, a poison going in: an acid accent sliding down a semitone, a blow in the chest, a crooked gurgle. -->
 <sequence name="Veleno e danno" values="BNSAGKHCTUVPM" size="10 3 10" symmetry="()">
   <sound bpm="132" scale="phrygian" root="45" swing="0" cutoff="4200" space="0.35">
     <track y="0" instrument="lead" volume="0.55"/>
@@ -18,10 +18,10 @@
   <color symbol="P" value="64748b" name="Scelta" hidden="True"/>
   <color symbol="M" value="14b8a6" name="Scelta" hidden="True"/>
 
-  <!-- Il colpo. -->
+  <!-- The blow. -->
   <line at="0 2 0" to="0 2 0" r="0" color="K"/>
   <line at="0 2 2" to="0 2 2" r="0" color="C"/>
-  <!-- L'accento acido e la scivolata, su strade diverse. -->
+  <!-- The acid accent and the slide, along different paths. -->
   <line at="0 0 5" to="0 0 5" r="0" color="T"/>
   <line at="0 0 6" to="0 0 6" r="0" color="T"/>
   <one in="T" out="A" steps="1"/>
@@ -38,7 +38,7 @@
   <one in="V" out="N" steps="1"/>
   <all in="V" out="B"/>
   <all in="NBB" out="NSS"/>
-  <!-- Il gorgoglio, giù nel basso. -->
+  <!-- The gurgle, down in the bass. -->
   <line at="1 1 0" to="1 1 0" r="0" color="A"/>
   <line at="4 1 0" to="4 1 0" r="0" color="P"/>
   <line at="5 1 2" to="5 1 2" r="0" color="P"/>

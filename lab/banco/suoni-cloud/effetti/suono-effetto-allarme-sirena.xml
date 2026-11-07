@@ -1,4 +1,4 @@
-<!-- Un allarme: due note che si alternano strette, su e giù come una sirena, con un colpo a ogni giro; il seme sceglie le due note e dove batte. -->
+<!-- An alarm: two notes alternating closely, up and down like a siren, with a hit at every turn; the seed picks the two notes and where it beats. -->
 <sequence name="Allarme e sirena" values="BNSAGKHCTUVPM" size="12 2 12" symmetry="()">
   <sound bpm="150" scale="harmonic_minor" root="57" swing="0" cutoff="7000" space="0.25">
     <track y="0" instrument="lead" volume="0.5"/>
@@ -17,7 +17,7 @@
   <color symbol="P" value="64748b" name="Scelta" hidden="True"/>
   <color symbol="M" value="14b8a6" name="Scelta" hidden="True"/>
 
-  <!-- La nota alta e quella bassa, scelte una volta. -->
+  <!-- The high note and the low one, chosen once. -->
   <line at="0 0 6" to="0 0 6" r="0" color="T"/>
   <line at="0 0 7" to="0 0 7" r="0" color="T"/>
   <one in="T" out="A" steps="1"/>
@@ -26,11 +26,11 @@
   <line at="3 0 5" to="3 0 5" r="0" color="U"/>
   <one in="U" out="N" steps="1"/>
   <all in="U" out="B"/>
-  <!-- Si ripetono: il passo dopo, la stessa altezza. -->
+  <!-- They repeat: the next step, the same pitch. -->
   <all in="ABBBBBB" out="ASSBBBN"/>
   <all in="NBBBBBB" out="NSSBBBN"/>
   <all in="NBB" out="NSS"/>
-  <!-- Il colpo. -->
+  <!-- The blow. -->
   <line at="0 1 0" to="0 1 0" r="0" color="K"/>
   <line at="6 1 2" to="6 1 2" r="0" color="V"/>
   <line at="6 1 0" to="6 1 0" r="0" color="V"/>

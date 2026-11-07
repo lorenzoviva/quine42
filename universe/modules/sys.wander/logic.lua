@@ -1,8 +1,8 @@
--- Vagabondaggio: ogni tanto si sceglie una direzione nuova, o ci si ferma a guardare.
--- Lo stato (direzione, timer) vive nel componente wander. Chi ha una mente (mind) vaga solo se
--- ha deciso di farlo: "segui" e "resta" sono affare di sys.follow.
--- Chi ha una meta (componente meta {x, y}, scelta dal kernel secondo la sua giornata: casa, lavoro,
--- piazza) ci cammina; arrivato, gironzola lì vicino.
+-- Wandering: every so often a new direction is chosen, or one stops to look around.
+-- The state (direction, timer) lives in the wander component. Whoever has a mind (mind) wanders only if
+-- it has decided to: "segui" and "resta" are the business of sys.follow.
+-- Whoever has a goal (goal component {x, y}, chosen by the kernel according to its day: home, work,
+-- square) walks there; once arrived, it strolls nearby.
 local M = {}
 
 local function verso(id, w, p, b, meta, dt)
@@ -15,7 +15,7 @@ local function verso(id, w, p, b, meta, dt)
   if world.free(p.x + ux * v, p.y, b.r, p.z) then p.x = p.x + ux * v moved = true end
   if world.free(p.x, p.y + uy * v, b.r, p.z) then p.y = p.y + uy * v moved = true end
   if not moved then
-    -- Ostacolo: si scansa di lato per un po'.
+    -- Obstacle: step aside for a while.
     w.sx, w.sy, w.scansa = -uy, ux, 0.8
     if hash(id, math.floor(time), 5) < 0.5 then w.sx, w.sy = uy, -ux end
   end
@@ -27,7 +27,7 @@ function M.update(dt)
   ecs.each("wander, pos, body", function(id, w, p, b)
     local mind = ecs.get(id, "mind")
     if mind and mind.mode ~= "vaga" then return end
-    -- Arrivato, fa quello che deve: dorme nel letto, zappa il campo, pesca sulla riva. Fermo.
+    -- Arrived, it does what it must: sleeps in the bed, hoes the field, fishes from the bank. Still.
     local att = ecs.get(id, "activity")
     if att and att.still then return end
     local meta = ecs.get(id, "goal")
@@ -50,7 +50,7 @@ function M.update(dt)
       end
       w.dx, w.dy = dx, dy
       t = 1 + hash(id, tick, 11) * 3
-      -- Vicino alla meta si resta vicino: pause più lunghe, passi brevi.
+      -- Near the goal one stays near: longer pauses, short steps.
       if meta and meta.x then t = t * 0.5 end
     end
     w.t = t

@@ -1,4 +1,4 @@
-<!-- Un traguardo: un rullo che cresce, una fanfara che sale per la triade e si posa in alto su un accordo pieno, coi piatti. Una battuta. -->
+<!-- A milestone: a growing roll, a fanfare rising up the triad and resting high on a full chord, with cymbals. One bar. -->
 <sequence name="Salita di livello" values="BNSAGKHCTUVPM" size="16 4 16" symmetry="()">
   <sound bpm="128" scale="dorian" root="55" swing="0" cutoff="8000" space="0.5">
     <track y="0" instrument="lead" volume="0.55"/>
@@ -19,7 +19,7 @@
   <color symbol="P" value="64748b" name="Scelta" hidden="True"/>
   <color symbol="M" value="14b8a6" name="Scelta" hidden="True"/>
 
-  <!-- Il rullo: rullanti che si infittiscono, il seme ne aggiunge qualcuno. -->
+  <!-- The roll: snares getting denser, the seed adds a few. -->
   <line at="0 3 2" to="0 3 2" r="0" color="C"/>
   <line at="4 3 2" to="4 3 2" r="0" color="C"/>
   <line at="6 3 2" to="6 3 2" r="0" color="C"/>
@@ -32,7 +32,7 @@
   <line at="10 3 1" to="15 3 1" r="0" color="U"/>
   <one in="U" out="H" steps="2"/>
   <all in="U" out="B"/>
-  <!-- La fanfara: per gradi della triade, la cima scelta dal seme. -->
+  <!-- The fanfare: by degrees of the triad, the top picked by the seed. -->
   <line at="0 0 0" to="0 0 0" r="0" color="N"/>
   <line at="2 0 2" to="2 0 2" r="0" color="N"/>
   <line at="4 0 4" to="4 0 4" r="0" color="N"/>
@@ -51,7 +51,7 @@
   <line at="14 0 9" to="14 0 9" r="0" color="M"/>
   <one in="M" out="G" steps="1"/>
   <all in="M" out="B"/>
-  <!-- L'accordo pieno e il basso. -->
+  <!-- The full chord and the bass. -->
   <line at="8 1 0" to="8 1 0" r="0" color="N"/>
   <line at="8 1 2" to="8 1 2" r="0" color="N"/>
   <line at="8 1 4" to="8 1 4" r="0" color="N"/>

@@ -1,5 +1,5 @@
--- Letto: dormire ristora; sotto il letto, a volte, qualcosa di dimenticato.
--- Lo stato ("già frugato") vive nel componente "searched" dell'entità.
+-- Bed: sleeping restores; under the bed, sometimes, something forgotten.
+-- The state ("already searched") lives in the entity's "searched" component.
 local M = {}
 
 function M.on_act(id, user, action)

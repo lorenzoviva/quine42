@@ -18,12 +18,12 @@
   <color symbol="P" value="64748b" name="Testa del ritmo" hidden="True"/>
   <color symbol="D" value="475569" name="Battuta" hidden="True"/>
 
-  <!-- Le teste, all'inizio del ciclo. -->
+  <!-- The heads, at the start of the cycle. -->
   <line at="0 0 3" to="0 0 3" r="0" color="M"/>
   <line at="0 1 1" to="0 1 1" r="0" color="T"/>
   <line at="0 2 0" to="0 2 0" r="0" color="P"/>
 
-  <!-- Il ritmo (y=2, quota 0): una testa segna le battute, ognuna ha il suo disegno. -->
+  <!-- The rhythm (y=2, height 0): a head marks the bars, each has its own pattern. -->
   <one in="PBBBBBBBBBBBBBBBB" out="DBBBBBBBBBBBBBBBP"/>
   <all in="P" out="D"/>
   <all>
@@ -32,26 +32,26 @@
     <rule in="DBBBBBBBBBBBBBBB" out="BBBBBBBBKBBBBBBB"/>
   </all>
 
-  <!-- L'armonia (y=1): la testa cammina di battuta in battuta e lascia una radice. -->
+  <!-- The harmony (y=1): the head walks from bar to bar and leaves a root. -->
   <one>
     <rule in="TBBBBBBBBBBBBBBBB" out="RBBBBBBBBBBBBBBBT" p="3"/>
     <rule in="BBBBBBBBBBBBBBBBB TBBBBBBBBBBBBBBBB" out="BBBBBBBBBBBBBBBBT RBBBBBBBBBBBBBBBB" p="2"/>
     <rule in="TBBBBBBBBBBBBBBBB BBBBBBBBBBBBBBBBB" out="RBBBBBBBBBBBBBBBB BBBBBBBBBBBBBBBBT" p="2"/>
   </one>
   <all in="T" out="R"/>
-  <!-- Il basso (y=2) suona la radice dell'accordo. -->
+  <!-- The bass (y=2) plays the root of the chord. -->
   <all in="R/B" out="*/A"/>
-  <!-- Il pad: tre note per radice, tenute; dove la cima non c'è resta la radice sola. -->
+  <!-- The pad: three notes per root, held; where the top is missing the root alone remains. -->
   <all in="B B B B R" out="N * N * N"/>
   <all in="R" out="N"/>
   <all in="NBBBBBBBBBBBBBBB" out="NSSSSSSSSSSSSSSS"/>
-  <!-- Il disegno del basso nella battuta. -->
+  <!-- The pattern of the bass in the bar. -->
   <all>
     <rule in="ABBBBBBBBBBBBBBB" out="ASSSSSSSSSSSSSSS" p="2"/>
     <rule in="ABBBBBBBBBBBBBBB" out="ASSSSSSSBBBBBBBB"/>
   </all>
 
-  <!-- La melodia (y=0): una testa che va avanti nel tempo e sale o scende di un grado. -->
+  <!-- The melody (y=0): a head going forward in time and rising or falling by a degree. -->
   <one>
     <rule in="MBB" out="NBM"/>
     <rule in="MBBBB" out="NSSBM" p="3"/>
@@ -62,6 +62,6 @@
     <rule in="MBB BBB BBB" out="NBB BBB BBM"/>
   </one>
   <all in="M" out="B"/>
-  <!-- Qualche accento. -->
+  <!-- A few accents. -->
   <one in="N/*/*" out="A/*/*" steps="3"/>
 </sequence>

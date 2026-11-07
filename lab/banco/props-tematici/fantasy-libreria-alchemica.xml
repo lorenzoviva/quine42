@@ -1,6 +1,6 @@
-<!-- Libreria alchemica (fantasy, aurora): uno scaffale di legno contro il muro, con tomi di cuoio e ampolle luminose sui ripiani. Il seme
-     sceglie la forma (alta e stretta, larga e bassa con un divisorio, o media con un banco da alchimista davanti e un alambicco), quali
-     ripiani hanno libri e quanto è alto ogni tomo, dove stanno le ampolle e cosa c'è sulla cornice in cima. -->
+<!-- Alchemical bookcase (fantasy, aurora): a wooden shelf against the wall, with leather tomes and glowing phials on the shelves. The seed
+     picks the shape (tall and narrow, wide and low with a divider, or medium with an alchemist's bench in front and an alembic), which
+     shelves have books and how tall each tome is, where the phials stand and what is on the cornice on top. -->
 <sequence values="BDWpKYyQGgCFVabo" size="20 20 20" symmetry="(xy)" name="Libreria alchemica">
   <color symbol="D" value="4a3020" name="legno scuro"/>
   <color symbol="W" value="6b4a2e" name="legno"/>
@@ -17,12 +17,12 @@
   <color symbol="a" hidden="True" name="alta e stretta"/>
   <color symbol="b" hidden="True" name="larga e bassa"/>
   <color symbol="o" hidden="True" name="media con il banco"/>
-  <!-- Il dado della forma -->
+  <!-- The die of the shape -->
   <box at="10 10 0" size="20 20 20" color="a"/>
   <all in="a" out="V"/>
   <one steps="1"><rule in="V" out="a"/><rule in="V" out="b"/><rule in="V" out="o"/></one>
   <all symmetry="(xyz)"><rule in="aV" out="aa"/><rule in="bV" out="bb"/><rule in="oV" out="oo"/></all>
-  <!-- Alta e stretta -->
+  <!-- Tall and narrow -->
   <box at="10 5 0" size="13 1 17" color="D" on="a"/>
   <box at="4 7 0" size="1 5 17" color="W" on="a"/>
   <box at="16 7 0" size="1 5 17" color="W" on="a"/>
@@ -32,7 +32,7 @@
   <box at="10 7 14" size="11 5 1" color="p" on="a"/>
   <box at="10 7 17" size="15 7 1" color="K" on="a"/>
   <box at="10 6 18" size="7 3 1" color="K" on="a"/>
-  <!-- Larga e bassa, con un divisorio -->
+  <!-- Wide and low, with a divider -->
   <box at="10 5 0" size="19 1 12" color="D" on="b"/>
   <box at="1 7 0" size="1 5 12" color="W" on="b"/>
   <box at="19 7 0" size="1 5 12" color="W" on="b"/>
@@ -41,7 +41,7 @@
   <box at="10 7 4" size="17 5 1" color="p" on="b"/>
   <box at="10 7 8" size="17 5 1" color="p" on="b"/>
   <box at="10 7 12" size="19 6 1" color="K" on="b"/>
-  <!-- Media, con il banco da alchimista -->
+  <!-- Medium, with the alchemist's bench -->
   <box at="10 5 0" size="15 1 15" color="D" on="o"/>
   <box at="3 7 0" size="1 5 15" color="W" on="o"/>
   <box at="17 7 0" size="1 5 15" color="W" on="o"/>
@@ -57,7 +57,7 @@
   <ellipsoid at="6 12 6" size="3 3 3" color="g" on="o"/>
   <line at="6 12 9" to="10 12 10" r="0" color="G" on="o"/>
   <line at="10 12 10" to="12 12 6" r="0" color="G" on="o"/>
-  <!-- Le ampolle e i tomi sui ripiani: dove e quanto alti li sceglie il seme -->
+  <!-- The phials and the tomes on the shelves: where and how tall is picked by the seed -->
   <prl steps="1" in="[abo] p" out="G *" p="0.05"/>
   <prl steps="1" in="[abo] p" out="Y *" p="0.55"/>
   <all steps="1" in="[abo] Y" out="Y *"/>

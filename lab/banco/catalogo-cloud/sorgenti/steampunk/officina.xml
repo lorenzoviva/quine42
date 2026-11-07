@@ -6,7 +6,7 @@
   <union symbol="2" values="tsdcfv"/>
   <union symbol="3" values="tb"/>
   <color symbol="k" value="3b2a1e" name="portone ferrato"/><color symbol="S" value="6e5a4a" name="cornice di ghisa"/><color symbol="F" value="7b5233" name="tavolato oliato"/><color symbol="C" value="8a3f2c" name="mattoni rossi"/><color symbol="W" value="a6553a" name="mattoni a vista"/><color symbol="R" value="4b4440" name="lamiera ondulata"/><color symbol="V" value="c9a45a" name="vetro ambrato" alpha="0.5"/><color symbol="D" value="2e2b29" name="ghisa"/><color symbol="L" value="6b4a2e" name="panca di noce"/><color symbol="T" value="5b544e" name="gradino di ferro"/><color symbol="K" value="3f3a36" name="scala di ferro"/><color symbol="A" value="5e5852" name="lastre di basalto"/><color symbol="a" value="4a3f38" name="fondazione"/><color symbol="x" value="6b4224" name="botti cerchiate"/><color symbol="c" value="2e2b29" name="ciminiera"/><color symbol="s" value="dcd8cf" name="fumo"/><color symbol="b" value="b87333" name="tubi di rame"/><color symbol="O" value="c9a227" name="ingranaggi"/>
-  <!-- 1. reticolo: bracci dal centro, poi le linee -->
+  <!-- 1. lattice: arms from the centre, then the lines -->
   <prl in="***/*E*/***" out="***/*z*/***"/>
   <all in="Nz" out="*a" steps="1"/>
   <prl in="[Nx]az" out="*xa" steps="14"/>
@@ -27,10 +27,10 @@
   <all><rule in="*p*/ppp/*p*" out="***/*P*/***"/><rule in="ppp/*p*" out="*P*/***"/><rule in="pp/p*" out="P*/**"/></all>
   <prl in="Op" out="*O" steps="5"/>
   <prl in="tz" out="*t"/>
-  <!-- una campata accanto a quella davanti: da lì la cantina e la scala scelgono la colonna -->
+  <!-- a bay beside the front one: from there the cellar and the stair pick the column -->
   <one in="*P*/zpt/zpt/zpt/zpt/zpt/zpt/zpt/zpt/zpt/zpt/zpt/zpt" out="***/***/***/***/***/***/tH*/***/***/***/***/***/***" symmetry="(x)" steps="1"/>
   <prl in="tz" out="*t"/>
-  <!-- la cantina: due campate in linea oltre un muro, la porta contro un pilastro -->
+  <!-- the cellar: two bays in a line beyond a wall, the door against a pillar -->
   <one in="*t/Pp/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*z/*p/*z" out="**/*m/*o/**/**/**/**/**/**/**/**/**/**/**/**/**/**/**/**/**/**/**/**/**/**/**/**/**/**/**/**/*l/*o" steps="1"/>
   <prl in="oz" out="*o"/>
   <prl in="lp" out="*l"/>
@@ -38,7 +38,7 @@
   <prl in="mp" out="*m" steps="10"/>
   <all in="m/o" out="*/x"/>
   <all in="x/o" out="*/Q"/>
-  <!-- 2. progetto: la scala parte dalla campata davanti e attraversa il muro verso una vicina -->
+  <!-- 2. design: the stair starts from the front bay and goes through the wall towards a neighbour -->
   <all in="Ot" out="*v"/>
   <prl in="vt" out="*v" steps="6"/>
   <all in="m/t" out="*/v"/>
@@ -48,7 +48,7 @@
   <all in="z/y" out="t/*"/>
   <prl in="tz" out="*t"/>
   <all in="*tttttttttttt/Ppppppppppppp/*tttttttttttt" out="*************/******H******/*************"/>
-  <!-- attorno alla scala niente porte; altre campate crescono attraverso un muro -->
+  <!-- no doors around the stair; other bays grow through a wall -->
   <all in="[gsdc]t" out="*v"/>
   <prl in="vt" out="*v" steps="9"/>
   <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
@@ -56,14 +56,14 @@
   <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
   <prl in="bz" out="*b"/>
   <prl in="Hp" out="*H" steps="5"/>
-  <!-- un muro aperto con la panca -->
+  <!-- an open wall with the bench -->
   <one in="bHb" out="*n*" steps="1"/>
   <prl><rule in="nH" out="*n"/><rule in="np" out="*n"/></prl>
   <one in="nnnnnnnnn" out="*eeeeeee*" steps="1"/>
   <one in="ppppppppppp/bbbbbbbbbbb/bbbbbbbbbbb/bbbbbbbbbbb/bbbbbbbbbbb" out="***********/*eeeeeeeee*/*eeeeeeeee*/***********/***********" steps="1"/>
   <prl in="v" out="t"/>
   <prl in="m" out="H"/>
-  <!-- 3. i muri dalle lettere vicine -->
+  <!-- 3. the walls from the neighbouring letters -->
   <all><rule in="[zE]p[zE]" out="*q*"/><rule in="[zE]p1" out="*w*"/><rule in="[zE]p2" out="*X*"/><rule in="1p1" out="*i*"/><rule in="2p2" out="*I*"/><rule in="1p2" out="*J*"/><rule in="1H1" out="*h*"/><rule in="1H2" out="*j*"/><rule in="EO2" out="*M*"/></all>
   <prl in="n" out="h"/>
   <all in="P[XIJjHMy]" out="I*"/>
@@ -74,9 +74,9 @@
   <prl in="q" out="E"/>
   <all in="M/E" out="*/A" symmetry="()"/>
   <all in="A/E" out="*/A" symmetry="()"/>
-  <!-- 4. le colonne: ogni lettera sale di tanti strati, e lascia una lettera -->
+  <!-- 4. the columns: every letter rises by so many layers, and leaves a letter -->
   <all steps="1" symmetry="()"><rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B b" out="R S B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B F S"/><rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B t" out="R S B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B F S B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B F S"/><rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B s" out="R S B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B F S"/><rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B d" out="R S B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B T S"/><rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B c" out="R S B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B Y S"/><rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B e" out="R S B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B G S"/><rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B f" out="R S B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B F S B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B G S"/><rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B w" out="w W W W W S S C C C C C C C C U U U U U U U U U U U U U U C C C C C C C C C S"/><rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B X" out="X S S S S W W W W W W W W u u u u u u u u u u u u u u W W W W W W W W S S C C C C C C C C U U U U U U U U U U U U U U C C C C C C C C C S"/><rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B i" out="i S S C C C C C C C C C C C C C C C C C C C C C C C C C C C C C C C S"/><rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B I" out="R S W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W S S C C C C C C C C C C C C C C C C C C C C C C C C C C C C C C C S"/><rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B J" out="J S S S S W W W W W W W W u u u u u u u u u u u u u u W W W W W W W W S S C C C C C C C C C C C C C C C C C C C C C C C C C C C C C C C S"/><rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B h" out="h S S B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B F S"/><rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B H" out="R S B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B F S B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B F S"/><rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B j" out="j S S S S W W W W W W W W u u u u u u u u u u u u u u W W W W W W W W S S B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B F S"/><rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B M" out="M S S S S W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W S S k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k F S"/><rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B y" out="R S B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K K S"/><rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B o" out="R S B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B l"/><rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B x" out="R S B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B m K"/><rule in="B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B Q" out="R S B B B B B B B B B B B B B B B B B B B B B B B B B B B B B B N K"/></all>
-  <!-- la cantina si scava dal suolo fino in fondo: nessun numero -->
+  <!-- the cellar is dug from the ground down to the bottom: no number -->
   <all in="Sl" out="al"/>
   <prl in="l B" out="* l" symmetry="()"/>
   <prl in="a B" out="* a" symmetry="()"/>
@@ -85,19 +85,19 @@
   <all in="mN****** ******** ******** **llllll" out="KK****** ******** ******** **KKKKmN"/>
   <prl in="l" out="B"/>
   <prl><rule in="m" out="K"/><rule in="N" out="K"/></prl>
-  <!-- 5. la scala -->
+  <!-- 5. the stair -->
   <all in="*BB *B* TY*" out="*TY *K* KK*" steps="16"/>
   <prl in="K B" out="* K" symmetry="()"/>
-  <!-- le botti: dal pavimento al soffitto, contro un muro, dove la scala non c'è -->
+  <!-- the barrels: from the floor to the ceiling, against a wall, where the stair is not -->
   <one in="*BB/*BB/*BB/*BB/*BB/*BB/*BB/*BB/*BB/*BB/*BB/*BB/*BB aAA/aAA/aAA/aAA/aAA/aAA/aAA/aAA/aAA/aAA/aAA/aAA/aAA" out="***/***/***/***/***/*xx/*xx/*xx/***/***/***/***/*** ***/***/***/***/***/***/***/***/***/***/***/***/***" steps="4"/>
   <prl in="B x" out="x *" symmetry="()"/>
-  <!-- panche -->
+  <!-- benches -->
   <all steps="8" symmetry="()" in="B G" out="G L"/>
   <one in="B[CS] [Ez]S" out="b* **" steps="6"/>
   <prl in="B7 b7" out="b* **"/>
   <prl in="B b" out="s *" steps="1" symmetry="()"/>
   <one in="BBB/WWW BBB/WWW BBB/WWW" out="***/OOO ***/OWO ***/OOO" steps="8"/>
-  <!-- 6. finestre, tetto -->
+  <!-- 6. windows, roof -->
   <all in="UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU" out="*********** DDDDDDDDDDD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DDDDDDDDDDD"/>
   <all in="uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu" out="*********** DDDDDDDDDDD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DDDDDDDDDDD"/>
   <prl in="*B* RRR" out="*R* ***" symmetry="()"/>
@@ -106,7 +106,7 @@
   <all in="c/B */R" out="*/c */*" symmetry="(y)" steps="1"/>
   <prl in="B c" out="c *" steps="20" symmetry="()"/>
   <prl in="B c" out="s *" steps="1" symmetry="()"/>
-  <!-- 7. pulizia -->
+  <!-- 7. cleanup -->
   <prl><rule in="[UwXJjM]" out="C"/><rule in="u" out="W"/><rule in="Y" out="T"/><rule in="G" out="L"/><rule in="[EZz]" out="B"/><rule in="[ih]" out="R"/><rule in="q" out="C"/></prl>
 </sequence>
 <action name="apri" label="Apri la porta"><prl in="k" out="B"/></action>

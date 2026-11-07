@@ -1,4 +1,4 @@
--- Uso generico degli oggetti, secondo categoria ed effetti (scritti dal Concilio nei pacchetti).
+-- Generic use of items, by category and effects (written by the Council in the packs).
 local M = {}
 
 local VERBI = { food = "Mangi", drink = "Bevi", medicine = "Usi", magic = "Assorbi" }

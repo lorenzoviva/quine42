@@ -1,4 +1,4 @@
-<!-- Una cura, una benedizione: una triade che sale piano, un luccichio in cima su una nota che il seme sceglie. -->
+<!-- A healing, a blessing: a triad rising slowly, a glimmer on top on a note picked by the seed. -->
 <sequence name="Cura e benedizione" values="BNSAGKHCTUVPM" size="12 2 14" symmetry="()">
   <sound bpm="120" scale="dorian" root="55" swing="0" cutoff="7000" space="0.65">
     <track y="0" instrument="lead" volume="0.5"/>
@@ -17,7 +17,7 @@
   <color symbol="P" value="64748b" name="Scelta" hidden="True"/>
   <color symbol="M" value="14b8a6" name="Scelta" hidden="True"/>
 
-  <!-- La triade che sale, nota per nota, e resta. -->
+  <!-- The triad rising, note by note, and staying. -->
   <line at="0 1 0" to="0 1 0" r="0" color="N"/>
   <line at="2 1 2" to="2 1 2" r="0" color="N"/>
   <line at="4 1 4" to="4 1 4" r="0" color="N"/>
@@ -29,7 +29,7 @@
   <all in="NBBBBBBBBB" out="NSSSSSSSSS"/>
   <all in="NBBBBBBB" out="NSSSSSSS"/>
   <all in="NBBBBB" out="NSSSSS"/>
-  <!-- Il luccichio. -->
+  <!-- The glimmer. -->
   <line at="6 0 7" to="9 0 7" r="0" color="U"/>
   <line at="6 0 9" to="9 0 9" r="0" color="U"/>
   <line at="7 0 11" to="9 0 11" r="0" color="U"/>

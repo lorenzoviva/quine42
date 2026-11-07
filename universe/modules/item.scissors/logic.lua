@@ -1,4 +1,4 @@
--- Forbici: tagliano ciò che è "tagliabile"; ciò che è tagliato lascia cadere i suoi frutti.
+-- Scissors: they cut what is "cuttable"; what is cut drops its fruit.
 local M = {}
 
 function M.on_action(user, target, item)

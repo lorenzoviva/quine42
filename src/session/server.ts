@@ -386,7 +386,7 @@ export class SessionServer {
       if (!client || this.clients.get(client.id) !== client) return;
       this.clients.delete(client.id);
       this.kernel.setRemote(client.id, false);
-      // What they carry stays theirs, saved; their entity leaves the world (`io` stays, without a client).
+      // What they carry stays theirs, saved; their entity leaves the world (`me` stays, without a client).
       this.kernel.removeWanderer(client.id);
       // Nobody left: the match is over, and whoever enters first, if it is the master, may set the knobs again (T247, ADR-0133).
       if (!this.clients.size) this.kernel.unlockSettings();

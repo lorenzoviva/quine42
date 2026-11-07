@@ -1,6 +1,6 @@
-<!-- Obelisco inciso (fantasy, aurora): un obelisco di pietra che si assottiglia verso l'alto, con la punta di bronzo e rune incise che
-     brillano dal fondo dei solchi. Il seme sceglie l'altezza (quattro quote), la base (a gradoni, un tamburo con quattro cristalli o un
-     cumulo di macerie) e dove la pietra è incisa e quanto è lungo ogni segno. -->
+<!-- Carved obelisk (fantasy, aurora): a stone obelisk thinning upwards, with a bronze tip and carved runes that
+     shine from the bottom of the grooves. The seed picks the height (four heights), the base (stepped, a drum with four crystals or a
+     heap of rubble) and where the stone is carved and how long every mark is. -->
 <sequence values="BSdGPRCxvVUklmnabo" size="20 20 60" symmetry="(xy)" name="Obelisco inciso">
   <color symbol="S" value="8a8478" name="pietra"/>
   <color symbol="d" value="5e5a52" name="pietra scura"/>
@@ -19,7 +19,7 @@
   <color symbol="a" hidden="True" name="base a gradoni"/>
   <color symbol="b" hidden="True" name="tamburo con i cristalli"/>
   <color symbol="o" hidden="True" name="cumulo di macerie"/>
-  <!-- Gli spazi e i due dadi -->
+  <!-- The spaces and the two dice -->
   <box at="10 10 0" size="21 21 60" color="v"/>
   <all in="v" out="B"/>
   <box at="10 10 0" size="21 21 6" color="V"/>
@@ -30,7 +30,7 @@
     <rule in="kU" out="kk"/><rule in="lU" out="ll"/><rule in="mU" out="mm"/><rule in="nU" out="nn"/>
     <rule in="aV" out="aa"/><rule in="bV" out="bb"/><rule in="oV" out="oo"/>
   </all>
-  <!-- La base -->
+  <!-- The base -->
   <box at="10 10 0" size="17 17 2" color="d" on="a"/>
   <box at="10 10 2" size="13 13 2" color="G" on="a"/>
   <box at="10 10 4" size="9 9 2" color="d" on="a"/>
@@ -43,28 +43,28 @@
   <ellipsoid at="10 10 0" size="19 19 12" color="d" on="o"/>
   <ellipsoid at="6 13 0" size="7 7 5" color="G" on="o"/>
   <ellipsoid at="14 6 0" size="5 5 3" color="S" on="o"/>
-  <!-- Il fusto alto 37 -->
+  <!-- The shaft 37 high -->
   <box at="10 10 6" size="7 7 10" color="S" on="k"/>
   <box at="10 10 6" size="5 5 27" color="S" on="k"/>
   <box at="10 10 33" size="3 3 2" color="P" on="k"/>
   <box at="10 10 35" size="1 1 2" color="P" on="k"/>
-  <!-- Il fusto alto 45 -->
+  <!-- The shaft 45 high -->
   <box at="10 10 6" size="7 7 21" color="S" on="l"/>
   <box at="10 10 6" size="5 5 35" color="S" on="l"/>
   <box at="10 10 41" size="3 3 2" color="P" on="l"/>
   <box at="10 10 43" size="1 1 2" color="P" on="l"/>
-  <!-- Il fusto alto 52 -->
+  <!-- The shaft 52 high -->
   <box at="10 10 6" size="7 7 16" color="S" on="m"/>
   <box at="10 10 6" size="5 5 42" color="S" on="m"/>
   <box at="10 10 48" size="3 3 2" color="P" on="m"/>
   <box at="10 10 50" size="1 1 2" color="P" on="m"/>
-  <!-- Il fusto alto 58 -->
+  <!-- The shaft 58 high -->
   <box at="10 10 6" size="7 7 28" color="S" on="n"/>
   <box at="10 10 6" size="5 5 48" color="S" on="n"/>
   <box at="10 10 54" size="3 3 2" color="P" on="n"/>
   <box at="10 10 56" size="1 1 2" color="P" on="n"/>
   <all in="[vVUklmnabo]" out="B"/>
-  <!-- Le incisioni: dove cominciano e quanto è lungo ogni segno -->
+  <!-- The carvings: where they start and how long every mark is -->
   <prl steps="1" in="SB" out="xB" p="0.025"/>
   <prl steps="3" in="S x" out="x *" p="0.5"/>
   <prl steps="1" in="xS" out="*x" p="0.15"/>

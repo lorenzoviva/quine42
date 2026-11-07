@@ -1,43 +1,43 @@
 <!--
-La Direzione (corona): la regia della software house e sala operativa dell'universo.
-Scritto da Gemini CLI (Gemini 3.8 Flash, abbonamento) il 23/10/2026, task T19.
-Scatola: 14 × 10 × 12 caselle, 112 × 80 × 96 voxel, 8 voxel per casella.
-Lettere chiave:
-  O = porta (vano di ingresso a z=0 con atrio interno vuoto per oltre 8 voxel sotto lo sbalzo)
-  F = insegna ("DIREZIONE", neon oro ffcf5c glow fisso sopra il maxischermo curvo)
-  P = targa scura opaca per contrasto dell'insegna
-  M = metallo nero cybernetico primario (pilastri portanti, architravi e solette a sbalzo)
-  m = metallo secondario scuro (pannellature tecniche, griglie, matrice display e profilati)
-  C = cemento grafite (fondazioni, piazzale d'accesso e camminamenti tecnici)
-  S = acciaio chiaro strutturale (traliccio della torre di trasmissione e raccordi)
-  s = acciaio scuro (travature reticolari e controventi)
-  V = vetro scuro riflettente dell'atrio e delle sale tecniche
-  v = fasce di riflesso azzurrato freddo
-  w = fasce di riflesso ambrato caldo
-  N = neon oro vivo per guide e cornici d'accento (glow)
-  n = neon oro tenue per profili e contorni (glow)
-  x, y = buffer temporanei per l'animazione (hidden)
-Schermo curvo (fasi 1..8):
-  1..3 = pacchetto segnale dati oro pulsante in scorrimento orizzontale (ffcf5c..d89e32 con glow)
-  4 = coda segnale oro tenue (8a6820 con glow)
-  5..8 = pixel dormiente/spento (22242e, indistinguibile dalla matrice m)
-Luci d'ostacolo torre (fasi j, k, l, p, q, r, t, u):
-  j, k = flash rosso aviazione ad alta intensità (ff3a3a..d82828 con glow)
-  l..u = bulbo spento in stasi
-Architettura a sbalzo:
-  Volume a sbalzo (z=14..48) sollevato da terra di 2 caselle su 8 massicci pilastri neri compositi,
-  con ampio atrio d'ingresso vetrato in penombra al centro (z=0..16) e porta O a z=0.
-Maxischermo curvo:
-  Imponente facciata anteriore convessa ad arco (x=16..96, y=58..70, z=18..47)
-  con griglia di trasmissione dati, grafici operativi e telemetria in tempo reale.
-Torre di trasmissione:
-  Struttura a traliccio in acciaio slanciata sul tetto (z=48..89, z~11 caselle) con antenne,
-  parabole di uplink e doppie luci d'ostacolo rosse stroboscopiche alternate.
-Animazione "trasmette" (8 frame):
-  Flusso orizzontale continuo dei flussi dati sul maxischermo e lampeggio coordinato dei beacon della torre.
+The Direction (corona): the control room of the software house and the operations room of the universe.
+Written by Gemini CLI (Gemini 3.8 Flash, subscription) on 23/10/2026, task T19.
+Box: 14 × 10 × 12 tiles, 112 × 80 × 96 voxels, 8 voxels per tile.
+Key letters:
+  O = door (entrance space at z=0 with an inner hall empty for over 8 voxels under the overhang)
+  F = sign ("DIREZIONE", gold neon ffcf5c with a steady glow above the curved giant screen)
+  P = dark matte plate for the contrast of the sign
+  M = primary cybernetic black metal (load-bearing pillars, lintels and overhanging slabs)
+  m = dark secondary metal (technical panelling, grilles, display matrix and profiles)
+  C = graphite concrete (foundations, access forecourt and technical walkways)
+  S = light structural steel (truss of the transmission tower and joints)
+  s = dark steel (lattice beams and bracing)
+  V = dark reflecting glass of the hall and of the technical rooms
+  v = bands of cold bluish reflection
+  w = bands of warm amber reflection
+  N = bright gold neon for guides and accent frames (glow)
+  n = soft gold neon for profiles and outlines (glow)
+  x, y = temporary buffers for the animation (hidden)
+Curved screen (phases 1..8):
+  1..3 = a pulsing gold data signal packet sliding horizontally (ffcf5c..d89e32 with glow)
+  4 = soft gold signal tail (8a6820 with glow)
+  5..8 = dormant/off pixel (22242e, indistinguishable from the matrix m)
+Tower obstacle lights (phases j, k, l, p, q, r, t, u):
+  j, k = high-intensity red aviation flash (ff3a3a..d82828 with glow)
+  l..u = bulb off, in stasis
+Overhanging architecture:
+  An overhanging volume (z=14..48) raised 2 tiles off the ground on 8 massive black composite pillars,
+  with a wide, dim, glazed entrance hall at the centre (z=0..16) and door O at z=0.
+Curved giant screen:
+  An imposing convex arched front facade (x=16..96, y=58..70, z=18..47)
+  with a data transmission grid, operational charts and real-time telemetry.
+Transmission tower:
+  A slender steel truss structure on the roof (z=48..89, z~11 tiles) with antennas,
+  uplink dishes and double alternating red strobe obstacle lights.
+Animation "trasmette" (8 frames):
+  A continuous horizontal flow of the data streams on the giant screen and a coordinated flashing of the tower beacons.
 -->
 <sequence values="BMmCSsVvwNnFPOxy12345678jklpqrtu" size="112 80 96" symmetry="()" name="La Direzione">
-  <!-- Materiali e palette neon punk -->
+  <!-- Materials and neon punk palette -->
   <color symbol="M" value="14141a" name="metallo primario"/>
   <color symbol="m" value="22242e" name="metallo secondario"/>
   <color symbol="C" value="34363e" name="cemento grafite"/>
@@ -54,7 +54,7 @@ Animazione "trasmette" (8 frame):
   <color symbol="x" hidden="True" name="buffer schermo"/>
   <color symbol="y" hidden="True" name="buffer torre"/>
 
-  <!-- 8 Fasi dello scorrimento dati del maxischermo curvo (1..8) -->
+  <!-- 8 phases of the data scroll of the curved giant screen (1..8) -->
   <color symbol="1" value="ffcf5c" glow="True" name="schermo oro vivo"/>
   <color symbol="2" value="ffe28a" glow="True" name="schermo oro picco"/>
   <color symbol="3" value="d89e32" glow="True" name="schermo oro medio"/>
@@ -64,7 +64,7 @@ Animazione "trasmette" (8 frame):
   <color symbol="7" value="22242e" name="schermo spento 3"/>
   <color symbol="8" value="22242e" name="schermo spento 4"/>
 
-  <!-- 8 Fasi delle luci d'ostacolo stroboscopiche della torre (j, k, l, p, q, r, t, u) -->
+  <!-- 8 phases of the tower's strobe obstacle lights (j, k, l, p, q, r, t, u) -->
   <color symbol="j" value="ff3a3a" glow="True" name="beacon rosso lampo"/>
   <color symbol="k" value="d82828" glow="True" name="beacon rosso bagliore"/>
   <color symbol="l" value="321010" name="beacon spento 1"/>
@@ -73,7 +73,7 @@ Animazione "trasmette" (8 frame):
   <color symbol="r" value="200a0a" name="beacon spento 4"/>
   <color symbol="t" value="200a0a" name="beacon spento 5"/>
   <color symbol="u" value="240c0c" name="beacon spento 6"/>
-  <!-- 1. BASAMENTO A TERRA E PIAZZALE FRONTALE (z = 0..3) -->
+  <!-- 1. GROUND BASE AND FRONT FORECOURT (z = 0..3) -->
   <box at="56 38 0" size="96 64 2" color="C"/>
   <box at="56 38 1" size="90 58 1" color="m"/>
   <box at="56 64 0" size="64 28 2" color="C"/>
@@ -85,7 +85,7 @@ Animazione "trasmette" (8 frame):
   <box at="44 74 4" size="2 2 1" color="N"/>
   <box at="68 74 0" size="2 2 4" color="M"/>
   <box at="68 74 4" size="2 2 1" color="N"/>
-  <!-- 2. GLI 8 PILASTRI PORTANTI DELLO SBALZO (z = 0..16) -->
+  <!-- 2. THE 8 LOAD-BEARING PILLARS OF THE OVERHANG (z = 0..16) -->
   <box at="24 48 0" size="6 6 2" color="M"/>
   <box at="24 48 2" size="4 4 13" color="M"/>
   <box at="24 48 2" size="2 6 13" color="m"/>
@@ -142,7 +142,7 @@ Animazione "trasmette" (8 frame):
   <box at="72 16 3" size="2 2 11" color="S"/>
   <box at="72 16 14" size="6 6 2" color="s"/>
   <box at="72 16 15" size="8 8 2" color="M"/>
-  <!-- 3. ATRIO D'INGRESSO VETRATO E PORTA O (z = 0..16) -->
+  <!-- 3. GLAZED ENTRANCE HALL AND DOOR O (z = 0..16) -->
   <box at="56 45 0" size="32 26 2" color="C"/>
   <box at="56 45 1" size="30 24 1" color="s"/>
   <box at="41 45 1" size="2 26 14" color="M"/>
@@ -183,7 +183,7 @@ Animazione "trasmette" (8 frame):
   <box at="56 32 3" size="24 2 10" color="m"/>
   <box at="48 33 2" size="4 1 10" color="s"/>
   <box at="64 33 2" size="4 1 10" color="s"/>
-  <!-- Parete frontale atrio e porta O -->
+  <!-- Front wall of the hall and door O -->
   <box at="43 58 0" size="6 2 15" color="M"/>
   <box at="69 58 0" size="6 2 15" color="M"/>
   <box at="43 58 4" size="4 2 8" color="V"/>
@@ -201,7 +201,7 @@ Animazione "trasmette" (8 frame):
   <box at="45 42 4" size="4 6 1" color="S"/>
   <box at="67 42 1" size="4 6 3" color="M"/>
   <box at="67 42 4" size="4 6 1" color="S"/>
-  <!-- 4. SOLETTA PORTANTE A SBALZO (z = 14..17) -->
+  <!-- 4. LOAD-BEARING OVERHANGING SLAB (z = 14..17) -->
   <box at="56 34 14" size="92 54 3" color="M"/>
   <box at="56 34 14" size="88 50 1" color="m"/>
   <box at="20 34 13" size="2 50 2" color="s"/>
@@ -219,7 +219,7 @@ Animazione "trasmette" (8 frame):
   <box at="56 8 14" size="92 1 1" color="n"/>
   <box at="11 34 14" size="1 53 1" color="n"/>
   <box at="101 34 14" size="1 53 1" color="n"/>
-  <!-- 5. VOLUME PRINCIPALE DELLA REGIA OPERATIVA (z = 17..48) -->
+  <!-- 5. MAIN VOLUME OF THE OPERATIONS CONTROL ROOM (z = 17..48) -->
   <box at="56 34 16" size="88 48 2" color="C"/>
   <box at="56 34 17" size="84 44 1" color="s"/>
   <box at="14 34 17" size="4 52 31" color="M"/>
@@ -268,7 +268,7 @@ Animazione "trasmette" (8 frame):
   <cylinder at="84 8 36" size="10 3 10" color="M"/>
   <cylinder at="84 7 36" size="8 2 8" color="m"/>
   <cylinder at="84 7 36" size="2 2 2" color="S"/>
-  <!-- 6. MAXISCHERMO CURVO ANTERIORE (z = 18..47, y frontale) -->
+  <!-- 6. FRONT CURVED GIANT SCREEN (z = 18..47, front y) -->
   <box at="19 57 16" size="7 3 2" color="M"/>
   <box at="19 57 47" size="7 3 2" color="M"/>
   <box at="26 58 16" size="7 5 2" color="M"/>
@@ -421,7 +421,7 @@ Animazione "trasmette" (8 frame):
   <box at="93 58 31" size="7 1 1" color="M"/>
   <box at="93 58 38" size="7 1 1" color="M"/>
   <box at="93 58 44" size="7 1 1" color="M"/>
-  <!-- Flussi dati, grafici e pixel operativi sulle fasi 1..8 -->
+  <!-- Data streams, charts and operational pixels on phases 1..8 -->
   <box at="16 58 21" size="1 1 1" color="3"/>
   <box at="16 58 22" size="1 1 1" color="6"/>
   <box at="16 58 35" size="1 1 1" color="2"/>
@@ -709,7 +709,7 @@ Animazione "trasmette" (8 frame):
   <box at="96 58 22" size="1 1 1" color="6"/>
   <box at="96 58 26" size="1 1 1" color="1"/>
   <box at="96 58 33" size="1 1 1" color="2"/>
-  <!-- 7. L'INSEGNA NEON "DIREZIONE" (z = 48..53, y = 71..72) -->
+  <!-- 7. THE NEON SIGN "DIREZIONE" (z = 48..53, y = 71..72) -->
   <box at="56 71 47" size="39 1 7" color="P"/>
   <box at="56 70 47" size="39 1 7" color="M"/>
   <box at="56 71 53" size="41 1 1" color="n"/>
@@ -752,7 +752,7 @@ Animazione "trasmette" (8 frame):
   <box at="72 72 52" size="2 1 1" color="F"/>
   <box at="72 72 50" size="1 1 1" color="F"/>
   <box at="72 72 48" size="2 1 1" color="F"/>
-  <!-- 8. COPERTURA E IMPIANTI TECNICI DEL TETTO (z = 48..56) -->
+  <!-- 8. COVERING AND TECHNICAL PLANTS ON THE ROOF (z = 48..56) -->
   <box at="56 34 48" size="88 48 2" color="C"/>
   <box at="56 34 49" size="84 44 1" color="m"/>
   <box at="56 10 50" size="86 1 2" color="m"/>
@@ -780,7 +780,7 @@ Animazione "trasmette" (8 frame):
   <box at="57 46 52" size="1 1 1" color="r"/>
   <box at="58 46 52" size="1 1 1" color="t"/>
   <box at="59 46 52" size="1 1 1" color="u"/>
-  <!-- 9. TORRE DI TRASMISSIONE A TRALICCIO (z = 48..89) -->
+  <!-- 9. TRUSS TRANSMISSION TOWER (z = 48..89) -->
   <box at="56 30 49" size="16 16 2" color="M"/>
   <box at="56 30 50" size="14 14 2" color="s"/>
   <box at="52 26 52" size="1 1 1" color="S"/>
@@ -982,13 +982,13 @@ Animazione "trasmette" (8 frame):
 </sequence>
 
 <!-- ================================================================= -->
-<!-- ANIMAZIONE CICLICA "TRANSMETTE" (8 frame)                         -->
-<!-- Scorrimento continuo della telemetria dati sul maxischermo curvo  -->
-<!-- e lampeggio coordinato stroboscopico dei fari d'ostacolo          -->
+<!-- CYCLIC ANIMATION "TRASMETTE" (8 frames)                           -->
+<!-- Continuous scrolling of the data telemetry on the curved giant screen -->
+<!-- and coordinated strobe flashing of the obstacle lights            -->
 <!-- ================================================================= -->
 <animation name="trasmette" frames="8">
   <sequence>
-    <!-- 1. Scorrimento dati orizzontale continuo su maxischermo (1..8) -->
+    <!-- 1. Continuous horizontal data scroll on the giant screen (1..8) -->
     <all in="1" out="x"/>
     <all in="2" out="1"/>
     <all in="3" out="2"/>
@@ -999,7 +999,7 @@ Animazione "trasmette" (8 frame):
     <all in="8" out="7"/>
     <all in="x" out="8"/>
 
-    <!-- 2. Lampeggio stroboscopico fari d'ostacolo torre (j, k, l, p, q, r, t, u) -->
+    <!-- 2. Strobe flashing of the tower obstacle lights (j, k, l, p, q, r, t, u) -->
     <all in="j" out="y"/>
     <all in="k" out="j"/>
     <all in="l" out="k"/>

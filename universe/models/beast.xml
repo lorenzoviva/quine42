@@ -1,6 +1,6 @@
-<!-- Lupo, procedurale (Cantiere 2): gli stessi colori e le stesse parti animate dell'originale (quattro zampe, coda). Il seme sceglie la
-     posa della testa (alta in ascolto o bassa a fiutare la traccia), la coda (bassa, dritta o alzata), quanto è massiccio il corpo se ha
-     la gorgiera di pelo chiaro sul petto e dove il pelo è arruffato. -->
+<!-- Wolf, procedural (Cantiere 2): the same colours and the same animated parts of the original (four legs, tail). The seed picks the
+     pose of the head (high, listening, or low, sniffing the trail), the tail (low, straight or raised), how massive the body is, whether it has
+     the ruff of light fur on the chest and where the fur is ruffled. -->
 <sequence values="BAIUVFDWHCKEhjenfoxyzspqmab0" size="25 40 30" symmetry="(xy)" name="Lupo">
   <color symbol="A" value="5b606d" name="zampa anteriore sx" part="leg"/>
   <color symbol="I" value="5b606d" name="zampa anteriore dx" part="leg"/>
@@ -29,11 +29,11 @@
   <color symbol="a" hidden="True" name="scelta"/>
   <color symbol="b" hidden="True" name="scelta"/>
   <color symbol="0" hidden="True" name="mescola"/>
-  <!-- Mescola: il generatore riparte da un punto diverso per ogni seme (vedi README) -->
+  <!-- Shuffle: the generator starts again from a different point for every seed (see README) -->
   <box at="12 0 29" size="25 2 1" color="0"/>
   <prl in="0" out="B" p="0.5" steps="1"/>
   <all in="0" out="B"/>
-  <!-- Le zampe -->
+  <!-- The legs -->
   <box at="7 24 0" size="3 4 11" color="A"/>
   <box at="17 24 0" size="3 4 11" color="I"/>
   <box at="7 10 0" size="3 4 8" color="U"/>
@@ -42,7 +42,7 @@
   <ellipsoid at="17 12 6" size="5 7 9" color="V"/>
   <ellipsoid at="7 23 9" size="5 6 8" color="A"/>
   <ellipsoid at="17 23 9" size="5 6 8" color="I"/>
-  <!-- Il corpo, forse più massiccio -->
+  <!-- The body, perhaps more massive -->
   <ellipsoid at="12 18 8" size="19 22 15" color="p" on="B"/>
   <ellipsoid at="12 14 10" size="13 13 10" color="F" on="[Bp]"/>
   <ellipsoid at="12 21 11" size="15 14 12" color="F" on="[Bp]"/>
@@ -58,7 +58,7 @@
   </all>
   <all in="a" out="F"/>
   <all in="p" out="B"/>
-  <!-- Il collo e le due teste possibili -->
+  <!-- The neck and the two possible heads -->
   <ellipsoid at="12 26 14" size="13 11 11" color="F" on="B"/>
   <cylinder at="12 25 13" size="11 10 8" color="F" on="B"/>
   <ellipsoid at="12 28 17" size="11 10 10" color="h" on="B"/>
@@ -92,7 +92,7 @@
   </all>
   <all in="[ab]" out="F"/>
   <all in="[hjefno]" out="B"/>
-  <!-- La coda: bassa, dritta o alzata -->
+  <!-- The tail: low, straight or raised -->
   <ellipsoid at="12 7 13" size="7 7 7" color="C" on="B"/>
   <ellipsoid at="12 5 8" size="6 8 7" color="x" on="B"/>
   <cone at="12 3 3" size="5 7 7" color="x" on="B"/>
@@ -109,7 +109,7 @@
   </all>
   <all in="a" out="C"/>
   <all in="[xyz]" out="B"/>
-  <!-- La gorgiera sul petto, forse -->
+  <!-- The ruff on the chest, perhaps -->
   <box at="12 27 9" size="9 7 7" color="q" on="F"/>
   <box at="12 27 9" size="1 1 1" color="m"/>
   <one steps="1">
@@ -128,7 +128,7 @@
   <convolution neighborhood="Moore" steps="1">
     <rule in="B" out="F" values="F" sum="18..26"/>
   </convolution>
-  <!-- Ciuffi di pelo arruffato sul dorso e sui fianchi -->
+  <!-- Tufts of ruffled fur on the back and on the sides -->
   <prl steps="1">
     <rule in="B [FD]" out="F *" p="0.12"/>
     <rule in="BF" out="FF" p="0.04"/>

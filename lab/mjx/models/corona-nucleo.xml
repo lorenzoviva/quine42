@@ -1,46 +1,46 @@
 <!--
-Il Nucleo (corona): edificio di contenimento a corona circolare (toro futuristico a gradoni)
-con grande atrio centrale a cielo aperto, sopra cui fluttua la sfera quantica di voxel neri
-in sospensione magnetica con celle energetiche pulsanti ad intermittenza azzurro neon,
-portale d'ingresso monumentale sul fronte sud a z=0 con atrio interno sgombro,
-insegna neon azzurro "IL NUCLEO" su targa scura opaca sopra il portale,
-quattro piloni d'ancoraggio con travi strutturali e fasci di contenimento neon verso la sfera,
-e pozzo d'emissione centrale con anelli di collimazione magnetica a terra.
-Scritto da Gemini CLI (Gemini 3.8 Flash, abbonamento) il 23/10/2026, task T19.
-Scatola: 14 × 14 × 14 caselle, 112 × 112 × 112 voxel, 8 voxel per casella.
-Lettere chiave:
-  O = porta (lettera O, nome "porta", al centro x=56, y=105, z=0..17, vano d'ingresso con atrio interno vuoto e passante y=92..104)
-  F = insegna ("IL NUCLEO", neon azzurro 6fc3ff glow fisso su targa scura P sopra il portale a z=22..28, y=106..107)
-  P = targa scura opaca per l'insegna (0a0e14)
-  M = metallo nero cybernetico primario (14141a, blindature anulari, solette, piloni)
-  m = metallo secondario scuro (20222a, carter, pannelli tecnici, fasce equatoriali)
-  K = nucleo nero profondo della sfera fluttuante (0a0c12)
-  C = cemento grafite perimetrale (34363e, platea e camminamenti)
-  c = conglomerato tecnico scuro e asfalto (262830)
-  S = acciaio chiaro strutturale (8a8f9c, travi diagonali di sospensione, tralicci, antenne)
-  s = acciaio scuro di supporto (525662, profilati e griglie)
-  V = vetro scuro riflettente (182434, fasce finestrate del toro)
-  v = riflessi azzurrati del vetro (2c425c)
-  w = riflessi chiari del vetro (486a8a)
-  N = neon azzurro vivo (6fc3ff glow, fasci di contenimento, cornici d'accento)
-  n = neon azzurro tenue (3a8ad8 glow, anelli di collimazione, guide tetto)
-  R = spia rossa d'ostacolo beacons (ff3a3a glow)
-  1 = cella energetica sfera attiva (6fc3ff glow, azzurro vivo)
-  0 = cella energetica sfera spenta (16202c, stasi)
-  x = buffer temporaneo per animazione (hidden)
-Architettura:
-  - Platea poligonale/circolare di fondazione a z=0..2 (diametro 102 voxel, distanziata dai bordi della griglia).
-  - Toro circolare a tre ordini concentrici degradanti da z=0 a z=34 (diametro esterno 96, foro interno 44 voxel).
-  - Pozzo di collimazione centrale (x=56, y=56, z=0..8) a cielo aperto con proiettore di campo magnetico a gradoni.
-  - Sfera quantica nera K (diametro 40 voxel, z=56..95) sospesa nel vuoto al centro della corte a z~7-12 caselle.
-  - 4 piloni d'ancoraggio angolari (z=28..38) con travi strutturali S e raggi di contenimento N/n collegati alla sfera.
-  - Portale d'accesso monumentale a sud (x=46..66, y=100..107, z=0..22) con porta O e atrio interno vuoto (y=92..104).
-  - Insegna "IL NUCLEO" a caratteri neon azzurro F centrata a x=56, y=107, z=23..27.
-Animazione "pulsa" (8 frame):
-  Scambio periodico delle celle energetiche attive (1, glow) e spente (0) sulla superficie della sfera quantica.
+The Core (corona): a containment building shaped as a circular crown (a stepped futuristic torus)
+with a big central hall open to the sky, above which floats the quantum sphere of black voxels
+in magnetic suspension with energy cells pulsing on and off in neon blue,
+a monumental entrance portal on the south front at z=0 with a clear inner hall,
+the blue neon sign "IL NUCLEO" on a dark matte plate above the portal,
+four anchoring pylons with structural beams and neon containment beams towards the sphere,
+and a central emission well with magnetic collimation rings on the ground.
+Written by Gemini CLI (Gemini 3.8 Flash, subscription) on 23/10/2026, task T19.
+Box: 14 × 14 × 14 tiles, 112 × 112 × 112 voxels, 8 voxels per tile.
+Key letters:
+  O = door (letter O, name "porta", at the centre x=56, y=105, z=0..17, an entrance space with an empty inner through hall y=92..104)
+  F = sign ("IL NUCLEO", blue neon 6fc3ff with a steady glow on the dark plate P above the portal at z=22..28, y=106..107)
+  P = dark matte plate for the sign (0a0e14)
+  M = primary cybernetic black metal (14141a, ring armour, slabs, pylons)
+  m = dark secondary metal (20222a, casings, technical panels, equatorial bands)
+  K = deep black core of the floating sphere (0a0c12)
+  C = perimeter graphite concrete (34363e, raft and walkways)
+  c = dark technical aggregate and asphalt (262830)
+  S = light structural steel (8a8f9c, diagonal suspension beams, trusses, antennas)
+  s = dark support steel (525662, profiles and grids)
+  V = dark reflecting glass (182434, window bands of the torus)
+  v = bluish reflections of the glass (2c425c)
+  w = light reflections of the glass (486a8a)
+  N = bright blue neon (6fc3ff glow, containment beams, accent frames)
+  n = soft blue neon (3a8ad8 glow, collimation rings, roof guides)
+  R = red obstacle warning beacons (ff3a3a glow)
+  1 = active energy cell of the sphere (6fc3ff glow, bright blue)
+  0 = energy cell of the sphere off (16202c, stasis)
+  x = temporary buffer for the animation (hidden)
+Architecture:
+  - A polygonal/circular foundation raft at z=0..2 (102 voxels across, kept away from the edges of the grid).
+  - A circular torus in three concentric orders stepping down from z=0 to z=34 (outer diameter 96, inner hole 44 voxels).
+  - A central collimation well (x=56, y=56, z=0..8) open to the sky with a stepped magnetic field projector.
+  - A black quantum sphere K (40 voxels across, z=56..95) hanging in the void at the centre of the court at z~7-12 tiles.
+  - 4 corner anchoring pylons (z=28..38) with structural beams S and containment rays N/n connected to the sphere.
+  - A monumental access portal to the south (x=46..66, y=100..107, z=0..22) with door O and an empty inner hall (y=92..104).
+  - The sign "IL NUCLEO" in blue neon letters F centred at x=56, y=107, z=23..27.
+Animation "pulsa" (8 frames):
+  A periodic swap of the active (1, glow) and inactive (0) energy cells on the surface of the quantum sphere.
 -->
 <sequence values="BMmKCcSsVvwNnFPO10xR" size="112 112 112" symmetry="()" name="Il Nucleo">
-  <!-- Materiali e palette neon punk -->
+  <!-- Materials and neon punk palette -->
   <color symbol="M" value="14141a" name="metallo primario"/>
   <color symbol="m" value="20222a" name="metallo secondary"/>
   <color symbol="K" value="0a0c12" name="nucleo sfera nero"/>
@@ -62,14 +62,14 @@ Animazione "pulsa" (8 frame):
   <color symbol="x" hidden="True" name="buffer animazione"/>
 
   <!-- ================================================================= -->
-  <!-- 1. BASAMENTO PERIMETRALE E PLATEA DI FONDAZIONE (z = 0..2)        -->
+  <!-- 1. PERIMETER BASE AND FOUNDATION RAFT (z = 0..2)                  -->
   <!-- ================================================================= -->
-  <!-- Diametro 102 (r=51): resta entro x=5..107, y=5..107 con 5 voxel di margine -->
+  <!-- Diameter 102 (r=51): stays within x=5..107, y=5..107 with a 5-voxel margin -->
   <cylinder at="56 56 0" size="102 102 2" color="C"/>
   <cylinder at="56 56 1" size="98 98 1" color="c"/>
   <cylinder at="56 56 1" size="96 96 1" color="m"/>
 
-  <!-- Canali e guide d'energia radiali a terra sulla platea esterna -->
+  <!-- Radial energy channels and guides on the ground on the outer raft -->
   <box at="56 12 1" size="4 10 1" color="s"/>
   <box at="56 12 1" size="2 10 1" color="n"/>
   <box at="56 100 1" size="4 10 1" color="s"/>
@@ -80,23 +80,23 @@ Animazione "pulsa" (8 frame):
   <box at="100 56 1" size="10 2 1" color="n"/>
 
   <!-- ================================================================= -->
-  <!-- 2. CORPO DELL'EDIFICIO AD ANELLO (LIVELLO 1: z = 0..18)           -->
+  <!-- 2. BODY OF THE RING BUILDING (LEVEL 1: z = 0..18)                 -->
   <!-- ================================================================= -->
-  <!-- Cilindro massiccio esterno r=48, scavato al centro con foro r=22 -->
+  <!-- Massive outer cylinder r=48, hollowed at the centre with a hole r=22 -->
   <cylinder at="56 56 0" size="96 96 18" color="M"/>
   <cylinder at="56 56 0" size="44 44 18" color="B"/>
 
-  <!-- Rivestimento a fasce di vetro cybernetico e modanature esterne -->
+  <!-- Cladding with bands of cybernetic glass and outer mouldings -->
   <cylinder at="56 56 4" size="96 96 10" color="V"/>
   <cylinder at="56 56 4" size="94 94 10" color="M"/>
 
-  <!-- Riflessi orizzontali azzurri e chiari sulla vetrata curva -->
+  <!-- Horizontal blue and light reflections on the curved glazing -->
   <cylinder at="56 56 7" size="96 96 1" color="v"/>
   <cylinder at="56 56 7" size="94 94 1" color="M"/>
   <cylinder at="56 56 11" size="96 96 1" color="w"/>
   <cylinder at="56 56 11" size="94 94 1" color="M"/>
 
-  <!-- Paraste e costoloni verticali in metallo nero lungo l'anello esterno -->
+  <!-- Pilasters and vertical black metal ribs along the outer ring -->
   <box at="56 10 0" size="8 4 18" color="M"/>
   <box at="56 102 0" size="8 4 18" color="M"/>
   <box at="10 56 0" size="4 8 18" color="M"/>
@@ -106,72 +106,72 @@ Animazione "pulsa" (8 frame):
   <box at="22 90 0" size="6 6 18" color="M"/>
   <box at="90 90 0" size="6 6 18" color="M"/>
 
-  <!-- Svuotamento della galleria/corridoio anulare interno (r=26..40) -->
+  <!-- Hollowing out the inner ring gallery/corridor (r=26..40) -->
   <cylinder at="56 56 1" size="82 82 16" color="B"/>
   <cylinder at="56 56 0" size="54 54 18" color="M"/>
   <cylinder at="56 56 0" size="44 44 18" color="B"/>
 
-  <!-- Pavimento tecnico interno del corridoio anulare a z=0..1 -->
+  <!-- Technical inner floor of the ring corridor at z=0..1 -->
   <cylinder at="56 56 0" size="82 82 1" color="c"/>
   <cylinder at="56 56 0" size="54 54 1" color="M"/>
   <cylinder at="56 56 0" size="44 44 1" color="B"/>
 
   <!-- ================================================================= -->
-  <!-- 3. LIVELLO 2 DELL'ANELLO (GALLERIA PANORAMICA: z = 18..28)        -->
+  <!-- 3. LEVEL 2 OF THE RING (PANORAMIC GALLERY: z = 18..28)            -->
   <!-- ================================================================= -->
-  <!-- Fascia neon di transizione tra livello 1 e livello 2 -->
+  <!-- Neon transition band between level 1 and level 2 -->
   <cylinder at="56 56 18" size="90 90 1" color="N"/>
   <cylinder at="56 56 18" size="86 86 1" color="M"/>
   <cylinder at="56 56 18" size="46 46 1" color="B"/>
 
-  <!-- Volume del livello 2 (diametro esterno 88, foro interno 48) -->
+  <!-- Volume of level 2 (outer diameter 88, inner hole 48) -->
   <cylinder at="56 56 19" size="88 88 9" color="m"/>
   <cylinder at="56 56 18" size="48 48 10" color="B"/>
 
-  <!-- Fascia finestrata continua esterna con vista sulla corte interna e all'esterno -->
+  <!-- Continuous outer window band with a view on the inner court and outside -->
   <cylinder at="56 56 21" size="88 88 5" color="V"/>
   <cylinder at="56 56 21" size="86 86 5" color="m"/>
   <cylinder at="56 56 23" size="88 88 1" color="v"/>
   <cylinder at="56 56 23" size="86 86 1" color="m"/>
 
-  <!-- Vetrata curva interna affacciata sul pozzo centrale e sulla sfera -->
+  <!-- Inner curved glazing facing the central well and the sphere -->
   <cylinder at="56 56 20" size="50 50 7" color="V"/>
   <cylinder at="56 56 20" size="48 48 7" color="B"/>
   <cylinder at="56 56 22" size="50 50 1" color="v"/>
   <cylinder at="56 56 22" size="48 48 1" color="B"/>
 
   <!-- ================================================================= -->
-  <!-- 4. LIVELLO 3: CORNICIONE E COPERTURA TECNICA (z = 28..34)         -->
+  <!-- 4. LEVEL 3: CORNICE AND TECHNICAL COVERING (z = 28..34)           -->
   <!-- ================================================================= -->
-  <!-- Soletta di coronamento dell'anello -->
+  <!-- Crowning slab of the ring -->
   <cylinder at="56 56 28" size="84 84 5" color="M"/>
   <cylinder at="56 56 28" size="52 52 5" color="B"/>
 
-  <!-- Piano di calpestio tecnico del tetto a z=32 -->
+  <!-- Technical walking surface of the roof at z=32 -->
   <cylinder at="56 56 32" size="82 82 1" color="c"/>
   <cylinder at="56 56 32" size="54 54 1" color="B"/>
 
-  <!-- Parapetto di sicurezza esterno con canalina neon azzurro -->
+  <!-- Outer safety parapet with a blue neon channel -->
   <cylinder at="56 56 33" size="84 84 1" color="M"/>
   <cylinder at="56 56 33" size="82 82 1" color="B"/>
   <cylinder at="56 56 34" size="84 84 1" color="n"/>
   <cylinder at="56 56 34" size="82 82 1" color="B"/>
 
-  <!-- Parapetto interno attorno al foro centrale a z=33..34 (foro interno libero r=26) -->
+  <!-- Inner parapet around the central hole at z=33..34 (inner hole free r=26) -->
   <cylinder at="56 56 33" size="54 54 1" color="M"/>
   <cylinder at="56 56 33" size="52 52 1" color="B"/>
   <cylinder at="56 56 34" size="54 54 1" color="n"/>
   <cylinder at="56 56 34" size="52 52 1" color="B"/>
 
   <!-- ================================================================= -->
-  <!-- 5. POZZO CENTRALE E PROIETTORE MAGNETICO A TERRA (z = 0..8)       -->
+  <!-- 5. CENTRAL WELL AND MAGNETIC PROJECTOR ON THE GROUND (z = 0..8)   -->
   <!-- ================================================================= -->
-  <!-- Piattaforma di collimazione nel cortile centrale (r=20) -->
+  <!-- Collimation platform in the central courtyard (r=20) -->
   <cylinder at="56 56 0" size="40 40 2" color="C"/>
   <cylinder at="56 56 1" size="36 36 1" color="c"/>
   <cylinder at="56 56 1" size="34 34 2" color="m"/>
 
-  <!-- Anelli concentrici di contenimento magnetico a gradoni -->
+  <!-- Stepped concentric magnetic containment rings -->
   <cylinder at="56 56 3" size="28 28 2" color="M"/>
   <cylinder at="56 56 4" size="30 30 1" color="n"/>
   <cylinder at="56 56 4" size="26 26 1" color="M"/>
@@ -179,12 +179,12 @@ Animazione "pulsa" (8 frame):
   <cylinder at="56 56 6" size="22 22 1" color="N"/>
   <cylinder at="56 56 6" size="18 18 1" color="s"/>
 
-  <!-- Lente centrale del collimatore primario a z=7 -->
+  <!-- Central lens of the primary collimator at z=7 -->
   <cylinder at="56 56 7" size="14 14 1" color="S"/>
   <cylinder at="56 56 7" size="8 8 1" color="N"/>
   <box at="56 56 8" size="4 4 1" color="1"/>
 
-  <!-- 4 Colonne verticali di campo magnetico nel cortile (z = 0..30) -->
+  <!-- 4 vertical magnetic field columns in the courtyard (z = 0..30) -->
   <box at="56 36 0" size="4 4 32" color="M"/>
   <box at="56 36 1" size="2 2 31" color="S"/>
   <box at="56 36 32" size="2 2 1" color="N"/>
@@ -202,45 +202,45 @@ Animazione "pulsa" (8 frame):
   <box at="76 56 32" size="2 2 1" color="N"/>
 
   <!-- ================================================================= -->
-  <!-- 6. QUATTRO PILONI DI SOSPENSIONE MAGNETICA SUL TETTO (z = 28..38) -->
+  <!-- 6. FOUR MAGNETIC SUSPENSION PYLONS ON THE ROOF (z = 28..38)       -->
   <!-- ================================================================= -->
-  <!-- Piloni strutturali a 45 gradi sul tetto dell'anello -->
-  <!-- Pilone Nord-Est (78, 34) -->
+  <!-- Structural pylons at 45 degrees on the roof of the ring -->
+  <!-- North-East pylon (78, 34) -->
   <box at="78 34 28" size="8 8 10" color="M"/>
   <box at="78 34 29" size="6 6 9" color="m"/>
   <box at="78 34 37" size="6 6 1" color="N"/>
 
-  <!-- Pilone Nord-Ovest (34, 34) -->
+  <!-- North-West pylon (34, 34) -->
   <box at="34 34 28" size="8 8 10" color="M"/>
   <box at="34 34 29" size="6 6 9" color="m"/>
   <box at="34 34 37" size="6 6 1" color="N"/>
 
-  <!-- Pilone Sud-Ovest (34, 78) -->
+  <!-- South-West pylon (34, 78) -->
   <box at="34 78 28" size="8 8 10" color="M"/>
   <box at="34 78 29" size="6 6 9" color="m"/>
   <box at="34 78 37" size="6 6 1" color="N"/>
 
-  <!-- Pilone Sud-Est (78, 78) -->
+  <!-- South-East pylon (78, 78) -->
   <box at="78 78 28" size="8 8 10" color="M"/>
   <box at="78 78 29" size="6 6 9" color="m"/>
   <box at="78 78 37" size="6 6 1" color="N"/>
 
   <!-- ================================================================= -->
-  <!-- 7. FASCI E TRAVI DI SOSPENSIONE VERSO LA SFERA (z = 38..66)        -->
+  <!-- 7. SUSPENSION BEAMS AND RAYS TOWARDS THE SPHERE (z = 38..66)       -->
   <!-- ================================================================= -->
-  <!-- Travi strutturali in acciaio chiaro S con raggio 1 -->
+  <!-- Structural beams in light steel S with radius 1 -->
   <line at="78 34 38" to="68 44 66" r="1" color="S"/>
   <line at="34 34 38" to="44 44 66" r="1" color="S"/>
   <line at="34 78 38" to="44 68 66" r="1" color="S"/>
   <line at="78 78 38" to="68 68 66" r="1" color="S"/>
 
-  <!-- Fasci di contenimento energetico azzurro vivo N -->
+  <!-- Bright blue energy containment beams N -->
   <line at="78 34 38" to="68 44 66" r="0" color="N"/>
   <line at="34 34 38" to="44 44 66" r="0" color="N"/>
   <line at="34 78 38" to="44 68 66" r="0" color="N"/>
   <line at="78 78 38" to="68 68 66" r="0" color="N"/>
 
-  <!-- Collari di ancoraggio magnetico sulla superficie della sfera -->
+  <!-- Magnetic anchoring collars on the surface of the sphere -->
   <box at="68 44 65" size="4 4 4" color="m"/>
   <box at="68 44 66" size="2 2 2" color="n"/>
 
@@ -253,35 +253,35 @@ Animazione "pulsa" (8 frame):
   <box at="68 68 65" size="4 4 4" color="m"/>
   <box at="68 68 66" size="2 2 2" color="n"/>
 
-  <!-- Fascio di collimazione assiale dal pozzo a terra al polo sud della sfera -->
+  <!-- Axial collimation beam from the well on the ground to the south pole of the sphere -->
   <line at="56 56 8" to="56 56 56" r="0" color="N"/>
 
   <!-- ================================================================= -->
-  <!-- 8. LA SFERA QUANTICA FLUTTUANTE (z = 56..95, diametro 40)        -->
+  <!-- 8. THE FLOATING QUANTUM SPHERE (z = 56..95, diameter 40)         -->
   <!-- ================================================================= -->
-  <!-- Corpo monolitico della sfera in composito nero profondo K -->
+  <!-- Monolithic body of the sphere in deep black composite K -->
   <ellipsoid at="56 56 56" size="40 40 40" color="K"/>
 
-  <!-- Fascia tecnologica equatoriale incassata (z = 75..76) -->
+  <!-- Recessed equatorial technological band (z = 75..76) -->
   <cylinder at="56 56 75" size="41 41 2" color="m"/>
   <cylinder at="56 56 75" size="39 39 2" color="K"/>
   <cylinder at="56 56 75" size="41 41 1" color="n"/>
   <cylinder at="56 56 75" size="39 39 1" color="m"/>
 
-  <!-- Sezioni meridiane decorative e giunti di contenimento -->
+  <!-- Decorative meridian sections and containment joints -->
   <box at="56 56 70" size="41 2 12" color="m"/>
   <box at="56 56 70" size="39 2 12" color="K"/>
   <box at="56 56 70" size="2 41 12" color="m"/>
   <box at="56 56 70" size="2 39 12" color="K"/>
 
   <!-- ================================================================= -->
-  <!-- 9. CELLE ENERGETICHE PULSANTI DELLA SFERA (ATTIVE 1 / STASI 0)    -->
+  <!-- 9. PULSING ENERGY CELLS OF THE SPHERE (ACTIVE 1 / STASIS 0)       -->
   <!-- ================================================================= -->
-  <!-- Poli della sfera -->
+  <!-- Poles of the sphere -->
   <box at="56 56 95" size="2 2 1" color="1"/>
   <box at="56 56 56" size="2 2 1" color="0"/>
 
-  <!-- Calotta Superiore: z = 90 (raggio orizzontale ~14) -->
+  <!-- Upper cap: z = 90 (horizontal radius ~14) -->
   <box at="70 56 90" size="2 1 1" color="1"/>
   <box at="66 66 90" size="2 1 1" color="0"/>
   <box at="56 70 90" size="1 2 1" color="1"/>
@@ -291,7 +291,7 @@ Animazione "pulsa" (8 frame):
   <box at="56 42 90" size="1 2 1" color="1"/>
   <box at="66 46 90" size="2 1 1" color="0"/>
 
-  <!-- Emisfero Superiore: z = 84 (raggio orizzontale ~18) -->
+  <!-- Upper hemisphere: z = 84 (horizontal radius ~18) -->
   <box at="74 56 84" size="2 1 1" color="0"/>
   <box at="73 63 84" size="2 1 1" color="1"/>
   <box at="69 69 84" size="2 1 1" color="0"/>
@@ -309,7 +309,7 @@ Animazione "pulsa" (8 frame):
   <box at="69 43 84" size="2 1 1" color="0"/>
   <box at="73 49 84" size="2 1 1" color="1"/>
 
-  <!-- Fascia Equatoriale: z = 76 (raggio orizzontale ~20) -->
+  <!-- Equatorial band: z = 76 (horizontal radius ~20) -->
   <box at="76 56 76" size="2 1 1" color="1"/>
   <box at="74 64 76" size="2 1 1" color="0"/>
   <box at="70 70 76" size="2 1 1" color="1"/>
@@ -327,7 +327,7 @@ Animazione "pulsa" (8 frame):
   <box at="70 42 76" size="2 1 1" color="1"/>
   <box at="74 48 76" size="2 1 1" color="0"/>
 
-  <!-- Emisfero Inferiore: z = 68 (raggio orizzontale ~18) -->
+  <!-- Lower hemisphere: z = 68 (horizontal radius ~18) -->
   <box at="74 56 68" size="2 1 1" color="0"/>
   <box at="73 63 68" size="2 1 1" color="1"/>
   <box at="69 69 68" size="2 1 1" color="0"/>
@@ -345,7 +345,7 @@ Animazione "pulsa" (8 frame):
   <box at="69 43 68" size="2 1 1" color="0"/>
   <box at="73 49 68" size="2 1 1" color="1"/>
 
-  <!-- Calotta Inferiore: z = 62 (raggio orizzontale ~14) -->
+  <!-- Lower cap: z = 62 (horizontal radius ~14) -->
   <box at="70 56 62" size="2 1 1" color="1"/>
   <box at="66 66 62" size="2 1 1" color="0"/>
   <box at="56 70 62" size="1 2 1" color="1"/>
@@ -356,74 +356,74 @@ Animazione "pulsa" (8 frame):
   <box at="66 46 62" size="2 1 1" color="0"/>
 
   <!-- ================================================================= -->
-  <!-- 10. PORTALE MONUMENTALE D'INGRESSO (FRONTE SUD: y = 100..107)     -->
+  <!-- 10. MONUMENTAL ENTRANCE PORTAL (SOUTH FRONT: y = 100..107)        -->
   <!-- ================================================================= -->
-  <!-- Piedritti e piloni dell'avancorpo d'ingresso -->
+  <!-- Jambs and pylons of the entrance block -->
   <box at="46 104 0" size="4 6 22" color="M"/>
   <box at="66 104 0" size="4 6 22" color="M"/>
   <box at="46 106 0" size="2 2 22" color="n"/>
   <box at="66 106 0" size="2 2 22" color="n"/>
 
-  <!-- Architrave e soletta sopra la porta -->
+  <!-- Lintel and slab above the door -->
   <box at="56 104 18" size="24 6 4" color="M"/>
   <box at="56 106 18" size="24 2 1" color="N"/>
 
-  <!-- Portale e vano porta O centrato a x=56, a z=0..17 -->
+  <!-- Portal and door space O centred at x=56, at z=0..17 -->
   <box at="56 105 0" size="16 1 18" color="O"/>
   <box at="56 105 0" size="16 1 1" color="m"/>
   <box at="56 105 17" size="16 1 1" color="n"/>
   <box at="48 105 0" size="1 1 18" color="n"/>
   <box at="64 105 0" size="1 1 18" color="n"/>
 
-  <!-- Atrio interno vuoto e sgombro per oltre 12 voxel dietro la porta -->
+  <!-- Inner hall empty and clear for over 12 voxels behind the door -->
   <box at="56 98 0" size="18 13 18" color="B"/>
 
   <!-- ================================================================= -->
-  <!-- 11. TARGA E INSEGNA NEON "IL NUCLEO" (y = 106..107, z = 22..28)   -->
+  <!-- 11. PLATE AND NEON SIGN "IL NUCLEO" (y = 106..107, z = 22..28)    -->
   <!-- ================================================================= -->
-  <!-- Targa di contrasto scura opaca P -->
+  <!-- Dark matte contrast plate P -->
   <box at="56 106 22" size="44 1 7" color="P"/>
   <box at="56 105 22" size="44 1 7" color="M"/>
 
-  <!-- Cornice neon azzurro attorno alla targa -->
+  <!-- Blue neon frame around the plate -->
   <box at="56 107 28" size="46 1 1" color="n"/>
   <box at="56 107 22" size="46 1 1" color="n"/>
   <box at="33 107 22" size="1 1 7" color="n"/>
   <box at="79 107 22" size="1 1 7" color="n"/>
 
-  <!-- Lettere neon F ("IL NUCLEO") a quota y=107, z=23..27 -->
-  <!-- Lettera 'I' (x = 39..41) -->
+  <!-- Neon letters F ("IL NUCLEO") at y=107, z=23..27 -->
+  <!-- Letter 'I' (x = 39..41) -->
   <box at="40 107 27" size="3 1 1" color="F"/>
   <box at="40 107 24" size="1 1 3" color="F"/>
   <box at="40 107 23" size="3 1 1" color="F"/>
 
-  <!-- Lettera 'L' (x = 43..45) -->
+  <!-- Letter 'L' (x = 43..45) -->
   <box at="43 107 23" size="1 1 5" color="F"/>
   <box at="44 107 23" size="1 1 1" color="F"/>
   <box at="45 107 23" size="1 1 1" color="F"/>
 
-  <!-- Lettera 'N' (x = 49..52) -->
+  <!-- Letter 'N' (x = 49..52) -->
   <box at="49 107 23" size="1 1 5" color="F"/>
   <box at="50 107 25" size="1 1 2" color="F"/>
   <box at="51 107 24" size="1 1 2" color="F"/>
   <box at="52 107 23" size="1 1 5" color="F"/>
 
-  <!-- Lettera 'U' (x = 54..56) -->
+  <!-- Letter 'U' (x = 54..56) -->
   <box at="54 107 24" size="1 1 4" color="F"/>
   <box at="56 107 24" size="1 1 4" color="F"/>
   <box at="55 107 23" size="3 1 1" color="F"/>
 
-  <!-- Lettera 'C' (x = 58..60) -->
+  <!-- Letter 'C' (x = 58..60) -->
   <box at="59 107 27" size="3 1 1" color="F"/>
   <box at="58 107 24" size="1 1 3" color="F"/>
   <box at="59 107 23" size="3 1 1" color="F"/>
 
-  <!-- Lettera 'L' (x = 62..64) -->
+  <!-- Letter 'L' (x = 62..64) -->
   <box at="62 107 23" size="1 1 5" color="F"/>
   <box at="63 107 23" size="1 1 1" color="F"/>
   <box at="64 107 23" size="1 1 1" color="F"/>
 
-  <!-- Lettera 'E' (x = 66..68) -->
+  <!-- Letter 'E' (x = 66..68) -->
   <box at="66 107 23" size="1 1 5" color="F"/>
   <box at="67 107 27" size="1 1 1" color="F"/>
   <box at="68 107 27" size="1 1 1" color="F"/>
@@ -431,27 +431,27 @@ Animazione "pulsa" (8 frame):
   <box at="67 107 23" size="1 1 1" color="F"/>
   <box at="68 107 23" size="1 1 1" color="F"/>
 
-  <!-- Lettera 'O' (x = 70..72) -->
+  <!-- Letter 'O' (x = 70..72) -->
   <box at="70 107 24" size="1 1 3" color="F"/>
   <box at="72 107 24" size="1 1 3" color="F"/>
   <box at="71 107 27" size="3 1 1" color="F"/>
   <box at="71 107 23" size="3 1 1" color="F"/>
 
   <!-- ================================================================= -->
-  <!-- 12. APPARATI TECNICI E ANTENNE SUL TETTO (z = 33..48)             -->
+  <!-- 12. TECHNICAL EQUIPMENT AND ANTENNAS ON THE ROOF (z = 33..48)     -->
   <!-- ================================================================= -->
-  <!-- Parabola radar/uplink a Ovest (x = 20, y = 56, z = 33..42) -->
+  <!-- Radar/uplink dish to the West (x = 20, y = 56, z = 33..42) -->
   <box at="20 56 33" size="4 4 4" color="M"/>
   <cylinder at="20 56 37" size="8 8 2" color="S"/>
   <cylinder at="20 56 38" size="6 6 1" color="s"/>
   <box at="20 56 39" size="1 1 3" color="N"/>
 
-  <!-- Gruppo dissipatori di calore e griglie a Est (x = 92, y = 56) -->
+  <!-- Group of heat sinks and grilles to the East (x = 92, y = 56) -->
   <box at="92 56 33" size="6 12 3" color="M"/>
   <box at="92 56 34" size="4 10 2" color="s"/>
   <box at="92 56 36" size="2 8 1" color="n"/>
 
-  <!-- Antenna di monitoraggio con luce rossa d'ostacolo R a Nord (x=56, y=16) -->
+  <!-- Monitoring antenna with a red obstacle light R to the North (x=56, y=16) -->
   <box at="56 16 33" size="4 4 3" color="M"/>
   <box at="56 16 36" size="1 1 11" color="S"/>
   <box at="56 16 41" size="5 1 1" color="S"/>
@@ -461,9 +461,9 @@ Animazione "pulsa" (8 frame):
 </sequence>
 
 <!-- ================================================================= -->
-<!-- ANIMAZIONE CICLICA "PULSA" (8 frame)                              -->
-<!-- Scambio periodico delle celle energetiche attive e spente         -->
-<!-- sulla superficie della sfera quantica                             -->
+<!-- CYCLIC ANIMATION "PULSA" (8 frames)                               -->
+<!-- Periodic swap of the active and inactive energy cells             -->
+<!-- on the surface of the quantum sphere                              -->
 <!-- ================================================================= -->
 <animation name="pulsa" frames="8">
   <sequence>

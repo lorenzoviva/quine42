@@ -1,23 +1,23 @@
--- Il lavoro (T245b): la giornata di chi ha un mestiere, compito per compito.
--- Il kernel mette il componente `job` a ogni fase del giorno: i compiti della fase e i posti (home, square, work).
--- Qui ogni comportamento è una funzione (id, compito, stato, mestiere, pos, dt) che dice "done", "ongoing" o "failed:<motivo>".
--- Lo stato del compito in corso sta nel componente `work`; ciò che si porta addosso in `load`.
--- Camminare lo fa sys.wander: qui si sceglie solo il prossimo punto della via (`goal`).
+-- Work (T245b): the day of whoever has a trade, task by task.
+-- The kernel sets the `job` component at every phase of the day: the tasks of the phase and the places (home, square, work).
+-- Here every behaviour is a function (id, task, state, trade, pos, dt) that says "done", "ongoing" or "failed:<reason>".
+-- The state of the current task is in the `work` component; what one carries in `load`.
+-- Walking is done by sys.wander: here only the next point of the way is chosen (`goal`).
 local M = {}
 
 local ARRIVATO = 1.3
 local VICINO_SOLIDO = 1.7
 
--- Fermo, a fare quello che fa (la posa la disegna il renderer).
+-- Still, doing what it does (the pose is drawn by the renderer).
 local function ferma(id, posa)
   ecs.set(id, "activity", { kind = posa or "work", still = true })
-  -- Fermo perché lavora, non perché è bloccato: il conto del cammino riparte.
+  -- Still because it works, not because it is stuck: the walking count starts over.
   local s = ecs.get(id, "work")
   if s then s.px, s.py, s.dal = nil, nil, nil end
 end
 
--- Chi non si muove da un po': vicino alla meta è arrivato (un muro di una forma, che la via sulle caselle non vede, la tiene
--- a un passo); lontano è bloccato, e il compito fallisce con il motivo.
+-- Whoever has not moved for a while: near the goal it has arrived (a wall of a shape, which the way over tiles does not see, keeps it
+-- one step away); far away it is stuck, and the task fails with the reason.
 local VICINO_FERMO = 3
 local FERMO = 2
 local BLOCCATO = 8
@@ -36,7 +36,7 @@ end
 -- How far a way is looked for (world.path looks no farther): beyond, one walks straight.
 local MAX_WAY = 60
 
--- Un passo verso (tx, ty): la meta di sys.wander è il prossimo punto della via. Vero se è arrivato.
+-- A step towards (tx, ty): the goal of sys.wander is the next point of the way. True if it has arrived.
 -- T299: the way is for a body as large as this one; with no way (nor one near the goal) nobody pushes at the wall: the task fails at
 -- once, and the day goes on with the next one.
 local function cammina(id, p, tx, ty, solido)
@@ -57,7 +57,7 @@ local function cammina(id, p, tx, ty, solido)
   return false
 end
 
--- Dove: home, work, square (dal kernel), venture (il cantiere), tile:<codice> (la più vicina).
+-- Where: home, work, square (from the kernel), venture (the building site), tile:<code> (the nearest one).
 local function posto(m, p, dove)
   if dove == "home" or dove == "work" or dove == "square" then return m[dove] end
   if dove == "venture" then return m.venture_spot end
@@ -91,13 +91,13 @@ function B.go(id, compito, s, m, p)
   return "ongoing"
 end
 
--- Una casella `da` vicino al lavoro diventa `a` dopo `durata` di lavoro; `quante` volte. Ciò che resta da fare è il mondo stesso.
+-- A tile `from` near the work becomes `to` after `duration` of work, `count` times. What is left to do is the world itself.
 local function cambia(id, compito, s, m, p, da, a, raccolto)
   if not s.x then
     local c = m.work or p
     local t = world.find_tile(da, c.x, c.y, 8)
     if not t then
-      -- Niente da fare qui: il compito è fatto per oggi.
+      -- Nothing to do here: the task is done for today.
       return "done"
     end
     s.x, s.y = t.x, t.y
@@ -130,7 +130,7 @@ function B.gather(id, compito, s, m, p)
   return cambia(id, compito, s, m, p, compito.tile, compito.drop or compito.tile, compito.item)
 end
 
--- Fermi, nella posa: senza durata fino alla fine della fase.
+-- Still, in the pose: with no duration, until the end of the phase.
 local function resta(posa)
   return function(id, compito, s)
     ferma(id, compito.pose or posa)
@@ -156,7 +156,7 @@ function B.patrol(id, compito, s, m, p)
   return "ongoing"
 end
 
--- Il deposito del luogo (T245c): ciò che i mestieri portano e prendono, nel magazzino di questo modulo, una chiave per luogo.
+-- The store of the place (T245c): what the trades bring and take, in this module's store, one key per place.
 local function deposito_di(id)
   local m = ecs.get(id, "job")
   if not m or type(m.chunk) ~= "string" then return nil end
@@ -171,7 +171,7 @@ local function deposita(id, oggetto, n)
   return world.store_set(k, d)
 end
 
--- Toglie dal deposito fino a n, e dice quanti.
+-- Takes up to n from the store, and says how many.
 local function preleva(id, oggetto, n)
   local k = deposito_di(id)
   if not k then return 0 end
@@ -193,7 +193,7 @@ local function scarica(id, oggetto, n)
   return tolto
 end
 
--- Prima di ogni cosa da fare, il posto: per default il lavoro.
+-- Before every thing to do, the place: by default the work.
 local function al_posto(id, compito, s, m, p)
   if s.arrivato then return true end
   local dove = compito.where or "work"
@@ -216,7 +216,7 @@ local function al_posto(id, compito, s, m, p)
   return false
 end
 
--- Porta ciò che ha al deposito del luogo (o dentro la cosa, se ha una tasca): tutto in una volta.
+-- Brings what it has to the store of the place (or into the thing, if it has a pocket): all at once.
 function B.carry(id, compito, s, m, p)
   local c = ecs.get(id, "load") or {}
   if (c[compito.item] or 0) <= 0 then return "done" end
@@ -236,7 +236,7 @@ function B.carry(id, compito, s, m, p)
   return "done"
 end
 
--- Prende dal deposito del luogo.
+-- Takes from the store of the place.
 function B.take(id, compito, s, m, p)
   local qui = al_posto(id, compito, s, m, p)
   if qui == nil then return "failed:no_place" end
@@ -248,7 +248,7 @@ function B.take(id, compito, s, m, p)
   return "done"
 end
 
--- Al banco (il posto), con ciò che serve (`con`: da ciò che porta, o dal deposito), dopo `durata` di lavoro: una cosa in più.
+-- At the bench (the place), with what is needed (`with`: from what it carries, or from the store), after `duration` of work: one more thing.
 function B.produce(id, compito, s, m, p)
   local qui = al_posto(id, compito, s, m, p)
   if qui == nil then return "failed:no_place" end
@@ -270,7 +270,7 @@ function B.produce(id, compito, s, m, p)
   return "ongoing"
 end
 
--- Usa una cosa come il viandante con «Usa»: il suo on_act, con l'individuo come chi la usa.
+-- Uses a thing like the wanderer does with «Usa»: its on_act, with the individual as the user.
 function B.use(id, compito, s, m, p)
   local qui = al_posto(id, compito, s, m, p)
   if qui == nil then return "failed:nothing_to_use" end
@@ -285,9 +285,9 @@ function B.use(id, compito, s, m, p)
   return "done"
 end
 
--- Costruire (T245d): il prossimo passo dell'impresa lo dice il kernel (world.venture). Portare un materiale (dal carico, o prima
--- dal deposito del luogo, in piazza), lavorare al cantiere, mietere. Finché c'è un passo il compito continua; senza, si torna al mestiere.
--- Il lavoro lo conta il kernel guardando chi sta fermo al cantiere: qui non si scrive nessun numero.
+-- Building (T245d): the next step of the venture is told by the kernel (world.venture). Bringing a material (from the load, or first
+-- from the store of the place, in the square), working at the building site, reaping. While there is a step the task goes on; without one, back to the trade.
+-- The work is counted by the kernel by looking at who stands still at the site: no number is written here.
 function B.build(id, compito, s, m, p, dt)
   local passo = world.venture(id)
   if not passo then return "done" end
@@ -297,7 +297,7 @@ function B.build(id, compito, s, m, p, dt)
   if passo.does == "carry" then
     local c = ecs.get(id, "load") or {}
     if (c[passo.item] or 0) <= 0 then
-      -- Al deposito del luogo, in piazza.
+      -- To the store of the place, in the square.
       local t = m.square or p
       if not cammina(id, p, t.x, t.y) then return "ongoing" end
       local n = preleva(id, passo.item, 2)
@@ -316,7 +316,7 @@ function B.build(id, compito, s, m, p, dt)
     if esito == "done" then s.fatti = 0 end
     return "ongoing"
   end
-  -- Lavorare: al proprio posto attorno al cantiere, fermi nella posa.
+  -- Working: at one's own spot around the building site, still in the pose.
   if not s.expires then
     if not cammina(id, p, passo.x, passo.y) then return "ongoing" end
     s.expires = true
@@ -326,7 +326,7 @@ function B.build(id, compito, s, m, p, dt)
   return "ongoing"
 end
 
--- Il pannello del cantiere (T245d): il pulsante porta ciò che serve dalla borsa del viandante, se è vicino al cantiere.
+-- The panel of the building site (T245d): the button brings what is needed from the wanderer's bag, if it is near the site.
 function M.on_ui(user, azione)
   if azione ~= "bring" then return nil end
   local n = world.venture_bring(user)
@@ -343,7 +343,7 @@ function M.update(dt)
     local s = ecs.get(id, "work")
     if not s or s.phase ~= m.phase or s.day ~= m.day or s.venture ~= m.venture then
       ecs.set(id, "work", { phase = m.phase, day = m.day, venture = m.venture, step = 1 })
-      -- ecs.set copia: ciò che il compito scrive va nella tabella del componente, quella che si rilegge.
+      -- ecs.set copies: what the task writes goes into the component's table, the one that is read again.
       s = ecs.get(id, "work")
     end
     local compito = m.tasks and m.tasks[s.step]
@@ -356,7 +356,7 @@ function M.update(dt)
     if esito == "ongoing" and s.no_way then esito = "failed:no_way" end
     if esito == "ongoing" and s.bloccato then esito = "failed:unreachable" end
     if esito ~= "ongoing" then
-      -- Il compito dopo comincia da capo: dello stato resta solo dove si è arrivati nella giornata, e l'ultimo motivo.
+      -- The next task starts from scratch: of the state only where one got to in the day remains, and the last reason.
       ecs.set(id, "work", { phase = s.phase, day = s.day, venture = s.venture, step = s.step + 1, reason = esito ~= "done" and esito or s.reason })
     end
   end)

@@ -20,7 +20,7 @@
   <color symbol="k" hidden="True" name="la quota scelta"/>
   <color symbol="p" hidden="True" name="dove può stare una bombola"/>
   <color symbol="q" hidden="True" name="una bombola"/>
-  <!-- Lo zoccolo -->
+  <!-- The plinth -->
   <box at="10 10 0" size="14 10 1" color="G"/>
   <box at="10 10 1" size="12 8 1" color="g"/>
   <!-- Le due capsule possibili, come sagome nascoste -->

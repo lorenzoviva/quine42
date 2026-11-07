@@ -1,4 +1,4 @@
-<!-- Gatto soriano: step 8B, gemini-3.8-flash, rivisto (b-figure-flash38/gatto.v2.json, voto dell'Artista 6/10). Convertito dal JSON (lab/mjx/convert.ts): stessi voxel. -->
+<!-- Tabby cat: step 8B, gemini-3.8-flash, revised (b-figure-flash38/gatto.v2.json, the Artist's vote 6/10). Converted from the JSON (lab/mjx/convert.ts): same voxels. -->
 <sequence values="BISCTUNERKJLPQAZ" size="15 20 15" symmetry="(xy)" name="Gatto soriano">
   <color symbol="I" value="cf7832" name="pelo fulvo"/>
   <color symbol="S" value="783b18" name="striatura scura"/>

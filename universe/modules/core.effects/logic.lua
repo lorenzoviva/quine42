@@ -1,6 +1,6 @@
--- Effetti: il Concilio sceglie da un insieme chiuso, il kernel li valida, qui accadono.
--- apply(bersaglio, chi, effetto, x, y) restituisce una frase (o nil). x, y: dove accade, se non c'è un bersaglio.
--- Gli effetti hanno nomi e campi inglesi (contratto 0.2): { type = "light", radius = 4, duration = 60 }.
+-- Effects: the Council picks from a closed set, the kernel validates them, here they happen.
+-- apply(target, who, effect, x, y) returns a sentence (or nil). x, y: where it happens, if there is no target.
+-- Effects have English names and fields (contract 0.2): { type = "light", radius = 4, duration = 60 }.
 local M = {}
 
 local NEEDS = { "hunger", "thirst", "energy", "health" }
@@ -118,7 +118,7 @@ function F.push(target, user, e)
   return nil
 end
 
--- Uno stato del viandante: a cavallo, in barca, con lo zaino. Cambia velocità, peso, luce.
+-- A state of the wanderer: on horseback, in a boat, with the backpack. It changes speed, weight, light.
 function F.state(_, user, e)
   local st = ecs.get(user, "states") or {}
   st[e.name] = { speed = e.speed or 1, weight = e.weight or 0, light = e.light or 0, expires = (e.duration or 0) > 0 and (time + e.duration) or 0 }
@@ -127,7 +127,7 @@ function F.state(_, user, e)
 end
 
 function F.remove_state(_, user, e)
-  -- Lo stato si spegne (false); il kernel poi lo toglie dalla tabella.
+  -- The state goes out (false); the kernel then removes it from the table.
   local st = ecs.get(user, "states")
   if st then st[e.name] = false end
   return nil
@@ -139,7 +139,7 @@ function F.summon(target, _, e, x, y)
   return nil
 end
 
--- Se un effetto ha chi lo applica: il kernel lo chiede prima di applicarlo, e un effetto senza è un guasto (T260).
+-- Whether an effect has someone applying it: the kernel asks before applying it, and an effect without one is a fault (T260).
 function M.handles(type)
   return F[type] ~= nil
 end

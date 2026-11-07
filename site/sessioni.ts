@@ -1,4 +1,4 @@
-// site/sessioni.ts — Hub delle sessioni multigiocatore e wizard di creazione nuovo universo (T103, ADR-0095)
+// site/sessioni.ts — the hub of the multiplayer sessions and the wizard that creates a new universe (T103, ADR-0095)
 
 import type { FileMap } from '../src/kernel/types';
 import { readConfig } from '../src/kernel/universe';
