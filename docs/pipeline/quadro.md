@@ -22,7 +22,7 @@ Aggiornato il 07/11/2026, epoca 323 (claude). Crediti: vedi `stato`.
 ## Pronti e priorità
 
 0. **Decisioni autore 04/11:** D32 SemVer `X.Y.Z`. Step 32: T260, T262 → T245a → T263/T245b → T245c-f. T265 prima della beta.
-1. **In corso:** **T324 fatto** (immagini Jev: utile come filtro dei difetti visivi, non per il giudizio dell'Artista) → conflitti in `AGENTS.md`, `lab/README.md` → **T329** (integrarlo, claude medium, p1).
+1. **In corso:** nessuno. T324 (immagini Jev: utile come filtro dei difetti visivi, non per il giudizio dell'Artista) integrato via T329.
 2. **Pronti:** T310 (inglese, dopo T309); T327 (NPC coeso, claude extra); T294 (laboratori giocatori, claude p3); T295 (carte prima della Genesi, claude p3); T315 (veste futuristica, p4); T321 (Scultore su Flash, claude p4); T281 (placeInside bloccati, p5, browser); T303 (misura Scenografo, claude p5); T288 (armi/attrezzi in mano, p6, browser); T242 (rapporto aureo, p33); T88 (generazione differita crediti che avanzano, p60).
 3. **Crediti (00:25 UTC 07/11):** Claude 5h 62 % (reset 02:59 UTC), settimana 57 % (reset 12/11); Gemini 100 % (5h reset 05:20 UTC, settimana 14/11); agy 100 %; Argon fermo fino all'11/11.
 
@@ -38,5 +38,5 @@ Aggiornato il 07/11/2026, epoca 323 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **323 (claude):** T324 fatto, `integra` in conflitto → T329 in corso; T309 integrato (kernel 0.5.1) → T310 pronto.
+- **323 (claude):** T324 integrato via T329; T309 integrato (kernel 0.5.1) → T310 pronto.
 - **322 (claude):** T328 e T308b integrati (`4537848`, contratto 0.5.0, ADR-0163); sbloccati T309 e T327; T325 integrato (casi d'uso Jev, domande in D45); T324 in corso.
