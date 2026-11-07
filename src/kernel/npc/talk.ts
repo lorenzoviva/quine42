@@ -44,7 +44,7 @@ export class Talk {
         if (Math.hypot(pa.x - pb.x, pa.y - pb.y) > 2.4) continue;
         const ia: Identity = this.host.ecs.get(a, 'identity');
         const ib: Identity = this.host.ecs.get(b, 'identity');
-        if (this.host.ecs.get(a, 'activity')?.tipo === 'sleep' || this.host.ecs.get(b, 'activity')?.tipo === 'sleep') continue;
+        if (this.host.ecs.get(a, 'activity')?.kind === 'sleep' || this.host.ecs.get(b, 'activity')?.kind === 'sleep') continue;
         const rel = ia.family?.find((f) => f.name === ib.name);
         const key = [ia.name, ib.name].sort().join('|');
         if ((this.greeted.get(key) ?? -1e9) > this.host.time - (rel ? 90 : 240)) continue;

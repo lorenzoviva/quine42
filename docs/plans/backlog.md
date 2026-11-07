@@ -4944,7 +4944,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì, per la parte (1): preview su una porta libera, misure dalla console, tappeto fermo; chiudi la preview alla fine.
 - Quando è fatto: commit su `task/T331`. Nell'esito i numeri principali (ms per frame per parte, ms per programma per taglia) e la raccomandazione. Sicurezza: nessuna superficie nuova.
 
-### T332 · Chi dorme non saluta: gli incontri leggono `activity.kind` — `da fare`
+### T332 · Chi dorme non saluta: gli incontri leggono `activity.kind` — `fatto` (`05d0e02f`)
 - Pipeline: claude · sforzo medium · stima 1.5% · approvato · priorità 4
 
 - Nasce da T327: `dossier T327` (bug trovato spostando la società in `src/kernel/npc/`).
@@ -4952,3 +4952,4 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - **Cosa fare:** leggere `kind` (cercare in `src/kernel/` altri accessi a campi di componenti di prima del contratto 0.5, es. `.tipo` sui componenti, e correggerli; non `m.tipo` delle trame se è un campo del Concilio ancora accettato); un test che due individui, uno dei quali dorme, non si incontrano.
 - **Quando è fatto:** test nuovo verde, suite e typecheck verdi; kernel sale di Z.
 - Dipende da T327.
+- Esito: talk.ts:47 legge activity.kind invece di activity.tipo, così chi dorme non saluta più; non ci sono altri accessi a campi di componenti di prima del contratto 0.5 in src/ né nel Lua del seme (i .tipo rimasti sono schemi del Concilio o nodi del grafo, T310b); test nuovo tests/npc-talk.test.ts, rosso prima della correzione e verde dopo; kernel 0.5.4 (version.ts, package.json, package-lock.json, universe/universe.json); suite intera (2691 passati, 1 saltato) e typecheck verdi nei turni; nessuna verifica nel browser (il task non la chiede); sicurezza: nessuna superficie nuova.
