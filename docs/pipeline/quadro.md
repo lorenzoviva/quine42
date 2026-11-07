@@ -22,7 +22,7 @@ Aggiornato il 07/11/2026, epoca 325 (claude). Crediti: vedi `stato`.
 ## Pronti e priorità
 
 0. **Decisioni autore 04/11:** D32 SemVer `X.Y.Z`. Step 32: T260, T262 → T245a → T263/T245b → T245c-f. T265 prima della beta.
-1. **In corso:** nessuno. T324 (immagini Jev: utile come filtro dei difetti visivi, non per il giudizio dell'Artista) integrato via T329.
+1. T324 (immagini Jev: utile come filtro dei difetti visivi, non per il giudizio dell'Artista) integrato via T329.
 2. **In corso:** T281. **Pronti:** T327 (NPC coeso, claude extra); T294 (laboratori giocatori, claude p3); T295 (carte prima della Genesi, claude p3); T315 (veste futuristica, p4); T321 (Scultore su Flash, claude p4); T281 (placeInside bloccati, p5, browser); T303 (misura Scenografo, claude p5); T288 (armi/attrezzi in mano, p6, browser); T242 (rapporto aureo, p33); T88 (generazione differita crediti che avanzano, p60).
 3. **Crediti (00:25 UTC 07/11):** Claude 5h 62 % (reset 02:59 UTC), settimana 57 % (reset 12/11); Gemini 100 % (5h reset 05:20 UTC, settimana 14/11); agy 100 %; Argon fermo fino all'11/11.
 
