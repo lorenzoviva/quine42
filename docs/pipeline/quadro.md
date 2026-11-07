@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 07/11/2026, epoca 329 (claude). Crediti: vedi `stato`.
+Aggiornato il 07/11/2026, epoca 331 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -23,8 +23,8 @@ Aggiornato il 07/11/2026, epoca 329 (claude). Crediti: vedi `stato`.
 
 0. **Decisioni autore 04/11:** D32 SemVer `X.Y.Z`. Step 32: T260, T262 → T245a → T263/T245b → T245c-f. T265 prima della beta.
 1. T324 (immagini Jev: utile come filtro dei difetti visivi, non per il giudizio dell'Artista) integrato via T329.
-2. **Pronti:** T333, T334 (nodi MJ che mancano), T331 (misura frame/generazione), T88. Da approvare: T310b. Bloccati da T333/T334: T335-T339 (edifici a sottoblocchi, taglia, parti coerenti).
-3. **Crediti (15:35 UTC 07/11):** Claude 5h 16 % residuo (reset 18:00 UTC), settimana 34 % (reset 12/11 16:00); Gemini e agy 100 %; Argon fermo fino all'11/11.
+2. **Nodi MJ:** **T333 integrato** (`<in>`/`<out>`, regole da file, `<import>`, ADR-0171, kernel 0.5.7; lo Scultore non lo conosce ancora); T334 in corso. **Pronti:** T335, T296, T331, T88. Da approvare: T310b. Bloccati: T336-T339.
+3. **Crediti (18:13 UTC 07/11):** Claude 5h 97 % (reset 22:59 UTC), settimana 33 % (reset 12/11 16:00); Gemini e agy 100 %; Argon fermo fino all'11/11.
 
 ## Attese dall'autore
 
@@ -38,5 +38,5 @@ Aggiornato il 07/11/2026, epoca 329 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **330-331 (gemini, claude):** T333 integrato (ADR-0171, kernel 0.5.7); T334 in corso.
 - **328-329 (claude):** T294 integrato (ADR-0168 → 0169); T295 integrato (ADR-0169 → 0170). Pianificati T338, T339 (richiesta autore 14:40).
-- **327 (claude):** T332 integrato (kernel 0.5.4); T289 integrato (D47 aperta); T292 integrato (ADR-0168); in corso T294. Pianificati T333-T337 (nodi MJ che mancano, edifici a sottoblocchi; richiesta dell autore).
