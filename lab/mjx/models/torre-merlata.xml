@@ -1,0 +1,30 @@
+<!-- Torre merlata (T333): un programma fatto di pezzi in altri file di lab/mjx/models. La cima viene da merli.xml (<import>), la porta
+     da una regola scritta in torre-porta.txt (file="torre-porta": in, una riga "->", out), le finestre da una regola con i figli <in>
+     e <out>. Cambiare merli.xml cambia anche questa torre. -->
+<sequence values="BSGMK" size="13 13 18" ground="G" symmetry="(xy)" name="Torre merlata">
+  <color symbol="S" value="8f8a7e" name="pietra"/>
+  <color symbol="G" value="5d8a3c" name="prato"/>
+  <color symbol="K" value="2a2622" name="ombra della finestra"/>
+  <!-- Il fusto, cavo dentro. -->
+  <box at="6 6 1" size="7 7 13" color="S"/>
+  <box at="6 6 1" size="5 5 13" color="B"/>
+  <!-- La cima: il sottoblocco dei merli. -->
+  <import file="merli"/>
+  <!-- La porta a terra, da un file di regole. -->
+  <one steps="1"><rule file="torre-porta"/></one>
+  <!-- Le finestre: tre strati di muro con il vuoto ai due lati, quello in mezzo si apre. -->
+  <one steps="4">
+    <in>
+      B/S/B
+      B/S/B
+      B/S/B
+      B/S/B
+    </in>
+    <out>
+      */*/*
+      */K/*
+      */K/*
+      */*/*
+    </out>
+  </one>
+</sequence>

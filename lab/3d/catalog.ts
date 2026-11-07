@@ -2,6 +2,7 @@
 // the earlier sessions) and a few of MarkovJunior's own 3D models, with the part each plays in the world.
 
 import type { Vec3 } from '../../src/mj/engine';
+import { mjxIncludes } from '../../src/mj/model';
 import { OFFICIAL } from '../mjx/official';
 
 export type Role = 'player' | 'npc' | 'animal' | 'tree' | 'plant' | 'rock' | 'prop' | 'structure' | 'official' | 'handmade';
@@ -25,9 +26,22 @@ export interface Entry {
   trial?: boolean;
   /** Written by Human in the editor */
   handmade?: boolean;
+  /** The files of lab/mjx/models it reads (`<import>`, rule files; T333). */
+  files?: Record<string, string>;
 }
 
 const files = import.meta.glob('../mjx/models/*.xml', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
+const ruleFiles = import.meta.glob('../mjx/models/*.txt', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
+
+/** The lab's models/ (T333, ADR-0171): what `<import file>` and the rule files of a program written in the lab may read, by name there. */
+export const LAB_FILES: Readonly<Record<string, string>> = Object.fromEntries(Object.entries({ ...files, ...ruleFiles }).map(([k, v]) => [k.replace(/^.*\//, ''), v]));
+/** The files of the lab's models/ a program reads, imports of imports too. */
+export const labIncludes = (xml: string): Record<string, string> => mjxIncludes(xml, (f) => LAB_FILES[f]);
+/** `files` for compileMjx, only if the program reads any. */
+export const withIncludes = (xml: string): { files?: Record<string, string> } => {
+  const inc = labIncludes(xml);
+  return Object.keys(inc).length ? { files: inc } : {};
+};
 
 const MODELS: Array<[string, string, Role, number?]> = [
   ['viandante', 'Viandante (a mano)', 'player'],
@@ -59,6 +73,8 @@ const MODELS: Array<[string, string, Role, number?]> = [
   ['pozzo', 'Pozzo', 'structure', 8],
   ['fontana', 'Fontana', 'structure', 8],
   ['torre-di-guardia', 'Torre di guardia', 'structure', 8],
+  ['torre-merlata', 'Torre merlata (include merli.xml e torre-porta.txt)', 'structure', 8],
+  ['merli', 'Merli (il sottoblocco della torre merlata)', 'structure', 8],
   ['corona-magia', 'Torre della magia (corona)', 'structure', 8],
   ['corona-persone', 'Studio dei personaggi (corona)', 'structure', 8],
   ['corona-cose', 'Laboratorio delle cose (corona)', 'structure', 8],
@@ -95,7 +111,7 @@ const sourceOf = (xml: string) => /^\s*<!--\s*([\s\S]*?)-->/.exec(xml)?.[1].repl
 export const CATALOG: Entry[] = [
   ...MODELS.map(([id, name, role, vpt]) => {
     const xml = files[`../mjx/models/${id}.xml`];
-    return { id, name, role, xml, vpt: vpt ?? 20, source: sourceOf(xml), ...(id === 'fiore' ? { grows: true } : {}) };
+    return { id, name, role, xml, vpt: vpt ?? 20, source: sourceOf(xml), ...(id === 'fiore' ? { grows: true } : {}), ...withIncludes(xml) };
   }),
   ...['Growth', 'MazeGrowth', 'NoDeadEnds', 'OpenCave3D', 'StrangeDungeon', 'OddScale3D', 'Hills', 'MazeTrail']
     .map((n) => OFFICIAL.find((o) => o.name === n)!)

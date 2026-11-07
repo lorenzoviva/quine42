@@ -4958,7 +4958,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Dipende da T327.
 - Esito: talk.ts:47 legge activity.kind invece di activity.tipo, così chi dorme non saluta più; non ci sono altri accessi a campi di componenti di prima del contratto 0.5 in src/ né nel Lua del seme (i .tipo rimasti sono schemi del Concilio o nodi del grafo, T310b); test nuovo tests/npc-talk.test.ts, rosso prima della correzione e verde dopo; kernel 0.5.4 (version.ts, package.json, package-lock.json, universe/universe.json); suite intera (2691 passati, 1 saltato) e typecheck verdi nei turni; nessuna verifica nel browser (il task non la chiede); sicurezza: nessuna superficie nuova.
 
-### T333 · MarkovJunior: `<in>` e `<out>` come figli delle regole, e un programma che carica un altro file — `da fare`
+### T333 · MarkovJunior: `<in>` e `<out>` come figli delle regole, e un programma che carica un altro file — `fatto` (`4915a5a3`)
 - Pipeline: claude · sforzo high · stima 5% · approvato · priorità 2
 - Step: 30
 - Contesto: l'autore in chat (07/11, epoca 327, testo in `docs/userchats/to-do-2026-11-07.md`, punto 2): i pattern lunghi negli attributi sono difficili da scrivere e sostituire; vuole decomporre le strutture complesse in sottoblocchi in file a parte e ricomporli (con MarkovJunior o con `wfc`, che arriva con un task a parte). Oggi le regole da file (`file`, `fin`, `fout`) non ci sono (`lab/banco/pattern.md` §12).
@@ -4966,6 +4966,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: figli e attributi danno lo stesso esito voxel per voxel; include, include mancante, ciclo, profondità; cache invalidata.
 - Browser: sì, l'editor del laboratorio con un modello che ne include un altro.
 - Quando è fatto: commit su `task/T333`; kernel sale di Z (nessun programma esistente cambia). Sicurezza: il caricamento di file è una superficie (percorsi): dillo nell'esito.
+- Esito: `<in>`/`<out>` figli delle regole (stessa sintassi degli attributi, invariati; i due insieme sono un errore), regole da file di testo (`fin`/`fout`/`file`, `models/<nome>.txt`), `<import file>` da `models/` per nome semplice, con tetti su profondità, numero e caratteri e i cicli come errore; la cache delle forme conta i file inclusi; il validatore controlla gli include e i `.txt`; editor del laboratorio con evidenziazione e la torre merlata come modello di prova; ADR-0171, kernel 0.5.7; motore invariato. Sicurezza: superficie nuova, il caricamento di file (percorsi): il compilatore non legge il disco, solo nomi semplici dentro `models/`, con i tetti. Non fatto: lo Scultore non conosce ancora `<import>` (T338/T339). Non provato: un include dentro un universo vero nel gioco.
 
 ### T334 · MarkovJunior: `field`, `temperature` e `observe` nel motore — `da fare`
 - Pipeline: claude · sforzo extra · stima 7% · approvato · priorità 3

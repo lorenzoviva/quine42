@@ -11,7 +11,7 @@ import type { SoundPurpose } from '../mj/sound';
 import { boxOf, classOf, CLASSES, type AssetClass } from '../mj/classes';
 import { Mj3Error, type Grid3, type PaletteEntry, type Vec3 } from '../mj/engine';
 import { colorTable, floors, footprint, surfaces, type Levels, type VoxelGrid } from '../mj/mesh';
-import { compileMjx, type MjxClip } from '../mj/model';
+import { compileMjx, mjxIncludes, type MjxClip } from '../mj/model';
 import { hexColor } from '../mj/palette';
 import { act, FORM_LIMITS, MAX_FORM_TIME, MAX_FORM_XML, runMjx } from '../mj/run';
 import { hashStr } from './rng';
@@ -110,6 +110,8 @@ export interface FormRequest {
   model?: string;
   /** Voxels under the ground, for a program that marks it (`soil`, ADR-0135) and only then: the others run and are kept as ever. */
   base?: number;
+  /** The files of models/ the program reads (`<import>`, rule files; T333, ADR-0171), only if it reads any. */
+  files?: Record<string, string>;
 }
 
 /** How long a model's program may run, unless its entry in the index says otherwise. */
@@ -500,9 +502,11 @@ export const FORM_CACHE_BYTES = 256 * 1024 * 1024;
  * are never taken for one, the seed, the box and the tint. The model's id, its density, `rig` and `sway` do not change the voxels; `tempo`
  * only says how long to wait for them, and what did not finish in time is not kept. The head is JSON, so where it ends is not in doubt.
  * `base` only where it is said (ADR-0135): the key of every other program stays what it was, and what is kept under it stays good.
+ * The files a program reads are part of it (T333): changing one changes the key of whoever reads it; a program that reads none keeps its key.
  */
 export function formKey(q: FormRequest): string {
-  return JSON.stringify([String(q.seed), q.size?.map(String) ?? null, q.tint?.symbol ?? null, q.tint?.color ?? null, ...(q.base ? [String(q.base)] : [])]) + q.xml;
+  const files = q.files && Object.keys(q.files).length ? JSON.stringify(Object.entries(q.files).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))) : '';
+  return JSON.stringify([String(q.seed), q.size?.map(String) ?? null, q.tint?.symbol ?? null, q.tint?.color ?? null, ...(q.base ? [String(q.base)] : [])]) + q.xml + files;
 }
 
 /** Results somewhere slower than memory, under a `formKey`: only the tests have one (`tests/setup/forms-disk.ts`). */
@@ -601,7 +605,7 @@ export class InlineRunner implements FormRunner {
 /** The pure part of running a form (the browser's worker does the same, then makes meshes). */
 export function runForm(q: FormRequest): FormResult & { model: ReturnType<typeof compileMjx>; finished: boolean } {
   if (q.xml.length > MAX_FORM_XML) throw new Mj3Error(`programma troppo lungo (max ${MAX_FORM_XML} caratteri)`);
-  const m = compileMjx(q.xml, { ...(q.size ? { size: q.size } : {}), ...(q.base ? { base: q.base } : {}) });
+  const m = compileMjx(q.xml, { ...(q.size ? { size: q.size } : {}), ...(q.base ? { base: q.base } : {}), ...(q.files ? { files: q.files, ...(q.model ? { self: q.model } : {}) } : {}) });
   if (q.tint && m.program.palette[q.tint.symbol]) m.program.palette[q.tint.symbol] = { ...m.program.palette[q.tint.symbol], color: q.tint.color };
   const r = runMjx(m, q.seed, { deadline: Math.min(q.tempo ?? MODEL_TIME, MAX_FORM_TIME), limits: FORM_LIMITS });
   const g = r.grid;
@@ -619,8 +623,10 @@ export class Forms {
   private forms = new Map<string, Form>();
   private library: Record<string, ModelInfo> = {};
   private files: FileMap = {};
-  /** Hash of each program's text: a form is of a program as it is written now. */
+  /** Hash of each program's text and of the files it reads: a form is of a program as it is written now. */
   private hashes = new Map<string, number>();
+  /** The files of models/ each program reads (T333), gathered once per load. */
+  private includes = new Map<string, Record<string, string>>();
   /** Forms whose meshes were asked for again and have not arrived. */
   private remaking = new Set<Form>();
   /** The run of each pending form: it ends when the form is ready or has failed (`settled`). */
@@ -635,6 +641,7 @@ export class Forms {
   load(files: FileMap): void {
     this.files = files;
     this.hashes.clear();
+    this.includes.clear();
     try {
       // The class and size of a model as the contract 0.1 wrote them are read as the internal ones (T307a), and so are the fields of 0.3
       // (`classe`, `taglia`, T308a): the values first, their repair reads the fields of before.
@@ -652,6 +659,19 @@ export class Forms {
       if (m) out[m[1]] = this.library[m[1]] ?? { class: 'object' };
     }
     return out;
+  }
+
+  /** A file of models/ by its name there (`torre.xml`, `porta.txt`). */
+  file(name: string): string | undefined {
+    const text = this.files[`${MODELS_DIR}${name}`];
+    return typeof text === 'string' ? text : undefined;
+  }
+
+  /** The files of models/ a program reads (`<import>`, rule files), with their text: none for almost every program. */
+  includesOf(model: string): Record<string, string> {
+    let inc = this.includes.get(model);
+    if (!inc) this.includes.set(model, (inc = mjxIncludes(this.files[`${MODELS_DIR}${model}.xml`] ?? '', (f) => this.file(f))));
+    return inc;
   }
 
   info(id: string): ModelInfo | undefined {
@@ -716,6 +736,7 @@ export class Forms {
       model,
       ...(info?.time ? { tempo: info.time } : {}),
       ...(under && /\s(?:soil|suolo)="/.test(rootTag(xml)) ? { base: under } : {}),
+      ...(Object.keys(this.includesOf(model)).length ? { files: this.includesOf(model) } : {}),
     };
   }
 
@@ -725,7 +746,10 @@ export class Forms {
     if (!xml) return undefined;
     const info = this.library[model];
     let h = this.hashes.get(model);
-    if (h === undefined) this.hashes.set(model, (h = hashStr(xml)));
+    if (h === undefined) {
+      const inc = this.includesOf(model);
+      this.hashes.set(model, (h = hashStr(Object.keys(inc).length ? xml + JSON.stringify(Object.entries(inc).sort(([a], [b]) => (a < b ? -1 : 1))) : xml)));
+    }
     const key = `${model}#${seed}#${info?.tint && tint ? tint : ''}#${h}`;
     let f = this.forms.get(key);
     if (f) return f;
@@ -822,7 +846,8 @@ export class Forms {
     if (!xml) return undefined;
     const info = this.library[model];
     const size = sizeFor(xml, this.classOf(model), info?.size, cellarOf(info) * vptOf(info));
-    return compileMjx(xml, size ? { size } : {});
+    const files = this.includesOf(model);
+    return compileMjx(xml, { ...(size ? { size } : {}), ...(Object.keys(files).length ? { files, self: model } : {}) });
   }
 }
 

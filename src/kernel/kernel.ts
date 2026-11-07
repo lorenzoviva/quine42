@@ -701,6 +701,7 @@ export class Kernel {
     k.validator = new Validator(k.sandbox);
     k.validator.modelTime = (id) => k.forms.info(id)?.time;
     k.validator.modelBox = (id) => k.forms.structureBox(id);
+    k.validator.modelFile = (name) => k.forms.file(name);
     k.council = new Council(opts.ai, () => ({ files: k.files, palette: k.palette, catalog: k.catalog(), graph: () => k.graph() }));
     k.council.onFeed = (e) => {
       k.archive.onFeed(e, (x) => k.pathForFeed(x));

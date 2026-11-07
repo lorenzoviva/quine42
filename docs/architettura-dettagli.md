@@ -722,6 +722,19 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   base, `<animation>` e `<action>` (regole sul modello finito: la porta si apre); il front-end ripara le forme
   sbagliate dagli agenti. Il codice è in `src/mj/`; il laboratorio (`lab/`, `lab/README.md`) serve ad analizzare e
   correggere i programmi che il Concilio non riesce a scrivere (sandbox 3D `/lab/3d/`, sezioni, foto, prove con Gemini).
+- **Pattern nei figli, regole da file, programmi inclusi** (ADR-0171, T333): un lato di una regola si scrive come attributo
+  (`in="…"`) oppure come testo di un figlio `<in>`/`<out>` (stessa sintassi, gli strati anche su righe diverse, una `/` può
+  chiudere una riga, `#` è una nota; i due insieme sono un errore), oppure si legge da un file di testo di `models/`
+  (`fin`, `fout`; `file` con in, una riga `->`, out). `<import file="x"/>` esegue lì il programma di `models/x.xml` sulle sue
+  lettere (ne vengono lettere, colori e unioni, quelli di chi include vincono; non la scatola, `origin`, `ground`, `soil`,
+  suono, animazioni, azioni). Il compilatore (`src/mj/model.ts`) non legge il disco: `compileMjx(xml, { files, self })` riceve i
+  testi per nome semplice (`MJX_FILE_RE`), raccolti da `mjxIncludes(xml, read)`: `Forms.includesOf` dai file dell'universo, il
+  validatore da `Validator.modelFile`, il laboratorio da `lab/mjx/models/` (`LAB_FILES`, `labIncludes`). Tetti: 6 inclusioni una
+  dentro l'altra, 64 per programma, un milione di caratteri letti; i cicli e i file che mancano sono errori col file e la riga.
+  L'inclusione avviene nella compilazione: il motore riceve gli stessi nodi e non cambia. `FormRequest.files` porta i file al
+  worker, `formKey` e l'hash di `Forms` li contano: cambiare un incluso cambia la forma di chi lo include, un programma che non
+  include nulla tiene la chiave. Il validatore controlla anche i `.txt` di `models/` (`ruleFileErrors`). Nel laboratorio il
+  modello di prova è la torre merlata (`torre-merlata.xml` + `merli.xml` + `torre-porta.txt`).
 - **Modelli** (ADR-0041): ogni cosa ha un programma della libreria `models/` (`appearance.model`, `ItemDef.model`,
   `TerrainDef.model`; senza, il generico della sua classe; gli oggetti senza modello il generico `oggetto` nel loro
   colore); un'istanza è un seme (pochi per tipo). Densità: 20 voxel per casella, o la `vpt` della voce in `models/index.json`

@@ -7,7 +7,7 @@ import { makeRenderer } from '../../src/render/gpu';
 import type { Grid3 } from '../../src/mj/engine';
 import { compileMjx, type MjxModel } from '../../src/mj/model';
 import { act, clipFrames } from '../../src/mj/run';
-import { byId, CATALOG, GROUPS, type Entry } from './catalog';
+import { byId, CATALOG, GROUPS, withIncludes, type Entry } from './catalog';
 import { floors, footprint, meshVoxels, type MeshData } from '../../src/mj/mesh';
 import type { BuildRequest, BuildResponse, Built } from './worker';
 import { makeLand, plan, type Land } from './world';
@@ -139,7 +139,7 @@ function asset(e: Entry, seed: number, xml = e.xml): Promise<Asset | string> {
   let p = assets.get(key);
   if (!p) {
     p = pool
-      .build({ xml, seed, vpt: e.vpt, size: e.size, steps: e.steps, sway: sways(e), rig: isFigure(e), growth: e.grows ? 48 : 0 })
+      .build({ xml, seed, vpt: e.vpt, size: e.size, steps: e.steps, sway: sways(e), rig: isFigure(e), growth: e.grows ? 48 : 0, ...withIncludes(xml) })
       .then((r) => {
         if (!r.ok) return r.error;
         const a: Asset = {
@@ -492,7 +492,7 @@ async function buildWorld(seed: number) {
 
 function modelOf(e: Entry): MjxModel {
   let m = models.get(e.id);
-  if (!m) models.set(e.id, (m = compileMjx(e.xml, e.size ? { size: e.size } : {})));
+  if (!m) models.set(e.id, (m = compileMjx(e.xml, { ...(e.size ? { size: e.size } : {}), ...withIncludes(e.xml) })));
   return m;
 }
 

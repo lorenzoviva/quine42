@@ -1,0 +1,12 @@
+# La porta della torre (T333): una regola in un file di testo, letta con <rule file="torre-porta"/>.
+# Prima «in», poi una riga con "->" sola, poi «out». Gli strati dall'alto, uno per riga; in uno strato le righe
+# separate da "/": fuori, il muro, dentro. Sotto c'è il prato: la porta si apre a terra, l'architrave resta.
+B/S/B
+B/S/B
+B/S/B
+G/G/G
+->
+*/*/*
+*/B/*
+*/B/*
+*/*/*

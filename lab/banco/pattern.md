@@ -219,8 +219,10 @@ spariscono: «delete fine scaffold»), `River` (`W`, `R` → `U` → `B`).
 - `wfc` a tessere (`ModernHouse`, `SeaVilla`, `Apartemazements`, `PillarsOfEternity`, `Partitioning`, `Surface`, `Escher*`): è il cuore di
   quei modelli (partizione a tessere `Partition`, scale `Stairs`/`OrientedStairs`). Qui si sostituisce con il reticolo e la crescita (1-3).
 - `field` e `temperature` (`Keys`, `SoftPath`, `Division`, `Dwarves`), `observe` (`StairsPath`, `RegularPath`), `convchain` (`ChainDungeon`),
-  regole da file (`fin`, `fout`, `file`: `CarmaTower`, `DungeonGrowth`), `map` frazionaria. Non si esprimono: un corridoio «verso» un bersaglio
-  si fa con `path`, non con un campo.
+  `map` frazionaria. Non si esprimono: un corridoio «verso» un bersaglio si fa con `path`, non con un campo.
+- Le regole da file ci sono dal T333 (ADR-0171), ma di testo, non immagini: `fin`, `fout` e `file` leggono `models/<nome>.txt`
+  (`CarmaTower`, `DungeonGrowth` vanno riscritti a lettere); un pattern lungo si scrive anche nei figli `<in>`/`<out>`, su più
+  righe, e un sottoblocco in un file a parte si esegue con `<import file="…"/>`.
 - Pattern più grandi di 1728 celle: una colonna da 96 strati sì, un profilo 18×96 sì (1728), una campata intera 31×31×anything no.
 
 ### 13. Regole corte con `steps` al posto dei pattern lunghi (T182)

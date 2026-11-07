@@ -12,6 +12,8 @@ export interface EditorBuildRequest {
   vpt: number;
   size?: Vec3;
   steps?: number;
+  /** The files of models/ the program reads (`<import>`, rule files; T333). */
+  files?: Record<string, string>;
 }
 
 export interface EditorBuildSuccess {
@@ -62,7 +64,7 @@ const buffers = (m: MeshData) => [
 self.onmessage = (ev: MessageEvent<EditorBuildRequest>) => {
   const q = ev.data;
   try {
-    const m = compileMjx(q.xml, q.size ? { size: q.size } : {});
+    const m = compileMjx(q.xml, { ...(q.size ? { size: q.size } : {}), ...(q.files ? { files: q.files } : {}) });
     const r = runMjx(m, q.seed, {
       deadline: 20_000,
       snapshots: 60,
