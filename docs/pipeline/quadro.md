@@ -23,7 +23,7 @@ Aggiornato il 07/11/2026, epoca 331 (claude). Crediti: vedi `stato`.
 
 0. **Decisioni autore 04/11:** D32 SemVer `X.Y.Z`. Step 32: T260, T262 → T245a → T263/T245b → T245c-f. T265 prima della beta.
 1. T324 (immagini Jev: utile come filtro dei difetti visivi, non per il giudizio dell'Artista) integrato via T329.
-2. **Nodi MJ:** **T333 integrato** (`<in>`/`<out>`, regole da file, `<import>`, ADR-0171, kernel 0.5.7; lo Scultore non lo conosce ancora); T334 in corso. **Pronti:** T335, T296, T331, T88. Da approvare: T310b. Bloccati: T336-T339.
+2. **Nodi MJ:** **T333 integrato** (`<in>`/`<out>`, regole da file, `<import>`, ADR-0171, kernel 0.5.7; lo Scultore non lo conosce ancora); T334 fatto (field/temperature/observe/search) ma in conflitto con T333 → **T340** lo integra (ADR-0172, kernel 0.5.8). T296 in corso. **Pronti:** T340, T335, T331, T88. Da approvare: T310b. Bloccati: T336-T339.
 3. **Crediti (18:13 UTC 07/11):** Claude 5h 97 % (reset 22:59 UTC), settimana 33 % (reset 12/11 16:00); Gemini e agy 100 %; Argon fermo fino all'11/11.
 
 ## Attese dall'autore
@@ -38,5 +38,5 @@ Aggiornato il 07/11/2026, epoca 331 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **330-331 (gemini, claude):** T333 integrato (ADR-0171, kernel 0.5.7); T334 in corso.
+- **330-331 (gemini, claude):** T333 integrato (ADR-0171, kernel 0.5.7); T334 in conflitto → T340.
 - **328-329 (claude):** T294 integrato (ADR-0168 → 0169); T295 integrato (ADR-0169 → 0170). Pianificati T338, T339 (richiesta autore 14:40).
