@@ -382,7 +382,7 @@ Modello di una voce:
 - Contromisura: `owns` (il master, mai anonimo; il token del mondo è rifiutato), `readBringRefs` (il client dice solo universo e modello, o l'id di una carta fatta a mano: al più 24), `choiceOf` (la scelta aperta in `universe.json`, nessuna Genesi dietro un universo dal seme, nessun mondo acceso né generazione), la stessa radice (`rootsOf`, solo da `server/git.ts`) e lo stesso contratto letto sul disco, `ProgramChecker` (in produzione un processo per controllo, come le carte fatte a mano: V-030), `cleanBroughtName` (al più 120 caratteri, `cleanText` e `metaBreak`), `broughtEntry` (la voce rifatta campo per campo; timbro e catena con nomi semplici, al più 32 anelli), tutto o niente in un commit del kernel dei soli `models/`; le carte fatte a mano solo con i laboratori aperti; con gli account un ritmo per master (`BRINGS`), e nel server di produzione le rotte sotto `HEAVY`
 - Task: T295
 - Test: `tests/sicurezza/carte-portate.test.ts`, `tests/bring.test.ts`
-- Esito: chiusa da T295 (ADR-0169), 07/11/2026, branch `task/T295`.
+- Esito: chiusa da T295 (ADR-0170), 07/11/2026, branch `task/T295`.
 
 ## Le prove dell'autore
 

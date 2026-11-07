@@ -133,7 +133,7 @@ export class ModelDirector {
   }
 
   /**
-   * A model that came with the cards (T295, ADR-0169) for a request of the same class and the same name (the Narrator was told their names):
+   * A model that came with the cards (T295, ADR-0170) for a request of the same class and the same name (the Narrator was told their names):
    * its program and its entry under the request's id, with its card (the same card, the same chain), no call. Undefined if none fits.
    */
   reused(req: SculptRequest): { xml: string; info: ModelInfo } | undefined {

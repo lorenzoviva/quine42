@@ -41,7 +41,7 @@ export interface KernelRange {
 
 export const showContract = (c: Contract): string => `${c.major}.${c.minor}`;
 export const contractOf = (v: KernelVersion): Contract => ({ major: v.major, minor: v.minor });
-/** This kernel's contract, `X.Y`: the root of the universes born from its seed (T295, ADR-0169), the check of the cards that cross universes. */
+/** This kernel's contract, `X.Y`: the root of the universes born from its seed (T295, ADR-0170), the check of the cards that cross universes. */
 export const KERNEL_CONTRACT = showContract(contractOf(parseVersion(KERNEL_VERSION)!));
 /** Negative, zero or positive, as a comes before, is or comes after b. */
 export const compareContracts = (a: Contract, b: Contract): number => a.major - b.major || a.minor - b.minor;

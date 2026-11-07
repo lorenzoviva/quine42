@@ -1,4 +1,4 @@
-# ADR-0169 — Le carte portate prima della Genesi: la radice del contratto, la scelta aperta, ciò che una carta diventa dove entra
+# ADR-0170 — Le carte portate prima della Genesi: la radice del contratto, la scelta aperta, ciò che una carta diventa dove entra
 
 Data: 2026-11-07 · Stato: accettato (task T295 del backlog, step 41) · Riferimenti: testo dell'autore in `docs/userchats/to-do-2026-11-05.md` («A regime: come usare le carte create a mano»), decisione D39 A (05/11), ADR-0056 (le carte), ADR-0068 (il clone), ADR-0084 (l'eredità dei cloni), ADR-0102 (chi chiede e cosa può), ADR-0103 (git solo da `server/git.ts`), ADR-0104 (i saldi fuori dall'universo), ADR-0109 (ciò che esce è un elenco), ADR-0110 (i mondi senza segreti), ADR-0112 (il server di produzione), ADR-0133 (le regolazioni si fissano entrando), ADR-0136 (la versione del kernel), ADR-0143 (la generazione differita), ADR-0160 (le strutture per taglia), ADR-0161 (le carte fatte a mano)
 

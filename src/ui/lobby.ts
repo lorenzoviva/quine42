@@ -29,7 +29,7 @@ export interface LobbyOptions {
   alone?: boolean;
   onRecharge?: (amount: number) => Promise<{ ok: boolean; url?: string; motivo?: string }>;
   /**
-   * The master of a universe that may still bring cards (a clone before its first entry, T295, ADR-0169): what may come, and how it comes
+   * The master of a universe that may still bring cards (a clone before its first entry, T295, ADR-0170): what may come, and how it comes
    * (the store, on the disk: the world reads it when it starts). The cards come with «Entra nel mondo», before entering.
    */
   cards?: { load: () => Promise<KinView | undefined>; bring: (refs: BringRef[]) => Promise<BringAnswer>; has: (id: string) => boolean };

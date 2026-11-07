@@ -1,4 +1,4 @@
-// The cards a master brings into a universe before it starts (T295, ADR-0169), as the store serves them:
+// The cards a master brings into a universe before it starts (T295, ADR-0170), as the store serves them:
 //
 //   GET  /api/universe/<name>/kin     → { ok, open, reason?, choice?, contract, kin, handmade }   what may come, and whether it may now
 //   POST /api/universe/<name>/bring   { cards: [{ universe, model } | { handmade }] }             → { ok, head, brought, changes }

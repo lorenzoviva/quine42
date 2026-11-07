@@ -194,7 +194,7 @@ export function toPalette(terrains: RawTerrain[]): Record<string, TerrainDef> {
 export type LayoutCheck = (id: string, def: EnvironmentDef, palette: Record<string, TerrainDef>) => string[];
 
 /**
- * What came with the cards before the Genesis (T295, ADR-0169), as its agents are told: the Artist every model and sound by name and class
+ * What came with the cards before the Genesis (T295, ADR-0170), as its agents are told: the Artist every model and sound by name and class
  * (they stay as they are: the guide welcomes them), the Cartographer the music by the environments it plays in, the Narrator the figures
  * and things it may cast by name. Never the universes they come from: inside the world nothing comes from elsewhere.
  */

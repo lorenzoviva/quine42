@@ -1,4 +1,4 @@
-// Bringing cards into a universe before it starts (T295, ADR-0169). A universe born from the seed may take, before its Genesis, models
+// Bringing cards into a universe before it starts (T295, ADR-0170). A universe born from the seed may take, before its Genesis, models
 // and sounds that are cards elsewhere: of the universes that have its root (the first commit, the same for every universe born from the
 // seed of one contract, `server/git.ts`) and the handmade cards (ADR-0161); a clone may, before its first wanderer enters. Then the choice
 // closes. Here what needs no disk: which entries of a universe are cards one may bring, the entry a card becomes where it enters (what the

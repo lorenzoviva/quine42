@@ -19,7 +19,7 @@
 //   GET  /api/universe/<name>/kin             → { open, kin, handmade… }      the cards the master may bring before the start (T295, server/bring.ts)
 //   POST /api/universe/<name>/bring           { cards }                       → { head, brought, changes }
 //
-// A universe born here starts from the root of its contract (T295, ADR-0169, `plantRoot`): every universe born from the seed of that
+// A universe born here starts from the root of its contract (T295, ADR-0170, `plantRoot`): every universe born from the seed of that
 // contract has it, so they are kin. A return to the root is refused: it holds no file.
 //
 // Who may do what (T120, ADR-0102, server/access.ts): a game alone is of whoever is on this machine, a multiplayer game of its master and
@@ -433,7 +433,7 @@ export function universeHandler(baseDir: string, opts: UniverseStoreOptions = {}
           sealLedger(baseDir, name);
           await fs.mkdir(root, { recursive: true });
           await git(root, ['init', '-q']);
-          // From the root of this kernel's contract, the same for every universe born here (T295, ADR-0169); the files come in the commit after.
+          // From the root of this kernel's contract, the same for every universe born here (T295, ADR-0170); the files come in the commit after.
           await plantRoot(root, KERNEL_CONTRACT, AUTHORS.kernel);
           const born = made && 'files' in made ? made.files : {};
           // A universe just born may bring cards, until its Genesis or its first entry: the kernel closes the choice.

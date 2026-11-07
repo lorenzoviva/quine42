@@ -1,4 +1,4 @@
-# Catture della verifica nel browser di T295 (ADR-0169)
+# Catture della verifica nel browser di T295 (ADR-0170)
 
 Le carte portate prima della Genesi. Build di produzione (`npm run build`), `npx vite preview` su una porta libera, `?offline`, Chrome con la
 scheda di Claude in Chrome. Gli spostamenti del viandante sono fatti dalla console (`docs/architettura-dettagli.md#convalida-browser`).

@@ -1,4 +1,4 @@
-// V-033 (T295, ADR-0169): the cards a master brings into a universe before it starts. They come from universes of other masters and from
+// V-033 (T295, ADR-0170): the cards a master brings into a universe before it starts. They come from universes of other masters and from
 // the archive of other players: only the master of the universe brings them (never a player, an anonymous account or the world), what a
 // card is the server reads from the disk (the client names only where), a hostile card does not come (a program that does not end, a
 // name with markup, a stamp or a chain that does not read, fields the game would run with), and no balance moves (rule 8d).

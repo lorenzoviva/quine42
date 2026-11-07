@@ -74,7 +74,7 @@ export async function holdGit<T>(cwd: string, work: () => Promise<T>): Promise<T
   }
 }
 
-// --- The root of a contract (T295, ADR-0169) ---------------------------------------------------------------------------------------
+// --- The root of a contract (T295, ADR-0170) ---------------------------------------------------------------------------------------
 // Every universe born from the seed of a contract starts from the same commit: an empty tree, a fixed author and date, a message that names
 // the contract. Written as the bytes of the object, so nothing of this machine (its git, its configuration, its clock) changes it; the
 // seed comes in the commit after, with what is the universe's own. Universes with a root in common are kin: one brings the cards of the other.

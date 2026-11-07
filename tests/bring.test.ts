@@ -1,4 +1,4 @@
-// Bringing cards into a universe before it starts (T295, ADR-0169): the root of a contract, the kin, the choice open and closed, what a
+// Bringing cards into a universe before it starts (T295, ADR-0170): the root of a contract, the kin, the choice open and closed, what a
 // card becomes where it enters (its chain, its holder, its shares), the doubles, and the Genesis that does not make again what came.
 // What concerns who may do what, and the hostile cards, is in tests/sicurezza/carte-portate.test.ts.
 

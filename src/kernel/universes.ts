@@ -44,7 +44,7 @@ export interface UniverseBackend {
   merge?(name: string, message: string): Promise<void>;
   /** A copy of this universe with another master (T42d), under a new name; returns the clone's head. */
   clone?(nome: string, master: string, titolari: 'restano' | 'master'): Promise<string | null>;
-  /** What the master may bring before the start (T295, ADR-0169): the kin universes and their cards, the handmade cards, whether the choice is open. */
+  /** What the master may bring before the start (T295, ADR-0170): the kin universes and their cards, the handmade cards, whether the choice is open. */
   kin?(): Promise<KinView>;
   /** The cards chosen, brought: the store reads them from the disk, checks and commits them; the answer has the files it wrote. */
   bring?(cards: BringRef[]): Promise<BringAnswer>;

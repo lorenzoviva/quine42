@@ -5464,7 +5464,7 @@ export class Kernel {
     return { ...DEFAULT_SCULPTORS, ...internalSculptors(this.config.ai.sculptors ?? {}) };
   }
 
-  // --- The cards brought before the start (T295, ADR-0169) --------------------------------------------------------------------
+  // --- The cards brought before the start (T295, ADR-0170) --------------------------------------------------------------------
 
   private broughtCache?: { files: FileMap; list: Array<{ id: string; info: ModelInfo }> };
 
@@ -5494,7 +5494,7 @@ export class Kernel {
   }
 
   /**
-   * The choice of the cards closes (T295, ADR-0169): when the Genesis begins, or when the first wanderer enters (`lockSettings`). universe.json loses
+   * The choice of the cards closes (T295, ADR-0170): when the Genesis begins, or when the first wanderer enters (`lockSettings`). universe.json loses
    * `cardChoice` in a commit of the kernel; a mirror, the bench and a universe that is only read write nothing.
    */
   private closeCardChoice(why: string): void {
@@ -6004,7 +6004,7 @@ export class Kernel {
   /** Entering: the settings are fixed from here (a wanderer enters a world of many, or the one who plays alone closes the lobby). */
   lockSettings(): void {
     if (this.settingsLocked) return;
-    // Whoever enters first closes the choice of the cards (T295, ADR-0169): from now on the world is played, not prepared.
+    // Whoever enters first closes the choice of the cards (T295, ADR-0170): from now on the world is played, not prepared.
     this.closeCardChoice('si entra nel mondo');
     let raw: Record<string, unknown> = {};
     try {

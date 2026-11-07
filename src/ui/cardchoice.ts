@@ -1,4 +1,4 @@
-// The choice of the cards to bring (T295, ADR-0169): before the Genesis (the Genesis screen) or, in a clone, before the first wanderer
+// The choice of the cards to bring (T295, ADR-0170): before the Genesis (the Genesis screen) or, in a clone, before the first wanderer
 // enters (the lobby), the master picks models and sounds of the kin universes (the same root) and handmade cards. Two cards with one id,
 // or an id this universe has already, are said here, before anything starts; the store says the rest (the check of every program).
 // Every text here is someone else's (a name, a signature): shown as text, never as markup.

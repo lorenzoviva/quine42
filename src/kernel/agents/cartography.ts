@@ -92,7 +92,7 @@ export interface PlanContext {
   rari?: SizeTier[];
   /** Who pays for the plan (T40): the wanderer who first came to the place. */
   chi?: string;
-  /** The structures that came with the cards (T295, ADR-0169): asked by their concept and size, they are worn as they are, at no cost. */
+  /** The structures that came with the cards (T295, ADR-0170): asked by their concept and size, they are worn as they are, at no cost. */
   brought?: Array<{ concept: string; size?: SizeTier }>;
 }
 
