@@ -4723,6 +4723,15 @@ Nasce da T307a e T299: `dossier T307a`, `dossier T299`. `integra T307a` si è fe
 - Quando è fatto: commit su `task/T310`. Nell'esito quanti testi del Concilio sono usciti in inglese per sbaglio e la differenza di token misurata.
 - Esito: prompt del Concilio in inglese (ruoli, tema e ambientazioni, principi, frammenti degli agenti e del kernel), lingua del mondo (`universe.json → language`, it se manca) e blocco «Lingua» di 128 token in ogni richiesta, valori degli schemi interni (riparazione dei valori italiani tenuta un contratto), quarta parete con tabelle it/en e test di frasi di prova e venti innocue per lingua, rilevatore della lingua, kernel 0.5.2, ADR-0164; token: testi fissi −6,9 %, richieste di una Genesi offline −3,3 %; prova a pagamento: ≈ 30 richieste invece delle ≈ 20 previste (luoghi in più aperti dal tappeto), ≈ 0,07 $, 156 testi del mondo, 0 in inglese, nessuno scarto né guasto; suite e typecheck verdi. Spezzato: T310b fa i nomi dei campi degli schemi in inglese, il tipo di legame come id, i valori interni ancora italiani (contratto nuovo) e le espressioni regolari di `lingue.md` §5; fr/es della quarta parete e controllo della lingua nel validatore restano a T239.
 
+### T310b · L'inglese come lingua interna: i nomi dei campi degli schemi, il tipo di legame come id, i valori interni ancora italiani — `da fare` (dipende da T310)
+- Pipeline: claude · sforzo extra · stima 6% · priorità 4
+- Step: 42
+- Contesto: spezzato da T310 (kernel 0.5.2, ADR-0165): i prompt sono inglesi, ma i nomi dei campi degli schemi Gemini, il tipo di legame (testo, non id) e alcuni valori interni restano italiani; serve un contratto nuovo (0.6) con la sua migrazione. Nasce da T310: `dossier T310`, e da T308b: `dossier T308b`. Le regole: `docs/lingua-interna.md`, `src/kernel/internalNames.ts`.
+- Cosa fare: i campi degli schemi in inglese (schemi Gemini, `MockAiModels`, chi legge le risposte, con lettura dei campi di prima finché serve); il tipo di legame come id interno inglese, il nome nella lingua del mondo; i valori interni ancora italiani in inglese con la migrazione `0.5 → 0.6` in `migrations.ts` (pura, deterministica, piani idempotenti); le espressioni regolari di `docs/lingue.md` §5. fr/es della quarta parete e il controllo della lingua nel validatore restano a T239.
+- Test: migrazione (universo 0.5 → 0.6, idempotente), mock, quarta parete; suite intera e typecheck con i loro turni.
+- Browser: una Genesi con `?offline` su un universo nuovo e un universo vecchio migrato che si apre senza guasti.
+- Quando è fatto: commit su `task/T310b`. Nell'esito: il contratto nuovo, cosa resta italiano e perché.
+
 ### T311 · Integrare T285 sul base con T284 e T286: la sezione delle vesti e il LEGGIMI — `fatto` (`b04e4b6`)
 - Pipeline: claude · sforzo high · stima 2% · approvato · priorità 1
 - Step: 34
