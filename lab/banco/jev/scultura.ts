@@ -131,7 +131,7 @@ function trimRows(rows: string[]): string[] {
 }
 
 /** The names of the letters a program uses: its own `<color name>`, else the palette's colour name. */
-function materialNames(xml: string): Record<string, string> {
+export function materialNames(xml: string): Record<string, string> {
   const out: Record<string, string> = {};
   for (const m of xml.matchAll(/<color\s+[^>]*symbol="(.)"[^>]*>/g)) {
     const name = /name="([^"]+)"/.exec(m[0])?.[1];
@@ -273,7 +273,7 @@ const SABOTAGES: Sabotage[] = [
 ];
 
 /** The most used letter of the outer walls: the one a sabotage writes with. */
-function wallLetter(g: Grid3): string {
+export function wallLetter(g: Grid3): string {
   const n = new Map<number, number>();
   for (let z = 2; z < g.Z; z += 2)
     for (let x = 0; x < g.X; x += 2) {

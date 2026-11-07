@@ -14,10 +14,11 @@ const readJson = (p: string) => JSON.parse(fs.readFileSync(path.join(ROOT, p), '
 
 /** The seed's library of models a new thing could wear: no sounds, nothing of the studio. */
 export function seedLibrary(): Array<{ id: string; nome: string; classe: string }> {
-  const index = readJson('universe/models/index.json') as Record<string, { classe: string; nome?: string }>;
+  // The fields are English from the contract 0.4 (ADR-0159): `class`, `name`; the Italian ones are read too (T324 found the filter open).
+  const index = readJson('universe/models/index.json') as Record<string, { class?: string; name?: string; classe?: string; nome?: string }>;
   return Object.entries(index)
-    .filter(([id, m]) => m.classe !== 'suono' && !/^(corona-|schermo-|circuito-)/.test(id))
-    .map(([id, m]) => ({ id, nome: m.nome ?? id, classe: m.classe }));
+    .map(([id, m]) => ({ id, nome: m.name ?? m.nome ?? id, classe: m.class ?? m.classe ?? '' }))
+    .filter((m) => m.classe !== 'suono' && !/^(corona-|schermo-|circuito-)/.test(m.id));
 }
 
 const ITEM_PACKS: Record<string, string[]> = {

@@ -20,6 +20,19 @@ export const JEV_PRICE = { input: 0.042, output: 0 };
 export const JEV_PRICE_READ_ON = '2026-11-06';
 export const JEV_MODELS = ['jev-1.13.0', 'jev-1.14.0'] as const;
 export const FLASH_LITE = 'gemini-3.1-flash-lite';
+/**
+ * The tokens of an image on Jev, for the estimate before a call (T324): TypeSafe does not say yet how it counts one («We'll be
+ * providing guidance on estimating image token usage soon», docs.typesafe.ai/images.md). Measured on the bench: about two tokens per
+ * square of 28 × 28 pixels and a hundred per image (≈ 390 pixels a token), rounded up.
+ */
+export const jevTokensOfImage = (w: number, h: number) => 2 * Math.ceil(w / 28) * Math.ceil(h / 28) + 120;
+
+/** The tokens the images of a case may cost on Jev, every use of a reference counted (the estimate, not the bill). */
+export function jevImageTokens(c: Case): number {
+  if (!c.images) return 0;
+  const uses = imageUses(c);
+  return Object.entries(caseImages(c)).reduce((s, [ref, im]) => s + Math.max(1, uses[ref] ?? 1) * jevTokensOfImage(im.w, im.h), 0);
+}
 
 // ---------------------------------------------------------------------------------------------------------- cases and questions
 
@@ -31,7 +44,7 @@ export type Question =
 /** noul: the right truth value; choice: the options that count as right; score: the right level (or levels). */
 export type Expected = boolean | string[] | number | number[];
 
-export type Group = 'decisioni' | 'scultura' | 'vita';
+export type Group = 'decisioni' | 'scultura' | 'vita' | 'immagini';
 
 export interface Case {
   id: string;
@@ -46,6 +59,16 @@ export interface Case {
   batchOf?: string[];
   source?: string;
   note?: string;
+  /**
+   * The images of the case (T324): a reference → the PNG, relative to the root of the repository. Jev gets them as `assets` (the
+   * reference is replaced by the image wherever it is written, the Danger Zone header on); Gemini gets them inline, in this order,
+   * with a line that names each reference.
+   */
+  images?: Record<string, string>;
+  /** How the images are cut (T324: `lati4`, `lato1`, `griglia`, `separate`; `nomi8`, `foto8`, `foto50` for the library): the variant of its runs. */
+  form?: string;
+  /** What the report needs of a case besides its answers (T324: whether it would pass seen from outside, the defect made on it). */
+  meta?: Record<string, string | number | boolean>;
 }
 
 /** A case as its file keeps it: the questions come from its kind (domande.ts) when it does not bring them. */
@@ -128,11 +151,35 @@ export interface JevOptions {
 }
 
 /** The request body Jev gets: the state once, every question under its id. */
-export function jevBody(c: Case, model: string): Record<string, unknown> {
+export function jevBody(c: Case, model: string, images?: Record<string, ImageData>): Record<string, unknown> {
   const questions = Object.fromEntries(
     c.questions.map((q) => [q.id, q.type === 'noul' ? { type: 'noul', instructions: q.instructions, ...(q.criteria ? { criteria: q.criteria } : {}) } : { type: q.type, instructions: q.instructions, criteria: q.criteria }]),
   );
-  return { model, state: c.state, questions };
+  const assets = images && Object.keys(images).length ? Object.fromEntries(Object.entries(images).map(([ref, im]) => [ref, { type: 'image', format: 'png', data_base64: im.base64 }])) : undefined;
+  return { model, state: c.state, questions, ...(assets ? { assets } : {}) };
+}
+
+/** An image of a case, read from the disk: its bytes in base64, its size in pixels (from the PNG header). */
+export interface ImageData {
+  base64: string;
+  w: number;
+  h: number;
+}
+
+/** The images of a case, read from the repository (lab/out/jev/foto, written by `--prepara immagini`). */
+export function caseImages(c: Case, root = path.resolve(BENCH_DIR, '../../..')): Record<string, ImageData> {
+  const out: Record<string, ImageData> = {};
+  for (const [ref, file] of Object.entries(c.images ?? {})) {
+    const bytes = fs.readFileSync(path.resolve(root, file));
+    out[ref] = { base64: bytes.toString('base64'), w: bytes.readUInt32BE(16), h: bytes.readUInt32BE(20) };
+  }
+  return out;
+}
+
+/** How many times each reference is written in the request: Jev adds the image again at every use (docs.typesafe.ai/images.md). */
+export function imageUses(c: Case): Record<string, number> {
+  const text = JSON.stringify({ state: c.state, questions: c.questions });
+  return Object.fromEntries(Object.keys(c.images ?? {}).map((ref) => [ref, text.split(ref).length - 1]));
 }
 
 export function jevAnswers(raw: Record<string, any>, c: Case): Record<string, Answer> {
@@ -161,18 +208,20 @@ export class JevJudge implements Judge {
     return (u.input * JEV_PRICE.input + u.output * JEV_PRICE.output) / 1e6;
   }
   estimate(c: Case): number {
-    // About 270 tokens of the request's own, then ~3.2 characters a token (measured on the first requests).
-    return this.cost({ input: 300 + Math.ceil(chars(jevBody(c, this.o.model)) / 3), output: 0 });
+    // About 270 tokens of the request's own, then ~3.2 characters a token (measured on the first requests); an image at every use.
+    return this.cost({ input: 300 + Math.ceil(chars(jevBody(c, this.o.model)) / 3) + jevImageTokens(c), output: 0 });
   }
   async ask(c: Case): Promise<Reply> {
     const t0 = Date.now();
     const f = this.o.fetchImpl ?? fetch;
+    const images = c.images ? caseImages(c) : undefined;
+    const body = JSON.stringify(jevBody(c, this.o.model, images));
     let last = '';
     for (let attempt = 0; attempt < 4; attempt++) {
       const r = await f(`${this.o.endpoint ?? 'https://api.typesafe.ai'}/v1/systemone`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${this.o.key}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(jevBody(c, this.o.model)),
+        headers: { Authorization: `Bearer ${this.o.key}`, 'Content-Type': 'application/json', ...(images ? { 'TypeSafe-Danger-Zone-Images': 'true' } : {}) },
+        body,
         signal: AbortSignal.timeout(this.o.timeout ?? 60_000),
       });
       const j: any = await r.json().catch(() => ({}));
@@ -189,6 +238,9 @@ export class JevJudge implements Judge {
 
 const text = (v: unknown) => (typeof v === 'string' ? v : JSON.stringify(v));
 
+/** What an image may cost on Gemini before a call (the estimate only: the bill is `promptTokenCount`). */
+export const GEMINI_IMAGE_TOKENS = 1300;
+
 export const TYPED_SYSTEM = [
   'You judge decisions in a video game world. You get a state (JSON) and some typed questions about it.',
   'Answer every question about the state only, only with the allowed values, in the JSON asked.',
@@ -196,7 +248,16 @@ export const TYPED_SYSTEM = [
 
 /** The prompt and the schema that ask Gemini exactly what Jev is asked: the same state, the same questions, the same options. */
 export function typedPrompt(c: Case): { prompt: string; schema: Schema } {
-  const lines: string[] = ['## State', '```json', JSON.stringify(c.state, null, 1), '```', '', '## Questions'];
+  const refs = Object.keys(c.images ?? {});
+  const lines: string[] = [
+    ...(refs.length ? ['## Images', `The images attached after this text, in this order, stand for these references wherever they are written: ${refs.map((r, i) => `image ${i + 1} = \`${r}\``).join(', ')}.`, ''] : []),
+    '## State',
+    '```json',
+    JSON.stringify(c.state, null, 1),
+    '```',
+    '',
+    '## Questions',
+  ];
   const properties: Record<string, Schema> = {};
   for (const q of c.questions) {
     if (q.type === 'noul') {
@@ -251,11 +312,13 @@ export class GeminiJudge implements Judge {
   }
   estimate(c: Case): number {
     const { prompt, schema } = typedPrompt(c);
-    return this.cost({ input: Math.ceil((prompt.length + TYPED_SYSTEM.length + chars(schema)) / 3) + 50, output: 120 + 40 * c.questions.length, thoughts: 600 });
+    const pics = Object.keys(c.images ?? {}).length * GEMINI_IMAGE_TOKENS;
+    return this.cost({ input: Math.ceil((prompt.length + TYPED_SYSTEM.length + chars(schema)) / 3) + 50 + pics, output: 120 + 40 * c.questions.length, thoughts: 600 });
   }
   async ask(c: Case): Promise<Reply> {
     const { prompt, schema } = typedPrompt(c);
-    return askGemini(this.o, { agent: 'banco', task: `jev.${c.kind}`, system: TYPED_SYSTEM, prompt, schema, temperature: this.o.temperature ?? 0.3 }, (raw) => typedAnswers(raw, c));
+    const images = c.images ? Object.values(caseImages(c)).map((im) => `data:image/png;base64,${im.base64}`) : undefined;
+    return askGemini(this.o, { agent: 'banco', task: `jev.${c.kind}`, system: TYPED_SYSTEM, prompt, schema, temperature: this.o.temperature ?? 0.3, ...(images ? { images } : {}) }, (raw) => typedAnswers(raw, c));
   }
 }
 
@@ -318,7 +381,7 @@ export class OfflineJudge implements Judge {
         answers[q.id] = { type: 'score', value: v, p: v };
       }
     }
-    return { answers, usage: { input: 300 + Math.ceil(chars(jevBody(c, this.label)) / 3), output: 20 * c.questions.length }, ms: 0, answeredBy: this.label };
+    return { answers, usage: { input: 300 + Math.ceil(chars(jevBody(c, this.label)) / 3) + jevImageTokens(c), output: 20 * c.questions.length }, ms: 0, answeredBy: this.label };
   }
 }
 
@@ -367,6 +430,8 @@ export interface LedgerLine {
   error?: string;
   answers?: Record<string, { v: Answer['value']; p?: number; c?: number; top?: Array<[string, number]> }>;
   right?: Record<string, boolean>;
+  /** The game's Artist (T324, `oggi`): its mark, whether it recognises the thing, its first problems. */
+  critique?: { voto: number; riconoscibile: boolean; problemi: string[] };
 }
 
 export function readLedger(file = LEDGER): LedgerLine[] {

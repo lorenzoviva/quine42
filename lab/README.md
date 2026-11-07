@@ -53,7 +53,7 @@ Il motore, il front-end XML, la palette, le mesh, lo scheletro, le classi e le f
   - `mjx-keep.ts`, `trial-keep.ts`: tengono i programmi migliori in `mjx/models/gemini/`.
 - `mjx-official.ts [-- Growth River]`: i modelli ufficiali eseguiti e fotografati.
 - `mjx-trace.ts -- modello.xml [--bersaglio moderna | --size "X Y Z"] [--forma differenze] [--tetto 4000] [--passo N]`: cosa ha fatto un programma, nodo per nodo, in testo (`banco/traccia.md`).
-- `jev-banco.ts -- --offline | --gruppi decisioni,scultura,vita [--modelli …] [--varianti base,rovescio,domande-2] [--oggi] | --prepara scultura|vita | --rapporto`: il banco di Jev (`banco/jev/README.md`); senza `--offline` costa, con i tetti sul registro intero.
+- `jev-banco.ts -- --offline | --gruppi decisioni,scultura,vita [--modelli …] [--varianti base,rovescio,domande-2] [--oggi] | --prepara scultura|vita | --rapporto`: il banco di Jev (`banco/jev/README.md`); senza `--offline` costa, con i tetti sul registro intero. Con le immagini (T324): `--prepara immagini` (le foto in `out/jev/foto`), `--gruppi immagini --varianti lati4,lato1,griglia,separate,nomi8,foto8,foto50`, `--oggi-artista` (l'Artista del gioco), `--tetti-giri img` (i tetti su quei giri soltanto).
 - `game-requests.ts`: quanto sono grandi le richieste del gioco (offline, conta i token con `countTokens`).
 
 ## Che cosa ho imparato scrivendo modelli (vale per chi corregge)
