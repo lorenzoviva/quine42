@@ -5012,6 +5012,15 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì, le foto del banco.
 - Quando è fatto: commit su `task/T338`, rapporto in `lab/banco/` con le foto; kernel sale di Z se cambiano i controlli.
 
+### T341 · Integrare T340 nel base (ADR e kernel presi da T296) — `da fare`
+- Pipeline: claude · sforzo high · stima 2% · approvato · priorità 1
+- Step: 30
+- Contesto: `integra T340` ha trovato un conflitto in `docs/glossario-censimento.md`. Inoltre T296, integrato poco prima (`67bf2669`), ha preso ADR-0172 e kernel 0.5.8, gli stessi numeri scritti da T340 (ADR di T334). Nasce da T340: `dossier T340`, `dossier T296`.
+- Cosa fare: nel worktree `git merge task/T340`; `docs/glossario-censimento.md` si rigenera con `node tools/glossario/glossario.mjs` dopo aver unito `docs/glossario.md`; l'ADR di T334 (field/temperature/observe/search) diventa ADR-0173 (il file, i rimandi in AGENTS.md, `docs/architettura-dettagli.md`, ADR README, glossario, codice e test), le carte guaste restano ADR-0172; il kernel sale a 0.5.9 (`version.ts`, `package.json`, `universe/universe.json`, test di versione), con la voce dei due incrementi distinta; test, typecheck e build verdi.
+- Test: suite intera (il fallimento noto di `tests/determinism.test.ts` sotto carico si riprova da solo), typecheck, build.
+- Browser: no (T340 e T296 già verificati).
+- Quando è fatto: commit su `task/T341`; poi l'orchestratore integra T341 e `integra T340` toglie worktree e branch di T340, poi `integra T334`.
+
 ### T340 · Integrare T334 nel base (conflitti con T333) — `da fare`
 - Pipeline: claude · sforzo high · stima 3% · approvato · priorità 1
 - Step: 30

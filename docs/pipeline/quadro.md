@@ -23,7 +23,7 @@ Aggiornato il 07/11/2026, epoca 332 (claude). Crediti: vedi `stato`.
 
 0. **Decisioni autore 04/11:** D32 SemVer `X.Y.Z`. Step 32: T260, T262 → T245a → T263/T245b → T245c-f. T265 prima della beta.
 1. T324 (immagini Jev: utile come filtro dei difetti visivi, non per il giudizio dell'Artista) integrato via T329.
-2. **Nodi MJ:** **T333 integrato** (`<in>`/`<out>`, regole da file, `<import>`, ADR-0171, kernel 0.5.7; lo Scultore non lo conosce ancora); T334 fatto (field/temperature/observe/search) ma in conflitto con T333 → **T340 in corso** lo integra: ADR-0172 e kernel 0.5.8 ora sono di T296, quindi T340 diventerà ADR-0173 e kernel 0.5.9 (conflitto atteso su version.ts/package.json). **Pronti:** T335, T331, T88. Da approvare: T310b. Bloccati: T336-T339.
+2. **Nodi MJ:** **T333 integrato** (`<in>`/`<out>`, regole da file, `<import>`, ADR-0171, kernel 0.5.7; lo Scultore non lo conosce ancora); T334 fatto (field/temperature/observe/search) ma in conflitto con T333 → T340 fatto (browser ok) ma `integra` in conflitto (glossario-censimento) e con ADR-0172/kernel 0.5.8 già di T296 → **T341** lo integra come ADR-0173, kernel 0.5.9. **Pronti:** T335, T331, T88. Da approvare: T310b. Bloccati: T336-T339.
 3. **Crediti (20:08 UTC 07/11):** Claude 5h 41 % (reset 22:59 UTC), settimana 29 % (reset 12/11 16:00); Gemini e agy 100 %; Argon fermo fino all'11/11.
 
 ## Attese dall'autore
@@ -38,5 +38,5 @@ Aggiornato il 07/11/2026, epoca 332 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **332 (claude):** T296 integrato (ADR-0172, kernel 0.5.8, browser verificato).
+- **332 (claude):** T296 integrato (ADR-0172, kernel 0.5.8, browser verificato); T340 in conflitto → T341.
 - **330-331 (gemini, claude):** T333 integrato (ADR-0171, kernel 0.5.7); T334 in conflitto → T340.
