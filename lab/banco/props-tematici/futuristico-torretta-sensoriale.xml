@@ -17,7 +17,7 @@
   <color symbol="A" hidden="True" name="la canna che si allunga"/>
   <color symbol="H" value="eef1f5" name="cupola"/>
   <color symbol="n" hidden="True" name="dove può stare un'antenna"/>
-  <!-- La base -->
+  <!-- The base -->
   <cylinder at="10 10 0" size="9 9 1" color="G"/>
   <cylinder at="10 10 1" size="7 7 1" color="w"/>
   <cylinder at="10 10 2" size="5 5 1" color="g"/>

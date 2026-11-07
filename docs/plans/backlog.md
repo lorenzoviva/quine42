@@ -4701,7 +4701,7 @@ Nasce da T307a e T299: `dossier T307a`, `dossier T299`. `integra T307a` si è fe
 - Quando è fatto: commit su `task/T308b`. Sicurezza: le voci o «nessuna superficie nuova» (tocca `src/session/`, la sandbox).
 - Esito: contratto 0.5.0 e migrazione 0.4→0.5 (ADR-0161): protocollo in inglese client e server insieme; componenti e campi per componente (`COMPONENT_FIELDS`; `fino` → `expires`, non `until` che in Lua è riservato); `world.venture`/`venture_bring`, evento `death`, chiave `deposit:`; `luaFor0_5` porta il Lua del Concilio e ripara il codice dell'Ingegnere fino a T310; voci aggiunte alla tabella (compiti, impresa_posto, concetto/classe/taglia, stati velocita/peso/luce, salto da/a/alto, cantiere titolo/stato/manca/squadra, morto, fame/sete); test nuovo `migration-0.5.test.ts`; suite (2533 passati) e typecheck verdi, build ok. Non coperti: `worldwire.ts` e rotte HTTP restano italiani; `sicurezza:prove` non lanciato; conflitti attesi con T319 all'integrazione. Sicurezza: nessuna superficie nuova (cambiano i nomi, non ciò che il server accetta né ciò che esce).
 
-### T309 · L'inglese come lingua interna: i commenti di Lua e degli XML — `da fare` (dipende da T308b, T328)
+### T309 · L'inglese come lingua interna: i commenti di Lua e degli XML — `fatto` (`b6140aec`) (dipende da T308b, T328)
 - Pipeline: claude · sforzo high · stima 4% · approvato · priorità 4
 - Step: 42
 - Contesto: T306 (`dossier T306`). ≈ 27.000 parole di commenti in `universe/modules/*/logic.lua` e `universe/models/*.xml`, più i programmi ufficiali di `lab/`. Oggi la convenzione li vuole italiani; l'ADR di T306 la cambia.
@@ -4709,6 +4709,7 @@ Nasce da T307a e T299: `dossier T307a`, `dossier T299`. `integra T307a` si è fe
 - Test: il controllo di identità, suite intera e typecheck con i loro turni.
 - Browser: non serve.
 - Quando è fatto: commit su `task/T309`.
+- Esito: commenti del Lua e degli XML del seme in inglese (≈ 2.000 commenti, 27.000 parole; anche le copie sotto lab/ tranne lab/banco/universi-cloud, che la migrazione riconosce per impronta), `tools/lingua/` (estrai, applica, confronta <ref>, italiano) e `tests/seed-comments.test.ts`; codice identico in tutti i file cambiati (token Lua, albero XML) e voxel uguali; commenti TS italiani di src/ e site/sessioni.ts tradotti; kernel 0.5.1; suite (2633 passati, 1 saltato) e typecheck verdi. Restano italiani i commenti di tests/, tools/pipeline/ e dei programmi del laboratorio che non sono copie del seme; docs/lingue-censimento.md non rigenerato (cambiata solo la riga della convenzione). Non provati: browser (non serviva).
 
 ### T310 · L'inglese come lingua interna: i prompt del Concilio in inglese, il mondo nella lingua del suo universo — `da fare` (dipende da T309)
 - Pipeline: claude · sforzo extra · stima 6% · approvato · priorità 4

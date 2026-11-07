@@ -1,5 +1,5 @@
-<!-- Sasso levigato, procedurale (Cantiere 2): stessa palette dell'originale. Il seme sceglie dove nascono due o tre lobi su un disco nascosto
-     al suolo, quanto crescono in alto e quanto si allargano: ogni sasso ha un'altra sagoma, liscia come l'originale. -->
+<!-- Smooth pebble, procedural (Cantiere 2): the same palette of the original. The seed picks where two or three lobes start on a hidden disc
+     on the ground, how much they grow upwards and how much they widen: every pebble has another outline, smooth like the original. -->
 <sequence values="BHLGDSVc" size="10 10 8" symmetry="(xy)" name="Sasso levigato">
   <color symbol="H" value="c4c9d4" name="pietra lucida"/>
   <color symbol="L" value="9ba0aa" name="pietra chiara"/>
@@ -8,7 +8,7 @@
   <color symbol="S" value="32353b" name="ombra profonda"/>
   <color symbol="V" hidden="True" name="dove può nascere un lobo"/>
   <color symbol="c" hidden="True" name="il centro"/>
-  <!-- Le scelte: il disco dei lobi, il centro e due lobi a caso, un terzo forse -->
+  <!-- The choices: the disc of the lobes, the centre and two random lobes, perhaps a third -->
   <ellipsoid at="5 5 0" size="7 7 1" color="V"/>
   <box at="5 5 0" size="1 1 1" color="G"/>
   <one in="V" out="G" steps="2"/>
@@ -16,7 +16,7 @@
   <all in="V" out="B"/>
   <one in="cB" out="*G" steps="1"/>
   <all in="c" out="B"/>
-  <!-- Crescita: prima tonda, poi un poco di lato; quanto dipende dal seme -->
+  <!-- Growth: first round, then a little sideways; how much depends on the seed -->
   <one steps="70" symmetry="(xyz)" in="GB" out="GG"/>
   <prl steps="2" in="GB" out="GG" p="0.25"/>
   <convolution neighborhood="Moore" steps="1">

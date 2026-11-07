@@ -1,40 +1,40 @@
 <!--
-La Sala del Concilio (corona): imponente struttura esagonale monumentale, sede del Concilio degli agenti.
-Scritto da Gemini CLI (Gemini 3.8 Flash, abbonamento) il 23/10/2026, task T19.
-Scatola: 20 × 20 × 9 caselle, 160 × 160 × 72 voxel, 8 voxel per casella.
-Lettere chiave:
-  O = porta (lettera O, nome "porta", al centro x=80, y=131, z=0..23, atrio interno vuoto per oltre 20 voxel)
-  F = insegna ("SALA DEL CONCILIO", neon rosa ff8ad8 glow fisso sopra il portale monumentale)
-  P = targa scura opaca per l'insegna
-  M = metallo nero primario (piloni d'angolo, architravi, pinne e basamenti)
-  m = metallo secondario scuro (profilati, lesene e pannelli)
-  C = cemento grafite monumentale (gradoni, scalinata e terrazze)
-  S = acciaio chiaro / lesene e raccordi strutturali
-  s = acciaio scuro (cornici e intarsi del pavimento)
-  V = vetro scuro riflettente
-  v = fasce di riflesso azzurrato freddo
-  w = fasce di riflesso magenta caldo
-  n = neon rosa tenue per cornici (glow)
-  N = neon rosa vivo per portale e lanterna (glow)
-  x = buffer temporaneo per l'animazione (hidden)
-Fasi pulsanti del neon rosa (1..8):
-  1..8 = gradiente continuo di 8 fasi (da 8a2862 a ffa0e2) con onda di deliberazione del Concilio.
-Architettura:
-  Pianta esagonale monumentale (lato 56 voxel, ingombro 120 × 104 voxel, z=2..42), con 6 massicci piloni
-  verticali poligonali agli angoli e facciata principale a sud rivolta verso il viale.
-Portale monumentale:
-  Avancorpo monumentale (x=64..96, y=118..134, z=0..38) alto 4 caselle con pinne scanalate laterali in metallo e acciaio,
-  porta O centrata a x=80 e grande insegna "SALA DEL CONCILIO" su due righe sopra il portale.
-Copertura e lanterna sommitale:
-  Tetto a gradoni esagonali (z=42..65) che sale verso la lanterna centrale con nucleo rosa pulsante e guglia a z=70.
-Interno della Sala:
-  Ampia aula consiliare con pavimento in marmo grafite, tavolo rotondo centrale del Concilio con le postazioni degli 8 agenti
-  e ologramma dell'universo in rotazione.
-Animazione "delibera" (8 frame):
-  Onda di energia fluida che pulsa lungo i sei spigoli verticali, il portale monumentale e la lanterna zenitale.
+The Council Hall (corona): an imposing monumental hexagonal structure, seat of the Council of agents.
+Written by Gemini CLI (Gemini 3.8 Flash, subscription) on 23/10/2026, task T19.
+Box: 20 × 20 × 9 tiles, 160 × 160 × 72 voxels, 8 voxels per tile.
+Key letters:
+  O = door (letter O, name "porta", at the centre x=80, y=131, z=0..23, inner hall empty for over 20 voxels)
+  F = sign ("SALA DEL CONCILIO", pink neon ff8ad8 with a steady glow above the monumental portal)
+  P = dark matte plate for the sign
+  M = primary black metal (corner pylons, lintels, fins and plinths)
+  m = dark secondary metal (profiles, pilasters and panels)
+  C = monumental graphite concrete (steps, staircase and terraces)
+  S = light steel / pilasters and structural joints
+  s = dark steel (frames and floor inlays)
+  V = dark reflecting glass
+  v = bands of cold bluish reflection
+  w = bands of warm magenta reflection
+  n = soft pink neon for frames (glow)
+  N = bright pink neon for the portal and the lantern (glow)
+  x = temporary buffer for the animation (hidden)
+Pulsing phases of the pink neon (1..8):
+  1..8 = continuous gradient of 8 phases (from 8a2862 to ffa0e2) with the wave of the Council's deliberation.
+Architecture:
+  Monumental hexagonal plan (side 56 voxels, footprint 120 × 104 voxels, z=2..42), with 6 massive polygonal vertical
+  pylons at the corners and the main facade to the south facing the avenue.
+Monumental portal:
+  Monumental forward block (x=64..96, y=118..134, z=0..38) 4 tiles high with grooved side fins in metal and steel,
+  door O centred at x=80 and a big sign "SALA DEL CONCILIO" on two lines above the portal.
+Roof and top lantern:
+  Roof in hexagonal steps (z=42..65) rising towards the central lantern with a pulsing pink core and a spire at z=70.
+Inside the Hall:
+  A wide council chamber with a graphite marble floor, the Council's central round table with the stations of the 8 agents
+  and a rotating hologram of the universe.
+Animation "delibera" (8 frames):
+  A fluid energy wave pulsing along the six vertical edges, the monumental portal and the zenith lantern.
 -->
 <sequence values="BMmCSsVvwNnFPOx12345678" size="160 160 72" symmetry="()" name="Sala del Concilio">
-  <!-- Materiali e palette -->
+  <!-- Materials and palette -->
   <color symbol="M" value="14141a" name="metallo primario"/>
   <color symbol="m" value="22242e" name="metallo secondario"/>
   <color symbol="C" value="32343c" name="cemento grafite"/>
@@ -50,7 +50,7 @@ Animazione "delibera" (8 frame):
   <color symbol="O" value="38182c" name="porta"/>
   <color symbol="x" hidden="True" name="buffer animazione"/>
 
-  <!-- 8 Fasi dell'onda neon rosa (deliberazione del Concilio) -->
+  <!-- 8 phases of the pink neon wave (the Council's deliberation) -->
   <color symbol="1" value="8a2862" glow="True" name="fase rosa 1"/>
   <color symbol="2" value="a83278" glow="True" name="fase rosa 2"/>
   <color symbol="3" value="c84292" glow="True" name="fase rosa 3"/>
@@ -61,23 +61,23 @@ Animazione "delibera" (8 frame):
   <color symbol="8" value="a83278" glow="True" name="fase rosa 8"/>
 
   <!-- ================================================================= -->
-  <!-- 1. BASAMENTO MONUMENTALE E SCALINATA D'ONORE (z = 0..3)           -->
+  <!-- 1. MONUMENTAL BASE AND GRAND STAIRCASE (z = 0..3)                 -->
   <!-- ================================================================= -->
-  <!-- Grande piattaforma ottagonale di fondazione (cx=80, cy=68) -->
+  <!-- Large octagonal foundation platform (cx=80, cy=68) -->
   <box at="80 68 0" size="140 120 2" color="C"/>
   <box at="80 68 1" size="134 114 1" color="m"/>
   <box at="80 68 2" size="130 110 1" color="C"/>
 
-  <!-- Scalinata cerimoniale e piazzale avanzato verso il viale (y=118..152) -->
+  <!-- Ceremonial staircase and forecourt towards the avenue (y=118..152) -->
   <box at="80 134 0" size="72 36 2" color="C"/>
   <box at="80 134 1" size="66 32 1" color="m"/>
   <box at="80 142 2" size="52 20 1" color="C"/>
 
-  <!-- Guide luminose neon rosa lungo la scalinata d'onore (fasi 2 e 6) -->
+  <!-- Pink neon light guides along the grand staircase (phases 2 and 6) -->
   <box at="58 142 2" size="1 20 1" color="2"/>
   <box at="102 142 2" size="1 20 1" color="6"/>
 
-  <!-- Colonne d'onore all'inizio della scalinata (y=150) con fari neon rosa -->
+  <!-- Columns of honour at the start of the staircase (y=150) with pink neon lamps -->
   <box at="56 150 0" size="4 4 12" color="M"/>
   <box at="56 150 12" size="2 2 2" color="S"/>
   <box at="56 150 14" size="1 1 2" color="5"/>
@@ -86,7 +86,7 @@ Animazione "delibera" (8 frame):
   <box at="104 150 14" size="1 1 2" color="5"/>
 
   <!-- ================================================================= -->
-  <!-- 2. I 6 GRANDI PILONI ANGOLARI DEL CONCILIO (z = 0..46)            -->
+  <!-- 2. THE 6 GREAT CORNER PYLONS OF THE COUNCIL (z = 0..46)          -->
   <!-- V_SW:(52,118); V_SE:(108,118); V_E:(138,68);                      -->
   <!-- V_NE:(108,18); V_NW:(52,18);   V_W:(22,68)                        -->
   <!-- ================================================================= -->
@@ -134,21 +134,21 @@ Animazione "delibera" (8 frame):
   <box at="22 68 48" size="2 2 2" color="5"/>
 
   <!-- ================================================================= -->
-  <!-- 3. PARETI ESAGONALI DELL'EDIFICIO (z = 2..42)                    -->
+  <!-- 3. HEXAGONAL WALLS OF THE BUILDING (z = 2..42)                   -->
   <!-- ================================================================= -->
-  <!-- Parete Sud (facciata d'onore, y=118, x=52..108) -->
+  <!-- South wall (facade of honour, y=118, x=52..108) -->
   <box at="80 118 2" size="56 4 40" color="M"/>
   <box at="80 118 4" size="52 2 36" color="V"/>
   <box at="80 118 16" size="54 3 2" color="v"/>
   <box at="80 118 28" size="54 3 2" color="w"/>
 
-  <!-- Parete Nord (fondo, y=18, x=52..108) -->
+  <!-- North wall (back, y=18, x=52..108) -->
   <box at="80 18 2" size="56 4 40" color="M"/>
   <box at="80 18 4" size="52 2 36" color="V"/>
   <box at="80 18 16" size="54 3 2" color="v"/>
   <box at="80 18 28" size="54 3 2" color="w"/>
 
-  <!-- 4 Pareti Diagonali a lesene scalate (SE, NE, NW, SW) -->
+  <!-- 4 diagonal walls with stepped pilasters (SE, NE, NW, SW) -->
   <box at="110 116 2" size="5 7 40" color="M"/>
   <box at="110 116 4" size="3 5 36" color="V"/>
   <box at="110 116 16" size="4 6 2" color="v"/>
@@ -311,7 +311,7 @@ Animazione "delibera" (8 frame):
   <box at="51 116 28" size="4 6 2" color="w"/>
 
   <!-- ================================================================= -->
-  <!-- 4. SVUOTAMENTO DELL'AULA CONSILIARE INTERNA (z = 2..42)            -->
+  <!-- 4. HOLLOWING OUT THE INNER COUNCIL CHAMBER (z = 2..42)            -->
   <!-- ================================================================= -->
   <cylinder at="80 68 2" size="86 86 40" color="B"/>
   <cylinder at="80 68 0" size="90 90 2" color="C"/>
@@ -319,18 +319,18 @@ Animazione "delibera" (8 frame):
   <cylinder at="80 68 2" size="86 86 1" color="m"/>
 
   <!-- ================================================================= -->
-  <!-- 5. TAVOLO ROTONDO DEL CONCILIO E SCULTURA CENTRALE (INTERNO)      -->
+  <!-- 5. ROUND TABLE OF THE COUNCIL AND CENTRAL SCULPTURE (INSIDE)      -->
   <!-- ================================================================= -->
-  <!-- Pedana circolare rialzata del Concilio -->
+  <!-- Raised round platform of the Council -->
   <cylinder at="80 68 3" size="36 36 2" color="C"/>
   <cylinder at="80 68 5" size="32 32 1" color="m"/>
 
-  <!-- Il Tavolo Rotondo degli 8 Membri del Concilio -->
+  <!-- The Round Table of the 8 Members of the Council -->
   <cylinder at="80 68 6" size="24 24 3" color="M"/>
   <cylinder at="80 68 8" size="26 26 1" color="S"/>
   <cylinder at="80 68 6" size="14 14 4" color="B"/>
 
-  <!-- Postazioni degli 8 agenti attorno al tavolo con schienali neon rosa -->
+  <!-- Stations of the 8 agents around the table with pink neon backrests -->
   <box at="96 68 6" size="3 3 4" color="m"/>
   <box at="96 68 10" size="2 2 3" color="M"/>
   <box at="96 68 13" size="1 1 1" color="1"/>
@@ -356,69 +356,69 @@ Animazione "delibera" (8 frame):
   <box at="91 57 10" size="2 2 3" color="M"/>
   <box at="91 57 13" size="1 1 1" color="8"/>
 
-  <!-- Pilone olografico e globo dell'universo centrale (z=3..16) -->
+  <!-- Holographic pylon and central globe of the universe (z=3..16) -->
   <cylinder at="80 68 3" size="6 6 10" color="S"/>
-  <!-- 4 bracci stabilizzatori in acciaio dal tavolo all'orbe -->
+  <!-- 4 steel stabiliser arms from the table to the orb -->
   <line at="76 68 9" to="78 68 13" r="0" color="S"/>
   <line at="84 68 9" to="82 68 13" r="0" color="S"/>
   <line at="80 64 9" to="80 66 13" r="0" color="S"/>
   <line at="80 72 9" to="80 70 13" r="0" color="S"/>
-  <!-- Globo / ologramma dell'universo sospeso (tocca i bracci e il pilone) -->
+  <!-- Suspended globe / hologram of the universe (touches the arms and the pylon) -->
   <ellipsoid at="80 68 12" size="8 8 8" color="5"/>
   <ellipsoid at="80 68 13" size="4 4 4" color="4"/>
 
   <!-- ================================================================= -->
-  <!-- 6. PORTALE MONUMENTALE AVANZATO (FACCIA SUD, y=118..134, z=0..46) -->
+  <!-- 6. MONUMENTAL FORWARD PORTAL (SOUTH FACE, y=118..134, z=0..46)    -->
   <!-- ================================================================= -->
-  <!-- Taglio monumentale nella facciata sud (x=66..94, y=116..122, z=0..32) -->
+  <!-- Monumental cut in the south facade (x=66..94, y=116..122, z=0..32) -->
   <box at="80 118 0" size="28 8 32" color="B"/>
 
-  <!-- Corpo del portale avanzato in metallo primario e secondario -->
+  <!-- Body of the forward portal in primary and secondary metal -->
   <box at="80 125 0" size="34 16 34" color="M"/>
   <box at="80 126 2" size="30 14 32" color="m"/>
 
-  <!-- 2 Colossali pinne architettoniche scanalate ai lati del portale -->
-  <!-- Pinna Sinistra (x=61..66, y=122..134, z=0..40) -->
+  <!-- 2 colossal grooved architectural fins at the sides of the portal -->
+  <!-- Left fin (x=61..66, y=122..134, z=0..40) -->
   <box at="63 128 0" size="6 12 40" color="M"/>
   <box at="63 128 4" size="4 10 36" color="S"/>
   <box at="60 134 2" size="1 1 38" color="N"/>
   <box at="63 128 40" size="6 12 2" color="S"/>
   <box at="63 134 42" size="2 2 2" color="5"/>
 
-  <!-- Pinna Destra (x=94..99, y=122..134, z=0..40) -->
+  <!-- Right fin (x=94..99, y=122..134, z=0..40) -->
   <box at="97 128 0" size="6 12 40" color="M"/>
   <box at="97 128 4" size="4 10 36" color="S"/>
   <box at="100 134 2" size="1 1 38" color="N"/>
   <box at="97 128 40" size="6 12 2" color="S"/>
   <box at="97 134 42" size="2 2 2" color="5"/>
 
-  <!-- Cornice neon rosa vivo e architrave dell'arco monumentale (y=132) -->
+  <!-- Bright pink neon frame and lintel of the monumental arch (y=132) -->
   <box at="68 132 0" size="1 1 25" color="N"/>
   <box at="92 132 0" size="1 1 25" color="N"/>
   <box at="80 132 25" size="25 1 1" color="N"/>
   <box at="80 131 26" size="27 3 3" color="S"/>
   <box at="80 132 28" size="23 1 1" color="w"/>
 
-  <!-- I VOXEL DELLA PORTA O (z=0..23, x=71..89, larghezza 19, altezza 24) -->
+  <!-- THE VOXELS OF DOOR O (z=0..23, x=71..89, width 19, height 24) -->
   <box at="80 130 0" size="19 1 24" color="O"/>
-  <!-- Atrio interno monumentale vuoto e sgombro per oltre 22 voxel (y=108..129) -->
+  <!-- Monumental inner hall, empty and clear for over 22 voxels (y=108..129) -->
   <box at="80 119 0" size="19 22 24" color="B"/>
   <box at="80 119 0" size="19 22 1" color="C"/>
 
   <!-- ================================================================= -->
-  <!-- 7. L'INSEGNA NEON "SALA DEL CONCILIO" (y=133, z=33..44)          -->
+  <!-- 7. THE NEON SIGN "SALA DEL CONCILIO" (y=133, z=33..44)          -->
   <!-- ================================================================= -->
-  <!-- Targa opaca scura di fondo per l'insegna -->
+  <!-- Dark matte backing plate for the sign -->
   <box at="80 132 32" size="42 1 14" color="P"/>
   <box at="80 131 32" size="42 1 14" color="M"/>
 
-  <!-- Cornice al neon rosa della targa -->
+  <!-- Pink neon frame of the plate -->
   <box at="80 132 31" size="44 1 1" color="n"/>
   <box at="80 132 46" size="44 1 1" color="n"/>
   <box at="58 132 32" size="1 1 14" color="n"/>
   <box at="102 132 32" size="1 1 14" color="n"/>
 
-  <!-- RIGA 1: "SALA DEL" (z=40..44, y=133) -->
+  <!-- LINE 1: "SALA DEL" (z=40..44, y=133) -->
   <box at="66 133 44" size="1 1 1" color="F"/>
   <box at="67 133 44" size="1 1 1" color="F"/>
   <box at="68 133 44" size="1 1 1" color="F"/>
@@ -488,7 +488,7 @@ Animazione "delibera" (8 frame):
   <box at="92 133 44" size="1 1 1" color="F"/>
   <box at="93 133 40" size="1 1 1" color="F"/>
   <box at="94 133 40" size="1 1 1" color="F"/>
-  <!-- RIGA 2: "CONCILIO" (z=33..37, y=133) -->
+  <!-- LINE 2: "CONCILIO" (z=33..37, y=133) -->
   <box at="65 133 37" size="1 1 1" color="F"/>
   <box at="66 133 37" size="1 1 1" color="F"/>
   <box at="67 133 37" size="1 1 1" color="F"/>
@@ -569,31 +569,31 @@ Animazione "delibera" (8 frame):
   <box at="95 133 33" size="1 1 1" color="F"/>
 
   <!-- ================================================================= -->
-  <!-- 8. COPERTURA A GRADONI ESAGONALI (z = 42..65, cx=80, cy=68)       -->
+  <!-- 8. ROOF IN HEXAGONAL STEPS (z = 42..65, cx=80, cy=68)             -->
   <!-- ================================================================= -->
-  <!-- Cornicione perimetrale in metallo primario e acciaio sopra i muri -->
+  <!-- Perimeter cornice in primary metal and steel above the walls -->
   <cylinder at="80 68 42" size="126 108 2" color="M"/>
   <cylinder at="80 68 43" size="128 110 1" color="N"/>
   <cylinder at="80 68 44" size="122 104 2" color="S"/>
 
-  <!-- 5 Ordini di gradoni della cupola esagonale -->
-  <!-- Ordine 1 (z=44..48) -->
+  <!-- 5 tiers of steps of the hexagonal dome -->
+  <!-- Tier 1 (z=44..48) -->
   <cylinder at="80 68 44" size="112 96 4" color="M"/>
   <cylinder at="80 68 46" size="114 98 1" color="v"/>
-  <!-- Ordine 2 (z=48..52) -->
+  <!-- Tier 2 (z=48..52) -->
   <cylinder at="80 68 48" size="96 82 4" color="m"/>
   <cylinder at="80 68 50" size="98 84 1" color="w"/>
-  <!-- Ordine 3 (z=52..56) -->
+  <!-- Tier 3 (z=52..56) -->
   <cylinder at="80 68 52" size="80 68 4" color="M"/>
   <cylinder at="80 68 54" size="82 70 1" color="v"/>
-  <!-- Ordine 4 (z=56..60) -->
+  <!-- Tier 4 (z=56..60) -->
   <cylinder at="80 68 56" size="64 54 4" color="m"/>
   <cylinder at="80 68 58" size="66 56 1" color="w"/>
-  <!-- Ordine 5 (z=60..64) -->
+  <!-- Tier 5 (z=60..64) -->
   <cylinder at="80 68 60" size="48 40 4" color="M"/>
   <cylinder at="80 68 62" size="50 42 1" color="S"/>
 
-  <!-- Nervature radiali neon rosa lungo i 6 spigoli del tetto -->
+  <!-- Pink neon radial ribs along the 6 edges of the roof -->
   <line at="52 118 44" to="80 68 64" r="0" color="3"/>
   <line at="52 118 44" to="80 68 64" r="0" color="N" on="M"/>
   <line at="108 118 44" to="80 68 64" r="0" color="3"/>
@@ -608,25 +608,25 @@ Animazione "delibera" (8 frame):
   <line at="22 68 44" to="80 68 64" r="0" color="N" on="M"/>
 
   <!-- ================================================================= -->
-  <!-- 9. LANTERNA ZENITALE E GUGLIA SOMMITALE (z = 64..70)              -->
+  <!-- 9. ZENITH LANTERN AND TOP SPIRE (z = 64..70)                      -->
   <!-- ================================================================= -->
-  <!-- Tamburo poligonale della lanterna con feritoie neon rosa vivo -->
+  <!-- Polygonal drum of the lantern with bright pink neon slits -->
   <cylinder at="80 68 64" size="32 28 2" color="M"/>
   <cylinder at="80 68 65" size="28 24 2" color="S"/>
   <cylinder at="80 68 66" size="22 20 2" color="5"/>
   <cylinder at="80 68 67" size="16 14 2" color="4"/>
 
-  <!-- Calotta e cuspide in metallo e acciaio -->
+  <!-- Cap and cusp in metal and steel -->
   <cylinder at="80 68 68" size="20 18 1" color="M"/>
   <cylinder at="80 68 69" size="12 10 1" color="S"/>
-  <!-- Guglia sommitale a z=70 (lascia margine di 1 voxel dal soffitto z=71) -->
+  <!-- Top spire at z=70 (leaves a margin of 1 voxel from the ceiling z=71) -->
   <box at="80 68 70" size="2 2 1" color="N"/>
 
 </sequence>
 
 <!-- ================================================================= -->
-<!-- ANIMAZIONE CICLICA "DELIBERA" (8 frame, pulsazione del Concilio)  -->
-<!-- L'onda magenta fluisce attraverso i 6 piloni, il portale e il globo -->
+<!-- CYCLIC ANIMATION "DELIBERA" (8 frames, the Council's pulse)       -->
+<!-- The magenta wave flows through the 6 pylons, the portal and the globe -->
 <!-- ================================================================= -->
 <animation name="delibera" frames="8">
   <sequence>

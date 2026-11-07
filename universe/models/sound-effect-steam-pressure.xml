@@ -1,4 +1,4 @@
-<!-- Una valvola sotto pressione: il soffio che si stringe in colpi sempre più fitti, un fischio che sale di semitono e scappa. -->
+<!-- A valve under pressure: the breath tightening into ever denser bursts, a whistle rising by a semitone and escaping. -->
 <sequence name="Vapore in pressione" values="BNSAGKHCTUVPM" size="12 3 12" symmetry="()">
   <sound bpm="132" scale="harmonic_minor" root="52" swing="0" cutoff="9000" space="0.4">
     <track y="0" instrument="lead" volume="0.55"/>
@@ -18,7 +18,7 @@
   <color symbol="P" value="64748b" name="Scelta" hidden="True"/>
   <color symbol="M" value="14b8a6" name="Scelta" hidden="True"/>
 
-  <!-- Il soffio che accelera, e lo sfogo aperto. -->
+  <!-- The breath speeding up, and the open release. -->
   <line at="0 1 1" to="0 1 1" r="0" color="H"/>
   <line at="5 1 1" to="5 1 1" r="0" color="H"/>
   <line at="7 1 1" to="7 1 1" r="0" color="H"/>
@@ -30,7 +30,7 @@
   <line at="10 1 4" to="10 1 4" r="0" color="T"/>
   <one in="T" out="H" steps="1"/>
   <all in="T" out="B"/>
-  <!-- Il fischio: sale per gradi della minore armonica, il seme sceglie dove si ferma. -->
+  <!-- The whistle: it rises by degrees of the harmonic minor, the seed picks where it stops. -->
   <line at="2 0 4" to="2 0 4" r="0" color="N"/>
   <line at="4 0 5" to="4 0 5" r="0" color="N"/>
   <line at="6 0 6" to="6 0 6" r="0" color="N"/>
@@ -41,7 +41,7 @@
   <all in="U" out="B"/>
   <all in="NB" out="NS"/>
   <all in="ABBB" out="ASSS"/>
-  <!-- La caldaia sotto. -->
+  <!-- The boiler underneath. -->
   <line at="0 2 0" to="0 2 0" r="0" color="N"/>
   <line at="0 2 4" to="0 2 4" r="0" color="V"/>
   <line at="0 2 2" to="0 2 2" r="0" color="V"/>

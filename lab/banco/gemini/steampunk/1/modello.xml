@@ -15,7 +15,7 @@
   <color symbol="K" value="26282c" name="ghisa e caldaia"/>
   <color symbol="A" value="6e6961" name="strada lastricata"/>
   <color symbol="O" value="d4af37" name="ingranaggi in ottone"/>
-  <!-- 1. reticolo: bracci dal centro, poi le linee -->
+  <!-- 1. lattice: arms from the centre, then the lines -->
   <prl in="***/*E*/***" out="***/*z*/***"/>
   <all in="Nz" out="*a" steps="1"/>
   <all in="[Nx]az" out="*xa" steps="14"/>

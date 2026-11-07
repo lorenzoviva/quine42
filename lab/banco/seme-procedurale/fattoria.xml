@@ -1,13 +1,13 @@
 <!--
-Fattoria, procedurale (Cantiere 2) dalla fattoria scritta a mano da Claude Code (step 8.2B). Il seme sceglie quanto è
-lungo il cortile, quanto è lunga la casa, quanto sono alti i muri (da 30 a 40 voxel: il tetto sale con loro), dove si
-aprono porta e finestre e dove crescono gli orti; il resto lo trovano le regole sulla pianta che c'è.
-La fattoria originale: una struttura grande (5 × 5 × 4 caselle, 100 × 100 × 80
-voxel) generata direttamente a piena risoluzione, senza `map`. A questa scala non si stampano pattern
-enormi: porta e finestre crescono da un seme (`all` con steps), come le stanze di MarkovJunior.
-Il cortile cresce dal seme e ha una palizzata; la casa sta nella sua metà di fondo, con muri spessi due
-voxel, graticcio, tetto a capanna con i timpani intonacati, comignolo; davanti un sentiero di ghiaia fino
-al cancello e due aiuole di ortaggi; dentro un tavolo. La porta si apre (azione); il comignolo fuma.
+Farm, procedural (Cantiere 2) from the farm written by hand by Claude Code (step 8.2B). The seed picks how
+long the yard is, how long the house is, how tall the walls are (from 30 to 40 voxels: the roof rises with them), where
+the door and the windows open and where the vegetable plots grow; the rest is found by the rules on the plan that is there.
+The original farm: a big structure (5 × 5 × 4 tiles, 100 × 100 × 80
+voxels) generated directly at full resolution, without `map`. At this scale one does not stamp huge
+patterns: door and windows grow from a seed (`all` with steps), like the rooms of MarkovJunior.
+The yard grows from the seed and has a palisade; the house stands in its back half, with walls two
+voxels thick, half-timbering, a gable roof with plastered gables, a chimney; in front a gravel path up
+to the gate and two vegetable beds; inside a table. The door opens (action); the chimney smokes.
 -->
 <sequence values="BXYFfEPpQRrIWwNnDdOoUKhjSGgTta0zv" size="100 100 80" origin="True" symmetry="(xy)">
   <color symbol="a" hidden="True" name="muro già diviso"/>
@@ -42,7 +42,7 @@ al cancello e due aiuole di ortaggi; dentro un tavolo. La porta si apre (azione)
   <color symbol="z" hidden="True" name="quote possibili dei muri"/>
   <color symbol="v" hidden="True" name="la quota scelta"/>
   <color symbol="0" hidden="True" name="mescola"/>
-  <!-- Mescola: il generatore riparte da un punto diverso per ogni seme (vedi README) -->
+  <!-- Shuffle: the generator starts again from a different point for every seed (see README) -->
   <box at="50 0 79" size="100 2 1" color="0"/>
   <prl in="0" out="B" p="0.5" steps="1"/>
   <all in="0" out="B"/>
@@ -50,20 +50,20 @@ al cancello e due aiuole di ortaggi; dentro un tavolo. La porta si apre (azione)
   <union symbol="#" values="WN"/>
   <union symbol="@" values="XY"/>
 
-  <!-- Il seme della casa cade sul fondo; il cortile cresce intorno: 89 × 81 voxel (4,5 × 4 caselle). -->
+  <!-- The seed of the house falls to the back; the yard grows around it: 89 × 81 voxels (4.5 × 4 tiles). -->
   <one in="X B" out="B X"/>
   <all in="@B" out="*Y" steps="36" symmetry="(x)"/>
   <prl in="@B" out="*Y" p="0.5" steps="8" symmetry="(x)"/>
   <all in="@/B" out="*/Y" steps="40" symmetry="(y)"/>
 
-  <!-- La casa: il seme torna indietro di 14, poi la pianta (45-53 × 29 voxel) nel fondo del cortile. -->
+  <!-- The house: the seed goes back 14, then the plan (45-53 × 29 voxels) at the back of the yard. -->
   <one in="Y/X" out="X/Y" steps="14" symmetry="()"/>
   <all in="XY" out="*X" steps="16" symmetry="(x)"/>
   <prl in="XY" out="*X" p="0.5" steps="12" symmetry="(x)"/>
   <all in="X/Y" out="*/X" steps="14" symmetry="(y)"/>
 
-  <!-- Volume: muri alti 39 voxel (quasi due caselle), base del tetto con la gronda, prisma, tetto a capanna. -->
-  <!-- La quota dei muri: uno strato d'aria scelto fa da soffitto alla crescita -->
+  <!-- Volume: walls 39 voxels high (almost two tiles), base of the roof with the eaves, prism, gable roof. -->
+  <!-- The height of the walls: a chosen layer of air acts as the ceiling of the growth -->
   <box at="0 0 31" size="1 1 10" color="z"/>
   <one in="z" out="v" steps="1"/>
   <all in="z" out="B"/>
@@ -77,7 +77,7 @@ al cancello e due aiuole di ortaggi; dentro un tavolo. La porta si apre (azione)
   <all in="*/Q B/*" out="*/B */*" symmetry="(y)"/>
   <prl in="Q" out="R" steps="1"/>
 
-  <!-- Scavo: muri spessi due voxel; pavimento in fondo, soffitto sotto il tetto, il resto è aria. -->
+  <!-- Digging: walls two voxels thick; floor at the bottom, ceiling under the roof, the rest is air. -->
   <prl in="XXXXX/XXXXX/XXXXX/XXXXX/XXXXX" out="*****/*****/**I**/*****/*****" steps="1"/>
   <prl in="R I" out="* n" steps="1"/>
   <prl in="I *" out="B *" steps="1"/>
@@ -85,24 +85,24 @@ al cancello e due aiuole di ortaggi; dentro un tavolo. La porta si apre (azione)
   <prl in="X *" out="W *" steps="1"/>
   <prl in="X" out="D" steps="1"/>
 
-  <!-- Timpani: dove il tetto finisce di lato, intonaco. -->
+  <!-- Gables: where the roof ends at the side, plaster. -->
   <prl in="RB" out="W*" symmetry="(x)" steps="1"/>
   <prl in="B W" out="* R" steps="1"/>
 
-  <!-- Graticcio: pali agli spigoli (larghi), travi doppie in cima e sopra lo zoccolo, pali ogni tanto. -->
+  <!-- Half-timbering: posts at the corners (wide), double beams at the top and above the plinth, posts every so often. -->
   <all in="BB/BW" out="**/*N"/>
   <all in="NW" out="*N" steps="1"/>
   <all in="R W" out="* N"/>
   <all in="N W" out="* N" steps="1"/>
   <all in="W D" out="N *"/>
-  <!-- (la regola scrive tutte e undici le celle: così due pali non possono stare a meno di undici voxel) -->
+  <!-- (the rule writes all eleven cells: so two posts cannot be less than eleven voxels apart) -->
   <all in="WWWWWWWWWWW/BBBBBBBBBBB NNNNNNNNNNN/BBBBBBBBBBB" out="aaaaaTaaaaa/*********** ***********/***********"/>
   <prl in="a" out="W" steps="1"/>
   <all in="W T" out="T *"/>
   <prl in="T" out="N" steps="1"/>
 
-  <!-- La porta: un seme nello zoccolo della facciata davanti (symmetry "()": verso y grande), lontano dagli
-       spigoli; sale per 32 voxel, si allarga a 13, attraversa il muro; poi la cornice. -->
+  <!-- The door: a seed in the plinth of the front facade (symmetry "()": towards large y), away from the
+       corners; it rises for 32 voxels, widens to 13, goes through the wall; then the frame. -->
   <one steps="1" symmetry="()" in="NNNNNNNNN/BBBBBBBBB DDDDDDDDD/YYYYYYYYY" out="****O****/********* *********/*********"/>
   <all in="# O" out="O *" steps="31"/>
   <all in="O#" out="*O" steps="6" symmetry="(x)"/>
@@ -111,8 +111,8 @@ al cancello e due aiuole di ortaggi; dentro un tavolo. La porta si apre (azione)
   <all in="# O" out="N *" steps="1"/>
   <all in="OOO" out="*o*" symmetry="()"/>
 
-  <!-- Finestre: un seme 9 voxel sotto la trave alta, sul lato di fuori; crescono in basso e di lato,
-       attraversano il muro; cornice e croce. -->
+  <!-- Windows: a seed 9 voxels under the high beam, on the outer side; they grow downwards and sideways,
+       go through the wall; frame and cross. -->
   <one steps="7" in="N/B W/B W/B W/B W/B W/B W/B W/B W/B W/B" out="*/* */* */* */* */* */* */* */* */* U/*"/>
   <all in="U W" out="* U" steps="10"/>
   <all in="UW" out="*U" steps="4"/>
@@ -121,11 +121,11 @@ al cancello e due aiuole di ortaggi; dentro un tavolo. La porta si apre (azione)
   <all in="U U" out="N *" steps="1" optional="True"/>
   <all in="UUUUUUUUU" out="****N****" optional="True"/>
 
-  <!-- Dentro: un tavolo su quattro gambe. -->
+  <!-- Inside: a table on four legs. -->
   <one steps="1" in="BBBBBBB/BBBBBBB/BBBBBBB BBBBBBB/BBBBBBB/BBBBBBB BBBBBBB/BBBBBBB/BBBBBBB BBBBBBB/BBBBBBB/BBBBBBB nnnnnnn/nnnnnnn/nnnnnnn"
        out="*******/*******/******* ttttttt/ttttttt/ttttttt t*****t/*******/t*****t t*****t/*******/t*****t *******/*******/*******"/>
 
-  <!-- Fuori: la soglia, il sentiero di ghiaia dritto fino alla palizzata, il cancello. -->
+  <!-- Outside: the threshold, the straight gravel path up to the palisade, the gate. -->
   <all in="O/B */Y" out="*/* */p" symmetry="()"/>
   <all in="Y/B" out="E/*" symmetry="()"/>
   <all in="YB" out="F*"/>
@@ -135,8 +135,8 @@ al cancello e due aiuole di ortaggi; dentro un tavolo. La porta si apre (azione)
   <all in="PE" out="*P" steps="1" symmetry="(x)"/>
   <prl in="E" out="F" steps="1"/>
 
-  <!-- Due aiuole: terra a solchi, ortaggi che spuntano. -->
-  <!-- (ognuna con un vialetto di ghiaia fino al sentiero: niente isole staccate) -->
+  <!-- Two beds: furrowed soil, sprouting vegetables. -->
+  <!-- (each with a little gravel path up to the main path: no detached islands) -->
   <one steps="1" in="YYYYYYYYYYY/YYYYYYYYYYY/YYYYYYYYYYY/YYYYYYYYYYY/YYYYYYYYYYY/YYYYYYYYYYY/YYYYYYYYYYY"
        out="vvvvvvvvvvv/vvvvvvvvvvv/vvvvvvvvvvv/vvvvvvvvvvv/vvvvvvvvvvv/vvvvvvvvvvv/vvvvvvvvvvv"/>
   <path from="v" to="P" on="Y" color="P"/>
@@ -148,16 +148,16 @@ al cancello e due aiuole di ortaggi; dentro un tavolo. La porta si apre (azione)
   <prl in="B G" out="g *" p="0.35" steps="1"/>
   <one in="B g" out="g *" steps="200"/>
 
-  <!-- La palizzata: pali chiari e scuri, alti 13-15 voxel. -->
+  <!-- The palisade: light and dark posts, 13-15 voxels high. -->
   <prl in="F" out="f" p="0.45" steps="1"/>
   <all in="B F" out="F *" steps="12"/>
   <all in="B f" out="f *" steps="12"/>
   <prl in="B ~" out="F *" p="0.4" steps="2"/>
 
-  <!-- Il cortile non si vede (sotto c'è il prato del mondo). -->
+  <!-- The yard is not shown (the world's lawn is underneath). -->
   <prl in="Y" out="B" steps="1"/>
 
-  <!-- Tetto, muri, pietra: i dettagli. -->
+  <!-- Roof, walls, stone: the details. -->
   <prl in="RB" out="r*" p="0.6" steps="1"/>
   <prl in="B R" out="* r" p="0.1" steps="1"/>
   <prl in="W" out="w" p="0.01" steps="1"/>

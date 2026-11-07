@@ -20,7 +20,7 @@ Palette armonizzata con gli edifici e i droni della Corona (Torre della Magia, S
   <color symbol="G" value="05d9e8" name="diffusore prismatico ciano"/>
   <color symbol="x" value="ff0000" hidden="True" name="marker temporaneo per ripristino fascia"/>
 
-  <!-- Fonti luminose attive (glow="True"): Gradiente Neon Punk a 26 fasi -->
+  <!-- Active light sources (glow="True"): a 26-phase Neon Punk gradient -->
   <!-- Dal picco laser bianco-ciano (1), attraverso elettrico/cobalto (6-Z), fino alla coda viola/magenta (F-Y) -->
   <color symbol="1" value="ffffff" glow="True" name="fascio neon 1 picco fotonico"/>
   <color symbol="2" value="d8fcff" glow="True" name="fascio neon 2 ghiaccio"/>
@@ -59,7 +59,7 @@ Palette armonizzata con gli edifici e i droni della Corona (Torre della Magia, S
   <color symbol="p" value="05d9e8" alpha="0.55" name="peso mortaio caricatore ciano"/>
   <color symbol="c" value="ff2a6d" alpha="0.60" name="peso mortaio in caduta magenta"/>
 
-  <!-- Marcatori per cinematica e regole generative -->
+  <!-- Markers for the kinematics and the generative rules -->
   <color symbol="a" value="29adff" alpha="0" name="apice mortaio"/>
   <color symbol="b" hidden="True" alpha="0" name="marker caduta mortaio"/>
   <color symbol="X" hidden="True" name="marker generativo"/>
@@ -322,7 +322,7 @@ Palette armonizzata con gli edifici e i droni della Corona (Torre della Magia, S
   <box at="3.5 6 62" size="2 1 1" color="b"/>
 
   <!-- ======================================================== -->
-  <!-- 6. REGOLE GENERATIVE: VARIANTI NEI SEMI                  -->
+  <!-- 6. GENERATIVE RULES: VARIANTS IN THE SEEDS               -->
   <!-- ======================================================== -->
   <one steps="1">
     <rule in="X" out="s" p="0.40"/>

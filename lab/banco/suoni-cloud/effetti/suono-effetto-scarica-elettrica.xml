@@ -1,4 +1,4 @@
-<!-- Una scarica elettrica: lampi di note seghettate in sedicesimi su altezze impazzite, il crepitio, il colpo finale. -->
+<!-- An electric discharge: flashes of sawtooth notes in sixteenths at crazy pitches, the crackle, the final blow. -->
 <sequence name="Scarica elettrica" values="BNSAGKHCTUVPM" size="10 2 12" symmetry="()">
   <sound bpm="190" scale="phrygian" root="52" swing="0" cutoff="11000" space="0.3">
     <track y="0" instrument="lead" volume="0.5"/>
@@ -17,7 +17,7 @@
   <color symbol="P" value="64748b" name="Scelta" hidden="True"/>
   <color symbol="M" value="14b8a6" name="Scelta" hidden="True"/>
 
-  <!-- I lampi: accenti (la sega) su altezze scelte dal seme. -->
+  <!-- The flashes: accents (the saw) at pitches picked by the seed. -->
   <line at="0 0 4" to="6 0 4" r="0" color="T"/>
   <line at="0 0 7" to="6 0 7" r="0" color="T"/>
   <line at="0 0 9" to="6 0 9" r="0" color="T"/>
@@ -25,7 +25,7 @@
   <line at="0 0 5" to="6 0 5" r="0" color="T"/>
   <one in="T" out="A" steps="5"/>
   <all in="T" out="B"/>
-  <!-- Il crepitio e il colpo. -->
+  <!-- The crackle and the blow. -->
   <line at="0 1 1" to="7 1 1" r="0" color="U"/>
   <one in="U" out="H" steps="4"/>
   <all in="U" out="B"/>

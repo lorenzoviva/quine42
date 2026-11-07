@@ -1,4 +1,4 @@
--- Pozzo: acqua per chi ha un secchio, un'eco per chi ascolta.
+-- Well: water for whoever has a bucket, an echo for whoever listens.
 local M = {}
 
 local ECHI = {

@@ -1,8 +1,8 @@
 <!--
-Falò, procedurale (Cantiere 2) dal falò scritto a mano da Claude Code (step 8.2A): un anello di pietre attorno alla
-brace, i ciocchi e le fiamme. Il seme sceglie quanto è largo e storto il cerchio di pietre, quante pietre sono doppie,
-quanti ciocchi ci sono (da uno a quattro) e come sono impilati, e quanto alte salgono le lingue di fuoco. L'animazione è MarkovJunior anche lei: a ogni fotogramma le punte delle fiamme si spengono o
-salgono a caso, e la brace pulsa. Fiamme e brace fanno luce (glow, ADR-0046).
+Campfire, procedural (Cantiere 2) from the campfire written by hand by Claude Code (step 8.2A): a ring of stones around the
+embers, the logs and the flames. The seed picks how wide and crooked the ring of stones is, how many stones are double,
+how many logs there are (from one to four) and how they are stacked, and how high the tongues of fire rise. The animation is MarkovJunior too: at every frame the tips of the flames go out or
+rise at random, and the embers pulse. Flames and embers give light (glow, ADR-0046).
 -->
 <sequence values="BXDdENnYORe" size="20 20 18" origin="True" symmetry="(xy)">
   <color symbol="X" hidden="True" name="seme"/>
@@ -17,24 +17,24 @@ salgono a caso, e la brace pulsa. Fiamme e brace fanno luce (glow, ADR-0046).
   <color symbol="e" value="c8501e" name="brace accesa" glow="True"/>
 
   <one in="X B" out="B X"/>
-  <!-- Un disco ottagonale: crescita a rombo, poi in diagonale. -->
+  <!-- An octagonal disc: rhombus growth, then diagonal. -->
   <prl in="XB" out="*X" p="0.75" steps="6"/>
   <prl in="X*/*B" out="**/*X" p="0.6" steps="2"/>
   <all in="BXB" out="*X*" steps="1"/>
-  <!-- Il bordo diventa pietre (alcune doppie), il resto cenere. -->
+  <!-- The edge becomes stones (some double), the rest ash. -->
   <all in="XB" out="D*"/>
   <prl in="X" out="E" steps="1"/>
   <prl in="B D" out="D *" p="0.5" steps="1"/>
   <prl in="D" out="d" p="0.3" steps="1"/>
 
-  <!-- Tre ciocchi sulla cenere, il secondo e il terzo appoggiati sopra quando non c'è posto. -->
+  <!-- Three logs on the ash, the second and third resting on top when there is no room. -->
   <one in="BBBBBBB EEEEEEE" out="NNNNNNN *******" steps="1"/>
   <one in="BBBBB EEEEE" out="NNNNN *****" steps="1"/>
   <prl in="BBBBB EEEEE" out="NNNNN *****" p="0.02" steps="1"/>
   <prl in="BBBBB NNNNN" out="NNNNN *****" p="0.08" steps="1"/>
   
 
-  <!-- Le fiamme: semi sopra i ciocchi, lingue che salgono a caso, poi i colori dalla base alla punta. -->
+  <!-- The flames: seeds above the logs, tongues rising at random, then the colours from the base to the tip. -->
   <prl in="B N" out="Y *" p="0.6" steps="1"/>
   <one in="B Y" out="Y *" steps="14"/>
   <prl in="B Y" out="Y *" p="0.3" steps="4"/>

@@ -1,6 +1,6 @@
-<!-- Betulla, procedurale (Cantiere 2): la corteccia bianca con le lenticelle e il fogliame chiaro dell'originale. Il seme decide quanto sale
-     il fusto sottile (fra 44 e 54 voxel) e come piega, dove nascono i rametti che salgono obliqui e quanto è grande ogni nuvola di foglie
-     alla loro punta: una chioma ariosa a ciuffi che non è mai la stessa. -->
+<!-- Birch, procedural (Cantiere 2): the white bark with the lenticels and the light foliage of the original. The seed decides how high the
+     thin trunk rises (between 44 and 54 voxels) and how it bends, where the twigs that rise obliquely grow and how big each cloud of leaves
+     at their tip is: an airy crown in tufts that is never the same. -->
 <sequence values="BWKDFlLShkVrxc" size="40 40 60" symmetry="(xy)" name="Betulla">
   <color symbol="W" value="f3f1e8" name="corteccia bianca"/>
   <color symbol="K" value="322c2b" name="macchia scura"/>
@@ -26,7 +26,7 @@
   </one>
   <all in="r" out="W"/>
   <all in="k" out="B"/>
-  <!-- I rametti obliqui, dalla metà in su -->
+  <!-- The oblique twigs, from halfway up -->
   <ellipsoid at="20 20 18" size="34 34 42" color="V" on="B"/>
   <box at="20 20 0" size="40 40 22" color="x" on="[BV]"/>
   <prl steps="1" in="V* *W" out="r* **" p="0.05"/>
@@ -36,7 +36,7 @@
     <rule in="V r" out="r W" p="0.4"/>
   </one>
   <all in="r" out="c"/>
-  <!-- Le nuvole di foglie: crescono dalle punte e dalla cima -->
+  <!-- The clouds of leaves: they grow from the tips and from the top -->
   <all in="V W" out="c W"/>
   <one steps="4200" symmetry="(xyz)">
     <rule in="cV" out="cF"/>

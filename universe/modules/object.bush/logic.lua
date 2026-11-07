@@ -1,4 +1,4 @@
--- Rovo: le more si raccolgono una volta; tagliato (con uno strumento "taglio") lascia legna.
+-- Bramble: the blackberries are picked once; cut (with a "cutting" tool) it leaves wood.
 local M = {}
 
 function M.on_act(id, user, action)

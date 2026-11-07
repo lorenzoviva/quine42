@@ -14,7 +14,7 @@
   <color symbol="T" value="d6ad76" name="legno chiaro"/>
   <color symbol="K" value="575956" name="pietra grigia"/>
   <color symbol="A" value="858279" name="ciottoli"/>
-  <!-- 1. reticolo: bracci dal centro, poi le linee -->
+  <!-- 1. lattice: arms from the centre, then the lines -->
   <prl in="***/*E*/***" out="***/*z*/***"/>
   <all in="Nz" out="*a" steps="1"/>
   <all in="[Nx]az" out="*xa" steps="14"/>
@@ -35,7 +35,7 @@
   <all><rule in="*p*/ppp/*p*" out="***/*P*/***"/><rule in="ppp/*p*" out="*P*/***"/><rule in="pp/p*" out="P*/**"/></all>
   <all in="Op" out="*O" steps="5"/>
   <all in="tz" out="*t"/>
-  <!-- 2. progetto: la scala parte dalla campata davanti e attraversa il muro verso una vicina -->
+  <!-- 2. design: the stair starts from the front bay and goes through the wall towards a neighbour -->
   <all in="Ot" out="*v"/>
   <all in="vt" out="*v" steps="6"/>
   <one in="*zzzzzzzzzzz/Pppppppppppp/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt" out="************/*yyyyyyyyyyy/*ggggggggggg/************/************/************/************/************/************/************/************/************/************/************/************/************/************/************/************" steps="1"/>
@@ -44,7 +44,7 @@
   <all in="z/y" out="t/*"/>
   <all in="tz" out="*t"/>
   <one in="*tttttttttttt/Ppppppppppppp/*tttttttttttt" out="*************/******H******/*************" steps="1"/>
-  <!-- attorno alla scala niente porte; altre campate crescono attraverso un muro -->
+  <!-- no doors around the stair; other bays grow through a wall -->
   <all in="[gsdc]t" out="*v"/>
   <all in="vt" out="*v" steps="9"/>
   <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
@@ -61,7 +61,7 @@
   <all><rule in="nH" out="*n"/><rule in="np" out="*n"/></all>
   <one in="nnnnnnnnn" out="*eeeeeee*" steps="1"/>
   <prl in="v" out="t"/>
-  <!-- 3. i muri dalle lettere vicine -->
+  <!-- 3. the walls from the neighbouring letters -->
   <all><rule in="[zE]p[zE]" out="*q*"/><rule in="[zE]p1" out="*w*"/><rule in="[zE]p2" out="*X*"/><rule in="1p1" out="*i*"/><rule in="2p2" out="*I*"/><rule in="1p2" out="*J*"/><rule in="1H1" out="*h*"/><rule in="1H2" out="*j*"/><rule in="EO2" out="*M*"/></all>
   <prl in="n" out="h"/>
   <all in="P[XIJjHMy]" out="I*"/>

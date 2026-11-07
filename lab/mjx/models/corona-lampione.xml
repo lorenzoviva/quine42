@@ -155,7 +155,7 @@ Animazione telemetria (6 fotogrammi):
   <box at="3.5 5.0 15" size="2 1 1" color="W"/>
 
   <!-- ======================================================== -->
-  <!-- 6. REGOLE GENERATIVE: VARIANTI NEI SEMI                  -->
+  <!-- 6. GENERATIVE RULES: VARIANTS IN THE SEEDS               -->
   <!-- ======================================================== -->
   <!-- A) Risoluzione del tirante e del contrafforte superiore -->
   <one steps="1">

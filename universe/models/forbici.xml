@@ -1,4 +1,4 @@
-<!-- Forbici da giardiniere: scritte a mano da Claude Code (step 9). Due lame d'acciaio incrociate e due manici di legno, posate a terra. -->
+<!-- Garden shears: written by hand by Claude Code (step 9). Two crossed steel blades and two wooden handles, lying on the ground. -->
 <sequence values="BSsHh" size="12 12 12" symmetry="()" name="Forbici">
   <color symbol="S" value="c0c8d0" name="lama"/>
   <color symbol="s" value="8a929c" name="filo"/>

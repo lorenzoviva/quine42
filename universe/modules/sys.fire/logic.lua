@@ -1,4 +1,4 @@
--- Fuoco, luci evocate e scudi: tutto ciò che dura un poco e poi passa.
+-- Fire, summoned lights and shields: everything that lasts a little while and then passes.
 local M = {}
 
 local INFIAMMABILE = { "infiammabile", "legno", "paglia", "tagliabile" }

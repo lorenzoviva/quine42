@@ -1,6 +1,6 @@
-<!-- Barile a doghe, procedurale (Cantiere 2): le doghe, i cerchi di ferro e il tappo dell'originale. Il seme sceglie quanto è panciuto il
-     barile (snello, a botte, largo), quanto è alto (da 8 a 19 voxel: una botticella o una botte da cantina) e se sul coperchio c'è un
-     mestolo appoggiato. -->
+<!-- Barrel with staves, procedural (Cantiere 2): the staves, the iron hoops and the bung of the original. The seed picks how bulging the
+     barrel is (slender, cask-shaped, wide), how tall it is (from 8 to 19 voxels: a small keg or a cellar cask) and whether a
+     ladle rests on the lid. -->
 <sequence values="BWLDISThkpqmab" size="20 20 20" symmetry="(xy)" name="Barile a doghe">
   <color symbol="W" value="8c532b" name="legno doghe"/>
   <color symbol="L" value="ad6f3d" name="legno chiaro"/>
@@ -15,7 +15,7 @@
   <color symbol="m" hidden="True" name="il dado della pancia, poi il mestolo"/>
   <color symbol="a" hidden="True" name="scelta: pancia larga"/>
   <color symbol="b" hidden="True" name="scelta: pancia a botte"/>
-  <!-- La pancia: il dado al centro del fondo sceglie fino a quale anello la botte si allarga -->
+  <!-- The belly: the die at the centre of the bottom picks up to which ring the cask widens -->
   <cylinder at="10 10 1" size="18 18 17" color="p"/>
   <cylinder at="10 10 1" size="16 16 17" color="q"/>
   <cylinder at="10 10 0" size="12 12 20" color="W"/>
@@ -35,25 +35,25 @@
   </all>
   <all in="[ab]" out="W"/>
   <all in="[pq]" out="B"/>
-  <!-- I fianchi arrotondati: gli spigoli della pancia si smussano -->
+  <!-- The rounded sides: the edges of the belly are smoothed -->
   <convolution neighborhood="Moore" steps="1">
     <rule in="W" out="B" values="B" sum="15..26"/>
   </convolution>
-  <!-- I cerchi di ferro -->
+  <!-- The iron hoops -->
   <box at="10 10 3" size="20 20 2" color="I" on="W"/>
   <box at="10 10 12" size="20 20 2" color="I" on="W"/>
-  <!-- L'altezza: lo strato scelto e tutto ciò che sta sopra spariscono -->
+  <!-- The height: the chosen layer and everything above it disappear -->
   <box at="0 0 8" size="1 1 12" color="h"/>
   <one in="h" out="k" steps="1"/>
   <all in="h" out="B"/>
   <all in="k*" out="kk"/>
   <all in="* k" out="k *"/>
   <all in="k" out="B"/>
-  <!-- Il coperchio: un anello scuro sul bordo di cima e il tappo al centro -->
+  <!-- The lid: a dark ring on the top rim and the bung at the centre -->
   <all in="B [WI]" out="B D"/>
   <all in="D/D/D/D/D D/D/D/D/D" out="*/*/*/*/* */*/W/*/*" symmetry="()"/>
   <all in="D/D/D D/D/D" out="*/*/* */T/*" symmetry="()" steps="1"/>
-  <!-- Forse un mestolo appoggiato sul coperchio -->
+  <!-- Perhaps a ladle resting on the lid -->
   <prl in="B D" out="m *" p="0.03" steps="1"/>
   <one in="m" out="S" steps="1"/>
   <all in="m" out="B"/>

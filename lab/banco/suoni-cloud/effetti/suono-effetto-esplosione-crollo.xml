@@ -1,4 +1,4 @@
-<!-- Un'esplosione e il crollo: il botto grave, il rullante che si spacca, poi i calcinacci che cadono dove il seme vuole. -->
+<!-- An explosion and the collapse: the low bang, the snare splitting, then the rubble falling where the seed wants. -->
 <sequence name="Esplosione e crollo" values="BNSAGKHCTUVPM" size="12 3 8" symmetry="()">
   <sound bpm="110" scale="phrygian" root="33" swing="0" cutoff="3000" space="0.5">
     <track y="0" instrument="bass" volume="0.85"/>
@@ -18,12 +18,12 @@
   <color symbol="P" value="64748b" name="Scelta" hidden="True"/>
   <color symbol="M" value="14b8a6" name="Scelta" hidden="True"/>
 
-  <!-- Il botto: un accento sul basso più grave è anche una cassa. -->
+  <!-- The bang: an accent on the lowest bass is also a kick. -->
   <line at="0 0 0" to="0 0 0" r="0" color="A"/>
   <all in="ABBBBBBB" out="ASSSSSSS"/>
   <line at="0 2 2" to="0 2 2" r="0" color="C"/>
   <line at="0 2 4" to="0 2 4" r="0" color="H"/>
-  <!-- Il rombo del crollo: quarte e quinte vuote, basse. -->
+  <!-- The rumble of the collapse: low, empty fourths and fifths. -->
   <line at="0 1 0" to="0 1 0" r="0" color="N"/>
   <line at="0 1 3" to="0 1 3" r="0" color="N"/>
   <line at="1 1 4" to="1 1 4" r="0" color="T"/>
@@ -32,7 +32,7 @@
   <one in="T" out="N" steps="1"/>
   <all in="T" out="B"/>
   <all in="NBBBBBB" out="NSSSSSS"/>
-  <!-- I calcinacci: colpi sparsi. -->
+  <!-- The rubble: scattered hits. -->
   <line at="2 2 1" to="11 2 1" r="0" color="U"/>
   <one in="U" out="H" steps="3"/>
   <all in="U" out="B"/>

@@ -1,37 +1,37 @@
 <!--
-Gerboa base (corona): avatar base per i membri del Concilio della corona (omaggio alla Guida Galattica per gli Autostoppisti).
-Scritto da Gemini CLI (Gemini 3.8 Flash, abbonamento), task T50a — versione morfologicamente autentica ad alta fedeltà.
-Scatola: 1.6 × 2.2 × 2.1 caselle, 32 × 44 × 42 voxel, 20 voxel per casella (vpt: 20).
-Ruolo: npc.
-Design e concetto scultoreo (ispirato fedelmente ai riferimenti reali e pixel art dei dipodidi del deserto):
-- Morfologia autentica da saltatore bipede del deserto (Euchoreutes naso / Jaculus):
-  silhouette slanciata e agile, corpo ovoide compatto inclinato in avanti a 30 gradi, sospeso su lunghissime zampe a trampolo;
-- Zampe posteriori estesissime e ravvicinate sotto il corpo (G, g, P, p, part="leg"):
-  - Cosce muscolose alte ancorate alla groppa posteriore (z=11..19, y=16..24, x=11 e x=20);
-  - Ginocchia piegate marcatamente in avanti (y=25, z=12);
-  - Stinchi e garretti lunghissimi e snelli (z=2..12, dislivello 10 voxel!) che scendono all'indietro verso il calcagno;
-  - Piedi lunghissimi piatti a terra (z=0..1, lunghezza 13 voxel, y=15..28!) con dita allungate e artiglietti;
-  - Il corpo "galleggia" visibilmente sollevato da terra sui trampoli elastici delle zampe;
-- Zampette anteriori minuscole e delicate (A, a, part="arm") raccolte con grazia sotto la gola/petto;
-- Testa grande e tenerissima (T, t, U, u, part="head", z=17..27) con musetto conico appuntito in avanti, guanciotte crema pulite e morbide, tartufo nasino scuro (N) e vibrisse discrete (W);
-- Occhi grandi profondi moro (E) di 3x2x3 voxel con punto luce riflesso bianco brillante (Z, glow="True") perfettamente visibili in visuale 3/4;
-- GIGANTESCHE ORECCHIE A CONCHIGLIA (O, o, R, r, part="head", z=25..39, altezza 14 voxel!):
-  padiglioni ampi a spatola/parabola aperti a V sopra la testa, con dorso fulvo e interno concavo in velluto rosa carne;
-- Coda lunghissima (K, k, part="tail", oltre 30 voxel di estensione!):
-  esce dalla groppa posteriore alta, scende sfiorando il suolo e risale con una spettacolare curva a bandiera terminando con un vistoso pennacchio a batuffolo bicolore piumato (base scura J, grande ciuffo bianco candido I);
-- Variazioni stocastiche nei semi: sfumature del manto sabbia/dorso fulvo, morbidezza del pelo e ciuffi della coda.
+Base jerboa (corona): the base avatar for the members of the Council of the corona (a tribute to the Hitchhiker's Guide to the Galaxy).
+Written by Gemini CLI (Gemini 3.8 Flash, subscription), task T50a: a morphologically authentic, high-fidelity version.
+Box: 1.6 × 2.2 × 2.1 tiles, 32 × 44 × 42 voxels, 20 voxels per tile (vpt: 20).
+Role: npc.
+Design and sculptural concept (faithfully inspired by real references and pixel art of desert dipodids):
+- Authentic morphology of a bipedal desert jumper (Euchoreutes naso / Jaculus):
+  a slender, agile silhouette, a compact ovoid body leaning forward at 30 degrees, raised on very long stilt legs;
+- Very long hind legs set close together under the body (G, g, P, p, part="leg"):
+  - High muscular thighs anchored to the high hindquarters (z=11..19, y=16..24, x=11 and x=20);
+  - Knees markedly bent forward (y=25, z=12);
+  - Very long, slender shins and hocks (z=2..12, a drop of 10 voxels!) going down backwards to the heel;
+  - Very long feet flat on the ground (z=0..1, 13 voxels long, y=15..28!) with long toes and little claws;
+  - The body visibly "floats" off the ground on the elastic stilts of the legs;
+- Tiny, delicate front paws (A, a, part="arm") gracefully gathered under the throat/chest;
+- A big, very tender head (T, t, U, u, part="head", z=17..27) with a conical muzzle pointing forward, clean and soft cream cheeks, a little dark nose (N) and discreet whiskers (W);
+- Big deep dark-brown eyes (E) of 3x2x3 voxels with a bright white reflected highlight (Z, glow="True") perfectly visible in the 3/4 view;
+- GIGANTIC SHELL-SHAPED EARS (O, o, R, r, part="head", z=25..39, 14 voxels high!):
+  wide spatula/dish-shaped auricles open in a V above the head, with a fawn back and a concave inside in flesh-pink velvet;
+- A very long tail (K, k, part="tail", over 30 voxels of extent!):
+  it comes out of the high hindquarters, goes down grazing the ground and rises again in a spectacular flag curve ending in a showy feathered two-coloured puff plume (dark base J, big pure white tuft I);
+- Stochastic variations in the seeds: shades of the sand coat/fawn back, softness of the fur and tufts of the tail.
 -->
 <sequence values="BFfDCcTtUuNWEZRrOoGgPpaAKkJI" size="32 44 42" symmetry="()" name="Gerboa">
-  <!-- Manto fulvo naturale / sabbia caldo del corpo e dorso -->
+  <!-- Natural fawn / warm sand coat of the body and back -->
   <color symbol="F" value="ab5236" name="fulvo base dorso"/>
   <color symbol="f" value="c87a48" name="fulvo chiaro luce"/>
   <color symbol="D" value="7a361e" name="fulvo scuro ombra"/>
 
-  <!-- Ventre, petto e gola in morbido crema soffice -->
+  <!-- Belly, chest and throat in a soft fluffy cream -->
   <color symbol="C" value="fff1e8" name="crema chiaro ventre"/>
   <color symbol="c" value="f2d5be" name="crema caldo sfumatura"/>
 
-  <!-- Testa, musetto, tartufo e baffi (part="head") -->
+  <!-- Head, muzzle, nose and whiskers (part="head") -->
   <color symbol="T" value="ab5236" part="head" name="testa fulva base"/>
   <color symbol="t" value="c87a48" part="head" name="testa fulvo chiaro guance"/>
   <color symbol="U" value="fff1e8" part="head" name="musetto e guance crema"/>
@@ -41,32 +41,32 @@ Design e concetto scultoreo (ispirato fedelmente ai riferimenti reali e pixel ar
   <color symbol="E" value="141418" part="head" name="occhi scuri profondi"/>
   <color symbol="Z" value="ffffff" glow="True" part="head" name="riflesso occhi vispo"/>
 
-  <!-- Grandi orecchie a conchiglia (part="head") -->
+  <!-- Big shell-shaped ears (part="head") -->
   <color symbol="O" value="ab5236" part="head" name="dorso orecchio fulvo"/>
   <color symbol="o" value="c87a48" part="head" name="bordo orecchio chiaro"/>
   <color symbol="R" value="ffaec0" part="head" name="interno orecchio rosa"/>
   <color symbol="r" value="ffd2dc" part="head" name="concavita orecchio rosa chiaro"/>
 
-  <!-- Zampe posteriori bipedali piegate a Z (part="leg") -->
+  <!-- Bipedal hind legs bent in a Z (part="leg") -->
   <color symbol="G" value="ab5236" part="leg" name="coscia fulva"/>
   <color symbol="g" value="8f4325" part="leg" name="stinco e garretto"/>
   <color symbol="P" value="f2d5be" part="leg" name="piede crema dita"/>
   <color symbol="p" value="d8a878" part="leg" name="polpastrelli unghie"/>
 
-  <!-- Zampette anteriori sul petto (part="arm") -->
+  <!-- Little front paws on the chest (part="arm") -->
   <color symbol="A" value="c87a48" part="arm" name="braccino fulvo"/>
   <color symbol="a" value="fff1e8" part="arm" name="manina crema"/>
 
-  <!-- Coda sinuosa e pennacchio bicolore (part="tail") -->
+  <!-- Sinuous tail and two-coloured plume (part="tail") -->
   <color symbol="K" value="ab5236" part="tail" name="fusto coda fulvo"/>
   <color symbol="k" value="8f4325" part="tail" name="giunto fusto coda"/>
   <color symbol="J" value="291814" part="tail" name="base pennacchio nera"/>
   <color symbol="I" value="fff1e8" part="tail" name="punta pennacchio bianca"/>
 
   <!-- ======================================================== -->
-  <!-- 1. LUNGHE ZAMPE POSTERIORI DA SALTATORE (part="leg")   -->
+  <!-- 1. LONG JUMPER'S HIND LEGS (part="leg")                -->
   <!-- ======================================================== -->
-  <!-- Piedone sinistro al suolo (x=10..12, y=15..28, z=0..1)   -->
+  <!-- Big left foot on the ground (x=10..12, y=15..28, z=0..1) -->
   <box at="11 21.5 0" size="3 14 1" color="P"/>
   <box at="10 28 0" size="1 1 1" color="p"/>
   <box at="11 28 0" size="1 1 1" color="p"/>
@@ -74,7 +74,7 @@ Design e concetto scultoreo (ispirato fedelmente ai riferimenti reali e pixel ar
   <box at="11 20 1" size="3 8 1" color="P"/>
   <box at="11 15.5 0" size="3 3 3" color="g"/>
 
-  <!-- Piedone destro al suolo (x=19..21, y=15..28, z=0..1)     -->
+  <!-- Big right foot on the ground (x=19..21, y=15..28, z=0..1) -->
   <box at="20 21.5 0" size="3 14 1" color="P"/>
   <box at="19 28 0" size="1 1 1" color="p"/>
   <box at="20 28 0" size="1 1 1" color="p"/>
@@ -82,121 +82,121 @@ Design e concetto scultoreo (ispirato fedelmente ai riferimenti reali e pixel ar
   <box at="20 20 1" size="3 8 1" color="P"/>
   <box at="20 15.5 0" size="3 3 3" color="g"/>
 
-  <!-- Lunghi stinchi inclinati in avanti dal garretto al ginocchio (z=2..12) -->
+  <!-- Long shins leaning forward from the hock to the knee (z=2..12) -->
   <line at="11 15.5 2" to="11 24.5 11.5" r="1.1" color="g"/>
   <line at="20 15.5 2" to="20 24.5 11.5" r="1.1" color="g"/>
 
-  <!-- Cosce muscolose alte piegate a Z che raccordano ginocchio e bacino -->
+  <!-- High muscular thighs bent in a Z joining knee and pelvis -->
   <ellipsoid at="11 20 9.5" size="5 9 10" color="G"/>
   <ellipsoid at="20 20 9.5" size="5 9 10" color="G"/>
 
   <!-- ======================================================== -->
-  <!-- 2. CORPO ALLUNGATO INCLINATO E VENTRE CREMA (z = 10..22)  -->
+  <!-- 2. LONG LEANING BODY AND CREAM BELLY (z = 10..22)         -->
   <!-- ======================================================== -->
-  <!-- Groppa posteriore alta (si salda alle cosce e alla coda) -->
+  <!-- High hindquarters (welded to the thighs and the tail) -->
   <ellipsoid at="15.5 18 15" size="12 10 9" color="F"/>
 
-  <!-- Dorso medio allungato (inclinato verso il basso e in avanti) -->
+  <!-- Long middle back (leaning down and forward) -->
   <ellipsoid at="15.5 24 14" size="11 10 8" color="F"/>
 
-  <!-- Petto e spalle anteriori                                  -->
+  <!-- Chest and front shoulders                                 -->
   <ellipsoid at="15.5 29 14.5" size="10 8 8" color="F"/>
 
-  <!-- Soffice ventre e pettorina crema (+y e parte inferiore)  -->
+  <!-- Soft cream belly and bib (+y and lower part)             -->
   <ellipsoid at="15.5 24 11" size="8 9 5" color="C"/>
   <ellipsoid at="15.5 28 12.5" size="7 7 6" color="C"/>
   <ellipsoid at="15.5 31 14" size="6 5 5" color="c"/>
 
   <!-- ======================================================== -->
-  <!-- 3. ZAMPETTE ANTERIORI MINUSCOLE AL PETTO (part="arm") -->
+  <!-- 3. TINY FRONT PAWS AT THE CHEST (part="arm") -->
   <!-- ======================================================== -->
-  <!-- Braccino sinistro e manina crema                         -->
+  <!-- Little left arm and cream little hand                    -->
   <line at="12 29 14" to="13.5 32 12" r="0.6" color="A"/>
   <box at="13.5 33 12" size="2 1 1" color="a"/>
 
-  <!-- Braccino destro e manina crema                          -->
+  <!-- Little right arm and cream little hand                  -->
   <line at="19 29 14" to="17.5 32 12" r="0.6" color="A"/>
   <box at="17.5 33 12" size="2 1 1" color="a"/>
 
   <!-- ======================================================== -->
-  <!-- 4. TESTA GRANDE, GUANCE, MUSETTO, OCCHI (part="head")   -->
+  <!-- 4. BIG HEAD, CHEEKS, MUZZLE, EYES (part="head")        -->
   <!-- ======================================================== -->
-  <!-- Cranio principale                                        -->
+  <!-- Main skull                                               -->
   <ellipsoid at="15.5 31 19" size="13 11 10" color="T"/>
 
-  <!-- Ponte frontale fulvo tra gli occhi                      -->
+  <!-- Fawn frontal bridge between the eyes                    -->
   <box at="15.5 34 21" size="4 4 4" color="T"/>
   <box at="15.5 36 22" size="2 2 2" color="t"/>
 
-  <!-- Guanciotte paffute e morbide crema ai lati del viso      -->
+  <!-- Chubby, soft cream little cheeks at the sides of the face -->
   <ellipsoid at="10.5 34 18.5" size="5 5 5" color="t"/>
   <ellipsoid at="20.5 34 18.5" size="5 5 5" color="t"/>
   <box at="10 35 18" size="3 3 3" color="U"/>
   <box at="21 35 18" size="3 3 3" color="U"/>
 
-  <!-- Musetto conico allungato in avanti crema (+y, z=18..19)  -->
+  <!-- Cream conical muzzle stretched forward (+y, z=18..19)    -->
   <box at="15.5 37 18" size="5 4 3" color="U"/>
   <box at="15.5 39 18" size="3 3 2" color="U"/>
-  <!-- Tartufo nasino scuro                                     -->
+  <!-- Little dark nose                                         -->
   <box at="15.5 40 19" size="2 1 1" color="N"/>
 
-  <!-- Sottili accenni di vibrisse laterali sul muso -->
+  <!-- Thin hints of side whiskers on the muzzle -->
   <box at="13 38 18" size="1 1 1" color="W"/>
   <box at="18 38 18" size="1 1 1" color="W"/>
 
-  <!-- Grandi occhi scuri espressivi (3x2x3 voxel a z=20..22, y=34..35) -->
+  <!-- Big expressive dark eyes (3x2x3 voxels at z=20..22, y=34..35) -->
   <box at="11 34.5 20" size="3 2 3" color="E"/>
   <box at="20 34.5 20" size="3 2 3" color="E"/>
 
-  <!-- Punti luce bianchi riflesso vispo (Z, glow="True") in alto a sx -->
+  <!-- White points of a lively reflection (Z, glow="True") at the top left -->
   <box at="10 35 22" size="1 1 1" color="Z"/>
   <box at="19 35 22" size="1 1 1" color="Z"/>
 
   <!-- ======================================================== -->
-  <!-- 5. GIGANTESCHE ORECCHIE A CONCHIGLIA (part="head", z=25..39) -->
+  <!-- 5. GIGANTIC SHELL-SHAPED EARS (part="head", z=25..39) -->
   <!-- ======================================================== -->
-  <!-- Orecchio sinistro: guscio fulvo posteriore/esterno       -->
+  <!-- Left ear: fawn back/outer shell                          -->
   <ellipsoid at="9.5 29 25" size="8 4 15" color="O"/>
-  <!-- Padiglione interno concavo velluto rosa carne            -->
+  <!-- Concave inner flesh-pink velvet auricle                  -->
   <ellipsoid at="9.5 30.5 26" size="6 3 13" color="R"/>
   <box at="9.5 31 27" size="4 1 8" color="r"/>
   <line at="6 30 28" to="9 30 38" r="0.5" color="o"/>
 
-  <!-- Orecchio destro: guscio fulvo posteriore/esterno        -->
+  <!-- Right ear: fawn back/outer shell                        -->
   <ellipsoid at="21.5 29 25" size="8 4 15" color="O"/>
-  <!-- Padiglione interno concavo velluto rosa carne            -->
+  <!-- Concave inner flesh-pink velvet auricle                  -->
   <ellipsoid at="21.5 30.5 26" size="6 3 13" color="R"/>
   <box at="21.5 31 27" size="4 1 8" color="r"/>
   <line at="25 30 28" to="22 30 38" r="0.5" color="o"/>
 
   <!-- ======================================================== -->
-  <!-- 6. LUNGHISSIMA CODA E PENNACCHIO BICOLORE (part="tail")  -->
+  <!-- 6. VERY LONG TAIL AND TWO-COLOURED PLUME (part="tail")   -->
   <!-- ======================================================== -->
-  <!-- Attacco alla groppa posteriore alta (y=15, z=16)         -->
+  <!-- Attachment to the high hindquarters (y=15, z=16)         -->
   <line at="15.5 15 16" to="15.5 10 9" r="1.1" color="K"/>
-  <!-- Discesa sinuosa verso il terreno                         -->
+  <!-- Sinuous descent towards the ground                       -->
   <line at="15.5 10 9" to="15.5 6 4" r="0.9" color="K"/>
   <line at="15.5 6 4" to="15.5 3.5 2.5" r="0.8" color="K"/>
-  <!-- Risalita verso l'alto                                    -->
+  <!-- Rising upwards again                                     -->
   <line at="15.5 3.5 2.5" to="15.5 2.5 5.5" r="0.8" color="k"/>
   <line at="15.5 2.5 5.5" to="15.5 2.5 9" r="0.8" color="k"/>
 
-  <!-- Spettacolare pennacchio bicolore: collare scuro e grande batuffolo bianco saldato -->
+  <!-- Spectacular two-coloured plume: dark collar and a big welded white puff -->
   <ellipsoid at="15.5 2.5 9" size="5 4 5" color="J"/>
   <ellipsoid at="15.5 2.5 12" size="6 5 6" color="I"/>
   <ellipsoid at="15.5 2.5 16" size="4 4 5" color="I"/>
   <box at="15.5 2.5 18" size="2 2 2" color="I"/>
 
   <!-- ======================================================== -->
-  <!-- 7. REGOLE GENERATIVE: SFUMATURE, PELO E TEXTURE          -->
+  <!-- 7. GENERATIVE RULES: SHADES, FUR AND TEXTURE             -->
   <!-- ======================================================== -->
-  <!-- Illuminazione sommitale del dorso e delle spalle         -->
+  <!-- Top lighting of the back and shoulders                   -->
   <prl steps="1" p="0.3" in="B F" out="B f"/>
-  <!-- Ombreggiatura naturale nelle pieghe inferiori del dorso  -->
+  <!-- Natural shading in the lower folds of the back           -->
   <prl steps="1" p="0.15" in="F/B" out="D/*"/>
-  <!-- Transizione morbida tra pancia crema e fianchi fulvi     -->
+  <!-- Soft transition between the cream belly and the fawn sides -->
   <prl steps="1" p="0.35" in="F/C" out="*/c"/>
   <prl steps="1" p="0.25" in="FC" out="Fc" symmetry="(x)"/>
-  <!-- Sfumatura delicata tra guance crema e muso               -->
+  <!-- Delicate shading between the cream cheeks and the muzzle -->
   <prl steps="1" p="0.25" in="t U" out="u *"/>
 </sequence>

@@ -1,24 +1,24 @@
 <!--
-corona-gerboa-actor: L'Interprete del Concilio (avatar della Corona).
-Membro del Concilio in forma di Gerboa gigante attore di compagnia (scala 20 vpt, anatomia base con orecchie in avanti).
-Manto lilla cenere con ventre chiaro. Indossa un grande cappello da moschettiere a tesa larga verde acqua (#5ce0c8, colore araldico
-dell'Attore) con fascia e fibbia d'oro e una lunga piuma bianca che sale dietro le orecchie e ricade (la punta brilla: glow="True");
-sul muso una mezza maschera da teatro, metà scura e metà chiara come il suo sigillo; al collo una gorgiera bianca a pieghe;
-giubba verde scuro con bottoni d'oro; pennacchio caudale verde acqua.
-Scatola: 1.6 × 2.2 × 2.1 caselle, 32 × 44 × 42 voxel, 20 voxel per casella (vpt: 20).
-Ruolo: npc.
+corona-gerboa-actor: the Council's Interpreter (avatar of the Corona).
+A member of the Council as a giant jerboa, a company actor (scale 20 vpt, base anatomy with ears forward).
+Ash-lilac coat with a light belly. It wears a big wide-brimmed musketeer hat in aqua green (#5ce0c8, the heraldic colour
+of the Actor) with a gold band and buckle and a long white feather that rises behind the ears and falls back (the tip shines: glow="True");
+on the muzzle a theatre half mask, half dark and half light like its seal; at the neck a pleated white ruff;
+a dark green jerkin with gold buttons; an aqua green tail plume.
+Box: 1.6 × 2.2 × 2.1 tiles, 32 × 44 × 42 voxels, 20 voxels per tile (vpt: 20).
+Role: npc.
 -->
 <sequence values="BFfDCcTtUuNWEZRrOoGgPpaAKkJIHhSsVvLMmXxYyQq" size="32 44 42" symmetry="()" name="GerboaAttore">
-  <!-- Manto lilla cenere del corpo e dorso -->
+  <!-- Ash-lilac coat of the body and back -->
   <color symbol="F" value="9c8fb0" name="lilla cenere base dorso"/>
   <color symbol="f" value="b7abc9" name="lilla chiaro luce dorso"/>
   <color symbol="D" value="6f6485" name="lilla scuro ombra"/>
 
-  <!-- Ventre, petto e gola chiari -->
+  <!-- Light belly, chest and throat -->
   <color symbol="C" value="f0e8f7" name="chiaro ventre"/>
   <color symbol="c" value="d9cfe6" name="sfumatura pancia"/>
 
-  <!-- Testa, musetto, tartufo e baffi (part="head") -->
+  <!-- Head, muzzle, nose and whiskers (part="head") -->
   <color symbol="T" value="9c8fb0" part="head" name="testa lilla base"/>
   <color symbol="t" value="b7abc9" part="head" name="guance lilla chiaro"/>
   <color symbol="U" value="f0e8f7" part="head" name="musetto chiaro"/>
@@ -28,29 +28,29 @@ Ruolo: npc.
   <color symbol="E" value="14161d" part="head" name="occhi scuri profondi"/>
   <color symbol="Z" value="ffffff" glow="True" part="head" name="riflesso occhi vispo"/>
 
-  <!-- Grandi orecchie a conchiglia (part="head") -->
+  <!-- Big shell-shaped ears (part="head") -->
   <color symbol="O" value="9c8fb0" part="head" name="dorso orecchio lilla"/>
   <color symbol="o" value="b7abc9" part="head" name="bordo orecchio chiaro"/>
   <color symbol="R" value="f7bed0" part="head" name="interno orecchio rosa"/>
   <color symbol="r" value="ffdbe5" part="head" name="concavita orecchio rosa chiaro"/>
 
-  <!-- Zampe posteriori bipedali piegate a Z (part="leg") -->
+  <!-- Bipedal hind legs bent in a Z (part="leg") -->
   <color symbol="G" value="9c8fb0" part="leg" name="coscia lilla"/>
   <color symbol="g" value="6f6485" part="leg" name="stinco e garretto"/>
   <color symbol="P" value="f0e8f7" part="leg" name="piede chiaro dita"/>
   <color symbol="p" value="c9b8d8" part="leg" name="polpastrelli unghie"/>
 
-  <!-- Zampette anteriori al petto (part="arm") -->
+  <!-- Little front paws at the chest (part="arm") -->
   <color symbol="A" value="9c8fb0" part="arm" name="braccino lilla"/>
   <color symbol="a" value="f0e8f7" part="arm" name="manina chiara"/>
 
-  <!-- Coda e pennacchio verde acqua (part="tail") -->
+  <!-- Tail and aqua green plume (part="tail") -->
   <color symbol="K" value="9c8fb0" part="tail" name="fusto coda lilla"/>
   <color symbol="k" value="6f6485" part="tail" name="giunto fusto coda"/>
   <color symbol="J" value="2c7d70" part="tail" name="base pennacchio verde scuro"/>
   <color symbol="I" value="5ce0c8" part="tail" name="ciuffo pennacchio verde acqua"/>
 
-  <!-- Accessori dell'Attore: cappello da moschettiere (part="head") -->
+  <!-- The Actor's accessories: musketeer hat (part="head") -->
   <color symbol="H" value="5ce0c8" part="head" name="cappello verde acqua"/>
   <color symbol="h" value="8aefdc" part="head" name="cupola cappello luce"/>
   <color symbol="S" value="f4c95d" part="head" name="fascia oro"/>
@@ -60,21 +60,21 @@ Ruolo: npc.
   <color symbol="m" value="e6dfd0" part="head" name="costa della piuma e pieghe"/>
   <color symbol="x" value="ffffff" glow="True" part="head" name="punta della piuma"/>
 
-  <!-- La mezza maschera da teatro (part="head") -->
+  <!-- The theatre half mask (part="head") -->
   <color symbol="V" value="1d2030" part="head" name="maschera meta scura"/>
   <color symbol="v" value="f5f2ea" part="head" name="maschera meta chiara"/>
   <color symbol="X" value="f4c95d" part="head" name="profilo oro della maschera"/>
 
-  <!-- Giubba verde scuro e gorgiera -->
+  <!-- Dark green jerkin and ruff -->
   <color symbol="Y" value="2c7d70" name="giubba verde scuro"/>
   <color symbol="y" value="5ce0c8" name="bordi giubba verde acqua"/>
   <color symbol="Q" value="ffd700" glow="True" name="bottoni oro"/>
   <color symbol="q" value="fffaf0" name="gorgiera bianca"/>
 
   <!-- ======================================================== -->
-  <!-- 1. LUNGHE ZAMPE POSTERIORI DA SALTATORE (part="leg")   -->
+  <!-- 1. LONG JUMPER'S HIND LEGS (part="leg")                -->
   <!-- ======================================================== -->
-  <!-- Piedone sinistro al suolo (x=10..12, y=15..28, z=0..1)   -->
+  <!-- Big left foot on the ground (x=10..12, y=15..28, z=0..1) -->
   <box at="11 21.5 0" size="3 14 1" color="P"/>
   <box at="10 28 0" size="1 1 1" color="p"/>
   <box at="11 28 0" size="1 1 1" color="p"/>
@@ -82,7 +82,7 @@ Ruolo: npc.
   <box at="11 20 1" size="3 8 1" color="P"/>
   <box at="11 15.5 0" size="3 3 3" color="g"/>
 
-  <!-- Piedone destro al suolo (x=19..21, y=15..28, z=0..1)     -->
+  <!-- Big right foot on the ground (x=19..21, y=15..28, z=0..1) -->
   <box at="20 21.5 0" size="3 14 1" color="P"/>
   <box at="19 28 0" size="1 1 1" color="p"/>
   <box at="20 28 0" size="1 1 1" color="p"/>
@@ -90,36 +90,36 @@ Ruolo: npc.
   <box at="20 20 1" size="3 8 1" color="P"/>
   <box at="20 15.5 0" size="3 3 3" color="g"/>
 
-  <!-- Lunghi stinchi inclinati in avanti dal garretto al ginocchio (z=2..12) -->
+  <!-- Long shins leaning forward from the hock to the knee (z=2..12) -->
   <line at="11 15.5 2" to="11 24.5 11.5" r="1.1" color="g"/>
   <line at="20 15.5 2" to="20 24.5 11.5" r="1.1" color="g"/>
 
-  <!-- Cosce muscolose alte piegate a Z che raccordano ginocchio e bacino -->
+  <!-- High muscular thighs bent in a Z joining knee and pelvis -->
   <ellipsoid at="11 20 9.5" size="5 9 10" color="G"/>
   <ellipsoid at="20 20 9.5" size="5 9 10" color="G"/>
 
   <!-- ======================================================== -->
-  <!-- 2. CORPO ALLUNGATO INCLINATO E PETTO CANDIDO             -->
+  <!-- 2. LONG LEANING BODY AND WHITE CHEST                      -->
   <!-- ======================================================== -->
-  <!-- Groppa posteriore alta (si salda alle cosce e alla coda) -->
+  <!-- High hindquarters (welded to the thighs and the tail) -->
   <ellipsoid at="15.5 18 15" size="12 10 9" color="F"/>
   <ellipsoid at="15.5 18 14" size="10 8 5" color="D"/>
   <box at="15.5 20 18" size="4 4 1" color="f"/>
 
-  <!-- Dorso medio allungato (inclinato verso il basso e in avanti) -->
+  <!-- Long middle back (leaning down and forward) -->
   <ellipsoid at="15.5 24 14" size="11 10 8" color="F"/>
 
-  <!-- Petto e spalle anteriori -->
+  <!-- Chest and front shoulders -->
   <ellipsoid at="15.5 29 14.5" size="10 8 8" color="F"/>
 
-  <!-- Soffice ventre e pettorina chiaro panna (+y e parte inferiore) -->
+  <!-- Soft cream belly and bib (+y and lower part) -->
   <ellipsoid at="15.5 24 11" size="8 9 5" color="C"/>
   <ellipsoid at="15.5 28 12.5" size="7 7 6" color="C"/>
   <ellipsoid at="15.5 31 14" size="6 5 5" color="c"/>
 
 
   <!-- ======================================================== -->
-  <!-- 3. GIUBBA DA TEATRO ABBOTTONATA SUL PANCINO              -->
+  <!-- 3. THEATRE JERKIN BUTTONED OVER THE TUMMY                 -->
   <!-- ======================================================== -->
   <ellipsoid at="15.5 25 12" size="9.5 9.5 6.5" color="Y"/>
   <box at="15.5 26.5 11.5" size="8 7 5" color="Y"/>
@@ -130,70 +130,70 @@ Ruolo: npc.
   <box at="15.5 32 12.5" size="2 1 1" color="Q"/>
 
   <!-- ======================================================== -->
-  <!-- 4. ZAMPETTE ANTERIORI MINUSCOLE AL PETTO (part="arm") -->
+  <!-- 4. TINY FRONT PAWS AT THE CHEST (part="arm") -->
   <!-- ======================================================== -->
-  <!-- Braccino sinistro e manina chiaro -->
+  <!-- Little left arm and light little hand -->
   <line at="12 29 14" to="13.5 32 12" r="0.6" color="A"/>
   <box at="13.5 33 12" size="2 2 2" color="a"/>
 
-  <!-- Braccino destro e manina chiaro -->
+  <!-- Little right arm and light little hand -->
   <line at="19 29 14" to="17.5 32 12" r="0.6" color="A"/>
   <box at="17.5 33 12" size="2 2 2" color="a"/>
 
   <!-- ======================================================== -->
-  <!-- 5. TESTA GRANDE, GUANCE, MUSETTO, OCCHI (part="head")   -->
+  <!-- 5. BIG HEAD, CHEEKS, MUZZLE, EYES (part="head")        -->
   <!-- ======================================================== -->
-  <!-- Cranio principale lilla -->
+  <!-- Main lilac skull -->
   <ellipsoid at="15.5 31 19" size="13 11 10" color="T"/>
 
-  <!-- Fronte tra gli occhi -->
+  <!-- Forehead between the eyes -->
   <box at="15.5 34 21" size="4 4 4" color="T"/>
   <box at="15.5 36 22" size="2 2 2" color="t"/>
 
-  <!-- Guanciotte morbide ai lati del muso -->
+  <!-- Soft little cheeks at the sides of the muzzle -->
   <ellipsoid at="10.5 34 18.5" size="5 5 5" color="t"/>
   <ellipsoid at="20.5 34 18.5" size="5 5 5" color="t"/>
   <box at="10 35 18" size="3 3 3" color="U"/>
   <box at="21 35 18" size="3 3 3" color="U"/>
 
-  <!-- Musetto conico chiaro allungato in avanti -->
+  <!-- Light conical muzzle stretched forward -->
   <box at="15.5 37 18" size="5 4 3" color="U"/>
   <box at="15.5 39 18" size="3 3 2" color="U"/>
   <box at="15.5 38 17" size="2 1 1" color="u"/>
-  <!-- Tartufo nasino rosa -->
+  <!-- Little pink nose -->
   <box at="15.5 40 19" size="2 1 1" color="N"/>
 
-  <!-- Sottili accenni di vibrisse discrete sul muso -->
+  <!-- Thin, discreet hints of whiskers on the muzzle -->
   <box at="13 38 18" size="1 1 1" color="W"/>
   <box at="18 38 18" size="1 1 1" color="W"/>
 
-  <!-- Occhio sinistro profondo (3x2x3 voxel) con vispo riflesso bianco Z -->
+  <!-- Deep left eye (3x2x3 voxels) with a lively white reflection Z -->
   <box at="11 34.5 20" size="3 2 3" color="E"/>
   <box at="10 35 22" size="1 1 1" color="Z"/>
 
-  <!-- Occhio destro profondo (3x2x3 voxel) con vispo riflesso bianco Z -->
+  <!-- Deep right eye (3x2x3 voxels) with a lively white reflection Z -->
   <box at="20 34.5 20" size="3 2 3" color="E"/>
   <box at="21 35 22" size="1 1 1" color="Z"/>
 
   <!-- ======================================================== -->
-  <!-- 6. GIGANTESCHE ORECCHIE A CONCHIGLIA (part="head", z=25..39) -->
+  <!-- 6. GIGANTIC SHELL-SHAPED EARS (part="head", z=25..39) -->
   <!-- ======================================================== -->
-  <!-- Orecchio sinistro: guscio lilla posteriore/esterno -->
+  <!-- Left ear: lilac back/outer shell -->
   <ellipsoid at="9.5 29 25" size="8 4 15" color="O"/>
-  <!-- Padiglione interno concavo velluto rosa -->
+  <!-- Concave inner pink velvet auricle -->
   <ellipsoid at="9.5 30.5 26" size="6 3 13" color="R"/>
   <box at="9.5 31 27" size="4 1 8" color="r"/>
   <line at="6 30 28" to="9 30 38" r="0.5" color="o"/>
 
-  <!-- Orecchio destro: guscio lilla posteriore/esterno -->
+  <!-- Right ear: lilac back/outer shell -->
   <ellipsoid at="21.5 29 25" size="8 4 15" color="O"/>
-  <!-- Padiglione interno concavo velluto rosa -->
+  <!-- Concave inner pink velvet auricle -->
   <ellipsoid at="21.5 30.5 26" size="6 3 13" color="R"/>
   <box at="21.5 31 27" size="4 1 8" color="r"/>
   <line at="25 30 28" to="22 30 38" r="0.5" color="o"/>
 
   <!-- ======================================================== -->
-  <!-- 7. GORGIERA BIANCA A PIEGHE ATTORNO AL COLLO             -->
+  <!-- 7. PLEATED WHITE RUFF AROUND THE NECK                    -->
   <!-- ======================================================== -->
   <ellipsoid at="15.5 30.5 14.5" size="16 12 3" color="q"/>
   <box at="9 30 14.5" size="1 1 2" color="m"/>
@@ -203,24 +203,24 @@ Ruolo: npc.
   <box at="15.5 36 14.5" size="1 1 2" color="m"/>
 
   <!-- ======================================================== -->
-  <!-- 8. MEZZA MASCHERA DA TEATRO: META SCURA, META CHIARA     -->
+  <!-- 8. THEATRE HALF MASK: HALF DARK, HALF LIGHT              -->
   <!-- ======================================================== -->
   <box at="13 36 21" size="5 1 3" color="V"/>
   <box at="18 36 21" size="5 1 3" color="v"/>
   <box at="15.5 36 23" size="10 1 1" color="X"/>
 
   <!-- ======================================================== -->
-  <!-- 9. CAPPELLO DA MOSCHETTIERE A TESA LARGA (part="head")  -->
+  <!-- 9. WIDE-BRIMMED MUSKETEER HAT (part="head")             -->
   <!-- ======================================================== -->
-  <!-- La tesa larga passa tra le orecchie: la sotto-tesa scura e sopra il verde acqua -->
+  <!-- The wide brim passes between the ears: the dark under-brim and the aqua green on top -->
   <cylinder at="15.5 29.5 25" size="16 15 1" color="s"/>
   <cylinder at="15.5 29.5 26" size="16 15 1" color="H"/>
-  <!-- La cupola e la fascia d'oro con la fibbia -->
+  <!-- The crown and the gold band with the buckle -->
   <cylinder at="15.5 30 28" size="9 9 3" color="H"/>
   <ellipsoid at="15.5 30 30.5" size="8.5 8.5 4" color="h"/>
   <cylinder at="15.5 30 27" size="9.5 9.5 1" color="S"/>
   <box at="15.5 35 27" size="2 1 2" color="L"/>
-  <!-- La lunga piuma: sale dalla fascia, passa dietro le orecchie e ricade -->
+  <!-- The long feather: it rises from the band, passes behind the ears and falls back -->
   <line at="19 29 28" to="20 24 36" r="1.3" color="M"/>
   <line at="20 24 36" to="18 15 39" r="1.2" color="M"/>
   <line at="18 15 39" to="15 8 36" r="0.9" color="M"/>
@@ -228,26 +228,26 @@ Ruolo: npc.
   <box at="15 8 36" size="2 2 2" color="x"/>
 
   <!-- ======================================================== -->
-  <!-- 10. LUNGHISSIMA CODA E PENNACCHIO VERDE ACQUA (part="tail") -->
+  <!-- 10. VERY LONG TAIL AND AQUA GREEN PLUME (part="tail") -->
   <!-- ======================================================== -->
-  <!-- Attacco alla groppa posteriore alta (y=15, z=16) -->
+  <!-- Attachment to the high hindquarters (y=15, z=16) -->
   <line at="15.5 15 16" to="15.5 10 9" r="1.1" color="K"/>
-  <!-- Discesa sinuosa verso il terreno -->
+  <!-- Sinuous descent towards the ground -->
   <line at="15.5 10 9" to="15.5 6 4" r="0.9" color="K"/>
   <line at="15.5 6 4" to="15.5 3.5 2.5" r="0.8" color="K"/>
-  <!-- Risalita verso l'alto -->
+  <!-- Rising upwards again -->
   <line at="15.5 3.5 2.5" to="15.5 2.5 5.5" r="0.8" color="k"/>
   <line at="15.5 2.5 5.5" to="15.5 2.5 9" r="0.8" color="k"/>
 
 
-  <!-- Pennacchio: base verde scuro e grande ciuffo verde acqua -->
+  <!-- Plume: dark green base and a big aqua green tuft -->
   <ellipsoid at="15.5 2.5 9" size="5 4 5" color="J"/>
   <ellipsoid at="15.5 2.5 12" size="6 5 6" color="I"/>
   <ellipsoid at="15.5 2.5 16" size="4 4 5" color="I"/>
   <box at="15.5 2.5 18" size="2 2 2" color="I"/>
 
   <!-- ======================================================== -->
-  <!-- 11. REGOLE GENERATIVE: SFUMATURE E PELO                  -->
+  <!-- 11. GENERATIVE RULES: SHADES AND FUR                     -->
   <!-- ======================================================== -->
   <prl steps="1" p="0.3" in="B F" out="B f"/>
   <prl steps="1" p="0.15" in="F/B" out="D/*"/>

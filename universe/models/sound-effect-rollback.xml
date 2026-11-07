@@ -1,4 +1,4 @@
-<!-- Si torna indietro: tre note che scendono. -->
+<!-- Going back: three notes going down. -->
 <sequence name="Ritorno" values="BNSAMT" size="12 1 12" symmetry="()">
   <sound bpm="170" scale="dorian" root="72" swing="0" cutoff="7000" space="0.3">
     <track y="0" instrument="bass" volume="0.85"/>

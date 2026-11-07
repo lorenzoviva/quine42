@@ -1,7 +1,7 @@
-<!-- Statua del guardiano (fantasy, aurora): un guerriero di pietra in armatura, su un piedistallo, con gli occhi e le rune che brillano.
-     Il seme sceglie il piedistallo (a gradoni, a tamburo o un plinto stretto con una fascia di rune), l'elmo (cornuto, una corona o un
-     cappuccio), l'arma della destra (una lancia alta, la spada piantata o il martello levato) e la sinistra (lo scudo, una sfera di
-     cristallo alzata o il braccio lungo il fianco); il muschio cresce dove capita. -->
+<!-- Guardian statue (fantasy, aurora): a stone warrior in armour, on a pedestal, with shining eyes and runes.
+     The seed picks the pedestal (stepped, a drum or a narrow plinth with a band of runes), the helmet (horned, a crown or a
+     hood), the weapon in the right hand (a tall spear, a planted sword or a raised hammer) and the left (the shield, a raised crystal
+     sphere or the arm along the side); the moss grows wherever it falls. -->
 <sequence values="BSdGgRCMmVHLPabocehijkltuv" size="20 20 60" symmetry="(xy)" name="Statua del guardiano">
   <color symbol="S" value="8a8478" name="pietra"/>
   <color symbol="d" value="5e5a52" name="pietra scura"/>
@@ -28,7 +28,7 @@
   <color symbol="t" hidden="True" name="sfera alzata"/>
   <color symbol="u" hidden="True" name="braccio lungo il fianco"/>
   <color symbol="v" hidden="True" name="per mescolare il caso"/>
-  <!-- Gli spazi e i quattro dadi -->
+  <!-- The spaces and the four dice -->
   <box at="10 10 0" size="20 20 60" color="v"/>
   <all in="v" out="B"/>
   <box at="10 10 0" size="20 20 12" color="V"/>
@@ -45,7 +45,7 @@
     <rule in="iP" out="ii"/><rule in="jP" out="jj"/><rule in="kP" out="kk"/>
     <rule in="lL" out="ll"/><rule in="tL" out="tt"/><rule in="uL" out="uu"/>
   </all>
-  <!-- Il piedistallo -->
+  <!-- The pedestal -->
   <box at="10 10 0" size="17 17 3" color="d" on="a"/>
   <box at="10 10 3" size="13 13 6" color="S" on="a"/>
   <box at="10 10 9" size="15 15 3" color="d" on="a"/>
@@ -56,7 +56,7 @@
   <box at="10 15 0" size="9 3 2" color="d" on="o"/>
   <box at="10 10 5" size="11 11 2" color="R" on="S"/>
   <box at="10 10 0" size="9 9 12" color="S" on="R"/>
-  <!-- Il guerriero -->
+  <!-- The warrior -->
   <box at="8 11 12" size="3 5 2" color="g"/>
   <box at="12 11 12" size="3 5 2" color="g"/>
   <box at="8 10 14" size="3 3 7" color="G"/>
@@ -66,7 +66,7 @@
   <box at="10 13 26" size="5 1 5" color="g"/>
   <box at="10 10 33" size="13 5 3" color="g"/>
   <box at="10 10 36" size="3 3 1" color="G"/>
-  <!-- L'elmo -->
+  <!-- The helmet -->
   <box at="10 10 37" size="5 5 6" color="G" on="[ceh]"/>
   <box at="10 10 43" size="5 5 1" color="g" on="c"/>
   <line at="8 10 40" to="5 10 44" r="0.5" color="g" on="c"/>
@@ -85,7 +85,7 @@
   <box at="10 13 38" size="3 1 2" color="h" on="g"/>
   <box at="10 12 39" size="5 1 1" color="R" on="G"/>
   <box at="10 12 39" size="3 1 1" color="G" on="R"/>
-  <!-- La destra: lancia, spada piantata o martello levato -->
+  <!-- The right: spear, planted sword or raised hammer -->
   <box at="17 10 26" size="3 3 8" color="G" on="i"/>
   <box at="17 12 12" size="1 1 42" color="M" on="i"/>
   <cone at="17 12 54" size="3 3 5" color="M" on="i"/>
@@ -98,7 +98,7 @@
   <box at="17 10 26" size="3 3 16" color="G" on="k"/>
   <box at="17 10 42" size="1 1 6" color="g" on="k"/>
   <box at="17 10 48" size="3 7 4" color="M" on="k"/>
-  <!-- La sinistra: scudo, sfera alzata o braccio lungo il fianco -->
+  <!-- The left: shield, raised sphere or arm along the side -->
   <box at="3 10 24" size="3 3 9" color="G" on="[lu]"/>
   <box at="2 12 16" size="5 1 13" color="d" on="l"/>
   <box at="2 13 21" size="1 1 3" color="R" on="l"/>
@@ -108,7 +108,7 @@
   <box at="3 11 33" size="3 3 5" color="G" on="t"/>
   <ellipsoid at="2 11 38" size="5 5 5" color="C" on="t"/>
   <all in="[VHLPabocehijkltuv]" out="B"/>
-  <!-- Il muschio, dove capita -->
+  <!-- The moss, wherever it falls -->
   <prl steps="1" in="B [Sd]" out="m *" p="0.05"/>
   <prl steps="1" in="B[Sd]" out="m*" p="0.03"/>
 </sequence>

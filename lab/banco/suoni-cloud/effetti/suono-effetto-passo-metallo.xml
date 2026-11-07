@@ -1,4 +1,4 @@
-<!-- Un passo su una grata di metallo: il colpo secco, la lamiera che vibra su un'altezza aspra e si spegne. -->
+<!-- A step on a metal grating: the sharp hit, the sheet metal vibrating at a harsh pitch and dying away. -->
 <sequence name="Passo sul metallo" values="BNSAGKHCTUVPM" size="8 2 10" symmetry="()">
   <sound bpm="150" scale="harmonic_minor" root="55" swing="0" cutoff="8000" space="0.4">
     <track y="0" instrument="lead" volume="0.55"/>
@@ -17,7 +17,7 @@
   <color symbol="P" value="64748b" name="Scelta" hidden="True"/>
   <color symbol="M" value="14b8a6" name="Scelta" hidden="True"/>
 
-  <!-- Il colpo: rullante e hi-hat insieme. -->
+  <!-- The hit: snare and hi-hat together. -->
   <line at="0 1 2" to="0 1 2" r="0" color="C"/>
   <line at="0 1 1" to="0 1 1" r="0" color="H"/>
   <line at="2 1 1" to="2 1 1" r="0" color="T"/>
@@ -25,7 +25,7 @@
   <line at="4 1 4" to="4 1 4" r="0" color="T"/>
   <one in="T" out="H" steps="1"/>
   <all in="T" out="B"/>
-  <!-- La lamiera: un accento acuto (la sega), poi un rimbalzo più basso. -->
+  <!-- The sheet metal: a high accent (the saw), then a lower bounce. -->
   <line at="0 0 7" to="0 0 7" r="0" color="U"/>
   <line at="0 0 8" to="0 0 8" r="0" color="U"/>
   <line at="0 0 6" to="0 0 6" r="0" color="U"/>

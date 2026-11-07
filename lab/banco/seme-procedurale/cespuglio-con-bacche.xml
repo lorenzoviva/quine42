@@ -1,5 +1,5 @@
-<!-- Cespuglio con bacche, procedurale (Cantiere 2): le foglie e le bacche rosse dell'originale. Il seme sceglie da due a quattro ciuffi su un
-     disco al suolo e quanto sale ciascuno; le foglie li uniscono in un cespuglio solo e le bacche nascono dove la luce arriva. -->
+<!-- Bush with berries, procedural (Cantiere 2): the leaves and red berries of the original. The seed picks from two to four tufts on a
+     disc on the ground and how high each rises; the leaves join them into a single bush and the berries grow where the light reaches. -->
 <sequence values="BLHDIVc" size="20 20 16" symmetry="(xy)" name="Cespuglio con bacche">
   <color symbol="L" value="3d7a35" name="foglie"/>
   <color symbol="H" value="62a447" name="foglie chiare"/>
@@ -12,9 +12,9 @@
   <one in="V" out="c" steps="1"/>
   <prl steps="1" in="V" out="c" p="0.04"/>
   <all in="V" out="B"/>
-  <!-- Ogni ciuffo sale di qualche voxel, a caso -->
+  <!-- Every tuft rises a few voxels, at random -->
   <prl steps="9" in="B c" out="c c" p="0.55"/>
-  <!-- Le foglie: prima attorno ai ciuffi, poi le uniscono -->
+  <!-- The leaves: first around the tufts, then they join them -->
   <all steps="2" symmetry="(xyz)" in="cB" out="cL"/>
   <one steps="520" symmetry="(xyz)" in="LB" out="LL"/>
   <one steps="200" in="LB" out="LL"/>

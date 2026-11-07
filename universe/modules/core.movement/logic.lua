@@ -1,10 +1,10 @@
--- Movimento del giocatore. Sistema senza stato: legge l'input, scrive la posizione.
--- Il terreno cambia il passo (world.speed_at), il carico lo appesantisce (pl.load > 1).
+-- Movement of the player. A stateless system: it reads the input, writes the position.
+-- The terrain changes the pace (world.speed_at), the load weighs it down (pl.load > 1).
 local M = {}
 
 local function step(p, b, dx, dy)
-  -- p.z è l'altezza dei piedi (il piano su cui si sta, la tiene il kernel): sopra un piano si cammina su di lui.
-  -- Se il mondo ti è cresciuto addosso (una casella appena diventata solida), puoi sempre uscirne.
+  -- p.z is the height of the feet (the floor one stands on, kept by the kernel): on top of a floor one walks on it.
+  -- If the world has grown over you (a tile that just became solid), you can always get out.
   local stuck = not world.free_real(p.x, p.y, b.r, p.z)
   local nx, ny = p.x + dx, p.y + dy
   if stuck or world.free_real(nx, p.y, b.r, p.z) then p.x = nx end
@@ -27,7 +27,7 @@ function M.update(dt)
     local here = world.player_pos()
     local terrain = world.speed_at(here.x, here.y)
     local burden = math.max(0.4, 1 - 0.5 * math.max(0, (pl.load or 0) - 1))
-    -- Gli stati (a cavallo, in barca…) cambiano il passo: il kernel ne tiene il prodotto in pl.step.
+    -- States (on horseback, in a boat…) change the pace: the kernel keeps their product in pl.step.
     local mult = tonumber(pl.step) or 1
     local v = speed * terrain * burden * mult * dt
     step(p, b, dx * v, dy * v)

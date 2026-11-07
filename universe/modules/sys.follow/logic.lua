@@ -1,4 +1,4 @@
--- Seguire: la decisione la prende il personaggio parlando (mind.mode = "segui"), qui la si esegue.
+-- Following: the character makes the decision while talking (mind.mode = "segui"), here it is carried out.
 local M = {}
 
 function M.update(dt)
@@ -8,7 +8,7 @@ function M.update(dt)
     local dx, dy = target.x - p.x, target.y - p.y
     local d = math.sqrt(dx * dx + dy * dy)
     if d < 1.4 then return end
-    if d > 14 then mind.mode = "vaga" return end -- ti ha perso di vista
+    if d > 14 then mind.mode = "vaga" return end -- it lost sight of you
     local w = ecs.get(id, "wander")
     local v = ((w and w.speed or 1.2) + 1.5) * world.speed_at(p.x, p.y) * dt
     local nx, ny = p.x + dx / d * v, p.y + dy / d * v

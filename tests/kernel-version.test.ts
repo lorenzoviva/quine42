@@ -252,7 +252,7 @@ describe('an effect that nobody applies', () => {
   });
 
   it('a core.effects written before `handles` knew only the Italian effects of 0.1: since 0.2 it is trusted with none (T307a)', async () => {
-    const old = bundledFiles['modules/core.effects/logic.lua'].replace(/-- Se un effetto ha chi lo applica[\s\S]*?\nend\n\n/, '');
+    const old = bundledFiles['modules/core.effects/logic.lua'].replace(/-- Whether an effect has someone applying it[\s\S]*?\nend\n\n/, '');
     expect(old).not.toContain('M.handles');
     const k = await boot({ ...bundledFiles, 'modules/core.effects/logic.lua': old });
     expect(k.applyEffects([{ type: 'message', text: 'ciao' } as any], k.wandererEntity)).toEqual([]);

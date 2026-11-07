@@ -51,7 +51,7 @@
   <box at="10 17 13" size="1 1 1" color="O"/>
   <box at="14 17 13" size="1 1 1" color="O"/>
   <box at="18 17 13" size="1 1 1" color="O"/>
-  <!-- L'altezza -->
+  <!-- The height -->
   <box at="0 0 7" size="1 1 9" color="h"/>
   <one in="h" out="k" steps="1"/>
   <all in="h" out="B"/>

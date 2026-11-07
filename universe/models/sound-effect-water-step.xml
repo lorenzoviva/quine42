@@ -1,4 +1,4 @@
-<!-- Un passo nell'acqua: lo sciacquio del piede, due gocce che ricadono su altezze che il seme sceglie. -->
+<!-- A step in the water: the splash of the foot, two drops falling back at pitches the seed picks. -->
 <sequence name="Passo nell'acqua" values="BNSAGKHCTUVPM" size="8 2 10" symmetry="()">
   <sound bpm="150" scale="pentatonic_minor" root="62" swing="0" cutoff="7000" space="0.55">
     <track y="0" instrument="lead" volume="0.5"/>
@@ -17,14 +17,14 @@
   <color symbol="P" value="64748b" name="Scelta" hidden="True"/>
   <color symbol="M" value="14b8a6" name="Scelta" hidden="True"/>
 
-  <!-- Lo sciacquio: un hi-hat aperto e uno chiuso subito dopo. -->
+  <!-- The splash: an open hi-hat and a closed one right after. -->
   <line at="0 1 4" to="0 1 4" r="0" color="H"/>
   <line at="1 1 1" to="1 1 1" r="0" color="T"/>
   <line at="2 1 1" to="2 1 1" r="0" color="T"/>
   <line at="2 1 4" to="2 1 4" r="0" color="T"/>
   <one in="T" out="H" steps="1"/>
   <all in="T" out="B"/>
-  <!-- Le gocce: due fra molte. -->
+  <!-- The drops: two among many. -->
   <line at="1 0 5" to="6 0 5" r="0" color="U"/>
   <line at="2 0 7" to="6 0 7" r="0" color="U"/>
   <line at="1 0 8" to="5 0 8" r="0" color="U"/>

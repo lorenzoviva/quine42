@@ -1,6 +1,6 @@
-<!-- Palma ricurva, procedurale (Cantiere 2): fusto ad anelli, fronde e noci di cocco dell'originale. Il seme decide quanto sale il fusto (fra
-     38 e 50 voxel) e come si incurva, quante fronde partono dalla cima, verso dove e quanto si allungano prima di ricadere, e quante noci
-     pendono sotto il ciuffo. -->
+<!-- Curved palm, procedural (Cantiere 2): ringed trunk, fronds and coconuts of the original. The seed decides how high the trunk rises (between
+     38 and 50 voxels) and how it curves, how many fronds start from the top, which way and how far they stretch before falling back, and how many nuts
+     hang under the tuft. -->
 <sequence values="BTKHFLDChkrfgc" size="40 40 60" symmetry="(xy)" name="Palma ricurva">
   <color symbol="T" value="a87d46" name="fusto palma"/>
   <color symbol="K" value="634423" name="anello tronco scuro"/>
@@ -19,7 +19,7 @@
   <one in="h" out="k" steps="1"/>
   <all in="h" out="B"/>
   <all in="kB" out="kk"/>
-  <!-- Il fusto: sale piegando, ogni piega lo porta di lato -->
+  <!-- The trunk: it rises bending, every bend takes it sideways -->
   <box at="20 20 0" size="1 1 1" color="r"/>
   <one steps="70">
     <rule in="B r" out="r T" p="1"/>
@@ -28,8 +28,8 @@
   <all in="r" out="c"/>
   <all in="k" out="B"/>
   <all in="TB" out="TT" steps="1"/>
-  <!-- Gli anelli -->
-  <!-- Le fronde: fino a otto, dritte verso fuori, di lunghezza diversa, poi ricadono -->
+  <!-- The rings -->
+  <!-- The fronds: up to eight, straight outwards, of different lengths, then they fall back -->
   <all in="B c" out="F *"/>
   <all>
     <rule in="FB" out="Ff"/>
@@ -48,7 +48,7 @@
   <all in="f" out="F"/>
   <prl steps="1" in="FB" out="FF" p="0.3"/>
   <prl in="T" out="K" p="0.12" steps="1"/>
-  <!-- Le noci di cocco: da due a quattro, appese sotto la cima -->
+  <!-- The coconuts: from two to four, hanging under the top -->
   <all in="c" out="T"/>
   <prl in="T B" out="* C" p="0.5" steps="1"/>
   <all in="C B" out="* C" steps="1"/>

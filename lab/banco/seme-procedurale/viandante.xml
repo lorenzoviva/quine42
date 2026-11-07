@@ -1,6 +1,6 @@
-<!-- Viandante, procedurale (Cantiere 2): gli stessi colori e le stesse parti animate dell'originale (stivali, braccio libero). Il seme sceglie
-     quanto è ampio il mantello (stretto, normale, a ruota fino a terra), se porta il cappello a tesa larga, se il cappuccio finisce a punta, se il bastone c'è e quanto è lungo, se il braccio libero è alzato, e se sulla
-     schiena porta una bisaccia. Il viso, gli occhi e la fibbia restano dove sono: lo si riconosce sempre. -->
+<!-- Wanderer, procedural (Cantiere 2): the same colours and the same animated parts of the original (boots, free arm). The seed picks
+     how wide the cloak is (narrow, normal, a full circle down to the ground), whether it wears the wide-brimmed hat, whether the hood ends in a point, whether the staff is there and how long it is, whether the free arm is raised, and whether it carries
+     a bag on its back. The face, the eyes and the buckle stay where they are: one always recognises it. -->
 <sequence values="BGMNOCSEAQHPWLKpqmabcdgzrs0" size="20 15 30" symmetry="(xy)" name="Viandante">
   <color symbol="G" value="4a3424" name="stivali" part="gamba"/>
   <color symbol="M" value="3f6470" name="mantello"/>
@@ -28,13 +28,13 @@
   <color symbol="r" hidden="True" name="il braccio alzato scelto"/>
   <color symbol="s" hidden="True" name="la mano alzata scelta"/>
   <color symbol="0" hidden="True" name="mescola"/>
-  <!-- Mescola: il generatore riparte da un punto diverso per ogni seme (vedi README) -->
+  <!-- Shuffle: the generator starts again from a different point for every seed (see README) -->
   <box at="10 0 29" size="20 2 1" color="0"/>
   <prl in="0" out="B" p="0.5" steps="1"/>
   <all in="0" out="B"/>
   <box at="8 7 0" size="3 3 9" color="G"/>
   <box at="12 7 0" size="3 3 9" color="G"/>
-  <!-- Il mantello: tre ampiezze, il dado al centro sceglie fin dove arriva -->
+  <!-- The cloak: three widths, the die at the centre picks how far it reaches -->
   <cone at="10 7 1" size="17 13 21" color="p" on="B"/>
   <cone at="10 7 6" size="14 11 16" color="q" on="[Bp]"/>
   <cone at="10 7 8" size="10 7 14" color="M" on="[Bpq]"/>
@@ -53,8 +53,8 @@
   </all>
   <all in="[ab]" out="M"/>
   <all in="[pq]" out="B"/>
-  <!-- Le braccia, il cappuccio e il viso come nell'originale -->
-  <!-- Il braccio libero: lungo il fianco, o alzato in saluto -->
+  <!-- The arms, the hood and the face as in the original -->
+  <!-- The free arm: along the side, or raised in greeting -->
   <cylinder at="4 7 10" size="3 3 7" color="A" on="B"/>
   <box at="4 7 9" size="2 2 2" color="Q" on="B"/>
   <cylinder at="3 7 17" size="3 3 6" color="p" on="B"/>
@@ -83,13 +83,13 @@
   <box at="12 11 19" size="1 5 2" color="E" on="S"/>
   <cylinder at="10 7 11" size="11 9 1" color="L" on="M"/>
   <box at="10 11 11" size="2 2 1" color="K" on="L"/>
-  <!-- La punta del cappuccio, forse, che sale e piega indietro -->
+  <!-- The tip of the hood, perhaps, rising and bending back -->
   <box at="10 5 28" size="1 1 1" color="c"/>
   <prl in="c" out="B" p="0.4" steps="1"/>
   <all in="c B C" out="C C *" steps="1"/>
   <all in="c B" out="* C"/>
   <all in="c" out="B"/>
-  <!-- Il cappello a tesa larga, forse, al posto della punta -->
+  <!-- The wide-brimmed hat, perhaps, in place of the tip -->
   <ellipsoid at="10 6 25" size="17 14 1" color="d" on="B"/>
   <cone at="10 6 25" size="9 9 5" color="d" on="B"/>
   <one steps="1">
@@ -98,7 +98,7 @@
   </one>
   <all symmetry="(xyz)" in="Ld" out="LL"/>
   <all in="d" out="B"/>
-  <!-- La bisaccia sulla schiena, forse -->
+  <!-- The bag on the back, perhaps -->
   <box at="10 3 8" size="10 4 11" color="d" on="B"/>
   <one steps="1">
     <rule in="d" out="L"/>
@@ -106,7 +106,7 @@
   </one>
   <all symmetry="(xyz)" in="Ld" out="LL"/>
   <all in="d" out="B"/>
-  <!-- Il bastone: assente, o alto da 17 a 26 voxel -->
+  <!-- The staff: absent, or from 17 to 26 voxels high -->
   <box at="0 0 17" size="1 1 10" color="g"/>
   <one in="g" out="z" steps="1"/>
   <all in="g" out="B"/>

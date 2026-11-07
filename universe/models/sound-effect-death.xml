@@ -1,4 +1,4 @@
-<!-- Il viaggio finisce: un colpo sordo e tre note gravi che scendono. -->
+<!-- The journey ends: a dull blow and three low notes going down. -->
 <sequence name="Morte" values="BNSAK" size="16 2 8" symmetry="()">
   <sound bpm="80" scale="phrygian" root="43" swing="0" cutoff="2400" space="0.6">
     <track y="0" instrument="pad" volume="0.9"/>

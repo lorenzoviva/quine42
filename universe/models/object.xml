@@ -1,4 +1,4 @@
-<!-- Cosa (l'oggetto generico): scritta a mano da Claude Code (step 9). Un fagotto legato in cima; la lettera C prende il colore della cosa (index.json: "tinta"), così un programma solo vale per tutti gli oggetti che non hanno un modello loro. -->
+<!-- Thing (the generic object): written by hand by Claude Code (step 9). A bundle tied at the top; the letter C takes the colour of the thing (index.json: "tinta"), so a single program serves all the objects that have no model of their own. -->
 <sequence values="BCN" size="12 12 12" symmetry="(xy)" name="Cosa">
   <color symbol="C" value="b08a5a" name="colore della cosa"/>
   <color symbol="N" value="5a4028" name="laccio"/>

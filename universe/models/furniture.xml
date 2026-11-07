@@ -1,6 +1,6 @@
-<!-- Cassa (il mobile generico), procedurale (Cantiere 2): assi, coperchio, fasce di ferro e serratura dell'originale. Il seme sceglie quanto è
-     alta (una cassetta o una cassapanca), se i fianchi la allungano a destra o a sinistra, se il coperchio è chiuso o alzato contro il retro,
-     e quante fasce di ferro la cingono. -->
+<!-- Chest (the generic piece of furniture), procedural (Cantiere 2): planks, lid, iron bands and lock of the original. The seed picks how
+     tall it is (a small box or a blanket chest), whether the sides lengthen it to the right or to the left, whether the lid is closed or raised against the back,
+     and how many iron bands go round it. -->
 <sequence values="BNnIKSwahkfgo" size="20 20 20" symmetry="(xy)" name="Cassa">
   <color symbol="N" value="8a5a30" name="assi"/>
   <color symbol="n" value="5e3c20" name="fessure"/>
@@ -14,7 +14,7 @@
   <color symbol="f" hidden="True" name="dove possono stare le fasce"/>
   <color symbol="g" hidden="True" name="una fascia scelta"/>
   <color symbol="o" hidden="True" name="il coperchio alzato"/>
-  <!-- Il corpo più grande possibile -->
+  <!-- The largest possible body -->
   <box at="10 10 0" size="18 12 12" color="w"/>
   <box at="10 10 0" size="12 12 12" color="N"/>
   <prl in="w" out="a" p="0.004" steps="1"/>
@@ -25,13 +25,13 @@
   </all>
   <all in="a" out="N"/>
   <all in="w" out="B"/>
-  <!-- L'altezza: da 6 a 12 -->
+  <!-- The height: from 6 to 12 -->
   <box at="0 0 6" size="1 1 7" color="h"/>
   <one in="h" out="k" steps="1"/>
   <all in="h" out="B"/>
   <all in="k*" out="kk"/>
   <all in="* k" out="k *"/>
-  <!-- Il coperchio: chiuso sopra, o alzato in piedi contro il retro -->
+  <!-- The lid: closed on top, or raised upright against the back -->
   <all in="k N" out="o *"/>
   <all in="k" out="B"/>
   <one steps="1">
@@ -40,15 +40,15 @@
   </one>
   <all in="Ko" out="KK"/>
   <all in="ao" out="aa"/>
-  <!-- Chiuso: il coperchio sporge di uno ed è spesso tre -->
+  <!-- Closed: the lid juts out by one and is three thick -->
   <prl in="KB" out="*K" p="1" steps="1"/>
   <all in="B K" out="K *" steps="2"/>
-  <!-- Alzato: resta la fila sul retro, che sale in piedi -->
+  <!-- Raised: the row at the back remains, and rises upright -->
   <all in="B/a" out="*/o" symmetry="()"/>
   <all in="a" out="B"/>
   <all in="B o" out="o *" steps="9"/>
   <all in="o" out="K"/>
-  <!-- Le fasce di ferro: da zero a tre, ognuna un anello attorno al corpo -->
+  <!-- The iron bands: from zero to three, each a ring around the body -->
   <box at="10 0 0" size="18 1 1" color="f"/>
   <prl in="f" out="g" p="0.15" steps="1"/>
   <all in="f" out="B"/>
@@ -67,7 +67,7 @@
     <rule in="I [NK]" out="I I"/>
   </all>
   <all in="g" out="B"/>
-  <!-- La serratura sul davanti, in alto al centro -->
+  <!-- The lock on the front, high in the centre -->
   <one in="N/B" out="*/S" symmetry="()" steps="1"/>
   <prl in="N" out="n" p="0.06" steps="1"/>
   <all in="n/N" out="*/n" steps="3" symmetry="(x)"/>

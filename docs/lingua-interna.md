@@ -1,6 +1,6 @@
 # La lingua interna: l'inglese, e le rune in latino (T306, step 42)
 
-> Stato: **decisa** dall'autore (D34, 05/11 sera), ADR-0153; **T307a fatto** (contratto `0.2.0`, ADR-0155: la simulazione e le rune latine, la migrazione `0.1 → 0.2`); **T307b fatto** (contratto `0.3.0`, ADR-0158: la società e il Concilio, la migrazione `0.2 → 0.3`); **T308a fatto** (contratto `0.4.0`, ADR-0159: i campi e i percorsi dei file dell’universo, la migrazione `0.3 → 0.4`); **T308b fatto** (contratto `0.5.0`, ADR-0163: il filo e Lua, la migrazione `0.4 → 0.5`). Questo documento è il piano: la tabella completa di ciò che cambia nome,
+> Stato: **decisa** dall'autore (D34, 05/11 sera), ADR-0153; **T307a fatto** (contratto `0.2.0`, ADR-0155: la simulazione e le rune latine, la migrazione `0.1 → 0.2`); **T307b fatto** (contratto `0.3.0`, ADR-0158: la società e il Concilio, la migrazione `0.2 → 0.3`); **T308a fatto** (contratto `0.4.0`, ADR-0159: i campi e i percorsi dei file dell’universo, la migrazione `0.3 → 0.4`); **T308b fatto** (contratto `0.5.0`, ADR-0163: il filo e Lua, la migrazione `0.4 → 0.5`); **T309 fatto** (kernel `0.5.1`: i commenti del Lua e degli XML del seme). Questo documento è il piano: la tabella completa di ciò che cambia nome,
 > dominio per dominio, e i task che la applicano. La stessa tabella, come dato, è `src/kernel/internalNames.ts` (`INTERNAL_NAMES`);
 > `tests/internal-names.test.ts` controlla che non abbia doppioni né collisioni e che copra i valori del codice; le tabelle qui sotto
 > le riscrive `npx vite-node lab/scripts/lingua-interna.ts` (con `-- --misura` conta anche i file che ogni passo tocca).
@@ -134,6 +134,14 @@ T307 come era scritto (tutti i valori insieme) toccava ≈ 400 file, T308 ≈ 38
    privato di `sys.work` nel suo `work`, gli eventi del bus che solo il TypeScript ascolta.
 5. **T309** — i commenti di Lua e XML, invariato: non cambia contratto (sale `Z`); il controllo di identità (token Lua uguali, albero XML
    senza commenti uguale, voxel uguali). Si fa dopo i passi di codice perché i commenti nominano i valori nuovi.
+   **Fatto** (kernel `0.5.1`): ≈ 2.000 commenti diversi (≈ 27.000 parole) di `universe/modules/*/logic.lua`, `universe/models/*.xml` e
+   `lab/mjx/official/`, tradotti a unità (le righe di commento che si seguono sono una frase sola) con `tools/lingua/cli.ts` (`estrai`,
+   `applica`, `confronta <ref>`); lo stesso testo è cambiato anche nelle copie dei programmi sotto `lab/` (le copie restano copie), tranne `lab/banco/universi-cloud/`: sono universi di un contratto prima, e la migrazione riconosce i file del seme di allora dalla loro impronta (`seed.json`), commenti compresi. Il
+   codice è lo stesso file per file (`confronta`: token Lua, albero XML senza commenti), i voxel anche (`tests/mj-engine-determinism.test.ts`);
+   `tests/seed-comments.test.ts` tiene inglesi i commenti del seme (un commento può citare ciò che il mondo dice: «…», "…"). I testi di
+   un'insegna o di un'animazione (`"SALA DEL CONCILIO"`, `"delibera"`) restano come sono: sono il mondo. `prelude.lua` era già inglese.
+   In TypeScript: le poche righe italiane di `src/` (`graph.ts`, `cards.ts`, `server.ts`) e `site/sessioni.ts`. Restano italiani i
+   commenti dei test (`tests/`), della pipeline (`tools/pipeline/`) e dei programmi del laboratorio che non sono copie del seme.
 6. **T310** — i prompt in inglese e il blocco «Lingua», invariato; in più: toglie (dopo un contratto) la riparazione dei valori italiani del
    punto 5, e aggiunge allo schema del Narratore il tipo di legame come id (`legami`), così `society.ts` non indovina più dalla parola.
 

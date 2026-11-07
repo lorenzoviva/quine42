@@ -23,21 +23,21 @@ export const GRAPH_BUILD = 4;
 export type NodeType = 'individual' | 'kind' | 'chunk' | 'region' | 'environment' | 'structure' | 'plot' | 'item' | 'recipe' | 'rune' | 'spell' | 'rule' | 'fact';
 
 export type EdgeType =
-  | 'legame' // persona → persona (attribute `legame`: what the source is to the target)
-  | 'e_un' // persona → tipo
-  | 'abita' // persona → luogo
-  | 'lavora' // persona → luogo
-  | 'porta' // persona → oggetto (what the wanderer carries)
-  | 'coinvolge' // trama → persona
-  | 'tappa' // trama → luogo
-  | 'in_regione' // luogo → regione
-  | 'ambiente' // luogo, regione → ambiente
-  | 'contiene' // luogo → tipo, oggetto, struttura
-  | 'ingrediente' // ricetta → oggetto (`strumento: true` when it is not consumed)
-  | 'produce' // ricetta → oggetto
-  | 'usa' // incantesimo → runa
-  | 'riguarda' // regola → tipo, oggetto
-  | 'cita'; // fatto → persona, luogo, regione
+  | 'legame' // individual → individual (attribute `legame`: what the source is to the target)
+  | 'e_un' // individual → kind
+  | 'abita' // individual → chunk
+  | 'lavora' // individual → chunk
+  | 'porta' // individual → item (what the wanderer carries)
+  | 'coinvolge' // plot → individual
+  | 'tappa' // plot → chunk
+  | 'in_regione' // chunk → region
+  | 'ambiente' // chunk, region → environment
+  | 'contiene' // chunk → kind, item, structure
+  | 'ingrediente' // recipe → item (`strumento: true` when it is not consumed)
+  | 'produce' // recipe → item
+  | 'usa' // spell → rune
+  | 'riguarda' // rule → kind, item
+  | 'cita'; // fact → individual, chunk, region
 
 /** How the Nucleus shows the graph (T28): a colour for each kind of node, a name for each kind of edge. */
 export const NODE_COLOR: Record<NodeType, string> = {

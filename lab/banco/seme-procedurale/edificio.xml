@@ -1,6 +1,6 @@
-<!-- Casetta, procedurale (Cantiere 2) dalla casetta di gemini-3.8-flash (step 8.2A, voto 9/10): stessa pietra, paglia, travi e finestre.
-     Il seme sceglie, sulla griglia grossa prima del map, quanto è lunga e profonda la pianta (da 7×6 a 15×13 celle), quanto sono alti i muri
-     (da 8 a 11), dove si apre la porta sul davanti e dove le finestre; il tetto a capanna si adatta alla pianta che trova. -->
+<!-- Cottage, procedural (Cantiere 2) from the cottage of gemini-3.8-flash (step 8.2A, vote 9/10): same stone, thatch, beams and windows.
+     The seed picks, on the coarse grid before the map, how long and deep the plan is (from 7×6 to 15×13 cells), how tall the walls are
+     (from 8 to 11), where the door opens at the front and where the windows; the gable roof adapts to the plan it finds. -->
 <sequence values="BXQIWNDnOURrGHhkm" size="25 25 24" origin="True" symmetry="(xy)">
   <color symbol="X" hidden="True" name="volume casa"/>
   <color symbol="Q" hidden="True" name="prisma tetto"/>
@@ -18,20 +18,20 @@
   <color symbol="k" hidden="True" name="il taglio"/>
   <color symbol="m" hidden="True" name="mescola"/>
 
-  <!-- Mescola: il generatore riparte da un punto diverso per ogni seme (vedi README) -->
+  <!-- Shuffle: the generator starts again from a different point for every seed (see README) -->
   <box at="12 0 23" size="25 2 1" color="m"/>
   <prl in="m" out="B" p="0.5" steps="1"/>
   <all in="m" out="B"/>
 
-  <!-- Il seme scende al suolo -->
+  <!-- The seed goes down to the ground -->
   <one in="X B" out="B X"/>
 
-  <!-- Pianta rettangolare: 13 lungo x, 11 lungo y -->
+  <!-- Rectangular plan: 13 along x, 11 along y -->
   <all in="XB" out="*X" steps="7" symmetry="(x)"/>
   <all in="X/B" out="*/X" steps="6" symmetry="(y)"/>
   <all in="B X" out="X *" steps="11"/>
 
-  <!-- Le misure scelte dal seme: un taglio a destra, uno sul retro, uno in alto -->
+  <!-- The sizes picked by the seed: a cut on the right, one at the back, one at the top -->
   <box at="16 0 0" size="7 1 1" color="h"/>
   <one in="h" out="k" steps="1"/>
   <all in="h" out="B"/>
@@ -61,41 +61,41 @@
   <all in="* k" out="k *"/>
   <all in="k" out="B"/>
 
-  <!-- Gronda e falde del tetto a due spioventi lungo x -->
+  <!-- Eaves and slopes of the gable roof along x -->
   <all in="B X" out="R *"/>
   <all in="RB XB" out="*R **" symmetry="(x)"/>
   <all in="B R" out="Q *"/>
   <all in="B Q" out="Q *" steps="6"/>
-  <!-- Erosione a due falde (tetto a capanna) -->
+  <!-- Erosion in two slopes (gable roof) -->
   <all in="*Q B*" out="*B **" symmetry="(x)"/>
 
-  <!-- Timpano frontale e posteriore (nord e sud) in legno -->
+  <!-- Front and back gable (north and south) in wood -->
   <all in="R Q" out="* n" symmetry="(y)"/>
   <all in="n Q" out="* n" symmetry="(y)"/>
 
-  <!-- Pareti di pietra e tetto -->
+  <!-- Stone walls and roof -->
   <all in="X" out="D"/>
   <all in="Q" out="R"/>
 
-  <!-- Travi di legno robuste sui quattro spigoli esterni -->
+  <!-- Sturdy wooden beams on the four outer corners -->
   <all in="BB/BD" out="**/*N"/>
 
-  <!-- Facciata frontale (y grande, verso sud): PORTA chiaramente scavata e sagomata -->
+  <!-- Front facade (large y, towards the south): a DOOR clearly dug and shaped -->
   <one steps="1" symmetry="()"
        in="DDDD/BBBB DDDD/BBBB DDDD/BBBB DDDD/BBBB DDDD/BBBB"
        out="NNNN/**** NOON/**** NOON/**** NOON/**** NOON/****"/>
 
-  <!-- Finestra con infisso in legno e davanzale sulla facciata sud a lato della porta -->
+  <!-- Window with a wooden frame and a sill on the south facade beside the door -->
   <one steps="1" symmetry="(x)"
        in="DDD/BBB DDD/BBB DDD/BBB"
        out="NNN/*** NUN/*** NNN/***"/>
 
-  <!-- Finestre laterali (est e ovest) per illuminare l'interno -->
+  <!-- Side windows (east and west) to light the inside -->
   <one steps="1" symmetry="(y)"
        in="D/B D/B D/B"
        out="N/* U/* N/*"/>
 
-  <!-- Risoluzione fine: scala x2 per raggiungere la scatola 50x50x48 (alto > 30) -->
+  <!-- Fine resolution: scale x2 to reach the 50x50x48 box (tall > 30) -->
   <map scale="2 2 2" values="BDNnOURrGHdFp">
     <rule in="D" out="DD/DD DD/DD"/>
     <rule in="N" out="NN/NN NN/NN"/>
@@ -110,24 +110,24 @@
     <color symbol="F" value="9c968c" name="luce pietra"/>
     <color symbol="p" value="a8daf0" name="riflesso vetro"/>
 
-    <!-- Tetto: gradoni e gronda con sottotetto in ombra netta -->
+    <!-- Roof: steps and eaves with a sharply shaded underside -->
     <prl in="RB" out="r*" steps="1"/>
     <prl in="B R" out="* r" p="0.2" steps="1"/>
 
-    <!-- Blocchi di pietra regolari e puliti (corsi orizzontali e verticali a scacchiera RPG) -->
+    <!-- Regular, clean stone blocks (horizontal and vertical courses in an RPG checkerboard) -->
     <all in="DD DD" out="*d **" steps="1"/>
     <prl in="DD/DD" out="*d/**" p="0.3" steps="1"/>
     <prl in="B D" out="* F" p="0.2" steps="1"/>
 
-    <!-- Dettaglio porta: maniglia in ferro scuro e separazione assi -->
+    <!-- Door detail: dark iron handle and separate planks -->
     <all in="OO" out="*H" symmetry="()" steps="1"/>
     <all in="O O" out="O H" symmetry="()" steps="1"/>
 
-    <!-- Dettaglio finestre: telaio a croce e riflesso chiaro nel vetro -->
+    <!-- Window detail: cross frame and a light reflection in the glass -->
     <all in="UU" out="Up" symmetry="()" steps="1"/>
     <all in="U U" out="N *" symmetry="()" steps="1"/>
 
-    <!-- Muschio e umidità alla base a nord (retro) -->
+    <!-- Moss and damp at the base to the north (back) -->
     <prl in="B/D" out="*/G" p="0.35" steps="1" symmetry="()"/>
     <prl in="G D" out="* G" p="0.25" steps="1" symmetry="()"/>
   </map>

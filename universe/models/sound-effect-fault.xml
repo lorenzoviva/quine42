@@ -1,4 +1,4 @@
-<!-- Qualcosa si è rotto: rumore a scatti, mai uguale. -->
+<!-- Something has broken: a jerky noise, never the same. -->
 <sequence name="Guasto" values="BHC" size="12 1 6" symmetry="()">
   <sound bpm="360" scale="phrygian" root="48" swing="0" cutoff="7000" space="0.15">
     <track y="0" instrument="lead" volume="0.9"/>

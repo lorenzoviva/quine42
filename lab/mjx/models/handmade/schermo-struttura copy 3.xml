@@ -1,6 +1,6 @@
 <sequence values="BSabcg" size="23 23 35" symmetry="()" name="JSON screen">
 
- <!-- 1 voxel in piu e richiesto per il matching vuoto -->
+ <!-- 1 more voxel is needed for the empty matching -->
 
   <color symbol="S" value="e8edf7" alpha="0.1" name="Schermo"/>
 

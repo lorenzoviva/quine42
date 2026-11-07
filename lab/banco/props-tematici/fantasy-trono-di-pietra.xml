@@ -1,7 +1,7 @@
-<!-- Trono di pietra (fantasy, aurora): un seggio di pietra con il cuscino di velluto rosso, i braccioli e uno schienale inciso con una
-     gemma che brilla. Il seme sceglie la parte bassa (su una pedana a gradini, su quattro gambe massicce o su un podio tondo con i
-     braccioli a blocco), lo schienale (alto e a punta, a ventaglio di punte, o tondo ad arco) e dove la pietra si scheggia e cresce il
-     muschio. -->
+<!-- Stone throne (fantasy, aurora): a stone seat with a red velvet cushion, armrests and a carved backrest with a
+     shining gem. The seed picks the lower part (on a stepped platform, on four massive legs or on a round podium with
+     block armrests), the backrest (tall and pointed, a fan of points, or round and arched) and where the stone chips and the
+     moss grows. -->
 <sequence values="BSdGRCrMXVUvabofgh" size="20 20 20" symmetry="(xy)" name="Trono di pietra">
   <color symbol="S" value="8a8478" name="pietra"/>
   <color symbol="d" value="5e5a52" name="pietra scura"/>
@@ -20,7 +20,7 @@
   <color symbol="f" hidden="True" name="schienale a punta"/>
   <color symbol="g" hidden="True" name="schienale a ventaglio"/>
   <color symbol="h" hidden="True" name="schienale ad arco"/>
-  <!-- Gli spazi e i due dadi -->
+  <!-- The spaces and the two dice -->
   <box at="10 10 0" size="20 20 20" color="v"/>
   <all in="v" out="B"/>
   <box at="10 10 0" size="21 21 10" color="V"/>
@@ -31,13 +31,13 @@
     <rule in="aV" out="aa"/><rule in="bV" out="bb"/><rule in="oV" out="oo"/>
     <rule in="fU" out="ff"/><rule in="gU" out="gg"/><rule in="hU" out="hh"/>
   </all>
-  <!-- Su una pedana a gradini -->
+  <!-- On a stepped platform -->
   <box at="10 10 0" size="19 17 1" color="d" on="a"/>
   <box at="10 9 1" size="15 13 1" color="S" on="a"/>
   <box at="10 8 2" size="11 9 4" color="S" on="a"/>
   <box at="4 8 2" size="3 9 7" color="G" on="a"/>
   <box at="16 8 2" size="3 9 7" color="G" on="a"/>
-  <!-- Su quattro gambe massicce -->
+  <!-- On four massive legs -->
   <box at="5 5 0" size="3 3 5" color="d" on="b"/>
   <box at="15 5 0" size="3 3 5" color="d" on="b"/>
   <box at="5 12 0" size="3 3 5" color="d" on="b"/>
@@ -47,23 +47,23 @@
   <box at="17 8 6" size="1 11 3" color="G" on="b"/>
   <box at="3 13 6" size="1 1 3" color="r" on="b"/>
   <box at="17 13 6" size="1 1 3" color="r" on="b"/>
-  <!-- Su un podio tondo, braccioli a blocco -->
+  <!-- On a round podium, block armrests -->
   <cylinder at="10 10 0" size="19 19 2" color="d" on="o"/>
   <box at="10 8 2" size="11 9 4" color="S" on="o"/>
   <box at="3 8 2" size="3 11 8" color="G" on="o"/>
   <box at="17 8 2" size="3 11 8" color="G" on="o"/>
   <box at="3 13 9" size="3 1 1" color="r" on="o"/>
   <box at="17 13 9" size="3 1 1" color="r" on="o"/>
-  <!-- Il cuscino e la base dello schienale -->
+  <!-- The cushion and the base of the backrest -->
   <box at="10 9 6" size="9 5 1" color="R" on="[abo]"/>
   <box at="10 4 6" size="11 3 4" color="S" on="[abo]"/>
-  <!-- Schienale alto e a punta -->
+  <!-- Tall, pointed backrest -->
   <box at="10 4 10" size="11 3 6" color="S" on="f"/>
   <box at="10 4 16" size="7 3 1" color="S" on="f"/>
   <box at="10 4 17" size="3 3 1" color="S" on="f"/>
   <box at="10 4 18" size="1 1 1" color="r" on="f"/>
   <box at="10 5 13" size="3 1 3" color="C" on="S"/>
-  <!-- Schienale a ventaglio di punte -->
+  <!-- Backrest as a fan of points -->
   <box at="10 4 10" size="15 3 3" color="S" on="g"/>
   <box at="4 4 13" size="1 3 2" color="d" on="g"/>
   <box at="7 4 13" size="1 3 4" color="d" on="g"/>
@@ -71,13 +71,13 @@
   <box at="13 4 13" size="1 3 4" color="d" on="g"/>
   <box at="16 4 13" size="1 3 2" color="d" on="g"/>
   <box at="10 4 19" size="1 1 1" color="C" on="g"/>
-  <!-- Schienale tondo ad arco -->
+  <!-- Round arched backrest -->
   <ellipsoid at="10 4 4" size="15 3 15" color="S" on="h"/>
   <ellipsoid at="10 4 7" size="9 3 9" color="R" on="S"/>
   <ellipsoid at="10 4 7" size="9 3 9" color="S" on="R"/>
   <box at="10 4 10" size="11 3 6" color="S" on="R"/>
   <all in="[VUvabofgh]" out="B"/>
-  <!-- Schegge e muschio: dove capita -->
+  <!-- Chips and moss: wherever they fall -->
   <prl steps="1" in="B[SdG]" out="X*" p="0.04"/>
   <prl steps="1" in="B [SdG]" out="M *" p="0.06"/>
 </sequence>

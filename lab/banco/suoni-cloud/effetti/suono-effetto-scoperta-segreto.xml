@@ -1,4 +1,4 @@
-<!-- Un segreto trovato: quattro note che salgono a sorpresa, l'ultima sospesa su un accordo che si apre; il seme cambia la strada. -->
+<!-- A secret found: four notes rising by surprise, the last one suspended on a chord that opens; the seed changes the path. -->
 <sequence name="Scoperta di un segreto" values="BNSAGKHCTUVPM" size="14 2 14" symmetry="()">
   <sound bpm="132" scale="dorian" root="52" swing="0" cutoff="6500" space="0.55">
     <track y="0" instrument="lead" volume="0.6"/>
@@ -17,7 +17,7 @@
   <color symbol="P" value="64748b" name="Scelta" hidden="True"/>
   <color symbol="M" value="14b8a6" name="Scelta" hidden="True"/>
 
-  <!-- Le quattro note: la prima e l'ultima ferme, le due di mezzo scelte. -->
+  <!-- The four notes: the first and the last fixed, the two in the middle chosen. -->
   <line at="0 0 4" to="0 0 4" r="0" color="N"/>
   <line at="2 0 5" to="2 0 5" r="0" color="T"/>
   <line at="2 0 6" to="2 0 6" r="0" color="T"/>
@@ -34,7 +34,7 @@
   <one in="V" out="A" steps="1"/>
   <all in="V" out="B"/>
   <all in="ABBBBBB" out="ASSSSSS"/>
-  <!-- L'accordo che si apre sotto l'ultima. -->
+  <!-- The chord opening under the last one. -->
   <line at="6 1 0" to="6 1 0" r="0" color="N"/>
   <line at="6 1 4" to="6 1 4" r="0" color="N"/>
   <line at="6 1 2" to="6 1 2" r="0" color="P"/>

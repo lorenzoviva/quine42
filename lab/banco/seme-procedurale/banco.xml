@@ -1,6 +1,6 @@
-<!-- Banco da lavoro, procedurale (Cantiere 2): legno, piano, ferro e manici dell'originale. Il seme sceglie l'altezza del piano (da 7 a 14
-     voxel: una panca da bottega o un banco alto), se sotto c'è il ripiano e a che altezza, quanto sporge il piano e quali attrezzi ci sono
-     sopra (morsa, cassetta, martello) e dove. -->
+<!-- Workbench, procedural (Cantiere 2): wood, top, iron and handles of the original. The seed picks the height of the top (from 7 to 14
+     voxels: a workshop bench or a tall bench), whether there is a shelf underneath and at what height, how far the top overhangs and which tools are
+     on it (vice, toolbox, hammer) and where. -->
 <sequence values="BNnTIGVhkrswabc" size="20 20 20" symmetry="(xy)" name="Banco da lavoro">
   <color symbol="N" value="7a5534" name="legno"/>
   <color symbol="n" value="553a22" name="legno scuro"/>
@@ -16,7 +16,7 @@
   <color symbol="a" hidden="True" name="la morsa"/>
   <color symbol="b" hidden="True" name="il martello"/>
   <color symbol="c" hidden="True" name="la cassetta"/>
-  <!-- Il piano più largo possibile, le gambe più alte, il ripiano possibile -->
+  <!-- The widest possible top, the tallest legs, the possible shelf -->
   <box at="10 10 6" size="20 14 10" color="w"/>
   <box at="10 10 6" size="16 14 10" color="V"/>
   <prl in="w" out="a" p="0.004" steps="1"/>
@@ -31,7 +31,7 @@
   <box at="16 5 0" size="2 2 16" color="N"/>
   <box at="4 15 0" size="2 2 16" color="N"/>
   <box at="16 15 0" size="2 2 16" color="N"/>
-  <!-- L'altezza -->
+  <!-- The height -->
   <box at="0 0 8" size="1 1 8" color="h"/>
   <one in="h" out="k" steps="1"/>
   <all in="h" out="B"/>
@@ -41,7 +41,7 @@
   <all in="B V" out="* T"/>
   <all in="T V" out="* T" steps="1"/>
   <all in="V" out="B"/>
-  <!-- Il ripiano, forse, a un'altezza scelta sotto il piano -->
+  <!-- The shelf, perhaps, at a chosen height under the top -->
   <box at="10 10 2" size="16 12 4" color="r" on="B"/>
   <box at="19 19 2" size="1 1 4" color="h"/>
   <prl in="h" out="k" p="0.6" steps="1"/>
@@ -51,7 +51,7 @@
   <all in="sr" out="*n"/>
   <all in="nr" out="nn"/>
   <all in="[sr]" out="B"/>
-  <!-- Gli attrezzi: nascono sul piano a caso, uno per tipo -->
+  <!-- The tools: they appear on the top at random, one per kind -->
   <prl in="B T" out="s *" p="0.02" steps="1"/>
   <one in="s" out="a" steps="1"/>
   <one in="s" out="b" steps="1"/>

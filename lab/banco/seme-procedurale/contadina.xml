@@ -1,6 +1,6 @@
-<!-- Contadina, procedurale (Cantiere 2): gli stessi colori dell'originale (gonna rosso mattone, corsetto blu, grembiule, fazzoletto ocra). Il
-     seme sceglie quanto è ampia la gonna (dritta, a campana, larga fino a terra), se in testa ha il fazzoletto o la crocchia di capelli e
-     che cosa porta: una cesta di mele al fianco, un sacco sulla schiena, una brocca in testa o niente. Il seme decide anche se saluta con il braccio alzato. Viso, occhi e corsetto restano dove sono. -->
+<!-- Peasant woman, procedural (Cantiere 2): the same colours of the original (brick-red skirt, blue bodice, apron, ochre headscarf). The
+     seed picks how wide the skirt is (straight, bell-shaped, wide down to the ground), whether she has the headscarf or a bun of hair on her head and
+     what she carries: a basket of apples at her side, a sack on her back, a jug on her head or nothing. The seed also decides whether she waves with her arm raised. Face, eyes and bodice stay where they are. -->
 <sequence values="BGKMRDWFSHECLpqmabcdrTuvy1234567890" size="20 15 30" symmetry="(xy)" name="Contadina">
   <color symbol="G" value="4a3424" name="scarpe" part="gamba"/>
   <color symbol="K" value="8c382b" name="gonna rosso mattone"/>
@@ -36,13 +36,13 @@
   <color symbol="d" hidden="True" name="il fazzoletto possibile"/>
   <color symbol="r" hidden="True" name="la crocchia possibile"/>
   <color symbol="0" hidden="True" name="mescola"/>
-  <!-- Mescola: il generatore riparte da un punto diverso per ogni seme (vedi README) -->
+  <!-- Shuffle: the generator starts again from a different point for every seed (see README) -->
   <box at="10 0 29" size="20 2 1" color="0"/>
   <prl in="0" out="B" p="0.5" steps="1"/>
   <all in="0" out="B"/>
     <box at="8 7 0" size="3 4 2" color="G"/>
   <box at="12 7 0" size="3 4 2" color="G"/>
-  <!-- La gonna: tre ampiezze -->
+  <!-- The skirt: three widths -->
   <cone at="10 7 0" size="20 15 15" color="p" on="B"/>
   <cone at="10 7 1" size="17 13 12" color="q" on="[Bp]"/>
   <cylinder at="10 7 1" size="11 9 10" color="K" on="[Bpq]"/>
@@ -60,10 +60,10 @@
   </all>
   <all in="[ab]" out="K"/>
   <all in="[pq]" out="B"/>
-  <!-- Corsetto, camicia, braccia, testa: come nell'originale -->
+  <!-- Bodice, shirt, arms, head: as in the original -->
   <cylinder at="10 7 10" size="12 9 6" color="D"/>
   <box at="10 10 10" size="7 2 6" color="W"/>
-  <!-- Il braccio sinistro: lungo il fianco, o alzato a salutare -->
+  <!-- The left arm: along the side, or raised to wave -->
   <cylinder at="3 7 10" size="3 4 5" color="8" on="B"/>
   <box at="3 7 7" size="3 3 3" color="9" on="B"/>
   <cylinder at="3 7 13" size="3 3 9" color="4" on="B"/>
@@ -94,7 +94,7 @@
   <box at="10 10 15" size="2 1 1" color="K"/>
   <box at="6 8 16" size="1 2 3" color="H"/>
   <box at="14 8 16" size="1 2 3" color="H"/>
-  <!-- In testa: il fazzoletto, o una crocchia alta -->
+  <!-- On the head: the headscarf, or a high bun -->
   <ellipsoid at="10 6 19" size="9 9 6" color="d" on="[BH]"/>
   <box at="10 5 18" size="8 4 5" color="d" on="[BH]"/>
   <box at="10 6 22" size="6 6 1" color="d" on="B"/>
@@ -113,7 +113,7 @@
   <all in="b" out="H"/>
   <all in="d" out="H"/>
   <all in="r" out="B"/>
-  <!-- Ciò che porta, uno solo: la cesta al fianco, il sacco sulla schiena, la brocca in testa, o niente -->
+  <!-- What she carries, one thing only: the basket at her side, the sack on her back, the jug on her head, or nothing -->
   <cylinder at="17 9 2" size="7 8 6" color="c" on="B"/>
   <box at="17 9 6" size="1 6 3" color="c" on="B"/>
   <ellipsoid at="10 2 6" size="12 5 12" color="u" on="B"/>
@@ -136,7 +136,7 @@
   <all in="2" out="F"/>
   <all in="3" out="R"/>
   <prl in="B T" out="R *" p="0.3" steps="1"/>
-  <!-- Il grembiule sul davanti della gonna -->
+  <!-- The apron at the front of the skirt -->
   <box at="10 11 2" size="8 2 8" color="W" on="[BK]"/>
   <prl steps="1" symmetry="()">
     <rule in="B/* */* W/B" out="B/* */* F/B" p="0.35"/>

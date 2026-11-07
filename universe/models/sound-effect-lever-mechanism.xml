@@ -1,4 +1,4 @@
-<!-- Una leva tirata: gli scatti del cricchetto, poi il meccanismo che cade al suo posto con un tonfo e una nota di ferro. -->
+<!-- A lever pulled: the clicks of the ratchet, then the mechanism falling into place with a thud and an iron note. -->
 <sequence name="Meccanismo e leva" values="BNSAGKHCTUVPM" size="12 3 8" symmetry="()">
   <sound bpm="140" scale="harmonic_minor" root="45" swing="0" cutoff="5200" space="0.3">
     <track y="0" instrument="bass" volume="0.75"/>
@@ -18,7 +18,7 @@
   <color symbol="P" value="64748b" name="Scelta" hidden="True"/>
   <color symbol="M" value="14b8a6" name="Scelta" hidden="True"/>
 
-  <!-- Gli scatti: tre sempre, un quarto se il seme vuole. -->
+  <!-- The clicks: three always, a fourth if the seed wants. -->
   <line at="0 2 1" to="0 2 1" r="0" color="H"/>
   <line at="1 2 1" to="1 2 1" r="0" color="H"/>
   <line at="2 2 1" to="2 2 1" r="0" color="H"/>
@@ -26,7 +26,7 @@
   <line at="4 2 1" to="4 2 1" r="0" color="T"/>
   <one in="T" out="H" steps="1"/>
   <all in="T" out="B"/>
-  <!-- Il tonfo e il ferro. -->
+  <!-- The thud and the iron. -->
   <line at="6 2 0" to="6 2 0" r="0" color="K"/>
   <line at="6 2 2" to="6 2 2" r="0" color="U"/>
   <line at="7 2 2" to="7 2 2" r="0" color="U"/>

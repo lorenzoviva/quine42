@@ -1,4 +1,4 @@
-<!-- Un fuoco che scoppietta: un tepore basso che resta, schiocchi brevi e scintille acute dove il seme vuole. Una battuta che gira. -->
+<!-- A crackling fire: a low warmth that stays, short snaps and high sparks where the seed wants. A bar that loops. -->
 <sequence name="Fuoco scoppiettante" values="BNSAGKHCTUVPM" size="16 3 12" symmetry="()">
   <sound bpm="96" scale="dorian" root="45" swing="0" cutoff="6000" space="0.5">
     <track y="0" instrument="lead" volume="0.42"/>
@@ -18,7 +18,7 @@
   <color symbol="P" value="64748b" name="Scelta" hidden="True"/>
   <color symbol="M" value="14b8a6" name="Scelta" hidden="True"/>
 
-  <!-- Il tepore: una quinta del pad e il basso, che respirano a metà battuta. -->
+  <!-- The warmth: a fifth of the pad and the bass, breathing at half the bar. -->
   <line at="0 1 0" to="0 1 0" r="0" color="N"/>
   <line at="0 1 4" to="0 1 4" r="0" color="N"/>
   <line at="8 1 2" to="8 1 2" r="0" color="T"/>
@@ -28,14 +28,14 @@
   <all in="T" out="B"/>
   <all in="NBBBBBBBBBBBBBB" out="NSSSSSSSSSSSSSS"/>
   <all in="NBBBBBBB" out="NSSSSSSS"/>
-  <!-- Gli schiocchi: colpi chiusi e qualche rullante. -->
+  <!-- The snaps: closed hits and a few snares. -->
   <line at="0 2 1" to="15 2 1" r="0" color="U"/>
   <one in="U" out="H" steps="5"/>
   <all in="U" out="B"/>
   <line at="1 2 2" to="15 2 2" r="0" color="V"/>
   <one in="V" out="C" steps="2"/>
   <all in="V" out="B"/>
-  <!-- Le scintille, su altezze diverse. -->
+  <!-- The sparks, at different pitches. -->
   <line at="0 0 6" to="15 0 6" r="0" color="P"/>
   <line at="0 0 8" to="15 0 8" r="0" color="P"/>
   <line at="0 0 9" to="15 0 9" r="0" color="P"/>

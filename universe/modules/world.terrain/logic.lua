@@ -1,14 +1,14 @@
--- Terreno di Valmora.
--- generate_chunk restituisce size*size codici di tile, riga per riga.
--- Deterministico: stesso seme, stesse coordinate, stesso mondo. È solo una BOZZA continua:
--- il Cartografo la usa come punto di partenza e la trasforma. Codici della bozza: g p t w r (base),
--- s sabbia, j giungla, o mare, k montagna, n neve (biomi).
+-- Terrain of Valmora.
+-- generate_chunk returns size*size tile codes, row by row.
+-- Deterministic: same seed, same coordinates, same world. It is only a continuous DRAFT:
+-- the Cartographer uses it as a starting point and transforms it. Codes of the draft: g p t w r (base),
+-- s sand, j jungle, o sea, k mountain, n snow (biomes).
 local M = {}
 
 local function smooth(t) return t * t * (3 - 2 * t) end
 local function lerp(a, b, t) return a + (b - a) * t end
 
--- C: cache dei valori del reticolo, vive solo per la durata di una chiamata (niente stato).
+-- C: cache of the lattice values, it lives only for the length of one call (no state).
 local function lattice(C, ix, iy, s)
   local layer = C[s]
   if not layer then layer = {}; C[s] = layer end
@@ -30,8 +30,8 @@ local function fbm(C, x, y, s)
   return vnoise(C, x / 24, y / 24, s) * 0.6 + vnoise(C, x / 9, y / 9, s + 1) * 0.3 + vnoise(C, x / 4, y / 4, s + 2) * 0.1
 end
 
--- Biomi su larga scala: temperatura e umidità cambiano lentamente (decine di luoghi), il continente
--- decide dove c'è il mare. Vicino all'origine il clima è mite: si parte da un borgo temperato.
+-- Large-scale biomes: temperature and humidity change slowly (tens of places), the continent
+-- decides where the sea is. Near the origin the climate is mild: one starts from a temperate village.
 local function bioma(C, wx, wy, seed)
   local d = math.min(1, math.sqrt(wx * wx + wy * wy) / 90)
   local temp = 0.5 + (vnoise(C, wx / 170, wy / 170, seed + 31) - 0.5) * 2 * d
@@ -41,7 +41,7 @@ local function bioma(C, wx, wy, seed)
 end
 
 local function tile_at(C, wx, wy, seed)
-  -- La piazza di partenza è sempre sgombra.
+  -- The starting square is always clear.
   if wx > -3 and wx < 3 and wy > -3 and wy < 3 then return "g" end
   local h = fbm(C, wx, wy, seed)
   local m = fbm(C, wx, wy, seed + 7)
@@ -49,7 +49,7 @@ local function tile_at(C, wx, wy, seed)
   local fiume = math.abs(vnoise(C, wx / 55, wy / 55, seed + 17) - 0.5) < 0.014
   local r = hash(wx, wy, seed + 3)
   local temp, umid, cont = bioma(C, wx, wy, seed)
-  -- Mare aperto, poi la riva di sabbia.
+  -- Open sea, then the sandy shore.
   if cont < 0.24 then return "o" end
   if cont < 0.28 then return h < 0.45 and "w" or "s" end
   if h > 0.8 then return "k" end
@@ -57,19 +57,19 @@ local function tile_at(C, wx, wy, seed)
   if fiume then return "w" end
   if road then return "p" end
   if temp > 0.68 and umid < 0.42 then
-    -- Deserto: sabbia, qualche roccia, rare oasi.
+    -- Desert: sand, a few rocks, rare oases.
     if h < 0.3 then return "w" end
     if r < 0.03 then return "r" end
     return "s"
   end
   if temp > 0.62 and umid > 0.6 then
-    -- Giungla: fittissima, con radure.
+    -- Jungle: very dense, with clearings.
     if h < 0.3 then return "w" end
     if m > 0.45 and r < 0.8 then return "j" end
     return "g"
   end
   if temp < 0.3 then
-    -- Nord gelido: neve e abeti.
+    -- Frozen north: snow and firs.
     if h < 0.3 then return "w" end
     if m > 0.6 and r < 0.5 then return "t" end
     return "n"

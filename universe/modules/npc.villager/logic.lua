@@ -1,4 +1,4 @@
--- Abitante: parla tramite il Narratore (persona nel manifest). Qui solo ciò che succede alla nascita.
+-- Villager: speaks through the Narrator (persona in the manifest). Here only what happens at birth.
 local M = {}
 
 function M.on_spawn(id)

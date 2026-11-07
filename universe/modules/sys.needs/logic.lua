@@ -1,4 +1,4 @@
--- Bisogni del viandante. Velocità per secondo: in una decina di minuti di cammino viene fame.
+-- Needs of the wanderer. Rates per second: in about ten minutes of walking hunger comes.
 local M = {}
 
 local CALO = { hunger = 0.12, thirst = 0.18, energy = 0.06 }
@@ -15,10 +15,10 @@ function M.update(dt)
     elseif n.hunger > 50 and n.thirst > 50 then
       n.health = math.min(100, n.health + 0.08 * dt)
     end
-    -- Il mana torna piano, da solo; i cristalli magici lo ridanno di colpo.
+    -- Mana comes back slowly, by itself; magic crystals give it back at once.
     n.mana = math.min(100, (n.mana or 0) + 0.12 * dt)
     if n.health <= 0 and not n.dead then
-      -- La fine del viaggio: il kernel chiude la sessione (si può continuare nello stesso mondo).
+      -- The end of the journey: the kernel closes the session (one can go on in the same world).
       n.health = 0
       n.dead = true
       bus.emit("death", { hunger = n.hunger <= 0, thirst = n.thirst <= 0 })

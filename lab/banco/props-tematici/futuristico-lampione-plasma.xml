@@ -16,7 +16,7 @@
   <color symbol="a" hidden="True" name="dove può nascere un braccio"/>
   <color symbol="A" hidden="True" name="un braccio che si allunga"/>
   <color symbol="L" hidden="True" name="una sfera di plasma"/>
-  <!-- Lo zoccolo -->
+  <!-- The plinth -->
   <cylinder at="10 10 0" size="9 9 2" color="W"/>
   <cylinder at="10 10 2" size="5 5 2" color="w"/>
   <!-- La quota della cima: una fra 38 e 55 -->

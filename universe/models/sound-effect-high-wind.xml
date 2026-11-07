@@ -1,4 +1,4 @@
-<!-- Il vento in cima ai monti: un fischio lungo che ondeggia fra poche note, raffiche di soffio sparse, un bordone sotto. Un ciclo di due battute. -->
+<!-- The wind on the mountain tops: a long whistle wavering among a few notes, scattered gusts of breath, a drone underneath. A two-bar cycle. -->
 <sequence name="Vento d'alta quota" values="BNSAGKHCTUVPM" size="32 3 12" symmetry="()">
   <sound bpm="72" scale="pentatonic_minor" root="50" swing="0" cutoff="5500" space="0.75">
     <track y="0" instrument="pad" volume="0.55"/>
@@ -18,7 +18,7 @@
   <color symbol="P" value="64748b" name="Scelta" hidden="True"/>
   <color symbol="M" value="14b8a6" name="Scelta" hidden="True"/>
 
-  <!-- Il bordone: due quinte, una per battuta. -->
+  <!-- The drone: two fifths, one per bar. -->
   <line at="0 1 0" to="0 1 0" r="0" color="A"/>
   <line at="16 1 0" to="16 1 0" r="0" color="N"/>
   <line at="16 1 3" to="16 1 3" r="0" color="T"/>
@@ -27,7 +27,7 @@
   <all in="T" out="B"/>
   <all in="ABBBBBBBBBBBBBBB" out="ASSSSSSSSSSSSSSS"/>
   <all in="NBBBBBBBBBBBBBBB" out="NSSSSSSSSSSSSSSS"/>
-  <!-- Il fischio: una testa che ondeggia lenta. -->
+  <!-- The whistle: a head wavering slowly. -->
   <line at="0 0 6" to="0 0 6" r="0" color="M"/>
   <one>
     <rule in="**B MBB" out="**M NSB" p="2"/>
@@ -38,7 +38,7 @@
     <rule in="MBBB" out="BBBM"/>
   </one>
   <all in="M" out="B"/>
-  <!-- Le raffiche: soffi aperti e chiusi dove il seme vuole. -->
+  <!-- The gusts: open and closed breaths where the seed wants. -->
   <line at="1 2 4" to="31 2 4" r="0" color="U"/>
   <one in="U" out="H" steps="5"/>
   <all in="U" out="B"/>

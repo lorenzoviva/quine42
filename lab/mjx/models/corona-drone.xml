@@ -18,39 +18,39 @@ Animazione "elica" (4 fotogrammi):
 - Il pacchetto dati pulsa ritmicamente modulando l'energia fotonica dei dati in transito (1 -> 2 -> 3 -> 4).
 -->
 <sequence values="BWwMmDSPVsIabcd1234GexyXYZ" size="8 8 8" symmetry="()" name="Drone">
-  <!-- Materiali strutturali: ceramica bianca aerodinamica e titanio cybernetico scuro -->
+  <!-- Structural materials: aerodynamic white ceramic and dark cybernetic titanium -->
   <color symbol="W" value="fff1e8" name="cyber-ceramica bianca scocca"/>
   <color symbol="w" value="d8d0c8" name="sfumatura e biselli scocca chiara"/>
   <color symbol="M" value="20222a" name="titanio grafite scuro telaio"/>
   <color symbol="m" value="2e323f" name="titanio secondario biselli e alette"/>
   <color symbol="D" value="141418" name="carbonio ultra-scuro bracci"/>
 
-  <!-- Meccanica, carrello, bracci e finiture cromate -->
+  <!-- Mechanics, landing gear, arms and chrome finishes -->
   <color symbol="S" value="83769c" name="cromo satinato montanti carrello e bracci"/>
   <color symbol="s" value="c2c3c7" name="argento cromo lucido pinze e antenna"/>
   <color symbol="P" value="3a3a40" name="pattini carrello grafite anti-usura"/>
 
-  <!-- Vano ottico, visore e lenti sensore espressive -->
+  <!-- Optical bay, visor and expressive sensor lenses -->
   <color symbol="V" value="1c2a3a" name="vano ottico vetro scuro visore"/>
   <color symbol="I" value="00ffff" glow="True" name="lente sensore occhio ciano"/>
 
-  <!-- Quattro fasi plasma ciano per rotazione rotori (glow="True") -->
+  <!-- Four cyan plasma phases for the rotors' rotation (glow="True") -->
   <color symbol="a" value="ffffff" glow="True" name="lama plasma bianco-ciano laser"/>
   <color symbol="b" value="00ffff" glow="True" name="lama neon ciano puro"/>
   <color symbol="c" value="05d9e8" glow="True" name="lama neon ciano elettrico"/>
   <color symbol="d" value="29adff" glow="True" name="lama plasma azzurro cobalto"/>
 
-  <!-- Quattro fasi energetiche per pacchetto dati ambra/oro (glow="True") -->
+  <!-- Four energy phases for the amber/gold data packet (glow="True") -->
   <color symbol="1" value="ffa300" glow="True" name="flusso dati ambra dorata"/>
   <color symbol="2" value="ffec27" glow="True" name="pacchetto dati oro brillante"/>
   <color symbol="3" value="ffe27a" glow="True" name="picco dati bianco-oro"/>
   <color symbol="4" value="ff7700" glow="True" name="plasma dati arancio denso"/>
   <color symbol="G" value="d8a878" name="staffa ambra isolante pacchetto"/>
 
-  <!-- Telemetria e beacon di navigazione sommitale -->
+  <!-- Telemetry and navigation beacon on top -->
   <color symbol="e" value="05d9e8" glow="True" name="beacon navigazione ciano"/>
 
-  <!-- Buffer di animazione e marcatori stocastici per semi diversi -->
+  <!-- Animation buffers and stochastic markers for different seeds -->
   <color symbol="x" hidden="True" name="buffer animazione rotori"/>
   <color symbol="y" hidden="True" name="buffer animazione pacchetto dati"/>
   <color symbol="X" hidden="True" name="marker quantistico pacchetto dati"/>
@@ -58,7 +58,7 @@ Animazione "elica" (4 fotogrammi):
   <color symbol="Z" hidden="True" name="marker carenatura dorsale"/>
 
   <!-- ======================================================== -->
-  <!-- 1. CARRELLI DI ATTERRAGGIO A SLITTA E MONTANTI (z = 0..1) -->
+  <!-- 1. SKID LANDING GEAR AND STRUTS (z = 0..1)               -->
   <!-- ======================================================== -->
   <!-- Slitta sinistra al suolo (x=1, y=2..5 a z=0)              -->
   <box at="1 3.5 0" size="1 4 1" color="P"/>
@@ -75,7 +75,7 @@ Animazione "elica" (4 fotogrammi):
   <box at="6 5 1" size="1 1 1" color="S"/>
 
   <!-- ======================================================== -->
-  <!-- 2. PINZE DI PRESA CROMATE DEL CARGO (z = 1..2)           -->
+  <!-- 2. CHROME CARGO GRIPPERS (z = 1..2)                      -->
   <!-- ======================================================== -->
   <!-- Pinze servo laterali che bloccano il pacchetto dati       -->
   <box at="2 3.5 1" size="1 2 1" color="s"/>
@@ -99,12 +99,12 @@ Animazione "elica" (4 fotogrammi):
   <box at="4 4 1" size="1 1 1" color="Y"/>
 
   <!-- ======================================================== -->
-  <!-- 4. BAIA DI DOCKING VENTRALE E CARENA CENTRALE (z = 2)     -->
+  <!-- 4. VENTRAL DOCKING BAY AND CENTRAL HULL (z = 2)          -->
   <!-- ======================================================== -->
   <box at="3.5 3.5 2" size="2 2 1" color="M"/>
 
   <!-- ======================================================== -->
-  <!-- 5. FUSOLIERA CENTRALE E VISORE OTTICO (z = 3)             -->
+  <!-- 5. CENTRAL FUSELAGE AND OPTICAL VISOR (z = 3)            -->
   <!-- ======================================================== -->
   <!-- Scocca centrale in ceramica bianca                        -->
   <box at="3.5 3.5 3" size="2 2 1" color="W"/>
@@ -120,32 +120,32 @@ Animazione "elica" (4 fotogrammi):
   <box at="4 2 3" size="1 1 1" color="m"/>
 
   <!-- Braccetti diagonali di supporto gondole a quota z=3       -->
-  <!-- Anteriore-Sinistro -->
+  <!-- Front-Left -->
   <box at="2 5 3" size="1 1 1" color="S"/>
   <box at="1 6 3" size="1 1 1" color="D"/>
   <box at="0 6 3" size="1 1 1" color="m"/>
   <box at="0 7 3" size="1 1 1" color="m"/>
 
-  <!-- Anteriore-Destro -->
+  <!-- Front-Right -->
   <box at="5 5 3" size="1 1 1" color="S"/>
   <box at="6 6 3" size="1 1 1" color="D"/>
   <box at="7 6 3" size="1 1 1" color="m"/>
   <box at="7 7 3" size="1 1 1" color="m"/>
 
-  <!-- Posteriore-Sinistro -->
+  <!-- Rear-Left -->
   <box at="2 2 3" size="1 1 1" color="S"/>
   <box at="1 1 3" size="1 1 1" color="D"/>
   <box at="0 1 3" size="1 1 1" color="m"/>
   <box at="0 0 3" size="1 1 1" color="m"/>
 
-  <!-- Posteriore-Destro -->
+  <!-- Rear-Right -->
   <box at="5 2 3" size="1 1 1" color="S"/>
   <box at="6 1 3" size="1 1 1" color="D"/>
   <box at="7 1 3" size="1 1 1" color="m"/>
   <box at="7 0 3" size="1 1 1" color="m"/>
 
   <!-- ======================================================== -->
-  <!-- 6. PIANO DEI 4 ROTORI VTOL E CANOPY (z = 4)               -->
+  <!-- 6. LAYER OF THE 4 VTOL ROTORS AND CANOPY (z = 4)          -->
   <!-- ======================================================== -->
   <!-- Tetto centrale con visiera sopra gli occhi sensori        -->
   <box at="3 5 4" size="1 1 1" color="w"/>
@@ -186,14 +186,14 @@ Animazione "elica" (4 fotogrammi):
   <box at="6 0 4" size="1 1 1" color="d"/>
 
   <!-- ======================================================== -->
-  <!-- 7. TETTO CANOPY SUPERIORE RASTREMATO (z = 5)              -->
+  <!-- 7. TAPERED UPPER CANOPY ROOF (z = 5)                      -->
   <!-- ======================================================== -->
   <box at="3.5 3.5 5" size="2 2 1" color="W"/>
   <box at="3 2 5" size="1 1 1" color="m"/>
   <box at="4 2 5" size="1 1 1" color="m"/>
 
   <!-- ======================================================== -->
-  <!-- 8. PINNA STABILIZZATRICE, MAST E BEACON (z = 6)           -->
+  <!-- 8. STABILISER FIN, MAST AND BEACON (z = 6)                -->
   <!-- ======================================================== -->
   <!-- Pinna stabilizzatrice posteriore                          -->
   <box at="3 2 6" size="1 1 1" color="m"/>
@@ -204,7 +204,7 @@ Animazione "elica" (4 fotogrammi):
   <box at="4 3 6" size="1 1 1" color="e"/>
 
   <!-- ======================================================== -->
-  <!-- 9. REGOLE GENERATIVE: VARIANTI STOCASTICHE NEI SEMI       -->
+  <!-- 9. GENERATIVE RULES: STOCHASTIC VARIANTS IN THE SEEDS     -->
   <!-- ======================================================== -->
   <!-- A) Risoluzione quantistica del pacchetto dati (X)         -->
   <one steps="4">
@@ -233,7 +233,7 @@ Animazione "elica" (4 fotogrammi):
 </sequence>
 
 <!-- ============================================================ -->
-<!-- 10. ANIMAZIONE ELICA (4 FRAMES): ROTAZIONE E PULSAZIONE DATI -->
+<!-- 10. PROPELLER ANIMATION (4 FRAMES): ROTATION AND DATA PULSE -->
 <!-- ============================================================ -->
 <animation name="elica" frames="4" symmetry="()">
   <sequence>
