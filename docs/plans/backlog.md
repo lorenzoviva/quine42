@@ -5011,6 +5011,15 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì, le foto del banco.
 - Quando è fatto: commit su `task/T338`, rapporto in `lab/banco/` con le foto; kernel sale di Z se cambiano i controlli.
 
+### T340 · Integrare T334 nel base (conflitti con T333) — `da fare`
+- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 1
+- Step: 30
+- Contesto: `integra T334` ha trovato conflitti con T333, integrato prima (`10bfb184`): `AGENTS.md`, `lab/banco/pattern.md`, `lab/editor/syntax.ts`, `src/kernel/validator.ts`, `src/mj/model.ts`. Entrambi hanno scritto ADR-0171 e kernel 0.5.7. Nasce da T334: `dossier T334`, `dossier T333`.
+- Cosa fare: nel worktree `git merge task/T334`; risolvere tenendo entrambe le aggiunte (i nodi `<in>`/`<out>`, regole da file, `<import>` di T333 e `field`/`temperature`/`observe`/`search` di T334, nel parser, nel validatore, nell'evidenziazione dell'editor, in AGENTS.md e nel banco); l'ADR di T334 diventa ADR-0172 (il file, i rimandi in AGENTS.md, `docs/architettura-dettagli.md`, ADR README, glossario e codice) e il kernel sale a 0.5.8 (`version.ts`, `package.json`, `universe/universe.json` e i test di versione); test, typecheck e build verdi; nel laboratorio una prova veloce che un modello con `<import>` e uno con `observe` girano ancora.
+- Test: suite intera (il fallimento noto di `tests/determinism.test.ts` sotto carico si riprova da solo), typecheck, build.
+- Browser: sì, breve: editor del laboratorio con la torre merlata (T333) e Keys (T334).
+- Quando è fatto: commit su `task/T340`; poi l'orchestratore integra T340 e `integra T334` toglie worktree e branch di T334.
+
 ### T339 · Modelli grandi a parti coerenti: oltre il tetto di una griglia sola — `da fare` (dipende da T333, T335)
 - Pipeline: claude · sforzo max · stima 9% · approvato · priorità 5
 - Step: 30
