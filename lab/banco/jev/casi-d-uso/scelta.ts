@@ -7,7 +7,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
-import { cutPrompt, cutSystem, rejoin, type Part, type Piece } from './contesto';
+import { cutPrompt, cutSystem, principlesIn, rejoin, type Part, type Piece } from './contesto';
 import { explore, RecordingModels } from './registratore';
 import { bootLikeTheGame, universeDir, USE_DIR } from './misura';
 import { appendLine, FLASH_LITE, GeminiJudge, JevJudge, OfflineJudge, type Answer, type Budget, type Case, type Judge, type LedgerLine, type Question, type Reply } from '../banco';
@@ -111,7 +111,9 @@ export function loadChoiceCases(file = CHOICE_FILE): ChoiceCase[] {
   if (!fs.existsSync(file)) return [];
   return (JSON.parse(fs.readFileSync(file, 'utf8')).cases as ChoiceCase[]).map((c) => {
     if (c.context || !c.contextLength) return c;
-    const at = c.system.indexOf(COUNCIL_PRINCIPLES) + COUNCIL_PRINCIPLES.length + 2;
+    // The recorded cases carry the principles of their time (Italian before T310).
+    const principles = principlesIn(c.system) ?? COUNCIL_PRINCIPLES;
+    const at = c.system.indexOf(principles) + principles.length + 2;
     return { ...c, context: c.system.slice(at, at + c.contextLength) };
   });
 }

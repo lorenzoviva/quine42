@@ -4713,7 +4713,7 @@ Nasce da T307a e T299: `dossier T307a`, `dossier T299`. `integra T307a` si è fe
 - Quando è fatto: commit su `task/T309`.
 - Esito: commenti del Lua e degli XML del seme in inglese (≈ 2.000 commenti, 27.000 parole; anche le copie sotto lab/ tranne lab/banco/universi-cloud, che la migrazione riconosce per impronta), `tools/lingua/` (estrai, applica, confronta <ref>, italiano) e `tests/seed-comments.test.ts`; codice identico in tutti i file cambiati (token Lua, albero XML) e voxel uguali; commenti TS italiani di src/ e site/sessioni.ts tradotti; kernel 0.5.1; suite (2633 passati, 1 saltato) e typecheck verdi. Restano italiani i commenti di tests/, tools/pipeline/ e dei programmi del laboratorio che non sono copie del seme; docs/lingue-censimento.md non rigenerato (cambiata solo la riga della convenzione). Non provati: browser (non serviva).
 
-### T310 · L'inglese come lingua interna: i prompt del Concilio in inglese, il mondo nella lingua del suo universo — `da fare` (dipende da T309)
+### T310 · L'inglese come lingua interna: i prompt del Concilio in inglese, il mondo nella lingua del suo universo — `fatto` (`4291afb0`) (dipende da T309)
 - Pipeline: claude · sforzo extra · stima 6% · approvato · priorità 4
 - Step: 42
 - Contesto: D34.4 con la C (05/11): i prompt diventano inglesi (P2 di `docs/lingue.md` §4), il testo del mondo resta nella lingua dell'universo (oggi l'italiano per tutti; la scelta alla Genesi la fa T239 in Fase III). `dossier T306`.
@@ -4721,6 +4721,7 @@ Nasce da T307a e T299: `dossier T307a`, `dossier T299`. `integra T307a` si è fe
 - Test: quarta parete per lingua, mock, suite intera e typecheck con i loro turni.
 - Browser: una Genesi con `?offline` e la prova a pagamento sopra.
 - Quando è fatto: commit su `task/T310`. Nell'esito quanti testi del Concilio sono usciti in inglese per sbaglio e la differenza di token misurata.
+- Esito: prompt del Concilio in inglese (ruoli, tema e ambientazioni, principi, frammenti degli agenti e del kernel), lingua del mondo (`universe.json → language`, it se manca) e blocco «Lingua» di 128 token in ogni richiesta, valori degli schemi interni (riparazione dei valori italiani tenuta un contratto), quarta parete con tabelle it/en e test di frasi di prova e venti innocue per lingua, rilevatore della lingua, kernel 0.5.2, ADR-0164; token: testi fissi −6,9 %, richieste di una Genesi offline −3,3 %; prova a pagamento: ≈ 30 richieste invece delle ≈ 20 previste (luoghi in più aperti dal tappeto), ≈ 0,07 $, 156 testi del mondo, 0 in inglese, nessuno scarto né guasto; suite e typecheck verdi. Spezzato: T310b fa i nomi dei campi degli schemi in inglese, il tipo di legame come id, i valori interni ancora italiani (contratto nuovo) e le espressioni regolari di `lingue.md` §5; fr/es della quarta parete e controllo della lingua nel validatore restano a T239.
 
 ### T311 · Integrare T285 sul base con T284 e T286: la sezione delle vesti e il LEGGIMI — `fatto` (`b04e4b6`)
 - Pipeline: claude · sforzo high · stima 2% · approvato · priorità 1

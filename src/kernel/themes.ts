@@ -1,8 +1,10 @@
 // The four themes offered by the Genesis screen (T152, ADR-0134): plain text, the same free text the player can rewrite.
 // A theme is not a seed of its own: what a universe keeps of it is `prompts/theme.md`, like any theme written by hand.
+// A theme is a prompt of the Council, so it is English (T310, ADR-0165); the world it makes speaks the language of its universe.
 
 export interface WorldTheme {
   id: 'medievale' | 'steampunk' | 'moderno' | 'futuristico';
+  /** The name the Genesis screen shows (the interface, Italian until T239). */
   name: string;
   text: string;
 }
@@ -12,63 +14,63 @@ export const WORLD_THEMES: readonly WorldTheme[] = [
   {
     id: 'medievale',
     name: 'Medievale',
-    text: `# Tema: Il Regno di Valmora
+    text: `# Theme: The Kingdom of Valmora
 
-Un regno medievale quieto: prati, boschi, laghi, colline, borghi di gente semplice, castelli lontani,
-strade che portano a terre sempre più diverse. Contadini, artigiani, mercanti, guardie, maghi di
-villaggio, briganti nei boschi, animali di casa e di bosco.
+A quiet medieval kingdom: meadows, woods, lakes, hills, villages of simple folk, distant castles,
+roads that lead to ever more different lands. Farmers, craftsmen, merchants, guards, village
+mages, brigands in the woods, animals of the house and of the wood.
 
-Tono: concreto, caldo, con un pizzico di meraviglia. Il mondo è vivo e coerente, e per chi ci vive è reale.
-Le storie nascono dalle persone: lavoro, famiglie, amori, debiti, feste, rivalità, viaggi, bestie, magia.
-Qua e là, sul suolo, ci sono le rune: lastre con un segno inciso che manda una luce tenue. La gente le
-raccoglie, le studia, le vende, le teme; ciò che fanno davvero è scritto nel canone delle rune.`,
+Tone: concrete, warm, with a pinch of wonder. The world is alive and consistent, and for those who live in it, it is real.
+Stories are born from the people: work, families, loves, debts, feasts, rivalries, journeys, beasts, magic.
+Here and there, on the ground, lie the runes: slabs carved with a sign that gives off a faint light. People
+pick them up, study them, sell them, fear them; what they really do is written in the canon of the runes.`,
   },
   {
     id: 'steampunk',
     name: 'Steampunk',
-    text: `# Tema: Le Città del Vapore
+    text: `# Theme: The Cities of Steam
 
-Un'età del vapore e dell'ottone: città di mattoni sotto un cielo di fuliggine, ferrovie sui viadotti, dirigibili
-ormeggiati alle torri, officine che non dormono; fuori, miniere, campagne con le trebbiatrici a caldaia, porti di
-bastimenti. Macchinisti, fuochisti, orologiai, operaie dei telai, inventori squattrinati, giornalai, ladri di rame,
-cavalli da tiro e gatti di fabbrica.
+An age of steam and brass: brick cities under a sky of soot, railways on the viaducts, airships
+moored to the towers, workshops that never sleep; outside, mines, countryside with boiler threshers, ports of
+steamships. Engine drivers, stokers, watchmakers, loom girls, penniless inventors, newsboys, copper thieves,
+draught horses and factory cats.
 
-Tono: concreto, caldo, con un pizzico di meraviglia. Il mondo è vivo e coerente, e per chi ci vive è reale.
-Le storie nascono dalle persone: lavoro, famiglie, amori, debiti, scioperi, brevetti, rivalità, viaggi.
-Qua e là, sul suolo, ci sono le rune: lastre con un segno inciso che manda una luce tenue. Gli inventori provano a
-capirle, i collezionisti le pagano bene, i vecchi le temono; c'è chi chiama magia ciò che fanno e chi una scienza
-ancora da scrivere. Ciò che fanno davvero è scritto nel canone delle rune.`,
+Tone: concrete, warm, with a pinch of wonder. The world is alive and consistent, and for those who live in it, it is real.
+Stories are born from the people: work, families, loves, debts, strikes, patents, rivalries, journeys.
+Here and there, on the ground, lie the runes: slabs carved with a sign that gives off a faint light. Inventors try to
+understand them, collectors pay well for them, the old fear them; some call what they do magic, others a science
+yet to be written. What they really do is written in the canon of the runes.`,
   },
   {
     id: 'moderno',
     name: 'Moderno',
-    text: `# Tema: La Grande Città, anni Novanta
+    text: `# Theme: The Big City, the Nineties
 
-Una grande città negli anni Novanta: condomini e palazzi, viali di platani, tram e metropolitana, cantieri, centri
-commerciali; ai margini la tangenziale, i campi, il porto, le colline dove si va la domenica. Baristi, tranvieri,
-idraulici, commesse, infermiere, studenti, vigili, tassisti, piccoli truffatori, cani e gatti di quartiere. Cabine
-telefoniche, radio private, videocassette, motorini.
+A big city in the nineties: blocks of flats and palazzi, avenues of plane trees, trams and the underground, building sites, shopping
+centres; at the edges the ring road, the fields, the harbour, the hills where people go on Sundays. Barmen, tram drivers,
+plumbers, shop girls, nurses, students, traffic wardens, taxi drivers, small-time swindlers, neighbourhood dogs and cats. Phone
+boxes, local radio stations, video cassettes, mopeds.
 
-Tono: concreto, caldo, con un pizzico di meraviglia. Il mondo è vivo e coerente, e per chi ci vive è reale.
-Le storie nascono dalle persone: lavoro, famiglie, amori, debiti, sfratti, feste di quartiere, rivalità, viaggi.
-Qua e là, sul suolo, ci sono le rune: lastre con un segno inciso che manda una luce tenue, sul prato come
-sul marciapiede. Alla radio ci ridono sopra; le raccolgono i ragazzi, le vendono ai mercatini, le studia qualche
-professore, e chi ne ha pronunciata una lo racconta sottovoce. Ciò che fanno davvero è scritto nel canone delle rune.`,
+Tone: concrete, warm, with a pinch of wonder. The world is alive and consistent, and for those who live in it, it is real.
+Stories are born from the people: work, families, loves, debts, evictions, neighbourhood feasts, rivalries, journeys.
+Here and there, on the ground, lie the runes: slabs carved with a sign that gives off a faint light, on the lawn as
+on the pavement. On the radio they laugh about them; kids pick them up, flea markets sell them, a professor or two
+studies them, and whoever has spoken one tells it under their breath. What they really do is written in the canon of the runes.`,
   },
   {
     id: 'futuristico',
     name: 'Futuristico',
-    text: `# Tema: Neon sulla Pioggia
+    text: `# Theme: Neon on the Rain
 
-Una metropoli del futuro: torri di vetro, insegne al neon sotto una pioggia che non smette, treni sospesi, mercati
-sotto i viadotti, serre verticali; oltre le mura, coste allagate e distese di rottami. Riparatori di automi, piloti di
-navette, cuoche di strada, medici senza licenza, corrieri, guardie delle compagnie, gatti e corvi di tetto.
+A metropolis of the future: glass towers, neon signs under a rain that never stops, suspended trains, markets
+under the viaducts, vertical greenhouses; beyond the walls, flooded coasts and stretches of scrap. Repairers of automatons, shuttle
+pilots, street cooks, unlicensed doctors, couriers, company guards, rooftop cats and crows.
 
-Tono: concreto, caldo sotto la pioggia, con un pizzico di meraviglia. Il mondo è vivo e coerente, e per chi ci vive è reale.
-Le storie nascono dalle persone: lavoro, famiglie, amori, debiti, turni, contrabbando, rivalità, viaggi.
-Qua e là, sul suolo, ci sono le rune: lastre con un segno inciso che manda una luce tenue, nel fango come
-sull'asfalto. Le compagnie le comprano, i corrieri le contrabbandano, gli ambulanti ne vendono di false; per strada
-c'è chi chiama magia ciò che fanno, senza vergognarsi. Ciò che fanno davvero è scritto nel canone delle rune.`,
+Tone: concrete, warm under the rain, with a pinch of wonder. The world is alive and consistent, and for those who live in it, it is real.
+Stories are born from the people: work, families, loves, debts, shifts, smuggling, rivalries, journeys.
+Here and there, on the ground, lie the runes: slabs carved with a sign that gives off a faint light, in the mud as
+on the asphalt. The companies buy them, couriers smuggle them, street sellers sell fake ones; on the street
+some call what they do magic, unashamed. What they really do is written in the canon of the runes.`,
   },
 ];
 

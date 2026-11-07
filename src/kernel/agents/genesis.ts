@@ -13,20 +13,20 @@ import { internalFields } from '../internalNames';
 
 /** Codes the procedural draft and the kernel rely on: every palette must define them. */
 export const BASE_CODES: Record<string, { meaning: string; layer: TerrainLayer; solid: boolean; indoor?: boolean }> = {
-  g: { meaning: 'terreno base calpestabile (prato, sabbia, terra…)', layer: 'ground', solid: false },
-  p: { meaning: 'sentiero o strada (anche i sentieri scavati dal kernel)', layer: 'ground', solid: false },
-  t: { meaning: 'vegetazione che blocca il passo (alberi, rovi…)', layer: 'vegetation', solid: true },
-  w: { meaning: 'acqua o liquido invalicabile', layer: 'liquid', solid: true },
-  r: { meaning: 'roccia, rilievo o macerie invalicabili', layer: 'rock', solid: true },
-  h: { meaning: 'muro degli edifici', layer: 'wall', solid: true },
-  f: { meaning: 'pavimento interno degli edifici', layer: 'floor', solid: false, indoor: true },
-  d: { meaning: 'porta o soglia', layer: 'door', solid: false },
+  g: { meaning: 'walkable base ground (grass, sand, earth…)', layer: 'ground', solid: false },
+  p: { meaning: 'path or road (also the paths the kernel digs)', layer: 'ground', solid: false },
+  t: { meaning: 'vegetation that blocks the way (trees, brambles…)', layer: 'vegetation', solid: true },
+  w: { meaning: 'water or uncrossable liquid', layer: 'liquid', solid: true },
+  r: { meaning: 'uncrossable rock, relief or rubble', layer: 'rock', solid: true },
+  h: { meaning: 'wall of the buildings', layer: 'wall', solid: true },
+  f: { meaning: 'inner floor of the buildings', layer: 'floor', solid: false, indoor: true },
+  d: { meaning: 'door or threshold', layer: 'door', solid: false },
   // Biomes of the procedural draft (world.terrain): they must exist in every world.
-  s: { meaning: 'terreno arido calpestabile (sabbia, deserto, spiaggia)', layer: 'ground', solid: false },
-  j: { meaning: 'vegetazione fittissima e invalicabile dei climi caldi (giungla)', layer: 'vegetation', solid: true },
-  o: { meaning: 'acqua profonda del mare o dell’oceano', layer: 'liquid', solid: true },
-  k: { meaning: 'montagna, pareti invalicabili', layer: 'rock', solid: true },
-  n: { meaning: 'terreno freddo calpestabile e lento (neve, gelo)', layer: 'ground', solid: false },
+  s: { meaning: 'dry walkable ground (sand, desert, beach)', layer: 'ground', solid: false },
+  j: { meaning: 'very thick, uncrossable vegetation of hot climates (jungle)', layer: 'vegetation', solid: true },
+  o: { meaning: 'deep water of the sea or the ocean', layer: 'liquid', solid: true },
+  k: { meaning: 'mountain, uncrossable walls', layer: 'rock', solid: true },
+  n: { meaning: 'cold walkable, slow ground (snow, frost)', layer: 'ground', solid: false },
 };
 
 /** The seed's environments that belong to no age (ADR-0134): a Genesis that wrote too few keeps these, not a castle in a city of neon. */
@@ -54,8 +54,8 @@ const BIBLE_SCHEMA: Schema = {
     luoghi: { type: 'ARRAY', items: { type: 'STRING' } },
     personaggi: { type: 'ARRAY', items: { type: 'STRING' } },
     fatti: { type: 'ARRAY', items: { type: 'STRING' } },
-    misteri: { type: 'ARRAY', items: { type: 'STRING' }, description: 'leggende raccontate dalla gente del mondo (persone, bestie, dei, potenti del passato)' },
-    usanze: { type: 'ARRAY', items: { type: 'STRING' }, description: 'al più 3 usanze o modi di dire propri di questo mondo, che arricchiscono il lessico senza contraddirlo né spiegarlo' },
+    misteri: { type: 'ARRAY', items: { type: 'STRING' }, description: 'legends told by the people of the world (people, beasts, gods, the powerful of the past)' },
+    usanze: { type: 'ARRAY', items: { type: 'STRING' }, description: 'at most 3 customs or sayings of this world, that enrich the lexicon without contradicting or explaining it' },
   },
   required: ['titolo', 'tono', 'sintesi', 'storia', 'luoghi', 'personaggi', 'fatti', 'misteri'],
 };
@@ -64,12 +64,12 @@ const STYLE_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
     stile: { type: 'STRING' },
-    forme: { type: 'STRING', description: 'proporzioni e forme dei modelli (teste grandi o realistiche, edifici tozzi o slanciati…)' },
+    forme: { type: 'STRING', description: 'proportions and shapes of the models (big or realistic heads, squat or slender buildings…)' },
     palette: { type: 'ARRAY', items: { type: 'STRING' } },
     luce: { type: 'STRING' },
     regole: { type: 'ARRAY', items: { type: 'STRING' } },
-    protagonista: { type: 'STRING', description: 'aspetto del viandante (il giocatore)' },
-    case_comuni: { type: 'STRING', description: 'come sono le case comuni, se non sono casette di pietra, legno e paglia; altrimenti vuoto' },
+    protagonista: { type: 'STRING', description: 'what the wanderer (the one who plays) looks like' },
+    case_comuni: { type: 'STRING', description: 'what the common houses look like, if they are not cottages of stone, wood and straw; empty otherwise' },
   },
   required: ['stile', 'forme', 'palette', 'luce', 'regole', 'protagonista'],
 };
@@ -84,8 +84,8 @@ const TERRAIN_SCHEMA: Schema = {
         properties: {
           codice: { type: 'STRING' },
           nome: { type: 'STRING' },
-          descrizione: { type: 'STRING', description: "com'è: materiale, colore, dettagli" },
-          colore: { type: 'STRING', description: 'esadecimale #rrggbb, ben distinto dagli altri' },
+          descrizione: { type: 'STRING', description: 'what it is like: material, colour, details' },
+          colore: { type: 'STRING', description: 'hexadecimal #rrggbb, well apart from the others' },
           strato: { type: 'STRING', enum: ['ground', 'floor', 'wall', 'door', 'liquid', 'vegetation', 'rock'] },
           solido: { type: 'BOOLEAN' },
           velocita: { type: 'NUMBER' },
@@ -93,7 +93,7 @@ const TERRAIN_SCHEMA: Schema = {
         required: ['codice', 'nome', 'descrizione', 'colore', 'strato', 'solido', 'velocita'],
       },
     },
-    tetto: { type: 'STRING', description: 'colore #rrggbb dei tetti degli edifici' },
+    tetto: { type: 'STRING', description: 'colour #rrggbb of the roofs of the buildings' },
   },
   required: ['terreni', 'tetto'],
 };
@@ -195,12 +195,12 @@ export type LayoutCheck = (id: string, def: EnvironmentDef, palette: Record<stri
 
 export async function planGenesis(c: Council, theme: string, base: FileMap, checkLayout: LayoutCheck): Promise<GenesisPlan> {
   const data = { theme };
-  // The Narrator still writes the bible with the Italian fields of its schema (until T310): it is read with those of 0.4 (T308a).
+  // The Narrator still writes the bible with the Italian fields of its schema (until T310b): it is read with those of 0.4 (T308a).
   const askBible = async (feedback = ''): Promise<Bible> =>
     internalFields('bible', await c.ask<Bible>(
       'narrator',
       'genesis.bible',
-      `Crea la bibbia di un nuovo universo a partire da questo tema:\n${theme}\n\nPer chi ci vive il mondo è reale (vedi i principi). Scrivi un mondo semplice e concreto, fatto di persone e mestieri, nell'epoca che il tema dice: tono e sintesi la dicono chiaramente (la tecnologia, com'è una città), perché gli altri lavoreranno da lì. Le rune sono come le dice il canone: non aggiungere nulla. Elenca 6-10 luoghi, 4-6 personaggi con mestieri concreti, 6-10 fatti, 2-4 leggende raccontate dalla gente (storie di persone, bestie, dei, potenti del passato: mai sul mondo stesso, né sulle rune oltre il canone). La gente parla e si comporta come dice il lessico: usalo dove viene da sé, senza spiegarlo; in «usanze» al più 3 usanze o modi di dire propri di questo mondo, che non contraddicono il lessico e non aggiungono parole che ne sostituiscono altre.${feedback ? `\nL'Arbitro ha obiettato: ${feedback}` : ''}`,
+      `Create the bible of a new universe from this theme:\n${theme}\n\nFor those who live in it the world is real (see the principles). Write a simple, concrete world, made of people and trades, in the age the theme says: the tone and the summary say it clearly (the technology, what a town is like), because the others will work from there. The runes are as the canon tells them: add nothing. List 6-10 places, 4-6 characters with concrete trades, 6-10 facts, 2-4 legends told by the people (stories of people, beasts, gods, the powerful of the past: never about the world itself, nor about the runes beyond the canon). People speak and behave as the lexicon says: use it where it comes naturally, without explaining it; in "usanze" at most 3 customs or sayings of this world, that do not contradict the lexicon and add no words that replace others.${feedback ? `\nThe Arbiter objected: ${feedback}` : ''}`,
       BIBLE_SCHEMA,
       { data },
     ));
@@ -208,7 +208,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
     c.ask<RawStyle>(
       'artist',
       'genesis.style',
-      `Scrivi la guida di stile per tutti i modelli di questo universo: è un gioco 3D in cui ogni cosa (persone, animali, alberi, rocce, oggetti, edifici) è un modello a voxel (20 voxel per casella) costruito da un programma di regole, visto dall'alto in 3/4. Il mondo si disegna come un cartone: fasce di luce piatte e un contorno scuro dove cambia la parte. Dì lo stile (semplice e leggibile da lontano), le forme e le proporzioni (tozze e semplificate), la palette (ambiente smorzato e chiaro, pochi accenti saturi sulle cose che contano), la luce, 3-6 regole (tra cui: un colore pieno per parte, parti vicine ben staccate di chiaro e scuro, dettagli come segni scuri) e l'aspetto del protagonista, tutto nell'epoca del tema. In «case_comuni», solo se le case comuni di quest'epoca non sono casette di pietra, legno e paglia, dì in una frase come sono (un condominio con i balconi, una baracca di lamiera con un'insegna); altrimenti lascialo vuoto.\nTema: ${theme}\nTitolo: ${bible.title}\nTono: ${bible.tone}\nSintesi: ${bible.summary}${feedback ? `\nL'Arbitro ha obiettato: ${feedback}` : ''}`,
+      `Write the style guide for all the models of this universe: it is a 3D game where everything (people, animals, trees, rocks, things, buildings) is a voxel model (20 voxels per tile) built by a program of rules, seen from above in 3/4. The world is drawn like a cartoon: flat bands of light and a dark outline where the part changes. Say the style (simple and readable from afar), the shapes and proportions (squat and simplified), the palette (a muted, light environment, few saturated accents on the things that matter), the light, 3-6 rules (among them: one solid colour per part, neighbouring parts well apart in light and dark, details as dark marks) and the look of the protagonist, all in the age of the theme. In "case_comuni", only if the common houses of this age are not cottages of stone, wood and straw, say in one sentence what they are like (a block of flats with balconies, a tin shack with a sign); otherwise leave it empty.\nTheme: ${theme}\nTitle: ${bible.title}\nTone: ${bible.tone}\nSummary: ${bible.summary}${feedback ? `\nThe Arbiter objected: ${feedback}` : ''}`,
       STYLE_SCHEMA,
       { data: { ...data, bible } },
     );
@@ -216,7 +216,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
     c.ask<{ terreni: RawTerrain[]; tetto: string }>(
       'cartographer',
       'genesis.terrain',
-      `Definisci 14-20 tipi di terreno per le mappe di questo universo, esterni e interni, della sua epoca.\nTema: ${theme}\nTono: ${bible.tone}\nLuoghi: ${bible.places.join('; ')}\nStile: ${style.stile}; palette ${style.palette.join(', ')}\nCodici obbligatori (un carattere ciascuno), adattati al tema:\n${Object.entries(BASE_CODES).map(([k, v]) => `- ${k}: ${v.meaning} [strato ${v.layer}]`).join('\n')}\nAggiungine altri (un carattere), ciò che nel tema esiste: in un borgo campi coltivati, fango, muro di pietra, paglia, staccionata, ponte levatoio; in una città asfalto, binari, cemento, vetro, lamiera, rete metallica; ovunque lava, tappeto. Colori ben distinti tra loro.${feedback ? `\nDa correggere: ${feedback}` : ''}`,
+      `Define 14-20 kinds of terrain for the maps of this universe, outdoor and indoor, of its age.\nTheme: ${theme}\nTone: ${bible.tone}\nPlaces: ${bible.places.join('; ')}\nStyle: ${style.stile}; palette ${style.palette.join(', ')}\nRequired codes (one character each), adapted to the theme:\n${Object.entries(BASE_CODES).map(([k, v]) => `- ${k}: ${v.meaning} [layer ${v.layer}]`).join('\n')}\nAdd others (one character), what exists in the theme: in a village tilled fields, mud, stone wall, straw, fence, drawbridge; in a city asphalt, rails, concrete, glass, sheet metal, wire fence; anywhere lava, carpet. Colours well apart from each other.${feedback ? `\nTo fix: ${feedback}` : ''}`,
       TERRAIN_SCHEMA,
       { data: { ...data, bible } },
     );
@@ -251,7 +251,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
     const phys = await c.ask<{ terreni: Array<{ codice: string; solido: boolean; velocita: number; nota?: string }> }>(
       'physicist',
       'genesis.physics',
-      `Rivedi la fisica di questi terreni: cosa si può attraversare e a che velocità (moltiplicatore 0.3-1.5).\n${terrain.terreni.map((t) => `${t.codice} ${t.nome} [${t.strato}]: ${t.descrizione} (solido=${t.solido}, velocita=${t.velocita})`).join('\n')}\nRegole fisse: g, p, f, d calpestabili; w, t, r, h invalicabili.`,
+      `Review the physics of these terrains: what can be crossed and at what speed (a multiplier of 0.3-1.5).\n${terrain.terreni.map((t) => `${t.codice} ${t.nome} [${t.strato}]: ${t.descrizione} (solido=${t.solido}, velocita=${t.velocita})`).join('\n')}\nFixed rules: g, p, f, d walkable; w, t, r, h uncrossable.`,
       PHYS_SCHEMA,
       { data: { terreni: terrain.terreni } },
     );
@@ -269,7 +269,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
   const review = await c.ask<{ approvato: boolean; problemi: Array<{ agente: AgentId; problema: string }> }>(
     'arbiter',
     'genesis.review',
-    `Verifica la coerenza tra bibbia, guida di stile e terreni di questo universo nascente. Segnala solo contraddizioni concrete.\nBibbia: ${JSON.stringify(bible)}\nStile: ${JSON.stringify(style)}\nTerreni: ${JSON.stringify(terrain.terreni)}`,
+    `Check that the bible, the style guide and the terrains of this newborn universe agree. Point out only concrete contradictions.\nBible: ${JSON.stringify(bible)}\nStyle: ${JSON.stringify(style)}\nTerrains: ${JSON.stringify(terrain.terreni)}`,
     REVIEW_SCHEMA,
     { data: { bible, style, terreni: terrain.terreni }, temperature: 0.2 },
   );
@@ -318,7 +318,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
   const { moduli } = await c.ask<{ moduli: CastEntry[] }>(
     'narrator',
     'genesis.cast',
-    `Scegli i primi abitanti e le prime cose di «${bible.title}»: 5 npc molto diversi tra loro (almeno 3 persone di mestieri, età e generi diversi, e 1 animale; nessuno uguale a un altro), 5 oggetti che stanno nel mondo (almeno 3 mobili o contenitori, come li ha la sua epoca: letto, credenza, cassa, banco da lavoro…, e 1-2 cose all'aperto con cui fare qualcosa: pozzo, altare, falò, cabina, distributore…), 2 strumenti speciali. Per ognuno una richiesta di una frase per la Fucina, coerente con la bibbia.`,
+    `Choose the first inhabitants and the first things of «${bible.title}»: 5 npcs very different from each other (at least 3 people of different trades, ages and genders, and 1 animal; none the same as another), 5 objects that stand in the world (at least 3 pieces of furniture or containers, as its age has them: bed, cupboard, chest, workbench…, and 1-2 outdoor things to do something with: well, altar, bonfire, booth, vending machine…), 2 special tools. For each one a one-sentence request for the Forge, consistent with the bible.`,
     CAST_SCHEMA,
     { data: { bible } },
   );

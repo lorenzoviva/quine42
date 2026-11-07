@@ -170,8 +170,8 @@ describe('runes and magic', () => {
     const c = new Council(models, () => ({ files: bundledFiles, palette: {}, catalog: [] }));
     const runes = (seq: string[]) => seq.map((t) => ({ token: t, name: t, element: t, description: t }));
     await nameSpell(c, runes(['fuoco', 'terra']), [{ sequence: 'terra fuoco', name: 'Palla di fuoco', description: 'boom' }], ['erba']);
-    expect(asked[0]).toContain("l'ordine conta");
-    expect(asked[0]).toMatch(/Le stesse rune in un altro ordine[^\n]*terra fuoco → Palla di fuoco/);
+    expect(asked[0]).toContain('the order matters');
+    expect(asked[0]).toMatch(/The same runes in another order[^\n]*terra fuoco → Palla di fuoco/);
     await nameSpell(c, runes(['acqua']), [{ sequence: 'terra fuoco', name: 'Palla di fuoco', description: 'boom' }], ['erba']);
     expect(asked[1]).not.toContain('Le stesse rune in un altro ordine');
   });

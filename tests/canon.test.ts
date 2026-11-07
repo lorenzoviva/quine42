@@ -23,15 +23,15 @@ describe('the rune canon', () => {
     const { c, asked } = council(bundledFiles);
     for (const agent of ['narrator', 'arbiter'] as const) {
       const ctx = c.context(agent);
-      expect(ctx).toMatch(/## Canone delle rune[\s\S]*nessuna trama/);
+      expect(ctx).toMatch(/## Canon of the runes[\s\S]*no plot/);
       expect(ctx).toContain('Non si spostano');
       // The token is Latin (T307a), the element in the language of the world.
       expect(ctx).toMatch(/ᛊ Sowilo \(«lux», luce\)/);
       expect(ctx).toMatch(/terra \+ ignis → Palla di fuoco/);
     }
-    for (const agent of ['sculptor', 'artist', 'physicist', 'engineer', 'cartographer', 'liaison'] as const) expect(c.context(agent)).not.toContain('Canone delle rune');
+    for (const agent of ['sculptor', 'artist', 'physicist', 'engineer', 'cartographer', 'liaison'] as const) expect(c.context(agent)).not.toContain('Canon of the runes');
     await c.ask('narrator', 'plot.weave', 'una trama', { type: 'OBJECT' });
-    expect(asked[0].system).toContain('Canone delle rune');
+    expect(asked[0].system).toContain('Canon of the runes');
   });
 
   it('lists the runes a universe added; an old universe receives the canon from the seed', () => {

@@ -124,8 +124,8 @@ describe('the Narrator weaves coherent plots', () => {
     const k = await bootWith(models);
     const p = (await k.weaveStory(true))!;
     expect(asked.length).toBe(2);
-    expect(asked[0].prompt).toMatch(/COERENZA/);
-    expect(asked[1].prompt).toMatch(/DA CORREGGERE[\s\S]*Fiocco è un animale e non parla[\s\S]*Bastiano è padrone di Fiocco/);
+    expect(asked[0].prompt).toMatch(/CONSISTENCY/);
+    expect(asked[1].prompt).toMatch(/TO FIX[\s\S]*Fiocco è un animale e non parla[\s\S]*Bastiano è padrone di Fiocco/);
     expect(p.title).toBe('Il debito di Ada');
     expect(readPlots(k.files).map((x) => x.title)).toEqual(['Il debito di Ada']);
     expect(k.feed().some((e) => e.kind === 'scarta' && e.task === 'plot.weave')).toBe(true);

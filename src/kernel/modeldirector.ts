@@ -88,7 +88,7 @@ export class ModelDirector {
       if (!lacks(d.model)) continue;
       // A common shape is asked for by its word in the language of the world (T307a: the id is internal, `shape-sack`; the word is «sacco»).
       const forma = d.model!.startsWith(SHAPE_PREFIX) ? italianName('impronte', d.model!.slice(SHAPE_PREFIX.length)) : undefined;
-      out.push(forma ? { id: d.model!, nome: `${forma} (forma comune degli oggetti)`, aspetto: `un ${forma} semplice e riconoscibile, come tanti oggetti del mondo (per esempio: ${d.name})`, classe: 'object', tinta: true } : { id: d.model!, nome: d.name, aspetto: d.look ?? d.description, classe: 'object' });
+      out.push(forma ? { id: d.model!, nome: `${forma} (forma comune degli oggetti)`, aspetto: `a simple, recognisable ${forma}, like many things of the world (for example: ${d.name})`, classe: 'object', tinta: true } : { id: d.model!, nome: d.name, aspetto: d.look ?? d.description, classe: 'object' });
     }
     // Structures the Cartographer asked for (ADR-0043), at their size (ADR-0092): the rare ones (Huge per zone,
     // Gargantuan per realm, the kernel sees to it) by the best model.
@@ -96,11 +96,11 @@ export class ModelDirector {
       const s = k.ecs.get(id, 'structure') as { model?: string; concept: string; class: string; size?: SizeTier };
       if (!lacks(s.model)) continue;
       const place = k.chunkAt(k.ecs.get(id, 'pos').x, k.ecs.get(id, 'pos').y)?.place;
-      out.push({ id: s.model!, nome: s.concept, shareWith: structureSiblings(s.concept).filter((x) => x !== s.model), aspetto: `${s.concept}: un edificio in cui si entra, con la porta sul davanti${place ? `, a «${place.name}» (${place.description})` : ''}`, classe: s.class, ...(s.size ? { taglia: s.size } : {}), contesto: place?.name });
+      out.push({ id: s.model!, nome: s.concept, shareWith: structureSiblings(s.concept).filter((x) => x !== s.model), aspetto: `${s.concept}: a building one enters, with the door at the front${place ? `, at «${place.name}» (${place.description})` : ''}`, classe: s.class, ...(s.size ? { taglia: s.size } : {}), contesto: place?.name });
     }
     for (const [code, t] of Object.entries(k.palette)) {
       if (code === '?' || !lacks(t.model)) continue;
-      out.push({ id: t.model!, nome: t.name, aspetto: t.description ?? t.name, classe: t.layer === 'vegetation' ? 'tree' : t.layer === 'rock' ? 'rock' : 'bush', contesto: `sulle caselle di ${t.name}` });
+      out.push({ id: t.model!, nome: t.name, aspetto: t.description ?? t.name, classe: t.layer === 'vegetation' ? 'tree' : t.layer === 'rock' ? 'rock' : 'bush', contesto: `on the tiles of ${t.name}` });
     }
     // Every common lot shows them: before anything else, or the budget may end on the seed's cottages.
     return [...out.filter((r) => r.id.startsWith(COMMON_HOUSE)), ...out.filter((r) => !r.id.startsWith(COMMON_HOUSE))];

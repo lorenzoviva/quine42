@@ -12,6 +12,7 @@ import type { WorldGraph } from '../graph';
 import { gameSetupSummary } from '../gameSetup';
 import { repairGameSetup } from '../validator';
 import { internalFields, italianName } from '../internalNames';
+import { languageBlock, languageOf } from '../language';
 
 export type AgentId = 'narrator' | 'cartographer' | 'artist' | 'sculptor' | 'physicist' | 'engineer' | 'arbiter' | 'liaison' | 'actor' | 'musician';
 
@@ -100,17 +101,17 @@ export function readBible(files: FileMap): Bible | null {
 }
 
 export function bibleSummary(b: Bible | null, full = false): string {
-  if (!b) return '(nessuna bibbia del mondo)';
+  if (!b) return '(no bible of the world)';
   const list = (xs: string[] | undefined, n: number) => (xs ?? []).slice(-n).map((x) => `- ${x}`).join('\n');
   return [
-    `Titolo: ${b.title}`,
-    `Tono: ${b.tone}`,
-    `Sintesi: ${b.summary}`,
-    full && b.history ? `Storia: ${b.history}` : '',
-    `Luoghi noti:\n${list(b.places, full ? 30 : 12)}`,
-    `Personaggi noti:\n${list(b.characters, full ? 20 : 8)}`,
-    `Fatti stabiliti:\n${list(b.facts, full ? 30 : 12)}`,
-    b.mysteries?.length ? `Misteri e leggende del mondo:\n${list(b.mysteries, 8)}` : '',
+    `Title: ${b.title}`,
+    `Tone: ${b.tone}`,
+    `Summary: ${b.summary}`,
+    full && b.history ? `History: ${b.history}` : '',
+    `Known places:\n${list(b.places, full ? 30 : 12)}`,
+    `Known characters:\n${list(b.characters, full ? 20 : 8)}`,
+    `Established facts:\n${list(b.facts, full ? 30 : 12)}`,
+    b.mysteries?.length ? `Mysteries and legends of the world:\n${list(b.mysteries, 8)}` : '',
   ]
     .filter(Boolean)
     .join('\n');
@@ -118,8 +119,8 @@ export function bibleSummary(b: Bible | null, full = false): string {
 
 /** The head of the bible, for the tasks that bring their own context from the graph. */
 export function bibleHead(b: Bible | null): string {
-  if (!b) return '(nessuna bibbia del mondo)';
-  return [`Titolo: ${b.title}`, `Tono: ${b.tone}`, `Sintesi: ${b.summary}`].join('\n');
+  if (!b) return '(no bible of the world)';
+  return [`Title: ${b.title}`, `Tone: ${b.tone}`, `Summary: ${b.summary}`].join('\n');
 }
 
 /** Characters of graph context a focused task gets (about 700 tokens), and how many recent rules. */
@@ -129,7 +130,7 @@ const FOCUSED_RULES = 12;
 export function paletteSummary(palette: Record<string, TerrainDef>): string {
   return Object.entries(palette)
     .filter(([code]) => code !== '?')
-    .map(([code, t]) => `- ${code} = ${t.name} (${t.color}${t.solid ? ', solido' : ''}${t.speed && t.speed !== 1 ? `, velocità ×${t.speed}` : ''})${t.description ? `: ${t.description}` : ''}`)
+    .map(([code, t]) => `- ${code} = ${t.name} (${t.color}${t.solid ? ', solid' : ''}${t.speed && t.speed !== 1 ? `, speed ×${t.speed}` : ''})${t.description ? `: ${t.description}` : ''}`)
     .join('\n');
 }
 
@@ -142,8 +143,8 @@ export function rulesSummary(files: FileMap, n = 30): string {
     return '';
   }
   if (!list.length) return '';
-  const lines = list.slice(-n).map((r) => `- ${r.text}: ${r.possible ? `si può${r.effects?.length ? ` (${r.effects.join(', ')})` : ''}` : 'non si può'} — ${r.story}`);
-  return `## Regole già stabilite dal Concilio (rispettale, sii coerente)\n${lines.join('\n')}`;
+  const lines = list.slice(-n).map((r) => `- ${r.text}: ${r.possible ? `possible${r.effects?.length ? ` (${r.effects.join(', ')})` : ''}` : 'not possible'} — ${r.story}`);
+  return `## Rules the Council has already established (respect them, be consistent)\n${lines.join('\n')}`;
 }
 
 /**
@@ -168,10 +169,10 @@ export function canonSummary(files: FileMap): string {
     for (const [seq, sp] of Object.entries(m.spells ?? {})) spells.push(`- ${seq.split(' ').join(' + ')} → ${sp.name}: ${sp.description}`);
   }
   return [
-    '## Canone delle rune (vale sempre: nessuna trama, fatto, mistero o dialogo dà alle rune comportamenti che qui non ci sono)',
+    '## Canon of the runes (always holds: no plot, fact, mystery or dialogue gives the runes behaviours that are not here)',
     canon,
-    runes.length ? `### Le rune magiche di questo mondo\n${runes.join('\n')}` : '',
-    spells.length ? `### Gli incantesimi conosciuti\n${spells.join('\n')}` : '',
+    runes.length ? `### The magic runes of this world\n${runes.join('\n')}` : '',
+    spells.length ? `### The known incantations\n${spells.join('\n')}` : '',
   ]
     .filter(Boolean)
     .join('\n\n');
@@ -191,9 +192,9 @@ export function lexiconSummary(files: FileMap): string {
   if (!lexicon) return '';
   const own = readBible(files)?.customs ?? [];
   return [
-    "## Lessico del mondo (vale sempre: le persone parlano e si comportano così, in ogni epoca; usalo nei dialoghi, nelle cose e nella bibbia, senza mai spiegarlo)",
+    "## Lexicon of the world (always holds: people speak and behave like this, in every age; use it in dialogue, in things and in the bible, never explaining it)",
     lexicon,
-    own.length ? `### Usanze di questo mondo\n${own.map((l) => `- ${l}`).join('\n')}` : '',
+    own.length ? `### Customs of this world\n${own.map((l) => `- ${l}`).join('\n')}` : '',
   ]
     .filter(Boolean)
     .join('\n\n');
@@ -211,7 +212,7 @@ export function gameSummary(files: FileMap): string {
 }
 
 export function catalogSummary(catalog: CatalogEntry[]): string {
-  return catalog.map((m) => `- ${m.id} «${m.name}» [${m.kind}] terreni ${m.tiles.join('') || '-'}: ${m.context}`).join('\n');
+  return catalog.map((m) => `- ${m.id} «${m.name}» [${m.kind}] terrains ${m.tiles.join('') || '-'}: ${m.context}`).join('\n');
 }
 
 export class Council {
@@ -275,47 +276,47 @@ export class Council {
       // The Actor plays the people (T157): it reads what the Narrator reads for those tasks, never more.
       case 'actor':
       case 'narrator':
-        if (focused) parts.push(`## Il mondo\n${bibleHead(bible)}`);
-        else parts.push(`## Bibbia del mondo\n${bibleSummary(bible, true)}`, `## Moduli esistenti\n${catalogSummary(v.catalog)}`);
+        if (focused) parts.push(`## The world\n${bibleHead(bible)}`);
+        else parts.push(`## Bible of the world\n${bibleSummary(bible, true)}`, `## Existing modules\n${catalogSummary(v.catalog)}`);
         if (canon) parts.push(canon);
         if (lexicon) parts.push(lexicon);
         if (rules) parts.push(focused ? rulesSummary(v.files, FOCUSED_RULES) : rules);
         break;
       case 'cartographer': {
-        parts.push(`## Bibbia del mondo\n${bibleSummary(bible)}`, `## Terreni\n${paletteSummary(v.palette)}`, `## Moduli posizionabili\n${catalogSummary(v.catalog)}`);
+        parts.push(`## Bible of the world\n${bibleSummary(bible)}`, `## Terrains\n${paletteSummary(v.palette)}`, `## Placeable modules\n${catalogSummary(v.catalog)}`);
         let regions: Array<{ name: string; environment: string; center: [number, number]; radius: number }> = [];
         try {
           regions = internalFields('atlas', JSON.parse(v.files['world/atlas.json'] ?? '{}')).regions ?? [];
         } catch {
           regions = [];
         }
-        if (regions.length) parts.push(`## Atlante (centro in luoghi; nord = y negativa)\n${regions.map((r) => `- ${r.name} [${r.environment}] centro ${r.center.join(',')} raggio ${r.radius}`).join('\n')}`);
+        if (regions.length) parts.push(`## Atlas (centre in places; north = negative y)\n${regions.map((r) => `- ${r.name} [${r.environment}] centre ${r.center.join(',')} radius ${r.radius}`).join('\n')}`);
         break;
       }
       case 'sculptor':
-        parts.push(`## Guida di stile\n${style}`);
+        parts.push(`## Style guide\n${style}`);
         break;
       case 'artist':
-        parts.push(`## Guida di stile\n${style}`, `## Tono\n${bible?.tone ?? ''}`);
+        parts.push(`## Style guide\n${style}`, `## Tone\n${bible?.tone ?? ''}`);
         break;
       case 'musician':
-        parts.push(`## Il mondo\n${bibleHead(bible)}`);
+        parts.push(`## The world\n${bibleHead(bible)}`);
         break;
       case 'physicist':
-        parts.push(`## Terreni\n${paletteSummary(v.palette)}`, `## Tono\n${bible?.tone ?? ''}`);
+        parts.push(`## Terrains\n${paletteSummary(v.palette)}`, `## Tone\n${bible?.tone ?? ''}`);
         if (rules) parts.push(rules);
         break;
       case 'engineer':
-        parts.push(`## Bibbia (sintesi)\n${bible?.summary ?? ''}`, `## Terreni\n${paletteSummary(v.palette)}`);
+        parts.push(`## Bible (summary)\n${bible?.summary ?? ''}`, `## Terrains\n${paletteSummary(v.palette)}`);
         break;
       case 'arbiter':
-        parts.push(`## Bibbia del mondo\n${bibleSummary(bible)}`, `## Guida di stile\n${style}`, `## Terreni\n${paletteSummary(v.palette)}`);
+        parts.push(`## Bible of the world\n${bibleSummary(bible)}`, `## Style guide\n${style}`, `## Terrains\n${paletteSummary(v.palette)}`);
         if (canon) parts.push(canon);
         if (lexicon) parts.push(lexicon);
         if (rules) parts.push(rules);
         break;
       case 'liaison':
-        parts.push(`## Bibbia del mondo\n${bibleSummary(bible)}`, `## Moduli esistenti\n${catalogSummary(v.catalog)}`);
+        parts.push(`## Bible of the world\n${bibleSummary(bible)}`, `## Existing modules\n${catalogSummary(v.catalog)}`);
         if (rules) parts.push(rules);
         break;
     }
@@ -337,7 +338,7 @@ export class Council {
     const ids = graph?.resolve(focus) ?? [];
     if (!graph || !ids.length) return '';
     this.onFocus?.(ids);
-    return `## Ciò che il mondo sa di questo compito (usa questi nomi e questi legami, non inventarne altri)\n${graph.context(ids, FOCUS_BUDGET)}`;
+    return `## What the world knows about this task (use these names and these bonds, do not invent others)\n${graph.context(ids, FOCUS_BUDGET)}`;
   }
 
   async ask<T>(agent: AgentId, task: string, prompt: string, schema: Schema, opts: CallOptions & { system?: string; role?: string } = {}): Promise<T> {
@@ -354,7 +355,7 @@ export class Council {
    * the agent's context, then `system` (instructions that change rarely) — so the cache serves it.
    */
   async write(agent: AgentId, task: string, prompt: string, opts: CallOptions & { schema?: Schema; system?: string; role?: string } = {}): Promise<string> {
-    const role = opts.role ?? this.files[`prompts/agents/${agent}.md`] ?? `Sei il ${AGENTS[agent].name} del gioco.`;
+    const role = opts.role ?? this.files[`prompts/agents/${agent}.md`] ?? `You are the ${agent} of the Council.`;
     // The focus goes last: what comes before it is the same for every focused task of the agent (the cache).
     const focus = this.focusContext(opts.focus);
     const chi = opts.chi ?? this.payer?.(task) ?? COMUNE;
@@ -370,7 +371,7 @@ export class Council {
     return models.text({
       agent,
       task,
-      system: [role, COUNCIL_PRINCIPLES, this.context(agent, !!focus), opts.system, focus].filter(Boolean).join('\n\n'),
+      system: [role, COUNCIL_PRINCIPLES, languageBlock(languageOf(this.files)), this.context(agent, !!focus), opts.system, focus].filter(Boolean).join('\n\n'),
       prompt,
       schema: opts.schema,
       images: opts.images,

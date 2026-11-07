@@ -46,12 +46,14 @@ describe('the fourth wall', () => {
   });
 
   it('the principles name the hints and forbid doubles of the runes; they go with every request', async () => {
-    for (const s of ['torna sempre in piazza', 'osserva ogni viandante', 'non si può superare', 'simbolo luminoso', 'Niente doppioni']) expect(COUNCIL_PRINCIPLES).toContain(s);
+    for (const s of ['always comes back to the square', 'watches every wanderer', 'cannot be crossed', 'glowing symbol', 'No doubles']) expect(COUNCIL_PRINCIPLES).toContain(s);
     const systems: string[] = [];
     const models = { text: async (r: TextCall) => (systems.push(r.system ?? ''), '{}') } as unknown as AiModels;
     const c = new Council(models, () => ({ files: bundledFiles, palette: {}, catalog: [] }));
     for (const agent of ['narrator', 'arbiter', 'cartographer', 'liaison'] as const) await c.ask(agent, 'prova', 'una prova', { type: 'OBJECT' });
-    for (const system of systems) expect(system).toContain('Niente doppioni degli elementi del gioco');
+    for (const system of systems) expect(system).toContain('No doubles of the elements of the game');
+    // The Language block follows the principles (T310): the world of the seed speaks Italian.
+    for (const system of systems) expect(system).toContain('## Language of the world: Italian (it)');
     expect(systems).toHaveLength(4);
   });
 

@@ -94,11 +94,11 @@ const CRITIQUE_SCHEMA: Schema = {
 
 const classLine = (c: AssetClass) => {
   const b = boxOf(c);
-  return `  - ${c.id} (${c.name}): ${b.join('×')} voxel = ${c.tiles.join('×')} caselle, taglia ${sizeOf(c.taglia)!.name}${c.minHeight ? `, alto almeno ${Math.round(c.minHeight * b[2])}` : ''}; ${c.hint}`;
+  return `  - ${c.id}: ${b.join('×')} voxels = ${c.tiles.join('×')} tiles, size ${c.taglia}${c.minHeight ? `, at least ${Math.round(c.minHeight * b[2])} tall` : ''}; ${c.hint}`;
 };
 
 /** The sizes of D&D (ADR-0092): how a class's box scales when an entity is of another size than its class's. */
-const sizesLine = () => `  Taglie (D&D): ${SIZE_TIERS.map((t) => `${t.name} ×${t.scala}`).join(' · ')} — il lato rispetto a Media; una cosa di un'altra taglia ha la scatola della sua classe scalata (la richiesta la dice)`;
+const sizesLine = () => `  Sizes (D&D): ${SIZE_TIERS.map((t) => `${t.id} ×${t.scala}`).join(' · ')} — the side against medium; a thing of another size has the box of its class scaled (the request says it)`;
 
 /**
  * The structures that grow by rules (T156, ADR-0160): the class `structure` from Large up, a box of 100 voxels a side or more.
@@ -131,7 +131,7 @@ export function skeletonOf(role: string): string | undefined {
  */
 export function sculptorRole(files: FileMap, structures = false): string {
   const palette = Object.entries(MJ_PALETTE).map(([k, v]) => `${k} ${v.color.slice(1)}`).join(' · ');
-  const text = files['prompts/agents/sculptor.md'] ?? 'Sei lo Scultore: scrivi programmi MarkovJunior in XML.';
+  const text = files['prompts/agents/sculptor.md'] ?? 'You are the Sculptor: you write MarkovJunior programs in XML.';
   const at = text.indexOf(STRUCTURES_MARK);
   if (structures && at >= 0) return text.slice(at + STRUCTURES_MARK.length).trim();
   return (at >= 0 ? text.slice(0, at).trimEnd() : text)
@@ -249,11 +249,11 @@ export function describe(req: SculptRequest, cls: AssetClass): string {
   const size = sizeOf(req.taglia);
   const tiles = tilesOf(cls, req.taglia);
   return [
-    `Scolpisci: ${req.nome}`,
-    `Com'è: ${req.aspetto}`,
-    req.contesto && `Dove si trova: ${req.contesto}`,
-    `Classe: ${cls.id}${size && size.id !== cls.taglia ? ` · taglia ${size.name} (${tiles.join(' × ')} caselle, ${densityOf(tiles)} voxel per casella)` : ''} · scatola ${box.join(' × ')} voxel${cls.minHeight ? ` · alto almeno ${Math.round(cls.minHeight * box[2])}` : ''}`,
-    req.tinta && 'Vale per molte cose di questo genere: il colore principale è la lettera C (il gioco la ricolora per ciascuna).',
+    `Sculpt: ${req.nome}`,
+    `What it looks like: ${req.aspetto}`,
+    req.contesto && `Where it is: ${req.contesto}`,
+    `Class: ${cls.id}${size && size.id !== cls.taglia ? ` · size ${size.id} (${tiles.join(' × ')} tiles, ${densityOf(tiles)} voxels per tile)` : ''} · box ${box.join(' × ')} voxels${cls.minHeight ? ` · at least ${Math.round(cls.minHeight * box[2])} tall` : ''}`,
+    req.tinta && 'It serves many things of this kind: the main colour is the letter C (the game recolours it for each one).',
     procedural(cls, req.taglia) && bodyLine(cls, req.taglia),
   ]
     .filter(Boolean)
@@ -265,9 +265,9 @@ function bodyLine(cls: AssetClass, taglia?: string): string {
   const [own, next] = triedSizes(cls, taglia);
   const body = (t: SizeTier) => {
     const vpt = densityOf(tilesOf(cls, t));
-    return `una casella è ${vpt} voxel, gradino ${Math.round(0.2 * vpt)}, persona alta ${Math.ceil(1.5 * vpt)}`;
+    return `a tile is ${vpt} voxels, a step ${Math.round(0.2 * vpt)}, a person ${Math.ceil(1.5 * vpt)} tall`;
   };
-  return `Corpo: ${body(own)}. Lo stesso programma serve anche la taglia ${sizeOf(next)!.name} (scatola ${boxOf(cls, next).join(' × ')}, ${body(next)}) e gira con ${STRUCTURE_SEEDS} semi: ognuno è un altro edificio dello stesso genere.`;
+  return `Body: ${body(own)}. The same program also serves the size ${next} (box ${boxOf(cls, next).join(' × ')}, ${body(next)}) and runs with ${STRUCTURE_SEEDS} seeds: each one is another building of the same kind.`;
 }
 
 /** What a procedural program did, node by node (T179), where it fell or at its first seed: the second request carries it. */
@@ -287,7 +287,7 @@ export function modelFor(req: SculptRequest, cls: AssetClass, m: SculptorAiModel
 
 export async function judge(c: Council, req: SculptRequest, cls: AssetClass, checked: Checked, artist: string): Promise<Critique | undefined> {
   try {
-    const raw = await c.ask<Partial<Critique>>('artist', 'model.judge', `${describe(req, cls)}\nL'immagine mostra il modello da quattro lati (fronte, destra, retro, sinistra), come appare nel mondo: fasce di luce piatte e un contorno scuro dove cambia la parte. Giudicalo, anche per come le sue parti si leggono a contorni.`, CRITIQUE_SCHEMA, {
+    const raw = await c.ask<Partial<Critique>>('artist', 'model.judge', `${describe(req, cls)}\nThe image shows the model from four sides (front, right, back, left), as it looks in the world: flat bands of light and a dark outline where the part changes. Judge it, also by how its parts read as outlines.`, CRITIQUE_SCHEMA, {
       images: [views(checked)],
       model: artist,
       temperature: 0.3,
@@ -316,20 +316,20 @@ async function write(c: Council, req: SculptRequest, cls: AssetClass, model: str
   const examples = proc ? [] : examplesFor(c.files, cls.id);
   const traced = (k: Checked) => {
     const t = proc ? traceOf(k, cls, req.taglia) : undefined;
-    return t ? `\nEcco cosa ha fatto il programma quando il gioco lo ha eseguito, nodo per nodo:\n${t}` : '';
+    return t ? `\nHere is what the program did when the game ran it, node by node:\n${t}` : '';
   };
-  const system = examples.length ? `## Esempi (programmi della libreria)\n${examples.join('\n\n')}` : undefined;
+  const system = examples.length ? `## Examples (programs of the library)\n${examples.join('\n\n')}` : undefined;
   let prompt = describe(req, cls);
   const images: string[] = [];
-  if (req.previous) prompt += `\n\nIl suo programma attuale:\n${req.previous}\n${req.desiderio ? `Si desidera: ${req.desiderio}\n` : ''}Rifallo: rispondi con il programma completo.`;
+  if (req.previous) prompt += `\n\nIts current program:\n${req.previous}\n${req.desiderio ? `What is wished: ${req.desiderio}\n` : ''}Redo it: answer with the whole program.`;
   if (previous) {
-    prompt += `\n\nIl tuo programma:\n${previous.checked.xml}\nL'immagine allegata lo mostra da quattro lati. L'Artista gli ha dato ${previous.critique.voto}/10.\nProblemi: ${previous.critique.problemi.join('; ') || '—'}\nConsigli: ${previous.critique.consigli.join('; ') || '—'}${traced(previous.checked)}\nMiglioralo: rispondi con il programma completo.`;
+    prompt += `\n\nYour program:\n${previous.checked.xml}\nThe attached image shows it from four sides. The Artist gave it ${previous.critique.voto}/10.\nProblems: ${previous.critique.problemi.join('; ') || '—'}\nAdvice: ${previous.critique.consigli.join('; ') || '—'}${traced(previous.checked)}\nImprove it: answer with the whole program.`;
     images.push(views(previous.checked));
   }
   let last: Checked | undefined;
   let calls = 0;
   for (let i = 0; i <= retries; i++) {
-    const p = i === 0 ? prompt : `${prompt}\n\nIl programma che hai scritto:\n${last!.xml.slice(0, proc ? 24_000 : 6000)}\nNon va: ${last!.error}${traced(last!)}\nCorreggilo e rispondi con il programma completo.`;
+    const p = i === 0 ? prompt : `${prompt}\n\nThe program you wrote:\n${last!.xml.slice(0, proc ? 24_000 : 6000)}\nIt does not pass: ${last!.error}${traced(last!)}\nFix it and answer with the whole program.`;
     calls++;
     const raw = await c.write('sculptor', 'model.sculpt', p, { role, system, images, model, temperature: 0.7, data: { request: req, classe: cls.id, example: proc ? skeletonOf(role) : examples[0] } });
     last = checkProgram(extractXml(raw), cls, req.taglia);
@@ -374,7 +374,7 @@ export async function sculpt(c: Council, req: SculptRequest, m: SculptorAiModels
   // A procedural structure keeps no box of its own: every size that shares it runs it in its own (ADR-0160).
   const place = (x: string) => (procedural(cls, req.taglia) ? withoutSize(x) : withSize(x, boxOf(cls, req.taglia)));
   if (best.critique) c.say('artist', voto !== undefined && voto >= 7 ? 'approva' : 'obietta', `«${req.nome}»: ${voto}/10${best.critique.problemi.length ? ` — ${best.critique.problemi[0]}` : ''}`, 'sculptor', 'model.judge');
-  const xml = `<!-- ${req.nome}: scolpito da ${model} (step 9)${voto !== undefined ? `, voto dell'Artista ${voto}/10` : ''} -->\n${place(best.checked.xml.replace(/^\s*<!--[\s\S]*?-->\s*/, ''))}\n`;
+  const xml = `<!-- ${req.nome}: sculpted by ${model} (step 9)${voto !== undefined ? `, the Artist's vote ${voto}/10` : ''} -->\n${place(best.checked.xml.replace(/^\s*<!--[\s\S]*?-->\s*/, ''))}\n`;
   return { xml, model, voto, calls };
 }
 
@@ -471,18 +471,18 @@ export async function sculptAction(c: Council, req: ActionRequest, model: string
   } catch {
     return undefined;
   }
-  const letters = info.letters.map((l) => `${l.lettera} (${l.nome ?? 'senza nome'}, #${l.colore?.replace('#', '')}, ${l.voxel} voxel${l.luce ? ", luminosa" : ""})`).join(', ');
+  const letters = info.letters.map((l) => `${l.lettera} (${l.nome ?? 'no name'}, #${l.colore?.replace('#', '')}, ${l.voxel} voxels${l.luce ? ', glowing' : ''})`).join(', ');
   const prompt = [
-    `Il viandante, davanti a «${req.nome}», fa: «${req.testo}». Il Concilio ha deciso che il suo aspetto cambia così: ${req.cambia}.`,
-    `Scrivi UNA regola <action name="${req.azione}" label="${req.etichetta}">nodi</action> per il programma qui sotto: i nodi girano una volta sul modello finito e lo cambiano (come la porta che si apre: <action name="apri" label="Apri la porta"><all><rule in="O" out="h"/></all></action>).`,
-    `Usa SOLO le lettere del modello finito (la cella vuota è ${info.background}): ${letters}. Cambia una parte del modello, non svuotarlo; metti steps sulle regole che potrebbero ripetersi all'infinito. Varrà per tutte le cose di questo tipo.`,
-    `Il programma:\n${req.xml.slice(0, 8000)}`,
-    'Rispondi con la sola <action>.',
+    `The wanderer, in front of «${req.nome}», does: «${req.testo}». The Council decided that its look changes like this: ${req.cambia}.`,
+    `Write ONE rule <action name="${req.azione}" label="${req.etichetta}">nodes</action> for the program below: the nodes run once on the finished model and change it (like the door that opens: <action name="open" label="Apri la porta"><all><rule in="O" out="h"/></all></action>).`,
+    `Use ONLY the letters of the finished model (the empty cell is ${info.background}): ${letters}. Change a part of the model, do not empty it; put steps on the rules that could repeat forever. It will hold for all the things of this kind.`,
+    `The program:\n${req.xml.slice(0, 8000)}`,
+    'Answer with the <action> only.',
   ].join('\n\n');
   let last: { clip?: string; error?: string } = {};
   let calls = 0;
   for (let i = 0; i <= retries; i++) {
-    const p = i === 0 ? prompt : `${prompt}\n\nHai scritto:\n${last.clip ?? '(niente)'}\nNon va: ${last.error}\nCorreggila e rispondi con la sola <action>.`;
+    const p = i === 0 ? prompt : `${prompt}\n\nYou wrote:\n${last.clip ?? '(nothing)'}\nIt does not pass: ${last.error}\nFix it and answer with the <action> only.`;
     calls++;
     const raw = await c.write('sculptor', 'model.action', p, { role: sculptorRole(c.files), model, temperature: 0.4, data: { request: req, background: info.background, letters: info.letters } });
     const clip = extractAction(raw, req.azione, req.etichetta);

@@ -9,7 +9,7 @@ import { ITEM_CATEGORIES, type ItemDef, type LootTable, type Recipe } from '../t
 import { slug } from './forge';
 import type { AgentId, Council } from './council';
 import { ITEM_SHAPES, itemShapeModel } from '../modeldirector';
-import { internalName, italianValues } from '../internalNames';
+import { internalName, internalValues } from '../internalNames';
 import { ACTIVITIES, DAY_PHASES, defaultRoutine, inferActivity, RELATION_WORDS, WHERES, type Activity, type DayPhase, type Gender, type Relation, type RoutineStep, type Species, type Where } from '../society';
 
 const ITEM_SCHEMA: Schema = {
@@ -17,18 +17,18 @@ const ITEM_SCHEMA: Schema = {
   properties: {
     nome: { type: 'STRING' },
     descrizione: { type: 'STRING' },
-    // The prompts still speak Italian (T310): categories and shapes of the contract 0.1, made internal by toItemDef.
-    categoria: { type: 'STRING', enum: italianValues('categorie') },
+    // Categories and shapes are internal since T310 (the prompts are English); an Italian one of the contract 0.1 is still made internal by toItemDef.
+    categoria: { type: 'STRING', enum: internalValues('categorie') },
     peso: { type: 'NUMBER' },
     pila: { type: 'INTEGER' },
     tag: { type: 'ARRAY', items: { type: 'STRING' } },
     effetti: { type: 'OBJECT', properties: { fame: { type: 'NUMBER' }, sete: { type: 'NUMBER' }, energia: { type: 'NUMBER' }, salute: { type: 'NUMBER' }, mana: { type: 'NUMBER' } } },
     impugnabile: { type: 'BOOLEAN' },
-    contenitore: { type: 'INTEGER', description: 'solo per borse, sacche, cesti, bisacce che si portano addosso: quante cose ci stanno dentro (2-12)' },
-    posto: { type: 'STRING', description: 'solo per ciò che si indossa o si impugna: testa, corpo, gambe, piedi, mani, arma, scudo, anello, collo, schiena' },
-    bonus: { type: 'OBJECT', description: 'solo per ciò che si indossa o si impugna: cosa dà', properties: { difesa: { type: 'NUMBER' }, attacco: { type: 'NUMBER' }, velocita: { type: 'NUMBER', description: 'moltiplicatore, es. 0.95 per un\'armatura pesante, 1.1 per stivali leggeri' }, peso: { type: 'NUMBER', description: 'peso trasportabile in più (zaini)' }, luce: { type: 'NUMBER' }, calore: { type: 'NUMBER' } } },
+    contenitore: { type: 'INTEGER', description: 'only for bags, sacks, baskets, saddlebags carried on oneself: how many things fit inside (2-12)' },
+    posto: { type: 'STRING', description: 'only for what is worn or held, one of these slot ids: testa, corpo, gambe, piedi, mani, arma, scudo, anello, collo, schiena' },
+    bonus: { type: 'OBJECT', description: 'only for what is worn or held: what it gives', properties: { difesa: { type: 'NUMBER' }, attacco: { type: 'NUMBER' }, velocita: { type: 'NUMBER', description: 'a multiplier, e.g. 0.95 for a heavy armour, 1.1 for light boots' }, peso: { type: 'NUMBER', description: 'extra carrying weight (backpacks)' }, luce: { type: 'NUMBER' }, calore: { type: 'NUMBER' } } },
     aspetto: { type: 'STRING' },
-    forma: { type: 'STRING', enum: italianValues('impronte').filter((f) => f !== 'forma'), description: 'la forma comune a cui somiglia (un modello per forma, colorato come l\'oggetto)' },
+    forma: { type: 'STRING', enum: internalValues('impronte').filter((f) => f !== 'shape'), description: 'the common shape it looks like (one model per shape, coloured like the thing)' },
   },
   required: ['nome', 'descrizione', 'categoria', 'peso', 'pila', 'tag', 'aspetto', 'forma'],
 };
@@ -95,12 +95,12 @@ export async function itemPack(c: Council, opts: { count: number; existing: stri
       'narrator',
       'content.items',
       [
-        `Inventa ${opts.count} oggetti per questo mondo, del genere che si trova spesso nelle case, nelle botteghe, nei campi e nei boschi (stile Project Zomboid: tanti oggetti comuni, utili, credibili; pochi rari).`,
-        `Varia le categorie: cibo, bevande, medicine, attrezzi, armi, materiali, luci, vestiario, contenitori, varie.`,
-        opts.hints.length ? `Includi, se coerenti con il mondo: ${opts.hints.join(', ')}.` : '',
-        opts.existing.length ? `Esistono già (non ripeterli): ${opts.existing.slice(-80).join(', ')}.` : '',
-        `"effetti" (da -50 a 60) solo per ciò che si consuma: fame/sete/energia/salute recuperate. "pila": quanti se ne impilano (1 per attrezzi e armi). "peso" in unità (il viandante ne porta 20). "tag": parole utili per trovarli e combinarli (es. cucina, legno, metallo, erbe, bottega, contadino). Tag comuni da usare: ${opts.tags.join(', ')}.`,
-        feedback && `L'Arbitro ha obiettato: ${feedback}`,
+        `Invent ${opts.count} things for this world, of the kind often found in houses, workshops, fields and woods (Project Zomboid style: many common, useful, believable things; few rare ones).`,
+        `Vary the categories: food, drinks, medicines, tools, weapons, materials, lights, clothing, containers, misc.`,
+        opts.hints.length ? `Include, if consistent with the world: ${opts.hints.join(', ')}.` : '',
+        opts.existing.length ? `They exist already (do not repeat them): ${opts.existing.slice(-80).join(', ')}.` : '',
+        `"effetti" (from -50 to 60) only for what is consumed: hunger/thirst/energy/health restored ("fame", "sete", "energia", "salute"). "pila": how many stack (1 for tools and weapons). "peso" in units (the wanderer carries 20). "tag": words useful to find and combine them, like the common ones (e.g. cucina, legno, metallo, erbe, bottega, contadino). Common tags to use: ${opts.tags.join(', ')}.`,
+        feedback && `The Arbiter objected: ${feedback}`,
       ]
         .filter(Boolean)
         .join('\n'),
@@ -114,7 +114,7 @@ export async function itemPack(c: Council, opts: { count: number; existing: stri
   const phys = await c.ask<{ correzioni: Array<{ nome: string; peso?: number; pila?: number; effetti?: RawItem['effetti']; nota?: string }> }>(
     'physicist',
     'content.physics',
-    `Controlla peso, pila ed effetti di questi oggetti: correggi solo ciò che è fisicamente incoerente (una incudine non pesa 1, un'ascia non si impila, il pane non dà 60 di energia).\n${oggetti.map((o) => `${o.nome}: peso ${o.peso}, pila ${o.pila}, effetti ${JSON.stringify(o.effetti ?? {})}`).join('\n')}`,
+    `Check the weight, stack and effects of these things: fix only what is physically inconsistent (an anvil does not weigh 1, an axe does not stack, bread does not give 60 energy).\n${oggetti.map((o) => `${o.nome}: weight ${o.peso}, stack ${o.pila}, effects ${JSON.stringify(o.effetti ?? {})}`).join('\n')}`,
     {
       type: 'OBJECT',
       properties: {
@@ -139,7 +139,7 @@ export async function itemPack(c: Council, opts: { count: number; existing: stri
   const review = await c.ask<{ approvato: boolean; problemi: Array<{ agente: AgentId; problema: string }> }>(
     'arbiter',
     'content.review',
-    `Questi oggetti sono coerenti con il mondo (epoca, tono, tecnologia)? Segnala solo quelli fuori posto.\n${oggetti.map((o) => `${o.nome} (${o.categoria}): ${o.descrizione}`).join('\n')}`,
+    `Are these things consistent with the world (age, tone, technology)? Point out only the ones out of place.\n${oggetti.map((o) => `${o.nome} (${o.categoria}): ${o.descrizione}`).join('\n')}`,
     { type: 'OBJECT', properties: { approvato: { type: 'BOOLEAN' }, problemi: { type: 'ARRAY', items: { type: 'OBJECT', properties: { agente: { type: 'STRING', enum: ['narrator'] }, problema: { type: 'STRING' } }, required: ['agente', 'problema'] } } }, required: ['approvato', 'problemi'] },
     { data: { oggetti }, temperature: 0.2 },
   );
@@ -155,9 +155,9 @@ export async function itemPack(c: Council, opts: { count: number; existing: stri
     'narrator',
     'content.recipes',
     [
-      `Scrivi 6-10 ricette di fabbricazione usando SOLO questi oggetti (nomi esatti): ${names.slice(-120).join(', ')}.`,
-      'Ogni ricetta: ingredienti consumati, attrezzi necessari ma non consumati, un risultato. Devono avere senso (corda + bastone → canna da pesca rudimentale solo se esiste).',
-      'Poi "bottino": tabelle di cosa si trova dove. Chiavi consigliate: comune, cucina, cassa, bottega, terreno, contadino, bosco. Ogni voce sceglie per "tag" (una categoria o un tag degli oggetti) o per "oggetto" (nome esatto), con un peso.',
+      `Write 6-10 crafting recipes using ONLY these things (exact names): ${names.slice(-120).join(', ')}.`,
+      'Each recipe: ingredients consumed, tools needed but not consumed, one result. They must make sense (rope + stick → a rough fishing rod, only if it exists).',
+      'Then "bottino": tables of what is found where. Suggested keys: comune, cucina, cassa, bottega, terreno, contadino, bosco. Each entry picks by "tag" (a category or a tag of the things) or by "oggetto" (exact name), with a weight.',
     ].join('\n'),
     {
       type: 'OBJECT',
@@ -201,7 +201,7 @@ export async function defineItems(c: Council, names: string[], context: string):
   const r = await c.ask<{ oggetti: RawItem[] }>(
     'narrator',
     'content.define',
-    `Nel mondo si è parlato di: ${names.join(', ')} (${context}). Definisci ognuno come oggetto del mondo, coerente con la bibbia. Se qualcosa non può esistere in questo mondo, omettilo.`,
+    `In the world people talked about: ${names.join(', ')} (${context}). Define each one as a thing of the world, consistent with the bible. If something cannot exist in this world, leave it out.`,
     { type: 'OBJECT', properties: { oggetti: { type: 'ARRAY', items: ITEM_SCHEMA } }, required: ['oggetti'] },
     { data: { names, context }, temperature: 0.6 },
   );
@@ -268,15 +268,15 @@ const INDIVIDUAL_SCHEMA: Schema = {
     aspetto: { type: 'STRING' },
     porta: { type: 'ARRAY', items: { type: 'STRING' } },
     mestiere: { type: 'STRING' },
-    genere: { type: 'STRING', enum: ['maschio', 'femmina'] },
-    eta: { type: 'STRING', description: 'giovane, adulto, anziano…' },
-    storia: { type: 'STRING', description: 'due frasi: da dove viene, cosa le è successo' },
-    famiglia: { type: 'ARRAY', items: { type: 'OBJECT', properties: { nome: { type: 'STRING' }, legame: { type: 'STRING', description: 'ciò che QUESTO individuo è per quella persona, al suo genere: madre, padre, figlia, figlio, sorella, fratello, moglie, marito, amica, amico, rivale, maestra, apprendista, padrone (di un animale), animale (di un padrone)…' } }, required: ['nome', 'legame'] } },
+    genere: { type: 'STRING', enum: ['male', 'female'] },
+    eta: { type: 'STRING', description: 'young, adult, old…, in the language of the world' },
+    storia: { type: 'STRING', description: 'two sentences: where they come from, what happened to them' },
+    famiglia: { type: 'ARRAY', items: { type: 'OBJECT', properties: { nome: { type: 'STRING' }, legame: { type: 'STRING', description: 'what THIS individual is to that person, in their gender, a word of the world: madre, padre, figlia, figlio, sorella, fratello, moglie, marito, amica, amico, rivale, maestra, apprendista, padrone (of an animal), animale (of an owner)…' } }, required: ['nome', 'legame'] } },
     routine: {
       type: 'ARRAY',
-      description: 'la sua giornata: 4 voci, una per momento',
-      // The Narrator's prompts are still Italian (T310): it writes the Italian values, and the kernel takes them internal (internalName).
-      items: { type: 'OBJECT', properties: { quando: { type: 'STRING', enum: italianValues('momenti') }, fa: { type: 'STRING', description: 'cosa fa, breve (es. "impasta il pane")' }, dove: { type: 'STRING', enum: italianValues('dove') }, azione: { type: 'STRING', enum: italianValues('attivita'), description: 'il gesto che si vede fare' } }, required: ['quando', 'fa', 'dove', 'azione'] },
+      description: 'their day: 4 entries, one per moment',
+      // The values are internal since T310 (the prompts are English); an Italian one is still taken internal (internalName).
+      items: { type: 'OBJECT', properties: { quando: { type: 'STRING', enum: internalValues('momenti') }, fa: { type: 'STRING', description: 'what they do, short, in the language of the world (e.g. "impasta il pane")' }, dove: { type: 'STRING', enum: internalValues('dove') }, azione: { type: 'STRING', enum: internalValues('attivita'), description: 'the gesture one sees them make' } }, required: ['quando', 'fa', 'dove', 'azione'] },
     },
   },
   required: ['nome', 'persona', 'aspetto', 'porta', 'mestiere', 'genere', 'famiglia', 'routine'],
@@ -285,11 +285,11 @@ const INDIVIDUAL_SCHEMA: Schema = {
 /** What the Narrator must know of relations for this species (the kernel repairs the rest). */
 function relationRules(specie: Species): string {
   return [
-    `In "famiglia" ogni legame dice cosa sei TU per quella persona, nella forma del tuo genere: {"nome": "Tazio", "legame": "figlia"} vuol dire che sei la figlia di Tazio. Parole possibili: ${RELATION_WORDS.join(', ')}.`,
+    `In "famiglia" each bond says what YOU are to that person, in the form of your gender: {"nome": "Tazio", "legame": "figlia"} means you are Tazio's daughter. Possible words: ${RELATION_WORDS.join(', ')}.`,
     specie === 'animal'
-      ? 'È un ANIMALE: niente mestieri da persona (il "mestiere" è ciò che fa: caccia topi, fa la guardia), niente parenti, maestri o apprendisti umani. Con una persona può essere solo "animale" (di un padrone: uno solo), "amico" o "rivale"; madre, padre, figlio, fratello solo con altri animali della sua specie.'
-      : 'È una PERSONA: un animale non è suo parente né suo apprendista; di un animale può essere "padrone" (l\'animale ne ha uno solo). Al massimo un padre, una madre e un coniuge.',
-    'Il nome deve essere nuovo: diverso, anche nella prima parola, da quelli delle persone già conosciute (niente "Elias il Giovane" accanto a "Elias il Vecchio", niente "Ombroso" accanto a "Ombra").',
+      ? 'It is an ANIMAL: no trades of a person (the "mestiere" is what it does: catches mice, keeps watch), no human relatives, masters or apprentices. With a person it can only be "animale" (of an owner: one only), "amico" or "rivale"; madre, padre, figlio, fratello only with other animals of its kind.'
+      : 'It is a PERSON: an animal is not their relative nor their apprentice; of an animal they can be "padrone" (the animal has only one). At most one father, one mother and one spouse.',
+    'The name must be new: different, also in its first word, from those of the people already known (no "Elias il Giovane" next to "Elias il Vecchio", no "Ombroso" next to "Ombra").',
   ].join('\n');
 }
 
@@ -303,17 +303,17 @@ export async function individuate(c: Council, archetype: { name: string; descrip
     'narrator',
     'npc.individuate',
     [
-      `Crea un individuo di questo tipo di personaggio: «${archetype.name}» (${archetype.description}), ${specie === 'animal' ? 'un animale' : 'una persona'}.`,
-      `Scheda del tipo:\n${archetype.persona}`,
-      `Luogo in cui si trova: ${ctx.place || 'sconosciuto'}.`,
-      ctx.society ? `LA SOCIETÀ DEL MONDO\n${ctx.society}` : '',
-      'Dagli un nome proprio, un carattere e una storia brevi e suoi (non generici), un genere (maschio o femmina), un mestiere, un dettaglio d\'aspetto, e 3-6 cose che porta con sé coerenti con la sua vita (attrezzi del mestiere, cibo, ricordi, piccoli oggetti).',
-      'Inseriscilo nella società: dagli una famiglia (1-3 legami) e, quando ha senso, legalo a persone già conosciute usando ESATTAMENTE i loro nomi (figlia del mugnaio, fratello del meccanico, rivale della barista: i mestieri del tuo mondo); può anche nominare parenti che non sono ancora stati incontrati. Se tra le persone nominate e mai incontrate ce n\'è una adatta a questo tipo, puoi essere proprio lei (usa il suo nome).',
+      `Create an individual of this kind of character: «${archetype.name}» (${archetype.description}), ${specie === 'animal' ? 'an animal' : 'a person'}.`,
+      `Sheet of the kind:\n${archetype.persona}`,
+      `Place where they are: ${ctx.place || 'unknown'}.`,
+      ctx.society ? `THE SOCIETY OF THE WORLD\n${ctx.society}` : '',
+      'Give them a proper name, a short character and a story of their own (not generic), a gender (male or female), a trade, a detail of their look, and 3-6 things they carry consistent with their life (tools of the trade, food, keepsakes, small things).',
+      'Put them into society: give them a family (1-3 bonds) and, when it makes sense, bind them to people already known using EXACTLY their names (the miller\'s daughter, the mechanic\'s brother, the barmaid\'s rival: the trades of your world); they may also name relatives not met yet. If among the people named and never met there is one that fits this kind, you can be that very one (use their name).',
       relationRules(specie),
-      ctx.avoid?.length ? `Nomi già presi o troppo simili, da NON usare: ${ctx.avoid.join(', ')}.` : '',
-      'Descrivi la sua giornata in "routine": mattina, giorno, sera, notte — cosa fa e dove (casa, lavoro, piazza, in giro).',
-      `Preferisci oggetti comuni già esistenti quando hanno senso: ${ctx.common.slice(0, 60).join(', ')}.`,
-      'In "persona" scrivi la scheda in seconda persona ("Sei …"): come parli, cosa vuoi, chi sono i tuoi cari, cosa sai e cosa credi del tuo mondo (le sue leggende, a modo tuo). Sei una persona del mondo: non sai nulla di giochi, codice o simulazioni.',
+      ctx.avoid?.length ? `Names already taken or too similar, NOT to use: ${ctx.avoid.join(', ')}.` : '',
+      'Describe their day in "routine": morning, day, evening, night — what they do and where (home, work, square, about).',
+      `Prefer common things that exist already when they make sense: ${ctx.common.slice(0, 60).join(', ')}.`,
+      'In "persona" write the sheet in the second person, in the language of the world (in Italian "Sei …"): how you speak, what you want, who your dear ones are, what you know and believe of your world (its legends, your way). You are a person of the world: you know nothing of games, code or simulations.',
     ]
       .filter(Boolean)
       .join('\n'),
@@ -339,7 +339,7 @@ export async function individuate(c: Council, archetype: { name: string; descrip
     gender: genere === 'male' || genere === 'female' ? genere : undefined,
     age: r.eta ? String(r.eta).slice(0, 20) : undefined,
     story: r.storia ? String(r.storia).slice(0, 300) : undefined,
-    // The Narrator writes with the Italian fields of its schema (until T310): the individual has those of 0.4 (T308a).
+    // The Narrator writes with the Italian fields of its schema (until T310b): the individual has those of 0.4 (T308a).
     family: (r.famiglia ?? []).filter((f) => f?.nome && f?.legame).slice(0, 4).map((f) => ({ name: String(f.nome).slice(0, 40), bond: String(f.legame).toLowerCase().slice(0, 20) })),
     routine: DAY_PHASES.map((q) => routine.find((s) => s.when === q) ?? defaultRoutine(job).find((s) => s.when === q)!),
   };

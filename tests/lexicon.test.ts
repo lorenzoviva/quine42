@@ -39,14 +39,14 @@ describe('the lexicon (T65)', () => {
     const { c, asked } = council(files);
     for (const agent of ['narrator', 'arbiter'] as const) {
       const ctx = c.context(agent);
-      expect(ctx).toMatch(/## Lessico del mondo[\s\S]*senza mai spiegarlo/);
+      expect(ctx).toMatch(/## Lexicon of the world[\s\S]*never explaining it/);
       expect(ctx).toContain('**bonombo**');
-      expect(ctx).toMatch(/### Usanze di questo mondo\n- Chi vende il primo pane/);
-      expect(c.context(agent, true)).toContain('## Lessico del mondo');
+      expect(ctx).toMatch(/### Customs of this world\n- Chi vende il primo pane/);
+      expect(c.context(agent, true)).toContain('## Lexicon of the world');
     }
-    for (const agent of ['sculptor', 'artist', 'physicist', 'engineer', 'cartographer', 'liaison'] as const) expect(c.context(agent)).not.toContain('Lessico del mondo');
+    for (const agent of ['sculptor', 'artist', 'physicist', 'engineer', 'cartographer', 'liaison'] as const) expect(c.context(agent)).not.toContain('Lexicon of the world');
     await c.ask('narrator', 'npc.reply', 'una battuta', { type: 'OBJECT' });
-    expect(asked[0].system).toContain('Lessico del mondo');
+    expect(asked[0].system).toContain('Lexicon of the world');
   });
 
   it('an old universe receives it from the seed; without it, nothing', () => {

@@ -93,43 +93,43 @@ describe('new magic runes (T57b)', () => {
     const k = await boot();
     const before = Object.keys(k.content.runes).length;
     const token = await k.inventRune('una prova');
-    expect(token).toBe('sangue');
-    const rune = k.content.runes.sangue;
+    expect(token).toBe('sanguis');
+    const rune = k.content.runes.sanguis;
     expect(rune).toBeTruthy();
     expect(Object.keys(k.content.runes)).toHaveLength(before + 1);
     // Its own sign (the mock asked for a word rune's letter), committed with the canon and the loot.
     expect(FUTHARK).not.toContain(rune.glyph);
     expect(Object.values(k.content.runes).filter((r) => r.glyph === rune.glyph)).toHaveLength(1);
-    expect(k.repo.head().message).toMatch(/runa nuova: sangue/);
-    expect(k.files['world/canon.md']).toContain('Wunjo («sangue»');
-    expect(canonSummary(k.files)).toContain('Wunjo («sangue», sangue)');
-    expect(k.content.loot.magia.entries.some((e) => e.item === 'rune:sangue')).toBe(true);
-    expect(k.content.get('rune:sangue')).toMatchObject({ category: 'magic', tags: ['runa', 'magica'] });
-    expect(allCards(k.files).some((c) => c.id === 'rune:sangue' && c.tipo === 'rune' && c.author === 'narrator')).toBe(true);
+    expect(k.repo.head().message).toMatch(/runa nuova: sanguis/);
+    expect(k.files['world/canon.md']).toContain('Wunjo («sanguis»');
+    expect(canonSummary(k.files)).toContain('Wunjo («sanguis», blood)');
+    expect(k.content.loot.magia.entries.some((e) => e.item === 'rune:sanguis')).toBe(true);
+    expect(k.content.get('rune:sanguis')).toMatchObject({ category: 'magic', tags: ['runa', 'magica'] });
+    expect(allCards(k.files).some((c) => c.id === 'rune:sanguis' && c.tipo === 'rune' && c.author === 'narrator')).toBe(true);
     expect(k.feed().some((e) => e.task === 'rune.invent' && /runa nuova/.test(e.text))).toBe(true);
 
     // On the ground like any rune: picked up, it goes to the phrase.
     clearArea(k);
-    giveRunes(k, ['sangue']);
-    expect(k.inscribe(['sangue'])).toBe(true);
-    expect(countItem(k.inventory(), 'rune:sangue')).toBe(0);
+    giveRunes(k, ['sanguis']);
+    expect(k.inscribe(['sanguis'])).toBe(true);
+    expect(countItem(k.inventory(), 'rune:sanguis')).toBe(0);
     k.phrase().tokens = [];
     k.carpet()!.active = false;
     k.tick(DT);
     expect(k.pickUpRune()).toBe(true);
-    expect(countItem(k.inventory(), 'rune:sangue')).toBe(1);
-    expect(k.phrase().tokens).toEqual(['sangue']);
+    expect(countItem(k.inventory(), 'rune:sanguis')).toBe(1);
+    expect(k.phrase().tokens).toEqual(['sanguis']);
 
     // Composed with the others: a formula the Narrator names once.
     giveRunes(k, ['ignis']);
-    k.phrase().tokens = ['sangue', 'ignis'];
+    k.phrase().tokens = ['sanguis', 'ignis'];
     k.needs()!.mana = 100;
-    expect(k.incantation()).toEqual(['sangue', 'ignis']);
+    expect(k.incantation()).toEqual(['sanguis', 'ignis']);
     expect(await k.castSpell()).toBe(true);
-    expect(k.content.spells['sangue ignis']).toBeTruthy();
+    expect(k.content.spells['sanguis ignis']).toBeTruthy();
 
     // A second one is another rune; the same one never twice.
-    expect(await k.inventRune('ancora')).toBe('ghiaccio');
+    expect(await k.inventRune('ancora')).toBe('glacies');
     expect(Object.keys(k.content.runes)).toHaveLength(before + 2);
   });
 
@@ -146,16 +146,16 @@ describe('new magic runes (T57b)', () => {
     const orig = models.text;
     models.text = async (call: TextCall) => (call.task === 'rune.invent' && asked.push(call.prompt), orig(call));
     expect(await k.holdSession(true)).toBe('runa');
-    expect(k.content.runes.sangue).toBeTruthy();
-    expect(asked[0]).toMatch(/sessione del Concilio[^\n]*ghiaccio/);
+    expect(k.content.runes.sanguis).toBeTruthy();
+    expect(asked[0]).toMatch(/session of the Council[^\n]*ghiaccio/);
     // The formula that calls for an element no rune has: one more rune, after the spell.
     clearArea(k);
     giveRunes(k, ['vita', 'aqua']);
     k.phrase().tokens = ['vita', 'aqua'];
     k.needs()!.mana = 100;
     expect(await k.castSpell()).toBe(true);
-    for (let i = 0; i < 40 && !k.content.runes.ghiaccio; i++) await new Promise((r) => setTimeout(r, 25));
-    expect(k.content.runes.ghiaccio).toBeTruthy();
+    for (let i = 0; i < 40 && !k.content.runes.glacies; i++) await new Promise((r) => setTimeout(r, 25));
+    expect(k.content.runes.glacies).toBeTruthy();
     expect(asked[1]).toMatch(/vita aqua[^\n]*ombra/);
   });
 });

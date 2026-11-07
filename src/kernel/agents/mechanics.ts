@@ -5,46 +5,48 @@
 import type { Schema } from '../ai/models';
 import type { UiElement, UiPanel } from '../types';
 import type { Council } from './council';
-import { internalComponents, internalFields, internalName, italianValues } from '../internalNames';
+import { internalComponents, internalFields, internalName, internalValues } from '../internalNames';
 import { luaFor0_5 } from '../migrations';
 
 const ELEMENT: Schema = {
   type: 'OBJECT',
   properties: {
-    tipo: { type: 'STRING', enum: italianValues('pannelli') },
-    id: { type: 'STRING', description: 'slot: il suo id (es. testa); pulsante: l\'azione che riceve on_ui' },
-    etichetta: { type: 'STRING' },
-    accetta: { type: 'ARRAY', items: { type: 'STRING' }, description: 'slot: cosa ci va (posti degli oggetti come testa/corpo/arma, categorie come vestiario/arma, o tag)' },
-    campo: { type: 'STRING', description: 'barra/testo: "componente.campo" del viandante (es. needs.health, reputazione.valore)' },
+    // An element of a panel as the manifest keeps it (T310): its fields and kinds are internal; cleanPanel still reads the Italian of before.
+    type: { type: 'STRING', enum: internalValues('pannelli') },
+    id: { type: 'STRING', description: 'slot: its id (e.g. testa); button: the action on_ui receives' },
+    label: { type: 'STRING', description: 'in the language of the world' },
+    accepts: { type: 'ARRAY', items: { type: 'STRING' }, description: 'slot: what goes in it (slots of the things like testa/corpo/arma, categories like clothing/weapon, or tags)' },
+    field: { type: 'STRING', description: 'bar/text: "component.field" of the wanderer (e.g. needs.health, reputation.value)' },
     max: { type: 'NUMBER' },
   },
-  required: ['tipo', 'etichetta'],
+  required: ['type', 'label'],
 };
 
 /** A case of the bench (T27): a small scene that shows the mechanic working, run with the real code. */
 const CASE: Schema = {
   type: 'OBJECT',
   properties: {
-    titolo: { type: 'STRING', description: 'il caso in poche parole (es. «Si indossa l’elmo»)' },
-    racconto: { type: 'STRING', description: 'cosa si vede succedere, prima e dopo' },
-    viandante_json: { type: 'STRING', description: 'componenti del viandante prima del caso, come JSON (es. {"needs":{"health":40}}), facoltativo' },
+    titolo: { type: 'STRING', description: 'the case in a few words, in the language of the world (e.g. «Si indossa l’elmo»)' },
+    racconto: { type: 'STRING', description: 'what one sees happen, before and after' },
+    viandante_json: { type: 'STRING', description: 'components of the wanderer before the case, as JSON (e.g. {"needs":{"health":40}}), optional' },
     oggetti: {
       type: 'ARRAY',
-      description: 'ciò che il viandante porta: un oggetto che esiste (per nome) o uno di prova, con il suo posto e i bonus',
-      items: { type: 'OBJECT', properties: { nome: { type: 'STRING' }, posto: { type: 'STRING' }, categoria: { type: 'STRING' }, bonus_json: { type: 'STRING', description: 'es. {"difesa":3}' } }, required: ['nome'] },
+      description: 'what the wanderer carries: a thing that exists (by name) or a test one, with its slot and bonuses',
+      items: { type: 'OBJECT', properties: { nome: { type: 'STRING' }, posto: { type: 'STRING' }, categoria: { type: 'STRING' }, bonus_json: { type: 'STRING', description: 'e.g. {"difesa":3}' } }, required: ['nome'] },
     },
     passi: {
       type: 'ARRAY',
-      description: 'cosa succede, in ordine: un oggetto in uno slot del pannello, toglierlo, un pulsante, un po’ di tempo, il viandante che cammina (verso e secondi)',
+      description: 'what happens, in order: a thing into a slot of the panel, taking it out, a button, some time, the wanderer walking (toward and seconds)',
       items: {
         type: 'OBJECT',
-        properties: { tipo: { type: 'STRING', enum: ['slot', 'togli', 'pulsante', 'attendi', 'cammina'] }, verso: { type: 'STRING', enum: ['su', 'giu', 'sinistra', 'destra'] }, slot: { type: 'STRING' }, oggetto: { type: 'STRING' }, azione: { type: 'STRING' }, secondi: { type: 'NUMBER' } },
+        // The steps and the ways are internal since T310 (cleanCases still reads the Italian of the contract 0.1).
+        properties: { tipo: { type: 'STRING', enum: ['slot', 'remove', 'button', 'wait', 'walk'] }, verso: { type: 'STRING', enum: ['up', 'down', 'left', 'right'] }, slot: { type: 'STRING' }, oggetto: { type: 'STRING' }, azione: { type: 'STRING' }, secondi: { type: 'NUMBER' } },
         required: ['tipo'],
       },
     },
-    durata: { type: 'NUMBER', description: 'secondi dopo i passi (al massimo 30)' },
-    guarda: { type: 'ARRAY', items: { type: 'STRING' }, description: 'i campi "componente.campo" del viandante che il caso cambia (es. difesa.valore)' },
-    righe: { type: 'ARRAY', items: { type: 'INTEGER' }, description: 'le righe di logica (da 1) che fanno il caso' },
+    durata: { type: 'NUMBER', description: 'seconds after the steps (at most 30)' },
+    guarda: { type: 'ARRAY', items: { type: 'STRING' }, description: 'the fields "component.field" of the wanderer that the case changes (e.g. defense.value)' },
+    righe: { type: 'ARRAY', items: { type: 'INTEGER' }, description: 'the lines of logic (from 1) that make the case' },
   },
   required: ['titolo', 'racconto', 'durata', 'guarda'],
 };
@@ -53,11 +55,11 @@ const MECHANIC_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
     nome: { type: 'STRING' },
-    descrizione: { type: 'STRING', description: 'cosa aggiunge al gioco e quali conseguenze ha' },
+    descrizione: { type: 'STRING', description: 'what it adds to the game and what consequences it has' },
     pannello: { type: 'OBJECT', properties: { titolo: { type: 'STRING' }, elementi: { type: 'ARRAY', items: ELEMENT } }, required: ['titolo', 'elementi'] },
-    componenti_json: { type: 'STRING', description: 'componenti iniziali del viandante, come JSON (es. {"reputazione":{"valore":0}}), facoltativo' },
-    logica: { type: 'STRING', description: 'logic.lua del modulo (return M), con on_slot(user, slot, item, panel), on_ui(user, azione) e/o update(dt)' },
-    casi: { type: 'ARRAY', items: CASE, description: '1-3 casi d’uso che il banco della Sala sistemi mette in scena con il codice vero' },
+    componenti_json: { type: 'STRING', description: 'initial components of the wanderer, as JSON (e.g. {"reputation":{"value":0}}), optional' },
+    logica: { type: 'STRING', description: 'logic.lua of the module (return M), with on_slot(user, slot, item, panel), on_ui(user, action) and/or update(dt)' },
+    casi: { type: 'ARRAY', items: CASE, description: '1-3 use cases that the bench of the Systems Hall stages with the real code' },
   },
   required: ['nome', 'descrizione', 'pannello', 'logica', 'casi'],
 };
@@ -77,12 +79,12 @@ export async function designMechanic(c: Council, request: string, ctx: { items: 
     'engineer',
     'mechanic.design',
     [
-      `Il Concilio introduce una meccanica nel gioco: «${request}».`,
-      `Oggetti esistenti (con il posto dove si indossano, se c'è): ${ctx.items.slice(0, 60).join(', ') || 'nessuno'}.`,
-      `Meccaniche già presenti: ${ctx.mechanics.join(', ') || 'nessuna'}.`,
-      'Scrivi un modulo di sistema con un pannello (il kernel lo disegna come scheda dell\'inventario) e la sua logica Lua. Vedi il tuo ruolo, sezione «Meccaniche e interfacce», per gli elementi del pannello e l\'API (ui.slot, items.bonus, stati del viandante). La meccanica deve avere conseguenze vere nel gioco (es. le armature danno difesa e pesano, le armi si impugnano, uno zaino dà peso).',
-      'In "casi" 1-3 casi d’uso, come esempi per chi visita la Sala sistemi: il kernel li esegue con il tuo codice in un mondo in miniatura (il viandante, ciò che porta, i passi) e controlla che i campi di "guarda" cambino davvero.',
-      ctx.feedback ? `IL TENTATIVO PRECEDENTE NON ANDAVA: ${ctx.feedback}` : '',
+      `The Council introduces a mechanic into the game: «${request}».`,
+      `Existing things (with the slot where they are worn, if any): ${ctx.items.slice(0, 60).join(', ') || 'none'}.`,
+      `Mechanics already there: ${ctx.mechanics.join(', ') || 'none'}.`,
+      'Write a system module with a panel (the kernel draws it as a tab of the inventory) and its Lua logic. See your role, section "Mechanics and interfaces", for the elements of the panel and the API (ui.slot, items.bonus, states of the wanderer). The mechanic must have real consequences in the game (e.g. armours give defence and weigh, weapons are held, a backpack gives weight).',
+      'In "casi" 1-3 use cases, as examples for whoever visits the Systems Hall: the kernel runs them with your code in a miniature world (the wanderer, what they carry, the steps) and checks that the fields of "guarda" really change.',
+      ctx.feedback ? `THE PREVIOUS ATTEMPT DID NOT WORK: ${ctx.feedback}` : '',
     ]
       .filter(Boolean)
       .join('\n\n'),
@@ -112,7 +114,7 @@ export function cleanPanel(panel: { title?: string; elements?: unknown[]; titolo
   const elementi: UiElement[] = [];
   const seen = new Set<string>();
   for (const el0 of (panel.elements ?? panel.elementi ?? []).slice(0, 16) as Array<Record<string, unknown>>) {
-    // The Council still writes the Italian of the contracts 0.1 and 0.3 (T307a, T308a, until T310): `barra` is a `bar`, `etichetta` a `label`.
+    // The Council may still write the Italian of the contracts 0.1 and 0.3 (T307a, T308a; the schema is internal since T310): `barra` is a `bar`, `etichetta` a `label`.
     const raw = (el0 && typeof el0 === 'object' ? internalFields('panelElement', el0) : {}) as Record<string, unknown>;
     const tipo = typeof raw?.type === 'string' ? internalName('pannelli', raw.type) : undefined;
     if (tipo !== 'slot' && tipo !== 'bar' && tipo !== 'text' && tipo !== 'button') continue;

@@ -131,10 +131,10 @@ describe('a coherent society', () => {
     const id = await individuate(c, { name: 'Gatto', description: 'un gatto', persona: 'Sei un gatto', specie: 'animal' }, { place: 'piazza', common: [], avoid: ['Ombra'] });
     expect(id.gender).toBe('female');
     const prompt = asked[0].prompt;
-    expect(prompt).toContain('un animale');
-    expect(prompt).toMatch(/È un ANIMALE: niente mestieri da persona/);
-    expect(prompt).toMatch(/cosa sei TU per quella persona/);
-    expect(prompt).toContain('da NON usare: Ombra');
+    expect(prompt).toContain('an animal');
+    expect(prompt).toMatch(/It is an ANIMAL: no trades of a person/);
+    expect(prompt).toMatch(/what YOU are to that person/);
+    expect(prompt).toContain('NOT to use: Ombra');
   });
 
   it('at boot the kernel repairs an old registry and commits it; new people are unlike the others', async () => {

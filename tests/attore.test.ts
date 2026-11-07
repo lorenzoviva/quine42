@@ -112,13 +112,13 @@ describe("the Actor's option", () => {
     const saved = k.individualOf(a.name)!.sheet!;
     expect(saved.text).toContain(`Sei ${a.name}`);
     expect(saved.fingerprint).toBe(sheetFingerprint(k.individualOf(a.name)!));
-    expect(reply.prompt).toContain('scritta dal Narratore');
+    expect(reply.prompt).toContain('written by the Narrator');
     expect(reply.prompt).toContain(saved.text);
     expect(reply.system).toContain(COUNCIL_PRINCIPLES);
-    expect(reply.system).toContain("L'Attore");
-    expect(reply.system).toContain('Canone delle rune');
-    expect(reply.system).toContain('Lessico del mondo');
-    expect(reply.system).toContain('Ciò che il mondo sa di questo compito');
+    expect(reply.system).toContain('# The Actor');
+    expect(reply.system).toContain('Canon of the runes');
+    expect(reply.system).toContain('Lexicon of the world');
+    expect(reply.system).toContain('What the world knows about this task');
     // A second line: no new sheet.
     await k.talk(a.id, 'E cosa fai di bello?');
     expect(models.of('npc.sheet')).toHaveLength(1);
@@ -175,7 +175,7 @@ describe("the Actor's option", () => {
     expect(talk.agent).toBe('actor');
     expect(talk.model).toBe(ACTOR_MODEL);
     expect(talk.chi).toBe(payerOf('npc.dialogue', 'me'));
-    expect(talk.prompt).toContain('scheda:');
+    expect(talk.prompt).toContain('sheet:');
     expect(models.of('npc.sheet').map((c) => c.chi)).toEqual(['comune', 'comune']);
     expect(k.individualOf(a.name)?.sheet?.text).toBeTruthy();
     expect(k.individualOf(b.name)?.sheet?.text).toBeTruthy();
@@ -197,7 +197,7 @@ describe("the Actor's option", () => {
     expect(k.individualOf(a.name)?.sheet).toBeUndefined();
     const reply = models.of('npc.reply')[0];
     expect(reply.agent).toBe('actor');
-    expect(reply.prompt).not.toContain('scritta dal Narratore');
+    expect(reply.prompt).not.toContain('written by the Narrator');
     expect(k.feed().some((e) => e.kind === 'scarta' && e.task === 'npc.sheet')).toBe(true);
   });
 

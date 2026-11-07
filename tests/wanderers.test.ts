@@ -94,7 +94,7 @@ describe('the wanderer with an id (T34)', () => {
     expect(toLia.say).not.toMatch(/lanterna/);
     // The Narrator knows who is talking.
     const asked = models.calls.filter((c) => c.task === 'npc.reply').pop()!;
-    expect(asked.prompt).toMatch(/Parli con Lia/);
+    expect(asked.prompt).toMatch(/You are talking with Lia/);
     expect(asked.prompt).not.toMatch(/lanterna/);
 
     await k.talk(id, 'Ti prometto che tornerò con una spada', 'lia');

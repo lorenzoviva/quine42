@@ -7,7 +7,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { Budget, JevJudge, readLedger, runBench, type Answer } from '../banco/jev/banco';
-import { cut, cutPrompt, cutSystem, estimateCounter, familyOf, FAMILIES, geminiCounter, hashOf, hourCalls, hourTable, measure, partsHour, rejoin, PARTS } from '../banco/jev/casi-d-uso/contesto';
+import { cut, cutPrompt, cutSystem, estimateCounter, familyOf, FAMILIES, geminiCounter, hashOf, hourCalls, hourTable, measure, partsHour, principlesIn, rejoin, PARTS } from '../banco/jev/casi-d-uso/contesto';
 import { GUARD_QUESTIONS, guardRoute, reuseDecision } from '../banco/jev/casi-d-uso/domande';
 import { loadUseCases, runTrials } from '../banco/jev/casi-d-uso/prove';
 import { candidates, CUTS, loadChoiceCases, runChoice, selectionOf, selectionQuestions, thinned } from '../banco/jev/casi-d-uso/scelta';
@@ -54,7 +54,8 @@ describe('i casi delle prove di T325', () => {
   it('la scelta del contesto: richieste vere del Concilio, con i principi e il contesto dell’agente', () => {
     expect(choices.length).toBeGreaterThanOrEqual(20);
     for (const c of choices) {
-      expect(c.system).toContain(COUNCIL_PRINCIPLES);
+      // The cases were recorded before T310: they carry the Italian principles of then.
+      expect(principlesIn(c.system)).toBeTruthy();
       expect(c.context && c.system.includes(c.context)).toBe(true);
       expect(Object.keys(candidates(c)).length).toBeGreaterThan(0);
     }

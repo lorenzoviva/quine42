@@ -840,9 +840,14 @@ export function italianName(domain: string, value: string): string {
   return Object.keys(names).find((k) => names[k] === value) ?? value;
 }
 
-/** The Italian values of a domain, in the table's order: what the Council's prompts still list until they change (T310). */
+/** The Italian values of a domain, in the table's order: what the validator still repairs for one contract more (T310). */
 export function italianValues(domain: string): string[] {
   return Object.keys(INTERNAL_NAMES.find((x) => x.id === domain)?.names ?? {});
+}
+
+/** The internal values of a domain, in the table's order: what the Council's schemas and prompts list (T310, the ids in English). */
+export function internalValues(domain: string): string[] {
+  return Object.values(INTERNAL_NAMES.find((x) => x.id === domain)?.names ?? {});
 }
 
 // --- The contract 0.2 (T307a): the repair of the values of the world's simulation ------------------------------------------------------

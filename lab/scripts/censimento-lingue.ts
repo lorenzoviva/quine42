@@ -496,8 +496,9 @@ export function fixedPrompts(): Array<{ name: string; where: string; chars: numb
   const fw = read('src/kernel/fourthwall.ts');
   const principles = /COUNCIL_PRINCIPLES = `([\s\S]*?)`;/.exec(fw)?.[1] ?? '';
   out.push({ name: 'COUNCIL_PRINCIPLES (con ogni richiesta)', where: 'src/kernel/fourthwall.ts', chars: principles.length, words: words(principles) });
-  const meta = /const META_RE = new RegExp\(([\s\S]*?)\]\.map/.exec(fw)?.[1] ?? '';
-  out.push({ name: 'META_RE (filtro, parole e frasi)', where: 'src/kernel/fourthwall.ts', chars: meta.length, words: (meta.match(/\|/g) ?? []).length + 1 });
+  // One table per language since T310 (ADR-0165): the Italian one, as the census counted it before.
+  const meta = /const META_RE = new RegExp\(([\s\S]*?)\]\.map/.exec(fw)?.[1] ?? /META_PATTERNS[\s\S]*?\bit: \[([\s\S]*?)\],\n\s*en:/.exec(fw)?.[1] ?? '';
+  out.push({ name: 'META_PATTERNS.it (filtro, parole e frasi)', where: 'src/kernel/fourthwall.ts', chars: meta.length, words: (meta.match(/\|/g) ?? []).length + 1 });
   for (const abs of walk(path.join(ROOT, 'universe/prompts'))) {
     const t = fs.readFileSync(abs, 'utf8');
     out.push({ name: path.relative(path.join(ROOT, 'universe/prompts'), abs), where: 'universe/prompts/', chars: t.length, words: words(t) });

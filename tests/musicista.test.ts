@@ -145,7 +145,7 @@ describe('what does not pass goes back to the Musician, with the reason', () => 
     const r = await compose(k.council, { richiesta: 'una musica' }, world, 'prova');
     expect(r?.nome).toBe('La Forra');
     expect(r?.calls).toBe(2);
-    expect(models.calls[1].prompt).toMatch(/Non va: .*suono /);
+    expect(models.calls[1].prompt).toMatch(/It does not pass: .*suono /);
     expect(models.calls[1].prompt).toContain(FLAT.slice(0, 40));
     expect(k.feed().some((e) => e.kind === 'scarta' && e.to === 'musician')).toBe(true);
   }, 60_000);
@@ -228,7 +228,7 @@ describe('the rules of a content of the Council', () => {
     const role = composerRole(bundledFiles);
     expect(role).toContain('hirajoshi');
     expect(role).toContain('lead, pad, bass');
-    expect(role).toMatch(/almeno 4 eventi a battuta/);
+    expect(role).toMatch(/at least 4 events per bar/);
     expect(role).not.toContain('@@');
     expect(AGENTS.musician.name).toBe('Musicista');
   });

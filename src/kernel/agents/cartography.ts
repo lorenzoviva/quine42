@@ -8,7 +8,7 @@ import type { CardStamp } from '../cards';
 import type { EnvironmentDef, ChunkInfo, TerrainDef } from '../types';
 import type { MjNode } from '../mj';
 import { sizeOf, type SizeTier } from '../../mj/classes';
-import { internalName, italianValues } from '../internalNames';
+import { internalName, internalValues } from '../internalNames';
 import { paletteSummary, type CatalogEntry, type Council } from './council';
 
 export type Where = 'dentro' | 'fuori' | 'ovunque';
@@ -105,7 +105,7 @@ const PLAN_SCHEMA: Schema = {
     a_terra: { type: 'ARRAY', items: { type: 'STRING' } },
     nuovi: { type: 'ARRAY', items: { type: 'OBJECT', properties: { concetto: { type: 'STRING' }, dove: { type: 'STRING', enum: WHERE } }, required: ['concetto', 'dove'] } },
     rune: { type: 'ARRAY', items: { type: 'STRING' } },
-    strutture: { type: 'ARRAY', items: { type: 'OBJECT', properties: { concetto: { type: 'STRING' }, taglia: { type: 'STRING', enum: italianValues('taglie') } }, required: ['concetto'] } },
+    strutture: { type: 'ARRAY', items: { type: 'OBJECT', properties: { concetto: { type: 'STRING' }, taglia: { type: 'STRING', enum: internalValues('taglie') } }, required: ['concetto'] } },
   },
   required: ['luogo', 'ambiente', 'oggetti', 'rune'],
 };
@@ -115,28 +115,28 @@ const PLAN_SCHEMA: Schema = {
  * of the plans before ADR-0092 (the castle of then is Huge).
  */
 export function readStructure(s: any): { concept: string; size?: SizeTier } {
-  // The Cartographer still writes the Italian fields and sizes (T307a, T308a, until T310): the one it means.
+  // The Cartographer still writes the Italian fields (until T310b); its sizes are English since T310, an Italian one is still the one it means.
   const size = sizeOf(internalName('taglie', String(s?.size ?? s?.taglia ?? '').trim().toLowerCase()))?.id ?? (s?.importante === true ? 'huge' : undefined);
   return { concept: String(s?.concept ?? s?.concetto ?? '').trim(), ...(size ? { size } : {}) };
 }
 
 export async function planChunk(c: Council, ctx: PlanContext): Promise<ChunkPlan> {
   const prompt = [
-    `Progetta il luogo (${ctx.cx}, ${ctx.cy}). Terreno di partenza: ${ctx.terrain}.`,
-    ctx.neighbors.length ? `Luoghi confinanti: ${ctx.neighbors.map((n) => `${n.place} (${n.layout})`).join('; ')}. Mantieni continuità: un abitato non finisce di colpo, un bosco sfuma.` : '',
-    `Ambienti disponibili ("ambiente" = uno di questi id):\n${ctx.layouts.map((l) => `- ${l.id}: ${l.name} [${l.environment}] — ${l.description}`).join('\n')}`,
-    ctx.start ? 'È la piazza di partenza: scegli un ambiente abitato e accogliente.' : '',
-    ctx.region ? `Questo luogo fa parte della regione «${ctx.region.nome}» (${ctx.region.descrizione}): il nome e ciò che c'è devono appartenerle (es. «${ctx.region.nome} — la porta nord»).` : '',
-    `Oggetti e personaggi: 2-6 voci, "modulo" = ESATTAMENTE uno degli id qui sotto; "dove": dentro (negli edifici), fuori, ovunque. Arreda gli interni (letti, tavoli, credenze, casse) e popola: circa un luogo su due ha almeno un personaggio; varia i personaggi (non mettere sempre lo stesso tipo, e mai lo stesso dei luoghi vicini).\n${ctx.catalog.map((m) => `- ${m.id} «${m.name}» [${m.kind}]: ${m.context}`).join('\n')}`,
-    `"a_terra": 0-4 nomi di oggetti comuni che si trovano per terra qui (anche nuovi, se coerenti).${ctx.wanted.length ? ` Se ha senso, includi qualcosa di cui si è parlato: ${ctx.wanted.join(', ')}.` : ''}`,
-    '"nuovi": quasi sempre vuoto; solo un oggetto concreto o un personaggio che il luogo richiede e che non esiste tra i moduli.',
-    `"rune": 0-2 frammenti presi esattamente da questo elenco: ${ctx.fragments.map((f) => `«${f}»`).join(', ')}.`,
-    '"strutture": 0-2 edifici o costruzioni di questo luogo, se l\'ambiente ne ha della sua epoca (es. «il mulino sul fiume», «il deposito dei tram», «l\'officina delle caldaie»): ognuno diventa un modello intero in cui si entra, sui lotti dell\'ambiente (gli altri lotti hanno case comuni).',
-    `"taglia" (facoltativa, come le taglie di D&D: minuscola, piccola, media, grande, enorme, gargantuesca): media una casa, grande un mulino, una stazione o una torre; il kernel la adatta al lotto.`,
+    `Design the place (${ctx.cx}, ${ctx.cy}). Starting terrain: ${ctx.terrain}.`,
+    ctx.neighbors.length ? `Neighbouring places: ${ctx.neighbors.map((n) => `${n.place} (${n.layout})`).join('; ')}. Keep continuity: a settlement does not end all at once, a wood fades out.` : '',
+    `Available environments ("ambiente" = one of these ids):\n${ctx.layouts.map((l) => `- ${l.id}: ${l.name} [${l.environment}] — ${l.description}`).join('\n')}`,
+    ctx.start ? 'It is the starting square: choose an inhabited, welcoming environment.' : '',
+    ctx.region ? `This place belongs to the region «${ctx.region.nome}» (${ctx.region.descrizione}): its name and what is in it must belong to the region (e.g. «${ctx.region.nome} — the north gate», in the language of the world).` : '',
+    `Things and characters: 2-6 entries, "modulo" = EXACTLY one of the ids below; "dove": dentro (inside the buildings), fuori (outside), ovunque (anywhere). Furnish the interiors (beds, tables, cupboards, chests) and people the place: about one place in two has at least one character; vary the characters (do not always put the same kind, and never the same as the neighbouring places).\n${ctx.catalog.map((m) => `- ${m.id} «${m.name}» [${m.kind}]: ${m.context}`).join('\n')}`,
+    `"a_terra": 0-4 names of common things lying on the ground here (new ones too, if consistent).${ctx.wanted.length ? ` If it makes sense, include something people have talked about: ${ctx.wanted.join(', ')}.` : ''}`,
+    '"nuovi": almost always empty; only a concrete thing or a character the place calls for and that does not exist among the modules.',
+    `"rune": 0-2 fragments taken exactly from this list: ${ctx.fragments.map((f) => `«${f}»`).join(', ')}.`,
+    '"strutture": 0-2 buildings or constructions of this place, if the environment has some of its age (e.g. "the mill on the river", "the tram depot", "the boiler works"): each becomes a whole model one can enter, on the lots of the environment (the other lots have common houses).',
+    `"taglia" (optional, as the sizes of D&D: tiny, small, medium, large, huge, gargantuan): medium a house, large a mill, a station or a tower; the kernel fits it to the lot.`,
     ctx.rari?.length
-      ? `Le taglie più grandi sono rare: in questa parte del mondo può esserci ancora ${ctx.rari.map((t) => (t === 'huge' ? 'una struttura "enorme" (ciò che nella sua epoca è enorme: un castello, una centrale, un grattacielo)' : 'una struttura "gargantuesca" (una cittadella, una cattedrale, una torre-città, una rovina immensa)')).join(' e ')}: al più una per luogo, solo se il luogo lo merita davvero.`
-      : 'Niente strutture "enorme" né "gargantuesca" qui: questa parte del mondo ha già i suoi luoghi notevoli.',
-    ctx.feedback ? `IL TENTATIVO PRECEDENTE È STATO SCARTATO: ${ctx.feedback}. Correggi.` : '',
+      ? `The biggest sizes are rare: this part of the world may still have ${ctx.rari.map((t) => (t === 'huge' ? 'one "huge" structure (what is huge in its age: a castle, a power station, a skyscraper)' : 'one "gargantuan" structure (a citadel, a cathedral, a tower-city, an immense ruin)')).join(' and ')}: at most one per place, only if the place truly deserves it.`
+      : 'No "huge" or "gargantuan" structures here: this part of the world already has its remarkable places.',
+    ctx.feedback ? `THE PREVIOUS ATTEMPT WAS DISCARDED: ${ctx.feedback}. Fix it.` : '',
   ]
     .filter(Boolean)
     .join('\n\n');
@@ -167,7 +167,7 @@ const LAYOUTS_SCHEMA: Schema = {
           nome: { type: 'STRING' },
           descrizione: { type: 'STRING' },
           tipo: { type: 'STRING', enum: ['esterno', 'interno', 'misto'] },
-          programma_json: { type: 'STRING', description: 'il programma MarkovJunior come JSON' },
+          programma_json: { type: 'STRING', description: 'the MarkovJunior program as JSON' },
         },
         required: ['id', 'nome', 'descrizione', 'tipo', 'programma_json'],
       },
@@ -182,11 +182,11 @@ export async function designLayouts(c: Council, palette: Record<string, TerrainD
     'cartographer',
     'genesis.layouts',
     [
-      'Scrivi 10-14 ambienti per i luoghi di questo mondo, ognuno come programma di riscrittura MarkovJunior (vedi il tuo ruolo per la sintassi) che trasforma la bozza procedurale.',
-      'Varietà, nell\'epoca della bibbia! Servono: dove si abita (più di un tipo: dal borgo di pietra al quartiere di condomini, secondo il mondo), dove si lavora e si coltiva, la natura che in questo mondo resta (boschi, giungle, deserti, montagne, laghi e coste, o ciò che ne hanno fatto), e luoghi speciali con i timbri del kernel. Più un interno grande con più stanze. La bozza è natura: un ambiente costruito fitto prima la sgombra.',
-      `Timbri disponibili: {"type":"stamp","shape":…} con shape tra ${italianValues('timbri').join(', ')} (vedi il ruolo). Un timbro è una forma, non un'epoca: il suo nome resta nel programma, nome e descrizione dell'ambiente li decidi tu e "codes" gli dà i materiali di questo mondo.`,
-      `Codici dei terreni utilizzabili:\n${paletteSummary(palette)}`,
-      feedback && `ALCUNI PROGRAMMI ERANO INVALIDI, correggili: ${feedback}`,
+      'Write 10-14 environments for the places of this world, each as a MarkovJunior rewrite program (see your role for the syntax) that transforms the procedural draft.',
+      'Variety, in the age of the bible! Needed: where people live (more than one kind: from the stone village to the quarter of blocks of flats, as the world has it), where they work and farm, the nature that remains in this world (woods, jungles, deserts, mountains, lakes and coasts, or what they made of them), and special places with the kernel\'s stamps. Plus one big interior with several rooms. The draft is nature: a densely built environment clears it first.',
+      `Available stamps: {"type":"stamp","shape":…} with shape among ${internalValues('timbri').join(', ')} (see the role). A stamp is a shape, not an age: its id stays in the program, the name and description of the environment are yours to decide and "codes" gives it the materials of this world.`,
+      `Usable terrain codes:\n${paletteSummary(palette)}`,
+      feedback && `SOME PROGRAMS WERE INVALID, fix them: ${feedback}`,
     ]
       .filter(Boolean)
       .join('\n\n'),
@@ -207,12 +207,12 @@ export async function designLayouts(c: Council, palette: Record<string, TerrainD
 const REGION_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
-    nome: { type: 'STRING', description: 'nome proprio della regione (es. «Rocca di Montenero», «Dune del Sale», «Darsena Vecchia»)' },
+    nome: { type: 'STRING', description: 'proper name of the region, in the language of the world (e.g. «Rocca di Montenero», «Dune del Sale», «Darsena Vecchia»)' },
     descrizione: { type: 'STRING' },
     ambiente: { type: 'STRING' },
     direzione: { type: 'STRING', enum: ['nord', 'nord-est', 'est', 'sud-est', 'sud', 'sud-ovest', 'ovest', 'nord-ovest'] },
-    distanza: { type: 'INTEGER', description: 'in luoghi dal punto di partenza (2-12)' },
-    raggio: { type: 'INTEGER', description: '1 = un luogo e i suoi vicini, 2-3 = una zona vasta (deserti, giungle, mari)' },
+    distanza: { type: 'INTEGER', description: 'in places from the starting point (2-12)' },
+    raggio: { type: 'INTEGER', description: '1 = a place and its neighbours, 2-3 = a wide zone (deserts, jungles, seas)' },
   },
   required: ['nome', 'descrizione', 'ambiente', 'direzione', 'distanza', 'raggio'],
 };
@@ -233,9 +233,9 @@ export async function drawAtlas(c: Council, layouts: Array<{ id: string; name: s
     'cartographer',
     'genesis.atlas',
     [
-      "Disegna la geografia del mondo: 8-14 regioni attorno al punto di partenza (che è al centro). Ognuna ha un nome proprio, una frase, un ambiente tra quelli disponibili, una direzione e una distanza (in luoghi) dal centro, e un raggio.",
-      'Rendila credibile e della sua epoca: il deserto lontano dai laghi, ciò che domina su un colle con un abitato vicino, le montagne a nord, il mare da un lato; più si va lontano più le cose sono strane.',
-      `Ambienti:\n${layouts.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}`,
+      'Draw the geography of the world: 8-14 regions around the starting point (which is at the centre). Each one has a proper name, a sentence, an environment among the available ones, a direction and a distance (in places) from the centre, and a radius.',
+      'Make it believable and of its age: the desert far from the lakes, what towers on a hill with a settlement nearby, the mountains to the north, the sea on one side; the farther you go, the stranger things are.',
+      `Environments:\n${layouts.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}`,
     ].join('\n\n'),
     { type: 'OBJECT', properties: { regioni: { type: 'ARRAY', items: { ...REGION_SCHEMA, properties: { ...REGION_SCHEMA.properties!, ambiente: { type: 'STRING', enum: ids } } } } }, required: ['regioni'] },
     { data: { layouts }, temperature: 0.8 },
@@ -246,18 +246,18 @@ export async function drawAtlas(c: Council, layouts: Array<{ id: string; name: s
 const ENV_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
-    usa_ambiente: { type: 'STRING', description: "se un ambiente esistente va già bene, il suo id (allora niente programma)" },
+    usa_ambiente: { type: 'STRING', description: 'if an existing environment already fits, its id (then no program)' },
     id: { type: 'STRING' },
     nome: { type: 'STRING' },
     descrizione: { type: 'STRING' },
     tipo: { type: 'STRING', enum: ['esterno', 'interno', 'misto'] },
-    programma_json: { type: 'STRING', description: 'il programma MarkovJunior come JSON (può usare i timbri)' },
+    programma_json: { type: 'STRING', description: 'the MarkovJunior program as JSON (it may use the stamps)' },
     nuovi_terreni: {
       type: 'ARRAY',
       items: {
         type: 'OBJECT',
         properties: {
-          codice: { type: 'STRING', description: 'un solo carattere non ancora usato' },
+          codice: { type: 'STRING', description: 'a single character not used yet' },
           nome: { type: 'STRING' },
           colore: { type: 'STRING', description: '#rrggbb' },
           strato: { type: 'STRING', enum: ['ground', 'floor', 'wall', 'door', 'liquid', 'vegetation', 'rock'] },
@@ -294,11 +294,11 @@ export async function designEnvironment(
     'cartographer',
     'cartographer.environment',
     [
-      `Ti chiedono: «${request}». Il viandante si trova a «${ctx.here}».`,
-      `Ambienti esistenti:\n${ctx.layouts.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}`,
-      `Terreni:\n${paletteSummary(ctx.palette)}`,
-      `Se serve, scrivi un ambiente nuovo come programma (puoi usare i timbri: ${ctx.stamps.join(', ')}) e aggiungi terreni nuovi (un carattere ciascuno, mai già usato). Poi collocalo nell'atlante: una regione con nome proprio, direzione e distanza in luoghi da dove si trova il viandante (in una zona ancora inesplorata, 3-8 luoghi).`,
-      ctx.feedback ? `IL TENTATIVO PRECEDENTE NON ANDAVA: ${ctx.feedback}` : '',
+      `You are asked: «${request}». The wanderer is at «${ctx.here}».`,
+      `Existing environments:\n${ctx.layouts.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}`,
+      `Terrains:\n${paletteSummary(ctx.palette)}`,
+      `If needed, write a new environment as a program (you may use the stamps: ${ctx.stamps.join(', ')}) and add new terrains (one character each, never one already used). Then place it in the atlas: a region with a proper name, a direction and a distance in places from where the wanderer is (in a zone not explored yet, 3-8 places).`,
+      ctx.feedback ? `THE PREVIOUS ATTEMPT DID NOT WORK: ${ctx.feedback}` : '',
     ]
       .filter(Boolean)
       .join('\n\n'),

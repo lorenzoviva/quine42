@@ -36,16 +36,16 @@ describe('the themes of the Genesis', () => {
 
   it.each(WORLD_THEMES.map((t) => [t.id, t.text]))('%s stays inside the world and says the runes as the canon does', (_, text) => {
     expect(metaBreak(text, wordsOf(bundledFiles))).toBeUndefined();
-    expect(text).toMatch(/lastre con un segno inciso che manda una luce tenue/);
-    expect(text).toMatch(/canone delle rune/);
+    expect(text).toMatch(/slabs carved with a sign that gives off a faint light/);
+    expect(text).toMatch(/canon of the runes/);
   });
 
   it('the principles go with every request and say that a world has its age', () => {
-    expect(COUNCIL_PRINCIPLES).toContain('Ogni mondo ha la sua epoca');
+    expect(COUNCIL_PRINCIPLES).toContain('Every world has its own age');
   });
 
   it('only the medieval one needs magic of the middle ages', () => {
-    for (const t of WORLD_THEMES.slice(1)) expect(t.text).not.toMatch(/\bmagh[io]\b|medieval|castell|\bregno\b/i);
+    for (const t of WORLD_THEMES.slice(1)) expect(t.text).not.toMatch(/\bmages?\b|medieval|castle|\bkingdom\b/i);
   });
 
   it.each(WORLD_THEMES.map((t) => [t.id, t.text]))('a Genesis offline with %s: the right files, a universe that starts', async (_, text) => {
