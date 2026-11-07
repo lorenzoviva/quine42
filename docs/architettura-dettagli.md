@@ -280,7 +280,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   modulo `data`, `job.<trade>/manifest.json`: nomi, posto, i compiti di ogni fase) si abbina per nome, poi per parola
   (`matchJob` in `jobs.ts`); il programma passa dal validatore per riferimento (`validateJobProgram`: comportamenti di un elenco chiuso,
   caselle del terreno, oggetti del registro, durate 5-300 s, al più 6 compiti per fase). A ogni fase del giorno il kernel mette
-  all'individuo il componente `job` (`mestiere` fino al contratto 0.4: i compiti della fase in `tasks`, `home`, `square` e `work` da `placeFor` e `findTile`) e non gli sceglie più
+  all'individuo il componente `job` (`mestiere` fino al contratto 0.4: i compiti della fase in `tasks`, `home`, `square` e `work` da `placeFor` e `findTile`, che non dà mai una casella di un lotto: l'erba sotto una casa non è un pascolo, T281) e non gli sceglie più
   la meta; `sys.work` (seme, ordine 28; `sys.lavoro` prima di T307b) esegue i compiti uno dopo l'altro con lo stato in `work` e ciò che porta in `load`, e
   cammina mettendo `goal` al prossimo punto di `world.path` (A* sulle caselle dei luoghi caricati, `route.ts`, con la cache), che
   `sys.wander` segue. **La via va dove va il passo** (T299, ADR-0154): una casella è libera se lo è un corpo al suo centro, e un passo
@@ -725,7 +725,10 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
 - **Lotti e strutture** (ADR-0043): ogni edificio del piano è un lotto con una struttura (entità `struttura`, origine
   `<chunk>#s<i>`): il modello `edificio`/`grande` o `struttura-<concetto>` chiesto dal Cartografo sui lotti più grandi,
   al centro del lotto, girato verso la porta; le caselle del lotto tornano terreno. Dentro = sul pavimento del modello
-  (`placeInside`, `floorAt`, `structureAt`); il renderer taglia la struttura in cui si è. Le scale sono rampe (T53a):
+  (`placeInside`, `floorAt`, `structureAt`); il renderer taglia la struttura in cui si è. I punti di quel pavimento
+  (`interiorPoints`, anche le case degli individui) sono il centro di finestre di `INDOOR_REACH` voxel per lato, ogni colonna
+  guardata, dove un corpo sta sul piano terra con le regole di `free` (`block` e `rampBlocks`, T281); `placeInside` scarta quelli
+  dove `free(x, y, INDOOR_R)` trova ciò che c'è già (un banco, un forziere). Aspetta la forma finché il suo programma corre (`Forms.settled`, al più `SETTLE_CAP_MS`): nel browser una struttura arriva dal worker in decine di secondi. Le scale sono rampe (T53a):
   ogni colonna di voxel ha il suo pavimento, ci si sale se è più alta al più di un gradino (0,2 caselle) di quelle vicine
   (`bodyGround`, `rampBlocks` in `forms.ts`); un muro resta un muro. Le strutture hanno più piani (T53b): una colonna ha un
   pavimento per ogni tratto di pieno (`surfaces`, `Form.levels`), il corpo sta su quello più vicino all'altezza dei suoi piedi,

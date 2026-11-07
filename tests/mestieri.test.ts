@@ -168,9 +168,11 @@ describe('a working day of each trade', () => {
     play(60, () => carried(id, 'item.ciocco') >= 2);
     expect(carried(id, 'item.ciocco')).toBe(2);
     expect(deposit(id, 'item.ciocco')).toBe(0);
-    // The bench next to the smith: what is tried here is the work at it, not the way across a world drawn by chance.
+    // The bench next to the smith: what is tried here is the work at it, not the way across a world drawn by chance. Where a
+    // bench stands free beside them (the morning may end in a gap of a wood, between two trees: T281).
     const at0 = k.ecs.get(id, 'pos');
-    Object.assign(k.ecs.get(bench, 'pos'), { x: at0.x + 1.2, y: at0.y });
+    const beside = [[1.2, 0], [-1.2, 0], [0, 1.2], [0, -1.2], [0.9, 0.9], [-0.9, 0.9], [0.9, -0.9], [-0.9, -0.9]].map(([dx, dy]) => ({ x: at0.x + dx, y: at0.y + dy }));
+    Object.assign(k.ecs.get(bench, 'pos'), beside.find((q) => k.free(q.x, q.y, 0.45)) ?? beside[0]);
     phase(d0, 'day', id);
     play(120, () => carried(id, 'item.chiodi') >= 2);
     expect(carried(id, 'item.chiodi')).toBe(2);

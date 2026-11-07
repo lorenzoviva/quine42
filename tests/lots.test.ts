@@ -3,16 +3,16 @@
 // zone and one Gargantuan per realm (ADR-0092).
 
 import { describe, expect, it } from 'vitest';
-import { Kernel, IMPORTANT_ZONE, REALM, realmOf, zoneOf } from '../src/kernel/kernel';
+import { Kernel, IMPORTANT_ZONE, INDOOR_R, REALM, realmOf, zoneOf } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockAiModels } from '../src/kernel/ai/mock';
-import type { FormComp } from '../src/kernel/forms';
+import { BODY_R, InlineRunner, type FormComp, type FormRequest, type FormRunner } from '../src/kernel/forms';
 import type { ChunkPlan } from '../src/kernel/agents/cartography';
 
 /** A kernel whose loaded chunks have all been planned by the Cartographer. */
-async function boot() {
-  const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
+async function boot(files = bundledFiles, forms?: FormRunner) {
+  const k = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels(), ...(forms ? { forms } : {}) });
   for (let i = 0; i < 80; i++) {
     k.tick(1 / 60);
     await new Promise((r) => setTimeout(r, 25));
@@ -71,29 +71,158 @@ describe('lots and structures', () => {
     for (const [i, sid] of structures.entries()) if (i !== largest) expect(k.ecs.get(sid, 'structure').concept).toMatch(/^una cas/);
   });
 
-  it('puts what goes indoors on the floor of the model, never inside its walls', async () => {
+  it('puts what goes indoors on the floor of the model, never inside its walls nor inside what already stands there', async () => {
     const k = await boot();
+    const kk = k as any;
     const ch = k.chunks.get('0,0')!;
-    const sid = structuresOf(k, ch.key).find((id) => id !== undefined)!;
-    const fc = k.ecs.get(sid, 'form') as FormComp;
-    const form = await k.forms.wait(fc.model, fc.seed);
-    expect(form?.floor).toBeDefined();
-    k.tick(1 / 60);
-    const placed: Array<{ x: number; y: number }> = [];
+    const structures = structuresOf(k, ch.key).filter((id) => id !== undefined);
+    // Every model of the place built: the houses and what the plan put in them (a counter, a chest: they block with their voxels).
+    for (const id of k.ecs.query('form', 'chunk')) {
+      const fc = k.ecs.get(id, 'form') as FormComp;
+      if (k.ecs.get(id, 'chunk').key === ch.key) await k.forms.wait(fc.model, fc.seed, fc.tint);
+    }
+    for (let i = 0; i < 5; i++) {
+      k.tick(1 / 60);
+      await new Promise((r) => setTimeout(r, 10));
+    }
+    // The seed's half-timbered house is the procedural one (T281), and the place has some.
+    expect(k.files['models/structure.xml']).toMatch(/Half-timbered house, procedural/);
+    expect(structures.filter((sid) => (k.ecs.get(sid, 'form') as FormComp).model === 'structure').length).toBeGreaterThan(0);
+    kk.rebuildSolids();
+    // What the plan put inside a structure stands on its floor, where nothing else stands (itself out of the way).
+    const inside = k.ecs.query('pos', 'chunk').filter((id) => !k.ecs.has(id, 'structure') && k.ecs.get(id, 'chunk').key === ch.key && k.structureAt(k.ecs.get(id, 'pos').x, k.ecs.get(id, 'pos').y) !== undefined);
+    expect(inside.length).toBeGreaterThan(0);
+    for (const id of inside) {
+      const p = k.ecs.get(id, 'pos');
+      const body = k.ecs.get(id, 'body');
+      const solid = body?.solid;
+      if (body) body.solid = false;
+      kk.rebuildSolids();
+      expect(k.floorAt(p.x, p.y), `${id}`).toBeGreaterThan(k.groundAt(p.x, p.y));
+      expect(k.free(p.x, p.y, INDOOR_R), `${k.ecs.get(id, 'module')?.id ?? id} at ${p.x},${p.y}`).toBe(true);
+      if (body) body.solid = solid;
+    }
+    // Every point of every structure, with what stands inside out of the way: on its floor, inside it, where a thing and a body stand.
+    const solids = k.ecs.query('body').filter((id) => !k.ecs.has(id, 'structure') && k.ecs.get(id, 'body').solid);
+    for (const id of solids) k.ecs.get(id, 'body').solid = false;
+    kk.rebuildSolids();
+    let points = 0;
+    for (const sid of structures) {
+      for (const p of kk.interiorPoints(sid) as Array<{ x: number; y: number }>) {
+        points++;
+        const at = `${(k.ecs.get(sid, 'form') as FormComp).model} ${p.x},${p.y}`;
+        expect(k.structureAt(p.x, p.y), at).toBe(sid);
+        expect(k.floorAt(p.x, p.y), at).toBeGreaterThan(k.groundAt(p.x, p.y));
+        expect(k.free(p.x, p.y, INDOOR_R), at).toBe(true);
+        expect(k.free(p.x, p.y, BODY_R), at).toBe(true);
+      }
+    }
+    expect(points).toBeGreaterThan(structures.length);
+    for (const id of solids) k.ecs.get(id, 'body').solid = true;
+    // With them back, what goes indoors still finds a free point of the floor, not the lot.
     const fallback = { x: 1e6, y: 1e6 };
-    for (let n = 0; n < 4; n++) await (k as any).placeInside(ch, sid, fallback, (x: number, y: number) => placed.push({ x, y }));
-    expect(placed).toHaveLength(4);
-    for (const p of placed) {
+    for (const sid of structures) {
+      if (!kk.interiorPoints(sid).length) continue;
+      let p = fallback;
+      await kk.placeInside(ch, sid, fallback, (x: number, y: number) => (p = { x, y }));
       expect(p).not.toEqual(fallback);
-      // On its floor, inside it, where one can stand.
       expect(k.structureAt(p.x, p.y)).toBe(sid);
-      expect(k.floorAt(p.x, p.y)).toBeGreaterThan(k.groundAt(p.x, p.y));
-      expect(k.free(p.x, p.y, 0.15), `${p.x},${p.y}`).toBe(true);
+      expect(k.free(p.x, p.y, INDOOR_R), `${p.x},${p.y}`).toBe(true);
     }
     // Outside the structure one stands on the ground.
+    const sid = structures[0];
     const far = k.ecs.get(sid, 'pos');
     expect(k.structureAt(far.x + 40, far.y + 40)).toBeUndefined();
     expect(k.floorAt(far.x + 40, far.y + 40)).toBe(k.groundAt(far.x + 40, far.y + 40));
+  }, 30_000);
+
+  it('waits for a structure as long as its program runs: what goes in it is on its floor even when the form comes late', async () => {
+    // As in the browser, where a structure comes from a worker in tens of seconds: the houses arrive after eight seconds, longer than
+    // `Forms.wait` waits (400 timers of 5 ms: two to six seconds, as the timers of the machine go). Before T281 what the plan put in
+    // them went where the plan said, inside their walls.
+    const inline = new InlineRunner();
+    const late: FormRunner = { run: (q: FormRequest) => (q.model === 'structure' ? inline.run(q).then((r) => new Promise((ok) => setTimeout(() => ok(r), 8_000))) : inline.run(q)) };
+    const k = await boot(bundledFiles, late);
+    const kk = k as any;
+    const ch = k.chunks.get('0,0')!;
+    const houses = structuresOf(k, ch.key).filter((id) => id !== undefined && (k.ecs.get(id, 'form') as FormComp).model === 'structure');
+    expect(houses.length).toBeGreaterThan(0);
+    for (const sid of houses) {
+      const fc = k.ecs.get(sid, 'form') as FormComp;
+      expect((await k.forms.settled(fc.model, fc.seed, fc.tint))?.status).toBe('ready');
+    }
+    for (let i = 0; i < 10; i++) {
+      k.tick(1 / 60);
+      await new Promise((r) => setTimeout(r, 20));
+    }
+    const inside = k.ecs.query('pos', 'chunk').filter((id) => !k.ecs.has(id, 'structure') && k.ecs.get(id, 'chunk').key === ch.key && houses.includes(k.structureAt(k.ecs.get(id, 'pos').x, k.ecs.get(id, 'pos').y)!));
+    expect(inside.length).toBeGreaterThan(0);
+    for (const id of inside) {
+      const p = k.ecs.get(id, 'pos');
+      const body = k.ecs.get(id, 'body');
+      const solid = body?.solid;
+      if (body) body.solid = false;
+      kk.rebuildSolids();
+      expect(k.free(p.x, p.y, INDOOR_R), `${k.ecs.get(id, 'module')?.id ?? id} at ${p.x},${p.y}`).toBe(true);
+      if (body) body.solid = solid;
+    }
+  }, 30_000);
+
+  it('never gives a tile of a lot as the nearest tile of a terrain (world.find_tile): the grass under a house is not a pasture', async () => {
+    const k = await boot();
+    const ch = k.chunks.get('0,0')!;
+    const S = k.config.chunkSize;
+    const b = ch.lots[0];
+    const lotTiles = new Set(ch.lots.flatMap((l) => [...l.floor, ...l.walls, ...l.doors]));
+    // The lot is ground again: the terrain of the tiles around it.
+    const code = ch.tiles[b.floor[0]];
+    const mid = { x: ch.cx * S + (b.x0 + b.x1 + 1) / 2, y: ch.cy * S + (b.y0 + b.y1 + 1) / 2 };
+    expect(k.tileAt(Math.floor(mid.x), Math.floor(mid.y))).toBe(code);
+    const t = k.findTile(code, mid.x, mid.y, 12)!;
+    expect(t).toBeDefined();
+    expect(lotTiles.has((Math.floor(t.y) - ch.cy * S) * S + (Math.floor(t.x) - ch.cx * S))).toBe(false);
+    // Within the lot alone there is none.
+    const r = Math.floor(Math.min(b.x1 - b.x0, b.y1 - b.y0) / 2) - 1;
+    if (r >= 0) expect(k.findTile(code, mid.x, mid.y, r)).toBeUndefined();
+  }, 30_000);
+
+  it('finds no point of a floor that the house itself blocks: a wall one voxel thin, a beam at head height', async () => {
+    // A house of 3 × 3 tiles (20 voxels a tile): a floor two voxels high, its four walls, a partition one voxel thick on an odd
+    // column (x = 29) and a beam over the floor between a step and a head above it (z = 14..15, x = 40). Before T281
+    // `interiorPoints` looked at one column in two and, without a cellar, not at where a body cannot stand: it gave points beside both.
+    const house = `<sequence values="BWF" size="60 60 40">
+  <color symbol="W" value="aa8866" name="wall"/>
+  <color symbol="F" value="776655" name="floor"/>
+  <box at="30 30 0" size="57 57 2" color="F"/>
+  <box at="2 30 2" size="1 57 30" color="W"/>
+  <box at="58 30 2" size="1 57 30" color="W"/>
+  <box at="30 2 2" size="57 1 30" color="W"/>
+  <box at="30 58 2" size="57 1 30" color="W"/>
+  <box at="29 30 2" size="1 41 30" color="W"/>
+  <box at="40 30 14" size="1 41 2" color="W"/>
+</sequence>`;
+    const k = await boot({ ...bundledFiles, 'models/structure.xml': house });
+    const kk = k as any;
+    const ch = k.chunks.get('0,0')!;
+    const houses = structuresOf(k, ch.key).filter((id) => id !== undefined && (k.ecs.get(id, 'form') as FormComp).model === 'structure');
+    expect(houses.length).toBeGreaterThan(0);
+    for (const sid of houses) {
+      const fc = k.ecs.get(sid, 'form') as FormComp;
+      await k.forms.wait(fc.model, fc.seed, fc.tint);
+    }
+    k.tick(1 / 60);
+    // Only the house: what stands inside it out of the way.
+    for (const id of k.ecs.query('body')) if (!k.ecs.has(id, 'structure')) k.ecs.get(id, 'body').solid = false;
+    kk.rebuildSolids();
+    for (const sid of houses) {
+      const points = kk.interiorPoints(sid) as Array<{ x: number; y: number }>;
+      // Both rooms have points, away from the partition and the beam.
+      expect(points.length).toBeGreaterThan(8);
+      for (const p of points) {
+        expect(k.free(p.x, p.y, INDOOR_R), `${p.x},${p.y}`).toBe(true);
+        expect(k.free(p.x, p.y, BODY_R), `${p.x},${p.y}`).toBe(true);
+      }
+    }
   }, 30_000);
 
   it('keeps one Huge structure per zone and one Gargantuan per realm, fitted to their lots, and remembers which', async () => {

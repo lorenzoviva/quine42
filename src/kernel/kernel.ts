@@ -390,6 +390,13 @@ export const PLACE_UP = 1.5;
 export const PLACE_DOWN = 1;
 /** The things lying on furniture that a save keeps, the most recent ones. */
 export const MAX_PLACED = 4000;
+/**
+ * What goes indoors (T281): the points of a structure's floor are the middles of windows this many voxels each way of
+ * ground floor (a body of 0.3 tiles at 20 voxels a tile), and a thing put there needs a box this large (tiles) that
+ * `Kernel.free` finds free of what already stands there.
+ */
+export const INDOOR_REACH = 6;
+export const INDOOR_R = 0.15;
 /** How far above its height (tiles) a thing lying on furniture still finds its shelf: the rounding of a save, far less than a voxel. */
 const REST_SLACK = 0.01;
 
@@ -2517,7 +2524,11 @@ export class Kernel {
     };
   }
 
-  /** Points of a structure's floor, inside its walls (world, carpet space), for what goes indoors. */
+  /**
+   * Points of a structure's floor, inside its walls (world, carpet space), for what goes indoors: the middle of a window of
+   * INDOOR_REACH voxels each way where every column is ground floor one stands on, and where `Kernel.free` finds the structure
+   * no obstacle (T281: the same `rampBlocks`, on every column of the window, not one in two).
+   */
   private interiorPoints(sid: Id): Array<{ x: number; y: number }> {
     const fc: FormComp | undefined = this.ecs.get(sid, 'form');
     const f = fc && this.forms.ready(fc.model, fc.seed, fc.tint);
@@ -2525,24 +2536,31 @@ export class Kernel {
     // A house under way has no rooms yet: one lives there from its roof (T245e).
     if (!fc || !f?.floor || !p || (this.ecs.get(sid, 'structure')?.stage ?? 1) < 0.9) return [];
     const g = f.result!.grid;
-    const { foot, floor, block } = this.groundOf(sid, fc, f);
+    const X = g.X, Y = g.Y, W = INDOOR_REACH;
+    const ground = this.groundOf(sid, fc, f);
+    const { foot, floor, block } = ground;
     const step = stepOf(f.vpt);
-    // Over a cellar (T52b) only where the ground floor holds a body (not over the stairwell).
-    const cellar = f.base > 0;
-    // The ground floor: a floor no higher than a step (what goes indoors does not go up the stairs).
-    const clear = (vx: number, vy: number) => {
-      for (let dy = -6; dy <= 6; dy += 2) for (let dx = -6; dx <= 6; dx += 2) {
-        const x = vx + dx, y = vy + dy;
-        if (x < 0 || y < 0 || x >= g.X || y >= g.Y || foot[x + y * g.X] || !floor[x + y * g.X] || floor[x + y * g.X] > step || (cellar && block[x + y * g.X])) return false;
+    // A column where nothing goes: something at body height, no floor of the model, a floor higher than a step (what goes
+    // indoors does not go up the stairs), a floor where a body does not stand (a ceiling too low, out of reach; over a cellar
+    // the stairwell, T52b). Counted in a summed table, so a window is clear when it has none.
+    const W1 = X + 1;
+    const sum = new Int32Array(W1 * (Y + 1));
+    for (let y = 0; y < Y; y++)
+      for (let x = 0; x < X; x++) {
+        const i = x + y * X;
+        const bad = foot[i] || !floor[i] || floor[i] > step || block[i] ? 1 : 0;
+        sum[x + 1 + (y + 1) * W1] = bad + sum[x + (y + 1) * W1] + sum[x + 1 + y * W1] - sum[x + y * W1];
       }
-      return true;
-    };
+    const badIn = (x0: number, y0: number, x1: number, y1: number) => sum[x1 + 1 + (y1 + 1) * W1] - sum[x0 + (y1 + 1) * W1] - sum[x1 + 1 + y0 * W1] + sum[x0 + y0 * W1];
+    const local = (v: number, n: number) => (v + 0.5 - n / 2) / f.vpt;
     const out: Array<{ x: number; y: number }> = [];
     const c = Math.cos(fc.yaw), s = Math.sin(fc.yaw);
-    for (let vy = 6; vy < g.Y - 6; vy += 4)
-      for (let vx = 6; vx < g.X - 6; vx += 4) {
-        if (!clear(vx, vy)) continue;
-        const lx = (vx + 0.5 - g.X / 2) / f.vpt, lz = (vy + 0.5 - g.Y / 2) / f.vpt;
+    for (let vy = W; vy < Y - W; vy += 4)
+      for (let vx = W; vx < X - W; vx += 4) {
+        if (badIn(vx - W, vy - W, vx + W, vy + W)) continue;
+        // And what `free` asks besides: no two neighbouring floors more than a step apart, measured as it measures (at the ground).
+        if (rampBlocks(f, ground, local(vx - W, X), local(vy - W, Y), local(vx + W, X), local(vy + W, Y), f.base)) continue;
+        const lx = local(vx, X), lz = local(vy, Y);
         out.push({ x: p.x + lx * c + lz * s, y: p.y - lx * s + lz * c });
       }
     return out;
@@ -2551,17 +2569,21 @@ export class Kernel {
   /** Puts something inside a structure, on its floor, when its form is ready (or where the plan said, if it never is). */
   private async placeInside(ch: Chunk, sid: Id, fallback: { x: number; y: number }, spawn: (x: number, y: number) => void, solid = false): Promise<void> {
     const fc: FormComp | undefined = this.ecs.get(sid, 'form');
-    if (fc) await this.forms.wait(fc.model, fc.seed, fc.tint);
+    // As long as its program runs (T281): in the browser a structure comes from a worker in tens of seconds, and what goes in
+    // would otherwise go where the plan said, inside its walls.
+    if (fc) await this.forms.settled(fc.model, fc.seed, fc.tint);
     if (!this.alive(ch) || !this.ecs.alive.has(sid)) return;
     this.rebuildSolids();
-    // Away from what already stands there (not the structure itself: its position is the middle of its floor);
-    // a crowded floor is still better than the lot, which may be inside the walls.
+    // Not where something already stands (`free`: a chest, a counter put there before, T281), and away from what is
+    // there (not the structure itself: its position is the middle of its floor); a crowded floor is still better than
+    // the lot, which may be inside the walls.
     const taken = this.ecs.query('pos').filter((id) => id !== sid).map((id) => this.ecs.get(id, 'pos'));
     const S = this.config.chunkSize;
     const doorPositions = solid ? ch.lots.flatMap((b) => b.doors).map((d) => ({ x: ch.cx * S + (d % S) + 0.5, y: ch.cy * S + Math.floor(d / S) + 0.5 })) : [];
     const inside = this.interiorPoints(sid);
-    const free = inside.filter((q) => taken.every((t) => Math.hypot(t.x - q.x, t.y - q.y) > 0.9) && (!solid || doorPositions.every((dp) => Math.hypot(dp.x - q.x, dp.y - q.y) > 1.2)));
-    const pool = free.length ? free : (solid ? [] : inside);
+    const open = inside.filter((q) => this.free(q.x, q.y, INDOOR_R));
+    const roomy = open.filter((q) => taken.every((t) => Math.hypot(t.x - q.x, t.y - q.y) > 0.9) && (!solid || doorPositions.every((dp) => Math.hypot(dp.x - q.x, dp.y - q.y) > 1.2)));
+    const pool = roomy.length ? roomy : solid ? [] : open.length ? open : inside;
     const p = pool.length ? pool[hash32(sid, pool.length, this.ecs.query('pos').length) % pool.length] : fallback;
     spawn(p.x, p.y);
   }
@@ -7615,17 +7637,29 @@ export class Kernel {
     return codes.find((c) => this.palette[c].id === word) ?? codes.find((c) => this.palette[c].name.toLowerCase() === low);
   }
 
-  /** The centre of the nearest tile of a terrain (code, id or name) within r (at most 24) of a point: the nearest, then the first row, then the first column. */
+  /**
+   * The centre of the nearest tile of a terrain (code, id or name) within r (at most 24) of a point: the nearest, then the first row, then
+   * the first column. Not a tile of a lot (T281): a structure stands there, or will, and the grass under a house is not a pasture.
+   */
   findTile(word: string, x: number, y: number, r: number): { x: number; y: number } | undefined {
     const code = this.tileCodeOf(word);
     if (!code || ![x, y].every(Number.isFinite)) return undefined;
     const R = Math.max(0, Math.min(24, Math.floor(Number.isFinite(r) ? r : 8)));
     const c0 = Math.floor(x);
     const r0 = Math.floor(y);
+    const S = this.config.chunkSize;
+    const lotTiles = new Map<Chunk, Set<number>>();
+    const inLot = (col: number, row: number) => {
+      const ch = this.chunkAt(col, row);
+      if (!ch?.lots.length) return false;
+      let tiles = lotTiles.get(ch);
+      if (!tiles) lotTiles.set(ch, (tiles = new Set(ch.lots.flatMap((b) => [...b.floor, ...b.walls, ...b.doors]))));
+      return tiles.has((row - ch.cy * S) * S + (col - ch.cx * S));
+    };
     let best: { x: number; y: number; d: number } | undefined;
     for (let dr = -R; dr <= R; dr++)
       for (let dc = -R; dc <= R; dc++) {
-        if (this.tileAt(c0 + dc, r0 + dr) !== code) continue;
+        if (this.tileAt(c0 + dc, r0 + dr) !== code || inLot(c0 + dc, r0 + dr)) continue;
         const cx = c0 + dc + 0.5;
         const cy = r0 + dr + 0.5;
         const d = Math.hypot(cx - x, cy - y);

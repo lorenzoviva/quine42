@@ -1,15 +1,15 @@
 <!--
-Casa a graticcio, procedurale (Cantiere 2) dalla casa scritta a mano da Claude Code (step 8.2A). Il seme sceglie la
-lunghezza (le due punte della pianta), la profondità (un taglio sul retro), dove si aprono la porta e le otto finestre,
-dove sale il comignolo e quanto è alto, e se sul retro c'è un'ala bassa con il tetto a falda.
-La casa originale: una struttura intera in un solo programma
-MarkovJunior, senza blocchi né architetto. Come in ModernHouse e CarmaTower, si decide in grande e si
-rifinisce in piccolo: la casa si progetta su una griglia grossa (una cella = 3 voxel), poi `map` la
-ingrandisce e le regole aggiungono i dettagli voxel per voxel.
-Nella griglia grossa il blocco pieno della casa si scava; il tetto a padiglione nasce da un prisma eroso
-strato per strato; travi, porta e finestre le trovano i pattern sulla facciata.
-La porta si apre e si chiude con due azioni; il comignolo fuma (animazione). Scala del gioco: 20 voxel
-per casella; la casa occupa circa 3 × 2 caselle, la porta è alta quanto il viandante.
+Half-timbered house, procedural (Cantiere 2) from the house written by hand by Claude Code (step 8.2A). The seed picks the
+length (the two tips of the plan), the depth (a cut at the back), where the door and the eight windows open,
+where the chimney rises and how tall it is, and whether at the back there is a low wing with a lean-to roof.
+The original house: a whole structure in a single MarkovJunior
+program, with no blocks nor architect. As in ModernHouse and CarmaTower, one decides at a large scale and
+refines at a small one: the house is designed on a coarse grid (one cell = 3 voxels), then `map`
+enlarges it and the rules add the details voxel by voxel.
+In the coarse grid the solid block of the house is dug out; the hip roof is born from a prism eroded
+layer by layer; beams, door and windows are found by the patterns on the facade.
+The door opens and closes with two actions; the chimney smokes (animation). Scale of the game: 20 voxels
+per tile; the house takes about 3 × 2 tiles, the door is as tall as the wanderer.
 -->
 <sequence values="BXQIWNnDOURrKhk0" size="24 24 30" origin="True" symmetry="(xy)">
   <color symbol="X" hidden="True" name="volume della casa"/>
@@ -38,7 +38,7 @@ per casella; la casa occupa circa 3 × 2 caselle, la porta è alta quanto il via
   <all in="XB" out="*X" steps="6" symmetry="(x)"/>
   <prl in="XB" out="*X" p="0.5" steps="3" symmetry="(x)"/>
   <all in="X/B" out="*/X" steps="5" symmetry="(y)"/>
-  <!-- La profondità: dal retro, tutto ciò che sta prima della riga scelta sparisce -->
+  <!-- The depth: from the back, everything before the chosen row disappears -->
   <box at="0 8 0" size="1 4 1" color="h"/>
   <one in="h" out="k" steps="1"/>
   <all in="h" out="B"/>

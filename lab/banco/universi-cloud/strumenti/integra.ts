@@ -6,7 +6,13 @@
 // models/index.json; then the plans of its places (maps/*.json) get the structures on their lots, as the kernel will build them (`lotti` in
 // cloud.ts: the largest lots first, `claimSizes`'s rules: Grande on a lot whose longest side is 5 or more, one Enorme in the whole zone on a lot
 // of 8 or more). Aurora has no maps of its own: the places around the start are planned once here by the offline Cartographer and kept in
-// lab/banco/universi-cloud/aurora/maps/. Running it again gives the same files.
+// lab/banco/universi-cloud/aurora/maps/. Running it again gave the same files, until the contracts after 0.1 (below).
+//
+// It stops before writing (T281): it still writes the shapes of contract 0.1 (the seed's programs as lab/ has them, Italian ids and fields in
+// models/index.json), while the seed is of today's contract (English ids, `open`/`close`, English comments, T307a-T309) and the plans it writes
+// come out mixed (`strutture: []` beside `structures`). Run again on the files of 7 November it rewrote 234 of them. The three universes of Claude Cloud
+// stay of 0.1 on the disk and take the seed's models through the seed (their copies are the 0.1 seed's, by fingerprint: `diQuestoKernel`).
+// To run it again it must first write each universe in its own contract.
 
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -17,6 +23,7 @@ import { MemoryChunks, type ChunkRecord } from '../../../../src/kernel/chunks';
 import { commonHouseModel, modelSize } from '../../../../src/kernel/modeldirector';
 import type { ChunkPlan } from '../../../../src/kernel/agents/cartography';
 import type { FileMap } from '../../../../src/kernel/types';
+import { KERNEL_VERSION, parseVersion } from '../../../../src/kernel/version';
 import { prefissoMappe } from './carica';
 import { LUOGHI } from './luoghi';
 import { CASA_SIDERA, CASE_SIDERA, collocate, leggiDisco, lotti, luogoDi, modelloDi, PROGETTO, props, semeProcedurale, strutture, suoni, UNIVERSI, xmlDi, xmlLab, xmlStruttura, type Lotto, type Struttura, type Universo } from './cloud';
@@ -261,6 +268,14 @@ function segnaTaglie(u: Universo, maps: Record<string, ChunkRecord>) {
 }
 
 // --- main -------------------------------------------------------------------------------------------------------------------------------------
+
+/** The contract this script writes (see the head of the file): on a kernel of a later one it stops before writing. */
+const CONTRATTO = { major: 0, minor: 1 };
+const kernel = parseVersion(KERNEL_VERSION)!;
+if (kernel.major !== CONTRATTO.major || kernel.minor !== CONTRATTO.minor) {
+  console.error(`integra.ts scrive gli universi del contratto ${CONTRATTO.major}.${CONTRATTO.minor} e il kernel è ${KERNEL_VERSION}: rilanciato riscriverebbe male i modelli e i piani (T281, vedi l'intestazione).`);
+  process.exit(1);
+}
 
 {
   const riepilogo: Record<string, unknown> = {};

@@ -149,12 +149,11 @@ export interface Modello {
 }
 
 /**
- * Seed models that stay as they are. `grande`, the common house of every world without a `commonHouse` (aurora): what the kernel puts indoors
- * (`placeInside`) goes to points of the floor that `interiorPoints` finds clear and that `free` may still find blocked, on the old house as on
- * the new one (measured: 21 of 32 points of the old one, all 15 of the new one, at yaw 0; INTEGRAZIONE.md). tests/lots.test.ts passed on the
- * old one because its four draws fell on clear points: the new one would make it fail, the defect is the kernel's and is left to a task of its own.
+ * Seed models that stay as they are: none. `grande` (the half-timbered house, the common house of every world without a `commonHouse`) was
+ * kept old until T281, because what the kernel put indoors could go into the walls: `interiorPoints` looked at one voxel column in two and
+ * not at where a body cannot stand, which `free` does (kernel 0.5.2). Its procedural program is now the seed's `models/structure.xml`.
  */
-export const SEME_TENUTI = new Set(['grande']);
+export const SEME_TENUTI = new Set<string>();
 
 /** The seed models rewritten as procedural programs (T270), but those the seed keeps: the same ids, the same classes, the seed's own names. */
 export function semeProcedurale(): Modello[] {

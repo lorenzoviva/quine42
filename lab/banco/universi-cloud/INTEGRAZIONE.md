@@ -152,15 +152,15 @@ stesso `0.1`, `Z` uguale a quello del kernel. `tests/universi-cloud.test.ts` li 
   `futuristico/laboratorio-del-plasma`. Il catalogo ha ora 48 strutture, 12 per ambientazione.
 - *I 60 modelli* (`origin/claude/markov-junior-3d-60-models-pajzz6`, `lab/banco/fauna-biomi-cloud/`): uniti senza conflitti; **non**
   registrati negli universi (la richiesta nomina strutture, seme, props e suoni; nessun luogo li userebbe ancora).
-- *La registrazione* (`strumenti/integra.ts`, si può rilanciare: dà gli stessi file). In `models/` e `models/index.json` di ognuno:
+- *La registrazione* (`strumenti/integra.ts`, si poteva rilanciare e dava gli stessi file finché il kernel era del contratto 0.1: da T281 si ferma, vedi sotto). In `models/` e `models/index.json` di ognuno:
   - le 12 strutture del tema con id `struttura-<ownModelId(concetto).slice(0, 30)>`, `classe: grande`, `sotto: 1` per le 6 con la
     cantina (senza, la libreria la taglierebbe: ADR-0135), e per quella Enorme `taglia: enorme`, `vpt: 16` (`modelSize`: la taglia di una
     struttura è del suo modello). Il concetto è il nome del file in parole (`torre-del-mago` → «torre del mago»), tranne
     `moderno/mercato-coperto` → «mercato coperto rionale», perché neapolis ha già il suo `struttura-mercato-coperto`;
   - i modelli procedurali del seme (T270) **al posto** delle copie del seme che l'universo aveva (tutte identiche al seme), con la voce che
-    resta (nome, tinta) e `autore` nuovo; il `voto` dell'Artista, che era del modello vecchio, va via. Sono 23 su 24: **`grande`** (la casa
-    a graticcio, la casa comune di aurora) resta la vecchia, per il difetto del kernel descritto sotto. Sidera ne aveva 10 su 24 (aveva tolto
-    gli altri): 9, gli stessi meno `grande`;
+    resta (nome, tinta) e `autore` nuovo; il `voto` dell'Artista, che era del modello vecchio, va via. Erano 23 su 24: **`grande`** (la casa
+    a graticcio, la casa comune di aurora) era rimasta la vecchia, per il difetto del kernel descritto sotto, ed è la procedurale da T281. Sidera ne aveva 10 su 24 (aveva tolto
+    gli altri): 9, gli stessi meno `grande`, che da T281 le arriva dal seme;
   - i 10 props del tema (T270);
   - i 6 brani del tema e i 19 effetti (T271). Dove suona ogni brano (`suono.ambienti`, `momenti`) è in `strumenti/cloud.ts → MUSICA`: chi
     nomina un ambiente esattamente suona lì, l'ultimo dell'indice per primo, quindi ogni brano prende pochi ambienti e lascia gli altri alla
@@ -218,17 +218,49 @@ e sulla fattoria di prima (`lab/tests/fixtures/`), perché le loro proprietà er
 `tests/soundanalysis.test.ts` contano i suoni del seme (13 brani, 29 effetti); `tools/sicurezza/ambiente.mjs` dà a `git` 256 MB di uscita: il
 seme ora pesa 2 MB e `git log --all -p` di un universo passava il MB di `execFileSync` (V-016).
 
-## Un difetto del kernel che le strutture mostrano (non corretto qui)
+## Un difetto del kernel che le strutture mostravano (corretto da T281, kernel `0.5.2`)
 
-Ciò che il piano mette «dentro» una struttura (`placeInside`) va in un punto del pavimento che `interiorPoints` trova sgombro (niente
-`foot` nei ±6 voxel, pavimento non più alto di un gradino), ma che `kernel.free(x, y, 0.15)` può trovare bloccato: è `formBlocks`, non le
-caselle (contati sui 4 universi installati, punti bloccati su punti trovati). Per la casa a graticcio del seme: **21 su 32 la vecchia, 15 su
-15 la procedurale**, a yaw 0 (girata di −π/2, 0 su 32 e 0 su 15); per le strutture del catalogo da 10 su 59 a 61 su 128, a ogni rotazione;
-per la casa comune grande di orichalcum (T272) 34 su 800. `tests/lots.test.ts` («never inside its walls») passava con la casa vecchia perché i
-suoi quattro tiri cadevano su punti sgombri, e cadrebbe con la nuova: per questo `grande` resta la vecchia (`SEME_TENUTI` in
-`strumenti/cloud.ts`). Toccare `src/kernel/` voleva dire alzare `KERNEL_VERSION` in un compito di integrazione, ed è fuori da questo:
-**da fare in un task del kernel** (guardare se `interiorPoints` e `formsUnder`/`rampBlocks` usano la stessa rotazione e lo stesso livello: senza
-`z`, `free` misura al suolo un pavimento rialzato), poi togliere `grande` da `SEME_TENUTI` e rilanciare `integra.ts`.
+Ciò che il piano mette «dentro» una struttura (`placeInside`) andava in un punto del pavimento che `interiorPoints` trovava sgombro, ma che
+`kernel.free(x, y, 0.15)` poteva trovare bloccato (`formBlocks`, non le caselle). Il rapporto di T273 lo contava su tutti i punti trovati: per la
+casa a graticcio del seme 21 su 32 la vecchia, 15 su 15 la procedurale; per le strutture del catalogo da 10 su 59 a 61 su 128, a ogni rotazione.
+Le cause, misurate da T281 (`free` sui punti, una struttura alla volta, e chi blocca):
+
+- **non la rotazione né il livello**: `interiorPoints` e `formsUnder` girano allo stesso modo (`toLocal` è l'inverso), e senza `z` `free` misura
+  il pavimento più vicino al suolo, che per un piano terra entro un gradino è quello giusto;
+- **una colonna su due**: `interiorPoints` guardava i ±6 voxel attorno al punto a passi di 2, quindi mai le colonne dispari; un tramezzo,
+  la fila di un banco o di uno scaffale spessa un voxel su una colonna dispari non c'era, e `rampBlocks` (che guarda ogni colonna sotto la
+  scatola) la trovava. In aurora, con la casa nuova: 285 punti su 1.441, tutti delle 12 strutture del catalogo (da 1 a 32 per struttura), nessuno delle case;
+- **dove un corpo non sta**: senza cantina `interiorPoints` non guardava `block` (un soffitto troppo basso sopra un pavimento rialzato, un
+  pavimento non raggiunto), che `rampBlocks` guarda;
+- **ciò che c'è già**: un banco, un forziere, una credenza messi prima sullo stesso pavimento; `placeInside` se ne teneva lontano solo
+  di 0,9 dal loro centro, e quando nessun punto lo era prendeva un punto qualsiasi, anche dentro il mobile. È il caso della casa nuova del seme
+  nel luogo 0,0 (il banco della prima casa copriva 11 dei suoi 15 punti), quello che `tests/lots.test.ts` avrebbe preso.
+
+Ora `interiorPoints` guarda ogni colonna della finestra (`INDOOR_REACH`, 6 voxel, con una tabella delle somme) con `foot`, il pavimento, il
+gradino e `block`, e poi `rampBlocks` sulla finestra intera, la stessa funzione di `free`; `placeInside` scarta i punti dove `free(x, y,
+INDOOR_R)` trova qualcosa, e solo dopo cerca quelli lontani da ciò che c'è. Nel browser c'era una quinta causa, che i test non vedevano: `placeInside` aspettava la
+forma con `forms.wait`, che si arrende dopo 400 attese da 5 ms (2-6 s secondo i timer), e una struttura del catalogo arriva dal worker in
+decine di secondi; al primo caricamento ciò che va dentro andava al punto del piano, nel pieno (visto: il banco della torre del mago di aurora a
+25,5; 6,5). Ora aspetta `forms.settled`, la corsa vera del programma (pronta o fallita, al più `SETTLE_CAP_MS`, 3 minuti). Visto sulla preview, aurora
+installata in una cartella temporanea, `?skip&offline`, al primo caricamento (le forme del luogo 1,0 pronte dopo 7 s): i 10 mobili dentro le
+strutture dei luoghi attorno alla partenza sul loro pavimento, dove `free` non trova altro; il banco della torre del mago dentro la stanza
+centrale, accanto alla scala, e la credenza della casa a graticcio nuova (0,1) dentro i suoi muri; 0 guasti, kernel `0.5.2`. Misurato sui quattro universi con la casa nuova: 0 punti bloccati
+dalla loro struttura (aurora 968, orichalcum 1.702, neapolis 952, sidera 2.221), 0 cose messe dentro dove `free` trova un'altra cosa, tranne quelle
+delle strutture **senza interno**: le case comuni di neapolis (la palazzina è un blocco pieno), `struttura-mercato-coperto`,
+`struttura-torre-di-vetro`, il modulo abitativo di sidera, la cupola e la costola hanno 0 punti, prima e dopo, e ciò che il piano mette
+dentro va al punto del piano, dentro il pieno (2 cose in neapolis, 2 in sidera). Non corretto qui: è del modello o di dove il piano mette le cose.
+
+`grande` non è più in `SEME_TENUTI`: il programma procedurale è `universe/models/structure.xml` (con `open`/`close`, i commenti in inglese come
+il resto del seme, T309; tradotta anche l'intestazione della copia in `lab/banco/seme-procedurale/grande.xml`). **`integra.ts` non si è
+rilanciato**: scrive ancora le forme del contratto 0.1 (gli id e i campi italiani, i programmi come li ha `lab/`) e i piani gli escono misti
+(`strutture: []` accanto a `structures`); rilanciato sui file del 7/11 ne riscriveva 234. Ora si ferma prima di scrivere se il kernel non è del
+contratto 0.1. I tre universi Cloud restano del contratto 0.1 sul disco, e il loro `grande.xml` è la copia del seme 0.1 (impronta `7e2ed15c` in
+`seme-0.1.json`): caricati (`diQuestoKernel`, `componi`), prendono la casa del seme di oggi; nel loro indice è cambiato solo `autore`.
+
+Con la casa nuova la suite ha trovato altre due cose. `findTile` (`world.find_tile`, il posto di lavoro dei mestieri) dava anche le caselle dei
+lotti, che tornano terreno sotto la casa: la pastora andava a pascolare in un punto della casa 4 del luogo 0,0 (con la casa vecchia ci entrava,
+con la nuova c'è il muro). Ora non dà mai una casella di un lotto. E in `tests/mestieri.test.ts` il banco del fabbro, messo a 1,2 caselle da
+lui, finiva in un varco del bosco fra due alberi (i tempi del cammino sono cambiati con la casa): ora va accanto a lui dove un banco sta libero.
 
 ## L'integrazione su Windows (T279, 05/11)
 
