@@ -19,6 +19,7 @@ import type { FileMap } from '../kernel/types';
 import type { Profile } from '../kernel/wanderers';
 import { hashStr, hex } from '../kernel/rng';
 import { takeFromSlot } from '../kernel/inventory';
+import { isThing } from '../kernel/moving';
 import { ENTITY_PARTS } from './protocol';
 import { SEA_DRAFT } from '../kernel/relief';
 
@@ -359,7 +360,10 @@ export class ThinClient {
       this.others.set(o.id, id);
     } else this.targets.set(id, { x: o.x, y: o.y });
     // What they wield (T288): the renderer puts it in their hand; a string or nothing, whatever came.
-    k.ecs.set(id, 'remote', { id: o.id, name: o.name, introduction: o.introduction ?? '', ...(typeof o.held === 'string' && o.held ? { held: o.held.slice(0, 120) } : {}) });
+    // What they hold (T288), and the seed of its look when it is a thing of the world they carry (T292): numbers and a text only.
+    const held = typeof o.held === 'string' && o.held ? o.held.slice(0, 120) : undefined;
+    const seed = held && typeof o.heldSeed === 'number' && Number.isInteger(o.heldSeed) && Math.abs(o.heldSeed) < 1e9 ? o.heldSeed : undefined;
+    k.ecs.set(id, 'remote', { id: o.id, name: o.name, introduction: o.introduction ?? '', ...(held ? { held } : {}), ...(seed !== undefined ? { heldSeed: seed } : {}) });
     k.ecs.set(id, 'identity', { name: o.name });
     if (o.form) k.ecs.set(id, 'form', { ...o.form });
     if (o.text) this.say(id, o.text);
@@ -597,6 +601,9 @@ export class ThinClient {
       return r.ok;
     };
     k.action = (target) => {
+      // A thing of the world carried goes down in front (T292): the server decides where, as for what is put down from a slot.
+      const inv = k.inventory();
+      if (inv.equipped !== null && isThing(inv.slots[inv.equipped]?.item)) return k.dropSlot(inv.equipped);
       const sid = target !== undefined ? this.server.get(target) : this.server.get(k.targetInFront() ?? -1);
       if (sid === undefined) return k.message('Non c’è niente davanti a te.', 'warn');
       void this.show(this.session.act({ t: 'action', entity: sid, action: 'strumento' }));

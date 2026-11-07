@@ -16,6 +16,7 @@
     "solid": true,
     "radius": 0.42
   },
+  "takeable": true,
   "container": {
     "size": 10,
     "loot": "cassa"

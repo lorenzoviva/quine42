@@ -21,8 +21,9 @@ const LOBBY_AI_FIELDS = ['textModel', 'sculptors', 'coefficients', 'minimums', '
  * what spawns it is not here: `spawn`, `interaction`, `container`, `inventory`, `loot`, `layouts`, `fragments`, `drops`; nor what only the
  * Council reads: `persona`, `lore`, `context`, `prompts`, `origin`; nor `cases`. A field added to `Manifest` stays home until it is
  * named here. `card` is on the list because anyone may read it (`publicFiles`, ADR-0102). `ui` is whole: it is the panel drawn.
+ * `takeable` (T292): the client's menu offers «Prendi», and makes the item of a thing carried, with its name and look.
  */
-const MANIFEST_FIELDS = ['id', 'name', 'kind', 'version', 'description', 'order', 'physics', 'tags', 'item', 'roof', 'ui', 'card'];
+const MANIFEST_FIELDS = ['id', 'name', 'kind', 'version', 'description', 'order', 'physics', 'tags', 'item', 'roof', 'ui', 'card', 'takeable'];
 /** Only for the modules that make up the client's own wanderer and carpet: the others' entities come from the server. */
 const OWN_FIELDS = ['components', 'singleton', 'persist'];
 const APPEARANCE_FIELDS = ['glyph', 'color', 'model', 'class', 'size'];

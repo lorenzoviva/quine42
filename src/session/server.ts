@@ -13,7 +13,8 @@ import { readWandererState, SOLO, validWandererId, type Profile } from '../kerne
 import { accountWanderer, type Account, type Verifier } from './account';
 import { playerChanges, playerFiles } from './files';
 import { hashStr, hex } from '../kernel/rng';
-import { equippedItem } from '../kernel/inventory';
+import { equippedItem, shownInventory } from '../kernel/inventory';
+import { isThing, PUT_DOWN, thingSeed } from '../kernel/moving';
 import { ENTITY_PARTS, type ClientMsg, type FileChanges, type ItemOp, type Dialog, type FormView, type Me, type MyState, type Notice, type OtherView, type ChunkView, type ServerLink, type ServerMsg, type EntityView } from './protocol';
 
 export interface SessionOptions {
@@ -58,6 +59,12 @@ export const LIMITS = {
   /** What may call the models (`heavy`): one every two seconds, and how many may come at once. */
   heavyRate: 0.5,
   heavyBurst: 20,
+  /**
+   * Taking a thing of the world and putting one down (T292, ADR-0168): the ways around it are walked again (a few milliseconds each), so
+   * at most this many a second, and how many may come at once. Nobody playing gets near it.
+   */
+  moveRate: 4,
+  moveBurst: 8,
   /** A wanderer's requests running at once; the others wait their turn, up to this many. Nobody else's wait for them. */
   atOnce: 2,
   waiting: 8,
@@ -73,6 +80,7 @@ export const LIMITS = {
 interface Pace {
   msgs: number;
   heavy: number;
+  moves: number;
   refused: number;
   running: number;
   queue: Array<{ c: Client; msg: ClientMsg }>;
@@ -87,6 +95,11 @@ const words = (v: unknown) => String(v ?? '').slice(0, LIMITS.text);
  * The messages that may call the models (or write the wanderer's state, `profile`). Everything else the kernel does at once
  * and alone: `action` only for the actions that ask the Narrator, so picking things up never waits for a chat.
  */
+/** What takes a thing of the world or puts something down (T292): `LIMITS.moveRate`. */
+function moves(msg: ClientMsg): boolean {
+  return (msg.t === 'action' && msg.action === 'prendi') || (msg.t === 'tile' && msg.action === PUT_DOWN) || (msg.t === 'item' && msg.op === 'put_down');
+}
+
 function heavy(msg: ClientMsg): boolean {
   switch (msg.t) {
     case 'chat':
@@ -498,7 +511,7 @@ export class SessionServer {
 
   private paceOf(id: string): Pace {
     let p = this.paces.get(id);
-    if (!p) this.paces.set(id, (p = { msgs: LIMITS.burst, heavy: LIMITS.heavyBurst, refused: 0, running: 0, queue: [] }));
+    if (!p) this.paces.set(id, (p = { msgs: LIMITS.burst, heavy: LIMITS.heavyBurst, moves: LIMITS.moveBurst, refused: 0, running: 0, queue: [] }));
     return p;
   }
 
@@ -520,6 +533,10 @@ export class SessionServer {
       if (p.heavy < 1) return this.answer(c, seqOf(msg), { ok: false, reason: SLOW_DOWN });
       p.heavy--;
     }
+    if (moves(msg)) {
+      if (p.moves < 1) return this.answer(c, seqOf(msg), { ok: false, reason: SLOW_DOWN });
+      p.moves--;
+    }
     this.inbox.push({ c, msg });
   }
 
@@ -528,9 +545,10 @@ export class SessionServer {
     for (const [id, p] of this.paces) {
       p.msgs = Math.min(LIMITS.burst, p.msgs + LIMITS.rate * dt);
       p.heavy = Math.min(LIMITS.heavyBurst, p.heavy + LIMITS.heavyRate * dt);
+      p.moves = Math.min(LIMITS.moveBurst, p.moves + LIMITS.moveRate * dt);
       p.refused = Math.max(0, p.refused - LIMITS.rate * dt);
       this.startWaiting(p);
-      if (!this.clients.has(id) && !p.running && p.msgs >= LIMITS.burst && p.heavy >= LIMITS.heavyBurst) this.paces.delete(id);
+      if (!this.clients.has(id) && !p.running && p.msgs >= LIMITS.burst && p.heavy >= LIMITS.heavyBurst && p.moves >= LIMITS.moveBurst) this.paces.delete(id);
     }
   }
 
@@ -924,7 +942,8 @@ export class SessionServer {
     const state: MyState = k.as(c.id, () => ({
       needs: k.needs() as unknown as Record<string, number>,
       hand: k.phrase(),
-      inventory: k.inventory(),
+      // A thing of the world carried goes with the seed of its look only (T292): who it is and its state stay here.
+      inventory: shownInventory(k.inventory()),
       states: k.states(),
       slots: k.slots(),
       credits: k.creditsOf(c.id),
@@ -987,7 +1006,9 @@ export class SessionServer {
       // What they wield, seen in their hand (T288): the item, not the inventory.
       const inv = k.ecs.get(o.entity, 'inventory');
       const held = inv ? equippedItem(inv) : null;
-      const v: OtherView = { id: w.id, name: w.name, x: round(o.x), y: round(o.y), facing: o.facing, ...(form ? { form } : {}), ...(b ? { text: b.text } : {}), ...(intro ? { introduction: intro } : {}), ...(held ? { held } : {}) };
+      // A thing of the world they carry (T292): the seed of its look too, so that it looks as it stood.
+      const heldSeed = held && isThing(held) ? thingSeed(inv.slots[inv.equipped]) : undefined;
+      const v: OtherView = { id: w.id, name: w.name, x: round(o.x), y: round(o.y), facing: o.facing, ...(form ? { form } : {}), ...(b ? { text: b.text } : {}), ...(intro ? { introduction: intro } : {}), ...(held ? { held } : {}), ...(heldSeed !== undefined ? { heldSeed } : {}) };
       const key = JSON.stringify(v);
       if (c.others.get(w.id) !== key) others.push(v);
       c.others.set(w.id, key);

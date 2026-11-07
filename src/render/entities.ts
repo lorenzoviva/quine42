@@ -12,8 +12,8 @@ import { Builder } from './terrain';
 import { casts, clipped, MAT, rgbOf, solid } from './materials';
 import { geoOf, isSharedGeometry, modelObject, showFrame } from './models';
 import type { FormComp } from '../kernel/forms';
-import type { Hand } from '../mj/hold';
-import { heldBy, hold, type Holding } from './held';
+import { overheadTurn, type Hand } from '../mj/hold';
+import { heldBy, heldSeedOf, hold, type Holding } from './held';
 
 export interface Limb {
   pivot: THREE.Object3D;
@@ -101,13 +101,14 @@ function itemStandIn(color: string): THREE.Mesh {
   return casts(new THREE.Mesh(new THREE.OctahedronGeometry(0.16), solid(color, { emissive: 0.35 })));
 }
 
-/** Legs swing while it walks, arms against them, the head nods a little. */
-export function animateLimbs(v: { limbs: Limb[]; body: THREE.Object3D; phase: number }, moving: boolean, dt: number, t: number): void {
+/** Legs swing while it walks, arms against them, the head nods a little; the arms stay up while they carry something over the head (T292). */
+export function animateLimbs(v: { limbs: Limb[]; body: THREE.Object3D; phase: number; holding?: Holding }, moving: boolean, dt: number, t: number): void {
   const k = moving ? 1 : 0;
+  const up = !!(v.holding?.overhead && v.holding.holder);
   for (const l of v.limbs) {
     const swing = Math.sin(v.phase) * l.phase;
     if (l.part === 'leg') l.pivot.rotation.x = THREE.MathUtils.lerp(l.pivot.rotation.x, swing * 0.6 * k, Math.min(1, dt * 12));
-    else if (l.part === 'arm') l.pivot.rotation.x = THREE.MathUtils.lerp(l.pivot.rotation.x, swing * 0.45 * k, Math.min(1, dt * 12));
+    else if (l.part === 'arm') l.pivot.rotation.x = THREE.MathUtils.lerp(l.pivot.rotation.x, up ? overheadTurn(l.hand) : swing * 0.45 * k, Math.min(1, dt * 12));
     else if (l.part === 'tail') l.pivot.rotation.y = Math.sin(t * 5 + v.phase) * 0.35;
     else if (l.part === 'head') l.pivot.rotation.x = Math.sin(t * 1.3 + l.pivot.id) * 0.05;
   }
@@ -232,7 +233,7 @@ export class Entities {
       }
       animateLimbs(v, moved > 0.0005 && moved < 2, dt, t);
       // What they hold, in hand (T288): another wanderer's as the server says, an individual's if it has one.
-      hold(k, v, heldBy(k, id), MAT.world, t, (o) => (o.userData.entity = id));
+      hold(k, v, heldBy(k, id), MAT.world, t, (o) => (o.userData.entity = id), heldSeedOf(k, id));
     }
     for (const id of [...this.views.keys()]) if (!seen.has(id)) this.remove(id);
   }
@@ -322,7 +323,7 @@ export class Wanderer {
     if (walking && !jump) this.view.phase += Math.max(moved, 0.05) * 7;
     animateLimbs(this.view, walking && !jump, dt, t);
     // What it wields, in hand (T288), with the wanderer's material: never cut, as its body.
-    hold(k, this.view, heldBy(k, k.wandererEntity), MAT.corona, t, (o) => (o.userData.player = true));
+    hold(k, this.view, heldBy(k, k.wandererEntity), MAT.corona, t, (o) => (o.userData.player = true), heldSeedOf(k, k.wandererEntity));
   }
 }
 

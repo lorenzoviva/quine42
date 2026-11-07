@@ -262,6 +262,29 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   posati` (oggetto, quanti, x, y, z, yaw, la borsa; al più `MAX_PLACED`), letto con validazione; la Genesi lo toglie. In
   multigiocatore `placed` (`posato` fino al contratto 0.4) è in `ENTITY_PARTS` e il kernel specchio lo posa sulla sua copia del mobile; l'azione viaggia in `action`
   (nessun messaggio nuovo). Il renderer lo disegna fermo, all'altezza del ripiano, girato come lo si è posato.
+- **Prendere e spostare i mobili** (ADR-0168, T292): una cosa il cui manifest dice `takeable` (assente vale no: nel seme credenza,
+  cassapanca, letto, banco, cassa; non il pozzo né il cartello) ha «Prendi» nel menu (`perform(id, 'prendi')` → `kernel.takeThing`).
+  Non si prende, con una frase del mondo (`takeRefusal` in `src/kernel/moving.ts`), se dentro c'è qualcosa (un contenitore mai aperto
+  si riempie come l'aprirebbe: si vuota prima, niente borse dentro borse), se sopra c'è qualcosa di posato o qualcuno, se non c'è posto,
+  oltre `TAKE_REACH`. Presa, l'entità esce dal mondo ed entra in mano come l'oggetto `thing:<modulo>` (`Content.things`: dal manifest,
+  pila 1, impugnabile, peso metà della massa tra 2 e 20; fuori da pacchetti, bottino e nomi) con la **cosa portata** (`Slot.thing`:
+  l'origine, il seme dell'aspetto, lo stato, cioè i componenti che non sono del kernel, `readParts`, al più 4096 caratteri); l'origine
+  va in `consumed`, il contenitore vuoto in `savedContainers`, le azioni del modello in `savedForms`. Si muove solo intera: mai in
+  una borsa, in un contenitore o in un pannello; a un altro viandante passa intera. Si posa a terra dal menu della casella («Posa *X* qui»,
+  `t:_posa`), con F o «Posa davanti a te» (la casella a 1,2 caselle davanti): `placeCarried` aspetta la sua forma, poi decide
+  (`putCarried`, `spotFailure`): chi posa è a terra, la casella entro `PUT_REACH`, sotto ogni colonna della sua impronta il terreno
+  la regge (non l'acqua), nessun terreno solido né modello che salga oltre un gradino entro la sua altezza (`formFills`), nessuno,
+  niente a terra, nessuna runa; se è solida, né su né accanto a una porta (del terreno o dei lotti) e **il luogo resta connesso**
+  (`wouldSplit`: le caselle di `MOVE_AREA` attorno, passabili e unite come la via le vede, `free` e `stepsBetween`, prima e con la
+  cosa per un momento nell'indice dei solidi; due caselle unite prima lo restano; `walkGroups`, `splitBetween`). Altrimenti una frase
+  (`putRefusal`) e resta in mano. Torna con la sua origine (contenitore e azioni), il suo stato sopra quello del manifest e prima di
+  `on_spawn`, girata con la fronte verso chi la posa (`facingYaw`); `npc.forgetWays()` a ogni presa e posa. Il salvataggio la tiene
+  in `world/state.json → moved` (modulo, origine, x, y, yaw, stato; al più `MAX_MOVED`, letto con `readMoved`): senza luogo, come gli
+  oggetti posati, nasce al caricamento dove è stata posata e il piano del suo luogo non la rifà (le origini delle cose spostate e portate
+  tornano in `consumed` a ogni caricamento); la Genesi le toglie, `breakEntity` la toglie. Il Narratore lo decide nel concetto della
+  Fucina (`takeable`), il Cartografo per ciò che chiede a un luogo (`nuovi[].takeable`, l'ultima parola); il kernel lo scrive solo per
+  un `oggetto` delle `TAKEABLE_CLASSES` (`furniture`, `object`, `pebble`) non grande. Non coperto: portare via i mobili dalla casa
+  di un individuo non ha conseguenze.
 
 <a id="societa"></a>
 ## Società, NPC, personaggi
@@ -580,6 +603,13 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   viola, con «Segui» nel pannello) e nell'atlante. `segui {id}` fa mandare al master ciò che è attorno al giocatore (`Client.watch`);
   `kernel.follow`, `watching`, `watched()`: il renderer (`Renderer.offset()`) mette il giocatore al centro, nasconde corona e viandante
   del master, che resta nello studio; Esc o «Torna» sull'insegna (`#watch`, `master.ts`) la lasciano.
+- **I mobili che si spostano, tra molti** (ADR-0168, T292): la presa viaggia in `action` (`prendi`), la posa in `tile` (`_posa`) o in
+  `item` (`put_down`; il client sottile manda F così), con il raggio del server e nei messaggi che ci sono, al più `LIMITS.moveRate` (4) al
+  secondo e 8 di fila (ogni posa rifà le vie attorno: qualche millisecondo). Due che prendono la stessa
+  cosa nello stesso momento: il server fa l'una (`takeThing` è un passo solo), l'altra trova che non c'è più (`outOfReach`); per tutti
+  sparisce con l'aggiornamento dopo (`gone`). Di una cosa portata a chi la porta esce solo il seme del suo aspetto (`shownInventory`:
+  origine e stato restano sul server), agli altri `OtherView.heldSeed` accanto a `held`, letto solo se è un intero. Il manifest dice
+  `takeable` anche ai client (`MANIFEST_FIELDS`): il menu del kernel specchio offre «Prendi».
 
 <a id="account"></a>
 ## L'account Firebase
@@ -674,6 +704,13 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   `glow` nelle mesh, senza occlusione, emissione nei materiali; il renderer disegna in un target con la maschera del
   bagliore nell'alfa e un bloom leggero prende solo ciò che brilla (`src/render/bloom.ts`); nelle foto non prende ombra.
 - **Ciò che si impugna** (ADR-0167, T288): ciò che una figura impugna (`inventory.equipped`) si disegna con la mesh che l'oggetto ha a terra, la stessa geometria condivisa di ogni istanza (`geoOf`), appesa al perno del braccio del suo **punto di aggancio** (`MOUNTS` in `src/mj/hold.ts`, uno per punto: `hand`, la mano destra, per tutto; `forearm`, l'avambraccio sinistro, per lo `scudo`, letto anche come `shield`), quindi oscilla con il passo e gira con il corpo. Tutto viene dai voxel, senza una tabella per oggetto. La **mano** (`handsOf`) è l'estremità libera di ogni braccio del rig: in basso per un braccio lungo il fianco, in alto per uno che non scende a metà del corpo (il braccio alzato di metà dei semi del viandante); la figura guarda verso le y grandi, la sua destra è x piccola; `modelObject` la legge una volta per forma e la accoppia al perno del worker per giunto, il sostituto ha la sua. La **presa** (`gripOf`) prende gli assi principali dei voxel: ciò che è lungo si tiene per un'estremità (quella che non brilla, poi quella di legno, poi la più leggera, poi quella accanto alla fetta più larga, un'elsa; altrimenti dal basso), lungo l'asse del manico se il manico è un'asta, e punta avanti, in fuori dal fianco, un poco in giù (in su da una mano alzata; `aimOf`, `HOLD_AIM`) con la larghezza in piano e il grosso avanti, così si legge da ogni quarto di giro della camera; ciò che è spesso al centro (un arco) si tiene al centro, in piedi; ciò che è piatto è lungo dove le sue estremità differiscono di più (le forbici); ciò che è compatto pende dalla cima, sopra il suolo; nulla supera l'80 % del corpo (`MAX_SHARE`); lo scudo guarda fuori dall'avambraccio. La posa (`holdPose`) è nel sistema del perno. Il renderer (`hold` in `src/render/held.ts`) legge la presa di una forma una volta (`gripFor`) e a ogni fotogramma non cerca niente finché l'oggetto, la sua definizione e `forms.version` restano: un cambio fa due oggetti three.js, nessuna griglia né geometria. Un oggetto senza forma pronta o che il client non conosce, un corpo senza braccia (la contadina, gli animali), un inventario scritto male non mostrano niente. In multigiocatore `OtherView.held` porta l'id dell'oggetto impugnato (a elenco, regola 8f: dell'inventario nient'altro), il client sottile lo mette in `remote.held` (`heldBy`) e arriva a chi è vicino con il prossimo `update`. Gli individui non hanno niente in mano: nessuna API lo dà loro (il renderer lo mostrerebbe da un loro `inventory.equipped` in singola; sul filo mancherebbe il campo). Le mesh di una forma le fa `formMeshes` (`src/render/formmeshes.ts`), nel worker e nei test. Costo: in Node 60 portatori costano quanto 60 mani vuote entro il rumore, 60 cambi insieme 3 ms; nel browser (cartone, RTX 2070) il fotogramma intero 4,72 contro 4,24 ms, tre chiamate di disegno per mano (scena, ombre, inchiostro), 3 geometrie per 60 mani. La tinta di un modello si legge anche in `hsl()` (`hexColor` in `Forms.request`): prima la lettera tinta degli oggetti del Narratore spariva. Catture in `docs/catture/T288/`.
+- **Sopra la testa** (ADR-0168, T292): una cosa del mondo portata (`thing:<modulo>`) va sul punto di aggancio `overhead`: sul **corpo**
+  (dondola col passo, non col braccio), dritta, la fronte dove guarda il corpo, il fondo sulle mani alzate o sulla testa (`overheadPose`,
+  `raisedHand`, `boxOf` in `src/mj/hold.ts`; `boxFor` legge la scatola di una forma una volta), il lato più largo al più 0,48 e
+  l'altezza al più 0,5 dell'altezza del corpo (`OVERHEAD`, scelti sulle catture: a grandezza piena copre il viandante); le braccia
+  restano alzate finché la porta (`animateLimbs`, `overheadTurn`: un braccio già alzato dal modello resta com'è). La mesh è quella di
+  terra della sua forma, con il seme dell'istanza (`heldSeedOf`: dalla tasca per il viandante, da `remote.heldSeed` per un altro).
+  Catture in `docs/catture/T292/`.
 
 <a id="markovjunior-modelli"></a>
 ## MarkovJunior, i modelli, la cache delle forme

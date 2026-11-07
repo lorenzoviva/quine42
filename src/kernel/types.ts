@@ -270,6 +270,11 @@ export interface Manifest {
   spawn?: SpawnRule;
   /** An individual: at most one in the loaded world (a named character, a unique relic). */
   unique?: boolean;
+  /**
+   * A thing of the world one can take and put down elsewhere (T292, ADR-0168): a cupboard yes, a well no; absent is no. Only an
+   * entity that is not someone: taken, it is the item `thing:<id>` with who it is and its state.
+   */
+  takeable?: boolean;
   /** Character sheet for NPCs: the LLM plays this individual. */
   persona?: string;
   /** Module ids an NPC carries (can give them away). */

@@ -675,6 +675,27 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: `appoggiato`
 - **Fermo**: il componente `placed` (`posato` fino al contratto 0.4), il campo `placed` di `world/state.json`, l'azione `posa`.
 
+### Cosa che si prende
+- **Inglese**: `takeable`, `takeThing`, `takeableOf`, `TAKEABLE_CLASSES`, `takeRefusal`
+- **Definizione**: una cosa del mondo il cui manifest dice `takeable` (la credenza sì, il pozzo no; assente vale no): si prende se è vuota e niente e nessuno le sta sopra, e si posa altrove come sé stessa (T292, ADR-0168).
+- **Dove vive**: `src/kernel/types.ts`, `src/kernel/kernel.ts`, `src/kernel/moving.ts`, `src/kernel/agents/forge.ts`
+- **Da non usare**: `raccoglibile` (si raccoglie un oggetto da terra), `prendibile`
+- **Fermo**: il campo `takeable` del manifest, l'azione `prendi`.
+
+### Cosa portata
+- **Inglese**: `CarriedThing`, `thingItem`, `thingModule`, `isThing`, `THING_PREFIX`, `placeCarried`, `putRefusal`, `shownInventory`, `heldSeedOf`
+- **Definizione**: una cosa del mondo presa: nell'inventario è l'oggetto `thing:<modulo>` con la sua origine (chi è), il seme del suo aspetto e il suo stato (i componenti che non sono del kernel); in mano si porta sopra la testa; posata a terra torna sé stessa, se il luogo resta connesso (T292, ADR-0168).
+- **Dove vive**: `src/kernel/moving.ts`, `src/kernel/inventory.ts`, `src/kernel/kernel.ts`, `src/render/held.ts`, `src/mj/hold.ts`
+- **Da non usare**: `mobile in tasca`, `oggetto mobile` (l'oggetto è la cosa mentre la si porta)
+- **Fermo**: gli oggetti `thing:<modulo>`, il campo `thing` di una tasca nei file dei viandanti, `heldSeed` di `OtherView`, l'opzione `_posa` del menu di una casella.
+
+### Cosa spostata
+- **Inglese**: `moved`, `MovedRecord`, `movedToSave`, `restoreMoved`, `readMoved`
+- **Definizione**: una cosa del mondo posata altrove da dove il suo luogo la faceva: sta lì nel salvataggio, senza luogo, e il luogo non la rifà (`consumed`) (T292, ADR-0168).
+- **Dove vive**: `src/kernel/kernel.ts`, `src/kernel/moving.ts`
+- **Da non usare**: `trasferita`
+- **Fermo**: il campo `moved` di `world/state.json`.
+
 ### Oggetto impugnato
 - **Inglese**: `heldBy`, `hold`, `Holding`, `held`
 - **Definizione**: ciò che una figura tiene in mano (la tasca `equipped` del suo inventario), disegnato sul suo corpo con la mesh che ha a terra, appeso al braccio del suo punto di aggancio; gli altri viandanti lo vedono (`OtherView.held`) (T288, ADR-0167).
@@ -689,8 +710,8 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: `impugnatura` (è la parte dell'oggetto per cui lo si tiene, non il modo di tenerlo)
 
 ### Punto di aggancio
-- **Inglese**: `MOUNTS`, `Mount`, `MountId`, `SLOT_MOUNTS`, `mountOf`
-- **Definizione**: dove va sul corpo ciò che si impugna, secondo il posto dell'oggetto (`ItemDef.slot`): la mano destra per tutto, l'avambraccio sinistro per uno scudo; scritto una volta per punto (T288, ADR-0167).
+- **Inglese**: `MOUNTS`, `Mount`, `MountId`, `SLOT_MOUNTS`, `mountOf`, `overheadPose`, `OVERHEAD`
+- **Definizione**: dove va sul corpo ciò che si impugna, secondo il posto dell'oggetto (`ItemDef.slot`): la mano destra per tutto, l'avambraccio sinistro per uno scudo; scritto una volta per punto (T288, ADR-0167); una cosa del mondo portata va sopra la testa, sul corpo, con le braccia alzate (T292, ADR-0168).
 - **Dove vive**: `src/mj/hold.ts`
 - **Da non usare**: `attacco` (per il punto)
 

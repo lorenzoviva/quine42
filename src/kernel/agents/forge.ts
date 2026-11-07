@@ -33,6 +33,8 @@ export interface ForgeRequest {
   existingNames?: string[];
   /** Who pays (T36): the world (`comune`) for the Genesis and the Council's sessions; default the Council's policy. */
   chi?: string;
+  /** Whether the thing can be taken and put down elsewhere (T292), when who asks for it decided (the Cartographer, for what a place calls for). */
+  takeable?: boolean;
 }
 
 /**
@@ -62,7 +64,15 @@ export interface Concept {
   contenitore?: { capienza: number; bottino: string };
   porta?: string[];
   tags: string[];
+  /** For an object: a wanderer can lift it and put it down elsewhere (T292, ADR-0168), a cupboard yes, a well no. */
+  takeable?: boolean;
 }
+
+/**
+ * The classes of what can be taken (T292): furniture and small things, not what is built or grows in place (a well is a building, a
+ * statue a monument), not someone; and not of a large size.
+ */
+export const TAKEABLE_CLASSES: ReadonlySet<string> = new Set(['furniture', 'object', 'pebble']);
 
 export interface PhysicsSpec {
   solido: boolean;
@@ -127,6 +137,7 @@ const CONCEPT_SCHEMA: Schema = {
     },
     porta: { type: 'ARRAY', items: { type: 'STRING' }, description: 'for an npc: things they carry' },
     tags: { type: 'ARRAY', items: { type: 'STRING' } },
+    takeable: { type: 'BOOLEAN', description: 'for an object: true if a wanderer could lift it and set it down elsewhere (a cupboard, a chest, a stool, a crate), false if it is fixed or built in place (a well, an oven, a statue, an altar of stone)' },
   },
   required: ['nome', 'tipo', 'descrizione', 'lore', 'aspetto', 'contesto', 'interazione', 'comandi', 'tags'],
 };
@@ -266,6 +277,9 @@ export function assembleManifest(id: string, concept: Concept, physics: PhysicsS
   // A chest that cannot be opened is incoherent: furniture that holds things always does.
   else if (concept.tipo === 'oggetto' && FURNITURE.test(concept.nome)) m.container = { size: 8, loot: /credenz|madia|dispens|cucin/i.test(concept.nome) ? 'cucina' : /banco|bottega|attrezz/i.test(concept.nome) ? 'bottega' : 'cassa' };
   if (m.physics!.pushable) m.components!.vel = { x: 0, y: 0 };
+  // What a wanderer can carry elsewhere (T292): an object the Narrator (or who asked for it) says so of, of a class one lifts.
+  const size = m.appearance!.size ?? (m.appearance as { taglia?: string }).taglia;
+  if (concept.tipo === 'oggetto' && concept.takeable === true && TAKEABLE_CLASSES.has(m.appearance!.class!) && size !== 'large') m.takeable = true;
   return m;
 }
 
@@ -291,7 +305,8 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
         `Valid terrains for "contesto.terreni": ${codes}. "rarita" between 0.02 and 0.5.`,
         'For an npc: a concrete trade or role of the world (baker, guard, shepherd, healer, brigand, merchant…), never abstract roles; in "persona" the sheet of the kind of character (every individual will then have a name and a story of their own), in the language of the world: how they speak, what they want, what they know and believe of their world; in "porta" 3-6 common things of their trade.',
         req.existingNames?.length ? `They exist already (no doubles, neither of name nor of role): ${req.existingNames.slice(0, 80).join(', ')}.` : '',
-        'For an object: in "azioni" 1-4 concrete things one can do with it (open, sit down, draw water, sleep, light, pray…), with "richiede" if a tool is needed; if it is a piece of furniture that holds things, "contenitore" with capacity and loot table (cucina, cassa, bottega, comune, contadino).',
+        'For an object: in "azioni" 1-4 concrete things one can do with it (open, sit down, draw water, sleep, light, pray…), with "richiede" if a tool is needed; if it is a piece of furniture that holds things, "contenitore" with capacity and loot table (cucina, cassa, bottega, comune, contadino); "takeable" true if a wanderer could lift it and set it down elsewhere (a cupboard, a chest, a stool), false if it is fixed or built in place (a well, an oven, a statue).',
+        req.takeable !== undefined ? `Who asked for it decided: ${req.takeable ? 'a wanderer can lift it and set it down elsewhere ("takeable": true)' : 'it stays where it is built ("takeable": false)'}.` : '',
         'For a tool list in "comandi" at most two entries: "usa" = effect on whoever uses it, or consumption (eat, drink, read, light); "azione" = effect on what the wanderer has in front of them (cut, hit, open, dig).',
         'Do not create modules for elements of the terrain (paths, rivers, bridges, walls, meadows): those are the Cartographer\'s map. Create concrete things that stand on the terrain.',
         feedback && `The Arbiter objected: ${feedback}`,
@@ -331,7 +346,9 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
       { chi: req.chi, data: { ...data, concept, physics }, temperature: 0.3 },
     ).then(internalCode);
 
-  let concept = await askConcept();
+  // Who asked for it decided whether it can be taken (T292): the concept says what they said.
+  const decided = (x: Concept): Concept => (req.takeable === undefined ? x : { ...x, takeable: req.takeable });
+  let concept = decided(await askConcept());
   if (req.kind) concept.tipo = req.kind;
   c.say('narrator', 'propone', `«${concept.nome}» (${concept.tipo}): ${concept.descrizione}`);
   // Inside the world nothing knows of the Council's table; nor is anything made twice.
@@ -341,7 +358,7 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
     if (!meta && !dup) break;
     const why = meta ? `«${concept.nome}» rompe la quarta parete («${meta}»): dentro il mondo nessuno sa di codice, simulazioni o del Concilio. Crea una persona o una cosa vera del mondo.` : `«${concept.nome}» esiste già: crea qualcosa di diverso.`;
     c.say('kernel', 'scarta', why, 'narrator');
-    concept = await askConcept(why);
+    concept = decided(await askConcept(why));
     if (req.kind) concept.tipo = req.kind;
     if (tries === 1 && (metaBreak(`${concept.nome} ${concept.descrizione} ${concept.persona ?? ''}`) || req.existingNames?.some((n) => normName(n) === normName(concept.nome)))) throw new ForgeRejected(`ancora fuori dal mondo o doppione: ${concept.nome}`, 'narrator');
   }
@@ -349,7 +366,7 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
   if (isStructure(concept)) {
     const why = `«${concept.nome}» è un edificio o una struttura: quelli sono ambienti del Cartografo, non oggetti. Crea invece qualcosa che sta dentro o fuori un edificio (un mobile, un attrezzo, una persona).`;
     c.say('kernel', 'scarta', why, 'narrator');
-    concept = await askConcept(why);
+    concept = decided(await askConcept(why));
     if (req.kind) concept.tipo = req.kind;
     if (isStructure(concept)) throw new ForgeRejected(`ancora una struttura: ${concept.nome}`, 'narrator');
     c.say('narrator', 'corregge', `«${concept.nome}» (${concept.tipo}): ${concept.descrizione}`);
@@ -372,7 +389,7 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
     for (const p of review.problemi.slice(0, 3)) c.say('arbiter', 'obietta', p.problema, p.agente);
     const issues = (agent: AgentId) => review.problemi.filter((p) => p.agente === agent).map((p) => p.problema).join('; ');
     if (issues('narrator')) {
-      concept = await askConcept(issues('narrator'));
+      concept = decided(await askConcept(issues('narrator')));
       if (req.kind) concept.tipo = req.kind;
       c.say('narrator', 'corregge', `«${concept.nome}»: ${concept.descrizione}`);
     }
@@ -400,7 +417,7 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
     manifest = assembleManifest(id, concept, physics, code, req.paletteCodes, req.origin);
   }
 
-  return { id, manifest, logic: code.logic, concept, summary: `${concept.tipo === 'npc' ? 'Nuovo abitante' : concept.tipo === 'strumento' ? 'Nuovo strumento' : 'Nuovo oggetto'} «${concept.nome}» (${id})` };
+  return { id, manifest, logic: code.logic, concept, summary: `${concept.tipo === 'npc' ? 'Nuovo abitante' : concept.tipo === 'strumento' ? 'Nuovo strumento' : 'Nuovo oggetto'} «${concept.nome}» (${id})${manifest.takeable ? ', si può spostare' : ''}` };
 }
 
 /** A generated module failed at runtime: the Engineer gets the code and the error, and fixes it. */

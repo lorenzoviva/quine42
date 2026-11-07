@@ -1,6 +1,7 @@
 // Inventories: fixed slots, stacks, weight, one equipped slot. Pure functions over component data,
 // shared by the player and by NPCs (who can give things away).
 
+import { readThing, thingSeed, type CarriedThing } from './moving';
 import type { ItemSpec } from './types';
 
 export interface Slot {
@@ -8,6 +9,8 @@ export interface Slot {
   count: number;
   /** Contents, for items that are containers (bags, pouches): never stacked. */
   inv?: Inventory;
+  /** A thing of the world carried (T292, ADR-0168): who it is and its state; never stacked, never split, never in a bag. */
+  thing?: CarriedThing;
 }
 
 export interface Inventory {
@@ -109,18 +112,18 @@ export function takeFromSlot(inv: Inventory, index: number, n?: number): Slot | 
   if (s.count <= 0) {
     inv.slots[index] = null;
     if (inv.equipped === index) inv.equipped = null;
-    // A bag leaves with what is inside it.
-    if (s.inv) return { item: s.item, count: k, inv: s.inv };
+    // A bag leaves with what is inside it, a thing of the world with who it is (T292).
+    if (s.inv || s.thing) return { item: s.item, count: k, ...(s.inv ? { inv: s.inv } : {}), ...(s.thing ? { thing: s.thing } : {}) };
   }
   return { item: s.item, count: k };
 }
 
-/** Puts a taken slot back somewhere: bags (with contents) into an empty slot, the rest stacked. */
+/** Puts a taken slot back somewhere: bags (with contents) and things of the world (T292) into an empty slot, the rest stacked. */
 export function putSlot(inv: Inventory, slot: Slot, spec: ItemSpec | undefined): number {
-  if (!slot.inv) return addItem(inv, slot.item, slot.count, spec);
+  if (!slot.inv && !slot.thing) return addItem(inv, slot.item, slot.count, spec);
   const i = inv.slots.indexOf(null);
   if (i < 0) return 0;
-  inv.slots[i] = { item: slot.item, count: 1, inv: slot.inv };
+  inv.slots[i] = { item: slot.item, count: 1, ...(slot.inv ? { inv: slot.inv } : {}), ...(slot.thing ? { thing: slot.thing } : {}) };
   return 1;
 }
 
@@ -130,7 +133,8 @@ export function totalWeight(inv: Inventory, lookup: ItemLookup): number {
 
 /**
  * An inventory as a file of the universe holds it (a bag lying somewhere, with what is in it, T291), or undefined: only slots with an item
- * and a whole count, and bags in them a little deep; nothing held. What is not that is left out, never thrown at the world.
+ * and a whole count, and bags in them a little deep; nothing held. What is not that is left out, never thrown at the world. Not who a
+ * thing of the world carried is (T292): a bag holds no furniture.
  */
 export function readInventory(v: unknown, depth = 0): Inventory | undefined {
   if (!v || typeof v !== 'object' || depth > 2) return undefined;
@@ -145,6 +149,25 @@ export function readInventory(v: unknown, depth = 0): Inventory | undefined {
       return { item, count: Math.min(count, 999), ...(bag ? { inv: bag } : {}) };
     }),
     equipped: null,
+  };
+}
+
+/** The thing of the world a slot carries (T292), read without trusting it: the wanderer's file is the universe's, and Lua writes slots. */
+export const thingOf = (slot: Slot | null | undefined): CarriedThing | undefined => (slot ? readThing(slot.thing) : undefined);
+
+/**
+ * An inventory as a client sees it (T292): a thing carried only with the seed of its look; who it is and its state stay on the
+ * server. Not an `Inventory` (a client's slot has no origin): what goes on the wire.
+ */
+export function shownInventory(inv: Inventory): unknown {
+  if (!inv.slots.some((s) => s?.thing)) return inv;
+  return {
+    ...inv,
+    slots: inv.slots.map((s) => {
+      if (!s?.thing) return s;
+      const seed = thingSeed(s);
+      return { item: s.item, count: s.count, ...(s.inv ? { inv: s.inv } : {}), ...(seed !== undefined ? { thing: { seed } } : {}) };
+    }),
   };
 }
 
