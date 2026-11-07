@@ -16,7 +16,7 @@ export { repairCoefficients, repairActor } from './coefficients';
 export { repairMinimums } from './universe';
 import { boxOf, classOf, CLASSES, sizeOf, SIZE_TIERS } from '../mj/classes';
 import { Mj3Error } from '../mj/engine';
-import { compileMjx, MJX_FILE_RE, mjxIncludes, patternText, type MjxFiles, type MjxModel } from '../mj/model';
+import { compileMjx, inferenceIn, MJX_FILE_RE, mjxIncludes, patternText, type MjxFiles, type MjxModel } from '../mj/model';
 import { FORM_LIMITS, MAX_FORM_TIME, MAX_FORM_XML, runMjx } from '../mj/run';
 import { analyzeSound } from '../mj/soundanalysis';
 import { reservedName } from './paths';
@@ -73,6 +73,8 @@ export function modelErrors(path: string, xml: string, time = 8_000, box?: [numb
     const size = /<(?!!)[a-z]+\b[^>]*\ssize="/i.test(xml) ? undefined : (box ?? boxOf(classOf('object')!));
     const self = /^models\/([^/]+)\.xml$/.exec(path)?.[1];
     const m = compileMjx(xml, { ...(size ? { size } : {}), ...(files && Object.keys(files).length ? { files, ...(self ? { self } : {}) } : {}) });
+    const infers = inferenceRefusal(m);
+    if (infers) return [`${path}: ${infers}`];
     if (m.sound) {
       const errors = soundErrors(path, m, time);
       if (!errors.length) lastCleanSound = xml;
@@ -108,6 +110,15 @@ export function ruleFileErrors(path: string, text: string): string[] {
   if (arrows > 1) errors.push(`${path}: al più una riga "->" (fra in e out)`);
   if (!errors.length && text.split(/^[ \t]*->[ \t]*\r?$/m).some((part) => !patternText(part))) errors.push(`${path}: un pattern vuoto`);
   return errors.slice(0, 6);
+}
+
+/**
+ * The engine infers (T334), the world does not yet: `field` and `observe` wait for their ceilings and the Sculptor's prompt (T336).
+ * Why a program that uses them goes back, or undefined.
+ */
+export function inferenceRefusal(m: Parameters<typeof inferenceIn>[0]): string | undefined {
+  const found = inferenceIn(m);
+  return found.length ? `${found.map((n) => `<${n}>`).join(' e ')} non ${found.length > 1 ? 'sono ancora ammessi' : 'è ancora ammesso'} nei programmi del mondo: scrivilo senza` : undefined;
 }
 
 /** The last sound program that passed: the measures are a pure function of the text. */

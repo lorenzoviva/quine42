@@ -43,6 +43,7 @@ import { compileMjx } from '../src/mj/model';
 import { runMjx } from '../src/mj/run';
 import { meshVoxels } from '../src/mj/mesh';
 import {
+  extractRuleAtPos,
   generateRuleXml,
   getPaletteSymbols,
   insertRuleIntoXmlAt,
@@ -102,6 +103,26 @@ describe('MarkovJunior Editor (T59a)', () => {
       expect(MJ_ATTRS.has('in')).toBe(true);
       expect(MJ_ATTRS.has('out')).toBe(true);
       expect(MJ_ATTRS.has('glow')).toBe(true);
+    });
+
+    it('riconosce field, observe e gli attributi dell’inferenza (T334)', () => {
+      const xml = [
+        '<one values="BRG" size="9 9 1" in="RB" out="BR" temperature="2" search="False" depthCoefficient="0.5">',
+        '  <field for="R" to="G" on="B" recompute="True" essential="False"/>',
+        '  <observe value="G" from="B" to="R"/>',
+        '</one>',
+      ].join('\n');
+      const html = highlightXml(xml);
+      expect(html).toContain('<span class="tok-tag tok-mj-node">field</span>');
+      expect(html).toContain('<span class="tok-tag tok-mj-node">observe</span>');
+      for (const a of ['for', 'recompute', 'essential', 'temperature', 'search', 'depthCoefficient']) expect(html).toContain(`<span class="tok-attr tok-mj-attr">${a}</span>`);
+      const res = validateMjx(xml);
+      expect(res.ok).toBe(true);
+      // Their from and to are sets of letters, not patterns to draw: the rule under the cursor is not them.
+      expect(extractRuleAtPos(xml, xml.indexOf('<field') + 3)).toBeNull();
+      expect(extractRuleAtPos(xml, xml.indexOf('<observe') + 3)).toBeNull();
+      const keys = CATALOG.find((e) => e.id === 'mj:Keys')!;
+      expect(validateMjx(keys.xml, keys.size).ok).toBe(true);
     });
   });
 

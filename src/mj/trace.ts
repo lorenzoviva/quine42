@@ -55,6 +55,8 @@ export interface NodeTrace {
   changes: Map<string, number>;
   /** Why it never did anything. */
   why?: string;
+  /** What it found out on its own: a search's trajectory (T334). */
+  note?: string;
 }
 
 /** Consecutive steps of one unit. */
@@ -130,7 +132,7 @@ export function traceProgram(model: Pick<MjxModel, 'program'>, seed: number, opt
       shadowY = g.Y;
       size = [g.X, g.Y, g.Z];
     },
-    step({ node, grid: g, from, epoch, fired }) {
+    step({ node, grid: g, from, epoch, fired, note }) {
       step++;
       const n = byNode.get(node)!;
       let cells = 0;
@@ -162,6 +164,7 @@ export function traceProgram(model: Pick<MjxModel, 'program'>, seed: number, opt
       n.cells += cells;
       n.box = join(n.box, box);
       n.fired = [...fired];
+      if (note) n.note = note;
       const p = phases[phases.length - 1];
       if (p?.unit === n.unit) {
         p.to = step;
@@ -279,7 +282,7 @@ export function nodeName(node: Node3): string {
     case 'all':
     case 'prl': {
       const r = node.rules[0];
-      return `${node.type} ${short(written(r.in))} → ${short(written(r.out))}${node.rules.length > 1 ? ` (+${node.rules.length - 1})` : ''}${node.steps !== undefined && Number.isFinite(node.steps) ? ` passi=${node.steps}` : ''}`;
+      return `${node.type} ${short(written(r.in))} → ${short(written(r.out))}${node.rules.length > 1 ? ` (+${node.rules.length - 1})` : ''}${node.steps !== undefined && Number.isFinite(node.steps) ? ` passi=${node.steps}` : ''}${inferenceName(node)}`;
     }
     case 'conv':
       return `convolution ${node.rules.map((r) => `${r.in}→${r.out}${r.sums ? ` se ${r.neighbors} in [${r.sums.join(',')}]` : ''}`).slice(0, 2).join('; ')}${node.rules.length > 2 ? ` (+${node.rules.length - 2})` : ''}`;
@@ -292,6 +295,16 @@ export function nodeName(node: Node3): string {
     default:
       return node.type;
   }
+}
+
+/** What a rule node infers (T334), in the words of the trace: its fields, temperature, observations and search. */
+function inferenceName(node: Extract<Node3, { type: 'one' | 'all' | 'prl' }>): string {
+  const parts: string[] = [];
+  for (const f of node.fields ?? []) parts.push(`campo ${f.for} ${f.from !== undefined ? `da ${f.from}` : `verso ${f.to}`} su ${f.on}${f.recompute ? ' ricalcolato' : ''}${f.essential ? ' essenziale' : ''}`);
+  if (node.temperature !== undefined) parts.push(`temperatura=${node.temperature}`);
+  for (const o of node.observe ?? []) parts.push(`osserva ${o.value}${o.from !== undefined && o.from !== o.value ? `→${o.from}` : ''} fino a ${o.to}`);
+  if (node.search) parts.push(`ricerca${node.limit !== undefined ? ` limite=${node.limit}` : ''}${node.depthCoefficient !== undefined ? ` profondità=${node.depthCoefficient}` : ''}`);
+  return parts.length ? ` [${parts.join('; ')}]` : '';
 }
 
 /** What the rules of a node did, when it has more than one: the rule that never applies is the interesting one. */
@@ -311,7 +324,7 @@ function nodeLine(n: NodeTrace, changes = true): string[] {
   const pad = ' '.repeat(n.depth);
   if (n.node.type === 'sequence' || n.node.type === 'markov') return [`${pad}#${n.id} ${n.node.type}`];
   const where = n.box ? ` ${showBox(n.box)}` : '';
-  return [`${pad}#${n.id} ${nodeName(n.node)}: ×${n.runs}, ${n.cells} celle${where}, passi ${span(n.first, n.last)}${changes && n.changes.size ? `, ${changesText(n.changes)}` : ''}`, ...ruleLines(n, pad)];
+  return [`${pad}#${n.id} ${nodeName(n.node)}: ×${n.runs}, ${n.cells} celle${where}, passi ${span(n.first, n.last)}${changes && n.changes.size ? `, ${changesText(n.changes)}` : ''}${n.note ? `, ${n.note}` : ''}`, ...ruleLines(n, pad)];
 }
 
 /** Consecutive phases shown together: one phase with its nodes, or several merged into a line. */
