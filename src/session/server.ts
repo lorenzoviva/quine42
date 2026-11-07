@@ -225,6 +225,8 @@ interface Client {
   watch?: string;
   /** The players connected, as the master last heard of them. */
   players?: string;
+  /** The brought cards that do not work in the world, as this client last heard of them (T296). */
+  broken?: string;
   /** What the other wanderers did to this one since the last update (T43a). */
   notices: Notice[];
   /** Spending ceiling for this session in USD (T45d: lobby). */
@@ -448,6 +450,8 @@ export class SessionServer {
     const w = this.kernel.wanderers().find((x) => x.id === id)!;
     const form = this.formOf(this.kernel.wandererAt(id)?.entity);
     const master = this.kernel.isMaster(id);
+    const broken = this.kernel.brokenCards();
+    c.broken = JSON.stringify(broken);
     link.send({
       t: 'welcome',
       id,
@@ -467,6 +471,7 @@ export class SessionServer {
       entities: u.entities ?? [],
       wanderers: u.wanderers ?? [],
       ...(u.players ? { players: u.players } : {}),
+      ...(broken.length ? { broken } : {}),
     });
     return c;
   }
@@ -505,7 +510,7 @@ export class SessionServer {
         if (Object.keys(mine).length) c.link.send({ t: 'file', files: mine });
       }
       const u = this.view(c);
-      if (u.me || u.state || u.chunks || u.entities || u.gone || u.wanderers || u.departed || u.notices) c.link.send(u);
+      if (u.me || u.state || u.chunks || u.entities || u.gone || u.wanderers || u.departed || u.notices || u.broken) c.link.send(u);
     }
   }
 
@@ -640,6 +645,11 @@ export class SessionServer {
         return;
       case 'publish':
         return this.answer(c, seq, this.publish(c));
+      case 'card':
+        // The master takes a brought card away (T296): the kernel checks it is the master and a brought card, and commits.
+        if (!k.isMaster(c.id)) return this.answer(c, seq, { ok: false, reason: 'solo il master toglie una carta dal suo universo' });
+        if (msg.op !== 'remove' || typeof msg.id !== 'string') return this.answer(c, seq, { ok: false, reason: 'richiesta non valida' });
+        return k.removeCard(msg.id.slice(0, 64), c.id).then((r) => this.answer(c, seq, { ok: r.ok, ...(r.ok ? { value: r.text, ...(r.commit ? { done: r.commit } : {}) } : { reason: r.reason }) }));
       case 'follow':
         return this.answer(c, seq, this.watch(c, msg.id));
       case 'agent':
@@ -921,6 +931,11 @@ export class SessionServer {
     const k = this.kernel;
     const out: Extract<ServerMsg, { t: 'update' }> = { t: 'update', tick: k.ticks, time: round(k.time) };
     if (c.notices.length) out.notices = c.notices.splice(0);
+    // The cards that do not work in the world (T296): every client draws in their place what the world uses; said again only when it changes.
+    const broken = k.brokenCards();
+    const brokenKey = JSON.stringify(broken);
+    if (brokenKey !== (c.broken ?? '[]')) out.broken = broken;
+    c.broken = brokenKey;
     const at = k.wandererAt(c.id);
     if (!at) return out;
     const me: Me = { x: round(at.x), y: round(at.y), facing: at.facing };

@@ -99,6 +99,8 @@ export class ThinClient {
       k.connected = [...s.players];
       k.follow = (id) => void this.follow(id);
     }
+    // The cards the world does not use (T296), after the master's branch: the master's mirror shows them as faults too.
+    k.worldBroken(s.broken);
   }
 
   /**
@@ -159,6 +161,8 @@ export class ThinClient {
         this.k.message(m.reason, 'warn');
         break;
       case 'update':
+        // The cards the world does not use (T296) first: the entities that come with them are drawn as the world has them.
+        if (m.broken) this.k.worldBroken(this.session.broken);
         this.places(m.chunks ?? []);
         this.things(m.entities ?? []);
         for (const id of m.gone ?? []) this.drop(id);
@@ -218,6 +222,7 @@ export class ThinClient {
     for (const [p, v] of Object.entries(files)) if (this.main[p] !== v) changed[p] = v;
     for (const p of Object.keys(this.main)) if (files[p] === undefined) changed[p] = null;
     if (Object.keys(changed).length) this.worldFiles(changed);
+    k.worldBroken(s.broken);
     this.places([...s.places.values()]);
     this.things([...s.entities.values()]);
     for (const o of s.others.values()) this.other(o);
@@ -329,7 +334,8 @@ export class ThinClient {
     const parts: Record<string, unknown> = { ...(t.c ?? {}) };
     // An item on the ground has no module: what it is, is what it would be in the hand.
     if (t.m && (t.c?.pickup as { item?: string } | undefined)?.item !== t.m) parts.module = { id: t.m };
-    if (t.form) parts.form = { ...t.form };
+    // A card that does not work here is not drawn (T296): the generic of its class in its place, as the world does.
+    if (t.form) parts.form = k.worn({ ...t.form });
     if (t.glyph) parts.glyph = t.glyph;
     for (const name of MIRRORED) {
       // An opened container keeps what it was seen to hold (the server sends only its size with the entity).
@@ -612,6 +618,8 @@ export class ThinClient {
     if (this.session.master) {
       k.rollback = (id?: string) => this.rollbackBranch(id);
       k.grantCredits = (id, amount) => this.session.act({ t: 'recharge', wanderer: id, count: amount }).then((r) => ({ ok: r.ok, ...(r.reason ? { motivo: r.reason } : {}) }));
+      // A card is taken away in the world (T296): the files that go come back as the world's.
+      k.removeCard = (id) => this.session.act({ t: 'card', op: 'remove', id }).then((r) => ({ ok: r.ok, ...(r.reason ? { reason: r.reason } : {}), ...(r.text ? { text: r.text } : {}), ...(r.done ? { commit: r.done } : {}) }));
       // The Referente and the teams of the corona work on the server, on the master's branch (T42e).
       k.talkToAgent = async (agent, text) => {
         const r = await this.session.act({ t: 'agent', agent, text });

@@ -63,6 +63,8 @@ export class Console {
   close(): void {
     this.root.hidden = true;
     clearInterval(this.timer);
+    this.cardNote = '';
+    this.arming = undefined;
     this.onClose?.();
   }
 
@@ -247,6 +249,7 @@ export class Console {
         return [
           el('div', { class: 'note' }, `Universo «${k.config.name}» — seme ${k.config.seed} — ${Object.keys(k.files).length} file — ${k.ecs.count()} entità — ${k.chunks.size} chunk`),
           el('div', { class: 'note' }, k.repo.backend ? `Due repository: il kernel (il seme, immutabile) e questo universo, un repository git su disco in universes/${k.config.name}/ — ogni commit valido vi viene scritto; la partita si salva da sola.` : 'Nessun repository su disco (hosting statico): l\'universo vive nel browser.'),
+          ...this.broughtCards(),
           el('div', { class: 'row' }, exp),
           el('div', { class: 'row' }, 'Importa: ', file),
           el('div', { class: 'row' }, genesis),
@@ -257,5 +260,44 @@ export class Console {
         ];
       }
     }
+  }
+
+  /** What was said of the last card taken away (or not), until the console closes. */
+  private cardNote = '';
+  /** The card whose «Togli» was pressed once: a second press takes it away (no browser dialog: it would stop the page). */
+  private arming?: { id: string; until: number };
+
+  /**
+   * The cards brought before the Genesis (T296, ADR-0172): where each came from, whether it works in this world (and why not), and the master's
+   * gesture that takes it away with a commit. Only the master has this console; a player's never shows it.
+   */
+  private broughtCards(): HTMLElement[] {
+    const k = this.kernel;
+    const cards = k.broughtCards();
+    if (!cards.length && !this.cardNote) return [];
+    const head = el('div', { class: 'note' }, `Le carte portate (${cards.length}): ${cards.some((c) => c.broken) ? 'quelle che non funzionano in questo mondo sono isolate (chi le usava veste il modello generico, il suono tace).' : 'funzionano tutte in questo mondo.'} Togliere una carta la toglie da questo universo con un commit: chi la usava torna al modello generico della sua classe e il Concilio ne fa un altro entro i suoi tetti. La carta resta dove è nata e nella collezione del suo autore.`);
+    const rows = cards.map((c) => {
+      const what = c.kind === 'sound' ? 'suono' : `modello${c.class ? ` (${c.class})` : ''}`;
+      const from = c.from === '.handmade' ? 'fatta a mano' : `da «${c.from}»`;
+      const copies = c.copies.length ? ` · anche come ${c.copies.join(', ')}` : '';
+      const state = c.broken ? `⚠ non funziona: ${c.broken.reason}` : 'funziona';
+      const armed = this.arming?.id === c.id && this.arming.until > Date.now();
+      const b = el('button', { class: armed ? 'danger' : '' }, armed ? `Sicuro? Togli «${c.name}»` : 'Togli');
+      b.onclick = () => {
+        if (!(this.arming?.id === c.id && this.arming.until > Date.now())) {
+          this.arming = { id: c.id, until: Date.now() + 5000 };
+          return this.render();
+        }
+        this.arming = undefined;
+        b.setAttribute('disabled', '');
+        void k
+          .removeCard(c.id)
+          .then((r) => (this.cardNote = r.ok ? `✓ ${r.text ?? `«${c.name}» è tolta`}` : `✗ «${c.name}» non è tolta: ${r.reason ?? 'nessuna risposta'}`))
+          .catch((e: Error) => (this.cardNote = `✗ «${c.name}» non è tolta: ${e.message}`))
+          .finally(() => this.render());
+      };
+      return el('div', { class: `row${c.broken ? ' fault' : ''}`, 'data-card': c.id }, el('span', { class: 'id' }, c.id), el('span', { class: 's' }, what), `«${c.name}» · ${from}${copies} — ${state}`, b);
+    });
+    return [head, ...rows, ...(this.cardNote ? [el('div', { class: 'note', 'data-card-note': '' }, this.cardNote)] : [])];
   }
 }

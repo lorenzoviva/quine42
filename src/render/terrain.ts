@@ -159,10 +159,13 @@ export interface TerrainView {
 /** How many seeds of a terrain's model stand on its tiles. */
 const TILE_SEEDS = 3;
 
-/** The ready forms (with meshes) of what stands on a terrain, or undefined while they are not all ready. */
+/**
+ * The ready forms (with meshes) of what stands on a terrain, or undefined while they are not all ready. A card isolated here (T296) is not
+ * drawn: the terrain keeps its own look, as without a model.
+ */
 export function tileForms(k: Kernel, code: string): Array<{ form: Form; geo: ModelGeo }> | undefined {
   const t = k.palette[code];
-  if (!t?.model || !k.forms.info(t.model)) return undefined;
+  if (!t?.model || !k.forms.usable(t.model)) return undefined;
   const out: Array<{ form: Form; geo: ModelGeo }> = [];
   for (let s = 1; s <= TILE_SEEDS; s++) {
     const f = k.forms.ready(t.model, s);

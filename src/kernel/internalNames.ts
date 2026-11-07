@@ -744,7 +744,9 @@ export const INTERNAL_NAMES: readonly NameDomain[] = [
       altro: 'other', chat: 'chat', dici: 'say', dai: 'give', oggetto: 'item', contenitore: 'container', fabbrica: 'craft', pannello: 'panel',
       casella: 'tile', ramo: 'branch', pubblica: 'publish', segui: 'follow', agente: 'agent', ricarica: 'recharge', ingresso: 'welcome',
       aggiorna: 'update', correzione: 'correction', esito: 'result', rifiuto: 'refusal', mondo: 'world', concilio: 'council', file: 'file',
+      carta: 'card',
     },
+    note: '`card` (T296, ADR-0172: il master toglie una carta portata) nasce inglese; `carta` è solo la parola del concetto, nessun client l’ha mandata',
   }),
   d({
     id: 'valori-filo',

@@ -35,6 +35,7 @@ import { $ } from './ui/dom';
 import { applyTeleport, teleportTarget } from './kernel/teleport';
 import type { MasterTools } from './master';
 import type { BringRef } from './kernel/bring';
+import { breakReason } from './kernel/brokencards';
 import './style.css';
 
 const DT = 1 / 60;
@@ -377,6 +378,8 @@ async function main() {
   const sfx = new Sfx();
   const renders = new SoundRenders(undefined, keepsFormsOnDisk(location));
   const sound = new SoundDirector(sfx, renders);
+  // A brought sound that stays silent here is a card that does not work (T296): the kernel isolates it and the master sees why.
+  sound.onFail = (id, reason) => void kernel.cardBroke(id, 'mute', breakReason('mute', { error: reason }));
   (window as any).suono = { sfx, director: sound, renders };
   bindSoundMenu(sfx, $<HTMLInputElement>('#sound-volume'), $<HTMLInputElement>('#sound-mute'));
   const unlockSound = () => {

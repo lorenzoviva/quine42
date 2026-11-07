@@ -4,6 +4,7 @@
 import { hash32, hashStr } from '../kernel/rng';
 import type { DayPhase } from '../kernel/npc/model';
 import { namesEnvironment, soundPrograms, type SoundProgram } from '../mj/sound';
+import type { SoundRequest } from './prepare';
 import type { SoundRenders } from './renders';
 import type { SoundOut } from './sfx';
 
@@ -101,12 +102,26 @@ export class SoundDirector {
   private played = new Map<SoundCue, number>();
   /** What the last `update` read: the id and seed of the piece, for whoever measures. */
   now?: { id: string; seed: number; variant: number };
+  /**
+   * A program that stays silent, and why (T296): it failed in the worker, did not finish in time, or plays nothing. The game tells the kernel,
+   * which isolates a card that does it and shows it to the master; here it is silence as ever (ADR-0126).
+   */
+  onFail?: (id: string, reason: string) => void;
 
   constructor(
     private out: SoundOut,
-    private renders: Pick<SoundRenders, 'get'>,
+    private renders: Pick<SoundRenders, 'get'> & Partial<Pick<SoundRenders, 'reasonFor'>>,
     private clock: () => number = () => performance.now(),
   ) {}
+
+  /** Who is told of a program that stays silent: never a throw back into the game (rule 7). */
+  private failed(id: string, req: SoundRequest): void {
+    try {
+      this.onFail?.(id, this.renders.reasonFor?.(req) ?? 'non suona nulla');
+    } catch {
+      /* silence, and the game goes on */
+    }
+  }
 
   /** Programs may come and go (a reload, a master's edit): the piece follows at the next update. */
   setPrograms(programs: SoundProgram[]): void {
@@ -125,7 +140,11 @@ export class SoundDirector {
   private prepareEffects(): void {
     for (const cue of Object.values(SOUND_CUES)) {
       const program = effectProgram(cue.effect, this.programs);
-      if (program) for (const seed of cue.seeds) void this.renders.get({ xml: program.xml, seed, use: 'effect' });
+      if (!program) continue;
+      for (const seed of cue.seeds) {
+        const req: SoundRequest = { xml: program.xml, seed, use: 'effect' };
+        void this.renders.get(req).then((sound) => sound || this.failed(program.id, req));
+      }
     }
   }
 
@@ -155,7 +174,9 @@ export class SoundDirector {
     this.current = { key, state, variant, since: this.clock(), silent: !choice };
     this.now = choice && { id: choice.id, seed: choice.seed, variant };
     if (!choice) return this.out.stopMusic(FAIL_FADE);
-    void this.renders.get({ xml: choice.xml, seed: choice.seed, use: 'music' }).then((sound) => {
+    const req: SoundRequest = { xml: choice.xml, seed: choice.seed, use: 'music' };
+    void this.renders.get(req).then((sound) => {
+      if (!sound) this.failed(choice.id, req);
       if (turn !== this.turn) return;
       if (sound) return this.out.playMusic(sound, fade);
       // It fails: silence, and no more tries until the place or the program changes (rule 7).
@@ -173,8 +194,10 @@ export class SoundDirector {
     const n = this.played.get(name) ?? 0;
     this.played.set(name, n + 1);
     const asked = this.clock();
-    void this.renders.get({ xml: program.xml, seed: seeds[n % seeds.length], use: 'effect' }).then((sound) => {
-      if (sound && this.clock() - asked <= EFFECT_PATIENCE_MS) this.out.playEffect(sound);
+    const req: SoundRequest = { xml: program.xml, seed: seeds[n % seeds.length], use: 'effect' };
+    void this.renders.get(req).then((sound) => {
+      if (!sound) return this.failed(program.id, req);
+      if (this.clock() - asked <= EFFECT_PATIENCE_MS) this.out.playEffect(sound);
     });
   }
 }

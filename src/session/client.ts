@@ -7,6 +7,7 @@ import type { AiSettings, FileMap } from '../kernel/types';
 import type { FeedEntry } from '../kernel/agents/council';
 import type { PlayerSpot } from '../kernel/situation';
 import type { Profile } from '../kernel/wanderers';
+import { readBrokenCards, type BrokenCard } from '../kernel/brokencards';
 import type { ClientLink, ClientMsg, ContainerView, Dialog, FileChanges, FormView, Me, MyState, Notice, OtherView, ChunkView, ServerMsg, EntityView } from './protocol';
 
 export interface Outcome {
@@ -58,6 +59,8 @@ export class SessionClient {
   readonly others = new Map<string, OtherView>();
   /** The master's (T42c): every player connected and where they are, as the server last said. */
   players: PlayerSpot[] = [];
+  /** The brought cards that do not work in the world (T296), as the server last said: read, never taken as they came. */
+  broken: BrokenCard[] = [];
   /** What the other wanderers said to this one and gave them (T43a), oldest first. */
   readonly notices: Notice[] = [];
   /** Steps the server did not let through. */
@@ -151,6 +154,7 @@ export class SessionClient {
         Object.assign(this, { id: m.id, name: m.name, profile: m.profile, repaired: m.repaired ?? [], anonymous: !!m.anonymous, master: !!m.master, fee: m.fee, files: m.files, branch: m.branch ?? {}, me: m.me, form: m.form, state: m.state });
         if (m.settings) this.settingsAnswer = m.settings;
         this.feed.splice(0, this.feed.length, ...(m.council ?? []));
+        this.broken = [];
         this.places.clear();
         this.entities.clear();
         this.others.clear();
@@ -194,10 +198,11 @@ export class SessionClient {
     this.onMessage?.(m);
   }
 
-  private apply(m: { tick: number; time: number; chunks?: ChunkView[]; entities?: EntityView[]; gone?: number[]; wanderers?: OtherView[]; departed?: string[]; players?: PlayerSpot[] }): void {
+  private apply(m: { tick: number; time: number; chunks?: ChunkView[]; entities?: EntityView[]; gone?: number[]; wanderers?: OtherView[]; departed?: string[]; players?: PlayerSpot[]; broken?: unknown }): void {
     this.tick = m.tick;
     this.time = m.time;
     if (m.players) this.players = m.players;
+    if (m.broken !== undefined) this.broken = readBrokenCards(m.broken);
     for (const p of m.chunks ?? []) this.places.set(p.key, p);
     // An entity that only moved keeps what it is.
     for (const t of m.entities ?? []) this.entities.set(t.id, Object.keys(t).length > 3 ? t : { ...(this.entities.get(t.id) ?? t), x: t.x, y: t.y });

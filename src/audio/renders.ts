@@ -53,6 +53,11 @@ export class SoundRenders {
     return this.failed;
   }
 
+  /** Why a request failed, if it did (T296: the director tells which program is silent, and why). */
+  reasonFor(req: SoundRequest): string | undefined {
+    return this.failed.get(soundKey(req));
+  }
+
   /** Never rejects. A program that failed once is not run again until its text changes. */
   get(req: SoundRequest): Promise<PreparedSound | undefined> {
     const key = soundKey(req);
