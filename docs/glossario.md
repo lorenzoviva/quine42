@@ -351,6 +351,12 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Dove vive**: `src/mj/`, `src/kernel/mj.ts`
 - **Da non usare**: `codice` (è il Lua), `xml` (nei documenti)
 
+### Passo persistente
+- **Inglese**: `Stepper`, `advance`, `rewind`
+- **Definizione**: un programma MarkovJunior tenuto compilato sulla sua griglia fra una chiamata e l'altra, per ciò che si muove un poco a ogni tick di una pagina: `advance` prosegue la stessa corsa (a pezzi è quella di `runOn`), `tick` rifà il programma dal primo nodo con le corrispondenze tenute al passo dal registro della griglia invece di cercarle di nuovo (ADR-0164).
+- **Dove vive**: `src/mj/engine.ts`, `site/skins/futuristica/lights-mj.ts`, `site/skins/futuristica/program.ts`
+- **Da non usare**: nessuno
+
 ### Programma sonoro
 - **Inglese**: `SOUND_CLASS`, `soundPrograms`, `SoundSettings`, `soundSettings`
 - **Definizione**: un programma con `<sound>` sulla radice: la sua griglia si ascolta invece di guardarla; sta in `models/` con la classe `suono`.
@@ -1172,6 +1178,12 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Definizione**: il nome del gioco disegnato come logo, nella barra e nel piede del sito. Nella veste futuristica è la proposta 05 di Claude estratta così com'è: le lettere grandi QUINE42 fatte di righe del piccolo QUINE42, che si muovono come un tappeto (ADR-0151).
 - **Dove vive**: `site/skins/futuristica/scritta.ts`, `site/skins/futuristica/surface.ts`, `tools/vesti/scritta.ts`
 - **Da non usare**: `wordmark`
+
+### Labirinto della veste
+- **Inglese**: `programLights`, `MazeLights`, `mazeInk`, `MAZE_PROGRAM`
+- **Definizione**: nella veste futuristica, il programma MarkovJunior in due dimensioni scritto con le lettere della scritta, in una sezione sua sotto l'hero della landing: cresce dal centro, accende la via più lunga e ricomincia; i colori sono al contrario di quelli della scritta, pareti di lettere tenui e percorsi liberi in bande di luce con le lettere incise (ADR-0164).
+- **Dove vive**: `site/skins/futuristica/program.ts`, `site/skins/futuristica/effects.ts`
+- **Da non usare**: nessuno
 
 ### Veste
 - **Inglese**: `skin`, `SkinManifest`, `siteSkins`, `SKIN_KEY`

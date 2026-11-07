@@ -1,26 +1,36 @@
-// What moves in the futuristic skin (T284, ADR-0145): the lettering of the proposal, big, at the top of the landing's hero, and stripes of
-// the same small text along every page, fainter. The small letters slide along their rows like a carpet, and lights run over them like
-// a program being compiled (heads along the rows, waves through a big letter). Only what is on screen moves, a tick at a time and one
-// frame per tick; nothing moves with the tab hidden or with `prefers-reduced-motion`, where the lettering stands as the proposal drew it.
+// What moves in the futuristic skin (T284, T315, ADR-0151, ADR-0164): the lettering of the proposal, big, at the top of the landing's
+// hero; stripes of the same small text along every page, fainter; and on the landing, in a section of its own under the hero, a maze of
+// the same letters (program.ts). The small letters slide along their rows like a carpet, lights run over them like a program being
+// compiled (heads along the rows, waves through a big letter), the maze grows and lights its longest path. Only what is on screen moves,
+// a tick at a time, in one frame or, on a slow machine, a few; nothing moves with the tab hidden or with `prefers-reduced-motion`, where
+// the lettering stands as the proposal drew it and the maze stands finished.
 //
-// The lights are the same thing written twice (docs/architettura-dettagli.md#sito, the numbers): plain loops (lights-simple.ts, the
-// default: the numbers chose it) or a MarkovJunior program run by the game's engine (lights-mj.ts). `?fx=` picks: `semplice`, `mj`, or
-// `mj-pagina`, the variant proposed to the author: no 3D stage, MarkovJunior everywhere and, in the stage's place, a MarkovJunior program
-// in two dimensions (program.ts). Whatever is asked that is not one of these is the default.
+// The lights are a MarkovJunior program run by the game's engine and kept on its grid between ticks (lights-mj.ts): the author asked
+// for MarkovJunior along the page, and kept on its grid it costs about what plain loops cost (docs/architettura-dettagli.md#sito).
+// `?fx=semplice` puts in its place the same lights written as plain loops (lights-simple.ts), to measure one against the other; whatever
+// else is asked is the default.
 
 import { LETTERING } from './scritta';
+import { mazeInk, programLights, type MazeLights } from './program';
 import { GLYPH_H, GLYPH_W, glyphOffsets, inkOf, letteringSurface, paint, pictureSize, restingStates, stripeSurface, type Ink, type Lights, type LightsMaker, type Surface } from './surface';
 
 /** A tick of the lights. */
 const TICK_MS = 90;
 /** The carpet moves one small letter every so many ticks. */
 const CARPET_EVERY = 3;
-const MODES: Record<string, { engine: () => Promise<LightsMaker>; variant: boolean }> = {
-  semplice: { engine: async () => (await import('./lights-simple')).simpleLights, variant: false },
-  mj: { engine: async () => (await import('./lights-mj')).mjLights, variant: false },
-  'mj-pagina': { engine: async () => (await import('./lights-mj')).mjLights, variant: true },
+const MODES: Record<string, () => Promise<LightsMaker>> = {
+  mj: async () => (await import('./lights-mj')).mjLights,
+  semplice: async () => (await import('./lights-simple')).simpleLights,
 };
-const DEFAULT_MODE = 'semplice';
+const DEFAULT_MODE = 'mj';
+/** Each row of the maze starts this many letters after the one above, so that its small Qs do not stand in columns. */
+const MAZE_SHIFT = 3;
+/**
+ * Milliseconds a frame may give the effects: past them, what is left of the tick goes to the next frame. A fast machine paints a tick
+ * in one frame (one picture for the compositor, not one per piece); a slow one spreads it, and no frame carries all the pieces.
+ * (Guessing each piece's cost to give the maze a frame of its own was tried: more frames, more work, the same longest one.)
+ */
+const FRAME_BUDGET_MS = 4;
 
 type Shape = 'lettering' | 'stripe' | 'grid';
 
@@ -37,7 +47,7 @@ interface Piece {
   /** Rows of small text of a stripe. */
   rows: number;
   ink: Ink;
-  /** Its own lights (the variant's program), instead of the page's engine. */
+  /** Its own lights (the maze's program), instead of the page's engine. */
   maker?: LightsMaker;
   /** Where it says how many steps its program has made. */
   meter?: HTMLElement;
@@ -52,6 +62,9 @@ interface Piece {
   offsets?: Int32Array[];
   /** Where the picture goes on the canvas, in device pixels, and whether it is blown up soft. */
   at?: { x: number; y: number; w: number; h: number; smooth: boolean };
+  /** What it painted last: a tick that changes nothing paints nothing. */
+  painted?: Uint8Array;
+  paintedCarpet?: number;
   visible: boolean;
 }
 
@@ -83,7 +96,7 @@ function fit(p: Piece, make: LightsMaker, seed: number): void {
   } else if (p.shape === 'grid') {
     const across = odd(Math.floor(box.width / placeW));
     const down = odd(Math.floor(box.height / placeH));
-    surface = p.surface && p.surface.X === across && p.surface.Y === down ? p.surface : stripeSurface(across, down);
+    surface = p.surface && p.surface.X === across && p.surface.Y === down ? p.surface : stripeSurface(across, down, MAZE_SHIFT);
   } else surface = p.surface ?? letteringSurface();
   const [pw, ph] = pictureSize(surface);
   // The scale of a cell, in device pixels: whole when it costs little, so the small letters stay sharp.
@@ -106,6 +119,7 @@ function fit(p: Piece, make: LightsMaker, seed: number): void {
     p.glowImage = new ImageData(surface.X, surface.Y);
     p.glowPixels = new Uint32Array(p.glowImage.data.buffer);
     p.offsets = glyphOffsets(pw);
+    p.painted = undefined;
   }
 }
 
@@ -132,16 +146,32 @@ function draw(p: Piece, carpet: number, still: boolean): void {
   ctx.globalAlpha = 1;
   const steps = (p.lights as { steps?: number }).steps;
   if (p.meter && steps !== undefined) p.meter.textContent = `PASSI ${steps}`;
+  if (p.painted?.length !== states.length) p.painted = new Uint8Array(states.length);
+  p.painted.set(states);
+  p.paintedCarpet = still ? -1 : carpet;
 }
 
-/** The variant's panel in the stage's place: a MarkovJunior program in two dimensions, as the landing says. */
-async function programPiece(hero: HTMLElement): Promise<{ piece: Piece; place: () => void; remove: () => void }> {
-  const { programInk, programLights } = await import('./program');
-  const p = piece('fx-programma', 'grid', programInk(LETTERING.colors), 1, 2);
+/** Whether a piece shows now what it painted last. */
+function unchanged(p: Piece, carpet: number): boolean {
+  const states = p.lights!.states;
+  const painted = p.painted;
+  if (!painted || p.paintedCarpet !== carpet || painted.length !== states.length) return false;
+  for (let i = 0; i < states.length; i++) if (painted[i] !== states[i]) return false;
+  return true;
+}
+
+/**
+ * The maze, in a section of its own under the landing's hero: the band of the stage's frame, with the program's name and steps written
+ * over it on their own dark ground, so they stay readable over the lit paths.
+ */
+function mazeSection(hero: HTMLElement): { piece: Piece; section: HTMLElement } {
+  const section = document.createElement('section');
+  section.className = 'section-wrap fx-labirinto';
+  const p = piece('fx-programma', 'grid', mazeInk(LETTERING.colors), 1, 2);
   p.host.removeAttribute('aria-hidden');
   p.host.setAttribute('role', 'img');
-  p.host.setAttribute('aria-label', 'Un labirinto che cresce: un programma MarkovJunior in due dimensioni, scritto con le lettere della scritta');
-  p.maker = (s, seed) => programLights(s, seed);
+  p.host.setAttribute('aria-label', 'Un labirinto che si scrive: un programma MarkovJunior in due dimensioni, fatto con le lettere della scritta. Cresce dal centro, poi accende la via più lunga.');
+  p.maker = programLights;
   const badge = document.createElement('span');
   badge.className = 'hero-3d-badge comic-badge green';
   badge.textContent = 'MARKOVJUNIOR 2D';
@@ -151,18 +181,13 @@ async function programPiece(hero: HTMLElement): Promise<{ piece: Piece; place: (
   caption.className = 'hero-3d-caption arcade-text text-cyan';
   caption.textContent = '// PROGRAMMA: LABIRINTO //';
   p.host.append(badge, p.meter, caption);
-  return {
-    piece: p,
-    place: () => {
-      hero.classList.add('fx-senza-3d');
-      (hero.querySelector('.hero-content') ?? hero).after(p.host);
-    },
-    remove: () => hero.classList.remove('fx-senza-3d'),
-  };
+  section.append(p.host);
+  hero.after(section);
+  return { piece: p, section };
 }
 
-/** The pieces of this page: the lettering in the landing's hero, a stripe under the bar, at the top of every section and of the footer. */
-function piecesOf(ink: Ink): Piece[] {
+/** The pieces of this page: the lettering and the maze on the landing, a stripe under the bar, at the top of every section and of the footer. */
+function piecesOf(ink: Ink, added: HTMLElement[]): Piece[] {
   const out: Piece[] = [];
   const hero = document.querySelector<HTMLElement>('.hero');
   if (hero) {
@@ -175,6 +200,11 @@ function piecesOf(ink: Ink): Piece[] {
     const p = piece('fx-striscia fx-barra', 'stripe', ink, 0.9, 1, 1);
     nav.append(p.host);
     out.push(p);
+  }
+  if (hero) {
+    const maze = mazeSection(hero);
+    added.push(maze.section);
+    out.push(maze.piece);
   }
   for (const section of document.querySelectorAll<HTMLElement>('main > section.section-wrap, main.section-wrap')) {
     const p = piece('fx-striscia fx-sezione', 'stripe', ink, 0.4, 1, 2);
@@ -192,41 +222,51 @@ function piecesOf(ink: Ink): Piece[] {
 
 export function start(): () => void {
   const asked = new URLSearchParams(location.search).get('fx') ?? '';
-  const mode = MODES[asked] ?? MODES[DEFAULT_MODE];
+  const engine = MODES[asked] ?? MODES[DEFAULT_MODE];
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const pieces = piecesOf(inkOf(LETTERING.colors));
-  const undo: Array<() => void> = [];
+  const added: HTMLElement[] = [];
+  const pieces = piecesOf(inkOf(LETTERING.colors), added);
   let make: LightsMaker | undefined;
   let stopped = false;
   let raf = 0;
   let timer = 0;
   let tick = 0;
+  /** The pieces still to step in this tick: as many a frame as its budget allows. */
+  let queue: Piece[] = [];
 
   const still = () => reduced.matches;
   const carpet = () => Math.floor(tick / CARPET_EVERY);
   const refit = (p: Piece) => {
     if (!make) return;
     fit(p, make, 42 + pieces.indexOf(p) * 97);
+    if (still()) (p.lights as Partial<MazeLights>).settle?.();
     draw(p, still() ? 0 : carpet(), still());
   };
   const moving = () => !!make && !stopped && !document.hidden && !still() && pieces.some((p) => p.visible);
-  // One frame per tick, and nothing in between: a timer waits, then the frame paints. The page is idle between two ticks.
   const frame = () => {
     raf = 0;
     if (!moving()) return;
-    tick++;
-    for (const p of pieces) {
-      if (!p.visible || !p.lights) continue;
-      p.lights.step();
-      draw(p, carpet(), false);
+    const t0 = performance.now();
+    while (queue.length) {
+      const p = queue.shift()!;
+      if (p.visible && p.lights) {
+        p.lights.step();
+        if (!unchanged(p, carpet())) draw(p, carpet(), false);
+      }
+      if (performance.now() - t0 >= FRAME_BUDGET_MS) break;
     }
-    run();
+    if (queue.length) raf = requestAnimationFrame(frame);
   };
+  // A timer marks the ticks; in between the page is idle, and a tick's pieces take one frame, or more when a frame's budget runs out.
   const run = () => {
-    if (raf || timer || !moving()) return;
+    if (timer || !moving()) return;
     timer = window.setTimeout(() => {
       timer = 0;
-      if (moving()) raf = requestAnimationFrame(frame);
+      if (!moving()) return;
+      tick++;
+      queue = pieces.filter((p) => p.visible && p.lights);
+      if (!raf && queue.length) raf = requestAnimationFrame(frame);
+      run();
     }, TICK_MS);
   };
 
@@ -251,27 +291,20 @@ export function start(): () => void {
   document.addEventListener('visibilitychange', onVisibility);
   reduced.addEventListener('change', onMotion);
 
-  void (async () => {
-    const hero = document.querySelector<HTMLElement>('.hero');
-    if (mode.variant && hero) {
-      const extra = await programPiece(hero);
+  void engine()
+    .then((m) => {
       if (stopped) return;
-      extra.place();
-      pieces.push(extra.piece);
-      undo.push(extra.remove);
-    }
-    const m = await mode.engine();
-    if (stopped) return;
-    make = m;
-    for (const p of pieces) {
-      refit(p);
-      seen.observe(p.host);
-      resized.observe(p.host);
-    }
-    run();
-  })().catch(() => {
-    /* an effect that does not start leaves the page as it is */
-  });
+      make = m;
+      for (const p of pieces) {
+        refit(p);
+        seen.observe(p.host);
+        resized.observe(p.host);
+      }
+      run();
+    })
+    .catch(() => {
+      /* an effect that does not start leaves the page as it is */
+    });
 
   return () => {
     stopped = true;
@@ -282,6 +315,6 @@ export function start(): () => void {
     document.removeEventListener('visibilitychange', onVisibility);
     reduced.removeEventListener('change', onMotion);
     for (const p of pieces) p.host.remove();
-    for (const f of undo) f();
+    for (const el of added) el.remove();
   };
 }

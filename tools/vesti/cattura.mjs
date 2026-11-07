@@ -1,6 +1,6 @@
-// Screenshots of a skin (T284): the landing and another page at 1920 px and on a phone (390 px), the icon at its sizes, and a short
-// recording of what moves, as an animated PNG (APNG) put together from Chrome's own PNG frames, without decoding them. A headless Chrome
-// of its own (cdp.mjs), only on a page of this machine.
+// Screenshots of a skin (T284, T315): the landing and another page at 1920 px and on a phone (390 px), the icon at its sizes, and short
+// recordings of what moves (the lettering, the maze), as animated PNGs (APNG) put together from Chrome's own PNG frames, without decoding
+// them. A headless Chrome of its own (cdp.mjs), only on a page of this machine.
 //
 //   node tools/vesti/cattura.mjs --url http://127.0.0.1:4185/site/index.html --cartella docs/design/vesti/futuristica [--veste futuristica]
 
@@ -20,6 +20,8 @@ const SKIN = opt('veste', 'futuristica');
 const FRAMES = Number(opt('fotogrammi', '20'));
 /** The recording shows the first big letters, at the lettering's own size: wide enough to see the carpet and the lights, light enough for git. */
 const CLIP_WIDTH = Number(opt('larghezza-registrazione', '300'));
+/** And the middle of the maze, where it starts to grow: a corner of it, light enough for git (each frame is a PNG of small letters). */
+const MAZE_CLIP = { width: 280, height: 196 };
 checkLocal(URL_PAGE);
 fs.mkdirSync(OUT, { recursive: true });
 
@@ -103,6 +105,30 @@ function apng(frames) {
   return Buffer.concat(parts);
 }
 
+/** A short recording of what an element shows, as an APNG: `frames` frames `every` ms apart, `width` × `height` pixels of it, its first or its middle ones. */
+async function record(page, selector, file, { frames, every, width, height = Infinity, middle = false }) {
+  const box = await evaluate(page, `(() => { const r = document.querySelector(${JSON.stringify(selector)})?.getBoundingClientRect(); if (!r) return undefined; const w = Math.min(r.width, ${width}); const h = Math.min(r.height, ${Number.isFinite(height) ? height : 1e9}); return { x: r.x + scrollX + (${middle} ? (r.width - w) / 2 : 0), y: r.y + scrollY + (${middle} ? (r.height - h) / 2 : 0), width: w, height: h }; })()`);
+  if (!box) return;
+  const list = [];
+  let last = Date.now();
+  for (let k = 0; k < frames; k++) {
+    const png = await shot(page, undefined, { clip: box, format: 'png' });
+    const now = Date.now();
+    list.push({ png, delay: 0 });
+    if (k) list[k - 1].delay = now - last;
+    last = now;
+    await sleep(every);
+  }
+  list[list.length - 1].delay = 100;
+  const out = path.join(OUT, file);
+  fs.writeFileSync(out, apng(list));
+  console.log(`scritto ${out} (${list.length} fotogrammi, ${(fs.statSync(out).size / 1024).toFixed(0)} KB)`);
+}
+
+/** Scrolls so that an element stands in the middle of the screen. */
+const centre = (page, selector) =>
+  evaluate(page, `(() => { const r = document.querySelector(${JSON.stringify(selector)})?.getBoundingClientRect(); if (r) window.scrollTo(0, Math.max(0, r.top + scrollY - (innerHeight - r.height) / 2)); return !!r; })()`);
+
 const chrome = await launch({ width: 1920, height: 1080 });
 const page = chrome.page;
 try {
@@ -112,40 +138,35 @@ try {
   const landing = new URL(URL_PAGE).href;
   const cards = new URL('/site/carte.html', URL_PAGE).href;
 
-  // The landing at 1920: the top, then further down where the stripes are.
+  // The landing at 1920: the top, the maze under the hero (the futuristic skin, T315), further down where the stripes are, the footer.
   await open(page, DESKTOP, landing, 4000);
   await shot(page, 'landing-1920.jpg');
-  await evaluate(page, 'window.scrollTo(0, 1000)');
+  if (await centre(page, '.fx-programma')) {
+    await sleep(6500);
+    await shot(page, 'landing-1920-labirinto.jpg');
+  }
+  await evaluate(page, 'window.scrollTo(0, 2000)');
   await sleep(1500);
   await shot(page, 'landing-1920-strisce.jpg');
   await evaluate(page, 'window.scrollTo(0, document.body.scrollHeight)');
   await sleep(1500);
   await shot(page, 'landing-1920-piede.jpg');
 
-  // What moves: the lettering at the top of the hero, frame by frame.
+  // What moves: the lettering at the top of the hero, frame by frame; the maze as it grows, a frame every few ticks.
   await evaluate(page, 'window.scrollTo(0, 0)');
   await sleep(1500);
-  const box = await evaluate(page, `(() => { const r = document.querySelector('.fx-scritta')?.getBoundingClientRect(); return r && { x: r.x, y: r.y, width: Math.min(r.width, ${CLIP_WIDTH}), height: r.height }; })()`);
-  if (box) {
-    const frames = [];
-    let last = Date.now();
-    for (let k = 0; k < FRAMES; k++) {
-      const png = await shot(page, undefined, { clip: box, format: 'png' });
-      const now = Date.now();
-      frames.push({ png, delay: 0 });
-      if (k) frames[k - 1].delay = now - last;
-      last = now;
-      await sleep(60);
-    }
-    frames[frames.length - 1].delay = 100;
-    const file = path.join(OUT, 'scritta-animata.png');
-    fs.writeFileSync(file, apng(frames));
-    console.log(`scritto ${file} (${frames.length} fotogrammi, ${(fs.statSync(file).size / 1024).toFixed(0)} KB)`);
+  await record(page, '.fx-scritta', 'scritta-animata.png', { frames: FRAMES, every: 60, width: CLIP_WIDTH });
+  await open(page, DESKTOP, landing, 2500);
+  if (await centre(page, '.fx-programma')) {
+    // The maze grows only on screen: it starts now, and its first picture comes with the next tick.
+    await sleep(400);
+    await record(page, '.fx-programma', 'labirinto-animato.png', { frames: 12, every: 330, ...MAZE_CLIP, middle: true });
   }
 
   // The icon at its sizes, on a light and on a dark ground.
   const icon = await evaluate(page, "document.getElementById('skin-icon')?.getAttribute('href')");
   if (icon) {
+    await evaluate(page, 'window.scrollTo(0, 0)');
     await evaluate(
       page,
       `(() => { const box = document.createElement('div'); box.id = 'prova-icona'; box.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#ffffff;display:flex;flex-direction:column;gap:21px;padding:21px';
@@ -157,18 +178,18 @@ try {
     await shot(page, 'icona.png', { clip: { x: 0, y: 0, width: 700, height: 640 }, format: 'png' });
   }
 
-  // The variant proposed to the author: no 3D stage, MarkovJunior everywhere.
-  await open(page, DESKTOP, `${landing}${landing.includes('?') ? '&' : '?'}fx=mj-pagina`, 6000);
-  await shot(page, 'variante-mj-pagina-1920.jpg');
-
   // Another page, at 1920.
   await open(page, DESKTOP, cards, 3000);
   await shot(page, 'carte-1920.jpg');
 
-  // A phone.
+  // A phone: the top, the maze, further down.
   await open(page, PHONE, landing, 4000);
   await shot(page, 'landing-390.jpg');
-  await evaluate(page, 'window.scrollTo(0, 1400)');
+  if (await centre(page, '.fx-programma')) {
+    await sleep(6500);
+    await shot(page, 'landing-390-labirinto.jpg');
+  }
+  await evaluate(page, 'window.scrollTo(0, 2400)');
   await sleep(1500);
   await shot(page, 'landing-390-strisce.jpg');
   await open(page, PHONE, cards, 3000);

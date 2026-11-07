@@ -340,9 +340,20 @@ abstract class Runner {
   reset(): void {
     this.count = 0;
   }
+  /** As `reset`, for a program kept between calls (`Stepper.tick`): what the node knows of the grid stays, its count starts again. */
+  rewind(): void {
+    this.count = 0;
+  }
   /** One step: true if the node changed the grid. */
   abstract go(g: Grid3, rng: Rng): boolean;
 }
+
+/**
+ * True while a `Stepper` runs its program again (`tick`): a node that starts again keeps its matches and brings them up to date from
+ * the grid's log, instead of scanning the grid. False for every other run, which therefore does not change (ADR-0142).
+ */
+let keeping = false;
+const restart = (r: Runner) => (keeping ? r.rewind() : r.reset());
 
 /**
  * Matches kept as a set with O(1) random pick and removal. The order of `keys` is part of the run (a pick is an index into it), so
@@ -808,67 +819,115 @@ class PathRunner extends Runner {
     this.inertia = node.inertia === true;
     this.longest = node.longest === true;
   }
+  /**
+   * Without an array per cell (T315): the same walk as before, the neighbours in the order of VON_NEUMANN and the same draws, so the
+   * same grid voxel for voxel (tests/mj-path.test.ts); a maze of the site's page solved in a fraction of the time, even before the JIT.
+   */
   go(g: Grid3, rng: Rng): boolean {
     if (this.limit !== undefined && this.count >= this.limit) return false;
-    const N = g.cells.length;
-    const XY = g.X * g.Y;
-    const has = (set: number, idx: number) => this.sets[set][g.cells[idx]] === 1;
+    const { X, Y, Z, cells } = g;
+    const N = cells.length;
+    const XY = X * Y;
+    const to = this.sets[this.to];
+    const on = this.sets[this.on];
+    const from = this.sets[this.from];
     const dist = new Int32Array(N).fill(-1);
-    const queue: number[] = [];
+    const queue = new Int32Array(N);
+    let tail = 0;
     for (let i = 0; i < N; i++)
-      if (has(this.to, i)) {
+      if (to[cells[i]] === 1) {
         dist[i] = 0;
-        queue.push(i);
+        queue[tail++] = i;
       }
-    if (!queue.length) {
+    if (!tail) {
       if (!this.total) this.why ??= 'in quel momento non c\'era nessuna cella di arrivo ("to")';
       return false;
     }
-    const near = (c: number): number[] => {
-      const x = c % g.X, y = Math.floor(c / g.X) % g.Y, z = Math.floor(c / XY);
-      const out: number[] = [];
-      for (const [dx, dy, dz] of VON_NEUMANN) {
-        const nx = x + dx, ny = y + dy, nz = z + dz;
-        if (nx >= 0 && ny >= 0 && nz >= 0 && nx < g.X && ny < g.Y && nz < g.Z) out.push(nx + ny * g.X + nz * XY);
-      }
-      return out;
+    // The neighbours of a cell inside the grid, in the order of VON_NEUMANN: written into `around`, how many.
+    const around = new Int32Array(6);
+    const near = (c: number): number => {
+      const x = c % X;
+      const y = ((c / X) | 0) % Y;
+      const z = (c / XY) | 0;
+      let k = 0;
+      if (x + 1 < X) around[k++] = c + 1;
+      if (x > 0) around[k++] = c - 1;
+      if (y + 1 < Y) around[k++] = c + X;
+      if (y > 0) around[k++] = c - X;
+      if (z + 1 < Z) around[k++] = c + XY;
+      if (z > 0) around[k++] = c - XY;
+      return k;
     };
-    for (let q = 0; q < queue.length; q++) {
+    for (let q = 0; q < tail; q++) {
       const c = queue[q];
-      for (const n of near(c))
-        if (dist[n] < 0 && has(this.on, n)) {
+      const k = near(c);
+      for (let t = 0; t < k; t++) {
+        const n = around[t];
+        if (dist[n] < 0 && on[cells[n]] === 1) {
           dist[n] = dist[c] + 1;
-          queue.push(n);
+          queue[tail++] = n;
         }
+      }
     }
-    // Starts: `from` cells next to the field (a start is not walked over, so it needs no "on").
+    // Starts: `from` cells next to the field (a start is not walked over, so it needs no "on"); a cell and its distance, in pairs.
     let best = -1;
-    const starts: Array<[number, number]> = [];
+    const starts: number[] = [];
     for (let i = 0; i < N; i++) {
-      if (!has(this.from, i) || dist[i] === 0) continue;
+      if (from[cells[i]] !== 1 || dist[i] === 0) continue;
       let d = -1;
-      for (const n of near(i)) if (dist[n] >= 0 && (d < 0 || dist[n] < d)) d = dist[n];
+      const k = near(i);
+      for (let t = 0; t < k; t++) {
+        const n = dist[around[t]];
+        if (n >= 0 && (d < 0 || n < d)) d = n;
+      }
       if (d < 0) continue;
-      starts.push([i, d]);
-      best = Math.max(best, d);
+      starts.push(i, d);
+      if (d > best) best = d;
     }
     if (!starts.length) {
       if (!this.total) this.why ??= codesOf(this.sets[this.from]).some((c) => censusOf(g).total[c] > 0) ? 'le celle di partenza ("from") c\'erano, ma nessuna toccava una cella "on" collegata all\'arrivo' : 'in quel momento non c\'era nessuna cella di partenza ("from")';
       return false;
     }
-    const pool = this.longest ? starts.filter(([, d]) => d === best) : starts;
-    const [start] = pool[rng.int(pool.length)];
+    let start = -1;
+    if (this.longest) {
+      let pool = 0;
+      for (let s = 1; s < starts.length; s += 2) if (starts[s] === best) pool++;
+      let pick = rng.int(pool);
+      for (let s = 1; s < starts.length; s += 2)
+        if (starts[s] === best && pick-- === 0) {
+          start = starts[s - 1];
+          break;
+        }
+    } else start = starts[2 * rng.int(starts.length / 2)];
     let cur = start;
     let dir = 0;
     let changed = false;
     for (let guard = 0; guard < N; guard++) {
-      const steps = near(cur).filter((n) => dist[n] >= 0);
-      if (!steps.length) break;
-      const low = Math.min(...steps.map((n) => dist[n]));
+      const k = near(cur);
+      let low = -1;
+      for (let t = 0; t < k; t++) {
+        const d = dist[around[t]];
+        if (d >= 0 && (low < 0 || d < low)) low = d;
+      }
+      if (low < 0) break;
       if (cur !== start && low >= dist[cur]) break;
-      const ok = steps.filter((n) => dist[n] === low);
-      const straight = this.inertia ? ok.find((n) => n - cur === dir) : undefined;
-      const next = straight ?? ok[rng.int(ok.length)];
+      // The neighbours at the lowest distance, in order: the one straight ahead if it is one of them, else one drawn among them.
+      let ok = 0;
+      let next = -1;
+      for (let t = 0; t < k; t++) {
+        const n = around[t];
+        if (dist[n] !== low) continue;
+        ok++;
+        if (this.inertia && next < 0 && n - cur === dir) next = n;
+      }
+      if (next < 0) {
+        let pick = rng.int(ok);
+        for (let t = 0; t < k; t++)
+          if (dist[around[t]] === low && pick-- === 0) {
+            next = around[t];
+            break;
+          }
+      }
       dir = next - cur;
       if (dist[next] === 0) break;
       changed = write(g, next, this.color) || changed;
@@ -1065,11 +1124,16 @@ class SequenceRunner extends Runner {
     this.index = 0;
     for (const c of this.children) c.reset();
   }
+  rewind(): void {
+    super.rewind();
+    this.index = 0;
+    for (const c of this.children) c.rewind();
+  }
   go(g: Grid3, rng: Rng): boolean {
     while (this.index < this.children.length) {
       if (this.children[this.index].go(g, rng)) return true;
       this.index++;
-      if (this.index < this.children.length) this.children[this.index].reset();
+      if (this.index < this.children.length) restart(this.children[this.index]);
     }
     return false;
   }
@@ -1083,13 +1147,17 @@ class MarkovRunner extends Runner {
     super.reset();
     for (const c of this.children) c.reset();
   }
+  rewind(): void {
+    super.rewind();
+    for (const c of this.children) c.rewind();
+  }
   go(g: Grid3, rng: Rng): boolean {
     // for (const c of this.children) if (c.go(g, rng)) { c.reset(); return true; };
     // for (const c of this.children) if (c.go(g, rng)) return true;
     for (let index: number = 0; index < this.children.length; index++) {
       const c = this.children[index];
       if (c.go(g, rng)) {
-        if (index === this.children.length - 1) for (const c of this.children) c.reset();
+        if (index === this.children.length - 1) for (const c of this.children) restart(c);
         return true
       }
     }
@@ -1104,6 +1172,9 @@ class WatchedRunner extends Runner {
   }
   reset(): void {
     this.inner.reset();
+  }
+  rewind(): void {
+    this.inner.rewind();
   }
   go(g: Grid3, rng: Rng): boolean {
     const from = g.log.length;
@@ -1301,6 +1372,65 @@ export function runOn(grid: Grid3, p: Pick<Program3, 'palette' | 'unions' | 'pro
   grid.log = [];
   grid.epoch++;
   return exec(root, grid, seed, maxSteps, t0, trace, opts);
+}
+
+/**
+ * A program kept on its grid between calls, for what moves a little at every tick of a page (the site's lights and maze, T315,
+ * ADR-0164): compiled once, with one random generator and the grid's census, instead of a `runOn` at every tick that compiles the
+ * program again and scans the whole grid for every node. Runs with `run` and `runOn` do not change (ADR-0142).
+ * - `advance(n)` goes on with the same run for at most `n` steps: the run is the one `runOn` would make with the same seed, cut in pieces.
+ * - `tick(n)` runs the program again from its first node, as a new `runOn` would, but its nodes keep their matches and bring them
+ *   up to date from the grid's log (`keeping`): the same rules, the matches in another order than a scan's, so not the run of `runOn`.
+ */
+export class Stepper {
+  /** Steps made so far. */
+  steps = 0;
+  private root: Runner;
+  private rng: Rng;
+  private context: { g: Grid3; census?: Census };
+  /** Past this many writes in the log, between two ticks the log starts again and the nodes scan the grid once: memory stays bounded. */
+  private logCap: number;
+  constructor(readonly grid: Grid3, p: Pick<Program3, 'palette' | 'unions' | 'program'>, seed: number, limits: GridLimits = { side: 4096, cells: 64_000_000 }) {
+    const alpha = alphabetOf(p, grid.alphabet);
+    this.root = compile(p.program, alpha, limits);
+    grid.alphabet = alpha.codes;
+    grid.log = [];
+    grid.epoch++;
+    this.rng = new Rng(seed);
+    this.context = { g: grid };
+    this.logCap = Math.max(4096, grid.cells.length * 4);
+    this.root.reset();
+  }
+  /** Goes on with the run for at most `maxSteps` steps: how many it made (fewer when the program has finished). */
+  advance(maxSteps: number): number {
+    return this.go(maxSteps, false);
+  }
+  /** Runs the program again from its first node, for at most `maxSteps` steps: how many it made. */
+  tick(maxSteps: number): number {
+    return this.go(maxSteps, true);
+  }
+  private go(maxSteps: number, again: boolean): number {
+    const outer = current;
+    const was = keeping;
+    current = this.context;
+    keeping = again;
+    let made = 0;
+    try {
+      if (again) this.root.rewind();
+      while (made < maxSteps && this.root.go(this.grid, this.rng)) made++;
+    } finally {
+      keeping = was;
+      current = outer;
+      // Only between ticks: a run that goes on keeps its log, as one `runOn` would (a new epoch makes the nodes scan again).
+      const g = this.grid;
+      if (again && g.log.length > this.logCap) {
+        g.log.length = 0;
+        g.epoch++;
+      }
+    }
+    this.steps += made;
+    return made;
+  }
 }
 
 export const at = (g: Grid3, x: number, y: number, z: number) => g.alphabet[g.cells[x + y * g.X + z * g.X * g.Y]];

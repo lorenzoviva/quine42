@@ -1,7 +1,8 @@
-/* La veste futuristica (T284, ADR-0145): l'inception di scritte al neon, tra Matrix e Tron.
+/* La veste futuristica (T284, T315, ADR-0145): l'inception di scritte al neon, tra Matrix e Tron.
    Il logo è la scritta della proposta 05 «Il quine» di Claude (v2), estratta così com'è da tools/vesti/scritta.ts: le lettere grandi
    QUINE42 fatte di righe del piccolo QUINE42, la Q piccola rosa e il resto ciano su #090514. I colori sono i suoi, neon punk.
-   Ciò che si muove (la scritta grande nell'hero, le strisce lungo le pagine) è di effects.ts: qui solo dove sta e come appare. */
+   Ciò che si muove (la scritta grande nell'hero, le strisce lungo le pagine, il labirinto sotto l'hero) è di effects.ts: qui solo dove
+   sta e come appare. */
 :root[data-skin='futuristica'] {
   /* Colori: il fondo, il ciano e il rosa della scritta; il giallo e il viola della stessa tavolozza */
   --skin-bg: #090514;
@@ -140,15 +141,13 @@
   position: relative;
 }
 
-/* La variante proposta (?fx=mj-pagina): niente palco 3D, al suo posto un programma MarkovJunior in due dimensioni (program.ts). */
-[data-skin='futuristica'] .hero.fx-senza-3d .hero-3d {
-  display: none;
-}
-
+/* Il labirinto (T315): una sezione sua sotto l'hero, un programma MarkovJunior in due dimensioni (program.ts), largo quanto la pagina.
+   Le pareti sono lettere tenui, i percorsi liberi bande di luce con le lettere incise; nome e passi stanno sul loro fondo scuro. */
 [data-skin='futuristica'] .fx-programma {
   position: relative;
-  height: clamp(var(--measure-322), 38.2vw, var(--measure-521));
-  background: var(--skin-stage-background);
+  height: clamp(var(--measure-322), 23.6vw, var(--measure-377));
+  /* Un fondo scuro e piano: le pareti restano tenui anche al centro, dove il palco ha la sua luce. */
+  background: var(--skin-ink);
   border: var(--border-ink-thick);
   border-color: rgba(0, 240, 255, 0.45);
   box-shadow: var(--shadow-m) var(--skin-accent);
@@ -170,6 +169,7 @@
   left: 50%;
   right: auto;
   transform: translateX(-50%);
+  white-space: nowrap;
 }
 
 /* Pulsanti e pannelli: filo di luce al posto dell'inchiostro. */

@@ -1,8 +1,10 @@
-// The lights of the futuristic skin as a MarkovJunior program (T284): the game's own engine (src/mj/engine.ts) runs it once per tick on
-// the grid of the surface, as the game runs an animation clip on the frame before (src/mj/run.ts, `clipFrames`). The states are the
-// grid's codes (surface.ts, STATES), so nothing is translated: what the program writes is what the page paints.
+// The lights of the futuristic skin as a MarkovJunior program (T284, T315): the game's own engine (src/mj/engine.ts) runs it once per
+// tick on the grid of the surface, as the game runs an animation clip on the frame before (src/mj/run.ts, `clipFrames`). The states are
+// the grid's codes (surface.ts, STATES), so nothing is translated: what the program writes is what the page paints.
+// The program stays compiled on its grid between ticks (`Stepper.tick`, T315): its nodes keep their matches and bring them up to date
+// with the cells written since, instead of a `runOn` at every tick that compiled it again and scanned the whole grid for every node.
 
-import { runOn, type Grid3, type Node3, type Program3 } from '../../../src/mj/engine';
+import { Stepper, type Grid3, type Node3, type Program3 } from '../../../src/mj/engine';
 import { OUT, RATES, STATES, restingStates, type LightsMaker, type Surface } from './surface';
 
 /**
@@ -65,13 +67,11 @@ function gridOf(s: Surface): Grid3 {
 export const mjLights: LightsMaker = (s, seed) => {
   const grid = gridOf(s);
   const states = restingStates(s);
-  const program = { palette: PALETTE, program: PROGRAM };
-  let tick = 0;
+  const program = new Stepper(grid, { palette: PALETTE, program: PROGRAM }, (seed * 31 + 7) >>> 0);
   return {
     states,
     step() {
-      tick++;
-      runOn(grid, program, (seed * 31 + tick * 7919) >>> 0, MAX_STEPS, { side: 4096, cells: 1 << 20 });
+      program.tick(MAX_STEPS);
       // The codes never move (the grid's alphabet comes first): copy the inside back.
       const X = grid.X;
       for (let y = 0; y < s.Y; y++) states.set(grid.cells.subarray((y + 1) * X + 1, (y + 1) * X + 1 + s.X), y * s.X);
