@@ -38,5 +38,5 @@ Aggiornato il 07/11/2026, epoca 327 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **327 (claude):** T332 integrato (kernel 0.5.4); T289 integrato (D47 aperta); T292 integrato (ADR-0168); in corso T294.
+- **327 (claude):** T332 integrato (kernel 0.5.4); T289 integrato (D47 aperta); T292 integrato (ADR-0168); in corso T294. Pianificati T333-T337 (nodi MJ che mancano, edifici a sottoblocchi; richiesta dell autore).
 - **326 (claude):** T330 integrato (GPU: RTX 2070 via ANGLE D3D11); T327 integrato, T332 creato e approvato. T288 integrato (ADR 0166 → 0167).
