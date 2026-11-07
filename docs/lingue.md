@@ -86,7 +86,7 @@ token stimati), più i frammenti dei moduli `agents/*.ts`. Tre alternative:
 | **P2. Prompt in inglese come unica fonte** (decisa, D34) | tradurre 13.800 parole (prompt + frammenti) e riverificare tutto il comportamento del Concilio | − 10/20 % di token d'ingresso (l'inglese si tokenizza meglio: **stima**, non misurata) | regressione su tutto ciò che il Concilio sa fare oggi; l'autore scrive i prompt in italiano |
 | P3. Prompt in 4 lingue | ×4 ogni modifica di prompt | nessuno | è la quadruplicazione che l'autore vuole evitare: scartata |
 
-**Decisa: P2** (D34): i prompt diventano inglesi, con il blocco «Lingua» che dice in che lingua scrivere il testo del mondo (T310). Resta il
+**Decisa: P2** (D34): i prompt diventano inglesi, con il blocco «Lingua» che dice in che lingua scrivere il testo del mondo (T310). **Fatto** (T310, ADR-0164): il blocco è `languageBlock` in `src/kernel/language.ts`, 128 token; testi fissi −6,9 %, richieste intere −3,3 % (il contesto del mondo resta italiano); in una prova a pagamento nessun testo del mondo è uscito in inglese. Il rilevatore c'è (`detectLanguage`); il controllo nel validatore resta L4. Resta il
 **controllo della lingua nel validatore**, che con P2 conta ancora di più (un modello con i prompt inglesi scivola in inglese): un rilevatore deterministico (parole funzionali delle quattro lingue,
 lo stesso metodo di `isItalian` del censimento, spostato in `src/kernel/language.ts`) dice in che lingua è un testo generato; un testo
 lungo nella lingua sbagliata torna all'agente col motivo, come ogni invalido (regola 2). Gli esempi dei prompt restano italiani, ma
@@ -100,7 +100,7 @@ lingua per universo il Concilio scrive una volta sola.
 ### Il filtro della quarta parete (`META_RE`, regola 0)
 
 `META_RE` è italiano dalla prima all'ultima alternativa (9 espressioni, ≈ 70 alternative), come `glossaryBreak` («significa», «vuol dire»).
-In un universo inglese oggi **non filtra nulla**: è il rischio più grave di tutto il progetto, perché rompe una regola inviolabile senza
+**Fatto per l'italiano e l'inglese** (T310, ADR-0164: `META_PATTERNS`, `GLOSSARY_PATTERNS`, i prestiti solo nella loro lingua; francese e spagnolo li porta T239). Prima: in un universo inglese oggi **non filtra nulla**: è il rischio più grave di tutto il progetto, perché rompe una regola inviolabile senza
 errori. Decisa (D34): **la lingua del mondo, l'italiano e l'inglese**, come proposto qui sotto (T310).
 - `META_PATTERNS: Record<Lingua, string[]>` in `fourthwall.ts`, una tabella per lingua, scritta e verificata dall'autore (≈ 70 voci
   ciascuna); `metaBreak(text, words, lingua)`.

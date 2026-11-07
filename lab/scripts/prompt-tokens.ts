@@ -4,6 +4,7 @@
 // with Gemini's countTokens (free, no generation), the key from the .env of --root.
 // npx vite-node lab/scripts/prompt-tokens.ts -- --capture lab/out/prompts-it.json
 // npx vite-node lab/scripts/prompt-tokens.ts -- --count lab/out/prompts-it.json lab/out/prompts-en.json [--root H:/projects/rune] [--per-task 2]
+// npx vite-node lab/scripts/prompt-tokens.ts -- --roles eceb3b21 [--root H:/projects/rune]  # the fixed texts alone: roles, theme, principles, the Language block
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -89,6 +90,42 @@ async function count(before: string, after: string): Promise<void> {
   if (only(ga, gb).length || only(gb, ga).length) console.log(`solo prima: ${only(ga, gb).join(', ') || '-'}; solo dopo: ${only(gb, ga).join(', ') || '-'}`);
 }
 
+/** The fixed texts alone: each agent's role, the theme, the principles at a git ref and now, and the Language block (which is new). */
+async function roles(ref: string): Promise<void> {
+  const { execSync } = await import('node:child_process');
+  const { COUNCIL_PRINCIPLES } = await import('../../src/kernel/fourthwall');
+  const { languageBlock } = await import('../../src/kernel/language');
+  const root = path.resolve(opt('root') ?? '../../..');
+  const key = /^GEMINI_API_KEY\s*=\s*"?([^"\r\n]+)"?/m.exec(fs.readFileSync(path.join(root, '.env'), 'utf8'))?.[1]?.trim();
+  if (!key) throw new Error('nessuna chiave');
+  const tokens = async (text: string): Promise<number> => {
+    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:countTokens', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
+      body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text }] }] }),
+    });
+    const j = (await res.json()) as { totalTokens?: number };
+    if (!res.ok || typeof j.totalTokens !== 'number') throw new Error(`countTokens ${res.status}`);
+    return j.totalTokens;
+  };
+  const at = (p: string) => execSync(`git show ${ref}:${p}`, { encoding: 'utf8' });
+  const before = /export const COUNCIL_PRINCIPLES = `([\s\S]*?)`;/.exec(at('src/kernel/fourthwall.ts'))![1];
+  const files = [...fs.readdirSync('universe/prompts/agents').map((f) => `universe/prompts/agents/${f}`), 'universe/prompts/theme.md'];
+  const rows: string[] = ['| testo | prima (token) | dopo (token) | differenza |', '|---|---:|---:|---:|'];
+  let sa = 0;
+  let sb = 0;
+  for (const [name, a, b] of [['COUNCIL_PRINCIPLES', before, COUNCIL_PRINCIPLES], ...files.map((f) => [f.replace('universe/', ''), at(f), fs.readFileSync(f, 'utf8')])]) {
+    const [ta, tb] = [await tokens(a), await tokens(b)];
+    sa += ta;
+    sb += tb;
+    rows.push(`| ${name} | ${ta} | ${tb} | ${(((tb - ta) / ta) * 100).toFixed(1)} % |`);
+  }
+  rows.push(`| **testi fissi** | ${sa} | ${sb} | ${(((sb - sa) / sa) * 100).toFixed(1)} % |`);
+  rows.push(`| blocco «Lingua» (nuovo, con ogni richiesta) | — | ${await tokens(languageBlock('it'))} | |`);
+  console.log(rows.join('\n'));
+}
+
 if (opt('capture')) await capture(opt('capture')!);
 else if (argv.includes('--count')) await count(argv[argv.indexOf('--count') + 1], argv[argv.indexOf('--count') + 2]);
-else console.log('uso: --capture <file> | --count <prima> <dopo>');
+else if (opt('roles')) await roles(opt('roles')!);
+else console.log('uso: --capture <file> | --count <prima> <dopo> | --roles <ref git>');

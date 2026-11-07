@@ -39,13 +39,10 @@ const FORBIDDEN_WORDS: Partial<Record<WorldLanguage, string>> = {
  */
 export function languageBlock(lang: WorldLanguage = DEFAULT_LANGUAGE): string {
   const name = WORLD_LANGUAGES[lang];
+  // Short on purpose: it goes with every request (T310 measured it).
   return [
     `## Language of the world: ${name} (${lang})`,
-    `- Write every text of the world in ${name}: names, descriptions, dialogue, stories, the bible, memories, plots, signs, labels of actions, what the wanderer reads. These instructions are in English; the world is not.`,
-    `- The ids stay as the schema gives them, in English: enum values, codes, ids of modules, models, items, actions and terrains, field names. Do not translate them, do not write the world's text in them.`,
-    `- Examples in these instructions are only forms: write their like in ${name}, never copy their words.`,
-    `- Code is English (names and comments); a string of the code that the wanderer reads is in ${name}.`,
-    `- In ${name} the words the principles forbid are not used even for something else: ${FORBIDDEN_WORDS[lang] ?? FORBIDDEN_WORDS.en}.`,
+    `Write every text of the world in ${name} (names, descriptions, dialogue, stories, memories, signs, labels): these instructions are English, the world is not. Ids stay as the schema gives them, in English (enum values, codes, ids, field names). Examples are only forms. Code is English; what it shows the wanderer is ${name}. The forbidden words are not used even for something else: ${FORBIDDEN_WORDS[lang] ?? FORBIDDEN_WORDS.en}.`,
   ].join('\n');
 }
 

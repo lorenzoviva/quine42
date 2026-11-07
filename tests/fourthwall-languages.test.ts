@@ -137,7 +137,7 @@ describe('the Language block', () => {
   it('says the language of the world, that the ids stay English, and the world’s words for what is forbidden', () => {
     const it_ = languageBlock('it');
     expect(it_).toMatch(/^## Language of the world: Italian \(it\)/);
-    expect(it_).toContain('ids stay as the schema gives them, in English');
+    expect(it_).toContain('Ids stay as the schema gives them, in English');
     expect(it_).toContain('«calcolatore»');
     expect(languageBlock('en')).toContain('"footballer"');
     // A language without its own words says the English ones.
