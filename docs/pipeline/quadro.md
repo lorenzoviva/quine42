@@ -7,7 +7,7 @@ Aggiornato il 07/11/2026, epoca 326 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
-- **NPC coeso (autore, 06/11 sera):** T326 integrato (`87255e5`, confine `src/kernel/npc/`, facciata `NpcSubsystem`) → **T327 pronto** (claude extra) → T245g-i.
+- **NPC coeso (autore, 06/11 sera):** T327 integrato (facciata `Npc` in `src/kernel/npc/`, kernel 0.5.3, ADR-0166) → T332 (bug: chi dorme saluta) → T245g-i.
 - **Carte fatte a mano (autore, 05/11, step 41):** T293 integrato (`7e6c4e6`, ADR-0161, kernel 0.4.2): archivio `universes/.handmade/`, rotte `/api/handmade` sotto `gate` e `laboratori`, controllo programmi, V-030..V-032 chiuse → T294 (laboratori giocatori) e T295 (carte prima della Genesi) sbloccati.
 - **Gemini (autore, 06/11 sera):** consumare Gemini finché orchestro con task non troppo difficili. T322, T323, T326 integrati; T320 (controllo 2 piani) integrato (`86acd5f`, kernel 0.4.3, ADR-0162) → T321 sbloccato.
 - **Inglese lingua interna (step 42):** … T308b (contratto 0.5.0) → T309 (kernel 0.5.1) → **T310 integrato** (prompt del Concilio in inglese, `universe.json → language`, kernel 0.5.2, ADR-0165) → **T310b proposto** (campi degli schemi, legame come id, contratto 0.6; da approvare).
@@ -38,5 +38,4 @@ Aggiornato il 07/11/2026, epoca 326 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **325 (claude):** T310 integrato (ADR-0164 → 0165); T310b nel backlog, da approvare; T281 integrato (placeInside, casa a graticcio nel seme; anch'esso kernel 0.5.2: due cambi sulla stessa Z).
-- **326 (claude):** T330 integrato (GPU: RTX 2070 via ANGLE D3D11).
+- **326 (claude):** T330 integrato (GPU: RTX 2070 via ANGLE D3D11).; T327 integrato, T332 creato e approvato.

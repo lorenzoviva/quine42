@@ -4942,3 +4942,12 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: gli script di misura girano offline; typecheck con il suo turno.
 - Browser: sì, per la parte (1): preview su una porta libera, misure dalla console, tappeto fermo; chiudi la preview alla fine.
 - Quando è fatto: commit su `task/T331`. Nell'esito i numeri principali (ms per frame per parte, ms per programma per taglia) e la raccomandazione. Sicurezza: nessuna superficie nuova.
+
+### T332 · Chi dorme non saluta: gli incontri leggono `activity.kind` — `da fare`
+- Pipeline: claude · sforzo medium · stima 1.5% · approvato · priorità 4
+
+- Nasce da T327: `dossier T327` (bug trovato spostando la società in `src/kernel/npc/`).
+- **Contesto:** `src/kernel/npc/talk.ts:47` salta gli incontri di chi dorme guardando `activity.tipo`, ma dal contratto 0.5 (ADR-0163) il componente è `activity {kind, still}`: il controllo non scatta mai e chi dorme saluta.
+- **Cosa fare:** leggere `kind` (cercare in `src/kernel/` altri accessi a campi di componenti di prima del contratto 0.5, es. `.tipo` sui componenti, e correggerli; non `m.tipo` delle trame se è un campo del Concilio ancora accettato); un test che due individui, uno dei quali dorme, non si incontrano.
+- **Quando è fatto:** test nuovo verde, suite e typecheck verdi; kernel sale di Z.
+- Dipende da T327.
