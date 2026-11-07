@@ -10,13 +10,17 @@ import { runeGlyph, type RuneComp } from '../kernel/runes';
 import { hash32, hashStr } from '../kernel/rng';
 import { Builder } from './terrain';
 import { casts, clipped, MAT, rgbOf, solid } from './materials';
-import { geoOf, modelObject, showFrame } from './models';
+import { geoOf, isSharedGeometry, modelObject, showFrame } from './models';
 import type { FormComp } from '../kernel/forms';
+import type { Hand } from '../mj/hold';
+import { heldBy, hold, type Holding } from './held';
 
 export interface Limb {
   pivot: THREE.Object3D;
   part: 'leg' | 'arm' | 'head' | 'tail';
   phase: number;
+  /** An arm's hand (T288): where it holds what the figure wields, in the frame of the pivot. */
+  hand?: Hand;
 }
 
 export interface EntityView {
@@ -36,6 +40,8 @@ export interface EntityView {
   phase: number;
   /** What the view was built from: rebuilt when it changes. */
   sig: string;
+  /** What it holds in hand (T288). */
+  holding?: Holding;
 }
 
 /** Bodies go up and down the steps of the relief (and of a house) in a moment, not at once; far jumps are at once. */
@@ -80,7 +86,9 @@ export function figureStandIn(color: string, scale = 1, skin = '#e8b88a', materi
     arm.position.set(side * 0.28 * s, 0.94 * s, 0);
     arm.add(mesh(box(0.12 * s, 0.42 * s, 0.12 * s, c.map((v) => v * 0.85), -0.42 * s)));
     root.add(arm);
-    limbs.push({ pivot: arm, part: 'arm', phase: -side });
+    // Its hand at the bottom of the arm (T288): it looks toward +z, so its right is -x.
+    const hand: Hand = { joint: [side * 0.28 * s, 0.94 * s, 0], at: [0, -0.36 * s, 0], side: side < 0 ? 'right' : 'left', raised: false, girth: 0.06 * s, height: 1.3 * s };
+    limbs.push({ pivot: arm, part: 'arm', phase: -side, hand });
   }
   return { root, body, limbs };
 }
@@ -223,6 +231,8 @@ export class Entities {
         v.phase += moved * 7;
       }
       animateLimbs(v, moved > 0.0005 && moved < 2, dt, t);
+      // What they hold, in hand (T288): another wanderer's as the server says, an individual's if it has one.
+      hold(k, v, heldBy(k, id), MAT.world, t, (o) => (o.userData.entity = id));
     }
     for (const id of [...this.views.keys()]) if (!seen.has(id)) this.remove(id);
   }
@@ -231,10 +241,10 @@ export class Entities {
     const v = this.views.get(id);
     if (!v) return;
     this.world.remove(v.root);
-    // Models share their geometry among instances (models.ts keeps it); stand-ins own theirs.
+    // Models share their geometry among instances (models.ts keeps it); stand-ins own theirs, but not what they hold (T288).
     if (v.owned)
       v.root.traverse((o) => {
-        if (o instanceof THREE.Mesh) o.geometry.dispose();
+        if (o instanceof THREE.Mesh && !isSharedGeometry(o.geometry)) o.geometry.dispose();
       });
     this.views.delete(id);
   }
@@ -246,7 +256,7 @@ export class Entities {
 
 /** The wanderer, in real space, facing where it walks: its model, or a stand-in until the model is ready. */
 export class Wanderer {
-  view: { root: THREE.Group; body: THREE.Object3D; limbs: Limb[]; yaw: number; phase: number };
+  view: { root: THREE.Group; body: THREE.Object3D; limbs: Limb[]; yaw: number; phase: number; holding?: Holding };
   private last = { x: 0, y: 0 };
   private sig = '';
   /** How high above its floor a jump carries it (T56b): the camera does not follow it up. */
@@ -311,6 +321,8 @@ export class Wanderer {
     turnTowards(this.view, goal, dt);
     if (walking && !jump) this.view.phase += Math.max(moved, 0.05) * 7;
     animateLimbs(this.view, walking && !jump, dt, t);
+    // What it wields, in hand (T288), with the wanderer's material: never cut, as its body.
+    hold(k, this.view, heldBy(k, k.wandererEntity), MAT.corona, t, (o) => (o.userData.player = true));
   }
 }
 

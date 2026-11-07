@@ -675,6 +675,25 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: `appoggiato`
 - **Fermo**: il componente `placed` (`posato` fino al contratto 0.4), il campo `placed` di `world/state.json`, l'azione `posa`.
 
+### Oggetto impugnato
+- **Inglese**: `heldBy`, `hold`, `Holding`, `held`
+- **Definizione**: ciò che una figura tiene in mano (la tasca `equipped` del suo inventario), disegnato sul suo corpo con la mesh che ha a terra, appeso al braccio del suo punto di aggancio; gli altri viandanti lo vedono (`OtherView.held`) (T288, ADR-0167).
+- **Dove vive**: `src/render/held.ts`, `src/mj/hold.ts`, `src/session/server.ts`
+- **Da non usare**: `equipaggiato` (per ciò che è in mano: si equipaggia un pannello)
+- **Fermo**: `inventory.equipped`, l'operazione `wield` del protocollo, `held` di `OtherView`.
+
+### Presa
+- **Inglese**: `Grip`, `gripOf`, `gripFor`, `Hand`, `handsOf`, `holdPose`, `aimOf`, `HOLD_AIM`
+- **Definizione**: come una mano tiene un oggetto, letto dai voxel di entrambi: la mano è l'estremità libera di un braccio del rig (in basso lungo il fianco, in alto se alzato); un oggetto lungo si tiene per un'estremità (quella che non brilla, poi il legno, poi la più leggera, poi quella accanto all'elsa, altrimenti dal basso) e punta avanti e in fuori, uno spesso al centro (un arco) al centro, uno compatto pende dalla cima (T288, ADR-0167).
+- **Dove vive**: `src/mj/hold.ts`, `src/render/held.ts`, `src/render/models.ts`
+- **Da non usare**: `impugnatura` (è la parte dell'oggetto per cui lo si tiene, non il modo di tenerlo)
+
+### Punto di aggancio
+- **Inglese**: `MOUNTS`, `Mount`, `MountId`, `SLOT_MOUNTS`, `mountOf`
+- **Definizione**: dove va sul corpo ciò che si impugna, secondo il posto dell'oggetto (`ItemDef.slot`): la mano destra per tutto, l'avambraccio sinistro per uno scudo; scritto una volta per punto (T288, ADR-0167).
+- **Dove vive**: `src/mj/hold.ts`
+- **Da non usare**: `attacco` (per il punto)
+
 ### Bottino
 - **Inglese**: `loot`, `LootTable`, `LootEntry`
 - **Definizione**: le tabelle per tag da cui escono gli oggetti di un luogo o di un contenitore.

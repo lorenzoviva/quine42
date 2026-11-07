@@ -12,6 +12,7 @@ import { boxOf, classOf, CLASSES, type AssetClass } from '../mj/classes';
 import { Mj3Error, type Grid3, type PaletteEntry, type Vec3 } from '../mj/engine';
 import { colorTable, floors, footprint, surfaces, type Levels, type VoxelGrid } from '../mj/mesh';
 import { compileMjx, type MjxClip } from '../mj/model';
+import { hexColor } from '../mj/palette';
 import { act, FORM_LIMITS, MAX_FORM_TIME, MAX_FORM_XML, runMjx } from '../mj/run';
 import { hashStr } from './rng';
 import { internalFields, internalModelInfo } from './internalNames';
@@ -697,11 +698,13 @@ export class Forms {
     const cls = this.classOf(model);
     const vpt = vptOf(info);
     const under = cellarOf(info) * vpt;
+    // The tint as the palette reads it (T288): the packs write `hsl(…)`, and a letter with a colour the meshes cannot read vanished.
+    const color = info?.tint ? hexColor(tint) : undefined;
     return {
       xml,
       seed,
       size: sizeFor(xml, cls, info?.size, under),
-      tint: info?.tint && tint ? { symbol: info.tint, color: tint } : undefined,
+      tint: info?.tint && color ? { symbol: info.tint, color } : undefined,
       rig: cls.animation === 'walk',
       sway: cls.animation === 'wind',
       vpt,

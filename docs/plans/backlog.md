@@ -4432,7 +4432,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Se sceglie subito: restano la veste scelta e, solo se è la futuristica o la fumetto, le sue conseguenze (senza showcase se è MJ; i fumetti degli NPC in gioco se è la fumetto).
 - Se si vota: lo switch in alto e una scelta per account, che si può cambiare, registrata dal server. Una rotta nuova passa da `gate` e dall'elenco di `server/production.ts`, con il suo ritmo in `FRONT_RATES`; i voti stanno sotto `universes/` in una cartella che non si serve, e i conti li legge solo il master. Due parole per i tester nella guida della beta. Sicurezza: voci nuove.
 
-### T288 · Ciò che il viandante impugna si vede addosso: armi e attrezzi — `da fare` (dipende da T255)
+### T288 · Ciò che il viandante impugna si vede addosso: armi e attrezzi — `fatto` (`cf93ce5e`) (dipende da T255)
 - Pipeline: claude · sforzo max · stima 4% · approvato · browser · priorità 6
 - Sforzo: max, scelto dall'autore. Dipende da T255 perché questo sforzo arrivi davvero alla CLI.
 - Step: 40
@@ -4445,6 +4445,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Test: aggancio e scelta del punto come funzioni pure; ciò che esce verso gli altri client; typecheck e suite intera con i loro turni. Versione del kernel se tocchi `src/kernel/` (ADR-0136).
 - Browser: sì, con `?skip&offline`: spada e attrezzo fermi e in cammino, da più lati, a cartone e con `?classica`; due schede in multigiocatore. Catture nel commit.
 - Quando è fatto: impugno, si vede, lo vede anche l'altro viandante; commit su `task/T288`, riga in `#mondo3d`. Sicurezza: scrivi l'esito, tocca ciò che esce dal server.
+- Esito: l'oggetto impugnato si vede in mano con la sua mesh di terra condivisa, mano ricavata dalle braccia e presa dalla forma, senza tabelle per oggetto; un punto di aggancio per posto (mano destra, avambraccio per lo scudo); in multigiocatore `OtherView.held` porta solo l'id dell'oggetto e il cambio arriva all'altro senza ricaricare; costo misurato con 60 viandanti (Node: nessuna differenza entro il rumore; browser: 4,72 contro 4,24 ms, +3 chiamate di disegno per mano, nessuna griglia o geometria rifatta); corretto il colore `hsl()` che svuotava i modelli tinti (kernel 0.5.3); ADR-0166, `#mondo3d`, AGENTS.md, glossario, 22 test nuovi; mancano gli individui con qualcosa in mano (nessuna funzione glielo dà; in multigiocatore manca anche il campo); non provati i modelli dello Scultore reali (usati programmi scritti a mano) né gli fps in headless; sicurezza: nessuna superficie nuova.
 
 ### T289 · Vestiti e armature addosso: il banco che decide come — `da fare` (dipende da T288)
 - Pipeline: claude · sforzo max · stima 3% · approvato · browser · priorità 6

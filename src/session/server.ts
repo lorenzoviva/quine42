@@ -13,6 +13,7 @@ import { readWandererState, SOLO, validWandererId, type Profile } from '../kerne
 import { accountWanderer, type Account, type Verifier } from './account';
 import { playerChanges, playerFiles } from './files';
 import { hashStr, hex } from '../kernel/rng';
+import { equippedItem } from '../kernel/inventory';
 import { ENTITY_PARTS, type ClientMsg, type FileChanges, type ItemOp, type Dialog, type FormView, type Me, type MyState, type Notice, type OtherView, type ChunkView, type ServerLink, type ServerMsg, type EntityView } from './protocol';
 
 export interface SessionOptions {
@@ -983,7 +984,10 @@ export class SessionServer {
       const form = this.formOf(o.entity);
       const b = k.bubbles.get(o.entity);
       const intro = k.profileOf(w.id)?.introduction;
-      const v: OtherView = { id: w.id, name: w.name, x: round(o.x), y: round(o.y), facing: o.facing, ...(form ? { form } : {}), ...(b ? { text: b.text } : {}), ...(intro ? { introduction: intro } : {}) };
+      // What they wield, seen in their hand (T288): the item, not the inventory.
+      const inv = k.ecs.get(o.entity, 'inventory');
+      const held = inv ? equippedItem(inv) : null;
+      const v: OtherView = { id: w.id, name: w.name, x: round(o.x), y: round(o.y), facing: o.facing, ...(form ? { form } : {}), ...(b ? { text: b.text } : {}), ...(intro ? { introduction: intro } : {}), ...(held ? { held } : {}) };
       const key = JSON.stringify(v);
       if (c.others.get(w.id) !== key) others.push(v);
       c.others.set(w.id, key);

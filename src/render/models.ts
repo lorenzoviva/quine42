@@ -5,6 +5,7 @@
 import * as THREE from 'three';
 import type { Kernel } from '../kernel/kernel';
 import { instanceGrid, type Form, type FormComp } from '../kernel/forms';
+import { handsOf, type Hand } from '../mj/hold';
 import { meshVoxels, stageGrid, type MeshData } from '../mj/mesh';
 import { casts, MAT } from './materials';
 import type { Limb } from './entities';
@@ -132,6 +133,17 @@ export function modelMaterials(geo: THREE.BufferGeometry, mat: THREE.Material): 
   return [mat, mat === MAT.cut ? MAT.cutGlass : mat === MAT.corona || mat === MAT.coronaSway ? MAT.coronaGlass : MAT.glass];
 }
 
+/** The hands of a figure's form (T288): read once from its grid, as many as the arms of its rig. */
+const hands = new Map<string, Hand[]>();
+function handsFor(f: Form): Hand[] {
+  let h = hands.get(f.key);
+  if (!h) hands.set(f.key, (h = f.result ? handsOf(f.result.grid, f.result.palette, f.vpt) : []));
+  return h;
+}
+
+/** The hand of a limb of the worker's (an arm), found by its joint: the same rig on the same grid puts it in the same place. */
+const handAt = (list: Hand[], joint: [number, number, number]) => list.find((h) => Math.abs(h.joint[0] - joint[0]) + Math.abs(h.joint[1] - joint[1]) + Math.abs(h.joint[2] - joint[2]) < 1e-6);
+
 export interface ModelObject {
   root: THREE.Group;
   body: THREE.Object3D;
@@ -170,7 +182,8 @@ export function modelObject(k: Kernel, f: Form, fc: FormComp | undefined, materi
     pivot.position.set(...l.joint);
     pivot.add(mesh(l.geo));
     body.add(pivot);
-    return { pivot, part: l.part, phase: l.phase };
+    const hand = l.part === 'arm' ? handAt(handsFor(f), l.joint) : undefined;
+    return { pivot, part: l.part, phase: l.phase, ...(hand ? { hand } : {}) };
   });
   // An animated model shows one frame at a time instead of its body (the action's body has none).
   const frames = fc?.done?.length || rising ? [] : g.frames.map((geo) => {
