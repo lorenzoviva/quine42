@@ -220,7 +220,7 @@ spariscono: «delete fine scaffold»), `River` (`W`, `R` → `U` → `B`).
   quei modelli (partizione a tessere `Partition`, scale `Stairs`/`OrientedStairs`). Qui si sostituisce con il reticolo e la crescita (1-3).
 - `convchain` (`ChainDungeon`), regole da file (`fin`, `fout`, `file`: `CarmaTower`, `DungeonGrowth`), `map` frazionaria.
 - `field` e `temperature` (`Keys`, `SoftPath`, `Division`, `Dwarves`), `observe` e `search` (`StairsPath`, `RegularPath`, `CompleteSAW`):
-  **il motore li sa da T334** (ADR-0171; i modelli in `lab/mjx/official/`, le foto accanto all'originale in `inferenza/`), ma il validatore del
+  **il motore li sa da T334** (ADR-0172; i modelli in `lab/mjx/official/`, le foto accanto all'originale in `inferenza/`), ma il validatore del
   gioco non li prende finché T336 non li apre: per lo Scultore, oggi, un corridoio «verso» un bersaglio si fa ancora con `path`.
 - Pattern più grandi di 1728 celle: una colonna da 96 strati sì, un profilo 18×96 sì (1728), una campata intera 31×31×anything no.
 

@@ -1,4 +1,4 @@
-// Inference in MarkovJunior's rule nodes (T334, ADR-0171): `field` (to, from, on, recompute, essential), `temperature`, `observe`
+// Inference in MarkovJunior's rule nodes (T334, ADR-0172): `field` (to, from, on, recompute, essential), `temperature`, `observe`
 // (value, from, to) and `search` (limit, depthCoefficient), each in a small case whose result is known; the ceilings; determinism; and
 // what the original (MarkovJunior's C#, run with lab/banco/inferenza/originale) gave on the same models.
 
