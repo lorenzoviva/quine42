@@ -783,7 +783,7 @@ interface ObserveRun {
 }
 
 /**
- * A rule node that infers (T334, ADR-0172): MarkovJunior's RuleNode with fields, observations and search (RuleNode.cs, OneNode.cs,
+ * A rule node that infers (T334, ADR-0173): MarkovJunior's RuleNode with fields, observations and search (RuleNode.cs, OneNode.cs,
  * AllNode.cs, ParallelNode.cs). A match is wherever the input fits. `one` takes the match with the best heuristic (with `temperature`,
  * a draw weighted by exp(-h/T)); `all` applies its matches best first where they do not overlap; `prl` only waits for its fields.
  * With observations the node stops when the grid reaches the future; with a trajectory from the search it replays it, a state a step.

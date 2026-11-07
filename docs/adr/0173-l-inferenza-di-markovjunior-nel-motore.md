@@ -1,4 +1,4 @@
-# ADR-0172 — L'inferenza di MarkovJunior nel motore: `field`, `temperature`, `observe`, `search`
+# ADR-0173 — L'inferenza di MarkovJunior nel motore: `field`, `temperature`, `observe`, `search`
 
 Data: 2026-11-07 · Stato: accettato (task T334 del backlog, step 30) · Riferimenti: l'autore in chat (07/11, punto 1), `lab/banco/pattern.md` §12, ADR-0036 e ADR-0038 (MarkovJunior nel gioco e nel laboratorio), ADR-0105 (i limiti della sandbox), ADR-0118 (la traccia), ADR-0136 (la versione del kernel), ADR-0142 (il motore si ottimizza solo voxel per voxel identico); il sorgente di MarkovJunior (github.com/mxgmn/MarkovJunior, MIT): `Field.cs`, `Observation.cs`, `Search.cs`, `RuleNode.cs`, `OneNode.cs`, `AllNode.cs`, `ParallelNode.cs`
 

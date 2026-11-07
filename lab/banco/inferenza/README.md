@@ -33,7 +33,7 @@ Come si leggono:
 - **I passi.** L'originale conta anche il passo in cui un ramo finisce (`Branch.Go` che torna falso): uno per la radice, uno per ogni `markov`
   che si chiude (Keys 356 contro 354, Division 9 contro 8). Dove i cammini sono più lunghi i passi sono di più in entrambi.
 
-Le differenze volute dall'originale sono nell'ADR-0172: il motore guarda corrispondenze sempre aggiornate (l'originale, in un `all` con i
+Le differenze volute dall'originale sono nell'ADR-0173: il motore guarda corrispondenze sempre aggiornate (l'originale, in un `all` con i
 campi, perde fino a quando il nodo ricomincia le corrispondenze che in un passo non hanno potenziale), un `all` che non applica niente si ferma subito
 invece di contare un passo vuoto, i tetti della ricerca. StairsPath è senza il `map` finale: disegna le scale con tessere da file (`fout`),
 che il motore non legge ancora (T333, T335); il cammino resta sulla griglia grossa, `A` il corridoio, `D` gli angoli e i capi delle rampe.

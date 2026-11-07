@@ -1,4 +1,4 @@
-// Inference in MarkovJunior's rule nodes (T334, ADR-0172), as MarkovJunior does it (github.com/mxgmn/MarkovJunior, source/Field.cs,
+// Inference in MarkovJunior's rule nodes (T334, ADR-0173), as MarkovJunior does it (github.com/mxgmn/MarkovJunior, source/Field.cs,
 // Observation.cs, Search.cs), in three dimensions:
 //   field     a potential per code: the distance, over the `on` cells, from the nearest `to` cell (or `from`, inversed); the node then
 //             prefers the matches that lower the potential of what they write (`temperature` makes the preference soft)

@@ -373,35 +373,35 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Campo di potenziale
 - **Inglese**: `field`, `FieldSpec`, `fieldPotential`
-- **Definizione**: in un nodo di regole di un programma, per una lettera, la distanza di ogni cella dalla cella `to` più vicina passando solo per le celle `on` (con `from` è rovesciato: il nodo se ne allontana); il nodo preferisce le corrispondenze che scrivono quella lettera dove il campo scende. Il suo valore in una cella è il potenziale; -1 dove non arriva (ADR-0172).
+- **Definizione**: in un nodo di regole di un programma, per una lettera, la distanza di ogni cella dalla cella `to` più vicina passando solo per le celle `on` (con `from` è rovesciato: il nodo se ne allontana); il nodo preferisce le corrispondenze che scrivono quella lettera dove il campo scende. Il suo valore in una cella è il potenziale; -1 dove non arriva (ADR-0173).
 - **Dove vive**: `src/mj/infer.ts`, `src/mj/engine.ts`, `src/mj/model.ts`
 - **Da non usare**: `potenziale` (per il campo intero: è il suo valore in una cella)
 - **Fermo**: `<field for to from on recompute essential>`, come nell'XML di MarkovJunior.
 
 ### Temperatura
 - **Inglese**: `temperature`
-- **Definizione**: quanto a caso sceglie un nodo con campi o osservazioni: a 0 sempre la corrispondenza dall'euristica migliore, sopra con probabilità proporzionale a exp(-h/T); senza campi né osservazioni non fa niente (ADR-0172).
+- **Definizione**: quanto a caso sceglie un nodo con campi o osservazioni: a 0 sempre la corrispondenza dall'euristica migliore, sopra con probabilità proporzionale a exp(-h/T); senza campi né osservazioni non fa niente (ADR-0173).
 - **Dove vive**: `src/mj/engine.ts`
 - **Da non usare**: nessuno
 - **Fermo**: l'attributo `temperature` dell'XML di MarkovJunior.
 
 ### Osservazione
 - **Inglese**: `observe`, `ObserveSpec`, `backwardPotentials`, `goalReached`
-- **Definizione**: in un nodo di regole, ciò che le celle di una lettera devono diventare alla fine (`to`) e ciò che diventano subito (`from`): la griglia diventa un presente e un futuro, e il nodo cammina verso il futuro lungo i potenziali propagati all'indietro dalle sue regole, fermandosi quando ci arriva (ADR-0172).
+- **Definizione**: in un nodo di regole, ciò che le celle di una lettera devono diventare alla fine (`to`) e ciò che diventano subito (`from`): la griglia diventa un presente e un futuro, e il nodo cammina verso il futuro lungo i potenziali propagati all'indietro dalle sue regole, fermandosi quando ci arriva (ADR-0173).
 - **Dove vive**: `src/mj/infer.ts`, `src/mj/engine.ts`
 - **Da non usare**: `vincolo`, `obiettivo` (per l'osservazione)
 - **Fermo**: `<observe value from to>`, come nell'XML di MarkovJunior.
 
 ### Ricerca della traiettoria
 - **Inglese**: `search`, `SearchOutcome`, `INFERENCE_LIMITS`
-- **Definizione**: con le osservazioni, la ricerca best-first di tutta la sequenza di stati dal presente al futuro, prima del primo passo, che il nodo poi rigioca uno stato a passo; entro tetti di stati, byte e figli che contano unità (deterministici) e un tetto di tempo oltre il quale la corsa non è finita (ADR-0172).
+- **Definizione**: con le osservazioni, la ricerca best-first di tutta la sequenza di stati dal presente al futuro, prima del primo passo, che il nodo poi rigioca uno stato a passo; entro tetti di stati, byte e figli che contano unità (deterministici) e un tetto di tempo oltre il quale la corsa non è finita (ADR-0173).
 - **Dove vive**: `src/mj/infer.ts`
 - **Da non usare**: nessuno
 - **Fermo**: `search`, `limit`, `depthCoefficient`, come nell'XML di MarkovJunior.
 
 ### Nodo guidato
 - **Inglese**: `GuidedRunner`, `inferenceIn`, `inferenceRefusal`
-- **Definizione**: un nodo di regole con almeno un campo di potenziale o un'osservazione: vede una corrispondenza dovunque il suo ingresso combacia, anche se non cambierebbe niente, e sceglie con l'euristica; ogni altro nodo resta quello di sempre. Il validatore del gioco non lo prende finché T336 non lo apre (ADR-0172).
+- **Definizione**: un nodo di regole con almeno un campo di potenziale o un'osservazione: vede una corrispondenza dovunque il suo ingresso combacia, anche se non cambierebbe niente, e sceglie con l'euristica; ogni altro nodo resta quello di sempre. Il validatore del gioco non lo prende finché T336 non lo apre (ADR-0173).
 - **Dove vive**: `src/mj/engine.ts`, `src/mj/model.ts`, `src/kernel/validator.ts`
 - **Da non usare**: nessuno
 

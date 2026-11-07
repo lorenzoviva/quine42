@@ -28,7 +28,7 @@
 //   <import file="x"/>                      the program of models/x.xml run here as a node: its letters, colours and unions come
 //                                           with it; its box, origin, ground, soil, sound, animations and actions do not
 // Files come from `opts.files` (`mjxIncludes` gathers them): plain names, never a path, bounded in depth, number and size.
-// Inference, as MarkovJunior (T334, ADR-0172, src/mj/infer.ts): inside one, all and prl, <field for from|to on recompute essential/> and
+// Inference, as MarkovJunior (T334, ADR-0173, src/mj/infer.ts): inside one, all and prl, <field for from|to on recompute essential/> and
 // <observe value from to/>, with temperature, search, limit and depthCoefficient on the node.
 // Not supported (they need tiles): wfc, convchain.
 
