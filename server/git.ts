@@ -4,6 +4,7 @@
 // Whoever stops waits for what git is doing in a folder (`settleGit`, T209): a process that exits under a `git commit` leaves its locks in the universe.
 
 import { execFile, type ChildProcess } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -71,6 +72,45 @@ export async function holdGit<T>(cwd: string, work: () => Promise<T>): Promise<T
     busy.held--;
     release(key, busy);
   }
+}
+
+// --- The root of a contract (T295, ADR-0169) ---------------------------------------------------------------------------------------
+// Every universe born from the seed of a contract starts from the same commit: an empty tree, a fixed author and date, a message that names
+// the contract. Written as the bytes of the object, so nothing of this machine (its git, its configuration, its clock) changes it; the
+// seed comes in the commit after, with what is the universe's own. Universes with a root in common are kin: one brings the cards of the other.
+
+/** git's empty tree: the root holds no file, so a return to it would be a universe of nothing (the store refuses it). */
+export const EMPTY_TREE = '4b825dc642cb6eb9a060e54bf8d69288fbee4904';
+/** Who wrote every root, and when: 2026-11-07, the day the roots began. */
+const ROOT_SIGNATURE = 'Kernel <kernel@rune.local> 1794009600 +0000';
+
+/** The text of the root of a contract (`X.Y`): a commit of git, as `git cat-file commit` shows it. */
+export function rootCommitText(contract: string): string {
+  if (!/^\d{1,4}\.\d{1,5}$/.test(contract)) throw new Error(`contratto non valido: ${contract}`);
+  return `tree ${EMPTY_TREE}\nauthor ${ROOT_SIGNATURE}\ncommitter ${ROOT_SIGNATURE}\n\nradice degli universi del contratto ${contract}\n`;
+}
+
+/** The id of the root of a contract, as git computes it: the same on every machine. */
+export function rootCommitId(contract: string): string {
+  const body = Buffer.from(rootCommitText(contract), 'utf8');
+  return createHash('sha1').update(Buffer.concat([Buffer.from(`commit ${body.length}\0`, 'utf8'), body])).digest('hex');
+}
+
+/** A repository just made (`git init`, no commit) starts from the root of `contract`: its HEAD is the root. Returns the root's id. */
+export async function plantRoot(cwd: string, contract: string, author: [string, string]): Promise<string> {
+  // The empty tree is written too: what reads the root (a check, a copy) finds every object it names.
+  const tree = (await runGit(cwd, ['mktree'], { author, input: '' })).trim();
+  if (tree !== EMPTY_TREE) throw new Error(`albero vuoto inatteso: ${tree}`);
+  const id = (await runGit(cwd, ['hash-object', '-t', 'commit', '-w', '--stdin'], { author, input: rootCommitText(contract) })).trim();
+  if (id !== rootCommitId(contract)) throw new Error(`radice inattesa: ${id}`);
+  await runGit(cwd, ['update-ref', 'HEAD', id], { author });
+  return id;
+}
+
+/** The roots of a repository (the commits without parents its HEAD comes from), sorted; none for a folder without commits or not git's. */
+export async function rootsOf(cwd: string, author: [string, string]): Promise<string[]> {
+  const out = await runGit(cwd, ['rev-list', '--max-parents=0', 'HEAD'], { author }).catch(() => '');
+  return out.split('\n').map((s) => s.trim()).filter((s) => /^[0-9a-f]{40}$/.test(s)).sort();
 }
 
 /** The locks of a repository: all that is in `.git`, outside its objects. */

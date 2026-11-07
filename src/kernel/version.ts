@@ -5,7 +5,7 @@
 // The same string is in package.json (a test says so) and in every universe.json the kernel writes (`kernel`).
 // Every universe says the range of the kernels it runs on (T302, ADR-0152): `kernels`, from the contract it was born or ported with.
 
-export const KERNEL_VERSION = '0.5.5';
+export const KERNEL_VERSION = '0.5.6';
 
 export interface KernelVersion {
   major: number;
@@ -41,6 +41,8 @@ export interface KernelRange {
 
 export const showContract = (c: Contract): string => `${c.major}.${c.minor}`;
 export const contractOf = (v: KernelVersion): Contract => ({ major: v.major, minor: v.minor });
+/** This kernel's contract, `X.Y`: the root of the universes born from its seed (T295, ADR-0169), the check of the cards that cross universes. */
+export const KERNEL_CONTRACT = showContract(contractOf(parseVersion(KERNEL_VERSION)!));
 /** Negative, zero or positive, as a comes before, is or comes after b. */
 export const compareContracts = (a: Contract, b: Contract): number => a.major - b.major || a.minor - b.minor;
 

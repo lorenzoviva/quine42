@@ -34,6 +34,7 @@ import { keepsFormsOnDisk } from './render/forms';
 import { $ } from './ui/dom';
 import { applyTeleport, teleportTarget } from './kernel/teleport';
 import type { MasterTools } from './master';
+import type { BringRef } from './kernel/bring';
 import './style.css';
 
 const DT = 1 / 60;
@@ -147,7 +148,11 @@ async function main() {
       .catch(() => undefined);
     const credits = Number(seen?.viandante?.crediti) || 0;
     const isAnon = account?.anonimo ?? false;
+    // The master of a clone nobody entered yet may still bring cards (T295): asked of the store as the master, before the world starts.
+    const asMaster = client && readConfig(snapFiles).config.game?.master === id && !isAnon;
+    if (asMaster) client.identify(account ? { Authorization: `Bearer ${account.token}` } : { [WANDERER_HEADER]: id });
     const lobby = new LobbyScreen({
+      ...(asMaster ? { cards: { load: () => client.kin().catch(() => undefined), bring: (refs: BringRef[]) => client.bring(refs), has: (m: string) => snapFiles[`models/${m}.xml`] !== undefined } } : {}),
       name,
       files: snapFiles,
       wandererId: id,

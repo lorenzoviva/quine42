@@ -1060,6 +1060,20 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: «carta-mano», `.carte-mano` (la cartella è inglese, ADR-0153), «copia» (per la carta: un fork ha un id suo e non sostituisce l'originale)
 - **Fermo**: `/api/handmade`, `universes/.handmade/<viandante>.json`, i campi `kind`, `name`, `class`, `size`, `xml`, `kernel`, `author`, `from`, `origins`, `made`, `changed`, `signature`.
 
+### Radice del contratto
+- **Inglese**: `plantRoot`, `rootCommitId`, `rootCommitText`, `rootsOf`, `EMPTY_TREE`, `KERNEL_CONTRACT`
+- **Definizione**: il primo commit di ogni universo nato dal seme di un contratto `X.Y`: lo stesso su ogni macchina (albero vuoto, autore e data fissi, il messaggio che nomina il contratto); due universi con una radice in comune sono **parenti** (`kin`) e si portano le carte prima della Genesi. Non è uno stato dell'universo: non ci si torna.
+- **Dove vive**: `server/git.ts`, `server/universeStore.ts`, `src/kernel/version.ts`
+- **Da non usare**: «antenato» (per la radice: un antenato è ogni commit di prima), «primo commit» (il primo commit con i file viene dopo la radice)
+- **Fermo**: il testo della radice (`rootCommitText`): cambiarlo cambia la radice, e gli universi nati prima non sarebbero più parenti dei nuovi.
+
+### Carta portata
+- **Inglese**: `bring`, `brought`, `BringRef`, `broughtEntry`, `bringCards`, `kinCards`, `kinOf`, `KinView`, `cardChoice`, `CardChoicePanel`
+- **Definizione**: un modello o un suono, carta di un universo parente o carta fatta a mano, che il master porta in un universo prima della sua Genesi (in un clone, prima che entri il primo viandante): riletto dal disco e controllato, entra con un commit del kernel, il titolare il master e un anello in più nella catena. La **scelta delle carte** è aperta finché `universe.json → cardChoice` lo dice.
+- **Dove vive**: `src/kernel/bring.ts`, `server/bring.ts`, `src/ui/cardchoice.ts`
+- **Da non usare**: «carta importata», «importare» (per le carte: si portano), «fork» (un fork è una carta fatta a mano: un'altra carta)
+- **Fermo**: `universe.json → cardChoice` (`seed`, `clone`), il campo `brought` delle voci di `models/index.json` (`.handmade` per una carta fatta a mano), le rotte `/api/universe/<nome>/kin` e `/api/universe/<nome>/bring`.
+
 ### Controllo del programma
 - **Inglese**: `handmadeProgramErrors`, `HANDMADE_LIMITS`, `ProgramChecker`, `processChecker`, `inlineChecker`
 - **Definizione**: la prova del programma di una carta fatta a mano sul motore vero, entro tetti misurati sui programmi del seme (griglia, passi, tempo, azioni, animazioni, soglie del suono); nel server di produzione la fa il programma dei mondi, un processo per controllo senza segreti.

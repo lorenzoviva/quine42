@@ -48,6 +48,15 @@ export function contentText(o: unknown): string {
   return JSON.stringify(canon(o)) ?? '';
 }
 
+/**
+ * The id of a handmade card (ADR-0161): `handmade-` and ten letters or digits. It is a model's id too, so a universe takes the card as
+ * it is (T295); a model of a universe with such an id is measured by its program, as the card was, not by its index entry.
+ */
+export const HANDMADE_ID_RE = /^handmade-[a-z0-9]{10}$/;
+
+/** The «universe» of the link a handmade card leaves in the chain when it enters a universe (T295): its author held it in the archive, not in a universe; no universe can have this name. */
+export const HANDMADE_ORIGIN = '.handmade';
+
 /** How many numbers a fingerprint has: the resolution of `changeOf` is their inverse. */
 export const FINGERPRINT = 32;
 

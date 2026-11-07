@@ -11,6 +11,7 @@ import { BudgetError } from './ai/models';
 import { modelGap, sculptPlan } from './coefficients';
 import { hashStr, hex } from './rng';
 import { italianName } from './internalNames';
+import { sameName } from './bring';
 
 /**
  * What a model's index entry says of its size (ADR-0092): the size, if not its class's own, and the coarser density
@@ -51,6 +52,12 @@ export function structureModel(concept: string, size?: SizeTier): string {
 
 /** The entries of the same concept at every size: where a program to share is looked for. */
 export const structureSiblings = (concept: string): string[] => [...new Set([structureModel(concept), ...SIZE_TIERS.map((t) => structureModel(concept, t.id))])];
+
+/**
+ * What the Sculptor writes for the world is a card of the world (ADR-0056: the world pays for `model.sculpt`), so another universe may bring it
+ * (T295); a model that came with the cards keeps the card it came with.
+ */
+const SCULPTED = { task: 'model.sculpt', author: 'sculptor' };
 
 export class ModelDirector {
   private busy = false;
@@ -125,16 +132,38 @@ export class ModelDirector {
     return undefined;
   }
 
+  /**
+   * A model that came with the cards (T295, ADR-0169) for a request of the same class and the same name (the Narrator was told their names):
+   * its program and its entry under the request's id, with its card (the same card, the same chain), no call. Undefined if none fits.
+   */
+  reused(req: SculptRequest): { xml: string; info: ModelInfo } | undefined {
+    const k = this.k;
+    const own = (t?: string) => sizeOf(t)?.id ?? classOf(req.classe)?.taglia;
+    for (const { id, info } of k.broughtModels()) {
+      const xml = k.files[`models/${id}.xml`];
+      if (id === req.id || info.class !== req.classe || !xml || !sameName(info.name, req.nome) || own(info.size) !== own(req.taglia)) continue;
+      return { xml, info: { ...info, name: req.nome } };
+    }
+    return undefined;
+  }
+
+  /**
+   * A request that costs nothing: the program of another size of its structure (ADR-0160), or a model that came with the cards (T295).
+   * Put in the library now; true if it was one (added, or skipped as invalid).
+   */
+  free(r: SculptRequest): boolean {
+    const shared = r.shareWith?.length ? this.shared(r) : undefined;
+    const s = shared ?? this.reused(r);
+    if (!s) return false;
+    if (!this.k.addModel(r.id, s.xml, s.info, shared ? `scultore: ${r.nome}, lo stesso programma di un'altra taglia` : `scultore: ${r.nome}, il modello venuto con le carte`, SCULPTED)) this.skip.add(r.id);
+    return true;
+  }
+
   /** Called every few seconds: starts the next model if idle. */
   pump(): void {
     if (!this.active || this.busy || this.k.generationHeld) return;
-    // What another size already has costs nothing, and does not wait for the budget.
-    for (const r of this.missing()) {
-      const s = r.shareWith?.length ? this.shared(r) : undefined;
-      if (!s) continue;
-      if (!this.k.addModel(r.id, s.xml, s.info, `scultore: ${r.nome}, lo stesso programma di un'altra taglia`)) this.skip.add(r.id);
-      return;
-    }
+    // What another size already has costs nothing, and does not wait for the budget; nor what came with the cards.
+    for (const r of this.missing()) if (this.free(r)) return;
     if (this.used >= (this.k.config.ai.maxModels ?? 40) || this.k.time < this.nextAt || this.k.coefficients().models <= 0) return;
     const req = this.missing()[0];
     if (req) void this.make(req);
@@ -154,7 +183,7 @@ export class ModelDirector {
         this.lacking(req, 'invalid', this.k.lastDiscard('sculptor', 'model.sculpt'));
         return false;
       }
-      const added = this.k.addModel(req.id, r.xml, { class: req.classe, ...modelSize(req), name: req.nome, author: r.model, ...(cls && procedural(cls, req.taglia) ? { seeds: STRUCTURE_SEEDS } : {}), ...(r.voto !== undefined ? { score: r.voto } : {}), ...(req.tinta ? { tint: 'C' } : {}) }, `scultore: ${req.nome}`);
+      const added = this.k.addModel(req.id, r.xml, { class: req.classe, ...modelSize(req), name: req.nome, author: r.model, ...(cls && procedural(cls, req.taglia) ? { seeds: STRUCTURE_SEEDS } : {}), ...(r.voto !== undefined ? { score: r.voto } : {}), ...(req.tinta ? { tint: 'C' } : {}) }, `scultore: ${req.nome}`, SCULPTED);
       if (!added) this.lacking(req, 'invalid', this.k.lastDiscard('sculptor', 'model.sculpt'));
       return added;
     } catch (e) {

@@ -160,6 +160,8 @@ export function readConfig(files: FileMap): { config: UniverseConfig; error?: st
           actor: repairActor(parsed.ai?.actor),
         }),
         game: repairGameSetup(parsed.game),
+        // Only what the store writes opens the choice of the cards (T295): anything else is closed.
+        cardChoice: parsed.cardChoice === 'seed' || parsed.cardChoice === 'clone' ? parsed.cardChoice : undefined,
       },
     };
   } catch (e) {

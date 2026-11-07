@@ -268,6 +268,9 @@ export class Repo {
     if (b.readBranch) out.readBranch = (name) => b.readBranch!(name);
     if (b.merge) out.merge = (name, message) => (sealed() ? Promise.resolve() : b.merge!(name, message));
     if (b.clone) out.clone = (nome, master, titolari) => b.clone!(nome, master, titolari);
+    // The cards brought before the start (T295) are a write too: none while the repository is read-only.
+    if (b.kin) out.kin = () => b.kin!();
+    if (b.bring) out.bring = (cards) => (sealed() ? Promise.resolve({ ok: false as const, reason: 'questo universo si legge soltanto' }) : b.bring!(cards));
     return out;
   }
 }

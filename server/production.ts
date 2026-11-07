@@ -242,7 +242,8 @@ export function createProductionServer(o: ProductionOptions): ProductionServer {
   // Not a reason not to start: the site without videos is the site. The name, never the value.
   if (videos && !existsSync(videos)) console.warn('QUINE_VIDEO: la cartella non c’è, il sito resta senza video');
   const routes: Route[] = [
-    universeHandler(universesDir, { accounts, internal, quota: universesPerAccount(o.env.QUINE_UNIVERSI_PER_ACCOUNT) }),
+    // The cards a master brings before the start (T295): checked by the same processes as the handmade cards.
+    universeHandler(universesDir, { accounts, internal, quota: universesPerAccount(o.env.QUINE_UNIVERSI_PER_ACCOUNT), checker, labs: () => o.labs === true }),
     (req, res, next) => (req.url?.split('?')[0] === '/api/account' ? answerAccount(req, res) : next()),
     stripeHandler({ settings: stripeSettings(o.env), accounts, universesDir, getActiveWorld }),
     wandererHandler({ accounts, universesDir, getActiveWorld }),

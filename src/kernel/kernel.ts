@@ -51,7 +51,9 @@ import { designEnvironment, drawAtlas, planChunk, readStructure, type ChunkPlan,
 import { WaterFlow, WET, type WaterChange } from './water';
 import { forge, ForgeRejected, judgeCombination, repairLogic, slug, type ForgeOrigin } from './agents/forge';
 import { agentReply, examine, narrate, NARRATOR_PLAYS, liaisonReply, type Interpreter, type NpcReply, type Turn } from './agents/minds';
-import { planGenesis } from './agents/genesis';
+import { planGenesis, type GenesisBrought } from './agents/genesis';
+import { broughtModels, CAST_CLASSES, sameName, withCardChoice, type BringAnswer, type BringRef, type KinView } from './bring';
+import { soundPrograms } from '../mj/sound';
 import { councilSession, inventRune, judgeAction, judgeCraft, judgeDeath, nameSpell } from './agents/effects';
 import { canonWithRune, MAX_MAGIC_RUNES, validateNewRune } from './magic';
 import { cleanPanel, designMechanic } from './agents/mechanics';
@@ -1900,6 +1902,7 @@ export class Kernel {
           fragments: this.fragments.map((f) => f.line), wanted: [...this.wanted].map((id) => this.itemInfo(id).name).slice(0, 8), start, attempt, feedback,
           region: region ? { nome: region.name, descrizione: region.description } : undefined,
           rari: this.rareAllowed(ch),
+          ...(this.broughtStructures().length ? { brought: this.broughtStructures() } : {}),
           chi: ch.chi,
         });
         const verdict = this.validator.validatePlan(raw, new Set(layouts.map((l) => l.id)), placeable);
@@ -2324,6 +2327,9 @@ export class Kernel {
    * program that scales and is of another size: then its size has an entry of its own, which the `ModelDirector` gives the same program.
    */
   private structureModelFor(concept: string, size?: SizeTier): string {
+    // A structure that came with the cards (T295): the concept it is named by, at its size, wears it, whatever its id (a handmade card's too).
+    const brought = this.broughtStructures().find((b) => sameName(b.concept, concept) && (size === undefined ? b.size === undefined : (b.size ?? classOf(b.class)?.taglia) === size));
+    if (brought) return brought.id;
     const sized = structureModel(concept, size), plain = structureModel(concept);
     if (sized === plain || this.forms.info(sized)) return sized;
     const old = this.forms.info(plain), xml = this.files[`models/${plain}.xml`];
@@ -5458,6 +5464,85 @@ export class Kernel {
     return { ...DEFAULT_SCULPTORS, ...internalSculptors(this.config.ai.sculptors ?? {}) };
   }
 
+  // --- The cards brought before the start (T295, ADR-0169) --------------------------------------------------------------------
+
+  private broughtCache?: { files: FileMap; list: Array<{ id: string; info: ModelInfo }> };
+
+  /** The models that came with a choice of cards (`brought` in the library's index). */
+  broughtModels(): Array<{ id: string; info: ModelInfo }> {
+    if (this.broughtCache?.files !== this.files) this.broughtCache = { files: this.files, list: broughtModels(this.files) };
+    return this.broughtCache.list;
+  }
+
+  /** The structures that came with the cards, by the concept they are named by and their size: the Cartographer may ask for them, and they cost nothing. */
+  broughtStructures(): Array<{ id: string; class: string; concept: string; size?: SizeTier }> {
+    return this.broughtModels()
+      .filter(({ info }) => info.class === 'structure' || info.class === 'building')
+      .map(({ id, info }) => ({ id, class: info.class, concept: info.name ?? id, ...(sizeOf(info.size) ? { size: info.size as SizeTier } : {}) }));
+  }
+
+  /** What the agents of the Genesis are told came with the cards: everything for the style guide, the music by environment, the figures and things by name. */
+  private broughtForGenesis(): GenesisBrought | undefined {
+    const all = this.broughtModels();
+    if (!all.length) return undefined;
+    const music = soundPrograms(this.files).filter((p) => all.some((b) => b.id === p.id) && p.sound?.use === 'music' && p.sound.environments?.length);
+    return {
+      all: all.map(({ id, info }) => ({ name: info.name ?? id, class: info.class })),
+      music: music.map((p) => ({ name: p.name ?? p.id, environments: p.sound!.environments! })),
+      cast: all.filter(({ info }) => CAST_CLASSES.has(info.class)).map(({ id, info }) => ({ name: info.name ?? id, class: info.class })),
+    };
+  }
+
+  /**
+   * The choice of the cards closes (T295, ADR-0169): when the Genesis begins, or when the first wanderer enters (`lockSettings`). universe.json loses
+   * `cardChoice` in a commit of the kernel; a mirror, the bench and a universe that is only read write nothing.
+   */
+  private closeCardChoice(why: string): void {
+    if (this.mirror || this.bench || !this.config.cardChoice || this.readOnly() !== undefined) return;
+    const text = this.repo.working['universe.json'];
+    if (text === undefined) return;
+    const closed = withCardChoice(text, undefined);
+    this.writeCommanded('universe.json', closed);
+    this.config = { ...this.config, cardChoice: undefined };
+    this.files = { ...this.files, 'universe.json': closed };
+    this.repo.commit(`la scelta delle carte si chiude: ${why}`, 'kernel');
+  }
+
+  /** What the master may bring now, from the store (kin universes, handmade cards, whether the choice is open); undefined without one. */
+  async cardChoice(): Promise<KinView | undefined> {
+    const b = this.repo.backend;
+    if (this.mirror || !b?.kin) return undefined;
+    return b.kin().catch(() => undefined);
+  }
+
+  /**
+   * Brings the cards chosen (T295): the store reads them from the disk, checks them and commits them (one commit of the kernel); here the
+   * same files enter this session, and the next commit finds them on the disk already. Only the master, only while the choice is open
+   * and before the match.
+   */
+  async bringCards(cards: BringRef[]): Promise<BringAnswer> {
+    const no = (reason: string): BringAnswer => ({ ok: false, reason });
+    if (this.mirror) return no('le carte le porta il mondo, non uno specchio');
+    if (!this.isMaster()) return no('solo il master porta le carte nel suo universo');
+    if (this.settingsLocked) return no('la partita è cominciata: le carte si portano prima');
+    if (!this.config.cardChoice) return no('la scelta delle carte è chiusa');
+    if (this.readOnly() !== undefined) return no('questo universo si legge soltanto');
+    const b = this.repo.backend;
+    if (!b?.bring) return no('senza il server degli universi le carte non vengono');
+    const r = await b.bring(cards).catch((e: unknown): BringAnswer => no((e as Error).message));
+    if (!r.ok) {
+      this.council.say('kernel', 'scarta', `carte da portare: ${r.reason}${r.cards?.length ? ` (${r.cards.map((c) => `${c.card}: ${c.reason}`).join('; ')})` : ''}`);
+      return r;
+    }
+    // The store committed the cards; this commit finds them on the disk and carries only what the kernel keeps (ledgers, graph).
+    for (const [p, v] of Object.entries(r.changes)) this.repo.write(p, v);
+    this.applyFiles({ ...this.repo.working });
+    this.repo.commit(`il kernel prende le carte portate: ${r.brought.map((x) => x.id).join(', ')}`, 'kernel');
+    for (const x of r.brought) this.bus.emit('model:added', { id: x.id });
+    this.council.say('kernel', 'approva', `carte portate: ${r.brought.map((x) => `«${x.name}» (${x.from})`).join(', ')}`);
+    return r;
+  }
+
   /** A program enters the library (or replaces one): validated, written with its index entry, committed. */
   addModel(id: string, xml: string, info: ModelInfo, message: string, card?: { task: string; author: string; chi?: string }): boolean {
     const path = `models/${id}.xml`;
@@ -5919,6 +6004,8 @@ export class Kernel {
   /** Entering: the settings are fixed from here (a wanderer enters a world of many, or the one who plays alone closes the lobby). */
   lockSettings(): void {
     if (this.settingsLocked) return;
+    // Whoever enters first closes the choice of the cards (T295, ADR-0169): from now on the world is played, not prepared.
+    this.closeCardChoice('si entra nel mondo');
     let raw: Record<string, unknown> = {};
     try {
       raw = JSON.parse(this.repo.working['universe.json'] ?? '{}');
@@ -7583,9 +7670,11 @@ export class Kernel {
     const keptGame = this.game;
     try {
       // The game is chosen once, for a universe that was never generated (ADR-0053).
+      // The cards came before (T295): the Genesis closes the choice (a commit of its own, before the game is chosen), and its agents know what came.
+      this.closeCardChoice('comincia la Genesi');
       if (game && this.needsGenesis()) this.chooseGame(game);
       onProgress?.('Il Concilio si riunisce');
-      const plan = await planGenesis(this.council, theme, this.repo.working, (id, def, palette) => this.validator.validateLayout(id, def, palette, this.sampleDrafts()));
+      const plan = await planGenesis(this.council, theme, this.repo.working, (id, def, palette) => this.validator.validateLayout(id, def, palette, this.sampleDrafts()), this.broughtForGenesis());
       for (const [p, src] of Object.entries(plan.files)) this.repo.write(p, src);
       this.stampContent('genesis.layouts', 'cartographer', COMUNE);
       // Example content shipped on disk makes room for the generated world.

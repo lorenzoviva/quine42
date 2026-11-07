@@ -12,6 +12,8 @@ import { BUDGET_KEYS, BUDGET_SCALE, readConfig, SCULPTOR_CLASSES, withinMinimums
 import type { AiSettings, FileMap } from '../kernel/types';
 import { usd } from '../kernel/ai/prices';
 import { checkKernelVersion, KERNEL_VERSION } from '../kernel/version';
+import type { BringAnswer, BringRef, KinView } from '../kernel/bring';
+import { CardChoicePanel } from './cardchoice';
 import { el } from './dom';
 
 export interface LobbyOptions {
@@ -26,6 +28,11 @@ export interface LobbyOptions {
   /** A game alone: only the settings, there is no ceiling, no recharge and nobody else (T247). */
   alone?: boolean;
   onRecharge?: (amount: number) => Promise<{ ok: boolean; url?: string; motivo?: string }>;
+  /**
+   * The master of a universe that may still bring cards (a clone before its first entry, T295, ADR-0169): what may come, and how it comes
+   * (the store, on the disk: the world reads it when it starts). The cards come with «Entra nel mondo», before entering.
+   */
+  cards?: { load: () => Promise<KinView | undefined>; bring: (refs: BringRef[]) => Promise<BringAnswer>; has: (id: string) => boolean };
 }
 
 export interface LobbyResult {
@@ -363,12 +370,33 @@ export class LobbyScreen {
     );
 
     // Action buttons
+    // The cards to bring (T295): only the master of a clone nobody has entered yet; the store says whether the choice is open.
+    const choice = isMaster && !inCorso && this.opts.cards ? new CardChoicePanel({ load: this.opts.cards.load, has: this.opts.cards.has }) : undefined;
     const btnEnter = el('button', { class: 'primary comic-btn arcade' }, 'Entra nel mondo');
-    btnEnter.onclick = () => {
+    btnEnter.onclick = async () => {
       const tetto = isAnonymous || alone ? 0 : Number(capInput.value) || 0;
       if (!alone && tetto < minCap) {
         statusEl.textContent = `Il master richiede un tetto minimo di ${usd(minCap)} per entrare.`;
         return;
+      }
+      const chosen = choice?.open ? choice.chosen() : [];
+      if (chosen.length) {
+        const twice = choice!.doubles();
+        if (twice.size) {
+          statusEl.textContent = `Due carte con lo stesso id, o un id che c'è già: ${[...twice.values()][0]}.`;
+          return;
+        }
+        btnEnter.disabled = true;
+        choice!.lock(true);
+        statusEl.textContent = `Le carte entrano (${chosen.length}): ogni programma ripassa dal controllo…`;
+        const brought = await this.opts.cards!.bring(chosen).catch((e: unknown): BringAnswer => ({ ok: false, reason: (e as Error).message }));
+        choice!.showAnswer(brought);
+        btnEnter.disabled = false;
+        choice!.lock(false);
+        if (!brought.ok) {
+          statusEl.textContent = `Le carte non entrano: ${brought.reason}. Togli quelle che non vanno e riprova.`;
+          return;
+        }
       }
       const now = read();
       this.close({ tetto, ...(editable && JSON.stringify(now) !== opened ? { regolazioni: now } : {}) });
@@ -408,6 +436,7 @@ export class LobbyScreen {
       el('div', { class: 'lobby-sub' }, alone ? `Universo «${name}»` : `Universo «${name}» · Master: ${master}`),
       ...(kernels.ok ? [] : [el('div', { class: 'locked-note kernel-range' }, kernels.etichetta ? `${kernels.etichetta}: questo universo gira su altri kernel (questo è il ${KERNEL_VERSION}). Si apre con il guasto che lo dice e non si salva; non si cancella.` : `Questo universo non è di questo kernel: ${kernels.motivo}.`)]),
       masterBlock,
+      ...(choice ? [choice.root] : []),
       ...(minimumsBlock ? [minimumsBlock] : []),
       ...(alone ? [] : [wandererBlock, cardsBlock]),
       statusEl,

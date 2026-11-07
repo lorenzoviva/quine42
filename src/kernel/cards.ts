@@ -9,7 +9,7 @@
 import { slug } from './graph';
 import { hash32, hashStr } from './rng';
 import { MODELS_INDEX } from './forms';
-import { contentText, fingerprint, readOrigins, repairHeritage, sharesOf, type CardOrigin } from './heritage';
+import { contentText, fingerprint, HANDMADE_ID_RE, readOrigins, repairHeritage, sharesOf, type CardOrigin } from './heritage';
 import { readPeople, readPlots } from './npc/model';
 import type { FileMap, Manifest } from './types';
 import { internalCardId, internalCardsIn, internalFields, internalSoloIn } from './internalNames';
@@ -159,7 +159,9 @@ export function allCards(files: FileMap, shares = false): Card[] {
     for (const [token, r] of Object.entries(m.runes ?? {})) part(`rune:${slug(token)}`, 'rune', r.name ?? token, r);
     for (const r of m.recipes ?? []) part(`recipe:${slug(r.id)}`, 'recipe', r.name ?? r.id, r);
   }
-  for (const [id, info] of Object.entries(internalFields('modelIndex', stamped(files[MODELS_INDEX]) ?? {}) as Record<string, { name?: string; card?: CardStamp }>)) push(`model:${slug(id)}`, 'model', info?.name ?? id, MODELS_INDEX, info);
+  // A handmade card that entered the universe (T295) is measured by its program, as it was in the archive (ADR-0161); any other model by its entry (ADR-0084).
+  for (const [id, info] of Object.entries(internalFields('modelIndex', stamped(files[MODELS_INDEX]) ?? {}) as Record<string, { name?: string; card?: CardStamp }>))
+    push(`model:${slug(id)}`, 'model', info?.name ?? id, MODELS_INDEX, info, HANDMADE_ID_RE.test(id) ? () => files[`models/${id}.xml`] ?? '' : undefined);
   for (const [key, c] of Object.entries(ledger.chunks)) push(`chunk:${key}`, 'chunk', c.name || key, 'maps/', c, () => String(c.name ?? ''));
   // People and plots measured as the file has them, as the clone did (the repaired ones give the names).
   const people = raw('world/people.json', 'people', 'people');

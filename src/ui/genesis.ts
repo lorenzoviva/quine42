@@ -12,6 +12,7 @@ import { DEFAULT_SCULPTORS, type SculptorAiModels } from '../kernel/agents/sculp
 import { usd } from '../kernel/ai/prices';
 import { themeOfText, WORLD_THEMES } from '../kernel/themes';
 import { feedLine } from './feed';
+import { CardChoicePanel } from './cardchoice';
 import { $, el } from './dom';
 
 export class GenesisScreen {
@@ -171,6 +172,8 @@ export class GenesisScreen {
       if (!canGenerate) go.setAttribute('disabled', '');
       const game = this.gameForm();
       const detail = this.aiForm();
+      // The cards to bring (T295): only with the store of the universes, and only while the choice is open (it says why not).
+      const cards = this.k.repo.backend?.kin ? new CardChoicePanel({ load: () => this.k.cardChoice(), has: (id) => this.k.files[`models/${id}.xml`] !== undefined }) : undefined;
       const cost = el(
         'div',
         { class: 'note' },
@@ -192,6 +195,16 @@ export class GenesisScreen {
         this.root.hidden = true;
         resolve();
       };
+      const unlock = () => {
+        go.removeAttribute('disabled');
+        skip.removeAttribute('disabled');
+        theme.removeAttribute('disabled');
+        themes.disabled = false;
+        game.lock(false);
+        detail.lock(false);
+        cards?.lock(false);
+        this.root.classList.remove('running');
+      };
       go.onclick = async () => {
         go.setAttribute('disabled', '');
         skip.setAttribute('disabled', '');
@@ -199,6 +212,23 @@ export class GenesisScreen {
         themes.disabled = true;
         game.lock(true);
         detail.lock(true);
+        // The cards come first (T295): the Genesis then knows them, and does not make them again.
+        const chosen = cards?.open ? cards.chosen() : [];
+        if (chosen.length) {
+          const twice = cards!.doubles();
+          if (twice.size) {
+            status.textContent = `Due carte con lo stesso id, o un id che c'è già: ${[...twice.values()][0]}.`;
+            return unlock();
+          }
+          cards!.lock(true);
+          status.textContent = `Le carte entrano (${chosen.length}): ogni programma ripassa dal controllo…`;
+          const brought = await this.k.bringCards(chosen);
+          cards!.showAnswer(brought);
+          if (!brought.ok) {
+            status.textContent = `Le carte non entrano: ${brought.reason}. Togli quelle che non vanno e riprova.`;
+            return unlock();
+          }
+        }
         this.k.setAi(detail.read());
         this.root.classList.add('running');
         const ok = await this.k.runGenesis(theme.value, (step) => (status.textContent = step), game.read());
@@ -210,13 +240,9 @@ export class GenesisScreen {
             resolve();
           }, 1500);
         } else {
-          go.removeAttribute('disabled');
-          skip.removeAttribute('disabled');
-          theme.removeAttribute('disabled');
-          themes.disabled = false;
-          game.lock(false);
-          detail.lock(false);
-          this.root.classList.remove('running');
+          unlock();
+          // The Genesis closed the choice when it began: the panel says so, the cards that came stay.
+          void cards?.reload();
         }
       };
       this.root.replaceChildren(
@@ -230,6 +256,7 @@ export class GenesisScreen {
           theme,
           game.form,
           detail.form,
+          ...(cards ? [cards.root] : []),
           cost,
           el('div', { class: 'actions' }, go, skip),
           status,

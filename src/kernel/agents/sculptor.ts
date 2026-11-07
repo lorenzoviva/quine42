@@ -140,9 +140,9 @@ export function sculptorRole(files: FileMap, structures = false): string {
     .replace('@@PALETTE@@', palette);
 }
 
-/** Up to two programs of the library of the same class (or family) to learn from: the hand-written first. */
+/** Up to two programs of the library of the same class (or family) to learn from: the hand-written first, then those that came with the cards (T295). */
 export function examplesFor(files: FileMap, classe: string): string[] {
-  let index: Record<string, { class?: string; author?: string }> = {};
+  let index: Record<string, { class?: string; author?: string; brought?: string }> = {};
   try {
     // The fields of 0.3 (`classe`, `autore`) read internal (T308a).
     index = internalFields('modelIndex', JSON.parse(files['models/index.json'] ?? '{}'));
@@ -153,7 +153,9 @@ export function examplesFor(files: FileMap, classe: string): string[] {
   const ids = Object.keys(index).filter((id) => files[`models/${id}.xml`]);
   const picked: string[] = [];
   for (const cls of family[classe] ?? [classe, 'furniture']) {
-    const of = ids.filter((id) => index[id].class === cls).sort((a, b) => Number(/mano/.test(index[b].author ?? '')) - Number(/mano/.test(index[a].author ?? '')));
+    // The hand-written first, then what the master brought from other worlds (the world's look grows from them), then the rest.
+    const rank = (id: string) => (/mano/.test(index[id].author ?? '') ? 2 : typeof index[id].brought === 'string' ? 1 : 0);
+    const of = ids.filter((id) => index[id].class === cls).sort((a, b) => rank(b) - rank(a));
     for (const id of of) if (picked.length < 2 && !picked.includes(id)) picked.push(id);
   }
   return picked.map((id) => files[`models/${id}.xml`].trim());

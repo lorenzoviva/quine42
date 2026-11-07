@@ -224,7 +224,7 @@ export class HandmadeArchive {
  * another contract ported in memory). Only if the program is not under its name of now (a sound of before the contract 0.3, renamed by a
  * migration) is the whole folder of the models read.
  */
-async function modelFiles(root: string, model: string): Promise<FileMap> {
+export async function modelFiles(root: string, model: string): Promise<FileMap> {
   const files: FileMap = {};
   const read = async (rel: string) => {
     try {

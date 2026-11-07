@@ -92,6 +92,8 @@ export interface PlanContext {
   rari?: SizeTier[];
   /** Who pays for the plan (T40): the wanderer who first came to the place. */
   chi?: string;
+  /** The structures that came with the cards (T295, ADR-0169): asked by their concept and size, they are worn as they are, at no cost. */
+  brought?: Array<{ concept: string; size?: SizeTier }>;
 }
 
 const WHERE: Where[] = ['dentro', 'fuori', 'ovunque'];
@@ -132,6 +134,7 @@ export async function planChunk(c: Council, ctx: PlanContext): Promise<ChunkPlan
     '"nuovi": almost always empty; only a concrete thing or a character the place calls for and that does not exist among the modules; for a thing, "takeable": true if a wanderer could lift it and set it down elsewhere (a chest, a stool), false if it is fixed or built in place (a well, an oven, a statue).',
     `"rune": 0-2 fragments taken exactly from this list: ${ctx.fragments.map((f) => `«${f}»`).join(', ')}.`,
     '"strutture": 0-2 buildings or constructions of this place, if the environment has some of its age (e.g. "the mill on the river", "the tram depot", "the boiler works"): each becomes a whole model one can enter, on the lots of the environment (the other lots have common houses).',
+    ctx.brought?.length ? `These structures are already built in the library: ${ctx.brought.slice(0, 30).map((b) => `«${b.concept}»${b.size ? ` (${b.size})` : ''}`).join(', ')}. When one fits this place, write EXACTLY its concept (and its size) in "strutture".` : '',
     `"taglia" (optional, as the sizes of D&D: tiny, small, medium, large, huge, gargantuan): medium a house, large a mill, a station or a tower; the kernel fits it to the lot.`,
     ctx.rari?.length
       ? `The biggest sizes are rare: this part of the world may still have ${ctx.rari.map((t) => (t === 'huge' ? 'one "huge" structure (what is huge in its age: a castle, a power station, a skyscraper)' : 'one "gargantuan" structure (a citadel, a cathedral, a tower-city, an immense ruin)')).join(' and ')}: at most one per place, only if the place truly deserves it.`
@@ -177,7 +180,7 @@ const LAYOUTS_SCHEMA: Schema = {
 };
 
 /** Genesis: the Cartographer writes the environments of this world as rewrite programs. */
-export async function designLayouts(c: Council, palette: Record<string, TerrainDef>, feedback = ''): Promise<Array<{ id: string; def: EnvironmentDef } | { id: string; error: string }>> {
+export async function designLayouts(c: Council, palette: Record<string, TerrainDef>, feedback = '', music: Array<{ name: string; environments: string[] }> = []): Promise<Array<{ id: string; def: EnvironmentDef } | { id: string; error: string }>> {
   const raw = await c.ask<{ ambienti: Array<{ id: string; nome: string; descrizione: string; tipo: EnvironmentDef['environment']; programma_json: string }> }>(
     'cartographer',
     'genesis.layouts',
@@ -186,6 +189,8 @@ export async function designLayouts(c: Council, palette: Record<string, TerrainD
       'Variety, in the age of the bible! Needed: where people live (more than one kind: from the stone village to the quarter of blocks of flats, as the world has it), where they work and farm, the nature that remains in this world (woods, jungles, deserts, mountains, lakes and coasts, or what they made of them), and special places with the kernel\'s stamps. Plus one big interior with several rooms. The draft is nature: a densely built environment clears it first.',
       `Available stamps: {"type":"stamp","shape":…} with shape among ${internalValues('timbri').join(', ')} (see the role). A stamp is a shape, not an age: its id stays in the program, the name and description of the environment are yours to decide and "codes" gives it the materials of this world.`,
       `Usable terrain codes:\n${paletteSummary(palette)}`,
+      // The music that came with the cards (T295) plays where an environment's id contains one of its words.
+      music.length && `Music is already written for the environments whose id contains: ${music.slice(0, 20).map((m) => `${m.environments.map((e) => `"${e}"`).join(' or ')} (${m.name})`).join('; ')}. When one of yours is that kind of place, put that word in its id.`,
       feedback && `SOME PROGRAMS WERE INVALID, fix them: ${feedback}`,
     ]
       .filter(Boolean)
