@@ -1,6 +1,7 @@
-// A surface of the futuristic skin (T284): small letters on a grid of places, the carpet that moves them along their rows, and the
+// A surface of the futuristic skin (T284, T315): small letters on a grid of places, the carpet that moves them along their rows, and the
 // lights that run over them. Pure: no DOM, so the tests read it as the page does. The lettering and its rule are the proposal's
-// (scritta.ts): each row is the small text from its first letter, over the places that hold one, skipping the gaps.
+// (scritta.ts): each row is the small text from its first letter, over the places that hold one, skipping the gaps. A place may also
+// be a block of light with its letter cut in it (the maze's free paths, program.ts).
 
 import { LETTERING } from './scritta';
 
@@ -33,8 +34,8 @@ export interface Surface {
   way: Int8Array;
 }
 
-/** A surface from rows of '#' and '.' (the lettering's own rows), one row of places per string. */
-export function surfaceOf(rows: readonly string[], ways: (row: number) => 1 | -1 = () => 1): Surface {
+/** A surface from rows of '#' and '.' (the lettering's own rows), one row of places per string; a row's text may start `phase` letters on. */
+export function surfaceOf(rows: readonly string[], ways: (row: number) => 1 | -1 = () => 1, phase: (row: number) => number = () => 0): Surface {
   const Y = rows.length;
   const X = Math.max(...rows.map((r) => r.length));
   const mask = new Uint8Array(X * Y);
@@ -42,7 +43,7 @@ export function surfaceOf(rows: readonly string[], ways: (row: number) => 1 | -1
   const way = new Int8Array(Y);
   for (let y = 0; y < Y; y++) {
     way[y] = ways(y);
-    let n = 0;
+    let n = phase(y);
     for (let x = 0; x < X; x++) {
       if (rows[y][x] !== '#') continue;
       mask[x + y * X] = 1;
@@ -66,10 +67,10 @@ export function letteringSurface(): Surface {
   );
 }
 
-/** A stripe: `rows` full rows of small letters, `places` across. */
-export function stripeSurface(places: number, rows: number): Surface {
+/** A stripe: `rows` full rows of small letters, `places` across; each row starts `shift` letters after the one above (the maze: no column of Qs). */
+export function stripeSurface(places: number, rows: number, shift = 0): Surface {
   const line = '#'.repeat(Math.max(1, places));
-  return surfaceOf(Array.from({ length: Math.max(1, rows) }, () => line), (y) => (y % 2 ? -1 : 1));
+  return surfaceOf(Array.from({ length: Math.max(1, rows) }, () => line), (y) => (y % 2 ? -1 : 1), (y) => y * shift);
 }
 
 /** The letter of the text at a place after `step` steps of the carpet: the row's text slides along its own small letters. */
@@ -111,6 +112,11 @@ export interface Ink {
   letter: Uint32Array[];
   /** The halo of each state, one pixel per place, blown up soft under the letters; 0 for none. */
   halo: Uint32Array;
+  /**
+   * A block of light under the letter, for each state; 0 for none. Two places side by side that both have one are joined across the
+   * gap between them, so that a row of them is one band of light (a free path of the maze) with its letters cut in it.
+   */
+  block?: Uint32Array;
 }
 
 /** The proposal's colours at rest; lit, they go towards white, and the front of a wave is yellow. */
@@ -149,16 +155,30 @@ export function paint(s: Surface, states: Uint8Array, step: number, ink: Ink, of
   const [w] = pictureSize(s);
   pixels.fill(0);
   halo.fill(0);
-  const { X, Y, mask } = s;
+  const { X, Y, mask, order, way } = s;
+  const block = ink.block;
+  const len = LETTERING.text.length;
   for (let y = 0; y < Y; y++) {
     const rowBase = y * (GLYPH_H + 1) * w;
+    // The carpet's shift of this row, as `letterAt` has it, once for the row.
+    const shift = (((way[y] * step) % len) + len) % len;
     for (let x = 0; x < X; x++) {
       const i = x + y * X;
       if (!mask[i]) continue;
       const state = states[i] || DIM;
-      const k = letterAt(s, i, step);
+      const k = (order[i] + shift) % len;
       const color = ink.letter[k === 0 ? 0 : 1][state];
       const at = rowBase + x * (GLYPH_W + 1);
+      const light = block ? block[state] : 0;
+      if (light) {
+        // The block, and the gap to the right and below when the neighbour there is a block too: a band, not a row of tiles.
+        // Written cell by cell: a `fill` of three cells costs more than the cells.
+        const right = x + 1 < X && mask[i + 1] && block![states[i + 1] || DIM] ? 1 : 0;
+        const below = y + 1 < Y && mask[i + X] && block![states[i + X] || DIM] ? 1 : 0;
+        const across = GLYPH_W + right;
+        for (let r = 0, o = at; r < GLYPH_H; r++, o += w) for (let d = 0; d < across; d++) pixels[o + d] = light;
+        if (below) for (let d = 0, o = at + GLYPH_H * w; d < GLYPH_W; d++) pixels[o + d] = light;
+      }
       const cells = offsets[k];
       for (let c = 0; c < cells.length; c++) pixels[at + cells[c]] = color;
       halo[i] = ink.halo[state];

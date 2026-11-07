@@ -1,16 +1,17 @@
-// The futuristic skin (T284): the lettering is the proposal's, cell by cell, and so is what the page paints; what the tool writes is
-// what the skin holds; the carpet keeps the proposal's rule; the icon is the lettering's Q and its ring is closed at 16 px; the two
-// engines of the lights behave the same way; the variant's program grows a maze and lights a path; the tools open only this machine.
+// The futuristic skin (T284, T315): the lettering is the proposal's, cell by cell, and so is what the page paints; what the tool writes
+// is what the skin holds; the carpet keeps the proposal's rule; the icon is the lettering's Q and its ring is closed at 16 px; the two
+// engines of the lights behave the same way; the maze grows a perfect maze, lights its longest path and is painted the other way round
+// from the lettering (faint walls, free paths lit); the tools open only this machine.
 
 import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { DRAWING, PROPOSAL, SECTION, cellsOf, extractLettering, firstLetter, iconSvg, letteringBox, letteringCells, letteringModule, letteringSvg, sectionOf, squaresOf, svgOf, unbundle } from '../tools/vesti/scritta';
 import { LETTERING } from '../site/skins/futuristica/scritta';
-import { DIM, FRONT, HEAD, OUT, STATES, glyphOffsets, inkOf, letterAt, letteringSurface, paint, pictureSize, restingStates, rgba, stripeSurface, type LightsMaker, type Surface } from '../site/skins/futuristica/surface';
+import { DIM, FRONT, GLYPH_H, GLYPH_W, HEAD, OUT, STATES, glyphOffsets, inkOf, letterAt, letteringSurface, paint, pictureSize, restingStates, rgba, stripeSurface, type LightsMaker, type Surface } from '../site/skins/futuristica/surface';
 import { mjLights } from '../site/skins/futuristica/lights-mj';
 import { simpleLights } from '../site/skins/futuristica/lights-simple';
-import { END, PATH, programLights } from '../site/skins/futuristica/program';
+import { END, FRESH, MAZE, PATH, UNWRITTEN, WARM, mazeInk, programLights } from '../site/skins/futuristica/program';
 // @ts-expect-error: a module of the tools, in plain JavaScript
 import { checkLocal } from '../tools/vesti/cdp.mjs';
 
@@ -212,20 +213,101 @@ describe('the lights', () => {
 
 
 
-describe("the variant's program", () => {
-  it('grows a maze of small letters and lights a path through it', () => {
-    const s = stripeSurface(31, 21);
-    const lights = programLights(s, 3);
-    let path = 0;
-    let end = 0;
-    for (let t = 0; t < 80 && !path; t++) {
-      lights.step();
-      path = lights.states.filter((v) => v === PATH).length;
-      end = lights.states.filter((v) => v === END).length;
+describe('the maze', () => {
+  const s = stripeSurface(31, 21, 3);
+  const free = (v: number) => v >= MAZE;
+  const count = (states: Uint8Array, v: number) => states.filter((x) => x === v).length;
+
+  /** Whether the free places are a tree: all joined, and one join fewer than places (no loop). */
+  function perfect(states: Uint8Array): boolean {
+    const places = [...states.keys()].filter((i) => free(states[i]));
+    let joins = 0;
+    for (const i of places) {
+      if (i % s.X < s.X - 1 && free(states[i + 1])) joins++;
+      if (i + s.X < states.length && free(states[i + s.X])) joins++;
     }
+    const seen = new Set([places[0]]);
+    const todo = [places[0]];
+    while (todo.length) {
+      const i = todo.pop()!;
+      for (const j of [i - 1, i + 1, i - s.X, i + s.X]) {
+        if (j < 0 || j >= states.length || seen.has(j) || !free(states[j]) || (Math.abs(j - i) === 1 && ((j / s.X) | 0) !== ((i / s.X) | 0))) continue;
+        seen.add(j);
+        todo.push(j);
+      }
+    }
+    return seen.size === places.length && joins === places.length - 1;
+  }
+
+  it('grows a perfect maze of small letters, lights its longest path, holds it, then starts again', () => {
+    const lights = programLights(s, 3);
+    let t = 0;
+    for (; t < 80 && !count(lights.states, PATH); t++) lights.step();
     expect(lights.steps).toBeGreaterThan(100);
-    expect(path).toBeGreaterThan(5);
-    expect(end).toBe(1);
+    expect(count(lights.states, PATH)).toBeGreaterThan(5);
+    expect(count(lights.states, END)).toBe(1);
+    expect(perfect(lights.states)).toBe(true);
+    let held = 0;
+    while (count(lights.states, UNWRITTEN) < s.X * s.Y * 0.9 && held < 80) {
+      lights.step();
+      held++;
+    }
+    expect(held).toBeGreaterThan(40);
+    expect(held).toBeLessThan(80);
+  });
+
+  it('settles at once when nothing may move: finished, its path lit, nothing new in it', () => {
+    const lights = programLights(s, 9);
+    lights.settle();
+    expect(count(lights.states, FRESH) + count(lights.states, WARM)).toBe(0);
+    expect(count(lights.states, END)).toBe(1);
+    expect(count(lights.states, PATH)).toBeGreaterThan(5);
+    expect(perfect(lights.states)).toBe(true);
+  });
+
+  it('paints the free paths as bands of light with their letters cut in them, and the walls as faint letters', () => {
+    const lights = programLights(s, 5);
+    lights.settle();
+    const ink = mazeInk(LETTERING.colors);
+    const [w, h] = pictureSize(s);
+    const offsets = glyphOffsets(w);
+    const pixels = new Uint32Array(w * h);
+    paint(s, lights.states, 2, ink, offsets, pixels, new Uint32Array(s.X * s.Y));
+    const states = lights.states;
+    const wrong: string[] = [];
+    for (let y = 0; y < s.Y; y++)
+      for (let x = 0; x < s.X; x++) {
+        const i = x + y * s.X;
+        const v = states[i];
+        const k = letterAt(s, i, 2);
+        const at = y * (GLYPH_H + 1) * w + x * (GLYPH_W + 1);
+        const glyph = new Set(offsets[k]);
+        for (let r = 0; r < GLYPH_H; r++)
+          for (let d = 0; d < GLYPH_W; d++) {
+            const off = d + r * w;
+            const want = glyph.has(off) ? ink.letter[k === 0 ? 0 : 1][v] : free(v) ? ink.block![v] : 0;
+            if (pixels[at + off] !== want) wrong.push(`${x},${y} cella ${d},${r}`);
+          }
+        // The gaps: lit only between two free places, so a free path is one band.
+        if (x < s.X - 1) for (let r = 0; r < GLYPH_H; r++) if (pixels[at + GLYPH_W + r * w] !== (free(v) && free(states[i + 1]) ? ink.block![v] : 0)) wrong.push(`${x},${y} a destra`);
+        if (y < s.Y - 1) for (let d = 0; d < GLYPH_W; d++) if (pixels[at + GLYPH_H * w + d] !== (free(v) && free(states[i + s.X]) ? ink.block![v] : 0)) wrong.push(`${x},${y} sotto`);
+      }
+    expect(wrong.slice(0, 5)).toEqual([]);
+    // Lit and faint: a free path's light is strong, a wall's letter is faint, and a free path's letter is cut darker than its light.
+    const alpha = (c: number) => (c >>> 24) / 255;
+    const lum = (c: number) => (c & 0xff) + ((c >>> 8) & 0xff) + ((c >>> 16) & 0xff);
+    expect(alpha(ink.block![MAZE])).toBeGreaterThan(0.5);
+    expect(alpha(ink.letter[1][UNWRITTEN])).toBeLessThan(0.25);
+    expect(ink.block![UNWRITTEN]).toBe(0);
+    expect(lum(ink.letter[1][MAZE]) * alpha(ink.letter[1][MAZE])).toBeLessThan(lum(ink.block![MAZE]) * alpha(ink.block![MAZE]));
+  });
+
+  it('starts each row three letters after the one above, so that its small Qs are not in columns', () => {
+    const t = stripeSurface(21, 5, 3);
+    for (let y = 0; y < t.Y; y++) expect(letterAt(t, y * t.X, 0)).toBe((3 * y) % LETTERING.text.length);
+    // The stripes stay as they were: every row from the Q.
+    const stripe = stripeSurface(21, 3);
+    for (let y = 0; y < stripe.Y; y++) expect(letterAt(stripe, y * stripe.X, 0)).toBe(0);
   });
 });
 

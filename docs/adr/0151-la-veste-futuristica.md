@@ -1,6 +1,6 @@
 # ADR-0151 — La veste futuristica: la scritta estratta dalla proposta, gli effetti a tick, il motore delle luci scelto coi numeri
 
-Data: 2026-11-05 · Stato: accettato · Riferimenti: ADR-0145 (le vesti del sito), ADR-0142 (il motore MarkovJunior si ottimizza solo a voxel identici), ADR-0111 (la CSP), T283, T284, T287
+Data: 2026-11-05 · Stato: accettato, aggiornato da ADR-0164 (T315: il labirinto sotto l'hero, le luci MarkovJunior sul passo persistente, la variante tolta) · Riferimenti: ADR-0145 (le vesti del sito), ADR-0142 (il motore MarkovJunior si ottimizza solo a voxel identici), ADR-0111 (la CSP), T283, T284, T287
 
 ## Contesto
 
@@ -31,3 +31,7 @@ L'autore ha bocciato le prime stesure delle vesti di T283: mancavano scritte e i
 - Una proposta nuova può diventare una veste allo stesso modo: uno strumento che la estrae e la rifiuta se non è quella, e un test cella per cella.
 - La variante, se scelta, vuole che la landing carichi three.js solo quando il palco si vede (oggi lo importa sempre) e, per i suoi picchi di 11–15 ms a 4×, il passo persistente del motore o un labirinto più piccolo.
 - Sicurezza: nessuna superficie nuova nel sito né nel server; gli strumenti aprono solo loopback e un Chrome con un profilo temporaneo.
+
+## Aggiornamento (2026-11-07, T315): la veste mista
+
+L'autore ha scelto un misto delle due cose (D42): il palco 3D resta e il labirinto MarkovJunior in due dimensioni entra in una sezione sua sotto l'hero, coi colori invertiti (pareti tenui, percorsi liberi in bande di luce). Il «passo persistente nel motore» che qui era il primo lavoro da fare è stato fatto (`Stepper` in `src/mj/engine.ts`, senza cambiare un voxel delle corse di `run` e `runOn`): con lui le luci MarkovJunior costano quanto quelle semplici e sono il predefinito, su scritta e strisce. Il palco 3D si carica solo quando sta per vedersi, si ferma fuori schermo e fa girare i suoi programmi in un worker. `?fx=mj-pagina` e `?fx=mj` non ci sono più; `?fx=semplice` resta per il confronto. Decisione, numeri e alternative in ADR-0164.
