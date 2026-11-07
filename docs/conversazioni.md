@@ -313,14 +313,14 @@ flowchart TD
   [Questo luogo fa parte della regione «{ctx.region.nome}»...]
   Oggetti e personaggi: 2-6 voci, "modulo" = ESATTAMENTE uno degli id qui sotto; "dove": dentro, fuori, ovunque... {ctx.catalog}
   "a_terra": 0-4 nomi di oggetti comuni...
-  "nuovi": quasi sempre vuoto; solo un oggetto concreto o un personaggio...
+  "nuovi": quasi sempre vuoto; solo un oggetto concreto o un personaggio...; per una cosa, "takeable": true se un viandante può sollevarla e posarla altrove (T292)
   "rune": 0-2 frammenti presi esattamente da questo elenco: {ctx.fragments}...
   "strutture": 0-2 edifici o costruzioni di questo luogo...
   ["importante" (al più una struttura): solo per un luogo notevole...]
   [IL TENTATIVO PRECEDENTE È STATO SCARTATO: {ctx.feedback}. Correggi.]
   ```
 - **Response Schema** (`PLAN_SCHEMA` con `ambiente` ristretto via enum agli id validi):
-  `luogo` (`nome`, `descrizione`), `ambiente` (str id), `oggetti` (arr di `modulo` e `dove`: enum dentro/fuori/ovunque), `a_terra` (arr str), `nuovi` (arr di `concetto` e `dove`), `rune` (arr str), `strutture` (arr di `concetto`, `importante`: bool).
+  `luogo` (`nome`, `descrizione`), `ambiente` (str id), `oggetti` (arr di `modulo` e `dove`: enum dentro/fuori/ovunque), `a_terra` (arr str), `nuovi` (arr di `concetto`, `dove` e `takeable` facoltativo: bool, T292, ADR-0168: passa alla Fucina e ha l'ultima parola), `rune` (arr str), `strutture` (arr di `concetto`, `importante`: bool).
 - **Validazione**: Rune validate una a una; se una riga non compila, viene scartata; gli oggetti devono corrispondere al catalogo; l'ambiente deve esistere.
 
 #### 10. `cartographer.environment`
@@ -392,13 +392,14 @@ sequenceDiagram
   Terreni validi per "contesto.terreni": {codes}. "rarita" tra 0.02 e 0.5.
   Per un npc: un mestiere o un ruolo concreto del mondo... in "persona" la scheda del tipo... in "porta" 3-6 oggetti comuni...
   [Esistono già: {req.existingNames}...]
-  Per un oggetto: in "azioni" 1-4 cose concrete... se mobile "contenitore"...
+  Per un oggetto: in "azioni" 1-4 cose concrete... se mobile "contenitore"...; "takeable" true se un viandante può sollevarlo e posarlo altrove (una credenza, una cassa), false se è fisso o costruito sul posto (un pozzo, un forno, una statua)
+  [Chi l'ha chiesto ha deciso: si solleva e si posa altrove / resta dov'è (T292, il Cartografo)]
   Per uno strumento: in "comandi" al massimo due voci: "usa" e "azione"...
   Non creare moduli per elementi del terreno...
   [L'Arbitro ha obiettato: {feedback}]
   ```
 - **Response Schema** (`CONCEPT_SCHEMA`):
-  `nome`, `tipo` (npc/oggetto/strumento), `descrizione`, `lore`, `aspetto`, `classe` (enum classi MJ), `contesto` (`terreni`, `luoghi`, `rarita`), `interazione` (parla/leggi/usa/nessuna), `comandi` (arr di `azione` usa/azione e `descrizione`), `persona` (str opt), `unico` (bool), `azioni` (arr `id`, `etichetta`, `richiede`), `contenitore` (`capienza`, `bottino`), `porta` (arr str), `tags` (arr str).
+  `nome`, `tipo` (npc/oggetto/strumento), `descrizione`, `lore`, `aspetto`, `classe` (enum classi MJ), `contesto` (`terreni`, `luoghi`, `rarita`), `interazione` (parla/leggi/usa/nessuna), `comandi` (arr di `azione` usa/azione e `descrizione`), `persona` (str opt), `unico` (bool), `azioni` (arr `id`, `etichetta`, `richiede`), `contenitore` (`capienza`, `bottino`), `porta` (arr str), `tags` (arr str), `takeable` (bool, T292, ADR-0168: il kernel lo scrive nel manifest solo per un `oggetto` di classe `furniture`, `object` o `pebble` non grande; il riassunto dice «si può spostare»).
 - **Filtro Quarta Parete**: [`metaBreak()`](file:///H:/projects/rune/.claude/worktrees/t67/src/kernel/fourthwall.ts#L50) controlla nome, descrizione, persona e lore. Rifiuta termini come codice, pixel, simulazione, Concilio.
 
 #### 12. `forge.physics`

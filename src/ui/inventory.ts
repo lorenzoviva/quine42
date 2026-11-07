@@ -7,6 +7,7 @@ import { HOTBAR, totalWeight } from '../kernel/inventory';
 import { itemIcon } from './hud';
 import { $, el } from './dom';
 import { runeGlyph } from '../kernel/runes';
+import { isThing } from '../kernel/moving';
 
 export class InventoryPanel {
   private root = $('#inventory');
@@ -218,9 +219,11 @@ export class InventoryPanel {
         if (def?.container) btn(`Apri (${(s.inv?.slots.filter(Boolean).length ?? 0)}/${def.container.size})`, () => k.useSlot(this.sel), 'primary');
         if (isRune) btn('Aggiungi alla frase', () => k.composeRune(s.item.slice(5)), 'primary');
         if (usable) btn(info.category === 'food' ? 'Mangia' : info.category === 'drink' ? 'Bevi' : info.category === 'magic' ? 'Assorbi' : 'Usa', () => k.useSlot(this.sel), 'primary');
-        if (info.spec.equippable) btn(inv.equipped === this.sel ? 'Riponi' : 'Impugna', () => k.equipSlot(this.sel), 'primary');
+        // A thing of the world goes over the head, and down in front, whole (T292): it is not wielded, nor thrown.
+        const thing = isThing(s.item);
+        if (info.spec.equippable) btn(inv.equipped === this.sel ? 'Riponi' : thing ? 'Solleva' : 'Impugna', () => k.equipSlot(this.sel), 'primary');
         for (const a of def?.actions ?? []) if (a.effects?.length) btn(a.label, () => k.itemAct(this.sel, a.id), 'primary');
-        btn('Getta', () => k.dropSlot(this.sel));
+        btn(thing ? 'Posa davanti a te' : 'Getta', () => k.dropSlot(this.sel));
         if (s.count > 1) btn('Getta 1', () => k.dropSlot(this.sel, 1));
         const e = info.effects ?? {};
         const effects = [e.hunger && `fame ${e.hunger > 0 ? '+' : ''}${e.hunger}`, e.thirst && `sete ${e.thirst > 0 ? '+' : ''}${e.thirst}`, e.energy && `energia ${e.energy > 0 ? '+' : ''}${e.energy}`, e.health && `salute ${e.health > 0 ? '+' : ''}${e.health}`].filter(Boolean).join(' · ');
@@ -228,7 +231,7 @@ export class InventoryPanel {
           el('div', { class: 'big' }, itemIcon(k, s.item, 96)),
           el('div', { class: 'name' }, `${info.name}${s.count > 1 ? ` ×${s.count}` : ''}`),
           el('div', { class: 'descr' }, info.description),
-          el('div', { class: 'props' }, `${info.category} · peso ${info.spec.weight}${info.spec.stackable ? ` · pila fino a ${info.spec.maxStack}` : ''}${info.spec.equippable ? ' · si impugna (F)' : ''}`),
+          el('div', { class: 'props' }, `${info.category} · peso ${info.spec.weight}${info.spec.stackable ? ` · pila fino a ${info.spec.maxStack}` : ''}${thing ? ' · si porta sopra la testa (F per posare)' : info.spec.equippable ? ' · si impugna (F)' : ''}`),
           effects ? el('div', { class: 'control' }, effects) : '',
           info.tags.length ? el('div', { class: 'props' }, info.tags.join(', ')) : '',
           actions,

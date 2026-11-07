@@ -5,6 +5,7 @@
 import { Rng } from './rng';
 import { runeGlyph } from './runes';
 import { internalName, italianName } from './internalNames';
+import { isThing, thingItem, thingModule, thingWeight } from './moving';
 import type { ItemDef, ItemSpec, EnvironmentDef, LootTable, MagicRune, ModuleEntry, Recipe, Spell } from './types';
 
 export const CATEGORY_GLYPHS: Record<string, string> = {
@@ -42,10 +43,16 @@ export class Content {
   spells: Record<string, Spell> = {};
   /** Which module defines each item / layout (for writing updates back). */
   readonly itemSource = new Map<string, string>();
+  /**
+   * The things of the world one can take (T292, ADR-0168), by module: what each is as an item while carried (`thing:<module>`).
+   * Not among the items: no pack, loot table or name of the Council's finds them, only `get` by their id.
+   */
+  readonly things = new Map<string, ItemDef>();
 
   rebuild(modules: ModuleEntry[]): void {
     this.items.clear();
     this.itemSource.clear();
+    this.things.clear();
     this.recipes = [];
     this.loot = {};
     this.layouts = {};
@@ -73,6 +80,23 @@ export class Content {
         });
         this.itemSource.set(man.id, man.id);
       }
+      if (man.kind === 'entity' && man.takeable === true && !man.persona) {
+        const app = man.appearance;
+        this.things.set(man.id, {
+          id: thingItem(man.id),
+          name: man.name,
+          description: man.description || man.name,
+          category: 'misc',
+          weight: thingWeight(man.physics?.mass),
+          stack: 1,
+          tags: [...(man.tags ?? [])],
+          glyph: app?.glyph ?? '?',
+          color: app?.color ?? '#aaa',
+          ...(app?.look ? { look: app.look } : {}),
+          ...(app?.model ? { model: app.model } : {}),
+          equippable: true,
+        });
+      }
       for (const it of man.items ?? []) {
         this.items.set(it.id, { ...it, tags: [...new Set([...(it.tags ?? []), it.category])] });
         this.itemSource.set(it.id, man.id);
@@ -91,7 +115,10 @@ export class Content {
    */
   get(id: string): ItemDef | undefined {
     const d = this.items.get(id);
-    if (d || !id.startsWith('rune:')) return d;
+    if (d) return d;
+    const thing = thingModule(id);
+    if (thing !== undefined) return this.things.get(thing);
+    if (!id.startsWith('rune:')) return undefined;
     const token = id.slice(5);
     if (!token || token.length > 24) return undefined;
     const magic = this.runes[token];
@@ -133,7 +160,8 @@ export class Content {
     const [lo, hi] = table.rolls;
     const rolls = lo + rng.int(Math.max(1, hi - lo + 1));
     const out: Array<{ item: string; count: number }> = [];
-    const entries = table.entries.filter((e) => (e.item ? !!this.get(e.item) : this.withTag(e.tag ?? '').length));
+    // A chest holds no furniture (T292): a thing of the world is never loot.
+    const entries = table.entries.filter((e) => (e.item ? !!this.get(e.item) && !isThing(e.item) : this.withTag(e.tag ?? '').length));
     const total = entries.reduce((s, e) => s + e.weight, 0);
     for (let i = 0; i < rolls && total > 0; i++) {
       let r = rng.next() * total;

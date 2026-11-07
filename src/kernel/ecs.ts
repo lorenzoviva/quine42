@@ -40,6 +40,14 @@ export class World {
     this.stores.get(name)?.delete(id);
   }
 
+  /** Every component of an entity, by name (the objects themselves, not copies). */
+  componentsOf(id: Id): Record<string, any> {
+    const out: Record<string, any> = {};
+    if (!this.alive.has(id)) return out;
+    for (const [name, store] of this.stores) if (store.has(id)) out[name] = store.get(id);
+    return out;
+  }
+
   /** Ids having all the given components. Returns a snapshot, safe to mutate the world while iterating. */
   query(...names: string[]): Id[] {
     if (names.length === 0) return [...this.alive];

@@ -57,7 +57,8 @@ import { canonWithRune, MAX_MAGIC_RUNES, validateNewRune } from './magic';
 import { cleanPanel, designMechanic } from './agents/mechanics';
 import { BENCH, cleanCases, runCase, textKey, type BenchEntry, type BenchRun, type BenchScene, type BenchShown } from './bench';
 import { assemblePack, defineItems, itemPack, toItemDef, type Identity } from './agents/content';
-import { addItem, CARRY_CAPACITY, countItem, HOTBAR, equippedItem, moveSlot, newInventory, putSlot, readInventory, removeItem, takeFromSlot, totalWeight, type Inventory } from './inventory';
+import { addItem, CARRY_CAPACITY, countItem, HOTBAR, equippedItem, moveSlot, newInventory, putSlot, readInventory, removeItem, takeFromSlot, thingOf, totalWeight, type Inventory } from './inventory';
+import { facingYaw, isThing, MAX_MOVED, PUT_DOWN, putRefusal, readMoved, readParts, splitBetween, takeRefusal, thingItem, thingModule, walkGroups, type MovedRecord, type PutFailure, type TakeFailure, type ThingParts, type TileArea, type Walk } from './moving';
 import { chunkLevels, HILLS, LEVEL, Relief, RELIEF_PATH, worldLevels } from './relief';
 import { CardUses, CARDS_FILE, COMUNE, allCards, collectionOf, moduleCardId, receivedBy, type Received, payerOf, chunkCardId, stampFiles, cardHolderOf, type Card, type CardStamp } from './cards';
 import { playerFile, PLAYERS_DIR, readWandererState, repairProfile, SOLO, validWandererId, WANDERER_NAME, wandererColor, wandererOf, wanderersIn, type Profile, type ProfileRepair, type Wanderer, type WandererState, PER_WANDERER } from './wanderers';
@@ -388,6 +389,19 @@ export const INDOOR_REACH = 6;
 export const INDOOR_R = 0.15;
 /** How far above its height (tiles) a thing lying on furniture still finds its shelf: the rounding of a save, far less than a voxel. */
 const REST_SLACK = 0.01;
+/** The option of a tile's menu that puts down what is carried (T292): in `moving.ts`, so that the server reads it without the kernel. */
+export { PUT_DOWN };
+/**
+ * Taking things of the world and putting them down elsewhere (T292): how far from the middle of a thing one takes it, how far the
+ * tile it goes down on may be, how far ahead of the wanderer «in front» is (a little more than a tile: what goes down there does
+ * not go into them), the half-side of the area around it whose ways it must not cut (tiles), the body those ways are for (a
+ * villager's, as `world.path` measures them).
+ */
+export const TAKE_REACH = 2.6;
+export const PUT_REACH = 2.6;
+const PUT_AHEAD = 1.2;
+export const MOVE_AREA = 10;
+const MOVE_BODY = 0.35;
 
 /** Why something does not go on a piece of furniture, as the world says it (T291): no word of the game in it. */
 export function placeRefusal(why: SpotFailure, name: string, what: string): string {
@@ -412,7 +426,7 @@ export function placeRefusal(why: SpotFailure, name: string, what: string): stri
  */
 // Also known, so never kept as a field of tomorrow: the names they had until the contract 0.3 (T308a), and the balance of before the
 // ledger (`crediti`, ADR-0104).
-const STATE_FIELDS: ReadonlySet<string> = new Set(['consumed', 'containers', 'forms', 'rares', 'time', 'important', 'wanderer', 'placed', ...italianFieldsOf('campi-stato')]);
+const STATE_FIELDS: ReadonlySet<string> = new Set(['consumed', 'containers', 'forms', 'rares', 'time', 'important', 'wanderer', 'placed', 'moved', ...italianFieldsOf('campi-stato')]);
 const WANDERER_FIELDS: ReadonlySet<string> = new Set(['name', 'profile', 'pos', 'inventory', 'needs', 'hand', 'states', 'slots', 'transcended', 'anonymous', 'credits', ...italianFieldsOf('campi-viandante')]);
 
 /** The fields of a saved JSON object that are not in `known`. */
@@ -1499,8 +1513,17 @@ export class Kernel {
     return { model, seed: this.forms.seedFor(model, who), yaw: man?.persona || man?.kind === 'player' ? 0 : (hashStr(who) % 628) / 100, ...(app?.model && app.model !== model ? { wanted: app.model, classe } : {}) };
   }
 
-  /** The look of an item: its own model, or the generic entity in its colour. */
-  itemLook(item: string): FormComp {
+  /**
+   * The look of an item: its own model, or the generic entity in its colour. A thing of the world carried (T292) looks as its
+   * module makes it, with `seed` the one it had standing (its slot says it), else one for its module.
+   */
+  itemLook(item: string, seed?: number): FormComp {
+    const module = thingModule(item);
+    const man = module !== undefined ? this.modules.get(module)?.manifest : undefined;
+    if (man) {
+      const look = this.formFor(man, item);
+      return { ...look, yaw: 0, ...(typeof seed === 'number' && Number.isInteger(seed) ? { seed } : {}) };
+    }
     const d = this.content.get(item);
     const model = this.forms.resolve(d?.model, 'object');
     return { model, seed: 1, yaw: 0, tint: d?.color, ...(d?.model && d.model !== model ? { wanted: d.model, classe: 'object' } : {}) };
@@ -2836,12 +2859,12 @@ export class Kernel {
   }
 
   /** The Cartographer asked for something that does not exist yet: the Forge makes it, then it appears. */
-  private async forgeForChunk(ch: Chunk, f: { concept: string; where: Where }, pick: (w: Where, solid?: boolean) => number | undefined, at: (c: number) => { x: number; y: number }): Promise<void> {
+  private async forgeForChunk(ch: Chunk, f: { concept: string; where: Where; takeable?: boolean }, pick: (w: Where, solid?: boolean) => number | undefined, at: (c: number) => { x: number; y: number }): Promise<void> {
     const tag = `${ch.key}:${f.concept}`;
     if (this.forging.has(tag) || this.forgesUsed >= this.config.ai.maxForges) return;
     this.forging.add(tag);
     this.forgesUsed++;
-    const r = await this.forgeModule(`${f.concept} (per il luogo «${ch.place?.name}»: ${ch.place?.description})`, 'cartografo', undefined, false, ch.chi);
+    const r = await this.forgeModule(`${f.concept} (per il luogo «${ch.place?.name}»: ${ch.place?.description})`, 'cartografo', undefined, false, ch.chi, f.takeable);
     this.forging.delete(tag);
     if (!r.ok || !r.id || !ch.plan) return;
     ch.plan.objects.push({ module: r.id, where: f.where });
@@ -2919,11 +2942,13 @@ export class Kernel {
 
   // --- Entities --------------------------------------------------------------------------------
 
-  spawnModuleEntity(m: ModuleEntry, x: number, y: number, chunkKey?: string, origin?: string): Id {
+  /** `parts`: the state a thing brings back into the world (T292), over its manifest's components and under the kernel's. */
+  spawnModuleEntity(m: ModuleEntry, x: number, y: number, chunkKey?: string, origin?: string, parts?: ThingParts): Id {
     const man = m.manifest;
     if (man.kind === 'item') return this.spawnItem(man.id, x, y, 1, chunkKey, origin);
     const comps: Record<string, any> = {
       ...clone(man.components ?? {}),
+      ...clone(readParts(parts) ?? {}),
       pos: { x, y },
       module: { id: man.id },
       body: { r: man.physics?.radius ?? 0.35, solid: !!man.physics?.solid && !man.physics?.pushable, pushable: !!man.physics?.pushable, mass: man.physics?.mass ?? 1, friction: man.physics?.friction ?? 0.6 },
@@ -2995,6 +3020,8 @@ export class Kernel {
     const origin = this.ecs.get(id, 'origin')?.key;
     const box: Container | undefined = this.ecs.get(id, 'container');
     if (origin) this.consumed.add(origin);
+    // A thing moved that breaks is gone for good, wherever it stood (T292).
+    if (origin) this.moved.delete(origin);
     // A building that falls is rebuilt (T245d): its lot becomes a venture of its place, once the building is gone.
     const ruin = this.ecs.get(id, 'structure');
     const ruinForm: FormComp | undefined = this.ecs.get(id, 'form');
@@ -3560,7 +3587,9 @@ export class Kernel {
       return;
     }
     inv.equipped = inv.equipped === index ? null : index;
-    this.message(inv.equipped === null ? `Riponi ${info.name}.` : `Impugni ${info.name}. F per usarlo su ciò che hai davanti.`);
+    // A thing of the world goes over the head (T292), and F puts it down.
+    const held = isThing(slot.item) ? `Porti ${info.name} sopra la testa (F per posare davanti a te).` : `Impugni ${info.name}. F per usarlo su ciò che hai davanti.`;
+    this.message(inv.equipped === null ? `Riponi ${info.name}.` : held);
   }
 
   /** Hotbar keys 1–6: equip what can be held, use the rest. */
@@ -3578,6 +3607,8 @@ export class Kernel {
       this.message('Non impugni nulla (1–6 o inventario).', 'warn');
       return;
     }
+    // A thing of the world carried goes down in front (T292).
+    if (isThing(item)) return void this.placeCarried(this.inventory().equipped!);
     const pc = this.wandererCarpet();
     const [dx, dy] = this.facingDelta();
     const t = target ?? this.nearest(pc.x + dx * 0.9, pc.y + dy * 0.9, 1.1) ?? null;
@@ -3594,6 +3625,8 @@ export class Kernel {
 
   dropSlot(index: number, count?: number): void {
     if (this.zone !== 'sim') return;
+    // A thing of the world goes down whole, in front, where the place lets it (T292); else it stays carried.
+    if (isThing(this.inventory().slots[index]?.item)) return void this.placeCarried(index);
     const taken = takeFromSlot(this.inventory(), index, count);
     if (!taken) return;
     const pc = this.wandererCarpet();
@@ -3627,15 +3660,21 @@ export class Kernel {
     if (!p || !placed || !Number.isFinite(placed.z) || !Number.isFinite(p.x) || !Number.isFinite(p.y)) return undefined;
     for (const s of this.solidForms.get(`${Math.floor(p.x)},${Math.floor(p.y)}`) ?? []) {
       if (s.id === id || !this.isFurniture(s.id)) continue;
-      const [lx, lz] = toLocal(p.x - s.x, p.y - s.y, s.yaw);
-      const g = s.form.result!.grid;
-      const vx = Math.floor(lx * s.form.vpt + g.X / 2), vy = Math.floor(lz * s.form.vpt + g.Y / 2);
-      if (vx < 0 || vy < 0 || vx >= g.X || vy >= g.Y) continue;
-      const i = vx + vy * g.X;
-      const h = this.levelIn(s, placed.z);
-      for (let l = s.levels.start[i]; l < s.levels.start[i + 1]; l++) if (Math.abs(s.levels.z[l] - h) < 0.5) return s.id;
+      if (this.restsOn(s, p.x, p.y, placed.z)) return s.id;
     }
     return undefined;
+  }
+
+  /** Whether a point of the simulation at height z (tiles) is on a floor of a solid model: a shelf, its top. */
+  private restsOn(s: SolidForm, x: number, y: number, z: number): boolean {
+    const [lx, lz] = toLocal(x - s.x, y - s.y, s.yaw);
+    const g = s.form.result!.grid;
+    const vx = Math.floor(lx * s.form.vpt + g.X / 2), vy = Math.floor(lz * s.form.vpt + g.Y / 2);
+    if (vx < 0 || vy < 0 || vx >= g.X || vy >= g.Y) return false;
+    const i = vx + vy * g.X;
+    const h = this.levelIn(s, z);
+    for (let l = s.levels.start[i]; l < s.levels.start[i + 1]; l++) if (Math.abs(s.levels.z[l] - h) < 0.5) return true;
+    return false;
   }
 
   /** The shape of an item on a shelf (T291): its model's, or a small block while its model is not there. */
@@ -3694,6 +3733,8 @@ export class Kernel {
     if (at === null || !held) return refuse('Non impugni nulla da posare (1–6 o inventario).');
     if (this.zone !== 'sim' || !this.ecs.alive.has(target)) return false;
     const what = this.itemInfo(held.item).name;
+    // A thing of the world carried goes down on the ground, as itself (T292), never on a shelf as a thing lying there.
+    if (isThing(held.item)) return refuse(putRefusal('taken', what));
     const id = this.ecs.has(target, 'placed') ? this.supportOf(target) : target;
     if (id === undefined) return refuse(`${this.nameOf(target)} non sta su un mobile.`);
     const name = this.nameOf(id);
@@ -3754,6 +3795,393 @@ export class Kernel {
     return said;
   }
 
+  // --- Taking things of the world and putting them down elsewhere (T292, ADR-0168) -----------------------------------------------
+
+  /** The things moved from where their place made them (T292), by origin: where they stand; the save keeps them (`moved`). */
+  private moved = new Map<string, MovedRecord>();
+
+  /** The manifest of a thing one can take (T292): an entity of a module that says `takeable`, not someone, not a building, not an item. */
+  private takeableOf(id: Id): Manifest | undefined {
+    if (!this.ecs.alive.has(id) || ['structure', 'pickup', 'player', 'remote', 'identity', 'mind', 'rune', 'carpet'].some((c) => this.ecs.has(id, c))) return undefined;
+    const m = this.modules.get(this.ecs.get(id, 'module')?.id)?.manifest;
+    return m && m.kind === 'entity' && m.takeable === true && !m.persona ? m : undefined;
+  }
+
+  /** A container as its first opening fills it: taking a thing fills it the same way (T292), to know whether it is empty. */
+  private fillContainer(id: Id): Container | undefined {
+    const box = this.container(id);
+    if (!box) return undefined;
+    if (!box.filled) {
+      box.filled = true;
+      const origin = this.ecs.get(id, 'origin')?.key ?? `e${id}`;
+      const rng = new Rng(hash32(this.config.seed, hashStr(origin), 7));
+      for (const l of this.content.roll(box.loot, rng, [...this.wanted])) addItem(box.inv, l.item, l.count, this.itemSpec(l.item));
+    }
+    return box;
+  }
+
+  /** Why the wanderer acting does not take a thing now, or undefined (T292). A container never opened is filled as opening it would. */
+  private takeFailure(id: Id): TakeFailure | undefined {
+    if (this.zone !== 'sim') return 'nowhere';
+    const p = this.ecs.get(id, 'pos');
+    const c = this.wandererCarpet();
+    if (!p || !Number.isFinite(p.x) || !Number.isFinite(p.y) || Math.hypot(p.x - c.x, p.y - c.y) > TAKE_REACH) return 'far';
+    // Emptied first, so that no bag goes inside a bag: a chest with something in it, a thing that carries things.
+    if (this.ecs.has(id, 'container') && this.fillContainer(id)!.inv.slots.some(Boolean)) return 'full';
+    const own: Inventory | undefined = this.ecs.get(id, 'inventory');
+    if (own?.slots?.some(Boolean)) return 'full';
+    if (this.ecs.query('placed', 'pickup').some((o) => this.supportOf(o) === id)) return 'on-top';
+    if (this.standsOn(id)) return 'someone';
+    if (!this.inventory().slots.includes(null)) return 'no-room';
+    return undefined;
+  }
+
+  /** Whether someone stands on a solid thing (on its top, on its shelf): a wanderer or a figure whose feet are on a floor of its form. */
+  private standsOn(id: Id): boolean {
+    const p = this.ecs.get(id, 'pos');
+    const s = (this.solidForms.get(`${Math.floor(p.x)},${Math.floor(p.y)}`) ?? []).find((x) => x.id === id);
+    if (!s) return false;
+    return this.standing().some((b) => b.z !== undefined && Number.isFinite(b.z) && b.z > this.groundAt(b.x, b.y) + 1e-6 && Math.hypot(b.x - s.x, b.y - s.y) <= s.form.reach + b.r && this.restsOn(s, b.x, b.y, b.z));
+  }
+
+  /** An origin for a thing that has none (made by code, left by something broken): the one its look was seeded with, made unique. */
+  private freshOrigin(module: string, p: { x: number; y: number }): string {
+    const base = `${module}@${p.x.toFixed(2)},${p.y.toFixed(2)}`;
+    const used = (o: string) => this.consumed.has(o) || this.moved.has(o) || this.ecs.query('origin').some((e) => this.ecs.get(e, 'origin').key === o);
+    let o = base;
+    for (let i = 2; used(o); i++) o = `${base}#${i}`;
+    return o;
+  }
+
+  /**
+   * Takes a thing of the world (T292): it leaves the world and is the item `thing:<module>` in the first free slot, in hand, with who
+   * it is (its origin, the seed of its look) and its state (its components that are not the kernel's). The place it was born in no
+   * longer makes it (`consumed`); its container stays as it was left, empty; the actions done on its model stay. False, with a
+   * sentence of the world, when it is not taken: it is not a thing one takes, something is in it or on it, someone stands on it, no room.
+   */
+  takeThing(id: Id): string | false {
+    const refuse = (text: string): false => (this.message(text, 'warn'), false);
+    if (!this.ecs.alive.has(id)) return false;
+    const name = this.nameOf(id);
+    const m = this.takeableOf(id);
+    if (!m) return refuse(takeRefusal('fixed', name));
+    const why = this.takeFailure(id);
+    if (why) return refuse(takeRefusal(why, name));
+    const p = this.ecs.get(id, 'pos');
+    const fc: FormComp | undefined = this.ecs.get(id, 'form');
+    const origin: string = this.ecs.get(id, 'origin')?.key ?? this.freshOrigin(m.id, p);
+    const parts = readParts(this.ecs.componentsOf(id));
+    const box: Container | undefined = this.ecs.get(id, 'container');
+    if (box) this.savedContainers.set(origin, { inv: clone(box.inv), filled: true });
+    if (fc?.done?.length) this.savedForms.set(origin, [...fc.done]);
+    this.consumed.add(origin);
+    this.moved.delete(origin);
+    const inv = this.inventory();
+    const at = inv.slots.indexOf(null);
+    const item = thingItem(m.id);
+    inv.slots[at] = { item, count: 1, thing: { origin, ...(fc && Number.isInteger(fc.seed) ? { seed: fc.seed } : {}), ...(parts ? { parts } : {}) } };
+    inv.equipped = at;
+    this.ecs.destroy(id);
+    this.instanceFeet.delete(id);
+    this.rebuildSolids();
+    this.npc.forgetWays();
+    this.bus.emit('item:picked', { item });
+    this.bus.emit('inventory:changed', {});
+    const said = `Prendi ${name}.`;
+    this.message(said);
+    return said;
+  }
+
+  /** The tile in front of the wanderer acting where a thing they carry goes down: a little more than a tile ahead (T292). */
+  private tileInFront(): { col: number; row: number } {
+    const c = this.wandererCarpet();
+    const [dx, dy] = this.facingDelta();
+    return { col: Math.floor(c.x + dx * PUT_AHEAD), row: Math.floor(c.y + dy * PUT_AHEAD) };
+  }
+
+  /**
+   * Puts down a thing carried (T292): `slot` holds it, `at` is the tile (none: the one in front). Its form first, as a program runs in
+   * a worker or a promise; then `putCarried` decides, at once. It stays in hand when it does not go, with a sentence of the world.
+   */
+  async placeCarried(slot: number, at?: { col: number; row: number }): Promise<string | false> {
+    const who = this.wanderer().id;
+    const s = this.inventory().slots[slot];
+    const module = thingModule(s?.item);
+    const man = module !== undefined ? this.modules.get(module)?.manifest : undefined;
+    if (man) {
+      const fc = this.formFor(man, thingOf(s)?.origin ?? thingItem(man.id));
+      if (!this.forms.ready(fc.model, fc.seed, fc.tint)) {
+        await this.forms.wait(fc.model, fc.seed, fc.tint);
+        // Who asked may have gone meanwhile: nobody does it in their place.
+        if (!this.wanderersById.has(who)) return false;
+      }
+    }
+    return this.as(who, () => this.putCarried(slot, at));
+  }
+
+  private putCarried(slot: number, at?: { col: number; row: number }): string | false {
+    const inv = this.inventory();
+    const s = inv.slots[slot];
+    const module = thingModule(s?.item);
+    const name = s ? this.itemInfo(s.item).name : '';
+    const refuse = (why: PutFailure): false => (this.message(putRefusal(why, name), 'warn'), false);
+    if (!s || module === undefined) return refuse('nothing');
+    const entry = this.modules.get(module);
+    // Its module gone, or no longer a thing of the world: it stays carried, nothing is lost.
+    if (!entry || entry.manifest.kind !== 'entity' || entry.manifest.persona || this.zone !== 'sim') return refuse('nowhere');
+    const c = this.wandererCarpet();
+    // Down on the ground floor: a thing goes where the feet stand, not onto the floor above or a roof.
+    const feet = this.wandererPos().z;
+    if (typeof feet === 'number' && Number.isFinite(feet) && feet - this.groundAt(c.x, c.y) > 0.2) return refuse('down');
+    const tile = at ?? this.tileInFront();
+    if (![tile.col, tile.row].every(Number.isInteger)) return refuse('nowhere');
+    const x = tile.col + 0.5, y = tile.row + 0.5;
+    if (Math.hypot(x - c.x, y - c.y) > PUT_REACH) return refuse('far');
+    const thing = thingOf(s);
+    const origin = thing?.origin ?? this.freshOrigin(module, { x, y });
+    const yaw = facingYaw(c.x - x, c.y - y);
+    const fc: FormComp = { ...this.formFor(entry.manifest, origin), yaw };
+    const done = this.savedForms.get(origin);
+    if (done?.length) fc.done = [...done];
+    const why = this.spotFailure(entry.manifest, fc, x, y);
+    if (why) return refuse(why);
+    // It goes: out of the hand, into the world as itself, where it was put; the save keeps it there.
+    takeFromSlot(inv, slot);
+    const id = this.spawnModuleEntity(entry, x, y, undefined, origin, thing?.parts);
+    this.ecs.get(id, 'form').yaw = yaw;
+    this.consumed.add(origin);
+    this.moved.set(origin, { module, origin, x, y, yaw, ...(thing?.parts ? { parts: thing.parts } : {}) });
+    this.rebuildSolids();
+    this.npc.forgetWays();
+    this.bus.emit('item:placed', { item: s.item });
+    this.bus.emit('inventory:changed', {});
+    const said = `Posi ${name}.`;
+    this.message(said);
+    return said;
+  }
+
+  /**
+   * Why a thing of the world does not go down at (x, y) as `fc` (T292), or undefined. Rule 10: the ground holds it, nothing is there
+   * (terrain, a model, someone, something lying, a rune), and, if it is solid, it is not in front of a door and the place stays whole:
+   * every tile a body walked to from another, around it, it still walks to (ADR-0064).
+   */
+  private spotFailure(man: Manifest, fc: FormComp, x: number, y: number): PutFailure | undefined {
+    const f = this.forms.ready(fc.model, fc.seed, fc.tint);
+    const solid = !!man.physics?.solid && !man.physics?.pushable;
+    // Where it stands: the middle of every column of its model seen from above (its tile, without a model), and how tall it is.
+    const shape = f?.result ? itemShape(f.result.grid, f.result.palette, f.vpt) : undefined;
+    const points: Array<{ x: number; y: number }> = [];
+    let height = 1;
+    if (f?.result && shape) {
+      const g = f.result.grid;
+      const cos = Math.cos(fc.yaw), sin = Math.sin(fc.yaw);
+      for (let vy = 0; vy < g.Y; vy++)
+        for (let vx = 0; vx < g.X; vx++) {
+          if (!shape.mask[vx + vy * g.X]) continue;
+          const lx = (vx + 0.5 - g.X / 2) / f.vpt, ly = (vy + 0.5 - g.Y / 2) / f.vpt;
+          points.push({ x: x + lx * cos + ly * sin, y: y - lx * sin + ly * cos });
+        }
+      height = Math.max(0.1, (shape.height - f.base) / f.vpt);
+    } else points.push({ x, y });
+    const ground = this.groundAt(x, y);
+    const tiles = new Map<string, [number, number]>();
+    for (const p of points) {
+      const col = Math.floor(p.x), row = Math.floor(p.y);
+      const key = `${col},${row}`;
+      if (!tiles.has(key)) {
+        tiles.set(key, [col, row]);
+        const code = this.tileAt(col, row);
+        if (code === undefined || this.chunkAt(col, row)?.stage !== 'planned') return 'nowhere';
+        const def = this.palette[code];
+        // Water does not hold it up; a wall, a rock, a wood leave it no room.
+        if (def?.solid) return def.layer === 'liquid' ? 'ground' : 'taken';
+        if (def?.layer === 'door') return 'door';
+        if (this.solidTiles.has(key)) return 'taken';
+        if (this.runeTiles.has(key)) return 'rune';
+      }
+      if (this.formFills(p.x, p.y, ground, height)) return 'taken';
+    }
+    // Who and what is there now: the wanderer acting, the others, the figures, what lies on the ground, what moves.
+    const half = f ? 0.5 / f.vpt : 0.5;
+    const covers = (bx: number, by: number, r: number) => points.some((p) => Math.abs(p.x - bx) < r + half && Math.abs(p.y - by) < r + half);
+    const me = this.wanderer().id;
+    for (const w of this.wanderersById.keys()) {
+      if (!this.inWorld(w)) continue;
+      const b = this.as(w, () => ({ c: this.wandererCarpet(), z: this.wandererPos().z, r: Number(this.ecs.get(this.wandererEntity, 'body')?.r) || 0.3 }));
+      if (typeof b.z === 'number' && Number.isFinite(b.z) && b.z >= ground + height) continue;
+      if (covers(b.c.x, b.c.y, b.r)) return w === me ? 'you' : 'someone';
+    }
+    for (const id of this.ecs.query('pos', 'body')) {
+      if (this.ecs.has(id, 'player') || this.ecs.has(id, 'remote')) continue;
+      const p = this.ecs.get(id, 'pos');
+      const b = this.ecs.get(id, 'body');
+      if (!Number.isFinite(p?.x) || !Number.isFinite(p?.y) || Math.hypot(p.x - x, p.y - y) > (f?.reach ?? 1) + 1.5) continue;
+      if (typeof p.z === 'number' && Number.isFinite(p.z) && p.z >= ground + height) continue;
+      const figure = this.ecs.has(id, 'mind') || this.ecs.has(id, 'wander') || this.ecs.has(id, 'identity');
+      if (this.ecs.has(id, 'pickup')) {
+        if (covers(p.x, p.y, 0.15)) return 'lying';
+      } else if (figure) {
+        if (covers(p.x, p.y, Number(b?.r) || 0.3)) return 'someone';
+      } else if (!b?.solid && covers(p.x, p.y, Number(b?.r) || 0.3)) return 'taken';
+    }
+    if (!solid) return undefined;
+    for (const [col, row] of tiles.values()) for (const [dc, dr] of [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]]) if (this.isDoor(col + dc, row + dr)) return 'door';
+    return this.wouldSplit(f?.result ? { ...fc, f } : undefined, x, y) ? 'split' : undefined;
+  }
+
+  /** Whether a model of the world fills a point of the simulation from a step above the ground at `ground` to `height` over it (tiles). */
+  private formFills(x: number, y: number, ground: number, height: number): boolean {
+    for (const s of this.solidForms.get(`${Math.floor(x)},${Math.floor(y)}`) ?? []) {
+      const [lx, lz] = toLocal(x - s.x, y - s.y, s.yaw);
+      const g = s.form.result!.grid;
+      const vx = Math.floor(lx * s.form.vpt + g.X / 2), vy = Math.floor(lz * s.form.vpt + g.Y / 2);
+      if (vx < 0 || vy < 0 || vx >= g.X || vy >= g.Y) continue;
+      const i = vx + vy * g.X;
+      // Over a cellar there is no ground to stand on.
+      if (s.hole?.[i]) return true;
+      // The thing's heights in the model's voxels: it stands on the ground under its middle, the model on the ground under its own.
+      const at = (z: number) => (z - this.groundAt(s.x, s.y)) * s.form.vpt + s.form.base;
+      const lo = at(ground) + stepOf(s.form.vpt), hi = at(ground + height);
+      for (let l = s.levels.start[i]; l < s.levels.start[i + 1]; l++) if (s.levels.base[l] < hi && s.levels.z[l] > lo) return true;
+    }
+    return false;
+  }
+
+  /** Whether a tile is a door: of the terrain, or of a lot of its place. */
+  private isDoor(col: number, row: number): boolean {
+    const code = this.tileAt(col, row);
+    if (code && this.palette[code]?.layer === 'door') return true;
+    const ch = this.chunkAt(col, row);
+    if (!ch) return false;
+    const S = this.config.chunkSize;
+    const t = (row - ch.cy * S) * S + (col - ch.cx * S);
+    return ch.lots.some((b) => b.doors.includes(t));
+  }
+
+  /**
+   * Whether a body of half-size r steps from the middle of a tile to the middle of the next (both passable), as a walk sees it: the
+   * tiles say it all where no model stands; else free halfway and at the end, from the floor under the start (the boxes of the three
+   * points cover the way, so an edge or a rise anywhere on it is in one of them).
+   */
+  private stepsBetween(c: number, r: number, nc: number, nr: number, body: number): boolean {
+    if (!this.solidForms.has(`${c},${r}`) && !this.solidForms.has(`${nc},${nr}`)) return true;
+    const x0 = c + 0.5, y0 = r + 0.5;
+    let z = this.floorAt(x0, y0);
+    for (const t of [0.5, 1]) {
+      const x = x0 + (nc - c) * t, y = y0 + (nr - r) * t;
+      if (!this.free(x, y, body, z)) return false;
+      z = this.floorAt(x, y, z);
+    }
+    return true;
+  }
+
+  /**
+   * Whether a solid thing standing at (x, y) splits the place around it (rule 10, ADR-0064): the groups of tiles a body walks
+   * between in `MOVE_AREA` tiles each way, before and with the thing there (its model in the index of solids for a moment, or its
+   * tile while it has none). Only around it the tiles are walked again; elsewhere the first answer stands.
+   */
+  private wouldSplit(thing: (FormComp & { f: Form }) | undefined, x: number, y: number): boolean {
+    const col = Math.floor(x), row = Math.floor(y);
+    const area: TileArea = { col: col - MOVE_AREA, row: row - MOVE_AREA, cols: 2 * MOVE_AREA + 1, rows: 2 * MOVE_AREA + 1 };
+    const memo = <K>(m: Map<K, boolean>, k: K, fn: () => boolean) => {
+      let v = m.get(k);
+      if (v === undefined) m.set(k, (v = fn()));
+      return v;
+    };
+    const passes = new Map<string, boolean>(), steps = new Map<string, boolean>();
+    const passable = (c: number, r: number) => this.tileAt(c, r) !== undefined && this.free(c + 0.5, r + 0.5, MOVE_BODY);
+    const before: Walk = {
+      passable: (c, r) => memo(passes, `${c},${r}`, () => passable(c, r)),
+      step: (c, r, nc, nr) => memo(steps, `${c},${r},${nc},${nr}`, () => this.stepsBetween(c, r, nc, nr, MOVE_BODY)),
+    };
+    const a = walkGroups(area, before);
+    // The thing, for a moment, where it would stand: in every tile its collision may reach.
+    const reach = thing ? thing.f.reach : 0;
+    const c0 = Math.floor(x - reach), c1 = Math.floor(x + reach), r0 = Math.floor(y - reach), r1 = Math.floor(y + reach);
+    const added: Array<[string, SolidForm]> = [];
+    const tileKey = `${col},${row}`;
+    const hadTile = this.solidTiles.has(tileKey);
+    if (thing) {
+      const s: SolidForm = { id: -1, x, y, yaw: thing.yaw, form: thing.f, ...this.groundOf(-1, thing, thing.f) };
+      for (let cy = r0; cy <= r1; cy++)
+        for (let cx = c0; cx <= c1; cx++) {
+          const key = `${cx},${cy}`;
+          (this.solidForms.get(key) ?? this.solidForms.set(key, []).get(key)!).push(s);
+          added.push([key, s]);
+        }
+    } else this.solidTiles.add(tileKey);
+    try {
+      const near = (c: number, r: number) => c >= c0 - 1 && c <= c1 + 1 && r >= r0 - 1 && r <= r1 + 1;
+      const after: Walk = {
+        passable: (c, r) => (near(c, r) ? passable(c, r) : before.passable(c, r)),
+        step: (c, r, nc, nr) => (near(c, r) || near(nc, nr) ? this.stepsBetween(c, r, nc, nr, MOVE_BODY) : before.step(c, r, nc, nr)),
+      };
+      return splitBetween(a, walkGroups(area, after));
+    } finally {
+      for (const [key, s] of added) {
+        const list = this.solidForms.get(key)!;
+        list.splice(list.indexOf(s), 1);
+        if (!list.length) this.solidForms.delete(key);
+      }
+      if (!thing && !hadTile) this.solidTiles.delete(tileKey);
+      this.instanceFeet.delete(-1);
+    }
+  }
+
+  /** The things moved as the save keeps them (T292): from the world where they stand now, the rest as they were last seen. */
+  private movedToSave(): MovedRecord[] {
+    const r4 = (v: number) => Math.round(v * 10000) / 10000;
+    const live = new Map<string, Id>();
+    for (const id of this.ecs.query('origin', 'module')) {
+      const o = this.ecs.get(id, 'origin').key;
+      if (this.moved.has(o)) live.set(o, id);
+    }
+    const out: MovedRecord[] = [];
+    for (const r of [...this.moved.values()]) {
+      const id = live.get(r.origin);
+      if (id === undefined) {
+        // Its module is there and it is not in the world: something destroyed it (Lua). A module gone: it waits in the save.
+        const m = this.modules.get(r.module)?.manifest;
+        if (m && m.kind === 'entity' && !m.persona) this.moved.delete(r.origin);
+        else out.push(r);
+        continue;
+      }
+      const p = this.ecs.get(id, 'pos');
+      const yaw = this.ecs.get(id, 'form')?.yaw ?? r.yaw;
+      if (![p?.x, p?.y, yaw].every(Number.isFinite)) continue;
+      const parts = readParts(this.ecs.componentsOf(id));
+      const now: MovedRecord = { module: r.module, origin: r.origin, x: r4(p.x), y: r4(p.y), yaw: r4(yaw), ...(parts ? { parts } : {}) };
+      this.moved.set(r.origin, now);
+      out.push(now);
+    }
+    return out.slice(-MAX_MOVED);
+  }
+
+  /**
+   * Puts back the things moved when the game was saved (T292), where they were put, as themselves; and keeps the places from making
+   * again what was taken or moved, including what a wanderer carries (`consumed` keeps only the most recent).
+   */
+  private restoreMoved(list: unknown): void {
+    for (const r of readMoved(list)) {
+      this.consumed.add(r.origin);
+      this.moved.set(r.origin, r);
+      const entry = this.modules.get(r.module);
+      // A module gone, or not a thing any more: the record waits in the save, nothing comes into the world.
+      if (!entry || entry.manifest.kind !== 'entity' || entry.manifest.persona) continue;
+      if (this.ecs.query('origin').some((e) => this.ecs.get(e, 'origin').key === r.origin)) continue;
+      const id = this.spawnModuleEntity(entry, r.x, r.y, undefined, r.origin, r.parts);
+      this.ecs.get(id, 'form').yaw = r.yaw;
+    }
+  }
+
+  /** What the wanderer acting carries of the world (T292): the places do not make it again, whatever `consumed` still remembers. */
+  private keepCarried(): void {
+    for (const s of this.inventory()?.slots ?? []) {
+      const t = isThing(s?.item) ? thingOf(s) : undefined;
+      if (t) this.consumed.add(t.origin);
+    }
+  }
+
   moveSlot(from: number, to: number): void {
     moveSlot(this.inventory(), from, to, this.itemSpec);
   }
@@ -3764,14 +4192,8 @@ export class Kernel {
 
   /** First opening fills the container from its loot table (things people talked about turn up more). */
   openContainer(id: Id): Container | undefined {
-    const box = this.container(id);
+    const box = this.fillContainer(id);
     if (!box) return undefined;
-    if (!box.filled) {
-      box.filled = true;
-      const origin = this.ecs.get(id, 'origin')?.key ?? `e${id}`;
-      const rng = new Rng(hash32(this.config.seed, hashStr(origin), 7));
-      for (const l of this.content.roll(box.loot, rng, [...this.wanted])) addItem(box.inv, l.item, l.count, this.itemSpec(l.item));
-    }
     this.bus.emit('ui:container', { id, name: this.nameOf(id) });
     return box;
   }
@@ -3780,7 +4202,7 @@ export class Kernel {
     const box = this.container(id);
     const s = box?.inv.slots[slot];
     if (!box || !s) return;
-    const moved = s.inv ? putSlot(this.inventory(), s, this.itemSpec(s.item)) : this.give(s.item, s.count);
+    const moved = s.inv || s.thing ? putSlot(this.inventory(), s, this.itemSpec(s.item)) : this.give(s.item, s.count);
     if (!moved) return this.message("L'inventario è pieno.", 'warn');
     takeFromSlot(box.inv, slot, moved);
     this.message(`Prendi: ${this.itemInfo(s.item).name}${moved > 1 ? ` ×${moved}` : ''}`);
@@ -3790,6 +4212,8 @@ export class Kernel {
     const box = this.container(id);
     const s = this.inventory().slots[slot];
     if (!box || !s) return;
+    // A chest holds no furniture (T292).
+    if (isThing(s.item)) return this.message(`${this.itemInfo(s.item).name} non ci va, in ${this.nameOf(id)}.`, 'warn');
     const moved = putSlot(box.inv, s, this.itemSpec(s.item));
     if (moved) takeFromSlot(this.inventory(), slot, moved);
     this.syncPhrase();
@@ -3809,7 +4233,8 @@ export class Kernel {
     const s = this.inventory().slots[slot];
     const def = s ? this.content.get(s.item) : undefined;
     const it = this.content.get(item);
-    if (!def?.container || !it || it.container) return false;
+    // No bag inside a bag, no thing of the world in a bag (T292).
+    if (!def?.container || !it || it.container || isThing(item)) return false;
     return !def.container.accepts || it.tags.includes(def.container.accepts) || isCategory(it, def.container.accepts);
   }
 
@@ -3991,6 +4416,8 @@ export class Kernel {
     const inv = this.inventory();
     const has = (req: string) => countItem(inv, req) > 0 || inv.slots.some((s) => s && this.itemInfo(s.item).tags.includes(req));
     if (this.ecs.has(id, 'pickup')) out.push({ id: 'raccogli', label: 'Raccogli', enabled: true });
+    // A thing of the world one can carry elsewhere (T292); the kernel says why when it does not go.
+    if (this.takeableOf(id)) out.push({ id: 'prendi', label: 'Prendi', enabled: true });
     const it = this.ecs.get(id, 'interact');
     if (it?.type === 'talk') out.push({ id: 'parla', label: 'Parla', enabled: true });
     if (it?.type === 'read') out.push({ id: 'leggi', label: 'Leggi', enabled: true });
@@ -4004,9 +4431,11 @@ export class Kernel {
       out.push({ id: `act:${a.id}`, label: a.label, enabled: ok, reason: ok ? undefined : `serve: ${this.content.get(a.requires!)?.name ?? a.requires}` });
     }
     const held = equippedItem(inv);
-    // What is held goes down on furniture (T291), or beside what already lies on it; the kernel says why when it does not.
-    if (held && this.offersPlace(id)) out.push({ id: 'posa', label: `Posa ${this.itemInfo(held).name} ${this.ecs.has(id, 'placed') ? 'accanto' : 'qui sopra'}`, enabled: true });
-    if (held) out.push({ id: 'strumento', label: `Usa ${this.itemInfo(held).name}`, enabled: true });
+    // What is held goes down on furniture (T291), or beside what already lies on it; the kernel says why when it does not. A thing
+    // of the world carried goes on the ground only (T292): the tile's own menu has it.
+    const carrying = isThing(held);
+    if (held && !carrying && this.offersPlace(id)) out.push({ id: 'posa', label: `Posa ${this.itemInfo(held).name} ${this.ecs.has(id, 'placed') ? 'accanto' : 'qui sopra'}`, enabled: true });
+    if (held && !carrying) out.push({ id: 'strumento', label: `Usa ${this.itemInfo(held).name}`, enabled: true });
     out.push({ id: 'esamina', label: 'Esamina', enabled: true });
     out.push({ id: 'altro', label: 'Altro…', enabled: true });
     return out;
@@ -4047,17 +4476,19 @@ export class Kernel {
     const other = this.besideWanderer(to, GIVE_REACH, 'Avvicinati per dargli qualcosa.');
     if (!other) return false;
     const name = this.itemInfo(s.item).name;
+    // A bag goes whole with what is in it, a thing of the world with who it is (T292): a slot of their own, a copy of this one.
+    const whole = !!(s.inv || s.thing);
     const moved = this.as(to, () => {
-      if (!s.inv) return this.give(s.item, n);
+      if (!whole) return this.give(s.item, n);
       const theirs = this.inventory();
       const free = theirs.slots.findIndex((x) => !x);
       if (free < 0) return 0;
-      theirs.slots[free] = s;
+      theirs.slots[free] = { ...s };
       return s.count;
     });
     if (!moved) return void this.message(`${other.nome} non ha posto per ${name}.`, 'warn'), false;
     s.count -= moved;
-    if (s.count <= 0 || s.inv) {
+    if (s.count <= 0 || whole) {
       inv.slots[slot] = null;
       if (inv.equipped === slot) inv.equipped = null;
     }
@@ -4097,6 +4528,9 @@ export class Kernel {
     const on = entity ?? this.nearest(col + 0.5, row + 0.5, 0.75);
     const options: ActionOption[] = [];
     if (on !== undefined) for (const o of this.actionsFor(on)) options.push({ ...o, id: `e:${o.id}`, label: o.id === 'altro' ? `Altro… (${this.nameOf(on)})` : o.label });
+    // A thing of the world carried goes down here (T292); the kernel says why when it does not.
+    const held = equippedItem(this.inventory());
+    if (t && this.zone === 'sim' && isThing(held)) options.push({ id: `t:${PUT_DOWN}`, label: `Posa ${this.itemInfo(held!).name} qui`, enabled: true });
     if (t) {
       for (const a of t.actions ?? []) if (a.effects?.length) options.push({ id: `t:${a.id}`, label: `${a.label} (${t.name})`, enabled: !a.requires || countItem(this.inventory(), a.requires) > 0, reason: a.requires && countItem(this.inventory(), a.requires) <= 0 ? `serve: ${this.itemInfo(a.requires).name}` : undefined });
       options.push({ id: 't:altro', label: `Altro… (${t.name})`, enabled: true });
@@ -4131,6 +4565,12 @@ export class Kernel {
   async performMenu(option: string, entity: Id, col: number, row: number): Promise<void> {
     if (option.startsWith('e:') && entity >= 0) return this.perform(entity, option.slice(2));
     if (option === 't:altro') return void this.bus.emit('ui:freeaction', { id: -1, col, row, name: this.palette[this.tileAt(col, row) ?? '']?.name ?? 'qui' });
+    if (option === `t:${PUT_DOWN}`) {
+      const at = this.inventory().equipped;
+      if (at === null || !isThing(this.inventory().slots[at]?.item)) return this.message(putRefusal('nothing', ''), 'warn');
+      await this.placeCarried(at, { col, row });
+      return;
+    }
     if (option.startsWith('t:')) {
       const code = this.tileAt(col, row);
       const a = code ? this.palette[code]?.actions?.find((x) => x.id === option.slice(2)) : undefined;
@@ -4186,6 +4626,9 @@ export class Kernel {
         return;
       case 'posa':
         await this.placeOn(id);
+        return;
+      case 'prendi':
+        this.takeThing(id);
         return;
       case 'altro':
         this.bus.emit('ui:freeaction', { id, name: speaker });
@@ -5722,7 +6165,8 @@ export class Kernel {
     const el = p?.panel.elements.find((e) => e.type === 'slot' && e.id === slotId);
     const s = this.inventory().slots[invSlot];
     if (!p || !el || !s) return false;
-    if (!this.fits(s.item, el.accepts)) {
+    // A thing of the world is carried, not worn (T292).
+    if (isThing(s.item) || !this.fits(s.item, el.accepts)) {
       this.message(`${this.itemInfo(s.item).name} non va lì (${el.label}).`, 'warn');
       return false;
     }
@@ -6931,7 +7375,8 @@ export class Kernel {
   // --- The Forge and Genesis ---------------------------------------------------------------------
 
   /** Forges a module through the Council, then validates, commits and hot loads it; the Sculptor gives it a model. */
-  async forgeModule(prompt: string, origin: ForgeOrigin, kind?: 'npc' | 'oggetto' | 'strumento', permissive = false, chi?: string): Promise<{ ok: boolean; id?: string; summary: string }> {
+  /** `takeable` (T292): whether the thing can be taken and put down elsewhere, when who asks for it decided (the Cartographer). */
+  async forgeModule(prompt: string, origin: ForgeOrigin, kind?: 'npc' | 'oggetto' | 'strumento', permissive = false, chi?: string, takeable?: boolean): Promise<{ ok: boolean; id?: string; summary: string }> {
     // The Genesis is the world's; what the wanderer who transcended asks is theirs, and they wrote it (T36).
     if (origin === 'genesi') chi = COMUNE;
     const autore = permissive ? this.wanderer().id : 'narrator';
@@ -6940,7 +7385,7 @@ export class Kernel {
     try {
       const r = await forge(
         this.council,
-        { prompt, origin, kind, chi, existingIds: ids, paletteCodes: Object.keys(this.palette).filter((c) => c !== '?' && !this.palette[c].solid), permissive, existingNames: [...this.modules.values()].filter((m) => m.manifest.kind === 'entity' || m.manifest.kind === 'item').map((m) => m.manifest.name) },
+        { prompt, origin, kind, chi, existingIds: ids, paletteCodes: Object.keys(this.palette).filter((c) => c !== '?' && !this.palette[c].solid), permissive, existingNames: [...this.modules.values()].filter((m) => m.manifest.kind === 'entity' || m.manifest.kind === 'item').map((m) => m.manifest.name), ...(takeable !== undefined ? { takeable } : {}) },
         (m, logic) => this.validator.validateForged(m, logic, new Set(ids)),
       );
       // What a character carries: existing items by name, new ones defined by the Narrator.
@@ -7152,8 +7597,10 @@ export class Kernel {
       this.consumed.clear();
       this.savedContainers.clear();
       for (const m of this.rari.values()) m.clear();
-      // What lay on the furniture of the world of before goes with it (T291).
+      // What lay on the furniture of the world of before goes with it (T291), and what was moved in it (T292).
       for (const id of this.ecs.query('placed')) this.ecs.destroy(id);
+      for (const id of this.ecs.query('origin')) if (this.moved.has(this.ecs.get(id, 'origin').key)) this.ecs.destroy(id);
+      this.moved.clear();
       this.repo.write('world/state.json', null);
       for (const p of Object.keys(this.repo.working)) if (p.startsWith(PLAYERS_DIR)) this.repo.write(p, null);
       this.wanted.clear();
@@ -7226,6 +7673,7 @@ export class Kernel {
       if (c.filled) containers[this.ecs.get(id, 'origin').key] = { inv: c.inv, filled: true };
     }
     const placed = this.placedToSave();
+    const moved = this.movedToSave();
     const state = {
       consumed: [...this.consumed].slice(-5000),
       containers,
@@ -7233,6 +7681,7 @@ export class Kernel {
       rares: Object.fromEntries([...this.rari].map(([t, m]) => [t, Object.fromEntries(m)])),
       time: Math.round(this.time),
       ...(placed.length ? { placed } : {}),
+      ...(moved.length ? { moved } : {}),
     };
     // Each wanderer in their own file (T34); the world's state no longer carries one.
     const players = Object.fromEntries([...this.wanderersById.values()].map((w) => [playerFile(w.id), this.as(w.id, () => this.wandererState(w))]));
@@ -7297,7 +7746,10 @@ export class Kernel {
       const p = this.wandererPos();
       if (c && p) Object.assign(c, { ox: v.pos!.x - p.x, oy: v.pos!.y - p.y });
     }
-    if (v.inventory?.slots) this.ecs.set(this.wandererEntity, 'inventory', v.inventory);
+    if (v.inventory?.slots) {
+      this.ecs.set(this.wandererEntity, 'inventory', v.inventory);
+      this.keepCarried();
+    }
     if (v.needs) Object.assign(this.needs() ?? {}, v.needs, { dead: false });
     if (v.hand?.tokens) Object.assign(this.phrase(), v.hand);
     if (v.states) this.ecs.set(this.wandererEntity, 'states', internalComponent('states', Object.fromEntries(Object.entries(v.states).filter(([, x]) => x && typeof x === 'object'))));
@@ -7561,6 +8013,8 @@ export class Kernel {
     for (const [k, c] of Object.entries(st.containers ?? {})) this.savedContainers.set(k, c as { inv: Inventory; filled: boolean });
     for (const [k, d] of Object.entries(st.forms ?? {})) if (Array.isArray(d)) this.savedForms.set(k, d.map(String));
     this.restorePlaced(st.placed);
+    // After the containers and the forms: a thing moved comes back with what its origin keeps (T292).
+    this.restoreMoved(st.moved);
     // The important structures of before ADR-0092 are the Huge ones.
     for (const [z, c] of Object.entries(st.important ?? {})) if (typeof c === 'string') this.rari.get('huge')!.set(z, c);
     for (const t of RARE_SIZES) for (const [z, c] of Object.entries(st.rares?.[t] ?? {})) if (typeof c === 'string') this.rari.get(t)!.set(z, c);

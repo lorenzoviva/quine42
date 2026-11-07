@@ -19,6 +19,7 @@
     "mass": 20,
     "friction": 0.8
   },
+  "takeable": true,
   "spawn": {
     "tiles": [
       "p",

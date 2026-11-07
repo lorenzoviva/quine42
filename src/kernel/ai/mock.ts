@@ -512,6 +512,8 @@ export class MockAiModels implements AiModels {
       azioni: tipo === 'oggetto' ? [{ id: 'tocca', etichetta: `Tocca ${nome.toLowerCase()}` }] : [],
       contenitore: tipo === 'oggetto' && /madia|cassa|credenza|armadio|baule|cesta|scaffale/.test(req.prompt) ? { capienza: 6, bottino: 'cucina' } : undefined,
       porta: tipo === 'npc' ? ['Pagnotta', 'Fune di canapa'] : undefined,
+      // A careful narrator (T292): furniture and small things are lifted and set down elsewhere; what is built in place is not.
+      ...(tipo === 'oggetto' ? { takeable: /madia|cassa|credenza|armadio|baule|cesta|scaffale|sgabello|panca|sedia|tavol|botte|forziere|cassett/.test(req.prompt.toLowerCase()) && !/pozzo|forno|statua|altare|fontana|colonna|torre/.test(req.prompt.toLowerCase()) } : {}),
     };
   }
 

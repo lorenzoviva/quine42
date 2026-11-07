@@ -180,6 +180,9 @@ export class Validator {
       if (typeof s.chance !== 'number' || s.chance < 0 || s.chance > 1) err('spawn.chance deve essere in [0,1]');
       if (!Number.isInteger(s.max) || s.max < 0 || s.max > 16) err('spawn.max deve essere un intero 0..16');
     }
+    if (m.takeable !== undefined && typeof m.takeable !== 'boolean') err('takeable deve essere true o false');
+    // Only a thing of the world is taken (T292): not someone, not an item (it is one already), not what the world is made of.
+    if (m.takeable === true && (m.kind !== 'entity' || m.persona !== undefined)) err('takeable vale solo per le cose del mondo (kind entity, senza persona)');
     if (m.interaction && !['talk', 'read', 'lua'].includes(m.interaction.type)) err('interaction.type deve essere talk, read o lua');
     if (m.interaction?.type === 'talk' && typeof m.persona !== 'string') err('un personaggio (talk) richiede "persona"');
     if (m.kind === 'item') {

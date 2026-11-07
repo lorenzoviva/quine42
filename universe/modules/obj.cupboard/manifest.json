@@ -16,6 +16,7 @@
     "solid": true,
     "radius": 0.45
   },
+  "takeable": true,
   "container": {
     "size": 8,
     "loot": "cucina"

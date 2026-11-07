@@ -99,6 +99,8 @@ export interface OtherView {
   introduction?: string;
   /** The item they wield (T288, ADR-0167): its id, which the client's files make a look of. Nothing else of what they carry. */
   held?: string;
+  /** When what they hold is a thing of the world they carry (T292, ADR-0168): the seed of its look, as it stood. Not who it is. */
+  heldSeed?: number;
 }
 
 export type ClientMsg =

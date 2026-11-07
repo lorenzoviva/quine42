@@ -41,8 +41,8 @@ export interface ChunkPlan {
   objects: PlacedObject[];
   /** Names of items lying around. */
   ground: string[];
-  /** Entities that do not exist yet: the Forge will create them. */
-  fresh: Array<{ concept: string; where: Where }>;
+  /** Entities that do not exist yet: the Forge will create them; `takeable` (T292) if the Cartographer said whether a wanderer can carry it elsewhere. */
+  fresh: Array<{ concept: string; where: Where; takeable?: boolean }>;
   /** Rune fragments (lines from the catalogue) to scatter. */
   runes: string[];
   /**
@@ -103,7 +103,7 @@ const PLAN_SCHEMA: Schema = {
     ambiente: { type: 'STRING' },
     oggetti: { type: 'ARRAY', items: { type: 'OBJECT', properties: { modulo: { type: 'STRING' }, dove: { type: 'STRING', enum: WHERE } }, required: ['modulo', 'dove'] } },
     a_terra: { type: 'ARRAY', items: { type: 'STRING' } },
-    nuovi: { type: 'ARRAY', items: { type: 'OBJECT', properties: { concetto: { type: 'STRING' }, dove: { type: 'STRING', enum: WHERE } }, required: ['concetto', 'dove'] } },
+    nuovi: { type: 'ARRAY', items: { type: 'OBJECT', properties: { concetto: { type: 'STRING' }, dove: { type: 'STRING', enum: WHERE }, takeable: { type: 'BOOLEAN' } }, required: ['concetto', 'dove'] } },
     rune: { type: 'ARRAY', items: { type: 'STRING' } },
     strutture: { type: 'ARRAY', items: { type: 'OBJECT', properties: { concetto: { type: 'STRING' }, taglia: { type: 'STRING', enum: internalValues('taglie') } }, required: ['concetto'] } },
   },
@@ -129,7 +129,7 @@ export async function planChunk(c: Council, ctx: PlanContext): Promise<ChunkPlan
     ctx.region ? `This place belongs to the region «${ctx.region.nome}» (${ctx.region.descrizione}): its name and what is in it must belong to the region (e.g. «${ctx.region.nome} — the north gate», in the language of the world).` : '',
     `Things and characters: 2-6 entries, "modulo" = EXACTLY one of the ids below; "dove": dentro (inside the buildings), fuori (outside), ovunque (anywhere). Furnish the interiors (beds, tables, cupboards, chests) and people the place: about one place in two has at least one character; vary the characters (do not always put the same kind, and never the same as the neighbouring places).\n${ctx.catalog.map((m) => `- ${m.id} «${m.name}» [${m.kind}]: ${m.context}`).join('\n')}`,
     `"a_terra": 0-4 names of common things lying on the ground here (new ones too, if consistent).${ctx.wanted.length ? ` If it makes sense, include something people have talked about: ${ctx.wanted.join(', ')}.` : ''}`,
-    '"nuovi": almost always empty; only a concrete thing or a character the place calls for and that does not exist among the modules.',
+    '"nuovi": almost always empty; only a concrete thing or a character the place calls for and that does not exist among the modules; for a thing, "takeable": true if a wanderer could lift it and set it down elsewhere (a chest, a stool), false if it is fixed or built in place (a well, an oven, a statue).',
     `"rune": 0-2 fragments taken exactly from this list: ${ctx.fragments.map((f) => `«${f}»`).join(', ')}.`,
     '"strutture": 0-2 buildings or constructions of this place, if the environment has some of its age (e.g. "the mill on the river", "the tram depot", "the boiler works"): each becomes a whole model one can enter, on the lots of the environment (the other lots have common houses).',
     `"taglia" (optional, as the sizes of D&D: tiny, small, medium, large, huge, gargantuan): medium a house, large a mill, a station or a tower; the kernel fits it to the lot.`,
@@ -149,7 +149,7 @@ export async function planChunk(c: Council, ctx: PlanContext): Promise<ChunkPlan
     layout: String(raw?.ambiente ?? ''),
     objects: (raw?.oggetti ?? []).slice(0, 8).map((o: any) => ({ module: String(o?.modulo ?? ''), where: where(o?.dove) })),
     ground: (raw?.a_terra ?? []).slice(0, 4).map(String),
-    fresh: (raw?.nuovi ?? []).slice(0, 1).map((o: any) => ({ concept: String(o?.concetto ?? ''), where: where(o?.dove) })),
+    fresh: (raw?.nuovi ?? []).slice(0, 1).map((o: any) => ({ concept: String(o?.concetto ?? ''), where: where(o?.dove), ...(typeof o?.takeable === 'boolean' ? { takeable: o.takeable } : {}) })),
     runes: (raw?.rune ?? []).slice(0, 3).map(String),
     structures: (raw?.strutture ?? []).slice(0, 3).map(readStructure),
   };

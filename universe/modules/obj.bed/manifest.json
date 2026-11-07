@@ -17,6 +17,7 @@
     "solid": true,
     "radius": 0.45
   },
+  "takeable": true,
   "actions": [
     {
       "id": "sleep",

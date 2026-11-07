@@ -10,7 +10,9 @@
 //   widest slice (a guard), else the lower one; with its widest slice in the middle (a bow) it is held there. A flat thing is
 //   long along the axis whose ends differ most. A compact thing hangs from its top;
 // - the mount (`MOUNTS`, `mountOf`): where on the body a thing goes by its place (`ItemDef.slot`), written once per mount;
-// - the pose (`holdPose`): where the thing goes in the frame of the arm's pivot, turned and scaled, so that it follows the arm.
+// - the pose (`holdPose`): where the thing goes in the frame of the arm's pivot, turned and scaled, so that it follows the arm;
+// - over the head (`overheadPose`, T292): a thing of the world carried (a cupboard, a chest) rides on the raised hands, upright,
+//   small enough for the body, in the frame of the body: it bobs with the step, the arms stay up.
 //
 // Frames are three.js's, in tiles: a model's has its origin at the centre of its floor, y up, and the figure looks toward +z; an
 // arm's pivot is at its joint, with the same axes when the arm hangs still; a thing's mesh has its origin at the centre of its floor.
@@ -62,16 +64,20 @@ export interface Grip {
 /** Where on the body: which arm, and how the thing sits on it. */
 export interface Mount {
   side: Side;
-  /** `grip`: in the hand, held as its grip says; `strap`: on the forearm, its flat face outward (a shield). */
-  pose: 'grip' | 'strap';
+  /**
+   * `grip`: in the hand, held as its grip says; `strap`: on the forearm, its flat face outward (a shield); `overhead`: on both raised
+   * hands, over the head (a thing of the world carried, T292).
+   */
+  pose: 'grip' | 'strap' | 'overhead';
 }
 
-export type MountId = 'hand' | 'forearm';
+export type MountId = 'hand' | 'forearm' | 'overhead';
 
-/** The mounts, each written once. What is wielded goes in the right hand; a shield on the other forearm. */
+/** The mounts, each written once. What is wielded goes in the right hand; a shield on the other forearm; furniture over the head. */
 export const MOUNTS: Readonly<Record<MountId, Mount>> = {
   hand: { side: 'right', pose: 'grip' },
   forearm: { side: 'left', pose: 'strap' },
+  overhead: { side: 'right', pose: 'overhead' },
 };
 
 /**
@@ -478,6 +484,66 @@ export function holdPose(grip: Grip, mount: Mount, hand: Hand): Pose {
     to = [aim, level, cross(aim, level)];
   }
   return { position: [...hand.at], quaternion: turnBetween([grip.axis, grip.width, grip.thickness], to), scale: k, offset: scale(grip.at, -1) };
+}
+
+// --- Over the head (T292) --------------------------------------------------------------------------------------------------------
+
+/**
+ * How a thing of the world is carried over the head: the arms turned up about the shoulder (radians: up and a little forward), its
+ * widest side at most `width` of the body's height, its height at most `tall` of it, `gap` (tiles) over the hands or the head. Chosen
+ * on the captures (T292): at full size a cupboard hides the whole wanderer from the camera; at about two thirds the body reads under it.
+ */
+export const OVERHEAD = { arms: -2.75, width: 0.48, tall: 0.5, gap: 0.02 } as const;
+
+/** The box of a thing's voxels in the frame of its mesh (tiles), or undefined if its model holds nothing visible. */
+export function boxOf(g: VoxelGrid, palette: Record<string, PaletteEntry>, vpt: number): { min: Vec3; max: Vec3 } | undefined {
+  const s = 1 / vpt;
+  const colors = colorTable(g.alphabet, palette);
+  const XY = g.X * g.Y;
+  const min: Vec3 = [Infinity, Infinity, Infinity];
+  const max: Vec3 = [-Infinity, -Infinity, -Infinity];
+  for (let i = 0; i < g.cells.length; i++) {
+    if (!colors[g.cells[i]]) continue;
+    const p: Vec3 = [((i % g.X) - g.X / 2) * s, Math.floor(i / XY) * s, ((Math.floor(i / g.X) % g.Y) - g.Y / 2) * s];
+    for (let a = 0; a < 3; a++) {
+      min[a] = Math.min(min[a], p[a]);
+      max[a] = Math.max(max[a], p[a] + s);
+    }
+  }
+  return min[0] <= max[0] ? { min, max } : undefined;
+}
+
+/** The turn of an arm (about its shoulder, radians) while it carries over the head: up, unless the model has it up already. */
+export const overheadTurn = (hand: Hand | undefined): number => (hand?.raised ? 0 : OVERHEAD.arms);
+
+/** Where a hand is in the frame of the body when its arm is turned up to carry over the head. */
+export function raisedHand(hand: Hand): Vec3 {
+  const a = overheadTurn(hand);
+  const c = Math.cos(a);
+  const s = Math.sin(a);
+  const [x, y, z] = hand.at;
+  return [hand.joint[0] + x, hand.joint[1] + y * c - z * s, hand.joint[2] + y * s + z * c];
+}
+
+/**
+ * Where a thing of the world carried goes over the head (T292), in the frame of the body: upright, facing where the body faces, its
+ * floor on the raised hands (or on the head, if the hands do not reach over it), between them; small enough for the body (`OVERHEAD`).
+ */
+export function overheadPose(box: { min: Vec3; max: Vec3 }, hands: readonly Hand[]): Pose {
+  const height = Math.max(1e-6, ...hands.map((h) => h.height));
+  const w = box.max[0] - box.min[0];
+  const d = box.max[2] - box.min[2];
+  const h = box.max[1] - box.min[1];
+  const k = Math.min(1, (OVERHEAD.width * height) / Math.max(w, d, 1e-6), (OVERHEAD.tall * height) / Math.max(h, 1e-6));
+  const up = hands.map(raisedHand);
+  const floor = Math.max(height, ...up.map((p) => p[1])) + OVERHEAD.gap;
+  const ahead = up.length ? up.reduce((a, p) => a + p[2], 0) / up.length : 0;
+  return {
+    position: [0, floor, ahead],
+    quaternion: [0, 0, 0, 1],
+    scale: k,
+    offset: [-(box.min[0] + box.max[0]) / 2, -box.min[1], -(box.min[2] + box.max[2]) / 2],
+  };
 }
 
 /** Where a point of a held thing's mesh is, in the frame of the arm's pivot. */
