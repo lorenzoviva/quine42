@@ -2113,6 +2113,7 @@ describe('un task che torna da fare riparte da capo (T256)', () => {
     fs.mkdirSync(path.dirname(copy), { recursive: true });
     fs.mkdirSync(path.join(repo, 'docs', 'plans'), { recursive: true });
     fs.copyFileSync(script, copy);
+    fs.copyFileSync(path.join(path.dirname(script), 'generatore.mjs'), path.join(path.dirname(copy), 'generatore.mjs'));
     fs.writeFileSync(path.join(repo, 'docs', 'plans', 'backlog.md'), block(state));
     fs.writeFileSync(path.join(repo, '.gitignore'), '.pipeline/\n.pipeline-task.md\n.claude/\ndocs/pipeline/\n');
     git('init', '-q', '-b', 'base3d');
