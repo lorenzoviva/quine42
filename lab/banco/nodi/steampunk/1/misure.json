@@ -1,0 +1,184 @@
+{
+  "bersaglio": "steampunk",
+  "caratteriXml": 10530,
+  "passa": false,
+  "difetti": [
+    "large (20 voxel per casella, gradino 4), seme 1 e altri 4: salti: 0 (serve ≥ 2)",
+    "large (20 voxel per casella, gradino 4), seme 5: sagoma: 3 (serve ≥ 4)",
+    "huge (16 voxel per casella, gradino 3), seme 1 e altri 3: salti: 0 (serve ≥ 2)"
+  ],
+  "caduta": {
+    "taglia": "large",
+    "seme": 1
+  },
+  "voci": [
+    {
+      "id": "finisce",
+      "ok": true,
+      "valore": "759 ms",
+      "richiesto": "entro 8000 ms"
+    },
+    {
+      "id": "valido",
+      "ok": true,
+      "valore": "sì",
+      "richiesto": "i controlli di check.ts"
+    },
+    {
+      "id": "piani",
+      "ok": true,
+      "valore": "2",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "testa",
+      "ok": true,
+      "valore": "1.5 1.5",
+      "richiesto": "≥ 1.5 caselle per piano"
+    },
+    {
+      "id": "stanze",
+      "ok": true,
+      "valore": "6",
+      "richiesto": "≥ 3"
+    },
+    {
+      "id": "murato",
+      "ok": true,
+      "valore": "0",
+      "richiesto": "≤ 0.25"
+    },
+    {
+      "id": "porta",
+      "ok": true,
+      "valore": "x 49, scarto 0.01, alta 1.5, libera",
+      "richiesto": "sul davanti, scarto ≤ 0.33, alta ≥ 1.5"
+    },
+    {
+      "id": "salti",
+      "ok": false,
+      "valore": "0",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "materiali",
+      "ok": true,
+      "valore": "11",
+      "richiesto": "≥ 6"
+    },
+    {
+      "id": "dominante",
+      "ok": true,
+      "valore": "0.26",
+      "richiesto": "≤ 0.6"
+    },
+    {
+      "id": "finestre",
+      "ok": true,
+      "valore": "87 su 4 lati",
+      "richiesto": "≥ 6 su ≥ 3 lati"
+    },
+    {
+      "id": "dettagli",
+      "ok": true,
+      "valore": "277, 0 lati vuoti",
+      "richiesto": "≥ 24, ≤ 1 lati vuoti"
+    },
+    {
+      "id": "rumore",
+      "ok": true,
+      "valore": "0.05",
+      "richiesto": "≤ 0.7"
+    },
+    {
+      "id": "sagoma",
+      "ok": true,
+      "valore": "4",
+      "richiesto": "≥ 4"
+    },
+    {
+      "id": "rilievo",
+      "ok": true,
+      "valore": "0.32",
+      "richiesto": "≥ 0.12"
+    },
+    {
+      "id": "ingombro",
+      "ok": true,
+      "valore": "0.48",
+      "richiesto": "≥ 0.3"
+    }
+  ],
+  "misure": {
+    "voxel": 51566,
+    "ms": 759,
+    "finito": true,
+    "piani": [
+      {
+        "z": 2,
+        "quota": 0.1,
+        "area": 5.4225,
+        "testa": 1.5,
+        "stanze": 4
+      },
+      {
+        "z": 34,
+        "quota": 1.7,
+        "area": 3.02,
+        "testa": 1.5,
+        "stanze": 2
+      }
+    ],
+    "cantina": 0,
+    "terrazze": 0,
+    "stanze": 6,
+    "murato": 0,
+    "persi": [],
+    "porta": {
+      "x": 49,
+      "y": 95,
+      "scarto": 0.025,
+      "alta": 1.5,
+      "libera": true
+    },
+    "salti": [],
+    "materiali": 11,
+    "dominante": 0.2565837955241826,
+    "finestre": 87,
+    "latiConFinestre": 4,
+    "dettagli": 277,
+    "latiVuoti": 0,
+    "rumore": 0.048109965635738834,
+    "rilievo": 0.32062062062062063,
+    "sagoma": 4,
+    "ingombro": 0.4761,
+    "luci": 0,
+    "inutili": [
+      "one \"bHb\" → \"*n*\" — le celle cercate c'erano, ma mai disposte come nel pattern",
+      "all \"nH\" → \"*n\" (e altre 1 regole) — in quel momento nella griglia non c'erano celle \"n\"",
+      "one \"nnnnnnnnn\" → \"*eeeeeee*\" — in quel momento nella griglia non c'erano celle \"n\"",
+      "one \"nnnnnnnnn\" → \"*fffffff*\" — in quel momento nella griglia non c'erano celle \"n\"",
+      "prl \"n\" → \"h\" — in quel momento nella griglia non c'erano celle \"n\"",
+      "all \"l .\" → \"F l\" — in quel momento nella griglia non c'erano celle \"l\"",
+      "all \"q .\" → \"m q\" — in quel momento nella griglia non c'erano celle \"q\"",
+      "prl \"l\" → \"F\" (e altre 1 regole) — in quel momento nella griglia non c'erano celle \"l\", \"q\""
+    ],
+    "avvisi": [
+      "tocca i bordi laterali della griglia: forse è tagliato",
+      "tocca il soffitto della griglia: forse è tagliato in alto",
+      "colori mai usati: N E x z a P p Q b O H t s g c d v e f w X i I J h j M U u Y n r y q l"
+    ],
+    "errori": []
+  },
+  "token": {
+    "input": 17505,
+    "cacheScritta": 0,
+    "cacheLetta": 0,
+    "output": 81999,
+    "inputTotale": 17505,
+    "pensiero": 38858
+  },
+  "modello": "gemini-3.8-flash-high",
+  "dollari": 0.320625,
+  "ms": 299772
+}

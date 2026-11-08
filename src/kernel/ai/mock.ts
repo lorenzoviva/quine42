@@ -64,6 +64,20 @@ const STOCK: Array<[string, string, string, number, number, string[], Record<str
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const words = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').match(/[a-z]+/g) ?? [];
 
+/**
+ * The offline Sculptor's program when the library has none of the class (T336, ADR-0176): on the ground a goal and a walker, the walker
+ * goes down the potential of a `field` toward the goal leaving a wall, which then rises to the top of the box. It passes the validator.
+ */
+export const MOCK_FIELD_PROGRAM = `<sequence values="BCRGW" ground="C" symmetry="(xy)">
+  <one in="B C" out="G *" steps="1"/>
+  <one in="B C" out="R *" steps="1"/>
+  <one temperature="0.2" steps="60">
+    <in>RB</in><out>WR</out>
+    <field for="R" to="G" on="B"/>
+  </one>
+  <all in="B W" out="W *"/>
+  <prl><rule in="R" out="W"/><rule in="G" out="W"/></prl>
+</sequence>`;
 export class MockAiModels implements AiModels {
   readonly name = 'offline';
   readonly usage = emptyUsage();
@@ -111,8 +125,9 @@ export class MockAiModels implements AiModels {
       case 'genesis.style':
         return { stile: 'voxel medievale, semplice e caldo', forme: 'persone tozze dalla testa grande, case basse', palette: ['verde', 'ocra', 'blu'], luce: 'diurna morbida', regole: ['niente testo'], protagonista: 'un viandante incappucciato' };
       case 'model.sculpt':
-        // Offline the Sculptor answers with the library's hand-written program of the class.
-        return d.example ?? '<sequence values="BC" size="12 12 12"><box at="6 6 0" size="8 8 8" color="C"/></sequence>';
+        // Offline the Sculptor answers with the library's hand-written program of the class; without one, a program of the nodes of
+        // T333-T336 (a field leads a walker to its goal, the rule written in <in>/<out> children), which holds in every box but a procedural one.
+        return d.example ?? MOCK_FIELD_PROGRAM;
       case 'sound.compose': {
         // Offline the Musician plays the library's hand-written program a little faster or slower: it passes every check, and it is not the same text.
         const r = d.request ?? {};

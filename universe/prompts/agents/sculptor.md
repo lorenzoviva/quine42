@@ -67,6 +67,27 @@ by a space — as in MarkovJunior, THE FIRST LAYER IS THE TOP ONE.
   frame the nodes run on the finished model (flames, water, smoke). Actions, optional:
   `<action name="open" label="Apri la porta">nodes</action>` inside the root (doors, trunks; the label in the language of the world).
 
+## Nodes that look ahead, tiles and files (as in MarkovJunior)
+- A long pattern can be written as children instead of attributes, on more lines: `<rule><in>RB</in><out>WR</out></rule>`
+  (also `<one>…<in>…</in><out>…</out></one>`); the attribute or the child, never both.
+- `<field for="R" to="G" on="B"/>` inside a `<one>`, `<all>` or `<prl>`: the rules that move R choose the match that brings it
+  closer to G through cells B (`from="G"` instead: away from G); `recompute="True"` when G moves or grows, `essential="True"` stops
+  the node when G cannot be reached. `temperature="0.5"` on the node: 0 always the best step, more is more at random (a winding
+  path). For what goes TOWARD something: roots toward water, a corridor toward the door, a stream downhill, a creature's tail.
+  Cheaper and more varied than `path`, which is always the shortest.
+- `<observe value="R" to="W"/>` inside a node: what the cells of R must become at the end (`from="B"` what they become at once);
+  the node plans its steps so that the grid ends that way. With `search="True" limit="500"` it searches a whole trajectory: only on
+  small grids, and in the world a search always has `limit` (at most 2000 states).
+- `<wfc tileset="x" values="BAC…" tries="20"><rule in="W" out="Room|Hall"/>…nodes…</wfc>`: every cell of the grid so far becomes
+  a tile of the tileset `models/x.xml` that fits its neighbours (the rules say which tiles a letter may become), the grid becomes
+  the tiles side by side and the nodes inside run on it. `sample="x"` instead: the windows of a flat sample `models/x.txt`. In the
+  world `tries` is always written (1-100). Use it to compose a plan from parts that fit (rooms, stairs, paths).
+- `<convchain sample="x" on="B" black="D" white="A" n="3" steps="10"/>`: on a flat grid, the B cells become D and A with the
+  texture of the sample (caves, cracks, patches); in the world `steps` is written (at most 50) and `n` is at most 3.
+- `<import file="x"/>` runs the program of `models/x.xml` here, with its letters and colours; `<rule file="x"/>` (or `fin`, `fout`)
+  reads a pattern from `models/x.txt`. Tilesets, samples and rule files: only those the request lists (a program reads at most
+  64 files of models/ and imports at most 3 one inside the other); without them, `field` and `observe` need no file.
+
 ## The colour of the thing
 If the request says so, the model serves many things of the same kind (bottles, sacks, fruits):
 use the letter C for the main colour, the game recolours it for each thing; the rest (cork, string,
@@ -240,6 +261,13 @@ The building asked for must be recognisable at first glance: do not hand in the 
 - **The roof**: half of what one sees. Pitched or stepped, on the layer `R`: `<all in="***/*B*/*** *R*/RRR/*R*" out="***/*R*/*** ***/***/***" steps="10" symmetry="()"/>` rises by one layer above the cells that have `R` around them, up to the ridge; with one letter per pitch or another letter on top the ridge reads; for the eaves `RB → *R` in the layer before. Battlements: `WWWWWWWW → MMMMmmmm` on the top of a wall. Lanterns, chimneys, smokestacks, antennas: `<one in="B B R" out="* D *" steps="2" symmetry="()"/>` and `<all in="B D" out="D *" steps="N" symmetry="()"/>` (a smokestack is tall and slender).
 - **The facades**: rules on the walls, after the columns: bands (`U`, `u`), pipes, exposed beams, gears, buttresses, a sign above the door. The rules on the plane hold on the four faces, so every side has its own things depending on the seed.
 - **Inside**: every room asked for is recognisable. In the bays that must stay clear: rugs and floors of another letter (1 high), things hung on the walls above the heads, lights. In the halls of two bays: furniture with a rule on the plan against a wall (a letter of its own, rising 8-20 layers): counter, barrels, bed, altar. Never in the middle.
+
+## Nodes that make every seed another building
+Besides `one`, `all` and `prl` the program may use the nodes of MarkovJunior that look ahead; they run on the same box, so they hold at every size:
+- `<field for="m" to="O" on="z"/>` inside a node, with `temperature="1"`: a marker that walks toward the door (`O`) through the bays (`z`), winding differently at every seed: which bays grow, a courtyard path, a corridor through a block. `essential="True"` if it must arrive. Its rules have `steps`, as every growth.
+- `<observe value="m" to="q"/>` with `search="True" limit="300"`: only for a small piece whose end is fixed (a stair that must come out at a height); never on the whole box, it costs.
+- `wfc`, `convchain`, `import` and rule files need files of models/: use them only if the request lists some, with `tries` (at most 100) on every `wfc` and `steps` on every `convchain`.
+A marker the field moves disappears at the end, as every other.
 
 ## How to do it
 Decide first, in a few lines, what you add to the skeleton and which letter for what. Then write the whole program, in order: lattice, project, walls, columns, stair, facades, roof, cleaning. Check only: every letter is in the `values`, every pattern has `in` and `out` of the same shape, every marker disappears.

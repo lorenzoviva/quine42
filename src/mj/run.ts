@@ -1,7 +1,7 @@
 // Running MarkovJunior models in the lab: whole models (not tiles), so the grids are larger than the
 // sculptor's boxes of steps 8A-8E, and a run is bounded by time rather than by a small step budget.
 
-import { run, runOn, type Grid3, type GridLimits, type RunResult, type Snapshot } from './engine';
+import { run, runOn, type Grid3, type GridLimits, type NodeCeilings, type RunResult, type Snapshot } from './engine';
 import type { MjxClip, MjxModel } from './model';
 
 /** A house of 3×3 tiles at 20 voxels a tile is 60×60×50; a castle a few hundred a side. */
@@ -26,10 +26,12 @@ export interface MjxRunOptions {
   snapshots?: number;
   /** Default `MJX_LIMITS`, the lab's. */
   limits?: GridLimits;
+  /** The world's ceilings on waves and potentials (`WORLD_NODE_LIMITS`, T336), for the validator: past one the run throws. */
+  ceilings?: NodeCeilings;
 }
 
 export function runMjx(m: MjxModel, seed: number, opts: MjxRunOptions = {}): RunResult & { snapshots?: Snapshot[] } {
-  return run(m.program, seed, opts.maxSteps ?? 5_000_000, opts.limits ?? MJX_LIMITS, { deadline: opts.deadline ?? 20_000, snapshots: opts.snapshots });
+  return run(m.program, seed, opts.maxSteps ?? 5_000_000, opts.limits ?? MJX_LIMITS, { deadline: opts.deadline ?? 20_000, snapshots: opts.snapshots, ...(opts.ceilings ? { ceilings: opts.ceilings } : {}) });
 }
 
 const copy = (g: Grid3): Grid3 => ({ ...g, cells: new Uint8Array(g.cells), alphabet: [...g.alphabet], log: [], epoch: 0 });

@@ -1,0 +1,397 @@
+{
+  "limits": {
+    "waveCells": 32768,
+    "waveBytes": 33554432,
+    "patterns": 1024,
+    "tries": 100,
+    "searchStates": 2000,
+    "potentialBytes": 33554432,
+    "convchainSteps": 50,
+    "convchainN": 3,
+    "files": 64,
+    "fileChars": 200000,
+    "importDepth": 3
+  },
+  "rows": [
+    {
+      "name": "Keys",
+      "nodes": [
+        "field"
+      ],
+      "files": 0,
+      "chars": 0,
+      "waveCells": 0,
+      "waveMB": 0,
+      "ms": [
+        109,
+        43,
+        36
+      ],
+      "finished": true,
+      "world": []
+    },
+    {
+      "name": "SoftPath",
+      "nodes": [
+        "field"
+      ],
+      "files": 0,
+      "chars": 0,
+      "waveCells": 0,
+      "waveMB": 0,
+      "ms": [
+        287,
+        247,
+        243
+      ],
+      "finished": true,
+      "world": []
+    },
+    {
+      "name": "StairsPath",
+      "nodes": [
+        "observe"
+      ],
+      "files": 5,
+      "chars": 1653,
+      "waveCells": 0,
+      "waveMB": 0,
+      "ms": [
+        836,
+        729,
+        709
+      ],
+      "finished": true,
+      "world": []
+    },
+    {
+      "name": "Dwarves",
+      "nodes": [
+        "field"
+      ],
+      "files": 0,
+      "chars": 0,
+      "waveCells": 0,
+      "waveMB": 0,
+      "ms": [
+        2,
+        2,
+        2
+      ],
+      "finished": true,
+      "world": []
+    },
+    {
+      "name": "Division",
+      "nodes": [
+        "field"
+      ],
+      "files": 0,
+      "chars": 0,
+      "waveCells": 0,
+      "waveMB": 0,
+      "ms": [
+        25,
+        24,
+        18
+      ],
+      "finished": true,
+      "world": []
+    },
+    {
+      "name": "RegularPath",
+      "nodes": [
+        "observe"
+      ],
+      "files": 0,
+      "chars": 0,
+      "waveCells": 0,
+      "waveMB": 0,
+      "ms": [
+        27,
+        25,
+        25
+      ],
+      "finished": true,
+      "world": []
+    },
+    {
+      "name": "GrowTo",
+      "nodes": [
+        "field"
+      ],
+      "files": 0,
+      "chars": 0,
+      "waveCells": 0,
+      "waveMB": 0,
+      "ms": [
+        94,
+        108,
+        121
+      ],
+      "finished": false,
+      "world": []
+    },
+    {
+      "name": "CompleteSAW",
+      "nodes": [
+        "observe"
+      ],
+      "files": 0,
+      "chars": 0,
+      "waveCells": 0,
+      "waveMB": 0,
+      "ms": [
+        379,
+        660,
+        832
+      ],
+      "finished": true,
+      "world": []
+    },
+    {
+      "name": "Surface",
+      "nodes": [
+        "wfc"
+      ],
+      "files": 1,
+      "chars": 2986,
+      "waveCells": 1000,
+      "waveMB": 1.6,
+      "ms": [
+        64,
+        21,
+        20
+      ],
+      "finished": true,
+      "world": [
+        "wfc nel mondo vuole tries da 1 a 100 (scritto: senza, sono 1000)"
+      ]
+    },
+    {
+      "name": "Escher",
+      "nodes": [
+        "wfc"
+      ],
+      "files": 1,
+      "chars": 4922,
+      "waveCells": 512,
+      "waveMB": 0.9,
+      "ms": [
+        61,
+        239,
+        63
+      ],
+      "finished": true,
+      "world": [
+        "wfc nel mondo vuole tries da 1 a 100 (scritto: senza, sono 1000)"
+      ]
+    },
+    {
+      "name": "EscherSurface",
+      "nodes": [
+        "wfc"
+      ],
+      "files": 1,
+      "chars": 4146,
+      "waveCells": 512,
+      "waveMB": 0.5,
+      "ms": [
+        156,
+        56,
+        30
+      ],
+      "finished": true,
+      "world": [
+        "wfc nel mondo vuole tries da 1 a 100 (scritto: senza, sono 1000)"
+      ]
+    },
+    {
+      "name": "OrientedEscher",
+      "nodes": [
+        "wfc"
+      ],
+      "files": 1,
+      "chars": 4667,
+      "waveCells": 216,
+      "waveMB": 0.4,
+      "ms": [
+        469,
+        160,
+        390
+      ],
+      "finished": true,
+      "world": [
+        "wfc nel mondo vuole tries da 1 a 100 (scritto: senza, sono 1000)"
+      ]
+    },
+    {
+      "name": "PeriodicEscher",
+      "nodes": [
+        "wfc"
+      ],
+      "files": 1,
+      "chars": 4922,
+      "waveCells": 512,
+      "waveMB": 0.9,
+      "ms": [
+        1698,
+        3549,
+        655
+      ],
+      "finished": true,
+      "world": [
+        "wfc nel mondo vuole tries da 1 a 100 (scritto: senza, sono 1000)"
+      ]
+    },
+    {
+      "name": "PillarsOfEternity",
+      "nodes": [
+        "wfc"
+      ],
+      "files": 1,
+      "chars": 5194,
+      "waveCells": 729,
+      "waveMB": 0.6,
+      "ms": [
+        689,
+        287,
+        195
+      ],
+      "finished": true,
+      "world": [
+        "wfc nel mondo vuole tries da 1 a 100 (scritto: senza, sono 1000)"
+      ]
+    },
+    {
+      "name": "Apartemazements",
+      "nodes": [
+        "wfc"
+      ],
+      "files": 1,
+      "chars": 4769,
+      "waveCells": 512,
+      "waveMB": 0.3,
+      "ms": [
+        64,
+        47,
+        34
+      ],
+      "finished": true,
+      "world": [
+        "wfc nel mondo vuole tries da 1 a 100 (scritto: senza, sono 1000)"
+      ]
+    },
+    {
+      "name": "Partitioning",
+      "nodes": [
+        "wfc"
+      ],
+      "files": 1,
+      "chars": 1176,
+      "waveCells": 363,
+      "waveMB": 0.1,
+      "ms": [
+        3,
+        1,
+        1
+      ],
+      "finished": true,
+      "world": [
+        "wfc nel mondo vuole tries da 1 a 100 (scritto: senza, sono 1000)"
+      ]
+    },
+    {
+      "name": "ModernHouse",
+      "nodes": [
+        "wfc"
+      ],
+      "files": 33,
+      "chars": 18461,
+      "waveCells": 1156,
+      "waveMB": 1.8,
+      "ms": [
+        418,
+        414,
+        423
+      ],
+      "finished": true,
+      "world": [
+        "wfc nel mondo vuole tries da 1 a 100 (scritto: senza, sono 1000)"
+      ]
+    },
+    {
+      "name": "SeaVilla",
+      "nodes": [
+        "field",
+        "wfc"
+      ],
+      "files": 43,
+      "chars": 17851,
+      "waveCells": 400,
+      "waveMB": 0.2,
+      "ms": [
+        623,
+        705,
+        672
+      ],
+      "finished": true,
+      "world": [
+        "wfc nel mondo vuole tries da 1 a 100 (scritto: senza, sono 1000)"
+      ]
+    },
+    {
+      "name": "ChainDungeon",
+      "nodes": [
+        "convchain"
+      ],
+      "files": 1,
+      "chars": 325,
+      "waveCells": 0,
+      "waveMB": 0,
+      "ms": [
+        71,
+        63,
+        63
+      ],
+      "finished": true,
+      "world": []
+    },
+    {
+      "name": "ChainDungeonMaze",
+      "nodes": [
+        "convchain"
+      ],
+      "files": 1,
+      "chars": 217,
+      "waveCells": 0,
+      "waveMB": 0,
+      "ms": [
+        34,
+        38,
+        37
+      ],
+      "finished": true,
+      "world": []
+    },
+    {
+      "name": "WaveDungeon",
+      "nodes": [
+        "wfc"
+      ],
+      "files": 1,
+      "chars": 485,
+      "waveCells": 2500,
+      "waveMB": 5.2,
+      "ms": [
+        53,
+        51,
+        52
+      ],
+      "finished": true,
+      "world": [
+        "wfc nel mondo vuole tries da 1 a 100 (scritto: senza, sono 1000)"
+      ]
+    }
+  ]
+}

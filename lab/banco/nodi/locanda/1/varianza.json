@@ -1,0 +1,190 @@
+{
+  "taglie": [
+    {
+      "taglia": "large",
+      "box": [
+        100,
+        100,
+        100
+      ],
+      "vpt": 20,
+      "gradino": 4,
+      "semi": [
+        {
+          "seme": 1,
+          "difetti": [
+            "piani: 0 (serve ≥ 2)",
+            "testa: — (serve ≥ 1.5 caselle per piano)",
+            "stanze: 0 (serve ≥ 3)",
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+            "murato: 1643 (serve ≤ 0.25)",
+            "porta: nessuna sul davanti (serve sul davanti, scarto ≤ 0.33, alta ≥ 1.5)",
+            "salti: 1 (serve ≥ 2)"
+          ],
+          "ms": 987
+        },
+        {
+          "seme": 2,
+          "difetti": [
+            "piani: 0 (serve ≥ 2)",
+            "testa: — (serve ≥ 1.5 caselle per piano)",
+            "stanze: 0 (serve ≥ 3)",
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+            "murato: 1982 (serve ≤ 0.25)",
+            "porta: nessuna sul davanti (serve sul davanti, scarto ≤ 0.33, alta ≥ 1.5)",
+            "salti: 1 (serve ≥ 2)"
+          ],
+          "ms": 864
+        },
+        {
+          "seme": 3,
+          "difetti": [
+            "piani: 0 (serve ≥ 2)",
+            "testa: — (serve ≥ 1.5 caselle per piano)",
+            "stanze: 0 (serve ≥ 3)",
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+            "murato: 1618 (serve ≤ 0.25)",
+            "porta: nessuna sul davanti (serve sul davanti, scarto ≤ 0.33, alta ≥ 1.5)"
+          ],
+          "ms": 906
+        },
+        {
+          "seme": 4,
+          "difetti": [
+            "piani: 0 (serve ≥ 2)",
+            "testa: — (serve ≥ 1.5 caselle per piano)",
+            "stanze: 0 (serve ≥ 3)",
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+            "murato: 1612 (serve ≤ 0.25)",
+            "porta: nessuna sul davanti (serve sul davanti, scarto ≤ 0.33, alta ≥ 1.5)",
+            "salti: 1 (serve ≥ 2)"
+          ],
+          "ms": 927
+        },
+        {
+          "seme": 5,
+          "difetti": [
+            "piani: 0 (serve ≥ 2)",
+            "testa: — (serve ≥ 1.5 caselle per piano)",
+            "stanze: 0 (serve ≥ 3)",
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+            "murato: 1611 (serve ≤ 0.25)",
+            "porta: nessuna sul davanti (serve sul davanti, scarto ≤ 0.33, alta ≥ 1.5)"
+          ],
+          "ms": 914
+        }
+      ],
+      "regge": false,
+      "varianza": {
+        "voxel": 0.6612217523252859,
+        "colore": 0.23721032448547008,
+        "pianta": 0.5572532233430101,
+        "perimetro": 0.33713424800012237,
+        "interno": 0,
+        "semi": 5,
+        "firmePiani": 1,
+        "firmeStanze": 1,
+        "architetture": 5,
+        "statico": false
+      },
+      "difettiVarianza": [
+        "interno: 0 (serve ≥ 0.35)",
+        "piani e stanze: 1 liste di piani, 1 di stanze (serve almeno una con ≥ 2)"
+      ]
+    },
+    {
+      "taglia": "huge",
+      "box": [
+        120,
+        120,
+        112
+      ],
+      "vpt": 16,
+      "gradino": 3,
+      "semi": [
+        {
+          "seme": 1,
+          "difetti": [
+            "piani: 0 (serve ≥ 2)",
+            "testa: — (serve ≥ 1.5 caselle per piano)",
+            "stanze: 0 (serve ≥ 3)",
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+            "murato: 2015 (serve ≤ 0.25)",
+            "porta: nessuna sul davanti (serve sul davanti, scarto ≤ 0.33, alta ≥ 1.5)"
+          ],
+          "ms": 1047
+        },
+        {
+          "seme": 2,
+          "difetti": [
+            "piani: 0 (serve ≥ 2)",
+            "testa: — (serve ≥ 1.5 caselle per piano)",
+            "stanze: 0 (serve ≥ 3)",
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+            "murato: 1991 (serve ≤ 0.25)",
+            "porta: nessuna sul davanti (serve sul davanti, scarto ≤ 0.33, alta ≥ 1.5)"
+          ],
+          "ms": 1091
+        },
+        {
+          "seme": 3,
+          "difetti": [
+            "piani: 0 (serve ≥ 2)",
+            "testa: — (serve ≥ 1.5 caselle per piano)",
+            "stanze: 0 (serve ≥ 3)",
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+            "murato: 2004 (serve ≤ 0.25)",
+            "porta: nessuna sul davanti (serve sul davanti, scarto ≤ 0.33, alta ≥ 1.5)"
+          ],
+          "ms": 1013
+        },
+        {
+          "seme": 4,
+          "difetti": [
+            "piani: 0 (serve ≥ 2)",
+            "testa: — (serve ≥ 1.5 caselle per piano)",
+            "stanze: 0 (serve ≥ 3)",
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+            "murato: 2050 (serve ≤ 0.25)",
+            "porta: nessuna sul davanti (serve sul davanti, scarto ≤ 0.33, alta ≥ 1.5)"
+          ],
+          "ms": 1110
+        },
+        {
+          "seme": 5,
+          "difetti": [
+            "piani: 0 (serve ≥ 2)",
+            "testa: — (serve ≥ 1.5 caselle per piano)",
+            "stanze: 0 (serve ≥ 3)",
+            "cantina: 0 (serve ≥ 1.2 caselle² raggiunte sotto il suolo)",
+            "murato: 2048 (serve ≤ 0.25)",
+            "porta: nessuna sul davanti (serve sul davanti, scarto ≤ 0.33, alta ≥ 1.5)"
+          ],
+          "ms": 1074
+        }
+      ],
+      "regge": false,
+      "varianza": {
+        "voxel": 0.6146675376280945,
+        "colore": 0.11608744201163046,
+        "pianta": 0.5722916097915267,
+        "perimetro": 0.3713413409392199,
+        "interno": 0,
+        "semi": 5,
+        "firmePiani": 1,
+        "firmeStanze": 1,
+        "architetture": 5,
+        "statico": false
+      },
+      "difettiVarianza": [
+        "interno: 0 (serve ≥ 0.35)",
+        "piani e stanze: 1 liste di piani, 1 di stanze (serve almeno una con ≥ 2)"
+      ]
+    }
+  ],
+  "regge": false,
+  "statico": false,
+  "varia": false,
+  "passa": false,
+  "ms": 10227
+}

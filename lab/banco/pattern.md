@@ -219,19 +219,33 @@ spariscono: «delete fine scaffold»), `River` (`W`, `R` → `U` → `B`).
   di ogni taglia (100 × 100 × 80 e 120 × 120 × 96 si dividono per 4), e sulla griglia grossa la composizione si scrive con numeri piccoli
   (`metodo/README.md`); nel gioco però `withSize` tratta ogni programma con `map` come uno con la sua scatola, da correggere.
 
-### 12. Ciò che il motore non sa fare
+### 12. I nodi dell'originale: cosa fa ognuno, quando serve a una struttura
 
-- `wfc` a tessere (`ModernHouse`, `SeaVilla`, `Apartemazements`, `PillarsOfEternity`, `Partitioning`, `Surface`, `Escher*`): è il cuore di
-  quei modelli (partizione a tessere `Partition`, scale `Stairs`/`OrientedStairs`). **Il motore lo sa da T335** (ADR-0174), con `wfc` a
-  sovrapposizione, `convchain` (`ChainDungeon`) e la `map` frazionaria: un tileset è un file di `models/` in testo, una tessera è un pattern (anche
-  un sottoblocco `.txt` di T333, `<tile file>`); i modelli dell'originale e le foto accanto alle sue sono in `lab/banco/wfc/`. Il validatore del gioco
-  non li prende finché T336 non li apre: per lo Scultore, oggi, una partizione si fa ancora con il reticolo e la crescita (1-3).
-- `field` e `temperature` (`Keys`, `SoftPath`, `Division`, `Dwarves`), `observe` e `search` (`StairsPath`, `RegularPath`, `CompleteSAW`):
-  **il motore li sa da T334** (ADR-0173; i modelli in `lab/mjx/official/`, le foto accanto all'originale in `inferenza/`), ma il validatore del
-  gioco non li prende finché T336 non li apre: per lo Scultore, oggi, un corridoio «verso» un bersaglio si fa ancora con `path`.
-- Le regole da file ci sono dal T333 (ADR-0171), ma di testo, non immagini: `fin`, `fout` e `file` leggono `models/<nome>.txt`
-  (`CarmaTower`, `DungeonGrowth` vanno riscritti a lettere); un pattern lungo si scrive anche nei figli `<in>`/`<out>`, su più
-  righe, e un sottoblocco in un file a parte si esegue con `<import file="…"/>`.
+Il motore li sa da T333-T335; il mondo li prende dal T336 (ADR-0176) entro i tetti di `WORLD_NODE_LIMITS` (`src/kernel/validator.ts`),
+misurati sui modelli dell'originale (`lab/scripts/nodi-mondo.ts`, la tabella in `nodi/`): l'onda di una `wfc` su al più 32 768 celle e 32 MB,
+al più 1024 motivi, `tries` scritto (1-100), una ricerca con `limit` scritto (al più 2000 stati), una `convchain` con `steps` scritto (al più
+50) e `n` fino a 3, al più 64 file di `models/` letti per 200 000 caratteri, import fino a 3 uno dentro l'altro, 32 MB di potenziali.
+
+- **`field` e `temperature`** (`Keys`, `SoftPath`, `Division`, `Dwarves`): una regola che muove una lettera sceglie la corrispondenza che la
+  avvicina (`to`) o la allontana (`from`) da un'altra, attraverso le celle di `on`; `temperature` mescola il caso (0: sempre la migliore).
+  **Per una struttura**: un marcatore che va verso la porta serpeggiando in modo diverso a ogni seme (quali campate crescono, la via del
+  cortile, un corridoio scavato in un blocco), radici verso l'acqua, un torrente che scende. Costa poco (un campo per passo, `recompute` se il
+  bersaglio si muove) e regge ogni taglia perché è ancorato a ciò che c'è. È il primo da provare per la varianza (T337).
+- **`observe` e `search`** (`StairsPath`, `RegularPath`, `CompleteSAW`): si dice come deve finire la griglia, il nodo pianifica; con
+  `search` cerca una traiettoria intera. **Per una struttura**: un pezzo piccolo con la fine fissata (una scala che deve sbucare a una quota,
+  un cammino che chiude un anello); mai sull'intera scatola da 100: i potenziali sono codici × celle e la ricerca stati interi.
+- **`wfc` a tessere** (`ModernHouse`, `SeaVilla`, `Apartemazements`, `PillarsOfEternity`, `Partitioning`, `Surface`, `Escher*`): ogni cella
+  della griglia grossa diventa una tessera di un tileset di `models/` (testo, ADR-0174) che combacia con le vicine; poi i nodi dentro lavorano
+  sulla griglia nuova. **Per una struttura**: la partizione in stanze (`Partition`), le scale orientate (`OrientedStairs`), una pianta fatta di
+  pezzi che combaciano per costruzione. Serve un tileset nella biblioteca: oggi il seme non ne ha, lo Scultore li usa solo se la richiesta
+  li elenca (`libraryResources` in `sculptor.ts`); quale tileset portare nel seme lo misura T337. Il validatore controlla anche i tileset
+  (`tilesetErrors`). La `wfc` a sovrapposizione (`sample`) è solo piana.
+- **`convchain`** (`ChainDungeon`): su una griglia piana, la tessitura di un campione (grotte, crepe, macchie); per una struttura poco, se non
+  la pianta di un sotterraneo.
+- **`map` frazionaria** (`ModernHouse` 1/3 e 5/3): come `map` (§11), la scatola la decide il programma: non per le strutture procedurali.
+- **Regole da file, figli `<in>`/`<out>`, `<import>`** (T333, ADR-0171): un pattern lungo nei figli, su più righe; un sottoblocco in un file
+  a parte. Lo Scultore scrive un XML solo: un file lo legge solo se c'è già in `models/`.
+
 - Pattern più grandi di 1728 celle: una colonna da 96 strati sì, un profilo 18×96 sì (1728), una campata intera 31×31×anything no.
 
 ### 13. Regole corte con `steps` al posto dei pattern lunghi (T182)

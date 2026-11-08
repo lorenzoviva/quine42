@@ -266,7 +266,23 @@ class Census {
 }
 
 /** The grid of the run in progress and its census (built when a scan first needs it), and when the run must end: runs do not nest. */
-let current: { g: Grid3; census?: Census; deadline?: number } | undefined;
+let current: { g: Grid3; census?: Census; deadline?: number; ceilings?: NodeCeilings } | undefined;
+
+/**
+ * Ceilings a run may ask for besides the engine's own (the world's, T336, ADR-0176): past one the node is an error that says so, below
+ * them nothing changes, so a program the validator took with them runs the same without them.
+ */
+export interface NodeCeilings {
+  /** Cells of the grid a wave is observed on (a `wfc`'s grid before its tiles, or the sample's). */
+  waveCells: number;
+  /** Bytes of the waves of a node (`WFC_LIMITS.waveBytes` the engine's). */
+  waveBytes: number;
+  /** Bytes of the potentials and of the propagation of a node that infers (`INFERENCE_LIMITS.potentialBytes` the engine's). */
+  potentialBytes: number;
+}
+
+/** The bytes of potentials a node may take in this run: the engine's, or the run's ceiling if lower. */
+const potentialCeiling = (): number => Math.min(INFERENCE_LIMITS.potentialBytes, current?.ceilings?.potentialBytes ?? Infinity);
 
 function censusOf(g: Grid3): Census {
   if (current?.g !== g) current = { g };
@@ -929,7 +945,8 @@ class GuidedRunner extends RuleRunner {
     if (!this.potentials || this.potentials.length !== C) this.potentials = new Array<Int32Array | undefined>(C);
     const pot = this.potentials;
     const want = all ? C : this.fields.length;
-    if (want * N * 4 > INFERENCE_LIMITS.potentialBytes) throw new Mj3Error(`i potenziali di ${want} valori su ${N} celle superano ${INFERENCE_LIMITS.potentialBytes >> 20} MB`);
+    const cap = potentialCeiling();
+    if (want * N * 4 > cap) throw new Mj3Error(`i potenziali di ${want} valori su ${N} celle superano ${Math.round(cap / 2 ** 20)} MB`);
     for (let c = 0; c < C; c++) {
       if ((all || this.fields.some((f) => f.code === c)) && pot[c]?.length !== N) pot[c] = new Int32Array(N);
       else if (pot[c] && pot[c]!.length !== N) pot[c] = undefined;
@@ -951,7 +968,8 @@ class GuidedRunner extends RuleRunner {
     if (!p || p.X !== X || p.Y !== Y || p.Z !== Z || p.C !== C) {
       const rules = prepare(this.patterns.map((pt): InferRule => ({ dx: pt.dx, dy: pt.dy, dz: pt.dz, input: Array.from(pt.input, (id) => (id === -1 ? undefined : this.sets[id])), output: pt.output })), C, X, Y, Z);
       const bytes = C * N * 4 * (searching ? 3 : 2) + (rules.length * N) / 8;
-      if (bytes > INFERENCE_LIMITS.potentialBytes) throw new Mj3Error(`observe: ${C} valori su ${N} celle con ${rules.length} varianti di regole superano ${INFERENCE_LIMITS.potentialBytes >> 20} MB`);
+      const cap = potentialCeiling();
+      if (bytes > cap) throw new Mj3Error(`observe: ${C} valori su ${N} celle con ${rules.length} varianti di regole superano ${Math.round(cap / 2 ** 20)} MB`);
       p = this.prepared = { X, Y, Z, C, rules };
     }
     if (!searching) p.work ??= makeWork(C, N, p.rules.length);
@@ -1598,6 +1616,9 @@ class WfcRunner extends Runner {
     const D = n.propagator.length;
     const bytes = waveBytes(g.cells.length, this.P, D, n.shannon === true);
     if (bytes > WFC_LIMITS.waveBytes) throw new Mj3Error(`wfc: l'onda è troppo grande (${Math.round(bytes / 2 ** 20)} MB, al più ${WFC_LIMITS.waveBytes / 2 ** 20}): meno celle o meno motivi`);
+    const cap = current?.ceilings;
+    if (cap && (g.cells.length > cap.waveCells || bytes > cap.waveBytes))
+      throw new Mj3Error(`wfc: nel mondo l'onda sta su al più ${cap.waveCells} celle e ${Math.round(cap.waveBytes / 2 ** 20)} MB (qui ${g.cells.length} celle, ${Math.ceil(bytes / 2 ** 20)} MB): una griglia più piccola prima della wfc, o meno tessere`);
     const solver = new WfcSolver({ MX: g.X, MY: g.Y, MZ: g.Z, weights: n.weights, propagator: n.propagator, periodic: !tile || n.periodic === true, shannon: n.shannon === true });
     for (let i = 0; i < g.cells.length; i++) {
       const mask = this.allowed.get(g.cells[i]);
@@ -1995,6 +2016,8 @@ export interface RunOptions {
   snapshots?: number;
   /** Who wants to see every step of the run (src/mj/trace.ts, ADR-0118): the run does not change. */
   watch?: RunWatch;
+  /** Ceilings besides the engine's (the world's, T336): past one the run throws, below them it does not change. */
+  ceilings?: NodeCeilings;
 }
 
 /** One step of a run: the leaf node that did something. */
@@ -2026,7 +2049,7 @@ export interface Snapshot {
 
 function exec(root: Runner, g: Grid3, seed: number, maxSteps: number, t0: number, trace: Trace = [], opts: RunOptions = {}): RunResult & { snapshots?: Snapshot[] } {
   const outer = current;
-  current = { g, ...(opts.deadline ? { deadline: t0 + opts.deadline } : {}) };
+  current = { g, ...(opts.deadline ? { deadline: t0 + opts.deadline } : {}), ...(opts.ceilings ? { ceilings: opts.ceilings } : {}) };
   try {
     return execIn(root, g, seed, maxSteps, t0, trace, opts);
   } finally {

@@ -11,16 +11,17 @@ import type { Schema } from '../ai/models';
 import { analyse } from '../../mj/check';
 import { boxOf, classOf, CLASSES, densityOf, RARE_SIZES, sizeOf, sizeRank, SIZE_TIERS, TILE, tilesOf, type AssetClass, type SizeTier } from '../../mj/classes';
 import { Mj3Error, type RunResult, type Vec3 } from '../../mj/engine';
-import { compileMjx, type MjxModel } from '../../mj/model';
+import { compileMjx, mjxIncludes, type MjxFiles, type MjxModel } from '../../mj/model';
 import { MJ_PALETTE } from '../../mj/palette';
 import { cartoonRender, render, sheet, type RenderOptions } from '../../mj/photo';
 import { pngDataUrl } from '../../mj/png';
 import { act, runMjx } from '../../mj/run';
-import { symbolName } from '../../mj/symbols';
+import { isNoteLine, symbolName } from '../../mj/symbols';
 import { traceText } from '../../mj/trace';
 import { reachableStoreys } from '../forms';
 import type { FileMap } from '../types';
 import { internalFields } from '../internalNames';
+import { isTileset, WORLD_NODE_LIMITS, worldNodeErrors } from '../validator';
 import type { Council } from './council';
 
 export type ModelCategory = 'simple' | 'figure' | 'structure';
@@ -200,28 +201,55 @@ interface Checked {
   error?: string;
 }
 
-/** The kernel's checks on a program: what makes it unusable goes back to the Sculptor with the reason. */
-export function checkProgram(xml: string, cls: AssetClass, taglia?: string): Checked {
-  if (!procedural(cls, taglia)) return checkOnce(xml, cls, taglia, 1);
+/** The files of models/ a program reads (T333-T335), from the universe's: tilesets, tiles, samples, rule files, programs it imports. */
+export const filesOf = (xml: string, files: FileMap): MjxFiles => mjxIncludes(xml, (f) => files[`models/${f}`]);
+
+/**
+ * What of models/ a program may read besides the programs of the library (T336): the tilesets with their tiles, the samples and the rule
+ * files, one line each, for the request. Empty if the universe has none.
+ */
+export function libraryResources(files: FileMap): string[] {
+  const out: string[] = [];
+  for (const [path, text] of Object.entries(files)) {
+    const name = /^models\/([^/]+)\.(xml|txt)$/.exec(path);
+    if (!name || typeof text !== 'string') continue;
+    if (name[2] === 'xml' && isTileset(text)) {
+      const tiles = [...text.matchAll(/<tile\b[^>]*\sname="([^"]+)"/g)].map((m) => m[1]);
+      const values = /<tileset\b[^>]*\svalues="([^"]*)"/.exec(text)?.[1];
+      out.push(`- tileset="${name[1]}"${values ? ` (its values "${values}")` : ''}: tiles ${tiles.join(', ')}`);
+    } else if (name[2] === 'txt') {
+      const rows = text.split(/\r?\n/).filter((l) => l.trim() && !isNoteLine(l));
+      out.push(`- ${name[1]}.txt: ${/^[ \t]*->[ \t]*$/m.test(text) ? 'a rule (file="…")' : `a pattern or a sample, ${rows.length} line${rows.length === 1 ? '' : 's'}`}`);
+    }
+  }
+  return out.sort().slice(0, 40);
+}
+
+/** The kernel's checks on a program: what makes it unusable goes back to the Sculptor with the reason. `files` are the universe's (`filesOf`). */
+export function checkProgram(xml: string, cls: AssetClass, taglia?: string, files: MjxFiles = {}): Checked {
+  if (!procedural(cls, taglia)) return checkOnce(xml, cls, taglia, 1, files);
   // A procedural structure (ADR-0160): every seed the world shows at its size, and the first at the next size, which shares it.
   xml = withoutSize(xml);
   const [own, next] = triedSizes(cls, taglia);
   const tries: Array<[SizeTier, number]> = [...Array.from({ length: STRUCTURE_SEEDS }, (_, i): [SizeTier, number] => [own, i + 1]), [next, 1]];
   let first: Checked | undefined;
   for (const [t, seed] of tries) {
-    const c = checkOnce(xml, cls, t, seed);
+    const c = checkOnce(xml, cls, t, seed, files);
     first ??= c;
     if (c.error) return { ...c, xml, failedAt: { taglia: t, seed }, error: `taglia ${sizeOf(t)!.name}, seme ${seed}: ${c.error}` };
   }
   return first!;
 }
 
-function checkOnce(xml: string, cls: AssetClass, taglia: string | undefined, seed: number): Checked {
+function checkOnce(xml: string, cls: AssetClass, taglia: string | undefined, seed: number, files: MjxFiles = {}): Checked {
   const box = boxOf(cls, taglia);
   try {
     // A program that decides on a coarse grid and maps up keeps its own size; the others get the class's box.
-    const model = compileMjx(xml, scales(xml) ? {} : { size: box });
-    const result = runMjx(model, seed, { deadline: 8_000 });
+    const model = compileMjx(xml, { ...(scales(xml) ? {} : { size: box }), ...(Object.keys(files).length ? { files } : {}) });
+    // The nodes of T333-T335 within the world's ceilings (T336, ADR-0176), as the validator will want them.
+    const nodes = worldNodeErrors(model, xml, files);
+    if (nodes.length) return { xml, model, error: nodes.join('; ') };
+    const result = runMjx(model, seed, { deadline: 8_000, ceilings: WORLD_NODE_LIMITS });
     if (!result.finished) return { xml, model, error: 'il programma non finisce in 8 secondi: ogni crescita deve avere steps' };
     const a = analyse(result, model.program.palette, { grounded: true, minHeight: Math.round((cls.minHeight ?? 0) * box[2]) });
     const notes = [...a.errors];
@@ -323,6 +351,8 @@ async function write(c: Council, req: SculptRequest, cls: AssetClass, model: str
   };
   const system = examples.length ? `## Examples (programs of the library)\n${examples.join('\n\n')}` : undefined;
   let prompt = describe(req, cls);
+  const resources = libraryResources(c.files);
+  if (resources.length) prompt += `\n\nFiles of models/ the program may read (wfc tileset or sample, convchain sample, rules with file/fin/fout):\n${resources.join('\n')}`;
   const images: string[] = [];
   if (req.previous) prompt += `\n\nIts current program:\n${req.previous}\n${req.desiderio ? `What is wished: ${req.desiderio}\n` : ''}Redo it: answer with the whole program.`;
   if (previous) {
@@ -335,7 +365,8 @@ async function write(c: Council, req: SculptRequest, cls: AssetClass, model: str
     const p = i === 0 ? prompt : `${prompt}\n\nThe program you wrote:\n${last!.xml.slice(0, proc ? 24_000 : 6000)}\nIt does not pass: ${last!.error}${traced(last!)}\nFix it and answer with the whole program.`;
     calls++;
     const raw = await c.write('sculptor', 'model.sculpt', p, { role, system, images, model, temperature: 0.7, data: { request: req, classe: cls.id, example: proc ? skeletonOf(role) : examples[0] } });
-    last = checkProgram(extractXml(raw), cls, req.taglia);
+    const xml = extractXml(raw);
+    last = checkProgram(xml, cls, req.taglia, filesOf(xml, c.files));
     if (!last.error) return { checked: last, calls };
     c.say('kernel', 'scarta', `«${req.nome}»: ${last.error.slice(0, 160)}`, 'sculptor', 'model.sculpt');
   }

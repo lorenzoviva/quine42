@@ -16,7 +16,9 @@ export { repairCoefficients, repairActor } from './coefficients';
 export { repairMinimums } from './universe';
 import { boxOf, classOf, CLASSES, sizeOf, SIZE_TIERS } from '../mj/classes';
 import { Mj3Error } from '../mj/engine';
-import { compileMjx, MJX_FILE_RE, mjxIncludes, newNodesIn, patternText, type MjxFiles, type MjxModel } from '../mj/model';
+import { compileMjx, MJX_FILE_RE, mjxIncludes, patternText, type MjxFiles, type MjxModel } from '../mj/model';
+import type { Node3, NodeCeilings } from '../mj/engine';
+import { parseXml, type XmlElement } from '../mj/xml';
 import { isNoteLine, symbolTokens } from '../mj/symbols';
 import { FORM_LIMITS, MAX_FORM_TIME, MAX_FORM_XML, runMjx } from '../mj/run';
 import { analyzeSound } from '../mj/soundanalysis';
@@ -74,14 +76,14 @@ export function modelErrors(path: string, xml: string, time = 8_000, box?: [numb
     const size = /<(?!!)[a-z]+\b[^>]*\ssize="/i.test(xml) ? undefined : (box ?? boxOf(classOf('object')!));
     const self = /^models\/([^/]+)\.xml$/.exec(path)?.[1];
     const m = compileMjx(xml, { ...(size ? { size } : {}), ...(files && Object.keys(files).length ? { files, ...(self ? { self } : {}) } : {}) });
-    const infers = newNodesRefusal(m);
-    if (infers) return [`${path}: ${infers}`];
+    const nodes = worldNodeErrors(m, xml, files ?? {});
+    if (nodes.length) return nodes.map((e) => `${path}: ${e}`);
     if (m.sound) {
       const errors = soundErrors(path, m, time);
       if (!errors.length) lastCleanSound = xml;
       return errors;
     }
-    const r = runMjx(m, 1, { deadline: time, limits: FORM_LIMITS });
+    const r = runMjx(m, 1, { deadline: time, limits: FORM_LIMITS, ceilings: WORLD_NODE_LIMITS });
     if (!r.finished) return [`${path}: il programma non finisce in ${Math.round(time / 1000)} secondi (ogni crescita deve avere steps; un programma lento scritto a mano può avere \`tempo\` in models/index.json)`];
     return analyse(r, m.program.palette, { grounded: true }).errors.map((e) => `${path}: ${e}`);
   } catch (e) {
@@ -117,12 +119,128 @@ export function ruleFileErrors(path: string, text: string): string[] {
 }
 
 /**
- * The engine infers (T334) and collapses waves (T335), the world does not yet: `field`, `observe`, `wfc` and `convchain` wait for their
- * ceilings and the Sculptor's prompt (T336). Why a program that uses them goes back, or undefined.
+ * The world's ceilings on the nodes of T333-T335 (T336, ADR-0176), tighter than the engine's (`INFERENCE_LIMITS`, `WFC_LIMITS`,
+ * `MJX_INCLUDE_*`): a model runs at every seed in every world and on every client, the lab's experiments do not. All count units, so the
+ * same program gets the same answer on every machine; time is the validator's own (`modelErrors`, 8 s or the model's `tempo`).
+ * Measured on the original's models (`lab/scripts/nodi-mondo.ts`, `lab/banco/nodi/`).
  */
-export function newNodesRefusal(m: Parameters<typeof newNodesIn>[0]): string | undefined {
-  const found = newNodesIn(m);
-  return found.length ? `${found.map((n) => `<${n}>`).join(' e ')} non ${found.length > 1 ? 'sono ancora ammessi' : 'è ancora ammesso'} nei programmi del mondo: scrivilo senza` : undefined;
+export const WORLD_NODE_LIMITS = {
+  /** Cells of the grid a wave is observed on: a tile wfc's coarse grid, or a sample's flat grid. */
+  waveCells: 32_768,
+  /** Bytes of a node's waves. */
+  waveBytes: 32 * 2 ** 20,
+  /** Patterns of a wfc: tiles with their turns, or the windows of a sample. */
+  patterns: 1024,
+  /** `tries` of a wfc, written: without it the engine's 1000. */
+  tries: 100,
+  /** `limit` of a search, written: the states it keeps (the depth it reaches). */
+  searchStates: 2_000,
+  /** Bytes of the potentials and the propagation of a node that infers. */
+  potentialBytes: 32 * 2 ** 20,
+  /** `steps` of a convchain, written, and its `n`. */
+  convchainSteps: 50,
+  convchainN: 3,
+  /** Files of models/ a program reads (imports, rule files, tilesets, tiles, samples), their characters, imports one inside the other. */
+  files: 64,
+  fileChars: 200_000,
+  importDepth: 3,
+} satisfies NodeCeilings & Record<string, number>;
+
+/** How deep the imports of a program go (an import inside an imported file is 2); the compiler has refused cycles already. */
+export function importDepth(xml: string, files: MjxFiles, seen: string[] = []): number {
+  let roots: XmlElement[];
+  try {
+    roots = parseXml(xml);
+  } catch {
+    return 0;
+  }
+  let deepest = 0;
+  const visit = (el: XmlElement) => {
+    if (el.name === 'import' && el.attrs.file && !seen.includes(el.attrs.file)) {
+      const text = files[`${el.attrs.file}.xml`];
+      if (typeof text === 'string') deepest = Math.max(deepest, 1 + importDepth(text, files, [...seen, el.attrs.file]));
+    }
+    el.children.forEach(visit);
+  };
+  roots.forEach(visit);
+  return deepest;
+}
+
+/**
+ * Why a program goes beyond what the world takes of the nodes of T333-T335 (T336, ADR-0176), or nothing: a search says its `limit`, a
+ * wfc its `tries` and has few patterns, a convchain its `steps`; the files it reads are few and short, the imports shallow. What a run
+ * finds (the wave, the potentials) the validator's run checks with `WORLD_NODE_LIMITS` as ceilings. `files` are those it reads.
+ */
+export function worldNodeErrors(m: Pick<MjxModel, 'program'> & Partial<Pick<MjxModel, 'animations' | 'actions'>>, xml = '', files: MjxFiles = {}): string[] {
+  const L = WORLD_NODE_LIMITS;
+  const errors = new Set<string>();
+  const visit = (n: Node3) => {
+    if (n.type === 'sequence' || n.type === 'markov') n.children.forEach(visit);
+    else if ((n.type === 'one' || n.type === 'all' || n.type === 'prl') && n.search && !(n.limit !== undefined && n.limit <= L.searchStates))
+      errors.add(`search nel mondo vuole limit da 1 a ${L.searchStates} (gli stati che la ricerca tiene)${n.limit !== undefined ? `, non ${n.limit}` : ''}`);
+    else if (n.type === 'wfc') {
+      if (!(n.tries !== undefined && n.tries <= L.tries)) errors.add(`wfc nel mondo vuole tries da 1 a ${L.tries}${n.tries !== undefined ? `, non ${n.tries}` : ' (scritto: senza, sono 1000)'}`);
+      if (n.patterns.length > L.patterns) errors.add(`wfc: ${n.patterns.length} motivi (tessere con le loro rotazioni, o finestre del campione), nel mondo al più ${L.patterns}`);
+    } else if (n.type === 'convchain') {
+      if (!(n.steps !== undefined && n.steps <= L.convchainSteps)) errors.add(`convchain nel mondo vuole steps da 1 a ${L.convchainSteps}`);
+      if (n.n > L.convchainN) errors.add(`convchain nel mondo vuole n fino a ${L.convchainN}, non ${n.n}`);
+    }
+  };
+  visit(m.program.program);
+  for (const clip of [...(m.animations ?? []), ...(m.actions ?? [])]) visit(clip.program.program);
+  const read = Object.values(files).filter((t): t is string => typeof t === 'string');
+  if (read.length > L.files) errors.add(`legge ${read.length} file di models/, nel mondo al più ${L.files}`);
+  const chars = read.reduce((a, t) => a + t.length, 0);
+  if (chars > L.fileChars) errors.add(`i file che legge sono lunghi ${chars} caratteri, nel mondo al più ${L.fileChars}`);
+  if (/<import\b/.test(xml)) {
+    const depth = importDepth(xml, files);
+    if (depth > L.importDepth) errors.add(`import uno dentro l'altro fino a ${depth}, nel mondo al più ${L.importDepth}`);
+  }
+  return [...errors];
+}
+
+/** Whether a file of models/ is a tileset (T335): its root is `<tileset>`, not a program. */
+export function isTileset(xml: string): boolean {
+  // Skipped by hand, not by one expression: a lazy comment inside a repeated group backtracks exponentially on a file of many comments.
+  let s = xml.replace(/^﻿/, '').trimStart();
+  if (s.startsWith('<?xml')) s = s.slice(s.indexOf('>') + 1).trimStart();
+  while (s.startsWith('<!--')) {
+    const end = s.indexOf('-->');
+    if (end < 0) return false;
+    s = s.slice(end + 3).trimStart();
+  }
+  return /^<tileset\b/.test(s);
+}
+
+/**
+ * A tileset of models/ (T335, ADR-0174; the validator reads it since T336): a plain name, `<tileset>` with its tiles and neighbours, as a
+ * wfc of a program would read it: a wfc of one try on its own letters compiles, so the tiles are square and of one size, their symbols in
+ * the tileset's `values`, the neighbours known tiles, the tiles with their turns within the world's patterns. `read` gives the tiles' files.
+ */
+export function tilesetErrors(path: string, xml: string, read: (file: string) => string | undefined = () => undefined): string[] {
+  const name = /^models\/([^/]+)\.xml$/.exec(path)?.[1];
+  if (!name || !MJX_FILE_RE.test(name)) return [`${path}: un tileset è models/<nome>.xml, con lettere, cifre e "-" nel nome`];
+  if (xml.length > MAX_RULE_FILE) return [`${path}: troppo lungo (max ${MAX_RULE_FILE} caratteri)`];
+  try {
+    const root = parseXml(xml).find((r) => r.name === 'tileset');
+    if (!root) return [`${path}: la radice di un tileset è <tileset>`];
+    // Its letters: its own `values`, or those its tiles are written in (then the node's first, the empty one, is one more before them).
+    let values = root.attrs.values?.replace(/\s+/g, '');
+    if (!values) {
+      const texts = root.children
+        .filter((c) => c.name === 'tiles')
+        .flatMap((c) => c.children)
+        .map((t) => (t.text?.trim() ? t.text : (read(`${t.attrs.file ?? `${name}-${t.attrs.name}`}.txt`) ?? '')));
+      const used = [...new Set(texts.flatMap((t) => symbolTokens(t).filter((k) => k.code !== undefined).map((k) => k.text)))];
+      values = [['B', 'E', 'Z', 'Q'].find((c) => !used.includes(c)) ?? '#2000', ...used].join('');
+    }
+    const probe = `<sequence values="${values}" size="1 1 1"><wfc values="${values}" tileset="${name}" tries="1"/></sequence>`;
+    const files = mjxIncludes(probe, (f) => (f === `${name}.xml` ? xml : read(f)));
+    const m = compileMjx(probe, { files });
+    return worldNodeErrors(m, probe, files).map((e) => `${path}: ${e}`);
+  } catch (e) {
+    return [`${path}: ${e instanceof Mj3Error ? e.message : (e as Error).message}`];
+  }
 }
 
 /** The last sound program that passed: the measures are a pure function of the text. */
@@ -277,6 +395,7 @@ export class Validator {
 
   validateFile(path: string, content: string, box?: [number, number, number]): string[] {
     if (path.endsWith('.lua')) return this.checkLua(path, content);
+    if (/^models\/[^/]+\.xml$/.test(path) && isTileset(content)) return tilesetErrors(path, content, (f) => this.modelFile(f));
     if (/^models\/[^/]+\.xml$/.test(path)) {
       const id = path.slice('models/'.length, -'.xml'.length);
       return modelErrors(path, content, this.modelTime(id), box ?? this.modelBox(id), mjxIncludes(content, (f) => this.modelFile(f)));
