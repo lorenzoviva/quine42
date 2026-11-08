@@ -23,12 +23,12 @@ Aggiornato il 08/11/2026, epoca 336 (claude). Crediti: vedi `stato`.
 
 0. **Decisioni autore 04/11:** D32 SemVer `X.Y.Z`. Step 32: T260, T262 → T245a → T263/T245b → T245c-f. T265 prima della beta.
 1. T324 (immagini Jev: utile come filtro dei difetti visivi, non per il giudizio dell'Artista) integrato via T329.
-2. **Nodi MJ:** T333 integrato (ADR-0171, kernel 0.5.7; lo Scultore non lo conosce ancora); **T334 integrato via T340/T341** (field/temperature/observe/search, ADR-0173, kernel 0.5.9). **T335 integrato** (ADR-0174, kernel 0.5.10). **T342 integrato** (simboli `#<numero>`, ADR-0175, contratto 0.6, kernel 0.6.0) → **T336 in corso** (ripreso dopo un errore di rete SSL alle 03:46 UTC). **T331 integrato** (studio GPU, `docs/design/gpu.md`: WebGPU non ora; 4 task proposti da approvare: mesh senza allocazioni, corona solo quando serve, scatti all’arrivo, rimisurare). **Pronti:** T336, T337, T339, T88. Da approvare: T310b. Bloccati: T338.
+2. **Nodi MJ:** T333 integrato (ADR-0171, kernel 0.5.7; lo Scultore non lo conosce ancora); **T334 integrato via T340/T341** (field/temperature/observe/search, ADR-0173, kernel 0.5.9). **T335 integrato** (ADR-0174, kernel 0.5.10). **T342 integrato** (simboli `#<numero>`, ADR-0175, contratto 0.6, kernel 0.6.0) → **T336 in corso** (ripreso dopo un errore di rete SSL alle 03:46 UTC). **T331 integrato** (studio GPU, `docs/design/gpu.md`: WebGPU non ora; 4 task proposti da approvare: mesh senza allocazioni, corona solo quando serve, scatti all’arrivo, rimisurare). **T337 integrato** (scheletro copiato 78-92 %, metodo a zone; D48). **Pronti:** T339, T88. Da approvare: T310b. Bloccati: T338.
 3. **Crediti (20:30 UTC 07/11):** Claude 5h 36 % (reset 23:00 UTC), settimana 28 % (reset 12/11 16:00); Gemini e agy 100 %; Argon fermo fino all'11/11.
 
 ## Attese dall'autore
 
-- **Domande aperte in `domande/aperte.md`:** D34 (lingue), D35 (piano lancio, account D3.1), **D47 (vestiti addosso, T289)**. Chiuse: D36, D37, D38 A, D46 B+C. Aperta D45 (Jev), ampliata da T325 (integrato, `lab/banco/jev/casi-d-uso.md`: ordine, guardie, battute, Attore, stima lobby). Proposta aperta: `piani.google.pro.moltiplicatoreStima` 2,5 → 1.
+- **Domande aperte in `domande/aperte.md`:** D34 (lingue), D35 (piano lancio, account D3.1), **D47 (vestiti addosso, T289)**, **D48 (prompt Scultore strutture, T337)**. Chiuse: D36, D37, D38 A, D46 B+C. Aperta D45 (Jev), ampliata da T325 (integrato, `lab/banco/jev/casi-d-uso.md`: ordine, guardie, battute, Attore, stima lobby). Proposta aperta: `piani.google.pro.moltiplicatoreStima` 2,5 → 1.
 - **Autonomia autore confermata fino al 06/11 18:00 locali.**
 
 ## Regole attive
@@ -38,5 +38,5 @@ Aggiornato il 08/11/2026, epoca 336 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **336 (claude):** T336 fallito per errore di rete (SSL), ripreso con la sua conversazione.
+- **336 (claude):** T336 ripreso dopo errore di rete; T337 integrato, D48 aperta.
 - **335 (claude):** T331 e T342 integrati (cartella vuota `worktrees/t342` occupata, branch tolto).
