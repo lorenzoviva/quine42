@@ -68,7 +68,7 @@ describe('il generatore sui crediti che avanzano', () => {
     fs.mkdirSync(progress, { recursive: true });
     const procs: Array<{ pid: number; args: string[]; alive: boolean; log: string }> = [];
     let next = 1000;
-    const spawnFn = (cmd: string, args: string[], o: { stdio: [string, number, number] }) => {
+    const spawnFn = (cmd: string, args: string[]) => {
       const p = { pid: next++, args: [cmd, ...args], alive: true, log: '' };
       procs.push(p);
       return { pid: p.pid, on() {}, unref() {} };
