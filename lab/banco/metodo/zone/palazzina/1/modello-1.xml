@@ -1,0 +1,144 @@
+<!--
+PALAZZINA DI CITTÀ, Novecento. Tre piani, tetto piano con parapetto.
+Parti sul piano grosso (1 casella = 4 voxel):
+  x  corpo rettangolare centrato su N: larghezza 21-23, profondità 13-15. Le casualità sono il fianco sinistro, il fianco destro e il retro.
+  W  muro perimetrale (anello esterno di x)
+  c  i due muri del nucleo scala, a N±4: l'atrio e la scala stanno sull'asse del portone
+  h  pavimento del nucleo, largo 7: atrio davanti, scala dietro
+  s  striscia della scala, 3×5 contro un muro del nucleo, sul lato sinistro o destro a seconda del seme; sale verso il retro, con il pianerottolo contro il muro di fondo
+  x  i due appartamenti, uno a destra e uno a sinistra del nucleo. Il tramezzo m (destra) / q (sinistra) sulla riga di N li divide in camera davanti e camera dietro, con una porta d in posizione casuale
+  d  porte larghe 3: dal nucleo a ogni appartamento (davanti o dietro a seconda del seme), nei tramezzi, e dal nucleo al cortile
+  G  portone sull'asse, davanti, largo 3
+  H  pensilina, 3×2 davanti al portone
+  S  strada diritta fino al bordo
+  P  balconi sul fronte, su tutta la facciata tranne la zona della pensilina; la lunghezza cambia con il seme
+  g  cortile sul retro, profondo 4 righe
+  L  muretto di cinta del cortile
+  n  ripostiglio 3×2 in un angolo del cortile (a sinistra o a destra)
+  b  due panche da saltare nel cortile
+  o  zona da tenere libera davanti alla porta sul retro (temporanea)
+  v  percorso dal centro al portone (temporaneo)
+  a  testa dei camminatori (temporanea)
+  z  lotto edificabile (temporaneo)
+-->
+<sequence values="BNE" symmetry="(xy)" ground="E" origin="bottom">
+  <map scale="1/4 1/4 1/4" values="BNEzaxWchmqIGvdsgLonbPHS">
+    <rule in="E" out="E"/><rule in="N" out="N"/>
+
+    <!-- lotto: margine di 1 casella dal bordo -->
+    <prl in="***/*E*/***" out="***/*z*/***"/>
+
+    <!-- bracci orizzontali: semilarghezza 10 sicura, 11 a caso -->
+    <all in="Nz" out="*a" steps="1" symmetry="(x)"/>
+    <all in="[Nx]az" out="*xa" steps="9" symmetry="(x)"/>
+    <prl steps="1" symmetry="(x)"><rule in="xaz" out="*xa" p="0.5"/></prl>
+    <prl in="a" out="x"/>
+
+    <!-- braccio davanti: fisso a N+7 -->
+    <all in="N/z" out="*/a" steps="1" symmetry="()"/>
+    <all in="[Nx]/a/z" out="*/x/a" steps="6" symmetry="()"/>
+    <prl in="a" out="x"/>
+
+    <!-- braccio dietro: da N-5 a N-7 -->
+    <all in="z/N" out="a/*" steps="1" symmetry="()"/>
+    <all in="z/a/[Nx]" out="a/x/*" steps="4" symmetry="()"/>
+    <prl steps="2" symmetry="()"><rule in="z/a/x" out="a/x/*" p="0.5"/></prl>
+    <prl in="a" out="x"/>
+
+    <!-- riempimento del rettangolo -->
+    <all in="[Nx]z/*[Nx]" out="*x/**"/>
+
+    <!-- muro perimetrale -->
+    <prl in="x[zE]" out="W*"/>
+
+    <!-- muri del nucleo a N±4, dal fondo al fronte -->
+    <all in="Nxxxx" out="****c" steps="1" symmetry="(x)"/>
+    <all symmetry="()">
+      <rule in="c/x" out="*/c"/>
+      <rule in="x/c" out="c/*"/>
+    </all>
+
+    <!-- tramezzi degli appartamenti sulla riga di N -->
+    <all in="Nxxxcx" out="*****m" steps="1" symmetry="()"/>
+    <all in="xcxxxN" out="q*****" steps="1" symmetry="()"/>
+    <all in="mx" out="*m" symmetry="()"/>
+    <all in="xq" out="q*" symmetry="()"/>
+
+    <!-- pavimento del nucleo -->
+    <all in="[Nh]x" out="*h"/>
+
+    <!-- portone sull'asse -->
+    <all in="N/h" out="*/v" steps="1" symmetry="()"/>
+    <all in="v/h" out="*/v" symmetry="()"/>
+    <all in="v/W" out="*/G" symmetry="()"/>
+    <all in="WGW" out="GGG" steps="1" symmetry="()"/>
+
+    <!-- pensilina 3x2 e strada fino al bordo -->
+    <all in="G/[zE]" out="*/H" symmetry="()"/>
+    <all in="H/[zE]" out="*/H" steps="1" symmetry="()"/>
+    <all in="H/[zE]" out="*/S" steps="1" symmetry="()"/>
+    <all in="S/[zE]" out="*/S" symmetry="()"/>
+
+    <!-- balconi sul fronte, staccati dalla pensilina, accorciati a caso -->
+    <all in="W/z" out="*/P" symmetry="()"/>
+    <prl in="PH" out="z*"/>
+    <prl steps="2" symmetry="(x)"><rule in="zP" out="*z" p="0.4"/></prl>
+
+    <!-- scala: striscia 3x5 contro il muro del nucleo, a sinistra o a destra; pianerottolo contro il fondo, 2 righe libere davanti -->
+    <one in="WWWW/chhh/chhh/chhh/chhh/chhh/chhh/chhh/chhh" out="****/****/*sss/*sss/*sss/*sss/*sss/****/****" steps="1" symmetry="(x)"/>
+
+    <!-- porte dal nucleo agli appartamenti, una per lato -->
+    <one in="xxxchh/xxxchh/xxxchh" out="***d**/***d**/***d**" steps="1" symmetry="()"/>
+    <one in="hhcxxx/hhcxxx/hhcxxx" out="**d***/**d***/**d***" steps="1" symmetry="()"/>
+
+    <!-- porte nei tramezzi -->
+    <one in="xxx/xxx/mmm/xxx/xxx" out="***/***/ddd/***/***" steps="1" symmetry="()"/>
+    <one in="xxx/xxx/qqq/xxx/xxx" out="***/***/ddd/***/***" steps="1" symmetry="()"/>
+    <prl><rule in="c" out="I"/><rule in="m" out="I"/><rule in="q" out="I"/></prl>
+
+    <!-- cortile sul retro e muretto di cinta -->
+    <all in="z/W" out="g/*" symmetry="()"/>
+    <all in="z/g" out="g/*" steps="3" symmetry="()"/>
+    <prl in="g[zE]" out="L*"/>
+
+    <!-- porta sul cortile, con 2 righe libere davanti -->
+    <one in="ggg/ggg/WWW/hhh/hhh" out="ooo/ooo/ddd/***/***" steps="1" symmetry="()"/>
+
+    <!-- ripostiglio in un angolo del cortile, contro la casa -->
+    <one in="Lggg/Lggg/WWWW" out="*nnn/*nnn/****" steps="1" symmetry="(x)"/>
+
+    <!-- due panche da saltare -->
+    <one in="gggg/gggg/gggg" out="****/*bb*/****" steps="2"/>
+
+    <!-- pulizia dei marcatori -->
+    <prl>
+      <rule in="o" out="g"/>
+      <rule in="v" out="h"/>
+      <rule in="z" out="E"/>
+    </prl>
+  </map>
+
+  <color symbol="E" value="#7a7f6a" name="terreno"/>
+  <color symbol="N" value="#ff00ff" name="centro"/>
+  <color symbol="z" value="#9aa28a" name="lotto"/>
+  <color symbol="a" value="#ff0000" name="camminatore"/>
+  <color symbol="x" value="#e3cfa0" name="pavimento appartamento"/>
+  <color symbol="W" value="#d9b97c" name="intonaco color sabbia"/>
+  <color symbol="c" value="#c9a76a" name="muro del nucleo"/>
+  <color symbol="m" value="#b8965c" name="tramezzo destro"/>
+  <color symbol="q" value="#b8965c" name="tramezzo sinistro"/>
+  <color symbol="I" value="#c4a46e" name="muro interno"/>
+  <color symbol="h" value="#cfc6b4" name="pavimento atrio in graniglia"/>
+  <color symbol="s" value="#f2f0ea" name="scala in marmo bianco"/>
+  <color symbol="G" value="#5a3a22" name="portone in legno"/>
+  <color symbol="d" value="#8a5a34" name="porta"/>
+  <color symbol="v" value="#ffaa00" name="percorso"/>
+  <color symbol="H" value="#3b3f42" name="pensilina in ferro"/>
+  <color symbol="S" value="#5c5c5c" name="strada"/>
+  <color symbol="P" value="#2f3a33" name="balcone in ferro"/>
+  <color symbol="g" value="#8fae6a" name="cortile"/>
+  <color symbol="L" value="#ece6d8" name="muretto bianco"/>
+  <color symbol="n" value="#a0522d" name="ripostiglio"/>
+  <color symbol="b" value="#4f7a45" name="panca verde"/>
+  <color symbol="o" value="#00ffff" name="zona libera"/>
+</sequence>

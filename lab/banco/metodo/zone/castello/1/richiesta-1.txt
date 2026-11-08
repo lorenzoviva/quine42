@@ -1,0 +1,8 @@
+Edificio: Castello del signore
+Stile: castello medievale: pietra chiara, tetti conici d’ardesia, stendardi
+Com'è: Un mastio alto con la sala grande e le stanze del signore, torri rotonde o quadrate con i tetti a cono, una cinta più bassa con il portone, un cortile d’onore, una cappella addossata alle mura, finestre a bifora sul mastio. Più alto e più elegante di un forte, con la sagoma che si vede da lontano.
+Scatola: 120 × 120 × 96 voxel; una casella è 16 voxel.
+Corpo: gradino 3 voxel, passaggio largo almeno 10, persona alta 24; salto: sale al più 16, va da 16 a 41 voxel di distanza.
+Il suolo è in fondo alla scatola.
+
+## Block 1 of 3: the composition. Write the program with level A only: the root, the map to 1/4 and the composition on the coarse plan (z=0); no heights and no map back yet (the grid stays the coarse one, and the game shows it as it is). Begin with a few comment lines: the parts of this concept, their letters, where each goes relative to the others, what the seeds change. Give every letter a <color> so that the views show it.

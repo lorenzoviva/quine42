@@ -1,0 +1,143 @@
+{
+  "taglie": [
+    {
+      "taglia": "large",
+      "box": [
+        100,
+        100,
+        80
+      ],
+      "vpt": 20,
+      "gradino": 4,
+      "semi": [
+        {
+          "seme": 1,
+          "difetti": [
+            "stanze: 0 (serve ≥ 3)",
+            "salti: 0 (serve ≥ 2)"
+          ],
+          "ms": 224
+        },
+        {
+          "seme": 2,
+          "difetti": [
+            "stanze: 0 (serve ≥ 3)",
+            "salti: 0 (serve ≥ 2)"
+          ],
+          "ms": 222
+        },
+        {
+          "seme": 3,
+          "difetti": [
+            "stanze: 0 (serve ≥ 3)",
+            "salti: 0 (serve ≥ 2)",
+            "rilievo: 0.12 (serve ≥ 0.12)"
+          ],
+          "ms": 207
+        },
+        {
+          "seme": 4,
+          "difetti": [
+            "stanze: 0 (serve ≥ 3)"
+          ],
+          "ms": 206
+        },
+        {
+          "seme": 5,
+          "difetti": [
+            "stanze: 1 (serve ≥ 3)",
+            "salti: 1 (serve ≥ 2)",
+            "rilievo: 0.12 (serve ≥ 0.12)"
+          ],
+          "ms": 232
+        }
+      ],
+      "regge": false,
+      "varianza": {
+        "voxel": 0.3910818013999081,
+        "colore": 0.06650735638097485,
+        "pianta": 0.20257191207450032,
+        "perimetro": 0,
+        "interno": 0.2984585872735446,
+        "semi": 5,
+        "firmePiani": 1,
+        "firmeStanze": 2,
+        "architetture": 3,
+        "statico": false
+      },
+      "difettiVarianza": [
+        "perimetro: 0 (serve ≥ 0.15)",
+        "interno: 0.3 (serve ≥ 0.35)"
+      ]
+    },
+    {
+      "taglia": "huge",
+      "box": [
+        120,
+        120,
+        96
+      ],
+      "vpt": 16,
+      "gradino": 3,
+      "semi": [
+        {
+          "seme": 1,
+          "difetti": [
+            "stanze: 2 (serve ≥ 3)",
+            "rilievo: 0.12 (serve ≥ 0.12)"
+          ],
+          "ms": 361
+        },
+        {
+          "seme": 2,
+          "difetti": [
+            "stanze: 2 (serve ≥ 3)",
+            "rilievo: 0.12 (serve ≥ 0.12)"
+          ],
+          "ms": 313
+        },
+        {
+          "seme": 3,
+          "difetti": [],
+          "ms": 359
+        },
+        {
+          "seme": 4,
+          "difetti": [
+            "stanze: 2 (serve ≥ 3)"
+          ],
+          "ms": 345
+        },
+        {
+          "seme": 5,
+          "difetti": [
+            "stanze: 0 (serve ≥ 3)"
+          ],
+          "ms": 342
+        }
+      ],
+      "regge": false,
+      "varianza": {
+        "voxel": 0.31342649902683195,
+        "colore": 0.0378565282421707,
+        "pianta": 0.14190845870378915,
+        "perimetro": 0,
+        "interno": 0.4025029665045209,
+        "semi": 5,
+        "firmePiani": 1,
+        "firmeStanze": 3,
+        "architetture": 4,
+        "statico": false
+      },
+      "difettiVarianza": [
+        "pianta: 0.14 (serve ≥ 0.15)",
+        "perimetro: 0 (serve ≥ 0.15)"
+      ]
+    }
+  ],
+  "regge": false,
+  "statico": false,
+  "varia": false,
+  "passa": false,
+  "ms": 2945
+}

@@ -1,0 +1,115 @@
+{
+ "nome": "nodi",
+ "semi": 5,
+ "taglia": "large",
+ "traSemi": [
+  {
+   "nome": "castello/1",
+   "concetto": "castello",
+   "quote": {
+    "impronta": 0.5427929541722645,
+    "profilo": 0.3582549507027565,
+    "pieni": 0.19867182026757035,
+    "distanza": 0.34531900457945197
+   },
+   "colore": 0.1468552479124216,
+   "voxel": 0.7391276320297269
+  },
+  {
+   "nome": "villetta/1",
+   "concetto": "villetta",
+   "quote": {
+    "impronta": 0.5482251219776729,
+    "profilo": 0.37117695807640694,
+    "pieni": 0.18583559798093818,
+    "distanza": 0.33409682452590694
+   },
+   "colore": 0.12702706313279089,
+   "voxel": 0.7056365278913337
+  }
+ ],
+ "dentro": {
+  "impronta": 0.546826881609398,
+  "profilo": 0.3647658038260756,
+  "pieni": 0.19300031342221646,
+  "distanza": 0.3406215866826001
+ },
+ "fra": {
+  "impronta": 0.5421538461538462,
+  "profilo": 0.33495100956702745,
+  "pieni": 0.16732627211457096,
+  "distanza": 0.3403733131410182
+ },
+ "separazione": {
+  "impronta": 0.9914542689602269,
+  "profilo": 0.9182631871016501,
+  "pieni": 0.8669740952623234,
+  "distanza": 0.9992711162436887
+ },
+ "vicini": 0,
+ "matrice": {
+  "concetti": [
+   "castello",
+   "villetta"
+  ],
+  "d": [
+   [
+    0.34531900457945197,
+    0.3403733131410182
+   ],
+   [
+    0.3403733131410182,
+    0.33409682452590694
+   ]
+  ]
+ },
+ "descrittori": {
+  "castello/1": {
+   "copertura": 0.48888,
+   "pieno": 0.2664799495461021,
+   "altezzaMedia": 0.727186380905299,
+   "altezzaMassima": 1,
+   "cortile": 0,
+   "quote": 21,
+   "torri": 1.2
+  },
+  "villetta/1": {
+   "copertura": 0.47850000000000004,
+   "pieno": 0.24489347238388218,
+   "altezzaMedia": 0.7181131452036554,
+   "altezzaMassima": 1,
+   "cortile": 0,
+   "quote": 20.4,
+   "torri": 0.6
+  }
+ },
+ "extra": {
+  "rocca/1": {
+   "errori": [
+    "seme 1: il simbolo \"#4\" non ha colore nella palette di MarkovJunior: dagliene uno con <color symbol=\"#4\" value=\"rrggbb\"/>",
+    "seme 2: il simbolo \"#4\" non ha colore nella palette di MarkovJunior: dagliene uno con <color symbol=\"#4\" value=\"rrggbb\"/>",
+    "seme 3: il simbolo \"#4\" non ha colore nella palette di MarkovJunior: dagliene uno con <color symbol=\"#4\" value=\"rrggbb\"/>",
+    "seme 4: il simbolo \"#4\" non ha colore nella palette di MarkovJunior: dagliene uno con <color symbol=\"#4\" value=\"rrggbb\"/>",
+    "seme 5: il simbolo \"#4\" non ha colore nella palette di MarkovJunior: dagliene uno con <color symbol=\"#4\" value=\"rrggbb\"/>"
+   ],
+   "ms": 39,
+   "righe": 96,
+   "copiate": 0.8125,
+   "tenute": 0.9342105263157895
+  },
+  "castello/1": {
+   "errori": [],
+   "ms": 2806,
+   "righe": 94,
+   "copiate": 0.851063829787234,
+   "tenute": 0.9473684210526315
+  },
+  "villetta/1": {
+   "errori": [],
+   "ms": 2374,
+   "righe": 85,
+   "copiate": 0.9176470588235294,
+   "tenute": 0.9210526315789473
+  }
+ }
+}

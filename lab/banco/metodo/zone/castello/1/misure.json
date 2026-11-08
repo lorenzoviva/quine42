@@ -1,0 +1,207 @@
+{
+  "bersaglio": "castello",
+  "chiamate": [
+    {
+      "blocco": 1,
+      "input": 5852,
+      "output": 32768,
+      "dollari": 0.7021679999999999,
+      "ms": 363884
+    },
+    {
+      "blocco": 2,
+      "input": 15555,
+      "output": 43532,
+      "dollari": 0.957281,
+      "ms": 458514
+    },
+    {
+      "blocco": 3,
+      "input": 26627,
+      "output": 66686,
+      "dollari": 1.508937,
+      "ms": 705487
+    }
+  ],
+  "totale": {
+    "input": 48034,
+    "output": 142986,
+    "dollari": 3.168386,
+    "ms": 1527885
+  },
+  "caratteriXml": 13854,
+  "passa": false,
+  "difetti": [
+    "huge (16 voxel per casella, gradino 3), seme 1 e altri 4: stanze: 0 (serve ≥ 3)",
+    "huge (16 voxel per casella, gradino 3), seme 1 e altri 3: finestre: 9 su 1 lati (serve ≥ 6 su ≥ 3 lati)",
+    "huge (16 voxel per casella, gradino 3), seme 4: piani: 1 (serve ≥ 2)",
+    "huge (16 voxel per casella, gradino 3), seme 4: murato: 1.69 (serve ≤ 0.25)",
+    "gargantuan (12 voxel per casella, gradino 2), seme 1 e altri 3: finestre: 9 su 1 lati (serve ≥ 6 su ≥ 3 lati)",
+    "gargantuan (12 voxel per casella, gradino 2), seme 4: stanze: 2 (serve ≥ 3)",
+    "gargantuan (12 voxel per casella, gradino 2), seme 4: salti: 1 (serve ≥ 2)",
+    "varianza a huge: perimetro: 0.04 (serve ≥ 0.15)"
+  ],
+  "voci": [
+    {
+      "id": "finisce",
+      "ok": true,
+      "valore": "195 ms",
+      "richiesto": "entro 8000 ms"
+    },
+    {
+      "id": "valido",
+      "ok": true,
+      "valore": "sì",
+      "richiesto": "i controlli di check.ts"
+    },
+    {
+      "id": "piani",
+      "ok": true,
+      "valore": "2",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "testa",
+      "ok": true,
+      "valore": "1.94 2.06",
+      "richiesto": "≥ 1.5 caselle per piano"
+    },
+    {
+      "id": "stanze",
+      "ok": false,
+      "valore": "0",
+      "richiesto": "≥ 3"
+    },
+    {
+      "id": "murato",
+      "ok": true,
+      "valore": "0",
+      "richiesto": "≤ 0.25"
+    },
+    {
+      "id": "porta",
+      "ok": true,
+      "valore": "x 60, scarto 0, alta 1.94, libera",
+      "richiesto": "sul davanti, scarto ≤ 0.33, alta ≥ 1.5"
+    },
+    {
+      "id": "salti",
+      "ok": true,
+      "valore": "2",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "materiali",
+      "ok": true,
+      "valore": "15",
+      "richiesto": "≥ 6"
+    },
+    {
+      "id": "dominante",
+      "ok": true,
+      "valore": "0.34",
+      "richiesto": "≤ 0.6"
+    },
+    {
+      "id": "finestre",
+      "ok": false,
+      "valore": "9 su 1 lati",
+      "richiesto": "≥ 6 su ≥ 3 lati"
+    },
+    {
+      "id": "dettagli",
+      "ok": true,
+      "valore": "149, 0 lati vuoti",
+      "richiesto": "≥ 24, ≤ 1 lati vuoti"
+    },
+    {
+      "id": "rumore",
+      "ok": true,
+      "valore": "0.01",
+      "richiesto": "≤ 0.7"
+    },
+    {
+      "id": "sagoma",
+      "ok": true,
+      "valore": "10",
+      "richiesto": "≥ 4"
+    },
+    {
+      "id": "rilievo",
+      "ok": true,
+      "valore": "0.46",
+      "richiesto": "≥ 0.12"
+    },
+    {
+      "id": "ingombro",
+      "ok": true,
+      "valore": "0.73",
+      "richiesto": "≥ 0.3"
+    }
+  ],
+  "misure": {
+    "voxel": 254769,
+    "ms": 195,
+    "finito": true,
+    "piani": [
+      {
+        "z": 1,
+        "quota": 0.0625,
+        "area": 3.734375,
+        "testa": 1.9375,
+        "stanze": 0
+      },
+      {
+        "z": 35,
+        "quota": 2.1875,
+        "area": 1.6875,
+        "testa": 2.0625,
+        "stanze": 0
+      }
+    ],
+    "cantina": 0,
+    "terrazze": 0,
+    "stanze": 0,
+    "murato": 0,
+    "persi": [],
+    "porta": {
+      "x": 60,
+      "y": 111,
+      "scarto": 0.03125,
+      "alta": 1.9375,
+      "libera": true
+    },
+    "salti": [
+      {
+        "x": 63,
+        "y": 53,
+        "z": 1,
+        "sale": false
+      },
+      {
+        "x": 47,
+        "y": 66,
+        "z": 1,
+        "sale": false
+      }
+    ],
+    "materiali": 15,
+    "dominante": 0.3431500692784444,
+    "finestre": 9,
+    "latiConFinestre": 1,
+    "dettagli": 149,
+    "latiVuoti": 0,
+    "rumore": 0.013245033112582781,
+    "rilievo": 0.4633979993937557,
+    "sagoma": 10,
+    "ingombro": 0.7266666666666667,
+    "luci": 0,
+    "inutili": [],
+    "avvisi": [
+      "19 frammenti staccati (0% dei voxel)",
+      "tocca i bordi laterali della griglia: forse è tagliato",
+      "colori mai usati: N E z a x T v G H D K r d P q c S s f R g l i j u e U Y"
+    ],
+    "errori": []
+  }
+}

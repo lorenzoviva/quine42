@@ -1,0 +1,778 @@
+Edificio: Tempio a gradoni
+Stile: antico: pietra chiara, oro, colonne
+Com'è: Piramide a terrazze con una scalinata larga sul davanti, colonne lungo il primo livello, un vestibolo, una sala delle offerte e due celle laterali, una cella più in alto raggiunta da una scala interna, statue e bracieri accesi.
+Scatola: 100 × 100 × 80 voxel; una casella è 20 voxel.
+Corpo: gradino 4 voxel, passaggio largo almeno 11, persona alta 30; salto: sale al più 21, va da 20 a 52 voxel di distanza.
+Il suolo è in fondo alla scatola.
+
+## Your program so far
+```xml
+<!--
+TEMPIO A GRADONI
+Pianta grossa (1 casella = 4 voxel):
+  x  impronta del primo gradone: rettangolo intorno a N, mezzo lato 8..12 a caso (davanti 8..10)
+  W  muro del primo gradone (8 strati); in cima O, la cornice con il parapetto; colonne sulle facce esterne
+  G  porta sul davanti, sull'asse, larga 3, coperta;  o  strada scoperta fino al bordo
+  q/p  scalinata: due rampe 3x5 ai lati della strada, contro la facciata, salgono verso l'esterno
+  w  muro dietro le rampe: in cima V, senza parapetto (lo sbarco sulla terrazza)
+  I  anello del secondo gradone (x ristretto di 4, 5 davanti): muro di due piani
+  y  sala delle offerte al piano terra; sopra, la cella alta (8+8 strati)
+  D  porta nell'anello I: vestibolo-sala sotto, cella alta-terrazza sopra
+  g  pavimento libero dietro D;  i/j  scala interna 3x5 contro un muro di I
+  P  tramezzi: dagli angoli anteriori di I al muro esterno, e uno sull'asse dietro
+  h  vestibolo;  b  vestibolo con un braciere sulla terrazza ai lati della porta alta
+  l  le due celle laterali a L;  d  le loro porte dal vestibolo;  k  una statua in fondo a ogni cella
+  J  lucernario: buco di 3x6 nella terrazza sopra ogni cella laterale, da saltare
+Sopra: terrazza a z=8, anello I fino a z=16 con bracieri agli angoli, piramide d'oro sul tetto della cella.
+I semi cambiano i lati, la profondita' della sala, la scala, i lucernari, le porte, la piramide d'oro.
+-->
+<sequence values="BNE" symmetry="(xy)" ground="E" origin="bottom">
+  <map scale="1/4 1/4 1/4" values="BNEzaxvWwGoqpyIDPhbldJgijkRFOVnuCKZLHTm">
+    <rule in="E" out="E"/><rule in="N" out="N"/>
+
+    <!-- il lotto: margine 2, davanti 4 -->
+    <prl in="***/*E*/***" out="***/*z*/***"/>
+    <prl in="Ez" out="*E" steps="1"/>
+    <prl in="z/E" out="E/*" symmetry="()" steps="2"/>
+
+    <!-- impronta del primo gradone -->
+    <all in="Nz" out="*a" steps="1"/>
+    <all in="[Nx]az" out="*xa" steps="7"/>
+    <prl steps="4"><rule in="xaz" out="*xa" p="0.5"/></prl>
+    <prl in="a" out="x"/>
+    <all in="[Nx]z/*[Nx]" out="*x/**"/>
+    <prl in="z" out="E"/>
+    <prl in="Ex" out="*W"/>
+
+    <!-- porta sul davanti -->
+    <all in="N/x" out="*/v" symmetry="()" steps="1"/>
+    <all in="v/x" out="*/v" symmetry="()"/>
+    <all in="v/W" out="*/G" symmetry="()"/>
+    <all in="WGW" out="GGG" symmetry="()" steps="1"/>
+    <prl in="v" out="x"/>
+    <all in="G/E" out="*/o" symmetry="()"/>
+    <all in="o/E" out="*/o" symmetry="()"/>
+
+    <!-- scalinata -->
+    <all in="GWWWWW/oEEEEE/oEEEEE/oEEEEE" out="******/*qpppp/*qpppp/*qpppp" symmetry="(x)"/>
+    <all in="W/[pq]" out="w/*" symmetry="()"/>
+
+    <!-- secondo gradone -->
+    <prl in="x" out="y"/>
+    <prl in="[WwGx]y" out="*x" steps="3"/>
+    <prl in="y/x" out="x/*" symmetry="()" steps="1"/>
+    <prl in="xy" out="*I"/>
+
+    <!-- porta della sala sull'asse -->
+    <all in="N/y" out="*/v" symmetry="()" steps="1"/>
+    <all in="v/y" out="*/v" symmetry="()"/>
+    <all in="v/I" out="*/D" symmetry="()"/>
+    <all in="IDI" out="DDD" symmetry="()" steps="1"/>
+    <prl in="v" out="y"/>
+
+    <!-- tramezzo sull'asse dietro la sala: divide le due celle laterali -->
+    <all in="y/N" out="v/*" symmetry="()" steps="1"/>
+    <all in="y/v" out="v/*" symmetry="()"/>
+    <all in="x/I/v" out="P/*/*" symmetry="()"/>
+    <all in="x/P" out="P/*" symmetry="()"/>
+    <prl in="v" out="y"/>
+    <prl in="N" out="y"/>
+
+    <!-- tramezzi anteriori -->
+    <all in="I/I/x" out="*/*/P" symmetry="()"/>
+    <all in="P/x" out="*/P" symmetry="()"/>
+
+    <!-- vestibolo e celle laterali -->
+    <all in="x/G" out="h/*" symmetry="()"/>
+    <all in="hx" out="*h"/>
+    <prl in="x" out="l"/>
+    <all in="hPl/hPl/hPl" out="*d*/*d*/*d*" steps="1"/>
+    <all in="IDDDI/hhhhh" out="*****/b***b" symmetry="()" steps="1"/>
+
+    <!-- pavimento libero dietro la porta della sala -->
+    <all in="y/D" out="g/*" symmetry="()"/>
+    <all in="y/g" out="g/*" symmetry="()" steps="2"/>
+
+    <!-- statue in fondo alle celle laterali -->
+    <all in="WW/lP/lP/lP/II" out="**/**/k*/**/**" symmetry="(x)"/>
+
+    <!-- lucernari da saltare sulla terrazza -->
+    <one in="WlllI/WlllI/WlllI/WlllI/WlllI/WlllI/WlllI/WlllI" out="*****/*JJJ*/*JJJ*/*JJJ*/*JJJ*/*JJJ*/*JJJ*/*****" symmetry="()" steps="1"/>
+    <one in="IlllW/IlllW/IlllW/IlllW/IlllW/IlllW/IlllW/IlllW" out="*****/*JJJ*/*JJJ*/*JJJ*/*JJJ*/*JJJ*/*JJJ*/*****" symmetry="()" steps="1"/>
+
+    <!-- scala interna contro un muro di I -->
+    <one in="IIIIIIII/[yg][yg]yyyyy[yg]/[yg][yg]yyyyy[yg]/[yg][yg]yyyyy[yg]" out="********/**ijjjj*/**ijjjj*/**ijjjj*" steps="1"/>
+
+    <!-- B. altezze -->
+    <all in="B W" out="W *" steps="7" symmetry="()"/>
+    <all in="B W" out="O *" steps="1" symmetry="()"/>
+    <all in="B w" out="w *" steps="7" symmetry="()"/>
+    <all in="B w" out="V *" steps="1" symmetry="()"/>
+    <all in="B P" out="P *" steps="7" symmetry="()"/>
+    <all in="B P" out="F *" steps="1" symmetry="()"/>
+    <all in="B I" out="I *" steps="15" symmetry="()"/>
+    <all in="B I" out="K *" steps="1" symmetry="()"/>
+
+    <!-- il vano della scala -->
+    <all in="B [ij]" out="u *" steps="1" symmetry="()"/>
+    <all in="B u" out="u *" steps="14" symmetry="()"/>
+    <all in="B u" out="C *" steps="1" symmetry="()"/>
+
+    <!-- piano terra -->
+    <all in="B [GDdhblJgy]" out="R *" steps="1" symmetry="()"/>
+    <all in="B R" out="R *" steps="6" symmetry="()"/>
+    <all in="B k" out="T *" steps="1" symmetry="()"/>
+    <all in="B T" out="T *" steps="3" symmetry="()"/>
+    <all in="B T" out="m *" steps="1" symmetry="()"/>
+    <all in="B m" out="R *" steps="1" symmetry="()"/>
+    <all in="B R m" out="R * *" steps="1" symmetry="()"/>
+    <all in="B R R R R R R R J" out="n * * * * * * * *" symmetry="()"/>
+    <all in="B R R R R R R R G" out="O * * * * * * * *" symmetry="()"/>
+    <all in="B R" out="F *" steps="1" symmetry="()"/>
+
+    <!-- cella alta -->
+    <all in="B F R R R R R R R [ygD]" out="R * * * * * * * * *" symmetry="()"/>
+    <all in="B R" out="R *" steps="6" symmetry="()"/>
+    <all in="B R" out="C *" steps="1" symmetry="()"/>
+    <all in="B F R R R R R R R b" out="H * * * * * * * * *" symmetry="()"/>
+
+    <!-- finestre -->
+    <all in="BBB/WWW BBB/WWW BBB/WWW EEE/WWW" out="***/*L* ***/*** ***/*** ***/***"/>
+    <all in="BBB/III BBB/III BBB/III [Fn][Fn][Fn]/III" out="***/*L* ***/*** ***/*** ***/***"/>
+    <all in="[WI] L" out="L *" steps="1" symmetry="()"/>
+
+    <!-- piramide d'oro e bracieri agli angoli del secondo gradone -->
+    <prl in="***/*B*/*** *C*/CCC/*C*" out="***/*Z*/*** ***/***/***" symmetry="()"/>
+    <prl in="***/*B*/*** *Z*/ZZZ/*Z*" out="***/*Z*/*** ***/***/***" symmetry="()"/>
+    <all in="***/*B*/*** *B*/BKK/*K*" out="***/*H*/*** ***/***/***"/>
+
+    <!-- C. scala piena -->
+    <map scale="4 4 4" values="BSAoseWIPKZLFOVCMXUYQcftT">
+      <rule in="B" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB"/>
+      <rule in="R" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB"/>
+      <rule in="n" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB"/>
+      <rule in="u" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB"/>
+      <rule in="E" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB SSSS/SSSS/SSSS/SSSS"/>
+      <rule in="o" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB oooo/oooo/oooo/oooo"/>
+      <rule in="q" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB ssss/ssss/ssss/ssss"/>
+      <rule in="i" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB ssss/ssss/ssss/ssss"/>
+      <rule in="p" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB eeee/eeee/eeee/eeee"/>
+      <rule in="j" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB eeee/eeee/eeee/eeee"/>
+      <rule in="G" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB AAAA/AAAA/AAAA/AAAA"/>
+      <rule in="D" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB AAAA/AAAA/AAAA/AAAA"/>
+      <rule in="d" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB AAAA/AAAA/AAAA/AAAA"/>
+      <rule in="h" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB AAAA/AAAA/AAAA/AAAA"/>
+      <rule in="b" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB AAAA/AAAA/AAAA/AAAA"/>
+      <rule in="l" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB AAAA/AAAA/AAAA/AAAA"/>
+      <rule in="J" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB AAAA/AAAA/AAAA/AAAA"/>
+      <rule in="g" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB AAAA/AAAA/AAAA/AAAA"/>
+      <rule in="y" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB AAAA/AAAA/AAAA/AAAA"/>
+      <rule in="k" out="tttt/tttt/tttt/tttt tttt/tttt/tttt/tttt tttt/tttt/tttt/tttt tttt/tttt/tttt/tttt"/>
+      <rule in="W" out="WWWW/WWWW/WWWW/WWWW WWWW/WWWW/WWWW/WWWW WWWW/WWWW/WWWW/WWWW WWWW/WWWW/WWWW/WWWW"/>
+      <rule in="w" out="WWWW/WWWW/WWWW/WWWW WWWW/WWWW/WWWW/WWWW WWWW/WWWW/WWWW/WWWW WWWW/WWWW/WWWW/WWWW"/>
+      <rule in="I" out="IIII/IIII/IIII/IIII IIII/IIII/IIII/IIII IIII/IIII/IIII/IIII IIII/IIII/IIII/IIII"/>
+      <rule in="P" out="PPPP/PPPP/PPPP/PPPP PPPP/PPPP/PPPP/PPPP PPPP/PPPP/PPPP/PPPP PPPP/PPPP/PPPP/PPPP"/>
+      <rule in="K" out="KKKK/KKKK/KKKK/KKKK KKKK/KKKK/KKKK/KKKK KKKK/KKKK/KKKK/KKKK KKKK/KKKK/KKKK/KKKK"/>
+      <rule in="Z" out="ZZZZ/ZZZZ/ZZZZ/ZZZZ ZZZZ/ZZZZ/ZZZZ/ZZZZ ZZZZ/ZZZZ/ZZZZ/ZZZZ ZZZZ/ZZZZ/ZZZZ/ZZZZ"/>
+      <rule in="L" out="LLLL/LLLL/LLLL/LLLL LLLL/LLLL/LLLL/LLLL LLLL/LLLL/LLLL/LLLL LLLL/LLLL/LLLL/LLLL"/>
+      <rule in="F" out="BBBB/BBBB/BBBB/BBBB FFFF/FFFF/FFFF/FFFF FFFF/FFFF/FFFF/FFFF FFFF/FFFF/FFFF/FFFF"/>
+      <rule in="O" out="BBBB/BBBB/BBBB/BBBB OOOO/OOOO/OOOO/OOOO OOOO/OOOO/OOOO/OOOO OOOO/OOOO/OOOO/OOOO"/>
+      <rule in="V" out="BBBB/BBBB/BBBB/BBBB VVVV/VVVV/VVVV/VVVV VVVV/VVVV/VVVV/VVVV VVVV/VVVV/VVVV/VVVV"/>
+      <rule in="C" out="CCCC/CCCC/CCCC/CCCC CCCC/CCCC/CCCC/CCCC BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB"/>
+      <rule in="H" out="BBBB/BffB/BffB/BBBB cccc/cffc/cffc/cccc BBBB/BccB/BccB/BBBB BBBB/BccB/BccB/BBBB"/>
+      <rule in="T" out="BTTB/TTTT/TTTT/BTTB BTTB/TTTT/TTTT/BTTB BTTB/TTTT/TTTT/BTTB BTTB/TTTT/TTTT/BTTB"/>
+      <rule in="m" out="BBBB/BBBB/BBBB/BBBB BBBB/BTTB/BTTB/BBBB BBBB/BTTB/BTTB/BBBB BTTB/TTTT/TTTT/BTTB"/>
+
+      <!-- gradini: rampe della scalinata e scala interna -->
+      <all in="BBB sse" out="UY* ***" steps="1"/>
+      <all in="*BB *B* UY*" out="*UY *Q* QQ*" steps="17"/>
+      <all in="Q B" out="* Q" symmetry="()"/>
+
+      <!-- colonne lungo il primo gradone -->
+      <all in="BBBBBBBB/BBBBBBBB/WWWWWWWW SSSSSSSS/SSSSSSSS/WWWWWWWW" out="***XX***/***XX***/******** ********/********/********"/>
+      <all in="BB[WL] XX[WL]" out="XX* ***"/>
+
+      <!-- parapetti sulle cornici -->
+      <all in="B* [OK]B" out="M* **"/>
+      <all in="B M" out="M *" steps="3" symmetry="()"/>
+
+      <!-- piede dei bracieri sulla terrazza -->
+      <all in="c B [FO]" out="* c *" symmetry="()"/>
+
+      <!-- pulizia -->
+      <prl><rule in="s" out="A"/><rule in="e" out="A"/><rule in="U" out="Q"/><rule in="Y" out="B"/></prl>
+    </map>
+  </map>
+
+  <color symbol="B" value="#000000" name="aria"/>
+  <color symbol="E" value="#b39b72" name="terreno sabbioso"/>
+  <color symbol="S" value="#c9b48a" name="sabbia"/>
+  <color symbol="N" value="#ff00ff" name="centro"/>
+  <color symbol="z" value="#c9b48a" name="lotto"/>
+  <color symbol="a" value="#ff8800" name="cammino"/>
+  <color symbol="x" value="#e0d6c0" name="impronta"/>
+  <color symbol="v" value="#ff0000" name="asse"/>
+  <color symbol="W" value="#ece3cc" name="pietra chiara del primo gradone"/>
+  <color symbol="w" value="#ece3cc" name="muro dietro la scalinata"/>
+  <color symbol="G" value="#3a2a1a" name="porta del tempio"/>
+  <color symbol="o" value="#9c8f7a" name="strada lastricata"/>
+  <color symbol="q" value="#f4eedc" name="primo gradino della scalinata"/>
+  <color symbol="p" value="#ddd3b8" name="scalinata"/>
+  <color symbol="s" value="#f4eedc" name="inizio della scala"/>
+  <color symbol="e" value="#ddd3b8" name="corsa della scala"/>
+  <color symbol="y" value="#c8b27a" name="sala delle offerte"/>
+  <color symbol="g" value="#c8b27a" name="pavimento davanti alla porta della sala"/>
+  <color symbol="i" value="#f4eedc" name="piede della scala interna"/>
+  <color symbol="j" value="#ddd3b8" name="scala interna"/>
+  <color symbol="I" value="#ddcfae" name="pietra del secondo gradone"/>
+  <color symbol="D" value="#5a3e22" name="porta della sala"/>
+  <color symbol="P" value="#cdbf9e" name="tramezzo"/>
+  <color symbol="h" value="#a8987c" name="pavimento del vestibolo"/>
+  <color symbol="b" value="#a8987c" name="vestibolo sotto i bracieri"/>
+  <color symbol="l" value="#8f8470" name="pavimento delle celle laterali"/>
+  <color symbol="d" value="#6b4a2a" name="porta di cella"/>
+  <color symbol="J" value="#8f8470" name="cella sotto il lucernario"/>
+  <color symbol="k" value="#bfb39a" name="piedistallo"/>
+  <color symbol="t" value="#bfb39a" name="piedistallo della statua"/>
+  <color symbol="T" value="#e0b84a" name="statua dorata"/>
+  <color symbol="m" value="#e0b84a" name="testa della statua"/>
+  <color symbol="R" value="#000000" name="aria delle stanze"/>
+  <color symbol="n" value="#000000" name="lucernario"/>
+  <color symbol="u" value="#000000" name="vano della scala"/>
+  <color symbol="A" value="#e6dac0" name="pavimento di pietra"/>
+  <color symbol="F" value="#d6c7a2" name="terrazza e solaio"/>
+  <color symbol="O" value="#f5efdf" name="cornice del primo gradone"/>
+  <color symbol="V" value="#f0e8d2" name="sbarco della scalinata"/>
+  <color symbol="C" value="#c4b48c" name="tetto della cella alta"/>
+  <color symbol="K" value="#f2ead6" name="cornice del secondo gradone"/>
+  <color symbol="Z" value="#d4a520" name="piramide d'oro"/>
+  <color symbol="L" value="#2b3a4a" name="finestra"/>
+  <color symbol="H" value="#8a5a2b" name="braciere"/>
+  <color symbol="c" value="#8a5a2b" name="bronzo del braciere"/>
+  <color symbol="f" value="#ff6a10" name="fuoco acceso"/>
+  <color symbol="M" value="#e8d9a8" name="parapetto"/>
+  <color symbol="X" value="#fbf7ea" name="colonne"/>
+  <color symbol="Q" value="#ddd3b8" name="gradini"/>
+  <color symbol="U" value="#ddd3b8" name="gradino"/>
+  <color symbol="Y" value="#ddd3b8" name="direzione del gradino"/>
+</sequence>
+```
+
+## What the game made of it
+## Le viste
+### Seme 1: griglia 100×100×80, un carattere = 2×2 celle (il retro in alto, il davanti in basso; «.» vuoto)
+Lettere: W pietra chiara del primo gradone, o strada lastricata, I pietra del secondo gradone, P tramezzo, F terrazza e solaio, O cornice del primo gradone, V sbarco della scalinata, C tetto della cella alta, K cornice del secondo gradone, Z piramide d'oro, L finestra, T statua dorata, S sabbia, A pavimento di pietra, M parapetto, X colonne, Q gradini, c bronzo del braciere, f fuoco acceso, t piedistallo della statua
+Pianta (la lettera in cima a ogni colonna):
+```
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+SSSSSSSSXXXXXXSXXXXSXXXXXXXXSXXXXXXXSXXXXXXSSSSSSS
+SSSSSSMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMSSSSSS
+SSSSSSMOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOSSSSSS
+SSSSSXMOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFOOXSSSSS
+SSSSSXMOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFOOXSSSSS
+SSSSSXMOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFOOXSSSSS
+SSSSSXMOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFOOXSSSSS
+SSSSSXMOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFOOXSSSSS
+SSSSSXMOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFOOXSSSSS
+SSSSSSMOFFFFFFccMMMMMMMMMMMMMMMMMMccFFFFFFOOXSSSSS
+SSSSSXMOFFFFFFccKKKKKKKKKKKKKKKKKKccFFFFFFOOXSSSSS
+SSSSSXMOAAAAAAMKCCCCCCCCCCCCCCCCCCKKAAAAAAMOXSSSSS
+SSSSSXMOAAAAAAMKCCCCCCCCCCCCCCCCCCKKAAAAAAMOXSSSSS
+SSSSSXMOAAAAAAMKCCZZZZZZZZZZZZZZCCKKAAAAAAMOXSSSSS
+SSSSSXMOAAAAAAMKCCZZZZZZZZZZZZZZCCKKAAAAAAMOXSSSSS
+SSSSSXMOAAAAAAMKCCZZZZZZZZZZZZZZCCKKAAAAAAMOSSSSSS
+SSSSSXMOAAAAAAMKCCZZZZZZZZZZZZZZCCKKAAAAAAMOXSSSSS
+SSSSSXMOAAAAAAMKCCZZZZZZZZZZZZZZCCKKAAAAAAMOXSSSSS
+SSSSSSMOAAAAAAMKCCZZZZZZZZZZZZZZCCKKAAAAAAMOXSSSSS
+SSSSSXMOAAAAAAMKCCZZZZZZZZZZZZZZCCKKAAAAAAMOSSSSSS
+SSSSSXMOAAAAAAMKCCZZZZZZZZZZZZZZCCKKAAAAAAMOXSSSSS
+SSSSSXMOAAAAAAMKCCZZZZZZZZZZZZZZCCKKAAAAAAMOXSSSSS
+SSSSSXMOAAAAAAMKCCZZZZZZZZZZZZZZCCKKAAAAAAMOXSSSSS
+SSSSSXMOFFFFFFMKCCCCCCZZZZZZCCCCCCKKFFFFFFOOXSSSSS
+SSSSSXMOFFFFFFMKCCCCCCZZZZZZCCCCCCKKFFFFFFOOXSSSSS
+SSSSSSMOFFFFFFccKKKKKKCCCCCCKKKKKKccFFFFFFOOXSSSSS
+SSSSSXMOFFFFFFccKKKKKKCCCCCCKKKKKKccFFFFFFOOXSSSSS
+SSSSSXMOFFFFFFFFFFFFccFFFFFFccFFFFFFFFFFFFOOSSSSSS
+SSSSSXMOFFFFFFFFFFFFccFFFFFFccFFFFFFFFFFFFOOXSSSSS
+SSSSSSMOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFOOXSSSSS
+SSSSSXMOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFOOXSSSSS
+SSSSSXMOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFOOXSSSSS
+SSSSSXMOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFOOXSSSSS
+SSSSSSMOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFOOXSSSSS
+SSSSSXMOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFOOXSSSSS
+SSSSSXMOOOOOVVVVVVVVVVOOOOOOVVVVVVVVVVOOOOOOSSSSSS
+SSSSSSMOOOOOVVVVVVVVVVOOOOOOVVVVVVVVVVOOOOOMSSSSSS
+SSSSSSSSXXSSQQQQQQQQQAooooooAQQQQQQQQQSSXXSSSSSSSS
+SSSSSSSSSSSSQQQQQQQQQAooooooAQQQQQQQQQSSSSSSSSSSSS
+SSSSSSSSSSSSQQQQQQQQQAooooooAQQQQQQQQQSSSSSSSSSSSS
+SSSSSSSSSSSSQQQQQQQQQAooooooAQQQQQQQQQSSSSSSSSSSSS
+SSSSSSSSSSSSQQQQQQQQQAooooooAQQQQQQQQQSSSSSSSSSSSS
+SSSSSSSSSSSSQQQQQQQQQAooooooAQQQQQQQQQSSSSSSSSSSSS
+SSSSSSSSSSSSSSSSSSSSSSooooooSSSSSSSSSSSSSSSSSSSSSS
+SSSSSSSSSSSSSSSSSSSSSSooooooSSSSSSSSSSSSSSSSSSSSSS
+```
+Altezze (la cima di ogni colonna, da 0 a z: 36 gradini dell'altezza della griglia):
+```
+00000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000
+00000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0000000
+000000hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh000000
+00000ehffffffffffffffffffffffffffffffffffffhe00000
+00000ehffffffffffffffffffffffffffffffffffffhe00000
+00000ehffffffffffffffffffffffffffffffffffffhe00000
+00000ehffffffffffffffffffffffffffffffffffffhe00000
+00000ehffffffffffffffffffffffffffffffffffffhe00000
+00000ehffffffffffffffffffffffffffffffffffffhe00000
+00000ehffffffffffffffffffffffffffffffffffffhe00000
+00000ehfffffffwwwwwwwwwwwwwwwwwwwwwwfffffffhe00000
+00000ehfffffffwwuuuuuuuuuuuuuuuuuuwwfffffffhe00000
+00000ehh000000wuuuuuuuuuuuuuuuuuuuuw000000hhe00000
+00000ehh000000wuuuuuuuuuuuuuuuuuuuuw000000hhe00000
+00000ehh000000wuuuwwwwwwwwwwwwwwuuuw000000hhe00000
+00000ehh000000wuuuwwwwwwwwwwwwwwuuuw000000hhe00000
+00000ehh000000wuuuwwxxxxxxxxxxwwuuuw000000hhe00000
+00000ehh000000wuuuwwxxxxxxxxxxwwuuuw000000hhe00000
+00000ehh000000wuuuwwxxzzzzzzxxwwuuuw000000hhe00000
+00000ehh000000wuuuwwxxzzzzzzxxwwuuuw000000hhe00000
+00000ehh000000wuuuwwxxzzzzzzxxwwuuuw000000hhe00000
+00000ehh000000wuuuwwxxzzzzzzxxwwuuuw000000hhe00000
+00000ehh000000wuuuwwwwxxxxxxwwwwuuuw000000hhe00000
+00000ehh000000wuuuwwwwxxxxxxwwwwuuuw000000hhe00000
+00000ehfffffffwuuuuuuuwwwwwwuuuuuuuwfffffffhe00000
+00000ehfffffffwuuuuuuuwwwwwwuuuuuuuwfffffffhe00000
+00000ehfffffffwwuuuuuuuuuuuuuuuuuuwwfffffffhe00000
+00000ehfffffffwwwwwwwwuuuuuuwwwwwwwwfffffffhe00000
+00000ehfffffffffffffhhffffffhhfffffffffffffhe00000
+00000ehfffffffffffffhhffffffhhfffffffffffffhe00000
+00000ehffffffffffffffffffffffffffffffffffffhe00000
+00000ehffffffffffffffffffffffffffffffffffffhe00000
+00000ehffffffffffffffffffffffffffffffffffffhe00000
+00000ehffffffffffffffffffffffffffffffffffffhe00000
+00000ehffffffffffffffffffffffffffffffffffffhe00000
+00000ehffffffffffffffffffffffffffffffffffffhe00000
+00000ehffffffffffffffffffffffffffffffffffffh000000
+000000hhhhhhffffffffffhhhhhhffffffffffhhhhhh000000
+00000000ee00geca875310000000013578aceg0eee00000000
+000000000000geca875310000000013578aceg000000000000
+000000000000geca875310000000013578aceg000000000000
+000000000000geca875310000000013578aceg000000000000
+000000000000geca875310000000013578aceg000000000000
+000000000000geca875310000000013578aceg000000000000
+00000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000
+```
+Fronte (guardando dal davanti; in alto il cielo):
+```
+......................ZZZZZZ......................
+......................ZZZZZZ......................
+....................ZZZZZZZZZZ....................
+....................ZZZZZZZZZZ....................
+..............ccMMMMMMZZZZZZMMMMMMcc..............
+..............MMMMMMMMZZZZZZMMMMMMMM..............
+..............KKKKKKKKCCCCCCKKKKKKKK..............
+..............KKKKKKKKKKKKKKKKKKKKKK..............
+..............IIIIIIIIIIIIIIIIIIIIII..............
+..............IIIIIIIIIIIIIIIIIIIIII..............
+..............IIIIIIIIIIIIIIIIIIIIII..............
+..............IIIIIIIIIIIIIIIIIIIIII..............
+..............IIIIIIIIIIIIIIIIIIIIII..............
+..............IIIIIIIIIIIIIIIIIIIIII..............
+..............IILLIIIILLLLLLIIIILLII..............
+..............IILLIIIILLLLLLIIIILLII..............
+..............IILLIIIILLLLLLIIIILLII..............
+..............IILLIIIILLLLLLIIIILLII..............
+..............IIIIIIIIIIIIIIIIIIIIII..............
+..............IIIIIIIIIIIIIIIIIIIIII..............
+......MMMMMMMMIIIIIIccMMMMMMccIIIIIIMMMMMMMM......
+......MMMMMMMMIIIIIIIcMMMMMMIcIIIIIIMMMMMMMM......
+......OOOOOOQVVVVVVVVVOOOOOOVVVVVVVVVQOOOOOO......
+......OOOOOOQVVVVVVVVVOOOOOOVVVVVVVVVQOOOOOO......
+.....XWWXXWWQQWWWWWWWWIIIIIIWWWWWWWWWQWWXXWWX.....
+.....XWWXXWWQQWWWWWWWWIIIIIIWWWWWWWWQQWWXXWWX.....
+.....XWWXXWWQQQWWWWWWWQIIIIIWWWWWWWWQQWWXXWWX.....
+.....XWWXXWWQQQWWWWWWWQIIIIIWWWWWWWQQQWWXXWWX.....
+.....XWWXXWWQQQQWWWWWWQQIIIIWWWWWWWQQQWWXXWWX.....
+.....XWWXXWWQQQQWWWWWWQQIIIIWWWWWWQQQQWWXXWWX.....
+.....XWWXXWWQQQQQWWWWWQQQIIIWWWWWWQQQQWWXXWWX.....
+.....XWWXXWWQQQQQWWWWWQQQIIIWWWWWQQQQQWWXXWWX.....
+.....XWWXXWWQQQQQQWWWWQQQQIIWWWWWQQQQQWWXXWWX.....
+.....XWWXXWWQQQQQQWWWWQQQQIIWWWWQQQQQQWWXXWWX.....
+.....XWWXXWWQQQQQQQWWWQQQQQIWWWWQQQQQQWWXXWWX.....
+.....XWWXXWWQQQQQQQWWWQQQQQIWWWQQQQQQQWWXXWWX.....
+.....XWWXXWWQQQQQQQQWWQQQQQQWWWQQQQQQQWWXXWWX.....
+.....XWWXXWWQQQQQQQQWWQQQQQQWWQQQQQQQQWWXXWWX.....
+.....XWWXXWWQQQQQQQQQWQQQQQQWWQQQQQQQQWWXXWWX.....
+SSSSSSSSSSSSSSSSSSSSSSooooooSSSSSSSSSSSSSSSSSSSSSS
+```
+Lato destro (guardando da destra):
+```
+......................ZZZZ........................
+......................ZZZZ........................
+....................ZZZZZZZZ......................
+....................ZZZZZZZZ......................
+..............ccMMMMMMMMMMMMMMcc..................
+..............MMMMMMMMMMMMMMMMMM..................
+..............KKKKKKKKKKKKKKKKKK..................
+..............KKKKKKKKKKKKKKKKKK..................
+..............IIIIIIIIIIIIIIIIII..................
+..............IIIIIIIIIIIIIIIIII..................
+..............IIIIIIIIIIIIIIIIII..................
+..............IIIIIIIIIIIIIIIIII..................
+..............IIIIIIIIIIIIIIIIII..................
+..............IIIIIIIIIIIIIIIIII..................
+..............IILLLLLLLLLLLLLLII..................
+..............IILLLLLLLLLLLLLLII..................
+..............IILLLLLLLLLLLLLLII..................
+..............IILLLLLLLLLLLLLLII..................
+..............IIIIIIIIIIIIIIIIII..................
+..............IIIIIIIIIIIIIIIIII..................
+......MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM........
+......MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM........
+......OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOQQQQQQ..
+......OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOQQQQQQ..
+.....XWWXXXXXXXXXXXXWXXXWXXXXXXXWXXXXXXXWWXQQQQQ..
+.....XWWXXXXXXXXXXXXWXXXWXXXXXXXWXXXXXXXWWXQQQQQ..
+.....XWWXXXXXXXXXXXXWXXXWXXXXXXXWXXXXXXXWWXQQQQQ..
+.....XWWXXXXXXXXXXXXWXXXWXXXXXXXWXXXXXXXWWXQQQQQ..
+.....XWWXXXXXXXXXXXXWXXXWXXXXXXXWXXXXXXXWWXQQQQQ..
+.....XWWXXXXXXXXXXXXWXXXWXXXXXXXWXXXXXXXWWXQQQQQ..
+.....XWWXXXXXXXXXXXXLXXXLXXXXXXXLXXXXXXXWWXQQQQQ..
+.....XWWXXXXXXXXXXXXLXXXLXXXXXXXLXXXXXXXWWXQQQQQ..
+.....XWWXXXXXXXXXXXXLXXXLXXXXXXXLXXXXXXXWWXQQQQQ..
+.....XWWXXXXXXXXXXXXLXXXLXXXXXXXLXXXXXXXWWXQQQQQ..
+.....XWWXXXXXXXXXXXXWXXXWXXXXXXXWXXXXXXXWWXQQQQQ..
+.....XWWXXXXXXXXXXXXWXXXWXXXXXXXWXXXXXXXWWXQQQQQ..
+.....XWWXXXXXXXXXXXXWXXXWXXXXXXXWXXXXXXXWWXQQQQQ..
+.....XWWXXXXXXXXXXXXWXXXWXXXXXXXWXXXXXXXWWXQQQQQ..
+.....XWWXXXXXXXXXXXXWXXXWXXXXXXXWXXXXXXXWWXQQQQQ..
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+```
+Sezione a z=11 (le lettere a quell'altezza: porte, stanze, scale):
+```
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+........XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.......
+......WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW......
+.....XWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWX.....
+.....XWW................PP................WWX.....
+.....XWW................PP................WWX.....
+.....XWW..............TTPPTT..............WWX.....
+.....XWW..............TTPPTT..............WWX.....
+.....XWW................PP................WWX.....
+.....XWW................PP................WWX.....
+.....XWW......IIIIIIIIIIIIIIIIIIIIII......WWX.....
+.....XWW......IIIIIIIIIIIIIIIIIIIIII......WWX.....
+.....XWW......II....QQQQQQQ.......II......WWX.....
+.....XWW......II....QQQQQQQ.......II......WWX.....
+.....XWW......II....QQQQQQQ.......II......WWX.....
+.....XWW......II....QQQQQQQ.......II......WWX.....
+.....XWW......II....QQQQQQQ.......II......WWX.....
+.....XWW......II....QQQQQQQ.......II......WWX.....
+.....XWW......II..................II......WWX.....
+.....XWW......II..................II......WWX.....
+.....XWW......II..................II......WWX.....
+.....XWW......II..................II......WWX.....
+.....XWW......II..................II......WWX.....
+.....XWW......II..................II......WWX.....
+.....XWW......II..................II......WWX.....
+.....XWW......II..................II......WWX.....
+.....XWW......IIIIIIII......IIIIIIII......WWX.....
+.....XWW......IIIIIIII......IIIIIIII......WWX.....
+.....XWW..................................WWX.....
+.....XWW..................................WWX.....
+.....XWW..................................WWX.....
+.....XWW..................................WWX.....
+.....XWW..................................WWX.....
+.....XWW..................................WWX.....
+.....XWW......PP..................PP......WWX.....
+.....XWW......PP..................PP......WWX.....
+.....XWWWWWWWWWWWWWWWW......WWWWWWWWWWWWWWWW......
+......WWWWWWWWWWWWWWWW......WWWWWWWWWWWWWWWW......
+........XX..QQQQQQQ............QQQQQQQ.XXX........
+............QQQQQQQ............QQQQQQQ............
+............QQQQQQQ............QQQQQQQ............
+............QQQQQQQ............QQQQQQQ............
+............QQQQQQQ............QQQQQQQ............
+............QQQQQQQ............QQQQQQQ............
+..................................................
+..................................................
+```
+Sezione a z=43 (le lettere a quell'altezza: porte, stanze, scale):
+```
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..............IIIIIIIIIIIIIIIIIIIIII..............
+..............IIIIIIIIIIIIIIIIIIIIII..............
+..............II..................II..............
+..............II..................II..............
+..............II..................II..............
+..............II..................II..............
+..............II..................II..............
+..............II..................II..............
+..............II..................II..............
+..............II..................II..............
+..............II..................II..............
+..............II..................II..............
+..............II..................II..............
+..............II..................II..............
+..............II..................II..............
+..............II..................II..............
+..............IIIIIIII......IIIIIIII..............
+..............IIIIIIII......IIIIIIII..............
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+```
+Sezione a z=75 (le lettere a quell'altezza: porte, stanze, scale):
+```
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+....................ZZZZZZZZZZ....................
+....................ZZZZZZZZZZ....................
+....................ZZZZZZZZZZ....................
+....................ZZZZZZZZZZ....................
+....................ZZZZZZZZZZ....................
+....................ZZZZZZZZZZ....................
+......................ZZZZZZ......................
+......................ZZZZZZ......................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+```
+
+### Seme 2: pianta e altezze
+```
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS   00000000000000000000000000000000000000000000000000
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS   00000000000000000000000000000000000000000000000000
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS   00000000000000000000000000000000000000000000000000
+SSSSSSSSXSXXXXXXSXXXXXXXSXXXXXXXXSXXXXSXXXXSSSSSSS   00000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0000000
+SSSSSSMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMSSSSSS   000000hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh000000
+SSSSSSMOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOSSSSSS   00000ehffffffffffffffffffffffffffffffffffffh000000
+SSSSSXMOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFOOXSSSSS   00000ehffffffffffffffffffffffffffffffffffffhe00000
+SSSSSXMOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFOOSSSSSS   00000ehffffffffffffffffffffffffffffffffffffhe00000
+SSSSSXMOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFOOXSSSSS   00000ehffffffffffffffffffffffffffffffffffffhe00000
+SSSSSXMOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFOOXSSSSS   00000ehffffffffffffffffffffffffffffffffffffhe00000
+SSSSSXMOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFOOXSSSSS   00000ehffffffffffffffffffffffffffffffffffffhe00000
+SSSSSXMOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFOOXSSSSS   00000ehffffffffffffffffffffffffffffffffffffhe00000
+SSSSSXMOFFFFFFccMMMMMMMMMMMMMMMMMMccFFFFFFOOSSSSSS   00000ehfffffffwwwwwwwwwwwwwwwwwwwwwwfffffffhe00000
+SSSSSXMOFFFFFFccKKKKKKKKKKKKKKKKKKccFFFFFFOOXSSSSS   00000ehfffffffwwuuuuuuuuuuuuuuuuuuwwfffffffhe00000
+SSSSSXMOFFFFFFMKCCCCCCCCCCCCCCCCCCKKFFFFFFOOXSSSSS   00000ehfffffffwuuuuuuuuuuuuuuuuuuuuwfffffffhe00000
+SSSSSXMOFFFFFFMKCCCCCCCCCCCCCCCCCCKKFFFFFFOOXSSSSS   00000ehfffffffwuuuuuuuuuuuuuuuuuuuuwfffffffhe00000
+SSSSSXMOFFFFFFMKCCZZZZZZZZZZZZZZCCKKFFFFFFOOXSSSSS   00000ehfffffffwuuuwwwwwwwwwwwwwwuuuwfffffffhe00000
+SSSSSXMOFFFFFFMKCCZZZZZZZZZZZZZZCCKKFFFFFFOOXSSSSS   00000ehfffffffwuuuwwwwwwwwwwwwwwuuuwfffffffhe00000
+SSSSSXMOAAAAAAMKCCZZZZZZZZZZZZZZCCKKAAAAAAMOXSSSSS   00000ehh000000wuuuwwxxxxxxxxxxwwuuuw000000hhe00000
+SSSSSXMOAAAAAAMKCCZZZZZZZZZZZZZZCCKKAAAAAAMOXSSSSS   00000ehh000000wuuuwwxxxxxxxxxxwwuuuw000000hhe00000
+SSSSSXMOAAAAAAMKCCZZZZZZZZZZZZZZCCKKAAAAAAMOXSSSSS   00000ehh000000wuuuwwxxzzzzzzxxwwuuuw000000hhe00000
+SSSSSXMOAAAAAAMKCCZZZZZZZZZZZZZZCCKKAAAAAAMOXSSSSS   00000ehh000000wuuuwwxxzzzzzzxxwwuuuw000000hhe00000
+SSSSSXMOAAAAAAMKCCZZZZZZZZZZZZZZCCKKAAAAAAMOXSSSSS   00000ehh000000wuuuwwxxzzzzzzxxwwuuuw000000hhe00000
+SSSSSXMOAAAAAAMKCCZZZZZZZZZZZZZZCCKKAAAAAAMOXSSSSS   00000ehh000000wuuuwwxxzzzzzzxxwwuuuw000000hhe00000
+SSSSSXMOAAAAAAMKCCZZZZZZZZZZZZZZCCKKAAAAAAMOXSSSSS   00000ehh000000wuuuwwxxzzzzzzxxwwuuuw000000hhe00000
+SSSSSXMOAAAAAAMKCCZZZZZZZZZZZZZZCCKKAAAAAAMOSSSSSS   00000ehh000000wuuuwwxxzzzzzzxxwwuuuw000000hhe00000
+SSSSSXMOAAAAAAMKCCZZZZZZZZZZZZZZCCKKAAAAAAMOXSSSSS   00000ehh000000wuuuwwwwxxxxxxwwwwuuuw000000hhe00000
+SSSSSXMOAAAAAAMKCCZZZZZZZZZZZZZZCCKKAAAAAAMOXSSSSS   00000ehh000000wuuuwwwwxxxxxxwwwwuuuw000000hhe00000
+SSSSSXMOAAAAAAMKCCCCCCZZZZZZCCCCCCKKAAAAAAMOXSSSSS   00000ehh000000wuuuuuuuwwwwwwuuuuuuuw000000hhe00000
+SSSSSXMOAAAAAAMKCCCCCCZZZZZZCCCCCCKKAAAAAAMOXSSSSS   00000ehh000000wuuuuuuuwwwwwwuuuuuuuw000000hhe00000
+SSSSSSMOFFFFFFccKKKKKKCCCCCCKKKKKKccFFFFFFOOXSSSSS   00000ehfffffffwwuuuuuuuuuuuuuuuuuuwwfffffffhe00000
+SSSSSXMOFFFFFFccKKKKKKCCCCCCKKKKKKccFFFFFFOOXSSSSS   00000ehfffffffwwwwwwwwuuuuuuwwwwwwwwfffffffhe00000
+SSSSSXMOFFFFFFFFFFFFccFFFFFFccFFFFFFFFFFFFOOXSSSSS   00000ehfffffffffffffhhffffffhhfffffffffffffhe00000
+SSSSSXMOFFFFFFFFFFFFccFFFFFFccFFFFFFFFFFFFOOXSSSSS   00000ehfffffffffffffhhffffffhhfffffffffffffhe00000
+SSSSSXMOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFOOXSSSSS   00000ehffffffffffffffffffffffffffffffffffffhe00000
+SSSSSXMOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFOOXSSSSS   00000ehffffffffffffffffffffffffffffffffffffhe00000
+SSSSSXMOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFOOSSSSSS   00000ehffffffffffffffffffffffffffffffffffffhe00000
+SSSSSSMOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFOOXSSSSS   00000ehffffffffffffffffffffffffffffffffffffhe00000
+SSSSSXMOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFOOXSSSSS   00000ehffffffffffffffffffffffffffffffffffffhe00000
+SSSSSXMOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFOOXSSSSS   00000ehffffffffffffffffffffffffffffffffffffhe00000
+SSSSSXMOOOOOVVVVVVVVVVOOOOOOVVVVVVVVVVOOOOOOXSSSSS   00000ehffffffffffffffffffffffffffffffffffffhe00000
+SSSSSSMOOOOOVVVVVVVVVVOOOOOOVVVVVVVVVVOOOOOMSSSSSS   000000hhhhhhffffffffffhhhhhhffffffffffhhhhhh000000
+SSSSSSSSXXXSQQQQQQQQQAooooooAQQQQQQQQQSSXXSSSSSSSS   0000000eeee0geca875310000000013578aceg0eee00000000
+SSSSSSSSSSSSQQQQQQQQQAooooooAQQQQQQQQQSSSSSSSSSSSS   000000000000geca875310000000013578aceg000000000000
+SSSSSSSSSSSSQQQQQQQQQAooooooAQQQQQQQQQSSSSSSSSSSSS   000000000000geca875310000000013578aceg000000000000
+SSSSSSSSSSSSQQQQQQQQQAooooooAQQQQQQQQQSSSSSSSSSSSS   000000000000geca875310000000013578aceg000000000000
+SSSSSSSSSSSSQQQQQQQQQAooooooAQQQQQQQQQSSSSSSSSSSSS   000000000000geca875310000000013578aceg000000000000
+SSSSSSSSSSSSQQQQQQQQQAooooooAQQQQQQQQQSSSSSSSSSSSS   000000000000geca875310000000013578aceg000000000000
+SSSSSSSSSSSSSSSSSSSSSSooooooSSSSSSSSSSSSSSSSSSSSSS   00000000000000000000000000000000000000000000000000
+SSSSSSSSSSSSSSSSSSSSSSooooooSSSSSSSSSSSSSSSSSSSSSS   00000000000000000000000000000000000000000000000000
+```
+
+### Seme 3: pianta e altezze
+```
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS   00000000000000000000000000000000000000000000000000
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS   00000000000000000000000000000000000000000000000000
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS   00000000000000000000000000000000000000000000000000
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS   00000000000000000000000000000000000000000000000000
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS   00000000000000000000000000000000000000000000000000
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS   00000000000000000000000000000000000000000000000000
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS   00000000000000000000000000000000000000000000000000
+SSSSSSSSSSXSXXXXXSXXXXXXXXSXXXXXXXXXSXXSXSSSSSSSSS   0000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeee000000000
+SSSSSSSSMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMSSSSSSSS   00000000hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh00000000
+SSSSSSSSMOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOSSSSSSSS   00000000hffffffffffffffffffffffffffffffffhe0000000
+SSSSSSSXMOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFOOXSSSSSSS   0000000ehffffffffffffffffffffffffffffffffhe0000000
+SSSSSSSSMOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFOOXSSSSSSS   0000000ehffffffffffffffffffffffffffffffffhe0000000
+SSSSSSSXMOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFOOXSSSSSSS   0000000ehffffffffffffffffffffffffffffffffhe0000000
+SSSSSSSXMOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFOOXSSSSSSS   0000000ehffffffffffffffffffffffffffffffffhe0000000
+SSSSSSSXMOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFOOXSSSSSSS   0000000ehffffffffffffffffffffffffffffffffhe0000000
+SSSSSSSXMOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFOOXSSSSSSS   0000000ehffffffffffffffffffffffffffffffffhe0000000
+SSSSSSSXMOFFFFFFccMMMMMMMMMMMMMMccFFFFFFOOXSSSSSSS   0000000ehfffffffwwwwwwwwwwwwwwwwwwfffffffhe0000000
+SSSSSSSXMOFFFFFFccKKKKKKKKKKKKKKccFFFFFFOOXSSSSSSS   0000000ehfffffffwwuuuuuuuuuuuuuuwwfffffffhe0000000
+SSSSSSSXMOAAAAAAMKCCCCCCCCCCCCCCKKAAAAAAMOXSSSSSSS   0000000ehh000000wuuuuuuuuuuuuuuuuw000000hhe0000000
+SSSSSSSSMOAAAAAAMKCCCCCCCCCCCCCCKKAAAAAAMOSSSSSSSS   0000000ehh000000wuuuuuuuuuuuuuuuuw000000hhe0000000
+SSSSSSSXMOAAAAAAMKCCZZZZZZZZZZCCKKAAAAAAMOXSSSSSSS   0000000ehh000000wuuuwwwwwwwwwwuuuw000000hhe0000000
+SSSSSSSXMOAAAAAAMKCCZZZZZZZZZZCCKKAAAAAAMOXSSSSSSS   0000000ehh000000wuuuwwwwwwwwwwuuuw000000hhe0000000
+SSSSSSSXMOAAAAAAMKCCZZZZZZZZZZCCKKAAAAAAMOXSSSSSSS   0000000ehh000000wuuuwwxxxxxxwwuuuw000000hhe0000000
+SSSSSSSSMOAAAAAAMKCCZZZZZZZZZZCCKKAAAAAAMOSSSSSSSS   0000000ehh000000wuuuwwxxxxxxwwuuuw000000hhe0000000
+SSSSSSSXMOAAAAAAMKCCZZZZZZZZZZCCKKAAAAAAMOXSSSSSSS   0000000ehh000000wuuuwwxxzzxxwwuuuw000000hhe0000000
+SSSSSSSXMOAAAAAAMKCCZZZZZZZZZZCCKKAAAAAAMOXSSSSSSS   0000000ehh000000wuuuwwxxzzxxwwuuuw000000hhe0000000
+SSSSSSSXMOAAAAAAMKCCZZZZZZZZZZCCKKAAAAAAMOXSSSSSSS   0000000ehh000000wuuuwwxxxxxxwwuuuw000000hhe0000000
+SSSSSSSXMOAAAAAAMKCCZZZZZZZZZZCCKKAAAAAAMOXSSSSSSS   0000000ehh000000wuuuwwxxxxxxwwuuuw000000hhe0000000
+SSSSSSSXMOAAAAAAMKCCCCZZZZZZCCCCKKAAAAAAMOXSSSSSSS   0000000ehh000000wuuuuuwwwwwwuuuuuw000000hhe0000000
+SSSSSSSSMOAAAAAAMKCCCCZZZZZZCCCCKKAAAAAAMOXSSSSSSS   0000000ehh000000wuuuuuwwwwwwuuuuuw000000hhe0000000
+SSSSSSSXMOFFFFFFccKKKKCCCCCCKKKKccFFFFFFOOSSSSSSSS   0000000ehfffffffwwuuuuuuuuuuuuuuwwfffffffhe0000000
+SSSSSSSXMOFFFFFFccKKKKCCCCCCKKKKccFFFFFFOOXSSSSSSS   0000000ehfffffffwwwwwwuuuuuuwwwwwwfffffffhe0000000
+SSSSSSSXMOFFFFFFFFFFccFFFFFFccFFFFFFFFFFOOXSSSSSSS   0000000ehfffffffffffhhffffffhhfffffffffffhe0000000
+SSSSSSSSMOFFFFFFFFFFccFFFFFFccFFFFFFFFFFOOXSSSSSSS   0000000ehfffffffffffhhffffffhhfffffffffffhe0000000
+SSSSSSSXMOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFOOXSSSSSSS   0000000ehffffffffffffffffffffffffffffffffhe0000000
+SSSSSSSXMOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFOOSSSSSSSS   0000000ehffffffffffffffffffffffffffffffffhe0000000
+SSSSSSSXMOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFOOXSSSSSSS   0000000ehffffffffffffffffffffffffffffffffhe0000000
+SSSSSSSXMOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFOOXSSSSSSS   0000000ehffffffffffffffffffffffffffffffffhe0000000
+SSSSSSSXMOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFOOSSSSSSSS   0000000ehffffffffffffffffffffffffffffffffhe0000000
+SSSSSSSXMOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFOOXSSSSSSS   0000000ehffffffffffffffffffffffffffffffffhe0000000
+SSSSSSSSMOOOVVVVVVVVVVOOOOOOVVVVVVVVVVOOOOXSSSSSSS   00000000hffffffffffffffffffffffffffffffffhe0000000
+SSSSSSSSMOOOVVVVVVVVVVOOOOOOVVVVVVVVVVOOOMSSSSSSSS   00000000hhhhffffffffffhhhhhhffffffffffhhhh00000000
+SSSSSSSSSSXSQQQQQQQQQAooooooAQQQQQQQQQSSXSSSSSSSSS   000000000ee0geca875310000000013578aceg0ee000000000
+SSSSSSSSSSSSQQQQQQQQQAooooooAQQQQQQQQQSSSSSSSSSSSS   000000000000geca875310000000013578aceg000000000000
+SSSSSSSSSSSSQQQQQQQQQAooooooAQQQQQQQQQSSSSSSSSSSSS   000000000000geca875310000000013578aceg000000000000
+SSSSSSSSSSSSQQQQQQQQQAooooooAQQQQQQQQQSSSSSSSSSSSS   000000000000geca875310000000013578aceg000000000000
+SSSSSSSSSSSSQQQQQQQQQAooooooAQQQQQQQQQSSSSSSSSSSSS   000000000000geca875310000000013578aceg000000000000
+SSSSSSSSSSSSQQQQQQQQQAooooooAQQQQQQQQQSSSSSSSSSSSS   000000000000geca875310000000013578aceg000000000000
+SSSSSSSSSSSSSSSSSSSSSSooooooSSSSSSSSSSSSSSSSSSSSSS   00000000000000000000000000000000000000000000000000
+SSSSSSSSSSSSSSSSSSSSSSooooooSSSSSSSSSSSSSSSSSSSSSS   00000000000000000000000000000000000000000000000000
+```
+
+## La forma (media dei semi)
+copertura della pianta 0,55, cortili chiusi 0,10, picchi 1,00, altezza massima 1,00 della griglia, pieno 0,47 (1 è un blocco pieno)
+quanto differiscono i semi: 0,14 (0 uguali, 1 niente in comune; un edificio che varia sta fra 0,25 e 0,6)
+
+## La traccia (seme 1)
+Traccia, seme 1: griglia 100×100×80, 92 nodi, 268 passi, finito in 114 ms.
+x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
+Lettere: N=centro, E=terreno sabbioso, z=lotto, a=cammino, x=impronta, v=asse, W=pietra chiara del primo gradone, w=muro dietro la scalinata, G=porta del tempio, o=strada lastricata, q=primo gradino della scalinata, p=scalinata, y=sala delle offerte, I=pietra del secondo gradone, D=porta della sala, P=tramezzo, h=pavimento del vestibolo, b=vestibolo sotto i bracieri, l=pavimento delle celle laterali, d=porta di cella, J=cella sotto il lucernario, g=pavimento davanti alla porta della sala, i=piede della scala interna, j=scala interna, k=piedistallo, R=aria delle stanze, F=terrazza e solaio, O=cornice del primo gradone, V=sbarco della scalinata, n=lucernario, u=vano della scala, C=tetto della cella alta, K=cornice del secondo gradone, Z=piramide d'oro, L=finestra, H=braciere, T=statua dorata, m=testa della statua, A=pavimento di pietra, s=inizio della scala, e=corsa della scala, M=parapetto, X=colonne, U=gradino, Y=direzione del gradino, Q=gradini, c=bronzo del braciere.
+Alla fine: I 30592, W 27776, Q 11664, X 11408, L 9728, F 9024, A 4240, Z 3968, S 3856, O 2880, P 2560, K 2112, C 2112, M 1720, V 480, T 424, o 192, t 128, c 128, f 48.
+  #3 map scala 1/4 1/4 1/4: ×1, 625 celle x0-24 y0-24 z0-19, passi 1
+  #4 prl ***/*E*/*** → ***/*z*/***: ×1, 528 celle x1-23 y1-23 z0, passi 2, E→z 528
+#5-10 prl×4, all×2: 200 celle x1-23 y1-23 z0, passi 3-15
+  #11 all [Nx]z/*[Nx] → *x/**: ×17, 306 celle x3-21 y3-20 z0, passi 16-32, z→x 306
+#12-22 prl×3, all×8: 196 celle x2-22 y2-24 z0, passi 33-50
+  #23 prl x → y: ×1, 271 celle x4-20 y4-19 z0, passi 51, x→y 271
+#24-41 prl×6, all×12: 272 celle x4-20 y4-19 z0, passi 52-81
+#42-50 prl×1, all×5, one×3: 196 celle x4-20 y4-19 z0, passi 82-91
+  #51 all . W → W * passi=7: ×7, 399 celle x3-21 y3-20 z1-7, passi 92-98, .→W 399
+#52-56 all×5: 177 celle x3-21 y3-20 z1-8, passi 99-115
+  #57 all . I → I * passi=15: ×15, 495 celle x7-17 y7-15 z1-15, passi 116-130, .→I 495
+#58-61 all×4: 273 celle x7-17 y7-15 z1-16, passi 131-147
+  #62 all . [GDdhblJgy] → R * passi=1: ×1, 220 celle x4-20 y4-20 z1, passi 148, .→R 220
+  #63 all . R → R * passi=6: ×6, 1320 celle x4-20 y4-20 z2-7, passi 149-154, .→R 1320
+#64-70 all×7: 53 celle x4-20 y5-20 z1-8, passi 155-163
+#71-72 all×2: 234 celle x4-20 y4-19 z8-9, passi 164-165
+  #73 all . R → R * passi=6: ×6, 306 celle x8-16 y8-15 z10-15, passi 166-171, .→R 306
+#74-81 all×6, prl×2: 271 celle x3-21 y3-20 z3-19, passi 172-180
+   #83 map scala 4 4 4: ×1, 100240 celle x0-99 y0-99 z0-79, passi 181
+   #84 all ... sse → UY* *** passi=1: ×1, 72 celle x40-59 y32-95 z1, passi 182, .→Y 36, .→U 36
+   #85 all *.. *.* UY* → *UY *Q* QQ* passi=17: ×17, 3060 celle x23-76 y32-95 z1-35, passi 183-199, Y→Q 612, U→Q 612, .→Q 612, .→Y 612, +1
+   #86 all Q . → * Q: ×32, 9792 celle x24-75 y32-95 z1-32, passi 200-231, .→Q 9792
+   #87 all ......../......../WWWWWWWW SSSSSSSS/SSSSSSSS/WW… → ***XX***/***XX***/******** ********/********/**…: ×1, 368 celle x10-89 y10-85 z1, passi 232, .→X 368
+   #88 all ..[WL] XX[WL] → XX* ***: ×30, 11040 celle x10-89 y10-85 z2-31, passi 233-262, .→X 11040
+   #89 all .* [OK]. → M* **: ×1, 444 celle x12-87 y12-83 z35-68, passi 263, .→M 444
+   #90 all . M → M * passi=3: ×3, 1276 celle x12-87 y12-83 z36-71, passi 264-266, .→M 1276
+   #91 all c . [FO] → * c *: ×1, 8 celle x41-58 y65-66 z35, passi 267, .→c 8
+   #92 prl s → A (+3): ×1, 792 celle x23-76 y32-95 z0-35, passi 268, e→A 576, s→A 144, U→Q 36, Y→. 36
+     r1 s → A ×144; r2 e → A ×576; r3 U → Q ×36; r4 Y → . ×36
+
+## Le misure del gioco (5 semi, large e huge)
+- large (20 voxel per casella, gradino 4), seme 1 e altri 4: piani: 1 (serve ≥ 2)
+- large (20 voxel per casella, gradino 4), seme 1 e altri 4: stanze: 0 (serve ≥ 3)
+- large (20 voxel per casella, gradino 4), seme 1 e altri 4: finestre: 1 su 1 lati (serve ≥ 6 su ≥ 3 lati)
+- large (20 voxel per casella, gradino 4), seme 2 e altri 3: salti: 0 (serve ≥ 2)
+- large (20 voxel per casella, gradino 4), seme 4 e altri 1: murato: 0.38 (serve ≤ 0.25)
+- huge (16 voxel per casella, gradino 3), seme 1 e altri 4: stanze: 2 (serve ≥ 3)
+- huge (16 voxel per casella, gradino 3), seme 1 e altri 4: finestre: 1 su 1 lati (serve ≥ 6 su ≥ 3 lati)
+- huge (16 voxel per casella, gradino 3), seme 4: piani: 1 (serve ≥ 2)
+- huge (16 voxel per casella, gradino 3), seme 4: murato: 0.32 (serve ≤ 0.25)
+- huge (16 voxel per casella, gradino 3), seme 4: salti: 0 (serve ≥ 2)
+- varianza a large: perimetro: 0 (serve ≥ 0.15)
+- varianza a huge: perimetro: 0 (serve ≥ 0.15)
+
+## Block 3 of 3: the corrections. What came back is the game's verdict at every seed and at both sizes: correct the program so that every seed holds, keeping the concept and the variety. Answer with the whole program.

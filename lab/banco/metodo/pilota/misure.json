@@ -1,0 +1,189 @@
+{
+  "bersaglio": "rocca",
+  "scritto": "a mano (T337), guardandolo solo con il ritorno in testo",
+  "caratteriXml": 8703,
+  "passa": false,
+  "difetti": [
+    "huge (16 voxel per casella, gradino 3), seme 1 e altri 4: stanze: 0 (serve ≥ 3)",
+    "huge (16 voxel per casella, gradino 3), seme 2 e altri 3: piani: 0 (serve ≥ 2)",
+    "huge (16 voxel per casella, gradino 3), seme 2: testa: — (serve ≥ 1.5 caselle per piano)",
+    "huge (16 voxel per casella, gradino 3), seme 2: murato: 11.75 (serve ≤ 0.25)",
+    "huge (16 voxel per casella, gradino 3), seme 2: porta: nessuna sul davanti (serve sul davanti, scarto ≤ 0.33, alta ≥ 1.5)",
+    "huge (16 voxel per casella, gradino 3), seme 2: salti: 0 (serve ≥ 2)",
+    "gargantuan (12 voxel per casella, gradino 2), seme 2 e altri 3: piani: 1 (serve ≥ 2)",
+    "gargantuan (12 voxel per casella, gradino 2), seme 2 e altri 3: stanze: 1 (serve ≥ 3)",
+    "gargantuan (12 voxel per casella, gradino 2), seme 2 e altri 2: murato: 0.54 (serve ≤ 0.25)",
+    "gargantuan (12 voxel per casella, gradino 2), seme 2: porta: nessuna sul davanti (serve sul davanti, scarto ≤ 0.33, alta ≥ 1.5)"
+  ],
+  "voci": [
+    {
+      "id": "finisce",
+      "ok": true,
+      "valore": "302 ms",
+      "richiesto": "entro 8000 ms"
+    },
+    {
+      "id": "valido",
+      "ok": true,
+      "valore": "sì",
+      "richiesto": "i controlli di check.ts"
+    },
+    {
+      "id": "piani",
+      "ok": true,
+      "valore": "2",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "testa",
+      "ok": true,
+      "valore": "1.94 2.06",
+      "richiesto": "≥ 1.5 caselle per piano"
+    },
+    {
+      "id": "stanze",
+      "ok": false,
+      "valore": "0",
+      "richiesto": "≥ 3"
+    },
+    {
+      "id": "murato",
+      "ok": true,
+      "valore": "0",
+      "richiesto": "≤ 0.25"
+    },
+    {
+      "id": "porta",
+      "ok": true,
+      "valore": "x 60, scarto 0, alta 1.94, libera",
+      "richiesto": "sul davanti, scarto ≤ 0.33, alta ≥ 1.5"
+    },
+    {
+      "id": "salti",
+      "ok": true,
+      "valore": "3",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "materiali",
+      "ok": true,
+      "valore": "13",
+      "richiesto": "≥ 6"
+    },
+    {
+      "id": "dominante",
+      "ok": true,
+      "valore": "0.35",
+      "richiesto": "≤ 0.6"
+    },
+    {
+      "id": "finestre",
+      "ok": true,
+      "valore": "41 su 4 lati",
+      "richiesto": "≥ 6 su ≥ 3 lati"
+    },
+    {
+      "id": "dettagli",
+      "ok": true,
+      "valore": "72, 0 lati vuoti",
+      "richiesto": "≥ 24, ≤ 1 lati vuoti"
+    },
+    {
+      "id": "rumore",
+      "ok": true,
+      "valore": "0.05",
+      "richiesto": "≤ 0.7"
+    },
+    {
+      "id": "sagoma",
+      "ok": true,
+      "valore": "6",
+      "richiesto": "≥ 4"
+    },
+    {
+      "id": "rilievo",
+      "ok": true,
+      "valore": "0.66",
+      "richiesto": "≥ 0.12"
+    },
+    {
+      "id": "ingombro",
+      "ok": true,
+      "valore": "0.71",
+      "richiesto": "≥ 0.3"
+    }
+  ],
+  "misure": {
+    "voxel": 216021,
+    "ms": 302,
+    "finito": true,
+    "piani": [
+      {
+        "z": 1,
+        "quota": 0.0625,
+        "area": 3.234375,
+        "testa": 1.9375,
+        "stanze": 0
+      },
+      {
+        "z": 35,
+        "quota": 2.1875,
+        "area": 1.5,
+        "testa": 2.0625,
+        "stanze": 0
+      }
+    ],
+    "cantina": 0,
+    "terrazze": 0,
+    "stanze": 0,
+    "murato": 0,
+    "persi": [],
+    "porta": {
+      "x": 60,
+      "y": 107,
+      "scarto": 0.03125,
+      "alta": 1.9375,
+      "libera": true
+    },
+    "salti": [
+      {
+        "x": 39,
+        "y": 72,
+        "z": 1,
+        "sale": false
+      },
+      {
+        "x": 78,
+        "y": 31,
+        "z": 1,
+        "sale": false
+      },
+      {
+        "x": 56,
+        "y": 75,
+        "z": 1,
+        "sale": false
+      }
+    ],
+    "materiali": 13,
+    "dominante": 0.3528545835821517,
+    "finestre": 41,
+    "latiConFinestre": 4,
+    "dettagli": 72,
+    "latiVuoti": 0,
+    "rumore": 0.05263157894736842,
+    "rilievo": 0.6647058823529411,
+    "sagoma": 6,
+    "ingombro": 0.71,
+    "luci": 0,
+    "inutili": [
+      "prl \"WE/*E\" → \"O*/**\" — le celle cercate c'erano, ma mai disposte come nel pattern"
+    ],
+    "avvisi": [
+      "27 frammenti staccati (2% dei voxel)",
+      "tocca i bordi laterali della griglia: forse è tagliato",
+      "colori mai usati: N E a x W t k v r R C s e d P p i j u n b h H w z D Y U"
+    ],
+    "errori": []
+  }
+}

@@ -1,0 +1,416 @@
+Edificio: Castello del signore
+Stile: castello medievale: pietra chiara, tetti conici d’ardesia, stendardi
+Com'è: Un mastio alto con la sala grande e le stanze del signore, torri rotonde o quadrate con i tetti a cono, una cinta più bassa con il portone, un cortile d’onore, una cappella addossata alle mura, finestre a bifora sul mastio. Più alto e più elegante di un forte, con la sagoma che si vede da lontano.
+Scatola: 120 × 120 × 96 voxel; una casella è 16 voxel.
+Corpo: gradino 3 voxel, passaggio largo almeno 10, persona alta 24; salto: sale al più 16, va da 16 a 41 voxel di distanza.
+Il suolo è in fondo alla scatola.
+
+## Your program so far
+```xml
+<sequence values="BNE" symmetry="(xy)" ground="E" origin="bottom">
+  <!--
+    CASTELLO DEL SIGNORE: pianta grossa, il fronte è y grande.
+    x  cortile d'onore: rettangolo attorno a N, semilati da 7 a 10 caselle (i semi cambiano i lati)
+    W/O cinta bassa spessa 3 (O = faccia esterna); T/t torri 5x5 agli angoli convessi della cinta
+    S/s 0-2 torri in più a metà dei lati liberi della cinta (lato e posto variano col seme), poi T/t
+    v  asse dalla corte al fronte; G  portone 3x3 attraverso la cinta, sull'asse, strada libera fino al bordo
+    H  androne coperto 7x4 dietro il portone, h i suoi muri, D la sua porta verso il cortile
+    K/k mastio 10x8 nell'angolo di fondo più lontano dall'androne (sinistro o destro a seconda del seme),
+        con la faccia di fondo nella cinta; r il suo interno, d la porta sul cortile
+    P/p cappella addossata alla cinta di fondo e laterale, nell'altro angolo, larga fino al mastio; q la sua porta
+    c  davanti di ogni porta (libero, poi torna cortile); J abbeveratoi da saltare nel cortile
+  -->
+  <map scale="1/4 1/4 1/4" values="BNEzaxWOTtvGHhDKkrdPpqcJSs">
+    <rule in="E" out="E"/>
+    <rule in="N" out="N"/>
+
+    <!-- il lotto -->
+    <prl in="***/*E*/***" out="***/*z*/***"/>
+    <prl in="Ez" out="*E" steps="4"/>
+
+    <!-- cortile: rettangolo con lati casuali -->
+    <all in="Nz" out="*a" steps="1"/>
+    <all in="[Nx]az" out="*xa" steps="6"/>
+    <prl steps="3"><rule in="xaz" out="*xa" p="0.5"/></prl>
+    <prl in="a" out="x"/>
+    <all in="[Nx]z/*[Nx]" out="*x/**"/>
+    <prl in="z" out="E"/>
+
+    <!-- cinta spessa 3 -->
+    <all in="[Nx]E" out="*W"/>
+    <all in="WE" out="*W" steps="2"/>
+    <all in="WE/*W" out="*W/**"/>
+    <prl in="WE" out="O*"/>
+
+    <!-- torri d'angolo -->
+    <all in="EE/EO" out="**/*T"/>
+    <all steps="2">
+      <rule in="[Tt][EWOx]" out="*t"/>
+      <rule in="[Tt]*/*[EWOx]" out="**/*t"/>
+    </all>
+
+    <!-- asse e portone -->
+    <all in="N/x" out="*/v" symmetry="()" steps="1"/>
+    <all in="v/x" out="*/v" symmetry="()"/>
+    <all in="v/[WO]" out="*/G" symmetry="()"/>
+    <all in="G/[WO]" out="*/G" symmetry="()"/>
+    <all in="[WO]G[WO]" out="GGG" symmetry="()" steps="1"/>
+
+    <!-- androne dietro il portone: 9x5, bordo verso il cortile = muri h, pavimento 7x4 -->
+    <all in="v/G" out="H/*" symmetry="()" steps="1"/>
+    <all in="Hx" out="*H" symmetry="(x)" steps="4"/>
+    <all in="[xv]/H" out="H/*" symmetry="()" steps="4"/>
+    <prl in="H[xv]" out="h*"/>
+    <one in="xvx/xvx/hhh" out="ccc/ccc/DDD" symmetry="()" steps="1"/>
+    <prl><rule in="N" out="x"/><rule in="v" out="x"/></prl>
+
+    <!-- mastio: angolo di fondo lontano dall'androne, dentro la cinta di fondo -->
+    <one in="x" out="K" steps="1"><field for="K" from="HhDc" on="x"/></one>
+    <all in="[Kk]x" out="*k" symmetry="(x)" steps="9"/>
+    <all in="[WO]/[Kk]" out="k/*" symmetry="()" steps="3"/>
+    <all in="[Kk]/x" out="*/k" symmetry="()" steps="4"/>
+    <prl in="K" out="k"/>
+    <prl in="*k*/kkk/*k*" out="***/*r*/***"/>
+    <one in="rrr/rrr/rrr/kkk/xxx/xxx" out="***/***/***/ddd/ccc/ccc" symmetry="()" steps="1"/>
+
+    <!-- cappella: l'altro angolo di fondo, contro le mura, fino al mastio -->
+    <one in="[Wt][Wt]/[Wt]x" out="**/*P" symmetry="(x)" steps="1"/>
+    <all in="[Pp]x" out="*p" symmetry="(x)"/>
+    <all in="[Pp]/x" out="*/p" symmetry="()" steps="3"/>
+    <prl in="P" out="p"/>
+    <one in="ppp/xxx/xxx" out="qqq/ccc/ccc" symmetry="()" steps="1"/>
+
+    <!-- torri a metà dei lati liberi -->
+    <one steps="2"><rule in="EEEEEEEEEEEEE/OOOOOOOOOOOOO" out="*************/******S******"/></one>
+    <all steps="2">
+      <rule in="[Ss][EWOx]" out="*s"/>
+      <rule in="[Ss]*/*[EWOx]" out="**/*s"/>
+    </all>
+    <prl><rule in="S" out="T"/><rule in="s" out="t"/></prl>
+
+    <!-- abbeveratoi da saltare, lontani da porte e muri -->
+    <one steps="3"><rule in="xxxx/xxxx/xxxx" out="****/*JJ*/****"/></one>
+    <prl in="c" out="x"/>
+  </map>
+
+  <color symbol="B" value="000000" name="aria"/>
+  <color symbol="N" value="FF0000" name="centro"/>
+  <color symbol="E" value="6E8B4A" name="prato"/>
+  <color symbol="z" value="8FA868" name="lotto"/>
+  <color symbol="a" value="FF00FF" name="camminatore"/>
+  <color symbol="x" value="C9B48A" name="cortile d'onore"/>
+  <color symbol="W" value="D8D2C2" name="pietra chiara della cinta"/>
+  <color symbol="O" value="B8B0A0" name="faccia esterna della cinta"/>
+  <color symbol="T" value="3E4A5A" name="centro della torre"/>
+  <color symbol="t" value="E6E0D0" name="pietra chiara delle torri"/>
+  <color symbol="v" value="FFD000" name="asse"/>
+  <color symbol="G" value="6B4A2B" name="portone di quercia"/>
+  <color symbol="H" value="9A8F7C" name="pavimento dell'androne"/>
+  <color symbol="h" value="CFC7B4" name="muri dell'androne"/>
+  <color symbol="D" value="7A5634" name="porta dell'androne"/>
+  <color symbol="K" value="FFFFFF" name="seme del mastio"/>
+  <color symbol="k" value="F2EEE4" name="pietra chiara del mastio"/>
+  <color symbol="r" value="8C7A66" name="sala grande"/>
+  <color symbol="d" value="5C3F24" name="porta del mastio"/>
+  <color symbol="P" value="FFFFFF" name="seme della cappella"/>
+  <color symbol="p" value="E9DCC4" name="cappella"/>
+  <color symbol="q" value="4E3520" name="porta della cappella"/>
+  <color symbol="c" value="FFA040" name="davanti della porta"/>
+  <color symbol="J" value="3F6E9A" name="abbeveratoio"/>
+  <color symbol="S" value="3E4A5A" name="seme di torre"/>
+  <color symbol="s" value="E6E0D0" name="torre in crescita"/>
+</sequence>
+```
+
+## What the game made of it
+## Le viste
+### Seme 1: griglia 30×30×24, un carattere = 1×1 celle (il retro in alto, il davanti in basso; «.» vuoto)
+Lettere: E prato, x cortile d'onore, W pietra chiara della cinta, O faccia esterna della cinta, T centro della torre, t pietra chiara delle torri, G portone di quercia, H pavimento dell'androne, h muri dell'androne, D porta dell'androne, k pietra chiara del mastio, r sala grande, d porta del mastio, p cappella, q porta della cappella, J abbeveratoio
+Pianta (la lettera in cima a ogni colonna):
+```
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+EEtttttEEEEEEEEEEEEEEEEEEttttt
+EEtttttEEEEEEEEEEEEEEEEEEttttt
+EEttTttOOOOOOOOkkkkkkkkkkttTtt
+EEtttttWWWWWWWWkrrrrrrrrkttttt
+EEtttttWWWWWWWWkrrrrrrrrkttttt
+EEEEOWWppppppppkrrrrrrrrkWWOEE
+EEEEOWWppppppppkrrrrrrrrkWWOEE
+EEEEOWWppppppppkrrrrrrrrkWWOEE
+EEEEOWWppppqqqpkrrrrrrrrkWWOEE
+EEEEOWWxxxxxxxxkdddkkkkkkWWOEE
+EEEEOWWxxxxxxxxxxxxxxxxxxWWOEE
+EEtttttxxxxxxxxxxxxxxxxxxWWOEE
+EEtttttxxxxJxxxxxxxxxxxxxttttt
+EEttTttxxxxJxxxxxxxxxxxxxttttt
+EEtttttxxxxxxxxxxxxxJxxxxttTtt
+EEtttttxxxxxxxxxxxxxJxxxxttttt
+EEEEOWWxxxxxxxxxxxxxxxxxxttttt
+EEEEOWWxxxxxxxxxxxxxxxxxxWWOEE
+EEEEOWWxJJxhhhDDDhhhxxxxxWWOEE
+EEEEOWWxxxxhHHHHHHHhxxxxxWWOEE
+EEEEOWWxxxxhHHHHHHHhxxxxxWWOEE
+EEEEOWWxxxxhHHHHHHHhxxxxxWWOEE
+EEEEOWWxxxxhHHHHHHHhxxxxxWWOEE
+EEtttttWWWWWWWGGGWWWWWWWWttttt
+EEtttttWWWWWWWGGGWWWWWWWWttttt
+EEttTttOOOOOOOGGGOOOOOOOOttTtt
+EEtttttEEEEEEEEEEEEEEEEEEttttt
+EEtttttEEEEEEEEEEEEEEEEEEttttt
+```
+Altezze (la cima di ogni colonna, da 0 a z: 36 gradini dell'altezza della griglia):
+```
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+```
+Fronte (guardando dal davanti; in alto il cielo):
+```
+EEtttttEEEEEEEEEEEEEEEEEEttttt
+```
+Lato destro (guardando da destra):
+```
+EEtttttEEEEEEEtttttEEEEEEttttt
+```
+Sezione a z=3 (le lettere a quell'altezza: porte, stanze, scale):
+```
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+```
+Sezione a z=11 (le lettere a quell'altezza: porte, stanze, scale):
+```
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+```
+Sezione a z=19 (le lettere a quell'altezza: porte, stanze, scale):
+```
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+```
+
+### Seme 2: pianta e altezze
+```
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE   111111111111111111111111111111
+EEEtttttEEEEEEEEEEEEEEEEtttttE   111111111111111111111111111111
+EEEtttttEEEEEEEEEEEEEEEEtttttE   111111111111111111111111111111
+EEEttTttOOOOOOkkkkkkkkkkttTttE   111111111111111111111111111111
+EEEtttttWWWWWWkrrrrrrrrktttttE   111111111111111111111111111111
+EEEtttttWWWWWWkrrrrrrrrktttttE   111111111111111111111111111111
+EEEEEOWWppppppkrrrrrrrrkWWOEEE   111111111111111111111111111111
+EEEEEOWWppppppkrrrrrrrrkWWOEEE   111111111111111111111111111111
+EEEEEOWWppppppkrrrrrrrrkWWOEEE   111111111111111111111111111111
+EEEEEOWWpppqqqkrrrrrrrrkWWOEEE   111111111111111111111111111111
+EEEEEOWWxxxxxxkkkkkdddkkWWOEEE   111111111111111111111111111111
+EEEEEOWWxxxxxxxxxxxxxxxxWWOEEE   111111111111111111111111111111
+EEEEEOWWxxxxxxxJJxxxxxxxWWOEEE   111111111111111111111111111111
+EEEEEOWWxxxxxxxxxxxxxxxxtttttE   111111111111111111111111111111
+EEEEEOWWxxxxxxxxxxxxxxxxtttttE   111111111111111111111111111111
+EEEtttttxxxxxxxxJJxxxxxxttTttE   111111111111111111111111111111
+EEEtttttxxxxJxxxxxxxxxxxtttttE   111111111111111111111111111111
+EEEttTttxxxxJxxxxxxxxxxxtttttE   111111111111111111111111111111
+EEEtttttxxxxxxxxxxxxxxxxWWOEEE   111111111111111111111111111111
+EEEtttttxxxxxxxxxxxxxxxxWWOEEE   111111111111111111111111111111
+EEEEEOWWxxxhhhDDDhhhxxxxWWOEEE   111111111111111111111111111111
+EEEEEOWWxxxhHHHHHHHhxxxxWWOEEE   111111111111111111111111111111
+EEEEEOWWxxxhHHHHHHHhxxxxWWOEEE   111111111111111111111111111111
+EEEEEOWWxxxhHHHHHHHhxxxxWWOEEE   111111111111111111111111111111
+EEEEEOWWxxxhHHHHHHHhxxxxWWOEEE   111111111111111111111111111111
+EEEtttttWWWWWWGGGWWWWWWWtttttE   111111111111111111111111111111
+EEEtttttWWWWWWGGGWWWWWWWtttttE   111111111111111111111111111111
+EEEttTttOOOOOOGGGOOOOOOOttTttE   111111111111111111111111111111
+EEEtttttEEEEEEEEEEEEEEEEtttttE   111111111111111111111111111111
+EEEtttttEEEEEEEEEEEEEEEEtttttE   111111111111111111111111111111
+```
+
+### Seme 3: pianta e altezze
+```
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE   111111111111111111111111111111
+EtttttEEEEEEEEEEEEEEEEEEEttttt   111111111111111111111111111111
+EtttttEEEEEEEEEEEEEEEEEEEttttt   111111111111111111111111111111
+EttTttkkkkkkkkkkOOOOOOOOOttTtt   111111111111111111111111111111
+EtttttkrrrrrrrrkWWWWWWWWWttttt   111111111111111111111111111111
+EtttttkrrrrrrrrkWWWWWWWWWttttt   111111111111111111111111111111
+EEEOWWkrrrrrrrrkpppppppppWWOEE   111111111111111111111111111111
+EEEOWWkrrrrrrrrkpppppppppWWOEE   111111111111111111111111111111
+EEEOWWkrrrrrrrrkpppppppppWWOEE   111111111111111111111111111111
+EEEOWWkrrrrrrrrkpppqqqpppWWOEE   111111111111111111111111111111
+EEEOWWkdddkkkkkkxxxxxxxxxWWOEE   111111111111111111111111111111
+EEEOWWxxxxxxxxxxxxxxxxxxxttttt   111111111111111111111111111111
+EEEOWWxxxxxxxxxxxJxxxxxxxttttt   111111111111111111111111111111
+EEEOWWxxxxxxxxxxxJxxxxxxxttTtt   111111111111111111111111111111
+EtttttxxxxxxxJJxxxxxxxxxxttttt   111111111111111111111111111111
+Etttttxxxxxxxxxxxxxxxxxxxttttt   111111111111111111111111111111
+EttTttxxxxxxxxxxxxxxxxxJxWWOEE   111111111111111111111111111111
+EtttttxxxxxxxxxxxxxxxxxJxWWOEE   111111111111111111111111111111
+EtttttxxxxxxxxxxxxxxxxxxxWWOEE   111111111111111111111111111111
+EEEOWWxxxxxxxxxxxxxxxxxxxWWOEE   111111111111111111111111111111
+EEEOWWxxxxxhhhDDDhhhxxxxxWWOEE   111111111111111111111111111111
+EEEOWWxxxxxhHHHHHHHhxxxxxWWOEE   111111111111111111111111111111
+EEEOWWxxxxxhHHHHHHHhxxxxxWWOEE   111111111111111111111111111111
+EEEOWWxxxxxhHHHHHHHhxxxxxWWOEE   111111111111111111111111111111
+EEEOWWxxxxxhHHHHHHHhxxxxxWWOEE   111111111111111111111111111111
+EtttttWWWWWWWWGGGWWWWWWWWttttt   111111111111111111111111111111
+EtttttWWWWWWWWGGGWWWWWWWWttttt   111111111111111111111111111111
+EttTttOOOOOOOOGGGOOOOOOOOttTtt   111111111111111111111111111111
+EtttttEEEEEEEEEEEEEEEEEEEttttt   111111111111111111111111111111
+EtttttEEEEEEEEEEEEEEEEEEEttttt   111111111111111111111111111111
+```
+
+## La forma (media dei semi)
+copertura della pianta 0,00, cortili chiusi 0,00, picchi 0,00, altezza massima 0,00 della griglia, pieno 0,00 (1 è un blocco pieno)
+quanto differiscono i semi: 0,00 (0 uguali, 1 niente in comune; un edificio che varia sta fra 0,25 e 0,6)
+
+## La traccia (seme 1)
+Traccia, seme 1: griglia 120×120×96 → 30×30×24, 45 nodi, 112 passi, finito in 55 ms.
+x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
+Lettere: N=centro, E=prato, z=lotto, a=camminatore, x=cortile d'onore, W=pietra chiara della cinta, O=faccia esterna della cinta, T=centro della torre, t=pietra chiara delle torri, v=asse, G=portone di quercia, H=pavimento dell'androne, h=muri dell'androne, D=porta dell'androne, K=seme del mastio, k=pietra chiara del mastio, r=sala grande, d=porta del mastio, P=seme della cappella, p=cappella, q=porta della cappella, c=davanti della porta, J=abbeveratoio, S=seme di torre, s=torre in crescita.
+Alla fine: E 240, x 191, t 144, W 98, O 49, r 48, k 29, p 29, H 28, h 14, G 9, T 6, J 6, q 3, d 3, D 3.
+  #3 map scala 1/4 1/4 1/4: ×1, 900 celle x0-29 y0-29 z0-23, passi 1
+  #4 prl ***/*E*/*** → ***/*z*/***: ×1, 783 celle x1-28 y1-28 z0, passi 2, E→z 783
+  #5 prl Ez → *E passi=4: ×4, 384 celle x1-28 y1-28 z0, passi 3-6, z→E 384
+  #6 all Nz → *a passi=1: ×1, 4 celle x14-16 y14-16 z0, passi 7, z→a 4
+  #7 all [Nx]az → *xa passi=6: ×6, 48 celle x8-22 y8-22 z0, passi 8-13, z→a 24, a→x 24
+#8-9 prl×2: 16 celle x7-24 y7-24 z0, passi 14-17
+  #10 all [Nx]z/*[Nx] → *x/**: ×17, 289 celle x7-24 y7-24 z0, passi 18-34, z→x 289
+  #11 prl z → E: ×1, 76 celle x5-24 y5-24 z0, passi 35, z→E 76
+  #12 all [Nx]E → *W: ×1, 72 celle x6-25 y6-25 z0, passi 36, E→W 72
+  #13 all WE → *W passi=2: ×2, 156 celle x4-27 y4-27 z0, passi 37-38, E→W 156
+  #14 all WE/*W → *W/**: ×3, 24 celle x4-27 y4-27 z0, passi 39-41, E→W 24
+  #15 prl WE → O*: ×1, 92 celle x4-27 y4-27 z0, passi 42, W→O 92
+  #16 all EE/EO → **/*T: ×1, 4 celle x4-27 y4-27 z0, passi 43, O→T 4
+  #17 all [Tt][EWOx] → *t (+1) passi=2: ×2, 96 celle x2-29 y2-29 z0, passi 44-45, E→t 64, O→t 16, W→t 16
+    r1 [Tt][EWOx] → *t ×36; r2 [Tt]*/*[EWOx] → **/*t ×60
+#18-19 all×2: 9 celle x15 y16-24 z0, passi 46-54
+#20-23 all×4: 10 celle x14-16 y24-27 z0, passi 55-59
+  #24 all Hx → *H passi=4: ×4, 8 celle x11-19 y24 z0, passi 60-63, x→H 8
+  #25 all [xv]/H → H/* passi=4: ×4, 36 celle x11-19 y20-23 z0, passi 64-67, x→H 32, v→H 4
+  #26 prl H[xv] → h*: ×1, 17 celle x11-19 y20-24 z0, passi 68, H→h 17
+#27-29 one×2, prl×1: 13 celle x14-24 y7-20 z0, passi 69-71
+  #30 all [Kk]x → *k passi=9: ×9, 9 celle x15-23 y7 z0, passi 72-80, x→k 9
+  #31 all [WO]/[Kk] → k/* passi=3: ×3, 30 celle x15-24 y4-6 z0, passi 81-83, W→k 20, O→k 10
+  #32 all [Kk]/x → */k passi=4: ×4, 40 celle x15-24 y8-11 z0, passi 84-87, x→k 40
+  #33 prl K → k: ×1, 1 celle x24 y7 z0, passi 88, K→k 1
+  #34 prl *k*/kkk/*k* → ***/*r*/***: ×1, 48 celle x16-23 y5-10 z0, passi 89, k→r 48
+#35-37 one×2, all×1: 17 celle x7-18 y7-13 z0, passi 90-98
+  #38 all [Pp]/x → */p passi=3: ×3, 24 celle x7-14 y8-10 z0, passi 99-101, x→p 24
+#39-41 prl×1, one×2: 12 celle x4-27 y7-16 z0, passi 102-105
+  #42 all [Ss][EWOx] → *s (+1) passi=2: ×2, 48 celle x2-29 y13-18 z0, passi 106-107, W→s 20, E→s 20, O→s 8
+    r1 [Ss][EWOx] → *s ×19; r2 [Ss]*/*[EWOx] → **/*s ×29
+  #43 prl S → T (+1): ×1, 50 celle x2-29 y13-18 z0, passi 108, s→t 48, S→T 2
+    r1 S → T ×2; r2 s → t ×48
+  #44 one xxxx/xxxx/xxxx → ****/*JJ*/**** passi=3: ×3, 6 celle x8-20 y14-20 z0, passi 109-111, x→J 6
+  #45 prl c → x: ×1, 18 celle x11-18 y11-19 z0, passi 112, c→x 18
+
+## Block 2 of 3: the heights and the full scale. First correct the composition if what came back says so (the concept, the variety between the seeds, something outside the box or missing). Then add level B (the columns, storeys of 8 layers, the strips of the stairs and their holes) and level C (the map back to 4 4 4 with a block for every coarse letter, the steps, parapets, windows, roofs, cleaning, colours). Answer with the whole program.

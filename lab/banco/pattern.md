@@ -215,7 +215,9 @@ spariscono: «delete fine scaffold»), `River` (`W`, `R` → `U` → `B`).
 - **`map`** (`OddScale3D`, `CarmaTower`, `ModernHouse` 1/3 e 5/3): decidere su una griglia grossa e poi ingrandire. Qui **non si usa**: con
   `map` la scatola la decide il programma (`withSize` lascia la `size` scritta, `scales` in `sculptor.ts`) e un programma non serve più due
   taglie. Dal T335 (ADR-0174) il motore accetta anche le frazioni (`1/3`, `5/3`, solo con la griglia nuova vuota): `ModernHouse` e `SeaVilla`
-  girano interi (`lab/banco/wfc/`).
+  girano interi (`lab/banco/wfc/`). **Scendere e risalire** (T337): `map scale="1/4 1/4 1/4"` e dentro `map scale="4 4 4"` tornano alla scatola
+  di ogni taglia (100 × 100 × 80 e 120 × 120 × 96 si dividono per 4), e sulla griglia grossa la composizione si scrive con numeri piccoli
+  (`metodo/README.md`); nel gioco però `withSize` tratta ogni programma con `map` come uno con la sua scatola, da correggere.
 
 ### 12. Ciò che il motore non sa fare
 

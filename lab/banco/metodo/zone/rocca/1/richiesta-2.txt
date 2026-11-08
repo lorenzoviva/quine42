@@ -1,0 +1,415 @@
+Edificio: Rocca di frontiera
+Stile: fortezza: pietra grigia, merli, legno scuro
+Com'è: Mura con il cammino di ronda e quattro torri, portone sul davanti, cortile interno con un pozzo, corpo di guardia e armeria, una scala sulle mura, il mastio con una sala in alto. È grande e rara.
+Scatola: 120 × 120 × 96 voxel; una casella è 16 voxel.
+Corpo: gradino 3 voxel, passaggio largo almeno 10, persona alta 24; salto: sale al più 16, va da 16 a 41 voxel di distanza.
+Il suolo è in fondo alla scatola.
+
+## Your program so far
+```xml
+<!--
+ROCCA DI FRONTIERA - block 1: coarse composition (1 cell = 4 voxels)
+Parts and letters (coarse plan):
+  x courtyard: a rectangle with random sides around N
+  W wall ring, 3 cells thick around the courtyard; O its outer face
+  T/t four corner towers, 5x5, on the convex corners of the ring
+  v path from N to the front; G gate, 3 wide, in the front wall on the axis
+  h covered passage behind the gate, 3x4; g guardhouse wings beside it (h+g = hall 7x4)
+  K/k keep, r its inside: in the back corner farthest from the gate
+  P/p armoury, y its inside: in the other back corner, also far from the gate
+  d doors (keep, armoury) facing the courtyard
+  S stair strip (3x3) against the inside of a side wall, climbing to the wall walk
+  w well and q troughs: the jumps, in the free courtyard
+  f free marker (buffer and door fronts), turned back into x at the end
+What the seeds change: courtyard width and depth, the back corner of the keep
+(the armoury takes the other), the wall that gets the stair, where the well
+and the troughs go.
+-->
+<sequence values="BNE" symmetry="(xy)" ground="E" origin="bottom">
+  <map scale="1/4 1/4 1/4" values="BNEzaxWOTtvGKkrhgfdPpySwq">
+    <rule in="E" out="E"/><rule in="N" out="N"/>
+
+    <!-- lot -->
+    <prl in="***/*E*/***" out="***/*z*/***"/>
+    <prl in="Ez" out="*E" steps="4"/>
+
+    <!-- courtyard rectangle: at least 13x13 -->
+    <all in="Nz" out="*a" steps="1"/>
+    <all in="[Nx]az" out="*xa" steps="5"/>
+    <prl steps="7"><rule in="xaz" out="*xa" p="0.5"/></prl>
+    <prl in="a" out="x"/>
+    <all in="[Nx]z/*[Nx]" out="*x/**"/>
+    <prl in="z" out="E"/>
+
+    <!-- wall ring and its outer face -->
+    <all in="[Nx]E" out="*W"/>
+    <all in="WE" out="*W" steps="2"/>
+    <all in="WE/*W" out="*W/**"/>
+    <prl in="WE" out="O*"/>
+
+    <!-- corner towers -->
+    <all in="EE/EO" out="**/*T"/>
+    <all steps="2"><rule in="[Tt][EWOx]" out="*t"/><rule in="[Tt]*/*[EWOx]" out="**/*t"/></all>
+
+    <!-- path to the front and the gate -->
+    <all in="N/x" out="*/v" symmetry="()" steps="1"/>
+    <all in="v/x" out="*/v" symmetry="()"/>
+    <all in="v/[WO]" out="*/G" symmetry="()"/>
+    <all in="G/[WO]" out="*/G" symmetry="()"/>
+    <all in="[WO]G[WO]" out="GGG" symmetry="()" steps="1"/>
+
+    <!-- keep: the back corner farthest from the gate, 5x5 -->
+    <one in="x" out="K" steps="1"><field for="K" from="v" on="xv"/></one>
+    <all steps="4"><rule in="[Kk]x" out="*k"/><rule in="[Kk]*/*x" out="**/*k"/></all>
+    <prl in="K" out="k"/>
+    <prl in="*k*/kkk/*k*" out="***/*r*/***"/>
+
+    <!-- gate hall: passage h (3x4) behind the gate, guardhouse wings g -->
+    <all in="[xv]/G" out="h/*" symmetry="()"/>
+    <all in="[xv]/h" out="h/*" symmetry="()" steps="3"/>
+    <all steps="2" symmetry="()"><rule in="x[hg]" out="g*"/><rule in="[hg]x" out="*g"/></all>
+
+    <!-- free buffer around the keep and the gate hall -->
+    <prl in="[kgh]x" out="*f"/>
+
+    <!-- armoury: the other back corner, far from the gate -->
+    <one in="x" out="P" steps="1"><field for="P" from="v" on="xvf"/></one>
+    <all steps="4"><rule in="[Pp]x" out="*p"/><rule in="[Pp]*/*x" out="**/*p"/></all>
+    <prl in="P" out="p"/>
+    <prl in="*p*/ppp/*p*" out="***/*y*/***"/>
+    <prl in="px" out="*f"/>
+
+    <!-- doors to the courtyard, their fronts kept free -->
+    <one in="rrr/rrr/rrr/kkk/fff/[xf][xf][xf]" out="***/***/***/ddd/***/fff" steps="1"/>
+    <one in="yyy/yyy/yyy/ppp/fff/[xf][xf][xf]" out="***/***/***/ddd/***/fff" steps="1"/>
+
+    <!-- stair to the wall walk, against the inside of a wall -->
+    <one in="WWW/xxx/xxx/xxx/xxx/xxx" out="***/SSS/SSS/SSS/fff/fff" steps="1"/>
+    <prl in="Sx" out="*f"/>
+
+    <!-- jumps: the well and two troughs in the free courtyard -->
+    <one in="xxxx/xxxx/xxxx/xxxx" out="****/*ww*/*ww*/****" steps="1"/>
+    <one in="xxxx/xxxx/xxxx" out="****/*qq*/****" steps="2"/>
+
+    <!-- markers back to courtyard -->
+    <prl in="f" out="x"/>
+  </map>
+
+  <color symbol="E" value="6b8a4a" name="prato"/>
+  <color symbol="N" value="ff0000" name="centro"/>
+  <color symbol="z" value="a0b070" name="lotto"/>
+  <color symbol="a" value="ff00ff" name="camminatore"/>
+  <color symbol="x" value="c8b896" name="cortile in terra battuta"/>
+  <color symbol="W" value="8a8a8a" name="mura in pietra grigia"/>
+  <color symbol="O" value="6e6e6e" name="faccia esterna delle mura"/>
+  <color symbol="T" value="4a4a4a" name="centro torre"/>
+  <color symbol="t" value="5c5c5c" name="torre angolare"/>
+  <color symbol="v" value="b09060" name="strada"/>
+  <color symbol="G" value="3b2a1a" name="portone in legno scuro"/>
+  <color symbol="K" value="303040" name="seme del mastio"/>
+  <color symbol="k" value="505060" name="mastio"/>
+  <color symbol="r" value="9090a0" name="sala del mastio"/>
+  <color symbol="h" value="7a6040" name="androne coperto"/>
+  <color symbol="g" value="806850" name="corpo di guardia"/>
+  <color symbol="f" value="e0e0a0" name="libero"/>
+  <color symbol="d" value="2a1a0a" name="porta"/>
+  <color symbol="P" value="503020" name="seme armeria"/>
+  <color symbol="p" value="705040" name="armeria"/>
+  <color symbol="y" value="a08060" name="interno armeria"/>
+  <color symbol="S" value="d0d0d0" name="scala sulle mura"/>
+  <color symbol="w" value="3060a0" name="pozzo"/>
+  <color symbol="q" value="604020" name="abbeveratoio"/>
+</sequence>
+```
+
+## What the game made of it
+## Le viste
+### Seme 1: griglia 30×30×24, un carattere = 1×1 celle (il retro in alto, il davanti in basso; «.» vuoto)
+Lettere: N centro, E prato, x cortile in terra battuta, W mura in pietra grigia, O faccia esterna delle mura, T centro torre, t torre angolare, v strada, G portone in legno scuro, k mastio, r sala del mastio, h androne coperto, g corpo di guardia, d porta, p armeria, y interno armeria, S scala sulle mura, w pozzo, q abbeveratoio
+Pianta (la lettera in cima a ogni colonna):
+```
+tttttEEEEEEEEEEEEEEEEEEEtttttE
+tttttEEEEEEEEEEEEEEEEEEEtttttE
+ttTttOOOOOOOOOOOOOOOOOOOttTttE
+tttttWWWWWWWWWWWWWWWWWWWtttttE
+tttttWWWWWWWWWWWWWWWWWWWtttttE
+EEOWWkkkkkxxxxxxxxxpppppWWOEEE
+EEOWWkrrrdxxxxxxxxxpyyypWWOEEE
+EEOWWkrrrdxxxxxxxxxpyyypWWOEEE
+EEOWWkrrrdxxxxxxxxxpyyypWWOEEE
+EEOWWkkkkkxxxxxxxxxpdddpWWOEEE
+EEOWWxxxxxxxxxxxxxxxxxxxWWOEEE
+EEOWWxxxxxxxxxxxxxxxxxxxWWOEEE
+EEOWWxxxxxxxxxxqxxxxxxxxWWOEEE
+EEOWWxxxqxxxxxxqxxxxxxxxWWOEEE
+EEOWWxxxqxwwxxxxxxxxxxxxWWOEEE
+EEOWWxxxxxwwxxxNxxxxxxxxWWOEEE
+EEOWWxxxxxxxxxxvxxxxxxxxWWOEEE
+EEOWWxxxxxxxxxxvxxxxxxxxWWOEEE
+EEOWWxxxxxxxxxxvxxxxxxxxWWOEEE
+EEOWWxxxxxxxxxxvxxxxxxxxWWOEEE
+EEOWWxxxxxxxxxxvxxxxxxxxWWOEEE
+EEOWWxxxxxxxgghhhggxxxxxWWOEEE
+EEOWWxSSSxxxgghhhggxxxxxWWOEEE
+EEOWWxSSSxxxgghhhggxxxxxWWOEEE
+EEOWWxSSSxxxgghhhggxxxxxWWOEEE
+tttttWWWWWWWWWGGGWWWWWWWtttttE
+tttttWWWWWWWWWGGGWWWWWWWtttttE
+ttTttOOOOOOOOOGGGOOOOOOOttTttE
+tttttEEEEEEEEEEEEEEEEEEEtttttE
+tttttEEEEEEEEEEEEEEEEEEEtttttE
+```
+Altezze (la cima di ogni colonna, da 0 a z: 36 gradini dell'altezza della griglia):
+```
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+111111111111111111111111111111
+```
+Fronte (guardando dal davanti; in alto il cielo):
+```
+tttttEEEEEEEEEEEEEEEEEEEtttttE
+```
+Lato destro (guardando da destra):
+```
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+```
+Sezione a z=3 (le lettere a quell'altezza: porte, stanze, scale):
+```
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+```
+Sezione a z=11 (le lettere a quell'altezza: porte, stanze, scale):
+```
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+```
+Sezione a z=19 (le lettere a quell'altezza: porte, stanze, scale):
+```
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+..............................
+```
+
+### Seme 2: pianta e altezze
+```
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE   111111111111111111111111111111
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE   111111111111111111111111111111
+tttttEEEEEEEEEEEEEEEEEEtttttEE   111111111111111111111111111111
+tttttEEEEEEEEEEEEEEEEEEtttttEE   111111111111111111111111111111
+ttTttOOOOOOOOOOOOOOOOOOttTttEE   111111111111111111111111111111
+tttttWWWWWWWWWWWWWWWWWWtttttEE   111111111111111111111111111111
+tttttWWWWWWWWWWWWWWWWWWtttttEE   111111111111111111111111111111
+EEOWWkkkkkxxxxxxxxpppppWWOEEEE   111111111111111111111111111111
+EEOWWkrrrkxxxxxxxxpyyypWWOEEEE   111111111111111111111111111111
+EEOWWkrrrkxxxxxxxxpyyypWWOEEEE   111111111111111111111111111111
+EEOWWkrrrkxxxxxxxxpyyypWWOEEEE   111111111111111111111111111111
+EEOWWkdddkxxxxxxxxpdddpWWOEEEE   111111111111111111111111111111
+EEOWWxxxxxxxxxxxxxxxxxxWWOEEEE   111111111111111111111111111111
+EEOWWxxxxxxxxxxxxxxxxxxWWOEEEE   111111111111111111111111111111
+EEOWWxxxxxxxxxxxxxxxxxxWWOEEEE   111111111111111111111111111111
+EEOWWxxxxxxxxxxNxxxxxxxWWOEEEE   111111111111111111111111111111
+EEOWWxxxxxxxxxxvxwwxqqxWWOEEEE   111111111111111111111111111111
+EEOWWxxxxxxxxxxvxwwxxxxWWOEEEE   111111111111111111111111111111
+EEOWWxxxxxqxxxxvxxxxxxxWWOEEEE   111111111111111111111111111111
+EEOWWxxxxxqxxxxvxxxxxxxWWOEEEE   111111111111111111111111111111
+EEOWWxxxxxxxxxxvxxxxxxxWWOEEEE   111111111111111111111111111111
+EEOWWxxxxxxxgghhhggxxxxWWOEEEE   111111111111111111111111111111
+EEOWWSSSxxxxgghhhggxxxxWWOEEEE   111111111111111111111111111111
+EEOWWSSSxxxxgghhhggxxxxWWOEEEE   111111111111111111111111111111
+EEOWWSSSxxxxgghhhggxxxxWWOEEEE   111111111111111111111111111111
+tttttWWWWWWWWWGGGWWWWWWtttttEE   111111111111111111111111111111
+tttttWWWWWWWWWGGGWWWWWWtttttEE   111111111111111111111111111111
+ttTttOOOOOOOOOGGGOOOOOOttTttEE   111111111111111111111111111111
+tttttEEEEEEEEEEEEEEEEEEtttttEE   111111111111111111111111111111
+tttttEEEEEEEEEEEEEEEEEEtttttEE   111111111111111111111111111111
+```
+
+### Seme 3: pianta e altezze
+```
+EEtttttEEEEEEEEEEEEEEEEEEttttt   111111111111111111111111111111
+EEtttttEEEEEEEEEEEEEEEEEEttttt   111111111111111111111111111111
+EEttTttOOOOOOOOOOOOOOOOOOttTtt   111111111111111111111111111111
+EEtttttWWWWWWWWWWWWWWWWWWttttt   111111111111111111111111111111
+EEtttttWWWWWWWWWWWWWWWWWWttttt   111111111111111111111111111111
+EEEEOWWpppppxxxxxxxxkkkkkWWOEE   111111111111111111111111111111
+EEEEOWWpyyypxxxqxxxxdrrrkWWOEE   111111111111111111111111111111
+EEEEOWWpyyypxxxqxxxxdrrrkWWOEE   111111111111111111111111111111
+EEEEOWWpyyypxxxxxxxxdrrrkWWOEE   111111111111111111111111111111
+EEEEOWWpdddpxxxxxxxxkkkkkWWOEE   111111111111111111111111111111
+EEEEOWWxxxxxxxxxxxxxxxxxxWWOEE   111111111111111111111111111111
+EEEEOWWxxxxxxxxxqqxxxxxxxWWOEE   111111111111111111111111111111
+EEEEOWWxxxxxxxxxxxxxxxxxxWWOEE   111111111111111111111111111111
+EEEEOWWxxxxxxxxxxxxwwxxxxWWOEE   111111111111111111111111111111
+EEEEOWWSSSxxxxxxxxxwwxxxxWWOEE   111111111111111111111111111111
+EEEEOWWSSSxxxxxNxxxxxxxxxWWOEE   111111111111111111111111111111
+EEEEOWWSSSxxxxxvxxxxxxxxxWWOEE   111111111111111111111111111111
+EEEEOWWxxxxxxxxvxxxxxxxxxWWOEE   111111111111111111111111111111
+EEEEOWWxxxxxxxxvxxxxxxxxxWWOEE   111111111111111111111111111111
+EEEEOWWxxxxxxxxvxxxxxxxxxWWOEE   111111111111111111111111111111
+EEEEOWWxxxxxxxxvxxxxxxxxxWWOEE   111111111111111111111111111111
+EEEEOWWxxxxxgghhhggxxxxxxWWOEE   111111111111111111111111111111
+EEEEOWWxxxxxgghhhggxxxxxxWWOEE   111111111111111111111111111111
+EEEEOWWxxxxxgghhhggxxxxxxWWOEE   111111111111111111111111111111
+EEEEOWWxxxxxgghhhggxxxxxxWWOEE   111111111111111111111111111111
+EEtttttWWWWWWWGGGWWWWWWWWttttt   111111111111111111111111111111
+EEtttttWWWWWWWGGGWWWWWWWWttttt   111111111111111111111111111111
+EEttTttOOOOOOOGGGOOOOOOOOttTtt   111111111111111111111111111111
+EEtttttEEEEEEEEEEEEEEEEEEttttt   111111111111111111111111111111
+EEtttttEEEEEEEEEEEEEEEEEEttttt   111111111111111111111111111111
+```
+
+## La forma (media dei semi)
+copertura della pianta 0,00, cortili chiusi 0,00, picchi 0,00, altezza massima 0,00 della griglia, pieno 0,00 (1 è un blocco pieno)
+quanto differiscono i semi: 0,00 (0 uguali, 1 niente in comune; un edificio che varia sta fra 0,25 e 0,6)
+
+## La traccia (seme 1)
+Traccia, seme 1: griglia 120×120×96 → 30×30×24, 42 nodi, 93 passi, finito in 66 ms.
+x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
+Lettere: E=prato, z=lotto, a=camminatore, x=cortile in terra battuta, W=mura in pietra grigia, O=faccia esterna delle mura, T=centro torre, t=torre angolare, v=strada, G=portone in legno scuro, K=seme del mastio, k=mastio, r=sala del mastio, h=androne coperto, g=corpo di guardia, f=libero, d=porta, P=seme armeria, p=armeria, y=interno armeria, S=scala sulle mura, w=pozzo, q=abbeveratoio.
+Alla fine: x 279, E 186, W 150, t 96, O 75, g 16, k 13, p 13, h 12, r 9, y 9, S 9, G 9, d 6, v 5, T 4, q 4, w 4, N 1.
+  #3 map scala 1/4 1/4 1/4: ×1, 900 celle x0-29 y0-29 z0-23, passi 1
+  #4 prl ***/*E*/*** → ***/*z*/***: ×1, 783 celle x1-28 y1-28 z0, passi 2, E→z 783
+  #5 prl Ez → *E passi=4: ×4, 384 celle x1-28 y1-28 z0, passi 3-6, z→E 384
+  #6 all Nz → *a passi=1: ×1, 4 celle x14-16 y14-16 z0, passi 7, z→a 4
+  #7 all [Nx]az → *xa passi=5: ×5, 40 celle x9-21 y9-21 z0, passi 8-12, z→a 20, a→x 20
+  #8 prl xaz → *xa passi=7: ×7, 26 celle x5-23 y5-24 z0, passi 13-19, z→a 13, a→x 13
+  #9 prl a → x: ×1, 4 celle x5-23 y5-24 z0, passi 20, a→x 4
+  #10 all [Nx]z/*[Nx] → *x/**: ×19, 342 celle x5-23 y5-24 z0, passi 21-39, z→x 342
+  #11 prl z → E: ×1, 20 celle x24 y5-24 z0, passi 40, z→E 20
+  #12 all [Nx]E → *W: ×1, 78 celle x4-24 y4-25 z0, passi 41, E→W 78
+  #13 all WE → *W passi=2: ×2, 168 celle x2-26 y2-27 z0, passi 42-43, E→W 168
+  #14 all WE/*W → *W/**: ×3, 24 celle x2-26 y2-27 z0, passi 44-46, E→W 24
+  #15 prl WE → O*: ×1, 98 celle x2-26 y2-27 z0, passi 47, W→O 98
+  #16 all EE/EO → **/*T: ×1, 4 celle x2-26 y2-27 z0, passi 48, O→T 4
+  #17 all [Tt][EWOx] → *t (+1) passi=2: ×2, 96 celle x0-28 y0-29 z0, passi 49-50, E→t 64, O→t 16, W→t 16
+    r1 [Tt][EWOx] → *t ×42; r2 [Tt]*/*[EWOx] → **/*t ×54
+#18-19 all×2: 9 celle x15 y16-24 z0, passi 51-59
+#20-23 all×3, one×1: 10 celle x5-16 y5-27 z0, passi 60-64
+  #24 all [Kk]x → *k (+1) passi=4: ×4, 24 celle x5-9 y5-9 z0, passi 65-68, x→k 24
+    r1 [Kk]x → *k ×7; r2 [Kk]*/*x → **/*k ×17
+#25-26 prl×2: 10 celle x5-8 y5-8 z0, passi 69-70
+#27-28 all×2: 12 celle x14-16 y21-24 z0, passi 71-74
+  #29 all x[hg] → g* (+1) passi=2: ×2, 16 celle x12-18 y21-24 z0, passi 75-76, x→g 16
+    r1 x[hg] → g* ×8; r2 [hg]x → *g ×8
+  #30 prl [kgh]x → *f: ×1, 24 celle x5-19 y5-24 z0, passi 77, x→f 24
+  #31 one x → P passi=1 [campo P da v su xvf]: ×1, 1 celle x23 y5 z0, passi 78, x→P 1
+  #32 all [Pp]x → *p (+1) passi=4: ×4, 24 celle x19-23 y5-9 z0, passi 79-82, x→p 24
+    r1 [Pp]x → *p ×13; r2 [Pp]*/*x → **/*p ×11
+#33-34 prl×2: 10 celle x20-23 y5-8 z0, passi 83-84
+  #35 prl px → *f: ×1, 10 celle x18-23 y5-10 z0, passi 85, x→f 10
+#36-37 one×2: 12 celle x9-22 y6-11 z0, passi 86-87
+  #38 one WWW/xxx/xxx/xxx/xxx/xxx → ***/SSS/SSS/SSS/fff/fff passi=1: ×1, 15 celle x6-8 y20-24 z0, passi 88, x→S 9, x→f 6
+#39-41 prl×1, one×2: 14 celle x5-15 y12-24 z0, passi 89-92
+  #42 prl f → x: ×1, 52 celle x5-23 y5-24 z0, passi 93, f→x 52
+
+## Block 2 of 3: the heights and the full scale. First correct the composition if what came back says so (the concept, the variety between the seeds, something outside the box or missing). Then add level B (the columns, storeys of 8 layers, the strips of the stairs and their holes) and level C (the map back to 4 4 4 with a block for every coarse letter, the steps, parapets, windows, roofs, cleaning, colours). Answer with the whole program.

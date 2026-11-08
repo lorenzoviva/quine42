@@ -1,0 +1,8 @@
+Edificio: Rocca di frontiera
+Stile: fortezza: pietra grigia, merli, legno scuro
+Com'è: Mura con il cammino di ronda e quattro torri, portone sul davanti, cortile interno con un pozzo, corpo di guardia e armeria, una scala sulle mura, il mastio con una sala in alto. È grande e rara.
+Scatola: 120 × 120 × 96 voxel; una casella è 16 voxel.
+Corpo: gradino 3 voxel, passaggio largo almeno 10, persona alta 24; salto: sale al più 16, va da 16 a 41 voxel di distanza.
+Il suolo è in fondo alla scatola.
+
+## Block 1 of 3: the composition. Write the program with level A only: the root, the map to 1/4 and the composition on the coarse plan (z=0); no heights and no map back yet (the grid stays the coarse one, and the game shows it as it is). Begin with a few comment lines: the parts of this concept, their letters, where each goes relative to the others, what the seeds change. Give every letter a <color> so that the views show it.

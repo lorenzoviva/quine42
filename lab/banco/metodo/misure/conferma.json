@@ -1,0 +1,440 @@
+{
+ "nome": "conferma",
+ "semi": 5,
+ "traSemi": [
+  {
+   "nome": "moderna/1",
+   "concetto": "moderna",
+   "quote": {
+    "impronta": 0,
+    "profilo": 0,
+    "pieni": 0,
+    "distanza": 0
+   },
+   "colore": 0,
+   "voxel": 0
+  },
+  {
+   "nome": "moderna/2",
+   "concetto": "moderna",
+   "quote": {
+    "impronta": 0,
+    "profilo": 0,
+    "pieni": 0,
+    "distanza": 0
+   },
+   "colore": 0,
+   "voxel": 0
+  },
+  {
+   "nome": "steampunk/1",
+   "concetto": "steampunk",
+   "quote": {
+    "impronta": 0,
+    "profilo": 0,
+    "pieni": 0,
+    "distanza": 0
+   },
+   "colore": 0,
+   "voxel": 0
+  },
+  {
+   "nome": "steampunk/2",
+   "concetto": "steampunk",
+   "quote": {
+    "impronta": 0,
+    "profilo": 0,
+    "pieni": 0,
+    "distanza": 0
+   },
+   "colore": 0,
+   "voxel": 0
+  },
+  {
+   "nome": "futuristica/1/seconda",
+   "concetto": "futuristica",
+   "quote": {
+    "impronta": 0,
+    "profilo": 0,
+    "pieni": 0,
+    "distanza": 0
+   },
+   "colore": 0,
+   "voxel": 0
+  },
+  {
+   "nome": "locanda/1/seconda",
+   "concetto": "locanda",
+   "quote": {
+    "impronta": 0,
+    "profilo": 0,
+    "pieni": 0,
+    "distanza": 0
+   },
+   "colore": 0,
+   "voxel": 0
+  },
+  {
+   "nome": "locanda/2",
+   "concetto": "locanda",
+   "quote": {
+    "impronta": 0,
+    "profilo": 0,
+    "pieni": 0,
+    "distanza": 0
+   },
+   "colore": 0,
+   "voxel": 0
+  },
+  {
+   "nome": "tempio/1",
+   "concetto": "tempio",
+   "quote": {
+    "impronta": 0,
+    "profilo": 0,
+    "pieni": 0,
+    "distanza": 0
+   },
+   "colore": 0,
+   "voxel": 0
+  },
+  {
+   "nome": "tempio/2",
+   "concetto": "tempio",
+   "quote": {
+    "impronta": 0,
+    "profilo": 0,
+    "pieni": 0,
+    "distanza": 0
+   },
+   "colore": 0,
+   "voxel": 0
+  },
+  {
+   "nome": "rocca/1",
+   "concetto": "rocca",
+   "quote": {
+    "impronta": 0,
+    "profilo": 0,
+    "pieni": 0,
+    "distanza": 0
+   },
+   "colore": 0,
+   "voxel": 0
+  },
+  {
+   "nome": "rocca/2",
+   "concetto": "rocca",
+   "quote": {
+    "impronta": 0,
+    "profilo": 0,
+    "pieni": 0,
+    "distanza": 0
+   },
+   "colore": 0,
+   "voxel": 0
+  },
+  {
+   "nome": "pagoda/1/seconda",
+   "concetto": "pagoda",
+   "quote": {
+    "impronta": 0,
+    "profilo": 0,
+    "pieni": 0,
+    "distanza": 0
+   },
+   "colore": 0,
+   "voxel": 0
+  },
+  {
+   "nome": "pagoda/2/seconda",
+   "concetto": "pagoda",
+   "quote": {
+    "impronta": 0,
+    "profilo": 0,
+    "pieni": 0,
+    "distanza": 0
+   },
+   "colore": 0,
+   "voxel": 0
+  }
+ ],
+ "dentro": {
+  "impronta": 0,
+  "profilo": 0,
+  "pieni": 0,
+  "distanza": 0
+ },
+ "fra": {
+  "impronta": 0.20985849904845433,
+  "profilo": 0.22324217184366413,
+  "pieni": 0.3587582242630672,
+  "distanza": 0.2531654937807376
+ },
+ "separazione": {
+  "impronta": null,
+  "profilo": null,
+  "pieni": null,
+  "distanza": null
+ },
+ "vicini": 1,
+ "matrice": {
+  "concetti": [
+   "moderna",
+   "steampunk",
+   "futuristica",
+   "locanda",
+   "tempio",
+   "rocca",
+   "pagoda"
+  ],
+  "d": [
+   [
+    0.1567425069023196,
+    0.1974266715354489,
+    0.22588963318030367,
+    0.23365564075928924,
+    0.22709665405635682,
+    0.4539544499376752,
+    0.2583777823469092
+   ],
+   [
+    0.1974266715354489,
+    0.16186289572361612,
+    0.20701129661703246,
+    0.17677220488297474,
+    0.23297394376174035,
+    0.441526043088901,
+    0.23326032332143318
+   ],
+   [
+    0.22588963318030367,
+    0.20701129661703246,
+    0,
+    0.2188196865949522,
+    0.1766612689152481,
+    0.44762527538855923,
+    0.2421708896965559
+   ],
+   [
+    0.23365564075928924,
+    0.17677220488297474,
+    0.2188196865949522,
+    0.21075063676804365,
+    0.2552271759607565,
+    0.4277545327587725,
+    0.2872831370002179
+   ],
+   [
+    0.22709665405635682,
+    0.23297394376174035,
+    0.1766612689152481,
+    0.2552271759607565,
+    0.14638821253554482,
+    0.45709649582941425,
+    0.23413081496928753
+   ],
+   [
+    0.4539544499376752,
+    0.441526043088901,
+    0.44762527538855923,
+    0.4277545327587725,
+    0.45709649582941425,
+    0.2172810452148848,
+    0.4776290640103583
+   ],
+   [
+    0.2583777823469092,
+    0.23326032332143318,
+    0.2421708896965559,
+    0.2872831370002179,
+    0.23413081496928753,
+    0.4776290640103583,
+    0.24731825204497182
+   ]
+  ]
+ },
+ "descrittori": {
+  "moderna/1": {
+   "copertura": 0.7856,
+   "pieno": 0.24790486586843846,
+   "altezzaMedia": 0.7898234894772573,
+   "altezzaMassima": 1,
+   "cortile": 0,
+   "quote": 9,
+   "torri": 0
+  },
+  "moderna/2": {
+   "copertura": 0.756,
+   "pieno": 0.2619664803976289,
+   "altezzaMedia": 0.7994479717813051,
+   "altezzaMassima": 1,
+   "cortile": 0,
+   "quote": 9,
+   "torri": 0
+  },
+  "steampunk/1": {
+   "copertura": 0.8412,
+   "pieno": 0.3062712142048983,
+   "altezzaMedia": 0.8321477254715486,
+   "altezzaMassima": 1,
+   "cortile": 0.003317535545023697,
+   "quote": 12,
+   "torri": 0
+  },
+  "steampunk/2": {
+   "copertura": 0.7828,
+   "pieno": 0.2801942912165029,
+   "altezzaMedia": 0.834937830011923,
+   "altezzaMassima": 1,
+   "cortile": 0,
+   "quote": 13,
+   "torri": 0
+  },
+  "futuristica/1/seconda": {
+   "copertura": 0.8248999999999999,
+   "pieno": 0.30743156587630915,
+   "altezzaMedia": 0.6742683961692326,
+   "altezzaMassima": 1,
+   "cortile": 0,
+   "quote": 8,
+   "torri": 1
+  },
+  "locanda/1/seconda": {
+   "copertura": 0.8198000000000001,
+   "pieno": 0.29446879991836444,
+   "altezzaMedia": 0.8287907619744652,
+   "altezzaMassima": 1,
+   "cortile": 0,
+   "quote": 11,
+   "torri": 0
+  },
+  "locanda/2": {
+   "copertura": 0.799,
+   "pieno": 0.31359479533846485,
+   "altezzaMedia": 0.7423145598664999,
+   "altezzaMassima": 1,
+   "cortile": 0,
+   "quote": 15,
+   "torri": 0
+  },
+  "tempio/1": {
+   "copertura": 0.8139999999999998,
+   "pieno": 0.2587627492769067,
+   "altezzaMedia": 0.6886420966420966,
+   "altezzaMassima": 1,
+   "cortile": 0,
+   "quote": 6,
+   "torri": 3
+  },
+  "tempio/2": {
+   "copertura": 0.7887,
+   "pieno": 0.25572945212431236,
+   "altezzaMedia": 0.666250792443261,
+   "altezzaMassima": 1,
+   "cortile": 0,
+   "quote": 8,
+   "torri": 3
+  },
+  "rocca/1": {
+   "copertura": 0.7638888888888888,
+   "pieno": 0.6068856103545703,
+   "altezzaMedia": 0.5742628458498024,
+   "altezzaMassima": 0.9891304347826086,
+   "cortile": 0.19965075669383003,
+   "quote": 16,
+   "torri": 6
+  },
+  "rocca/2": {
+   "copertura": 0.7938194444444444,
+   "pieno": 0.5590350939724043,
+   "altezzaMedia": 0.5735823257123078,
+   "altezzaMassima": 1,
+   "cortile": 0.20618055555555553,
+   "quote": 18,
+   "torri": 5
+  },
+  "pagoda/1/seconda": {
+   "copertura": 0.8618,
+   "pieno": 0.1964467758697481,
+   "altezzaMedia": 0.6252649493308579,
+   "altezzaMassima": 1,
+   "cortile": 0,
+   "quote": 21,
+   "torri": 8
+  },
+  "pagoda/2/seconda": {
+   "copertura": 0.7805,
+   "pieno": 0.2369156325933491,
+   "altezzaMedia": 0.8162340380098227,
+   "altezzaMassima": 1,
+   "cortile": 0,
+   "quote": 11,
+   "torri": 0
+  }
+ },
+ "extra": {
+  "moderna/1": {
+   "errori": [],
+   "ms": 702
+  },
+  "moderna/2": {
+   "errori": [],
+   "ms": 448
+  },
+  "steampunk/1": {
+   "errori": [],
+   "ms": 592
+  },
+  "steampunk/2": {
+   "errori": [],
+   "ms": 735
+  },
+  "futuristica/1/seconda": {
+   "errori": [],
+   "ms": 435
+  },
+  "futuristica/2/seconda": {
+   "errori": [
+    "seme 1: riga 120, <box>: \"at\" vuole tre numeri separati da spazi",
+    "seme 2: riga 120, <box>: \"at\" vuole tre numeri separati da spazi",
+    "seme 3: riga 120, <box>: \"at\" vuole tre numeri separati da spazi",
+    "seme 4: riga 120, <box>: \"at\" vuole tre numeri separati da spazi",
+    "seme 5: riga 120, <box>: \"at\" vuole tre numeri separati da spazi"
+   ],
+   "ms": 6
+  },
+  "locanda/1/seconda": {
+   "errori": [],
+   "ms": 477
+  },
+  "locanda/2": {
+   "errori": [],
+   "ms": 424
+  },
+  "tempio/1": {
+   "errori": [],
+   "ms": 370
+  },
+  "tempio/2": {
+   "errori": [],
+   "ms": 352
+  },
+  "rocca/1": {
+   "errori": [],
+   "ms": 651
+  },
+  "rocca/2": {
+   "errori": [],
+   "ms": 853
+  },
+  "pagoda/1/seconda": {
+   "errori": [],
+   "ms": 375
+  },
+  "pagoda/2/seconda": {
+   "errori": [],
+   "ms": 340
+  }
+ }
+}

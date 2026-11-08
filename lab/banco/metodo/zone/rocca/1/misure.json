@@ -1,0 +1,242 @@
+{
+  "bersaglio": "rocca",
+  "chiamate": [
+    {
+      "blocco": 1,
+      "input": 5806,
+      "output": 12358,
+      "dollari": 0.29359999999999997,
+      "ms": 133995
+    },
+    {
+      "blocco": 2,
+      "input": 15209,
+      "output": 54207,
+      "dollari": 1.168013,
+      "ms": 564290
+    },
+    {
+      "blocco": 3,
+      "input": 26731,
+      "output": 42547,
+      "dollari": 1.026989,
+      "ms": 436438
+    }
+  ],
+  "totale": {
+    "input": 47746,
+    "output": 109112,
+    "dollari": 2.4886019999999998,
+    "ms": 1134723
+  },
+  "caratteriXml": 13806,
+  "passa": false,
+  "difetti": [
+    "huge (16 voxel per casella, gradino 3), seme 1 e altri 4: piani: 1 (serve ≥ 2)",
+    "huge (16 voxel per casella, gradino 3), seme 1 e altri 4: stanze: 0 (serve ≥ 3)",
+    "huge (16 voxel per casella, gradino 3), seme 1 e altri 4: porta: nessuna sul davanti (serve sul davanti, scarto ≤ 0.33, alta ≥ 1.5)",
+    "huge (16 voxel per casella, gradino 3), seme 3 e altri 1: testa: — (serve ≥ 1.5 caselle per piano)",
+    "huge (16 voxel per casella, gradino 3), seme 3: salti: 0 (serve ≥ 2)",
+    "huge (16 voxel per casella, gradino 3), seme 3: sagoma: 3 (serve ≥ 4)",
+    "gargantuan (12 voxel per casella, gradino 2), seme 1 e altri 3: piani: 1 (serve ≥ 2)",
+    "gargantuan (12 voxel per casella, gradino 2), seme 1 e altri 4: stanze: 0 (serve ≥ 3)",
+    "gargantuan (12 voxel per casella, gradino 2), seme 1 e altri 3: murato: 0.29 (serve ≤ 0.25)",
+    "gargantuan (12 voxel per casella, gradino 2), seme 3: salti: 1 (serve ≥ 2)",
+    "gargantuan (12 voxel per casella, gradino 2), seme 3: sagoma: 3 (serve ≥ 4)",
+    "varianza a huge: perimetro: 0 (serve ≥ 0.15)"
+  ],
+  "voci": [
+    {
+      "id": "finisce",
+      "ok": true,
+      "valore": "265 ms",
+      "richiesto": "entro 8000 ms"
+    },
+    {
+      "id": "valido",
+      "ok": true,
+      "valore": "sì",
+      "richiesto": "i controlli di check.ts"
+    },
+    {
+      "id": "piani",
+      "ok": false,
+      "valore": "1",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "testa",
+      "ok": true,
+      "valore": "1.94",
+      "richiesto": "≥ 1.5 caselle per piano"
+    },
+    {
+      "id": "stanze",
+      "ok": false,
+      "valore": "0",
+      "richiesto": "≥ 3"
+    },
+    {
+      "id": "murato",
+      "ok": true,
+      "valore": "0",
+      "richiesto": "≤ 0.25"
+    },
+    {
+      "id": "porta",
+      "ok": false,
+      "valore": "nessuna sul davanti",
+      "richiesto": "sul davanti, scarto ≤ 0.33, alta ≥ 1.5"
+    },
+    {
+      "id": "salti",
+      "ok": true,
+      "valore": "6",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "materiali",
+      "ok": true,
+      "valore": "14",
+      "richiesto": "≥ 6"
+    },
+    {
+      "id": "dominante",
+      "ok": true,
+      "valore": "0.37",
+      "richiesto": "≤ 0.6"
+    },
+    {
+      "id": "finestre",
+      "ok": true,
+      "valore": "20 su 3 lati",
+      "richiesto": "≥ 6 su ≥ 3 lati"
+    },
+    {
+      "id": "dettagli",
+      "ok": true,
+      "valore": "62, 0 lati vuoti",
+      "richiesto": "≥ 24, ≤ 1 lati vuoti"
+    },
+    {
+      "id": "rumore",
+      "ok": true,
+      "valore": "0.02",
+      "richiesto": "≤ 0.7"
+    },
+    {
+      "id": "sagoma",
+      "ok": true,
+      "valore": "5",
+      "richiesto": "≥ 4"
+    },
+    {
+      "id": "rilievo",
+      "ok": true,
+      "valore": "0.59",
+      "richiesto": "≥ 0.12"
+    },
+    {
+      "id": "ingombro",
+      "ok": true,
+      "valore": "1",
+      "richiesto": "≥ 0.3"
+    }
+  ],
+  "misure": {
+    "voxel": 246900,
+    "ms": 265,
+    "finito": true,
+    "piani": [
+      {
+        "z": 1,
+        "quota": 0.0625,
+        "area": 1.375,
+        "testa": 1.9375,
+        "stanze": 0
+      }
+    ],
+    "cantina": 0,
+    "terrazze": 1,
+    "stanze": 0,
+    "murato": 0,
+    "persi": [],
+    "salti": [
+      {
+        "x": 81,
+        "y": 59,
+        "z": 1,
+        "sale": false
+      },
+      {
+        "x": 86,
+        "y": 42,
+        "z": 35,
+        "sale": false
+      },
+      {
+        "x": 30,
+        "y": 99,
+        "z": 36,
+        "sale": false
+      },
+      {
+        "x": 105,
+        "y": 99,
+        "z": 36,
+        "sale": false
+      },
+      {
+        "x": 48,
+        "y": 96,
+        "z": 36,
+        "sale": false
+      },
+      {
+        "x": 75,
+        "y": 96,
+        "z": 36,
+        "sale": false
+      }
+    ],
+    "materiali": 14,
+    "dominante": 0.36652895909275013,
+    "finestre": 20,
+    "latiConFinestre": 3,
+    "dettagli": 62,
+    "latiVuoti": 0,
+    "rumore": 0.015873015873015872,
+    "rilievo": 0.5912344223644325,
+    "sagoma": 5,
+    "ingombro": 1,
+    "luci": 0,
+    "inutili": [
+      "prl \"y\" → \"Y\"",
+      "all \"Yy\" → \"*Y\" — in quel momento nella griglia non c'erano celle \"Y\"",
+      "prl \"DY\" → \"Z*\" — in quel momento nella griglia non c'erano celle \"Y\"",
+      "prl \"Yp\" → \"*J\" — in quel momento nella griglia non c'erano celle \"Y\"",
+      "prl \"p[JZ]/[JZ]Y\" → \"J*/**\" — in quel momento nella griglia non c'erano celle \"JZ\", \"Y\"",
+      "one \"YYY/JJJ/WWW\" → \"***/QQQ/***\" — in quel momento nella griglia non c'erano celle \"Y\", \"J\"",
+      "all \"Y .\" → \"A Y\" — in quel momento nella griglia non c'erano celle \"Y\"",
+      "all \"Y .\" → \"u Y\" — in quel momento nella griglia non c'erano celle \"Y\"",
+      "all \"Y .\" → \"F Y\" — in quel momento nella griglia non c'erano celle \"Y\"",
+      "all \"Y .\" → \"u Y\" — in quel momento nella griglia non c'erano celle \"Y\"",
+      "prl \"Y\" → \"R\" — in quel momento nella griglia non c'erano celle \"Y\"",
+      "all \"Z .\" → \"A Z\" — in quel momento nella griglia non c'erano celle \"Z\"",
+      "all \"Z .\" → \"u Z\" — in quel momento nella griglia non c'erano celle \"Z\"",
+      "all \"Z .\" → \"J Z\" — in quel momento nella griglia non c'erano celle \"Z\"",
+      "prl \"Z\" → \"R\" — in quel momento nella griglia non c'erano celle \"Z\"",
+      "all \"J .\" → \"* J\" — in quel momento nella griglia non c'erano celle \"J\"",
+      "all \"J .\" → \"* R\" — in quel momento nella griglia non c'erano celle \"J\"",
+      "all \"Q .\" → \"J Q\" — in quel momento nella griglia non c'erano celle \"Q\"",
+      "all \"Q .\" → \"u Q\" — in quel momento nella griglia non c'erano celle \"Q\"",
+      "prl \"Q\" → \"J\" — in quel momento nella griglia non c'erano celle \"Q\"",
+      "all \"J .\" → \"* R\" — in quel momento nella griglia non c'erano celle \"J\""
+    ],
+    "avvisi": [
+      "tocca i bordi laterali della griglia: forse è tagliato",
+      "colori mai usati: N z x W t v G k r h g f d p y w q c o i j l u n b m H S Y s e U"
+    ],
+    "errori": []
+  }
+}
