@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 07/11/2026, epoca 333 (claude). Crediti: vedi `stato`.
+Aggiornato il 08/11/2026, epoca 335 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -23,7 +23,7 @@ Aggiornato il 07/11/2026, epoca 333 (claude). Crediti: vedi `stato`.
 
 0. **Decisioni autore 04/11:** D32 SemVer `X.Y.Z`. Step 32: T260, T262 → T245a → T263/T245b → T245c-f. T265 prima della beta.
 1. T324 (immagini Jev: utile come filtro dei difetti visivi, non per il giudizio dell'Artista) integrato via T329.
-2. **Nodi MJ:** T333 integrato (ADR-0171, kernel 0.5.7; lo Scultore non lo conosce ancora); **T334 integrato via T340/T341** (field/temperature/observe/search, ADR-0173, kernel 0.5.9). **T335 in corso.** **T342** (simboli `#<numero>`, contratto nuovo, autore 08/11) dopo T335, prima di T336. **Pronti:** T331, T88. Da approvare: T310b. Bloccati: T336-T339.
+2. **Nodi MJ:** T333 integrato (ADR-0171, kernel 0.5.7; lo Scultore non lo conosce ancora); **T334 integrato via T340/T341** (field/temperature/observe/search, ADR-0173, kernel 0.5.9). **T335 integrato** (ADR-0174, kernel 0.5.10). **T342 in corso** (simboli `#<numero>`, contratto nuovo), prima di T336. **T331 integrato** (studio GPU, `docs/design/gpu.md`: WebGPU non ora; 4 task proposti da approvare: mesh senza allocazioni, corona solo quando serve, scatti all’arrivo, rimisurare). **Pronti:** T337, T339, T88. Da approvare: T310b. Bloccati: T336-T339.
 3. **Crediti (20:30 UTC 07/11):** Claude 5h 36 % (reset 23:00 UTC), settimana 28 % (reset 12/11 16:00); Gemini e agy 100 %; Argon fermo fino all'11/11.
 
 ## Attese dall'autore
@@ -38,5 +38,5 @@ Aggiornato il 07/11/2026, epoca 333 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **333 (claude):** T341 integrato → T340 e T334 chiusi (ADR-0173, kernel 0.5.9).
-- **332 (claude):** T296 integrato (ADR-0172, kernel 0.5.8, browser verificato); T340 in conflitto → T341.
+- **335 (claude):** T331 integrato; T342 lanciato.
+- **334 (claude):** T335 integrato (kernel 0.5.10); T342 sbloccato.
