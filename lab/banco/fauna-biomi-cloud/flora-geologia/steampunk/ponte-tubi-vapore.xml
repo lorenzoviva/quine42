@@ -1,5 +1,5 @@
 <!-- Ponte di tubi a vapore (Cantiere 8, orichalcum): piloni e tubi a caso; valvole e vapore a caso. -->
-<sequence values="BIKOCRSPQu123456z" symmetry="(xy)" name="Ponte di tubi a vapore">
+<sequence values="BIKOCRSPQu#1#2#3#4#5#6z" symmetry="(xy)" name="Ponte di tubi a vapore">
   <color symbol="I" value="3c3a38" name="ferro"/>
   <color symbol="K" value="8a4a35" name="mattoni"/>
   <color symbol="O" value="b8892e" name="tubi d'ottone"/>
@@ -9,12 +9,12 @@
   <color symbol="P" hidden="True" name="marcatore"/>
   <color symbol="Q" hidden="True" name="marcatore"/>
   <color symbol="u" hidden="True" name="marcatore"/>
-  <color symbol="1" hidden="True" name="marcatore"/>
-  <color symbol="2" hidden="True" name="marcatore"/>
-  <color symbol="3" hidden="True" name="marcatore"/>
-  <color symbol="4" hidden="True" name="marcatore"/>
-  <color symbol="5" hidden="True" name="marcatore"/>
-  <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="#1" hidden="True" name="marcatore"/>
+  <color symbol="#2" hidden="True" name="marcatore"/>
+  <color symbol="#3" hidden="True" name="marcatore"/>
+  <color symbol="#4" hidden="True" name="marcatore"/>
+  <color symbol="#5" hidden="True" name="marcatore"/>
+  <color symbol="#6" hidden="True" name="marcatore"/>
   <color symbol="z" hidden="True" name="marcatore"/>
   <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
   <box at="3 0 0" size="7 1 1" color="z" on="B"/>
@@ -22,49 +22,49 @@
   <one in="z" out="B" steps="8"/>
   <!-- scelta «piloni»: traliccio | mattoni | cavalletto -->
   <box at="25 25 0" size="50 22 30" color="u" on="B"/>
-  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
-  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
   <!--   1: traliccio -->
-  <line at="4 21 0" to="6 25 26" r="1" color="I" on="1"/>
-  <line at="8 29 0" to="6 25 26" r="1" color="I" on="1"/>
-  <line at="4 29 0" to="6 25 26" r="1" color="I" on="1"/>
-  <line at="8 21 0" to="6 25 26" r="1" color="I" on="1"/>
-  <line at="46 21 0" to="44 25 26" r="1" color="I" on="1"/>
-  <line at="42 29 0" to="44 25 26" r="1" color="I" on="1"/>
-  <line at="46 29 0" to="44 25 26" r="1" color="I" on="1"/>
-  <line at="42 21 0" to="44 25 26" r="1" color="I" on="1"/>
-  <box at="6 25 25" size="8 10 3" color="I" on="1"/>
-  <box at="44 25 25" size="8 10 3" color="I" on="1"/>
+  <line at="4 21 0" to="6 25 26" r="1" color="I" on="#1"/>
+  <line at="8 29 0" to="6 25 26" r="1" color="I" on="#1"/>
+  <line at="4 29 0" to="6 25 26" r="1" color="I" on="#1"/>
+  <line at="8 21 0" to="6 25 26" r="1" color="I" on="#1"/>
+  <line at="46 21 0" to="44 25 26" r="1" color="I" on="#1"/>
+  <line at="42 29 0" to="44 25 26" r="1" color="I" on="#1"/>
+  <line at="46 29 0" to="44 25 26" r="1" color="I" on="#1"/>
+  <line at="42 21 0" to="44 25 26" r="1" color="I" on="#1"/>
+  <box at="6 25 25" size="8 10 3" color="I" on="#1"/>
+  <box at="44 25 25" size="8 10 3" color="I" on="#1"/>
   <!--   2: mattoni -->
-  <box at="6 25 0" size="9 11 27" color="K" on="2"/>
-  <box at="44 25 0" size="9 11 27" color="K" on="2"/>
-  <box at="6 25 26" size="11 13 2" color="I" on="2"/>
-  <box at="44 25 26" size="11 13 2" color="I" on="2"/>
+  <box at="6 25 0" size="9 11 27" color="K" on="#2"/>
+  <box at="44 25 0" size="9 11 27" color="K" on="#2"/>
+  <box at="6 25 26" size="11 13 2" color="I" on="#2"/>
+  <box at="44 25 26" size="11 13 2" color="I" on="#2"/>
   <!--   3: cavalletto -->
-  <line at="2 25 0" to="6 25 26" r="1.5" color="I" on="3"/>
-  <line at="10 25 0" to="6 25 26" r="1.5" color="I" on="3"/>
-  <line at="40 25 0" to="44 25 26" r="1.5" color="I" on="3"/>
-  <line at="48 25 0" to="44 25 26" r="1.5" color="I" on="3"/>
-  <box at="6 25 26" size="6 12 2" color="I" on="3"/>
-  <box at="44 25 26" size="6 12 2" color="I" on="3"/>
-  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <line at="2 25 0" to="6 25 26" r="1.5" color="I" on="#3"/>
+  <line at="10 25 0" to="6 25 26" r="1.5" color="I" on="#3"/>
+  <line at="40 25 0" to="44 25 26" r="1.5" color="I" on="#3"/>
+  <line at="48 25 0" to="44 25 26" r="1.5" color="I" on="#3"/>
+  <box at="6 25 26" size="6 12 2" color="I" on="#3"/>
+  <box at="44 25 26" size="6 12 2" color="I" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
   <!-- scelta «tubi»: tre in fila | due grandi | quattro a gradini -->
   <box at="25 25 26" size="50 22 16" color="u" on="B"/>
-  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
-  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
   <!--   1: tre in fila -->
-  <line at="1 20 30" to="48 20 30" r="2" color="O" on="1"/>
-  <line at="1 25 30" to="48 25 30" r="2" color="C" on="1"/>
-  <line at="1 30 30" to="48 30 30" r="2" color="O" on="1"/>
+  <line at="1 20 30" to="48 20 30" r="2" color="O" on="#1"/>
+  <line at="1 25 30" to="48 25 30" r="2" color="C" on="#1"/>
+  <line at="1 30 30" to="48 30 30" r="2" color="O" on="#1"/>
   <!--   2: due grandi -->
-  <line at="1 22 32" to="48 22 32" r="4" color="C" on="2"/>
-  <line at="1 30 31" to="48 30 31" r="3" color="O" on="2"/>
+  <line at="1 22 32" to="48 22 32" r="4" color="C" on="#2"/>
+  <line at="1 30 31" to="48 30 31" r="3" color="O" on="#2"/>
   <!--   3: quattro a gradini -->
-  <line at="1 19 29" to="48 19 29" r="1.5" color="O" on="3"/>
-  <line at="1 23 31" to="48 23 31" r="1.5" color="C" on="3"/>
-  <line at="1 27 33" to="48 27 33" r="1.5" color="O" on="3"/>
-  <line at="1 31 35" to="48 31 35" r="1.5" color="C" on="3"/>
-  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <line at="1 19 29" to="48 19 29" r="1.5" color="O" on="#3"/>
+  <line at="1 23 31" to="48 23 31" r="1.5" color="C" on="#3"/>
+  <line at="1 27 33" to="48 27 33" r="1.5" color="O" on="#3"/>
+  <line at="1 31 35" to="48 31 35" r="1.5" color="C" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
   <!-- tiranti che scendono a caso dai tubi verso il basso, di lunghezza propria -->
   <one in="C B" out="* Q" steps="3"/>
   <prl in="Q B" out="I Q" p="0.85" steps="12"/>

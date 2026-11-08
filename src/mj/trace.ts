@@ -12,6 +12,7 @@
 import { describe, run, type Grid3, type GridLimits, type Node3, type PaletteEntry, type RunResult, type RunWatch, type Vec3 } from './engine';
 import type { MjxModel } from './model';
 import { FORM_LIMITS } from './run';
+import { showSymbols, symbolName } from './symbols';
 
 export type TraceForm = 'nodes' | 'sections' | 'diffs' | 'boxes';
 export const TRACE_FORMS: readonly TraceForm[] = ['nodes', 'sections', 'diffs', 'boxes'];
@@ -142,7 +143,7 @@ export function traceProgram(model: Pick<MjxModel, 'program'>, seed: number, opt
         if (was === now) return;
         shadow[idx] = now;
         cells++;
-        const key = `${g.alphabet[was]}→${g.alphabet[now]}`;
+        const key = `${symbolName(g.alphabet[was])}→${symbolName(g.alphabet[now])}`;
         n.changes.set(key, (n.changes.get(key) ?? 0) + 1);
         const z = Math.floor(idx / (g.X * g.Y));
         box = widen(box, idx % g.X, Math.floor(idx / g.X) % g.Y, z);
@@ -272,7 +273,9 @@ export function estimateTokens(text: string): number {
 const span = (a: number, b: number) => (a === b ? `${a}` : `${a}-${b}`);
 const showBox = (b: Box) => `x${span(b.x0, b.x1)} y${span(b.y0, b.y1)} z${span(b.z0, b.z1)}`;
 /** A pattern as the program writes it: the top layer first. The engine holds it bottom first, with air as '.'. */
-const written = (s: string) => s.split(' ').reverse().join(' ');
+const written = (s: string) => showSymbols(s.split(' ').reverse().join(' '));
+/** Symbols as the program writes them (`#12`, T342). */
+const w = showSymbols;
 const short = (s: string, n = 48) => (s.length > n ? `${s.slice(0, n - 1)}…` : s);
 
 /** One line for a node, without what it did. */
@@ -285,17 +288,17 @@ export function nodeName(node: Node3): string {
       return `${node.type} ${short(written(r.in))} → ${short(written(r.out))}${node.rules.length > 1 ? ` (+${node.rules.length - 1})` : ''}${node.steps !== undefined && Number.isFinite(node.steps) ? ` passi=${node.steps}` : ''}${inferenceName(node)}`;
     }
     case 'conv':
-      return `convolution ${node.rules.map((r) => `${r.in}→${r.out}${r.sums ? ` se ${r.neighbors} in [${r.sums.join(',')}]` : ''}`).slice(0, 2).join('; ')}${node.rules.length > 2 ? ` (+${node.rules.length - 2})` : ''}`;
+      return `convolution ${node.rules.map((r) => `${w(r.in)}→${w(r.out)}${r.sums ? ` se ${w(r.neighbors)} in [${r.sums.join(',')}]` : ''}`).slice(0, 2).join('; ')}${node.rules.length > 2 ? ` (+${node.rules.length - 2})` : ''}`;
     case 'path':
-      return `path da ${node.from} a ${node.to} su ${node.on} colore ${node.color}${node.inertia ? ' inerzia' : ''}${node.longest ? ' piu-lungo' : ''}`;
+      return `path da ${w(node.from)} a ${w(node.to)} su ${w(node.on)} colore ${w(node.color)}${node.inertia ? ' inerzia' : ''}${node.longest ? ' piu-lungo' : ''}`;
     case 'map':
       return `map scala ${node.scale.map((n, a) => (node.divide && node.divide[a] !== 1 ? `${n}/${node.divide[a]}` : `${n}`)).join(' ')}`;
     case 'wfc':
       return `wfc ${node.model === 'tile' ? `a tessere ${node.dims.join('×')}` : `a sovrapposizione N=${node.dims[0]}`}, ${node.patterns.length} motivi${node.periodic ? ' periodica' : ''}${node.shannon ? ' shannon' : ''}${node.tries !== undefined ? ` tentativi=${node.tries}` : ''}`;
     case 'convchain':
-      return `convchain su ${node.on} → ${node.black}/${node.white} N=${node.n}${node.temperature !== undefined ? ` temperatura=${node.temperature}` : ''}${node.steps !== undefined && Number.isFinite(node.steps) ? ` passi=${node.steps}` : ''}`;
+      return `convchain su ${w(node.on)} → ${w(node.black)}/${w(node.white)} N=${node.n}${node.temperature !== undefined ? ` temperatura=${node.temperature}` : ''}${node.steps !== undefined && Number.isFinite(node.steps) ? ` passi=${node.steps}` : ''}`;
     case 'shape':
-      return node.shape === 'line' ? `line ${node.at.join(' ')} → ${node.to?.join(' ')} ${node.color}` : `${node.shape} at ${node.at.join(' ')} size ${node.size?.join(' ')} ${node.color}${node.on ? ` su ${node.on}` : ''}`;
+      return node.shape === 'line' ? `line ${node.at.join(' ')} → ${node.to?.join(' ')} ${w(node.color)}` : `${node.shape} at ${node.at.join(' ')} size ${node.size?.join(' ')} ${w(node.color)}${node.on ? ` su ${w(node.on)}` : ''}`;
     default:
       return node.type;
   }
@@ -304,9 +307,9 @@ export function nodeName(node: Node3): string {
 /** What a rule node infers (T334), in the words of the trace: its fields, temperature, observations and search. */
 function inferenceName(node: Extract<Node3, { type: 'one' | 'all' | 'prl' }>): string {
   const parts: string[] = [];
-  for (const f of node.fields ?? []) parts.push(`campo ${f.for} ${f.from !== undefined ? `da ${f.from}` : `verso ${f.to}`} su ${f.on}${f.recompute ? ' ricalcolato' : ''}${f.essential ? ' essenziale' : ''}`);
+  for (const f of node.fields ?? []) parts.push(`campo ${w(f.for)} ${f.from !== undefined ? `da ${w(f.from)}` : `verso ${w(f.to ?? '')}`} su ${w(f.on)}${f.recompute ? ' ricalcolato' : ''}${f.essential ? ' essenziale' : ''}`);
   if (node.temperature !== undefined) parts.push(`temperatura=${node.temperature}`);
-  for (const o of node.observe ?? []) parts.push(`osserva ${o.value}${o.from !== undefined && o.from !== o.value ? `→${o.from}` : ''} fino a ${o.to}`);
+  for (const o of node.observe ?? []) parts.push(`osserva ${w(o.value)}${o.from !== undefined && o.from !== o.value ? `→${w(o.from)}` : ''} fino a ${w(o.to)}`);
   if (node.search) parts.push(`ricerca${node.limit !== undefined ? ` limite=${node.limit}` : ''}${node.depthCoefficient !== undefined ? ` profondità=${node.depthCoefficient}` : ''}`);
   return parts.length ? ` [${parts.join('; ')}]` : '';
 }
@@ -315,7 +318,7 @@ function inferenceName(node: Extract<Node3, { type: 'one' | 'all' | 'prl' }>): s
 function ruleLines(n: NodeTrace, pad: string): string[] {
   const node = n.node;
   if (n.fired.length < 2 || (node.type !== 'one' && node.type !== 'all' && node.type !== 'prl' && node.type !== 'conv')) return [];
-  const names = node.type === 'conv' ? node.rules.map((r) => `${r.in}→${r.out}`) : node.rules.map((r) => `${short(written(r.in), 32)} → ${short(written(r.out), 32)}`);
+  const names = node.type === 'conv' ? node.rules.map((r) => `${w(r.in)}→${w(r.out)}`) : node.rules.map((r) => `${short(written(r.in), 32)} → ${short(written(r.out), 32)}`);
   return [`${pad}  ${names.map((name, i) => `r${i + 1} ${name} ×${n.fired[i]}`).join('; ')}`];
 }
 
@@ -402,11 +405,11 @@ function neverLines(t: ProgramTrace): string[] {
 
 function header(t: ProgramTrace): string[] {
   const used = new Set(t.nodes.flatMap((n) => [...n.changes.keys()].flatMap((k) => k.split('→'))));
-  const letters = Object.entries(t.palette).filter(([k]) => used.has(k)).map(([k, v]) => `${k}=${v.name ?? v.color ?? '?'}${v.hidden ? ' (marcatore)' : ''}`);
+  const letters = Object.entries(t.palette).filter(([k]) => used.has(symbolName(k))).map(([k, v]) => `${symbolName(k)}=${v.name ?? v.color ?? '?'}${v.hidden ? ' (marcatore)' : ''}`);
   const g = t.result.grid;
   const counts = new Map<number, number>();
   for (const c of g.cells) if (c) counts.set(c, (counts.get(c) ?? 0) + 1);
-  const tally = [...counts].sort((a, b) => b[1] - a[1]).map(([c, v]) => `${g.alphabet[c]} ${v}`);
+  const tally = [...counts].sort((a, b) => b[1] - a[1]).map(([c, v]) => `${symbolName(g.alphabet[c])} ${v}`);
   const grown = t.size.join() !== t.finalSize.join() ? ` → ${t.finalSize.join('×')}` : '';
   return [
     `Traccia, seme ${t.seed}: griglia ${t.size.join('×')}${grown}, ${t.nodes.length} nodi, ${t.steps} passi, ${t.finished ? 'finito' : 'NON finito (tempo esaurito)'} in ${t.ms} ms.`,
@@ -457,7 +460,7 @@ export function sectionLines(f: Frame, opts: { plain?: boolean } = {}): string[]
         const c = f.cells[i];
         let run = 1;
         while (x + run < f.X && f.cells[i + run] === c) run++;
-        const ch = c ? f.alphabet[c] : '.';
+        const ch = c ? symbolName(f.alphabet[c]) : '.';
         parts.push(opts.plain || run < 3 ? ch.repeat(run) : `${ch}×${run}`);
         x += run;
         i += run;
@@ -502,7 +505,7 @@ export function diffLines(a: Frame, b: Frame, most: number): string[] {
   const label = new Int32Array(a.cells.length);
   for (let i = 0; i < a.cells.length; i++) {
     if (a.cells[i] === b.cells[i]) continue;
-    const key = `${a.cells[i] ? a.alphabet[a.cells[i]] : '.'}→${b.cells[i] ? b.alphabet[b.cells[i]] : '.'}`;
+    const key = `${a.cells[i] ? symbolName(a.alphabet[a.cells[i]]) : '.'}→${b.cells[i] ? symbolName(b.alphabet[b.cells[i]]) : '.'}`;
     let id = ids.get(key);
     if (id === undefined) {
       id = names.push(key) - 1;
@@ -543,7 +546,7 @@ function differencesText(t: ProgramTrace, model: Pick<MjxModel, 'program'>, grou
 
 /** (c) A frame as a static model: the voxels of each letter grouped in boxes. */
 export function boxesText(f: Frame, most: number): string[] {
-  const names = f.alphabet.map((c, i) => (i ? c : ''));
+  const names = f.alphabet.map((c, i) => (i ? symbolName(c) : ''));
   return boxLines(boxesOf(f.X, f.Y, f.Z, f.cells), names, most);
 }
 

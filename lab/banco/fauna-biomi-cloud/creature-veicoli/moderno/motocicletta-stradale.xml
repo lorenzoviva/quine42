@@ -1,5 +1,5 @@
 <!-- Motocicletta stradale (Cantiere 8, neapolis): stile, scarico e accessori a caso; adesivi a caso. -->
-<sequence values="BRKMCVLYu123456z" symmetry="(xy)" name="Motocicletta stradale">
+<sequence values="BRKMCVLYu#1#2#3#4#5#6z" symmetry="(xy)" name="Motocicletta stradale">
   <color symbol="R" value="b8202a" name="carena rossa"/>
   <color symbol="K" value="1c1c1f" name="gomme e sella"/>
   <color symbol="M" value="8d9096" name="motore"/>
@@ -8,12 +8,12 @@
   <color symbol="L" value="fff3c0" name="faro" glow="True"/>
   <color symbol="Y" value="f0c020" name="adesivi"/>
   <color symbol="u" hidden="True" name="marcatore"/>
-  <color symbol="1" hidden="True" name="marcatore"/>
-  <color symbol="2" hidden="True" name="marcatore"/>
-  <color symbol="3" hidden="True" name="marcatore"/>
-  <color symbol="4" hidden="True" name="marcatore"/>
-  <color symbol="5" hidden="True" name="marcatore"/>
-  <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="#1" hidden="True" name="marcatore"/>
+  <color symbol="#2" hidden="True" name="marcatore"/>
+  <color symbol="#3" hidden="True" name="marcatore"/>
+  <color symbol="#4" hidden="True" name="marcatore"/>
+  <color symbol="#5" hidden="True" name="marcatore"/>
+  <color symbol="#6" hidden="True" name="marcatore"/>
   <color symbol="z" hidden="True" name="marcatore"/>
   <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
   <box at="3 0 0" size="7 1 1" color="z" on="B"/>
@@ -22,98 +22,98 @@
   <box at="12 19 4" size="6 9 7" color="M"/>
   <!-- scelta «stile»: sportiva | custom | naked | turismo -->
   <box at="12 20 0" size="25 40 30" color="u" on="B"/>
-  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/><rule in="u" out="4"/></one>
-  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/><rule in="4u" out="*4"/></all>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/><rule in="u" out="#4"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/><rule in="#4u" out="*#4"/></all>
   <!--   1: sportiva -->
-  <ellipsoid at="12 8 0" size="3 12 12" color="K" on="1"/>
-  <ellipsoid at="12 31 0" size="3 12 12" color="K" on="1"/>
-  <line at="12 8 6" to="12 31 6" r="0.5" color="C" on="1"/>
-  <ellipsoid at="12 22 10" size="6 9 5" color="R" on="1"/>
-  <ellipsoid at="12 29 7" size="7 9 10" color="R" on="1"/>
-  <box at="12 14 12" size="5 8 2" color="K" on="1"/>
-  <cone at="12 9 12" size="5 6 4" color="R" on="1"/>
-  <box at="12 33 15" size="5 2 3" color="V" on="1"/>
-  <box at="12 34 11" size="2 1 2" color="L" on="1"/>
-  <line at="9 28 15" to="15 28 15" r="0.5" color="C" on="1"/>
+  <ellipsoid at="12 8 0" size="3 12 12" color="K" on="#1"/>
+  <ellipsoid at="12 31 0" size="3 12 12" color="K" on="#1"/>
+  <line at="12 8 6" to="12 31 6" r="0.5" color="C" on="#1"/>
+  <ellipsoid at="12 22 10" size="6 9 5" color="R" on="#1"/>
+  <ellipsoid at="12 29 7" size="7 9 10" color="R" on="#1"/>
+  <box at="12 14 12" size="5 8 2" color="K" on="#1"/>
+  <cone at="12 9 12" size="5 6 4" color="R" on="#1"/>
+  <box at="12 33 15" size="5 2 3" color="V" on="#1"/>
+  <box at="12 34 11" size="2 1 2" color="L" on="#1"/>
+  <line at="9 28 15" to="15 28 15" r="0.5" color="C" on="#1"/>
   <!--   2: custom -->
-  <ellipsoid at="12 7 0" size="3 13 13" color="K" on="2"/>
-  <ellipsoid at="12 35 0" size="3 11 11" color="K" on="2"/>
-  <line at="12 35 5" to="12 27 21" r="0.5" color="C" on="2"/>
-  <line at="12 7 6" to="12 28 8" r="0.5" color="C" on="2"/>
-  <ellipsoid at="12 22 11" size="5 8 5" color="R" on="2"/>
-  <box at="12 14 9" size="6 8 2" color="K" on="2"/>
-  <line at="8 27 21" to="16 27 21" r="0.5" color="C" on="2"/>
-  <line at="8 27 21" to="8 26 26" r="0.5" color="C" on="2"/>
-  <line at="16 27 21" to="16 26 26" r="0.5" color="C" on="2"/>
-  <box at="12 29 18" size="2 2 2" color="L" on="2"/>
+  <ellipsoid at="12 7 0" size="3 13 13" color="K" on="#2"/>
+  <ellipsoid at="12 35 0" size="3 11 11" color="K" on="#2"/>
+  <line at="12 35 5" to="12 27 21" r="0.5" color="C" on="#2"/>
+  <line at="12 7 6" to="12 28 8" r="0.5" color="C" on="#2"/>
+  <ellipsoid at="12 22 11" size="5 8 5" color="R" on="#2"/>
+  <box at="12 14 9" size="6 8 2" color="K" on="#2"/>
+  <line at="8 27 21" to="16 27 21" r="0.5" color="C" on="#2"/>
+  <line at="8 27 21" to="8 26 26" r="0.5" color="C" on="#2"/>
+  <line at="16 27 21" to="16 26 26" r="0.5" color="C" on="#2"/>
+  <box at="12 29 18" size="2 2 2" color="L" on="#2"/>
   <!--   3: naked -->
-  <ellipsoid at="12 9 0" size="3 12 12" color="K" on="3"/>
-  <ellipsoid at="12 30 0" size="3 12 12" color="K" on="3"/>
-  <line at="12 9 6" to="12 30 6" r="0.5" color="C" on="3"/>
-  <line at="12 30 6" to="12 27 17" r="0.5" color="C" on="3"/>
-  <ellipsoid at="12 21 11" size="6 8 5" color="R" on="3"/>
-  <box at="12 14 14" size="6 12 2" color="K" on="3"/>
-  <line at="8 27 18" to="16 27 18" r="0.5" color="C" on="3"/>
-  <cylinder at="12 29 14" size="3 3 3" color="L" on="3"/>
+  <ellipsoid at="12 9 0" size="3 12 12" color="K" on="#3"/>
+  <ellipsoid at="12 30 0" size="3 12 12" color="K" on="#3"/>
+  <line at="12 9 6" to="12 30 6" r="0.5" color="C" on="#3"/>
+  <line at="12 30 6" to="12 27 17" r="0.5" color="C" on="#3"/>
+  <ellipsoid at="12 21 11" size="6 8 5" color="R" on="#3"/>
+  <box at="12 14 14" size="6 12 2" color="K" on="#3"/>
+  <line at="8 27 18" to="16 27 18" r="0.5" color="C" on="#3"/>
+  <cylinder at="12 29 14" size="3 3 3" color="L" on="#3"/>
   <!--   4: turismo -->
-  <ellipsoid at="12 8 0" size="3 12 12" color="K" on="4"/>
-  <ellipsoid at="12 31 0" size="3 12 12" color="K" on="4"/>
-  <line at="12 8 6" to="12 31 6" r="0.5" color="C" on="4"/>
-  <ellipsoid at="12 27 8" size="11 10 12" color="R" on="4"/>
-  <box at="12 30 17" size="9 2 6" color="V" on="4"/>
-  <box at="12 16 11" size="6 12 3" color="K" on="4"/>
-  <box at="5 10 5" size="4 9 8" color="R" on="4"/>
-  <box at="19 10 5" size="4 9 8" color="R" on="4"/>
-  <line at="6 10 10" to="12 10 10" r="0.5" color="C" on="4"/>
-  <line at="18 10 10" to="12 10 10" r="0.5" color="C" on="4"/>
-  <box at="12 9 13" size="9 6 6" color="R" on="4"/>
-  <box at="12 34 11" size="3 1 2" color="L" on="4"/>
-  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/><rule in="4" out="B"/></prl>
+  <ellipsoid at="12 8 0" size="3 12 12" color="K" on="#4"/>
+  <ellipsoid at="12 31 0" size="3 12 12" color="K" on="#4"/>
+  <line at="12 8 6" to="12 31 6" r="0.5" color="C" on="#4"/>
+  <ellipsoid at="12 27 8" size="11 10 12" color="R" on="#4"/>
+  <box at="12 30 17" size="9 2 6" color="V" on="#4"/>
+  <box at="12 16 11" size="6 12 3" color="K" on="#4"/>
+  <box at="5 10 5" size="4 9 8" color="R" on="#4"/>
+  <box at="19 10 5" size="4 9 8" color="R" on="#4"/>
+  <line at="6 10 10" to="12 10 10" r="0.5" color="C" on="#4"/>
+  <line at="18 10 10" to="12 10 10" r="0.5" color="C" on="#4"/>
+  <box at="12 9 13" size="9 6 6" color="R" on="#4"/>
+  <box at="12 34 11" size="3 1 2" color="L" on="#4"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/><rule in="#4" out="B"/></prl>
   <!-- scelta «scarico»: basso a destra | alto a sinistra | doppio -->
   <box at="12 12 0" size="25 24 22" color="u" on="B"/>
-  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
-  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
   <!--   1: basso a destra -->
-  <line at="15 19 5" to="16 6 6" r="1" color="C" on="1"/>
+  <line at="15 19 5" to="16 6 6" r="1" color="C" on="#1"/>
   <!--   2: alto a sinistra -->
-  <line at="9 19 6" to="8 9 12" r="1" color="C" on="2"/>
-  <cylinder at="8 6 10" size="3 3 4" color="C" on="2"/>
+  <line at="9 19 6" to="8 9 12" r="1" color="C" on="#2"/>
+  <cylinder at="8 6 10" size="3 3 4" color="C" on="#2"/>
   <!--   3: doppio -->
-  <line at="15 19 5" to="17 5 9" r="1" color="C" on="3"/>
-  <line at="9 19 5" to="7 5 9" r="1" color="C" on="3"/>
-  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <line at="15 19 5" to="17 5 9" r="1" color="C" on="#3"/>
+  <line at="9 19 5" to="7 5 9" r="1" color="C" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
   <!-- scelta «accessorio»: cavalletto | casco sul serbatoio | bauletto -->
   <box at="12 20 0" size="25 30 26" color="u" on="B"/>
-  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
-  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
   <!--   1: cavalletto -->
-  <line at="9 19 4" to="5 21 0" r="0.5" color="C" on="1"/>
+  <line at="9 19 4" to="5 21 0" r="0.5" color="C" on="#1"/>
   <!--   2: casco sul serbatoio -->
-  <ellipsoid at="12 21 14" size="6 6 6" color="K" on="2"/>
-  <box at="12 23 16" size="4 1 2" color="V" on="2"/>
+  <ellipsoid at="12 21 14" size="6 6 6" color="K" on="#2"/>
+  <box at="12 23 16" size="4 1 2" color="V" on="#2"/>
   <!--   3: bauletto -->
-  <line at="9 19 4" to="5 21 0" r="0.5" color="C" on="3"/>
-  <box at="12 8 9" size="8 5 8" color="K" on="3"/>
-  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <line at="9 19 4" to="5 21 0" r="0.5" color="C" on="#3"/>
+  <box at="12 8 9" size="8 5 8" color="K" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
   <!-- scelta «extra»: faro supplementare | portapacchi alto | paramani | niente di più -->
   <box at="12 20 0" size="25 40 30" color="u" on="B"/>
-  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/><rule in="u" out="4"/></one>
-  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/><rule in="4u" out="*4"/></all>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/><rule in="u" out="#4"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/><rule in="#4u" out="*#4"/></all>
   <!--   1: faro supplementare -->
-  <line at="12 30 14" to="12 36 14" r="0.5" color="C" on="1"/>
-  <box at="12 37 14" size="4 2 3" color="L" on="1"/>
+  <line at="12 30 14" to="12 36 14" r="0.5" color="C" on="#1"/>
+  <box at="12 37 14" size="4 2 3" color="L" on="#1"/>
   <!--   2: portapacchi alto -->
-  <line at="12 12 12" to="12 4 20" r="0.5" color="C" on="2"/>
-  <box at="12 4 20" size="8 6 1" color="C" on="2"/>
-  <box at="12 4 21" size="6 5 4" color="K" on="2"/>
+  <line at="12 12 12" to="12 4 20" r="0.5" color="C" on="#2"/>
+  <box at="12 4 20" size="8 6 1" color="C" on="#2"/>
+  <box at="12 4 21" size="6 5 4" color="K" on="#2"/>
   <!--   3: paramani -->
-  <line at="12 27 16" to="6 27 18" r="0.5" color="C" on="3"/>
-  <line at="12 27 16" to="18 27 18" r="0.5" color="C" on="3"/>
-  <box at="5 28 18" size="2 4 3" color="R" on="3"/>
-  <box at="19 28 18" size="2 4 3" color="R" on="3"/>
+  <line at="12 27 16" to="6 27 18" r="0.5" color="C" on="#3"/>
+  <line at="12 27 16" to="18 27 18" r="0.5" color="C" on="#3"/>
+  <box at="5 28 18" size="2 4 3" color="R" on="#3"/>
+  <box at="19 28 18" size="2 4 3" color="R" on="#3"/>
   <!--   4: niente di più -->
-  <box at="12 19 3" size="1 1 1" color="M" on="4"/>
-  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/><rule in="4" out="B"/></prl>
+  <box at="12 19 3" size="1 1 1" color="M" on="#4"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/><rule in="#4" out="B"/></prl>
   <!-- adesivi a caso sulle carene -->
   <prl in="BR" out="*Y" p="0.04" steps="1"/>
 </sequence>

@@ -1,5 +1,5 @@
 <!-- Cinghiale corazzato (Cantiere 8, aurora): zampe, corpo e testa a caso; le punte delle placche nascono in posti a caso. -->
-<sequence values="BFRSGTKPu123456z" symmetry="(xy)" name="Cinghiale corazzato">
+<sequence values="BFRSGTKPu#1#2#3#4#5#6z" symmetry="(xy)" name="Cinghiale corazzato">
   <color symbol="F" value="5a3f2c" name="setole brune"/>
   <color symbol="R" value="8f8676" name="placche d'osso"/>
   <color symbol="S" value="d9d0bc" name="punte"/>
@@ -8,12 +8,12 @@
   <color symbol="K" value="1a120c" name="grugno e zoccoli"/>
   <color symbol="P" hidden="True" name="marcatore"/>
   <color symbol="u" hidden="True" name="marcatore"/>
-  <color symbol="1" hidden="True" name="marcatore"/>
-  <color symbol="2" hidden="True" name="marcatore"/>
-  <color symbol="3" hidden="True" name="marcatore"/>
-  <color symbol="4" hidden="True" name="marcatore"/>
-  <color symbol="5" hidden="True" name="marcatore"/>
-  <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="#1" hidden="True" name="marcatore"/>
+  <color symbol="#2" hidden="True" name="marcatore"/>
+  <color symbol="#3" hidden="True" name="marcatore"/>
+  <color symbol="#4" hidden="True" name="marcatore"/>
+  <color symbol="#5" hidden="True" name="marcatore"/>
+  <color symbol="#6" hidden="True" name="marcatore"/>
   <color symbol="z" hidden="True" name="marcatore"/>
   <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
   <box at="3 0 0" size="7 1 1" color="z" on="B"/>
@@ -21,52 +21,52 @@
   <one in="z" out="B" steps="8"/>
   <!-- scelta «zampe»: ferme | alla carica -->
   <box at="12 20 0" size="21 38 10" color="u" on="B"/>
-  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/></one>
-  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/></all>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/></all>
   <!--   1: ferme -->
-  <cylinder at="8 12 0" size="4 4 9" color="G" on="1"/>
-  <cylinder at="16 12 0" size="4 4 9" color="G" on="1"/>
-  <cylinder at="8 28 0" size="4 4 9" color="G" on="1"/>
-  <cylinder at="16 28 0" size="4 4 9" color="G" on="1"/>
+  <cylinder at="8 12 0" size="4 4 9" color="G" on="#1"/>
+  <cylinder at="16 12 0" size="4 4 9" color="G" on="#1"/>
+  <cylinder at="8 28 0" size="4 4 9" color="G" on="#1"/>
+  <cylinder at="16 28 0" size="4 4 9" color="G" on="#1"/>
   <!--   2: alla carica -->
-  <line at="8 34 0" to="9 27 8" r="1.5" color="G" on="2"/>
-  <line at="16 25 0" to="15 27 8" r="1.5" color="G" on="2"/>
-  <line at="8 6 0" to="9 13 8" r="1.5" color="G" on="2"/>
-  <line at="16 15 0" to="15 13 8" r="1.5" color="G" on="2"/>
-  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/></prl>
+  <line at="8 34 0" to="9 27 8" r="1.5" color="G" on="#2"/>
+  <line at="16 25 0" to="15 27 8" r="1.5" color="G" on="#2"/>
+  <line at="8 6 0" to="9 13 8" r="1.5" color="G" on="#2"/>
+  <line at="16 15 0" to="15 13 8" r="1.5" color="G" on="#2"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/></prl>
   <!-- scelta «corpo»: massiccio | allungato | tozzo -->
   <box at="12 20 4" size="24 34 22" color="u" on="B"/>
-  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
-  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
   <!--   1: massiccio -->
-  <ellipsoid at="12 20 5" size="17 28 15" color="F" on="1"/>
+  <ellipsoid at="12 20 5" size="17 28 15" color="F" on="#1"/>
   <!--   2: allungato -->
-  <ellipsoid at="12 19 6" size="14 32 12" color="F" on="2"/>
+  <ellipsoid at="12 19 6" size="14 32 12" color="F" on="#2"/>
   <!--   3: tozzo -->
-  <ellipsoid at="12 21 5" size="20 26 17" color="F" on="3"/>
-  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <ellipsoid at="12 21 5" size="20 26 17" color="F" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
   <!-- le placche coprono il dorso -->
   <ellipsoid at="12 20 13" size="16 26 10" color="R" on="F"/>
   <!-- scelta «testa»: bassa alla carica | alta | voltata -->
   <box at="12 33 0" size="25 14 22" color="u" on="B"/>
-  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
-  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
   <!--   1: bassa alla carica -->
-  <ellipsoid at="12 33 3" size="10 9 9" color="F" on="1"/>
-  <box at="12 38 4" size="5 3 4" color="K" on="1"/>
-  <line at="9 37 5" to="7 39 11" r="1" color="T" on="1"/>
-  <line at="15 37 5" to="17 39 11" r="1" color="T" on="1"/>
+  <ellipsoid at="12 33 3" size="10 9 9" color="F" on="#1"/>
+  <box at="12 38 4" size="5 3 4" color="K" on="#1"/>
+  <line at="9 37 5" to="7 39 11" r="1" color="T" on="#1"/>
+  <line at="15 37 5" to="17 39 11" r="1" color="T" on="#1"/>
   <!--   2: alta -->
-  <ellipsoid at="12 33 9" size="10 9 9" color="F" on="2"/>
-  <box at="12 38 10" size="5 3 4" color="K" on="2"/>
-  <line at="9 37 11" to="7 39 17" r="1" color="T" on="2"/>
-  <line at="15 37 11" to="17 39 17" r="1" color="T" on="2"/>
+  <ellipsoid at="12 33 9" size="10 9 9" color="F" on="#2"/>
+  <box at="12 38 10" size="5 3 4" color="K" on="#2"/>
+  <line at="9 37 11" to="7 39 17" r="1" color="T" on="#2"/>
+  <line at="15 37 11" to="17 39 17" r="1" color="T" on="#2"/>
   <!--   3: voltata -->
-  <ellipsoid at="7 33 6" size="10 9 9" color="F" on="3"/>
-  <box at="4 37 7" size="4 3 4" color="K" on="3"/>
-  <line at="3 36 8" to="1 38 14" r="1" color="T" on="3"/>
-  <line at="8 37 8" to="9 39 14" r="1" color="T" on="3"/>
-  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <ellipsoid at="7 33 6" size="10 9 9" color="F" on="#3"/>
+  <box at="4 37 7" size="4 3 4" color="K" on="#3"/>
+  <line at="3 36 8" to="1 38 14" r="1" color="T" on="#3"/>
+  <line at="8 37 8" to="9 39 14" r="1" color="T" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
   <!-- 9 punte a caso sulla faccia alta di R, alte fino a 5 -->
   <one in="B R" out="P *" steps="9"/>
   <all steps="5"><rule in="B P" out="P S"/><rule in="B* *P" out="P* *S"/></all>

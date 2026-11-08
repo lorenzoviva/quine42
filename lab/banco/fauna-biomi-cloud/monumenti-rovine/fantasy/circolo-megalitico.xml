@@ -1,5 +1,5 @@
 <!-- Circolo megalitico (Cantiere 8, aurora): pietre in posti e altezze a caso; centro a caso. -->
-<sequence values="BESDLMFgPxu123456z" symmetry="(xy)" name="Circolo megalitico">
+<sequence values="BESDLMFgPxu#1#2#3#4#5#6z" symmetry="(xy)" name="Circolo megalitico">
   <color symbol="E" value="6a7a4a" name="poggio erboso"/>
   <color symbol="S" value="8a8680" name="pietra"/>
   <color symbol="D" value="5f5b55" name="pietra scura"/>
@@ -10,12 +10,12 @@
   <color symbol="P" hidden="True" name="marcatore"/>
   <color symbol="x" hidden="True" name="marcatore"/>
   <color symbol="u" hidden="True" name="marcatore"/>
-  <color symbol="1" hidden="True" name="marcatore"/>
-  <color symbol="2" hidden="True" name="marcatore"/>
-  <color symbol="3" hidden="True" name="marcatore"/>
-  <color symbol="4" hidden="True" name="marcatore"/>
-  <color symbol="5" hidden="True" name="marcatore"/>
-  <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="#1" hidden="True" name="marcatore"/>
+  <color symbol="#2" hidden="True" name="marcatore"/>
+  <color symbol="#3" hidden="True" name="marcatore"/>
+  <color symbol="#4" hidden="True" name="marcatore"/>
+  <color symbol="#5" hidden="True" name="marcatore"/>
+  <color symbol="#6" hidden="True" name="marcatore"/>
   <color symbol="z" hidden="True" name="marcatore"/>
   <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
   <box at="3 0 0" size="7 1 1" color="z" on="B"/>
@@ -33,23 +33,23 @@
   <all in="SB" out="*S" steps="2"/>
   <!-- scelta «centro»: altare | pietra madre | dolmen | cerchio del fuoco -->
   <box at="25 25 2" size="24 24 40" color="u" on="B"/>
-  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/><rule in="u" out="4"/></one>
-  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/><rule in="4u" out="*4"/></all>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/><rule in="u" out="#4"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/><rule in="#4u" out="*#4"/></all>
   <!--   1: altare -->
-  <box at="25 25 2" size="10 6 5" color="D" on="1"/>
-  <box at="25 25 7" size="12 8 2" color="S" on="1"/>
+  <box at="25 25 2" size="10 6 5" color="D" on="#1"/>
+  <box at="25 25 7" size="12 8 2" color="S" on="#1"/>
   <!--   2: pietra madre -->
-  <line at="25 25 2" to="25 25 36" r="2.5" color="D" on="2"/>
+  <line at="25 25 2" to="25 25 36" r="2.5" color="D" on="#2"/>
   <!--   3: dolmen -->
-  <box at="20 25 2" size="3 8 12" color="S" on="3"/>
-  <box at="30 25 2" size="3 8 12" color="S" on="3"/>
-  <box at="25 25 14" size="16 12 3" color="D" on="3"/>
+  <box at="20 25 2" size="3 8 12" color="S" on="#3"/>
+  <box at="30 25 2" size="3 8 12" color="S" on="#3"/>
+  <box at="25 25 14" size="16 12 3" color="D" on="#3"/>
   <!--   4: cerchio del fuoco -->
-  <cone at="25 25 2" size="6 6 6" color="F" on="4"/>
-  <cylinder at="25 25 2" size="6 6 2" color="x" on="4"/>
-  <cylinder at="25 25 2" size="10 10 2" color="D" on="4"/>
-  <line at="25 25 2" to="25 25 32" r="0.5" color="D" on="4"/>
-  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/><rule in="4" out="B"/></prl>
+  <cone at="25 25 2" size="6 6 6" color="F" on="#4"/>
+  <cylinder at="25 25 2" size="6 6 2" color="x" on="#4"/>
+  <cylinder at="25 25 2" size="10 10 2" color="D" on="#4"/>
+  <line at="25 25 2" to="25 25 32" r="0.5" color="D" on="#4"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/><rule in="#4" out="B"/></prl>
   <prl in="x" out="B"/>
   <prl in="BS" out="*L" p="0.08" steps="1"/>
   <prl in="B S" out="* M" p="0.4" steps="1"/>

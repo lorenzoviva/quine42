@@ -14,6 +14,7 @@ import { colorTable, floors, footprint, surfaces, type Levels, type VoxelGrid } 
 import { compileMjx, mjxIncludes, type MjxClip } from '../mj/model';
 import { hexColor } from '../mj/palette';
 import { act, FORM_LIMITS, MAX_FORM_TIME, MAX_FORM_XML, runMjx } from '../mj/run';
+import { symbolOf } from '../mj/symbols';
 import { hashStr } from './rng';
 import { internalFields, internalModelInfo } from './internalNames';
 import type { FileMap } from './types';
@@ -783,11 +784,13 @@ export class Forms {
     const under = cellarOf(info) * vpt;
     // The tint as the palette reads it (T288): the packs write `hsl(…)`, and a letter with a colour the meshes cannot read vanished.
     const color = info?.tint ? hexColor(tint) : undefined;
+    // The letter as the engine holds it: `#12` is one character (T342).
+    const symbol = symbolOf(info?.tint);
     return {
       xml,
       seed,
       size: sizeFor(xml, cls, info?.size, under),
-      tint: info?.tint && color ? { symbol: info.tint, color } : undefined,
+      tint: symbol && color ? { symbol, color } : undefined,
       rig: cls.animation === 'walk',
       sway: cls.animation === 'wind',
       vpt,

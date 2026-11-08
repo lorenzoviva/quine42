@@ -11,6 +11,7 @@ import { compileMjx } from '../mj/model';
 import { parseXml, XmlError } from '../mj/xml';
 import { classSeeds, rootTag } from './forms';
 import { metaBreak } from './fourthwall';
+import { portedProgram } from './migrations';
 import { fingerprint, HANDMADE_ID_RE, readOrigins, type CardOrigin } from './heritage';
 import { newNodesRefusal, soundErrors } from './validator';
 import { contractOf, parseContract, parseVersion, showContract, KERNEL_VERSION } from './version';
@@ -249,7 +250,9 @@ export function readHandmadeCard(raw: unknown): HandmadeCard | undefined {
   if (typeof c.id !== 'string' || !HANDMADE_ID_RE.test(c.id)) return undefined;
   if (!HANDMADE_KINDS.includes(c.kind as HandmadeKind) || typeof c.name !== 'string' || typeof c.xml !== 'string') return undefined;
   if (!contractSaid(c.kernel) || !validWandererId(c.author) || !isDate(c.made) || !isDate(c.changed)) return undefined;
-  const card: HandmadeCard = { id: c.id, kind: c.kind as HandmadeKind, name: c.name, xml: c.xml, kernel: contractSaid(c.kernel)!, author: c.author, made: c.made, changed: c.changed };
+  // A card of an older contract reads in this one through the migration of the programs (T342: its digits `#d`, the same voxels).
+  const ported = portedProgram(c.xml, contractSaid(c.kernel)!);
+  const card: HandmadeCard = { id: c.id, kind: c.kind as HandmadeKind, name: c.name, xml: ported.xml, kernel: ported.contract, author: c.author, made: c.made, changed: c.changed };
   if (card.kind === 'model') {
     if (!classOf(c.class as string)) return undefined;
     card.class = c.class as string;

@@ -45,7 +45,7 @@ Architecture:
 Animation "rotazione" (8 frames):
   A cyclic, synchronised 360° rotation of the strobe alarm/guide lights on top of the two security pillars.
 -->
-<sequence values="BMmCcGgSsVvwNnR12345678FPOx" size="112 112 40" symmetry="()" name="Sala sistemi">
+<sequence values="BMmCcGgSsVvwNnR#1#2#3#4#5#6#7#8FPOx" size="112 112 40" symmetry="()" name="Sala sistemi">
   <!-- Materials and neon punk palette -->
   <color symbol="M" value="14141a" name="metallo primario"/>
   <color symbol="m" value="20222a" name="metallo secondary"/>
@@ -67,14 +67,14 @@ Animation "rotazione" (8 frames):
   <color symbol="x" hidden="True" name="buffer animazione"/>
 
   <!-- 8 phases of the rotating strobe light (1..8) -->
-  <color symbol="1" value="b9a6ff" glow="True" name="faro fascio principale"/>
-  <color symbol="2" value="282436" name="faro lente spenta 2"/>
-  <color symbol="3" value="221e30" name="faro lente spenta 3"/>
-  <color symbol="4" value="1c1a26" name="faro lente spenta 4"/>
-  <color symbol="5" value="1c1a26" name="faro lente spenta 5"/>
-  <color symbol="6" value="221e30" name="faro lente spenta 6"/>
-  <color symbol="7" value="504270" name="faro dissolvenza 7"/>
-  <color symbol="8" value="8a70c8" glow="True" name="faro scia bagliore"/>
+  <color symbol="#1" value="b9a6ff" glow="True" name="faro fascio principale"/>
+  <color symbol="#2" value="282436" name="faro lente spenta 2"/>
+  <color symbol="#3" value="221e30" name="faro lente spenta 3"/>
+  <color symbol="#4" value="1c1a26" name="faro lente spenta 4"/>
+  <color symbol="#5" value="1c1a26" name="faro lente spenta 5"/>
+  <color symbol="#6" value="221e30" name="faro lente spenta 6"/>
+  <color symbol="#7" value="504270" name="faro dissolvenza 7"/>
+  <color symbol="#8" value="8a70c8" glow="True" name="faro scia bagliore"/>
 
   <!-- ================================================================= -->
   <!-- 1. PERIMETER BASE AND SERVICE PAVING                             -->
@@ -405,14 +405,14 @@ Animation "rotazione" (8 frames):
   <box at="42 98 14" size="3 3 1" color="M"/>
 
   <!-- Rotating sectors of the West light (8 cardinal directions at z=11..13, 3 voxels high) -->
-  <box at="42 97 11" size="1 1 3" color="1"/>  <!-- North -->
-  <box at="43 97 11" size="1 1 3" color="2"/>  <!-- North-East -->
-  <box at="43 98 11" size="1 1 3" color="3"/>  <!-- East -->
-  <box at="43 99 11" size="1 1 3" color="4"/>  <!-- South-East -->
-  <box at="42 99 11" size="1 1 3" color="5"/>  <!-- South -->
-  <box at="41 99 11" size="1 1 3" color="6"/>  <!-- South-West -->
-  <box at="41 98 11" size="1 1 3" color="7"/>  <!-- West -->
-  <box at="41 97 11" size="1 1 3" color="8"/>  <!-- North-West -->
+  <box at="42 97 11" size="1 1 3" color="#1"/>  <!-- North -->
+  <box at="43 97 11" size="1 1 3" color="#2"/>  <!-- North-East -->
+  <box at="43 98 11" size="1 1 3" color="#3"/>  <!-- East -->
+  <box at="43 99 11" size="1 1 3" color="#4"/>  <!-- South-East -->
+  <box at="42 99 11" size="1 1 3" color="#5"/>  <!-- South -->
+  <box at="41 99 11" size="1 1 3" color="#6"/>  <!-- South-West -->
+  <box at="41 98 11" size="1 1 3" color="#7"/>  <!-- West -->
+  <box at="41 97 11" size="1 1 3" color="#8"/>  <!-- North-West -->
 
   <!-- East security pillar (centre x=70, y=98, z=0..14) -->
   <!-- Plinth -->
@@ -433,14 +433,14 @@ Animation "rotazione" (8 frames):
   <box at="70 98 14" size="3 3 1" color="M"/>
 
   <!-- Rotating sectors of the East light (8 cardinal directions at z=11..13, 3 voxels high) -->
-  <box at="70 97 11" size="1 1 3" color="1"/>  <!-- North -->
-  <box at="71 97 11" size="1 1 3" color="2"/>  <!-- North-East -->
-  <box at="71 98 11" size="1 1 3" color="3"/>  <!-- East -->
-  <box at="71 99 11" size="1 1 3" color="4"/>  <!-- South-East -->
-  <box at="70 99 11" size="1 1 3" color="5"/>  <!-- South -->
-  <box at="69 99 11" size="1 1 3" color="6"/>  <!-- South-West -->
-  <box at="69 98 11" size="1 1 3" color="7"/>  <!-- West -->
-  <box at="69 97 11" size="1 1 3" color="8"/>  <!-- North-West -->
+  <box at="70 97 11" size="1 1 3" color="#1"/>  <!-- North -->
+  <box at="71 97 11" size="1 1 3" color="#2"/>  <!-- North-East -->
+  <box at="71 98 11" size="1 1 3" color="#3"/>  <!-- East -->
+  <box at="71 99 11" size="1 1 3" color="#4"/>  <!-- South-East -->
+  <box at="70 99 11" size="1 1 3" color="#5"/>  <!-- South -->
+  <box at="69 99 11" size="1 1 3" color="#6"/>  <!-- South-West -->
+  <box at="69 98 11" size="1 1 3" color="#7"/>  <!-- West -->
+  <box at="69 97 11" size="1 1 3" color="#8"/>  <!-- North-West -->
 
   <!-- Access control barrier arm (raised at 45° on the right side, z=7..16) -->
   <!-- Hydraulic lifting joint on the East pillar -->
@@ -540,14 +540,14 @@ Animation "rotazione" (8 frames):
 <!-- ================================================================= -->
 <animation name="rotazione" frames="8">
   <sequence>
-    <all in="1" out="x"/>
-    <all in="2" out="1"/>
-    <all in="3" out="2"/>
-    <all in="4" out="3"/>
-    <all in="5" out="4"/>
-    <all in="6" out="5"/>
-    <all in="7" out="6"/>
-    <all in="8" out="7"/>
-    <all in="x" out="8"/>
+    <all in="#1" out="x"/>
+    <all in="#2" out="#1"/>
+    <all in="#3" out="#2"/>
+    <all in="#4" out="#3"/>
+    <all in="#5" out="#4"/>
+    <all in="#6" out="#5"/>
+    <all in="#7" out="#6"/>
+    <all in="#8" out="#7"/>
+    <all in="x" out="#8"/>
   </sequence>
 </animation>

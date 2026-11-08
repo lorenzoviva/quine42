@@ -40,12 +40,15 @@
 //   <map scale="5/3 5/3 6/3">               a fraction: the new grid is M·N/D cells, the rules write at x·N/D
 //   folder="F" on the root, a map or a wfc  the rule files of that grid are models/F-<name>.txt (MarkovJunior's folders)
 // A union belongs to its grid (the root, a map, a wfc), as in MarkovJunior: the same symbol may mean other letters in another grid.
+// Symbols (T342, ADR-0175, src/mj/symbols.ts): a letter, or `#` and a number (`#12`) when the letters are not enough; a digit alone
+// is not one (up to the contract 0.5 it was: the migration writes `3` as `#3`). The compiler hands the engine one character per symbol.
 
 import { internalName } from '../kernel/internalNames';
 import { Mj3Error, PARTS, SHAPES, type ConvRule, type FieldSpec, type Inference, type Node3, type ObserveSpec, type PaletteEntry, type Part, type Program3, type Rule3, type ShapeKind, type Sym, type Vec3 } from './engine';
 import { MJ_PALETTE } from './palette';
 import { soundSettings, type SoundSettings } from './sound';
 import { overlapModel, squareSubgroup, tileModel, WFC_LIMITS, WfcError, type NeighborSource, type TileSource, type WfcModel } from './wfc';
+import { isNoteLine, isSymbolCode, MAX_SYMBOLS, readSymbols, showSymbols, SymbolError, symbolName, symbolTokens } from './symbols';
 import { parseXml, XmlError, type XmlElement } from './xml';
 
 export interface MjxClip {
@@ -92,13 +95,13 @@ export const MJX_INCLUDE_CHARS = 1_000_000;
 const RULE_HOLDERS = new Set(['one', 'all', 'prl', 'rule', 'convolution']);
 
 /**
- * The text of a pattern written in a child or a file as the attribute's: lines starting with "#" are notes, a "/" with spaces or
- * lines around it joins two rows, the rest stays as it is (spaces and lines between layers).
+ * The text of a pattern written in a child or a file as the attribute's: lines starting with "#" and no number are notes (`#12AB` is a
+ * row, T342), a "/" with spaces or lines around it joins two rows, the rest stays as it is (spaces and lines between layers).
  */
 export function patternText(s: string): string {
   return s
     .split(/\r?\n/)
-    .filter((l) => !/^\s*#/.test(l))
+    .filter((l) => !isNoteLine(l))
     .join('\n')
     .replace(/\s*\/\s*/g, '/')
     .trim();
@@ -180,6 +183,8 @@ interface Ctx {
 const GRID_TAGS = new Set(['map', 'wfc']);
 /** The symbols a union becomes when it means other letters in another grid: the engine has one table (private use, never typed). */
 const PRIVATE_UNION = 0xe000;
+/** Where the numbered symbols begin (symbols.ts): the private unions stop before. */
+const PRIVATE_UNION_END = 0xf000;
 
 class Compiler {
   unions: Record<string, string> = {};
@@ -239,6 +244,23 @@ class Compiler {
   mend(el: XmlElement, msg: string): void {
     if (this.strict) this.fail(el, msg);
     this.warnings.push(`${this.where(el)}: ${msg} (riparato)`);
+  }
+
+  /** A text of symbols as the engine reads it (`#12` one character, T342), or why not. */
+  syms(el: XmlElement, s: string, what: string): string {
+    try {
+      return readSymbols(s);
+    } catch (e) {
+      if (e instanceof SymbolError) this.fail(el, `${what}: ${e.message}`);
+      throw e;
+    }
+  }
+
+  /** A symbol on its own, as the engine reads it (not the grid's '.'): a union's or a colour's sign, black and white of a sample. */
+  sign(el: XmlElement, s: string | undefined, what: string): string {
+    const t = typeof s === 'string' ? this.syms(el, s, what) : '';
+    if (t.length !== 1) this.fail(el, `"${what}" è un solo simbolo (una lettera o # e un numero), non "${s ?? ''}"`);
+    return t;
   }
 
   /** A file of models/ by its plain name, counted. */
@@ -343,24 +365,28 @@ class Compiler {
     return ['in', 'out', 'fin', 'fout', 'file'].some((a) => el.attrs[a] !== undefined) || el.children.some((c) => c.name === 'in' || c.name === 'out');
   }
 
+  /** The symbols of a grid, in the engine's characters: letters, or `#` and a number (T342); the first is the empty cell. */
   values(el: XmlElement, s: string | undefined): string {
-    if (!s) this.fail(el, 'manca "values" (le lettere della griglia; la prima è la cella vuota)');
+    if (!s) this.fail(el, 'manca "values" (i simboli della griglia; il primo è la cella vuota)');
     const seen = new Set<string>();
     let out = '';
-    for (const ch of s) {
-      if (seen.has(ch)) {
-        this.mend(el, `la lettera "${ch}" è ripetuta in values`);
+    for (const t of symbolTokens(s)) {
+      if (t.error) this.fail(el, `values: ${t.error}`);
+      const ch = t.code;
+      if (ch === undefined) {
+        if (/\s|,/.test(t.text)) this.mend(el, 'values è una parola di simboli, senza spazi né virgole');
+        else this.fail(el, `"${t.text}" non può essere un valore (solo lettere, o # e un numero: #12)`);
         continue;
       }
-      if (!/^[A-Za-z0-9]$/.test(ch)) {
-        if (/\s|,/.test(ch)) this.mend(el, 'values è una parola di lettere, senza spazi né virgole');
-        else this.fail(el, `"${ch}" non può essere un valore (solo lettere e cifre)`);
+      if (seen.has(ch)) {
+        this.mend(el, `il simbolo "${t.text}" è ripetuto in values`);
         continue;
       }
       seen.add(ch);
       this.declared.add(ch);
       out += ch;
     }
+    if (this.declared.size > MAX_SYMBOLS + 1) this.fail(el, `troppi simboli: ${this.declared.size - 1} oltre la cella vuota, il motore ne regge al più ${MAX_SYMBOLS} in un programma`);
     return out;
   }
 
@@ -372,20 +398,20 @@ class Compiler {
     return sym;
   }
 
-  /** A pattern or a set of letters, in the engine's terms: the empty letter becomes '.', every letter checked. */
+  /** A pattern or a set of symbols as written, in the engine's terms: every symbol one character, the empty one '.', every one checked. */
   letters(el: XmlElement, s: string, ctx: Ctx, what: string): string {
     let out = '';
-    for (const ch of s) {
+    for (const ch of this.syms(el, s, what)) {
       if (ch === ctx.bg) out += '.';
       else if (this.conflicted.has(ch)) out += this.scopedUnion(ch, ctx);
       else if ('*/ []'.includes(ch) || ch === '.') out += ch;
       else if (ctx.values.has(ch) || ch in this.unions) out += ch;
-      else if (!this.strict && /^[A-Za-z0-9]$/.test(ch)) {
-        this.mend(el, `${what}: la lettera "${ch}" non era tra i values della griglia, aggiunta`);
+      else if (!this.strict && isSymbolCode(ch)) {
+        this.mend(el, `${what}: il simbolo "${symbolName(ch)}" non era tra i values della griglia, aggiunto`);
         ctx.values.add(ch);
         this.declared.add(ch);
         out += ch;
-      } else this.fail(el, `${what}: la lettera "${ch}" non è tra i values della griglia ("${[...ctx.values].join('')}")`);
+      } else this.fail(el, `${what}: il simbolo "${symbolName(ch)}" non è tra i values della griglia ("${showSymbols([...ctx.values].join(''))}")`);
     }
     return out;
   }
@@ -397,7 +423,7 @@ class Compiler {
   }
 
   one(el: XmlElement, s: string | undefined, ctx: Ctx, what: string): string {
-    if (typeof s !== 'string' || s.length !== 1) this.fail(el, `"${what}" è una sola lettera`);
+    if (typeof s !== 'string' || this.syms(el, s, what).length !== 1) this.fail(el, `"${what}" è un solo simbolo (una lettera o # e un numero)`);
     return this.letters(el, s, ctx, what);
   }
 
@@ -449,10 +475,12 @@ class Compiler {
         const mine = this.scopedUnions.get(d.scope) ?? new Map<string, string>();
         this.scopedUnions.set(d.scope, mine);
         if (mine.has(sym)) {
-          if (defs.some((e) => e.scope === d.scope && e.values !== d.values)) throw new Mj3Error(`riga ${d.scope.line}: l'unione "${sym}" è scritta due volte nella stessa griglia, con lettere diverse`);
+          if (defs.some((e) => e.scope === d.scope && e.values !== d.values)) throw new Mj3Error(`riga ${d.scope.line}: l'unione "${symbolName(sym)}" è scritta due volte nella stessa griglia, con simboli diversi`);
           continue;
         }
-        const bg = [...(d.scope.attrs.values ?? '').replace(/\s+/g, '')][0];
+        // The grid's empty symbol, as `values` will read it (a values that does not read fails there, with its line).
+        const bg = symbolTokens((d.scope.attrs.values ?? '').replace(/\s+/g, ''))[0]?.code;
+        if (next >= PRIVATE_UNION_END) throw new Mj3Error(`riga ${d.scope.line}: troppe unioni con più sensi (al più ${PRIVATE_UNION_END - PRIVATE_UNION})`);
         const priv = String.fromCharCode(next++);
         mine.set(sym, priv);
         this.privateUnions[priv] = [...d.values].map((ch) => (ch === bg ? '.' : ch)).join('');
@@ -482,14 +510,15 @@ class Compiler {
       return;
     }
     if (el.name === 'union') {
-      const sym = el.attrs.symbol;
-      if (!sym || sym.length !== 1 || '*/ []'.includes(sym)) this.fail(el, '"symbol" è un solo carattere');
+      // A symbol (`?`, `#12`, a letter), or a sign of one character: not a mark of a pattern, not "#" (it starts a numbered symbol).
+      const sym = this.syms(el, el.attrs.symbol ?? '', 'symbol');
+      if (sym.length !== 1 || '*/ []'.includes(sym)) this.fail(el, '"symbol" è un solo simbolo o un segno (?, !, ~…), non uno di * / [ ] né uno spazio');
       if (!el.attrs.values) this.fail(el, 'manca "values"');
-      this.unions[sym] = el.attrs.values;
-      if (!this.file) this.unionDefs.push({ sym, values: el.attrs.values, scope });
+      const values = this.syms(el, el.attrs.values, 'values');
+      this.unions[sym] = values;
+      if (!this.file) this.unionDefs.push({ sym, values, scope });
     } else if (el.name === 'color') {
-      const sym = el.attrs.symbol;
-      if (!sym || sym.length !== 1) this.fail(el, '"symbol" è una sola lettera');
+      const sym = this.sign(el, el.attrs.symbol, 'symbol');
       const value = el.attrs.value?.replace(/^#/, '');
       if (value !== undefined && !/^[0-9a-fA-F]{6}$/.test(value)) this.fail(el, `"value" è un colore esadecimale (rrggbb), non "${el.attrs.value}"`);
       // A part of the contract 0.2 (`gamba`) reads internal (T307b): the Sculptor still writes it in Italian until its prompt changes (T310).
@@ -739,9 +768,9 @@ class Compiler {
     return n;
   }
 
-  /** A pattern's text as cells: layers from the top (as written), rows from the back; every layer and row of one size. */
+  /** A pattern's text as cells, a symbol each (the engine's character): layers from the top (as written), rows from the back; every layer and row of one size. */
   block(el: XmlElement, text: string, what: string): string[][][] {
-    const layers = patternText(text).split(/\s+/).filter(Boolean).map((l) => l.split('/').map((row) => [...row]));
+    const layers = patternText(text).split(/\s+/).filter(Boolean).map((l) => l.split('/').map((row) => [...this.syms(el, row, what)]));
     if (!layers.length) this.fail(el, `${what} è vuoto`);
     const dy = layers[0].length, dx = layers[0][0].length;
     if (!dx || layers.some((l) => l.length !== dy || l.some((r) => r.length !== dx))) this.fail(el, `${what}: ogni strato con le stesse righe, ogni riga con le stesse celle`);
@@ -764,7 +793,7 @@ class Compiler {
     const map: Record<string, number[]> = {};
     const mapLetter = (r: XmlElement) => {
       const input = this.one(r, r.attrs.in, ctx, 'in');
-      if (input in map) this.fail(r, `una sola regola per la lettera "${r.attrs.in}"`);
+      if (input in map) this.fail(r, `una sola regola per il simbolo "${r.attrs.in}"`);
       if (!r.attrs.out) this.fail(r, 'manca "out" (le tessere, o le lettere, separate da "|")');
       return input;
     };
@@ -803,7 +832,7 @@ class Compiler {
         const rows = layers[0];
         const cells = Uint8Array.from(rows.flat(), (ch) => {
           const k = values.indexOf(ch);
-          if (k < 0) this.fail(el, `models/${sample}.txt: la lettera "${ch}" non è tra i values del nodo ("${values}")`);
+          if (k < 0) this.fail(el, `models/${sample}.txt: il simbolo "${symbolName(ch)}" non è tra i values del nodo ("${showSymbols(values)}")`);
           return k;
         });
         if (cells.length > WFC_LIMITS.sampleCells) this.fail(el, `il campione è troppo grande (al più ${WFC_LIMITS.sampleCells} celle)`);
@@ -811,8 +840,9 @@ class Compiler {
         for (const r of rules) {
           const input = mapLetter(r);
           const outs = new Set(r.attrs.out.split('|').map((s) => {
-            const k = values.indexOf(s.trim());
-            if (s.trim().length !== 1 || k < 0) this.fail(r, `"${s}" non è una lettera dei values del nodo ("${values}")`);
+            const ch = this.syms(r, s.trim(), 'out');
+            const k = values.indexOf(ch);
+            if (ch.length !== 1 || k < 0) this.fail(r, `"${s}" non è un simbolo dei values del nodo ("${showSymbols(values)}")`);
             return k;
           }));
           map[input] = built.patterns.flatMap((p, t) => (outs.has(p[0]) ? [t] : []));
@@ -849,12 +879,12 @@ class Compiler {
     const tilesFolder = el.attrs.tiles ?? name;
     return this.inside(name, () => {
       const root = roots.find((r) => r.name === 'tileset') ?? this.fail(el, `models/${name}.xml non è un tileset (la sua radice è <tileset>)`);
-      const own = root.attrs.values?.replace(/\s+/g, '');
-      if (own !== undefined && new Set(own).size !== own.length) this.fail(root, 'una lettera è ripetuta nei values del tileset');
+      const own = root.attrs.values === undefined ? undefined : this.syms(root, root.attrs.values.replace(/\s+/g, ''), 'values');
+      if (own !== undefined && new Set(own).size !== own.length) this.fail(root, 'un simbolo è ripetuto nei values del tileset');
       const ordinal = (t: XmlElement, ch: string) => {
         const k = own !== undefined ? own.indexOf(ch) : values.indexOf(ch);
-        if (k < 0) this.fail(t, `la lettera "${ch}" non è tra i values ${own !== undefined ? `del tileset ("${own}")` : `del nodo ("${values}")`}`);
-        if (k >= values.length) this.fail(t, `la lettera "${ch}" è la ${k + 1}ª del tileset, e il nodo ha solo ${values.length} values`);
+        if (k < 0) this.fail(t, `il simbolo "${symbolName(ch)}" non è tra i values ${own !== undefined ? `del tileset ("${showSymbols(own)}")` : `del nodo ("${showSymbols(values)}")`}`);
+        if (k >= values.length) this.fail(t, `il simbolo "${symbolName(ch)}" è il ${k + 1}º del tileset, e il nodo ha solo ${values.length} values`);
         return k;
       };
       const full = truthy(root.attrs.fullSymmetry);
@@ -897,14 +927,16 @@ class Compiler {
    */
   convchain(el: XmlElement, ctx: Ctx, sym: Sym): Node3 {
     const name = el.attrs.sample;
-    if (name === undefined) this.fail(el, 'manca "sample" (un campione piano di models/, nelle lettere black e white)');
+    if (name === undefined) this.fail(el, 'manca "sample" (un campione piano di models/, nei simboli black e white)');
     const black = this.one(el, el.attrs.black, ctx, 'black');
     const white = this.one(el, el.attrs.white, ctx, 'white');
-    if (black === white) this.fail(el, 'black e white sono due lettere diverse');
+    if (black === white) this.fail(el, 'black e white sono due simboli diversi');
+    // The sample is written in the symbols themselves, not in the grid's '.' for the empty one.
+    const [b, w] = [this.sign(el, el.attrs.black, 'black'), this.sign(el, el.attrs.white, 'white')];
     const layers = this.block(el, this.fileText(el, name, 'txt', 'sample'), `models/${name}.txt`);
     if (layers.length !== 1) this.fail(el, `models/${name}.txt: il campione è piano, uno strato solo (come nell'originale)`);
     const rows = layers[0];
-    const sample = rows.flat().map((ch) => (ch === el.attrs.white ? '1' : ch === el.attrs.black ? '0' : this.fail(el, `models/${name}.txt: la lettera "${ch}" non è né black ("${el.attrs.black}") né white ("${el.attrs.white}")`))).join('');
+    const sample = rows.flat().map((ch) => (ch === w ? '1' : ch === b ? '0' : this.fail(el, `models/${name}.txt: il simbolo "${symbolName(ch)}" non è né black ("${el.attrs.black}") né white ("${el.attrs.white}")`))).join('');
     if (sample.length > WFC_LIMITS.sampleCells) this.fail(el, `il campione è troppo grande (al più ${WFC_LIMITS.sampleCells} celle)`);
     const temperature = this.num(el, el.attrs.temperature, 'temperature');
     if (temperature !== undefined && !(temperature > 0)) this.fail(el, 'temperature è un numero positivo');
@@ -1058,10 +1090,10 @@ export function compileMjx(src: string, opts: { size?: Vec3; strict?: boolean; b
     if (ch === values[0]) continue;
     const base = MJ_PALETTE[ch];
     const own = c.colors[ch];
-    if (!base && !own?.color && !own?.hidden) throw new Mj3Error(`la lettera "${ch}" non ha colore nella palette di MarkovJunior: dagliene uno con <color symbol="${ch}" value="rrggbb"/>`);
+    if (!base && !own?.color && !own?.hidden) throw new Mj3Error(`il simbolo "${symbolName(ch)}" non ha colore nella palette di MarkovJunior: dagliene uno con <color symbol="${symbolName(ch)}" value="rrggbb"/>`);
     palette[ch] = { name: own?.name ?? base?.name, ...(own?.color ?? base?.color ? { color: own?.color ?? base!.color } : {}), ...(own?.part ? { part: own.part } : {}), ...(own?.hidden ? { hidden: true } : {}), ...(own?.glow ? { glow: true } : {}), ...(typeof own?.alpha === 'number' ? { alpha: own.alpha } : {}) };
   }
-  for (const ch of Object.keys(c.colors)) if (!c.declared.has(ch)) c.warnings.push(`<color symbol="${ch}">: la lettera non è in nessun values`);
+  for (const ch of Object.keys(c.colors)) if (!c.declared.has(ch)) c.warnings.push(`<color symbol="${symbolName(ch)}">: il simbolo non è in nessun values`);
   const unions: Record<string, string> = {};
   for (const [k, v] of Object.entries(c.unions)) unions[k] = [...v].map((ch) => (ch === values[0] ? '.' : ch)).join('');
   Object.assign(unions, c.privateUnions);

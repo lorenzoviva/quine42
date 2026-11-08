@@ -1,5 +1,5 @@
 <!-- Relitto d'astronave (Cantiere 8, sidera): scafo, pinna e cratere a caso; squarci, rottami e fumo a caso. -->
-<sequence values="BHKFNREMxgPu123456z" symmetry="(xy)" name="Relitto d'astronave">
+<sequence values="BHKFNREMxgPu#1#2#3#4#5#6z" symmetry="(xy)" name="Relitto d'astronave">
   <color symbol="H" value="a8b0b8" name="scafo"/>
   <color symbol="K" value="3a3e44" name="scafo bruciato"/>
   <color symbol="F" value="c8d0d8" name="pinna"/>
@@ -11,12 +11,12 @@
   <color symbol="g" hidden="True" name="marcatore"/>
   <color symbol="P" hidden="True" name="marcatore"/>
   <color symbol="u" hidden="True" name="marcatore"/>
-  <color symbol="1" hidden="True" name="marcatore"/>
-  <color symbol="2" hidden="True" name="marcatore"/>
-  <color symbol="3" hidden="True" name="marcatore"/>
-  <color symbol="4" hidden="True" name="marcatore"/>
-  <color symbol="5" hidden="True" name="marcatore"/>
-  <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="#1" hidden="True" name="marcatore"/>
+  <color symbol="#2" hidden="True" name="marcatore"/>
+  <color symbol="#3" hidden="True" name="marcatore"/>
+  <color symbol="#4" hidden="True" name="marcatore"/>
+  <color symbol="#5" hidden="True" name="marcatore"/>
+  <color symbol="#6" hidden="True" name="marcatore"/>
   <color symbol="z" hidden="True" name="marcatore"/>
   <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
   <box at="3 0 0" size="7 1 1" color="z" on="B"/>
@@ -24,36 +24,36 @@
   <one in="z" out="B" steps="8"/>
   <!-- scelta «scafo»: fusoliera lunga | disco | cuneo | spezzato in due -->
   <box at="25 25 0" size="50 50 22" color="u" on="B"/>
-  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/><rule in="u" out="4"/></one>
-  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/><rule in="4u" out="*4"/></all>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/><rule in="u" out="#4"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/><rule in="#4u" out="*#4"/></all>
   <!--   1: fusoliera lunga -->
-  <ellipsoid at="25 25 -8" size="22 46 26" color="H" on="1"/>
+  <ellipsoid at="25 25 -8" size="22 46 26" color="H" on="#1"/>
   <!--   2: disco -->
-  <ellipsoid at="25 25 -4" size="42 42 16" color="H" on="2"/>
-  <ellipsoid at="25 25 6" size="14 14 8" color="H" on="2"/>
+  <ellipsoid at="25 25 -4" size="42 42 16" color="H" on="#2"/>
+  <ellipsoid at="25 25 6" size="14 14 8" color="H" on="#2"/>
   <!--   3: cuneo -->
-  <line at="25 4 6" to="25 44 10" r="7" color="H" on="3"/>
-  <box at="25 24 0" size="18 40 6" color="H" on="3"/>
+  <line at="25 4 6" to="25 44 10" r="7" color="H" on="#3"/>
+  <box at="25 24 0" size="18 40 6" color="H" on="#3"/>
   <!--   4: spezzato in due -->
-  <ellipsoid at="18 14 -6" size="18 24 20" color="H" on="4"/>
-  <ellipsoid at="32 36 -6" size="18 24 22" color="H" on="4"/>
-  <ellipsoid at="25 25 0" size="16 16 8" color="N" on="4"/>
-  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/><rule in="4" out="B"/></prl>
+  <ellipsoid at="18 14 -6" size="18 24 20" color="H" on="#4"/>
+  <ellipsoid at="32 36 -6" size="18 24 22" color="H" on="#4"/>
+  <ellipsoid at="25 25 0" size="16 16 8" color="N" on="#4"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/><rule in="#4" out="B"/></prl>
   <!-- scelta «pinna»: alta | doppia | ala spezzata -->
   <box at="25 25 4" size="50 50 46" color="u" on="B"/>
-  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
-  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
   <!--   1: alta -->
-  <box at="25 18 4" size="2 12 30" color="F" on="1"/>
-  <line at="25 14 33" to="25 24 33" r="1" color="F" on="1"/>
+  <box at="25 18 4" size="2 12 30" color="F" on="#1"/>
+  <line at="25 14 33" to="25 24 33" r="1" color="F" on="#1"/>
   <!--   2: doppia -->
-  <line at="21 20 6" to="15 14 34" r="1.5" color="F" on="2"/>
-  <line at="29 20 6" to="35 14 32" r="1.5" color="F" on="2"/>
+  <line at="21 20 6" to="15 14 34" r="1.5" color="F" on="#2"/>
+  <line at="29 20 6" to="35 14 32" r="1.5" color="F" on="#2"/>
   <!--   3: ala spezzata -->
-  <line at="25 25 6" to="40 30 36" r="2" color="F" on="3"/>
-  <line at="25 25 6" to="10 22 12" r="2" color="F" on="3"/>
-  <box at="40 30 33" size="6 6 4" color="K" on="3"/>
-  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <line at="25 25 6" to="40 30 36" r="2" color="F" on="#3"/>
+  <line at="25 25 6" to="10 22 12" r="2" color="F" on="#3"/>
+  <box at="40 30 33" size="6 6 4" color="K" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
   <!-- squarci che si aprono a caso nello scafo -->
   <prl in="BH" out="*x" p="0.012" steps="1"/>
   <prl in="xH" out="*x" p="0.6" steps="3" symmetry="(xyz)"/>
@@ -61,17 +61,17 @@
   <prl in="BH" out="*K" p="0.15" steps="1"/>
   <!-- scelta «cratere»: rottami sparsi | sabbia ammucchiata | terra bruciata -->
   <box at="25 25 0" size="50 50 6" color="u" on="B"/>
-  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
-  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
   <!--   1: rottami sparsi -->
-  <line at="25 25 1" to="6 40 1" r="1.5" color="R" on="1"/>
-  <line at="25 25 1" to="44 8 1" r="1.5" color="R" on="1"/>
-  <line at="25 25 1" to="42 44 1" r="1" color="R" on="1"/>
+  <line at="25 25 1" to="6 40 1" r="1.5" color="R" on="#1"/>
+  <line at="25 25 1" to="44 8 1" r="1.5" color="R" on="#1"/>
+  <line at="25 25 1" to="42 44 1" r="1" color="R" on="#1"/>
   <!--   2: sabbia ammucchiata -->
-  <ellipsoid at="25 25 0" size="48 48 6" color="N" on="2"/>
+  <ellipsoid at="25 25 0" size="48 48 6" color="N" on="#2"/>
   <!--   3: terra bruciata -->
-  <cylinder at="25 25 0" size="46 46 1" color="K" on="3"/>
-  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <cylinder at="25 25 0" size="46 46 1" color="K" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
   <!-- 9 massi nascono a caso sul terreno accanto a ciò che c'è già ([HKNF]) e crescono di lato e in alto -->
   <box at="25 25 0" size="50 50 1" color="g" on="B"/>
   <one in="[HKNF]g" out="*R" steps="9"/>

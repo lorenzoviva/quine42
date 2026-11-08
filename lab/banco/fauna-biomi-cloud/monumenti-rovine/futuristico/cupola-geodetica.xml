@@ -1,5 +1,5 @@
 <!-- Cupola geodetica (Cantiere 8, sidera): tunnel, cupola e impianti a caso; pannelli e antenne a caso. -->
-<sequence values="BWVTSExPu123456z" symmetry="(xy)" name="Cupola geodetica">
+<sequence values="BWVTSExPu#1#2#3#4#5#6z" symmetry="(xy)" name="Cupola geodetica">
   <color symbol="W" value="e6ecef" name="pannelli pieni"/>
   <color symbol="V" value="7fd0e8" name="pannelli di vetro" alpha="0.6"/>
   <color symbol="T" value="8a929a" name="telaio"/>
@@ -8,12 +8,12 @@
   <color symbol="x" hidden="True" name="marcatore"/>
   <color symbol="P" hidden="True" name="marcatore"/>
   <color symbol="u" hidden="True" name="marcatore"/>
-  <color symbol="1" hidden="True" name="marcatore"/>
-  <color symbol="2" hidden="True" name="marcatore"/>
-  <color symbol="3" hidden="True" name="marcatore"/>
-  <color symbol="4" hidden="True" name="marcatore"/>
-  <color symbol="5" hidden="True" name="marcatore"/>
-  <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="#1" hidden="True" name="marcatore"/>
+  <color symbol="#2" hidden="True" name="marcatore"/>
+  <color symbol="#3" hidden="True" name="marcatore"/>
+  <color symbol="#4" hidden="True" name="marcatore"/>
+  <color symbol="#5" hidden="True" name="marcatore"/>
+  <color symbol="#6" hidden="True" name="marcatore"/>
   <color symbol="z" hidden="True" name="marcatore"/>
   <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
   <box at="3 0 0" size="7 1 1" color="z" on="B"/>
@@ -22,69 +22,69 @@
   <box at="25 25 0" size="50 50 1" color="T"/>
   <!-- scelta «tunnel»: a est | a ovest | a nord | a sud -->
   <box at="25 25 0" size="50 50 11" color="u" on="B"/>
-  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/><rule in="u" out="4"/></one>
-  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/><rule in="4u" out="*4"/></all>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/><rule in="u" out="#4"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/><rule in="#4u" out="*#4"/></all>
   <!--   1: a est -->
-  <box at="43 25 0" size="22 6 7" color="x" on="1"/>
-  <box at="45 25 0" size="18 10 10" color="W" on="1"/>
+  <box at="43 25 0" size="22 6 7" color="x" on="#1"/>
+  <box at="45 25 0" size="18 10 10" color="W" on="#1"/>
   <!--   2: a ovest -->
-  <box at="7 25 0" size="22 6 7" color="x" on="2"/>
-  <box at="5 25 0" size="18 10 10" color="W" on="2"/>
+  <box at="7 25 0" size="22 6 7" color="x" on="#2"/>
+  <box at="5 25 0" size="18 10 10" color="W" on="#2"/>
   <!--   3: a nord -->
-  <box at="25 43 0" size="6 22 7" color="x" on="3"/>
-  <box at="25 45 0" size="10 18 10" color="W" on="3"/>
+  <box at="25 43 0" size="6 22 7" color="x" on="#3"/>
+  <box at="25 45 0" size="10 18 10" color="W" on="#3"/>
   <!--   4: a sud -->
-  <box at="25 7 0" size="6 22 7" color="x" on="4"/>
-  <box at="25 5 0" size="10 18 10" color="W" on="4"/>
-  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/><rule in="4" out="B"/></prl>
+  <box at="25 7 0" size="6 22 7" color="x" on="#4"/>
+  <box at="25 5 0" size="10 18 10" color="W" on="#4"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/><rule in="#4" out="B"/></prl>
   <!-- scelta «cupola»: emisfera | a cipolla | doppia | schiacciata con la torre -->
   <box at="25 25 1" size="44 44 48" color="u" on="B"/>
-  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/><rule in="u" out="4"/></one>
-  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/><rule in="4u" out="*4"/></all>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/><rule in="u" out="#4"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/><rule in="#4u" out="*#4"/></all>
   <!--   1: emisfera -->
-  <ellipsoid at="25 25 -28" size="36 36 56" color="x" on="1"/>
-  <ellipsoid at="25 25 -32" size="42 42 64" color="W" on="1"/>
+  <ellipsoid at="25 25 -28" size="36 36 56" color="x" on="#1"/>
+  <ellipsoid at="25 25 -32" size="42 42 64" color="W" on="#1"/>
   <!--   2: a cipolla -->
-  <ellipsoid at="25 25 0" size="32 32 34" color="x" on="2"/>
-  <ellipsoid at="25 25 -2" size="38 38 40" color="W" on="2"/>
-  <cone at="25 25 32" size="16 16 16" color="W" on="2"/>
+  <ellipsoid at="25 25 0" size="32 32 34" color="x" on="#2"/>
+  <ellipsoid at="25 25 -2" size="38 38 40" color="W" on="#2"/>
+  <cone at="25 25 32" size="16 16 16" color="W" on="#2"/>
   <!--   3: doppia -->
-  <ellipsoid at="16 25 -18" size="22 26 40" color="x" on="3"/>
-  <ellipsoid at="34 25 -18" size="22 26 40" color="x" on="3"/>
-  <ellipsoid at="16 25 -20" size="26 30 46" color="W" on="3"/>
-  <ellipsoid at="34 25 -20" size="26 30 46" color="W" on="3"/>
-  <line at="25 25 0" to="25 25 34" r="1" color="T" on="3"/>
+  <ellipsoid at="16 25 -18" size="22 26 40" color="x" on="#3"/>
+  <ellipsoid at="34 25 -18" size="22 26 40" color="x" on="#3"/>
+  <ellipsoid at="16 25 -20" size="26 30 46" color="W" on="#3"/>
+  <ellipsoid at="34 25 -20" size="26 30 46" color="W" on="#3"/>
+  <line at="25 25 0" to="25 25 34" r="1" color="T" on="#3"/>
   <!--   4: schiacciata con la torre -->
-  <ellipsoid at="25 25 -14" size="38 38 34" color="x" on="4"/>
-  <ellipsoid at="25 25 -16" size="44 44 40" color="W" on="4"/>
-  <cylinder at="25 25 20" size="6 6 22" color="T" on="4"/>
-  <ellipsoid at="25 25 40" size="10 10 6" color="W" on="4"/>
-  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/><rule in="4" out="B"/></prl>
+  <ellipsoid at="25 25 -14" size="38 38 34" color="x" on="#4"/>
+  <ellipsoid at="25 25 -16" size="44 44 40" color="W" on="#4"/>
+  <cylinder at="25 25 20" size="6 6 22" color="T" on="#4"/>
+  <ellipsoid at="25 25 40" size="10 10 6" color="W" on="#4"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/><rule in="#4" out="B"/></prl>
   <prl in="x" out="B"/>
   <!-- pannelli di vetro e pieni si alternano a caso -->
   <prl in="W" out="V" p="0.3" steps="1"/>
   <prl in="BW" out="*T" p="0.15" steps="1"/>
   <!-- scelta «impianti»: pannelli solari | serbatoi | antenna a traliccio -->
   <box at="44 6 1" size="12 12 30" color="u" on="B"/>
-  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
-  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
   <!--   1: pannelli solari -->
-  <line at="42 4 1" to="42 4 4" r="0.5" color="T" on="1"/>
-  <line at="46 8 1" to="46 8 4" r="0.5" color="T" on="1"/>
-  <box at="44 6 5" size="11 11 1" color="S" on="1"/>
-  <line at="44 6 6" to="44 6 12" r="0.5" color="T" on="1"/>
-  <box at="44 6 12" size="1 1 1" color="P" on="1"/>
+  <line at="42 4 1" to="42 4 4" r="0.5" color="T" on="#1"/>
+  <line at="46 8 1" to="46 8 4" r="0.5" color="T" on="#1"/>
+  <box at="44 6 5" size="11 11 1" color="S" on="#1"/>
+  <line at="44 6 6" to="44 6 12" r="0.5" color="T" on="#1"/>
+  <box at="44 6 12" size="1 1 1" color="P" on="#1"/>
   <!--   2: serbatoi -->
-  <cylinder at="42 4 1" size="6 6 14" color="T" on="2"/>
-  <cylinder at="47 8 1" size="5 5 10" color="T" on="2"/>
-  <ellipsoid at="42 4 13" size="6 6 4" color="W" on="2"/>
-  <box at="42 4 17" size="1 1 1" color="P" on="2"/>
+  <cylinder at="42 4 1" size="6 6 14" color="T" on="#2"/>
+  <cylinder at="47 8 1" size="5 5 10" color="T" on="#2"/>
+  <ellipsoid at="42 4 13" size="6 6 4" color="W" on="#2"/>
+  <box at="42 4 17" size="1 1 1" color="P" on="#2"/>
   <!--   3: antenna a traliccio -->
-  <line at="44 6 1" to="44 6 28" r="0.5" color="T" on="3"/>
-  <line at="40 2 1" to="44 6 22" r="0.5" color="T" on="3"/>
-  <line at="48 10 1" to="44 6 22" r="0.5" color="T" on="3"/>
-  <box at="44 6 28" size="1 1 1" color="P" on="3"/>
-  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <line at="44 6 1" to="44 6 28" r="0.5" color="T" on="#3"/>
+  <line at="40 2 1" to="44 6 22" r="0.5" color="T" on="#3"/>
+  <line at="48 10 1" to="44 6 22" r="0.5" color="T" on="#3"/>
+  <box at="44 6 28" size="1 1 1" color="P" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
   <one steps="10">
     <rule in="B P" out="P T" p="2"/>
     <rule in="B* *P" out="P* *T" p="1"/>

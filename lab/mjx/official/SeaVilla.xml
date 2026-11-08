@@ -204,16 +204,16 @@
       <rule in="l l l o" out="o * * *"/>
     </all>
     <prl in="Yl" out="O*"/>
-    <union symbol="6" values="PY"/>
+    <union symbol="#6" values="PY"/>
     <markov comment="mark open areas">
       <all>
-        <rule in="Piioii6" out="*SS*SSP"/>
-        <rule in="Piio*** ***i*** ***i*** ***oii6" out="*SS**** ***S*** ***S*** ****SSP"/>
-        <rule in="***oii6 ***i*** ***i*** Piio***" out="****SSP ***S*** ***S*** *SS****"/>
-        <rule in="Piio*** ***i*** ***i*** ***o*** ***i*** ***i*** ***oii6" out="*SS**** ***S*** ***S*** ******* ***S*** ***S*** ****SSP"/>
-        <rule in="***oii6 ***i*** ***i*** ***o*** ***i*** ***i*** Piio***" out="****SSP ***S*** ***S*** ******* ***S*** ***S*** *SS****"/>
-        <rule in="Piio*** ***i*** ***i*** ***o*** ***i*** ***i*** ***o*** ***i*** ***i*** ***oii6" out="*SS**** ***S*** ***S*** ******* ***S*** ***S*** ******* ***S*** ***S*** ****SSP"/>
-        <rule in="***oii6 ***i*** ***i*** ***o*** ***i*** ***i*** ***o*** ***i*** ***i*** Piio***" out="****SSP ***S*** ***S*** ******* ***S*** ***S*** ******* ***S*** ***S*** *SS****"/>
+        <rule in="Piioii#6" out="*SS*SSP"/>
+        <rule in="Piio*** ***i*** ***i*** ***oii#6" out="*SS**** ***S*** ***S*** ****SSP"/>
+        <rule in="***oii#6 ***i*** ***i*** Piio***" out="****SSP ***S*** ***S*** *SS****"/>
+        <rule in="Piio*** ***i*** ***i*** ***o*** ***i*** ***i*** ***oii#6" out="*SS**** ***S*** ***S*** ******* ***S*** ***S*** ****SSP"/>
+        <rule in="***oii#6 ***i*** ***i*** ***o*** ***i*** ***i*** Piio***" out="****SSP ***S*** ***S*** ******* ***S*** ***S*** *SS****"/>
+        <rule in="Piio*** ***i*** ***i*** ***o*** ***i*** ***i*** ***o*** ***i*** ***i*** ***oii#6" out="*SS**** ***S*** ***S*** ******* ***S*** ***S*** ******* ***S*** ***S*** ****SSP"/>
+        <rule in="***oii#6 ***i*** ***i*** ***o*** ***i*** ***i*** ***o*** ***i*** ***i*** Piio***" out="****SSP ***S*** ***S*** ******* ***S*** ***S*** ******* ***S*** ***S*** *SS****"/>
       </all>
       <all in="P" out="p"/>
       <one in="O" out="P"/>

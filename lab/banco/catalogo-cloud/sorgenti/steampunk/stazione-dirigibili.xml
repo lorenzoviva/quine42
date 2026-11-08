@@ -1,10 +1,10 @@
 <!-- Stazione dei dirigibili, con la torre dell’orologio -->
 <sequence values="BNExzaPpQbOHtsgcdvefwXiIJhjMSFCWRVDLUuTYGKAknryql" symmetry="(xy)" suolo="E" origin="bottom">
-  <union symbol="8" values="XJMjw"/>
-  <union symbol="7" values="CUWSuXJMjwDV"/>
-  <union symbol="1" values="be"/>
-  <union symbol="2" values="tsdcfv"/>
-  <union symbol="3" values="tb"/>
+  <union symbol="#8" values="XJMjw"/>
+  <union symbol="#7" values="CUWSuXJMjwDV"/>
+  <union symbol="#1" values="be"/>
+  <union symbol="#2" values="tsdcfv"/>
+  <union symbol="#3" values="tb"/>
   <color symbol="k" value="3b2a1e" name="portone ferrato"/><color symbol="S" value="6e5a4a" name="cornice di ghisa"/><color symbol="F" value="7b5233" name="tavolato oliato"/><color symbol="C" value="8a3f2c" name="mattoni rossi"/><color symbol="W" value="a6553a" name="mattoni a vista"/><color symbol="R" value="9fb7a8" name="tettoia di vetro" alpha="0.6"/><color symbol="V" value="c9a45a" name="vetro ambrato" alpha="0.5"/><color symbol="D" value="2e2b29" name="ghisa"/><color symbol="L" value="6b4a2e" name="panca di noce"/><color symbol="T" value="5b544e" name="gradino di ferro"/><color symbol="K" value="3f3a36" name="scala di ferro"/><color symbol="A" value="5e5852" name="lastre di basalto"/><color symbol="a" value="4a3f38" name="fondazione"/><color symbol="x" value="6b4224" name="botti cerchiate"/><color symbol="I" value="6a3324" name="mattoni della torre"/><color symbol="O" value="e9d9a0" name="quadrante" glow="True"/><color symbol="b" value="b87333" name="tubi di rame"/><color symbol="s" value="e8e4dc" name="vapore"/>
   <!-- 1. lattice: arms from the centre, then the lines -->
   <prl in="***/*E*/***" out="***/*z*/***"/>
@@ -39,14 +39,14 @@
   <!-- no doors around the stair; other bays grow through a wall -->
   <all in="[gsdc]t" out="*v"/>
   <prl in="vt" out="*v" steps="9"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
   <prl in="bz" out="*b"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
   <prl in="bz" out="*b"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
   <prl in="bz" out="*b"/>
   <!-- a fourth, low bay in one seed out of two: the seed r stays only if the coin keeps it, otherwise the door goes back to wall -->
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******r******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******r******/******H******/*************" steps="1"/>
   <prl steps="1"><rule in="r" out="b" p="0.5"/></prl>
   <prl in="r/H" out="z/p"/>
   <prl in="bz" out="*b"/>
@@ -59,10 +59,10 @@
   <prl steps="1"><rule in="f" out="t" p="0.5"/></prl>
   <prl in="fr" out="*f"/>
   <prl in="r" out="t"/>
-  <one in="EEEEEEEEEEEEEEE/EEEEEEEEEEEEEEE/EEEEEEEEEEEEEEE/EEEEEEEEEEEEEEE/EEEEEEEEEEEEEEE/EEEEEEEEEEEEEEE/EEEEEEEEEEEEEEE/EEEEEEEEEEEEEEE/EEEEEEEEEEEEEEE/EEEEEEEEEEEEEEE/EEEEEEEEEEEEEEE/EEEEEEEEEEEEEEE/EEEEEEEEEEEEEEE/ppppppppppppppp/333333333333333" out="***************/*GGGGGGGGGGGGG*/*GGGGGGGGGGGGG*/*GGGGGGGGGGGGG*/*GGGGGGGGGGGGG*/*GGGGGGGGGGGGG*/*GGGGGGGGGGGGG*/*GGGGGGGGGGGGG*/*GGGGGGGGGGGGG*/*GGGGGGGGGGGGG*/*GGGGGGGGGGGGG*/*GGGGGGGGGGGGG*/*GGGGGGGGGGGGG*/***************/***************" steps="2"/>
+  <one in="EEEEEEEEEEEEEEE/EEEEEEEEEEEEEEE/EEEEEEEEEEEEEEE/EEEEEEEEEEEEEEE/EEEEEEEEEEEEEEE/EEEEEEEEEEEEEEE/EEEEEEEEEEEEEEE/EEEEEEEEEEEEEEE/EEEEEEEEEEEEEEE/EEEEEEEEEEEEEEE/EEEEEEEEEEEEEEE/EEEEEEEEEEEEEEE/EEEEEEEEEEEEEEE/ppppppppppppppp/#3#3#3#3#3#3#3#3#3#3#3#3#3#3#3" out="***************/*GGGGGGGGGGGGG*/*GGGGGGGGGGGGG*/*GGGGGGGGGGGGG*/*GGGGGGGGGGGGG*/*GGGGGGGGGGGGG*/*GGGGGGGGGGGGG*/*GGGGGGGGGGGGG*/*GGGGGGGGGGGGG*/*GGGGGGGGGGGGG*/*GGGGGGGGGGGGG*/*GGGGGGGGGGGGG*/*GGGGGGGGGGGGG*/***************/***************" steps="2"/>
   <prl in="v" out="t"/>
   <!-- 3. the walls from the neighbouring letters -->
-  <all><rule in="[zE]p[zE]" out="*q*"/><rule in="[zE]p1" out="*w*"/><rule in="[zE]p2" out="*X*"/><rule in="1p1" out="*i*"/><rule in="2p2" out="*I*"/><rule in="1p2" out="*J*"/><rule in="1H1" out="*h*"/><rule in="1H2" out="*j*"/><rule in="EO2" out="*M*"/></all>
+  <all><rule in="[zE]p[zE]" out="*q*"/><rule in="[zE]p#1" out="*w*"/><rule in="[zE]p#2" out="*X*"/><rule in="#1p#1" out="*i*"/><rule in="#2p#2" out="*I*"/><rule in="#1p#2" out="*J*"/><rule in="#1H#1" out="*h*"/><rule in="#1H#2" out="*j*"/><rule in="EO#2" out="*M*"/></all>
   <prl in="n" out="h"/>
   <all in="P[XIJjHMy]" out="I*"/>
   <all in="P[wihO]" out="i*"/>
@@ -95,7 +95,7 @@
   <!-- benches -->
   <all steps="8" symmetry="()" in="B G" out="G L"/>
   <one in="B[CS] [Ez]S" out="b* **" steps="4"/>
-  <prl in="B7 b7" out="b* **"/>
+  <prl in="B#7 b#7" out="b* **"/>
   <prl in="B b" out="s *" steps="1" symmetry="()"/>
   <!-- 6. windows, roof -->
   <all in="UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU" out="*********** DDDDDDDDDDD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DDDDDDDDDDD"/>

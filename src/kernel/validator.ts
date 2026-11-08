@@ -17,6 +17,7 @@ export { repairMinimums } from './universe';
 import { boxOf, classOf, CLASSES, sizeOf, SIZE_TIERS } from '../mj/classes';
 import { Mj3Error } from '../mj/engine';
 import { compileMjx, MJX_FILE_RE, mjxIncludes, newNodesIn, patternText, type MjxFiles, type MjxModel } from '../mj/model';
+import { isNoteLine, symbolTokens } from '../mj/symbols';
 import { FORM_LIMITS, MAX_FORM_TIME, MAX_FORM_XML, runMjx } from '../mj/run';
 import { analyzeSound } from '../mj/soundanalysis';
 import { reservedName } from './paths';
@@ -92,8 +93,9 @@ export function modelErrors(path: string, xml: string, time = 8_000, box?: [numb
 export const MAX_RULE_FILE = 100_000;
 
 /**
- * A rule file of models/ (`<name>.txt`, T333, ADR-0171): a plain name, text of pattern cells only (letters, digits, `* / [ ]`, spaces), notes
- * after "#", at most one line "->". Whether its patterns fit a program is said when the program that reads it compiles.
+ * A rule file of models/ (`<name>.txt`, T333, ADR-0171): a plain name, text of pattern cells only (symbols, letters or `#12` since T342,
+ * `* / [ ]`, spaces), notes on lines starting with "#" and no number, at most one line "->". Whether its patterns fit a program is said
+ * when the program that reads it compiles.
  */
 export function ruleFileErrors(path: string, text: string): string[] {
   const name = /^models\/([^/]+)\.txt$/.exec(path)?.[1];
@@ -102,10 +104,12 @@ export function ruleFileErrors(path: string, text: string): string[] {
   const errors: string[] = [];
   let arrows = 0;
   text.split(/\r?\n/).forEach((line, i) => {
-    if (/^\s*#/.test(line)) return;
+    if (isNoteLine(line)) return;
     if (/^[ \t]*->[ \t]*$/.test(line)) return void arrows++;
-    const bad = /[^A-Za-z0-9*/[\] \t]/.exec(line);
-    if (bad) errors.push(`${path}: riga ${i + 1}: "${bad[0]}" non sta in un pattern (lettere, cifre, * / [ ] e spazi; le note dopo #)`);
+    for (const t of symbolTokens(line)) {
+      const why = t.error ?? (t.code === undefined && !/^[*/[\] \t]$/.test(t.text) ? `"${t.text}" non sta in un pattern (simboli, * / [ ] e spazi; le note dopo # senza numero)` : undefined);
+      if (why) return void errors.push(`${path}: riga ${i + 1}: ${why}`);
+    }
   });
   if (arrows > 1) errors.push(`${path}: al più una riga "->" (fra in e out)`);
   if (!errors.length && text.split(/^[ \t]*->[ \t]*\r?$/m).some((part) => !patternText(part))) errors.push(`${path}: un pattern vuoto`);

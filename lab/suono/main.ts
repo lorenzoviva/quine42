@@ -4,6 +4,7 @@
 
 import indexJson from '../../universe/models/index.json';
 import { AIR, type PaletteEntry } from '../../src/mj/engine';
+import { symbolName } from '../../src/mj/symbols';
 import { pitchOf, SCALES, soundPrograms, type Instrument, type SoundSettings, type SoundTrack } from '../../src/mj/sound';
 import { escapeHtml, highlightXml } from '../editor/syntax';
 import { brushFor, leadComment, letterAt, levels, noteName, paintCell, retouchCount, rollCell, ROLL, seedNote, setSoundAttr, setTrackVolume, stepSlice, wavBytes, withSeedNote, type GridData } from './logic';
@@ -418,7 +419,7 @@ function drawRoll(step: number): void {
           x2d.globalAlpha = 1;
           x2d.fillStyle = '#090b10';
           x2d.textAlign = 'center';
-          x2d.fillText(letter, px + cellW / 2, py + h * 0.78);
+          x2d.fillText(symbolName(letter), px + cellW / 2, py + h * 0.78);
         }
         x2d.globalAlpha = 1;
       }
@@ -547,10 +548,10 @@ function buildBrushes(): void {
     const known = letter === AIR || letter in palette;
     const b = document.createElement('button');
     const color = letter === AIR ? '#334155' : (palette[letter]?.color ?? SOUNDING[letter]?.color ?? '#64748b');
-    const name = letter === AIR ? 'Vuoto' : (palette[letter]?.name ?? SOUNDING[letter]?.name ?? letter);
-    b.innerHTML = `<b style="background:${color}">${escapeHtml(letter)}</b>${escapeHtml(name)}`;
+    const name = letter === AIR ? 'Vuoto' : (palette[letter]?.name ?? SOUNDING[letter]?.name ?? symbolName(letter));
+    b.innerHTML = `<b style="background:${color}">${escapeHtml(symbolName(letter))}</b>${escapeHtml(name)}`;
     b.disabled = !known;
-    b.title = known ? (SOUNDING[letter] || letter === AIR ? '' : 'Lettera muta: un seme per le regole') : `"${letter}" non è tra i values del programma: aggiungila lì per dipingerla`;
+    b.title = known ? (SOUNDING[letter] || letter === AIR ? '' : 'Lettera muta: un seme per le regole') : `"${symbolName(letter)}" non è tra i values del programma: aggiungilo lì per dipingerlo`;
     b.classList.toggle('on', brush === letter);
     b.addEventListener('click', () => {
       brush = letter;
@@ -713,7 +714,7 @@ function bindRoll(): void {
     if (!cell || !g) return;
     const t = settings?.tracks.find((k) => k.y === cell.y);
     const note = t && settings ? noteName(pitchOf(cell.z, settings, t.instrument)) : 'muta';
-    $('hover').textContent = `Cella x ${cell.x}, y ${cell.y} (${t?.instrument ?? 'senza traccia'}), z ${cell.z} (${note}) = ${letterAt(g, cell.x, cell.y, cell.z)}`;
+    $('hover').textContent = `Cella x ${cell.x}, y ${cell.y} (${t?.instrument ?? 'senza traccia'}), z ${cell.z} (${note}) = ${symbolName(letterAt(g, cell.x, cell.y, cell.z))}`;
     if (stroke !== undefined && finalGrid && letterAt(finalGrid, cell.x, cell.y, cell.z) !== stroke) {
       paintCell(finalGrid, cell, stroke);
       gridChanged();

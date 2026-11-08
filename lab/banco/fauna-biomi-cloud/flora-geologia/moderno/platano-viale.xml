@@ -1,5 +1,5 @@
 <!-- Platano di viale (Cantiere 8, neapolis): piede a caso; tronco, rami, chioma e corteccia chiazzata a caso. -->
-<sequence values="BTUKAFLIWSHewsnu123456z" symmetry="(xy)" name="Platano di viale">
+<sequence values="BTUKAFLIWSHewsnu#1#2#3#4#5#6z" symmetry="(xy)" name="Platano di viale">
   <color symbol="T" value="9a9070" name="corteccia"/>
   <color symbol="U" value="9a9070" name="corteccia alta"/>
   <color symbol="K" value="c8c0a0" name="chiazze chiare"/>
@@ -15,12 +15,12 @@
   <color symbol="s" hidden="True" name="marcatore"/>
   <color symbol="n" hidden="True" name="marcatore"/>
   <color symbol="u" hidden="True" name="marcatore"/>
-  <color symbol="1" hidden="True" name="marcatore"/>
-  <color symbol="2" hidden="True" name="marcatore"/>
-  <color symbol="3" hidden="True" name="marcatore"/>
-  <color symbol="4" hidden="True" name="marcatore"/>
-  <color symbol="5" hidden="True" name="marcatore"/>
-  <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="#1" hidden="True" name="marcatore"/>
+  <color symbol="#2" hidden="True" name="marcatore"/>
+  <color symbol="#3" hidden="True" name="marcatore"/>
+  <color symbol="#4" hidden="True" name="marcatore"/>
+  <color symbol="#5" hidden="True" name="marcatore"/>
+  <color symbol="#6" hidden="True" name="marcatore"/>
   <color symbol="z" hidden="True" name="marcatore"/>
   <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
   <box at="3 0 0" size="7 1 1" color="z" on="B"/>
@@ -28,18 +28,18 @@
   <one in="z" out="B" steps="8"/>
   <!-- scelta «piede»: griglia di ghisa | panchina tonda | fioriera di cemento -->
   <box at="20 20 0" size="40 40 9" color="u" on="B"/>
-  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
-  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
   <!--   1: griglia di ghisa -->
-  <box at="20 20 0" size="16 16 1" color="I" on="1"/>
-  <box at="20 20 1" size="10 10 1" color="I" on="1"/>
+  <box at="20 20 0" size="16 16 1" color="I" on="#1"/>
+  <box at="20 20 1" size="10 10 1" color="I" on="#1"/>
   <!--   2: panchina tonda -->
-  <cylinder at="20 20 0" size="20 20 5" color="W" on="2"/>
-  <cylinder at="20 20 0" size="14 14 5" color="S" on="2"/>
+  <cylinder at="20 20 0" size="20 20 5" color="W" on="#2"/>
+  <cylinder at="20 20 0" size="14 14 5" color="S" on="#2"/>
   <!--   3: fioriera di cemento -->
-  <box at="20 20 0" size="18 18 7" color="S" on="3"/>
-  <box at="20 20 7" size="16 16 1" color="F" on="3"/>
-  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <box at="20 20 0" size="18 18 7" color="S" on="#3"/>
+  <box at="20 20 7" size="16 16 1" color="F" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
   <cylinder at="20 20 0" size="6 6 8" color="T"/>
   <box at="20 20 8" size="1 1 1" color="H"/>
   <!-- il tronco cammina verso l'alto, dritto o di sbieco -->

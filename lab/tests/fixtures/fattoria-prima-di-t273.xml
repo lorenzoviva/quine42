@@ -37,7 +37,7 @@ al cancello e due aiuole di ortaggi; dentro un tavolo. La porta si apre (azione)
   <color symbol="g" value="4e8a3a" name="ortaggi"/>
   <color symbol="t" value="9a7048" name="tavolo"/>
   <union symbol="~" values="Ff"/>
-  <union symbol="#" values="WN"/>
+  <union symbol="^" values="WN"/>
   <union symbol="@" values="XY"/>
 
   <!-- The seed of the house falls to the back; the yard grows around it: 89 × 81 voxels (4.5 × 4 tiles). -->
@@ -87,11 +87,11 @@ al cancello e due aiuole di ortaggi; dentro un tavolo. La porta si apre (azione)
   <!-- The door: a seed in the plinth of the front facade (symmetry "()": towards large y), away from the
        corners; it rises for 32 voxels, widens to 13, goes through the wall; then the frame. -->
   <one steps="1" symmetry="()" in="NNNNNNNNN/BBBBBBBBB DDDDDDDDD/YYYYYYYYY" out="****O****/********* *********/*********"/>
-  <all in="# O" out="O *" steps="31"/>
-  <all in="O#" out="*O" steps="6" symmetry="(x)"/>
-  <all in="#/O" out="O/*" symmetry="()"/>
-  <all in="O#" out="*N" steps="1"/>
-  <all in="# O" out="N *" steps="1"/>
+  <all in="^ O" out="O *" steps="31"/>
+  <all in="O^" out="*O" steps="6" symmetry="(x)"/>
+  <all in="^/O" out="O/*" symmetry="()"/>
+  <all in="O^" out="*N" steps="1"/>
+  <all in="^ O" out="N *" steps="1"/>
   <all in="OOO" out="*o*" symmetry="()"/>
 
   <!-- Windows: a seed 9 voxels under the high beam, on the outer side; they grow downwards and sideways,

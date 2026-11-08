@@ -1,7 +1,7 @@
 <!-- Wolf, procedural (Cantiere 2): the same colours and the same animated parts of the original (four legs, tail). The seed picks the
      pose of the head (high, listening, or low, sniffing the trail), the tail (low, straight or raised), how massive the body is, whether it has
      the ruff of light fur on the chest and where the fur is ruffled. -->
-<sequence values="BAIUVFDWHCKEhjenfoxyzspqmab0" size="25 40 30" symmetry="(xy)" name="Lupo">
+<sequence values="BAIUVFDWHCKEhjenfoxyzspqmab#0" size="25 40 30" symmetry="(xy)" name="Lupo">
   <color symbol="A" value="5b606d" name="zampa anteriore sx" part="gamba"/>
   <color symbol="I" value="5b606d" name="zampa anteriore dx" part="gamba"/>
   <color symbol="U" value="4f535f" name="zampa posteriore sx" part="gamba"/>
@@ -28,11 +28,11 @@
   <color symbol="m" hidden="True" name="dado"/>
   <color symbol="a" hidden="True" name="scelta"/>
   <color symbol="b" hidden="True" name="scelta"/>
-  <color symbol="0" hidden="True" name="mescola"/>
+  <color symbol="#0" hidden="True" name="mescola"/>
   <!-- Shuffle: the generator starts again from a different point for every seed (see README) -->
-  <box at="12 0 29" size="25 2 1" color="0"/>
-  <prl in="0" out="B" p="0.5" steps="1"/>
-  <all in="0" out="B"/>
+  <box at="12 0 29" size="25 2 1" color="#0"/>
+  <prl in="#0" out="B" p="0.5" steps="1"/>
+  <all in="#0" out="B"/>
   <!-- The legs -->
   <box at="7 24 0" size="3 4 11" color="A"/>
   <box at="17 24 0" size="3 4 11" color="I"/>

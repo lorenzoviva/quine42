@@ -1,6 +1,8 @@
 // The fingerprint of every program the engine runs (T258, D33): models of the seed in their game box, the reference programs of the
 // bench at Grande and Enorme, and their actions and animations. Two versions of `src/mj/engine.ts` must give the same hashes, voxel by
-// voxel: the test `tests/mj-engine-determinism.test.ts` compares them with `tests/fixtures/mj-engine-hashes.json`.
+// voxel: the test `tests/mj-engine-determinism.test.ts` compares them with `tests/fixtures/mj-engine-hashes.json`. The sound programs of the
+// seed are also heard (T342): their samples, sample by sample, in `tests/fixtures/mj-sound-hashes.json` (taken with the compiler of 0.5,
+// before the symbols `#n`).
 //
 //   npx vite-node lab/scripts/mj-hashes.ts -- --scrivi    # rewrites the fixture (only with the engine one trusts)
 
@@ -13,10 +15,12 @@ import { modelSize } from '../../src/kernel/modeldirector';
 import { Mj3Error, type Grid3 } from '../../src/mj/engine';
 import { compileMjx } from '../../src/mj/model';
 import { act, clipFrames, FORM_LIMITS, runMjx } from '../../src/mj/run';
+import { renderSoundProgram } from '../../src/mj/synth';
 import { bersaglio } from '../banco/bersagli';
 import { scatolaDi, type Bersaglio } from '../banco/misure';
 
 export const FIXTURE = 'tests/fixtures/mj-engine-hashes.json';
+export const SOUND_FIXTURE = 'tests/fixtures/mj-sound-hashes.json';
 
 const ROOT = path.resolve(__dirname, '../..');
 const hashGrid = (g: Grid3) => createHash('sha1').update(`${g.X}x${g.Y}x${g.Z}|${g.alphabet.join('')}|`).update(g.cells).digest('hex').slice(0, 16);
@@ -95,6 +99,22 @@ export function voci(semi = [1, 2]): Voce[] {
   return out;
 }
 
+/** Every sound program of the seed, heard with seed 1: the hash of its samples (a score and a seed give the same samples, synth.ts). */
+export function suoni(): Voce[] {
+  const dir = path.join(ROOT, 'universe/models');
+  return fs
+    .readdirSync(dir)
+    .filter((f) => f.startsWith('sound-') && f.endsWith('.xml'))
+    .sort()
+    .map((f) => ({
+      nome: `suono/${f.slice(0, -4)}#1`,
+      run: () => {
+        const s = renderSoundProgram(fs.readFileSync(path.join(dir, f), 'utf8'), 1).samples;
+        return createHash('sha1').update(new Uint8Array(s.buffer, s.byteOffset, s.byteLength)).digest('hex').slice(0, 16);
+      },
+    }));
+}
+
 if (process.argv.includes('--scrivi')) {
   const t0 = Date.now();
   const res: Record<string, string> = {};
@@ -104,5 +124,8 @@ if (process.argv.includes('--scrivi')) {
     console.log(`${v.nome} ${Date.now() - t} ms ${res[v.nome]}`);
   }
   fs.writeFileSync(path.join(ROOT, FIXTURE), JSON.stringify(res, null, 1) + '\n');
+  const sounds: Record<string, string> = {};
+  for (const v of suoni()) sounds[v.nome] = v.run();
+  fs.writeFileSync(path.join(ROOT, SOUND_FIXTURE), JSON.stringify(sounds, null, 1) + '\n');
   console.log(`${Object.keys(res).length} voci in ${Date.now() - t0} ms`);
 }

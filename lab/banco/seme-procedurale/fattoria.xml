@@ -9,7 +9,7 @@ The yard grows from the seed and has a palisade; the house stands in its back ha
 voxels thick, half-timbering, a gable roof with plastered gables, a chimney; in front a gravel path up
 to the gate and two vegetable beds; inside a table. The door opens (action); the chimney smokes.
 -->
-<sequence values="BXYFfEPpQRrIWwNnDdOoUKhjSGgTta0zv" size="100 100 80" origin="True" symmetry="(xy)">
+<sequence values="BXYFfEPpQRrIWwNnDdOoUKhjSGgTta#0zv" size="100 100 80" origin="True" symmetry="(xy)">
   <color symbol="a" hidden="True" name="muro già diviso"/>
   <color symbol="Y" hidden="True" name="cortile"/>
   <color symbol="X" hidden="True" name="volume della casa"/>
@@ -41,13 +41,13 @@ to the gate and two vegetable beds; inside a table. The door opens (action); the
   <color symbol="t" value="9a7048" name="tavolo"/>
   <color symbol="z" hidden="True" name="quote possibili dei muri"/>
   <color symbol="v" hidden="True" name="la quota scelta"/>
-  <color symbol="0" hidden="True" name="mescola"/>
+  <color symbol="#0" hidden="True" name="mescola"/>
   <!-- Shuffle: the generator starts again from a different point for every seed (see README) -->
-  <box at="50 0 79" size="100 2 1" color="0"/>
-  <prl in="0" out="B" p="0.5" steps="1"/>
-  <all in="0" out="B"/>
+  <box at="50 0 79" size="100 2 1" color="#0"/>
+  <prl in="#0" out="B" p="0.5" steps="1"/>
+  <all in="#0" out="B"/>
   <union symbol="~" values="Ff"/>
-  <union symbol="#" values="WN"/>
+  <union symbol="^" values="WN"/>
   <union symbol="@" values="XY"/>
 
   <!-- The seed of the house falls to the back; the yard grows around it: 89 × 81 voxels (4.5 × 4 tiles). -->
@@ -104,11 +104,11 @@ to the gate and two vegetable beds; inside a table. The door opens (action); the
   <!-- The door: a seed in the plinth of the front facade (symmetry "()": towards large y), away from the
        corners; it rises for 32 voxels, widens to 13, goes through the wall; then the frame. -->
   <one steps="1" symmetry="()" in="NNNNNNNNN/BBBBBBBBB DDDDDDDDD/YYYYYYYYY" out="****O****/********* *********/*********"/>
-  <all in="# O" out="O *" steps="31"/>
-  <all in="O#" out="*O" steps="6" symmetry="(x)"/>
-  <all in="#/O" out="O/*" symmetry="()"/>
-  <all in="O#" out="*N" steps="1"/>
-  <all in="# O" out="N *" steps="1"/>
+  <all in="^ O" out="O *" steps="31"/>
+  <all in="O^" out="*O" steps="6" symmetry="(x)"/>
+  <all in="^/O" out="O/*" symmetry="()"/>
+  <all in="O^" out="*N" steps="1"/>
+  <all in="^ O" out="N *" steps="1"/>
   <all in="OOO" out="*o*" symmetry="()"/>
 
   <!-- Windows: a seed 9 voxels under the high beam, on the outer side; they grow downwards and sideways,

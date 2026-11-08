@@ -9,7 +9,8 @@ measures what comes out and, if it does not pass, sends the program back to you 
 `<sequence name="…" values="BNSAGKHCR…" size="128 3 12" symmetry="()">`, with `symmetry="()"` on the root: a rule holds only as it is written.
 - **x is time**, in sixteenths: 16 steps are a bar. **y is the track**. **z is the pitch** on the scale, from the bottom.
 - The FIRST letter of `values` is the empty cell (B). The letters that sound: **N** note, **S** sustain (the tail of the note before), **A** accent,
-  **G** ghost (a soft note), **K** kick, **H** hi-hat (open from z = 4), **C** snare. Every other letter is mute: use them as working marks.
+  **G** ghost (a soft note), **K** kick, **H** hi-hat (open from z = 4), **C** snare. Every other symbol is mute: use them as working marks; a symbol is a
+  letter or, when the letters are not enough, `#` and a number (`#12`): a digit alone is not a symbol.
 - Music: `size` of 64 or 128 steps, 2 or 3 tracks, 8-12 pitches; the loop comes back on itself. Effect: from 4 to 24 steps, 1 or 2 tracks, 4-8 pitches.
 
 ## The parameters

@@ -1,5 +1,5 @@
 <!-- Fermata della metropolitana (Cantiere 8, neapolis): pensilina, scala e arredo a caso; cartacce a caso. -->
-<sequence values="BSDIVRWYKxu123456z" symmetry="(xy)" name="Fermata della metropolitana">
+<sequence values="BSDIVRWYKxu#1#2#3#4#5#6z" symmetry="(xy)" name="Fermata della metropolitana">
   <color symbol="S" value="b8b4aa" name="marciapiede"/>
   <color symbol="D" value="6a6660" name="gradini"/>
   <color symbol="I" value="2a2c30" name="ringhiere"/>
@@ -10,12 +10,12 @@
   <color symbol="K" value="e8e2d0" name="cartacce"/>
   <color symbol="x" hidden="True" name="marcatore"/>
   <color symbol="u" hidden="True" name="marcatore"/>
-  <color symbol="1" hidden="True" name="marcatore"/>
-  <color symbol="2" hidden="True" name="marcatore"/>
-  <color symbol="3" hidden="True" name="marcatore"/>
-  <color symbol="4" hidden="True" name="marcatore"/>
-  <color symbol="5" hidden="True" name="marcatore"/>
-  <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="#1" hidden="True" name="marcatore"/>
+  <color symbol="#2" hidden="True" name="marcatore"/>
+  <color symbol="#3" hidden="True" name="marcatore"/>
+  <color symbol="#4" hidden="True" name="marcatore"/>
+  <color symbol="#5" hidden="True" name="marcatore"/>
+  <color symbol="#6" hidden="True" name="marcatore"/>
   <color symbol="z" hidden="True" name="marcatore"/>
   <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
   <box at="3 0 0" size="7 1 1" color="z" on="B"/>
@@ -23,37 +23,37 @@
   <one in="z" out="B" steps="8"/>
   <!-- scelta «lato della scala»: davanti | dietro | a destra | a sinistra -->
   <box at="25 25 0" size="40 40 8" color="u" on="B"/>
-  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/><rule in="u" out="4"/></one>
-  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/><rule in="4u" out="*4"/></all>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/><rule in="u" out="#4"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/><rule in="#4u" out="*#4"/></all>
   <!--   1: davanti -->
-  <box at="25 27 6" size="12 2 1" color="x" on="1"/>
-  <box at="25 29 5" size="12 2 2" color="x" on="1"/>
-  <box at="25 31 4" size="12 2 3" color="x" on="1"/>
-  <box at="25 33 3" size="12 2 4" color="x" on="1"/>
-  <box at="25 35 2" size="12 2 5" color="x" on="1"/>
-  <box at="25 37 1" size="12 2 6" color="x" on="1"/>
+  <box at="25 27 6" size="12 2 1" color="x" on="#1"/>
+  <box at="25 29 5" size="12 2 2" color="x" on="#1"/>
+  <box at="25 31 4" size="12 2 3" color="x" on="#1"/>
+  <box at="25 33 3" size="12 2 4" color="x" on="#1"/>
+  <box at="25 35 2" size="12 2 5" color="x" on="#1"/>
+  <box at="25 37 1" size="12 2 6" color="x" on="#1"/>
   <!--   2: dietro -->
-  <box at="25 23 6" size="12 2 1" color="x" on="2"/>
-  <box at="25 21 5" size="12 2 2" color="x" on="2"/>
-  <box at="25 19 4" size="12 2 3" color="x" on="2"/>
-  <box at="25 17 3" size="12 2 4" color="x" on="2"/>
-  <box at="25 15 2" size="12 2 5" color="x" on="2"/>
-  <box at="25 13 1" size="12 2 6" color="x" on="2"/>
+  <box at="25 23 6" size="12 2 1" color="x" on="#2"/>
+  <box at="25 21 5" size="12 2 2" color="x" on="#2"/>
+  <box at="25 19 4" size="12 2 3" color="x" on="#2"/>
+  <box at="25 17 3" size="12 2 4" color="x" on="#2"/>
+  <box at="25 15 2" size="12 2 5" color="x" on="#2"/>
+  <box at="25 13 1" size="12 2 6" color="x" on="#2"/>
   <!--   3: a destra -->
-  <box at="27 25 6" size="2 12 1" color="x" on="3"/>
-  <box at="29 25 5" size="2 12 2" color="x" on="3"/>
-  <box at="31 25 4" size="2 12 3" color="x" on="3"/>
-  <box at="33 25 3" size="2 12 4" color="x" on="3"/>
-  <box at="35 25 2" size="2 12 5" color="x" on="3"/>
-  <box at="37 25 1" size="2 12 6" color="x" on="3"/>
+  <box at="27 25 6" size="2 12 1" color="x" on="#3"/>
+  <box at="29 25 5" size="2 12 2" color="x" on="#3"/>
+  <box at="31 25 4" size="2 12 3" color="x" on="#3"/>
+  <box at="33 25 3" size="2 12 4" color="x" on="#3"/>
+  <box at="35 25 2" size="2 12 5" color="x" on="#3"/>
+  <box at="37 25 1" size="2 12 6" color="x" on="#3"/>
   <!--   4: a sinistra -->
-  <box at="23 25 6" size="2 12 1" color="x" on="4"/>
-  <box at="21 25 5" size="2 12 2" color="x" on="4"/>
-  <box at="19 25 4" size="2 12 3" color="x" on="4"/>
-  <box at="17 25 3" size="2 12 4" color="x" on="4"/>
-  <box at="15 25 2" size="2 12 5" color="x" on="4"/>
-  <box at="13 25 1" size="2 12 6" color="x" on="4"/>
-  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/><rule in="4" out="B"/></prl>
+  <box at="23 25 6" size="2 12 1" color="x" on="#4"/>
+  <box at="21 25 5" size="2 12 2" color="x" on="#4"/>
+  <box at="19 25 4" size="2 12 3" color="x" on="#4"/>
+  <box at="17 25 3" size="2 12 4" color="x" on="#4"/>
+  <box at="15 25 2" size="2 12 5" color="x" on="#4"/>
+  <box at="13 25 1" size="2 12 6" color="x" on="#4"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/><rule in="#4" out="B"/></prl>
   <!-- il marciapiede, dove la scala non ha già preso posto -->
   <box at="25 25 0" size="40 40 7" color="D" on="B"/>
   <box at="25 25 6" size="44 44 1" color="S" on="[BD]"/>
@@ -65,30 +65,30 @@
   <prl in="B I" out="I *" steps="2"/>
   <!-- scelta «pensilina»: arcuata di vetro | tettoia piatta | ferri liberty | nessuna -->
   <box at="25 25 7" size="44 44 30" color="u" on="B"/>
-  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/><rule in="u" out="4"/></one>
-  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/><rule in="4u" out="*4"/></all>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/><rule in="u" out="#4"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/><rule in="#4u" out="*#4"/></all>
   <!--   1: arcuata di vetro -->
-  <ellipsoid at="25 25 0" size="30 30 46" color="x" on="1"/>
-  <ellipsoid at="25 25 -2" size="34 34 52" color="V" on="1"/>
-  <line at="12 12 7" to="12 12 20" r="0.5" color="I" on="1"/>
-  <line at="38 38 7" to="38 38 20" r="0.5" color="I" on="1"/>
+  <ellipsoid at="25 25 0" size="30 30 46" color="x" on="#1"/>
+  <ellipsoid at="25 25 -2" size="34 34 52" color="V" on="#1"/>
+  <line at="12 12 7" to="12 12 20" r="0.5" color="I" on="#1"/>
+  <line at="38 38 7" to="38 38 20" r="0.5" color="I" on="#1"/>
   <!--   2: tettoia piatta -->
-  <line at="12 12 7" to="12 12 22" r="0.5" color="I" on="2"/>
-  <line at="38 12 7" to="38 12 22" r="0.5" color="I" on="2"/>
-  <line at="12 38 7" to="12 38 22" r="0.5" color="I" on="2"/>
-  <line at="38 38 7" to="38 38 22" r="0.5" color="I" on="2"/>
-  <box at="25 25 22" size="32 32 1" color="V" on="2"/>
-  <box at="25 25 23" size="32 32 1" color="I" on="2"/>
+  <line at="12 12 7" to="12 12 22" r="0.5" color="I" on="#2"/>
+  <line at="38 12 7" to="38 12 22" r="0.5" color="I" on="#2"/>
+  <line at="12 38 7" to="12 38 22" r="0.5" color="I" on="#2"/>
+  <line at="38 38 7" to="38 38 22" r="0.5" color="I" on="#2"/>
+  <box at="25 25 22" size="32 32 1" color="V" on="#2"/>
+  <box at="25 25 23" size="32 32 1" color="I" on="#2"/>
   <!--   3: ferri liberty -->
-  <line at="12 12 7" to="18 18 24" r="1" color="I" on="3"/>
-  <line at="38 12 7" to="32 18 24" r="1" color="I" on="3"/>
-  <line at="12 38 7" to="18 32 24" r="1" color="I" on="3"/>
-  <line at="38 38 7" to="32 32 24" r="1" color="I" on="3"/>
-  <ellipsoid at="25 25 22" size="22 22 8" color="V" on="3"/>
-  <cone at="25 25 26" size="8 8 6" color="I" on="3"/>
+  <line at="12 12 7" to="18 18 24" r="1" color="I" on="#3"/>
+  <line at="38 12 7" to="32 18 24" r="1" color="I" on="#3"/>
+  <line at="12 38 7" to="18 32 24" r="1" color="I" on="#3"/>
+  <line at="38 38 7" to="32 32 24" r="1" color="I" on="#3"/>
+  <ellipsoid at="25 25 22" size="22 22 8" color="V" on="#3"/>
+  <cone at="25 25 26" size="8 8 6" color="I" on="#3"/>
   <!--   4: nessuna -->
-  <box at="25 25 7" size="1 1 1" color="I" on="4"/>
-  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/><rule in="4" out="B"/></prl>
+  <box at="25 25 7" size="1 1 1" color="I" on="#4"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/><rule in="#4" out="B"/></prl>
   <prl in="x" out="B"/>
   <!-- il palo con la lettera -->
   <line at="5 5 7" to="5 5 34" r="0.5" color="I"/>
@@ -96,23 +96,23 @@
   <box at="5 4 35" size="3 1 3" color="R"/>
   <!-- scelta «arredo»: panchina | distributore | cestini | biciclette -->
   <box at="25 44 7" size="44 8 12" color="u" on="B"/>
-  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/><rule in="u" out="4"/></one>
-  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/><rule in="4u" out="*4"/></all>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/><rule in="u" out="#4"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/><rule in="#4u" out="*#4"/></all>
   <!--   1: panchina -->
-  <box at="25 45 7" size="14 3 3" color="I" on="1"/>
-  <box at="25 46 10" size="14 1 3" color="I" on="1"/>
+  <box at="25 45 7" size="14 3 3" color="I" on="#1"/>
+  <box at="25 46 10" size="14 1 3" color="I" on="#1"/>
   <!--   2: distributore -->
-  <box at="30 45 7" size="5 4 11" color="Y" on="2"/>
-  <box at="30 43 12" size="3 1 3" color="W" on="2"/>
+  <box at="30 45 7" size="5 4 11" color="Y" on="#2"/>
+  <box at="30 43 12" size="3 1 3" color="W" on="#2"/>
   <!--   3: cestini -->
-  <cylinder at="16 45 7" size="4 4 5" color="I" on="3"/>
-  <cylinder at="34 45 7" size="4 4 5" color="I" on="3"/>
+  <cylinder at="16 45 7" size="4 4 5" color="I" on="#3"/>
+  <cylinder at="34 45 7" size="4 4 5" color="I" on="#3"/>
   <!--   4: biciclette -->
-  <ellipsoid at="16 45 7" size="1 8 8" color="I" on="4"/>
-  <ellipsoid at="22 45 7" size="1 8 8" color="I" on="4"/>
-  <ellipsoid at="28 45 7" size="1 8 8" color="I" on="4"/>
-  <box at="22 45 7" size="16 1 1" color="I" on="4"/>
-  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/><rule in="4" out="B"/></prl>
+  <ellipsoid at="16 45 7" size="1 8 8" color="I" on="#4"/>
+  <ellipsoid at="22 45 7" size="1 8 8" color="I" on="#4"/>
+  <ellipsoid at="28 45 7" size="1 8 8" color="I" on="#4"/>
+  <box at="22 45 7" size="16 1 1" color="I" on="#4"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/><rule in="#4" out="B"/></prl>
   <!-- cartacce sul marciapiede -->
   <prl in="B S" out="K *" p="0.01" steps="1"/>
 </sequence>

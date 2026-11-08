@@ -40,6 +40,7 @@ import {
   alignShapeAt,
 } from './cad';
 import { MJ_PALETTE } from '../../src/mj/palette';
+import { symbolOf } from '../../src/mj/symbols';
 import type { PaletteEntry } from '../../src/mj/engine';
 import { startCards, type CardsBar } from '../handmade/bar';
 import { boxFor } from '../handmade/logic';
@@ -74,7 +75,7 @@ const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as 
 // ------------------------------------------------------------------ Starter templates
 
 const TEMPLATE_CUBE = `<!-- Cubo elementare con gradiente di colore -->
-<sequence values="0BGY" size="12 12 12">
+<sequence values="#0BGY" size="12 12 12">
   <box at="6 6 0" size="10 10 2" color="B"/>
   <box at="6 6 2" size="8 8 4" color="G"/>
   <box at="6 6 6" size="6 6 4" color="Y"/>
@@ -494,6 +495,8 @@ let activePaletteSource: 'model' | 'default' = 'model';
 let hasCustomColorsPrev: boolean | null = null;
 let pickerActiveTab: 'model' | 'default' = 'model';
 let pickerTargetPos: number | null = null;
+/** How long the symbol under the picker is: `#12` is three characters (T342). */
+let pickerTargetLen = 1;
 
 // Playback Elements (T59c)
 const playbackBar = $('playback-bar');
@@ -1287,6 +1290,7 @@ function syncPaletteState() {
 
 function openColorPickerPopup(pos: number, attr: string, letter: string, rect: DOMRect) {
   pickerTargetPos = pos;
+  pickerTargetLen = Math.max(1, letter.length);
 
   pickerAttrInfo.textContent = `${attr}="${letter}" · Voxel ${letter}`;
 
@@ -1386,10 +1390,10 @@ function applyPickerSelection(newChar: string) {
 
   const val = codeInput.value;
   const before = val.slice(0, pickerTargetPos);
-  const after = val.slice(pickerTargetPos + 1);
+  const after = val.slice(pickerTargetPos + pickerTargetLen);
   codeInput.value = before + newChar + after;
 
-  const nextPos = pickerTargetPos + 1;
+  const nextPos = pickerTargetPos + newChar.length;
   closeColorPickerPopup();
 
   onCodeChange();
@@ -2838,8 +2842,8 @@ btnRefactorApply.addEventListener('click', () => {
   const oldSym = activeColorSymbol;
   const newSym = refactorNewSymbol.value.trim();
 
-  if (!newSym || newSym.length !== 1) {
-    alert('Inserisci un singolo carattere valido per il nuovo simbolo.');
+  if (symbolOf(newSym) === undefined) {
+    alert('Inserisci un simbolo valido: una lettera, o # e un numero (#12).');
     return;
   }
 

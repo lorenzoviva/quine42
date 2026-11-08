@@ -1,5 +1,5 @@
 <!-- Albero di ferro fuso (Cantiere 8, orichalcum): piede a caso; canna, rami a tubo e foglie di rame a caso. -->
-<sequence values="BTUAFOZHewsnu123456z" symmetry="(xy)" name="Albero di ferro fuso">
+<sequence values="BTUAFOZHewsnu#1#2#3#4#5#6z" symmetry="(xy)" name="Albero di ferro fuso">
   <color symbol="T" value="3e3a36" name="ghisa"/>
   <color symbol="U" value="4b4640" name="ghisa alta"/>
   <color symbol="A" value="5a544c" name="tubi"/>
@@ -12,12 +12,12 @@
   <color symbol="s" hidden="True" name="marcatore"/>
   <color symbol="n" hidden="True" name="marcatore"/>
   <color symbol="u" hidden="True" name="marcatore"/>
-  <color symbol="1" hidden="True" name="marcatore"/>
-  <color symbol="2" hidden="True" name="marcatore"/>
-  <color symbol="3" hidden="True" name="marcatore"/>
-  <color symbol="4" hidden="True" name="marcatore"/>
-  <color symbol="5" hidden="True" name="marcatore"/>
-  <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="#1" hidden="True" name="marcatore"/>
+  <color symbol="#2" hidden="True" name="marcatore"/>
+  <color symbol="#3" hidden="True" name="marcatore"/>
+  <color symbol="#4" hidden="True" name="marcatore"/>
+  <color symbol="#5" hidden="True" name="marcatore"/>
+  <color symbol="#6" hidden="True" name="marcatore"/>
   <color symbol="z" hidden="True" name="marcatore"/>
   <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
   <box at="3 0 0" size="7 1 1" color="z" on="B"/>
@@ -25,19 +25,19 @@
   <one in="z" out="B" steps="8"/>
   <!-- scelta «piede»: flangia | treppiede | cassa di ingranaggi -->
   <box at="20 20 0" size="40 40 8" color="u" on="B"/>
-  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
-  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
   <!--   1: flangia -->
-  <cylinder at="20 20 0" size="14 14 2" color="O" on="1"/>
-  <cylinder at="20 20 2" size="9 9 2" color="T" on="1"/>
+  <cylinder at="20 20 0" size="14 14 2" color="O" on="#1"/>
+  <cylinder at="20 20 2" size="9 9 2" color="T" on="#1"/>
   <!--   2: treppiede -->
-  <line at="20 20 6" to="10 14 0" r="1.5" color="T" on="2"/>
-  <line at="20 20 6" to="30 14 0" r="1.5" color="T" on="2"/>
-  <line at="20 20 6" to="20 31 0" r="1.5" color="T" on="2"/>
+  <line at="20 20 6" to="10 14 0" r="1.5" color="T" on="#2"/>
+  <line at="20 20 6" to="30 14 0" r="1.5" color="T" on="#2"/>
+  <line at="20 20 6" to="20 31 0" r="1.5" color="T" on="#2"/>
   <!--   3: cassa di ingranaggi -->
-  <box at="20 20 0" size="14 14 7" color="O" on="3"/>
-  <cylinder at="13 20 3" size="2 9 2" color="T" on="3"/>
-  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <box at="20 20 0" size="14 14 7" color="O" on="#3"/>
+  <cylinder at="13 20 3" size="2 9 2" color="T" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
   <cylinder at="20 20 0" size="5 5 7" color="T"/>
   <box at="20 20 7" size="1 1 1" color="H"/>
   <!-- il tronco cammina verso l'alto, dritto o di sbieco -->

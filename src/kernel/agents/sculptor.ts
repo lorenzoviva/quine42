@@ -16,6 +16,7 @@ import { MJ_PALETTE } from '../../mj/palette';
 import { cartoonRender, render, sheet, type RenderOptions } from '../../mj/photo';
 import { pngDataUrl } from '../../mj/png';
 import { act, runMjx } from '../../mj/run';
+import { symbolName } from '../../mj/symbols';
 import { traceText } from '../../mj/trace';
 import { reachableStoreys } from '../forms';
 import type { FileMap } from '../types';
@@ -417,11 +418,12 @@ export function actionLetters(xml: string, cls: AssetClass): { background: strin
   for (const c of g.cells) counts.set(c, (counts.get(c) ?? 0) + 1);
   const pal = model.program.palette;
   const letters = g.alphabet
-    .map((ch, code) => ({ lettera: ch, nome: pal[ch]?.name, colore: pal[ch]?.color, hidden: pal[ch]?.hidden, ...(pal[ch]?.glow ? { luce: true } : {}), voxel: counts.get(code) ?? 0 }))
-    .filter((l) => l.lettera !== '.' && l.colore && !l.hidden && l.voxel > 0)
+    // As the program writes them (`#12`, T342): the Sculptor writes the action with these.
+    .map((ch, code) => ({ air: ch === '.', lettera: symbolName(ch), nome: pal[ch]?.name, colore: pal[ch]?.color, hidden: pal[ch]?.hidden, ...(pal[ch]?.glow ? { luce: true } : {}), voxel: counts.get(code) ?? 0 }))
+    .filter((l) => !l.air && l.colore && !l.hidden && l.voxel > 0)
     .sort((a, b) => b.voxel - a.voxel)
-    .map(({ hidden: _, ...l }) => l);
-  return { background: model.background, letters };
+    .map(({ hidden: _, air: __, ...l }) => l);
+  return { background: symbolName(model.background), letters };
 }
 
 /** The `<action>` in an answer, named as the kernel wants it. */

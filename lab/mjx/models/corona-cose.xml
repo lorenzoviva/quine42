@@ -30,7 +30,7 @@ Inner laboratory:
 Animation "sintesi" (8 frames):
   A continuous energy wave flowing through the geodesic rings, the tensile cables and the central core.
 -->
-<sequence values="BMmCSVvNFPOnx12345678" size="112 112 64" symmetry="()" name="Laboratorio delle cose">
+<sequence values="BMmCSVvNFPOnx#1#2#3#4#5#6#7#8" size="112 112 64" symmetry="()" name="Laboratorio delle cose">
   <!-- Materials and palette -->
   <color symbol="M" value="16161e" name="metallo primario"/>
   <color symbol="m" value="242632" name="metallo secondario"/>
@@ -46,14 +46,14 @@ Animation "sintesi" (8 frames):
   <color symbol="x" hidden="True" name="buffer animazione"/>
 
   <!-- 8 phases of the copper neon wave (fluid cyclic pulse) -->
-  <color symbol="1" value="844422" glow="True" name="fase rame 1"/>
-  <color symbol="2" value="9c542a" glow="True" name="fase rame 2"/>
-  <color symbol="3" value="b86a36" glow="True" name="fase rame 3"/>
-  <color symbol="4" value="d68448" glow="True" name="fase rame 4"/>
-  <color symbol="5" value="f2b07c" glow="True" name="fase rame apice"/>
-  <color symbol="6" value="d68448" glow="True" name="fase rame 6"/>
-  <color symbol="7" value="b86a36" glow="True" name="fase rame 7"/>
-  <color symbol="8" value="9c542a" glow="True" name="fase rame 8"/>
+  <color symbol="#1" value="844422" glow="True" name="fase rame 1"/>
+  <color symbol="#2" value="9c542a" glow="True" name="fase rame 2"/>
+  <color symbol="#3" value="b86a36" glow="True" name="fase rame 3"/>
+  <color symbol="#4" value="d68448" glow="True" name="fase rame 4"/>
+  <color symbol="#5" value="f2b07c" glow="True" name="fase rame apice"/>
+  <color symbol="#6" value="d68448" glow="True" name="fase rame 6"/>
+  <color symbol="#7" value="b86a36" glow="True" name="fase rame 7"/>
+  <color symbol="#8" value="9c542a" glow="True" name="fase rame 8"/>
 
   <!-- ================================================================= -->
   <!-- 1. BASE, FORECOURT AND PERIMETER (z = 0..3)                       -->
@@ -69,8 +69,8 @@ Animation "sintesi" (8 frames):
   <box at="56 94 2" size="24 24 1" color="C"/>
 
   <!-- Copper neon light guides along the footpath (phases 1 and 5) -->
-  <box at="47 101 2" size="1 10 1" color="1"/>
-  <box at="65 101 2" size="1 10 1" color="5"/>
+  <box at="47 101 2" size="1 10 1" color="#1"/>
+  <box at="65 101 2" size="1 10 1" color="#5"/>
 
   <!-- Monolithic base for the totem of the sign (left side) -->
   <box at="26 104 0" size="46 6 2" color="C"/>
@@ -82,31 +82,31 @@ Animation "sintesi" (8 frames):
   <!-- 8 angled perimeter anchoring pylons (R ~ 44 from cx=56, cy=46) -->
   <box at="12 46 0" size="4 6 16" color="M"/>
   <box at="12 46 16" size="4 4 3" color="S"/>
-  <box at="12 46 19" size="2 2 2" color="1"/>
+  <box at="12 46 19" size="2 2 2" color="#1"/>
 
   <box at="100 46 0" size="4 6 16" color="M"/>
   <box at="100 46 16" size="4 4 3" color="S"/>
-  <box at="100 46 19" size="2 2 2" color="1"/>
+  <box at="100 46 19" size="2 2 2" color="#1"/>
 
   <box at="56 6 0" size="6 4 16" color="M"/>
   <box at="56 6 16" size="4 4 3" color="S"/>
-  <box at="56 6 19" size="2 2 2" color="1"/>
+  <box at="56 6 19" size="2 2 2" color="#1"/>
 
   <box at="25 15 0" size="6 6 16" color="M"/>
   <box at="25 15 16" size="4 4 3" color="S"/>
-  <box at="25 15 19" size="2 2 2" color="3"/>
+  <box at="25 15 19" size="2 2 2" color="#3"/>
 
   <box at="87 15 0" size="6 6 16" color="M"/>
   <box at="87 15 16" size="4 4 3" color="S"/>
-  <box at="87 15 19" size="2 2 2" color="3"/>
+  <box at="87 15 19" size="2 2 2" color="#3"/>
 
   <box at="25 77 0" size="6 6 16" color="M"/>
   <box at="25 77 16" size="4 4 3" color="S"/>
-  <box at="25 77 19" size="2 2 2" color="7"/>
+  <box at="25 77 19" size="2 2 2" color="#7"/>
 
   <box at="87 77 0" size="6 6 16" color="M"/>
   <box at="87 77 16" size="4 4 3" color="S"/>
-  <box at="87 77 19" size="2 2 2" color="7"/>
+  <box at="87 77 19" size="2 2 2" color="#7"/>
 
   <!-- ================================================================= -->
   <!-- 3. SHELL OF THE DOME (REFLECTING GLASS AND REFLECTIONS)           -->
@@ -138,7 +138,7 @@ Animation "sintesi" (8 frames):
   <!-- Parallel 2 (z=14..15) with a pulsing copper neon thread (phase 2) -->
   <cylinder at="56 46 14" size="77 77 2" color="M" on="Vv"/>
   <cylinder at="56 46 14" size="73 73 2" color="V" on="M"/>
-  <cylinder at="56 46 14" size="78 78 1" color="2" on="M"/>
+  <cylinder at="56 46 14" size="78 78 1" color="#2" on="M"/>
 
   <!-- Parallel 3 (z=23..24) -->
   <cylinder at="56 46 23" size="69 69 2" color="M" on="Vv"/>
@@ -147,7 +147,7 @@ Animation "sintesi" (8 frames):
   <!-- Parallel 4 (z=31..32) with a pulsing copper neon thread (phase 6) -->
   <cylinder at="56 46 31" size="55 55 2" color="M" on="Vv"/>
   <cylinder at="56 46 31" size="51 51 2" color="V" on="M"/>
-  <cylinder at="56 46 31" size="56 56 1" color="6" on="M"/>
+  <cylinder at="56 46 31" size="56 56 1" color="#6" on="M"/>
 
   <!-- Parallel 5 (z=36..37) -->
   <cylinder at="56 46 36" size="37 37 2" color="M" on="Vv"/>
@@ -163,196 +163,196 @@ Animation "sintesi" (8 frames):
   <box at="93 46 14" size="1 1 1" color="S" on="VvM"/>
   <line at="92 61 6" to="82 72 14" r="0" color="M" on="Vv"/>
   <line at="84 74 6" to="90 60 14" r="0" color="M" on="Vv"/>
-  <box at="90 60 14" size="1 1 1" color="2" on="VvM"/>
+  <box at="90 60 14" size="1 1 1" color="#2" on="VvM"/>
   <line at="84 74 6" to="70 80 14" r="0" color="M" on="Vv"/>
   <line at="71 82 6" to="82 72 14" r="0" color="M" on="Vv"/>
   <box at="82 72 14" size="1 1 1" color="S" on="VvM"/>
   <line at="71 82 6" to="56 83 14" r="0" color="M" on="Vv"/>
   <line at="56 85 6" to="70 80 14" r="0" color="M" on="Vv"/>
-  <box at="70 80 14" size="1 1 1" color="4" on="VvM"/>
+  <box at="70 80 14" size="1 1 1" color="#4" on="VvM"/>
   <line at="56 85 6" to="42 80 14" r="0" color="M" on="Vv"/>
   <line at="41 82 6" to="56 83 14" r="0" color="M" on="Vv"/>
   <box at="56 83 14" size="1 1 1" color="S" on="VvM"/>
   <line at="41 82 6" to="30 72 14" r="0" color="M" on="Vv"/>
   <line at="28 74 6" to="42 80 14" r="0" color="M" on="Vv"/>
-  <box at="42 80 14" size="1 1 1" color="6" on="VvM"/>
+  <box at="42 80 14" size="1 1 1" color="#6" on="VvM"/>
   <line at="28 74 6" to="22 60 14" r="0" color="M" on="Vv"/>
   <line at="20 61 6" to="30 72 14" r="0" color="M" on="Vv"/>
   <box at="30 72 14" size="1 1 1" color="S" on="VvM"/>
   <line at="20 61 6" to="19 46 14" r="0" color="M" on="Vv"/>
   <line at="17 46 6" to="22 60 14" r="0" color="M" on="Vv"/>
-  <box at="22 60 14" size="1 1 1" color="8" on="VvM"/>
+  <box at="22 60 14" size="1 1 1" color="#8" on="VvM"/>
   <line at="17 46 6" to="22 32 14" r="0" color="M" on="Vv"/>
   <line at="20 31 6" to="19 46 14" r="0" color="M" on="Vv"/>
   <box at="19 46 14" size="1 1 1" color="S" on="VvM"/>
   <line at="20 31 6" to="30 20 14" r="0" color="M" on="Vv"/>
   <line at="28 18 6" to="22 32 14" r="0" color="M" on="Vv"/>
-  <box at="22 32 14" size="1 1 1" color="2" on="VvM"/>
+  <box at="22 32 14" size="1 1 1" color="#2" on="VvM"/>
   <line at="28 18 6" to="42 12 14" r="0" color="M" on="Vv"/>
   <line at="41 10 6" to="30 20 14" r="0" color="M" on="Vv"/>
   <box at="30 20 14" size="1 1 1" color="S" on="VvM"/>
   <line at="41 10 6" to="56 9 14" r="0" color="M" on="Vv"/>
   <line at="56 7 6" to="42 12 14" r="0" color="M" on="Vv"/>
-  <box at="42 12 14" size="1 1 1" color="4" on="VvM"/>
+  <box at="42 12 14" size="1 1 1" color="#4" on="VvM"/>
   <line at="56 7 6" to="70 12 14" r="0" color="M" on="Vv"/>
   <line at="71 10 6" to="56 9 14" r="0" color="M" on="Vv"/>
   <box at="56 9 14" size="1 1 1" color="S" on="VvM"/>
   <line at="71 10 6" to="82 20 14" r="0" color="M" on="Vv"/>
   <line at="84 18 6" to="70 12 14" r="0" color="M" on="Vv"/>
-  <box at="70 12 14" size="1 1 1" color="6" on="VvM"/>
+  <box at="70 12 14" size="1 1 1" color="#6" on="VvM"/>
   <line at="84 18 6" to="90 32 14" r="0" color="M" on="Vv"/>
   <line at="92 31 6" to="82 20 14" r="0" color="M" on="Vv"/>
   <box at="82 20 14" size="1 1 1" color="S" on="VvM"/>
   <line at="92 31 6" to="93 46 14" r="0" color="M" on="Vv"/>
   <line at="95 46 6" to="90 32 14" r="0" color="M" on="Vv"/>
-  <box at="90 32 14" size="1 1 1" color="8" on="VvM"/>
+  <box at="90 32 14" size="1 1 1" color="#8" on="VvM"/>
   <!-- Geodesic tier 2 (z=14..23) -->
   <line at="93 46 14" to="86 59 23" r="0" color="M" on="Vv"/>
   <line at="90 60 14" to="89 46 23" r="0" color="M" on="Vv"/>
   <box at="89 46 23" size="1 1 1" color="S" on="VvM"/>
   <line at="90 60 14" to="79 69 23" r="0" color="M" on="Vv"/>
   <line at="82 72 14" to="86 59 23" r="0" color="M" on="Vv"/>
-  <box at="86 59 23" size="1 1 1" color="2" on="VvM"/>
+  <box at="86 59 23" size="1 1 1" color="#2" on="VvM"/>
   <line at="82 72 14" to="69 76 23" r="0" color="M" on="Vv"/>
   <line at="70 80 14" to="79 69 23" r="0" color="M" on="Vv"/>
   <box at="79 69 23" size="1 1 1" color="S" on="VvM"/>
   <line at="70 80 14" to="56 79 23" r="0" color="M" on="Vv"/>
   <line at="56 83 14" to="69 76 23" r="0" color="M" on="Vv"/>
-  <box at="69 76 23" size="1 1 1" color="4" on="VvM"/>
+  <box at="69 76 23" size="1 1 1" color="#4" on="VvM"/>
   <line at="56 83 14" to="43 76 23" r="0" color="M" on="Vv"/>
   <line at="42 80 14" to="56 79 23" r="0" color="M" on="Vv"/>
   <box at="56 79 23" size="1 1 1" color="S" on="VvM"/>
   <line at="42 80 14" to="33 69 23" r="0" color="M" on="Vv"/>
   <line at="30 72 14" to="43 76 23" r="0" color="M" on="Vv"/>
-  <box at="43 76 23" size="1 1 1" color="6" on="VvM"/>
+  <box at="43 76 23" size="1 1 1" color="#6" on="VvM"/>
   <line at="30 72 14" to="26 59 23" r="0" color="M" on="Vv"/>
   <line at="22 60 14" to="33 69 23" r="0" color="M" on="Vv"/>
   <box at="33 69 23" size="1 1 1" color="S" on="VvM"/>
   <line at="22 60 14" to="23 46 23" r="0" color="M" on="Vv"/>
   <line at="19 46 14" to="26 59 23" r="0" color="M" on="Vv"/>
-  <box at="26 59 23" size="1 1 1" color="8" on="VvM"/>
+  <box at="26 59 23" size="1 1 1" color="#8" on="VvM"/>
   <line at="19 46 14" to="26 33 23" r="0" color="M" on="Vv"/>
   <line at="22 32 14" to="23 46 23" r="0" color="M" on="Vv"/>
   <box at="23 46 23" size="1 1 1" color="S" on="VvM"/>
   <line at="22 32 14" to="33 23 23" r="0" color="M" on="Vv"/>
   <line at="30 20 14" to="26 33 23" r="0" color="M" on="Vv"/>
-  <box at="26 33 23" size="1 1 1" color="2" on="VvM"/>
+  <box at="26 33 23" size="1 1 1" color="#2" on="VvM"/>
   <line at="30 20 14" to="43 16 23" r="0" color="M" on="Vv"/>
   <line at="42 12 14" to="33 23 23" r="0" color="M" on="Vv"/>
   <box at="33 23 23" size="1 1 1" color="S" on="VvM"/>
   <line at="42 12 14" to="56 13 23" r="0" color="M" on="Vv"/>
   <line at="56 9 14" to="43 16 23" r="0" color="M" on="Vv"/>
-  <box at="43 16 23" size="1 1 1" color="4" on="VvM"/>
+  <box at="43 16 23" size="1 1 1" color="#4" on="VvM"/>
   <line at="56 9 14" to="69 16 23" r="0" color="M" on="Vv"/>
   <line at="70 12 14" to="56 13 23" r="0" color="M" on="Vv"/>
   <box at="56 13 23" size="1 1 1" color="S" on="VvM"/>
   <line at="70 12 14" to="79 23 23" r="0" color="M" on="Vv"/>
   <line at="82 20 14" to="69 16 23" r="0" color="M" on="Vv"/>
-  <box at="69 16 23" size="1 1 1" color="6" on="VvM"/>
+  <box at="69 16 23" size="1 1 1" color="#6" on="VvM"/>
   <line at="82 20 14" to="86 33 23" r="0" color="M" on="Vv"/>
   <line at="90 32 14" to="79 23 23" r="0" color="M" on="Vv"/>
   <box at="79 23 23" size="1 1 1" color="S" on="VvM"/>
   <line at="90 32 14" to="89 46 23" r="0" color="M" on="Vv"/>
   <line at="93 46 14" to="86 33 23" r="0" color="M" on="Vv"/>
-  <box at="86 33 23" size="1 1 1" color="8" on="VvM"/>
+  <box at="86 33 23" size="1 1 1" color="#8" on="VvM"/>
   <!-- Geodesic tier 3 (z=23..31) -->
   <line at="89 46 23" to="80 56 31" r="0" color="M" on="Vv"/>
   <line at="86 59 23" to="82 46 31" r="0" color="M" on="Vv"/>
   <box at="82 46 31" size="1 1 1" color="S" on="VvM"/>
   <line at="86 59 23" to="74 64 31" r="0" color="M" on="Vv"/>
   <line at="79 69 23" to="80 56 31" r="0" color="M" on="Vv"/>
-  <box at="80 56 31" size="1 1 1" color="2" on="VvM"/>
+  <box at="80 56 31" size="1 1 1" color="#2" on="VvM"/>
   <line at="79 69 23" to="66 70 31" r="0" color="M" on="Vv"/>
   <line at="69 76 23" to="74 64 31" r="0" color="M" on="Vv"/>
   <box at="74 64 31" size="1 1 1" color="S" on="VvM"/>
   <line at="69 76 23" to="56 72 31" r="0" color="M" on="Vv"/>
   <line at="56 79 23" to="66 70 31" r="0" color="M" on="Vv"/>
-  <box at="66 70 31" size="1 1 1" color="4" on="VvM"/>
+  <box at="66 70 31" size="1 1 1" color="#4" on="VvM"/>
   <line at="56 79 23" to="46 70 31" r="0" color="M" on="Vv"/>
   <line at="43 76 23" to="56 72 31" r="0" color="M" on="Vv"/>
   <box at="56 72 31" size="1 1 1" color="S" on="VvM"/>
   <line at="43 76 23" to="38 64 31" r="0" color="M" on="Vv"/>
   <line at="33 69 23" to="46 70 31" r="0" color="M" on="Vv"/>
-  <box at="46 70 31" size="1 1 1" color="6" on="VvM"/>
+  <box at="46 70 31" size="1 1 1" color="#6" on="VvM"/>
   <line at="33 69 23" to="32 56 31" r="0" color="M" on="Vv"/>
   <line at="26 59 23" to="38 64 31" r="0" color="M" on="Vv"/>
   <box at="38 64 31" size="1 1 1" color="S" on="VvM"/>
   <line at="26 59 23" to="30 46 31" r="0" color="M" on="Vv"/>
   <line at="23 46 23" to="32 56 31" r="0" color="M" on="Vv"/>
-  <box at="32 56 31" size="1 1 1" color="8" on="VvM"/>
+  <box at="32 56 31" size="1 1 1" color="#8" on="VvM"/>
   <line at="23 46 23" to="32 36 31" r="0" color="M" on="Vv"/>
   <line at="26 33 23" to="30 46 31" r="0" color="M" on="Vv"/>
   <box at="30 46 31" size="1 1 1" color="S" on="VvM"/>
   <line at="26 33 23" to="38 28 31" r="0" color="M" on="Vv"/>
   <line at="33 23 23" to="32 36 31" r="0" color="M" on="Vv"/>
-  <box at="32 36 31" size="1 1 1" color="2" on="VvM"/>
+  <box at="32 36 31" size="1 1 1" color="#2" on="VvM"/>
   <line at="33 23 23" to="46 22 31" r="0" color="M" on="Vv"/>
   <line at="43 16 23" to="38 28 31" r="0" color="M" on="Vv"/>
   <box at="38 28 31" size="1 1 1" color="S" on="VvM"/>
   <line at="43 16 23" to="56 20 31" r="0" color="M" on="Vv"/>
   <line at="56 13 23" to="46 22 31" r="0" color="M" on="Vv"/>
-  <box at="46 22 31" size="1 1 1" color="4" on="VvM"/>
+  <box at="46 22 31" size="1 1 1" color="#4" on="VvM"/>
   <line at="56 13 23" to="66 22 31" r="0" color="M" on="Vv"/>
   <line at="69 16 23" to="56 20 31" r="0" color="M" on="Vv"/>
   <box at="56 20 31" size="1 1 1" color="S" on="VvM"/>
   <line at="69 16 23" to="74 28 31" r="0" color="M" on="Vv"/>
   <line at="79 23 23" to="66 22 31" r="0" color="M" on="Vv"/>
-  <box at="66 22 31" size="1 1 1" color="6" on="VvM"/>
+  <box at="66 22 31" size="1 1 1" color="#6" on="VvM"/>
   <line at="79 23 23" to="80 36 31" r="0" color="M" on="Vv"/>
   <line at="86 33 23" to="74 28 31" r="0" color="M" on="Vv"/>
   <box at="74 28 31" size="1 1 1" color="S" on="VvM"/>
   <line at="86 33 23" to="82 46 31" r="0" color="M" on="Vv"/>
   <line at="89 46 23" to="80 36 31" r="0" color="M" on="Vv"/>
-  <box at="80 36 31" size="1 1 1" color="8" on="VvM"/>
+  <box at="80 36 31" size="1 1 1" color="#8" on="VvM"/>
   <!-- Geodesic tier 4 (z=31..36) -->
   <line at="82 46 31" to="72 53 36" r="0" color="M" on="Vv"/>
   <line at="80 56 31" to="73 46 36" r="0" color="M" on="Vv"/>
   <box at="73 46 36" size="1 1 1" color="S" on="VvM"/>
   <line at="80 56 31" to="68 58 36" r="0" color="M" on="Vv"/>
   <line at="74 64 31" to="72 53 36" r="0" color="M" on="Vv"/>
-  <box at="72 53 36" size="1 1 1" color="2" on="VvM"/>
+  <box at="72 53 36" size="1 1 1" color="#2" on="VvM"/>
   <line at="74 64 31" to="63 62 36" r="0" color="M" on="Vv"/>
   <line at="66 70 31" to="68 58 36" r="0" color="M" on="Vv"/>
   <box at="68 58 36" size="1 1 1" color="S" on="VvM"/>
   <line at="66 70 31" to="56 63 36" r="0" color="M" on="Vv"/>
   <line at="56 72 31" to="63 62 36" r="0" color="M" on="Vv"/>
-  <box at="63 62 36" size="1 1 1" color="4" on="VvM"/>
+  <box at="63 62 36" size="1 1 1" color="#4" on="VvM"/>
   <line at="56 72 31" to="49 62 36" r="0" color="M" on="Vv"/>
   <line at="46 70 31" to="56 63 36" r="0" color="M" on="Vv"/>
   <box at="56 63 36" size="1 1 1" color="S" on="VvM"/>
   <line at="46 70 31" to="44 58 36" r="0" color="M" on="Vv"/>
   <line at="38 64 31" to="49 62 36" r="0" color="M" on="Vv"/>
-  <box at="49 62 36" size="1 1 1" color="6" on="VvM"/>
+  <box at="49 62 36" size="1 1 1" color="#6" on="VvM"/>
   <line at="38 64 31" to="40 53 36" r="0" color="M" on="Vv"/>
   <line at="32 56 31" to="44 58 36" r="0" color="M" on="Vv"/>
   <box at="44 58 36" size="1 1 1" color="S" on="VvM"/>
   <line at="32 56 31" to="39 46 36" r="0" color="M" on="Vv"/>
   <line at="30 46 31" to="40 53 36" r="0" color="M" on="Vv"/>
-  <box at="40 53 36" size="1 1 1" color="8" on="VvM"/>
+  <box at="40 53 36" size="1 1 1" color="#8" on="VvM"/>
   <line at="30 46 31" to="40 39 36" r="0" color="M" on="Vv"/>
   <line at="32 36 31" to="39 46 36" r="0" color="M" on="Vv"/>
   <box at="39 46 36" size="1 1 1" color="S" on="VvM"/>
   <line at="32 36 31" to="44 34 36" r="0" color="M" on="Vv"/>
   <line at="38 28 31" to="40 39 36" r="0" color="M" on="Vv"/>
-  <box at="40 39 36" size="1 1 1" color="2" on="VvM"/>
+  <box at="40 39 36" size="1 1 1" color="#2" on="VvM"/>
   <line at="38 28 31" to="49 30 36" r="0" color="M" on="Vv"/>
   <line at="46 22 31" to="44 34 36" r="0" color="M" on="Vv"/>
   <box at="44 34 36" size="1 1 1" color="S" on="VvM"/>
   <line at="46 22 31" to="56 29 36" r="0" color="M" on="Vv"/>
   <line at="56 20 31" to="49 30 36" r="0" color="M" on="Vv"/>
-  <box at="49 30 36" size="1 1 1" color="4" on="VvM"/>
+  <box at="49 30 36" size="1 1 1" color="#4" on="VvM"/>
   <line at="56 20 31" to="63 30 36" r="0" color="M" on="Vv"/>
   <line at="66 22 31" to="56 29 36" r="0" color="M" on="Vv"/>
   <box at="56 29 36" size="1 1 1" color="S" on="VvM"/>
   <line at="66 22 31" to="68 34 36" r="0" color="M" on="Vv"/>
   <line at="74 28 31" to="63 30 36" r="0" color="M" on="Vv"/>
-  <box at="63 30 36" size="1 1 1" color="6" on="VvM"/>
+  <box at="63 30 36" size="1 1 1" color="#6" on="VvM"/>
   <line at="74 28 31" to="72 39 36" r="0" color="M" on="Vv"/>
   <line at="80 36 31" to="68 34 36" r="0" color="M" on="Vv"/>
   <box at="68 34 36" size="1 1 1" color="S" on="VvM"/>
   <line at="80 36 31" to="73 46 36" r="0" color="M" on="Vv"/>
   <line at="82 46 31" to="72 39 36" r="0" color="M" on="Vv"/>
-  <box at="72 39 36" size="1 1 1" color="8" on="VvM"/>
+  <box at="72 39 36" size="1 1 1" color="#8" on="VvM"/>
 
   <!-- Steel tension cables from the outer pylons to parallel 2 of the dome -->
   <line at="12 46 17" to="20 46 14" r="0" color="S"/>
@@ -369,11 +369,11 @@ Animation "sintesi" (8 frames):
   <!-- Top ring of structural junction -->
   <cylinder at="56 46 39" size="18 18 2" color="M"/>
   <cylinder at="56 46 40" size="14 14 2" color="S"/>
-  <cylinder at="56 46 41" size="10 10 2" color="4"/>
+  <cylinder at="56 46 41" size="10 10 2" color="#4"/>
   <cylinder at="56 46 43" size="6 6 2" color="M"/>
   <!-- Spire / data transmission antenna -->
   <cylinder at="56 46 44" size="3 3 5" color="S"/>
-  <box at="56 46 49" size="1 1 2" color="5"/>
+  <box at="56 46 49" size="1 1 2" color="#5"/>
 
   <!-- ================================================================= -->
   <!-- 6. TECHNOLOGICAL CORE INSIDE THE LABORATORY                      -->
@@ -389,8 +389,8 @@ Animation "sintesi" (8 frames):
   <cylinder at="56 46 16" size="12 12 1" color="S"/>
 
   <!-- Glowing copper plasma core (the synthesis of things, phases 4 and 5) -->
-  <ellipsoid at="56 46 8" size="6 6 6" color="5"/>
-  <ellipsoid at="56 46 10" size="2 2 2" color="4"/>
+  <ellipsoid at="56 46 8" size="6 6 6" color="#5"/>
+  <ellipsoid at="56 46 10" size="2 2 2" color="#4"/>
 
   <!-- 4 robotic mechanical arms around the cylinder -->
   <box at="47 46 4" size="2 4 7" color="M"/>
@@ -414,7 +414,7 @@ Animation "sintesi" (8 frames):
   <!-- Arched ribs of the tunnel in metal and neon -->
   <box at="56 80 0" size="24 2 19" color="M"/>
   <box at="56 86 0" size="24 2 19" color="M"/>
-  <box at="56 86 19" size="20 1 1" color="3"/>
+  <box at="56 86 19" size="20 1 1" color="#3"/>
   <box at="56 92 0" size="24 2 19" color="M"/>
 
   <!-- Hollowing out the inside of the tunnel (corridor and entrance hall) -->
@@ -680,14 +680,14 @@ Animation "sintesi" (8 frames):
 <!-- ================================================================= -->
 <animation name="sintesi" frames="8">
   <sequence>
-    <all in="1" out="x"/>
-    <all in="2" out="1"/>
-    <all in="3" out="2"/>
-    <all in="4" out="3"/>
-    <all in="5" out="4"/>
-    <all in="6" out="5"/>
-    <all in="7" out="6"/>
-    <all in="8" out="7"/>
-    <all in="x" out="8"/>
+    <all in="#1" out="x"/>
+    <all in="#2" out="#1"/>
+    <all in="#3" out="#2"/>
+    <all in="#4" out="#3"/>
+    <all in="#5" out="#4"/>
+    <all in="#6" out="#5"/>
+    <all in="#7" out="#6"/>
+    <all in="#8" out="#7"/>
+    <all in="x" out="#8"/>
   </sequence>
 </animation>

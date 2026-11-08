@@ -351,6 +351,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Dove vive**: `src/mj/`, `src/kernel/mj.ts`
 - **Da non usare**: `codice` (è il Lua), `xml` (nei documenti)
 
+### Simbolo
+- **Inglese**: `symbol`, `symbolTokens`, `readSymbols`, `symbolName`, `showSymbols`, `numberedSymbol`, `MAX_SYMBOLS`
+- **Definizione**: il colore di una cella di un programma MarkovJunior, come il programma lo scrive: una lettera, oppure `#` e un numero (`#12`, il **simbolo numerato**), letto avidamente; una cifra da sola non lo è (dal contratto 0.6, ADR-0175). Dentro il motore ogni simbolo è un carattere; fuori si mostra col suo nome. Un programma ne ha al più 255 oltre la cella vuota.
+- **Dove vive**: `src/mj/symbols.ts`, `src/mj/model.ts`, `src/kernel/migrations.ts` (`programFor0_6`)
+- **Da non usare**: `lettera` quando può essere un `#12` (nei documenti nuovi), `codice` (è il numero della cella nel motore), `colore` (è ciò che la palette gli dà)
+- **Fermo**: `#` e il numero nei programmi, l'attributo `symbol` di `<union>` e `<color>`.
+
 ### Programma incluso
 - **Inglese**: `import`, `importNode`, `mjxIncludes`, `MjxFiles`, `files`, `includesOf`
 - **Definizione**: il programma di un altro modello di `models/` eseguito dentro un programma come un nodo, con `<import file="<nome>"/>`: ne vengono le lettere, i colori e le unioni, non la scatola né le animazioni (ADR-0171). I file che un programma legge (programmi inclusi e file di regole) si danno al compilatore per nome semplice.

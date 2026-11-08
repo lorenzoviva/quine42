@@ -1,5 +1,5 @@
 <!-- Faro iperspaziale (Cantiere 8, sidera): guglia, anelli e cima a caso; raggi a caso. -->
-<sequence values="BTDRLExPu123456z" symmetry="(xy)" name="Faro iperspaziale">
+<sequence values="BTDRLExPu#1#2#3#4#5#6z" symmetry="(xy)" name="Faro iperspaziale">
   <color symbol="T" value="d0d6dc" name="guglia"/>
   <color symbol="D" value="4a525c" name="gambe"/>
   <color symbol="R" value="7a8ab8" name="anelli"/>
@@ -8,12 +8,12 @@
   <color symbol="x" hidden="True" name="marcatore"/>
   <color symbol="P" hidden="True" name="marcatore"/>
   <color symbol="u" hidden="True" name="marcatore"/>
-  <color symbol="1" hidden="True" name="marcatore"/>
-  <color symbol="2" hidden="True" name="marcatore"/>
-  <color symbol="3" hidden="True" name="marcatore"/>
-  <color symbol="4" hidden="True" name="marcatore"/>
-  <color symbol="5" hidden="True" name="marcatore"/>
-  <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="#1" hidden="True" name="marcatore"/>
+  <color symbol="#2" hidden="True" name="marcatore"/>
+  <color symbol="#3" hidden="True" name="marcatore"/>
+  <color symbol="#4" hidden="True" name="marcatore"/>
+  <color symbol="#5" hidden="True" name="marcatore"/>
+  <color symbol="#6" hidden="True" name="marcatore"/>
   <color symbol="z" hidden="True" name="marcatore"/>
   <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
   <box at="3 0 0" size="7 1 1" color="z" on="B"/>
@@ -24,67 +24,67 @@
   <line at="25 25 14" to="25 45 0" r="2" color="D"/>
   <!-- scelta «guglia»: ago | a gradoni | cristallo -->
   <box at="25 25 10" size="20 20 32" color="u" on="B"/>
-  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
-  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
   <!--   1: ago -->
-  <cone at="25 25 10" size="8 8 32" color="T" on="1"/>
-  <cylinder at="25 25 10" size="4 4 30" color="T" on="1"/>
+  <cone at="25 25 10" size="8 8 32" color="T" on="#1"/>
+  <cylinder at="25 25 10" size="4 4 30" color="T" on="#1"/>
   <!--   2: a gradoni -->
-  <box at="25 25 10" size="12 12 8" color="T" on="2"/>
-  <box at="25 25 18" size="9 9 8" color="T" on="2"/>
-  <box at="25 25 26" size="6 6 8" color="T" on="2"/>
-  <box at="25 25 34" size="3 3 8" color="T" on="2"/>
+  <box at="25 25 10" size="12 12 8" color="T" on="#2"/>
+  <box at="25 25 18" size="9 9 8" color="T" on="#2"/>
+  <box at="25 25 26" size="6 6 8" color="T" on="#2"/>
+  <box at="25 25 34" size="3 3 8" color="T" on="#2"/>
   <!--   3: cristallo -->
-  <cone at="25 25 22" size="12 12 20" color="T" on="3"/>
-  <cone at="25 25 22" size="12 12 -12" color="T" on="3"/>
-  <line at="25 25 10" to="25 25 40" r="1.5" color="T" on="3"/>
-  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <cone at="25 25 22" size="12 12 20" color="T" on="#3"/>
+  <cone at="25 25 22" size="12 12 -12" color="T" on="#3"/>
+  <line at="25 25 10" to="25 25 40" r="1.5" color="T" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
   <!-- scelta «anelli»: uno grande | due di fianco | tre impilati -->
   <box at="25 25 8" size="50 50 34" color="u" on="B"/>
-  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
-  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
   <!--   1: uno grande -->
-  <ellipsoid at="25 25 26" size="34 34 1" color="x" on="1"/>
-  <ellipsoid at="25 25 26" size="40 40 2" color="R" on="1"/>
-  <line at="25 25 27" to="44 25 27" r="0.5" color="R" on="1"/>
-  <line at="25 25 27" to="16 41 27" r="0.5" color="R" on="1"/>
-  <line at="25 25 27" to="15 9 27" r="0.5" color="R" on="1"/>
+  <ellipsoid at="25 25 26" size="34 34 1" color="x" on="#1"/>
+  <ellipsoid at="25 25 26" size="40 40 2" color="R" on="#1"/>
+  <line at="25 25 27" to="44 25 27" r="0.5" color="R" on="#1"/>
+  <line at="25 25 27" to="16 41 27" r="0.5" color="R" on="#1"/>
+  <line at="25 25 27" to="15 9 27" r="0.5" color="R" on="#1"/>
   <!--   2: due di fianco -->
-  <ellipsoid at="25 25 10" size="1 26 26" color="x" on="2"/>
-  <ellipsoid at="25 25 9" size="2 32 28" color="R" on="2"/>
-  <ellipsoid at="25 25 10" size="26 1 26" color="x" on="2"/>
-  <ellipsoid at="25 25 9" size="32 2 28" color="R" on="2"/>
+  <ellipsoid at="25 25 10" size="1 26 26" color="x" on="#2"/>
+  <ellipsoid at="25 25 9" size="2 32 28" color="R" on="#2"/>
+  <ellipsoid at="25 25 10" size="26 1 26" color="x" on="#2"/>
+  <ellipsoid at="25 25 9" size="32 2 28" color="R" on="#2"/>
   <!--   3: tre impilati -->
-  <ellipsoid at="25 25 16" size="22 22 1" color="x" on="3"/>
-  <ellipsoid at="25 25 16" size="28 28 2" color="R" on="3"/>
-  <line at="25 25 17" to="39 25 17" r="0.5" color="R" on="3"/>
-  <ellipsoid at="25 25 24" size="18 18 1" color="x" on="3"/>
-  <ellipsoid at="25 25 24" size="24 24 2" color="R" on="3"/>
-  <line at="25 25 25" to="37 25 25" r="0.5" color="R" on="3"/>
-  <ellipsoid at="25 25 32" size="14 14 1" color="x" on="3"/>
-  <ellipsoid at="25 25 32" size="20 20 2" color="R" on="3"/>
-  <line at="25 25 33" to="35 25 33" r="0.5" color="R" on="3"/>
-  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <ellipsoid at="25 25 16" size="22 22 1" color="x" on="#3"/>
+  <ellipsoid at="25 25 16" size="28 28 2" color="R" on="#3"/>
+  <line at="25 25 17" to="39 25 17" r="0.5" color="R" on="#3"/>
+  <ellipsoid at="25 25 24" size="18 18 1" color="x" on="#3"/>
+  <ellipsoid at="25 25 24" size="24 24 2" color="R" on="#3"/>
+  <line at="25 25 25" to="37 25 25" r="0.5" color="R" on="#3"/>
+  <ellipsoid at="25 25 32" size="14 14 1" color="x" on="#3"/>
+  <ellipsoid at="25 25 32" size="20 20 2" color="R" on="#3"/>
+  <line at="25 25 33" to="35 25 33" r="0.5" color="R" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
   <prl in="x" out="B"/>
   <!-- scelta «cima»: sfera | prisma | corona di punte -->
   <box at="25 25 40" size="20 20 10" color="u" on="B"/>
-  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
-  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
   <!--   1: sfera -->
-  <ellipsoid at="25 25 40" size="9 9 9" color="L" on="1"/>
-  <box at="25 25 49" size="1 1 1" color="P" on="1"/>
+  <ellipsoid at="25 25 40" size="9 9 9" color="L" on="#1"/>
+  <box at="25 25 49" size="1 1 1" color="P" on="#1"/>
   <!--   2: prisma -->
-  <cone at="25 25 40" size="8 8 10" color="L" on="2"/>
-  <box at="25 25 49" size="1 1 1" color="P" on="2"/>
+  <cone at="25 25 40" size="8 8 10" color="L" on="#2"/>
+  <box at="25 25 49" size="1 1 1" color="P" on="#2"/>
   <!--   3: corona di punte -->
-  <cylinder at="25 25 40" size="8 8 2" color="L" on="3"/>
-  <cone at="28 25 42" size="3 3 6" color="L" on="3"/>
-  <cone at="26 28 42" size="3 3 6" color="L" on="3"/>
-  <cone at="23 27 42" size="3 3 6" color="L" on="3"/>
-  <cone at="23 23 42" size="3 3 6" color="L" on="3"/>
-  <cone at="26 22 42" size="3 3 6" color="L" on="3"/>
-  <box at="25 25 42" size="1 1 1" color="P" on="3"/>
-  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <cylinder at="25 25 40" size="8 8 2" color="L" on="#3"/>
+  <cone at="28 25 42" size="3 3 6" color="L" on="#3"/>
+  <cone at="26 28 42" size="3 3 6" color="L" on="#3"/>
+  <cone at="23 27 42" size="3 3 6" color="L" on="#3"/>
+  <cone at="23 23 42" size="3 3 6" color="L" on="#3"/>
+  <cone at="26 22 42" size="3 3 6" color="L" on="#3"/>
+  <box at="25 25 42" size="1 1 1" color="P" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
   <one steps="10">
     <rule in="B P" out="P E" p="1"/>
     <rule in="B* *P" out="P* *E" p="3"/>

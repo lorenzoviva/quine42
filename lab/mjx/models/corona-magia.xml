@@ -21,7 +21,7 @@ Arcane Heart:
 Animation "energia" (16 frames, 2.4s):
   A wide cosmic wave with glyphs appearing and disappearing in unison with the breathing of the tower.
 -->
-<sequence values="BMmCSVPFOxy0123456789ADEGHIabdeghijklnqrtuw" size="80 80 192" symmetry="(xy)" name="Torre della Magia">
+<sequence values="BMmCSVPFOxy#0#1#2#3#4#5#6#7#8#9ADEGHIabdeghijklnqrtuw" size="80 80 192" symmetry="(xy)" name="Torre della Magia">
   <!-- Architectural materials -->
   <color symbol="M" value="16161e" name="metallo primario"/>
   <color symbol="m" value="242632" name="metallo secondario"/>
@@ -35,16 +35,16 @@ Animation "energia" (16 frames, 2.4s):
   <color symbol="y" hidden="True" name="buffer condotti"/>
 
   <!-- 16 phases of the wall glyphs (0..6 off in the metal M, 7..I lit with a soft glow) -->
-  <color symbol="0" value="16161e" name="glifo spento 0"/>
-  <color symbol="1" value="16161e" name="glifo spento 1"/>
-  <color symbol="2" value="16161e" name="glifo spento 2"/>
-  <color symbol="3" value="16161e" name="glifo spento 3"/>
-  <color symbol="4" value="16161e" name="glifo spento 4"/>
-  <color symbol="5" value="16161e" name="glifo spento 5"/>
-  <color symbol="6" value="16161e" name="glifo spento 6"/>
-  <color symbol="7" value="6d32a0" glow="True" name="glifo scintilla"/>
-  <color symbol="8" value="8444bc" glow="True" name="glifo risveglio"/>
-  <color symbol="9" value="9c5cd8" glow="True" name="glifo medio"/>
+  <color symbol="#0" value="16161e" name="glifo spento 0"/>
+  <color symbol="#1" value="16161e" name="glifo spento 1"/>
+  <color symbol="#2" value="16161e" name="glifo spento 2"/>
+  <color symbol="#3" value="16161e" name="glifo spento 3"/>
+  <color symbol="#4" value="16161e" name="glifo spento 4"/>
+  <color symbol="#5" value="16161e" name="glifo spento 5"/>
+  <color symbol="#6" value="16161e" name="glifo spento 6"/>
+  <color symbol="#7" value="6d32a0" glow="True" name="glifo scintilla"/>
+  <color symbol="#8" value="8444bc" glow="True" name="glifo risveglio"/>
+  <color symbol="#9" value="9c5cd8" glow="True" name="glifo medio"/>
   <color symbol="A" value="b272f0" glow="True" name="glifo radioso"/>
   <color symbol="D" value="c68ef8" glow="True" name="glifo apice"/>
   <color symbol="E" value="b272f0" glow="True" name="glifo calante 1"/>
@@ -139,14 +139,14 @@ Animation "energia" (16 frames, 2.4s):
     <box at="64 52 25" size="1 1 1" color="D"/>
     <box at="64 51 24" size="1 1 1" color="D"/>
     <!-- Glyph 0 at theta=155 z=26 phase=5 (5) -->
-    <box at="16 51 28" size="1 1 1" color="5"/>
-    <box at="16 52 27" size="1 1 1" color="5"/>
-    <box at="15 51 27" size="1 1 1" color="5"/>
-    <box at="16 53 26" size="1 1 1" color="5"/>
-    <box at="15 50 26" size="1 1 1" color="5"/>
-    <box at="16 52 25" size="1 1 1" color="5"/>
-    <box at="15 51 25" size="1 1 1" color="5"/>
-    <box at="16 51 24" size="1 1 1" color="5"/>
+    <box at="16 51 28" size="1 1 1" color="#5"/>
+    <box at="16 52 27" size="1 1 1" color="#5"/>
+    <box at="15 51 27" size="1 1 1" color="#5"/>
+    <box at="16 53 26" size="1 1 1" color="#5"/>
+    <box at="15 50 26" size="1 1 1" color="#5"/>
+    <box at="16 52 25" size="1 1 1" color="#5"/>
+    <box at="15 51 25" size="1 1 1" color="#5"/>
+    <box at="16 51 24" size="1 1 1" color="#5"/>
     <!-- Glyph 8 at theta=205 z=26 phase=11 (D) -->
     <box at="15 29 28" size="1 1 1" color="D"/>
     <box at="16 29 28" size="1 1 1" color="D"/>
@@ -172,35 +172,35 @@ Animation "energia" (16 frames, 2.4s):
     <box at="29 15 25" size="1 1 1" color="D"/>
     <box at="29 16 24" size="1 1 1" color="D"/>
     <!-- Glyph 8 at theta=295 z=26 phase=1 (1) -->
-    <box at="51 15 28" size="1 1 1" color="1"/>
-    <box at="51 16 28" size="1 1 1" color="1"/>
-    <box at="51 15 27" size="1 1 1" color="1"/>
-    <box at="51 15 26" size="1 1 1" color="1"/>
-    <box at="51 15 25" size="1 1 1" color="1"/>
-    <box at="51 15 24" size="1 1 1" color="1"/>
-    <box at="51 16 24" size="1 1 1" color="1"/>
+    <box at="51 15 28" size="1 1 1" color="#1"/>
+    <box at="51 16 28" size="1 1 1" color="#1"/>
+    <box at="51 15 27" size="1 1 1" color="#1"/>
+    <box at="51 15 26" size="1 1 1" color="#1"/>
+    <box at="51 15 25" size="1 1 1" color="#1"/>
+    <box at="51 15 24" size="1 1 1" color="#1"/>
+    <box at="51 16 24" size="1 1 1" color="#1"/>
     <!-- Glyph 4 at theta=315 z=26 phase=2 (2) -->
-    <box at="58 20 28" size="1 1 1" color="2"/>
-    <box at="60 22 28" size="1 1 1" color="2"/>
-    <box at="58 20 27" size="1 1 1" color="2"/>
-    <box at="60 22 27" size="1 1 1" color="2"/>
-    <box at="59 21 26" size="1 1 1" color="2"/>
-    <box at="59 21 25" size="1 1 1" color="2"/>
+    <box at="58 20 28" size="1 1 1" color="#2"/>
+    <box at="60 22 28" size="1 1 1" color="#2"/>
+    <box at="58 20 27" size="1 1 1" color="#2"/>
+    <box at="60 22 27" size="1 1 1" color="#2"/>
+    <box at="59 21 26" size="1 1 1" color="#2"/>
+    <box at="59 21 25" size="1 1 1" color="#2"/>
     <!-- Glyph 0 at theta=335 z=26 phase=3 (3) -->
-    <box at="64 29 28" size="1 1 1" color="3"/>
-    <box at="64 28 27" size="1 1 1" color="3"/>
-    <box at="65 29 27" size="1 1 1" color="3"/>
-    <box at="64 27 26" size="1 1 1" color="3"/>
-    <box at="65 30 26" size="1 1 1" color="3"/>
-    <box at="64 28 25" size="1 1 1" color="3"/>
-    <box at="65 29 25" size="1 1 1" color="3"/>
-    <box at="64 29 24" size="1 1 1" color="3"/>
+    <box at="64 29 28" size="1 1 1" color="#3"/>
+    <box at="64 28 27" size="1 1 1" color="#3"/>
+    <box at="65 29 27" size="1 1 1" color="#3"/>
+    <box at="64 27 26" size="1 1 1" color="#3"/>
+    <box at="65 30 26" size="1 1 1" color="#3"/>
+    <box at="64 28 25" size="1 1 1" color="#3"/>
+    <box at="65 29 25" size="1 1 1" color="#3"/>
+    <box at="64 29 24" size="1 1 1" color="#3"/>
     <!-- Glyph 11 at theta=25 z=40 phase=3 (3) -->
-    <box at="64 51 42" size="1 1 1" color="3"/>
-    <box at="65 51 41" size="1 1 1" color="3"/>
-    <box at="64 51 40" size="1 1 1" color="3"/>
-    <box at="64 52 39" size="1 1 1" color="3"/>
-    <box at="64 51 38" size="1 1 1" color="3"/>
+    <box at="64 51 42" size="1 1 1" color="#3"/>
+    <box at="65 51 41" size="1 1 1" color="#3"/>
+    <box at="64 51 40" size="1 1 1" color="#3"/>
+    <box at="64 52 39" size="1 1 1" color="#3"/>
+    <box at="64 51 38" size="1 1 1" color="#3"/>
     <!-- Glyph 11 at theta=155 z=40 phase=13 (G) -->
     <box at="16 51 42" size="1 1 1" color="G"/>
     <box at="16 52 41" size="1 1 1" color="G"/>
@@ -208,43 +208,43 @@ Animation "energia" (16 frames, 2.4s):
     <box at="15 51 39" size="1 1 1" color="G"/>
     <box at="16 51 38" size="1 1 1" color="G"/>
     <!-- Glyph 7 at theta=205 z=40 phase=0 (0) -->
-    <box at="15 29 42" size="1 1 1" color="0"/>
-    <box at="16 28 42" size="1 1 1" color="0"/>
-    <box at="15 29 41" size="1 1 1" color="0"/>
-    <box at="16 28 41" size="1 1 1" color="0"/>
-    <box at="16 29 40" size="1 1 1" color="0"/>
-    <box at="16 29 39" size="1 1 1" color="0"/>
-    <box at="16 29 38" size="1 1 1" color="0"/>
+    <box at="15 29 42" size="1 1 1" color="#0"/>
+    <box at="16 28 42" size="1 1 1" color="#0"/>
+    <box at="15 29 41" size="1 1 1" color="#0"/>
+    <box at="16 28 41" size="1 1 1" color="#0"/>
+    <box at="16 29 40" size="1 1 1" color="#0"/>
+    <box at="16 29 39" size="1 1 1" color="#0"/>
+    <box at="16 29 38" size="1 1 1" color="#0"/>
     <!-- Glyph 3 at theta=225 z=40 phase=1 (1) -->
-    <box at="21 21 42" size="1 1 1" color="1"/>
-    <box at="20 22 41" size="1 1 1" color="1"/>
-    <box at="22 20 41" size="1 1 1" color="1"/>
-    <box at="20 22 40" size="1 1 1" color="1"/>
-    <box at="22 20 40" size="1 1 1" color="1"/>
-    <box at="20 22 39" size="1 1 1" color="1"/>
-    <box at="22 20 39" size="1 1 1" color="1"/>
+    <box at="21 21 42" size="1 1 1" color="#1"/>
+    <box at="20 22 41" size="1 1 1" color="#1"/>
+    <box at="22 20 41" size="1 1 1" color="#1"/>
+    <box at="20 22 40" size="1 1 1" color="#1"/>
+    <box at="22 20 40" size="1 1 1" color="#1"/>
+    <box at="20 22 39" size="1 1 1" color="#1"/>
+    <box at="22 20 39" size="1 1 1" color="#1"/>
     <!-- Glyph 11 at theta=245 z=40 phase=3 (3) -->
-    <box at="29 16 42" size="1 1 1" color="3"/>
-    <box at="28 16 41" size="1 1 1" color="3"/>
-    <box at="29 16 40" size="1 1 1" color="3"/>
-    <box at="29 15 39" size="1 1 1" color="3"/>
-    <box at="29 16 38" size="1 1 1" color="3"/>
+    <box at="29 16 42" size="1 1 1" color="#3"/>
+    <box at="28 16 41" size="1 1 1" color="#3"/>
+    <box at="29 16 40" size="1 1 1" color="#3"/>
+    <box at="29 15 39" size="1 1 1" color="#3"/>
+    <box at="29 16 38" size="1 1 1" color="#3"/>
     <!-- Glyph 7 at theta=295 z=40 phase=6 (6) -->
-    <box at="51 15 42" size="1 1 1" color="6"/>
-    <box at="52 16 42" size="1 1 1" color="6"/>
-    <box at="51 15 41" size="1 1 1" color="6"/>
-    <box at="52 16 41" size="1 1 1" color="6"/>
-    <box at="51 16 40" size="1 1 1" color="6"/>
-    <box at="51 16 39" size="1 1 1" color="6"/>
-    <box at="51 16 38" size="1 1 1" color="6"/>
+    <box at="51 15 42" size="1 1 1" color="#6"/>
+    <box at="52 16 42" size="1 1 1" color="#6"/>
+    <box at="51 15 41" size="1 1 1" color="#6"/>
+    <box at="52 16 41" size="1 1 1" color="#6"/>
+    <box at="51 16 40" size="1 1 1" color="#6"/>
+    <box at="51 16 39" size="1 1 1" color="#6"/>
+    <box at="51 16 38" size="1 1 1" color="#6"/>
     <!-- Glyph 3 at theta=315 z=40 phase=7 (7) -->
-    <box at="59 21 42" size="1 1 1" color="7"/>
-    <box at="58 20 41" size="1 1 1" color="7"/>
-    <box at="60 22 41" size="1 1 1" color="7"/>
-    <box at="58 20 40" size="1 1 1" color="7"/>
-    <box at="60 22 40" size="1 1 1" color="7"/>
-    <box at="58 20 39" size="1 1 1" color="7"/>
-    <box at="60 22 39" size="1 1 1" color="7"/>
+    <box at="59 21 42" size="1 1 1" color="#7"/>
+    <box at="58 20 41" size="1 1 1" color="#7"/>
+    <box at="60 22 41" size="1 1 1" color="#7"/>
+    <box at="58 20 40" size="1 1 1" color="#7"/>
+    <box at="60 22 40" size="1 1 1" color="#7"/>
+    <box at="58 20 39" size="1 1 1" color="#7"/>
+    <box at="60 22 39" size="1 1 1" color="#7"/>
     <!-- Glyph 11 at theta=335 z=40 phase=11 (D) -->
     <box at="64 29 42" size="1 1 1" color="D"/>
     <box at="64 28 41" size="1 1 1" color="D"/>
@@ -252,18 +252,18 @@ Animation "energia" (16 frames, 2.4s):
     <box at="65 29 39" size="1 1 1" color="D"/>
     <box at="64 29 38" size="1 1 1" color="D"/>
     <!-- Glyph 10 at theta=25 z=54 phase=8 (8) -->
-    <box at="65 51 55" size="1 1 1" color="8"/>
-    <box at="64 52 55" size="1 1 1" color="8"/>
-    <box at="64 51 53" size="1 1 1" color="8"/>
+    <box at="65 51 55" size="1 1 1" color="#8"/>
+    <box at="64 52 55" size="1 1 1" color="#8"/>
+    <box at="64 51 53" size="1 1 1" color="#8"/>
     <!-- Glyph 6 at theta=45 z=54 phase=7 (7) -->
-    <box at="60 58 56" size="1 1 1" color="7"/>
-    <box at="59 59 56" size="1 1 1" color="7"/>
-    <box at="58 60 56" size="1 1 1" color="7"/>
-    <box at="59 59 55" size="1 1 1" color="7"/>
-    <box at="59 59 54" size="1 1 1" color="7"/>
-    <box at="60 58 53" size="1 1 1" color="7"/>
-    <box at="59 59 53" size="1 1 1" color="7"/>
-    <box at="58 60 53" size="1 1 1" color="7"/>
+    <box at="60 58 56" size="1 1 1" color="#7"/>
+    <box at="59 59 56" size="1 1 1" color="#7"/>
+    <box at="58 60 56" size="1 1 1" color="#7"/>
+    <box at="59 59 55" size="1 1 1" color="#7"/>
+    <box at="59 59 54" size="1 1 1" color="#7"/>
+    <box at="60 58 53" size="1 1 1" color="#7"/>
+    <box at="59 59 53" size="1 1 1" color="#7"/>
+    <box at="58 60 53" size="1 1 1" color="#7"/>
     <!-- Glyph 2 at theta=65 z=54 phase=11 (D) -->
     <box at="52 64 56" size="1 1 1" color="D"/>
     <box at="51 65 56" size="1 1 1" color="D"/>
@@ -287,36 +287,36 @@ Animation "energia" (16 frames, 2.4s):
     <box at="21 59 53" size="1 1 1" color="I"/>
     <box at="20 58 53" size="1 1 1" color="I"/>
     <!-- Glyph 2 at theta=155 z=54 phase=3 (3) -->
-    <box at="16 52 56" size="1 1 1" color="3"/>
-    <box at="15 51 56" size="1 1 1" color="3"/>
-    <box at="16 51 55" size="1 1 1" color="3"/>
-    <box at="16 51 54" size="1 1 1" color="3"/>
-    <box at="16 52 53" size="1 1 1" color="3"/>
-    <box at="15 51 53" size="1 1 1" color="3"/>
-    <box at="16 53 52" size="1 1 1" color="3"/>
-    <box at="15 50 52" size="1 1 1" color="3"/>
+    <box at="16 52 56" size="1 1 1" color="#3"/>
+    <box at="15 51 56" size="1 1 1" color="#3"/>
+    <box at="16 51 55" size="1 1 1" color="#3"/>
+    <box at="16 51 54" size="1 1 1" color="#3"/>
+    <box at="16 52 53" size="1 1 1" color="#3"/>
+    <box at="15 51 53" size="1 1 1" color="#3"/>
+    <box at="16 53 52" size="1 1 1" color="#3"/>
+    <box at="15 50 52" size="1 1 1" color="#3"/>
     <!-- Glyph 10 at theta=205 z=54 phase=6 (6) -->
-    <box at="15 29 55" size="1 1 1" color="6"/>
-    <box at="16 28 55" size="1 1 1" color="6"/>
-    <box at="16 29 53" size="1 1 1" color="6"/>
+    <box at="15 29 55" size="1 1 1" color="#6"/>
+    <box at="16 28 55" size="1 1 1" color="#6"/>
+    <box at="16 29 53" size="1 1 1" color="#6"/>
     <!-- Glyph 6 at theta=225 z=54 phase=7 (7) -->
-    <box at="20 22 56" size="1 1 1" color="7"/>
-    <box at="21 21 56" size="1 1 1" color="7"/>
-    <box at="22 20 56" size="1 1 1" color="7"/>
-    <box at="21 21 55" size="1 1 1" color="7"/>
-    <box at="21 21 54" size="1 1 1" color="7"/>
-    <box at="20 22 53" size="1 1 1" color="7"/>
-    <box at="21 21 53" size="1 1 1" color="7"/>
-    <box at="22 20 53" size="1 1 1" color="7"/>
+    <box at="20 22 56" size="1 1 1" color="#7"/>
+    <box at="21 21 56" size="1 1 1" color="#7"/>
+    <box at="22 20 56" size="1 1 1" color="#7"/>
+    <box at="21 21 55" size="1 1 1" color="#7"/>
+    <box at="21 21 54" size="1 1 1" color="#7"/>
+    <box at="20 22 53" size="1 1 1" color="#7"/>
+    <box at="21 21 53" size="1 1 1" color="#7"/>
+    <box at="22 20 53" size="1 1 1" color="#7"/>
     <!-- Glyph 2 at theta=245 z=54 phase=9 (9) -->
-    <box at="28 16 56" size="1 1 1" color="9"/>
-    <box at="29 15 56" size="1 1 1" color="9"/>
-    <box at="29 16 55" size="1 1 1" color="9"/>
-    <box at="29 16 54" size="1 1 1" color="9"/>
-    <box at="28 16 53" size="1 1 1" color="9"/>
-    <box at="29 15 53" size="1 1 1" color="9"/>
-    <box at="27 16 52" size="1 1 1" color="9"/>
-    <box at="30 15 52" size="1 1 1" color="9"/>
+    <box at="28 16 56" size="1 1 1" color="#9"/>
+    <box at="29 15 56" size="1 1 1" color="#9"/>
+    <box at="29 16 55" size="1 1 1" color="#9"/>
+    <box at="29 16 54" size="1 1 1" color="#9"/>
+    <box at="28 16 53" size="1 1 1" color="#9"/>
+    <box at="29 15 53" size="1 1 1" color="#9"/>
+    <box at="27 16 52" size="1 1 1" color="#9"/>
+    <box at="30 15 52" size="1 1 1" color="#9"/>
     <!-- Glyph 10 at theta=295 z=54 phase=12 (E) -->
     <box at="51 15 55" size="1 1 1" color="E"/>
     <box at="52 16 55" size="1 1 1" color="E"/>
@@ -331,14 +331,14 @@ Animation "energia" (16 frames, 2.4s):
     <box at="59 21 53" size="1 1 1" color="G"/>
     <box at="60 22 53" size="1 1 1" color="G"/>
     <!-- Glyph 2 at theta=335 z=54 phase=1 (1) -->
-    <box at="64 28 56" size="1 1 1" color="1"/>
-    <box at="65 29 56" size="1 1 1" color="1"/>
-    <box at="64 29 55" size="1 1 1" color="1"/>
-    <box at="64 29 54" size="1 1 1" color="1"/>
-    <box at="64 28 53" size="1 1 1" color="1"/>
-    <box at="65 29 53" size="1 1 1" color="1"/>
-    <box at="64 27 52" size="1 1 1" color="1"/>
-    <box at="65 30 52" size="1 1 1" color="1"/>
+    <box at="64 28 56" size="1 1 1" color="#1"/>
+    <box at="65 29 56" size="1 1 1" color="#1"/>
+    <box at="64 29 55" size="1 1 1" color="#1"/>
+    <box at="64 29 54" size="1 1 1" color="#1"/>
+    <box at="64 28 53" size="1 1 1" color="#1"/>
+    <box at="65 29 53" size="1 1 1" color="#1"/>
+    <box at="64 27 52" size="1 1 1" color="#1"/>
+    <box at="65 30 52" size="1 1 1" color="#1"/>
 
   <!-- ================================================================= -->
   <!-- 3. MIDDLE TRANSITION BALCONY (z = 64..68)                         -->
@@ -371,38 +371,38 @@ Animation "energia" (16 frames, 2.4s):
 
   <!-- TAPESTRY OF CARVED GLYPHS ON TIER 2 -->
     <!-- Glyph 0 at theta=25 z=76 phase=0 (0) -->
-    <box at="61 50 78" size="1 1 1" color="0"/>
-    <box at="61 49 77" size="1 1 1" color="0"/>
-    <box at="60 51 77" size="1 1 1" color="0"/>
-    <box at="62 48 76" size="1 1 1" color="0"/>
-    <box at="60 51 76" size="1 1 1" color="0"/>
-    <box at="61 49 75" size="1 1 1" color="0"/>
-    <box at="60 51 75" size="1 1 1" color="0"/>
-    <box at="61 50 74" size="1 1 1" color="0"/>
+    <box at="61 50 78" size="1 1 1" color="#0"/>
+    <box at="61 49 77" size="1 1 1" color="#0"/>
+    <box at="60 51 77" size="1 1 1" color="#0"/>
+    <box at="62 48 76" size="1 1 1" color="#0"/>
+    <box at="60 51 76" size="1 1 1" color="#0"/>
+    <box at="61 49 75" size="1 1 1" color="#0"/>
+    <box at="60 51 75" size="1 1 1" color="#0"/>
+    <box at="61 50 74" size="1 1 1" color="#0"/>
     <!-- Glyph 8 at theta=45 z=76 phase=2 (2) -->
-    <box at="57 56 78" size="1 1 1" color="2"/>
-    <box at="56 56 78" size="1 1 1" color="2"/>
-    <box at="57 56 77" size="1 1 1" color="2"/>
-    <box at="57 56 76" size="1 1 1" color="2"/>
-    <box at="57 56 75" size="1 1 1" color="2"/>
-    <box at="57 56 74" size="1 1 1" color="2"/>
-    <box at="56 56 74" size="1 1 1" color="2"/>
+    <box at="57 56 78" size="1 1 1" color="#2"/>
+    <box at="56 56 78" size="1 1 1" color="#2"/>
+    <box at="57 56 77" size="1 1 1" color="#2"/>
+    <box at="57 56 76" size="1 1 1" color="#2"/>
+    <box at="57 56 75" size="1 1 1" color="#2"/>
+    <box at="57 56 74" size="1 1 1" color="#2"/>
+    <box at="56 56 74" size="1 1 1" color="#2"/>
     <!-- Glyph 4 at theta=65 z=76 phase=3 (3) -->
-    <box at="51 60 78" size="1 1 1" color="3"/>
-    <box at="49 61 78" size="1 1 1" color="3"/>
-    <box at="51 60 77" size="1 1 1" color="3"/>
-    <box at="49 61 77" size="1 1 1" color="3"/>
-    <box at="50 61 76" size="1 1 1" color="3"/>
-    <box at="50 61 75" size="1 1 1" color="3"/>
+    <box at="51 60 78" size="1 1 1" color="#3"/>
+    <box at="49 61 78" size="1 1 1" color="#3"/>
+    <box at="51 60 77" size="1 1 1" color="#3"/>
+    <box at="49 61 77" size="1 1 1" color="#3"/>
+    <box at="50 61 76" size="1 1 1" color="#3"/>
+    <box at="50 61 75" size="1 1 1" color="#3"/>
     <!-- Glyph 0 at theta=115 z=76 phase=6 (6) -->
-    <box at="30 61 78" size="1 1 1" color="6"/>
-    <box at="31 61 77" size="1 1 1" color="6"/>
-    <box at="29 60 77" size="1 1 1" color="6"/>
-    <box at="32 62 76" size="1 1 1" color="6"/>
-    <box at="29 60 76" size="1 1 1" color="6"/>
-    <box at="31 61 75" size="1 1 1" color="6"/>
-    <box at="29 60 75" size="1 1 1" color="6"/>
-    <box at="30 61 74" size="1 1 1" color="6"/>
+    <box at="30 61 78" size="1 1 1" color="#6"/>
+    <box at="31 61 77" size="1 1 1" color="#6"/>
+    <box at="29 60 77" size="1 1 1" color="#6"/>
+    <box at="32 62 76" size="1 1 1" color="#6"/>
+    <box at="29 60 76" size="1 1 1" color="#6"/>
+    <box at="31 61 75" size="1 1 1" color="#6"/>
+    <box at="29 60 75" size="1 1 1" color="#6"/>
+    <box at="30 61 74" size="1 1 1" color="#6"/>
     <!-- Glyph 8 at theta=135 z=76 phase=10 (A) -->
     <box at="24 57 78" size="1 1 1" color="A"/>
     <box at="24 56 78" size="1 1 1" color="A"/>
@@ -428,52 +428,52 @@ Animation "energia" (16 frames, 2.4s):
     <box at="20 29 75" size="1 1 1" color="H"/>
     <box at="19 30 74" size="1 1 1" color="H"/>
     <!-- Glyph 8 at theta=225 z=76 phase=2 (2) -->
-    <box at="23 24 78" size="1 1 1" color="2"/>
-    <box at="24 24 78" size="1 1 1" color="2"/>
-    <box at="23 24 77" size="1 1 1" color="2"/>
-    <box at="23 24 76" size="1 1 1" color="2"/>
-    <box at="23 24 75" size="1 1 1" color="2"/>
-    <box at="23 24 74" size="1 1 1" color="2"/>
-    <box at="24 24 74" size="1 1 1" color="2"/>
+    <box at="23 24 78" size="1 1 1" color="#2"/>
+    <box at="24 24 78" size="1 1 1" color="#2"/>
+    <box at="23 24 77" size="1 1 1" color="#2"/>
+    <box at="23 24 76" size="1 1 1" color="#2"/>
+    <box at="23 24 75" size="1 1 1" color="#2"/>
+    <box at="23 24 74" size="1 1 1" color="#2"/>
+    <box at="24 24 74" size="1 1 1" color="#2"/>
     <!-- Glyph 4 at theta=245 z=76 phase=1 (1) -->
-    <box at="29 20 78" size="1 1 1" color="1"/>
-    <box at="31 19 78" size="1 1 1" color="1"/>
-    <box at="29 20 77" size="1 1 1" color="1"/>
-    <box at="31 19 77" size="1 1 1" color="1"/>
-    <box at="30 19 76" size="1 1 1" color="1"/>
-    <box at="30 19 75" size="1 1 1" color="1"/>
+    <box at="29 20 78" size="1 1 1" color="#1"/>
+    <box at="31 19 78" size="1 1 1" color="#1"/>
+    <box at="29 20 77" size="1 1 1" color="#1"/>
+    <box at="31 19 77" size="1 1 1" color="#1"/>
+    <box at="30 19 76" size="1 1 1" color="#1"/>
+    <box at="30 19 75" size="1 1 1" color="#1"/>
     <!-- Glyph 0 at theta=295 z=76 phase=4 (4) -->
-    <box at="50 19 78" size="1 1 1" color="4"/>
-    <box at="49 19 77" size="1 1 1" color="4"/>
-    <box at="51 20 77" size="1 1 1" color="4"/>
-    <box at="48 18 76" size="1 1 1" color="4"/>
-    <box at="51 20 76" size="1 1 1" color="4"/>
-    <box at="49 19 75" size="1 1 1" color="4"/>
-    <box at="51 20 75" size="1 1 1" color="4"/>
-    <box at="50 19 74" size="1 1 1" color="4"/>
+    <box at="50 19 78" size="1 1 1" color="#4"/>
+    <box at="49 19 77" size="1 1 1" color="#4"/>
+    <box at="51 20 77" size="1 1 1" color="#4"/>
+    <box at="48 18 76" size="1 1 1" color="#4"/>
+    <box at="51 20 76" size="1 1 1" color="#4"/>
+    <box at="49 19 75" size="1 1 1" color="#4"/>
+    <box at="51 20 75" size="1 1 1" color="#4"/>
+    <box at="50 19 74" size="1 1 1" color="#4"/>
     <!-- Glyph 8 at theta=315 z=76 phase=8 (8) -->
-    <box at="56 23 78" size="1 1 1" color="8"/>
-    <box at="56 24 78" size="1 1 1" color="8"/>
-    <box at="56 23 77" size="1 1 1" color="8"/>
-    <box at="56 23 76" size="1 1 1" color="8"/>
-    <box at="56 23 75" size="1 1 1" color="8"/>
-    <box at="56 23 74" size="1 1 1" color="8"/>
-    <box at="56 24 74" size="1 1 1" color="8"/>
+    <box at="56 23 78" size="1 1 1" color="#8"/>
+    <box at="56 24 78" size="1 1 1" color="#8"/>
+    <box at="56 23 77" size="1 1 1" color="#8"/>
+    <box at="56 23 76" size="1 1 1" color="#8"/>
+    <box at="56 23 75" size="1 1 1" color="#8"/>
+    <box at="56 23 74" size="1 1 1" color="#8"/>
+    <box at="56 24 74" size="1 1 1" color="#8"/>
     <!-- Glyph 4 at theta=335 z=76 phase=9 (9) -->
-    <box at="60 29 78" size="1 1 1" color="9"/>
-    <box at="61 31 78" size="1 1 1" color="9"/>
-    <box at="60 29 77" size="1 1 1" color="9"/>
-    <box at="61 31 77" size="1 1 1" color="9"/>
-    <box at="61 30 76" size="1 1 1" color="9"/>
-    <box at="61 30 75" size="1 1 1" color="9"/>
+    <box at="60 29 78" size="1 1 1" color="#9"/>
+    <box at="61 31 78" size="1 1 1" color="#9"/>
+    <box at="60 29 77" size="1 1 1" color="#9"/>
+    <box at="61 31 77" size="1 1 1" color="#9"/>
+    <box at="61 30 76" size="1 1 1" color="#9"/>
+    <box at="61 30 75" size="1 1 1" color="#9"/>
     <!-- Glyph 3 at theta=25 z=94 phase=9 (9) -->
-    <box at="61 50 96" size="1 1 1" color="9"/>
-    <box at="61 49 95" size="1 1 1" color="9"/>
-    <box at="60 51 95" size="1 1 1" color="9"/>
-    <box at="61 49 94" size="1 1 1" color="9"/>
-    <box at="60 51 94" size="1 1 1" color="9"/>
-    <box at="62 48 93" size="1 1 1" color="9"/>
-    <box at="60 51 93" size="1 1 1" color="9"/>
+    <box at="61 50 96" size="1 1 1" color="#9"/>
+    <box at="61 49 95" size="1 1 1" color="#9"/>
+    <box at="60 51 95" size="1 1 1" color="#9"/>
+    <box at="61 49 94" size="1 1 1" color="#9"/>
+    <box at="60 51 94" size="1 1 1" color="#9"/>
+    <box at="62 48 93" size="1 1 1" color="#9"/>
+    <box at="60 51 93" size="1 1 1" color="#9"/>
     <!-- Glyph 11 at theta=45 z=94 phase=11 (D) -->
     <box at="56 56 96" size="1 1 1" color="D"/>
     <box at="57 56 95" size="1 1 1" color="D"/>
@@ -497,27 +497,27 @@ Animation "energia" (16 frames, 2.4s):
     <box at="32 62 93" size="1 1 1" color="I"/>
     <box at="29 60 93" size="1 1 1" color="I"/>
     <!-- Glyph 11 at theta=135 z=94 phase=3 (3) -->
-    <box at="24 56 96" size="1 1 1" color="3"/>
-    <box at="24 57 95" size="1 1 1" color="3"/>
-    <box at="24 56 94" size="1 1 1" color="3"/>
-    <box at="23 56 93" size="1 1 1" color="3"/>
-    <box at="24 56 92" size="1 1 1" color="3"/>
+    <box at="24 56 96" size="1 1 1" color="#3"/>
+    <box at="24 57 95" size="1 1 1" color="#3"/>
+    <box at="24 56 94" size="1 1 1" color="#3"/>
+    <box at="23 56 93" size="1 1 1" color="#3"/>
+    <box at="24 56 92" size="1 1 1" color="#3"/>
     <!-- Glyph 7 at theta=155 z=94 phase=4 (4) -->
-    <box at="20 51 96" size="1 1 1" color="4"/>
-    <box at="19 49 96" size="1 1 1" color="4"/>
-    <box at="20 51 95" size="1 1 1" color="4"/>
-    <box at="19 49 95" size="1 1 1" color="4"/>
-    <box at="19 50 94" size="1 1 1" color="4"/>
-    <box at="19 50 93" size="1 1 1" color="4"/>
-    <box at="19 50 92" size="1 1 1" color="4"/>
+    <box at="20 51 96" size="1 1 1" color="#4"/>
+    <box at="19 49 96" size="1 1 1" color="#4"/>
+    <box at="20 51 95" size="1 1 1" color="#4"/>
+    <box at="19 49 95" size="1 1 1" color="#4"/>
+    <box at="19 50 94" size="1 1 1" color="#4"/>
+    <box at="19 50 93" size="1 1 1" color="#4"/>
+    <box at="19 50 92" size="1 1 1" color="#4"/>
     <!-- Glyph 3 at theta=205 z=94 phase=7 (7) -->
-    <box at="19 30 96" size="1 1 1" color="7"/>
-    <box at="19 31 95" size="1 1 1" color="7"/>
-    <box at="20 29 95" size="1 1 1" color="7"/>
-    <box at="19 31 94" size="1 1 1" color="7"/>
-    <box at="20 29 94" size="1 1 1" color="7"/>
-    <box at="18 32 93" size="1 1 1" color="7"/>
-    <box at="20 29 93" size="1 1 1" color="7"/>
+    <box at="19 30 96" size="1 1 1" color="#7"/>
+    <box at="19 31 95" size="1 1 1" color="#7"/>
+    <box at="20 29 95" size="1 1 1" color="#7"/>
+    <box at="19 31 94" size="1 1 1" color="#7"/>
+    <box at="20 29 94" size="1 1 1" color="#7"/>
+    <box at="18 32 93" size="1 1 1" color="#7"/>
+    <box at="20 29 93" size="1 1 1" color="#7"/>
     <!-- Glyph 11 at theta=225 z=94 phase=11 (D) -->
     <box at="24 24 96" size="1 1 1" color="D"/>
     <box at="23 24 95" size="1 1 1" color="D"/>
@@ -541,19 +541,19 @@ Animation "energia" (16 frames, 2.4s):
     <box at="48 18 93" size="1 1 1" color="G"/>
     <box at="51 20 93" size="1 1 1" color="G"/>
     <!-- Glyph 11 at theta=315 z=94 phase=1 (1) -->
-    <box at="56 24 96" size="1 1 1" color="1"/>
-    <box at="56 23 95" size="1 1 1" color="1"/>
-    <box at="56 24 94" size="1 1 1" color="1"/>
-    <box at="57 24 93" size="1 1 1" color="1"/>
-    <box at="56 24 92" size="1 1 1" color="1"/>
+    <box at="56 24 96" size="1 1 1" color="#1"/>
+    <box at="56 23 95" size="1 1 1" color="#1"/>
+    <box at="56 24 94" size="1 1 1" color="#1"/>
+    <box at="57 24 93" size="1 1 1" color="#1"/>
+    <box at="56 24 92" size="1 1 1" color="#1"/>
     <!-- Glyph 7 at theta=335 z=94 phase=2 (2) -->
-    <box at="60 29 96" size="1 1 1" color="2"/>
-    <box at="61 31 96" size="1 1 1" color="2"/>
-    <box at="60 29 95" size="1 1 1" color="2"/>
-    <box at="61 31 95" size="1 1 1" color="2"/>
-    <box at="61 30 94" size="1 1 1" color="2"/>
-    <box at="61 30 93" size="1 1 1" color="2"/>
-    <box at="61 30 92" size="1 1 1" color="2"/>
+    <box at="60 29 96" size="1 1 1" color="#2"/>
+    <box at="61 31 96" size="1 1 1" color="#2"/>
+    <box at="60 29 95" size="1 1 1" color="#2"/>
+    <box at="61 31 95" size="1 1 1" color="#2"/>
+    <box at="61 30 94" size="1 1 1" color="#2"/>
+    <box at="61 30 93" size="1 1 1" color="#2"/>
+    <box at="61 30 92" size="1 1 1" color="#2"/>
     <!-- Glyph 6 at theta=25 z=110 phase=15 (I) -->
     <box at="61 49 112" size="1 1 1" color="I"/>
     <box at="61 50 112" size="1 1 1" color="I"/>
@@ -564,36 +564,36 @@ Animation "energia" (16 frames, 2.4s):
     <box at="61 50 109" size="1 1 1" color="I"/>
     <box at="60 51 109" size="1 1 1" color="I"/>
     <!-- Glyph 2 at theta=45 z=110 phase=1 (1) -->
-    <box at="57 56 112" size="1 1 1" color="1"/>
-    <box at="56 57 112" size="1 1 1" color="1"/>
-    <box at="56 56 111" size="1 1 1" color="1"/>
-    <box at="56 56 110" size="1 1 1" color="1"/>
-    <box at="57 56 109" size="1 1 1" color="1"/>
-    <box at="56 57 109" size="1 1 1" color="1"/>
-    <box at="58 55 108" size="1 1 1" color="1"/>
-    <box at="55 58 108" size="1 1 1" color="1"/>
+    <box at="57 56 112" size="1 1 1" color="#1"/>
+    <box at="56 57 112" size="1 1 1" color="#1"/>
+    <box at="56 56 111" size="1 1 1" color="#1"/>
+    <box at="56 56 110" size="1 1 1" color="#1"/>
+    <box at="57 56 109" size="1 1 1" color="#1"/>
+    <box at="56 57 109" size="1 1 1" color="#1"/>
+    <box at="58 55 108" size="1 1 1" color="#1"/>
+    <box at="55 58 108" size="1 1 1" color="#1"/>
     <!-- Glyph 10 at theta=65 z=110 phase=2 (2) -->
-    <box at="51 60 111" size="1 1 1" color="2"/>
-    <box at="49 61 111" size="1 1 1" color="2"/>
-    <box at="50 61 109" size="1 1 1" color="2"/>
+    <box at="51 60 111" size="1 1 1" color="#2"/>
+    <box at="49 61 111" size="1 1 1" color="#2"/>
+    <box at="50 61 109" size="1 1 1" color="#2"/>
     <!-- Glyph 6 at theta=115 z=110 phase=5 (5) -->
-    <box at="31 61 112" size="1 1 1" color="5"/>
-    <box at="30 61 112" size="1 1 1" color="5"/>
-    <box at="29 60 112" size="1 1 1" color="5"/>
-    <box at="30 61 111" size="1 1 1" color="5"/>
-    <box at="30 61 110" size="1 1 1" color="5"/>
-    <box at="31 61 109" size="1 1 1" color="5"/>
-    <box at="30 61 109" size="1 1 1" color="5"/>
-    <box at="29 60 109" size="1 1 1" color="5"/>
+    <box at="31 61 112" size="1 1 1" color="#5"/>
+    <box at="30 61 112" size="1 1 1" color="#5"/>
+    <box at="29 60 112" size="1 1 1" color="#5"/>
+    <box at="30 61 111" size="1 1 1" color="#5"/>
+    <box at="30 61 110" size="1 1 1" color="#5"/>
+    <box at="31 61 109" size="1 1 1" color="#5"/>
+    <box at="30 61 109" size="1 1 1" color="#5"/>
+    <box at="29 60 109" size="1 1 1" color="#5"/>
     <!-- Glyph 2 at theta=135 z=110 phase=9 (9) -->
-    <box at="24 57 112" size="1 1 1" color="9"/>
-    <box at="23 56 112" size="1 1 1" color="9"/>
-    <box at="24 56 111" size="1 1 1" color="9"/>
-    <box at="24 56 110" size="1 1 1" color="9"/>
-    <box at="24 57 109" size="1 1 1" color="9"/>
-    <box at="23 56 109" size="1 1 1" color="9"/>
-    <box at="25 58 108" size="1 1 1" color="9"/>
-    <box at="22 55 108" size="1 1 1" color="9"/>
+    <box at="24 57 112" size="1 1 1" color="#9"/>
+    <box at="23 56 112" size="1 1 1" color="#9"/>
+    <box at="24 56 111" size="1 1 1" color="#9"/>
+    <box at="24 56 110" size="1 1 1" color="#9"/>
+    <box at="24 57 109" size="1 1 1" color="#9"/>
+    <box at="23 56 109" size="1 1 1" color="#9"/>
+    <box at="25 58 108" size="1 1 1" color="#9"/>
+    <box at="22 55 108" size="1 1 1" color="#9"/>
     <!-- Glyph 10 at theta=155 z=110 phase=10 (A) -->
     <box at="20 51 111" size="1 1 1" color="A"/>
     <box at="19 49 111" size="1 1 1" color="A"/>
@@ -608,40 +608,40 @@ Animation "energia" (16 frames, 2.4s):
     <box at="19 30 109" size="1 1 1" color="G"/>
     <box at="20 29 109" size="1 1 1" color="G"/>
     <!-- Glyph 2 at theta=225 z=110 phase=1 (1) -->
-    <box at="23 24 112" size="1 1 1" color="1"/>
-    <box at="24 23 112" size="1 1 1" color="1"/>
-    <box at="24 24 111" size="1 1 1" color="1"/>
-    <box at="24 24 110" size="1 1 1" color="1"/>
-    <box at="23 24 109" size="1 1 1" color="1"/>
-    <box at="24 23 109" size="1 1 1" color="1"/>
-    <box at="22 25 108" size="1 1 1" color="1"/>
-    <box at="25 22 108" size="1 1 1" color="1"/>
+    <box at="23 24 112" size="1 1 1" color="#1"/>
+    <box at="24 23 112" size="1 1 1" color="#1"/>
+    <box at="24 24 111" size="1 1 1" color="#1"/>
+    <box at="24 24 110" size="1 1 1" color="#1"/>
+    <box at="23 24 109" size="1 1 1" color="#1"/>
+    <box at="24 23 109" size="1 1 1" color="#1"/>
+    <box at="22 25 108" size="1 1 1" color="#1"/>
+    <box at="25 22 108" size="1 1 1" color="#1"/>
     <!-- Glyph 10 at theta=245 z=110 phase=0 (0) -->
-    <box at="29 20 111" size="1 1 1" color="0"/>
-    <box at="31 19 111" size="1 1 1" color="0"/>
-    <box at="30 19 109" size="1 1 1" color="0"/>
+    <box at="29 20 111" size="1 1 1" color="#0"/>
+    <box at="31 19 111" size="1 1 1" color="#0"/>
+    <box at="30 19 109" size="1 1 1" color="#0"/>
     <!-- Glyph 6 at theta=295 z=110 phase=3 (3) -->
-    <box at="49 19 112" size="1 1 1" color="3"/>
-    <box at="50 19 112" size="1 1 1" color="3"/>
-    <box at="51 20 112" size="1 1 1" color="3"/>
-    <box at="50 19 111" size="1 1 1" color="3"/>
-    <box at="50 19 110" size="1 1 1" color="3"/>
-    <box at="49 19 109" size="1 1 1" color="3"/>
-    <box at="50 19 109" size="1 1 1" color="3"/>
-    <box at="51 20 109" size="1 1 1" color="3"/>
+    <box at="49 19 112" size="1 1 1" color="#3"/>
+    <box at="50 19 112" size="1 1 1" color="#3"/>
+    <box at="51 20 112" size="1 1 1" color="#3"/>
+    <box at="50 19 111" size="1 1 1" color="#3"/>
+    <box at="50 19 110" size="1 1 1" color="#3"/>
+    <box at="49 19 109" size="1 1 1" color="#3"/>
+    <box at="50 19 109" size="1 1 1" color="#3"/>
+    <box at="51 20 109" size="1 1 1" color="#3"/>
     <!-- Glyph 2 at theta=315 z=110 phase=7 (7) -->
-    <box at="56 23 112" size="1 1 1" color="7"/>
-    <box at="57 24 112" size="1 1 1" color="7"/>
-    <box at="56 24 111" size="1 1 1" color="7"/>
-    <box at="56 24 110" size="1 1 1" color="7"/>
-    <box at="56 23 109" size="1 1 1" color="7"/>
-    <box at="57 24 109" size="1 1 1" color="7"/>
-    <box at="55 22 108" size="1 1 1" color="7"/>
-    <box at="58 25 108" size="1 1 1" color="7"/>
+    <box at="56 23 112" size="1 1 1" color="#7"/>
+    <box at="57 24 112" size="1 1 1" color="#7"/>
+    <box at="56 24 111" size="1 1 1" color="#7"/>
+    <box at="56 24 110" size="1 1 1" color="#7"/>
+    <box at="56 23 109" size="1 1 1" color="#7"/>
+    <box at="57 24 109" size="1 1 1" color="#7"/>
+    <box at="55 22 108" size="1 1 1" color="#7"/>
+    <box at="58 25 108" size="1 1 1" color="#7"/>
     <!-- Glyph 10 at theta=335 z=110 phase=8 (8) -->
-    <box at="60 29 111" size="1 1 1" color="8"/>
-    <box at="61 31 111" size="1 1 1" color="8"/>
-    <box at="61 30 109" size="1 1 1" color="8"/>
+    <box at="60 29 111" size="1 1 1" color="#8"/>
+    <box at="61 31 111" size="1 1 1" color="#8"/>
+    <box at="61 30 109" size="1 1 1" color="#8"/>
 
   <!-- ================================================================= -->
   <!-- 5. COLLAR AND UPPER ORDER (z = 120..166)                          -->
@@ -695,38 +695,38 @@ Animation "energia" (16 frames, 2.4s):
     <box at="48 56 134" size="1 1 1" color="H"/>
     <box at="48 56 133" size="1 1 1" color="H"/>
     <!-- Glyph 0 at theta=115 z=134 phase=1 (1) -->
-    <box at="32 56 136" size="1 1 1" color="1"/>
-    <box at="33 57 135" size="1 1 1" color="1"/>
-    <box at="32 56 135" size="1 1 1" color="1"/>
-    <box at="34 57 134" size="1 1 1" color="1"/>
-    <box at="31 55 134" size="1 1 1" color="1"/>
-    <box at="33 57 133" size="1 1 1" color="1"/>
-    <box at="32 56 133" size="1 1 1" color="1"/>
-    <box at="32 56 132" size="1 1 1" color="1"/>
+    <box at="32 56 136" size="1 1 1" color="#1"/>
+    <box at="33 57 135" size="1 1 1" color="#1"/>
+    <box at="32 56 135" size="1 1 1" color="#1"/>
+    <box at="34 57 134" size="1 1 1" color="#1"/>
+    <box at="31 55 134" size="1 1 1" color="#1"/>
+    <box at="33 57 133" size="1 1 1" color="#1"/>
+    <box at="32 56 133" size="1 1 1" color="#1"/>
+    <box at="32 56 132" size="1 1 1" color="#1"/>
     <!-- Glyph 8 at theta=135 z=134 phase=5 (5) -->
-    <box at="28 53 136" size="1 1 1" color="5"/>
-    <box at="27 53 136" size="1 1 1" color="5"/>
-    <box at="28 53 135" size="1 1 1" color="5"/>
-    <box at="28 53 134" size="1 1 1" color="5"/>
-    <box at="28 53 133" size="1 1 1" color="5"/>
-    <box at="28 53 132" size="1 1 1" color="5"/>
-    <box at="27 53 132" size="1 1 1" color="5"/>
+    <box at="28 53 136" size="1 1 1" color="#5"/>
+    <box at="27 53 136" size="1 1 1" color="#5"/>
+    <box at="28 53 135" size="1 1 1" color="#5"/>
+    <box at="28 53 134" size="1 1 1" color="#5"/>
+    <box at="28 53 133" size="1 1 1" color="#5"/>
+    <box at="28 53 132" size="1 1 1" color="#5"/>
+    <box at="27 53 132" size="1 1 1" color="#5"/>
     <!-- Glyph 4 at theta=155 z=134 phase=6 (6) -->
-    <box at="24 48 136" size="1 1 1" color="6"/>
-    <box at="23 47 136" size="1 1 1" color="6"/>
-    <box at="24 48 135" size="1 1 1" color="6"/>
-    <box at="23 47 135" size="1 1 1" color="6"/>
-    <box at="24 48 134" size="1 1 1" color="6"/>
-    <box at="24 48 133" size="1 1 1" color="6"/>
+    <box at="24 48 136" size="1 1 1" color="#6"/>
+    <box at="23 47 136" size="1 1 1" color="#6"/>
+    <box at="24 48 135" size="1 1 1" color="#6"/>
+    <box at="23 47 135" size="1 1 1" color="#6"/>
+    <box at="24 48 134" size="1 1 1" color="#6"/>
+    <box at="24 48 133" size="1 1 1" color="#6"/>
     <!-- Glyph 0 at theta=205 z=134 phase=9 (9) -->
-    <box at="24 32 136" size="1 1 1" color="9"/>
-    <box at="23 33 135" size="1 1 1" color="9"/>
-    <box at="24 32 135" size="1 1 1" color="9"/>
-    <box at="23 34 134" size="1 1 1" color="9"/>
-    <box at="25 31 134" size="1 1 1" color="9"/>
-    <box at="23 33 133" size="1 1 1" color="9"/>
-    <box at="24 32 133" size="1 1 1" color="9"/>
-    <box at="24 32 132" size="1 1 1" color="9"/>
+    <box at="24 32 136" size="1 1 1" color="#9"/>
+    <box at="23 33 135" size="1 1 1" color="#9"/>
+    <box at="24 32 135" size="1 1 1" color="#9"/>
+    <box at="23 34 134" size="1 1 1" color="#9"/>
+    <box at="25 31 134" size="1 1 1" color="#9"/>
+    <box at="23 33 133" size="1 1 1" color="#9"/>
+    <box at="24 32 133" size="1 1 1" color="#9"/>
+    <box at="24 32 132" size="1 1 1" color="#9"/>
     <!-- Glyph 8 at theta=225 z=134 phase=13 (G) -->
     <box at="27 28 136" size="1 1 1" color="G"/>
     <box at="27 27 136" size="1 1 1" color="G"/>
@@ -752,50 +752,50 @@ Animation "energia" (16 frames, 2.4s):
     <box at="48 24 133" size="1 1 1" color="I"/>
     <box at="48 24 132" size="1 1 1" color="I"/>
     <!-- Glyph 8 at theta=315 z=134 phase=3 (3) -->
-    <box at="52 27 136" size="1 1 1" color="3"/>
-    <box at="53 27 136" size="1 1 1" color="3"/>
-    <box at="52 27 135" size="1 1 1" color="3"/>
-    <box at="52 27 134" size="1 1 1" color="3"/>
-    <box at="52 27 133" size="1 1 1" color="3"/>
-    <box at="52 27 132" size="1 1 1" color="3"/>
-    <box at="53 27 132" size="1 1 1" color="3"/>
+    <box at="52 27 136" size="1 1 1" color="#3"/>
+    <box at="53 27 136" size="1 1 1" color="#3"/>
+    <box at="52 27 135" size="1 1 1" color="#3"/>
+    <box at="52 27 134" size="1 1 1" color="#3"/>
+    <box at="52 27 133" size="1 1 1" color="#3"/>
+    <box at="52 27 132" size="1 1 1" color="#3"/>
+    <box at="53 27 132" size="1 1 1" color="#3"/>
     <!-- Glyph 4 at theta=335 z=134 phase=4 (4) -->
-    <box at="56 32 136" size="1 1 1" color="4"/>
-    <box at="57 33 136" size="1 1 1" color="4"/>
-    <box at="56 32 135" size="1 1 1" color="4"/>
-    <box at="57 33 135" size="1 1 1" color="4"/>
-    <box at="56 32 134" size="1 1 1" color="4"/>
-    <box at="56 32 133" size="1 1 1" color="4"/>
+    <box at="56 32 136" size="1 1 1" color="#4"/>
+    <box at="57 33 136" size="1 1 1" color="#4"/>
+    <box at="56 32 135" size="1 1 1" color="#4"/>
+    <box at="57 33 135" size="1 1 1" color="#4"/>
+    <box at="56 32 134" size="1 1 1" color="#4"/>
+    <box at="56 32 133" size="1 1 1" color="#4"/>
     <!-- Glyph 3 at theta=25 z=152 phase=1 (1) -->
-    <box at="56 48 154" size="1 1 1" color="1"/>
-    <box at="57 47 153" size="1 1 1" color="1"/>
-    <box at="56 48 153" size="1 1 1" color="1"/>
-    <box at="57 47 152" size="1 1 1" color="1"/>
-    <box at="56 48 152" size="1 1 1" color="1"/>
-    <box at="57 46 151" size="1 1 1" color="1"/>
-    <box at="55 49 151" size="1 1 1" color="1"/>
+    <box at="56 48 154" size="1 1 1" color="#1"/>
+    <box at="57 47 153" size="1 1 1" color="#1"/>
+    <box at="56 48 153" size="1 1 1" color="#1"/>
+    <box at="57 47 152" size="1 1 1" color="#1"/>
+    <box at="56 48 152" size="1 1 1" color="#1"/>
+    <box at="57 46 151" size="1 1 1" color="#1"/>
+    <box at="55 49 151" size="1 1 1" color="#1"/>
     <!-- Glyph 11 at theta=45 z=152 phase=3 (3) -->
-    <box at="53 53 154" size="1 1 1" color="3"/>
-    <box at="53 52 153" size="1 1 1" color="3"/>
-    <box at="53 53 152" size="1 1 1" color="3"/>
-    <box at="52 53 151" size="1 1 1" color="3"/>
-    <box at="53 53 150" size="1 1 1" color="3"/>
+    <box at="53 53 154" size="1 1 1" color="#3"/>
+    <box at="53 52 153" size="1 1 1" color="#3"/>
+    <box at="53 53 152" size="1 1 1" color="#3"/>
+    <box at="52 53 151" size="1 1 1" color="#3"/>
+    <box at="53 53 150" size="1 1 1" color="#3"/>
     <!-- Glyph 7 at theta=65 z=152 phase=4 (4) -->
-    <box at="48 56 154" size="1 1 1" color="4"/>
-    <box at="47 57 154" size="1 1 1" color="4"/>
-    <box at="48 56 153" size="1 1 1" color="4"/>
-    <box at="47 57 153" size="1 1 1" color="4"/>
-    <box at="48 56 152" size="1 1 1" color="4"/>
-    <box at="48 56 151" size="1 1 1" color="4"/>
-    <box at="48 56 150" size="1 1 1" color="4"/>
+    <box at="48 56 154" size="1 1 1" color="#4"/>
+    <box at="47 57 154" size="1 1 1" color="#4"/>
+    <box at="48 56 153" size="1 1 1" color="#4"/>
+    <box at="47 57 153" size="1 1 1" color="#4"/>
+    <box at="48 56 152" size="1 1 1" color="#4"/>
+    <box at="48 56 151" size="1 1 1" color="#4"/>
+    <box at="48 56 150" size="1 1 1" color="#4"/>
     <!-- Glyph 3 at theta=115 z=152 phase=7 (7) -->
-    <box at="32 56 154" size="1 1 1" color="7"/>
-    <box at="33 57 153" size="1 1 1" color="7"/>
-    <box at="32 56 153" size="1 1 1" color="7"/>
-    <box at="33 57 152" size="1 1 1" color="7"/>
-    <box at="32 56 152" size="1 1 1" color="7"/>
-    <box at="34 57 151" size="1 1 1" color="7"/>
-    <box at="31 55 151" size="1 1 1" color="7"/>
+    <box at="32 56 154" size="1 1 1" color="#7"/>
+    <box at="33 57 153" size="1 1 1" color="#7"/>
+    <box at="32 56 153" size="1 1 1" color="#7"/>
+    <box at="33 57 152" size="1 1 1" color="#7"/>
+    <box at="32 56 152" size="1 1 1" color="#7"/>
+    <box at="34 57 151" size="1 1 1" color="#7"/>
+    <box at="31 55 151" size="1 1 1" color="#7"/>
     <!-- Glyph 11 at theta=135 z=152 phase=11 (D) -->
     <box at="27 53 154" size="1 1 1" color="D"/>
     <box at="28 53 153" size="1 1 1" color="D"/>
@@ -819,33 +819,33 @@ Animation "energia" (16 frames, 2.4s):
     <box at="23 34 151" size="1 1 1" color="I"/>
     <box at="25 31 151" size="1 1 1" color="I"/>
     <!-- Glyph 11 at theta=225 z=152 phase=3 (3) -->
-    <box at="27 27 154" size="1 1 1" color="3"/>
-    <box at="27 28 153" size="1 1 1" color="3"/>
-    <box at="27 27 152" size="1 1 1" color="3"/>
-    <box at="28 27 151" size="1 1 1" color="3"/>
-    <box at="27 27 150" size="1 1 1" color="3"/>
+    <box at="27 27 154" size="1 1 1" color="#3"/>
+    <box at="27 28 153" size="1 1 1" color="#3"/>
+    <box at="27 27 152" size="1 1 1" color="#3"/>
+    <box at="28 27 151" size="1 1 1" color="#3"/>
+    <box at="27 27 150" size="1 1 1" color="#3"/>
     <!-- Glyph 7 at theta=245 z=152 phase=2 (2) -->
-    <box at="32 24 154" size="1 1 1" color="2"/>
-    <box at="33 23 154" size="1 1 1" color="2"/>
-    <box at="32 24 153" size="1 1 1" color="2"/>
-    <box at="33 23 153" size="1 1 1" color="2"/>
-    <box at="32 24 152" size="1 1 1" color="2"/>
-    <box at="32 24 151" size="1 1 1" color="2"/>
-    <box at="32 24 150" size="1 1 1" color="2"/>
+    <box at="32 24 154" size="1 1 1" color="#2"/>
+    <box at="33 23 154" size="1 1 1" color="#2"/>
+    <box at="32 24 153" size="1 1 1" color="#2"/>
+    <box at="33 23 153" size="1 1 1" color="#2"/>
+    <box at="32 24 152" size="1 1 1" color="#2"/>
+    <box at="32 24 151" size="1 1 1" color="#2"/>
+    <box at="32 24 150" size="1 1 1" color="#2"/>
     <!-- Glyph 3 at theta=295 z=152 phase=5 (5) -->
-    <box at="48 24 154" size="1 1 1" color="5"/>
-    <box at="47 23 153" size="1 1 1" color="5"/>
-    <box at="48 24 153" size="1 1 1" color="5"/>
-    <box at="47 23 152" size="1 1 1" color="5"/>
-    <box at="48 24 152" size="1 1 1" color="5"/>
-    <box at="46 23 151" size="1 1 1" color="5"/>
-    <box at="49 25 151" size="1 1 1" color="5"/>
+    <box at="48 24 154" size="1 1 1" color="#5"/>
+    <box at="47 23 153" size="1 1 1" color="#5"/>
+    <box at="48 24 153" size="1 1 1" color="#5"/>
+    <box at="47 23 152" size="1 1 1" color="#5"/>
+    <box at="48 24 152" size="1 1 1" color="#5"/>
+    <box at="46 23 151" size="1 1 1" color="#5"/>
+    <box at="49 25 151" size="1 1 1" color="#5"/>
     <!-- Glyph 11 at theta=315 z=152 phase=9 (9) -->
-    <box at="53 27 154" size="1 1 1" color="9"/>
-    <box at="52 27 153" size="1 1 1" color="9"/>
-    <box at="53 27 152" size="1 1 1" color="9"/>
-    <box at="53 28 151" size="1 1 1" color="9"/>
-    <box at="53 27 150" size="1 1 1" color="9"/>
+    <box at="53 27 154" size="1 1 1" color="#9"/>
+    <box at="52 27 153" size="1 1 1" color="#9"/>
+    <box at="53 27 152" size="1 1 1" color="#9"/>
+    <box at="53 28 151" size="1 1 1" color="#9"/>
+    <box at="53 27 150" size="1 1 1" color="#9"/>
     <!-- Glyph 7 at theta=335 z=152 phase=10 (A) -->
     <box at="56 32 154" size="1 1 1" color="A"/>
     <box at="57 33 154" size="1 1 1" color="A"/>
@@ -1051,17 +1051,17 @@ Animation "energia" (16 frames, 2.4s):
 <animation name="energia" frames="16">
   <sequence>
     <!-- 1. Cycle of the wall glyphs (0..6 off, 7..I lit) -->
-    <all in="0" out="x"/>
-    <all in="1" out="0"/>
-    <all in="2" out="1"/>
-    <all in="3" out="2"/>
-    <all in="4" out="3"/>
-    <all in="5" out="4"/>
-    <all in="6" out="5"/>
-    <all in="7" out="6"/>
-    <all in="8" out="7"/>
-    <all in="9" out="8"/>
-    <all in="A" out="9"/>
+    <all in="#0" out="x"/>
+    <all in="#1" out="#0"/>
+    <all in="#2" out="#1"/>
+    <all in="#3" out="#2"/>
+    <all in="#4" out="#3"/>
+    <all in="#5" out="#4"/>
+    <all in="#6" out="#5"/>
+    <all in="#7" out="#6"/>
+    <all in="#8" out="#7"/>
+    <all in="#9" out="#8"/>
+    <all in="A" out="#9"/>
     <all in="D" out="A"/>
     <all in="E" out="D"/>
     <all in="G" out="E"/>

@@ -56,7 +56,7 @@ export const WFC_PRESETS: WfcPreset[] = [
   <!-- Tessere: B=Aria, R=TuboX, G=TuboY, Y=TuboZ, C=Curva -->
 </wfc>`,
     nativeMjXml: `<!-- Modello WFC Nativo: Tubi 3D (Rete di condotti procedurali) -->
-<sequence values="0BRGYC" size="12 12 12" origin="True">
+<sequence values="#0BRGYC" size="12 12 12" origin="True">
   <color symbol="R" value="ff004d" name="condotto_x"/>
   <color symbol="G" value="00e436" name="condotto_y"/>
   <color symbol="Y" value="ffec27" name="condotto_z"/>
@@ -87,7 +87,7 @@ export const WFC_PRESETS: WfcPreset[] = [
     periodic: false,
     symmetry: '(xy)',
     tiles: [
-      { name: 'Spazio / Aria', symbol: '0', color: '#0c0e14', weight: 5 },
+      { name: 'Spazio / Aria', symbol: '#0', color: '#0c0e14', weight: 5 },
       { name: 'Muro Labirinto', symbol: 'W', color: '#5f574f', weight: 4 },
       { name: 'Sentiero / Passaggio', symbol: 'P', color: '#ffccaa', weight: 4 },
       { name: 'Porta / Snodo', symbol: 'D', color: '#ab5236', weight: 1 },
@@ -97,14 +97,14 @@ export const WFC_PRESETS: WfcPreset[] = [
   <!-- Vincoli: corridoi P connessi a P, muri W delimitano i passaggi -->
 </wfc>`,
     nativeMjXml: `<!-- Modello WFC Nativo: Labirinto 3D con sentieri garantiti -->
-<sequence values="0WPD" size="14 14 10">
+<sequence values="#0WPD" size="14 14 10">
   <color symbol="W" value="5f574f" name="muro"/>
   <color symbol="P" value="ffccaa" name="passaggio"/>
   <color symbol="D" value="ab5236" name="porta_snodo"/>
   <!-- Fondamenta piene -->
   <box at="7 7 0" size="14 14 1" color="W"/>
   <!-- Rete volumetrica di blocchi divisori -->
-  <all in="0" out="W" steps="1"/>
+  <all in="#0" out="W" steps="1"/>
   <!-- Scavo iniziale corridoio centrale -->
   <one in="W" out="P" steps="1"/>
   <!-- Propagazione e allargamento passaggi senza vicoli ciechi -->
@@ -127,7 +127,7 @@ export const WFC_PRESETS: WfcPreset[] = [
     periodic: false,
     symmetry: '(xy)',
     tiles: [
-      { name: 'Aria', symbol: '0', color: '#000000', weight: 1 },
+      { name: 'Aria', symbol: '#0', color: '#000000', weight: 1 },
       { name: 'Pietra Mura', symbol: 'P', color: '#787a85', weight: 6 },
       { name: 'Pietra Scura', symbol: 'D', color: '#4e505a', weight: 3 },
       { name: 'Merlatura', symbol: 'C', color: '#9ca0ad', weight: 2 },
@@ -138,7 +138,7 @@ export const WFC_PRESETS: WfcPreset[] = [
   <!-- Tessere: P=Muro, D=Angolo, C=Merlatura, I=Portone -->
 </wfc>`,
     nativeMjXml: `<!-- Modello WFC Nativo: Castello procedurale con mura e torri -->
-<sequence values="0PDCI" size="16 16 12" symmetry="(xy)">
+<sequence values="#0PDCI" size="16 16 12" symmetry="(xy)">
   <color symbol="P" value="787a85" name="pietra"/>
   <color symbol="D" value="4e505a" name="pietra_scura"/>
   <color symbol="C" value="9ca0ad" name="merlatura"/>
@@ -147,7 +147,7 @@ export const WFC_PRESETS: WfcPreset[] = [
   <box at="8 8 0" size="14 14 1" color="D"/>
   <!-- Perimetro mura esterne -->
   <box at="8 8 1" size="14 14 6" color="P"/>
-  <box at="8 8 1" size="10 10 7" color="0"/>
+  <box at="8 8 1" size="10 10 7" color="#0"/>
   <!-- Torri ai quattro angoli -->
   <box at="2 2 1" size="4 4 9" color="D"/>
   <box at="14 2 1" size="4 4 9" color="D"/>
@@ -157,7 +157,7 @@ export const WFC_PRESETS: WfcPreset[] = [
   <box at="8 15 1" size="2 2 4" color="I"/>
   <!-- Merlature sommitali alternate -->
   <prl steps="1" symmetry="(xy)">
-    <rule in="P 0 P" out="P C P"/>
+    <rule in="P #0 P" out="P C P"/>
   </prl>
 </sequence>`,
   },
@@ -170,7 +170,7 @@ export const WFC_PRESETS: WfcPreset[] = [
     periodic: false,
     symmetry: '(xy)',
     tiles: [
-      { name: 'Aria', symbol: '0', color: '#000000', weight: 1 },
+      { name: 'Aria', symbol: '#0', color: '#000000', weight: 1 },
       { name: 'Pavimento', symbol: 'F', color: '#303440', weight: 5 },
       { name: 'Muro Divisorio', symbol: 'W', color: '#686b7c', weight: 4 },
       { name: 'Pilastro / Colonna', symbol: 'C', color: '#888d9d', weight: 2 },
@@ -181,7 +181,7 @@ export const WFC_PRESETS: WfcPreset[] = [
   <!-- Vincoli: stanze chiuse da pareti W con porte D sui passaggi -->
 </wfc>`,
     nativeMjXml: `<!-- Modello WFC Nativo: Dungeon modulare con stanze e pilastri -->
-<sequence values="0FWCD" size="14 14 8" symmetry="(xy)">
+<sequence values="#0FWCD" size="14 14 8" symmetry="(xy)">
   <color symbol="F" value="303440" name="pavimento"/>
   <color symbol="W" value="686b7c" name="muro"/>
   <color symbol="C" value="888d9d" name="colonna"/>
@@ -190,10 +190,10 @@ export const WFC_PRESETS: WfcPreset[] = [
   <box at="7 7 0" size="12 12 1" color="F"/>
   <!-- Pareti perimetrali e divisorie -->
   <box at="7 7 1" size="12 12 4" color="W"/>
-  <box at="4 4 1" size="4 4 5" color="0"/>
-  <box at="10 4 1" size="4 4 5" color="0"/>
-  <box at="4 10 1" size="4 4 5" color="0"/>
-  <box at="10 10 1" size="4 4 5" color="0"/>
+  <box at="4 4 1" size="4 4 5" color="#0"/>
+  <box at="10 4 1" size="4 4 5" color="#0"/>
+  <box at="4 10 1" size="4 4 5" color="#0"/>
+  <box at="10 10 1" size="4 4 5" color="#0"/>
   <!-- Pilastri strutturali centrali -->
   <cylinder at="7 7 1" size="2 2 4" color="C"/>
   <!-- Aperture e porte di comunicazione tra ambienti -->
@@ -219,7 +219,7 @@ export const WFC_PRESETS: WfcPreset[] = [
   <!-- Vincolo di adiacenza altimetrica: U tocca S; S tocca U e G; G tocca S e R; R tocca G -->
 </wfc>`,
     nativeMjXml: `<!-- Modello WFC Nativo: Terreno procedurale a vincolo naturale -->
-<sequence values="0USGR" size="16 16 8" symmetry="(xy)">
+<sequence values="#0USGR" size="16 16 8" symmetry="(xy)">
   <color symbol="U" value="1d2b53" name="acqua"/>
   <color symbol="S" value="ffa300" name="sabbia"/>
   <color symbol="G" value="00e436" name="erba"/>
@@ -256,7 +256,7 @@ export function generateWfcXml(config: WfcConfig): string {
     }
 
     // Generic native MJ constraint model from custom configuration
-    const valStr = '0' + tiles.map((t) => t.symbol).join('');
+    const valStr = '#0' + tiles.map((t) => t.symbol).join('');
     const lines: string[] = [];
     if (comment) lines.push(`<!-- ${comment} -->`);
     lines.push(`<!-- Modello a vincoli generato con WFC Wizard -->`);

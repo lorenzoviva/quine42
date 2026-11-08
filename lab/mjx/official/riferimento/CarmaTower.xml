@@ -97,18 +97,18 @@
       <rule in="a" out="R" />
       <rule in="R" out="L" />
     </prl>
-    <all in="BBB/+++ LLL/BBB *L*/BBB" out="***/*** ***/*** *H*/***" comment="special windows" /><union symbol="2" values="HW" /><all>
+    <all in="BBB/+++ LLL/BBB *L*/BBB" out="***/*** ***/*** *H*/***" comment="special windows" /><union symbol="#2" values="HW" /><all>
       <rule in="H L L L L L L" out="H H H W W W W" />
       <rule in="W+ LB LB" out="** ** H*" />
     </all>
     <all>
-      <rule in="L 2 L" out="* R *" />
-      <rule in="L2L" out="*R*" />
-      <rule in="2T" out="R*" />
-      <rule in="22/BL" out="RR/**" />
-      <rule in="2L/BL" out="R*/**" />
+      <rule in="L #2 L" out="* R *" />
+      <rule in="L#2L" out="*R*" />
+      <rule in="#2T" out="R*" />
+      <rule in="#2#2/BL" out="RR/**" />
+      <rule in="#2L/BL" out="R*/**" />
     </all>
-    <all in="R2" out="*R" symmetry="(xyz)" />
+    <all in="R#2" out="*R" symmetry="(xyz)" />
     <all comment="mark long enough windows">
       <rule in="LHHHHHH LHHHHHH LHHHHHH" out="*VVVVVV *VVVVVV *VVVVVV" />
       <rule in="VH" out="*V" />
@@ -167,7 +167,7 @@
     <convolution neighborhood="VonNeumann" comment="mark edges">
       <rule in="L" out="p" sum="2..3" values="Bo" />
     </convolution>
-    <union symbol="5" values="LURG" /><union symbol="6" values="LD" color="222034" /> b
+    <union symbol="#5" values="LURG" /><union symbol="#6" values="LD" color="222034" /> b
     <all symmetry="(xyz)">
       <rule in="QL/==" out="*D/**" />
       <rule in="DL/==" out="*D/**" />
@@ -183,7 +183,7 @@
         <rule in="UR/==" out="UU/**" />
         <rule in="UL/==" out="UU/**" />
       </all>
-      <one in="L5/=5" out="R*/**" />
+      <one in="L#5/=#5" out="R*/**" />
     </markov>
     <one in="R" out="K" steps="12" />
     <all in="KR" out="*K" symmetry="(xyz)" />
@@ -335,17 +335,17 @@
       <rule in="LTB" out="*LT" />
       <rule in="LtB" out="*Lt" />
     </all>
-    <union symbol="0" values="LH" />
-    <all in="0hB 0hB 0hB" out="HB* HB* Haa" comment="deepen windows" />
-    <all in="0hB 0hB" out="HB* Haa" />
-    <all in="0hB" out="HB*" />
+    <union symbol="#0" values="LH" />
+    <all in="#0hB #0hB #0hB" out="HB* HB* Haa" comment="deepen windows" />
+    <all in="#0hB #0hB" out="HB* Haa" />
+    <all in="#0hB" out="HB*" />
     <all comment="deepen special windows">
       <rule in="QGB" out="*B*" />
       <rule in="LQB" out="B**" />
       <rule in="LVB" out="B**" />
     </all>
-    <union symbol="#" values="Lh" />
-    <all in="#BV" out="h*B" />
+    <union symbol="~" values="Lh" />
+    <all in="~BV" out="h*B" />
     <all in="BV/VL" out="*B/B*" />
     <all>
       <rule in="Lh/LB" out="*R/**" />
@@ -357,7 +357,7 @@
       <rule in="hRh hRh hRh" out="*M* *M* *M*" />
       <rule in="hRh hRh hRh" out="*M* *M* *M*" />
     </one>
-    <all in="0hB" out="HB*" comment="secondary deepening" />
+    <all in="#0hB" out="HB*" comment="secondary deepening" />
     <prl>
       <rule in="R" out="L" />
       <rule in="M" out="L" />

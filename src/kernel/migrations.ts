@@ -4,7 +4,8 @@
 // a migration is worth writing, it goes in MIGRATIONS: a pure function from the files of `from` to the files of `to`, with its test.
 // The first is 0.1 → 0.2 (T307a, ADR-0153, ADR-0155): the internal language of the world's simulation; then 0.2 → 0.3 (T307b,
 // ADR-0158): the internal language of society, work and the Council; then 0.3 → 0.4 (T308a, ADR-0159): the fields and the paths of the
-// universe's files; then 0.4 → 0.5 (T308b, ADR-0163): the wire and Lua, the components and their fields, the API, the bus's events.
+// universe's files; then 0.4 → 0.5 (T308b, ADR-0163): the wire and Lua, the components and their fields, the API, the bus's events;
+// then 0.5 → 0.6 (T342, ADR-0175): the symbols of the MarkovJunior programs, a digit alone written `#` and the digit.
 // The universe's places live apart (`maps/`, a chunk store): a migration says how a place's plan is ported too (`migratePlan`), and the
 // kernel ports every plan it reads (`migratePlanRecord`). The kernel runs the chain at boot (`Kernel.boot`), before the files are read; the
 // pages, the worlds of many and the tools run it before they take the seed (`prepareUniverse`, universes.ts), so the seed's new files
@@ -13,6 +14,7 @@
 import type { ChunkPlan } from './agents/cartography';
 import { COMPONENT_FIELDS, INTERNAL_NAMES, internalAgent, internalCardId, internalCardsIn, internalCoefficients, internalComponent, internalComponentField, internalComponentName, internalEvent, internalFields, internalGraph, internalJobProgram, internalManifest, internalManifest0_5, internalModelId, internalModelId0_3, internalModelInfo, internalModuleId, internalName, internalPath, internalPeople, internalPlots, internalSculptors, internalSoloIn, internalSoundPurpose, internalStoreKey, internalVenture, type FieldShapeId } from './internalNames';
 import { STORE_DIR } from './store';
+import { hashDigits } from '../mj/symbols';
 import { hashStr, hex } from './rng';
 import type { FileMap } from './types';
 import { checkKernelVersion, compareContracts, contractOf, KERNEL_VERSION, parseContract, parseVersion, runsOnThisKernel, showContract, universeKernels, type Contract } from './version';
@@ -65,6 +67,13 @@ export const MIGRATIONS: readonly Migration[] = [
     descrizione:
       'la lingua interna del filo e di Lua (T308b): i componenti che Lua vede e i loro campi (luce → light, stati → states, mestiere → job, raggio → radius, fino → expires…), nei manifest, nei casi, nei pannelli, negli stati dei viandanti e nel Lua dei moduli del Concilio; l’API (world.impresa → world.venture, world.impresa_porta → world.venture_bring), l’evento morte → death, le chiavi del deposito di sys.work (deposito: → deposit:)',
     migrate: (files) => migrate0_5(files),
+  },
+  {
+    from: '0.5',
+    to: '0.6',
+    descrizione:
+      'i simboli dei programmi MarkovJunior (T342): una cifra da sola non è più un simbolo, si scrive # e la cifra (3 → #3) nei values, nei pattern (attributi, figli <in> e <out>, file di regole, tessere e campioni), nelle unioni, nei colori e nei simboli dei nodi; un’unione "#" prende un segno libero; la tinta dei modelli in models/index.json',
+    migrate: (files) => migrate0_6(files),
   },
 ];
 
@@ -1036,7 +1045,11 @@ function migrate0_5(files: FileMap): FileMap {
     else if (p === `${STORE_DIR}sys.work.json`) next = rewriteJson(text, workStore0_5);
     out[p] = next;
   }
-  // seed.json follows, as in 0.2-0.4: a file of the seed the migration changed, untouched by the universe, stays the seed's.
+  return withSeedFollowing(files, out);
+}
+
+/** seed.json follows, as in 0.2-0.6: a file of the seed the migration changed, untouched by the universe, stays the seed's. */
+function withSeedFollowing(files: FileMap, out: FileMap): FileMap {
   if (files[SEED] !== undefined) {
     const base = parseJson(files[SEED]);
     if (isRecord(base)) {
@@ -1049,4 +1062,183 @@ function migrate0_5(files: FileMap): FileMap {
     } else out[SEED] = files[SEED];
   }
   return out;
+}
+
+// --- 0.5 → 0.6 (T342, ADR-0175): the symbols of the MarkovJunior programs ------------------------------------------------------------
+// Up to 0.5 a symbol of a program was one character, a letter or a digit; from 0.6 it is a letter or `#` and a number (`#12`), and a
+// digit alone is no symbol (src/mj/symbols.ts). Every program of the universe (`models/*.xml`) and every text file it reads (`models/
+// *.txt`: rules, tiles, samples) writes its digits `#` and the digit, only where a symbol stands: values, patterns, unions, colours, the
+// symbols of the nodes; never sizes, steps, scales, files, names or numbers. A union that was "#" (a sign, then: now it starts a numbered
+// symbol) takes a sign the program does not use. The engine reads `#3` as it read `3`: the same program, voxel for voxel. The tint of a
+// model in models/index.json is a symbol too. The handmade cards (handmade.ts) and the cards brought from a universe of before
+// (`portedFiles`) pass through the same functions.
+
+/** The attributes that hold symbols, element by element (T342); `values`, `ground` and `soil` everywhere. */
+const SYMBOL_ATTRS: Readonly<Record<string, readonly string[]>> = {
+  one: ['in', 'out'],
+  all: ['in', 'out'],
+  prl: ['in', 'out'],
+  rule: ['in', 'out'],
+  convolution: ['in', 'out'],
+  union: ['symbol'],
+  color: ['symbol'],
+  path: ['from', 'to', 'on', 'color'],
+  box: ['color', 'on'],
+  ellipsoid: ['color', 'on'],
+  cylinder: ['color', 'on'],
+  cone: ['color', 'on'],
+  line: ['color', 'on'],
+  field: ['for', 'from', 'to', 'on'],
+  observe: ['value', 'from', 'to'],
+  convchain: ['on', 'black', 'white'],
+};
+const SYMBOL_ATTRS_EVERYWHERE = ['values', 'ground', 'soil', 'suolo'];
+/** The elements whose text is a pattern: a rule's sides (T333), a tile (T335). */
+const PATTERN_TEXTS = new Set(['in', 'out', 'tile']);
+/** The signs a union "#" may take, in order: none is a mark of a pattern, nor "|" (the separator of a wfc's out). */
+const UNION_SIGNS = ['~', '^', '!', '$', '%', '@', '+', '=', '_', ';', ':', ','];
+
+interface OpenElement {
+  name: string;
+  attrs: Record<string, string>;
+}
+
+/**
+ * A MarkovJunior program rebuilt piece by piece, everything as it is but what `attr` and `text` give back: an attribute's value (with
+ * its element and the elements it is inside, outermost first), the text inside an element. What does not read as XML stays as it is.
+ */
+function rewriteMjxSource(
+  xml: string,
+  attr: (el: OpenElement, outer: readonly OpenElement[], name: string, value: string) => string,
+  text: (el: OpenElement, value: string) => string,
+): string {
+  let out = '';
+  let i = 0;
+  const stack: OpenElement[] = [];
+  /** Where what starts at `i` ends, `close` included (the end of the text if it is not there). */
+  const endOf = (close: string) => {
+    const end = xml.indexOf(close, i);
+    return end < 0 ? xml.length : end + close.length;
+  };
+  while (i < xml.length) {
+    const lt = xml.indexOf('<', i);
+    const top = stack[stack.length - 1];
+    if (lt < 0) {
+      out += xml.slice(i);
+      break;
+    }
+    if (lt > i) out += top ? text(top, xml.slice(i, lt)) : xml.slice(i, lt);
+    i = lt;
+    if (xml.startsWith('<!--', i) || xml.startsWith('<?', i) || xml.startsWith('<!', i) || xml.startsWith('</', i)) {
+      const end = endOf(xml.startsWith('<!--', i) ? '-->' : '>');
+      if (xml.startsWith('</', i)) stack.pop();
+      out += xml.slice(i, end);
+      i = end;
+      continue;
+    }
+    const m = /^<([\w:.-]+)((?:\s+[\w:.-]+\s*=\s*(?:"[^"]*"|'[^']*'))*)(\s*\/?>)/.exec(xml.slice(i));
+    if (!m) {
+      out += '<';
+      i++;
+      continue;
+    }
+    const el: OpenElement = { name: m[1], attrs: {} };
+    for (const a of m[2].matchAll(/([\w:.-]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/g)) el.attrs[a[1]] = a[2] ?? a[3];
+    const outer = [...stack];
+    const attrs = m[2].replace(/([\w:.-]+)(\s*=\s*)(?:"([^"]*)"|'([^']*)')/g, (all: string, name: string, eq: string, dq: string | undefined, sq: string | undefined) => {
+      const value = dq ?? sq ?? '';
+      const next = attr(el, outer, name, value);
+      const q = dq !== undefined ? '"' : "'";
+      return next === value ? all : `${name}${eq}${q}${next}${q}`;
+    });
+    out += `<${m[1]}${attrs}${m[3]}`;
+    i += m[0].length;
+    if (!m[3].trim().startsWith('/')) stack.push(el);
+  }
+  return out;
+}
+
+/** Whether an attribute of an element holds symbols: the end of a line is a point, a wfc's tiles in `out` are names. */
+function holdsSymbols(el: OpenElement, outer: readonly OpenElement[], name: string): boolean {
+  if (el.name === 'line' && name === 'to') return false;
+  if (SYMBOL_ATTRS_EVERYWHERE.includes(name)) return true;
+  if (!SYMBOL_ATTRS[el.name]?.includes(name)) return false;
+  const parent = outer[outer.length - 1];
+  return !(el.name === 'rule' && name === 'out' && parent?.name === 'wfc' && parent.attrs.tileset !== undefined);
+}
+
+/** A pattern's text of 0.5 in 0.6, line by line: a note ("#" at the start, then) stays as it was, the rest writes its digits `#d`. */
+function patternLines0_6(s: string, sign?: string): string {
+  return s
+    .split(/(\r?\n)/)
+    .map((line, k) => (k % 2 || /^\s*#/.test(line) ? line : hashDigits(sign ? line.replaceAll('#', sign) : line)))
+    .join('');
+}
+
+/**
+ * A MarkovJunior program of the contract 0.5 in 0.6 (T342): its digits `#` and the digit wherever a symbol stands, a union "#" with a
+ * sign of its own. Pure and idempotent: a program of 0.6 stays as it is.
+ */
+export function programFor0_6(xml: string): string {
+  // A union "#" of before: the first sign the program does not use takes its place (in 0.6 "#" starts a numbered symbol).
+  let sign: string | undefined;
+  if (/<union\b[^>]*\bsymbol\s*=\s*["']#["']/.test(xml)) {
+    const used = new Set<string>();
+    const note = (value: string) => {
+      for (const ch of value) used.add(ch);
+      return value;
+    };
+    rewriteMjxSource(xml, (el, outer, name, value) => (holdsSymbols(el, outer, name) ? note(value) : value), (el, value) => (PATTERN_TEXTS.has(el.name) ? note(value) : value));
+    sign = UNION_SIGNS.find((s) => !used.has(s));
+  }
+  return rewriteMjxSource(
+    xml,
+    (el, outer, name, value) => (holdsSymbols(el, outer, name) ? hashDigits(sign ? value.replaceAll('#', sign) : value) : value),
+    (el, value) => (PATTERN_TEXTS.has(el.name) ? patternLines0_6(value, sign) : value),
+  );
+}
+
+/** A text file of models/ of 0.5 (a rule's sides, a tile, a sample) in 0.6: its digits `#d`, the notes and the line "->" as they are. */
+export const patternFileFor0_6 = (text: string): string => patternLines0_6(text);
+
+/**
+ * The steps of MIGRATIONS that carry a program on its own (a handmade card's) to the next contract, by the contract they read. A step
+ * not here does not: a card of before it stays of its contract, kept and not offered (ADR-0161), as the cards of 0.4 stayed in 0.5.
+ */
+const PROGRAM_STEPS: Readonly<Record<string, (xml: string) => string>> = { '0.5': programFor0_6 };
+
+/**
+ * A program alone, of the contract `contract` (`X.Y`), as this kernel reads it (a handmade card's, T342): ported by every step from there
+ * to this kernel's contract, with the contract it is of now, when every step carries programs. Otherwise (a step that does not, a
+ * contract this kernel has no way from, one after it, one that is not a contract) it stays as it is.
+ */
+export function portedProgram(xml: string, contract: string): { xml: string; contract: string } {
+  const from = parseContract(contract);
+  const to = contractOf(parseVersion(KERNEL_VERSION)!);
+  const chain = from && migrationPath(from, to);
+  if (!chain || !chain.every((m) => PROGRAM_STEPS[m.from])) return { xml, contract };
+  let out = xml;
+  for (const m of chain) out = PROGRAM_STEPS[m.from](out);
+  return { xml: out, contract: showContract(to) };
+}
+
+/** models/index.json of 0.5 in 0.6: the tint of a model is a symbol. */
+function index0_6(raw: unknown): unknown {
+  if (!isRecord(raw)) return raw;
+  const out: Record<string, unknown> = {};
+  for (const [id, info] of Object.entries(raw)) out[id] = isRecord(info) && typeof info.tint === 'string' ? { ...info, tint: hashDigits(info.tint) } : info;
+  return out;
+}
+
+function migrate0_6(files: FileMap): FileMap {
+  const out: FileMap = {};
+  for (const [p, text] of Object.entries(files)) {
+    if (p === SEED) continue;
+    let next = text;
+    if (p === 'models/index.json') next = rewriteJson(text, index0_6);
+    else if (/^models\/[^/]+\.xml$/.test(p)) next = programFor0_6(text);
+    else if (/^models\/[^/]+\.txt$/.test(p)) next = patternFileFor0_6(text);
+    out[p] = next;
+  }
+  return withSeedFollowing(files, out);
 }

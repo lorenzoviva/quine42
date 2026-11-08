@@ -3,7 +3,7 @@ Flying data-carrying logistics drone (corona): an autonomous aerial courier carr
 Drawn by hand by the author at double scale (lab/mjx/models/handmade/drone-xl.xml, 20 × 20 × 16) and reduced at 1:2 (T113):
 box 10 × 10 × 8, every box with its voxels halved, the rings of the propellers rewritten around the blades.
 -->
-<sequence values="BWwMmDSPVsIabcd1234GexyXYZfg" size="10 10 8" symmetry="()" name="Drone">
+<sequence values="BWwMmDSPVsIabcd#1#2#3#4GexyXYZfg" size="10 10 8" symmetry="()" name="Drone">
   <!-- Structural materials: aerodynamic white ceramic and dark cybernetic titanium -->
   <color symbol="W" value="fff1e8" name="cyber-ceramica bianca scocca"/>
   <color symbol="w" value="d8d0c8" name="sfumatura e biselli scocca chiara"/>
@@ -27,10 +27,10 @@ box 10 × 10 × 8, every box with its voxels halved, the rings of the propellers
   <color symbol="d" value="29adff" glow="True" name="lama plasma azzurro cobalto"/>
 
   <!-- Four energy phases for the amber/gold data packet (glow="True") -->
-  <color symbol="1" value="ffa300" glow="True" name="flusso dati ambra dorata"/>
-  <color symbol="2" value="ffec27" glow="True" name="pacchetto dati oro brillante"/>
-  <color symbol="3" value="ffe27a" glow="True" name="picco dati bianco-oro"/>
-  <color symbol="4" value="ff7700" glow="True" name="plasma dati arancio denso"/>
+  <color symbol="#1" value="ffa300" glow="True" name="flusso dati ambra dorata"/>
+  <color symbol="#2" value="ffec27" glow="True" name="pacchetto dati oro brillante"/>
+  <color symbol="#3" value="ffe27a" glow="True" name="picco dati bianco-oro"/>
+  <color symbol="#4" value="ff7700" glow="True" name="plasma dati arancio denso"/>
   <color symbol="G" value="d8a878" name="staffa ambra isolante pacchetto"/>
 
   <!-- Telemetry and navigation beacon on top -->
@@ -78,14 +78,14 @@ box 10 × 10 × 8, every box with its voxels halved, the rings of the propellers
   <!-- 3. CENTRAL GLOWING DATA PACKET (z = 0..1, x=4..5)        -->
   <!-- ======================================================== -->
   <!-- Lower layer of the packet (z=1) -->
-  <box at="4 4 1" size="1 1 1" color="3"/>
-  <box at="5 4 1" size="1 1 1" color="4"/>
+  <box at="4 4 1" size="1 1 1" color="#3"/>
+  <box at="5 4 1" size="1 1 1" color="#4"/>
   <box at="4 5 1" size="1 1 1" color="G"/>
-  <box at="5 5 1" size="1 1 1" color="1"/>
+  <box at="5 5 1" size="1 1 1" color="#1"/>
 
   <!-- Upper layer of the packet (z=2) -->
-  <box at="4 4 2" size="1 1 1" color="1"/>
-  <box at="5 4 2" size="1 1 1" color="2"/>
+  <box at="4 4 2" size="1 1 1" color="#1"/>
+  <box at="5 4 2" size="1 1 1" color="#2"/>
   <box at="4 5 2" size="1 1 1" color="X"/>
   <box at="5 5 5" size="1 1 1" color="X"/>
   <box at="5 5 2" size="1 1 1" color="Y"/>
@@ -217,20 +217,20 @@ box 10 × 10 × 8, every box with its voxels halved, the rings of the propellers
   <!-- ======================================================== -->
   <!-- A) Quantum resolution of the data packet (X) -->
   <one steps="4">
-    <rule in="X" out="1" p="0.40"/>
-    <rule in="X" out="2" p="0.30"/>
-    <rule in="X" out="3" p="0.20"/>
-    <rule in="X" out="4" p="0.10"/>
+    <rule in="X" out="#1" p="0.40"/>
+    <rule in="X" out="#2" p="0.30"/>
+    <rule in="X" out="#3" p="0.20"/>
+    <rule in="X" out="#4" p="0.10"/>
   </one>
-  <all in="X" out="2" optional="True"/>
+  <all in="X" out="#2" optional="True"/>
 
   <!-- B) Resolution of the circuits and the packet casing (Y) -->
   <one steps="4">
-    <rule in="Y" out="2" p="0.40"/>
-    <rule in="Y" out="3" p="0.30"/>
+    <rule in="Y" out="#2" p="0.40"/>
+    <rule in="Y" out="#3" p="0.30"/>
     <rule in="Y" out="G" p="0.30"/>
   </one>
-  <all in="Y" out="2" optional="True"/>
+  <all in="Y" out="#2" optional="True"/>
 
   <!-- C) Dorsal details of the canopy (Z) -->
   <one steps="2">
@@ -254,11 +254,11 @@ box 10 × 10 × 8, every box with its voxels halved, the rings of the propellers
     <all in="x" out="d"/>
 
     <!-- 2. Rhythmic pulse of the energy data flow -->
-    <all in="1" out="y"/>
-    <all in="2" out="1"/>
-    <all in="3" out="2"/>
-    <all in="4" out="3"/>
-    <all in="y" out="4"/>
+    <all in="#1" out="y"/>
+    <all in="#2" out="#1"/>
+    <all in="#3" out="#2"/>
+    <all in="#4" out="#3"/>
+    <all in="y" out="#4"/>
     
     <prl in="f" out="e" p="0.8"/>  
     <prl in="g" out="e" p="0.8"/>

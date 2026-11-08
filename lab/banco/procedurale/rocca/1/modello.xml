@@ -1,8 +1,8 @@
 <sequence values="BNExzaPpQbOHtsgcdvefwXiIJhjMSFCWRVDLUuTYGKAknryqlZmo" symmetry="(xy)" ground="E" origin="bottom">
-  <union symbol="1" values="begaf"/>
-  <union symbol="2" values="tsdcv"/>
-  <union symbol="3" values="tb"/>
-  <union symbol="4" values="tbv"/>
+  <union symbol="#1" values="begaf"/>
+  <union symbol="#2" values="tsdcv"/>
+  <union symbol="#3" values="tb"/>
+  <union symbol="#4" values="tbv"/>
   <color symbol="k" value="3a2416" name="portone"/><color symbol="S" value="a9a69c" name="cornice di pietra"/><color symbol="F" value="4a3220" name="legno scuro"/><color symbol="C" value="8a8a84" name="pietra grigia"/><color symbol="W" value="6f6f6a" name="pietra scura"/><color symbol="R" value="5f5d58" name="lastre"/><color symbol="V" value="2a3138" alpha="0.6" name="finestra"/><color symbol="P" value="ffc66a" glow="True" name="finestra illuminata"/><color symbol="D" value="2b2d30" name="ferro"/><color symbol="L" value="5a3a22" name="rovere scuro"/><color symbol="T" value="b5b2a8" name="gradino"/><color symbol="K" value="77756f" name="muratura della scala"/><color symbol="A" value="94908a" name="lastricato"/><color symbol="r" value="7b7a74" name="pietra di torre"/><color symbol="m" value="9c9a92" name="merlo"/><color symbol="q" value="8e2020" name="stoffa rossa"/><color symbol="x" value="2d6b8a" name="acqua"/>
   <prl in="***/*E*/***" out="***/*z*/***"/>
   <all in="Nz" out="*a" steps="1"/>
@@ -34,23 +34,23 @@
   <one in="*tttttttttttt/Ppppppppppppp/*tttttttttttt" out="*************/******H******/*************" steps="1"/>
   <all in="[gsdc]t" out="*v"/>
   <all in="vt" out="*v" steps="9"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
   <all in="bz" out="*b"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
   <all in="bz" out="*b"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
   <all in="bz" out="*b"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******r******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******r******/******H******/*************" steps="1"/>
   <all><rule in="rz" out="*r"/><rule in="rpz" out="**r"/></all>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******r******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******r******/******H******/*************" steps="1"/>
   <all><rule in="rz" out="*r"/><rule in="rpz" out="**r"/></all>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******r******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******r******/******H******/*************" steps="1"/>
   <all><rule in="rz" out="*r"/><rule in="rpz" out="**r"/></all>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******r******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******r******/******H******/*************" steps="1"/>
   <all><rule in="rz" out="*r"/><rule in="rpz" out="**r"/></all>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*444444444444" out="******r******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#4#4#4#4#4#4#4#4#4#4#4#4" out="******r******/******H******/*************" steps="1"/>
   <all><rule in="rz" out="*r"/><rule in="rpz" out="**r"/></all>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*444444444444" out="******r******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#4#4#4#4#4#4#4#4#4#4#4#4" out="******r******/******H******/*************" steps="1"/>
   <all><rule in="rz" out="*r"/><rule in="rpz" out="**r"/></all>
   <prl in="r" out="z"/>
   <all in="Hp" out="*H" steps="5"/>
@@ -67,7 +67,7 @@
   <prl in="v" out="t"/>
   <one in="ttttttttt/ttttttttt/ttttttttt/ttttttttt/ttttttttt/ttttttttt/ttttttttt/ttttttttt/ttttttttt/ttttttttt/ttttttttt/ttttttttt/ttttttttt/ttttttttt/ttttttttt" out="vvvvvvvvv/vvvvvvvvv/vvvvvvvvv/vvvvvvvvv/vvvvvvvvv/vvvvvvvvv/vvvvvvvvv/vvvvvvvvv/vvvvvvvvv/vvvvvvvvv/vvvvvvvvv/vvvvvvvvv/vvvvvvvvv/vvvvvvvvv/vvvvvvvvv" steps="2"/>
   <all in="Epz" out="*w*"/>
-  <all><rule in="[zE]p[zE]" out="*q*"/><rule in="[zE]p1" out="*w*"/><rule in="[zE]p2" out="*X*"/><rule in="1p1" out="*i*"/><rule in="2p2" out="*I*"/><rule in="1p2" out="*J*"/><rule in="1H1" out="*h*"/><rule in="1H2" out="*j*"/><rule in="zH1" out="*h*"/><rule in="zH2" out="*j*"/><rule in="EO2" out="*M*"/></all>
+  <all><rule in="[zE]p[zE]" out="*q*"/><rule in="[zE]p#1" out="*w*"/><rule in="[zE]p#2" out="*X*"/><rule in="#1p#1" out="*i*"/><rule in="#2p#2" out="*I*"/><rule in="#1p#2" out="*J*"/><rule in="#1H#1" out="*h*"/><rule in="#1H#2" out="*j*"/><rule in="zH#1" out="*h*"/><rule in="zH#2" out="*j*"/><rule in="EO#2" out="*M*"/></all>
   <prl in="n" out="h"/>
   <all in="EE/EP" out="**/*Z"/>
   <all in="P[XIJjHMy]" out="I*"/>
