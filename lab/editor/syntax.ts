@@ -92,6 +92,8 @@ export const MJ_NODES = new Set([
   'neighbors',
   'neighbor',
   'convchain',
+  // The grid in pieces (T339).
+  'pieces',
 ]);
 
 export const MJ_ATTRS = new Set([
@@ -161,6 +163,12 @@ export const MJ_ATTRS = new Set([
   'folder',
   'legend',
   'clear',
+  // The grid in pieces (T339): <pieces piece margin time halo edge>.
+  'piece',
+  'margin',
+  'time',
+  'halo',
+  'edge',
 ]);
 
 export function escapeHtml(str: string): string {
@@ -481,6 +489,13 @@ export const TAG_SCHEMAS: Record<string, TagAttrDef[]> = {
   map: [
     { name: 'scale', default: '2 2 2', description: 'Moltiplicatore risoluzione X Y Z' },
     { name: 'values', default: 'BW', description: 'Simboli considerati' },
+    { name: 'comment', default: '', description: 'Descrizione opzionale' },
+  ],
+  // The grid in pieces (T339, ADR-0176).
+  pieces: [
+    { name: 'piece', default: '128', description: 'Il lato di un pezzo in celle (x, o x y): i nodi dentro girano un pezzo alla volta' },
+    { name: 'margin', default: '8', description: 'Le celle attorno al pezzo che le sue regole guardano (quanto guarda la regola più lontana)' },
+    { name: 'time', default: '4000', description: 'Millisecondi di un pezzo: oltre, la corsa non è finita' },
     { name: 'comment', default: '', description: 'Descrizione opzionale' },
   ],
   field: [

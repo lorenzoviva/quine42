@@ -1,7 +1,7 @@
 // Running MarkovJunior models in the lab: whole models (not tiles), so the grids are larger than the
 // sculptor's boxes of steps 8A-8E, and a run is bounded by time rather than by a small step budget.
 
-import { run, runOn, type Grid3, type GridLimits, type RunResult, type Snapshot } from './engine';
+import { run, runOn, type Grid3, type GridLimits, type PieceLimits, type RunResult, type Snapshot } from './engine';
 import type { MjxClip, MjxModel } from './model';
 
 /** A house of 3×3 tiles at 20 voxels a tile is 60×60×50; a castle a few hundred a side. */
@@ -12,6 +12,14 @@ export const MJX_LIMITS: GridLimits = { side: 512, cells: 24_000_000 };
  * grow it, and everything runs in line. The largest model of the seed is under 2 million cells.
  */
 export const FORM_LIMITS: GridLimits = { side: 512, cells: 8_000_000 };
+/**
+ * What a model of the game may be when it runs its detail in pieces (T339, ADR-0176), only where the game makes its forms (`runForm`):
+ * a larger grid (a farm of 50 x 50 tiles at 10 voxels a tile is 12.5 million cells), each piece within its time, all of them within
+ * theirs, outside the model's own time. The validator does not give it: a program it checks runs within `FORM_LIMITS` and its time.
+ */
+export const FORM_PIECES: PieceLimits = { side: 1024, cells: 32_000_000, pieceMs: 4_000, totalMs: 45_000, count: 1024, steps: 5_000_000 };
+/** The limits the game makes its forms with (`runForm`): `FORM_LIMITS`, and `FORM_PIECES` for a program with `<pieces>` (T339). */
+export const FORM_RUN_LIMITS: GridLimits = { ...FORM_LIMITS, pieces: FORM_PIECES };
 /** The longest `tempo` an index entry may ask for, in milliseconds. */
 export const MAX_FORM_TIME = 30_000;
 /** The longest program, in characters. */

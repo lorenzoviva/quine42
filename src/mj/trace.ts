@@ -111,7 +111,7 @@ function listNodes(root: Node3): NodeTrace[] {
     const opens = unit === undefined && node.type === 'sequence';
     const own = opens ? -1 : (unit ?? units++);
     out.push({ id: out.length + 1, node, depth, unit: own, runs: 0, cells: 0, first: 0, last: 0, fired: [], changes: new Map() });
-    if (node.type === 'sequence' || node.type === 'markov') for (const c of node.children) visit(c, depth + 1, opens ? undefined : own);
+    if (node.type === 'sequence' || node.type === 'markov' || node.type === 'pieces') for (const c of node.children) visit(c, depth + 1, opens ? undefined : own);
   };
   visit(root, 0, undefined);
   return out;
@@ -299,6 +299,8 @@ export function nodeName(node: Node3): string {
       return `convchain su ${w(node.on)} → ${w(node.black)}/${w(node.white)} N=${node.n}${node.temperature !== undefined ? ` temperatura=${node.temperature}` : ''}${node.steps !== undefined && Number.isFinite(node.steps) ? ` passi=${node.steps}` : ''}`;
     case 'shape':
       return node.shape === 'line' ? `line ${node.at.join(' ')} → ${node.to?.join(' ')} ${w(node.color)}` : `${node.shape} at ${node.at.join(' ')} size ${node.size?.join(' ')} ${w(node.color)}${node.on ? ` su ${w(node.on)}` : ''}`;
+    case 'pieces':
+      return `pieces ${node.size.join('×')}, margine ${node.margin ?? 8}${node.halo === 'written' ? ', legge ciò che hanno scritto i pezzi prima' : ''}${node.edge === 'grow' ? ', il margine cresce' : ''} (i suoi nodi girano un pezzo alla volta: qui non si contano)`;
     default:
       return node.type;
   }
@@ -397,7 +399,14 @@ function groupLines(t: ProgramTrace, g: Group, changes = true): string[] {
 }
 
 function neverLines(t: ProgramTrace): string[] {
-  const never = t.nodes.filter((n) => !n.runs && n.node.type !== 'sequence' && n.node.type !== 'markov');
+  // The nodes inside `<pieces>` run a piece at a time and are not watched one by one (T339): the pieces node says what they did.
+  const inside = new Set<Node3>();
+  const mark = (n: Node3) => {
+    if (n.type === 'pieces') n.children.forEach(function walk(c: Node3) { inside.add(c); if (c.type === 'sequence' || c.type === 'markov') c.children.forEach(walk); });
+    else if (n.type === 'sequence' || n.type === 'markov') n.children.forEach(mark);
+  };
+  if (t.nodes[0]) mark(t.nodes[0].node);
+  const never = t.nodes.filter((n) => !n.runs && !inside.has(n.node) && n.node.type !== 'sequence' && n.node.type !== 'markov');
   if (!never.length) return [];
   const most = 12;
   return ['Senza effetto (non hanno mai cambiato una cella):', ...never.slice(0, most).map((n) => `#${n.id} ${nodeName(n.node)}${n.why ? `: ${n.why}` : ''}`), ...(never.length > most ? [`… e altri ${never.length - most}`] : [])];

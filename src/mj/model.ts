@@ -40,11 +40,16 @@
 //   <map scale="5/3 5/3 6/3">               a fraction: the new grid is M·N/D cells, the rules write at x·N/D
 //   folder="F" on the root, a map or a wfc  the rule files of that grid are models/F-<name>.txt (MarkovJunior's folders)
 // A union belongs to its grid (the root, a map, a wfc), as in MarkovJunior: the same symbol may mean other letters in another grid.
+// The grid in pieces (T339, ADR-0176), not in MarkovJunior:
+//   <pieces piece="130" margin="28" time="4000">…nodes…</pieces>  the nodes run on one piece of the grid at a time (piece × piece
+//                                           cells, full height), each on a window with the margin around it; what the model decides
+//                                           once goes before, on a plan a map brings to the voxels. No map, wfc, shape, observe,
+//                                           search or pieces inside; halo="written" and edge="frozen" are the ways measured and left.
 // Symbols (T342, ADR-0175, src/mj/symbols.ts): a letter, or `#` and a number (`#12`) when the letters are not enough; a digit alone
 // is not one (up to the contract 0.5 it was: the migration writes `3` as `#3`). The compiler hands the engine one character per symbol.
 
 import { internalName } from '../kernel/internalNames';
-import { Mj3Error, PARTS, SHAPES, type ConvRule, type FieldSpec, type Inference, type Node3, type ObserveSpec, type PaletteEntry, type Part, type Program3, type Rule3, type ShapeKind, type Sym, type Vec3 } from './engine';
+import { hasPieces, Mj3Error, PARTS, PIECE_DEFAULTS, SHAPES, type ConvRule, type FieldSpec, type Inference, type Node3, type ObserveSpec, type PaletteEntry, type Part, type Program3, type Rule3, type ShapeKind, type Sym, type Vec3 } from './engine';
 import { MJ_PALETTE } from './palette';
 import { soundSettings, type SoundSettings } from './sound';
 import { overlapModel, squareSubgroup, tileModel, WFC_LIMITS, WfcError, type NeighborSource, type TileSource, type WfcModel } from './wfc';
@@ -74,7 +79,7 @@ export interface MjxModel {
 const SYMMETRY: Record<string, Sym> = { '()': 'none', '(x)': 'x', '(y)': 'y', '(z)': 'z', '(xy)': 'xy', '(xyz+)': 'rot', '(xyz)': 'all' };
 const RULE_NODES = new Set(['one', 'all', 'prl']);
 /** Every node the engine runs, as the XML names it (`<import>` is not one: it becomes the nodes of the file it reads). */
-export const MJX_NODES: readonly string[] = ['one', 'all', 'prl', 'sequence', 'markov', 'convolution', 'path', 'map', 'wfc', 'convchain', ...SHAPES];
+export const MJX_NODES: readonly string[] = ['one', 'all', 'prl', 'sequence', 'markov', 'convolution', 'path', 'map', 'wfc', 'convchain', 'pieces', ...SHAPES];
 /** The nodes a program may start with (its root, or an imported file's). */
 const ROOT_NODES = new Set(['one', 'all', 'prl', 'sequence', 'markov', 'map', 'convolution', 'path']);
 
@@ -177,6 +182,8 @@ interface Ctx {
   folder?: string;
   /** The elements of the grids in scope, outermost first (the root, then each map and wfc): where a union belongs (T335). */
   scopes?: readonly XmlElement[];
+  /** Inside `<pieces>` (T339): no other grid, no coordinates of the whole grid, no future of the whole grid. */
+  inPieces?: boolean;
 }
 
 /** The grids of a program: a union written in one belongs to it (MarkovJunior's Grid.Load). */
@@ -319,7 +326,7 @@ class Compiler {
       for (const a of ['origin', 'ground', 'soil', 'suolo'])
         if (root.attrs[a] !== undefined) this.warnings.push(`${this.where(root)}: ${a} vale solo quando il programma si apre da sé, non incluso`);
       const values = this.values(root, root.attrs.values);
-      return this.node(root, { bg: values[0], sym, values: new Set(values), folder: root.attrs.folder, scopes: [...(ctx.scopes ?? []), root] }) ?? this.fail(root, 'nessun nodo da eseguire');
+      return this.node(root, { bg: values[0], sym, values: new Set(values), folder: root.attrs.folder, scopes: [...(ctx.scopes ?? []), root], ...(ctx.inPieces ? { inPieces: true } : {}) }) ?? this.fail(root, 'nessun nodo da eseguire');
     });
   }
 
@@ -581,6 +588,7 @@ class Compiler {
     const sym = this.symmetry(el, ctx);
     const kids = this.children(el, { ...ctx, sym });
     if (!kids.length) this.fail(el, 'nessun nodo dentro');
+    if (kids.some(hasPieces)) this.fail(el, `pieces va nel programma, non in un'${el.name === 'animation' ? 'animazione' : 'azione'}`);
     const frames = el.name === 'animation' ? Math.max(2, Math.min(32, Number(el.attrs.frames) || 8)) : 1;
     const clip: MjxClip = { name, ...(el.attrs.label ? { label: el.attrs.label } : {}), frames, program: { palette: {}, program: kids.length === 1 ? kids[0] : { type: 'sequence', children: kids } } };
     (el.name === 'animation' ? this.animations : this.actions).push(clip);
@@ -625,13 +633,15 @@ class Compiler {
     if (el.attrs.d === '2') return null;
     const sym = this.symmetry(el, ctx);
     if (RULE_NODES.has(el.name)) {
+      const inference = this.inference(el, ctx);
+      if (ctx.inPieces && (inference.observe || inference.search)) this.fail(el, 'dentro pieces: observe e search guardano il futuro di tutta la griglia, vanno prima di pieces (field sì)');
       return {
         type: el.name as 'one' | 'all' | 'prl',
         rules: this.rules(el, ctx, sym),
         steps: this.steps(el),
         symmetry: sym,
         ...(/^true$/i.test(el.attrs.optional ?? '') ? { optional: true } : {}),
-        ...this.inference(el, ctx),
+        ...inference,
       };
     }
     if (INFERENCE_TAGS.has(el.name)) this.fail(el, 'va dentro one, all o prl');
@@ -654,6 +664,9 @@ class Compiler {
         ...(/^true$/i.test(el.attrs.longest ?? '') ? { longest: true } : {}),
       };
     }
+    if (ctx.inPieces && (el.name === 'map' || el.name === 'wfc' || el.name === 'pieces' || (SHAPES as readonly string[]).includes(el.name)))
+      this.fail(el, el.name === 'pieces' ? 'pieces non va dentro un altro pieces' : `dentro pieces: <${el.name}> ${el.name === 'map' || el.name === 'wfc' ? "fa un'altra griglia" : 'ha le coordinate della griglia intera'}, va prima di pieces`);
+    if (el.name === 'pieces') return this.pieces(el, ctx, sym);
     if (el.name === 'map') return this.map(el, ctx, sym);
     if (el.name === 'wfc') return this.wfc(el, ctx, sym);
     if (el.name === 'convchain') return this.convchain(el, ctx, sym);
@@ -734,6 +747,33 @@ class Compiler {
       return { in: input, out: output, neighbors, sums, ...(p !== undefined ? { p } : {}) };
     });
     return { type: 'conv', rules, neighborhood, steps: this.steps(el), ...(/^true$/i.test(el.attrs.periodic ?? '') ? { periodic: true } : {}) };
+  }
+
+  /**
+   * `<pieces piece="x y" margin time halo edge>` (T339, ADR-0176): its nodes run on one piece of the grid at a time, with the margin around
+   * it they may read. The grid stays the one in scope: the same letters, the same unions. `piece` is not `size`: a program's `size` is its box.
+   */
+  pieces(el: XmlElement, ctx: Ctx, sym: Sym): Node3 {
+    const written = (el.attrs.piece ?? '').trim().split(/[\s,]+/).map(Number);
+    const size = written.length === 1 ? [written[0], written[0]] : written;
+    if (size.length !== 2 || size.some((v) => !Number.isInteger(v) || v < 1 || v > 4096)) this.fail(el, `piece vuole uno o due interi (i lati x e y di un pezzo, in celle), non "${el.attrs.piece ?? ''}"`);
+    const margin = this.int(el, 'margin', 0, PIECE_DEFAULTS.maxMargin);
+    const time = this.int(el, 'time', 1, 3_600_000);
+    const halo = el.attrs.halo;
+    if (halo !== undefined && halo !== 'before' && halo !== 'written') this.fail(el, `halo è before (ogni pezzo legge la griglia com'era) o written (anche ciò che hanno scritto i pezzi prima), non "${halo}"`);
+    const edge = el.attrs.edge;
+    if (edge !== undefined && edge !== 'frozen' && edge !== 'grow') this.fail(el, `edge è frozen (il margine non cambia) o grow (cresce con le regole del pezzo), non "${edge}"`);
+    const children = this.children(el, { ...ctx, sym, inPieces: true });
+    if (!children.length) this.fail(el, 'nessun nodo dentro');
+    return {
+      type: 'pieces',
+      size: [size[0], size[1]],
+      ...(margin !== undefined ? { margin } : {}),
+      ...(time !== undefined ? { time } : {}),
+      ...(halo ? { halo: halo as 'before' | 'written' } : {}),
+      ...(edge ? { edge: edge as 'frozen' | 'grow' } : {}),
+      children,
+    };
   }
 
   map(el: XmlElement, ctx: Ctx, sym: Sym): Node3 {
@@ -1025,7 +1065,7 @@ const hasMap = (el: XmlElement): boolean => GRID_TAGS.has(el.name) || el.childre
 export function inferenceIn(m: Pick<MjxModel, 'program'> & Partial<Pick<MjxModel, 'animations' | 'actions'>>): string[] {
   const found = new Set<string>();
   const visit = (n: Node3) => {
-    if (n.type === 'sequence' || n.type === 'markov') n.children.forEach(visit);
+    if (n.type === 'sequence' || n.type === 'markov' || n.type === 'pieces') n.children.forEach(visit);
     else if (n.type === 'one' || n.type === 'all' || n.type === 'prl') {
       if (n.fields?.length) found.add('field');
       if (n.observe?.length) found.add('observe');
@@ -1043,7 +1083,7 @@ export function inferenceIn(m: Pick<MjxModel, 'program'> & Partial<Pick<MjxModel
 export function newNodesIn(m: Pick<MjxModel, 'program'> & Partial<Pick<MjxModel, 'animations' | 'actions'>>): string[] {
   const found = new Set<string>(inferenceIn(m));
   const visit = (n: Node3) => {
-    if (n.type === 'sequence' || n.type === 'markov') n.children.forEach(visit);
+    if (n.type === 'sequence' || n.type === 'markov' || n.type === 'pieces') n.children.forEach(visit);
     else if (n.type === 'wfc' || n.type === 'convchain') found.add(n.type);
   };
   visit(m.program.program);

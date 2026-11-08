@@ -1,0 +1,554 @@
+[
+ {
+  "banco": "fattoria",
+  "seme": 1,
+  "via": "intera",
+  "ms": 1272,
+  "finito": true,
+  "strutture": 0,
+  "salti": {
+   "bordi": 0,
+   "dentro": 0,
+   "coppie": [
+    101,
+    70
+   ]
+  },
+  "continui": {
+   "sentieri": [
+    2,
+    2
+   ],
+   "traverse dei recinti": [
+    360,
+    360
+   ]
+  }
+ },
+ {
+  "banco": "fattoria",
+  "seme": 1,
+  "via": "a",
+  "ms": 1691,
+  "finito": true,
+  "pezzi": 16,
+  "pezzoLento": 196,
+  "strutture": 0,
+  "salti": {
+   "bordi": 0,
+   "dentro": 0,
+   "coppie": [
+    100,
+    70
+   ]
+  },
+  "continui": {
+   "sentieri": [
+    2,
+    2
+   ],
+   "traverse dei recinti": [
+    360,
+    360
+   ]
+  }
+ },
+ {
+  "banco": "fattoria",
+  "seme": 1,
+  "via": "a-fermo",
+  "ms": 1426,
+  "finito": true,
+  "pezzi": 16,
+  "pezzoLento": 108,
+  "strutture": 7030,
+  "salti": {
+   "bordi": 0,
+   "dentro": 0,
+   "coppie": [
+    100,
+    70
+   ]
+  },
+  "continui": {
+   "sentieri": [
+    2,
+    2
+   ],
+   "traverse dei recinti": [
+    360,
+    360
+   ]
+  }
+ },
+ {
+  "banco": "fattoria",
+  "seme": 1,
+  "via": "b",
+  "ms": 1548,
+  "finito": true,
+  "pezzi": 16,
+  "pezzoLento": 163,
+  "strutture": 0,
+  "salti": {
+   "bordi": 0,
+   "dentro": 0,
+   "coppie": [
+    100,
+    70
+   ]
+  },
+  "continui": {
+   "sentieri": [
+    2,
+    2
+   ],
+   "traverse dei recinti": [
+    360,
+    360
+   ]
+  }
+ },
+ {
+  "banco": "fattoria",
+  "seme": 1,
+  "via": "b-fermo",
+  "ms": 1383,
+  "finito": true,
+  "pezzi": 16,
+  "pezzoLento": 102,
+  "strutture": 6366,
+  "salti": {
+   "bordi": 0,
+   "dentro": 0,
+   "coppie": [
+    100,
+    70
+   ]
+  },
+  "continui": {
+   "sentieri": [
+    2,
+    2
+   ],
+   "traverse dei recinti": [
+    360,
+    360
+   ]
+  }
+ },
+ {
+  "banco": "fattoria",
+  "seme": 2,
+  "via": "intera",
+  "ms": 1311,
+  "finito": true,
+  "strutture": 0,
+  "salti": {
+   "bordi": 0,
+   "dentro": 0,
+   "coppie": [
+    40,
+    50
+   ]
+  },
+  "continui": {
+   "sentieri": [
+    2,
+    2
+   ],
+   "traverse dei recinti": [
+    105,
+    105
+   ]
+  }
+ },
+ {
+  "banco": "fattoria",
+  "seme": 2,
+  "via": "a",
+  "ms": 1761,
+  "finito": true,
+  "pezzi": 16,
+  "pezzoLento": 210,
+  "strutture": 0,
+  "salti": {
+   "bordi": 0,
+   "dentro": 0,
+   "coppie": [
+    41,
+    50
+   ]
+  },
+  "continui": {
+   "sentieri": [
+    2,
+    2
+   ],
+   "traverse dei recinti": [
+    105,
+    105
+   ]
+  }
+ },
+ {
+  "banco": "fattoria",
+  "seme": 2,
+  "via": "a-fermo",
+  "ms": 1419,
+  "finito": true,
+  "pezzi": 16,
+  "pezzoLento": 161,
+  "strutture": 3990,
+  "salti": {
+   "bordi": 0,
+   "dentro": 0,
+   "coppie": [
+    40,
+    50
+   ]
+  },
+  "continui": {
+   "sentieri": [
+    2,
+    2
+   ],
+   "traverse dei recinti": [
+    105,
+    105
+   ]
+  }
+ },
+ {
+  "banco": "fattoria",
+  "seme": 2,
+  "via": "b",
+  "ms": 1578,
+  "finito": true,
+  "pezzi": 16,
+  "pezzoLento": 193,
+  "strutture": 0,
+  "salti": {
+   "bordi": 0,
+   "dentro": 0,
+   "coppie": [
+    40,
+    50
+   ]
+  },
+  "continui": {
+   "sentieri": [
+    2,
+    2
+   ],
+   "traverse dei recinti": [
+    105,
+    105
+   ]
+  }
+ },
+ {
+  "banco": "fattoria",
+  "seme": 2,
+  "via": "b-fermo",
+  "ms": 1413,
+  "finito": true,
+  "pezzi": 16,
+  "pezzoLento": 153,
+  "strutture": 3738,
+  "salti": {
+   "bordi": 1,
+   "dentro": 0,
+   "coppie": [
+    41,
+    50
+   ]
+  },
+  "continui": {
+   "sentieri": [
+    2,
+    2
+   ],
+   "traverse dei recinti": [
+    105,
+    105
+   ]
+  }
+ },
+ {
+  "banco": "fattoria",
+  "seme": 3,
+  "via": "intera",
+  "ms": 1282,
+  "finito": true,
+  "strutture": 0,
+  "salti": {
+   "bordi": 0,
+   "dentro": 0,
+   "coppie": [
+    110,
+    60
+   ]
+  },
+  "continui": {
+   "sentieri": [
+    1,
+    1
+   ],
+   "traverse dei recinti": [
+    199,
+    199
+   ]
+  }
+ },
+ {
+  "banco": "fattoria",
+  "seme": 3,
+  "via": "a",
+  "ms": 1765,
+  "finito": true,
+  "pezzi": 16,
+  "pezzoLento": 235,
+  "strutture": 0,
+  "salti": {
+   "bordi": 0,
+   "dentro": 0,
+   "coppie": [
+    110,
+    60
+   ]
+  },
+  "continui": {
+   "sentieri": [
+    1,
+    1
+   ],
+   "traverse dei recinti": [
+    199,
+    199
+   ]
+  }
+ },
+ {
+  "banco": "fattoria",
+  "seme": 3,
+  "via": "a-fermo",
+  "ms": 1410,
+  "finito": true,
+  "pezzi": 16,
+  "pezzoLento": 166,
+  "strutture": 9960,
+  "salti": {
+   "bordi": 0,
+   "dentro": 0,
+   "coppie": [
+    110,
+    60
+   ]
+  },
+  "continui": {
+   "sentieri": [
+    1,
+    1
+   ],
+   "traverse dei recinti": [
+    199,
+    199
+   ]
+  }
+ },
+ {
+  "banco": "fattoria",
+  "seme": 3,
+  "via": "b",
+  "ms": 1537,
+  "finito": true,
+  "pezzi": 16,
+  "pezzoLento": 230,
+  "strutture": 0,
+  "salti": {
+   "bordi": 0,
+   "dentro": 0,
+   "coppie": [
+    110,
+    60
+   ]
+  },
+  "continui": {
+   "sentieri": [
+    1,
+    1
+   ],
+   "traverse dei recinti": [
+    199,
+    199
+   ]
+  }
+ },
+ {
+  "banco": "fattoria",
+  "seme": 3,
+  "via": "b-fermo",
+  "ms": 1467,
+  "finito": true,
+  "pezzi": 16,
+  "pezzoLento": 159,
+  "strutture": 9357,
+  "salti": {
+   "bordi": 0,
+   "dentro": 0,
+   "coppie": [
+    110,
+    60
+   ]
+  },
+  "continui": {
+   "sentieri": [
+    1,
+    1
+   ],
+   "traverse dei recinti": [
+    199,
+    199
+   ]
+  }
+ },
+ {
+  "banco": "fattoria",
+  "seme": 4,
+  "via": "intera",
+  "ms": 1254,
+  "finito": true,
+  "strutture": 0,
+  "salti": {
+   "bordi": 0,
+   "dentro": 0,
+   "coppie": [
+    140,
+    70
+   ]
+  },
+  "continui": {
+   "sentieri": [
+    2,
+    2
+   ],
+   "traverse dei recinti": [
+    251,
+    251
+   ]
+  }
+ },
+ {
+  "banco": "fattoria",
+  "seme": 4,
+  "via": "a",
+  "ms": 1692,
+  "finito": true,
+  "pezzi": 16,
+  "pezzoLento": 259,
+  "strutture": 0,
+  "salti": {
+   "bordi": 0,
+   "dentro": 0,
+   "coppie": [
+    140,
+    70
+   ]
+  },
+  "continui": {
+   "sentieri": [
+    2,
+    2
+   ],
+   "traverse dei recinti": [
+    251,
+    251
+   ]
+  }
+ },
+ {
+  "banco": "fattoria",
+  "seme": 4,
+  "via": "a-fermo",
+  "ms": 1421,
+  "finito": true,
+  "pezzi": 16,
+  "pezzoLento": 179,
+  "strutture": 10520,
+  "salti": {
+   "bordi": 0,
+   "dentro": 0,
+   "coppie": [
+    140,
+    70
+   ]
+  },
+  "continui": {
+   "sentieri": [
+    2,
+    2
+   ],
+   "traverse dei recinti": [
+    251,
+    251
+   ]
+  }
+ },
+ {
+  "banco": "fattoria",
+  "seme": 4,
+  "via": "b",
+  "ms": 1520,
+  "finito": true,
+  "pezzi": 16,
+  "pezzoLento": 209,
+  "strutture": 0,
+  "salti": {
+   "bordi": 0,
+   "dentro": 0,
+   "coppie": [
+    140,
+    70
+   ]
+  },
+  "continui": {
+   "sentieri": [
+    2,
+    2
+   ],
+   "traverse dei recinti": [
+    251,
+    251
+   ]
+  }
+ },
+ {
+  "banco": "fattoria",
+  "seme": 4,
+  "via": "b-fermo",
+  "ms": 1388,
+  "finito": true,
+  "pezzi": 16,
+  "pezzoLento": 184,
+  "strutture": 9905,
+  "salti": {
+   "bordi": 1,
+   "dentro": 0,
+   "coppie": [
+    141,
+    70
+   ]
+  },
+  "continui": {
+   "sentieri": [
+    2,
+    2
+   ],
+   "traverse dei recinti": [
+    251,
+    251
+   ]
+  }
+ }
+]
