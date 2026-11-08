@@ -491,7 +491,7 @@ export const TAG_SCHEMAS: Record<string, TagAttrDef[]> = {
     { name: 'values', default: 'BW', description: 'Simboli considerati' },
     { name: 'comment', default: '', description: 'Descrizione opzionale' },
   ],
-  // The grid in pieces (T339, ADR-0177).
+  // The grid in pieces (T339, ADR-0178).
   pieces: [
     { name: 'piece', default: '128', description: 'Il lato di un pezzo in celle (x, o x y): i nodi dentro girano un pezzo alla volta' },
     { name: 'margin', default: '8', description: 'Le celle attorno al pezzo che le sue regole guardano (quanto guarda la regola più lontana)' },

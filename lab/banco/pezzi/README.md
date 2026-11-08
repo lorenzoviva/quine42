@@ -3,7 +3,7 @@
 L'autore (07/11): le misure massime dei modelli sono limitate perché MarkovJunior lavora sull'intera griglia, una fattoria di 50 × 50
 caselle con il pascolo non entra, e una prova di prima con due griglie di misure diverse è fallita perché i pezzi quasi mai combaciavano.
 Qui: dove sta il tetto oggi, misurato; perché la prova di prima non combaciava; le due vie provate con le misure; la via scelta, nel
-motore e nella cache delle forme (ADR-0177). Si rifà tutto offline:
+motore e nella cache delle forme (ADR-0178). Si rifà tutto offline:
 
 ```bash
 npx vite-node lab/scripts/misura-tetto.ts -- --lati 120,240,360,480 --z 96 --json lab/banco/pezzi/misure/tetto.json   # il tetto

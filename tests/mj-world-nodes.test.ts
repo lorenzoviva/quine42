@@ -42,7 +42,7 @@ describe('i tetti del mondo (WORLD_NODE_LIMITS)', () => {
     expect(worldNodeErrors(chain(' steps="5" n="2"'))).toEqual([]);
   });
 
-  it('ciò che sta dentro pieces conta come il resto (T339, ADR-0177)', () => {
+  it('ciò che sta dentro pieces conta come il resto (T339, ADR-0178)', () => {
     const chain = (attrs: string) =>
       compileMjx(`<sequence values="BAD" size="8 8 1"><pieces piece="4" margin="2"><convchain sample="c" on="B" black="D" white="A"${attrs}/></pieces></sequence>`, { files: { 'c.txt': 'AD/DA' } });
     expect(worldNodeErrors(chain('')).join()).toMatch(/convchain nel mondo vuole steps/);

@@ -148,7 +148,7 @@ export interface ConvChainNode {
 }
 
 /**
- * The grid in pieces (T339, ADR-0177; MarkovJunior has no such node): its nodes run on one piece of the grid at a time, full height, with
+ * The grid in pieces (T339, ADR-0178; MarkovJunior has no such node): its nodes run on one piece of the grid at a time, full height, with
  * the cells around it it may read (`margin`), each piece in its own time. What is decided once for the whole model goes before (a plan
  * mapped up): of what a piece writes only its own cells reach the grid, so a piece of a large grid costs what a small grid costs.
  */
@@ -228,14 +228,14 @@ export interface GridLimits {
   side: number;
   cells: number;
   /**
-   * What a program with `<pieces>` may do (T339, ADR-0177), if who runs it allows it: a larger grid, and the pieces' time apart from the
+   * What a program with `<pieces>` may do (T339, ADR-0178), if who runs it allows it: a larger grid, and the pieces' time apart from the
    * run's. Without it a program with pieces runs within `side` and `cells`, and its pieces count in the run's time like any other node.
    */
   pieces?: PieceLimits;
 }
 export const MODEL_LIMITS: GridLimits = { side: MAX_SIDE, cells: MAX_CELLS };
 
-/** The ceilings of a program that runs its detail in pieces (T339, ADR-0177): its grids, each piece's time, all of them, how many. */
+/** The ceilings of a program that runs its detail in pieces (T339, ADR-0178): its grids, each piece's time, all of them, how many. */
 export interface PieceLimits {
   /** The largest grid of a program with pieces: its box, a map's or a wfc's grid. */
   side: number;
@@ -1871,7 +1871,7 @@ let pieceReports: PieceReport[] = [];
 let piecesSteps = 0;
 
 /**
- * `<pieces>` (T339, ADR-0177): the grid cut into pieces of `size` cells, full height, in rows from the back. Each piece runs the node's
+ * `<pieces>` (T339, ADR-0178): the grid cut into pieces of `size` cells, full height, in rows from the back. Each piece runs the node's
  * children alone, from the start, on a window of its own cells and `margin` more on every side: its own random generator (from one draw
  * of the run's), its own time, its own census and matches, so a piece of a large grid costs what a small grid costs. Of the window only
  * the piece's own cells go back to the grid. A rule never matches where it would change a frozen cell, and `write` never changes one;

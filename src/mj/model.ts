@@ -40,7 +40,7 @@
 //   <map scale="5/3 5/3 6/3">               a fraction: the new grid is M·N/D cells, the rules write at x·N/D
 //   folder="F" on the root, a map or a wfc  the rule files of that grid are models/F-<name>.txt (MarkovJunior's folders)
 // A union belongs to its grid (the root, a map, a wfc), as in MarkovJunior: the same symbol may mean other letters in another grid.
-// The grid in pieces (T339, ADR-0177), not in MarkovJunior:
+// The grid in pieces (T339, ADR-0178), not in MarkovJunior:
 //   <pieces piece="130" margin="28" time="4000">…nodes…</pieces>  the nodes run on one piece of the grid at a time (piece × piece
 //                                           cells, full height), each on a window with the margin around it; what the model decides
 //                                           once goes before, on a plan a map brings to the voxels. No map, wfc, shape, observe,
@@ -750,7 +750,7 @@ class Compiler {
   }
 
   /**
-   * `<pieces piece="x y" margin time halo edge>` (T339, ADR-0177): its nodes run on one piece of the grid at a time, with the margin around
+   * `<pieces piece="x y" margin time halo edge>` (T339, ADR-0178): its nodes run on one piece of the grid at a time, with the margin around
    * it they may read. The grid stays the one in scope: the same letters, the same unions. `piece` is not `size`: a program's `size` is its box.
    */
   pieces(el: XmlElement, ctx: Ctx, sym: Sym): Node3 {
