@@ -6,6 +6,15 @@
     { "universo": "neapolis", "ambientazione": "moderno", "tettoSettimana": 25 },
     { "universo": "sidera", "ambientazione": "futuristico", "tettoSettimana": 25 }
   ],
+  "generatore": {
+    "acceso": true,
+    "provider": "claude",
+    "minimo": 10,
+    "sessioneMinima": 30,
+    "sessioneArresto": 15,
+    "comando": ["npm", "run", "genera", "--", "{universo}", "--tema", "{ambientazione}", "--partita", "{partita}", "--tetto", "{tetto}"],
+    "coda": ["npm", "run", "abbonamento"]
+  },
   "abbonamenti": {
     "claude": "max5x",
     "google": "pro"

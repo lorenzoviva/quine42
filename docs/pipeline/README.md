@@ -93,6 +93,7 @@ node tools/pipeline/pipeline.mjs stato                  # rigenera PIANO.md e st
 node tools/pipeline/pipeline.mjs budget claude 40       # il residuo attuale (%) del limite settimanale
 node tools/pipeline/pipeline.mjs sospendi claude [fino a <data>] # non dà nuovi task a Claude fino a revoca o scadenza (T96)
 node tools/pipeline/pipeline.mjs riattiva claude         # riattiva l'assegnazione di nuovi task a Claude
+node tools/pipeline/pipeline.mjs generatore [spegni|accendi] # la generazione differita sui crediti che avanzano (T88): cosa genera, quanto ha speso
 node tools/pipeline/pipeline.mjs esegui [--sempre] [--max 5] [--solo claude|gemini|argon] [--task T43b]
 node tools/pipeline/pipeline.mjs worktree               # i worktree, cosa resta in ciascuno
 node tools/pipeline/pipeline.mjs traccia T43b           # la conversazione dell'agente (id, file, come riprenderla), consumo, ultime azioni, riepilogo
@@ -147,6 +148,13 @@ muore, al riavvio `esegui` segue i task ancora vivi e riprende la conversazione 
   Sotto `sogliaUnSolo` (10 %, settimana o 5 ore) nessun task nuovo e al più uno in corso, nessuno su
   quello dell'orchestratore. Un task a **priorità 0** (le urgenze dell'autore) può usare uno slot in più, mai oltre il tetto.
   `stato` (e `PIANO.md`, l'interfaccia web) mostra per provider tetto, slot, sospensione, task in programma, esaurimento previsto e reset;
+- **il generatore sui crediti che avanzano** (ADR-0177, T88): se a slot pieni Claude arriverebbe al reset settimanale con almeno
+  `generatore.minimo` % avanzato (il ritmo degli ultimi giorni × `tetto / slot`), la finestra delle 5 ore è sopra `sessioneMinima`, c'è un posto
+  sotto il tetto della CLI e nessun task pronto lo vuole, `esegui` lancia `npm run genera` (T207) sul prossimo universo di `generazione`, con
+  `--tetto` = `min(tettoSettimana, speso + avanzo − riserva)` (e `npm run abbonamento` se nessuno serve la coda). Occupa uno dei posti del tetto,
+  che non cambia, e lo cede subito a un task pronto della stessa CLI: lo uccide, il passo in corso non si scrive, quelli prima restano, e riparte
+  quando il posto torna libero. Si ferma anche sotto `sessioneArresto` % di finestra, con l'autore (`generatore spegni`) e con `ferma`. Tetto
+  dell'universo raggiunto → il prossimo; `finito` → non ci torna; `errore` → riprova dopo 6 ore. Stato in `.pipeline/generatore.json`, `stato` lo dice;
 - **nessun ripiego** (ADR-0119): un task gira solo sul suo provider; se quello non ha slot o crediti, aspetta. Il ripiego automatico mandava task complessi su modelli meno capaci. Solo l'orchestratore o l'autore lo spostano, con `assegna`;
 - **turni delle operazioni pesanti** (ADR-0088): in tutta la pipeline al più **una verifica nel browser**, **una suite intera** di vitest,
   **un typecheck** e **una build** alla volta; chi le vuole fare le lancia con `node tools/pipeline/pipeline.mjs turno browser|test|typecheck|build -- <comando>`, che aspetta il turno

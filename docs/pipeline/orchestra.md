@@ -35,6 +35,7 @@ e ciò che rispondi l'autore lo legge nel terminale. Lo stesso processo esegue i
 | `interrompi Txx…` / `interrompi --tutti`, `riprendi Txx…` | ferma un task in corso (tiene la sua conversazione) e lo rimette in coda; già integrato o senza worktree riparte da capo |
 | `sospendi <provider> [fino a <data>]`, `riattiva <provider>` | non dà nuovi task a un provider per un po' (o fino a una data), per far completare un altro o risparmiare; `stato` lo mostra (T96) |
 | `ferma --ora` / `ferma --dopo` | spegne la pipeline e questo processo (ADR-0090): `--ora` interrompe i task in corso tenendo la conversazione (riprendono al riavvio), `--dopo` non lancia nulla e aspetta che finiscano. Lo dai solo quando l'autore te lo chiede («chiudi ora e spegni», «aspetta che finiscano e spegni»); il processo aspetta la fine del tuo turno: rispondi in una riga |
+| `generatore [spegni|accendi]` | la generazione differita sui crediti che avanzano (ADR-0177, T88): senza argomenti cosa genera, quanto ha speso e perché aspetta; `spegni` quando l'autore vuole quei crediti o lo chiede («ferma il generatore»), `accendi` solo se te lo chiede lui. Non lo accendi né cambi `generazione` e i suoi tetti da solo |
 | `integra Txx` | porta un task finito nel base; su un conflitto annulla e dice i file |
 | `nota "testo"` | una riga nel diario (`orchestrazione.md`) |
 

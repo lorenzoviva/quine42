@@ -8,6 +8,7 @@ import { EventEmitter } from 'node:events';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { Generator, generatorConf, setGeneratorSwitch } from './generatore.mjs';
 
 const HERE = path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1'));
 export const REPO = path.resolve(HERE, '..', '..');
@@ -28,6 +29,11 @@ const ORCHESTRATOR = path.join(STATE_DIR, 'orchestratore.json');
 export const STOP = path.join(STATE_DIR, 'arresto.json');
 export const SHUTDOWN = path.join(STATE_DIR, 'spegnimento.json');
 const PROCESS = path.join(STATE_DIR, 'processo.json');
+// The generator of the leftover credits (T88, ADR-0177): its state, and the author's switch, a file of its own.
+export const GENERATOR_STATE = path.join(STATE_DIR, 'generatore.json');
+export const GENERATOR_SWITCH = path.join(STATE_DIR, 'generatore-spento.json');
+/** The generator of this pipeline (`opts` for the tests: another spawn, kill, liveness). */
+export const generatorOf = (opts = {}) => new Generator({ config: CONFIG, stateFile: GENERATOR_STATE, switchFile: GENERATOR_SWITCH, repo: REPO, logs: LOGS, kill: killTree, isAlive: alive, say, ...opts });
 const RESUME = 'Ti sei fermato in questo punto, riprendi.';
 
 export const readJson = (file, fallback) => { try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return fallback; } };
@@ -857,8 +863,10 @@ export function readOutput(text) {
   };
 }
 
-export async function execute({ max = CONFIG.maxParalleli, only, task, always = false } = {}) {
+export async function execute({ max = CONFIG.maxParalleli, only, task, always = false, generator = generatorOf() } = {}) {
   const runs = readJson(RUNS, {});
+  // Not with `--task` or `--solo`: those run what they name.
+  const gen = task || only ? undefined : generator;
   const active = new Map(); // id → promise
   let waitingUntil = 0;
   let lastLaunch = 0; // the last new task: they are spaced (holdBack)
@@ -916,6 +924,11 @@ export async function execute({ max = CONFIG.maxParalleli, only, task, always = 
         .map((r) => ({ ...tasks.find((t) => t.id === r.id), id: r.id, provider: r.provider, estimate: r.stima, ...(r.sforzo ? { sforzo: r.sforzo } : {}) })),
       ...queues.pronti.filter((t) => (!runs[t.id] || startsOver(runs[t.id], t)) && (!task || t.id === task)),
     ];
+    if (gen) {
+      // The generator holds a place under the ceiling of its CLI and gives it back to any ready task that would start without it.
+      const live = [...active.keys()].map((id) => runs[id]);
+      gen.tick({ budget, ...generatorPlace(candidates, { budget, live, orch, runs, lastLaunch, max }), stopping: Boolean(stop) });
+    }
     for (const t of stop ? [] : candidates) {
       if (active.size >= max) break;
       // A task runs only on its provider: if that one cannot take it, it waits (ADR-0119).
@@ -950,7 +963,7 @@ export async function execute({ max = CONFIG.maxParalleli, only, task, always = 
     }
     if (!active.size) {
       const waiting = Object.values(runs).filter((r) => r.stato === 'sospeso');
-      if (!waiting.length && !always) { fs.rmSync(PROCESS, { force: true }); console.log('Niente da lanciare: fine.'); return; }
+      if (!waiting.length && !always && !gen?.running()) { fs.rmSync(PROCESS, { force: true }); console.log('Niente da lanciare: fine.'); return; }
       if (waiting.length) {
         const next = Math.min(...waiting.map((r) => new Date(r.fermoFino).getTime()));
         // Once per wait, and only on the console: the diary is for events.
@@ -962,6 +975,21 @@ export async function execute({ max = CONFIG.maxParalleli, only, task, always = 
     const size = active.size;
     for (let i = 0; i < CONFIG.controlloSecondi && active.size === size && (stop || !fs.existsSync(STOP)); i++) await new Promise((r) => setTimeout(r, 1000));
   }
+}
+
+/**
+ * The generator's place among the tasks (T88): how many tasks run on its CLI, the ceiling of that CLI, and whether a ready
+ * (or resumable) task of that CLI would start now if the generator gave its place back.
+ */
+export function generatorPlace(candidates, { budget, live = [], orch, runs = {}, lastLaunch = 0, max = Infinity, config = CONFIG, nowMs = Date.now() }) {
+  const cmd = config.providers?.[generatorConf(config).provider]?.cmd;
+  const mine = live.filter((r) => config.providers?.[r.provider]?.cmd === cmd);
+  const wanting = Boolean(cmd) && candidates.some((t) => {
+    if (config.providers?.[t.provider]?.cmd !== cmd || !allowedProviders(t, config).includes(t.provider)) return false;
+    const resuming = Boolean(runs[t.id]) && !startsOver(runs[t.id], t);
+    return fitsOn(t.provider, t, { budget, live, orch, resuming, config, nowMs }) && !holdBack(t, live, { resuming, lastLaunch, nowMs, minutes: config.intervalloLanciMinuti ?? 0 });
+  });
+  return { live: mine.length, ceiling: config.limiti?.provider?.[cmd] ?? max, wanting };
 }
 
 /** Copies an interruption from the runs on disk into a run this process holds (`stato`, when, why). */
@@ -1040,7 +1068,8 @@ export function requestStop(modo, { chi, ...opts } = {}) {
   const owner = readJson(path.join(p.stateDir, 'processo.json'), undefined);
   const running = owner?.pid && owner.pid !== process.pid && !alive(owner.pid) ? undefined : owner?.pid;
   if (!running) {
-    // Nobody to obey it: the shutdown is already done.
+    // Nobody to obey it: the shutdown is already done (a generation it left running stops too).
+    if (!opts.repo && !opts.stateDir) generatorOf().stop(`ferma --${modo}`, readJson(p.budget, {}));
     writeJson(p.shutdown, shutdownRecord(readJson(p.runs, {}), stop));
     fs.rmSync(p.stop, { force: true });
   }
@@ -1272,6 +1301,7 @@ function status() {
   for (const b of Object.values(budget)) for (const c of b.contatori ?? []) others.delete(`${c.nome} (${c.finestra})`);
   if (others.size) console.log(`non usati dalla pipeline:${[...others].map(([k, c]) => `\n  ${k}: ${c.residuo} %, reset ${c.reset}`).join('')}`);
   for (const [kind, h] of Object.entries(turnsOf())) console.log(`turno ${kind}: ${h.chi ? `${h.chi} (${h.comando}, dal ${h.dal})` : 'libero'}${h.attesa ? `, ${h.attesa} in attesa` : ''}`);
+  for (const line of generatorOf().describe(budget)) console.log(line);
   console.log('Piano in docs/pipeline/PIANO.md');
 }
 
@@ -2070,6 +2100,13 @@ if (process.argv[1]?.endsWith('pipeline.mjs')) {
     }
   }
   else if (cmd === 'uso') { refreshUsage(); status(); }
+  else if (cmd === 'generatore') {
+    if (rest[0] === 'spegni' || rest[0] === 'accendi') {
+      setGeneratorSwitch(GENERATOR_SWITCH, rest[0] === 'spegni', flag('chi'));
+      say(`generatore: ${rest[0] === 'spegni' ? 'spento (la pipeline lo ferma al prossimo controllo, il lavoro fatto resta)' : 'acceso'}${flag('chi') ? `, ${flag('chi')}` : ''}`);
+    } else if (rest[0]) console.log('Uso: generatore [spegni|accendi]');
+    for (const line of generatorOf().describe(loadBudget({ read: false }))) console.log(line);
+  }
   else if (cmd === 'budget') {
     const b = loadBudget();
     const prov = rest[0];
@@ -2148,6 +2185,7 @@ if (process.argv[1]?.endsWith('pipeline.mjs')) {
   approva <Txx…> | assegna <Txx> <provider> <stima %> [priorità] [--sforzo low|medium|high|extra|xhigh|max] [--approva]
   step <n> [Txx…] | step <n> --priorita <p> | step --da-tabella   i task di uno step, il tag, la priorità di quelli non finiti (ADR-0128)
   interrompi <Txx…|--tutti> | riprendi <Txx…> | integra <Txx>
+  generatore [spegni|accendi]                               la generazione differita sui crediti che avanzano (T88): cosa genera, quanto ha speso
   ferma --ora | --dopo                                      spegne la pipeline: interrompe i task (riprendono al riavvio) o aspetta che finiscano
   budget <provider> <residuo %> | sospendi <provider> [fino a <data>] | riattiva <provider>
   orchestratore [provider] | nota <testo>
