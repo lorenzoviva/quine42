@@ -55,6 +55,29 @@ export const BERSAGLI: Bersaglio[] = [
     descrizione: 'Tre tetti sporgenti uno sopra l’altro con le punte rialzate, ballatoi attorno a ogni piano, pannelli di carta illuminati, una sala al piano terra divisa da pareti scorrevoli, una scala interna, lanterne appese.',
     classe: 'structure',
   },
+  // T337: the buildings the author found «all the same» (07/11): the fort is `rocca`, the temple `tempio`.
+  {
+    id: 'castello',
+    nome: 'Castello del signore',
+    stile: 'castello medievale: pietra chiara, tetti conici d’ardesia, stendardi',
+    descrizione: 'Un mastio alto con la sala grande e le stanze del signore, torri rotonde o quadrate con i tetti a cono, una cinta più bassa con il portone, un cortile d’onore, una cappella addossata alle mura, finestre a bifora sul mastio. Più alto e più elegante di un forte, con la sagoma che si vede da lontano.',
+    classe: 'structure',
+    taglia: 'huge',
+  },
+  {
+    id: 'palazzina',
+    nome: 'Palazzina di città',
+    stile: 'Novecento: intonaco color sabbia, cornici bianche, persiane verdi, balconi in ferro',
+    descrizione: 'Tre piani con il tetto piano e il parapetto, il portone al centro con la pensilina, l’atrio e la scala, due appartamenti per piano, balconi sul davanti, finestre regolari sui quattro lati, un piccolo cortile sul retro.',
+    classe: 'structure',
+  },
+  {
+    id: 'villetta',
+    nome: 'Villetta con giardino',
+    stile: 'casa di campagna: intonaco bianco, tetto a falde di coppi rossi, legno',
+    descrizione: 'Un corpo a due piani e un’ala bassa, tetti a falde, un portico sul davanti, soggiorno e cucina al piano terra, camere sopra, un comignolo, un giardino con un vialetto e una siepe.',
+    classe: 'structure',
+  },
 ];
 
 export const bersaglio = (id: string) => BERSAGLI.find((b) => b.id === id);

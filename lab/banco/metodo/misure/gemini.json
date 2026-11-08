@@ -1,0 +1,215 @@
+{
+ "nome": "gemini",
+ "semi": 5,
+ "taglia": "large",
+ "traSemi": [
+  {
+   "nome": "steampunk/1/seconda",
+   "concetto": "steampunk",
+   "quote": {
+    "impronta": 0.5461019157885808,
+    "profilo": 0.3626521723095121,
+    "pieni": 0.10950609942035422,
+    "distanza": 0.32647433069090226
+   },
+   "colore": 0.1784691064627183,
+   "voxel": 0.663782376679568
+  },
+  {
+   "nome": "futuristica/1",
+   "concetto": "futuristica",
+   "quote": {
+    "impronta": 0.5449978384757274,
+    "profilo": 0.37587911461969187,
+    "pieni": 0.14936834924705011,
+    "distanza": 0.33252783422922383
+   },
+   "colore": 0.16742927084879944,
+   "voxel": 0.6888093165831566
+  },
+  {
+   "nome": "rocca/1/seconda",
+   "concetto": "rocca",
+   "quote": {
+    "impronta": 0.5420082030693357,
+    "profilo": 0.38217129979648456,
+    "pieni": 0.15876368082679804,
+    "distanza": 0.33965977205800496
+   },
+   "colore": 0.14176038472562688,
+   "voxel": 0.7626938487372356
+  },
+  {
+   "nome": "pagoda/1/seconda",
+   "concetto": "pagoda",
+   "quote": {
+    "impronta": 0.5195126836762447,
+    "profilo": 0.3483180953510576,
+    "pieni": 0.16070013901248548,
+    "distanza": 0.3187638570295515
+   },
+   "colore": 0.1528877335984658,
+   "voxel": 0.6820544784972605
+  }
+ ],
+ "dentro": {
+  "impronta": 0.5386548038721952,
+  "profilo": 0.37166282564583797,
+  "pieni": 0.14950502150449685,
+  "distanza": 0.32647433069090226
+ },
+ "fra": {
+  "impronta": 0.5246968696800194,
+  "profilo": 0.35331721988085274,
+  "pieni": 0.2673790791128644,
+  "distanza": 0.3677786526210035
+ },
+ "separazione": {
+  "impronta": 0.9740874227950121,
+  "profilo": 0.9506391156201697,
+  "pieni": 1.7884287525741878,
+  "distanza": 1.1265162925449326
+ },
+ "vicini": 0,
+ "matrice": {
+  "concetti": [
+   "steampunk",
+   "futuristica",
+   "rocca",
+   "pagoda"
+  ],
+  "d": [
+   [
+    0.32647433069090226,
+    0.3129301486345766,
+    0.38587932590256285,
+    0.37222591008487377
+   ],
+   [
+    0.3129301486345766,
+    0.33252783422922383,
+    0.37964863901069995,
+    0.35481615990784743
+   ],
+   [
+    0.38587932590256285,
+    0.37964863901069995,
+    0.33965977205800496,
+    0.39220630060556666
+   ],
+   [
+    0.37222591008487377,
+    0.35481615990784743,
+    0.39220630060556666,
+    0.3187638570295515
+   ]
+  ]
+ },
+ "descrittori": {
+  "steampunk/1/seconda": {
+   "copertura": 0.47890000000000005,
+   "pieno": 0.17682502217943563,
+   "altezzaMedia": 0.6574053704302815,
+   "altezzaMassima": 0.9173333333333333,
+   "cortile": 0,
+   "quote": 4,
+   "torri": 0.2
+  },
+  "futuristica/1": {
+   "copertura": 0.48414,
+   "pieno": 0.18635906352550038,
+   "altezzaMedia": 0.6647765544868467,
+   "altezzaMassima": 0.8853333333333333,
+   "cortile": 0,
+   "quote": 6.4,
+   "torri": 0.2
+  },
+  "rocca/1/seconda": {
+   "copertura": 0.47859999999999997,
+   "pieno": 0.23011806579096392,
+   "altezzaMedia": 0.7042870095801792,
+   "altezzaMassima": 1,
+   "cortile": 0,
+   "quote": 6,
+   "torri": 5
+  },
+  "pagoda/1/seconda": {
+   "copertura": 0.51402,
+   "pieno": 0.19045131481389663,
+   "altezzaMedia": 0.7232961509970373,
+   "altezzaMassima": 0.9493333333333334,
+   "cortile": 0,
+   "quote": 9.4,
+   "torri": 0.2
+  }
+ },
+ "extra": {
+  "moderna/1/seconda": {
+   "errori": [
+    "seme 1: nessun programma: il primo elemento è il nodo radice (sequence, markov, one…) con values",
+    "seme 2: nessun programma: il primo elemento è il nodo radice (sequence, markov, one…) con values",
+    "seme 3: nessun programma: il primo elemento è il nodo radice (sequence, markov, one…) con values",
+    "seme 4: nessun programma: il primo elemento è il nodo radice (sequence, markov, one…) con values",
+    "seme 5: nessun programma: il primo elemento è il nodo radice (sequence, markov, one…) con values"
+   ],
+   "ms": 4,
+   "righe": 0,
+   "copiate": 0,
+   "tenute": 0
+  },
+  "steampunk/1/seconda": {
+   "errori": [],
+   "ms": 2987,
+   "righe": 95,
+   "copiate": 0.6947368421052632,
+   "tenute": 0.7894736842105263
+  },
+  "futuristica/1": {
+   "errori": [],
+   "ms": 2450,
+   "righe": 90,
+   "copiate": 0.8666666666666667,
+   "tenute": 0.9473684210526315
+  },
+  "locanda/1/seconda": {
+   "errori": [
+    "seme 1: nessun programma: il primo elemento è il nodo radice (sequence, markov, one…) con values",
+    "seme 2: nessun programma: il primo elemento è il nodo radice (sequence, markov, one…) con values",
+    "seme 3: nessun programma: il primo elemento è il nodo radice (sequence, markov, one…) con values",
+    "seme 4: nessun programma: il primo elemento è il nodo radice (sequence, markov, one…) con values",
+    "seme 5: nessun programma: il primo elemento è il nodo radice (sequence, markov, one…) con values"
+   ],
+   "ms": 2,
+   "righe": 0,
+   "copiate": 0,
+   "tenute": 0
+  },
+  "tempio/1/seconda": {
+   "errori": [
+    "seme 1: nessun programma: il primo elemento è il nodo radice (sequence, markov, one…) con values",
+    "seme 2: nessun programma: il primo elemento è il nodo radice (sequence, markov, one…) con values",
+    "seme 3: nessun programma: il primo elemento è il nodo radice (sequence, markov, one…) con values",
+    "seme 4: nessun programma: il primo elemento è il nodo radice (sequence, markov, one…) con values",
+    "seme 5: nessun programma: il primo elemento è il nodo radice (sequence, markov, one…) con values"
+   ],
+   "ms": 1,
+   "righe": 0,
+   "copiate": 0,
+   "tenute": 0
+  },
+  "rocca/1/seconda": {
+   "errori": [],
+   "ms": 2459,
+   "righe": 91,
+   "copiate": 0.8021978021978022,
+   "tenute": 0.8552631578947368
+  },
+  "pagoda/1/seconda": {
+   "errori": [],
+   "ms": 2714,
+   "righe": 89,
+   "copiate": 0.7528089887640449,
+   "tenute": 0.8026315789473685
+  }
+ }
+}

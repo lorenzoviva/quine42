@@ -1,0 +1,199 @@
+{
+  "bersaglio": "palazzina",
+  "chiamate": [
+    {
+      "blocco": 1,
+      "input": 5829,
+      "output": 22035,
+      "dollari": 0.44953299999999996,
+      "ms": 241966
+    },
+    {
+      "blocco": 2,
+      "input": 15211,
+      "output": 55736,
+      "dollari": 1.198609,
+      "ms": 585141
+    },
+    {
+      "blocco": 3,
+      "input": 34153,
+      "output": 46070,
+      "dollari": 1.156825,
+      "ms": 484384
+    }
+  ],
+  "totale": {
+    "input": 55193,
+    "output": 123841,
+    "dollari": 2.804967,
+    "ms": 1311491
+  },
+  "caratteriXml": 14594,
+  "passa": false,
+  "difetti": [
+    "large (20 voxel per casella, gradino 4), seme 1 e altri 4: stanze: 0 (serve ≥ 3)",
+    "large (20 voxel per casella, gradino 4), seme 1 e altri 3: salti: 0 (serve ≥ 2)",
+    "large (20 voxel per casella, gradino 4), seme 3 e altri 1: rilievo: 0.12 (serve ≥ 0.12)",
+    "huge (16 voxel per casella, gradino 3), seme 1 e altri 3: stanze: 2 (serve ≥ 3)",
+    "huge (16 voxel per casella, gradino 3), seme 1 e altri 1: rilievo: 0.12 (serve ≥ 0.12)",
+    "varianza a large: perimetro: 0 (serve ≥ 0.15)",
+    "varianza a large: interno: 0.3 (serve ≥ 0.35)",
+    "varianza a huge: pianta: 0.14 (serve ≥ 0.15)",
+    "varianza a huge: perimetro: 0 (serve ≥ 0.15)"
+  ],
+  "voci": [
+    {
+      "id": "finisce",
+      "ok": true,
+      "valore": "79 ms",
+      "richiesto": "entro 8000 ms"
+    },
+    {
+      "id": "valido",
+      "ok": true,
+      "valore": "sì",
+      "richiesto": "i controlli di check.ts"
+    },
+    {
+      "id": "piani",
+      "ok": true,
+      "valore": "2",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "testa",
+      "ok": true,
+      "valore": "1.55 1.65",
+      "richiesto": "≥ 1.5 caselle per piano"
+    },
+    {
+      "id": "stanze",
+      "ok": false,
+      "valore": "0",
+      "richiesto": "≥ 3"
+    },
+    {
+      "id": "murato",
+      "ok": true,
+      "valore": "0",
+      "richiesto": "≤ 0.25"
+    },
+    {
+      "id": "porta",
+      "ok": true,
+      "valore": "x 49, scarto 0.01, alta 1.55, libera",
+      "richiesto": "sul davanti, scarto ≤ 0.33, alta ≥ 1.5"
+    },
+    {
+      "id": "salti",
+      "ok": false,
+      "valore": "0",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "materiali",
+      "ok": true,
+      "valore": "20",
+      "richiesto": "≥ 6"
+    },
+    {
+      "id": "dominante",
+      "ok": true,
+      "valore": "0.4",
+      "richiesto": "≤ 0.6"
+    },
+    {
+      "id": "finestre",
+      "ok": true,
+      "valore": "14 su 4 lati",
+      "richiesto": "≥ 6 su ≥ 3 lati"
+    },
+    {
+      "id": "dettagli",
+      "ok": true,
+      "valore": "128, 0 lati vuoti",
+      "richiesto": "≥ 24, ≤ 1 lati vuoti"
+    },
+    {
+      "id": "rumore",
+      "ok": true,
+      "valore": "0",
+      "richiesto": "≤ 0.7"
+    },
+    {
+      "id": "sagoma",
+      "ok": true,
+      "valore": "4",
+      "richiesto": "≥ 4"
+    },
+    {
+      "id": "rilievo",
+      "ok": true,
+      "valore": "0.22",
+      "richiesto": "≥ 0.12"
+    },
+    {
+      "id": "ingombro",
+      "ok": true,
+      "valore": "1",
+      "richiesto": "≥ 0.3"
+    }
+  ],
+  "misure": {
+    "voxel": 129090,
+    "ms": 79,
+    "finito": true,
+    "piani": [
+      {
+        "z": 1,
+        "quota": 0.05,
+        "area": 3.01,
+        "testa": 1.55,
+        "stanze": 0
+      },
+      {
+        "z": 35,
+        "quota": 1.75,
+        "area": 2.74,
+        "testa": 1.65,
+        "stanze": 0
+      }
+    ],
+    "cantina": 0,
+    "terrazze": 0,
+    "stanze": 0,
+    "murato": 0,
+    "persi": [],
+    "porta": {
+      "x": 49,
+      "y": 83,
+      "scarto": 0.025,
+      "alta": 1.55,
+      "libera": true
+    },
+    "salti": [],
+    "materiali": 20,
+    "dominante": 0.39959718026183283,
+    "finestre": 14,
+    "latiConFinestre": 4,
+    "dettagli": 128,
+    "latiVuoti": 0,
+    "rumore": 0,
+    "rilievo": 0.21925426201112225,
+    "sagoma": 4,
+    "ingombro": 1,
+    "luci": 0,
+    "inutili": [
+      "prl \"[zE]P\" → \"*z\"",
+      "prl \"c/W\" → \"l/*\"",
+      "all \"c/l\" → \"l/*\" — in quel momento nella griglia non c'erano celle \"l\""
+    ],
+    "avvisi": [
+      "tocca i bordi laterali della griglia: forse è tagliato",
+      "tocca il soffitto della griglia: forse è tagliato in alto",
+      "colori mai usati: N z a x c h G v d i j o P w R O D u y l t s e U Y"
+    ],
+    "errori": []
+  }
+}

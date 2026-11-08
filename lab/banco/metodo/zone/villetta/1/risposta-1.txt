@@ -1,0 +1,121 @@
+```xml
+<!--
+VILLETTA CON GIARDINO: a country house.
+PARTS
+  S  hedge on the edge of the lot, broken only by the garden path
+  g  garden (grass) between the hedge and the house
+  x/k/r  main body, two storeys: r floor (living room below, bedrooms above), k walls
+  h/l  low wing, one storey, set against one side of the body: the kitchen. h floor, l walls
+         (no wall of its own on the body side)
+  n  door, 3 cells, in the side wall of the body between body and wing
+  P  porch, 3 cells deep, across the whole front of the body
+  D  front door, 3 wide, in the middle of the front wall on the axis of N
+  v  hall path inside, from the centre to the door
+  p  passage through the porch
+  V  path, straight from the porch through the hedge to the front edge
+  X  chimney on the side wall of the body without the wing
+  J  jumps in the garden: troughs and benches, 2 cells long, away from the path
+ARRANGEMENT
+  The body is centred on N. The porch is in front of it.
+  The path runs straight from the door to the front.
+  The wing grows outward from the left or the right side, starting from a cell
+  in the middle part of that side wall.
+  The garden is all around, inside the hedge.
+WHAT THE SEEDS CHANGE
+  The width of the body (11 or 13) and its depth (7 to 10).
+  The side of the wing, its position along the body, its width (4 to 6) and its depth (7 to 11).
+  Where the chimney stands.
+  Where the jumps are.
+  (later) The heights and the direction of the roof pitches.
+-->
+<sequence values="BNE" symmetry="(xy)" ground="E" origin="bottom">
+  <map scale="1/4 1/4 1/4" values="BNESgzxabckvDnmqhlPpVJXr">
+    <rule in="E" out="E"/><rule in="N" out="N"/>
+
+    <!-- the lot: the edge becomes the hedge, one band of garden, then the building area z -->
+    <prl in="***/*E*/***" out="***/*z*/***"/>
+    <prl in="E" out="S"/>
+    <prl in="Sz" out="*g" steps="1"/>
+
+    <!-- the main body: walkers from N, with their own lengths per direction -->
+    <all in="Nz" out="*a" symmetry="(x)" steps="1"/>
+    <all in="z/N" out="b/*" symmetry="()" steps="1"/>
+    <all in="N/z" out="*/c" symmetry="()" steps="1"/>
+    <all in="[Nx]az" out="*xa" symmetry="(x)" steps="4"/>
+    <prl symmetry="(x)" steps="1"><rule in="xaz" out="*xa" p="0.5"/></prl>
+    <all in="z/b/[Nx]" out="b/x/*" symmetry="()" steps="2"/>
+    <prl symmetry="()" steps="2"><rule in="z/b/x" out="b/x/*" p="0.5"/></prl>
+    <all in="[Nx]/c/z" out="*/x/c" symmetry="()" steps="2"/>
+    <prl symmetry="()" steps="1"><rule in="x/c/z" out="*/x/c" p="0.5"/></prl>
+    <prl><rule in="a" out="x"/><rule in="b" out="x"/><rule in="c" out="x"/></prl>
+    <all in="[Nx]z/*[Nx]" out="*x/**"/>
+
+    <!-- the walls of the body -->
+    <all in="xz" out="k*"/>
+
+    <!-- the door to the wing: in the middle part of a side wall (left or right), 3 wide -->
+    <one in="xkz/xkz/xkz/xkz/xkz" out="***/***/*nm/***/***" symmetry="(x)" steps="1"/>
+    <all in="k/n/k" out="n/n/n" steps="1"/>
+
+    <!-- the low wing: a rectangle grown from m outward and along the side -->
+    <all in="mz" out="*q" steps="1"/>
+    <all in="[mh]qz" out="*hq" steps="2"/>
+    <prl steps="2"><rule in="hqz" out="*hq" p="0.5"/></prl>
+    <prl><rule in="q" out="h"/><rule in="m" out="h"/></prl>
+    <all in="hz/*h" out="*h/**"/>
+
+    <!-- the porch: 3 cells deep along the whole front wall -->
+    <all in="k/z" out="*/P" symmetry="()" steps="1"/>
+    <all in="P/z" out="*/P" symmetry="()" steps="2"/>
+
+    <!-- the walls of the wing, except on the body side -->
+    <all in="h[zgSP]" out="l*"/>
+
+    <!-- the hall path from the centre, the front door, the passage through the porch, the garden path -->
+    <all in="N/x" out="*/v" symmetry="()" steps="1"/>
+    <all in="v/x" out="*/v" symmetry="()"/>
+    <all in="v/k" out="*/D" symmetry="()"/>
+    <all in="kDk" out="DDD" symmetry="()" steps="1"/>
+    <all in="D/P" out="*/p" symmetry="()"/>
+    <all in="p/P" out="*/p" symmetry="()"/>
+    <all in="p/[zg]" out="*/V" symmetry="()"/>
+    <all in="V/[zgS]" out="*/V" symmetry="()"/>
+    <prl in="p" out="P"/>
+
+    <!-- the rest of the lot is garden -->
+    <prl in="z" out="g"/>
+
+    <!-- the chimney on a free side wall -->
+    <one in="xkg" out="*Xg" symmetry="(x)" steps="1"/>
+
+    <!-- jumps: 3 troughs or benches in open garden, away from the path and the porch -->
+    <one in="ggggg/ggggg/ggggg" out="*****/*JJ**/*****" steps="3"/>
+
+    <!-- the floor of the body -->
+    <prl in="x" out="r"/>
+  </map>
+  <color symbol="E" value="8A7A5A" name="terra"/>
+  <color symbol="N" value="FF00FF" name="origine"/>
+  <color symbol="S" value="2F5D2A" name="siepe"/>
+  <color symbol="g" value="7FB65A" name="prato del giardino"/>
+  <color symbol="z" value="C9C08A" name="lotto"/>
+  <color symbol="x" value="E0D6C0" name="corpo"/>
+  <color symbol="a" value="FF0000" name="cammino a"/>
+  <color symbol="b" value="FF8800" name="cammino b"/>
+  <color symbol="c" value="FFFF00" name="cammino c"/>
+  <color symbol="k" value="F4F1EA" name="muro intonacato"/>
+  <color symbol="r" value="B88A5A" name="pavimento in cotto"/>
+  <color symbol="v" value="D9A066" name="ingresso"/>
+  <color symbol="D" value="6B3E1F" name="porta d'ingresso"/>
+  <color symbol="n" value="8B5A2B" name="porta interna"/>
+  <color symbol="m" value="00FFFF" name="seme dell'ala"/>
+  <color symbol="q" value="0088FF" name="cammino dell'ala"/>
+  <color symbol="h" value="C79A6B" name="pavimento cucina"/>
+  <color symbol="l" value="EDE6D6" name="muro dell'ala"/>
+  <color symbol="P" value="A0703C" name="portico in legno"/>
+  <color symbol="p" value="905F30" name="passaggio portico"/>
+  <color symbol="V" value="BFB3A0" name="vialetto di ghiaia"/>
+  <color symbol="J" value="7A6E66" name="vasca e panca"/>
+  <color symbol="X" value="9E4A30" name="comignolo"/>
+</sequence>
+```

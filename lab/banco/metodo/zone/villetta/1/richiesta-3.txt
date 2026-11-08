@@ -1,0 +1,769 @@
+Edificio: Villetta con giardino
+Stile: casa di campagna: intonaco bianco, tetto a falde di coppi rossi, legno
+Com'è: Un corpo a due piani e un’ala bassa, tetti a falde, un portico sul davanti, soggiorno e cucina al piano terra, camere sopra, un comignolo, un giardino con un vialetto e una siepe.
+Scatola: 100 × 100 × 80 voxel; una casella è 20 voxel.
+Corpo: gradino 4 voxel, passaggio largo almeno 11, persona alta 30; salto: sale al più 21, va da 20 a 52 voxel di distanza.
+Il suolo è in fondo alla scatola.
+
+## Your program so far
+```xml
+<!--
+VILLETTA CON GIARDINO: a country house.
+PARTS
+  S  hedge on the edge of the lot, broken only by the garden path
+  g  garden (grass) between the hedge and the house
+  x/k/r  main body, two storeys: r floor (living room below, bedrooms above), k walls
+  h/l  low wing, one storey, set against one side of the body: the kitchen. h floor, l walls
+         (no wall of its own on the body side)
+  n  door, 3 cells, in the side wall of the body between body and wing
+  P  porch, 3 cells deep, across the whole front of the body; o its wooden posts
+  D  front door, 3 wide, in the middle of the front wall on the axis of N
+  v  hall path inside, from the centre to the door
+  p  passage through the porch
+  V  path, straight from the porch through the hedge to the front edge
+  i/j  stair strip against a wall of the body, open above (u)
+  X  chimney on a free side wall of the body
+  J  jumps in the garden: stone troughs with water, 2 cells long, away from the path
+  M/y  window candidates and windows, one row per storey
+ARRANGEMENT
+  The body is centred on N. The porch is in front of it.
+  The path runs straight from the door to the front.
+  The wing grows outward from the left or the right side, starting from a cell
+  in the middle part of that side wall.
+  The garden is all around, inside the hedge.
+WHAT THE SEEDS CHANGE
+  The width of the body (11 or 13) and its depth.
+  The side of the wing, its position along the body, its width and its depth.
+  The wall of the stair, where the chimney stands, where the jumps are.
+-->
+<sequence values="BNE" symmetry="(xy)" ground="E" origin="bottom">
+  <map scale="1/4 1/4 1/4" values="BNESgzxabckvDnmqhlPpVJXrofRFCHTIMyuij">
+    <rule in="E" out="E"/><rule in="N" out="N"/>
+
+    <!-- ===== A. COMPOSITION ===== -->
+    <prl in="***/*E*/***" out="***/*z*/***"/>
+    <prl in="E" out="S"/>
+    <prl in="Sz" out="*g" steps="1"/>
+
+    <all in="Nz" out="*a" symmetry="(x)" steps="1"/>
+    <all in="z/N" out="b/*" symmetry="()" steps="1"/>
+    <all in="N/z" out="*/c" symmetry="()" steps="1"/>
+    <all in="[Nx]az" out="*xa" symmetry="(x)" steps="4"/>
+    <prl symmetry="(x)" steps="1"><rule in="xaz" out="*xa" p="0.5"/></prl>
+    <all in="z/b/[Nx]" out="b/x/*" symmetry="()" steps="3"/>
+    <prl symmetry="()" steps="2"><rule in="z/b/x" out="b/x/*" p="0.5"/></prl>
+    <all in="[Nx]/c/z" out="*/x/c" symmetry="()" steps="2"/>
+    <prl symmetry="()" steps="1"><rule in="x/c/z" out="*/x/c" p="0.5"/></prl>
+    <prl><rule in="a" out="x"/><rule in="b" out="x"/><rule in="c" out="x"/></prl>
+    <all in="[Nx]z/*[Nx]" out="*x/**"/>
+
+    <all in="xz" out="k*"/>
+
+    <one in="xkz/xkz/xkz/xkz/xkz" out="***/***/*nm/***/***" symmetry="(x)" steps="1"/>
+    <all in="k/n/k" out="n/n/n" steps="1"/>
+
+    <all in="mz" out="*q" steps="1"/>
+    <all in="[mh]qz" out="*hq" steps="2"/>
+    <prl steps="2"><rule in="hqz" out="*hq" p="0.5"/></prl>
+    <prl><rule in="q" out="h"/><rule in="m" out="h"/></prl>
+    <all in="hz/*h" out="*h/**"/>
+
+    <all in="k/z" out="*/P" symmetry="()" steps="1"/>
+    <all in="P/z" out="*/P" symmetry="()" steps="2"/>
+
+    <all in="h[zgSP]" out="l*"/>
+
+    <all in="N/x" out="*/v" symmetry="()" steps="1"/>
+    <all in="v/x" out="*/v" symmetry="()"/>
+    <all in="v/k" out="*/D" symmetry="()"/>
+    <all in="kDk" out="DDD" symmetry="()" steps="1"/>
+    <all in="D/P" out="*/p" symmetry="()"/>
+    <all in="p/P" out="*/p" symmetry="()"/>
+    <all in="p/[zg]" out="*/V" symmetry="()"/>
+    <all in="V/[zgS]" out="*/V" symmetry="()"/>
+    <prl in="p" out="P"/>
+
+    <prl in="z" out="g"/>
+
+    <one in="ggggg/ggggg/ggggg" out="*****/*JJ**/*****" steps="3"/>
+
+    <prl in="x" out="r"/>
+
+    <!-- porch posts: the two front corners and the two beside the path -->
+    <all in="Pg/gg" out="o*/**" symmetry="(x)"/>
+    <all in="PP/gV" out="o*/**" symmetry="(x)"/>
+
+    <!-- the stair strip: against a wall, 2 free cells before, 2 after -->
+    <one in="kkkkkkkkk/rrrrrrrrr/rrrrrrrrr/rrrrrrrrr" out="*********/**ijjjj**/**ijjjj**/**ijjjj**" steps="1"/>
+
+    <!-- the chimney on a free side wall -->
+    <one in="[rij]kg" out="*Xg" symmetry="(x)" steps="1"/>
+
+    <prl><rule in="v" out="r"/><rule in="N" out="r"/></prl>
+
+    <!-- ===== B. HEIGHTS ===== -->
+    <!-- stair hole, open to the roof -->
+    <all in="B [ij]" out="u *" steps="1" symmetry="()"/>
+    <all in="B u" out="u *" steps="15" symmetry="()"/>
+    <all in="B u" out="C *" steps="1" symmetry="()"/>
+
+    <!-- body: two storeys -->
+    <all in="B r" out="r f" steps="1" symmetry="()"/>
+    <all in="B r" out="r R" steps="7" symmetry="()"/>
+    <all in="B r" out="r F" steps="1" symmetry="()"/>
+    <all in="B r" out="r R" steps="8" symmetry="()"/>
+    <prl in="r" out="C"/>
+
+    <!-- wing: one storey -->
+    <all in="B h" out="h f" steps="1" symmetry="()"/>
+    <all in="B h" out="h R" steps="7" symmetry="()"/>
+    <prl in="h" out="C"/>
+
+    <!-- porch: deck, air, roof; posts -->
+    <all in="B P" out="P T" steps="1" symmetry="()"/>
+    <all in="B P" out="P H" steps="7" symmetry="()"/>
+    <prl in="P" out="C"/>
+    <all in="B o" out="o *" steps="7" symmetry="()"/>
+    <all in="B o" out="C *" steps="1" symmetry="()"/>
+
+    <!-- wing walls with a window row -->
+    <all in="B l" out="l *" steps="2" symmetry="()"/>
+    <all in="B l" out="M *" steps="1" symmetry="()"/>
+    <all in="B M" out="M *" steps="1" symmetry="()"/>
+    <all in="B M" out="l *" steps="1" symmetry="()"/>
+    <all in="B l" out="l *" steps="2" symmetry="()"/>
+    <all in="B l" out="C *" steps="1" symmetry="()"/>
+
+    <!-- body walls with a window row on each storey -->
+    <all in="B k" out="k *" steps="2" symmetry="()"/>
+    <all in="B k" out="M *" steps="1" symmetry="()"/>
+    <all in="B M" out="M *" steps="1" symmetry="()"/>
+    <all in="B M" out="k *" steps="1" symmetry="()"/>
+    <all in="B k" out="k *" steps="6" symmetry="()"/>
+    <all in="B k" out="M *" steps="1" symmetry="()"/>
+    <all in="B M" out="M *" steps="1" symmetry="()"/>
+    <all in="B M" out="k *" steps="1" symmetry="()"/>
+    <all in="B k" out="k *" steps="2" symmetry="()"/>
+
+    <!-- doors: floor, 7 of air, wall above -->
+    <all in="B D" out="D f" steps="1" symmetry="()"/>
+    <all in="B D" out="D R" steps="7" symmetry="()"/>
+    <all in="B D" out="D k" steps="8" symmetry="()"/>
+    <prl in="D" out="k"/>
+    <all in="B n" out="n f" steps="1" symmetry="()"/>
+    <all in="B n" out="n R" steps="7" symmetry="()"/>
+    <all in="B n" out="n k" steps="8" symmetry="()"/>
+    <prl in="n" out="k"/>
+    <all in="B k" out="C *" steps="1" symmetry="()"/>
+
+    <!-- chimney to the top, hedge, troughs -->
+    <all in="B X" out="X *" symmetry="()"/>
+    <all in="B S" out="S *" steps="2" symmetry="()"/>
+    <all in="B J" out="I *" steps="1" symmetry="()"/>
+
+    <!-- windows: only on outer faces, not at corners, one every other cell -->
+    <prl in="*[BH]/[BH]M" out="**/*k"/>
+    <prl in="[BH]M" out="*y"/>
+    <prl in="M" out="k"/>
+    <all symmetry="()"><rule in="yy yy" out="yk yk"/><rule in="y/y y/y" out="y/k y/k"/></all>
+
+    <!-- ===== C. FULL SCALE ===== -->
+    <map scale="4 4 4" values="BAWFCZLSgVJwKQseUY">
+      <rule in="S" out="SSSS/SSSS/SSSS/SSSS SSSS/SSSS/SSSS/SSSS SSSS/SSSS/SSSS/SSSS SSSS/SSSS/SSSS/SSSS"/>
+      <rule in="g" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB gggg/gggg/gggg/gggg"/>
+      <rule in="V" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB VVVV/VVVV/VVVV/VVVV"/>
+      <rule in="J" out="JJJJ/JJJJ/JJJJ/JJJJ JJJJ/JJJJ/JJJJ/JJJJ JJJJ/JJJJ/JJJJ/JJJJ JJJJ/JJJJ/JJJJ/JJJJ"/>
+      <rule in="I" out="BBBB/BBBB/BBBB/BBBB JJJJ/JwwJ/JwwJ/JJJJ JJJJ/JJJJ/JJJJ/JJJJ JJJJ/JJJJ/JJJJ/JJJJ"/>
+      <rule in="f" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB AAAA/AAAA/AAAA/AAAA"/>
+      <rule in="T" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB ZZZZ/ZZZZ/ZZZZ/ZZZZ"/>
+      <rule in="i" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB ssss/ssss/ssss/ssss"/>
+      <rule in="j" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB eeee/eeee/eeee/eeee"/>
+      <rule in="R" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB"/>
+      <rule in="H" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB"/>
+      <rule in="u" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB"/>
+      <rule in="F" out="BBBB/BBBB/BBBB/BBBB FFFF/FFFF/FFFF/FFFF FFFF/FFFF/FFFF/FFFF FFFF/FFFF/FFFF/FFFF"/>
+      <rule in="C" out="CCCC/CCCC/CCCC/CCCC FFFF/FFFF/FFFF/FFFF FFFF/FFFF/FFFF/FFFF FFFF/FFFF/FFFF/FFFF"/>
+      <rule in="k" out="WWWW/WWWW/WWWW/WWWW WWWW/WWWW/WWWW/WWWW WWWW/WWWW/WWWW/WWWW WWWW/WWWW/WWWW/WWWW"/>
+      <rule in="l" out="WWWW/WWWW/WWWW/WWWW WWWW/WWWW/WWWW/WWWW WWWW/WWWW/WWWW/WWWW WWWW/WWWW/WWWW/WWWW"/>
+      <rule in="y" out="ZLLZ/LLLL/LLLL/ZLLZ ZLLZ/LLLL/LLLL/ZLLZ ZLLZ/LLLL/LLLL/ZLLZ ZLLZ/LLLL/LLLL/ZLLZ"/>
+      <rule in="o" out="BBBB/BZZB/BZZB/BBBB BBBB/BZZB/BZZB/BBBB BBBB/BZZB/BZZB/BBBB BBBB/BZZB/BZZB/BBBB"/>
+      <rule in="X" out="KKKK/KKKK/KKKK/KKKK KKKK/KKKK/KKKK/KKKK KKKK/KKKK/KKKK/KKKK KKKK/KKKK/KKKK/KKKK"/>
+
+      <!-- the stair: 2 up, 1 forward, solid below -->
+      <all in="BBB sse" out="UY* ***" steps="1"/>
+      <all in="*BB *B* UY*" out="*UY *Q* QQ*" steps="17"/>
+      <all in="Q B" out="* Q" symmetry="()"/>
+
+      <!-- pitched roofs of tiles: hips on the body and the wing, lean-to against the walls -->
+      <prl steps="12" symmetry="()">
+        <rule in="***/*B*/*** *[CWK]*/[CWK]C[CWK]/*[CWK]*" out="***/*C*/*** ***/***/***"/>
+      </prl>
+
+      <!-- cleaning -->
+      <prl><rule in="s" out="A"/><rule in="e" out="A"/><rule in="Y" out="Q"/><rule in="U" out="Q"/></prl>
+    </map>
+  </map>
+  <color symbol="E" value="8A7A5A" name="terra"/>
+  <color symbol="N" value="FF00FF" name="origine"/>
+  <color symbol="S" value="2F5D2A" name="siepe"/>
+  <color symbol="g" value="7FB65A" name="prato del giardino"/>
+  <color symbol="z" value="C9C08A" name="lotto"/>
+  <color symbol="x" value="E0D6C0" name="corpo"/>
+  <color symbol="a" value="FF0000" name="cammino a"/>
+  <color symbol="b" value="FF8800" name="cammino b"/>
+  <color symbol="c" value="FFFF00" name="cammino c"/>
+  <color symbol="k" value="F4F1EA" name="muro intonacato"/>
+  <color symbol="r" value="B88A5A" name="pavimento in cotto"/>
+  <color symbol="v" value="D9A066" name="ingresso"/>
+  <color symbol="D" value="6B3E1F" name="porta d'ingresso"/>
+  <color symbol="n" value="8B5A2B" name="porta interna"/>
+  <color symbol="m" value="00FFFF" name="seme dell'ala"/>
+  <color symbol="q" value="0088FF" name="cammino dell'ala"/>
+  <color symbol="h" value="C79A6B" name="pavimento cucina"/>
+  <color symbol="l" value="EDE6D6" name="muro dell'ala"/>
+  <color symbol="P" value="A0703C" name="portico in legno"/>
+  <color symbol="p" value="905F30" name="passaggio portico"/>
+  <color symbol="V" value="C8BFAE" name="vialetto di ghiaia"/>
+  <color symbol="J" value="8E8A80" name="vasca in pietra"/>
+  <color symbol="X" value="9E4A30" name="comignolo"/>
+  <color symbol="o" value="6E4424" name="pilastro del portico"/>
+  <color symbol="f" value="B5653A" name="pavimento"/>
+  <color symbol="R" value="FFFFFF" name="aria della stanza"/>
+  <color symbol="H" value="FFFFFE" name="aria del portico"/>
+  <color symbol="T" value="9A6A3A" name="assito del portico"/>
+  <color symbol="I" value="4A90C0" name="bordo della vasca"/>
+  <color symbol="M" value="00FF88" name="candidato finestra"/>
+  <color symbol="y" value="9FC8D8" name="finestra"/>
+  <color symbol="u" value="FFFFFD" name="vano scala"/>
+  <color symbol="i" value="D0A070" name="inizio scala"/>
+  <color symbol="j" value="C09060" name="striscia scala"/>
+  <color symbol="A" value="B5653A" name="pavimento in cotto"/>
+  <color symbol="W" value="F2EFE6" name="intonaco bianco"/>
+  <color symbol="F" value="8A5A32" name="solaio in legno"/>
+  <color symbol="C" value="B5442A" name="tetto di coppi rossi"/>
+  <color symbol="Z" value="6E4424" name="legno"/>
+  <color symbol="L" value="9FC8D8" name="vetro della finestra"/>
+  <color symbol="w" value="4A90C0" name="acqua"/>
+  <color symbol="K" value="8E3B26" name="mattoni del comignolo"/>
+  <color symbol="Q" value="A08060" name="gradini in pietra"/>
+  <color symbol="s" value="D0A070" name="inizio scala"/>
+  <color symbol="e" value="C09060" name="striscia scala"/>
+  <color symbol="U" value="FF4040" name="gradino"/>
+  <color symbol="Y" value="40FF40" name="direzione scala"/>
+</sequence>
+```
+
+## What the game made of it
+## Le viste
+### Seme 1: griglia 100×100×80, un carattere = 2×2 celle (il retro in alto, il davanti in basso; «.» vuoto)
+Lettere: S siepe, g prato del giardino, V vialetto di ghiaia, J vasca in pietra, F solaio in legno, C tetto di coppi rossi, A pavimento in cotto, W intonaco bianco, Z legno, L vetro della finestra, w acqua, K mattoni del comignolo, Q gradini in pietra
+Pianta (la lettera in cima a ogni colonna):
+```
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+SSggggggggggggggggggggggggggggggggggggggggggggggSS
+SSggggggggggggggggggggggggggggggggggggggggggggggSS
+SSggggggggggggggggggggggggggggggggggggggggggggggSS
+SSggggggggggggggggggggggggggggggggggggggggggggggSS
+SSggggggggggggggggggggggggggggggggggJJJJggggggggSS
+SSggggggggggggggggggggggggggggggggggJJJJggggggggSS
+SSggggggggggggggggggggggggggggggggggggggggggggggSS
+SSggggggggggggggggggggggggggggggggggggggggggggggSS
+SSggggggggggggggggggggggggggggggggggggggggggggggSS
+SSggggggggggggggggggggggggggggggggggggggggggggggSS
+SSggggggggggggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggggSS
+SSggggggggggggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggggSS
+SSggggggggggggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggggSS
+SSggggggggggggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggggSS
+SSggggggggggggKKCCCCCCCCCCCCCCCCCCCCCCCCCCCCggggSS
+SSggggggggggggKKCCCCCCCCCCCCCCCCCCCCCCCCCCCCggggSS
+SSggJJggggggggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggggSS
+SSggJJggggggggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggggSS
+SSggJJggggggggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggggSS
+SSggJJggggggggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggggSS
+SSggggggggggggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggggSS
+SSggggggggggggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggggSS
+SSggggggggggggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggggSS
+SSggggggggggggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggggSS
+SSggggggggggggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggggSS
+SSggggggggggggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggggSS
+SSggggggggggggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggggSS
+SSggggggggggggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggggSS
+SSggggggggggggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggggSS
+SSggggggggggggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggggSS
+SSggggggggggggCCCCCCCCCCCCCCCCCCCCCCggggggggggggSS
+SSggggggggggggCCCCCCCCCCCCCCCCCCCCCCggggggggggggSS
+SSggggggggggggCCCCCCCCCCCCCCCCCCCCCCggggggggggggSS
+SSggggggggggggCCCCCCCCCCCCCCCCCCCCCCggggggggggggSS
+SSggggggggggggCCCCCCCCCCCCCCCCCCCCCCggggggggggggSS
+SSggggggggggggCCCCCCCCCCCCCCCCCCCCCCggggggggggggSS
+SSggggggggggggCCCCCCCCCCCCCCCCCCCCCCggggggggggggSS
+SSggggggggggggCCCCCCCCCCCCCCCCCCCCCCggggggggggggSS
+SSggggggggggggggggggggVVVVVVggggggggggggJJggggggSS
+SSggggggggggggggggggggVVVVVVggggggggggggJJggggggSS
+SSggggggggggggggggggggVVVVVVggggggggggggJJggggggSS
+SSggggggggggggggggggggVVVVVVggggggggggggJJggggggSS
+SSggggggggggggggggggggVVVVVVggggggggggggggggggggSS
+SSggggggggggggggggggggVVVVVVggggggggggggggggggggSS
+SSggggggggggggggggggggVVVVVVggggggggggggggggggggSS
+SSggggggggggggggggggggVVVVVVggggggggggggggggggggSS
+SSSSSSSSSSSSSSSSSSSSSSVVVVVVSSSSSSSSSSSSSSSSSSSSSS
+SSSSSSSSSSSSSSSSSSSSSSVVVVVVSSSSSSSSSSSSSSSSSSSSSS
+```
+Altezze (la cima di ogni colonna, da 0 a z: 36 gradini dell'altezza della griglia):
+```
+55555555555555555555555555555555555555555555555555
+55555555555555555555555555555555555555555555555555
+55000000000000000000000000000000000000000000000055
+55000000000000000000000000000000000000000000000055
+55000000000000000000000000000000000000000000000055
+55000000000000000000000000000000000000000000000055
+55000000000000000000000000000000000033330000000055
+55000000000000000000000000000000000033330000000055
+55000000000000000000000000000000000000000000000055
+55000000000000000000000000000000000000000000000055
+55000000000000000000000000000000000000000000000055
+55000000000000000000000000000000000000000000000055
+55000000000000wwwwwwwwwwwwwwwwwwwwwwgggggggg000055
+55000000000000wxxxxxxxxxxxxxxxxxxxxwhhhhhhhg000055
+55000000000000wxyyyyyyyyyyyyyyyyyyxwiiiiiihg000055
+55000000000000wxyzzzzzzzzzzzzzzzzyxwjjjjjihg000055
+55000000000000zzzzzzzzzzzzzzzzzzzyxwkkkkjihg000055
+55000000000000zzzzzzzzzzzzzzzzzzzyxwkkkkjihg000055
+55003300000000wxyzzzzzzzzzzzzzzzzyxwllkkjihg000055
+55003300000000wxyzzzzzzzzzzzzzzzzyxwllkkjihg000055
+55003300000000wxyzzzzzzzzzzzzzzzzyxwllkkjihg000055
+55003300000000wxyzzzzzzzzzzzzzzzzyxwllkkjihg000055
+55000000000000wxyzzzzzzzzzzzzzzzzyxwllkkjihg000055
+55000000000000wxyzzzzzzzzzzzzzzzzyxwllkkjihg000055
+55000000000000wxyzzzzzzzzzzzzzzzzyxwllkkjihg000055
+55000000000000wxyzzzzzzzzzzzzzzzzyxwllkkjihg000055
+55000000000000wxyzzzzzzzzzzzzzzzzyxwkkkkjihg000055
+55000000000000wxyzzzzzzzzzzzzzzzzyxwkkkkjihg000055
+55000000000000wxyzzzzzzzzzzzzzzzzyxwjjjjjihg000055
+55000000000000wxyzzzzzzzzzzzzzzzzyxwiiiiiihg000055
+55000000000000wxyzzzzzzzzzzzzzzzzyxwhhhhhhhg000055
+55000000000000wxyyyyyyyyyyyyyyyyyyxwgggggggg000055
+55000000000000wxxxxxxxxxxxxxxxxxxxxw00000000000055
+55000000000000wwwwwwwwwwwwwwwwwwwwww00000000000055
+55000000000000ghijkkkkkkkkkkkkkkjihg00000000000055
+55000000000000ghijkkkkkkkkkkkkkkjihg00000000000055
+55000000000000ghijjjjjjjjjjjjjjjjihg00000000000055
+55000000000000ghiiiiiiiiiiiiiiiiiihg00000000000055
+55000000000000ghhhhhhhhhhhhhhhhhhhhg00000000000055
+55000000000000gggggggggggggggggggggg00000000000055
+55000000000000000000000000000000000000003300000055
+55000000000000000000000000000000000000003300000055
+55000000000000000000000000000000000000003300000055
+55000000000000000000000000000000000000003300000055
+55000000000000000000000000000000000000000000000055
+55000000000000000000000000000000000000000000000055
+55000000000000000000000000000000000000000000000055
+55000000000000000000000000000000000000000000000055
+55555555555555555555550000005555555555555555555555
+55555555555555555555550000005555555555555555555555
+```
+Fronte (guardando dal davanti; in alto il cielo):
+```
+..............KK.CCCCCCCCCCCCCCC..................
+..............KKCCCCCCCCCCCCCCCCC.................
+..............KKCCCCCCCCCCCCCCCCCC................
+..............KCCCCCCCCCCCCCCCCCCCC...............
+..............FFFFFFFFFFFFFFFFFFFFFF..............
+..............FFFFFFFFFFFFFFFFFFFFFF..............
+..............WWWWWWWWWWWWWWWWWWWWWW..............
+..............WWWWWWWWWWWWWWWWWWWWWW..............
+..............WWWWWWWWWWWWWWWWWWWWWW..............
+..............WWWWWWWWWWWWWWWWWWWWWW..............
+..............WWWWWWWWWWWWWWWWWWWWWW..............
+..............WWWWWWWWWWWWWWWWWWWWWW..............
+..............WWZLWWZLWWWWWWZLWWWWWW..............
+..............WWZLWWZLWWWWWWZLWWWWWW..............
+..............WWZLWWZLWWWWWWZLWWWWWW..............
+..............WWZLWWZLWWWWWWZLWWWWWW..............
+..............WWWWWWCCCCCCCCCCWWWWWWCC............
+..............WWWWWCCCCCCCCCCCCWWWWWCCC...........
+..............WWWWCCCCCCCCCCCCCCWWWWCCCC..........
+..............WWWCCCCCCCCCCCCCCCCWWWCCCCC.........
+..............WWCCCCCCCCCCCCCCCCCCWWCCCCCC........
+..............WCCCCCCCCCCCCCCCCCCCCWCCCCCCC.......
+..............FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF......
+..............FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF......
+..............WZWWWWWZWWWWWWWZWWWWWZWWWWWWWW......
+..............WZWWWWWZWWWWWWWZWWWWWZWWWWWWWW......
+..............WZWWWWWZQWWWWWWZWWWWWZWWWWWWWW......
+..............WZWWWWWZQWWWWWWZWWWWWZWWWWWWWW......
+..............WZWWWWWZQQWWWWWZWWWWWZWWWWWWWW......
+..............WZWWWWWZQQWWWWWZWWWWWZWWWWWWWW......
+..............WZZLWWZZQQQLWWZZWWZLWZZLWWZLWW......
+..............WZZLWWZZQQQLWWZZWWZLWZZLWWZLWW......
+..............WZZLWWZZQQQQWWZZWWZLWZZLWWZLWW......
+..............WZZLWWZZQQQQWWZZWWZLWZZLWWZLWW......
+SSSSSSSSSSSSSSSSSSSSSSQQQQQWSSSSSSSSSSSSSSSSSSSSSS
+SSSSSSSSSSSSSSSSSSSSSSQQQQQWSSSSSSSSSSSSSSSSSSSSSS
+SSSSSSSSSSSSSSSSSSSSSSQQQQQQSSSSSSSSSSSSSSSSSSSSSS
+SSSSSSSSSSSSSSSSSSSSSSQQQQQQSSSSSSSSSSSSSSSSSSSSSS
+SSSSSSSSSSSSSSSSSSSSSSQQQQQQSSSSSSSSSSSSSSSSSSSSSS
+SSSSSSSSSSSSSSSSSSSSSSVVVVVVSSSSSSSSSSSSSSSSSSSSSS
+```
+Lato destro (guardando da destra):
+```
+................CCCCCCCCCCCCCC....................
+...............CCCCCCCCCCCCCCCC...................
+..............CCCCCCCCCCCCCCCCCC..................
+.............CCCCCCCCCCCCCCCCCCCC.................
+............FFFFFFFFFFFFFFFFFFFFFF................
+............FFFFFFFFFFFFFFFFFFFFFF................
+............WWWWWWWWWWWWWWWWWWWWWW................
+............WWWWWWWWWWWWWWWWWWWWWW................
+............WWWWWWWWWWWWWWWWWWWWWW................
+............WWWWWWWWWWWWWWWWWWWWWW................
+............WWWWWWWWWWWWWWWWWWWWWW................
+............WWWWWWWWWWWWWWWWWWWWWW................
+............WWZLWWZLWWWWWWZLWWZLWW................
+............WWZLWWZLWWWWWWZLWWZLWW................
+............WWZLWWZLWWWWWWZLWWZLWW................
+............WWZLWWZLWWWWWWZLWWZLWW................
+............WWWWWWCCCCCCCCWWWWWWWW................
+............WWWWWCCCCCCCCCCWWWWWWWC...............
+............WWWWCCCCCCCCCCCCWWWWWWCC..............
+............WWWCCCCCCCCCCCCCCWWWWWCCC.............
+............WWCCCCCCCCCCCCCCCCWWWWCCCC............
+............WCCCCCCCCCCCCCCCCCCWWWCCCCC...........
+............FFFFFFFFFFFFFFFFFFFFWWFFFFFF..........
+............FFFFFFFFFFFFFFFFFFFFWWFFFFFF..........
+............WWWWWWWWWWWWWWWWWWWWWW....ZZ..........
+............WWWWWWWWWWWWWWWWWWWWWW....ZZ..........
+............WWWWWWWWWWWWWWWWWWWWWW....ZZ..........
+............WWWWWWWWWWWWWWWWWWWWWW....ZZ..........
+............WWWWWWWWWWWWWWWWWWWWWW....ZZ..........
+............WWWWWWWWWWWWWWWWWWWWWW....ZZ..........
+............WWZLWWZLWWZLWWZLWWWWWW....ZZ..........
+............WWZLWWZLWWZLWWZLWWWWWW....ZZ..........
+............WWZLWWZLWWZLWWZLWWWWWW....ZZ..........
+............WWZLWWZLWWZLWWZLWWWWWW....ZZ..........
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+```
+Sezione a z=11 (le lettere a quell'altezza: porte, stanze, scale):
+```
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+SS..............................................SS
+SS..............................................SS
+SS..............................................SS
+SS..............................................SS
+SS..............................................SS
+SS..............................................SS
+SS..............................................SS
+SS..............................................SS
+SS..............................................SS
+SS..............................................SS
+SS............WWWWWWWWWWWWWWWWWWWWWWWWWWWWWW....SS
+SS............WWWWWWWWWWWWWWWWWWWWWWWWWWWWWW....SS
+SS............WW....QQQQQQQ.......WW......WW....SS
+SS............WW....QQQQQQQ.......WW......WW....SS
+SS............KK....QQQQQQQ.......WW......WW....SS
+SS............KK....QQQQQQQ.......WW......WW....SS
+SS............WW....QQQQQQQ.......WW......WW....SS
+SS............WW....QQQQQQQ.......WW......WW....SS
+SS............WW..........................WW....SS
+SS............WW..........................WW....SS
+SS............WW..........................WW....SS
+SS............WW..........................WW....SS
+SS............WW..........................WW....SS
+SS............WW..........................WW....SS
+SS............WW..................WW......WW....SS
+SS............WW..................WW......WW....SS
+SS............WW..................WW......WW....SS
+SS............WW..................WW......WW....SS
+SS............WW..................WWWWWWWWWW....SS
+SS............WW..................WWWWWWWWWW....SS
+SS............WWWWWWWW......WWWWWWWW............SS
+SS............WWWWWWWW......WWWWWWWW............SS
+SS..............................................SS
+SS..............................................SS
+SS..............................................SS
+SS..............................................SS
+SS..............................................SS
+SS..............................................SS
+SS..............................................SS
+SS..............................................SS
+SS..............................................SS
+SS..............................................SS
+SS..............................................SS
+SS..............................................SS
+SS..............................................SS
+SS..............................................SS
+SSSSSSSSSSSSSSSSSSSSSS......SSSSSSSSSSSSSSSSSSSSSS
+SSSSSSSSSSSSSSSSSSSSSS......SSSSSSSSSSSSSSSSSSSSSS
+```
+Sezione a z=43 (le lettere a quell'altezza: porte, stanze, scale):
+```
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..............WWWWWWWWWWWWWWWWWWWWWW..............
+..............WWWWWWWWWWWWWWWWWWWWWW..............
+..............WW..................WW..............
+..............WW..................WW..............
+..............KK..................WWCCCC..........
+..............KK..................WWCCCC..........
+..............WW..................WWCCCC..........
+..............WW..................WWCCCC..........
+..............WW..................WWCCCC..........
+..............WW..................WWCCCC..........
+..............WW..................WWCCCC..........
+..............WW..................WWCCCC..........
+..............WW..................WWCCCC..........
+..............WW..................WWCCCC..........
+..............WW..................WWCCCC..........
+..............WW..................WWCCCC..........
+..............WW..................WW..............
+..............WW..................WW..............
+..............WW..................WW..............
+..............WW..................WW..............
+..............WWWWWWWWWWWWWWWWWWWWWW..............
+..............WWWWWWWWWWWWWWWWWWWWWW..............
+..................CCCCCCCCCCCCCC..................
+..................CCCCCCCCCCCCCC..................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+```
+Sezione a z=75 (le lettere a quell'altezza: porte, stanze, scale):
+```
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+................CCCCCCCCCCCCCCCCCC................
+................CCCCCCCCCCCCCCCCCC................
+..............KKCCCCCCCCCCCCCCCCCC................
+..............KKCCCCCCCCCCCCCCCCCC................
+................CCCCCCCCCCCCCCCCCC................
+................CCCCCCCCCCCCCCCCCC................
+................CCCCCCCCCCCCCCCCCC................
+................CCCCCCCCCCCCCCCCCC................
+................CCCCCCCCCCCCCCCCCC................
+................CCCCCCCCCCCCCCCCCC................
+................CCCCCCCCCCCCCCCCCC................
+................CCCCCCCCCCCCCCCCCC................
+................CCCCCCCCCCCCCCCCCC................
+................CCCCCCCCCCCCCCCCCC................
+................CCCCCCCCCCCCCCCCCC................
+................CCCCCCCCCCCCCCCCCC................
+................CCCCCCCCCCCCCCCCCC................
+................CCCCCCCCCCCCCCCCCC................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+..................................................
+```
+
+### Seme 2: pianta e altezze
+```
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS   55555555555555555555555555555555555555555555555555
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS   55555555555555555555555555555555555555555555555555
+SSggggggggggggggggggggggggggggggggggggggggggggggSS   55000000000000000000000000000000000000000000000055
+SSggggggggggggggggggggggggggggggggggggggggggggggSS   55000000000000000000000000000000000000000000000055
+SSggggggggggggggggggggggggggggggggggggggggggggggSS   55000000000000000000000000000000000000000000000055
+SSggggggggggggggggggggggggggggggggggggggggggggggSS   55000000000000000000000000000000000000000000000055
+SSggggggggggggggggggggggggggggggggggggggggggggggSS   55000000000000000000000000000000000000000000000055
+SSggggggggggggggggggggggggggggggggggggggggggggggSS   55000000000000000000000000000000000000000000000055
+SSggggggggggggggggggggJJggggggggggggggJJggggggggSS   55000000000000000000003300000000000000330000000055
+SSggggggggggggggggggggJJggggggggggggggJJggggggggSS   55000000000000000000003300000000000000330000000055
+SSggggggggggggggggggggJJggggggggggggggJJggggggggSS   55000000000000000000003300000000000000330000000055
+SSggggggggggggggggggggJJggggggggggggggJJggggggggSS   55000000000000000000003300000000000000330000000055
+SSggggggJJJJggggggggggggggggggggggggggggggggggggSS   55000000333300000000000000000000000000000000000055
+SSggggggJJJJggggggggggggggggggggggggggggggggggggSS   55000000333300000000000000000000000000000000000055
+SSggggggggggggggggggggggggggggggggggggggggggggggSS   55000000000000000000000000000000000000000000000055
+SSggggggggggggggggggggggggggggggggggggggggggggggSS   55000000000000000000000000000000000000000000000055
+SSggggggggggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggSS   550000000000wwwwwwwwwwwwwwwwwwwwwwwwgggggggggg0055
+SSggggggggggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggSS   550000000000wxxxxxxxxxxxxxxxxxxxxxxwhhhhhhhhhg0055
+SSggggggggggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggSS   550000000000wxyyyyyyyyyyyyyyyyyyyyxwiiiiiiiihg0055
+SSggggggggggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggSS   550000000000wxyzzzzzzzzzzzzzzzzzzyxwjjjjjjjihg0055
+SSggggggggggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggSS   550000000000wxyzzzzzzzzzzzzzzzzzzyxwkkkkkkjihg0055
+SSggggggggggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggSS   550000000000wxyzzzzzzzzzzzzzzzzzzyxwkkkkkkjihg0055
+SSggggggggggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggSS   550000000000wxyzzzzzzzzzzzzzzzzzzyxwllllkkjihg0055
+SSggggggggggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggSS   550000000000wxyzzzzzzzzzzzzzzzzzzyxwllllkkjihg0055
+SSggggggggggKKCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggSS   550000000000zzzzzzzzzzzzzzzzzzzzzyxwllllkkjihg0055
+SSggggggggggKKCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggSS   550000000000zzzzzzzzzzzzzzzzzzzzzyxwllllkkjihg0055
+SSggggggggggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggSS   550000000000wxyzzzzzzzzzzzzzzzzzzyxwllllkkjihg0055
+SSggggggggggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggSS   550000000000wxyzzzzzzzzzzzzzzzzzzyxwllllkkjihg0055
+SSggggggggggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggSS   550000000000wxyzzzzzzzzzzzzzzzzzzyxwkkkkkkjihg0055
+SSggggggggggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggSS   550000000000wxyyyyyyyyyyyyyyyyyyyyxwkkkkkkjihg0055
+SSggggggggggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggSS   550000000000wxxxxxxxxxxxxxxxxxxxxxxwjjjjjjjihg0055
+SSggggggggggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggSS   550000000000wwwwwwwwwwwwwwwwwwwwwwwwiiiiiiiihg0055
+SSggggggggggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggSS   550000000000ghijkkkkkkkkkkkkkkkkkkjihhhhhhhhhg0055
+SSggggggggggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggSS   550000000000ghijkkkkkkkkkkkkkkkkkjihgggggggggg0055
+SSggggggggggCCCCCCCCCCCCCCCCCCCCCCCCggggggggggggSS   550000000000ghijjjjjjjjjjjjjjjjjjihg00000000000055
+SSggggggggggCCCCCCCCCCCCCCCCCCCCCCCCggggggggggggSS   550000000000ghiiiiiiiiiiiiiiiiiiiihg00000000000055
+SSggggggggggCCCCCCCCCCCCCCCCCCCCCCCCggggggggggggSS   550000000000ghhhhhhhhhhhhhhhhhhhhhhg00000000000055
+SSggggggggggCCCCCCCCCCCCCCCCCCCCCCCCggggggggggggSS   550000000000gggggggggggggggggggggggg00000000000055
+SSggggggggggggggggggggVVVVVVggggggggggggggggggggSS   55000000000000000000000000000000000000000000000055
+SSggggggggggggggggggggVVVVVVggggggggggggggggggggSS   55000000000000000000000000000000000000000000000055
+SSggggggggggggggggggggVVVVVVggggggggggggggggggggSS   55000000000000000000000000000000000000000000000055
+SSggggggggggggggggggggVVVVVVggggggggggggggggggggSS   55000000000000000000000000000000000000000000000055
+SSggggggggggggggggggggVVVVVVggggggggggggggggggggSS   55000000000000000000000000000000000000000000000055
+SSggggggggggggggggggggVVVVVVggggggggggggggggggggSS   55000000000000000000000000000000000000000000000055
+SSggggggggggggggggggggVVVVVVggggggggggggggggggggSS   55000000000000000000000000000000000000000000000055
+SSggggggggggggggggggggVVVVVVggggggggggggggggggggSS   55000000000000000000000000000000000000000000000055
+SSggggggggggggggggggggVVVVVVggggggggggggggggggggSS   55000000000000000000000000000000000000000000000055
+SSggggggggggggggggggggVVVVVVggggggggggggggggggggSS   55000000000000000000000000000000000000000000000055
+SSSSSSSSSSSSSSSSSSSSSSVVVVVVSSSSSSSSSSSSSSSSSSSSSS   55555555555555555555550000005555555555555555555555
+SSSSSSSSSSSSSSSSSSSSSSVVVVVVSSSSSSSSSSSSSSSSSSSSSS   55555555555555555555550000005555555555555555555555
+```
+
+### Seme 3: pianta e altezze
+```
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS   55555555555555555555555555555555555555555555555555
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS   55555555555555555555555555555555555555555555555555
+SSggggggggggggggggggggggggggggggggggggggggggggggSS   55000000000000000000000000000000000000000000000055
+SSggggggggggggggggggggggggggggggggggggggggggggggSS   55000000000000000000000000000000000000000000000055
+SSggggggggggggggggggggggggggggggggggggggggggggggSS   55000000000000000000000000000000000000000000000055
+SSggggggggggggggggggggggggggggggggggggggggggggggSS   55000000000000000000000000000000000000000000000055
+SSggggggggggggggggggggggggggggggggggggggggggggggSS   55000000000000000000000000000000000000000000000055
+SSggggggggggggggggggggggggggggggggggggggggggggggSS   55000000000000000000000000000000000000000000000055
+SSggggggggggggggggggggggggggggggggggggggggggggggSS   55000000000000000000000000000000000000000000000055
+SSggggggggggggggggggggggggggggggggggggggggggggggSS   55000000000000000000000000000000000000000000000055
+SSggggggggggggggggggggggggggggJJJJggggggggggggggSS   55000000000000000000000000000033330000000000000055
+SSggggggggggggggggggggggggggggJJJJggggggggggggggSS   55000000000000000000000000000033330000000000000055
+SSggCCCCCCCCCCggggggggggggggggggggggggggggggggggSS   5500gggggggggg000000000000000000000000000000000055
+SSggCCCCCCCCCCggggggggggggggggggggggggggggggggggSS   5500ghhhhhhhhg000000000000000000000000000000000055
+SSggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggggggggggggSS   5500ghiiiiiiihwwwwwwwwwwwwwwwwwwwwww00000000000055
+SSggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggggggggggggSS   5500ghijjjjjjiwxxxxxxxxxxxxxxxxxxxxw00000000000055
+SSggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggggggggggggSS   5500ghijkkkkkjwxyyyyyyyyyyyyyyyyyyxw00000000000055
+SSggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggggggggggggSS   5500ghijkkkkkkwxyzzzzzzzzzzzzzzzzyxw00000000000055
+SSggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggggggggggggSS   5500ghijkklllkwxyzzzzzzzzzzzzzzzzyxw00000000000055
+SSggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggggggggggggSS   5500ghijkkllllwxyzzzzzzzzzzzzzzzzyxw00000000000055
+SSggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCKKggggggggggggSS   5500ghijkkllllwxyzzzzzzzzzzzzzzzzzzz00000000000055
+SSggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCKKggggggggggggSS   5500ghijkkllllwxyzzzzzzzzzzzzzzzzzzz00000000000055
+SSggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggggggggggggSS   5500ghijkkllllwxyzzzzzzzzzzzzzzzzyxw00000000000055
+SSggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggggggggggggSS   5500ghijkkllllwxyzzzzzzzzzzzzzzzzyxw00000000000055
+SSggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggggggggggggSS   5500ghijkkkkkkwxyzzzzzzzzzzzzzzzzyxw00000000000055
+SSggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggggggggggggSS   5500ghijkkkkkkwxyzzzzzzzzzzzzzzzzyxw00000000000055
+SSggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggggggggggggSS   5500ghijjjjjjjwxyzzzzzzzzzzzzzzzzyxw00000000000055
+SSggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggggggggggggSS   5500ghiiiiiiiiwxyzzzzzzzzzzzzzzzzyxw00000000000055
+SSggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggggggggggggSS   5500ghhhhhhhhhwxyzzzzzzzzzzzzzzzzyxw00000000000055
+SSggCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCggggggggggggSS   5500ggggggggggwxyzzzzzzzzzzzzzzzzyxw00000000000055
+SSggggggggggggCCCCCCCCCCCCCCCCCCCCCCggggggggggggSS   55000000000000wxyzzzzzzzzzzzzzzzzyxw00000000000055
+SSggggggggggggCCCCCCCCCCCCCCCCCCCCCCggggggggggggSS   55000000000000wxyyyyyyyyyyyyyyyyyyxw00000000000055
+SSggggggggggggCCCCCCCCCCCCCCCCCCCCCCggggggggggggSS   55000000000000wxxxxxxxxxxxxxxxxxxxxw00000000000055
+SSggggggggggggCCCCCCCCCCCCCCCCCCCCCCggggggggggggSS   55000000000000wwwwwwwwwwwwwwwwwwwwww00000000000055
+SSggggggggggggCCCCCCCCCCCCCCCCCCCCCCggggggggggggSS   55000000000000ghijkkkkkkkkkkkkkkjihg00000000000055
+SSggggggggggggCCCCCCCCCCCCCCCCCCCCCCggggggggggggSS   55000000000000ghijkkkkkkkkkkkkkkjihg00000000000055
+SSggggggggggggCCCCCCCCCCCCCCCCCCCCCCggggggggggggSS   55000000000000ghijjjjjjjjjjjjjjjjihg00000000000055
+SSggggggggggggCCCCCCCCCCCCCCCCCCCCCCggggggggggggSS   55000000000000ghiiiiiiiiiiiiiiiiiihg00000000000055
+SSggggggggggggCCCCCCCCCCCCCCCCCCCCCCggggggggggggSS   55000000000000ghhhhhhhhhhhhhhhhhhhhg00000000000055
+SSggggggggggggCCCCCCCCCCCCCCCCCCCCCCggggggggggggSS   55000000000000gggggggggggggggggggggg00000000000055
+SSggggJJJJggggggggggggVVVVVVggggggggggggggggggggSS   55000033330000000000000000000000000000000000000055
+SSggggJJJJggggggggggggVVVVVVggggggggggggggggggggSS   55000033330000000000000000000000000000000000000055
+SSggggggggggggggggggggVVVVVVggggggggggggggggggggSS   55000000000000000000000000000000000000000000000055
+SSggggggggggggggggggggVVVVVVggggggggggggggggggggSS   55000000000000000000000000000000000000000000000055
+SSggggggggggggggggggggVVVVVVggggggJJJJggggggggggSS   55000000000000000000000000000000003333000000000055
+SSggggggggggggggggggggVVVVVVggggggJJJJggggggggggSS   55000000000000000000000000000000003333000000000055
+SSggggggggggggggggggggVVVVVVggggggggggggggggggggSS   55000000000000000000000000000000000000000000000055
+SSggggggggggggggggggggVVVVVVggggggggggggggggggggSS   55000000000000000000000000000000000000000000000055
+SSSSSSSSSSSSSSSSSSSSSSVVVVVVSSSSSSSSSSSSSSSSSSSSSS   55555555555555555555550000005555555555555555555555
+SSSSSSSSSSSSSSSSSSSSSSVVVVVVSSSSSSSSSSSSSSSSSSSSSS   55555555555555555555550000005555555555555555555555
+```
+
+## La forma (media dei semi)
+copertura della pianta 0,46, cortili chiusi 0,00, picchi 1,00, altezza massima 1,00 della griglia, pieno 0,48 (1 è un blocco pieno)
+quanto differiscono i semi: 0,16 (0 uguali, 1 niente in comune; un edificio che varia sta fra 0,25 e 0,6)
+
+## La traccia (seme 1)
+Traccia, seme 1: griglia 100×100×80, 99 nodi, 285 passi, finito in 86 ms.
+x sinistra→destra, y fondo→davanti, z basso→alto; «.» è la cella vuota; #n è il nodo nell'ordine dell'XML; ×n quante volte ha agito.
+Lettere: N=origine, E=terra, S=siepe, g=prato del giardino, z=lotto, x=corpo, a=cammino a, b=cammino b, c=cammino c, k=muro intonacato, v=ingresso, D=porta d'ingresso, n=porta interna, m=seme dell'ala, q=cammino dell'ala, h=pavimento cucina, l=muro dell'ala, P=portico in legno, p=passaggio portico, V=vialetto di ghiaia, J=vasca in pietra, X=comignolo, r=pavimento in cotto, o=pilastro del portico, f=pavimento, R=aria della stanza, F=solaio in legno, C=tetto di coppi rossi, H=aria del portico, T=assito del portico, I=bordo della vasca, M=candidato finestra, y=finestra, u=vano scala, i=inizio scala, j=striscia scala, A=pavimento in cotto, Q=gradini in pietra, s=inizio scala, e=striscia scala, U=gradino, Y=direzione scala.
+Alla fine: W 42944, C 18750, S 17856, F 12432, g 5072, Q 3900, L 3456, Z 2128, A 1776, K 1280, J 648, V 240, w 24.
+  #3 map scala 1/4 1/4 1/4: ×1, 625 celle x0-24 y0-24 z0-19, passi 1
+  #4 prl ***/*E*/*** → ***/*z*/***: ×1, 528 celle x1-23 y1-23 z0, passi 2, E→z 528
+#5-16 prl×5, all×6: 224 celle x0-24 y0-24 z0, passi 3-20
+#17-37 all×17, one×1, prl×3: 284 celle x7-21 y6-24 z0, passi 21-64
+  #38 prl z → g: ×1, 238 celle x2-22 y2-22 z0, passi 65, z→g 238
+#39-46 one×3, prl×2, all×3: 122 celle x2-20 y3-21 z0-1, passi 66-75
+  #47 all . u → u * passi=15: ×15, 225 celle x10-14 y7-9 z2-16, passi 76-90, .→u 225
+#48-49 all×2: 147 celle x8-16 y7-15 z0-17, passi 91-92
+  #50 all . r → r R passi=7: ×7, 924 celle x8-16 y7-15 z1-8, passi 93-99, r→R 462, .→r 462
+  #51 all . r → r F passi=1: ×1, 132 celle x8-16 y7-15 z8-9, passi 100, r→F 66, .→r 66
+  #52 all . r → r R passi=8: ×8, 1056 celle x8-16 y7-15 z9-17, passi 101-108, r→R 528, .→r 528
+#53-54 prl×1, all×1: 114 celle x8-20 y7-15 z0-17, passi 109-110
+  #55 all . h → h R passi=7: ×7, 336 celle x18-20 y7-14 z1-8, passi 111-117, h→R 168, .→h 168
+#56-57 prl×1, all×1: 82 celle x7-20 y7-19 z0-8, passi 118-119
+  #58 all . P → P H passi=7: ×7, 406 celle x7-17 y17-19 z1-8, passi 120-126, P→H 203, .→P 203
+#59-65 prl×1, all×6: 141 celle x7-21 y6-19 z1-8, passi 127-140
+#66-71 all×6: 213 celle x7-21 y6-16 z1-8, passi 141-148
+  #72 all . k → k * passi=6: ×6, 198 celle x7-17 y6-16 z6-11, passi 149-154, .→k 198
+#73-79 all×7: 261 celle x7-17 y6-16 z0-16, passi 155-175
+#80-87 prl×2, all×6: 346 celle x0-24 y0-24 z0-19, passi 176-215
+#88-92 all×2, prl×3: 232 celle x2-21 y3-21 z1-13, passi 216-221
+   #94 map scala 4 4 4: ×1, 90944 celle x0-99 y0-99 z0-79, passi 222
+   #95 all ... sse → UY* *** passi=1: ×1, 24 celle x56-57 y28-39 z1, passi 223, .→Y 12, .→U 12
+   #96 all *.. *.* UY* → *UY *Q* QQ* passi=17: ×17, 1020 celle x39-57 y28-39 z1-35, passi 224-240, Y→Q 204, U→Q 204, .→Q 204, .→Y 204, +1
+   #97 all Q . → * Q: ×32, 3264 celle x40-55 y28-39 z1-32, passi 241-272, .→Q 3264
+   #98 prl ***/*.*/*** *[CWK]*/[CWK]C[CWK]/*[CWK]* → ***/*C*/*** ***/***/*** passi=12: ×12, 15662 celle x29-86 y25-78 z36-79, passi 273-284, .→C 15662
+   #99 prl s → A (+3): ×1, 264 celle x39-59 y28-39 z0-35, passi 285, e→A 192, s→A 48, Y→Q 12, U→Q 12
+     r1 s → A ×48; r2 e → A ×192; r3 Y → Q ×12; r4 U → Q ×12
+Senza effetto (non hanno mai cambiato una cella):
+#11 prl xaz → *xa passi=1
+
+## Le misure del gioco (5 semi, large e huge)
+- large (20 voxel per casella, gradino 4), seme 1 e altri 4: stanze: 0 (serve ≥ 3)
+- large (20 voxel per casella, gradino 4), seme 2 e altri 3: piani: 1 (serve ≥ 2)
+- huge (16 voxel per casella, gradino 3), seme 1 e altri 4: stanze: 0 (serve ≥ 3)
+- huge (16 voxel per casella, gradino 3), seme 1 e altri 4: sagoma: 3 (serve ≥ 4)
+- huge (16 voxel per casella, gradino 3), seme 2 e altri 2: piani: 1 (serve ≥ 2)
+- varianza a large: perimetro: 0.01 (serve ≥ 0.15)
+- varianza a huge: perimetro: 0.04 (serve ≥ 0.15)
+
+## Block 3 of 3: the corrections. What came back is the game's verdict at every seed and at both sizes: correct the program so that every seed holds, keeping the concept and the variety. Answer with the whole program.

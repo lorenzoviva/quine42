@@ -160,7 +160,11 @@ Ogni criterio vale «sì» solo se si vede nelle foto; per passare servono tutti
 
 ## I bersagli
 
-In `bersagli.ts`: `moderna`, `steampunk`, `futuristica`, `locanda` (con la cantina), `tempio`, `rocca` (Enorme, 120 × 120 × 96 a 16 voxel per casella), `pagoda`.
+In `bersagli.ts`: `moderna`, `steampunk`, `futuristica`, `locanda` (con la cantina), `tempio`, `rocca` (Enorme, 120 × 120 × 96 a 16 voxel per casella), `pagoda`; da T337 `castello` (Enorme), `palazzina` e `villetta`.
+
+## Varianza tra concetti e metodo a zone (T337)
+
+`metodo/README.md`: perché gli edifici dello Scultore sembrano tutti lo stesso (misura tra concetti e tra semi, `concetti.ts`: col prompt di oggi due concetti distano quanto due semi, e il 78-92 % di ogni programma è lo scheletro), il metodo provato (la composizione per concetto su una griglia a 1/4, `metodo/prompt-zone.md`) e il ritorno in testo dopo ogni blocco (`blocchi.ts`, `viste.ts`; `lab/scripts/banco-blocchi.ts`, `banco-ritorno.ts`, `banco-concetti.ts`, `banco-rimisura.ts`). **La porta**: dal contratto 0.5 l'azione si chiama `open`; `esegui` la apriva solo con `apr…`, e un giro col prompt di oggi risultava tutto chiuso (corretto, T337).
 
 ## Gli esempi
 

@@ -1,0 +1,297 @@
+<!--
+PALAZZINA DI CITTÀ, Novecento. Due piani abitati alti 32 voxel (la scatola è alta 80), tetto piano con parapetto e comignoli.
+Pianta grossa (1 casella = 4 voxel):
+  x  corpo rettangolare su N: davanti a N+6, dietro a N-5, fianchi a N±9..12 (casuali, indipendenti).
+  l  ali posteriori: ogni angolo dietro, con p=0.5, mette un'ala di 6×2 caselle verso il cortile (pianta a L, a U o rettangolo).
+  W  muro perimetrale (anche negli angoli rientranti). w: finestre sui muri esterni degli appartamenti, sui quattro lati.
+  c  muri del nucleo a N±4, per tutta la profondità: atrio e scala sull'asse del portone.
+  h  atrio. i/j: striscia della scala 3×5 contro un muro del nucleo (t), sale verso il retro, pianerottolo di 2 file.
+  l  (dopo) l'altro muro del nucleo, con p=0.5, è aperto al piano terra: l'androne si unisce all'appartamento (portineria/bottega).
+  x  ogni appartamento è una sola stanza grande (4-6 × 10-12 caselle). d: porte di 3 caselle sui muri del nucleo.
+  G  portone davanti e porta sul cortile dietro. H: pensilina. S: strada. P: balconi davanti agli appartamenti, accorciati a caso.
+  g  cortile fino al bordo, L muretto, n ripostiglio in un angolo, b panche da saltare con 2 caselle libere per lato. o: zona libera.
+Altezze grosse: z0 pavimento, z1-7 piano terra, z8 solaio, z9-16 primo piano, z17 tetto, poi parapetto e comignoli.
+-->
+<sequence values="BNE" symmetry="(xy)" ground="E" origin="bottom">
+  <map scale="1/4 1/4 1/4" values="BNEzaxWchIGvdijgLonbPHSwRfkFCZKODpuTylt">
+    <rule in="E" out="E"/><rule in="N" out="N"/>
+
+    <!-- ============ A. COMPOSIZIONE ============ -->
+    <prl in="***/*E*/***" out="***/*z*/***"/>
+
+    <!-- larghezza: due fianchi indipendenti -->
+    <all in="Nz" out="*a" steps="1" symmetry="(x)"/>
+    <all in="[Nx]az" out="*xa" steps="8" symmetry="(x)"/>
+    <prl steps="3" symmetry="(x)"><rule in="xaz" out="*xa" p="0.5"/></prl>
+    <prl in="a" out="x"/>
+
+    <!-- profondità: davanti a N+6, dietro a N-5 -->
+    <all in="N/z" out="*/a" steps="1" symmetry="()"/>
+    <all in="[Nx]/a/z" out="*/x/a" steps="5" symmetry="()"/>
+    <prl in="a" out="x"/>
+    <all in="z/N" out="a/*" steps="1" symmetry="()"/>
+    <all in="z/a/[Nx]" out="a/x/*" steps="4" symmetry="()"/>
+    <prl in="a" out="x"/>
+    <all in="[Nx]z/*[Nx]" out="*x/**"/>
+
+    <!-- ali posteriori agli angoli, a caso -->
+    <prl steps="1" symmetry="(x)"><rule in="zz/xz" out="**/lz" p="0.5"/></prl>
+    <all in="xl" out="l*" steps="5" symmetry="(x)"/>
+    <all in="z/l" out="l/x" steps="2" symmetry="()"/>
+    <prl in="l" out="x"/>
+
+    <!-- muro perimetrale, angoli rientranti compresi -->
+    <prl>
+      <rule in="x[zE]" out="W*"/>
+      <rule in="x*/*[zE]" out="W*/**"/>
+    </prl>
+
+    <!-- nucleo -->
+    <all in="Nxxxx" out="****c" steps="1" symmetry="(x)"/>
+    <all symmetry="()">
+      <rule in="c/x" out="*/c"/>
+      <rule in="x/c" out="c/*"/>
+    </all>
+    <all in="[Nh]x" out="*h"/>
+
+    <!-- portone -->
+    <all in="N/h" out="*/v" steps="1" symmetry="()"/>
+    <all in="v/h" out="*/v" symmetry="()"/>
+    <all in="v/W" out="*/G" symmetry="()"/>
+    <all in="WGW" out="GGG" steps="1" symmetry="()"/>
+
+    <!-- pensilina e strada -->
+    <all in="G/[zE]" out="*/H" symmetry="()"/>
+    <all in="H/[zE]" out="*/H" steps="1" symmetry="()"/>
+    <all in="H/[zE]" out="*/S" steps="1" symmetry="()"/>
+    <all in="S/[zE]" out="*/S" symmetry="()"/>
+
+    <!-- balconi davanti agli appartamenti -->
+    <all in="x/W/z" out="*/*/P" symmetry="()"/>
+    <prl steps="2" symmetry="(x)"><rule in="[zE]P" out="*z" p="0.5"/></prl>
+
+    <!-- scala: 2 file di pianerottolo contro il fondo, striscia j…j i, 2 file libere davanti -->
+    <one in="WWWW/chhh/chhh/chhh/chhh/chhh/chhh/chhh/chhh/chhh" out="****/****/****/*jjj/*jjj/*jjj/*jjj/*iii/****/****" steps="1" symmetry="(x)"/>
+
+    <!-- il muro della scala resta pieno; l'altro, a caso, si apre al piano terra -->
+    <all in="c[ij]" out="t*" symmetry="(x)"/>
+    <all symmetry="()">
+      <rule in="t/c" out="*/t"/>
+      <rule in="c/t" out="t/*"/>
+    </all>
+    <prl steps="1" symmetry="()"><rule in="c/W" out="l/*" p="0.5"/></prl>
+    <all in="c/l" out="l/*" symmetry="()"/>
+
+    <!-- porte degli appartamenti -->
+    <one in="xxx[ctl]hh/xxx[ctl]hh/xxx[ctl]hh" out="***d**/***d**/***d**" steps="1" symmetry="()"/>
+    <one in="hh[ctl]xxx/hh[ctl]xxx/hh[ctl]xxx" out="**d***/**d***/**d***" steps="1" symmetry="()"/>
+    <prl><rule in="c" out="I"/><rule in="t" out="I"/></prl>
+
+    <!-- cortile fino al bordo del lotto -->
+    <all in="z/W" out="g/*" symmetry="()"/>
+    <all in="z/g" out="g/*" symmetry="()"/>
+    <prl in="g[zE]" out="L*"/>
+    <one in="ggg/ggg/WWW/hhh/hhh" out="ooo/ooo/GGG/***/***" steps="1" symmetry="()"/>
+    <one in="Lggg/Lggg/WWWW" out="*nnn/*nnn/****" steps="1" symmetry="(x)"/>
+    <one steps="3" symmetry="()">
+      <rule in="ggggg/ggggg/ggggg/ggggg" out="*****/**b**/**b**/*****"/>
+      <rule in="gggg/gggg/gggg/gggg/gggg" out="****/****/*bb*/****/****"/>
+    </one>
+
+    <!-- finestre regolari sui muri esterni delle stanze -->
+    <all in="WWW/xxx" out="*w*/***"/>
+
+    <prl>
+      <rule in="o" out="g"/>
+      <rule in="v" out="h"/>
+      <rule in="z" out="E"/>
+    </prl>
+
+    <!-- ============ B. ALTEZZE ============ -->
+    <prl><rule in="d" out="x"/><rule in="N" out="h"/></prl>
+
+    <!-- vano scala: niente solaio sopra la striscia -->
+    <all in="B [ij]" out="u *" steps="1" symmetry="()"/>
+    <all in="B u" out="u *" steps="15" symmetry="()"/>
+    <all in="B u" out="C *" steps="1" symmetry="()"/>
+
+    <!-- z0 -->
+    <all steps="1" symmetry="()">
+      <rule in="B x" out="x f"/>
+      <rule in="B h" out="h k"/>
+      <rule in="B l" out="l k"/>
+      <rule in="B G" out="G k"/>
+      <rule in="B W" out="W Z"/>
+      <rule in="B w" out="w Z"/>
+      <rule in="B I" out="I I"/>
+      <rule in="B H" out="H p"/>
+      <rule in="B P" out="P p"/>
+      <rule in="B L" out="L L"/>
+      <rule in="B n" out="n n"/>
+      <rule in="B b" out="b b"/>
+    </all>
+    <all in="B L" out="L L" steps="1" symmetry="()"/>
+    <all in="B n" out="n n" steps="3" symmetry="()"/>
+    <all in="B n" out="T *" steps="1" symmetry="()"/>
+
+    <!-- piano terra z1-7 -->
+    <all steps="7" symmetry="()">
+      <rule in="B x" out="x R"/>
+      <rule in="B h" out="h R"/>
+      <rule in="B l" out="l R"/>
+      <rule in="B G" out="G R"/>
+      <rule in="B W" out="W W"/>
+      <rule in="B I" out="I I"/>
+      <rule in="B H" out="H B"/>
+      <rule in="B P" out="P B"/>
+    </all>
+    <all in="B w" out="w W" steps="1" symmetry="()"/>
+    <all in="B w" out="w O" steps="1" symmetry="()"/>
+    <all in="B w" out="w D" steps="1" symmetry="()"/>
+    <all in="B w" out="w W" steps="4" symmetry="()"/>
+
+    <!-- solaio z8 e fascia marcapiano -->
+    <all steps="1" symmetry="()">
+      <rule in="B x" out="x F"/>
+      <rule in="B h" out="h F"/>
+      <rule in="B l" out="l F"/>
+      <rule in="B G" out="G K"/>
+      <rule in="B W" out="W K"/>
+      <rule in="B w" out="w K"/>
+      <rule in="B I" out="I I"/>
+    </all>
+
+    <!-- primo piano z9-16 -->
+    <all steps="8" symmetry="()">
+      <rule in="B x" out="x R"/>
+      <rule in="B h" out="h R"/>
+      <rule in="B l" out="l I"/>
+      <rule in="B G" out="G W"/>
+      <rule in="B W" out="W W"/>
+      <rule in="B I" out="I I"/>
+    </all>
+    <all in="B w" out="w W" steps="2" symmetry="()"/>
+    <all in="B w" out="w O" steps="1" symmetry="()"/>
+    <all in="B w" out="w D" steps="1" symmetry="()"/>
+    <all in="B w" out="w W" steps="4" symmetry="()"/>
+
+    <!-- tetto z17 e cornicione -->
+    <all in="B W" out="* K" steps="1" symmetry="()"/>
+    <prl>
+      <rule in="x" out="C"/>
+      <rule in="h" out="C"/>
+      <rule in="l" out="I"/>
+      <rule in="G" out="K"/>
+      <rule in="w" out="K"/>
+    </prl>
+
+    <!-- comignoli sui muri interni -->
+    <one in="B I" out="y *" steps="2" symmetry="()"/>
+    <all in="B y" out="y *" steps="1" symmetry="()"/>
+
+    <!-- ============ C. SCALA PIENA ============ -->
+    <map scale="4 4 4" values="BEZWKIFCfkAVrpSgLnbHJXMseUYQT">
+      <rule in="E" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB EEEE/EEEE/EEEE/EEEE"/>
+      <rule in="S" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB SSSS/SSSS/SSSS/SSSS"/>
+      <rule in="g" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB gggg/gggg/gggg/gggg"/>
+      <rule in="p" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB pppp/pppp/pppp/pppp"/>
+      <rule in="k" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB kkkk/kkkk/kkkk/kkkk"/>
+      <rule in="f" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB ffff/ffff/ffff/ffff"/>
+      <rule in="i" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB ssss/ssss/ssss/ssss"/>
+      <rule in="j" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB eeee/eeee/eeee/eeee"/>
+      <rule in="R" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB"/>
+      <rule in="u" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB"/>
+      <rule in="F" out="BBBB/BBBB/BBBB/BBBB FFFF/FFFF/FFFF/FFFF FFFF/FFFF/FFFF/FFFF FFFF/FFFF/FFFF/FFFF"/>
+      <rule in="P" out="BBBB/BBBB/BBBB/BBBB JJJJ/JJJJ/JJJJ/JJJJ JJJJ/JJJJ/JJJJ/JJJJ JJJJ/JJJJ/JJJJ/JJJJ"/>
+      <rule in="H" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB HHHH/HHHH/HHHH/HHHH HHHH/HHHH/HHHH/HHHH"/>
+      <rule in="C" out="CCCC/CCCC/CCCC/CCCC CCCC/CCCC/CCCC/CCCC CCCC/CCCC/CCCC/CCCC CCCC/CCCC/CCCC/CCCC"/>
+      <rule in="W" out="WWWW/WWWW/WWWW/WWWW WWWW/WWWW/WWWW/WWWW WWWW/WWWW/WWWW/WWWW WWWW/WWWW/WWWW/WWWW"/>
+      <rule in="Z" out="ZZZZ/ZZZZ/ZZZZ/ZZZZ ZZZZ/ZZZZ/ZZZZ/ZZZZ ZZZZ/ZZZZ/ZZZZ/ZZZZ ZZZZ/ZZZZ/ZZZZ/ZZZZ"/>
+      <rule in="K" out="KKKK/KKKK/KKKK/KKKK KKKK/KKKK/KKKK/KKKK KKKK/KKKK/KKKK/KKKK KKKK/KKKK/KKKK/KKKK"/>
+      <rule in="I" out="IIII/IIII/IIII/IIII IIII/IIII/IIII/IIII IIII/IIII/IIII/IIII IIII/IIII/IIII/IIII"/>
+      <rule in="O" out="VVVV/VVVV/VVVV/VVVV VVVV/VVVV/VVVV/VVVV VVVV/VVVV/VVVV/VVVV AAAA/AAAA/AAAA/AAAA"/>
+      <rule in="D" out="AAAA/AAAA/AAAA/AAAA VVVV/VVVV/VVVV/VVVV VVVV/VVVV/VVVV/VVVV VVVV/VVVV/VVVV/VVVV"/>
+      <rule in="L" out="LLLL/LLLL/LLLL/LLLL LLLL/LLLL/LLLL/LLLL LLLL/LLLL/LLLL/LLLL LLLL/LLLL/LLLL/LLLL"/>
+      <rule in="n" out="nnnn/nnnn/nnnn/nnnn nnnn/nnnn/nnnn/nnnn nnnn/nnnn/nnnn/nnnn nnnn/nnnn/nnnn/nnnn"/>
+      <rule in="y" out="nnnn/nnnn/nnnn/nnnn nnnn/nnnn/nnnn/nnnn nnnn/nnnn/nnnn/nnnn nnnn/nnnn/nnnn/nnnn"/>
+      <rule in="T" out="TTTT/TTTT/TTTT/TTTT TTTT/TTTT/TTTT/TTTT TTTT/TTTT/TTTT/TTTT TTTT/TTTT/TTTT/TTTT"/>
+      <rule in="b" out="bbbb/bbbb/bbbb/bbbb bbbb/bbbb/bbbb/bbbb bbbb/bbbb/bbbb/bbbb bbbb/bbbb/bbbb/bbbb"/>
+
+      <!-- la scala: gradini di 2, pieno sotto -->
+      <all in="BBB sse" out="UY* ***" steps="1"/>
+      <all in="*BB *B* UY*" out="*UY *Q* QQ*" steps="17"/>
+      <all in="Q B" out="* Q" symmetry="()"/>
+
+      <!-- persiane verdi ai lati delle finestre -->
+      <all in="BB/VW" out="*r/**"/>
+      <all in="rB/WW" out="*r/**" steps="1"/>
+
+      <!-- ringhiere in ferro sui bordi dei balconi -->
+      <all in="B* JB" out="X* **"/>
+      <all in="B X" out="X *" steps="7" symmetry="()"/>
+
+      <!-- parapetto del tetto piano, con copertina bianca -->
+      <all in="B* KB" out="M* **"/>
+      <all in="B M" out="M *" steps="4" symmetry="()"/>
+      <all in="B M" out="K *" steps="1" symmetry="()"/>
+
+      <!-- pulizia -->
+      <prl>
+        <rule in="s" out="k"/>
+        <rule in="e" out="k"/>
+        <rule in="U" out="Q"/>
+        <rule in="Y" out="Q"/>
+      </prl>
+    </map>
+  </map>
+
+  <color symbol="E" value="#7a7f6a" name="terreno"/>
+  <color symbol="N" value="#ff00ff" name="centro"/>
+  <color symbol="z" value="#9aa28a" name="lotto"/>
+  <color symbol="a" value="#ff0000" name="camminatore"/>
+  <color symbol="x" value="#e3cfa0" name="stanza dell'appartamento"/>
+  <color symbol="W" value="#d9b97c" name="intonaco color sabbia"/>
+  <color symbol="c" value="#c9a76a" name="muro del nucleo"/>
+  <color symbol="t" value="#c9a76a" name="muro della scala"/>
+  <color symbol="l" value="#d4b98a" name="muro del nucleo aperto al piano terra"/>
+  <color symbol="I" value="#c4a46e" name="muro interno"/>
+  <color symbol="h" value="#cfc6b4" name="atrio"/>
+  <color symbol="G" value="#5a3a22" name="portone e porta sul cortile"/>
+  <color symbol="d" value="#8a5a34" name="porta interna"/>
+  <color symbol="v" value="#ffaa00" name="percorso"/>
+  <color symbol="i" value="#f2f0ea" name="piede della scala"/>
+  <color symbol="j" value="#e8e4da" name="striscia della scala"/>
+  <color symbol="u" value="#ddeeff" name="vano scala"/>
+  <color symbol="g" value="#8fae6a" name="cortile erboso"/>
+  <color symbol="L" value="#ece6d8" name="muretto bianco"/>
+  <color symbol="o" value="#00ffff" name="zona libera"/>
+  <color symbol="n" value="#a0522d" name="mattoni"/>
+  <color symbol="T" value="#b5532d" name="tegole del ripostiglio"/>
+  <color symbol="b" value="#4f7a45" name="panca verde"/>
+  <color symbol="P" value="#e6e0d2" name="balcone"/>
+  <color symbol="H" value="#3b3f42" name="pensilina in ferro"/>
+  <color symbol="S" value="#5c5c5c" name="strada"/>
+  <color symbol="w" value="#7fa3b8" name="finestra"/>
+  <color symbol="R" value="#f5f0e0" name="aria della stanza"/>
+  <color symbol="f" value="#a8743f" name="parquet"/>
+  <color symbol="k" value="#cfc6b4" name="pavimento in graniglia"/>
+  <color symbol="F" value="#b9b2a6" name="solaio"/>
+  <color symbol="C" value="#8e8a84" name="tetto piano"/>
+  <color symbol="Z" value="#8c8478" name="zoccolo in pietra"/>
+  <color symbol="K" value="#f1ede4" name="cornice bianca"/>
+  <color symbol="O" value="#6f93a8" name="finestra parte bassa"/>
+  <color symbol="D" value="#6f93a8" name="finestra parte alta"/>
+  <color symbol="p" value="#a9a59c" name="marciapiede"/>
+  <color symbol="y" value="#8b4a2b" name="comignolo"/>
+  <color symbol="A" value="#fbfaf6" name="cornice bianca della finestra"/>
+  <color symbol="V" value="#6f93a8" name="vetro della finestra"/>
+  <color symbol="r" value="#2f6b3a" name="persiana verde"/>
+  <color symbol="J" value="#e6e0d2" name="soletta del balcone"/>
+  <color symbol="X" value="#2b2b2b" name="ringhiera in ferro"/>
+  <color symbol="M" value="#cfae72" name="parapetto in intonaco"/>
+  <color symbol="s" value="#f2f0ea" name="piede della scala"/>
+  <color symbol="e" value="#e8e4da" name="striscia della scala"/>
+  <color symbol="U" value="#ffffff" name="gradino"/>
+  <color symbol="Y" value="#eeeeee" name="direzione del gradino"/>
+  <color symbol="Q" value="#f2f0ea" name="scala in marmo bianco"/>
+</sequence>

@@ -1,0 +1,6 @@
+Edificio: Villetta con giardino
+Stile: casa di campagna: intonaco bianco, tetto a falde di coppi rossi, legno
+Com'è: Un corpo a due piani e un’ala bassa, tetti a falde, un portico sul davanti, soggiorno e cucina al piano terra, camere sopra, un comignolo, un giardino con un vialetto e una siepe.
+Scatola: 100 × 100 × 80 voxel; una casella è 20 voxel.
+Corpo: gradino 4 voxel, passaggio largo almeno 11, persona alta 30; salto: sale al più 21, va da 20 a 52 voxel di distanza.
+Il suolo è in fondo alla scatola.

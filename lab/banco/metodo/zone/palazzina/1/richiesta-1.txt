@@ -1,0 +1,8 @@
+Edificio: Palazzina di città
+Stile: Novecento: intonaco color sabbia, cornici bianche, persiane verdi, balconi in ferro
+Com'è: Tre piani con il tetto piano e il parapetto, il portone al centro con la pensilina, l’atrio e la scala, due appartamenti per piano, balconi sul davanti, finestre regolari sui quattro lati, un piccolo cortile sul retro.
+Scatola: 100 × 100 × 80 voxel; una casella è 20 voxel.
+Corpo: gradino 4 voxel, passaggio largo almeno 11, persona alta 30; salto: sale al più 21, va da 20 a 52 voxel di distanza.
+Il suolo è in fondo alla scatola.
+
+## Block 1 of 3: the composition. Write the program with level A only: the root, the map to 1/4 and the composition on the coarse plan (z=0); no heights and no map back yet (the grid stays the coarse one, and the game shows it as it is). Begin with a few comment lines: the parts of this concept, their letters, where each goes relative to the others, what the seeds change. Give every letter a <color> so that the views show it.

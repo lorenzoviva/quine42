@@ -158,7 +158,8 @@ describe('i bersagli e la prova', () => {
 
 describe('i modelli finali (T155)', () => {
   const radice = 'lab/banco/finale';
-  const tentativi = BERSAGLI.flatMap((b) => ['1', '2'].map((n) => ({ b, dir: `${radice}/${b.id}/${n}` })));
+  // The targets of that round: the ones added later (T337) have no attempt there.
+  const tentativi = BERSAGLI.flatMap((b) => ['1', '2'].map((n) => ({ b, dir: `${radice}/${b.id}/${n}` }))).filter(({ dir }) => fs.existsSync(`${dir}/misure.json`));
   const passa = (dir: string) => (JSON.parse(fs.readFileSync(`${dir}/misure.json`, 'utf8')) as { passa: boolean }).passa;
 
   it.each(tentativi.filter(({ dir }) => passa(dir)).map(({ b, dir }) => [dir, b] as const))('%s gira nel motore e passa i controlli', (dir, b) => {
@@ -187,7 +188,7 @@ describe('i modelli del giro di conferma (T173)', () => {
   const radice = 'lab/banco/conferma';
   const passa = (dir: string) => (JSON.parse(fs.readFileSync(`${dir}/misure.json`, 'utf8')) as { passa: boolean }).passa;
   /** The last request of each attempt: the second, if it had one. */
-  const finali = BERSAGLI.flatMap((b) => ['1', '2'].map((n) => ({ b, dir: fs.existsSync(`${radice}/${b.id}/${n}/seconda`) ? `${radice}/${b.id}/${n}/seconda` : `${radice}/${b.id}/${n}` })));
+  const finali = BERSAGLI.filter((b) => fs.existsSync(`${radice}/${b.id}`)).flatMap((b) => ['1', '2'].map((n) => ({ b, dir: fs.existsSync(`${radice}/${b.id}/${n}/seconda`) ? `${radice}/${b.id}/${n}/seconda` : `${radice}/${b.id}/${n}` })));
 
   it.each(finali.filter(({ dir }) => passa(dir)).map(({ b, dir }) => [dir, b] as const))('%s gira nel motore e passa i controlli', (dir, b) => {
     const e = esegui(fs.readFileSync(`${dir}/modello.xml`, 'utf8'), b);

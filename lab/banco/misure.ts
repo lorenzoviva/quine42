@@ -81,7 +81,8 @@ export function esegui(xml: string, b: Bersaglio, seme = 1, tempo?: number): Ese
   const result = runMjx(model, seme, { deadline: Math.min(tempo ?? q.tempo ?? MODEL_TIME, MAX_FORM_TIME), limits: FORM_LIMITS });
   const g = result.grid;
   const box: Vec3 = [g.X, g.Y, g.Z];
-  const clip = model.actions.find((a) => /^apr/i.test(a.name));
+  // The door opens with the action the Sculptor writes: `open` since the contract 0.5 (T308b renamed `apri`), `apri…` before.
+  const clip = model.actions.find((a) => /^(apr|open)/i.test(a.name));
   const grid = clip ? copia(g) : g;
   if (clip) act(grid, clip, seme);
   return { model, result, grid, ...(clip ? { aperta: clip.name } : {}), scatola: { ...scatola, box }, xml: scritto };
