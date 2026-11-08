@@ -26,6 +26,8 @@
 //                      Metropolis steps make every N×N window as likely as in the sample
 //   shape            — box, ellipsoid, cylinder, cone resting on `at` (centre of the base), or a line
 //                      from `at` to `to` with radius `r`; `on` limits which codes it may overwrite
+//   pieces           — the nodes inside run on one piece of the grid at a time, each on a window with a margin around it
+//                      (T339, not in MarkovJunior): see `PiecesNode` and `PiecesRunner`
 // A rule node may also infer (infer.ts, T334): `fields` (potentials that rank its matches, softly with `temperature`), `observe`
 // (a future the node walks towards) and `search` (a whole trajectory found first, within ceilings); then a match is wherever the
 // input fits, as in MarkovJunior, and the node is a `GuidedRunner`. Every other node runs as it always did (ADR-0142).
@@ -33,7 +35,7 @@
 // Programs written in MarkovJunior's own XML (lab/mjx) compile to these nodes with MarkovJunior's
 // semantics: map with `clear` (a new empty grid, rules wrapping round), conv with `sums`, unlimited steps.
 
-import { Rng } from '../kernel/rng';
+import { hash32, Rng } from '../kernel/rng';
 import { backwardPotentials, fieldPotential, goalReached, INFERENCE_LIMITS, makeWork, MAX_OBSERVED_CODES, prepare, search, type InferRule, type Prepared, type Work } from './infer';
 import { MAX_SYMBOLS, showSymbols, symbolName } from './symbols';
 import { convchainWeights, squareSubgroup, waveBytes, WFC_LIMITS, WfcError, WfcSolver } from './wfc';
@@ -145,6 +147,29 @@ export interface ConvChainNode {
   symmetry?: Sym;
 }
 
+/**
+ * The grid in pieces (T339, ADR-0178; MarkovJunior has no such node): its nodes run on one piece of the grid at a time, full height, with
+ * the cells around it it may read (`margin`), each piece in its own time. What is decided once for the whole model goes before (a plan
+ * mapped up): of what a piece writes only its own cells reach the grid, so a piece of a large grid costs what a small grid costs.
+ */
+export interface PiecesNode {
+  type: 'pieces';
+  /** Cells of a piece along x and y (the last ones may be smaller). */
+  size: [number, number];
+  /** Cells around a piece its rules read, on each side (8 if not said). */
+  margin?: number;
+  /** Milliseconds a piece may run (`PieceLimits.pieceMs` at most): past them the run stops, not finished. */
+  time?: number;
+  /**
+   * What a piece reads around itself: `before` (the default), the grid as it was when the node started, so the pieces do not depend on
+   * each other; `written`, what the pieces before it (in rows, from the back) have written.
+   */
+  halo?: 'before' | 'written';
+  /** Whether the margin grows with the piece's own rules (`grow`, the default, thrown away afterwards) or stays as it was read (`frozen`). */
+  edge?: 'frozen' | 'grow';
+  children: Node3[];
+}
+
 export type Node3 =
   | ({ type: 'one' | 'all' | 'prl'; rules: Rule3[]; steps?: number; symmetry?: Sym; optional?: boolean } & Inference)
   /** `gated` (a sequence the compiler makes of a wfc and its nodes, T335): the rest runs only if the first child did something. */
@@ -155,6 +180,7 @@ export type Node3 =
   | { type: 'map'; scale: Vec3; divide?: Vec3; rules?: Rule3[]; symmetry?: Sym; clear?: boolean }
   | WfcNode
   | ConvChainNode
+  | PiecesNode
   | { type: 'shape'; shape: ShapeKind; at: Vec3; size?: Vec3; to?: Vec3; r?: number; color: string; on?: string };
 
 /** Body parts the kernel can move to animate a figure (legs and arms swing, the head nods, tails wag). */
@@ -201,8 +227,31 @@ export const MAX_CODES = MAX_SYMBOLS + 1;
 export interface GridLimits {
   side: number;
   cells: number;
+  /**
+   * What a program with `<pieces>` may do (T339, ADR-0178), if who runs it allows it: a larger grid, and the pieces' time apart from the
+   * run's. Without it a program with pieces runs within `side` and `cells`, and its pieces count in the run's time like any other node.
+   */
+  pieces?: PieceLimits;
 }
 export const MODEL_LIMITS: GridLimits = { side: MAX_SIDE, cells: MAX_CELLS };
+
+/** The ceilings of a program that runs its detail in pieces (T339, ADR-0178): its grids, each piece's time, all of them, how many. */
+export interface PieceLimits {
+  /** The largest grid of a program with pieces: its box, a map's or a wfc's grid. */
+  side: number;
+  cells: number;
+  /** Milliseconds a piece may take at most (a node's `time` up to this). */
+  pieceMs: number;
+  /** Milliseconds all the pieces of a run may take together: past them the run stops, not finished. */
+  totalMs: number;
+  /** Pieces of one node. */
+  count: number;
+  /** Steps of one piece: past them the run is not finished. */
+  steps: number;
+}
+
+/** What a pieces node is held to when who runs it says nothing (T339): its time counts in the run's, its grid is the run's. */
+export const PIECE_DEFAULTS = { margin: 8, pieceMs: 4_000, maxMargin: 64, count: 4096, steps: 5_000_000 } as const;
 
 export class Mj3Error extends Error { }
 
@@ -290,9 +339,25 @@ function censusOf(g: Grid3): Census {
   return current.census;
 }
 
+/** A cell of a piece's window (T339): the piece's own, the margin it only reads, the margin its rules grow and the piece throws away. */
+const OWN = 0;
+const FROZEN = 1;
+const LOOSE = 2;
+
+/**
+ * While a piece runs (T339): its grid and, per cell of it, `OWN`, `FROZEN` or `LOOSE`. `write` never changes a frozen cell, and a rule
+ * never matches where it would change one; `one` picks only where it changes the piece. Undefined otherwise:
+ * every other run is the run it always was.
+ */
+let pieceGuard: { g: Grid3; mask: Uint8Array } | undefined;
+
+/** Milliseconds the pieces of the run in progress have taken, which its deadline does not count when its limits have `pieces` (T339). */
+let piecesTime = 0;
+
 function write(g: Grid3, idx: number, v: number): boolean {
   const was = g.cells[idx];
   if (was === v) return false;
+  if (pieceGuard !== undefined && pieceGuard.mask[idx] === FROZEN && pieceGuard.g === g) return false;
   g.cells[idx] = v;
   const c = current;
   if (c !== undefined && c.g === g && c.census !== undefined && c.census.cells === g.cells) c.census.moved(idx, was, v);
@@ -652,6 +717,31 @@ class RuleRunner extends Runner {
     return true;
   }
 
+  /**
+   * In a piece (T339): whether a match at `o` changes no frozen cell (what it would write where the cell already is does not count).
+   * Across the edge of the piece a match is a match: a stair that climbs out of it grows in the margin as it would in the whole grid, and
+   * the next piece, which grows it too, keeps the rest. `one` (`needOwn`) picks only where it changes the piece (a match that changes
+   * nothing, where it starts), so its steps are the piece's; `all` and `prl` grow in the margin too.
+   */
+  private static freeAt(pr: Probe, cells: Uint8Array, o: number, mask: Uint8Array, needOwn: boolean): boolean {
+    const { outOff, outVal } = pr;
+    let own = false, changes = false;
+    for (let t = 0; t < outOff.length; t++) {
+      const idx = o + outOff[t];
+      if (cells[idx] === outVal[t]) continue;
+      const m = mask[idx];
+      if (m === FROZEN) return false;
+      changes = true;
+      if (m === OWN) own = true;
+    }
+    return !needOwn || own || (!changes && mask[o] === OWN);
+  }
+
+  /** The guard of the piece running on this grid, if any (T339). */
+  private static guardOf(g: Grid3): Uint8Array | undefined {
+    return pieceGuard !== undefined && pieceGuard.g === g ? pieceGuard.mask : undefined;
+  }
+
   private scan(g: Grid3): void {
     const N = g.cells.length;
     this.matches.clear();
@@ -671,12 +761,14 @@ class RuleRunner extends Runner {
     const base = pi * N;
     const nIn = pr.inOff.length;
     const only = this.inputOnly;
+    // In a piece (T339) a match must also leave alone the cells the piece may not change: the same scan, one more test per match.
+    const mask = RuleRunner.guardOf(g);
     if (nIn === 0) {
       for (let z = 0; z + p.dz <= Z; z++)
         for (let y = 0; y + p.dy <= Y; y++)
           for (let x = 0; x + p.dx <= X; x++) {
             const o = x + y * X + z * XY;
-            if (only || RuleRunner.checkAt(pr, cells, o)) this.matches.push(base + o);
+            if ((only || RuleRunner.checkAt(pr, cells, o)) && (mask === undefined || RuleRunner.freeAt(pr, cells, o, mask, this.kind === 'one'))) this.matches.push(base + o);
           }
       return;
     }
@@ -713,7 +805,11 @@ class RuleRunner extends Runner {
         }
         const o0 = oy * X + oz * XY;
         const a0 = (oz + aK) * XY + (oy + aJ) * X + aI;
-        if (only) {
+        if (mask !== undefined) {
+          const one = this.kind === 'one';
+          for (let ox = 0; ox + p.dx <= X; ox++)
+            if (aSet[cells[a0 + ox]] && (only ? RuleRunner.fitsAt(pr, cells, o0 + ox) : RuleRunner.checkAt(pr, cells, o0 + ox)) && RuleRunner.freeAt(pr, cells, o0 + ox, mask, one)) this.matches.push(base + o0 + ox);
+        } else if (only) {
           for (let ox = 0; ox + p.dx <= X; ox++) if (aSet[cells[a0 + ox]] && RuleRunner.fitsAt(pr, cells, o0 + ox)) this.matches.push(base + o0 + ox);
         } else for (let ox = 0; ox + p.dx <= X; ox++) if (aSet[cells[a0 + ox]] && RuleRunner.checkAt(pr, cells, o0 + ox)) this.matches.push(base + o0 + ox);
       }
@@ -735,6 +831,7 @@ class RuleRunner extends Runner {
       const mark = ++stampN;
       const probes = this.patterns.map((_, pi) => this.probe(pi, g));
       const only = this.inputOnly;
+      const mask = RuleRunner.guardOf(g);
       for (let l = this.seen; l < log.length; l++) {
         const c = log[l];
         if (stamps[c] === mark) continue;
@@ -756,7 +853,7 @@ class RuleRunner extends Runner {
                 const ox = cx - i;
                 if (ox < 0 || ox + p.dx > X) continue;
                 const o = ox + oy * X + oz * XY;
-                if (only ? RuleRunner.fitsAt(pr, cells, o) : RuleRunner.checkAt(pr, cells, o)) this.matches.add(base + o);
+                if ((only ? RuleRunner.fitsAt(pr, cells, o) : RuleRunner.checkAt(pr, cells, o)) && (mask === undefined || RuleRunner.freeAt(pr, cells, o, mask, this.kind === 'one'))) this.matches.add(base + o);
                 else this.matches.remove(base + o);
               }
             }
@@ -1758,6 +1855,162 @@ class ConvChainRunner extends Runner {
   }
 }
 
+/** What a piece did (T339): where it is in the grid (its own cells, full height), how long it ran, how many steps, whether it finished. */
+export interface PieceReport {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  ms: number;
+  steps: number;
+  finished: boolean;
+}
+
+/** The reports of the pieces of the run in progress (T339), for its result; and their steps, which the run's count includes. */
+let pieceReports: PieceReport[] = [];
+let piecesSteps = 0;
+
+/**
+ * `<pieces>` (T339, ADR-0178): the grid cut into pieces of `size` cells, full height, in rows from the back. Each piece runs the node's
+ * children alone, from the start, on a window of its own cells and `margin` more on every side: its own random generator (from one draw
+ * of the run's), its own time, its own census and matches, so a piece of a large grid costs what a small grid costs. Of the window only
+ * the piece's own cells go back to the grid. A rule never matches where it would change a frozen cell, and `write` never changes one;
+ * `one` picks only where it changes the piece. With `halo="before"` a piece reads the grid as it was when the node started (the pieces do
+ * not depend on each other); with `written`, what the pieces before it wrote. With `edge="frozen"` the margin is read and never changes;
+ * with `grow` the rules may change it too (cells of earlier pieces with `written` excepted), and those changes are thrown away: a rule
+ * that is the same wherever it runs and looks no farther than the margin gives in a piece what it gives in the whole grid.
+ */
+class PiecesRunner extends Runner {
+  private root: Runner;
+  private size: [number, number];
+  private margin: number;
+  private time: number;
+  private halo: 'before' | 'written';
+  private edge: 'frozen' | 'grow';
+  constructor(node: PiecesNode, alpha: Alphabet, private limits: GridLimits, depth: number, trace?: Trace) {
+    super(1);
+    const [px, py] = Array.isArray(node.size) ? node.size : [];
+    if (!isInt(px, 1, 4096) || !isInt(py, 1, 4096)) throw new Mj3Error('pieces: il lato di un pezzo ("piece") vuole due interi (x e y) da 1 a 4096');
+    const margin = node.margin ?? PIECE_DEFAULTS.margin;
+    if (!isInt(margin, 0, PIECE_DEFAULTS.maxMargin)) throw new Mj3Error(`pieces: "margin" va da 0 a ${PIECE_DEFAULTS.maxMargin}`);
+    const most = limits.pieces?.pieceMs ?? PIECE_DEFAULTS.pieceMs;
+    if (node.time !== undefined && !isInt(node.time, 1, Number.MAX_SAFE_INTEGER)) throw new Mj3Error('pieces: "time" è un numero di millisecondi');
+    if (node.halo !== undefined && node.halo !== 'before' && node.halo !== 'written') throw new Mj3Error('pieces: "halo" è before o written');
+    if (node.edge !== undefined && node.edge !== 'frozen' && node.edge !== 'grow') throw new Mj3Error('pieces: "edge" è frozen o grow');
+    if (!Array.isArray(node.children) || !node.children.length) throw new Mj3Error('pieces senza nodi dentro');
+    this.size = [px, py];
+    this.margin = margin;
+    this.time = Math.min(node.time ?? most, most);
+    this.halo = node.halo ?? 'before';
+    this.edge = node.edge ?? 'grow';
+    // The trace sees the node as one step; its nodes are not watched one by one (another grid, a piece at a time).
+    const kids = node.children.map((c) => compile(c, alpha, limits, depth + 1, trace, undefined, true));
+    this.root = kids.length === 1 ? kids[0] : new SequenceRunner(kids);
+  }
+  reset(): void {
+    super.reset();
+    this.root.reset();
+  }
+  rewind(): void {
+    this.reset();
+  }
+  go(g: Grid3, rng: Rng): boolean {
+    if (this.count >= 1) return false;
+    this.count++;
+    this.total++;
+    const { X, Y, Z } = g;
+    const [PX, PY] = this.size;
+    const cols = Math.ceil(X / PX), rows = Math.ceil(Y / PY);
+    const most = this.limits.pieces?.count ?? PIECE_DEFAULTS.count;
+    if (cols * rows > most) throw new Mj3Error(`pieces: ${cols * rows} pezzi di ${PX}×${PY} su ${X}×${Y}, al più ${most}`);
+    const own = this.limits.pieces;
+    const outer = current;
+    const outerGuard = pieceGuard;
+    const started = Date.now();
+    const base = rng.int(0x7fffffff);
+    // `before`: every piece reads the grid as it was; the pieces write back into the grid itself, which only `written` reads.
+    const source = this.halo === 'before' ? new Uint8Array(g.cells) : g.cells;
+    const m = this.margin;
+    const XY = X * Y;
+    let late = false;
+    let slowest = 0;
+    let index = 0;
+    for (let row = 0; row < rows; row++)
+      for (let col = 0; col < cols; col++, index++) {
+        const x0 = col * PX, x1 = Math.min(X, x0 + PX), y0 = row * PY, y1 = Math.min(Y, y0 + PY);
+        const wx0 = Math.max(0, x0 - m), wx1 = Math.min(X, x1 + m), wy0 = Math.max(0, y0 - m), wy1 = Math.min(Y, y1 + m);
+        const W = wx1 - wx0, H = wy1 - wy0;
+        const cells = new Uint8Array(W * H * Z);
+        const mask = new Uint8Array(W * H * Z);
+        for (let z = 0; z < Z; z++)
+          for (let y = wy0; y < wy1; y++) {
+            const at = (y - wy0) * W + z * W * H;
+            cells.set(source.subarray(wx0 + y * X + z * XY, wx1 + y * X + z * XY), at);
+            if (z > 0) continue;
+            for (let x = wx0; x < wx1; x++) {
+              const inside = x >= x0 && x < x1 && y >= y0 && y < y1;
+              // With `written`, a cell of a piece before this one is what that piece wrote: it stays as it is.
+              const earlier = this.halo === 'written' && Math.floor(y / PY) * cols + Math.floor(x / PX) < index;
+              mask[at + x - wx0] = inside ? OWN : this.edge === 'frozen' || earlier ? FROZEN : LOOSE;
+            }
+          }
+        // The mask is the same at every height: full columns.
+        for (let z = 1; z < Z; z++) mask.copyWithin(z * W * H, 0, W * H);
+        const pg: Grid3 = { X: W, Y: H, Z, cells, alphabet: g.alphabet, log: [], epoch: 0 };
+        const t0 = Date.now();
+        // Its own time, within what is left of the pieces' total (or of the run, when the limits do not give pieces their own).
+        const left = own ? own.totalMs - piecesTime - (t0 - started) : (outer?.deadline ?? Infinity) - t0;
+        const deadline = t0 + Math.max(0, Math.min(this.time, left));
+        const cap = own?.steps ?? PIECE_DEFAULTS.steps;
+        let steps = 0;
+        let done = true;
+        current = { ...(outer ?? {}), g: pg, census: undefined, deadline };
+        pieceGuard = { g: pg, mask };
+        this.root.reset();
+        const prng = new Rng(hash32(base, index));
+        try {
+          for (;;) {
+            if (steps >= cap || Date.now() > deadline) {
+              done = false;
+              break;
+            }
+            if (!this.root.go(pg, prng)) break;
+            steps++;
+          }
+        } catch (e) {
+          if (!(e instanceof Mj3Late)) throw e;
+          done = false;
+        } finally {
+          current = outer;
+          pieceGuard = outerGuard;
+        }
+        // Its own cells, row by row, back to the grid.
+        for (let z = 0; z < Z; z++)
+          for (let y = y0; y < y1; y++) {
+            const at = x0 - wx0 + (y - wy0) * W + z * W * H;
+            g.cells.set(cells.subarray(at, at + x1 - x0), x0 + y * X + z * XY);
+          }
+        const ms = Date.now() - t0;
+        slowest = Math.max(slowest, ms);
+        piecesSteps += steps;
+        pieceReports.push({ x: x0, y: y0, w: x1 - x0, h: y1 - y0, ms, steps, finished: done });
+        if (!done) late = true;
+      }
+    // The grid changed under the census and the nodes' matches: whoever comes next looks at it again.
+    if (current?.g === g) current.census = undefined;
+    g.log.length = 0;
+    g.epoch++;
+    const spent = Date.now() - started;
+    if (own) {
+      piecesTime += spent;
+      if (current?.deadline !== undefined) current.deadline += spent;
+    }
+    this.note = `${cols * rows} pezzi di ${PX}×${PY} (margine ${m}) in ${(spent / 1000).toFixed(1)} s, il più lento ${(slowest / 1000).toFixed(1)} s${late ? ', non tutti finiti' : ''}`;
+    if (late) throw new Mj3Late();
+    return true;
+  }
+}
+
 /** A box of cells turned the way transform() turns patterns. */
 function turnCells<T extends Int32Array | Int16Array>(src: T, d: Vec3, perm: Vec3, flip: Vec3): [T, Vec3] {
   const nd: Vec3 = [d[perm[0]], d[perm[1]], d[perm[2]]];
@@ -1938,25 +2191,37 @@ export function describe(node: Node3): string | undefined {
   if (node.type === 'conv') return `conv "${node.rules[0]?.in}" → "${node.rules[0]?.out}"`;
   if (node.type === 'wfc') return `wfc ${node.model === 'tile' ? 'a tessere' : 'a sovrapposizione'} (${node.patterns?.length} motivi)`;
   if (node.type === 'convchain') return `convchain su "${node.on}"`;
+  if (node.type === 'pieces') return `pieces ${node.size?.join('×')}`;
   return undefined;
 }
 
 type Trace = Array<{ runner: Runner; what: string }>;
 
-function compile(node: Node3, alpha: Alphabet, limits: GridLimits, depth = 0, trace?: Trace, watch?: RunWatch): Runner {
-  const r = compileNode(node, alpha, limits, depth, trace, watch);
+function compile(node: Node3, alpha: Alphabet, limits: GridLimits, depth = 0, trace?: Trace, watch?: RunWatch, inPieces = false): Runner {
+  const r = compileNode(node, alpha, limits, depth, trace, watch, inPieces);
   const what = trace && node && typeof node === 'object' ? describe(node) : undefined;
   if (what) trace!.push({ runner: r, what });
   return watch && node.type !== 'sequence' && node.type !== 'markov' ? new WatchedRunner(r, node, watch) : r;
 }
 
-function compileNode(node: Node3, alpha: Alphabet, limits: GridLimits, depth: number, trace?: Trace, watch?: RunWatch): Runner {
+/** What does not go inside `<pieces>` (T339): what makes another grid, what is written in the coordinates of the whole grid, what looks at all of it. */
+const NOT_IN_PIECES: Partial<Record<Node3['type'], string>> = {
+  map: "una map fa un'altra griglia: va prima di pieces",
+  wfc: "una wfc fa un'altra griglia: va prima di pieces",
+  shape: 'una forma ha le coordinate della griglia intera: va prima di pieces',
+  pieces: 'pieces non va dentro un altro pieces',
+};
+
+function compileNode(node: Node3, alpha: Alphabet, limits: GridLimits, depth: number, trace?: Trace, watch?: RunWatch, inPieces = false): Runner {
   if (depth > 16) throw new Mj3Error('programma troppo annidato');
   if (!node || typeof node !== 'object') throw new Mj3Error('nodo non valido');
+  if (inPieces && NOT_IN_PIECES[node.type]) throw new Mj3Error(`dentro pieces: ${NOT_IN_PIECES[node.type]}`);
   switch (node.type) {
     case 'one':
     case 'all':
     case 'prl': {
+      // An observation, and a search, look at the future of the whole grid: a piece cannot reach it (T339).
+      if (inPieces && (node.observe?.length || node.search)) throw new Mj3Error('dentro pieces: observe e search guardano tutta la griglia, vanno prima di pieces (field sì)');
       const limit = node.steps ?? (node.type === 'prl' ? 1 : undefined);
       // Only a node that infers runs another way (T334): every other program is the same run, voxel by voxel (ADR-0142).
       if (node.fields?.length || node.observe?.length) return new GuidedRunner(node, limit, node.symmetry ?? 'xy', alpha);
@@ -1974,10 +2239,12 @@ function compileNode(node: Node3, alpha: Alphabet, limits: GridLimits, depth: nu
       return new WfcRunner(node, alpha, limits);
     case 'convchain':
       return new ConvChainRunner(node, alpha);
+    case 'pieces':
+      return new PiecesRunner(node, alpha, limits, depth, trace);
     case 'sequence':
     case 'markov': {
       if (!Array.isArray(node.children) || !node.children.length) throw new Mj3Error(`nodo ${node.type} senza figli`);
-      const children = node.children.map((c) => compile(c, alpha, limits, depth + 1, trace, watch));
+      const children = node.children.map((c) => compile(c, alpha, limits, depth + 1, trace, watch, inPieces));
       return node.type === 'sequence' ? new SequenceRunner(children, node.gated === true) : new MarkovRunner(children);
     }
     default:
@@ -1993,6 +2260,8 @@ export interface RunResult {
   ms: number;
   /** Rule nodes and paths that never did anything (described by their first rule): often a mistake. */
   unused?: string[];
+  /** What each piece of a `<pieces>` did, in the order they ran (T339): only for a program that has some. */
+  pieces?: PieceReport[];
 }
 
 export function checkSize(size: unknown, limits: GridLimits = MODEL_LIMITS): Vec3 {
@@ -2058,6 +2327,19 @@ function exec(root: Runner, g: Grid3, seed: number, maxSteps: number, t0: number
 }
 
 function execIn(root: Runner, g: Grid3, seed: number, maxSteps: number, t0: number, trace: Trace, opts: RunOptions): RunResult & { snapshots?: Snapshot[] } {
+  // The pieces of this run (T339): their time, their steps, their reports; a run inside another keeps its own.
+  const outerPieces = [piecesTime, piecesSteps, pieceReports] as const;
+  piecesTime = 0;
+  piecesSteps = 0;
+  pieceReports = [];
+  try {
+    return execSteps(root, g, seed, maxSteps, t0, trace, opts);
+  } finally {
+    [piecesTime, piecesSteps, pieceReports] = outerPieces;
+  }
+}
+
+function execSteps(root: Runner, g: Grid3, seed: number, maxSteps: number, t0: number, trace: Trace, opts: RunOptions): RunResult & { snapshots?: Snapshot[] } {
   root.reset();
   const rng = new Rng(seed);
   let steps = 0;
@@ -2089,8 +2371,9 @@ function execIn(root: Runner, g: Grid3, seed: number, maxSteps: number, t0: numb
         every *= 2;
       }
     }
-    // At every step: on a large grid one step can take long, and 256 of them were seconds past the deadline.
-    if (opts.deadline && Date.now() - t0 > opts.deadline) {
+    // At every step: on a large grid one step can take long, and 256 of them were seconds past the deadline. The time of pieces that
+    // have their own (T339) is not the run's.
+    if (opts.deadline && Date.now() - t0 - piecesTime > opts.deadline) {
       late = true;
       break;
     }
@@ -2098,17 +2381,27 @@ function execIn(root: Runner, g: Grid3, seed: number, maxSteps: number, t0: numb
   if (keep && shots[shots.length - 1]?.step !== steps) shoot();
   return {
     grid: g,
-    steps,
+    steps: steps + piecesSteps,
     finished: steps < maxSteps && !late,
     ms: Date.now() - t0,
     unused: trace.filter((t) => t.runner.total === 0).map((t) => (t.runner.why ? `${t.what} — ${t.runner.why}` : t.what)),
     ...(keep ? { snapshots: shots } : {}),
+    ...(pieceReports.length ? { pieces: pieceReports } : {}),
   };
+}
+
+/** Whether a program has `<pieces>` (T339), anywhere in its nodes. */
+export function hasPieces(node: Node3 | undefined): boolean {
+  if (!node || typeof node !== 'object') return false;
+  if (node.type === 'pieces') return true;
+  return (node.type === 'sequence' || node.type === 'markov') && Array.isArray(node.children) && node.children.some(hasPieces);
 }
 
 /** Runs a program from an empty box. Throws Mj3Error if the program does not compile. */
 export function run(p: Program3, seed: number, maxSteps = 20000, limits: GridLimits = MODEL_LIMITS, opts: RunOptions = {}): RunResult & { snapshots?: Snapshot[] } {
   const t0 = Date.now();
+  // A program that runs its detail in pieces may have the larger grids its runner allows (T339): its box, its maps, its waves.
+  if (limits.pieces && hasPieces(p?.program)) limits = { ...limits, side: Math.max(limits.side, limits.pieces.side), cells: Math.max(limits.cells, limits.pieces.cells) };
   const [X, Y, Z] = checkSize(p?.size, limits);
   const alpha = alphabetOf(p);
   const trace: Trace = [];

@@ -5028,7 +5028,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì, le foto del banco.
 - Quando è fatto: commit su `task/T338`, rapporto in `lab/banco/` con le foto; kernel sale di Z se cambiano i controlli.
 
-### T344 · Integrare T339 nel base (conflitti con T336: ADR-0176, kernel, `run.ts`) — `da fare`
+### T344 · Integrare T339 nel base (conflitti con T336: ADR-0176, kernel, `run.ts`) — `fatto` (`e156ffd2`)
 - Pipeline: claude · sforzo high · stima 4% · approvato · priorità 1
 - Step: 30
 - Contesto: `integra T339` (il nodo `<pieces>`, griglie più grandi a pezzi) ha trovato conflitti con T336, integrato prima (`ed2536c7`, nodi nuovi nel mondo entro `WORLD_NODE_LIMITS`, ADR-0176, kernel 0.6.1): `AGENTS.md`, `docs/architettura-dettagli.md`, `docs/glossario-censimento.md`, `package-lock.json`, `package.json`, `src/kernel/version.ts`, `src/mj/run.ts`, `universe/universe.json`. Entrambi hanno scritto ADR-0176. Nasce da T339: `dossier T339`, `dossier T336`, `traccia T339`.
@@ -5036,6 +5036,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: suite intera (il fallimento noto di `tests/determinism.test.ts` sotto carico si riprova da solo), typecheck, build.
 - Browser: no (T339 e T336 già verificati).
 - Quando è fatto: commit su `task/T344`; poi l'orchestratore integra T344 e `integra T339` toglie worktree e branch di T339.
+- Esito: integrato T339 dopo T336 tenendo entrambe le aggiunte: ADR-0177 la griglia a pezzi, ADR-0176 i nodi nel mondo, kernel 0.6.2 ovunque, import di `run.ts` uniti, AGENTS.md e `architettura-dettagli.md` con le due voci, censimento del glossario rigenerato; `worldNodeErrors` controlla anche i figli di `<pieces>`, con un test; suite intera (2943 superati, 1 saltato), typecheck e build verdi; sicurezza: nessuna superficie nuova (un controllo del validatore in più). Resta da fare l'integrazione di T344, che toglie worktree e branch di T339.
 
 ### T343 · Integrare T336 nel base (conflitto con T337 in `lab/banco/misure.ts`) — `fatto` (`ed2536c7`)
 - Pipeline: claude · sforzo high · stima 2% · approvato · priorità 1

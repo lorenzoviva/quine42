@@ -32,6 +32,9 @@ const ALL_NODES = `<sequence values="BNSAGKHCRTMPDE" size="8 3 8" symmetry="()" 
     <all in="G" out="B"/>
   </markov>
   <path from="R" to="T" on="BP" color="N" steps="2" inertia="True" longest="True"/>
+  <pieces piece="4 3" margin="1">
+    <all in="A" out="M"/>
+  </pieces>
   <convolution neighborhood="Moore" periodic="True" steps="2">
     <rule in="B" out="H" values="X" sum="1..3" p="0.5"/>
     <rule in="P" out="K" values="P" sum="2..26"/>
@@ -51,7 +54,7 @@ const ALL_NODES = `<sequence values="BNSAGKHCRTMPDE" size="8 3 8" symmetry="()" 
 const WORLD_NODES = MJX_NODES.filter((n) => n !== 'wfc' && n !== 'convchain');
 
 function kindsOf(n: Node3, out = new Set<string>()): Set<string> {
-  if (n.type === 'sequence' || n.type === 'markov') {
+  if (n.type === 'sequence' || n.type === 'markov' || n.type === 'pieces') {
     out.add(n.type);
     n.children.forEach((c) => kindsOf(c, out));
   } else if (n.type === 'shape') out.add(n.shape);

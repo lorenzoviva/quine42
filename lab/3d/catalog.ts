@@ -28,6 +28,8 @@ export interface Entry {
   handmade?: boolean;
   /** The files of lab/mjx/models it reads (`<import>`, rule files; T333). */
   files?: Record<string, string>;
+  /** A large model of the bench of the grid in pieces (T339, lab/banco/pezzi/): only for the developers. */
+  pieces?: boolean;
 }
 
 const files = import.meta.glob('../mjx/models/*.xml', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
@@ -137,6 +139,19 @@ for (const [file, xml] of Object.entries(trial)) {
 }
 
 
+// The bench of the grid in pieces (T339, lab/banco/pezzi/): the farm of 50 × 50 tiles at 10 voxels a tile and the large fort, whole
+// models of millions of cells. Only for the developers: in the players' build there is no bench.
+const pieced = (import.meta.env.MODE !== 'production' ? import.meta.glob('../banco/pezzi/*.xml', { query: '?raw', import: 'default', eager: true }) : {}) as Record<string, string>;
+const PIECED: Record<string, { name: string; vpt: number; size: Vec3 }> = {
+  fattoria: { name: 'Fattoria di 50 × 50 caselle (a pezzi)', vpt: 10, size: [500, 500, 50] },
+  forte: { name: 'Forte grande (a pezzi)', vpt: 12, size: [384, 384, 96] },
+};
+for (const [file, xml] of Object.entries(pieced)) {
+  const base = file.replace(/^.*\//, '').replace(/\.xml$/, '');
+  const p = PIECED[base];
+  if (p) CATALOG.push({ id: `pezzi:${base}`, name: p.name, role: 'structure', xml, vpt: p.vpt, size: p.size, source: sourceOf(xml), pieces: true });
+}
+
 // Hand drawn models
 const handmade = (import.meta.env.MODE !== 'production' ? import.meta.glob('../mjx/models/handmade/*.xml', { query: '?raw', import: 'default', eager: true }) : {}) as Record<string, string>;
 for (const [file, xml] of Object.entries(handmade)) {
@@ -159,10 +174,11 @@ export const byId = (id: string) => CATALOG.find((e) => e.id === id);
 export const GROUPS: Array<[string, (e: Entry) => boolean]> = [
   ['Persone e animali', (e) => !e.trial && ['player', 'npc', 'animal'].includes(e.role)],
   ['Piante e rocce', (e) => !e.trial && ['tree', 'plant', 'rock'].includes(e.role)],
-  ['Oggetti e strutture', (e) => !e.trial && ['prop', 'structure'].includes(e.role)],
+  ['Oggetti e strutture', (e) => !e.trial && !e.pieces && ['prop', 'structure'].includes(e.role)],
   ...(DEV_TOOLS
     ? ([
         ['MarkovJunior (originali)', (e) => e.role === 'official'],
+        ['Banco: modelli grandi a pezzi (T339)', (e) => !!e.pieces],
         ['Gemini: prove degli step 8.2A e 8.2B', (e) => !!e.trial],
         ['Modelli dell\'editor', (e) => !!e.handmade],
       ] as Array<[string, (e: Entry) => boolean]>)
