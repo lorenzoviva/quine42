@@ -174,6 +174,8 @@ In `bersagli.ts`: `moderna`, `steampunk`, `futuristica`, `locanda` (con la canti
 
 `metodo/README.md`: perché gli edifici dello Scultore sembrano tutti lo stesso (misura tra concetti e tra semi, `concetti.ts`: col prompt di oggi due concetti distano quanto due semi, e il 78-92 % di ogni programma è lo scheletro), il metodo provato (la composizione per concetto su una griglia a 1/4, `metodo/prompt-zone.md`) e il ritorno in testo dopo ogni blocco (`blocchi.ts`, `viste.ts`; `lab/scripts/banco-blocchi.ts`, `banco-ritorno.ts`, `banco-concetti.ts`, `banco-rimisura.ts`). **La porta**: dal contratto 0.5 l'azione si chiama `open`; `esegui` la apriva solo con `apr…`, e un giro col prompt di oggi risultava tutto chiuso (corretto, T337).
 
+`pezzi/README.md`: i modelli grandi a parti coerenti (T339, ADR-0177): dove sta il tetto di un modello oggi (il motore regge la griglia intera; si fermano `FORM_LIMITS`, le scatole delle classi e la mesh), perché le strutture a blocchi di una volta non combaciavano, le due vie per fare un modello a pezzi misurate su una fattoria di 50 × 50 caselle e un forte grande (`pezzi/fattoria.xml`, `pezzi/forte.xml`, i controlli sui bordi in `pezzi/bordi.ts`; `lab/scripts/misura-tetto.ts`, `banco-pezzi.ts`).
+
 ## Gli esempi
 
 `esempi/buono.xml` (scritto a mano, passa le misure ma è statico), `esempi/scala-stretta.xml` (lo stesso con la scala larga 4 voxel), `esempi/brutto.xml` (una scatola), `esempi/variabile.xml` (varia e non è un edificio, T180): li usa

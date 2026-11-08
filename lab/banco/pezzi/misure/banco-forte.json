@@ -1,0 +1,474 @@
+[
+ {
+  "banco": "forte",
+  "seme": 1,
+  "via": "intera",
+  "ms": 1107,
+  "finito": true,
+  "strutture": 0,
+  "salti": {
+   "bordi": 2,
+   "dentro": 26,
+   "coppie": [
+    108,
+    164
+   ]
+  },
+  "continui": {
+   "selciato": [
+    1,
+    1
+   ]
+  }
+ },
+ {
+  "banco": "forte",
+  "seme": 1,
+  "via": "a",
+  "ms": 1368,
+  "finito": true,
+  "pezzi": 9,
+  "pezzoLento": 102,
+  "strutture": 0,
+  "salti": {
+   "bordi": 5,
+   "dentro": 26,
+   "coppie": [
+    108,
+    164
+   ]
+  },
+  "continui": {
+   "selciato": [
+    1,
+    1
+   ]
+  }
+ },
+ {
+  "banco": "forte",
+  "seme": 1,
+  "via": "a-fermo",
+  "ms": 1121,
+  "finito": true,
+  "pezzi": 9,
+  "pezzoLento": 85,
+  "strutture": 0,
+  "salti": {
+   "bordi": 4,
+   "dentro": 26,
+   "coppie": [
+    108,
+    164
+   ]
+  },
+  "continui": {
+   "selciato": [
+    1,
+    1
+   ]
+  }
+ },
+ {
+  "banco": "forte",
+  "seme": 1,
+  "via": "b",
+  "ms": 1146,
+  "finito": true,
+  "pezzi": 9,
+  "pezzoLento": 85,
+  "strutture": 0,
+  "salti": {
+   "bordi": 5,
+   "dentro": 28,
+   "coppie": [
+    108,
+    164
+   ]
+  },
+  "continui": {
+   "selciato": [
+    1,
+    1
+   ]
+  }
+ },
+ {
+  "banco": "forte",
+  "seme": 1,
+  "via": "b-fermo",
+  "ms": 1104,
+  "finito": true,
+  "pezzi": 9,
+  "pezzoLento": 93,
+  "strutture": 0,
+  "salti": {
+   "bordi": 6,
+   "dentro": 26,
+   "coppie": [
+    108,
+    164
+   ]
+  },
+  "continui": {
+   "selciato": [
+    1,
+    1
+   ]
+  }
+ },
+ {
+  "banco": "forte",
+  "seme": 2,
+  "via": "intera",
+  "ms": 833,
+  "finito": true,
+  "strutture": 0,
+  "salti": {
+   "bordi": 3,
+   "dentro": 8,
+   "coppie": [
+    84,
+    156
+   ]
+  },
+  "continui": {
+   "selciato": [
+    1,
+    1
+   ]
+  }
+ },
+ {
+  "banco": "forte",
+  "seme": 2,
+  "via": "a",
+  "ms": 1177,
+  "finito": true,
+  "pezzi": 9,
+  "pezzoLento": 109,
+  "strutture": 0,
+  "salti": {
+   "bordi": 4,
+   "dentro": 7,
+   "coppie": [
+    84,
+    156
+   ]
+  },
+  "continui": {
+   "selciato": [
+    1,
+    1
+   ]
+  }
+ },
+ {
+  "banco": "forte",
+  "seme": 2,
+  "via": "a-fermo",
+  "ms": 1078,
+  "finito": true,
+  "pezzi": 9,
+  "pezzoLento": 110,
+  "strutture": 0,
+  "salti": {
+   "bordi": 3,
+   "dentro": 7,
+   "coppie": [
+    84,
+    156
+   ]
+  },
+  "continui": {
+   "selciato": [
+    1,
+    1
+   ]
+  }
+ },
+ {
+  "banco": "forte",
+  "seme": 2,
+  "via": "b",
+  "ms": 1098,
+  "finito": true,
+  "pezzi": 9,
+  "pezzoLento": 89,
+  "strutture": 0,
+  "salti": {
+   "bordi": 6,
+   "dentro": 7,
+   "coppie": [
+    84,
+    156
+   ]
+  },
+  "continui": {
+   "selciato": [
+    1,
+    1
+   ]
+  }
+ },
+ {
+  "banco": "forte",
+  "seme": 2,
+  "via": "b-fermo",
+  "ms": 1033,
+  "finito": true,
+  "pezzi": 9,
+  "pezzoLento": 83,
+  "strutture": 0,
+  "salti": {
+   "bordi": 1,
+   "dentro": 8,
+   "coppie": [
+    84,
+    156
+   ]
+  },
+  "continui": {
+   "selciato": [
+    1,
+    1
+   ]
+  }
+ },
+ {
+  "banco": "forte",
+  "seme": 3,
+  "via": "intera",
+  "ms": 904,
+  "finito": true,
+  "strutture": 0,
+  "salti": {
+   "bordi": 14,
+   "dentro": 12,
+   "coppie": [
+    168,
+    120
+   ]
+  },
+  "continui": {
+   "selciato": [
+    1,
+    1
+   ]
+  }
+ },
+ {
+  "banco": "forte",
+  "seme": 3,
+  "via": "a",
+  "ms": 1191,
+  "finito": true,
+  "pezzi": 9,
+  "pezzoLento": 89,
+  "strutture": 0,
+  "salti": {
+   "bordi": 15,
+   "dentro": 14,
+   "coppie": [
+    168,
+    120
+   ]
+  },
+  "continui": {
+   "selciato": [
+    1,
+    1
+   ]
+  }
+ },
+ {
+  "banco": "forte",
+  "seme": 3,
+  "via": "a-fermo",
+  "ms": 1134,
+  "finito": true,
+  "pezzi": 9,
+  "pezzoLento": 83,
+  "strutture": 0,
+  "salti": {
+   "bordi": 14,
+   "dentro": 15,
+   "coppie": [
+    168,
+    120
+   ]
+  },
+  "continui": {
+   "selciato": [
+    1,
+    1
+   ]
+  }
+ },
+ {
+  "banco": "forte",
+  "seme": 3,
+  "via": "b",
+  "ms": 1144,
+  "finito": true,
+  "pezzi": 9,
+  "pezzoLento": 84,
+  "strutture": 0,
+  "salti": {
+   "bordi": 16,
+   "dentro": 15,
+   "coppie": [
+    168,
+    120
+   ]
+  },
+  "continui": {
+   "selciato": [
+    1,
+    1
+   ]
+  }
+ },
+ {
+  "banco": "forte",
+  "seme": 3,
+  "via": "b-fermo",
+  "ms": 1164,
+  "finito": true,
+  "pezzi": 9,
+  "pezzoLento": 82,
+  "strutture": 0,
+  "salti": {
+   "bordi": 14,
+   "dentro": 15,
+   "coppie": [
+    168,
+    120
+   ]
+  },
+  "continui": {
+   "selciato": [
+    1,
+    1
+   ]
+  }
+ },
+ {
+  "banco": "forte",
+  "seme": 4,
+  "via": "intera",
+  "ms": 876,
+  "finito": true,
+  "strutture": 0,
+  "salti": {
+   "bordi": 3,
+   "dentro": 13,
+   "coppie": [
+    212,
+    160
+   ]
+  },
+  "continui": {
+   "selciato": [
+    2,
+    2
+   ]
+  }
+ },
+ {
+  "banco": "forte",
+  "seme": 4,
+  "via": "a",
+  "ms": 1249,
+  "finito": true,
+  "pezzi": 9,
+  "pezzoLento": 117,
+  "strutture": 0,
+  "salti": {
+   "bordi": 8,
+   "dentro": 14,
+   "coppie": [
+    212,
+    160
+   ]
+  },
+  "continui": {
+   "selciato": [
+    2,
+    2
+   ]
+  }
+ },
+ {
+  "banco": "forte",
+  "seme": 4,
+  "via": "a-fermo",
+  "ms": 1131,
+  "finito": true,
+  "pezzi": 9,
+  "pezzoLento": 99,
+  "strutture": 0,
+  "salti": {
+   "bordi": 6,
+   "dentro": 12,
+   "coppie": [
+    212,
+    160
+   ]
+  },
+  "continui": {
+   "selciato": [
+    2,
+    2
+   ]
+  }
+ },
+ {
+  "banco": "forte",
+  "seme": 4,
+  "via": "b",
+  "ms": 1174,
+  "finito": true,
+  "pezzi": 9,
+  "pezzoLento": 109,
+  "strutture": 0,
+  "salti": {
+   "bordi": 10,
+   "dentro": 12,
+   "coppie": [
+    212,
+    160
+   ]
+  },
+  "continui": {
+   "selciato": [
+    2,
+    2
+   ]
+  }
+ },
+ {
+  "banco": "forte",
+  "seme": 4,
+  "via": "b-fermo",
+  "ms": 1131,
+  "finito": true,
+  "pezzi": 9,
+  "pezzoLento": 105,
+  "strutture": 0,
+  "salti": {
+   "bordi": 5,
+   "dentro": 13,
+   "coppie": [
+    212,
+    160
+   ]
+  },
+  "continui": {
+   "selciato": [
+    2,
+    2
+   ]
+  }
+ }
+]

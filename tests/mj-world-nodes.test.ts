@@ -42,6 +42,14 @@ describe('i tetti del mondo (WORLD_NODE_LIMITS)', () => {
     expect(worldNodeErrors(chain(' steps="5" n="2"'))).toEqual([]);
   });
 
+  it('ciò che sta dentro pieces conta come il resto (T339, ADR-0177)', () => {
+    const chain = (attrs: string) =>
+      compileMjx(`<sequence values="BAD" size="8 8 1"><pieces piece="4" margin="2"><convchain sample="c" on="B" black="D" white="A"${attrs}/></pieces></sequence>`, { files: { 'c.txt': 'AD/DA' } });
+    expect(worldNodeErrors(chain('')).join()).toMatch(/convchain nel mondo vuole steps/);
+    expect(worldNodeErrors(chain(' steps="5" n="4"')).join()).toMatch(/n fino a 3/);
+    expect(worldNodeErrors(chain(' steps="5" n="2"'))).toEqual([]);
+  });
+
   it('ciò che sta in un\'animazione o in un\'azione conta come il resto', () => {
     const m = compileMjx('<sequence values="BR" size="5 1 1"><all in="B" out="R" steps="1"/></sequence><action name="a" label="A"><one in="RB" out="BR" search="True"><observe value="R" to="B"/></one></action>');
     expect(worldNodeErrors(m).join()).toMatch(/search nel mondo/);

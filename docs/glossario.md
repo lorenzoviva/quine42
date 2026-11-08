@@ -448,6 +448,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: nessuno
 - **Fermo**: l'attributo `scale` di `<map>`, come nell'XML di MarkovJunior.
 
+### Griglia a pezzi
+- **Inglese**: `pieces`, `PiecesNode`, `PieceLimits`, `PieceReport`, `FORM_PIECES`, `FORM_RUN_LIMITS`
+- **Definizione**: il nodo `<pieces piece margin time>` di un programma MarkovJunior (non c'è nell'originale): i suoi nodi girano su un **pezzo** della griglia alla volta (`piece` celle per lato, tutta l'altezza), ognuno su una finestra che ha il **margine** attorno, col suo generatore, il suo tempo e le sue corrispondenze; della finestra si tiene solo il pezzo. Ciò che il modello deve decidere una volta sta prima, sul piano grossolano, e una `map` lo porta ai voxel: le parti combaciano perché vengono dallo stesso piano, e una regola che non dipende dall'ordine e guarda non più lontano del margine dà nei pezzi ciò che dà la griglia intera. `one` sceglie nel suo pezzo (i passi sono del pezzo); dentro non vanno `map`, `wfc`, forme, `observe`, `search` né un altro `pieces` (ADR-0177).
+- **Dove vive**: `src/mj/engine.ts`, `src/mj/model.ts`, `src/mj/run.ts`
+- **Da non usare**: `chunk` (è il luogo), `blocchi` (le strutture a blocchi di ADR-0032), `tessere` (sono della `wfc`), `finestre` (per il pezzo: la finestra è il pezzo col suo margine)
+- **Fermo**: `<pieces piece margin time halo edge>`.
+
 ### Cartella delle regole
 - **Inglese**: `folder`
 - **Definizione**: l'attributo `folder` della radice, di una `map` o di una `wfc`: le regole da file della sua griglia si leggono da `models/<cartella>-<nome>.txt`, il posto che nell'originale è `resources/rules/<cartella>/` (ADR-0174).

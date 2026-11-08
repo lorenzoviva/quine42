@@ -175,7 +175,8 @@ export function worldNodeErrors(m: Pick<MjxModel, 'program'> & Partial<Pick<MjxM
   const L = WORLD_NODE_LIMITS;
   const errors = new Set<string>();
   const visit = (n: Node3) => {
-    if (n.type === 'sequence' || n.type === 'markov') n.children.forEach(visit);
+    // The nodes inside <pieces> (T339, ADR-0177) count as the rest: every piece runs them.
+    if (n.type === 'sequence' || n.type === 'markov' || n.type === 'pieces') n.children.forEach(visit);
     else if ((n.type === 'one' || n.type === 'all' || n.type === 'prl') && n.search && !(n.limit !== undefined && n.limit <= L.searchStates))
       errors.add(`search nel mondo vuole limit da 1 a ${L.searchStates} (gli stati che la ricerca tiene)${n.limit !== undefined ? `, non ${n.limit}` : ''}`);
     else if (n.type === 'wfc') {

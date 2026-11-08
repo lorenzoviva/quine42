@@ -1,0 +1,570 @@
+[
+ {
+  "id": "forte-di-frontiera",
+  "box": [
+   120,
+   120,
+   96
+  ],
+  "seme": 1,
+  "celle": 1382400,
+  "ms": 255,
+  "passi": 611,
+  "finito": true,
+  "picco": 149,
+  "resta": 48,
+  "mesh": {
+   "ms": 322,
+   "vertici": 363112,
+   "mb": 17.1
+  }
+ },
+ {
+  "id": "forte-di-frontiera",
+  "box": [
+   240,
+   240,
+   96
+  ],
+  "seme": 1,
+  "celle": 5529600,
+  "ms": 371,
+  "passi": 729,
+  "finito": true,
+  "picco": 132,
+  "resta": 84,
+  "mesh": {
+   "ms": 346,
+   "vertici": 344224,
+   "mb": 16.2
+  }
+ },
+ {
+  "id": "forte-di-frontiera",
+  "box": [
+   360,
+   360,
+   96
+  ],
+  "seme": 1,
+  "celle": 12441600,
+  "ms": 624,
+  "passi": 825,
+  "finito": true,
+  "picco": 140,
+  "resta": 124,
+  "mesh": {
+   "ms": 378,
+   "vertici": 319304,
+   "mb": 15
+  }
+ },
+ {
+  "id": "forte-di-frontiera",
+  "box": [
+   480,
+   480,
+   96
+  ],
+  "seme": 1,
+  "celle": 22118400,
+  "ms": 943,
+  "passi": 976,
+  "finito": true,
+  "picco": 211,
+  "resta": 176,
+  "mesh": {
+   "ms": 474,
+   "vertici": 419352,
+   "mb": 19.7
+  }
+ },
+ {
+  "id": "locanda",
+  "box": [
+   120,
+   120,
+   96
+  ],
+  "seme": 1,
+  "celle": 1382400,
+  "ms": 281,
+  "passi": 706,
+  "finito": true,
+  "picco": 126,
+  "resta": 45,
+  "mesh": {
+   "ms": 326,
+   "vertici": 368536,
+   "mb": 18.8
+  }
+ },
+ {
+  "id": "locanda",
+  "box": [
+   240,
+   240,
+   96
+  ],
+  "seme": 1,
+  "celle": 5529600,
+  "ms": 400,
+  "passi": 766,
+  "finito": true,
+  "picco": 151,
+  "resta": 70,
+  "mesh": {
+   "ms": 337,
+   "vertici": 333624,
+   "mb": 15.7
+  }
+ },
+ {
+  "id": "locanda",
+  "box": [
+   360,
+   360,
+   96
+  ],
+  "seme": 1,
+  "celle": 12441600,
+  "ms": 654,
+  "passi": 977,
+  "finito": true,
+  "picco": 173,
+  "resta": 120,
+  "mesh": {
+   "ms": 399,
+   "vertici": 377320,
+   "mb": 19.2
+  }
+ },
+ {
+  "id": "locanda",
+  "box": [
+   480,
+   480,
+   96
+  ],
+  "seme": 1,
+  "celle": 22118400,
+  "ms": 1007,
+  "passi": 1014,
+  "finito": true,
+  "picco": 190,
+  "resta": 190,
+  "mesh": {
+   "ms": 444,
+   "vertici": 344128,
+   "mb": 17.6
+  }
+ },
+ {
+  "id": "tempio-della-luna",
+  "box": [
+   120,
+   120,
+   96
+  ],
+  "seme": 1,
+  "celle": 1382400,
+  "ms": 314,
+  "passi": 620,
+  "finito": true,
+  "picco": 159,
+  "resta": 47,
+  "mesh": {
+   "ms": 298,
+   "vertici": 347688,
+   "mb": 16.3
+  }
+ },
+ {
+  "id": "tempio-della-luna",
+  "box": [
+   240,
+   240,
+   96
+  ],
+  "seme": 1,
+  "celle": 5529600,
+  "ms": 402,
+  "passi": 738,
+  "finito": true,
+  "picco": 149,
+  "resta": 75,
+  "mesh": {
+   "ms": 347,
+   "vertici": 331160,
+   "mb": 15.6
+  }
+ },
+ {
+  "id": "tempio-della-luna",
+  "box": [
+   360,
+   360,
+   96
+  ],
+  "seme": 1,
+  "celle": 12441600,
+  "ms": 793,
+  "passi": 834,
+  "finito": true,
+  "picco": 156,
+  "resta": 121,
+  "mesh": {
+   "ms": 375,
+   "vertici": 305400,
+   "mb": 14.4
+  }
+ },
+ {
+  "id": "tempio-della-luna",
+  "box": [
+   480,
+   480,
+   96
+  ],
+  "seme": 1,
+  "celle": 22118400,
+  "ms": 966,
+  "passi": 985,
+  "finito": true,
+  "picco": 270,
+  "resta": 176,
+  "mesh": {
+   "ms": 538,
+   "vertici": 404328,
+   "mb": 19
+  }
+ },
+ {
+  "id": "riferimento-forte",
+  "box": [
+   120,
+   120,
+   96
+  ],
+  "seme": 1,
+  "celle": 1382400,
+  "ms": 1646,
+  "passi": 159,
+  "finito": true,
+  "picco": 188,
+  "resta": 36,
+  "mesh": {
+   "ms": 364,
+   "vertici": 450000,
+   "mb": 21.2
+  }
+ },
+ {
+  "id": "riferimento-forte",
+  "box": [
+   240,
+   240,
+   96
+  ],
+  "seme": 1,
+  "celle": 5529600,
+  "ms": 1829,
+  "passi": 185,
+  "finito": true,
+  "picco": 190,
+  "resta": 71,
+  "mesh": {
+   "ms": 415,
+   "vertici": 457840,
+   "mb": 21.5
+  }
+ },
+ {
+  "id": "riferimento-forte",
+  "box": [
+   360,
+   360,
+   96
+  ],
+  "seme": 1,
+  "celle": 12441600,
+  "ms": 2403,
+  "passi": 177,
+  "finito": true,
+  "picco": 264,
+  "resta": 115,
+  "mesh": {
+   "ms": 477,
+   "vertici": 509400,
+   "mb": 23.9
+  }
+ },
+ {
+  "id": "riferimento-forte",
+  "box": [
+   480,
+   480,
+   96
+  ],
+  "seme": 1,
+  "celle": 22118400,
+  "ms": 2400,
+  "passi": 169,
+  "finito": true,
+  "picco": 196,
+  "resta": 182,
+  "mesh": {
+   "ms": 503,
+   "vertici": 443520,
+   "mb": 20.8
+  }
+ },
+ {
+  "id": "riferimento-palazzina",
+  "box": [
+   120,
+   120,
+   96
+  ],
+  "seme": 1,
+  "celle": 1382400,
+  "ms": 945,
+  "passi": 93,
+  "finito": true,
+  "picco": 192,
+  "resta": 35,
+  "mesh": {
+   "ms": 339,
+   "vertici": 342680,
+   "mb": 16.1
+  }
+ },
+ {
+  "id": "riferimento-palazzina",
+  "box": [
+   240,
+   240,
+   96
+  ],
+  "seme": 1,
+  "celle": 5529600,
+  "ms": 1488,
+  "passi": 100,
+  "finito": true,
+  "picco": 157,
+  "resta": 71,
+  "mesh": {
+   "ms": 399,
+   "vertici": 404128,
+   "mb": 19
+  }
+ },
+ {
+  "id": "riferimento-palazzina",
+  "box": [
+   360,
+   360,
+   96
+  ],
+  "seme": 1,
+  "celle": 12441600,
+  "ms": 1634,
+  "passi": 103,
+  "finito": true,
+  "picco": 138,
+  "resta": 117,
+  "mesh": {
+   "ms": 420,
+   "vertici": 353224,
+   "mb": 16.6
+  }
+ },
+ {
+  "id": "riferimento-palazzina",
+  "box": [
+   480,
+   480,
+   96
+  ],
+  "seme": 1,
+  "celle": 22118400,
+  "ms": 1792,
+  "passi": 106,
+  "finito": true,
+  "picco": 205,
+  "resta": 188,
+  "mesh": {
+   "ms": 495,
+   "vertici": 343920,
+   "mb": 16.2
+  }
+ },
+ {
+  "id": "fattoria-pezzi",
+  "box": [
+   120,
+   120,
+   96
+  ],
+  "seme": 1,
+  "celle": 1382400,
+  "ms": 414,
+  "passi": 140,
+  "finito": true,
+  "picco": 103,
+  "resta": 46,
+  "pezzi": 1,
+  "pezzoLento": 216,
+  "mesh": {
+   "ms": 235,
+   "vertici": 169944,
+   "mb": 8
+  }
+ },
+ {
+  "id": "fattoria-pezzi",
+  "box": [
+   240,
+   240,
+   96
+  ],
+  "seme": 1,
+  "celle": 5529600,
+  "ms": 936,
+  "passi": 512,
+  "finito": true,
+  "picco": 310,
+  "resta": 48,
+  "pezzi": 4,
+  "pezzoLento": 183,
+  "mesh": {
+   "ms": 619,
+   "vertici": 1003448,
+   "mb": 47.2
+  }
+ },
+ {
+  "id": "fattoria-pezzi",
+  "box": [
+   360,
+   360,
+   96
+  ],
+  "seme": 1,
+  "celle": 12441600,
+  "ms": 1551,
+  "passi": 757,
+  "finito": true,
+  "picco": 592,
+  "resta": 132,
+  "pezzi": 9,
+  "pezzoLento": 280,
+  "mesh": {
+   "ms": 1086,
+   "vertici": 1884752,
+   "mb": 88.6
+  }
+ },
+ {
+  "id": "fattoria-pezzi",
+  "box": [
+   480,
+   480,
+   96
+  ],
+  "seme": 1,
+  "celle": 22118400,
+  "ms": 2563,
+  "passi": 1084,
+  "finito": true,
+  "picco": 809,
+  "resta": 170,
+  "pezzi": 16,
+  "pezzoLento": 239,
+  "mesh": {
+   "ms": 1497,
+   "vertici": 2704448,
+   "mb": 127.1
+  }
+ },
+ {
+  "id": "fattoria-intera",
+  "box": [
+   120,
+   120,
+   96
+  ],
+  "seme": 1,
+  "celle": 1382400,
+  "ms": 346,
+  "passi": 139,
+  "finito": true,
+  "picco": 99,
+  "resta": 31,
+  "mesh": {
+   "ms": 174,
+   "vertici": 170216,
+   "mb": 8
+  }
+ },
+ {
+  "id": "fattoria-intera",
+  "box": [
+   240,
+   240,
+   96
+  ],
+  "seme": 1,
+  "celle": 5529600,
+  "ms": 626,
+  "passi": 214,
+  "finito": true,
+  "picco": 385,
+  "resta": 58,
+  "mesh": {
+   "ms": 600,
+   "vertici": 1003016,
+   "mb": 47.1
+  }
+ },
+ {
+  "id": "fattoria-intera",
+  "box": [
+   360,
+   360,
+   96
+  ],
+  "seme": 1,
+  "celle": 12441600,
+  "ms": 1251,
+  "passi": 397,
+  "finito": true,
+  "picco": 600,
+  "resta": 115,
+  "mesh": {
+   "ms": 1185,
+   "vertici": 1886360,
+   "mb": 88.7
+  }
+ },
+ {
+  "id": "fattoria-intera",
+  "box": [
+   480,
+   480,
+   96
+  ],
+  "seme": 1,
+  "celle": 22118400,
+  "ms": 1815,
+  "passi": 530,
+  "finito": true,
+  "picco": 896,
+  "resta": 182,
+  "mesh": {
+   "ms": 1512,
+   "vertici": 2704096,
+   "mb": 127.1
+  }
+ }
+]
