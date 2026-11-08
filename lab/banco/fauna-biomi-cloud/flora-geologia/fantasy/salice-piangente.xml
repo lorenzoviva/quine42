@@ -1,5 +1,5 @@
 <!-- Salice piangente (Cantiere 8, aurora): tronco e rami a caso; le fronde ricadono a caso. -->
-<sequence values="BTUAFLSHewsnu123456z" symmetry="(xy)" name="Salice piangente">
+<sequence values="BTUAFLSHewsnu#1#2#3#4#5#6z" symmetry="(xy)" name="Salice piangente">
   <color symbol="T" value="6b5a42" name="corteccia"/>
   <color symbol="U" value="6b5a42" name="corteccia alta"/>
   <color symbol="A" value="7a6a4a" name="rami"/>
@@ -12,12 +12,12 @@
   <color symbol="s" hidden="True" name="marcatore"/>
   <color symbol="n" hidden="True" name="marcatore"/>
   <color symbol="u" hidden="True" name="marcatore"/>
-  <color symbol="1" hidden="True" name="marcatore"/>
-  <color symbol="2" hidden="True" name="marcatore"/>
-  <color symbol="3" hidden="True" name="marcatore"/>
-  <color symbol="4" hidden="True" name="marcatore"/>
-  <color symbol="5" hidden="True" name="marcatore"/>
-  <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="#1" hidden="True" name="marcatore"/>
+  <color symbol="#2" hidden="True" name="marcatore"/>
+  <color symbol="#3" hidden="True" name="marcatore"/>
+  <color symbol="#4" hidden="True" name="marcatore"/>
+  <color symbol="#5" hidden="True" name="marcatore"/>
+  <color symbol="#6" hidden="True" name="marcatore"/>
   <color symbol="z" hidden="True" name="marcatore"/>
   <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
   <box at="3 0 0" size="7 1 1" color="z" on="B"/>
@@ -25,22 +25,22 @@
   <one in="z" out="B" steps="8"/>
   <!-- scelta «base»: sul prato | sulla riva | sulle radici -->
   <box at="20 20 0" size="40 40 5" color="u" on="B"/>
-  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
-  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
   <!--   1: sul prato -->
-  <cylinder at="20 20 0" size="10 10 2" color="T" on="1"/>
+  <cylinder at="20 20 0" size="10 10 2" color="T" on="#1"/>
   <!--   2: sulla riva -->
-  <ellipsoid at="12 20 0" size="8 7 4" color="S" on="2"/>
-  <ellipsoid at="28 16 0" size="7 8 3" color="S" on="2"/>
-  <ellipsoid at="20 28 0" size="9 6 4" color="S" on="2"/>
-  <cylinder at="20 20 0" size="12 12 2" color="T" on="2"/>
+  <ellipsoid at="12 20 0" size="8 7 4" color="S" on="#2"/>
+  <ellipsoid at="28 16 0" size="7 8 3" color="S" on="#2"/>
+  <ellipsoid at="20 28 0" size="9 6 4" color="S" on="#2"/>
+  <cylinder at="20 20 0" size="12 12 2" color="T" on="#2"/>
   <!--   3: sulle radici -->
-  <line at="20 20 3" to="30 20 0" r="1.5" color="T" on="3"/>
-  <line at="20 20 3" to="23 30 0" r="1.5" color="T" on="3"/>
-  <line at="20 20 3" to="12 26 0" r="1.5" color="T" on="3"/>
-  <line at="20 20 3" to="12 14 0" r="1.5" color="T" on="3"/>
-  <line at="20 20 3" to="23 11 0" r="1.5" color="T" on="3"/>
-  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <line at="20 20 3" to="30 20 0" r="1.5" color="T" on="#3"/>
+  <line at="20 20 3" to="23 30 0" r="1.5" color="T" on="#3"/>
+  <line at="20 20 3" to="12 26 0" r="1.5" color="T" on="#3"/>
+  <line at="20 20 3" to="12 14 0" r="1.5" color="T" on="#3"/>
+  <line at="20 20 3" to="23 11 0" r="1.5" color="T" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
   <cylinder at="20 20 0" size="7 7 4" color="T"/>
   <box at="20 20 4" size="1 1 1" color="H"/>
   <!-- il tronco cammina verso l'alto, dritto o di sbieco -->

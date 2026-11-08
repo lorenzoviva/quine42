@@ -18,9 +18,10 @@ sides and judges it.
 @@CLASSES@@
 
 ## The program
-Answer with the XML only (no explanations). The root node has `values`: the letters of the grid;
+Answer with the XML only (no explanations). The root node has `values`: the symbols of the grid;
 the FIRST is the empty cell (usually B), the second is the one `origin="True"` puts at the centre of the
-box. Every letter has the colour of the MarkovJunior palette:
+box. A symbol is a letter or, when the letters are not enough, `#` and a number (`#12`, one cell): a digit
+alone is not a symbol. Every letter has the colour of the MarkovJunior palette (a `#12` has none: give it a `<color>`):
 @@PALETTE@@
 For the tones of the style guide recolour a letter: `<color symbol="N" value="6b4a2e"/>`.
 A working mark that must not be seen: `<color symbol="X" hidden="True"/>`. What gives light (flames,
@@ -108,7 +109,7 @@ Write a single MarkovJunior XML program that **grows** the building asked for, a
 The same XML runs with at least 5 seeds and 2 sizes: a box from 100×100×80 (20 voxels per tile, step 4, a person 30 tall) to 120×120×96 (16 voxels per tile, step 3, a person 24; with 12 voxels per tile step 2, a person 18). Every seed must give another building, with a different outline, plan and rooms, and all of them must hold. So no `<box>`, no coordinates and no `size`: only rules, anchored to the centre of the floor and to what is there already.
 
 ## The format
-x from left to right, y from the back to the front (the front is large y), z from bottom to top. `values` are the letters, one letter per cell (the first, B, is the air), letters only: digits have no colour and serve for the names of the `union`s. A pattern: rows (growing y) separated by `/`, layers separated by spaces, **the top layer first**: `in="B t"` is t with the air above it. `*` is any cell (in `out`: it does not change), `[ab]` is a or b, `<union symbol="1" values="ab"/>` gives a name to a set.
+x from left to right, y from the back to the front (the front is large y), z from bottom to top. `values` are the symbols, one per cell (the first, B, is the air): letters, or `#` and a number (`#12`) when the letters are not enough; a digit alone is not a symbol, and a `#12` has no colour until a `<color>` gives it one. A pattern: rows (growing y) separated by `/`, layers separated by spaces, **the top layer first**: `in="B t"` is t with the air above it. `*` is any cell (in `out`: it does not change), `[ab]` is a or b, `<union symbol="#1" values="ab"/>` gives a name to a set.
 - `<one>` rewrites one match at random per step, `<all>` all those that do not overlap, `<prl>` each one with its own probability (`p` goes on the `<rule>`; one step only). Without `steps` a node goes as long as it can; `steps="N"` stops it after N steps. The nodes run in order.
 - The symmetry of the root, `(xy)`, tries every rule in all the directions of the plane; `symmetry="()"` only as it is written, `(x)` and `(y)` also mirrored.
 - `soil="E"` is the letter of the soil: before the program starts, the kernel writes it over the whole layer where the soil of the world is, at every size, and `origin="bottom"` puts there, at the centre, the second letter. Here it is z=0. `ground="Z"` fills the layer z=0, the bottom of the box.
@@ -128,9 +129,9 @@ The body is 9 voxels wide (it passes in 11), walks on the floors and does not pa
 It holds 19-20 seeds out of 20 at the two sizes, and it is an ordinary small block of flats: it is the starting point, not the result.
 ```xml
 <sequence values="BNExzaPpQbOHtsgcdvefwXiIJhjMSFCWRVDLUuTYGKAknryql" symmetry="(xy)" soil="E" origin="bottom">
-  <union symbol="1" values="be"/>
-  <union symbol="2" values="tsdcfv"/>
-  <union symbol="3" values="tb"/>
+  <union symbol="#1" values="be"/>
+  <union symbol="#2" values="tsdcfv"/>
+  <union symbol="#3" values="tb"/>
   <color symbol="k" value="5a3a22" name="porta"/><color symbol="S" value="d6d2c8" name="cemento chiaro"/><color symbol="F" value="a8743f" name="legno"/><color symbol="C" value="b9b5ab" name="cemento grigio"/><color symbol="W" value="f0ece2" name="intonaco"/><color symbol="R" value="8f8f88" name="ghiaia"/><color symbol="V" value="86b8c8" alpha="0.5" name="vetro"/><color symbol="D" value="3a3d42" name="telaio"/><color symbol="L" value="7a5a3c" name="rovere"/><color symbol="T" value="e0d9c2" name="gradino"/><color symbol="K" value="c2c7cc" name="acciaio"/><color symbol="A" value="9a9590" name="lastricato"/>
   <!-- 1. lattice: arms from the centre, then the lines -->
   <prl in="***/*E*/***" out="***/*z*/***"/>
@@ -165,11 +166,11 @@ It holds 19-20 seeds out of 20 at the two sizes, and it is an ordinary small blo
   <!-- no doors around the stair; other bays grow through a wall -->
   <all in="[gsdc]t" out="*v"/>
   <all in="vt" out="*v" steps="9"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
   <all in="bz" out="*b"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
   <all in="bz" out="*b"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
   <all in="bz" out="*b"/>
   <all in="Hp" out="*H" steps="5"/>
   <prl><rule in="tHb" out="*Ht" p="0.07"/></prl>
@@ -180,7 +181,7 @@ It holds 19-20 seeds out of 20 at the two sizes, and it is an ordinary small blo
   <one in="nnnnnnnnn" out="*eeeeeee*" steps="1"/>
   <prl in="v" out="t"/>
   <!-- 3. the walls from the neighbouring letters -->
-  <all><rule in="[zE]p[zE]" out="*q*"/><rule in="[zE]p1" out="*w*"/><rule in="[zE]p2" out="*X*"/><rule in="1p1" out="*i*"/><rule in="2p2" out="*I*"/><rule in="1p2" out="*J*"/><rule in="1H1" out="*h*"/><rule in="1H2" out="*j*"/><rule in="EO2" out="*M*"/></all>
+  <all><rule in="[zE]p[zE]" out="*q*"/><rule in="[zE]p#1" out="*w*"/><rule in="[zE]p#2" out="*X*"/><rule in="#1p#1" out="*i*"/><rule in="#2p#2" out="*I*"/><rule in="#1p#2" out="*J*"/><rule in="#1H#1" out="*h*"/><rule in="#1H#2" out="*j*"/><rule in="EO#2" out="*M*"/></all>
   <prl in="n" out="h"/>
   <all in="P[XIJjHMy]" out="I*"/>
   <all in="P[wihO]" out="i*"/>
@@ -227,7 +228,7 @@ It holds 19-20 seeds out of 20 at the two sizes, and it is an ordinary small blo
 Why it holds, and what does not break:
 - **Section 1**: a marker walks only forward if the rule looks at its trail (`[Nx]az → *xa`); if it can cross a line (`[zp]`), its trail has a different letter (`l`), otherwise it goes back. The lattice is always 3×3 bays of 30: `E` outside, `z` the bays, `p` the lines, `P` the crossings, `O` the door.
 - **Section 2**: a fill (`tz → *t`) stops at the lines. One grows by passing a wall at the spot where the door is put: so everything stays connected, without paths to compute. The doors stand 1-11 from a pillar: the rest of the wall stays free. The stair is chosen **before** the other doors, in the front bay: a strip of 11×17 attached to a pillar, far from the door (`v`), that crosses the wall toward a neighbouring bay (`y`); 16 steps of stair climb 32, that is from the floor (one voxel above the ground) to the floor above, in line beyond `y`. Around it `v` keeps the other doors away. The columns `s`, `c`, `d` have no slab: it is the hole. One letter for every thing that rises in a different way.
-- **Section 3**: the walls say what they are from the letters on their sides: `w` outer low, `X` outer high, `i`, `I` inner, `J` inner below and outer above, `h`, `H`, `j` inner doors. `2` is all that is high, `1` what is low.
+- **Section 3**: the walls say what they are from the letters on their sides: `w` outer low, `X` outer high, `i`, `I` inner, `J` inner below and outer above, `h`, `H`, `j` inner doors. `#2` is all that is high, `#1` what is low.
 - **Section 4**: `in="B t" out="t F"` makes the head `t` rise by one layer and leaves `F`; `steps` is how much it rises: **the heights are numbers of steps**, one line per stretch. What ends writes `R S` and the head disappears. A new letter on the plan (`i`, `I` are buttresses already: they are two walls in front of a wall) rises with a line of its own.
 - **Time**: a rare letter in the first cell (bottom left) costs little; a pattern that starts with `*` or with the air over the whole grid costs a lot.
 

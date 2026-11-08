@@ -39,7 +39,7 @@ Architecture:
 Animation "pulsa" (8 frames):
   A periodic swap of the active (1, glow) and inactive (0) energy cells on the surface of the quantum sphere.
 -->
-<sequence values="BMmKCcSsVvwNnFPO10xR" size="112 112 112" symmetry="()" name="Il Nucleo">
+<sequence values="BMmKCcSsVvwNnFPO#1#0xR" size="112 112 112" symmetry="()" name="Il Nucleo">
   <!-- Materials and neon punk palette -->
   <color symbol="M" value="14141a" name="metallo primario"/>
   <color symbol="m" value="20222a" name="metallo secondary"/>
@@ -56,8 +56,8 @@ Animation "pulsa" (8 frames):
   <color symbol="P" value="0a0e14" name="targa insegna"/>
   <color symbol="F" value="6fc3ff" glow="True" name="insegna fissa"/>
   <color symbol="O" value="182434" name="porta"/>
-  <color symbol="1" value="6fc3ff" glow="True" name="cella energetica attiva"/>
-  <color symbol="0" value="16202c" name="cella energetica stasi"/>
+  <color symbol="#1" value="6fc3ff" glow="True" name="cella energetica attiva"/>
+  <color symbol="#0" value="16202c" name="cella energetica stasi"/>
   <color symbol="R" value="ff3a3a" glow="True" name="luce ostacolo rossa"/>
   <color symbol="x" hidden="True" name="buffer animazione"/>
 
@@ -182,7 +182,7 @@ Animation "pulsa" (8 frames):
   <!-- Central lens of the primary collimator at z=7 -->
   <cylinder at="56 56 7" size="14 14 1" color="S"/>
   <cylinder at="56 56 7" size="8 8 1" color="N"/>
-  <box at="56 56 8" size="4 4 1" color="1"/>
+  <box at="56 56 8" size="4 4 1" color="#1"/>
 
   <!-- 4 vertical magnetic field columns in the courtyard (z = 0..30) -->
   <box at="56 36 0" size="4 4 32" color="M"/>
@@ -278,82 +278,82 @@ Animation "pulsa" (8 frames):
   <!-- 9. PULSING ENERGY CELLS OF THE SPHERE (ACTIVE 1 / STASIS 0)       -->
   <!-- ================================================================= -->
   <!-- Poles of the sphere -->
-  <box at="56 56 95" size="2 2 1" color="1"/>
-  <box at="56 56 56" size="2 2 1" color="0"/>
+  <box at="56 56 95" size="2 2 1" color="#1"/>
+  <box at="56 56 56" size="2 2 1" color="#0"/>
 
   <!-- Upper cap: z = 90 (horizontal radius ~14) -->
-  <box at="70 56 90" size="2 1 1" color="1"/>
-  <box at="66 66 90" size="2 1 1" color="0"/>
-  <box at="56 70 90" size="1 2 1" color="1"/>
-  <box at="46 66 90" size="2 1 1" color="0"/>
-  <box at="42 56 90" size="2 1 1" color="1"/>
-  <box at="46 46 90" size="2 1 1" color="0"/>
-  <box at="56 42 90" size="1 2 1" color="1"/>
-  <box at="66 46 90" size="2 1 1" color="0"/>
+  <box at="70 56 90" size="2 1 1" color="#1"/>
+  <box at="66 66 90" size="2 1 1" color="#0"/>
+  <box at="56 70 90" size="1 2 1" color="#1"/>
+  <box at="46 66 90" size="2 1 1" color="#0"/>
+  <box at="42 56 90" size="2 1 1" color="#1"/>
+  <box at="46 46 90" size="2 1 1" color="#0"/>
+  <box at="56 42 90" size="1 2 1" color="#1"/>
+  <box at="66 46 90" size="2 1 1" color="#0"/>
 
   <!-- Upper hemisphere: z = 84 (horizontal radius ~18) -->
-  <box at="74 56 84" size="2 1 1" color="0"/>
-  <box at="73 63 84" size="2 1 1" color="1"/>
-  <box at="69 69 84" size="2 1 1" color="0"/>
-  <box at="63 73 84" size="1 2 1" color="1"/>
-  <box at="56 74 84" size="1 2 1" color="0"/>
-  <box at="49 73 84" size="1 2 1" color="1"/>
-  <box at="43 69 84" size="2 1 1" color="0"/>
-  <box at="39 63 84" size="2 1 1" color="1"/>
-  <box at="38 56 84" size="2 1 1" color="0"/>
-  <box at="39 49 84" size="2 1 1" color="1"/>
-  <box at="43 43 84" size="2 1 1" color="0"/>
-  <box at="49 39 84" size="1 2 1" color="1"/>
-  <box at="56 38 84" size="1 2 1" color="0"/>
-  <box at="63 39 84" size="1 2 1" color="1"/>
-  <box at="69 43 84" size="2 1 1" color="0"/>
-  <box at="73 49 84" size="2 1 1" color="1"/>
+  <box at="74 56 84" size="2 1 1" color="#0"/>
+  <box at="73 63 84" size="2 1 1" color="#1"/>
+  <box at="69 69 84" size="2 1 1" color="#0"/>
+  <box at="63 73 84" size="1 2 1" color="#1"/>
+  <box at="56 74 84" size="1 2 1" color="#0"/>
+  <box at="49 73 84" size="1 2 1" color="#1"/>
+  <box at="43 69 84" size="2 1 1" color="#0"/>
+  <box at="39 63 84" size="2 1 1" color="#1"/>
+  <box at="38 56 84" size="2 1 1" color="#0"/>
+  <box at="39 49 84" size="2 1 1" color="#1"/>
+  <box at="43 43 84" size="2 1 1" color="#0"/>
+  <box at="49 39 84" size="1 2 1" color="#1"/>
+  <box at="56 38 84" size="1 2 1" color="#0"/>
+  <box at="63 39 84" size="1 2 1" color="#1"/>
+  <box at="69 43 84" size="2 1 1" color="#0"/>
+  <box at="73 49 84" size="2 1 1" color="#1"/>
 
   <!-- Equatorial band: z = 76 (horizontal radius ~20) -->
-  <box at="76 56 76" size="2 1 1" color="1"/>
-  <box at="74 64 76" size="2 1 1" color="0"/>
-  <box at="70 70 76" size="2 1 1" color="1"/>
-  <box at="64 74 76" size="1 2 1" color="0"/>
-  <box at="56 76 76" size="1 2 1" color="1"/>
-  <box at="48 74 76" size="1 2 1" color="0"/>
-  <box at="42 70 76" size="2 1 1" color="1"/>
-  <box at="38 64 76" size="2 1 1" color="0"/>
-  <box at="36 56 76" size="2 1 1" color="1"/>
-  <box at="38 48 76" size="2 1 1" color="0"/>
-  <box at="42 42 76" size="2 1 1" color="1"/>
-  <box at="48 38 76" size="1 2 1" color="0"/>
-  <box at="56 36 76" size="1 2 1" color="1"/>
-  <box at="64 38 76" size="1 2 1" color="0"/>
-  <box at="70 42 76" size="2 1 1" color="1"/>
-  <box at="74 48 76" size="2 1 1" color="0"/>
+  <box at="76 56 76" size="2 1 1" color="#1"/>
+  <box at="74 64 76" size="2 1 1" color="#0"/>
+  <box at="70 70 76" size="2 1 1" color="#1"/>
+  <box at="64 74 76" size="1 2 1" color="#0"/>
+  <box at="56 76 76" size="1 2 1" color="#1"/>
+  <box at="48 74 76" size="1 2 1" color="#0"/>
+  <box at="42 70 76" size="2 1 1" color="#1"/>
+  <box at="38 64 76" size="2 1 1" color="#0"/>
+  <box at="36 56 76" size="2 1 1" color="#1"/>
+  <box at="38 48 76" size="2 1 1" color="#0"/>
+  <box at="42 42 76" size="2 1 1" color="#1"/>
+  <box at="48 38 76" size="1 2 1" color="#0"/>
+  <box at="56 36 76" size="1 2 1" color="#1"/>
+  <box at="64 38 76" size="1 2 1" color="#0"/>
+  <box at="70 42 76" size="2 1 1" color="#1"/>
+  <box at="74 48 76" size="2 1 1" color="#0"/>
 
   <!-- Lower hemisphere: z = 68 (horizontal radius ~18) -->
-  <box at="74 56 68" size="2 1 1" color="0"/>
-  <box at="73 63 68" size="2 1 1" color="1"/>
-  <box at="69 69 68" size="2 1 1" color="0"/>
-  <box at="63 73 68" size="1 2 1" color="1"/>
-  <box at="56 74 68" size="1 2 1" color="0"/>
-  <box at="49 73 68" size="1 2 1" color="1"/>
-  <box at="43 69 68" size="2 1 1" color="0"/>
-  <box at="39 63 68" size="2 1 1" color="1"/>
-  <box at="38 56 68" size="2 1 1" color="0"/>
-  <box at="39 49 68" size="2 1 1" color="1"/>
-  <box at="43 43 68" size="2 1 1" color="0"/>
-  <box at="49 39 68" size="1 2 1" color="1"/>
-  <box at="56 38 68" size="1 2 1" color="0"/>
-  <box at="63 39 68" size="1 2 1" color="1"/>
-  <box at="69 43 68" size="2 1 1" color="0"/>
-  <box at="73 49 68" size="2 1 1" color="1"/>
+  <box at="74 56 68" size="2 1 1" color="#0"/>
+  <box at="73 63 68" size="2 1 1" color="#1"/>
+  <box at="69 69 68" size="2 1 1" color="#0"/>
+  <box at="63 73 68" size="1 2 1" color="#1"/>
+  <box at="56 74 68" size="1 2 1" color="#0"/>
+  <box at="49 73 68" size="1 2 1" color="#1"/>
+  <box at="43 69 68" size="2 1 1" color="#0"/>
+  <box at="39 63 68" size="2 1 1" color="#1"/>
+  <box at="38 56 68" size="2 1 1" color="#0"/>
+  <box at="39 49 68" size="2 1 1" color="#1"/>
+  <box at="43 43 68" size="2 1 1" color="#0"/>
+  <box at="49 39 68" size="1 2 1" color="#1"/>
+  <box at="56 38 68" size="1 2 1" color="#0"/>
+  <box at="63 39 68" size="1 2 1" color="#1"/>
+  <box at="69 43 68" size="2 1 1" color="#0"/>
+  <box at="73 49 68" size="2 1 1" color="#1"/>
 
   <!-- Lower cap: z = 62 (horizontal radius ~14) -->
-  <box at="70 56 62" size="2 1 1" color="1"/>
-  <box at="66 66 62" size="2 1 1" color="0"/>
-  <box at="56 70 62" size="1 2 1" color="1"/>
-  <box at="46 66 62" size="2 1 1" color="0"/>
-  <box at="42 56 62" size="2 1 1" color="1"/>
-  <box at="46 46 62" size="2 1 1" color="0"/>
-  <box at="56 42 62" size="1 2 1" color="1"/>
-  <box at="66 46 62" size="2 1 1" color="0"/>
+  <box at="70 56 62" size="2 1 1" color="#1"/>
+  <box at="66 66 62" size="2 1 1" color="#0"/>
+  <box at="56 70 62" size="1 2 1" color="#1"/>
+  <box at="46 66 62" size="2 1 1" color="#0"/>
+  <box at="42 56 62" size="2 1 1" color="#1"/>
+  <box at="46 46 62" size="2 1 1" color="#0"/>
+  <box at="56 42 62" size="1 2 1" color="#1"/>
+  <box at="66 46 62" size="2 1 1" color="#0"/>
 
   <!-- ================================================================= -->
   <!-- 10. MONUMENTAL ENTRANCE PORTAL (SOUTH FRONT: y = 100..107)        -->
@@ -467,8 +467,8 @@ Animation "pulsa" (8 frames):
 <!-- ================================================================= -->
 <animation name="pulsa" frames="8">
   <sequence>
-    <all in="1" out="x"/>
-    <all in="0" out="1"/>
-    <all in="x" out="0"/>
+    <all in="#1" out="x"/>
+    <all in="#0" out="#1"/>
+    <all in="x" out="#0"/>
   </sequence>
 </animation>

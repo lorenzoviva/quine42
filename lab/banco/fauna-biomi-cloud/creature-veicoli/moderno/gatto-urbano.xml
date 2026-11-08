@@ -1,5 +1,5 @@
 <!-- Gatto urbano (Cantiere 8, neapolis): postura a caso; la coda e le strisce crescono a caso. -->
-<sequence values="BFDWGEQu123456z" symmetry="(xy)" name="Gatto urbano">
+<sequence values="BFDWGEQu#1#2#3#4#5#6z" symmetry="(xy)" name="Gatto urbano">
   <color symbol="F" value="9a9a96" name="pelo grigio"/>
   <color symbol="D" value="4e4d4b" name="strisce"/>
   <color symbol="W" value="e9e6df" name="petto bianco"/>
@@ -7,12 +7,12 @@
   <color symbol="E" value="9be35a" name="occhi" glow="True"/>
   <color symbol="Q" hidden="True" name="marcatore"/>
   <color symbol="u" hidden="True" name="marcatore"/>
-  <color symbol="1" hidden="True" name="marcatore"/>
-  <color symbol="2" hidden="True" name="marcatore"/>
-  <color symbol="3" hidden="True" name="marcatore"/>
-  <color symbol="4" hidden="True" name="marcatore"/>
-  <color symbol="5" hidden="True" name="marcatore"/>
-  <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="#1" hidden="True" name="marcatore"/>
+  <color symbol="#2" hidden="True" name="marcatore"/>
+  <color symbol="#3" hidden="True" name="marcatore"/>
+  <color symbol="#4" hidden="True" name="marcatore"/>
+  <color symbol="#5" hidden="True" name="marcatore"/>
+  <color symbol="#6" hidden="True" name="marcatore"/>
   <color symbol="z" hidden="True" name="marcatore"/>
   <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
   <box at="3 0 0" size="7 1 1" color="z" on="B"/>
@@ -20,63 +20,63 @@
   <one in="z" out="B" steps="8"/>
   <!-- scelta «postura»: seduto | in cammino | a pagnotta | ad arco | sdraiato su un fianco -->
   <box at="7 10 0" size="15 20 15" color="u" on="B"/>
-  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/><rule in="u" out="4"/><rule in="u" out="5"/></one>
-  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/><rule in="4u" out="*4"/><rule in="5u" out="*5"/></all>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/><rule in="u" out="#4"/><rule in="u" out="#5"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/><rule in="#4u" out="*#4"/><rule in="#5u" out="*#5"/></all>
   <!--   1: seduto -->
-  <box at="7 5 1" size="1 1 1" color="Q" on="1"/>
-  <ellipsoid at="7 8 0" size="8 8 5" color="F" on="1"/>
-  <ellipsoid at="7 9 2" size="6 7 8" color="F" on="1"/>
-  <line at="6 12 0" to="6 11 5" r="0.5" color="G" on="1"/>
-  <line at="8 12 0" to="8 11 5" r="0.5" color="G" on="1"/>
-  <box at="6 14 11" size="1 1 1" color="E" on="1"/>
-  <box at="8 14 11" size="1 1 1" color="E" on="1"/>
-  <ellipsoid at="7 12 9" size="6 5 4" color="F" on="1"/>
-  <cone at="5 12 12" size="2 2 3" color="F" on="1"/>
-  <cone at="9 12 12" size="2 2 3" color="F" on="1"/>
-  <box at="7 13 7" size="3 1 3" color="W" on="1"/>
+  <box at="7 5 1" size="1 1 1" color="Q" on="#1"/>
+  <ellipsoid at="7 8 0" size="8 8 5" color="F" on="#1"/>
+  <ellipsoid at="7 9 2" size="6 7 8" color="F" on="#1"/>
+  <line at="6 12 0" to="6 11 5" r="0.5" color="G" on="#1"/>
+  <line at="8 12 0" to="8 11 5" r="0.5" color="G" on="#1"/>
+  <box at="6 14 11" size="1 1 1" color="E" on="#1"/>
+  <box at="8 14 11" size="1 1 1" color="E" on="#1"/>
+  <ellipsoid at="7 12 9" size="6 5 4" color="F" on="#1"/>
+  <cone at="5 12 12" size="2 2 3" color="F" on="#1"/>
+  <cone at="9 12 12" size="2 2 3" color="F" on="#1"/>
+  <box at="7 13 7" size="3 1 3" color="W" on="#1"/>
   <!--   2: in cammino -->
-  <box at="7 5 6" size="1 1 1" color="Q" on="2"/>
-  <line at="6 6 0" to="6 7 5" r="0.5" color="G" on="2"/>
-  <line at="8 8 0" to="8 7 5" r="0.5" color="G" on="2"/>
-  <line at="6 15 0" to="6 13 5" r="0.5" color="G" on="2"/>
-  <line at="8 12 0" to="8 13 5" r="0.5" color="G" on="2"/>
-  <ellipsoid at="7 10 4" size="6 12 5" color="F" on="2"/>
-  <box at="6 18 9" size="1 1 1" color="E" on="2"/>
-  <box at="8 18 9" size="1 1 1" color="E" on="2"/>
-  <ellipsoid at="7 16 7" size="6 5 4" color="F" on="2"/>
-  <cone at="5 16 10" size="2 2 3" color="F" on="2"/>
-  <cone at="9 16 10" size="2 2 3" color="F" on="2"/>
+  <box at="7 5 6" size="1 1 1" color="Q" on="#2"/>
+  <line at="6 6 0" to="6 7 5" r="0.5" color="G" on="#2"/>
+  <line at="8 8 0" to="8 7 5" r="0.5" color="G" on="#2"/>
+  <line at="6 15 0" to="6 13 5" r="0.5" color="G" on="#2"/>
+  <line at="8 12 0" to="8 13 5" r="0.5" color="G" on="#2"/>
+  <ellipsoid at="7 10 4" size="6 12 5" color="F" on="#2"/>
+  <box at="6 18 9" size="1 1 1" color="E" on="#2"/>
+  <box at="8 18 9" size="1 1 1" color="E" on="#2"/>
+  <ellipsoid at="7 16 7" size="6 5 4" color="F" on="#2"/>
+  <cone at="5 16 10" size="2 2 3" color="F" on="#2"/>
+  <cone at="9 16 10" size="2 2 3" color="F" on="#2"/>
   <!--   3: a pagnotta -->
-  <box at="7 5 2" size="1 1 1" color="Q" on="3"/>
-  <ellipsoid at="7 9 0" size="8 11 6" color="F" on="3"/>
-  <box at="6 16 6" size="1 1 1" color="E" on="3"/>
-  <box at="8 16 6" size="1 1 1" color="E" on="3"/>
-  <ellipsoid at="7 14 4" size="6 5 4" color="F" on="3"/>
-  <cone at="5 14 7" size="2 2 3" color="F" on="3"/>
-  <cone at="9 14 7" size="2 2 3" color="F" on="3"/>
+  <box at="7 5 2" size="1 1 1" color="Q" on="#3"/>
+  <ellipsoid at="7 9 0" size="8 11 6" color="F" on="#3"/>
+  <box at="6 16 6" size="1 1 1" color="E" on="#3"/>
+  <box at="8 16 6" size="1 1 1" color="E" on="#3"/>
+  <ellipsoid at="7 14 4" size="6 5 4" color="F" on="#3"/>
+  <cone at="5 14 7" size="2 2 3" color="F" on="#3"/>
+  <cone at="9 14 7" size="2 2 3" color="F" on="#3"/>
   <!--   4: ad arco -->
-  <box at="7 5 8" size="1 1 1" color="Q" on="4"/>
-  <line at="6 5 0" to="6 7 7" r="0.5" color="G" on="4"/>
-  <line at="8 5 0" to="8 7 7" r="0.5" color="G" on="4"/>
-  <line at="6 15 0" to="6 13 7" r="0.5" color="G" on="4"/>
-  <line at="8 15 0" to="8 13 7" r="0.5" color="G" on="4"/>
-  <ellipsoid at="7 10 6" size="6 11 7" color="F" on="4"/>
-  <box at="6 17 7" size="1 1 1" color="E" on="4"/>
-  <box at="8 17 7" size="1 1 1" color="E" on="4"/>
-  <ellipsoid at="7 15 5" size="6 5 4" color="F" on="4"/>
-  <cone at="5 15 8" size="2 2 3" color="F" on="4"/>
-  <cone at="9 15 8" size="2 2 3" color="F" on="4"/>
+  <box at="7 5 8" size="1 1 1" color="Q" on="#4"/>
+  <line at="6 5 0" to="6 7 7" r="0.5" color="G" on="#4"/>
+  <line at="8 5 0" to="8 7 7" r="0.5" color="G" on="#4"/>
+  <line at="6 15 0" to="6 13 7" r="0.5" color="G" on="#4"/>
+  <line at="8 15 0" to="8 13 7" r="0.5" color="G" on="#4"/>
+  <ellipsoid at="7 10 6" size="6 11 7" color="F" on="#4"/>
+  <box at="6 17 7" size="1 1 1" color="E" on="#4"/>
+  <box at="8 17 7" size="1 1 1" color="E" on="#4"/>
+  <ellipsoid at="7 15 5" size="6 5 4" color="F" on="#4"/>
+  <cone at="5 15 8" size="2 2 3" color="F" on="#4"/>
+  <cone at="9 15 8" size="2 2 3" color="F" on="#4"/>
   <!--   5: sdraiato su un fianco -->
-  <box at="7 5 2" size="1 1 1" color="Q" on="5"/>
-  <ellipsoid at="7 10 0" size="10 12 6" color="F" on="5"/>
-  <line at="10 8 0" to="13 6 0" r="0.5" color="G" on="5"/>
-  <line at="10 12 0" to="13 14 0" r="0.5" color="G" on="5"/>
-  <box at="5 17 4" size="1 1 1" color="E" on="5"/>
-  <box at="8 17 4" size="1 1 1" color="E" on="5"/>
-  <ellipsoid at="6 15 2" size="6 5 5" color="F" on="5"/>
-  <cone at="4 15 6" size="2 2 3" color="F" on="5"/>
-  <cone at="8 15 6" size="2 2 3" color="F" on="5"/>
-  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/><rule in="4" out="B"/><rule in="5" out="B"/></prl>
+  <box at="7 5 2" size="1 1 1" color="Q" on="#5"/>
+  <ellipsoid at="7 10 0" size="10 12 6" color="F" on="#5"/>
+  <line at="10 8 0" to="13 6 0" r="0.5" color="G" on="#5"/>
+  <line at="10 12 0" to="13 14 0" r="0.5" color="G" on="#5"/>
+  <box at="5 17 4" size="1 1 1" color="E" on="#5"/>
+  <box at="8 17 4" size="1 1 1" color="E" on="#5"/>
+  <ellipsoid at="6 15 2" size="6 5 5" color="F" on="#5"/>
+  <cone at="4 15 6" size="2 2 3" color="F" on="#5"/>
+  <cone at="8 15 6" size="2 2 3" color="F" on="#5"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/><rule in="#4" out="B"/><rule in="#5" out="B"/></prl>
   <!-- la coda: sei passi in direzioni a caso -->
   <one steps="7"><rule in="B Q" out="Q F"/><rule in="B* *Q" out="Q* *F"/><rule in="QB" out="FQ"/></one>
   <prl in="Q" out="D"/>

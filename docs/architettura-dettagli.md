@@ -723,9 +723,26 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   base, `<animation>` e `<action>` (regole sul modello finito: la porta si apre); il front-end ripara le forme
   sbagliate dagli agenti. Il codice è in `src/mj/`; il laboratorio (`lab/`, `lab/README.md`) serve ad analizzare e
   correggere i programmi che il Concilio non riesce a scrivere (sandbox 3D `/lab/3d/`, sezioni, foto, prove con Gemini).
+- **I simboli** (ADR-0175, T342, contratto 0.6): un simbolo è una lettera o `#` e un numero (`#0`…`#2047`), letto avidamente
+  (`#12A` sono `#12` e `A`, `#1#2` due), senza zeri davanti; una cifra da sola e un `#` senza numero sono errori del compilatore
+  col motivo, anche nel modo che ripara. Valgono ovunque si legge un simbolo: `values`, pattern (attributi, figli, file),
+  unioni (i loro segni restano `? ! ~…`, tranne `#`), `<color symbol>`, `origin`/`ground`/`soil`, `path`, forme, `field`/`observe`,
+  tessere e campioni di `wfc`/`convchain`, la tinta di `models/index.json`; nei testi di un pattern una riga con `#` e nessun
+  numero è una nota. `src/mj/symbols.ts` legge i simboli (`symbolTokens`, `readSymbols`, `symbolOf`) e li nomina (`symbolName`,
+  `showSymbols`); il compilatore dà al motore un carattere per simbolo: le lettere sé stesse, `#0`-`#9` le cifre, da `#10` un
+  carattere dell'area d'uso privato (da U+F000; le unioni private stanno sotto, da U+E000). Un programma di prima, convertito, è
+  così lo stesso per il motore, voce per voce; traccia, messaggi, lettere delle azioni dello Scultore, editor e SoundLab mostrano
+  e scrivono il nome. Tetto: 255 simboli per programma oltre la cella vuota (`MAX_SYMBOLS`; le celle sono byte, `MAX_CODES` 256),
+  contati su tutte le griglie. La migrazione `0.5 → 0.6` (`programFor0_6`, `patternFileFor0_6`) scrive `#` davanti a ogni cifra
+  solo dove sta un simbolo, elemento per elemento (mai `size`, `steps`, `scale`, `at`, il `to` di una `line`, i file, le tessere
+  di una `wfc` a tessere), lascia il resto carattere per carattere, dà a un'unione `#` un segno libero ed è idempotente; le carte
+  fatte a mano della 0.5 ci passano quando si leggono (`portedProgram`), quelle portate da un universo di prima con
+  `portedFiles`. Il seme e il laboratorio sono convertiti con la stessa funzione (`lab/scripts/mj-simboli.ts`, gli universi del
+  laboratorio esclusi: li porta la migrazione); `tests/mj-engine-determinism.test.ts` confronta le griglie e i campioni dei suoni
+  del seme con le impronte prese prima.
 - **Pattern nei figli, regole da file, programmi inclusi** (ADR-0171, T333): un lato di una regola si scrive come attributo
   (`in="…"`) oppure come testo di un figlio `<in>`/`<out>` (stessa sintassi, gli strati anche su righe diverse, una `/` può
-  chiudere una riga, `#` è una nota; i due insieme sono un errore), oppure si legge da un file di testo di `models/`
+  chiudere una riga, `#` senza numero è una nota; i due insieme sono un errore), oppure si legge da un file di testo di `models/`
   (`fin`, `fout`; `file` con in, una riga `->`, out). `<import file="x"/>` esegue lì il programma di `models/x.xml` sulle sue
   lettere (ne vengono lettere, colori e unioni, quelli di chi include vincono; non la scatola, `origin`, `ground`, `soil`,
   suono, animazioni, azioni). Il compilatore (`src/mj/model.ts`) non legge il disco: `compileMjx(xml, { files, self })` riceve i

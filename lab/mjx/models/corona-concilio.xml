@@ -33,7 +33,7 @@ Inside the Hall:
 Animation "delibera" (8 frames):
   A fluid energy wave pulsing along the six vertical edges, the monumental portal and the zenith lantern.
 -->
-<sequence values="BMmCSsVvwNnFPOx12345678" size="160 160 72" symmetry="()" name="Sala del Concilio">
+<sequence values="BMmCSsVvwNnFPOx#1#2#3#4#5#6#7#8" size="160 160 72" symmetry="()" name="Sala del Concilio">
   <!-- Materials and palette -->
   <color symbol="M" value="14141a" name="metallo primario"/>
   <color symbol="m" value="22242e" name="metallo secondario"/>
@@ -51,14 +51,14 @@ Animation "delibera" (8 frames):
   <color symbol="x" hidden="True" name="buffer animazione"/>
 
   <!-- 8 phases of the pink neon wave (the Council's deliberation) -->
-  <color symbol="1" value="8a2862" glow="True" name="fase rosa 1"/>
-  <color symbol="2" value="a83278" glow="True" name="fase rosa 2"/>
-  <color symbol="3" value="c84292" glow="True" name="fase rosa 3"/>
-  <color symbol="4" value="e858ae" glow="True" name="fase rosa 4"/>
-  <color symbol="5" value="ffa0e2" glow="True" name="fase rosa apice"/>
-  <color symbol="6" value="e858ae" glow="True" name="fase rosa 6"/>
-  <color symbol="7" value="c84292" glow="True" name="fase rosa 7"/>
-  <color symbol="8" value="a83278" glow="True" name="fase rosa 8"/>
+  <color symbol="#1" value="8a2862" glow="True" name="fase rosa 1"/>
+  <color symbol="#2" value="a83278" glow="True" name="fase rosa 2"/>
+  <color symbol="#3" value="c84292" glow="True" name="fase rosa 3"/>
+  <color symbol="#4" value="e858ae" glow="True" name="fase rosa 4"/>
+  <color symbol="#5" value="ffa0e2" glow="True" name="fase rosa apice"/>
+  <color symbol="#6" value="e858ae" glow="True" name="fase rosa 6"/>
+  <color symbol="#7" value="c84292" glow="True" name="fase rosa 7"/>
+  <color symbol="#8" value="a83278" glow="True" name="fase rosa 8"/>
 
   <!-- ================================================================= -->
   <!-- 1. MONUMENTAL BASE AND GRAND STAIRCASE (z = 0..3)                 -->
@@ -74,16 +74,16 @@ Animation "delibera" (8 frames):
   <box at="80 142 2" size="52 20 1" color="C"/>
 
   <!-- Pink neon light guides along the grand staircase (phases 2 and 6) -->
-  <box at="58 142 2" size="1 20 1" color="2"/>
-  <box at="102 142 2" size="1 20 1" color="6"/>
+  <box at="58 142 2" size="1 20 1" color="#2"/>
+  <box at="102 142 2" size="1 20 1" color="#6"/>
 
   <!-- Columns of honour at the start of the staircase (y=150) with pink neon lamps -->
   <box at="56 150 0" size="4 4 12" color="M"/>
   <box at="56 150 12" size="2 2 2" color="S"/>
-  <box at="56 150 14" size="1 1 2" color="5"/>
+  <box at="56 150 14" size="1 1 2" color="#5"/>
   <box at="104 150 0" size="4 4 12" color="M"/>
   <box at="104 150 12" size="2 2 2" color="S"/>
-  <box at="104 150 14" size="1 1 2" color="5"/>
+  <box at="104 150 14" size="1 1 2" color="#5"/>
 
   <!-- ================================================================= -->
   <!-- 2. THE 6 GREAT CORNER PYLONS OF THE COUNCIL (z = 0..46)          -->
@@ -94,44 +94,44 @@ Animation "delibera" (8 frames):
   <box at="52 118 0" size="8 8 46" color="M"/>
   <box at="52 118 0" size="6 6 46" color="m"/>
   <box at="52 118 4" size="4 4 42" color="S"/>
-  <box at="49 121 2" size="1 1 44" color="1"/>
+  <box at="49 121 2" size="1 1 44" color="#1"/>
   <box at="52 118 46" size="6 6 2" color="S"/>
-  <box at="52 118 48" size="2 2 2" color="5"/>
+  <box at="52 118 48" size="2 2 2" color="#5"/>
   <!-- Pilon SE at (108, 118) -->
   <box at="108 118 0" size="8 8 46" color="M"/>
   <box at="108 118 0" size="6 6 46" color="m"/>
   <box at="108 118 4" size="4 4 42" color="S"/>
-  <box at="111 121 2" size="1 1 44" color="2"/>
+  <box at="111 121 2" size="1 1 44" color="#2"/>
   <box at="108 118 46" size="6 6 2" color="S"/>
-  <box at="108 118 48" size="2 2 2" color="5"/>
+  <box at="108 118 48" size="2 2 2" color="#5"/>
   <!-- Pilon E at (138, 68) -->
   <box at="138 68 0" size="8 8 46" color="M"/>
   <box at="138 68 0" size="6 6 46" color="m"/>
   <box at="138 68 4" size="4 4 42" color="S"/>
-  <box at="141 68 2" size="1 1 44" color="3"/>
+  <box at="141 68 2" size="1 1 44" color="#3"/>
   <box at="138 68 46" size="6 6 2" color="S"/>
-  <box at="138 68 48" size="2 2 2" color="5"/>
+  <box at="138 68 48" size="2 2 2" color="#5"/>
   <!-- Pilon NE at (108, 18) -->
   <box at="108 18 0" size="8 8 46" color="M"/>
   <box at="108 18 0" size="6 6 46" color="m"/>
   <box at="108 18 4" size="4 4 42" color="S"/>
-  <box at="111 15 2" size="1 1 44" color="5"/>
+  <box at="111 15 2" size="1 1 44" color="#5"/>
   <box at="108 18 46" size="6 6 2" color="S"/>
-  <box at="108 18 48" size="2 2 2" color="5"/>
+  <box at="108 18 48" size="2 2 2" color="#5"/>
   <!-- Pilon NW at (52, 18) -->
   <box at="52 18 0" size="8 8 46" color="M"/>
   <box at="52 18 0" size="6 6 46" color="m"/>
   <box at="52 18 4" size="4 4 42" color="S"/>
-  <box at="49 15 2" size="1 1 44" color="6"/>
+  <box at="49 15 2" size="1 1 44" color="#6"/>
   <box at="52 18 46" size="6 6 2" color="S"/>
-  <box at="52 18 48" size="2 2 2" color="5"/>
+  <box at="52 18 48" size="2 2 2" color="#5"/>
   <!-- Pilon W at (22, 68) -->
   <box at="22 68 0" size="8 8 46" color="M"/>
   <box at="22 68 0" size="6 6 46" color="m"/>
   <box at="22 68 4" size="4 4 42" color="S"/>
-  <box at="19 68 2" size="1 1 44" color="7"/>
+  <box at="19 68 2" size="1 1 44" color="#7"/>
   <box at="22 68 46" size="6 6 2" color="S"/>
-  <box at="22 68 48" size="2 2 2" color="5"/>
+  <box at="22 68 48" size="2 2 2" color="#5"/>
 
   <!-- ================================================================= -->
   <!-- 3. HEXAGONAL WALLS OF THE BUILDING (z = 2..42)                   -->
@@ -333,28 +333,28 @@ Animation "delibera" (8 frames):
   <!-- Stations of the 8 agents around the table with pink neon backrests -->
   <box at="96 68 6" size="3 3 4" color="m"/>
   <box at="96 68 10" size="2 2 3" color="M"/>
-  <box at="96 68 13" size="1 1 1" color="1"/>
+  <box at="96 68 13" size="1 1 1" color="#1"/>
   <box at="91 79 6" size="3 3 4" color="m"/>
   <box at="91 79 10" size="2 2 3" color="M"/>
-  <box at="91 79 13" size="1 1 1" color="2"/>
+  <box at="91 79 13" size="1 1 1" color="#2"/>
   <box at="80 84 6" size="3 3 4" color="m"/>
   <box at="80 84 10" size="2 2 3" color="M"/>
-  <box at="80 84 13" size="1 1 1" color="3"/>
+  <box at="80 84 13" size="1 1 1" color="#3"/>
   <box at="69 79 6" size="3 3 4" color="m"/>
   <box at="69 79 10" size="2 2 3" color="M"/>
-  <box at="69 79 13" size="1 1 1" color="4"/>
+  <box at="69 79 13" size="1 1 1" color="#4"/>
   <box at="64 68 6" size="3 3 4" color="m"/>
   <box at="64 68 10" size="2 2 3" color="M"/>
-  <box at="64 68 13" size="1 1 1" color="5"/>
+  <box at="64 68 13" size="1 1 1" color="#5"/>
   <box at="69 57 6" size="3 3 4" color="m"/>
   <box at="69 57 10" size="2 2 3" color="M"/>
-  <box at="69 57 13" size="1 1 1" color="6"/>
+  <box at="69 57 13" size="1 1 1" color="#6"/>
   <box at="80 52 6" size="3 3 4" color="m"/>
   <box at="80 52 10" size="2 2 3" color="M"/>
-  <box at="80 52 13" size="1 1 1" color="7"/>
+  <box at="80 52 13" size="1 1 1" color="#7"/>
   <box at="91 57 6" size="3 3 4" color="m"/>
   <box at="91 57 10" size="2 2 3" color="M"/>
-  <box at="91 57 13" size="1 1 1" color="8"/>
+  <box at="91 57 13" size="1 1 1" color="#8"/>
 
   <!-- Holographic pylon and central globe of the universe (z=3..16) -->
   <cylinder at="80 68 3" size="6 6 10" color="S"/>
@@ -364,8 +364,8 @@ Animation "delibera" (8 frames):
   <line at="80 64 9" to="80 66 13" r="0" color="S"/>
   <line at="80 72 9" to="80 70 13" r="0" color="S"/>
   <!-- Suspended globe / hologram of the universe (touches the arms and the pylon) -->
-  <ellipsoid at="80 68 12" size="8 8 8" color="5"/>
-  <ellipsoid at="80 68 13" size="4 4 4" color="4"/>
+  <ellipsoid at="80 68 12" size="8 8 8" color="#5"/>
+  <ellipsoid at="80 68 13" size="4 4 4" color="#4"/>
 
   <!-- ================================================================= -->
   <!-- 6. MONUMENTAL FORWARD PORTAL (SOUTH FACE, y=118..134, z=0..46)    -->
@@ -383,14 +383,14 @@ Animation "delibera" (8 frames):
   <box at="63 128 4" size="4 10 36" color="S"/>
   <box at="60 134 2" size="1 1 38" color="N"/>
   <box at="63 128 40" size="6 12 2" color="S"/>
-  <box at="63 134 42" size="2 2 2" color="5"/>
+  <box at="63 134 42" size="2 2 2" color="#5"/>
 
   <!-- Right fin (x=94..99, y=122..134, z=0..40) -->
   <box at="97 128 0" size="6 12 40" color="M"/>
   <box at="97 128 4" size="4 10 36" color="S"/>
   <box at="100 134 2" size="1 1 38" color="N"/>
   <box at="97 128 40" size="6 12 2" color="S"/>
-  <box at="97 134 42" size="2 2 2" color="5"/>
+  <box at="97 134 42" size="2 2 2" color="#5"/>
 
   <!-- Bright pink neon frame and lintel of the monumental arch (y=132) -->
   <box at="68 132 0" size="1 1 25" color="N"/>
@@ -594,17 +594,17 @@ Animation "delibera" (8 frames):
   <cylinder at="80 68 62" size="50 42 1" color="S"/>
 
   <!-- Pink neon radial ribs along the 6 edges of the roof -->
-  <line at="52 118 44" to="80 68 64" r="0" color="3"/>
+  <line at="52 118 44" to="80 68 64" r="0" color="#3"/>
   <line at="52 118 44" to="80 68 64" r="0" color="N" on="M"/>
-  <line at="108 118 44" to="80 68 64" r="0" color="3"/>
+  <line at="108 118 44" to="80 68 64" r="0" color="#3"/>
   <line at="108 118 44" to="80 68 64" r="0" color="N" on="M"/>
-  <line at="138 68 44" to="80 68 64" r="0" color="3"/>
+  <line at="138 68 44" to="80 68 64" r="0" color="#3"/>
   <line at="138 68 44" to="80 68 64" r="0" color="N" on="M"/>
-  <line at="108 18 44" to="80 68 64" r="0" color="3"/>
+  <line at="108 18 44" to="80 68 64" r="0" color="#3"/>
   <line at="108 18 44" to="80 68 64" r="0" color="N" on="M"/>
-  <line at="52 18 44" to="80 68 64" r="0" color="3"/>
+  <line at="52 18 44" to="80 68 64" r="0" color="#3"/>
   <line at="52 18 44" to="80 68 64" r="0" color="N" on="M"/>
-  <line at="22 68 44" to="80 68 64" r="0" color="3"/>
+  <line at="22 68 44" to="80 68 64" r="0" color="#3"/>
   <line at="22 68 44" to="80 68 64" r="0" color="N" on="M"/>
 
   <!-- ================================================================= -->
@@ -613,8 +613,8 @@ Animation "delibera" (8 frames):
   <!-- Polygonal drum of the lantern with bright pink neon slits -->
   <cylinder at="80 68 64" size="32 28 2" color="M"/>
   <cylinder at="80 68 65" size="28 24 2" color="S"/>
-  <cylinder at="80 68 66" size="22 20 2" color="5"/>
-  <cylinder at="80 68 67" size="16 14 2" color="4"/>
+  <cylinder at="80 68 66" size="22 20 2" color="#5"/>
+  <cylinder at="80 68 67" size="16 14 2" color="#4"/>
 
   <!-- Cap and cusp in metal and steel -->
   <cylinder at="80 68 68" size="20 18 1" color="M"/>
@@ -630,14 +630,14 @@ Animation "delibera" (8 frames):
 <!-- ================================================================= -->
 <animation name="delibera" frames="8">
   <sequence>
-    <all in="1" out="x"/>
-    <all in="2" out="1"/>
-    <all in="3" out="2"/>
-    <all in="4" out="3"/>
-    <all in="5" out="4"/>
-    <all in="6" out="5"/>
-    <all in="7" out="6"/>
-    <all in="8" out="7"/>
-    <all in="x" out="8"/>
+    <all in="#1" out="x"/>
+    <all in="#2" out="#1"/>
+    <all in="#3" out="#2"/>
+    <all in="#4" out="#3"/>
+    <all in="#5" out="#4"/>
+    <all in="#6" out="#5"/>
+    <all in="#7" out="#6"/>
+    <all in="#8" out="#7"/>
+    <all in="x" out="#8"/>
   </sequence>
 </animation>

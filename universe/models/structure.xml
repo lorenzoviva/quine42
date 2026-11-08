@@ -11,9 +11,9 @@ layer by layer; beams, door and windows are found by the patterns on the facade.
 The door opens and closes with two actions; the chimney smokes (animation). Scale of the game: 20 voxels
 per tile; the house takes about 3 × 2 tiles, the door is as tall as the wanderer.
 -->
-<sequence values="BXQIWNnDOURrKhk0" size="24 24 30" origin="True" symmetry="(xy)">
+<sequence values="BXQIWNnDOURrKhk#0" size="24 24 30" origin="True" symmetry="(xy)">
   <color symbol="X" hidden="True" name="volume della casa"/>
-  <color symbol="0" hidden="True" name="mescola"/>
+  <color symbol="#0" hidden="True" name="mescola"/>
   <color symbol="h" hidden="True" name="profondità possibili"/>
   <color symbol="k" hidden="True" name="il taglio"/>
   <color symbol="Q" hidden="True" name="volume del tetto"/>
@@ -31,9 +31,9 @@ per tile; the house takes about 3 × 2 tiles, the door is as tall as the wandere
   <!-- The seed falls to the bottom and becomes a rectangular plan: a line along x (the two tips
        lengthen at random: prl decides for every match), then the whole line advances along y. -->
   <!-- Shuffle: the generator starts again from a different point for every seed (see README) -->
-  <box at="12 0 29" size="24 2 1" color="0"/>
-  <prl in="0" out="B" p="0.5" steps="1"/>
-  <all in="0" out="B"/>
+  <box at="12 0 29" size="24 2 1" color="#0"/>
+  <prl in="#0" out="B" p="0.5" steps="1"/>
+  <all in="#0" out="B"/>
   <one in="X B" out="B X"/>
   <all in="XB" out="*X" steps="6" symmetry="(x)"/>
   <prl in="XB" out="*X" p="0.5" steps="3" symmetry="(x)"/>

@@ -1,7 +1,7 @@
 <!-- Peasant woman, procedural (Cantiere 2): the same colours of the original (brick-red skirt, blue bodice, apron, ochre headscarf). The
      seed picks how wide the skirt is (straight, bell-shaped, wide down to the ground), whether she has the headscarf or a bun of hair on her head and
      what she carries: a basket of apples at her side, a sack on her back, a jug on her head or nothing. The seed also decides whether she waves with her arm raised. Face, eyes and bodice stay where they are. -->
-<sequence values="BGKMRDWFSHECLpqmabcdrTuvy1234567890" size="20 15 30" symmetry="(xy)" name="Contadina">
+<sequence values="BGKMRDWFSHECLpqmabcdrTuvy#1#2#3#4#5#6#7#8#9#0" size="20 15 30" symmetry="(xy)" name="Contadina">
   <color symbol="G" value="4a3424" name="scarpe" part="gamba"/>
   <color symbol="K" value="8c382b" name="gonna rosso mattone"/>
   <color symbol="M" value="63241b" name="ombra gonna"/>
@@ -24,22 +24,22 @@
   <color symbol="u" hidden="True" name="il sacco possibile"/>
   <color symbol="v" hidden="True" name="la brocca possibile"/>
   <color symbol="y" hidden="True" name="niente da portare"/>
-  <color symbol="1" hidden="True" name="scelta: la cesta"/>
-  <color symbol="2" hidden="True" name="scelta: il sacco"/>
-  <color symbol="3" hidden="True" name="scelta: la brocca"/>
-  <color symbol="4" hidden="True" name="il braccio alzato possibile"/>
-  <color symbol="5" hidden="True" name="la mano alzata possibile"/>
-  <color symbol="6" hidden="True" name="il braccio alzato scelto"/>
-  <color symbol="7" hidden="True" name="la mano alzata scelta"/>
-  <color symbol="8" hidden="True" name="il braccio lungo il fianco"/>
-  <color symbol="9" hidden="True" name="la mano lungo il fianco"/>
+  <color symbol="#1" hidden="True" name="scelta: la cesta"/>
+  <color symbol="#2" hidden="True" name="scelta: il sacco"/>
+  <color symbol="#3" hidden="True" name="scelta: la brocca"/>
+  <color symbol="#4" hidden="True" name="il braccio alzato possibile"/>
+  <color symbol="#5" hidden="True" name="la mano alzata possibile"/>
+  <color symbol="#6" hidden="True" name="il braccio alzato scelto"/>
+  <color symbol="#7" hidden="True" name="la mano alzata scelta"/>
+  <color symbol="#8" hidden="True" name="il braccio lungo il fianco"/>
+  <color symbol="#9" hidden="True" name="la mano lungo il fianco"/>
   <color symbol="d" hidden="True" name="il fazzoletto possibile"/>
   <color symbol="r" hidden="True" name="la crocchia possibile"/>
-  <color symbol="0" hidden="True" name="mescola"/>
+  <color symbol="#0" hidden="True" name="mescola"/>
   <!-- Shuffle: the generator starts again from a different point for every seed (see README) -->
-  <box at="10 0 29" size="20 2 1" color="0"/>
-  <prl in="0" out="B" p="0.5" steps="1"/>
-  <all in="0" out="B"/>
+  <box at="10 0 29" size="20 2 1" color="#0"/>
+  <prl in="#0" out="B" p="0.5" steps="1"/>
+  <all in="#0" out="B"/>
     <box at="8 7 0" size="3 4 2" color="G"/>
   <box at="12 7 0" size="3 4 2" color="G"/>
   <!-- The skirt: three widths -->
@@ -64,25 +64,25 @@
   <cylinder at="10 7 10" size="12 9 6" color="D"/>
   <box at="10 10 10" size="7 2 6" color="W"/>
   <!-- The left arm: along the side, or raised to wave -->
-  <cylinder at="3 7 10" size="3 4 5" color="8" on="B"/>
-  <box at="3 7 7" size="3 3 3" color="9" on="B"/>
-  <cylinder at="3 7 13" size="3 3 9" color="4" on="B"/>
-  <box at="3 7 22" size="3 3 2" color="5" on="B"/>
+  <cylinder at="3 7 10" size="3 4 5" color="#8" on="B"/>
+  <box at="3 7 7" size="3 3 3" color="#9" on="B"/>
+  <cylinder at="3 7 13" size="3 3 9" color="#4" on="B"/>
+  <box at="3 7 22" size="3 3 2" color="#5" on="B"/>
   <box at="3 7 7" size="1 1 1" color="m"/>
   <one steps="1">
     <rule in="m" out="a"/>
-    <rule in="m" out="9"/>
+    <rule in="m" out="#9"/>
   </one>
   <all symmetry="(xyz)">
-    <rule in="a[89]" out="aa"/>
-    <rule in="a4" out="a6"/>
-    <rule in="64" out="66"/>
-    <rule in="65" out="67"/>
-    <rule in="75" out="77"/>
+    <rule in="a[#8#9]" out="aa"/>
+    <rule in="a#4" out="a#6"/>
+    <rule in="#6#4" out="#6#6"/>
+    <rule in="#6#5" out="#6#7"/>
+    <rule in="#7#5" out="#7#7"/>
   </all>
-  <all in="[a45]" out="B"/>
-  <all in="[68]" out="W"/>
-  <all in="[79]" out="S"/>
+  <all in="[a#4#5]" out="B"/>
+  <all in="[#6#8]" out="W"/>
+  <all in="[#7#9]" out="S"/>
   <cylinder at="17 7 10" size="3 4 5" color="W"/>
   <box at="17 7 7" size="3 3 3" color="S"/>
   <cylinder at="10 7 15" size="5 5 2" color="S"/>
@@ -121,20 +121,20 @@
   <box at="0 0 0" size="1 1 1" color="y"/>
   <box at="1 0 0" size="1 1 1" color="y"/>
   <one steps="1">
-    <rule in="c" out="1"/>
-    <rule in="u" out="2"/>
-    <rule in="v" out="3"/>
+    <rule in="c" out="#1"/>
+    <rule in="u" out="#2"/>
+    <rule in="v" out="#3"/>
     <rule in="y" out="B"/>
   </one>
   <all symmetry="(xyz)">
-    <rule in="1c" out="11"/>
-    <rule in="2u" out="22"/>
-    <rule in="3v" out="33"/>
+    <rule in="#1c" out="#1#1"/>
+    <rule in="#2u" out="#2#2"/>
+    <rule in="#3v" out="#3#3"/>
   </all>
   <all in="[cuvy]" out="B"/>
-  <all in="1" out="T"/>
-  <all in="2" out="F"/>
-  <all in="3" out="R"/>
+  <all in="#1" out="T"/>
+  <all in="#2" out="F"/>
+  <all in="#3" out="R"/>
   <prl in="B T" out="R *" p="0.3" steps="1"/>
   <!-- The apron at the front of the skirt -->
   <box at="10 11 2" size="8 2 8" color="W" on="[BK]"/>

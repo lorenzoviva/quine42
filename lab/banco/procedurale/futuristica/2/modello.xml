@@ -1,7 +1,7 @@
 <sequence values="BNExzaPpQbOHtsgcdvefwXiIJhjMSFCWRVDLUuTYGKAknryqlmoZ" symmetry="(xy)" ground="E" origin="bottom">
-  <union symbol="1" values="be"/>
-  <union symbol="2" values="tsdcfv"/>
-  <union symbol="3" values="tb"/>
+  <union symbol="#1" values="be"/>
+  <union symbol="#2" values="tsdcfv"/>
+  <union symbol="#3" values="tb"/>
   <color symbol="k" value="66f2ff" glow="True" name="porta luminosa"/><color symbol="S" value="cfd6dd" name="pannello metallico"/><color symbol="F" value="2f3742" name="pavimento scuro"/><color symbol="C" value="e3e8ec" name="metallo bianco satinato"/><color symbol="W" value="f8fafb" name="metallo bianco"/><color symbol="R" value="4a525e" name="copertura tecnica"/><color symbol="V" value="10202e" alpha="0.5" name="vetro scuro"/><color symbol="D" value="262c35" name="telaio scuro"/><color symbol="L" value="6f8c96" name="banco da laboratorio"/><color symbol="T" value="eef3f6" name="rampa"/><color symbol="K" value="98a4b0" name="nucleo in acciaio"/><color symbol="A" value="59636f" name="viale"/><color symbol="N" value="35f0ff" glow="True" name="neon ciano"/><color symbol="Z" value="ff3bd0" glow="True" name="neon magenta"/><color symbol="x" value="7a7cff" glow="True" name="pavimento luminoso"/><color symbol="l" value="d7efe9" name="piastrelle del laboratorio"/><color symbol="Q" value="aeb7c0" name="piattaforma esterna"/><color symbol="c" value="2a2f55" name="pavimento della sala di comando"/>
   <prl in="***/*E*/***" out="***/*z*/***"/>
   <all in="Nz" out="*a" steps="1"/>
@@ -34,11 +34,11 @@
   <one in="*tttttttttttt/Ppppppppppppp/*tttttttttttt" out="*************/******H******/*************" steps="1"/>
   <all in="[gsdc]t" out="*v"/>
   <all in="vt" out="*v" steps="9"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
   <all in="bz" out="*b"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
   <all in="bz" out="*b"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
   <all in="bz" out="*b"/>
   <all in="Hp" out="*H" steps="5"/>
   <prl><rule in="tHb" out="*Ht" p="0.07"/></prl>
@@ -47,7 +47,7 @@
   <all><rule in="nH" out="*n"/><rule in="np" out="*n"/></all>
   <one in="nnnnnnnnn" out="*eeeeeee*" steps="1"/>
   <prl in="v" out="t"/>
-  <all><rule in="[zE]p[zE]" out="*q*"/><rule in="[zE]p1" out="*w*"/><rule in="[zE]p2" out="*X*"/><rule in="1p1" out="*i*"/><rule in="2p2" out="*I*"/><rule in="1p2" out="*J*"/><rule in="1H1" out="*h*"/><rule in="1H2" out="*j*"/><rule in="EO2" out="*M*"/></all>
+  <all><rule in="[zE]p[zE]" out="*q*"/><rule in="[zE]p#1" out="*w*"/><rule in="[zE]p#2" out="*X*"/><rule in="#1p#1" out="*i*"/><rule in="#2p#2" out="*I*"/><rule in="#1p#2" out="*J*"/><rule in="#1H#1" out="*h*"/><rule in="#1H#2" out="*j*"/><rule in="EO#2" out="*M*"/></all>
   <prl in="n" out="h"/>
   <all in="P[XIJjHMy]" out="I*"/>
   <all in="P[wihO]" out="i*"/>

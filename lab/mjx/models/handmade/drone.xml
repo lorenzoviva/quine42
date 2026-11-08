@@ -17,7 +17,7 @@ Animazione "elica" (4 fotogrammi):
 - I 4 rotori scambiano ciclicamente le celle di plasma ciano (a -> b -> c -> d) simulando una rotazione continua a 360 gradi;
 - Il pacchetto dati pulsa ritmicamente modulando l'energia fotonica dei dati in transito (1 -> 2 -> 3 -> 4).
 -->
-<sequence values="BWwMmDSPVsIabcd1234GexyXYZfg" size="10 8 10" symmetry="()" name="Drone">
+<sequence values="BWwMmDSPVsIabcd#1#2#3#4GexyXYZfg" size="10 8 10" symmetry="()" name="Drone">
   <!-- Structural materials: aerodynamic white ceramic and dark cybernetic titanium -->
   <color symbol="W" value="fff1e8" name="cyber-ceramica bianca scocca"/>
   <color symbol="w" value="d8d0c8" name="sfumatura e biselli scocca chiara"/>
@@ -41,10 +41,10 @@ Animazione "elica" (4 fotogrammi):
   <color symbol="d" value="29adff" glow="True" name="lama plasma azzurro cobalto"/>
 
   <!-- Four energy phases for the amber/gold data packet (glow="True") -->
-  <color symbol="1" value="ffa300" glow="True" name="flusso dati ambra dorata"/>
-  <color symbol="2" value="ffec27" glow="True" name="pacchetto dati oro brillante"/>
-  <color symbol="3" value="ffe27a" glow="True" name="picco dati bianco-oro"/>
-  <color symbol="4" value="ff7700" glow="True" name="plasma dati arancio denso"/>
+  <color symbol="#1" value="ffa300" glow="True" name="flusso dati ambra dorata"/>
+  <color symbol="#2" value="ffec27" glow="True" name="pacchetto dati oro brillante"/>
+  <color symbol="#3" value="ffe27a" glow="True" name="picco dati bianco-oro"/>
+  <color symbol="#4" value="ff7700" glow="True" name="plasma dati arancio denso"/>
   <color symbol="G" value="d8a878" name="staffa ambra isolante pacchetto"/>
 
   <!-- Telemetry and navigation beacon on top -->
@@ -90,14 +90,14 @@ Animazione "elica" (4 fotogrammi):
   <!-- 3. PACCHETTO DATI LUMINOSO CENTRALE (z = 0..1, x=3..4)   -->
   <!-- ======================================================== -->
   <!-- Strato inferiore del pacchetto a contatto suolo (z=0)     -->
-  <box at="3 3 1" size="1 1 1" color="3"/>
-  <box at="4 3 1" size="1 1 1" color="4"/>
+  <box at="3 3 1" size="1 1 1" color="#3"/>
+  <box at="4 3 1" size="1 1 1" color="#4"/>
   <box at="3 4 1" size="1 1 1" color="G"/>
-  <box at="4 4 1" size="1 1 1" color="1"/>
+  <box at="4 4 1" size="1 1 1" color="#1"/>
 
   <!-- Strato superiore del pacchetto (z=1)                      -->
-  <box at="3 3 2" size="1 1 1" color="1"/>
-  <box at="4 3 2" size="1 1 1" color="2"/>
+  <box at="3 3 2" size="1 1 1" color="#1"/>
+  <box at="4 3 2" size="1 1 1" color="#2"/>
   <box at="3 4 2" size="1 1 1" color="X"/>
   <box at="4 4 2" size="1 1 1" color="Y"/>
 
@@ -201,20 +201,20 @@ Animazione "elica" (4 fotogrammi):
   <!-- ======================================================== -->
   <!-- A) Risoluzione quantistica del pacchetto dati (X)         -->
   <one steps="4">
-    <rule in="X" out="1" p="0.40"/>
-    <rule in="X" out="2" p="0.30"/>
-    <rule in="X" out="3" p="0.20"/>
-    <rule in="X" out="4" p="0.10"/>
+    <rule in="X" out="#1" p="0.40"/>
+    <rule in="X" out="#2" p="0.30"/>
+    <rule in="X" out="#3" p="0.20"/>
+    <rule in="X" out="#4" p="0.10"/>
   </one>
-  <all in="X" out="2" optional="True"/>
+  <all in="X" out="#2" optional="True"/>
 
   <!-- B) Risoluzione dei circuiti e involucro pacchetto (Y)     -->
   <one steps="4">
-    <rule in="Y" out="2" p="0.40"/>
-    <rule in="Y" out="3" p="0.30"/>
+    <rule in="Y" out="#2" p="0.40"/>
+    <rule in="Y" out="#3" p="0.30"/>
     <rule in="Y" out="G" p="0.30"/>
   </one>
-  <all in="Y" out="2" optional="True"/>
+  <all in="Y" out="#2" optional="True"/>
 
   <!-- C) Dettagli dorsali della canopy (Z)                      -->
   <one steps="2">
@@ -238,11 +238,11 @@ Animazione "elica" (4 fotogrammi):
     <all in="x" out="d"/>
 
     <!-- 2. Pulsazione ritmica del flusso dati energetico         -->
-    <all in="1" out="y"/>
-    <all in="2" out="1"/>
-    <all in="3" out="2"/>
-    <all in="4" out="3"/>
-    <all in="y" out="4"/>
+    <all in="#1" out="y"/>
+    <all in="#2" out="#1"/>
+    <all in="#3" out="#2"/>
+    <all in="#4" out="#3"/>
+    <all in="y" out="#4"/>
 
     
     <prl in="f" out="e" p="0.8"/>  

@@ -31,7 +31,7 @@ Architecture:
 Animation "quadro" (8 frames):
   Harmonic breathing of the monumental pink neon frame.
 -->
-<sequence values="BMmCSsVvwNnFPOQx12345678" size="112 112 80" symmetry="()" name="Galleria dell'Artista">
+<sequence values="BMmCSsVvwNnFPOQx#1#2#3#4#5#6#7#8" size="112 112 80" symmetry="()" name="Galleria dell'Artista">
   <!-- Materials and neon punk palette -->
   <color symbol="M" value="14141a" name="metallo primario"/>
   <color symbol="m" value="22242e" name="metallo secondary"/>
@@ -50,14 +50,14 @@ Animation "quadro" (8 frames):
   <color symbol="x" hidden="True" name="buffer animazione"/>
 
   <!-- 8 phases of the pink neon breathing of the frame (1..8) -->
-  <color symbol="1" value="8a2862" glow="True" name="fase rosa profondo"/>
-  <color symbol="2" value="a83278" glow="True" name="fase rosa 2"/>
-  <color symbol="3" value="c84292" glow="True" name="fase rosa 3"/>
-  <color symbol="4" value="e858ae" glow="True" name="fase rosa 4"/>
-  <color symbol="5" value="ffa0e2" glow="True" name="fase rosa apice"/>
-  <color symbol="6" value="e858ae" glow="True" name="fase rosa 6"/>
-  <color symbol="7" value="c84292" glow="True" name="fase rosa 7"/>
-  <color symbol="8" value="a83278" glow="True" name="fase rosa 8"/>
+  <color symbol="#1" value="8a2862" glow="True" name="fase rosa profondo"/>
+  <color symbol="#2" value="a83278" glow="True" name="fase rosa 2"/>
+  <color symbol="#3" value="c84292" glow="True" name="fase rosa 3"/>
+  <color symbol="#4" value="e858ae" glow="True" name="fase rosa 4"/>
+  <color symbol="#5" value="ffa0e2" glow="True" name="fase rosa apice"/>
+  <color symbol="#6" value="e858ae" glow="True" name="fase rosa 6"/>
+  <color symbol="#7" value="c84292" glow="True" name="fase rosa 7"/>
+  <color symbol="#8" value="a83278" glow="True" name="fase rosa 8"/>
 
   <!-- ================================================================= -->
   <!-- 1. PERIMETER BASE AND FRONT FORECOURT (z = 0..1)                  -->
@@ -234,36 +234,36 @@ Animation "quadro" (8 frames):
 
   <!-- PULSING PINK NEON THREAD (phases 1..8) along the inner outline of the frame -->
   <!-- Vertical neon sides (x=35 and x=77, z=10..49) -->
-  <box at="35 75 10" size="1 1 1" color="1"/>
-  <box at="35 75 11" size="1 1 5" color="2"/>
-  <box at="35 75 16" size="1 1 5" color="3"/>
-  <box at="35 75 21" size="1 1 5" color="4"/>
-  <box at="35 75 26" size="1 1 5" color="5"/>
-  <box at="35 75 31" size="1 1 5" color="6"/>
-  <box at="35 75 36" size="1 1 5" color="7"/>
-  <box at="35 75 41" size="1 1 5" color="8"/>
-  <box at="35 75 46" size="1 1 4" color="1"/>
+  <box at="35 75 10" size="1 1 1" color="#1"/>
+  <box at="35 75 11" size="1 1 5" color="#2"/>
+  <box at="35 75 16" size="1 1 5" color="#3"/>
+  <box at="35 75 21" size="1 1 5" color="#4"/>
+  <box at="35 75 26" size="1 1 5" color="#5"/>
+  <box at="35 75 31" size="1 1 5" color="#6"/>
+  <box at="35 75 36" size="1 1 5" color="#7"/>
+  <box at="35 75 41" size="1 1 5" color="#8"/>
+  <box at="35 75 46" size="1 1 4" color="#1"/>
 
-  <box at="77 75 10" size="1 1 1" color="1"/>
-  <box at="77 75 11" size="1 1 5" color="2"/>
-  <box at="77 75 16" size="1 1 5" color="3"/>
-  <box at="77 75 21" size="1 1 5" color="4"/>
-  <box at="77 75 26" size="1 1 5" color="5"/>
-  <box at="77 75 31" size="1 1 5" color="6"/>
-  <box at="77 75 36" size="1 1 5" color="7"/>
-  <box at="77 75 41" size="1 1 5" color="8"/>
-  <box at="77 75 46" size="1 1 4" color="1"/>
+  <box at="77 75 10" size="1 1 1" color="#1"/>
+  <box at="77 75 11" size="1 1 5" color="#2"/>
+  <box at="77 75 16" size="1 1 5" color="#3"/>
+  <box at="77 75 21" size="1 1 5" color="#4"/>
+  <box at="77 75 26" size="1 1 5" color="#5"/>
+  <box at="77 75 31" size="1 1 5" color="#6"/>
+  <box at="77 75 36" size="1 1 5" color="#7"/>
+  <box at="77 75 41" size="1 1 5" color="#8"/>
+  <box at="77 75 46" size="1 1 4" color="#1"/>
 
   <!-- Upper horizontal neon crossbar (z=49, x=36..76) -->
-  <box at="40 75 49" size="8 1 1" color="2"/>
-  <box at="48 75 49" size="8 1 1" color="3"/>
-  <box at="56 75 49" size="8 1 1" color="5"/>
-  <box at="64 75 49" size="8 1 1" color="7"/>
-  <box at="72 75 49" size="8 1 1" color="8"/>
+  <box at="40 75 49" size="8 1 1" color="#2"/>
+  <box at="48 75 49" size="8 1 1" color="#3"/>
+  <box at="56 75 49" size="8 1 1" color="#5"/>
+  <box at="64 75 49" size="8 1 1" color="#7"/>
+  <box at="72 75 49" size="8 1 1" color="#8"/>
 
   <!-- Lower horizontal neon strokes (z=10, x=36..49 and x=63..76) -->
-  <box at="43 75 10" size="14 1 1" color="4"/>
-  <box at="69 75 10" size="14 1 1" color="6"/>
+  <box at="43 75 10" size="14 1 1" color="#4"/>
+  <box at="69 75 10" size="14 1 1" color="#6"/>
 
   <!-- THE BIG MUSEUM GLASS WALL INSIDE THE FRAME (x=36..76, z=11..48, y=74) -->
   <box at="56 74 11" size="41 1 38" color="V"/>
@@ -451,14 +451,14 @@ Animation "quadro" (8 frames):
 <!-- ================================================================= -->
 <animation name="quadro" frames="8">
   <sequence>
-    <all in="1" out="x"/>
-    <all in="2" out="1"/>
-    <all in="3" out="2"/>
-    <all in="4" out="3"/>
-    <all in="5" out="4"/>
-    <all in="6" out="5"/>
-    <all in="7" out="6"/>
-    <all in="8" out="7"/>
-    <all in="x" out="8"/>
+    <all in="#1" out="x"/>
+    <all in="#2" out="#1"/>
+    <all in="#3" out="#2"/>
+    <all in="#4" out="#3"/>
+    <all in="#5" out="#4"/>
+    <all in="#6" out="#5"/>
+    <all in="#7" out="#6"/>
+    <all in="#8" out="#7"/>
+    <all in="x" out="#8"/>
   </sequence>
 </animation>

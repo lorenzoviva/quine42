@@ -7,6 +7,7 @@
 
 import { AIR, Mj3Error, run, runOn, type Grid3 } from '../../src/mj/engine';
 import { compileMjx } from '../../src/mj/model';
+import { symbolName } from '../../src/mj/symbols';
 import type { RenderedSound } from '../../src/mj/synth';
 import { SOUND_LIMITS, SOUND_MAX_STEPS } from '../../src/mj/synth';
 import type { SoundTrack } from '../../src/mj/sound';
@@ -142,7 +143,8 @@ function insertRetouches(xml: string, boxes: ReturnType<typeof retouchBoxes>): s
   if (root?.name !== 'sequence' || root.closeStart === undefined) return undefined;
   let at = root.closeStart;
   while (at > 0 && (xml[at - 1] === ' ' || xml[at - 1] === '\t')) at--;
-  const lines = boxes.map((b) => `  <box at="${b.x + (b.n - 1) / 2} ${b.y} ${b.z}" size="${b.n} 1 1" color="${b.letter}"/>`);
+  // The symbol as the program writes it (`#12`, T342), not the engine's character.
+  const lines = boxes.map((b) => `  <box at="${b.x + (b.n - 1) / 2} ${b.y} ${b.z}" size="${b.n} 1 1" color="${symbolName(b.letter)}"/>`);
   const block = `  ${RETOUCH_OPEN}\n${lines.join('\n')}\n  ${RETOUCH_CLOSE}\n`;
   return `${xml.slice(0, at)}${at > 0 && xml[at - 1] !== '\n' ? '\n' : ''}${block}${xml.slice(at)}`;
 }

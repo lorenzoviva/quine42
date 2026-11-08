@@ -31,7 +31,7 @@ Architecture:
 Animation "canone" (8 frames):
   A fluid, cyclic breathing of the light of the runes immersed in the water mirror and of the top core of the lantern.
 -->
-<sequence values="BMmCSsVvWNnFPOx12345678" size="112 112 56" symmetry="()" name="Biblioteca del Mondo">
+<sequence values="BMmCSsVvWNnFPOx#1#2#3#4#5#6#7#8" size="112 112 56" symmetry="()" name="Biblioteca del Mondo">
   <!-- Materials and neon punk palette -->
   <color symbol="M" value="14141a" name="metallo primario"/>
   <color symbol="m" value="22242e" name="metallo secondario"/>
@@ -49,14 +49,14 @@ Animation "canone" (8 frames):
   <color symbol="x" hidden="True" name="buffer animazione"/>
 
   <!-- 8 phases of the breathing of the canon (1..8) -->
-  <color symbol="1" value="7dd87d" glow="True" name="fase verde apice"/>
-  <color symbol="2" value="88e288" glow="True" name="fase verde brillante"/>
-  <color symbol="3" value="70cc70" glow="True" name="fase verde medio"/>
-  <color symbol="4" value="5cb45c" glow="True" name="fase verde morbido"/>
-  <color symbol="5" value="489848" glow="True" name="fase verde profondo"/>
-  <color symbol="6" value="5cb45c" glow="True" name="fase verde morbido 2"/>
-  <color symbol="7" value="70cc70" glow="True" name="fase verde medio 2"/>
-  <color symbol="8" value="88e288" glow="True" name="fase verde brillante 2"/>
+  <color symbol="#1" value="7dd87d" glow="True" name="fase verde apice"/>
+  <color symbol="#2" value="88e288" glow="True" name="fase verde brillante"/>
+  <color symbol="#3" value="70cc70" glow="True" name="fase verde medio"/>
+  <color symbol="#4" value="5cb45c" glow="True" name="fase verde morbido"/>
+  <color symbol="#5" value="489848" glow="True" name="fase verde profondo"/>
+  <color symbol="#6" value="5cb45c" glow="True" name="fase verde morbido 2"/>
+  <color symbol="#7" value="70cc70" glow="True" name="fase verde medio 2"/>
+  <color symbol="#8" value="88e288" glow="True" name="fase verde brillante 2"/>
 
   <!-- ================================================================= -->
   <!-- 1. PERIMETER BASE, PARVIS AND PAVING (z = 0..2)                   -->
@@ -115,55 +115,55 @@ Animation "canone" (8 frames):
   <!-- Central medallion of the canon immersed at z=1 (cx=56, cy=56) -->
   <box at="56 56 1" size="7 7 1" color="M"/>
   <box at="56 56 1" size="5 5 1" color="s"/>
-  <box at="56 56 1" size="3 3 1" color="1"/>
+  <box at="56 56 1" size="3 3 1" color="#1"/>
   <box at="56 56 1" size="1 1 1" color="M"/>
 
   <!-- 8 Runes of the Canon flush on the surface of the water (z=1) -->
   <!-- Rune 1 (North, Light / zen arrow): cx=56, cy=44 -->
-  <box at="56 44 1" size="1 5 1" color="1"/>
-  <box at="55 43 1" size="1 1 1" color="1"/>
-  <box at="57 43 1" size="1 1 1" color="1"/>
-  <box at="54 44 1" size="1 1 1" color="1"/>
-  <box at="58 44 1" size="1 1 1" color="1"/>
+  <box at="56 44 1" size="1 5 1" color="#1"/>
+  <box at="55 43 1" size="1 1 1" color="#1"/>
+  <box at="57 43 1" size="1 1 1" color="#1"/>
+  <box at="54 44 1" size="1 1 1" color="#1"/>
+  <box at="58 44 1" size="1 1 1" color="#1"/>
 
   <!-- Rune 2 (North-East, Fire / angular chevron): cx=65, cy=47 -->
-  <box at="64 47 1" size="1 5 1" color="2"/>
-  <box at="65 46 1" size="1 1 1" color="2"/>
-  <box at="65 48 1" size="1 1 1" color="2"/>
-  <box at="66 47 1" size="1 1 1" color="2"/>
+  <box at="64 47 1" size="1 5 1" color="#2"/>
+  <box at="65 46 1" size="1 1 1" color="#2"/>
+  <box at="65 48 1" size="1 1 1" color="#2"/>
+  <box at="66 47 1" size="1 1 1" color="#2"/>
 
   <!-- Rune 3 (East, Water / fluid hook): cx=68, cy=56 -->
-  <box at="68 56 1" size="1 5 1" color="3"/>
-  <box at="69 54 1" size="1 2 1" color="3"/>
-  <box at="67 58 1" size="1 1 1" color="3"/>
+  <box at="68 56 1" size="1 5 1" color="#3"/>
+  <box at="69 54 1" size="1 2 1" color="#3"/>
+  <box at="67 58 1" size="1 1 1" color="#3"/>
 
   <!-- Rune 4 (South-East, Earth / closed lozenge): cx=65, cy=65 -->
-  <box at="65 65 1" size="3 3 1" color="4"/>
+  <box at="65 65 1" size="3 3 1" color="#4"/>
   <box at="65 65 1" size="1 1 1" color="W"/>
 
   <!-- Rune 5 (South, Life / sacred trident): cx=56, cy=68 -->
-  <box at="56 68 1" size="1 5 1" color="5"/>
-  <box at="54 66 1" size="1 3 1" color="5"/>
-  <box at="58 66 1" size="1 3 1" color="5"/>
-  <box at="56 68 1" size="3 1 1" color="5"/>
+  <box at="56 68 1" size="1 5 1" color="#5"/>
+  <box at="54 66 1" size="1 3 1" color="#5"/>
+  <box at="58 66 1" size="1 3 1" color="#5"/>
+  <box at="56 68 1" size="3 1 1" color="#5"/>
 
   <!-- Rune 6 (South-West, Shield / cybernetic triangle): cx=47, cy=65 -->
-  <box at="46 65 1" size="1 5 1" color="6"/>
-  <box at="47 64 1" size="1 1 1" color="6"/>
-  <box at="47 66 1" size="1 1 1" color="6"/>
-  <box at="48 65 1" size="1 1 1" color="6"/>
+  <box at="46 65 1" size="1 5 1" color="#6"/>
+  <box at="47 64 1" size="1 1 1" color="#6"/>
+  <box at="47 66 1" size="1 1 1" color="#6"/>
+  <box at="48 65 1" size="1 1 1" color="#6"/>
 
   <!-- Rune 7 (West, Wind / broken bolt): cx=44, cy=56 -->
-  <box at="43 54 1" size="1 2 1" color="7"/>
-  <box at="44 55 1" size="1 3 1" color="7"/>
-  <box at="45 57 1" size="1 2 1" color="7"/>
+  <box at="43 54 1" size="1 2 1" color="#7"/>
+  <box at="44 55 1" size="1 3 1" color="#7"/>
+  <box at="45 57 1" size="1 2 1" color="#7"/>
 
   <!-- Rune 8 (North-West, Canon / geometric weave): cx=47, cy=47 -->
-  <box at="47 47 1" size="5 1 1" color="8"/>
-  <box at="45 46 1" size="1 1 1" color="8"/>
-  <box at="49 48 1" size="1 1 1" color="8"/>
-  <box at="47 45 1" size="1 1 1" color="8"/>
-  <box at="47 49 1" size="1 1 1" color="8"/>
+  <box at="47 47 1" size="5 1 1" color="#8"/>
+  <box at="45 46 1" size="1 1 1" color="#8"/>
+  <box at="49 48 1" size="1 1 1" color="#8"/>
+  <box at="47 45 1" size="1 1 1" color="#8"/>
+  <box at="47 49 1" size="1 1 1" color="#8"/>
 
   <!-- ================================================================= -->
   <!-- 3. THE ZENITH LANTERN IN THE NORTH-EAST CORNER (cx=71, cy=41)     -->
@@ -172,7 +172,7 @@ Animation "canone" (8 frames):
   <box at="71 41 0" size="3 3 2" color="M"/>
   <box at="71 41 2" size="3 3 1" color="s"/>
   <box at="71 41 3" size="3 3 1" color="M"/>
-  <box at="71 41 3" size="1 1 1" color="1"/>
+  <box at="71 41 3" size="1 1 1" color="#1"/>
 
   <!-- Slender, thin shaft in black titanium (z=4..39) -->
   <box at="71 41 4" size="1 1 36" color="M"/>
@@ -192,8 +192,8 @@ Animation "canone" (8 frames):
   <box at="69 43 41" size="1 1 4" color="S"/>
   <box at="73 43 41" size="1 1 4" color="S"/>
   <!-- Pulsing green heart of light (phases 1..8) at the centre of the lantern -->
-  <box at="71 41 41" size="1 1 4" color="1"/>
-  <box at="71 41 42" size="3 3 2" color="1"/>
+  <box at="71 41 41" size="1 1 4" color="#1"/>
+  <box at="71 41 42" size="3 3 2" color="#1"/>
 
   <!-- Pavilion roof of the lantern (z=45..47) -->
   <box at="71 41 45" size="7 7 1" color="M"/>
@@ -574,14 +574,14 @@ Animation "canone" (8 frames):
 <animation name="canone" frames="8">
   <sequence>
     <!-- Cyclic run through the 8 phases of green light intensity -->
-    <all in="1" out="x"/>
-    <all in="2" out="1"/>
-    <all in="3" out="2"/>
-    <all in="4" out="3"/>
-    <all in="5" out="4"/>
-    <all in="6" out="5"/>
-    <all in="7" out="6"/>
-    <all in="8" out="7"/>
-    <all in="x" out="8"/>
+    <all in="#1" out="x"/>
+    <all in="#2" out="#1"/>
+    <all in="#3" out="#2"/>
+    <all in="#4" out="#3"/>
+    <all in="#5" out="#4"/>
+    <all in="#6" out="#5"/>
+    <all in="#7" out="#6"/>
+    <all in="#8" out="#7"/>
+    <all in="x" out="#8"/>
   </sequence>
 </animation>

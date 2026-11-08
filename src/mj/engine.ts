@@ -35,6 +35,7 @@
 
 import { Rng } from '../kernel/rng';
 import { backwardPotentials, fieldPotential, goalReached, INFERENCE_LIMITS, makeWork, MAX_OBSERVED_CODES, prepare, search, type InferRule, type Prepared, type Work } from './infer';
+import { MAX_SYMBOLS, showSymbols, symbolName } from './symbols';
 import { convchainWeights, squareSubgroup, waveBytes, WFC_LIMITS, WfcError, WfcSolver } from './wfc';
 
 export type Vec3 = [number, number, number];
@@ -193,8 +194,8 @@ export interface Program3 {
 export const AIR = '.';
 export const MAX_SIDE = 64;
 export const MAX_CELLS = 64 * 64 * 64;
-/** Codes a program may use, air included (cells are bytes). */
-export const MAX_CODES = 256;
+/** Codes a program may use, air included (cells are bytes): the symbols of a program are at most `MAX_SYMBOLS` (T342, ADR-0175). */
+export const MAX_CODES = MAX_SYMBOLS + 1;
 
 /** How large a grid may be: voxel models (the default) or layouts of blocks (structure.ts). */
 export interface GridLimits {
@@ -298,10 +299,10 @@ class Alphabet {
   unions = new Map<string, string>();
   private setIds = new Map<string, number>();
   index(ch: string): number {
-    if (this.unions.has(ch)) throw new Mj3Error(`"${ch}" è un'unione: vale solo negli ingressi delle regole`);
+    if (this.unions.has(ch)) throw new Mj3Error(`"${symbolName(ch)}" è un'unione: vale solo negli ingressi delle regole`);
     let i = this.codes.indexOf(ch);
     if (i < 0) {
-      if (this.codes.length >= MAX_CODES) throw new Mj3Error(`troppi codici (max ${MAX_CODES - 1})`);
+      if (this.codes.length >= MAX_CODES) throw new Mj3Error(`troppi simboli (al più ${MAX_CODES - 1} oltre la cella vuota)`);
       i = this.codes.push(ch) - 1;
     }
     return i;
@@ -346,8 +347,8 @@ function parsePattern(rule: Rule3, alpha: Alphabet): Pattern {
   const dy = li[0].length;
   const dx = li[0][0].length;
   const same = (ls: string[][][]) => ls.length === dz && ls.every((l) => l.length === dy && l.every((r) => r.length === dx));
-  if (!same(li) || !same(lo)) throw new Mj3Error(`in e out devono avere la stessa forma: "${rule.in}" → "${rule.out}"`);
-  if (dx * dy * dz > 1728) throw new Mj3Error(`regola troppo grande (max 1728 celle): ${rule.in}`);
+  if (!same(li) || !same(lo)) throw new Mj3Error(`in e out devono avere la stessa forma: "${showSymbols(rule.in)}" → "${showSymbols(rule.out)}"`);
+  if (dx * dy * dz > 1728) throw new Mj3Error(`regola troppo grande (max 1728 celle): ${showSymbols(rule.in)}`);
   const input = new Int32Array(dx * dy * dz);
   const output = new Int16Array(dx * dy * dz);
   for (let k = 0; k < dz; k++)

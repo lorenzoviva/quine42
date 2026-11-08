@@ -2,6 +2,7 @@
 // Provides tools for generating, configuring, and inserting MarkovJunior rewrite rules (<all>, <one>, <prl>).
 
 import { MJ_PALETTE } from '../../src/mj/palette';
+import { symbolOf, symbolTexts } from '../../src/mj/symbols';
 import { parseColorsFromXml } from './cad';
 
 export type RuleNodeType =
@@ -138,7 +139,7 @@ export function getPaletteSymbols(xml: string): PaletteSymbolInfo[] {
   const valuesMatch = /\bvalues\s*=\s*["']([^"']+)["']/i.exec(xml);
   if (valuesMatch) {
     const rawValues = valuesMatch[1].replace(/\s+/g, '');
-    for (const char of rawValues) {
+    for (const char of symbolTexts(rawValues)) {
       if (!seen.has(char)) {
         seen.add(char);
         const pal = MJ_PALETTE[char];
@@ -424,7 +425,8 @@ export function parsePattern3D(patternStr: string): ParsedPattern3D {
     const rows = lStr.split('/');
     if (rows.length > maxY) maxY = rows.length;
     return rows.map((rStr) => {
-      const cells = rStr.match(/\[[^\]]*\]|./g) ?? [];
+      // A cell is a symbol (`#12` is one, T342), a set in brackets or a mark.
+      const cells = rStr.match(/\[[^\]]*\]|#\d+|./g) ?? [];
       if (cells.length > maxX) maxX = cells.length;
       return cells;
     });
@@ -504,7 +506,7 @@ export interface ColorSymbolOccurrences {
  * Scans an XML string for all occurrences of a color symbol and reports a detailed breakdown.
  */
 export function countColorSymbolOccurrences(xml: string, symbol: string): ColorSymbolOccurrences {
-  if (!symbol || symbol.length !== 1) {
+  if (symbolOf(symbol) === undefined) {
     return { symbol, total: 0, colorDecl: 0, valuesDecl: 0, rulePatterns: 0, shapesAndOther: 0, details: [] };
   }
 
@@ -526,7 +528,7 @@ export function countColorSymbolOccurrences(xml: string, symbol: string): ColorS
   while ((m = valuesRegex.exec(xml)) !== null) {
     const val = m[1];
     let occ = 0;
-    for (const ch of val) if (ch === symbol) occ++;
+    for (const ch of symbolTexts(val)) if (ch === symbol) occ++;
     if (occ > 0) {
       valuesDecl += occ;
     }
@@ -537,7 +539,7 @@ export function countColorSymbolOccurrences(xml: string, symbol: string): ColorS
   while ((m = patternRegex.exec(xml)) !== null) {
     const attrVal = m[2];
     let occ = 0;
-    for (const ch of attrVal) if (ch === symbol) occ++;
+    for (const ch of symbolTexts(attrVal)) if (ch === symbol) occ++;
     if (occ > 0) {
       rulePatterns += occ;
     }
@@ -548,7 +550,7 @@ export function countColorSymbolOccurrences(xml: string, symbol: string): ColorS
   while ((m = shapeRegex.exec(xml)) !== null) {
     const attrVal = m[2];
     let occ = 0;
-    for (const ch of attrVal) if (ch === symbol) occ++;
+    for (const ch of symbolTexts(attrVal)) if (ch === symbol) occ++;
     if (occ > 0) {
       shapesAndOther += occ;
     }
@@ -579,7 +581,7 @@ export function refactorColorSymbol(
   oldSym: string,
   newSym: string,
 ): { newXml: string; count: number } {
-  if (!oldSym || !newSym || oldSym.length !== 1 || newSym.length !== 1 || oldSym === newSym) {
+  if (symbolOf(oldSym) === undefined || symbolOf(newSym) === undefined || oldSym === newSym) {
     return { newXml: xml, count: 0 };
   }
 
@@ -600,42 +602,42 @@ export function refactorColorSymbol(
         }
 
         // 2. values attribute (in <sequence>, <markov>, <map>, <union>, <convolution>)
-        if (lowerName === 'values' && attrVal.includes(oldSym)) {
+        if (lowerName === 'values' && symbolTexts(attrVal).includes(oldSym)) {
           let replaced = '';
-          for (let k = 0; k < attrVal.length; k++) {
-            if (attrVal[k] === oldSym) {
+          for (const t of symbolTexts(attrVal)) {
+            if (t === oldSym) {
               replaced += newSym;
               count++;
             } else {
-              replaced += attrVal[k];
+              replaced += t;
             }
           }
           return `${attrName}=${quote}${replaced}${quote}`;
         }
 
         // 3. in and out patterns
-        if ((lowerName === 'in' || lowerName === 'out') && attrVal.includes(oldSym)) {
+        if ((lowerName === 'in' || lowerName === 'out') && symbolTexts(attrVal).includes(oldSym)) {
           let replaced = '';
-          for (let k = 0; k < attrVal.length; k++) {
-            if (attrVal[k] === oldSym) {
+          for (const t of symbolTexts(attrVal)) {
+            if (t === oldSym) {
               replaced += newSym;
               count++;
             } else {
-              replaced += attrVal[k];
+              replaced += t;
             }
           }
           return `${attrName}=${quote}${replaced}${quote}`;
         }
 
         // 4. color, on, from, to, ground
-        if (['color', 'on', 'from', 'to', 'ground'].includes(lowerName) && attrVal.includes(oldSym)) {
+        if (['color', 'on', 'from', 'to', 'ground'].includes(lowerName) && symbolTexts(attrVal).includes(oldSym)) {
           let replaced = '';
-          for (let k = 0; k < attrVal.length; k++) {
-            if (attrVal[k] === oldSym) {
+          for (const t of symbolTexts(attrVal)) {
+            if (t === oldSym) {
               replaced += newSym;
               count++;
             } else {
-              replaced += attrVal[k];
+              replaced += t;
             }
           }
           return `${attrName}=${quote}${replaced}${quote}`;

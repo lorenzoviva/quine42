@@ -1,4 +1,4 @@
-<sequence values="BSgT123" size="33 33 45" origin="True" name="Albero_Spoglio_Neon_3D">
+<sequence values="BSgT#1#2#3" size="33 33 45" origin="True" name="Albero_Spoglio_Neon_3D">
 
   <!-- ======================================================== -->
   <!-- 1. COLORI                                                -->
@@ -11,9 +11,9 @@
   <color symbol="T" value="22dd55" glow="true" alpha="0.9" name="Rami secondari"/>
 
   <!-- Teste di crescita (Agenti / Cursori) -->
-  <color symbol="1" value="ffffff" glow="true" name="Testa Tronco"/>
-  <color symbol="2" value="ffff44" glow="true" name="Testa Ramo Primario"/>
-  <color symbol="3" value="ff44bb" glow="true" name="Testa Ramoscello Terminale"/>
+  <color symbol="#1" value="ffffff" glow="true" name="Testa Tronco"/>
+  <color symbol="#2" value="ffff44" glow="true" name="Testa Ramo Primario"/>
+  <color symbol="#3" value="ff44bb" glow="true" name="Testa Ramoscello Terminale"/>
 
   <!-- ======================================================== -->
   <!-- 2. SETUP SPAZIALE                                        -->
@@ -21,9 +21,9 @@
   <box at="1 1 1" size="31 31 43" color="S"/>
 
   <!-- Seme iniziale centrato sul fondo (Z basso) -->
-  <one in="S" out="1" steps="1"/>
-  <all in="SSS/SSS/SSS SSS/S1S/SSS BBB/BBB/BBB" 
-       out="SSS/SSS/SSS SSS/S1S/SSS BBB/BBB/BBB"/>
+  <one in="S" out="#1" steps="1"/>
+  <all in="SSS/SSS/SSS SSS/S#1S/SSS BBB/BBB/BBB" 
+       out="SSS/SSS/SSS SSS/S#1S/SSS BBB/BBB/BBB"/>
 
   <!-- ======================================================== -->
   <!-- 3. TRONCO CENTRALE VERTICALE                             -->
@@ -31,11 +31,11 @@
   <!-- ======================================================== -->
   <sequence steps="14">
     <!-- Avanzamento verticale puro: '1' sale su Z lasciando 'g' sotto di sé -->
-    <one in="S 1" out="1 g" steps="1"/>
+    <one in="S #1" out="#1 g" steps="1"/>
     
     <!-- Leggera deviazione orizzontale occasionale per evitare una colonna a palo -->
-    <one in="S/S 1/S" out="1/S g/S" steps="1" p="0.2" symmetry="(xy)"/>
-    <one in="SS 1S" out="1S gS" steps="1" p="0.2" symmetry="(xy)"/>
+    <one in="S/S #1/S" out="#1/S g/S" steps="1" p="0.2" symmetry="(xy)"/>
+    <one in="SS #1S" out="#1S gS" steps="1" p="0.2" symmetry="(xy)"/>
   </sequence>
 
   <!-- Ispessimento della sola base del tronco (forma conica solida al suolo) -->
@@ -46,8 +46,8 @@
   <!-- 4. GENERAZIONE DEI RAMI PRINCIPALI (Biforcazione a 45°) -->
   <!-- Trasforma la testa 1 in 3 o 4 rami primari 2            -->
   <!-- ======================================================== -->
-  <one in="SSS/SSS/SSS SSS/S1S/SSS SSS/SSS/SSS"
-       out="S2S/SSS/S2S SSS/SgS/SSS S2S/SSS/S2S" steps="1" symmetry="(xy)"/>
+  <one in="SSS/SSS/SSS SSS/S#1S/SSS SSS/SSS/SSS"
+       out="S#2S/SSS/S#2S SSS/SgS/SSS S#2S/SSS/S#2S" steps="1" symmetry="(xy)"/>
 
   <!-- ======================================================== -->
   <!-- 5. CRESCITA DEI RAMI PRIMARI (Salita verso l'esterno)    -->
@@ -55,35 +55,35 @@
   <!-- ======================================================== -->
   <markov steps="36">
     <!-- Passo diagonale: sale su Z e contemporaneamente si sposta in fuori su X o Y -->
-    <one in="SS/SS 2S/SS" out="S2/SS gS/SS" symmetry="(xy)" p="0.6"/>
-    <one in="SS/SS S2/SS" out="SS/S2 SS/gS" symmetry="(xy)" p="0.6"/>
+    <one in="SS/SS #2S/SS" out="S#2/SS gS/SS" symmetry="(xy)" p="0.6"/>
+    <one in="SS/SS S#2/SS" out="SS/S#2 SS/gS" symmetry="(xy)" p="0.6"/>
 
     <!-- Salita verticale pura per allungare il ramo -->
-    <one in="S 2" out="2 g" p="0.3"/>
+    <one in="S #2" out="#2 g" p="0.3"/>
 
     <!-- Biforcazione secondaria occasionale: un ramo '2' genera una gemma '3' laterale -->
-    <one in="SSS/SSS S2S/SSS" out="S3S/SSS Sg2/SSS" symmetry="(xy)" p="0.12" steps="1"/>
+    <one in="SSS/SSS S#2S/SSS" out="S#3S/SSS Sg#2/SSS" symmetry="(xy)" p="0.12" steps="1"/>
   </markov>
   <!-- Converte le teste primarie arrivate a fine corsa in rami T -->
-  <all in="2" out="g"/>
+  <all in="#2" out="g"/>
 
   <!-- ======================================================== -->
   <!-- 6. GENERAZIONE RAMETTI TERMINALI CONTORTI (Stile Secco)   -->
   <!-- Rami sottili 1-voxel che deviano ad angolo vivo          -->
   <!-- ======================================================== -->
   <!-- Spawna ulteriori gemme terminali '3' lungo i rami alti -->
-  <all in="SgS/SSS/SSS" out="S3S/SSS/SSS" steps="8" symmetry="(xy)"/>
+  <all in="SgS/SSS/SSS" out="S#3S/SSS/SSS" steps="8" symmetry="(xy)"/>
 
   <markov steps="45">
     <!-- Allungamento orizzontale a gomito (ramo spezzato tipico cimitero) -->
-    <one in="SS 3S" out="3S TS" symmetry="(xy)" p="0.4"/>
-    <one in="S/S 3/S" out="3/S T/S" symmetry="(xy)" p="0.4"/>
+    <one in="SS #3S" out="#3S TS" symmetry="(xy)" p="0.4"/>
+    <one in="S/S #3/S" out="#3/S T/S" symmetry="(xy)" p="0.4"/>
 
     <!-- Salita verso l'alto diagonale terminale -->
-    <one in="SS 3S" out="S3 ST" symmetry="(xy)" p="0.35"/>
-    <one in="S 3" out="3 T" p="0.3"/>
+    <one in="SS #3S" out="S#3 ST" symmetry="(xy)" p="0.35"/>
+    <one in="S #3" out="#3 T" p="0.3"/>
   </markov>
-  <all in="3" out="T"/>
+  <all in="#3" out="T"/>
 
   <!-- ======================================================== -->
   <!-- 7. PULIZIA VOLUMETRICA                                   -->

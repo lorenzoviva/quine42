@@ -1,9 +1,9 @@
-<sequence values="BNExzaPpQbOHtsgcdvefwXiIJhjMSFCWRVDLUuTYGKAknryqlmoZ67" symmetry="(xy)" suolo="E" ground="Z" origin="bottom">
-  <union symbol="1" values="beoxQ"/>
-  <union symbol="2" values="tsdcfv"/>
-  <union symbol="3" values="tb"/>
-  <union symbol="4" values="Ez"/>
-  <color symbol="6" value="7a4a24" name="campata in prova"/><color symbol="7" value="5a3a22" name="varco in prova"/>
+<sequence values="BNExzaPpQbOHtsgcdvefwXiIJhjMSFCWRVDLUuTYGKAknryqlmoZ#6#7" symmetry="(xy)" suolo="E" ground="Z" origin="bottom">
+  <union symbol="#1" values="beoxQ"/>
+  <union symbol="#2" values="tsdcfv"/>
+  <union symbol="#3" values="tb"/>
+  <union symbol="#4" values="Ez"/>
+  <color symbol="#6" value="7a4a24" name="campata in prova"/><color symbol="#7" value="5a3a22" name="varco in prova"/>
   <color symbol="k" value="4a2d18" name="porta di quercia"/>
   <color symbol="S" value="c9c0ad" name="pietra chiara"/>
   <color symbol="F" value="a8743f" name="assito"/>
@@ -64,16 +64,16 @@
   <all in="[gsdc]t" out="*v"/>
   <all in="vt" out="*v" steps="9"/>
   <!-- una campata in più, che a volte non si costruisce: il contorno cambia da un seme all'altro -->
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******6******/******7******/*************" steps="1"/>
-  <prl in="6" out="z" p="0.5"/>
-  <all in="z/7" out="*/p"/>
-  <all in="6/7" out="b/H"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******#6******/******#7******/*************" steps="1"/>
+  <prl in="#6" out="z" p="0.5"/>
+  <all in="z/#7" out="*/p"/>
+  <all in="#6/#7" out="b/H"/>
   <all in="bz" out="*b"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
   <all in="bz" out="*b"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
   <all in="bz" out="*b"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
   <all in="bz" out="*b"/>
   <all in="Hp" out="*H" steps="5"/>
   <prl><rule in="tHb" out="*Ht" p="0.02"/></prl>
@@ -83,7 +83,7 @@
   <one in="nnnnnnnnn" out="*eeeeeee*" steps="1"/>
   <prl in="v" out="t"/>
   <prl in="m" out="H"/>
-  <all><rule in="[zE]p[zE]" out="*q*"/><rule in="[zE]p1" out="*w*"/><rule in="[zE]p2" out="*X*"/><rule in="1p1" out="*i*"/><rule in="2p2" out="*I*"/><rule in="1p2" out="*J*"/><rule in="1H1" out="*h*"/><rule in="1H2" out="*j*"/><rule in="EO2" out="*M*"/></all>
+  <all><rule in="[zE]p[zE]" out="*q*"/><rule in="[zE]p#1" out="*w*"/><rule in="[zE]p#2" out="*X*"/><rule in="#1p#1" out="*i*"/><rule in="#2p#2" out="*I*"/><rule in="#1p#2" out="*J*"/><rule in="#1H#1" out="*h*"/><rule in="#1H#2" out="*j*"/><rule in="EO#2" out="*M*"/></all>
   <prl in="n" out="h"/>
   <all in="P[XIJjHMy]" out="I*"/>
   <all in="P[wihO]" out="i*"/>
@@ -94,8 +94,8 @@
   <one in="GGGGGGGGGGGGG" out="*EEEEEEEEEEE*" steps="1"/>
   <prl in="a" out="z"/>
   <prl in="P" out="E"/>
-  <one in="44444444444444444/44444444444444444/44444444444444444/44444444444444444/XXXXXXXXXXXXXXXXX" out="*fffffffffffffff*/*fvvvvvvvvvvvvvf*/*fvvvvvvvvvvvvvf*/*fvvvvvvvvvvvvvf*/*****************" steps="1"/>
-  <one in="44444/44444/XXXXX" out="*nnn*/*nnn*/*****" steps="1"/>
+  <one in="#4#4#4#4#4#4#4#4#4#4#4#4#4#4#4#4#4/#4#4#4#4#4#4#4#4#4#4#4#4#4#4#4#4#4/#4#4#4#4#4#4#4#4#4#4#4#4#4#4#4#4#4/#4#4#4#4#4#4#4#4#4#4#4#4#4#4#4#4#4/XXXXXXXXXXXXXXXXX" out="*fffffffffffffff*/*fvvvvvvvvvvvvvf*/*fvvvvvvvvvvvvvf*/*fvvvvvvvvvvvvvf*/*****************" steps="1"/>
+  <one in="#4#4#4#4#4/#4#4#4#4#4/XXXXX" out="*nnn*/*nnn*/*****" steps="1"/>
   <one steps="6"><rule in="EEEEEEE/EEEEEEE/wwwwwww" out="*iiiii*/*iiiii*/*******"/><rule in="EEEEEEE/EEEEEEE/XXXXXXX" out="*IIIII*/*IIIII*/*******"/></one>
   <one steps="13"><rule in="qqqqqqqqq" out="GGGGGGGGG"/><rule in="zzzzzzzzz" out="GGGGGGGGG"/></one>
   <prl in="q" out="E"/>

@@ -10,7 +10,9 @@ scritti con questo metodo (`riferimento/`) e ciò che il motore non sa fare.
 Le regole del motore che contano (`src/mj/engine.ts`, `src/mj/model.ts`): gli strati si scrivono dall'alto (`in="D W"` è D sopra W);
 `one` riscrive una corrispondenza a caso per passo, `all` tutte quelle che non si sovrappongono nelle celle scritte, `prl` ognuna con
 probabilità `p` (che sta sulla `<rule>`, non sul nodo); senza `steps` un nodo va finché cambia qualcosa; la simmetria predefinita in 3D è
-tutto il gruppo del cubo: un edificio vuole `symmetry="(xy)"` sulla radice (la gravità resta) e `"()"` sulle regole verticali.
+tutto il gruppo del cubo: un edificio vuole `symmetry="(xy)"` sulla radice (la gravità resta) e `"()"` sulle regole verticali. Un simbolo è una lettera o, quando le
+lettere non bastano, `#` e un numero (`#12`, una cella; T342, ADR-0175): una cifra da sola non lo è più (fino al contratto 0.5 sì: i
+programmi di qui sono convertiti), e un programma ne regge al più 255 oltre la cella vuota.
 
 ## Come costa un programma
 
@@ -172,7 +174,7 @@ testa riceve una **panca** da saltare; ogni tratto che resta riceve **una** port
 che un tratto è intero, una regola si applica, poi non più).
 
 ```xml
-<one steps="1"><rule in="[qQ]IIII…I[qQ]" out="*2222…2*"/></one>
+<one steps="1"><rule in="[qQ]IIII…I[qQ]" out="*#2#2#2#2…#2*"/></one>
 <one><rule in="[qQ]III…[qQ]" out="****HHHHHHHHHHH***…"/><rule in="[qQ]III…[qQ]" out="**********HHHHHHHHHHH…"/></one>
 ```
 
@@ -239,7 +241,7 @@ con regole di poche celle ripetute (`riferimento/cantiere.xml`, ~7 000 token sti
 <all in="[Nx]az" out="*xa" steps="14"/>        <!-- un camminatore: va solo avanti perché guarda la sua scia -->
 <all in="[Ql]a[zp]" out="*la" steps="44"/>     <!-- attraversa le linee p: la scia ha una lettera diversa, o torna indietro a caso -->
 <all in="tz" out="*t"/>                        <!-- riempie una campata e si ferma alle linee -->
-<one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>  <!-- cresce passando un muro: la porta è dove passa, tutto resta collegato -->
+<one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>  <!-- cresce passando un muro: la porta è dove passa, tutto resta collegato -->
 <all steps="30" symmetry="()"><rule in="B t" out="t B"/><rule in="B i" out="i C"/></all>  <!-- la testa sale di 30 e lascia una lettera: le quote sono numeri di passi -->
 <all in="*BB *B* TY*" out="*TY *K* KK*" steps="16"/>  <!-- la scala: T è il gradino, Y dice la direzione; alzata 2, pedata 1 -->
 <all in="K B" out="* K" symmetry="()"/>        <!-- sotto la scala è pieno: un vuoto sotto i gradini ferma il corpo (`levelAt`) -->

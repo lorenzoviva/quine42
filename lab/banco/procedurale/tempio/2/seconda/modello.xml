@@ -1,9 +1,9 @@
 <sequence values="BNExzaPpQbOHtsgcdvefwXiIJhjMSFCWRVDLUuTYGKAknryqlmoZ" symmetry="(xy)" ground="E" origin="bottom">
-  <union symbol="1" values="be"/>
-  <union symbol="2" values="tsdcfv"/>
-  <union symbol="3" values="tb"/>
-  <union symbol="4" values="wX"/>
-  <union symbol="5" values="Ez"/>
+  <union symbol="#1" values="be"/>
+  <union symbol="#2" values="tsdcfv"/>
+  <union symbol="#3" values="tb"/>
+  <union symbol="#4" values="wX"/>
+  <union symbol="#5" values="Ez"/>
   <color symbol="k" value="7a5a22" name="porta di bronzo"/><color symbol="S" value="e8dfc4" name="pietra chiara"/><color symbol="F" value="c9b38a" name="travertino"/><color symbol="C" value="d5c9a6" name="pietra"/><color symbol="W" value="f1ead6" name="pietra bianca"/><color symbol="R" value="bfae8a" name="terrazza"/><color symbol="V" value="e8c66a" alpha="0.5" name="finestra dorata"/><color symbol="D" value="6b4a24" name="telaio di bronzo"/><color symbol="L" value="8a4b3a" name="granito rosso"/><color symbol="T" value="f3eee0" name="gradino di marmo"/><color symbol="K" value="cfc4a8" name="massello"/><color symbol="A" value="b8aa8a" name="lastricato"/><color symbol="r" value="d4a017" name="oro"/><color symbol="m" value="ff8c1a" glow="True" name="fuoco"/><color symbol="o" value="efe7d2" name="colonna"/><color symbol="Z" value="8e2b2b" name="pavimento rosso"/>
   <prl in="***/*E*/***" out="***/*z*/***"/>
   <all in="Nz" out="*a" steps="1"/>
@@ -37,7 +37,7 @@
   <one in="*tttttttttttt/Ppppppppppppp/*tttttttttttt" out="*************/******H******/*************" steps="1"/>
   <all in="[gsdc]t" out="*v"/>
   <all in="vt" out="*v" steps="9"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
   <all in="bz" out="*b"/>
   <one in="*zzzzzzzzzzzz/Ppppppppppppp/*bbbbbbbbbbbb" out="******b******/******H******/*************" steps="1"/>
   <all in="bz" out="*b"/>
@@ -46,9 +46,9 @@
   <all in="x/Q" out="z/p"/>
   <prl in="Q" out="H"/>
   <all in="tz" out="*t"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
   <all in="bz" out="*b"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******x******/******Q******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******x******/******Q******/*************" steps="1"/>
   <prl><rule in="x" out="b" p="0.5"/></prl>
   <all in="x/Q" out="z/p"/>
   <prl in="Q" out="H"/>
@@ -59,9 +59,9 @@
   <one in="Pnnn/pbbb/pbbb/pbbb/pbbb/pbbb/pbbb/pbbb/pbbb/pbbb/pbbb/pbbb" out="****/****/****/*ee*/*ee*/*ee*/*ee*/*ee*/*ee*/*ee*/*ee*/*ee*" steps="2"/>
   <all in="Pnnnnnnnnn" out="**eeeeeee*"/>
   <prl in="v" out="t"/>
-  <all><rule in="[zE]p[zE]" out="*q*"/><rule in="[zE]p1" out="*w*"/><rule in="[zE]p2" out="*X*"/><rule in="1p1" out="*i*"/><rule in="2p2" out="*I*"/><rule in="1p2" out="*J*"/><rule in="1H1" out="*h*"/><rule in="1H2" out="*j*"/><rule in="EO2" out="*M*"/></all>
+  <all><rule in="[zE]p[zE]" out="*q*"/><rule in="[zE]p#1" out="*w*"/><rule in="[zE]p#2" out="*X*"/><rule in="#1p#1" out="*i*"/><rule in="#2p#2" out="*I*"/><rule in="#1p#2" out="*J*"/><rule in="#1H#1" out="*h*"/><rule in="#1H#2" out="*j*"/><rule in="EO#2" out="*M*"/></all>
   <prl in="n" out="h"/>
-  <all in="*55555555555555555555555555555*/*55555555555555555555555555555*/*55555555555555555555555555555*/P44444444444444444444444444444P" out="*alllaaalllaaalllaaalllaaallla*/*alllaaalllaaalllaaalllaaallla*/*aaaaaaaaaaaaaaaaaaaaaaaaaaaaa*/*******************************"/>
+  <all in="*#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5*/*#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5*/*#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5#5*/P#4#4#4#4#4#4#4#4#4#4#4#4#4#4#4#4#4#4#4#4#4#4#4#4#4#4#4#4#4P" out="*alllaaalllaaalllaaalllaaallla*/*alllaaalllaaalllaaalllaaallla*/*aaaaaaaaaaaaaaaaaaaaaaaaaaaaa*/*******************************"/>
   <all in="P[XIJjHMy]" out="I*"/>
   <all in="P[wihO]" out="i*"/>
   <prl in="P" out="E"/>

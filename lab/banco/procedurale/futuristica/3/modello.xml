@@ -1,8 +1,8 @@
 <sequence values="BNExzaPpQbOHtsgcdvefwXiIJhjMSFCWRVDLUuTYGKAknryqlZmo" symmetry="(xy)" ground="E" origin="bottom">
-  <union symbol="1" values="be"/>
-  <union symbol="2" values="tsdcfvl"/>
-  <union symbol="3" values="tb"/>
-  <union symbol="4" values="ro"/>
+  <union symbol="#1" values="be"/>
+  <union symbol="#2" values="tsdcfvl"/>
+  <union symbol="#3" values="tb"/>
+  <union symbol="#4" values="ro"/>
   <color symbol="k" value="19d8ff" glow="True" name="porta del portale luminoso"/><color symbol="S" value="c3ccd4" name="acciaio satinato"/><color symbol="F" value="59646e" name="resina grigia"/><color symbol="C" value="dfe4e8" name="pannello bianco"/><color symbol="W" value="f4f6f8" name="metallo bianco"/><color symbol="R" value="747e89" name="lastre della piattaforma"/><color symbol="V" value="16212c" alpha="0.55" name="vetro scuro"/><color symbol="D" value="20262c" name="telaio nero"/><color symbol="L" value="39424c" name="banco del laboratorio"/><color symbol="T" value="e8edf0" name="rampa"/><color symbol="K" value="8a94a0" name="nucleo in acciaio"/><color symbol="A" value="5b626a" name="viale"/><color symbol="Z" value="30e8ff" glow="True" name="neon ciano"/><color symbol="m" value="ff2fd0" glow="True" name="neon magenta"/><color symbol="Q" value="9fd8e0" name="pavimento accoglienza"/><color symbol="N" value="8b98a3" name="pavimento laboratorio"/><color symbol="g" value="2b3a4a" name="pavimento sala di comando"/><color symbol="O" value="aab3bc" name="copertura della torre"/>
   <prl in="***/*E*/***" out="***/*z*/***"/>
   <all in="Nz" out="*a" steps="1"/>
@@ -34,11 +34,11 @@
   <one in="*tttttttttttt/Ppppppppppppp/*tttttttttttt" out="*************/******H******/*************" steps="1"/>
   <all in="[gsdc]t" out="*v"/>
   <all in="vt" out="*v" steps="9"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
   <all in="bz" out="*b"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
   <all in="bz" out="*b"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
   <all in="bz" out="*b"/>
   <all in="Hp" out="*H" steps="5"/>
   <prl><rule in="tHb" out="*Ht" p="0.07"/></prl>
@@ -47,7 +47,7 @@
   <all><rule in="nH" out="*n"/><rule in="np" out="*n"/></all>
   <one in="nnnnnnnnn" out="*eeeeeee*" steps="1"/>
   <prl in="v" out="t"/>
-  <all><rule in="[zE]p[zE]" out="*q*"/><rule in="[zE]p1" out="*w*"/><rule in="[zE]p2" out="*X*"/><rule in="1p1" out="*i*"/><rule in="2p2" out="*I*"/><rule in="1p2" out="*J*"/><rule in="1H1" out="*h*"/><rule in="1H2" out="*j*"/><rule in="EO2" out="*M*"/></all>
+  <all><rule in="[zE]p[zE]" out="*q*"/><rule in="[zE]p#1" out="*w*"/><rule in="[zE]p#2" out="*X*"/><rule in="#1p#1" out="*i*"/><rule in="#2p#2" out="*I*"/><rule in="#1p#2" out="*J*"/><rule in="#1H#1" out="*h*"/><rule in="#1H#2" out="*j*"/><rule in="EO#2" out="*M*"/></all>
   <prl in="n" out="h"/>
   <one steps="6"><rule in="qqqqqqqqq" out="GGGGGGGGG"/><rule in="zzzzzzzzz" out="GGGGGGGGG"/></one>
   <prl in="q" out="E"/>
@@ -62,7 +62,7 @@
   <all><rule in="r[Ez]/*P" out="*r/**"/><rule in="o[Ez]/*P" out="*o/**"/></all>
   <all><rule in="Pr[Ez]" out="**r"/><rule in="Po[Ez]" out="**o"/><rule in="Prr[Ez]" out="***r"/><rule in="Poo[Ez]" out="***o"/></all>
   <all in="[Ez][Ez][Ez]r/[Ez][Ez][Ez]r/[Ez][Ez][Ez]r/rrrP" out="rrr*/rrr*/rrr*/****"/>
-  <all in="[Ez][Ez][Ez]4/[Ez][Ez][Ez]4/[Ez][Ez][Ez]4/444P" out="ooo*/ooo*/ooo*/****"/>
+  <all in="[Ez][Ez][Ez]#4/[Ez][Ez][Ez]#4/[Ez][Ez][Ez]#4/#4#4#4P" out="ooo*/ooo*/ooo*/****"/>
   <all in="P[XIJjHMy]" out="I*"/>
   <all in="P[wihO]" out="i*"/>
   <prl in="P" out="E"/>

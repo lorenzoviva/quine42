@@ -142,7 +142,7 @@ describe('a universe of the contract before, ported by the migrations (T317)', (
     const { k, ai, disk } = await open(withKernel('0.1.14', { from: '0.1' }));
     expect(k.faults.has('universe:kernel')).toBe(false);
     expect(k.readOnly()).toBeUndefined();
-    expect(JSON.parse(k.files['universe.json']).kernels).toEqual({ from: '0.5' });
+    expect(JSON.parse(k.files['universe.json']).kernels).toEqual({ from: '0.6' });
     const head = k.repo.head();
     k.repo.write('world/prova.txt', 'x\n');
     const c = k.repo.commit('il Concilio scrive', 'agent');

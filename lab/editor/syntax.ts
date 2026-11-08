@@ -3,6 +3,7 @@
 import { compileMjx, type MjxModel } from '../../src/mj/model';
 import type { Vec3 } from '../../src/mj/engine';
 import { MJ_PALETTE } from '../../src/mj/palette';
+import { symbolTokens } from '../../src/mj/symbols';
 
 export interface ValidationSuccess {
   ok: true;
@@ -201,14 +202,20 @@ function patternChips(rawVal: string, attrName: string, start: number, options: 
   const valStartInSrc = start;
   let chipsHtml = '';
   let note = false;
-  for (let k = 0; k < rawVal.length; k++) {
-    const ch = rawVal[k];
+  // One chip per symbol: `#12` is one (T342), and a line starting with "#" and no number is a note.
+  for (const tok of symbolTokens(rawVal)) {
+    const ch = tok.text;
+    const k = tok.at;
     const charPos = valStartInSrc + k;
 
     if (ch === '\n') note = false;
-    else if (notes && ch === '#' && /^[ \t]*$/.test(rawVal.slice(rawVal.lastIndexOf('\n', k - 1) + 1, k))) note = true;
+    else if (notes && ch.startsWith('#') && ch.length === 1 && /^[ \t]*$/.test(rawVal.slice(rawVal.lastIndexOf('\n', k - 1) + 1, k))) note = true;
     if (note || /\s/.test(ch) || ch === '/' || ch === '[' || ch === ']') {
       chipsHtml += escapeHtml(ch);
+      continue;
+    }
+    if (tok.error) {
+      chipsHtml += `<span class="tok-color-chip tok-unknown" data-letter="${escapeHtml(ch)}" data-attr="${escapeHtml(attrName)}" data-pos="${charPos}" title="${escapeHtml(tok.error)}">${escapeHtml(ch)}</span>`;
       continue;
     }
 

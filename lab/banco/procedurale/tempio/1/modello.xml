@@ -1,8 +1,8 @@
 <sequence values="BNExzaPpQbOHtsgcdvefwXiIJhjMSFCWRVDLUuTYGKAknryqlmoZ" symmetry="(xy)" ground="E" origin="bottom">
-  <union symbol="1" values="beNlv"/>
-  <union symbol="2" values="tsdcf"/>
-  <union symbol="3" values="tb"/>
-  <union symbol="4" values="zE"/>
+  <union symbol="#1" values="beNlv"/>
+  <union symbol="#2" values="tsdcf"/>
+  <union symbol="#3" values="tb"/>
+  <union symbol="#4" values="zE"/>
   <color symbol="k" value="8a6420" name="porta di bronzo"/><color symbol="S" value="e8dfc6" name="pietra chiara"/><color symbol="F" value="c9b48a" name="travertino"/><color symbol="C" value="d9cca8" name="calcare"/><color symbol="W" value="efe4c6" name="arenaria"/><color symbol="R" value="b8a67e" name="terrazza"/><color symbol="V" value="d8a84a" alpha="0.5" name="vetro ambrato"/><color symbol="D" value="b8892c" name="bronzo dorato"/><color symbol="L" value="c49a3a" name="altare dorato"/><color symbol="T" value="f3ecd8" name="gradino"/><color symbol="K" value="a89c84" name="gradinata"/><color symbol="A" value="cfc3a2" name="lastricato"/><color symbol="f" value="f6f0de" name="colonna"/><color symbol="m" value="f0c030" name="oro"/><color symbol="g" value="dcae2e" name="cornice d'oro"/><color symbol="Q" value="d2a95a" name="marmo giallo della cella"/><color symbol="N" value="9c5a48" name="mosaico delle offerte"/><color symbol="e" value="4e4a52" name="statua di basalto"/><color symbol="n" value="ff8c1e" glow="True" name="fiamma"/><color symbol="a" value="dccfae" name="gradone"/><color symbol="x" value="eadfc2" name="gradone alto"/><color symbol="c" value="f4ead0" name="cima"/>
   <prl in="***/*E*/***" out="***/*z*/***"/>
   <all in="Nz" out="*a" steps="1"/>
@@ -34,11 +34,11 @@
   <one in="*tttttttttttt/Ppppppppppppp/*tttttttttttt" out="*************/******H******/*************" steps="1"/>
   <all in="[gsdc]t" out="*v"/>
   <all in="vt" out="*v" steps="9"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
   <all in="bz" out="*b"/>
   <one in="*zzzzzzzzzzzz/Ppppppppppppp/*bbbbbbbbbbbb" out="******b******/******H******/*************" steps="1"/>
   <all in="bz" out="*b"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
   <all in="bz" out="*b"/>
   <all in="Hp" out="*H" steps="5"/>
   <one in="bHb" out="*n*" steps="1"/>
@@ -50,14 +50,14 @@
   <prl in="v" out="t"/>
   <one in="ppppp/NNNNN/NNNNN" out="*****/*lll*/*lll*" steps="4"/>
   <one in="ppppp/NNNNN/NNNNN" out="*****/*vv**/*vv**" steps="4"/>
-  <all><rule in="[zE]p[zE]" out="*q*"/><rule in="[zE]p1" out="*w*"/><rule in="[zE]p2" out="*X*"/><rule in="1p1" out="*i*"/><rule in="2p2" out="*I*"/><rule in="1p2" out="*J*"/><rule in="1H1" out="*h*"/><rule in="1H2" out="*j*"/><rule in="EO2" out="*M*"/></all>
+  <all><rule in="[zE]p[zE]" out="*q*"/><rule in="[zE]p#1" out="*w*"/><rule in="[zE]p#2" out="*X*"/><rule in="#1p#1" out="*i*"/><rule in="#2p#2" out="*I*"/><rule in="#1p#2" out="*J*"/><rule in="#1H#1" out="*h*"/><rule in="#1H#2" out="*j*"/><rule in="EO#2" out="*M*"/></all>
   <prl in="n" out="h"/>
   <all steps="1">
-    <rule in="**************444/**************444/**************444/Pwwwwwwwwwwwwwwww" out="**************ooo/**************ooo/*****************/**************ZZZ"/>
-    <rule in="**************444/**************444/**************444/PXXXXXXXXXXXXXXXX" out="**************ooo/**************ooo/*****************/**************rrr"/>
-    <rule in="*44/*44/*44/Pww" out="*oo/*oo/***/*ZZ"/>
-    <rule in="*44/*44/*44/PXX" out="*oo/*oo/***/*rr"/>
-    <rule in="*44/*44/*44/MXX" out="*oo/*oo/***/*rr"/>
+    <rule in="**************#4#4#4/**************#4#4#4/**************#4#4#4/Pwwwwwwwwwwwwwwww" out="**************ooo/**************ooo/*****************/**************ZZZ"/>
+    <rule in="**************#4#4#4/**************#4#4#4/**************#4#4#4/PXXXXXXXXXXXXXXXX" out="**************ooo/**************ooo/*****************/**************rrr"/>
+    <rule in="*#4#4/*#4#4/*#4#4/Pww" out="*oo/*oo/***/*ZZ"/>
+    <rule in="*#4#4/*#4#4/*#4#4/PXX" out="*oo/*oo/***/*rr"/>
+    <rule in="*#4#4/*#4#4/*#4#4/MXX" out="*oo/*oo/***/*rr"/>
   </all>
   <all in="P[XIJjHMyr]" out="I*"/>
   <all in="P[wihOZ]" out="i*"/>
@@ -68,7 +68,7 @@
   <prl in="N" out="b"/>
   <all in="M/E" out="*/A" symmetry="()"/>
   <all symmetry="()"><rule in="A/E" out="*/Y"/><rule in="Y/E" out="*/A"/></all>
-  <all in="4[wXZrM]" out="x*"/>
+  <all in="#4[wXZrM]" out="x*"/>
   <all steps="1" symmetry="()"><rule in="B b" out="b S"/><rule in="B t" out="t S"/><rule in="B s" out="s S"/><rule in="B d" out="d S"/><rule in="B c" out="c S"/><rule in="B e" out="e S"/><rule in="B f" out="f S"/><rule in="B w" out="w S"/><rule in="B X" out="X S"/><rule in="B i" out="i S"/><rule in="B I" out="I S"/><rule in="B J" out="J S"/><rule in="B h" out="h S"/><rule in="B H" out="H S"/><rule in="B j" out="j S"/><rule in="B M" out="M S"/><rule in="B y" out="y S"/><rule in="B Z" out="Z S"/><rule in="B r" out="r S"/><rule in="B o" out="o S"/><rule in="B x" out="x S"/><rule in="B l" out="l S"/><rule in="B v" out="v S"/></all>
   <all steps="1" symmetry="()"><rule in="B y" out="y K"/><rule in="B b" out="b N"/><rule in="B t" out="t F"/><rule in="B s" out="s F"/><rule in="B d" out="s T"/><rule in="B c" out="s Y"/><rule in="B e" out="b G"/><rule in="B f" out="t G"/><rule in="B h" out="h F"/><rule in="B H" out="H F"/><rule in="B j" out="j F"/><rule in="B M" out="M F"/><rule in="B w" out="w C"/><rule in="B X" out="X C"/><rule in="B i" out="i C"/><rule in="B I" out="I C"/><rule in="B J" out="J C"/><rule in="B Z" out="Z C"/><rule in="B r" out="r C"/><rule in="B o" out="o D"/><rule in="B x" out="x T"/><rule in="B l" out="b l"/><rule in="B v" out="b v"/></all>
   <all steps="30" symmetry="()"><rule in="B y" out="y K"/><rule in="B b" out="b B"/><rule in="B t" out="t B"/><rule in="B s" out="s B"/><rule in="B h" out="h B"/><rule in="B H" out="H B"/><rule in="B j" out="j B"/><rule in="B M" out="M k"/><rule in="B i" out="i C"/><rule in="B I" out="I C"/><rule in="B J" out="J C"/><rule in="B Z" out="Z C"/><rule in="B r" out="r C"/><rule in="B o" out="o f"/></all>

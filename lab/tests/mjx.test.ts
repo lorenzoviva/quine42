@@ -35,8 +35,8 @@ describe('MarkovJunior XML (lab/mjx)', () => {
     expect(() => compileMjx('<sequence values="BW" size="4 4 4">\n  <one in="BX" out="WW"/>\n</sequence>', { strict: true })).toThrow(/riga 2.*"X"/);
     // Without strict, what the sculptors get wrong in form is mended, with a warning.
     const m = compileMjx('<sequence values="B W W" size="4 4 4">\n  <color symbol="X" value="ff0000" part="busto"/>\n  <one in="BX" out="WW"/>\n</sequence>');
-    expect(m.warnings.join(' ')).toMatch(/spazi.*ripetuta|ripetuta.*spazi/);
-    expect(m.warnings.join(' ')).toMatch(/"X".*aggiunta/);
+    expect(m.warnings.join(' ')).toMatch(/spazi.*ripetuto|ripetuto.*spazi/);
+    expect(m.warnings.join(' ')).toMatch(/"X".*aggiunto/);
     expect(m.warnings.join(' ')).toMatch(/busto/);
     expect(() => compileMjx('<sequence values="BW" size="4 4 4">\n  <one in="B" out="W">\n</sequence>')).toThrow(/riga 3/);
     expect(() => compileMjx('<sequence values="BW" size="4 4 4"><wfc/></sequence>')).toThrow(/tileset|sample/);

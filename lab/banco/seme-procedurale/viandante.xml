@@ -1,7 +1,7 @@
 <!-- Wanderer, procedural (Cantiere 2): the same colours and the same animated parts of the original (boots, free arm). The seed picks
      how wide the cloak is (narrow, normal, a full circle down to the ground), whether it wears the wide-brimmed hat, whether the hood ends in a point, whether the staff is there and how long it is, whether the free arm is raised, and whether it carries
      a bag on its back. The face, the eyes and the buckle stay where they are: one always recognises it. -->
-<sequence values="BGMNOCSEAQHPWLKpqmabcdgzrs0" size="20 15 30" symmetry="(xy)" name="Viandante">
+<sequence values="BGMNOCSEAQHPWLKpqmabcdgzrs#0" size="20 15 30" symmetry="(xy)" name="Viandante">
   <color symbol="G" value="4a3424" name="stivali" part="gamba"/>
   <color symbol="M" value="3f6470" name="mantello"/>
   <color symbol="N" value="5a8592" name="mantello al sole"/>
@@ -27,11 +27,11 @@
   <color symbol="z" hidden="True" name="il bastone che sale"/>
   <color symbol="r" hidden="True" name="il braccio alzato scelto"/>
   <color symbol="s" hidden="True" name="la mano alzata scelta"/>
-  <color symbol="0" hidden="True" name="mescola"/>
+  <color symbol="#0" hidden="True" name="mescola"/>
   <!-- Shuffle: the generator starts again from a different point for every seed (see README) -->
-  <box at="10 0 29" size="20 2 1" color="0"/>
-  <prl in="0" out="B" p="0.5" steps="1"/>
-  <all in="0" out="B"/>
+  <box at="10 0 29" size="20 2 1" color="#0"/>
+  <prl in="#0" out="B" p="0.5" steps="1"/>
+  <all in="#0" out="B"/>
   <box at="8 7 0" size="3 3 9" color="G"/>
   <box at="12 7 0" size="3 3 9" color="G"/>
   <!-- The cloak: three widths, the die at the centre picks how far it reaches -->

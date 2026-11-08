@@ -206,7 +206,7 @@ describe('MarkovJunior Editor (T59a)', () => {
   });
 
   describe('CAD voxel tools & manipulation (T59b)', () => {
-    const SAMPLE_XML = `<sequence values="0BGY" size="12 12 12">
+    const SAMPLE_XML = `<sequence values="#0BGY" size="12 12 12">
   <box at="6 6 0" size="10 10 2" color="B"/>
   <box at="6 6 2" size="8 8 4" color="G"/>
   <cylinder at="6 6 6" size="6 6 4" color="Y"/>
@@ -240,7 +240,7 @@ describe('MarkovJunior Editor (T59a)', () => {
         color: 'R',
       });
 
-      expect(newXml).toContain('values="0BGYR"');
+      expect(newXml).toContain('values="#0BGYR"');
       expect(newXml).toContain('<cone at="6 6 10" size="4 4 2" color="R"/>');
       expect(line).toBeGreaterThan(3);
 
@@ -257,7 +257,7 @@ describe('MarkovJunior Editor (T59a)', () => {
         color: 'W',
       });
 
-      expect(updated).toContain('values="0BGYW"');
+      expect(updated).toContain('values="#0BGYW"');
       expect(updated).toContain('<box at="7 7 3" size="6 6 3" color="W"/>');
 
       const shapes = parseShapesFromXml(updated);
@@ -291,7 +291,7 @@ describe('MarkovJunior Editor (T59a)', () => {
         part: 'testa',
       });
 
-      expect(withGlow).toContain('values="0BGYR"');
+      expect(withGlow).toContain('values="#0BGYR"');
       expect(withGlow).toContain('glow="True"');
       expect(withGlow).toContain('value="ff0055"');
       expect(withGlow).toContain('part="testa"');
@@ -401,7 +401,7 @@ describe('MarkovJunior Editor (T59a)', () => {
 
     it('handles static models without rewrite rules or snapshots cleanly', () => {
       const staticXml = `
-<sequence values="0B" size="8 8 8">
+<sequence values="#0B" size="8 8 8">
   <box at="4 4 0" size="4 4 4" color="B"/>
 </sequence>`;
       const model = compileMjx(staticXml);
@@ -606,14 +606,14 @@ describe('MarkovJunior Editor (T59a)', () => {
           type: 'one',
           steps: 10,
           rules: [
-            { in: '0', out: 'R', p: 0.8 },
-            { in: '0', out: 'G', p: 0.2 },
+            { in: '#0', out: 'R', p: 0.8 },
+            { in: '#0', out: 'G', p: 0.2 },
           ],
         };
         const xml = generateRuleXml(config);
         expect(xml).toContain('<one steps="10">');
-        expect(xml).toContain('<rule in="0" out="R" p="0.8"/>');
-        expect(xml).toContain('<rule in="0" out="G" p="0.2"/>');
+        expect(xml).toContain('<rule in="#0" out="R" p="0.8"/>');
+        expect(xml).toContain('<rule in="#0" out="G" p="0.2"/>');
         expect(xml).toContain('</one>');
       });
 
@@ -628,7 +628,7 @@ describe('MarkovJunior Editor (T59a)', () => {
 
       it('extracts palette symbols accurately from XML', () => {
         const sampleXml = `
-<sequence values="0BGY" size="10 10 10">
+<sequence values="#0BGY" size="10 10 10">
   <color symbol="B" value="1a1e2e" name="nero"/>
   <color symbol="G" value="00e436" name="verde" glow="True"/>
 </sequence>`;
@@ -667,7 +667,7 @@ describe('MarkovJunior Editor (T59a)', () => {
       });
 
       it('produces valid XML that passes validateMjx', () => {
-        const baseXml = '<sequence values="0BW" size="6 6 6">\n  <box at="3 3 0" size="4 4 4" color="B"/>\n</sequence>';
+        const baseXml = '<sequence values="#0BW" size="6 6 6">\n  <box at="3 3 0" size="4 4 4" color="B"/>\n</sequence>';
         const ruleXml = generateRuleXml({
           type: 'all',
           steps: 2,
@@ -763,7 +763,7 @@ describe('MarkovJunior Editor (T59a)', () => {
 
         const xml = generateWfcXml(config);
         expect(xml).toContain('<!-- Custom room -->');
-        expect(xml).toContain('<sequence values="0FW" size="8 8 8" symmetry="(xy)">');
+        expect(xml).toContain('<sequence values="#0FW" size="8 8 8" symmetry="(xy)">');
         expect(xml).toContain('<color symbol="F" value="444444" name="pavimento"/>');
         expect(xml).toContain('<color symbol="W" value="888888" name="muro"/>');
 
@@ -861,7 +861,7 @@ describe('MarkovJunior Editor (T59a)', () => {
       });
 
       it('resolves palette symbols combining custom colors and values', () => {
-        const xml = `<sequence values="0BWG" size="10 10 10">
+        const xml = `<sequence values="#0BWG" size="10 10 10">
           <color symbol="N" value="8b5a2b" name="Legno"/>
           <box color="N"/>
         </sequence>`;
@@ -881,7 +881,7 @@ describe('MarkovJunior Editor (T59a)', () => {
 
     describe('CAD Advanced: Glass, Raycasting Bounds, Multi-Selection & Double Definition', () => {
       it('parses translucent glass colors with alpha/opacity', () => {
-        const xml = `<sequence values="0VG">
+        const xml = `<sequence values="#0VG">
           <color symbol="V" value="88ccff" glass="true" name="Vetro"/>
           <color symbol="T" value="ffffff" alpha="0.3"/>
         </sequence>`;
@@ -950,7 +950,7 @@ describe('MarkovJunior Editor (T59a)', () => {
       });
 
       it('moves multiple shapes together in XML without index shifting bugs', () => {
-        const xml = `<sequence values="0RGB">
+        const xml = `<sequence values="#0RGB">
   <box at="2 3 0" size="1 1 1" color="R"/>
   <box at="4 5 1" size="2 2 2" color="G"/>
   <box at="6 7 2" size="3 3 3" color="B"/>
@@ -966,7 +966,7 @@ describe('MarkovJunior Editor (T59a)', () => {
       });
 
       it('deletes and duplicates multiple shapes cleanly', () => {
-        const xml = `<sequence values="0RGB">
+        const xml = `<sequence values="#0RGB">
   <box at="2 3 0" size="1 1 1" color="R"/>
   <box at="4 5 1" size="2 2 2" color="G"/>
   <box at="6 7 2" size="3 3 3" color="B"/>
@@ -986,13 +986,13 @@ describe('MarkovJunior Editor (T59a)', () => {
       });
 
       it('doubles definition (8x volume: 2x in X, Y, Z) leaving rules untouched', () => {
-        const xml = `<sequence values="0w" size="9 9 9">
+        const xml = `<sequence values="#0w" size="9 9 9">
   <!-- Static CAD shapes -->
   <box at="4 4 0" size="1 1 1" color="w"/>
   <cylinder at="4 4 2" size="3 3 4" color="w"/>
   <!-- Generative rules -->
   <one steps="5">
-    <rule in="w" out="0"/>
+    <rule in="w" out="#0"/>
   </one>
 </sequence>`;
 
@@ -1014,7 +1014,7 @@ describe('MarkovJunior Editor (T59a)', () => {
 
         // Generative rules completely intact
         expect(doubled).toContain('<one steps="5">');
-        expect(doubled).toContain('<rule in="w" out="0"/>');
+        expect(doubled).toContain('<rule in="w" out="#0"/>');
       });
 
       it('alignCenterToSize and alignShapeAt automatically align half-units for even lengths', () => {
@@ -1057,7 +1057,7 @@ describe('MarkovJunior Editor (T59a)', () => {
       });
 
       it('compiles model with alpha attribute and produces separated opaque/translucent mesh groups', () => {
-        const xml = `<sequence values="0Sg" size="6 6 6">
+        const xml = `<sequence values="#0Sg" size="6 6 6">
   <color symbol="S" value="e8edf7" alpha="0.1" name="Schermo"/>
   <color symbol="g" value="00e436" name="Solido"/>
   <box at="3 3 0" size="2 2 2" color="g"/>

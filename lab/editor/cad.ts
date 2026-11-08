@@ -2,6 +2,7 @@
 // Handles interactive voxel shapes, color palettes, glow properties, and XML synchronization.
 
 import { MJ_PALETTE } from '../../src/mj/palette';
+import { symbolOf, symbolTexts } from '../../src/mj/symbols';
 
 export type ShapeKind = 'box' | 'cylinder' | 'ellipsoid' | 'cone' | 'line';
 
@@ -133,7 +134,7 @@ export function parseColorsFromXml(xml: string): Record<string, CadColorDef> {
     const attrStr = match[1] || '';
     const attrs = parseAttrs(attrStr);
     const symbol = attrs.symbol || '';
-    if (!symbol || symbol.length !== 1) continue;
+    if (symbolOf(symbol) === undefined) continue;
 
     const value = attrs.value?.replace(/^#/, '').toLowerCase();
     const glow = /^true$/i.test(attrs.glow || '');
@@ -162,7 +163,7 @@ export function parseColorsFromXml(xml: string): Record<string, CadColorDef> {
 // ------------------------------------------------------------------ Root Values Management
 
 export function ensureValueInRoot(xml: string, symbol: string): string {
-  if (!symbol || symbol.length !== 1) return xml;
+  if (symbolOf(symbol) === undefined) return xml;
 
   const rootMatch = /<([a-zA-Z0-9_-]+)\b([^>]*?)>/i.exec(xml);
   if (!rootMatch) return xml;
@@ -173,7 +174,7 @@ export function ensureValueInRoot(xml: string, symbol: string): string {
 
   if (valuesMatch) {
     const currentValues = valuesMatch[1] ?? valuesMatch[2] ?? '';
-    if (currentValues.includes(symbol)) return xml;
+    if (symbolTexts(currentValues).includes(symbol)) return xml;
     const newValuesAttr = `values="${currentValues}${symbol}"`;
     const newRootTag = rootTag.replace(valuesMatch[0], newValuesAttr);
     return xml.replace(rootTag, newRootTag);
@@ -181,7 +182,7 @@ export function ensureValueInRoot(xml: string, symbol: string): string {
 
   // If no values attribute, add it
   const insertPos = rootTag.length - 1;
-  const newRootTag = rootTag.slice(0, insertPos) + ` values="0${symbol}"` + rootTag.slice(insertPos);
+  const newRootTag = rootTag.slice(0, insertPos) + ` values="#0${symbol}"` + rootTag.slice(insertPos);
   return xml.replace(rootTag, newRootTag);
 }
 
@@ -327,7 +328,7 @@ export function setLetterColorInXml(
   symbol: string,
   opts: { value?: string; glow?: boolean; alpha?: number; glass?: boolean; part?: string; name?: string },
 ): string {
-  if (!symbol || symbol.length !== 1) return xml;
+  if (symbolOf(symbol) === undefined) return xml;
   let updatedXml = ensureValueInRoot(xml, symbol);
 
   const colors = parseColorsFromXml(updatedXml);

@@ -1,5 +1,5 @@
 <!-- Faro aeronautico (Cantiere 8, orichalcum): torre, fasci e braccio d'ormeggio a caso; rivetti e fuliggine a caso. -->
-<sequence values="BKIOLYNSu123456z" symmetry="(xy)" name="Faro aeronautico">
+<sequence values="BKIOLYNSu#1#2#3#4#5#6z" symmetry="(xy)" name="Faro aeronautico">
   <color symbol="K" value="8a4a35" name="mattoni"/>
   <color symbol="I" value="3a3633" name="ferro"/>
   <color symbol="O" value="b88a2e" name="ottone"/>
@@ -8,12 +8,12 @@
   <color symbol="N" value="1e1c1a" name="fuliggine"/>
   <color symbol="S" value="9a948a" name="pietra"/>
   <color symbol="u" hidden="True" name="marcatore"/>
-  <color symbol="1" hidden="True" name="marcatore"/>
-  <color symbol="2" hidden="True" name="marcatore"/>
-  <color symbol="3" hidden="True" name="marcatore"/>
-  <color symbol="4" hidden="True" name="marcatore"/>
-  <color symbol="5" hidden="True" name="marcatore"/>
-  <color symbol="6" hidden="True" name="marcatore"/>
+  <color symbol="#1" hidden="True" name="marcatore"/>
+  <color symbol="#2" hidden="True" name="marcatore"/>
+  <color symbol="#3" hidden="True" name="marcatore"/>
+  <color symbol="#4" hidden="True" name="marcatore"/>
+  <color symbol="#5" hidden="True" name="marcatore"/>
+  <color symbol="#6" hidden="True" name="marcatore"/>
   <color symbol="z" hidden="True" name="marcatore"/>
   <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
   <box at="3 0 0" size="7 1 1" color="z" on="B"/>
@@ -22,70 +22,70 @@
   <cylinder at="25 25 0" size="22 22 3" color="S"/>
   <!-- scelta «torre»: traliccio | mattoni rastremati | tubo con i contrafforti -->
   <box at="25 25 3" size="24 24 35" color="u" on="B"/>
-  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/></one>
-  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/></all>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
   <!--   1: traliccio -->
-  <line at="16 16 3" to="22 22 36" r="1" color="I" on="1"/>
-  <line at="34 16 3" to="28 22 36" r="1" color="I" on="1"/>
-  <line at="16 34 3" to="22 28 36" r="1" color="I" on="1"/>
-  <line at="34 34 3" to="28 28 36" r="1" color="I" on="1"/>
-  <box at="25 25 10" size="15 15 1" color="I" on="1"/>
-  <box at="25 25 18" size="12 12 1" color="I" on="1"/>
-  <box at="25 25 26" size="9 9 1" color="I" on="1"/>
-  <cylinder at="25 25 3" size="3 3 34" color="O" on="1"/>
+  <line at="16 16 3" to="22 22 36" r="1" color="I" on="#1"/>
+  <line at="34 16 3" to="28 22 36" r="1" color="I" on="#1"/>
+  <line at="16 34 3" to="22 28 36" r="1" color="I" on="#1"/>
+  <line at="34 34 3" to="28 28 36" r="1" color="I" on="#1"/>
+  <box at="25 25 10" size="15 15 1" color="I" on="#1"/>
+  <box at="25 25 18" size="12 12 1" color="I" on="#1"/>
+  <box at="25 25 26" size="9 9 1" color="I" on="#1"/>
+  <cylinder at="25 25 3" size="3 3 34" color="O" on="#1"/>
   <!--   2: mattoni rastremati -->
-  <cone at="25 25 3" size="18 18 52" color="K" on="2"/>
-  <box at="25 25 34" size="3 3 3" color="K" on="2"/>
+  <cone at="25 25 3" size="18 18 52" color="K" on="#2"/>
+  <box at="25 25 34" size="3 3 3" color="K" on="#2"/>
   <!--   3: tubo con i contrafforti -->
-  <cylinder at="25 25 3" size="10 10 34" color="I" on="3"/>
-  <line at="36 25 3" to="30 25 26" r="1.5" color="I" on="3"/>
-  <line at="25 36 3" to="25 30 26" r="1.5" color="I" on="3"/>
-  <line at="14 25 3" to="20 25 26" r="1.5" color="I" on="3"/>
-  <line at="25 14 3" to="25 20 26" r="1.5" color="I" on="3"/>
-  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/></prl>
+  <cylinder at="25 25 3" size="10 10 34" color="I" on="#3"/>
+  <line at="36 25 3" to="30 25 26" r="1.5" color="I" on="#3"/>
+  <line at="25 36 3" to="25 30 26" r="1.5" color="I" on="#3"/>
+  <line at="14 25 3" to="20 25 26" r="1.5" color="I" on="#3"/>
+  <line at="25 14 3" to="25 20 26" r="1.5" color="I" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
   <cylinder at="25 25 36" size="14 14 1" color="I"/>
   <cylinder at="25 25 37" size="8 8 7" color="L"/>
   <cone at="25 25 44" size="12 12 6" color="O"/>
   <!-- scelta «fasci»: due opposti | quattro a croce | uno lungo | tre -->
   <box at="25 25 39" size="50 50 4" color="u" on="B"/>
-  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/><rule in="u" out="4"/></one>
-  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/><rule in="4u" out="*4"/></all>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/><rule in="u" out="#4"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/><rule in="#4u" out="*#4"/></all>
   <!--   1: due opposti -->
-  <line at="25 25 40" to="47 34 41" r="1" color="Y" on="1"/>
-  <line at="25 25 40" to="3 16 41" r="1" color="Y" on="1"/>
+  <line at="25 25 40" to="47 34 41" r="1" color="Y" on="#1"/>
+  <line at="25 25 40" to="3 16 41" r="1" color="Y" on="#1"/>
   <!--   2: quattro a croce -->
-  <line at="25 25 40" to="49 25 41" r="1" color="Y" on="2"/>
-  <line at="25 25 40" to="25 49 41" r="1" color="Y" on="2"/>
-  <line at="25 25 40" to="1 25 41" r="1" color="Y" on="2"/>
-  <line at="25 25 40" to="25 1 41" r="1" color="Y" on="2"/>
+  <line at="25 25 40" to="49 25 41" r="1" color="Y" on="#2"/>
+  <line at="25 25 40" to="25 49 41" r="1" color="Y" on="#2"/>
+  <line at="25 25 40" to="1 25 41" r="1" color="Y" on="#2"/>
+  <line at="25 25 40" to="25 1 41" r="1" color="Y" on="#2"/>
   <!--   3: uno lungo -->
-  <line at="25 25 40" to="11 44 41" r="1" color="Y" on="3"/>
+  <line at="25 25 40" to="11 44 41" r="1" color="Y" on="#3"/>
   <!--   4: tre -->
-  <line at="25 25 40" to="38 45 41" r="1" color="Y" on="4"/>
-  <line at="25 25 40" to="1 26 41" r="1" color="Y" on="4"/>
-  <line at="25 25 40" to="36 4 41" r="1" color="Y" on="4"/>
-  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/><rule in="4" out="B"/></prl>
+  <line at="25 25 40" to="38 45 41" r="1" color="Y" on="#4"/>
+  <line at="25 25 40" to="1 26 41" r="1" color="Y" on="#4"/>
+  <line at="25 25 40" to="36 4 41" r="1" color="Y" on="#4"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/><rule in="#4" out="B"/></prl>
   <!-- scelta «ormeggio»: a est | a ovest | a nord | a sud -->
   <box at="25 25 26" size="50 50 14" color="u" on="B"/>
-  <one steps="1"><rule in="u" out="1"/><rule in="u" out="2"/><rule in="u" out="3"/><rule in="u" out="4"/></one>
-  <all symmetry="(xyz)"><rule in="1u" out="*1"/><rule in="2u" out="*2"/><rule in="3u" out="*3"/><rule in="4u" out="*4"/></all>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/><rule in="u" out="#4"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/><rule in="#4u" out="*#4"/></all>
   <!--   1: a est -->
-  <line at="30 25 32" to="47 25 32" r="1" color="I" on="1"/>
-  <cone at="47 25 28" size="4 4 4" color="O" on="1"/>
-  <line at="30 25 38" to="43 25 32" r="0.5" color="I" on="1"/>
+  <line at="30 25 32" to="47 25 32" r="1" color="I" on="#1"/>
+  <cone at="47 25 28" size="4 4 4" color="O" on="#1"/>
+  <line at="30 25 38" to="43 25 32" r="0.5" color="I" on="#1"/>
   <!--   2: a ovest -->
-  <line at="20 25 32" to="3 25 32" r="1" color="I" on="2"/>
-  <cone at="3 25 28" size="4 4 4" color="O" on="2"/>
-  <line at="20 25 38" to="7 25 32" r="0.5" color="I" on="2"/>
+  <line at="20 25 32" to="3 25 32" r="1" color="I" on="#2"/>
+  <cone at="3 25 28" size="4 4 4" color="O" on="#2"/>
+  <line at="20 25 38" to="7 25 32" r="0.5" color="I" on="#2"/>
   <!--   3: a nord -->
-  <line at="25 30 32" to="25 47 32" r="1" color="I" on="3"/>
-  <cone at="25 47 28" size="4 4 4" color="O" on="3"/>
-  <line at="25 30 38" to="25 43 32" r="0.5" color="I" on="3"/>
+  <line at="25 30 32" to="25 47 32" r="1" color="I" on="#3"/>
+  <cone at="25 47 28" size="4 4 4" color="O" on="#3"/>
+  <line at="25 30 38" to="25 43 32" r="0.5" color="I" on="#3"/>
   <!--   4: a sud -->
-  <line at="25 20 32" to="25 3 32" r="1" color="I" on="4"/>
-  <cone at="25 3 28" size="4 4 4" color="O" on="4"/>
-  <line at="25 20 38" to="25 7 32" r="0.5" color="I" on="4"/>
-  <prl><rule in="u" out="B"/><rule in="1" out="B"/><rule in="2" out="B"/><rule in="3" out="B"/><rule in="4" out="B"/></prl>
+  <line at="25 20 32" to="25 3 32" r="1" color="I" on="#4"/>
+  <cone at="25 3 28" size="4 4 4" color="O" on="#4"/>
+  <line at="25 20 38" to="25 7 32" r="0.5" color="I" on="#4"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/><rule in="#4" out="B"/></prl>
   <prl in="BI" out="*O" p="0.04" steps="1"/>
   <prl in="B K" out="* N" p="0.15" steps="1"/>
   <prl in="B I" out="* N" p="0.1" steps="1"/>

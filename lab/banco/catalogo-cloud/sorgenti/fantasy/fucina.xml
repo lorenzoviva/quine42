@@ -1,10 +1,10 @@
 <!-- The smith's forge, with the coal store underground -->
 <sequence values="BNExzaPpQbOHtsgcdvefwXiIJhjMSFCWRVDLUuTYGKAknryqlmoZ" symmetry="(xy)" suolo="E" ground="Z" origin="bottom">
-  <union symbol="8" values="XJMjw"/>
-  <union symbol="7" values="CUWSuXJMjwDV"/>
-  <union symbol="1" values="beoxQ"/>
-  <union symbol="2" values="tsdcfv"/>
-  <union symbol="3" values="tb"/>
+  <union symbol="#8" values="XJMjw"/>
+  <union symbol="#7" values="CUWSuXJMjwDV"/>
+  <union symbol="#1" values="beoxQ"/>
+  <union symbol="#2" values="tsdcfv"/>
+  <union symbol="#3" values="tb"/>
   <color symbol="k" value="5a3a22" name="portone di quercia"/><color symbol="S" value="c9c0a6" name="pietra squadrata"/><color symbol="F" value="9a6b3c" name="assi di legno"/><color symbol="C" value="6a645c" name="pietra scura"/><color symbol="W" value="b8ab90" name="intonaco annerito"/><color symbol="R" value="4a5058" name="ardesia"/><color symbol="V" value="9cc3b4" name="vetro piombato" alpha="0.5"/><color symbol="D" value="4a3020" name="legno scuro"/><color symbol="L" value="7a5a3c" name="panca di castagno"/><color symbol="T" value="b4a98e" name="gradino di pietra"/><color symbol="K" value="7d5634" name="scala di legno"/><color symbol="A" value="8c8a80" name="acciottolato"/><color symbol="a" value="5f5a52" name="fondazione"/><color symbol="x" value="7a4a24" name="botti"/><color symbol="c" value="5c4a3e" name="camino della forgia"/><color symbol="n" value="ff7a2a" name="brace" glow="True"/><color symbol="O" value="6e7275" name="scudi di ferro"/>
   <!-- 1. lattice: arms from the centre, then the lines -->
   <prl in="***/*E*/***" out="***/*z*/***"/>
@@ -51,9 +51,9 @@
   <!-- no doors around the stair; other bays grow through a wall -->
   <all in="[gsdc]t" out="*v"/>
   <prl in="vt" out="*v" steps="9"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
   <prl in="bz" out="*b"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
   <prl in="bz" out="*b"/>
   <prl in="Hp" out="*H" steps="5"/>
   <!-- an open wall with the bench -->
@@ -64,7 +64,7 @@
   <prl in="v" out="t"/>
   <prl in="m" out="H"/>
   <!-- 3. the walls from the neighbouring letters -->
-  <all><rule in="[zE]p[zE]" out="*q*"/><rule in="[zE]p1" out="*w*"/><rule in="[zE]p2" out="*X*"/><rule in="1p1" out="*i*"/><rule in="2p2" out="*I*"/><rule in="1p2" out="*J*"/><rule in="1H1" out="*h*"/><rule in="1H2" out="*j*"/><rule in="EO2" out="*M*"/></all>
+  <all><rule in="[zE]p[zE]" out="*q*"/><rule in="[zE]p#1" out="*w*"/><rule in="[zE]p#2" out="*X*"/><rule in="#1p#1" out="*i*"/><rule in="#2p#2" out="*I*"/><rule in="#1p#2" out="*J*"/><rule in="#1H#1" out="*h*"/><rule in="#1H#2" out="*j*"/><rule in="EO#2" out="*M*"/></all>
   <prl in="n" out="h"/>
   <all in="P[XIJjHMy]" out="I*"/>
   <all in="P[wihO]" out="i*"/>

@@ -43,7 +43,7 @@ Animation "scansione" (8 frames):
   A soft green laser beam slides smoothly from back to front, scanning the whole floor
   under the building up to the front quay, a single active line at a time with no over-lighting.
 -->
-<sequence values="BMmCSsTtVvNnFPOx12345678" size="112 72 56" symmetry="()" name="Ufficio dei luoghi">
+<sequence values="BMmCSsTtVvNnFPOx#1#2#3#4#5#6#7#8" size="112 72 56" symmetry="()" name="Ufficio dei luoghi">
   <!-- Materials and neon punk palette -->
   <color symbol="M" value="14141a" name="metallo primario"/>
   <color symbol="m" value="20242e" name="metallo secondario"/>
@@ -62,14 +62,14 @@ Animation "scansione" (8 frames):
   <color symbol="x" hidden="True" name="buffer animazione"/>
 
   <!-- LIDAR scan phases: only 1 is active with glow; 2 is a soft trail; 3..8 are off -->
-  <color symbol="1" value="9ad27a" glow="True" name="fascio attivo LIDAR"/>
-  <color symbol="2" value="488048" name="scia fosfori tenue"/>
-  <color symbol="3" value="18241c" name="pavimento spento 3"/>
-  <color symbol="4" value="18241c" name="pavimento spento 4"/>
-  <color symbol="5" value="18241c" name="pavimento spento 5"/>
-  <color symbol="6" value="18241c" name="pavimento spento 6"/>
-  <color symbol="7" value="18241c" name="pavimento spento 7"/>
-  <color symbol="8" value="18241c" name="pavimento spento 8"/>
+  <color symbol="#1" value="9ad27a" glow="True" name="fascio attivo LIDAR"/>
+  <color symbol="#2" value="488048" name="scia fosfori tenue"/>
+  <color symbol="#3" value="18241c" name="pavimento spento 3"/>
+  <color symbol="#4" value="18241c" name="pavimento spento 4"/>
+  <color symbol="#5" value="18241c" name="pavimento spento 5"/>
+  <color symbol="#6" value="18241c" name="pavimento spento 6"/>
+  <color symbol="#7" value="18241c" name="pavimento spento 7"/>
+  <color symbol="#8" value="18241c" name="pavimento spento 8"/>
 
   <!-- ================================================================= -->
   <!-- 1. THE 4 CONTINUOUS TRACKED UNDERCARRIAGES (z = 0..8)             -->
@@ -355,14 +355,14 @@ Animation "scansione" (8 frames):
   <box at="44 40 1" size="1 54 1" color="s"/>
   <box at="68 40 1" size="1 54 1" color="s"/>
   <box at="84 40 1" size="1 54 1" color="s"/>
-  <box at="56 16 1" size="74 2 1" color="1"/>
-  <box at="56 23 1" size="74 2 1" color="2"/>
-  <box at="56 30 1" size="74 2 1" color="3"/>
-  <box at="56 37 1" size="74 2 1" color="4"/>
-  <box at="56 44 1" size="74 2 1" color="5"/>
-  <box at="56 51 1" size="74 2 1" color="6"/>
-  <box at="56 58 1" size="74 2 1" color="7"/>
-  <box at="56 65 1" size="74 2 1" color="8"/>
+  <box at="56 16 1" size="74 2 1" color="#1"/>
+  <box at="56 23 1" size="74 2 1" color="#2"/>
+  <box at="56 30 1" size="74 2 1" color="#3"/>
+  <box at="56 37 1" size="74 2 1" color="#4"/>
+  <box at="56 44 1" size="74 2 1" color="#5"/>
+  <box at="56 51 1" size="74 2 1" color="#6"/>
+  <box at="56 58 1" size="74 2 1" color="#7"/>
+  <box at="56 65 1" size="74 2 1" color="#8"/>
 
   <!-- ================================================================= -->
   <!-- 10. ACCESS WALKWAY, HALL AND DOOR O (z = 0..16)                    -->
@@ -478,14 +478,14 @@ Animation "scansione" (8 frames):
 <!-- ================================================================= -->
 <animation name="scansione" frames="8">
   <sequence>
-    <all in="1" out="x"/>
-    <all in="2" out="1"/>
-    <all in="3" out="2"/>
-    <all in="4" out="3"/>
-    <all in="5" out="4"/>
-    <all in="6" out="5"/>
-    <all in="7" out="6"/>
-    <all in="8" out="7"/>
-    <all in="x" out="8"/>
+    <all in="#1" out="x"/>
+    <all in="#2" out="#1"/>
+    <all in="#3" out="#2"/>
+    <all in="#4" out="#3"/>
+    <all in="#5" out="#4"/>
+    <all in="#6" out="#5"/>
+    <all in="#7" out="#6"/>
+    <all in="#8" out="#7"/>
+    <all in="x" out="#8"/>
   </sequence>
 </animation>

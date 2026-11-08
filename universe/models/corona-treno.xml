@@ -18,7 +18,7 @@ Animation "levitazione" (4 frames):
 - The inner data archives cycle the quantum energy of the files in transit synchronisation (1 -> 2 -> 3 -> 4);
 - The thrusters and the route telemetry pulse in sequence (T -> t, C -> c).
 -->
-<sequence values="BMmSsDPVvWRrAtTcC1234GQXYZxyz" size="20 8 10" symmetry="()" name="TrenoPod">
+<sequence values="BMmSsDPVvWRrAtTcC#1#2#3#4GQXYZxyz" size="20 8 10" symmetry="()" name="TrenoPod">
   <!-- Structural materials: dark carbon, titanium and satin/chrome finishes -->
   <color symbol="M" value="141418" name="carbonio ultra-scuro telaio e scocca"/>
   <color symbol="m" value="20222a" name="titanio grafite scuro carrozzeria"/>
@@ -46,10 +46,10 @@ Animation "levitazione" (4 frames):
   <color symbol="t" value="ff5277" glow="True" name="plasma vettoriale coda secondario"/>
 
   <!-- Lit inner data archives (glow="True") -->
-  <color symbol="1" value="ffec27" glow="True" name="cubetti dati oro brillante"/>
-  <color symbol="2" value="ffa300" glow="True" name="pacchetti logici ambra"/>
-  <color symbol="3" value="ffe27a" glow="True" name="cubi quantistici panna-oro"/>
-  <color symbol="4" value="ff7700" glow="True" name="cristalli archivio arancio vivo"/>
+  <color symbol="#1" value="ffec27" glow="True" name="cubetti dati oro brillante"/>
+  <color symbol="#2" value="ffa300" glow="True" name="pacchetti logici ambra"/>
+  <color symbol="#3" value="ffe27a" glow="True" name="cubi quantistici panna-oro"/>
+  <color symbol="#4" value="ff7700" glow="True" name="cristalli archivio arancio vivo"/>
   <color symbol="G" value="00ffff" glow="True" name="cluster dati iper-densi ciano"/>
 
   <!-- Invisible markers for stochastic variants in the seeds -->
@@ -151,40 +151,40 @@ Animation "levitazione" (4 frames):
   <!-- Data rack modules and lit archive cubes (z=2)            -->
   <!-- Directly visible from the side openings!                 -->
   <!-- Rack 1 (rear x=5..6)                                     -->
-  <box at="5 1 2" size="1 1 1" color="1"/>
-  <box at="6 1 2" size="1 1 1" color="2"/>
-  <box at="5 2 2" size="1 1 1" color="1"/>
-  <box at="6 2 2" size="1 1 1" color="2"/>
+  <box at="5 1 2" size="1 1 1" color="#1"/>
+  <box at="6 1 2" size="1 1 1" color="#2"/>
+  <box at="5 2 2" size="1 1 1" color="#1"/>
+  <box at="6 2 2" size="1 1 1" color="#2"/>
   <box at="5 5 2" size="1 1 1" color="Z"/>
-  <box at="6 5 2" size="1 1 1" color="3"/>
+  <box at="6 5 2" size="1 1 1" color="#3"/>
   <box at="5 6 2" size="1 1 1" color="Z"/>
-  <box at="6 6 2" size="1 1 1" color="3"/>
+  <box at="6 6 2" size="1 1 1" color="#3"/>
 
   <!-- Rack 2 (central x=8..10)                                 -->
-  <box at="8 1 2" size="1 1 1" color="3"/>
+  <box at="8 1 2" size="1 1 1" color="#3"/>
   <box at="9 1 2" size="1 1 1" color="Y"/>
   <box at="10 1 2" size="1 1 1" color="G"/>
-  <box at="8 2 2" size="1 1 1" color="3"/>
+  <box at="8 2 2" size="1 1 1" color="#3"/>
   <box at="9 2 2" size="1 1 1" color="Y"/>
-  <box at="10 2 2" size="1 1 1" color="1"/>
-  <box at="8 5 2" size="1 1 1" color="2"/>
-  <box at="9 5 2" size="1 1 1" color="4"/>
+  <box at="10 2 2" size="1 1 1" color="#1"/>
+  <box at="8 5 2" size="1 1 1" color="#2"/>
+  <box at="9 5 2" size="1 1 1" color="#4"/>
   <box at="10 5 2" size="1 1 1" color="G"/>
-  <box at="8 6 2" size="1 1 1" color="2"/>
-  <box at="9 6 2" size="1 1 1" color="4"/>
+  <box at="8 6 2" size="1 1 1" color="#2"/>
+  <box at="9 6 2" size="1 1 1" color="#4"/>
   <box at="10 6 2" size="1 1 1" color="G"/>
 
   <!-- Rack 3 (front x=12..14)                                  -->
   <box at="12 1 2" size="1 1 1" color="X"/>
-  <box at="13 1 2" size="1 1 1" color="1"/>
-  <box at="14 1 2" size="1 1 1" color="4"/>
+  <box at="13 1 2" size="1 1 1" color="#1"/>
+  <box at="14 1 2" size="1 1 1" color="#4"/>
   <box at="12 2 2" size="1 1 1" color="X"/>
-  <box at="13 2 2" size="1 1 1" color="1"/>
+  <box at="13 2 2" size="1 1 1" color="#1"/>
   <box at="12 5 2" size="1 1 1" color="G"/>
-  <box at="13 5 2" size="1 1 1" color="2"/>
+  <box at="13 5 2" size="1 1 1" color="#2"/>
   <box at="12 6 2" size="1 1 1" color="G"/>
-  <box at="13 6 2" size="1 1 1" color="2"/>
-  <box at="14 6 2" size="1 1 1" color="1"/>
+  <box at="13 6 2" size="1 1 1" color="#2"/>
+  <box at="14 6 2" size="1 1 1" color="#1"/>
 
   <!-- Route console and front avionics (x=14..15)             -->
   <box at="14.5 3.5 2" size="2 2 1" color="m"/>
@@ -223,22 +223,22 @@ Animation "levitazione" (4 frames):
   <box at="15 6 3" size="1 1 1" color="S"/>
 
   <!-- Inner data cubes and quantum archives at z=3             -->
-  <box at="5 2 3" size="1 1 1" color="2"/>
-  <box at="6 2 3" size="1 1 1" color="1"/>
-  <box at="5 5 3" size="1 1 1" color="1"/>
+  <box at="5 2 3" size="1 1 1" color="#2"/>
+  <box at="6 2 3" size="1 1 1" color="#1"/>
+  <box at="5 5 3" size="1 1 1" color="#1"/>
   <box at="6 5 3" size="1 1 1" color="Z"/>
 
   <box at="8 2 3" size="1 1 1" color="Y"/>
-  <box at="9 2 3" size="1 1 1" color="3"/>
-  <box at="10 2 3" size="1 1 1" color="4"/>
+  <box at="9 2 3" size="1 1 1" color="#3"/>
+  <box at="10 2 3" size="1 1 1" color="#4"/>
   <box at="8 5 3" size="1 1 1" color="G"/>
-  <box at="9 5 3" size="1 1 1" color="1"/>
-  <box at="10 5 3" size="1 1 1" color="2"/>
+  <box at="9 5 3" size="1 1 1" color="#1"/>
+  <box at="10 5 3" size="1 1 1" color="#2"/>
 
-  <box at="12 2 3" size="1 1 1" color="1"/>
+  <box at="12 2 3" size="1 1 1" color="#1"/>
   <box at="13 2 3" size="1 1 1" color="X"/>
-  <box at="12 5 3" size="1 1 1" color="3"/>
-  <box at="13 5 3" size="1 1 1" color="1"/>
+  <box at="12 5 3" size="1 1 1" color="#3"/>
+  <box at="13 5 3" size="1 1 1" color="#1"/>
 
   <!-- Central floating holographic quantum data core           -->
   <box at="9 3.5 3" size="1 2 1" color="G"/>
@@ -274,12 +274,12 @@ Animation "levitazione" (4 frames):
   <box at="9.5 6 4" size="10 1 1" color="V"/>
 
   <!-- Cabin ceiling with hanging data racks                    -->
-  <box at="6 2 4" size="1 1 1" color="1"/>
-  <box at="6 5 4" size="1 1 1" color="3"/>
-  <box at="9 2 4" size="1 1 1" color="2"/>
+  <box at="6 2 4" size="1 1 1" color="#1"/>
+  <box at="6 5 4" size="1 1 1" color="#3"/>
+  <box at="9 2 4" size="1 1 1" color="#2"/>
   <box at="9 5 4" size="1 1 1" color="G"/>
-  <box at="12 2 4" size="1 1 1" color="4"/>
-  <box at="12 5 4" size="1 1 1" color="1"/>
+  <box at="12 2 4" size="1 1 1" color="#4"/>
+  <box at="12 5 4" size="1 1 1" color="#1"/>
 
   <!-- Sloping cupola and front lidar scanner (x=16..18)        -->
   <box at="16 3.5 4" size="1 4 1" color="V"/>
@@ -331,28 +331,28 @@ Animation "levitazione" (4 frames):
   <!-- ======================================================== -->
   <!-- A) Quantum resolution of archive 1 (X)                   -->
   <one steps="4">
-    <rule in="X" out="1" p="0.40"/>
-    <rule in="X" out="3" p="0.30"/>
+    <rule in="X" out="#1" p="0.40"/>
+    <rule in="X" out="#3" p="0.30"/>
     <rule in="X" out="G" p="0.20"/>
-    <rule in="X" out="2" p="0.10"/>
+    <rule in="X" out="#2" p="0.10"/>
   </one>
-  <all in="X" out="1" optional="True"/>
+  <all in="X" out="#1" optional="True"/>
 
   <!-- B) Resolution of the data packets of archive 2 (Y)       -->
   <one steps="4">
-    <rule in="Y" out="2" p="0.45"/>
-    <rule in="Y" out="4" p="0.25"/>
-    <rule in="Y" out="1" p="0.20"/>
+    <rule in="Y" out="#2" p="0.45"/>
+    <rule in="Y" out="#4" p="0.25"/>
+    <rule in="Y" out="#1" p="0.20"/>
     <rule in="Y" out="G" p="0.10"/>
   </one>
-  <all in="Y" out="2" optional="True"/>
+  <all in="Y" out="#2" optional="True"/>
 
   <!-- C) Resolution of the cluster of archive 3 (Z)            -->
   <one steps="4">
     <rule in="Z" out="G" p="0.35"/>
-    <rule in="Z" out="1" p="0.35"/>
-    <rule in="Z" out="3" p="0.20"/>
-    <rule in="Z" out="4" p="0.10"/>
+    <rule in="Z" out="#1" p="0.35"/>
+    <rule in="Z" out="#3" p="0.20"/>
+    <rule in="Z" out="#4" p="0.10"/>
   </one>
   <all in="Z" out="G" optional="True"/>
 
@@ -371,11 +371,11 @@ Animation "levitazione" (4 frames):
 <animation name="levitazione" frames="4" symmetry="()">
   <sequence>
     <!-- 1. Quantum energy cycle of the data in the archives      -->
-    <all in="1" out="x"/>
-    <all in="2" out="1"/>
-    <all in="3" out="2"/>
-    <all in="4" out="3"/>
-    <all in="x" out="4"/>
+    <all in="#1" out="x"/>
+    <all in="#2" out="#1"/>
+    <all in="#3" out="#2"/>
+    <all in="#4" out="#3"/>
+    <all in="x" out="#4"/>
 
     <!-- 2. Wave of induction and magnetic repulsion on the pads  -->
     <all in="R" out="y"/>

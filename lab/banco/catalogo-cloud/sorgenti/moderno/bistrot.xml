@@ -1,10 +1,10 @@
 <!-- Bistrot con l’enoteca interrata -->
 <sequence values="BNExzaPpQbOHtsgcdvefwXiIJhjMSFCWRVDLUuTYGKAknryqlmoZ" symmetry="(xy)" suolo="E" ground="Z" origin="bottom">
-  <union symbol="8" values="XJMjw"/>
-  <union symbol="7" values="CUWSuXJMjwDV"/>
-  <union symbol="1" values="beoxQ"/>
-  <union symbol="2" values="tsdcfv"/>
-  <union symbol="3" values="tb"/>
+  <union symbol="#8" values="XJMjw"/>
+  <union symbol="#7" values="CUWSuXJMjwDV"/>
+  <union symbol="#1" values="beoxQ"/>
+  <union symbol="#2" values="tsdcfv"/>
+  <union symbol="#3" values="tb"/>
   <color symbol="k" value="3a3d42" name="porta di acciaio"/><color symbol="S" value="d6d2c8" name="cemento chiaro"/><color symbol="F" value="b88a55" name="parquet di rovere"/><color symbol="C" value="a9a59b" name="cemento a vista"/><color symbol="W" value="f2efe8" name="intonaco bianco"/><color symbol="R" value="8f8f88" name="ghiaia"/><color symbol="V" value="86b8c8" name="vetro" alpha="0.5"/><color symbol="D" value="2f3236" name="telaio di alluminio"/><color symbol="L" value="8a6a48" name="panca di rovere"/><color symbol="T" value="e0d9c2" name="gradino"/><color symbol="K" value="c2c7cc" name="acciaio"/><color symbol="A" value="9a9590" name="pavimento di pietra"/><color symbol="a" value="6f6c66" name="fondazione"/><color symbol="x" value="7a4a24" name="botti"/><color symbol="O" value="24324a" name="pannelli solari"/><color symbol="f" value="a0703f" name="listelli di larice"/><color symbol="c" value="9da3a8" name="canna fumaria"/>
   <!-- 1. lattice: arms from the centre, then the lines -->
   <prl in="***/*E*/***" out="***/*z*/***"/>
@@ -51,9 +51,9 @@
   <!-- no doors around the stair; other bays grow through a wall -->
   <all in="[gsdc]t" out="*v"/>
   <prl in="vt" out="*v" steps="9"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
   <prl in="bz" out="*b"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
   <prl in="bz" out="*b"/>
   <prl in="Hp" out="*H" steps="5"/>
   <!-- an open wall with the bench -->
@@ -64,7 +64,7 @@
   <prl in="v" out="t"/>
   <prl in="m" out="H"/>
   <!-- 3. the walls from the neighbouring letters -->
-  <all><rule in="[zE]p[zE]" out="*q*"/><rule in="[zE]p1" out="*w*"/><rule in="[zE]p2" out="*X*"/><rule in="1p1" out="*i*"/><rule in="2p2" out="*I*"/><rule in="1p2" out="*J*"/><rule in="1H1" out="*h*"/><rule in="1H2" out="*j*"/><rule in="EO2" out="*M*"/></all>
+  <all><rule in="[zE]p[zE]" out="*q*"/><rule in="[zE]p#1" out="*w*"/><rule in="[zE]p#2" out="*X*"/><rule in="#1p#1" out="*i*"/><rule in="#2p#2" out="*I*"/><rule in="#1p#2" out="*J*"/><rule in="#1H#1" out="*h*"/><rule in="#1H#2" out="*j*"/><rule in="EO#2" out="*M*"/></all>
   <prl in="n" out="h"/>
   <all in="P[XIJjHMy]" out="I*"/>
   <all in="P[wihO]" out="i*"/>

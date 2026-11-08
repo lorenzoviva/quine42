@@ -1,8 +1,8 @@
-<sequence values="BNExzaPpQbOHtsgcdvefwXiIJhjMSFCWRVDLUuTYGKAknryqlmoZ67" symmetry="(xy)" suolo="E" ground="Z" origin="bottom">
-  <union symbol="1" values="beoxQ"/>
-  <union symbol="2" values="tsdcfv"/>
-  <union symbol="3" values="tb"/>
-  <color symbol="6" value="7a4a24" name="campata in prova"/><color symbol="7" value="5a3a22" name="varco in prova"/>
+<sequence values="BNExzaPpQbOHtsgcdvefwXiIJhjMSFCWRVDLUuTYGKAknryqlmoZ#6#7" symmetry="(xy)" suolo="E" ground="Z" origin="bottom">
+  <union symbol="#1" values="beoxQ"/>
+  <union symbol="#2" values="tsdcfv"/>
+  <union symbol="#3" values="tb"/>
+  <color symbol="#6" value="7a4a24" name="campata in prova"/><color symbol="#7" value="5a3a22" name="varco in prova"/>
   <color symbol="k" value="2e2620" name="porta ferrata"/><color symbol="S" value="9a9a94" name="pietra grigia"/><color symbol="F" value="5a3e28" name="legno scuro"/><color symbol="C" value="7d7d78" name="pietra scura"/><color symbol="W" value="b5b2a8" name="pietra chiara"/><color symbol="R" value="5b5e63" name="ardesia"/><color symbol="V" value="86b8c8" alpha="0.5" name="vetro"/><color symbol="D" value="3a3d42" name="telaio"/><color symbol="L" value="3d2b1d" name="quercia"/><color symbol="T" value="e0d9c2" name="gradino"/><color symbol="K" value="55585e" name="ferro"/><color symbol="A" value="6e6c66" name="lastricato"/><color symbol="a" value="4a4844" name="fondazione"/><color symbol="x" value="4a4d52" name="pilastri e grate"/>
   <!-- 1. lattice: arms from the centre, then the lines -->
   <prl in="***/*E*/***" out="***/*z*/***"/>
@@ -50,22 +50,22 @@
   <all in="[gsdc]t" out="*v"/>
   <all in="vt" out="*v" steps="9"/>
   <!-- una campata in più, che a volte non si costruisce: il contorno cambia da un seme all'altro -->
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******6******/******7******/*************" steps="1"/>
-  <prl in="6" out="z" p="0.6"/>
-  <all in="z/7" out="*/p"/>
-  <all in="6/7" out="b/H"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******#6******/******#7******/*************" steps="1"/>
+  <prl in="#6" out="z" p="0.6"/>
+  <all in="z/#7" out="*/p"/>
+  <all in="#6/#7" out="b/H"/>
   <all in="bz" out="*b"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
   <all in="bz" out="*b"/>
   <!-- una campata in più, che a volte non si costruisce: il contorno cambia da un seme all'altro -->
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******6******/******7******/*************" steps="1"/>
-  <prl in="6" out="z" p="0.6"/>
-  <all in="z/7" out="*/p"/>
-  <all in="6/7" out="b/H"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******#6******/******#7******/*************" steps="1"/>
+  <prl in="#6" out="z" p="0.6"/>
+  <all in="z/#7" out="*/p"/>
+  <all in="#6/#7" out="b/H"/>
   <all in="bz" out="*b"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
   <all in="bz" out="*b"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
   <all in="bz" out="*b"/>
   <all in="Hp" out="*H" steps="5"/>
   <prl><rule in="tHb" out="*Ht" p="0.07"/></prl>
@@ -77,7 +77,7 @@
   <prl in="v" out="t"/>
   <prl in="m" out="H"/>
   <!-- 3. the walls from the neighbouring letters -->
-  <all><rule in="[zE]p[zE]" out="*q*"/><rule in="[zE]p1" out="*w*"/><rule in="[zE]p2" out="*X*"/><rule in="1p1" out="*i*"/><rule in="2p2" out="*I*"/><rule in="1p2" out="*J*"/><rule in="1H1" out="*h*"/><rule in="1H2" out="*j*"/><rule in="EO2" out="*M*"/></all>
+  <all><rule in="[zE]p[zE]" out="*q*"/><rule in="[zE]p#1" out="*w*"/><rule in="[zE]p#2" out="*X*"/><rule in="#1p#1" out="*i*"/><rule in="#2p#2" out="*I*"/><rule in="#1p#2" out="*J*"/><rule in="#1H#1" out="*h*"/><rule in="#1H#2" out="*j*"/><rule in="EO#2" out="*M*"/></all>
   <prl in="n" out="h"/>
   <all in="P[XIJjHMy]" out="I*"/>
   <all in="P[wihO]" out="i*"/>

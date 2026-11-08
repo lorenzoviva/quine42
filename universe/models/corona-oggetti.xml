@@ -36,7 +36,7 @@ Logistics quay:
 Animation "stasi" (8 frames):
   A continuous energy wave flowing through the neon lines of the edges, the top capstone and the stasis cells of the vault.
 -->
-<sequence values="BMmCSsVvwNnFPOx12345678" size="112 112 80" symmetry="()" name="Magazzino degli oggetti">
+<sequence values="BMmCSsVvwNnFPOx#1#2#3#4#5#6#7#8" size="112 112 80" symmetry="()" name="Magazzino degli oggetti">
   <!-- Materials and palette -->
   <color symbol="M" value="16161e" name="metallo primario"/>
   <color symbol="m" value="242632" name="metallo secondario"/>
@@ -54,14 +54,14 @@ Animation "stasi" (8 frames):
   <color symbol="x" hidden="True" name="buffer animazione"/>
 
   <!-- 8 phases of the amber neon wave (the cyclic pulse of the vault) -->
-  <color symbol="1" value="8a5220" glow="True" name="fase ambra 1"/>
-  <color symbol="2" value="a86828" glow="True" name="fase ambra 2"/>
-  <color symbol="3" value="c48035" glow="True" name="fase ambra 3"/>
-  <color symbol="4" value="dc9948" glow="True" name="fase ambra 4"/>
-  <color symbol="5" value="f6bf68" glow="True" name="fase ambra apice"/>
-  <color symbol="6" value="dc9948" glow="True" name="fase ambra 6"/>
-  <color symbol="7" value="c48035" glow="True" name="fase ambra 7"/>
-  <color symbol="8" value="a86828" glow="True" name="fase ambra 8"/>
+  <color symbol="#1" value="8a5220" glow="True" name="fase ambra 1"/>
+  <color symbol="#2" value="a86828" glow="True" name="fase ambra 2"/>
+  <color symbol="#3" value="c48035" glow="True" name="fase ambra 3"/>
+  <color symbol="#4" value="dc9948" glow="True" name="fase ambra 4"/>
+  <color symbol="#5" value="f6bf68" glow="True" name="fase ambra apice"/>
+  <color symbol="#6" value="dc9948" glow="True" name="fase ambra 6"/>
+  <color symbol="#7" value="c48035" glow="True" name="fase ambra 7"/>
+  <color symbol="#8" value="a86828" glow="True" name="fase ambra 8"/>
 
   <!-- ================================================================= -->
   <!-- 1. BASE, FORECOURT AND QUAYS (z = 0..3)                           -->
@@ -77,8 +77,8 @@ Animation "stasi" (8 frames):
   <box at="56 94 2" size="24 24 1" color="C"/>
 
   <!-- Amber neon light guides along the footpath (phases 2 and 6) -->
-  <box at="47 101 2" size="1 10 1" color="2"/>
-  <box at="65 101 2" size="1 10 1" color="6"/>
+  <box at="47 101 2" size="1 10 1" color="#2"/>
+  <box at="65 101 2" size="1 10 1" color="#6"/>
 
   <!-- Monolithic base for the totem of the sign (left side) -->
   <box at="26 104 0" size="46 6 2" color="C"/>
@@ -95,10 +95,10 @@ Animation "stasi" (8 frames):
   <!-- Logistics control columns with amber signals (phases 4 and 5) -->
   <box at="77 104 0" size="3 3 8" color="M"/>
   <box at="77 104 8" size="2 2 2" color="S"/>
-  <box at="77 104 10" size="1 1 2" color="5"/>
+  <box at="77 104 10" size="1 1 2" color="#5"/>
   <box at="97 104 0" size="3 3 8" color="M"/>
   <box at="97 104 8" size="2 2 2" color="S"/>
-  <box at="97 104 10" size="1 1 2" color="4"/>
+  <box at="97 104 10" size="1 1 2" color="#4"/>
 
   <!-- ================================================================= -->
   <!-- 2. BODY OF THE STEPPED PYRAMID (z = 2..71, cx=56, cy=46)          -->
@@ -206,28 +206,28 @@ Animation "stasi" (8 frames):
 
   <!-- Animated amber neon lines in a vertical gradient along the 4 edges (r=0) -->
   <!-- SW edge (front-west) -->
-  <line at="15 87 2" to="23 79 19" r="0" color="1"/>
-  <line at="23 79 19" to="32 70 36" r="0" color="2"/>
-  <line at="32 70 36" to="41 62 54" r="0" color="3"/>
-  <line at="41 62 54" to="49 53 71" r="0" color="4"/>
+  <line at="15 87 2" to="23 79 19" r="0" color="#1"/>
+  <line at="23 79 19" to="32 70 36" r="0" color="#2"/>
+  <line at="32 70 36" to="41 62 54" r="0" color="#3"/>
+  <line at="41 62 54" to="49 53 71" r="0" color="#4"/>
 
   <!-- SE edge (front-east) -->
-  <line at="97 87 2" to="89 79 19" r="0" color="5"/>
-  <line at="89 79 19" to="80 70 36" r="0" color="6"/>
-  <line at="80 70 36" to="71 62 54" r="0" color="7"/>
-  <line at="71 62 54" to="63 53 71" r="0" color="8"/>
+  <line at="97 87 2" to="89 79 19" r="0" color="#5"/>
+  <line at="89 79 19" to="80 70 36" r="0" color="#6"/>
+  <line at="80 70 36" to="71 62 54" r="0" color="#7"/>
+  <line at="71 62 54" to="63 53 71" r="0" color="#8"/>
 
   <!-- NW edge (back-west) -->
-  <line at="15 5 2" to="23 13 19" r="0" color="3"/>
-  <line at="23 13 19" to="32 22 36" r="0" color="4"/>
-  <line at="32 22 36" to="41 31 54" r="0" color="5"/>
-  <line at="41 31 54" to="49 39 71" r="0" color="6"/>
+  <line at="15 5 2" to="23 13 19" r="0" color="#3"/>
+  <line at="23 13 19" to="32 22 36" r="0" color="#4"/>
+  <line at="32 22 36" to="41 31 54" r="0" color="#5"/>
+  <line at="41 31 54" to="49 39 71" r="0" color="#6"/>
 
   <!-- NE edge (back-east) -->
-  <line at="97 5 2" to="89 13 19" r="0" color="7"/>
-  <line at="89 13 19" to="80 22 36" r="0" color="8"/>
-  <line at="80 22 36" to="71 31 54" r="0" color="1"/>
-  <line at="71 31 54" to="63 39 71" r="0" color="2"/>
+  <line at="97 5 2" to="89 13 19" r="0" color="#7"/>
+  <line at="89 13 19" to="80 22 36" r="0" color="#8"/>
+  <line at="80 22 36" to="71 31 54" r="0" color="#1"/>
+  <line at="71 31 54" to="63 39 71" r="0" color="#2"/>
 
   <!-- ================================================================= -->
   <!-- 5. APEX AND TOP CAPSTONE (z = 70..79)                             -->
@@ -240,19 +240,19 @@ Animation "stasi" (8 frames):
   <!-- 4 prism pylons holding the capstone, with amber tips -->
   <box at="50 40 71" size="3 3 6" color="M"/>
   <box at="50 40 77" size="2 2 1" color="S"/>
-  <box at="50 40 78" size="1 1 1" color="5"/>
+  <box at="50 40 78" size="1 1 1" color="#5"/>
 
   <box at="62 40 71" size="3 3 6" color="M"/>
   <box at="62 40 77" size="2 2 1" color="S"/>
-  <box at="62 40 78" size="1 1 1" color="5"/>
+  <box at="62 40 78" size="1 1 1" color="#5"/>
 
   <box at="50 52 71" size="3 3 6" color="M"/>
   <box at="50 52 77" size="2 2 1" color="S"/>
-  <box at="50 52 78" size="1 1 1" color="5"/>
+  <box at="50 52 78" size="1 1 1" color="#5"/>
 
   <box at="62 52 71" size="3 3 6" color="M"/>
   <box at="62 52 77" size="2 2 1" color="S"/>
-  <box at="62 52 78" size="1 1 1" color="5"/>
+  <box at="62 52 78" size="1 1 1" color="#5"/>
 
   <!-- Steel containment arms connecting the pylons to the capstone -->
   <line at="50 40 74" to="53 43 74" r="0" color="S"/>
@@ -261,9 +261,9 @@ Animation "stasi" (8 frames):
   <line at="62 52 74" to="59 49 74" r="0" color="S"/>
 
   <!-- The Capstone: a high-energy suspended geometric amber crystal -->
-  <box at="56 46 73" size="6 6 4" color="5"/>
-  <box at="56 46 72" size="4 4 1" color="4"/>
-  <box at="56 46 77" size="4 4 1" color="4"/>
+  <box at="56 46 73" size="6 6 4" color="#5"/>
+  <box at="56 46 72" size="4 4 1" color="#4"/>
+  <box at="56 46 77" size="4 4 1" color="#4"/>
   <box at="56 46 78" size="2 2 1" color="N"/>
 
   <!-- ================================================================= -->
@@ -280,30 +280,30 @@ Animation "stasi" (8 frames):
   <box at="62 52 2" size="2 2 66" color="S"/>
 
   <!-- Central vertical stasis conduit / amber beam (phase 5 at the peak) -->
-  <box at="56 46 2" size="2 2 66" color="5"/>
-  <box at="56 46 2" size="4 4 66" color="4" on="B"/>
+  <box at="56 46 2" size="2 2 66" color="#5"/>
+  <box at="56 46 2" size="4 4 66" color="#4" on="B"/>
 
   <!-- Lit stasis cells with the stored items (phases 1..8) -->
   <!-- Tier 1 of cells (z=8) -->
-  <box at="56 38 8" size="10 2 3" color="1"/>
-  <box at="56 54 8" size="10 2 3" color="2"/>
-  <box at="48 46 8" size="2 10 3" color="3"/>
-  <box at="64 46 8" size="2 10 3" color="4"/>
+  <box at="56 38 8" size="10 2 3" color="#1"/>
+  <box at="56 54 8" size="10 2 3" color="#2"/>
+  <box at="48 46 8" size="2 10 3" color="#3"/>
+  <box at="64 46 8" size="2 10 3" color="#4"/>
   <!-- Tier 2 of cells (z=22) -->
-  <box at="56 38 22" size="10 2 3" color="5"/>
-  <box at="56 54 22" size="10 2 3" color="6"/>
-  <box at="48 46 22" size="2 10 3" color="7"/>
-  <box at="64 46 22" size="2 10 3" color="8"/>
+  <box at="56 38 22" size="10 2 3" color="#5"/>
+  <box at="56 54 22" size="10 2 3" color="#6"/>
+  <box at="48 46 22" size="2 10 3" color="#7"/>
+  <box at="64 46 22" size="2 10 3" color="#8"/>
   <!-- Tier 3 of cells (z=38) -->
-  <box at="56 38 38" size="8 2 3" color="1"/>
-  <box at="56 54 38" size="8 2 3" color="3"/>
-  <box at="48 46 38" size="2 8 3" color="5"/>
-  <box at="64 46 38" size="2 8 3" color="7"/>
+  <box at="56 38 38" size="8 2 3" color="#1"/>
+  <box at="56 54 38" size="8 2 3" color="#3"/>
+  <box at="48 46 38" size="2 8 3" color="#5"/>
+  <box at="64 46 38" size="2 8 3" color="#7"/>
   <!-- Tier 4 of cells (z=54) -->
-  <box at="56 40 54" size="6 2 3" color="2"/>
-  <box at="56 52 54" size="6 2 3" color="4"/>
-  <box at="50 46 54" size="2 6 3" color="6"/>
-  <box at="62 46 54" size="2 6 3" color="8"/>
+  <box at="56 40 54" size="6 2 3" color="#2"/>
+  <box at="56 52 54" size="6 2 3" color="#4"/>
+  <box at="50 46 54" size="2 6 3" color="#6"/>
+  <box at="62 46 54" size="2 6 3" color="#8"/>
 
   <!-- ================================================================= -->
   <!-- 7. MONUMENTAL ENTRANCE PORTAL (SOUTH FACE, y=82..98)              -->
@@ -330,7 +330,7 @@ Animation "stasi" (8 frames):
   <!-- Grooved steel lintel and an amber optical sensor -->
   <box at="56 97 19" size="19 2 2" color="S"/>
   <box at="56 98 19" size="15 1 1" color="w"/>
-  <box at="56 98 20" size="5 1 1" color="5"/>
+  <box at="56 98 20" size="5 1 1" color="#5"/>
 
   <!-- THE VOXELS OF DOOR O (z=0..16, x=50..62, width 13, height 17) -->
   <box at="56 97 0" size="13 1 17" color="O"/>
@@ -610,14 +610,14 @@ Animation "stasi" (8 frames):
 <!-- ================================================================= -->
 <animation name="stasi" frames="8">
   <sequence>
-    <all in="1" out="x"/>
-    <all in="2" out="1"/>
-    <all in="3" out="2"/>
-    <all in="4" out="3"/>
-    <all in="5" out="4"/>
-    <all in="6" out="5"/>
-    <all in="7" out="6"/>
-    <all in="8" out="7"/>
-    <all in="x" out="8"/>
+    <all in="#1" out="x"/>
+    <all in="#2" out="#1"/>
+    <all in="#3" out="#2"/>
+    <all in="#4" out="#3"/>
+    <all in="#5" out="#4"/>
+    <all in="#6" out="#5"/>
+    <all in="#7" out="#6"/>
+    <all in="#8" out="#7"/>
+    <all in="x" out="#8"/>
   </sequence>
 </animation>

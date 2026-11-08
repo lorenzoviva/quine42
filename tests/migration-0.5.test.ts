@@ -13,11 +13,13 @@ import { memoryStore } from '../src/kernel/repo';
 import { internalComponent, internalComponents, internalFieldPath, internalManifest0_5 } from '../src/kernel/internalNames';
 import { luaFor0_5, migrateUniverse, MIGRATIONS } from '../src/kernel/migrations';
 import { prepareUniverse, SEED_FILE } from '../src/kernel/universes';
-import { checkKernelVersion, KERNEL_VERSION } from '../src/kernel/version';
+import { checkKernelVersion } from '../src/kernel/version';
 import { apiErrors } from '../src/kernel/validator';
 import { hashStr, hex } from '../src/kernel/rng';
 import type { FileMap } from '../src/kernel/types';
 
+/** The kernel of the contract 0.5: what this migration gives, before the next one (0.5 → 0.6, T342) takes it on. */
+const TO_0_5 = '0.5.0';
 const json = (s: string | undefined) => JSON.parse(s ?? 'null');
 const write = (v: unknown) => JSON.stringify(v, null, 2) + '\n';
 const h = (s: string) => hex(hashStr(s));
@@ -121,18 +123,19 @@ function universe04(): FileMap {
 
 describe('the migration 0.4 → 0.5: a universe of 0.4, file by file', () => {
   const before = universe04();
-  const { files, applied } = migrateUniverse(before);
+  const { files, applied } = migrateUniverse(before, TO_0_5);
 
   it('is the fourth migration of the chain, it says what it does, and the universe runs on this kernel', () => {
-    expect(MIGRATIONS.map((m) => `${m.from}→${m.to}`)).toEqual(['0.1→0.2', '0.2→0.3', '0.3→0.4', '0.4→0.5']);
+    expect(MIGRATIONS.map((m) => `${m.from}→${m.to}`)).toEqual(['0.1→0.2', '0.2→0.3', '0.3→0.4', '0.4→0.5', '0.5→0.6']);
     expect(applied).toHaveLength(1);
     expect(applied[0]).toMatch(/^0\.4→0\.5: .*world\.venture/);
     const cfg = json(files['universe.json']);
-    expect(cfg).toMatchObject({ kernel: KERNEL_VERSION, kernels: { from: '0.5' } });
-    expect(checkKernelVersion(cfg.kernel, KERNEL_VERSION, cfg.kernels).ok).toBe(true);
-    // The same files give the same files, and a universe of 0.5 stays as it is.
-    expect(migrateUniverse(universe04()).files).toEqual(files);
-    expect(migrateUniverse(files).applied).toEqual([]);
+    expect(cfg).toMatchObject({ kernel: TO_0_5, kernels: { from: '0.5' } });
+    expect(checkKernelVersion(cfg.kernel, TO_0_5, cfg.kernels).ok).toBe(true);
+    // The same files give the same files, and a universe of 0.5 stays as it is (for the kernel of 0.5; this one ports it on, T342).
+    expect(migrateUniverse(universe04(), TO_0_5).files).toEqual(files);
+    expect(migrateUniverse(files, TO_0_5).applied).toEqual([]);
+    expect(migrateUniverse(files).applied).toHaveLength(1);
   });
 
   it('the manifests: the components they give, their panels\' fields, their cases; the work\'s panel and button', () => {
@@ -172,10 +175,10 @@ describe('the migration 0.4 → 0.5: a universe of 0.4, file by file', () => {
     expect(seed['modules/mio.lume/manifest.json']).toBe('cambiato');
   });
 
-  it('prepareUniverse: the chain, then the seed of 0.5 (its sys.work, its Lua)', () => {
+  it('prepareUniverse: the chain (0.4 → 0.5 → 0.6), then the seed of today (its sys.work, its Lua)', () => {
     const out = prepareUniverse(universe04(), bundledFiles);
-    expect(out.applied).toHaveLength(1);
-    expect(json(out.files['universe.json']).kernels).toEqual({ from: '0.5' });
+    expect(out.applied).toHaveLength(2);
+    expect(json(out.files['universe.json']).kernels).toEqual({ from: '0.6' });
   });
 });
 

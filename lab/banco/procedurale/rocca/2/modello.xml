@@ -1,7 +1,7 @@
 <sequence values="BNExzaPpQbOHtsgcdvefwXiIJhjMSFCWRVDLUuTYGKAknryqloZ" symmetry="(xy)" ground="E" origin="bottom">
-  <union symbol="1" values="bea"/>
-  <union symbol="2" values="tsdcx"/>
-  <union symbol="3" values="tb"/>
+  <union symbol="#1" values="bea"/>
+  <union symbol="#2" values="tsdcx"/>
+  <union symbol="#3" values="tb"/>
   <color symbol="k" value="3b2616" name="portone"/><color symbol="S" value="5f6266" name="pietra scura"/><color symbol="F" value="4a3120" name="legno scuro"/><color symbol="C" value="85888b" name="pietra grigia"/><color symbol="W" value="a0a2a2" name="pietra chiara"/><color symbol="R" value="6f6b63" name="cammino di ronda"/><color symbol="V" value="2c3f4a" alpha="0.5" name="finestra feritoia"/><color symbol="D" value="24262a" name="ferro"/><color symbol="L" value="5c3d24" name="rastrelliera"/><color symbol="T" value="b0aea6" name="gradino"/><color symbol="K" value="77797b" name="pietra della scala"/><color symbol="A" value="8e8a80" name="lastricato"/><color symbol="f" value="8a4f35" name="cotto del corpo di guardia"/><color symbol="n" value="6d2f2c" name="pavimento dell'armeria"/><color symbol="P" value="3f4650" name="ardesia"/><color symbol="Z" value="b4b5b2" name="merli"/><color symbol="r" value="9b8660" name="terra battuta"/><color symbol="l" value="2f6f8f" name="acqua del pozzo"/><color symbol="x" value="ffb347" glow="True" name="lanterna"/>
   <prl in="***/*E*/***" out="***/*z*/***"/>
   <all in="Nz" out="*a" steps="1"/>
@@ -36,11 +36,11 @@
   <one in="*rrrrrrrrrrrr/Ppppppppppppp/*tttttttttttt" out="*************/******H******/*************" steps="1"/>
   <all in="[gsdc]t" out="*v"/>
   <all in="vt" out="*v" steps="9"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
   <all in="bz" out="*b"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
   <all in="bz" out="*b"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*333333333333" out="******b******/******H******/*************" steps="1"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
   <all in="bz" out="*b"/>
   <all in="Hp" out="*H" steps="5"/>
   <prl><rule in="tHb" out="*Ht" p="0.02"/></prl>
@@ -56,7 +56,7 @@
   <all in="xt" out="*x"/>
   <prl><rule in="EEE/EPp/Epz" out="***/***/**E" p="0.5"/></prl>
   <all in="Ez" out="*E"/>
-  <all><rule in="EpE" out="*E*"/><rule in="[zr]p[zr]" out="*q*"/><rule in="Ep[zr]" out="*w*"/><rule in="[zEr]p1" out="*w*"/><rule in="[zEr]p2" out="*X*"/><rule in="1p1" out="*i*"/><rule in="2p2" out="*I*"/><rule in="1p2" out="*J*"/><rule in="1H1" out="*h*"/><rule in="1H2" out="*v*"/><rule in="[rz]H2" out="*j*"/><rule in="EO2" out="*M*"/></all>
+  <all><rule in="EpE" out="*E*"/><rule in="[zr]p[zr]" out="*q*"/><rule in="Ep[zr]" out="*w*"/><rule in="[zEr]p#1" out="*w*"/><rule in="[zEr]p#2" out="*X*"/><rule in="#1p#1" out="*i*"/><rule in="#2p#2" out="*I*"/><rule in="#1p#2" out="*J*"/><rule in="#1H#1" out="*h*"/><rule in="#1H#2" out="*v*"/><rule in="[rz]H#2" out="*j*"/><rule in="EO#2" out="*M*"/></all>
   <prl in="n" out="h"/>
   <all in="*E*/EPE/*E*" out="***/*E*/***"/>
   <all in="EEEEEEEEE/EEEEEEEEE/EEEEEEEEE/EEEEEEEEE/EEEEP****/EEEE*****/EEEE*****/EEEE*****/EEEE*****" out="QQQQQQQQQ/QQQQQQQQQ/QQQQQQQQQ/QQQQQQQQQ/QQQQQ****/QQQQ*****/QQQQ*****/QQQQ*****/QQQQ*****"/>
