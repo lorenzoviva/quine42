@@ -1,0 +1,121 @@
+{
+  "taglie": [
+    {
+      "taglia": "large",
+      "box": [
+        100,
+        100,
+        80
+      ],
+      "vpt": 20,
+      "gradino": 4,
+      "semi": [
+        {
+          "seme": 1,
+          "difetti": [
+            "testa: 1.4 1.4 (serve ≥ 1.5 caselle per piano)"
+          ],
+          "ms": 1039
+        },
+        {
+          "seme": 2,
+          "difetti": [
+            "testa: 1.4 1.4 (serve ≥ 1.5 caselle per piano)"
+          ],
+          "ms": 812
+        },
+        {
+          "seme": 3,
+          "difetti": [
+            "testa: 1.4 1.4 (serve ≥ 1.5 caselle per piano)"
+          ],
+          "ms": 882
+        },
+        {
+          "seme": 4,
+          "difetti": [
+            "testa: 1.4 1.4 (serve ≥ 1.5 caselle per piano)"
+          ],
+          "ms": 979
+        },
+        {
+          "seme": 5,
+          "difetti": [
+            "testa: 1.4 1.4 (serve ≥ 1.5 caselle per piano)"
+          ],
+          "ms": 846
+        }
+      ],
+      "regge": false,
+      "varianza": {
+        "voxel": 0.6758557951366101,
+        "colore": 0.1330986038740884,
+        "pianta": 0.5597694549611278,
+        "perimetro": 0.2125114606958452,
+        "interno": 0.718693740069469,
+        "semi": 5,
+        "firmePiani": 1,
+        "firmeStanze": 3,
+        "architetture": 5,
+        "statico": false
+      },
+      "difettiVarianza": []
+    },
+    {
+      "taglia": "huge",
+      "box": [
+        120,
+        120,
+        96
+      ],
+      "vpt": 16,
+      "gradino": 3,
+      "semi": [
+        {
+          "seme": 1,
+          "difetti": [],
+          "ms": 1070
+        },
+        {
+          "seme": 2,
+          "difetti": [],
+          "ms": 965
+        },
+        {
+          "seme": 3,
+          "difetti": [],
+          "ms": 1039
+        },
+        {
+          "seme": 4,
+          "difetti": [],
+          "ms": 995
+        },
+        {
+          "seme": 5,
+          "difetti": [],
+          "ms": 990
+        }
+      ],
+      "regge": true,
+      "varianza": {
+        "voxel": 0.6540386220364595,
+        "colore": 0.0977672241153753,
+        "pianta": 0.5624904305428392,
+        "perimetro": 0.2863262184016901,
+        "interno": 0.680500234894195,
+        "semi": 5,
+        "firmePiani": 1,
+        "firmeStanze": 2,
+        "architetture": 5,
+        "statico": false
+      },
+      "difettiVarianza": []
+    }
+  ],
+  "regge": false,
+  "statico": false,
+  "varia": true,
+  "passa": false,
+  "ms": 9825
+}

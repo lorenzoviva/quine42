@@ -420,6 +420,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: `tilemap`, `set di tessere`
 - **Fermo**: `<tileset>`, `<tiles>`, `<tile>`, `<neighbors>`, `<neighbor>`, come i tileset di MarkovJunior.
 
+### Tetti del mondo (dei nodi)
+- **Inglese**: `WORLD_NODE_LIMITS`, `worldNodeErrors`, `NodeCeilings`, `ceilings`
+- **Definizione**: ciò che il mondo prende dei nodi di T333-T335, più stretto di ciò che il motore regge: le celle e i byte di un'onda, i motivi, `tries` di una `wfc` e `limit` di una ricerca scritti, i passi di una `convchain`, i file di `models/` letti e gli import uno dentro l'altro, i byte dei potenziali; tutti in unità, non in tempo (ADR-0176). Il validatore, le carte fatte a mano, i controlli dello Scultore e il banco li vogliono; quelli che dipendono dalla griglia li controlla la corsa (`RunOptions.ceilings`), che sotto non cambia niente.
+- **Dove vive**: `src/kernel/validator.ts`, `src/mj/engine.ts`
+- **Da non usare**: `limiti del mondo` (i limiti sono quelli del motore e della griglia, `*_LIMITS`)
+- **Fermo**: niente su disco né sul filo.
+
 ### Campione
 - **Inglese**: `sample`, `overlapModel`, `convchainWeights`
 - **Definizione**: un pattern piano di `models/<nome>.txt` da cui la `wfc` a sovrapposizione (nelle lettere del nodo) e `convchain` (nelle sue due lettere, black e white) imparano quali finestre N×N possono stare insieme e quanto spesso (ADR-0174). Al posto dell'immagine PNG dell'originale.
@@ -449,8 +456,8 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Fermo**: l'attributo `folder` dell'XML di MarkovJunior.
 
 ### Nodo guidato
-- **Inglese**: `GuidedRunner`, `inferenceIn`, `newNodesRefusal`
-- **Definizione**: un nodo di regole con almeno un campo di potenziale o un'osservazione: vede una corrispondenza dovunque il suo ingresso combacia, anche se non cambierebbe niente, e sceglie con l'euristica; ogni altro nodo resta quello di sempre. Il validatore del gioco non lo prende finché T336 non lo apre (ADR-0173; dal T335 lo dice `newNodesRefusal`, che rifiuta anche `wfc` e `convchain`).
+- **Inglese**: `GuidedRunner`, `inferenceIn`, `newNodesIn`
+- **Definizione**: un nodo di regole con almeno un campo di potenziale o un'osservazione: vede una corrispondenza dovunque il suo ingresso combacia, anche se non cambierebbe niente, e sceglie con l'euristica; ogni altro nodo resta quello di sempre. Il mondo lo prende dal T336 entro i suoi tetti (ADR-0173, ADR-0176: `worldNodeErrors`).
 - **Dove vive**: `src/mj/engine.ts`, `src/mj/model.ts`, `src/kernel/validator.ts`
 - **Da non usare**: nessuno
 

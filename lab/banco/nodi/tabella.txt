@@ -1,0 +1,24 @@
+
+| modello | nodi | file (caratteri) | celle dell'onda | MB dell'onda | ms per seme | nel mondo |
+|---|---|---|---|---|---|---|
+| Keys | field | 0 (0) | — | — | 109 / 43 / 36 | ammesso |
+| SoftPath | field | 0 (0) | — | — | 287 / 247 / 243 | ammesso |
+| StairsPath | observe | 5 (1653) | — | — | 836 / 729 / 709 | ammesso |
+| Dwarves | field | 0 (0) | — | — | 2 / 2 / 2 | ammesso |
+| Division | field | 0 (0) | — | — | 25 / 24 / 18 | ammesso |
+| RegularPath | observe | 0 (0) | — | — | 27 / 25 / 25 | ammesso |
+| GrowTo | field | 0 (0) | — | — | 94 / 108 / 121 (non finisce) | ammesso |
+| CompleteSAW | observe | 0 (0) | — | — | 379 / 660 / 832 | ammesso |
+| Surface | wfc | 1 (2986) | 1000 | 1.6 | 64 / 21 / 20 | wfc nel mondo vuole tries da 1 a 100 (scritto: senza, sono 1000) |
+| Escher | wfc | 1 (4922) | 512 | 0.9 | 61 / 239 / 63 | wfc nel mondo vuole tries da 1 a 100 (scritto: senza, sono 1000) |
+| EscherSurface | wfc | 1 (4146) | 512 | 0.5 | 156 / 56 / 30 | wfc nel mondo vuole tries da 1 a 100 (scritto: senza, sono 1000) |
+| OrientedEscher | wfc | 1 (4667) | 216 | 0.4 | 469 / 160 / 390 | wfc nel mondo vuole tries da 1 a 100 (scritto: senza, sono 1000) |
+| PeriodicEscher | wfc | 1 (4922) | 512 | 0.9 | 1698 / 3549 / 655 | wfc nel mondo vuole tries da 1 a 100 (scritto: senza, sono 1000) |
+| PillarsOfEternity | wfc | 1 (5194) | 729 | 0.6 | 689 / 287 / 195 | wfc nel mondo vuole tries da 1 a 100 (scritto: senza, sono 1000) |
+| Apartemazements | wfc | 1 (4769) | 512 | 0.3 | 64 / 47 / 34 | wfc nel mondo vuole tries da 1 a 100 (scritto: senza, sono 1000) |
+| Partitioning | wfc | 1 (1176) | 363 | 0.1 | 3 / 1 / 1 | wfc nel mondo vuole tries da 1 a 100 (scritto: senza, sono 1000) |
+| ModernHouse | wfc | 33 (18461) | 1156 | 1.8 | 418 / 414 / 423 | wfc nel mondo vuole tries da 1 a 100 (scritto: senza, sono 1000) |
+| SeaVilla | field, wfc | 43 (17851) | 400 | 0.2 | 623 / 705 / 672 | wfc nel mondo vuole tries da 1 a 100 (scritto: senza, sono 1000) |
+| ChainDungeon | convchain | 1 (325) | — | — | 71 / 63 / 63 | ammesso |
+| ChainDungeonMaze | convchain | 1 (217) | — | — | 34 / 38 / 37 | ammesso |
+| WaveDungeon | wfc | 1 (485) | 2500 | 5.2 | 53 / 51 / 52 | wfc nel mondo vuole tries da 1 a 100 (scritto: senza, sono 1000) |

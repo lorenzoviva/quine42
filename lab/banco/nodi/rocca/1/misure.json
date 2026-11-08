@@ -1,0 +1,193 @@
+{
+  "bersaglio": "rocca",
+  "caratteriXml": 9729,
+  "passa": false,
+  "difetti": [
+    "huge (16 voxel per casella, gradino 3), seme 3 e altri 1: salti: 0 (serve ≥ 2)",
+    "gargantuan (12 voxel per casella, gradino 2), seme 3 e altri 1: salti: 1 (serve ≥ 2)"
+  ],
+  "caduta": {
+    "taglia": "huge",
+    "seme": 3
+  },
+  "voci": [
+    {
+      "id": "finisce",
+      "ok": true,
+      "valore": "872 ms",
+      "richiesto": "entro 8000 ms"
+    },
+    {
+      "id": "valido",
+      "ok": true,
+      "valore": "sì",
+      "richiesto": "i controlli di check.ts"
+    },
+    {
+      "id": "piani",
+      "ok": true,
+      "valore": "2",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "testa",
+      "ok": true,
+      "valore": "1.88 1.88",
+      "richiesto": "≥ 1.5 caselle per piano"
+    },
+    {
+      "id": "stanze",
+      "ok": true,
+      "valore": "6",
+      "richiesto": "≥ 3"
+    },
+    {
+      "id": "murato",
+      "ok": true,
+      "valore": "0",
+      "richiesto": "≤ 0.25"
+    },
+    {
+      "id": "porta",
+      "ok": true,
+      "valore": "x 59, scarto 0, alta 1.88, libera",
+      "richiesto": "sul davanti, scarto ≤ 0.33, alta ≥ 1.5"
+    },
+    {
+      "id": "salti",
+      "ok": true,
+      "valore": "2",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "materiali",
+      "ok": true,
+      "valore": "10",
+      "richiesto": "≥ 6"
+    },
+    {
+      "id": "dominante",
+      "ok": true,
+      "valore": "0.35",
+      "richiesto": "≤ 0.6"
+    },
+    {
+      "id": "finestre",
+      "ok": true,
+      "valore": "33 su 4 lati",
+      "richiesto": "≥ 6 su ≥ 3 lati"
+    },
+    {
+      "id": "dettagli",
+      "ok": true,
+      "valore": "128, 0 lati vuoti",
+      "richiesto": "≥ 24, ≤ 1 lati vuoti"
+    },
+    {
+      "id": "rumore",
+      "ok": true,
+      "valore": "0.09",
+      "richiesto": "≤ 0.7"
+    },
+    {
+      "id": "sagoma",
+      "ok": true,
+      "valore": "5",
+      "richiesto": "≥ 4"
+    },
+    {
+      "id": "rilievo",
+      "ok": true,
+      "valore": "0.45",
+      "richiesto": "≥ 0.12"
+    },
+    {
+      "id": "ingombro",
+      "ok": true,
+      "valore": "0.35",
+      "richiesto": "≥ 0.3"
+    }
+  ],
+  "misure": {
+    "voxel": 65427,
+    "ms": 872,
+    "finito": true,
+    "piani": [
+      {
+        "z": 2,
+        "quota": 0.125,
+        "area": 6.71484375,
+        "testa": 1.875,
+        "stanze": 3
+      },
+      {
+        "z": 34,
+        "quota": 2.125,
+        "area": 6.546875,
+        "testa": 1.875,
+        "stanze": 3
+      }
+    ],
+    "cantina": 0,
+    "terrazze": 0,
+    "stanze": 6,
+    "murato": 0,
+    "persi": [],
+    "porta": {
+      "x": 59,
+      "y": 105,
+      "scarto": 0.03125,
+      "alta": 1.875,
+      "libera": true
+    },
+    "salti": [
+      {
+        "x": 27,
+        "y": 21,
+        "z": 2,
+        "sale": false
+      },
+      {
+        "x": 43,
+        "y": 21,
+        "z": 2,
+        "sale": false
+      }
+    ],
+    "materiali": 10,
+    "dominante": 0.35246916410656154,
+    "finestre": 33,
+    "latiConFinestre": 4,
+    "dettagli": 128,
+    "latiVuoti": 0,
+    "rumore": 0.09219858156028368,
+    "rilievo": 0.44708563985672417,
+    "sagoma": 5,
+    "ingombro": 0.34673611111111113,
+    "luci": 0,
+    "inutili": [
+      "one \"bHb\" → \"*n*\" — in quel momento nella griglia non c'erano celle \"b\"",
+      "all \"nH\" → \"*n\" (e altre 1 regole) — in quel momento nella griglia non c'erano celle \"n\"",
+      "one \"nnnnnnnnn\" → \"*eeeeeee*\" — in quel momento nella griglia non c'erano celle \"n\"",
+      "prl \"n\" → \"h\" — in quel momento nella griglia non c'erano celle \"n\"",
+      "prl \"r\" → \"m\" — in quel momento nella griglia non c'erano celle \"r\"",
+      "all \"G .\" → \"L G\" — in quel momento nella griglia non c'erano celle \"G\""
+    ],
+    "avvisi": [
+      "tocca i bordi laterali della griglia: forse è tagliato",
+      "colori mai usati: N E x z a P p Q b O H t s g c d v e f w X i I J h j M L U u Y G n r y q l m o"
+    ],
+    "errori": []
+  },
+  "token": {
+    "input": 17475,
+    "cacheScritta": 0,
+    "cacheLetta": 0,
+    "output": 86912,
+    "inputTotale": 17475,
+    "pensiero": 41401
+  },
+  "modello": "gemini-3.8-flash-high",
+  "dollari": 0.33902625,
+  "ms": 308319
+}

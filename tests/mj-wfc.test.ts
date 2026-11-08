@@ -255,13 +255,15 @@ describe('determinismo e tetti', () => {
     expect(s.solve(new Rng(1), 10, 100, () => 101).late).toBe(true);
   });
 
-  it('il mondo non li prende ancora: il validatore dice quali', () => {
+  it('il mondo li prende dal T336 entro i suoi tetti: il validatore dice quale manca', () => {
     const files = { 'dama.xml': DAMA };
-    const xml = '<sequence values="BW" size="3 3 2"><all in="B" out="W"/><wfc values="BAC" tileset="dama"/></sequence>';
-    expect(newNodesIn(compileMjx(xml, { files }))).toEqual(['wfc']);
-    expect(modelErrors('models/x.xml', xml, 8_000, undefined, files).join()).toMatch(/<wfc> non è ancora ammesso/);
-    const chain = '<sequence values="BAD" size="4 4 1"><convchain sample="c" on="B" black="D" white="A" steps="2"/></sequence>';
-    expect(modelErrors('models/x.xml', chain, 8_000, undefined, { 'c.txt': 'AD/DA' }).join()).toMatch(/<convchain> non è ancora ammesso/);
+    const xml = (tries: string) => `<sequence values="BW" size="3 3 2"><all in="B" out="W"/><wfc values="BAC" tileset="dama"${tries}/></sequence>`;
+    expect(newNodesIn(compileMjx(xml(''), { files }))).toEqual(['wfc']);
+    expect(modelErrors('models/x.xml', xml(''), 8_000, undefined, files).join()).toMatch(/wfc nel mondo vuole tries da 1 a 100/);
+    expect(modelErrors('models/x.xml', xml(' tries="10"'), 8_000, undefined, files).join()).not.toMatch(/tries|ammess/);
+    const chain = (steps: string) => `<sequence values="BAD" size="4 4 1"><convchain sample="c" on="B" black="D" white="A"${steps}/></sequence>`;
+    expect(modelErrors('models/x.xml', chain(''), 8_000, undefined, { 'c.txt': 'AD/DA' }).join()).toMatch(/convchain nel mondo vuole steps/);
+    expect(modelErrors('models/x.xml', chain(' steps="2"'), 8_000, undefined, { 'c.txt': 'AD/DA' }).join()).not.toMatch(/convchain|ammess/);
   });
 
   it('la traccia dice cosa ha fatto la wfc', () => {

@@ -1,0 +1,6 @@
+Edificio: Torre futuristica
+Stile: futuristico: metallo bianco, vetro scuro, luci al neon
+Com'è: Torre con anelli sporgenti e fasce di neon, ingresso con un portale luminoso, sala d’accoglienza e laboratorio al piano terra, una rampa che gira attorno a un nucleo centrale, una sala di comando in alto con le vetrate, una piattaforma esterna.
+Scatola: 100 × 100 × 80 voxel; una casella è 20 voxel.
+Corpo: gradino 4 voxel, passaggio largo almeno 11, persona alta 30; salto: sale al più 21, va da 20 a 52 voxel di distanza.
+Il suolo è in fondo alla scatola.

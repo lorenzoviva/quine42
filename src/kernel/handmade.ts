@@ -13,7 +13,7 @@ import { classSeeds, rootTag } from './forms';
 import { metaBreak } from './fourthwall';
 import { portedProgram } from './migrations';
 import { fingerprint, HANDMADE_ID_RE, readOrigins, type CardOrigin } from './heritage';
-import { newNodesRefusal, soundErrors } from './validator';
+import { soundErrors, WORLD_NODE_LIMITS, worldNodeErrors } from './validator';
 import { contractOf, parseContract, parseVersion, showContract, KERNEL_VERSION } from './version';
 import { validWandererId } from './wanderers';
 
@@ -183,8 +183,8 @@ export function handmadeProgramErrors(q: HandmadeProgram, limits: HandmadeLimits
     if (q.kind === 'sound') {
       const m = compileMjx(q.xml, {});
       if (!m.sound) return ['manca <sound>: questo programma è un modello, salvalo come modello'];
-      const infers = newNodesRefusal(m);
-      if (infers) return [infers];
+      const nodes = worldNodeErrors(m, q.xml);
+      if (nodes.length) return nodes;
       const errors = soundErrors('programma', m, left(limits.soundMs));
       return now() > end ? [slow] : errors;
     }
@@ -193,14 +193,15 @@ export function handmadeProgramErrors(q: HandmadeProgram, limits: HandmadeLimits
     const box = /\ssize="/.test(rootTag(q.xml)) ? undefined : boxOf(cls, q.size);
     const m = compileMjx(q.xml, box ? { size: box } : {});
     if (m.sound) return ['questo programma è un suono (<sound>): salvalo come suono'];
-    const infers = newNodesRefusal(m);
-    if (infers) return [infers];
+    // The nodes of T333-T335 within the world's ceilings (T336, ADR-0176): a card reads no files, so no wfc, convchain or import.
+    const nodes = worldNodeErrors(m, q.xml);
+    if (nodes.length) return nodes;
     if (m.actions.length > limits.actions) return [`troppe azioni: ${m.actions.length}, al più ${limits.actions}`];
     if (m.animations.length > limits.animations) return [`troppe animazioni: ${m.animations.length}, al più ${limits.animations}`];
     let first: Grid3 | undefined;
     for (let seed = 1; seed <= classSeeds(cls.id); seed++) {
       if (now() >= end) return [slow];
-      const r = run(m.program, seed, limits.steps, limits.grid, { deadline: left(limits.runMs) });
+      const r = run(m.program, seed, limits.steps, limits.grid, { deadline: left(limits.runMs), ceilings: WORLD_NODE_LIMITS });
       if (!r.finished) return [`il seme ${seed} non finisce entro ${limits.steps} passi e ${limits.runMs / 1000} s (ogni crescita deve avere steps)`];
       const errors = analyse(r, m.program.palette, { grounded: true }).errors;
       if (errors.length) return errors.map((e) => `seme ${seed}: ${e}`);
@@ -208,7 +209,7 @@ export function handmadeProgramErrors(q: HandmadeProgram, limits: HandmadeLimits
     }
     for (const clip of m.actions) {
       if (now() >= end) return [slow];
-      const r = runOn(copyGrid(first!), clip.program, 1, limits.clipSteps, limits.grid, { deadline: left(limits.clipMs) });
+      const r = runOn(copyGrid(first!), clip.program, 1, limits.clipSteps, limits.grid, { deadline: left(limits.clipMs), ceilings: WORLD_NODE_LIMITS });
       if (!r.finished) return [`l'azione «${clip.name}» non finisce entro ${limits.clipSteps} passi e ${limits.clipMs / 1000} s`];
     }
     for (const clip of m.animations) {
@@ -217,7 +218,7 @@ export function handmadeProgramErrors(q: HandmadeProgram, limits: HandmadeLimits
       for (let k = 1; k < clip.frames; k++) {
         if (now() >= end) return [slow];
         const next = copyGrid(g);
-        const r = runOn(next, clip.program, 31 + k, limits.clipSteps, limits.grid, { deadline: left(limits.clipMs) });
+        const r = runOn(next, clip.program, 31 + k, limits.clipSteps, limits.grid, { deadline: left(limits.clipMs), ceilings: WORLD_NODE_LIMITS });
         if (!r.finished) return [`l'animazione «${clip.name}» non finisce al fotogramma ${k + 1} entro ${limits.clipSteps} passi e ${limits.clipMs / 1000} s`];
         g = next;
       }

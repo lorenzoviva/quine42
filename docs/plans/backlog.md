@@ -5026,7 +5026,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì, le foto del banco.
 - Quando è fatto: commit su `task/T338`, rapporto in `lab/banco/` con le foto; kernel sale di Z se cambiano i controlli.
 
-### T343 · Integrare T336 nel base (conflitto con T337 in `lab/banco/misure.ts`) — `da fare`
+### T343 · Integrare T336 nel base (conflitto con T337 in `lab/banco/misure.ts`) — `fatto` (`ed2536c7`)
 - Pipeline: claude · sforzo high · stima 2% · approvato · priorità 1
 - Step: 30
 - Contesto: `integra T336` ha trovato un conflitto in `lab/banco/misure.ts` con T337, integrato poco prima (`0a23fae5`, misura tra concetti e semi, metodo a zone). Nasce da T336: `dossier T336`, `dossier T337`.
@@ -5034,6 +5034,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: suite intera (T336 non l'aveva rilanciata dopo la correzione del glossario; il fallimento noto di `tests/determinism.test.ts` sotto carico si riprova da solo), typecheck, build.
 - Browser: no (T336 e T337 già verificati).
 - Quando è fatto: commit su `task/T343`; poi l'orchestratore integra T343 e `integra T336` toglie worktree e branch di T336.
+- Esito: T336 integrato dopo T337: conflitto solo in `lab/banco/misure.ts`, tenuti i tetti del mondo di T336 e il commento di T337 sulla porta `open` (una riga sola); ADR-0176 e kernel 0.6.1 ancora liberi, niente da rinumerare; suite intera 2930 passati e 1 saltato, typecheck e build verdi; browser non richiesto; sicurezza: nessuna superficie nuova (solo il merge).
 
 ### T341 · Integrare T340 nel base (ADR e kernel presi da T296) — `fatto` (`6909ea52`)
 - Pipeline: claude · sforzo high · stima 2% · approvato · priorità 1
