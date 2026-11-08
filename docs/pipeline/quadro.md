@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 08/11/2026, epoca 338 (claude). Crediti: vedi `stato`.
+Aggiornato il 08/11/2026, epoca 339 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -23,7 +23,7 @@ Aggiornato il 08/11/2026, epoca 338 (claude). Crediti: vedi `stato`.
 
 0. **Decisioni autore 04/11:** D32 SemVer `X.Y.Z`. Step 32: T260, T262 → T245a → T263/T245b → T245c-f. T265 prima della beta.
 1. T324 (immagini Jev: utile come filtro dei difetti visivi, non per il giudizio dell'Artista) integrato via T329.
-2. **Nodi MJ:** T333 integrato (ADR-0171, kernel 0.5.7; lo Scultore non lo conosce ancora); **T334 integrato via T340/T341** (field/temperature/observe/search, ADR-0173, kernel 0.5.9). **T335 integrato** (ADR-0174, kernel 0.5.10). **T342 integrato** (simboli `#<numero>`, ADR-0175, contratto 0.6, kernel 0.6.0) → **T336 fatto** (validatore accetta i nodi nuovi entro `WORLD_NODE_LIMITS`, ADR-0176, kernel 0.6.1; corretto «piani: 0» delle strutture procedurali): conflitto con T337 in `lab/banco/misure.ts` → **T343** lo integra. **T339 fatto** (nodo `<pieces>`, griglie grandi a pezzi, kernel 0.6.2; verificato nel browser): conflitti con T336 → **T344** lo integra (ADR → 0178, `worldNodeErrors` nei figli di `pieces`). **T331 integrato** (studio GPU, `docs/design/gpu.md`: WebGPU non ora; 4 task proposti da approvare: mesh senza allocazioni, corona solo quando serve, scatti all’arrivo, rimisurare). **T337 integrato** (scheletro copiato 78-92 %, metodo a zone; D48). **Pronti:** T344 (in corso). Da approvare: T310b. Bloccati: T338.
+2. **Nodi MJ:** T333 integrato (ADR-0171, kernel 0.5.7; lo Scultore non lo conosce ancora); **T334 integrato via T340/T341** (field/temperature/observe/search, ADR-0173, kernel 0.5.9). **T335 integrato** (ADR-0174, kernel 0.5.10). **T342 integrato** (simboli `#<numero>`, ADR-0175, contratto 0.6, kernel 0.6.0) → **T336 integrato via T343** (validatore accetta i nodi nuovi entro `WORLD_NODE_LIMITS`, ADR-0176, kernel 0.6.1; corretto «piani: 0» delle strutture procedurali). **T339 integrato via T344** (nodo `<pieces>`, griglie grandi a pezzi, kernel 0.6.2, ADR-0178; `worldNodeErrors` anche nei figli di `pieces`). **T331 integrato** (studio GPU, `docs/design/gpu.md`: WebGPU non ora; 4 task proposti da approvare: mesh senza allocazioni, corona solo quando serve, scatti all’arrivo, rimisurare). **T337 integrato** (scheletro copiato 78-92 %, metodo a zone; D48). **Pronti:** T338 (strutture per taglia). Da approvare: T310b.
 3. **Crediti (10:12 UTC 08/11):** Claude 5h 53 % (reset 14:00 UTC), settimana 12 % (reset 12/11 16:00); Gemini 96-99 %, agy 100 %; Argon fermo fino all'11/11.
 
 ## Attese dall'autore
@@ -38,5 +38,5 @@ Aggiornato il 08/11/2026, epoca 338 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **339 (claude):** T344 e T339 integrati; T338 pronto.
 - **338 (claude):** T339 finito; `integra` in conflitto con T336 → T344 lanciato. T88 integrato (generatore sui crediti avanzati, ADR-0177).
-- **337 (claude):** T336 integrato via T343 (conflitto con T337 risolto).
