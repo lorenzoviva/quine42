@@ -897,6 +897,7 @@ Il kernel è in console come `window.quine` (o `window.rune`) in singola e per i
 - Testo per mondo: Genesi ~60 chiamate; poi 1 per luogo, 1-2 per individuo, ~4 per pacchetto di oggetti.
 - Niente immagini (step 9): il costo dell'aspetto è testo, un programma per tipo (vedi il report 8.2B, sezione 4).
 - Tick ≈ 5 ms in Node con ~100 entità (`sys.wander` il più costoso); budget di istruzioni Lua ~1.5×.
+- **Dove va il tempo** (T331, [`docs/design/gpu.md`](design/gpu.md)): nel browser il frame sta in 5-8 ms su 16,7 (tick 2,6-3,5 ms, di cui Lua il 60 %; disegno 2,3-3,9 ms; GPU 2-4 ms su una RTX 2070), l'acqua non costa; nei worker l'83 % del tempo di un modello è la mesh (`meshVoxels`), non il programma, e gli edifici della corona sono i lavori più lunghi del caricamento. MarkovJunior su WebGPU non conviene ora. Si rimisura con `lab/scripts/misura-frame.mjs` e `lab/scripts/misura-mj.ts`.
 - Lezione ricorrente: i modelli non contano caratteri né caselle. Il kernel ripara le forme (griglie,
   regole dei programmi, nomi nelle ricette) e posiziona le cose; si scarta solo ciò che non si capisce.
 
