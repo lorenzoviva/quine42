@@ -619,7 +619,7 @@ export function runForm(q: FormRequest): FormResult & { model: ReturnType<typeof
   if (q.xml.length > MAX_FORM_XML) throw new Mj3Error(`programma troppo lungo (max ${MAX_FORM_XML} caratteri)`);
   const m = compileMjx(q.xml, { ...(q.size ? { size: q.size } : {}), ...(q.base ? { base: q.base } : {}), ...(q.files ? { files: q.files, ...(q.model ? { self: q.model } : {}) } : {}) });
   if (q.tint && m.program.palette[q.tint.symbol]) m.program.palette[q.tint.symbol] = { ...m.program.palette[q.tint.symbol], color: q.tint.color };
-  // A program with pieces may be larger, and its pieces have their own time besides the model's (T339, ADR-0176).
+  // A program with pieces may be larger, and its pieces have their own time besides the model's (T339, ADR-0177).
   const r = runMjx(m, q.seed, { deadline: Math.min(q.tempo ?? MODEL_TIME, MAX_FORM_TIME), limits: FORM_RUN_LIMITS });
   const g = r.grid;
   return {

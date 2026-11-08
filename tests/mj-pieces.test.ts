@@ -1,4 +1,4 @@
-// The grid in pieces (T339, ADR-0176): a program decides on a plan what the whole model must agree on, a map brings it to the
+// The grid in pieces (T339, ADR-0177): a program decides on a plan what the whole model must agree on, a map brings it to the
 // voxels, and `<pieces>` runs the detail one piece at a time. What must hold: the parts fit at the borders, the run is the same at
 // every seed, a piece has its own time, and nothing of a piece goes where it may not.
 

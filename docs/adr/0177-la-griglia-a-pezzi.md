@@ -1,4 +1,4 @@
-# ADR-0176 — La griglia a pezzi: modelli grandi a parti coerenti
+# ADR-0177 — La griglia a pezzi: modelli grandi a parti coerenti
 
 Data: 2026-11-08 · Stato: accettato (task T339 del backlog, step 30) · Riferimenti: l'autore in chat (07/11, epoca 328,
 [`docs/userchats/to-do-2026-11-07.md`](../userchats/to-do-2026-11-07.md)), ADR-0032…0036 (le strutture a blocchi e perché sono state

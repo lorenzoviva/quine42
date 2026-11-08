@@ -13,7 +13,7 @@ export const MJX_LIMITS: GridLimits = { side: 512, cells: 24_000_000 };
  */
 export const FORM_LIMITS: GridLimits = { side: 512, cells: 8_000_000 };
 /**
- * What a model of the game may be when it runs its detail in pieces (T339, ADR-0176), only where the game makes its forms (`runForm`):
+ * What a model of the game may be when it runs its detail in pieces (T339, ADR-0177), only where the game makes its forms (`runForm`):
  * a larger grid (a farm of 50 x 50 tiles at 10 voxels a tile is 12.5 million cells), each piece within its time, all of them within
  * theirs, outside the model's own time. The validator does not give it: a program it checks runs within `FORM_LIMITS` and its time.
  */
