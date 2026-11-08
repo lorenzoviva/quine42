@@ -1019,8 +1019,8 @@ function pad(a: string, b: string): [string, string] {
 const hasMap = (el: XmlElement): boolean => GRID_TAGS.has(el.name) || el.children.some(hasMap);
 
 /**
- * What a program infers: `field` and `observe` in its rule nodes, its animations and its actions (T334). The engine runs them; the
- * game's validator and the handmade cards take them only when T336 gives them their ceilings.
+ * What a program infers: `field` and `observe` in its rule nodes, its animations and its actions (T334); the world takes them within
+ * its ceilings (`worldNodeErrors`, T336).
  */
 export function inferenceIn(m: Pick<MjxModel, 'program'> & Partial<Pick<MjxModel, 'animations' | 'actions'>>): string[] {
   const found = new Set<string>();
@@ -1037,8 +1037,8 @@ export function inferenceIn(m: Pick<MjxModel, 'program'> & Partial<Pick<MjxModel
 }
 
 /**
- * What a program uses that the world does not take yet (T335): `field` and `observe` (T334), `wfc` and `convchain`, in its nodes, its
- * animations and its actions. The engine runs them; the game's validator and the handmade cards take them when T336 opens them.
+ * The nodes of T334-T335 a program uses: `field` and `observe`, `wfc` and `convchain`, in its nodes, its animations and its actions.
+ * The world takes them within its ceilings (`WORLD_NODE_LIMITS`, T336, ADR-0176).
  */
 export function newNodesIn(m: Pick<MjxModel, 'program'> & Partial<Pick<MjxModel, 'animations' | 'actions'>>): string[] {
   const found = new Set<string>(inferenceIn(m));

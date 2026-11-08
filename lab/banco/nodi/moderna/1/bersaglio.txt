@@ -1,0 +1,6 @@
+Edificio: Villa moderna
+Stile: moderno, cemento chiaro, legno e grandi vetrate
+Com'è: Volumi squadrati sfalsati, tetto piano con una terrazza su cui si sale, una parete di vetro su un lato, soggiorno e cucina al piano terra, camere sopra, una scala a vista, pensilina sopra la porta.
+Scatola: 100 × 100 × 80 voxel; una casella è 20 voxel.
+Corpo: gradino 4 voxel, passaggio largo almeno 11, persona alta 30; salto: sale al più 21, va da 20 a 52 voxel di distanza.
+Il suolo è in fondo alla scatola.

@@ -1,0 +1,210 @@
+{
+  "bersaglio": "pagoda",
+  "caratteriXml": 10602,
+  "passa": false,
+  "difetti": [
+    "large (20 voxel per casella, gradino 4), seme 1 e altri 4: piani: 1 (serve ≥ 2)",
+    "large (20 voxel per casella, gradino 4), seme 1 e altri 4: testa: 1.1 (serve ≥ 1.5 caselle per piano)",
+    "large (20 voxel per casella, gradino 4), seme 1 e altri 4: murato: 0.57 (serve ≤ 0.25)",
+    "large (20 voxel per casella, gradino 4), seme 1 e altri 4: porta: x 49, scarto 0.01, alta 1.1, libera (serve sul davanti, scarto ≤ 0.33, alta ≥ 1.5)",
+    "large (20 voxel per casella, gradino 4), seme 2: salti: 1 (serve ≥ 2)",
+    "huge (16 voxel per casella, gradino 3), seme 1 e altri 4: piani: 1 (serve ≥ 2)",
+    "huge (16 voxel per casella, gradino 3), seme 1 e altri 4: testa: 1.38 (serve ≥ 1.5 caselle per piano)",
+    "huge (16 voxel per casella, gradino 3), seme 1 e altri 4: murato: 0.77 (serve ≤ 0.25)",
+    "huge (16 voxel per casella, gradino 3), seme 1 e altri 4: porta: x 59, scarto 0, alta 1.38, libera (serve sul davanti, scarto ≤ 0.33, alta ≥ 1.5)"
+  ],
+  "caduta": {
+    "taglia": "large",
+    "seme": 1
+  },
+  "voci": [
+    {
+      "id": "finisce",
+      "ok": true,
+      "valore": "728 ms",
+      "richiesto": "entro 8000 ms"
+    },
+    {
+      "id": "valido",
+      "ok": true,
+      "valore": "sì",
+      "richiesto": "i controlli di check.ts"
+    },
+    {
+      "id": "piani",
+      "ok": false,
+      "valore": "1",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "testa",
+      "ok": false,
+      "valore": "1.1",
+      "richiesto": "≥ 1.5 caselle per piano"
+    },
+    {
+      "id": "stanze",
+      "ok": true,
+      "valore": "3",
+      "richiesto": "≥ 3"
+    },
+    {
+      "id": "murato",
+      "ok": false,
+      "valore": "0.57",
+      "richiesto": "≤ 0.25"
+    },
+    {
+      "id": "porta",
+      "ok": false,
+      "valore": "x 49, scarto 0.01, alta 1.1, libera",
+      "richiesto": "sul davanti, scarto ≤ 0.33, alta ≥ 1.5"
+    },
+    {
+      "id": "salti",
+      "ok": true,
+      "valore": "4",
+      "richiesto": "≥ 2"
+    },
+    {
+      "id": "materiali",
+      "ok": true,
+      "valore": "10",
+      "richiesto": "≥ 6"
+    },
+    {
+      "id": "dominante",
+      "ok": true,
+      "valore": "0.27",
+      "richiesto": "≤ 0.6"
+    },
+    {
+      "id": "finestre",
+      "ok": true,
+      "valore": "37 su 4 lati",
+      "richiesto": "≥ 6 su ≥ 3 lati"
+    },
+    {
+      "id": "dettagli",
+      "ok": true,
+      "valore": "208, 0 lati vuoti",
+      "richiesto": "≥ 24, ≤ 1 lati vuoti"
+    },
+    {
+      "id": "rumore",
+      "ok": true,
+      "valore": "0.13",
+      "richiesto": "≤ 0.7"
+    },
+    {
+      "id": "sagoma",
+      "ok": true,
+      "valore": "14",
+      "richiesto": "≥ 4"
+    },
+    {
+      "id": "rilievo",
+      "ok": true,
+      "valore": "0.34",
+      "richiesto": "≥ 0.12"
+    },
+    {
+      "id": "ingombro",
+      "ok": true,
+      "valore": "0.49",
+      "richiesto": "≥ 0.3"
+    }
+  ],
+  "misure": {
+    "voxel": 63941,
+    "ms": 728,
+    "finito": true,
+    "piani": [
+      {
+        "z": 2,
+        "quota": 0.1,
+        "area": 5.7575,
+        "testa": 1.1,
+        "stanze": 3
+      }
+    ],
+    "cantina": 0,
+    "terrazze": 0,
+    "stanze": 3,
+    "murato": 0.5735996526270083,
+    "persi": [
+      {
+        "z": 26,
+        "x0": 40,
+        "x1": 90,
+        "y0": 40,
+        "y1": 90,
+        "area": 3.3025
+      }
+    ],
+    "porta": {
+      "x": 49,
+      "y": 95,
+      "scarto": 0.025,
+      "alta": 1.1,
+      "libera": true
+    },
+    "salti": [
+      {
+        "x": 19,
+        "y": 18,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 27,
+        "y": 50,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 12,
+        "y": 92,
+        "z": 0,
+        "sale": false
+      },
+      {
+        "x": 12,
+        "y": 70,
+        "z": 0,
+        "sale": false
+      }
+    ],
+    "materiali": 10,
+    "dominante": 0.2691387372734239,
+    "finestre": 37,
+    "latiConFinestre": 4,
+    "dettagli": 208,
+    "latiVuoti": 0,
+    "rumore": 0.1297071129707113,
+    "rilievo": 0.33574451333530164,
+    "sagoma": 14,
+    "ingombro": 0.4884,
+    "luci": 6386,
+    "inutili": [
+      "all \"../.R ../..\" → \"**/*R **/**\" — le celle cercate c'erano, ma mai disposte come nel pattern"
+    ],
+    "avvisi": [
+      "5 frammenti staccati (1% dei voxel)",
+      "tocca i bordi laterali della griglia: forse è tagliato",
+      "colori mai usati: N E x z a P p Q b O H t s g c d v e f w X i I J h j M U u Y G n r y q l"
+    ],
+    "errori": []
+  },
+  "token": {
+    "input": 17486,
+    "cacheScritta": 0,
+    "cacheLetta": 0,
+    "output": 98330,
+    "inputTotale": 17486,
+    "pensiero": 47010
+  },
+  "modello": "gemini-3.8-flash-high",
+  "dollari": 0.381852,
+  "ms": 353515
+}

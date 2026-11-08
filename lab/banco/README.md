@@ -33,7 +33,7 @@ stessi argomenti e la stessa conferma di isolamento della coda degli abbonamenti
 sostituisce quello di Claude Code: il prompt è `prompt.md`, il messaggio è il bersaglio (`testoBersaglio`).
 
 **Le misure** (`misure.ts`) girano con il codice del gioco, sulla scatola della classe (`withSize`, `modelSize`, `Forms.request`, `FORM_LIMITS`, `MODEL_TIME`). Se il modello ha un'azione
-`apr…` la porta si misura aperta. Un corpo largo come il viandante (`BODY_R`) parte dal davanti e cammina a passi di un voxel con `rampBlocks` e `levelAt`, come `Kernel.free` e `floorAt`:
+`open` (`apr…` prima del contratto 0.5) la porta si misura aperta. Un corpo largo come il viandante (`BODY_R`) parte dal davanti e cammina a passi di un voxel con `rampBlocks` e `levelAt`, come `Kernel.free` e `floorAt`:
 una scala larga un voxel, che `bodyGround` conta perché ragiona per colonne, per lui non c'è (`tests`: `scala-stretta.xml`). I salti rifanno `Kernel.jump` con `topUnder`. Le foto non fanno la trasparenza: un vetro con `alpha` vi appare pieno nel suo colore (nel gioco no, `meshVoxels`).
 
 ## La soglia
@@ -93,6 +93,14 @@ Il contrario dei modelli di `finale/` e `conferma/`: `pattern.md` dice con quali
 ## Su Gemini (T156)
 
 `--provider agy [--modello gemini-3.8-flash-high]` fa la stessa prova su Gemini con `agy -p` (`agy.ts`): da una cartella vuota, nella sua sandbox, prompt e bersaglio in un messaggio solo (agy non ha un prompt di sistema da sostituire; oltre 30 000 caratteri il messaggio va in un file della cartella). Antigravity non esclude i suoi strumenti: per questo non serve mai la coda (ADR-0106), e qui va bene solo perché il prompt è quello fidato del banco. I token sono quelli che agy scrive alla fine: il suo prompt di sistema ne conta circa 10 800 a ogni chiamata, il ragionamento è nell'output (Gemini lo fattura così), i dollari sono a listino (`prices.ts`). Il giro è in `gemini/`, con `gemini/giudizio.md`; il gioco con le stesse idee, `gemini/browser/`. I primi edifici veri che reggono e variano (`gemini/futuristica/1`, `gemini/rocca/1/seconda`) passano la soglia di varianza proposta qui sotto e nel foglio sono edifici diversi dello stesso genere: la proposta resta com'è.
+
+## I nodi nuovi (T336)
+
+`nodi/` è il giro dei sette bersagli su Gemini con il prompt del gioco e la sezione sui nodi di T333-T335 (ADR-0176): 0 su 7 alla prima
+richiesta contro 1 su 7 di T156, nessun programma che usi i nodi nuovi, 2,39 $ (`nodi/giudizio.md`). Strada facendo: dal contratto 0.5 la
+porta si apre con l'azione `open` e il banco e il gioco la cercavano come `apr…`, quindi misuravano la porta chiusa (corretto). Il banco
+vuole i nodi entro i tetti del mondo (`worldNodeErrors`, `WORLD_NODE_LIMITS`), come il validatore; `lab/scripts/nodi-mondo.ts` misura i
+modelli dell'originale contro quei tetti (`nodi/tabella.txt`).
 
 ## Varianza e scala (T180)
 

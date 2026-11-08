@@ -47,7 +47,7 @@ const ALL_NODES = `<sequence values="BNSAGKHCRTMPDE" size="8 3 8" symmetry="()" 
   </map>
 </sequence>`;
 
-/** The nodes a program of the world may use: wfc and convchain the engine runs, the world takes them with T336 (ADR-0174). */
+/** The nodes of a program of one file: wfc and convchain read a tileset or a sample of models/ (ADR-0174, ADR-0176), the Musician writes one. */
 const WORLD_NODES = MJX_NODES.filter((n) => n !== 'wfc' && n !== 'convchain');
 
 function kindsOf(n: Node3, out = new Set<string>()): Set<string> {

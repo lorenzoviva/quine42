@@ -3,6 +3,7 @@
 // by column: a stair one voxel wide is a stair for `bodyGround`, not for a body. `giudica` turns the numbers into the threshold.
 
 import { JUMP_FAR, JUMP_UP } from '../../src/kernel/kernel';
+import { WORLD_NODE_LIMITS, worldNodeErrors } from '../../src/kernel/validator';
 import { withSize } from '../../src/kernel/agents/sculptor';
 import { FormCache, Forms, groundOfForm, holesOf, InlineRunner, levelAt, MODEL_TIME, rampBlocks, stepOf, topUnder, type Form, type Ground } from '../../src/kernel/forms';
 import { modelSize } from '../../src/kernel/modeldirector';
@@ -78,10 +79,13 @@ export function esegui(xml: string, b: Bersaglio, seme = 1, tempo?: number): Ese
   const { forms, id } = voce(b, scritto);
   const q = forms.request(id, seme)!;
   const model = compileMjx(q.xml, { ...(q.size ? { size: q.size } : {}), ...(q.base ? { base: q.base } : {}) });
-  const result = runMjx(model, seme, { deadline: Math.min(tempo ?? q.tempo ?? MODEL_TIME, MAX_FORM_TIME), limits: FORM_LIMITS });
+  // The nodes of T333-T335 as the world takes them (T336, ADR-0176): what the validator refuses, the bench refuses.
+  const nodes = worldNodeErrors(model, q.xml);
+  if (nodes.length) throw new Mj3Error(nodes.join('; '));
+  const result = runMjx(model, seme, { deadline: Math.min(tempo ?? q.tempo ?? MODEL_TIME, MAX_FORM_TIME), limits: FORM_LIMITS, ceilings: WORLD_NODE_LIMITS });
   const g = result.grid;
   const box: Vec3 = [g.X, g.Y, g.Z];
-  const clip = model.actions.find((a) => /^apr/i.test(a.name));
+  const clip = model.actions.find((a) => /^(open|apr)/i.test(a.name));
   const grid = clip ? copia(g) : g;
   if (clip) act(grid, clip, seme);
   return { model, result, grid, ...(clip ? { aperta: clip.name } : {}), scatola: { ...scatola, box }, xml: scritto };

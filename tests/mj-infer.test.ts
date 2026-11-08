@@ -231,7 +231,8 @@ describe('con <import> e i figli <in>/<out> (T333, T340)', () => {
     const host = '<sequence values="BRG"><import file="walker"/></sequence>';
     for (const seed of [1, 2]) expect(play(host, 'BRBBBBG', seed, 10_000, {}, files).text).toBe('BBBBBRG');
     expect(inferenceIn(compileMjx(host, { size: [7, 1, 1], files }))).toEqual(['field']);
-    expect(modelErrors('models/torre.xml', host, 8_000, [7, 1, 1], files).join(' ')).toMatch(/<field> non è ancora ammesso/);
+    // Since T336 the world takes it: what the validator says is about the model, not about the field.
+    expect(modelErrors('models/torre.xml', host, 8_000, [7, 1, 1], files).join(' ')).not.toMatch(/field|ammess/);
   });
 });
 
@@ -299,8 +300,11 @@ describe('il programma', () => {
     expect(compileMjx('<one values="BR" size="3 3 3" in="R" out="B" temperature="2"/>').warnings.join(' ')).toMatch(/temperature senza field/);
   });
 
-  it('il validatore del gioco non li prende ancora (T336)', () => {
-    expect(modelErrors('models/prova.xml', '<sequence values="BRG" size="9 9 9" origin="True"><one in="RB" out="BR" steps="3"><field for="R" to="G" on="B"/></one></sequence>').join(' ')).toMatch(/<field> non è ancora ammesso/);
+  it('il validatore del gioco li prende dal T336, una ricerca con il suo limit', () => {
+    expect(modelErrors('models/prova.xml', '<sequence values="BRG" size="9 9 9" origin="True"><one in="RB" out="BR" steps="3"><field for="R" to="G" on="B"/></one></sequence>').join(' ')).not.toMatch(/field|ammess/);
+    const search = (limit: string) => `<sequence values="BRG" size="9 9 9" origin="True"><one in="RB" out="BR" steps="3" search="True"${limit}><observe value="R" to="B"/></one></sequence>`;
+    expect(modelErrors('models/prova.xml', search('')).join(' ')).toMatch(/search nel mondo vuole limit/);
+    expect(modelErrors('models/prova.xml', search(' limit="5000"')).join(' ')).toMatch(/non 5000/);
   });
 
   it('la traccia dice cosa inferisce un nodo', () => {

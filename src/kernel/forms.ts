@@ -420,7 +420,8 @@ function picchi(perZ: Map<number, number>, minimo: number, lontano: number): num
  */
 export function reachableStoreys(grid: VoxelGrid, palette: Record<string, PaletteEntry>, vpt: number, base = 0, actions: readonly MjxClip[] = [], seed = 1): number[] {
   let g = grid;
-  const clip = actions.find((a) => /^apr/i.test(a.name));
+  // The door opens with the action `open` (`apri` before the contract 0.5, T308b): measured open, as a body finds it.
+  const clip = actions.find((a) => /^(open|apr)/i.test(a.name));
   if (clip) {
     const copy: Grid3 = { ...grid, cells: new Uint8Array(grid.cells), alphabet: [...grid.alphabet], log: [], epoch: 0 };
     act(copy, clip, seed);
