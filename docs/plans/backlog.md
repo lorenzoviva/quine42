@@ -5026,6 +5026,15 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì, le foto del banco.
 - Quando è fatto: commit su `task/T338`, rapporto in `lab/banco/` con le foto; kernel sale di Z se cambiano i controlli.
 
+### T343 · Integrare T336 nel base (conflitto con T337 in `lab/banco/misure.ts`) — `da fare`
+- Pipeline: claude · sforzo high · stima 2% · approvato · priorità 1
+- Step: 30
+- Contesto: `integra T336` ha trovato un conflitto in `lab/banco/misure.ts` con T337, integrato poco prima (`0a23fae5`, misura tra concetti e semi, metodo a zone). Nasce da T336: `dossier T336`, `dossier T337`.
+- Cosa fare: nel worktree `git merge task/T336`; risolvere `lab/banco/misure.ts` tenendo entrambe le aggiunte (le misure di T337 e la correzione di T336 a `reachableStoreys`/banco, azione `open` al posto di `apr…`); controllare che ADR-0176 e kernel 0.6.1 di T336 siano ancora liberi; test, typecheck e build verdi.
+- Test: suite intera (T336 non l'aveva rilanciata dopo la correzione del glossario; il fallimento noto di `tests/determinism.test.ts` sotto carico si riprova da solo), typecheck, build.
+- Browser: no (T336 e T337 già verificati).
+- Quando è fatto: commit su `task/T343`; poi l'orchestratore integra T343 e `integra T336` toglie worktree e branch di T336.
+
 ### T341 · Integrare T340 nel base (ADR e kernel presi da T296) — `fatto` (`6909ea52`)
 - Pipeline: claude · sforzo high · stima 2% · approvato · priorità 1
 - Step: 30
