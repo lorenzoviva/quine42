@@ -1621,3 +1621,6 @@
 - [2026-11-10T02:36:10.611Z] orchestratore: epoca 342 su claude (contesto a 42 % della finestra)
 - [2026-11-10T02:38:12.409Z] orchestratore: epoca 343 su gemini (claude sotto il 10 %)
 - [2026-11-10T02:46:52.865Z] orchestratore: epoca 344 su gemini (contesto a 111 % della finestra)
+- [2026-11-10T02:49:07.626Z] orchestratore: epoca 345 su gemini (contesto a 122 % della finestra)
+- [2026-11-10T03:14:54.024Z] pipeline spenta (ferma --ora, Ctrl+C)
+- [2026-11-10T17:16:26.380Z] orchestratore: epoca 347 su gemini (contesto a 46 % della finestra)
