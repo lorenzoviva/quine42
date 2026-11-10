@@ -8,7 +8,7 @@ import { cleanCardName, HANDMADE_CONTRACT, HANDMADE_ID_RE, NAME_MAX, type Handma
 import { internalFields } from '../../src/kernel/internalNames';
 import { UNIVERSE_NAME_RE } from '../../src/kernel/paths';
 import type { FileMap } from '../../src/kernel/types';
-import { boxOf, classOf, SIZE_TIERS } from '../../src/mj/classes';
+import { boxUnderMaxSide, classOf, SIZE_TIERS } from '../../src/mj/classes';
 import type { Vec3 } from '../../src/mj/engine';
 import { SOUND_CLASS } from '../../src/mj/sound';
 
@@ -93,7 +93,8 @@ export function boxFor(xml: string, cls: string | undefined, size?: string): Vec
   } catch {
     /* a text that does not read yet: the class's box, and the lab says what does not read */
   }
-  return boxOf(c, size);
+  // As the server tries a handmade card (`handmadeProgramErrors`): under MAX_SIDE, where its ceilings were measured (ADR-0179).
+  return boxUnderMaxSide(c, size);
 }
 
 /** What a lab is working on: the program and what the card says of it. `base` is what it was when opened or saved last. */

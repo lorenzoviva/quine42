@@ -8,7 +8,7 @@
 // and for actions. A form that is not ready yet is simply not there: the entity blocks by its radius.
 
 import type { SoundPurpose } from '../mj/sound';
-import { boxOf, classOf, CLASSES, type AssetClass } from '../mj/classes';
+import { boxOf, classOf, CLASSES, growsByRules, tilesOf, voxelsOf, type AssetClass } from '../mj/classes';
 import { Mj3Error, type Grid3, type PaletteEntry, type Vec3 } from '../mj/engine';
 import { colorTable, floors, footprint, surfaces, type Levels, type VoxelGrid } from '../mj/mesh';
 import { compileMjx, mjxIncludes, type MjxClip } from '../mj/model';
@@ -186,12 +186,21 @@ export const stepOf = (vpt: number) => Math.round(0.2 * vpt);
 export const rootTag = (xml: string) => /<[a-z]+\b[^>]*>/i.exec(xml.replace(/<!--[\s\S]*?-->/g, ''))?.[0] ?? '';
 
 /**
- * The box a program runs in: its own `size` if it says one (structures decide on a coarse grid and `map`
- * up), otherwise its class's box at its size.
+ * The box of a library entry in voxels: its class's at its size; a structure that grows by rules at the density its entry says
+ * (ADR-0179), so an entry sculpted before keeps the box it was sculpted in (`vpt` 16 at Huge, 120 voxels) and a new one, at
+ * TILE voxels a tile, has a larger area at every larger size.
  */
-function sizeFor(xml: string, cls: AssetClass, taglia?: string, under = 0): Vec3 | undefined {
+export function entryBox(cls: AssetClass, info: Pick<ModelInfo, 'size' | 'vpt'> | undefined): Vec3 {
+  return growsByRules(cls, info?.size) ? voxelsOf(tilesOf(cls, info?.size), vptOf(info as ModelInfo)) : boxOf(cls, info?.size);
+}
+
+/**
+ * The box a program runs in: its own `size` if it says one (structures decide on a coarse grid and `map`
+ * up), otherwise its entry's box (`entryBox`).
+ */
+function sizeFor(xml: string, cls: AssetClass, info: ModelInfo | undefined, under = 0): Vec3 | undefined {
   if (/\ssize="/.test(rootTag(xml))) return undefined;
-  const [X, Y, Z] = boxOf(cls, taglia);
+  const [X, Y, Z] = entryBox(cls, info);
   // A model with a cellar (T52b): the box goes down by it, the program writes the cellar in its lowest voxels.
   return [X, Y, Z + under];
 }
@@ -419,13 +428,156 @@ function picchi(perZ: Map<number, number>, minimo: number, lontano: number): num
  * can stand, separated from other storeys by at least 0.7 tiles.
  */
 export function reachableStoreys(grid: VoxelGrid, palette: Record<string, PaletteEntry>, vpt: number, base = 0, actions: readonly MjxClip[] = [], seed = 1): number[] {
+  return storeysOf(walkIn(grid, palette, vpt, base, actions, seed), vpt);
+}
+
+/** Where a body walks in a model, from the outside ground through the open door: every cell and the height its feet are at. */
+interface Walked {
+  /** The grid as the body finds it: the door open. */
+  g: VoxelGrid;
+  levels: Levels;
+  celle: Array<{ x: number; y: number; z: number }>;
+  /** The cells the action `open` changed (the door leaves), if the model has one. */
+  opened?: number[];
+  /** Whether a body standing with its feet `at` voxels up, centred on a column, hits something. */
+  blocks: (x: number, y: number, at: number) => boolean;
+}
+
+function storeysOf(w: Walked, vpt: number): number[] {
+  const coperte = new Map<number, number>();
+  for (const c of w.celle) {
+    const i = c.x + c.y * w.g.X;
+    if (testaSopra(w.levels, i, c.z) !== undefined) coperte.set(c.z, (coperte.get(c.z) ?? 0) + 1);
+  }
+  const minArea = (1.1 * vpt) ** 2;
+  const lontano = Math.ceil(0.7 * vpt);
+  return picchi(coperte, minArea, lontano);
+}
+
+/** A floor of a model one lives on (T338): its height, and the largest room where one stands. */
+export interface RoomMeasure {
+  /** The height of its floor, voxels from the base. */
+  z: number;
+  /** Covered floor where a body stands, in columns of a voxel (where its centre may be). */
+  area: number;
+  /** The side, in voxels, of the largest square of covered floor with a ceiling at least `clear` above (0: none). */
+  room: number;
+  /** The highest ceiling over its covered floor, in voxels (how high one could stand). */
+  clear: number;
+}
+
+/** The parts of a model one lives in, measured (T338, ADR-0179): its storeys, its rooms, its doors. */
+export interface HabitableMeasure {
+  /** The storeys reached on foot (`reachableStoreys`). */
+  storeys: number[];
+  /** Every floor with covered ground where a body stands, at least as large as a storey, reached or not. */
+  rooms: RoomMeasure[];
+  /** Every door leaf the action `open` takes away: its widest horizontal side and its height, in voxels. */
+  doors: Array<{ width: number; height: number }>;
+}
+
+/**
+ * The storeys, rooms and doors of a model (T338): the storeys as `reachableStoreys` finds them; the rooms on every floor with covered
+ * ground where a body stands (the door open), reached or not, so a room too small is said as such even where the way in is shut: the
+ * side of the largest square of it under a ceiling at least `clear` voxels up, counting the body's width (the wall the body stands off
+ * is the room's edge); the doors from the cells the action `open` changes, each piece measured by its widest side and its height.
+ */
+export function habitableParts(grid: VoxelGrid, palette: Record<string, PaletteEntry>, vpt: number, clear: number, base = 0, actions: readonly MjxClip[] = [], seed = 1): HabitableMeasure {
+  const w = walkIn(grid, palette, vpt, base, actions, seed);
+  const { g, levels } = w;
+  const body = Math.round(2 * BODY_R * vpt);
+  // Every column's covered floors where a body stands: the height of the feet, the ceiling above them.
+  const cells: Array<{ i: number; z: number; head: number }> = [];
+  const perZ = new Map<number, number>();
+  for (let y = 0; y < g.Y; y++)
+    for (let x = 0; x < g.X; x++) {
+      const i = x + y * g.X;
+      for (let l = levels.start[i]; l < levels.start[i + 1]; l++) {
+        const z = levels.z[l];
+        const head = testaSopra(levels, i, z);
+        if (head === undefined || head <= stepOf(vpt) || w.blocks(x, y, z)) continue;
+        cells.push({ i, z, head });
+        perZ.set(z, (perZ.get(z) ?? 0) + 1);
+      }
+    }
+
+  // Every height with covered floor, the floors of a voxel more or less with it (a rug, a threshold): a room smaller than a
+  // storey is measured too, so it says how small it is.
+  const heights = [...perZ.keys()].filter((z) => (perZ.get(z - 1) ?? 0) + perZ.get(z)! + (perZ.get(z + 1) ?? 0) >= body * body).sort((a, b) => a - b);
+  const rooms = heights.map((z): RoomMeasure => {
+    const mask = new Uint8Array(g.X * g.Y);
+    const seen = new Uint8Array(g.X * g.Y);
+    let area = 0, top = 0;
+    for (const c of cells) {
+      if (Math.abs(c.z - z) > 1) continue;
+      if (!seen[c.i]) (seen[c.i] = 1), area++;
+      top = Math.max(top, c.head);
+      if (c.head >= clear) mask[c.i] = 1;
+    }
+    const side = largestSquare(mask, g.X, g.Y);
+    return { z, area, room: side ? side + body : 0, clear: top };
+  }).filter((r) => r.room > 0);
+  return { storeys: storeysOf(w, vpt), rooms, doors: w.opened ? doorsOf(w.opened, g.X, g.Y) : [] };
+}
+
+/** The side of the largest square of ones in a mask of X × Y. */
+function largestSquare(mask: Uint8Array, X: number, Y: number): number {
+  const row = new Uint16Array(X + 1);
+  let best = 0;
+  for (let y = 0; y < Y; y++) {
+    let diag = 0;
+    for (let x = 0; x < X; x++) {
+      const up = row[x + 1];
+      row[x + 1] = mask[x + y * X] ? Math.min(row[x], up, diag) + 1 : 0;
+      diag = up;
+      if (row[x + 1] > best) best = row[x + 1];
+    }
+  }
+  return best;
+}
+
+/** The door leaves among the cells an action changed: each 26-connected piece, its widest horizontal side and its height. */
+function doorsOf(cells: number[], X: number, Y: number): Array<{ width: number; height: number }> {
+  const set = new Set(cells);
+  const out: Array<{ width: number; height: number }> = [];
+  const XY = X * Y;
+  for (const start of cells) {
+    if (!set.has(start)) continue;
+    set.delete(start);
+    const stack = [start];
+    const lo = [Infinity, Infinity, Infinity], hi = [-1, -1, -1];
+    while (stack.length) {
+      const c = stack.pop()!;
+      const p = [c % X, Math.floor(c / X) % Y, Math.floor(c / XY)];
+      for (let a = 0; a < 3; a++) (lo[a] = Math.min(lo[a], p[a])), (hi[a] = Math.max(hi[a], p[a]));
+      for (let dz = -1; dz <= 1; dz++)
+        for (let dy = -1; dy <= 1; dy++)
+          for (let dx = -1; dx <= 1; dx++) {
+            const nx = p[0] + dx, ny = p[1] + dy;
+            if (nx < 0 || ny < 0 || nx >= X || ny >= Y) continue;
+            const n = c + dx + dy * X + dz * XY;
+            if (!set.has(n)) continue;
+            set.delete(n);
+            stack.push(n);
+          }
+    }
+    out.push({ width: Math.max(hi[0] - lo[0], hi[1] - lo[1]) + 1, height: hi[2] - lo[2] + 1 });
+  }
+  return out;
+}
+
+function walkIn(grid: VoxelGrid, palette: Record<string, PaletteEntry>, vpt: number, base: number, actions: readonly MjxClip[], seed: number): Walked {
   let g = grid;
+  let opened: number[] | undefined;
   // The door opens with the action `open` (`apri` before the contract 0.5, T308b): measured open, as a body finds it.
   const clip = actions.find((a) => /^(open|apr)/i.test(a.name));
   if (clip) {
     const copy: Grid3 = { ...grid, cells: new Uint8Array(grid.cells), alphabet: [...grid.alphabet], log: [], epoch: 0 };
     act(copy, clip, seed);
     g = copy;
+    opened = [];
+    // Compared by letter: the action may add letters to the alphabet.
+    for (let i = 0; i < grid.cells.length; i++) if (grid.alphabet[grid.cells[i]] !== copy.alphabet[copy.cells[i]]) opened.push(i);
   }
 
   const ground = groundOfForm(g, palette, vpt, base);
@@ -495,15 +647,7 @@ export function reachableStoreys(grid: VoxelGrid, palette: Record<string, Palett
       }
     }
   }
-
-  const coperte = new Map<number, number>();
-  for (const c of celle) {
-    const i = c.x + c.y * g.X;
-    if (testaSopra(levels, i, c.z) !== undefined) coperte.set(c.z, (coperte.get(c.z) ?? 0) + 1);
-  }
-  const minArea = (1.1 * vpt) ** 2;
-  const lontano = Math.ceil(0.7 * vpt);
-  return picchi(coperte, minArea, lontano);
+  return { g, levels, celle, blocks, ...(opened ? { opened } : {}) };
 }
 
 /** The most forms the process keeps, and the most memory they may take (ADR-0108): a server lives long, and many universes share it. */
@@ -791,7 +935,7 @@ export class Forms {
     return {
       xml,
       seed,
-      size: sizeFor(xml, cls, info?.size, under),
+      size: sizeFor(xml, cls, info, under),
       tint: symbol && color ? { symbol, color } : undefined,
       rig: cls.animation === 'walk',
       sway: cls.animation === 'wind',
@@ -907,7 +1051,7 @@ export class Forms {
   structureBox(model: string): Vec3 | undefined {
     const info = this.library[model];
     if (!info || info.class !== 'structure') return undefined;
-    return [...boxOf(this.classOf(model), info.size)] as Vec3;
+    return [...entryBox(this.classOf(model), info)] as Vec3;
   }
 
   /** The program of a model, compiled (for actions). */
@@ -915,7 +1059,7 @@ export class Forms {
     const xml = this.files[`${MODELS_DIR}${model}.xml`];
     if (!xml) return undefined;
     const info = this.library[model];
-    const size = sizeFor(xml, this.classOf(model), info?.size, cellarOf(info) * vptOf(info));
+    const size = sizeFor(xml, this.classOf(model), info, cellarOf(info) * vptOf(info));
     const files = this.includesOf(model);
     return compileMjx(xml, { ...(size ? { size } : {}), ...(Object.keys(files).length ? { files, self: model } : {}) });
   }

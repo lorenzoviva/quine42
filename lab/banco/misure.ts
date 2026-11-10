@@ -7,7 +7,7 @@ import { WORLD_NODE_LIMITS, worldNodeErrors } from '../../src/kernel/validator';
 import { withSize } from '../../src/kernel/agents/sculptor';
 import { FormCache, Forms, groundOfForm, holesOf, InlineRunner, levelAt, MODEL_TIME, rampBlocks, stepOf, topUnder, type Form, type Ground } from '../../src/kernel/forms';
 import { modelSize } from '../../src/kernel/modeldirector';
-import { boxOf, classOf, type SizeTier } from '../../src/mj/classes';
+import { boxUnderMaxSide, classOf, densityOf, TILE, tilesOf, type SizeTier } from '../../src/mj/classes';
 import { analyse, type Analysis } from '../../src/mj/check';
 import { Mj3Error, type Grid3, type PaletteEntry, type RunResult, type Vec3 } from '../../src/mj/engine';
 import { colorTable, surfaces, type Levels } from '../../src/mj/mesh';
@@ -45,7 +45,11 @@ export interface Scatola {
 /** The library's own idea of a model of this class, size and cellar: how it would run in the game. */
 function voce(b: Bersaglio, xml = '<sequence values="B"/>'): { forms: Forms; id: string; vpt: number; size?: Vec3 } {
   const id = 'prova';
-  const info = { class: b.classe, ...modelSize(b), ...(b.sotto ? { cellar: b.sotto } : {}) };
+  // The bench of T154-T182 keeps the scale of its time, under MAX_SIDE (16 voxels a tile at Huge, 12 at Gargantuan): its targets,
+  // its fixtures and its reports were measured there. The structures of today at TILE at every size are the bench of T338 (ADR-0179).
+  const cls = classOf(b.classe), tiles = cls && tilesOf(cls, b.taglia);
+  const before = tiles && b.taglia && densityOf(tiles) !== TILE ? { vpt: densityOf(tiles) } : {};
+  const info = { class: b.classe, ...modelSize(b), ...before, ...(b.sotto ? { cellar: b.sotto } : {}) };
   const forms = new Forms(new InlineRunner(new FormCache()));
   forms.load({ [`models/${id}.xml`]: xml, 'models/index.json': JSON.stringify({ [id]: info }) });
   const q = forms.request(id, 1)!;
@@ -532,7 +536,7 @@ export function misura(e: Eseguito, b: Bersaglio): Misure {
   const { vpt, base } = scatola;
   const palette = model.program.palette;
   const cls = classOf(b.classe)!;
-  const classBox = boxOf(cls, b.taglia);
+  const classBox = boxUnderMaxSide(cls, b.taglia);
   const analisi = analyse(result, palette, { grounded: true, minHeight: Math.round((cls.minHeight ?? 0) * classBox[2]) + base });
   const step = stepOf(vpt);
   const ground = groundOfForm(g, palette, vpt, base);

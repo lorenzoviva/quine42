@@ -127,7 +127,15 @@ When "much variety" and "high quality" are asked, take as reference models:
 Write a single MarkovJunior XML program that **grows** the building asked for, a voxel model that one enters, climbs and jumps in. Answer with the XML only, without comments or explanations. Do not compute the program cell by cell: start from the skeleton below, which already holds, and change what is needed.
 
 ## The program runs with many seeds and more sizes
-The same XML runs with at least 5 seeds and 2 sizes: a box from 100×100×80 (20 voxels per tile, step 4, a person 30 tall) to 120×120×96 (16 voxels per tile, step 3, a person 24; with 12 voxels per tile step 2, a person 18). Every seed must give another building, with a different outline, plan and rooms, and all of them must hold. So no `<box>`, no coordinates and no `size`: only rules, anchored to the centre of the floor and to what is there already.
+The same XML runs with at least 5 seeds and 2 sizes: a box of 100×100×80 (Large, 5 × 5 tiles), 150×150×120 (Huge, 7.5 × 7.5) or 200×200×160 (Gargantuan, 10 × 10), always 20 voxels per tile, step 4, a person 30 tall. Every seed must give another building, with a different outline, plan and rooms, and all of them must hold. So no `<box>`, no coordinates and no `size`: only rules, anchored to the centre of the floor and to what is there already.
+
+## What fits: the size decides what is built, not how big
+A tile is always 20 voxels, so a larger size is a larger area at the same scale. The parts one lives in never shrink: a door at least 11 × 30, a room at least 28 a side under a ceiling at least 30 up, a lean-to at least 30 clear and 20 deep; the request repeats them. A program that is too small for the whole building builds **less** of it, and a larger area holds **more**, never the same building bigger (the checks compare the two sizes: the larger needs another kind of part, or a quarter more parts). Decide first the scale of the concept, what fits at each size: a fort is one tower with a wide base at 5 × 5, a keep with a walled yard at 7.5 × 7.5, a full fort with towers at the corners at 10 × 10; a farm is a house of normal size with a lean-to and the hay behind at 5 × 5, then fields, a fence and a path, then a barn and animals at pasture. Then write it with rules that choose from the area, not from numbers:
+- the main body grows by `steps` (fixed sizes in voxels: they are fixed in tiles too), anchored to the centre;
+- the rest of the area grows around it until it meets the edge of the box (a yard `oE → *o` with `steps`, fields that fill what is left), so it is larger where the box is larger;
+- a part that needs room goes where a pattern of free ground of its size matches (`<one in="EEEE…/EEEE…">` of the barn's footprint): where it does not fit, the node does nothing and the program goes on;
+- a ring beyond the yard (a wall, a fence) only where the ground goes on past the yard (`oE → *m`).
+Every part stays attached to the rest on the ground (a path, a fence, a wall), not standing alone.
 
 ## The format
 x from left to right, y from the back to the front (the front is large y), z from bottom to top. `values` are the symbols, one per cell (the first, B, is the air): letters, or `#` and a number (`#12`) when the letters are not enough; a digit alone is not a symbol, and a `#12` has no colour until a `<color>` gives it one. A pattern: rows (growing y) separated by `/`, layers separated by spaces, **the top layer first**: `in="B t"` is t with the air above it. `*` is any cell (in `out`: it does not change), `[ab]` is a or b, `<union symbol="#1" values="ab"/>` gives a name to a set.
@@ -143,17 +151,18 @@ The body is 9 voxels wide (it passes in 11), walks on the floors and does not pa
 - **A door** at the front, in the middle, as tall as a person and 11 wide, with the road straight and uncovered to the edge (nothing above it at any height).
 - **At least 2 covered floors** that one reaches on foot, the ceiling at least 30 above the floor; **at least 4 rooms** adding up the floors, with openings of at most 11-20 voxels; no room or floor walled up. **At 100×100 a bay of 29 counts as a room only if it is clear up to the walls**: a piece of furniture that juts out more than a voxel takes it out of the count (a hall of two bays joined, an open wall: that one holds the furniture). Leave at least 3 bays clear at every seed.
 - **At least 2 places where the jump is needed**: an obstacle higher than a step and at most 16, that one climbs over toward a floor one also reaches on foot.
-- **At least 6 windows on 3 sides** (glass or holes, at least 7 voxels a side, on the outer plane of the wall; the arrow slits are called `name="finestra…"`); **6 visible materials**, the most used under 50 % of the voxels; **4 heights of the top**; **at least 24 details** on the facades (pieces of 2-300 voxels of one letter) on all sides; **12 % of the facades out of the plane** (buttresses, balconies, wings); **at least 30 % of the plan of the box taken up, at every size** (at 120 that is at least 5 bays of 30).
-- Everything attached, resting on the bottom, finished in 8 seconds at 120×120×96.
+- **At least 6 windows on 3 sides** (glass or holes, at least 7 voxels a side, on the outer plane of the wall; the arrow slits are called `name="finestra…"`); **6 visible materials**, the most used under 50 % of the voxels; **4 heights of the top**; **at least 24 details** on the facades (pieces of 2-300 voxels of one letter) on all sides; **12 % of the facades out of the plane** (buttresses, balconies, wings); **at least 30 % of the plan of the box taken up at 100×100**; at the larger sizes what fits around it takes the rest (yard, wall, annexes).
+- Everything attached, resting on the bottom, finished in 8 seconds at 200×200×160.
 
 ## The skeleton
-It holds 19-20 seeds out of 20 at the two sizes, and it is an ordinary small block of flats: it is the starting point, not the result.
+It holds 19-20 seeds out of 20 at the three sizes, and it is an ordinary small block of flats: it is the starting point, not the result. At 100×100 it is the block alone; at 150 a yard and a low wall around it; at 200 also an avenue outside the wall.
 ```xml
-<sequence values="BNExzaPpQbOHtsgcdvefwXiIJhjMSFCWRVDLUuTYGKAknryql" symmetry="(xy)" soil="E" origin="bottom">
+<sequence values="BNExzaPpQbOHtsgcdvefwXiIJhjMSFCWRVDLUuTYGKAknryqlmoZ#5" symmetry="(xy)" soil="E" origin="bottom">
   <union symbol="#1" values="be"/>
+  <union symbol="#4" values="NxzaPpQbOHtsgcdvefwXiIJhjMSFCWRVDLUuTYGKknryql"/>
   <union symbol="#2" values="tsdcfv"/>
   <union symbol="#3" values="tb"/>
-  <color symbol="k" value="5a3a22" name="porta"/><color symbol="S" value="d6d2c8" name="cemento chiaro"/><color symbol="F" value="a8743f" name="legno"/><color symbol="C" value="b9b5ab" name="cemento grigio"/><color symbol="W" value="f0ece2" name="intonaco"/><color symbol="R" value="8f8f88" name="ghiaia"/><color symbol="V" value="86b8c8" alpha="0.5" name="vetro"/><color symbol="D" value="3a3d42" name="telaio"/><color symbol="L" value="7a5a3c" name="rovere"/><color symbol="T" value="e0d9c2" name="gradino"/><color symbol="K" value="c2c7cc" name="acciaio"/><color symbol="A" value="9a9590" name="lastricato"/>
+  <color symbol="k" value="5a3a22" name="porta"/><color symbol="S" value="d6d2c8" name="cemento chiaro"/><color symbol="F" value="a8743f" name="legno"/><color symbol="C" value="b9b5ab" name="cemento grigio"/><color symbol="W" value="f0ece2" name="intonaco"/><color symbol="R" value="8f8f88" name="ghiaia"/><color symbol="V" value="86b8c8" alpha="0.5" name="vetro"/><color symbol="D" value="3a3d42" name="telaio"/><color symbol="L" value="7a5a3c" name="rovere"/><color symbol="T" value="e0d9c2" name="gradino"/><color symbol="K" value="c2c7cc" name="acciaio"/><color symbol="A" value="9a9590" name="lastricato"/><color symbol="#5" value="8a8378" name="muro di cinta"/><color symbol="Z" value="b0a58c" name="viale"/>
   <!-- 1. lattice: arms from the centre, then the lines -->
   <prl in="***/*E*/***" out="***/*z*/***"/>
   <all in="Nz" out="*a" steps="1"/>
@@ -241,8 +250,15 @@ It holds 19-20 seeds out of 20 at the two sizes, and it is an ordinary small blo
   <all in="DB *R" out="*D **" symmetry="(x)" steps="8"/>
   <all in="D/B */R" out="*/D */*" symmetry="(y)" steps="8"/>
   <all in="B D" out="D *" steps="7" symmetry="()"/>
-  <!-- 7. cleaning -->
-  <prl><rule in="U" out="C"/><rule in="u" out="W"/><rule in="Y" out="T"/><rule in="G" out="L"/><rule in="E" out="B"/><rule in="z" out="B"/><rule in="w" out="C"/><rule in="X" out="C"/><rule in="J" out="C"/><rule in="j" out="C"/><rule in="M" out="C"/><rule in="i" out="R"/><rule in="h" out="R"/></prl>
+  <!-- 7. what fits around: the yard (o) 14 wide; where the ground goes on past it, a low wall (m) with the road as its gate; where it runs straight with 20 more free, an avenue (Z) outside it -->
+  <all in="#4E" out="*o" steps="1"/>
+  <all in="oE" out="*o" steps="13"/>
+  <all in="oE" out="*m" steps="1"/>
+  <all in="mEEEEEEEEEEEEEEEEEEEE/mEEEEEEEEEEEEEEEEEEEE/mEEEEEEEEEEEEEEEEEEEE" out="*Z*******************/*Z*******************/*Z*******************" steps="1"/>
+  <all in="ZE" out="*Z" steps="3"/>
+  <all steps="15" symmetry="()"><rule in="B m" out="m #5"/></all>
+  <!-- 8. cleaning -->
+  <prl><rule in="U" out="C"/><rule in="u" out="W"/><rule in="Y" out="T"/><rule in="G" out="L"/><rule in="E" out="B"/><rule in="z" out="B"/><rule in="w" out="C"/><rule in="X" out="C"/><rule in="J" out="C"/><rule in="j" out="C"/><rule in="M" out="C"/><rule in="i" out="R"/><rule in="h" out="R"/><rule in="o" out="B"/><rule in="m" out="#5"/></prl>
 </sequence>
 <action name="open" label="Apri la porta"><prl in="k" out="B"/></action>
 ```
@@ -251,6 +267,7 @@ Why it holds, and what does not break:
 - **Section 2**: a fill (`tz → *t`) stops at the lines. One grows by passing a wall at the spot where the door is put: so everything stays connected, without paths to compute. The doors stand 1-11 from a pillar: the rest of the wall stays free. The stair is chosen **before** the other doors, in the front bay: a strip of 11×17 attached to a pillar, far from the door (`v`), that crosses the wall toward a neighbouring bay (`y`); 16 steps of stair climb 32, that is from the floor (one voxel above the ground) to the floor above, in line beyond `y`. Around it `v` keeps the other doors away. The columns `s`, `c`, `d` have no slab: it is the hole. One letter for every thing that rises in a different way.
 - **Section 3**: the walls say what they are from the letters on their sides: `w` outer low, `X` outer high, `i`, `I` inner, `J` inner below and outer above, `h`, `H`, `j` inner doors. `#2` is all that is high, `#1` what is low.
 - **Section 4**: `in="B t" out="t F"` makes the head `t` rise by one layer and leaves `F`; `steps` is how much it rises: **the heights are numbers of steps**, one line per stretch. What ends writes `R S` and the head disappears. A new letter on the plan (`i`, `I` are buttresses already: they are two walls in front of a wall) rises with a line of its own.
+- **Section 7**: `#4` is everything built on the plan. The yard `o` grows 14 from it; where it meets the edge of the box (at 100) there is no ground past it and no wall; where ground is left, its edge becomes the wall `m`, which leaves the road `A` open as the gate, and rises like a column. The avenue needs three cells of wall in a row with 20 free past them: only the straight stretches of a wall with room outside, at 200.
 - **Time**: a rare letter in the first cell (bottom left) costs little; a pattern that starts with `*` or with the air over the whole grid costs a lot.
 
 ## What to change, according to the building

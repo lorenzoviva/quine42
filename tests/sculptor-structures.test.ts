@@ -10,6 +10,7 @@ import { emptyUsage, type AiModels, type TextCall } from '../src/kernel/ai/model
 import { Council } from '../src/kernel/agents/council';
 import { checkProgram, procedural, sculpt, sculptorRole, shareableProgram, skeletonOf, STRUCTURE_SEEDS, STRUCTURES_MARK, triedSizes, withoutSize } from '../src/kernel/agents/sculptor';
 import { modelSize, structureModel, structureSiblings } from '../src/kernel/modeldirector';
+import { entryBox } from '../src/kernel/forms';
 import { MODEL_RE } from '../src/kernel/validator';
 import { classOf } from '../src/mj/classes';
 
@@ -85,7 +86,8 @@ describe('the procedural prompt of the structures (T156)', () => {
     expect(calls[0].system).not.toContain('## Examples');
     expect(calls[0].system).not.toContain('## Traps');
     expect(calls[0].prompt).toMatch(/The same program also serves the size gargantuan/);
-    expect(calls[0].prompt).toMatch(/a tile is 16 voxels, a step 3/);
+    expect(calls[0].prompt).toMatch(/a tile is 20 voxels, a step 4/);
+    expect(calls[0].prompt).toMatch(/a door at least 11 × 30, a room at least 28 a side/);
     expect(calls[1].prompt).toMatch(/It does not pass: taglia Enorme, seme 1: /);
     expect(calls[1].prompt).toContain('node by node');
     expect(r!.xml).not.toMatch(/<sequence[^>]*\ssize="/);
@@ -117,10 +119,15 @@ describe('one program for two sizes (ADR-0160)', () => {
     expect(s.xml).toBe(k.files[`models/${huge.id}.xml`]);
     expect(s.info).toMatchObject({ class: 'structure', ...modelSize(gar), seeds: STRUCTURE_SEEDS });
     expect(k.addModel(gar.id, s.xml, s.info, 'prova')).toBe(true);
-    // The same text, two boxes of the same voxels: a Gargantuan tile is 12 voxels, a Huge one 16.
-    expect(k.forms.request(gar.id, 1)!.size).toEqual(k.forms.request(huge.id, 1)!.size);
-    expect(k.forms.request(gar.id, 1)!.vpt).toBe(12);
-    expect(k.forms.request(huge.id, 1)!.vpt).toBe(16);
+    // The same text, two areas at the same scale (T338, ADR-0179): a tile is 20 voxels at both, the Gargantuan box is larger.
+    expect(k.forms.request(gar.id, 1)!.size).toEqual([200, 200, 160]);
+    expect(k.forms.request(huge.id, 1)!.size).toEqual([150, 150, 120]);
+    expect(k.forms.request(gar.id, 1)!.vpt).toBe(20);
+    expect(k.forms.request(huge.id, 1)!.vpt).toBe(20);
+    // An entry sculpted before, at 16 voxels a tile, keeps the box it was sculpted in.
+    expect(entryBox(structure, { size: 'huge', vpt: 16 })).toEqual([120, 120, 96]);
+    expect(entryBox(structure, { size: 'gargantuan', vpt: 12 })).toEqual([120, 120, 96]);
+    expect(entryBox(structure, { size: 'huge' })).toEqual([150, 150, 120]);
     // An entry of before (a Huge fort named without its size, its box written in) goes on as it was, under the new name.
     const old = '<sequence values="BW" size="120 120 96"><box at="60 60 0" size="40 40 60" color="W"/></sequence>';
     expect(k.addModel('struttura-un-forte', old, { class: 'structure', ...modelSize({ classe: 'structure', taglia: 'huge' }) }, 'prova')).toBe(true);

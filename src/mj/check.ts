@@ -1,6 +1,7 @@
 // Judging voxel models, like src/kernel/validator.ts does for the game: the model a program builds is
 // measured, and what makes it unusable (empty, floating, in pieces, too low) goes back to the sculptor.
 
+import { partVoxels } from './classes';
 import { AIR, type Grid3, type PaletteEntry, type RunResult, type Vec3 } from './engine';
 
 export interface Analysis {
@@ -120,4 +121,103 @@ export function analyse(r: RunResult, palette: Record<string, PaletteEntry>, opt
   const unused = Object.keys(palette).filter((k) => !palette[k].hidden && palette[k].color && !colors[k]);
   if (unused.length) a.warnings.push(`colori mai usati: ${unused.join(' ')}`);
   return a;
+}
+
+// The parts one lives in and what a structure contains (T338, ADR-0179): a small structure is not a large one drawn smaller.
+
+/** What the walk found of the parts one lives in (`habitableParts` in src/kernel/forms.ts), as these checks read it. */
+export interface PartsMeasured {
+  rooms: Array<{ z: number; room: number; clear: number }>;
+  doors: Array<{ width: number; height: number }>;
+}
+
+const tiles = (v: number, vpt: number) => (v / vpt).toFixed(2).replace('.', ',');
+
+/**
+ * A part one lives in under its least measure (`PARTS` in classes.ts, at the model's density): a door, a storey where one does
+ * not stand, a building without a room where one stands. Each with the measure found and the one wanted, and what to do instead.
+ */
+export function partErrors(m: PartsMeasured, vpt: number): string[] {
+  const p = partVoxels(vpt);
+  const out: string[] = [];
+  for (const d of m.doors)
+    if (d.width < p.door.width || d.height < p.door.height) {
+      out.push(`porta: ${d.width} × ${d.height} voxel (${tiles(d.width, vpt)} × ${tiles(d.height, vpt)} caselle), una porta è almeno ${p.door.width} × ${p.door.height} a ogni taglia`);
+      break;
+    }
+  if (m.rooms.length) {
+    const room = Math.max(...m.rooms.map((s) => s.room));
+    const clear = Math.max(...m.rooms.map((s) => s.clear));
+    if (clear < p.storey.clear) out.push(`piano: il soffitto più alto è a ${clear} voxel dal pavimento, ne servono ${p.storey.clear} per starci in piedi`);
+    else if (room < p.room.side)
+      out.push(
+        `stanza: la più grande in cui si sta in piedi ha il lato di ${room} voxel (${tiles(room, vpt)} caselle), una stanza ne vuole almeno ${p.room.side} (${tiles(p.room.side, vpt)}) a ogni taglia: se l'area è piccola fai meno parti, non più piccole`,
+      );
+  }
+  return out;
+}
+
+/** What a structure contains (T338): its parts, as many as the pieces of one letter that stand on their own. */
+export interface Composition {
+  voxels: number;
+  /** Visible letters with at least `MIN_PART` voxels. */
+  letters: number;
+  /** Pieces of one letter (26-connected) with at least `MIN_PART` voxels: a window, a field, a post, a wall. */
+  parts: number;
+  /** The same, letter by letter. */
+  byLetter: Record<string, number>;
+}
+
+/** The least piece that counts as a part: a post, a small window. */
+export const MIN_PART = 8;
+
+export function compositionOf(g: Grid3, palette: Record<string, PaletteEntry>): Composition {
+  const vis = visibleCodes(g, palette);
+  const XY = g.X * g.Y;
+  const seen = new Uint8Array(g.cells.length);
+  const byLetter: Record<string, number> = {};
+  let voxels = 0;
+  const stack: number[] = [];
+  for (let i = 0; i < g.cells.length; i++) {
+    const code = g.cells[i];
+    if (!vis[code] || seen[i]) continue;
+    let size = 0;
+    seen[i] = 1;
+    stack.push(i);
+    while (stack.length) {
+      const c = stack.pop()!;
+      size++;
+      const x = c % g.X, y = Math.floor(c / g.X) % g.Y, z = Math.floor(c / XY);
+      for (let dz = -1; dz <= 1; dz++)
+        for (let dy = -1; dy <= 1; dy++)
+          for (let dx = -1; dx <= 1; dx++) {
+            const nx = x + dx, ny = y + dy, nz = z + dz;
+            if (nx < 0 || ny < 0 || nz < 0 || nx >= g.X || ny >= g.Y || nz >= g.Z) continue;
+            const n = nx + ny * g.X + nz * XY;
+            if (!seen[n] && g.cells[n] === code) {
+              seen[n] = 1;
+              stack.push(n);
+            }
+          }
+    }
+    voxels += size;
+    if (size >= MIN_PART) {
+      const ch = g.alphabet[code];
+      byLetter[ch] = (byLetter[ch] ?? 0) + 1;
+    }
+  }
+  const counts = Object.values(byLetter);
+  return { voxels, letters: counts.length, parts: counts.reduce((a, b) => a + b, 0), byLetter };
+}
+
+/**
+ * Whether a larger size contains more than a smaller one (T338): the same program at a larger area adds kinds of parts (fields, a
+ * fence, a barn, a wall, towers: a letter more) or a quarter more parts, it does not draw the same parts bigger. The same building in a
+ * larger box, by chance of its growth, has a seventh more or less (the skeleton: 92-105 parts at 100, 150 and 200 voxels): a quarter is
+ * past chance. Undefined when it adds.
+ */
+export function varietyError(small: Composition, large: Composition, smallName: string, largeName: string): string | undefined {
+  const want = Math.max(small.parts + 2, Math.ceil(small.parts * 1.25));
+  if (large.letters > small.letters || large.parts >= want) return undefined;
+  return `varietà: alla taglia ${largeName} ${large.letters} tipi di parti e ${large.parts} parti, alla ${smallName} ${small.letters} e ${small.parts}: in un'area più grande entra di più (annessi, recinti, campi, mura, torri: un tipo nuovo, o almeno ${want} parti), non lo stesso edificio più grande`;
 }
