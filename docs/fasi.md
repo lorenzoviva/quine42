@@ -1,14 +1,14 @@
 # Le fasi e gli step di QUINE42
 
 Come si divide lo sviluppo (ADR-0128). Il testo dell'autore è in [`userchats/to-do-2026-11-04.md`](userchats/to-do-2026-11-04.md), «Fasi dello sviluppo»: le
-fasi sono quelle pianificate oggi e **possono cambiare in corso d'opera**. Le parole sono nel [glossario](glossario.md#lo-sviluppo).
+fasi sono quelle pianificate oggi e **possono cambiare in corso d'opera** (il 10/11 l'autore le ha portate a sei: due beta, una fase di raffinamento e la produzione in fondo, [`userchats/to-do-2026-11-10.md`](userchats/to-do-2026-11-10.md)). Le parole sono nel [glossario](glossario.md#lo-sviluppo).
 
-- **Fase**: un tratto dello sviluppo con un traguardo che si vede da fuori. Sono quattro.
+- **Fase**: un tratto dello sviluppo con un traguardo che si vede da fuori. Sono sei.
 - **Step**: il raggiungimento di un obiettivo condiviso tra task, per esempio «step 25: aggiungere il suono al gioco». Non è più una tappa del piano, come erano gli step fino al 9.
 
-## Le quattro fasi
+## Le sei fasi
 
-Siamo nella **Fase I**. Il criterio della Fase I l'ha approvato l'autore il 04/11; quelli delle altre tre sono ricavati da ciò che l'autore ha scritto. Il criterio lo può cambiare solo lui, ed è sempre lui a dire finita una fase.
+Siamo nella **Fase I**. Il criterio della Fase I l'ha approvato l'autore il 04/11; quelli delle altre cinque sono ricavati da ciò che l'autore ha scritto. Il criterio lo può cambiare solo lui, ed è sempre lui a dire finita una fase.
 
 ### Fase I: il kernel 0.9.0
 
@@ -25,7 +25,7 @@ L'autore: l'implementazione del kernel 0.9.0, divisa in step. La guida dei beta 
 7. Un viandante nuovo ha seguito i due file della guida sul server di beta, e ogni passo torna (T237).
 8. `package.json`, `KERNEL_VERSION` (`src/kernel/version.ts`) e `universe.json → kernel` del seme dicono `0.9.0` (oggi `0.1.x`: `Z` sale a ogni task che cambia il kernel, ADR-0136) e quel commit ha un tag.
 
-### Fase II: i beta tester
+### Fase II: la closed beta
 
 L'autore: una decina di persone fidate, suoi amici e lui stesso, non pagati («non è il classico beta testing noioso»); serve a raccogliere i requisiti del kernel nuovo. Lui dà 5 € di crediti a testa e genera a sue spese gli universi vanilla. Con la guida i tester sanno che si prenota il turno per non sovraccaricare i server, che si può giocare insieme nella stessa sessione senza esagerare con quelle a molti, e tutti i limiti del server di beta con cui potrebbero frustrarsi. Una parte dei crediti è per esplorare; un secondo file spiega la corona e sblocca l'altra, così provano tutto anche se non capiscono come uscire dal tappeto. Le decisioni prese dopo sono in T236 (2 € + 3 €, a mano); calendario e comunicazioni stanno fuori dal repository.
 
@@ -37,11 +37,23 @@ L'autore: occorre individuare le funzionalità che il Concilio non riesce a impl
 
 **Finita quando:** l'elenco dei requisiti è fatto o rimandato per scelta dell'autore, il gioco è nelle quattro lingue e `package.json` dice `1.0.0`. Gli step di questa fase, a parte quelli in tabella, nascono dall'elenco della Fase II.
 
-### Fase IV: la produzione
+### Fase IV: la open beta
 
-L'autore: il rilascio aperto al pubblico, con i pagamenti Stripe. Il piano di lancio è T240, che verifica anche ciò che il to-do afferma sui concorrenti.
+L'autore (10/11): il rilascio della open beta al posto della produzione. Si coinvolgono la community dei giocatori e quella degli sviluppatori, e i fornitori esterni li pagano direttamente i giocatori: per i modelli OpenRouter, per l'hosting un servizio esterno (RunPod, Vast.ai, Railway) **e anche** il self-hosting. Nessun pagamento passa dall'autore: niente Stripe vero e commissione a 0 (oggi non apre una partita IVA, essendo lavoratore dipendente). La veste del sito si sceglie entro la Fase VI: in questa fase il sito ha la scelta delle vesti con il contatore (T287). Il piano di lancio di T240 (concorrenti, canali, Boa Loger) vale per questa uscita, tolto ciò che riguarda i pagamenti.
 
-**Finita quando:** il sito è pubblico, i pagamenti Stripe sono veri e non più in prova, e il post del lancio con il link è uscito. Che cosa viene dopo non è ancora detto.
+**Finita quando:** il sito è pubblico, un giocatore gioca con la sua chiave o il suo account OpenRouter, un mondo gira su un hosting esterno e uno in self-hosting seguendo la guida, il contatore delle vesti è acceso e il post del lancio con il link è uscito.
+
+### Fase V: l'analisi e il raffinamento del kernel
+
+L'autore (10/11): un'altra fase di analisi e raffinamento del kernel, dopo la open beta. Qui si progetta anche il valore delle carte (chi ha generato contenuti di qualità ne è ricompensato) e il prezzo della produzione.
+
+**Finita quando:** lo dice l'autore; gli step nascono da ciò che la open beta ha mostrato.
+
+### Fase VI: la produzione
+
+L'autore: il rilascio che monetizza, con i pagamenti Stripe e il valore delle carte; il costo cresce per i margini, e chi ha contribuito ai contenuti ne riceve una parte. La veste del sito è scelta. Prima: la partita IVA e i dati nel piè di pagina (D35, D3.4).
+
+**Finita quando:** i pagamenti Stripe sono veri e non più in prova e il valore delle carte è acceso. Che cosa viene dopo non è ancora detto.
 
 ## Le regole della tabella
 
@@ -97,6 +109,7 @@ L'autore: il rilascio aperto al pubblico, con i pagamenti Stripe. Il piano di la
 | 40 | Gli oggetti si vedono: in mano, addosso, sui mobili; i mobili si spostano | I | da fare | T288 T289 T290 T291 T292 T301 |
 | 41 | I giocatori modificano le carte nei laboratori; le carte passano da un universo all'altro prima della Genesi | I | da fare | T293 T294 T295 T296 |
 | 42 | L'inglese è la lingua interna: chi apre il repository lo legge | I | da fare | T306 T307a T314 T307b T308a T308b T309 T310 T310b |
+| 43 | La open beta: i giocatori pagano OpenRouter e l'hosting, anche in self-hosting | IV | in attesa | T345 |
 
 La Fase II non ha ancora uno step per la beta stessa e la Fase III non ha quelli dei requisiti: uno step si apre quando ha dei task.
 

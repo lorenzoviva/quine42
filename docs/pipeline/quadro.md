@@ -3,10 +3,11 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 10/11/2026, epoca 340 (claude). Crediti: vedi `stato`.
+Aggiornato il 10/11/2026, epoca 341 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
+- **Sei fasi (autore, 10/11):** I kernel 0.9.0, II closed beta, III kernel 1.0.0, **IV open beta** (giocatori pagano OpenRouter e hosting, anche self-hosting; nessun incasso dell'autore, niente partita IVA ora), V raffinamento del kernel, VI produzione (Stripe, valore delle carte). `docs/fasi.md`, testo in `userchats/to-do-2026-11-10.md`. Step 43 con T345 (studio, da approvare).
 - **NPC coeso (autore, 06/11 sera):** T327 integrato (facciata `Npc` in `src/kernel/npc/`, kernel 0.5.3, ADR-0166) → **T332 integrato** (chi dorme non saluta, kernel 0.5.4) → T245g-i.
 - **Carte fatte a mano (autore, 05/11, step 41):** T293 integrato (ADR-0161) → **T294 integrato** (laboratori giocatori, ADR-0169) → **T295 integrato** (carte prima della Genesi, radice del contratto, `cardChoice`, ADR-0170, kernel 0.5.6, V-033 chiusa) → **T296 integrato** (carte guaste isolate, «Togli» del master, ADR-0172, kernel 0.5.8). Restano fuori: universi senza radice, modelli scolpiti prima di 0.5.6 senza carta, `npm run genera` non sceglie carte.
 - **Gemini (autore, 06/11 sera):** consumare Gemini finché orchestro con task non troppo difficili. T322, T323, T326 integrati; T320 (controllo 2 piani) integrato (`86acd5f`, kernel 0.4.3, ADR-0162) → T321 sbloccato.
@@ -28,7 +29,7 @@ Aggiornato il 10/11/2026, epoca 340 (claude). Crediti: vedi `stato`.
 
 ## Attese dall'autore
 
-- **Domande aperte in `domande/aperte.md`:** D34 (lingue), D35 (piano lancio, account D3.1), **D47 (vestiti addosso, T289)**, **D48 (prompt Scultore strutture, T337)**. Chiuse: D36, D37, D38 A, D46 B+C. Aperta D45 (Jev), ampliata da T325 (integrato, `lab/banco/jev/casi-d-uso.md`: ordine, guardie, battute, Attore, stima lobby). Proposta aperta: `piani.google.pro.moltiplicatoreStima` 2,5 → 1.
+- **Domande aperte in `domande/aperte.md`:** D34 (lingue), D35 (piano lancio, account D3.1), **D47 (vestiti addosso, T289)**, **D48 (prompt Scultore strutture, T337)**, **D49 (valore delle carte), D50 (gestito o dei giocatori in VI), D51 (T345, vesti)**. Chiuse: D36, D37, D38 A, D46 B+C. Aperta D45 (Jev), ampliata da T325 (integrato, `lab/banco/jev/casi-d-uso.md`: ordine, guardie, battute, Attore, stima lobby). Proposta aperta: `piani.google.pro.moltiplicatoreStima` 2,5 → 1.
 - **Autonomia autore confermata fino al 06/11 18:00 locali.**
 
 ## Regole attive
@@ -38,5 +39,5 @@ Aggiornato il 10/11/2026, epoca 340 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **339 (claude):** T344 e T339 integrati; T338 pronto.
+- **341 (claude):** sei fasi in `fasi.md`; T345 proposto; D49-D51.
 - **338 (claude):** T339 finito; `integra` in conflitto con T336 → T344 lanciato. T88 integrato (generatore sui crediti avanzati, ADR-0177).
