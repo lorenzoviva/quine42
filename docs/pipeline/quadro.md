@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 10/11/2026, epoca 343 (gemini). Crediti: vedi `stato`.
+Aggiornato il 10/11/2026, epoca 344 (gemini). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -39,5 +39,5 @@ Aggiornato il 10/11/2026, epoca 343 (gemini). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **344 (gemini):** chiarimento hosting T345 (ufficiale GCP, self-hosting Docker agnostico).
 - **343 (gemini):** approvato T345 (open beta OpenRouter/hosting, studio e ADR proposto), pronto in coda.
-- **341 (claude):** sei fasi in `fasi.md`; T345 proposto; D49-D51.

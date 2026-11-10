@@ -1620,3 +1620,4 @@
 - [2026-11-10T02:06:32.411Z] orchestratore: epoca 341 su claude (contesto a 36 % della finestra)
 - [2026-11-10T02:36:10.611Z] orchestratore: epoca 342 su claude (contesto a 42 % della finestra)
 - [2026-11-10T02:38:12.409Z] orchestratore: epoca 343 su gemini (claude sotto il 10 %)
+- [2026-11-10T02:46:52.865Z] orchestratore: epoca 344 su gemini (contesto a 111 % della finestra)
