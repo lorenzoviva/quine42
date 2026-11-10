@@ -13,3 +13,4 @@ lab/out/
 graphify-out/
 .pipeline/
 .pipeline-task.md
+docs/.tmp/

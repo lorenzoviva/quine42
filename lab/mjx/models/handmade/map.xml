@@ -1,0 +1,15 @@
+<!--
+Falò, scritto a mano da Claude Code (step 8.2A): un anello di pietre attorno alla brace, tre ciocchi e
+le fiamme. L'animazione è MarkovJunior anche lei: a ogni fotogramma le punte delle fiamme si spengono o
+salgono a caso, e la brace pulsa.
+-->
+<sequence values="BN" size="20 20 18" origin="True" symmetry="(xy)">
+
+  <color symbol="N" value="6b4528" name="ciocco"/>
+
+  <box at="9.5 9.5 0" size="4 4 4" color="N"/>
+   
+  <map scale="2 2 2" values="BN">
+    <rule in="N" out="NN/NN NN/NN"/>
+  </map>
+</sequence>
