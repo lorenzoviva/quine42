@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 10/11/2026, epoca 344 (gemini). Crediti: vedi `stato`.
+Aggiornato il 10/11/2026, epoca 346 (gemini). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -25,7 +25,7 @@ Aggiornato il 10/11/2026, epoca 344 (gemini). Crediti: vedi `stato`.
 0. **Decisioni autore 04/11:** D32 SemVer `X.Y.Z`. Step 32: T260, T262 → T245a → T263/T245b → T245c-f. T265 prima della beta.
 1. T324 (immagini Jev: utile come filtro dei difetti visivi, non per il giudizio dell'Artista) integrato via T329.
 2. **Nodi MJ:** T333 integrato (ADR-0171, kernel 0.5.7; lo Scultore non lo conosce ancora); **T334 integrato via T340/T341** (field/temperature/observe/search, ADR-0173, kernel 0.5.9). **T335 integrato** (ADR-0174, kernel 0.5.10). **T342 integrato** (simboli `#<numero>`, ADR-0175, contratto 0.6, kernel 0.6.0) → **T336 integrato via T343** (validatore accetta i nodi nuovi entro `WORLD_NODE_LIMITS`, ADR-0176, kernel 0.6.1; corretto «piani: 0» delle strutture procedurali). **T339 integrato via T344** (nodo `<pieces>`, griglie grandi a pezzi, kernel 0.6.2, ADR-0178; `worldNodeErrors` anche nei figli di `pieces`). **T331 integrato** (studio GPU, `docs/design/gpu.md`: WebGPU non ora; 4 task proposti da approvare: mesh senza allocazioni, corona solo quando serve, scatti all’arrivo, rimisurare). **T337 integrato** (scheletro copiato 78-92 %, metodo a zone; D48). **T338 integrato** (strutture a regole a 20 voxel per casella fino a 200 di lato, misure minime abitabili nello Scultore, ADR-0179, kernel 0.6.3; non provato su Gemini). **Pronti:** T345. Da approvare: T310b.
-3. **Crediti (10/11):** Claude 5h 11 %, settimana 11 % (reset 12/11 16:00); Gemini 99-100 %, agy 100 %; Argon fermo fino all'11/11.
+3. **Crediti (10/11):** Claude 5h 9 %, settimana 9 % (reset 12/11 16:00); Gemini 98-100 %, agy 100 %; Argon fermo fino all'11/11.
 
 ## Attese dall'autore
 
@@ -39,5 +39,5 @@ Aggiornato il 10/11/2026, epoca 344 (gemini). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **345 (gemini):** riavviata su gemini, poi pipeline spenta con `ferma --ora` (Ctrl+C). Nessun task in corso interrotto.
 - **344 (gemini):** chiarimento hosting T345 (ufficiale GCP, self-hosting Docker agnostico).
-- **343 (gemini):** approvato T345 (open beta OpenRouter/hosting, studio e ADR proposto), pronto in coda.
