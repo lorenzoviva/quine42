@@ -5,7 +5,7 @@
 
 import type { Kernel } from './kernel';
 import { procedural, sculpt, shareableProgram, STRUCTURE_SEEDS, type SculptRequest } from './agents/sculptor';
-import { classOf, densityOf, guessClass, sizeOf, SIZE_TIERS, TILE, tilesOf, type SizeTier } from '../mj/classes';
+import { classOf, densityFor, guessClass, sizeOf, SIZE_TIERS, TILE, type SizeTier } from '../mj/classes';
 import type { ModelInfo } from './forms';
 import { BudgetError } from './ai/models';
 import { modelGap, sculptPlan } from './coefficients';
@@ -20,7 +20,7 @@ import { sameName } from './bring';
 export function modelSize(req: Pick<SculptRequest, 'classe' | 'taglia'>): Pick<ModelInfo, 'size' | 'vpt'> {
   const cls = classOf(req.classe), t = sizeOf(req.taglia);
   if (!cls || !t || t.id === cls.taglia) return {};
-  const vpt = densityOf(tilesOf(cls, t.id));
+  const vpt = densityFor(cls, t.id);
   return { size: t.id, ...(vpt !== TILE ? { vpt } : {}) };
 }
 

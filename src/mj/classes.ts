@@ -84,13 +84,67 @@ export const MAX_SIDE = 120;
 /** Voxels per tile for a box in tiles: the usual TILE, fewer for the boxes that would pass MAX_SIDE. */
 export const densityOf = (tiles: [number, number, number]) => Math.min(TILE, Math.floor(MAX_SIDE / Math.max(...tiles)));
 
+/**
+ * The largest side, in voxels, a structure that grows by rules runs at (T338, ADR-0179): up to it a tile stays TILE voxels at
+ * every size, so a larger size is a larger area at the same scale, where more fits, and not the same building drawn bigger.
+ */
+export const STRUCTURE_SIDE = 200;
+
+/** The structures that grow by rules (ADR-0160): the class `structure` from Large up. Their parts keep their size in tiles. */
+export const growsByRules = (c: AssetClass, taglia?: string): boolean => c.id === 'structure' && sizeRank(sizeOf(taglia)?.id ?? c.taglia) >= sizeRank('large');
+
+/** Voxels per tile a class runs at, at a size: `densityOf`, but a structure that grows by rules keeps TILE up to STRUCTURE_SIDE (ADR-0179). */
+export function densityFor(c: AssetClass, taglia?: string): number {
+  const tiles = tilesOf(c, taglia);
+  if (growsByRules(c, taglia)) return Math.min(TILE, Math.floor(STRUCTURE_SIDE / Math.max(...tiles)));
+  return taglia ? densityOf(tiles) : TILE;
+}
+
 export const classOf = (id: string | undefined) => CLASSES.find((c) => c.id === id);
 
-/** The box of a class in voxels (at a size, if given: at the density that size runs at). */
-export function boxOf(c: AssetClass, taglia?: string): Vec3 {
+/** A box in tiles at a density, in voxels. */
+export const voxelsOf = (tiles: readonly number[], vpt: number): Vec3 => tiles.map((t) => Math.max(4, Math.round(t * vpt))) as Vec3;
+
+/**
+ * The box of a class at a size at the density under MAX_SIDE (`densityOf`), as every class had it before ADR-0179: the handmade cards
+ * keep it, their ceilings were measured there (ADR-0161).
+ */
+export function boxUnderMaxSide(c: AssetClass, taglia?: string): Vec3 {
   const tiles = tilesOf(c, taglia);
-  const vpt = taglia ? densityOf(tiles) : TILE;
-  return tiles.map((t) => Math.max(4, Math.round(t * vpt))) as Vec3;
+  return voxelsOf(tiles, taglia ? densityOf(tiles) : TILE);
+}
+
+/** The box of a class in voxels (at a size, if given: at the density that size runs at, `densityFor`). */
+export function boxOf(c: AssetClass, taglia?: string): Vec3 {
+  return voxelsOf(tilesOf(c, taglia), densityFor(c, taglia));
+}
+
+/**
+ * The parts one lives in (T338, ADR-0179), their least measures in tiles: the same at every size. A small structure does not get
+ * a smaller door, a lower storey or a narrower room: what does not fit is left out (a small fort is a tower, a small farm a house
+ * with a lean-to). A person is 1 × 0.75 × 1.5 tiles and passes where the body (0.44 tiles) does; a room is the side of the largest
+ * square of covered floor where one stands, the bays of the skeleton (29 voxels at 20) are the least.
+ */
+export const PARTS = {
+  /** A door: as wide as a body passes and as tall as a person. */
+  door: { width: 0.55, height: 1.5 },
+  /** A storey: the clear height where one stands, floor to ceiling. */
+  storey: { clear: 1.5 },
+  /** A room: the side of the largest square of covered floor where one stands. */
+  room: { side: 1.4 },
+  /** A lean-to (a roof on posts, open on the sides): one stands under it, and it is deep enough to keep something dry. */
+  shelter: { clear: 1.5, depth: 1 },
+} as const;
+
+/** The least measures of the parts in voxels at a density (rounded up: never under the measure in tiles). */
+export function partVoxels(vpt: number) {
+  const v = (t: number) => Math.ceil(t * vpt - 1e-9);
+  return {
+    door: { width: v(PARTS.door.width), height: v(PARTS.door.height) },
+    storey: { clear: v(PARTS.storey.clear) },
+    room: { side: v(PARTS.room.side) },
+    shelter: { clear: v(PARTS.shelter.clear), depth: v(PARTS.shelter.depth) },
+  };
 }
 
 /** A guess from the name and description, for assets that do not say. */

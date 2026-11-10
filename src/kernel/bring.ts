@@ -12,7 +12,7 @@ import { internalCardsIn, internalFields } from './internalNames';
 import { UNIVERSE_NAME_RE } from './paths';
 import type { CardChoice, FileMap } from './types';
 import { validWandererId } from './wandererIds';
-import { classOf, densityOf, sizeOf, tilesOf, TILE } from '../mj/classes';
+import { classOf, densityFor, densityOf, growsByRules, sizeOf, TILE, tilesOf } from '../mj/classes';
 import { soundPrograms, SOUND_CLASS, type SoundPurpose } from '../mj/sound';
 
 /** A card the master chooses: a model or a sound of a universe, or a handmade card. Only names: what it is, the store reads from the disk. */
@@ -129,10 +129,13 @@ export type BringSource =
     };
 
 /** The size of an entry and the density its box runs at (as `modelSize` writes them): only a size that is not its class's own. */
-function sized(classe: string, size: unknown): Pick<ModelInfo, 'size' | 'vpt'> {
+function sized(classe: string, size: unknown, own?: unknown, handmade = false): Pick<ModelInfo, 'size' | 'vpt'> {
   const cls = classOf(classe), t = sizeOf(typeof size === 'string' ? size : undefined);
   if (!cls || !t || t.id === cls.taglia) return {};
-  const vpt = densityOf(tilesOf(cls, t.id));
+  // A structure that grows by rules keeps the density it was sculpted at (ADR-0179): 16 at Huge before, TILE at every size now.
+  const kept = growsByRules(cls, t.id) && typeof own === 'number' && Number.isInteger(own) && own >= 4 && own <= TILE ? own : undefined;
+  // A handmade card runs where it was tried, under MAX_SIDE (its ceilings, ADR-0161).
+  const vpt = kept ?? (handmade ? densityOf(tilesOf(cls, t.id)) : densityFor(cls, t.id));
   return { size: t.id, ...(vpt !== TILE ? { vpt } : {}) };
 }
 
@@ -154,7 +157,7 @@ export function broughtEntry(src: BringSource, master: string): { info: ModelInf
   if (typeof classe !== 'string' || (src.kind === 'model' && !classOf(classe))) return { error: 'un modello senza una classe che questo kernel conosce' };
   const e: Record<string, any> = 'handmade' in src ? { size: src.size } : src.entry;
   const info: ModelInfo = { class: classe, name: src.name };
-  if (src.kind === 'model') Object.assign(info, sized(classe, e.size));
+  if (src.kind === 'model') Object.assign(info, sized(classe, e.size, e.vpt, 'handmade' in src));
   if (Number.isInteger(e.cellar) && e.cellar >= 1 && e.cellar <= 3) info.cellar = e.cellar;
   if (Number.isInteger(e.seeds) && e.seeds >= 1 && e.seeds <= 8) info.seeds = e.seeds;
   if (typeof e.score === 'number' && Number.isFinite(e.score)) info.score = Math.max(0, Math.min(10, Math.round(e.score)));

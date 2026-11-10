@@ -8,8 +8,8 @@
 // enough, does not fill its box) and goes back with the reason while it does not pass.
 
 import type { Schema } from '../ai/models';
-import { analyse } from '../../mj/check';
-import { boxOf, classOf, CLASSES, densityOf, RARE_SIZES, sizeOf, sizeRank, SIZE_TIERS, TILE, tilesOf, type AssetClass, type SizeTier } from '../../mj/classes';
+import { analyse, compositionOf, partErrors, varietyError, type Composition } from '../../mj/check';
+import { boxOf, classOf, CLASSES, densityFor, growsByRules, partVoxels, PARTS, RARE_SIZES, sizeOf, sizeRank, SIZE_TIERS, TILE, tilesOf, type AssetClass, type SizeTier } from '../../mj/classes';
 import { Mj3Error, type RunResult, type Vec3 } from '../../mj/engine';
 import { compileMjx, mjxIncludes, type MjxFiles, type MjxModel } from '../../mj/model';
 import { MJ_PALETTE } from '../../mj/palette';
@@ -18,7 +18,7 @@ import { pngDataUrl } from '../../mj/png';
 import { act, runMjx } from '../../mj/run';
 import { isNoteLine, symbolName } from '../../mj/symbols';
 import { traceText } from '../../mj/trace';
-import { reachableStoreys } from '../forms';
+import { habitableParts } from '../forms';
 import type { FileMap } from '../types';
 import { internalFields } from '../internalNames';
 import { isTileset, WORLD_NODE_LIMITS, worldNodeErrors } from '../validator';
@@ -107,7 +107,7 @@ const sizesLine = () => `  Sizes (D&D): ${SIZE_TIERS.map((t) => `${t.id} ×${t.s
  * Their prompt is the procedural one (the skeleton of the bench, T182), the program has no box of its own (`size`), so one
  * program serves every size (`shareableProgram`), and it is tried at more seeds and at the next size.
  */
-export const procedural = (cls: AssetClass, taglia?: string): boolean => cls.id === 'structure' && sizeRank(sizeOf(taglia)?.id ?? cls.taglia) >= sizeRank('large');
+export const procedural = (cls: AssetClass, taglia?: string): boolean => growsByRules(cls, taglia);
 
 /** The sizes a procedural program is tried at: its own and the next (the last one, Gargantuan, with the one before). */
 export function triedSizes(cls: AssetClass, taglia?: string): SizeTier[] {
@@ -198,6 +198,8 @@ interface Checked {
   failedAt?: { taglia: SizeTier; seed: number };
   model?: MjxModel;
   result?: RunResult;
+  /** What a procedural structure contains at this size (T338): a larger size must contain more. */
+  composition?: Composition;
   error?: string;
 }
 
@@ -233,13 +235,26 @@ export function checkProgram(xml: string, cls: AssetClass, taglia?: string, file
   const [own, next] = triedSizes(cls, taglia);
   const tries: Array<[SizeTier, number]> = [...Array.from({ length: STRUCTURE_SEEDS }, (_, i): [SizeTier, number] => [own, i + 1]), [next, 1]];
   let first: Checked | undefined;
+  let other: Checked | undefined;
   for (const [t, seed] of tries) {
     const c = checkOnce(xml, cls, t, seed, files);
     first ??= c;
+    if (t === next) other = c;
     if (c.error) return { ...c, xml, failedAt: { taglia: t, seed }, error: `taglia ${sizeOf(t)!.name}, seme ${seed}: ${c.error}` };
   }
+  // A larger size contains more, not the same drawn bigger (T338, ADR-0179): the first seed at the two sizes.
+  const [small, large] = sizeRank(own) < sizeRank(next) ? [first!, other!] : [other!, first!];
+  const [smallT, largeT] = sizeRank(own) < sizeRank(next) ? [own, next] : [next, own];
+  const v = small.composition && large.composition && varietyError(small.composition, large.composition, sizeOf(smallT)!.name, sizeOf(largeT)!.name);
+  if (v) return { ...first!, xml, failedAt: { taglia: largeT, seed: 1 }, error: v };
   return first!;
 }
+
+/**
+ * How tall a model of a class must be at a size: a share of its box; a structure that grows by rules a share of its class's own box,
+ * at every size (T338): a larger area adds what fits, and need not be taller.
+ */
+export const leastHeight = (cls: AssetClass, taglia?: string): number => Math.round((cls.minHeight ?? 0) * boxOf(cls, procedural(cls, taglia) ? undefined : taglia)[2]);
 
 function checkOnce(xml: string, cls: AssetClass, taglia: string | undefined, seed: number, files: MjxFiles = {}): Checked {
   const box = boxOf(cls, taglia);
@@ -251,16 +266,20 @@ function checkOnce(xml: string, cls: AssetClass, taglia: string | undefined, see
     if (nodes.length) return { xml, model, error: nodes.join('; ') };
     const result = runMjx(model, seed, { deadline: 8_000, ceilings: WORLD_NODE_LIMITS });
     if (!result.finished) return { xml, model, error: 'il programma non finisce in 8 secondi: ogni crescita deve avere steps' };
-    const a = analyse(result, model.program.palette, { grounded: true, minHeight: Math.round((cls.minHeight ?? 0) * box[2]) });
+    const a = analyse(result, model.program.palette, { grounded: true, minHeight: leastHeight(cls, taglia) });
     const notes = [...a.errors];
     const cells = result.grid.X * result.grid.Y * result.grid.Z;
     if (a.voxels > cells * 0.85) notes.push(`riempie il ${Math.round((a.voxels / cells) * 100)}% della scatola: qualcosa cresce senza limite (manca steps?) o la prima lettera di values non è la cella vuota`);
+    let composition: Composition | undefined;
     if (procedural(cls, taglia) && !notes.length) {
-      const vpt = densityOf(tilesOf(cls, taglia));
-      const storeys = reachableStoreys(result.grid, model.program.palette, vpt, 0, model.actions, seed);
-      if (storeys.length < 2) notes.push(`piani: ${storeys.length} (serve ≥ 2)`);
+      // The storeys reached (ADR-0162) and the parts one lives in at their least measures, the same at every size (T338, ADR-0179).
+      const vpt = densityFor(cls, taglia);
+      const parts = habitableParts(result.grid, model.program.palette, vpt, partVoxels(vpt).storey.clear, 0, model.actions, seed);
+      if (parts.storeys.length < 2) notes.push(`piani: ${parts.storeys.length} (serve ≥ 2)`);
+      notes.push(...partErrors(parts, vpt));
+      if (seed === 1) composition = compositionOf(result.grid, model.program.palette);
     }
-    return { xml, model, result, ...(notes.length ? { error: notes.join('; ') } : {}) };
+    return { xml, model, result, ...(composition ? { composition } : {}), ...(notes.length ? { error: notes.join('; ') } : {}) };
   } catch (e) {
     return { xml, error: e instanceof Mj3Error ? e.message : `errore: ${(e as Error).message}` };
   }
@@ -283,7 +302,7 @@ export function describe(req: SculptRequest, cls: AssetClass): string {
     `Sculpt: ${req.nome}`,
     `What it looks like: ${req.aspetto}`,
     req.contesto && `Where it is: ${req.contesto}`,
-    `Class: ${cls.id}${size && size.id !== cls.taglia ? ` · size ${size.id} (${tiles.join(' × ')} tiles, ${densityOf(tiles)} voxels per tile)` : ''} · box ${box.join(' × ')} voxels${cls.minHeight ? ` · at least ${Math.round(cls.minHeight * box[2])} tall` : ''}`,
+    `Class: ${cls.id}${size && size.id !== cls.taglia ? ` · size ${size.id} (${tiles.join(' × ')} tiles, ${densityFor(cls, req.taglia)} voxels per tile)` : ''} · box ${box.join(' × ')} voxels${cls.minHeight ? ` · at least ${leastHeight(cls, req.taglia)} tall` : ''}`,
     req.tinta && 'It serves many things of this kind: the main colour is the letter C (the game recolours it for each one).',
     procedural(cls, req.taglia) && bodyLine(cls, req.taglia),
   ]
@@ -291,14 +310,24 @@ export function describe(req: SculptRequest, cls: AssetClass): string {
     .join('\n');
 }
 
-/** What a procedural structure's message says of the body at its size, and of the size that shares the program (as the bench says it, T154). */
+/**
+ * What a procedural structure's message says of the body at its size, and of the size that shares the program (as the bench says it, T154);
+ * the parts that do not shrink and what a larger size must add (T338, ADR-0179).
+ */
 function bodyLine(cls: AssetClass, taglia?: string): string {
   const [own, next] = triedSizes(cls, taglia);
   const body = (t: SizeTier) => {
-    const vpt = densityOf(tilesOf(cls, t));
+    const vpt = densityFor(cls, t);
     return `a tile is ${vpt} voxels, a step ${Math.round(0.2 * vpt)}, a person ${Math.ceil(1.5 * vpt)} tall`;
   };
-  return `Body: ${body(own)}. The same program also serves the size ${next} (box ${boxOf(cls, next).join(' × ')}, ${body(next)}) and runs with ${STRUCTURE_SEEDS} seeds: each one is another building of the same kind.`;
+  const area = (t: SizeTier) => tilesOf(cls, t).slice(0, 2).join(' × ');
+  const p = partVoxels(densityFor(cls, own));
+  const larger = sizeRank(next) > sizeRank(own);
+  return [
+    `Body: ${body(own)}; the area is ${area(own)} tiles.`,
+    `Parts that never shrink, at every size: a door at least ${p.door.width} × ${p.door.height}, a room at least ${p.room.side} a side under a ceiling at least ${p.storey.clear} up, a lean-to at least ${p.shelter.clear} clear and ${p.shelter.depth} deep (${PARTS.room.side} tiles a room). Build what fits at their measure: if the whole building does not fit, build less of it, not a smaller one (a small fort is one tower with a wide base, a small farm a house with a lean-to and the hay behind).`,
+    `The same program also serves the size ${next} (box ${boxOf(cls, next).join(' × ')}, ${area(next)} tiles, ${body(next)}): ${larger ? 'there it must contain more' : 'here it must contain more than there'}, another kind of part or a quarter more parts (an annex, a fence, fields, a wall, towers), not the same building bigger. It runs with ${STRUCTURE_SEEDS} seeds: each one is another building of the same kind.`,
+  ].join('\n');
 }
 
 /** What a procedural program did, node by node (T179), where it fell or at its first seed: the second request carries it. */

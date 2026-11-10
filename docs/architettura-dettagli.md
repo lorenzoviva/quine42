@@ -844,6 +844,25 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   `ModelDirector` dà a una taglia nuova il programma di un'altra (`shared`, senza chiamate) se è la stessa taglia (una voce di prima, senza
   suffisso) o se il programma scala (`shareableProgram`); la voce dice i suoi semi (`ModelInfo.seeds`, `seedsOf`). Il validatore prova un
   programma senza `size` della classe `structure` nella scatola della sua voce (`Validator.modelBox`, `Forms.structureBox`).
+- **Ciò che entra, non l'edificio rimpicciolito** (ADR-0179, T338): una struttura che cresce a regole (`growsByRules` in `src/mj/classes.ts`)
+  gira a `TILE` (20) voxel per casella a ogni taglia fino a `STRUCTURE_SIDE` (200): Grande 100, Enorme 150, Gargantuesca 200 voxel di lato
+  (`densityFor`), così una taglia più grande è un'area più grande alla stessa scala. Una voce scolpita prima tiene la sua scatola: la scatola di
+  una voce è la sua taglia alla densità che la voce dice (`entryBox` in `forms.ts`: `vpt` 16 all'Enorme, 120 voxel), una nuova non scrive
+  `vpt` (`modelSize`); una carta portata tiene il suo (`bring.ts`). Le parti abitabili hanno misure minime in caselle, le stesse a ogni
+  taglia (`PARTS`, `partVoxels`): porta 0,55 × 1,5 (11 × 30 a 20), piano 1,5 di luce, stanza 1,4 di lato, tettoia 1,5 di luce e 1 di
+  fondo. `habitableParts` (`forms.ts`) le misura sulla griglia: i piani raggiunti a piedi (`reachableStoreys`), le stanze su ogni
+  pavimento coperto dove sta un corpo, raggiunto o no (il lato del quadrato più grande con il soffitto ad almeno la luce di un piano,
+  il corpo compreso), le porte dalle celle che l'azione `open` cambia. In `checkProgram` (`checkOnce`) una parte sotto la sua misura
+  è un errore col motivo (`partErrors` in `src/mj/check.ts`: la fattoria di 5 × 5 di prima ha la stanza di 0,6-1,3 caselle); al primo seme
+  delle due taglie provate la più grande deve contenere di più (`compositionOf`: le parti sono i pezzi di una lettera di almeno
+  `MIN_PART` voxel; `varietyError`: un tipo di parte in più o un quarto di parti in più, `failedAt` alla più grande). L'altezza minima
+  di una struttura che cresce a regole è quella della scatola della sua classe (`leastHeight`): l'area cresce, l'altezza non deve. Il
+  prompt procedurale e il messaggio (`bodyLine`) dicono le misure e il metodo: il corpo principale a `steps`, il resto che cresce fino
+  al bordo, una parte dove un pattern di terreno libero della sua misura combacia (un nodo che non trova niente non fa niente); lo
+  scheletro aggiunge un muro di cinta a 150 e un viale a 200 (la sua sezione 7). Il validatore e i modelli del seme non applicano le
+  misure: le chiede lo Scultore a ciò che scrive. Le carte fatte a mano restano alla densità di prima (`boxUnderMaxSide`), dove sono
+  misurati i loro tetti. Il banco: `lab/banco/taglie/` (fattoria e forte alle tre taglie, `npx vite-node
+  lab/scripts/banco-taglie.ts`).
 
 <a id="taglie"></a>
 ## Le taglie

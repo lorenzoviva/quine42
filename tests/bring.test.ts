@@ -182,8 +182,13 @@ describe('le carte portate, pure (T295)', () => {
     expect(info).toEqual({ class: 'furniture', name: 'Barile', author: 'gemini-3.8-flash', score: 8, brought: 'fonte' });
     expect(card).toEqual({ author: 'sculptor', payer: 'comune', holder: 'me', origins: [{ holder: 'carla', universe: 'primo', fingerprint: [1, 2] }, { holder: 'anna', universe: 'fonte', fingerprint: fingerprint(contentText(info)) }] });
     // A size of D&D that is not the class's own is kept, with the density it runs at; one that is not a size is not.
-    const big = broughtEntry({ kind: 'model', universe: 'fonte', id: 'torre', entry: { class: 'structure', size: 'gargantuan', card: stamp('anna') }, xml: '<x/>', name: 'Torre' }, 'me');
-    expect('info' in big && big.info).toMatchObject({ size: 'gargantuan', vpt: expect.any(Number) });
+    // A structure that grows by rules keeps the density it was sculpted at (T338, ADR-0179): 12 at Gargantuan before, 20 now (not written).
+    const big = broughtEntry({ kind: 'model', universe: 'fonte', id: 'torre', entry: { class: 'structure', size: 'gargantuan', vpt: 12, card: stamp('anna') }, xml: '<x/>', name: 'Torre' }, 'me');
+    expect('info' in big && big.info).toMatchObject({ size: 'gargantuan', vpt: 12 });
+    const now = broughtEntry({ kind: 'model', universe: 'fonte', id: 'torre', entry: { class: 'structure', size: 'gargantuan', card: stamp('anna') }, xml: '<x/>', name: 'Torre' }, 'me');
+    expect('info' in now && now.info.size === 'gargantuan' && now.info.vpt).toBeUndefined();
+    const beast = broughtEntry({ kind: 'model', universe: 'fonte', id: 'drago', entry: { class: 'beast', size: 'gargantuan', card: stamp('anna') }, xml: '<x/>', name: 'Drago' }, 'me');
+    expect('info' in beast && beast.info).toMatchObject({ size: 'gargantuan' });
     const odd = broughtEntry({ kind: 'model', universe: 'fonte', id: 'torre', entry: { class: 'structure', size: 'enorme', card: stamp('anna') }, xml: '<x/>', name: 'Torre' }, 'me');
     expect('info' in odd && odd.info.size).toBeUndefined();
     // A model of the seed is no card, and its chain must read.

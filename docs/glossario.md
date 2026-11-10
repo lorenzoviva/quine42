@@ -258,11 +258,25 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Fermo**: l'attributo `suolo` nei programmi.
 
 ### Struttura procedurale
-- **Inglese**: `procedural`, `shareableProgram`, `structureModel`, `STRUCTURE_SEEDS`, `ModelInfo.seeds`
+- **Inglese**: `procedural`, `growsByRules`, `shareableProgram`, `structureModel`, `STRUCTURE_SEEDS`, `ModelInfo.seeds`, `STRUCTURE_SIDE`, `densityFor`, `entryBox`
 - **Definizione**: una struttura grande (classe `structure`, da Grande in su) il cui programma cresce a regole, senza una scatola sua: un seme è un altro edificio dello stesso genere, e lo stesso programma serve più taglie, una voce della libreria per taglia.
 - **Dove vive**: `src/kernel/agents/sculptor.ts`, `src/kernel/modeldirector.ts`, `src/kernel/forms.ts`
 - **Da non usare**: «struttura parametrica»
 - **Fermo**: il campo `seeds` in `models/index.json`; il suffisso della taglia negli id `struttura-<concetto>-<taglia>`.
+
+### Parti abitabili
+- **Inglese**: `PARTS`, `partVoxels`, `habitableParts`, `partErrors`, `HabitableMeasure`
+- **Definizione**: le parti di una struttura in cui si vive (porta, piano, stanza, tettoia), con le loro misure minime in caselle, le stesse a ogni taglia: una struttura piccola ne ha meno, non più piccole (ADR-0179).
+- **Dove vive**: `src/mj/classes.ts`, `src/mj/check.ts`, `src/kernel/forms.ts`, `src/kernel/agents/sculptor.ts`
+- **Da non usare**: «stanze minime», «misure abitabili»
+- **Fermo**: nessuno (le misure stanno nel codice, non su disco).
+
+### Composizione
+- **Inglese**: `Composition`, `compositionOf`, `varietyError`, `MIN_PART`
+- **Definizione**: ciò che una struttura contiene a una taglia, contato in parti (i pezzi di una lettera di almeno `MIN_PART` voxel) e tipi di parti (le lettere): a una taglia più grande lo stesso programma deve contenere di più, «ciò che entra» (ADR-0179).
+- **Dove vive**: `src/mj/check.ts`, `src/kernel/agents/sculptor.ts`
+- **Da non usare**: «varietà delle parti» per il dato (è il controllo)
+- **Fermo**: nessuno.
 
 ### Cantina
 - **Inglese**: `cellar`, `cellarOf`, `sunk`

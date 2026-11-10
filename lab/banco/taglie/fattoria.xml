@@ -1,0 +1,154 @@
+<!--
+Farm that fits its size (T338, lab/banco/taglie/README.md): one program, three areas at the same scale (20 voxels a tile). At 5 × 5
+tiles (100 voxels) a house of normal size in two storeys (rooms of 31 voxels, a door of 11 × 30, a stair of 16 steps) with a lean-to
+behind it and the hay under it; where the ground goes on past the yard (7.5 × 7.5 tiles) a fence with the road as its gate and the
+fields around it; where a free square of 41 × 41 is left past the fence (10 × 10 tiles), a barn, and sheep at pasture where the fields
+end. No number of the box: what fits is found by the patterns of free ground. Written by lab/banco/taglie/genera.mjs.
+-->
+<sequence values="BHEXSIQRrWNDnOohjUKTakPYVFZymfLGgACcxeutv#6#7" symmetry="(xy)" soil="E" origin="bottom">
+  <color symbol="R" value="a5482e" name="coppi"/><color symbol="r" value="7e3424" name="coppi in ombra"/>
+  <color symbol="W" value="e8dcc0" name="intonaco"/><color symbol="w" value="d4c6a4" name="intonaco scrostato"/>
+  <color symbol="N" value="6b4a2e" name="travi"/><color symbol="D" value="7d766c" name="pietra"/>
+  <color symbol="n" value="8e6a44" name="assito"/><color symbol="O" value="7a4a26" name="porta"/><color symbol="o" value="5e3a1e" name="asse scura"/>
+  <color symbol="U" value="86b8c8" alpha="0.5" name="vetro"/><color symbol="K" value="8e8578" name="comignolo"/><color symbol="k" value="9a7048" name="scala"/>
+  <color symbol="P" value="a89c86" name="ghiaia"/><color symbol="V" value="8a6a3a" name="tetto della tettoia"/><color symbol="F" value="7a5634" name="pali"/>
+  <color symbol="Z" value="d8b84a" name="paglia"/><color symbol="f" value="5e4026" name="paletti"/><color symbol="L" value="8e6a44" name="traverse"/>
+  <color symbol="G" value="5a4030" name="terra dei campi"/><color symbol="g" value="9ab04a" name="grano"/>
+  <color symbol="C" value="9a3a2a" name="tavole del fienile"/><color symbol="c" value="4a3a32" name="tetto del fienile"/>
+  <color symbol="e" value="eeeae0" name="lana"/><color symbol="u" value="3a3030" name="muso"/>
+  <color symbol="H" hidden="True"/><color symbol="E" hidden="True"/><color symbol="X" hidden="True"/><color symbol="S" hidden="True"/><color symbol="I" hidden="True"/><color symbol="Q" hidden="True"/><color symbol="T" hidden="True"/><color symbol="t" hidden="True"/><color symbol="a" hidden="True"/><color symbol="Y" hidden="True"/><color symbol="y" hidden="True"/><color symbol="m" hidden="True"/><color symbol="A" hidden="True"/><color symbol="x" hidden="True"/><color symbol="v" hidden="True"/><color symbol="h" hidden="True"/><color symbol="j" hidden="True"/><color symbol="#6" hidden="True"/><color symbol="#7" hidden="True"/>
+
+  <!-- 1. The house: a line of 55 from the centre, 8 more at its ends by chance, 35 deep; the lean-to 20 behind it. -->
+  <all in="HE" out="*H" symmetry="(x)" steps="27"/>
+  <one in="HE" out="*H" symmetry="(x)" steps="8"/>
+  <all in="H/E" out="*/H" symmetry="()" steps="17"/>
+  <all in="E/H" out="H/*" symmetry="()" steps="17"/>
+  <all in="E/H" out="Y/*" symmetry="()" steps="1"/>
+  <all in="E/Y" out="Y/*" symmetry="()" steps="19"/>
+
+  <!-- 2. What fits around it: the yard (y) 16 at the sides, 12 behind, 28 in front; where 8 more are free past it, the fence (m);
+       a barn where a square of 41 × 41 is free past the fence: its yard (x) and its plan (A). -->
+  <all in="[HYy]E" out="*y" symmetry="(x)" steps="16"/>
+  <all in="E/[HYy]" out="y/*" symmetry="()" steps="12"/>
+  <all in="[HYy]/E" out="*/y" symmetry="()" steps="28"/>
+  <all in="yEEEEEEEE" out="*m*******"/>
+  <all in="Em/my" out="m*/**"/>
+  <one in="EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE" out="*****************************************/*xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx*/*xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx*/*xxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxx*/*xxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxx*/*xxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxx*/*xxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxx*/*xxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxx*/*xxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxx*/*xxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxx*/*xxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxx*/*xxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxx*/*xxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxx*/*xxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxx*/*xxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxx*/*xxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxx*/*xxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxx*/*xxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxx*/*xxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxx*/*xxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxx*/*xxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxx*/*xxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxx*/*xxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxx*/*xxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxx*/*xxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxx*/*xxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxx*/*xxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxx*/*xxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxx*/*xxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxx*/*xxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxx*/*xxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxx*/*xxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxx*/*xxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxx*/*xxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxx*/*xxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxx*/*xxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxx*/*xxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxx*/*xxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxx*/*xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx*/*xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx*/*****************************************" steps="1"/>
+
+  <!-- 3. The house rises: two storeys of 32, the slab between them (S), the roof on top, its gables in plaster. -->
+  <all in="B H" out="H *" steps="31"/>
+  <all in="B H" out="S *" steps="1"/>
+  <all in="B S" out="X *" steps="1"/>
+  <all in="B X" out="X *" steps="23"/>
+  <all in="B X" out="R *"/>
+  <all in="RB XB" out="*R **"/>
+  <all in="B R" out="Q *"/>
+  <all in="B Q" out="Q *" steps="24"/>
+  <all in="*/Q B/*" out="*/B */*" symmetry="(y)"/>
+  <prl in="Q" out="R" steps="1"/>
+  <prl in="RB" out="W*" symmetry="(x)" steps="1"/>
+  <prl in="B W" out="* R" steps="1"/>
+
+  <!-- 4. Digging: walls two thick; the floor below, the slab between the storeys, the ceiling under the roof; plinth, beams, corners. -->
+  <prl in="HHHHH/HHHHH/HHHHH/HHHHH/HHHHH" out="*****/*****/**I**/*****/*****" steps="1"/>
+  <prl in="XXXXX/XXXXX/XXXXX/XXXXX/XXXXX" out="*****/*****/**I**/*****/*****" steps="1"/>
+  <prl in="SSSSS/SSSSS/SSSSS/SSSSS/SSSSS" out="*****/*****/**n**/*****/*****" steps="1"/>
+  <prl in="R I" out="* n" steps="1"/>
+  <prl in="I *" out="B *" steps="1"/>
+  <prl in="I" out="n" steps="1"/>
+  <prl in="S" out="N" steps="1"/>
+  <prl in="X" out="W" steps="1"/>
+  <prl in="H *" out="W *" steps="1"/>
+  <prl in="H" out="D" steps="1"/>
+  <all in="W D" out="D *" steps="3"/>
+  <all in="R W" out="* N"/>
+  <all in="BB/BW" out="**/*N"/>
+
+  <!-- 5. The stair: a strip of 16 × 11 along the back wall, a landing of 10 by the corner, its hole in the slab, a walker that climbs 2 for every 1, solid under it. -->
+  <one in="DDDDDDDDDDDDDDDDDDDDDDDDDDD/DBBBBBBBBBBBBBBBBBBBBBBBBBB/DBBBBBBBBBBBBBBBBBBBBBBBBBB/DBBBBBBBBBBBBBBBBBBBBBBBBBB/DBBBBBBBBBBBBBBBBBBBBBBBBBB/DBBBBBBBBBBBBBBBBBBBBBBBBBB/DBBBBBBBBBBBBBBBBBBBBBBBBBB/DBBBBBBBBBBBBBBBBBBBBBBBBBB/DBBBBBBBBBBBBBBBBBBBBBBBBBB/DBBBBBBBBBBBBBBBBBBBBBBBBBB/DBBBBBBBBBBBBBBBBBBBBBBBBBB/DBBBBBBBBBBBBBBBBBBBBBBBBBB DDDDDDDDDDDDDDDDDDDDDDDDDDD/Dnnnnnnnnnnnnnnnnnnnnnnnnnn/Dnnnnnnnnnnnnnnnnnnnnnnnnnn/Dnnnnnnnnnnnnnnnnnnnnnnnnnn/Dnnnnnnnnnnnnnnnnnnnnnnnnnn/Dnnnnnnnnnnnnnnnnnnnnnnnnnn/Dnnnnnnnnnnnnnnnnnnnnnnnnnn/Dnnnnnnnnnnnnnnnnnnnnnnnnnn/Dnnnnnnnnnnnnnnnnnnnnnnnnnn/Dnnnnnnnnnnnnnnnnnnnnnnnnnn/Dnnnnnnnnnnnnnnnnnnnnnnnnnn/Dnnnnnnnnnnnnnnnnnnnnnnnnnn" out="***************************/***********TTTTTTTTTTTTTTTT/***********TTTTTTTTTTTTTTTT/***********TTTTTTTTTTTTTTTT/***********TTTTTTTTTTTTTTTT/***********TTTTTTTTTTTTTTTT/***********TTTTTTTTTTTTTTTT/***********TTTTTTTTTTTTTTTT/***********TTTTTTTTTTTTTTTT/***********TTTTTTTTTTTTTTTT/***********TTTTTTTTTTTTTTTT/***********TTTTTTTTTTTTTTTT ***************************/***************************/***************************/***************************/***************************/***************************/***************************/***************************/***************************/***************************/***************************/***************************" symmetry="()" steps="1"/>
+  <all in="B T" out="t *"/>
+  <all in="B t" out="t *"/>
+  <all in="n t" out="v *"/>
+  <prl in="t" out="B" steps="1"/>
+  <prl in="v" out="B" steps="1"/>
+  <all in="BT" out="*a" symmetry="()"/>
+  <all in="B a" out="a k" symmetry="()" steps="1"/>
+  <all in="*B ** a*" out="*a ** k*" symmetry="()" steps="15"/>
+  <prl in="a" out="k" steps="1"/>
+  <all in="k B" out="* k"/>
+  <prl in="T" out="k" steps="1"/>
+
+  <!-- 6. The door: 11 wide in the plinth of the front, through the wall, 30 high; its frame and planks. The road from it to the edge. -->
+  <one steps="1" symmetry="()" in="DDDDDDDDDDDDD/BBBBBBBBBBBBB DDDDDDDDDDDDD/yyyyyyyyyyyyy" out="*OOOOOOOOOOO*/************* *************/*************"/>
+  <all in="D/O" out="O/*" symmetry="()"/>
+  <all in="[DWN] O" out="O *" steps="29"/>
+  <all in="[DWN] O" out="N *" steps="1"/>
+  <all in="O[DW]" out="*N" steps="1"/>
+  <all in="OOO" out="*o*" symmetry="()"/>
+  <all in="[Oo]/B */y" out="*/* */P" symmetry="()"/>
+  <all in="P/[yEmx]" out="*/P" symmetry="()"/>
+
+  <!-- 7. Windows: a seed 10 under a beam, on the outer face; they grow down and sideways, through the wall; frame and cross. -->
+  <one steps="8" in="N/B W/B W/B W/B W/B W/B W/B W/B W/B W/B" out="*/* */* */* */* */* */* */* */* */* U/*"/>
+  <all in="U W" out="* U" steps="10"/>
+  <all in="UW" out="*U" steps="4"/>
+  <all in="UW" out="*N" steps="1"/>
+  <all in="W U" out="N *" steps="1"/>
+  <all in="UUUUUUUUU" out="****N****" optional="True"/>
+
+  <!-- 8. The lean-to: posts 35 high at its outer corners and every 11, its roof of boards; the hay under it against the wall. -->
+  <all in="EE/EY" out="**/*F"/>
+  <all in="yy/yY" out="**/*F"/>
+  <all in="EEEEEEEEEEEE/FYYYYYYYYYYY" out="************/***********F"/>
+  <all in="yyyyyyyyyyyy/FYYYYYYYYYYY" out="************/***********F"/>
+  <all in="B Y" out="Y *" steps="35"/>
+  <all in="B Y" out="V *" steps="1"/>
+  <all in="Y F" out="F *"/>
+  <prl in="Y *" out="B *" steps="1"/>
+  <prl in="Y" out="P" steps="1"/>
+  <one in="BBBBBBBBBBBBB/BBBBBBBBBBBBB/BBBBBBBBBBBBB/DDDDDDDDDDDDD PPPPPPPPPPPPP/PPPPPPPPPPPPP/PPPPPPPPPPPPP/DDDDDDDDDDDDD" out="ZZZZZZZZZZZZZ/ZZZZZZZZZZZZZ/ZZZZZZZZZZZZZ/************* *************/*************/*************/*************" symmetry="()" steps="3"/>
+  <all in="B Z" out="Z *" steps="9"/>
+
+  <!-- 9. The fence: a post every 5, rising 12; between them a rail at 7-8. -->
+  <all in="mmmmm" out="#7#7f#7#7" steps="1"/>
+  <prl in="#7" out="m" steps="1"/>
+  <all in="B f" out="f *" steps="12"/>
+  <all steps="7" symmetry="()"><rule in="B m" out="m #6"/></all>
+  <all steps="2" symmetry="()"><rule in="B m" out="m L"/></all>
+
+  <!-- 10. The barn: walls 36 high, two thick, its roof; an opening of 15 × 28 on one side. -->
+  <all in="B A" out="A *" steps="35"/>
+  <all in="B A" out="c *"/>
+  <all in="cB AB" out="*c **"/>
+  <all in="B c" out="Q *"/>
+  <all in="B Q" out="Q *" steps="30"/>
+  <all in="*/Q B/*" out="*/B */*" symmetry="(y)"/>
+  <prl in="Q" out="c" steps="1"/>
+  <prl in="cB" out="C*" symmetry="(x)" steps="1"/>
+  <prl in="AAAAA/AAAAA/AAAAA/AAAAA/AAAAA" out="*****/*****/**I**/*****/*****" steps="1"/>
+  <prl in="I *" out="B *" steps="1"/>
+  <prl in="I" out="P" steps="1"/>
+  <prl in="A" out="C" steps="1"/>
+  <one in="CCCCCCCCCCCCCCCCC/CCCCCCCCCCCCCCCCC/BBBBBBBBBBBBBBBBB CCCCCCCCCCCCCCCCC/CCCCCCCCCCCCCCCCC/xxxxxxxxxxxxxxxxx" out="*vvvvvvvvvvvvvvv*/*vvvvvvvvvvvvvvv*/***************** *****************/*****************/*****************" steps="1"/>
+  <all in="C v" out="v *" steps="27"/>
+  <prl in="v" out="B" steps="1"/>
+
+  <!-- 11. The fields: 22 around the fence (and up to the barn's yard), wheat on them; sheep where the ground is still free. -->
+  <all in="[#6fG]E" out="*G" symmetry="(x)" steps="22"/>
+  <all in="[#6fG]/E" out="*/G" symmetry="(y)" steps="22"/>
+  <prl in="B G" out="g *" p="0.45" steps="1"/>
+  <prl in="B g" out="g *" p="0.4" steps="1"/>
+  <one in="EEEEEEEEEEEE/EEEEEEEEEEEE/EEEEEEEEEEEE/EEEEEEEEEEEE/EEEEEEEEEEEE/EEEEEEEEEEEE/EEEEEEEEEEEE/EEEEEEEEEEEE/EEEEEEEEEEEE/EEEEEEEEEEEE/EEEEEEEEEEEE/EEEEEEEEEEEE" out="************/************/************/************/***eeeeee***/***eeeeeeuu*/***eeeeeeuu*/***eeeeee***/************/************/************/************" steps="7"/>
+  <all in="B e" out="e *" steps="4"/>
+  <all in="B u" out="u *" steps="6"/>
+
+  <!-- 12. Details and cleaning: the shade on the roofs, the chimney; the markers go. -->
+  <prl in="RB" out="r*" p="0.6" steps="1"/>
+  <prl in="W" out="w" p="0.02" steps="1"/>
+  <one in="B B R" out="* K *" steps="1"/>
+  <all in="KB" out="*K" steps="1"/>
+  <all in="B K" out="K *" steps="7"/>
+  <prl><rule in="E" out="B"/><rule in="y" out="B"/><rule in="m" out="B"/><rule in="#6" out="B"/><rule in="x" out="P"/><rule in="T" out="k"/></prl>
+  <action name="open" label="Apri la porta"><all><rule in="O" out="h"/><rule in="o" out="j"/></all></action>
+  <action name="close" label="Chiudi la porta"><all><rule in="h" out="O"/><rule in="j" out="o"/></all></action>
+</sequence>

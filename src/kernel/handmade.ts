@@ -5,7 +5,7 @@
 // process that checks a program (the world's program, `worldProcess.ts`) and the labs read the same.
 
 import { analyse } from '../mj/check';
-import { boxOf, classOf, CLASSES, SIZE_TIERS, type SizeTier } from '../mj/classes';
+import { boxUnderMaxSide, classOf, CLASSES, SIZE_TIERS, type SizeTier } from '../mj/classes';
 import { run, runOn, type Grid3, type GridLimits } from '../mj/engine';
 import { compileMjx } from '../mj/model';
 import { parseXml, XmlError } from '../mj/xml';
@@ -190,7 +190,7 @@ export function handmadeProgramErrors(q: HandmadeProgram, limits: HandmadeLimits
     }
     const cls = classOf(q.class)!;
     // The box as the game gives it (`Forms`): the program's own `size`, or its class's at its size.
-    const box = /\ssize="/.test(rootTag(q.xml)) ? undefined : boxOf(cls, q.size);
+    const box = /\ssize="/.test(rootTag(q.xml)) ? undefined : boxUnderMaxSide(cls, q.size);
     const m = compileMjx(q.xml, box ? { size: box } : {});
     if (m.sound) return ['questo programma è un suono (<sound>): salvalo come suono'];
     // The nodes of T333-T335 within the world's ceilings (T336, ADR-0176): a card reads no files, so no wfc, convchain or import.

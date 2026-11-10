@@ -57,7 +57,7 @@ describe('la libreria', () => {
 
   it.each([
     ['large', 20, [100, 100, 100]],
-    ['huge', 16, [120, 120, 112]],
+    ['huge', 20, [150, 150, 140]], // at TILE at every size (ADR-0179): Huge is 150 a side
   ] as const)('lo stesso XML a %s: il suolo è a z=%i, dove il modello è posato', async (taglia, base, box) => {
     const forms = forme(PROG, { classe: 'structure', ...modelSize({ classe: 'structure', taglia }), sotto: 1 });
     expect(forms.request('prova', 1)!.base).toBe(base);

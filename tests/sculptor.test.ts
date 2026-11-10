@@ -11,7 +11,7 @@ import { Council } from '../src/kernel/agents/council';
 import { checkProgram, DEFAULT_SCULPTORS, describe as describeRequest, modelFor, sculpt, withSize } from '../src/kernel/agents/sculptor';
 import { forgedSize } from '../src/kernel/agents/forge';
 import { modelSize } from '../src/kernel/modeldirector';
-import { boxOf, classOf, densityOf, MAX_SIDE, SIZE_TIERS, tilesOf } from '../src/mj/classes';
+import { boxOf, classOf, densityFor, densityOf, MAX_SIDE, SIZE_TIERS, STRUCTURE_SIDE, TILE, tilesOf } from '../src/mj/classes';
 import { encodePng } from '../src/mj/png';
 import type { FormComp } from '../src/kernel/forms';
 
@@ -133,19 +133,23 @@ describe('the sizes of D&D (ADR-0092)', () => {
     expect(tilesOf(persona, 'large')).toEqual([2, 1.5, 3]);
     expect(tilesOf(grande, 'huge')).toEqual([7.5, 7.5, 6]);
     expect(tilesOf(grande, 'gargantuan')).toEqual([10, 10, 8]);
-    // A box past MAX_SIDE voxels runs at a coarser density: a request «Enorme» gives the right box.
+    // A box past MAX_SIDE voxels runs at a coarser density (a Huge beast); a structure that grows by rules keeps TILE voxels a tile
+    // up to STRUCTURE_SIDE (T338, ADR-0179): a larger size is a larger area at the same scale.
     expect(densityOf(tilesOf(grande, 'huge'))).toBe(16);
-    expect(boxOf(grande, 'huge')).toEqual([120, 120, 96]);
-    expect(boxOf(grande, 'gargantuan')).toEqual([120, 120, 96]);
-    expect(Math.max(...boxOf(grande, 'gargantuan'))).toBeLessThanOrEqual(MAX_SIDE);
-    // The index entry says it, so the library runs the model in the box it was sculpted in.
-    expect(modelSize({ classe: 'structure', taglia: 'huge' })).toEqual({ size: 'huge', vpt: 16 });
+    expect(densityFor(classOf('beast')!, 'gargantuan')).toBe(densityOf(tilesOf(classOf('beast')!, 'gargantuan')));
+    expect(densityFor(grande, 'huge')).toBe(TILE);
+    expect(boxOf(grande, 'huge')).toEqual([150, 150, 120]);
+    expect(boxOf(grande, 'gargantuan')).toEqual([200, 200, 160]);
+    expect(Math.max(...boxOf(grande, 'gargantuan'))).toBeLessThanOrEqual(STRUCTURE_SIDE);
+    expect(Math.max(...boxOf(classOf('beast')!, 'gargantuan'))).toBeLessThanOrEqual(MAX_SIDE);
+    // The index entry says it, so the library runs the model in the box it was sculpted in: a new structure at TILE says no density.
+    expect(modelSize({ classe: 'structure', taglia: 'huge' })).toEqual({ size: 'huge' });
     expect(modelSize({ classe: 'structure', taglia: 'large' })).toEqual({});
     expect(modelSize({ classe: 'person', taglia: 'small' })).toEqual({ size: 'small' });
     // The Sculptor reads the size and the box.
     const text = describeRequest({ id: 'x', nome: 'la cittadella', aspetto: 'mura', classe: 'structure', taglia: 'huge' }, grande);
-    expect(text).toContain('size huge (7.5 × 7.5 × 6 tiles, 16 voxels per tile)');
-    expect(text).toContain('box 120 × 120 × 96 voxels');
+    expect(text).toContain('size huge (7.5 × 7.5 × 6 tiles, 20 voxels per tile)');
+    expect(text).toContain('box 150 × 150 × 120 voxels');
     // Six sizes, Gargantuan the largest; a forged entity never takes the two rare ones.
     expect(SIZE_TIERS.map((t) => t.id)).toEqual(['tiny', 'small', 'medium', 'large', 'huge', 'gargantuan']);
     // The Forge still hears the Italian sizes (T310): the one meant.

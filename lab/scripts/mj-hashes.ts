@@ -89,7 +89,7 @@ export function voci(semi = [1, 2]): Voce[] {
             const b: Bersaglio = { ...bersaglio(id)!, taglia };
             const s = scatolaDi(b);
             const scritto = withSize(fs.readFileSync(path.join(ROOT, `lab/banco/${file}.xml`), 'utf8'), s.box);
-            const info = { class: b.classe, ...modelSize(b), ...(b.sotto ? { cellar: b.sotto } : {}) };
+            const info = { class: b.classe, ...modelSize(b), vpt: s.vpt, ...(b.sotto ? { cellar: b.sotto } : {}) };
             const f = new Forms(new InlineRunner(new FormCache()));
             f.load({ 'models/prova.xml': scritto, 'models/index.json': JSON.stringify({ prova: info }) });
             const q = f.request('prova', seme)!;
