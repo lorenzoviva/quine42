@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 12/11/2026, epoca 356 (claude). Crediti: vedi `stato`.
+Aggiornato il 12/11/2026, epoca 357 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -11,7 +11,7 @@ Aggiornato il 12/11/2026, epoca 356 (claude). Crediti: vedi `stato`.
 - **Nuovo generatore MJ (autore, 10/11):** D48 chiusa con D integrata (T346 approvato: porte torri, merli, feritoie, staccionata, via animali dal modello MJ verso Narratore/Scenografo, campi incastrati e varianza T339 + architettura T338, tetti gargantua con `<pieces>`).
 - **Vestiti e armature (step 40):** T290 integrato (ADR-0180, `<worn>`); T353 integrato (ADR-0181, kernel 0.6.5: abiti degli individui dalla scheda o dal mestiere); mancano cambio d’abito dopo l’individuazione, abiti nella scheda dell’Attore, gambe/piedi/mani.
 - **Launcher (D51.2):** T233 integrato (`492b5e5e`): la home è il launcher; «in gioco ora» provato solo con `/api/session` simulata.
-- **Jev nel gioco (D45):** T348 integrato (varco `TypeSafeGate`, strato `decide`, ADR-0157 accettato, V-034 chiusa); non provato contro TypeSafe vero; segue T349.
+- **Jev nel gioco (D45):** T348 integrato (kernel 0.6.6 con T357) (varco `TypeSafeGate`, strato `decide`, ADR-0157 accettato, V-034 chiusa); non provato contro TypeSafe vero; segue T349.
 - **Campagna del Master (autore, 10/11):** spese universo a carico del master, universo privato su invito, velocità/pausa di generazione, direttive della campagna nel Referente iniettate per competenza, controllo preventivo cartografia → proposto T347 (step 43).
 - **Claude Fable (autore, 10/11):** reset settimanale giovedì 12/11 16:00; adozione intensiva da giovedì per massimizzare il reset di Fable (portare Fable a 100% con altri <50%, poi reset).
 - **Domande chiuse (10/11):** D45 (Jev, ZDR spiegato), D47 (vestiti C+B), D48 (strutture D integrata), D49 (carte solo uso reale), D50 (gestito + self-hosting in VI), D51 (T345 e contatore vesti).
@@ -21,9 +21,9 @@ Aggiornato il 12/11/2026, epoca 356 (claude). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **In corso/pronti:** T357 (claude, p1: kernel 0.6.6 dopo T353+T348, suite insieme), T346 (fable high), T345, T347 (fable high, approvato), T349→T350 (Jev nel gioco, D45), T352; bloccati T351, T354→T355 (non prima del 15/11), T356.
+0. **In corso/pronti:** T346 (fable high, in corso), T345, T347 (fable high, approvato), T349→T350 (Jev nel gioco, D45), T352; bloccati T351, T354→T355 (non prima del 15/11), T356.
 1. **Da approvare dall'autore:** T310b (lingua interna campi schemi, extra 6% p4).
-2. **Crediti (12/11 23:15):** Claude settimana 91 %, 5h 77 % (reset 02:59 UTC); Fable settimana 91 %, 5h 75 %; Gemini 98 %; Argon 92 %; agy 100 %. Generatore acceso, fermo (avanzo negativo).
+2. **Crediti (12/11 23:40):** Claude settimana 90 %, 5h 55 % (reset 03:00 UTC); Fable settimana 88 %, 5h 55 %; Gemini 98 %; Argon 92 %; agy 100 %. Generatore acceso, fermo (avanzo negativo).
 
 ## Attese dall'autore
 
@@ -37,5 +37,5 @@ Aggiornato il 12/11/2026, epoca 356 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **357 (claude):** T357 integrato (kernel 0.6.6, suite 3030 verde con T353+T348).
 - **356 (claude):** T353 e T348 integrati (entrambi a kernel 0.6.5) → T357 per 0.6.6 e la suite insieme.
-- **355 (argon):** rotazione su Argon per finestra 5h di Claude a 0 % (reset 22:00 UTC); T353 in attesa del reset (22:01 UTC).
