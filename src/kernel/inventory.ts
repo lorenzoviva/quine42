@@ -1,8 +1,9 @@
-// Inventories: fixed slots, stacks, weight, one equipped slot. Pure functions over component data,
+// Inventories: fixed slots, stacks, weight, one equipped slot, the slots worn on the body (T290). Pure functions over component data,
 // shared by the player and by NPCs (who can give things away).
 
 import { readThing, thingSeed, type CarriedThing } from './moving';
 import type { ItemSpec } from './types';
+import type { WornZone } from '../mj/worn';
 
 export interface Slot {
   item: string;
@@ -17,6 +18,11 @@ export interface Inventory {
   slots: Array<Slot | null>;
   /** Index of the equipped slot (the item held in hand), or null. */
   equipped: number | null;
+  /**
+   * What is worn on the body (T290, ADR-0180): zone → the slot of the thing, which stays in the inventory. A mark follows its thing
+   * when it moves, and goes when its slot empties; absent when nothing is worn. Who reads it does not trust it (`wornSlots`).
+   */
+  worn?: Partial<Record<WornZone, number>>;
 }
 
 export const SLOTS = 24;
@@ -31,6 +37,34 @@ export function newInventory(size = SLOTS): Inventory {
 }
 
 const maxStack = (spec: ItemSpec | undefined) => (spec?.stackable ? Math.max(1, spec.maxStack) : 1);
+
+/** The zones whose mark is on a slot. */
+const wornAt = (inv: Inventory, i: number): WornZone[] => (inv.worn ? (Object.keys(inv.worn) as WornZone[]).filter((z) => inv.worn![z] === i) : []);
+
+/** What a slot has on comes off (T290): the thing stays where it is. */
+export function takeOff(inv: Inventory, i: number): void {
+  if (!inv.worn) return;
+  for (const z of wornAt(inv, i)) delete inv.worn[z];
+  if (!Object.keys(inv.worn).length) delete inv.worn;
+}
+
+/** A slot that emptied: what was held or worn from it is not any more. */
+export function emptied(inv: Inventory, i: number): void {
+  if (inv.equipped === i) inv.equipped = null;
+  takeOff(inv, i);
+}
+
+/** The marks worn on two slots trade places (a swap), or those of `from` go to `to` (a stack merged whole). */
+function moveWorn(inv: Inventory, from: number, to: number, swap: boolean): void {
+  if (!inv.worn) return;
+  const a = wornAt(inv, from);
+  const b = swap ? wornAt(inv, to) : [];
+  for (const z of a) inv.worn[z] = to;
+  for (const z of b) inv.worn[z] = from;
+}
+
+/** Whether a slot is worn (T290). */
+export const isWorn = (inv: Inventory, i: number): boolean => wornAt(inv, i).length > 0;
 
 /** Adds up to n items; returns how many fit. */
 export function addItem(inv: Inventory, item: string, n: number, spec: ItemSpec | undefined): number {
@@ -53,10 +87,11 @@ export function addItem(inv: Inventory, item: string, n: number, spec: ItemSpec 
   return Math.floor(n) - left;
 }
 
-/** Removes up to n items (equipped slot last); returns how many were removed. */
+/** Removes up to n items (equipped and worn slots last); returns how many were removed. */
 export function removeItem(inv: Inventory, item: string, n: number): number {
   let left = Math.max(0, Math.floor(n));
-  const order = inv.slots.map((_, i) => i).sort((a, b) => (a === inv.equipped ? 1 : 0) - (b === inv.equipped ? 1 : 0) || b - a);
+  const kept = (i: number) => (i === inv.equipped || isWorn(inv, i) ? 1 : 0);
+  const order = inv.slots.map((_, i) => i).sort((a, b) => kept(a) - kept(b) || b - a);
   for (const i of order) {
     const s = inv.slots[i];
     if (!left) break;
@@ -66,7 +101,7 @@ export function removeItem(inv: Inventory, item: string, n: number): number {
     left -= k;
     if (s.count <= 0) {
       inv.slots[i] = null;
-      if (inv.equipped === i) inv.equipped = null;
+      emptied(inv, i);
     }
   }
   // Then from inside bags.
@@ -82,7 +117,7 @@ export function countItem(inv: Inventory, item: string): number {
   return inv.slots.reduce((n, s) => n + (s && s.item === item ? s.count : 0) + (s?.inv ? countItem(s.inv, item) : 0), 0);
 }
 
-/** Drag and drop: merges stacks of the same item, otherwise swaps. The equipped mark follows its item. */
+/** Drag and drop: merges stacks of the same item, otherwise swaps. The equipped and worn marks follow their items. */
 export function moveSlot(inv: Inventory, from: number, to: number, lookup: ItemLookup): void {
   if (from === to || !inv.slots[from]) return;
   const a = inv.slots[from]!;
@@ -94,6 +129,8 @@ export function moveSlot(inv: Inventory, from: number, to: number, lookup: ItemL
     if (a.count <= 0) {
       inv.slots[from] = null;
       if (inv.equipped === from) inv.equipped = to;
+      // The stack it went into is worn now if this one was (the same thing, the same zone).
+      moveWorn(inv, from, to, false);
     }
     return;
   }
@@ -101,6 +138,7 @@ export function moveSlot(inv: Inventory, from: number, to: number, lookup: ItemL
   inv.slots[from] = b;
   if (inv.equipped === from) inv.equipped = to;
   else if (inv.equipped === to) inv.equipped = b ? from : null;
+  moveWorn(inv, from, to, true);
 }
 
 /** Takes n items out of a slot (all if omitted). */
@@ -111,7 +149,7 @@ export function takeFromSlot(inv: Inventory, index: number, n?: number): Slot | 
   s.count -= k;
   if (s.count <= 0) {
     inv.slots[index] = null;
-    if (inv.equipped === index) inv.equipped = null;
+    emptied(inv, index);
     // A bag leaves with what is inside it, a thing of the world with who it is (T292).
     if (s.inv || s.thing) return { item: s.item, count: k, ...(s.inv ? { inv: s.inv } : {}), ...(s.thing ? { thing: s.thing } : {}) };
   }

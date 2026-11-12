@@ -1,0 +1,40 @@
+<!-- Helmet (T289 bench, a fixture of T290): the program of the thing on the ground, as the Sculptor writes one, and its <worn> section (way B): the
+     rules that model it on whoever wears it. A dome of iron with a brass rim, a nasal guard and a red crest. -->
+<sequence values="BIDGRK" size="12 12 12" name="Elmo">
+  <color symbol="I" value="a3acb6" name="iron"/>
+  <color symbol="D" value="6e7681" name="iron in the shade"/>
+  <color symbol="G" value="c9a23a" name="brass"/>
+  <color symbol="R" value="b8392f" name="crest"/>
+  <color symbol="K" hidden="True" name="hollow"/>
+  <!-- The dome, its rim on the ground, hollow inside -->
+  <ellipsoid at="6 6 -6" size="11 11 15" color="I"/>
+  <ellipsoid at="6 6 -6" size="9 9 13" color="K" on="I"/>
+  <cylinder at="6 6 0" size="12 12 1" color="G" on="[BI]"/>
+  <cylinder at="6 6 0" size="9 9 1" color="K" on="G"/>
+  <!-- The nasal guard in front, the crest from front to back -->
+  <box at="6 11 1" size="1 1 4" color="G"/>
+  <box at="6 6 8" size="1 8 1" color="R" on="B"/>
+  <box at="6 6 9" size="1 6 1" color="R"/>
+  <all in="K" out="B"/>
+  <prl in="I B" out="D B" p="0.5" symmetry="()"/>
+</sequence>
+<!-- Worn: rules run on the body of the wearer, in the frame of its head (it looks toward +y). Before them the kernel writes z
+     (the voxels of the head), o (the rest of the body), r (the air around the head, three voxels at most) and m (that air on the
+     middle line of the head); afterwards what is still z, o, r or m goes back as it was. -->
+<worn zone="head">
+  <!-- The shell: over the head, behind it and at its sides, one voxel thick; the face stays free -->
+  <all>
+    <rule in="[rm] z" out="I z"/>
+    <rule in="[rm]/z" out="I/z"/>
+    <rule in="[rm]z" out="Iz"/>
+    <rule in="z[rm]" out="zI"/>
+  </all>
+  <!-- The brow comes two voxels down the front, under the shell -->
+  <all steps="2" in="*/I z/[rm]" out="*/* */I"/>
+  <!-- The crest: on the middle line, over the shell, two voxels high -->
+  <all in="m I" out="R I"/>
+  <all steps="1" in="m R" out="R R"/>
+  <!-- The rim: wherever the shell ends, brass -->
+  <all in="I [rmoB]" out="G *"/>
+  <prl in="I [rmB]" out="D *" p="0.3"/>
+</worn>

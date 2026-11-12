@@ -10,10 +10,11 @@ import { runeGlyph, type RuneComp } from '../kernel/runes';
 import { hash32, hashStr } from '../kernel/rng';
 import { Builder } from './terrain';
 import { casts, clipped, MAT, rgbOf, solid } from './materials';
-import { geoOf, isSharedGeometry, modelObject, showFrame } from './models';
-import type { FormComp } from '../kernel/forms';
+import { geoOf, isSharedGeometry, modelObject, showFrame, type ModelGeo } from './models';
+import type { Form, FormComp } from '../kernel/forms';
 import { overheadTurn, type Hand } from '../mj/hold';
 import { heldBy, heldSeedOf, hold, type Holding } from './held';
+import { dressedFor, wornBy } from './dressed';
 
 export interface Limb {
   pivot: THREE.Object3D;
@@ -139,12 +140,19 @@ export class Entities {
     return { scale: 0.94 + (h % 11) / 100, color: `hsl(${h % 360}, 45%, 52%)` };
   }
 
-  /** What a view is made of now: rebuilt when it changes (its model got ready, an action changed it). */
+  /** The figure in what it wears (T290), once its body is made: until then the view stays as it is. */
+  private dressedOf(id: Id, f: Form | undefined, fc: FormComp | undefined): { key: string; geo: ModelGeo } | undefined {
+    if (!f || !geoOf(f)) return undefined;
+    return dressedFor(this.k, f, fc, wornBy(this.k, id));
+  }
+
+  /** What a view is made of now: rebuilt when it changes (its model got ready, an action changed it, what it wears changed). */
   private sigOf(id: Id): string {
     const k = this.k;
     const fc: FormComp | undefined = k.ecs.get(id, 'form');
     const f = fc && k.forms.ready(fc.model, fc.seed, fc.tint);
-    return `${k.ecs.get(id, 'glyph')?.color}|${f && geoOf(f) ? f.key : 'stand-in'}|${fc?.done?.join(',') ?? ''}|${k.ecs.get(id, 'structure')?.stage ?? ''}`;
+    const dressed = this.dressedOf(id, f, fc);
+    return `${k.ecs.get(id, 'glyph')?.color}|${f && geoOf(f) ? f.key : 'stand-in'}|${fc?.done?.join(',') ?? ''}|${k.ecs.get(id, 'structure')?.stage ?? ''}|${dressed?.key ?? ''}`;
   }
 
   private build(id: Id, sig: string): EntityView {
@@ -156,8 +164,8 @@ export class Entities {
     const fc: FormComp | undefined = k.ecs.get(id, 'form');
     const f = fc && k.forms.ready(fc.model, fc.seed, fc.tint);
     const v = this.variant(id);
-    // A building under way shows its stage (T245e).
-    const model = f && modelObject(k, f, fc, undefined, k.ecs.get(id, 'structure')?.stage);
+    // A building under way shows its stage (T245e); a figure what it wears (T290).
+    const model = f && modelObject(k, f, fc, undefined, k.ecs.get(id, 'structure')?.stage, this.dressedOf(id, f, fc)?.geo);
     let root: THREE.Group, body: THREE.Object3D, limbs: Limb[] = [], frames: THREE.Mesh[] = [];
     if (model) {
       ({ root, body, limbs, frames } = model);
@@ -273,11 +281,11 @@ export class Wanderer {
     scene.add(this.shadow);
   }
 
-  private make(k?: Kernel): Wanderer['view'] {
+  private make(k?: Kernel, dressed?: ModelGeo): Wanderer['view'] {
     const fc: FormComp | undefined = k?.ecs.get(k.wandererEntity, 'form');
     const f = k && fc && k.forms.ready(fc.model, fc.seed, fc.tint);
-    // The wanderer is never clipped: beyond the circle is where it goes when it leaves the simulation.
-    const m = (f && modelObject(k, f, fc, MAT.corona)) ?? figureStandIn('#4a6680', 1.15, '#e8c39a', MAT.corona);
+    // The wanderer is never clipped: beyond the circle is where it goes when it leaves the simulation. What it wears is on it (T290).
+    const m = (f && modelObject(k, f, fc, MAT.corona, undefined, dressed)) ?? figureStandIn('#4a6680', 1.15, '#e8c39a', MAT.corona);
     m.root.traverse((o) => (o.userData.player = true));
     this.scene.add(m.root);
     return { root: m.root, body: m.body, limbs: m.limbs, yaw: this.view?.yaw ?? 0, phase: 0 };
@@ -290,11 +298,12 @@ export class Wanderer {
   update(k: Kernel, dt: number, t: number): void {
     const fc: FormComp | undefined = k.ecs.get(k.wandererEntity, 'form');
     const f = fc && k.forms.ready(fc.model, fc.seed, fc.tint);
-    const sig = f && geoOf(f) ? f.key : 'stand-in';
+    const dressed = f && geoOf(f) ? dressedFor(k, f, fc, wornBy(k, k.wandererEntity)) : undefined;
+    const sig = f && geoOf(f) ? `${f.key}|${dressed?.key ?? ''}` : 'stand-in';
     if (sig !== this.sig) {
       this.sig = sig;
       this.scene.remove(this.view.root);
-      this.view = this.make(k);
+      this.view = this.make(k, dressed?.geo);
     }
     const p = k.wandererPos();
     const dx = p.x - this.last.x, dy = p.y - this.last.y;

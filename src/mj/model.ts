@@ -293,9 +293,9 @@ class Compiler {
       if (e instanceof XmlError) this.fail(el, `models/${name}.xml: XML: ${e.message}`);
       throw e;
     }
-    const mains = roots.filter((r) => !CLIP_TAGS.has(r.name));
+    const mains = roots.filter((r) => !ASIDE_TAGS.has(r.name));
     if (mains.length !== 1) this.fail(el, `models/${name}.xml deve avere un solo nodo radice (trovati ${mains.length})`);
-    if (roots.length > 1) this.warnings.push(`${this.where(el)}: models/${name}.xml: le sue animazioni e azioni restano sue, qui non entrano`);
+    if (roots.length > 1) this.warnings.push(`${this.where(el)}: models/${name}.xml: le sue animazioni, azioni e sezioni indossate restano sue, qui non entrano`);
     this.parsed.set(name!, mains[0]);
     return mains[0];
   }
@@ -497,6 +497,8 @@ class Compiler {
 
   /** First pass: unions and colours, wherever they are (MarkovJunior lets a union appear anywhere), each union with its grid. */
   collect(el: XmlElement, scope: XmlElement = el): void {
+    // What is worn (T290, ADR-0180) runs on a body, not here: its letters, colours and unions are its own (src/mj/worn.ts).
+    if (el.name === 'worn') return;
     if (el.name === 'import') {
       // An imported file's colours and unions come with it; the program's own win (they are written over them, or kept).
       const name = el.attrs.file;
@@ -572,6 +574,7 @@ class Compiler {
   /** The nodes among an element's children (unions, colours, animations and actions are not nodes). */
   children(el: XmlElement, ctx: Ctx): Node3[] {
     return el.children.flatMap((c) => {
+      if (c.name === 'worn') return [];
       if (c.name === 'animation' || c.name === 'action') {
         if (this.file) this.warnings.push(`${this.where(c)}: <${c.name}> di un programma incluso resta suo, qui non entra`);
         else this.pending.push(c);
@@ -1031,6 +1034,8 @@ class Compiler {
 }
 
 const CLIP_TAGS = new Set(['animation', 'action']);
+/** What may stand beside the root: animations and actions, and the sections of what is worn (T290, ADR-0180), which run on a body. */
+const ASIDE_TAGS = new Set([...CLIP_TAGS, 'worn']);
 
 const cellsOf = (row: string) => row.match(/\[[^\]]*\]|./g) ?? [];
 const grid = (s: string) => s.split(' ').map((layer) => layer.split('/').map(cellsOf));
@@ -1104,9 +1109,9 @@ export function compileMjx(src: string, opts: { size?: Vec3; strict?: boolean; b
     if (e instanceof XmlError) throw new Mj3Error(`XML: ${e.message}`);
     throw e;
   }
-  const mains = roots.filter((r) => !CLIP_TAGS.has(r.name));
+  const mains = roots.filter((r) => !ASIDE_TAGS.has(r.name));
   if (!mains.length) throw new Mj3Error('nessun programma: il primo elemento è il nodo radice (sequence, markov, one…) con values');
-  if (mains.length > 1) throw new Mj3Error(`un solo nodo radice (trovati: ${mains.map((m) => `<${m.name}>`).join(', ')}); animazioni e azioni possono stare accanto`);
+  if (mains.length > 1) throw new Mj3Error(`un solo nodo radice (trovati: ${mains.map((m) => `<${m.name}>`).join(', ')}); animazioni, azioni e sezioni <worn> possono stare accanto`);
   const root = mains[0];
   const c = new Compiler(opts.strict === true, opts.files, opts.self);
   for (const r of roots) c.collect(r, r);

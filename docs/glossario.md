@@ -840,6 +840,33 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Dove vive**: `src/mj/hold.ts`
 - **Da non usare**: `attacco` (per il punto)
 
+### Capo indossato
+- **Inglese**: `worn`, `wearSlot`, `outfit`, `wornBy`, `wornItems`, `wornSlots`, `keepWornMarks`
+- **Definizione**: ciò che una figura ha addosso: il segno `worn` del suo inventario (zona → tasca), come `equipped` per ciò che è in mano; il capo resta nell'inventario, e gettato, dato o messo in una borsa non è più indossato. Si vede sul corpo (il corpo vestito) e gli altri viandanti lo vedono (`OtherView.worn`) (T290, ADR-0180).
+- **Dove vive**: `src/kernel/wearing.ts`, `src/kernel/inventory.ts`, `src/render/dressed.ts`
+- **Da non usare**: `equipaggiato` (per ciò che è addosso: si equipaggia un pannello)
+- **Fermo**: `inventory.worn`, l'operazione `wear` del protocollo, `worn` di `OtherView`.
+
+### Zona del corpo
+- **Inglese**: `WornZone`, `WORN_ZONES`, `Zone`, `bodyOf`, `SLOT_ZONES`, `wornZoneOf`
+- **Definizione**: dove va sul corpo ciò che si indossa: la testa, il busto, la schiena (`head`, `torso`, `back`), trovate dai voxel e dal rig di ogni figura, in piedi o a quattro zampe, senza una tabella per corpo; la zona di un capo la dice il suo posto (`ItemDef.slot`) o, per un capo senza posto, le parole del suo nome (T289, T290, ADR-0180).
+- **Dove vive**: `src/mj/worn.ts`, `src/kernel/wearing.ts`
+- **Da non usare**: `slot` (è il posto dell'oggetto o la tasca dell'inventario), `parte` (è un arto del rig)
+- **Fermo**: i valori `head`, `torso`, `back` in `inventory.worn`, in `OtherView.worn` e nell'attributo `zone` della sezione indossata.
+
+### Sezione indossata
+- **Inglese**: `WornSection`, `wornSections`, `wornProgram`, `compileWorn`, `wornErrors`, `WORN_MARKS`, `trialBodies`
+- **Definizione**: l'elemento `worn` del programma di un capo, accanto alla radice: le regole che lo mettono addosso a chi lo indossa (via B), su una copia del corpo con le quattro lettere del kernel (`z` la zona, `o` il resto del corpo, `r` l'aria dove il capo può stare, `m` quell'aria sulla linea di mezzo). La scrive lo Scultore; il validatore e i suoi controlli la provano su due corpi del kernel; quando manca o fallisce il capo si mostra con i suoi colori (via C) (T290, ADR-0180).
+- **Dove vive**: `src/mj/worn.ts`, `src/kernel/validator.ts`, `src/kernel/agents/sculptor.ts`, `universe/prompts/agents/sculptor.md`
+- **Da non usare**: `programma indossato` (era la via A del banco, un secondo programma: scartata)
+- **Fermo**: l'elemento `worn` con `zone`, le lettere `z o r m`.
+
+### Corpo vestito
+- **Inglese**: `dressBody`, `dressMeshes`, `DressRequest`, `DressedMeshes`, `dressedFor`, `keepGeometry`
+- **Definizione**: la figura con ciò che indossa: la griglia del suo corpo in una scatola più grande, i capi messi dal più esterno (schiena, busto, testa), le mesh fatte nel worker con il rig del corpo nudo, quindi gli stessi arti attorno agli stessi giunti; gli stessi capi sulla stessa forma sono un corpo solo, condiviso (T290, ADR-0180).
+- **Dove vive**: `src/mj/worn.ts`, `src/render/formmeshes.ts`, `src/render/forms.ts`, `src/render/dressed.ts`
+- **Da non usare**: `skin` (è la veste del sito)
+
 ### Bottino
 - **Inglese**: `loot`, `LootTable`, `LootEntry`
 - **Definizione**: le tabelle per tag da cui escono gli oggetti di un luogo o di un contenitore.

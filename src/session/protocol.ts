@@ -9,6 +9,7 @@ import type { FeedEntry } from '../kernel/agents/council';
 import type { PlayerSpot } from '../kernel/situation';
 import type { Profile } from '../kernel/wanderers';
 import type { BrokenCard } from '../kernel/brokencards';
+import type { WornZone } from '../kernel/wearing';
 
 /** A tick of the server's world and its hour. */
 export interface Clock {
@@ -102,6 +103,8 @@ export interface OtherView {
   held?: string;
   /** When what they hold is a thing of the world they carry (T292, ADR-0168): the seed of its look, as it stood. Not who it is. */
   heldSeed?: number;
+  /** What they wear (T290, ADR-0180): zone → the thing's id, which the client's files dress their body with. Nothing else of what they carry. */
+  worn?: Partial<Record<WornZone, string>>;
 }
 
 export type ClientMsg =
@@ -160,8 +163,8 @@ export type ClientMsg =
 /** Files changed: their new text, or null when they are gone. */
 export type FileChanges = Record<string, string | null>;
 
-/** What can be done with something carried: use, hold, drop, move, put into or take from a bag, a learned action. */
-export type ItemOp = 'use' | 'wield' | 'put_down' | 'move' | 'to_bag' | 'from_bag' | 'action';
+/** What can be done with something carried: use, hold, wear or take off (T290), drop, move, put into or take from a bag, a learned action. */
+export type ItemOp = 'use' | 'wield' | 'wear' | 'put_down' | 'move' | 'to_bag' | 'from_bag' | 'action';
 
 /** A container as the wanderer sees it once open; `open` when this answer opened it. */
 export interface ContainerView {

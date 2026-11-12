@@ -1,0 +1,40 @@
+<!-- Cuirass (T289 bench, a fixture of T290): the program of the thing on the ground and its <worn> section (way B). A shell of steel with a brass
+     gorget, a ridge down the chest and a leather fauld. -->
+<sequence values="BSDGAK" size="12 12 12" name="Corazza">
+  <color symbol="S" value="8f9aa6" name="steel"/>
+  <color symbol="D" value="5d6672" name="steel in the shade"/>
+  <color symbol="G" value="caa23c" name="brass"/>
+  <color symbol="A" value="7a4a2a" name="leather"/>
+  <color symbol="K" hidden="True" name="hollow"/>
+  <!-- The shell, standing on its fauld -->
+  <cylinder at="6 6 2" size="11 9 8" color="S"/>
+  <ellipsoid at="6 6 6" size="11 9 7" color="S" on="B"/>
+  <cylinder at="6 6 2" size="9 7 10" color="K" on="S"/>
+  <!-- The fauld under it, the gorget round the neck -->
+  <cylinder at="6 6 0" size="11 9 2" color="A"/>
+  <cylinder at="6 6 0" size="9 7 2" color="K" on="A"/>
+  <cylinder at="6 6 9" size="7 5 1" color="G" on="S"/>
+  <!-- The ridge down the front -->
+  <box at="6 10 2" size="1 1 7" color="G" on="S"/>
+  <all in="K" out="B"/>
+  <prl in="S B" out="D B" p="0.4" symmetry="()"/>
+</sequence>
+<!-- Worn: rules run on the body of the wearer, in the frame of its torso (standing, its back toward −y). Before them the kernel
+     writes z (the voxels of the torso), o (the rest of the body), r (the air around the torso, two voxels at most, between its
+     top and its bottom) and m (that air on the middle line). -->
+<worn zone="torso">
+  <!-- The ridge: on the middle line, in front of the chest -->
+  <all in="z/m" out="z/G"/>
+  <!-- The plates: one voxel out of the torso, all round -->
+  <all>
+    <rule in="[rm]z" out="Sz"/>
+    <rule in="z[rm]" out="zS"/>
+    <rule in="[rm]/z" out="S/z"/>
+    <rule in="z/[rm]" out="z/S"/>
+  </all>
+  <!-- The gorget where the plates meet the neck or end at the top, the fauld where they end at the bottom: not where the air goes
+       on round a curved body (r) -->
+  <all in="[oB] [SG]" out="* G"/>
+  <all in="S [oB]" out="A *"/>
+  <prl in="S [rmB]" out="D *" p="0.3"/>
+</worn>

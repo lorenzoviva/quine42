@@ -14,6 +14,7 @@ import { accountWanderer, type Account, type Verifier } from './account';
 import { playerChanges, playerFiles } from './files';
 import { hashStr, hex } from '../kernel/rng';
 import { equippedItem, shownInventory } from '../kernel/inventory';
+import { wornItems } from '../kernel/wearing';
 import { isThing, PUT_DOWN, thingSeed } from '../kernel/moving';
 import { ENTITY_PARTS, type ClientMsg, type FileChanges, type ItemOp, type Dialog, type FormView, type Me, type MyState, type Notice, type OtherView, type ChunkView, type ServerLink, type ServerMsg, type EntityView } from './protocol';
 
@@ -816,6 +817,8 @@ export class SessionServer {
     const ops: Record<ItemOp, () => unknown> = {
       use: () => k.useSlot(slot),
       wield: () => k.equipSlot(slot),
+      // Put on or taken off (T290): the kernel says whether it is worn and where.
+      wear: () => k.wearSlot(slot),
       put_down: () => (count === undefined || count > 0) && k.dropSlot(slot, count),
       move: () => to >= 0 && k.moveSlot(slot, to),
       to_bag: () => k.putIntoBag(bag, slot),
@@ -1023,7 +1026,10 @@ export class SessionServer {
       const held = inv ? equippedItem(inv) : null;
       // A thing of the world they carry (T292): the seed of its look too, so that it looks as it stood.
       const heldSeed = held && isThing(held) ? thingSeed(inv.slots[inv.equipped]) : undefined;
-      const v: OtherView = { id: w.id, name: w.name, x: round(o.x), y: round(o.y), facing: o.facing, ...(form ? { form } : {}), ...(b ? { text: b.text } : {}), ...(intro ? { introduction: intro } : {}), ...(held ? { held } : {}), ...(heldSeed !== undefined ? { heldSeed } : {}) };
+      // What they wear (T290): the ids by zone, read as the kernel reads them; of the inventory nothing else.
+      const worn = wornItems(inv, (item) => k.wornZone(item));
+      const dressed = Object.keys(worn).length > 0;
+      const v: OtherView = { id: w.id, name: w.name, x: round(o.x), y: round(o.y), facing: o.facing, ...(form ? { form } : {}), ...(b ? { text: b.text } : {}), ...(intro ? { introduction: intro } : {}), ...(held ? { held } : {}), ...(heldSeed !== undefined ? { heldSeed } : {}), ...(dressed ? { worn } : {}) };
       const key = JSON.stringify(v);
       if (c.others.get(w.id) !== key) others.push(v);
       c.others.set(w.id, key);

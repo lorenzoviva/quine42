@@ -3,6 +3,7 @@
 import type { Kernel, HoverInfo } from '../kernel/kernel';
 import type { Renderer } from '../render/renderer';
 import { HOTBAR } from '../kernel/inventory';
+import { wornSlots } from '../kernel/wearing';
 import { $, el } from './dom';
 import { ofThe } from '../kernel/corona';
 import { runeGlyph } from '../kernel/runes';
@@ -121,12 +122,14 @@ export class Hud {
     }
 
     const inv = k.inventory();
-    const hotKey = JSON.stringify([inv.slots.slice(0, HOTBAR), inv.equipped]);
+    const hotKey = JSON.stringify([inv.slots.slice(0, HOTBAR), inv.equipped, inv.worn ?? null]);
     if (hotKey !== this.lastHot) {
       this.lastHot = hotKey;
+      // What is worn (T290), read as the inventory reads it.
+      const worn = new Set(Object.values(wornSlots(inv, (item) => k.wornZone(item))));
       this.hotbarEl.replaceChildren(
         ...inv.slots.slice(0, HOTBAR).map((s, i) => {
-          const cell = el('div', { class: `hot${inv.equipped === i ? ' held' : ''}`, title: s ? k.itemInfo(s.item).name : '' }, el('span', { class: 'n' }, String(i + 1)));
+          const cell = el('div', { class: `hot${inv.equipped === i ? ' held' : ''}${worn.has(i) ? ' worn' : ''}`, title: s ? k.itemInfo(s.item).name : '' }, el('span', { class: 'n' }, String(i + 1)));
           if (s) {
             cell.append(itemIcon(k, s.item, 30));
             if (s.count > 1) cell.append(el('span', { class: 'count' }, String(s.count)));

@@ -1,12 +1,13 @@
 // Runs a model's MarkovJunior program off the page's thread and turns it into meshes (formmeshes.ts): the body (for a
-// figure without its limbs), each limb around its joint, the frames of its first animation.
+// figure without its limbs), each limb around its joint, the frames of its first animation. It also dresses a figure (T290,
+// ADR-0180): what it wears on its body, by the things' worn rules or the kernel's colours, and the meshes of the dressed body.
 
 import { Mj3Error } from '../mj/engine';
 import type { MeshData } from '../mj/mesh';
 import { runForm, type FormRequest, type FormResult } from '../kernel/forms';
-import { formMeshes, type FormMeshes } from './formmeshes';
+import { dressMeshes, formMeshes, type DressedMeshes, type DressRequest, type FormMeshes } from './formmeshes';
 
-export type { FormMeshes, LimbMesh } from './formmeshes';
+export type { DressedMeshes, DressRequest, FormMeshes, LimbMesh } from './formmeshes';
 
 /** `finished`: the program ended by itself; out of time or of steps it is half a model, not to be kept (ADR-0108). */
 export type WorkerAnswer = { id: number; ok: true; result: FormResult; finished: boolean } | { id: number; ok: false; error: string };
@@ -24,6 +25,8 @@ export interface MeshAnswer {
   read: true;
   meshes?: FormMeshes;
 }
+/** A figure dressed (T290): its meshes, or why not. */
+export type DressAnswer = { id: number; dressed: true; ok: true; meshes: DressedMeshes } | { id: number; dressed: true; ok: false; error: string };
 
 const buffers = (m: MeshData) => [m.positions.buffer, m.normals.buffer, m.colors.buffer, m.indices.buffer, ...(m.sway ? [m.sway.buffer] : []), ...(m.glow ? [m.glow.buffer] : []), ...(m.alpha ? [m.alpha.buffer] : []), ...(m.part ? [m.part.buffer] : [])];
 
@@ -73,7 +76,17 @@ async function readMeshes(read: MeshRead): Promise<FormMeshes | undefined> {
   }
 }
 
-self.onmessage = (ev: MessageEvent<{ id: number; req: FormRequest } | { id: number; read: MeshRead }>) => {
+self.onmessage = (ev: MessageEvent<{ id: number; req: FormRequest } | { id: number; read: MeshRead } | { id: number; dress: DressRequest }>) => {
+  if ('dress' in ev.data) {
+    const { id, dress } = ev.data;
+    try {
+      const meshes = dressMeshes(dress);
+      (self as unknown as Worker).postMessage({ id, dressed: true, ok: true, meshes } satisfies DressAnswer, meshBuffers(meshes));
+    } catch (e) {
+      (self as unknown as Worker).postMessage({ id, dressed: true, ok: false, error: e instanceof Error ? e.message : String(e) } satisfies DressAnswer);
+    }
+    return;
+  }
   if ('read' in ev.data) {
     const { id, read } = ev.data;
     void readMeshes(read).then((meshes) => (self as unknown as Worker).postMessage({ id, read: true, meshes } satisfies MeshAnswer, meshes ? meshBuffers(meshes) : []));

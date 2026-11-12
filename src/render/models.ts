@@ -75,6 +75,27 @@ export function geoOf(f: Form): ModelGeo | undefined {
   return g;
 }
 
+/**
+ * The geometries of meshes made apart from a form's (a dressed figure, T290), kept under `key` with the others: `trimGeometries` lets
+ * them go as it does the forms' when nothing draws them, and then `cachedGeometry` gives undefined and whoever wants them asks again.
+ */
+export function keepGeometry(key: string, m: Pick<FormMeshes, 'body' | 'limbs'> & { frames?: FormMeshes['frames'] }): ModelGeo {
+  const g: ModelGeo = { body: geometry(m.body), limbs: m.limbs.map((l) => ({ part: l.part, joint: l.joint, phase: l.phase, geo: geometry(l.mesh) })), frames: (m.frames ?? []).map(geometry), sway: !!m.body.sway };
+  for (const b of geometries(g)) shared.add(b);
+  const old = cache.get(key);
+  if (old) for (const b of geometries(old.geo)) b.dispose();
+  cache.set(key, { geo: g, bytes: geometries(g).reduce((n, b) => n + geometryBytes(b), 0), used: clock() });
+  return g;
+}
+
+/** What `keepGeometry` kept under a key, if it is still there. */
+export function cachedGeometry(key: string): ModelGeo | undefined {
+  const hit = cache.get(key);
+  if (!hit) return undefined;
+  hit.used = clock();
+  return hit.geo;
+}
+
 /** For who asks once and does not come back at the next frame (an icon): waits while the meshes are on their way. */
 export async function geoWhenReady(f: Form): Promise<ModelGeo | undefined> {
   for (let i = 0; i < 400; i++) {
@@ -165,15 +186,19 @@ export function stagedBody(k: Kernel, f: Form, done: string[], stadio: number): 
   return g;
 }
 
-/** An object for one instance of a form. `material` overrides the world's (the wanderer is never clipped). `stadio` < 1: a building under way. */
-export function modelObject(k: Kernel, f: Form, fc: FormComp | undefined, material?: THREE.Material, stadio?: number): ModelObject | undefined {
-  const g = geoOf(f);
+/**
+ * An object for one instance of a form. `material` overrides the world's (the wanderer is never clipped). `stadio` < 1: a building under way.
+ * `dressed` (T290): the figure in what it wears, made from this form (src/render/dressed.ts): its body and limbs instead of the form's.
+ */
+export function modelObject(k: Kernel, f: Form, fc: FormComp | undefined, material?: THREE.Material, stadio?: number, dressed?: ModelGeo): ModelObject | undefined {
+  const g = dressed ?? geoOf(f);
   if (!g) return undefined;
   const mat = material ?? (g.sway ? MAT.sway : MAT.world);
   const mesh = (geo: THREE.BufferGeometry) => casts(new THREE.Mesh(geo, modelMaterials(geo, mat)), true);
   const root = new THREE.Group();
-  const rising = typeof stadio === 'number' && Number.isFinite(stadio) && stadio < 1;
-  const bodyMesh = mesh(rising ? stagedBody(k, f, fc?.done ?? [], stadio) : fc?.done?.length ? changedBody(k, f, fc.done) : g.body);
+  const rising = !dressed && typeof stadio === 'number' && Number.isFinite(stadio) && stadio < 1;
+  // A dressed body was made from the instance's grid, its actions done.
+  const bodyMesh = mesh(dressed ? g.body : rising ? stagedBody(k, f, fc?.done ?? [], stadio) : fc?.done?.length ? changedBody(k, f, fc.done) : g.body);
   const body = new THREE.Group();
   body.add(bodyMesh);
   root.add(body);
