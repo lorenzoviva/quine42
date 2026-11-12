@@ -61,7 +61,9 @@ import { canonWithRune, MAX_MAGIC_RUNES, validateNewRune } from './magic';
 import { cleanPanel, designMechanic } from './agents/mechanics';
 import { BENCH, cleanCases, runCase, textKey, type BenchEntry, type BenchRun, type BenchScene, type BenchShown } from './bench';
 import { assemblePack, defineItems, itemPack, toItemDef, type Identity } from './agents/content';
-import { addItem, CARRY_CAPACITY, countItem, HOTBAR, equippedItem, moveSlot, newInventory, putSlot, readInventory, removeItem, takeFromSlot, thingOf, totalWeight, type Inventory } from './inventory';
+import { addItem, CARRY_CAPACITY, countItem, HOTBAR, emptied, equippedItem, isWorn, moveSlot, newInventory, putSlot, readInventory, removeItem, takeFromSlot, takeOff, thingOf, totalWeight, type Inventory } from './inventory';
+import { keepWornMarks, wornItems, wornZoneOf, ZONE_WORDS, type WornZone } from './wearing';
+import { isWornZone, wornSections } from '../mj/worn';
 import { facingYaw, isThing, MAX_MOVED, PUT_DOWN, putRefusal, readMoved, readParts, splitBetween, takeRefusal, thingItem, thingModule, walkGroups, type MovedRecord, type PutFailure, type TakeFailure, type ThingParts, type TileArea, type Walk } from './moving';
 import { chunkLevels, HILLS, LEVEL, Relief, RELIEF_PATH, worldLevels } from './relief';
 import { CardUses, CARDS_FILE, COMUNE, allCards, collectionOf, moduleCardId, receivedBy, type Received, payerOf, chunkCardId, stampFiles, cardHolderOf, type Card, type CardStamp } from './cards';
@@ -3587,6 +3589,8 @@ export class Kernel {
     if (def?.container) return void this.bus.emit('ui:bag', { slot: index });
     if (slot.item.startsWith('rune:')) return void this.composeRune(slot.item.slice(5));
     const custom = def?.module && this.sandbox.has(def.module, 'on_use') ? def.module : null;
+    // A garment is put on or taken off (T290): what it is worn for is its own module's to say.
+    if (!custom && !def?.effects && this.wornZone(slot.item)) return this.wearSlot(index);
     if (!custom && def?.equippable && !def.effects && !['light', 'clothing'].includes(def.category)) return this.equipSlot(index);
     const { value, failed } = this.runModule(custom ?? 'core.items', custom ? 'on_use' : 'use', this.wandererEntity, slot.item);
     if (!failed && typeof value === 'string' && value) this.message(value);
@@ -3606,9 +3610,57 @@ export class Kernel {
       return;
     }
     inv.equipped = inv.equipped === index ? null : index;
+    // What is held is not worn (T290): taken in hand, it comes off the body.
+    if (inv.equipped === index && isWorn(inv, index)) takeOff(inv, index);
     // A thing of the world goes over the head (T292), and F puts it down.
     const held = isThing(slot.item) ? `Porti ${info.name} sopra la testa (F per posare davanti a te).` : `Impugni ${info.name}. F per usarlo su ciò che hai davanti.`;
     this.message(inv.equipped === null ? `Riponi ${info.name}.` : held);
+  }
+
+  /** The zone of the body a thing goes on (T290, ADR-0180), or undefined: its place, or the words of a garment without one. */
+  wornZone(item: string): WornZone | undefined {
+    if (isThing(item)) return undefined;
+    const def = this.content.get(item);
+    if (!def) return undefined;
+    // Asked at every frame for what every figure wears: read once per definition (a pack read again makes new ones).
+    let zone = this.wornZones.get(def);
+    if (zone === undefined) this.wornZones.set(def, (zone = wornZoneOf(def) ?? null));
+    return zone ?? undefined;
+  }
+  private wornZones = new WeakMap<object, WornZone | null>();
+
+  /** What the wanderer acting now wears (T290): zone → the thing's id, only what holds (`wornSlots`). */
+  outfit(): Partial<Record<WornZone, string>> {
+    return wornItems(this.inventory(), (item) => this.wornZone(item));
+  }
+
+  /**
+   * Puts on, or takes off, the thing of a slot (T290, ADR-0180): on its zone of the body, in place of what was there (which stays in
+   * the inventory); worn already, it comes off. What is held in hand is let go of: one does not wear what one wields.
+   */
+  wearSlot(index: number): void {
+    const inv = this.inventory();
+    const slot = inv.slots[index];
+    if (!slot) return;
+    const info = this.itemInfo(slot.item);
+    const zone = this.wornZone(slot.item);
+    if (!zone) {
+      this.message(`${info.name} non si indossa.`, 'warn');
+      return;
+    }
+    keepWornMarks(inv, (item) => this.wornZone(item));
+    if (inv.worn?.[zone] === index) {
+      takeOff(inv, index);
+      this.message(`Ti togli ${info.name}.`);
+    } else {
+      const before = inv.worn?.[zone];
+      const was = before !== undefined ? inv.slots[before] : null;
+      inv.worn = { ...inv.worn, [zone]: index };
+      if (inv.equipped === index) inv.equipped = null;
+      this.message(was ? `Ti togli ${this.itemInfo(was.item).name} e indossi ${info.name}.` : `Indossi ${info.name} ${ZONE_WORDS[zone]}.`);
+    }
+    this.bus.emit('item:worn', { item: slot.item, zone, worn: inv.worn?.[zone] === index });
+    this.bus.emit('inventory:changed', {});
   }
 
   /** Hotbar keys 1–6: equip what can be held, use the rest. */
@@ -4509,7 +4561,7 @@ export class Kernel {
     s.count -= moved;
     if (s.count <= 0 || whole) {
       inv.slots[slot] = null;
-      if (inv.equipped === slot) inv.equipped = null;
+      emptied(inv, slot);
     }
     // A rune given is no longer in the phrase.
     this.syncPhrase();
@@ -5444,7 +5496,7 @@ export class Kernel {
       if (!current || this.sculpting.isGeneric(current)) o.model = ownModelId(fallback);
       return { id: o.model!, previous: current };
     };
-    let req: { id: string; previous?: string; nome: string; aspetto: string; classe: string } | undefined;
+    let req: { id: string; previous?: string; nome: string; aspetto: string; classe: string; worn?: WornZone } | undefined;
     if (kind === 'module' && load(this.modules.get(id)?.manifestPath)) {
       if (!man.appearance) return false;
       const r = own(man.appearance, man.name, man.id);
@@ -5454,13 +5506,17 @@ export class Kernel {
       const o = it ?? man.appearance;
       if (!o) return false;
       const r = own(o, it?.name ?? man.name, id);
-      req = { ...r, nome: it?.name ?? man.name, aspetto: o.look ?? it?.description ?? man.name, classe: 'object' };
+      // A thing worn keeps (or gets) its section for its zone (T290).
+      const zone = this.wornZone(id);
+      req = { ...r, nome: it?.name ?? man.name, aspetto: o.look ?? it?.description ?? man.name, classe: 'object', ...(zone ? { worn: zone } : {}) };
     } else if (kind === 'model') {
       const info = this.forms.info(id);
       const previous = this.repo.working[`models/${id}.xml`];
       if (!previous) return false;
       this.council.say('artist', 'propone', `da riscolpire: ${target}${why ? ` (${why})` : ''}`, 'sculptor', 'model.resculpt');
-      void this.sculpting.make({ id, nome: info?.name ?? id, aspetto: `${info?.name ?? id}${why ? `; ${why}` : ''}`, classe: info?.class ?? 'object', previous, ...(why ? { desiderio: why } : {}) });
+      // A program with a worn section is redone with one for the same zone (T290).
+      const zone = wornSections(previous).map((w) => w.zone).find(isWornZone);
+      void this.sculpting.make({ id, nome: info?.name ?? id, aspetto: `${info?.name ?? id}${why ? `; ${why}` : ''}`, classe: info?.class ?? 'object', previous, ...(why ? { desiderio: why } : {}), ...(zone ? { worn: zone } : {}) });
       return true;
     } else return false;
     this.repo.write(path!, JSON.stringify(man, null, 2) + '\n');
@@ -5468,7 +5524,7 @@ export class Kernel {
     this.repo.commit(`scultore: da riscolpire ${target}`, 'agent');
     this.council.say('artist', 'propone', `da riscolpire: ${target}${why ? ` (${why})` : ''}`, 'sculptor', 'model.resculpt');
     const previous = req.previous ? this.repo.working[`models/${req.previous}.xml`] : undefined;
-    void this.sculpting.make({ id: req.id, nome: req.nome, aspetto: req.aspetto, classe: req.classe, ...(previous ? { previous } : {}), ...(why ? { desiderio: why } : {}) });
+    void this.sculpting.make({ id: req.id, nome: req.nome, aspetto: req.aspetto, classe: req.classe, ...(previous ? { previous } : {}), ...(why ? { desiderio: why } : {}), ...(req.worn ? { worn: req.worn } : {}) });
     return true;
   }
 
@@ -8033,6 +8089,8 @@ export class Kernel {
     if (v.inventory?.slots) {
       this.ecs.set(this.wandererEntity, 'inventory', v.inventory);
       this.keepCarried();
+      // What was worn (T290) only where it still holds: a thing gone from the world, a slot written by hand.
+      keepWornMarks(v.inventory, (item) => this.wornZone(item));
     }
     if (v.needs) Object.assign(this.needs() ?? {}, v.needs, { dead: false });
     if (v.hand?.tokens) Object.assign(this.phrase(), v.hand);

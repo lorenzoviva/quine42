@@ -6,7 +6,8 @@
 // (e.g. circuito-3D with 32 animation frames) run once and reload instantly across sessions and seeds.
 
 import { formKey, runForm, type FormRequest, type FormResult, type FormRunner } from '../kernel/forms';
-import type { FormMeshes, MeshAnswer, MeshRead, WorkerAnswer } from './worker';
+import type { DressAnswer, DressedMeshes, DressRequest, FormMeshes, MeshAnswer, MeshRead, WorkerAnswer } from './worker';
+import { dressMeshes } from './formmeshes';
 import type { MeshData } from '../mj/mesh';
 
 /**
@@ -22,6 +23,11 @@ export const FORMS_DB_VERSION = 6;
  * The second one must hold a whole world: least recently used out first, a world bigger than the cache would push out at every load what the next load asks for.
  */
 export const FORM_MEMORY_BYTES = 128 * 1024 * 1024;
+/**
+ * The most the dressed figures kept here may take (T290, ADR-0180), in bytes of arrays: a figure in what it wears is 0.4-1 MB, a dressed
+ * figure is cheap to make again (10-40 ms in a worker), and none goes to disk.
+ */
+export const DRESSED_MEMORY_BYTES = 32 * 1024 * 1024;
 export const FORM_DISK_BYTES = 4 * 1024 * 1024 * 1024;
 export const FORM_ENTRIES = 4096;
 
@@ -48,6 +54,9 @@ export function keepsFormsOnDisk(place: { hostname: string; port: string; search
 
 /** The bytes of the arrays of a mesh. */
 const meshBytes = (m: MeshData): number => [m.positions, m.normals, m.colors, m.indices, m.sway, m.glow, m.alpha, m.part].reduce((n, a) => n + (a?.byteLength ?? 0), 0);
+
+/** The bytes of the meshes of a figure (its body, its limbs, its frames). */
+export const meshesBytes = (m: FormMeshes): number => meshBytes(m.body) + m.limbs.reduce((n, l) => n + meshBytes(l.mesh), 0) + m.frames.reduce((n, f) => n + meshBytes(f), 0);
 
 /** About how much a form takes: its arrays. Everything else in it is small, and the key is the program's text, already in memory. */
 export function formBytes(res: FormResult): number {
@@ -294,6 +303,13 @@ export class WorkerRunner implements FormRunner {
   /** Reads of meshes: they go before any program, which may take seconds while someone is looking at a stand-in. */
   private reads: Array<{ id: number; read: MeshRead }> = [];
   private reading = new Map<number, (meshes: FormMeshes | undefined) => void>();
+  /** Figures to dress (T290): after the reads, before the programs, so that a change of clothes is seen at once. */
+  private dresses: Array<{ id: number; dress: DressRequest }> = [];
+  private dressing = new Map<number, { ok: (m: DressedMeshes) => void; fail: (e: Error) => void }>();
+  private dressedInflight = new Map<string, Promise<DressedMeshes>>();
+  /** Dressed figures, least recently used first, and how much they hold. */
+  private dressed = new Map<string, { meshes: DressedMeshes; bytes: number }>();
+  dressedBytes = 0;
   readonly store: FormStore;
   /** The workers alive, and what each is doing now with its watchdog (T296: a worker that stops fails only what it was doing). */
   private workers = new Map<Worker, { job?: number; watchdog?: ReturnType<typeof setTimeout> }>();
@@ -337,7 +353,7 @@ export class WorkerRunner implements FormRunner {
     }
     this.made++;
     this.workers.set(w, {});
-    w.onmessage = (ev: MessageEvent<WorkerAnswer | MeshAnswer>) => {
+    w.onmessage = (ev: MessageEvent<WorkerAnswer | MeshAnswer | DressAnswer>) => {
       const state = this.workers.get(w);
       // A worker given up (it did not answer in time) says nothing any more.
       if (!state) return;
@@ -346,7 +362,12 @@ export class WorkerRunner implements FormRunner {
       const a = ev.data;
       const p = this.waiting.get(a.id);
       this.waiting.delete(a.id);
-      if ('read' in a) {
+      if ('dressed' in a) {
+        const d = this.dressing.get(a.id);
+        this.dressing.delete(a.id);
+        if (d && a.ok) d.ok(a.meshes);
+        else if (d && !a.ok) d.fail(new Error(a.error));
+      } else if ('read' in a) {
         this.reading.get(a.id)?.(a.meshes);
         this.reading.delete(a.id);
       } else if (p) {
@@ -386,6 +407,9 @@ export class WorkerRunner implements FormRunner {
       const r = this.reading.get(state.job);
       this.reading.delete(state.job);
       r?.(undefined);
+      const d = this.dressing.get(state.job);
+      this.dressing.delete(state.job);
+      d?.fail(new Error(why));
     }
     this.addWorker();
     if (!this.workers.size) {
@@ -395,13 +419,64 @@ export class WorkerRunner implements FormRunner {
       for (const r of this.reading.values()) r(undefined);
       this.reading.clear();
       this.reads = [];
+      for (const d of this.dressing.values()) d.fail(new Error(why + '; nessun worker rimasto'));
+      this.dressing.clear();
+      this.dresses = [];
     }
     this.pump();
   }
 
   /** Jobs waiting or running (the HUD may show it). */
   get busy(): number {
-    return this.queue.length + this.waiting.size + this.reading.size;
+    return this.queue.length + this.waiting.size + this.reading.size + this.dressing.size;
+  }
+
+  /**
+   * A figure in what it wears (T290, ADR-0180), under `key` (the caller's: the bare form and the things): from memory if it is there,
+   * else made by a worker (here, without workers). The request's grid is copied for the worker, never taken from whoever holds it.
+   */
+  dress(key: string, req: DressRequest): Promise<DressedMeshes> {
+    const hit = this.dressed.get(key);
+    if (hit) {
+      this.dressed.delete(key);
+      this.dressed.set(key, hit);
+      return Promise.resolve(hit.meshes);
+    }
+    const existing = this.dressedInflight.get(key);
+    if (existing) return existing;
+    const made = (async () => {
+      if (!this.makeWorker) return dressMeshes(req);
+      if (!this.workers.size) throw new Error('nessun worker rimasto');
+      const grid = { X: req.grid.X, Y: req.grid.Y, Z: req.grid.Z, cells: new Uint8Array(req.grid.cells), alphabet: [...req.grid.alphabet] };
+      return new Promise<DressedMeshes>((ok, fail) => {
+        const id = this.next++;
+        this.dressing.set(id, { ok, fail });
+        this.dresses.push({ id, dress: { ...req, grid } });
+        this.pump();
+      });
+    })()
+      .then((meshes) => {
+        this.keepDressed(key, meshes);
+        return meshes;
+      })
+      .finally(() => this.dressedInflight.delete(key));
+    this.dressedInflight.set(key, made);
+    return made;
+  }
+
+  /** Within its limit, least recently used out first (the geometries already made have their own hold on the arrays). */
+  private keepDressed(key: string, meshes: DressedMeshes): void {
+    const bytes = meshesBytes(meshes);
+    const old = this.dressed.get(key);
+    if (old) this.dressedBytes -= old.bytes;
+    this.dressed.delete(key);
+    this.dressed.set(key, { meshes, bytes });
+    this.dressedBytes += bytes;
+    for (const [k, e] of this.dressed) {
+      if (this.dressed.size <= 1 || this.dressedBytes <= DRESSED_MEMORY_BYTES) break;
+      this.dressed.delete(k);
+      this.dressedBytes -= e.bytes;
+    }
   }
 
   private readInWorker(read: MeshRead): Promise<FormMeshes | undefined> {
@@ -522,6 +597,10 @@ export class WorkerRunner implements FormRunner {
 
   private pump(): void {
     while (this.idle.length && this.reads.length) this.post(this.idle.pop()!, this.reads.shift()!);
+    while (this.idle.length && this.dresses.length) {
+      const job = this.dresses.shift()!;
+      this.post(this.idle.pop()!, job, [job.dress.grid.cells.buffer]);
+    }
     while (this.idle.length && this.queue.length) {
       const job = this.queue.shift()!;
       this.post(this.idle.pop()!, { id: job.id, req: job.req });
@@ -529,10 +608,10 @@ export class WorkerRunner implements FormRunner {
   }
 
   /** A job (or a read) to a worker, which has `watchdogMs` to answer: a program stops itself well before (`MAX_FORM_TIME`), a worker that hangs does not. */
-  private post(w: Worker, msg: { id: number; req: FormRequest } | { id: number; read: MeshRead }): void {
+  private post(w: Worker, msg: { id: number; req: FormRequest } | { id: number; read: MeshRead } | { id: number; dress: DressRequest }, transfer: Transferable[] = []): void {
     const watchdog = setTimeout(() => this.lose(w, 'il worker non risponde'), this.watchdogMs);
     (watchdog as { unref?: () => void }).unref?.();
     this.workers.set(w, { job: msg.id, watchdog });
-    w.postMessage(msg);
+    w.postMessage(msg, transfer);
   }
 }

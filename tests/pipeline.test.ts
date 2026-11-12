@@ -342,7 +342,6 @@ describe('Fable (ADR-0115)', () => {
   });
 
   it('i modelli sono scritti, il tetto è 1', () => {
-    // The alias, not a version: Fable 5.2 since 12/11 (fed7410c).
     expect(config.providers.fable.args).toContain('fable');
     expect(config.providers.claude.args).toContain('claude-opus-5-5');
     expect(config.limiti.modello.fable).toBe(1);

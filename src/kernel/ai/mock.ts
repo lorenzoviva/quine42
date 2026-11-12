@@ -10,6 +10,7 @@ import type { Concept, ForgeRequest, PhysicsSpec } from '../agents/forge';
 import type { NpcContext } from '../agents/minds';
 import { fallbackDeath } from '../gameSetup';
 import { italianName } from '../internalNames';
+import { symbolTokens } from '../../mj/symbols';
 
 const PLACES: Record<string, { nouns: string[]; descr: string[] }> = {
   forest: {
@@ -68,6 +69,14 @@ const words = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g
  * The offline Sculptor's program when the library has none of the class (T336, ADR-0176): on the ground a goal and a walker, the walker
  * goes down the potential of a `field` toward the goal leaving a wall, which then rises to the top of the box. It passes the validator.
  */
+/** The `<worn>` section the offline Sculptor writes for a zone (T290): the second letter of the program's values, one voxel over the zone. */
+export function mockWorn(program: string, zone: string): string {
+  const values = /<(?!!)[a-z]+\b[^>]*\svalues="([^"]*)"/i.exec(program.replace(/<!--[\s\S]*?-->/g, ''))?.[1] ?? '';
+  const main = symbolTokens(values).filter((t) => t.code !== undefined && !t.error)[1]?.text ?? 'W';
+  const rules = zone === 'back' ? [`[rm]/z`, `[rm] z`].map((i) => `<rule in="${i}" out="${main}${i.slice(4)}"/>`) : [`<rule in="[rm] z" out="${main} z"/>`, `<rule in="[rm]z" out="${main}z"/>`, `<rule in="z[rm]" out="z${main}"/>`, `<rule in="[rm]/z" out="${main}/z"/>`];
+  return `<worn zone="${zone}">\n  <all>${rules.join('')}</all>\n</worn>`;
+}
+
 export const MOCK_FIELD_PROGRAM = `<sequence values="BCRGW" ground="C" symmetry="(xy)">
   <one in="B C" out="G *" steps="1"/>
   <one in="B C" out="R *" steps="1"/>
@@ -124,10 +133,13 @@ export class MockAiModels implements AiModels {
         return { misteri: ['i vecchi non calpestano le rune: dicono che porti sfortuna'], titolo: 'Il Regno di Valmora', tono: 'concreto e caldo', sintesi: 'Un regno quieto di prati, boschi e borghi.', storia: '', luoghi: ['Piazza di Valmora'], personaggi: ['Abitanti di Valmora'], fatti: ['Il pane del forno di piazza è famoso in tutto il regno.'], usanze: ['Chi sforna il primo pane del giorno lo lascia sulla soglia per il primo che passa.'] };
       case 'genesis.style':
         return { stile: 'voxel medievale, semplice e caldo', forme: 'persone tozze dalla testa grande, case basse', palette: ['verde', 'ocra', 'blu'], luce: 'diurna morbida', regole: ['niente testo'], protagonista: 'un viandante incappucciato' };
-      case 'model.sculpt':
+      case 'model.sculpt': {
         // Offline the Sculptor answers with the library's hand-written program of the class; without one, a program of the nodes of
         // T333-T336 (a field leads a walker to its goal, the rule written in <in>/<out> children), which holds in every box but a procedural one.
-        return d.example ?? MOCK_FIELD_PROGRAM;
+        const program = String(d.example ?? MOCK_FIELD_PROGRAM);
+        // A thing worn (T290): a section for its zone, a layer of its main letter over the zone, as the prompt asks.
+        return d.worn ? `${program.trimEnd()}\n${mockWorn(program, String(d.worn))}\n` : program;
+      }
       case 'sound.compose': {
         // Offline the Musician plays the library's hand-written program a little faster or slower: it passes every check, and it is not the same text.
         const r = d.request ?? {};

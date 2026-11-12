@@ -4,6 +4,7 @@
 
 import type { Kernel } from '../kernel/kernel';
 import { HOTBAR, totalWeight } from '../kernel/inventory';
+import { wornSlots, ZONE_WORDS } from '../kernel/wearing';
 import { itemIcon } from './hud';
 import { $, el } from './dom';
 import { runeGlyph } from '../kernel/runes';
@@ -77,10 +78,10 @@ export class InventoryPanel {
     this.onClose?.();
   }
 
-  private grid(slots: Array<{ item: string; count: number } | null>, opts: { hotbar?: boolean; held?: number | null; sel?: number; onClick: (i: number) => void; onDbl?: (i: number) => void; drag?: string; onDrop?: (from: number, to: number) => void }): HTMLElement {
+  private grid(slots: Array<{ item: string; count: number } | null>, opts: { hotbar?: boolean; held?: number | null; worn?: ReadonlySet<number>; sel?: number; onClick: (i: number) => void; onDbl?: (i: number) => void; drag?: string; onDrop?: (from: number, to: number) => void }): HTMLElement {
     const grid = el('div', { class: 'grid' });
     slots.forEach((s, i) => {
-      const cell = el('div', { class: `cell${i === opts.sel ? ' sel' : ''}${opts.held === i ? ' held' : ''}${opts.hotbar && i < HOTBAR ? ' hotbar' : ''}`, draggable: s && opts.drag ? 'true' : 'false' });
+      const cell = el('div', { class: `cell${i === opts.sel ? ' sel' : ''}${opts.held === i ? ' held' : ''}${opts.worn?.has(i) ? ' worn' : ''}${opts.hotbar && i < HOTBAR ? ' hotbar' : ''}`, draggable: s && opts.drag ? 'true' : 'false' });
       if (opts.hotbar && i < HOTBAR) cell.append(el('span', { class: 'n' }, String(i + 1)));
       if (s) {
         cell.append(itemIcon(this.k, s.item, 38));
@@ -112,9 +113,12 @@ export class InventoryPanel {
     const bag = this.bagSlot !== null && !box ? k.bag(this.bagSlot) : undefined;
     if (this.bagSlot !== null && !bag) this.bagSlot = null;
 
+    // What is worn (T290): marked on its slot, as what is held.
+    const worn = new Set(Object.values(wornSlots(inv, (item) => k.wornZone(item))));
     const mine = this.grid(inv.slots, {
       hotbar: true,
       held: inv.equipped,
+      worn,
       sel: this.sel,
       drag: 'slot',
       onClick: (i) => {
@@ -215,7 +219,11 @@ export class InventoryPanel {
         };
         const def = k.content.get(s.item);
         const isRune = s.item.startsWith('rune:');
-        const usable = !isRune && !def?.container && (!!info.effects || ['food', 'drink', 'medicine', 'light', 'clothing'].includes(info.category) || k.sandbox.has(def?.module ?? '', 'on_use'));
+        // A garment is put on and taken off (T290): its button, not «Usa», unless its module says what using it does.
+        const zone = k.wornZone(s.item);
+        const wears = !!zone && !info.effects && !k.sandbox.has(def?.module ?? '', 'on_use');
+        const usable = !wears && !isRune && !def?.container && (!!info.effects || ['food', 'drink', 'medicine', 'light', 'clothing'].includes(info.category) || k.sandbox.has(def?.module ?? '', 'on_use'));
+        if (wears) btn(worn.has(this.sel) ? 'Togli' : 'Indossa', () => k.wearSlot(this.sel), 'primary');
         if (def?.container) btn(`Apri (${(s.inv?.slots.filter(Boolean).length ?? 0)}/${def.container.size})`, () => k.useSlot(this.sel), 'primary');
         if (isRune) btn('Aggiungi alla frase', () => k.composeRune(s.item.slice(5)), 'primary');
         if (usable) btn(info.category === 'food' ? 'Mangia' : info.category === 'drink' ? 'Bevi' : info.category === 'magic' ? 'Assorbi' : 'Usa', () => k.useSlot(this.sel), 'primary');
@@ -231,7 +239,7 @@ export class InventoryPanel {
           el('div', { class: 'big' }, itemIcon(k, s.item, 96)),
           el('div', { class: 'name' }, `${info.name}${s.count > 1 ? ` ×${s.count}` : ''}`),
           el('div', { class: 'descr' }, info.description),
-          el('div', { class: 'props' }, `${info.category} · peso ${info.spec.weight}${info.spec.stackable ? ` · pila fino a ${info.spec.maxStack}` : ''}${thing ? ' · si porta sopra la testa (F per posare)' : info.spec.equippable ? ' · si impugna (F)' : ''}`),
+          el('div', { class: 'props' }, `${info.category} · peso ${info.spec.weight}${info.spec.stackable ? ` · pila fino a ${info.spec.maxStack}` : ''}${thing ? ' · si porta sopra la testa (F per posare)' : info.spec.equippable ? ' · si impugna (F)' : ''}${zone ? ` · si indossa ${ZONE_WORDS[zone]}${worn.has(this.sel) ? ' (indossato)' : ''}` : ''}`),
           effects ? el('div', { class: 'control' }, effects) : '',
           info.tags.length ? el('div', { class: 'props' }, info.tags.join(', ')) : '',
           actions,

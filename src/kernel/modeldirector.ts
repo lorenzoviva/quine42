@@ -108,7 +108,10 @@ export class ModelDirector {
       if (!lacks(d.model)) continue;
       // A common shape is asked for by its word in the language of the world (T307a: the id is internal, `shape-sack`; the word is «sacco»).
       const forma = d.model!.startsWith(SHAPE_PREFIX) ? italianName('impronte', d.model!.slice(SHAPE_PREFIX.length)) : undefined;
-      out.push(forma ? { id: d.model!, nome: `${forma} (forma comune degli oggetti)`, aspetto: `a simple, recognisable ${forma}, like many things of the world (for example: ${d.name})`, classe: 'object', tinta: true } : { id: d.model!, nome: d.name, aspetto: d.look ?? d.description, classe: 'object' });
+      // A thing worn on the body (T290) has its section for the zone: its own model, or the common shape every hat shares.
+      const zone = k.wornZone(d.id);
+      const worn = zone && (!forma || d.model === itemShapeModel('hat')) ? { worn: zone } : {};
+      out.push(forma ? { id: d.model!, nome: `${forma} (forma comune degli oggetti)`, aspetto: `a simple, recognisable ${forma}, like many things of the world (for example: ${d.name})`, classe: 'object', tinta: true, ...worn } : { id: d.model!, nome: d.name, aspetto: d.look ?? d.description, classe: 'object', ...worn });
     }
     // Structures the Cartographer asked for (ADR-0043), at their size (ADR-0092): the rare ones (Huge per zone,
     // Gargantuan per realm, the kernel sees to it) by the best model.

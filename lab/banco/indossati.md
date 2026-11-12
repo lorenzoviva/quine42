@@ -4,6 +4,10 @@ L'autore (05/11, `docs/userchats/to-do-2026-11-05.md`): per gli attrezzi la stes
 «per i vestiti e l'armatura va deciso», forse due mesh, una a terra e una indossata, che «eventualmente potrebbe essere solo una modifica
 alla mesh dell'NPC». E da `docs/pipeline/domande/T232.md`: non rigenerare tutti i modelli, costa caro.
 
+> **La decisione e il gioco.** L'autore ha scelto **C + B** (D47, 10/11), con sì alle quattro sotto-domande. Il gioco la porta da T290
+> (ADR-0180): le zone, la via C e la via B di questo banco stanno in `src/mj/worn.ts`, il corpo vestito si fa nel worker
+> (`dressMeshes`), indossare è il segno `worn` dell'inventario. Il banco resta com'era, con le sue misure: è la prova della scelta.
+
 Il banco prova tre vie sugli stessi tre oggetti (un **elmo**, una **corazza**, un **mantello**) e sugli stessi due corpi (il **viandante**
 e il **lupo** del seme, una creatura a quattro zampe), poi lo stesso abito su **27 corpi** del seme e generati (Cantiere 8). Niente
 chiamate ai modelli: gli oggetti li ho scritti a mano come li scriverebbe lo Scultore. Il gioco non cambia.
