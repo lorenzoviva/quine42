@@ -3,13 +3,13 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 12/11/2026, epoca 355 (argon). Crediti: vedi `stato`.
+Aggiornato il 12/11/2026, epoca 356 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
 - **Sei fasi (autore, 10/11):** I kernel 0.9.0, II closed beta, III kernel 1.0.0, **IV open beta** (OpenRouter, hosting esterno e self-hosting, niente partita IVA ora), V raffinamento, VI produzione (Stripe, quote carte). Step 43 aperto con T345 (in coda).
 - **Nuovo generatore MJ (autore, 10/11):** D48 chiusa con D integrata (T346 approvato: porte torri, merli, feritoie, staccionata, via animali dal modello MJ verso Narratore/Scenografo, campi incastrati e varianza T339 + architettura T338, tetti gargantua con `<pieces>`).
-- **Vestiti e armature (step 40):** T290 integrato (ADR-0180, `<worn>`); T353 (seguito) in corso su Fable.
+- **Vestiti e armature (step 40):** T290 integrato (ADR-0180, `<worn>`); T353 integrato (ADR-0181, kernel 0.6.5: abiti degli individui dalla scheda o dal mestiere); mancano cambio d’abito dopo l’individuazione, abiti nella scheda dell’Attore, gambe/piedi/mani.
 - **Launcher (D51.2):** T233 integrato (`492b5e5e`): la home è il launcher; «in gioco ora» provato solo con `/api/session` simulata.
 - **Campagna del Master (autore, 10/11):** spese universo a carico del master, universo privato su invito, velocità/pausa di generazione, direttive della campagna nel Referente iniettate per competenza, controllo preventivo cartografia → proposto T347 (step 43).
 - **Claude Fable (autore, 10/11):** reset settimanale giovedì 12/11 16:00; adozione intensiva da giovedì per massimizzare il reset di Fable (portare Fable a 100% con altri <50%, poi reset).
@@ -20,9 +20,9 @@ Aggiornato il 12/11/2026, epoca 355 (argon). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **In corso:** T353 (fable high, in pausa per limite 5h fino a 22:01 UTC / 23:01 ora locale). **Pronti:** T346 (fable high), T345, T347 (fable high, approvato), T348→T349→T350 (Jev nel gioco, D45), T352; bloccati T351, T354→T355 (non prima del 15/11), T356.
+0. **In corso:** T348 (claude high). **Pronti:** T346 (fable high), T345, T347 (fable high, approvato), T349→T350 (Jev nel gioco, D45), T352; bloccati T351, T354→T355 (non prima del 15/11), T356.
 1. **Da approvare dall'autore:** T310b (lingua interna campi schemi, extra 6% p4).
-2. **Crediti (12/11 sera):** Claude settimana 93 %, Fable settimana 94 %, 5h 0 % (reset 22:00 UTC / 23:00 ora locale); slot Claude 1; Gemini 98 %; Argon 93 %; agy 100 %. Generatore acceso, fermo finché Claude è fermo.
+2. **Crediti (12/11 23:15):** Claude settimana 91 %, 5h 77 % (reset 02:59 UTC); Fable settimana 91 %, 5h 75 %; Gemini 98 %; Argon 92 %; agy 100 %. Generatore acceso, fermo (avanzo negativo).
 
 ## Attese dall'autore
 
@@ -36,5 +36,5 @@ Aggiornato il 12/11/2026, epoca 355 (argon). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **356 (claude):** T353 integrato; T348 lanciato su Claude.
 - **355 (argon):** rotazione su Argon per finestra 5h di Claude a 0 % (reset 22:00 UTC); T353 in attesa del reset (22:01 UTC).
-- **354 (claude):** riavvio dopo `ferma --dopo` (correzione EPERM del generatore, `d46ff703`); T233 integrato; T353 lanciato su Fable.
