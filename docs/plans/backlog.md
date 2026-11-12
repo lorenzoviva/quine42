@@ -5043,7 +5043,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T347`; l'autore decide sull'ADR proposto.
 
 ### T346 · Strutture MJ: correzione dettagli, separazione animali e campi vari (passo 1 di D48) — `da fare` (dipende da T338, T339)
-- Pipeline: claude · sforzo high · stima 5% · approvato · browser · priorità 4
+- Pipeline: fable · sforzo extra · stima 5% · approvato · browser · priorità 4
 - Step: 30
 - Contesto: feedback dell'autore su T338 e T339 (10/11, epoca 347) e approvazione di D48 (risposta D integrata, `lab/banco/taglie/` e `lab/banco/pezzi/`). Le strutture dinamiche funzionano bene, ma presentano difetti di dettaglio ed entità da scorporare.
 - Cosa fare: (1) Forte: aggiungere porte tra camminamento e torri, merli regolari e coerenti lungo il perimetro, distribuzione simmetrica/ordinata delle feritoie; (2) Fattoria: rimuovere i blocchi marroncino cubici anomali dalla staccionata; (3) Separazione entità viventi: togliere gli animali dal programma MJ della struttura (competenza di Narratore e Scenografo); il programma definisce e annota l'impronta delle aree (recinto pascolo, stalla) come metadati/zone per chi genererà o posizionerà NPC/animali; (4) Varianza e composizione: unire l'architettura completa di T338 (casa pastore 2 piani, fieno sotto tettoia) con la varianza dei campi a incastro e recinti irregolari di T339; (5) Tetto voxel gargantua: verificare e adeguare i tetti di dimensione/voxel per le taglie gargantua oltre i 200 voxel usando `<pieces>` di T339; (6) Sottoblocchi del seme modulari per l'inclusione con `<import>` (passo 1 di D48).

@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 10/11/2026, epoca 347 (gemini). Crediti: vedi `stato`.
+Aggiornato il 12/11/2026, epoca 350 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -19,9 +19,9 @@ Aggiornato il 10/11/2026, epoca 347 (gemini). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **In coda pronta su Claude:** T290 (vestiti addosso, max 6% p4), T346 (dettagli MJ e animali, high 5% p4), T345 (open beta studio, high 3% p5).
+0. **In corso:** T290 (vestiti addosso, claude max, lanciato 12/11 17:09). **Pronti:** T346 (spostato su **fable**, sforzo extra, adozione intensiva dopo il reset), T345 (claude high 3% p5).
 1. **Da approvare dall'autore:** T347 (studio Campagna del Master, high 4% p5), T310b (lingua interna campi schemi, extra 6% p4).
-2. **Crediti (10/11):** Claude 5h 9 %, settimana 9 % (reset 12/11 16:00); Gemini 97-98 %, agy 100 %; Argon fermo fino all'11/11 18:44; Fable fermo fino a giovedì 16:00.
+2. **Crediti (12/11):** Claude, Fable, Sonnet, Haiku 100 % (reset settimanale 19/11 16:00); Gemini 98 %; Argon 93 %; agy 100 %. Generatore acceso, fermo per i task pronti.
 
 ## Attese dall'autore
 
@@ -30,7 +30,7 @@ Aggiornato il 10/11/2026, epoca 347 (gemini). Crediti: vedi `stato`.
 
 ## Regole attive
 
-- Tetti dell'autore (3 Claude, 1 agy); finestra 5h protetta dallo script; nessun ripiego; Argon solo task piccoli; Fable intensivo dopo reset giovedì 12/11.
+- Tetti dell'autore (3 Claude, 1 agy); finestra 5h protetta dallo script; nessun ripiego; Argon solo task piccoli; Fable intensivo da ora (reset avvenuto 12/11), i task difficili su fable.
 - Domande per intero in chat con raccomandazione. Finestra 5h con l'ora del reset. Sforzo: qualità prima del tempo. Mai `git commit -a` nel base.
 
 ## Ultime 2 epoche
