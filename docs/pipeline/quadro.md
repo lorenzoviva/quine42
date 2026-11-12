@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 12/11/2026, epoca 357 (claude). Crediti: vedi `stato`.
+Aggiornato il 13/11/2026, epoca 358 (argon). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -21,9 +21,9 @@ Aggiornato il 12/11/2026, epoca 357 (claude). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **In corso/pronti:** T346 (fable high, in corso), T345, T347 (fable high, approvato), T349→T350 (Jev nel gioco, D45), T352; bloccati T351, T354→T355 (non prima del 15/11), T356.
+0. **In corso/pronti:** T346 (fable high, in pausa per limite 5h fino a 03:01 UTC), T345, T347 (fable high, approvato), T349→T350 (Jev nel gioco, D45), T352; bloccati T351, T354→T355 (non prima del 15/11), T356.
 1. **Da approvare dall'autore:** T310b (lingua interna campi schemi, extra 6% p4).
-2. **Crediti (12/11 23:40):** Claude settimana 90 %, 5h 55 % (reset 03:00 UTC); Fable settimana 88 %, 5h 55 %; Gemini 98 %; Argon 92 %; agy 100 %. Generatore acceso, fermo (avanzo negativo).
+2. **Crediti (13/11 00:28):** Claude settimana 84 %, 5h 0 % (reset 02:59 UTC / 03:59 CET); Fable settimana 77 % (all 84 %), 5h 0 %; Gemini 98 %; Argon 92 %; agy 100 %. Generatore acceso, fermo (avanzo negativo).
 
 ## Attese dall'autore
 
@@ -37,5 +37,5 @@ Aggiornato il 12/11/2026, epoca 357 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **358 (argon):** finestra 5h di Claude/Fable a 0 % (reset 03:59 CET); T346 in pausa su Fable con ripresa alle 04:01 CET (`03:01 UTC`).
 - **357 (claude):** T357 integrato (kernel 0.6.6, suite 3030 verde con T353+T348).
-- **356 (claude):** T353 e T348 integrati (entrambi a kernel 0.6.5) → T357 per 0.6.6 e la suite insieme.
