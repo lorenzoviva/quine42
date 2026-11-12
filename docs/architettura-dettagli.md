@@ -148,7 +148,7 @@
   da 0 a 1, riparati dal validatore; diretti (`sessioni dialoghi trame revisioni modelli brani`: ritmi allungati; `luoghi parole sguardi azioni magia morte riparazioni studio`: la quota che va ai modelli, ADR-0133) e indiretti (`persone abitanti
   pacchetti cose`: meno di ciò che causa le chiamate); a 0 nessuna chiamata, per nessuna riga; il censimento delle chiamate in `CENSUS`, dove solo la Genesi non ha una manopola, il preset «Low Detail» (`LOW_DETAIL`, anche
   lo Scultore su Flash-Lite), la stima di un'ora di gioco (`hourlyEstimate`); nella Genesi si scelgono con i modelli (`kernel.setAi`).
-- **Le decisioni chiuse, Jev di TypeSafe** (ADR-0157, T348): un modello che non scrive ma sceglie. Lo strato è `src/kernel/ai/decisions.ts`, accanto ad
+- **Le decisioni chiuse, Jev di TypeSafe** (ADR-0157, T348, kernel 0.6.6): un modello che non scrive ma sceglie. Lo strato è `src/kernel/ai/decisions.ts`, accanto ad
   `AiModels`: una `DecisionCall` porta l'agente, il compito, lo **stato** (scritto dal kernel, solo dati del mondo e del catalogo: mai il testo libero del
   viandante finché TypeSafe non ha la ritenzione zero, D45), le **domande** (Choice: la chiave di un'opzione; Noul: un sì o un no; Score: l'indice di un
   livello) e la **regola** di oggi, domanda per domanda. Chiede il Concilio, `Council.decide(agent, task, { state, questions, rule, chi })`: solo per un

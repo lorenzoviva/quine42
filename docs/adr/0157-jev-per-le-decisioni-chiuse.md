@@ -109,3 +109,5 @@ Il varco e lo strato, senza ancora un compito che li usi (il primo lo accende T3
 - **I prezzi** stanno in `DECISION_PRICES` (`prices.ts`, letti il 06/11): `priceOf` li trova, il registro dei consumi (`world/usage.json`, non
   `consumi.json`) conta ogni chiamata sotto il suo modello e compito, e in multigiocatore si addebita come le altre.
 - **Sicurezza**: la voce V-034 del registro (`tests/sicurezza/typesafe.test.ts`).
+- **La versione**: kernel **0.6.6**. T348 aveva portato il kernel a 0.6.5 come T353 (ADR-0181), integrato prima; T357 dà al varco e allo strato
+  l'incremento successivo e fa girare la suite sui due insieme.
