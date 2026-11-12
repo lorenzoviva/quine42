@@ -19,6 +19,7 @@ import type { FileMap } from '../kernel/types';
 import type { Profile } from '../kernel/wanderers';
 import { hashStr, hex } from '../kernel/rng';
 import { takeFromSlot } from '../kernel/inventory';
+import { readWorn } from '../kernel/wearing';
 import { isThing } from '../kernel/moving';
 import { ENTITY_PARTS } from './protocol';
 import { SEA_DRAFT } from '../kernel/relief';
@@ -369,7 +370,9 @@ export class ThinClient {
     // What they hold (T288), and the seed of its look when it is a thing of the world they carry (T292): numbers and a text only.
     const held = typeof o.held === 'string' && o.held ? o.held.slice(0, 120) : undefined;
     const seed = held && typeof o.heldSeed === 'number' && Number.isInteger(o.heldSeed) && Math.abs(o.heldSeed) < 1e9 ? o.heldSeed : undefined;
-    k.ecs.set(id, 'remote', { id: o.id, name: o.name, introduction: o.introduction ?? '', ...(held ? { held } : {}), ...(seed !== undefined ? { heldSeed: seed } : {}) });
+    // What they wear (T290): the zones and a text of an id for each, whatever else came is left out.
+    const worn = readWorn(o.worn);
+    k.ecs.set(id, 'remote', { id: o.id, name: o.name, introduction: o.introduction ?? '', ...(held ? { held } : {}), ...(seed !== undefined ? { heldSeed: seed } : {}), ...(worn ? { worn } : {}) });
     k.ecs.set(id, 'identity', { name: o.name });
     if (o.form) k.ecs.set(id, 'form', { ...o.form });
     if (o.text) this.say(id, o.text);
@@ -639,6 +642,7 @@ export class ThinClient {
     const here = {
       useSlot: k.useSlot.bind(k),
       equipSlot: k.equipSlot.bind(k),
+      wearSlot: k.wearSlot.bind(k),
       moveSlot: k.moveSlot.bind(k),
       putIntoBag: k.putIntoBag.bind(k),
       takeFromBag: k.takeFromBag.bind(k),
@@ -655,9 +659,14 @@ export class ThinClient {
       if (!s) return;
       // A bag opens here, a rune joins the phrase here: both are the client's own.
       if (k.content.get(s.item)?.container || s.item.startsWith('rune:')) return here.useSlot(i);
+      // A garment goes on or off as the server would (T290): at once here too, as `wear`.
+      const def = k.content.get(s.item);
+      if (!def?.effects && !(def?.module && k.sandbox.has(def.module, 'on_use')) && k.wornZone(s.item)) return k.wearSlot(i);
       void this.carry({ t: 'item', op: 'use', slot: i });
     };
     k.equipSlot = (i) => void this.carry({ t: 'item', op: 'wield', slot: i }, () => here.equipSlot(i));
+    // Put on or taken off here at once (T290): the body changes on this client while the server does the same.
+    k.wearSlot = (i) => void this.carry({ t: 'item', op: 'wear', slot: i }, () => here.wearSlot(i));
     k.moveSlot = (a, b) => void this.carry({ t: 'item', op: 'move', slot: a, toward: b }, () => here.moveSlot(a, b));
     k.dropSlot = (i, n) => {
       if (k.zone !== 'sim' || !k.inventory().slots[i]) return;

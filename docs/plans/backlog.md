@@ -4464,7 +4464,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Quando è fatto: l'autore può decidere guardando le foto; commit su `task/T289`. Sicurezza: nessuna superficie nuova.
 - Esito: banco degli indossati in `lab/banco/indossati.md` e `lab/banco/indossati/` (zone del corpo dai voxel e dal rig; tre vie A due programmi / B sezione `<worn>` / C colori del kernel; elmo, corazza e mantello scritti a mano come lo Scultore; foto a cartone da quattro lati su viandante e lupo, lo stesso abito su 27 corpi del seme e del Cantiere 8; tempi, memoria, chiamate di disegno, costo con lo Scultore in `riepilogo.md` e `misure.json`), pagina 3D `/lab/indossati/` con 12 catture, `lab/scripts/indossati.ts`, 10 test in `lab/tests/indossati.test.ts`, voce della pagina in `vite.config.ts`; raccomandazione C + B, domanda aperta per l'autore in `docs/pipeline/domande/T289.md` (serve a T290); il gioco non cambia; non provato: nessun modello vero ha scritto una sezione `<worn>`, tempi misurati in Node e non nel browser, zone euristiche (sbagliano sul cane randagio e sul ragno meccanico); sicurezza: nessuna superficie nuova.
 
-### T290 · Vestiti e armature addosso nel gioco — `da fare` (dipende da T289)
+### T290 · Vestiti e armature addosso nel gioco — `fatto` (`30d48ec8`) (dipende da T289)
 - Pipeline: claude · sforzo max · stima 6% · approvato · browser · priorità 4
 - Step: 40
 - Contesto: decisione dell'autore su D47 (10/11, epoca 347, banco T289 in `lab/banco/indossati.md`): scelta la via C+B. La via C subito per tutto ciò che esiste oggi (colori del kernel applicati sulle zone del corpo, senza rigenerare i modelli); la via B (sezione `<worn>` nel programma MarkovJunior) per gli oggetti che lo Scultore scolpisce da ora in poi per riscolpire la mesh del corpo; quando B manca si usa C come ripiego garantito. Nasce da T289 (`dossier T289`).
@@ -4472,6 +4472,7 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 - Test: vestizione e svestizione nei 3 slot; ricalcolo mesh nel worker con C e B; sincronizzazione tra viandanti; salvataggio dello stato; typecheck e suite.
 - Browser: sì, verifica visiva di viandante con elmo, corazza e mantello indossati nel gioco (`?skip&offline`), foto prima e dopo.
 - Quando è fatto: commit su `task/T290`, kernel sale di Z. Sicurezza: nessuna superficie nuova fuori dal gioco.
+- Esito: indossare/togliere in testa, busto, schiena (segno `worn` nell'inventario, `wearSlot`, zona dal posto o dal nome); corpo vestito rifatto nel worker con la via B (sezione `<worn>`) o C (colori), C come ripiego; sync multigiocatore (`wear`, `OtherView.worn` solo id); prompt e controlli dello Scultore e validatore per `<worn>`; oggetti di oggi e mantello del seme via C; ADR-0180, kernel 0.6.4, docs e glossario; 25 test nuovi, typecheck e build verdi, suite intera: primo giro verde, ultimo 1 fallimento noto e instabile (`tests/determinism.test.ts`, da solo 3/3); non provato: una sezione `<worn>` scritta dallo Scultore vero, multigiocatore nel browser; manca: individui, gambe/piedi/mani, capi negli slot dei pannelli; sicurezza: nessuna superficie nuova.
 
 ### T291 · Posare gli oggetti sui mobili — `fatto` (`bbf0db7`) (dipende da T255)
 - Pipeline: claude · sforzo max · stima 3% · approvato · browser · priorità 6

@@ -223,6 +223,9 @@ input[type='checkbox'], input[type='radio'] { accent-color: var(--neon-pink); }
   background: var(--comic-ink-light); border: var(--border-ink-thick); box-shadow: 3px 3px 0 var(--neon-cyan);
 }
 #hotbar .hot.held, #inventory .cell.held { border-color: var(--neon-yellow); box-shadow: 3px 3px 0 var(--neon-pink); }
+/* What is worn on the body (T290): its own mark, apart from what is held. */
+#hotbar .hot.worn, #inventory .cell.worn { border-color: var(--neon-green); box-shadow: 3px 3px 0 var(--neon-purple); }
+#hotbar .hot.worn::after, #inventory .cell.worn::after { content: '◆'; position: absolute; top: var(--space-2); right: var(--space-2); font: var(--text-8)/1 var(--font-arcade); color: var(--neon-green); }
 #hotbar .n, #inventory .n { position: absolute; top: var(--space-2); left: var(--space-2); font: var(--text-8)/1 var(--font-arcade); color: var(--neon-cyan); }
 #hotbar .count, #inventory .count { position: absolute; bottom: 0; right: var(--space-2); font: var(--text-18)/1 var(--font-pixel); color: #fff; text-shadow: 1px 1px 0 var(--comic-ink), -1px -1px 0 var(--comic-ink), 1px -1px 0 var(--comic-ink), -1px 1px 0 var(--comic-ink); }
 .icon { display: inline-flex; align-items: center; justify-content: center; line-height: 1; }

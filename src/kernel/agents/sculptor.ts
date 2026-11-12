@@ -22,6 +22,7 @@ import { habitableParts } from '../forms';
 import type { FileMap } from '../types';
 import { internalFields } from '../internalNames';
 import { isTileset, WORLD_NODE_LIMITS, worldNodeErrors } from '../validator';
+import { wornErrors, wornSections, type WornZone } from '../../mj/worn';
 import type { Council } from './council';
 
 export type ModelCategory = 'simple' | 'figure' | 'structure';
@@ -67,7 +68,12 @@ export interface SculptRequest {
   desiderio?: string;
   /** A structure's entries of the same concept at the other sizes (ADR-0160): a program that scales is shared, not sculpted again. */
   shareWith?: string[];
+  /** It is worn there (T290, ADR-0180): the program has its `<worn>` section for that zone of the body. */
+  worn?: WornZone;
 }
+
+/** Where a thing is worn, as the request says it. */
+const WORN_ON: Record<WornZone, string> = { head: 'on the head', torso: 'on the torso', back: 'on the back' };
 
 export interface Critique {
   voto: number;
@@ -268,6 +274,8 @@ function checkOnce(xml: string, cls: AssetClass, taglia: string | undefined, see
     if (!result.finished) return { xml, model, error: 'il programma non finisce in 8 secondi: ogni crescita deve avere steps' };
     const a = analyse(result, model.program.palette, { grounded: true, minHeight: leastHeight(cls, taglia) });
     const notes = [...a.errors];
+    // What is worn (T290): its sections tried on the kernel's two bodies, as the validator and the world will.
+    if (wornSections(xml).length) notes.push(...wornErrors(xml, { background: symbolName(model.background), palette: model.program.palette }));
     const cells = result.grid.X * result.grid.Y * result.grid.Z;
     if (a.voxels > cells * 0.85) notes.push(`riempie il ${Math.round((a.voxels / cells) * 100)}% della scatola: qualcosa cresce senza limite (manca steps?) o la prima lettera di values non è la cella vuota`);
     let composition: Composition | undefined;
@@ -304,6 +312,7 @@ export function describe(req: SculptRequest, cls: AssetClass): string {
     req.contesto && `Where it is: ${req.contesto}`,
     `Class: ${cls.id}${size && size.id !== cls.taglia ? ` · size ${size.id} (${tiles.join(' × ')} tiles, ${densityFor(cls, req.taglia)} voxels per tile)` : ''} · box ${box.join(' × ')} voxels${cls.minHeight ? ` · at least ${leastHeight(cls, req.taglia)} tall` : ''}`,
     req.tinta && 'It serves many things of this kind: the main colour is the letter C (the game recolours it for each one).',
+    req.worn && `It is worn ${WORN_ON[req.worn]}: after the program write its <worn zone="${req.worn}"> section (see «Worn things»).`,
     procedural(cls, req.taglia) && bodyLine(cls, req.taglia),
   ]
     .filter(Boolean)
@@ -393,7 +402,7 @@ async function write(c: Council, req: SculptRequest, cls: AssetClass, model: str
   for (let i = 0; i <= retries; i++) {
     const p = i === 0 ? prompt : `${prompt}\n\nThe program you wrote:\n${last!.xml.slice(0, proc ? 24_000 : 6000)}\nIt does not pass: ${last!.error}${traced(last!)}\nFix it and answer with the whole program.`;
     calls++;
-    const raw = await c.write('sculptor', 'model.sculpt', p, { role, system, images, model, temperature: 0.7, data: { request: req, classe: cls.id, example: proc ? skeletonOf(role) : examples[0] } });
+    const raw = await c.write('sculptor', 'model.sculpt', p, { role, system, images, model, temperature: 0.7, data: { request: req, classe: cls.id, example: proc ? skeletonOf(role) : examples[0], ...(req.worn ? { worn: req.worn } : {}) } });
     const xml = extractXml(raw);
     last = checkProgram(xml, cls, req.taglia, filesOf(xml, c.files));
     if (!last.error) return { checked: last, calls };

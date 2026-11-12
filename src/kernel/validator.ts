@@ -19,7 +19,8 @@ import { Mj3Error } from '../mj/engine';
 import { compileMjx, MJX_FILE_RE, mjxIncludes, patternText, type MjxFiles, type MjxModel } from '../mj/model';
 import type { Node3, NodeCeilings } from '../mj/engine';
 import { parseXml, type XmlElement } from '../mj/xml';
-import { isNoteLine, symbolTokens } from '../mj/symbols';
+import { isNoteLine, symbolName, symbolTokens } from '../mj/symbols';
+import { wornErrors } from '../mj/worn';
 import { FORM_LIMITS, MAX_FORM_TIME, MAX_FORM_XML, runMjx } from '../mj/run';
 import { analyzeSound } from '../mj/soundanalysis';
 import { reservedName } from './paths';
@@ -85,7 +86,9 @@ export function modelErrors(path: string, xml: string, time = 8_000, box?: [numb
     }
     const r = runMjx(m, 1, { deadline: time, limits: FORM_LIMITS, ceilings: WORLD_NODE_LIMITS });
     if (!r.finished) return [`${path}: il programma non finisce in ${Math.round(time / 1000)} secondi (ogni crescita deve avere steps; un programma lento scritto a mano può avere \`tempo\` in models/index.json)`];
-    return analyse(r, m.program.palette, { grounded: true }).errors.map((e) => `${path}: ${e}`);
+    // What is worn (T290, ADR-0180): every section tried on the kernel's two bodies, as the world will try it on any.
+    const worn = wornErrors(xml, { background: symbolName(m.background), palette: m.program.palette });
+    return [...analyse(r, m.program.palette, { grounded: true }).errors, ...worn].map((e) => `${path}: ${e}`);
   } catch (e) {
     return [`${path}: ${e instanceof Mj3Error ? e.message : (e as Error).message}`];
   }
