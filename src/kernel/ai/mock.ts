@@ -3,6 +3,7 @@
 // answer badly on purpose, so the discard-and-regenerate path is always exercised.
 
 import { emptyUsage, type Limits, type AiModels, type TextCall } from './models';
+import { ruleDecisions, type DecisionCall, type DecisionModels, type Decisions } from './decisions';
 import { hashStr, Rng } from '../rng';
 import { tokenize } from '../runes';
 import type { PlanContext } from '../agents/cartography';
@@ -87,15 +88,23 @@ export const MOCK_FIELD_PROGRAM = `<sequence values="BCRGW" ground="C" symmetry=
   <all in="B W" out="W *"/>
   <prl><rule in="R" out="W"/><rule in="G" out="W"/></prl>
 </sequence>`;
-export class MockAiModels implements AiModels {
+export class MockAiModels implements AiModels, DecisionModels {
   readonly name = 'offline';
   readonly usage = emptyUsage();
+  /** Closed decisions answered (ADR-0157): always with today's rule. */
+  decided = 0;
   limits: Limits = { text: Infinity };
   /** Probability that a first chunk plan is broken on purpose. */
   corruptRate = 0.15;
   latency = 15;
   /** Individuals drawn so far: each a different individual, the same ones in every run (T35). */
   private drawn = 0;
+
+  /** A closed decision (ADR-0157): the local models answer with the rule the kernel brings, so the game without a key is the game of before. */
+  async decide(call: DecisionCall): Promise<Decisions> {
+    this.decided++;
+    return ruleDecisions(call);
+  }
 
   async text(call: TextCall): Promise<string> {
     this.usage.text++;

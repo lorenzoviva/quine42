@@ -1,6 +1,6 @@
 # ADR-0157 — Jev per le decisioni chiuse: un varco sul server come `GeminiGate`, la regola di oggi come pavimento e come risposta dei modelli locali
 
-Data: 2026-11-06 · Stato: **proposto** (task T313 e T323 del backlog: il banco e le misure sull'italiano sono fatti, portarlo nel gioco lo decide l'autore) · Riferimenti: ADR-0099 (il varco della chiave di Gemini, regola 9), ADR-0085 e ADR-0133 (i coefficienti e le manopole), ADR-0113 (chi paga si dice), ADR-0140, ADR-0147 (mestieri e imprese), ADR-0042 (lo Scultore), ADR-0153 (la lingua interna), `lab/banco/jev/README.md`
+Data: 2026-11-06 · Stato: **accettato** (D45, autore 10/11; il varco e lo strato da T348, 12/11) · Proposto con T313 e T323 · Riferimenti: ADR-0099 (il varco della chiave di Gemini, regola 9), ADR-0085 e ADR-0133 (i coefficienti e le manopole), ADR-0113 (chi paga si dice), ADR-0140, ADR-0147 (mestieri e imprese), ADR-0042 (lo Scultore), ADR-0153 (la lingua interna), `lab/banco/jev/README.md`
 
 ## Contesto
 
@@ -23,7 +23,7 @@ In sintesi (le tabelle sono nel README del banco):
   scelte che oggi non si fanno perché costerebbero (i bivi e le mete degli individui, ADR-0140: con Jev 30 individui per un'ora costano
   2-5 ¢ invece di 1,87 $ del `npc.decide` progettato su Flash-Lite).
 
-## Decisione proposta
+## Decisione
 
 1. **Un varco sul server, come `GeminiGate`** (`server/typesafeProxy.ts`, ADR-0099 e regola 9): `TypeSafeGate` tiene `TYPESAFE_KEY`, che
    non arriva mai al browser; i modelli da un elenco (`jev-1.13.0`, `jev-1.14.0`: versioni fisse, mai un alias che si sposta), il corpo
@@ -74,8 +74,38 @@ In sintesi (le tabelle sono nel README del banco):
   della documentazione) va provato prima di portare quei due compiti; gli effetti restano l'insieme chiuso che il validatore controlla.
 - `KERNEL_VERSION`: un compito nuovo che i modelli locali risolvono con la regola di oggi lascia buoni gli universi della stessa `X.Y`.
 
-## Domande per l'autore
+## Domande per l'autore (chiuse: D45, 10/11)
 
-1. Portarlo nel gioco, e in che ordine (la proposta è quella del punto 4)?
-2. Il riuso dei modelli anche per le persone, o solo per mobili, piante, rocce, strutture? Meno modelli scolpiti vuol dire meno varietà.
-3. I dati del mondo a un fornitore nuovo vanno bene così, senza ritenzione zero?
+1. Portarlo nel gioco, e in che ordine (la proposta è quella del punto 4)? **Sì, tutte le proposte approvate**, nell'ordine di T325
+   (`lab/banco/jev/casi-d-uso.md` §6-7): il varco (T348) → `model.reuse` (T349) → guardie e quarta parete (T350) → le altre scelte del
+   punto 4 → l'Attore con la cache esplicita di Gemini (T351) → le battute riusate.
+2. Il riuso dei modelli anche per le persone, o solo per mobili, piante, rocce, strutture? Approvato con il resto; le classi le fissa T349.
+3. I dati del mondo a un fornitore nuovo vanno bene così, senza ritenzione zero? **Sì per i dati del mondo e del catalogo; il testo libero
+   del viandante no** (D45.3, privacy e GDPR) finché TypeSafe non offre la ritenzione zero. Quindi `action.judge`, `referente.coordinate` e
+   `craft.free` del punto 4.5, il cui stato porterebbe ciò che il viandante scrive, restano al Narratore fino ad allora; e così le guardie di
+   T325 sul testo del viandante.
+
+## Come è fatto (T348)
+
+Il varco e lo strato, senza ancora un compito che li usi (il primo lo accende T349). Ciò che è cambiato rispetto alla proposta:
+
+- **Il varco** è `server/typesafeProxy.ts`: `TypeSafeGate` con `forward(body)`, `direct()` per i mondi e `typesafeRoute` (dev e preview,
+  mai nel server di produzione). Il corpo, al più 128 KB (`JEV_MAX_BODY`: il banco arrivava a 60 KB, il contesto di produzione di Jev è
+  32k token), **si rifà campo per campo** (`jevRequest`): un modello dell'elenco `JEV_MODELS`, lo stato, al più 64 domande di tipo
+  `choice`, `noul` o `score`; ogni altro campo, `assets` compresi, è un rifiuto. Il tetto è `TYPESAFE_TETTO_GIORNALIERO`, 1 $ se non detto
+  (circa 24 milioni di token), obbligatorio con la chiave nel server di produzione (`productionProblems`); la spesa sta in
+  `universes/.typesafe-spend.json` (`serverPath(…, 'typesafeSpend')`, un nome inglese: ADR-0159). Le ripetizioni dei 429 e 529 le fa il
+  client, come per Gemini; il varco no.
+- **Il canale dei mondi** porta `op: 'typesafe'` accanto a `gemini` (`worldwire.ts`, `worldHost.ts`, `worldProcess.ts`): il mondo ha un
+  `fetch` che non conosce indirizzo né chiave.
+- **Lo strato** è `src/kernel/ai/decisions.ts`: `DecisionCall` (agente, compito, stato, domande, `rule`, `chi`), `DecisionModels`,
+  `JevDecisionModels` (il client del varco, `jev-1.13.0`), `settleDecisions` (dentro le opzioni, o la regola domanda per domanda) e
+  `readJevAnswers`. **Chi chiede è il Concilio**: `Council.decide(agent, task, { state, questions, rule, chi })`, che non getta mai, applica
+  come `write` chi paga (`payer`), i crediti, la manopola e la sola lettura (i modelli locali), e la regola su ogni errore. I modelli locali
+  (`MockAiModels.decide`) rispondono con la regola. `Kernel.boot({ decisions })`: nel browser di chi gioca da solo se
+  `/api/typesafe/status` dice che la chiave c'è, nei mondi di molti se il server ce l'ha.
+- **La manopola** (regola 8b-bis): una riga di `CENSUS` per compito con `via: 'decide'` (`decisionKnob`); un compito che il censimento non
+  dice decisione non arriva allo strato. La prima riga è `model.reuse` con la manopola `models`.
+- **I prezzi** stanno in `DECISION_PRICES` (`prices.ts`, letti il 06/11): `priceOf` li trova, il registro dei consumi (`world/usage.json`, non
+  `consumi.json`) conta ogni chiamata sotto il suo modello e compito, e in multigiocatore si addebita come le altre.
+- **Sicurezza**: la voce V-034 del registro (`tests/sicurezza/typesafe.test.ts`).

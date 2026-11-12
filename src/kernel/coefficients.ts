@@ -90,9 +90,10 @@ const GENESIS_ONCE = "una volta, alla Genesi: la lobby viene dopo; chi non vuole
 
 /**
  * The census of every call (docs/conversazioni.md, T67): what regulates it. `diretta` and `indiretta` name their
- * coefficient; `non regolabile` is only the Genesis, with the reason in `nota` (a test holds this: T247).
+ * coefficient; `non regolabile` is only the Genesis, with the reason in `nota` (a test holds this: T247). `via: 'decide'` is a closed
+ * decision (ADR-0157): it goes to the layer of decisions (`ai/decisions.ts`, Jev), never to a model that writes, and only these tasks may.
  */
-export const CENSUS: Array<{ compito: string; agente: string; modo: 'diretta' | 'indiretta' | 'non regolabile'; coefficiente?: CoefficientKey; nota?: string }> = [
+export const CENSUS: Array<{ compito: string; agente: string; modo: 'diretta' | 'indiretta' | 'non regolabile'; coefficiente?: CoefficientKey; via?: 'decide'; nota?: string }> = [
   { compito: 'genesis.bible', agente: 'narrator', modo: 'non regolabile', nota: GENESIS_ONCE },
   { compito: 'genesis.style', agente: 'artist', modo: 'non regolabile', nota: GENESIS_ONCE },
   { compito: 'genesis.terrain', agente: 'cartographer', modo: 'non regolabile', nota: GENESIS_ONCE },
@@ -135,7 +136,12 @@ export const CENSUS: Array<{ compito: string; agente: string; modo: 'diretta' | 
   { compito: 'mechanic.design', agente: 'engineer', modo: 'diretta', coefficiente: 'studio', nota: 'su richiesta (sessioni e Referente)' },
   { compito: 'review.fourthwall', agente: 'narrator', modo: 'indiretta', coefficiente: 'sessions', nota: 'una volta per universo, per ciò che era nato prima del filtro: a 0 restano i ritiri che il kernel decide da sé' },
   { compito: 'sound.compose', agente: 'musician', modo: 'diretta', coefficiente: 'pieces', nota: 'per gli ambienti senza musica; ciò che chiede il viandante non si dirada' },
+  // The closed decisions (ADR-0157): the knob at 0 means today's rule, without a call.
+  { compito: 'model.reuse', agente: 'sculptor', modo: 'diretta', coefficiente: 'models', via: 'decide', nota: 'prima di scolpire: un modello che c’è già va bene? Una scelta, non un testo' },
 ];
+
+/** The knob of a closed decision (ADR-0157), or undefined: a task the census does not name as a decision is never asked to the layer. */
+export const decisionKnob = (task: string): CoefficientKey | undefined => CENSUS.find((c) => c.compito === task && c.via === 'decide')?.coefficiente;
 
 /** The knobs the Council applies to a call itself (T247): what they do not let through goes to the local models. */
 export const RATIONED_KEYS: readonly CoefficientKey[] = ['chunks', 'words', 'looks', 'actions', 'magic', 'death', 'studio'];

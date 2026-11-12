@@ -26,7 +26,7 @@ let asked = 0;
 let host: UniverseHost | undefined;
 let calls: WorldCalls | undefined;
 
-function ask<T>(op: 'gemini' | 'verify', args: unknown[]): Promise<T> {
+function ask<T>(op: 'gemini' | 'verify' | 'typesafe', args: unknown[]): Promise<T> {
   const id = ++asked;
   return new Promise<T>((done, fail) => {
     waiting.set(id, { done: done as (v: unknown) => void, fail });
@@ -34,10 +34,10 @@ function ask<T>(op: 'gemini' | 'verify', args: unknown[]): Promise<T> {
   });
 }
 
-/** `fetch` for Gemini: over the channel, to the only one who has the key and its limits. */
-const gemini = (async (input: RequestInfo | URL, init?: RequestInit) => {
+/** `fetch` for Gemini (or for TypeSafe, ADR-0157): over the channel, to the only one who has the key and its limits. */
+const overChannel = (op: 'gemini' | 'typesafe') => (async (input: RequestInfo | URL, init?: RequestInit) => {
   const call: GeminiCall = { url: String(input), method: init?.method, body: typeof init?.body === 'string' ? init.body : undefined };
-  const answer = ask<GeminiAnswer>('gemini', [call]);
+  const answer = ask<GeminiAnswer>(op, [call]);
   const signal = init?.signal;
   // Who gave up does not wait; what was already sent may be paid, as with any request.
   const r = await (signal
@@ -45,6 +45,8 @@ const gemini = (async (input: RequestInfo | URL, init?: RequestInit) => {
     : answer);
   return new Response(r.text, { status: r.status, headers: { 'Content-Type': 'application/json' } });
 }) as typeof fetch;
+const gemini = overChannel('gemini');
+const typesafe = overChannel('typesafe');
 
 const verify: Verifier = (token) => ask<Account | undefined>('verify', [token]);
 
@@ -69,6 +71,7 @@ async function open(o: WorldOpen): Promise<void> {
     token: o.token,
     offline: o.offline,
     gemini: o.gemini ? gemini : undefined,
+    typesafe: o.typesafe ? typesafe : undefined,
     verify: o.verify ? verify : undefined,
     masterUid: o.masterUid,
     restore: o.restore,

@@ -179,6 +179,8 @@ export function sessionList(accounts?: AccountSettings): Connect.NextHandleFunct
 export interface SessionOptions {
   accounts?: AccountSettings;
   gemini?: typeof fetch;
+  /** TypeSafe's gate (ADR-0157): the closed decisions of the worlds. */
+  typesafe?: typeof fetch;
   internal?: string;
   credits?: { universesDir: string; grantCap: number; platformFee?: number };
   memoryMb?: number;
@@ -198,7 +200,7 @@ export interface SessionOptions {
 
 /** The sockets of the multiplayer games on a server, whichever it is. `stop` stops the worlds, saving what they can, and closes the clients. */
 export function attachSessions(httpServer: HttpServer, o: SessionOptions): { stop(): Promise<void> } {
-  const { accounts, gemini, internal, credits, memoryMb, maxWorlds, program, crowd } = o;
+  const { accounts, gemini, typesafe, internal, credits, memoryMb, maxWorlds, program, crowd } = o;
   const wss = new WebSocketServer({ noServer: true, maxPayload: MAX_MESSAGE });
   /** Sockets now, by account and by address. */
   const accountSockets = new Map<string, number>();
@@ -235,6 +237,7 @@ export function attachSessions(httpServer: HttpServer, o: SessionOptions): { sto
       internal: internal ?? '',
       offline,
       gemini,
+      typesafe,
       verify: accounts?.verify,
       masterUid: accounts?.masterUid,
       ...(universes && credits ? { ledgerFile: path.join(serverPath(universes, 'balances'), `${name}.json`), grantCap: credits.grantCap, platformFee: credits.platformFee } : {}),
@@ -367,7 +370,7 @@ export function attachSessions(httpServer: HttpServer, o: SessionOptions): { sto
   return { stop };
 }
 
-export function sessionServer(accounts?: AccountSettings, gemini?: typeof fetch, internal?: string, credits?: SessionOptions['credits'], memoryMb?: number, maxWorlds?: number): Plugin {
+export function sessionServer(accounts?: AccountSettings, gemini?: typeof fetch, internal?: string, credits?: SessionOptions['credits'], memoryMb?: number, maxWorlds?: number, typesafe?: typeof fetch): Plugin {
   return {
     name: 'rune-session',
     configureServer(server: ViteDevServer) {
@@ -386,7 +389,7 @@ export function sessionServer(accounts?: AccountSettings, gemini?: typeof fetch,
         return (built ??= buildWorld(root, { outDir, preserveSymlinks: server.config.resolve.preserveSymlinks }));
       };
       if (!server.httpServer) return;
-      const { stop } = attachSessions(server.httpServer as HttpServer, { accounts, gemini, internal, credits, memoryMb, maxWorlds, program });
+      const { stop } = attachSessions(server.httpServer as HttpServer, { accounts, gemini, typesafe, internal, credits, memoryMb, maxWorlds, program });
       server.httpServer.on('close', () => void stop().then(() => outDir && fs.rmSync(outDir, { recursive: true, force: true })));
     },
     configurePreviewServer(server) {

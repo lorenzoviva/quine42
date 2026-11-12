@@ -783,4 +783,5 @@ export const UNCOVERED = {
   'V-031': 'le carte fatte a mano hanno l’interruttore spento nel progetto del kit: le prova il server di produzione vero, tests/sicurezza/serververo.test.ts',
   'V-032': 'il nome di una carta si prova sulle sue funzioni: tests/sicurezza/carte-mano.test.ts',
   'V-033': 'le carte portate si provano sullo store con gli account finti: tests/sicurezza/carte-portate.test.ts',
+  'V-034': 'il kit non ha la chiave di TypeSafe e non esce sulla rete: il varco si prova con TypeSafe finto, tests/sicurezza/typesafe.test.ts',
 };

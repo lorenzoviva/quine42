@@ -7,6 +7,7 @@ import type { FileMap } from './kernel/types';
 import { readConfig } from './kernel/universe';
 import { IdbChunks } from './kernel/chunks';
 import { GeminiAiModels } from './kernel/ai/gemini';
+import { JevDecisionModels } from './kernel/ai/decisions';
 import { MockAiModels } from './kernel/ai/mock';
 import type { AiModels } from './kernel/ai/models';
 import { describeQueue, describeSubscriptions, QueueAiModels, RoutedAiModels, SUBSCRIPTIONS, subscriptionsOf, usesSubscriptions, type Provider } from './kernel/ai/subscription';
@@ -94,7 +95,9 @@ async function bootAlone(client: UniverseClient | null, snap: UniverseSnapshot |
     }
   }
   const chunks = client ? new UniverseChunks(client, new IdbChunks()) : new IdbChunks();
-  const kernel = await Kernel.boot({ files, store: client ? memoryStore() : localStore, ai: models, chunks, forms: new WorkerRunner(), wasmUri, backend: client ?? undefined, past });
+  // The closed decisions (ADR-0157): Jev through the route of this machine, if the server has its key; otherwise the rule of today.
+  const decisions = !params.has('offline') && (await JevDecisionModels.available()) ? new JevDecisionModels() : undefined;
+  const kernel = await Kernel.boot({ files, store: client ? memoryStore() : localStore, ai: models, decisions, chunks, forms: new WorkerRunner(), wasmUri, backend: client ?? undefined, past });
   return { kernel, online };
 }
 

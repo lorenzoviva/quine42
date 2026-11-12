@@ -144,15 +144,17 @@ describe('il sorvegliante, con un mondo finto', () => {
 
   it('V-007 i segreti restano qui: nel comando e nell’ambiente del mondo non ci sono', async () => {
     process.env.GEMINI_API_KEY = 'chiave-finta';
+    process.env.TYPESAFE_KEY = 'chiave-finta-typesafe';
     try {
       const env = worldEnv();
-      expect(Object.keys(env).sort().join()).not.toMatch(/GEMINI|STRIPE|FIREBASE|QUINE/);
+      expect(Object.keys(env).sort().join()).not.toMatch(/GEMINI|TYPESAFE|STRIPE|FIREBASE|QUINE/);
       expect(JSON.stringify(env)).not.toContain('chiave-finta');
       // The fee passes by value (ADR-0132): that name, nothing else of ours.
       expect(Object.keys(worldEnv(0)).filter((k) => /GEMINI|STRIPE|FIREBASE|QUINE/.test(k))).toEqual(['QUINE_COMMISSIONE']);
       expect(worldEnv(0).QUINE_COMMISSIONE).toBe('0');
     } finally {
       delete process.env.GEMINI_API_KEY;
+      delete process.env.TYPESAFE_KEY;
     }
   });
 

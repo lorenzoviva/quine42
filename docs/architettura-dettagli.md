@@ -148,6 +148,20 @@
   da 0 a 1, riparati dal validatore; diretti (`sessioni dialoghi trame revisioni modelli brani`: ritmi allungati; `luoghi parole sguardi azioni magia morte riparazioni studio`: la quota che va ai modelli, ADR-0133) e indiretti (`persone abitanti
   pacchetti cose`: meno di ciò che causa le chiamate); a 0 nessuna chiamata, per nessuna riga; il censimento delle chiamate in `CENSUS`, dove solo la Genesi non ha una manopola, il preset «Low Detail» (`LOW_DETAIL`, anche
   lo Scultore su Flash-Lite), la stima di un'ora di gioco (`hourlyEstimate`); nella Genesi si scelgono con i modelli (`kernel.setAi`).
+- **Le decisioni chiuse, Jev di TypeSafe** (ADR-0157, T348): un modello che non scrive ma sceglie. Lo strato è `src/kernel/ai/decisions.ts`, accanto ad
+  `AiModels`: una `DecisionCall` porta l'agente, il compito, lo **stato** (scritto dal kernel, solo dati del mondo e del catalogo: mai il testo libero del
+  viandante finché TypeSafe non ha la ritenzione zero, D45), le **domande** (Choice: la chiave di un'opzione; Noul: un sì o un no; Score: l'indice di un
+  livello) e la **regola** di oggi, domanda per domanda. Chiede il Concilio, `Council.decide(agent, task, { state, questions, rule, chi })`: solo per un
+  compito che `CENSUS` dice decisione (`via: 'decide'`, `decisionKnob`, ognuno con la sua manopola: il primo è `model.reuse` con `models`); come `write`
+  sceglie chi paga e passa ai modelli locali con la manopola a 0, senza crediti o in sola lettura; tiene della risposta solo ciò che sta nelle opzioni
+  (`settleDecisions`) e mette la regola al posto del resto, di un errore o del tetto; non getta mai. I modelli locali (`MockAiModels.decide`) rispondono con la
+  regola: senza chiave, offline e nei test il gioco è quello di prima. Jev arriva da `JevDecisionModels` (versione fissa `jev-1.13.0`; `jev-1.14.0` ammessa),
+  che ripete solo 429 e 529, porta un 402 come `BudgetError` e non manda una richiesta oltre 128 KB o 64 domande. **Il varco** è `TypeSafeGate`
+  (`server/typesafeProxy.ts`): la chiave `TYPESAFE_KEY` solo lì, il corpo rifatto campo per campo (`jevRequest`: modello dell'elenco, stato, domande; niente
+  immagini), il tetto `TYPESAFE_TETTO_GIORNALIERO` (1 $ se non detto) con la spesa in `universes/.typesafe-spend.json`; la route `/api/typesafe` (`status`,
+  `v1/systemone`) solo da questa macchina e dalla stessa origine, nel server di sviluppo e nella preview, mai in quello di produzione; i mondi di molti
+  chiedono per il canale (`op: 'typesafe'`, `direct()`). Ogni chiamata va nel registro dei consumi sotto il suo modello e compito, al prezzo di
+  `DECISION_PRICES` (`prices.ts`: 0,042 $ al milione di token in ingresso, la risposta gratis), e si addebita come le altre.
 
 <a id="lobby"></a>
 ## La lobby multigiocatore

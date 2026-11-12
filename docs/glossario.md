@@ -1164,6 +1164,12 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: «registro dei fallimenti»
 - **Fermo**: `world/shortfalls.json` e i suoi campi (`voci`, `richiesta`, `chi`, `agente`, `compito`, `esito`, `motivo`, `volte`, `primo`, `ultimo`).
 
+### Decisione chiusa
+- **Inglese**: `decision`, `decide`, `DecisionCall`, `DecisionModels`
+- **Definizione**: una scelta fra opzioni note (un'opzione, un sì o un no, un livello) che il Concilio chiede a Jev di TypeSafe invece di farla scrivere a un modello; ha sempre la regola di oggi come pavimento e come risposta dei modelli locali (ADR-0157).
+- **Dove vive**: `src/kernel/ai/decisions.ts`, `src/kernel/agents/council.ts`, `CENSUS` (`via: 'decide'`), `server/typesafeProxy.ts`
+- **Da non usare**: «giudizio» (è dei modelli che scrivono: `action.judge`, `model.judge`)
+
 ## Client, soldi e carte
 
 ### Client sottile
@@ -1457,7 +1463,7 @@ Stessa parola, concetti diversi: il problema che confonde di più, più dei sino
 | `cell` | cella di un programma; ciò che resta col nome vecchio per una casella: i campi `cell` di `Placements` e di `HoverInfo`, `Building.cells`, l'automa di `water.ts`, `Overlay.cell`; gli altri si chiamavano così fino alla rinomina R10, ora sono `gateTiles`, `freeTiles`, `tileOf` | «Cella» e «Casella» |
 | registro | del Concilio (`feed`); dei consumi (`usage`); dei viandanti (`wanderers`); delle vulnerabilità | il nome lungo |
 | `Ledger` | saldi (`Ledger`); consumi e utilizzi delle carte si chiamavano così fino alla rinomina R8, ora sono `UsageLog` e `CardUses` | «Saldi» |
-| `gate` | varco di un luogo (`layout.ts`); chi può passare (`gate` in `server/access.ts`, `GeminiGate`) | il file |
+| `gate` | varco di un luogo (`layout.ts`); chi può passare (`gate` in `server/access.ts`, `GeminiGate`, `TypeSafeGate`) | il file |
 | zona | area di 56 × 56 luoghi (`zoneOf`); `kernel.zone` (`sim`, `corona`, `studio`) | «Zona» è la prima |
 | `path` | sentiero (`carvePath`); percorso di un file | «Sentiero» |
 | forma | ciò che esce da un programma (`Form`); gli id `forma-…` dei modelli degli oggetti (`ItemShape`) | «Forma» è la prima |

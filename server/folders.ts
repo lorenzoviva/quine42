@@ -20,6 +20,8 @@ export const SERVER_FOLDERS = {
   generation: ['.generation', '.generazione'],
   /** What the key spent today (ADR-0099, `geminiProxy.ts`). */
   geminiSpend: ['.gemini-spend.json', '.spesa-gemini.json'],
+  /** What the key of TypeSafe spent today (ADR-0157, `typesafeProxy.ts`): born with the contract 0.6, it has no name of before. */
+  typesafeSpend: ['.typesafe-spend.json'],
   /** The handmade cards, one file per account (ADR-0161, `handmade.ts`): born with the contract 0.4, it has no name of before. */
   handmade: ['.handmade'],
 } as const satisfies Record<string, readonly [string, string?]>;

@@ -5,6 +5,8 @@
 
 import { parseJson, type AiModels, type Schema, type Thinking } from '../ai/models';
 import { MockAiModels } from '../ai/mock';
+import { ruleDecisions, settleDecisions, type DecisionCall, type DecisionModels, type Decisions } from '../ai/decisions';
+import { decisionKnob } from '../coefficients';
 import { COMUNE } from '../cards';
 import { COUNCIL_PRINCIPLES, lexiconWords } from '../fourthwall';
 import type { FileMap, MagicRune, Spell, TerrainDef } from '../types';
@@ -231,7 +233,9 @@ export class Council {
   readOnly?: () => string | undefined;
   /** The reasoning of every call that does not say its own (`ai.thinking`): the lobby sets it (T247). */
   thinking?: () => CallOptions['thinking'];
-  localAiModels: AiModels = new MockAiModels();
+  localAiModels: AiModels & DecisionModels = new MockAiModels();
+  /** Who takes the closed decisions (ADR-0157): Jev through its gate, or (without a key) the local models, which answer with the rule. */
+  decisions: DecisionModels = this.localAiModels;
   /** The nodes of the graph a prompt carried as its focus (the kernel counts the cards' uses, T36). */
   onFocus?: (ids: string[]) => void;
 
@@ -339,6 +343,29 @@ export class Council {
     if (!graph || !ids.length) return '';
     this.onFocus?.(ids);
     return `## What the world knows about this task (use these names and these bonds, do not invent others)\n${graph.context(ids, FOCUS_BUDGET)}`;
+  }
+
+  /**
+   * A closed decision (ADR-0157): the state and the questions to the layer of decisions, today's rule as the floor. Only a task the census
+   * names as a decision (`via: 'decide'`) is asked; the knob at 0, a read-only universe and a payer without credits get the rule from the
+   * local models, as a call that writes gets them; a failure or an answer outside the options gets the rule, question by question. Never
+   * throws: whoever asks always has an answer it can use.
+   */
+  async decide(agent: AgentId, task: string, call: Pick<DecisionCall, 'state' | 'questions' | 'rule'> & { chi?: string }): Promise<Decisions> {
+    const chi = call.chi ?? this.payer?.(task) ?? COMUNE;
+    const full: DecisionCall = { agent, task, state: call.state, questions: call.questions, rule: call.rule, chi };
+    try {
+      if (decisionKnob(task) === undefined) {
+        this.say('kernel', 'info', `«${task}» non è una decisione del censimento: vale la regola`, undefined, task);
+        return ruleDecisions(full);
+      }
+      const sealed = this.readOnly?.() !== undefined;
+      const local = sealed || (!!this.hasCredits && !this.hasCredits(chi)) || !!this.rationed?.(task);
+      return settleDecisions(full, await (local ? this.localAiModels : this.decisions).decide(full));
+    } catch (e) {
+      this.say('kernel', 'info', `«${task}»: ${(e as Error).message}; vale la regola`, undefined, task);
+      return ruleDecisions(full);
+    }
   }
 
   async ask<T>(agent: AgentId, task: string, prompt: string, schema: Schema, opts: CallOptions & { system?: string; role?: string } = {}): Promise<T> {

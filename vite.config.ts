@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { defineConfig, loadEnv, searchForWorkspaceRoot } from 'vite';
 import { GeminiGate, geminiProxy } from './server/geminiProxy';
+import { TypeSafeGate, typesafeProxy } from './server/typesafeProxy';
 import { hideUniverses } from './server/hidden';
 import { securityHeaders } from './server/csp';
 import { universeStore, universesPerAccount } from './server/universeStore';
@@ -30,6 +31,8 @@ export default defineConfig(({ mode }) => {
   const universesDir = path.resolve(process.cwd(), 'universes');
   // The only holder of the key (T123): models on a list, a daily cap; the route for the browser, `direct()` for the worlds of many.
   const gemini = new GeminiGate({ apiKey: env.GEMINI_API_KEY, dailyCap: env.GEMINI_TETTO_GIORNALIERO, universesDir, ledgerFile: serverPath(universesDir, 'geminiSpend') });
+  // The only holder of TypeSafe's key (T348, ADR-0157): Jev's fixed versions, a daily cap; the route for the browser, `direct()` for the worlds.
+  const typesafe = new TypeSafeGate({ apiKey: env.TYPESAFE_KEY, dailyCap: env.TYPESAFE_TETTO_GIORNALIERO, ledgerFile: serverPath(universesDir, 'typesafeSpend') });
   // How the worlds of this process prove themselves to the store (T120, ADR-0102): only in memory, a new one at every start.
   const internal = newSecret();
   return {
@@ -42,6 +45,7 @@ export default defineConfig(({ mode }) => {
       // Before the routes: what lives in universes/ reaches a browser only through the routes below (T130, ADR-0109).
       hideUniverses(process.cwd(), universesDir),
       geminiProxy(gemini),
+      typesafeProxy(typesafe),
       // The cards a master brings before the start (T295): their programs checked here, as the handmade cards' (only this machine listens).
       universeStore(universesDir, { accounts, internal, quota: universesPerAccount(env.QUINE_UNIVERSI_PER_ACCOUNT), checker: inlineChecker(), labs: () => labsOn(process.cwd()) }),
       accountRoute(accounts),
@@ -57,7 +61,7 @@ export default defineConfig(({ mode }) => {
       walletRoute({ accounts, universesDir, getActiveWorld, platformFee: platformFeeOf(env) }),
       // The handmade cards (T293, ADR-0161): only with `laboratori` in site/beta.json, read at every request; the programs checked here (only this machine listens).
       handmadeRoute({ accounts, universesDir, labs: () => labsOn(process.cwd()), checker: inlineChecker() }),
-      sessionServer(accounts, gemini.direct(), internal, { universesDir, grantCap: grantCapOf(env, !!accounts?.verify), platformFee: platformFeeOf(env) }, Number(env.QUINE_MONDO_MEMORIA) || undefined, Number(env.QUINE_MONDI_MASSIMI) || undefined),
+      sessionServer(accounts, gemini.direct(), internal, { universesDir, grantCap: grantCapOf(env, !!accounts?.verify), platformFee: platformFeeOf(env) }, Number(env.QUINE_MONDO_MEMORIA) || undefined, Number(env.QUINE_MONDI_MASSIMI) || undefined, typesafe.direct()),
       subscriptionQueue(serverPath(path.resolve(process.cwd(), 'universes'), 'queue'), { enabled: queueWanted(env) }),
       // The site's videos, from the same folder as in production (T244, ADR-0131), and the instructions of the beta: what is off never reaches the build.
       videoRoute({ folder: videoFolder(env), accounts }),

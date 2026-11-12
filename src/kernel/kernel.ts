@@ -32,6 +32,7 @@ import { askedRunes, carpetLine, CARPET_TOKENS, tileIndex, COUNCIL_RUNE, extract
 import { hash32, hashStr, hex, Rng } from './rng';
 import { knobOfTask, onBeat, Rationing, rationedKnob, repairActor, repairCoefficients, type ActorConfig, type Coefficients } from './coefficients';
 import { BudgetError, type AiModels } from './ai/models';
+import type { DecisionModels } from './ai/decisions';
 import { billedModel, costOf } from './ai/prices';
 import { USAGE_FILE, UsageLog, type CallRecord } from './ai/usage';
 import { SHORTFALLS_FILE, ShortfallLog, type ShortfallNote } from './shortfalls';
@@ -311,6 +312,8 @@ export interface KernelOptions {
   platformFee?: number;
   store: KeyValueStore;
   ai: AiModels;
+  /** Who takes the closed decisions (ADR-0157): Jev through its gate; without, the local models answer with today's rule. */
+  decisions?: DecisionModels;
   chunks?: ChunkStore;
   /** Who runs the MarkovJunior programs of the models (default: this thread; the browser uses workers). */
   forms?: FormRunner;
@@ -746,6 +749,14 @@ export class Kernel {
       k.usage.record(r);
       k.billCall(r);
     };
+    // The closed decisions (ADR-0157): in the same ledger, and paid as every call.
+    if (opts.decisions) {
+      k.council.decisions = opts.decisions;
+      opts.decisions.onCall = (r) => {
+        k.usage.record(r);
+        k.billCall(r);
+      };
+    }
     k.usage.onChange = () => k.bus.emit('usage', k.usage);
     // The cards (T36): who pays for every call (cards.ts), and how often every card goes into a prompt.
     k.cards.load(repo.working);
@@ -8483,11 +8494,17 @@ export class Kernel {
    * its own (a mirror), the one acting is `wanderer`. What a request to the Council commits there is the branch's.
    */
   async branchKernel(files: FileMap, wanderer: string): Promise<Kernel> {
-    const k = await Kernel.boot({ files, store: memoryStore(), ai: this.ai, wasmUri: this.wasmUri, mirror: true });
+    const decisions = this.council.decisions === this.council.localAiModels ? undefined : this.council.decisions;
+    const k = await Kernel.boot({ files, store: memoryStore(), ai: this.ai, decisions, wasmUri: this.wasmUri, mirror: true });
     this.ai.onCall = (r) => {
       this.usage.record(r);
       this.billCall(r);
     };
+    if (decisions)
+      decisions.onCall = (r) => {
+        this.usage.record(r);
+        this.billCall(r);
+      };
     k.bus.on('council', (e: FeedEntry) => this.council.say(e.from, e.kind, e.text, e.to, e.task));
     const body = k.addWanderer(wanderer);
     if (body !== undefined) k.wandererEntity = body;
