@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 12/11/2026, epoca 354 (claude). Crediti: vedi `stato`.
+Aggiornato il 12/11/2026, epoca 355 (argon). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -20,9 +20,9 @@ Aggiornato il 12/11/2026, epoca 354 (claude). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **In corso:** T353 (fable high). **Pronti:** T346 (fable max), T345, T347 (approvato: richiesta esplicita), T348→T349→T350 (Jev nel gioco, D45), T352; bloccati T351, T354→T355 (non prima del 15/11), T356.
+0. **In corso:** T353 (fable high, in pausa per limite 5h fino a 22:01 UTC / 23:01 ora locale). **Pronti:** T346 (fable high), T345, T347 (fable high, approvato), T348→T349→T350 (Jev nel gioco, D45), T352; bloccati T351, T354→T355 (non prima del 15/11), T356.
 1. **Da approvare dall'autore:** T310b (lingua interna campi schemi, extra 6% p4).
-2. **Crediti (12/11 sera):** Claude/Fable 96 % settimana, 5h 37 % (reset 22:00); slot Claude 1 dalla previsione; Gemini 98 %; Argon 93 %; agy 100 %. Generatore acceso, fermo per i task pronti.
+2. **Crediti (12/11 sera):** Claude settimana 93 %, Fable settimana 94 %, 5h 0 % (reset 22:00 UTC / 23:00 ora locale); slot Claude 1; Gemini 98 %; Argon 93 %; agy 100 %. Generatore acceso, fermo finché Claude è fermo.
 
 ## Attese dall'autore
 
@@ -36,5 +36,5 @@ Aggiornato il 12/11/2026, epoca 354 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **355 (argon):** rotazione su Argon per finestra 5h di Claude a 0 % (reset 22:00 UTC); T353 in attesa del reset (22:01 UTC).
 - **354 (claude):** riavvio dopo `ferma --dopo` (correzione EPERM del generatore, `d46ff703`); T233 integrato; T353 lanciato su Fable.
-- **353 (claude):** corretto il crash EPERM del generatore; T290 e T233 integrati; spegnimento chiesto dall'autore.
