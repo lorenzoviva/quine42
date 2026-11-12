@@ -1,0 +1,74 @@
+<!-- Chest (the generic piece of furniture), procedural (Cantiere 2): planks, lid, iron bands and lock of the original. The seed picks how
+     tall it is (a small box or a blanket chest), whether the sides lengthen it to the right or to the left, whether the lid is closed or raised against the back,
+     and how many iron bands go round it. -->
+<sequence values="BNnIKSwahkfgo" size="20 20 20" symmetry="(xy)" name="Cassa">
+  <color symbol="N" value="8a5a30" name="assi"/>
+  <color symbol="n" value="5e3c20" name="fessure"/>
+  <color symbol="I" value="4a4f5a" name="ferro"/>
+  <color symbol="K" value="9a6a3a" name="coperchio"/>
+  <color symbol="S" value="c8a040" name="serratura"/>
+  <color symbol="w" hidden="True" name="i fianchi che possono esserci"/>
+  <color symbol="a" hidden="True" name="scelta"/>
+  <color symbol="h" hidden="True" name="altezze possibili"/>
+  <color symbol="k" hidden="True" name="il taglio"/>
+  <color symbol="f" hidden="True" name="dove possono stare le fasce"/>
+  <color symbol="g" hidden="True" name="una fascia scelta"/>
+  <color symbol="o" hidden="True" name="il coperchio alzato"/>
+  <!-- The largest possible body -->
+  <box at="10 10 0" size="18 12 12" color="w"/>
+  <box at="10 10 0" size="12 12 12" color="N"/>
+  <prl in="w" out="a" p="0.004" steps="1"/>
+  <all>
+    <rule in="aw" out="aa"/>
+    <rule in="a w" out="a a"/>
+    <rule in="w a" out="a a"/>
+  </all>
+  <all in="a" out="N"/>
+  <all in="w" out="B"/>
+  <!-- The height: from 6 to 12 -->
+  <box at="0 0 6" size="1 1 7" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all in="k*" out="kk"/>
+  <all in="* k" out="k *"/>
+  <!-- The lid: closed on top, or raised upright against the back -->
+  <all in="k N" out="o *"/>
+  <all in="k" out="B"/>
+  <one steps="1">
+    <rule in="o" out="K"/>
+    <rule in="o" out="a"/>
+  </one>
+  <all in="Ko" out="KK"/>
+  <all in="ao" out="aa"/>
+  <!-- Closed: the lid juts out by one and is three thick -->
+  <prl in="KB" out="*K" p="1" steps="1"/>
+  <all in="B K" out="K *" steps="2"/>
+  <!-- Raised: the row at the back remains, and rises upright -->
+  <all in="B/a" out="*/o" symmetry="()"/>
+  <all in="a" out="B"/>
+  <all in="B o" out="o *" steps="9"/>
+  <all in="o" out="K"/>
+  <!-- The iron bands: from zero to three, each a ring around the body -->
+  <box at="10 0 0" size="18 1 1" color="f"/>
+  <prl in="f" out="g" p="0.15" steps="1"/>
+  <all in="f" out="B"/>
+  <all symmetry="()">
+    <rule in="g/B" out="g/g"/>
+    <rule in="B/g" out="g/g"/>
+    <rule in="B g" out="g g"/>
+    <rule in="g B" out="g g"/>
+    <rule in="g/[NK]" out="g/I"/>
+    <rule in="[NK]/g" out="I/g"/>
+    <rule in="[NK] g" out="I g"/>
+    <rule in="g [NK]" out="g I"/>
+    <rule in="I/[NK]" out="I/I"/>
+    <rule in="[NK]/I" out="I/I"/>
+    <rule in="[NK] I" out="I I"/>
+    <rule in="I [NK]" out="I I"/>
+  </all>
+  <all in="g" out="B"/>
+  <!-- The lock on the front, high in the centre -->
+  <one in="N/B" out="*/S" symmetry="()" steps="1"/>
+  <prl in="N" out="n" p="0.06" steps="1"/>
+  <all in="n/N" out="*/n" steps="3" symmetry="(x)"/>
+</sequence>

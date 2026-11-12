@@ -1,0 +1,113 @@
+<!-- Well, procedural (Cantiere 2): the stone, the water, the wood, the rope and the tiles of the original. The seed picks how wide and tall
+     the stone parapet is, what cover it has (a two-slope roof, a conical roof, or none: only the posts and the windlass), where the
+     bucket hangs and how far the moss has spread. -->
+<sequence values="BPpdWgNnCcRoUmabkhqrstuvxyzw" size="50 50 50" symmetry="(xy)" name="Pozzo">
+  <color symbol="P" value="7d766c" name="pietra base"/>
+  <color symbol="p" value="a29c92" name="pietra chiara rilievo"/>
+  <color symbol="d" value="544e47" name="pietra scura fessure"/>
+  <color symbol="W" value="23769c" name="acqua pozzo profonda"/>
+  <color symbol="g" value="448a3c" name="muschio umido"/>
+  <color symbol="N" value="5c381e" name="legno scuro travi"/>
+  <color symbol="n" value="8f582f" name="legno caldo doghe"/>
+  <color symbol="C" value="7a7872" name="corda e ferro"/>
+  <color symbol="c" value="9e9d96" name="ferro chiaro secchio"/>
+  <color symbol="R" value="a93b29" name="tegole tetto rossicce"/>
+  <color symbol="o" value="c85834" name="tegole cresta calda"/>
+  <color symbol="U" value="45b5cc" name="riflesso acqua brillante"/>
+  <color symbol="m" hidden="True" name="mescola e dadi"/>
+  <color symbol="a" hidden="True" name="scelta"/>
+  <color symbol="b" hidden="True" name="scelta"/>
+  <color symbol="k" hidden="True" name="il taglio"/>
+  <color symbol="h" hidden="True" name="altezze possibili"/>
+  <color symbol="q" hidden="True" name="il parapetto largo"/>
+  <color symbol="r" hidden="True" name="il tetto a due falde"/>
+  <color symbol="s" hidden="True" name="il tetto a cono"/>
+  <color symbol="t" hidden="True" name="nessun tetto"/>
+  <color symbol="w" hidden="True" name="dove i due tetti si sovrappongono"/>
+  <color symbol="u" hidden="True" name="scelta: due falde"/>
+  <color symbol="v" hidden="True" name="scelta: cono"/>
+  <color symbol="x" hidden="True" name="il secchio possibile"/>
+  <color symbol="y" hidden="True" name="scelta del secchio"/>
+  <color symbol="z" hidden="True" name="la corda possibile"/>
+  <!-- Shuffle: the generator starts again from a different point for every seed (see README) -->
+  <box at="25 0 49" size="50 2 1" color="m"/>
+  <prl in="m" out="B" p="0.5" steps="1"/>
+  <all in="m" out="B"/>
+  <!-- The parapet: narrow or wide, then from 8 to 13 high -->
+  <cylinder at="25 25 0" size="32 32 13" color="q"/>
+  <cylinder at="25 25 0" size="26 26 13" color="P"/>
+  <box at="25 25 0" size="1 1 1" color="m"/>
+  <one steps="1">
+    <rule in="m" out="a"/>
+    <rule in="m" out="P"/>
+  </one>
+  <all symmetry="(xyz)">
+    <rule in="aP" out="aa"/>
+    <rule in="aq" out="aa"/>
+  </all>
+  <all in="a" out="P"/>
+  <all in="q" out="B"/>
+  <box at="49 49 8" size="1 1 6" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all in="k*" out="kk"/>
+  <all in="* k" out="k *"/>
+  <all in="k" out="B"/>
+  <!-- The mouth and the water, the light kerb -->
+  <cylinder at="25 25 1" size="18 18 40" color="B"/>
+  <cylinder at="25 25 1" size="18 18 4" color="W"/>
+  <all in="B P" out="* p"/>
+  <prl in="pB" out="pp" p="0.5" steps="1"/>
+  <!-- The posts and the beam of the windlass, up to 33 -->
+  <all in="B p" out="m *" steps="1"/>
+  <box at="13 25 0" size="4 4 34" color="N" on="[Bm]"/>
+  <box at="37 25 0" size="4 4 34" color="N" on="[Bm]"/>
+  <all in="m" out="B"/>
+  <box at="13 25 0" size="4 4 14" color="P" on="N"/>
+  <box at="37 25 0" size="4 4 14" color="P" on="N"/>
+  <all in="N/B" out="*/*"/>
+  <box at="25 25 31" size="28 4 3" color="N"/>
+  <cylinder at="25 25 28" size="4 4 14" color="n"/>
+  <!-- The cover: two slopes, cone or nothing -->
+  <box at="25 25 34" size="32 26 2" color="r"/>
+  <box at="25 25 36" size="34 24 2" color="r"/>
+  <box at="25 25 38" size="32 20 2" color="r"/>
+  <box at="25 25 40" size="30 16 2" color="r"/>
+  <box at="25 25 42" size="28 12 2" color="r"/>
+  <box at="25 25 44" size="26 8 2" color="r"/>
+  <box at="25 25 46" size="24 4 2" color="r"/>
+  <cone at="25 25 33" size="40 40 16" color="s" on="[Bt]"/>
+  <cone at="25 25 33" size="40 40 16" color="w" on="r"/>
+  <box at="25 25 34" size="3 3 1" color="t"/>
+  <one steps="1">
+    <rule in="r" out="u"/>
+    <rule in="s" out="v"/>
+    <rule in="t" out="B"/>
+  </one>
+  <all symmetry="(xyz)">
+    <rule in="u[rw]" out="uu"/>
+    <rule in="v[sw]" out="vv"/>
+  </all>
+  <all in="[rstw]" out="B"/>
+  <all in="B [uv]" out="* o"/>
+  <all in="[uv]" out="R"/>
+  <prl in="R R" out="* o" p="0.2" steps="1"/>
+  <!-- The bucket: hanging from the rope at a height picked by the seed -->
+  <box at="25 25 15" size="1 1 13" color="z" on="B"/>
+  <one in="z" out="y" steps="1"/>
+  <all in="n z" out="* C"/>
+  <all in="C z" out="* C"/>
+  <all in="z" out="B"/>
+  <all in="yB" out="yy" steps="2"/>
+  <all in="y B" out="* y" steps="3"/>
+  <all in="B y" out="* x"/>
+  <all in="xy" out="*x"/>
+  <all in="x" out="c"/>
+  <all in="y" out="n"/>
+  <!-- Stones, cracks, moss, reflections -->
+  <prl in="PP" out="Pd" p="0.25" steps="1"/>
+  <prl in="P/P" out="P/d" p="0.2" steps="1"/>
+  <prl in="P" out="g" p="0.08" steps="1"/>
+  <prl in="Pg" out="gg" p="0.5" steps="6"/>
+  <prl in="W" out="U" p="0.15" steps="1"/>
+</sequence>

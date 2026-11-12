@@ -1,0 +1,74 @@
+<!-- Column (the generic monument), procedural (Cantiere 2): stone, worn stone, marble and flutes of the original. The seed picks
+     the height of the shaft (from 40 to 57 voxels), whether it is round and fluted or a square pillar, whether it has a capital on top or is broken like
+     a ruin, and how many steps the base has. -->
+<sequence values="BDdWwhkpcsmrq" size="20 20 60" symmetry="(xy)" name="Colonna">
+  <color symbol="D" value="b8b0a0" name="pietra"/>
+  <color symbol="d" value="8e8678" name="pietra consumata"/>
+  <color symbol="W" value="d8d0c0" name="marmo"/>
+  <color symbol="w" value="a8a090" name="scanalatura"/>
+  <color symbol="h" hidden="True" name="altezze possibili"/>
+  <color symbol="k" hidden="True" name="il taglio"/>
+  <color symbol="p" hidden="True" name="il pilastro quadrato possibile"/>
+  <color symbol="c" hidden="True" name="il capitello che si allarga"/>
+  <color symbol="s" hidden="True" name="il gradino in più possibile"/>
+  <color symbol="m" hidden="True" name="dado"/>
+  <color symbol="r" hidden="True" name="la rottura"/>
+  <color symbol="q" hidden="True" name="il capitello"/>
+  <!-- Shuffle: the generator starts again from a different point for every seed (see README) -->
+  <box at="10 0 59" size="20 2 1" color="m"/>
+  <prl in="m" out="B" p="0.5" steps="1"/>
+  <all in="m" out="B"/>
+  <!-- The base: one or two steps -->
+  <box at="10 10 0" size="18 18 2" color="D"/>
+  <box at="10 10 2" size="16 16 3" color="D"/>
+  <box at="10 10 5" size="13 13 2" color="s"/>
+  <box at="10 10 5" size="1 1 1" color="m"/>
+  <one steps="1">
+    <rule in="m" out="D"/>
+    <rule in="m" out="k"/>
+  </one>
+  <all in="Ds" out="DD"/>
+  <all in="ks" out="kk"/>
+  <all in="k" out="B"/>
+  <!-- The shaft: round, or square -->
+  <box at="10 10 5" size="10 10 54" color="p" on="[Bs]"/>
+  <cylinder at="10 10 5" size="10 10 54" color="W"/>
+  <box at="10 10 8" size="1 1 1" color="m"/>
+  <one steps="1">
+    <rule in="m" out="c"/>
+    <rule in="m" out="W"/>
+  </one>
+  <all symmetry="(xyz)">
+    <rule in="cW" out="cc"/>
+    <rule in="cp" out="cc"/>
+  </all>
+  <all in="c" out="W"/>
+  <all in="p" out="B"/>
+  <!-- The height -->
+  <box at="0 0 40" size="1 1 18" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all in="k*" out="kk"/>
+  <all in="* k" out="k *"/>
+  <all in="k" out="B"/>
+  <!-- On top: the capital, or the break. The die spreads through the air and reaches the top, wherever it is -->
+  <box at="0 19 0" size="1 1 1" color="m"/>
+  <one steps="1">
+    <rule in="m" out="c"/>
+    <rule in="m" out="r"/>
+    <rule in="m" out="c"/>
+  </one>
+  <all symmetry="(xyz)">
+    <rule in="cB" out="cc"/>
+    <rule in="rB" out="rr"/>
+  </all>
+  <prl in="r W" out="* r" p="0.5" steps="5"/>
+  <all in="c W" out="q *"/>
+  <all in="[cr]" out="B"/>
+  <all in="qB" out="qq" steps="2"/>
+  <all in="B q" out="q *" steps="1"/>
+  <all in="qB" out="qq" steps="1"/>
+  <all in="q" out="D"/>
+  <prl in="W/B" out="w/*" p="0.5" steps="1" symmetry="()"/>
+  <prl in="D" out="d" p="0.1" steps="1"/>
+</sequence>

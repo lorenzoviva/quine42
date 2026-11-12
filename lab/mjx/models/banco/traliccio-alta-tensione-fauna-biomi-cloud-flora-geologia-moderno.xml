@@ -1,0 +1,111 @@
+<!-- Traliccio dell'alta tensione (Cantiere 8, neapolis): sagoma a caso; isolatori, nido e cartelli a caso. -->
+<sequence values="BICWRSPu#1#2#3#4#5#6z" size="500 500 50" symmetry="(xy)" name="Traliccio dell'alta tensione">
+  <color symbol="I" value="6f7378" name="acciaio"/>
+  <color symbol="C" value="c8d0d8" name="isolatori"/>
+  <color symbol="W" value="7a5a3a" name="nido"/>
+  <color symbol="R" value="d02a2a" name="cartello"/>
+  <color symbol="S" value="b8b4aa" name="plinti"/>
+  <color symbol="P" hidden="True" name="marcatore"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="#1" hidden="True" name="marcatore"/>
+  <color symbol="#2" hidden="True" name="marcatore"/>
+  <color symbol="#3" hidden="True" name="marcatore"/>
+  <color symbol="#4" hidden="True" name="marcatore"/>
+  <color symbol="#5" hidden="True" name="marcatore"/>
+  <color symbol="#6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
+  <box at="1 1 0" size="3 3 2" color="S"/>
+  <box at="18 1 0" size="3 3 2" color="S"/>
+  <box at="1 18 0" size="3 3 2" color="S"/>
+  <box at="18 18 0" size="3 3 2" color="S"/>
+  <!-- scelta «sagoma»: a delta | a botte | a Y | a T doppia -->
+  <box at="10 10 0" size="20 20 60" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/><rule in="u" out="#4"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/><rule in="#4u" out="*#4"/></all>
+  <!--   1: a delta -->
+  <line at="1 1 0" to="7 7 38" r="0.5" color="I" on="#1"/>
+  <line at="18 1 0" to="13 7 38" r="0.5" color="I" on="#1"/>
+  <line at="1 18 0" to="7 13 38" r="0.5" color="I" on="#1"/>
+  <line at="18 18 0" to="13 13 38" r="0.5" color="I" on="#1"/>
+  <box at="10 10 6" size="17 17 1" color="I" on="#1"/>
+  <box at="10 10 14" size="14 14 1" color="I" on="#1"/>
+  <box at="10 10 22" size="11 11 1" color="I" on="#1"/>
+  <box at="10 10 30" size="9 9 1" color="I" on="#1"/>
+  <box at="10 10 38" size="6 6 1" color="I" on="#1"/>
+  <line at="7 10 38" to="10 10 52" r="0.5" color="I" on="#1"/>
+  <line at="13 10 38" to="10 10 52" r="0.5" color="I" on="#1"/>
+  <line at="0 10 40" to="19 10 40" r="1" color="I" on="#1"/>
+  <line at="0 10 40" to="10 10 52" r="0.5" color="I" on="#1"/>
+  <line at="19 10 40" to="10 10 52" r="0.5" color="I" on="#1"/>
+  <box at="1 10 39" size="1 1 1" color="P" on="#1"/>
+  <box at="18 10 39" size="1 1 1" color="P" on="#1"/>
+  <box at="10 10 51" size="1 1 1" color="P" on="#1"/>
+  <!--   2: a botte -->
+  <line at="1 1 0" to="7 7 54" r="0.5" color="I" on="#2"/>
+  <line at="18 1 0" to="13 7 54" r="0.5" color="I" on="#2"/>
+  <line at="1 18 0" to="7 13 54" r="0.5" color="I" on="#2"/>
+  <line at="18 18 0" to="13 13 54" r="0.5" color="I" on="#2"/>
+  <box at="10 10 6" size="18 18 1" color="I" on="#2"/>
+  <box at="10 10 14" size="16 16 1" color="I" on="#2"/>
+  <box at="10 10 22" size="14 14 1" color="I" on="#2"/>
+  <box at="10 10 30" size="12 12 1" color="I" on="#2"/>
+  <box at="10 10 36" size="10 10 1" color="I" on="#2"/>
+  <box at="10 10 44" size="8 8 1" color="I" on="#2"/>
+  <box at="10 10 52" size="6 6 1" color="I" on="#2"/>
+  <line at="1 10 36" to="19 10 36" r="1" color="I" on="#2"/>
+  <line at="0 10 44" to="19 10 44" r="1" color="I" on="#2"/>
+  <line at="3 10 52" to="17 10 52" r="1" color="I" on="#2"/>
+  <box at="1 10 35" size="1 1 1" color="P" on="#2"/>
+  <box at="18 10 35" size="1 1 1" color="P" on="#2"/>
+  <box at="0 10 43" size="1 1 1" color="P" on="#2"/>
+  <box at="19 10 43" size="1 1 1" color="P" on="#2"/>
+  <box at="3 10 51" size="1 1 1" color="P" on="#2"/>
+  <box at="17 10 51" size="1 1 1" color="P" on="#2"/>
+  <!--   3: a Y -->
+  <line at="1 1 0" to="7 7 40" r="0.5" color="I" on="#3"/>
+  <line at="18 1 0" to="13 7 40" r="0.5" color="I" on="#3"/>
+  <line at="1 18 0" to="7 13 40" r="0.5" color="I" on="#3"/>
+  <line at="18 18 0" to="13 13 40" r="0.5" color="I" on="#3"/>
+  <box at="10 10 6" size="17 17 1" color="I" on="#3"/>
+  <box at="10 10 14" size="14 14 1" color="I" on="#3"/>
+  <box at="10 10 22" size="12 12 1" color="I" on="#3"/>
+  <box at="10 10 30" size="9 9 1" color="I" on="#3"/>
+  <box at="10 10 40" size="6 6 1" color="I" on="#3"/>
+  <line at="7 10 40" to="1 10 54" r="1" color="I" on="#3"/>
+  <line at="13 10 40" to="19 10 54" r="1" color="I" on="#3"/>
+  <line at="1 10 54" to="19 10 54" r="0.5" color="I" on="#3"/>
+  <box at="2 10 53" size="1 1 1" color="P" on="#3"/>
+  <box at="10 10 53" size="1 1 1" color="P" on="#3"/>
+  <box at="18 10 53" size="1 1 1" color="P" on="#3"/>
+  <!--   4: a T doppia -->
+  <line at="1 1 0" to="7 7 50" r="0.5" color="I" on="#4"/>
+  <line at="18 1 0" to="13 7 50" r="0.5" color="I" on="#4"/>
+  <line at="1 18 0" to="7 13 50" r="0.5" color="I" on="#4"/>
+  <line at="18 18 0" to="13 13 50" r="0.5" color="I" on="#4"/>
+  <box at="10 10 6" size="17 17 1" color="I" on="#4"/>
+  <box at="10 10 14" size="15 15 1" color="I" on="#4"/>
+  <box at="10 10 22" size="13 13 1" color="I" on="#4"/>
+  <box at="10 10 30" size="11 11 1" color="I" on="#4"/>
+  <box at="10 10 42" size="8 8 1" color="I" on="#4"/>
+  <box at="10 10 50" size="6 6 1" color="I" on="#4"/>
+  <line at="0 10 42" to="19 10 42" r="1" color="I" on="#4"/>
+  <line at="2 10 50" to="17 10 50" r="1" color="I" on="#4"/>
+  <line at="10 10 50" to="10 10 58" r="0.5" color="I" on="#4"/>
+  <box at="1 10 41" size="1 1 1" color="P" on="#4"/>
+  <box at="18 10 41" size="1 1 1" color="P" on="#4"/>
+  <box at="3 10 49" size="1 1 1" color="P" on="#4"/>
+  <box at="16 10 49" size="1 1 1" color="P" on="#4"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/><rule in="#4" out="B"/></prl>
+  <!-- gli isolatori pendono dalle punte per lunghezze a caso -->
+  <prl in="P B" out="C P" p="0.8" steps="6"/>
+  <prl in="P" out="C"/>
+  <!-- un nido e i cartelli -->
+  <one in="B I" out="W *" steps="2"/>
+  <prl in="BW" out="*W" p="0.7" steps="2"/>
+  <prl in="B W" out="W *" p="0.5" steps="2"/>
+  <one in="BI" out="*R" steps="2"/>
+</sequence>

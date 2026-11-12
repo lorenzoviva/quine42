@@ -1,0 +1,244 @@
+<!--
+VILLETTA CON GIARDINO: a country house.
+PARTS
+  S  hedge on the edge of the lot, broken only by the garden path
+  g  garden (grass) between the hedge and the house
+  x/k/r  main body, two storeys: r floor (living room below, bedrooms above), k walls
+  h/l  low wing, one storey, set against one side of the body: the kitchen. h floor, l walls
+         (no wall of its own on the body side)
+  n  door, 3 cells, in the side wall of the body between body and wing
+  P  porch, 3 cells deep, across the whole front of the body; o its wooden posts
+  D  front door, 3 wide, in the middle of the front wall on the axis of N
+  v  hall path inside, from the centre to the door
+  p  passage through the porch
+  V  path, straight from the porch through the hedge to the front edge
+  i/j  stair strip against a wall of the body, open above (u)
+  X  chimney on a free side wall of the body
+  J  jumps in the garden: stone troughs with water, 2 cells long, away from the path
+  M/y  window candidates and windows, one row per storey
+ARRANGEMENT
+  The body is centred on N. The porch is in front of it.
+  The path runs straight from the door to the front.
+  The wing grows outward from the left or the right side, starting from a cell
+  in the middle part of that side wall.
+  The garden is all around, inside the hedge.
+WHAT THE SEEDS CHANGE
+  The width of the body (11 or 13) and its depth.
+  The side of the wing, its position along the body, its width and its depth.
+  The wall of the stair, where the chimney stands, where the jumps are.
+-->
+<sequence values="BNE" size="500 500 50" symmetry="(xy)" ground="E" origin="bottom">
+  <map scale="1/4 1/4 1/4" values="BNESgzxabckvDnmqhlPpVJXrofRFCHTIMyuij">
+    <rule in="E" out="E"/><rule in="N" out="N"/>
+
+    <!-- ===== A. COMPOSITION ===== -->
+    <prl in="***/*E*/***" out="***/*z*/***"/>
+    <prl in="E" out="S"/>
+    <prl in="Sz" out="*g" steps="1"/>
+
+    <all in="Nz" out="*a" symmetry="(x)" steps="1"/>
+    <all in="z/N" out="b/*" symmetry="()" steps="1"/>
+    <all in="N/z" out="*/c" symmetry="()" steps="1"/>
+    <all in="[Nx]az" out="*xa" symmetry="(x)" steps="4"/>
+    <prl symmetry="(x)" steps="1"><rule in="xaz" out="*xa" p="0.5"/></prl>
+    <all in="z/b/[Nx]" out="b/x/*" symmetry="()" steps="3"/>
+    <prl symmetry="()" steps="2"><rule in="z/b/x" out="b/x/*" p="0.5"/></prl>
+    <all in="[Nx]/c/z" out="*/x/c" symmetry="()" steps="2"/>
+    <prl symmetry="()" steps="1"><rule in="x/c/z" out="*/x/c" p="0.5"/></prl>
+    <prl><rule in="a" out="x"/><rule in="b" out="x"/><rule in="c" out="x"/></prl>
+    <all in="[Nx]z/*[Nx]" out="*x/**"/>
+
+    <all in="xz" out="k*"/>
+
+    <one in="xkz/xkz/xkz/xkz/xkz" out="***/***/*nm/***/***" symmetry="(x)" steps="1"/>
+    <all in="k/n/k" out="n/n/n" steps="1"/>
+
+    <all in="mz" out="*q" steps="1"/>
+    <all in="[mh]qz" out="*hq" steps="2"/>
+    <prl steps="2"><rule in="hqz" out="*hq" p="0.5"/></prl>
+    <prl><rule in="q" out="h"/><rule in="m" out="h"/></prl>
+    <all in="hz/*h" out="*h/**"/>
+
+    <all in="k/z" out="*/P" symmetry="()" steps="1"/>
+    <all in="P/z" out="*/P" symmetry="()" steps="2"/>
+
+    <all in="h[zgSP]" out="l*"/>
+
+    <all in="N/x" out="*/v" symmetry="()" steps="1"/>
+    <all in="v/x" out="*/v" symmetry="()"/>
+    <all in="v/k" out="*/D" symmetry="()"/>
+    <all in="kDk" out="DDD" symmetry="()" steps="1"/>
+    <all in="D/P" out="*/p" symmetry="()"/>
+    <all in="p/P" out="*/p" symmetry="()"/>
+    <all in="p/[zg]" out="*/V" symmetry="()"/>
+    <all in="V/[zgS]" out="*/V" symmetry="()"/>
+    <prl in="p" out="P"/>
+
+    <prl in="z" out="g"/>
+
+    <one in="ggggg/ggggg/ggggg" out="*****/*JJ**/*****" steps="3"/>
+
+    <prl in="x" out="r"/>
+
+    <!-- porch posts: the two front corners and the two beside the path -->
+    <all in="Pg/gg" out="o*/**" symmetry="(x)"/>
+    <all in="PP/gV" out="o*/**" symmetry="(x)"/>
+
+    <!-- the stair strip: against a wall, 2 free cells before, 2 after -->
+    <one in="kkkkkkkkk/rrrrrrrrr/rrrrrrrrr/rrrrrrrrr" out="*********/**ijjjj**/**ijjjj**/**ijjjj**" steps="1"/>
+
+    <!-- the chimney on a free side wall -->
+    <one in="[rij]kg" out="*Xg" symmetry="(x)" steps="1"/>
+
+    <prl><rule in="v" out="r"/><rule in="N" out="r"/></prl>
+
+    <!-- ===== B. HEIGHTS ===== -->
+    <!-- stair hole, open to the roof -->
+    <all in="B [ij]" out="u *" steps="1" symmetry="()"/>
+    <all in="B u" out="u *" steps="15" symmetry="()"/>
+    <all in="B u" out="C *" steps="1" symmetry="()"/>
+
+    <!-- body: two storeys -->
+    <all in="B r" out="r f" steps="1" symmetry="()"/>
+    <all in="B r" out="r R" steps="7" symmetry="()"/>
+    <all in="B r" out="r F" steps="1" symmetry="()"/>
+    <all in="B r" out="r R" steps="8" symmetry="()"/>
+    <prl in="r" out="C"/>
+
+    <!-- wing: one storey -->
+    <all in="B h" out="h f" steps="1" symmetry="()"/>
+    <all in="B h" out="h R" steps="7" symmetry="()"/>
+    <prl in="h" out="C"/>
+
+    <!-- porch: deck, air, roof; posts -->
+    <all in="B P" out="P T" steps="1" symmetry="()"/>
+    <all in="B P" out="P H" steps="7" symmetry="()"/>
+    <prl in="P" out="C"/>
+    <all in="B o" out="o *" steps="7" symmetry="()"/>
+    <all in="B o" out="C *" steps="1" symmetry="()"/>
+
+    <!-- wing walls with a window row -->
+    <all in="B l" out="l *" steps="2" symmetry="()"/>
+    <all in="B l" out="M *" steps="1" symmetry="()"/>
+    <all in="B M" out="M *" steps="1" symmetry="()"/>
+    <all in="B M" out="l *" steps="1" symmetry="()"/>
+    <all in="B l" out="l *" steps="2" symmetry="()"/>
+    <all in="B l" out="C *" steps="1" symmetry="()"/>
+
+    <!-- body walls with a window row on each storey -->
+    <all in="B k" out="k *" steps="2" symmetry="()"/>
+    <all in="B k" out="M *" steps="1" symmetry="()"/>
+    <all in="B M" out="M *" steps="1" symmetry="()"/>
+    <all in="B M" out="k *" steps="1" symmetry="()"/>
+    <all in="B k" out="k *" steps="6" symmetry="()"/>
+    <all in="B k" out="M *" steps="1" symmetry="()"/>
+    <all in="B M" out="M *" steps="1" symmetry="()"/>
+    <all in="B M" out="k *" steps="1" symmetry="()"/>
+    <all in="B k" out="k *" steps="2" symmetry="()"/>
+
+    <!-- doors: floor, 7 of air, wall above -->
+    <all in="B D" out="D f" steps="1" symmetry="()"/>
+    <all in="B D" out="D R" steps="7" symmetry="()"/>
+    <all in="B D" out="D k" steps="8" symmetry="()"/>
+    <prl in="D" out="k"/>
+    <all in="B n" out="n f" steps="1" symmetry="()"/>
+    <all in="B n" out="n R" steps="7" symmetry="()"/>
+    <all in="B n" out="n k" steps="8" symmetry="()"/>
+    <prl in="n" out="k"/>
+    <all in="B k" out="C *" steps="1" symmetry="()"/>
+
+    <!-- chimney to the top, hedge, troughs -->
+    <all in="B X" out="X *" symmetry="()"/>
+    <all in="B S" out="S *" steps="2" symmetry="()"/>
+    <all in="B J" out="I *" steps="1" symmetry="()"/>
+
+    <!-- windows: only on outer faces, not at corners, one every other cell -->
+    <prl in="*[BH]/[BH]M" out="**/*k"/>
+    <prl in="[BH]M" out="*y"/>
+    <prl in="M" out="k"/>
+    <all symmetry="()"><rule in="yy yy" out="yk yk"/><rule in="y/y y/y" out="y/k y/k"/></all>
+
+    <!-- ===== C. FULL SCALE ===== -->
+    <map scale="4 4 4" values="BAWFCZLSgVJwKQseUY">
+      <rule in="S" out="SSSS/SSSS/SSSS/SSSS SSSS/SSSS/SSSS/SSSS SSSS/SSSS/SSSS/SSSS SSSS/SSSS/SSSS/SSSS"/>
+      <rule in="g" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB gggg/gggg/gggg/gggg"/>
+      <rule in="V" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB VVVV/VVVV/VVVV/VVVV"/>
+      <rule in="J" out="JJJJ/JJJJ/JJJJ/JJJJ JJJJ/JJJJ/JJJJ/JJJJ JJJJ/JJJJ/JJJJ/JJJJ JJJJ/JJJJ/JJJJ/JJJJ"/>
+      <rule in="I" out="BBBB/BBBB/BBBB/BBBB JJJJ/JwwJ/JwwJ/JJJJ JJJJ/JJJJ/JJJJ/JJJJ JJJJ/JJJJ/JJJJ/JJJJ"/>
+      <rule in="f" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB AAAA/AAAA/AAAA/AAAA"/>
+      <rule in="T" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB ZZZZ/ZZZZ/ZZZZ/ZZZZ"/>
+      <rule in="i" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB ssss/ssss/ssss/ssss"/>
+      <rule in="j" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB eeee/eeee/eeee/eeee"/>
+      <rule in="R" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB"/>
+      <rule in="H" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB"/>
+      <rule in="u" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB"/>
+      <rule in="F" out="BBBB/BBBB/BBBB/BBBB FFFF/FFFF/FFFF/FFFF FFFF/FFFF/FFFF/FFFF FFFF/FFFF/FFFF/FFFF"/>
+      <rule in="C" out="CCCC/CCCC/CCCC/CCCC FFFF/FFFF/FFFF/FFFF FFFF/FFFF/FFFF/FFFF FFFF/FFFF/FFFF/FFFF"/>
+      <rule in="k" out="WWWW/WWWW/WWWW/WWWW WWWW/WWWW/WWWW/WWWW WWWW/WWWW/WWWW/WWWW WWWW/WWWW/WWWW/WWWW"/>
+      <rule in="l" out="WWWW/WWWW/WWWW/WWWW WWWW/WWWW/WWWW/WWWW WWWW/WWWW/WWWW/WWWW WWWW/WWWW/WWWW/WWWW"/>
+      <rule in="y" out="ZLLZ/LLLL/LLLL/ZLLZ ZLLZ/LLLL/LLLL/ZLLZ ZLLZ/LLLL/LLLL/ZLLZ ZLLZ/LLLL/LLLL/ZLLZ"/>
+      <rule in="o" out="BBBB/BZZB/BZZB/BBBB BBBB/BZZB/BZZB/BBBB BBBB/BZZB/BZZB/BBBB BBBB/BZZB/BZZB/BBBB"/>
+      <rule in="X" out="KKKK/KKKK/KKKK/KKKK KKKK/KKKK/KKKK/KKKK KKKK/KKKK/KKKK/KKKK KKKK/KKKK/KKKK/KKKK"/>
+
+      <!-- the stair: 2 up, 1 forward, solid below -->
+      <all in="BBB sse" out="UY* ***" steps="1"/>
+      <all in="*BB *B* UY*" out="*UY *Q* QQ*" steps="17"/>
+      <all in="Q B" out="* Q" symmetry="()"/>
+
+      <!-- pitched roofs of tiles: hips on the body and the wing, lean-to against the walls -->
+      <prl steps="12" symmetry="()">
+        <rule in="***/*B*/*** *[CWK]*/[CWK]C[CWK]/*[CWK]*" out="***/*C*/*** ***/***/***"/>
+      </prl>
+
+      <!-- cleaning -->
+      <prl><rule in="s" out="A"/><rule in="e" out="A"/><rule in="Y" out="Q"/><rule in="U" out="Q"/></prl>
+    </map>
+  </map>
+  <color symbol="E" value="8A7A5A" name="terra"/>
+  <color symbol="N" value="FF00FF" name="origine"/>
+  <color symbol="S" value="2F5D2A" name="siepe"/>
+  <color symbol="g" value="7FB65A" name="prato del giardino"/>
+  <color symbol="z" value="C9C08A" name="lotto"/>
+  <color symbol="x" value="E0D6C0" name="corpo"/>
+  <color symbol="a" value="FF0000" name="cammino a"/>
+  <color symbol="b" value="FF8800" name="cammino b"/>
+  <color symbol="c" value="FFFF00" name="cammino c"/>
+  <color symbol="k" value="F4F1EA" name="muro intonacato"/>
+  <color symbol="r" value="B88A5A" name="pavimento in cotto"/>
+  <color symbol="v" value="D9A066" name="ingresso"/>
+  <color symbol="D" value="6B3E1F" name="porta d'ingresso"/>
+  <color symbol="n" value="8B5A2B" name="porta interna"/>
+  <color symbol="m" value="00FFFF" name="seme dell'ala"/>
+  <color symbol="q" value="0088FF" name="cammino dell'ala"/>
+  <color symbol="h" value="C79A6B" name="pavimento cucina"/>
+  <color symbol="l" value="EDE6D6" name="muro dell'ala"/>
+  <color symbol="P" value="A0703C" name="portico in legno"/>
+  <color symbol="p" value="905F30" name="passaggio portico"/>
+  <color symbol="V" value="C8BFAE" name="vialetto di ghiaia"/>
+  <color symbol="J" value="8E8A80" name="vasca in pietra"/>
+  <color symbol="X" value="9E4A30" name="comignolo"/>
+  <color symbol="o" value="6E4424" name="pilastro del portico"/>
+  <color symbol="f" value="B5653A" name="pavimento"/>
+  <color symbol="R" value="FFFFFF" name="aria della stanza"/>
+  <color symbol="H" value="FFFFFE" name="aria del portico"/>
+  <color symbol="T" value="9A6A3A" name="assito del portico"/>
+  <color symbol="I" value="4A90C0" name="bordo della vasca"/>
+  <color symbol="M" value="00FF88" name="candidato finestra"/>
+  <color symbol="y" value="9FC8D8" name="finestra"/>
+  <color symbol="u" value="FFFFFD" name="vano scala"/>
+  <color symbol="i" value="D0A070" name="inizio scala"/>
+  <color symbol="j" value="C09060" name="striscia scala"/>
+  <color symbol="A" value="B5653A" name="pavimento in cotto"/>
+  <color symbol="W" value="F2EFE6" name="intonaco bianco"/>
+  <color symbol="F" value="8A5A32" name="solaio in legno"/>
+  <color symbol="C" value="B5442A" name="tetto di coppi rossi"/>
+  <color symbol="Z" value="6E4424" name="legno"/>
+  <color symbol="L" value="9FC8D8" name="vetro della finestra"/>
+  <color symbol="w" value="4A90C0" name="acqua"/>
+  <color symbol="K" value="8E3B26" name="mattoni del comignolo"/>
+  <color symbol="Q" value="A08060" name="gradini in pietra"/>
+  <color symbol="s" value="D0A070" name="inizio scala"/>
+  <color symbol="e" value="C09060" name="striscia scala"/>
+  <color symbol="U" value="FF4040" name="gradino"/>
+  <color symbol="Y" value="40FF40" name="direzione scala"/>
+</sequence>

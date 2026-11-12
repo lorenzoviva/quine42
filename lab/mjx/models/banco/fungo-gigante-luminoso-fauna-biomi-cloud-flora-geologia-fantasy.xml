@@ -1,0 +1,60 @@
+<!-- Fungo gigante luminoso (Cantiere 8, aurora): gambo storto a caso, cappello a caso, lamelle e funghetti a caso. -->
+<sequence values="BTUCWGMHPu#1#2#3#4#5#6z" size="500 500 50" symmetry="(xy)" name="Fungo gigante luminoso">
+  <color symbol="T" value="e6dccb" name="gambo"/>
+  <color symbol="U" value="e6dccb" name="gambo alto"/>
+  <color symbol="C" value="7a3f9e" name="cappello"/>
+  <color symbol="W" value="f2ecf8" name="macchie del cappello"/>
+  <color symbol="G" value="7ff0ff" name="lamelle" glow="True"/>
+  <color symbol="M" value="6a8f4a" name="muschio"/>
+  <color symbol="H" hidden="True" name="marcatore"/>
+  <color symbol="P" hidden="True" name="marcatore"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="#1" hidden="True" name="marcatore"/>
+  <color symbol="#2" hidden="True" name="marcatore"/>
+  <color symbol="#3" hidden="True" name="marcatore"/>
+  <color symbol="#4" hidden="True" name="marcatore"/>
+  <color symbol="#5" hidden="True" name="marcatore"/>
+  <color symbol="#6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
+  <ellipsoid at="20 20 0" size="16 16 5" color="M"/>
+  <cylinder at="20 20 0" size="8 8 5" color="T"/>
+  <box at="20 20 5" size="1 1 1" color="H"/>
+  <!-- il tronco cammina verso l'alto, dritto o di sbieco -->
+  <one steps="18"><rule in="B H" out="H T" p="4"/><rule in="B* *H" out="H* *T" p="1"/></one>
+  <one steps="16"><rule in="B H" out="H U" p="4"/><rule in="B* *H" out="H* *U" p="1"/></one>
+  <all in="TB" out="*T" steps="2"/>
+  <all in="UB" out="*U" steps="1"/>
+  <!-- il cappello si appoggia dove il gambo è arrivato: una cella in cima diventa il suo centro -->
+  <prl in="H" out="P"/>
+  <!-- scelta «cappello»: piatto | a cupola | a cono | a due piani -->
+  <box at="20 20 30" size="40 40 30" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/><rule in="u" out="#4"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/><rule in="#4u" out="*#4"/></all>
+  <!--   1: piatto -->
+  <ellipsoid at="20 20 41" size="34 34 9" color="C" on="#1"/>
+  <!--   2: a cupola -->
+  <ellipsoid at="20 20 36" size="28 28 20" color="C" on="#2"/>
+  <!--   3: a cono -->
+  <cone at="20 20 37" size="30 30 22" color="C" on="#3"/>
+  <!--   4: a due piani -->
+  <ellipsoid at="20 20 36" size="32 32 8" color="C" on="#4"/>
+  <ellipsoid at="20 20 44" size="20 20 10" color="C" on="#4"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/><rule in="#4" out="B"/></prl>
+  <!-- il gambo arriva sempre sotto il cappello: sale finché trova la carne del cappello -->
+  <all in="B P" out="P U"/>
+  <prl in="P" out="U"/>
+  <!-- lamelle sotto il cappello -->
+  <prl in="C B" out="* G" p="0.7" steps="1"/>
+  <prl in="G B" out="* G" p="0.3" steps="1"/>
+  <prl in="B C" out="* W" p="0.08" steps="1"/>
+  <prl in="WC" out="*W" p="0.4" steps="1"/>
+  <!-- funghetti sul muschio -->
+  <!-- 5 punte a caso sulla faccia alta di M, alte fino a 3 -->
+  <one in="B M" out="P *" steps="5"/>
+  <all steps="3"><rule in="B P" out="P T"/><rule in="B* *P" out="P* *T"/></all>
+  <prl in="P" out="T"/>
+</sequence>

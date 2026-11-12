@@ -1,0 +1,196 @@
+<sequence values="BCDWTVKGLARS" size="500 500 50">
+  <color symbol="C" value="e6e3da" name="cemento chiaro"/>
+  <color symbol="D" value="aaa79e" name="cemento grigio"/>
+  <color symbol="W" value="b07c45" name="legno"/>
+  <color symbol="T" value="6e4a2a" name="legno scuro"/>
+  <color symbol="V" value="86b8c8" alpha="0.5" name="vetro"/>
+  <color symbol="K" value="2b2b2e" name="metallo nero"/>
+  <color symbol="G" value="5f8a4a" name="piante"/>
+  <color symbol="L" value="ffcc66" glow="True" name="luce"/>
+  <color symbol="A" value="3f9fbf" alpha="0.7" name="acqua"/>
+  <color symbol="R" value="c0492f" name="tessuto rosso"/>
+  <color symbol="S" value="c9c2b4" name="pietra"/>
+
+  <box at="47.5 36 0" size="92 61 36" color="C"/>
+  <box at="49 76.5 0" size="55 20 36" color="C"/>
+  <box at="85 78 34" size="17 23 2" color="C"/>
+  <box at="39 36 36" size="75 61 40" color="C"/>
+  <box at="85 17.5 36" size="17 24 40" color="C"/>
+  <box at="92.5 82 0" size="2 5 34" color="C"/>
+
+  <box at="47.5 36 2" size="88 57 32" color="B"/>
+  <box at="49 75.5 2" size="51 18 32" color="B"/>
+  <box at="39 36 36" size="71 57 38" color="B"/>
+  <box at="83 15.5 36" size="17 16 38" color="B"/>
+
+  <box at="47.5 36 0" size="92 61 1" color="D"/>
+  <box at="49 76.5 0" size="55 20 1" color="D"/>
+  <box at="47.5 36 1" size="88 57 1" color="W"/>
+  <box at="49 75.5 1" size="51 18 1" color="W"/>
+  <box at="47.5 36 34" size="92 61 2" color="D"/>
+  <box at="49 76.5 34" size="55 20 2" color="D"/>
+  <box at="85 78 34" size="17 23 2" color="D"/>
+  <box at="39 36 35" size="71 57 1" color="W"/>
+  <box at="83 15.5 35" size="17 16 1" color="W"/>
+  <box at="50 75.5 35" size="53 18 1" color="T"/>
+  <box at="84.5 76.5 35" size="16 22 1" color="T"/>
+  <box at="39 36 74" size="75 61 2" color="D"/>
+  <box at="85 17.5 74" size="17 24 2" color="D"/>
+  <box at="39 36 75" size="71 57 1" color="T"/>
+  <box at="83.5 18.5 75" size="18 22 1" color="T"/>
+
+  <box at="39 66 36" size="75 1 38" color="W"/>
+  <box at="93 17.5 36" size="1 24 38" color="W"/>
+  <box at="77 47.5 36" size="1 36 40" color="C"/>
+
+  <box at="49.5 15 34" size="32 15 2" color="B"/>
+
+  <box at="50.5 44 2" size="2 41 32" color="C"/>
+  <box at="47.5 23 2" size="28 1 32" color="V"/>
+  <box at="39 44 36" size="1 41 38" color="C"/>
+  <box at="50.5 24 36" size="22 1 38" color="C"/>
+  <box at="47.5 23 36" size="28 1 4" color="K"/>
+
+  <box at="7.5 10 2" size="8 5 30" color="W"/>
+  <box at="46.5 40 2" size="6 25 6" color="T"/>
+  <box at="48.5 40 8" size="2 25 6" color="T"/>
+  <box at="45.5 33.5 8" size="4 6 2" color="R"/>
+  <box at="45.5 46.5 8" size="4 6 2" color="R"/>
+  <box at="47.5 58 2" size="4 9 28" color="D"/>
+  <box at="46 58 4" size="1 5 8" color="L"/>
+  <box at="88.5 44 2" size="6 29 11" color="W"/>
+  <box at="88.5 44 13" size="6 29 1" color="K"/>
+  <box at="88.5 26.5 2" size="6 6 30" color="D"/>
+  <box at="89.5 44 24" size="4 9 10" color="K"/>
+  <box at="77 11 2" size="15 7 10" color="W"/>
+  <box at="88.5 15 2" size="6 15 30" color="T"/>
+  <box at="26.5 76 2" size="6 13 6" color="T"/>
+  <box at="71.5 74 2" size="6 13 10" color="W"/>
+  <box at="71.5 74 12" size="2 2 4" color="L"/>
+
+  <box at="13.5 61.5 36" size="20 6 5" color="W"/>
+  <box at="15.5 61.5 41" size="16 6 2" color="R"/>
+  <box at="5.5 61.5 41" size="4 6 2" color="C"/>
+  <box at="7 15 36" size="7 15 34" color="T"/>
+  <box at="50 61.5 36" size="17 6 5" color="T"/>
+  <box at="52 61.5 41" size="13 6 2" color="D"/>
+  <box at="43.5 61.5 41" size="4 6 2" color="C"/>
+  <box at="50 64 50" size="5 1 3" color="L"/>
+  <box at="89.5 15.5 36" size="4 16 30" color="W"/>
+
+  <box at="51 75.5 36" size="11 18 6" color="D"/>
+  <box at="51 75.5 42" size="9 16 2" color="G"/>
+  <box at="60.5 75.5 68" size="2 18 2" color="T"/>
+  <box at="65.5 75.5 68" size="2 18 2" color="T"/>
+  <box at="70.5 75.5 68" size="2 18 2" color="T"/>
+  <box at="75.5 75.5 68" size="2 18 2" color="T"/>
+  <box at="60.5 83.5 36" size="2 2 32" color="T"/>
+  <box at="75.5 83.5 36" size="2 2 32" color="T"/>
+  <box at="68 83.5 66" size="17 2 2" color="T"/>
+
+  <box at="49 85.5 36" size="55 2 4" color="C"/>
+  <box at="22.5 75.5 36" size="2 18 4" color="C"/>
+  <box at="85 88.5 36" size="17 2 4" color="C"/>
+  <box at="93 76.5 36" size="1 22 4" color="C"/>
+
+  <box at="2.5 36 2" size="2 57 32" color="V"/>
+  <box at="2.5 36 36" size="2 57 38" color="V"/>
+  <box at="2 22.5 2" size="1 2 72" color="K"/>
+  <box at="2 36.5 2" size="1 2 72" color="K"/>
+  <box at="2 50.5 2" size="1 2 72" color="K"/>
+
+  <box at="22 6.5 10" size="17 2 18" color="V"/>
+  <box at="77 6.5 14" size="19 2 14" color="V"/>
+  <box at="20 6.5 44" size="21 2 22" color="V"/>
+  <box at="64 6.5 44" size="17 2 22" color="V"/>
+  <box at="92.5 44 14" size="2 29 14" color="V"/>
+  <box at="92.5 15 10" size="2 11 18" color="V"/>
+  <box at="92.5 16 44" size="2 13 22" color="V"/>
+  <box at="13 65.5 46" size="15 2 20" color="V"/>
+  <box at="49 65.5 46" size="15 2 20" color="V"/>
+  <box at="32 85.5 10" size="13 2 20" color="V"/>
+  <box at="67 85.5 10" size="13 2 20" color="V"/>
+
+  <box at="49.5 3.5 0" size="4 4 80" color="D"/>
+  <box at="49.5 3.5 78" size="4 4 2" color="K"/>
+  <box at="32.5 4.5 0" size="2 2 76" color="K"/>
+  <box at="72.5 4.5 0" size="2 2 76" color="K"/>
+
+  <box at="41.5 85.5 2" size="2 2 32" color="K"/>
+  <box at="57.5 85.5 2" size="2 2 32" color="K"/>
+  <box at="49.5 86 34" size="34 1 2" color="T"/>
+  <box at="37.5 90.5 34" size="10 8 2" color="T"/>
+  <box at="61.5 90.5 34" size="10 8 2" color="T"/>
+
+  <box at="49.5 93 0" size="34 13 1" color="S"/>
+  <box at="27 93 0" size="11 13 8" color="C"/>
+  <box at="27 93 6" size="9 11 2" color="G"/>
+  <box at="71.5 93 0" size="10 13 8" color="C"/>
+  <box at="71.5 93 6" size="8 11 2" color="G"/>
+  <box at="11.5 69 0" size="20 5 1" color="W"/>
+  <box at="11.5 78 0" size="16 13 1" color="A"/>
+  <box at="91.5 72.5 0" size="4 12 8" color="K"/>
+  <box at="91.5 72.5 8" size="4 12 2" color="R"/>
+
+  <box at="47.5 6.5 76" size="92 2 4" color="C"/>
+  <box at="2.5 37 76" size="2 59 4" color="C"/>
+  <box at="40 65.5 76" size="73 2 4" color="C"/>
+  <box at="75.5 47 76" size="2 35 4" color="C"/>
+  <box at="77 47.5 76" size="1 36 4" color="C"/>
+  <box at="93 18.5 76" size="1 22 4" color="C"/>
+
+  <box at="23 42 76" size="15 17 1" color="K"/>
+  <box at="23 42 74" size="13 15 5" color="V"/>
+  <box at="56 50 76" size="25 21 2" color="K"/>
+  <box at="10 57 76" size="9 11 2" color="C"/>
+  <box at="10 57 78" size="9 11 1" color="G"/>
+  <box at="49 19 76" size="19 15 3" color="K"/>
+  <box at="49 19 78" size="15 11 1" color="A"/>
+  <box at="27 9.5 76" size="15 4 3" color="W"/>
+
+  <box at="49.5 85.5 2" size="14 2 32" color="B"/>
+  <box at="49.5 93 1" size="14 13 79" color="B"/>
+  <box at="40 65.5 2" size="17 2 32" color="B"/>
+  <box at="60 65.5 2" size="17 2 32" color="B"/>
+  <box at="13 65.5 2" size="15 2 32" color="B"/>
+  <box at="83 65.5 2" size="13 2 32" color="B"/>
+  <box at="39 50 36" size="1 13 32" color="B"/>
+  <box at="31.5 65.5 36" size="14 2 32" color="B"/>
+  <box at="67 65.5 36" size="15 2 32" color="B"/>
+  <box at="68 24 36" size="13 1 38" color="B"/>
+
+  <box at="49.5 15 2" size="32 15 72" color="B"/>
+  <box at="22.5 15 2" size="22 15 32" color="B"/>
+  <box at="76.5 15 36" size="22 15 38" color="B"/>
+  <box at="85 58.5 36" size="15 58 44" color="B"/>
+  <box at="85 18.5 76" size="15 22 4" color="B"/>
+
+  <box at="35.5 15 2" size="4 15 4" color="W"/>
+  <box at="39.5 15 2" size="4 15 8" color="W"/>
+  <box at="43.5 15 2" size="4 15 12" color="W"/>
+  <box at="47.5 15 2" size="4 15 16" color="W"/>
+  <box at="51.5 15 2" size="4 15 20" color="W"/>
+  <box at="55.5 15 2" size="4 15 24" color="W"/>
+  <box at="59.5 15 2" size="4 15 28" color="W"/>
+  <box at="63.5 15 2" size="4 15 32" color="W"/>
+
+  <box at="85 63.5 36" size="15 4 4" color="D"/>
+  <box at="85 59.5 36" size="15 4 8" color="D"/>
+  <box at="85 55.5 36" size="15 4 12" color="D"/>
+  <box at="85 51.5 36" size="15 4 16" color="D"/>
+  <box at="85 47.5 36" size="15 4 20" color="D"/>
+  <box at="85 43.5 36" size="15 4 24" color="D"/>
+  <box at="85 39.5 36" size="15 4 28" color="D"/>
+  <box at="85 35.5 36" size="15 4 32" color="D"/>
+  <box at="85 31.5 36" size="15 4 36" color="D"/>
+
+  <box at="93 63.5 36" size="1 4 9" color="V"/>
+  <box at="93 59.5 36" size="1 4 13" color="V"/>
+  <box at="93 55.5 36" size="1 4 17" color="V"/>
+  <box at="93 51.5 36" size="1 4 21" color="V"/>
+  <box at="93 47.5 36" size="1 4 25" color="V"/>
+  <box at="93 43.5 36" size="1 4 29" color="V"/>
+  <box at="93 39.5 36" size="1 4 33" color="V"/>
+  <box at="93 35.5 36" size="1 4 37" color="V"/>
+  <box at="93 31.5 36" size="1 4 41" color="V"/>
+</sequence>

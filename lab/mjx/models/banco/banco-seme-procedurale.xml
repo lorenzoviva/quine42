@@ -1,0 +1,68 @@
+<!-- Workbench, procedural (Cantiere 2): wood, top, iron and handles of the original. The seed picks the height of the top (from 7 to 14
+     voxels: a workshop bench or a tall bench), whether there is a shelf underneath and at what height, how far the top overhangs and which tools are
+     on it (vice, toolbox, hammer) and where. -->
+<sequence values="BNnTIGVhkrswabc" size="20 20 20" symmetry="(xy)" name="Banco da lavoro">
+  <color symbol="N" value="7a5534" name="legno"/>
+  <color symbol="n" value="553a22" name="legno scuro"/>
+  <color symbol="T" value="9a7048" name="piano"/>
+  <color symbol="I" value="6d7687" name="ferro"/>
+  <color symbol="G" value="b08040" name="manico"/>
+  <color symbol="V" hidden="True" name="dove può stare il piano"/>
+  <color symbol="h" hidden="True" name="altezze possibili"/>
+  <color symbol="k" hidden="True" name="la quota scelta"/>
+  <color symbol="r" hidden="True" name="dove può stare il ripiano"/>
+  <color symbol="s" hidden="True" name="un attrezzo che nasce"/>
+  <color symbol="w" hidden="True" name="la sporgenza"/>
+  <color symbol="a" hidden="True" name="la morsa"/>
+  <color symbol="b" hidden="True" name="il martello"/>
+  <color symbol="c" hidden="True" name="la cassetta"/>
+  <!-- The widest possible top, the tallest legs, the possible shelf -->
+  <box at="10 10 6" size="20 14 10" color="w"/>
+  <box at="10 10 6" size="16 14 10" color="V"/>
+  <prl in="w" out="a" p="0.004" steps="1"/>
+  <all>
+    <rule in="aw" out="aa"/>
+    <rule in="a w" out="a a"/>
+    <rule in="w a" out="a a"/>
+  </all>
+  <all in="a" out="V"/>
+  <all in="w" out="B"/>
+  <box at="4 5 0" size="2 2 16" color="N"/>
+  <box at="16 5 0" size="2 2 16" color="N"/>
+  <box at="4 15 0" size="2 2 16" color="N"/>
+  <box at="16 15 0" size="2 2 16" color="N"/>
+  <!-- The height -->
+  <box at="0 0 8" size="1 1 8" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all in="k*" out="kk"/>
+  <all in="* k" out="k *"/>
+  <all in="k" out="B"/>
+  <all in="B V" out="* T"/>
+  <all in="T V" out="* T" steps="1"/>
+  <all in="V" out="B"/>
+  <!-- The shelf, perhaps, at a chosen height under the top -->
+  <box at="10 10 2" size="16 12 4" color="r" on="B"/>
+  <box at="19 19 2" size="1 1 4" color="h"/>
+  <prl in="h" out="k" p="0.6" steps="1"/>
+  <one in="k" out="s" steps="1"/>
+  <all in="[hk]" out="B"/>
+  <all in="sB" out="ss"/>
+  <all in="sr" out="*n"/>
+  <all in="nr" out="nn"/>
+  <all in="[sr]" out="B"/>
+  <!-- The tools: they appear on the top at random, one per kind -->
+  <prl in="B T" out="s *" p="0.02" steps="1"/>
+  <one in="s" out="a" steps="1"/>
+  <one in="s" out="b" steps="1"/>
+  <one in="s" out="c" steps="1"/>
+  <all in="s" out="B"/>
+  <all in="aB" out="aa" steps="2"/>
+  <all in="bB" out="bb" steps="3" symmetry="(x)"/>
+  <all in="B c" out="c *" steps="1"/>
+  <all in="cB" out="cc" steps="1"/>
+  <all in="a" out="I"/>
+  <all in="b" out="G"/>
+  <all in="c" out="n"/>
+  <prl in="T" out="n" p="0.04" steps="1"/>
+</sequence>

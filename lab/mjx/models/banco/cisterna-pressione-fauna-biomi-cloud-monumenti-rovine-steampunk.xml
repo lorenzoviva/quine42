@@ -1,0 +1,63 @@
+<!-- Cisterna a pressione (Cantiere 8, orichalcum): serbatoio a caso; tubi, valvole, manometri e ruggine a caso. -->
+<sequence values="BTICRGZSewsnu#1#2#3#4#5#6z" size="500 500 50" symmetry="(xy)" name="Cisterna a pressione">
+  <color symbol="T" value="7a7570" name="lamiera"/>
+  <color symbol="I" value="3a3633" name="ferro"/>
+  <color symbol="C" value="c4703a" name="tubi di rame"/>
+  <color symbol="R" value="a3322a" name="valvole"/>
+  <color symbol="G" value="f0e8c8" name="manometri" glow="True"/>
+  <color symbol="Z" value="8a4a2a" name="ruggine"/>
+  <color symbol="S" value="9a948a" name="basamento"/>
+  <color symbol="e" hidden="True" name="marcatore"/>
+  <color symbol="w" hidden="True" name="marcatore"/>
+  <color symbol="s" hidden="True" name="marcatore"/>
+  <color symbol="n" hidden="True" name="marcatore"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="#1" hidden="True" name="marcatore"/>
+  <color symbol="#2" hidden="True" name="marcatore"/>
+  <color symbol="#3" hidden="True" name="marcatore"/>
+  <color symbol="#4" hidden="True" name="marcatore"/>
+  <color symbol="#5" hidden="True" name="marcatore"/>
+  <color symbol="#6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
+  <box at="25 25 0" size="40 40 2" color="S"/>
+  <!-- scelta «serbatoio»: sfera su gambe | cilindro alto | due botti coricate | botte a cerchi -->
+  <box at="25 25 2" size="44 44 48" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/><rule in="u" out="#4"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/><rule in="#4u" out="*#4"/></all>
+  <!--   1: sfera su gambe -->
+  <ellipsoid at="25 25 12" size="30 30 30" color="T" on="#1"/>
+  <line at="15 15 2" to="18 18 20" r="1.5" color="I" on="#1"/>
+  <line at="35 15 2" to="32 18 20" r="1.5" color="I" on="#1"/>
+  <line at="15 35 2" to="18 32 20" r="1.5" color="I" on="#1"/>
+  <line at="35 35 2" to="32 32 20" r="1.5" color="I" on="#1"/>
+  <!--   2: cilindro alto -->
+  <cylinder at="25 25 2" size="24 24 30" color="T" on="#2"/>
+  <ellipsoid at="25 25 26" size="24 24 14" color="T" on="#2"/>
+  <line at="13 25 2" to="13 25 32" r="0.5" color="I" on="#2"/>
+  <!--   3: due botti coricate -->
+  <ellipsoid at="25 16 6" size="40 14 14" color="T" on="#3"/>
+  <ellipsoid at="25 34 6" size="40 14 14" color="T" on="#3"/>
+  <box at="12 25 2" size="4 32 6" color="I" on="#3"/>
+  <box at="38 25 2" size="4 32 6" color="I" on="#3"/>
+  <box at="25 25 18" size="4 22 2" color="I" on="#3"/>
+  <line at="25 25 19" to="25 25 32" r="1" color="C" on="#3"/>
+  <!--   4: botte a cerchi -->
+  <cylinder at="25 25 2" size="28 28 24" color="T" on="#4"/>
+  <cylinder at="25 25 7" size="30 30 2" color="I" on="#4"/>
+  <cylinder at="25 25 17" size="30 30 2" color="I" on="#4"/>
+  <cone at="25 25 26" size="28 28 8" color="T" on="#4"/>
+  <line at="25 25 32" to="25 25 38" r="1" color="C" on="#4"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/><rule in="#4" out="B"/></prl>
+  <!-- i tubi partono dalla lamiera e corrono dritti, salendo a gomiti -->
+  <!-- 7 rami nati a caso sui fianchi di T: ognuno va dalla sua parte e a volte sale -->
+  <one steps="7" symmetry="()"><rule in="TB" out="*e"/><rule in="BT" out="w*"/><rule in="T/B" out="*/s"/><rule in="B/T" out="n/*"/></one>
+  <prl steps="16" symmetry="()"><rule in="eB" out="Ce" p="0.95"/><rule in="*B e*" out="*e C*" p="0.12"/><rule in="Bw" out="wC" p="0.95"/><rule in="B* *w" out="w* *C" p="0.12"/><rule in="s/B" out="C/s" p="0.95"/><rule in="*/B s/*" out="*/s C/*" p="0.12"/><rule in="B/n" out="n/C" p="0.95"/><rule in="B/* */n" out="n/* */C" p="0.12"/></prl>
+  <prl><rule in="e" out="R"/><rule in="w" out="R"/><rule in="s" out="R"/><rule in="n" out="R"/></prl>
+  <prl in="BT" out="*G" p="0.012" steps="1"/>
+  <prl in="BT" out="*Z" p="0.08" steps="1"/>
+  <prl in="ZT" out="*Z" p="0.3" steps="2"/>
+</sequence>

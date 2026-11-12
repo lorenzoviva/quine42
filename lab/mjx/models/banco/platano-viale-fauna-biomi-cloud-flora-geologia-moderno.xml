@@ -1,0 +1,60 @@
+<!-- Platano di viale (Cantiere 8, neapolis): piede a caso; tronco, rami, chioma e corteccia chiazzata a caso. -->
+<sequence values="BTUKAFLIWSHewsnu#1#2#3#4#5#6z" size="500 500 50" symmetry="(xy)" name="Platano di viale">
+  <color symbol="T" value="9a9070" name="corteccia"/>
+  <color symbol="U" value="9a9070" name="corteccia alta"/>
+  <color symbol="K" value="c8c0a0" name="chiazze chiare"/>
+  <color symbol="A" value="7a7058" name="rami"/>
+  <color symbol="F" value="4f8a3c" name="chioma"/>
+  <color symbol="L" value="7ab35a" name="foglie al sole"/>
+  <color symbol="I" value="3a3a3a" name="ghisa"/>
+  <color symbol="W" value="8a6a4a" name="legno della panchina"/>
+  <color symbol="S" value="b8b4aa" name="cemento"/>
+  <color symbol="H" hidden="True" name="marcatore"/>
+  <color symbol="e" hidden="True" name="marcatore"/>
+  <color symbol="w" hidden="True" name="marcatore"/>
+  <color symbol="s" hidden="True" name="marcatore"/>
+  <color symbol="n" hidden="True" name="marcatore"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="#1" hidden="True" name="marcatore"/>
+  <color symbol="#2" hidden="True" name="marcatore"/>
+  <color symbol="#3" hidden="True" name="marcatore"/>
+  <color symbol="#4" hidden="True" name="marcatore"/>
+  <color symbol="#5" hidden="True" name="marcatore"/>
+  <color symbol="#6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
+  <!-- scelta «piede»: griglia di ghisa | panchina tonda | fioriera di cemento -->
+  <box at="20 20 0" size="40 40 9" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
+  <!--   1: griglia di ghisa -->
+  <box at="20 20 0" size="16 16 1" color="I" on="#1"/>
+  <box at="20 20 1" size="10 10 1" color="I" on="#1"/>
+  <!--   2: panchina tonda -->
+  <cylinder at="20 20 0" size="20 20 5" color="W" on="#2"/>
+  <cylinder at="20 20 0" size="14 14 5" color="S" on="#2"/>
+  <!--   3: fioriera di cemento -->
+  <box at="20 20 0" size="18 18 7" color="S" on="#3"/>
+  <box at="20 20 7" size="16 16 1" color="F" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
+  <cylinder at="20 20 0" size="6 6 8" color="T"/>
+  <box at="20 20 8" size="1 1 1" color="H"/>
+  <!-- il tronco cammina verso l'alto, dritto o di sbieco -->
+  <one steps="20"><rule in="B H" out="H T" p="4"/><rule in="B* *H" out="H* *T" p="0.7"/></one>
+  <one steps="18"><rule in="B H" out="H U" p="4"/><rule in="B* *H" out="H* *U" p="0.7"/></one>
+  <all in="TB" out="*T" steps="2"/>
+  <all in="UB" out="*U" steps="1"/>
+  <!-- 8 rami nati a caso sui fianchi di U: ognuno va dalla sua parte e a volte sale -->
+  <one steps="8" symmetry="()"><rule in="UB" out="*e"/><rule in="BU" out="w*"/><rule in="U/B" out="*/s"/><rule in="B/U" out="n/*"/></one>
+  <prl steps="17" symmetry="()"><rule in="eB" out="Ae" p="0.9"/><rule in="*B e*" out="*e A*" p="0.35"/><rule in="Bw" out="wA" p="0.9"/><rule in="B* *w" out="w* *A" p="0.35"/><rule in="s/B" out="A/s" p="0.9"/><rule in="*/B s/*" out="*/s A/*" p="0.35"/><rule in="B/n" out="n/A" p="0.9"/><rule in="B/* */n" out="n/* */A" p="0.35"/></prl>
+  <!-- le punte diventano foglie, che si gonfiano a caso in tutte le direzioni -->
+  <prl><rule in="e" out="F"/><rule in="w" out="F"/><rule in="s" out="F"/><rule in="n" out="F"/><rule in="H" out="F"/></prl>
+  <prl in="FB" out="*F" p="0.5" steps="6" symmetry="(xyz)"/>
+  <prl in="B F" out="* L" p="0.5" steps="1"/>
+  <!-- la corteccia si sfoglia a chiazze -->
+  <prl in="BT" out="*K" p="0.08" steps="1"/>
+  <prl in="KT" out="*K" p="0.4" steps="2" symmetry="(xyz)"/>
+</sequence>

@@ -1,0 +1,113 @@
+<!--
+Fort that fits its size (T338, lab/banco/taglie/README.md): one program, three areas at the same scale (20 voxels a tile). At 5 × 5
+tiles (100 voxels) one keep, a tower with a wide base: a stone talus on three sides, two storeys (rooms of 37, a door of 11 × 30, a
+stair of 16 steps), arrow slits, a crenellated platform; where the ground goes on past its yard (7.5 × 7.5 tiles) a curtain wall with
+battlements around it and the road as its gate; where 30 × 30 are free past a corner of the wall (10 × 10 tiles), a tower there with
+its roof. No number of the box: what fits is found by the patterns of free ground. Written by lab/banco/taglie/genera.mjs.
+-->
+<sequence values="BHEXSIQRWNDnOohjUKTakPybmCcqdMv#6#7#8#9" size="500 500 50" symmetry="(xy)" soil="E" origin="bottom">
+  <color symbol="W" value="a39d90" name="pietra"/><color symbol="D" value="7d766c" name="zoccolo"/><color symbol="N" value="6e685e" name="cornice"/>
+  <color symbol="d" value="8a8274" name="scarpa"/><color symbol="n" value="8e6a44" name="assito"/><color symbol="R" value="97928a" name="terrazza"/>
+  <color symbol="M" value="b2ac9f" name="merli"/><color symbol="O" value="6a4424" name="porta"/><color symbol="o" value="4e3218" name="borchie"/>
+  <color symbol="U" value="2a2622" name="feritoie"/><color symbol="k" value="9a7048" name="scala"/><color symbol="P" value="a89c86" name="selciato"/>
+  <color symbol="K" value="5a4a3a" name="asta"/><color symbol="C" value="c4bba8" name="mura"/><color symbol="c" value="47506a" name="ardesia"/>
+  <color symbol="H" hidden="True"/><color symbol="E" hidden="True"/><color symbol="X" hidden="True"/><color symbol="S" hidden="True"/><color symbol="I" hidden="True"/><color symbol="Q" hidden="True"/><color symbol="T" hidden="True"/><color symbol="t" hidden="True"/><color symbol="a" hidden="True"/><color symbol="y" hidden="True"/><color symbol="b" hidden="True"/><color symbol="m" hidden="True"/><color symbol="q" hidden="True"/><color symbol="v" hidden="True"/><color symbol="h" hidden="True"/><color symbol="j" hidden="True"/><color symbol="#6" hidden="True"/><color symbol="#7" hidden="True"/><color symbol="#8" hidden="True"/><color symbol="#9" hidden="True"/>
+
+  <!-- 1. The keep: a square of 47 from the centre, 4 more on one side by chance; the talus (b) 8 wide at the back and at the sides. -->
+  <all in="HE" out="*H" symmetry="(x)" steps="23"/>
+  <one in="HE" out="*H" symmetry="(x)" steps="4"/>
+  <all in="H/E" out="*/H" symmetry="()" steps="23"/>
+  <all in="E/H" out="H/*" symmetry="()" steps="23"/>
+  <all in="[Hb]E" out="*b" symmetry="(x)" steps="8"/>
+  <all in="E/[Hb]" out="b/*" symmetry="()" steps="8"/>
+
+  <!-- 2. What fits around it: the yard (y) 24 every way; where 8 more are free past it, the curtain wall (m), its corners;
+       a tower on a corner of the wall where 30 × 30 are free past it (q). -->
+  <all in="[Hby]E" out="*y" symmetry="(x)" steps="24"/>
+  <all in="E/[Hby]" out="y/*" symmetry="()" steps="24"/>
+  <all in="[Hby]/E" out="*/y" symmetry="()" steps="24"/>
+  <all in="yEEEEEEEE" out="*m*******"/>
+  <all in="Em/my" out="m*/**"/>
+  <all in="EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE/EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEm" out="*******************************/*******************************/*******************************/*******************************/*******************************/*******************************/*******************************/*******************************/*******************************/*******************************/*******************************/*******************************/*******************************/*******************************/*******************************/*******************************/*******************************/*******************************/*******************************/*******************************/*******************************/*******************************/*******************************/*******************************/*******************************/*******************************/*******************************/*******************************/*******************************/*******************************/******************************q"/>
+
+  <!-- 3. The keep rises: two storeys of 32, the slab between them (S), the platform on top (R); the talus slopes 1 in 1. -->
+  <all in="B H" out="H *" steps="31"/>
+  <all in="B H" out="S *" steps="1"/>
+  <all in="B S" out="X *" steps="1"/>
+  <all in="B X" out="X *" steps="27"/>
+  <all in="B X" out="R *"/>
+  <all in="B b" out="b *" steps="9"/>
+  <all in="*/b B/*" out="*/B */*"/>
+  <prl in="b" out="d" steps="1"/>
+
+  <!-- 4. Digging: walls two thick; the floor below, the slab between the storeys; plinth, string course, corners. -->
+  <prl in="HHHHH/HHHHH/HHHHH/HHHHH/HHHHH" out="*****/*****/**I**/*****/*****" steps="1"/>
+  <prl in="XXXXX/XXXXX/XXXXX/XXXXX/XXXXX" out="*****/*****/**I**/*****/*****" steps="1"/>
+  <prl in="SSSSS/SSSSS/SSSSS/SSSSS/SSSSS" out="*****/*****/**n**/*****/*****" steps="1"/>
+  <prl in="I *" out="B *" steps="1"/>
+  <prl in="I" out="n" steps="1"/>
+  <prl in="S" out="N" steps="1"/>
+  <prl in="X" out="W" steps="1"/>
+  <prl in="H *" out="W *" steps="1"/>
+  <prl in="H" out="D" steps="1"/>
+  <all in="W D" out="D *" steps="3"/>
+  <all in="R W" out="* N"/>
+
+  <!-- 5. The stair: a strip of 16 × 11 along the back wall, a landing of 10 by the corner, its hole in the slab, a walker. -->
+  <one in="DDDDDDDDDDDDDDDDDDDDDDDDDDD/DBBBBBBBBBBBBBBBBBBBBBBBBBB/DBBBBBBBBBBBBBBBBBBBBBBBBBB/DBBBBBBBBBBBBBBBBBBBBBBBBBB/DBBBBBBBBBBBBBBBBBBBBBBBBBB/DBBBBBBBBBBBBBBBBBBBBBBBBBB/DBBBBBBBBBBBBBBBBBBBBBBBBBB/DBBBBBBBBBBBBBBBBBBBBBBBBBB/DBBBBBBBBBBBBBBBBBBBBBBBBBB/DBBBBBBBBBBBBBBBBBBBBBBBBBB/DBBBBBBBBBBBBBBBBBBBBBBBBBB/DBBBBBBBBBBBBBBBBBBBBBBBBBB DDDDDDDDDDDDDDDDDDDDDDDDDDD/Dnnnnnnnnnnnnnnnnnnnnnnnnnn/Dnnnnnnnnnnnnnnnnnnnnnnnnnn/Dnnnnnnnnnnnnnnnnnnnnnnnnnn/Dnnnnnnnnnnnnnnnnnnnnnnnnnn/Dnnnnnnnnnnnnnnnnnnnnnnnnnn/Dnnnnnnnnnnnnnnnnnnnnnnnnnn/Dnnnnnnnnnnnnnnnnnnnnnnnnnn/Dnnnnnnnnnnnnnnnnnnnnnnnnnn/Dnnnnnnnnnnnnnnnnnnnnnnnnnn/Dnnnnnnnnnnnnnnnnnnnnnnnnnn/Dnnnnnnnnnnnnnnnnnnnnnnnnnn" out="***************************/***********TTTTTTTTTTTTTTTT/***********TTTTTTTTTTTTTTTT/***********TTTTTTTTTTTTTTTT/***********TTTTTTTTTTTTTTTT/***********TTTTTTTTTTTTTTTT/***********TTTTTTTTTTTTTTTT/***********TTTTTTTTTTTTTTTT/***********TTTTTTTTTTTTTTTT/***********TTTTTTTTTTTTTTTT/***********TTTTTTTTTTTTTTTT/***********TTTTTTTTTTTTTTTT ***************************/***************************/***************************/***************************/***************************/***************************/***************************/***************************/***************************/***************************/***************************/***************************" symmetry="()" steps="1"/>
+  <all in="B T" out="t *"/>
+  <all in="B t" out="t *"/>
+  <all in="n t" out="v *"/>
+  <prl in="t" out="B" steps="1"/>
+  <prl in="v" out="B" steps="1"/>
+  <all in="BT" out="*a" symmetry="()"/>
+  <all in="B a" out="a k" symmetry="()" steps="1"/>
+  <all in="*B ** a*" out="*a ** k*" symmetry="()" steps="15"/>
+  <prl in="a" out="k" steps="1"/>
+  <all in="k B" out="* k"/>
+  <prl in="T" out="k" steps="1"/>
+
+  <!-- 6. The door: 11 wide in the plinth of the front, through the wall, 30 high; frame and studs. The road from it to the edge. -->
+  <one steps="1" symmetry="()" in="DDDDDDDDDDDDD/BBBBBBBBBBBBB DDDDDDDDDDDDD/yyyyyyyyyyyyy" out="*OOOOOOOOOOO*/************* *************/*************"/>
+  <all in="D/O" out="O/*" symmetry="()"/>
+  <all in="[DWN] O" out="O *" steps="29"/>
+  <all in="[DWN] O" out="N *" steps="1"/>
+  <all in="O[DW]" out="*N" steps="1"/>
+  <all in="OOOO" out="*o**" symmetry="()"/>
+  <all in="[Oo]/B */y" out="*/* */P" symmetry="()"/>
+  <all in="P/[yEm]" out="*/P" symmetry="()"/>
+
+  <!-- 7. Arrow slits: a seed 6 under the string course or the platform, on the outer face, 9 high, through the wall. -->
+  <one steps="10" in="N/B W/B W/B W/B W/B W/B" out="*/* */* */* */* */* U/*"/>
+  <all in="U W" out="* U" steps="8"/>
+  <all in="UW" out="*U" steps="1"/>
+
+  <!-- 8. The platform: merlons of 4 and gaps of 4 on its edge, 6 high; a pole on it. -->
+  <all in="BBBBBBBB/BBBBBBBB BBBBBBBB/RRRRRRRR" out="********/******** ********/#9#9#9#9#8#8#8#8"/>
+  <all in="B #9" out="#9 *" steps="6"/>
+  <prl><rule in="#9" out="M"/><rule in="#8" out="R"/></prl>
+  <one in="B B R" out="* K *" steps="1"/>
+  <all in="B K" out="K *" steps="14"/>
+
+  <!-- 9. The curtain wall: 4 thick inward, 24 high, merlons on both its faces; the road is its gate. -->
+  <all in="my" out="*m" steps="3"/>
+  <all in="B m" out="m *" steps="23"/>
+  <prl in="m" out="C" steps="1"/>
+  <all in="BBBBBBBB/BBBBBBBB BBBBBBBB/CCCCCCCC" out="********/******** ********/#9#9#9#9#8#8#8#8"/>
+  <all in="B #9" out="#9 *" steps="5"/>
+  <prl><rule in="#9" out="C"/><rule in="#8" out="C"/></prl>
+
+  <!-- 10. The towers: 15 a side on the corners of the wall, 44 high, a pyramid of slate on top. -->
+  <all in="q[Emy]" out="*q" symmetry="(x)" steps="7"/>
+  <all in="q/[Emy]" out="*/q" symmetry="(y)" steps="7"/>
+  <all in="B q" out="q *" steps="43"/>
+  <all in="B q" out="c *"/>
+  <all in="cB qB" out="*c **"/>
+  <all in="***/*B*/*** *c*/ccc/*c*" out="***/*c*/*** ***/***/***" steps="9" symmetry="()"/>
+  <prl in="q" out="C" steps="1"/>
+
+  <!-- 11. Cleaning: the markers go; the yard is the world's ground. -->
+  <prl><rule in="E" out="B"/><rule in="y" out="B"/><rule in="T" out="k"/></prl>
+  <action name="open" label="Apri la porta"><all><rule in="O" out="h"/><rule in="o" out="j"/></all></action>
+  <action name="close" label="Chiudi la porta"><all><rule in="h" out="O"/><rule in="j" out="o"/></all></action>
+</sequence>

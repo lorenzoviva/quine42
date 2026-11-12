@@ -1,0 +1,64 @@
+<!-- Aiuola fiorita (Cantiere 8, neapolis): bordo e centro a caso; steli e fiori a caso. -->
+<sequence values="BSEGRYVFILPu#1#2#3#4#5#6z" size="500 500 50" symmetry="(xy)" name="Aiuola fiorita">
+  <color symbol="S" value="b8b4aa" name="cemento"/>
+  <color symbol="E" value="4a3628" name="terra"/>
+  <color symbol="G" value="4f8a3c" name="steli"/>
+  <color symbol="R" value="e0453a" name="fiori rossi"/>
+  <color symbol="Y" value="f2c94c" name="fiori gialli"/>
+  <color symbol="V" value="9a5ad0" name="fiori viola"/>
+  <color symbol="F" value="3f7a35" name="foglie"/>
+  <color symbol="I" value="3a3a3a" name="ferro"/>
+  <color symbol="L" value="fff2b0" name="lampada" glow="True"/>
+  <color symbol="P" hidden="True" name="marcatore"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="#1" hidden="True" name="marcatore"/>
+  <color symbol="#2" hidden="True" name="marcatore"/>
+  <color symbol="#3" hidden="True" name="marcatore"/>
+  <color symbol="#4" hidden="True" name="marcatore"/>
+  <color symbol="#5" hidden="True" name="marcatore"/>
+  <color symbol="#6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
+  <!-- scelta «bordo»: tondo | quadrato | a ottagono -->
+  <box at="10 10 0" size="20 20 4" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
+  <!--   1: tondo -->
+  <cylinder at="10 10 1" size="15 15 2" color="E" on="#1"/>
+  <cylinder at="10 10 0" size="19 19 3" color="S" on="#1"/>
+  <!--   2: quadrato -->
+  <box at="10 10 1" size="14 14 2" color="E" on="#2"/>
+  <box at="10 10 0" size="18 18 3" color="S" on="#2"/>
+  <!--   3: a ottagono -->
+  <box at="10 10 1" size="12 12 2" color="E" on="#3"/>
+  <cylinder at="10 10 1" size="14 14 2" color="E" on="#3"/>
+  <cylinder at="10 10 0" size="19 19 3" color="S" on="#3"/>
+  <box at="10 10 0" size="16 16 3" color="S" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
+  <!-- scelta «centro»: un arbusto | un lampioncino | un cartello | una fontanella -->
+  <box at="10 10 2" size="10 10 14" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/><rule in="u" out="#4"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/><rule in="#4u" out="*#4"/></all>
+  <!--   1: un arbusto -->
+  <ellipsoid at="10 10 2" size="8 8 9" color="F" on="#1"/>
+  <!--   2: un lampioncino -->
+  <line at="10 10 2" to="10 10 13" r="0.5" color="I" on="#2"/>
+  <box at="10 10 13" size="3 3 2" color="L" on="#2"/>
+  <!--   3: un cartello -->
+  <line at="10 10 2" to="10 10 9" r="0.5" color="I" on="#3"/>
+  <box at="10 10 9" size="7 1 4" color="S" on="#3"/>
+  <!--   4: una fontanella -->
+  <cylinder at="10 10 2" size="3 3 9" color="I" on="#4"/>
+  <box at="10 11 9" size="1 3 1" color="I" on="#4"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/><rule in="#4" out="B"/></prl>
+  <!-- gli steli nascono a caso sulla terra e salgono di altezze diverse -->
+  <one in="B E" out="P *" steps="22"/>
+  <prl steps="11"><rule in="B P" out="P G" p="0.6"/></prl>
+  <all><rule in="P" out="R"/><rule in="P" out="Y"/><rule in="P" out="V"/></all>
+  <!-- ogni fiore apre i petali -->
+  <prl><rule in="BR" out="*R" p="0.5"/><rule in="BY" out="*Y" p="0.5"/><rule in="BV" out="*V" p="0.5"/></prl>
+  <prl in="B G" out="* F" p="0.15" steps="1"/>
+</sequence>

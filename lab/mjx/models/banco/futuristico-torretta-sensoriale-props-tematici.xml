@@ -1,0 +1,58 @@
+<!-- Torretta sensoriale (ambientazione futuristica, sidera): una base di grafite e ceramica, il collo di ceramica bianca e la testa a cupola con la
+     canna del sensore che finisce nell'occhio ciano, e le antenne magenta. Il seme sceglie quanto è alto il collo, da che parte guarda
+     la canna e quanto è lunga, e quali antenne ha la testa. -->
+<sequence values="BWwGgCMVhkrPaAHn" size="20 20 20" symmetry="(xy)" name="Torretta sensoriale">
+  <color symbol="W" value="eef1f5" name="ceramica bianca"/>
+  <color symbol="w" value="c3c9d3" name="ceramica in ombra"/>
+  <color symbol="G" value="353a42" name="grafite"/>
+  <color symbol="g" value="565d68" name="grafite chiara"/>
+  <color symbol="C" value="5ff0ff" name="occhio ciano" glow="True"/>
+  <color symbol="M" value="ff3ec8" name="luce magenta" glow="True"/>
+  <color symbol="V" value="9fd8e6" name="vetro"/>
+  <color symbol="h" hidden="True" name="quote possibili"/>
+  <color symbol="k" hidden="True" name="la quota scelta"/>
+  <color symbol="r" hidden="True" name="il collo che sale"/>
+  <color symbol="P" value="eef1f5" name="collo"/>
+  <color symbol="a" hidden="True" name="dove può guardare la canna"/>
+  <color symbol="A" hidden="True" name="la canna che si allunga"/>
+  <color symbol="H" value="eef1f5" name="cupola"/>
+  <color symbol="n" hidden="True" name="dove può stare un'antenna"/>
+  <!-- The base -->
+  <cylinder at="10 10 0" size="9 9 1" color="G"/>
+  <cylinder at="10 10 1" size="7 7 1" color="w"/>
+  <cylinder at="10 10 2" size="5 5 1" color="g"/>
+  <!-- La quota della testa: una fra 6 e 12 -->
+  <box at="0 0 6" size="1 1 7" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all in="kB" out="kk"/>
+  <box at="10 10 3" size="1 1 1" color="r"/>
+  <one steps="20" symmetry="()">
+    <rule in="B r" out="r P"/>
+  </one>
+  <all in="k" out="B"/>
+  <!-- La canna: una direzione sola, lunga da cinque a otto -->
+  <all in="Br" out="ar"/>
+  <one in="a" out="A" steps="1"/>
+  <all in="a" out="B"/>
+  <all in="rAB" out="*GA" steps="1"/>
+  <all in="GAB" out="*GA" steps="4"/>
+  <prl in="GAB" out="*GA" p="0.5" steps="3"/>
+  <all in="AB" out="CB"/>
+  <all in="A" out="C"/>
+  <all in="B/C/B" out="V/*/V"/>
+  <!-- La cupola attorno alla cima del collo -->
+  <all in="r" out="H"/>
+  <all steps="4">
+    <rule in="HB" out="*H"/>
+    <rule in="B H" out="H *"/>
+  </all>
+  <all in="B H" out="* w" steps="1" symmetry="()"/>
+  <!-- Le antenne: a caso sui quattro lati della cupola -->
+  <prl in="B w" out="n *" p="0.07" steps="1" symmetry="()"/>
+  <all in="B n" out="n n" steps="3" symmetry="()"/>
+  <all in="B n" out="M *" symmetry="()"/>
+  <all in="n" out="g"/>
+  <!-- Il collo si ispessisce -->
+  <all in="BP" out="gP" steps="1"/>
+</sequence>

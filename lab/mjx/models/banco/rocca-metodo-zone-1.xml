@@ -1,0 +1,113 @@
+<!--
+ROCCA DI FRONTIERA - block 1: coarse composition (1 cell = 4 voxels)
+Parts and letters (coarse plan):
+  x courtyard: a rectangle with random sides around N
+  W wall ring, 3 cells thick around the courtyard; O its outer face
+  T/t four corner towers, 5x5, on the convex corners of the ring
+  v path from N to the front; G gate, 3 wide, in the front wall on the axis
+  h covered passage behind the gate, 3x4; g guardhouse wings beside it (h+g = hall 7x4)
+  K/k keep, r its inside: in the back corner farthest from the gate
+  P/p armoury, y its inside: in the other back corner, also far from the gate
+  d doors (keep, armoury) facing the courtyard
+  S stair strip (3x3) against the inside of a side wall, climbing to the wall walk
+  w well and q troughs: the jumps, in the free courtyard
+  f free marker (buffer and door fronts), turned back into x at the end
+What the seeds change: courtyard width and depth, the back corner of the keep
+(the armoury takes the other), the wall that gets the stair, where the well
+and the troughs go.
+-->
+<sequence values="BNE" size="500 500 50" symmetry="(xy)" ground="E" origin="bottom">
+  <map scale="1/4 1/4 1/4" values="BNEzaxWOTtvGKkrhgfdPpySwq">
+    <rule in="E" out="E"/><rule in="N" out="N"/>
+
+    <!-- lot -->
+    <prl in="***/*E*/***" out="***/*z*/***"/>
+    <prl in="Ez" out="*E" steps="4"/>
+
+    <!-- courtyard rectangle: at least 13x13 -->
+    <all in="Nz" out="*a" steps="1"/>
+    <all in="[Nx]az" out="*xa" steps="5"/>
+    <prl steps="7"><rule in="xaz" out="*xa" p="0.5"/></prl>
+    <prl in="a" out="x"/>
+    <all in="[Nx]z/*[Nx]" out="*x/**"/>
+    <prl in="z" out="E"/>
+
+    <!-- wall ring and its outer face -->
+    <all in="[Nx]E" out="*W"/>
+    <all in="WE" out="*W" steps="2"/>
+    <all in="WE/*W" out="*W/**"/>
+    <prl in="WE" out="O*"/>
+
+    <!-- corner towers -->
+    <all in="EE/EO" out="**/*T"/>
+    <all steps="2"><rule in="[Tt][EWOx]" out="*t"/><rule in="[Tt]*/*[EWOx]" out="**/*t"/></all>
+
+    <!-- path to the front and the gate -->
+    <all in="N/x" out="*/v" symmetry="()" steps="1"/>
+    <all in="v/x" out="*/v" symmetry="()"/>
+    <all in="v/[WO]" out="*/G" symmetry="()"/>
+    <all in="G/[WO]" out="*/G" symmetry="()"/>
+    <all in="[WO]G[WO]" out="GGG" symmetry="()" steps="1"/>
+
+    <!-- keep: the back corner farthest from the gate, 5x5 -->
+    <one in="x" out="K" steps="1"><field for="K" from="v" on="xv"/></one>
+    <all steps="4"><rule in="[Kk]x" out="*k"/><rule in="[Kk]*/*x" out="**/*k"/></all>
+    <prl in="K" out="k"/>
+    <prl in="*k*/kkk/*k*" out="***/*r*/***"/>
+
+    <!-- gate hall: passage h (3x4) behind the gate, guardhouse wings g -->
+    <all in="[xv]/G" out="h/*" symmetry="()"/>
+    <all in="[xv]/h" out="h/*" symmetry="()" steps="3"/>
+    <all steps="2" symmetry="()"><rule in="x[hg]" out="g*"/><rule in="[hg]x" out="*g"/></all>
+
+    <!-- free buffer around the keep and the gate hall -->
+    <prl in="[kgh]x" out="*f"/>
+
+    <!-- armoury: the other back corner, far from the gate -->
+    <one in="x" out="P" steps="1"><field for="P" from="v" on="xvf"/></one>
+    <all steps="4"><rule in="[Pp]x" out="*p"/><rule in="[Pp]*/*x" out="**/*p"/></all>
+    <prl in="P" out="p"/>
+    <prl in="*p*/ppp/*p*" out="***/*y*/***"/>
+    <prl in="px" out="*f"/>
+
+    <!-- doors to the courtyard, their fronts kept free -->
+    <one in="rrr/rrr/rrr/kkk/fff/[xf][xf][xf]" out="***/***/***/ddd/***/fff" steps="1"/>
+    <one in="yyy/yyy/yyy/ppp/fff/[xf][xf][xf]" out="***/***/***/ddd/***/fff" steps="1"/>
+
+    <!-- stair to the wall walk, against the inside of a wall -->
+    <one in="WWW/xxx/xxx/xxx/xxx/xxx" out="***/SSS/SSS/SSS/fff/fff" steps="1"/>
+    <prl in="Sx" out="*f"/>
+
+    <!-- jumps: the well and two troughs in the free courtyard -->
+    <one in="xxxx/xxxx/xxxx/xxxx" out="****/*ww*/*ww*/****" steps="1"/>
+    <one in="xxxx/xxxx/xxxx" out="****/*qq*/****" steps="2"/>
+
+    <!-- markers back to courtyard -->
+    <prl in="f" out="x"/>
+  </map>
+
+  <color symbol="E" value="6b8a4a" name="prato"/>
+  <color symbol="N" value="ff0000" name="centro"/>
+  <color symbol="z" value="a0b070" name="lotto"/>
+  <color symbol="a" value="ff00ff" name="camminatore"/>
+  <color symbol="x" value="c8b896" name="cortile in terra battuta"/>
+  <color symbol="W" value="8a8a8a" name="mura in pietra grigia"/>
+  <color symbol="O" value="6e6e6e" name="faccia esterna delle mura"/>
+  <color symbol="T" value="4a4a4a" name="centro torre"/>
+  <color symbol="t" value="5c5c5c" name="torre angolare"/>
+  <color symbol="v" value="b09060" name="strada"/>
+  <color symbol="G" value="3b2a1a" name="portone in legno scuro"/>
+  <color symbol="K" value="303040" name="seme del mastio"/>
+  <color symbol="k" value="505060" name="mastio"/>
+  <color symbol="r" value="9090a0" name="sala del mastio"/>
+  <color symbol="h" value="7a6040" name="androne coperto"/>
+  <color symbol="g" value="806850" name="corpo di guardia"/>
+  <color symbol="f" value="e0e0a0" name="libero"/>
+  <color symbol="d" value="2a1a0a" name="porta"/>
+  <color symbol="P" value="503020" name="seme armeria"/>
+  <color symbol="p" value="705040" name="armeria"/>
+  <color symbol="y" value="a08060" name="interno armeria"/>
+  <color symbol="S" value="d0d0d0" name="scala sulle mura"/>
+  <color symbol="w" value="3060a0" name="pozzo"/>
+  <color symbol="q" value="604020" name="abbeveratoio"/>
+</sequence>

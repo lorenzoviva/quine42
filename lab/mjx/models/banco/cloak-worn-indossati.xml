@@ -1,0 +1,21 @@
+<!-- Cloak, worn (T289 bench, way A): the second program of the cloak, the mesh it has on a body. Written for the box behind a
+     back (the wanderer's: as wide as the back with a voxel each side, from just behind it to the middle of the torso, from the
+     ground to over the shoulders): the kernel stretches it behind the back of whoever wears it. -->
+<sequence values="BMNOGK" size="13 6 18" name="Mantello indossato">
+  <color symbol="M" value="7a2e3a" name="wool"/>
+  <color symbol="N" value="9a404e" name="wool in the sun"/>
+  <color symbol="O" value="561f29" name="fold and hem"/>
+  <color symbol="G" value="c9a23a" name="clasp"/>
+  <color symbol="K" hidden="True" name="where the back is"/>
+  <!-- Half a tube of wool round the back, the open side toward the body (+y) -->
+  <cylinder at="6 6 0" size="13 12 18" color="M"/>
+  <cylinder at="6 6 0" size="11 10 17" color="K" on="M"/>
+  <!-- The collar over the shoulders, the clasp, the hem, the folds -->
+  <box at="6 3 17" size="13 6 1" color="M" on="K"/>
+  <box at="6 5 16" size="2 1 1" color="G"/>
+  <box at="6 3 0" size="13 6 1" color="O" on="M"/>
+  <box at="3 0 1" size="1 1 15" color="O" on="M"/>
+  <box at="9 0 1" size="1 1 15" color="O" on="M"/>
+  <all in="K" out="B"/>
+  <prl in="B M" out="B N" p="0.8" symmetry="()"/>
+</sequence>

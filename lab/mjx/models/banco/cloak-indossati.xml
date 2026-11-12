@@ -1,0 +1,31 @@
+<!-- Cloak (T289 bench): the program of the thing on the ground (folded) and its <worn> section (way B). Burgundy wool with a
+     darker hem and a brass clasp. -->
+<sequence values="BMNOGK" size="12 12 12" name="Mantello">
+  <color symbol="M" value="7a2e3a" name="wool"/>
+  <color symbol="N" value="9a404e" name="wool in the sun"/>
+  <color symbol="O" value="561f29" name="fold and hem"/>
+  <color symbol="G" value="c9a23a" name="clasp"/>
+  <color symbol="K" hidden="True" name="unused"/>
+  <!-- Folded on the ground: a low heap with two folds and the clasp on top -->
+  <ellipsoid at="6 6 0" size="11 10 5" color="M"/>
+  <box at="6 4 1" size="11 1 3" color="O" on="M"/>
+  <box at="6 8 1" size="11 1 3" color="O" on="M"/>
+  <box at="6 6 4" size="2 1 1" color="G" on="[BM]"/>
+  <prl in="B M" out="B N" p="0.7" symmetry="()"/>
+</sequence>
+<!-- Worn: rules run on the body of the wearer, in the frame of its back (standing, the back toward −y). Before them the kernel
+     writes z (the voxels of the back), o (the rest of the body), r (the air behind the back, from the shoulders down to the
+     ground standing, to the end of the back on all fours) and m (that air on the middle line). -->
+<worn zone="back">
+  <!-- On the back and over the shoulders, one voxel out -->
+  <all>
+    <rule in="[rm]/z" out="M/z"/>
+    <rule in="[rm] z" out="M z"/>
+  </all>
+  <!-- It falls straight down as long as there is air for it -->
+  <all in="M [rm]" out="M M"/>
+  <!-- The clasp under the collar, on the middle line; the hem where the fall ends -->
+  <all in="M m" out="M G" steps="1"/>
+  <all in="[MN] [oBr]" out="O *"/>
+  <prl in="[rmB] M" out="* N" p="0.8"/>
+</worn>

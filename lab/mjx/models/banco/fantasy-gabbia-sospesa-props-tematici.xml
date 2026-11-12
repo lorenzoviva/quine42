@@ -1,0 +1,116 @@
+<!-- Hanging cage (fantasy, aurora): a wooden gallows on a base, with a reinforced arm from which hangs, on a wrought-iron
+     chain, a barred cage with a captive flame inside. The seed picks the height of the arm, the length of the chain
+     and the shape of the cage (round with a dome, square, small and low, tall and narrow), the base (a stone block, two crossed
+     beams or a heap of stones) and where the crows perch. -->
+<sequence values="BWwIiSdKFJvVUabcgepq" size="20 20 60" symmetry="(xy)" name="Gabbia sospesa">
+  <color symbol="W" value="6b4a2e" name="legno"/>
+  <color symbol="w" value="4a3020" name="legno scuro"/>
+  <color symbol="I" value="424754" name="ferro battuto"/>
+  <color symbol="i" value="6d7687" name="catena"/>
+  <color symbol="S" value="8a8478" name="pietra"/>
+  <color symbol="d" value="5e5a52" name="pietra scura"/>
+  <color symbol="K" value="1e1e24" name="corvo"/>
+  <color symbol="F" value="7fd8ff" name="fiammella prigioniera" glow="True"/>
+  <color symbol="J" hidden="True" name="ferro della gabbia in lavorazione"/>
+  <color symbol="v" hidden="True" name="per mescolare il caso"/>
+  <color symbol="V" hidden="True" name="spazio della forca"/>
+  <color symbol="U" hidden="True" name="spazio della base"/>
+  <color symbol="a" hidden="True" name="braccio a 52, gabbia tonda"/>
+  <color symbol="b" hidden="True" name="braccio a 46, gabbia quadrata"/>
+  <color symbol="c" hidden="True" name="braccio a 56, gabbia piccola e bassa"/>
+  <color symbol="g" hidden="True" name="braccio a 42, gabbia alta e stretta"/>
+  <color symbol="e" hidden="True" name="base di pietra"/>
+  <color symbol="p" hidden="True" name="travi incrociate"/>
+  <color symbol="q" hidden="True" name="mucchio di sassi"/>
+  <!-- The spaces and the two dice -->
+  <box at="10 10 0" size="20 20 60" color="v"/>
+  <all in="v" out="B"/>
+  <box at="10 10 0" size="20 20 3" color="U"/>
+  <box at="10 10 3" size="20 20 57" color="V"/>
+  <one steps="1"><rule in="V" out="a"/><rule in="V" out="b"/><rule in="V" out="c"/><rule in="V" out="g"/></one>
+  <one steps="1"><rule in="U" out="e"/><rule in="U" out="p"/><rule in="U" out="q"/></one>
+  <all symmetry="(xyz)">
+    <rule in="aV" out="aa"/><rule in="bV" out="bb"/><rule in="cV" out="cc"/><rule in="gV" out="gg"/>
+    <rule in="eU" out="ee"/><rule in="pU" out="pp"/><rule in="qU" out="qq"/>
+  </all>
+  <!-- The base -->
+  <box at="3 10 0" size="7 7 3" color="S" on="e"/>
+  <box at="3 10 2" size="7 7 1" color="d" on="e"/>
+  <box at="3 10 0" size="9 3 2" color="w" on="p"/>
+  <box at="3 10 0" size="3 9 2" color="w" on="p"/>
+  <box at="3 10 2" size="3 3 1" color="w" on="p"/>
+  <ellipsoid at="3 10 0" size="9 9 5" color="S" on="q"/>
+  <ellipsoid at="5 8 0" size="5 5 3" color="d" on="q"/>
+  <!-- Variant a: arm at 52, round cage -->
+  <box at="3 10 3" size="3 3 51" color="W" on="a"/>
+  <box at="8 10 52" size="13 3 2" color="W" on="a"/>
+  <line at="4 10 45" to="10 10 51" r="0.5" color="w" on="a"/>
+  <box at="12 10 39" size="1 1 13" color="i" on="a"/>
+  <cylinder at="12 10 28" size="9 9 11" color="J" on="a"/>
+  <cylinder at="12 10 29" size="7 7 9" color="a" on="J"/>
+  <box at="9 10 29" size="1 20 9" color="a" on="J"/>
+  <box at="11 10 29" size="1 20 9" color="a" on="J"/>
+  <box at="13 10 29" size="1 20 9" color="a" on="J"/>
+  <box at="15 10 29" size="1 20 9" color="a" on="J"/>
+  <box at="12 7 29" size="20 1 9" color="a" on="J"/>
+  <box at="12 9 29" size="20 1 9" color="a" on="J"/>
+  <box at="12 11 29" size="20 1 9" color="a" on="J"/>
+  <box at="12 13 29" size="20 1 9" color="a" on="J"/>
+  <ellipsoid at="12 10 36" size="9 9 6" color="I" on="a"/>
+  <ellipsoid at="12 10 29" size="3 3 3" color="F" on="a"/>
+  <all in="J" out="I"/>
+  <!-- Variant b: arm at 46, square cage -->
+  <box at="3 10 3" size="3 3 45" color="W" on="b"/>
+  <box at="8 10 46" size="13 3 2" color="W" on="b"/>
+  <line at="4 10 39" to="10 10 45" r="0.5" color="w" on="b"/>
+  <box at="12 10 37" size="1 1 9" color="i" on="b"/>
+  <box at="12 10 24" size="9 9 13" color="J" on="b"/>
+  <box at="12 10 25" size="7 7 11" color="b" on="J"/>
+  <box at="9 10 25" size="1 20 11" color="b" on="J"/>
+  <box at="11 10 25" size="1 20 11" color="b" on="J"/>
+  <box at="13 10 25" size="1 20 11" color="b" on="J"/>
+  <box at="15 10 25" size="1 20 11" color="b" on="J"/>
+  <box at="12 7 25" size="20 1 11" color="b" on="J"/>
+  <box at="12 9 25" size="20 1 11" color="b" on="J"/>
+  <box at="12 11 25" size="20 1 11" color="b" on="J"/>
+  <box at="12 13 25" size="20 1 11" color="b" on="J"/>
+  <box at="12 10 37" size="5 5 1" color="J" on="b"/>
+  <ellipsoid at="12 10 25" size="3 3 3" color="F" on="b"/>
+  <all in="J" out="I"/>
+  <!-- Variant c: arm at 56, round cage -->
+  <box at="3 10 3" size="3 3 55" color="W" on="c"/>
+  <box at="8 10 56" size="13 3 2" color="W" on="c"/>
+  <line at="4 10 49" to="10 10 55" r="0.5" color="w" on="c"/>
+  <box at="12 10 23" size="1 1 33" color="i" on="c"/>
+  <cylinder at="12 10 14" size="7 7 9" color="J" on="c"/>
+  <cylinder at="12 10 15" size="5 5 7" color="c" on="J"/>
+  <box at="10 10 15" size="1 20 7" color="c" on="J"/>
+  <box at="12 10 15" size="1 20 7" color="c" on="J"/>
+  <box at="14 10 15" size="1 20 7" color="c" on="J"/>
+  <box at="12 8 15" size="20 1 7" color="c" on="J"/>
+  <box at="12 10 15" size="20 1 7" color="c" on="J"/>
+  <box at="12 12 15" size="20 1 7" color="c" on="J"/>
+  <ellipsoid at="12 10 20" size="7 7 6" color="I" on="c"/>
+  <ellipsoid at="12 10 15" size="3 3 3" color="F" on="c"/>
+  <all in="J" out="I"/>
+  <!-- Variant g: arm at 42, square cage -->
+  <box at="3 10 3" size="3 3 41" color="W" on="g"/>
+  <box at="8 10 42" size="13 3 2" color="W" on="g"/>
+  <line at="4 10 35" to="10 10 41" r="0.5" color="w" on="g"/>
+  <box at="12 10 33" size="1 1 9" color="i" on="g"/>
+  <box at="12 10 16" size="7 7 17" color="J" on="g"/>
+  <box at="12 10 17" size="5 5 15" color="g" on="J"/>
+  <box at="10 10 17" size="1 20 15" color="g" on="J"/>
+  <box at="12 10 17" size="1 20 15" color="g" on="J"/>
+  <box at="14 10 17" size="1 20 15" color="g" on="J"/>
+  <box at="12 8 17" size="20 1 15" color="g" on="J"/>
+  <box at="12 10 17" size="20 1 15" color="g" on="J"/>
+  <box at="12 12 17" size="20 1 15" color="g" on="J"/>
+  <box at="12 10 33" size="5 5 1" color="J" on="g"/>
+  <ellipsoid at="12 10 17" size="3 3 3" color="F" on="g"/>
+  <all in="J" out="I"/>
+  <all in="[vVUabcgepq]" out="B"/>
+  <!-- The crows perched on the arm and on the cage -->
+  <prl steps="1" in="B [WI]" out="K *" p="0.03"/>
+  <prl steps="1" in="B K" out="K *" p="0.5"/>
+</sequence>

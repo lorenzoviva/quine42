@@ -1,0 +1,18 @@
+<!-- Antenna di trasmissione: a mano (Claude Code, Cantiere 9). Un traliccio su una base, un piatto bianco inclinato in cima; ogni seme cambia le crociere del traliccio e i sassi della base. -->
+<sequence values="BDTPCRL" size="20 20 40" symmetry="()" name="Antenna di trasmissione">
+  <color symbol="D" value="5a5e66" name="base"/>
+  <color symbol="T" value="9aa0a8" name="traliccio"/>
+  <color symbol="P" value="eef0f2" name="piatto"/>
+  <color symbol="C" value="3a3e46" name="crociera"/>
+  <color symbol="R" value="8a7a6a" name="sassi"/>
+  <color symbol="L" value="e8403a" name="spia" glow="True"/>
+  <box at="10 10 0" size="12 12 3" color="D"/>
+  <box at="10 10 3" size="2 2 24" color="T"/>
+  <box at="10 10 27" size="14 3 2" color="P"/>
+  <box at="10 11 29" size="12 2 3" color="P"/>
+  <box at="10 12 32" size="8 2 2" color="P"/>
+  <box at="10 9 30" size="1 1 2" color="L"/>
+  <prl in="BT" out="CT" p="0.15" steps="1"/>
+  <prl in="TB" out="TC" p="0.15" steps="1"/>
+  <prl in="B D" out="R D" p="0.3" steps="1"/>
+</sequence>

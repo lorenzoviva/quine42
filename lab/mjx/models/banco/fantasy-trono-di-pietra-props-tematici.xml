@@ -1,0 +1,83 @@
+<!-- Stone throne (fantasy, aurora): a stone seat with a red velvet cushion, armrests and a carved backrest with a
+     shining gem. The seed picks the lower part (on a stepped platform, on four massive legs or on a round podium with
+     block armrests), the backrest (tall and pointed, a fan of points, or round and arched) and where the stone chips and the
+     moss grows. -->
+<sequence values="BSdGRCrMXVUvabofgh" size="20 20 20" symmetry="(xy)" name="Trono di pietra">
+  <color symbol="S" value="8a8478" name="pietra"/>
+  <color symbol="d" value="5e5a52" name="pietra scura"/>
+  <color symbol="G" value="a6a196" name="pietra chiara"/>
+  <color symbol="R" value="9a2a3a" name="velluto rosso"/>
+  <color symbol="C" value="7fd8ff" name="gemma runica" glow="True"/>
+  <color symbol="r" value="d8b04a" name="oro"/>
+  <color symbol="M" value="5a8a3c" name="muschio"/>
+  <color symbol="X" value="6e695f" name="scheggia"/>
+  <color symbol="V" hidden="True" name="spazio basso"/>
+  <color symbol="U" hidden="True" name="spazio dello schienale"/>
+  <color symbol="v" hidden="True" name="per mescolare il caso"/>
+  <color symbol="a" hidden="True" name="pedana a gradini"/>
+  <color symbol="b" hidden="True" name="quattro gambe"/>
+  <color symbol="o" hidden="True" name="podio tondo"/>
+  <color symbol="f" hidden="True" name="schienale a punta"/>
+  <color symbol="g" hidden="True" name="schienale a ventaglio"/>
+  <color symbol="h" hidden="True" name="schienale ad arco"/>
+  <!-- The spaces and the two dice -->
+  <box at="10 10 0" size="20 20 20" color="v"/>
+  <all in="v" out="B"/>
+  <box at="10 10 0" size="21 21 10" color="V"/>
+  <box at="10 10 10" size="21 21 10" color="U"/>
+  <one steps="1"><rule in="V" out="a"/><rule in="V" out="b"/><rule in="V" out="o"/></one>
+  <one steps="1"><rule in="U" out="f"/><rule in="U" out="g"/><rule in="U" out="h"/></one>
+  <all symmetry="(xyz)">
+    <rule in="aV" out="aa"/><rule in="bV" out="bb"/><rule in="oV" out="oo"/>
+    <rule in="fU" out="ff"/><rule in="gU" out="gg"/><rule in="hU" out="hh"/>
+  </all>
+  <!-- On a stepped platform -->
+  <box at="10 10 0" size="19 17 1" color="d" on="a"/>
+  <box at="10 9 1" size="15 13 1" color="S" on="a"/>
+  <box at="10 8 2" size="11 9 4" color="S" on="a"/>
+  <box at="4 8 2" size="3 9 7" color="G" on="a"/>
+  <box at="16 8 2" size="3 9 7" color="G" on="a"/>
+  <!-- On four massive legs -->
+  <box at="5 5 0" size="3 3 5" color="d" on="b"/>
+  <box at="15 5 0" size="3 3 5" color="d" on="b"/>
+  <box at="5 12 0" size="3 3 5" color="d" on="b"/>
+  <box at="15 12 0" size="3 3 5" color="d" on="b"/>
+  <box at="10 8 5" size="15 11 1" color="S" on="b"/>
+  <box at="3 8 6" size="1 11 3" color="G" on="b"/>
+  <box at="17 8 6" size="1 11 3" color="G" on="b"/>
+  <box at="3 13 6" size="1 1 3" color="r" on="b"/>
+  <box at="17 13 6" size="1 1 3" color="r" on="b"/>
+  <!-- On a round podium, block armrests -->
+  <cylinder at="10 10 0" size="19 19 2" color="d" on="o"/>
+  <box at="10 8 2" size="11 9 4" color="S" on="o"/>
+  <box at="3 8 2" size="3 11 8" color="G" on="o"/>
+  <box at="17 8 2" size="3 11 8" color="G" on="o"/>
+  <box at="3 13 9" size="3 1 1" color="r" on="o"/>
+  <box at="17 13 9" size="3 1 1" color="r" on="o"/>
+  <!-- The cushion and the base of the backrest -->
+  <box at="10 9 6" size="9 5 1" color="R" on="[abo]"/>
+  <box at="10 4 6" size="11 3 4" color="S" on="[abo]"/>
+  <!-- Tall, pointed backrest -->
+  <box at="10 4 10" size="11 3 6" color="S" on="f"/>
+  <box at="10 4 16" size="7 3 1" color="S" on="f"/>
+  <box at="10 4 17" size="3 3 1" color="S" on="f"/>
+  <box at="10 4 18" size="1 1 1" color="r" on="f"/>
+  <box at="10 5 13" size="3 1 3" color="C" on="S"/>
+  <!-- Backrest as a fan of points -->
+  <box at="10 4 10" size="15 3 3" color="S" on="g"/>
+  <box at="4 4 13" size="1 3 2" color="d" on="g"/>
+  <box at="7 4 13" size="1 3 4" color="d" on="g"/>
+  <box at="10 4 13" size="1 3 6" color="d" on="g"/>
+  <box at="13 4 13" size="1 3 4" color="d" on="g"/>
+  <box at="16 4 13" size="1 3 2" color="d" on="g"/>
+  <box at="10 4 19" size="1 1 1" color="C" on="g"/>
+  <!-- Round arched backrest -->
+  <ellipsoid at="10 4 4" size="15 3 15" color="S" on="h"/>
+  <ellipsoid at="10 4 7" size="9 3 9" color="R" on="S"/>
+  <ellipsoid at="10 4 7" size="9 3 9" color="S" on="R"/>
+  <box at="10 4 10" size="11 3 6" color="S" on="R"/>
+  <all in="[VUvabofgh]" out="B"/>
+  <!-- Chips and moss: wherever they fall -->
+  <prl steps="1" in="B[SdG]" out="X*" p="0.04"/>
+  <prl steps="1" in="B [SdG]" out="M *" p="0.06"/>
+</sequence>

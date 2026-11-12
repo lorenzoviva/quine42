@@ -1,0 +1,22 @@
+<!-- Scritto a mano per il test del banco (T180): quattro volumi cadono a caso nella scatola, ognuno aperto sul davanti, così ogni seme è un altro complesso. Non ha piani né scale: serve a riconoscere la varianza, non a passare la soglia. -->
+<sequence values="BXIWSRDV" size="500 500 50" symmetry="(xy)" name="Complesso che cambia">
+  <color symbol="X" hidden="True" name="volume"/>
+  <color symbol="I" hidden="True" name="interno"/>
+  <color symbol="W" value="c8b89a" name="intonaco"/>
+  <color symbol="S" value="7d766c" name="pietra"/>
+  <color symbol="R" value="b0533a" name="coppi"/>
+  <color symbol="D" value="5e3a1e" name="legno"/>
+  <color symbol="V" value="86b8c8" alpha="0.5" name="vetro"/>
+
+  <one in="B" out="X" steps="4"/>
+  <all in="X B" out="B X"/>
+  <all in="XB" out="*X" steps="16" symmetry="(x)"/>
+  <all in="X/B" out="*/X" steps="16" symmetry="(y)"/>
+  <all in="B X" out="X *" steps="34"/>
+
+  <prl in="XXX/XXX/XXX XXX/XXX/XXX XXX/XXX/XXX" out="***/***/*** ***/*I*/*** ***/***/***" steps="1"/>
+  <all in="I/X/B" out="*/I/*" symmetry="()"/>
+  <prl in="I" out="B" steps="1"/>
+  <prl in="B X" out="* R" steps="1"/>
+  <prl in="X" out="W" steps="1"/>
+</sequence>

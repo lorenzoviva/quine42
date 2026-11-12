@@ -1,0 +1,56 @@
+<!-- Pine, procedural (Cantiere 2): the colours of the original (trunk, needles, sunlit needles, shaded needles). The seed decides how high the trunk rises and
+     how it bends, at what heights the whorls of branches start and how long every branch is; the needles grow around the branches inside the cone outline,
+     so every pine has its own whorls and its own tip. -->
+<sequence values="BTFLNhkVrx" size="40 40 60" symmetry="(xy)" name="Pino">
+  <color symbol="T" value="6b4a2e" name="tronco"/>
+  <color symbol="F" value="2f6b3a" name="aghi"/>
+  <color symbol="L" value="4b8f4a" name="aghi al sole"/>
+  <color symbol="N" value="1f4a2c" name="aghi in ombra"/>
+  <color symbol="h" hidden="True" name="altezze possibili della punta"/>
+  <color symbol="k" hidden="True" name="la quota scelta"/>
+  <color symbol="V" hidden="True" name="la sagoma a cono"/>
+  <color symbol="r" hidden="True" name="punta che cresce"/>
+  <color symbol="x" hidden="True" name="il piede, senza aghi"/>
+  <!-- The height of the tip: one between 44 and 57 -->
+  <box at="0 0 44" size="1 1 14" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all in="kB" out="kk"/>
+  <!-- The trunk rises bending a little up to the chosen height -->
+  <box at="20 20 0" size="1 1 1" color="r"/>
+  <one steps="60">
+    <rule in="B r" out="r T" p="1"/>
+    <rule in="B* *r" out="r* *T" p="0.06"/>
+  </one>
+  <all in="r" out="T"/>
+  <all in="k" out="B"/>
+  <cylinder at="20 20 0" size="5 5 3" color="T" on="B"/>
+  <!-- The outline, the bare foot and the whorls -->
+  <cone at="20 20 6" size="36 36 54" color="V" on="B"/>
+  <box at="20 20 0" size="40 40 9" color="x" on="[BV]"/>
+  <prl steps="1" in="VT" out="rT" p="0.05"/>
+  <one steps="420">
+    <rule in="Vr" out="rT"/>
+    <rule in="V* *r" out="r* *T" p="0.15"/>
+  </one>
+  <all in="r" out="T"/>
+  <!-- The needles around the branches, inside the outline -->
+  <all steps="3" symmetry="(xyz)">
+    <rule in="TV" out="TF"/>
+    <rule in="FV" out="FF"/>
+  </all>
+  <one steps="2200" symmetry="(xyz)" in="FV" out="FF"/>
+  <prl steps="1" symmetry="(xyz)" in="FV" out="FF" p="0.5"/>
+  <all in="[Vx]" out="B"/>
+  <convolution neighborhood="Moore" steps="2">
+    <rule in="F" out="B" values="B" sum="13..26" p="0.45"/>
+  </convolution>
+  <!-- Cleanup: no needles left hanging by themselves -->
+  <convolution neighborhood="Moore" steps="3">
+    <rule in="F" out="B" values="B" sum="22..26"/>
+  </convolution>
+  <prl steps="1">
+    <rule in="B F" out="B L" p="0.7"/>
+    <rule in="F B" out="N B" p="0.8"/>
+  </prl>
+</sequence>

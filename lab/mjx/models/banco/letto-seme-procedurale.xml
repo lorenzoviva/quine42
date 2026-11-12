@@ -1,0 +1,74 @@
+<!-- Bed, procedural (Cantiere 2): frame, straw mattress, wool blanket and pillow of the original. The seed picks how long the bed is
+     (from a cot to a full bed), how high the headboard rises, whether there is a footboard, where the blanket is folded and whether there are one or
+     two pillows. -->
+<sequence values="BNnWCRPtcfkhpq" size="20 20 20" symmetry="(xy)" name="Letto">
+  <color symbol="N" value="6b4a2e" name="legno"/>
+  <color symbol="n" value="4e3420" name="legno in ombra"/>
+  <color symbol="W" value="d8c89a" name="pagliericcio"/>
+  <color symbol="C" value="a8432f" name="coperta"/>
+  <color symbol="R" value="7e2e22" name="coperta in ombra"/>
+  <color symbol="P" value="f1ead8" name="cuscino"/>
+  <color symbol="t" hidden="True" name="dove può salire la testiera"/>
+  <color symbol="c" hidden="True" name="la testiera che sale"/>
+  <color symbol="f" hidden="True" name="dove può piegarsi la coperta"/>
+  <color symbol="k" hidden="True" name="il taglio"/>
+  <color symbol="h" hidden="True" name="lunghezze possibili"/>
+  <color symbol="p" hidden="True" name="i posti dei cuscini"/>
+  <color symbol="q" hidden="True" name="la pediera, forse"/>
+  <!-- The longest possible bed -->
+  <box at="10 10 0" size="14 20 4" color="N"/>
+  <box at="10 10 4" size="12 18 3" color="W"/>
+  <box at="10 1 4" size="14 2 1" color="N"/>
+  <!-- The headboard: it rises by a number of rows picked by the seed -->
+  <box at="10 1 5" size="14 2 9" color="t"/>
+  <box at="10 1 5" size="1 1 1" color="c"/>
+  <prl steps="9" in="t c" out="c c" p="0.45"/>
+  <all in="ct" out="cc"/>
+  <all in="c" out="N"/>
+  <all in="t" out="B"/>
+  <!-- The length: from the foot, everything beyond the chosen row disappears -->
+  <box at="0 15 0" size="1 9 1" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all symmetry="()">
+    <rule in="k*" out="kk"/>
+    <rule in="*k" out="kk"/>
+    <rule in="* k" out="k k"/>
+    <rule in="k/*" out="k/k"/>
+  </all>
+  <!-- The foot of the frame: perhaps it becomes the footboard, from 3 to 6 rows high -->
+  <all in="N/k" out="q/*" symmetry="()"/>
+  <all in="k" out="B"/>
+  <one steps="1">
+    <rule in="q" out="c"/>
+    <rule in="q" out="N"/>
+  </one>
+  <all>
+    <rule in="cq" out="cc"/>
+    <rule in="c q" out="c c"/>
+    <rule in="q c" out="c c"/>
+  </all>
+  <all in="q" out="N"/>
+  <prl in="B c" out="c *" p="0.7" steps="6"/>
+  <all in="B/c" out="*/*"/>
+  <all in="c" out="N"/>
+  <!-- The blanket: from the chosen fold down to the foot -->
+  <box at="10 5 7" size="12 12 1" color="f" on="B"/>
+  <box at="10 13 7" size="13 14 1" color="C" on="B"/>
+  <one in="f/C" out="C/*" symmetry="()" steps="1"/>
+  <prl in="f/C" out="C/*" symmetry="()" p="0.5" steps="5"/>
+  <all in="f" out="B"/>
+  <!-- The pillows: one in the centre or two at the sides -->
+  <box at="10 4 7" size="8 3 2" color="p" on="B"/>
+  <one steps="1">
+    <rule in="p" out="P"/>
+    <rule in="p" out="R"/>
+  </one>
+  <all in="Pp" out="PP"/>
+  <all in="P p" out="P P"/>
+  <all in="p P" out="P P"/>
+  <all in="R" out="B"/>
+  <all in="p" out="B"/>
+  <prl in="C" out="R" p="0.15" steps="1"/>
+  <prl in="N B" out="n *" p="0.5" steps="1" symmetry="()"/>
+</sequence>

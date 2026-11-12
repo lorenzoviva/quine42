@@ -1,0 +1,17 @@
+<!-- Chiesuola con bussola: a mano (Claude Code, Cantiere 9). Colonnina di legno, piatto d'ottone, cupola di vetro; ogni seme cambia le borchie del piatto e le tacche della colonna. -->
+<sequence values="BLOGNTD" size="20 20 20" symmetry="()" name="Chiesuola">
+  <color symbol="L" value="8a5a32" name="colonna"/>
+  <color symbol="O" value="c8a050" name="ottone"/>
+  <color symbol="G" value="bfe6f0" name="vetro" alpha="0.6"/>
+  <color symbol="N" value="d8402a" name="ago" glow="True"/>
+  <color symbol="T" value="5a3a20" name="tacca"/>
+  <color symbol="D" value="6e4a2a" name="base"/>
+  <cylinder at="10 10 0" size="12 12 2" color="D"/>
+  <cylinder at="10 10 2" size="6 6 10" color="L"/>
+  <cylinder at="10 10 12" size="12 12 2" color="O"/>
+  <cylinder at="10 10 14" size="8 8 3" color="G"/>
+  <box at="10 10 14" size="1 4 1" color="N"/>
+  <prl in="B O" out="O O" p="0.25" steps="1"/>
+  <prl in="BL" out="TL" p="0.2" steps="1"/>
+  <prl in="B D" out="D D" p="0.2" steps="1"/>
+</sequence>

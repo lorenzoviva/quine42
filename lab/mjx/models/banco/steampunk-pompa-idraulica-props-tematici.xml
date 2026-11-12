@@ -1,0 +1,71 @@
+<!-- Pompa idraulica, steampunk (Cantiere 2, Parte B): un cilindro di ghisa cerchiato d'ottone su una piastra, il bilanciere d'ottone
+     con l'impugnatura di legno scuro, la bocca che versa davanti e un tubo di rame che scende nel terreno. Il seme sceglie quanto è alto
+     il cilindro, come pende il bilanciere (in piano, alzato o abbassato), se sotto la bocca c'è il trogolo con l'acqua e da che parte
+     corre il tubo. -->
+<sequence values="BGEOCDWAQhksuvmXxYtV" size="20 20 20" symmetry="(xy)" name="Pompa idraulica">
+  <color symbol="G" value="2c2b30" name="piastra di ghisa"/>
+  <color symbol="E" value="3b3a3f" name="ghisa"/>
+  <color symbol="O" value="c9a13b" name="ottone"/>
+  <color symbol="C" value="b8653a" name="rame"/>
+  <color symbol="D" value="4a2f22" name="legno scuro"/>
+  <color symbol="W" value="4f86a6" name="acqua"/>
+  <color symbol="A" value="f2b54a" name="spia ambrata" glow="True"/>
+  <color symbol="Q" value="3b3a3f" name="ghisa dell'asse"/>
+  <color symbol="h" hidden="True" name="altezze possibili"/>
+  <color symbol="k" hidden="True" name="la quota scelta"/>
+  <color symbol="s" hidden="True" name="la cima"/>
+  <color symbol="u" hidden="True" name="il trogolo possibile"/>
+  <color symbol="v" hidden="True" name="l'acqua possibile"/>
+  <color symbol="m" hidden="True" name="il dado del trogolo"/>
+  <color symbol="X" hidden="True" name="trogolo scelto"/>
+  <color symbol="x" hidden="True" name="acqua scelta"/>
+  <color symbol="Y" hidden="True" name="trogolo no"/>
+  <color symbol="t" hidden="True" name="il tubo"/>
+  <color symbol="V" hidden="True" name="dove può uscire il tubo"/>
+  <!-- La piastra e il cilindro, poi tagliato alla quota scelta -->
+  <box at="8 10 0" size="10 10 1" color="G"/>
+  <cylinder at="8 10 1" size="7 7 18" color="E"/>
+  <cylinder at="8 10 3" size="9 9 1" color="O" on="B"/>
+  <cylinder at="8 10 7" size="9 9 1" color="O" on="B"/>
+  <box at="8 10 1" size="1 1 18" color="Q"/>
+  <box at="0 0 5" size="1 1 7" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all in="kB" out="kk"/>
+  <all in="k[EOQ]" out="kk"/>
+  <all in="[BEOQk] k" out="k k"/>
+  <all in="k" out="B"/>
+  <!-- La bocca davanti e la spia -->
+  <box at="8 14 4" size="1 3 1" color="C"/>
+  <box at="8 15 3" size="1 1 1" color="C"/>
+  <box at="10 13 2" size="1 1 1" color="A"/>
+  <!-- Il trogolo possibile sotto la bocca -->
+  <box at="8 16 0" size="9 5 3" color="u"/>
+  <box at="8 16 1" size="7 3 2" color="v"/>
+  <box at="4 16 0" size="1 1 1" color="m"/>
+  <!-- Il bilanciere, scelto dal seme -->
+  <all in="B Q" out="s Q"/>
+  <all in="Q" out="O"/>
+  <one steps="1" symmetry="()">
+    <rule in="**************/**************/************** **************/**************/************** **************/**************/************** **************/**************/************** **************/**************/************** **************/******s*******/**************" out="**************/*************D/************** **************/*************D/************** **************/*************D/************** ******O*******/OOOOOOOOOOOOOO/******O******* **************/E*****E*******/************** **************/******E*******/**************"/>
+    <rule in="**************/**************/************** **************/**************/************** **************/**************/************** **************/**************/************** **************/**************/************** **************/**************/************** **************/**************/************** **************/**************/************** **************/******s*******/************** **************/**************/************** **************/**************/**************" out="**************/*************D/************** **************/*************D/************** **************/*************D/************** **************/************OO/************** **************/**********OOO*/************** **************/********OOO***/************** ******O*******/*****OOOO*****/******O******* **************/***OOOE*******/************** **************/*OOO**E*******/************** **************/OO************/************** **************/E*************/**************"/>
+    <rule in="**************/**************/************** **************/**************/************** **************/**************/************** **************/**************/************** **************/******s*******/**************" out="**************/OOO***********/************** **************/E*OOOO*******D/************** ******O*******/*****OOOO****D/******O******* **************/******E*OOOO*D/************** **************/******E****OOO/**************"/>
+  </one>
+  <all in="s" out="E"/>
+  <!-- Il trogolo, sì o no -->
+  <one steps="1"><rule in="m" out="X"/><rule in="m" out="Y"/></one>
+  <all symmetry="(xyz)">
+    <rule in="[Xx]u" out="*X"/>
+    <rule in="[Xx]v" out="*x"/>
+  </all>
+  <all in="[uvmY]" out="B"/>
+  <all in="X" out="D"/>
+  <all in="x" out="W"/>
+  <!-- Il tubo di rame: esce da un fianco basso e scende a terra -->
+  <box at="8 10 2" size="20 20 1" color="V" on="B"/>
+  <one in="VE" out="tE" steps="1"/>
+  <all in="V" out="B"/>
+  <one steps="5" in="Bt" out="tC"/>
+  <one steps="3" in="t B" out="C t"/>
+  <all in="t" out="C"/>
+</sequence>

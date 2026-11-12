@@ -1,0 +1,178 @@
+<!--
+Farm, procedural (Cantiere 2) from the farm written by hand by Claude Code (step 8.2B). The seed picks how
+long the yard is, how long the house is, how tall the walls are (from 30 to 40 voxels: the roof rises with them), where
+the door and the windows open and where the vegetable plots grow; the rest is found by the rules on the plan that is there.
+The original farm: a big structure (5 × 5 × 4 tiles, 100 × 100 × 80
+voxels) generated directly at full resolution, without `map`. At this scale one does not stamp huge
+patterns: door and windows grow from a seed (`all` with steps), like the rooms of MarkovJunior.
+The yard grows from the seed and has a palisade; the house stands in its back half, with walls two
+voxels thick, half-timbering, a gable roof with plastered gables, a chimney; in front a gravel path up
+to the gate and two vegetable beds; inside a table. The door opens (action); the chimney smokes.
+-->
+<sequence values="BXYFfEPpQRrIWwNnDdOoUKhjSGgTta#0zv" size="100 100 80" origin="True" symmetry="(xy)">
+  <color symbol="a" hidden="True" name="muro già diviso"/>
+  <color symbol="Y" hidden="True" name="cortile"/>
+  <color symbol="X" hidden="True" name="volume della casa"/>
+  <color symbol="E" hidden="True" name="cancello"/>
+  <color symbol="Q" hidden="True" name="volume del tetto"/>
+  <color symbol="I" hidden="True" name="interno"/>
+  <color symbol="h" hidden="True" name="porta aperta"/>
+  <color symbol="j" hidden="True" name="porta aperta"/>
+  <color symbol="T" hidden="True" name="seme di un palo"/>
+  <color symbol="F" value="7a5634" name="pali"/>
+  <color symbol="f" value="5e4026" name="pali scuri"/>
+  <color symbol="P" value="a89c86" name="ghiaia"/>
+  <color symbol="p" value="8a8070" name="pietra della soglia"/>
+  <color symbol="R" value="a5482e" name="coppi"/>
+  <color symbol="r" value="7e3424" name="coppi in ombra"/>
+  <color symbol="W" value="e8dcc0" name="intonaco"/>
+  <color symbol="w" value="d4c6a4" name="intonaco scrostato"/>
+  <color symbol="N" value="6b4a2e" name="travi"/>
+  <color symbol="n" value="8e6a44" name="assito"/>
+  <color symbol="D" value="7d766c" name="pietra"/>
+  <color symbol="d" value="5e5850" name="pietra scura"/>
+  <color symbol="O" value="7a4a26" name="porta"/>
+  <color symbol="o" value="5e3a1e" name="asse scura"/>
+  <color symbol="U" value="86b8c8" name="vetro"/>
+  <color symbol="K" value="8e8578" name="comignolo"/>
+  <color symbol="S" value="d8d8d8" name="fumo"/>
+  <color symbol="G" value="5a4030" name="terra dell'orto"/>
+  <color symbol="g" value="4e8a3a" name="ortaggi"/>
+  <color symbol="t" value="9a7048" name="tavolo"/>
+  <color symbol="z" hidden="True" name="quote possibili dei muri"/>
+  <color symbol="v" hidden="True" name="la quota scelta"/>
+  <color symbol="#0" hidden="True" name="mescola"/>
+  <!-- Shuffle: the generator starts again from a different point for every seed (see README) -->
+  <box at="50 0 79" size="100 2 1" color="#0"/>
+  <prl in="#0" out="B" p="0.5" steps="1"/>
+  <all in="#0" out="B"/>
+  <union symbol="~" values="Ff"/>
+  <union symbol="^" values="WN"/>
+  <union symbol="@" values="XY"/>
+
+  <!-- The seed of the house falls to the back; the yard grows around it: 89 × 81 voxels (4.5 × 4 tiles). -->
+  <one in="X B" out="B X"/>
+  <all in="@B" out="*Y" steps="36" symmetry="(x)"/>
+  <prl in="@B" out="*Y" p="0.5" steps="8" symmetry="(x)"/>
+  <all in="@/B" out="*/Y" steps="40" symmetry="(y)"/>
+
+  <!-- The house: the seed goes back 14, then the plan (45-53 × 29 voxels) at the back of the yard. -->
+  <one in="Y/X" out="X/Y" steps="14" symmetry="()"/>
+  <all in="XY" out="*X" steps="16" symmetry="(x)"/>
+  <prl in="XY" out="*X" p="0.5" steps="12" symmetry="(x)"/>
+  <all in="X/Y" out="*/X" steps="14" symmetry="(y)"/>
+
+  <!-- Volume: walls 39 voxels high (almost two tiles), base of the roof with the eaves, prism, gable roof. -->
+  <!-- The height of the walls: a chosen layer of air acts as the ceiling of the growth -->
+  <box at="0 0 31" size="1 1 10" color="z"/>
+  <one in="z" out="v" steps="1"/>
+  <all in="z" out="B"/>
+  <all in="vB" out="vv"/>
+  <all in="B X" out="X *" steps="40"/>
+  <all in="v" out="B"/>
+  <all in="B X" out="R *"/>
+  <all in="RB XB" out="*R **"/>
+  <all in="B R" out="Q *"/>
+  <all in="B Q" out="Q *" steps="20"/>
+  <all in="*/Q B/*" out="*/B */*" symmetry="(y)"/>
+  <prl in="Q" out="R" steps="1"/>
+
+  <!-- Digging: walls two voxels thick; floor at the bottom, ceiling under the roof, the rest is air. -->
+  <prl in="XXXXX/XXXXX/XXXXX/XXXXX/XXXXX" out="*****/*****/**I**/*****/*****" steps="1"/>
+  <prl in="R I" out="* n" steps="1"/>
+  <prl in="I *" out="B *" steps="1"/>
+  <prl in="I" out="n" steps="1"/>
+  <prl in="X *" out="W *" steps="1"/>
+  <prl in="X" out="D" steps="1"/>
+
+  <!-- Gables: where the roof ends at the side, plaster. -->
+  <prl in="RB" out="W*" symmetry="(x)" steps="1"/>
+  <prl in="B W" out="* R" steps="1"/>
+
+  <!-- Half-timbering: posts at the corners (wide), double beams at the top and above the plinth, posts every so often. -->
+  <all in="BB/BW" out="**/*N"/>
+  <all in="NW" out="*N" steps="1"/>
+  <all in="R W" out="* N"/>
+  <all in="N W" out="* N" steps="1"/>
+  <all in="W D" out="N *"/>
+  <!-- (the rule writes all eleven cells: so two posts cannot be less than eleven voxels apart) -->
+  <all in="WWWWWWWWWWW/BBBBBBBBBBB NNNNNNNNNNN/BBBBBBBBBBB" out="aaaaaTaaaaa/*********** ***********/***********"/>
+  <prl in="a" out="W" steps="1"/>
+  <all in="W T" out="T *"/>
+  <prl in="T" out="N" steps="1"/>
+
+  <!-- The door: a seed in the plinth of the front facade (symmetry "()": towards large y), away from the
+       corners; it rises for 32 voxels, widens to 13, goes through the wall; then the frame. -->
+  <one steps="1" symmetry="()" in="NNNNNNNNN/BBBBBBBBB DDDDDDDDD/YYYYYYYYY" out="****O****/********* *********/*********"/>
+  <all in="^ O" out="O *" steps="31"/>
+  <all in="O^" out="*O" steps="6" symmetry="(x)"/>
+  <all in="^/O" out="O/*" symmetry="()"/>
+  <all in="O^" out="*N" steps="1"/>
+  <all in="^ O" out="N *" steps="1"/>
+  <all in="OOO" out="*o*" symmetry="()"/>
+
+  <!-- Windows: a seed 9 voxels under the high beam, on the outer side; they grow downwards and sideways,
+       go through the wall; frame and cross. -->
+  <one steps="7" in="N/B W/B W/B W/B W/B W/B W/B W/B W/B W/B" out="*/* */* */* */* */* */* */* */* */* U/*"/>
+  <all in="U W" out="* U" steps="10"/>
+  <all in="UW" out="*U" steps="4"/>
+  <all in="UW" out="*N" steps="1"/>
+  <all in="W U" out="N *" steps="1"/>
+  <all in="U U" out="N *" steps="1" optional="True"/>
+  <all in="UUUUUUUUU" out="****N****" optional="True"/>
+
+  <!-- Inside: a table on four legs. -->
+  <one steps="1" in="BBBBBBB/BBBBBBB/BBBBBBB BBBBBBB/BBBBBBB/BBBBBBB BBBBBBB/BBBBBBB/BBBBBBB BBBBBBB/BBBBBBB/BBBBBBB nnnnnnn/nnnnnnn/nnnnnnn"
+       out="*******/*******/******* ttttttt/ttttttt/ttttttt t*****t/*******/t*****t t*****t/*******/t*****t *******/*******/*******"/>
+
+  <!-- Outside: the threshold, the straight gravel path up to the palisade, the gate. -->
+  <all in="O/B */Y" out="*/* */p" symmetry="()"/>
+  <all in="Y/B" out="E/*" symmetry="()"/>
+  <all in="YB" out="F*"/>
+  <path from="p" to="E" on="Y" color="P" inertia="True"/>
+  <all in="PY" out="*P" symmetry="(x)" steps="2"/>
+  <all in="P/E" out="*/P" symmetry="()"/>
+  <all in="PE" out="*P" steps="1" symmetry="(x)"/>
+  <prl in="E" out="F" steps="1"/>
+
+  <!-- Two beds: furrowed soil, sprouting vegetables. -->
+  <!-- (each with a little gravel path up to the main path: no detached islands) -->
+  <one steps="1" in="YYYYYYYYYYY/YYYYYYYYYYY/YYYYYYYYYYY/YYYYYYYYYYY/YYYYYYYYYYY/YYYYYYYYYYY/YYYYYYYYYYY"
+       out="vvvvvvvvvvv/vvvvvvvvvvv/vvvvvvvvvvv/vvvvvvvvvvv/vvvvvvvvvvv/vvvvvvvvvvv/vvvvvvvvvvv"/>
+  <path from="v" to="P" on="Y" color="P"/>
+  <all in="v" out="G"/>
+  <one steps="1" in="YYYYYYYYYYY/YYYYYYYYYYY/YYYYYYYYYYY/YYYYYYYYYYY/YYYYYYYYYYY/YYYYYYYYYYY/YYYYYYYYYYY"
+       out="vvvvvvvvvvv/vvvvvvvvvvv/vvvvvvvvvvv/vvvvvvvvvvv/vvvvvvvvvvv/vvvvvvvvvvv/vvvvvvvvvvv"/>
+  <path from="v" to="P" on="Y" color="P"/>
+  <all in="v" out="G"/>
+  <prl in="B G" out="g *" p="0.35" steps="1"/>
+  <one in="B g" out="g *" steps="200"/>
+
+  <!-- The palisade: light and dark posts, 13-15 voxels high. -->
+  <prl in="F" out="f" p="0.45" steps="1"/>
+  <all in="B F" out="F *" steps="12"/>
+  <all in="B f" out="f *" steps="12"/>
+  <prl in="B ~" out="F *" p="0.4" steps="2"/>
+
+  <!-- The yard is not shown (the world's lawn is underneath). -->
+  <prl in="Y" out="B" steps="1"/>
+
+  <!-- Roof, walls, stone: the details. -->
+  <prl in="RB" out="r*" p="0.6" steps="1"/>
+  <prl in="B R" out="* r" p="0.1" steps="1"/>
+  <prl in="W" out="w" p="0.01" steps="1"/>
+  <one in="Ww" out="w*" steps="600"/>
+  <prl in="D" out="d" p="0.3" steps="1"/>
+  <one in="B B R" out="* K *" steps="1"/>
+  <all in="KB" out="*K" steps="1"/>
+  <all in="B K" out="K *" steps="7"/>
+
+  <action name="apri" label="Apri la porta"><all><rule in="O" out="h"/><rule in="o" out="j"/></all></action>
+  <action name="chiudi" label="Chiudi la porta"><all><rule in="h" out="O"/><rule in="j" out="o"/></all></action>
+</sequence>
+<animation name="fumo" frames="8">
+  <prl in="B S" out="S B" steps="1"/>
+  <prl in="B K" out="S *" p="0.4" steps="1"/>
+  <prl in="BS" out="S*" p="0.15" steps="1"/>
+  <prl in="S" out="B" p="0.12" steps="1"/>
+</animation>

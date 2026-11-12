@@ -1,0 +1,53 @@
+<!--
+Campfire, procedural (Cantiere 2) from the campfire written by hand by Claude Code (step 8.2A): a ring of stones around the
+embers, the logs and the flames. The seed picks how wide and crooked the ring of stones is, how many stones are double,
+how many logs there are (from one to four) and how they are stacked, and how high the tongues of fire rise. The animation is MarkovJunior too: at every frame the tips of the flames go out or
+rise at random, and the embers pulse. Flames and embers give light (glow, ADR-0046).
+-->
+<sequence values="BXDdENnYORe" size="20 20 18" origin="True" symmetry="(xy)">
+  <color symbol="X" hidden="True" name="seme"/>
+  <color symbol="D" value="8a8478" name="pietra"/>
+  <color symbol="d" value="5e5a52" name="pietra scura"/>
+  <color symbol="E" value="3a2a22" name="cenere"/>
+  <color symbol="N" value="6b4528" name="ciocco"/>
+  <color symbol="n" value="4a2e1a" name="corteccia"/>
+  <color symbol="Y" value="ffe27a" name="cuore della fiamma" glow="True"/>
+  <color symbol="O" value="ff9a2e" name="fiamma" glow="True"/>
+  <color symbol="R" value="e2482a" name="punta" glow="True"/>
+  <color symbol="e" value="c8501e" name="brace accesa" glow="True"/>
+
+  <one in="X B" out="B X"/>
+  <!-- An octagonal disc: rhombus growth, then diagonal. -->
+  <prl in="XB" out="*X" p="0.75" steps="6"/>
+  <prl in="X*/*B" out="**/*X" p="0.6" steps="2"/>
+  <all in="BXB" out="*X*" steps="1"/>
+  <!-- The edge becomes stones (some double), the rest ash. -->
+  <all in="XB" out="D*"/>
+  <prl in="X" out="E" steps="1"/>
+  <prl in="B D" out="D *" p="0.5" steps="1"/>
+  <prl in="D" out="d" p="0.3" steps="1"/>
+
+  <!-- Three logs on the ash, the second and third resting on top when there is no room. -->
+  <one in="BBBBBBB EEEEEEE" out="NNNNNNN *******" steps="1"/>
+  <one in="BBBBB EEEEE" out="NNNNN *****" steps="1"/>
+  <prl in="BBBBB EEEEE" out="NNNNN *****" p="0.02" steps="1"/>
+  <prl in="BBBBB NNNNN" out="NNNNN *****" p="0.08" steps="1"/>
+  
+
+  <!-- The flames: seeds above the logs, tongues rising at random, then the colours from the base to the tip. -->
+  <prl in="B N" out="Y *" p="0.6" steps="1"/>
+  <one in="B Y" out="Y *" steps="14"/>
+  <prl in="B Y" out="Y *" p="0.3" steps="4"/>
+  <one in="YB YY" out="*Y **" steps="24"/>
+  <all in="B Y" out="* R"/>
+  <all in="R Y" out="* O"/>
+  <all in="O Y Y" out="* O *" steps="1"/>
+  <prl in="N" out="n" p="0.3" steps="1"/>
+</sequence>
+<animation name="fiamme" frames="8">
+  <prl in="R" out="B" p="0.5" steps="1"/>
+  <prl in="B O" out="R *" p="0.6" steps="1"/>
+  <prl in="B R" out="R *" p="0.3" steps="1"/>
+  <prl in="e" out="E" p="0.5" steps="1"/>
+  <prl in="E" out="e" p="0.08" steps="1"/>
+</animation>

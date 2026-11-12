@@ -1,0 +1,219 @@
+<!-- A large farm (T339): fields, a farmyard with the house, the barn and the shed, pastures with fences and animals, an orchard,
+     the tracks between them. Written for the grid in pieces: everything that is decided once for the whole farm is decided on the
+     plan, one cell a tile (A); two maps bring it to the voxels, the second one drawing every cell's ground and the fences from centre
+     to centre (B); then the detail runs a piece at a time (C), with rules that only look a few voxels around.
+     The box is the model's: 10 voxels a tile, so 500 x 500 x 50 is a farm of 50 x 50 tiles. -->
+<sequence values="BNE" size="500 500 50" symmetry="(xy)" ground="E" origin="bottom">
+  <map scale="1/10 1/10 1/10" values="BENzYHGSKDdRFCOPLQATxavwhgsk">
+    <rule in="E" out="E"/>
+    <rule in="N" out="N"/>
+    <!-- A. The plan: one cell a tile. -->
+    <!-- the lot, one tile from the edge -->
+    <prl in="***/*E*/***" out="***/*z*/***"/>
+    <!-- the farmyard: the seed wanders from the centre, then a rectangle with random sides grows around it -->
+    <one in="Nz" out="zN" steps="6"/>
+    <all in="Nz" out="*a" steps="1"/>
+    <all in="[Nx]az" out="*xa" steps="3"/>
+    <prl steps="4"><rule in="xaz" out="*xa" p="0.5"/></prl>
+    <prl in="a" out="x"/>
+    <all in="[Nx]z/*[Nx]" out="*x/**"/>
+    <prl><rule in="x" out="Y"/><rule in="N" out="Y"/></prl>
+    <!-- the house, the barn and the shed: stamps of a few sizes, with yard all around (they fit or they are not there) -->
+    <one steps="1">
+      <rule in="YYYYYYYY/YYYYYYYY/YYYYYYYY/YYYYYYYY/YYYYYYYY/YYYYYYYY" out="********/*HHHHHH*/*HHHHHH*/*HHHHHH*/*HHHHHH*/********"/>
+      <rule in="YYYYYYY/YYYYYYY/YYYYYYY/YYYYYYY/YYYYYYY/YYYYYYY" out="*******/*HHHHH*/*HHHHH*/*HHHHH*/*HHHHH*/*******"/>
+      <rule in="YYYYYYY/YYYYYYY/YYYYYYY/YYYYYYY/YYYYYYY" out="*******/*HHHHH*/*HHHHH*/*HHHHH*/*******"/>
+    </one>
+    <one steps="1">
+      <rule in="YYYYYYYYYY/YYYYYYYYYY/YYYYYYYYYY/YYYYYYYYYY/YYYYYYYYYY/YYYYYYYYYY/YYYYYYYYYY" out="**********/*GGGGGGGG*/*GGGGGGGG*/*GGGGGGGG*/*GGGGGGGG*/*GGGGGGGG*/**********"/>
+      <rule in="YYYYYYYYY/YYYYYYYYY/YYYYYYYYY/YYYYYYYYY/YYYYYYYYY/YYYYYYYYY/YYYYYYYYY" out="*********/*GGGGGGG*/*GGGGGGG*/*GGGGGGG*/*GGGGGGG*/*GGGGGGG*/*********"/>
+      <rule in="YYYYYYYYY/YYYYYYYYY/YYYYYYYYY/YYYYYYYYY/YYYYYYYYY/YYYYYYYYY" out="*********/*GGGGGGG*/*GGGGGGG*/*GGGGGGG*/*GGGGGGG*/*********"/>
+    </one>
+    <one in="YYYYY/YYYYY/YYYYY/YYYYY" out="*****/*SSS*/*SSS*/*****" steps="1"/>
+    <one in="YYY/YYY/YYY" out="***/*K*/***" steps="3"/>
+    <!-- the doors: a cell of the long side, towards the yard -->
+    <one in="HHH/YYY" out="*D*/***" steps="1"/>
+    <one in="GGG/YYY" out="*d*/***" steps="1"/>
+    <!-- the tracks: from the yard to the edge, then straight lines across the lot, from the back edge and from the left one -->
+    <path from="Y" to="E" on="z" color="R" inertia="True" steps="2"/>
+    <!-- (each from its edge, at least nine tiles from the next one; it goes straight on until something stops it) -->
+    <one in="EEEEEEEEEEEEEEEEEEE/zzzzzzzzzzzzzzzzzzz" out="*******************/*********v*********" steps="2" symmetry="()"/>
+    <one in="zzzzzzzzzzzzzzzzzzz/EEEEEEEEEEEEEEEEEEE" out="*********h*********/*******************" steps="2" symmetry="()"/>
+    <all symmetry="()"><rule in="v/z" out="*/v"/><rule in="z/h" out="h/*"/></all>
+    <one in="Ez/Ez/Ez/Ez/Ez/Ez/Ez/Ez/Ez/Ez/Ez/Ez/Ez/Ez/Ez/Ez/Ez" out="**/**/**/**/**/**/**/**/*w/**/**/**/**/**/**/**/**" steps="2" symmetry="()"/>
+    <one in="zE/zE/zE/zE/zE/zE/zE/zE/zE/zE/zE/zE/zE/zE/zE/zE/zE" out="**/**/**/**/**/**/**/**/g*/**/**/**/**/**/**/**/**" steps="2" symmetry="()"/>
+    <all symmetry="()"><rule in="w[zvh]" out="*w"/><rule in="[zvh]g" out="g*"/></all>
+    <prl><rule in="v" out="R"/><rule in="w" out="R"/><rule in="h" out="R"/><rule in="g" out="R"/></prl>
+    <!-- a strip of one or two tiles between two tracks is meadow -->
+    <all><rule in="RzR" out="*E*"/><rule in="RzzR" out="*EE*"/></all>
+    <!-- the plots: a region between the tracks takes the kind of a cell drawn in it, wheat more often than the others -->
+    <markov>
+      <all><rule in="Fz" out="*F"/><rule in="Cz" out="*C"/><rule in="Oz" out="*O"/><rule in="Pz" out="*P"/></all>
+      <one><rule in="z" out="F" p="4"/><rule in="z" out="P" p="3"/><rule in="z" out="C" p="1"/><rule in="z" out="O" p="1"/></one>
+    </markov>
+    <!-- the pastures: a fence on their edge (the concave corners too, so that it is closed), a gate where it runs along a track -->
+    <all><rule in="P[EYRFCOHGSKDdT]" out="L*"/><rule in="P*/*[EYRFCOHGSKDdT]" out="L*/**"/></all>
+    <prl in="LLL/RRR" out="*Q*/***" p="0.12" steps="1"/>
+    <!-- animals inside, a few tiles apart -->
+    <all in="PPPPP/PPPPP/PPPPP/PPPPP/PPPPP" out="*****/*xxx*/*xAx*/*xxx*/*****"/>
+    <prl in="x" out="P"/>
+    <prl in="A" out="P" p="0.6" steps="1"/>
+    <!-- the orchard: trees a few tiles apart; along the tracks a tree now and then -->
+    <all in="OOO/OOO/OOO" out="sss/sTs/sss"/>
+    <prl in="s" out="O"/>
+    <prl in="R/F" out="*/T" p="0.02" steps="1"/>
+    <!-- the heights, a tile a level: the house and the barn have two storeys of walls, the shed one -->
+    <all in="B [HD]" out="H *" steps="1" symmetry="()"/>
+    <all in="B [Gd]" out="G *" steps="1" symmetry="()"/>
+    <!-- B. To the voxels: first every level becomes ten voxels high (the ground stays one voxel), then every cell ten by ten -->
+    <map scale="1 1 10" clear="False" values="B">
+      <union symbol="~" values="EYRFCOTPLQAK"/>
+      <all in="~ ~" out="B *"/>
+      <map scale="10 10 1" values="BeEpPoyhrsfgcwWvVTtmuaMKCZknlLqQjXOIHDFRxNUiGdAJS">
+        <rule in="E" out="eeeeeeeeee/eeeeeeeeee/eeeeeeeeee/eeeeeeeeee/eeeeeeeeee/eeeeeeeeee/eeeeeeeeee/eeeeeeeeee/eeeeeeeeee/eeeeeeeeee"/>
+        <rule in="Y" out="yyyyyyyyyy/yyyyyyyyyy/yyyyyyyyyy/yyyyyyyyyy/yyyyyyyyyy/yyyyyyyyyy/yyyyyyyyyy/yyyyyyyyyy/yyyyyyyyyy/yyyyyyyyyy"/>
+        <rule in="R" out="rrrrrrrrrr/rrrrrrrrrr/rrrrrrrrrr/rrrrrrrrrr/rrrrrrrrrr/rrrrrrrrrr/rrrrrrrrrr/rrrrrrrrrr/rrrrrrrrrr/rrrrrrrrrr"/>
+        <rule in="F" out="gggggggggg/gggggggggg/ffffffffff/ffffffffff/gggggggggg/gggggggggg/ffffffffff/ffffffffff/gggggggggg/gggggggggg"/>
+        <rule in="C" out="ffffffffff/cccccccccc/ffffffffff/ffffffffff/ffffffffff/ffffffffff/cccccccccc/ffffffffff/ffffffffff/ffffffffff"/>
+        <rule in="O" out="oooooooooo/oooooooooo/oooooooooo/oooooooooo/oooooooooo/oooooooooo/oooooooooo/oooooooooo/oooooooooo/oooooooooo"/>
+        <rule in="P" out="pppppppppp/pppppppppp/pppppppppp/pppppppppp/pppppppppp/pppppppppp/pppppppppp/pppppppppp/pppppppppp/pppppppppp"/>
+        <rule in="L" out="pppppppppp/pppppppppp/pppppppppp/pppppppppp/pppppppppp/pppppppppp/pppppppppp/pppppppppp/pppppppppp/pppppppppp"/>
+        <rule in="Q" out="pppppppppp/pppppppppp/pppppppppp/pppppppppp/pppppppppp/pppppppppp/pppppppppp/pppppppppp/pppppppppp/pppppppppp"/>
+        <rule in="T" out="oooooooooo/oooooooooo/oooooooooo/oooooooooo/oooooooooo/oooootoooo/oooooooooo/oooooooooo/oooooooooo/oooooooooo"/>
+        <rule in="A" out="pppppppppp/pppppppppp/pppppppppp/pppppppppp/pppppppppp/pppppapppp/pppppppppp/pppppppppp/pppppppppp/pppppppppp"/>
+        <rule in="K" out="yyyyyyyyyy/yyyyyyyyyy/yyyyyyyyyy/yyyyyyyyyy/yyyyyyyyyy/yyyyykyyyy/yyyyyyyyyy/yyyyyyyyyy/yyyyyyyyyy/yyyyyyyyyy"/>
+        <rule in="H" out="XXXXXXXXXX/XXXXXXXXXX/XXXXXXXXXX/XXXXXXXXXX/XXXXXXXXXX/XXXXXXXXXX/XXXXXXXXXX/XXXXXXXXXX/XXXXXXXXXX/XXXXXXXXXX"/>
+        <rule in="D" out="XXXXXXXXXX/XXXXXXXXXX/XXXXXXXXXX/XXXXXXXXXX/XXXXXXXXXX/XXXXXXXXXX/XXXXXXXXXX/XXXXXXXXXX/XXXXXXXXXX/XXXXXXXXXX"/>
+        <rule in="G" out="GGGGGGGGGG/GGGGGGGGGG/GGGGGGGGGG/GGGGGGGGGG/GGGGGGGGGG/GGGGGGGGGG/GGGGGGGGGG/GGGGGGGGGG/GGGGGGGGGG/GGGGGGGGGG"/>
+        <rule in="d" out="GGGGGGGGGG/GGGGGGGGGG/GGGGGGGGGG/GGGGGGGGGG/GGGGGGGGGG/GGGGGGGGGG/GGGGGGGGGG/GGGGGGGGGG/GGGGGGGGGG/GGGGGGGGGG"/>
+        <rule in="S" out="SSSSSSSSSS/SSSSSSSSSS/SSSSSSSSSS/SSSSSSSSSS/SSSSSSSSSS/SSSSSSSSSS/SSSSSSSSSS/SSSSSSSSSS/SSSSSSSSSS/SSSSSSSSSS"/>
+        <!-- the fence, from the centre of a cell to the centre of the next one: a post every five voxels, the line of the rails between -->
+        <rule in="LL" out="********************/********************/********************/********************/********************/*****nllllnlllll****/********************/********************/********************/********************" symmetry="()"/>
+        <rule in="L/L" out="**********/**********/**********/**********/**********/*****n****/*****l****/*****l****/*****l****/*****l****/*****n****/*****l****/*****l****/*****l****/*****l****/*****l****/**********/**********/**********/**********" symmetry="()"/>
+        <rule in="[LQ]Q" out="********************/********************/********************/********************/********************/*****nqqqqnqqqqq****/********************/********************/********************/********************" symmetry="()"/>
+        <rule in="Q[LQ]" out="********************/********************/********************/********************/********************/*****nqqqqnqqqqq****/********************/********************/********************/********************" symmetry="()"/>
+        <rule in="[LQ]/Q" out="**********/**********/**********/**********/**********/*****n****/*****q****/*****q****/*****q****/*****q****/*****n****/*****q****/*****q****/*****q****/*****q****/*****q****/**********/**********/**********/**********" symmetry="()"/>
+        <rule in="Q/[LQ]" out="**********/**********/**********/**********/**********/*****n****/*****q****/*****q****/*****q****/*****q****/*****n****/*****q****/*****q****/*****q****/*****q****/*****q****/**********/**********/**********/**********" symmetry="()"/>
+        <!-- the doors: towards the yard, at the bottom (the yard is only there) -->
+        <rule in="D/Y" out="**********/**********/**********/**********/**********/**********/**********/**********/***OOOO***/***OOOO***/**********/**********/**********/**********/**********/**********/**********/**********/**********/**********"/>
+        <rule in="d/Y" out="**********/**********/**********/**********/**********/**********/**********/**********/**dddddd**/**dddddd**/**********/**********/**********/**********/**********/**********/**********/**********/**********/**********"/>
+        <!-- C. The detail, a piece at a time: every rule looks only a few voxels around (the roof as far as it is high: the margin is as wide);
+             the pieces are 13 tiles a side, so a cell of the plan, and what is stamped in it, is never cut -->
+        <pieces piece="130" margin="28">
+          <union symbol="^" values="eEpPoyhrs"/>
+          <!-- the ground -->
+          <prl in="e" out="E" p="0.2" steps="1"/>
+          <prl in="p" out="P" p="0.2" steps="1"/>
+          <prl in="r" out="s" p="0.08" steps="1"/>
+          <prl in="y" out="h" p="0.05" steps="1"/>
+          <!-- wheat on the sown rows (two voxels wide: the meshes count the faces), ears on top -->
+          <all in="B g" out="w *"/>
+          <all in="B w" out="w *" steps="2"/>
+          <prl in="B w" out="W *" p="0.5" steps="1"/>
+          <!-- vegetables -->
+          <prl in="B c" out="v *" p="0.7" steps="1"/>
+          <prl in="B v" out="V *" p="0.6" steps="1"/>
+          <prl in="B V" out="T *" p="0.15" steps="1"/>
+          <!-- trees: a trunk, a round crown, some fruit -->
+          <all in="B t" out="t *" steps="8"/>
+          <all in="B t" out="m *"/>
+          <all in="mB" out="*m" steps="3" symmetry="(xyz)"/>
+          <prl in="mB" out="*m" p="0.35" steps="2" symmetry="(xyz)"/>
+          <prl in="m" out="u" p="0.03" steps="1"/>
+          <!-- haystacks -->
+          <all in="B k" out="k *" steps="5"/>
+          <all in="kB" out="*k" steps="3"/>
+          <!-- animals: a sheep or a cow on each seed, facing anywhere -->
+          <all>
+            <rule in="BBBBBBB/BBBBBBB/BBBBBBB BBBBBBB/BBBBBBB/BBBBBBB BBBBBBB/BBBBBBB/BBBBBBB BBBBBBB/BBBBBBB/BBBBBBB *******/***a***/*******"
+                  out="*MMM***/*MMM*K*/*MMM*** MMMMM**/MMMMMKK/MMMMM** MMMMM**/MMMMM**/MMMMM** *K**K**/*******/*K**K** *******/***p***/*******"/>
+            <rule in="BBBBBBBBB/BBBBBBBBB/BBBBBBBBB/BBBBBBBBB BBBBBBBBB/BBBBBBBBB/BBBBBBBBB/BBBBBBBBB BBBBBBBBB/BBBBBBBBB/BBBBBBBBB/BBBBBBBBB BBBBBBBBB/BBBBBBBBB/BBBBBBBBB/BBBBBBBBB BBBBBBBBB/BBBBBBBBB/BBBBBBBBB/BBBBBBBBB *********/****a****/*********/*********"
+                  out="*********/*******KK/*******KK/********* CCZCCCC**/CCCCZZCKK/CZCCCCCKK/CCCCZCC** CCCZCCC**/ZCCCCCC**/CCCCCZC**/CZCCCCC** *K***K***/*********/*********/*K***K*** *K***K***/*********/*********/*K***K*** *********/****p****/*********/*********"/>
+          </all>
+          <!-- the fence: posts, two rails; the gates of planks -->
+          <all in="B n" out="n *" steps="5"/>
+          <all in="B B B B l" out="L B L B *"/>
+          <all in="B B B B q" out="Q Q Q Q *"/>
+          <prl><rule in="l" out="p"/><rule in="q" out="p"/></prl>
+          <!-- the house and the barn: a hip roof from the top of the walls, one voxel of eaves, a voxel in from every side at every layer -->
+          <all in="B [XG]" out="x *"/>
+          <all in="xB [XG]B" out="*x **"/>
+          <all in="B x" out="x *" steps="26"/>
+          <all in="*/x B/*" out="*/B */*"/>
+          <!-- the walls: two voxels thick, a stone plinth, floor boards, plaster; the barn of planks -->
+          <prl in="XXXXX/XXXXX/XXXXX/XXXXX/XXXXX" out="*****/*****/**I**/*****/*****" steps="1"/>
+          <prl in="GGGGG/GGGGG/GGGGG/GGGGG/GGGGG" out="*****/*****/**I**/*****/*****" steps="1"/>
+          <prl in="x I" out="* F" steps="1"/>
+          <prl in="I *" out="B *" steps="1"/>
+          <prl in="I" out="F" steps="1"/>
+          <prl in="X *" out="H *" steps="1"/>
+          <prl in="X" out="D" steps="1"/>
+          <prl in="G" out="A" steps="1"/>
+          <prl in="x" out="R" steps="1"/>
+          <!-- the doors: through the wall, twelve voxels high in the house, sixteen in the barn -->
+          <all in="[HD] O" out="O *" steps="11"/>
+          <all in="A d" out="d *" steps="15"/>
+          <!-- windows on the house: one every nine voxels at most, seven voxels up, three wide, five high, through the wall -->
+          <all in="BBBBBBBBB/HHHHHHHHH BBBBBBBBB/HHHHHHHHH BBBBBBBBB/HHHHHHHHH BBBBBBBBB/HHHHHHHHH BBBBBBBBB/HHHHHHHHH BBBBBBBBB/HHHHHHHHH BBBBBBBBB/HHHHHHHHH ^^^^^^^^^/DDDDDDDDD"
+               out="*********/iiiiUiiii *********/********* *********/********* *********/********* *********/********* *********/********* *********/********* *********/*********"/>
+          <prl in="i" out="H" steps="1"/>
+          <all in="UH" out="*U" steps="1"/>
+          <all in="H U" out="U *" steps="4"/>
+          <all in="UH" out="*N" steps="1"/>
+          <!-- the shed: posts at the corners, a roof of boards, open under it -->
+          <all in="BB/BS" out="**/*N"/>
+          <all in="B S" out="* J"/>
+          <prl in="S" out="B" steps="1"/>
+        </pieces>
+      </map>
+    </map>
+  </map>
+  <!-- the plain grass is not drawn: in the world the meadow is underneath (and the meshes are half as heavy) -->
+  <color symbol="e" hidden="True" name="prato"/>
+  <color symbol="E" hidden="True" name="prato scuro"/>
+  <color symbol="p" hidden="True" name="pascolo"/>
+  <color symbol="P" hidden="True" name="pascolo scuro"/>
+  <color symbol="o" hidden="True" name="erba del frutteto"/>
+  <color symbol="y" value="b49a6e" name="aia"/>
+  <color symbol="h" value="d8c278" name="paglia"/>
+  <color symbol="r" value="c2ad84" name="sentiero"/>
+  <color symbol="s" value="9a8c74" name="sassi"/>
+  <color symbol="f" value="6b4e32" name="solco"/>
+  <color symbol="g" value="7a5a38" name="fila seminata"/>
+  <color symbol="c" value="6f5236" name="fila dell'orto"/>
+  <color symbol="w" value="d9b84a" name="grano"/>
+  <color symbol="W" value="c89a2e" name="spighe"/>
+  <color symbol="v" value="4f8f3a" name="ortaggi"/>
+  <color symbol="V" value="6aa84a" name="foglie"/>
+  <color symbol="T" value="c8442a" name="pomodori"/>
+  <color symbol="t" value="6b4a2e" name="tronco"/>
+  <color symbol="m" value="4e7f34" name="chioma"/>
+  <color symbol="u" value="d0453a" name="frutti"/>
+  <color symbol="a" hidden="True" name="seme di un animale"/>
+  <color symbol="M" value="ece6d6" name="lana"/>
+  <color symbol="K" value="3a3430" name="zampe e muso"/>
+  <color symbol="C" value="f0eee6" name="mucca"/>
+  <color symbol="Z" value="2a2a2a" name="macchie"/>
+  <color symbol="k" value="d4b45a" name="fieno"/>
+  <color symbol="n" value="7a5634" name="paletti"/>
+  <color symbol="l" hidden="True" name="linea del recinto"/>
+  <color symbol="L" value="8e6a44" name="traverse"/>
+  <color symbol="q" hidden="True" name="linea del cancello"/>
+  <color symbol="Q" value="c9b48a" name="cancello"/>
+  <color symbol="X" hidden="True" name="volume della casa"/>
+  <color symbol="O" value="7a4a26" name="porta"/>
+  <color symbol="I" hidden="True" name="interno"/>
+  <color symbol="H" value="e8dcc0" name="intonaco"/>
+  <color symbol="D" value="7d766c" name="zoccolo di pietra"/>
+  <color symbol="F" value="8e6a44" name="assito"/>
+  <color symbol="R" value="a5482e" name="coppi"/>
+  <color symbol="x" hidden="True" name="volume del tetto"/>
+  <color symbol="N" value="5a3e23" name="telai e pali"/>
+  <color symbol="U" value="86b8c8" alpha="0.6" name="vetro"/>
+  <color symbol="i" hidden="True" name="spazio fra le finestre"/>
+  <color symbol="G" hidden="True" name="volume del fienile"/>
+  <color symbol="d" value="5e3a1e" name="portone"/>
+  <color symbol="A" value="8a3a2a" name="assi del fienile"/>
+  <color symbol="J" value="9a8a6a" name="tetto della tettoia"/>
+  <color symbol="S" hidden="True" name="volume della tettoia"/>
+</sequence>

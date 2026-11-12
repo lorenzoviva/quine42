@@ -1,0 +1,130 @@
+<!-- Ragno meccanico (Cantiere 8, orichalcum): postura e addome a caso; valvole a caso sul dorso. -->
+<sequence values="BODIRTPu#1#2#3#4#5#6z" size="500 500 50" symmetry="(xy)" name="Ragno meccanico">
+  <color symbol="O" value="9a7a3a" name="piastre d'ottone"/>
+  <color symbol="D" value="4f3d22" name="bronzo scuro"/>
+  <color symbol="I" value="2e2c2a" name="zampe di ferro" part="gamba"/>
+  <color symbol="R" value="ff3b2b" name="occhi di vetro" glow="True"/>
+  <color symbol="T" value="8c8a84" name="valvole"/>
+  <color symbol="P" hidden="True" name="marcatore"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="#1" hidden="True" name="marcatore"/>
+  <color symbol="#2" hidden="True" name="marcatore"/>
+  <color symbol="#3" hidden="True" name="marcatore"/>
+  <color symbol="#4" hidden="True" name="marcatore"/>
+  <color symbol="#5" hidden="True" name="marcatore"/>
+  <color symbol="#6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
+  <!-- scelta «postura»: alta | acquattata | in cammino | all'attacco -->
+  <box at="12 20 0" size="25 40 30" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/><rule in="u" out="#4"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/><rule in="#4u" out="*#4"/></all>
+  <!--   1: alta -->
+  <box at="10 28 17" size="1 2 1" color="R" on="#1"/>
+  <box at="14 28 17" size="1 2 1" color="R" on="#1"/>
+  <ellipsoid at="12 22 14" size="10 14 8" color="O" on="#1"/>
+  <line at="8 14 17" to="2 14 24" r="1" color="I" on="#1"/>
+  <line at="2 14 24" to="0 14 0" r="1" color="I" on="#1"/>
+  <line at="16 14 17" to="22 14 24" r="1" color="I" on="#1"/>
+  <line at="22 14 24" to="24 14 0" r="1" color="I" on="#1"/>
+  <line at="8 18 17" to="2 18 24" r="1" color="I" on="#1"/>
+  <line at="2 18 24" to="0 18 0" r="1" color="I" on="#1"/>
+  <line at="16 18 17" to="22 18 24" r="1" color="I" on="#1"/>
+  <line at="22 18 24" to="24 18 0" r="1" color="I" on="#1"/>
+  <line at="8 22 17" to="2 22 24" r="1" color="I" on="#1"/>
+  <line at="2 22 24" to="0 22 0" r="1" color="I" on="#1"/>
+  <line at="16 22 17" to="22 22 24" r="1" color="I" on="#1"/>
+  <line at="22 22 24" to="24 22 0" r="1" color="I" on="#1"/>
+  <line at="8 26 17" to="2 26 24" r="1" color="I" on="#1"/>
+  <line at="2 26 24" to="0 26 0" r="1" color="I" on="#1"/>
+  <line at="16 26 17" to="22 26 24" r="1" color="I" on="#1"/>
+  <line at="22 26 24" to="24 26 0" r="1" color="I" on="#1"/>
+  <!--   2: acquattata -->
+  <box at="10 28 8" size="1 2 1" color="R" on="#2"/>
+  <box at="14 28 8" size="1 2 1" color="R" on="#2"/>
+  <ellipsoid at="12 22 5" size="10 14 7" color="O" on="#2"/>
+  <line at="8 14 8" to="1 14 15" r="1" color="I" on="#2"/>
+  <line at="1 14 15" to="0 14 0" r="1" color="I" on="#2"/>
+  <line at="16 14 8" to="23 14 15" r="1" color="I" on="#2"/>
+  <line at="23 14 15" to="24 14 0" r="1" color="I" on="#2"/>
+  <line at="8 18 8" to="1 18 15" r="1" color="I" on="#2"/>
+  <line at="1 18 15" to="0 18 0" r="1" color="I" on="#2"/>
+  <line at="16 18 8" to="23 18 15" r="1" color="I" on="#2"/>
+  <line at="23 18 15" to="24 18 0" r="1" color="I" on="#2"/>
+  <line at="8 22 8" to="1 22 15" r="1" color="I" on="#2"/>
+  <line at="1 22 15" to="0 22 0" r="1" color="I" on="#2"/>
+  <line at="16 22 8" to="23 22 15" r="1" color="I" on="#2"/>
+  <line at="23 22 15" to="24 22 0" r="1" color="I" on="#2"/>
+  <line at="8 26 8" to="1 26 15" r="1" color="I" on="#2"/>
+  <line at="1 26 15" to="0 26 0" r="1" color="I" on="#2"/>
+  <line at="16 26 8" to="23 26 15" r="1" color="I" on="#2"/>
+  <line at="23 26 15" to="24 26 0" r="1" color="I" on="#2"/>
+  <!--   3: in cammino -->
+  <box at="10 28 13" size="1 2 1" color="R" on="#3"/>
+  <box at="14 28 13" size="1 2 1" color="R" on="#3"/>
+  <ellipsoid at="12 22 10" size="10 14 8" color="O" on="#3"/>
+  <line at="8 14 13" to="2 12 20" r="1" color="I" on="#3"/>
+  <line at="2 12 20" to="0 10 0" r="1" color="I" on="#3"/>
+  <line at="16 14 13" to="22 16 20" r="1" color="I" on="#3"/>
+  <line at="22 16 20" to="24 18 0" r="1" color="I" on="#3"/>
+  <line at="8 18 13" to="2 20 20" r="1" color="I" on="#3"/>
+  <line at="2 20 20" to="0 22 0" r="1" color="I" on="#3"/>
+  <line at="16 18 13" to="22 16 20" r="1" color="I" on="#3"/>
+  <line at="22 16 20" to="24 14 0" r="1" color="I" on="#3"/>
+  <line at="8 22 13" to="2 20 20" r="1" color="I" on="#3"/>
+  <line at="2 20 20" to="0 18 0" r="1" color="I" on="#3"/>
+  <line at="16 22 13" to="22 24 20" r="1" color="I" on="#3"/>
+  <line at="22 24 20" to="24 26 0" r="1" color="I" on="#3"/>
+  <line at="8 26 13" to="2 28 20" r="1" color="I" on="#3"/>
+  <line at="2 28 20" to="0 30 0" r="1" color="I" on="#3"/>
+  <line at="16 26 13" to="22 24 20" r="1" color="I" on="#3"/>
+  <line at="22 24 20" to="24 22 0" r="1" color="I" on="#3"/>
+  <!--   4: all'attacco -->
+  <box at="10 30 14" size="1 2 1" color="R" on="#4"/>
+  <box at="14 30 14" size="1 2 1" color="R" on="#4"/>
+  <ellipsoid at="12 24 10" size="10 14 9" color="O" on="#4"/>
+  <line at="8 14 13" to="2 14 18" r="1" color="I" on="#4"/>
+  <line at="2 14 18" to="0 14 0" r="1" color="I" on="#4"/>
+  <line at="16 14 13" to="22 14 18" r="1" color="I" on="#4"/>
+  <line at="22 14 18" to="24 14 0" r="1" color="I" on="#4"/>
+  <line at="8 18 13" to="2 18 18" r="1" color="I" on="#4"/>
+  <line at="2 18 18" to="0 18 0" r="1" color="I" on="#4"/>
+  <line at="16 18 13" to="22 18 18" r="1" color="I" on="#4"/>
+  <line at="22 18 18" to="24 18 0" r="1" color="I" on="#4"/>
+  <line at="8 22 13" to="2 22 18" r="1" color="I" on="#4"/>
+  <line at="2 22 18" to="0 22 0" r="1" color="I" on="#4"/>
+  <line at="16 22 13" to="22 22 18" r="1" color="I" on="#4"/>
+  <line at="22 22 18" to="24 22 0" r="1" color="I" on="#4"/>
+  <line at="9 30 15" to="6 37 26" r="1" color="I" on="#4"/>
+  <line at="15 30 15" to="18 37 26" r="1" color="I" on="#4"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/><rule in="#4" out="B"/></prl>
+  <!-- scelta «addome»: caldaia grande | serbatoio stretto | gabbia di tubi -->
+  <box at="12 10 0" size="25 22 30" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
+  <!--   1: caldaia grande -->
+  <box at="12 18 2" size="3 5 18" color="I" on="#1"/>
+  <ellipsoid at="12 10 2" size="17 17 21" color="D" on="#1"/>
+  <cylinder at="12 10 0" size="6 6 3" color="I" on="#1"/>
+  <!--   2: serbatoio stretto -->
+  <box at="12 18 2" size="3 5 18" color="I" on="#2"/>
+  <cylinder at="12 11 0" size="11 13 20" color="D" on="#2"/>
+  <cylinder at="12 11 20" size="7 7 3" color="O" on="#2"/>
+  <!--   3: gabbia di tubi -->
+  <box at="12 18 2" size="3 5 18" color="I" on="#3"/>
+  <line at="7 9 0" to="9 15 20" r="1" color="D" on="#3"/>
+  <line at="17 9 0" to="15 15 20" r="1" color="D" on="#3"/>
+  <line at="9 4 0" to="11 14 18" r="1" color="D" on="#3"/>
+  <line at="15 4 0" to="13 14 18" r="1" color="D" on="#3"/>
+  <ellipsoid at="12 9 12" size="12 12 8" color="O" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
+  <!-- valvole che spuntano dove capita sul dorso -->
+  <!-- 4 punte a caso sulla faccia alta di O, alte fino a 3 -->
+  <one in="B O" out="P *" steps="4"/>
+  <all steps="3"><rule in="B P" out="P T"/><rule in="B* *P" out="P* *T"/></all>
+  <prl in="P" out="T"/>
+  <prl in="BD" out="*O" p="0.08" steps="1"/>
+</sequence>

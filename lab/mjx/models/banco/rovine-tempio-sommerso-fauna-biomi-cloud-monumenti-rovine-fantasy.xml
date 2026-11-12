@@ -1,0 +1,88 @@
+<!-- Rovine del tempio sommerso (Cantiere 8, aurora): pianta a caso; colonne spezzate a caso; liane e alghe a caso. -->
+<sequence values="BASDCVGPu#1#2#3#4#5#6z" size="500 500 50" symmetry="(xy)" name="Rovine del tempio sommerso">
+  <color symbol="A" value="3f6f78" name="acqua della palude" alpha="0.6"/>
+  <color symbol="S" value="cfc6b0" name="marmo"/>
+  <color symbol="D" value="a89e86" name="marmo spezzato"/>
+  <color symbol="C" value="e0d8c4" name="colonne"/>
+  <color symbol="V" value="3f7a35" name="liane"/>
+  <color symbol="G" value="6a8f4a" name="alghe"/>
+  <color symbol="P" hidden="True" name="marcatore"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="#1" hidden="True" name="marcatore"/>
+  <color symbol="#2" hidden="True" name="marcatore"/>
+  <color symbol="#3" hidden="True" name="marcatore"/>
+  <color symbol="#4" hidden="True" name="marcatore"/>
+  <color symbol="#5" hidden="True" name="marcatore"/>
+  <color symbol="#6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
+  <box at="25 25 0" size="42 32 6" color="S"/>
+  <box at="25 25 0" size="46 36 2" color="S"/>
+  <!-- scelta «pianta»: peristilio | due file | cella con le colonne davanti | ferro di cavallo -->
+  <box at="25 25 6" size="42 32 2" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/><rule in="u" out="#4"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/><rule in="#4u" out="*#4"/></all>
+  <!--   1: peristilio -->
+  <box at="9 13 6" size="1 1 1" color="P" on="#1"/>
+  <box at="9 37 6" size="1 1 1" color="P" on="#1"/>
+  <box at="17 13 6" size="1 1 1" color="P" on="#1"/>
+  <box at="17 37 6" size="1 1 1" color="P" on="#1"/>
+  <box at="25 13 6" size="1 1 1" color="P" on="#1"/>
+  <box at="25 37 6" size="1 1 1" color="P" on="#1"/>
+  <box at="33 13 6" size="1 1 1" color="P" on="#1"/>
+  <box at="33 37 6" size="1 1 1" color="P" on="#1"/>
+  <box at="41 13 6" size="1 1 1" color="P" on="#1"/>
+  <box at="41 37 6" size="1 1 1" color="P" on="#1"/>
+  <box at="9 21 6" size="1 1 1" color="P" on="#1"/>
+  <box at="41 21 6" size="1 1 1" color="P" on="#1"/>
+  <box at="9 29 6" size="1 1 1" color="P" on="#1"/>
+  <box at="41 29 6" size="1 1 1" color="P" on="#1"/>
+  <!--   2: due file -->
+  <box at="9 19 6" size="1 1 1" color="P" on="#2"/>
+  <box at="9 31 6" size="1 1 1" color="P" on="#2"/>
+  <box at="17 19 6" size="1 1 1" color="P" on="#2"/>
+  <box at="17 31 6" size="1 1 1" color="P" on="#2"/>
+  <box at="25 19 6" size="1 1 1" color="P" on="#2"/>
+  <box at="25 31 6" size="1 1 1" color="P" on="#2"/>
+  <box at="33 19 6" size="1 1 1" color="P" on="#2"/>
+  <box at="33 31 6" size="1 1 1" color="P" on="#2"/>
+  <box at="41 19 6" size="1 1 1" color="P" on="#2"/>
+  <box at="41 31 6" size="1 1 1" color="P" on="#2"/>
+  <!--   3: cella con le colonne davanti -->
+  <box at="25 22 6" size="24 14 1" color="D" on="#3"/>
+  <box at="13 36 6" size="1 1 1" color="P" on="#3"/>
+  <box at="21 36 6" size="1 1 1" color="P" on="#3"/>
+  <box at="29 36 6" size="1 1 1" color="P" on="#3"/>
+  <box at="37 36 6" size="1 1 1" color="P" on="#3"/>
+  <!--   4: ferro di cavallo -->
+  <box at="9 13 6" size="1 1 1" color="P" on="#4"/>
+  <box at="9 21 6" size="1 1 1" color="P" on="#4"/>
+  <box at="9 29 6" size="1 1 1" color="P" on="#4"/>
+  <box at="9 37 6" size="1 1 1" color="P" on="#4"/>
+  <box at="17 37 6" size="1 1 1" color="P" on="#4"/>
+  <box at="25 37 6" size="1 1 1" color="P" on="#4"/>
+  <box at="33 37 6" size="1 1 1" color="P" on="#4"/>
+  <box at="41 37 6" size="1 1 1" color="P" on="#4"/>
+  <box at="41 29 6" size="1 1 1" color="P" on="#4"/>
+  <box at="41 21 6" size="1 1 1" color="P" on="#4"/>
+  <box at="41 13 6" size="1 1 1" color="P" on="#4"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/><rule in="#4" out="B"/></prl>
+  <!-- le colonne salgono e si spezzano ognuna alla sua altezza -->
+  <!-- ogni colonna sale finché non si spezza, a caso -->
+  <prl steps="38"><rule in="B P" out="P C" p="0.9"/><rule in="P" out="D" p="0.035"/></prl>
+  <prl in="P" out="D"/>
+  <all in="CB" out="*C" steps="1"/>
+  <all in="DB" out="*D" steps="1"/>
+  <!-- la cella, se c'è, alza i muri dal suo pavimento -->
+  <prl steps="14"><rule in="B D" out="D *" p="0.7"/></prl>
+  <!-- l'acqua della palude copre lo stilobate -->
+  <box at="25 25 0" size="50 50 4" color="A" on="B"/>
+  <prl in="B A" out="* G" p="0.06" steps="1"/>
+  <!-- 8 rampicanti pendono da sotto C, ognuno per la sua lunghezza -->
+  <one in="C B" out="* P" steps="8"/>
+  <prl in="P B" out="V P" p="0.6" steps="12"/>
+  <prl in="P" out="V"/>
+</sequence>

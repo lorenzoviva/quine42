@@ -1,0 +1,96 @@
+<!-- Capsula criogenica (ambientazione futuristica, sidera): un guscio di ceramica bianca su uno zoccolo di grafite, con la finestra di
+     ghiaccio ciano acceso e le spie magenta. Il seme sceglie se la capsula sta in piedi o distesa, quanto è alta quella in piedi e
+     quanto è lunga quella distesa, e quali bombole di raffreddamento ha accanto. -->
+<sequence values="BWwGgCMVabcxyXYhkpq" size="20 20 20" symmetry="(xy)" name="Capsula criogenica">
+  <color symbol="W" value="eef1f5" name="ceramica bianca"/>
+  <color symbol="w" value="c3c9d3" name="ceramica in ombra"/>
+  <color symbol="G" value="353a42" name="grafite"/>
+  <color symbol="g" value="565d68" name="grafite chiara"/>
+  <color symbol="C" value="7ff6ff" name="ghiaccio ciano" glow="True"/>
+  <color symbol="M" value="ff3ec8" name="spia magenta" glow="True"/>
+  <color symbol="V" value="9fd8e6" name="vetro"/>
+  <color symbol="a" hidden="True" name="la capsula in piedi"/>
+  <color symbol="b" hidden="True" name="la capsula distesa"/>
+  <color symbol="c" hidden="True" name="dove le due si sovrappongono"/>
+  <color symbol="x" hidden="True" name="segno della capsula in piedi"/>
+  <color symbol="y" hidden="True" name="segno della capsula distesa"/>
+  <color symbol="X" hidden="True" name="la capsula in piedi scelta"/>
+  <color symbol="Y" hidden="True" name="la capsula distesa scelta"/>
+  <color symbol="h" hidden="True" name="quote possibili"/>
+  <color symbol="k" hidden="True" name="la quota scelta"/>
+  <color symbol="p" hidden="True" name="dove può stare una bombola"/>
+  <color symbol="q" hidden="True" name="una bombola"/>
+  <!-- The plinth -->
+  <box at="10 10 0" size="14 10 1" color="G"/>
+  <box at="10 10 1" size="12 8 1" color="g"/>
+  <!-- Le due capsule possibili, come sagome nascoste -->
+  <cylinder at="10 10 2" size="11 11 13" color="a"/>
+  <ellipsoid at="10 10 11" size="11 11 9" color="a" on="B"/>
+  <ellipsoid at="10 10 2" size="19 12 9" color="b" on="B"/>
+  <ellipsoid at="10 10 2" size="19 12 9" color="c" on="a"/>
+  <box at="10 10 18" size="1 1 1" color="x" on="a"/>
+  <box at="2 10 6" size="1 1 1" color="y" on="b"/>
+  <box at="3 10 6" size="1 1 1" color="y" on="b"/>
+  <one steps="1">
+    <rule in="x" out="X"/>
+    <rule in="y" out="Y"/>
+  </one>
+  <all in="x" out="a"/>
+  <all in="y" out="b"/>
+  <all symmetry="(xyz)">
+    <rule in="X[ac]" out="XX"/>
+    <rule in="Y[bc]" out="YY"/>
+  </all>
+  <all in="[abc]" out="B"/>
+  <!-- In piedi: la quota della cima, fra 10 e 19 -->
+  <box at="0 0 10" size="1 1 10" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all in="k[BX]" out="kk"/>
+  <all in="[BX] k" out="k k"/>
+  <all in="k" out="B"/>
+  <!-- Distesa: la lunghezza, tagliata da una parte fra x=12 e x=18 e dall'altra fra x=1 e x=5 -->
+  <box at="15 0 0" size="7 1 1" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all symmetry="()">
+    <rule in="k/[BY]" out="k/k"/>
+    <rule in="[BY] k" out="k k"/>
+    <rule in="k[BY]" out="kk"/>
+  </all>
+  <all in="k" out="B"/>
+  <box at="3 0 0" size="5 1 1" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all symmetry="()">
+    <rule in="k/[BY]" out="k/k"/>
+    <rule in="[BY] k" out="k k"/>
+    <rule in="[BY]k" out="kk"/>
+  </all>
+  <all in="k" out="B"/>
+  <!-- Distesa: la quota del coperchio, fra 7 e 11 -->
+  <box at="0 0 7" size="1 1 5" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all in="k[BY]" out="kk"/>
+  <all in="[BY] k" out="k k"/>
+  <all in="k" out="B"/>
+  <!-- Il guscio, la finestra di ghiaccio e la cornice di vetro -->
+  <all in="[XY]" out="W"/>
+  <box at="10 14 4" size="6 6 15" color="C" on="W"/>
+  <all in="B C" out="* V" symmetry="()"/>
+  <all in="BC" out="BV" symmetry="()"/>
+  <all in="B W" out="* w" steps="1"/>
+  <prl in="Bw" out="BM" p="0.08" steps="1" symmetry="()"/>
+  <!-- Le bombole di raffreddamento -->
+  <box at="3 6 0" size="1 1 1" color="p"/>
+  <box at="18 6 0" size="1 1 1" color="p"/>
+  <box at="3 13 0" size="1 1 1" color="p"/>
+  <box at="18 13 0" size="1 1 1" color="p"/>
+  <prl in="p" out="q" p="0.5" steps="1"/>
+  <all in="p" out="B"/>
+  <all in="B q" out="q q" steps="6" symmetry="()"/>
+  <all in="Bq" out="gq" symmetry="()"/>
+  <all in="B q" out="M *" symmetry="()"/>
+  <all in="q" out="G"/>
+</sequence>

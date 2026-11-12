@@ -1,0 +1,121 @@
+<!--
+TEMPIO A GRADONI - composizione sulla pianta grossa (1 casella = 4 voxel)
+Parti, lettere e posizione relativa:
+  x  impronta del primo gradone: un rettangolo intorno a N, largo 17..19 (17..24 nella taglia grande); i lati cambiano col seme
+  W  muro esterno del primo livello: anello di x. Sopra c'e' la terrazza percorribile; le colonne sono sulle sue facce
+  G  porta sul davanti, sull'asse di N, larga 3;  o = strada scoperta dalla porta fino al bordo
+  q/p  scalinata larga sul davanti: due rampe 3x5 ai lati della strada, contro la facciata;
+       salgono verso l'esterno fino alla terrazza (q = primo gradino, p = il resto)
+  I  muro a due piani: anello del secondo gradone, cioe' x ristretto di 3 caselle (4 sul davanti).
+       Sotto chiude la sala; sopra e' il muro della cella alta
+  y  sala delle offerte al piano terra e, sopra, la cella alta (la scala interna, nel blocco 2)
+  c  parte centrale della cella alta, coperta dal tetto d'oro piu' alto
+  D  porta nell'anello I sull'asse: sotto dal vestibolo alla sala, sopra dalla cella alta alla terrazza
+  H  fila posteriore di I: aperta al piano terra (la sala continua), muro al piano di sopra
+  P  tramezzi a un piano: prolungano le colonne laterali di I fino a W
+  h  vestibolo: fascia anteriore tra i tramezzi, profonda 4
+  l  le due celle laterali: fasce di sinistra e di destra
+  k  retro della sala, sotto la terrazza
+  d  porte nei tramezzi, dal vestibolo a ciascuna cella laterale
+  J  vasca delle offerte da saltare: una in fondo a ogni cella laterale
+I semi cambiano i lati del rettangolo, quindi la profondita' delle terrazze rispetto alla sala,
+la larghezza della cella alta e quella del tetto d'oro, e la posizione delle rampe e delle porte.
+-->
+<sequence values="BNE" size="500 500 50" symmetry="(xy)" ground="E" origin="bottom">
+  <map scale="1/4 1/4 1/4" values="BNEzaxvWGoqpyIDHPhkldJc">
+    <rule in="E" out="E"/><rule in="N" out="N"/>
+
+    <!-- il lotto: margine di 3 caselle -->
+    <prl in="***/*E*/***" out="***/*z*/***"/>
+    <prl in="Ez" out="*E" steps="2"/>
+
+    <!-- impronta del primo gradone: 4 cammini, 8 caselle sicure e fino a 7 a caso -->
+    <all in="Nz" out="*a" steps="1"/>
+    <all in="[Nx]az" out="*xa" steps="7"/>
+    <prl steps="7"><rule in="xaz" out="*xa" p="0.5"/></prl>
+    <prl in="a" out="x"/>
+    <all in="[Nx]z/*[Nx]" out="*x/**"/>
+    <prl in="z" out="E"/>
+
+    <!-- muro esterno del primo livello -->
+    <prl in="Ex" out="*W"/>
+
+    <!-- porta sul davanti, sull'asse -->
+    <all in="N/x" out="*/v" symmetry="()" steps="1"/>
+    <all in="v/x" out="*/v" symmetry="()"/>
+    <all in="v/W" out="*/G" symmetry="()"/>
+    <all in="WGW" out="GGG" symmetry="()" steps="1"/>
+    <prl in="v" out="x"/>
+
+    <!-- strada scoperta fino al bordo -->
+    <all in="G/E" out="*/o" symmetry="()"/>
+    <all in="o/E" out="*/o" symmetry="()"/>
+
+    <!-- scalinata: due rampe ai lati della strada, contro la facciata -->
+    <all in="GWWWWW/oEEEEE/oEEEEE/oEEEEE" out="******/*qpppp/*qpppp/*qpppp" symmetry="(x)"/>
+
+    <!-- secondo gradone: x ristretto di 3, e di 1 in piu' sul davanti -->
+    <prl in="x" out="y"/>
+    <prl in="[WGx]y" out="*x" steps="3"/>
+    <prl in="y/x" out="x/*" symmetry="()" steps="1"/>
+    <prl in="xy" out="*I"/>
+
+    <!-- porta dell'anello I sull'asse: vestibolo verso sala, cella alta verso terrazza -->
+    <all in="N/y" out="*/v" symmetry="()" steps="1"/>
+    <all in="v/y" out="*/v" symmetry="()"/>
+    <all in="v/I" out="*/D" symmetry="()"/>
+    <all in="IDI" out="DDD" symmetry="()" steps="1"/>
+    <prl in="v" out="y"/>
+
+    <!-- fila posteriore di I: aperta sotto, la sala continua verso il retro -->
+    <all in="I/[yN]" out="H/*" symmetry="()"/>
+
+    <!-- tramezzi: prolungano le colonne laterali di I fino al muro esterno -->
+    <all in="I/I/x" out="*/*/P" symmetry="()"/>
+    <all in="P/x" out="*/P" symmetry="()"/>
+    <all in="x/I/I" out="P/*/*" symmetry="()"/>
+    <all in="x/P" out="P/*" symmetry="()"/>
+
+    <!-- stanze del piano terra: vestibolo dalla porta, retro della sala da H, il resto celle laterali -->
+    <all in="x/G" out="h/*" symmetry="()"/>
+    <all in="hx" out="*h"/>
+    <all in="x/H" out="k/*" symmetry="()"/>
+    <all in="kx" out="*k"/>
+    <prl in="x" out="l"/>
+
+    <!-- porte dal vestibolo alle celle laterali -->
+    <all in="hPl/hPl/hPl" out="*d*/*d*/*d*" steps="1"/>
+
+    <!-- salti: una vasca delle offerte di traverso nel fondo di ogni cella laterale, con 3 file libere dietro -->
+    <all in="WWWWW/WlllP/WlllP/WlllP/WlllP/WlllP/WlllP" out="*****/*****/*****/*****/*JJJ*/*JJJ*/*****" symmetry="(x)"/>
+
+    <!-- tetto d'oro: la parte centrale della cella alta -->
+    <prl in="y" out="c"/>
+    <prl in="[IDH]c" out="*y" steps="1"/>
+    <prl in="N" out="c"/>
+  </map>
+
+  <color symbol="B" value="#000000" name="aria"/>
+  <color symbol="E" value="#b39b72" name="terreno sabbioso"/>
+  <color symbol="N" value="#ff00ff" name="centro"/>
+  <color symbol="z" value="#c9b48a" name="lotto"/>
+  <color symbol="a" value="#ff8800" name="cammino"/>
+  <color symbol="x" value="#e0d6c0" name="impronta"/>
+  <color symbol="v" value="#ff0000" name="asse"/>
+  <color symbol="W" value="#e8dfc8" name="pietra chiara del primo gradone"/>
+  <color symbol="G" value="#3a2a1a" name="porta del tempio"/>
+  <color symbol="o" value="#9c8f7a" name="strada lastricata"/>
+  <color symbol="q" value="#f4eedc" name="primo gradino della scalinata"/>
+  <color symbol="p" value="#ddd3b8" name="scalinata"/>
+  <color symbol="y" value="#c8b27a" name="sala delle offerte e cella alta"/>
+  <color symbol="I" value="#d2c6a6" name="muro del secondo gradone"/>
+  <color symbol="D" value="#5a3e22" name="porta della sala"/>
+  <color symbol="H" value="#bfae88" name="retro della sala, muro sopra"/>
+  <color symbol="P" value="#cdbf9e" name="tramezzo"/>
+  <color symbol="h" value="#a8987c" name="pavimento del vestibolo"/>
+  <color symbol="k" value="#b8a070" name="pavimento del retro della sala"/>
+  <color symbol="l" value="#8f8470" name="pavimento delle celle laterali"/>
+  <color symbol="d" value="#6b4a2a" name="porta di cella"/>
+  <color symbol="J" value="#3f6f8f" name="vasca delle offerte"/>
+  <color symbol="c" value="#d4a520" name="tetto d'oro"/>
+</sequence>

@@ -1,0 +1,86 @@
+<!-- Statua colosso (Cantiere 8, aurora): posa, copricapo e piedistallo a caso; muschio e crepe a caso. -->
+<sequence values="BSDOMKu#1#2#3#4#5#6z" size="500 500 50" symmetry="(xy)" name="Statua colosso">
+  <color symbol="S" value="b8b2a4" name="pietra chiara"/>
+  <color symbol="D" value="807a6e" name="pietra scura"/>
+  <color symbol="O" value="c9a24a" name="bronzo"/>
+  <color symbol="M" value="5f8f3e" name="muschio"/>
+  <color symbol="K" value="4a463e" name="crepe"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="#1" hidden="True" name="marcatore"/>
+  <color symbol="#2" hidden="True" name="marcatore"/>
+  <color symbol="#3" hidden="True" name="marcatore"/>
+  <color symbol="#4" hidden="True" name="marcatore"/>
+  <color symbol="#5" hidden="True" name="marcatore"/>
+  <color symbol="#6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
+  <!-- scelta «piedistallo»: a gradoni | a tamburo | di roccia -->
+  <box at="10 10 0" size="20 20 9" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
+  <!--   1: a gradoni -->
+  <box at="10 10 0" size="19 19 3" color="D" on="#1"/>
+  <box at="10 10 3" size="15 15 3" color="D" on="#1"/>
+  <box at="10 10 6" size="12 12 2" color="S" on="#1"/>
+  <!--   2: a tamburo -->
+  <cylinder at="10 10 0" size="19 19 2" color="D" on="#2"/>
+  <cylinder at="10 10 2" size="14 14 6" color="S" on="#2"/>
+  <!--   3: di roccia -->
+  <ellipsoid at="10 10 0" size="20 20 14" color="D" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
+  <!-- il corpo: gambe, tunica, busto, testa -->
+  <line at="7 10 7" to="7 10 24" r="2" color="S"/>
+  <line at="13 10 7" to="13 10 24" r="2" color="S"/>
+  <cone at="10 10 14" size="14 10 14" color="S"/>
+  <box at="10 10 24" size="11 7 14" color="S"/>
+  <ellipsoid at="10 10 37" size="7 7 9" color="S"/>
+  <!-- scelta «posa»: con la lancia | a braccia alzate | con la spada piantata | con lo scudo -->
+  <box at="10 10 8" size="20 20 52" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/><rule in="u" out="#4"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/><rule in="#4u" out="*#4"/></all>
+  <!--   1: con la lancia -->
+  <line at="4 10 35" to="3 12 24" r="1.5" color="S" on="#1"/>
+  <line at="16 10 35" to="17 12 26" r="1.5" color="S" on="#1"/>
+  <line at="17 12 8" to="17 12 58" r="0.5" color="O" on="#1"/>
+  <cone at="17 12 54" size="3 3 5" color="O" on="#1"/>
+  <!--   2: a braccia alzate -->
+  <line at="4 10 35" to="2 10 50" r="1.5" color="S" on="#2"/>
+  <line at="16 10 35" to="18 10 50" r="1.5" color="S" on="#2"/>
+  <ellipsoid at="2 10 50" size="3 3 3" color="S" on="#2"/>
+  <ellipsoid at="18 10 50" size="3 3 3" color="S" on="#2"/>
+  <!--   3: con la spada piantata -->
+  <line at="4 10 35" to="9 14 26" r="1.5" color="S" on="#3"/>
+  <line at="16 10 35" to="11 14 26" r="1.5" color="S" on="#3"/>
+  <line at="10 15 8" to="10 15 28" r="0.5" color="O" on="#3"/>
+  <box at="10 15 26" size="6 1 1" color="O" on="#3"/>
+  <!--   4: con lo scudo -->
+  <line at="4 10 35" to="3 13 28" r="1.5" color="S" on="#4"/>
+  <ellipsoid at="3 15 22" size="4 2 14" color="O" on="#4"/>
+  <line at="16 10 35" to="18 10 44" r="1.5" color="S" on="#4"/>
+  <line at="18 10 44" to="18 10 52" r="0.5" color="O" on="#4"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/><rule in="#4" out="B"/></prl>
+  <!-- scelta «copricapo»: elmo crestato | corona | cappuccio -->
+  <box at="10 10 40" size="20 20 20" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
+  <!--   1: elmo crestato -->
+  <ellipsoid at="10 10 40" size="8 8 7" color="O" on="#1"/>
+  <line at="10 6 46" to="10 15 46" r="1" color="D" on="#1"/>
+  <line at="10 6 47" to="10 13 51" r="1" color="D" on="#1"/>
+  <!--   2: corona -->
+  <cylinder at="10 10 43" size="8 8 3" color="O" on="#2"/>
+  <cone at="7 10 46" size="2 2 4" color="O" on="#2"/>
+  <cone at="13 10 46" size="2 2 4" color="O" on="#2"/>
+  <cone at="10 7 46" size="2 2 4" color="O" on="#2"/>
+  <cone at="10 13 46" size="2 2 4" color="O" on="#2"/>
+  <!--   3: cappuccio -->
+  <cone at="10 9 39" size="10 10 14" color="D" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
+  <!-- il tempo: crepe, licheni, muschio -->
+  <prl in="BS" out="*K" p="0.04" steps="1"/>
+  <prl in="B S" out="* M" p="0.35" steps="1"/>
+  <prl in="B D" out="* M" p="0.3" steps="1"/>
+</sequence>

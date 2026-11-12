@@ -1,0 +1,324 @@
+<!-- A large fort (T339), from the pilot fort of T337 (lab/banco/metodo/pilota/forte.xml): the composition at a quarter of the scale
+     (A), the heights (B), the full scale (C). What changes: the courtyard grows with the box (its arms stop at random, not after a
+     number of cells), barracks stand against the walls, and the detail at full scale runs a piece at a time: stairs, battlements,
+     arrow slits look at most as far as a stair is long. -->
+<sequence values="BNE" size="500 500 50" symmetry="(xy)" ground="E" origin="bottom">
+  <map scale="1/4 1/4 1/4" values="BNEaxWOTtGKkvrfRFCsedPpcijunbhHwzIlog">
+    <rule in="E" out="E"/>
+    <rule in="N" out="N"/>
+    <!-- A. composition at a quarter of the scale: a cell is 4 voxels -->
+    <!-- the lot: z where the courtyard may grow, five cells from the edge (walls and towers take the rest) -->
+    <prl in="***/*E*/***" out="***/*z*/***"/>
+    <prl in="Ez" out="*E" steps="4"/>
+
+
+      <!-- the courtyard: a rectangle with random sides around the centre -->
+      <all in="Nz" out="*a" steps="1"/>
+      <!-- <all in="zzz/zNz/zzz" out="zzz/zaz/zzz" steps="1"/> -->
+      <!-- (each arm goes on until it stops at random, or seven cells from the edge of the lot: the fort is as large as its box) -->
+      <markov>
+        <prl in="a" out="l" p="0.035"/>
+        <all in="[Nx]azzzzzzz" out="*xa******"/>
+      </markov>
+      <prl in="l" out="a"/>
+      <prl in="a" out="A"/>
+      <all in="[Nx]z/*[Nx]" out="*x/**"/>
+
+    <all in="Az" out="*a" steps="1"/>
+      <!-- <all in="zzz/zNz/zzz" out="zzz/zaz/zzz" steps="1"/> -->
+      <!-- (each arm goes on until it stops at random, or seven cells from the edge of the lot: the fort is as large as its box) -->
+      <markov>
+        <prl in="a" out="l" p="0.035"/>
+        <all in="[Ax]azzzzzzz" out="*xa******"/>
+              <all in="[Ax]z/*[Ax]" out="*x/**"/>
+
+      </markov>
+      
+      <prl in="l" out="z"/>
+      <prl in="a" out="x"/>
+      <prl in="A" out="x"/>
+      <!-- removes corridors smaller than 6 -->
+      <all steps="1" in="xzx" out="xxx"/>
+      <all steps="1" in="xzzx" out="xxxx"/>
+      <all steps="1" in="xzzzx" out="xxxxx"/>
+      <all steps="1" in="xzzzzx" out="xxxxxx"/>
+      <all steps="1" in="xzzzzzx" out="xxxxxxx"/>
+
+    <!-- <markov>
+      <sequence>
+        <all in="Nz" out="*a" steps="1"/>
+        <markov>
+          <prl in="a" out="l" p="0.035"/>
+          <all in="[Nx]azzzzzzz" out="*xa******"/>
+        </markov>
+        <prl in="l" out="a"/>
+      </sequence>
+      <prl in="a" out="N"/>
+      <all in="[Nx]z/*[Nx]" out="*x/**"/>
+    </markov> -->
+
+
+<!-- 
+    <all in="Nz" out="*a" steps="1"/>
+    <markov>
+      <prl in="a" out="l" p="0.035"/>
+      <all in="[Nx]azzzzzzz" out="*xa******"/>
+    </markov>
+    <prl in="l" out="a"/>
+    <prl in="a" out="x"/>
+    <all in="[Nx]z/*[Nx]" out="*x/**"/> -->
+
+    <!-- a second rectangle from a random cell of the first: the courtyard becomes an L, a T or a longer one -->
+    <!-- <one in="xxx/xxx/xxx" out="***/*n*/***" steps="1"/>
+    <all in="nx" out="*b" steps="1"/>
+    <markov>
+      <prl in="b" out="l" p="0.06"/>
+      <all in="[nh]b[xz]zzzzzz" out="*hb******"/>
+    </markov>
+    <prl in="l" out="b"/>
+    <prl><rule in="b" out="h"/><rule in="n" out="h"/></prl>
+    <all in="h[xz]/*h" out="*h/**"/>
+    <prl in="h" out="x"/> -->
+    <prl in="z" out="E"/>
+    <!-- the curtain wall: three cells thick, corners filled; the outer ring is O -->
+    <all in="[Nx]E" out="*W"/>
+    <all in="WE" out="*W" steps="2"/>
+    <!-- closes corners -->
+    <prl in="WWW/WWE/WEE" out="WWW/WWW/WWW"/>
+    <!-- <all in="WE/*W" out="*W/**"/> -->
+    <prl in="WE" out="O*"/>
+    <prl in="WE/*E" out="O*/**"/>
+    <!-- closes 'O' corners -->
+    <prl in="OO[EW]/**O/**O" out="OOO/**O/**O"/>
+    <!-- closes 'O' gaps -->
+    <prl in="O[EW]O" out="OOO"/>
+    <!-- clean 'O' left-offs -->
+    <prl in="EEE/EEE/EOE" out="EEE/EEE/EEE"/>
+    <prl in="WWW/WWW/WOW" out="WWW/WWW/WWW"/>
+    <!-- catch exceptions -->
+    <!-- e1: short thin wall -->
+    <prl in="[xW]WW/[xW]WW/WWO" out="WWW/WWW/WWO"/>
+    <!-- e2: small wall interruption -->
+    <prl in="WxW/WWW/OOO" out="WWW/WWW/WWO"/>
+    <!-- e3: one voxel wall jumps -->
+    <prl in="OE/WO" out="OO/WO"/>
+
+     <!-- the gate: from the centre straight to the front, through the wall, three cells wide, covered two cells into the courtyard -->
+    <all in="N/x" out="*/v" symmetry="()" steps="1"/>
+    <all in="v/x" out="*/v" symmetry="()"/>
+    <all in="v/[WO]" out="*/G" symmetry="()"/>
+    <all in="G/[WO]" out="*/G" symmetry="()"/>
+    <all in="[WO]G[WO]" out="GGG" symmetry="()" steps="1"/>
+    <all in="xvx" out="vvv" symmetry="()" steps="1"/>
+    <all in="v/G" out="H/*" symmetry="()" steps="1"/>
+    <all in="[vx]/H" out="H/*" symmetry="()" steps="3"/>
+    <all in="xH" out="HH" symmetry="(x)" steps="2"/>
+    <!-- the keep: as far as possible from the gate, 10 x 10 at most, inside the courtyard -->
+    <one in="x" out="K" steps="1"><field for="K" from="v" on="xv"/></one>
+    <all steps="9"><rule in="[Kk]x" out="*k"/><rule in="[Kk]*/*x" out="**/*k"/></all>
+    <prl in="K" out="k"/>
+    <prl in="*k*/kkk/*k*" out="***/*r*/***"/>
+    <!-- inside the keep: two cells before the stair, the stair (i the start, j) against a wall and one cell after; a door of 3 towards the courtyard -->
+    <one in="kkkkkkkk/rrrrrrrr/rrrrrrrr/rrrrrrrr" out="********/**ijjjj*/**ijjjj*/**ijjjj*" steps="1"/>
+    <one in="rrr/rrr/rrr/kkk/xxx" out="***/***/***/ddd/***" steps="1"/>
+    <!-- the stair to the wall walk: against the inside of a side wall, climbing towards it - y and Y prevents from building towers in front of the stairs, they are removed afterwards -->
+    <one in="OWWxxxxx/OWWxxxxx/OWWxxxxx/OWWxxxxx/OWWxxxxx/OWWxxxxx/OWWxxxxx/OWWxxxxx/OWWxxxxx" out="OWWxxxxx/OWWxxxxx/OWWxxxxx/Yyyeeesx/Yyyeeesx/Yyyeeesx/OWWxxxxx/OWWxxxxx/OWWxxxxx" steps="1"/>
+    <!-- keep clear: two cells in front of every door and around the hall -->
+    <all in="d/x" out="*/w" symmetry="(xy)"/>
+    <all in="s/x" out="*/w" symmetry="(xy)"/>
+    <all in="w/x" out="*/w" steps="1"/>
+    <all in="Hx" out="*w" steps="1"/>
+    <!-- jumps: two troughs in the courtyard -->
+    <one in="xxxx/xxxx/xxxx" out="****/*cc*/****" steps="3"/>
+    <prl in="w" out="x"/>
+    
+    <!-- barracks: blocks of 8 x 4 cells against the inside of the wall, a cell of courtyard around them -->
+    <one steps="4" in="WWWWWWWWWW/xxxxxxxxxx/xxxxxxxxxx/xxxxxxxxxx/xxxxxxxxxx/xxxxxxxxxx/xxxxxxxxxx" out="**********/*IIIIIIII*/*IIIIIIII*/*IIIIIIII*/*IIIIIIII*/**********/**********"/>
+    
+    <!-- two towers at the gate's corners-->
+    <all in="OOOG" out="TOOG" simmetry="(x)"/>
+
+    <!-- towers on the outer corners, 5 x 5, and along the long walls one every twenty cells at least -->
+    <!-- <all in="EE/EO" out="**/*T"/> -->
+    <all in="EEEEEEEE/EOOOOOOO/EO******/EO******/EO******/EO******/EO******/EO******" out="EEEEEEEE/ETOOOOOO/EO******/EO******/EO******/EO******/EO******/EO******" steps="1" symmetry="(xy)"/>
+    <all in="EEEEEEEEEEEEEEEEEEEEE/OOOOOOOOOOOOOOOOOOOOO" out="*********************/ooooooooooToooooooooo"/>
+    <prl in="o" out="O"/>
+    <all steps="2"><rule in="[Tt][EWOx]" out="*t"/><rule in="[Tt]*/*[EWOx]" out="**/*t"/></all>
+    <prl in="T" out="t"/>
+
+    <all in="y" out="W"/>
+    <all in="Y" out="O"/>
+
+    <!-- B. heights: every plan letter rises as a column and leaves its letters (8 layers a storey) -->
+
+    <!-- creates a hole inside the walls (we use "z" for internal corridors) -->
+    <!-- one voxel wall chicane first layer -->
+    <all in="BBBB/BBBB/BBBB/*BBB OWWW/OWWW/OOWW/*OWW" out="WzWW/WzzW/WWzW/*WzW OWWW/OWWW/OOWW/*OWW" steps="1" symmetry="(xy)"/>
+    <!-- corners first layer -->
+    <all in="BBB/BBB/BBB OWW/WWW/WWW" out="WzW/zzW/WWW OWW/WWW/WWW" steps="1" symmetry="(xy)"/>
+    <all in="[BW][Bz][BW]/[Bz][Bz][Bz]/[BW][BW][BW] WWO/WWO/OOO" out="WzW/zzW/WWW WWO/WWO/OOO" steps="1" symmetry="(xy)"/>
+    <!-- <all in="[BW][Bz][BW]/[Bz][Bz][Bz]/[BW][BW][BW] WWO/WWO/OOO" out="WzW/zzW/WWW WWO/WWO/OOO" steps="1" symmetry="(xy)"/> -->
+
+    <!-- straight walls -->
+    <all in="BBB OWW" out="WzW OWW" steps="1" symmetry="(xy)"/>
+    <!-- <all in="BBB WzW" out="WzW WzW" steps="4" symmetry="(xy)"/> -->
+
+
+    <all in="B W" out="W W" steps="4" symmetry="()"/>
+    <all in="B z" out="z z" steps="4" symmetry="()"/>
+
+    <!-- corners upper layers -->
+    <!-- <all in="[WB][zB][WB]/[zB][zB][WB]/[WB][WB][WB] WzW/zzW/WWW" out="WzW/zzW/WWW WzW/zzW/WWW" steps="4" symmetry="(xy)"/> -->
+
+    <!-- <all in="[WB][zB][WB]/[zB][zB][WB]/[WB][WB][WB] WzW/zzW/WWW" out="WzW/zzW/WWW WzW/zzW/WWW" steps="4" symmetry="(xy)"/> -->
+
+
+    <all in="BBBBB/BBBBB/BBBBB/BBBBB/BBBBB ttttt/ttttt/ttttt/ttttt/ttttt" out="ttttt/tgggt/tgggt/tgggt/ttttt ttttt/ttttt/ttttt/ttttt/ttttt" steps="1" symmetry="(xy)"/>
+    <all in="BBBBB/BBBBB/BBBBB/BBBBB/BBBBB ttttt/tgggt/tgggt/tgggt/ttttt" out="ttttt/tgggt/tgggt/tgggt/ttttt ttttt/tgggt/tgggt/tgggt/ttttt" steps="9" symmetry="(xy)"/>
+
+    <!-- <all in="BBBBB/BBBBB/BBBBB/BBBBB/BBBBB ttttt/ttttt/ttttt/ttttt/ttttt" out="ttttt/t111t/t111t/t111t/ttttt ttttt/ttttt/ttttt/ttttt/ttttt" steps="1" symmetry="(xy)"/> -->
+
+
+    <!-- <all in="BBBBB/BBBBB/BBBBB/BBBBB/BBBBB ttttt/ttttt/ttttt/ttttt/ttttt" out="ttttt/tgggt/tgggt/tgggt/ttttt ttttt/ttttt/ttttt/ttttt/ttttt" steps="1" symmetry="(xy)"/>
+    <all in="BBBBB tgggt" out="tgggt tgggt" steps="9" symmetry="(xy)"/> -->
+
+
+
+    <!-- <all in="B t" out="t *" steps="10" symmetry="()"/> -->
+    <all in="B G" out="G P" steps="1" symmetry="()"/>
+    <all in="B G" out="G p" steps="7" symmetry="()"/>
+    <all in="B G" out="G *" steps="2" symmetry="()"/>
+    <all in="B H" out="H P" steps="1" symmetry="()"/>
+    <all in="B H" out="H p" steps="7" symmetry="()"/>
+    <prl in="H" out="G"/>
+    <all in="B k" out="k *" steps="17" symmetry="()"/>
+    <all in="B I" out="I *" steps="5" symmetry="()"/>
+    <all in="B d" out="d f" steps="1" symmetry="()"/>
+    <all in="B d" out="d R" steps="7" symmetry="()"/>
+    <all in="B d" out="d k" steps="9" symmetry="()"/>
+    <prl in="d" out="k"/>
+    <all in="B r" out="r f" steps="1" symmetry="()"/>
+    <all in="B r" out="r R" steps="7" symmetry="()"/>
+    <all in="B r" out="r F" steps="1" symmetry="()"/>
+    <all in="B r" out="r R" steps="8" symmetry="()"/>
+    <prl in="r" out="C"/>
+    <all in="B [ij]" out="u *" steps="1" symmetry="()"/>
+    <all in="B u" out="u *" steps="15" symmetry="()"/>
+    <all in="B u" out="C *" steps="1" symmetry="()"/>
+    <all in="B c" out="c *" steps="1" symmetry="()"/>
+    <!-- C. at full scale -->
+    <map scale="4 4 4" values="BEASOTGKfFsecVLMDYQUz">
+      <rule in="E" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB EEEE/EEEE/EEEE/EEEE"/>
+      <rule in="N" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB AAAA/AAAA/AAAA/AAAA"/>
+      <rule in="x" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB AAAA/AAAA/AAAA/AAAA"/>
+      <rule in="v" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB VVVV/VVVV/VVVV/VVVV"/>
+      <rule in="P" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB VVVV/VVVV/VVVV/VVVV"/>
+      <rule in="p" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB"/>
+      <rule in="W" out="SSSS/SSSS/SSSS/SSSS SSSS/SSSS/SSSS/SSSS SSSS/SSSS/SSSS/SSSS SSSS/SSSS/SSSS/SSSS"/>
+      <rule in="O" out="OOOO/OOOO/OOOO/OOOO OOOO/OOOO/OOOO/OOOO OOOO/OOOO/OOOO/OOOO OOOO/OOOO/OOOO/OOOO"/>
+      <rule in="t" out="TTTT/TTTT/TTTT/TTTT TTTT/TTTT/TTTT/TTTT TTTT/TTTT/TTTT/TTTT TTTT/TTTT/TTTT/TTTT"/>
+      <rule in="G" out="GGGG/GGGG/GGGG/GGGG GGGG/GGGG/GGGG/GGGG GGGG/GGGG/GGGG/GGGG GGGG/GGGG/GGGG/GGGG"/>
+      <rule in="k" out="KKKK/KKKK/KKKK/KKKK KKKK/KKKK/KKKK/KKKK KKKK/KKKK/KKKK/KKKK KKKK/KKKK/KKKK/KKKK"/>
+      <rule in="I" out="KKKK/KKKK/KKKK/KKKK KKKK/KKKK/KKKK/KKKK KKKK/KKKK/KKKK/KKKK KKKK/KKKK/KKKK/KKKK"/>
+      <rule in="f" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB ffff/ffff/ffff/ffff"/>
+      <rule in="R" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB"/>
+      <rule in="F" out="BBBB/BBBB/BBBB/BBBB FFFF/FFFF/FFFF/FFFF FFFF/FFFF/FFFF/FFFF FFFF/FFFF/FFFF/FFFF"/>
+      <rule in="C" out="FFFF/FFFF/FFFF/FFFF FFFF/FFFF/FFFF/FFFF FFFF/FFFF/FFFF/FFFF FFFF/FFFF/FFFF/FFFF"/>
+      <rule in="s" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB ssss/ssss/ssss/ssss"/>
+      <rule in="e" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB eeee/eeee/eeee/eeee"/>
+      <rule in="i" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB iiii/iiii/iiii/iiii"/>
+      <rule in="j" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB jjjj/jjjj/jjjj/jjjj"/>
+      <rule in="u" out="BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB BBBB/BBBB/BBBB/BBBB"/>
+      <rule in="c" out="cccc/cccc/cccc/cccc cccc/cccc/cccc/cccc cccc/cccc/cccc/cccc cccc/cccc/cccc/cccc"/>
+      <rule in="z" out="zzzz/zzzz/zzzz/zzzz zzzz/zzzz/zzzz/zzzz zzzz/zzzz/zzzz/zzzz zzzz/zzzz/zzzz/zzzz"/>
+      <rule in="g" out="gggg/gggg/gggg/gggg gggg/gggg/gggg/gggg gggg/gggg/gggg/gggg gggg/gggg/gggg/gggg"/>
+
+
+      <!-- C. The detail at full scale, a piece at a time: two stairs (22 and 34 voxels), the margin is as wide -->
+      <pieces piece="128" margin="40">
+        <!-- the long stairs: climbs 17 steps (34 voxels) start on the second row of i, then 2 up and 1 forward; under them solid -->
+        <all in="BBB iij" out="UY* ***" steps="1"/>
+        <all in="*BB *B* UY*" out="*UY *Q* QQ*" steps="17"/>
+        <all in="Q B" out="* Q" symmetry="()"/>
+        <!-- cleaning -->
+        <prl><rule in="i" out="A"/><rule in="j" out="A"/><rule in="Y" out="Q"/><rule in="U" out="Q"/></prl>
+      </pieces>
+
+
+        <!-- enlarge the wall inner corridor -->
+        <all in="SSSSSSSSSSSS/SSSSSSSSSSSS/SSSSSSSSSSSS/SSSSSSSSSSSS/SSSSzzzzzzzz/SSSSzzzzzzzz/SSSSzzzzzzzz/SSSSzzzzzzzz/SSSSzzzzSSSS/SSSSzzzzSSSS/SSSSzzzzSSSS/SSSSzzzzSSSS"
+         out="SSSSSSSSSSSS/Szzzzzzzzzzz/Szzzzzzzzzzz/Szzzzzzzzzzz/Szzzzzzzzzzz/Szzzzzzzzzzz/Szzzzzzzzzzz/Szzzzzzzzzzz/Szzzzzzzzzzz/Szzzzzzzzzzz/Szzzzzzzzzzz/SzzzzzzzzzzS" steps="1" symmetry="(xy)"/>
+        <prl in="SSSSzzzzSSSS" out="SzzzzzzzzzzS" symmetry="(xy)"/>
+        <!-- catch one's voxel chicane walls -->
+         <all in="****Sz/SSSSSz/SSSSSz/SSSSSz/SSSSSz/SSSSzz/SSSSzz/SSSSzz/SSSSzz/Szzzzz"
+          out="****Sz/SSSSSz/Szzzzz/Szzzzz/Szzzzz/Szzzzz/Szzzzz/Szzzzz/Szzzzz/Szzzzz" symmetry="(xy)"/>
+
+
+
+        <!-- <all in="SSSSS/SSSSS/SSSSS/SSSSS/SSSSz" out="SSSSS/Szzzz/Szzzz/Szzzz/Szzzz" steps="1" symmetry="(xy)"/> -->
+        <!-- <prl in="SSSSz" out="Szzzz" symmetry="(xy)"/> -->
+        <!-- <prl in="SSSz" out="Szzz" symmetry="(xy)"/> -->
+        
+        <!-- enlarge the towers inner corridor -->
+        <all in="TTTTT/TTTTT/TTTTT/TTTTT/TTTTg" out="TTTTT/Tgggg/Tgggg/Tgggg/Tgggg" steps="1" symmetry="(xy)"/>
+        <prl in="TTTTg" out="Tgggg" symmetry="(xy)"/>
+
+        <!-- opens wall between the towers and the walls -->
+        <all in="zTg zTg zTg zTg zTg zTg zTg zTg zTg zTg zTg **T" out="zzg zzg zzg zzg zzg zzg zzg zzg zzg zzg zzg **T" steps="2" symmetry="(xy)"/>
+
+        <!-- opens wall between the towers and the upper wall -->
+        <all in="gTB gTB gTB gTB gTB gTB gTB gTB gTB gTB gTB gTz" out="gzB gzB gzB gzB gzB gzB gzB gzB gzB gzB gzB gTz" steps="2" symmetry="(xy)"/>
+        
+            <!-- creates arcs over the wall entrances -->
+        <prl in="TTTTTTTTTTTT TTTTTTTTTTTT TTTTTTTTTTTT TTTTTTTTTTTT TzzzzzzzzzzT" out="TTTTTzzTTTTT TTTzzzzzzTTT TTzzzzzzzzTT TTzzzzzzzzTT TzzzzzzzzzzT" symmetry="(xy)"/>
+
+      <pieces piece="128" margin="40">
+        <!-- the short stairs: climbs 11 steps (22 voxels) start on the second row of s, then 2 up and 1 forward; under them solid -->
+        <all in="BBB sse" out="UY* ***" steps="1"/>
+        <all in="*BB *B* UY*" out="*UY *Q* QQ*" steps="11"/>
+        <all in="Q B" out="* Q" symmetry="()"/>
+        <!-- battlements: a parapet one voxel thick on the outer edge of walls, towers, gatehouse and keep -->
+        <all in="B* [OTGKS]B" out="M* **" steps="1"/>
+        <all in="B M" out="M *" steps="3" symmetry="()"/>
+        <all in="MMMMMM MMMMMM MMMMMM MMMMMM" out="BBMMBB BBMMBB MMMMMM MMMMMM"/> 
+        <!-- arrow slits on the outer faces: a one in pieces picks in its piece, its steps are the piece's (5 in each of nine pieces, as the 40 of the whole fort) -->
+        <one steps="5"><rule in="BT/BT BT/BT BT/BT BT/BT BT/BT BT/BT" out="*L/*L *L/*L *L/*L *L/*L *L/*L *L/*L"/><rule in="BK/BK BK/BK BK/BK BK/BK BK/BK BK/BK" out="*L/*L *L/*L *L/*L *L/*L *L/*L *L/*L"/><rule in="BO/BO BO/BO BO/BO BO/BO" out="*L/*L *L/*L *L/*L *L/*L"/></one>
+        <!-- cleaning -->
+        <prl><rule in="E" out="B"/><rule in="s" out="A"/><rule in="e" out="A"/><rule in="Y" out="Q"/><rule in="U" out="Q"/></prl>
+      </pieces>
+      
+        <!-- fill the missing voxel gap in stairs -->
+        <all in="SBQ" out="SQQ" steps="1" symmetry="(xy)"/>
+        <all in="SBBQ" out="SQQQ" steps="1" symmetry="(xy)"/>
+
+        <!-- remove the in front of the stairs -->    
+        <all in="B/M Q/S" out="B/B Q/S" steps="1" symmetry="(xy)"/>
+        <all in="M B" out="B B" steps="4" symmetry="()"/>
+
+
+        <!-- <all in="TTg" out="Tgg" steps="7" symmetry="(xy)"/>
+        <all in="g T" out="g g" steps="4" symmetry="(z)"/> -->
+
+        <!-- remove interiors markers (z,g) -->
+        <all in="z" out="B" steps="1" symmetry="()"/>
+        <all in="g" out="B" steps="1" symmetry="()"/>
+
+    </map>
+  </map>
+
+<color symbol="g" value="00ff00" name="tmp"/>
+
+  <color symbol="A" value="a89c84" name="selciato"/>
+  <color symbol="V" value="c2b391" name="strada"/>
+  <color symbol="S" value="8a8a86" name="mura"/>
+  <color symbol="O" value="77776f" name="mura esterne"/>
+  <color symbol="T" value="6e6c66" name="torre"/>
+  <color symbol="G" value="5d5a52" name="torre porta"/>
+  <color symbol="K" value="9a958a" name="mastio"/>
+  <color symbol="M" value="b0aca2" name="merli"/>
+  <color symbol="f" value="7a5a3c" name="pavimento di legno"/>
+  <color symbol="F" value="5e4630" name="solaio"/>
+  <color symbol="Q" value="b9a77f" name="scala"/>
+  <color symbol="c" value="6b4a2e" name="abbeveratoio"/>
+  <color symbol="L" value="222226" name="finestra a feritoia"/>
+</sequence>

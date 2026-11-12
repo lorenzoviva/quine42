@@ -1,0 +1,63 @@
+<!-- Quercia secolare (Cantiere 8, aurora): radici a caso; tronco, rami e chioma crescono a caso. -->
+<sequence values="BTUAFLMRHewsnu#1#2#3#4#5#6z" size="500 500 50" symmetry="(xy)" name="Quercia secolare">
+  <color symbol="T" value="5a4030" name="corteccia"/>
+  <color symbol="U" value="5a4030" name="corteccia alta"/>
+  <color symbol="A" value="6b4a2e" name="rami"/>
+  <color symbol="F" value="3f7a35" name="chioma"/>
+  <color symbol="L" value="6aa04a" name="foglie al sole"/>
+  <color symbol="M" value="7aa050" name="muschio"/>
+  <color symbol="R" value="4a3020" name="radici"/>
+  <color symbol="H" hidden="True" name="marcatore"/>
+  <color symbol="e" hidden="True" name="marcatore"/>
+  <color symbol="w" hidden="True" name="marcatore"/>
+  <color symbol="s" hidden="True" name="marcatore"/>
+  <color symbol="n" hidden="True" name="marcatore"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="#1" hidden="True" name="marcatore"/>
+  <color symbol="#2" hidden="True" name="marcatore"/>
+  <color symbol="#3" hidden="True" name="marcatore"/>
+  <color symbol="#4" hidden="True" name="marcatore"/>
+  <color symbol="#5" hidden="True" name="marcatore"/>
+  <color symbol="#6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
+  <!-- scelta «radici»: larghe | a ceppo | ad arco -->
+  <box at="20 20 0" size="40 40 6" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
+  <!--   1: larghe -->
+  <line at="20 20 3" to="34 20 0" r="1.5" color="R" on="#1"/>
+  <line at="20 20 3" to="27 32 0" r="1.5" color="R" on="#1"/>
+  <line at="20 20 3" to="13 32 0" r="1.5" color="R" on="#1"/>
+  <line at="20 20 3" to="6 20 0" r="1.5" color="R" on="#1"/>
+  <line at="20 20 3" to="13 8 0" r="1.5" color="R" on="#1"/>
+  <line at="20 20 3" to="27 8 0" r="1.5" color="R" on="#1"/>
+  <!--   2: a ceppo -->
+  <cylinder at="20 20 0" size="13 13 3" color="R" on="#2"/>
+  <cone at="20 20 3" size="13 13 6" color="R" on="#2"/>
+  <!--   3: ad arco -->
+  <line at="20 20 5" to="30 27 0" r="2" color="R" on="#3"/>
+  <line at="20 20 5" to="13 30 0" r="2" color="R" on="#3"/>
+  <line at="20 20 5" to="10 13 0" r="2" color="R" on="#3"/>
+  <line at="20 20 5" to="27 10 0" r="2" color="R" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
+  <cylinder at="20 20 0" size="9 9 5" color="T"/>
+  <box at="20 20 5" size="1 1 1" color="H"/>
+  <!-- il tronco cammina verso l'alto, dritto o di sbieco -->
+  <one steps="22"><rule in="B H" out="H T" p="4"/><rule in="B* *H" out="H* *T" p="1"/></one>
+  <one steps="17"><rule in="B H" out="H U" p="4"/><rule in="B* *H" out="H* *U" p="1"/></one>
+  <all in="TB" out="*T" steps="3"/>
+  <all in="UB" out="*U" steps="2"/>
+  <!-- 9 rami nati a caso sui fianchi di U: ognuno va dalla sua parte e a volte sale -->
+  <one steps="9" symmetry="()"><rule in="UB" out="*e"/><rule in="BU" out="w*"/><rule in="U/B" out="*/s"/><rule in="B/U" out="n/*"/></one>
+  <prl steps="16" symmetry="()"><rule in="eB" out="Ae" p="0.9"/><rule in="*B e*" out="*e A*" p="0.3"/><rule in="Bw" out="wA" p="0.9"/><rule in="B* *w" out="w* *A" p="0.3"/><rule in="s/B" out="A/s" p="0.9"/><rule in="*/B s/*" out="*/s A/*" p="0.3"/><rule in="B/n" out="n/A" p="0.9"/><rule in="B/* */n" out="n/* */A" p="0.3"/></prl>
+  <prl in="AB" out="*F" p="0.1" steps="1"/>
+  <!-- le punte diventano foglie, che si gonfiano a caso in tutte le direzioni -->
+  <prl><rule in="e" out="F"/><rule in="w" out="F"/><rule in="s" out="F"/><rule in="n" out="F"/><rule in="H" out="F"/></prl>
+  <prl in="FB" out="*F" p="0.55" steps="6" symmetry="(xyz)"/>
+  <prl in="B F" out="* L" p="0.5" steps="1"/>
+  <prl in="BT" out="*M" p="0.12" steps="1"/>
+</sequence>

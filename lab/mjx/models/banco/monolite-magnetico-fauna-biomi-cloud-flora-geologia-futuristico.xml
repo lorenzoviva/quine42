@@ -1,0 +1,72 @@
+<!-- Monolite magnetico (Cantiere 8, sidera): monolite e frammenti a caso; limatura e segni a caso. -->
+<sequence values="BKDGFPu#1#2#3#4#5#6z" size="500 500 50" symmetry="(xy)" name="Monolite magnetico">
+  <color symbol="K" value="15161c" name="pietra nera"/>
+  <color symbol="D" value="2b2d38" name="pietra lucida"/>
+  <color symbol="G" value="6af0ff" name="linee di campo" glow="True"/>
+  <color symbol="F" value="484c5a" name="limatura"/>
+  <color symbol="P" hidden="True" name="marcatore"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="#1" hidden="True" name="marcatore"/>
+  <color symbol="#2" hidden="True" name="marcatore"/>
+  <color symbol="#3" hidden="True" name="marcatore"/>
+  <color symbol="#4" hidden="True" name="marcatore"/>
+  <color symbol="#5" hidden="True" name="marcatore"/>
+  <color symbol="#6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
+  <cylinder at="10 10 0" size="19 19 2" color="D"/>
+  <!-- scelta «monolite»: lastra | obelisco | blocchi sfalsati | anello -->
+  <box at="10 10 2" size="20 20 46" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/><rule in="u" out="#4"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/><rule in="#4u" out="*#4"/></all>
+  <!--   1: lastra -->
+  <box at="10 10 2" size="10 4 40" color="K" on="#1"/>
+  <!--   2: obelisco -->
+  <box at="10 10 2" size="7 7 34" color="K" on="#2"/>
+  <cone at="10 10 36" size="7 7 8" color="K" on="#2"/>
+  <!--   3: blocchi sfalsati -->
+  <box at="9 10 2" size="9 9 10" color="K" on="#3"/>
+  <box at="11 9 12" size="8 8 10" color="K" on="#3"/>
+  <box at="9 11 22" size="7 7 10" color="K" on="#3"/>
+  <box at="10 10 32" size="6 6 8" color="K" on="#3"/>
+  <!--   4: anello -->
+  <box at="10 10 2" size="6 6 10" color="K" on="#4"/>
+  <line at="10 10 12" to="3 10 22" r="2" color="K" on="#4"/>
+  <line at="10 10 12" to="17 10 22" r="2" color="K" on="#4"/>
+  <line at="3 10 22" to="10 10 36" r="2" color="K" on="#4"/>
+  <line at="17 10 22" to="10 10 36" r="2" color="K" on="#4"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/><rule in="#4" out="B"/></prl>
+  <!-- scelta «frammenti»: in alto | a spirale | ai lati -->
+  <box at="10 10 20" size="20 20 40" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
+  <!--   1: in alto -->
+  <line at="10 10 38" to="10 10 50" r="0.5" color="G" on="#1"/>
+  <box at="10 10 50" size="4 4 4" color="K" on="#1"/>
+  <line at="10 10 54" to="10 10 58" r="0.5" color="G" on="#1"/>
+  <box at="10 10 58" size="2 2 2" color="K" on="#1"/>
+  <!--   2: a spirale -->
+  <line at="10 12 34" to="3 15 40" r="0.5" color="G" on="#2"/>
+  <box at="3 15 40" size="3 3 3" color="K" on="#2"/>
+  <line at="10 10 38" to="16 4 46" r="0.5" color="G" on="#2"/>
+  <box at="16 4 46" size="3 3 3" color="K" on="#2"/>
+  <line at="10 10 38" to="5 5 52" r="0.5" color="G" on="#2"/>
+  <box at="5 5 52" size="3 3 3" color="K" on="#2"/>
+  <!--   3: ai lati -->
+  <line at="10 10 28" to="1 10 34" r="0.5" color="G" on="#3"/>
+  <box at="1 10 34" size="2 4 6" color="K" on="#3"/>
+  <line at="10 10 28" to="18 10 34" r="0.5" color="G" on="#3"/>
+  <box at="18 10 34" size="2 4 6" color="K" on="#3"/>
+  <line at="10 10 36" to="10 10 48" r="0.5" color="G" on="#3"/>
+  <box at="10 10 48" size="3 3 3" color="K" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
+  <!-- la limatura si drizza a caso sulla base -->
+  <!-- 14 punte a caso sulla faccia alta di D, alte fino a 4 -->
+  <one in="B D" out="P *" steps="14"/>
+  <all steps="4"><rule in="B P" out="P F"/><rule in="B* *P" out="P* *F"/></all>
+  <prl in="P" out="F"/>
+  <prl in="BK" out="*G" p="0.03" steps="1"/>
+</sequence>

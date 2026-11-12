@@ -1,0 +1,126 @@
+<!--
+Half-timbered house, procedural (Cantiere 2) from the house written by hand by Claude Code (step 8.2A). The seed picks the
+length (the two tips of the plan), the depth (a cut at the back), where the door and the eight windows open,
+where the chimney rises and how tall it is, and whether at the back there is a low wing with a lean-to roof.
+The original house: a whole structure in a single MarkovJunior
+program, with no blocks nor architect. As in ModernHouse and CarmaTower, one decides at a large scale and
+refines at a small one: the house is designed on a coarse grid (one cell = 3 voxels), then `map`
+enlarges it and the rules add the details voxel by voxel.
+In the coarse grid the solid block of the house is dug out; the hip roof is born from a prism eroded
+layer by layer; beams, door and windows are found by the patterns on the facade.
+The door opens and closes with two actions; the chimney smokes (animation). Scale of the game: 20 voxels
+per tile; the house takes about 3 × 2 tiles, the door is as tall as the wanderer.
+-->
+<sequence values="BXQIWNnDOURrKhk#0" size="24 24 30" origin="True" symmetry="(xy)">
+  <color symbol="X" hidden="True" name="volume della casa"/>
+  <color symbol="#0" hidden="True" name="mescola"/>
+  <color symbol="h" hidden="True" name="profondità possibili"/>
+  <color symbol="k" hidden="True" name="il taglio"/>
+  <color symbol="Q" hidden="True" name="volume del tetto"/>
+  <color symbol="I" hidden="True" name="interno"/>
+  <color symbol="W" value="e6d8b8" name="intonaco"/>
+  <color symbol="N" value="6b4a2e" name="travi"/>
+  <color symbol="n" value="8a6440" name="assito"/>
+  <color symbol="D" value="7d766c" name="pietra"/>
+  <color symbol="O" value="7a4a26" name="porta"/>
+  <color symbol="U" value="86b8c8" name="vetro"/>
+  <color symbol="R" value="b0533a" name="coppi"/>
+  <color symbol="r" value="80372a" name="coppi in ombra"/>
+  <color symbol="K" value="8e8578" name="comignolo"/>
+
+  <!-- The seed falls to the bottom and becomes a rectangular plan: a line along x (the two tips
+       lengthen at random: prl decides for every match), then the whole line advances along y. -->
+  <!-- Shuffle: the generator starts again from a different point for every seed (see README) -->
+  <box at="12 0 29" size="24 2 1" color="#0"/>
+  <prl in="#0" out="B" p="0.5" steps="1"/>
+  <all in="#0" out="B"/>
+  <one in="X B" out="B X"/>
+  <all in="XB" out="*X" steps="6" symmetry="(x)"/>
+  <prl in="XB" out="*X" p="0.5" steps="3" symmetry="(x)"/>
+  <all in="X/B" out="*/X" steps="5" symmetry="(y)"/>
+  <!-- The depth: from the back, everything before the chosen row disappears -->
+  <box at="0 8 0" size="1 4 1" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all symmetry="()">
+    <rule in="k*" out="kk"/>
+    <rule in="*k" out="kk"/>
+    <rule in="*/k" out="k/k"/>
+  </all>
+  <all in="k" out="B"/>
+  <!-- The volume: the house 14 high, above it the base of the roof jutting out by one (the eaves) and the prism. -->
+  <all in="B X" out="X *" steps="13"/>
+  <all in="B X" out="R *"/>
+  <all in="RB XB" out="*R **"/>
+  <all in="B R" out="Q *"/>
+  <all in="B Q" out="Q *" steps="10"/>
+  <!-- Hip roof: every layer of the prism loses the edge that has nothing diagonally below it. -->
+  <all in="*Q B*" out="*B **"/>
+
+  <!-- Digging: the inside becomes empty; the walls remain, the floor at the bottom and the ceiling under the roof. -->
+  <prl in="XXX/XXX/XXX" out="***/*I*/***" steps="1"/>
+  <prl in="R I" out="* n" steps="1"/>
+  <prl in="I *" out="B *" steps="1"/>
+  <prl in="I" out="n" steps="1"/>
+  <prl in="X *" out="W *" steps="1"/>
+  <prl in="X" out="D" steps="1"/>
+  <prl in="Q" out="R" steps="1"/>
+
+  <!-- Half-timbering: posts at the corners, a beam on top of the walls and above the plinth. -->
+  <all in="BB/BW" out="**/*N"/>
+  <all in="R W" out="* N"/>
+  <all in="W D" out="N *"/>
+
+  <!-- The door at the front (towards large y: symmetry "()"), as tall as a person; the windows under the beam. -->
+  <one steps="1" symmetry="()"
+       in="WWWWWWWW/BBBBBBBB WWWWWWWW/BBBBBBBB WWWWWWWW/BBBBBBBB WWWWWWWW/BBBBBBBB WWWWWWWW/BBBBBBBB WWWWWWWW/BBBBBBBB WWWWWWWW/BBBBBBBB WWWWWWWW/BBBBBBBB WWWWWWWW/BBBBBBBB WWWWWWWW/BBBBBBBB WWWWWWWW/BBBBBBBB NNNNNNNN/BBBBBBBB DDDDDDDD/BBBBBBBB"
+       out="*NNNNNN*/******** *NOOOON*/******** *NOOOON*/******** *NOOOON*/******** *NOOOON*/******** *NOOOON*/******** *NOOOON*/******** *NOOOON*/******** *NOOOON*/******** *NOOOON*/******** *NOOOON*/******** *NOOOON*/******** ********/********"/>
+  <one steps="8"
+       in="NNNNNN/BBBBBB WWWWWW/BBBBBB WWWWWW/BBBBBB WWWWWW/BBBBBB WWWWWW/BBBBBB WWWWWW/BBBBBB"
+       out="******/****** ******/****** *NUUN*/****** *NUUN*/****** *NUUN*/****** *NNNN*/******"/>
+  <!-- The chimney, on a point of the roof with air above. -->
+  <one in="B B R" out="* K *" steps="1"/>
+  <all in="B K" out="K *" steps="3"/>
+
+  <!-- At a small scale: every cell becomes a cube of 3 × 3 × 3 voxels. -->
+  <map scale="3 3 3" values="BWNnDOURrKwdoghjS">
+    <rule in="W" out="WWW/WWW/WWW WWW/WWW/WWW WWW/WWW/WWW"/>
+    <rule in="N" out="NNN/NNN/NNN NNN/NNN/NNN NNN/NNN/NNN"/>
+    <rule in="n" out="nnn/nnn/nnn nnn/nnn/nnn nnn/nnn/nnn"/>
+    <rule in="D" out="DDD/DDD/DDD DDD/DDD/DDD DDD/DDD/DDD"/>
+    <rule in="O" out="OOO/OOO/OOO OOO/OOO/OOO OOO/OOO/OOO"/>
+    <rule in="U" out="UUU/UUU/UUU UUU/UUU/UUU UUU/UUU/UUU"/>
+    <rule in="R" out="RRR/RRR/RRR RRR/RRR/RRR RRR/RRR/RRR"/>
+    <rule in="r" out="rrr/rrr/rrr rrr/rrr/rrr rrr/rrr/rrr"/>
+    <rule in="K" out="KKK/KKK/KKK KKK/KKK/KKK KKK/KKK/KKK"/>
+    <color symbol="w" value="d6c8a6" name="intonaco scrostato"/>
+    <color symbol="d" value="5e5850" name="pietra scura"/>
+    <color symbol="o" value="5e3a1e" name="asse scura"/>
+    <color symbol="g" value="5a8a3c" name="muschio"/>
+    <color symbol="h" hidden="True" name="porta aperta"/>
+    <color symbol="j" hidden="True" name="porta aperta"/>
+    <color symbol="S" value="d8d8d8" name="fumo"/>
+
+    <!-- The stepped roof: the risers in shade, a few dark tiles, moss on the north side. -->
+    <prl in="RB" out="r*" steps="1"/>
+    <prl in="B R" out="* r" p="0.12" steps="1"/>
+    <prl in="B/r" out="*/g" p="0.3" steps="1" symmetry="()"/>
+    <!-- Flaking plaster, dark stones in the plinth, planks of the door. -->
+    <prl in="W" out="w" p="0.02" steps="1"/>
+    <one in="Ww" out="w*" steps="400"/>
+    <prl in="D" out="d" p="0.3" steps="1"/>
+    <all in="OOO" out="*o*" symmetry="()"/>
+    <!-- The windows have the cross. -->
+    <all in="UUUUUU" out="**NN**" symmetry="()"/>
+    <all in="U U U U U U U U U" out="* * * * N * * * *" symmetry="(x)"/>
+  </map>
+
+  <action name="apri" label="Apri la porta"><all><rule in="O" out="h"/><rule in="o" out="j"/></all></action>
+  <action name="chiudi" label="Chiudi la porta"><all><rule in="h" out="O"/><rule in="j" out="o"/></all></action>
+</sequence>
+<animation name="fumo" frames="8">
+  <prl in="B S" out="S B" steps="1"/>
+  <prl in="B K" out="S *" p="0.4" steps="1"/>
+  <prl in="BS" out="S*" p="0.15" steps="1"/>
+  <prl in="S" out="B" p="0.12" steps="1"/>
+</animation>

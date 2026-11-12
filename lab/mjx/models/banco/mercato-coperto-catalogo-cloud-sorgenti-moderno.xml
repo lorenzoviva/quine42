@@ -1,0 +1,105 @@
+<!-- Mercato coperto -->
+<sequence values="BNExzaPpQbOHtsgcdvefwXiIJhjMSFCWRVDLUuTYGKAknryql" size="500 500 50" symmetry="(xy)" suolo="E" origin="bottom">
+  <union symbol="#8" values="XJMjw"/>
+  <union symbol="#7" values="CUWSuXJMjwDV"/>
+  <union symbol="#1" values="be"/>
+  <union symbol="#2" values="tsdcfv"/>
+  <union symbol="#3" values="tb"/>
+  <color symbol="k" value="3a3d42" name="porta di acciaio"/><color symbol="S" value="d6d2c8" name="cemento chiaro"/><color symbol="F" value="b88a55" name="parquet di rovere"/><color symbol="C" value="a9a59b" name="cemento a vista"/><color symbol="W" value="f2efe8" name="intonaco bianco"/><color symbol="R" value="a7c7d3" name="copertura di vetro" alpha="0.6"/><color symbol="V" value="86b8c8" name="vetro" alpha="0.5"/><color symbol="D" value="2f3236" name="telaio di alluminio"/><color symbol="L" value="8a6a48" name="panca di rovere"/><color symbol="T" value="e0d9c2" name="gradino"/><color symbol="K" value="c2c7cc" name="acciaio"/><color symbol="A" value="9a9590" name="pavimento di pietra"/><color symbol="a" value="6f6c66" name="fondazione"/><color symbol="x" value="7a4a24" name="botti"/><color symbol="O" value="6c7378" name="travi di acciaio"/>
+  <!-- 1. lattice: arms from the centre, then the lines -->
+  <prl in="***/*E*/***" out="***/*z*/***"/>
+  <all in="Nz" out="*a" steps="1"/>
+  <prl in="[Nx]az" out="*xa" steps="14"/>
+  <prl in="a" out="Q"/>
+  <all in="xQz" out="*Qa" steps="1"/>
+  <prl in="[Qx]az" out="*xa" steps="29"/>
+  <prl in="a" out="Q"/>
+  <all in="z/Q/z" out="a/Q/a" symmetry="()"/>
+  <prl in="[Qp]/a/z" out="*/p/a" symmetry="(y)" steps="44"/>
+  <prl in="a" out="p"/>
+  <all in="zQz" out="aQa" symmetry="()"/>
+  <prl in="[Ql]a[zp]" out="*la" symmetry="(x)" steps="44"/>
+  <prl><rule in="a" out="p"/><rule in="l" out="p"/></prl>
+  <all in="x/Q/z" out="t/O/*" symmetry="()"/>
+  <prl in="Q" out="p"/>
+  <prl><rule in="x" out="z"/><rule in="N" out="z"/></prl>
+  <prl in="Ez" out="*E"/>
+  <all><rule in="*p*/ppp/*p*" out="***/*P*/***"/><rule in="ppp/*p*" out="*P*/***"/><rule in="pp/p*" out="P*/**"/></all>
+  <prl in="Op" out="*O" steps="5"/>
+  <prl in="tz" out="*t"/>
+  <!-- 2. design: the stair starts from the front bay and goes through the wall towards a neighbour -->
+  <all in="Ot" out="*v"/>
+  <prl in="vt" out="*v" steps="6"/>
+  <one in="*zzzzzzzzzzz/Pppppppppppp/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt" out="************/*yyyyyyyyyyy/*ggggggggggg/************/************/************/************/************/************/************/************/************/************/************/************/************/************/************/************" steps="1"/>
+  <all in="[ys]/g/t" out="*/s/g" steps="16"/>
+  <all in="s/g" out="c/d"/>
+  <all in="z/y" out="t/*"/>
+  <prl in="tz" out="*t"/>
+  <one in="*tttttttttttt/Ppppppppppppp/*tttttttttttt" out="*************/******H******/*************" steps="1"/>
+  <!-- no doors around the stair; other bays grow through a wall -->
+  <all in="[gsdc]t" out="*v"/>
+  <prl in="vt" out="*v" steps="9"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
+  <prl in="bz" out="*b"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
+  <prl in="bz" out="*b"/>
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
+  <prl in="bz" out="*b"/>
+  <!-- a fourth, low bay in one seed out of two: the seed r stays only if the coin keeps it, otherwise the door goes back to wall -->
+  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******r******/******H******/*************" steps="1"/>
+  <prl steps="1"><rule in="r" out="b" p="0.5"/></prl>
+  <prl in="r/H" out="z/p"/>
+  <prl in="bz" out="*b"/>
+  <prl in="Hp" out="*H" steps="5"/>
+  <!-- an open wall with the bench -->
+  <one in="bHb" out="*n*" steps="1"/>
+  <prl><rule in="nH" out="*n"/><rule in="np" out="*n"/></prl>
+  <one in="nnnnnnnnn" out="*eeeeeee*" steps="1"/>
+  <one in="ppppppppppp/ttttttttttt/ttttttttttt/ttttttttttt/ttttttttttt" out="***********/*frrrrrrrr*/*rrrrrrrrr*/***********/***********" steps="1"/>
+  <prl steps="1"><rule in="f" out="t" p="0.5"/></prl>
+  <prl in="fr" out="*f"/>
+  <prl in="r" out="t"/>
+  <one in="EEEEEEEEEEEEEEE/EEEEEEEEEEEEEEE/EEEEEEEEEEEEEEE/EEEEEEEEEEEEEEE/EEEEEEEEEEEEEEE/EEEEEEEEEEEEEEE/EEEEEEEEEEEEEEE/EEEEEEEEEEEEEEE/EEEEEEEEEEEEEEE/EEEEEEEEEEEEEEE/EEEEEEEEEEEEEEE/EEEEEEEEEEEEEEE/EEEEEEEEEEEEEEE/ppppppppppppppp/#3#3#3#3#3#3#3#3#3#3#3#3#3#3#3" out="***************/*GGGGGGGGGGGGG*/*GGGGGGGGGGGGG*/*GGGGGGGGGGGGG*/*GGGGGGGGGGGGG*/*GGGGGGGGGGGGG*/*GGGGGGGGGGGGG*/*GGGGGGGGGGGGG*/*GGGGGGGGGGGGG*/*GGGGGGGGGGGGG*/*GGGGGGGGGGGGG*/*GGGGGGGGGGGGG*/*GGGGGGGGGGGGG*/***************/***************" steps="2"/>
+  <prl in="v" out="t"/>
+  <!-- 3. the walls from the neighbouring letters -->
+  <all><rule in="[zE]p[zE]" out="*q*"/><rule in="[zE]p#1" out="*w*"/><rule in="[zE]p#2" out="*X*"/><rule in="#1p#1" out="*i*"/><rule in="#2p#2" out="*I*"/><rule in="#1p#2" out="*J*"/><rule in="#1H#1" out="*h*"/><rule in="#1H#2" out="*j*"/><rule in="EO#2" out="*M*"/></all>
+  <prl in="n" out="h"/>
+  <all in="P[XIJjHMy]" out="I*"/>
+  <all in="P[wihO]" out="i*"/>
+  <prl in="P" out="E"/>
+  <one steps="6"><rule in="EEEEEEE/EEEEEEE/wwwwwww" out="*iiiii*/*iiiii*/*******"/><rule in="EEEEEEE/EEEEEEE/XXXXXXX" out="*IIIII*/*IIIII*/*******"/></one>
+  <one steps="10"><rule in="qqqqqqqqq" out="GGGGGGGGG"/><rule in="zzzzzzzzz" out="GGGGGGGGG"/></one>
+  <prl in="q" out="E"/>
+  <all in="M/E" out="*/A" symmetry="()"/>
+  <all in="A/E" out="*/A" symmetry="()"/>
+  <!-- 4. the columns: every letter rises by so many layers, and leaves a letter -->
+  <all steps="1" symmetry="()"><rule in="B b" out="b S"/><rule in="B t" out="t S"/><rule in="B s" out="s S"/><rule in="B d" out="d S"/><rule in="B c" out="c S"/><rule in="B e" out="e S"/><rule in="B f" out="f S"/><rule in="B w" out="w S"/><rule in="B X" out="X S"/><rule in="B i" out="i S"/><rule in="B I" out="I S"/><rule in="B J" out="J S"/><rule in="B h" out="h S"/><rule in="B H" out="H S"/><rule in="B j" out="j S"/><rule in="B M" out="M S"/><rule in="B y" out="y S"/></all>
+  <all steps="1" symmetry="()"><rule in="B y" out="y K"/><rule in="B b" out="b F"/><rule in="B t" out="t F"/><rule in="B s" out="s F"/><rule in="B d" out="s T"/><rule in="B c" out="s Y"/><rule in="B e" out="b G"/><rule in="B f" out="t G"/><rule in="B h" out="h F"/><rule in="B H" out="H F"/><rule in="B j" out="j F"/><rule in="B M" out="M F"/><rule in="B w" out="w C"/><rule in="B X" out="X C"/><rule in="B i" out="i C"/><rule in="B I" out="I C"/><rule in="B J" out="J C"/></all>
+  <all steps="30" symmetry="()"><rule in="B y" out="y K"/><rule in="B b" out="b B"/><rule in="B t" out="t B"/><rule in="B s" out="s B"/><rule in="B h" out="h B"/><rule in="B H" out="H B"/><rule in="B j" out="j B"/><rule in="B M" out="M k"/><rule in="B i" out="i C"/><rule in="B I" out="I C"/><rule in="B J" out="J C"/></all>
+  <all steps="8" symmetry="()"><rule in="B w" out="w C"/><rule in="B X" out="X C"/></all>
+  <all steps="14" symmetry="()"><rule in="B w" out="w U"/><rule in="B X" out="X U"/></all>
+  <all steps="8" symmetry="()"><rule in="B w" out="w C"/><rule in="B X" out="X C"/></all>
+  <all steps="2" symmetry="()"><rule in="B s" out="s B"/><rule in="B w" out="w S"/><rule in="B X" out="X S"/><rule in="B J" out="J S"/><rule in="B I" out="I S"/><rule in="B j" out="j S"/><rule in="B M" out="M S"/><rule in="B i" out="i S"/><rule in="B h" out="h S"/></all>
+  <all steps="1" symmetry="()"><rule in="B y" out="y K"/><rule in="B b" out="R S"/><rule in="B t" out="t S"/><rule in="B H" out="H S"/></all>
+  <all steps="1" symmetry="()"><rule in="B y" out="y B"/><rule in="B t" out="t F"/><rule in="B H" out="H F"/></all>
+  <all steps="4" symmetry="()"><rule in="B w" out="w W"/></all>
+  <all steps="30" symmetry="()"><rule in="B y" out="y B"/><rule in="B t" out="t B"/><rule in="B s" out="s B"/><rule in="B H" out="H B"/><rule in="B I" out="I W"/><rule in="B M" out="M W"/></all>
+  <all steps="8" symmetry="()"><rule in="B X" out="X W"/><rule in="B J" out="J W"/><rule in="B j" out="j W"/></all>
+  <all steps="14" symmetry="()"><rule in="B X" out="X u"/><rule in="B J" out="J u"/><rule in="B j" out="j u"/></all>
+  <all steps="8" symmetry="()"><rule in="B X" out="X W"/><rule in="B J" out="J W"/><rule in="B j" out="j W"/></all>
+  <all steps="1" symmetry="()"><rule in="B y" out="R S"/><rule in="B t" out="R S"/><rule in="B s" out="R S"/><rule in="B H" out="R S"/><rule in="B I" out="R S"/></all>
+  <all steps="4" symmetry="()"><rule in="B X" out="X S"/><rule in="B J" out="J S"/><rule in="B j" out="j S"/><rule in="B M" out="M S"/></all>
+  <!-- 5. the stair -->
+  <all in="*BB *B* TY*" out="*TY *K* KK*" steps="16"/>
+  <prl in="K B" out="* K" symmetry="()"/>
+  <!-- benches -->
+  <all steps="8" symmetry="()" in="B G" out="G L"/>
+  <prl in="BW BS BS BC" out="** *O *O **"/>
+  <!-- 6. windows, roof -->
+  <all in="UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU" out="*********** DDDDDDDDDDD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DDDDDDDDDDD"/>
+  <all in="uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu" out="*********** DDDDDDDDDDD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DVVVVVVVVVD DDDDDDDDDDD"/>
+  <prl in="*/B/* R/R/R" out="*/R/* */*/*" symmetry="()"/>
+  <!-- 7. cleanup -->
+  <prl><rule in="[UwXJjM]" out="C"/><rule in="u" out="W"/><rule in="Y" out="T"/><rule in="G" out="L"/><rule in="[EZz]" out="B"/><rule in="[ih]" out="R"/><rule in="q" out="C"/></prl>
+</sequence>
+<action name="apri" label="Apri la porta"><prl in="k" out="B"/></action>

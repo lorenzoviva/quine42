@@ -1,0 +1,134 @@
+<!-- Cottage, procedural (Cantiere 2) from the cottage of gemini-3.8-flash (step 8.2A, vote 9/10): same stone, thatch, beams and windows.
+     The seed picks, on the coarse grid before the map, how long and deep the plan is (from 7×6 to 15×13 cells), how tall the walls are
+     (from 8 to 11), where the door opens at the front and where the windows; the gable roof adapts to the plan it finds. -->
+<sequence values="BXQIWNDnOURrGHhkm" size="25 25 24" origin="True" symmetry="(xy)">
+  <color symbol="X" hidden="True" name="volume casa"/>
+  <color symbol="Q" hidden="True" name="prisma tetto"/>
+  <color symbol="I" hidden="True" name="interno"/>
+  <color symbol="D" value="7d766c" name="pietra grigia"/>
+  <color symbol="N" value="4a2e18" name="legno scuro travi"/>
+  <color symbol="n" value="7a4d28" name="legno medio"/>
+  <color symbol="O" value="8f582d" name="porta asse"/>
+  <color symbol="U" value="68a6b8" name="vetro finestra"/>
+  <color symbol="R" value="d2a146" name="paglia chiara"/>
+  <color symbol="r" value="986c28" name="paglia scura ombra"/>
+  <color symbol="G" value="4d7332" name="muschio verde"/>
+  <color symbol="H" value="2c1a0e" name="ferramenta e ombra profonda"/>
+  <color symbol="h" hidden="True" name="misure possibili"/>
+  <color symbol="k" hidden="True" name="il taglio"/>
+  <color symbol="m" hidden="True" name="mescola"/>
+
+  <!-- Shuffle: the generator starts again from a different point for every seed (see README) -->
+  <box at="12 0 23" size="25 2 1" color="m"/>
+  <prl in="m" out="B" p="0.5" steps="1"/>
+  <all in="m" out="B"/>
+
+  <!-- The seed goes down to the ground -->
+  <one in="X B" out="B X"/>
+
+  <!-- Rectangular plan: 13 along x, 11 along y -->
+  <all in="XB" out="*X" steps="7" symmetry="(x)"/>
+  <all in="X/B" out="*/X" steps="6" symmetry="(y)"/>
+  <all in="B X" out="X *" steps="11"/>
+
+  <!-- The sizes picked by the seed: a cut on the right, one at the back, one at the top -->
+  <box at="16 0 0" size="7 1 1" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all symmetry="()">
+    <rule in="k/*" out="k/k"/>
+    <rule in="*/k" out="k/k"/>
+    <rule in="* k" out="k k"/>
+    <rule in="k *" out="k k"/>
+    <rule in="k*" out="kk"/>
+  </all>
+  <all in="k" out="B"/>
+  <box at="0 9 0" size="1 7 1" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all symmetry="()">
+    <rule in="k*" out="kk"/>
+    <rule in="*k" out="kk"/>
+    <rule in="* k" out="k k"/>
+    <rule in="k *" out="k k"/>
+    <rule in="*/k" out="k/k"/>
+  </all>
+  <all in="k" out="B"/>
+  <box at="24 24 8" size="1 1 4" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all in="k*" out="kk"/>
+  <all in="* k" out="k *"/>
+  <all in="k" out="B"/>
+
+  <!-- Eaves and slopes of the gable roof along x -->
+  <all in="B X" out="R *"/>
+  <all in="RB XB" out="*R **" symmetry="(x)"/>
+  <all in="B R" out="Q *"/>
+  <all in="B Q" out="Q *" steps="6"/>
+  <!-- Erosion in two slopes (gable roof) -->
+  <all in="*Q B*" out="*B **" symmetry="(x)"/>
+
+  <!-- Front and back gable (north and south) in wood -->
+  <all in="R Q" out="* n" symmetry="(y)"/>
+  <all in="n Q" out="* n" symmetry="(y)"/>
+
+  <!-- Stone walls and roof -->
+  <all in="X" out="D"/>
+  <all in="Q" out="R"/>
+
+  <!-- Sturdy wooden beams on the four outer corners -->
+  <all in="BB/BD" out="**/*N"/>
+
+  <!-- Front facade (large y, towards the south): a DOOR clearly dug and shaped -->
+  <one steps="1" symmetry="()"
+       in="DDDD/BBBB DDDD/BBBB DDDD/BBBB DDDD/BBBB DDDD/BBBB"
+       out="NNNN/**** NOON/**** NOON/**** NOON/**** NOON/****"/>
+
+  <!-- Window with a wooden frame and a sill on the south facade beside the door -->
+  <one steps="1" symmetry="(x)"
+       in="DDD/BBB DDD/BBB DDD/BBB"
+       out="NNN/*** NUN/*** NNN/***"/>
+
+  <!-- Side windows (east and west) to light the inside -->
+  <one steps="1" symmetry="(y)"
+       in="D/B D/B D/B"
+       out="N/* U/* N/*"/>
+
+  <!-- Fine resolution: scale x2 to reach the 50x50x48 box (tall > 30) -->
+  <map scale="2 2 2" values="BDNnOURrGHdFp">
+    <rule in="D" out="DD/DD DD/DD"/>
+    <rule in="N" out="NN/NN NN/NN"/>
+    <rule in="n" out="nn/nn nn/nn"/>
+    <rule in="O" out="OO/OO OO/OO"/>
+    <rule in="U" out="UU/UU UU/UU"/>
+    <rule in="R" out="RR/RR RR/RR"/>
+    <rule in="r" out="rr/rr rr/rr"/>
+    <rule in="G" out="GG/GG GG/GG"/>
+    <rule in="H" out="HH/HH HH/HH"/>
+    <color symbol="d" value="5a544d" name="fuga tra pietre"/>
+    <color symbol="F" value="9c968c" name="luce pietra"/>
+    <color symbol="p" value="a8daf0" name="riflesso vetro"/>
+
+    <!-- Roof: steps and eaves with a sharply shaded underside -->
+    <prl in="RB" out="r*" steps="1"/>
+    <prl in="B R" out="* r" p="0.2" steps="1"/>
+
+    <!-- Regular, clean stone blocks (horizontal and vertical courses in an RPG checkerboard) -->
+    <all in="DD DD" out="*d **" steps="1"/>
+    <prl in="DD/DD" out="*d/**" p="0.3" steps="1"/>
+    <prl in="B D" out="* F" p="0.2" steps="1"/>
+
+    <!-- Door detail: dark iron handle and separate planks -->
+    <all in="OO" out="*H" symmetry="()" steps="1"/>
+    <all in="O O" out="O H" symmetry="()" steps="1"/>
+
+    <!-- Window detail: cross frame and a light reflection in the glass -->
+    <all in="UU" out="Up" symmetry="()" steps="1"/>
+    <all in="U U" out="N *" symmetry="()" steps="1"/>
+
+    <!-- Moss and damp at the base to the north (back) -->
+    <prl in="B/D" out="*/G" p="0.35" steps="1" symmetry="()"/>
+    <prl in="G D" out="* G" p="0.25" steps="1" symmetry="()"/>
+  </map>
+</sequence>

@@ -1,0 +1,104 @@
+<!-- Stazione della teleferica (Cantiere 8, orichalcum): tetto, cabina e pilone a caso; fumo a caso. -->
+<sequence values="BKIORVSFPu#1#2#3#4#5#6z" size="500 500 50" symmetry="(xy)" name="Stazione della teleferica">
+  <color symbol="K" value="8a4a35" name="mattoni"/>
+  <color symbol="I" value="3a3633" name="ferro"/>
+  <color symbol="O" value="b88a2e" name="ottone"/>
+  <color symbol="R" value="a3322a" name="cabina rossa"/>
+  <color symbol="V" value="8fc4d0" name="vetri"/>
+  <color symbol="S" value="9a948a" name="pietra"/>
+  <color symbol="F" value="cfd3d6" name="fumo"/>
+  <color symbol="P" hidden="True" name="marcatore"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="#1" hidden="True" name="marcatore"/>
+  <color symbol="#2" hidden="True" name="marcatore"/>
+  <color symbol="#3" hidden="True" name="marcatore"/>
+  <color symbol="#4" hidden="True" name="marcatore"/>
+  <color symbol="#5" hidden="True" name="marcatore"/>
+  <color symbol="#6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
+  <box at="25 9 0" size="40 18 16" color="K"/>
+  <box at="25 9 16" size="42 20 1" color="I"/>
+  <!-- la ruota delle funi -->
+  <cylinder at="25 14 17" size="20 20 2" color="O"/>
+  <cylinder at="25 14 17" size="4 4 5" color="I"/>
+  <line at="18 14 19" to="18 49 34" r="0.5" color="I"/>
+  <line at="32 14 19" to="32 49 34" r="0.5" color="I"/>
+  <!-- scelta «tetto»: a falde | a cupola d'ottone | piatto con l'insegna -->
+  <box at="25 9 17" size="44 20 33" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
+  <!--   1: a falde -->
+  <box at="25 6 22" size="40 12 2" color="I" on="#1"/>
+  <box at="25 6 24" size="40 10 2" color="I" on="#1"/>
+  <box at="25 6 26" size="40 8 2" color="I" on="#1"/>
+  <box at="25 6 28" size="40 6 2" color="I" on="#1"/>
+  <box at="25 6 30" size="40 4 2" color="I" on="#1"/>
+  <box at="25 6 32" size="40 2 2" color="I" on="#1"/>
+  <line at="25 6 22" to="25 6 20" r="2" color="I" on="#1"/>
+  <box at="10 6 30" size="3 3 6" color="K" on="#1"/>
+  <box at="10 6 36" size="1 1 1" color="P" on="#1"/>
+  <line at="13 3 17" to="13 3 22" r="1" color="I" on="#1"/>
+  <line at="37 3 17" to="37 3 22" r="1" color="I" on="#1"/>
+  <!--   2: a cupola d'ottone -->
+  <ellipsoid at="25 7 17" size="30 14 20" color="O" on="#2"/>
+  <cylinder at="25 7 36" size="3 3 3" color="O" on="#2"/>
+  <box at="12 4 26" size="3 3 8" color="K" on="#2"/>
+  <box at="12 4 34" size="1 1 1" color="P" on="#2"/>
+  <!--   3: piatto con l'insegna -->
+  <box at="25 4 17" size="36 6 4" color="K" on="#3"/>
+  <box at="25 3 21" size="30 1 8" color="O" on="#3"/>
+  <box at="38 4 21" size="3 3 8" color="K" on="#3"/>
+  <box at="38 4 29" size="1 1 1" color="P" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
+  <!-- scelta «cabina»: in partenza | a metà | al pilone | in arrivo -->
+  <box at="18 30 4" size="14 40 34" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/><rule in="u" out="#4"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/><rule in="#4u" out="*#4"/></all>
+  <!--   1: in partenza -->
+  <line at="18 23 23" to="18 23 17" r="0.5" color="I" on="#1"/>
+  <box at="18 23 9" size="8 8 8" color="R" on="#1"/>
+  <box at="18 27 12" size="5 1 3" color="V" on="#1"/>
+  <!--   2: a metà -->
+  <line at="18 31 26" to="18 31 20" r="0.5" color="I" on="#2"/>
+  <box at="18 31 12" size="8 8 8" color="R" on="#2"/>
+  <box at="18 35 15" size="5 1 3" color="V" on="#2"/>
+  <!--   3: al pilone -->
+  <line at="18 39 30" to="18 39 24" r="0.5" color="I" on="#3"/>
+  <box at="18 39 16" size="8 8 8" color="R" on="#3"/>
+  <box at="18 43 19" size="5 1 3" color="V" on="#3"/>
+  <!--   4: in arrivo -->
+  <line at="18 46 33" to="18 46 27" r="0.5" color="I" on="#4"/>
+  <box at="18 46 19" size="8 8 8" color="R" on="#4"/>
+  <box at="18 50 22" size="5 1 3" color="V" on="#4"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/><rule in="#4" out="B"/></prl>
+  <!-- scelta «pilone»: a traliccio | di pietra | a cavalletto -->
+  <box at="25 44 0" size="24 10 36" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
+  <!--   1: a traliccio -->
+  <line at="20 44 0" to="24 44 30" r="1" color="I" on="#1"/>
+  <line at="30 44 0" to="26 44 30" r="1" color="I" on="#1"/>
+  <box at="25 44 30" size="18 3 2" color="I" on="#1"/>
+  <box at="25 44 8" size="8 2 1" color="I" on="#1"/>
+  <box at="25 44 16" size="6 2 1" color="I" on="#1"/>
+  <box at="25 44 24" size="4 2 1" color="I" on="#1"/>
+  <!--   2: di pietra -->
+  <box at="25 44 0" size="8 6 30" color="S" on="#2"/>
+  <box at="25 44 30" size="18 4 2" color="I" on="#2"/>
+  <!--   3: a cavalletto -->
+  <line at="25 40 0" to="25 44 30" r="1.5" color="I" on="#3"/>
+  <line at="25 48 0" to="25 44 30" r="1.5" color="I" on="#3"/>
+  <box at="25 44 30" size="18 3 2" color="I" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
+  <one steps="12">
+    <rule in="B P" out="P F" p="3"/>
+    <rule in="B* *P" out="P* *F" p="2"/>
+    <rule in="B*B *P*" out="P*P *F*" p="0.6"/>
+  </one>
+  <prl in="P" out="F"/>
+  <prl in="BF" out="*F" p="0.4" steps="1"/>
+</sequence>

@@ -1,0 +1,23 @@
+<!-- Telegrafo: a mano (Claude Code, Cantiere 9). Un banco di legno con il tasto d'ottone, la bobina e il rotolo di nastro; ogni seme cambia il nastro srotolato e le carte sul banco. -->
+<sequence values="BLGOWNC" size="20 20 20" symmetry="()" name="Telegrafo">
+  <color symbol="L" value="7a5432" name="banco"/>
+  <color symbol="G" value="5a3a22" name="gambe"/>
+  <color symbol="O" value="c8a050" name="ottone"/>
+  <color symbol="W" value="b04a2a" name="bobina"/>
+  <color symbol="N" value="f2ead8" name="nastro"/>
+  <color symbol="C" value="d8c8a0" name="carte"/>
+  <box at="4 6 0" size="2 2 10" color="G"/>
+  <box at="16 6 0" size="2 2 10" color="G"/>
+  <box at="4 14 0" size="2 2 10" color="G"/>
+  <box at="16 14 0" size="2 2 10" color="G"/>
+  <box at="10 10 10" size="16 12 2" color="L"/>
+  <box at="7 10 12" size="4 3 1" color="O"/>
+  <box at="7 10 13" size="1 1 2" color="O"/>
+  <cylinder at="13 10 12" size="3 3 4" color="W"/>
+  <box at="13 6 12" size="2 2 2" color="N"/>
+  <prl in="B L" out="C L" p="0.12" steps="1"/>
+  <all steps="3">
+    <rule in="B N" out="N N" p="0.4"/>
+    <rule in="BN" out="NN" p="0.3"/>
+  </all>
+</sequence>

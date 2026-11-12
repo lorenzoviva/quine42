@@ -1,0 +1,91 @@
+<!-- Market stall (fantasy, aurora): a wooden counter on four poles, under a striped cloth awning, with the goods on
+     display. The seed picks the awning (sloping, a flat canopy with a valance or a gable roof), the goods (crates of fruit,
+     jars and jugs, or bolts of cloth and glowing phials) and the small things scattered on the counter. -->
+<sequence values="BWwTQqOoYyPcGLXUZvabnefg" size="20 20 20" symmetry="(xy)" name="Bancarella del mercato">
+  <color symbol="W" value="6b4a2e" name="legno"/>
+  <color symbol="w" value="8a6440" name="piano del banco"/>
+  <color symbol="T" value="b8322e" name="stoffa rossa"/>
+  <color symbol="Q" value="efe0b8" name="stoffa chiara"/>
+  <color symbol="q" value="4a3020" name="legno scuro"/>
+  <color symbol="O" value="e8902a" name="arance"/>
+  <color symbol="o" value="c23a2a" name="mele"/>
+  <color symbol="Y" value="b5683a" name="terracotta"/>
+  <color symbol="y" value="8a4a28" name="terracotta scura"/>
+  <color symbol="P" value="3f5f9a" name="pezza blu"/>
+  <color symbol="c" value="5a8a3c" name="pezza verde"/>
+  <color symbol="G" value="6effc8" name="ampolla luminosa" glow="True"/>
+  <color symbol="L" value="ffc04a" name="lanterna" glow="True"/>
+  <color symbol="X" value="d8c49a" name="sacchetti"/>
+  <color symbol="U" hidden="True" name="spazio della tenda"/>
+  <color symbol="Z" hidden="True" name="spazio della merce"/>
+  <color symbol="v" hidden="True" name="per mescolare il caso"/>
+  <color symbol="a" hidden="True" name="tenda spiovente"/>
+  <color symbol="b" hidden="True" name="tettoia piatta"/>
+  <color symbol="n" hidden="True" name="tetto a capanna"/>
+  <color symbol="e" hidden="True" name="cassette di frutta"/>
+  <color symbol="f" hidden="True" name="orci e brocche"/>
+  <color symbol="g" hidden="True" name="stoffe e ampolle"/>
+  <!-- The spaces and the two dice -->
+  <box at="10 10 0" size="20 20 20" color="v"/>
+  <all in="v" out="B"/>
+  <box at="10 10 13" size="20 20 7" color="U"/>
+  <box at="10 10 7" size="20 20 6" color="Z"/>
+  <one steps="1"><rule in="U" out="a"/><rule in="U" out="b"/><rule in="U" out="n"/></one>
+  <one steps="1"><rule in="Z" out="e"/><rule in="Z" out="f"/><rule in="Z" out="g"/></one>
+  <all symmetry="(xyz)">
+    <rule in="aU" out="aa"/><rule in="bU" out="bb"/><rule in="nU" out="nn"/>
+    <rule in="eZ" out="ee"/><rule in="fZ" out="ff"/><rule in="gZ" out="gg"/>
+  </all>
+  <!-- The counter and the poles -->
+  <box at="10 12 0" size="17 5 6" color="W"/>
+  <box at="10 15 0" size="17 1 6" color="q"/>
+  <box at="6 15 1" size="1 1 4" color="W"/>
+  <box at="10 15 1" size="1 1 4" color="W"/>
+  <box at="14 15 1" size="1 1 4" color="W"/>
+  <box at="10 12 6" size="19 7 1" color="w"/>
+  <box at="1 15 0" size="1 1 14" color="q"/>
+  <box at="19 15 0" size="1 1 14" color="q"/>
+  <box at="1 5 0" size="1 1 17" color="q"/>
+  <box at="19 5 0" size="1 1 17" color="q"/>
+  <!-- Sloping awning -->
+  <box at="10 5 16" size="19 3 1" color="Q" on="a"/>
+  <box at="10 8 15" size="19 3 1" color="Q" on="a"/>
+  <box at="10 11 14" size="19 3 1" color="Q" on="a"/>
+  <box at="10 14 13" size="19 3 1" color="Q" on="a"/>
+  <!-- Flat canopy with a valance -->
+  <box at="10 10 14" size="19 15 1" color="Q" on="b"/>
+  <box at="10 17 12" size="19 1 3" color="Q" on="b"/>
+  <!-- Gable roof -->
+  <box at="10 10 13" size="19 17 1" color="Q" on="n"/>
+  <box at="10 10 14" size="19 13 1" color="Q" on="n"/>
+  <box at="10 10 15" size="19 9 1" color="Q" on="n"/>
+  <box at="10 10 16" size="19 5 1" color="Q" on="n"/>
+  <box at="10 10 17" size="19 1 1" color="q" on="n"/>
+  <!-- The stripes of the cloth -->
+  <box at="3 10 0" size="2 20 20" color="T" on="Q"/>
+  <box at="7 10 0" size="2 20 20" color="T" on="Q"/>
+  <box at="11 10 0" size="2 20 20" color="T" on="Q"/>
+  <box at="15 10 0" size="2 20 20" color="T" on="Q"/>
+  <box at="19 10 0" size="2 20 20" color="T" on="Q"/>
+  <!-- Crates of fruit -->
+  <box at="5 12 7" size="5 5 3" color="W" on="e"/>
+  <box at="14 12 7" size="7 5 2" color="W" on="e"/>
+  <ellipsoid at="5 12 9" size="5 5 4" color="O" on="e"/>
+  <ellipsoid at="14 12 8" size="7 5 4" color="o" on="e"/>
+  <!-- Jars and jugs -->
+  <cylinder at="4 12 7" size="4 4 5" color="Y" on="f"/>
+  <cylinder at="9 12 7" size="4 4 3" color="y" on="f"/>
+  <cylinder at="14 11 7" size="3 3 5" color="Y" on="f"/>
+  <cylinder at="17 13 7" size="2 2 2" color="y" on="f"/>
+  <!-- Cloth and phials -->
+  <box at="6 12 7" size="7 3 2" color="P" on="g"/>
+  <box at="6 12 9" size="7 2 1" color="c" on="g"/>
+  <box at="13 11 7" size="1 1 2" color="G" on="g"/>
+  <box at="15 12 7" size="1 1 3" color="G" on="g"/>
+  <box at="17 11 7" size="1 1 2" color="G" on="g"/>
+  <box at="1 16 11" size="1 1 2" color="L" on="g"/>
+  <all in="[UZvabnefg]" out="B"/>
+  <!-- The small things scattered on the counter -->
+  <prl steps="1" in="B w" out="X *" p="0.12"/>
+  <prl steps="1" in="B X" out="X *" p="0.4"/>
+</sequence>

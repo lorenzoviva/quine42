@@ -1,0 +1,106 @@
+<!-- Orologio astrario (Cantiere 8, orichalcum): ora, cima e basamento a caso; ingranaggi a caso. -->
+<sequence values="BIOWKCSALxu#1#2#3#4#5#6z" size="500 500 50" symmetry="(xy)" name="Orologio astrario">
+  <color symbol="I" value="33302c" name="ghisa"/>
+  <color symbol="O" value="c9a24a" name="ottone"/>
+  <color symbol="W" value="efe6cf" name="quadranti"/>
+  <color symbol="K" value="1a1714" name="lancette"/>
+  <color symbol="C" value="c4703a" name="ingranaggi di rame"/>
+  <color symbol="S" value="9a948a" name="pietra"/>
+  <color symbol="A" value="6aa8c8" name="acqua" alpha="0.6"/>
+  <color symbol="L" value="ffd27a" name="luce dei quadranti" glow="True"/>
+  <color symbol="x" hidden="True" name="marcatore"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="#1" hidden="True" name="marcatore"/>
+  <color symbol="#2" hidden="True" name="marcatore"/>
+  <color symbol="#3" hidden="True" name="marcatore"/>
+  <color symbol="#4" hidden="True" name="marcatore"/>
+  <color symbol="#5" hidden="True" name="marcatore"/>
+  <color symbol="#6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
+  <!-- scelta «basamento»: a gradini | a fontana | a panchine -->
+  <box at="25 25 0" size="50 50 7" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
+  <!--   1: a gradini -->
+  <box at="25 25 0" size="30 30 2" color="S" on="#1"/>
+  <box at="25 25 2" size="24 24 2" color="S" on="#1"/>
+  <box at="25 25 4" size="18 18 2" color="S" on="#1"/>
+  <!--   2: a fontana -->
+  <cylinder at="25 25 1" size="40 40 3" color="A" on="#2"/>
+  <cylinder at="25 25 0" size="44 44 4" color="S" on="#2"/>
+  <box at="25 25 4" size="16 16 2" color="S" on="#2"/>
+  <!--   3: a panchine -->
+  <box at="25 25 0" size="22 22 6" color="S" on="#3"/>
+  <box at="25 8 0" size="16 3 3" color="O" on="#3"/>
+  <box at="25 42 0" size="16 3 3" color="O" on="#3"/>
+  <box at="8 25 0" size="3 16 3" color="O" on="#3"/>
+  <box at="42 25 0" size="3 16 3" color="O" on="#3"/>
+  <box at="25 12 0" size="16 7 1" color="S" on="#3"/>
+  <box at="25 38 0" size="16 7 1" color="S" on="#3"/>
+  <box at="12 25 0" size="7 16 1" color="S" on="#3"/>
+  <box at="38 25 0" size="7 16 1" color="S" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
+  <box at="25 25 6" size="10 10 22" color="I"/>
+  <box at="25 25 28" size="15 15 11" color="I"/>
+  <!-- quattro quadranti luminosi -->
+  <box at="25 33 29" size="9 1 9" color="W" on="B"/>
+  <box at="25 17 29" size="9 1 9" color="L" on="B"/>
+  <box at="33 25 29" size="1 9 9" color="L" on="B"/>
+  <box at="17 25 29" size="1 9 9" color="L" on="B"/>
+  <!-- scelta «ora»: le tre | le sei | le nove | mezzogiorno -->
+  <box at="25 34 29" size="10 1 9" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/><rule in="u" out="#4"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/><rule in="#4u" out="*#4"/></all>
+  <!--   1: le tre -->
+  <line at="25 34 33" to="25 34 37" r="0" color="K" on="#1"/>
+  <line at="25 34 33" to="28 34 33" r="0" color="K" on="#1"/>
+  <!--   2: le sei -->
+  <line at="25 34 33" to="25 34 37" r="0" color="K" on="#2"/>
+  <line at="25 34 33" to="25 34 30" r="0" color="K" on="#2"/>
+  <!--   3: le nove -->
+  <line at="25 34 33" to="25 34 37" r="0" color="K" on="#3"/>
+  <line at="25 34 33" to="22 34 33" r="0" color="K" on="#3"/>
+  <!--   4: mezzogiorno -->
+  <line at="25 34 33" to="25 34 37" r="0" color="K" on="#4"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/><rule in="#4" out="B"/></prl>
+  <!-- scelta «cima»: sfera armillare | planetario a bracci | cupola con la campana | guglia con la banderuola -->
+  <box at="25 25 39" size="50 50 11" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/><rule in="u" out="#4"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/><rule in="#4u" out="*#4"/></all>
+  <!--   1: sfera armillare -->
+  <line at="25 25 38" to="25 25 49" r="0.5" color="O" on="#1"/>
+  <ellipsoid at="25 25 41" size="16 16 1" color="x" on="#1"/>
+  <ellipsoid at="25 25 41" size="20 20 1" color="O" on="#1"/>
+  <ellipsoid at="25 25 40" size="1 14 9" color="x" on="#1"/>
+  <ellipsoid at="25 25 39" size="1 18 11" color="O" on="#1"/>
+  <ellipsoid at="25 25 40" size="14 1 9" color="x" on="#1"/>
+  <ellipsoid at="25 25 39" size="18 1 11" color="O" on="#1"/>
+  <ellipsoid at="25 25 43" size="4 4 4" color="L" on="#1"/>
+  <!--   2: planetario a bracci -->
+  <line at="25 25 39" to="25 25 48" r="1" color="O" on="#2"/>
+  <ellipsoid at="25 25 46" size="5 5 5" color="L" on="#2"/>
+  <line at="25 25 42" to="10 25 42" r="0.5" color="O" on="#2"/>
+  <ellipsoid at="10 25 41" size="4 4 4" color="C" on="#2"/>
+  <line at="25 25 44" to="36 36 44" r="0.5" color="O" on="#2"/>
+  <ellipsoid at="36 36 43" size="3 3 3" color="W" on="#2"/>
+  <line at="25 25 40" to="25 8 40" r="0.5" color="O" on="#2"/>
+  <ellipsoid at="25 8 39" size="5 5 5" color="O" on="#2"/>
+  <!--   3: cupola con la campana -->
+  <line at="19 19 39" to="19 19 45" r="0.5" color="I" on="#3"/>
+  <line at="31 19 39" to="31 19 45" r="0.5" color="I" on="#3"/>
+  <line at="19 31 39" to="19 31 45" r="0.5" color="I" on="#3"/>
+  <line at="31 31 39" to="31 31 45" r="0.5" color="I" on="#3"/>
+  <ellipsoid at="25 25 41" size="8 8 6" color="O" on="#3"/>
+  <ellipsoid at="25 25 44" size="16 16 8" color="C" on="#3"/>
+  <!--   4: guglia con la banderuola -->
+  <cone at="25 25 39" size="14 14 9" color="C" on="#4"/>
+  <line at="25 25 46" to="25 25 49" r="0" color="O" on="#4"/>
+  <box at="27 25 48" size="4 1 2" color="O" on="#4"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/><rule in="#4" out="B"/></prl>
+  <prl in="x" out="B"/>
+  <prl in="BI" out="*C" p="0.03" steps="1"/>
+</sequence>

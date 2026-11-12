@@ -1,0 +1,66 @@
+<!-- Birch, procedural (Cantiere 2): the white bark with the lenticels and the light foliage of the original. The seed decides how high the
+     thin trunk rises (between 44 and 54 voxels) and how it bends, where the twigs that rise obliquely grow and how big each cloud of leaves
+     at their tip is: an airy crown in tufts that is never the same. -->
+<sequence values="BWKDFlLShkVrxc" size="40 40 60" symmetry="(xy)" name="Betulla">
+  <color symbol="W" value="f3f1e8" name="corteccia bianca"/>
+  <color symbol="K" value="322c2b" name="macchia scura"/>
+  <color symbol="D" value="9e958d" name="corteccia ombra"/>
+  <color symbol="F" value="7ec850" name="foglie verde chiaro"/>
+  <color symbol="l" value="b2e868" name="foglie sole"/>
+  <color symbol="L" value="4e9b38" name="foglie ombra"/>
+  <color symbol="S" value="386828" name="foglie profonde"/>
+  <color symbol="h" hidden="True" name="altezze possibili della cima"/>
+  <color symbol="k" hidden="True" name="la quota scelta"/>
+  <color symbol="V" hidden="True" name="dove possono stare le foglie"/>
+  <color symbol="r" hidden="True" name="punta che cresce"/>
+  <color symbol="x" hidden="True" name="il fusto nudo"/>
+  <color symbol="c" hidden="True" name="dove nasce una nuvola"/>
+  <box at="0 0 44" size="1 1 11" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all in="kB" out="kk"/>
+  <box at="20 20 0" size="1 1 1" color="r"/>
+  <one steps="60">
+    <rule in="B r" out="r W" p="1"/>
+    <rule in="B* *r" out="r* *W" p="0.08"/>
+  </one>
+  <all in="r" out="W"/>
+  <all in="k" out="B"/>
+  <!-- The oblique twigs, from halfway up -->
+  <ellipsoid at="20 20 18" size="34 34 42" color="V" on="B"/>
+  <box at="20 20 0" size="40 40 22" color="x" on="[BV]"/>
+  <prl steps="1" in="V* *W" out="r* **" p="0.05"/>
+  <one steps="1" in="V* *W" out="r* **"/>
+  <one steps="70">
+    <rule in="V* *r" out="r* *W" p="1"/>
+    <rule in="V r" out="r W" p="0.4"/>
+  </one>
+  <all in="r" out="c"/>
+  <!-- The clouds of leaves: they grow from the tips and from the top -->
+  <all in="V W" out="c W"/>
+  <one steps="4200" symmetry="(xyz)">
+    <rule in="cV" out="cF"/>
+    <rule in="FV" out="FF"/>
+  </one>
+  <all in="c" out="W"/>
+  <all in="[Vx]" out="B"/>
+  <all steps="1" in="WB" out="WW"/>
+  <prl steps="1">
+    <rule in="W" out="K" p="0.12"/>
+    <rule in="W" out="D" p="0.10"/>
+  </prl>
+  <all in="KW" out="KK" steps="1"/>
+  <convolution neighborhood="Moore" steps="1">
+    <rule in="F" out="B" values="B" sum="15..26" p="0.5"/>
+  </convolution>
+  <convolution neighborhood="Moore" steps="3">
+    <rule in="F" out="B" values="B" sum="22..26"/>
+  </convolution>
+  <prl steps="1">
+    <rule in="B F" out="B l" p="0.85"/>
+    <rule in="F B" out="L B" p="0.75"/>
+  </prl>
+  <convolution neighborhood="NoCorners" steps="1">
+    <rule in="F" out="S" values="F l L S" sum="16..18"/>
+  </convolution>
+</sequence>

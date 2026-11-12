@@ -1,0 +1,114 @@
+<!-- Guardian statue (fantasy, aurora): a stone warrior in armour, on a pedestal, with shining eyes and runes.
+     The seed picks the pedestal (stepped, a drum or a narrow plinth with a band of runes), the helmet (horned, a crown or a
+     hood), the weapon in the right hand (a tall spear, a planted sword or a raised hammer) and the left (the shield, a raised crystal
+     sphere or the arm along the side); the moss grows wherever it falls. -->
+<sequence values="BSdGgRCMmVHLPabocehijkltuv" size="20 20 60" symmetry="(xy)" name="Statua del guardiano">
+  <color symbol="S" value="8a8478" name="pietra"/>
+  <color symbol="d" value="5e5a52" name="pietra scura"/>
+  <color symbol="G" value="a6a196" name="pietra della statua"/>
+  <color symbol="g" value="7c776d" name="pietra in ombra"/>
+  <color symbol="R" value="7fd8ff" name="runa luminosa" glow="True"/>
+  <color symbol="C" value="b48cff" name="cristallo arcano" glow="True"/>
+  <color symbol="M" value="9aa3ad" name="ferro"/>
+  <color symbol="m" value="5a8a3c" name="muschio"/>
+  <color symbol="V" hidden="True" name="spazio del piedistallo"/>
+  <color symbol="H" hidden="True" name="spazio della testa"/>
+  <color symbol="L" hidden="True" name="spazio della sinistra"/>
+  <color symbol="P" hidden="True" name="spazio della destra"/>
+  <color symbol="a" hidden="True" name="piedistallo a gradoni"/>
+  <color symbol="b" hidden="True" name="piedistallo a tamburo"/>
+  <color symbol="o" hidden="True" name="plinto con le rune"/>
+  <color symbol="c" hidden="True" name="elmo cornuto"/>
+  <color symbol="e" hidden="True" name="corona"/>
+  <color symbol="h" hidden="True" name="cappuccio"/>
+  <color symbol="i" hidden="True" name="lancia"/>
+  <color symbol="j" hidden="True" name="spada piantata"/>
+  <color symbol="k" hidden="True" name="martello levato"/>
+  <color symbol="l" hidden="True" name="scudo"/>
+  <color symbol="t" hidden="True" name="sfera alzata"/>
+  <color symbol="u" hidden="True" name="braccio lungo il fianco"/>
+  <color symbol="v" hidden="True" name="per mescolare il caso"/>
+  <!-- The spaces and the four dice -->
+  <box at="10 10 0" size="20 20 60" color="v"/>
+  <all in="v" out="B"/>
+  <box at="10 10 0" size="20 20 12" color="V"/>
+  <box at="10 10 36" size="11 20 24" color="H"/>
+  <box at="2 10 12" size="5 20 48" color="L"/>
+  <box at="18 10 12" size="5 20 48" color="P"/>
+  <one steps="1"><rule in="V" out="a"/><rule in="V" out="b"/><rule in="V" out="o"/></one>
+  <one steps="1"><rule in="H" out="c"/><rule in="H" out="e"/><rule in="H" out="h"/></one>
+  <one steps="1"><rule in="P" out="i"/><rule in="P" out="j"/><rule in="P" out="k"/></one>
+  <one steps="1"><rule in="L" out="l"/><rule in="L" out="t"/><rule in="L" out="u"/></one>
+  <all symmetry="(xyz)">
+    <rule in="aV" out="aa"/><rule in="bV" out="bb"/><rule in="oV" out="oo"/>
+    <rule in="cH" out="cc"/><rule in="eH" out="ee"/><rule in="hH" out="hh"/>
+    <rule in="iP" out="ii"/><rule in="jP" out="jj"/><rule in="kP" out="kk"/>
+    <rule in="lL" out="ll"/><rule in="tL" out="tt"/><rule in="uL" out="uu"/>
+  </all>
+  <!-- The pedestal -->
+  <box at="10 10 0" size="17 17 3" color="d" on="a"/>
+  <box at="10 10 3" size="13 13 6" color="S" on="a"/>
+  <box at="10 10 9" size="15 15 3" color="d" on="a"/>
+  <cylinder at="10 10 0" size="19 19 2" color="d" on="b"/>
+  <cylinder at="10 10 2" size="13 13 8" color="S" on="b"/>
+  <cylinder at="10 10 10" size="16 16 2" color="d" on="b"/>
+  <box at="10 10 0" size="11 11 12" color="S" on="o"/>
+  <box at="10 15 0" size="9 3 2" color="d" on="o"/>
+  <box at="10 10 5" size="11 11 2" color="R" on="S"/>
+  <box at="10 10 0" size="9 9 12" color="S" on="R"/>
+  <!-- The warrior -->
+  <box at="8 11 12" size="3 5 2" color="g"/>
+  <box at="12 11 12" size="3 5 2" color="g"/>
+  <box at="8 10 14" size="3 3 7" color="G"/>
+  <box at="12 10 14" size="3 3 7" color="G"/>
+  <box at="10 10 20" size="9 5 5" color="g"/>
+  <box at="10 10 25" size="9 5 8" color="G"/>
+  <box at="10 13 26" size="5 1 5" color="g"/>
+  <box at="10 10 33" size="13 5 3" color="g"/>
+  <box at="10 10 36" size="3 3 1" color="G"/>
+  <!-- The helmet -->
+  <box at="10 10 37" size="5 5 6" color="G" on="[ceh]"/>
+  <box at="10 10 43" size="5 5 1" color="g" on="c"/>
+  <line at="8 10 40" to="5 10 44" r="0.5" color="g" on="c"/>
+  <line at="12 10 40" to="15 10 44" r="0.5" color="g" on="c"/>
+  <line at="5 10 44" to="6 10 48" r="0.5" color="g" on="c"/>
+  <line at="15 10 44" to="14 10 48" r="0.5" color="g" on="c"/>
+  <box at="10 10 43" size="7 7 2" color="g" on="e"/>
+  <box at="7 7 45" size="1 1 2" color="g" on="e"/>
+  <box at="13 7 45" size="1 1 2" color="g" on="e"/>
+  <box at="7 13 45" size="1 1 2" color="g" on="e"/>
+  <box at="13 13 45" size="1 1 2" color="g" on="e"/>
+  <box at="10 13 45" size="1 1 3" color="g" on="e"/>
+  <box at="10 13 44" size="1 1 1" color="C" on="g"/>
+  <ellipsoid at="10 9 35" size="9 9 11" color="g" on="h"/>
+  <box at="10 13 37" size="5 2 5" color="h" on="g"/>
+  <box at="10 13 38" size="3 1 2" color="h" on="g"/>
+  <box at="10 12 39" size="5 1 1" color="R" on="G"/>
+  <box at="10 12 39" size="3 1 1" color="G" on="R"/>
+  <!-- The right: spear, planted sword or raised hammer -->
+  <box at="17 10 26" size="3 3 8" color="G" on="i"/>
+  <box at="17 12 12" size="1 1 42" color="M" on="i"/>
+  <cone at="17 12 54" size="3 3 5" color="M" on="i"/>
+  <box at="17 10 21" size="3 3 5" color="G" on="j"/>
+  <box at="17 12 12" size="1 1 10" color="M" on="j"/>
+  <box at="17 12 22" size="3 1 1" color="g" on="j"/>
+  <box at="17 12 23" size="1 1 3" color="g" on="j"/>
+  <box at="17 10 30" size="3 3 4" color="G" on="j"/>
+  <box at="17 11 24" size="3 3 6" color="G" on="j"/>
+  <box at="17 10 26" size="3 3 16" color="G" on="k"/>
+  <box at="17 10 42" size="1 1 6" color="g" on="k"/>
+  <box at="17 10 48" size="3 7 4" color="M" on="k"/>
+  <!-- The left: shield, raised sphere or arm along the side -->
+  <box at="3 10 24" size="3 3 9" color="G" on="[lu]"/>
+  <box at="2 12 16" size="5 1 13" color="d" on="l"/>
+  <box at="2 13 21" size="1 1 3" color="R" on="l"/>
+  <box at="2 13 22" size="3 1 1" color="R" on="l"/>
+  <box at="3 10 22" size="3 3 2" color="g" on="u"/>
+  <box at="3 10 30" size="3 3 3" color="G" on="t"/>
+  <box at="3 11 33" size="3 3 5" color="G" on="t"/>
+  <ellipsoid at="2 11 38" size="5 5 5" color="C" on="t"/>
+  <all in="[VHLPabocehijkltuv]" out="B"/>
+  <!-- The moss, wherever it falls -->
+  <prl steps="1" in="B [Sd]" out="m *" p="0.05"/>
+  <prl steps="1" in="B[Sd]" out="m*" p="0.03"/>
+</sequence>

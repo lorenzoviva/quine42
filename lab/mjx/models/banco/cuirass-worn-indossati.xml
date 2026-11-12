@@ -1,0 +1,18 @@
+<!-- Cuirass, worn (T289 bench, way A): the second program of the cuirass, the mesh it has on a body. Written for the box of a
+     torso (the wanderer's, with a voxel all round): the kernel stretches it onto the torso of whoever wears it. -->
+<sequence values="BSDGAK" size="15 12 9" name="Corazza indossata">
+  <color symbol="S" value="8f9aa6" name="steel"/>
+  <color symbol="D" value="5d6672" name="steel in the shade"/>
+  <color symbol="G" value="caa23c" name="brass"/>
+  <color symbol="A" value="7a4a2a" name="leather"/>
+  <color symbol="K" hidden="True" name="where the torso is"/>
+  <!-- The shell round the torso, open at the top and at the bottom -->
+  <cylinder at="7 5.5 0" size="15 12 9" color="S"/>
+  <cylinder at="7 5.5 0" size="13 10 9" color="K" on="S"/>
+  <!-- The fauld, the gorget, the ridge -->
+  <box at="7 5.5 0" size="15 12 1" color="A" on="S"/>
+  <box at="7 5.5 8" size="15 12 1" color="G" on="S"/>
+  <box at="7 11 1" size="1 1 7" color="G" on="S"/>
+  <all in="K" out="B"/>
+  <prl in="S B" out="D B" p="0.3" symmetry="()"/>
+</sequence>

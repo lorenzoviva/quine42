@@ -1,0 +1,74 @@
+<!-- Anello del teletrasporto (Cantiere 8, sidera): anello e piattaforma a caso; cavi e luci a caso. -->
+<sequence values="BSTFKExewsnu#1#2#3#4#5#6z" size="500 500 50" symmetry="(xy)" name="Anello del teletrasporto">
+  <color symbol="S" value="c8ccd0" name="piattaforma"/>
+  <color symbol="T" value="7a828c" name="acciaio"/>
+  <color symbol="F" value="6af0ff" name="campo" alpha="0.5"/>
+  <color symbol="K" value="2a3038" name="cavi"/>
+  <color symbol="E" value="9ff8ff" name="emettitori" glow="True"/>
+  <color symbol="x" hidden="True" name="marcatore"/>
+  <color symbol="e" hidden="True" name="marcatore"/>
+  <color symbol="w" hidden="True" name="marcatore"/>
+  <color symbol="s" hidden="True" name="marcatore"/>
+  <color symbol="n" hidden="True" name="marcatore"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="#1" hidden="True" name="marcatore"/>
+  <color symbol="#2" hidden="True" name="marcatore"/>
+  <color symbol="#3" hidden="True" name="marcatore"/>
+  <color symbol="#4" hidden="True" name="marcatore"/>
+  <color symbol="#5" hidden="True" name="marcatore"/>
+  <color symbol="#6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
+  <!-- scelta «piattaforma»: tonda a gradini | quadra | a stella -->
+  <box at="25 25 0" size="50 50 5" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
+  <!--   1: tonda a gradini -->
+  <cylinder at="25 25 0" size="42 42 2" color="S" on="#1"/>
+  <cylinder at="25 25 2" size="34 34 2" color="S" on="#1"/>
+  <!--   2: quadra -->
+  <box at="25 25 0" size="38 38 4" color="S" on="#2"/>
+  <!--   3: a stella -->
+  <box at="25 25 0" size="44 12 3" color="S" on="#3"/>
+  <box at="25 25 0" size="12 44 3" color="S" on="#3"/>
+  <cylinder at="25 25 0" size="26 26 4" color="S" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
+  <!-- scelta «anello»: ritto di fronte | ritto di fianco | orizzontale sui piloni | a ferro di cavallo -->
+  <box at="25 25 3" size="50 50 47" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/><rule in="u" out="#4"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/><rule in="#4u" out="*#4"/></all>
+  <!--   1: ritto di fronte -->
+  <ellipsoid at="25 25 6" size="34 1 38" color="F" on="#1"/>
+  <ellipsoid at="25 25 6" size="34 6 38" color="x" on="#1"/>
+  <ellipsoid at="25 25 2" size="44 6 46" color="T" on="#1"/>
+  <box at="25 25 3" size="20 8 4" color="T" on="#1"/>
+  <!--   2: ritto di fianco -->
+  <ellipsoid at="25 25 6" size="1 34 38" color="F" on="#2"/>
+  <ellipsoid at="25 25 6" size="6 34 38" color="x" on="#2"/>
+  <ellipsoid at="25 25 2" size="6 44 46" color="T" on="#2"/>
+  <box at="25 25 3" size="8 20 4" color="T" on="#2"/>
+  <!--   3: orizzontale sui piloni -->
+  <ellipsoid at="25 25 32" size="32 32 1" color="F" on="#3"/>
+  <ellipsoid at="25 25 31" size="32 32 4" color="x" on="#3"/>
+  <ellipsoid at="25 25 30" size="44 44 6" color="T" on="#3"/>
+  <line at="9 9 3" to="9 9 31" r="1.5" color="T" on="#3"/>
+  <line at="41 9 3" to="41 9 31" r="1.5" color="T" on="#3"/>
+  <line at="25 45 3" to="25 45 31" r="1.5" color="T" on="#3"/>
+  <!--   4: a ferro di cavallo -->
+  <box at="25 25 3" size="30 1 28" color="F" on="#4"/>
+  <box at="25 25 3" size="30 9 28" color="x" on="#4"/>
+  <ellipsoid at="25 25 14" size="30 9 30" color="x" on="#4"/>
+  <box at="25 25 3" size="40 6 26" color="T" on="#4"/>
+  <ellipsoid at="25 25 10" size="40 6 36" color="T" on="#4"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/><rule in="#4" out="B"/></prl>
+  <prl in="x" out="B"/>
+  <prl in="BT" out="*E" p="0.05" steps="1"/>
+  <!-- i cavi partono dalla piattaforma e corrono dritti -->
+  <!-- 6 rami nati a caso sui fianchi di S: ognuno va dalla sua parte e a volte sale -->
+  <one steps="6" symmetry="()"><rule in="SB" out="*e"/><rule in="BS" out="w*"/><rule in="S/B" out="*/s"/><rule in="B/S" out="n/*"/></one>
+  <prl steps="14" symmetry="()"><rule in="eB" out="Ke" p="0.95"/><rule in="*B e*" out="*e K*" p="0"/><rule in="Bw" out="wK" p="0.95"/><rule in="B* *w" out="w* *K" p="0"/><rule in="s/B" out="K/s" p="0.95"/><rule in="*/B s/*" out="*/s K/*" p="0"/><rule in="B/n" out="n/K" p="0.95"/><rule in="B/* */n" out="n/* */K" p="0"/></prl>
+  <prl><rule in="e" out="E"/><rule in="w" out="E"/><rule in="s" out="E"/><rule in="n" out="E"/></prl>
+</sequence>

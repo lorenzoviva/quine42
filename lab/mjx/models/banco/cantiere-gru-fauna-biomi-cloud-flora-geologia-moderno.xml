@@ -1,0 +1,135 @@
+<!-- Cantiere con la gru (Cantiere 8, neapolis): pilastri di altezza a caso, solai, gru e armature a caso. -->
+<sequence values="BSCRYIKWPsu#1#2#3#4#5#6z" size="500 500 50" symmetry="(xy)" name="Cantiere con la gru">
+  <color symbol="S" value="b8b4aa" name="cemento"/>
+  <color symbol="C" value="a8a49a" name="pilastri"/>
+  <color symbol="R" value="8a4a2a" name="ferri d'armatura"/>
+  <color symbol="Y" value="f2c230" name="gru"/>
+  <color symbol="I" value="3a3a3a" name="ferro"/>
+  <color symbol="K" value="e8e2d0" name="sacchi"/>
+  <color symbol="W" value="9a7a4a" name="tavole del ponteggio"/>
+  <color symbol="P" hidden="True" name="marcatore"/>
+  <color symbol="s" hidden="True" name="marcatore"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="#1" hidden="True" name="marcatore"/>
+  <color symbol="#2" hidden="True" name="marcatore"/>
+  <color symbol="#3" hidden="True" name="marcatore"/>
+  <color symbol="#4" hidden="True" name="marcatore"/>
+  <color symbol="#5" hidden="True" name="marcatore"/>
+  <color symbol="#6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
+  <box at="27 27 0" size="34 34 2" color="S"/>
+  <box at="8 12 0" size="6 14 2" color="S"/>
+  <box at="14 14 2" size="1 1 1" color="P"/>
+  <box at="14 23 2" size="1 1 1" color="P"/>
+  <box at="14 32 2" size="1 1 1" color="P"/>
+  <box at="14 41 2" size="1 1 1" color="P"/>
+  <box at="23 14 2" size="1 1 1" color="P"/>
+  <box at="23 23 2" size="1 1 1" color="P"/>
+  <box at="23 32 2" size="1 1 1" color="P"/>
+  <box at="23 41 2" size="1 1 1" color="P"/>
+  <box at="32 14 2" size="1 1 1" color="P"/>
+  <box at="32 23 2" size="1 1 1" color="P"/>
+  <box at="32 32 2" size="1 1 1" color="P"/>
+  <box at="32 41 2" size="1 1 1" color="P"/>
+  <box at="41 14 2" size="1 1 1" color="P"/>
+  <box at="41 23 2" size="1 1 1" color="P"/>
+  <box at="41 32 2" size="1 1 1" color="P"/>
+  <box at="41 41 2" size="1 1 1" color="P"/>
+  <!-- ogni pilastro sale finché non si ferma, a caso -->
+  <prl steps="40"><rule in="B P" out="P C" p="0.9"/><rule in="P" out="R" p="0.07"/></prl>
+  <all in="CB" out="*C" steps="1"/>
+  <!-- i solai si gettano attorno ai pilastri che arrivano alla loro quota, e si allargano a caso -->
+  <box at="27 27 12" size="32 32 1" color="s" on="B"/>
+  <box at="27 27 22" size="32 32 1" color="s" on="B"/>
+  <prl in="Cs" out="*S" steps="1"/>
+  <prl in="Ss" out="*S" p="0.55" steps="9"/>
+  <prl in="s" out="B"/>
+  <!-- i ferri sulle teste -->
+  <prl in="P" out="R"/>
+  <all in="B R" out="R R" steps="3"/>
+  <!-- scelta «gru»: braccio a est | braccio a nord | braccio in diagonale | braccio corto -->
+  <box at="25 25 0" size="50 50 50" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/><rule in="u" out="#4"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/><rule in="#4u" out="*#4"/></all>
+  <!--   1: braccio a est -->
+  <line at="6 6 44" to="46 6 44" r="1" color="Y" on="#1"/>
+  <line at="6 6 44" to="0 6 44" r="1" color="Y" on="#1"/>
+  <line at="6 6 49" to="36 6 44" r="0.5" color="Y" on="#1"/>
+  <line at="36 6 44" to="36 6 30" r="0" color="I" on="#1"/>
+  <box at="36 6 28" size="3 3 2" color="I" on="#1"/>
+  <!--   2: braccio a nord -->
+  <line at="6 6 44" to="6 46 44" r="1" color="Y" on="#2"/>
+  <line at="6 6 44" to="6 0 44" r="1" color="Y" on="#2"/>
+  <line at="6 6 49" to="6 36 44" r="0.5" color="Y" on="#2"/>
+  <line at="6 36 44" to="6 36 30" r="0" color="I" on="#2"/>
+  <box at="6 36 28" size="3 3 2" color="I" on="#2"/>
+  <!--   3: braccio in diagonale -->
+  <line at="6 6 44" to="36 36 44" r="1" color="Y" on="#3"/>
+  <line at="6 6 44" to="2 2 44" r="1" color="Y" on="#3"/>
+  <line at="6 6 49" to="28 28 44" r="0.5" color="Y" on="#3"/>
+  <line at="28 28 44" to="28 28 30" r="0" color="I" on="#3"/>
+  <box at="28 28 28" size="3 3 2" color="I" on="#3"/>
+  <!--   4: braccio corto -->
+  <line at="6 6 44" to="6 26 46" r="1" color="Y" on="#4"/>
+  <line at="6 6 44" to="6 1 44" r="1" color="Y" on="#4"/>
+  <line at="6 20 46" to="6 20 38" r="0" color="I" on="#4"/>
+  <box at="6 20 36" size="3 3 2" color="I" on="#4"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/><rule in="#4" out="B"/></prl>
+  <!-- la torre della gru -->
+  <box at="6 6 2" size="6 6 1" color="S"/>
+  <line at="4 4 2" to="4 4 45" r="0" color="Y"/>
+  <line at="8 4 2" to="8 4 45" r="0" color="Y"/>
+  <line at="4 8 2" to="4 8 45" r="0" color="Y"/>
+  <line at="8 8 2" to="8 8 45" r="0" color="Y"/>
+  <box at="6 6 8" size="5 5 1" color="Y"/>
+  <box at="6 6 16" size="5 5 1" color="Y"/>
+  <box at="6 6 24" size="5 5 1" color="Y"/>
+  <box at="6 6 32" size="5 5 1" color="Y"/>
+  <box at="6 6 40" size="5 5 1" color="Y"/>
+  <box at="6 6 44" size="5 5 3" color="I"/>
+  <line at="6 6 47" to="6 6 49" r="0" color="Y"/>
+  <!-- scelta «ponteggio»: sul lato est | sul lato ovest | sul lato nord | sul lato sud -->
+  <box at="27 27 2" size="40 40 30" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/><rule in="u" out="#4"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/><rule in="#4u" out="*#4"/></all>
+  <!--   1: sul lato est -->
+  <line at="44 11 2" to="44 11 30" r="0" color="I" on="#1"/>
+  <line at="44 43 2" to="44 43 30" r="0" color="I" on="#1"/>
+  <line at="44 27 2" to="44 27 30" r="0" color="I" on="#1"/>
+  <box at="44 27 10" size="1 33 1" color="W" on="#1"/>
+  <box at="44 27 18" size="1 33 1" color="W" on="#1"/>
+  <box at="44 27 26" size="1 33 1" color="W" on="#1"/>
+  <line at="44 11 2" to="44 43 30" r="0.5" color="I" on="#1"/>
+  <!--   2: sul lato ovest -->
+  <line at="10 18 2" to="10 18 30" r="0" color="I" on="#2"/>
+  <line at="10 43 2" to="10 43 30" r="0" color="I" on="#2"/>
+  <line at="10 31 2" to="10 31 30" r="0" color="I" on="#2"/>
+  <box at="10 31 10" size="1 26 1" color="W" on="#2"/>
+  <box at="10 31 18" size="1 26 1" color="W" on="#2"/>
+  <box at="10 31 26" size="1 26 1" color="W" on="#2"/>
+  <line at="10 18 2" to="10 43 30" r="0.5" color="I" on="#2"/>
+  <!--   3: sul lato nord -->
+  <line at="11 44 2" to="11 44 30" r="0" color="I" on="#3"/>
+  <line at="43 44 2" to="43 44 30" r="0" color="I" on="#3"/>
+  <line at="27 44 2" to="27 44 30" r="0" color="I" on="#3"/>
+  <box at="27 44 10" size="33 1 1" color="W" on="#3"/>
+  <box at="27 44 18" size="33 1 1" color="W" on="#3"/>
+  <box at="27 44 26" size="33 1 1" color="W" on="#3"/>
+  <line at="11 44 2" to="43 44 30" r="0.5" color="I" on="#3"/>
+  <!--   4: sul lato sud -->
+  <line at="18 10 2" to="18 10 30" r="0" color="I" on="#4"/>
+  <line at="43 10 2" to="43 10 30" r="0" color="I" on="#4"/>
+  <line at="31 10 2" to="31 10 30" r="0" color="I" on="#4"/>
+  <box at="31 10 10" size="26 1 1" color="W" on="#4"/>
+  <box at="31 10 18" size="26 1 1" color="W" on="#4"/>
+  <box at="31 10 26" size="26 1 1" color="W" on="#4"/>
+  <line at="18 10 2" to="43 10 30" r="0.5" color="I" on="#4"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/><rule in="#4" out="B"/></prl>
+  <!-- sacchi di materiale sulla platea -->
+  <one in="B S" out="K *" steps="5"/>
+  <prl in="BK" out="*K" p="0.6" steps="1"/>
+</sequence>

@@ -1,0 +1,116 @@
+<!-- Passerella pedonale (Cantiere 8, neapolis): struttura, teste e parapetti a caso; graffiti a caso. -->
+<sequence values="BSIWVLGHxPu#1#2#3#4#5#6z" size="500 500 50" symmetry="(xy)" name="Passerella pedonale">
+  <color symbol="S" value="b8b4aa" name="cemento"/>
+  <color symbol="I" value="50565e" name="acciaio"/>
+  <color symbol="W" value="e0e2e4" name="acciaio chiaro"/>
+  <color symbol="V" value="8ab8d0" name="vetro" alpha="0.5"/>
+  <color symbol="L" value="fff2b0" name="lampioni" glow="True"/>
+  <color symbol="G" value="d050a0" name="graffiti"/>
+  <color symbol="H" value="30a0d0" name="graffiti azzurri"/>
+  <color symbol="x" hidden="True" name="marcatore"/>
+  <color symbol="P" hidden="True" name="marcatore"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="#1" hidden="True" name="marcatore"/>
+  <color symbol="#2" hidden="True" name="marcatore"/>
+  <color symbol="#3" hidden="True" name="marcatore"/>
+  <color symbol="#4" hidden="True" name="marcatore"/>
+  <color symbol="#5" hidden="True" name="marcatore"/>
+  <color symbol="#6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
+  <box at="25 25 18" size="50 8 2" color="S"/>
+  <line at="25 21 20" to="25 21 32" r="0.5" color="I"/>
+  <box at="25 22 32" size="3 3 1" color="L"/>
+  <!-- gli altri lampioni nascono in punti a caso dell'impalcato e si fermano a un'altezza propria -->
+  <one in="B S" out="P *" steps="3"/>
+  <prl steps="16"><rule in="B P" out="P I" p="0.9"/><rule in="P" out="L" p="0.06"/></prl>
+  <prl in="P" out="L"/>
+  <prl in="BL" out="*L" p="0.7" steps="1"/>
+  <!-- scelta «struttura»: archi reticolari sopra | due pile | strallata -->
+  <box at="25 25 0" size="50 20 50" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
+  <!--   1: archi reticolari sopra -->
+  <ellipsoid at="25 21 -5" size="42 1 46" color="x" on="#1"/>
+  <ellipsoid at="25 29 -5" size="42 1 46" color="x" on="#1"/>
+  <ellipsoid at="25 21 -8" size="48 1 52" color="W" on="#1"/>
+  <ellipsoid at="25 29 -8" size="48 1 52" color="W" on="#1"/>
+  <line at="14 21 20" to="14 29 40" r="0.5" color="W" on="#1"/>
+  <line at="25 21 20" to="25 29 40" r="0.5" color="W" on="#1"/>
+  <line at="36 21 20" to="36 29 40" r="0.5" color="W" on="#1"/>
+  <!--   2: due pile -->
+  <box at="16 25 0" size="6 6 18" color="S" on="#2"/>
+  <box at="34 25 0" size="6 6 18" color="S" on="#2"/>
+  <box at="25 25 16" size="30 6 2" color="I" on="#2"/>
+  <!--   3: strallata -->
+  <box at="25 30 0" size="4 4 46" color="W" on="#3"/>
+  <line at="25 30 44" to="3 28 20" r="0.5" color="I" on="#3"/>
+  <line at="25 30 44" to="10 28 20" r="0.5" color="I" on="#3"/>
+  <line at="25 30 44" to="17 28 20" r="0.5" color="I" on="#3"/>
+  <line at="25 30 44" to="33 28 20" r="0.5" color="I" on="#3"/>
+  <line at="25 30 44" to="40 28 20" r="0.5" color="I" on="#3"/>
+  <line at="25 30 44" to="47 28 20" r="0.5" color="I" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
+  <prl in="x" out="B"/>
+  <!-- scelta «teste»: scale | rampe | torri degli ascensori -->
+  <box at="25 25 0" size="50 30 22" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
+  <!--   1: scale -->
+  <box at="3 21 0" size="6 1 18" color="S" on="#1"/>
+  <box at="3 20 0" size="6 1 16" color="S" on="#1"/>
+  <box at="3 19 0" size="6 1 14" color="S" on="#1"/>
+  <box at="3 18 0" size="6 1 12" color="S" on="#1"/>
+  <box at="3 17 0" size="6 1 10" color="S" on="#1"/>
+  <box at="3 16 0" size="6 1 8" color="S" on="#1"/>
+  <box at="3 15 0" size="6 1 6" color="S" on="#1"/>
+  <box at="3 14 0" size="6 1 4" color="S" on="#1"/>
+  <box at="3 13 0" size="6 1 2" color="S" on="#1"/>
+  <box at="47 29 0" size="6 1 18" color="S" on="#1"/>
+  <box at="47 30 0" size="6 1 16" color="S" on="#1"/>
+  <box at="47 31 0" size="6 1 14" color="S" on="#1"/>
+  <box at="47 32 0" size="6 1 12" color="S" on="#1"/>
+  <box at="47 33 0" size="6 1 10" color="S" on="#1"/>
+  <box at="47 34 0" size="6 1 8" color="S" on="#1"/>
+  <box at="47 35 0" size="6 1 6" color="S" on="#1"/>
+  <box at="47 36 0" size="6 1 4" color="S" on="#1"/>
+  <box at="47 37 0" size="6 1 2" color="S" on="#1"/>
+  <!--   2: rampe -->
+  <line at="2 21 18" to="2 2 0" r="2" color="S" on="#2"/>
+  <line at="48 29 18" to="48 48 0" r="2" color="S" on="#2"/>
+  <box at="2 23 0" size="4 4 18" color="S" on="#2"/>
+  <box at="48 27 0" size="4 4 18" color="S" on="#2"/>
+  <!--   3: torri degli ascensori -->
+  <box at="3 25 0" size="6 10 26" color="V" on="#3"/>
+  <box at="47 25 0" size="6 10 26" color="V" on="#3"/>
+  <box at="3 25 26" size="7 11 2" color="I" on="#3"/>
+  <box at="47 25 26" size="7 11 2" color="I" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
+  <!-- scelta «parapetti»: a sbarre | pieni | di vetro -->
+  <box at="25 25 20" size="50 10 5" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
+  <!--   1: a sbarre -->
+  <box at="25 21 20" size="50 1 4" color="I" on="#1"/>
+  <box at="25 29 20" size="50 1 4" color="I" on="#1"/>
+  <box at="25 21 21" size="48 1 2" color="x" on="#1"/>
+  <box at="25 29 21" size="48 1 2" color="x" on="#1"/>
+  <!--   2: pieni -->
+  <box at="25 21 20" size="50 1 4" color="W" on="#2"/>
+  <box at="25 29 20" size="50 1 4" color="W" on="#2"/>
+  <!--   3: di vetro -->
+  <box at="25 21 20" size="50 1 4" color="V" on="#3"/>
+  <box at="25 29 20" size="50 1 4" color="V" on="#3"/>
+  <box at="25 21 24" size="50 1 1" color="I" on="#3"/>
+  <box at="25 29 24" size="50 1 1" color="I" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
+  <prl in="x" out="B"/>
+  <!-- graffiti -->
+  <prl in="BS" out="*G" p="0.01" steps="1"/>
+  <prl in="BW" out="*H" p="0.01" steps="1"/>
+  <prl in="GS" out="*G" p="0.5" steps="2"/>
+  <prl in="HW" out="*H" p="0.5" steps="2"/>
+</sequence>

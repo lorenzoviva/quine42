@@ -1,0 +1,54 @@
+<!-- Scogliera frangiflutti (Cantiere 8, neapolis): muro a caso; massi, tetrapodi e alghe a caso. -->
+<sequence values="BSDRTAIGgPu#1#2#3#4#5#6z" size="500 500 50" symmetry="(xy)" name="Scogliera frangiflutti">
+  <color symbol="S" value="c4c0b6" name="cemento"/>
+  <color symbol="D" value="8f8b84" name="cemento scuro"/>
+  <color symbol="R" value="6e6a64" name="scogli"/>
+  <color symbol="T" value="a8a49a" name="tetrapodi"/>
+  <color symbol="A" value="3f6a4a" name="alghe"/>
+  <color symbol="I" value="3a3a3a" name="ringhiera"/>
+  <color symbol="G" value="3ad06a" name="lanterna verde" glow="True"/>
+  <color symbol="g" hidden="True" name="marcatore"/>
+  <color symbol="P" hidden="True" name="marcatore"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="#1" hidden="True" name="marcatore"/>
+  <color symbol="#2" hidden="True" name="marcatore"/>
+  <color symbol="#3" hidden="True" name="marcatore"/>
+  <color symbol="#4" hidden="True" name="marcatore"/>
+  <color symbol="#5" hidden="True" name="marcatore"/>
+  <color symbol="#6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
+  <!-- scelta «muro»: passeggiata con ringhiera | a gradoni | con la lanterna -->
+  <box at="25 38 0" size="50 24 50" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
+  <!--   1: passeggiata con ringhiera -->
+  <box at="25 40 0" size="50 14 28" color="S" on="#1"/>
+  <box at="25 34 28" size="50 1 4" color="I" on="#1"/>
+  <box at="25 46 28" size="50 1 4" color="I" on="#1"/>
+  <box at="25 40 28" size="50 10 1" color="D" on="#1"/>
+  <!--   2: a gradoni -->
+  <box at="25 44 0" size="50 10 32" color="S" on="#2"/>
+  <box at="25 37 0" size="50 6 20" color="S" on="#2"/>
+  <box at="25 32 0" size="50 6 10" color="D" on="#2"/>
+  <!--   3: con la lanterna -->
+  <box at="25 42 0" size="50 12 24" color="S" on="#3"/>
+  <cylinder at="42 42 24" size="8 8 12" color="S" on="#3"/>
+  <cylinder at="42 42 36" size="5 5 4" color="G" on="#3"/>
+  <cone at="42 42 40" size="7 7 5" color="D" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
+  <!-- 10 massi nascono a caso sul terreno accanto a ciò che c'è già ([SDR]) e crescono di lato e in alto -->
+  <box at="25 22 0" size="50 30 1" color="g" on="B"/>
+  <one in="[SDR]g" out="*R" steps="10"/>
+  <prl steps="9"><rule in="R[Bg]" out="*R" p="0.5"/><rule in="B R" out="R *" p="0.4"/></prl>
+  <prl in="g" out="B"/>
+  <!-- tetrapodi: punte che spuntano dai massi e crescono di sbieco -->
+  <one in="B R" out="P *" steps="9"/>
+  <all steps="4"><rule in="B* *P" out="P* *T"/><rule in="B P" out="P T"/></all>
+  <prl in="P" out="T"/>
+  <prl in="BT" out="*T" p="0.5" steps="1"/>
+  <prl in="BR" out="*A" p="0.12" steps="1"/>
+</sequence>

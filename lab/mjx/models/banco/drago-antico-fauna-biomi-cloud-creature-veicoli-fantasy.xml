@@ -1,0 +1,125 @@
+<!-- Drago antico (Cantiere 8, aurora): corpo, zampe, ali, collo e coda a caso; corna e creste crescono a caso. -->
+<sequence values="BFWMOAEPu#1#2#3#4#5#6z" size="500 500 50" symmetry="(xy)" name="Drago antico">
+  <color symbol="F" value="8a5a2b" name="squame bronzo"/>
+  <color symbol="W" value="d9b26a" name="ventre"/>
+  <color symbol="M" value="a8432f" name="membrana delle ali"/>
+  <color symbol="O" value="4a3020" name="ossa delle ali"/>
+  <color symbol="A" value="ece2c6" name="corna e creste"/>
+  <color symbol="E" value="ffcc33" name="occhi" glow="True"/>
+  <color symbol="P" hidden="True" name="marcatore"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="#1" hidden="True" name="marcatore"/>
+  <color symbol="#2" hidden="True" name="marcatore"/>
+  <color symbol="#3" hidden="True" name="marcatore"/>
+  <color symbol="#4" hidden="True" name="marcatore"/>
+  <color symbol="#5" hidden="True" name="marcatore"/>
+  <color symbol="#6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
+  <!-- scelta «corpo»: possente | lungo | raccolto -->
+  <box at="25 24 11" size="30 36 22" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
+  <!--   1: possente -->
+  <ellipsoid at="25 24 13" size="20 28 15" color="F" on="#1"/>
+  <!--   2: lungo -->
+  <ellipsoid at="25 23 14" size="17 32 13" color="F" on="#2"/>
+  <!--   3: raccolto -->
+  <ellipsoid at="25 25 13" size="22 24 16" color="F" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
+  <ellipsoid at="25 24 12" size="14 22 6" color="W" on="F"/>
+  <!-- scelta «zampe»: piantate | impennate -->
+  <box at="25 24 0" size="40 40 20" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/></all>
+  <!--   1: piantate -->
+  <line at="17 15 0" to="20 16 17" r="2.5" color="F" on="#1"/>
+  <line at="33 15 0" to="30 16 17" r="2.5" color="F" on="#1"/>
+  <line at="17 34 0" to="20 32 17" r="2.5" color="F" on="#1"/>
+  <line at="33 34 0" to="30 32 17" r="2.5" color="F" on="#1"/>
+  <!--   2: impennate -->
+  <line at="16 13 0" to="20 16 17" r="2.5" color="F" on="#2"/>
+  <line at="34 13 0" to="30 16 17" r="2.5" color="F" on="#2"/>
+  <line at="20 32 17" to="19 40 12" r="2.5" color="F" on="#2"/>
+  <line at="30 32 17" to="31 40 12" r="2.5" color="F" on="#2"/>
+  <box at="25 24 0" size="6 6 14" color="F" on="#2"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/></prl>
+  <!-- scelta «ali»: spiegate | alzate | raccolte -->
+  <box at="25 24 17" size="50 29 33" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
+  <!--   1: spiegate -->
+  <line at="19 26 25" to="2 29 31" r="1.5" color="O" on="#1"/>
+  <line at="31 26 25" to="48 29 31" r="1.5" color="O" on="#1"/>
+  <ellipsoid at="10 24 25" size="18 18 3" color="M" on="#1"/>
+  <ellipsoid at="40 24 25" size="18 18 3" color="M" on="#1"/>
+  <!--   2: alzate -->
+  <line at="18 26 24" to="12 27 48" r="1.5" color="O" on="#2"/>
+  <line at="32 26 24" to="38 27 48" r="1.5" color="O" on="#2"/>
+  <ellipsoid at="15 23 24" size="3 16 25" color="M" on="#2"/>
+  <ellipsoid at="35 23 24" size="3 16 25" color="M" on="#2"/>
+  <!--   3: raccolte -->
+  <ellipsoid at="16 22 19" size="5 22 12" color="M" on="#3"/>
+  <ellipsoid at="34 22 19" size="5 22 12" color="M" on="#3"/>
+  <line at="17 30 27" to="15 12 26" r="1" color="O" on="#3"/>
+  <line at="33 30 27" to="35 12 26" r="1" color="O" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
+  <!-- scelta «collo»: eretto | basso | voltato -->
+  <box at="25 42 8" size="44 16 42" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
+  <!--   1: eretto -->
+  <line at="25 34 21" to="25 40 32" r="3" color="F" on="#1"/>
+  <line at="25 40 32" to="25 43 38" r="2.5" color="F" on="#1"/>
+  <ellipsoid at="25 44 36" size="8 10 7" color="F" on="#1"/>
+  <box at="23 48 39" size="1 1 1" color="E" on="#1"/>
+  <box at="27 48 39" size="1 1 1" color="E" on="#1"/>
+  <box at="23 43 43" size="1 1 1" color="P" on="#1"/>
+  <box at="27 43 43" size="1 1 1" color="P" on="#1"/>
+  <!--   2: basso -->
+  <line at="25 34 19" to="25 44 16" r="3" color="F" on="#2"/>
+  <ellipsoid at="25 46 12" size="8 8 7" color="F" on="#2"/>
+  <box at="23 49 16" size="1 1 1" color="E" on="#2"/>
+  <box at="27 49 16" size="1 1 1" color="E" on="#2"/>
+  <box at="23 45 19" size="1 1 1" color="P" on="#2"/>
+  <box at="27 45 19" size="1 1 1" color="P" on="#2"/>
+  <!--   3: voltato -->
+  <line at="25 34 21" to="14 40 29" r="3" color="F" on="#3"/>
+  <ellipsoid at="11 42 27" size="8 9 7" color="F" on="#3"/>
+  <box at="8 45 30" size="1 1 1" color="E" on="#3"/>
+  <box at="12 46 30" size="1 1 1" color="E" on="#3"/>
+  <box at="9 41 34" size="1 1 1" color="P" on="#3"/>
+  <box at="13 41 34" size="1 1 1" color="P" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
+  <!-- scelta «coda»: arrotolata a destra | arrotolata a sinistra | alzata -->
+  <box at="25 9 0" size="48 19 44" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
+  <!--   1: arrotolata a destra -->
+  <line at="25 16 18" to="32 4 6" r="3" color="F" on="#1"/>
+  <line at="32 4 6" to="43 6 2" r="2" color="F" on="#1"/>
+  <line at="43 6 2" to="46 11 1" r="1" color="F" on="#1"/>
+  <!--   2: arrotolata a sinistra -->
+  <line at="25 16 18" to="18 4 6" r="3" color="F" on="#2"/>
+  <line at="18 4 6" to="7 6 2" r="2" color="F" on="#2"/>
+  <line at="7 6 2" to="4 11 1" r="1" color="F" on="#2"/>
+  <!--   3: alzata -->
+  <line at="25 16 19" to="25 3 25" r="3" color="F" on="#3"/>
+  <line at="25 3 25" to="25 1 35" r="2" color="F" on="#3"/>
+  <cone at="25 1 35" size="5 3 6" color="A" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
+  <!-- corna: due punte che salgono e piegano -->
+  <one steps="10">
+    <rule in="B P" out="P A" p="1"/>
+    <rule in="B* *P" out="P* *A" p="2"/>
+    <rule in="B*B *P*" out="P*P *A*" p="0.2"/>
+  </one>
+  <prl in="P" out="A"/>
+  <!-- 7 punte a caso sulla faccia alta di F, alte fino a 3 -->
+  <one in="B F" out="P *" steps="7"/>
+  <all steps="3"><rule in="B P" out="P A"/><rule in="B* *P" out="P* *A"/></all>
+  <prl in="P" out="A"/>
+</sequence>

@@ -1,0 +1,23 @@
+<!-- Helmet, worn (T289 bench, way A): the second program of the helmet, the mesh it has on a body. Written for the box of a
+     head (the wanderer's, with a voxel all round and one above): the kernel stretches it onto the head of whoever wears it. -->
+<sequence values="BIDGRK" size="13 11 11" name="Elmo indossato">
+  <color symbol="I" value="a3acb6" name="iron"/>
+  <color symbol="D" value="6e7681" name="iron in the shade"/>
+  <color symbol="G" value="c9a23a" name="brass"/>
+  <color symbol="R" value="b8392f" name="crest"/>
+  <color symbol="K" hidden="True" name="where the head is"/>
+  <!-- A shell round the head, open under it -->
+  <ellipsoid at="6 5 -3" size="13 11 15" color="I"/>
+  <ellipsoid at="6 5 -3" size="11 9 13" color="K" on="I"/>
+  <!-- The face: no iron in front, under the brow -->
+  <box at="6 9 0" size="7 5 6" color="K" on="I"/>
+  <!-- The rim, the brow and the nasal guard -->
+  <cylinder at="6 5 0" size="13 11 1" color="G" on="I"/>
+  <box at="6 9 6" size="7 5 1" color="G" on="I"/>
+  <box at="6 10 2" size="1 1 4" color="G"/>
+  <!-- The crest on top, from front to back -->
+  <box at="6 5 10" size="1 7 1" color="R"/>
+  <box at="6 5 9" size="1 9 1" color="R" on="B"/>
+  <all in="K" out="B"/>
+  <prl in="I B" out="D B" p="0.3" symmetry="()"/>
+</sequence>

@@ -1,0 +1,58 @@
+<!-- Albero di ferro fuso (Cantiere 8, orichalcum): piede a caso; canna, rami a tubo e foglie di rame a caso. -->
+<sequence values="BTUAFOZHewsnu#1#2#3#4#5#6z" size="500 500 50" symmetry="(xy)" name="Albero di ferro fuso">
+  <color symbol="T" value="3e3a36" name="ghisa"/>
+  <color symbol="U" value="4b4640" name="ghisa alta"/>
+  <color symbol="A" value="5a544c" name="tubi"/>
+  <color symbol="F" value="c4703a" name="foglie di rame"/>
+  <color symbol="O" value="b8892e" name="ottone"/>
+  <color symbol="Z" value="8a4a2a" name="ruggine"/>
+  <color symbol="H" hidden="True" name="marcatore"/>
+  <color symbol="e" hidden="True" name="marcatore"/>
+  <color symbol="w" hidden="True" name="marcatore"/>
+  <color symbol="s" hidden="True" name="marcatore"/>
+  <color symbol="n" hidden="True" name="marcatore"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="#1" hidden="True" name="marcatore"/>
+  <color symbol="#2" hidden="True" name="marcatore"/>
+  <color symbol="#3" hidden="True" name="marcatore"/>
+  <color symbol="#4" hidden="True" name="marcatore"/>
+  <color symbol="#5" hidden="True" name="marcatore"/>
+  <color symbol="#6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
+  <!-- scelta «piede»: flangia | treppiede | cassa di ingranaggi -->
+  <box at="20 20 0" size="40 40 8" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
+  <!--   1: flangia -->
+  <cylinder at="20 20 0" size="14 14 2" color="O" on="#1"/>
+  <cylinder at="20 20 2" size="9 9 2" color="T" on="#1"/>
+  <!--   2: treppiede -->
+  <line at="20 20 6" to="10 14 0" r="1.5" color="T" on="#2"/>
+  <line at="20 20 6" to="30 14 0" r="1.5" color="T" on="#2"/>
+  <line at="20 20 6" to="20 31 0" r="1.5" color="T" on="#2"/>
+  <!--   3: cassa di ingranaggi -->
+  <box at="20 20 0" size="14 14 7" color="O" on="#3"/>
+  <cylinder at="13 20 3" size="2 9 2" color="T" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
+  <cylinder at="20 20 0" size="5 5 7" color="T"/>
+  <box at="20 20 7" size="1 1 1" color="H"/>
+  <!-- il tronco cammina verso l'alto, dritto o di sbieco -->
+  <one steps="19"><rule in="B H" out="H T" p="4"/><rule in="B* *H" out="H* *T" p="0.5"/></one>
+  <one steps="23"><rule in="B H" out="H U" p="4"/><rule in="B* *H" out="H* *U" p="0.5"/></one>
+  <all in="TB" out="*T" steps="1"/>
+  <all in="UB" out="*U" steps="1"/>
+  <!-- i rami a tubo: dritti, e salgono di rado (gomiti) -->
+  <!-- 8 rami nati a caso sui fianchi di U: ognuno va dalla sua parte e a volte sale -->
+  <one steps="8" symmetry="()"><rule in="UB" out="*e"/><rule in="BU" out="w*"/><rule in="U/B" out="*/s"/><rule in="B/U" out="n/*"/></one>
+  <prl steps="14" symmetry="()"><rule in="eB" out="Ae" p="0.95"/><rule in="*B e*" out="*e A*" p="0.15"/><rule in="Bw" out="wA" p="0.95"/><rule in="B* *w" out="w* *A" p="0.15"/><rule in="s/B" out="A/s" p="0.95"/><rule in="*/B s/*" out="*/s A/*" p="0.15"/><rule in="B/n" out="n/A" p="0.95"/><rule in="B/* */n" out="n/* */A" p="0.15"/></prl>
+  <!-- le foglie di rame si allargano in piano -->
+  <prl><rule in="e" out="F"/><rule in="w" out="F"/><rule in="s" out="F"/><rule in="n" out="F"/><rule in="H" out="F"/></prl>
+  <prl in="FB" out="*F" p="0.6" steps="5"/>
+  <prl in="B F" out="F *" p="0.15" steps="2"/>
+  <prl in="BA" out="*O" p="0.05" steps="1"/>
+  <prl in="B T" out="* Z" p="0.3" steps="1"/>
+</sequence>

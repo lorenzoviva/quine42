@@ -5,7 +5,7 @@ import type { Vec3 } from '../../src/mj/engine';
 import { mjxIncludes } from '../../src/mj/model';
 import { OFFICIAL, OFFICIAL_FILES } from '../mjx/official';
 
-export type Role = 'player' | 'npc' | 'animal' | 'tree' | 'plant' | 'rock' | 'prop' | 'structure' | 'official' | 'handmade';
+export type Role = 'player' | 'npc' | 'animal' | 'tree' | 'plant' | 'rock' | 'prop' | 'structure' | 'official' | 'handmade' | 'bench';
 
 export interface Entry {
   id: string;
@@ -26,6 +26,8 @@ export interface Entry {
   trial?: boolean;
   /** Written by Human in the editor */
   handmade?: boolean;
+  /** Written for the bench */
+  bench?: boolean;
   /** The files of lab/mjx/models it reads (`<import>`, rule files; T333). */
   files?: Record<string, string>;
   /** A large model of the bench of the grid in pieces (T339, lab/banco/pezzi/): only for the developers. */
@@ -162,6 +164,18 @@ for (const [file, xml] of Object.entries(handmade)) {
 }
 
 
+// Hand drawn models
+const bench = (import.meta.env.MODE !== 'production' ? import.meta.glob('../mjx/models/banco/*.xml', { query: '?raw', import: 'default', eager: true }) : {}) as Record<string, string>;
+for (const [file, xml] of Object.entries(bench)) {
+  const base = file.replace(/^.*\//, '').replace(/\.xml$/, '');
+  const target = base.split('.')[0];
+  // The windmill of step 8.2B is a large structure: its box is the class's (5 × 5 × 4 tiles).
+  CATALOG.push({ id: `${target}`, name: `${target}`, role: 'bench', xml, vpt: 20, source: sourceOf(xml) || `modelli del banco`, bench: true });
+}
+
+
+
+
 
 /**
  * Whether the page has the developers' tools (T294, ADR-0169): `npm run dev`. The build is the players' labs (served by the production
@@ -177,10 +191,11 @@ export const GROUPS: Array<[string, (e: Entry) => boolean]> = [
   ['Oggetti e strutture', (e) => !e.trial && !e.pieces && ['prop', 'structure'].includes(e.role)],
   ...(DEV_TOOLS
     ? ([
-        ['MarkovJunior (originali)', (e) => e.role === 'official'],
-        ['Banco: modelli grandi a pezzi (T339)', (e) => !!e.pieces],
-        ['Gemini: prove degli step 8.2A e 8.2B', (e) => !!e.trial],
-        ['Modelli dell\'editor', (e) => !!e.handmade],
-      ] as Array<[string, (e: Entry) => boolean]>)
+      ['MarkovJunior (originali)', (e) => e.role === 'official'],
+      ['Banco: modelli grandi a pezzi (T339)', (e) => !!e.pieces],
+      ['Gemini: prove degli step 8.2A e 8.2B', (e) => !!e.trial],
+      ['Modelli dell\'editor', (e) => !!e.handmade],
+      ['Modelli del banco', (e) => !!e.bench],
+    ] as Array<[string, (e: Entry) => boolean]>)
     : []),
 ];

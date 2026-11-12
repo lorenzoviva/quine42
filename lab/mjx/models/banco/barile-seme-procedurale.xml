@@ -1,0 +1,71 @@
+<!-- Barrel with staves, procedural (Cantiere 2): the staves, the iron hoops and the bung of the original. The seed picks how bulging the
+     barrel is (slender, cask-shaped, wide), how tall it is (from 8 to 19 voxels: a small keg or a cellar cask) and whether a
+     ladle rests on the lid. -->
+<sequence values="BWLDISThkpqmab" size="20 20 20" symmetry="(xy)" name="Barile a doghe">
+  <color symbol="W" value="8c532b" name="legno doghe"/>
+  <color symbol="L" value="ad6f3d" name="legno chiaro"/>
+  <color symbol="D" value="4e2c14" name="fessura doghe"/>
+  <color symbol="I" value="424754" name="cerchio ferro"/>
+  <color symbol="S" value="6d7687" name="ferro lucido"/>
+  <color symbol="T" value="6a3b1a" name="tappo botte"/>
+  <color symbol="h" hidden="True" name="altezze possibili"/>
+  <color symbol="k" hidden="True" name="il taglio"/>
+  <color symbol="p" hidden="True" name="la pancia larga"/>
+  <color symbol="q" hidden="True" name="la pancia a botte"/>
+  <color symbol="m" hidden="True" name="il dado della pancia, poi il mestolo"/>
+  <color symbol="a" hidden="True" name="scelta: pancia larga"/>
+  <color symbol="b" hidden="True" name="scelta: pancia a botte"/>
+  <!-- The belly: the die at the centre of the bottom picks up to which ring the cask widens -->
+  <cylinder at="10 10 1" size="18 18 17" color="p"/>
+  <cylinder at="10 10 1" size="16 16 17" color="q"/>
+  <cylinder at="10 10 0" size="12 12 20" color="W"/>
+  <box at="10 10 0" size="1 1 1" color="m"/>
+  <one steps="1">
+    <rule in="m" out="a"/>
+    <rule in="m" out="b"/>
+    <rule in="m" out="W"/>
+  </one>
+  <all>
+    <rule in="aW" out="aa"/>
+    <rule in="a q" out="a a"/>
+    <rule in="aq" out="aa"/>
+    <rule in="ap" out="aa"/>
+    <rule in="bW" out="bb"/>
+    <rule in="bq" out="bb"/>
+  </all>
+  <all in="[ab]" out="W"/>
+  <all in="[pq]" out="B"/>
+  <!-- The rounded sides: the edges of the belly are smoothed -->
+  <convolution neighborhood="Moore" steps="1">
+    <rule in="W" out="B" values="B" sum="15..26"/>
+  </convolution>
+  <!-- The iron hoops -->
+  <box at="10 10 3" size="20 20 2" color="I" on="W"/>
+  <box at="10 10 12" size="20 20 2" color="I" on="W"/>
+  <!-- The height: the chosen layer and everything above it disappear -->
+  <box at="0 0 8" size="1 1 12" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all in="k*" out="kk"/>
+  <all in="* k" out="k *"/>
+  <all in="k" out="B"/>
+  <!-- The lid: a dark ring on the top rim and the bung at the centre -->
+  <all in="B [WI]" out="B D"/>
+  <all in="D/D/D/D/D D/D/D/D/D" out="*/*/*/*/* */*/W/*/*" symmetry="()"/>
+  <all in="D/D/D D/D/D" out="*/*/* */T/*" symmetry="()" steps="1"/>
+  <!-- Perhaps a ladle resting on the lid -->
+  <prl in="B D" out="m *" p="0.03" steps="1"/>
+  <one in="m" out="S" steps="1"/>
+  <all in="m" out="B"/>
+  <one in="SB" out="SS" steps="5"/>
+  <prl steps="1" in="B W" out="B D" p="0.05"/>
+  <all steps="8">
+    <rule in="D W" out="D D"/>
+    <rule in="W D" out="D D"/>
+  </all>
+  <prl steps="1">
+    <rule in="B W" out="B L" p="0.65"/>
+    <rule in="B I" out="B S" p="0.5"/>
+    <rule in="I" out="S" p="0.12"/>
+  </prl>
+</sequence>

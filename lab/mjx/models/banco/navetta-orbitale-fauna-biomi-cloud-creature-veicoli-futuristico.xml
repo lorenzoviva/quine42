@@ -1,0 +1,95 @@
+<!-- Navetta orbitale (Cantiere 8, sidera): fusoliera, ali, deriva e motori a caso; pannelli termici a caso. -->
+<sequence values="BWKGVOPu#1#2#3#4#5#6z" size="500 500 50" symmetry="(xy)" name="Navetta orbitale">
+  <color symbol="W" value="eceff1" name="scafo"/>
+  <color symbol="K" value="2c3036" name="pannelli termici"/>
+  <color symbol="G" value="7d858c" name="carrelli" part="gamba"/>
+  <color symbol="V" value="3f6c8a" name="vetri"/>
+  <color symbol="O" value="ff8c3a" name="ugelli" glow="True"/>
+  <color symbol="P" hidden="True" name="marcatore"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="#1" hidden="True" name="marcatore"/>
+  <color symbol="#2" hidden="True" name="marcatore"/>
+  <color symbol="#3" hidden="True" name="marcatore"/>
+  <color symbol="#4" hidden="True" name="marcatore"/>
+  <color symbol="#5" hidden="True" name="marcatore"/>
+  <color symbol="#6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
+  <line at="25 40 0" to="25 40 12" r="1" color="G"/>
+  <line at="18 12 0" to="22 14 12" r="1" color="G"/>
+  <line at="32 12 0" to="28 14 12" r="1" color="G"/>
+  <box at="25 40 0" size="5 5 1" color="G"/>
+  <box at="18 12 0" size="5 5 1" color="G"/>
+  <box at="32 12 0" size="5 5 1" color="G"/>
+  <!-- scelta «fusoliera»: lunga | tozza | a freccia -->
+  <box at="25 25 6" size="20 50 18" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
+  <!--   1: lunga -->
+  <ellipsoid at="25 25 8" size="12 44 11" color="W" on="#1"/>
+  <!--   2: tozza -->
+  <ellipsoid at="25 26 7" size="16 34 14" color="W" on="#2"/>
+  <!--   3: a freccia -->
+  <ellipsoid at="25 24 8" size="10 46 10" color="W" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
+  <ellipsoid at="25 36 13" size="8 10 6" color="V" on="W"/>
+  <!-- scelta «ali»: a delta | a freccia | corte -->
+  <box at="25 20 8" size="50 30 6" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
+  <!--   1: a delta -->
+  <ellipsoid at="25 14 10" size="46 22 2" color="W" on="#1"/>
+  <!--   2: a freccia -->
+  <line at="23 24 11" to="3 8 11" r="1.5" color="W" on="#2"/>
+  <line at="27 24 11" to="47 8 11" r="1.5" color="W" on="#2"/>
+  <line at="23 18 11" to="5 6 11" r="1.5" color="W" on="#2"/>
+  <line at="27 18 11" to="45 6 11" r="1.5" color="W" on="#2"/>
+  <!--   3: corte -->
+  <box at="25 18 10" size="36 10 2" color="W" on="#3"/>
+  <box at="7 18 8" size="2 10 6" color="K" on="#3"/>
+  <box at="43 18 8" size="2 10 6" color="K" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
+  <!-- scelta «deriva»: singola | doppia | a V -->
+  <box at="25 10 14" size="30 14 24" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
+  <!--   1: singola -->
+  <box at="25 11 15" size="2 8 18" color="W" on="#1"/>
+  <!--   2: doppia -->
+  <line at="23 12 16" to="19 8 31" r="1" color="W" on="#2"/>
+  <line at="27 12 16" to="31 8 31" r="1" color="W" on="#2"/>
+  <!--   3: a V -->
+  <line at="24 11 15" to="15 8 30" r="1.5" color="W" on="#3"/>
+  <line at="26 11 15" to="35 8 30" r="1.5" color="W" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
+  <!-- scelta «motori»: due | tre | uno grande -->
+  <box at="25 7 4" size="30 10 18" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
+  <!--   1: due -->
+  <ellipsoid at="21 8 9" size="6 8 6" color="K" on="#1"/>
+  <ellipsoid at="29 8 9" size="6 8 6" color="K" on="#1"/>
+  <box at="21 4 11" size="3 1 3" color="O" on="#1"/>
+  <box at="29 4 11" size="3 1 3" color="O" on="#1"/>
+  <!--   2: tre -->
+  <ellipsoid at="20 9 8" size="5 8 5" color="K" on="#2"/>
+  <ellipsoid at="30 9 8" size="5 8 5" color="K" on="#2"/>
+  <ellipsoid at="25 8 14" size="5 8 5" color="K" on="#2"/>
+  <box at="20 5 10" size="2 1 2" color="O" on="#2"/>
+  <box at="30 5 10" size="2 1 2" color="O" on="#2"/>
+  <box at="25 4 16" size="2 1 2" color="O" on="#2"/>
+  <!--   3: uno grande -->
+  <ellipsoid at="25 8 7" size="10 9 10" color="K" on="#3"/>
+  <box at="25 3 11" size="5 1 5" color="O" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
+  <!-- antenne dorsali che spuntano a caso, alte a caso -->
+  <one in="B W" out="P *" steps="3"/>
+  <prl steps="8"><rule in="B P" out="P G" p="0.8"/></prl>
+  <prl in="P" out="O"/>
+  <!-- pannelli termici che si allargano sulla pancia -->
+  <prl in="W B" out="K *" p="0.03" steps="1"/>
+  <prl in="KW" out="*K" p="0.4" steps="3"/>
+</sequence>

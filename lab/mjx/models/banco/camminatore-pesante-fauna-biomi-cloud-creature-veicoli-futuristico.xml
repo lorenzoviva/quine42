@@ -1,0 +1,102 @@
+<!-- Camminatore pesante (Cantiere 8, sidera): gambe, cabina e bracci a caso; antenne a rami dalle spalle. -->
+<sequence values="BWYGKVPQu#1#2#3#4#5#6z" size="500 500 50" symmetry="(xy)" name="Camminatore pesante">
+  <color symbol="W" value="c9d0d4" name="corazza"/>
+  <color symbol="Y" value="e2b23a" name="piastre gialle"/>
+  <color symbol="G" value="4c545a" name="pistoni" part="gamba"/>
+  <color symbol="K" value="23282c" name="giunti"/>
+  <color symbol="V" value="6ad0ff" name="cabina di vetro" glow="True"/>
+  <color symbol="P" hidden="True" name="marcatore"/>
+  <color symbol="Q" hidden="True" name="marcatore"/>
+  <color symbol="u" hidden="True" name="marcatore"/>
+  <color symbol="#1" hidden="True" name="marcatore"/>
+  <color symbol="#2" hidden="True" name="marcatore"/>
+  <color symbol="#3" hidden="True" name="marcatore"/>
+  <color symbol="#4" hidden="True" name="marcatore"/>
+  <color symbol="#5" hidden="True" name="marcatore"/>
+  <color symbol="#6" hidden="True" name="marcatore"/>
+  <color symbol="z" hidden="True" name="marcatore"/>
+  <!-- mescola: consuma le prime otto estrazioni del generatore, che per semi vicini (1, 2, 3…) danno numeri vicini -->
+  <box at="3 0 0" size="7 1 1" color="z" on="B"/>
+  <box at="0 1 0" size="1 1 1" color="z" on="B"/>
+  <one in="z" out="B" steps="8"/>
+  <box at="25 25 20" size="14 10 6" color="K"/>
+  <!-- scelta «gambe»: erette | al passo | accovacciate -->
+  <box at="25 25 0" size="40 46 23" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
+  <!--   1: erette -->
+  <box at="17 27 0" size="8 12 3" color="K" on="#1"/>
+  <box at="33 27 0" size="8 12 3" color="K" on="#1"/>
+  <line at="20 25 22" to="17 25 11" r="2.5" color="G" on="#1"/>
+  <line at="17 25 11" to="17 26 2" r="2.5" color="G" on="#1"/>
+  <line at="30 25 22" to="33 25 11" r="2.5" color="G" on="#1"/>
+  <line at="33 25 11" to="33 26 2" r="2.5" color="G" on="#1"/>
+  <!--   2: al passo -->
+  <box at="17 37 0" size="8 12 3" color="K" on="#2"/>
+  <box at="33 15 0" size="8 12 3" color="K" on="#2"/>
+  <line at="20 25 22" to="18 33 12" r="2.5" color="G" on="#2"/>
+  <line at="18 33 12" to="17 36 2" r="2.5" color="G" on="#2"/>
+  <line at="30 25 22" to="33 21 11" r="2.5" color="G" on="#2"/>
+  <line at="33 21 11" to="33 15 2" r="2.5" color="G" on="#2"/>
+  <!--   3: accovacciate -->
+  <box at="14 27 0" size="8 12 3" color="K" on="#3"/>
+  <box at="36 27 0" size="8 12 3" color="K" on="#3"/>
+  <line at="20 25 22" to="14 36 13" r="2.5" color="G" on="#3"/>
+  <line at="14 36 13" to="14 27 2" r="2.5" color="G" on="#3"/>
+  <line at="30 25 22" to="36 36 13" r="2.5" color="G" on="#3"/>
+  <line at="36 36 13" to="36 27 2" r="2.5" color="G" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
+  <!-- scelta «cabina»: larga | a cupola | a torre -->
+  <box at="25 25 25" size="28 24 25" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
+  <!--   1: larga -->
+  <box at="25 34 30" size="14 1 4" color="V" on="#1"/>
+  <box at="25 25 25" size="24 18 12" color="W" on="#1"/>
+  <!--   2: a cupola -->
+  <box at="25 34 31" size="10 1 4" color="V" on="#2"/>
+  <ellipsoid at="25 25 24" size="22 20 16" color="W" on="#2"/>
+  <!--   3: a torre -->
+  <box at="25 31 36" size="10 1 4" color="V" on="#3"/>
+  <box at="25 24 25" size="16 14 18" color="W" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
+  <box at="15 25 30" size="7 8 6" color="K"/>
+  <box at="35 25 30" size="7 8 6" color="K"/>
+  <box at="14 23 36" size="1 1 1" color="P"/>
+  <box at="36 23 36" size="1 1 1" color="P"/>
+  <!-- scelta «bracci»: due cannoni | lanciamissili | artiglio e cannone -->
+  <box at="25 30 4" size="50 40 46" color="u" on="B"/>
+  <one steps="1"><rule in="u" out="#1"/><rule in="u" out="#2"/><rule in="u" out="#3"/></one>
+  <all symmetry="(xyz)"><rule in="#1u" out="*#1"/><rule in="#2u" out="*#2"/><rule in="#3u" out="*#3"/></all>
+  <!--   1: due cannoni -->
+  <line at="11 25 31" to="11 45 31" r="2.5" color="G" on="#1"/>
+  <line at="39 25 31" to="39 45 31" r="2.5" color="G" on="#1"/>
+  <box at="11 47 31" size="4 4 4" color="K" on="#1"/>
+  <box at="39 47 31" size="4 4 4" color="K" on="#1"/>
+  <!--   2: lanciamissili -->
+  <box at="10 25 36" size="8 12 8" color="Y" on="#2"/>
+  <box at="40 25 36" size="8 12 8" color="Y" on="#2"/>
+  <line at="11 25 30" to="8 30 18" r="2" color="G" on="#2"/>
+  <line at="39 25 30" to="42 30 18" r="2" color="G" on="#2"/>
+  <!--   3: artiglio e cannone -->
+  <line at="11 26 31" to="8 36 14" r="2.5" color="G" on="#3"/>
+  <line at="8 36 14" to="6 41 6" r="1.5" color="K" on="#3"/>
+  <line at="8 36 14" to="11 42 6" r="1.5" color="K" on="#3"/>
+  <line at="39 25 31" to="39 46 33" r="2.5" color="G" on="#3"/>
+  <cylinder at="39 22 34" size="5 5 6" color="Y" on="#3"/>
+  <prl><rule in="u" out="B"/><rule in="#1" out="B"/><rule in="#2" out="B"/><rule in="#3" out="B"/></prl>
+  <!-- sfiati che spuntano a caso sulla cabina -->
+  <!-- 4 punte a caso sulla faccia alta di W, alte fino a 3 -->
+  <one in="B W" out="Q *" steps="4"/>
+  <all steps="3"><rule in="B Q" out="Q K"/><rule in="B* *Q" out="Q* *K"/></all>
+  <prl in="Q" out="K"/>
+  <!-- antenne a rami dalle spalle -->
+  <one steps="10">
+    <rule in="B P" out="P K" p="2"/>
+    <rule in="B* *P" out="P* *K" p="1"/>
+    <rule in="B*B *P*" out="P*P *K*" p="0.4"/>
+  </one>
+  <prl in="P" out="K"/>
+  <prl in="W" out="Y" p="0.002" steps="1"/>
+  <prl in="YW" out="*Y" p="0.5" steps="3"/>
+</sequence>

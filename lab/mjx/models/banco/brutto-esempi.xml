@@ -1,0 +1,7 @@
+<!-- Una scatola: un colore, una stanza, la porta sul retro, nessuna scala. -->
+<sequence values="BW" size="500 500 50" name="Scatola">
+  <color symbol="W" value="c8b89a" name="muro"/>
+  <box at="49.5 49.5 0" size="80 80 51" color="W"/>
+  <box at="49.5 49.5 3" size="74 74 45" color="B"/>
+  <box at="49.5 11 3" size="12 3 34" color="B"/>
+</sequence>

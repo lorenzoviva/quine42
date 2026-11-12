@@ -1,0 +1,80 @@
+<!-- Runic altar (fantasy, aurora): a stone altar on a plinth, with carved runes shining on the sides. The seed picks the
+     shape of the body (a solid block, a table on two pillars or a round cup-shaped altar) and what stands on top (an arcane crystal, a book
+     open on a lectern, candles of different heights or a carved stele). -->
+<sequence values="BSdRCKPpWFLVUaboefgh" size="20 20 20" symmetry="(xy)" name="Altare runico">
+  <color symbol="S" value="8a8478" name="pietra"/>
+  <color symbol="d" value="5e5a52" name="pietra scura"/>
+  <color symbol="R" value="7fd8ff" name="runa luminosa" glow="True"/>
+  <color symbol="C" value="b48cff" name="cristallo arcano" glow="True"/>
+  <color symbol="K" value="7a52d0" name="cristallo in ombra"/>
+  <color symbol="P" value="eadcb4" name="pergamena"/>
+  <color symbol="p" value="6b4a2e" name="legno del leggio"/>
+  <color symbol="W" value="efe6cc" name="cera"/>
+  <color symbol="F" value="ffc04a" name="fiamma" glow="True"/>
+  <color symbol="L" value="4a3020" name="copertina di cuoio"/>
+  <color symbol="V" hidden="True" name="spazio del corpo"/>
+  <color symbol="U" hidden="True" name="spazio sopra"/>
+  <color symbol="a" hidden="True" name="corpo a blocco"/>
+  <color symbol="b" hidden="True" name="corpo a tavola"/>
+  <color symbol="o" hidden="True" name="corpo rotondo"/>
+  <color symbol="e" hidden="True" name="sopra: cristallo"/>
+  <color symbol="f" hidden="True" name="sopra: libro"/>
+  <color symbol="g" hidden="True" name="sopra: candele"/>
+  <color symbol="h" hidden="True" name="sopra: stele"/>
+  <!-- The two dice: the shape of the body and what stands on top -->
+  <box at="10 10 0" size="20 20 10" color="a"/>
+  <all in="a" out="V"/>
+  <box at="10 10 10" size="20 20 10" color="U"/>
+  <one steps="1"><rule in="V" out="a"/><rule in="V" out="b"/><rule in="V" out="o"/></one>
+  <one steps="1"><rule in="U" out="e"/><rule in="U" out="f"/><rule in="U" out="g"/><rule in="U" out="h"/></one>
+  <all symmetry="(xyz)">
+    <rule in="aV" out="aa"/><rule in="bV" out="bb"/><rule in="oV" out="oo"/>
+    <rule in="eU" out="ee"/><rule in="fU" out="ff"/><rule in="gU" out="gg"/><rule in="hU" out="hh"/>
+  </all>
+  <!-- The plinth -->
+  <box at="10 10 0" size="17 13 1" color="d" on="[abo]"/>
+  <!-- Solid block -->
+  <box at="10 10 1" size="13 9 8" color="S" on="a"/>
+  <box at="10 10 9" size="15 11 1" color="d" on="a"/>
+  <!-- Table on two pillars -->
+  <box at="5 10 1" size="3 7 7" color="S" on="b"/>
+  <box at="15 10 1" size="3 7 7" color="S" on="b"/>
+  <box at="10 10 8" size="17 11 2" color="S" on="b"/>
+  <box at="10 10 9" size="17 11 1" color="d" on="b"/>
+  <!-- Round cup-shaped altar -->
+  <cylinder at="10 10 1" size="9 9 5" color="S" on="o"/>
+  <cylinder at="10 10 6" size="13 13 2" color="S" on="o"/>
+  <cylinder at="10 10 8" size="17 17 2" color="d" on="o"/>
+  <!-- Fallen, chipped stones on the edge of the plinth -->
+  <prl steps="1" in="[abo] d" out="S *" p="0.12"/>
+  <prl steps="1" in="d[abo]" out="dS" p="0.05"/>
+  <!-- The runes carved on the sides -->
+  <prl steps="1" in="SB" out="RB" p="0.07"/>
+  <prl steps="1" in="S[abo]" out="R*" p="0.07"/>
+  <all steps="1" in="R S" out="R R"/>
+  <!-- An arcane crystal with two shards -->
+  <box at="10 10 10" size="3 3 6" color="C" on="e"/>
+  <cone at="10 10 16" size="3 3 3" color="C" on="e"/>
+  <line at="9 10 10" to="6 9 13" r="0.6" color="K" on="e"/>
+  <line at="11 11 10" to="13 12 12" r="0.6" color="K" on="e"/>
+  <!-- A book open on a lectern -->
+  <box at="10 10 10" size="3 3 3" color="p" on="f"/>
+  <box at="10 10 13" size="9 5 1" color="L" on="f"/>
+  <box at="8 10 14" size="3 5 1" color="P" on="f"/>
+  <box at="12 10 14" size="3 5 1" color="P" on="f"/>
+  <box at="10 10 14" size="1 5 1" color="R" on="f"/>
+  <!-- Candles of different heights -->
+  <box at="5 8 10" size="2 2 5" color="W" on="g"/>
+  <box at="15 8 10" size="2 2 3" color="W" on="g"/>
+  <box at="8 12 10" size="2 2 2" color="W" on="g"/>
+  <box at="13 12 10" size="2 2 4" color="W" on="g"/>
+  <box at="10 9 10" size="3 3 6" color="W" on="g"/>
+  <all in="B W" out="F *"/>
+  <!-- A carved stele -->
+  <box at="10 9 10" size="9 3 8" color="S" on="h"/>
+  <box at="10 9 18" size="7 3 1" color="S" on="h"/>
+  <box at="10 11 12" size="1 1 5" color="R" on="h"/>
+  <box at="8 11 14" size="5 1 1" color="R" on="h"/>
+  <box at="10 11 16" size="3 1 1" color="R" on="h"/>
+  <all in="[VUaboefgh]" out="B"/>
+</sequence>

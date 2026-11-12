@@ -1,0 +1,113 @@
+<sequence values="BNE" size="500 500 50" symmetry="(xy)" ground="E" origin="bottom">
+  <!--
+    CASTELLO DEL SIGNORE: pianta grossa, il fronte è y grande.
+    x  cortile d'onore: rettangolo attorno a N, semilati da 7 a 10 caselle (i semi cambiano i lati)
+    W/O cinta bassa spessa 3 (O = faccia esterna); T/t torri 5x5 agli angoli convessi della cinta
+    S/s 0-2 torri in più a metà dei lati liberi della cinta (lato e posto variano col seme), poi T/t
+    v  asse dalla corte al fronte; G  portone 3x3 attraverso la cinta, sull'asse, strada libera fino al bordo
+    H  androne coperto 7x4 dietro il portone, h i suoi muri, D la sua porta verso il cortile
+    K/k mastio 10x8 nell'angolo di fondo più lontano dall'androne (sinistro o destro a seconda del seme),
+        con la faccia di fondo nella cinta; r il suo interno, d la porta sul cortile
+    P/p cappella addossata alla cinta di fondo e laterale, nell'altro angolo, larga fino al mastio; q la sua porta
+    c  davanti di ogni porta (libero, poi torna cortile); J abbeveratoi da saltare nel cortile
+  -->
+  <map scale="1/4 1/4 1/4" values="BNEzaxWOTtvGHhDKkrdPpqcJSs">
+    <rule in="E" out="E"/>
+    <rule in="N" out="N"/>
+
+    <!-- il lotto -->
+    <prl in="***/*E*/***" out="***/*z*/***"/>
+    <prl in="Ez" out="*E" steps="4"/>
+
+    <!-- cortile: rettangolo con lati casuali -->
+    <all in="Nz" out="*a" steps="1"/>
+    <all in="[Nx]az" out="*xa" steps="6"/>
+    <prl steps="3"><rule in="xaz" out="*xa" p="0.5"/></prl>
+    <prl in="a" out="x"/>
+    <all in="[Nx]z/*[Nx]" out="*x/**"/>
+    <prl in="z" out="E"/>
+
+    <!-- cinta spessa 3 -->
+    <all in="[Nx]E" out="*W"/>
+    <all in="WE" out="*W" steps="2"/>
+    <all in="WE/*W" out="*W/**"/>
+    <prl in="WE" out="O*"/>
+
+    <!-- torri d'angolo -->
+    <all in="EE/EO" out="**/*T"/>
+    <all steps="2">
+      <rule in="[Tt][EWOx]" out="*t"/>
+      <rule in="[Tt]*/*[EWOx]" out="**/*t"/>
+    </all>
+
+    <!-- asse e portone -->
+    <all in="N/x" out="*/v" symmetry="()" steps="1"/>
+    <all in="v/x" out="*/v" symmetry="()"/>
+    <all in="v/[WO]" out="*/G" symmetry="()"/>
+    <all in="G/[WO]" out="*/G" symmetry="()"/>
+    <all in="[WO]G[WO]" out="GGG" symmetry="()" steps="1"/>
+
+    <!-- androne dietro il portone: 9x5, bordo verso il cortile = muri h, pavimento 7x4 -->
+    <all in="v/G" out="H/*" symmetry="()" steps="1"/>
+    <all in="Hx" out="*H" symmetry="(x)" steps="4"/>
+    <all in="[xv]/H" out="H/*" symmetry="()" steps="4"/>
+    <prl in="H[xv]" out="h*"/>
+    <one in="xvx/xvx/hhh" out="ccc/ccc/DDD" symmetry="()" steps="1"/>
+    <prl><rule in="N" out="x"/><rule in="v" out="x"/></prl>
+
+    <!-- mastio: angolo di fondo lontano dall'androne, dentro la cinta di fondo -->
+    <one in="x" out="K" steps="1"><field for="K" from="HhDc" on="x"/></one>
+    <all in="[Kk]x" out="*k" symmetry="(x)" steps="9"/>
+    <all in="[WO]/[Kk]" out="k/*" symmetry="()" steps="3"/>
+    <all in="[Kk]/x" out="*/k" symmetry="()" steps="4"/>
+    <prl in="K" out="k"/>
+    <prl in="*k*/kkk/*k*" out="***/*r*/***"/>
+    <one in="rrr/rrr/rrr/kkk/xxx/xxx" out="***/***/***/ddd/ccc/ccc" symmetry="()" steps="1"/>
+
+    <!-- cappella: l'altro angolo di fondo, contro le mura, fino al mastio -->
+    <one in="[Wt][Wt]/[Wt]x" out="**/*P" symmetry="(x)" steps="1"/>
+    <all in="[Pp]x" out="*p" symmetry="(x)"/>
+    <all in="[Pp]/x" out="*/p" symmetry="()" steps="3"/>
+    <prl in="P" out="p"/>
+    <one in="ppp/xxx/xxx" out="qqq/ccc/ccc" symmetry="()" steps="1"/>
+
+    <!-- torri a metà dei lati liberi -->
+    <one steps="2"><rule in="EEEEEEEEEEEEE/OOOOOOOOOOOOO" out="*************/******S******"/></one>
+    <all steps="2">
+      <rule in="[Ss][EWOx]" out="*s"/>
+      <rule in="[Ss]*/*[EWOx]" out="**/*s"/>
+    </all>
+    <prl><rule in="S" out="T"/><rule in="s" out="t"/></prl>
+
+    <!-- abbeveratoi da saltare, lontani da porte e muri -->
+    <one steps="3"><rule in="xxxx/xxxx/xxxx" out="****/*JJ*/****"/></one>
+    <prl in="c" out="x"/>
+  </map>
+
+  <color symbol="B" value="000000" name="aria"/>
+  <color symbol="N" value="FF0000" name="centro"/>
+  <color symbol="E" value="6E8B4A" name="prato"/>
+  <color symbol="z" value="8FA868" name="lotto"/>
+  <color symbol="a" value="FF00FF" name="camminatore"/>
+  <color symbol="x" value="C9B48A" name="cortile d'onore"/>
+  <color symbol="W" value="D8D2C2" name="pietra chiara della cinta"/>
+  <color symbol="O" value="B8B0A0" name="faccia esterna della cinta"/>
+  <color symbol="T" value="3E4A5A" name="centro della torre"/>
+  <color symbol="t" value="E6E0D0" name="pietra chiara delle torri"/>
+  <color symbol="v" value="FFD000" name="asse"/>
+  <color symbol="G" value="6B4A2B" name="portone di quercia"/>
+  <color symbol="H" value="9A8F7C" name="pavimento dell'androne"/>
+  <color symbol="h" value="CFC7B4" name="muri dell'androne"/>
+  <color symbol="D" value="7A5634" name="porta dell'androne"/>
+  <color symbol="K" value="FFFFFF" name="seme del mastio"/>
+  <color symbol="k" value="F2EEE4" name="pietra chiara del mastio"/>
+  <color symbol="r" value="8C7A66" name="sala grande"/>
+  <color symbol="d" value="5C3F24" name="porta del mastio"/>
+  <color symbol="P" value="FFFFFF" name="seme della cappella"/>
+  <color symbol="p" value="E9DCC4" name="cappella"/>
+  <color symbol="q" value="4E3520" name="porta della cappella"/>
+  <color symbol="c" value="FFA040" name="davanti della porta"/>
+  <color symbol="J" value="3F6E9A" name="abbeveratoio"/>
+  <color symbol="S" value="3E4A5A" name="seme di torre"/>
+  <color symbol="s" value="E6E0D0" name="torre in crescita"/>
+</sequence>
