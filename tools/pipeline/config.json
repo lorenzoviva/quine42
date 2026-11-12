@@ -200,7 +200,7 @@
       "ratioSessioneSettimana": 12
     },
     "fable": {
-      "modello": "Fable 5.1",
+      "modello": "Fable 5.2",
       "cmd": "claude",
       "args": [
         "--output-format",
@@ -208,7 +208,7 @@
         "--dangerously-skip-permissions",
         "--chrome",
         "--model",
-        "claude-fable-5-1"
+        "fable"
       ],
       "resume": [
         "--resume",
