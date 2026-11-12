@@ -3801,7 +3801,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Step: 34
 - **Assorbito (autore, 05/11: «vedi tu»; decisione dell'orchestratore):** le tre proposte diventano le tre vesti di T284, T285 e T286, e griglia e tipografia da φ e Fibonacci stanno nella base comune di T283. Ciò che era «launcher» (carte e strutture in 3D, universi più giocati, notizie) resta a fine Fase II, in T233 e T235, sulla veste scelta. La richiesta di partenza: «sembra a metà tra un pitch per una startup e un blog per fumetti»; la vuole come il launcher di un gioco multiplayer moderno, «oddly satisfying», senza testi che guastino la scoperta della corona.
 
-### T233 · La landing launcher nel sito — `da fare`
+### T233 · La landing launcher nel sito — `fatto` (`de2c837f`)
 - Pipeline: claude · sforzo high · stima 3% · approvato · priorità 2
 - Step: 35
 - Contesto: D51.2 (autore, 10/11): il launcher si fa sulla **base comune** delle vesti (ADR-0145), senza aspettare la scelta della veste, che arriva entro la Fase VI col contatore (T287); deve funzionare con ogni veste di `site/skins/` (`dossier T287`; da dove viene: `dossier T232`).
@@ -3809,6 +3809,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Test: typecheck, build e suite intera con i loro turni.
 - Browser: sì, a 1920 e 390 px, con almeno due vesti, in `npm run dev` e sotto `npm run serve`.
 - Quando è fatto: la home è il launcher scelto; commit su `task/T233`. Sicurezza: nessuna superficie nuova, o le voci.
+- Esito: la home è il launcher: pannello di lancio nell'hero (universo, GIOCA anche nella barra, numeri, «in gioco ora»), novità/video/showcase nascosti finché vuoti, la striscia «coming soon» degli altri universi resta, le porte del sito in quattro riquadri; `site/launcher-core.ts` puro con `tests/site-launcher.test.ts`; nessuna rotta nuova (sicurezza: nessuna superficie nuova); corretti i pulsanti `hidden` che restavano visibili e l'evidenza della barra; allineato `tests/pipeline.test.ts` all'alias `fable` di fed7410c (falliva già sulla base). Non provato con una sessione vera: «in gioco ora» solo con una risposta di `/api/session` simulata.
 
 ### T234 · Il news-blog del sito — `fatto` (`fc48b9b`)
 - Pipeline: claude · stima 2% · approvato · priorità 3

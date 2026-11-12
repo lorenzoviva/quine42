@@ -1432,6 +1432,12 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Dove vive**: `site/skins/`, `site/skin.ts`, `site/skin-core.ts`, `server/skins.ts`
 - **Da non usare**: `tema` (per la veste: è il testo di un'ambientazione e `src/theme.css`)
 
+### Launcher
+- **Inglese**: `launcher`, `Launch`, `launchOf`
+- **Definizione**: la home del sito come il launcher di un gioco multigiocatore: nell'hero il pannello di lancio (l'universo, GIOCA, chi è in gioco ora) accanto al palco 3D; sotto novità, video e showcase solo quando hanno contenuti, le porte del sito e gli universi che arriveranno (T233).
+- **Dove vive**: `site/index.html`, `site/landing.ts`, `site/launcher-core.ts`
+- **Da non usare**: `pitch`, `homepage` (per il launcher)
+
 ## Gli omonimi
 
 Stessa parola, concetti diversi: il problema che confonde di più, più dei sinonimi. Quando il contesto non basta si usa il nome lungo.
