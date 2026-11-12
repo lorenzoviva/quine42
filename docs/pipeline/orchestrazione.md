@@ -1624,3 +1624,7 @@
 - [2026-11-10T02:49:07.626Z] orchestratore: epoca 345 su gemini (contesto a 122 % della finestra)
 - [2026-11-10T03:14:54.024Z] pipeline spenta (ferma --ora, Ctrl+C)
 - [2026-11-10T17:16:26.380Z] orchestratore: epoca 347 su gemini (contesto a 46 % della finestra)
+- [2026-11-10T17:23:07.060Z] orchestratore: epoca 348 su gemini (contesto a 338 % della finestra)
+- [2026-11-10T18:02:44.830Z] pipeline spenta (ferma --ora, Ctrl+C)
+- [2026-11-12T17:09:12.986Z] lancio T290 su claude (Opus 5.5, sforzo max) in H:\projects\rune\.claude\worktrees\t290
+- [2026-11-12T17:09:17.902Z] orchestratore: epoca 350 su claude (claude ha di nuovo crediti)

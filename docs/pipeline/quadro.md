@@ -19,14 +19,14 @@ Aggiornato il 12/11/2026, epoca 350 (claude). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **In corso:** T290 (vestiti addosso, claude max, lanciato 12/11 17:09). **Pronti:** T346 (spostato su **fable**, sforzo extra, adozione intensiva dopo il reset), T345 (claude high 3% p5).
-1. **Da approvare dall'autore:** T347 (studio Campagna del Master, high 4% p5), T310b (lingua interna campi schemi, extra 6% p4).
+0. **In corso:** T290 (claude max). **Pronti:** T346 (fable max), T345, T233 (launcher sulla base comune, D51.2), T347 (approvato: richiesta esplicita), T348→T349→T350 (Jev nel gioco, D45), T351, T352; dopo T290 T353; dopo T346 T354→T355 (non prima del 15/11) e T356 (tetto voxel gargantuesche).
+1. **Da approvare dall'autore:** T310b (lingua interna campi schemi, extra 6% p4).
 2. **Crediti (12/11):** Claude, Fable, Sonnet, Haiku 100 % (reset settimanale 19/11 16:00); Gemini 98 %; Argon 93 %; agy 100 %. Generatore acceso, fermo per i task pronti.
 
 ## Attese dall'autore
 
 - **D35 (piano di lancio):** in analisi dall'autore per i primi prerequisiti (D3.1 account HN/Reddit da subito).
-- **Approvazione proposte:** T347 (Campagna del Master), T310b (schema campi inglese).
+- **Approvazione proposte:** T310b (schema campi inglese).
 
 ## Regole attive
 

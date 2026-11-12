@@ -3077,6 +3077,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 - Pipeline: claude · stima 5% · approvato · priorità 8
 - Step: 30
 - Contesto: decisione dell'autore del 04/11 (`domande/T182.md`, domanda 2, opzione C): interni, decorazioni e oggetti di scena non li scrive lo Scultore ma un agente a parte, come il passaggio dal Cartografo allo Scultore. L'autore si aspetta di risparmiare rispetto a generare tutto insieme: va misurato. T182 dice che accorciare il prompt non ha abbassato il costo (1,15 $ contro 1,22 $: quasi tutto l'output è ragionamento), quindi il risparmio non è scontato. Nasce da T182 (`dossier T182`).
+- Autore (10/11, `docs/userchats/to-do-2026-11-10.md`, seconda richiesta): le immagini del banco vanno bene; quando riparte, lo Scenografo va **integrato con le informazioni sugli ambienti prodotte dalla generazione dell'edificio** (le parti abitabili misurate di T338, `habitableParts`, e le zone che T346 annota: recinti, stalle, stanze) e riceve anche il posto degli animali, che T346 toglie dal programma della struttura.
 - Cosa fare, senza toccare il gioco: `docs/design/scenografo.md`. Come riceve l'edificio (programma, semi, piani, stanze misurate); come resta vera la regola «un programma per tipo, le istanze sono semi» su un edificio che cambia a ogni seme, confrontando un programma che cresce sulla griglia già fatta con la scelta di mobili esistenti come dati; quando parte (al primo ingresso o nella generazione differita); cosa si vede prima; quale manopola in `CENSUS`; chi paga. Sul banco, poche richieste: un edificio di T182 con il suo interno a parte contro lo stesso edificio con l'interno insieme, con token e costo; anche su un modello che costi meno.
 - Test: i programmi provati girano nel motore e passano i controlli.
 - Browser: non serve; fogli di contatto nel commit.
@@ -3800,13 +3801,13 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Step: 34
 - **Assorbito (autore, 05/11: «vedi tu»; decisione dell'orchestratore):** le tre proposte diventano le tre vesti di T284, T285 e T286, e griglia e tipografia da φ e Fibonacci stanno nella base comune di T283. Ciò che era «launcher» (carte e strutture in 3D, universi più giocati, notizie) resta a fine Fase II, in T233 e T235, sulla veste scelta. La richiesta di partenza: «sembra a metà tra un pitch per una startup e un blog per fumetti»; la vuole come il launcher di un gioco multiplayer moderno, «oddly satisfying», senza testi che guastino la scoperta della corona.
 
-### T233 · La landing launcher nel sito — `da fare` (dipende da T287)
-- Pipeline: claude · stima 3% · priorità 2
+### T233 · La landing launcher nel sito — `da fare`
+- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 2
 - Step: 35
-- Contesto: si approva solo quando è scelta la veste del sito (`dossier T287`; da dove viene: `dossier T232`).
-- Cosa fare: la proposta scelta in `site/` col tema condiviso, senza framework; le sezioni di showcase e notizie restano nascoste finché non hanno contenuti, niente «coming soon» finti. La striscia «coming soon» degli altri universi resta.
+- Contesto: D51.2 (autore, 10/11): il launcher si fa sulla **base comune** delle vesti (ADR-0145), senza aspettare la scelta della veste, che arriva entro la Fase VI col contatore (T287); deve funzionare con ogni veste di `site/skins/` (`dossier T287`; da dove viene: `dossier T232`).
+- Cosa fare: la proposta di launcher in `site/` sulla base comune, con il tema condiviso e i soli token `--skin-*`, senza framework; le sezioni di showcase e notizie restano nascoste finché non hanno contenuti, niente «coming soon» finti. La striscia «coming soon» degli altri universi resta.
 - Test: typecheck, build e suite intera con i loro turni.
-- Browser: sì, a 1920 e 390 px, in `npm run dev` e sotto `npm run serve`.
+- Browser: sì, a 1920 e 390 px, con almeno due vesti, in `npm run dev` e sotto `npm run serve`.
 - Quando è fatto: la home è il launcher scelto; commit su `task/T233`. Sicurezza: nessuna superficie nuova, o le voci.
 
 ### T234 · Il news-blog del sito — `fatto` (`fc48b9b`)
@@ -5033,20 +5034,96 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T338`, rapporto in `lab/banco/` con le foto; kernel sale di Z se cambiano i controlli.
 - Esito: le strutture che crescono a regole a 20 voxel per casella fino a 200 di lato (Grande 100, Enorme 150, Gargantuesca 200), le voci di prima con la loro scatola, le carte fatte a mano e il banco T154-T182 alla scala di prima; le misure minime delle parti abitabili (porta, piano, stanza, tettoia) misurate sulla griglia e controllate nello Scultore (la fattoria 5x5 del seme rifiutata per la stanza); la taglia più grande deve contenere di più; prompt e scheletro aggiornati (muro a 150, viale a 200); banco `lab/banco/taglie/` con fattoria e forte a tre taglie, foto, misure e rapporto; ADR-0179, kernel 0.6.3; test 2962 verdi, typecheck verde. Non provato: lo Scultore su Gemini col prompt nuovo; la fattoria di 50 × 50 non entra nel tetto di oggi; il validatore e i modelli del seme non applicano le misure. Sicurezza: nessuna superficie nuova.
 
-### T347 · La Campagna del Master: spese master, universo privato su invito e direttive del Concilio (studio e ADR proposto) — `da fare`
-- Pipeline: claude · sforzo high · stima 4% · priorità 5
-- Step: 43
-- Contesto: richiesta dell'autore (10/11, epoca 347) per abilitare lo scenario "Campagna D&D / libro-game dinamico" gestita da un Master umano. Oggi le spese comuni sono divise o a consumo (`as: 'comune'`), gli universi sono aperti al join se noti, la generazione procede al ritmo dei passi dei viandanti senza memoria di campagna centralizzata e la cartografia non ammette vincoli preventivi.
-- Cosa fare: `docs/design/campagna-master.md` e ADR proposto. (1) Spese a carico del master: opzione nell'universo per cui tutte le generazioni e spese di IA del mondo sono addebitate al master (`payerNow()` = master per tutte le azioni del Concilio), permettendo ai giocatori di partecipare senza crediti propri; (2) Universo privato su invito: modalità per cui l'universo ammette al `join` (`server/access.ts`, `server/session.ts`) solo account invitati (whitelist/token d'invito); (3) Ritmo e pausa: controllo della velocità di espansione e modalità "Pausa Generazione / Revisione Master" (il Concilio prepara bozze che il master può approvare, modificare o scartare prima del commit su git); (4) Memoria e Direttive del Master: il Referente nello studio della corona gestisce le "Direttive della Campagna" (`campaign.json` o file in `world/`); all'invocazione di ciascun agente del Concilio (Cartografo, Narratore, Scultore, Biografo), il kernel inietta solo la sezione pertinente delle direttive come vincolo di contesto (es. al Cartografo le linee geografiche, al Narratore le fazioni e il tono, allo Scultore lo stile); (5) Controllo preventivo cartografico: strumenti con cui il master può pre-impostare tessere o biomi nella mappa (es. forzare mare in aree inesplorate per bloccare i costi e indirizzare la trama, o posizionare un'isola/villaggio specifico); (6) Schema delle modifiche e task conseguenti con stime. Niente codice.
-- Test: typecheck con il suo turno.
+### T348 · Jev nel gioco, passo 1: il varco `TypeSafeGate` e lo strato `decide` (ADR-0157 accettato) — `da fare`
+- Pipeline: claude · sforzo high · stima 4% · approvato · priorità 5
+- Contesto: D45 (autore, 10/11): approvate tutte le proposte di ADR-0157 e di T325 (`lab/banco/jev/casi-d-uso.md` §6-7). Ordine: varco → `model.reuse` (T349) → guardie e quarta parete (T350) → le altre scelte di T313 (`job.match`, `npc.decide`, `action.judge`, Referente, `craft.free`, nodi dello Scultore: nascono dall'esito di questo task) → Attore con la cache esplicita (T351) → battute riusate. **A Jev solo stato e domande del mondo, mai il testo libero del viandante** finché TypeSafe non offre ritenzione zero (D45.3). Nasce da T313, T323, T325: `dossier T313`, `dossier T325`.
+- Cosa fare: ADR-0157 da proposto ad accettato (con le risposte di D45); il varco `TypeSafeGate` sul server come `GeminiGate` (regola 9: la chiave `TYPESAFE_KEY` mai al browser né ai mondi di molti, tetto di spesa, elenco dei modelli, rete via canale per i mondi, ADR-0110), la route solo dove serve (8h), lo strato `decide` del kernel con la regola di oggi come pavimento e come risposta di `MockAiModels`, chi paga (8i), la manopola in `CENSUS` (8b-bis), una voce nel registro dei consumi e nei prezzi; nessun uso ancora (lo accende T349). AGENTS e dettagli aggiornati.
+- Test: varco (chiave assente, tetto, modelli fuori elenco, corpo troppo grande), strato `decide` offline, la suite di sicurezza; suite e typecheck coi turni.
 - Browser: non serve.
-- Quando è fatto: commit su `task/T347`; l'autore decide sull'ADR proposto.
+- Quando è fatto: commit su `task/T348`, kernel sale di Z. Sicurezza: superficie nuova (una chiave e una route): voci nel registro o «nessuna».
+
+### T349 · Jev nel gioco, passo 2: `model.reuse` (riuso dei modelli della libreria) — `da fare` (dipende da T348)
+- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 5
+- Contesto: D45 (autore, 10/11), ADR-0157; il riuso solo per mobili, piante, rocce e strutture, **non per le persone** (D45.2). Banco: riuso col companion Noul al 97 %, nessun riuso sbagliato (`lab/banco/jev/`). `dossier T313`.
+- Cosa fare: il `ModelDirector` chiede a Jev se un modello che manca può riusarne uno della libreria prima di chiamare lo Scultore; la regola di oggi come pavimento; misura del risparmio su una Genesi offline e nella stima della lobby.
+- Test: offline col mock, casi del banco come fixture; suite e typecheck coi turni.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T349`, kernel sale di Z.
+
+### T350 · Jev nel gioco, passo 3: le guardie del testo e la quarta parete — `da fare` (dipende da T349)
+- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 5
+- Contesto: D45.5 (autore, 10/11): testo senza senso o del mondo reale va al Narratore che risponde nel personaggio; testo che detta ordini si isola tra virgolette, non si ferma (regola 3); la quarta parete con domande atomiche e `metaBreak` davanti (94 % sul banco). A Jev solo testi del Concilio e stato del mondo, non il testo libero del viandante (D45.3): per quello la guardia resta locale finché non c'è ritenzione zero. `lab/banco/jev/casi-d-uso.md`, `dossier T325`.
+- Cosa fare: le guardie e il filtro della quarta parete (`fourthwall.ts`) sullo strato `decide`, la regola di oggi come pavimento.
+- Test: `casi-d-uso/casi/guardia.json` come fixture; suite e typecheck coi turni.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T350`, kernel sale di Z.
+
+### T351 · L'Attore con la cache esplicita di Gemini 3.8 Flash — `da fare`
+- Pipeline: claude · sforzo high · stima 2% · approvato · priorità 6
+- Contesto: D45.7 (autore, 10/11): prima di dare l'Attore a Jev, la cache esplicita di 3.8 Flash per le schede degli individui (`lab/banco/jev/casi-d-uso.md` §6-7, `dossier T325`). L'archivio delle domande del viandante per riusare le battute vale solo per la sessione (D45.6): task a parte dopo T350.
+- Cosa fare: le schede dell'Attore (`npc.reply`, `npc.dialogue`) in una cache esplicita di Gemini, con durata e costo nei prezzi e nel registro; chi paga la cache (8i); misura offline dei token risparmiati con `prompt-tokens.ts`.
+- Test: offline col mock; suite e typecheck coi turni.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T351`, kernel sale di Z.
+
+### T352 · La stima della lobby con i token misurati — `da fare`
+- Pipeline: claude · sforzo medium · stima 2% · approvato · priorità 6
+- Contesto: D45.8 (autore, 10/11): la stima oraria della lobby (`coefficients.ts`, ADR-0085) usa token stimati; T325 li ha misurati con `countTokens` sulle richieste vere (`lab/scripts/jev-casi-d-uso.ts --contesto --conta`). `dossier T325`.
+- Cosa fare: aggiornare i token per compito della stima con le misure, con la data e il comando per rifarle.
+- Test: test dei coefficienti; suite e typecheck coi turni.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T352`, kernel sale di Z.
+
+### T353 · Vestire gli individui: gli abiti dalla scheda o dal mestiere — `da fare` (dipende da T290)
+- Pipeline: claude · sforzo high · stima 4% · approvato · browser · priorità 5
+- Step: 40
+- Contesto: D47.4 (autore, 10/11): dopo T290 si vestono anche gli individui, dalla scheda del Narratore o dal mestiere. `dossier T289`, `dossier T290`.
+- Cosa fare: gli abiti di ogni individuo (testa, busto, schiena) scelti dalla scheda o dal mestiere, con la via C e la B di T290; ciò che esce ai client; i costi (nessuna chiamata in più se basta il mestiere).
+- Test: individui vestiti nel tick e dopo il ritorno; suite e typecheck coi turni.
+- Browser: sì, individui vestiti in un luogo del seme (`?skip&offline`), foto.
+- Quando è fatto: commit su `task/T353`, kernel sale di Z.
+
+### T354 · Lo Scultore delle strutture senza scheletro, a zone coi sottoblocchi (passo 2 di D48) — `da fare` (dipende da T346)
+- Pipeline: claude · sforzo extra · stima 4% · approvato · browser · priorità 5
+- Step: 30
+- Contesto: D48 → D integrata (autore, 10/11): il prompt a zone senza scheletro (via C di T337, separazione 3,73) con le parti abitabili come sottoblocchi del seme inclusi con `<import>` (passo 1 = T346). `dossier T337`, `dossier T346`, `docs/pipeline/domande/T337.md`.
+- Cosa fare: il prompt dello Scultore per le strutture senza scheletro, il ritorno in testo a blocchi, i sottoblocchi elencati nella richiesta (ADR-0176), i controlli di T338; prova offline sul banco coi programmi scritti a mano come lo Scultore, nessuna chiamata a Gemini (è T355).
+- Test: banco `banco-taglie.ts`; suite e typecheck coi turni.
+- Browser: sì, foto del banco nel laboratorio 3D.
+- Quando è fatto: commit su `task/T354`, kernel sale di Z.
+
+### T355 · Il giro su Gemini dello Scultore nuovo, prima di cambiare quello del gioco (passo 3 di D48) — `da fare` (dipende da T354)
+- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 5
+- Step: 30
+- Contesto: D48 passo 3 (autore, 10/11): non prima del 15/11 (crediti di Gemini); le prove costano (CLAUDE.md). `dossier T354`.
+- Cosa fare: forte e fattoria a tre taglie e due semi scritti da Gemini col prompt di T354, costo per modello, foto, confronto con T337-T339; lo Scultore del gioco passa al prompt nuovo solo se il banco regge, altrimenti una domanda all'autore.
+- Test: suite e typecheck coi turni.
+- Browser: non serve (foto dal banco).
+- Quando è fatto: commit su `task/T355`, rapporto e foto in `lab/banco/`.
+
+### T356 · Il tetto dei voxel delle strutture gargantuesche — `da fare` (dipende da T346)
+- Pipeline: claude · sforzo high · stima 4% · approvato · browser · priorità 5
+- Step: 30
+- Contesto: l'autore (10/11): a 20 voxel per casella le gargantuesche a 200 voxel sono solo 10 caselle, piccole rispetto alla mappa; va alzato il tetto. T339 ha `<pieces>` (ADR-0178) e la misura di dove sta il tetto (la mesh, `FORM_LIMITS`, le scatole delle classi); T338 ha `STRUCTURE_SIDE` e `densityFor` (ADR-0179). `dossier T338`, `dossier T339`.
+- Cosa fare: alzare `STRUCTURE_SIDE` per le gargantuesche (20-50 caselle) con `<pieces>` e una mesh per pezzo se serve, misurando tempo, memoria e frame (`misura-tetto.ts`, `misura-frame.mjs`); un lotto più grande di un luogo se serve, o la domanda all'autore.
+- Test: `banco-pezzi.ts`, `banco-taglie.ts`; suite e typecheck coi turni.
+- Browser: sì, una fattoria gargantuesca nel laboratorio 3D e nel gioco, frame misurati.
+- Quando è fatto: commit su `task/T356`, kernel sale di Z.
+
+### T347 · La Campagna del Master: spese del master, universo privato su invito, ritmo della generazione e direttive al Concilio (studio e ADR proposto) — `da fare`
+- Pipeline: claude · sforzo high · stima 4% · approvato · priorità 5
+- Step: 43
+- Contesto: richiesta dell'autore (10/11, testo intero in `docs/userchats/to-do-2026-11-10.md`, seconda richiesta, «Gestione delle spese dell'universo» e «Gestione della campagna da master»): dare al master gli strumenti per una campagna (D&D, libro-gioco a storia dinamica, il gioco di un content creator dentro QUINE42): storia, narrativa, relazioni, società, individui, razze, vite, architettura. Oggi la generazione è troppo rapida e poco influenzabile perché un umano possa davvero «masterare» senza giocare offline. Vincoli da rispettare o da cambiare con un ADR: regola 8b-bis (a partita in corso nessuno cambia `ai`, ADR-0133), 8i (chi paga si dice, fuori da un `as` `payerNow()` è `comune`, ADR-0113; spese comuni divise, ADR-0081), 8b e 8j (`gate`, `admit`), 8e (ritmi), regola 0 (le direttive del master non portano meta-gioco nel mondo). Leggi `#lobby`, `#carte-crediti`, `#multigiocatore`, `#concilio`, `#corona` (Referente) in `docs/architettura-dettagli.md`.
+- Cosa fare: `docs/design/campagna-master.md` e un ADR **proposto** (non applicato). (1) **Il master paga tutto**: un'opzione dell'universo per cui ogni spesa del Concilio e dei viandanti va al master, così i giocatori entrano senza crediti; come convive con 8i, il tetto di ogni viandante e il ledger. (2) **Universo privato su invito**: chi può fare `join` (elenco di account o inviti a token), dove sta (fuori dall'universo come i saldi?), cosa cambia in `gate`/`admit` e nel sito. (3) **Ritmo e pausa della generazione**: velocità regolabile anche **da dentro il gioco**, dove si può, e interrompibile (come i modelli locali di `?offline`), con ciò che vede il viandante quando un luogo non c'è ancora; come si concilia con 8b-bis (eccezione per il solo master? manopole sicure e no?). (4) **Memoria delle richieste del master**: gli agenti ricordano cosa il master ha chiesto e in che modo. Confronta almeno: memoria per agente; un testo letto da tutti; solo il Referente ricorda e smista; un orchestratore nuovo; direttive a sezioni per competenza iniettate a ogni agente (la via proposta in epoca 347); col costo in token misurato su richieste vere (`lab/scripts/prompt-tokens.ts`) e una raccomandazione. (5) **Controllo esteso** su ciò che oggi non si pilota (cartografia, individui nuovi, razze, narrativa): il master dichiara prima dove sta un villaggio o un'isola; per contenere i costi chiede al Cartografo solo mare nei luoghi nuovi dove il gruppo va fuori trama; quali strumenti nello studio o nella console. (6) I task che ne nascono, in ordine, con stima. Niente codice.
+- Test: nessun codice: typecheck con il suo turno.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T347`; l'autore decide sull'ADR proposto. Sicurezza: nessuna superficie nuova (quelle che il progetto aprirà, inviti e pagamenti del master, elencate nel documento).
 
 ### T346 · Strutture MJ: correzione dettagli, separazione animali e campi vari (passo 1 di D48) — `da fare` (dipende da T338, T339)
-- Pipeline: fable · sforzo extra · stima 5% · approvato · browser · priorità 4
+- Pipeline: fable · sforzo max · stima 5% · approvato · browser · priorità 4
 - Step: 30
-- Contesto: feedback dell'autore su T338 e T339 (10/11, epoca 347) e approvazione di D48 (risposta D integrata, `lab/banco/taglie/` e `lab/banco/pezzi/`). Le strutture dinamiche funzionano bene, ma presentano difetti di dettaglio ed entità da scorporare.
-- Cosa fare: (1) Forte: aggiungere porte tra camminamento e torri, merli regolari e coerenti lungo il perimetro, distribuzione simmetrica/ordinata delle feritoie; (2) Fattoria: rimuovere i blocchi marroncino cubici anomali dalla staccionata; (3) Separazione entità viventi: togliere gli animali dal programma MJ della struttura (competenza di Narratore e Scenografo); il programma definisce e annota l'impronta delle aree (recinto pascolo, stalla) come metadati/zone per chi genererà o posizionerà NPC/animali; (4) Varianza e composizione: unire l'architettura completa di T338 (casa pastore 2 piani, fieno sotto tettoia) con la varianza dei campi a incastro e recinti irregolari di T339; (5) Tetto voxel gargantua: verificare e adeguare i tetti di dimensione/voxel per le taglie gargantua oltre i 200 voxel usando `<pieces>` di T339; (6) Sottoblocchi del seme modulari per l'inclusione con `<import>` (passo 1 di D48).
+- Contesto: feedback dell'autore su T338 e T339 (10/11, testo intero in `docs/userchats/to-do-2026-11-10.md`, seconda richiesta) e D48 → D integrata (`docs/pipeline/domande/T337.md`, `lab/banco/metodo/README.md`). Nasce da T337, T338, T339: `dossier T337`, `dossier T338`, `dossier T339`. La forma che cambia con la taglia va bene; i difetti sono nei dettagli. **Riferimenti visivi dell'autore:** i più ricchi e piacevoli sono i modelli di T173 (`lab/banco/metodo/misure/conferma.png`, ma mobili e decorazioni sono dello Scenografo, T259), molto belli quelli di T337 (`lab/banco/metodo/misure/zone.png`); per varianza e dimensioni `lab/banco/pezzi/fattoria.png` e `lab/banco/taglie/fattoria-gargantuan.png`. La fattoria gargantuesca di T338 è meno bella di quella di T339: T338 ha l'architettura più completa (casa del pastore a due piani, fieno sotto la tettoia, come chiedeva il prompt), T339 i campi irregolari che si incastrano, il recinto irregolare e una forma che cambia molto col seme.
+- Cosa fare: (1) Forte: aggiungere porte tra camminamento e torri, merli regolari e coerenti lungo il perimetro, distribuzione simmetrica/ordinata delle feritoie; (2) Fattoria: rimuovere i blocchi marroncino cubici anomali dalla staccionata; (3) Separazione entità viventi: togliere gli animali dal programma MJ della struttura (competenza di Narratore e Scenografo); il programma definisce e annota l'impronta delle aree (recinto pascolo, stalla) come metadati/zone per chi genererà o posizionerà NPC/animali; (4) Varianza e composizione: unire l'architettura completa di T338 (casa pastore 2 piani, fieno sotto tettoia) con la varianza dei campi a incastro e recinti irregolari di T339; (5) il tetto dei voxel delle gargantuesche è T356, non qui; (6) passo 1 di D48: le parti abitabili come sottoblocchi del seme inclusi con `<import>` e provati, con le misure di T338, la `map` condivisa fra le taglie e `open` in `reachableStoreys`. I passi 2 e 3 di D48 sono T354 e T355.
 - Test: controlli del banco (`banco-taglie.ts`, `banco-pezzi.ts`); verifica assenza animali nella griglia; porte e merli validati; typecheck e suite.
 - Browser: sì, foto aggiornate di forte e fattoria a tre taglie in `lab/banco/taglie/`.
 - Quando è fatto: commit su `task/T346`, foto del banco nel commit, kernel sale di Z se cambiano i controlli.

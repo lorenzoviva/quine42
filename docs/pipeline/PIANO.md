@@ -1,45 +1,44 @@
 # Il piano della pipeline
 
-> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-11-10T17:21:55.316Z: non modificarlo a mano,
+> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-11-12T17:12:19.661Z: non modificarlo a mano,
 > la fonte è `docs/plans/backlog.md` (righe `- Pipeline:`).
 
 ## Budget
 
-Orchestratore: **gemini** (sotto il 10 % nessun task su di lui; si cambia con `orchestratore <provider>`).
+Orchestratore: **claude** (sotto il 10 % nessun task su di lui; si cambia con `orchestratore <provider>`).
 
-- **claude** (Opus 5.5): settimana 9 %, 5 ore 9 %; tetto 3, slot 1 (task in programma 3), esaurimento previsto 2026-11-11T19:13:05.735Z, reset 2026-11-12T16:00:00.000Z (letto da /usage il 2026-11-10T17:19:45.623Z)
-  - week (all models), settimana: 9 % residuo, reset 2026-11-12T16:00:00.000Z
-- **gemini** (Gemini 3.8 Flash): settimana 97 %, 5 ore 98 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto 2027-02-15T13:45:36.636Z, reset 2026-11-15T06:15:36.000Z (letto da /usage il 2026-11-10T17:19:54.105Z)
-  - Gemini Models, settimana: 97 % residuo, reset 2026-11-15T06:15:36.000Z
-  - Gemini Models, 5h: 98 % residuo, reset 2026-11-10T22:14:42.000Z
-- **argon** (Gemini 4 Argon): settimana 100 %, 5 ore 100 %, fermo fino a 2026-11-11T18:44:35.000Z; tetto 1, slot 1 (task in programma 0), esaurimento previsto mai a questo ritmo, reset 2026-11-17T17:19:49.000Z (letto da /usage il 2026-11-10T17:19:54.105Z)
-  - Gemini 4 Argon, settimana: 100 % residuo, reset 2026-11-17T17:19:49.000Z
-- **fable** (Fable 5.1): settimana 9 %, 5 ore 9 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto 2026-11-11T19:13:51.779Z, reset 2026-11-12T16:00:00.000Z (letto da /usage il 2026-11-10T17:19:45.623Z)
-  - week (all models), settimana: 9 % residuo, reset 2026-11-12T16:00:00.000Z
-  - week (Fable), settimana: 100 % residuo, reset 2026-11-12T16:00:00.000Z
-- **sonnet** (Sonnet 5.5): settimana 9 %, 5 ore 9 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto 2026-11-11T19:13:51.779Z, reset 2026-11-12T16:00:00.000Z (letto da /usage il 2026-11-10T17:19:45.623Z)
-  - week (all models), settimana: 9 % residuo, reset 2026-11-12T16:00:00.000Z
-- **haiku** (Haiku 5.5): settimana 9 %, 5 ore 9 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto 2026-11-11T19:13:51.779Z, reset 2026-11-12T16:00:00.000Z (letto da /usage il 2026-11-10T17:19:45.623Z)
-  - week (all models), settimana: 9 % residuo, reset 2026-11-12T16:00:00.000Z
-- **agy-opus** (Opus 5.5 (agy)): settimana 100 %, 5 ore 100 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto mai a questo ritmo, reset 2026-11-17T17:19:49.000Z (letto da /usage il 2026-11-10T17:19:54.105Z)
-  - Claude and GPT models, settimana: 100 % residuo, reset 2026-11-17T17:19:49.000Z
-  - Claude and GPT models, 5h: 100 % residuo, reset 2026-11-10T22:19:49.000Z
-- **agy-sonnet** (Sonnet 5.5 (agy)): settimana 100 %, 5 ore 100 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto mai a questo ritmo, reset 2026-11-17T17:19:49.000Z (letto da /usage il 2026-11-10T17:19:54.105Z)
-  - Claude and GPT models, settimana: 100 % residuo, reset 2026-11-17T17:19:49.000Z
-  - Claude and GPT models, 5h: 100 % residuo, reset 2026-11-10T22:19:49.000Z
+- **claude** (Opus 5.5): settimana 100 %, 5 ore 100 %; tetto 3, slot 2 (task in programma 2), esaurimento previsto mai a questo ritmo, reset 2026-11-19T16:00:00.000Z (letto da /usage il 2026-11-12T17:08:39.966Z)
+  - week (all models), settimana: 100 % residuo, reset 2026-11-19T16:00:00.000Z
+- **gemini** (Gemini 3.8 Flash): settimana 98 %, 5 ore 100 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto mai a questo ritmo, reset 2026-11-15T06:15:36.000Z (letto da /usage il 2026-11-12T17:08:50.147Z)
+  - Gemini Models, settimana: 98 % residuo, reset 2026-11-15T06:15:36.000Z
+  - Gemini Models, 5h: 100 % residuo, reset 2026-11-12T22:08:45.000Z
+- **argon** (Gemini 4 Argon): settimana 93 %, 5 ore 93 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto 2026-12-18T06:42:38.644Z, reset 2026-11-17T21:39:05.000Z (letto da /usage il 2026-11-12T17:08:50.147Z)
+  - Gemini 4 Argon, settimana: 93 % residuo, reset 2026-11-17T21:39:05.000Z
+- **fable** (Fable 5.1): settimana 100 %, 5 ore 100 %; tetto 1, slot 1 (task in programma 1), esaurimento previsto mai a questo ritmo, reset 2026-11-19T16:00:00.000Z (letto da /usage il 2026-11-12T17:08:39.966Z)
+  - week (all models), settimana: 100 % residuo, reset 2026-11-19T16:00:00.000Z
+  - week (Fable), settimana: 100 % residuo, reset 2026-11-19T16:00:00.000Z
+- **sonnet** (Sonnet 5.5): settimana 100 %, 5 ore 100 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto mai a questo ritmo, reset 2026-11-19T16:00:00.000Z (letto da /usage il 2026-11-12T17:08:39.966Z)
+  - week (all models), settimana: 100 % residuo, reset 2026-11-19T16:00:00.000Z
+- **haiku** (Haiku 5.5): settimana 100 %, 5 ore 100 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto mai a questo ritmo, reset 2026-11-19T16:00:00.000Z (letto da /usage il 2026-11-12T17:08:39.966Z)
+  - week (all models), settimana: 100 % residuo, reset 2026-11-19T16:00:00.000Z
+- **agy-opus** (Opus 5.5 (agy)): settimana 100 %, 5 ore 100 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto mai a questo ritmo, reset 2026-11-19T17:08:45.000Z (letto da /usage il 2026-11-12T17:08:50.147Z)
+  - Claude and GPT models, settimana: 100 % residuo, reset 2026-11-19T17:08:45.000Z
+  - Claude and GPT models, 5h: 100 % residuo, reset 2026-11-12T22:08:45.000Z
+- **agy-sonnet** (Sonnet 5.5 (agy)): settimana 100 %, 5 ore 100 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto mai a questo ritmo, reset 2026-11-19T17:08:45.000Z (letto da /usage il 2026-11-12T17:08:50.147Z)
+  - Claude and GPT models, settimana: 100 % residuo, reset 2026-11-19T17:08:45.000Z
+  - Claude and GPT models, 5h: 100 % residuo, reset 2026-11-12T22:08:45.000Z
 
-## In corso (0)
+## In corso (1)
 
-_nessuno_
+- **T290** Vestiti e armature addosso nel gioco — claude (Opus 5.5), sforzo max, 6 %
 
 ## Finiti, da guardare e integrare (`integra Txx`) (0)
 
 _nessuno_
 
-## Pronti, in ordine di priorità (3)
+## Pronti, in ordine di priorità (2)
 
-- **T290** Vestiti e armature addosso nel gioco — claude (Opus 5.5), sforzo max, 6 %
-- **T346** Strutture MJ: correzione dettagli, separazione animali e campi vari (passo 1 di D48) — claude (Opus 5.5), sforzo high, 5 %
+- **T346** Strutture MJ: correzione dettagli, separazione animali e campi vari (passo 1 di D48) — fable (Fable 5.1), sforzo extra, 5 %
 - **T345** La open beta senza pagamenti all'autore: OpenRouter, hosting esterno e self-hosting (studio e ADR proposto) — claude (Opus 5.5), sforzo high, 3 %
 
 ## Da approvare (provider e stima proposti) (2)
