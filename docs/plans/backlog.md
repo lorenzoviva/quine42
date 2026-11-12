@@ -5075,7 +5075,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T352`, kernel sale di Z.
 
 ### T353 · Vestire gli individui: gli abiti dalla scheda o dal mestiere — `da fare` (dipende da T290)
-- Pipeline: claude · sforzo high · stima 4% · approvato · browser · priorità 5
+- Pipeline: fable · sforzo high · stima 4% · approvato · browser · priorità 5
 - Step: 40
 - Contesto: D47.4 (autore, 10/11): dopo T290 si vestono anche gli individui, dalla scheda del Narratore o dal mestiere. `dossier T289`, `dossier T290`.
 - Cosa fare: gli abiti di ogni individuo (testa, busto, schiena) scelti dalla scheda o dal mestiere, con la via C e la B di T290; ciò che esce ai client; i costi (nessuna chiamata in più se basta il mestiere).
@@ -5084,7 +5084,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T353`, kernel sale di Z.
 
 ### T354 · Lo Scultore delle strutture senza scheletro, a zone coi sottoblocchi (passo 2 di D48) — `da fare` (dipende da T346)
-- Pipeline: claude · sforzo extra · stima 4% · approvato · browser · priorità 5
+- Pipeline: fable · sforzo extra · stima 4% · approvato · browser · priorità 5
 - Step: 30
 - Contesto: D48 → D integrata (autore, 10/11): il prompt a zone senza scheletro (via C di T337, separazione 3,73) con le parti abitabili come sottoblocchi del seme inclusi con `<import>` (passo 1 = T346). `dossier T337`, `dossier T346`, `docs/pipeline/domande/T337.md`.
 - Cosa fare: il prompt dello Scultore per le strutture senza scheletro, il ritorno in testo a blocchi, i sottoblocchi elencati nella richiesta (ADR-0176), i controlli di T338; prova offline sul banco coi programmi scritti a mano come lo Scultore, nessuna chiamata a Gemini (è T355).
@@ -5102,7 +5102,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T355`, rapporto e foto in `lab/banco/`.
 
 ### T356 · Il tetto dei voxel delle strutture gargantuesche — `da fare` (dipende da T346)
-- Pipeline: claude · sforzo high · stima 4% · approvato · browser · priorità 5
+- Pipeline: fable · sforzo high · stima 4% · approvato · browser · priorità 5
 - Step: 30
 - Contesto: l'autore (10/11): a 20 voxel per casella le gargantuesche a 200 voxel sono solo 10 caselle, piccole rispetto alla mappa; va alzato il tetto. T339 ha `<pieces>` (ADR-0178) e la misura di dove sta il tetto (la mesh, `FORM_LIMITS`, le scatole delle classi); T338 ha `STRUCTURE_SIDE` e `densityFor` (ADR-0179). `dossier T338`, `dossier T339`.
 - Cosa fare: alzare `STRUCTURE_SIDE` per le gargantuesche (20-50 caselle) con `<pieces>` e una mesh per pezzo se serve, misurando tempo, memoria e frame (`misura-tetto.ts`, `misura-frame.mjs`); un lotto più grande di un luogo se serve, o la domanda all'autore.
@@ -5111,7 +5111,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T356`, kernel sale di Z.
 
 ### T347 · La Campagna del Master: spese del master, universo privato su invito, ritmo della generazione e direttive al Concilio (studio e ADR proposto) — `da fare`
-- Pipeline: claude · sforzo high · stima 4% · approvato · priorità 5
+- Pipeline: fable · sforzo high · stima 4% · approvato · priorità 5
 - Step: 43
 - Contesto: richiesta dell'autore (10/11, testo intero in `docs/userchats/to-do-2026-11-10.md`, seconda richiesta, «Gestione delle spese dell'universo» e «Gestione della campagna da master»): dare al master gli strumenti per una campagna (D&D, libro-gioco a storia dinamica, il gioco di un content creator dentro QUINE42): storia, narrativa, relazioni, società, individui, razze, vite, architettura. Oggi la generazione è troppo rapida e poco influenzabile perché un umano possa davvero «masterare» senza giocare offline. Vincoli da rispettare o da cambiare con un ADR: regola 8b-bis (a partita in corso nessuno cambia `ai`, ADR-0133), 8i (chi paga si dice, fuori da un `as` `payerNow()` è `comune`, ADR-0113; spese comuni divise, ADR-0081), 8b e 8j (`gate`, `admit`), 8e (ritmi), regola 0 (le direttive del master non portano meta-gioco nel mondo). Leggi `#lobby`, `#carte-crediti`, `#multigiocatore`, `#concilio`, `#corona` (Referente) in `docs/architettura-dettagli.md`.
 - Cosa fare: `docs/design/campagna-master.md` e un ADR **proposto** (non applicato). (1) **Il master paga tutto**: un'opzione dell'universo per cui ogni spesa del Concilio e dei viandanti va al master, così i giocatori entrano senza crediti; come convive con 8i, il tetto di ogni viandante e il ledger. (2) **Universo privato su invito**: chi può fare `join` (elenco di account o inviti a token), dove sta (fuori dall'universo come i saldi?), cosa cambia in `gate`/`admit` e nel sito. (3) **Ritmo e pausa della generazione**: velocità regolabile anche **da dentro il gioco**, dove si può, e interrompibile (come i modelli locali di `?offline`), con ciò che vede il viandante quando un luogo non c'è ancora; come si concilia con 8b-bis (eccezione per il solo master? manopole sicure e no?). (4) **Memoria delle richieste del master**: gli agenti ricordano cosa il master ha chiesto e in che modo. Confronta almeno: memoria per agente; un testo letto da tutti; solo il Referente ricorda e smista; un orchestratore nuovo; direttive a sezioni per competenza iniettate a ogni agente (la via proposta in epoca 347); col costo in token misurato su richieste vere (`lab/scripts/prompt-tokens.ts`) e una raccomandazione. (5) **Controllo esteso** su ciò che oggi non si pilota (cartografia, individui nuovi, razze, narrativa): il master dichiara prima dove sta un villaggio o un'isola; per contenere i costi chiede al Cartografo solo mare nei luoghi nuovi dove il gruppo va fuori trama; quali strumenti nello studio o nella console. (6) I task che ne nascono, in ordine, con stima. Niente codice.
@@ -5120,7 +5120,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T347`; l'autore decide sull'ADR proposto. Sicurezza: nessuna superficie nuova (quelle che il progetto aprirà, inviti e pagamenti del master, elencate nel documento).
 
 ### T346 · Strutture MJ: correzione dettagli, separazione animali e campi vari (passo 1 di D48) — `da fare` (dipende da T338, T339)
-- Pipeline: fable · sforzo max · stima 5% · approvato · browser · priorità 4
+- Pipeline: fable · sforzo high · stima 5% · approvato · browser · priorità 4
 - Step: 30
 - Contesto: feedback dell'autore su T338 e T339 (10/11, testo intero in `docs/userchats/to-do-2026-11-10.md`, seconda richiesta) e D48 → D integrata (`docs/pipeline/domande/T337.md`, `lab/banco/metodo/README.md`). Nasce da T337, T338, T339: `dossier T337`, `dossier T338`, `dossier T339`. La forma che cambia con la taglia va bene; i difetti sono nei dettagli. **Riferimenti visivi dell'autore:** i più ricchi e piacevoli sono i modelli di T173 (`lab/banco/metodo/misure/conferma.png`, ma mobili e decorazioni sono dello Scenografo, T259), molto belli quelli di T337 (`lab/banco/metodo/misure/zone.png`); per varianza e dimensioni `lab/banco/pezzi/fattoria.png` e `lab/banco/taglie/fattoria-gargantuan.png`. La fattoria gargantuesca di T338 è meno bella di quella di T339: T338 ha l'architettura più completa (casa del pastore a due piani, fieno sotto la tettoia, come chiedeva il prompt), T339 i campi irregolari che si incastrano, il recinto irregolare e una forma che cambia molto col seme.
 - Cosa fare: (1) Forte: aggiungere porte tra camminamento e torri, merli regolari e coerenti lungo il perimetro, distribuzione simmetrica/ordinata delle feritoie; (2) Fattoria: rimuovere i blocchi marroncino cubici anomali dalla staccionata; (3) Separazione entità viventi: togliere gli animali dal programma MJ della struttura (competenza di Narratore e Scenografo); il programma definisce e annota l'impronta delle aree (recinto pascolo, stalla) come metadati/zone per chi genererà o posizionerà NPC/animali; (4) Varianza e composizione: unire l'architettura completa di T338 (casa pastore 2 piani, fieno sotto tettoia) con la varianza dei campi a incastro e recinti irregolari di T339; (5) il tetto dei voxel delle gargantuesche è T356, non qui; (6) passo 1 di D48: le parti abitabili come sottoblocchi del seme inclusi con `<import>` e provati, con le misure di T338, la `map` condivisa fra le taglie e `open` in `reachableStoreys`. I passi 2 e 3 di D48 sono T354 e T355.

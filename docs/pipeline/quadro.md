@@ -30,7 +30,7 @@ Aggiornato il 12/11/2026, epoca 350 (claude). Crediti: vedi `stato`.
 
 ## Regole attive
 
-- Tetti dell'autore (3 Claude, 1 agy); finestra 5h protetta dallo script; nessun ripiego; Argon solo task piccoli; Fable intensivo da ora (reset avvenuto 12/11), i task difficili su fable.
+- Tetti dell'autore (3 Claude, 1 agy); finestra 5h protetta dallo script; nessun ripiego; Argon solo task piccoli; Fable 5.2 (più forte di Opus 5.5): l'orchestratore ci sposta liberamente i task, senza chiedere, con lo stesso sforzo che avrebbe Opus (autore 12/11).
 - Domande per intero in chat con raccomandazione. Finestra 5h con l'ora del reset. Sforzo: qualità prima del tempo. Mai `git commit -a` nel base.
 
 ## Ultime 2 epoche
