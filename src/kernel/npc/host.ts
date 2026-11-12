@@ -17,6 +17,7 @@ import type { Commit } from '../repo';
 import type { ShortfallNote } from '../shortfalls';
 import type { ModuleStores } from '../store';
 import type { ChunkInfo, FileMap, ItemDef, ItemSpec, ModuleEntry, Rule, TerrainDef } from '../types';
+import type { WornZone } from '../wearing';
 import type { DayPhase } from './society';
 
 /** A place of the world as the people see it: a loaded chunk (the kernel's `Chunk` is one). */
@@ -87,6 +88,8 @@ export interface NpcHost {
   spawnModuleEntity(m: ModuleEntry, x: number, y: number, chunkKey?: string, origin?: string): Id;
   itemInfo(id: string): { name: string };
   itemSpec(id: string): ItemSpec | undefined;
+  /** The zone of the body a thing is worn on (T353), or undefined if it is not worn (`Kernel.wornZone`). */
+  wornZone(item: string): WornZone | undefined;
   /** New items defined by the Narrator (the «citati» pack). */
   introduceItems(names: string[], context: string, chi?: string): Promise<ItemDef[]>;
   /** Things mentioned in a talk become part of the world. */

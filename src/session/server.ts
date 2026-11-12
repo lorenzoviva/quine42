@@ -1056,12 +1056,16 @@ export class SessionServer {
     // A building under way (T245e): of its structure only the stage, so every client sees it rise.
     const stage = k.ecs.get(id, 'structure')?.stage;
     if (typeof stage === 'number' && Number.isFinite(stage) && stage < 1) parts.structure = { stage };
+    // What an individual wears (T353): the ids by zone, read as the kernel reads them; of its inventory nothing else.
+    const inv = k.ecs.get(id, 'inventory');
+    const worn = inv?.worn ? wornItems(inv, (item) => k.wornZone(item)) : {};
     return {
       ...(m ? { m: String(m) } : {}),
       ...(form ? { form } : {}),
       ...(k.ecs.has(id, 'glyph') ? { glyph: k.ecs.get(id, 'glyph') } : {}),
       ...(Object.keys(parts).length ? { c: parts } : {}),
       ...(b ? { text: b.text } : {}),
+      ...(Object.keys(worn).length ? { worn } : {}),
     };
   }
 

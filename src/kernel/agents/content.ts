@@ -251,6 +251,8 @@ export interface Identity {
   persona: string;
   look: string;
   carrying: string[];
+  /** What they wear on the head, the torso and the back (T353, ADR-0181): names of garments, the common ones first; empty if the card says nothing. */
+  wearing: string[];
   /** Their place in society (ADR-0018). */
   job?: string;
   gender?: Gender;
@@ -267,6 +269,7 @@ const INDIVIDUAL_SCHEMA: Schema = {
     persona: { type: 'STRING' },
     aspetto: { type: 'STRING' },
     porta: { type: 'ARRAY', items: { type: 'STRING' } },
+    indossa: { type: 'ARRAY', items: { type: 'STRING' }, description: 'what they wear on the head, the torso and the back, 0-3 garments by name: the common ones that exist when they fit, else new ones' },
     mestiere: { type: 'STRING' },
     genere: { type: 'STRING', enum: ['male', 'female'] },
     eta: { type: 'STRING', description: 'young, adult, old…, in the language of the world' },
@@ -299,7 +302,7 @@ function relationRules(specie: Species): string {
  */
 export async function individuate(c: Council, archetype: { name: string; description: string; persona: string; specie?: Species }, ctx: { place: string; common: string[]; society?: string; avoid?: string[]; focus?: string[] }): Promise<Identity> {
   const specie = archetype.specie ?? 'person';
-  const r = await c.ask<{ nome: string; persona: string; aspetto: string; porta: string[]; mestiere?: string; genere?: string; eta?: string; storia?: string; famiglia?: Array<{ nome: string; legame: string }>; routine?: Array<{ quando: string; fa: string; dove: string; azione?: string }> }>(
+  const r = await c.ask<{ nome: string; persona: string; aspetto: string; porta: string[]; indossa?: string[]; mestiere?: string; genere?: string; eta?: string; storia?: string; famiglia?: Array<{ nome: string; legame: string }>; routine?: Array<{ quando: string; fa: string; dove: string; azione?: string }> }>(
     'narrator',
     'npc.individuate',
     [
@@ -308,6 +311,7 @@ export async function individuate(c: Council, archetype: { name: string; descrip
       `Place where they are: ${ctx.place || 'unknown'}.`,
       ctx.society ? `THE SOCIETY OF THE WORLD\n${ctx.society}` : '',
       'Give them a proper name, a short character and a story of their own (not generic), a gender (male or female), a trade, a detail of their look, and 3-6 things they carry consistent with their life (tools of the trade, food, keepsakes, small things).',
+      specie === 'animal' ? 'An animal wears nothing: "indossa" is empty.' : 'In "indossa" what they wear on the head, the torso and the back (a hat, a tunic or an apron, a cloak or a shawl): 0-3 garments by name, of their trade and their means, the common ones that exist when they fit; an empty list if they wear nothing worth a word.',
       'Put them into society: give them a family (1-3 bonds) and, when it makes sense, bind them to people already known using EXACTLY their names (the miller\'s daughter, the mechanic\'s brother, the barmaid\'s rival: the trades of your world); they may also name relatives not met yet. If among the people named and never met there is one that fits this kind, you can be that very one (use their name).',
       relationRules(specie),
       ctx.avoid?.length ? `Names already taken or too similar, NOT to use: ${ctx.avoid.join(', ')}.` : '',
@@ -335,6 +339,8 @@ export async function individuate(c: Council, archetype: { name: string; descrip
     persona: String(r.persona ?? archetype.persona),
     look: String(r.aspetto ?? ''),
     carrying: (r.porta ?? []).map(String).slice(0, 8),
+    // An animal wears nothing, whatever the card says (T353).
+    wearing: specie === 'animal' ? [] : (Array.isArray(r.indossa) ? r.indossa : []).filter((n) => typeof n === 'string' && n.trim()).map((n) => String(n).trim().slice(0, 60)).slice(0, 3),
     job,
     gender: genere === 'male' || genere === 'female' ? genere : undefined,
     age: r.eta ? String(r.eta).slice(0, 20) : undefined,

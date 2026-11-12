@@ -586,7 +586,7 @@ export const INTERNAL_NAMES: readonly NameDomain[] = [
     names: {
       persone: 'people', attesi: 'expected', di: 'of', nome: 'name', legame: 'bond', specie: 'species', genere: 'gender', tipo: 'kind',
       mestiere: 'job', eta: 'age', famiglia: 'family', storia: 'story', luogo: 'place', origine: 'origin', persona: 'persona', aspetto: 'look',
-      porta: 'carries', ricordi: 'memories', legameViandante: 'wandererBond', scheda: 'sheet', testo: 'text', impronta: 'fingerprint',
+      porta: 'carries', indossa: 'wears', ricordi: 'memories', legameViandante: 'wandererBond', scheda: 'sheet', testo: 'text', impronta: 'fingerprint',
       viandante: 'wanderer', quando: 'when', fa: 'does', dove: 'where', azione: 'activity', con: 'with', peso: 'weight',
     },
   }),
@@ -1207,7 +1207,7 @@ const MANIFEST: FieldShape = {
 const P = ['campi-persone', 'campi-carte'];
 const INDIVIDUAL: FieldShape = {
   d: P,
-  only: ['nome', 'specie', 'genere', 'tipo', 'mestiere', 'eta', 'famiglia', 'storia', 'luogo', 'origine', 'aspetto', 'porta', 'ricordi', 'legameViandante', 'scheda', 'carta'],
+  only: ['nome', 'specie', 'genere', 'tipo', 'mestiere', 'eta', 'famiglia', 'storia', 'luogo', 'origine', 'aspetto', 'porta', 'indossa', 'ricordi', 'legameViandante', 'scheda', 'carta'],
   sub: {
     family: { d: P, only: ['nome', 'legame', 'viandante'] },
     routine: { d: P, only: ['quando', 'fa', 'dove', 'azione'] },

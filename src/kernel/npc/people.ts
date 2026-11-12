@@ -14,7 +14,9 @@ import { guessClass } from '../../mj/classes';
 import { hashStr } from '../rng';
 import type { ItemDef } from '../types';
 import { SOLO, WANDERER_NAME, wandererOf } from '../wandererIds';
+import { dressInventory } from '../wearing';
 import type { NpcHost, NpcWanderer } from './host';
+import { outfitOf, type Garment, type Outfit } from './outfits';
 import { PLOTS_FILE, readPlots, reviewPlot, writePlots, type Plot } from './plots';
 import { addIndividual, applyRenames, bondWith, defaultRoutine, freshName, guessGender, readPeople, remember, repairSociety, sheetFingerprint, similarNames, societySummary, type DayPhase, type Individual, type Species } from './society';
 
@@ -58,7 +60,7 @@ export class People {
     const known = origin ? people.people.find((p) => p.origin === origin && p.kind === modId) : undefined;
     let identity: Identity;
     if (known) {
-      identity = { name: known.name, persona: known.persona ?? m.persona, look: known.look ?? '', carrying: known.carries ?? [], job: known.job, gender: known.gender, age: known.age, family: known.family, routine: known.routine, story: known.story };
+      identity = { name: known.name, persona: known.persona ?? m.persona, look: known.look ?? '', carrying: known.carries ?? [], wearing: known.wears ?? [], job: known.job, gender: known.gender, age: known.age, family: known.family, routine: known.routine, story: known.story };
     } else {
       const specie = this.speciesOf(modId!) ?? 'person';
       // Names already taken (people met, people around): a newcomer's name is unlike all of them,
@@ -77,7 +79,7 @@ export class People {
           identity = await ask([...alike(identity.name), identity.name]);
         }
       } catch {
-        identity = { name: m.name, persona: m.persona, look: '', carrying: [], routine: defaultRoutine('') };
+        identity = { name: m.name, persona: m.persona, look: '', carrying: [], wearing: [], routine: defaultRoutine('') };
       }
       identity.gender ??= guessGender({ name: identity.name, job: identity.job ?? '', family: identity.family ?? [] });
       // Still alike: a name the kernel picks (and the persona says it).
@@ -89,16 +91,21 @@ export class People {
     }
     if (!this.host.ecs.alive.has(id)) return identity;
     this.host.ecs.set(id, 'identity', identity);
-    const resolved = identity.carrying.map((n) => this.host.content.byName(n));
-    const unknown = identity.carrying.filter((_, i) => !resolved[i]);
-    const defs = [...resolved.filter((d): d is ItemDef => !!d), ...(unknown.length ? await this.host.introduceItems(unknown, `portati da ${identity.name}`) : [])];
+    // What they carry and what they wear (T353): the things of the world by name; those the world does not have yet, the Narrator
+    // defines in one call for both lists (the same call that defined what they carried before).
+    const byName = (n: string) => this.host.content.byName(n);
+    const unknown = [...new Set([...identity.carrying, ...identity.wearing].filter((n) => !byName(n)))];
+    const introduced = unknown.length ? await this.host.introduceItems(unknown, `portati da ${identity.name}`) : [];
+    const defs = [...identity.carrying.map(byName).filter((d): d is ItemDef => !!d), ...introduced.filter((d) => !identity.wearing.some((n) => byName(n)?.id === d.id))];
     let inv: Inventory | undefined = this.host.ecs.get(id, 'inventory');
     if (!inv) inv = this.host.ecs.set(id, 'inventory', newInventory(10));
     if (!inv.slots.some(Boolean)) for (const d of defs) addItem(inv, d.id, 1, this.host.itemSpec(d.id));
+    const worn = this.dress(id, identity, inv, [...identity.wearing.map(byName).filter((d): d is ItemDef => !!d), ...introduced]);
     if (!known && identity.name !== m.name) {
       const individual: Individual = {
         name: identity.name, kind: modId!, species: this.speciesOf(modId!) ?? 'person', gender: identity.gender, job: identity.job || m.name, age: identity.age, family: identity.family ?? [], routine: identity.routine ?? defaultRoutine(identity.job ?? ''),
         story: identity.story, place: this.host.chunkAt(this.host.ecs.get(id, 'pos')?.x ?? 0, this.host.ecs.get(id, 'pos')?.y ?? 0)?.place?.name, origin: origin, persona: identity.persona, look: identity.look, carries: identity.carrying,
+        ...(identity.wearing.length ? { wears: identity.wearing } : {}),
       };
       // The kernel makes the society coherent: the other side of each relation, what this species can be.
       const next = addIndividual(readPeople(this.host.files()), individual, (t) => this.speciesOf(t));
@@ -112,9 +119,29 @@ export class People {
         if (back) oi.family = back.family;
       }
       const fam = (identity.family ?? []).map((f) => `${f.bond} di ${f.name}`).join(', ');
-      this.host.council.say('narrator', 'propone', `${m.name} → ${identity.name}, ${individual.job}${fam ? `; ${fam}` : ''}: ${identity.look} (porta ${defs.map((d) => d.name).join(', ') || 'niente'})`, undefined, 'npc.individuate');
+      const dressed = Object.values(worn).map((item) => this.host.itemInfo(item).name);
+      this.host.council.say('narrator', 'propone', `${m.name} → ${identity.name}, ${individual.job}${fam ? `; ${fam}` : ''}: ${identity.look} (porta ${defs.map((d) => d.name).join(', ') || 'niente'}${dressed.length ? `; indossa ${dressed.join(', ')}` : ''})`, undefined, 'npc.individuate');
     }
     return identity;
+  }
+
+  /**
+   * Dresses an individual (T353, ADR-0181): the garments the card names (`named`, in its order), each on its zone, and for every zone
+   * left bare one of their trade among the garments of the world (`outfitOf`: by name, description or tags, chosen by their name, so
+   * the same every time they are met), with no call to the models. The marks are the inventory's, as the wanderer's (`dressInventory`):
+   * the renderer and the wire read them the same way; the inventory a garment is added to is theirs. An animal wears nothing.
+   */
+  private dress(id: Id, identity: Identity, inv: Inventory, named: ItemDef[]): Outfit {
+    const kind: string | undefined = this.host.ecs.get(id, 'module')?.id;
+    if (kind && this.speciesOf(kind) === 'animal') return {};
+    const garments: Garment[] = [];
+    for (const d of this.host.content.items.values()) {
+      const zone = this.host.wornZone(d.id);
+      if (zone) garments.push({ id: d.id, name: d.name, description: d.description, tags: d.tags, zone });
+    }
+    const outfit = outfitOf(named.map((d) => d.id), identity.job, garments, identity.name);
+    const on = dressInventory(inv, outfit, (item) => this.host.itemSpec(item));
+    return Object.fromEntries(on.map((zone) => [zone, outfit[zone]!])) as Outfit;
   }
 
   /**
@@ -328,6 +355,7 @@ export class People {
       persona: `Sei ${nome}, ${gender === 'female' ? 'una bambina appena nata' : 'un bambino appena nato'}, ${child_} di ${parent.name} e ${ofOther}. Parli a monosillabi, guardi tutto con meraviglia.`,
       look: 'piccolissimo, in fasce',
       carrying: [],
+      wearing: [],
       job: 'bambino',
       age: 'neonato',
       gender,

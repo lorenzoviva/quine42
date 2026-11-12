@@ -316,6 +316,17 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   da `sys.wander`). Un legame dice cosa è l'individuo per l'altro, nel suo genere; il validatore della società
   (`repairSociety` in `npc/society.ts`) lo rende possibile per le due specie e simmetrico, un padrone per animale,
   nomi non simili (rinomina anche nelle trame); ripara a ogni aggiunta e all'avvio (`reviewSociety`).
+- **Gli abiti degli individui** (ADR-0181, T353): la scheda di `npc.individuate` dice anche cosa indossano (`indossa`: 0–3 capi per testa,
+  busto e schiena, i comuni quando vanno bene; un animale niente), nella stessa chiamata di prima; i capi che il mondo non ha entrano con
+  `introduceItems` nella stessa chiamata di ciò che portano; la scelta resta in `world/people.json → wears` (`Identity.wearing`). Le zone
+  che la scheda lascia nude le veste il **mestiere**, senza chiamate (`outfitOf` in `npc/outfits.ts`, puro, dalla faccia `model.ts`): fra i
+  capi del mondo uno il cui nome, descrizione o tag comincia con una radice del mestiere (`tradeStems`: parole di almeno quattro lettere
+  tagliate a 4–7, «contadina» e «contadini» una radice sola; `garmentOfTrade`), scelto da un hash del nome e della zona (lo stesso
+  individuo sempre uguale, non tutti uguali); un mestiere senza capi non veste. Il seme ha il cappello di paglia (contadini, pastori) e il
+  grembiule di cuoio (fabbri, fornai). `People.dress` mette i segni nell'inventario dell'individuo (`dressInventory` in `wearing.ts`: il
+  capo nella tasca in cui sta o aggiunto, il segno sulla zona) dopo ogni individuazione, anche di chi è già nel registro (rivisto dopo
+  che un luogo è stato lasciato): il renderer li legge come quelli del viandante (`wornBy`), il filo li porta in `EntityView.worn`
+  (`#multigiocatore`). La zona la dà la porta (`NpcHost.wornZone`). Gli individui non si cambiano: chi veste è l'individuazione.
 - **Vita degli NPC** (ADR-0024): attività visibili (`attivita {tipo, ferma}`), dialoghi tra individui,
   ricordi pesati, legami col viandante e figli (effetti `legame ricordo nascita`), trame e missioni
   (`world/plots.json`, diario nell'HUD). Ogni trama passa dal validatore (`reviewPlot` in `npc/plots.ts`): individui che
@@ -616,7 +627,9 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   client sottile fa subito anche da sé, come `wield` (anche «Usa» e il doppio clic su un capo: `useSlot` lo manda come `wear`); il proprio
   inventario arriva intero in `MyState`, i segni `worn` compresi. Agli altri `OtherView.worn` porta zona → id dei capi (`wornItems`, letti
   come li legge il kernel; dell'inventario nient'altro, regola 8f), il client sottile li mette in `remote.worn` (`readWorn`: solo le tre
-  zone, testi tagliati) e ne fa il corpo con i suoi file. Gli individui non hanno segni: sul filo `EntityView` non li porta.
+  zone, testi tagliati) e ne fa il corpo con i suoi file. Gli individui (ADR-0181, T353): `EntityView.worn` porta zona → id dei capi di
+  un'entità con segni nell'inventario (`wornItems`; dell'inventario nient'altro), il client sottile lo mette nel componente `worn` dello
+  specchio (`readWorn`), che `wornBy` legge dopo `remote.worn` e prima dei segni; se ne va con il prossimo `update` senza segni.
 
 <a id="account"></a>
 ## L'account Firebase
@@ -748,7 +761,9 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   non arriva la figura resta com'era, poi `Entities` e `Wanderer` la rifanno (`modelObject` con `dressed`). Gli stessi capi sulla stessa
   forma sono un corpo solo, condiviso; il worker ne tiene 32 MB (`DRESSED_MEMORY_BYTES`), le geometrie stanno con quelle delle forme
   (`keepGeometry`, sotto `trimGeometries`). Il multigiocatore è in `#multigiocatore`; lo Scultore in `#markovjunior-modelli`. Catture
-  in `docs/catture/T290/` (prima, la via B di fronte, di fianco e di spalle, la via C con l'ascia in mano, l'inventario, dopo).
+  in `docs/catture/T290/` (prima, la via B di fronte, di fianco e di spalle, la via C con l'ascia in mano, l'inventario, dopo). Gli
+  **individui** si vestono dalla scheda del Narratore o dal mestiere (ADR-0181, T353, `#societa`): i loro segni sono quelli dell'inventario
+  e il renderer li legge allo stesso modo; catture in `docs/catture/T353/`.
 
 <a id="markovjunior-modelli"></a>
 ## MarkovJunior, i modelli, la cache delle forme

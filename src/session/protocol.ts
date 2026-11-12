@@ -78,6 +78,8 @@ export interface EntityView {
   c?: Record<string, unknown>;
   /** What it is saying, while it says it. */
   text?: string;
+  /** What it wears (T353, ADR-0181): zone → the thing's id, as `OtherView.worn`; of what it carries nothing else. */
+  worn?: Partial<Record<WornZone, string>>;
 }
 
 /**

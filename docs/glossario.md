@@ -841,11 +841,11 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: `attacco` (per il punto)
 
 ### Capo indossato
-- **Inglese**: `worn`, `wearSlot`, `outfit`, `wornBy`, `wornItems`, `wornSlots`, `keepWornMarks`
-- **Definizione**: ciò che una figura ha addosso: il segno `worn` del suo inventario (zona → tasca), come `equipped` per ciò che è in mano; il capo resta nell'inventario, e gettato, dato o messo in una borsa non è più indossato. Si vede sul corpo (il corpo vestito) e gli altri viandanti lo vedono (`OtherView.worn`) (T290, ADR-0180).
-- **Dove vive**: `src/kernel/wearing.ts`, `src/kernel/inventory.ts`, `src/render/dressed.ts`
-- **Da non usare**: `equipaggiato` (per ciò che è addosso: si equipaggia un pannello)
-- **Fermo**: `inventory.worn`, l'operazione `wear` del protocollo, `worn` di `OtherView`.
+- **Inglese**: `worn`, `wearSlot`, `outfit`, `wornBy`, `wornItems`, `wornSlots`, `keepWornMarks`, `dressInventory`; per gli individui `Outfit`, `outfitOf`, `Garment`, `tradeStems`, `garmentOfTrade`, `wears`, `wearing`
+- **Definizione**: ciò che una figura ha addosso: il segno `worn` del suo inventario (zona → tasca), come `equipped` per ciò che è in mano; il capo resta nell'inventario, e gettato, dato o messo in una borsa non è più indossato. Si vede sul corpo (il corpo vestito) e gli altri viandanti lo vedono (`OtherView.worn`) (T290, ADR-0180). Un individuo lo riceve dal kernel: dalla scheda del Narratore (`indossa`, in `world/people.json` `wears`) o dal mestiere fra i capi del mondo (`outfitOf`), e gli altri lo vedono (`EntityView.worn`) (T353, ADR-0181).
+- **Dove vive**: `src/kernel/wearing.ts`, `src/kernel/inventory.ts`, `src/render/dressed.ts`, `src/kernel/npc/outfits.ts`
+- **Da non usare**: `equipaggiato` (per ciò che è addosso: si equipaggia un pannello), `abito`/`vestito` come identificatore (è un capo indossato, `worn`; `Outfit` è l'insieme per zona)
+- **Fermo**: `inventory.worn`, l'operazione `wear` del protocollo, `worn` di `OtherView` e di `EntityView`, `indossa` nella scheda di `npc.individuate`, `wears` in `world/people.json`.
 
 ### Zona del corpo
 - **Inglese**: `WornZone`, `WORN_ZONES`, `Zone`, `bodyOf`, `SLOT_ZONES`, `wornZoneOf`

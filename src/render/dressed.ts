@@ -16,11 +16,14 @@ import { cachedGeometry, keepGeometry, type ModelGeo } from './models';
 
 /**
  * What an entity wears, zone → the thing's id: the wanderer, from its inventory; another wanderer, as the server says (`remote.worn`);
- * an individual, from its inventory if it has marks (none has today: nothing dresses them yet).
+ * an entity of a mirror, as the server says of it (`worn`, from `EntityView.worn`, T353); an individual, from the marks of its
+ * inventory (the kernel dresses it from the Narrator's card or its trade, `npc/outfits.ts`).
  */
 export function wornBy(k: Kernel, id: Id): Partial<Record<WornZone, string>> {
   const remote = id === k.wandererEntity ? undefined : k.ecs.get(id, 'remote');
   if (remote) return readWorn(remote.worn) ?? {};
+  const mirrored = id === k.wandererEntity ? undefined : k.ecs.get(id, 'worn');
+  if (mirrored) return readWorn(mirrored) ?? {};
   const inv = k.ecs.get(id, 'inventory');
   if (!inv?.worn) return {};
   return wornItems(inv, (item) => k.wornZone(item));
