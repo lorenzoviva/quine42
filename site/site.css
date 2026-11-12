@@ -1324,6 +1324,138 @@ img, svg {
   margin-top: var(--space-8);
 }
 
+/* The launcher (T233): the panel that starts the game, in the hero next to the stage. The universe and the button divide by φ; what has
+   nothing to show (no universes, nobody playing, no news, no showcase) is hidden, and stays hidden whatever display a class gives it. */
+.launcher [hidden] {
+  display: none !important;
+}
+.launch-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-13);
+  max-width: var(--measure-521);
+  margin-top: var(--space-8);
+}
+.launch-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+}
+.launch-label {
+  font-family: var(--skin-font-label);
+  font-size: var(--text-11);
+  color: var(--skin-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.launch-state {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-5);
+  font-family: var(--skin-font-label);
+  font-size: var(--text-8);
+  letter-spacing: 0.05em;
+  color: var(--skin-text-dim);
+  white-space: nowrap;
+}
+.launch-row {
+  display: grid;
+  grid-template-columns: minmax(0, var(--column-major)) minmax(0, var(--column-minor));
+  gap: var(--space-13);
+  align-items: stretch;
+}
+.launch-row.is-alone {
+  grid-template-columns: minmax(0, 1fr);
+}
+.launch-select {
+  min-width: 0;
+  cursor: pointer;
+}
+.launch-play {
+  white-space: nowrap;
+}
+.launch-note {
+  margin: 0;
+  font-size: var(--text-13);
+  line-height: var(--leading-snug);
+  color: var(--skin-text-dim);
+}
+.launch-live {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  padding-top: var(--space-13);
+  border-top: 1px dashed color-mix(in srgb, var(--skin-text) 15%, transparent);
+}
+.launch-live-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.launch-live-list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-13);
+}
+.launch-live-name {
+  font-family: var(--skin-font-display);
+  font-size: var(--text-18);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.launch-live-count {
+  font-family: var(--skin-font-label);
+  font-size: var(--text-8);
+  color: var(--skin-success);
+  white-space: nowrap;
+}
+
+/* The launcher's doors: universes, cards, wanderer, credits. A whole card is the link. */
+.launch-tile {
+  gap: var(--space-13);
+}
+.launch-tile .comic-badge {
+  align-self: flex-start;
+}
+.launch-tile-title {
+  font-family: var(--skin-font-display);
+  font-size: var(--text-21);
+  font-weight: var(--skin-title-weight);
+  line-height: var(--leading-tight);
+  color: var(--skin-title-color);
+}
+.launch-tile-text {
+  font-size: var(--text-13);
+  line-height: var(--leading-read);
+  color: var(--skin-text-dim);
+}
+.launch-tile:focus-visible {
+  outline: 2px solid var(--skin-accent);
+  outline-offset: 2px;
+}
+@media (max-width: 768px) {
+  /* On a phone GIOCA comes before the words, within the first screen: the panel right under the title. */
+  .hero-content > .hero-desc {
+    order: 1;
+  }
+  .hero-content > .hero-cta {
+    order: 2;
+  }
+}
+@media (max-width: 480px) {
+  /* On a phone the universe above, the button under it, as wide as the panel. */
+  .launch-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 /* The 3D stage: the template's mockup frame, with the canvas inside. */
 .hero-3d {
   position: relative;
@@ -1428,15 +1560,15 @@ img, svg {
   background: var(--skin-text-dim);
   box-shadow: 0 0 0 2px var(--skin-ink);
 }
-.status-pill[data-state='on'] .status-dot {
+:is(.status-pill, .launch-state)[data-state='on'] .status-dot {
   background: var(--skin-success);
   box-shadow: 0 0 0 2px var(--skin-ink), var(--glow-success);
   animation: statusPulse 1.6s ease-in-out infinite;
 }
-.status-pill[data-state='off'] .status-dot {
+:is(.status-pill, .launch-state)[data-state='off'] .status-dot {
   background: var(--skin-danger);
 }
-.status-pill[data-state='wait'] .status-dot {
+:is(.status-pill, .launch-state)[data-state='wait'] .status-dot {
   background: var(--skin-primary);
 }
 @keyframes statusPulse {

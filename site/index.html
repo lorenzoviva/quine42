@@ -28,12 +28,13 @@
       <button class="nav-toggle-btn" id="nav-toggle" aria-controls="nav-links" aria-expanded="false">MENU ▼</button>
       <nav aria-label="Sezioni">
         <ul class="nav-links" id="nav-links">
-          <li><a href="#mondo" class="nav-link active">Mondo</a></li>
+          <li><a href="#mondo" class="nav-link active">Gioca</a></li>
+          <li id="nav-news" hidden><a href="#notizie" class="nav-link">Novità</a></li>
           <li id="nav-video" hidden><a href="#video" class="nav-link">Video</a></li>
+          <li id="nav-showcase" hidden><a href="#showcase" class="nav-link">Dal mondo</a></li>
           <li id="nav-guide" hidden><a href="./istruzioni.html" class="nav-link">Istruzioni</a></li>
           <li><a href="#vetrina" class="nav-link">Dentro il gioco</a></li>
           <li><a href="./carte.html" class="nav-link">Carte 3D</a></li>
-          <li><a href="#reami" class="nav-link">Universi</a></li>
           <li><a href="./sessioni.html" class="nav-link">Sessioni</a></li>
           <li><a href="./notizie.html" class="nav-link">Notizie</a></li>
           <li><a href="./profilo.html" class="nav-link">Profilo</a></li>
@@ -41,12 +42,13 @@
         </ul>
       </nav>
       <div class="nav-actions">
-        <a href="../index.html" class="comic-btn arcade cyan">GIOCA</a>
+        <a href="../index.html" class="comic-btn arcade cyan" id="nav-play">GIOCA</a>
       </div>
     </header>
 
-    <main>
-      <!-- L'hero: il palco three.js fa crescere programmi MarkovJunior veri (site/landing.ts) -->
+    <main class="launcher">
+      <!-- Il launcher (T233): a sinistra il pannello che fa partire il gioco, a destra il palco three.js che fa crescere programmi MarkovJunior
+           veri (site/landing.ts). Il pannello legge solo ciò che il server dice già (site/launcher-core.ts). -->
       <section class="hero" id="mondo">
         <div class="hero-content">
           <div>
@@ -57,14 +59,28 @@
             QUINE42 è un gioco 3D visto dall'alto. Il kernel è scritto a mano; storia, luoghi, persone, oggetti e il loro aspetto
             li generano agenti IA mentre giochi. Nel terreno ci sono rune, che sono token Lua veri: ciò che componi viene eseguito.
           </p>
-          <p class="hero-desc">
-            Il modello qui accanto non è un'animazione: è un programma MarkovJunior che gira in questa pagina, come ogni cosa nel gioco.
-            È una beta, quindi qualcosa si romperà: sapere cosa è il motivo del test.
-          </p>
+          <p class="hero-desc">È una beta, quindi qualcosa si romperà: sapere cosa è il motivo del test.</p>
+
+          <!-- Il pannello di lancio: l'universo, GIOCA, chi è in gioco ora. Senza server il gioco parte in questo browser. -->
+          <div class="launch-panel comic-panel cyan-shadow" id="launch" role="group" aria-label="Gioca">
+            <div class="launch-head">
+              <label class="launch-label" id="launch-label" for="launch-universe">Universo</label>
+              <span class="launch-state" id="launch-state" data-state="wait"><span class="status-dot"></span><span class="status-text">MONDO…</span></span>
+            </div>
+            <div class="launch-row is-alone" id="launch-row">
+              <select class="comic-select launch-select" id="launch-universe" hidden></select>
+              <a href="../index.html" class="comic-btn pink lg launch-play" id="launch-play">GIOCA</a>
+            </div>
+            <p class="launch-note" id="launch-note" aria-live="polite"></p>
+            <div class="launch-live" id="launch-live" hidden>
+              <span class="launch-label">In gioco ora</span>
+              <ul class="launch-live-list" id="launch-live-list"></ul>
+            </div>
+          </div>
+
           <div class="hero-cta">
-            <a href="../index.html" class="comic-btn pink lg">GIOCA</a>
-            <a href="./istruzioni.html" class="comic-btn cyan lg" id="hero-guide" hidden>ISTRUZIONI</a>
-            <a href="#reami" class="comic-btn lg">UNIVERSI</a>
+            <a href="./istruzioni.html" class="comic-btn cyan" id="hero-guide" hidden>ISTRUZIONI</a>
+            <a href="./sessioni.html" class="comic-btn">TUTTI GLI UNIVERSI</a>
           </div>
         </div>
 
@@ -77,6 +93,17 @@
         </div>
       </section>
 
+      <!-- Le ultime notizie (site/notizie/): senza notizie la sezione resta nascosta -->
+      <section class="section-wrap" id="notizie" hidden>
+        <div class="section-head">
+          <h2 class="comic-title">Novità</h2>
+        </div>
+        <div class="grid-3" id="news-latest"></div>
+        <div class="news-all">
+          <a href="./notizie.html" class="comic-btn cyan">TUTTE LE NOTIZIE</a>
+        </div>
+      </section>
+
       <!-- I video (server/video.ts): la sezione si vede solo se il server ne ha, con il loro file -->
       <section class="section-wrap" id="video" hidden>
         <div class="section-head">
@@ -85,14 +112,54 @@
         <div class="video-list" id="video-list"></div>
       </section>
 
-      <!-- Le ultime notizie (site/notizie/): senza notizie la sezione resta nascosta -->
-      <section class="section-wrap" id="notizie" hidden>
+      <!-- Lo showcase (T235): carte famose, strutture, universi più giocati. Resta nascosto finché non ha contenuti veri: niente segnaposto -->
+      <section class="section-wrap" id="showcase" hidden>
         <div class="section-head">
-          <h2 class="comic-title">Ultime notizie</h2>
+          <h2 class="comic-title">Dal mondo</h2>
         </div>
-        <div class="grid-3" id="news-latest"></div>
-        <div class="news-all">
-          <a href="./notizie.html" class="comic-btn cyan">TUTTE LE NOTIZIE</a>
+        <div class="grid-3" id="showcase-list"></div>
+      </section>
+
+      <!-- Le porte del launcher: universi, carte, profilo, crediti; sotto, gli universi che arriveranno -->
+      <section class="section-wrap" id="reami">
+        <div class="section-head">
+          <h2 class="comic-title">Il tuo viaggio</h2>
+        </div>
+
+        <div class="grid-4 launch-tiles">
+          <a class="comic-card launch-tile" href="./sessioni.html">
+            <span class="comic-badge green">UNIVERSI</span>
+            <span class="launch-tile-title">Scegli un universo</span>
+            <span class="launch-tile-text">Chi lo guida, quanto costa un'ora di gioco, la sua sala d'attesa.</span>
+          </a>
+          <a class="comic-card launch-tile" href="./carte.html">
+            <span class="comic-badge cyan">CARTE 3D</span>
+            <span class="launch-tile-title">Le carte</span>
+            <span class="launch-tile-text">Ciò che porti nel mondo diventa una tua carta, e conta quanto viene usato.</span>
+          </a>
+          <a class="comic-card launch-tile" href="./profilo.html">
+            <span class="comic-badge yellow">VIANDANTE</span>
+            <span class="launch-tile-title">Il tuo viandante</span>
+            <span class="launch-tile-text">Accedi con Google o entra anonimo; il colore del mantello e il suo aspetto.</span>
+          </a>
+          <a class="comic-card launch-tile" href="./pagamenti.html">
+            <span class="comic-badge pink">CREDITI</span>
+            <span class="launch-tile-title">I tuoi crediti</span>
+            <span class="launch-tile-text">Pagano i modelli che fanno crescere il mondo mentre lo esplori: saldo e consumi.</span>
+          </a>
+        </div>
+
+        <!-- Universes still to come (T186): only words, nothing here leads anywhere yet -->
+        <div class="comic-panel yellow-shadow coming-soon">
+          <div class="coming-soon-head">
+            <span class="comic-badge yellow">COMING SOON</span>
+            <h3 class="comic-title">ALTRI UNIVERSI ALL'ORIZZONTE</h3>
+          </div>
+          <ul class="coming-soon-list">
+            <li><b>SPAZIO</b> Rotte tra le stelle e stazioni alla deriva.</li>
+            <li><b>PIRATI</b> Isole senza mappa e velieri da abbordare.</li>
+            <li><b>COWBOY</b> Polvere, mandrie e città di frontiera.</li>
+          </ul>
         </div>
       </section>
 
@@ -177,61 +244,6 @@
           </div>
         </div>
       </section>
-
-      <!-- Gli universi e ciò che arriverà: sessioni, crediti, profilo -->
-      <section class="section-wrap" id="reami">
-        <div class="section-head">
-          <h2 class="comic-title">Universi, crediti, profilo</h2>
-        </div>
-
-        <div class="grid-3">
-          <div class="comic-card">
-            <span class="comic-badge green" style="align-self: flex-start; margin-bottom: var(--space-13)">UNIVERSI CONDIVISI</span>
-            <h4 class="comic-title" style="font-size: var(--text-21)">ENTRA IN UN UNIVERSO</h4>
-            <p class="arcade-text text-dim" style="font-size: var(--text-11); line-height: var(--leading-read)">
-              Scegli un universo, guarda chi lo guida e quanto costa un'ora di gioco, poi entra nella sua sala d'attesa.
-            </p>
-            <div style="margin-top: auto; padding-top: var(--space-13)">
-              <a href="./sessioni.html" class="comic-btn arcade cyan sm full-width">SCEGLI UN UNIVERSO</a>
-            </div>
-          </div>
-
-          <div class="comic-card">
-            <span class="comic-badge pink" style="align-self: flex-start; margin-bottom: var(--space-13)">CREDITI</span>
-            <h4 class="comic-title" style="font-size: var(--text-21)">I TUOI CREDITI</h4>
-            <p class="arcade-text text-dim" style="font-size: var(--text-11); line-height: var(--leading-read)">
-              I crediti pagano i modelli che fanno crescere il mondo mentre lo esplori. Qui vedi saldo e consumi.
-            </p>
-            <div style="margin-top: auto; padding-top: var(--space-13)">
-              <a href="./pagamenti.html" class="comic-btn arcade pink sm full-width">VEDI I CREDITI</a>
-            </div>
-          </div>
-
-          <div class="comic-card">
-            <span class="comic-badge yellow" style="align-self: flex-start; margin-bottom: var(--space-13)">PROFILO VIANDANTE</span>
-            <h4 class="comic-title" style="font-size: var(--text-21)">IL TUO VIANDANTE</h4>
-            <p class="arcade-text text-dim" style="font-size: var(--text-11); line-height: var(--leading-read)">
-              Accedi con Google o entra anonimo; scegli il colore del mantello e l'aspetto del tuo viandante.
-            </p>
-            <div style="margin-top: auto; padding-top: var(--space-13)">
-              <a class="comic-btn arcade sm full-width" href="./profilo.html">APRI IL PROFILO</a>
-            </div>
-          </div>
-        </div>
-
-        <!-- Universes still to come (T186): only words, nothing here leads anywhere yet -->
-        <div class="comic-panel yellow-shadow coming-soon">
-          <div class="coming-soon-head">
-            <span class="comic-badge yellow">COMING SOON</span>
-            <h3 class="comic-title">ALTRI UNIVERSI ALL'ORIZZONTE</h3>
-          </div>
-          <ul class="coming-soon-list">
-            <li><b>SPAZIO</b> Rotte tra le stelle e stazioni alla deriva.</li>
-            <li><b>PIRATI</b> Isole senza mappa e velieri da abbordare.</li>
-            <li><b>COWBOY</b> Polvere, mandrie e città di frontiera.</li>
-          </ul>
-        </div>
-      </section>
     </main>
 
     <!-- Il tramonto synthwave e il segreto dei gerboa (allusivo) -->
@@ -251,10 +263,8 @@
       <div class="footer-brand">QUINE42</div>
       <div class="footer-links">
         <a href="../index.html">GIOCO</a>
-        <a href="#mondo">MONDO</a>
         <a href="#vetrina">DENTRO IL GIOCO</a>
         <a href="./carte.html">CARTE</a>
-        <a href="#reami">UNIVERSI</a>
         <a href="./sessioni.html">SESSIONI</a>
         <a href="./notizie.html">NOTIZIE</a>
         <a href="./profilo.html">PROFILO</a>

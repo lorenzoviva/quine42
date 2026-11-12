@@ -4,6 +4,10 @@
 
 import { validWandererId } from '../src/kernel/wanderers';
 import { accountConfig, signIn, type SignedIn } from '../src/session/login';
+import { pickUniverse, store, stored, UNIVERSE_KEY } from './launcher-core';
+
+// What the landing shares with the pages with an account, without carrying the sign-in (launcher-core.ts).
+export { pickUniverse, store, stored, UNIVERSE_KEY };
 
 /** Who a page asks for: an account (its token) or, without accounts, an id. */
 export interface Who {
@@ -11,20 +15,12 @@ export interface Who {
   localId?: string;
 }
 
-/** The site remembers the universe and, without accounts, the id the player typed. */
-export const UNIVERSE_KEY = 'quine:sito:reame';
+/** The site remembers, without accounts, the id the player typed (the universe: `UNIVERSE_KEY`, launcher-core.ts). */
 const LOCAL_ID_KEY = 'quine:sito:viandante';
 
 /** Credits in dollars, as the game's panel says them. */
 export function formatCredits(n: number): string {
   return `$${(Number.isFinite(n) ? Math.max(0, n) : 0).toFixed(2)}`;
-}
-
-/** The universe to show: the one in the address, the last one seen, or the first. */
-export function pickUniverse(universes: string[], asked: string | null, last: string | null): string | undefined {
-  if (asked && universes.includes(asked)) return asked;
-  if (last && universes.includes(last)) return last;
-  return universes[0];
 }
 
 /** Where the game opens this universe (a server without accounts also needs to know which wanderer). */
@@ -70,23 +66,6 @@ export function initNav(): void {
     actions?.classList.toggle('is-open', open);
     toggle.setAttribute('aria-expanded', String(open));
   });
-}
-
-export function stored(key: string): string | null {
-  try {
-    return localStorage.getItem(key);
-  } catch {
-    return null;
-  }
-}
-
-export function store(key: string, value: string | undefined): void {
-  try {
-    if (value === undefined) localStorage.removeItem(key);
-    else localStorage.setItem(key, value);
-  } catch {
-    /* a browser that keeps nothing: the page asks again */
-  }
 }
 
 /** The sign-in panel's two buttons, as the way `signIn` asks how the player comes in. */
