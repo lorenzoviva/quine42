@@ -16,7 +16,25 @@ const NAME_RE = /^[a-z0-9][a-z0-9_-]{0,63}$/i;
 const RETRY_MS = 6 * 3_600_000;
 
 const readJson = (file, fallback) => { try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return fallback; } };
-const writeJson = (file, data) => { fs.mkdirSync(path.dirname(file), { recursive: true }); const tmp = `${file}.${process.pid}.tmp`; fs.writeFileSync(tmp, JSON.stringify(data, null, 2) + '\n'); fs.renameSync(tmp, file); };
+// On Windows a rename onto a file another process has open (the web page, `stato`, an antivirus) fails with EPERM or EBUSY:
+// it is retried a few times, then the file is written in place; the state file is never worth crashing the pipeline for.
+const writeJson = (file, data) => {
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  const text = JSON.stringify(data, null, 2) + '\n';
+  const tmp = `${file}.${process.pid}.tmp`;
+  try {
+    fs.writeFileSync(tmp, text);
+    for (let i = 0; ; i++) {
+      try { fs.renameSync(tmp, file); return; } catch (e) {
+        if (i >= 4 || !['EPERM', 'EBUSY', 'EACCES'].includes(e.code)) throw e;
+        Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 25 * (i + 1));
+      }
+    }
+  } catch (e) {
+    try { fs.rmSync(tmp, { force: true }); } catch { /* left for the next write */ }
+    try { fs.writeFileSync(file, text); } catch (e2) { console.error(`generatore: ${file} non scritto (${e2.code ?? e2.message})`); }
+  }
+};
 const readText = (file) => { try { return fs.readFileSync(file, 'utf8'); } catch { return ''; } };
 const round = (n) => Math.round(n * 10) / 10;
 

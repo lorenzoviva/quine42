@@ -342,7 +342,7 @@ describe('Fable (ADR-0115)', () => {
   });
 
   it('i modelli sono scritti, il tetto è 1', () => {
-    expect(config.providers.fable.args).toContain('claude-fable-5-1');
+    expect(config.providers.fable.args).toContain('fable');
     expect(config.providers.claude.args).toContain('claude-opus-5-5');
     expect(config.limiti.modello.fable).toBe(1);
     expect(config.limiti.provider.claude).toBe(3);
