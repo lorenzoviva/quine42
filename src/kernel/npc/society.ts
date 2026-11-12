@@ -81,6 +81,8 @@ export interface Individual {
   persona?: string;
   look?: string;
   carries?: string[];
+  /** What the Narrator's card says they wear (T353, ADR-0181): names of garments, head, torso and back; the trade dresses the rest. */
+  wears?: string[];
   memories?: Memory[];
   /** Before T34: what they were to the only wanderer (read into `famiglia` with the id `io`). */
   wandererBond?: string;

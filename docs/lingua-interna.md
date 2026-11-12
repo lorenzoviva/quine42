@@ -226,7 +226,7 @@ posto di un pannello sul filo).
 | [Campi dei manifest (aspetto, terreni, pannelli, casi, mestieri)](#campi-manifest) | campi | 48 | disco, Lua, prompt | T308a (0.4) |
 | [Campi dei programmi di mestiere che cambiano senso](#campi-mestieri) | campi | 1 | disco, Lua | T308a (0.4) |
 | [Campi di `world/rules.json`](#campi-regole) | campi | 7 | disco, filo | T308a (0.4) |
-| [Campi di `world/people.json`](#campi-persone) | campi | 29 | disco, filo, prompt | T308a (0.4) |
+| [Campi di `world/people.json`](#campi-persone) | campi | 30 | disco, filo, prompt | T308a (0.4) |
 | [Campi di `world/plots.json`](#campi-trame) | campi | 25 | disco, filo, prompt | T308a (0.4) |
 | [Campi di `world/bible.json`](#campi-bibbia) | campi | 10 | disco, filo, prompt | T308a (0.4) |
 | [Campi di `world/atlas.json`](#campi-atlante) | campi | 6 | disco, filo, prompt | T308a (0.4) |
@@ -1218,6 +1218,7 @@ posto di un pannello sul filo).
 | `persona` | `persona` |
 | `aspetto` | `look` |
 | `porta` | `carries` |
+| `indossa` | `wears` |
 | `ricordi` | `memories` |
 | `legameViandante` | `wandererBond` |
 | `scheda` | `sheet` |

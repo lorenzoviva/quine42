@@ -243,6 +243,9 @@ export class MockAiModels implements AiModels {
             { quando: 'sera', fa: 'chiacchiera in piazza', dove: 'piazza' },
             { quando: 'notte', fa: 'dorme', dove: 'casa' },
           ],
+          // What they wear (T353): a common garment when the world has one, by the words of its name; an animal nothing. Last, so
+          // that the draws before it are those of before.
+          indossa: ((garments: string[]) => (d.archetype?.specie === 'animal' || !garments.length ? [] : [rng.pick(garments)]))(common.filter((n: string) => /mantell|sciall|cappell|berrett|cappucc|tunic|giubb|grembiul|camici/i.test(n))),
         };
       }
       case 'agent.chat': {
@@ -455,6 +458,9 @@ export class MockAiModels implements AiModels {
   private item(name: string): unknown {
     const ws = words(name);
     const food = ws.some((w) => EDIBLE.includes(w));
+    // A garment (T353): a thing of clothing with its place, so that whoever names it wears it.
+    const posto = /cappell|berrett|cappucc|elm/i.test(name) ? 'testa' : /tunic|giubb|grembiul|camici|corazz|vest/i.test(name) ? 'corpo' : /mantell|sciall|capp[ae]\b/i.test(name) ? 'schiena' : undefined;
+    if (posto) return { nome: name.trim().replace(/^./, (c) => c.toUpperCase()), descrizione: `${name}, come lo portano nel regno`, categoria: 'clothing', peso: 0.8, pila: 1, tag: ['stoffa'], posto, impugnabile: false, aspetto: name, forma: 'sack' };
     return { nome: name.trim().replace(/^./, (c) => c.toUpperCase()), descrizione: `${name}, come lo si trova nel regno`, categoria: food ? 'food' : 'misc', peso: 0.5, pila: food ? 5 : 1, tag: [food ? 'cucina' : 'casa'], effetti: food ? { fame: 15 } : undefined, impugnabile: false, aspetto: name, forma: food ? 'bread' : 'sack' };
   }
 

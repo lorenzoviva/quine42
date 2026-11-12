@@ -10,6 +10,7 @@ export * from './society';
 export * from './plots';
 export * from './jobs';
 export * from './ventures';
+export * from './outfits';
 
 /** The mind of a character on the ECS (`mind`): how it moves (`vaga` its routine, `segui` the wanderer, `resta` where it is), its mood, what was said with it. */
 export interface Mind {

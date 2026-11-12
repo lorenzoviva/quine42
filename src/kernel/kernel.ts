@@ -7324,6 +7324,7 @@ export class Kernel {
       spawnModuleEntity: (m, x, y, chunkKey, origin) => k.spawnModuleEntity(m, x, y, chunkKey, origin),
       itemInfo: (id) => k.itemInfo(id),
       itemSpec: (id) => k.itemSpec(id),
+      wornZone: (item) => k.wornZone(item),
       introduceItems: (names, context, chi) => k.introduceItems(names, context, chi),
       noteMentions: (names, context) => k.noteMentions(names, context),
       get chunks() {

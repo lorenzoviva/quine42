@@ -8,8 +8,8 @@
 // of its name, in Italian and in English. Nothing here trusts what it reads: an inventory is a component Lua may have written.
 
 import { normName, isCategory } from './content';
-import type { Inventory } from './inventory';
-import type { ItemDef } from './types';
+import { addItem, type Inventory } from './inventory';
+import type { ItemDef, ItemSpec } from './types';
 import { WORN_ZONES, type WornZone } from '../mj/worn';
 
 export { WORN_ZONES, type WornZone } from '../mj/worn';
@@ -86,6 +86,28 @@ export function wornItems(inv: unknown, zoneOf: (item: string) => WornZone | und
   const slots = (inv as { slots?: Array<{ item: string } | null> } | undefined)?.slots;
   for (const [zone, at] of Object.entries(wornSlots(inv, zoneOf)) as Array<[WornZone, number]>) out[zone] = slots![at]!.item;
   return out;
+}
+
+/**
+ * Dresses an inventory as the kernel decides (an individual, T353): each thing of `outfit` on its zone, found in the slot it is in or
+ * added (a trade's apron they did not carry); the zones not in `outfit` keep what they had. The marks are those of the wanderer
+ * (`Inventory.worn`): the renderer and the wire read them the same way. Returns the zones dressed.
+ */
+export function dressInventory(inv: Inventory, outfit: Partial<Record<WornZone, string>>, spec: (item: string) => ItemSpec | undefined): WornZone[] {
+  const dressed: WornZone[] = [];
+  for (const zone of WORN_ZONES) {
+    const item = outfit[zone];
+    if (!item) continue;
+    let at = inv.slots.findIndex((s) => s?.item === item && !s.thing);
+    if (at < 0) {
+      if (addItem(inv, item, 1, spec(item)) < 1) continue;
+      at = inv.slots.findIndex((s) => s?.item === item && !s.thing);
+      if (at < 0) continue;
+    }
+    inv.worn = { ...(inv.worn ?? {}), [zone]: at };
+    dressed.push(zone);
+  }
+  return dressed;
 }
 
 /** The marks of an inventory brought back to what holds (a saved file, a component written by Lua): nothing else changes. */

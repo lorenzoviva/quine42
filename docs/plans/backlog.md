@@ -5076,7 +5076,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: non serve.
 - Quando è fatto: commit su `task/T352`, kernel sale di Z.
 
-### T353 · Vestire gli individui: gli abiti dalla scheda o dal mestiere — `da fare` (dipende da T290)
+### T353 · Vestire gli individui: gli abiti dalla scheda o dal mestiere — `fatto` (`d830c45a`) (dipende da T290)
 - Pipeline: fable · sforzo high · stima 4% · approvato · browser · priorità 5
 - Step: 40
 - Contesto: D47.4 (autore, 10/11): dopo T290 si vestono anche gli individui, dalla scheda del Narratore o dal mestiere. `dossier T289`, `dossier T290`.
@@ -5084,6 +5084,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: individui vestiti nel tick e dopo il ritorno; suite e typecheck coi turni.
 - Browser: sì, individui vestiti in un luogo del seme (`?skip&offline`), foto.
 - Quando è fatto: commit su `task/T353`, kernel sale di Z.
+- Esito: gli abiti degli individui dalla scheda (`indossa`, `wears`) o dal mestiere (`outfitOf`, senza chiamate; un mestiere senza capi non veste), segni nell'inventario (`dressInventory`), `EntityView.worn` sul filo e `worn` dello specchio, `wornZone` nella porta, due capi di mestiere nel seme, mock con `indossa`; ADR-0181, kernel 0.6.5, docs, glossario, lingua interna; 8 test nuovi, suite 3007/3007, typecheck e build verdi; manca: gli individui non si cambiano dopo l'individuazione, la scheda dell'Attore non dice gli abiti, gambe/piedi/mani; non provato: una scheda scritta da Gemini vero con `indossa`, multigiocatore nel browser (solo in test); sicurezza: nessuna superficie nuova (`EntityView.worn` esce solo come id letti dal kernel, niente entra dal client).
 
 ### T354 · Lo Scultore delle strutture senza scheletro, a zone coi sottoblocchi (passo 2 di D48) — `da fare` (dipende da T346)
 - Pipeline: fable · sforzo extra · stima 4% · approvato · browser · priorità 5

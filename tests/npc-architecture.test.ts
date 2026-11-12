@@ -14,7 +14,7 @@ import { describe, expect, it } from 'vitest';
 const ROOT = path.resolve(__dirname, '..');
 const NPC = 'src/kernel/npc/';
 const FACES = new Set([`${NPC}index.ts`, `${NPC}model.ts`]);
-const DATA = new Set(['society', 'plots', 'jobs', 'ventures', 'route', 'model'].map((f) => `${NPC}${f}.ts`));
+const DATA = new Set(['society', 'plots', 'jobs', 'ventures', 'route', 'outfits', 'model'].map((f) => `${NPC}${f}.ts`));
 const PRODUCT = ['src', 'server', 'site', 'tools'];
 const NOT_FOR_NPC = ['src/kernel/kernel.ts', 'src/kernel/wanderers.ts', 'src/session/', 'src/render/', 'src/ui/', 'src/audio/', 'src/main.ts', 'src/master.ts', 'server/', 'site/', 'tools/', 'lab/', 'tests/'];
 const EXT = /\.(ts|tsx|mts|js|mjs)$/;

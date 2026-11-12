@@ -344,6 +344,10 @@ export class ThinClient {
       else if (name in parts) k.ecs.set(id, name, parts[name]);
       else k.ecs.remove(id, name);
     }
+    // What it wears (T353): the zones and a text of an id for each, whatever else came is left out; the renderer dresses it from here.
+    const worn = readWorn(t.worn);
+    if (worn) k.ecs.set(id, 'worn', worn);
+    else k.ecs.remove(id, 'worn');
     if (t.text) this.say(id, t.text);
     else k.bubbles.delete(id);
     return id;
