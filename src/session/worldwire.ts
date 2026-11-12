@@ -14,6 +14,8 @@ export interface WorldOpen {
   offline?: boolean;
   /** Whether the server has a key: the calls to Gemini go over the channel. */
   gemini?: boolean;
+  /** Whether the server has TypeSafe's key: the closed decisions go over the channel (ADR-0157). */
+  typesafe?: boolean;
   /** Whether the server has accounts: tokens are verified over the channel. */
   verify?: boolean;
   masterUid?: string;
@@ -45,12 +47,12 @@ export type FromWorld =
   | { t: 'vivo'; tick: number }
   | { t: 'invia'; cid: number; json: string }
   | { t: 'chiudi'; cid: number }
-  | { t: 'chiedi'; id: number; op: 'gemini' | 'verify'; args: unknown[] }
+  | { t: 'chiedi'; id: number; op: 'gemini' | 'verify' | 'typesafe'; args: unknown[] }
   | { t: 'risposta'; id: number; ok: boolean; value?: unknown; error?: string }
   /** Why the program cannot be a card; empty: it can. */
   | { t: 'checked'; id: number; errors: string[] };
 
-/** A call to Gemini as it crosses the channel. */
+/** A call to Gemini (or to TypeSafe: the same shape) as it crosses the channel. */
 export interface GeminiCall {
   url: string;
   method?: string;

@@ -384,6 +384,17 @@ Modello di una voce:
 - Test: `tests/sicurezza/carte-portate.test.ts`, `tests/bring.test.ts`
 - Esito: chiusa da T295 (ADR-0170), 07/11/2026, branch `task/T295`.
 
+### V-034 · La chiave di TypeSafe e le decisioni chiuse
+- Gravità: media
+- Stato: `chiusa`
+- Superficie: `server/typesafeProxy.ts` (`TypeSafeGate`, la route `/api/typesafe` del server di sviluppo e della preview, `direct()` per i mondi di molti), il canale dei mondi (`op: 'typesafe'`, `server/worldHost.ts`, `src/session/worldProcess.ts`), `src/kernel/ai/decisions.ts`
+- Proprietà violata: `TYPESAFE_KEY` si spende solo per il gioco, solo per le versioni fisse di Jev e dentro un tetto al giorno; non arriva al browser, alla build, a un mondo o a un universo; a TypeSafe vanno solo un modello, lo stato e le domande (niente immagini né «Danger Zone»), e solo dati del mondo, mai il testo libero di un viandante (D45.3); il server di produzione non ha la route (regola 8h)
+- Prova: test con TypeSafe finto (T348)
+- Contromisura: come `GeminiGate` (V-002): route solo da loopback e dalla stessa origine, `Content-Type` JSON; il corpo al più 128 KB (`JEV_MAX_BODY`) e rifatto campo per campo (`jevRequest`: modello dell'elenco `JEV_MODELS`, al più 64 domande di tipo `choice`, `noul`, `score`, ogni altro campo un rifiuto); il tetto `TYPESAFE_TETTO_GIORNALIERO` (1 $ se non detto; in produzione obbligatorio con la chiave, `productionProblems`) con la spesa in `universes/.typesafe-spend.json` e ciò che è in volo trattenuto; i mondi chiedono per il canale (`worldEnv` non porta la chiave); solo i compiti che il censimento dice decisioni (`via: 'decide'`) arrivano allo strato, e lo stato lo scrive il kernel
+- Task: T348
+- Test: `tests/sicurezza/typesafe.test.ts`, `tests/sicurezza/produzione.test.ts`, `tests/sicurezza/mondo.test.ts`, `tests/decisions.test.ts`
+- Esito: chiusa da T348 (ADR-0157), 12/11/2026, branch `task/T348`: le contromisure nascono con il varco.
+
 ## Le prove dell'autore
 
 Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm run sicurezza:prove`, `tools/sicurezza/catalogo.mjs`) e di [`prove-f12.md`](prove-f12.md); i test stanno in `tests/sicurezza/`. Le misure in [`esiti/`](esiti/). `tests/sicurezza-kit.test.ts` controlla che la tabella e il catalogo dicano le stesse prove: una voce nuova ha qui la sua riga.
@@ -423,6 +434,7 @@ Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm ru
 | V-031 | — | — | `carte-mano.test.ts`, `produzione.test.ts`, `serververo.test.ts` | le carte fatte a mano hanno l’interruttore spento nel progetto del kit: le prova il server di produzione vero, tests/sicurezza/serververo.test.ts |
 | V-032 | — | — | `carte-mano.test.ts`, `serververo.test.ts` | il nome di una carta si prova sulle sue funzioni: tests/sicurezza/carte-mano.test.ts |
 | V-033 | — | — | `carte-portate.test.ts` | le carte portate si provano sullo store con gli account finti: tests/sicurezza/carte-portate.test.ts |
+| V-034 | — | — | `typesafe.test.ts`, `produzione.test.ts`, `mondo.test.ts` | il kit non ha la chiave di TypeSafe e non esce sulla rete: il varco si prova con TypeSafe finto, tests/sicurezza/typesafe.test.ts |
 
 ## Ciò che nessuna voce copre ancora
 

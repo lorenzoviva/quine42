@@ -8,6 +8,7 @@ import http, { type IncomingMessage, type ServerResponse } from 'node:http';
 import path from 'node:path';
 import type { Duplex } from 'node:stream';
 import { accessRefusal, GeminiGate } from './geminiProxy';
+import { TypeSafeGate } from './typesafeProxy';
 import { isInternal, newSecret } from './access';
 import { accountHandler, accountSettings, type AccountSettings } from './account';
 import { contentSecurityPolicy } from './csp';
@@ -63,6 +64,7 @@ export function productionProblems(env: Record<string, string | undefined>): str
   else if (!origins.length) problems.push('QUINE_ORIGINI: senza, non si sa per quali siti questo server risponde');
   if (proxyHops(env.QUINE_PROXY_FIDATI) === undefined) problems.push('QUINE_PROXY_FIDATI: è quanti proxy nostri stanno davanti a questo server, un numero');
   if (has('GEMINI_API_KEY') && !(Number(env.GEMINI_TETTO_GIORNALIERO) >= 0 && has('GEMINI_TETTO_GIORNALIERO'))) problems.push('GEMINI_TETTO_GIORNALIERO: con la chiave serve un tetto in dollari al giorno, scritto');
+  if (has('TYPESAFE_KEY') && !(Number(env.TYPESAFE_TETTO_GIORNALIERO) >= 0 && has('TYPESAFE_TETTO_GIORNALIERO'))) problems.push('TYPESAFE_TETTO_GIORNALIERO: con la chiave di TypeSafe serve un tetto in dollari al giorno, scritto');
   return problems;
 }
 
@@ -248,6 +250,8 @@ export function createProductionServer(o: ProductionOptions): ProductionServer {
   };
   const gemini = new GeminiGate({ apiKey: o.env.GEMINI_API_KEY, dailyCap: o.env.GEMINI_TETTO_GIORNALIERO, universesDir, ledgerFile: serverPath(universesDir, 'geminiSpend') });
   if (!gemini.available) console.warn('GEMINI_API_KEY assente: i mondi usano i modelli locali');
+  // Jev (ADR-0157): only for the worlds, over their channel; no route here.
+  const typesafe = new TypeSafeGate({ apiKey: o.env.TYPESAFE_KEY, dailyCap: o.env.TYPESAFE_TETTO_GIORNALIERO, ledgerFile: serverPath(universesDir, 'typesafeSpend') });
   const answerAccount = accountHandler(accounts);
   // The programs of the handmade cards: each checked by the program of the worlds, in a process of its own (programCheck.ts).
   const checker = processChecker({ program: async () => o.worldProgram });
@@ -306,6 +310,7 @@ export function createProductionServer(o: ProductionOptions): ProductionServer {
   const sessions = attachSessions(server, {
     accounts,
     gemini: gemini.direct(),
+    typesafe: typesafe.direct(),
     internal,
     credits: { universesDir, grantCap: grantCapOf(o.env, true), platformFee: platformFeeOf(o.env) },
     memoryMb: Number(o.env.QUINE_MONDO_MEMORIA) || undefined,

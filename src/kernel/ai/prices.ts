@@ -38,6 +38,16 @@ export const ESTIMATED: Record<string, Price> = {
 };
 export const UNPRICED = Object.keys(ESTIMATED);
 
+/**
+ * The models that choose instead of writing (ADR-0157, `decisions.ts`): TypeSafe's Jev, read from https://docs.typesafe.ai/models.md on
+ * DECISION_PRICES_READ_ON. Input tokens only: the answer is free; no cache.
+ */
+export const DECISION_PRICES_READ_ON = '2026-11-06';
+export const DECISION_PRICES: Record<string, Price> = {
+  'jev-1.13.0': { input: 0.042, output: 0, cached: 0.042, note: 'TypeSafe: solo i token in ingresso' },
+  'jev-1.14.0': { input: 0.042, output: 0, cached: 0.042, note: 'TypeSafe: solo i token in ingresso' },
+};
+
 /** The calls served by a subscription's CLI (T68): already paid with the subscription, zero dollars per call. */
 export const SUBSCRIPTION_PRICES: Record<string, Price> = {
   'abbonamento-claude': { input: 0, output: 0, cached: 0, note: 'abbonamento (Claude Code)' },
@@ -47,7 +57,7 @@ export const SUBSCRIPTION_PRICES: Record<string, Price> = {
 
 export function priceOf(model: string, date = new Date().toISOString().slice(0, 10)): Price | undefined {
   const id = model.replace(/^models\//, '');
-  const p = PRICES[id] ?? ESTIMATED[id] ?? SUBSCRIPTION_PRICES[id];
+  const p = PRICES[id] ?? ESTIMATED[id] ?? DECISION_PRICES[id] ?? SUBSCRIPTION_PRICES[id];
   if (!p) return undefined;
   return p.until && p.next && date >= p.until ? { ...p.next } : p;
 }

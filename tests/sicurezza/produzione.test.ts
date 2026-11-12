@@ -56,6 +56,13 @@ describe('non parte senza configurazione', () => {
     expect(productionProblems({ ...ENV, GEMINI_API_KEY: FAKE.key, GEMINI_TETTO_GIORNALIERO: '10' })).toEqual([]);
   });
 
+  it('V-034 la chiave di TypeSafe solo con un tetto scritto', () => {
+    expect(said({ ...ENV, TYPESAFE_KEY: FAKE.key })).toContain('TYPESAFE_TETTO_GIORNALIERO');
+    expect(said({ ...ENV, TYPESAFE_KEY: FAKE.key, TYPESAFE_TETTO_GIORNALIERO: 'molto' })).toContain('TYPESAFE_TETTO_GIORNALIERO');
+    expect(said({ ...ENV, TYPESAFE_KEY: FAKE.key })).not.toContain(FAKE.key);
+    expect(productionProblems({ ...ENV, TYPESAFE_KEY: FAKE.key, TYPESAFE_TETTO_GIORNALIERO: '1' })).toEqual([]);
+  });
+
   it('V-014 le origini: https, o http solo per questa macchina; niente percorsi, jolly, credenziali', () => {
     expect(originsOf(' https://a.example , http://localhost:4173 ,https://b.example/')).toEqual({ origins: ['https://a.example', 'http://localhost:4173', 'https://b.example'], bad: [] });
     for (const no of ['http://a.example', 'https://a.example/x', '*', 'https://*.example', 'https://u:p@a.example', 'ftp://a.example', 'null']) expect(originsOf(no).bad, no).toEqual([1]);
@@ -211,11 +218,12 @@ describe('il server vero', () => {
 
   it('V-009 solo le rotte dell’elenco: niente Gemini, niente coda, anche con QUINE_CODA=1 e da questa macchina', async () => {
     for (const headers of [{}, { Host: `localhost:${port}` }] as Array<Record<string, string>>) {
-      for (const target of ['/api/gemini/status', '/api/coda', '/api/coda/prendi', '/api/qualunque', '/api']) {
+      for (const target of ['/api/gemini/status', '/api/typesafe/status', '/api/coda', '/api/coda/prendi', '/api/qualunque', '/api']) {
         const r = await ask(target, { headers });
         expect(r.status, target).toBe(404);
       }
       expect((await ask('/api/gemini/models/gemini-3.1-flash-lite:generateContent', { method: 'POST', headers: { ...headers, 'Content-Type': 'application/json' }, body: '{}' })).status).toBe(404);
+      expect((await ask('/api/typesafe/v1/systemone', { method: 'POST', headers: { ...headers, 'Content-Type': 'application/json' }, body: '{}' })).status).toBe(404);
     }
     expect((await ask('/api/universe')).status).toBe(200);
     expect(JSON.parse((await ask('/api/account')).text)).toEqual(accounts.config);

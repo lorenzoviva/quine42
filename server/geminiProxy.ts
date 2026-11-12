@@ -226,16 +226,17 @@ function send(res: ServerResponse, status: number, body: unknown): void {
   res.end(typeof body === 'string' ? body : JSON.stringify(body));
 }
 
-class TooLarge extends Error {}
+export class TooLarge extends Error {}
 
-function readBody(req: IncomingMessage): Promise<string> {
+/** A request's body, up to `max` bytes: past it, nothing more is kept and it fails with TooLarge (the gate of TypeSafe reads with its own). */
+export function readBody(req: IncomingMessage, max = MAX_BODY): Promise<string> {
   return new Promise((resolve, reject) => {
-    if (Number(req.headers['content-length']) > MAX_BODY) return reject(new TooLarge());
+    if (Number(req.headers['content-length']) > max) return reject(new TooLarge());
     let size = 0;
     const chunks: Buffer[] = [];
     const onData = (c: Buffer) => {
       size += c.length;
-      if (size <= MAX_BODY) return void chunks.push(c);
+      if (size <= max) return void chunks.push(c);
       chunks.length = 0;
       req.off('data', onData);
       reject(new TooLarge());

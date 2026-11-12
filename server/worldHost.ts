@@ -68,6 +68,8 @@ export interface WorldOptions {
   internal: string;
   offline?: boolean;
   gemini?: typeof fetch;
+  /** TypeSafe's gate (ADR-0157): the world asks it over the channel, never with the key. */
+  typesafe?: typeof fetch;
   verify?: Verifier;
   masterUid?: string;
   ledgerFile?: string;
@@ -191,6 +193,7 @@ export class WorldHost {
       token: worldToken(o.internal, o.name),
       ...(o.offline ? { offline: true } : {}),
       ...(o.gemini ? { gemini: true } : {}),
+      ...(o.typesafe ? { typesafe: true } : {}),
       ...(o.verify ? { verify: true } : {}),
       ...(o.masterUid ? { masterUid: o.masterUid } : {}),
       ...(o.ledgerFile ? { ledgerFile: o.ledgerFile, grantCap: o.grantCap } : {}),
@@ -252,7 +255,7 @@ export class WorldHost {
     }
   }
 
-  /** What the world asks of this process: only these two things, each through its own limits. */
+  /** What the world asks of this process: only these things, each through its own limits. */
   private async answer(id: number, op: string, args: unknown[]): Promise<void> {
     const reply = (ok: boolean, value?: unknown, error?: string) => this.tell({ t: 'risposta', id, ok, ...(ok ? { value } : { error }) });
     try {
@@ -260,6 +263,12 @@ export class WorldHost {
       if (op === 'gemini' && this.o.gemini) {
         const call = args?.[0] as GeminiCall;
         const r = await this.o.gemini(String(call?.url), { method: call?.method ?? 'POST', body: String(call?.body ?? '') });
+        const out: GeminiAnswer = { status: r.status, text: await r.text() };
+        return reply(true, out);
+      }
+      if (op === 'typesafe' && this.o.typesafe) {
+        const call = args?.[0] as GeminiCall;
+        const r = await this.o.typesafe(String(call?.url), { method: 'POST', body: String(call?.body ?? '') });
         const out: GeminiAnswer = { status: r.status, text: await r.text() };
         return reply(true, out);
       }

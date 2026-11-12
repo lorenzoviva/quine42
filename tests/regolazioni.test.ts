@@ -194,7 +194,8 @@ describe('ogni manopola al minimo', () => {
     expect(new Rationing().allows('words', 0.5)).toBe(false);
   });
 
-  const knobbed = CENSUS.filter((c) => c.coefficiente && c.compito !== 'forge.fix');
+  // The closed decisions (ADR-0157) do not write: tests/decisions.test.ts holds their knob at 0.
+  const knobbed = CENSUS.filter((c) => c.coefficiente && c.compito !== 'forge.fix' && !c.via);
 
   it.each(knobbed.map((c) => [c.compito, c.coefficiente!, c.agente] as const))('%s con %s a 0 non chiama i modelli e risponde', async (task, key, agent) => {
     const { k, online } = await boot({ coefficienti: { [key]: 0 } });
