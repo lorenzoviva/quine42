@@ -5295,11 +5295,12 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: non serve.
 - Quando è fatto: commit su `task/T365`, kernel sale di Z.
 
-### T366 · Open beta: il verificatore a inviti e gli universi privati — `in attesa` (D54)
-- Pipeline: fable · sforzo extra · stima 4% · priorità 5
+### T366 · Open beta e campagna: il verificatore a inviti e gli universi privati — `da fare`
+- Pipeline: fable · sforzo extra · stima 6% · approvato · priorità 5
 - Step: 43
-- Contesto: D52.7 (sì, insieme a T347); riga 6 del § 6 di `docs/design/open-beta.md` e lo studio di T347 (`docs/design/campagna-master.md`, ADR-0188 proposto). **Aspetta le risposte di D54.**
-- Cosa fare: il verificatore a inviti per il self-hosting (token firmati, scadenza, revoca, id che non si scontra con un uid), con gli universi privati di T347; voce nel registro della sicurezza (§ 5, punto 4).
+- Contesto: D52.7 (sì, insieme a T347); riga 6 del § 6 di `docs/design/open-beta.md` e lo studio di T347 (`docs/design/campagna-master.md`, ADR-0188). D54 chiusa il 13/11: **7** inviti di 7 giorni, un uso, token mostrato una volta; **8** universo privato e verificatore a inviti in questo task solo (è anche la riga 2 del § 6 di `campagna-master.md`, che non diventa un task a parte).
+- Cosa fare: il verificatore a inviti per il self-hosting (token firmati, scadenza, revoca, id che non si scontra con un uid) e l'universo privato della campagna: `universes/.campaign/`, ospiti e inviti, `admit`, `guestOf` sulle letture e sull'elenco (404 per chi non è ospite), la rotta `guests` solo del master, la console; voci nel registro della sicurezza (§ 5 punto 4 di `open-beta.md`, § 7 punti 2-5 di `campagna-master.md`).
+- Fatto anche quando: un terzo account è rifiutato, entra con un invito a un uso, non rientra con lo stesso, sparisce se tolto; l'elenco non lo mostra a chi non è ospite; il kit `tests/sicurezza/`.
 - Test: un server senza Firebase con due invitati; suite di sicurezza; suite e typecheck coi turni.
 - Quando è fatto: commit su `task/T366`.
 
@@ -5344,3 +5345,53 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Cosa fare: il forte al posto del forte di T339 come riferimento del banco (`lab/banco/taglie/`, `lab/banco/riferimento/`) e dello Scultore (esempio o metro nel prompt delle strutture, ADR-0183, senza superare i token misurati), con foto e viste in testo; una scala di giudizio nel banco che dica quanto un programma scritto da Gemini gli si avvicina.
 - Browser: sì, foto del forte nel laboratorio 3D.
 - Quando è fatto: commit su `task/T371`.
+
+### T372 · Campagna: il master paga tutto — `da fare`
+- Pipeline: claude · sforzo extra · stima 3% · approvato · priorità 5
+- Step: 43
+- Contesto: riga 1 del § 6 di `docs/design/campagna-master.md` (T347, `dossier T347`), ADR-0188; D54 chiusa il 13/11 (`docs/pipeline/domande/aperte.md`): **1** il titolare delle carte è chi paga, cioè il master (niente spoiler; scambi e cessioni più avanti); **2** in un universo pubblico gli anonimi vanno ai modelli locali, nel privato l'ospite invitato è a carico del master.
+- Cosa fare: ADR-0188 da «proposto» ad «accettato» con tutte le risposte di D54 (anche 3-8, per i task che seguono); `game.expenses` nel `join` e in `GAME_FIELDS`, `charge` col pagante risolto dalla politica, il titolare delle carte il master quando paga lui (quote dell'eredità a lui), il tetto del master, gli anonimi, portafoglio e lobby che lo dicono; versione del kernel; glossario («spese della partita»); voce nel registro della sicurezza (§ 7 punto 1).
+- Test: due viandanti senza crediti in un mondo di molti giocano coi modelli mentre scende il saldo del master; a saldo zero tutti ai modelli locali; i test dei crediti di oggi invariati; suite e typecheck coi turni.
+- Quando è fatto: commit su `task/T372`.
+
+### T373 · Campagna: il ritmo e la pausa del mondo — `da fare` (dipende da T366)
+- Pipeline: claude · sforzo high · stima 3% · approvato · browser · priorità 5
+- Step: 43
+- Contesto: riga 3 del § 6 di `docs/design/campagna-master.md`, ADR-0188; D54.3 e D54.4: la pausa ferma ciò che il mondo fa da sé (dialoghi fra individui, trame che avanzano, luoghi nuovi che restano bozze), le risposte ai viandanti continuano; l'HUD dice che il mondo è in pausa perché il master lo sta scrivendo (regola 0 per ciò che vede chi è dentro).
+- Cosa fare: `pace` (messaggio, kernel, `pumpDevelopment` e i direttori), su disco in `universes/.campaign/`, dalla console, dalla Direzione e dalla rotta; l'avviso dell'HUD; ADR-0133 con l'eccezione «solo verso il basso»; voci di sicurezza (§ 7 punti 5-6).
+- Test: in pausa i luoghi restano bozze e nessuna chiamata parte; «normale» riprende da dove sono i giocatori; `pace` non alza mai `placesPerMinute` sopra la lobby.
+- Browser: sì, la pausa dalla console e l'avviso nell'HUD.
+- Quando è fatto: commit su `task/T373`.
+
+### T374 · Campagna: le direttive del master — `da fare`
+- Pipeline: claude · sforzo extra · stima 4% · approvato · priorità 5
+- Step: 43
+- Contesto: riga 4 del § 6 di `docs/design/campagna-master.md`, ADR-0188 via E; D54.5 (autore 13/11, la via di mezzo): un file solo a sezioni, `world/campaign.md`, scritto da master e Referente; le direttive scritte dal master **non** passano da Jev, `metaBreak` locale sempre, Jev `text.fourthwall` una manopola nei privati.
+- Cosa fare: `campaign.md` a sezioni in `Council.context` (ogni agente la sua sezione e «Per tutti»; l'Attore solo «Per tutti»), l'incarico `direttiva` del Referente con la quarta parete come sopra, `cleanText` e i tetti, l'editor solo del master (`owns`); la misura in `lab/scripts/prompt-tokens.ts --campaign`; voce di sicurezza (§ 7 punto 7: il testo del master non va a Jev né ai client).
+- Test: richieste registrate con la sezione giusta; una direttiva con meta-gioco è rifiutata col motivo; `tests/regolazioni.test.ts` sui prompt; suite e typecheck coi turni.
+- Quando è fatto: commit su `task/T374`.
+
+### T375 · Campagna: le regioni del master (riempitivo e trattenuta) — `da fare` (dipende da T373)
+- Pipeline: claude · sforzo high · stima 4% · approvato · browser · priorità 5
+- Step: 43
+- Contesto: riga 5 del § 6 di `docs/design/campagna-master.md`, ADR-0188; **D54.6 riformulata dall'autore**: non una regione `mare` del kernel ma una regione «riempitivo» che sui luoghi nuovi ripete un ambiente che il mondo ha già (mare, deserto, bosco…) senza chiamate al Concilio, per indirizzare i viandanti senza dirlo e senza pagare luoghi che il master non vuole; `trattenuta` resta (pausa locale: bozza finché non si libera).
+- Cosa fare: «Dichiara regione» nell'Ufficio dei luoghi e nella Direzione; nel kernel il riempitivo (l'ambiente esistente scelto dal master, il piano dal suo programma col seme del luogo, connessione garantita, regola 10) e `trattenuta`; l'atlante del master; ADR-0188 aggiornato con la forma nuova; voce di sicurezza (§ 7 punto 8).
+- Test: un luogo in una regione di riempitivo prende l'ambiente detto senza nessuna chiamata; `trattenuta` resta bozza finché non si libera; suite e typecheck coi turni.
+- Browser: sì, una regione di riempitivo dichiarata e attraversata.
+- Quando è fatto: commit su `task/T375`.
+
+### T376 · Campagna: individui e trame dichiarati dal master — `da fare` (dipende da T374)
+- Pipeline: claude · sforzo high · stima 4% · approvato · priorità 6
+- Step: 43
+- Contesto: riga 6 del § 6 di `docs/design/campagna-master.md`, ADR-0188.
+- Cosa fare: l'incarico `individuo` del Referente (il Narratore coi fatti dati, gli attesi), «Scrivi trama» nella Direzione, «Modifica» sul leggio; validatori di oggi.
+- Test: un individuo dichiarato compare nel luogo detto con i fatti dati; una trama scritta a mano avanza come le altre; suite e typecheck coi turni.
+- Quando è fatto: commit su `task/T376`.
+
+### T377 · Campagna: la campagna nel sito — `da fare` (dipende da T366, T373, T375)
+- Pipeline: claude · sforzo high · stima 2% · approvato · browser · priorità 6
+- Step: 43
+- Contesto: riga 7 del § 6 di `docs/design/campagna-master.md`, ADR-0188.
+- Cosa fare: ospiti e inviti, ritmo, atlante e `campaign.md` nella pagina della sessione; la guida della beta (`docs/beta/`).
+- Browser: sì, con il server di produzione vero (`tools/produzione/laboratori.ts`).
+- Quando è fatto: commit su `task/T377`.

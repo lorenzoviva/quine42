@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 13/11/2026, epoca 384 (claude). Crediti: vedi `stato`.
+Aggiornato il 13/11/2026, epoca 385 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -12,7 +12,7 @@ Aggiornato il 13/11/2026, epoca 384 (claude). Crediti: vedi `stato`.
 - **Vestiti e armature (step 40):** T290 integrato (ADR-0180, `<worn>`); T353 integrato (ADR-0181, kernel 0.6.5: abiti degli individui dalla scheda o dal mestiere); mancano cambio d’abito dopo l’individuazione, abiti nella scheda dell’Attore, gambe/piedi/mani.
 - **Launcher (D51.2):** T233 integrato (`492b5e5e`): la home è il launcher; «in gioco ora» provato solo con `/api/session` simulata.
 - **Jev e costi del Concilio (D45):** T348 integrato (varco `TypeSafeGate`, strato `decide`, V-034 chiusa); T349 integrato (`model.reuse` nel `ModelDirector`, −16 % sculture stimato); T350 integrato (`2e733d0e`, kernel 0.6.9: guardie `text.guard` locali alle 5 porte senza inviare il testo del viandante a Jev finché `JEV_ZERO_RETENTION` è falso, e quarta parete `text.fourthwall` con `metaBreak` + Jev su Fucina, individui, schede Attore e trame, escluse le battute); T351 integrato (`6912ba9d`, ADR-0186, kernel 0.6.11: cache esplicita di Gemini 3.8 Flash per il prefisso di sistema dell'Attore, `ExplicitCaches` ttl 1800 s scritta alla seconda richiesta, `Price.storage` e `cache.write` pagata da `comune`, `GeminiGate.writeCache` con 4 test V-002, −47 % costo Attore misurato in `lab/banco/jev/cache-attore.md`, non provato contro Gemini vero). T352 integrato (`e28d73ce`, kernel 0.6.12): stima oraria della lobby coi token misurati da T325, un'ora a pieno dettaglio 1,42 $ (prima ~1,04), con l'Attore 1,68 $; restano stimate le uscite non misurate e `forge.fix`. Non provato contro TypeSafe vero né su traffico reale; manca l'archivio di sessione delle domande del viandante (D45.6). `tests/carte-guaste.test.ts` rosso nella suite intera e verde da solo (T352, causa non dimostrata): possibile instabilità sotto carico.
-- **Campagna del Master (autore, 10/11):** spese universo a carico del master, universo privato su invito, velocità/pausa di generazione, direttive della campagna nel Referente iniettate per competenza, controllo preventivo cartografia → T347 integrato (`c72f4617`, studio `docs/design/campagna-master.md`, ADR-0188 proposto: pagamento del master in `charge`, universo privato con inviti in `universes/.campaign/`, `pace`, direttive a sezioni `campaign.md`, regioni `mare`/`trattenuta`) → D54 con 8 domande; i 7 task dello studio (~25 % settimana) si pianificano dopo le risposte.
+- **Campagna del Master (autore, 10/11):** spese universo a carico del master, universo privato su invito, velocità/pausa di generazione, direttive della campagna nel Referente iniettate per competenza, controllo preventivo cartografia → T347 integrato (`c72f4617`, studio `docs/design/campagna-master.md`, ADR-0188 proposto: pagamento del master in `charge`, universo privato con inviti in `universes/.campaign/`, `pace`, direttive a sezioni `campaign.md`, regioni `mare`/`trattenuta`) → D54 chiusa il 13/11 → T366 (fable, ora anche universo privato e inviti, 6 %), T372 master paga, T373 ritmo/pausa, T374 direttive, T375 regioni riempitivo/trattenuta, T376 individui e trame, T377 campagna nel sito (claude, approvati, ~20 %).
 - **Claude Fable (autore, 10/11):** reset settimanale giovedì 12/11 16:00; adozione intensiva per massimizzare l'uso di Fable.
 - **Domande chiuse (10/11):** D45 (Jev, ZDR spiegato), D47 (vestiti C+B), D48 (strutture D integrata), D49 (carte solo uso reale), D50 (gestito + self-hosting in VI), D51 (T345 e contatore vesti).
 - **Modelli specializzati di Antigravity (autore, 13/11):** T360 integrato (`703c838c`, ADR-0187): provider `hydrogen` (Gemini 4 Hydrogen, conto `gemini`) e `orchestrator` (Orchestrator (Argon), conto `argon`), in prova a tetto 1, senza browser, non orchestrabili senza la casella; sforzo come suffisso `-high|-xhigh`, mai `--effort` su agy. Non misurati: contatori e rapporti 5h/settimana (prime righe di `consumi.jsonl`).
@@ -22,14 +22,13 @@ Aggiornato il 13/11/2026, epoca 384 (claude). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **In corso:** T310b (fable). **Pronti:** T362, T370 (fable, dopo T310b); poi T363→T364/T367/T368, T365. T355 `in attesa` fino al 15/11. Fable si esaurisce prima del reset (previsto 14/11 15:00): niente spostamenti su claude per ora.
+0. **In corso:** T310b (fable). **Pronti:** T362, T370, T366 (fable, dopo T310b), T372, T374 (claude); poi T373→T375→T377, T376; T363→T364/T367/T368, T365. T355 `in attesa` fino al 15/11. Fable si esaurisce prima del reset (previsto 14/11 15:00): niente spostamenti su claude per ora.
 1. **Da approvare dall'autore:** T369 (dopo).
 2. **Crediti (13/11 19:25 UTC):** Claude settimana 59 %, 5h 61 % (reset 22:59 UTC); Fable settimana 34 %; Gemini/Hydrogen 98 % (reset 15/11); Argon 71 %; agy Claude 100 %.
 
 ## Attese dall'autore
 
 - **D35 (piano di lancio):** in analisi dall'autore per i primi prerequisiti (D3.1 account HN/Reddit da subito).
-- **D54 (ADR-0188):** autore 13/11: 1 titolare = chi paga (il master), 2 4 7 8 sì; 3 la pausa ferma dialoghi fra individui, trame e luoghi nuovi (bozze), le risposte ai viandanti continuano; 6 riformulata: regione «riempitivo» che ripete sui luoghi nuovi un ambiente già esistente (mare, deserto…) senza chiamate, per indirizzare i viandanti. **Manca la 5** (via di mezzo proposta, richiesta di nuovo il 13/11). Poi pianifico i 7 task.
 
 ## Regole attive
 
@@ -38,5 +37,5 @@ Aggiornato il 13/11/2026, epoca 384 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **385 (claude):** D54 chiusa (5: via di mezzo); pianificati T372-T377, T366 allargato.
 - **384 (claude):** D54: 3, 6 (riempitivo), 7 chiarite; manca la 5.
-- **383 (claude):** D54 risposte parziali; integrato T361 (`0b0a5889`).
