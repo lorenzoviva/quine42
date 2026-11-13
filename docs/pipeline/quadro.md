@@ -8,7 +8,7 @@ Aggiornato il 13/11/2026, epoca 365 (argon). Crediti: vedi `stato`.
 ## Stato attuale
 
 - **Sei fasi (autore, 10/11):** I kernel 0.9.0, II closed beta, III kernel 1.0.0, **IV open beta** (OpenRouter, hosting esterno e self-hosting, niente partita IVA ora), V raffinamento, VI produzione (Stripe, quote carte). Step 43 aperto con T345 (in coda).
-- **Nuovo generatore MJ (autore, 10/11):** T346 integrato (`598dbeff`): parti abitabili come sottoblocchi `<import>`, aree delle strutture, `mapsBackToBox`, fattoria e forte del banco rifatti. Mancano: aree usate da Narratore/Scenografo, Scultore su Gemini (T354, T355), tetto voxel (T356), scala cortile→camminamento del forte. T358 integrato (`2342957e`): kernel 0.6.8 con T346+T349, suite verde (3046).
+- **Nuovo generatore MJ (autore, 10/11):** T346 integrato (`598dbeff`): parti abitabili come sottoblocchi `<import>`, aree delle strutture, `mapsBackToBox`, fattoria e forte del banco rifatti. T354 finito e verificato nel browser (`064dedd3`, ADR-0183: prompt strutture senza scheletro a 3 livelli sul piano a 1/5, due blocchi col ritorno in testo, parti del seme nella richiesta, `part-stair` tollerante, villetta e rocca nel banco e nel lab 3D); in integrazione con T359 (kernel 0.6.10). Mancano: aree usate da Narratore/Scenografo, giro dello Scultore su Gemini (T355, non prima del 15/11), tetto voxel (T356), scala cortile→camminamento del forte.
 - **Vestiti e armature (step 40):** T290 integrato (ADR-0180, `<worn>`); T353 integrato (ADR-0181, kernel 0.6.5: abiti degli individui dalla scheda o dal mestiere); mancano cambio d’abito dopo l’individuazione, abiti nella scheda dell’Attore, gambe/piedi/mani.
 - **Launcher (D51.2):** T233 integrato (`492b5e5e`): la home è il launcher; «in gioco ora» provato solo con `/api/session` simulata.
 - **Jev nel gioco (D45):** T348 integrato (varco `TypeSafeGate`, strato `decide`, V-034 chiusa); T349 integrato (`model.reuse` nel `ModelDirector`, −16 % sculture stimato); T350 integrato (`2e733d0e`, kernel 0.6.9: guardie `text.guard` locali alle 5 porte senza inviare il testo del viandante a Jev finché `JEV_ZERO_RETENTION` è falso, e quarta parete `text.fourthwall` con `metaBreak` + Jev su Fucina, individui, schede Attore e trame, escluse le battute). Non provato contro TypeSafe vero né su traffico reale; manca la stima nella lobby multigiocatore; segue T351.
@@ -21,9 +21,9 @@ Aggiornato il 13/11/2026, epoca 365 (argon). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **In corso/pronti:** T354 in corso su Fable (nel turno test); pronti T356 (dopo T346), T347 (fable high), T345, T351 (dopo T350), T352; bloccato T355 (dopo T354, non prima del 15/11).
+0. **In corso/pronti:** T359 pronto su Argon (p1, integra T354 con kernel 0.6.10); pronti su Claude/Fable (al reset 5h delle 13:00 UTC): T356 (dopo T346), T347 (fable high), T345, T351 (dopo T350), T352; bloccato T355 (dopo T354, non prima del 15/11).
 1. **Da approvare dall'autore:** T310b (lingua interna campi schemi, extra 6% p4).
-2. **Crediti (13/11 08:37 UTC):** Claude settimana 68 %, 5h 2 % (reset 13:00 UTC); Fable settimana 47 %, 5h 2 % (reset 12:59 UTC); Gemini 98 %; Argon 90 %; agy 100 %. Generatore acceso, fermo (avanzo negativo / 5h al 2 %).
+2. **Crediti (13/11 08:45 UTC):** Claude settimana 68 %, 5h 2 % (reset 13:00 UTC); Fable settimana 47 %, 5h 2 % (reset 12:59 UTC); Gemini 98 %; Argon 90 %; agy 100 %. Generatore acceso, fermo (avanzo negativo / 5h al 2 %).
 
 ## Attese dall'autore
 
@@ -37,5 +37,5 @@ Aggiornato il 13/11/2026, epoca 365 (argon). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **365 (argon):** T350 integrato (`2e733d0e`, kernel 0.6.9); T351 sbloccato; T354 in corso su Fable; finestra 5h Claude/Fable al 2 % (reset 13:00 UTC).
+- **365 (argon):** T350 integrato (`2e733d0e`, kernel 0.6.9); T354 finito e verificato nel browser (`064dedd3`), aperto T359 su Argon (p1, 1 %) per integrarlo nel base a kernel 0.6.10; finestra 5h Claude/Fable al 2 % (reset 13:00 UTC).
 - **364 (claude):** ripreso T354 su Fable e lanciato T350 su Claude al reset delle 08:00 UTC.
