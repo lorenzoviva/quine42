@@ -1,0 +1,115 @@
+# ADR-0188 — La Campagna del Master: le spese a carico del master, l'universo privato su invito, il ritmo del mondo che scende soltanto, le direttive a sezioni per competenza
+
+Data: 2026-11-13 · Stato: **proposto** (T347, step 43; decide l'autore) · Riferimenti: [`docs/design/campagna-master.md`](../design/campagna-master.md)
+(lo studio, con le misure), ADR-0025 (i due tavoli), ADR-0045 (il grafo e il `focus`), ADR-0056 (chi paga e le carte), ADR-0066 (il ramo del
+master), ADR-0069 (il Concilio sul ramo), ADR-0081 (le spese comuni divise), ADR-0084 (l'eredità delle carte), ADR-0102 (chi può scrivere),
+ADR-0104 (i saldi fuori dall'universo), ADR-0107 (i ritmi), ADR-0109 (gli elenchi), ADR-0110 (i mondi senza segreti), ADR-0113 (chi paga si
+dice), ADR-0114 (l'ammissione e le risorse per account), ADR-0133 (le regolazioni ferme a partita in corso), ADR-0143 (la generazione
+differita), ADR-0157 (le decisioni chiuse), ADR-0165 (la lingua delle richieste), ADR-0184 (la open beta: il verificatore a inviti), ADR-0186
+(la cache esplicita)
+
+## Contesto
+
+L'autore (10/11) vuole che un master possa condurre una **campagna**: pagare lui la generazione così che i giocatori entrino senza crediti,
+tenere l'universo privato su invito, rallentare o fermare il mondo anche da dentro il gioco, e che gli agenti ricordino che cosa ha chiesto
+e come; e che possa dichiarare prima dove sta un villaggio o un'isola, e chiedere solo mare dove il gruppo esce dalla trama. Oggi ogni
+viandante paga le sue chiamate e le comuni si dividono (ADR-0081); chiunque con un token entra in ogni universo di molti; le regolazioni si
+fissano entrando (ADR-0133) e la pausa esiste solo nella lobby; la conversazione con un agente vive in memoria e sparisce; le regioni
+dell'atlante le scrive solo il Cartografo. Le alternative e i numeri sono nello studio.
+
+## Decisione proposta
+
+1. **Le spese della partita** sono un campo della partita, `universe.json → game.expenses`: `shared` (oggi, assente vale così) o
+   `master`. Lo sceglie il master nella lobby con le altre regolazioni (`join.settings`), si fissa quando entra il primo viandante e si
+   sblocca quando esce l'ultimo (ADR-0133 vale com'è), esce ai client in `GAME_FIELDS`. **`chi` non cambia** (ADR-0113): chi ha chiesto
+   resta chi ha chiesto per le carte, i ritmi, il registro e le mancanze; cambia un punto solo, `charge`, dove con `master` ogni addebito,
+   personale o comune, va al master. Il tetto che conta è quello del master; il minimo della lobby non rifiuta più chi entra; a saldo zero
+   del master tutti passano ai modelli locali con l'avviso di oggi. Gli anonimi restano ai modelli locali a meno che l'universo sia privato.
+   Le carte: `payer` il master, `holder` chi ha chiesto, come per le comuni di oggi. In open beta (ADR-0184) è «tutte le chiamate sulla
+   chiave del master»: la chiave si sceglie dal pagante risolto, non da `chi`.
+2. **L'universo privato** sta fuori dall'universo, come i saldi (ADR-0104): `universes/.campaign/<nome>.json` (`SERVER_FOLDERS.campaign`),
+   atomico sotto lucchetto, con `private`, gli **ospiti** per id del viandante e gli **inviti** come impronte SHA-256 di token casuali con
+   scadenza (7 giorni) e usi (1). Un invito (`?invito=<token>`, `join.invite`) non è un'identità: l'identità resta il token verificato (8b);
+   un `join` con un invito buono consuma un uso e scrive l'id fra gli ospiti. Il controllo sta in `admit` (`server/session.ts`), dopo il
+   token e prima di accendere il mondo (V-026); il mondo non sa di ospiti (8g). Le letture di un universo privato (`carte`, `publicFiles`,
+   `/api/viandante`, l'elenco del sito) solo a master e ospiti (`guestOf` accanto a `owns`); a un estraneo l'universo non esiste. La lista
+   la scrive solo il master con `/api/universe/<nome>/guests` (`gate`, `owns`, JSON, `FRONT_RATES`; il token esce una volta sola); togliere
+   un ospite chiude il suo socket. Un universo nuovo e un clone nascono pubblici. Senza account (self-hosting) l'invito è l'unica prova: è il
+   verificatore a inviti di ADR-0184 §8, stesso formato e stesso file.
+3. **Il ritmo del mondo**, `pace` (`normal`, `slow`, `hold`, con `placesPerMinute`), è una manopola del master **che scende soltanto**: mai
+   sopra le regolazioni della lobby (quote, modelli, `placesPerMinute`), pause solo più lunghe. È l'eccezione a ADR-0133, scritta: **a
+   partita in corso il master può rallentare o fermare ciò che il mondo fa da sé, mai accelerarlo oltre la lobby**, perché chi è entrato con
+   una stima spende al più quella. `hold` trattiene i luoghi nuovi come bozze (il terreno procedurale, senza cose né persone: ciò che si
+   vede già mentre il Cartografo scrive), i modelli, i brani, le trame, le sessioni e i dialoghi nuovi; ciò che è in volo finisce; le
+   risposte alle parole dei viandanti continuano. Niente è scritto dai modelli locali in pausa: ciò che i modelli locali scrivono resta.
+   Si cambia col messaggio `pace` (solo il master), dalla console, dalla Direzione, dal sito (`/api/universe/<nome>/pace` → `WorldCalls`);
+   sta in `.campaign → pace` e arriva al mondo per valore all'avvio. Nel mondo nessun testo (regola 0); l'HUD può dirlo. Da soli lo stesso
+   `pace` nel kernel del browser. `?offline` e la generazione differita non cambiano.
+4. **Le direttive del master** sono `world/campaign.md`, nella lingua del mondo, a sezioni per competenza (`## Per tutti`, `## Narratore`,
+   `## Cartografo`, `## Scultore e Artista`, `## Ingegnere e Fisico`, `## Musicista`), con un tetto per sezione (4.000 caratteri) e uno per
+   il file. `Council.context(agent)` inietta la sezione di tutti e quella dell'agente dopo il riassunto della partita, nella parte stabile
+   della richiesta che la cache serve; l'Arbitro e il Referente leggono tutto; l'Attore solo «Per tutti»; le decisioni chiuse niente (D45).
+   Lo scrive il master nell'editor (e pubblica) o il Referente con l'incarico nuovo `direttiva`: capisce la sezione, riformula nei termini
+   del mondo, e il kernel appende con la data del mondo dopo il filtro della quarta parete (`metaBreak`, `cleanText`): una direttiva che
+   rompe la quarta parete torna al Referente col motivo. Le direttive dicono il **come**; i **fatti** vanno nei file di oggi (bibbia,
+   `people.json`, `plots.json`, atlante) e nel grafo. Il file non è in `playerFiles` né in `publicFiles`, non è una carta, entra in
+   `councilMayWrite` solo per ciò che il kernel vi scrive. Misurato sulle richieste registrate: 900 token di direttive costano 0,014 $
+   l'ora in cache (0,042 pieni), il 4 % dell'ora; un orchestratore nuovo dieci volte tanto con il doppio delle chiamate; il solo Referente non
+   raggiunge i compiti che il mondo fa da sé.
+5. **Le regioni del master**: il master dichiara regioni dell'atlante (centro, raggio, ambiente, descrizione) nell'Ufficio dei luoghi e
+   nella Direzione, e il kernel le scrive in `world/atlas.json` senza chiamate; `environmentsFor` le applica come quelle del Cartografo. Due
+   ambienti del kernel: `mare` (i luoghi dentro sono piani d'acqua scritti dal kernel, a costo zero, senza cose né rune: non un confine
+   raccontato, ma mare, che il mondo ha già) e `trattenuta` (i luoghi dentro restano bozze finché il master non la libera). Gli individui
+   dichiarati (incarico `individuo`: il Narratore coi fatti dati, gli attesi per i luoghi non ancora scritti) e le trame scritte dal master
+   («Scrivi trama» nella Direzione, dal validatore delle trame) entrano nei file e nelle chiamate di oggi. Nessun agente nuovo.
+6. **La versione del kernel**: i task che applicano l'ADR salgono di `Z`; `game.expenses`, `campaign.md` e le regioni del kernel assenti
+   valgono come oggi, così gli universi del contratto 0.6 restano buoni.
+
+## Alternative considerate
+
+- **Il master paga cambiando `payerOf`** (`chi` = master): rompe 8i (le carte, i ritmi e le mancanze direbbero il master per ciò che un
+  giocatore ha chiesto) e la coda `heavy` per pagante diventerebbe una sola. Scartata: si risolve in `charge`.
+- **Gli ospiti in `universe.json`**: viaggerebbero con cloni, export e carte portate, tornerebbero con `R`, e il mondo li leggerebbe. Scartata
+  (ADR-0104 vale anche per gli account).
+- **Il controllo degli ospiti nel `join` del mondo**: il mondo si accenderebbe per un estraneo (V-026) e dovrebbe leggere un file del server
+  (8g). Scartata: in `admit`.
+- **La pausa come `?offline`** (i modelli locali): ciò che scrivono resta e un master lo deve rifare. Scartata per la campagna; `?offline`
+  resta per chi gioca senza spendere.
+- **`pace` dentro `ai`, sbloccato per il solo master**: aprirebbe ADR-0133 in entrambe le direzioni. Scartata: una manopola a parte che
+  scende soltanto.
+- **La memoria per agente, un testo per tutti, il solo Referente, un orchestratore**: misurate nello studio (§ 4.3); la via a sezioni ha lo
+  stesso costo della memoria per agente senza riscritture né divergenze, metà del testo per tutti, raggiunge i compiti del mondo che il
+  Referente non vede, e costa un decimo dell'orchestratore senza raddoppiare le chiamate.
+- **Un agente «Regista» per la campagna**: un undicesimo agente da far parlare e tenere nello studio, per ciò che un file e il Referente
+  fanno già. Scartata.
+
+## Conseguenze
+
+- Regole di `AGENTS.md` che l'applicazione tocca: 8b-bis (l'eccezione «solo verso il basso» di `pace`), 8d (anche `.campaign/` fra ciò
+  che sta fuori dall'universo), 8f (`game.expenses` in `GAME_FIELDS`; `campaign.md` resta a casa), 8i (il pagante risolto in `charge`,
+  `chi` invariato), 8j (`admit` controlla anche gli ospiti), la tabella del Concilio (il Referente: `direttiva` e `individuo`). Applicandolo
+  si aggiornano `AGENTS.md`, `docs/architettura-dettagli.md` (`#lobby`, `#carte-crediti`, `#multigiocatore`, `#concilio`, `#corona`,
+  `#geografia`), il glossario (campagna, ospiti e inviti, ritmo del mondo, direttive, spese della partita) e `src/kernel/internalNames.ts`.
+- Superfici nuove, da registrare quando nascono i task (studio, § 7): il pagante risolto dalla politica, la rotta `guests`, l'invito
+  nell'URL, l'enumerazione, il file `.campaign`, il messaggio `pace`, le direttive nei prompt, i contenuti dichiarati.
+- I task, in ordine (studio, § 6): le spese del master; l'universo privato (lo stesso varco del task 6 di ADR-0184); il ritmo; le
+  direttive; le regioni; individui e trame; la campagna nel sito. Circa il 25 % di una settimana.
+- Un master che paga tutto e invita può ancora finire i crediti: il mondo passa ai modelli locali per tutti e lo dice; è la scelta di
+  ADR-0081 estesa, non un fermo.
+- Le direttive sono testo del master dentro i prompt: ciò che il filtro non prende arriva agli agenti; il master lo vede e lo corregge nel
+  file, e la quarta parete sui testi scritti (T350) resta a valle.
+
+## Domande per l'autore
+
+1. Quando paga il master, il titolare delle carte resta chi ha chiesto (le collezioni dei giocatori si riempiono, le quote dell'eredità
+   seguono loro) o è il master? *Consiglio: chi ha chiesto, come per le comuni di oggi; la lobby lo dice.*
+2. Con «paga il master» in un universo **pubblico**, gli anonimi restano ai modelli locali? *Consiglio: sì; in un universo privato un ospite
+   anonimo è stato invitato e il master risponde di lui.*
+3. La pausa ferma anche i dialoghi fra individui, le trame e le sessioni (ciò che il mondo fa da sé), e lascia le risposte ai viandanti?
+   *Consiglio: sì.*
+4. L'HUD dice ai giocatori «il mondo è in pausa: il master lo sta scrivendo»? *Consiglio: sì, fuori dal mondo come l'avviso dei crediti.*
+5. Le direttive: un file solo a sezioni (`campaign.md`), scritto dal master e dal Referente, con il filtro della quarta parete che rifiuta
+   col motivo? *Consiglio: sì, la via E.*
+6. La regione `mare` è un piano d'acqua scritto dal kernel a costo zero, e `trattenuta` una pausa locale? *Consiglio: sì a entrambe.*
+7. Gli inviti: 7 giorni e un uso per predefinito, il token mostrato una volta sola? *Consiglio: sì.*
+8. L'universo privato di T347 e il verificatore a inviti di ADR-0184 §8 in un task solo? *Consiglio: sì, il task 2 dello studio.*
