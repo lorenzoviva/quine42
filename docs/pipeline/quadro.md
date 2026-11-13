@@ -3,12 +3,12 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 13/11/2026, epoca 358 (argon). Crediti: vedi `stato`.
+Aggiornato il 13/11/2026, epoca 359 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
 - **Sei fasi (autore, 10/11):** I kernel 0.9.0, II closed beta, III kernel 1.0.0, **IV open beta** (OpenRouter, hosting esterno e self-hosting, niente partita IVA ora), V raffinamento, VI produzione (Stripe, quote carte). Step 43 aperto con T345 (in coda).
-- **Nuovo generatore MJ (autore, 10/11):** D48 chiusa con D integrata (T346 approvato: porte torri, merli, feritoie, staccionata, via animali dal modello MJ verso Narratore/Scenografo, campi incastrati e varianza T339 + architettura T338, tetti gargantua con `<pieces>`).
+- **Nuovo generatore MJ (autore, 10/11):** T346 integrato (`598dbeff`): parti abitabili come sottoblocchi `<import>`, aree delle strutture, `mapsBackToBox`, fattoria e forte del banco rifatti. Mancano: aree usate da Narratore/Scenografo, Scultore su Gemini (T354, T355), tetto voxel (T356), scala cortile→camminamento del forte. T346 diceva kernel 0.6.6 come T357 → T358 (0.6.7 + suite).
 - **Vestiti e armature (step 40):** T290 integrato (ADR-0180, `<worn>`); T353 integrato (ADR-0181, kernel 0.6.5: abiti degli individui dalla scheda o dal mestiere); mancano cambio d’abito dopo l’individuazione, abiti nella scheda dell’Attore, gambe/piedi/mani.
 - **Launcher (D51.2):** T233 integrato (`492b5e5e`): la home è il launcher; «in gioco ora» provato solo con `/api/session` simulata.
 - **Jev nel gioco (D45):** T348 integrato (kernel 0.6.6 con T357) (varco `TypeSafeGate`, strato `decide`, ADR-0157 accettato, V-034 chiusa); non provato contro TypeSafe vero; segue T349.
@@ -21,9 +21,9 @@ Aggiornato il 13/11/2026, epoca 358 (argon). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **In corso/pronti:** T346 (fable high, in pausa per limite 5h fino a 03:01 UTC), T345, T347 (fable high, approvato), T349→T350 (Jev nel gioco, D45), T352; bloccati T351, T354→T355 (non prima del 15/11), T356.
+0. **In corso/pronti:** T349 (claude, in corso) →T350; T358 (kernel 0.6.7 dopo T346, priorità 1), T347 (fable high), T345, T352; bloccati T351, T354→T355 (non prima del 15/11), T356.
 1. **Da approvare dall'autore:** T310b (lingua interna campi schemi, extra 6% p4).
-2. **Crediti (13/11 00:28):** Claude settimana 84 %, 5h 0 % (reset 02:59 UTC / 03:59 CET); Fable settimana 77 % (all 84 %), 5h 0 %; Gemini 98 %; Argon 92 %; agy 100 %. Generatore acceso, fermo (avanzo negativo).
+2. **Crediti (13/11 04:20):** Claude settimana 81 %, 5h 63 % (reset 08:00 UTC); Fable settimana 72 %, 5h 62 %; Gemini 98 %; Argon 91 %; agy 100 %. Generatore acceso, fermo (avanzo negativo).
 
 ## Attese dall'autore
 
